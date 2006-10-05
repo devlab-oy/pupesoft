@@ -6,11 +6,41 @@
 	if ($tee == 'M') {
 		if ($kohdevarasto != '' and $lahdevarasto != '' and $kohdevarasto != $lahdevarasto) {
 			$lask = 0;
-			
+
+			$lisa = "";
+
+			if ($osasto != "") {
+				$lisa .= " and tuote.osasto='$osasto' ";
+			}
+
+			if ($tuoteryhma != "") {
+				$lisa .= " and tuote.tuoteryhma='$tuoteryhma' ";
+			}
+
+			if ($tuotemerkki != "") {
+				$lisa .= " and tuote.tuotemerkki='$tuotemerkki' ";
+			}
+
+			if ($toimittaja != "") {
+				$query = "select tuoteno from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and toimittaja='$toimittaja'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) > 0) {
+					$lisa .= " and tuote.tuoteno in (";
+					while ($toimirow = mysql_fetch_array($result)) {
+						$lisa .= "'$toimirow[tuoteno]',";
+					}
+					$lisa = substr($lisa,0,-1).")";
+				}
+				else {
+					echo "<font class='error'>".t("Toimittaa ei lˆytynyt")."! ".t("Ajetaan ajo ilman rajausta")."!</font><br><br>";
+				}
+			}
+
 			$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
 			$delresult = mysql_query($query) or pupe_error($query);
 			$kukarow['kesken'] = 0;
-			
+
 			$query = "SELECT * FROM varastopaikat WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kohdevarasto'";
 			$result = mysql_query($query) or pupe_error($query);
 			$varow = mysql_fetch_array($result);
@@ -23,12 +53,14 @@
 						and hyllyalue <= '$varow[loppuhyllyalue]' and hyllynro <= '$varow[loppuhyllynro]'
 						and tuotepaikat.halytysraja != 0
 						and tuotepaikat.halytysraja > saldo
+						$lisa
 						order by tuotepaikat.tuoteno";
 			$resultti = mysql_query($query) or pupe_error($query);
 			$luku = mysql_num_rows($result);
 
 			$tehtyriveja = 0;
 			$otsikoita = 0;
+
 			if ((int) $olliriveja == 0 or $olliriveja == '') {
 				$olliriveja = 20;
 			}
@@ -176,7 +208,7 @@
 				echo "<font class='error'>".t("Yht‰‰n rivi‰ ei voitu toimittaa l‰hdevarastosta kohdevarastoon")."!!!!</font>";
 				$query = "	SELECT count(*) FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 				$okdelresult = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($okdelresult) == 0 and $kukarow['kesken'] != 0) {
 					$query = "	UPDATE lasku SET tila = 'D', alatila = 'G' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
 					$delresult = mysql_query($query) or pupe_error($query);
@@ -184,7 +216,7 @@
 				elseif ($kukarow['kesken'] != 0){
 					echo "<font class='error'>".t("APUAAAA tilauksella $kukarow[kesken] on rivej‰ vaikka luultiin ett‰ ei olisi!!!!!")."<br></font>";
 				}
-				
+
 			}
 			else {
 				echo "<font class='message'>".t("Luotiin")." $otsikoita ".t("siirtolistaa")."</font><br><br><br>";
@@ -217,12 +249,12 @@
 		{
 			$sel='';
 			if ($varow['tunnus']==$lahdevarasto) $sel = 'selected';
-			
+
 			$varastomaa = '';
 			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maakoodi'])) {
 				$varastomaa = strtoupper($varow['maa']);
 			}
-			
+
 			echo "<option value='$varow[tunnus]' $sel>$varastomaa $varow[nimitys]</option>";
 		}
 
@@ -238,7 +270,7 @@
 		{
 			$sel='';
 			if ($varow['tunnus']==$kohdevarasto) $sel = 'selected';
-			
+
 			$varastomaa = '';
 			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maakoodi'])) {
 				$varastomaa = strtoupper($varow['maa']);
@@ -248,8 +280,76 @@
 		}
 
 		echo "</select></td></tr>";
-		
+
 		echo "<tr><th>".t("Rivej‰ per tilaus (tyhj‰ = 20)").":</th><td><input type='text' size='8' value='' name='olliriveja'></td>";
+
+		echo "<tr><th>".t("Osasto")."</th><td>";
+
+		$query = "	SELECT distinct selite, selitetark
+					FROM avainsana
+					WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'
+					ORDER BY selite+0";
+		$sresult = mysql_query($query) or pupe_error($query);
+
+		echo "<select name='osasto'>";
+		echo "<option value=''>".t("Kaikki")."</option>";
+
+		while ($srow = mysql_fetch_array($sresult)) {
+			$sel = '';
+			if ($osasto == $srow["selite"]) {
+				$sel = "selected";
+			}
+			echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+		}
+		echo "</select>";
+
+
+		echo "</td></tr><tr><th>".t("Tuoteryhm‰")."</th><td>";
+
+		//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
+		$query = "	SELECT distinct selite, selitetark
+					FROM avainsana
+					WHERE yhtio='$kukarow[yhtio]' and laji='TRY'
+					ORDER BY selite+0";
+		$sresult = mysql_query($query) or pupe_error($query);
+
+		echo "<select name='tuoteryhma'>";
+		echo "<option value=''>".t("Kaikki")."</option>";
+
+		while ($srow = mysql_fetch_array($sresult)) {
+			$sel = '';
+			if ($tuoteryhma == $srow["selite"]) {
+				$sel = "selected";
+			}
+			echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+		}
+		echo "</select>";
+
+
+		echo "</td></tr>
+				<tr><th>".t("Tuotemerkki")."</th><td>";
+
+		//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
+		$query = "	SELECT distinct tuotemerkki
+					FROM tuote
+					WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != ''
+					ORDER BY tuotemerkki";
+		$sresult = mysql_query($query) or pupe_error($query);
+
+		echo "<select name='tuotemerkki'>";
+		echo "<option value=''>".t("Kaikki")."</option>";
+
+		while ($srow = mysql_fetch_array($sresult)) {
+			$sel = '';
+			if ($tuotemerkki == $srow["tuotemerkki"]) {
+				$sel = "selected";
+			}
+			echo "<option value='$srow[tuotemerkki]' $sel>$srow[tuotemerkki]</option>";
+		}
+		echo "</select>";
+
+		echo "</td></tr>
+			<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='toimittaja' value='$toimittaja'></td></tr>";
 
 		echo "</table><br>
 		<input type = 'submit' value = '".t("Generoi siirtolista")."'>

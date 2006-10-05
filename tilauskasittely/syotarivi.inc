@@ -1,0 +1,258 @@
+<?php
+	
+	$debug = 0;
+	
+	if ($debug == 1) {
+		echo " kukarow[extranet] = $kukarow[extranet] | toim = $toim | miniliittyma = $miniliittyma | syotarivi = $syotarivi<br>"; 
+	}
+
+	if (file_exists("../inc/alvpopup.inc")) {
+		require ("../inc/alvpopup.inc");
+	}
+	else {
+		require ("alvpopup.inc");
+	}
+
+	if ($kukarow["extranet"] == '' and ($toim == "PIKATILAUS" or  $toim == "TARJOUS")) {
+		// Pikatilauksen syöttörivi
+		echo "<table>
+				<tr>
+					<th align='left'>".t("Tuotenumero")."</th>
+					<th align='left'>".t("Kpl")."</th>
+					<th align='left'>".t("Var")."</th>
+					<th align='left'>".t("Hinta")."</th>
+					<th align='left'>".t("Ale%")."</th>
+					<th align='left'>".t("Netto")."</th>
+					<td class='back'></td>
+				</tr>
+			<tr>";
+
+
+		if ($ulos == '') {
+			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+		}
+		else {
+			echo "<td>$ulos</td>";
+		}
+
+		echo "	<td><input type='text' name='kpl' size='5' maxlength='5' value='$kpl'></td>
+				<td><input type='text' name='var' size='2' maxlength='1' value='$var'></td>
+				<td><input type='text' name='hinta' size='5' maxlength='12' value='$hinta'></td>
+				<td><input type='text' name='ale' size='5' maxlength='6' value='$ale'></td>
+				<td><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
+				<td class='back'><input type='submit' value='".t("Lisää")."'></td>
+				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
+			</tr>";
+
+		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
+		if ($rivitunnus!='') {
+			echo "<tr><td class='back' colspan='7'>".t("Rivikommentti").":</td></tr>";
+			echo "<tr><td class='back' colspan='7'><input type='text' value='$kommentti' name='kommentti' size='50' maxlength='255'></td></tr>";
+			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
+			echo "<input type='hidden' name='paikka' value='$paikka'>";
+		}
+		echo "</form>";
+		echo "</table>";
+	}
+	elseif ($kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS")) {
+		// Rivisyötön syöttörivi
+		echo "<table>
+				<tr>
+				<th align='left'>".t("Tuoteno")."</th>
+				<th align='left'>".t("Kpl")."</th>
+				<th align='left'>".t("Var")."</th>
+				<th align='left'>".t("Hinta")."</th>
+				<th align='left'>".t("Ale")."</th>
+				<th align='left'>".t("Netto")."</th>
+				<th align='left'>".t("Alv")."</th>
+				<td class='back'></td>
+				</tr>";
+
+
+		echo "<tr>";
+
+		if ($ulos == '') {
+			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+		}
+		else {
+			echo "<td>$ulos</td>";
+		}
+
+		echo "
+			<td><input type='text' size='5' name='kpl' value='$kpl'></td>";
+
+		$selh = $selj = $selp = "";
+
+		if ($var == "H") {
+			$selh = "SELECTED";
+		}
+		elseif ($var == "J") {
+			$selj = "SELECTED";
+		}
+		elseif ($var == "P") {
+			$selp = "SELECTED";
+		}
+
+		echo "<td><select name='var'>";
+		echo "<option value=''>".t("Oletus")."</option>";
+		echo "<option value='J' $selj>".t("JT")."</option>";
+		echo "<option value='H' $selh>".t("Hyväksy")."</option>";
+		echo "<option value='P' $selp>".t("Puute")."</option>";
+		echo "</select></td>";
+
+		echo "<td><input type='text' size='5' name='hinta' value='$hinta'></td>
+			<td><input type='text' size='5' name='ale' value='$ale'></td>";
+
+		$chke = $chkn = "";
+
+		if ($netto == 'N') {
+			$chkn = 'SELECTED';
+		}
+		elseif($netto == "E") {
+			$chke = 'SELECTED';
+		}
+
+		echo "<td><select name='netto'>";
+		echo "<option value=''>".t("Oletus")."</option>";
+		echo "<option value='N' $chkn>".t("N-Netto")."</option>";
+		echo "<option value='E' $chke>".t("E-Netto")."</option>";
+		echo "</select></td>";
+
+		echo "<td>".alv_popup_oletus('alv',$alv)."</td>";
+
+		echo "<td class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+
+		echo "<tr>
+				<th align='left'>".t("Toimitusaika")."</th>
+				<th align='left' colspan='2'>".t("Keräysaika")."</th>
+				<th colspan='4' align='left'>".t("Kommentti")."</th>
+				<td class='back'></td>
+				</tr>";
+
+		echo "<tr>
+				<td><input type='text' size='12' name='toimaika' value='$toimaika'></td>
+				<td colspan='2'><input type='text' size='12' name='kerayspvm' value = '$kerayspvm'></td>
+				<td colspan='4'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>
+				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'></td></tr>";
+
+		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
+		if ($rivitunnus!='') {
+			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
+			echo "<input type='hidden' name='paikka' value='$paikka'>";
+		}
+		echo "</form>";
+		echo "</table>";
+	}
+	elseif($kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON")) {
+		// Rivisyötön syöttörivi
+		echo "<table>
+				<tr>
+				<th align='left'>".t("Tuoteno")."</th>
+				<th align='left'>".t("Kpl")."</th>
+				</tr>";
+
+
+		echo "<tr>";
+
+		if ($ulos == '') {
+			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+		}
+		else {
+			echo "<td>$ulos</td>";
+		}
+
+		echo "
+			<td><input type='text' size='5' name='kpl' value='$kpl'></td>";
+
+		echo "<td class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+
+		echo "<tr>
+				<th colspan='2' align='left'>".t("Kommentti")."</th>
+				<td class='back'></td>
+				</tr>";
+
+		echo "<tr>
+				<td colspan='2'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>
+				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'></td></tr>";
+
+		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
+		if ($rivitunnus!='') {
+			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
+			echo "<input type='hidden' name='paikka' value='$paikka'>";
+		}
+		echo "</form>";
+		echo "</table>";
+	}
+	elseif($miniliittyma == "JOO") {
+		
+		echo "	<form name='rivi' action = '$PHP_SELF?ojarj=$array[0]$ulisa$ankka' method='post' autocomplete='off'>
+				<input type='hidden' name='tee' value = 'TI'>
+				<input type='hidden' name='toim' value = '$toim'>
+				<input type='hidden' name='toim_kutsu' value = '$toim_kutsu'>
+				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+				<input type='hidden' name='oldmerkki' value = '$merkki'>
+				<input type='hidden' name='oldcc' value = '$cc'>
+				<input type='hidden' name='oldmalli' value = '$malli'>
+				<input type='hidden' name='oldvm' value = '$vm'>
+				<input type='hidden' name='merkki' value = '$merkki'>
+				<input type='hidden' name='cc' value = '$cc'>
+				<input type='hidden' name='malli' value = '$malli'>
+				<input type='hidden' name='vm' value = '$vm'>";
+
+		// näytetään tilauksen syöttörivi... aina.
+		echo "<table>";
+		echo "<tr>";
+		echo "<input type='hidden' name='tuoteno' value='$hi_tuoteno'>
+				<td><input type='text' name='kpl' size='5' maxlength='5' value='$kpl' onKeyUp='DisableText();'></td>";
+
+		echo "	<td> $varaosavirhe </td> ";
+
+		echo "<td><input type='submit' value='".t("Lisää")."'></td>";
+
+		echo "</form>";
+		echo "</tr>";
+		echo "</table>";
+
+	}
+	elseif ($kukarow["extranet"] != '') {
+		// Extranetin syöttörivi
+		echo "<table>
+				<tr>
+					<th align='left'>".t("Tuotenumero")."</th>
+					<th align='left'>".t("Kpl")."</th>
+					<td class='back'></td>
+				</tr>
+			<tr>";
+
+		echo "<input type='hidden' name='var' value='$var'>";
+
+		if ($ulos == '') {
+			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+		}
+		else {
+			echo "<td>$ulos</td>";
+		}
+
+		echo "	<td><input type='text' name='kpl' size='5' maxlength='5' value='$kpl'></td>
+				<td class='back'><input type='submit' value='".t("Lisää")."'></td>
+				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
+			</tr>";
+
+		echo "<tr><th colspan='2'>".t("Rivikommentti").":</th></tr>";
+		echo "<tr><td class='back' colspan='2'><input type='text' value='$kommentti' name='kommentti' size='30' maxlength='255'></td></tr>";
+		echo "</form>";
+		echo "</table>";
+	}	
+
+	// Kursorinohjausta
+	if ($formi == '') {   
+		$formi = 'tilaus';
+	}
+
+   if ($kentta == '') {
+       $kentta='tuoteno';
+   }
+?>

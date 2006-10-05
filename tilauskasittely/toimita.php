@@ -1,0 +1,208 @@
+<?php
+	require ("../inc/parametrit.inc");
+
+	echo "<font class='head'>".t("Toimita tilaus").":</font><hr>";
+
+	if($tee=='P') {
+
+		// jos kyseessä ei ole nouto tai noutajan nimi on annettu, voidaan merkata tilaus toimitetuksi..
+		if (($nouto!='yes') or ($noutaja!='')) {
+			$query = "	UPDATE tilausrivi
+						SET toimitettu = '$kukarow[kuka]',
+						toimitettuaika = now() 
+						WHERE otunnus = '$otunnus' 
+						and var not in ('P','J') 
+						and yhtio = '$kukarow[yhtio]' 
+						and keratty != ''";
+			$result = mysql_query($query) or pupe_error($query);
+
+			//päivitetään noutaja laskulle...
+			if ($nouto == 'yes') {
+				$query = "update lasku set noutaja='$noutaja' where tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+
+			$query = "update lasku set alatila='D' where tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			// jos kyseessä on käteismyyntiä, tulostetaaan käteislasku
+			$query  = "select * from lasku, maksuehto where lasku.tunnus='$otunnus' and lasku.yhtio='$kukarow[yhtio]' and maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto";
+			$result = mysql_query($query) or pupe_error($query);
+			$tilrow = mysql_fetch_array($result);
+
+			// jos kyseessä on käteiskauppaa ja EI vientiä, laskutetaan ja tulostetaan tilaus..
+			if ($tilrow['kateinen']!='' and $tilrow["vienti"]=='') {
+				
+				//tulostetaan käteislasku...				
+				$laskutettavat	= $otunnus;
+				$tee 			= "TARKISTA";
+				$laskutakaikki 	= "KYLLA";
+				$silent		 	= "KYLLA";
+				
+				if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == "") {
+					$valittu_tulostin = $kukarow["kirjoitin"];
+				}
+				elseif($valittu_tulostin == "") {
+					$valittu_tulostin = "AUTOMAAGINEN_VALINTA";
+				}
+								
+				require ("verkkolasku.php");
+			}
+
+			$id=0;
+		}
+		else {
+			$id=$otunnus;
+			$virhe="<font class='error'>".t("Noutajan nimi on syötettävä")."!</font><br><br>";
+		}
+	}
+
+	if ($id=='') $id=0;
+
+	// meillä ei ole valittua tilausta
+	if ($id=='0') {
+		$formi="find";
+		$kentta="etsi";
+
+		// tehdään etsi valinta
+		echo "<form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
+
+		$haku='';
+		if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
+		if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
+
+		$query = "	select distinct otunnus
+					from tilausrivi, lasku, toimitustapa
+					where tilausrivi.yhtio='$kukarow[yhtio]' 
+					and lasku.yhtio='$kukarow[yhtio]' 
+					and lasku.tunnus=tilausrivi.otunnus 
+					and lasku.tila='L' 
+					and (lasku.alatila='C' or alatila='B') 
+					and toimitustapa.selite=lasku.toimitustapa 
+					and toimitustapa.nouto!='' 
+					and toimitettu='' 
+					and keratty!='' 
+					and vienti=''";
+		$tilre = mysql_query($query) or pupe_error($query);
+
+		while ($tilrow = mysql_fetch_array($tilre)) {
+			// etsitään sopivia tilauksia
+			$query = "	SELECT tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, toimitustapa, date_format(luontiaika, '%Y-%m-%d') laadittu, laatija
+						FROM lasku
+						WHERE tunnus='$tilrow[0]' and tila='L' $haku and yhtio='$kukarow[yhtio]' and (alatila='C' or alatila='B') ORDER by laadittu desc";
+			$result = mysql_query($query) or pupe_error($query);
+
+			//piirretään taulukko...
+			if (mysql_num_rows($result)!=0) {
+				while ($row = mysql_fetch_array($result)) {
+					// piirretään vaan kerran taulukko-otsikot
+					if ($boob=='') {
+						$boob='kala';
+						echo "<table>";
+						echo "<tr>";
+						for ($i=0; $i<mysql_num_fields($result); $i++)
+							echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+						echo "</tr>";
+					}
+
+					echo "<tr>";
+
+					for ($i=0; $i<mysql_num_fields($result); $i++)
+						echo "<td>$row[$i]</td>";
+
+					echo "<form method='post' action='$PHP_SELF'><td class='back'>
+						  <input type='hidden' name='id' value='$row[0]'>
+						  <input type='submit' name='tila' value='".t("Toimita")."'></td></tr></form>";
+				}
+			}
+		}
+
+		if ($boob!='')
+			echo "</table>";
+		else
+			echo "<font class='message'>".t("Yhtään toimitettavaa tilausta ei löytynyt")."...</font>";
+	}
+
+
+
+	if($id != '0') {
+		$query = "	SELECT concat_ws(' ',lasku.nimi, nimitark) nimi,  
+					lasku.osoite, concat_ws(' ', lasku.postino, lasku.postitp) postitp, 
+					toim_osoite, concat_ws(' ', toim_postino, toim_postitp) toim_postitp,
+					teksti 'maksuehto', lasku.toimitustapa, kateinen, lasku.tunnus
+					FROM lasku, maksuehto
+					WHERE lasku.tunnus='$id' and lasku.yhtio='$kukarow[yhtio]' and tila='L' and (alatila='C' or alatila='B')
+					and maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto";
+
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result)==0){
+			die(t("Tilausta")." $id ".t("ei voida toimittaa, koska kaikkia tilauksen tietoja ei löydy! Uuuuuuuhhhhhhh")."!");
+		}
+
+		$row    = mysql_fetch_array($result);
+
+		echo "<table>";
+		echo "<tr><th>" . t("Tilaus") ."</th><td>$row[tunnus]</td></tr>";	
+		echo "<tr><th>" . t("Asiakas") ."</th><td>$row[nimi]<br>$row[toim_nimi]</td></tr>";
+		echo "<tr><th>" . t("Laskutusosoite") ."</th><td>$row[osoite], $row[postitp]</td></tr>";
+		echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$row[toim_osoite], $row[toim_postitp]</td></tr>";
+		echo "<tr><th>" . t("Maksuehto") ."</th><td>$row[maksuehto]</td></tr>";	
+		echo "<tr><th>" . t("Toimitustapa") ."</th><td>$row[toimitustapa]</td></tr>";		
+		echo "</table><br><br>";
+
+		$query = "	SELECT concat_ws(' ',hyllyalue, hyllynro, hyllytaso, hyllyvali) varastopaikka, concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno, varattu, concat_ws('@',keratty,kerattyaika) keratty, tilausrivi.tunnus, var
+					FROM tilausrivi, tuote
+					WHERE tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and var!='J' and otunnus = '$id' and tilausrivi.yhtio='$kukarow[yhtio]'
+					ORDER BY varastopaikka";
+
+		$result = mysql_query($query) or pupe_error($query);
+		$riveja = mysql_num_rows($result);
+
+		echo "	<table cellpadding='2' cellspacing='1' border='0'>
+				<tr>
+				<th>".t("Varastopaikka")."</th>
+				<th>".t("Tuoteno")."</th>
+				<th>".t("Kpl")."</th>
+				<th>".t("Kerätty")."</th>
+				</tr>";
+
+
+		while($rivi = mysql_fetch_array($result)) {
+			if ($rivi['var']=='P') $rivi['varattu']=t("*puute*");
+
+			echo "<tr><td>$rivi[varastopaikka]</td>
+					<td>$rivi[tuoteno]</td>
+					<td>$rivi[varattu]</td>
+					<td>$rivi[keratty]</td>
+					</tr>";
+		}
+
+		echo "</table><br>";
+
+		$query = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$row[toimitustapa]'";
+		$tores = mysql_query($query) or pupe_error($query);
+		$toita = mysql_fetch_array($tores);
+
+		echo "<form name = 'rivit' method='post' action='$PHP_SELF'>
+				<input type='hidden' name='otunnus' value='$id'>
+				<input type='hidden' name='tee' value='P'>";
+
+
+		// jos kyseessä on nouto jota *EI* makseta käteisellä, kysytään noutajan nimeä..
+		if ($toita['nouto']!='' and $row['kateinen']=='') {
+			echo "<table><tr><th>".t("Syötä noutajan nimi")."</th></tr>";
+			echo "<tr><td><input size='60' type='text' name='noutaja'></td></tr></table><br>";
+			echo "<input type='hidden' name='nouto' value='yes'>";
+
+			//kursorinohjausta
+			$formi="rivit";
+			$kentta="noutaja";
+		}
+
+		echo "$virhe";
+		echo "<input type='submit' value='".t("Merkkaa toimitetuksi")."'></form>";
+	}
+
+	require "../inc/footer.inc";
+?>

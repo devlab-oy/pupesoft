@@ -1,0 +1,45 @@
+<?php
+	// Tämä ohjelma haluaa $liite muuttujan jossa on tiedostonnimi joka liitetään 
+	// Ja $kutsu jossa on tiedoston kuvaus
+	// $ctype muuttuja jossa on liitettävän tiedoston MIME tyyppi
+
+	///*Kasataan käyttäjälle lähetettävä meili *///
+	//tässa on kaikki failit jotka tarvitaan
+	$bound = uniqid(time()."_") ;
+
+	$kutsu   = $kukarow["yhtio"]."-".$kutsu;
+
+	$header  = "From: <mailer@pupesoft.com>\n";
+	$header .= "MIME-Version: 1.0\n" ;
+	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+
+	$content .= "--$bound\n";
+
+	
+	if ($ctype == "TEXT") {
+		$content .= "Content-Type: text/plain; name=\"".$kutsu."\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: inline; filename=\"".$kutsu."\"\n\n";
+	}
+	else {
+		$content .= "Content-Type: application/pdf; name=\"".$kutsu.".pdf\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: inline; filename=\"".$kutsu.".pdf\"\n\n";
+	}
+	
+	
+	$handle  = fopen($liite, "r");
+	$sisalto = fread($handle, filesize($liite));
+	fclose($handle);
+
+	$content .= chunk_split(base64_encode($sisalto));
+	$content .= "\n" ;
+	
+	$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - $kutsu", $content, $header);
+
+	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";
+
+	//Nää muuttujat voi olla aika isoja joten unsetataan ne
+	unset($content);
+	unset($sisalto);
+?>

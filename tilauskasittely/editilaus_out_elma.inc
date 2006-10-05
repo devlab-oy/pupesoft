@@ -1,0 +1,106 @@
+<?php
+
+if (!function_exists("dateconv")) {
+	function dateconv ($date) {
+		//kääntää mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
+		return substr($date,0,4).substr($date,5,2).substr($date,8,2);
+	}
+}
+
+$nimi = "../dataout/elma-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+
+if (!$toot = fopen($nimi, "w")) die("Filen $nimi luonti epäonnistui!");
+
+$query = "SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika 
+			FROM tilausrivi
+			LEFT JOIN tuote USING (yhtio, tuoteno)
+			LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
+			WHERE otunnus = '$laskurow[tunnus]' and varattu > 0 and tilausrivi.yhtio='$kukarow[yhtio]'
+			ORDER BY toim_tuoteno";
+$result = mysql_query($query) or pupe_error($query);
+
+if (mysql_num_rows($result) == 0) {
+	echo "<font class='error'>Lähetettäviä tilausrivejä ei löydy</font>";
+}
+else {
+	$ulos  = "ICHGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+	$ulos .= "ICHG_TYPE:POS\n";
+	$ulos .= "OMSGSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+	$ulos .= "OHDRSTART:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+	$ulos .= "OBGMITYPE:220\n";
+	$ulos .= "OBGMINUMB:" . $laskurow['tunnus'] . "\n";
+	$ulos .= "OBGMIACKR:NA\n";
+	$ulos .= "ODTM4__DT:" . dateconv($laskurow['luontiaika']) . "\n";
+	$ulos .= "ODTM137DT:" . dateconv($laskurow['luontiaika']) . "\n";
+	$ulos .= "OFTXDELTX:" . $laskurow['huolitsija'] . "\n";
+	$ulos .= "ONADSE_NA:" . $laskurow['nimi'] . "\n";
+	$ulos .= "ONADSE_NX:" . $laskurow['nimitark'] . "\n";
+	$ulos .= "ONADSE_SA:" . $laskurow['osoite'] . "\n";
+	$ulos .= "ONADSE_PO:" . $laskurow['postino'] . "\n";
+	$ulos .= "ONADSE_CI:" . $laskurow['postitp'] . "\n";
+	$ulos .= "ONADSE_CN:" . $laskurow['maakoodi'] . "\n";
+	$ulos .= "ONADBY_PC:" . sprintf ('%-18.18s', $yhtiorow['ovttunnus']) . "167 91". "\n";
+	$ulos .= "ONADBY_NA:" . $yhtiorow['nimi'] . "\n";
+	$ulos .= "ONADBY_SA:" . $yhtiorow['osoite'] . "\n";
+	$ulos .= "ONADBY_PO:" . $yhtiorow['postino'] . "\n";
+	$ulos .= "ONADBY_CI:" . $yhtiorow['postitp'] . "\n";
+	$ulos .= "ONADBY_CN:" . $yhtiorow['maakoodi'] . "\n";
+	$ulos .= "ONADBY_CC:" . $laskurow['myyja'] . "\n";
+	$ulos .= "ONADBY_RF:" . "VA  " . $yhtiorow['maakoodi'] . "-" . $yhtiorow['ytunnus'] . "\n";
+	$ulos .= "ONADBY_DO:" . "320 EI  1" . "\n";
+	$ulos .= "OHDR__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+	fputs($toot,$ulos);
+
+	$rivino=1; // joudumme tekemään dummy rivinumerot, kun elma ei salli yli kuusimerkkisiä rivinumeroita
+
+	while ($tilausrivirow=mysql_fetch_array ($result)) {
+		if ($tilausrivirow['yksikko'] == '') $tilausrivirow['yksikko'] = "PCE";
+		if ($tilausrivirow['eankoodi'] == 0) $tilausrivirow['eankoodi'] = '';
+		$ulos  = "OLINSTART:" . $rivino . "\n";
+		$ulos .= "OLINSA_NU:" . $tilausrivirow['toim_tuoteno']  . "\n";
+		$ulos .= "OLINEN_NU:" . $tilausrivirow['eankoodi'] . "\n";
+		$ulos .= "OLININ_PI:" . sprintf ('%-36.36s', $tilausrivirow['tuoteno']) . "1" . "\n";
+		$ulos .= "OLIN21_QT:" . sprintf("%013.4f", (float) $tilausrivirow['varattu']) . "\n";
+		$ulos .= "OLINCONIV:" . sprintf("%015.2f", (float) $tilausrivirow['ostohinta']) . " " . $laskurow['valkoodi'] . " " . $tilausrivirow['yksikko'] . "\n";
+		$ulos .= "OLIN2__DT:" . dateconv($tilausrivirow['toimaika']) . "\n";
+		$ulos .= "OLIN__END:" . $rivino . "\n";
+		fputs($toot,$ulos);
+		$rivino++;
+	}
+
+	$ulos  = "OMSG__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+	$ulos .= "ICHG__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
+	fputs($toot,$ulos);
+	fclose ($toot);
+
+	// tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
+	// palautetaan $palautus ja $syy
+
+	$ftphost = $toimirow['edi_palvelin'];
+	$ftpuser = $toimirow['edi_kayttaja'];
+	$ftppass = $toimirow['edi_salasana'];
+	$ftppath = $toimirow['edi_polku'];
+	$ftpfile = realpath($nimi);
+
+	require ("../inc/ftp-send.inc");
+
+	if ($palautus == 0)
+		echo "<font class='message'>Tilaus lähetettiin onnistuneesti!</font><br>";
+
+	#// näytetään faili ruudulla...
+	#$toot = fopen($nimi,"r");
+	#
+	#$contents = "";
+	#while (!feof ($toot)) {
+	#	$buffer = fgets($toot, 4096);
+	#	$contents .= $buffer;
+	#}
+	#fclose ($toot);
+	#
+	#echo "<pre>".htmlentities($contents)."</pre><br><br>";
+}
+
+$nimi  = "";
+$ulos  = "";
+
+?>

@@ -1,0 +1,199 @@
+<?php
+
+	//ryhmäjako
+	$ryhmanimet   = array('A-50','B-30','C-20');
+	$ryhmaprossat = array(50.00,30.00,20.00);
+
+	echo "<font class='head'>".t("ABC-Analyysiä: ABC-pitkälistaus")."<hr></font>";
+
+	// tutkaillaan saadut muuttujat
+	$osasto = trim($osasto);
+	$try    = trim($try);
+
+	if ($osasto == "")	$osasto = trim($osasto2);
+	if ($try    == "")	$try = trim($try2);
+
+	if ($ed == 'on')	$chk = "CHECKED";
+	else				$chk = "";
+
+	// piirrellään formi
+	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<input type='hidden' name='tee' value='PITKALISTA'>";
+	echo "<table>";
+
+	echo "<tr>";
+	echo "<th>".t("Syötä tai valitse osasto").":</th>";
+	echo "<td><input type='text' name='osasto' size='10'></td>";
+
+	$query = "	SELECT distinct selite, selitetark
+				FROM avainsana
+				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASOSASTO'
+				ORDER BY selite+0";
+	$sresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='osasto2' onChange='submit()'>";
+	echo "<option value=''>".t("Osasto")."</option>";
+
+	while ($srow = mysql_fetch_array($sresult)) {
+		if ($osasto == $srow[0]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+	}
+
+	echo "</select></td>";
+	echo "</tr>";
+
+	echo "<tr>";
+	echo "<th>".t("Syötä tai valitse piiri").":</th>";
+	echo "<td><input type='text' name='try' size='10'></td>";
+
+	$query = "	SELECT distinct piiri
+				FROM asiakas
+				WHERE yhtio='$kukarow[yhtio]' and piiri!=0
+				ORDER BY piiri";
+	$sresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='try2' onChange='submit()'>";
+	echo "<option value=''>".t("Piiri")."</option>";
+
+	while ($srow = mysql_fetch_array($sresult)) {
+		if ($try == $srow[0]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
+	}
+
+	echo "</select></td><td><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "</form>";
+
+
+	if ($osasto != '') {
+		$osastolisa = " and osasto='$osasto' ";
+	}
+	if ($try != '') {
+		$trylisa = " and try='$try' ";
+	}
+
+
+
+	echo "<pre>";
+	echo "ABC\t";
+
+	if ($trylisa != '') {
+		echo "Piirin luokka";
+	}
+
+	echo "Ytunnus\t";
+	echo "Nimi\t";
+	echo "Osasto\t";
+	echo "Piiri\t";
+	echo "Myyjä\t";
+	echo "Myynti$yhtiorow[valkoodi]\t";
+	echo "Kate\t";
+	echo "Kate%\t";
+	echo "Kateosuus\t";
+	//echo "MyyntieraKpl\t";
+	//echo "Myyntiera$yhtiorow[valkoodi]\t";
+	//echo "Myyntirivit\t";
+	echo "Puuterivit\t";
+	echo "Palvelutaso\t";
+	//echo "KustannusYht\t";
+	echo "\n";
+
+
+	$query = "	SELECT
+				distinct luokka
+				FROM abc_aputaulu
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tyyppi='A'
+				ORDER BY luokka";
+	$luokkares = mysql_query($query) or pupe_error($query);
+
+	while($luokkarow = mysql_fetch_array($luokkares)) {
+
+
+		//kauden yhteismyynnit ja katteet
+		$query = "	SELECT
+					sum(summa) yhtmyynti,
+					sum(kate)  yhtkate
+					FROM abc_aputaulu
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi='A'
+					$osastolisa
+					$trylisa
+					and luokka = '$luokkarow[luokka]'";
+		$sumres = mysql_query($query) or pupe_error($query);
+		$sumrow = mysql_fetch_array($sumres);
+
+		//haetaan rivien arvot
+		$query = "	SELECT
+					luokka,
+					luokka_try,
+					tuoteno,
+					osasto,
+					try,
+					osto_rivia,
+					summa,
+					kate,
+					katepros,
+					kate/$sumrow[yhtkate] * 100	kateosuus,
+					myyntierankpl,
+					myyntieranarvo,
+					rivia,
+					kpl,
+					puuterivia,
+					palvelutaso,
+					kustannus_yht
+					FROM abc_aputaulu
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi='A'
+					$osastolisa
+					$trylisa
+					and luokka = '$luokkarow[luokka]'
+					ORDER BY kate desc";
+		$res = mysql_query($query) or pupe_error($query);
+
+
+		while($row = mysql_fetch_array($res)) {
+
+			//haetaan asiakkaan tiedot
+			$query = "	SELECT *
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]'
+						and ytunnus = '$row[tuoteno]'";
+			$asres = mysql_query($query) or pupe_error($query);
+			$asrow = mysql_fetch_array($asres);
+
+			$l = $row["luokka"];
+
+			echo "$ryhmanimet[$l]\t";
+
+			if ($trylisa != '') {
+				$a = $row["luokka_try"];
+
+				echo "$ryhmanimet[$a]\t";
+			}
+
+			echo "$row[tuoteno]\t";
+			echo "$asrow[nimi]\t";
+			echo "$row[osasto]\t";
+			echo "$row[try]\t";
+			echo str_replace(".",",",sprintf('%.0f',$row["osto_rivia"]))."\t";
+			echo str_replace(".",",",sprintf('%.1f',$row["summa"]))."\t";
+			echo str_replace(".",",",sprintf('%.1f',$row["kate"]))."\t";
+			echo str_replace(".",",",sprintf('%.1f',$row["katepros"]))."\t";
+			echo str_replace(".",",",sprintf('%.1f',$row["kateosuus"]))."\t";
+			//echo str_replace(".",",",sprintf('%.1f',$row["myyntierankpl"]))."\t";
+			//echo str_replace(".",",",sprintf('%.1f',$row["myyntieranarvo"]))."\t";
+			//echo str_replace(".",",",sprintf('%.0f',$row["rivia"]))."\t";
+			//echo str_replace(".",",",sprintf('%.0f',$row["puuterivia"]))."\t";
+			echo str_replace(".",",",sprintf('%.1f',$row["palvelutaso"]))."\t";
+			//echo str_replace(".",",",sprintf('%.1f',$row["kustannus_yht"]))."\t";
+			echo "\n";
+
+		}
+	}
+
+	echo "</pre>";
+?>

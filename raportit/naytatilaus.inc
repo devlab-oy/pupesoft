@@ -1,0 +1,243 @@
+<?php
+    ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+	$useslave = 1;
+
+
+	if ($kukarow["extranet"] != '') {
+		$lis = " and liitostunnus = '$kukarow[oletus_asiakas]' ";
+	}
+
+	$query = "	SELECT *
+				FROM lasku
+				WHERE tunnus = '$tunnus'
+				$lis
+				and yhtio='$kukarow[yhtio]'";
+	$aresult = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($aresult) == 0) {
+		echo "<b>".t("VIRHE: Tilausta ei lˆydy")."!</b>$query<br>";
+		exit;
+	}
+	$laskurow = mysql_fetch_array($aresult);
+
+	if ($laskurow['tila']=='L') {
+		// haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
+		$query = "select * from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$laskurow[tunnus]' limit 1";
+		$rakre = mysql_query($query) or pupe_error($query);
+		$rakirrow = mysql_fetch_array($rakre);
+		// spacet rivinvaihdoiksi niin n‰ytt‰‰ kivemmalta
+		$rakirrow['rahtikirjanro'] = str_replace(" ", "<br>", trim($rakirrow['rahtikirjanro']));
+	}
+
+	echo "<table>";
+
+	echo "<tr>
+			<th>".t("Ytunnus")."</th>
+			<th colspan='2'>".t("Laskutusosoite")."</th>
+			<th colspan='3'>".t("Toimitusosoite")."</th>
+			<th colspan='2'>".t("Toimitustapa")."</th>
+			<th>".t("Kommentti")."</th>";	
+	echo "</tr>";
+
+	if ($laskurow['kohdistettu']=='K') {
+		$rahdinmaksaja = "<br>".t("L‰hett‰j‰ maksaa")."";
+	}
+	else {
+		$rahdinmaksaja = "<br>".t("Vastaanottaja maksaa")."";
+	}
+
+	echo "<tr>
+			<td>$laskurow[ytunnus]</td>
+			<td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]</td>
+			<td colspan='3'>$laskurow[toim_nimi] $laskurow[toim_nimitark]<br> $laskurow[toim_osoite]<br> $laskurow[toim_postino] $laskurow[toim_postitp]</td>
+			<td colspan='2'>$laskurow[toimitustapa]</td>
+			<td>$laskurow[comments]";
+
+	if ($laskurow["noutaja"] != '') {
+		echo "<br>".t("Noutaja").": $laskurow[noutaja]";
+	}
+	echo "</td>";
+	echo "</tr>";
+
+	echo "<tr>
+			<th>".t("Tilausnumero")."</th>
+			<th colspan='2'>".t("Tila")."</th>
+			<th>".t("Vienti")."</th>
+			<th>".t("Erikoisalennus")."</th>
+			<th>".t("Toimitusaika")."</th>
+			<th colspan='2'>".t("Rahtikirjanro")."</th>
+			<th>".t("Tilausviite")."</th>";	
+	echo "</tr>";
+
+	echo "<tr>
+			<td>$laskurow[tunnus]</td>";
+				
+	$laskutyyppi = $laskurow["tila"];
+	$alatila	 = $laskurow["alatila"];
+
+	//tehd‰‰n selv‰kielinen tila/alatila
+	if ($kukarow["extranet"] != '') {
+		require ("laskutyyppi.inc");
+	}
+	else {
+		require ("inc/laskutyyppi.inc");
+	}
+
+		
+	if ($laskurow["vienti"] == "K") {
+		$vteksti=t("Vienti ei-EU");
+	}
+	elseif($laskurow["vienti"] == "E") {
+		$vteksti=t("Vienti EU");
+	}
+	else {
+		$vteksti=t("Kotimaa");
+	}
+			
+	echo "	<td colspan='2'>".t("$laskutyyppi")." ".t("$alatila")."</td>			
+			<td>$vteksti</td>
+			<td>".str_replace(".",",",$laskurow['erikoisale'])."</td>
+			<td>$laskurow[toimaika]</td>";
+
+	// postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
+	if (strpos($rakirrow['rahtikirjanro'],"JFI")) {
+		$linkurl = "";
+		$jjfi = split("<br>", trim($rakirrow['rahtikirjanro']));
+
+		foreach ($jjfi as $nro) {
+			$linkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_trackId=$nro&LOTUS_hae=Hae'>$nro</a><br>";
+		}
+
+		$linkurl = substr($linkurl,0,-4); // vika br pois
+	}
+	else {
+		$linkurl = $rakirrow['rahtikirjanro'];
+	}
+
+	echo "	<td colspan='2'>$linkurl</td>
+			<td>$laskurow[viesti]</td>";	
+	echo "</tr>";
+
+
+	echo "<tr>
+			<th>".t("Laskunro")."</th>
+			<th>".t("Laskun pvm")."</th>
+			<th colspan='2'>".t("Er‰p‰iv‰")."</th>
+			<th colspan='2'>".t("Maksup‰iv‰")."</th>
+			<th colspan='2'>".t("ALV")."</th>";
+	
+	if ($laskurow["tila"] == "O") {
+		echo "<th>".t("Eturahti")."</th>";
+		echo "<th>".t("Rahti")."</th>";
+		echo "<th>".t("Huolinta")."</th>";
+	}
+
+	echo "<tr>
+			<td>$laskurow[laskunro]</td>
+			<td>$laskurow[tapvm]</td>
+			<td colspan='2'>$laskurow[erpcm]</td>
+			<td colspan='2'>$laskurow[mapvm]</td>
+			<td colspan='2'>".str_replace(".",",",$laskurow['alv'])." %</td>";
+
+	if ($laskurow["tila"] == "O") {
+		echo "<td>$laskurow[rahti_etu]</td>";
+		echo "<td>$laskurow[rahti]</td>";
+		echo "<td colspan='2'>$laskurow[rahti_huolinta]</td>";
+	}
+
+	echo "</table>";
+
+	echo "<br>";
+	echo "<b>".t("Tilausrivit").":</b><hr>";
+
+	if ($laskurow["tila"] == 'U') {
+		$where = " uusiotunnus = '$tunnus' ";
+	}
+	else {
+		$where = " otunnus = '$tunnus' ";
+	}
+
+	$jarjestys = "toimaika, tilausrivi.tunnus";
+
+	if (strlen($ojarj) > 0) {
+		$jarjestys = $ojarj;
+	}
+
+	//Listataan tilauksessa olevat tuotteet
+	if ($laskurow["tila"] != 'O') {
+		$query = "	SELECT otunnus tilausnumero, nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tuoteno, tilkpl, varattu+kpl kpl, jt,
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti
+					FROM tilausrivi
+					WHERE $where and yhtio='$kukarow[yhtio]'
+					and tilausrivi.tyyppi in ('E','L','G','V','W','T')
+					ORDER BY $jarjestys";
+	}
+	else {
+		$query = "	SELECT otunnus tilausnumero, tilausrivi.nimitys, concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+					tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
+					concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', jt,
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),2) rivihinta, tilausrivi.alv, tilausrivi.kommentti
+					FROM tilausrivi
+					JOIN tuote USING (yhtio, tuoteno)
+					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
+					WHERE $where 
+					and tilausrivi.yhtio='$kukarow[yhtio]'
+					and tyyppi='O'
+					ORDER BY $jarjestys";
+	}
+	$presult = mysql_query($query) or pupe_error($query);
+
+	echo "<table><tr>";
+
+
+	for ($i = 0; $i < mysql_num_fields($presult)-1; $i++) {
+		$ojarj=$i+1; // sortti numeron mukaan niin ei tuu onglemia
+		echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&tunnus=$tunnus&ytunnus=$ytunnus&nimi=$nimi&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";
+	}
+
+	echo "</tr>";
+
+
+	$summa = 0;
+	while ($prow = mysql_fetch_array ($presult)) {
+
+		echo "<tr>";
+		for ($i=0; $i < mysql_num_fields($presult)-1; $i++) {
+			echo "<td>".str_replace(".",",",$prow[$i])."</td>";
+		}
+		echo "</tr>";
+
+		if ($prow["kommentti"] != '') {
+			echo "<tr>";
+			echo "<td>".t("Kommentti").":</td>";
+			echo "<td colspan='13'>$prow[kommentti]</td>";
+			echo "</tr>";
+		}
+
+
+		$summa += $prow["rivihinta"];
+	}
+
+	echo "<tr><td class='back' colspan='11' align='right'>".t("Arvo").":</td><td class='back' colspan='2'>".str_replace(".",",",sprintf('%.2f',$summa))."</td></tr>";
+
+	$aquery = "	SELECT alv, round(sum(rivihinta*(alv/100)),2) alvrivihinta, sum(rivihinta) rivihinta
+				FROM tilausrivi
+				WHERE $where and yhtio='$kukarow[yhtio]'
+				GROUP BY alv
+				ORDER BY alv";
+	$aresult = mysql_query($aquery) or pupe_error($aquery);
+	$summa = 0;
+	while ($arow = mysql_fetch_array($aresult)) {
+
+		if ($arow['alvrivihinta']!=0) {
+			echo "<tr><td class='back' colspan='11' align='right'>".t("Alv").": ".str_replace(".",",",$arow['alv'])."%</td><td class='back' colspan='2'>".str_replace(".",",",$arow['alvrivihinta'])."</td></tr>";
+		}
+		$summa += $arow["alvrivihinta"] + $arow["rivihinta"];
+	}
+
+	if ($summa!=0) {
+		echo "<tr><td class='back' colspan='11' align='right'>".t("Yhteens‰").":</td><td class='back' colspan='2'>".str_replace(".",",",sprintf('%.2f',$summa))."</td></tr>";
+	}
+
+	echo "</table>";
+?>

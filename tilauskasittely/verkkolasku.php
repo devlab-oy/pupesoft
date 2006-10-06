@@ -770,25 +770,14 @@
 						$tyyppi='381';
 					}
 
-					//Laskukohtaisen kommentit kuntoon
-					$laskunkommentit = "";
-
-					if ($lasrow["vienti"] == 'E') {
-						$laskunkommentit .= "VAT 0% Intra community supply. ";
-					}
-					elseif ($lasrow["vienti"] == 'K') {
-						$laskunkommentit .= "VAT 0% Export of goods outside the European Union ";
-					}
-
-					if ($masrow["factoring"] != '') {
-						$laskunkommentit .= "Vår fordran enligt denna faktura har överlåtits till S E B Finans AB (publ).";
-						//tämä merkki | eli pystyviiva on rivinvaihdon merkki elmalla
-						$laskunkommentit .= "|";
-						$laskunkommentit .= "Fakturan skall därför betalas direkt till S E B Finans AB(publ), 167 81  BROMMA.";
-					}
-
+					// Laskukohtaisen kommentit kuntoon
+					// Tämä merkki | eli pystyviiva on rivinvaihdon merkki elmalla
+					// Laskun kommentti on stripattu erikoismerkeistä jo aikaisemmin joten se on nyt puhdas tässä
 					if(trim($lasrow['comments']) != '') {
-						//$laskunkommentit .= $lasrow['comments'];
+						$laskunkommentit = str_replace(array("\r\n","\r","\n"),"|", $lasrow['comments']);
+					}
+					else {
+						$laskunkommentit = "";
 					}
 
 					if ($lasrow["chn"] == "111") {

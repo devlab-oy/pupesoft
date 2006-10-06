@@ -16,12 +16,12 @@ $sisviestit1	= "";
 $viitetxt		= "";
 
 $query  = "	select sum(arvo) arvo, sum(summa) summa, sum(kate) kate, sum(bruttopaino) bruttopaino,
-			group_concat(distinct trim(comments) SEPARATOR ' / ') comments, 
-			group_concat(distinct trim(sisviesti1) SEPARATOR ' / ') sisviestit1, 
+			group_concat(distinct trim(comments) SEPARATOR ' / ') comments,
+			group_concat(distinct trim(sisviesti1) SEPARATOR ' / ') sisviestit1,
 			group_concat(distinct trim(viesti) SEPARATOR ' / ') viestit,
 			group_concat(distinct trim(viitetxt) SEPARATOR ' / ') viitetxt
-			from lasku 
-			where yhtio='$kukarow[yhtio]' 
+			from lasku
+			where yhtio='$kukarow[yhtio]'
 			and tunnus in ($tunnukset)";
 $uusiuresult = mysql_query($query) or pupe_error($query);
 
@@ -32,19 +32,25 @@ if (mysql_num_rows($uusiuresult) > 0) {
 	$summa			= round($sumrow["summa"], 2);
 	$kate			= round($sumrow["kate"], 2);
 	$bruttopaino	= round($sumrow["bruttopaino"], 2);
+
 	$viestit		= $sumrow["viestit"];
 	$comments		= $sumrow["comments"];
 	$sisviestit1	= $sumrow["sisviestit1"];
 	$viitetxt		= $sumrow["viitetxt"];
-	
+
+	//Onko t‰m‰ mysql-bugi vai group_concatin ominaisuus?
+	if ($viestit == " / ") 		$viestit = "";
+	if ($comments == " / ") 	$comments = "";
+	if ($sisviestit1 == " / ") 	$sisviestit1 = "";
+	if ($viitetxt == " / ") 	$viitetxt = "";
 }
 
 // haetaan laskulle otsikkotiedot ketjun ekalta laskulta
-$query  = "	select * 
-			from lasku 
-			where yhtio = '$kukarow[yhtio]' 
-			and tunnus in ($tunnukset) 
-			order by tunnus 
+$query  = "	select *
+			from lasku
+			where yhtio = '$kukarow[yhtio]'
+			and tunnus in ($tunnukset)
+			order by tunnus
 			limit 1";
 $uusiuresult = mysql_query($query) or pupe_error($query);
 $lasrow = mysql_fetch_array($uusiuresult);
@@ -63,15 +69,15 @@ if (mysql_num_rows($uusiuresult) != 1) {
 }
 
 // haetaan maksuehdon tiedot, jotta osataan tiliˆid‰ k‰teismyynti kassaan
-$query = "	select * 
-			from maksuehto 
-			where yhtio = '$kukarow[yhtio]' 
+$query = "	select *
+			from maksuehto
+			where yhtio = '$kukarow[yhtio]'
 			and tunnus  = '$lasrow[maksuehto]'";
 $xresult = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($xresult) == 0) {
 	$mehtorow = array();
-	
+
 	if ($lasrow["erpcm"] == "0000-00-00") {
 		$tulos_ulos_ulasku .= "<font class='message'><br>".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei lˆydy")."! Tunnus $lasrow[tunnus] ".t("Laskunro")." $lasrow[laskunro] ".t("meni nyt pahasti vituiks").".</font><br><br>\r\n";
 	}
@@ -91,6 +97,52 @@ if ($mehtorow['kateinen']!='') {
 
 ///* Lasketaan Kassa-alennus *///
 $kassaale = round($summa*$mehtorow['kassa_alepros']/100,2);
+
+
+$lisa_comments = "";
+
+//Laitetaan laskun kommenttiin talteen tiettyj‰ lis‰tietoja
+if ($mehtorow["factoring"] != '') {
+	$lisa_comments .= "VÂr fordran enligt denna faktura har ˆverlÂtits till S E B Finans AB (publ). \n";
+	$lisa_comments .= "Fakturan skall d‰rfˆr betalas direkt till S E B Finans AB(publ), 167 81  BROMMA. \n";
+}
+
+if ($lasrow["vienti"] == 'E') {
+	$lisa_comments .= "VAT 0% Intra community supply. \n";
+}
+if ($lasrow["vienti"] == 'K') {
+	$lisa_comments .= "VAT 0% Export of goods outside the European Union. \n";
+}
+
+if ($lasrow["vienti"] != '') {
+	//Laitetaan kollim‰‰r‰t ja kilot mukaan kommenttiin vientilaskuille
+	$query = "	SELECT pakkaus, pakkauskuvaus, sum(kilot) kilot, sum(kollit) kollit
+				FROM rahtikirjat
+				WHERE otsikkonro in ($tunnukset)
+				and yhtio='$kukarow[yhtio]'
+				group by pakkaus, pakkauskuvaus
+				having kollit > 0";
+	$rahtiresult = mysql_query($query) or pupe_error($query);
+
+	while($rahtirow = mysql_fetch_array($rahtiresult)) {
+
+		if($rahtirow["pakkaus"] != $rahtirow["pakkauskuvaus"]) {
+			$rahtirow["pakkaus"] .= " ".$rahtirow["pakkauskuvaus"];
+		}
+
+		$lisa_comments .= "$rahtirow[kollit] ".t("kpl").". $rahtirow[pakkaus] $rahtirow[kilot] kg. \n";
+	}
+}
+// Lis‰t‰‰n j‰rjestelm‰n generoimat kommentit laskun kommenttikentt‰‰n
+if ($lisa_comments != "") {
+	$comments = $lisa_comments." ".$comments;
+}
+
+//Siivotaan kommenteista kaikki kummalliset merkit pois
+$comments 		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/|%\r\n]", "", $comments);
+$viestit		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/|%\r\n]", "", $viestit);
+$sisviestit1	= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/|%\r\n]", "", $sisviestit1);
+$viitetxt		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/|%\r\n]", "", $viitetxt);
 
 
 // kirjotetaan kokonaan uusi lasku-olio laskusta.. helpottaa myyntireskontraa! tilaksi: U alatila: tyhj‰
@@ -193,9 +245,9 @@ $edotunnus = '';
 $edtunnus  = '';
 
 while ($valsurow = mysql_fetch_array($valsures)) {
-	
+
 	if ($valsurow["otunnus"] != $edotunnus and $edotunnus != '') {
-		
+
 		$query 		= "SELECT summa, valkoodi, nimi, toim_nimi, toim_osoite FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$edotunnus'";
 		$sumsresult = mysql_query($query) or pupe_error($query);
 		$sumsrow	= mysql_fetch_array($sumsresult);
@@ -207,14 +259,14 @@ while ($valsurow = mysql_fetch_array($valsures)) {
 		else {
 			$sumskommentti = t("Tilaus")." $edotunnus ".t("yhteens‰");
 		}
-		
+
 		//jos k‰ytet‰‰n pelkistetty‰ lasku niin ei haluta n‰it‰ kommentteja
 		if ($yhtiorow['laskutyyppi']!= 1) {
 			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, ' ', '$sumskommentti: $sumsrow[summa] $sumsrow[valkoodi].') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
 			$paivres = mysql_query($query) or pupe_error($query);
 		}
 	}
-	
+
 	$edotunnus = $valsurow["otunnus"];
 	$edtunnus  = $valsurow["tunnus"];
 }
@@ -224,8 +276,8 @@ if ($edtunnus != "") {
 	$query 		= "SELECT summa, valkoodi, nimi, toim_nimi, toim_osoite FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$edotunnus'";
 	$sumsresult = mysql_query($query) or pupe_error($query);
 	$sumsrow	= mysql_fetch_array($sumsresult);
-	
-	
+
+
 	// jos meill‰ on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteens‰riville kommenttiin...
 	if (strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) and $sumsrow["toim_nimi"] != "") {
 		$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteens‰");
@@ -249,7 +301,7 @@ $lasku = $laskurow;
 
 //haetaan asiakkaan tiedot (esim konserniyhtiˆ)
 $query = "	SELECT konserniyhtio
-			FROM asiakas 
+			FROM asiakas
 			WHERE yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
 $konsres = mysql_query($query) or pupe_error($query);
 $konsrow = mysql_fetch_array($konsres);

@@ -19,9 +19,11 @@ $pieni["font"] = "Times-Roman";
 $boldi["height"] = 10;
 $boldi["font"] = "Times-Bold";
 
+$pieni_boldi["height"] = 8;
+$pieni_boldi["font"] = "Times-Bold";
+
 // defaultteja
 $kala = 540;
-$lask = 1;
 $sivu = 1;
 
 
@@ -45,9 +47,9 @@ if (!function_exists('alku')) {
 				echo t("Logokuvavirhe").": ".$image.$data;
 			}
 			else {
-				$kala = array();
-				$kala['scale'] = 0.15;
-				$placement = $pdf->image_place($image, mm_pt(280), mm_pt(10), $firstpage, $kala);
+				$logoparam = array();
+				$logoparam['scale'] = 0.15;
+				$placement = $pdf->image_place($image, mm_pt(280), mm_pt(10), $firstpage, $logoparam);
 			}
 		}
 		else {
@@ -198,31 +200,33 @@ if (!function_exists('rivi')) {
 
 		if ($kala <= 180) {
 			$sivu++;
+
 			loppu($firstpage);
+
 			$firstpage = alku();
+
 			$kala = 540;
-			$lask = 1;
 		}
 
 		$rivihinta = 0;
 		$riviarvo  = 0;
 
 		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,22),	$firstpage, $norm);
-		$pdf->draw_text(190, $kala, $row["tuoteno"], 	$firstpage, $norm);
+		$pdf->draw_text(190, $kala, $row["tuoteno"], 				$firstpage, $norm);
 
 		if ($kutsuja != 'proforma') {
-			$pdf->draw_text(290, $kala, $row["kpl"], 		$firstpage, $norm);
+			$pdf->draw_text(290, $kala, $row["kpl"], 				$firstpage, $norm);
 		}
 		else {
-			$pdf->draw_text(290, $kala, $row["varattu"], 	$firstpage, $norm);
+			$pdf->draw_text(290, $kala, $row["varattu"], 			$firstpage, $norm);
 		}
 
-		$pdf->draw_text(350, $kala, $row["hinta"], 		$firstpage, $norm);
-		$pdf->draw_text(410, $kala, $row["ale"],		$firstpage, $norm);
+		$pdf->draw_text(350, $kala, $row["hinta"], 					$firstpage, $norm);
+		$pdf->draw_text(410, $kala, $row["ale"],					$firstpage, $norm);
 
 
 		if ($kutsuja != 'proforma') {
-			$pdf->draw_text(470, $kala, $row["rivihinta"], 	$firstpage, $norm);
+			$pdf->draw_text(470, $kala, $row["rivihinta"], 			$firstpage, $norm);
 		}
 		else {
 			///* Otetaan huomioon erikoisalennus *///
@@ -246,15 +250,16 @@ if (!function_exists('rivi')) {
 		}
 
 		if ($row["alv"] >= 500) {
-			$pdf->draw_text(530, $kala, t("M.V."),	 		$firstpage, $norm);
+			$pdf->draw_text(530, $kala, t("M.V."),	 				$firstpage, $norm);
 		}
 		else {
-			$pdf->draw_text(530, $kala, $row["alv"], 		$firstpage, $norm);
+			$pdf->draw_text(530, $kala, $row["alv"], 				$firstpage, $norm);
 		}
 
+		// Ensimmäinen rivi piirretty
 		$kala = $kala - 10;
 
-		$pohja = 0;
+
 
 		// Jos ALV no yli 500 niin tiedämme että tämä on marginaaliverotusta
 		if ($row["alv"] >= 500) {
@@ -262,21 +267,11 @@ if (!function_exists('rivi')) {
 		}
 
 		if ($row["kommentti"] != ''){
-			$korkeus = 30;
-			$kala += 10;
+			$pohja = $pdf->draw_paragraph($kala+8, 35, 160, 280, $row["otunnus"]."/".$row["kommentti"].$marginaalilisa, $firstpage, $pieni);
 
-			$pohja = $pdf->draw_paragraph($kala, 35, 160, 280, $row["otunnus"]."/".$row["kommentti"].$marginaalilisa, $firstpage, $pieni);
-
-			if (ceil(($kala - $pohja) / $korkeus) > 1) {
-				$lask += ceil(($kala - $pohja) / $korkeus);
-
-				if (!is_numeric($pohja)) {
-					$pohja = 160;
-				}
+			if (!is_numeric($pohja)) {
+				$pohja = 160;
 			}
-
-			$kala -= 10;
-
 		}
 		else {
 			$pdf->draw_text(35,  $kala, $row["otunnus"],	$firstpage, $pieni);
@@ -304,26 +299,16 @@ if (!function_exists('rivi')) {
 		}
 
 		$kala = $kala - 15;
-		$lask++;
 	}
 }
 
 if (!function_exists('loppu')) {
 	function loppu ($firstpage) {
 
-		global $kutsuja, $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit;
+		global $kutsuja, $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi;
 
-		if ($masrow["factoring"] != '') {
-			$pdf->draw_text(30, 130, "Vår fordran enligt denna faktura har överlåtits till S E B Finans AB (publ).", $firstpage);
-			$pdf->draw_text(30, 115, "Fakturan skall därför betalas direkt till S E B Finans AB(publ), 167 81  BROMMA.", $firstpage);
-		}
-
-		//teksti
-		if ($laskurow["vienti"] == 'E') {
-			$pdf->draw_text(30, 115, "VAT 0% Intra community supply.",						$firstpage, $norm);
-		}
-		if ($laskurow["vienti"] == 'K') {
-			$pdf->draw_text(30, 115, "VAT 0% Export of goods outside the European Union",	$firstpage, $norm);
+		if ($laskurow["comments"] != ''){
+			$pohja = $pdf->draw_paragraph(165, 35, 115, 340, $laskurow["comments"], 		$firstpage, $pieni_boldi);
 		}
 
 		//yhteensärivi

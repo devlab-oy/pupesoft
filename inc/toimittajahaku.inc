@@ -2,103 +2,188 @@
 	if ($tee == 'A') { // Näytetään toimittajan laskuja
 
 		$tunnus = (int) $tunnus;
-
-		if (($laji != 'K') and ($laji != 'H') and ($laji != 'M') and ($laji != 'Y')) {
-			echo "Fail!";
-			exit;
-		}
-
-		$query = "SELECT ytunnus, nimi, postitp
-			FROM toimi
-			WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) == 0) {
-		 	echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
-		}
-
-	 	$trow=mysql_fetch_array ($result);
-		echo "<b>$trow[ytunnus]</b> $trow[nimi] $trow[postitp]<br><br>";
+		if (!isset($kausi)) $kausi='';
 		
-		if ($laji != 'K') {
-			$lisa = " and tila = '" . $laji ."'";
-			if ($laji=='M'){
-				$lisa = " and tila < 'S'";
+		if (strlen($kausi) == 10) $laji='o';
+
+		if ($laji == 'O') {
+			$query = "SELECT ytunnus, nimi, postitp
+				FROM toimi
+				WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+			 	echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
 			}
-		}
 
-		$alku += 0;
-
-		$query = "SELECT tapvm, erpcm, summa, valkoodi, ebid, tila, tunnus
-				  FROM lasku
-				  WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$tunnus' $lisa
-				  		and tila in ('H', 'M', 'P', 'Q', 'Y')  
-				  ORDER BY tapvm desc LIMIT $alku, 20";
-
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) == 0) {
-		 	echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
-		}
-
-		echo "<table><tr>";
-		for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-		}
-		echo "</tr>";
-
-		while ($trow=mysql_fetch_array ($result)) {
-			echo "<tr>";
-			for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
-				if ($i == 4) {
-					if (strlen($trow['ebid']) > 0) {
-						$ebid = $trow['ebid'];
-						require "inc/ebid.inc";
-						echo "<td><a href='$url'>".t("Näytä lasku")."</a></td>";
-					}
-					else {
-					        echo "<td>".t("Paperilasku")."</td>";
-					}
+		 	$trow=mysql_fetch_array ($result);
+			echo "<b>$trow[ytunnus]</b> $trow[nimi] $trow[postitp]<br><br>";
+			$lisa='';
+			
+			if (!isset($kausi)) $kausi='';
+			
+			if ($kausi=='') {
+				$lisa = "and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]'";
+				$kentta = "left('$yhtiorow[tilikausi_alku]',4)";
+			}
+			
+			if (strlen($kausi) == 4) {
+				$lisa = "and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]'";
+				$kentta = "left(tapvm,7)";
+			}
+			
+			if (strlen($kausi) == 7) {
+				$kk= (int) substr($kausi,-2);
+				$vv= (int) substr($kausi,0,4);
+				$kk++;
+				
+				if ($kk > 12) {
+					$vv++;
+					$kk = $kk-12;
 				}
-				else {
-					if ($i == 0) { // Linkki tositteelle
-						if ($kukarow['taso'] < 2) {
-							echo "<td>$trow[tapvm]</td>";
-						}
-						else {
-							echo "<td>";
-							echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>";
-							echo "$trow[$i]</td>";
-						}
-					}
-					else {
-						if ($i == 5) { // Laskun tila
-							$laskutyyppi = $trow[$i];
-							require "inc/laskutyyppi.inc";
-							echo "<td>$laskutyyppi</td>";
-						}
-						else {
-							echo "<td>$trow[$i]</td>";
-						}
-					}
-				}
+				
+				$seuraava = $vv . "-" . $kk;
+				
+				$lisa = "and tapvm >= '$kausi-01' and tapvm < '$seuraava-01'";
+				$kentta = "tapvm";
+			}
+			
+			$query = "SELECT $kentta kausi, sum(summa) ostot
+					  FROM lasku
+					  WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$tunnus' $lisa
+					  		and tila in ('H', 'M', 'P', 'Q', 'Y')
+					  GROUP BY 1";
+
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+			 	echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
+			}
+
+			echo "<table><tr>";
+			for ($i = 0; $i < mysql_num_fields($result); $i++) {
+				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
 			}
 			echo "</tr>";
-		}
-		echo "</table><br>";
-		if ($alku > 0) {
-			$siirry = $alku - 20;
-			echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&alku=$siirry&laji=$laji'>".t("Edelliset")."</a> ";
+			while ($trow=mysql_fetch_array ($result)) {
+				echo "<tr>";
+				for ($i=0; $i<mysql_num_fields($result); $i++) {
+					if ($i==0) {
+						echo "<td><a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=O&tunnus=$tunnus&kausi=$trow[$i]'>$trow[$i]</a></td>";
+					}
+					else {
+						echo "<td>$trow[$i]</td>";
+					}
+				}
+				echo "</tr>";
+			}
+			echo "</table><br><br>";
+			require "footer.inc";
+			exit;
 		}
 		else {
-			echo "".t("Edelliset")." ";
+			if (($laji != 'K') and ($laji != 'H') and ($laji != 'M') and ($laji != 'Y') and ($laji != 'o')) {
+				echo "Fail!";
+				exit;
+			}
+
+			$query = "SELECT ytunnus, nimi, postitp
+				FROM toimi
+				WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+			 	echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
+			}
+
+		 	$trow=mysql_fetch_array ($result);
+			echo "<b>$trow[ytunnus]</b> $trow[nimi] $trow[postitp]<br><br>";
+			
+			$lisa='';
+			
+			if ($laji != 'K') {
+				$lisa = " and tila = '" . $laji ."'";
+				if ($laji=='M'){
+					$lisa = " and tila < 'S'";
+				}
+			}
+			 
+			if ($laji == 'o') $lisa = " and tapvm = '$kausi'";
+			 
+			$alku += 0;
+
+			$query = "SELECT tapvm, erpcm, summa, valkoodi, ebid, tila, tunnus
+					  FROM lasku
+					  WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$tunnus' $lisa
+					  		and tila in ('H', 'M', 'P', 'Q', 'Y')  
+					  ORDER BY tapvm desc LIMIT $alku, 20";
+
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+			 	echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
+			}
+
+			echo "<table><tr>";
+			for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
+				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+			}
+			echo "</tr>";
+
+			while ($trow=mysql_fetch_array ($result)) {
+				echo "<tr>";
+				for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
+					if ($i == 4) {
+						if (strlen($trow['ebid']) > 0) {
+							$ebid = $trow['ebid'];
+							require "inc/ebid.inc";
+							echo "<td><a href='$url'>".t("Näytä lasku")."</a></td>";
+						}
+						else {
+						        echo "<td>".t("Paperilasku")."</td>";
+						}
+					}
+					else {
+						if ($i == 0) { // Linkki tositteelle
+							if ($kukarow['taso'] < 2) {
+								echo "<td>$trow[tapvm]</td>";
+							}
+							else {
+								echo "<td>";
+								echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>";
+								echo "$trow[$i]</td>";
+							}
+						}
+						else {
+							if ($i == 5) { // Laskun tila
+								$laskutyyppi = $trow[$i];
+								require "inc/laskutyyppi.inc";
+								echo "<td>$laskutyyppi</td>";
+							}
+							else {
+								echo "<td>$trow[$i]</td>";
+							}
+						}
+					}
+				}
+				echo "</tr>";
+			}
+			echo "</table><br>";
+			if ($alku > 0) {
+				$siirry = $alku - 20;
+				echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&alku=$siirry&laji=$laji'>".t("Edelliset")."</a> ";
+			}
+			else {
+				echo "".t("Edelliset")." ";
+			}
+			$siirry = $alku + 20;
+			echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&alku=$siirry&laji=$laji'>".t("Seuraavat")."</a> ";
+			echo "<br><br>";
+			require "footer.inc";
+			exit;
 		}
-		$siirry = $alku + 20;
-		echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&alku=$siirry&laji=$laji'>".t("Seuraavat")."</a> ";
-		echo "<br><br>";
-		exit;
 	}
-	
+		
 	$lisat = '';
 	if ($tee == 'S') { // S = selaussanahaku
 		$lisat = "and selaus like '%" . $nimi . "%'";
@@ -145,6 +230,7 @@
 						<option value = 'H'>".t("Hyväksymättä")."
 						<option value = 'M'>".t("Maksamatta")."
 						<option value = 'Y'>".t("Maksettu")."
+						<option value = 'O'>".t("Ostoraportti")."
 						</select></td>
 						<td><input type='Submit' value='".t("Näytä")."'></td>
 						</tr></form>";

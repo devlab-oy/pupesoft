@@ -610,8 +610,8 @@ while (!feof ($fd)) {
 					$alv		= "";
 					$toimaika 	= $laskurow["toimaika"];
 					$kerayspvm	= $laskurow["kerayspvm"];
-					$paikka		= $olinvarasto;
-					$varasto 	= "";
+					$paikka		= "";
+					$varasto 	= $olinvarasto;
 					$kukarow["kesken"] = $laskurow["tunnus"];
 
 					// jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sekä laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys

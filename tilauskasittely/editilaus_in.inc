@@ -549,7 +549,7 @@ while (!feof ($fd)) {
 			// t‰m‰n rivin asiakkaan oma tuotenumero
 			$type = split("@", $tieto);
 			$olinsapi    = trim($type[0]);
-			$olinvarasto = trim($type[2]); // kolmannessa segmentiss‰ tulee varaston numero jos l‰hett‰j‰ tiet‰‰ sen
+			$olinvarasto = trim($type[2]); // kolmannessa segmentiss‰ tulee meid‰n varastopaikka jos l‰hett‰j‰ tiet‰‰ sen
 			break;
 
 		case 'OLINEN_NU' :
@@ -610,8 +610,8 @@ while (!feof ($fd)) {
 					$alv		= "";
 					$toimaika 	= $laskurow["toimaika"];
 					$kerayspvm	= $laskurow["kerayspvm"];
-					$paikka		= "";
-					$varasto 	= $olinvarasto;
+					$paikka		= $olinvarasto;
+					$varasto 	= "";
 					$kukarow["kesken"] = $laskurow["tunnus"];
 
 					// jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sek‰ laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys

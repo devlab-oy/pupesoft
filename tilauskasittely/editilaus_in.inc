@@ -57,6 +57,7 @@ $rivinumero    = "";
 $kommentti     = "";
 $tuoteno       = "";
 $olinsapi      = "";
+$olinvarasto   = "";
 $edi_nimitys   = "";
 
 // fiilataan parametrej‰ joita tarvitaan require fileiss‰
@@ -547,7 +548,8 @@ while (!feof ($fd)) {
 		case 'OLINSA_PI' :
 			// t‰m‰n rivin asiakkaan oma tuotenumero
 			$type = split("@", $tieto);
-			$olinsapi = trim($type[0]);
+			$olinsapi    = trim($type[0]);
+			$olinvarasto = trim($type[2]); // kolmannessa segmentiss‰ tulee varaston numero jos l‰hett‰j‰ tiet‰‰ sen
 			break;
 
 		case 'OLINEN_NU' :
@@ -609,7 +611,7 @@ while (!feof ($fd)) {
 					$toimaika 	= $laskurow["toimaika"];
 					$kerayspvm	= $laskurow["kerayspvm"];
 					$paikka		= "";
-					$varasto 	= "";
+					$varasto 	= $olinvarasto;
 					$kukarow["kesken"] = $laskurow["tunnus"];
 
 					// jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sek‰ laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
@@ -656,6 +658,7 @@ while (!feof ($fd)) {
 			$kommentti     = "";
 			$tuoteno       = "";
 			$olinsapi      = "";
+			$olinvarasto   = "";
 			$edi_nimitys   = "";
 
 			break;
@@ -741,6 +744,7 @@ while (!feof ($fd)) {
 			$loposoite            = "";
 			$edi_nimitys          = "";
 			$olinsapi             = "";
+			$olinvarasto          = "";
 			$lopviesti            = "";
 
 			break;

@@ -90,16 +90,19 @@
 
 						//tilausnumerot talteen, nämä pitää sitten lopuks lähettää ja merkata valmiiks
 						if (!in_array($tunnus, $superostot)) $superostot[] = $tunnus;
-
-						// haetaan oletuspaikan tiedot niin laitetaan se riville
-						$query = "select * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$rivi[tuoteno]' and oletus!=''";
-						$jtsre = mysql_query($query) or pupe_error($query);
-						$jtstu = mysql_fetch_array($jtsre);
-
+						
+						$varastoquery = "select tunnus
+									from varastopaikat
+									where yhtio = '$tiltoi[tyyppi_tieto]'
+									and concat(rpad(upper('$rivi[hyllyalue]') ,3,'0'),lpad('$rivi[hyllynro]' ,2,'0')) >= concat(rpad(upper(alkuhyllyalue) ,3,'0'),lpad(alkuhyllynro ,2,'0'))
+									and concat(rpad(upper('$rivi[hyllyalue]') ,3,'0'),lpad('$rivi[hyllynro]' ,2,'0')) <= concat(rpad(upper(loppuhyllyalue) ,3,'0'),lpad(loppuhyllynro ,2,'0'))";
+						$varastoresult = mysql_query($varastoquery) or pupe_error($varastoquery);
+						$varastoro = mysql_fetch_array($varastoresult);
+						
 						// lisätään ostotilausrivi
 						$query = "	insert into tilausrivi
 									(tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
-									('$rivi[tuoteno]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O','$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]','$rivi[tunnus]')";
+									('$rivi[tuoteno]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O','$varastoro[tunnus]','0','0','0','$rivi[tunnus]')";
 						$updre = mysql_query($query) or pupe_error($query);
 
 						$supercommentti .= "$tiltoi[nimi] - $rivi[tuoteno] $rivi[jt] kpl\n";

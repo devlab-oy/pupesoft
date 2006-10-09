@@ -32,6 +32,7 @@ OLINSTART:144532				// Rivit alkaa / tilaajan ostotilauksen rivinumero (ei pakol
 OLINSA_NU:314012				// Tilattava tuotenumero
 OLIN21_QT:12					// Tilattava määrä
 OLIN__END:144532				// Tilausrivi loppuu
+OLINSA_PI:						// varasto josta rivi on myyty
 
 // Kun kaikki rivit on käsitely
 
@@ -61,7 +62,8 @@ $nimi = $plkulsa."dataout/pupesoft-order-$kukarow[yhtio]-".date("Ymd")."-".md5(u
 
 if (!$toot = fopen($nimi, "w")) die("Filen $nimi luonti epäonnistui!");
 
-$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika
+$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika, 
+			tilausrivi.hyllyalue
 			FROM tilausrivi
 			LEFT JOIN tuote USING (yhtio, tuoteno)
 			LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
@@ -115,6 +117,11 @@ else {
 		$ulos .= "OLINSTART:$tilausrivirow[tunnus]\n";				// Meidän ostotilauksen rivinumero
 		$ulos .= "OLINSA_NU:$tilausrivirow[toim_tuoteno]\n";		// Tilattava tuotenumero
 		$ulos .= "OLIN21_QT:$tilausrivirow[varattu]\n";				// Tilattava määrä ja yksikkö (yksikkö ei pakollinen)
+		
+		if ($tilausrivirow['hyllyalue'] != '') {
+			$ulos .= "OLINSA_PI:@@$tilausrivirow[hyllyalue]\n";	//@@hashillä varaston tunnus
+		}
+		
 		$ulos .= "OLIN__END:$tilausrivirow[tunnus]\n";				// Tilausrivi loppuu
 	}
 

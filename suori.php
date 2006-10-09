@@ -67,7 +67,8 @@
 			else 
 				$summa = $laskurow['summa']-$laskurow['kasumma'];
 		}
-		$rahasumma = $summa;
+		
+		$rahasumma = (float) $summa;
 		if ($rahasumma==0) {
 			echo "<font class='error'>".t("Et antanut maksettua summaa")."!</font><br>";
 			$tee = 'W';

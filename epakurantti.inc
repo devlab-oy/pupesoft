@@ -38,7 +38,8 @@ if ($tee == "paalle" or $tee == "puolipaalle" or $tee == "pois") {
 	// jos ollaan merkkaamassa puoli- tai t‰ysep‰kurantiksi k‰‰nnet‰‰n etumerkki
 	if ($tee == 'paalle')      $muutos = $muutos * -1;
 	if ($tee == 'puolipaalle') $muutos = $muutos / 2 * -1;
-
+	$muutos = round($muutos,2);
+	
 	if ($tee == 'pois' or $tee == 'paalle' or $tee == 'puolipaalle') {
 
 		// katotaan onko tilauksessa

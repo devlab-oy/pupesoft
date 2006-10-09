@@ -55,7 +55,7 @@ if (!function_exists('alku')) {
 			else {
 				$kala = array();
 				$kala['scale'] = 0.15;
-				$placement = $pdf->image_place($image, mm_pt(280), mm_pt(10), $firstpage, $scale);
+				$placement = $pdf->image_place($image, mm_pt(280), mm_pt(10), $firstpage, $kala);
 			}
 		}
 		else {

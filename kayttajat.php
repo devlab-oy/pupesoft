@@ -81,15 +81,32 @@
 
 		if (mysql_num_rows($reskuka) > 0 and $jatka != 1) {
 			$monta = mysql_fetch_array($reskuka);
-			$salasana 	= $monta['salasana'];
-			$firname 	= $monta['nimi'];
-			$ktunnus 	= $monta['kuka'];
-			$phonenum 	= $monta['puhno'];
-			$email 		= $monta['eposti'];
-			$lang 		= $monta['kieli'];
-			$taso 		= $monta['taso'];
-			$profile 	= $monta['profiilit'];
-			echo "<font class='message'>".t("Käyttäjä")." $monta[kuka] ($monta[nimi]) ".t("löytyi muista yrityksistä.")."<br>".t("Hänelle lisätään nyt myös oikeudet yritykselle")." $yhtio.<br>".t("Käyttäjätiedot kopioidaan yhtiöstä")." $monta[yhtio].</font><br>";
+
+			$firname 						= $monta['nimi'];
+			$ktunnus 						= $monta['kuka'];
+			$phonenum 						= $monta['puhno'];
+			$email 							= $monta['eposti'];
+			$lang 							= $monta['kieli'];
+			$taso 							= $monta['taso'];
+			$hinta 							= $monta['hinnat'];
+			$saatavat 						= $monta['saatavat'];
+			//$osasto 						= $monta['osasto'];
+			$salasana 						= $monta['salasana'];
+			//$keraajanro 					= $monta['keraajanro'];
+			//$myyja 						= $monta['myyja'];
+			//$varasto 						= $monta['varasto'];
+			//$kirjoitin					= $monta['kirjoitin'];
+			$kassamyyja 					= $monta['kassamyyja'];
+			//$oletus_asiakas				= $monta['oletus_asiakas'];
+			$oletus_ohjelma 				= $monta['oletus_ohjelma'];
+			$resoluutio 					= $monta['resoluutio'];
+			$extranet 						= $monta['extranet'];
+			$hyvaksyja 						= $monta['hyvaksyja'];
+			$naytetaan_katteet_tilauksella	= $monta['naytetaan_katteet_tilauksella'];
+			$profile 						= $monta['profiilit'];
+
+			echo "<font class='message'>".t("Käyttäjä")." $monta[kuka] ($monta[nimi]) ".t("löytyi muista yrityksistä.")."<br>";
+			echo t("Hänelle lisätään nyt myös oikeudet yritykselle")." $yhtio.<br>".t("Käyttäjätiedot kopioidaan yhtiöstä")." $monta[yhtio].</font><br>";
 		}
 
 		if (strlen($ktunnus) > 0 and $jatka != 1) {
@@ -105,28 +122,29 @@
 			if ($salasana == "") $salasana = $password; // jos meillä ei ole kopioitua salasanaa toisesta yrityksestä, käytetään syötettyä
 
 			$query = "	INSERT into kuka
-						SET nimi 	= '$firname',
-						kuka 		= '$ktunnus',
-						puhno 		= '$phonenum',
-						eposti 		= '$email',
-						kieli 		= '$lang',
-						taso 		= '$taso',
-						hinnat		= '$hinta',
-						saatavat	= '$saatavat',
-						osasto		= '$osasto',
-						salasana	= '$salasana',
-						keraajanro 	= '$keraajanro',
-						myyja 		= '$myyja',
-						varasto 	= '$varasto',
-						kirjoitin 	= '$kirjoitin',
-						kassamyyja 	= '$kassamyyja',
-						oletus_asiakas = '$oletus_asiakas',
-						oletus_ohjelma = '$oletus_ohjelma',
-						resoluutio	= '$resoluutio',
-						extranet	= '$extranet',
-						hyvaksyja	= '$hyvaksyja',
-						profiilit 	= '$profile',
-						yhtio 		= '$yhtio'";
+						SET nimi 		= '$firname',
+						kuka 			= '$ktunnus',
+						puhno 			= '$phonenum',
+						eposti 			= '$email',
+						kieli 			= '$lang',
+						taso 			= '$taso',
+						hinnat			= '$hinta',
+						saatavat		= '$saatavat',
+						osasto			= '$osasto',
+						salasana		= '$salasana',
+						keraajanro 		= '$keraajanro',
+						myyja 			= '$myyja',
+						varasto 		= '$varasto',
+						kirjoitin 		= '$kirjoitin',
+						kassamyyja 		= '$kassamyyja',
+						oletus_asiakas 	= '$oletus_asiakas',
+						oletus_ohjelma 	= '$oletus_ohjelma',
+						resoluutio		= '$resoluutio',
+						extranet		= '$extranet',
+						hyvaksyja		= '$hyvaksyja',
+						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
+						profiilit 		= '$profile',
+						yhtio 			= '$yhtio'";
 			$result = mysql_query($query) or pupe_error($query);
 			$selkuka = mysql_insert_id();
 
@@ -249,25 +267,26 @@
 			}
 
 			$query = "	UPDATE kuka
-						SET nimi 	= '$firname',
-						puhno 		= '$phonenum',
-						eposti 		= '$email',
-						kieli 		= '$lang',
-						taso 		= '$taso',
-						hinnat		= '$hinnat',
-						saatavat	= '$saatavat',
-						keraajanro 	= '$keraajanro',
-						myyja 		= '$myyja',
-						osasto		= '$osasto',
-						varasto 	= '$varasto',
-						kirjoitin 	= '$kirjoitin',
-						oletus_asiakas = '$oletus_asiakas',
-						resoluutio 	= '$resoluutio',
-						extranet	='$extranet',
-						hyvaksyja	='$hyvaksyja',
-						kassamyyja 	= '$kassamyyja',
-						oletus_ohjelma = '$oletus_ohjelma',
-						profiilit 	= '$profile'
+						SET nimi 		= '$firname',
+						puhno 			= '$phonenum',
+						eposti 			= '$email',
+						kieli 			= '$lang',
+						taso 			= '$taso',
+						hinnat			= '$hinnat',
+						saatavat		= '$saatavat',
+						keraajanro 		= '$keraajanro',
+						myyja 			= '$myyja',
+						osasto			= '$osasto',
+						varasto 		= '$varasto',
+						kirjoitin 		= '$kirjoitin',
+						oletus_asiakas 	= '$oletus_asiakas',
+						resoluutio 		= '$resoluutio',
+						extranet		= '$extranet',
+						hyvaksyja		= '$hyvaksyja',
+						kassamyyja 		= '$kassamyyja',
+						oletus_ohjelma 	= '$oletus_ohjelma',
+						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
+						profiilit 		= '$profile'
 						WHERE kuka='$kuka' and yhtio='$yhtio'";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -388,7 +407,7 @@
 					echo "<option value='$apurow[0]' $sel>".t($maa)."</option>";
 				}
 			}
-			
+
 			if ($toim != 'extranet') {
 				echo "</select></td></tr>";
 
@@ -427,7 +446,7 @@
 				echo "<option value='2' $sel2>".t("Taso 2 Aloittelijatilaaja, tilaukset hyväksytetään ennen toimitusta")."</option>";
 				echo "</select></td></tr>";
 			}
-			
+
 			if ($toim == 'extranet') {
 				$sel0 = $sel1 = "";
 
@@ -444,7 +463,7 @@
 				echo "<option value='1' $sel1>".t("Näytetään vain tuotteen myyntihinta")."</option>";
 				echo "</select></td></tr>";
 			}
-			
+
 			if ($toim == 'extranet') {
 				$sel0 = $sel1 = "";
 
@@ -460,7 +479,7 @@
 				if ($krow["saatavat"] == "3") {
 					$sel3 = "SELECTED";
 				}
-				
+
 				echo "<tr><th align='left'>".t("Saatavat").":</th>";
 
 				echo "<td><select name='saatavat'>";
@@ -622,7 +641,35 @@
 					$sel2 = "";
 				}
 
-				echo "<tr><th align='left'>".t("Näytön koko").":</th><td><select name='resoluutio'><option value='P' $sel3>".t("Pieni")."</option><option value='N' $sel1>".t("Normaali")."</option><option value='I' $sel2>".t("Iso")."</option></select></td></tr>";
+				echo "<tr><th align='left'>".t("Näytön koko").":</th>
+						<td><select name='resoluutio'>
+						<option value='P' $sel3>".t("Pieni")."</option>
+						<option value='N' $sel1>".t("Normaali")."</option>
+						<option value='I' $sel2>".t("Iso")."</option>
+						</select></td></tr>";
+
+				if ($krow['naytetaan_katteet_tilauksella'] == "") {
+					$sel1 = "SELECTED";
+					$sel2 = "";
+					$sel3 = "";
+				}
+				if ($krow['naytetaan_katteet_tilauksella'] == "Y") {
+					$sel1 = "";
+					$sel2 = "SELECTED";
+					$sel3 = "";
+				}
+				if ($krow['naytetaan_katteet_tilauksella'] == "N") {
+					$sel1 = "";
+					$sel2 = "";
+					$sel3 = "SELECTED";
+				}
+
+				echo "<tr><th align='left'>".t("Katteet näytetään tilauksentekovaiheessa").":</th>
+						<td><select name='naytetaan_katteet_tilauksella'>
+						<option value=''  $sel1>".t("Oletus")."</option>
+						<option value='Y' $sel2>".t("Kate näytetään")."</option>
+						<option value='N' $sel3>".t("Katetta ei näytetä")."</option>
+						</select></td></tr>";
 			}
 			$andextra = "";
 

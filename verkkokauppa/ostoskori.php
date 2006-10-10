@@ -2,15 +2,15 @@
 
 if ($_POST["pyytaja"] == "yhteensopivuus") {
 	$_POST["pyytaja"] = "yhteensopivuus.php";
-	$pyytajadir = "../arwidson/";
+	$pyytajadir = "";
 }
 else {
 	$_POST["pyytaja"] = "tuote_selaus_haku.php";
-	$pyytajadir = "../tilauskasittely/";
+	$pyytajadir = "tilauskasittely/";
 }
 
-if (file_exists("../inc/parametrit.inc")) {
-	require ("../inc/parametrit.inc");
+if (file_exists("inc/parametrit.inc")) {
+	require ("inc/parametrit.inc");
 	$post_myynti = $pyytajadir.$pyytaja;
 }
 else {

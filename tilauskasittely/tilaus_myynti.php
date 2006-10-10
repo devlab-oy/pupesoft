@@ -686,7 +686,7 @@ if ($tee == '') {
 
 		// aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n
 		if ($kukarow["extranet"] == "" and $kukarow["yhtio"] == "artr") {
-			echo 	"<form action='../arwidson/yhteensopivuus.php' method='post'>
+			echo 	"<form action='../yhteensopivuus.php' method='post'>
 					<input type='hidden' name='toim_kutsu' value='$toim'>
 					<td class='back'><input type='submit' value='".t("Malliselain")."'></td>
 					</form>";

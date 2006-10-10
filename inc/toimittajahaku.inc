@@ -23,12 +23,13 @@
 			if (!isset($kausi)) $kausi='';
 			
 			if ($kausi=='') {
-				$lisa = "and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]'";
-				$kentta = "left('$yhtiorow[tilikausi_alku]',4)";
+				$alku = substr($yhtiorow[tilikausi_alku],04) - 2;
+				$lisa = "and tapvm >= '$alku' and tapvm <= '$yhtiorow[tilikausi_loppu]'";
+				$kentta = "left(tapvm,4)";
 			}
 			
 			if (strlen($kausi) == 4) {
-				$lisa = "and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]'";
+				$lisa = "and tapvm >= '$kausi-01-01' and tapvm <= '$kausi-12-31'";
 				$kentta = "left(tapvm,7)";
 			}
 			
@@ -48,7 +49,7 @@
 				$kentta = "tapvm";
 			}
 			
-			$query = "SELECT $kentta kausi, sum(summa) ostot
+			$query = "SELECT $kentta ajalta, sum(summa) ostot, round(sum(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi)),2) $yhtiorow[valkoodi]
 					  FROM lasku
 					  WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$tunnus' $lisa
 					  		and tila in ('H', 'M', 'P', 'Q', 'Y')

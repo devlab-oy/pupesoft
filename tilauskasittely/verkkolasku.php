@@ -773,8 +773,8 @@
 					// Laskukohtaisen kommentit kuntoon
 					// Tämä merkki | eli pystyviiva on rivinvaihdon merkki elmalla
 					// Laskun kommentti on stripattu erikoismerkeistä jo aikaisemmin joten se on nyt puhdas tässä
-					if(trim($lasrow['comments']) != '') {
-						$laskunkommentit = str_replace(array("\r\n","\r","\n"),"|", $lasrow['comments']);
+					if (trim($lasrow['sisviesti1']) != '') {
+						$laskunkommentit = str_replace(array("\r\n","\r","\n"),"|", $lasrow['sisviesti1']);
 					}
 					else {
 						$laskunkommentit = "";

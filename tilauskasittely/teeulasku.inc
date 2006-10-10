@@ -135,7 +135,7 @@ if ($lasrow["vienti"] != '') {
 }
 // Lis‰t‰‰n j‰rjestelm‰n generoimat kommentit laskun kommenttikentt‰‰n
 if ($lisa_comments != "") {
-	$comments = $lisa_comments." ".$comments;
+	$sisviestit1 = $lisa_comments." ".$sisviestit1;
 }
 
 //Siivotaan kommenteista kaikki kummalliset merkit pois

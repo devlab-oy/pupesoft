@@ -749,10 +749,7 @@
 
 		echo "<tr><td>".t("Kommentti")." 1:</td><td colspan='2'><textarea name='comments' rows='2' cols='60'>$srow[comments]</textarea></td><td>(".t("keräyslista + lähete").")</td></tr>";
 		echo "<tr><td>".t("Kommentti")." 2:</td><td colspan='2'><textarea name='sisviesti2' rows='2' cols='60'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";
-
-		if ($yhtiorow["laskutyyppi"] == 1) {
-			echo "<tr><td>".t("Kommentti")." 3:</td><td colspan='2'><textarea name='sisviesti1' rows='2' cols='60'>$srow[sisviesti1]</textarea></td><td>(".t("lasku").")</td></tr>";
-		}
+		echo "<tr><td>".t("Kommentti")." 3:</td><td colspan='2'><textarea name='sisviesti1' rows='2' cols='60'>$srow[sisviesti1]</textarea></td><td>(".t("lasku").")</td></tr>";
 
 		echo "</table>";
 

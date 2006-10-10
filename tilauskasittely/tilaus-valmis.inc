@@ -22,23 +22,23 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 	//Ennakkotilaukset
 
 	//tila on E ja alatila on A kun on ennakkotilaus
-	$query  = "	UPDATE lasku 
+	$query  = "	UPDATE lasku
 				SET tila='E',
-				alatila='A'			
+				alatila='A'
 				WHERE tunnus='$laskurow[tunnus]'
 				and tila in ('N','L','E')
 				and yhtio='$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	// ennakkotilauksissa tyyppi on E ja rivit ei ole ennakkopoistossa
-	$query = "	UPDATE tilausrivi 
-				SET tyyppi	= 'E' 
-				WHERE yhtio	= '$kukarow[yhtio]' 
+	$query = "	UPDATE tilausrivi
+				SET tyyppi	= 'E'
+				WHERE yhtio	= '$kukarow[yhtio]'
 				and otunnus	= '$laskurow[tunnus]'
 				and tyyppi in ('L','E')";
 	$result = mysql_query($query) or pupe_error($query);
-	
-							
+
+
 	//
 	// LƒHETETƒƒN TILAUSVAHVISTUS
 	//
@@ -57,72 +57,72 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 
 	if (strpos(" ".$laskurow['tilausvahvistus'],'F'))
 		require("tilausvahvistus-fax.inc");
-	
+
 	if (strpos(" ".$laskurow['tilausvahvistus'],'O'))
 		require("tilausvahvistus-email.inc");
 
 	if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
-		require("tilausvahvistus-futursoft.inc");		
+		require("tilausvahvistus-futursoft.inc");
 }
 elseif ($laskurow["tila"] == 'T') {
 	//Tarjoukset
-	
+
 	//tila on T kun kyseess‰ on tarjous
-	$query  = "	UPDATE lasku 
+	$query  = "	UPDATE lasku
 				SET tila='T',
-				alatila='A'			
+				alatila='A'
 				WHERE tunnus='$laskurow[tunnus]'
 				and tila ='T'
 				and yhtio='$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	// tarjouksissa tyyppi on T ja rivit ei ole ennakkopoistossa
-	$query = "	UPDATE tilausrivi 
-				SET tyyppi	= 'T' 
-				WHERE yhtio	= '$kukarow[yhtio]' 
+	$query = "	UPDATE tilausrivi
+				SET tyyppi	= 'T'
+				WHERE yhtio	= '$kukarow[yhtio]'
 				and otunnus	= '$laskurow[tunnus]'
 				and tyyppi in ('L','T')";
 	$result = mysql_query($query) or pupe_error($query);
 }
 else {
 	// T‰ss‰ on normaalit tilaukset
-	
+
 	// katotaan ihan aluksi, onko t‰m‰ jo ker‰tty...
 	$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and keratty!=''";
 	$keres = mysql_query($query) or pupe_error($query);
-	
+
 	//tila L ja alatila C, B, D, E niin tilaus on ker‰tty otsikko
 	//jos otsikko sanoo, ett‰ tilaus on ker‰tty mutta rivit kuitenkaan ei ole ker‰tty niin merkataan ne kumminkin ker‰tyiksi
 	//tai jos yksikin rivi on ker‰tty (l‰hetett‰ ei tulosteta uudestaan)...
 	if (mysql_num_rows($keres)>0 or ($laskurow["tila"] == 'L' and ($laskurow["alatila"] == 'C' or $laskurow["alatila"] == 'B' or $laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E'))) {
-	
+
 		//...niin p‰ivitet‰‰n ker‰‰m‰ttˆm‰t rivit ker‰tyksi aktiiviselle k‰ytt‰j‰lle
 		$query = "UPDATE tilausrivi SET keratty='$kukarow[kuka]', kerattyaika=now() where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and keratty='' and var != 'J'";
 		$result = mysql_query($query) or pupe_error($query);
-	
+
 		$tilaus_valmis_ulos .= "<font class='message'>".t("Tilauksella oli jo ker‰ttyj‰ rivej‰, joten l‰hetett‰ ei tulosteta").".<br>".t("Jos haluat l‰hetteen tulosta l‰hetteen kopio. Tilausnumero on")." $laskurow[tunnus].</font><br><br>";
 	}
 	else {
-	
+
 		//t‰ss‰ k‰yd‰‰n l‰pi v‰h‰n n‰it‰ rahtijuttuja
 		//jos rahtihinnoittelu tapahtuu tilauksen hinnan (alviton) perusteella niin tehd‰‰n se t‰ss‰
 		//t‰m‰ olkoon hyv‰ arvaus rahtihinnasta, sit‰ voidaan sitten myˆhemmin tarkentaa
 		if ($yhtiorow["rahti_hinnoittelu"] != "") {
-																
-			$query = "	select tunnus 
-						from tilausrivi 
-						where yhtio = '$kukarow[yhtio]' 
+
+			$query = "	select tunnus
+						from tilausrivi
+						where yhtio = '$kukarow[yhtio]'
 						and otunnus = '$laskurow[tunnus]'
 						and tuoteno = '$yhtiorow[rahti_tuotenumero]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			//jos tilauksella on jo rahtikulu niin ei lis‰t‰ sit‰ uudestaan
 			if (mysql_num_rows($result) == 0) {
-				
+
 				$query = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$torow = mysql_fetch_array($result);
-							
+
 				// jos toimitustapana on joku nouto niin ei lis‰t‰ rahtikulua
 				if ($torow["nouto"] == "") {
 					if ($yhtiorow["alv_kasittely"] == '') {
@@ -139,15 +139,15 @@ else {
 									and yhtio	  	= '$kukarow[yhtio]'
 									and tyyppi		= 'L'";
 					}
-					
+
 					$presult = mysql_query($query) or pupe_error($query);
-				
+
 					$nyht = 0;
 					$myht = 0;
 					$kyht = 0;
-				
+
 					while ($prow = mysql_fetch_array ($presult)) {
-	
+
 						if ($prow["netto"] != 'N') {
 							$myht += $prow["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT..
 						}
@@ -160,81 +160,81 @@ else {
 						$apu1 = round($laskurow['erikoisale']/100,2);	// erikoisale prosentti
 						$apu2 = round($myht*$apu1,2); 					// erikoisalen m‰‰r‰
 						$apu3 = round((1-$apu1)*$myht,2);				// loppusumma
-	
+
 						//Kakki yhteens‰
 						$kyht = $apu3 + $nyht;
 					}
 					else {
 						//Kakki yhteens‰
-						$kyht = $myht + $nyht;	
+						$kyht = $myht + $nyht;
 					}
-									
+
 					$query = "	select rahtihinta
 								from rahtimaksut
-								where yhtio		 = '$kukarow[yhtio]' 
+								where yhtio		 = '$kukarow[yhtio]'
 								and toimitustapa = '$laskurow[toimitustapa]'
 								and kilotalku   <= '$kyht'
 								and kilotloppu  >= '$kyht'";
-					$result = mysql_query($query) or pupe_error($query);				
-					
+					$result = mysql_query($query) or pupe_error($query);
+
 					if (mysql_num_rows($result) > 0) {
-						$hirow = mysql_fetch_array($result);	
+						$hirow = mysql_fetch_array($result);
 					}
 					else {
 						$hirow = array();
 						$hirow["rahtihinta"] = 0;
 					}
-				
-				
+
+
 					//lis‰t‰‰n rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivej‰ on ilmeisesti turha llis‰t‰
 					if ($hirow["rahtihinta"] != 0) {
 						$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 						$rhire = mysql_query($query) or pupe_error($query);
 						$trow  = mysql_fetch_array($rhire);
-	
+
 						$otunnus	= $laskurow['tunnus'];
 						$hinta		= $hirow["rahtihinta"]; // rahtihinta
 						$alv 		= '';
 						$trow["alv"]= $laskurow["alv"];
 						$nimitys	= $laskurow["toimitustapa"];
-						
+
 						require("alv.inc");
-	
+
 						$query  = "insert into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 						$addtil = mysql_query($query) or pupe_error($query);
-						
+
 						$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin rahtikulua").": $hinta $laskurow[valkoodi]<br>";
-						
+
 						if ($torow["jvkulu"] != 0) {
 							$otunnus	= $laskurow['tunnus'];
 							$hinta	= $torow["jvkulu"]; // jvkulu
 							$alv 		= '';
 							$nimitys	= t("J‰lkivaatimuskulu");
-	
+
 							require("alv.inc");
-	
+
 							$query  = "insert into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 							$addtil = mysql_query($query) or pupe_error($query);
-	
+
 							$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin j‰lkivaatimuskulua").": $hinta $laskurow[valkoodi]<br>";
 						}
-					}					
-				}				
-			}			
+					}
+				}
+			}
 		}
-		
-		
-		
+
+
+
 		// otetaan maksuehto t‰ss‰ heti alussa selville.. k‰teinen ja itsetulostus muuttaa asioita
 		$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$result = mysql_query($query) or pupe_error($query);
-	
+
 		$kateinen = "";
 		$itsetulostus = "";
-	
+
 		if (mysql_num_rows($result)==1) {
 			$maksuehtorow = mysql_fetch_array($result);
-			
+
 			// jos kyseess‰ on k‰teiskauppaa
 			if ($maksuehtorow['kateinen']!='') {
 				$kateinen = "X";
@@ -244,128 +244,128 @@ else {
 				$itsetulostus = "X";
 			}
 		}
-	
+
 		//jos on kassamyynti‰ ja se on k‰teist‰ niin tulostetaan lasku heti ilman l‰hetett‰
 		if (($kateinen == 'X' and $kukarow["kassamyyja"] != '' and $laskurow["vienti"] == '') or ($korkolasku == 'kylla')) {
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]',
-						toimitettuaika = now() 
-						WHERE otunnus = '$laskurow[tunnus]' 
-						and var not in ('P','J') 
-						and yhtio = '$kukarow[yhtio]' 
+						toimitettuaika = now()
+						WHERE otunnus = '$laskurow[tunnus]'
+						and var not in ('P','J')
+						and yhtio = '$kukarow[yhtio]'
 						and keratty != ''";
 			$result = mysql_query($query) or pupe_error($query);
-			
-			$query = "	UPDATE lasku 
-						SET tila='L', alatila='D' 
-						WHERE tunnus = '$laskurow[tunnus]' 
+
+			$query = "	UPDATE lasku
+						SET tila='L', alatila='D'
+						WHERE tunnus = '$laskurow[tunnus]'
 						and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			//tulostetaan k‰teislasku...
-			$laskutettavat	= $laskurow["tunnus"];			
+			$laskutettavat	= $laskurow["tunnus"];
 			$tee 			= "TARKISTA";
 			$laskutakaikki 	= "KYLLA";
 			$silent		 	= "KYLLA";
-			
+
 			if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
 				$valittu_tulostin = $kukarow["kirjoitin"];
 			}
 			elseif($valittu_tulostin == 0) {
 				$valittu_tulostin = "AUTOMAAGINEN_VALINTA";
 			}
-															
+
 			require ("tilauskasittely/verkkolasku.php");
 		}
 		// jos on myyntitilaus ja ei haluttu tulostaa l‰hetett‰, merkataan rivit ker‰tyksi ja toimitetuksi ja laitetaan alatila D
-		elseif ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {			
-			if ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '') {				
+		elseif ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
+			if ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '') {
 				// jos kyseess‰ on k‰teismyynti‰ tai vienti‰, merkataan tilaukset ker‰tyksi mutta ei toimitetuksi ja alatila C/B
 				// myˆs jos maksuehtolla on itsetulostust‰pp‰ trigattuna niin laitetaan se t‰h‰n haaraan
 				// Merkataan rivit ker‰tyiksi. JT-rivej‰ ei merkata ker‰tyiksi.
-				
+
 				$query  = "	UPDATE tilausrivi
 							SET kerattyaika = now(),
 							keratty = '$kukarow[kuka]'
-							WHERE otunnus 	= '$laskurow[tunnus]' 
-							and yhtio 		= '$kukarow[yhtio]' 
+							WHERE otunnus 	= '$laskurow[tunnus]'
+							and yhtio 		= '$kukarow[yhtio]'
 							and var not in ('P','J')
-							and keratty 	= '' 
+							and keratty 	= ''
 							and toimitettu 	= ''";
 				$result = mysql_query($query) or pupe_error($query);
-					
+
 				if ($laskurow['sisainen'] != '') {
 					$alat = "D";
-				}								
+				}
 				elseif($laskurow["vienti"] != '') {
 					$alat = "B";
 				}
 				else {
 					$alat = "C";
 				}
-								
-				$query  = "	UPDATE lasku set tila='L', alatila='$alat', lahetepvm=now() 
-							WHERE tunnus='$laskurow[tunnus]' 
+
+				$query  = "	UPDATE lasku set tila='L', alatila='$alat', lahetepvm=now()
+							WHERE tunnus='$laskurow[tunnus]'
 							and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {
-				// jos kyseess‰  EI ole k‰teismyynti‰ eik‰ itsetulostusta niin merkataan tilaus toimitetuksi				
+				// jos kyseess‰  EI ole k‰teismyynti‰ eik‰ itsetulostusta niin merkataan tilaus toimitetuksi
 				// t‰m‰ on kotimaan myyntia, mutta ei k‰teismyynti‰
 				//t‰ss‰ toimitetaan ja ker‰t‰‰n tilaus samantien jos ei_l‰hetett‰ nappi oli ruksattuna
 				// Merkataan rivit ker‰tyiksi ja toimitetuiksi. JT-rivej‰ ei merkata ker‰tyiksi.
-								
+
 				$query  = "	UPDATE tilausrivi
 							SET kerattyaika = now(),
 							keratty = '$kukarow[kuka]',
 							toimitettuaika = now(),
 							toimitettu = '$kukarow[kuka]'
-							WHERE otunnus 	= '$laskurow[tunnus]' 
-							and yhtio		= '$kukarow[yhtio]' 
+							WHERE otunnus 	= '$laskurow[tunnus]'
+							and yhtio		= '$kukarow[yhtio]'
 							and var not in ('P','J')
-							and keratty		= '' 
+							and keratty		= ''
 							and toimitettu	= ''";
 				$result = mysql_query($query) or pupe_error($query);
-			
-				$query  = "	UPDATE lasku set tila='L', alatila='D', lahetepvm=now() 
-							WHERE tunnus = '$laskurow[tunnus]' 
+
+				$query  = "	UPDATE lasku set tila='L', alatila='D', lahetepvm=now()
+							WHERE tunnus = '$laskurow[tunnus]'
 							and yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);				
+				$result = mysql_query($query) or pupe_error($query);
 			}
-							
+
 			if ($laskurow["sisainen"] != '') {
 				//laskutetaan koko tilaus heti jos se on sisainen lasku
-				$laskutettavat	= $laskurow["tunnus"];			
+				$laskutettavat	= $laskurow["tunnus"];
 				$tee 			= "TARKISTA";
 				$laskutakaikki 	= "KYLLA";
 				$silent		 	= "KYLLA";
-				
+
 				if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
 					$valittu_tulostin = $kukarow["kirjoitin"];
 				}
 				elseif($valittu_tulostin == 0) {
 					$valittu_tulostin = "AUTOMAAGINEN_VALINTA";
 				}
-									
-				require ("tilauskasittely/verkkolasku.php");					
+
+				require ("tilauskasittely/verkkolasku.php");
 			}
 		}
-		else {			
+		else {
 			// Katotaan mit‰ tehd‰‰n l‰hetteelle
 			// Ensin on pakko splitata l‰hete varastoittain
 			//tyhjennet‰‰n laskun varastokentt‰, siell‰ oli tieto varastoon optimoinnista mutta nyt se kertoo mihin varastoon l‰hete kuuluu laittaa
 			$laskurow['varasto'] = 0;
-			
+
 			//Toimitustava hetier‰ tarvitaan
 			$query = "select hetiera from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$totarowx = mysql_fetch_array($result);
-			
+
 			// Maksuehdon jv tieto tarvitaan
 			$query = "select jv from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$maehrowx = mysql_fetch_array($result);
-			
+
 			//haetaan kaikkien tilausrivien varastopaikat
 			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
 						FROM tilausrivi
@@ -378,18 +378,18 @@ else {
 			//t‰ss‰ muuttujassa on sit kaikki tunnukset splitin j‰lkeen
 			$tilausnumerot	 = array();
 			$tilausnumerot[] = $laskurow["tunnus"];
-			
+
 			//mihin varastoon l‰hete kuuluu. aluksi x
 			$varasto   = 'x';
 			$edvarasto = 'x';
 
 			while ($row = mysql_fetch_array($result)) {
-				$query = "	SELECT * 
-							FROM varastopaikat 
-							WHERE yhtio			= '$kukarow[yhtio]' 
-							and alkuhyllyalue  <= '$row[hyllyalue]' 
-							and loppuhyllyalue >= '$row[hyllyalue]' 
-							and alkuhyllynro   <= '$row[hyllynro]' 
+				$query = "	SELECT *
+							FROM varastopaikat
+							WHERE yhtio			= '$kukarow[yhtio]'
+							and alkuhyllyalue  <= '$row[hyllyalue]'
+							and loppuhyllyalue >= '$row[hyllyalue]'
+							and alkuhyllynro   <= '$row[hyllynro]'
 							and loppuhyllynro  >= '$row[hyllynro]'";
 				$vares = mysql_query($query) or pupe_error($query);
 
@@ -453,17 +453,20 @@ else {
 							yhtio			= '$laskurow[yhtio]',
 							clearing		= '$laskurow[clearing]',
 							tilaustyyppi	= '$laskurow[tilaustyyppi]',
-							ytunnus			= '$laskurow[ytunnus]'";
+							ytunnus			= '$laskurow[ytunnus]',
+							kuljetusmuoto			= '$laskurow[kuljetusmuoto]',
+							kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
+							maa_maara				= '$laskurow[maa_maara]'";
 
 					$uusires = mysql_query($query) or pupe_error($query);
-					$laskurow['tunnus'] = (string) mysql_insert_id();					
+					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tilausnumerot[] = $laskurow["tunnus"];
 				}
 				elseif ($laskurow["varasto"] == 0) {
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
-					$query  ="	update lasku set 
+					$query  ="	update lasku set
 								varasto = '$varow[tunnus]'
-								where yhtio='$kukarow[yhtio]' 
+								where yhtio='$kukarow[yhtio]'
 								and tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);
 
@@ -478,45 +481,45 @@ else {
 					$ohno  = mysql_query($query) or pupe_error($query);
 				}
 			}
-			//tyhjennet‰‰n muuttujat 
+			//tyhjennet‰‰n muuttujat
 			$varasto = '';
-			$edvarasto = '';						
-			
+			$edvarasto = '';
+
 			//loopataan kaikki yhdest‰ tilausesta syntyneet l‰hetteet
 			foreach ($tilausnumerot as $tilausnumero) {
 				//luetaan laskun tiedot uudestaan t‰ss‰, per splitti
 				$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 				$result = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_array($result);
-											
+
 				//
 				// LƒHETETƒƒN TILAUSVAHVISTUS
 				//
 				// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
-		
+
 				if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
 					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 				else
 					$naytatvale = 1; // halutaan n‰h‰ alet
-		
+
 				if (strpos(" ".$laskurow['tilausvahvistus'],'E'))
 					require("tilausvahvistus-edi.inc");
-		
+
 				if (strpos(" ".$laskurow['tilausvahvistus'],'S'))
 					require("tilausvahvistus-email.inc");
-		
+
 				if (strpos(" ".$laskurow['tilausvahvistus'],'F'))
 					require("tilausvahvistus-fax.inc");
-				
+
 				if (strpos(" ".$laskurow['tilausvahvistus'],'O'))
 					require("tilausvahvistus-email.inc");
 
 				if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
 					require("tilausvahvistus-futursoft.inc");
 
-				///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///							
+				///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///
 				$kutsuja = "tilaus-valmis.inc";
-				
+
 				require("tilaus-valmis-valitsetila.inc");
 			}
 		}

@@ -58,6 +58,15 @@
 	if ($toim == "MYYNTISOPIMUS") {
 		$fuse = t("Myyntisopimus");
 	}
+	if ($toim == "OSAMAKSUSOPIMUS") {
+		$fuse = t("Osamaksusopimus");
+	}
+	if ($toim == "LUOVUTUSTODISTUS") {
+		$fuse = t("Luovutustodistus");
+	}
+	if ($toim == "VAKUUTUSHAKEMUS") {
+		$fuse = t("Vakuutushakemus");
+	}
 
 	if($tee != 'NAYTATILAUS') echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
 
@@ -362,28 +371,8 @@
 
 				$use = "";
 			}
-			if ($toim == "TARJOUS") {
-				//myyntitilaus. Tulostetaan proforma.
-				$where = " tila = 'T' and tilaustyyppi='T' ";
-
-				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
-				}
-				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
-				}
-
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
-
-				$use = "";
-			}
-			if ($toim == "MYYNTISOPIMUS") {
-				//myyntitilaus. Tulostetaan proforma.
+			if ($toim == "TARJOUS" or $toim == "MYYNTISOPIMUS" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS") {
+				// Tulostellaan venemyyntiin liittyviä osia
 				$where = " tila = 'T' and tilaustyyppi='T' ";
 
 				if ($ytunnus{0} == '£') {
@@ -669,6 +658,24 @@
 				$komento["Myyntisopimus"] .= " -# $kappaleet ";
 			}
 		}
+		if ($toim == "OSAMAKSUSOPIMUS" and $komento["Osamaksusopimus"] != 'email') {
+			$tulostimet[0] = 'Osamaksusopimus';
+			if ($kappaleet > 0) {
+				$komento["Osamaksusopimus"] .= " -# $kappaleet ";
+			}
+		}
+		if ($toim == "LUOVUTUSTODISTUS" and $komento["Luovutustodistus"] != 'email') {
+			$tulostimet[0] = 'Luovutustodistus';
+			if ($kappaleet > 0) {
+				$komento["Luovutustodistus"] .= " -# $kappaleet ";
+			}
+		}
+		if ($toim == "VAKUUTUSHAKEMUS" and $komento["Vakuutushakemus"] != 'email') {
+			$tulostimet[0] = 'Vakuutushakemus';
+			if ($kappaleet > 0) {
+				$komento["Vakuutushakemus"] .= " -# $kappaleet ";
+			}
+		}
 		if ($toim == "TYOMAARAYS" and $komento["Työmääräys"] != 'email') {
 			$tulostimet[0] = 'Työmääräys';
 			if ($kappaleet > 0) {
@@ -878,7 +885,7 @@
 
 				//kuollaan jos yhtään riviä ei löydy
 				if (mysql_num_rows($result) == 0) {
-					echo "".t("Laskurivejä ei löytynyt")."";
+					echo t("Laskurivejä ei löytynyt");
 					exit;
 				}
 				// aloitellaan laskun teko
@@ -887,6 +894,7 @@
 				while ($row = mysql_fetch_array($result)) {
 					rivi($firstpage);
 				}
+
 				loppu($firstpage);
 				alvierittely ($firstpage, $kala);
 
@@ -946,6 +954,39 @@
 				$tee = '';
 			}
 
+
+			if ($toim == "OSAMAKSUSOPIMUS") {
+
+				$otunnus = $laskurow["tunnus"];
+
+				require_once ("tulosta_osamaksusoppari.inc");
+
+				tulosta_osamaksusoppari($otunnus, $komento["Osamaksusopimus"], $kieli, $tee);
+
+				$tee = '';
+			}
+
+			if ($toim == "LUOVUTUSTODISTUS") {
+
+				$otunnus = $laskurow["tunnus"];
+
+				require_once ("tulosta_luovutustodistus.inc");
+
+				tulosta_luovutustodistus($otunnus, $komento["Luovutustodistus"], $kieli, $tee);
+
+				$tee = '';
+			}
+
+			if ($toim == "VAKUUTUSHAKEMUS") {
+
+				$otunnus = $laskurow["tunnus"];
+
+				require_once ("tulosta_vakuutushakemus.inc");
+
+				tulosta_vakuutushakemus($otunnus, $komento["Vakuutushakemus"], $kieli, $tee);
+
+				$tee = '';
+			}
 
 			if ($toim == "TYOMAARAYS") {
 				//Tehdään joini

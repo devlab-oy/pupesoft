@@ -150,7 +150,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		case "yhteensopivuus_tuote" :
 			$pakolliset = array("ATUNNUS","TUOTENO");
 			$kielletyt = array("");
-				break;
+			break;
+		case "rekisteritiedot" :
+			$pakolliset = array("REKNO");
+			$kielletyt = array("");
+			break;
 		case "sanakirja" :
 			$pakolliset = array("FI");
 			$kielletyt = array("");
@@ -306,9 +310,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 		for($j=0; $j<count($indeksi); $j++) {
 			if ($otsikot[$indeksi[$j]] == "TUOTENO") {
-				
+
 				$tuoteno = trim($rivi[$indeksi[$j]]);
-																
+
 				$valinta .= " and TUOTENO='$tuoteno'";
 			}
 			elseif ($table == 'sanakirja' and $otsikot[$indeksi[$j]] == "FI") {
@@ -316,7 +320,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				if (in_array("RU", $otsikot) or in_array("EE", $otsikot)) {
 					//$rivi[$r] = recode_string("utf-8..latin1", $rivi[$r]);
 					$rivi[$indeksi[$j]] = iconv("UTF-8", "ISO-8859-1", $rivi[$indeksi[$j]]);
-					
+
 					$valinta .= " and ".$otsikot[$indeksi[$j]]."='".trim($rivi[$indeksi[$j]])."'";
 				}
 			}
@@ -605,13 +609,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							$chloppupvm = $rivi[$r];
 						}
 					}
-					
+
 					//tarkistetaan kuka juttuja
 					if ($table == 'kuka') {
 						if ($otsikot[$r] == 'SALASANA' and $rivi[$r] != '') {
 							$rivi[$r]=md5(trim($rivi[$r]));
 						}
-						
+
 						if ($otsikot[$r] == 'OLETUS_ASIAKAS' and $rivi[$r] != '') {
 							$xquery = "	SELECT tunnus
 										FROM asiakas
@@ -641,7 +645,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							}
 						}
 					}
-					
+
 					//muutetaan riviä, silloin ei saa päivittää pakollisia kenttiä
 					if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA' and (!in_array($otsikot[$r], $pakolliset) or ($table == 'asiakashinta' or $table == 'asiakasalennus'))) {
 						///* Tässä on kaikki oikeellisuuscheckit *///
@@ -796,6 +800,7 @@ else
 					<option value='kalenteri'>".t("Kalenteritietoja")."</option>
 					<option value='yhteensopivuus_auto'>".t("Yhteensopivuus automallit")."</option>
 					<option value='yhteensopivuus_tuote'>".t("Yhteensopivuus tuotteet")."</option>
+					<option value='rekisteritiedot'>".t("Rekisteritiedot")."</option>
 					<option value='sanakirja'>".t("Sanakirja")."</option>
 					<option value='tuotteen_toimittajat'>".t("Tuotteen toimittajat")."</option>
 					<option value='todo'>".t("Todo-lista")."</option>

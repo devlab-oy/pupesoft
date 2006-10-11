@@ -5,7 +5,7 @@ $tilaus_valmis_ulos = "";
 
 ///* Reload ja back-nappulatsekki *///
 if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
-	echo "<font class='error'> ".t("Älä perkele runkkaa systeemii")."! </font>";
+	echo "<font class='error'> ".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font>";
 	exit;
 }
 

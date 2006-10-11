@@ -84,7 +84,7 @@
 			$result = mysql_query($query);
 			
 			if (mysql_num_rows($result) != 1) {
-				die ("holy fuck! you went missing!");
+				die ("Tiedot katosivat!");
 			}
 			
 			// fetchataan rivi

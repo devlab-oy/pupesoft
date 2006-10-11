@@ -52,7 +52,7 @@
 			$tilre = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tilre) == 0) {
-				echo "<br><br><font class='error'> ".t("Älä perkele runkkaa systeemii")."! </font><br>";
+				echo "<br><br><font class='error'> ".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font><br>";
 				exit;
 			}
 

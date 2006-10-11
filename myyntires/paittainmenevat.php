@@ -52,11 +52,11 @@ if ($tee=='T') {
 						if ($debug==1) echo "$query<br>"; else $result = mysql_query($query) or pupe_error($query);
 					}
 					else {
-						echo "We are fucked 1";
+						echo "Järjestelmävirhe 1";
 					}
 				}
 				else {
-					echo "We are fucked 2";
+					echo "Järjestelmävirhe 2";
 				}
 			}
 			else {

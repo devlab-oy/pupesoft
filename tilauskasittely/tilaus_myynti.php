@@ -260,7 +260,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS") {
 
 	///* Reload ja back-nappulatsekki *///
 	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
-		echo "<font class='error'> ".t("Älä perkele runkkaa systeemii")."! </font>";
+		echo "<font class='error'> ".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font>";
 		exit;
 	}
 
@@ -313,7 +313,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS") {
 
 	///* Reload ja back-nappulatsekki *///
 	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
-		echo "<font class='error'> ".t("Älä perkele runkkaa systeemii")."! </font>";
+		echo "<font class='error'> ".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font>";
 		exit;
 	}
 
@@ -411,7 +411,7 @@ if ($tee == "VALMIS") {
 
 	///* Reload ja back-nappulatsekki *///
 	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
-		echo "<font class='error'> ".t("Älä perkele runkkaa systeemii")."! </font>";
+		echo "<font class='error'> ".t("ÄläTaisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font>";
 		exit;
 	}
 

@@ -237,7 +237,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_affected_rows() == 0) {
-			echo "<font class='error'>fuck! ".t("Varastopaikka")." $tilrivirow[hyllyalue]-$tilrivirow[hyllynro]-$tilrivirow[hyllytaso]-$tilrivirow[hyllyvali] ".t("ei löydy vaikka se on syötetty tilausriville! Koitetaan päivittää oletustapaikkaa!")."</font>";
+			echo "<font class='error'>".t("Varastopaikka")." $tilrivirow[hyllyalue]-$tilrivirow[hyllynro]-$tilrivirow[hyllytaso]-$tilrivirow[hyllyvali] ".t("ei löydy vaikka se on syötetty tilausriville! Koitetaan päivittää oletustapaikkaa!")."</font>";
 
 			$query = "	UPDATE tuotepaikat set
 	   		 			saldo       = saldo+$tilrivirow[varattu],
@@ -250,7 +250,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 	   		if (mysql_affected_rows() == 0) {
 
-	   			echo "<br><font class='error'>MAJOR fuck!! ".t("Tuotteella")." $tilrivirow[tuoteno] ".t("ei ole oletuspaikkaakaaaaan")."!!!</font><br><br>";
+	   			echo "<br><font class='error'>".t("Tuotteella")." $tilrivirow[tuoteno] ".t("ei ole oletuspaikkaakaaaaan")."!!!</font><br><br>";
 
 				// haetaan firman eka varasto, tökätään kama sinne ja tehdään siitä oletuspaikka
 				$query = "select alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' and tyyppi='' order by alkuhyllyalue, alkuhyllynro limit 1";

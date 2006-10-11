@@ -355,7 +355,7 @@ if ($tuoteno != '') {
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		//Jos samalla rivitunuksella löytyy monta tapahtumaa, niin oletamme että olemme saaneet sisään $tapahtumatunnus muuttujan
-		elseif(mysql_num_rows($result) > 1) {
+		elseif (mysql_num_rows($result) > 1) {
 			echo "<font class='error'>".t("Samalla rivitunnuksella löytyi useita kääntöpisteitä! Käytämme sekä rivitunnusta että tapahtumatunnusta.")."</font><br>";
 
 			$query = "SELECT * FROM tapahtuma WHERE yhtio = '$kukarow[yhtio]' and laji in ('tulo','valmistus') and rivitunnus='$rivitunnus' and tunnus='$tapahtumatunnus'";
@@ -380,7 +380,7 @@ if ($tuoteno != '') {
 
 		if ($jlerror != 1) {
 
-			$query = "	SELECT '', laji, kpl, hinta, kplhinta, tunnus
+			$query = "	SELECT sum(kpl) saldomuutos, sum(if(laji='Epäkurantti',1,0)) epaku
 						FROM tapahtuma
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'
@@ -392,64 +392,44 @@ if ($tuoteno != '') {
 			if ($debug > 1) echo "$query<br>";
 
 			if (mysql_num_rows($result) > 0) {
-				$laskuja 	 = 0;
-				$kpl 		 = 0;
-				$uusisaldo   = $saldo['saldo'];
-				$uusikehahin = $tuote['kehahin'];
 
-				if ($debug >= 1) echo "<font class='message'>Tiedot nyt: Tuote: $tuote[tuoteno] Saldo: $uusisaldo Kehahin: $uusikehahin Sort: Desc Begin</font><br>";
+				$trow = mysql_fetch_array ($result);
 
-				while ($trow = mysql_fetch_array ($result)) {
-
-					// epäkuranttisuutta ei osata poistaa
-					if ($trow['laji'] == 'Epäkurantti') { // We are fucked!
-						echo "<font class='error'>".t("Tuotteella on epäkuranntisuuden muutos. Emme osaa toimia!")."</font><br>";
-						if ($debug > 1) echo "$query<br>";
-						$jlerror=1;
-					}
-
-					if ($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') {
-
-						if ($laskuja != 0) {
-							$uusisaldo -= $kpl;
-							if ($debug >= 1) echo "<font class='message'>Tuote: $tuote[tuoteno] Laskuja ($laskuja) Kpl: $kpl Saldo: $uusisaldo Keskihinta: $uusikehahin Sort: Desc</font><br>";
-							$laskuja=0;
-							$kpl=0;
-						}
-
-						$uusisaldo -= $trow['kpl'];
-
-						if ($uusisaldo > 0) {
-							if ($debug >= 1) echo "<font class='message'>Matikka: uusikehahin = ($uusikehahin * ($trow[kpl] + $uusisaldo) - $trow[kplhinta] * $trow[kpl]) / $uusisaldo</font><br>";
-							$uusikehahin = round(($uusikehahin * ($trow['kpl'] + $uusisaldo) - $trow['kplhinta'] * $trow['kpl']) / $uusisaldo,4);
-						}
-						else {
-							if ($debug >= 1) echo "<font class='message'>Ei matikkaa: uusikehahin = $trow[kplhinta]</font><br>";
-							$uusikehahin = $trow['kplhinta'];
-						}
-
-						if ($debug >= 1) echo "<font class='message'>Tuote: $tuote[tuoteno] Saldo: $uusisaldo Kehahin: $uusikehahin Sort: Desc While</font><br>";
-					}
-
-					if ($trow['laji'] == 'laskutus') {
-						$laskuja++;
-						$kpl += $trow['kpl'];
-					}
-
-				} // end while
-
+				// epäkuranttisuutta ei osata poistaa --> We are fucked!
+				if ($trow['epaku'] > 0) {
+					echo "<font class='error'>".t("Tuotteella on epäkuranntisuuden muutos. Emme osaa toimia!")."</font><br>";
+					$jlerror=1;
+				}
 
 				$seliselilisa = "";
+				$uusisaldo    = $saldo["saldo"];
 
-				if ($kaantopisteen_saldomuutos != 0) {
-					$uusisaldo += $kaantopisteen_saldomuutos;
-					$seliselilisa = " + $kaantopisteen_saldomuutos ";
+				if ($trow["saldomuutos"] != 0) {
+					$uusisaldo += $trow["saldomuutos"];
+					$seliselilisa = " ($saldo[saldo] + $trow[saldomuutos]) ";
+				}
+
+				// haetaan tuotteelle edellinen kehahin
+				$query = "	SELECT hinta
+							FROM tapahtuma
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tuoteno'
+							and laadittu < '$pvm'
+							and hinta <> 0
+							ORDER BY laadittu desc
+							LIMIT 1";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) > 0) {
+					$trow = mysql_fetch_array ($result);
+					$uusikehahin = $trow["hinta"];
+				}
+				else {
+					$uusikehahin = 0;
 				}
 
 				// Nyt ollaan takaisin peruspäivässä.
 				if ($debug >= 1) echo "<br><font class='error'>".t("Olemme kääntöpisteessä. Saldo kääntöpisteessä:")."$uusisaldo $seliselilisa</font><br>";
-
-
 
 				if ($jlerror == 0) {
 					// Päivitetään korjattava tapahtuma

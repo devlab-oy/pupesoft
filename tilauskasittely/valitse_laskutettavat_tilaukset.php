@@ -68,7 +68,7 @@
 			$silent		 	= "VIENTI";
 
 			require("verkkolasku.php");
-			
+
 			echo "<br><br>";
         }
         else {
@@ -282,7 +282,8 @@
 					group_concat(distinct lasku.tunnus) tunnukset,
 					group_concat(distinct lasku.tunnus separator '<br>') tunnukset_ruudulle,
 					count(distinct lasku.tunnus) tilauksia,
-					count(tilausrivi.tunnus) riveja
+					count(tilausrivi.tunnus) riveja,
+					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*tilausrivi.varattu),2) arvo
 					from lasku use index (tila_index), tilausrivi use index (yhtio_otunnus), tuote
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
 					and lasku.yhtio = '$kukarow[yhtio]'
@@ -303,7 +304,10 @@
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
-			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivejä")."</th><tr>";
+			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivejä")."</th><th>".t("Arvo")."</th><tr>";
+
+			$arvoyhteensa = 0;
+			$tilauksiayhteensa = 0;
 
 			while ($tilrow = mysql_fetch_array($tilre)) {
 				echo "	<tr>
@@ -311,7 +315,8 @@
 						<td valign='top'>$tilrow[ytunnus]</td>
 						<td valign='top'>$tilrow[nimi] $tilrow[nimitark]</td>
 						<td valign='top'>$tilrow[tilauksia]</td>
-						<td valign='top'>$tilrow[riveja]</td>";
+						<td valign='top'>$tilrow[riveja]</td>
+						<td valign='top' align='right'>$tilrow[arvo]</td>";
 
 				echo "	<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='tee' value='VALITSE'>
@@ -319,8 +324,20 @@
 						<input type='hidden' name='tunnukset' value='$tilrow[tunnukset]'>
 						<td class='back' valign='top'><input type='submit' name='tila' value='".t("Valitse")."'></td>
 						</tr></form>";
+
+				$arvoyhteensa += $tilrow["arvo"];
+				$tilauksiayhteensa += $tilrow["tilauksia"];
+
 			}
 			echo "</table>";
+
+			if ($arvoyhteensa != 0) {
+				echo "<br><table cellpadding='5'><tr>";
+				echo "<th>".t("Tilausten arvo yhteensä")." ($tilauksiayhteensa ".t("kpl")."): </th>";
+				echo "<td>$arvoyhteensa $yhtiorow[valkoodi]</td>";
+				echo "</tr></table>";
+			}
+
 		}
 		else {
 			echo "<font class='message'>".t("Yhtään toimitettavaa ei löytynyt")."...</font>";

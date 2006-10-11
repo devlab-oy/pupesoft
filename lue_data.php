@@ -173,7 +173,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$kielletyt = array("");
 			break;
 		default :
-			echo t("Miten helvetiss‰ t‰nne p‰‰sit!");
+			echo t("Miten t‰nne p‰‰sit!");
 			exit;
 	}
 

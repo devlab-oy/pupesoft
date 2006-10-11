@@ -60,7 +60,7 @@
 				<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 				<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 				<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-	echo "<td class='back'><input type='submit' value='".t("Läheta")."'></td></tr></form></table>";
+	echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr></form></table>";
 
 
 

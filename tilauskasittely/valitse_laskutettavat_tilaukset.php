@@ -4,10 +4,9 @@
 	if ($toim == "") {
 		echo "<font class='head'>".t("Toimita ja laskuta tilaus").":</font><hr>";
 
-		$alatilat = " 	and lasku.alatila in ('B','C') ";
+		$alatilat = " 	and lasku.alatila in ('B','C','D') ";
 		$vientilisa = " and lasku.vienti = '' ";
-		$muutlisa = "	and tilausrivi.toimitettu = ''
-						and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
+		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
 						and tilausrivi.varattu  != 0";
 	}
 	else {

@@ -307,8 +307,8 @@ if (!function_exists('loppu')) {
 
 		global $kutsuja, $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi;
 
-		if ($laskurow["comments"] != ''){
-			$pohja = $pdf->draw_paragraph(165, 35, 115, 340, $laskurow["comments"], 		$firstpage, $pieni_boldi);
+		if ($laskurow["sisviesti1"] != ''){
+			$pohja = $pdf->draw_paragraph(165, 35, 115, 340, $laskurow["sisviesti1"], 		$firstpage, $pieni_boldi);
 		}
 
 		//yhteensärivi

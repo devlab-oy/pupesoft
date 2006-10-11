@@ -1,5 +1,5 @@
 <?php
-	if ((strlen($formi) > 0) and (strlen($kentta) > 0)) {
+	if (isset($formi) and isset($kentta)) {
 		echo "<script LANGUAGE='JavaScript'>
 			window.document.$formi.$kentta.focus();
 		      </script>";

@@ -67,6 +67,9 @@
 	if ($toim == "VAKUUTUSHAKEMUS") {
 		$fuse = t("Vakuutushakemus");
 	}
+	if ($toim == "REKISTERIILMOITUS") {
+		$fuse = t("Rekisteröinti-ilmoitus");
+	}
 
 	if($tee != 'NAYTATILAUS') echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
 
@@ -371,7 +374,7 @@
 
 				$use = "";
 			}
-			if ($toim == "TARJOUS" or $toim == "MYYNTISOPIMUS" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS") {
+			if ($toim == "TARJOUS" or $toim == "MYYNTISOPIMUS" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 				// Tulostellaan venemyyntiin liittyviä osia
 				$where = " tila = 'T' and tilaustyyppi='T' ";
 
@@ -674,6 +677,12 @@
 			$tulostimet[0] = 'Vakuutushakemus';
 			if ($kappaleet > 0) {
 				$komento["Vakuutushakemus"] .= " -# $kappaleet ";
+			}
+		}
+		if ($toim == "REKISTERIILMOITUS" and $komento["Rekisteröinti_ilmoitus"] != 'email') {
+			$tulostimet[0] = 'Rekisteröinti_ilmoitus';
+			if ($kappaleet > 0) {
+				$komento["Rekisteröinti_ilmoitus"] .= " -# $kappaleet ";
 			}
 		}
 		if ($toim == "TYOMAARAYS" and $komento["Työmääräys"] != 'email') {
@@ -984,6 +993,17 @@
 				require_once ("tulosta_vakuutushakemus.inc");
 
 				tulosta_vakuutushakemus($otunnus, $komento["Vakuutushakemus"], $kieli, $tee);
+
+				$tee = '';
+			}
+
+			if ($toim == "REKISTERIILMOITUS") {
+
+				$otunnus = $laskurow["tunnus"];
+
+				require_once ("tulosta_rekisteriilmoitus.inc");
+
+				tulosta_rekisteriilmoitus($otunnus, $komento["Rekisteröinti_ilmoitus"], $kieli, $tee);
 
 				$tee = '';
 			}

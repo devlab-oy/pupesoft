@@ -165,29 +165,29 @@
 
 		$bound = uniqid(time()."_") ;
 
-		$header  = "From: <mailer@pupesoft.com>\r\n";
-		$header .= "MIME-Version: 1.0\r\n" ;
-		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
+		$header  = "From: <mailer@pupesoft.com>\n";
+		$header .= "MIME-Version: 1.0\n" ;
+		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-		$content = "--$bound\r\n";
+		$content = "--$bound\n";
 
-		$content .= "Content-Type: application/vnd.ms-excel; name=\"Excel-mytuory-kausi-$kukarow[yhtio].xls\"\r\n" ;
-		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"Excel-mytuory-kausi-$kukarow[yhtio].xls\"\r\n\r\n";
+		$content .= "Content-Type: application/vnd.ms-excel; name=\"Excel-mytuory-kausi-$kukarow[yhtio].xls\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: attachment; filename=\"Excel-mytuory-kausi-$kukarow[yhtio].xls\"\n\n";
 
 		$content .= chunk_split(base64_encode(str_replace('.',',',$ulos)));
-		$content .= "\r\n" ;
+		$content .= "\n" ;
 
-		$content .= "--$bound\r\n";
+		$content .= "--$bound\n";
 
-		$content .= "Content-Type: text/x-comma-separated-values; name=\"OpenOffice-mytuory-kausi-$kukarow[yhtio].csv\"\r\n" ;
-		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"OpenOffice-mytuory-kausi-$kukarow[yhtio].csv\"\r\n\r\n";
+		$content .= "Content-Type: text/x-comma-separated-values; name=\"OpenOffice-mytuory-kausi-$kukarow[yhtio].csv\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: attachment; filename=\"OpenOffice-mytuory-kausi-$kukarow[yhtio].csv\"\n\n";
 
 		$content .= chunk_split(base64_encode($ulos));
-		$content .= "\r\n" ;
+		$content .= "\n" ;
 
-		$content .= "--$bound\r\n";
+		$content .= "--$bound\n";
 
 		$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - Myynnit tuoteryhmittäin kausi raportti", $content, $header);
 

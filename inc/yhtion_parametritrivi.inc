@@ -323,6 +323,52 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "oletus_toimitusehto") {
+
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
+					ORDER BY jarjestys, selite";
+		$kires = mysql_query($query) or pupe_error($query);
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
+
+		while ($kirow=mysql_fetch_array($kires)) {
+			if ($kirow["selite"]==$trow[$i]) $select='SELECTED';
+			else $select = '';
+
+			$ulos .= "<option value='$kirow[selite]' $select>$kirow[selitetark]</option>";
+		}
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "oletus_toimitusehto2") {
+
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
+					ORDER BY jarjestys, selite";
+		$kires = mysql_query($query) or pupe_error($query);
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa vaihtokohteille")."</option>";
+
+		while ($kirow=mysql_fetch_array($kires)) {
+			if ($kirow["selite"]==$trow[$i]) $select='SELECTED';
+			else $select = '';
+
+			$ulos .= "<option value='$kirow[selite]' $select>$kirow[selitetark]</option>";
+		}
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "lasku_tulostin") {
 
 		$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' ORDER BY kirjoitin";

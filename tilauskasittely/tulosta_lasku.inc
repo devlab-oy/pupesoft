@@ -165,7 +165,7 @@ if (!function_exists('alku')) {
 
 		$pdf->draw_rectangle(653, 300, 632, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 645, t("Toimitusehto", $kieli), $firstpage, $pieni);
-		//$pdf->draw_text(310, 635, $laskurow["toimitusehto"], $firstpage, $norm);
+		$pdf->draw_text(310, 635, $laskurow["toimitusehto"], $firstpage, $norm);
 
 		$pdf->draw_rectangle(632, 300, 611, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 624, t("Lisätietoja", $kieli), 	$firstpage, $pieni);
@@ -306,22 +306,28 @@ if (!function_exists('loppu')) {
 	function loppu ($firstpage) {
 
 		global $kutsuja, $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi;
-
+		
+		$vientikala = 0;
+		
+		if ($laskurow["vienti"] != "") {
+			$vientikala = 20;
+		}
+		
 		if ($laskurow["sisviesti1"] != ''){
-			$pohja = $pdf->draw_paragraph(165, 35, 115, 340, $laskurow["sisviesti1"], 		$firstpage, $pieni_boldi);
+			$pohja = $pdf->draw_paragraph(165, 35, 115+$vientikala, 340, $laskurow["sisviesti1"], 		$firstpage, $pieni_boldi);
 		}
 
 		//yhteensärivi
-		$pdf->draw_rectangle(110, 20, 90, 580,	$firstpage, $rectparam);
-		$pdf->draw_rectangle(110, 207, 90, 580,	$firstpage, $rectparam);
-		$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);
-		$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(110+$vientikala, 20, 90+$vientikala, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(110+$vientikala, 207, 90+$vientikala, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(110+$vientikala, 394, 90+$vientikala, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(110+$vientikala, 540, 90+$vientikala, 580,	$firstpage, $rectparam);
 
-		$pdf->draw_text(30,  102, t("Eräpäivä", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(30,  92,  $laskurow["erpcm"],		$firstpage, $norm);
-		$pdf->draw_text(217, 102, t("Viitenumero", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(217, 92,  $laskurow["viite"],		$firstpage, $norm);
-		$pdf->draw_text(404, 92,  t("Yhteensä", $kieli).":",$firstpage, $norm);
+		$pdf->draw_text(30,  102+$vientikala, t("Eräpäivä", $kieli),	$firstpage, $pieni);
+		$pdf->draw_text(30,  92+$vientikala,  $laskurow["erpcm"],		$firstpage, $norm);
+		$pdf->draw_text(217, 102+$vientikala, t("Viitenumero", $kieli),	$firstpage, $pieni);
+		$pdf->draw_text(217, 92+$vientikala,  $laskurow["viite"],		$firstpage, $norm);
+		$pdf->draw_text(404, 92+$vientikala,  t("Yhteensä", $kieli).":",$firstpage, $norm);
 
 
 		if ($kutsuja == 'proforma') {
@@ -331,13 +337,13 @@ if (!function_exists('loppu')) {
 			$summa = $laskurow["summa"];
 		}
 
-		$pdf->draw_text(464, 92,  $laskurow["summa"],		$firstpage, $boldi);
+		$pdf->draw_text(464, 92+$vientikala,  $laskurow["summa"],		$firstpage, $boldi);
 
 
-		$pdf->draw_text(550, 92,  $laskurow["valkoodi"],	$firstpage, $boldi);
+		$pdf->draw_text(550, 92+$vientikala,  $laskurow["valkoodi"],	$firstpage, $boldi);
 
 		//Pankkiyhteystiedot
-		$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
+		$pdf->draw_rectangle(90+$vientikala, 20, 20, 580,	$firstpage, $rectparam);
 
 	    if ($masrow["factoring"] != '') {
 			$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
@@ -345,11 +351,25 @@ if (!function_exists('loppu')) {
         	$pdf->draw_text(217, 72, $yhtiorow["factoring_pankkinimi2"]." ".$yhtiorow["factoring_pankkitili2"],	$firstpage, $norm);
         	$pdf->draw_text(404, 72, $yhtiorow["factoring_pankkinimi3"]." ".$yhtiorow["factoring_pankkitili3"],	$firstpage, $norm);
 		}
+		elseif ($laskurow["vienti"] != "") {
+			$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),								$firstpage, $pieni);
+			$pdf->draw_text(30,  92, $yhtiorow["pankkinimi1"]."  ".$yhtiorow["pankkitili1"],			$firstpage, $norm);
+			$pdf->draw_text(217, 92, "IBAN: ".$yhtiorow["pankkiiban1"],		$firstpage, $norm);
+			$pdf->draw_text(404, 92, "SWIFT: ".$yhtiorow["pankkiswift1"],	$firstpage, $norm);
+
+			$pdf->draw_text(30,  82, $yhtiorow["pankkinimi2"]."  ".$yhtiorow["pankkitili2"],			$firstpage, $norm);
+			$pdf->draw_text(217, 82, "IBAN: ".$yhtiorow["pankkiiban2"],		$firstpage, $norm);
+			$pdf->draw_text(404, 82, "SWIFT: ".$yhtiorow["pankkiswift2"],	$firstpage, $norm);
+			
+			$pdf->draw_text(30,  72, $yhtiorow["pankkinimi3"]."  ".$yhtiorow["pankkitili3"],			$firstpage, $norm);
+			$pdf->draw_text(217, 72, "IBAN: ".$yhtiorow["pankkiiban3"],		$firstpage, $norm);
+			$pdf->draw_text(404, 72, "SWIFT: ".$yhtiorow["pankkiswift3"],	$firstpage, $norm);
+		}
 		else {
 		    $pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
         	$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$firstpage, $norm);
         	$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"],	$firstpage, $norm);
-        	$pdf->draw_text(404, 72, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkinimi3"],	$firstpage, $norm);
+        	$pdf->draw_text(404, 72, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkitili3"],	$firstpage, $norm);
         }
 
 		//Alimmat kolme laatikkoa, yhtiötietoja

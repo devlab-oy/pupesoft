@@ -4,21 +4,27 @@
 		$tmp_maa = $t[$i];
 	}
 
-	if ((mysql_field_name($result, $i) == "ytunnus") and (trim($t[$i])!='')) {
+	if (mysql_field_name($result, $i) == "ytunnus") {
 
-		/*$ytunnus = trim($t[$i]);
+		$ytunnus = trim($t[$i]);
 
-		if (strtoupper($tmp_maa) == 'FI') {
-			require ("tarkistaytunnus.inc");
-		}
-
-		if ($ok == 0) {
-			$virhe[$i] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
-			#$errori = 1;
+		if ($ytunnus == "") {
+			$virhe[$i] = t("Y-tunnus puuttuu")."!";
+			$errori = 1;
 		}
 		else {
-			$t[$i] = $ytunnus;
-		}*/
+			if (strtoupper($tmp_maa) == 'FI') {
+				require ("tarkistaytunnus.inc");
+			}
+
+			if ($ok == 0) {
+				$virhe[$i] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
+				#$errori = 1;
+			}
+			else {
+				$t[$i] = $ytunnus;
+			}
+		}
 	}
 
 	if (mysql_field_name($result, $i) == "laatija") {

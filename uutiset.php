@@ -36,25 +36,42 @@ else {
 if ($tee == 'LISAA') {
 
 	if (strlen($otsikko) > 0 and strlen($uutinen) > 0) {
+	
+		$liitostunnus = 0;
+		
+		if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+			
+			$filetype = $_FILES['userfile']['type'];
+			$filesize = $_FILES['userfile']['size'];
+			$filename = $_FILES['userfile']['name'];
 
-		$filename = "pics/".$_FILES['userfile']['name'];
+			$file = fopen($_FILES['userfile']['tmp_name'], 'r');
+			$data = addslashes(fread($file, $filesize));
 
-		if (!move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
-			$filename = $kuva;
+			$selite = trim($otsikko);
+
+			// lis‰t‰‰n kuva
+			$query = "	insert into liitetiedostot set
+						yhtio    = '$kukarow[yhtio]',
+						liitos   = 'kalenteri',
+						data     = '$data',
+						selite   = '$selite',
+						filename = '$filename',
+						filesize = '$filesize',
+						filetype = '$filetype'";
+			$result = mysql_query($query) or pupe_error($query);
+			$liitostunnus = mysql_insert_id();
+			$kuva = $liitostunnus;
 		}
-		else {
-			system("chmod a+r $filename");
-		}
-
+		
 		$uutinen = nl2br(strip_tags($uutinen, '<a>'));
 
 		// ollaanko valittu konsernitasoinen uutinen
 		if ($konserni != '') $konserni = $yhtiorow['konserni'];
 
 		if ($tunnus != 0) {
-			$query = "	UPDATE kalenteri
-						SET ";
-			$postquery = " WHERE tunnus = '$tunnus'";
+			$query = "	UPDATE kalenteri SET ";
+			$postquery = " WHERE tunnus = '$tunnus' ";
 		}
 		else {
 			$query = "	INSERT INTO kalenteri
@@ -67,15 +84,21 @@ if ($tee == 'LISAA') {
 			$postquery = "";
 		}
 
-
 		$query .= "	kentta01 	= '$otsikko',
 					kentta02 	= '$uutinen',
-					kentta03 	= '$filename',
+					kentta03 	= '$kuva',
 					konserni 	= '$konserni',
 					kuittaus	= '$lukittu'";
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
+		$katunnus = mysql_insert_id();	
 
+		if ($liitostunnus != 0) {
+			// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
+			$query = "update liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+		
 		$tee = "";
 	}
 	else {
@@ -129,7 +152,7 @@ if ($tee == "SYOTA") {
 			echo "
 				<tr>
 					<th>".t("Nykyinen kuva")."</th>
-					<td><img src='$rivi[kentta03]' width='130'></td>
+					<td><img src=view.php?id=$rivi[kentta03]' width='130'></td>
 				</tr>";
 
 			echo "<input type='hidden' name='kuva' value='$rivi[kentta03]'>";
@@ -223,18 +246,22 @@ if ($tee == "PRINTTAA") {
 	kuvaurl    = kentta03
 	*/
 
-	if ($row["kentta03"] == '') {
-		$row["kentta03"] = $yhtiorow["logo"];
+	$kuvaurl = "";
+
+	if ($row["kentta03"] != "") {
+		$kuvaurl = "<img src='view.php?id=$row[kentta03]' width='130'>";
 	}
 
-	if (trim($uutinen["kentta03"]) == '') {
-		$row["kentta03"] = "http://www.pupesoft.com/pupesoft.gif";
+	if ($yhtiorow["logo"] != '' and $kuvaurl == '') {
+		$kuvaurl = "<img src='$yhtiorow[logo]' width='130'>";
 	}
 
+	if ($kuvaurl == '') {
+		$kuvaurl = "<img src='http://www.pupesoft.com/pupesoft.gif' width='130'>";
+	}
 
 	$otsikko        = $row["kentta01"];
 	$uutinen        = $row["kentta02"];
-	$kuvaurl        = $row["kentta03"];
 	$paivays        = $row["pvmalku"];
 	$toimittaja     = $row["kuka"];
 
@@ -254,7 +281,7 @@ if ($tee == "PRINTTAA") {
 
 				<TABLE BORDER='0' CELLSPACING='5' CELLPADDING='4'><TR>
 						<TD VALIGN='TOP'>
-								<IMG SRC='$kuvaurl' WIDTH='130'>
+								$kuvaurl
 						</TD><TD VALIGN='TOP'>
 								<FONT FACE='Lucida,Verdana,Helvetica,Arial' SIZE='-1'>
 								$uutinen
@@ -325,13 +352,20 @@ if ($tee == '') {
 			kuvaurl    = kentta03
 			*/
 
-			if ($uutinen["kentta03"] == '') {
-				$uutinen["kentta03"] = $yhtiorow["logo"];
+			$kuva = "";
+
+			if ($uutinen["kentta03"] != "") {
+				$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
 			}
 
-			if (trim($uutinen["kentta03"]) == '') {
-				$uutinen["kentta03"] = "http://www.pupesoft.com/pupesoft.gif";
+			if ($yhtiorow["logo"] != '' and $kuva == '') {
+				$kuva = "<img src='$yhtiorow[logo]' width='130'>";
 			}
+
+			if ($kuva == '') {
+				$kuva = "<img src='http://www.pupesoft.com/pupesoft.gif' width='130'>";
+			}
+
 
 			if ($uutinen['nimi'] == "") {
 				$uutinen['nimi'] = $uutinen['toimittaja'];
@@ -342,7 +376,7 @@ if ($tee == '') {
 			<tr>
 			<td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td>
 			</tr><tr>
-			<td valign='top' align='center' width='140'><br><img src='$uutinen[kentta03]' width='130'><br><br></td>
+			<td valign='top' align='center' width='140'><br>$kuva<br><br></td>
 			<td valign='top'>$uutinen[kentta02]</font>
 			<br>
 			<a href='$PHP_SELF?tee=PRINTTAA&toim=$toim&tun=$uutinen[tun]'>".t("Tulosta")."</a>

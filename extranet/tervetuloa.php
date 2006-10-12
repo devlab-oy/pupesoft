@@ -60,8 +60,18 @@ if ($tee == '') {
 			kuvaurl    = kentta03
 			*/
 
-			if (trim($uutinen["kentta03"]) == '' or !file_exists($uutinen["kentta03"])) {
-				$uutinen["kentta03"] = "http://www.pupesoft.com/pupesoft.gif";
+			$kuva = "";
+
+			if ($uutinen["kentta03"] != "") {
+				$kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
+			}
+
+			if ($yhtiorow["logo"] != '' and $kuva == '') {
+				$kuva = "<img src='$yhtiorow[logo]' width='130'>";
+			}
+
+			if ($kuva == '') {
+				$kuva = "<img src='http://www.pupesoft.com/pupesoft.gif' width='130'>";
 			}
 
 			if ($uutinen['nimi'] == "") {
@@ -73,7 +83,7 @@ if ($tee == '') {
 			<tr>
 			<td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td>
 			</tr><tr>
-			<td valign='top' align='center' width='140'><br><img src='$uutinen[kentta03]' width='130'><br><br></td>
+			<td valign='top' align='center' width='140'><br>$kuva<br><br></td>
 			<td valign='top'>$uutinen[kentta02]<br>
 			<a href='$PHP_SELF?tee=PRINTTAA&tun=$uutinen[tun]'>Tulosta</a>
 			</font></td>
@@ -130,15 +140,22 @@ if ($tee == "PRINTTAA") {
 	kuvaurl    = kentta03
 	*/
 
+	$kuvaurl = "";
 
-	if (trim($row["kentta03"]) == '' or !file_exists($row["kentta03"])) {
-		$row["kentta03"] = "http://www.pupesoft.com/pupesoft.gif";
+	if ($row["kentta03"] != "") {
+		$kuvaurl = "<img src='view.php?id=$row[kentta03]' width='130'>";
 	}
 
+	if ($yhtiorow["logo"] != '' and $kuvaurl == '') {
+		$kuvaurl = "<img src='$yhtiorow[logo]' width='130'>";
+	}
+
+	if ($kuvaurl == '') {
+		$kuvaurl = "<img src='http://www.pupesoft.com/pupesoft.gif' width='130'>";
+	}
 
 	$otsikko        = $row["kentta01"];
 	$uutinen        = $row["kentta02"];
-	$kuvaurl        = $row["kentta03"];
 	$paivays        = $row["pvmalku"];
 	$toimittaja     = $row["kuka"];
 
@@ -158,7 +175,7 @@ if ($tee == "PRINTTAA") {
 
 				<TABLE BORDER='0' CELLSPACING='5' CELLPADDING='4'><TR>
 						<TD VALIGN='TOP'>
-								<IMG SRC='$kuvaurl' WIDTH='130'>
+								$kuvaurl
 						</TD><TD VALIGN='TOP'>
 								<FONT FACE='Lucida,Verdana,Helvetica,Arial' SIZE='-1'>
 								$uutinen

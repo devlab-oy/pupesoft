@@ -482,7 +482,7 @@
 					where yhtio='$kukarow[yhtio]' and tila='U' and tullausnumero != ''
 					and (	(vienti='K' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne = '' or sisamaan_kuljetus = '' or sisamaan_kuljetusmuoto = '' or poistumistoimipaikka = '' or poistumistoimipaikka_koodi = ''))
 						or  (vienti='E' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne = '' ))
-					)
+					) and kauppatapahtuman_luonne != '999'
 					$haku
 					ORDER by 5,6,7,8,9,10,11,12,13,14";
 		$tilre = mysql_query($query) or pupe_error($query);

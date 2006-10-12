@@ -46,6 +46,7 @@
 					and tapvm	   <= '$vvl-$kkl-$ppl'
 					and tullausnumero != ''
 					and yhtio		= '$kukarow[yhtio]'
+					and lasku.kauppatapahtuman_luonne != '999'
 					ORDER BY laskunro";
 		$laskuresult = mysql_query($query) or pupe_error($query);
 

@@ -141,6 +141,7 @@
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
 					WHERE $where
+					and lasku.kauppatapahtuman_luonne != '999'
 					and lasku.yhtio='$kukarow[yhtio]'";
 
 		if ($toim == 'vienti') {

@@ -127,6 +127,7 @@ if ($tee == "") {
 
 	echo "<tr><td>".t("Kauppatapahtuman luonne").":</td><td colspan='3'>
 		<select NAME='ktapahtuman_luonne'>";
+	echo "<option value=''>".t("Valitse")."</option>";
 
 	$query = "	SELECT selite, selitetark
 				FROM avainsana
@@ -146,6 +147,7 @@ if ($tee == "") {
 
 	echo "<tr><td>".t("Kuljetusmuoto").":</td><td colspan='3'>
 				<select NAME='kuljetusmuoto'>";
+	echo "<option value=''>".t("Valitse")."</option>";
 
 	$query = "	SELECT selite, selitetark
 				FROM avainsana

@@ -375,7 +375,8 @@ if ($toiminto == "" and $ytunnus != "") {
 						where lasku.yhtio='$kukarow[yhtio]'
 						and tunnus='$row[tunnus]'
 						and maakoodi != '$yhtiorow[maakoodi]'
-						and (maa_lahetys = '' or bruttopaino = '' or kauppatapahtuman_luonne = '' or kuljetusmuoto = '' or toimaika = '0000-00-00')";
+						and (maa_lahetys = '' or bruttopaino = '' or kauppatapahtuman_luonne = '' or kuljetusmuoto = '' or toimaika = '0000-00-00')
+						and kauppatapahtuman_luonne != '999'";
 			$okres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($okres)==0) {

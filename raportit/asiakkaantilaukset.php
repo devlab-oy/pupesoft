@@ -3,7 +3,7 @@
 	$useslave = 1;
 
 	require ("../inc/parametrit.inc");
-	
+
 	if ($toim == 'MYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tilaukset").":</font><hr>";
 	}
@@ -16,16 +16,16 @@
 
 	if ($tee == 'NAYTATILAUS') {
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
-		
+
 		require ("naytatilaus.inc");
-		
+
 		if ($toim == "MYYNTI" or $toim == "TARJOUS") {
 			$query = "	SELECT *
 						FROM rahtikirjat
 						WHERE otsikkonro='$tunnus'
 						and yhtio = '$kukarow[yhtio]' ";
 			$rahtiresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($rahtiresult)> 0) {
 				echo "<b>".t("Rahtikirjatiedot").":</b><hr>";
 				echo "<table><tr><th>".t("Kilot")."</th>
@@ -40,7 +40,7 @@
 								<th>".t("Tulostettu")."</th>
 								<th>".t("Tulostuspaikka")."</th>
 								<th>".t("Tulostustapa")."</th></tr>";
-				
+
 				while ($rahtirow = mysql_fetch_array($rahtiresult)){
 					$query = "	SELECT nimitys
 								FROM varastopaikat
@@ -48,19 +48,19 @@
 								and yhtio = '$kukarow[yhtio]' limit 1";
 					$varnimresult = mysql_query($query) or pupe_error($query);
 					$varnimrow = mysql_fetch_array($varnimresult);
-					
+
 					echo "<tr><td>$rahtirow[kilot]</td>
 								<td>$rahtirow[kollit]</td>
 								<td>$rahtirow[kuutiot]</td>
 								<td>$rahtirow[lavametri]</td>";
-					
+
 					if ($rahtirow['merahti']== 'K') {
 						echo "	<td>".t("Lähettäjä")."</td>";
 					}
 					else {
 						echo "	<td>".t("Vastaanottaja")."</td>";
 					}
-					
+
 					echo "		<td>$rahtirow[pakkaus]</td>
 								<td>$rahtirow[pakkauskuvaus]</td>
 								<td>$rahtirow[poikkeava]</td>
@@ -271,7 +271,12 @@
 	echo "<form action = '$PHP_SELF' method = 'post'>
 		<input type='hidden' name='toim' value='$toim'>";
 
-	echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+	if ($toim == "OSTO") {
+		echo "<tr><th>".t("Toimittajan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+	}
+	else {
+		echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+	}
 	echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
 	echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";
 	echo "</table>";

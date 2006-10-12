@@ -6,9 +6,9 @@
 
 		// Annetaan mahdollisuus aktivoida edellinen tilaus, jos se on olemassa
 		if ($kukarow["kesken"] != 0) {
-		
-			$query   = "SELECT * 
-						FROM lasku 
+
+			$query   = "SELECT *
+						FROM lasku
 						WHERE tunnus='$kukarow[kesken]' and tila='O'";
 			$gresult = mysql_query($query) or pupe_error($query);
 			$grow    = mysql_fetch_array ($gresult);
@@ -26,7 +26,7 @@
 		}
 
 		// Tehd‰‰n popup k‰ytt‰j‰n lep‰‰m‰ss‰ olevista tilauksista
-		$query = "	SELECT tunnus, concat_ws(' ', nimi, nimitark, luontiaika) asiakas, tila
+		$query = "	SELECT tunnus, concat_ws(' ', nimi, nimitark, luontiaika) toimittaja, tila
 					FROM lasku use index (tila_index)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and laatija='$kukarow[kuka]' and alatila='' and tila = 'O'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -41,10 +41,10 @@
 					<input type='hidden' name='aktivoinnista' value='true'>
 					<td><select name='tilausnumero'>";
 
-			echo "<option value='$row[tunnus]'>$row[asiakas]";
+			echo "<option value='$row[tunnus]'>$row[toimittaja]";
 
 			while ($row = mysql_fetch_array($result)) {
-					echo "<option value='$row[tunnus]'>$row[asiakas]";
+					echo "<option value='$row[tunnus]'>$row[toimittaja]";
 			}
 			echo "</select></td>
 					<td class='back'><input type='submit' name='tila' value='".t("Muokkaa tilausta")."'></td></tr></form></table>";
@@ -68,14 +68,14 @@
 
 			if ($toim=='super') {
 				// Etsit‰‰n muutettavaa tilausta
-				$query = "	SELECT lasku.tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, ytunnus, luontiaika, lasku.laatija, alatila, tila
+				$query = "	SELECT lasku.tunnus 'tilaus', concat_ws(' ', nimi, nimitark) toimittaja, ytunnus, luontiaika, lasku.laatija, alatila, tila
 							FROM lasku use index (tila_index), tilausrivi use index (yhtio_otunnus)
-							WHERE lasku.yhtio = '$kukarow[yhtio]' 
-							and lasku.tila = 'O' 
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.tila = 'O'
 							and lasku.alatila != ''
 							and tilausrivi.yhtio = lasku.yhtio
 							and tilausrivi.otunnus = lasku.tunnus
-							and tilausrivi.uusiotunnus = 0 
+							and tilausrivi.uusiotunnus = 0
 							$haku
 							GROUP by 1
 							ORDER by luontiaika desc
@@ -83,7 +83,7 @@
 		  }
 			else {
 				// Etsit‰‰n muutettavaa tilausta
-				$query = "	SELECT tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, ytunnus, luontiaika, laatija, alatila, tila
+				$query = "	SELECT tunnus 'tilaus', concat_ws(' ', nimi, nimitark) toimittaja, ytunnus, luontiaika, laatija, alatila, tila
 							FROM lasku use index (tila_index)
 							WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='O' and alatila='' $haku
 							ORDER by luontiaika desc

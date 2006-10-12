@@ -1,6 +1,11 @@
 <?php
 
-require ("inc/connect.inc");
+if (file_exists("inc/connect.inc")) {
+	require ("inc/connect.inc");
+}
+else {
+	require ("connect.inc");
+}
 
 $id = (int) $id;
 

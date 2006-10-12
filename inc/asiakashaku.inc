@@ -9,11 +9,11 @@ if (trim($konserni) != '') {
 	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 	$result = mysql_query($query) or pupe_error($query);
 	$konsyhtiot = "";
-	
-	while ($row = mysql_fetch_array($result)) {	
+
+	while ($row = mysql_fetch_array($result)) {
 		$konsyhtiot .= " '".$row["yhtio"]."' ,";
-	}		
-	$konsyhtiot = " yhtio in (".substr($konsyhtiot, 0, -1).") ";			
+	}
+	$konsyhtiot = " yhtio in (".substr($konsyhtiot, 0, -1).") ";
 }
 else {
 	$konsyhtiot = " yhtio = '$kukarow[yhtio]' ";
@@ -26,59 +26,59 @@ $monta   = 0;
 
 
 if ($asiakasid != '' and substr($asiakasid,0,1) != '£') {
-	$query	= "	SELECT * 
-				FROM asiakas 
+	$query	= "	SELECT *
+				FROM asiakas
 				WHERE $konsyhtiot and tunnus='$asiakasid'";
 	$result = mysql_query($query) or pupe_error($query);
-	$monta  = mysql_num_rows($result);		
+	$monta  = mysql_num_rows($result);
 }
 elseif ($ytunnus != '') {
 	if (substr($ytunnus,0,1) == "£") {
 		// jos eka merkki £ etsitään laskun tunnuksella
 		// eka merkki pois alusta
 		$ytunnus = substr($ytunnus, 1);
-		
-		$query  = "	select *, concat('£', tunnus) tunnus, concat('£', tunnus) ytunnus, ytunnus spec_ytunnus, liitostunnus spec_tunnus 
-					FROM lasku 
+
+		$query  = "	select *, concat('£', tunnus) tunnus, concat('£', tunnus) ytunnus, ytunnus spec_ytunnus, liitostunnus spec_tunnus
+					FROM lasku
 					WHERE $konsyhtiot and tunnus='$ytunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
-	
+
 	if (substr($ytunnus,0,1) == "*") {
 		// jos eka merkki on * etsitään laskuilta asiakastietoja
-		
+
 		// eka merkki pois alusta
-		$ytunnus = substr($ytunnus, 1); 
-		
+		$ytunnus = substr($ytunnus, 1);
+
 		// kokeillaan ihan asiakkaan nimellä laskulta
-		$query	= "	SELECT nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio 
+		$query	= "	SELECT nimi, nimitark, osoite, postino, postitp, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio
 					FROM lasku use index (asiakasnimi)
-					WHERE $konsyhtiot and tila != 'D' and match (nimi) against ('$ytunnus*' IN BOOLEAN MODE) 
+					WHERE $konsyhtiot and tila != 'D' and match (nimi) against ('$ytunnus*' IN BOOLEAN MODE)
 					group by 1,2,3,4,5 order by 1";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
-		
-		if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
-	}		
-	
-	if ($monta == 0  and substr($ytunnus,0,1) == "#") {
-		// jos eka merkki on # etsitään toimitusnimen perusteella
-		
-		// eka merkki pois alusta
-		$ytunnus = substr($ytunnus, 1); 
-		
-		// kokeillaan ihan asiakkaan nimellä laskulta
-		$query	= "	SELECT toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, nimi, nimitark, osoite, postino, postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio 
-					FROM lasku use index (asiakastoim_nimi)
-					WHERE $konsyhtiot and tila != 'D' and match (toim_nimi) against ('$ytunnus*' IN BOOLEAN MODE) 
-					group by 1,2,3,4,5 order by 1";
-		$result = mysql_query($query) or pupe_error($query);
-		$monta  = mysql_num_rows($result);
-		
+
 		if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
 	}
-				
+
+	if ($monta == 0  and substr($ytunnus,0,1) == "#") {
+		// jos eka merkki on # etsitään toimitusnimen perusteella
+
+		// eka merkki pois alusta
+		$ytunnus = substr($ytunnus, 1);
+
+		// kokeillaan ihan asiakkaan nimellä laskulta
+		$query	= "	SELECT toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, nimi, nimitark, osoite, postino, postitp, concat('£',max(tunnus)) ytunnus, concat('£',max(tunnus)) tunnus, yhtio
+					FROM lasku use index (asiakastoim_nimi)
+					WHERE $konsyhtiot and tila != 'D' and match (toim_nimi) against ('$ytunnus*' IN BOOLEAN MODE)
+					group by 1,2,3,4,5 order by 1";
+		$result = mysql_query($query) or pupe_error($query);
+		$monta  = mysql_num_rows($result);
+
+		if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
+	}
+
 	if ($monta == 0) {
 		// Ytunnushaku
 		$query	= "	(SELECT * FROM asiakas WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='')
@@ -92,61 +92,61 @@ elseif ($ytunnus != '') {
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
-	
+
 	if ($monta == 0) {
 		// kokeillaan ytunnuksen alulla
-		$query	= "	SELECT * 
-					FROM asiakas use index (ytunnus_index) 
-					WHERE $konsyhtiot and ytunnus like '$ytunnus%' and ytunnus!='' 
+		$query	= "	SELECT *
+					FROM asiakas use index (ytunnus_index)
+					WHERE $konsyhtiot and ytunnus like '$ytunnus%' and ytunnus!=''
 					ORDER BY asiakas.nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
-	
+
 	if ($monta == 0 and is_string($ytunnus)) {
 		// kokeillaan nimen osalla
-		$query	= "	SELECT * 
+		$query	= "	SELECT *
 					FROM asiakas use index (asiakasnimi)
 					WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!=''
 					ORDER BY asiakas.nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
-	
+
 	if ($monta == 0 and is_string($ytunnus)) {
 		// kokeillaan toim_nimen osalla
-		$query	= "	SELECT * 
+		$query	= "	SELECT *
 					FROM asiakas use index (asiakastoim_nimi)
 					WHERE $konsyhtiot and toim_nimi like '%$ytunnus%' and toim_nimi!=''
 					ORDER BY asiakas.nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
-	
+
 	if ($monta == 0 and is_string($ytunnus)) {
 		// kokeillaan nimen ja toim_nimen osalla
-		$query	= "	SELECT * 
-					FROM asiakas use index (asiakasnimitark) 
+		$query	= "	SELECT *
+					FROM asiakas use index (asiakasnimitark)
 					WHERE $konsyhtiot and nimitark like '%$ytunnus%' and nimitark!=''
 					ORDER BY asiakas.nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
-	
+
 	if ($monta == 0 and is_string($ytunnus)) {
 		// kokeillaan nimen ja toim_nimen osalla
-		$query	= "	SELECT * 
-					FROM asiakas use index (asiakastoim_nimitark) 
+		$query	= "	SELECT *
+					FROM asiakas use index (asiakastoim_nimitark)
 					WHERE $konsyhtiot and toim_nimitark like '%$ytunnus%' and toim_nimitark!=''
 					ORDER BY asiakas.nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
-	
+
 	if ($monta == 0 and is_string($ytunnus)) {
 		// kokeillaan nimen ja ovt_tunnukset osalla
-		$query	= "	SELECT * 
-					FROM asiakas use index (ovttunnus_index) 
+		$query	= "	SELECT *
+					FROM asiakas use index (ovttunnus_index)
 					WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!=''
 					ORDER BY asiakas.nimi";
 		$result = mysql_query($query) or pupe_error($query);
@@ -156,7 +156,7 @@ elseif ($ytunnus != '') {
 
 if ($monta == 0) {
 	echo "<font class='error'>".t("Asiakas")." '$ytunnus' ".t("ei löydy")."!</font><br>";
-	$ytunnus = "";		
+	$ytunnus = "";
 }
 
 if ($monta == 1) {
@@ -168,18 +168,18 @@ if ($monta == 1) {
 if ($monta > 1 and $monta <= $limit) {
 	//tämä vain otsik.php:tä varten
 	echo $lause;
-	
+
 	echo "<table border='0'>";
 	echo "<tr>
 			<th>".t("ytunnus")."</th>
 			<th>".t("asnro")."</th>
 			<th>".t("lasknimi/toimnimi")."</th>
 			<th colspan='3'>".t("laskosoite/toimosoite")."</th>";
-	
+
 	if ($konserni != '') {
 		echo "<th>".t("yhtiö")."</th>";
 	}
-			
+
 	echo "<td class='back'></td>
 		</tr>";
 
@@ -188,22 +188,22 @@ if ($monta > 1 and $monta <= $limit) {
 		if     ($asiakas['ytunnus']    != '') $numero = trim($asiakas['ytunnus']);
 		elseif ($asiakas['asiakasnro'] != '') $numero = trim($asiakas['asiakasnro']);
 		else    die("Tällä asiakkaalla ei ole mitään tietoja! Tee JOTAIN!");
-		
+
 		$brnim 		= '';
 		$bros 		= '';
 		$brpostino  = '';
 		$brpostitp  = '';
-		
+
 		$asiakas['toim_nimi']		= trim($asiakas['toim_nimi']);
 		$asiakas['toim_osoite']		= trim($asiakas['toim_osoite']);
 		$asiakas['toim_postino']	= trim($asiakas['toim_postino']);
 		$asiakas['toim_postitp']	= trim($asiakas['toim_postitp']);
-		
+
 		$asiakas['nimi']			= trim($asiakas['nimi']);
 		$asiakas['osoite']			= trim($asiakas['osoite']);
 		$asiakas['postino']			= trim($asiakas['postino']);
 		$asiakas['postitp']			= trim($asiakas['postitp']);
-		
+
 		// jos mikätahansa on eri ja mikätahansa on erisuurta ku tyhjää.. tää on varmaan huomenna daily WTF:ssä.. :)
 		if (($asiakas['toim_nimi'] != $asiakas["nimi"] or $asiakas['toim_osoite'] != $asiakas["osoite"] or $asiakas['toim_postino'] != $asiakas["postino"] or $asiakas['toim_postitp'] != $asiakas["postitp"]) and
 			($asiakas['toim_nimi'] != "" or $asiakas['toim_osoite'] != "" or $asiakas['toim_postino'] != "" or $asiakas['toim_postitp'] != "")) {
@@ -220,32 +220,32 @@ if ($monta > 1 and $monta <= $limit) {
 				<td>$asiakas[osoite] $bros</td>
 				<td>$asiakas[postino] $brpostino</td>
 				<td>$asiakas[postitp] $brpostitp</td>";
-				
+
 		if ($konserni != '') {
 			echo "<td>$asiakas[yhtio]</td>";
 		}
-		
-		echo "<form action='$PHP_SELF' method='post'>";		
-		echo "<td class='back'>";				
+
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<td class='back'>";
 		echo "<input type='hidden' name='asiakasid' 	  value='$asiakas[tunnus]'>";
 		echo "<input type='hidden' name='tee' 			  value='$tee'>";
 		echo "<input type='hidden' name='konserni'		  value='$konserni'>";
 		echo "<input type='hidden' name='toim' 			  value='$toim'>";
-		echo "<input type='hidden' name='tilausnumero' 	  value='$tilausnumero'>";		
-		echo "<input type='hidden' name='from' 	  		  value='$from'>";		
+		echo "<input type='hidden' name='tilausnumero' 	  value='$tilausnumero'>";
+		echo "<input type='hidden' name='from' 	  		  value='$from'>";
 		echo "<input type='hidden' name='tila' 			  value='$tila'>";
 		echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
 		echo "<input type='hidden' name='ytunnus'  		  value='$numero'>";
 		echo "<input type='hidden' name='toimittajaid'	  value='$toimittajaid'>";
 		echo "<input type='hidden' name='asiakasyhtio'    value='$asiakas[yhtio]'>";
 		echo "<input type='hidden' name='alatila'		  value='$alatila'>";
-		echo "<input type='hidden' name='ylatila'  		  value='$ylatila'>";						
-		echo "<input type='submit' value='".t("Valitse")."'>";		
+		echo "<input type='hidden' name='ylatila'  		  value='$ylatila'>";
+		echo "<input type='submit' value='".t("Valitse")."'>";
 		echo "</td>";
 		echo "</form>";
 		echo "</tr>";
-		
-	}		
+
+	}
 	echo "</table><br>";
 	$ytunnus = "";
 }
@@ -262,20 +262,20 @@ $query = "	SELECT yhtio
 			and kuka	= '$kukarow[kuka]'
 			and nimi	= 'yllapito.php'
 			and alanimi = 'asiakas'
-			and paivitys != ''";	
+			and paivitys != ''";
 $oikeuresult = mysql_query($query) or pupe_error($query);
 
 if ($monta != 1 and mysql_num_rows($oikeuresult) > 0) {
 	//Annetaan mahdollisuus perustaa uusi asiakas
-	
+
 	echo "<table border='0'>";
-	
+
 	echo "<tr>
 		<td>".t("Oikeaa asiakasta ei löytynyt. Perusta uusi asiakas")."</td>";
-					
+
 	echo "<form action='../yllapito.php' method='post'>";
 	echo "<td class='back'>";
-	echo "<input type='hidden' name='lopetus' 			value='tilauskasittely/tilaus_myynti.php?toim=$toim'>";
+	echo "<input type='hidden' name='lopetus' 			value='tilauskasittely/tilaus_myynti.php!!!!toim=$toim'>";
 	echo "<input type='hidden' name='rajattu_nakyma' 	value='true'>";
 	echo "<input type='hidden' name='alias_set' 		value='VAHITTAISMYYNTI'>";
 	echo "<input type='hidden' name='toim'				value='asiakas'>";
@@ -284,7 +284,7 @@ if ($monta != 1 and mysql_num_rows($oikeuresult) > 0) {
 	echo "</td>";
 	echo "</form>";
 	echo "</tr>";
-	
+
 	echo "</table><br>";
 }
 

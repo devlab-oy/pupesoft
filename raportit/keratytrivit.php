@@ -75,7 +75,7 @@
 				$lask++;
 				$edkeraaja = $row["kuka"];
 			}
-			if ($psumma > 0) {
+			if ($summa > 0) {
 				echo "	<tr><td colspan='3' class='back'>".t("Yhteensä").":</td><td>$psumma</td><td>$ssumma</td><td>$ksumma</td><td>$summa</td><td></td><td></td><td></td></tr>";
 			}
 			// Kaikki yhteensä

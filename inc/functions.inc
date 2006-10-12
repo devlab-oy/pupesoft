@@ -125,7 +125,7 @@ if (!function_exists("kuuluukovarastoon")) {
 
 if (!function_exists("mm_pt")) {
 	function mm_pt($millimetreja) {
-		$pointseja = round($millimetreja / 0.3527777778,0);
+		$pointseja = round($millimetreja / 0.3527777778,2);
 		return $pointseja;
 	}
 }

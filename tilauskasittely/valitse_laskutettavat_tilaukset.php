@@ -283,7 +283,7 @@
 					group_concat(distinct lasku.tunnus separator '<br>') tunnukset_ruudulle,
 					count(distinct lasku.tunnus) tilauksia,
 					count(tilausrivi.tunnus) riveja,
-					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*tilausrivi.varattu),2) arvo
+					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
 					from lasku use index (tila_index), tilausrivi use index (yhtio_otunnus), tuote
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
 					and lasku.yhtio = '$kukarow[yhtio]'

@@ -267,7 +267,7 @@
 					LIMIT 50";
 
 		// haetaan kaikkien avoimien tilausten arvo
-		$sumquery = "	SELECT round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*tilausrivi.varattu),2) arvo, count(distinct lasku.tunnus) kpl
+		$sumquery = "	SELECT round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo, count(distinct lasku.tunnus) kpl
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and

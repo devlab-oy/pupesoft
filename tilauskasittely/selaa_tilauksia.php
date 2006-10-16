@@ -200,7 +200,7 @@
 		// tilausnäkymä
 		$query3 = "	SELECT lasku.tunnus valmistus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta,
 					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl),2) arvo
-					FROM tilausrivi use index (uusiotunnus_index)
+					FROM tilausrivi use index (yhtio_otunnus)
 					JOIN lasku on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
 					otunnus = '$tunnus'

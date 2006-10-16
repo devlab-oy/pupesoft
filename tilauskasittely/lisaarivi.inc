@@ -549,6 +549,20 @@
 									$toimittamatta -= $myy_kpl[$indeksi];
 								}
 
+								if ($myy_tyyppi[$indeksi] == "NORMAALI" and $myy_sarjatunnus > 0) {
+									$query = "	UPDATE sarjanumeroseuranta
+												SET myyntirivitunnus = '$lisatty_tun'
+												WHERE yhtio			 = '$kukarow[yhtio]'
+												and tunnus			 = '$myy_sarjatunnus'
+												and tuoteno			 = '$myy_tuoteno[$indeksi]'
+												and myyntirivitunnus = 0";
+									$sres = mysql_query($query) or pupe_error($query);
+
+									if(mysql_affected_rows() == 1) {
+										//echo "Sarjanumero linkattu tilausriviin!<br>";
+									}
+								}
+
 								if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {
 									//Päivitetään isän perhetunnus
 									if ($rivityyppi == 'V') {
@@ -612,7 +626,7 @@
 
 
 		//Tehdään suoratoimitusautomaatio jos kyseessä on extranet tai ediasiakas
-		if (($kukarow["extranet"] != '' or $kutsuja == "EDITILAUS") and $var == "" and $toimittamatta > 0) {
+		if (($yhtiorow["suoratoim_automaatio"] != '' or $kukarow["extranet"] != '' or $kutsuja == "EDITILAUS") and $var == "" and $toimittamatta > 0) {
 			$suora_tuoteno 	= $alkupera_trow["tuoteno"];
 			$suora_kpl		= $toimittamatta;
 			require("suoratoimitusvalinta.inc");

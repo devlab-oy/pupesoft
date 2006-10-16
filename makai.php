@@ -234,7 +234,11 @@
 	//----------- LUM3 AINEISTO --------------------------
 	echo "<br><br><br><font class='head'>LUM3-maksuaineisto</font><hr>";
 
-
+	$makskpl = 0;
+	$makssumma = 0;
+	$totkpl = 0;
+	$totsumma = 0;
+									
 	// Yritämme nyt välittää maksupointterin $laskusis1:ssä --> $laskurow[9] --> tunnus
 	$query = "	SELECT maksu_tili,
 				left(concat_ws(' ', lasku.nimi, nimitark),45),
@@ -278,7 +282,9 @@
 			exit;
 		}
 		echo "<font class='message'>Ulkomaan maksujen tiedoston nimi on: $nimi</font><br>";
-		
+
+		unset($edmaksu_tili);
+
 		while ($laskurow=mysql_fetch_array ($result)) {
 			$yritysnimi = strtoupper($yhtiorow ['nimi']);
 			$yritysosoite = strtoupper($yhtiorow['osoite']);
@@ -302,9 +308,12 @@
 			$laskupankki4  = $laskurow[17];
 			$laskuswift = $laskurow[18];
 
-			if (($laskurow[0] != $edmaksu_tili) || ($laskurow[5] != $edvalkoodi)) {
-				if (strlen($edmaksu_tili) > 0) {
+			if (($laskurow[0] != $edmaksu_tili) or ($laskurow[5] != $edvalkoodi)) {
+				if (isset($edmaksu_tili)) {
 					require "inc/lum2summa.inc";
+					echo "<font class='message'>Aineiston ($edyritystilino $edvalkoodi) loppusumma on $makssumma. Summa koostuu $makskpl laskusta</font><br>";
+					$totkpl += $makskpl;
+					$totsumma += $makssumma;
 					$makskpl = 0;
 					$makssumma = 0;
 				}
@@ -313,17 +322,19 @@
 				require "inc/lum2otsik.inc";
 				$edmaksu_tili = $laskurow[0];
 				$edvalkoodi = $laskurow[5];
+				$edyritystilino = $yritystilino;
 			}
 			require "inc/lum2rivi.inc";
 			$makskpl += 1;
 			$makssumma += $laskusumma;
 		}
-		echo "<font class='message'>Aineiston loppusumma on $makssumma. Summa koostuu $makskpl laskusta</font><br>";
-		
+
 		require "inc/lum2summa.inc";
-		
+		echo "<font class='message'>Aineiston ($edyritystilino $edvalkoodi) loppusumma on $makssumma. Summa koostuu $makskpl laskusta</font><br>";
+		$totkpl += $makskpl;
+		$totsumma += $makssumma;
 		fclose($toot);
-		
+		echo "<font class='message'>Aineiston kokonaissumma on $totsumma. Summa koostuu $totkpl laskusta</font><br>";
 		
 		//Laitetaan sähköpostiin jos yhtiorow pankki_polusta löytyy @-merkki
 		if (strpos($yhtiorow["pankki_polku"],"@") !== FALSE) {

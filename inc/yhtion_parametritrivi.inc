@@ -323,6 +323,27 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "suoratoim_automaatio") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1="";
+		$sel2="";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		else {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value='' $sel1>".t("Riviä ei automaattisesti myydä konserniyhtiön varastosta")."</option>";
+		$ulos .= "<option value='o' $sel2>".t("Jos oma saldo ei riitä rivi yritetään myydä konserniyhtiön varastosta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "oletus_toimitusehto") {
 
 		$query = "	SELECT selite, selitetark

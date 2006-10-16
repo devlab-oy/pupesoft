@@ -25,16 +25,16 @@
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssextranet)) {
 		$t[$cssextraneti] = $apucssextranet;
 	}
-		
+
 	require ("inc/$toim.inc");
-	
+
 	if ($otsikko == "") {
 		$otsikko = $toim;
 	}
 	if ($otsikko_nappi == "") {
 		$otsikko_nappi = $toim;
 	}
-	
+
 
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
 
@@ -59,12 +59,22 @@
 		}
 	}
 
-	// Tietue poistetaan (t‰ss‰ kyll‰ kannattaisi tarkistaa halutaanko tata todella...)
+	// Tietue poistetaan
 	if ($del == 1 and $saakopoistaa == "") {
 		$query = "	DELETE from $toim
 					WHERE tunnus='$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tunnus = 0;
+
+		// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
+		if ($lopetus != '') {
+			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+			$lopetus = str_replace('!!!!','?', $lopetus);
+			$lopetus = str_replace('!!','&',  $lopetus);
+
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
+			exit;
+		}
 	}
 
 	// Jotain p‰ivitet‰‰n tietokontaan
@@ -83,7 +93,7 @@
 		}
 
 		if ($errori != '') {
-			echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivittaa!")."</font>";
+			echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivitt‰‰!")."</font>";
 		}
 
 		// Luodaan tietue
@@ -114,21 +124,23 @@
 			}
 
 			$result = mysql_query($query) or pupe_error($query);
+
 			if ($tunnus == '') {
 				$tunnus = mysql_insert_id();
 			}
+
+			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 			if ($lopetus != '') {
+				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+				$lopetus = str_replace('!!!!','?', $lopetus);
+				$lopetus = str_replace('!!','&',  $lopetus);
 
-				if (strpos($lopetus, "?")  !== FALSE) {
-					$umerkki = "&";
-				}
-				else {
-					$umerkki = "?";
-				}
+				$lopetus .= "&yllapidossa=$toim&yllapidontunnus=$tunnus";
 
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus".$umerkki."ytunnus=$ytunnus&yllapidossa=$toim&yllapidontunnus=$tunnus'>";
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;
 			}
+
 			$uusi = 0;
 			$tunnus = 0;
 		}
@@ -173,14 +185,12 @@
 		echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form>";
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
-			echo "<form action = 'yllapito.php' method = 'post'>
+			echo "	<form action = 'yllapito.php' method = 'post'>
 					<input type='hidden' name='uusi' value='1'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='rajattu_nakyma' value='$rajattu_nakyma'>
 					<input type='hidden' name='alias_set' value='$alias_set'>
-			
-					<td class='back' valign='bottom'>&nbsp;&nbsp;
-					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></td></form>";
+					<td class='back' valign='bottom'><input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></td></form>";
 		}
 
 		echo "</tr>";
@@ -215,17 +225,17 @@
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
 
 		$al_lisa = "";
-		
+
 		if ($alias_set != '') {
 			if ($rajattu_nakyma != '') {
 				$al_lisa = " and selitetarktark = '$alias_set' ";
 			}
 			else {
-				$al_lisa = " and (selitetarktark = '$alias_set' or selitetarktark = '') ";	
+				$al_lisa = " and (selitetarktark = '$alias_set' or selitetarktark = '') ";
 			}
 		}
-		
-		
+
+
 		// Kokeillaan geneerist‰
 		$query = "	SELECT *
 					FROM $toim
@@ -249,10 +259,10 @@
 
 			require ("inc/$toim"."rivi.inc");
 
-			
+
 			//Haetaan tietokantasarakkeen nimialias
 			$al_nimi   = mysql_field_name($result, $i);
-			
+
 			$query = "	SELECT *
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -260,28 +270,29 @@
 						and selite='$toim.$al_nimi'
 						$al_lisa";
 			$al_res = mysql_query($query) or pupe_error($query);
-			
+
 			if(mysql_num_rows($al_res) > 0) {
 				$al_row = mysql_fetch_array($al_res);
-				
-				$otsikko = $al_row["selitetark"];					
+
+				$otsikko = $al_row["selitetark"];
 			}
 			else {
 				$otsikko = t(mysql_field_name($result, $i));
-				
+
 				if ($rajattu_nakyma != '') {
 					$ulos = "";
 					$tyyppi = 0;
 				}
 			}
-															
+
 			// $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
 			// $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti
 			// $tyyppi --> 2 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata
+			// $tyyppi --> -2 rivi‰ ei n‰ytet‰, mutta sen arvo menee kuitenkin hiddenin‰
 
 			if ($tyyppi > 0) {
 				echo "<tr>";
-																				
+
 				echo "<th align='left'>$otsikko</th>";
 			}
 
@@ -291,7 +302,11 @@
 			else {
 				$mita = 'text';
 
-				if ($tyyppi == "2") {
+
+				if ($tyyppi == -2) {
+					$mita = 'hidden';
+				}
+				elseif ($tyyppi == 2) {
 					$mita = 'hidden';
 					echo "<td>$trow[$i]";
 				}
@@ -299,7 +314,7 @@
 					echo "<td>";
 				}
 
-				if ($tyyppi > 0) {
+				if ($tyyppi != 0) {
 					echo "<input type = '$mita' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
 				}
 
@@ -332,12 +347,14 @@
 									return confirm(msg);
 							}
 					</SCRIPT>";
+
 				echo "<br><br>
 					<form action = 'yllapito.php' method = 'post' onSubmit = 'return verify()'>
 					<input type = 'hidden' name = 'toim' value='$toim'>
 					<input type = 'hidden' name = 'rajattu_nakyma' value = '$rajattu_nakyma'>
-					<input type = 'hidden' name = 'alias_set' value = '$alias_set'>					
+					<input type = 'hidden' name = 'alias_set' value = '$alias_set'>
 					<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
+					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name = 'del' value ='1'>
 					<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'></form>";
 			}
@@ -357,6 +374,10 @@
 			require ("inc/toimittajan_yhteyshenkilo.inc");
 		}
 
+		if ($uusi != 1 and $toim == "sarjanumeron_lisatiedot") {
+			require ("inc/sarjanumeron_lisatiedot_kuvat.inc");
+		}
+
 		echo "</td></tr></table>";
 
 	}
@@ -366,9 +387,9 @@
 				<input type = 'hidden' name = 'toim' value='$toim'>
 				<input type = 'hidden' name = 'uusi' value ='1'>
 				<input type = 'hidden' name = 'rajattu_nakyma' value = '$rajattu_nakyma'>
-				<input type = 'hidden' name = 'alias_set' value = '$alias_set'>		
+				<input type = 'hidden' name = 'alias_set' value = '$alias_set'>
 				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 	}
-	
+
 	require ("inc/footer.inc");
 ?>

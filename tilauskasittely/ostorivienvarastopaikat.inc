@@ -144,22 +144,54 @@ if ($tee == "valmis") {
 						and tyyppi		= 'O'";
 			$result = mysql_query($query) or pupe_error($query);
 
+			//Päivitetään myös sarjanumero-oliot jos meillä on niitä
+			$query = "	SELECT sarjanumeroseuranta
+						FROM tuote
+						WHERE yhtio='$kukarow[yhtio]'
+						and tuoteno='$tilausrivirow[tuoteno]'";
+			$tres = mysql_query($query) or pupe_error($query);
+			$trow = mysql_fetch_array($tres);
+
+			if ($trow["sarjanumeroseuranta"] != '') {
+				$query = "	UPDATE sarjanumeroseuranta
+							SET hyllyalue='$paikkarow[hyllyalue]', hyllynro='$paikkarow[hyllynro]', hyllyvali='$paikkarow[hyllyvali]', hyllytaso='$paikkarow[hyllytaso]'
+							WHERE yhtio			= '$kukarow[yhtio]'
+							and ostorivitunnus	= '$tunnus'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+
 			//jos halutaan tehdä tästä paikasta jolle nyt viedään saldoa, oli se uusi tai vanha niin poistetaan kaikilta paikoilta oletustieto ja tehdään tästä oletuspaikka
 			if ($oletusbox[$tunnus]!= '' and $virheita == 0) {
-				$query = "UPDATE tuotepaikat SET oletus = '' WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$paikkarow[tuoteno]'";
+				$query = "	UPDATE tuotepaikat
+							SET oletus = ''
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$paikkarow[tuoteno]'";
 				$upresult = mysql_query($query) or pupe_error($query);
 
-				$query = "UPDATE tuotepaikat SET oletus = 'X'
-				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$paikkarow[tuoteno]'
-				and hyllyalue='$paikkarow[hyllyalue]' and hyllynro='$paikkarow[hyllynro]' and hyllyvali='$paikkarow[hyllyvali]' and hyllytaso='$paikkarow[hyllytaso]' LIMIT 1";
+				$query = "	UPDATE tuotepaikat
+							SET oletus = 'X'
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and tuoteno 	= '$paikkarow[tuoteno]'
+							and hyllyalue	= '$paikkarow[hyllyalue]'
+							and hyllynro	= '$paikkarow[hyllynro]'
+							and hyllyvali	= '$paikkarow[hyllyvali]'
+							and hyllytaso	= '$paikkarow[hyllytaso]'
+							LIMIT 1";
 				$upresult = mysql_query($query) or pupe_error($query);
 
-				$query = "SELECT * FROM tuotepaikat
-				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$paikkarow[tuoteno]' and oletus != ''";
+				$query = "	SELECT *
+							FROM tuotepaikat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$paikkarow[tuoteno]'
+							and oletus != ''";
 				$upresult = mysql_query($query) or pupe_error($query);
+
 				if (mysql_num_rows($upresult) == 0) {
-					$query = "UPDATE tuotepaikat SET oletus = 'X'
-					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$paikkarow[tuoteno]' ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
+					$query = "	UPDATE tuotepaikat
+								SET oletus = 'X'
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$paikkarow[tuoteno]'
+								ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";
 					$upresult = mysql_query($query) or pupe_error($query);
 					echo "<font class='error'>".t("Tuotteelta")." $paikkarow[tuoteno] ".t("katosi oletuspaikka")."!!! ".t("Päivitetään ensimmäinen joka löytyy oletuspaikaksi")."!!!<br>";
 				}

@@ -1,5 +1,8 @@
 <?php
 
+	// käytetään slavea
+	$useslave = 1;
+
 	require ("../inc/parametrit.inc");
 
 	if ($toim == "") $toim = "MYYNTI";

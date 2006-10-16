@@ -99,7 +99,8 @@ if ($mehtorow['kateinen']!='') {
 $kassaale = round($summa*$mehtorow['kassa_alepros']/100,2);
 
 
-$lisa_comments = "";
+$lisa_comments 	= "";
+$lisa_viestit	= "";
 
 //Laitetaan laskun kommenttiin talteen tiettyjä lisätietoja
 if ($mehtorow["factoring"] != '') {
@@ -133,16 +134,32 @@ if ($lasrow["vienti"] != '') {
 		$lisa_comments .= "$rahtirow[kollit] ".t("kpl").". $rahtirow[pakkaus] $rahtirow[kilot] kg. \n";
 	}
 }
+
+//Laitetaan laskun viestikenttään talteen tiettyjä lisätietoja
+if ($mehtorow["jv"] != '') {
+	$lisa_viestit 	.= t("Kuitti jälkivaatimuksesta");
+	$lisa_comments 	.= t("Kuitataan jälkivaatimuksella saaduksi. TÄTÄ LASKUA EI TULE MAKSAA!")."\n";
+}
+
+
+
+
 // Lisätään järjestelmän generoimat kommentit laskun kommenttikenttään
 if ($lisa_comments != "") {
 	$sisviestit1 = $lisa_comments." ".$sisviestit1;
 }
 
+// Lisätään järjestelmän generoimat viestit laskun viestikenttään
+if ($lisa_comments != "") {
+	$viestit = $lisa_viestit." ".$viestit;
+}
+
+
 //Siivotaan kommenteista kaikki kummalliset merkit pois
-$comments 		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/|%\r\n]", "", $comments);
-$viestit		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/|%\r\n]", "", $viestit);
-$sisviestit1	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/|%\r\n]", "", $sisviestit1);
-$viitetxt		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/|%\r\n]", "", $viitetxt);
+$comments 		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|%\r\n]", "", $comments);
+$viestit		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|%\r\n]", "", $viestit);
+$sisviestit1	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|%\r\n]", "", $sisviestit1);
+$viitetxt		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|%\r\n]", "", $viitetxt);
 
 
 // kirjotetaan kokonaan uusi lasku-olio laskusta.. helpottaa myyntireskontraa! tilaksi: U alatila: tyhjä

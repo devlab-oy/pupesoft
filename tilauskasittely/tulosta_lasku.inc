@@ -105,9 +105,9 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(800, 300, 779, 580, 	$firstpage, $rectparam);
 		$pdf->draw_rectangle(800, 420, 779, 580, 	$firstpage, $rectparam);
 		$pdf->draw_text(310, 792, t("Laskun pvm", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(310, 782, $laskurow["tapvm"],		$firstpage, $norm);
+		$pdf->draw_text(310, 782, tv1dateconv($laskurow["tapvm"]),		$firstpage, $norm);
 		$pdf->draw_text(430, 792, t("Eräpäivä", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(430, 782, $laskurow["erpcm"], 		$firstpage, $norm);
+		$pdf->draw_text(430, 782, tv1dateconv($laskurow["erpcm"]), 		$firstpage, $norm);
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
@@ -131,7 +131,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 719, $laskurow["viikorkopros"],	 	$firstpage, $norm);
 		$pdf->draw_text(430, 729, t("Kassa-alennus pvm", $kieli), 	$firstpage, $pieni);
 		if ($laskurow["kapvm"] != '0000-00-00') {
-			$pdf->draw_text(430, 719, $laskurow["kapvm"], $firstpage, $norm);
+			$pdf->draw_text(430, 719, tv1dateconv($laskurow["kapvm"]), $firstpage, $norm);
 		}
 
 		$pdf->draw_rectangle(716, 300, 695, 580, $firstpage, $rectparam);
@@ -161,7 +161,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 666, t("Toimitustapa", $kieli), 	$firstpage, $pieni);
 		$pdf->draw_text(310, 656, $laskurow["toimitustapa"], 	$firstpage, $norm);
 		$pdf->draw_text(430, 666, t("Toimituspvm", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(430, 656, $laskurow["toimaika"], 		$firstpage, $norm);
+		$pdf->draw_text(430, 656, tv1dateconv($laskurow["toimaika"]), 		$firstpage, $norm);
 
 		$pdf->draw_rectangle(653, 300, 632, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 645, t("Toimitusehto", $kieli), $firstpage, $pieni);
@@ -280,7 +280,7 @@ if (!function_exists('rivi')) {
 		$pdf->draw_text(290, $kala, $row["yksikko"],	$firstpage, $pieni);
 
 
-		$row["toimitettuaika"] = substr($row["toimitettuaika"],0,10);
+		$row["toimitettuaika"] = substr(tv1dateconv($row["toimitettuaika"]),0,10);
 
 		if ($row["toimitettuaika"] == "0000-00-00") {
 			$row["toimitettuaika"] = "";
@@ -306,13 +306,13 @@ if (!function_exists('loppu')) {
 	function loppu ($firstpage) {
 
 		global $kutsuja, $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi;
-		
+
 		$vientikala = 0;
-		
+
 		if ($laskurow["vienti"] != "") {
 			$vientikala = 20;
 		}
-		
+
 		if ($laskurow["sisviesti1"] != ''){
 			$pohja = $pdf->draw_paragraph(165, 35, 115+$vientikala, 340, $laskurow["sisviesti1"], 		$firstpage, $pieni_boldi);
 		}
@@ -324,7 +324,7 @@ if (!function_exists('loppu')) {
 		$pdf->draw_rectangle(110+$vientikala, 540, 90+$vientikala, 580,	$firstpage, $rectparam);
 
 		$pdf->draw_text(30,  102+$vientikala, t("Eräpäivä", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(30,  92+$vientikala,  $laskurow["erpcm"],		$firstpage, $norm);
+		$pdf->draw_text(30,  92+$vientikala,  tv1dateconv($laskurow["erpcm"]),		$firstpage, $norm);
 		$pdf->draw_text(217, 102+$vientikala, t("Viitenumero", $kieli),	$firstpage, $pieni);
 		$pdf->draw_text(217, 92+$vientikala,  $laskurow["viite"],		$firstpage, $norm);
 		$pdf->draw_text(404, 92+$vientikala,  t("Yhteensä", $kieli).":",$firstpage, $norm);
@@ -360,7 +360,7 @@ if (!function_exists('loppu')) {
 			$pdf->draw_text(30,  82, $yhtiorow["pankkinimi2"]."  ".$yhtiorow["pankkitili2"],			$firstpage, $norm);
 			$pdf->draw_text(217, 82, "IBAN: ".$yhtiorow["pankkiiban2"],		$firstpage, $norm);
 			$pdf->draw_text(404, 82, "SWIFT: ".$yhtiorow["pankkiswift2"],	$firstpage, $norm);
-			
+
 			$pdf->draw_text(30,  72, $yhtiorow["pankkinimi3"]."  ".$yhtiorow["pankkitili3"],			$firstpage, $norm);
 			$pdf->draw_text(217, 72, "IBAN: ".$yhtiorow["pankkiiban3"],		$firstpage, $norm);
 			$pdf->draw_text(404, 72, "SWIFT: ".$yhtiorow["pankkiswift3"],	$firstpage, $norm);

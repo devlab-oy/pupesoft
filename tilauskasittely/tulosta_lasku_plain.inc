@@ -94,9 +94,9 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(800, 300, 779, 580, 	$firstpage, $rectparam);
 		$pdf->draw_rectangle(800, 420, 779, 580, 	$firstpage, $rectparam);
 		$pdf->draw_text(310, 792, t("Laskun pvm", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(310, 782, $laskurow["tapvm"],		$firstpage, $norm);
+		$pdf->draw_text(310, 782, tv1dateconv($laskurow["tapvm"]),		$firstpage, $norm);
 		$pdf->draw_text(430, 792, t("Eräpäivä", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(430, 782, $laskurow["erpcm"], 		$firstpage, $norm);
+		$pdf->draw_text(430, 782, tv1dateconv($laskurow["erpcm"]), 		$firstpage, $norm);
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
@@ -175,7 +175,7 @@ if (!function_exists('alku')) {
 
 
 		$pdf->draw_text(430, 666, t("Toimituspvm", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(430, 656, $myyrow[0], 		$firstpage, $norm);
+		$pdf->draw_text(430, 656, tv1dateconv($myyrow[0]), 		$firstpage, $norm);
 
 		$pdf->draw_rectangle(653, 300, 632, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 645, t("Toimitusehto", $kieli), $firstpage, $pieni);
@@ -281,7 +281,7 @@ if (!function_exists('loppu')) {
 		$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
 
 		$pdf->draw_text(30,  102, t("Eräpäivä", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(30,  92,  $laskurow["erpcm"],		$firstpage, $norm);
+		$pdf->draw_text(30,  92,  tv1dateconv($laskurow["erpcm"]),		$firstpage, $norm);
 		$pdf->draw_text(217, 102, t("Viitenumero", $kieli),	$firstpage, $pieni);
 		$pdf->draw_text(217, 92,  $laskurow["viite"],		$firstpage, $norm);
 		$pdf->draw_text(404, 92,  t("Yhteensä", $kieli).":",$firstpage, $norm);

@@ -64,7 +64,7 @@
 					ORDER BY luontiaika";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm,
+		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) summa,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
 					FROM lasku use index (yhtio_tila_luontiaika)
@@ -93,9 +93,7 @@
 	if ($toim == "OSTO") {
 		// kuukausinäkymä
 		$query1 = "	SELECT DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
-					count(distinct lasku.tunnus) tilauksia,
-					count(distinct tilausrivi.tunnus) riveja,
-					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) arvo
+					count(distinct lasku.tunnus) tilauksia, count(distinct tilausrivi.tunnus) riveja
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -106,8 +104,8 @@
 					ORDER BY luontiaika";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm,
-					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) arvo
+		$query2 = "	SELECT lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl),2) summa, lasku.valkoodi
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -120,7 +118,7 @@
 
 		// tilausnäkymä
 		$query3 = "	SELECT otunnus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta,
-					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl),2) arvo
+					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl),2) summa, lasku.valkoodi
 					FROM tilausrivi use index (yhtio_otunnus)
 					JOIN lasku on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
@@ -133,9 +131,7 @@
 	if ($toim == "KEIKKA") {
 		// kuukausinäkymä
 		$query1 = "	SELECT DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
-					count(distinct lasku.tunnus) keikkoja,
-					count(distinct tilausrivi.tunnus) riveja,
-					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) arvo
+					count(distinct lasku.tunnus) keikkoja, count(distinct tilausrivi.tunnus) riveja
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -147,8 +143,8 @@
 					ORDER BY luontiaika";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm,
-					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) arvo
+		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -162,7 +158,7 @@
 
 		// tilausnäkymä
 		$query3 = "	SELECT lasku.laskunro keikka, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta,
-					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl),2) arvo
+					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl),2) summa, lasku.valkoodi
 					FROM tilausrivi use index (uusiotunnus_index)
 					JOIN lasku on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.uusiotunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
@@ -188,7 +184,7 @@
 					ORDER BY luontiaika";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.tunnus valmistus, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm,
+		$query2 = "	SELECT lasku.tunnus valmistus, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) arvo
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
@@ -228,7 +224,7 @@
 					ORDER BY luontiaika";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm,
+		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) summa,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
 					FROM lasku use index (yhtio_tila_luontiaika)
@@ -305,10 +301,6 @@
 			echo "<th>".mysql_field_name($result, $i)."</th>";
 		}
 
-		if ($tee != "tilaus") {
-			echo "<th></th>";
-		}
-
 		echo "</tr>";
 
 		$arvo    = 0;
@@ -344,7 +336,7 @@
 			$summa += $row["summa"];
 
 			if ($tee != "tilaus") {
-				echo "<td><input type='submit' value='".t("Näytä")."'></td>";
+				echo "<td class='back'><input type='submit' value='".t("Näytä")."'></td>";
 			}
 
 			echo "</tr>";
@@ -360,13 +352,13 @@
 			if ($arvo != 0) {
 				echo "<tr>";
 				echo "<th>".t("Arvo yhteensä").": </th>";
-				echo "<td>".sprintf('%.02f',$arvo)." $yhtiorow[valkoodi]</td>";
+				echo "<td>".sprintf('%.02f',$arvo)."</td>";
 				echo "</tr>";
 			}
-			if ($summa != 0) {
+			if ($summa != 0 and $arvo != 0 and $arvo != $summa) {
 				echo "<tr>";
 				echo "<th>".t("Summa yhteensä").": </th>";
-				echo "<td>".sprintf('%.02f',$summa)." $yhtiorow[valkoodi]</td>";
+				echo "<td>".sprintf('%.02f',$summa)."</td>";
 				echo "</tr>";
 			}
 			echo "</table>";

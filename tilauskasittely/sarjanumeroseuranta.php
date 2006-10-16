@@ -138,7 +138,30 @@ if ($rivitunnus != "" and $formista == "kylla") {
 		//jos mikään ei ole ruksattu niin ei tietenkään halutakkaan lisätä mitään sarjanumeroa
 		if (count($sarjat) > 0) {
 			foreach ($sarjat as $sarjatunnus) {
-				$query = "update sarjanumeroseuranta set $tunnuskentta='$rivitunnus' WHERE yhtio='$kukarow[yhtio]' and tunnus='$sarjatunnus'";
+
+				if ($tunnuskentta == "ostorivitunnus") {
+					//Hanskataan sarjanumeron varastopaikkaa
+					$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus = '$rivitunnus'";
+					$sres = mysql_query($query) or pupe_error($query);
+					$srow = mysql_fetch_array($sres);
+
+					$paikkalisa = "	,
+									hyllyalue	= '$srow[hyllyalue]',
+									hyllynro	= '$srow[hyllynro]',
+									hyllyvali	= '$srow[hyllyvali]',
+									hyllytaso	= '$srow[hyllytaso]'";
+				}
+				else {
+					$paikkalisa = "";
+				}
+
+				$query = "	UPDATE sarjanumeroseuranta
+							SET $tunnuskentta='$rivitunnus'
+							$paikkalisa
+							WHERE yhtio='$kukarow[yhtio]' and tunnus='$sarjatunnus'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 		}

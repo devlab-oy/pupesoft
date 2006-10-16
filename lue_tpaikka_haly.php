@@ -80,6 +80,19 @@ if ($korjataan != '') {
 							halytysraja	='$halytysraja[$id]',
 							tilausmaara	='$tilattava[$id]'";
 				$result = mysql_query($query) or pupe_error($query);
+				
+				// tehd‰‰n tapahtuma
+				$query = "	INSERT into tapahtuma set
+							yhtio 		= '$kukarow[yhtio]',
+							tuoteno 	= '$tuoteno[$id]',
+							kpl 		= '0',
+							kplhinta	= '0',
+							hinta 		= '0',
+							laji 		= 'uusipaikka',
+							selite 		= '".t("Lis‰ttiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
+							laatija 	= '$kukarow[kuka]',
+							laadittu 	= now()";
+				$korjres = mysql_query($query) or pupe_error($query);
 			}
 			else {
 				$error ="<font class='error'>".t("Antamasi varastopaikka ei ole k‰sitelt‰v‰ss‰ varastossa")."</font>";

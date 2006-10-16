@@ -2,7 +2,7 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Korvaavien sis‰‰nluku").":</font><hr>";
+echo "<font class='head'>".t("Tuoteketjujen sis‰‰nluku").":</font><hr>";
 
 if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
 	if ($uusi == 1) {

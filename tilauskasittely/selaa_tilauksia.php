@@ -252,11 +252,12 @@
 
 	if ($tee == "paiva") {
 		$result = mysql_query($query2) or pupe_error($query2);
-		echo "<a href='$PHP_SELF?tee=paiva&vv=$epv&kk=$epk&pp=$epp&haku=$haku'>".t("Edellinen päivä")."</a> - <a href='$PHP_SELF?tee=paiva&vv=$npv&kk=$npk&pp=$npp&haku=$haku'>".t("Seuraava päivä")."</a>";
-		echo " - <a href=$PHP_SELF?tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
+		echo "<a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$epv&kk=$epk&pp=$epp&haku=$haku'>".t("Edellinen päivä")."</a> - <a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$npv&kk=$npk&pp=$npp&haku=$haku'>".t("Seuraava päivä")."</a>";
+		echo " - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
 		echo "<br><br>";
 
 		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='paiva'>";
 		echo "<input type='hidden' name='pp' value='$pp'>";
 		echo "<input type='hidden' name='kk' value='$kk'>";
@@ -276,13 +277,13 @@
 	}
 	elseif ($tee == "kk") {
 		$result = mysql_query($query1) or pupe_error($query1);
-		echo "<a href='$PHP_SELF?tee=kk&vv=$ekv&kk=$ekk&pp=$ekp'>".t("Edellinen kuukausi")."</a> - <a href='$PHP_SELF?tee=kk&vv=$nkv&kk=$nkk&pp=$nkp'>".t("Seuraava kuukausi")."</a>";
+		echo "<a href='$PHP_SELF?toim=$toim&tee=kk&vv=$ekv&kk=$ekk&pp=$ekp'>".t("Edellinen kuukausi")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$nkv&kk=$nkk&pp=$nkp'>".t("Seuraava kuukausi")."</a>";
 		echo "<br><br>";
 		//echo "$query1<br><br>";
 	}
 	elseif ($tee == "tilaus") {
 		$result = mysql_query($query3) or pupe_error($query3);
-		echo "<a href=$PHP_SELF?tee=paiva&vv=$vv&kk=$kk&pp=$pp>".t("Päivänäkymä")."</a> - <a href=$PHP_SELF?tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
+		echo "<a href=$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp>".t("Päivänäkymä")."</a> - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
 		echo "<br><br>";
 		//echo "$query3<br><br>";
 	}
@@ -328,6 +329,7 @@
 			echo "<input type='hidden' name='pp' value='$pp'>";
 			echo "<input type='hidden' name='kk' value='$kk'>";
 			echo "<input type='hidden' name='vv' value='$vv'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 			echo "<tr>";
 

@@ -1101,6 +1101,7 @@ if ($tee == '') {
 			elseif ($tapa == "VAIHDA") {
 				$perheid = $tilausrivi['perheid'];
 				$tila	 = "";
+				$var	= $tilausrivi["var"];
 			}
 			elseif ($tapa == "POISTA") {
 				$tuoteno	= '';

@@ -30,6 +30,7 @@
 
 	$saldoyhteensa		= 0; // tahan summaillaan saldoa yhteensä
 	$lapsiyhteensa		= 0;
+	$suoratoimeikiitos = '';
 
 	$lop				= "";
 
@@ -116,6 +117,7 @@
 	elseif ($var == "S" and substr($paikka,0,3) != "@@@") {
 		$var 		= "";
 		$rivinumero	= "";
+		$suoratoimeikiitos = "ei";
 	}
 
 	//echo "$paikka<br>";
@@ -626,7 +628,7 @@
 
 
 		//Tehdään suoratoimitusautomaatio jos kyseessä on extranet tai ediasiakas
-		if (($yhtiorow["suoratoim_automaatio"] != '' or $kukarow["extranet"] != '' or $kutsuja == "EDITILAUS") and $var == "" and $toimittamatta > 0) {
+		if (($yhtiorow["suoratoim_automaatio"] != '' or $kukarow["extranet"] != '' or $kutsuja == "EDITILAUS") and $var == "" and $toimittamatta > 0 and $suoratoimeikiitos == "") {
 			$suora_tuoteno 	= $alkupera_trow["tuoteno"];
 			$suora_kpl		= $toimittamatta;
 			require("suoratoimitusvalinta.inc");

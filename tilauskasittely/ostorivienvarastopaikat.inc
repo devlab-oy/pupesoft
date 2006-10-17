@@ -285,7 +285,7 @@ if ($tee == "") {
 				and tilausrivi.uusiotunnus='$otunnus'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.varattu <> 0
-				and tuotteen_toimittajat.toimittaja = '$laskurow[ytunnus]'
+				and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 				group by tilausrivi.tunnus
 				ORDER BY tuotteen_toimittajat.toim_tuoteno";
 	$result = mysql_query($query) or pupe_error($query);

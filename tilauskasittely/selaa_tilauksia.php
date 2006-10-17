@@ -143,7 +143,7 @@
 					ORDER BY luontiaika";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta, 
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')

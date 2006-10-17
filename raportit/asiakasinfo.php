@@ -238,32 +238,62 @@ if ($ytunnus!='') {
 		$result = mysql_query($query) or pupe_error($query);
 
 		$asale  = "<table>";
-		$asale .= "<tr><th>".t("Aleryhm‰")."</th><th>".t("Prosentti")."</th><th>".t("Tyyppi")."</th></tr>";
+		$asale .= "<tr><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Prosentti")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th><th>".t("Tyyppi")."</th></tr>";
 
 		while ($alerow = mysql_fetch_array($result)) {
 
 			$mita  = "Perus";
 			$ryhma = $alerow['ryhma'];
 			$ale   = $alerow['alennus'];
+			$showytunnus = 'PERUS';
 
-			$query = "select * from asiakasalennus where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and ryhma='$ryhma'";
-			$asres = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($asres)>0) {
-				$asrow = mysql_fetch_array($asres);
-				$mita  = "<font class='katepros'>".t("Asiakas")."</font>";
-				$ryhma = $asrow['ryhma'];
-				$ale   = $asrow['alennus'];
-			}
+			
 
 			if ($ale != 0.00) {
 				$asale .= "<tr>
+					<td><font class='info'>$showytunnus	<font></td>
 					<td><font class='info'>$ryhma	<font></td>
 					<td><font class='info'>$ale		<font></td>
+					<td><font class='info'>----------<font></td>
+					<td><font class='info'>----------<font></td>
 					<td><font class='info'>$mita	<font></td>
 					</tr>";
 			}
 		}
+		
+		$query = "select * from asiakasalennus where yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or asiakas_ryhma = '$asiakasrow[ryhma]') order by asiakas_ryhma, ytunnus, ryhma, tuoteno";
+		$asres = mysql_query($query) or pupe_error($query);
+
+		while ($asrow = mysql_fetch_array($asres)) {
+			$mita  = "<font class='katepros'>".t("Asiakas")."</font>";
+			
+			if ($asrow['asiakas_ryhma'] != '') {
+				$showytunnus = "(RY) ".$asrow['asiakas_ryhma'];
+			}
+			else {
+				$showytunnus = $asrow['ytunnus'];
+			}
+			
+			if ($asrow['ryhma'] != '') {
+				$showryhma = "(RY) ".$asrow['ryhma'];
+			}
+			else {
+				$showryhma = $asrow['tuoteno'];
+			}
+			
+			$ryhma = $asrow['ryhma'];
+			$ale   = $asrow['alennus'];
+			
+			$asale .= "<tr>
+				<td><font class='info'>$showytunnus	<font></td>
+				<td><font class='info'>$showryhma	<font></td>
+				<td><font class='info'>$ale		<font></td>
+				<td><font class='info'>$asrow[alkupvm]<font></td>
+				<td><font class='info'>$asrow[loppupvm]<font></td>
+				<td><font class='info'>$mita	<font></td>
+				</tr>";
+		}
+		
 		$asale .= "</table>";
 	}
 	else {
@@ -273,27 +303,37 @@ if ($ytunnus!='') {
 	if ($ashin!='') {
 		// haetaan asiakas hintoaja
 		$ashin  = "<table>";
-		$ashin .= "<tr><th>".t("Tuote")."</th><th>".t("Nimitys")."</th><th>".t("Hinta")."</th></tr>";
+		$ashin .= "<tr><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Hinta")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th></tr>";
 
-		$query = "	select tuote.tuoteno, tuote.nimitys, asiakashinta.hinta 
-					from asiakashinta, tuote 
-					where asiakashinta.yhtio='$kukarow[yhtio]' 
-					and ytunnus='$ytunnus' 
-					and asiakashinta.yhtio=tuote.yhtio 
-					and asiakashinta.tuoteno=tuote.tuoteno
-					and ((asiakashinta.alkupvm <= now() and asiakashinta.loppupvm >= now()) or (asiakashinta.alkupvm='0000-00-00' and asiakashinta.loppupvm='0000-00-00'))";
-		$result = mysql_query($query) or pupe_error($query);
+		$query = "select * from asiakashinta where yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or asiakas_ryhma = '$asiakasrow[ryhma]') order by asiakas_ryhma, ytunnus, ryhma, tuoteno";
+		$asres = mysql_query($query) or pupe_error($query);
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($asrow = mysql_fetch_array($asres)) {
+
+			if ($asrow['asiakas_ryhma'] != '') {
+				$showytunnus = "(RY) ".$asrow['asiakas_ryhma'];
+			}
+			else {
+				$showytunnus = $asrow['ytunnus'];
+			}
+
+			if ($asrow['ryhma'] != '') {
+				$showryhma = "(RY) ".$asrow['ryhma'];
+			}
+			else {
+				$showryhma = $asrow['tuoteno'];
+			}
+
+			$ryhma = $asrow['ryhma'];
+			$hinta   = $asrow['hinta'];
+
 			$ashin .= "<tr>
-				<td><font class='info'>$row[tuoteno]<font></td>
-				<td><font class='info'>$row[nimitys]<font></td>
-				<td><font class='info'>$row[hinta]	<font></td>
+				<td><font class='info'>$showytunnus	<font></td>
+				<td><font class='info'>$showryhma	<font></td>
+				<td><font class='info'>$hinta		<font></td>
+				<td><font class='info'>$asrow[alkupvm]<font></td>
+				<td><font class='info'>$asrow[loppupvm]<font></td>
 				</tr>";
-		}
-
-		if (mysql_num_rows($result)==0) {
-			$ashin .= "<tr><td colspan='3'><font class='info'>".t("Ei alennettuja tuotteita").".</font></td></tr>";
 		}
 
 		$ashin .= "</table>";
@@ -305,60 +345,87 @@ if ($ytunnus!='') {
 	if ($aletaulu!='') {
 		// tehd‰‰n asiakkaan alennustaulukko...
 		$aletaulu  = "<table>";
-		$aletaulu .= "<tr><th>".t("Os")."</th><th>".t("Osasto")."</th><th>".t("Tryno")."</th><th>".t("Tuoteryhm‰")."</th><th>".t("Aleryhm‰")."</th><th>".t("Prosentti")."</th><th>".t("Tyyppi")."</th></tr>";
+		$aletaulu .= "<tr><th>".t("Os")."</th><th>".t("Osasto")."</th><th>".t("Tryno")."</th><th>".t("Tuoteryhm‰")."</th><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Prosentti")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th><th>".t("Tyyppi")."</th></tr>";
 
-		// haetaan kaikki osastot ja tryt miss‰ status on tyhj‰ tai aktiivi
-		$query = "select distinct osasto, try, aleryhma
-					from tuote
-					where tuote.yhtio='$kukarow[yhtio]'
+		$query = "(select osasto, try, aleryhma, asiakasalennus.tuoteno, ryhma, ytunnus, asiakas_ryhma, alennus, alkupvm, loppupvm
+					from asiakasalennus, tuote
+					where asiakasalennus.yhtio = tuote.yhtio
+					and asiakasalennus.yhtio='$kukarow[yhtio]'
+					and asiakasalennus.ytunnus = '$ytunnus'
+					and if(asiakasalennus.tuoteno != '', asiakasalennus.tuoteno = tuote.tuoteno, asiakasalennus.ryhma = tuote.aleryhma)
 					and status in ('', 'A')
 					and osasto != 0
 					and try != 0
+					group by 1,2,3,4,5,6,7,8,9,10)
+					UNION
+					(select osasto, try, aleryhma, asiakasalennus.tuoteno, ryhma, ytunnus, asiakas_ryhma, alennus, alkupvm, loppupvm
+					from asiakasalennus, tuote
+					where asiakasalennus.yhtio = tuote.yhtio
+					and asiakasalennus.yhtio='$kukarow[yhtio]'
+					and asiakasalennus.asiakas_ryhma = '$asiakasrow[ryhma]'
+					and if(asiakasalennus.tuoteno != '', asiakasalennus.tuoteno = tuote.tuoteno, asiakasalennus.ryhma = tuote.aleryhma)
+					and status in ('', 'A')
+					and osasto != 0
+					and try != 0
+					group by 1,2,3,4,5,6,7,8,9,10)
+					UNION
+					(select osasto, try, aleryhma, '1' as tuoteno, ryhma, '1' as ytunnus, '1' as asiakas_ryhma, alennus, 'perus' as alkupvm, '1' as loppupvm
+					from perusalennus, tuote
+					where 
+					perusalennus.yhtio = tuote.yhtio
+					and perusalennus.ryhma = tuote.aleryhma
+					and perusalennus.yhtio = '$kukarow[yhtio]' 
+					and alennus > 0
+					and status in ('', 'A')
+					and osasto != 0
+					and try != 0
+					group by 1,2,3,4,5,6,7,8,9,10)
 					order by osasto+0, try+0, aleryhma";
 		$result = mysql_query($query) or pupe_error($query);
-
-		while ($row = mysql_fetch_array($result)) {
-
-			$query = "select * from asiakasalennus where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and ryhma='$row[aleryhma]'";
-			$alere = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($alere)>0) {
-				$alerow = mysql_fetch_array($alere);
-				$mita   = "<font class='katepros'>".t("Asiakas")."</font>";
-				$ale    = $alerow['alennus'];
+		
+		while ($alerow = mysql_fetch_array($result)) {
+			if ($alerow['alkupvm'] == 'perus') {
+					$mita   = "Perus";
+					$alerow['ytunnus'] = '';
+					$ale    = $alerow['alennus'];
+					$alerow['alkupvm'] = '----------';
+					$alerow['loppupvm'] = '----------';
+					
 			}
 			else {
-				$query = "select * from perusalennus where yhtio='$kukarow[yhtio]' and ryhma='$row[aleryhma]'";
-				$alere = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($alere)>0) {
-					$alerow = mysql_fetch_array($alere);
-					$mita   = "Perus";
-					$ale    = $alerow['alennus'];
+				$mita   = "<font class='katepros'>".t("Asiakas")."</font>";
+				$ale    = $alerow['alennus'];
+				if ($alerow['ytunnus'] == '') {
+					$alerow['ytunnus'] = "(RY) ".$alerow['asiakas_ryhma'];
+				}
+				if ($alerow['tuoteno'] == '') {
+					$alerow['aleryhma'] = "(RY) ".$alerow['aleryhma'];
 				}
 				else {
-					$mita = "";
-					$ale  = "";
+					$alerow['aleryhma'] = $alerow['tuoteno'];
 				}
 			}
 
-			$query = "select selitetark from avainsana where yhtio='$kukarow[yhtio]' and laji='try' and selite='$row[try]'";
+			$query = "select selitetark from avainsana where yhtio='$kukarow[yhtio]' and laji='try' and selite='$alerow[try]'";
 			$tryre = mysql_query($query) or pupe_error($query);
 			$tryro = mysql_fetch_array($tryre);
 
-			$query = "select selitetark from avainsana where yhtio='$kukarow[yhtio]' and laji='osasto' and selite='$row[osasto]'";
+			$query = "select selitetark from avainsana where yhtio='$kukarow[yhtio]' and laji='osasto' and selite='$alerow[osasto]'";
 			$osare = mysql_query($query) or pupe_error($query);
 			$osaro = mysql_fetch_array($osare);
 			
 			// n‰ytet‰‰n rivi vaan jos ale on olemassa ja se on erisuuri kuin nolla. Lis‰ksi tuoteryhm‰ll‰ on pakko olla nimi...
-			if ($ale != "" and $ale != 0.00 and $tryro["selitetark"] != "" and $osaro["selitetark"] != "") {
+			if ($ale != "" and $ale != 0.00) {
 				$aletaulu .= "<tr>
-					<td><font class='info'>$row[osasto]<font></td>
+					<td><font class='info'>$alerow[osasto]<font></td>
 					<td><font class='info'>$osaro[selitetark]<font></td>
-					<td><font class='info'>$row[try]<font></td>
+					<td><font class='info'>$alerow[try]<font></td>
 					<td><font class='info'>$tryro[selitetark]<font></td>
-					<td><font class='info'>$row[aleryhma]</td>
+					<td><font class='info'>$alerow[ytunnus]</td>
+					<td><font class='info'>$alerow[aleryhma]</td>
 					<td><font class='info'>$ale<font></td>
+					<td><font class='info'>$alerow[alkupvm]</td>
+					<td><font class='info'>$alerow[loppupvm]</td>
 					<td><font class='info'>$mita<font></td>
 					</tr>";
 			}

@@ -3,7 +3,7 @@
 // online kysely.. näillä infoilla pitäs onnistua
 if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_GET["ostoskori"] != "") {
 
-	$con = mysql_pconnect("d60.arwidson.fi", "pupeweb","web1") or die("Tietokantaongelma1!");
+	$con = mysql_connect("d60.arwidson.fi", "pupeweb","web1") or die("Tietokantaongelma1!");
 	mysql_select_db("pupesoft") or die ("Tietokantaongelma2!");
 
 	// katotaan löytyykö asiakas

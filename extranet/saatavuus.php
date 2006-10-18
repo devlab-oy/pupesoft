@@ -5,15 +5,15 @@
 	$tuoteno = trim ($_GET['tuoteno']);
 	$maara = (int) $_GET['maara'];
 	$kukarow["yhtio"] = "artr";
-	
+
 	if ($tuoteno != '') {
 
-		$con = mysql_pconnect("d60.arwidson.fi", "pupeweb","web1") or die("Tietokantaongelma1!");
+		$con = mysql_connect("d60.arwidson.fi", "pupeweb","web1") or die("Tietokantaongelma1!");
 		mysql_select_db("pupesoft") or die ("Tietokantaongelma2!");
 
 		$query = "select * from tuote WHERE yhtio='artr' and tuoteno='$tuoteno'";
 		$result = mysql_query($query) or die($query);
-		
+
 		if (mysql_num_rows($result) == 1) {
 
 			// katotaan paljonko on myytävissä
@@ -38,7 +38,7 @@
 
 				$kkrow  = mysql_fetch_array($kores);
 				$query  = "	select tuoteno from korvaavat use index (yhtio_id)
-							where yhtio='artr' and id='$kkrow[id]' 
+							where yhtio='artr' and id='$kkrow[id]'
 							order by jarjestys, tuoteno";
 				$kores  = mysql_query($query) or pupe_error($query);
 				$nexti  = 0;
@@ -53,7 +53,7 @@
 						$nexti = 1; // meidän tulee ottaa seuraava tuote, koska se on tämän tuotteen jälkeen seuraava korvaava
 					}
 				}
-				
+
 				// ei löydetty nextiä vaikka ois pitäny, oltiin ilmeisesti sitte vikassa tuotteessa, haetaan eka korvaava
 				if ($nexti == 1) {
 					$query = "	select tuoteno from korvaavat use index (yhtio_id)
@@ -61,14 +61,14 @@
 								order by jarjestys, tuoteno
 								limit 1";
 					$kores  = mysql_query($query) or pupe_error($query);
-					
+
 					if (mysql_num_rows($kores) == 1) {
 						$korow = mysql_fetch_array($kores);
 						echo "KORVAAVA=$korow[tuoteno]\n";
 					}
 				}
 			}
-			
+
 		} // end löytyykö
 		else {
 			// tuotetta ei löydy

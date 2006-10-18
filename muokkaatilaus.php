@@ -330,7 +330,7 @@
 			echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
 
 			// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-			if ($toim == "" or $toim == "super" or $toim == "EXRANET") {
+			if ($toim == "" or $toim == "super" or $toim == "EXTRANET") {
 				$aputoim1 = "RIVISYOTTO";
 				$aputoim2 = "PIKATILAUS";
 

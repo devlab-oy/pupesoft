@@ -69,7 +69,7 @@
 	if (mysql_num_rows($eresult) != 0 and $toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET") {
 
 		// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-		if ($toim == "" or $aputoim == "super") {
+		if ($toim == "" or $toim == "super") {
 			$aputoim1 = "RIVISYOTTO";
 			$aputoim2 = "PIKATILAUS";
 
@@ -102,7 +102,7 @@
 
 		echo "</select></td>";
 
-		if ($toim == "" or $aputoim == "super") {
+		if ($toim == "" or $toim == "super") {
 			echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
 		}
 
@@ -330,7 +330,7 @@
 			echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
 
 			// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-			if ($toim == "" or $aputoim == "super") {
+			if ($toim == "" or $toim == "super") {
 				$aputoim1 = "RIVISYOTTO";
 				$aputoim2 = "PIKATILAUS";
 

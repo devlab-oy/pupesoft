@@ -2,7 +2,7 @@
 
 	if (file_exists("../inc/parametrit.inc")) {
 		require ("../inc/parametrit.inc");
-		$post_myynti = "tilauskasittely/tilaus_myynti.php";
+		$post_myynti = "tilaus_myynti.php";
 		if ($toim_kutsu == "") $toim_kutsu = "RIVISYOTTO";
 	}
 	else {
@@ -243,6 +243,7 @@
 		$yht_i = 0; // t‰‰ on mei‰n indeksi
 
 		echo "<form action='$PHP_SELF' name='lisaa' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<input type='hidden' name='toiminto' value = 'LISAARIVI'>";
 		echo "<input type='hidden' name='merkki' value='$merkki'>";

@@ -1,12 +1,16 @@
 <?php
-	
+
 	if (file_exists("../inc/parametrit.inc")) {
 		require ("../inc/parametrit.inc");
+		$post_myynti = "tilauskasittely/tilaus_myynti.php";
+		if ($toim_kutsu == "") $toim_kutsu = "RIVISYOTTO";
 	}
 	else {
 		require ("parametrit.inc");
+		$post_myynti = "tilaus_myynti.php";
+		$toim_kutsu = "EXTRANET";
 	}
-	
+
 	if ($toim == '') {
 		$selain = "varaosaselain";
 	}
@@ -14,303 +18,308 @@
 		$selain = $toim."selain";
 	}
 
-	
+
 	echo "<font class='head'>".t(ucfirst(strtolower($selain)))."</font><hr>";
-	
+
 	if (strtoupper($yhtiorow['kieli']) != 'FI') {
 		$selain .= $yhtiorow['kieli'];
 	}
-	
-	$query    = "select * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-	$result   = mysql_query($query, $link) or pupe_error($query);
-	$laskurow = mysql_fetch_array($result);
-	
-	// Tarkistetaan tilausrivi
-	if ($tee == 'TI') {
-		if ($kpl > 0) {
-			$query = "	SELECT *
-						FROM tuote
-						WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]' and myyntihinta>0";				
-			$tuoteresult = mysql_query($query) or pupe_error($query);		
-						
-			if(mysql_num_rows($tuoteresult) == 1) {
-				
-				$trow = mysql_fetch_array($tuoteresult);
-								
-				$hinta 	= ""; 
-				$netto 	= ""; 
-				$ale 	= "";
-				$var	= "";
-				$alv	= "";			
-				$toimaika 	= $laskurow["toimaika"];
-				$kerayspvm	= $laskurow["kerayspvm"];
 
-				require ('lisaarivi.inc');
-				
-				echo "<br><font class='message'>".t("Lisättiin tilaukselle tuote").": $tuoteno</font><br><br>";
+	if ($kukarow["kesken"] != 0) {
+		echo "	<form method='post' action='$post_myynti'>
+				<input type='hidden' name='toim' value='$toim_kutsu'>
+				<input type='hidden' name='aktivoinnista' value='true'>
+				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
+				<input type='submit' value='".t("Takaisin tilaukselle")."'>
+				</form>";
+	}
 
-				$tee 		= "Y";
-				$tuoteno	= '';
-				$kpl		= '';
-				$var		= '';
-				$hinta		= '';
-				$netto		= '';
-				$ale		= '';
-				$rivitunnus	= '';
-				$kommentti	= '';
-				$kerayspvm	= '';
-				$toimaika	= '';
-				$paikka		= '';
-				$alv		= '';							
-			}
-			else {
-				$varaosavirhe = t("VIRHE: Tuotetta ei löydy")."!<br>";
-			}
+	if ($toiminto == "LISAARIVI" and $kukarow["kesken"] != 0) {
+
+		// haetaan avoimen tilauksen otsikko
+		$query    = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+		$laskures = mysql_query($query);
+
+		if (mysql_num_rows($laskures) == 0) {
+			echo "<font class='error'>Sinulla ei ole avointa tilausta!</font><br>";
 		}
 		else {
-			$varaosavirhe = t("VIRHE: Syötä kappalemäärä")."!<br>";
-			$kpl = "";
-		}
-		$tee = "Y";
-	}
-	
-	echo "	<script language='javascript'> 
-					function DisableText() {
-						var count = document.forms.length;
-						
-						for (i=1; i<count; i++) {						
-							var count2 = document.forms[i].elements.length;
-							
-							for (j=0; j<count2; j++) {
-								var element = document.forms[i].elements[j]; 
-								
-								if (element.type == 'text' && element.value == '') { 
-									element.disabled=true; 
-								}  								
-							}
-						}
+
+			// tilauksen tiedot
+			$laskurow = mysql_fetch_array($laskures);
+
+			echo "<font class='message'>Lisätään tuotteita tilaukselle $kukarow[kesken].</font><br>";
+
+			// käydään läpi formin kaikki rivit
+			foreach ($tilkpl as $yht_i => $kpl) {
+
+				if ((float) $kpl > 0) {
+
+					// haetaan tuotteen tiedot
+					$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tiltuoteno[$yht_i]'";
+					$tuoteres = mysql_query($query);
+
+					if (mysql_num_rows($tuoteres) == 0) {
+						echo "<font class='error'>Tuotetta $tiltuoteno[$yht_i] ei löydy!</font><br>";
 					}
-				</script> ";
-				
+					else {
+
+						// tuote löytyi ok, lisätään rivi
+						$trow = mysql_fetch_array($tuoteres);
+
+						$ytunnus         = $laskurow["ytunnus"];
+						$kpl             = (float) $kpl;
+						$tuoteno         = $trow["tuoteno"];
+						$toimaika 	     = $laskurow["toimaika"];
+						$kerayspvm	     = $laskurow["kerayspvm"];
+						$hinta 		     = "";
+						$netto 		     = "";
+						$ale 		     = "";
+						$var		     = "";
+						$alv		     = "";
+						$paikka		     = "";
+						$varasto 	     = "";
+						$rivitunnus		 = "";
+						$korvaavakielto	 = "";
+						$varataan_saldoa = "";
+
+						require ("lisaarivi.inc");
+
+						echo "<font class='message'>Lisättiin $kpl kpl tuotetta $trow[tuoteno].</font><br>";
+
+					} // tuote ok else
+
+				} // end kpl > 0
+
+			} // end foreach
+
+		} // end tuotelöytyi else
+
+		echo "<br>";
+	}
+
+	//Otetaan yhteys varaosaselaimen tietokantapalvelimeen
 	$con   = mysql_connect($dbhostvosa, $dbuservosa, $dbpassvosa) or die("Yhteys tietokantaan epaonnistui!");
 	$boo   = mysql_select_db ($dbkantavosa) or die ("Tietokanta ei löydy palvelimelta..");
-	
+
 	$query = "select distinct merkki from $selain order by merkki";
 	$res   = mysql_query($query,$con);
-	
+
 	echo "<form action='$PHP_SELF' name='varaosaselain' method='post'>";
-	echo "<input type='hidden' name='toim' value='$toim'";
+	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<table><tr>";
 	echo "<td><select name='merkki' onchange='submit()'>";
-	
-	
+
 	echo "<option value=''>".t("Valitse merkki")."</option>";
-	
-	
-	while ($rivi=mysql_fetch_array($res))
-	{
+
+	while ($rivi = mysql_fetch_array($res)) {
 		$selected='';
 		if ($merkki==$rivi[0]) $selected=' SELECTED';
 		echo "<option value='$rivi[0]'$selected>$rivi[0]</option>";
 	}
-	
+
 	echo "</select></td>";
-	
-	if ($merkki!=$oldmerkki)
-	{
+
+	if ($merkki!=$oldmerkki) {
 		$cc='';
 		$malli='';
 		$vm='';
 	}
-	
+
 	echo "<td><select name='cc' onchange='submit()'>";
 	echo "<option value=''>".t("Valitse CC")."</option>";
-	if ($merkki!='')
-	{
+
+	if ($merkki!='') {
 		$query = "select distinct cc from $selain where merkki='$merkki' order by cc";
 		$res   = mysql_query($query,$con);
-	
-		while ($rivi=mysql_fetch_array($res))
-		{
+
+		while ($rivi=mysql_fetch_array($res)) {
 			$selected='';
 			if ($cc==$rivi[0]) $selected=' SELECTED';
 			echo "<option value='$rivi[0]'$selected>$rivi[0]</option>";
 		}
 	}
 	echo "</select></td>";
-	
-	if ($cc!=$oldcc)
-	{
+
+	if ($cc!=$oldcc) {
 		$malli='';
 		$vm='';
 	}
-	
+
 	echo "<td><select name='malli' onchange='submit()'>";
 	echo "<option value=''>".t("Valitse Malli")."</option>";
-	if ($cc!='')
-	{
+
+	if ($cc!='') {
 		$query = "select distinct malli from $selain where merkki='$merkki' and cc='$cc' order by malli";
 		$res   = mysql_query($query,$con);
-	
-		while ($rivi=mysql_fetch_array($res))
-		{
+
+		while ($rivi=mysql_fetch_array($res)) {
 			$selected='';
 			if ($malli==$rivi[0]) $selected=' SELECTED';
 			echo "<option value='$rivi[0]'$selected>$rivi[0]</option>";
 		}
 	}
 	echo "</select></td>";
-	
-	if ($malli!=$oldmalli)
-	{
+
+	if ($malli!=$oldmalli) {
 		$vm='';
 	}
-	
+
 	echo "<td><select name='vm' onchange='submit()'>";
 	echo "<option value=''>".t("Valitse Vuosi")."</option>";
-	if ($malli!='')
-	{
+
+	if ($malli!='') {
 		$query = "select distinct vm from $selain where merkki='$merkki' and cc='$cc' and malli='$malli' order by vm";
 		$res   = mysql_query($query,$con);
-	
-		while ($rivi=mysql_fetch_array($res))
-		{
+
+		while ($rivi=mysql_fetch_array($res)){
 			$selected='';
 			if ($vm==$rivi[0]) $selected=' SELECTED';
+
 			echo "<option value='$rivi[0]'$selected>$rivi[0]</option>";
 		}
 	}
 	echo "</select></td>";
-	
+
 	echo "<input type='hidden' name='oldmerkki' value='$merkki'>";
 	echo "<input type='hidden' name='oldcc' value='$cc'>";
 	echo "<input type='hidden' name='oldmalli' value='$malli'>";
 	echo "<input type='hidden' name='oldvm' value='$vm'>";
 	echo "</tr></table>";
 	echo "</form>\n";
-	
-	if ($vm!='')
-	{
-		$query = "select tuoteno, tuoteryhma from $selain where merkki='$merkki' and cc='$cc' and malli='$malli' and vm='$vm' order by tuoteryhma";
-		$res   = mysql_query($query,$con);
-	
+
+	if ($vm!='') {
 		echo "<br><font class='header'>".t("Tuotteet").":</font><br><br>";
-		
+
 		if ($kukarow['extranet'] != '') {
 			require ("connect.inc");
 		}
 		else {
 			require ("../inc/connect.inc");
 		}
+
 		echo "<table>";
-		echo "<tr><th>".t("Nimitys")."</th><th>".t("Tuotenumero")."</th><th>".t("Myyntihinta")."</th><th>".t("Varastossa")."</th><th>".t("Lisää tilaukseen")."</th></tr>";
-		
-		while ($rivi=mysql_fetch_array($res))
-		{
-			$tuote = $rivi[0];
-	//		$wrong = array(" ","-",".","Ö","Ä","Å","ö","ä","å");	//mitä korvataan
-	//		$right = array("" ,"" ,"" ,"O","A","A","o","a","a");	//millä korvataan
-	//		$tuote = str_replace($wrong, $right, $tuote);
-	//		$tuote = ereg_replace("^0*", "", $tuote);				//vielä etunollat pois
-			
-			$query = "select myyntihinta, ei_saldoa from tuote where tuoteno='$tuote' and yhtio='$kukarow[yhtio]'";
-			$res2  = mysql_query($query, $link) or pupe_error($query);
-			$row2  = mysql_fetch_array($res2);
-	
-			$eka      = 0;
-			$vapaana  = 0;
-			$vapaana2 = 0;
-			
-			// Katsotaan myytävissä oleva määrä
-			if ($row2["ei_saldoa"] == '') {
-				$query = "	select * 
-							from varastopaikat 
-							where yhtio = '$kukarow[yhtio]' 
-							and tyyppi  = ''";
-				$varastoresult = mysql_query($query, $link) or pupe_error($query);
-				
-				while ($varastorow = mysql_fetch_array ($varastoresult)) {
-					//saldo
-					$query = "	select sum(saldo) saldo 
-								from tuotepaikat 
-								where tuoteno  = '$tuote' 
-								and yhtio      = '$kukarow[yhtio]'
-								and hyllyalue >= '$varastorow[alkuhyllyalue]' 
-								and hyllynro  >= '$varastorow[alkuhyllynro]' 
-								and hyllyalue <= '$varastorow[loppuhyllyalue]' 
-								and hyllynro  <= '$varastorow[loppuhyllynro]'";
-					$alkuresult = mysql_query($query, $link) or pupe_error($query);
-					$alkurow = mysql_fetch_array($alkuresult);
-		
-					//ennakkopoistot
-					$query = "	SELECT sum(varattu) varattu
-								FROM tilausrivi
-								WHERE tyyppi  in ('L','G','V') 
-								and yhtio 	   = '$kukarow[yhtio]' 
-								and tuoteno    = '$tuote' 
-								and varattu    > '0'
-								and hyllyalue >= '$varastorow[alkuhyllyalue]' 
-								and hyllynro  >= '$varastorow[alkuhyllynro]' 
-								and hyllyalue <= '$varastorow[loppuhyllyalue]' 
-								and hyllynro  <= '$varastorow[loppuhyllynro]'";
-					$varatutresult = mysql_query($query, $link) or pupe_error($query);
-					$varatutrow = mysql_fetch_array($varatutresult);
-		
-					$vapaana = $alkurow["saldo"] - $varatutrow["varattu"];
-					$vapaana2 += $vapaana;
-				}
+		echo "<tr><th>".t("Tuoteryhmä")."</th><th>".t("Nimitys")."</th><th>".t("Tuotenumero")."</th><th>".t("Myyntihinta")."</th><th>".t("Varastossa")."</th>";
+
+		if ($kukarow["kesken"] != 0) {
+			echo "<th>".t("Lisää tilaukseen")."</th>";
+		}
+
+		echo "</tr>";
+
+		//Otetaan konserniyhtiöt hanskaan jotta voidaan laskea konserniyhtiöiden saldoja
+		$query	= "	SELECT GROUP_CONCAT(distinct yhtio) yhtiot
+					from yhtio
+					where yhtio='$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
+		$pres = mysql_query($query, $link) or pupe_error($query);
+		$prow = mysql_fetch_array($pres);
+
+		$konsyhtiot = explode(",", $prow["yhtiot"]);
+
+
+		//Otetaan rumasti tuottet muuttujaan koska ne on nyt eri tietokannassa
+		$query = "	SELECT group_concat(distinct concat(\"'\", tuoteno, \"'\")) tuoteno
+					FROM $selain
+					WHERE merkki='$merkki' and cc='$cc' and malli='$malli' and vm='$vm'";
+		$res = mysql_query($query, $con);
+		$row = mysql_fetch_array($res);
+
+		// Joinataan korvaavat mukaan
+		$query = "	SELECT valitut.sorttauskentta, tuote_wrapper.*, valitut.trynimi
+					FROM tuote tuote_wrapper,
+					(	SELECT if(korvaavat.id>0,concat(tuote.try,(select tuoteno from korvaavat korva2 where korva2.yhtio=korvaavat.yhtio and korva2.id=korvaavat.id ORDER BY jarjestys LIMIT 1)), concat(tuote.try,tuote.tuoteno)) sorttauskentta,
+						ifnull(korvaavat.tuoteno, tuote.tuoteno) tuoteno, avainsana.selitetark trynimi
+						FROM tuote
+						LEFT JOIN avainsana ON avainsana.yhtio=tuote.yhtio and avainsana.selite=tuote.try and avainsana.laji='TRY'
+						LEFT JOIN korvaavat ON korvaavat.yhtio=tuote.yhtio and korvaavat.id = (select id from korvaavat where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1)
+						WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno in ($row[tuoteno])
+						GROUP BY 1,2,3
+						ORDER BY sorttauskentta, tuote.try, tuote.tuoteno
+					) valitut
+					WHERE tuote_wrapper.yhtio = '$kukarow[yhtio]'
+					and valitut.tuoteno = tuote_wrapper.tuoteno";
+		$ressu   = mysql_query($query,$link) or pupe_error($query);
+
+		$yht_i = 0; // tää on meiän indeksi
+
+		echo "<form action='$PHP_SELF' name='lisaa' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
+		echo "<input type='hidden' name='toiminto' value = 'LISAARIVI'>";
+		echo "<input type='hidden' name='merkki' value='$merkki'>";
+		echo "<input type='hidden' name='cc' value='$cc'>";
+		echo "<input type='hidden' name='malli' value='$malli'>";
+		echo "<input type='hidden' name='vm' value='$vm'>";
+		echo "<input type='hidden' name='oldmerkki' value='$merkki'>";
+		echo "<input type='hidden' name='oldcc' value='$cc'>";
+		echo "<input type='hidden' name='oldmalli' value='$malli'>";
+		echo "<input type='hidden' name='oldvm' value='$vm'>";
+
+		while ($tuote = mysql_fetch_array($ressu)) {
+
+
+			$class		= "";
+			$lisakala 	= "";
+			if ($tuote["sorttauskentta"] == $edtuoteno) {
+				$lisakala = "* ";
+				$class = 'spec';
+			}
+
+			// katotaan paljonko on myytävissä
+			$saldo = 0;
+
+			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
+			mysql_select_db ($dbkanta, $link) or die ("Tietokanta ei löydy palvelimelta..");
+
+			foreach($konsyhtiot as $yhtio) {
+				$saldo += saldo_myytavissa($tuote["tuoteno"], "", 0, $yhtio);
+			}
+
+			if ($tuote["myyntihinta"] > 0) {
+				$ruuhinta = "$tuote[myyntihinta] $yhtiorow[valkoodi]";
 			}
 			else {
-				$vapaana2 = 1;
-			}
-			
-			
-			if (mysql_num_rows($res2)=='1') {			
-				$ruuhinta = "$row2[myyntihinta] $yhtiorow[valkoodi]";
-			}
-			else { 
 				$ruuhinta = '-';
 			}
-	
-			
-			
-			echo "<tr><td>$rivi[tuoteryhma]</td><td>$rivi[tuoteno]</td><td align='right'>$ruuhinta</td>";
-			
-			
-			if ($vapaana2 > 0) {
-				echo "<td class='green'>".t("On")."</td>";
+
+			$query = "	SELECT *
+						FROM $selain
+						WHERE merkki='$merkki' and cc='$cc' and malli='$malli' and vm='$vm' and tuoteno='$tuote[tuoteno]'";
+			$res = mysql_query($query,$con);
+			$row = mysql_fetch_array($res);
+
+
+			echo "<tr>
+					<td class='$class'>$tuote[trynimi]</td>
+					<td class='$class'>$lisakala $row[tuoteryhma]</td>
+					<td class='$class'>$tuote[tuoteno]</td>
+					<td class='$class' align='right'>$ruuhinta</td>";
+
+			if ($saldo > 0) {
+				echo "<td align='center'><img width='12px' heigth='12px' src='../pics/vihrea.png'></td>";
 			}
 			else {
-				echo "<td class='red'>".t("Ei")."</td>";
-			}				
-			
+				echo "<td align='center'><img width='12px' heigth='12px' src='../pics/punainen.png'></td>";
+			}
+
 			if ($kukarow["kesken"] != 0) {
-					
-				if ($tuoteno == '' or $tuote == $tuoteno) {
-					if ($kukarow["extranet"] == '') {
-						$miniliittyma = "JOO";
-					}
-					
-					echo "<td>";
-					
-					$miniliittyma = "JOO";
-					$hi_tuoteno = $tuote;
-					
-					require('syotarivi.inc');				
-					
-					echo "</td>";
-				}
+				echo "<td>";
+				echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$tuote[tuoteno]'>";
+				echo "<input type='text' size='7' name='tilkpl[$yht_i]'>";
+				echo "<input type='submit' value = 'Lisää'>";
+				echo "</td>";
+				$yht_i++;
 			}
-			else {
-				echo "<td>".t("Sinulla ei ole tilausta auki")."!</td>";
-			}
-			
-			echo "</tr>\n";
-		}
-	
-		echo "</table>\n";
-	
+
+			$edtuoteno = $tuote["sorttauskentta"];
+
+			echo "</tr>";
+
+		} // end while tuote
+
+		echo "</form>";
+		echo "</table>";
 	}
+
 	if ($kukarow['extranet'] != '') {
 		require ("footer.inc");
 	}

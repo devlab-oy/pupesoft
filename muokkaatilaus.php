@@ -350,7 +350,7 @@
 					<input type='hidden' name='tee' value='AKTIVOI'>
 					<input type='hidden' name='tilausnumero' value='$row[tilaus]'>";
 
-			if ($toim == "" or $aputoim == "super") {
+			if ($toim == "" or $toim == "super") {
 				echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
 			}
 

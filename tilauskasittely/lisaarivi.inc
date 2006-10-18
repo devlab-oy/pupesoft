@@ -560,6 +560,8 @@
 												and myyntirivitunnus = 0";
 									$sres = mysql_query($query) or pupe_error($query);
 
+									$myy_sarjatunnus = 0;
+
 									if(mysql_affected_rows() == 1) {
 										//echo "Sarjanumero linkattu tilausriviin!<br>";
 									}
@@ -957,6 +959,30 @@
 			if ($i == 0) {
 				// lapsille oikea perheid
 				$perheid_lisaarivi = $lisatty_tun;
+
+
+				if ($var == "S" and $myy_sarjatunnus > 0 and $trow["tuoteno"] == $alkupera_trow["tuoteno"]) {
+
+					$query = "	SELECT *
+								FROM sarjanumeroseuranta
+								WHERE tunnus	= '$myy_sarjatunnus'
+								and tuoteno		= '$trow[tuoteno]'";
+					$sres = mysql_query($query) or pupe_error($query);
+					$srow = mysql_fetch_array($sres);
+
+					$query = "	INSERT INTO sarjanumeroseuranta
+								SET
+								yhtio				= '$kukarow[yhtio]',
+								tuoteno				= '$trow[tuoteno]',
+								lisatieto			= 'Suoratoimitetaan yhtiöstä: $srow[yhtio]. $srow[lisatieto]',
+								sarjanumero			= '$srow[sarjanumero]',
+								myyntirivitunnus 	= '$lisatty_tun'";
+					$sres = mysql_query($query) or pupe_error($query);
+
+					if(mysql_affected_rows() == 1) {
+						//echo "Sarjanumero linkattu tilausriviin!<br>";
+					}
+				}
 			}
 
 			if (count($puu_tuoteno) > 1 and $laskurow['tila'] != 'O' and $lop == "") {

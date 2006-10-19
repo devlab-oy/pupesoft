@@ -230,8 +230,12 @@ if (!function_exists('rivi')) {
 		}
 		else {
 			///* Otetaan huomioon erikoisalennus *///
-			$ale = round($row["ale"] + $laskurow["erikoisale"] - ($row["ale"] * $laskurow["erikoisale"] / 100),2);
-
+			if (strtoupper($row["netto"]) != 'N') {
+				$ale = round($row["ale"] + $laskurow["erikoisale"] - ($row["ale"] * $laskurow["erikoisale"] / 100),2);
+			}
+			else {
+				$ale = $row["ale"];
+			}
 
 			$rivihinta = $row["hinta"]*$row["varattu"]*(1-($ale/100));
 
@@ -241,7 +245,6 @@ if (!function_exists('rivi')) {
 			else {
 				$riviarvo  = $rivihinta / (1+$row["alv"]/100);
 			}
-
 
 			$summa += $rivihinta;
 			$arvo  += $riviarvo;
@@ -258,7 +261,6 @@ if (!function_exists('rivi')) {
 
 		// Ensimmäinen rivi piirretty
 		$kala = $kala - 10;
-
 
 
 		// Jos ALV no yli 500 niin tiedämme että tämä on marginaaliverotusta
@@ -330,11 +332,11 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(404, 92+$vientikala,  t("Yhteensä", $kieli).":",$firstpage, $norm);
 
 
-		if ($kutsuja == 'proforma') {
-			$summa = sprintf('%-1.2f',round($summa, 2));
+		if ($kutsuja != 'proforma') {
+			$summa = $laskurow["summa"];
 		}
 		else {
-			$summa = $laskurow["summa"];
+			$summa = sprintf('%-1.2f',round($summa, 2));
 		}
 
 		$pdf->draw_text(464, 92+$vientikala,  $laskurow["summa"],		$firstpage, $boldi);
@@ -486,8 +488,6 @@ if (!function_exists('alvierittely')) {
 							FROM tilausrivi
 							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'";
 			}
-
-
 			$aresult = mysql_query($aquery) or pupe_error($aquery);
 			$arow = mysql_fetch_array($aresult);
 
@@ -506,7 +506,7 @@ if (!function_exists('alvierittely')) {
 			$kala -= 10;
 		}
 
-		$pdf->draw_text(360, $kala, t("Lasku Yhteensä", $kieli).":",	$firstpage, $norm);
+		$pdf->draw_text(360, $kala, t("Lasku Yhteensä", $kieli).":",		$firstpage, $norm);
 
 		if ($kutsuja != 'proforma') {
 			$pdf->draw_text(470, $kala, $laskurow["summa"], 				$firstpage, $boldi);
@@ -515,7 +515,7 @@ if (!function_exists('alvierittely')) {
 			$pdf->draw_text(470, $kala, sprintf('%-1.2f',round($summa,2)),	$firstpage, $boldi);
 		}
 
-		$pdf->draw_text(530, $kala, $laskurow["valkoodi"], 				$firstpage, $boldi);
+		$pdf->draw_text(530, $kala, $laskurow["valkoodi"], 					$firstpage, $boldi);
 		$kala -= 10;
 
 		if ($loppumyos == 1) {

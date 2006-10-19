@@ -120,21 +120,29 @@ while (!feof ($fd)) {
 		case 'OSTOTIL.OT_TOIMITTAJANRO':
 		//Tilauksen vastaanottaja
 			$edi_ulos .= t("Tilaus yritykselle")." '" . $tieto .  "' ";
-			$tieto = substr($tieto, 4, 9) * 1;
 
-			// Arwidson häkki Arwidson Baltia varten
-			if ($tieto == 0) $tieto = 1066781;
-			// Arwidson häkki Arwidson Automotivea varten
-			if ($tieto == 1066781) $tieto = 7495288;
-
-			$query = "SELECT * FROM yhtio WHERE ytunnus='$tieto'";
+			$query = "SELECT * FROM yhtio WHERE ovttunnus='$tieto'";
 			$result = mysql_query($query) or die($query);
 
-			if (mysql_num_rows($result) == 0) {
+			if (mysql_num_rows($result) != 1) {
+				// kokeillaan vääntää luvusta ytunnus
+				$tieto = substr($tieto, 4, 9) * 1;
+
+				// Arwidson häkki Arwidson Baltia varten
+				if ($tieto == 0) $tieto = 1066781;
+				// Arwidson häkki Arwidson Automotivea varten
+				if ($tieto == 1066781) $tieto = 7495288;
+
+				$query = "SELECT * FROM yhtio WHERE ytunnus='$tieto'";
+				$result = mysql_query($query) or die($query);
+			}
+
+			if (mysql_num_rows($result) != 1) {
 				$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto'\n";
 				echo $edi_ulos;
 				exit;
 			}
+
 			$yhtiorow = mysql_fetch_array($result);
 
 			$query = "	SELECT *
@@ -603,6 +611,7 @@ while (!feof ($fd)) {
 					// halutaan $tuoteno
 					// $kpl kappaletta
 					// $trow jossa on tuotten tiedot
+					$ytunnus    = $arow["ytunnus"];
 					$hinta 		= "";
 					$netto 		= "";
 					$ale 		= "";

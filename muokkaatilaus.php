@@ -5,6 +5,9 @@
 	if ($toim == "" or $toim == "super") {
 		$otsikko = t("myyntitilausta");
 	}
+	elseif ($toim == "ennakko") {
+		$otsikko = t("ennakkotilausta");
+	}
 	elseif ($toim == "TYOMAARAYS") {
 		$otsikko = t("tyˆm‰‰r‰yst‰");
 	}
@@ -66,7 +69,7 @@
 	if (mysql_num_rows($eresult) != 0 and $toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET") {
 
 		// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-		if ($toim == "" or $toim == "super") {
+		if ($toim == "" or $toim == "super" or $toim == "ennakko") {
 			$aputoim1 = "RIVISYOTTO";
 			$aputoim2 = "PIKATILAUS";
 
@@ -106,7 +109,7 @@
 
 		echo "</select></td>";
 
-		if ($toim == "" or $toim == "super") {
+		if ($toim == "" or $toim == "super" or $toim == "ennakko") {
 			echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
 		}
 
@@ -334,7 +337,7 @@
 			echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
 
 			// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-			if ($toim == "" or $toim == "super" or $toim == "EXTRANET") {
+			if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko") {
 				$aputoim1 = "RIVISYOTTO";
 				$aputoim2 = "PIKATILAUS";
 
@@ -361,7 +364,7 @@
 					<input type='hidden' name='tee' value='AKTIVOI'>
 					<input type='hidden' name='tilausnumero' value='$row[tilaus]'>";
 
-			if ($toim == "" or $toim == "super" or $toim == "EXTRANET") {
+			if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko") {
 				echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
 			}
 

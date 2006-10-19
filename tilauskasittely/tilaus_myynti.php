@@ -1506,7 +1506,13 @@ if ($tee == '') {
 			echo "<br><table>";
 
 			if ($toim != "TYOMAARAYS") {
-				echo "<tr><td class='back' colspan='10'>".t("Tilausrivit").":</td></tr>";
+				if ($toim == "VALMISTAVARASTOON") {
+					echo "<tr><td class='back' colspan='10'>".t("Valmistusrivit").":</td></tr>";
+				}
+				else {
+					echo "<tr><td class='back' colspan='10'>".t("Tilausrivit").":</td></tr>";
+				}
+
 				echo "<tr><th>".t("#")."</th>";
 
 				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {

@@ -30,7 +30,7 @@ $sivu = 1;
 // laskun alku ja loppu functiot...
 if (!function_exists('alku')) {
 	function alku () {
-		global $kutsuja, $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kieli, $boldi;
+		global $yhtiorow, $kukarow, $kutsuja, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kieli, $boldi;
 
 		$firstpage = $pdf->new_page("a4");
 
@@ -130,6 +130,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 729, t("Viivästyskorko", $kieli), 		$firstpage, $pieni);
 		$pdf->draw_text(310, 719, $laskurow["viikorkopros"],	 	$firstpage, $norm);
 		$pdf->draw_text(430, 729, t("Kassa-alennus pvm", $kieli), 	$firstpage, $pieni);
+
 		if ($laskurow["kapvm"] != '0000-00-00') {
 			$pdf->draw_text(430, 719, tv1dateconv($laskurow["kapvm"]), $firstpage, $norm);
 		}
@@ -196,7 +197,7 @@ if (!function_exists('alku')) {
 
 if (!function_exists('rivi')) {
 	function rivi ($firstpage) {
-		global $kutsuja, $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $summa, $arvo, $pieni, $lask, $kieli, $laskurow;
+		global $yhtiorow, $kukarow, $kutsuja, $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $summa, $arvo, $pieni, $lask, $kieli, $laskurow;
 
 		if ($kala <= 180) {
 			$sivu++;
@@ -208,8 +209,8 @@ if (!function_exists('rivi')) {
 			$kala = 540;
 		}
 
-		$rivihinta = 0;
-		$riviarvo  = 0;
+		$rivihinta_veroton = 0;
+		$rivihinta_verolli = 0;
 
 		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,22),	$firstpage, $norm);
 		$pdf->draw_text(190, $kala, $row["tuoteno"], 				$firstpage, $norm);
@@ -221,11 +222,11 @@ if (!function_exists('rivi')) {
 			$pdf->draw_text(290, $kala, $row["varattu"], 			$firstpage, $norm);
 		}
 
+		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
 		$pdf->draw_text(350, $kala, $row["hinta"], 					$firstpage, $norm);
-		$pdf->draw_text(410, $kala, $row["ale"],					$firstpage, $norm);
-
 
 		if ($kutsuja != 'proforma') {
+			$pdf->draw_text(410, $kala, $row["ale"],				$firstpage, $norm);
 			$pdf->draw_text(470, $kala, $row["rivihinta"], 			$firstpage, $norm);
 		}
 		else {
@@ -237,19 +238,26 @@ if (!function_exists('rivi')) {
 				$ale = $row["ale"];
 			}
 
-			$rivihinta = $row["hinta"]*$row["varattu"]*(1-($ale/100));
-
-			if ($row["alv"] >= 500) {
-				$riviarvo  = $rivihinta;
+			if ($yhtiorow["alv_kasittely"] == '') {
+				$rivihinta_veroton = ($row["hinta"]*$row["varattu"]*(1-($ale/100)))  / (1+$row["alv"]/100);
 			}
 			else {
-				$riviarvo  = $rivihinta / (1+$row["alv"]/100);
+				$rivihinta_veroton = $row["hinta"]*$row["varattu"]*(1-($ale/100));
 			}
 
-			$summa += $rivihinta;
-			$arvo  += $riviarvo;
 
-			$pdf->draw_text(470, $kala, sprintf('%-1.2f',round($riviarvo,2)), 	$firstpage, $norm);
+			if ($row["alv"] >= 500) {
+				$rivihinta_verolli  = $rivihinta_veroton;
+			}
+			else {
+				$rivihinta_verolli  = $rivihinta_veroton * (1+$row["alv"]/100);
+			}
+
+			$pdf->draw_text(410, $kala, sprintf('%.2f', $ale),							$firstpage, $norm);
+			$pdf->draw_text(470, $kala, sprintf('%.2f',round($rivihinta_veroton,2)), 	$firstpage, $norm);
+
+			$summa += $rivihinta_verolli;
+			$arvo  += $rivihinta_veroton;
 		}
 
 		if ($row["alv"] >= 500) {
@@ -281,17 +289,17 @@ if (!function_exists('rivi')) {
 
 		$pdf->draw_text(290, $kala, $row["yksikko"],	$firstpage, $pieni);
 
-
-		$row["toimitettuaika"] = substr(tv1dateconv($row["toimitettuaika"]),0,10);
-
-		if ($row["toimitettuaika"] == "0000-00-00") {
-			$row["toimitettuaika"] = "";
+		if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {
+			$pdf->draw_text(350, $kala, tv1dateconv(substr($row["toimitettuaika"],0,10)), 	$firstpage, $pieni);
 		}
 
-		$pdf->draw_text(350, $kala, $row["toimitettuaika"], 	$firstpage, $pieni);
-
 		if ($row["alv"] < 500) {
-			$verollinenhinta = sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100)));
+			if ($kutsuja != 'proforma') {
+				$verollinenhinta = sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100)));
+			}
+			else {
+				$verollinenhinta = sprintf('%.2f', $rivihinta_verolli);
+			}
 
 			$pdf->draw_text(470, $kala, $verollinenhinta, $firstpage, $pieni);
 		}
@@ -307,7 +315,7 @@ if (!function_exists('rivi')) {
 if (!function_exists('loppu')) {
 	function loppu ($firstpage) {
 
-		global $kutsuja, $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi;
+		global $yhtiorow, $kukarow, $kutsuja, $pdf, $laskurow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi;
 
 		$vientikala = 0;
 
@@ -333,14 +341,11 @@ if (!function_exists('loppu')) {
 
 
 		if ($kutsuja != 'proforma') {
-			$summa = $laskurow["summa"];
+			$pdf->draw_text(464, 92+$vientikala,  $laskurow["summa"],					$firstpage, $boldi);
 		}
 		else {
-			$summa = sprintf('%-1.2f',round($summa, 2));
+			$pdf->draw_text(464, 92+$vientikala,  sprintf('%.2f',round($summa, 2)),	$firstpage, $boldi);
 		}
-
-		$pdf->draw_text(464, 92+$vientikala,  $laskurow["summa"],		$firstpage, $boldi);
-
 
 		$pdf->draw_text(550, 92+$vientikala,  $laskurow["valkoodi"],	$firstpage, $boldi);
 
@@ -426,7 +431,7 @@ if (!function_exists('loppu')) {
 
 if (!function_exists('alvierittely')) {
 	function alvierittely ($firstpage, $kala) {
-		global $kutsuja, $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kala, $lask, $kieli, $boldi;
+		global $yhtiorow, $kukarow, $kutsuja, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kala, $lask, $kieli, $boldi;
 
 		if ($lask >= 29) {
 			$sivu++;
@@ -442,13 +447,13 @@ if (!function_exists('alvierittely')) {
 		$pdf->draw_text(360, $kala, t("Veroton arvo yhteensä", $kieli).":", 	$firstpage, $norm);
 
 		if ($kutsuja != 'proforma') {
-			$pdf->draw_text(470, $kala, $laskurow["arvo"], $firstpage, $norm);
+			$pdf->draw_text(470, $kala, $laskurow["arvo"], 						$firstpage, $norm);
 		}
 		else {
-			$pdf->draw_text(470, $kala, sprintf('%.2f',round($arvo,2)), $firstpage, $norm);
+			$pdf->draw_text(470, $kala, sprintf('%.2f',round($arvo,2)), 		$firstpage, $norm);
 		}
 
-		$pdf->draw_text(530, $kala, $laskurow["valkoodi"], 		$firstpage, $norm);
+		$pdf->draw_text(530, $kala, $laskurow["valkoodi"], 						$firstpage, $norm);
 
 
 		if ($kutsuja != 'proforma') {
@@ -479,12 +484,14 @@ if (!function_exists('alvierittely')) {
 							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'";
 			}
 			elseif ($alvrow["alv"] < 500 and $kutsuja != 'proforma') {
-					$aquery = "	SELECT round(sum(rivihinta*(alv/100)),2) alvrivihinta, sum(rivihinta) rivihinta
-								FROM tilausrivi
-								WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'";
+				$aquery = "	SELECT round(sum(rivihinta*(alv/100)),2) alvrivihinta, sum(rivihinta) rivihinta
+							FROM tilausrivi
+							WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'";
 			}
 			else {
-				$aquery = "	SELECT round(sum(hinta/(1+alv/100)*varattu*(1-ale/100)*(alv/100)),2) alvrivihinta, round(sum(hinta/(1+alv/100)*varattu*(1-ale/100)),2) rivihinta
+				$aquery = "	SELECT
+							round(sum(hinta / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * if(netto='N', (1-ale/100), (1-(ale+$laskurow[erikoisale]-(ale*$laskurow[erikoisale]/100))/100)) * (alv/100)),2) alvrivihinta,
+							round(sum(hinta / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * if(netto='N', (1-ale/100), (1-(ale+$laskurow[erikoisale]-(ale*$laskurow[erikoisale]/100))/100))),2) rivihinta
 							FROM tilausrivi
 							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'";
 			}
@@ -512,7 +519,7 @@ if (!function_exists('alvierittely')) {
 			$pdf->draw_text(470, $kala, $laskurow["summa"], 				$firstpage, $boldi);
 		}
 		else {
-			$pdf->draw_text(470, $kala, sprintf('%-1.2f',round($summa,2)),	$firstpage, $boldi);
+			$pdf->draw_text(470, $kala, sprintf('%.2f',round($summa,2)),	$firstpage, $boldi);
 		}
 
 		$pdf->draw_text(530, $kala, $laskurow["valkoodi"], 					$firstpage, $boldi);

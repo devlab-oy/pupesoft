@@ -94,11 +94,11 @@ if ($tee == "tee") {
 	$lisa = ""; /// no hacking
 	if ($try != "")    $lisa .= "and try = '$try'";
 	if ($osasto != "") $lisa .= "and osasto = '$osasto'";
-	
+
 	// haetaan halutut tuotteet
 	$query  = "	SELECT tuoteno, osasto, try, nimitys, kehahin, epakurantti1pvm, epakurantti2pvm
-				FROM tuote 
-				WHERE yhtio = '$kukarow[yhtio]' 
+				FROM tuote
+				WHERE yhtio = '$kukarow[yhtio]'
 				and ei_saldoa = ''
 				$lisa
 				ORDER BY osasto, try, tuoteno";
@@ -131,34 +131,33 @@ if ($tee == "tee") {
 	   $vres = mysql_query($query) or pupe_error($query);
 	   $vrow = mysql_fetch_array($vres);
 	   $vkpl = $vrow["varasto"];
-    
+
 	   // tuotteen muutos varastossa
 	   $query = "	SELECT sum(kpl) muutos
-	   			FROM tapahtuma use index (yhtio_tuote_laadittu) 
+	   			FROM tapahtuma use index (yhtio_tuote_laadittu)
 	   			WHERE yhtio = '$kukarow[yhtio]'
 	   			and tuoteno = '$row[tuoteno]'
-	   			and laji in ('tulo', 'laskutus', 'inventointi')
 	   			and laadittu > '$vv-$kk-$pp 23:59:59'";
 	   $mres = mysql_query($query) or pupe_error($query);
 	   $mrow = mysql_fetch_array($mres);
 	   $mkpl = $mrow["muutos"];
-    
+
 	   // paljon saldo oli
 	   $saldo = $vkpl - $mkpl;
-	   
+
 	   // ei haeta keskihankintahintaa eikä tehä matikkaa jos saldo oli tuolloin nolla... säästetään tehoja!
 		if ($saldo <> 0) {
 
 			$arvo  = 0; // tuotteelta tuleva kehahin
 			$arvo2 = 0; // tapahtumista tuleva kehahin
 			$flag  = 0;
-			
+
 			// jos ollaan annettu tämä päivä niin ei ajeta tätä, koska nykyinen kehahin on oikein ja näin on nopeempaa! wheee!
 			if ($pp != date("d") or $kk != date("m") or $vv != date("Y")) {
 
 				// katotaan mikä oli tuotteen hinta tollon. ensiks näin, koska 2005-05-19 korjattiin yks bugi
 				$query = "	SELECT hinta
-							FROM tapahtuma use index (yhtio_tuote_laadittu) 
+							FROM tapahtuma use index (yhtio_tuote_laadittu)
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$row[tuoteno]'
 							and laadittu < '$vv-$kk-$pp 23:59:59'
@@ -177,15 +176,15 @@ if ($tee == "tee") {
 				else {
 					// katotaan mikä oli tuotteen hinta tollon
 					$query = "	SELECT hinta
-								FROM tapahtuma use index (yhtio_tuote_laadittu) 
+								FROM tapahtuma use index (yhtio_tuote_laadittu)
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$row[tuoteno]'
 								and laadittu < '$vv-$kk-$pp 23:59:59'
-								and laji in ('tulo', 'laskutus', 'inventointi')
+								and hinta <> 0
 								ORDER BY laadittu desc
 								LIMIT 1";
 					$ares = mysql_query($query) or pupe_error($query);
-				   	                	
+
 					if (mysql_num_rows($ares) == 1) {
 						// löydettiin keskihankintahinta tapahtumista
 						$arow = mysql_fetch_array($ares);
@@ -193,18 +192,18 @@ if ($tee == "tee") {
 					}
 				}
 			}
-			
+
 			// katotaan oliko tuote silloin epäkurantti vai ei
 			// verrataan vähän päivämääriä. onpa vittumaista PHP:ssä!
 			list($vv1,$kk1,$pp1) = split("-",$row["epakurantti1pvm"]);
 			list($vv2,$kk2,$pp2) = split("-",$row["epakurantti2pvm"]);
-			
+
 			$epa1 = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 			$epa2 = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
 			$raja = (int) date('Ymd',mktime(0,0,0,$kk, $pp, $vv ));
-			
+
 			$tagi = "";
-			
+
 			if ($row['epakurantti1pvm'] != '0000-00-00' and $epa1 <= $raja) {
 				$row['kehahin'] = $row['kehahin'] / 2;
 				$arvo2 = $arvo2 / 2; // emuloidaan puoliepäkuranttia, koska niitä tapahtumia me ei haeta
@@ -215,11 +214,11 @@ if ($tee == "tee") {
 				$tagi = "!";
 				$arvo2 = 0; // tässä keisissä pitää aina nollata arvo.
 			}
-			
+
 			$arvo = $row["kehahin"];
-			
+
 			if ($arvo2 == 0) $arvo2 = $arvo; // jos tapahtumista ei löydy yhtään lukua, luotetaan tuotteelta saatuun kehahintaan
-			
+
 			// tämä seuraava kikka on vaan sen takia, että tapahtumissa oli bugi epäkuranttien kohdalla joka korjattiin 2005-05-19
 			// jossain vaiheessa tämän voi ottaa pois?? ja hinta queryyn lisätä laji in ryhmään vielä 'Epäkurantti' ja ylhäätä turha tapahtuma query pois
 			if ($arvo != 0 and $flag != 1) {
@@ -230,16 +229,16 @@ if ($tee == "tee") {
 					$arvo2 = $arvo;
 				}
 			}
-			
+
 			// arvo kakkosessa pitäisi olla nyt oikea luku.. käytetään kuitenkin arvoa matikassa. ei ollenkaan sekavaa..
 			$arvo = $arvo2;
-			
+
 			// tämän tuotteen varastonarvo historiasta
 			$apu = $saldo * $arvo;
-			
+
 			// summataan varastonarvoa
 			$varvo = $varvo + $apu;
-			
+
 			if ($naytarivit != "") {
 	   			$ulos .= "$row[osasto]\t";
 	   			$ulos .= "$row[try]\t";
@@ -249,9 +248,9 @@ if ($tee == "tee") {
 	   			$ulos .= str_replace(".",",",$arvo)."\t";
 	   			$ulos .= str_replace(".",",",$apu)."\r\n";
 			}
-			
+
 		} // end saldo
-		
+
 	} // end while
 
 	if ($naytarivit != "") {
@@ -285,12 +284,12 @@ if ($tee == "tee") {
 	if ($virhe > 0) {
 		echo "<font class='message'>Käytettiin $virhe:ssa tuotteessa tämän hetkistä keskihankintahintaa, koska tapahtumista löytynyt hinta vippasi.</font><br><br>";
 	}
-		
+
 	echo "<table>";
 	echo "<tr><th>Pvm</th><th>Varastonarvo</th></tr>";
 	echo "<tr><td>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td></tr>";
 	echo "</table>";
-			
+
 }
 
 require ("../inc/footer.inc");

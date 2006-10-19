@@ -746,9 +746,15 @@ if ($tee == '') {
 		echo "<form action='$PHP_SELF' method='post'>
 			<input type='hidden' name='tee' value='mikrotila'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-			<input type='hidden' name='toim' value='$toim'>
-			<td class='back'><input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'></td>
-			</form>";
+			<input type='hidden' name='toim' value='$toim'>";
+		if ($toim != "VALMISTAVARASTOON") {
+			echo "<td class='back'><input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'></td>";
+		}
+		else {
+			echo "<td class='back'><input type='Submit' value='".t("Lue valmistusrivit tiedostosta")."'></td>";
+		}
+		
+		echo "</form>";
 
 
 		if ($kukarow["extranet"] == "" and $toim == "TARJOUS" and file_exists("osamaksusoppari.inc")) {
@@ -783,16 +789,26 @@ if ($tee == '') {
 	if ($laskurow["liitostunnus"] > 0) { // jos asiakasnumero on annettu
 
 		echo "<tr>";
-		echo "<th align='left'>".t("Asiakas").":</th>";
+		
+		if ($toim == "VALMISTAVARASTOON") {
+			echo "<th align='left'>".t("Varastot").":</th>";
 
-		if ($kukarow["extranet"] == "") {
-			echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$laskurow[ytunnus]'>$laskurow[ytunnus] $laskurow[nimi]</a><br>$laskurow[toim_nimi]</td>";
+			echo "<td>$laskurow[ytunnus] $laskurow[nimi]</td>";
+
+			echo "<th align='left'> </th>";
 		}
 		else {
-			echo "<td>$laskurow[ytunnus] $laskurow[nimi]<br>$laskurow[toim_nimi]</td>";
-		}
+			echo "<th align='left'>".t("Asiakas").":</th>";
 
-		echo "<th align='left'>".t("Toimitustapa").":</th>";
+			if ($kukarow["extranet"] == "") {
+				echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$laskurow[ytunnus]'>$laskurow[ytunnus] $laskurow[nimi]</a><br>$laskurow[toim_nimi]</td>";
+			}
+			else {
+				echo "<td>$laskurow[ytunnus] $laskurow[nimi]<br>$laskurow[toim_nimi]</td>";
+			}
+
+			echo "<th align='left'>".t("Toimitustapa").":</th>";
+		}
 
 		if ($toim != "VALMISTAVARASTOON") {
 
@@ -834,8 +850,13 @@ if ($tee == '') {
 		echo "<input type='text' size='30' name='viesti' value='$laskurow[viesti]'><input type='submit' value='".t("Tallenna")."'></td></tr>\n";
 
 		echo "<tr>";
-		echo "<th>".t("Tilausvahvistus").":</th>";
-
+		if ($toim != "VALMISTAVARASTOON") {
+			echo "<th>".t("Tilausvahvistus").":</th>";
+		}
+		else {
+			echo "<th> </th>";
+		}	
+		
 		if ($toim != "VALMISTAVARASTOON") {
 			$extralisa = "";
 			if ($kukarow["extranet"] != "") {
@@ -866,7 +887,13 @@ if ($tee == '') {
 		}
 
 		if ($kukarow["extranet"] == "") {
-			echo "<th align='left'>".t("Myyjänro").":</th>";
+			if ($toim != "VALMISTAVARASTOON") {
+				echo "<th align='left'>".t("Myyjänro").":</th>";
+			}
+			else {
+				echo "<th align='left'>".t("Laatija").":</th>";
+			}
+			
 			echo "<td><input type='text' name='myyjanro' size='8'> tai ";
 			echo "<select name='myyja' onchange='submit()'>";
 
@@ -943,15 +970,17 @@ if ($tee == '') {
 			// 	echo "<tr><th>".t("Maksuvalmius").":</th><td><font class='$fontcolor'>$maksukuvaus</font></td><th>".t("Avoimet")." / ".t("Limiitti").":</th><td><font class='$fontcolor'>$avoimetlaskut $yhtiorow[valkoodi] / $faktarow[luottoraja] $yhtiorow[valkoodi]</font></td></tr>\n";
 			//
 			// }
+			
+			if ($toim != 'VALMISTAVARASTOON') {
+				echo "<tr><th>".t("Asiakasfakta").":</th><td colspan='3'>";
 
-			echo "<tr><th>".t("Asiakasfakta").":</th><td colspan='3'>";
+				//jos asiakkaalla on luokka K niin se on myyntikiellossa ja siitä herjataan
+				if ($faktarow["luokka"]== 'K') {
+					echo "<font class='error'>".t("HUOM!!!!!! Asiakas on myyntikiellossa")."!!!!!<br></font>";
+				}
 
-			//jos asiakkaalla on luokka K niin se on myyntikiellossa ja siitä herjataan
-			if ($faktarow["luokka"]== 'K') {
-				echo "<font class='error'>".t("HUOM!!!!!! Asiakas on myyntikiellossa")."!!!!!<br></font>";
+				echo "$faktarow[fakta]&nbsp;</td></tr>\n";
 			}
-
-			echo "$faktarow[fakta]&nbsp;</td></tr>\n";
 		}
 		else {
 			echo "</tr>";

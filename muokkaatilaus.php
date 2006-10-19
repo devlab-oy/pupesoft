@@ -8,17 +8,14 @@
 	elseif ($toim == "TYOMAARAYS") {
 		$otsikko = t("työmääräystä");
 	}
-	elseif ($toim == "VALMISTAVARASTOON") {
-		$otsikko = t("varastoonvalmistusta");
+	elseif ($toim == "VALMISTUS") {
+		$otsikko = t("valmistusta");
 	}
 	elseif ($toim == "SIIRTOLISTA") {
 		$otsikko = t("varastosiirtoa");
 	}
 	elseif ($toim == "MYYNTITILI") {
 		$otsikko = t("myyntitiliä");
-	}
-	elseif ($toim == "VALMISTAASIAKKAALLE") {
-		$otsikko = t("asiakkaallevalmistusta");
 	}
 	elseif ($toim == "TARJOUS") {
 		$otsikko = t("tarjousta");
@@ -76,6 +73,13 @@
 			$lisa1 = t("Rivisyöttöön");
 			$lisa2 = t("Pikatilaukseen");
 		}
+		elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
+			$aputoim1 = "VALMISTAASIAKKAALLE";
+			$lisa1 = t("Muokkaa");
+			
+			$aputoim2 = "";
+			$lisa2 = "";
+		}
 		else {
 			$aputoim1 = $toim;
 			$aputoim2 = "";
@@ -118,7 +122,7 @@
 	// Näytetään muuten vaan sopivia tilauksia
 	echo "<br><form action='$PHP_SELF' method='post'>
 			<input type='hidden' name='toim' value='$toim'>
-			<font class='head'>".t("Etsi tilauksia").":<hr></font>
+			<font class='head'>".t("Etsi $otsikko").":<hr></font>
 			".t("Syötä tilausnumero, nimen tai laatijan osa").":
 			<input type='text' name='etsi'>
 			<input type='Submit' value = '".t("Etsi")."'>
@@ -218,23 +222,23 @@
 		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim=='VALMISTUS') {
-		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, luontiaika, laatija, viesti tilausviite, alatila, tila
+		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, luontiaika, laatija, viesti tilausviite, alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='V' and alatila in ('','A','B','J') $haku
 					order by luontiaika desc
 					LIMIT 50";
 
-		$miinus = 2;
+		$miinus = 3;
 		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "VALMISTUSSUPER") {
-		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, luontiaika, laatija, viesti tilausviite, alatila, tila
+		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, luontiaika, laatija, viesti tilausviite, alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='V' and alatila in ('','A','B','C','J') $haku
 					order by luontiaika desc
 					LIMIT 50";
 
-		$miinus = 2;
+		$miinus = 3;
 		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "TYOMAARAYS") {
@@ -336,6 +340,13 @@
 
 				$lisa1 = t("Rivisyöttöön");
 				$lisa2 = t("Pikatilaukseen");
+			}
+			elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
+				$aputoim1 = "VALMISTAASIAKKAALLE";
+				$lisa1 = t("Muokkaa");
+				
+				$aputoim2 = "";
+				$lisa2 = "";
 			}
 			else {
 				$aputoim1 = $toim;

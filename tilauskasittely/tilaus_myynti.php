@@ -47,6 +47,20 @@ if ($tee=='AKTIVOI') {
 		if ($toim == "RIVISYOTTO" and isset($PIKATILAUS)) {
 			$toim = "PIKATILAUS";
 		}
+		elseif ($toim == "VALMISTAASIAKKAALLE" and $tilausnumero != "") {
+			$tyyppiquery = "select tilaustyyppi from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
+			$tyyppiresult = mysql_query($tyyppiquery) or pupe_error($tyyppiquery);
+			if (mysql_num_rows($tyyppiresult) != 0) {
+				$tyyppirow=mysql_fetch_array($tyyppiresult);
+				if (strtoupper($tyyppirow['tilaustyyppi']) == 'W') {
+					$toim = "VALMISTAVARASTOON";
+				}
+			}
+			else {
+				echo "<font class='error'>".t("Tilaus katosi")."!!!</font><br>";
+				$tilausnumero = "";
+			}
+		}
 
 		$kukarow['kesken'] 	 = $tilausnumero;
 		$tee = "";

@@ -187,7 +187,7 @@ if ($tee == "tee") {
 				$alarow    = mysql_fetch_array($result2);
 
 				$varvo = $varvo - $alarow["muutos"];
-				echo "<td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td>"
+				echo "<td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td>";
 	    	}
 			echo "</tr>";
 		}

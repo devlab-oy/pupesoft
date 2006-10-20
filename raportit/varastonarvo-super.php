@@ -131,7 +131,7 @@ if ($tee == "tee") {
 	   $vrow = mysql_fetch_array($vres);
 	   $vkpl = $vrow["varasto"];
 
-	   // tuotteen muutos varastossa
+	   // tuotteen muutos varastossa annetun p‰iv‰n j‰lkeen
 	   $query = "	SELECT sum(kpl) muutos
 		   			FROM tapahtuma use index (yhtio_tuote_laadittu)
 		   			WHERE yhtio = '$kukarow[yhtio]'
@@ -149,9 +149,28 @@ if ($tee == "tee") {
 
 			$arvo = $row["kehahin"]; // tuotteen kehahin
 
+			// katotaan oliko tuote silloin ep‰kurantti vai ei
+			// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
+			list($vv1,$kk1,$pp1) = split("-",$row["epakurantti1pvm"]);
+			list($vv2,$kk2,$pp2) = split("-",$row["epakurantti2pvm"]);
+
+			$epa1 = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
+			$epa2 = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
+			$raja = (int) date('Ymd',mktime(0,0,0,$kk, $pp, $vv ));
+
+			// jos tuote on merkattu puoliep‰kurantiksi, ja se on ajassa ennen meid‰n rajausta puoliettaan arvo
+			if ($row['epakurantti1pvm'] != '0000-00-00' and $epa1 <= $raja) {
+				$arvo = $arvo / 2;
+			}
+
+			// jos tuote on merkattu t‰ysep‰kurantiksi, ja se on ajassa ennen meid‰n rajausta nollataan arvo
+			if ($row['epakurantti2pvm'] != '0000-00-00' and $epa2 <= $raja) {
+				$arvo = 0;
+			}
+
 			// jos ollaan annettu t‰m‰ p‰iv‰ niin ei ajeta t‰t‰, koska nykyinen kehahin on oikein ja n‰in on nopeempaa! wheee!
 			if ($pp != date("d") or $kk != date("m") or $vv != date("Y")) {
-				// katotaan mik‰ oli tuotteen hinta tollon historiassa
+				// katotaan mik‰ oli tuotteen viimeisin hinta annettuna p‰iv‰n‰ tai sitten sit‰ ennen
 				$query = "	SELECT hinta
 							FROM tapahtuma use index (yhtio_tuote_laadittu)
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -163,31 +182,12 @@ if ($tee == "tee") {
 				$ares = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($ares) == 1) {
-					// lˆydettiin keskihankintahinta tapahtumista k‰ytet‰‰n sitˆ
+					// lˆydettiin keskihankintahinta tapahtumista k‰ytet‰‰n sit‰
 					$arow = mysql_fetch_array($ares);
 					$arvo = $arow["hinta"];
 				}
 				else {
 					// echo "Ei lˆydetty kehahintaa tapahtumista <= $vv-$kk-$pp! K‰ytet‰‰n tuotteen $row[tuoteno] nykyist‰ kehahintaa!<br>";
-
-					// katotaan oliko tuote silloin ep‰kurantti vai ei
-					// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
-					list($vv1,$kk1,$pp1) = split("-",$row["epakurantti1pvm"]);
-					list($vv2,$kk2,$pp2) = split("-",$row["epakurantti2pvm"]);
-
-					$epa1 = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
-					$epa2 = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
-					$raja = (int) date('Ymd',mktime(0,0,0,$kk, $pp, $vv ));
-
-					// jos tuote on merkattu puoliep‰kurantiksi, ja se on ajassa ennen meid‰n rajausta puoliettaan arvo
-					if ($row['epakurantti1pvm'] != '0000-00-00' and $epa1 <= $raja) {
-						$arvo = $arvo / 2;
-					}
-
-					// jos tuote on merkattu t‰ysep‰kurantiksi, ja se on ajassa ennen meid‰n rajausta nollataan arvo
-					if ($row['epakurantti2pvm'] != '0000-00-00' and $epa2 <= $raja) {
-						$arvo = 0;
-					}
 				}
 			}
 

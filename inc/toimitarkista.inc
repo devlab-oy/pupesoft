@@ -63,11 +63,19 @@
 		
 		if ($tmp_maakoodi=='FI') {
 
+			$hetu = $ytunnus; // hetu talteen
 			require ("tarkistaytunnus.inc");
 
 			if ($ok==0) {
-				$virhe[$i] = "".t("Virheellinen y-tunnus!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrit_sel2.asp?kielikoodi=1'>".t("täältä")."</a>.";
-				$errori = 1;
+				
+				// katotaan oliko kyseessä hetu
+				require ("tarkistahetu.inc");
+				
+				// ei ollu oikee hetukaan
+				if ($hetuok == 1) {
+					$virhe[$i] = t("Virheellinen ytunnus/hetu!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrit_sel2.asp?kielikoodi=1'>".t("täältä")."</a>.";
+					$errori = 1;
+				}
 			}
 			else {
 				$t[$i] = $ytunnus;

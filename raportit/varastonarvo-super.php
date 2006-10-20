@@ -161,7 +161,7 @@ if ($tee == "tee") {
 
 			// yritetään kaivaa listaan vielä sen hetkinen kehahin jos se halutaan kerran nähdä
 			$kehasilloin = $row["kehahin"] * $kerroin; // nykyinen kehahin
-			$kehalisa = "~"; // laitetaan about merkki failiin jos ei löydetä tapahtumista mitää
+			$kehalisa = "\t~"; // laitetaan about merkki failiin jos ei löydetä tapahtumista mitää
 
 			// jos ollaan annettu tämä päivä niin ei ajeta tätä , koska nykyinen kehahin on oikein ja näin on nopeempaa! wheee!
 			if ($pp != date("d") or $kk != date("m") or $vv != date("Y")) {
@@ -182,6 +182,25 @@ if ($tee == "tee") {
 					$kehasilloin = $arow["hinta"];
 					$kehalisa = "";
 				}
+				else {
+					// ei löydetty alaspäin, kokeillaan kattoo lähin hinta ylöspäin
+					$query = "	SELECT hinta
+								FROM tapahtuma use index (yhtio_tuote_laadittu)
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$row[tuoteno]'
+								and laadittu >= '$vv-$kk-$pp 23:59:59'
+								and hinta <> 0
+								ORDER BY laadittu
+								LIMIT 1";
+					$ares = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($ares) == 1) {
+						// löydettiin keskihankintahinta tapahtumista käytetään
+						$arow = mysql_fetch_array($ares);
+						$kehasilloin = $arow["hinta"];
+						$kehalisa = "\t!";
+					}
+				}
 			}
 
    			$ulos .= "$row[osasto]\t";
@@ -189,8 +208,8 @@ if ($tee == "tee") {
    			$ulos .= "$row[tuoteno]\t";
    			$ulos .= "$row[nimitys]\t";
    			$ulos .= str_replace(".",",",$muutoskpl)."\t";
-   			$ulos .= "$kehalisa ".str_replace(".",",",$kehasilloin)."\t";
-   			$ulos .= str_replace(".",",",$muutoshinta)."\n";
+   			$ulos .= str_replace(".",",",$kehasilloin)."\t";
+   			$ulos .= str_replace(".",",",$muutoshinta)."$kehalisa\n";
 		}
 
 	} // end while

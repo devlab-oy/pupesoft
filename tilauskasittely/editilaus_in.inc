@@ -50,15 +50,16 @@ $loposoite            = "";
 $lopviesti            = "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
-$tuoteerror    = 1; // oletetaan aina ettei  tuotetta löydy
-$tuoteerrortxt = "";
-$kpl           = "";
-$rivinumero    = "";
-$kommentti     = "";
-$tuoteno       = "";
-$olinsapi      = "";
-$olinvarasto   = "";
-$edi_nimitys   = "";
+$tuoteerror      = 1; // oletetaan aina ettei  tuotetta löydy
+$tuoteerrortxt   = "";
+$kpl             = "";
+$rivinumero      = "";
+$kommentti       = "";
+$tuoteno         = "";
+$olinsapi        = "";
+$olinvarasto     = "";
+$edi_nimitys     = "";
+$edi_sarjanumero = "";
 
 // fiilataan parametrejä joita tarvitaan require fileissä
 $tulos_ulos = "edi"; // tää on ftp-send.incissä
@@ -589,6 +590,7 @@ while (!feof ($fd)) {
 			// asiakkaan antama nimitys tuotteelle
 			$type = split("@", $tieto);
 			$edi_nimitys = $type[4]; // rivin neljännessä segmentissä tulee oikee info
+			$edi_sarjanumero = $type[5]; // rivin viidennessä segmentissä tulee tuotteen sarjanumeron tunnus jos asiakas sen tiesi???
 			break;
 
 		case 'OLIN21_QT' :
@@ -660,15 +662,16 @@ while (!feof ($fd)) {
 			}
 
 			// nollataan kaikki rivin muuttujat (nämä samat pitää tehdä filen alussa)
-			$tuoteerror    = 1; // oletetaan aina ettei  tuotetta löydy
-			$tuoteerrortxt = "";
-			$kpl           = "";
-			$rivinumero    = "";
-			$kommentti     = "";
-			$tuoteno       = "";
-			$olinsapi      = "";
-			$olinvarasto   = "";
-			$edi_nimitys   = "";
+			$tuoteerror      = 1; // oletetaan aina ettei  tuotetta löydy
+			$tuoteerrortxt   = "";
+			$kpl             = "";
+			$rivinumero      = "";
+			$kommentti       = "";
+			$tuoteno         = "";
+			$olinsapi        = "";
+			$olinvarasto     = "";
+			$edi_nimitys     = "";
+			$edi_sarjanumero = "";
 
 			break;
 
@@ -755,7 +758,8 @@ while (!feof ($fd)) {
 			$olinsapi             = "";
 			$olinvarasto          = "";
 			$lopviesti            = "";
-
+			$edi_sarjanumero      = "";
+			
 			break;
 	}
 }

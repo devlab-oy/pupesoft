@@ -120,9 +120,13 @@ while (!feof ($fd)) {
 		case 'ICHG_RCPT':
 		case 'OSTOTIL.OT_TOIMITTAJANRO':
 		//Tilauksen vastaanottaja
+			
+			// Arwidson häkki Arwidson Automotivea varten
+			if ($tieto == "003701066781") $tieto = "003707495288";
+		
 			$edi_ulos .= t("Tilaus yritykselle")." '" . $tieto .  "' ";
 
-			$query = "SELECT * FROM yhtio WHERE ovttunnus='$tieto'";
+			$query = "SELECT * FROM yhtio WHERE ovttunnus='$tieto' and ovttunnus != ''";
 			$result = mysql_query($query) or die($query);
 
 			if (mysql_num_rows($result) != 1) {

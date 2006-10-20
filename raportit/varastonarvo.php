@@ -109,7 +109,7 @@ if ($tee == "tee") {
 		$kausi = date("Y-m-d", mktime(0, 0, 0, date("m")-12, 1, date("Y")));
 
 		// tuotteen varastonarvon muutos
-		$query  = "	SELECT date_format(laadittu, '%Y-%m') kausi, sum(kpl*hinta) muutos
+		$query  = "	SELECT date_format(laadittu, '%Y-%m') kausi, sum(kpl*hinta) muutos, date_format(laadittu, '%Y') yy, date_format(laadittu, '%m') mm
 					FROM tuote use index (osasto_try_index)
 					JOIN tapahtuma use index (yhtio_tuote_laadittu)
 					ON tapahtuma.yhtio = tuote.yhtio
@@ -129,7 +129,8 @@ if ($tee == "tee") {
 
 		while ($row = mysql_fetch_array($result)) {
 			$varvo = $varvo - $row["muutos"];
-			echo "<tr><td>$row[kausi]-01</td><td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td><td>arvio</td></tr>";
+			$apukausi = date("Y-m-d", mktime(0, 0, 0, $row["mm"], 0, $row["yy"]));
+			echo "<tr><td>$apukausi</td><td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td><td>arvio</td></tr>";
 		}
 
 		echo "</table>";

@@ -127,48 +127,43 @@ if ($tee == "tee") {
 		   			FROM tuotepaikat use index (tuote_index)
 		   			WHERE yhtio = '$kukarow[yhtio]'
 		   			and tuoteno = '$row[tuoteno]'";
-	   $vres = mysql_query($query) or pupe_error($query);
-	   $vrow = mysql_fetch_array($vres);
-	   $vkpl = $vrow["varasto"];
+		$vres = mysql_query($query) or pupe_error($query);
+		$vrow = mysql_fetch_array($vres);
 
-	   // tuotteen muutos varastossa annetun p‰iv‰n j‰lkeen
-	   $query = "	SELECT sum(kpl) muutos
-		   			FROM tapahtuma use index (yhtio_tuote_laadittu)
-		   			WHERE yhtio = '$kukarow[yhtio]'
-		   			and tuoteno = '$row[tuoteno]'
-		   			and laadittu > '$vv-$kk-$pp 23:59:59'";
-	   $mres = mysql_query($query) or pupe_error($query);
-	   $mrow = mysql_fetch_array($mres);
-	   $mkpl = $mrow["muutos"];
+		// tuotteen muutos varastossa annetun p‰iv‰n j‰lkeen
+		$query = "	SELECT sum(kpl*hinta) muutoshinta, sum(kpl) muutoskpl
+		 			FROM tapahtuma use index (yhtio_tuote_laadittu)
+		 			WHERE yhtio = '$kukarow[yhtio]'
+		 			and tuoteno = '$row[tuoteno]'
+		 			and laadittu > '$vv-$kk-$pp 23:59:59'";
+		$mres = mysql_query($query) or pupe_error($query);
+		$mrow = mysql_fetch_array($mres);
 
-	   // paljon saldo oli
-	   $saldo = $vkpl - $mkpl;
+		// katotaan onko tuote ep‰kurantti nyt
+		$kerroin = 1;
+		if ($row['epakurantti1pvm'] != '0000-00-00') {
+			$kerroin = 0.5;
+		}
+		if ($row['epakurantti2pvm'] != '0000-00-00') {
+			$kerroin = 0;
+		}
 
-	   // ei haeta keskihankintahintaa eik‰ teh‰ matikkaa jos saldo oli tuolloin nolla... s‰‰stet‰‰n tehoja!
-		if ($saldo <> 0) {
+		// arvo historiassa: lasketaan (nykyinen varastonarvo) - muutoshinta
+		$muutoshinta = ($vrow["varasto"] * $row["kehahin"] * $kerroin) - $mrow["muutoshinta"];
 
-			$arvo = $row["kehahin"]; // tuotteen kehahin
+		// saldo historiassa: lasketaan nykyiset kpl - muutoskpl
+		$muutoskpl = $vrow["varasto"] - $mrow["muutoskpl"];
 
-			// katotaan oliko tuote silloin ep‰kurantti vai ei
-			// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
-			list($vv1,$kk1,$pp1) = split("-",$row["epakurantti1pvm"]);
-			list($vv2,$kk2,$pp2) = split("-",$row["epakurantti2pvm"]);
+		// summataan varastonarvoa
+		$varvo += $muutoshinta;
 
-			$epa1 = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
-			$epa2 = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
-			$raja = (int) date('Ymd',mktime(0,0,0,$kk, $pp, $vv ));
+		if ($naytarivit != "" and $muutoskpl != 0) {
 
-			// jos tuote on merkattu puoliep‰kurantiksi, ja se on ajassa ennen meid‰n rajausta puoliettaan arvo
-			if ($row['epakurantti1pvm'] != '0000-00-00' and $epa1 <= $raja) {
-				$arvo = $arvo / 2;
-			}
+			// yritet‰‰n kaivaa listaan viel‰ sen hetkinen kehahin jos se halutaan kerran n‰hd‰
+			$kehasilloin = $row["kehahin"] * $kerroin; // nykyinen kehahin
+			$kehalisa = "~"; // laitetaan about merkki failiin jos ei lˆydet‰ tapahtumista mit‰‰
 
-			// jos tuote on merkattu t‰ysep‰kurantiksi, ja se on ajassa ennen meid‰n rajausta nollataan arvo
-			if ($row['epakurantti2pvm'] != '0000-00-00' and $epa2 <= $raja) {
-				$arvo = 0;
-			}
-
-			// jos ollaan annettu t‰m‰ p‰iv‰ niin ei ajeta t‰t‰, koska nykyinen kehahin on oikein ja n‰in on nopeempaa! wheee!
+			// jos ollaan annettu t‰m‰ p‰iv‰ niin ei ajeta t‰t‰ , koska nykyinen kehahin on oikein ja n‰in on nopeempaa! wheee!
 			if ($pp != date("d") or $kk != date("m") or $vv != date("Y")) {
 				// katotaan mik‰ oli tuotteen viimeisin hinta annettuna p‰iv‰n‰ tai sitten sit‰ ennen
 				$query = "	SELECT hinta
@@ -182,32 +177,21 @@ if ($tee == "tee") {
 				$ares = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($ares) == 1) {
-					// lˆydettiin keskihankintahinta tapahtumista k‰ytet‰‰n sit‰
+					// lˆydettiin keskihankintahinta tapahtumista k‰ytet‰‰n
 					$arow = mysql_fetch_array($ares);
-					$arvo = $arow["hinta"];
-				}
-				else {
-					// echo "Ei lˆydetty kehahintaa tapahtumista <= $vv-$kk-$pp! K‰ytet‰‰n tuotteen $row[tuoteno] nykyist‰ kehahintaa!<br>";
+					$kehasilloin = $arow["hinta"];
+					$kehalisa = "";
 				}
 			}
 
-			// t‰m‰n tuotteen varastonarvo historiasta
-			$apu = $saldo * $arvo;
-
-			// summataan varastonarvoa
-			$varvo += $apu;
-
-			if ($naytarivit != "") {
-	   			$ulos .= "$row[osasto]\t";
-	   			$ulos .= "$row[try]\t";
-	   			$ulos .= "$row[tuoteno]\t";
-	   			$ulos .= "$row[nimitys]\t";
-	   			$ulos .= str_replace(".",",",$saldo)."\t";
-	   			$ulos .= str_replace(".",",",$arvo)."\t";
-	   			$ulos .= str_replace(".",",",$apu)."\n";
-			}
-
-		} // end saldo
+   			$ulos .= "$row[osasto]\t";
+   			$ulos .= "$row[try]\t";
+   			$ulos .= "$row[tuoteno]\t";
+   			$ulos .= "$row[nimitys]\t";
+   			$ulos .= str_replace(".",",",$muutoskpl)."\t";
+   			$ulos .= "$kehalisa ".str_replace(".",",",$kehasilloin)."\t";
+   			$ulos .= str_replace(".",",",$muutoshinta)."\n";
+		}
 
 	} // end while
 

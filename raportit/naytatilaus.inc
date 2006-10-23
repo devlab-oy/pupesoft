@@ -2,7 +2,7 @@
     ///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
 
-
+	$lis = "";
 	if ($kukarow["extranet"] != '') {
 		$lis = " and liitostunnus = '$kukarow[oletus_asiakas]' ";
 	}

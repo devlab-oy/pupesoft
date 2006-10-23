@@ -143,7 +143,7 @@
 					ORDER BY luontiaika";
 
 		// päivänäkymä
-		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta, 
+		$query2 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
@@ -319,13 +319,6 @@
 
 			list ($pp,$kk,$vv) = explode(".", $row["pvm"],3);
 
-			echo "<form method='post' action='$PHP_SELF'>";
-			echo "<input type='hidden' name='tee' value='$teemita'>";
-			echo "<input type='hidden' name='pp' value='$pp'>";
-			echo "<input type='hidden' name='kk' value='$kk'>";
-			echo "<input type='hidden' name='vv' value='$vv'>";
-			echo "<input type='hidden' name='toim' value='$toim'>";
-			echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 			echo "<tr>";
 
 			for ($i = 0; $i < mysql_num_fields($result); $i++) {
@@ -335,13 +328,35 @@
 			$arvo  += $row["arvo"];
 			$summa += $row["summa"];
 
+			// jos ollaan muussa tilassa ku tilausnäkymässä tehdää näytä nappi
 			if ($tee != "tilaus") {
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee' value='$teemita'>";
+				echo "<input type='hidden' name='pp' value='$pp'>";
+				echo "<input type='hidden' name='kk' value='$kk'>";
+				echo "<input type='hidden' name='vv' value='$vv'>";
+				echo "<input type='hidden' name='toim' value='$toim'>";
+				echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 				echo "<td class='back'><input type='submit' value='".t("Näytä")."'></td>";
+				echo "</form>";
+			}
+
+			// katotaan löytyykö oikeuksia vaihda_tilaan...
+			$oikeuquery = "select * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi like '%vaihda_tila.php'";
+			$apuoikeures = mysql_query($oikeuquery) or pupe_error($oikeuquery);
+
+			// jos kyseessä on myyntitilaus, ollaan päivänäkymässä ja meillä on oikeudet, niin tehdään tällänenki nappula
+			if ($toim == "MYYNTI" and $tee == "paiva" and mysql_num_rows($apuoikeures) > 0) {
+				echo "<form method='post' action='vaihda_tila.php'>";
+				echo "<input type='hidden' name='parametrit' value='$teemita#$pp#$kk#$vv#$toim'>";
+				echo "<input type='hidden' name='tee' value='valitse'>";
+				echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
+				echo "<td class='back'><input type='submit' value='".t("Vaihda tila")."'></td>";
+				echo "</form>";
 			}
 
 			echo "</tr>";
 
-			echo "</form>";
 
 		}
 

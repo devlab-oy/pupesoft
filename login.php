@@ -175,10 +175,10 @@ if ($usea=='1') {
 		echo "<input type='hidden' name='yhtio'    value='$yrow[yhtio]'>";
 		echo "<td><input type='submit' value='".t("Valitse")."'></td></tr></form>";
 	}
-	echo "</table>";
+	echo "</table><br>";
 
 	if ($errormsg != "") {
-		echo "<br><font class='error'>$errormsg</font><br><br>";
+		echo "<font class='error'>$errormsg</font><br><br>";
 	}
 	echo "<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>";
 }

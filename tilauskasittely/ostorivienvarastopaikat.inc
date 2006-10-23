@@ -70,13 +70,13 @@ if ($tee == "valmis") {
 
 				if (mysql_num_rows($aresult) == 0) {
 					$oletus='X';
-					echo t("oletus")."<br>";
+					//echo t("oletus")."<br>";
 				}
 				else {
 					$oletus='';
 				}
 
-				if ($t1[$tunnus] != '' and $t2[$tunnus] != '' and $t3[$tunnus] != '') {
+				if ($t1[$tunnus] != '' and $t2[$tunnus] != '') {
 					//dubbelchekataan, ettei nyt varmasti mene duplikaattina mit‰‰n paikkaa
 					$query = "	SELECT tuoteno
 								FROM tuotepaikat
@@ -128,7 +128,7 @@ if ($tee == "valmis") {
 					}
 				}
 				else {
-					//echo t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhj‰‰ varastopaikkaa")."!<br>";
+					echo t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhj‰‰ varastopaikkaa")."!<br>";
 				}
 			}
 			else {

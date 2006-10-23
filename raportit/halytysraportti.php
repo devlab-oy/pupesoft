@@ -378,18 +378,27 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	$yhtiot 	= "";
 	$konsyhtiot = "";
 	
-	while ($prow = mysql_fetch_array($presult)) {				
-		if ($valitut["YHTIO##$prow[yhtio]"] == "YHTIO##".$prow["yhtio"]) {
-			$yhtiot .= "'".$prow["yhtio"]."',";
+	if (mysql_num_rows($presult) > 0) {
+		while ($prow = mysql_fetch_array($presult)) {				
+			if ($valitut["YHTIO##$prow[yhtio]"] == "YHTIO##".$prow["yhtio"]) {
+				$yhtiot .= "'".$prow["yhtio"]."',";
+			}
+			$konsyhtiot .= "'".$prow["yhtio"]."',";
 		}
-		$konsyhtiot .= "'".$prow["yhtio"]."',";
+
+		$yhtiot = substr($yhtiot,0,-1);
+		$yhtiot = " yhtio in ($yhtiot) ";
+
+		$konsyhtiot = substr($konsyhtiot,0,-1);
+		$konsyhtiot = " yhtio in ($konsyhtiot) ";
 	}
-	
-	$yhtiot = substr($yhtiot,0,-1);
-	$yhtiot = " yhtio in ($yhtiot) ";
-	
-	$konsyhtiot = substr($konsyhtiot,0,-1);
-	$konsyhtiot = " yhtio in ($konsyhtiot) ";
+	else {
+		$yhtiot = "'".$kukarow["yhtio"]."'";
+		$yhtiot = " yhtio in ($yhtiot) ";
+		
+		$konsyhtiot = "'".$kukarow["yhtio"]."'";
+		$konsyhtiot = " yhtio in ($konsyhtiot) ";
+	}
 	
 	//Katsotaan valitut varastot
 	$query = "	SELECT *
@@ -1423,40 +1432,46 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 	$konsyhtiot = "";
 	$vlask 		= 0;
 	
-	while ($prow = mysql_fetch_array($presult)) {
+	if (mysql_num_rows($presult) > 0) {
+		while ($prow = mysql_fetch_array($presult)) {
 		
-		$query = "	SELECT selitetark
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' 
-					and laji	= 'HALYRAP' 
-					and selite	= '$rappari' 
-					and selitetark = 'YHTIO##$prow[yhtio]'";
-		$sresult = mysql_query($query) or pupe_error($query);
-		$srow = mysql_fetch_array($sresult);
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and laji	= 'HALYRAP' 
+						and selite	= '$rappari' 
+						and selitetark = 'YHTIO##$prow[yhtio]'";
+			$sresult = mysql_query($query) or pupe_error($query);
+			$srow = mysql_fetch_array($sresult);
 		
-		$chk = "";
-		if (("YHTIO##".$prow["yhtio"] == $srow["selitetark"] and $tee == "JATKA") or $valitut["YHTIO##$prow[yhtio]"] != '' or $prow["yhtio"] == $kukarow["yhtio"]) {
-			$chk = "CHECKED";
-			$yhtiot .= "'".$prow["yhtio"]."',";
-		}
+			$chk = "";
+			if (("YHTIO##".$prow["yhtio"] == $srow["selitetark"] and $tee == "JATKA") or $valitut["YHTIO##$prow[yhtio]"] != '' or $prow["yhtio"] == $kukarow["yhtio"]) {
+				$chk = "CHECKED";
+				$yhtiot .= "'".$prow["yhtio"]."',";
+			}
 		
-		if ($vlask == 0) {
-			echo "<tr><th>Huomioi yhtiön myynnit:</th>";
-		}
-		else {
-			echo "<tr><td class='back'></td>";
-		}
+			if ($vlask == 0) {
+				echo "<tr><th>Huomioi yhtiön myynnit:</th>";
+			}
+			else {
+				echo "<tr><td class='back'></td>";
+			}
 		
-		echo "<td colspan='3'><input type='checkbox' name='valitut[YHTIO##$prow[yhtio]]' value='YHTIO##$prow[yhtio]' $chk onClick='submit();'> $prow[nimi]</td></tr>";
+			echo "<td colspan='3'><input type='checkbox' name='valitut[YHTIO##$prow[yhtio]]' value='YHTIO##$prow[yhtio]' $chk onClick='submit();'> $prow[nimi]</td></tr>";
 	
-		$konsyhtiot .= "'".$prow["yhtio"]."',";
-		$vlask++;
+			$konsyhtiot .= "'".$prow["yhtio"]."',";
+			$vlask++;
+		}
+	
+		$yhtiot = substr($yhtiot,0,-1);
+		$konsyhtiot = substr($konsyhtiot,0,-1);
+		
+		echo "	<tr><td class='back'><br></td></tr>";
 	}
-	
-	$yhtiot = substr($yhtiot,0,-1);
-	$konsyhtiot = substr($konsyhtiot,0,-1);
-		
-	echo "	<tr><td class='back'><br></td></tr>";
+	else {
+		$yhtiot = "'".$kukarow['yhtio']."'";
+		$konsyhtiot = "'".$kukarow['yhtio']."'";
+	}
 		
 	//Ajetaanko varastopaikoittain
 	$query = "	SELECT selitetark

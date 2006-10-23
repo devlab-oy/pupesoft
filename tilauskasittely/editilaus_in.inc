@@ -60,6 +60,7 @@ $olinsapi        = "";
 $olinvarasto     = "";
 $edi_nimitys     = "";
 $edi_sarjanumero = "";
+$edi_hinta       = "";
 
 // fiilataan parametrejä joita tarvitaan require fileissä
 $tulos_ulos = "edi"; // tää on ftp-send.incissä
@@ -120,10 +121,10 @@ while (!feof ($fd)) {
 		case 'ICHG_RCPT':
 		case 'OSTOTIL.OT_TOIMITTAJANRO':
 		//Tilauksen vastaanottaja
-			
+
 			// Arwidson häkki Arwidson Automotivea varten
 			if ($tieto == "003701066781") $tieto = "003707495288";
-		
+
 			$edi_ulos .= t("Tilaus yritykselle")." '" . $tieto .  "' ";
 
 			$query = "SELECT * FROM yhtio WHERE ovttunnus='$tieto' and ovttunnus != ''";
@@ -597,6 +598,12 @@ while (!feof ($fd)) {
 			$edi_sarjanumero = $type[5]; // rivin viidennessä segmentissä tulee tuotteen sarjanumeron tunnus jos asiakas sen tiesi???
 			break;
 
+		case 'OLINCONIV' :
+			// asiakkaan antama hinta tuotteelle
+			$type = split(" ", $tieto);
+			$edi_hinta = abs($type[0]);
+			break;
+
 		case 'OLIN21_QT' :
 		case 'OSTOTILRIV.OTR_TILATTUMAARA' :
 			//Tilattava määrä
@@ -611,7 +618,7 @@ while (!feof ($fd)) {
 
 			if ($editilaus_otsikko_ok == "KYLLA") {
 
-		 	// jos tuote on löytynyt ok
+		 		// jos tuote on löytynyt ok
 				if ($tuoteerror == 0) {
 
 					// halutaan $tuoteno
@@ -635,9 +642,35 @@ while (!feof ($fd)) {
 						$kommentti = "$olinsapi#$edi_nimitys";
 					}
 
+					// jos meillä on sarjanumero ja hinta tiedossa niin uskalletaan luottaa asiakkaan antamaan hintaan
+					if ($edi_sarjanumero != "" and $edi_hinta != "") {
+						$hinta = $edi_hinta;
+					}
+
 					$kutsuja = "EDITILAUS";
 
 					require ("lisaarivi.inc");
+
+					// jos meillä on tiedossa tuotteen sarjanumero, lisätään se
+					if ($edi_sarjanumero != "") {
+						// etsitään sarjanumero
+						$sarjaquery = "select * from sarjanumeroseuranta where tunnus='$edi_sarjanumero'";
+						$sarjaresult = mysql_query($sarjaquery) or pupe_error($sarjaquery);
+
+						if (mysql_num_rows($sarjaresult) == 1) {
+
+							$sarjarow = mysql_fetch_array($sarjaresult);
+
+							// liitetään tämä myyntirivi siihen kiinni (lisäärivi palauttaa $lisatty_tun)
+							$query = "	INSERT INTO sarjanumeroseuranta SET
+										yhtio				= '$kukarow[yhtio]',
+										tuoteno				= '$sarjarow[tuoteno]',
+										lisatieto			= 'Suoratoimitustilaus $arow[nimi] --> $tnimi',
+										sarjanumero			= '$sarjarow[sarjanumero]',
+										myyntirivitunnus 	= '$lisatty_tun'";
+							$sres = mysql_query($query) or pupe_error($query);
+						}
+					}
 
 					$edi_ulos .= "\n";
 
@@ -676,6 +709,7 @@ while (!feof ($fd)) {
 			$olinvarasto     = "";
 			$edi_nimitys     = "";
 			$edi_sarjanumero = "";
+			$edi_hinta       = "";
 
 			break;
 
@@ -763,7 +797,8 @@ while (!feof ($fd)) {
 			$olinvarasto          = "";
 			$lopviesti            = "";
 			$edi_sarjanumero      = "";
-			
+			$edi_hinta            = "";
+
 			break;
 	}
 }

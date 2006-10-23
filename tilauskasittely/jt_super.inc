@@ -90,7 +90,8 @@
 
 						//tilausnumerot talteen, n‰m‰ pit‰‰ sitten lopuks l‰hett‰‰ ja merkata valmiiks
 						if (!in_array($tunnus, $superostot)) $superostot[] = $tunnus;
-						
+
+						// katotaan mik‰ varasto on kysess‰ mist‰ halutaan tilata, niin laitetaan se hyllyalue kentt‰‰n
 						$varastoquery = "select tunnus
 									from varastopaikat
 									where yhtio = '$tiltoi[tyyppi_tieto]'
@@ -98,12 +99,34 @@
 									and concat(rpad(upper('$rivi[hyllyalue]') ,3,'0'),lpad('$rivi[hyllynro]' ,2,'0')) <= concat(rpad(upper(loppuhyllyalue) ,3,'0'),lpad(loppuhyllynro ,2,'0'))";
 						$varastoresult = mysql_query($varastoquery) or pupe_error($varastoquery);
 						$varastoro = mysql_fetch_array($varastoresult);
-						
+
+						// katotaan onko t‰m‰ myyntirivi tunnus linkattu johonkin sarjanumeroon
+						$sarjaquery = "select * from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and myyntirivitunnus='$rivi[tunnus]'";
+						$sarjaresult = mysql_query($sarjaquery) or pupe_error($sarjaquery);
+
+						// jos lˆydettiin sarjanumero, niin laitetaan se kommenttiin..
+						if (mysql_num_rows($sarjaresult) == 1) {
+							$sarjarow = mysql_fetch_array($sarjaresult);
+							$sarjacomment = "$sarjarow[tunnus]";
+						}
+						else {
+							$sarjacomment = "";
+						}
+
 						// lis‰t‰‰n ostotilausrivi
 						$query = "	insert into tilausrivi
-									(tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
-									('$rivi[tuoteno]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O','$varastoro[tunnus]','0','0','0','$rivi[tunnus]')";
+									(tuoteno, hinta, tilkpl, varattu, otunnus, yhtio, tyyppi, kommentti, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
+									('$rivi[tuoteno]', '$rivi[hinta]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O', '$sarjacomment', '$varastoro[tunnus]','0','0','0','$rivi[tunnus]')";
 						$updre = mysql_query($query) or pupe_error($query);
+						$rivitunnus = (string) mysql_insert_id();
+
+						// jos lˆydettiin sarjanumero, niin linkataan nyt sitte t‰m‰ ostorivi sarjanumeroon
+						if (mysql_num_rows($sarjaresult) == 1) {
+							$query = "	UPDATE sarjanumeroseuranta
+										SET	ostorivitunnus = '$rivitunnus'
+										WHERE tunnus='$sarjarow[tunnus]'";
+							$sres = mysql_query($query) or pupe_error($query);
+						}
 
 						$supercommentti .= "$tiltoi[nimi] - $rivi[tuoteno] $rivi[jt] kpl\n";
 

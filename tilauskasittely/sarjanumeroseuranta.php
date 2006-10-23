@@ -129,7 +129,7 @@ if ($toiminto == 'lisaa' and $sarjanumero != "") {
 // ollaan valittu joku tunnus listasta ja halutaan liitt‰‰ se tilausriviin tai poistaa se tilausrivilt‰
 if ($rivitunnus != "" and $formista == "kylla") {
 	// jos olemme ruksanneet v‰hemm‰n tai yht‰paljon kuin tuotteita on rivill‰, voidaan p‰ivitt‰‰ muutokset
-	if ($rivirow["varattu"] >= count($sarjat)) {
+	if ($rivirow["varattu"]+$rivirow["jt"] >= count($sarjat)) {
 
 		// poistetaan t‰‰ rivi kaikilta muilta sarjanumeroilta
 		$query = "update sarjanumeroseuranta set $tunnuskentta='' WHERE yhtio='$kukarow[yhtio]' and $tunnuskentta='$rivitunnus'";
@@ -167,7 +167,7 @@ if ($rivitunnus != "" and $formista == "kylla") {
 		}
 	}
 	else {
-		echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).".</font><br><br>";
+		echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"]+$rivirow["jt"])).".</font><br><br>";
 	}
 }
 

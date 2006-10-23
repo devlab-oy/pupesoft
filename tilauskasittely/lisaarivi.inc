@@ -960,7 +960,6 @@
 				// lapsille oikea perheid
 				$perheid_lisaarivi = $lisatty_tun;
 
-
 				if ($var == "S" and $myy_sarjatunnus > 0 and $trow["tuoteno"] == $alkupera_trow["tuoteno"]) {
 
 					$query = "	SELECT *
@@ -970,6 +969,7 @@
 					$sres = mysql_query($query) or pupe_error($query);
 					$srow = mysql_fetch_array($sres);
 
+					// jos syötetään sarjanumertollinen tuote suoratoimitukseen niin liitetään tämä myyntirivi siihen kiinni
 					$query = "	INSERT INTO sarjanumeroseuranta
 								SET
 								yhtio				= '$kukarow[yhtio]',
@@ -979,7 +979,7 @@
 								myyntirivitunnus 	= '$lisatty_tun'";
 					$sres = mysql_query($query) or pupe_error($query);
 
-					if(mysql_affected_rows() == 1) {
+					if (mysql_affected_rows() == 1) {
 						//echo "Sarjanumero linkattu tilausriviin!<br>";
 					}
 				}

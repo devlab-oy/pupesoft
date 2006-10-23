@@ -1893,7 +1893,7 @@ if ($tee == '') {
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 
-					if ($sarjarow["kpl"] == abs($row["varattu"])) {
+					if ($sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
 						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&myyntirivitunnus=$row[tunnus]&from=$toim' style='color:00FF00'>sarjanro OK</font></a>)";
 					}
 					else {

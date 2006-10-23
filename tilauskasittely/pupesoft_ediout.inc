@@ -56,14 +56,14 @@ if (!function_exists("dateconv")) {
 $plkulsa = "";
 if ($kukarow["extranet"] == "") {
 	$plkulsa = "../";
-} 
+}
 
 $nimi = $plkulsa."dataout/pupesoft-order-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 
 if (!$toot = fopen($nimi, "w")) die("Filen $nimi luonti epäonnistui!");
 
-$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika, 
-			tilausrivi.hyllyalue
+$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausrivi.tuoteno, round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) varattu, toimaika,
+			tilausrivi.hyllyalue, kommentti, hinta
 			FROM tilausrivi
 			LEFT JOIN tuote USING (yhtio, tuoteno)
 			LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
@@ -117,11 +117,18 @@ else {
 		$ulos .= "OLINSTART:$tilausrivirow[tunnus]\n";				// Meidän ostotilauksen rivinumero
 		$ulos .= "OLINSA_NU:$tilausrivirow[toim_tuoteno]\n";		// Tilattava tuotenumero
 		$ulos .= "OLIN21_QT:$tilausrivirow[varattu]\n";				// Tilattava määrä ja yksikkö (yksikkö ei pakollinen)
-		
+
+		// kolmanteen segmenttiin varaston tunnus jos se tiedetään
 		if ($tilausrivirow['hyllyalue'] != '') {
-			$ulos .= "OLINSA_PI:@@$tilausrivirow[hyllyalue]\n";	//@@hashillä varaston tunnus
+			$ulos .= "OLINSA_PI:@@$tilausrivirow[hyllyalue]\n";
 		}
-		
+
+		// viidenteen segmenttiin menee sarjanumeron tunnus jos se tiedetään, lisätään myös tässä keisissä riville mukaan tuotteen hinta koska vastaanottaja luottaa meihin
+		if ($tilausrivirow['kommentti'] != '') {
+			$ulos .= "OLIN8__IF:@@@@@$tilausrivirow[kommentti]\n";
+			$ulos .= "OLINCONIV:" . sprintf("%015.2f", (float) $tilausrivirow['hinta'])."\n";
+		}
+
 		$ulos .= "OLIN__END:$tilausrivirow[tunnus]\n";				// Tilausrivi loppuu
 	}
 

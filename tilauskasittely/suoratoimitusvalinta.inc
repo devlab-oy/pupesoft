@@ -3,6 +3,7 @@
 	//Tarvitsemme parametrin‰
 	//$suora_tuoteno jossa on k‰sitelt‰v‰ tuotenumero
 	//$suora_kpl jossa on tilattava m‰‰r‰
+	//$row jossa on tilausrivi kaikki tiedot
 
 	$suoratoim_array = array();
 

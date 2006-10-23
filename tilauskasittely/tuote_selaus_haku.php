@@ -83,27 +83,29 @@
 			if (is_array($tilsarjatunnus)) {
 				foreach ($tilsarjatunnus as  $yht_i => $sarjatunnus) {
 					//Haetaan sarjanumeron ja siihen liitettyjen sarjanumeroiden kaikki tiedot.
-					$query = "	SELECT perheid, yhtio
+					$query = "	SELECT *
 								FROM sarjanumeroseuranta
 								WHERE tunnus = '$sarjatunnus' and perheid != 0";
 					$sarres = mysql_query($query) or pupe_error($query);
 
-					while($sarrow = mysql_fetch_array($sarres)) {
+					if (mysql_num_rows($sarres) > 0) {
+						$sarrow = mysql_fetch_array($sarres);
+
 						$query = "	SELECT tuoteno, tunnus
 									FROM sarjanumeroseuranta
 									WHERE yhtio = '$sarrow[yhtio]'
 									and perheid = '$sarrow[perheid]'
-									and tunnus != '$sarjatunnus'";
+									and tunnus != '$sarrow[tunnus]'";
 						$sarres1 = mysql_query($query) or pupe_error($query);
-						$sarrow1 = mysql_fetch_array($sarres1);
 
+						while($sarrow1 = mysql_fetch_array($sarres1)) {
+							$yht_i_max = count($yht_i)+1;
 
-						$yht_i_max = count($yht_i)+1;
-
-						$tiltuoteno[$yht_i_max]		= $sarrow1["tuoteno"];
-						$tilkpl[$yht_i_max]			= 1;
-						$tilsarjatunnus[$yht_i_max]	= $sarrow1["tunnus"];
-						$tilpaikka[$yht_i_max]		= $tilpaikka[$yht_i];
+							$tiltuoteno[$yht_i_max]		= $sarrow1["tuoteno"];
+							$tilkpl[$yht_i_max]			= 1.00;
+							$tilsarjatunnus[$yht_i_max]	= $sarrow1["tunnus"];
+							$tilpaikka[$yht_i_max]		= $tilpaikka[$yht_i];
+						}
 					}
 				}
 			}

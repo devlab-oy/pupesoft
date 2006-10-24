@@ -406,23 +406,22 @@
 
 							while ($krow  = mysql_fetch_array($kres2)) {
 
-
 								// katotaan ennakkopoistot toimittavalta yritykseltä
 								$query = "	select sum(varattu) varattu
 											from tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 											where yhtio='$krow[yhtio]' and
 											tyyppi='L' and
-											varattu<>0 and
+											varattu>0 and
 											tuoteno='$tuoteno'
-											and concat(rpad(upper(hyllyalue) ,3,'0'),lpad(hyllynro ,2,'0')) >= concat(rpad(upper('$krow[alkuhyllyalue]') ,3,'0'),lpad('$krow[alkuhyllynro]' ,2,'0'))
-											and concat(rpad(upper(hyllyalue) ,3,'0'),lpad(hyllynro ,2,'0')) <= concat(rpad(upper('$krow[loppuhyllyalue]') ,3,'0'),lpad('$krow[loppuhyllynro]' ,2,'0'))";
+											and concat(rpad(upper(hyllyalue), 3, '0'),lpad(hyllynro, 2, '0')) >= concat(rpad(upper('$krow[alkuhyllyalue]'),  3, '0'),lpad(upper('$krow[alkuhyllynro]'),  2, '0'))
+											and concat(rpad(upper(hyllyalue), 3, '0'),lpad(hyllynro, 2, '0')) <= concat(rpad(upper('$krow[loppuhyllyalue]'), 3, '0'),lpad(upper('$krow[loppuhyllynro]'), 2, '0'))";
 								$krtre = mysql_query($query) or pupe_error($query);
 								$krtur = mysql_fetch_array($krtre);
 
 								// sitten katotaan ollaanko me jo varattu niitä JT rivejä toimittajalta
 								$query =	"select sum(jt) varattu
 											from tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-											where yhtio='$kukarow[yhtio]' and tyyppi='L' and laskutettuaika='0000-00-00'
+											where yhtio='$kukarow[yhtio]' and tyyppi='L' and laskutettuaika='0000-00-00' and var='S'
 											and tuoteno='$tuoteno' and tilaajanrivinro='$superrow[liitostunnus]'
 											and hyllyalue = '$krow[hyllyalue]' and hyllynro = '$krow[hyllynro]' and hyllyvali = '$krow[hyllyvali]' and hyllytaso = '$krow[hyllytaso]'";
 								$krtre = mysql_query($query) or pupe_error($query);

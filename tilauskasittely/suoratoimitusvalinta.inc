@@ -32,7 +32,7 @@
 	// K‰‰yd‰‰n l‰pi suoratoimittajan paikat
 	while ($superrow = mysql_fetch_array($superjtres)) {
 
-		$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso, 
+		$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso,
 					if(varastopaikat.maa = '$yhtiorow[maakoodi]', 1,2) as sorttaus, sum(saldo) saldo, varastopaikat.maa varastomaa
 					from tuotepaikat
 					join yhtio on yhtio.yhtio=tuotepaikat.yhtio
@@ -45,7 +45,7 @@
 					group by 1,2,3,4
 					order by sorttaus, varastopaikat.nimitys";
 		$kres2  = mysql_query($query) or pupe_error($query);
-		
+
 		while ($krow  = mysql_fetch_array($kres2)) {
 
 			// katotaan ennakkopoistot toimittavalta yritykselt‰
@@ -64,6 +64,7 @@
 						where yhtio			= '$kukarow[yhtio]'
 						and tyyppi			= 'L'
 						and laskutettuaika	= '0000-00-00'
+						and var				= 'S'
 						and tuoteno			= '$superrow[toim_tuoteno]'
 						and tilaajanrivinro	= '$superrow[liitostunnus]'
 						and hyllyalue 		= '$krow[hyllyalue]'

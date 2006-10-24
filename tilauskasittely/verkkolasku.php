@@ -82,6 +82,10 @@
 		require ("../inc/parametrit.inc");
 	}
 
+	//HUOMHUOM!!
+	$query = "SET SESSION group_concat_max_len = 100000, max_allowed_packet = 2095104";
+	$result = mysql_query($query) or pupe_error($query);
+
 	//Nollataan muuttujat
 	$tulostettavat = array();
 	$tulos_ulos = "";

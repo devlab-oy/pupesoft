@@ -250,6 +250,9 @@
 			echo "</table><br>";
 			echo "<input type='submit' value='".t("Hae")."'>";
 			echo "</form>";
+
+			$formi  = "paaformi";
+			$kentta = "nimi";
 		}
 		else {
 			echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
@@ -790,7 +793,7 @@
 			echo "</table><br>";
 
 			echo "<table>";
-			echo "<tr><td class='back'><input type='submit' name='jatka' value='".t("Jatka")."'></td></form>";
+			echo "<tr><td class='back'><input type='submit' ACCESSKEY='J' name='jatka' value='".t("Jatka")."'></td></form>";
 
 			echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='OTSIK'>";

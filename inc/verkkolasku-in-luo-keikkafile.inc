@@ -146,8 +146,10 @@
 
 		$laskuvirhe .= t("Vied‰‰n suoratoimitus varastoon").". ($laskurow[laskunro])\n";
 
-		// vied‰‰n varastoon...
+		// vied‰‰n varastoon... bufferit kiinni etteiechoilla mit‰‰ ruudulle
+		ob_start();
 		require ("tilauskasittely/varastoon.inc");
+		ob_end_clean();
 		// laskutetaan suoratoimitetut jtrivit jos niit‰ oli t‰ll‰ keikalla...
 		require ("tilauskasittely/jt_super_laskuta.inc");
 	}

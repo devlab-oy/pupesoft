@@ -77,8 +77,8 @@ if ($kukarow["extranet"] != '') {
 
 	if (mysql_num_rows($result) == 1) {
 		$extra_asiakas = mysql_fetch_array($result);
-		$ytunnus = $extra_asiakas["ytunnus"];
-		$asiakasid = $extra_asiakas["tunnus"];
+		$ytunnus 	= $extra_asiakas["ytunnus"];
+		$asiakasid 	= $extra_asiakas["tunnus"];
 
 		if ($kukarow["kesken"] != 0) {
 			$tilausnumero = $kukarow["kesken"];
@@ -126,7 +126,7 @@ $ale 	= str_replace(',','.',$ale);
 $kpl 	= str_replace(',','.',$kpl);
 
 // jos ei olla postattu mitään, niin halutaan varmaan tehdä kokonaan uusi tilaus..
-if ($kukarow["extranet"] == "" and count($_POST) == 0 and $from == '') {
+if ($kukarow["extranet"] == "" and count($_POST) == 0) {
 	$tila				= '';
 	$tilausnumero		= '';
 	$laskurow			= '';
@@ -138,7 +138,7 @@ if ($kukarow["extranet"] == "" and count($_POST) == 0 and $from == '') {
 }
 
 // asiakasnumero on annettu, etsitään tietokannasta...
-if (($kukarow["extranet"] != "" and $kukarow["kesken"] == 0) or ($kukarow["extranet"] == "" and $toim == "PIKATILAUS" and ($syotetty_ytunnus != '' or $asiakasid != ''))) {
+if ($tee == "" and ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or ($kukarow["extranet"] == "" and $toim == "PIKATILAUS" and ($syotetty_ytunnus != '' or $asiakasid != ''))) {
 
 	if (substr($ytunnus,0,1) == "£") {
 		$ytunnus = $asiakasid;
@@ -153,12 +153,17 @@ if (($kukarow["extranet"] != "" and $kukarow["kesken"] == 0) or ($kukarow["extra
 	else {
 		require ("asiakashaku.inc");
 	}
+
+	// Ei näytetä tilausta jos meillä on asiakaslista ruudulla
+	if ($monta != 1) {
+		$tee = "SKIPPAAKAIKKI";
+	}
 }
 
 //Luodaan otsikko
-if (($toim == "PIKATILAUS" and (((int) $kukarow["kesken"] == 0 and $tuoteno != '') or $asiakasid != '')) or ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)) {
+if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or ((int) $kukarow["kesken"] != 0 and $asiakasid != '')) or ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)) {
 
-	if ($ytunnus != '') {
+	if ($asiakasid != '') {
 		$nimi 			= $asiakasrow["nimi"];
 		$nimitark 		= $asiakasrow["nimitark"];
 		$osoite 		= $asiakasrow["osoite"];
@@ -459,7 +464,7 @@ if ($tee == "VALMIS") {
 
 	///* Reload ja back-nappulatsekki *///
 	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
-		echo "<font class='error'> ".t("ÄläTaisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font>";
+		echo "<font class='error'> ".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."! </font>";
 		exit;
 	}
 
@@ -617,7 +622,7 @@ if ($kukarow["extranet"] == "" and $toim == "TYOMAARAYS" and ($tee == "VAHINKO" 
 }
 
 //Muutetaan otsikkoa
-if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or (($toim == "MYYNTITILI" or $toim == "SIIRTOLISTA" or $toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or $toim == "TARJOUS" or $toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") and $laskurow["ytunnus"] == ''))) {
+if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" and $laskurow["liitostunnus"] == ''))) {
 
 	//Tämä jotta myös rivisyötön alkuhomma toimisi
 	$tee = "OTSIK";
@@ -731,7 +736,9 @@ if ($tee == '') {
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='tee' value='OTSIK'>
 					<input type='hidden' name='toim' value='$toim'>
-					<td class='back'><input type='submit' value='".t("Muuta Otsikkoa")."'></td>
+					<input type='hidden' name='tiedot_laskulta' value='YES'>
+					<input type='hidden' name='asiakasid' value='$laskurow[liitostunnus]'>
+					<td class='back'><input type='submit' ACCESSKEY='m' value='".t("Muuta Otsikkoa")."'></td>
 					</form>";
 		}
 
@@ -767,7 +774,7 @@ if ($tee == '') {
 		else {
 			echo "<td class='back'><input type='Submit' value='".t("Lue valmistusrivit tiedostosta")."'></td>";
 		}
-		
+
 		echo "</form>";
 
 
@@ -803,7 +810,7 @@ if ($tee == '') {
 	if ($laskurow["liitostunnus"] > 0) { // jos asiakasnumero on annettu
 
 		echo "<tr>";
-		
+
 		if ($toim == "VALMISTAVARASTOON") {
 			echo "<th align='left'>".t("Varastot").":</th>";
 
@@ -869,8 +876,8 @@ if ($tee == '') {
 		}
 		else {
 			echo "<th> </th>";
-		}	
-		
+		}
+
 		if ($toim != "VALMISTAVARASTOON") {
 			$extralisa = "";
 			if ($kukarow["extranet"] != "") {
@@ -907,7 +914,7 @@ if ($tee == '') {
 			else {
 				echo "<th align='left'>".t("Laatija").":</th>";
 			}
-			
+
 			echo "<td><input type='text' name='myyjanro' size='8'> tai ";
 			echo "<select name='myyja' onchange='submit()'>";
 
@@ -984,7 +991,7 @@ if ($tee == '') {
 			// 	echo "<tr><th>".t("Maksuvalmius").":</th><td><font class='$fontcolor'>$maksukuvaus</font></td><th>".t("Avoimet")." / ".t("Limiitti").":</th><td><font class='$fontcolor'>$avoimetlaskut $yhtiorow[valkoodi] / $faktarow[luottoraja] $yhtiorow[valkoodi]</font></td></tr>\n";
 			//
 			// }
-			
+
 			if ($toim != 'VALMISTAVARASTOON') {
 				echo "<tr><th>".t("Asiakasfakta").":</th><td colspan='3'>";
 
@@ -2536,7 +2543,7 @@ if ($tee == '') {
 
 
 
-			echo "<input type='submit' value='$otsikko ".t("valmis")."'>";
+			echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."'>";
 			echo "</form>";
 		}
 

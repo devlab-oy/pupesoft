@@ -17,14 +17,16 @@
 	// $rivitunnus		--> tietokannan tunnus jolle rivi lis‰t‰‰n
 	// $korvaavakielto	--> Jos erisuuri kuin tyhj‰ niin ei myyd‰ korvaavia
 	// $varataan_saldoa --> Jos == EI niin ei varata saldoa (tietyiss‰ keisseiss‰), tai siis ei ainakan tehd‰ saldotsekki‰
-	// $kutsuja			--> Kuka t‰s‰ skripti‰ kutsuu
+	// $kutsuja			--> Kuka t‰t‰ skripti‰ kutsuu
+	// $myy_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+
 
 	//palauttaa arrayn $lisatyt_rivit jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si
 
 	//muutetaan pilkkuja pisteiksi
-	$kpl = str_replace(',','.',$kpl);
-	$hinta = str_replace(',','.',$hinta);
-	$ale = str_replace(',','.',$ale);
+	$kpl 	= str_replace(',','.',$kpl);
+	$hinta 	= str_replace(',','.',$hinta);
+	$ale 	= str_replace(',','.',$ale);
 
 	$alkupera_trow		= $trow; // alkuper‰inen tuoterow talteen..
 

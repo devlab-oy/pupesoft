@@ -27,7 +27,7 @@
 	while ($rivi = mysql_fetch_array($superres)) {
 
 		// katsotaan onko tuotetta super-jt:ss‰ t‰lle samalle asiakkaalle samaa m‰‰r‰‰
-		$query = "	select tilausrivi.*, lasku.nimi, lasku.toim_nimi
+		$query = "	select tilausrivi.*, lasku.nimi, lasku.ytunnus
 					from tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 					join lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='$rivi[verkkotunnus]'
 					where tilausrivi.yhtio = '$kukarow[yhtio]' and
@@ -44,7 +44,7 @@
 		if (mysql_num_rows($jtres) == 1) {
 
 			$jtrivit = mysql_fetch_array($jtres);
-			$laskuvirhe .= $jtrivit["nimi"]." / ".$jtrivit["toim_nimi"].": ".t("T‰ysin oikea rivi lˆytyi").". $jtrivit[tuoteno] ".t("toimitetaan")." $jtrivit[jt] ".t("kpl")." ($jtrivit[tunnus])\n";
+			$laskuvirhe .= "$jtrivit[nimi] ($jtrivit[ytunnus]): ".t("T‰ysin oikea rivi lˆytyi").". $jtrivit[tuoteno] ".t("toimitetaan")." $jtrivit[jt] ".t("kpl")." ($jtrivit[tunnus])\n";
 
 			$kpl = array();
 			$loput = array();
@@ -63,7 +63,7 @@
 		else {
 
 			// katsotaan onko tuotetta super-jt:ss‰ t‰lle samalle asiakkaalle
-			$query = "	select tilausrivi.*, lasku.nimi, lasku.toim_nimi
+			$query = "	select tilausrivi.*, lasku.nimi, lasku.ytunnus
 						from tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 						join lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='$rivi[verkkotunnus]'
 						where tilausrivi.yhtio = '$kukarow[yhtio]' and
@@ -92,7 +92,7 @@
 				if ($rivi["kpl"] > $jtrivit["jt"]) $kpl[$tunnus] = $jtrivit["jt"];
 				else $kpl[$tunnus] = $rivi["kpl"];
 
-				$laskuvirhe .= $jtrivit["nimi"]." / ".$jtrivit["toim_nimi"].": ".t("Toimitetaan osatoimitus").". $jtrivit[tuoteno] ".t("yritet‰‰n toimittaa")." $kpl[$tunnus] ".t("kpl")." ".t("jtss‰ rivill‰")." $jtrivit[jt] ".t("kpl")." ".t("viem‰ss‰ varastoon")." $rivi[kpl] ".t("kpl")." ($jtrivit[tunnus])\n";
+				$laskuvirhe .= "$jtrivit[nimi] ($jtrivit[ytunnus]): ".t("Toimitetaan osatoimitus").". $jtrivit[tuoteno] ".t("yritet‰‰n toimittaa")." $kpl[$tunnus] ".t("kpl")." ".t("jtss‰ rivill‰")." $jtrivit[jt] ".t("kpl")." ".t("viem‰ss‰ varastoon")." $rivi[kpl] ".t("kpl")." ($jtrivit[tunnus])\n";
 
 				require ("tee_jt_tilaus.inc");
 

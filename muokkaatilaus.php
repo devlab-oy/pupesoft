@@ -17,7 +17,7 @@
 	elseif ($toim == "SIIRTOLISTA") {
 		$otsikko = t("varastosiirtoa");
 	}
-	elseif ($toim == "MYYNTITILI" or $toim == "MYYNTITILISUPER") {
+	elseif ($toim == "MYYNTITILI" or $toim == "MYYNTITILISUPER" or $toim == "MYYNTITILITOIMITA") {
 		$otsikko = t("myyntitiliä");
 	}
 	elseif ($toim == "TARJOUS") {
@@ -66,68 +66,70 @@
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
 
-	if (mysql_num_rows($eresult) != 0 and $toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET") {
+	if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET") {
+		if (mysql_num_rows($eresult) > 0) {
+			// tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
+			if ($toim == "" or $toim == "super" or $toim == "ennakko") {
+				$aputoim1 = "RIVISYOTTO";
+				$aputoim2 = "PIKATILAUS";
 
-		// tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
-		if ($toim == "" or $toim == "super" or $toim == "ennakko") {
-			$aputoim1 = "RIVISYOTTO";
-			$aputoim2 = "PIKATILAUS";
+				$lisa1 = t("Rivisyöttöön");
+				$lisa2 = t("Pikatilaukseen");
+			}
+			elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
+				$aputoim1 = "VALMISTAASIAKKAALLE";
+				$lisa1 = t("Muokkaa");
 
-			$lisa1 = t("Rivisyöttöön");
-			$lisa2 = t("Pikatilaukseen");
-		}
-		elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
-			$aputoim1 = "VALMISTAASIAKKAALLE";
-			$lisa1 = t("Muokkaa");
-			
-			$aputoim2 = "";
-			$lisa2 = "";
-		}
-		elseif ($toim == "MYYNTITILISUPER") {
-			$aputoim1 = "MYYNTITILI";
-			$lisa1 = t("Muokkaa");
-			
-			$aputoim2 = "";
-			$lisa2 = "";
+				$aputoim2 = "";
+				$lisa2 = "";
+			}
+			elseif ($toim == "MYYNTITILISUPER") {
+				$aputoim1 = "MYYNTITILI";
+				$lisa1 = t("Muokkaa");
+
+				$aputoim2 = "";
+				$lisa2 = "";
+			}
+			else {
+				$aputoim1 = $toim;
+				$aputoim2 = "";
+
+				$lisa1 = t("Muokkaa");
+				$lisa2 = "";
+			}
+
+			echo "<table>
+					<tr><form method='post' action='tilauskasittely/tilaus_myynti.php'>
+					<input type='hidden' name='toim' value='$aputoim1'>
+					<input type='hidden' name='tee' value='AKTIVOI'>
+					<th>".t("Kesken olevat tilauksesi").":</th>
+					<td class='back'><select name='tilausnumero'>";
+
+			while ($row=mysql_fetch_array($eresult)) {
+				$select="";
+				//valitaan keskenoleva oletukseksi..
+				if ($row['tunnus'] == $kukarow["kesken"]) {
+					$select="SELECTED";
+				}
+				echo "<option value='$row[tunnus]' $select>$row[tunnus]: $row[nimi] ($row[luontiaika])</option>";
+			}
+
+			echo "</select></td>";
+
+			if ($toim == "" or $toim == "super" or $toim == "ennakko") {
+				echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
+			}
+
+			echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
+			echo "</form>
+					</tr>
+					</table>";
 		}
 		else {
-			$aputoim1 = $toim;
-			$aputoim2 = "";
-
-			$lisa1 = t("Muokkaa");
-			$lisa2 = "";
+			echo t("Sinulla ei ole aktiivisia eikä kesken olevia tilauksia").".<br>";
 		}
-
-		echo "<table>
-				<tr><form method='post' action='tilauskasittely/tilaus_myynti.php'>
-				<input type='hidden' name='toim' value='$aputoim1'>
-				<input type='hidden' name='tee' value='AKTIVOI'>
-				<th>".t("Kesken olevat tilauksesi").":</th>
-				<td class='back'><select name='tilausnumero'>";
-
-		while ($row=mysql_fetch_array($eresult)) {
-			$select="";
-			//valitaan keskenoleva oletukseksi..
-			if ($row['tunnus'] == $kukarow["kesken"]) {
-				$select="SELECTED";
-			}
-			echo "<option value='$row[tunnus]' $select>$row[tunnus]: $row[nimi] ($row[luontiaika])</option>";
-		}
-
-		echo "</select></td>";
-
-		if ($toim == "" or $toim == "super" or $toim == "ennakko") {
-			echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
-		}
-
-		echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
-		echo "</form>
-				</tr>
-				</table>";
 	}
-	else {
-		echo t("Sinulla ei ole aktiivisia eikä kesken olevia tilauksia").".<br>";
-	}
+
 
 	// Näytetään muuten vaan sopivia tilauksia
 	echo "<br><form action='$PHP_SELF' method='post'>
@@ -354,11 +356,11 @@
 			elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
 				$aputoim1 = "VALMISTAASIAKKAALLE";
 				$lisa1 = t("Muokkaa");
-				
+
 				$aputoim2 = "";
 				$lisa2 = "";
 			}
-			elseif ($toim == "MYYNTITILISUPER") {
+			elseif ($toim == "MYYNTITILISUPER" or $toim == "MYYNTITILITOIMITA") {
 				$aputoim1 = "MYYNTITILI";
 				$lisa1 = t("Muokkaa");
 

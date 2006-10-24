@@ -132,7 +132,7 @@
 	// Näytetään muuten vaan sopivia tilauksia
 	echo "<br><form action='$PHP_SELF' method='post'>
 			<input type='hidden' name='toim' value='$toim'>
-			<font class='head'>".t("Etsi $otsikko").":<hr></font>
+			<font class='head'>".t("Etsi")." $otsikko:<hr></font>
 			".t("Syötä tilausnumero, nimen tai laatijan osa").":
 			<input type='text' name='etsi'>
 			<input type='Submit' value = '".t("Etsi")."'>

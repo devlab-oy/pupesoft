@@ -25,6 +25,10 @@ require("salasanat.php");
 $link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
 
+// HUOMHUOM!!
+$query = "SET SESSION group_concat_max_len = 100000, max_allowed_packet = 2095104";
+$result = mysql_query($query) or pupe_error($query);
+
 // jos käytetään jotain kummallista porttia (ei http eikä https)
 $portti = "";
 if ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') {
@@ -252,30 +256,30 @@ $css
 				else {
 					$urltoim = "";
 				}
-				
+
 				if (basename($phpnimi) == 'tervetuloa.php' and $kukarow['extranet'] != '') {
 					$urltoim = "/EXTRANET";
 				}
-				
+
 				$hreffi = "http://www.pupesoft.com/trac/wiki/$kukarow[kieli]/".basename($phpnimi).$urltoim;
-				
+
 //				ob_start();
 // 				$ohjeval = @readfile("$hreffi");
 // 				if (false !== $ohjeval) {
 // 					$ohjeval = ob_get_contents();
 // 				}
 // 				ob_end_clean();
-// 				
+//
 // 				//$etsinta = 'Describe "'.$kukarow["kieli"].'/'.basename($phpnimi).$urltoim.'" here';
 // 				$etsinta = "Describe ";
-// 				
+//
 // 				echo "$hreffi<br>$etsinta<br>".strlen($ohjeval)."<br>";
-// 				
+//
 // 				if (strpos($ohjeval,$etsinta)) {
 // 					echo "kala<br>";
 // 				}
 // 				else {
-// 					
+//
 // 				}
 echo "<div align='right'><a class='menu' target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
 			}

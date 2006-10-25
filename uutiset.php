@@ -1,7 +1,12 @@
 <?php
 
+$otsikko_apu = $_POST["otsikko"];
+$uutinen_apu = $_POST["uutinen"];
+
 require ("inc/parametrit.inc");
 
+$otsikko = $otsikko_apu;
+$uutinen = $uutinen_apu;
 
 if ($toim == "") {
 	echo "<font class='head'>".t("Intra Uutiset")."</font><hr>";
@@ -36,11 +41,11 @@ else {
 if ($tee == 'LISAA') {
 
 	if (strlen($otsikko) > 0 and strlen($uutinen) > 0) {
-	
+
 		$liitostunnus = 0;
-		
+
 		if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-			
+
 			$filetype = $_FILES['userfile']['type'];
 			$filesize = $_FILES['userfile']['size'];
 			$filename = $_FILES['userfile']['name'];
@@ -63,8 +68,9 @@ if ($tee == 'LISAA') {
 			$liitostunnus = mysql_insert_id();
 			$kuva = $liitostunnus;
 		}
-		
+
 		$uutinen = nl2br(strip_tags($uutinen, '<a>'));
+		$otsikko = nl2br(strip_tags($otsikko, '<a>'));
 
 		// ollaanko valittu konsernitasoinen uutinen
 		if ($konserni != '') $konserni = $yhtiorow['konserni'];
@@ -91,14 +97,14 @@ if ($tee == 'LISAA') {
 					kuittaus	= '$lukittu'";
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
-		$katunnus = mysql_insert_id();	
+		$katunnus = mysql_insert_id();
 
 		if ($liitostunnus != 0) {
 			// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
 			$query = "update liitetiedostot set liitostunnus='$katunnus' where tunnus='$liitostunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
-		
+
 		$tee = "";
 	}
 	else {

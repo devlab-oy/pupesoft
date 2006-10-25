@@ -171,11 +171,27 @@ if (!function_exists('alku')) {
 		$kala -= 20;
 
 		//tehdään viestejä ja lasketaan niitten pituuksia
-		if ($laskurow['sisviesti2'] != '' and $sivu == 1) {
+		if ($laskurow['sisviesti2'] != '') {
+
 			$pdf->draw_text(35, $kala, t("Huomautukset", $kieli).":", $firstpage, $p);
 			$pohja = $pdf->draw_paragraph(638, 35, 60, 550, $laskurow["sisviesti2"]."\n", $firstpage, $p); // top, left, bottom, right
-			if (!is_numeric($pohja)) $pohja = 60; // jos on liian pitkä sisviesti2 ni 
-			$kala = $pohja - 15;
+
+			$laskurow['sisviesti2'] = "";
+
+			if (!is_numeric($pohja)) {
+				$laskurow['sisviesti2'] = $pohja;
+				loppu($firstpage, 0);
+				$firstpage = alku();
+			}
+			else {
+				// viivat rivien väliin...
+				$x[0] = 20;
+				$x[1] = 580;
+				$y[0] = $y[1] = $pohja - 4;
+				$pdf->draw_line($x, $y, $firstpage, $rectparam);
+				$kala = $pohja - 15;
+			}
+
 		}
 
 		return($firstpage);
@@ -269,6 +285,7 @@ if (!function_exists('rivi')) {
 			}
 
 			$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$firstpage, $pp);
+//			$pdf->draw_text(23,  $kala, $kala,	$firstpage, $pp);
 			$pdf->draw_text(42,  $kala, $varastopaikka,					$firstpage, $p);
 			$pdf->draw_text(90,  $kala, $row["tuoteno"],				$firstpage, $p);
 

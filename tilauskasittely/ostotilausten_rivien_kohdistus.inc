@@ -424,7 +424,7 @@ if ($tila == '') {
 		// tarkastetaan onko hakukentässä jotakin
 		if (strlen($haku[$i]) > 0) {
 			$haku[$i] = str_replace(",",".",$haku[$i]);
-			$lisa .= " $kentta like '%$haku[$i]%' and";
+			$lisa1 .= " $kentta like '%$haku[$i]%' and";
 
 			//pidetään muistissa linkkejä varten
 			$ulisa .= "&haku[$i]=$haku[$i]";
@@ -469,8 +469,8 @@ if ($tila == '') {
 		$kentat .= $kentta.", ";
 	}
 
-	if ($lisa != '') {
-		$lisa = " HAVING ".substr($lisa, 0, -3);
+	if ($lisa1 != '') {
+		$lisa1 = " HAVING ".substr($lisa1, 0, -3);
 	}
 
 	// Tällä queryllä saadaan vain tuoteperheiden isät
@@ -489,7 +489,7 @@ if ($tila == '') {
 				and lasku.alatila not in ('X','B')
 				$lisa2
 				GROUP BY tilausrivi.tunnus
-				$lisa
+				$lisa1
 				ORDER BY $jarjestys
 				$limit";
 	$result = mysql_query($query) or pupe_error($query);

@@ -11,7 +11,7 @@
 	elseif ($toim == "TYOMAARAYS") {
 		$otsikko = t("työmääräystä");
 	}
-	elseif ($toim == "VALMISTUS") {
+	elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
 		$otsikko = t("valmistusta");
 	}
 	elseif ($toim == "SIIRTOLISTA") {

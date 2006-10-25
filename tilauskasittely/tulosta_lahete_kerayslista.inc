@@ -18,16 +18,15 @@ else {
 $p["height"] = 10;
 $p["font"] = "Times-Roman";
 $rectparam["width"] = 0.3;
-$sivu = 1;
+$sivu = 0;
 
 //muutamat funktiot...
 if (!function_exists('alku')) {
 	function alku () {
-		global $pdf, $image, $laskurow, $yhtiorow, $tid, $viite, $p, $kala, $lask, $rectparam, $kukarow, $kieli, $tilausnumeroita;
+		global $pdf, $image, $laskurow, $yhtiorow, $tid, $viite, $p, $kala, $lask, $rectparam, $kukarow, $kieli, $tilausnumeroita, $sivu;
 
 		//oletukasia
 		$kala = 638;
-		$lask = 1;
 		$sivu++;
 
 		//oletukset viivakoodeille
@@ -57,6 +56,8 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
 		$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
 		$pdf->draw_text(250,810, t("Ker‰ilylista", $kieli), 	$firstpage);
+		$pdf->draw_text(320,810, t("Sivu", $kieli)." $sivu", 	$firstpage,$p);
+
 		$pdf->draw_text(150,795, t("Tilausnumero/-numerot", $kieli).": ".$tilausnumeroita, $firstpage, $p);
 
 		$i["height"] = 28;
@@ -172,7 +173,8 @@ if (!function_exists('alku')) {
 		//tehd‰‰n viestej‰ ja lasketaan niitten pituuksia
 		if ($laskurow['sisviesti2'] != '' and $sivu == 1) {
 			$pdf->draw_text(35, $kala, t("Huomautukset", $kieli).":", $firstpage, $p);
-			$pohja = $pdf->draw_paragraph(638, 35, 120, 550, $laskurow["sisviesti2"]."\n", $firstpage, $p);
+			$pohja = $pdf->draw_paragraph(638, 35, 60, 550, $laskurow["sisviesti2"]."\n", $firstpage, $p); // top, left, bottom, right
+			if (!is_numeric($pohja)) $pohja = 60; // jos on liian pitk‰ sisviesti2 ni 
 			$kala = $pohja - 15;
 		}
 
@@ -200,8 +202,8 @@ if (!function_exists('rivi')) {
 			$pdf->draw_line($x, $y, $firstpage, $rectparam);
 		}
 
-		//jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-		if ($lask > 38) {
+		//jos ollaan liian pitk‰ll‰ tehd‰‰n uusi otsikko...
+		if ($kala < 75) {
 			loppu($firstpage, 0);
 			$firstpage = alku();
 		}
@@ -264,7 +266,6 @@ if (!function_exists('rivi')) {
 				$pdf->draw_text(42,  $kala, "# ".t("Tuoteperhe", $kieli).": ".$litania,	$firstpage, $p);
 
 				$kala = $kala - $rivinkorkeus;
-				$lask++;
 			}
 
 			$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$firstpage, $pp);
@@ -359,12 +360,10 @@ if (!function_exists('rivi')) {
 
 			if (strlen($row["nimitys"]) > 22) {
 				$kala = $kala - $rivinkorkeus;
-				$lask++;
 			}
 			$pdf->draw_text(190, $kala, $row["nimitys"], 	$firstpage, $p);
 
 			$kala = $kala - $rivinkorkeus;
-			$lask++;
 
 			if (trim($row["kommentti"]) != '' or $row["tilaajanrivinro"] != 0) {
 
@@ -378,7 +377,6 @@ if (!function_exists('rivi')) {
 				$pdf->draw_text(90,  $kala, "* $futur".$row["kommentti"],	$firstpage, $p);
 
 				$kala = $kala - $rivinkorkeus;
-				$lask++;
 			}
 
 			$perheid = $row["perheid"];

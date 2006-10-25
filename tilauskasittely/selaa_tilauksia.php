@@ -315,6 +315,10 @@
 			$teemita = "tilaus";
 		}
 
+		// katotaan löytyykö oikeuksia vaihda_tilaan... tätä käytetään tuolla whilen sisällä
+		$oikeuquery = "select * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi like '%vaihda_tila.php'";
+		$apuoikeures = mysql_query($oikeuquery) or pupe_error($oikeuquery);
+
 		while ($row = mysql_fetch_array($result)) {
 
 			list ($pp,$kk,$vv) = explode(".", $row["pvm"],3);
@@ -341,18 +345,23 @@
 				echo "</form>";
 			}
 
-			// katotaan löytyykö oikeuksia vaihda_tilaan...
-			$oikeuquery = "select * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi like '%vaihda_tila.php'";
-			$apuoikeures = mysql_query($oikeuquery) or pupe_error($oikeuquery);
-
-			// jos kyseessä on myyntitilaus, ollaan päivänäkymässä ja meillä on oikeudet, niin tehdään tällänenki nappula
+			// jos kyseessä on myyntitilaus, ollaan päivänäkymässä ja meillä on oikeudet, niin tehdään tällänen nappula
 			if ($toim == "MYYNTI" and $tee == "paiva" and mysql_num_rows($apuoikeures) > 0) {
-				echo "<form method='post' action='vaihda_tila.php'>";
-				echo "<input type='hidden' name='parametrit' value='$teemita#$pp#$kk#$vv#$toim'>";
-				echo "<input type='hidden' name='tee' value='valitse'>";
-				echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
-				echo "<td class='back'><input type='submit' value='".t("Vaihda tila")."'></td>";
-				echo "</form>";
+
+				// haetaan tässä keisissä vielä tila ja alatila
+				$aputilaquery = "select tila, alatila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";
+				$aputilares = mysql_query($aputilaquery) or pupe_error($aputilaquery);
+				$tila_row = mysql_fetch_array($aputilares);
+
+				// vain laskuttamattomille myyntitilaukille voi tehdä jotain
+				if ($tila_row["tila"] == "L" and $tila_row["alatila"] != "X" or ($tila_row["tila"] == "N" and in_array($tila_row["alatila"], array('A','')))) {
+					echo "<form method='post' action='vaihda_tila.php'>";
+					echo "<input type='hidden' name='parametrit' value='$teemita#$pp#$kk#$vv#$toim'>";
+					echo "<input type='hidden' name='tee' value='valitse'>";
+					echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
+					echo "<td class='back'><input type='submit' value='".t("Vaihda tila")."'></td>";
+					echo "</form>";
+				}
 			}
 
 			echo "</tr>";

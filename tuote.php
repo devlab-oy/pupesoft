@@ -660,7 +660,7 @@
 				$ehto = "";
 			}
 
-			$query = "	SELECT concat_ws('@', laatija, laadittu) kuka, laji, kpl, kplhinta, hinta, if(laji in ('tulo','valmistus'), kplhinta, hinta) arvo, selite
+			$query = "	SELECT concat_ws('@', laatija, laadittu) kuka, laji, kpl, kplhinta, hinta, if(laji in ('tulo','valmistus'), kplhinta, hinta)*kpl arvo, selite
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoteno'

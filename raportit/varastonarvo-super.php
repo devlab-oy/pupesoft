@@ -131,7 +131,7 @@ if ($tee == "tee") {
 		$vrow = mysql_fetch_array($vres);
 
 		// tuotteen muutos varastossa annetun päivän jälkeen
-		$query = "	SELECT sum(kpl*hinta) muutoshinta, sum(kpl) muutoskpl
+		$query = "	SELECT sum(kpl * if(laji in ('tulo','valmistus'), kplhinta, hinta)) muutoshinta, sum(kpl) muutoskpl
 		 			FROM tapahtuma use index (yhtio_tuote_laadittu)
 		 			WHERE yhtio = '$kukarow[yhtio]'
 		 			and tuoteno = '$row[tuoteno]'

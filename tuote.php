@@ -618,22 +618,52 @@
 
 			// Varastotapahtumat
 			echo "<table>";
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";
 
 			if ($historia == "") $historia=1;
-			$chk[$historia] = "CHECKED";
+			$chk[$historia] = "SELECTED";
 
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 
-
+			echo "<a href='#' name='Tapahtumat'>";
 
 			echo "<tr><th>".t("Tuotehistoria").":</th>";
+			echo "<th colspan='2'>".t("Näytä tapahtumat").":</th>";
+			echo "<th colspan='2'>";
+			echo "<select name='historia' onchange='submit();'>'";
+			echo "<option value='1' $chk[1]> ".t("20 viimeisintä")."</option>";
+			echo "<option value='2' $chk[2]> ".t("Tilivuoden alusta")."</option>";
+			echo "<option value='3' $chk[3]> ".t("Lähes kaikki")."</option>";
+			echo "</select>";
+			echo "</th>";
 
-			echo "<th colspan='6'>
-					<input type='radio' name='historia' value='1' onclick='submit()' $chk[1]> ".t("20 viimeisintä")."
-					<input type='radio' name='historia' value='2' onclick='submit()' $chk[2]> ".t("Tilivuoden alusta")."
-					<input type='radio' name='historia' value='3' onclick='submit()' $chk[3]> ".t("Lähes kaikki")."</th></tr>";
+
+			if ($tapahtumalaji == "laskutus") 			$sel1="SELECTED";
+			if ($tapahtumalaji == "tulo") 				$sel2="SELECTED";
+			if ($tapahtumalaji == "valmistus") 			$sel3="SELECTED";
+			if ($tapahtumalaji == "siirto") 			$sel4="SELECTED";
+			if ($tapahtumalaji == "kulutus") 			$sel5="SELECTED";
+			if ($tapahtumalaji == "Inventointi") 		$sel6="SELECTED";
+			if ($tapahtumalaji == "Epäkurantti") 		$sel7="SELECTED";
+			if ($tapahtumalaji == "poistettupaikka") 	$sel8="SELECTED";
+			if ($tapahtumalaji == "uusipaikka") 		$sel9="SELECTED";
+
+			echo "<th colspan='2'>".t("Tapahtumalaji").":</th>";
+			echo "<th>";
+			echo "<select name='tapahtumalaji' onchange='submit();'>'";
+			echo "<option value=''>".t("Näytä kaikki")."</option>";
+			echo "<option value='laskutus' $sel1>".t("Laskutukset")."</option>";
+			echo "<option value='tulo' $sel2>".t("Tulot")."</option>";
+			echo "<option value='valmistus' $sel3>".t("Valmistukset")."</option>";
+			echo "<option value='siirto' $sel4>".t("Siirrot")."</option>";
+			echo "<option value='kulutus' $sel5>".t("Kulutukset")."</option>";
+			echo "<option value='Inventointi' $sel6>".t("Inventoinnit")."</option>";
+			echo "<option value='Epäkurantti' $sel7>".t("Epäkuranttiusmerkinnät")."</option>";
+			echo "<option value='poistettupaikka' $sel8>".t("Poistetut tuotepaikat")."</option>";
+			echo "<option value='uusipaikka' $sel9>".t("Perustetut tuotepaikat")."</option>";
+			echo "</select>";
+			echo "</th>";
 
 			echo "<tr>";
 			echo "<th>".t("Käyttäjä@Pvm")."</th>";
@@ -642,6 +672,7 @@
 			echo "<th>".t("Kplhinta")."</th>";
 			echo "<th>".t("Kehahinta")."</th>";
 			echo "<th>".t("Arvo")."</th>";
+			echo "<th>".t("Var.Arvo")."</th>";
 			echo "<th>".t("Selite")."";
 
 			echo "</th></form>";
@@ -671,18 +702,32 @@
 						ORDER BY laadittu desc $maara";
 			$qresult = mysql_query($query) or pupe_error($query);
 
-			echo "<tr><td colspan='4'>".t("Varastonarvo nyt").":</td><td>$tuoterow[kehahin]</td><td align='right'>".sprintf('%.4f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"])."</td><td></td></tr>";
+			$vararvo_nyt = sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"]);
+
+			echo "<tr>
+					<td colspan='4'>".t("Varastonarvo nyt").":</td>
+					<td align='right'>$tuoterow[kehahin]</td>
+					<td align='right'>$vararvo_nyt</td>
+					<td align='right'>".sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"])."</td>
+					<td></td>
+					</tr>";
 
 			while ($prow = mysql_fetch_array ($qresult)) {
-				echo "<tr>";
-				echo "<td nowrap>$prow[kuka]</td>";
-				echo "<td nowrap>".t("$prow[laji]")."</td>";
-				echo "<td nowrap>$prow[kpl]</td>";
-				echo "<td nowrap>$prow[kplhinta]</td>";
-				echo "<td nowrap>$prow[hinta]</td>";
-				echo "<td nowrap align='right'>".sprintf('%.4f',$prow["arvo"])."</td>";
-				echo "<td>$prow[selite]</td>";
-				echo "</tr>";
+
+				$vararvo_nyt -= $prow["arvo"];
+
+				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
+					echo "<tr>";
+					echo "<td nowrap>$prow[kuka]</td>";
+					echo "<td nowrap>".t("$prow[laji]")."</td>";
+					echo "<td nowrap align='right'>$prow[kpl]</td>";
+					echo "<td nowrap align='right'>$prow[kplhinta]</td>";
+					echo "<td nowrap align='right'>$prow[hinta]</td>";
+					echo "<td nowrap align='right'>".sprintf('%.2f', $prow["arvo"])."</td>";
+					echo "<td nowrap align='right'>".sprintf('%.2f', $vararvo_nyt)."</td>";
+					echo "<td>$prow[selite]</td>";
+					echo "</tr>";
+				}
 			}
 			echo "</table>";
 		}

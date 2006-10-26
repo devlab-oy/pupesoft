@@ -671,7 +671,7 @@
 						ORDER BY laadittu desc $maara";
 			$qresult = mysql_query($query) or pupe_error($query);
 
-			echo "<tr><td colspan='4'>".t("Varastonarvo nyt").":</td><td>$tuoterow[kehahin]</td><td>$kokonaissaldo_tapahtumalle</td></tr>";
+			echo "<tr><td colspan='4'>".t("Varastonarvo nyt").":</td><td>$tuoterow[kehahin]</td><td align='right'>".sprintf('%.4f',$kokonaissaldo_tapahtumalle)."</td><td></td></tr>";
 
 			while ($prow = mysql_fetch_array ($qresult)) {
 				echo "<tr>";
@@ -680,7 +680,7 @@
 				echo "<td nowrap>$prow[kpl]</td>";
 				echo "<td nowrap>$prow[kplhinta]</td>";
 				echo "<td nowrap>$prow[hinta]</td>";
-				echo "<td nowrap>$prow[arvo]</td>";
+				echo "<td nowrap align='right'>".sprintf('%.4f',$prow["arvo"])."</td>";
 				echo "<td>$prow[selite]</td>";
 				echo "</tr>";
 			}

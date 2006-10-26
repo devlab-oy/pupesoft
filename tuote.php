@@ -364,6 +364,8 @@
 
 				echo "</table>";
 
+				$kokonaissaldo_tapahtumalle = $kokonaissaldo;
+
 				// katsotaan onko t‰lle tuotteelle yht‰‰n sis‰ist‰ toimittajaa ja ett‰ toimittajan tiedoissa on varmasti kaikki EDI mokkulat p‰‰ll‰ ja oletusvienti on jotain vaihto-omaisuutta
 				$query = "	select tyyppi_tieto, liitostunnus
 							from tuotteen_toimittajat, toimi
@@ -668,6 +670,8 @@
 						$ehto
 						ORDER BY laadittu desc $maara";
 			$qresult = mysql_query($query) or pupe_error($query);
+
+			echo "<tr><td colspan='4'>".t("Varastonarvo nyt").":</td><td>$tuoterow[kehahin]</td><td>$kokonaissaldo_tapahtumalle</td></tr>";
 
 			while ($prow = mysql_fetch_array ($qresult)) {
 				echo "<tr>";

@@ -559,7 +559,7 @@ if ($tuoteno != '') {
 
 									// yritetään korjata jotain joka on lukitulla tilikaudella.. estetään se
 									if ($korjaus_alku < $tilikausi_alku) {
-										echo "<font class='error'>!!! ".t("Korjauksia tiliöinteihin ei voida tehdä, koska tapahtuma on lukitulla tilikaudella")."! (".t("Inventointi").": $trow[laadittu])</font><br>";
+										echo "<font class='error'>".t("Korjauksia tiliöinteihin ei voida tehdä, koska tapahtuma on lukitulla tilikaudella")."! (".t("Inventointi").": $trow[laadittu])</font><br>";
 									}
 									else {
 										// yliviivataan kaikki tositteen aktiivit tiliöinnit

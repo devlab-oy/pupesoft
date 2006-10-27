@@ -6,6 +6,9 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
+	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti 
+		$maxsize++; //Tilaa mahdolliselle viivalle
+	}
  	if (mysql_field_name($result, $i) == "hyvak") { //hyväksyjät
 		$query = "SELECT kuka, nimi
                           FROM kuka

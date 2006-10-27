@@ -6,6 +6,10 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti 
+		$maxsize++; //Tilaa mahdolliselle viivalle
+	}
 	if (mysql_field_name($result, $i) == "oletus_suoravel_pankki") { //suoraveloitus suoritetaan automaattisesti 
 		$query = "SELECT nimi, tilino, tunnus
                           FROM yriti

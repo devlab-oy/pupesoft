@@ -365,7 +365,7 @@
 
 	if (strlen($tunnus) != 0) {
 // Lasku on valittu ja sitä tiliöidään
-		$query = "SELECT concat_ws('@', laatija, luontiaika) kuka, tapvm, erpcm,
+		$query = "SELECT concat_ws('@', laatija, luontiaika) kuka, tapvm, if(kapvm != '0000-00-00', concat_ws('<br>',kapvm,erpcm),erpcm) 'eräpvm/kapvm',
 						ytunnus, nimi, postitp,
 						round(summa * vienti_kurssi, 2) 'kotisumma',
 						 summa, valkoodi, ebid,
@@ -800,12 +800,12 @@
 		}
 
 		if ($nayta!='') $nayta = ''; else $nayta = "and alatila != 'H'";
-		$query = "SELECT tunnus, tapvm, erpcm 'eräpvm',
+		$query = "SELECT tunnus, tapvm, if(kapvm!='0000-00-00',concat_ws('<br>',kapvm,erpcm),erpcm) 'eräpvm/kapvm',
 					ytunnus, nimi, postitp,
 					round(summa * vienti_kurssi, 2) 'kotisumma', summa, valkoodi, ebid 'lasku', alatila, comments, hyvak1
 				  FROM lasku
 				  WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukarow[yhtio]' and tila != 'D' $nayta
-				  ORDER BY erpcm";
+				  ORDER BY if(kapvm!='0000-00-00',kapvm,erpcm)";
 
 		$result = mysql_query($query) or pupe_error($query);
 

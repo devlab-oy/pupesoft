@@ -26,45 +26,37 @@
 	}
 	//echo "Pankkiili = '$pankkitili' Pituus " . strlen($pankkitili) . "<br>";
 
-	// jos pankki ei ole sampo, niin lasketaan tarkiste: Luhnin moduli 10
-	if ($pankki != "8") {
-
-		for ($ip=0;  $ip<13; $ip++) {
-	 		// hmm, tilinumero on aina 14 pitkä, joten eka kerroin on aina 2
-			if ($ip % 2 == 0) {
-				$kerroin = 2;
-			}
-			else {
-				$kerroin = 1;
-			}
-			$tulo = $kerroin * substr($pankkitili, $ip, 1);
-	 		// jos > 10, lasketaan numerot yhteen....
-			if ($tulo > 9) {
-				$tulo = substr($tulo, 0, 1) + substr($tulo, 1, 1);
-			}
-			$tarkiste += $tulo;
-			//echo "$kerroin " . substr($pankkitili, $i, 1) . " --> $tulo --> $tarkiste <br>";
+	for ($ip=0;  $ip<13; $ip++) {
+ 		// hmm, tilinumero on aina 14 pitkä, joten eka kerroin on aina 2
+		if ($ip % 2 == 0) {
+			$kerroin = 2;
 		}
-
-	 	//echo "laskettu tarkiste: 10 - ".substr($tarkiste, -1)." = ";
-		$tarkiste = 10 - substr($tarkiste, -1); // Viimeinen merkki
-		//echo "$tarkiste<br>";
-
-		if ($tarkiste == 10) {
-			$tarkiste = 0;
+		else {
+			$kerroin = 1;
 		}
-
-	 	//echo "tilinumeron tarkiste: ".substr($pankkitili, 13, 1)."<br>";
-
-		if (substr($pankkitili, 13, 1) != $tarkiste) {
-			$pankkitili = "";
+		$tulo = $kerroin * substr($pankkitili, $ip, 1);
+ 		// jos > 10, lasketaan numerot yhteen....
+		if ($tulo > 9) {
+			$tulo = substr($tulo, 0, 1) + substr($tulo, 1, 1);
 		}
+		$tarkiste += $tulo;
+		//echo "$kerroin " . substr($pankkitili, $ip, 1) . " --> $tulo --> $tarkiste <br>";
 	}
 
-	// sampon tilinumeroiden laskentamenetelmä on Kerroin 137
-	if ($pankki == "8") {
-		// en jaksa koodata sampon checkiä, älkää tehkö virhettä sampon tilien kanssa!
-		echo "<font class='error'>Syötit Sampon pankkitilin, tilinumeron tarkistusta ei tehty!</font><br><br>";
+ 	//echo "laskettu tarkiste: 10 - ".substr($tarkiste, -1)." = ";
+	$tarkiste = 10 - substr($tarkiste, -1); // Viimeinen merkki
+	//echo "$tarkiste<br>";
+
+	if ($tarkiste == 10) {
+		$tarkiste = 0;
 	}
+
+ 	//echo "tilinumeron tarkiste: ".substr($pankkitili, 13, 1)."<br>";
+
+	if (substr($pankkitili, 13, 1) != $tarkiste) {
+		//echo "Tarkiste on väärin $tarkiste<br>";
+		$pankkitili = "";
+	}
+    //echo "Pankkiili = '$pankkitili' Pituus " . strlen($pankkitili) . "<br>";
 
 ?>

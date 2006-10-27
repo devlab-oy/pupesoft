@@ -257,6 +257,8 @@
 			elseif	(mysql_field_len($result,$i)<5)  $size='5';
 			else	$size='10';
 
+			$maxsize = mysql_field_len($result,$i); // Jotta tätä voidaan muuttaa
+			
 			require ("inc/$toim"."rivi.inc");
 
 
@@ -315,7 +317,7 @@
 				}
 
 				if ($tyyppi != 0) {
-					echo "<input type = '$mita' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+					echo "<input type = '$mita' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'>";
 				}
 
 				if ($tyyppi > 0) {

@@ -43,7 +43,7 @@
 	$npp = date("d",mktime(0, 0, 0, $kk, $pp+1, $vv));
 
 	$etsi='';
-	if (is_string($haku))  $etsi = "and lasku.nimi LIKE '%$haku%'";
+	if (is_string($haku))  $etsi = "and (lasku.nimi LIKE '%$haku%' or lasku.toim_nimi LIKE '%$haku%') ";
 	if (is_numeric($haku)) $etsi = "and lasku.ytunnus LIKE '%$haku%'";
 
 	// tässä myyntitilausten queryt

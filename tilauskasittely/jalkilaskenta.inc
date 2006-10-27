@@ -549,42 +549,56 @@ if ($tuoteno != '') {
 									$invupd = mysql_query($query) or pupe_error($query);
 									$invrow = mysql_fetch_array($invupd);
 
-									// yliviivataan kaikki tositteen aktiivit tiliöinnit
-									$query = "UPDATE tiliointi SET korjattu='$kukarow[kuka]', korjausaika=now() WHERE yhtio='$kukarow[yhtio]' and ltunnus='$invrow[ltunnus]' and korjattu=''";
-									if ($jalkilaskenta_debug > 1) echo "$query<br>";
-									$invupd = mysql_query($query) or pupe_error($query);
+									// katotaan saadaanko tehdä tiliöintejä
+									// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
+									list($tkvv,$tkkk,$tkpp) = split("-",$yhtiorow["tilikausi_alku"]);
+									list($klvv,$klkk,$klpp) = split("-",$trow["laadittu"]);
 
-									// kirjotetaan uudet tiliönnit
-									$query = "INSERT INTO tiliointi SET
-												yhtio    = '$kukarow[yhtio]',
-												ltunnus  = '$invrow[ltunnus]',
-												tilino   = '$yhtiorow[varastonmuutos]',
-												kustp    = '',
-												tapvm    = '$invrow[tapvm]',
-												summa    = $trow[kpl] * $uusikehahin * -1,
-												vero     = '0',
-												lukko    = '',
-												selite   = '$invrow[selite]',
-												laatija  = '$kukarow[kuka]',
-												laadittu = now()";
-									if ($jalkilaskenta_debug > 1) echo "$query<br>";
-									$invupd = mysql_query($query) or pupe_error($query);
+									$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
+									$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
 
-									// kirjotetaan uudet tiliönnit
-									$query = "INSERT INTO tiliointi SET
-												yhtio    = '$kukarow[yhtio]',
-												ltunnus  = '$invrow[ltunnus]',
-												tilino   = '$yhtiorow[varasto]',
-												kustp    = '',
-												tapvm    = '$invrow[tapvm]',
-												summa    = $trow[kpl] * $uusikehahin,
-												vero     = '0',
-												lukko    = '',
-												selite   = '$invrow[selite]',
-												laatija  = '$kukarow[kuka]',
-												laadittu = now()";
-									if ($jalkilaskenta_debug > 1) echo "$query<br>";
-									$invupd = mysql_query($query) or pupe_error($query);
+									// yritetään korjata jotain joka on lukitulla tilikaudella.. estetään se
+									if ($korjaus_alku < $tilikausi_alku) {
+										echo "<font class='error'>!!! ".t("Korjauksia tiliöinteihin ei voida tehdä, koska tapahtuma on lukitulla tilikaudella")."! (".t("Inventointi").": $trow[laadittu])</font><br>";
+									}
+									else {
+										// yliviivataan kaikki tositteen aktiivit tiliöinnit
+										$query = "UPDATE tiliointi SET korjattu='$kukarow[kuka]', korjausaika=now() WHERE yhtio='$kukarow[yhtio]' and ltunnus='$invrow[ltunnus]' and korjattu=''";
+										if ($jalkilaskenta_debug > 1) echo "$query<br>";
+										$invupd = mysql_query($query) or pupe_error($query);
+
+										// kirjotetaan uudet tiliönnit
+										$query = "INSERT INTO tiliointi SET
+													yhtio    = '$kukarow[yhtio]',
+													ltunnus  = '$invrow[ltunnus]',
+													tilino   = '$yhtiorow[varastonmuutos]',
+													kustp    = '',
+													tapvm    = '$invrow[tapvm]',
+													summa    = $trow[kpl] * $uusikehahin * -1,
+													vero     = '0',
+													lukko    = '',
+													selite   = '$invrow[selite]',
+													laatija  = '$kukarow[kuka]',
+													laadittu = now()";
+										if ($jalkilaskenta_debug > 1) echo "$query<br>";
+										$invupd = mysql_query($query) or pupe_error($query);
+
+										// kirjotetaan uudet tiliönnit
+										$query = "INSERT INTO tiliointi SET
+													yhtio    = '$kukarow[yhtio]',
+													ltunnus  = '$invrow[ltunnus]',
+													tilino   = '$yhtiorow[varasto]',
+													kustp    = '',
+													tapvm    = '$invrow[tapvm]',
+													summa    = $trow[kpl] * $uusikehahin,
+													vero     = '0',
+													lukko    = '',
+													selite   = '$invrow[selite]',
+													laatija  = '$kukarow[kuka]',
+													laadittu = now()";
+										if ($jalkilaskenta_debug > 1) echo "$query<br>";
+										$invupd = mysql_query($query) or pupe_error($query);
+									}
 								}
 								else {
 									$invapuluku = $trow["kpl"] * $uusikehahin;

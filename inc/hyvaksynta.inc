@@ -3,7 +3,7 @@
 	if ($tee == '') { // Summaus hyväksynnässä olevista laskuista
 
 		echo "<font class='message'>".t("Laskuja hyväksymättä")."</font><hr>";
-		
+
 		$query = "SELECT hyvaksyja_nyt, concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))), min(erpcm)
 					FROM lasku
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'H' and hyvaksyja_nyt <> ''
@@ -40,7 +40,7 @@
 					  FROM lasku
 					  WHERE tunnus = '$mika' and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Muutettavaa laskua ei löytynyt")."!</font>";
 				exit;
@@ -58,7 +58,7 @@
 				elseif (($trow['hyvak4'] == $kuka) and ($trow['h4time'] == '0000-00-00 00:00:00')) $mita = "hyvak4";
 				elseif (($trow['hyvak5'] == $kuka) and ($trow['h5time'] == '0000-00-00 00:00:00')) $mita = "hyvak5";
 				else {
-					echo "<font class='error'>".t("Laskun siirto ei onnitunut")."</font> '$kuka' --> '$nimi'<br>";
+					echo "<font class='error'>".t("Laskun siirto ei onnistunut")."</font> '$kuka' --> '$nimi'<br>";
 					exit;
 				}
 
@@ -80,6 +80,7 @@
 				  WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kuka'";
 
 		$result = mysql_query($query) or pupe_error($query);
+
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='message'>".t("Käyttäjää ei enää löydy tältä yhtiöltä")."!</font><br>";
 			$trow=array();
@@ -87,18 +88,18 @@
 		else {
 			$trow=mysql_fetch_array ($result);
 		}
-		
-		echo "<font class='message'>$kuka".t(":n pöydällä olevat laskut")."</font><hr>";
 
-// Tehdään popup, jolla voidaan hyväksyjä myöhemmin vaihtaa
+		echo "<font class='message'>$trow[nimi]".t(":n pöydällä olevat laskut")."</font><hr>";
+
+		// Tehdään popup, jolla voidaan hyväksyjä myöhemmin vaihtaa
 		$query = "SELECT kuka, nimi
-				  FROM kuka
-				  WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
-				  ORDER BY nimi";
+				FROM kuka
+				WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
+				ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
-		$ulos = "<form action = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$kuka' method = 'post'>";
 
-		$ulos .= "<select name='nimi'>";
+		$ulos = "<select name='nimi'>";
+
 		while ($vrow=mysql_fetch_array($result)) {
 			$sel = "";
 			if ($vrow['kuka'] == $trow['tuuraaja']) {
@@ -108,7 +109,7 @@
 		}
 		$ulos .= "</select>";
 
-		$query = "SELECT tapvm, kapvm, erpcm, if(alatila='',nimi,concat_ws('<br>', nimi, comments)) nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma',
+		$query = "	SELECT tapvm, kapvm, erpcm, if(alatila='',nimi,concat_ws('<br>', nimi, comments)) nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma',
 					summa, valkoodi, ebid, tunnus, alatila
 					FROM lasku
 					WHERE hyvaksyja_nyt='$kuka' and yhtio = '$kukarow[yhtio]'
@@ -124,8 +125,9 @@
 		echo "</tr>";
 
 		while ($trow=mysql_fetch_array ($result)) {
-			
+
 			echo "<tr>";
+
 			for ($i=0; $i<mysql_num_fields($result)-2; $i++) { // Ei näytetä tunnusta
 
 				if ($trow['alatila'] == 'H') $erotin = 'th'; else $erotin = 'td';
@@ -144,11 +146,16 @@
 					echo "<$erotin>$trow[$i]</$erotin>";
 				}
 			}
-			echo "<$erotin>$ulos<br>
-					<input type = 'hidden' name = 'mika' value = '$trow[tunnus]'><input type = 'submit' value = '".t("Siirrä")."'>
-					</$erotin></tr></form>";
+
+			echo "	<form action = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$kuka' method = 'post'>
+					<input type = 'hidden' name = 'mika' value = '$trow[tunnus]'>";
+			echo "	<$erotin>
+					$ulos
+					<input type = 'submit' value = '".t("Siirrä")."'>
+					</$erotin>
+					</form></tr>";
 		}
 		echo "</table><br>";
 	}
-	
+
 ?>

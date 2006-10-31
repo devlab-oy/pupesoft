@@ -54,6 +54,7 @@
 			$hyvitysrivi 		= "ON";
 		}
 
+		/*
 		// Katsotaan onko sarjanumerot vielä käytössä, tilausrivi on voitu poistaa
 		$query = "	SELECT sarjanumeroseuranta.tunnus sarjatunnus, tilausrivi.tunnus rivitunnus
 					FROM sarjanumeroseuranta
@@ -81,6 +82,7 @@
 			$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tunnus='$srow[sarjatunnus]'";
 			$sarjares = mysql_query($query) or pupe_error($query);
 		}
+		*/
 	}
 
 	//ollaan poistamassa sarjanumero-olio kokonaan
@@ -142,6 +144,7 @@
 						<input type='hidden' name='sarjatunnus' 		value='$sarjatunnus'>
 						<input type='hidden' name='sarjanumero_haku' 	value='$sarjanumero_haku'>
 						<input type='hidden' name='tuoteno_haku' 		value='$tuoteno_haku'>
+						<input type='hidden' name='nimitys_haku' 		value='$nimitys_haku'>
 						<input type='hidden' name='ostotilaus_haku' 	value='$ostotilaus_haku'
 						<input type='hidden' name='myyntitilaus_haku'	value='$myyntitilaus_haku'>
 						<input type='hidden' name='lisatieto_haku' 		value='$lisatieto_haku'>";
@@ -365,7 +368,7 @@
 		}
 	}
 
-	if (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "KERAA") and $hyvitysrivi != "ON") {
+	if (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA") and $hyvitysrivi != "ON") {
 		//Haetaan tuoteen tiedot
 		$query  = "	SELECT *
 					FROM tuote
@@ -390,7 +393,7 @@
 						$mlisa
 						order by sarjanumero";
 	}
-	elseif($from == "riviosto" or $from == "kohdista" or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "KERAA") and $hyvitysrivi == "ON")) {
+	elseif($from == "riviosto" or $from == "kohdista" or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA") and $hyvitysrivi == "ON")) {
 		// Haetaan vain sellaiset sarjanumerot jotka on vielä vapaita
 		$query    = "	SELECT sarjanumeroseuranta.*, tilausrivi.nimitys, tilausrivi.varattu, tilausrivi.kpl, lasku.tunnus otunnus
 						FROM sarjanumeroseuranta
@@ -402,20 +405,46 @@
 						order by sarjanumero";
 	}
 	else {
-		$lisa = "";
+		$lisa  = "";
+		$lisa2 = "";
 
-		if ($ostotilaus_haku != 0) {
-			$lisa .= " and lasku.tunnus='$ostotilaus_haku' ";
+		if ($ostotilaus_haku != "") {
+			if (is_numeric($ostotilaus_haku)) {
+				$lisa .= " and lasku.tunnus='$ostotilaus_haku' ";
+			}
+			else {
+				$lisa .= " and match (lasku.nimi) against ('$ostotilaus_haku*' IN BOOLEAN MODE) ";
+			}
 		}
-		if ($myyntitilaus_haku != 0) {
-			$lisa .= " and lasku.tunnus='$myyntitilaus_haku' ";
+
+		if ($myyntitilaus_haku != "") {
+			if (is_numeric($myyntitilaus_haku)) {
+				$lisa .= " and lasku.tunnus='$myyntitilaus_haku' ";
+			}
+			else {
+				$lisa .= " and match (lasku.nimi) against ('$myyntitilaus_haku*' IN BOOLEAN MODE) ";
+			}
 		}
-		if ($ostotilaus_haku != 0 and $myyntitilaus_haku != 0) {
+
+		if ($ostotilaus_haku != "" and $myyntitilaus_haku != "") {
 			$lisa .= " and lasku.tunnus in ('$ostotilaus_haku','$myyntitilaus_haku') ";
+		}
+
+		if ($ostotilaus_haku != "" or $myyntitilaus_haku != "") {
+			$lisa2 = "	LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and (sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus or sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus)
+						LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus ";
 		}
 
 		if ($lisatieto_haku) {
 			$lisa .= " and sarjanumeroseuranta.lisatieto like '$lisatieto_haku%' ";
+		}
+
+		if ($tuoteno_haku) {
+			$lisa .= " and sarjanumeroseuranta.tuoteno like '$tuoteno_haku%' ";
+		}
+
+		if ($nimitys_haku) {
+			$lisa .= " and tuote.nimitys like '$nimitys_haku%' ";
 		}
 
 		if ($sarjanumero_haku) {
@@ -430,11 +459,11 @@
 		$query = "	SELECT distinct sarjanumeroseuranta.*, tuote.nimitys
 					FROM sarjanumeroseuranta
 					LEFT JOIN tuote ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
-					LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and (sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus or sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus)
-					LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus
+					$lisa2
 					WHERE sarjanumeroseuranta.yhtio='$kukarow[yhtio]'
 					$lisa
-					ORDER BY sarjanumero";
+					ORDER BY tuoteno, myyntirivitunnus
+					LIMIT 100";
 	}
 	$sarjares = mysql_query($query) or pupe_error($query);
 
@@ -467,36 +496,37 @@
 	echo "</tr>";
 
 	echo "<form action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='$tunnuskentta' 		value='$rivitunnus'>";
-	echo "<input type='hidden' name='from' 				value='$from'>";
-	echo "<input type='hidden' name='muut_siirrettavat' 	value = '$muut_siirrettavat'>";
-	echo "<input type='hidden' name='toiminto' 			value='$toiminto'>";
-	echo "<input type='hidden' name='sarjatunnus' 		value='$sarjatunnus'>";
-	echo "<input type='hidden' name='otunnus' 			value='$otunnus'>";
+	echo "<input type='hidden' name='$tunnuskentta' 	value = '$rivitunnus'>";
+	echo "<input type='hidden' name='from' 				value = '$from'>";
+	echo "<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>";
+	echo "<input type='hidden' name='toiminto' 			value = '$toiminto'>";
+	echo "<input type='hidden' name='sarjatunnus' 		value = '$sarjatunnus'>";
+	echo "<input type='hidden' name='otunnus' 			value = '$otunnus'>";
 	echo "<tr>";
-	echo "<td><input type='text' size='10' name='sarjanumero_haku' 	value='$sarjanumero_haku'></td>";
-	echo "<td><input type='text' size='10' name='tuoteno_haku' 		value='$tuoteno_haku'></td>";
-	echo "<td><input type='text' size='10' name='nimitys_haku' 		value='$nimitys_haku'></td>";
-	echo "<td><input type='text' size='10' name='ostotilaus_haku' 	value='$ostotilaus_haku'></td>";
-	echo "<td><input type='text' size='10' name='myyntitilaus_haku'	value='$myyntitilaus_haku'></td>";
+	echo "<td><input type='text' size='10' name='sarjanumero_haku' 		value='$sarjanumero_haku'></td>";
+	echo "<td><input type='text' size='10' name='tuoteno_haku' 			value='$tuoteno_haku'></td>";
+	echo "<td><input type='text' size='10' name='nimitys_haku' 			value='$nimitys_haku'></td>";
+	echo "<td><input type='text' size='10' name='ostotilaus_haku' 		value='$ostotilaus_haku'></td>";
+	echo "<td><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
 	echo "<td><input type='text' size='10' name='lisatieto_haku' 		value='$lisatieto_haku'></td>";
 	echo "<td></td><td></td><td></td><td></td><td><input type='submit' value='Hae'></td>";
 	echo "</tr>";
 	echo "</form>";
 
 	echo "<form action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='$tunnuskentta' 		value='$rivitunnus'>";
+	echo "<input type='hidden' name='$tunnuskentta' 	value='$rivitunnus'>";
 	echo "<input type='hidden' name='from' 				value='$from'>";
-	echo "<input type='hidden' name='muut_siirrettavat' 	value = '$muut_siirrettavat'>";
+	echo "<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>";
 	echo "<input type='hidden' name='toiminto' 			value='$toiminto'>";
 	echo "<input type='hidden' name='sarjatunnus' 		value='$sarjatunnus'>";
 	echo "<input type='hidden' name='otunnus' 			value='$otunnus'>";
 	echo "<input type='hidden' name='formista' 			value='kylla'>";
 	echo "<input type='hidden' name='sarjanumero_haku' 	value='$sarjanumero_haku'>";
 	echo "<input type='hidden' name='tuoteno_haku' 		value='$tuoteno_haku'>";
+	echo "<input type='hidden' name='nimitys_haku' 		value='$nimitys_haku'>";
 	echo "<input type='hidden' name='ostotilaus_haku' 	value='$ostotilaus_haku'>";
 	echo "<input type='hidden' name='myyntitilaus_haku'	value='$myyntitilaus_haku'>";
-	echo "<input type='hidden' name='lisatieto_haku' 		value='$lisatieto_haku'>";
+	echo "<input type='hidden' name='lisatieto_haku' 	value='$lisatieto_haku'>";
 
 	while ($sarjarow = mysql_fetch_array($sarjares)) {
 
@@ -545,7 +575,7 @@
 			if ($tunnuskentta == "ostorivitunnus" and $sarjarow["kpl"] != 0) {
 				echo "<td>".t("Lukittu")."</td>";
 			}
-			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "KERAA") or ($from == "riviosto" or $from == "kohdista")) {
+			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA") or ($from == "riviosto" or $from == "kohdista")) {
 				echo "<input type='hidden' name='sarjat[]' value='$sarjarow[tunnus]'>";
 				echo "<td><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit()'></td>";
 			}
@@ -565,7 +595,7 @@
 
 
 		//jos saa muuttaa niin näytetään muokkaa linkki
-		echo "<td><a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku'>".t("Muokkaa")."</a></td>";
+		echo "<td><a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku'>".t("Muokkaa")."</a></td>";
 
 		if ($sarjarow['ostorivitunnus'] == "" and $sarjarow['myyntirivitunnus'] == "") {
 			echo "<td><a href='$PHP_SELF?toiminto=POISTA&$tunnuskentta=$rivitunnus&from=$from&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]'>".t("Poista")."</a></td>";
@@ -588,7 +618,7 @@
 			$ylisa = "&liitostunnus=$sarjarow[tunnus]&uusi=1";
 		}
 
-		echo "<td class='menu' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\"><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF!!!!$tunnuskentta=$rivitunnus!!from=$from!!otunnus=$otunnus'>".t("Lisätiedot")."</a></td>";
+		echo "<td class='menu' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\"><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF!!!!$tunnuskentta=$rivitunnus!!from=$from!!otunnus=$otunnus!!sarjanumero_haku=$sarjanumero_haku!!tuoteno_haku=$tuoteno_haku!!nimitys_haku=$nimitys_haku!!ostotilaus_haku=$ostotilaus_haku!!myyntitilaus_haku=$myyntitilaus_haku!!lisatieto_haku=$lisatieto_haku'>".t("Lisätiedot")."</a></td>";
 
 		echo "</tr>";
 
@@ -669,7 +699,7 @@
 
 	echo "<br>";
 
-	if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS") {
+	if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA") {
 		echo "<form method='post' action='tilaus_myynti.php'>
 			<input type='hidden' name='toim' value='$from'>
 			<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>

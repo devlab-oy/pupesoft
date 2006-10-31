@@ -3,7 +3,7 @@
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	if ($tee == 'Z') { //Olemme tulossa takain suorituksista
-		$query= "SELECT tilino FROM yriti 
+		$query= "SELECT tilino FROM yriti
 				WHERE tunnus = $mtili and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($result) != 1) {
@@ -20,7 +20,7 @@
 
 	if ($tee == 'X') {
 	//Pyyntö seuraavasta tiliotteesta
-		$query= "SELECT * FROM tiliotedata 
+		$query= "SELECT * FROM tiliotedata
 				WHERE alku > '$pvm' and tilino = '$tilino' and tyyppi ='1'
 				ORDER BY tunnus LIMIT 1";
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
@@ -34,7 +34,7 @@
 			$tyyppi=1;
 			$pvm=$tiliotedatarow['alku'];
 		}
-		
+
 	}
 
 	if ($tee == 'S') {
@@ -48,20 +48,20 @@
 				$pvm = $vv . "-" . $kk . "-" . $pp;
 			}
 	}
-		
+
 
 	if ($tee == 'T') {
 		$tee='S'; //Pvm on jo kunnossa
 	}
-	
+
 	if ($tee == 'S') {
 		if ($tyyppi=='3') {
-			$query= "SELECT * FROM tiliotedata 
+			$query= "SELECT * FROM tiliotedata
 						WHERE alku = '$pvm' and tilino = '$tilino' and tyyppi ='$tyyppi'
 						ORDER BY tieto";
 		}
 		else {
-			$query= "SELECT * FROM tiliotedata 
+			$query= "SELECT * FROM tiliotedata
 						WHERE alku = '$pvm' and tilino = '$tilino' and tyyppi ='$tyyppi'
 						ORDER BY tunnus";
 		}
@@ -74,7 +74,7 @@
 		{
 			while ($tiliotedatarow=mysql_fetch_array ($tiliotedataresult)) {
 				$tietue = $tiliotedatarow['tieto'];
-		
+
 				if ($tiliotedatarow['tyyppi'] == 1) {
 					require "inc/tiliote.inc";
 				}
@@ -127,7 +127,7 @@
 
 		$query = "SELECT alku, concat_ws(' ', yriti.nimi, yriti.tilino) tili, if(tyyppi='1', 'tiliote', if(tyyppi='2','lmp','viitesiirrot')) laji, tyyppi, yriti.tilino
 					FROM tiliotedata, yriti
-			                WHERE tiliotedata.yhtio='$kukarow[yhtio]' and tiliotedata.yhtio=yriti.yhtio and tiliotedata.tilino=yriti.tilino 
+			                WHERE tiliotedata.yhtio='$kukarow[yhtio]' and tiliotedata.yhtio=yriti.yhtio and tiliotedata.tilino=yriti.tilino
 					GROUP BY alku, tili, laji
 					ORDER BY alku desc, tiliotedata.tilino, laji
 					LIMIT 30";
@@ -137,26 +137,28 @@
 			exit;
 		}
 		echo "<table>";
-		echo "<tr>";		
+		echo "<tr>";
 		for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i)) ."</th>";
 		}
 		echo "</tr>";
+
 		while ($row=mysql_fetch_array ($result)) {
 			echo "<tr>";
 			for ($i=0; $i<mysql_num_fields($result)-2 ; $i++) {
 				echo "<td>$row[$i]</td>";
 			}
-			echo "<td><form name = 'valikko' action = '$PHP_SELF' method='post'>
-						<input type = 'submit' value = '".t("Valitse")."'>
-			  			<input type='hidden' name='tee' value='T'>
-						<input type='hidden' name='pvm' value='$row[alku]'>
-						<input type='hidden' name='tyyppi' value='$row[tyyppi]'>
-						<input type='hidden' name='tilino' value='$row[tilino]'></form>
-				
-				</td></tr>";
+			echo "	<form name = 'valikko' action = '$PHP_SELF' method='post'>
+					<input type='hidden' name='tee' value='T'>
+					<input type='hidden' name='pvm' value='$row[alku]'>
+					<input type='hidden' name='tyyppi' value='$row[tyyppi]'>
+					<input type='hidden' name='tilino' value='$row[tilino]'>
+					<td><input type = 'submit' value = '".t("Valitse")."'></td>
+			  		</form>
+			  		</tr>";
 		}
 		echo "</table></form>";
+
 		$tee = "";
 		$formi = 'valikko';
 		$kentta = 'pp';

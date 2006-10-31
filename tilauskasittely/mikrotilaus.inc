@@ -31,11 +31,11 @@ if ($tee == "file") {
 			$valinta='';
 
 			// luetaan rivi tiedostosta..
-			$poista	  	= array("'", "\\", " ");
+			$poista	  	= array("\"", "'", "\\", " ");
 			$rivi	  	= str_replace($poista,"",$rivi);
 			$rivi	  	= explode("\t", trim($rivi));
 
-			$tuoteno  	= $rivi[0];
+			$tuoteno	= trim($rivi[0]);
 			$kpl	  	= str_replace(",", ".", $rivi[1]);
 			$alv 		= "";
 

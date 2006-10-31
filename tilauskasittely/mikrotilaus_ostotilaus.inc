@@ -28,14 +28,14 @@ if ($tee == "file") {
 			$tuoteerror 	= 0;
 
 			// luetaan rivi tiedostosta..
-			$poista	  = array("\"", "'", "\\", " ");
-			$rivi	  = str_replace($poista,"",$rivi);
-			$rivi	  = explode("\t", trim($rivi));
+			$poista	  	= array("\"", "'", "\\", " ");
+			$rivi	  	= str_replace($poista,"",$rivi);
+			$rivi	  	= explode("\t", trim($rivi));
 
-			$tuoteno  = trim($rivi[0]);
-			$kpl  = (float) str_replace(",", ".", $rivi[1]);
+			$tuoteno	= trim($rivi[0]);
+			$kpl  		= (float) str_replace(",", ".", $rivi[1]);
 
-			$toimaika = $rivi[2];
+			$toimaika 	= $rivi[2];
 
 			if (trim($toimaika) == "") {
 				$toimaika = $laskurow["toimaika"];

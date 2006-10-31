@@ -11,12 +11,12 @@ if (!empty($HTTP_GET_VARS["oikeus"]) ||
 }
 
 echo "<font class='head'>".t("Manuaalinen suoritusten kohdistaminen (laskujen valinta)")."</font><hr>";
-$query = "SELECT suoritus.summa, concat(viite, viesti) tieto, suoritus.tilino, maksupvm, kirjpvm, nimi_maksaja, asiakas_tunnus, suoritus.tunnus, tiliointi.tilino ttilino FROM suoritus, tiliointi
-			 WHERE suoritus.yhtio ='$kukarow[yhtio]' and suoritus.tunnus='$suoritus_tunnus' and suoritus.yhtio=tiliointi.yhtio and suoritus.ltunnus=tiliointi.tunnus";
-
-//echo "<p>$query";
-//echo "<font class='head'> suoritus tunnus: $suoritus_tunnus</font>";
-
+$query = "	SELECT suoritus.summa, concat(viite, viesti) tieto, suoritus.tilino, maksupvm, kirjpvm, nimi_maksaja, asiakas_tunnus, suoritus.tunnus, tiliointi.tilino ttilino
+			FROM suoritus, tiliointi
+			 WHERE suoritus.yhtio ='$kukarow[yhtio]'
+			 and suoritus.tunnus='$suoritus_tunnus'
+			 and suoritus.yhtio=tiliointi.yhtio
+			 and suoritus.ltunnus=tiliointi.tunnus";
 $result = mysql_query($query) or pupe_error($query);
 
 //N‰ytet‰‰n suorituksen tiedot!
@@ -26,8 +26,8 @@ for ($i = 0; $i < mysql_num_fields($result)-3; $i++) {
 }
 echo "</tr>";
 
-$suoritus=mysql_fetch_array ($result);
-	
+$suoritus = mysql_fetch_array ($result);
+
 echo "<tr>";
 
 for ($i=0; $i<mysql_num_fields($result)-3; $i++) {
@@ -155,7 +155,7 @@ while ($maksurow=mysql_fetch_array ($result)) {
 	  echo "<input type='hidden' name='lasku_summa' value='$maksurow[0]'>";
 	  echo "</th><th>";
 	  echo "<input type='checkbox' name='lasku_tunnukset_kale[]' value='$lasku_tunnus' onclick='javascript:paivita2(this)'>";
-	  echo "<input type='hidden' name='lasku_kasumma' value='$bruttokale'>";	
+	  echo "<input type='hidden' name='lasku_kasumma' value='$bruttokale'>";
 	  echo "</th>";
   }
   else {
@@ -218,6 +218,7 @@ function paivitaSumma() {
   var i;
   var summa=0.0;
 ";
+
 if($laskucount==1)
      echo "
       if(document.forms[2].elements['lasku_tunnukset[]'].checked) {
@@ -240,17 +241,9 @@ else echo "
     }
 ";
 
-/* function round(number) {
-    return Math.round(number*Math.pow(10,2))/Math.pow(10,2);
-}
-function round(number) {
-    return parseInt(number*100+0.5)/100;
-}
- */
-
 echo "
-  document.forms[0].summa.value=round(summa);
-  document.forms[0].jaljella.value=round($suoritus_summa-summa);
+  document.forms[0].summa.value=Math.round(summa*100)/100;
+  document.forms[0].jaljella.value=Math.round(($suoritus_summa-summa)*100)/100;
 }
 
 function round(number) {
@@ -267,7 +260,7 @@ function osasuo(form) {
   }
 }
 
-function validate(form) {	
+function validate(form) {
 	var maara=0;
 	var kmaara=0;
 ";
@@ -284,7 +277,9 @@ if($laskucount>1) echo "
          		kmaara+=1.0;
       		}
     	}
+
 	maara = maara + kmaara;
+
 	if(document.forms[2].osasuoritus.checked) {
 		if ((kmaara==0) == false) {
 			alert ('".t("Jos osasuoritus, ei voi valita kassa-alennusta")."');
@@ -294,8 +289,7 @@ if($laskucount>1) echo "
 			alert ('".t("Jos osasuoritus, pit‰‰ valita vain ja ainoastaan yksi lasku")."! ' + maara + ' valittu');
 			return false;
 		}
-	}
-";
+	}";
 
 if($laskucount==1) echo "
 
@@ -312,14 +306,19 @@ echo "
 		alert('".t("Jotta voit kohdistaa, on ainakin yksi lasku valittava. Jos mit‰‰n kohdistettavaa ei lˆydy, klikkaa menusta Manuaalikohdistus p‰‰st‰ksesi takaisin alkuun")."');
 		return false;
 	}
+
 	var jaljella=document.forms[0].jaljella.value;
+	var kokolasku=document.forms[0].summa.value
 	var suoritus_summa=$suoritus_summa;
+
 	if(suoritus_summa==0)
 		return true;
-	if (document.forms[2].osasuoritus.checked == false) { 
-		var alennusprosentti=(-100.0*jaljella/suoritus_summa);
-		if(jaljella<0&&alennusprosentti>5) {
-			if(confirm('Haluatko varmasti antaa '+alennusprosentti+'% alennuksen? ('+(-1.0*jaljella)+' e)')==1) {
+
+	if (document.forms[2].osasuoritus.checked == false) {
+		var alennusprosentti = Math.round(100*(1-(suoritus_summa/kokolasku)));
+
+		if(jaljella<0) {
+			if(confirm('Haluatko varmasti antaa '+alennusprosentti+'% alennuksen? ('+(-1.0*jaljella)+' $yhtiorow[valkoodi])')==1) {
 			        return true;
 			} else return false;
 		}

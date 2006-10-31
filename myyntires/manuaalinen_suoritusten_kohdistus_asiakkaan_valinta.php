@@ -32,7 +32,7 @@ echo "	<table>
 		<th>".t("Avoimia laskuja")."
 		</tr>";
 
-while ($asiakas=mysql_fetch_object ($result)) {
+while ($asiakas = mysql_fetch_array($result)) {
 
 	// Onko asiakkaalla avoimia laskuja???
 	$query = "	SELECT COUNT(*) maara
@@ -42,10 +42,10 @@ while ($asiakas=mysql_fetch_object ($result)) {
 				and tila = 'U'
 				and ytunnus = '$asiakas[ytunnus]'";
 	$lresult = mysql_query($query) or pupe_error($query);
-	$lasku=mysql_fetch_array ($lresult);
+	$lasku = mysql_fetch_array ($lresult);
 
 	echo "<tr>
-			<td>$asiakas[nimi]]</td>
+			<td>$asiakas[nimi]</td>
 			<td>$asiakas[maara] / $asiakas[viitteita]</td>
 			<td>$lasku[maara]</td>";
 

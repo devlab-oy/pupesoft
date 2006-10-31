@@ -25,57 +25,57 @@ if ($tee == "file") {
 			$tila			= '';
 			$valinta		= '';
 			$varaosavirhe 	= '';
-			$tuoteerror 	= 0;			
-			
+			$tuoteerror 	= 0;
+
 			// luetaan rivi tiedostosta..
-			$poista	  = array("'", "\\", " ");
+			$poista	  = array("\"", "'", "\\", " ");
 			$rivi	  = str_replace($poista,"",$rivi);
 			$rivi	  = explode("\t", trim($rivi));
 
-			$tuoteno  = $rivi[0];
+			$tuoteno  = trim($rivi[0]);
 			$kpl  = (float) str_replace(",", ".", $rivi[1]);
-						
+
 			$toimaika = $rivi[2];
-			
+
 			if (trim($toimaika) == "") {
 				$toimaika = $laskurow["toimaika"];
 			}
-			
+
 			$hinta 	  = (float) str_replace(",", ".", $rivi[3]);
 			$ale	  = (float) str_replace(",", ".", $rivi[4]);
 			$netto 	  = $rivi[5];
-			
+
 			if ($tuoteno != '' and $kpl != 0) {
-				
+
 				///* Toimittajan tuotenumerospecial*///
-				if (substr($tuoteno,0,1) == '?') {			
+				if (substr($tuoteno,0,1) == '?') {
 					$query = "	SELECT *
 								FROM tuotteen_toimittajat
 								JOIN tuote USING (yhtio, tuoteno)
-								WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' 
+								WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 								and tuotteen_toimittajat.toim_tuoteno='".substr($tuoteno,1)."'";
 				}
 				else {
 					$query = "	SELECT *, tuote.tuoteno as tuoteno
 								FROM tuote
 								LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.oletus!=''
-								WHERE tuote.yhtio='$kukarow[yhtio]' 
+								WHERE tuote.yhtio='$kukarow[yhtio]'
 								and tuote.tuoteno='$tuoteno'";
 				}
-				$result = mysql_query($query) or pupe_error($query);		
-				
+				$result = mysql_query($query) or pupe_error($query);
+
 				if (mysql_num_rows($result) == 1) {
 
-					$trow = mysql_fetch_array($result);	
+					$trow = mysql_fetch_array($result);
 					$tuoteno = $trow["tuoteno"];
-		
-					require('lisaarivi.inc');																																																																							
+
+					require('lisaarivi.inc');
 				}
 				else {
 					echo "<font class='message'>".t("Tuotenumeroa")." $tuoteno ".t("ei löydy")."!</font><br>";
-				}																																																													
+				}
 			}
-			
+
 			$tuoteno	= '';
 			$kpl		= '';
 			$hinta		= '';
@@ -84,7 +84,7 @@ if ($tee == "file") {
 			$var		= '';
 			$toimaika	= '';
 			$kommentti	= '';
-			$rivitunnus = '';	
+			$rivitunnus = '';
 
 			$rivi = fgets($file, 4096);
 		} // end while eof
@@ -101,7 +101,7 @@ if ($tee == "file") {
 
 if ($tee == 'mikrotila') {
 	echo "<font class='head'>".t("Ostotilaus").":</font><hr><br>";
-	
+
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 			<input type='hidden' name='tee' value='file'>
@@ -115,8 +115,8 @@ if ($tee == 'mikrotila') {
 
 			<br>
 			<table>
-			<tr>";	
-	echo "	
+			<tr>";
+	echo "
 			<th>".t("Valitse tiedosto").":</th>
 			<td><input name='userfile' type='file'></td>
 			<td class='back'><input type='submit' value='".t("Läheta")."'></td>

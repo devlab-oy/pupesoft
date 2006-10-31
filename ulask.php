@@ -272,10 +272,12 @@ if ($tee == 'I') {
 	if (strlen($ytunnus) > 0) {
 		$query = "SELECT * FROM toimi WHERE tunnus = '$ytunnus'";
 		$result = mysql_query($query) or pupe_error($query);
+
 		if (mysql_num_rows($result) != 1) {
-			echo "".t("Toimittajaa")." $ytunnus ".t("ei löytynytkään")."!";
+			echo t("Toimittajaa")." $ytunnus ".t("ei löytynytkään")."!";
 			exit;
 		}
+
 		$trow = mysql_fetch_array ($result);
 	}
 
@@ -453,7 +455,7 @@ if ($tee == 'P' or $tee == 'E') {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
-			echo "".t("Toimittajaa")." $ytunnus ".t("ei löytynytkään")."!";
+			echo t("Toimittajaa")." $ytunnus ".t("ei löytynytkään")."!";
 			exit;
 		}
 
@@ -962,7 +964,7 @@ if ($tee == 'I') {
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 1) {
-		echo "".t("Valuuttaa")." $valkoodi ".t("ei löytynytkään")."!";
+		echo t("Valuuttaa")." $valkoodi ".t("ei löytynytkään")."!";
 		exit;
 	}
 

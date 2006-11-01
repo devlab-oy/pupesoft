@@ -160,7 +160,9 @@ if (sizeof($kieli) > 0) {
 		echo "<tr>";
 		for ($i=1; $i<mysql_num_fields($result); $i++) echo "<th>".mysql_field_name($result, $i)."</th>";
 		echo "</tr>";
-
+		
+		$laskkaannos = 0;
+		
 		while ($row = mysql_fetch_array($result)) {
 			echo "<tr>";
 			echo "<td>$row[fi]</td>";
@@ -170,9 +172,13 @@ if (sizeof($kieli) > 0) {
 			for ($i=2; $i<mysql_num_fields($result); $i++) {
 				echo "<td><input type='text' size='30' name='".mysql_field_name($result, $i)."[$row[tunnus]]' value='".htmlspecialchars($row[$i],ENT_QUOTES)."'></td>";
 			}
-
+			
+			$laskkaannos++;
+			
 			echo "</tr>";
 		}
+		
+		echo "<tr><th>Yhteens‰ k‰‰nt‰m‰tt‰ $laskkaannos</th></tr>";
 
 		echo "</table>";
 		echo "<input type='hidden' name='maxtunnus' value='$maxtunnus'>";

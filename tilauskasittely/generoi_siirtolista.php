@@ -214,7 +214,7 @@
 					$delresult = mysql_query($query) or pupe_error($query);
 				}
 				elseif ($kukarow['kesken'] != 0){
-					echo "<font class='error'>".t("APUAAAA tilauksella $kukarow[kesken] on rivejä vaikka luultiin että ei olisi!!!!!")."<br></font><br>";
+					echo "<font class='error'>".t("APUAAAA tilauksella")." $kukarow[kesken] ".t("on rivejä vaikka luultiin että ei olisi!!!!!")."<br></font><br>";
 				}
 
 			}

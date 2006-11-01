@@ -4,7 +4,24 @@ echo "<b>".t("Sidottup‰‰oma")."</b><hr>";
 
 echo "<form action='$PHP_SELF' method='post'><input type='hidden' name='toim' value='ostovelat'>";
 echo "<table><tr><th></th><th></th>";
-for ($j=0; $j<12; $j++) {
+
+if (isset($tkausi)) {
+	$query = "SELECT *
+			FROM tilikaudet
+			WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
+	$vresult = mysql_query($query) or pupe_error($query);
+	if (mysql_num_rows($vresult) == 1)
+		$tilikaudetrow=mysql_fetch_array($vresult);
+}
+
+if (is_array($tilikaudetrow)) {
+	$yhtiorow['tilikausi_alku'] = $tilikaudetrow['tilikausi_alku'];
+	$yhtiorow['tilikausi_loppu'] = $tilikaudetrow['tilikausi_loppu'];
+}
+
+$raja = '0000-00';
+
+while ($raja < substr($yhtiorow['tilikausi_loppu'],0,7)) {
 	$vuosi=substr($yhtiorow['tilikausi_alku'],0,4);
 	$kk=substr($yhtiorow['tilikausi_alku'],5,2);
 	$kk += $j;
@@ -13,9 +30,15 @@ for ($j=0; $j<12; $j++) {
 		$kk-=12;
 	}
 	if ($kk<10) $kk= '0'.$kk;
- 	echo "<th>$vuosi-$kk</th>";
+	
+	$raja = $vuosi . "-" . $kk;
+	
+ 	echo "<th>$raja</th>";
+ 	$j++;
 }
 echo "</tr>";
+
+$sarakkeita = $j;
 
 for ($i=1; $i<8; $i++) {
 
@@ -41,7 +64,10 @@ for ($i=1; $i<8; $i++) {
 		
 	if (trim($taso[$i]) != '') {
 		$lisa='';
-		for ($j=0; $j<12; $j++) {
+		$raja='0000-00';
+		$j=0;
+		
+		while ($raja < substr($yhtiorow['tilikausi_loppu'],0,7)) {
 			$vuosi=substr($yhtiorow['tilikausi_alku'],0,4);
 			$kk=substr($yhtiorow['tilikausi_alku'],5,2);
 			$kk += $j;
@@ -51,17 +77,21 @@ for ($i=1; $i<8; $i++) {
 			}
 			if ($kk<10) $kk= '0'.$kk;
 			
+			$raja = $vuosi . "-" . $kk;
+		
 			if ($kumulatiivinen != '')
 				$merkki = "<=";
 			else
 				$merkki = "=";
-				
+
 			if ($tuhat != '')
-				$lisa.= ", round(sum(if(left(tapvm,7) $merkki '$vuosi-$kk', summa,0))/1000,0)";
+				$lisa.= ", round(sum(if(left(tapvm,7) $merkki '$raja', summa,0))/1000,0)";
 			else
-				$lisa.= ", sum(if(left(tapvm,7) $merkki '$vuosi-$kk', summa,0))";
+				$lisa.= ", sum(if(left(tapvm,7) $merkki '$raja', summa,0))";
 	
+			$j++;
 		}
+		
 		$query = "SELECT taso.nimi $lisa
 					FROM tili, tiliointi USE INDEX (tiliointi_index), taso
 					WHERE tili.yhtio = '$kukarow[yhtio]'
@@ -88,19 +118,39 @@ for ($i=1; $i<8; $i++) {
 		}
 	}
 	else 
-		for ($j=0; $j<13; $j++) echo "<td></td>";
+		for ($j=0; $j<$sarakkeita+1; $j++) echo "<td></td>";
 	
 	echo "</tr>";
 }
 echo "<tr><th></th><th>".t('Yhteens‰')."</th>";
-for ($j=1; $j<13; $j++) echo "<th>$col[$j]</th>";
+for ($j=1; $j<$sarakkeita +1; $j++) echo "<th>$col[$j]</th>";
 echo "</tr>";
 if ((!isset($kumulatiivinen)) and (!is_array($taso))) $kumulatiivinen='on';
 if ($kumulatiivinen != '') $kumulatiivinen = "checked";
 if ((!isset($tuhat)) and (!is_array($taso))) $tuhat='on';
 if ($tuhat != '') $tuhat = "checked";
 echo "</table>";
-echo "<table><tr><td><input type='checkbox' name='kumulatiivinen' $kumulatiivinen> ".t("Kumulatiivinen")."</td>";
-echo "<td><input type='checkbox' name='tuhat' $tuhat> ".t("Jaa luvut 1000:lla")."</td><td><input type='submit' value='".t("N‰yt‰")."'></td></tr></table></form>";
+
+echo "<table><tr>";
+
+echo "<td>".t("Tilikausi");
+$query = "SELECT *
+			FROM tilikaudet
+			WHERE yhtio = '$kukarow[yhtio]'
+			ORDER BY tilikausi_alku";
+$vresult = mysql_query($query) or pupe_error($query);
+echo " <select name='tkausi'>";
+while ($vrow=mysql_fetch_array($vresult)) {
+	$sel="";
+	if ($tkausi == $vrow['tunnus']) {
+		$sel = "selected";
+	}
+	echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
+}
+echo "</select></td>";
+
+echo "<td><input type='checkbox' name='kumulatiivinen' $kumulatiivinen> ".t("Kumulatiivinen")."</td>";
+echo "<td><input type='checkbox' name='tuhat' $tuhat> ".t("Jaa luvut 1000:lla")."</td>";
+echo "<td><input type='submit' value='".t("N‰yt‰")."'></td></tr></table></form>";
 
 ?>

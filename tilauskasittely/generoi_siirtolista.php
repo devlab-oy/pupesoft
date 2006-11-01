@@ -205,8 +205,8 @@
 			echo "</table><br>";
 			//echo "lask = $lask<br><br>";
 			if ($lask == 0) {
-				echo "<font class='error'>".t("Yht‰‰n rivi‰ ei voitu toimittaa l‰hdevarastosta kohdevarastoon")."!!!!</font>";
-				$query = "	SELECT count(*) FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
+				echo "<font class='error'>".t("Yht‰‰n rivi‰ ei voitu toimittaa l‰hdevarastosta kohdevarastoon")."!!!!</font><br>";
+				$query = "	SELECT tunnus FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 				$okdelresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($okdelresult) == 0 and $kukarow['kesken'] != 0) {
@@ -214,7 +214,7 @@
 					$delresult = mysql_query($query) or pupe_error($query);
 				}
 				elseif ($kukarow['kesken'] != 0){
-					echo "<font class='error'>".t("APUAAAA tilauksella $kukarow[kesken] on rivej‰ vaikka luultiin ett‰ ei olisi!!!!!")."<br></font>";
+					echo "<font class='error'>".t("APUAAAA tilauksella $kukarow[kesken] on rivej‰ vaikka luultiin ett‰ ei olisi!!!!!")."<br></font><br>";
 				}
 
 			}

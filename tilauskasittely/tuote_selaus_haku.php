@@ -82,29 +82,31 @@
 			// Jos ollaan valkattu sarjanumerollisia tuotteita lisättäväksi niin hoidetaan tässä tää, että sarjanumeroiden liitokset lisätään kanssa
 			if (is_array($tilsarjatunnus)) {
 				foreach ($tilsarjatunnus as  $yht_i => $sarjatunnus) {
-					//Haetaan sarjanumeron ja siihen liitettyjen sarjanumeroiden kaikki tiedot.
-					$query = "	SELECT *
-								FROM sarjanumeroseuranta
-								WHERE tunnus = '$sarjatunnus' and perheid != 0";
-					$sarres = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($sarres) > 0) {
-						$sarrow = mysql_fetch_array($sarres);
-
-						$query = "	SELECT tuoteno, tunnus
+					if ($tilkpl[$yht_i] > 0) {
+						//Haetaan sarjanumeron ja siihen liitettyjen sarjanumeroiden kaikki tiedot.
+						$query = "	SELECT *
 									FROM sarjanumeroseuranta
-									WHERE yhtio = '$sarrow[yhtio]'
-									and perheid = '$sarrow[perheid]'
-									and tunnus != '$sarrow[tunnus]'";
-						$sarres1 = mysql_query($query) or pupe_error($query);
+									WHERE tunnus = '$sarjatunnus' and perheid != 0";
+						$sarres = mysql_query($query) or pupe_error($query);
 
-						while($sarrow1 = mysql_fetch_array($sarres1)) {
-							$yht_i_max = count($yht_i)+1;
+						if (mysql_num_rows($sarres) > 0) {
+							$sarrow = mysql_fetch_array($sarres);
 
-							$tiltuoteno[$yht_i_max]		= $sarrow1["tuoteno"];
-							$tilkpl[$yht_i_max]			= 1.00;
-							$tilsarjatunnus[$yht_i_max]	= $sarrow1["tunnus"];
-							$tilpaikka[$yht_i_max]		= $tilpaikka[$yht_i];
+							$query = "	SELECT tuoteno, tunnus
+										FROM sarjanumeroseuranta
+										WHERE yhtio = '$sarrow[yhtio]'
+										and perheid = '$sarrow[perheid]'
+										and tunnus != '$sarrow[tunnus]'";
+							$sarres1 = mysql_query($query) or pupe_error($query);
+
+							while($sarrow1 = mysql_fetch_array($sarres1)) {
+								$yht_i_max = count($yht_i)+1;
+
+								$tiltuoteno[$yht_i_max]		= $sarrow1["tuoteno"];
+								$tilkpl[$yht_i_max]			= 1.00;
+								$tilsarjatunnus[$yht_i_max]	= $sarrow1["tunnus"];
+								$tilpaikka[$yht_i_max]		= $tilpaikka[$yht_i];
+							}
 						}
 					}
 				}
@@ -368,7 +370,7 @@
 					group_concat(concat(toimi.tyyppi_tieto,'##',tuotteen_toimittajat.liitostunnus)) toimitiedot,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno
 					FROM tuote
-					LEFT JOIN sarjanumeroseuranta ON sarjanumeroseuranta.$yhtiot and tuote.tuoteno=sarjanumeroseuranta.tuoteno and sarjanumeroseuranta.ostorivitunnus > 0
+					LEFT JOIN sarjanumeroseuranta ON sarjanumeroseuranta.$yhtiot and tuote.tuoteno=sarjanumeroseuranta.tuoteno and sarjanumeroseuranta.myyntirivitunnus = 0
 					LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno
 					LEFT JOIN toimi ON 	toimi.yhtio         	= tuotteen_toimittajat.yhtio
 										and toimi.tunnus        = tuotteen_toimittajat.liitostunnus

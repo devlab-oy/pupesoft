@@ -53,7 +53,7 @@
 					and asiakas_ryhma = ''
 					and ryhma = '$trow[aleryhma]'
 					and ryhma != ''
-					and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+					and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 					and (alennus < 0 or left(alennus,1) = '-')
 					ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 					LIMIT 1";
@@ -103,7 +103,7 @@
 						and ryhma = '$trow[aleryhma]'
 						and ryhma != ''
 						and ytunnus = ''
-						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and (alennus < 0 or left(alennus,1) = '-')
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
@@ -153,7 +153,7 @@
 						and ytunnus != ''
 						and ryhma = '$trow[aleryhma]'
 						and ryhma != ''
-						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus = 999.99
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
@@ -192,7 +192,7 @@
 						and ytunnus != ''
 						and tuoteno = '$trow[tuoteno]' 
 						and tuoteno != ''
-						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
@@ -231,7 +231,7 @@
 						and ytunnus != ''
 						and ryhma = '$trow[aleryhma]' 
 						and ryhma != ''
-						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
@@ -271,7 +271,7 @@
 						and tuoteno = '$trow[tuoteno]'
 						and tuoteno != ''
 						and ytunnus = ''
-						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
@@ -311,7 +311,7 @@
 						and ryhma = '$trow[aleryhma]' 
 						and ryhma != ''
 						and ytunnus = ''
-						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
@@ -396,7 +396,7 @@
 					and ytunnus != ''
 					and tuoteno = '$trow[tuoteno]' 
 					and tuoteno != ''
-					and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+					and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 					and alennus > 0
 					and alennus <= 100
 					ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
@@ -419,7 +419,7 @@
 						and ytunnus != ''
 						and ryhma = '$trow[aleryhma]'
 						and ryhma != ''
-						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
@@ -444,7 +444,7 @@
 						and tuoteno = '$trow[tuoteno]'
 						and tuoteno != ''
 						and ytunnus = ''
-						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
@@ -469,7 +469,7 @@
 						and ryhma = '$trow[aleryhma]'
 						and ryhma != ''
 						and ytunnus = ''
-						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 

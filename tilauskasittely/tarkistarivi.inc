@@ -15,7 +15,7 @@
 		$tilausok++;
 	}
 
-	if ($row["hinta"] == 0 and !in_array($row["var"], array('J','S','P','O','H')) and strtoupper($trow["tuotetyyppi"]) != 'R') {
+	if ($row["hinta"] == 0 and !in_array($row["var"], array('J','S','P','O','H','V')) and strtoupper($trow["tuotetyyppi"]) != 'R') {
 		$varaosavirhe .= t("HUOM: Hinta puuttuu!")."<br>";
 		$riviok++;
 		$tilausok++;
@@ -34,20 +34,21 @@
 		$tilausok++;
 	}
 
-	if (!in_array($row["var"], array('','P','J','H','S','O','T','V','A','B'))) {
+	if (!in_array($row["var"], array('','P','J','H','S','O','T','U','V','A','B'))) {
 		// T‰ss‰ varrien selitykset
 		// P - Puute
 		// J - Jt
 		// H - V‰kisinhyv‰ksytty
-		// S - Suoratoimitus
+		// S - Suoratoimitus pupesoft toimittajalta suoraan asiakkaalle
 		// O - Yleinen OK:aus, ohittaa tiettyj‰ tsekkej‰
-		// T - Tilataan jotain toimittajalta
+		// T - Tilataan joltain toimittajalta omaan varastoon
+		// U - Tilataan joltain toimittajalta suoraan asiakkaalle
 		// V - Tehdaslis‰varusterivi
 		// A - Myyntitilirivi joka laskutetaan asiakkaalta
 		// B - Myyntitilirivi joka palautetaan myyntitilist‰ omaan varastoon
 
 
-		$varaosavirhe .= t("VIRHE: Var voi olla tyhj‰, P, J, H, S, T, V, A, B tai O!")."<br>";
+		$varaosavirhe .= t("VIRHE: Var voi olla tyhj‰, P, J, H, S, T, U, V, A, B tai O!")."<br>";
 		$riviok++;
 		$tilausok++;
 	}
@@ -106,7 +107,7 @@
 
 
 	// Otataan oieka kappalem‰‰r k‰sittelyyn
-	if ($row["var"] == 'J' or $row["var"] == 'S' or $row["var"] == 'T') {
+	if ($row["var"] == 'J' or $row["var"] == 'S' or $row["var"] == 'T' or $row["var"] == 'U') {
 		$kpl_st = $row['jt'];
 	}
 	elseif($row["var"] == 'P') {
@@ -179,15 +180,14 @@
 					and tuotepaikat.hyllyalue  != '!!M'";
 		$omavarastores = mysql_query($query) or pupe_error($query);
 
-		if ($toim == "TARJOUS" and $row["var"] != 'V') {
+		if (($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V') {
 			// Katsotaan onko t‰lle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta
 			$query = "	select tyyppi_tieto, liitostunnus, toimi.nimi
 						from tuotteen_toimittajat, toimi
 						where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 						and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-						and toimi.yhtio         = tuotteen_toimittajat.yhtio
-						and toimi.tunnus        = tuotteen_toimittajat.liitostunnus
-						and toimi.oletus_vienti in ('C','F','I')";
+						and toimi.yhtio	 = tuotteen_toimittajat.yhtio
+						and toimi.tunnus = tuotteen_toimittajat.liitostunnus";
 			$toimpaikres  = mysql_query($query) or pupe_error($query);
 
 			if(mysql_num_rows($toimpaikres) > 0) {
@@ -202,7 +202,7 @@
 		require("suoratoimitusvalinta.inc");
 
 		// K‰‰yd‰‰n l‰pi oman varaston paikat
-		if ((in_array($row["var"], array('','O','H','S','T')) and mysql_num_rows($omavarastores) >= $omapaikatraja) or (in_array($row["var"], array('S','T')) and mysql_num_rows($omavarastores) > 0)) {
+		if ((in_array($row["var"], array('','O','H','S','T','U')) and mysql_num_rows($omavarastores) >= $omapaikatraja) or (in_array($row["var"], array('S','T','U')) and mysql_num_rows($omavarastores) > 0)) {
 
 			while($alkurow = mysql_fetch_array($omavarastores)) {
 				if ($alkurow["varastotyyppi"] != "E" or $laskurow["varasto"] == $alkurow["varastotunnus"] or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])) {
@@ -244,20 +244,27 @@
 		}
 
 		// K‰‰yd‰‰n l‰pi tuotteen toimittajat
-		if ($toim == "TARJOUS" and $row["var"] != 'V') {
+		if (($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V') {
 			if ($kotipaikatlask == 0) {
 				$paikat = "<option value=''>".t("Tuotetta ei ole omassa varastossa")."</option>".$paikat;
 			}
 
 			while ($krow  = mysql_fetch_array($toimpaikres)) {
-				$sel = "";
+				$sel1 = "";
+				$sel2 = "";
 
 				if ($row["tilaajanrivinro"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
-					$sel = "SELECTED";
+					if ($row["var"] == 'T') {
+						$sel1 = "SELECTED";
+					}
+					else {
+						$sel2 = "SELECTED";
+					}
 				}
 
 				// tallennetaan riville toimittajan tunnus
-				$paikat .= "<option value='###$krow[liitostunnus]' $sel>".t("Toimittajalta")." - $krow[nimi]</option>";
+				$paikat .= "<option value='###$krow[liitostunnus]' $sel1>$krow[nimi] -> ".t("varastoon")."</option>";
+				$paikat .= "<option value='!!!$krow[liitostunnus]' $sel2>$krow[nimi] -> ".t("asiakkaalle")."</option>";
 				$paikatlask=$paikatlask+2;
 			}
 		}

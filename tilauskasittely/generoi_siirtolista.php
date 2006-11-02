@@ -14,7 +14,7 @@
 			}
 
 			if ($tuoteryhma != "") {
-				$lisa .= " and tuote.tuoteryhma='$tuoteryhma' ";
+				$lisa .= " and tuote.try='$tuoteryhma' ";
 			}
 
 			if ($tuotemerkki != "") {

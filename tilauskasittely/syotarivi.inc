@@ -1,9 +1,9 @@
 <?php
-	
+
 	$debug = 0;
-	
+
 	if ($debug == 1) {
-		echo " kukarow[extranet] = $kukarow[extranet] | toim = $toim | miniliittyma = $miniliittyma | syotarivi = $syotarivi<br>"; 
+		echo " kukarow[extranet] = $kukarow[extranet] | toim = $toim | miniliittyma = $miniliittyma | syotarivi = $syotarivi<br>";
 	}
 
 	if (file_exists("../inc/alvpopup.inc")) {
@@ -21,7 +21,7 @@
 					<th align='left'>".t("Kpl")."</th>
 					<th align='left'>".t("Var")."</th>
 					<th align='left'>".t("Hinta")."</th>
-					<th align='left'>".t("Ale%")."</th>
+					<th align='left'>".t("Ale")."</th>
 					<th align='left'>".t("Netto")."</th>
 					<td class='back'></td>
 				</tr>
@@ -50,6 +50,7 @@
 			echo "<tr><td class='back' colspan='7'><input type='text' value='$kommentti' name='kommentti' size='50' maxlength='255'></td></tr>";
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
+			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
 		echo "</form>";
@@ -139,6 +140,7 @@
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
@@ -180,6 +182,7 @@
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
@@ -187,7 +190,7 @@
 		echo "</table>";
 	}
 	elseif($miniliittyma == "JOO") {
-		
+
 		echo "	<form name='rivi' action = '$PHP_SELF?ojarj=$array[0]$ulisa$ankka' method='post' autocomplete='off'>
 				<input type='hidden' name='tee' value = 'TI'>
 				<input type='hidden' name='toim' value = '$toim'>
@@ -245,10 +248,10 @@
 		echo "<tr><td class='back' colspan='2'><input type='text' value='$kommentti' name='kommentti' size='30' maxlength='255'></td></tr>";
 		echo "</form>";
 		echo "</table>";
-	}	
+	}
 
 	// Kursorinohjausta
-	if ($formi == '') {   
+	if ($formi == '') {
 		$formi = 'tilaus';
 	}
 

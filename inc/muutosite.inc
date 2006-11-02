@@ -646,5 +646,6 @@ if ($tila=='') {
 	echo "</table><br><br>";
 }
 $tee='';	
-if ($kukarow['taso']==1) $tunnus=''; // Estetään väärä käyttöliittymä
+if ($kukarow['taso']==1 and $phpnimi=='hyvak.php') $tunnus=''; // Estetään väärä käyttöliittymä
+if ($phpnimi=='muutosite.php') $tee='E'; // Estetään väärä käyttöliittymä
 ?>

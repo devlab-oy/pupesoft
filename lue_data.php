@@ -324,6 +324,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$valinta .= " and ".$otsikot[$indeksi[$j]]."='".trim($rivi[$indeksi[$j]])."'";
 				}
 			}
+			elseif ($table == 'tuotepaikat' and $otsikot[$indeksi[$j]] == "OLETUS") {
+				//ei haluta tätä tänne
+			}
 			else {
 				$valinta .= " and ".$otsikot[$indeksi[$j]]."='".trim($rivi[$indeksi[$j]])."'";
 			}
@@ -340,7 +343,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						FROM $table
 						WHERE $valinta";
 			$fresult = mysql_query($query) or pupe_error($query);
-
+			
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 				if (mysql_num_rows($fresult) != 0 ) {
 					if ($table != 'asiakasalennus' and $table != 'asiakashinta') {

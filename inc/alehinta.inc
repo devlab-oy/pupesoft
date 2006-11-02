@@ -53,7 +53,7 @@
 					and asiakas_ryhma = ''
 					and ryhma = '$trow[aleryhma]'
 					and ryhma != ''
-					and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+					and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 					and (alennus < 0 or left(alennus,1) = '-')
 					ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 					LIMIT 1";
@@ -92,6 +92,57 @@
 			}
 		}
 		
+		// 1.5. asiakas.ryhmä tuote.aleryhmä negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
+		if ($hinta == 0) {
+	
+			$query = "	SELECT alennus
+						FROM asiakasalennus
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and asiakas_ryhma = '$alehi_asrow[ryhma]'
+						and asiakas_ryhma != ''
+						and ryhma = '$trow[aleryhma]'
+						and ryhma != ''
+						and ytunnus = ''
+						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and (alennus < 0 or left(alennus,1) = '-')
+						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+
+				$hrow = mysql_fetch_array($hresult);
+
+				//Tässä katotaan onko epäkuranttiutta
+				$kokoepakurantti = "";
+
+				if ($trow["epakurantti2pvm"] != "0000-00-00") {
+					$trow["kehahin"] = 0;
+					$kokoepakurantti = "ON";
+				}
+				elseif ($trow["epakurantti1pvm"] != "0000-00-00") {
+					$trow["kehahin"] = $trow["kehahin"]/2;
+				}
+
+				// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
+				if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					$hinta 		= 0.01;
+					$ale		= 0;
+					$netto		= "";
+					$aperuste 	.= "Asiakasryhmä Katemyyntihinta (kokoepäkurantti). ";
+				}
+				elseif ($trow['kehahin'] > 0) {
+					if ($yhtiorow['alv_kasittely']=='')
+						$hinta	= round(($trow['kehahin'] * (1+($trow['alv']/100))) * (1+(abs($hrow[alennus])/100)) ,2);
+					else
+						$hinta	= round(($trow['kehahin']  * (1+(abs($hrow[alennus])/100))) ,2);
+					$ale		= 0;
+					$netto		= "";
+					$aperuste 	.= "Asiakasryhmä Katemyyntihinta. ";
+				}
+			}
+		}
+		
 		// 2. asiakas.ytunnus tuote.aleryhmä aleprosentti == 999.99 (asiakkaan myymälähinta)
 		if ($hinta == 0) {
 					
@@ -102,7 +153,7 @@
 						and ytunnus != ''
 						and ryhma = '$trow[aleryhma]'
 						and ryhma != ''
-						and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus = 999.99
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
@@ -141,7 +192,7 @@
 						and ytunnus != ''
 						and tuoteno = '$trow[tuoteno]' 
 						and tuoteno != ''
-						and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
@@ -180,7 +231,7 @@
 						and ytunnus != ''
 						and ryhma = '$trow[aleryhma]' 
 						and ryhma != ''
-						and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
@@ -220,7 +271,7 @@
 						and tuoteno = '$trow[tuoteno]'
 						and tuoteno != ''
 						and ytunnus = ''
-						and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
@@ -260,7 +311,7 @@
 						and ryhma = '$trow[aleryhma]' 
 						and ryhma != ''
 						and ytunnus = ''
-						and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
@@ -345,7 +396,7 @@
 					and ytunnus != ''
 					and tuoteno = '$trow[tuoteno]' 
 					and tuoteno != ''
-					and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+					and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 					and alennus > 0
 					and alennus <= 100
 					ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
@@ -368,7 +419,7 @@
 						and ytunnus != ''
 						and ryhma = '$trow[aleryhma]'
 						and ryhma != ''
-						and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
@@ -393,7 +444,7 @@
 						and tuoteno = '$trow[tuoteno]'
 						and tuoteno != ''
 						and ytunnus = ''
-						and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 
@@ -418,7 +469,7 @@
 						and ryhma = '$trow[aleryhma]'
 						and ryhma != ''
 						and ytunnus = ''
-						and ((alkupvm <= now() and loppupvm >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((alkupvm <= now() and if(loppupvm,'0000-00-00','9999-99-99') >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and alennus > 0
 						and alennus <= 100
 						ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999) 

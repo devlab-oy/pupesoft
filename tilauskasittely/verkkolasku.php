@@ -556,6 +556,7 @@
 							and ytunnus				= '$row[ytunnus]'
 							and nimi				= '$row[nimi]'
 							and nimitark			= '$row[nimitark]'
+							and osoite				= '$row[osoite]'
 							and postino				= '$row[postino]'
 							and postitp				= '$row[postitp]'
 							and maksuehto			= '$row[maksuehto]'
@@ -572,7 +573,8 @@
 							and aktiivinen_kuljetus_kansallisuus = '$row[aktiivinen_kuljetus_kansallisuus]'
 							and sisamaan_kuljetusmuoto 	= '$row[sisamaan_kuljetusmuoto]'
 							and poistumistoimipaikka 	= '$row[poistumistoimipaikka]'
-							and poistumistoimipaikka_koodi = '$row[poistumistoimipaikka_koodi]'";
+							and poistumistoimipaikka_koodi = '$row[poistumistoimipaikka_koodi]'
+							and chn					= '$row[chn]'";
 			$lares    = mysql_query($query) or pupe_error($query);
 
 			$tunnukset= "";

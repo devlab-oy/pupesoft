@@ -3,11 +3,11 @@
 	$ulos = "";
 	$jatko = 1; // oletetaan normaali k‰sittely
 	$tyyppi = 1; // oletetaan rivin n‰kyvyys
-	
+
 	if (mysql_field_name($result, $i) == "yhtio") {
 		$tyyppi = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tuotetyyppi") {
 		// Tyyppi‰ ei saa vaihtaa, jos tuotteella on saldoa
 		$query = "	SELECT sum(saldo) saldo
@@ -15,13 +15,14 @@
 					WHERE yhtio='$kukarow[yhtio]' and tuoteno='$trow[tuoteno]'";
 		$sresult = mysql_query($query) or pupe_error($query);
 		$srow = mysql_fetch_array($sresult);
+
 		if ($srow['saldo'] == 0) {
 			$ulos = "<td><select name='$nimi'>";
 
 			if($trow[$i]=='') $selv="SELECTED";
 			if($trow[$i]=='P') $selp="SELECTED";
 			if($trow[$i]=='R') $selr="SELECTED";
-			if($trow[$i]=='K') $selk="SELECTED";	
+			if($trow[$i]=='K') $selk="SELECTED";
 
 			$ulos .= "<option value='' $selv>".t("Valmiste")."</option>";
 			//$ulos .= "<option value='P' $selp>".t("Puolivalmiste")."</option>";
@@ -53,9 +54,9 @@
 		mysql_field_name($result, $i) == "luontiaika") {
 		$tyyppi = 2;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tuoteno" and $uusi=='') {
-		$tyyppi = 2;
+		$tyyppi = 3;
 		$tuoteno = $trow[$i]; // otetaan t‰‰ talteen
 	}
 
@@ -96,7 +97,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "valuutta") { //valuutta
 		$query = "	SELECT nimi, tunnus
 					FROM valuu
@@ -125,13 +126,13 @@
 		$ulos .= "</td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
 		$ulos = "<td><select name='$nimi'>";
-				
+
 		$sel1=$sel2=$sel3=$sel4="";
-		
+
 		if ($trow[$i] == '') {
 			$sel1 = "selected";
 		}
@@ -141,15 +142,15 @@
 		if ($trow[$i] == 'M') {
 			$sel3 = "selected";
 		}
-		
+
 		$ulos .= "<option value = ''  $sel1>".t("Ei seurantaa/Normaali verotus")."</option>";
 		$ulos .= "<option value = 'S' $sel2>".t("Sarjanumeroseuranta/Normaali verotus")."</option>";
-		$ulos .= "<option value = 'M' $sel3>".t("Sarjanumeroseuranta/Marginaaliverotus")."</option>";		
+		$ulos .= "<option value = 'M' $sel3>".t("Sarjanumeroseuranta/Marginaaliverotus")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
-	
+
+
 	if (mysql_field_name($result, $i) == "aleryhma") {
 		$query = "	SELECT tunnus, ryhma, alennus
 					FROM perusalennus
@@ -173,12 +174,12 @@
 		$ulos = "<td><textarea cols='35' rows='7' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
-	
+
 	if(mysql_field_name($result, $i) == "toimittaja") {
 		$ulos = "<td><input type='text' size='45' name='$nimi' value='$trow[$i]'> <font class='message'>".t("Erottele pilkuilla")."!</font></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "yksikko") {
 		$query = "	SELECT tunnus, selite, selitetark
 					FROM avainsana
@@ -197,7 +198,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "alkuperamaa") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
@@ -219,7 +220,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "status") {
 		$query = "	SELECT tunnus, selite, selitetark
 					FROM avainsana
@@ -238,7 +239,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kustp") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -257,7 +258,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kohde") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -276,7 +277,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "projekti") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -295,27 +296,27 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "vienti") {
 
 		$ulos = "<td><select name='$nimi'>";
-				
+
 		$sel1=$sel2="";
-		
+
 		if ($trow[$i] == '') {
 			$sel1 = "selected";
 		}
 		if ($trow[$i] == 'S') {
 			$sel2 = "selected";
 		}
-		
+
 		$ulos .= "<option value = ''  $sel1>".t("Normaali (Saa vied‰)")."</option>";
 		$ulos .= "<option value = 'K' $sel2>".t("Vientikielto")."</option>";
-		
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "alv") {
 			require ('alvpopup.inc');
 			if ($trow[$i]=='') $trow[$i]=alv_oletus();
@@ -329,7 +330,7 @@
 			if ($trow[$i] == 'E') {
 				$sel = "selected";
 			}
-			
+
 			$ulos = "<td><select name = '$nimi'>
 				<option value=''>".t("Tuote n‰ytet‰‰n hinnastossa")."</option>
 				<option value='E' $sel>".t("Tuotetta ei n‰ytet‰ hinnastossa")."</option>

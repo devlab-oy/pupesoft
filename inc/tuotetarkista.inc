@@ -1,7 +1,7 @@
 <?php
 	if (mysql_field_name($result, $i) == "nimitys") {
 		if (trim($t[$i]) == '') {
-			$virhe[$i] = "".t("Tieto puuttuu")."";
+			$virhe[$i] = t("Tieto puuttuu");
 			$errori = 1;
 		}
 	}
@@ -18,7 +18,7 @@
 			$errori = 1;
 		}
 	}
-	
+
 	if ((mysql_field_name($result, $i) == "tullinimike1") and ($t[$i] != 0)) {
 		$query = "	SELECT cn
 					FROM tullinimike
@@ -29,27 +29,38 @@
 			$errori = 1;
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "tuoteno") {
 		if (trim($t[$i]) == '') {
-			$virhe[$i] = "".t("Tieto puuttuu")."";
+			$virhe[$i] = t("Tieto puuttuu");
 			$errori = 1;
+		}
+		else {
+			if ($tunnus == "") {
+				$query  = "SELECT yhtio FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='".trim($t[$i])."'";
+				$chkressiresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($chkressiresult) > 0) {
+					$virhe[$i] = t("Tuotenumero on jo perustettu järjestelmään");
+					$errori = 1;
+				}
+			}
 		}
 		$tem_tuoteno = $t[$i];
 	}
-	
+
 	if (mysql_field_name($result, $i) == "laatija") {
 		if ($tunnus == "") {
 			$t[$i] = $kukarow['kuka'];
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "luontiaika") {
 		if ($tunnus == "") {
 			$t[$i] = date('Y-m-d H:i:s');
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ei_saldoa") {
 		if ($t[$i] != '') {
 			$query = "SELECT *
@@ -63,13 +74,13 @@
 		}
 	}
 
-/*	
+/*
 	if (mysql_field_name($result, $i) == "tuotekuva" and $t[$i] != '') {
 		if (!file_exists($t[$i])) {
 			$virhe[$i] = t("Tiedosto ei löydy")."!";
 			$errori = 1;
 		}
 	}
-*/	
+*/
 
 ?>

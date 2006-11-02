@@ -97,32 +97,34 @@
 		}
 
 		// Luodaan tietue
-		if ($errori == '') {
+		if ($errori == "") {
 			if ($tunnus == "") {
 				// Taulun ensimmäinen kenttä on aina yhtiö
-				$query = "INSERT into $toim values ('$kukarow[yhtio]'";
+				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]' ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
-					if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
+					if (isset($t[$i])) {
+						if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 
-					$query .= ",'" . $t[$i] . "'";
+						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";
+					}
 				}
-				$query .= ")";
 			}
 			// Päivitetään
 			else {
-				$query = "UPDATE $toim set ";
-				for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
-					if (strlen($xquery) > 0) {
-						$xquery .= ", ";
-					}
-					$xquery .= mysql_field_name($result,$i);
-					if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
-					$xquery .= " = '" . $t[$i] . "'";
-				}
-				$query .= $xquery . " where tunnus = $tunnus";
-			}
+				// Taulun ensimmäinen kenttä on aina yhtiö
+				$query = "UPDATE $toim SET yhtio='$kukarow[yhtio]' ";
 
+				for ($i=1; $i < mysql_num_fields($result); $i++) {
+					if (isset($t[$i])) {
+						if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
+
+						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";
+					}
+				}
+
+				$query .= " where tunnus = $tunnus";
+			}
 			$result = mysql_query($query) or pupe_error($query);
 
 			if ($tunnus == '') {
@@ -247,20 +249,20 @@
 		echo "<table>";
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
+
 			$nimi = "t[$i]";
 
-			if (($errori != '') and ($tyyppi != 2)) // Jossain on virhe, joten näytetään syötetyt tiedot uudestaan
-				$trow[$i] = $t[$i];					// Jos tyyppi on 2, niin se pidetään vakiona
+			if (isset($t[$i])) {
+				$trow[$i] = $t[$i];
+			}
 
+			require ("inc/$toim"."rivi.inc");
 
-			if 	(mysql_field_len($result,$i)>10) $size='35';
-			elseif	(mysql_field_len($result,$i)<5)  $size='5';
+			if 	(mysql_field_len($result,$i)>10) 	$size='35';
+			elseif	(mysql_field_len($result,$i)<5)	$size='5';
 			else	$size='10';
 
 			$maxsize = mysql_field_len($result,$i); // Jotta tätä voidaan muuttaa
-			
-			require ("inc/$toim"."rivi.inc");
-
 
 			//Haetaan tietokantasarakkeen nimialias
 			$al_nimi   = mysql_field_name($result, $i);
@@ -289,54 +291,48 @@
 
 			// $tyyppi --> 0 riviä ei näytetä ollenkaan
 			// $tyyppi --> 1 rivi näytetään normaalisti
-			// $tyyppi --> 2 rivi näytetään, mutta sitä ei voida muokata
-			// $tyyppi --> -2 riviä ei näytetä, mutta sen arvo menee kuitenkin hiddeninä
+			// $tyyppi --> 2 rivi näytetään, mutta sitä ei voida muokata, eikä sen arvoa pävitetä
+			// $tyyppi --> 3 rivi näytetään, mutta sitä ei voida muokata, mutta sen arvo päivitetään
+			// $tyyppi --> 4 riviä ei näytetä ollenkaan, mutta sen arvo päivitetään
 
-			if ($tyyppi > 0) {
+			if ($tyyppi > 0 and $tyyppi < 4) {
 				echo "<tr>";
-
 				echo "<th align='left'>$otsikko</th>";
 			}
 
 			if ($jatko == 0) {
 				echo $ulos;
 			}
-			else {
-				$mita = 'text';
-
-
-				if ($tyyppi == -2) {
-					$mita = 'hidden';
-				}
-				elseif ($tyyppi == 2) {
-					$mita = 'hidden';
-					echo "<td>$trow[$i]";
-				}
-				elseif($tyyppi > 0) {
-					echo "<td>";
-				}
-
-				if ($tyyppi != 0) {
-					echo "<input type = '$mita' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'>";
-				}
-
-				if ($tyyppi > 0) {
-					echo "</td>";
-				}
+			elseif ($tyyppi == 1) {
+				echo "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
+			}
+			elseif ($tyyppi == 2) {
+				echo "<td>$trow[$i]</td>";
+			}
+			elseif($tyyppi == 3) {
+				echo "<td>$trow[$i]<input type = 'hidden' name = '$nimi' value = '$trow[$i]'></td>";
+			}
+			elseif($tyyppi == 4) {
+				echo "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>";
 			}
 
-			if ($tyyppi > 0) {
+			if (isset($virhe[$i])) {
 				echo "<td class='back'><font class='error'>$virhe[$i]</font></td>\n";
+			}
+
+			if ($tyyppi > 0 and $tyyppi < 4) {
 				echo "</tr>";
 			}
 		}
 		echo "</table>";
+
 		if ($uusi == 1) {
 			$nimi = "".t("Perusta $otsikko_nappi")."";
 		}
 		else {
 			$nimi = "".t("Päivitä $otsikko_nappi")."";
 		}
+
 		echo "<br><input type = 'submit' value = '$nimi'>";
 		echo "</form>";
 
@@ -364,19 +360,19 @@
 
 		echo "</td><td class='back' valign='top'>";
 
-		if ($uusi != 1 and $toim == "tuote") {
+		if ($errori == '' and $uusi != 1 and $toim == "tuote") {
 			require ("inc/tuotteen_toimittajat.inc");
 		}
 
-		if ($uusi != 1 and $toim == "yhtio") {
+		if ($errori == '' and $uusi != 1 and $toim == "yhtio") {
 			require ("inc/yhtion_toimipaikat.inc");
 		}
 
-		if ($uusi != 1 and $toim == "toimi") {
+		if ($errori == '' and $uusi != 1 and $toim == "toimi") {
 			require ("inc/toimittajan_yhteyshenkilo.inc");
 		}
 
-		if ($uusi != 1 and $toim == "sarjanumeron_lisatiedot") {
+		if ($errori == '' and $uusi != 1 and $toim == "sarjanumeron_lisatiedot") {
 			require ("inc/sarjanumeron_lisatiedot_kuvat.inc");
 		}
 

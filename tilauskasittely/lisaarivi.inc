@@ -20,7 +20,6 @@
 	// $kutsuja			--> Kuka tätä skriptiä kutsuu
 	// $myy_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
 
-
 	//palauttaa arrayn $lisatyt_rivit jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi
 
 	//muutetaan pilkkuja pisteiksi
@@ -92,8 +91,19 @@
 	if (substr($paikka,0,3) == "###") {
 		$var 		 = "T";
 		$rivinumero  = substr($paikka, 3);
+		$paikka		 = "#";
 	}
-	elseif ($var == "T" and substr($paikka,0,3) != "###") {
+	elseif ($var == "T" and substr($paikka,0,3) != "###" and substr($paikka,0,3) != "!!!") {
+		$var 		= "";
+		$rivinumero	= "";
+	}
+
+	if (substr($paikka,0,3) == "!!!") {
+		$var 		 = "U";
+		$rivinumero  = substr($paikka, 3);
+		$paikka		 = "#";
+	}
+	elseif ($var == "U" and substr($paikka,0,3) != "!!!") {
 		$var 		= "";
 		$rivinumero	= "";
 	}
@@ -554,12 +564,20 @@
 								}
 
 								if ($myy_tyyppi[$indeksi] == "NORMAALI" and $myy_sarjatunnus > 0) {
+
+									if ($varattu > 0) {
+										$tunken = "myyntirivitunnus";
+									}
+									else {
+										$tunken = "ostorivitunnus";
+									}
+
 									$query = "	UPDATE sarjanumeroseuranta
-												SET myyntirivitunnus = '$lisatty_tun'
+												SET $tunken 		 = '$lisatty_tun'
 												WHERE yhtio			 = '$kukarow[yhtio]'
 												and tunnus			 = '$myy_sarjatunnus'
 												and tuoteno			 = '$myy_tuoteno[$indeksi]'
-												and myyntirivitunnus = 0";
+												and $tunken 		 = 0";
 									$sres = mysql_query($query) or pupe_error($query);
 
 									$myy_sarjatunnus = 0;
@@ -786,6 +804,10 @@
 						$varattu 	= 0;
 						$jt 		= $kpl;
 						break;
+					case 'U' : // Tilataan toimittajalta asiakkaalle
+						$varattu 	= 0;
+						$jt 		= $kpl;
+						break;
 					case 'S' : // Suoratoimitus-JT
 						$varattu 	= 0;
 						$jt 		= $kpl;
@@ -962,7 +984,14 @@
 				// lapsille oikea perheid
 				$perheid_lisaarivi = $lisatty_tun;
 
-				if ($var == "S" and $myy_sarjatunnus > 0 and $trow["tuoteno"] == $alkupera_trow["tuoteno"]) {
+				if ($varattu+$jt != 0 and $myy_sarjatunnus > 0 and $trow["tuoteno"] == $alkupera_trow["tuoteno"]) {
+
+					if ($varattu+$jt > 0) {
+						$tunken = "myyntirivitunnus";
+					}
+					else {
+						$tunken = "ostorivitunnus";
+					}
 
 					$query = "	SELECT *
 								FROM sarjanumeroseuranta
@@ -971,19 +1000,26 @@
 					$sres = mysql_query($query) or pupe_error($query);
 					$srow = mysql_fetch_array($sres);
 
-					// jos syötetään sarjanumertollinen tuote suoratoimitukseen niin liitetään tämä myyntirivi siihen kiinni
-					$query = "	INSERT INTO sarjanumeroseuranta
-								SET
-								yhtio				= '$kukarow[yhtio]',
-								tuoteno				= '$trow[tuoteno]',
-								lisatieto			= 'Suoratoimitetaan yhtiöstä: $srow[yhtio]. $srow[lisatieto]',
-								sarjanumero			= '$srow[sarjanumero]',
-								myyntirivitunnus 	= '$lisatty_tun'";
-					$sres = mysql_query($query) or pupe_error($query);
-
-					if (mysql_affected_rows() == 1) {
-						//echo "Sarjanumero linkattu tilausriviin!<br>";
+					if ($var == "S") {
+						// jos syötetään sarjanumertollinen tuote suoratoimitukseen niin liitetään tämä myyntirivi siihen kiinni
+						$query = "	INSERT INTO sarjanumeroseuranta
+									SET
+									yhtio				= '$kukarow[yhtio]',
+									tuoteno				= '$trow[tuoteno]',
+									lisatieto			= 'Suoratoimitetaan yhtiöstä: $srow[yhtio]. $srow[lisatieto]',
+									sarjanumero			= '$srow[sarjanumero]',
+									myyntirivitunnus 	= '$lisatty_tun'";
 					}
+					else {
+						$query = "	UPDATE sarjanumeroseuranta
+									SET $tunken 		 = '$lisatty_tun'
+									WHERE yhtio			 = '$kukarow[yhtio]'
+									and tunnus			 = '$myy_sarjatunnus'
+									and tuoteno			 = '$trow[tuoteno]'
+									and $tunken 		 = 0";
+					}
+					$sres = mysql_query($query) or pupe_error($query);
+					$myy_sarjatunnus = 0;
 				}
 			}
 

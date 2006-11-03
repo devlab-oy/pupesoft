@@ -5,6 +5,14 @@
 
 	///*Kasataan käyttäjälle lähetettävä meili *///
 	//tässa on kaikki failit jotka tarvitaan
+	
+	$varaposti = '';
+	
+	if (substr($komento,0,12) == 'asiakasemail') {
+		$varaposti = $kukarow['eposti'];
+		$kukarow['eposti'] = substr($komento,13);
+	}
+	
 	$bound = uniqid(time()."_") ;
 
 	$kutsu   = $kukarow["yhtio"]."-".$kutsu;
@@ -42,4 +50,8 @@
 	//Nää muuttujat voi olla aika isoja joten unsetataan ne
 	unset($content);
 	unset($sisalto);
+	
+	if ($varaposti != '') {
+		$kukarow['eposti'] = $varaposti;
+	}
 ?>

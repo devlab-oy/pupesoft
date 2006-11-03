@@ -244,7 +244,7 @@
 		}
 
 		// K‰‰yd‰‰n l‰pi tuotteen toimittajat
-		if (($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V') {
+		if (in_array($row["var"], array('','O','H','S','T','U')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '')) {
 			if ($kotipaikatlask == 0) {
 				$paikat = "<option value=''>".t("Tuotetta ei ole omassa varastossa")."</option>".$paikat;
 			}

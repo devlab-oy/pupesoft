@@ -518,57 +518,68 @@ if ($tee == "VALMIS") {
 	// Tulostetaan tarjous
 	if($kukarow["extranet"] == "" and $toim == "TARJOUS") {
 		//Tulostetaan valitut paperit
-		$otunnus = $laskurow["tunnus"];
-		$komento["Tarjous"] 			= "email";
-		$komento["Myyntisopimus"]		= "email";
-		$komento["Osamaksusopimus"]		= "email";
-		$komento["Luovutustodistus"]	= "email";
-
-		require_once ("tulosta_tarjous.inc");
-
+		// $otunnus = $laskurow["tunnus"];
+		// $komento["Tarjous"] 			= "email";
+		// $komento["Myyntisopimus"]		= "email";
+		// $komento["Osamaksusopimus"]		= "email";
+		// $komento["Luovutustodistus"]	= "email";
+		// 
+		// require_once ("tulosta_tarjous.inc");
+		// 
+		// tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee);
+		// 
+		// require_once ("tulosta_myyntisopimus.inc");
+		// 
+		// tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee);
+		// 
+		// require_once ("tulosta_luovutustodistus.inc");
+		// 
+		// tulosta_luovutustodistus($otunnus, $komento["Luovutustodistus"], $kieli, $tee);
+		// 
+		// require_once ("tulosta_osamaksusoppari.inc");
+		// 
+		// tulosta_osamaksusoppari($otunnus, $komento["Osamaksusopimus"], $kieli, $tee);
+		
+		if (count($komento) == 0) {
+			echo "<font class='head'>".t("Tarjous").":</font><hr><br>";
+			
+			$otunnus = $tilausnumero;
+			$tulostimet[0] = "Tarjous";
+			require("../inc/valitse_tulostin.inc");
+		}
+		
+		require_once ('tulosta_tarjous.inc');
 		tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee);
-
-		require_once ("tulosta_myyntisopimus.inc");
-
-		tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee);
-
-		require_once ("tulosta_luovutustodistus.inc");
-
-		tulosta_luovutustodistus($otunnus, $komento["Luovutustodistus"], $kieli, $tee);
-
-		require_once ("tulosta_osamaksusoppari.inc");
-
-		tulosta_osamaksusoppari($otunnus, $komento["Osamaksusopimus"], $kieli, $tee);
-
+		
 		$query = "UPDATE lasku SET alatila='A' where yhtio='$kukarow[yhtio]' and alatila='' and tunnus='$kukarow[kesken]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// Tehd‰‰n asiakasmemotapahtuma
-		$kysely = "	INSERT INTO kalenteri
-					SET tapa 		= 'Tarjous asiakkaalle',
-					asiakas  	 	= '$laskurow[ytunnus]',
-					liitostunnus	= '$laskurow[liitostunnus]',
-					henkilo  		= '',
-					kuka     		= '$kukarow[kuka]',
-					yhtio    		= '$kukarow[yhtio]',
-					tyyppi   		= 'Memo',
-					pvmalku  		= now(),
-					kentta01 		='Tarjous $laskurow[tunnus] tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]'";
-		$result = mysql_query($kysely) or pupe_error($kysely);
+		// $kysely = "	INSERT INTO kalenteri
+// 					SET tapa 		= 'Tarjous asiakkaalle',
+// 					asiakas  	 	= '$laskurow[ytunnus]',
+// 					liitostunnus	= '$laskurow[liitostunnus]',
+// 					henkilo  		= '',
+// 					kuka     		= '$kukarow[kuka]',
+// 					yhtio    		= '$kukarow[yhtio]',
+// 					tyyppi   		= 'Memo',
+// 					pvmalku  		= now(),
+// 					kentta01 		='Tarjous $laskurow[tunnus] tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]'";
+// 		$result = mysql_query($kysely) or pupe_error($kysely);
 
 		// Tehd‰‰n myyj‰lle muistutus
-		$kysely = "	INSERT INTO kalenteri
-					SET
-					asiakas  	 	= '$laskurow[ytunnus]',
-					liitostunnus	= '$laskurow[liitostunnus]',
-					kuka     		= '$kukarow[kuka]',
-					yhtio    		= '$kukarow[yhtio]',
-					tyyppi   		= 'Muistutus',
-					tapa     		= 'Tarjous asiakkaalle',
-					kentta01 		= 'Muista tarjous $laskurow[tunnus]!',
-					kuittaus 		= 'K',
-					pvmalku  		= date_add(now(), INTERVAL 7 day)";
-		$result = mysql_query($kysely) or pupe_error($kysely);
+		// $kysely = "	INSERT INTO kalenteri
+		// 			SET
+		// 			asiakas  	 	= '$laskurow[ytunnus]',
+		// 			liitostunnus	= '$laskurow[liitostunnus]',
+		// 			kuka     		= '$kukarow[kuka]',
+		// 			yhtio    		= '$kukarow[yhtio]',
+		// 			tyyppi   		= 'Muistutus',
+		// 			tapa     		= 'Tarjous asiakkaalle',
+		// 			kentta01 		= 'Muista tarjous $laskurow[tunnus]!',
+		// 			kuittaus 		= 'K',
+		// 			pvmalku  		= date_add(now(), INTERVAL 7 day)";
+		// $result = mysql_query($kysely) or pupe_error($kysely);
 
 		$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -2677,8 +2688,6 @@ if ($tee == '') {
 
 				echo "</select><br><br></td></tr><tr><td class='back'>";
 			}
-
-
 
 			echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."'>";
 			echo "</form>";

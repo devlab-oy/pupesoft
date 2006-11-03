@@ -134,6 +134,32 @@
 			echo "</table>";
 			echo "</td><td colspan='2' valign='top'>";
 
+			// katotaan ollaanko valittu tilaajaksi joku muu toimipiste
+			if (isset($srow)) {
+				if ($toimipiste != 0) {
+					$edique  = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and tunnus='$toimipiste'";
+					$ediotr = mysql_query($edique) or pupe_error($edique);
+					$edioro = mysql_fetch_array($ediotr);
+
+					// laitetaan toimipisteen tiedot toimitusosoitteeseen jos siell‰ ei viel‰ muuta ole
+					$srow["toim_nimi"] 		= $edioro["nimi"];
+					$srow["toim_nimitark"] 	= $edioro["nimitark"];
+					$srow["toim_osoite"] 	= $edioro["osoite"];
+					$srow["toim_postino"] 	= $edioro["postino"];
+					$srow["toim_postitp"] 	= $edioro["postitp"];
+					$srow["toim_maa"] 		= $edioro["maa"];
+				}
+
+				// varmistellaan, ett‰ meill‰ menee jotain toimitusosoite kentt‰‰n
+				if(strlen(trim($srow["toim_nimi"])) == 0) {
+					$srow["toim_nimi"] 		= $yhtiorow["nimi"];
+					$srow["toim_nimitark"] 	= $yhtiorow["nimitark"];
+					$srow["toim_osoite"] 	= $yhtiorow["osoite"];
+					$srow["toim_postino"] 	= $yhtiorow["postino"];
+					$srow["toim_postitp"] 	= $yhtiorow["postitp"];
+					$srow["toim_maa"] 		= $yhtiorow["maa"];
+				}
+			}
 
 			echo "<table cellpadding='1' cellspacing='1'>";
 			echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Toimitusosoite").":</td></tr>";
@@ -145,28 +171,14 @@
 			echo "</table>";
 			echo "</td></tr>";
 
-
-
-
-
-
-
-
-
-
-
-
-
 			/*
 			echo "<tr><th colspan='2' align='left' valign='top'>&nbsp;".t("Toimittajan tiedot").":</td></tr>";
-
 
 			echo "<tr><td valign='top'>".t("Nimi").": </td><td><input type='text' name='nimi' size='35' maxlength='31' value='$srow[nimi]'></td></tr>";
 			echo "<tr><td></td><td><input type='text' name='nimitark' size='35' maxlength='31'  value='$srow[nimitark]'></td></tr>";
 			echo "<tr><td valign='top'>".t("Osoite").": </td><td><input type='text' name='osoite' size='35' maxlength='31' value='$srow[osoite]'></td></tr>";
 			echo "<tr><td valign='top'>".t("Postitp").": </td><td><input type='text' name='postino' size='6' maxlength='6' value='$srow[postino]'>";
 			echo "<input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'>";
-
 
 			if ($kukarow["kesken"] != 0) {
 				$query = "select otunnus from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
@@ -184,7 +196,7 @@
 			echo "</td></tr>";
 			echo "</table>";
 			echo "</td><td colspan='2' valign='top'>";
-*/
+			*/
 
 			if ($kukarow['kesken'] == 0) {
 				$toimpp = $kerpp = date(j);

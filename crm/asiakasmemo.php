@@ -1,6 +1,8 @@
 <?php
 
-	require ("../inc/parametrit.inc");
+	if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
+		require ("../inc/parametrit.inc");
+	}
 
 	echo "<font class='head'>".t("Asiakasmemo")."</font><hr>";
 
@@ -324,67 +326,69 @@
 			echo "</table><br>";
 
 			///* Syötä memo-tietoa *///
-			echo "<table width='620'>";
+			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
+				echo "<table width='620'>";
 
-			if ($yhtunnus > 0) {
-				echo "<tr><th>".t("Lisää kommentti")."</th><th colspan='2'>".t("Yhteyshenkilö:")." $ynimi</th></tr>";
-			}
-			else {
-				echo "<tr><th colspan='3'>".t("Lisää kommentti")."</th></tr>";
-			}
-
-
-			echo "	<tr>
-					<td colspan='3'>
-					<form action='$PHP_SELF' method='POST'>
-					<input type='hidden' name='tee' value='UUSIMEMO'>
-					<input type='hidden' name='korjaus' value='$ktunnus'>
-					<input type='hidden' name='kyhtunnus' value='$kyhtunnus'>
-					<input type='hidden' name='ytunnus' value='$ytunnus'>
-					<input type='hidden' name='yhtunnus' value='$yhtunnus'>
-					<textarea cols='83' rows='3' name='viesti' wrap='hard'>$kviesti</textarea></td>
-					</tr>
-					<tr>
-					<td>";
-
-
-			$query = "	SELECT selite, selitetark
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA'
-						ORDER BY selite";
-			$vresult = mysql_query($query) or pupe_error($query);
-
-
-			echo t("Tapa:")." <select name='tapa'>";
-
-
-			while ($vrow=mysql_fetch_row($vresult)) {
-				$sel="";
-
-				if ($ktapa == $vrow[1]) {
-					$sel = "selected";
+				if ($yhtunnus > 0) {
+					echo "<tr><th>".t("Lisää kommentti")."</th><th colspan='2'>".t("Yhteyshenkilö:")." $ynimi</th></tr>";
 				}
-				echo "<option value = '$vrow[1]' $sel>$vrow[1]";
+				else {
+					echo "<tr><th colspan='3'>".t("Lisää kommentti")."</th></tr>";
+				}
+
+
+				echo "	<tr>
+						<td colspan='3'>
+						<form action='$PHP_SELF' method='POST'>
+						<input type='hidden' name='tee' value='UUSIMEMO'>
+						<input type='hidden' name='korjaus' value='$ktunnus'>
+						<input type='hidden' name='kyhtunnus' value='$kyhtunnus'>
+						<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='hidden' name='yhtunnus' value='$yhtunnus'>
+						<textarea cols='83' rows='3' name='viesti' wrap='hard'>$kviesti</textarea></td>
+						</tr>
+						<tr>
+						<td>";
+
+
+				$query = "	SELECT selite, selitetark
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA'
+							ORDER BY selite";
+				$vresult = mysql_query($query) or pupe_error($query);
+
+
+				echo t("Tapa:")." <select name='tapa'>";
+
+
+				while ($vrow=mysql_fetch_row($vresult)) {
+					$sel="";
+
+					if ($ktapa == $vrow[1]) {
+						$sel = "selected";
+					}
+					echo "<option value = '$vrow[1]' $sel>$vrow[1]";
+				}
+
+				echo "</select></td>";
+
+				echo "	<td align='right'>
+						<input type='submit' name='submit' value='".t("Tallenna")."'>
+						</form>
+						</td>";
+
+
+				echo "	<td align='right'>
+						<form action='$PHP_SELF' method='POST'>
+						<input type='hidden' name='tee' value='KORJAAMEMO'>
+						<input type='hidden' name='yhtunnus' value='$yhtunnus'>
+						<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='submit' name='submit' value='".t("Korjaa viimeisintä")."'>
+						</form>
+						</td>";
+
+				echo "</table>";
 			}
-
-			echo "</select></td>";
-
-			echo "	<td align='right'>
-					<input type='submit' name='submit' value='".t("Tallenna")."'>
-					</form>
-					</td>";
-
-
-			echo "	<td align='right'>
-					<form action='$PHP_SELF' method='POST'>
-					<input type='hidden' name='tee' value='KORJAAMEMO'>
-					<input type='hidden' name='yhtunnus' value='$yhtunnus'>
-					<input type='hidden' name='ytunnus' value='$ytunnus'>
-					<input type='submit' name='submit' value='".t("Korjaa viimeisintä")."'>
-					</form>
-					</td>";
-
-			echo "</table>";
 
 			///* Haetaan memosta sisalto asiakkaan kohdalta *///
 			echo "<table width='620'>";
@@ -455,11 +459,15 @@
 			}
 
 			echo "</table>";
-			echo "<br>";
-			echo "	<th><a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&yhtunnus=$yhtunnus'>Näytä poistetut</a></th>";
+
+			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
+				echo "<br>";
+				echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&yhtunnus=$yhtunnus'>Näytä poistetut</a>";
+			}
 		}
    	}
 
-	require ("../inc/footer.inc");
-
+	if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
+		require ("../inc/footer.inc");
+	}
 ?>

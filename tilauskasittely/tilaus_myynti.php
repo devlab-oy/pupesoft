@@ -2373,25 +2373,44 @@ if ($tee == '') {
 			}
 
 			//annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
-			if ($kukarow["extranet"] == "" and $kukarow['kassamyyja'] != '') {
+			if ($kukarow["extranet"] == "" and ($kukarow['kassamyyja'] != '' or $toim == "TARJOUS")) {
 
 				if ($jyvsumma== '') {
 					$jyvsumma='0.00';
 				}
 
-				echo "	<tr>
-						<td class='back'>&nbsp;</td>
-						</tr>
-						<tr>
-						<form name='pyorista' action='$PHP_SELF' method='post' autocomplete='off'>
+
+
+				if ($toim == "TARJOUS") {
+					echo "<form name='valmis' action='tulostakopio.php' method='post'>
+							<input type='hidden' name='tee' value='NAYTATILAUS'>
+							<input type='hidden' name='otunnus' value='$tilausnumero'>
+							<th class='back' colspan='".(floor($ycspan/2))."' nowrap>".t("Näytä lomake").":</th>
+							<td class='back' colspan='".(ceil($ycspan/2))."' nowrap>";
+
+					echo "<select name='toim'>";
+					echo "<option value='TARJOUS'>Tarjous</value>";
+					echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</value>";
+					echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";
+					echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</value>";
+					echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
+					echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
+					echo "</select><input type='submit' value='".t("Näytä")."'>";
+					echo "</td>";
+					echo "</form>";
+				}
+				else {
+					echo "<td class='back' colspan='$ycspan' nowrap></td>";
+				}
+
+				echo "	<form name='pyorista' action='$PHP_SELF' method='post' autocomplete='off'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 						<input type='hidden' name='tee' value='jyvita'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='arvo' value='$arvo'>
-
-						<td class='back' colspan='$ycspan'></td>
 						<th colspan='4'>".t("Pyöristä loppusummaa").":</th>
 						<td class='spec'><input type='text' size='7' name='jyvsumma' value='$jyvsumma'></td>
+						<td class='spec'>$laskurow[valkoodi]</td>
 						<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."'></td>
 						</tr>
 						</form>";

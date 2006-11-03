@@ -320,7 +320,9 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS") {
 	//Luodaan valituista riveistä suoraan normaali ostotilaus
 	require("tilauksesta_ostotilaus.inc");
 
-	$tilauksesta_ostotilaus = tilauksesta_ostotilaus($kukarow["kesken"]);
+	$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');
+	$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"],'U');
+
 	if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
 
 	// katsotaan ollaanko tehty JT-supereita..
@@ -420,6 +422,10 @@ if ($kukarow["extranet"] == "" and $tee == "LEPAAMYYNTITILI") {
 	$tilatapa = "LEPAA";
 
 	require ("laskuta_myyntitilirivi.inc");
+}
+
+if($tee == "MAKSUSOPIMUS") {
+	require("maksusopimus.inc");
 }
 
 // Poistetaan tilaus
@@ -627,7 +633,9 @@ if ($tee == "VALMIS") {
 			if($yhtiorow["tee_osto_myyntitilaukselta"] != '') {
 				require("tilauksesta_ostotilaus.inc");
 
-				$tilauksesta_ostotilaus = tilauksesta_ostotilaus($kukarow["kesken"]);
+				$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');
+				$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"],'U');
+
 				if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
 			}
 
@@ -796,6 +804,25 @@ if ($tee == '') {
 					</form>";
 		}
 
+		// otetaan maksuehto selville.. jaksotus muuttaa asioita
+		$query = " 	select *
+					from maksuehto
+					where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result)==1) {
+			$maksuehtorow = mysql_fetch_array($result);
+
+			if ($maksuehtorow['jaksotettu']!='') {
+				echo "<form action = '$PHP_SELF' method='post'>
+				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+				<input type='hidden' name='tee' value='MAKSUSOPIMUS'>
+				<input type='hidden' name='toim' value='$toim'>
+				<td class='back'><input type='Submit' value='".t("Laskutuspositiot")."'></td>
+				</form>";
+			}
+		}
+
 		echo "	<form action='tuote_selaus_haku.php' method='post'>
 				<input type='hidden' name='toim_kutsu' value='$toim'>
 				<td class='back'><input type='submit' value='".t("Selaa tuotteita")."'></td>
@@ -885,7 +912,20 @@ if ($tee == '') {
 			echo "<th align='left'>".t("Asiakas").":</th>";
 
 			if ($kukarow["extranet"] == "") {
-				echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$laskurow[ytunnus]'>$laskurow[ytunnus] $laskurow[nimi]</a><br>$laskurow[toim_nimi]</td>";
+
+				ob_start();
+
+				$ytunnus = $laskurow["ytunnus"];
+
+				require("../crm/asiakasmemo.php");
+
+				$out1 = ob_get_contents();
+
+				ob_end_clean();
+
+
+				echo "<td><a onmouseout=\"popUp(event,'1')\" onmouseover=\"popUp(event,'1')\" href='../crm/asiakasmemo.php?ytunnus=$laskurow[ytunnus]'>$laskurow[ytunnus] $laskurow[nimi]</a><br>$laskurow[toim_nimi]</td>";
+
 			}
 			else {
 				echo "<td>$laskurow[ytunnus] $laskurow[nimi]<br>$laskurow[toim_nimi]</td>";
@@ -2492,7 +2532,7 @@ if ($tee == '') {
 		}
 
 		// JT-rivikäyttöliittymä
-		if ($estetaankomyynti == '' and $muokkauslukko == "" and $rivilaskuri == 0 and $laskurow["liitostunnus"] > 0 and $kukarow["kassamyyja"] == '' and $toim != "TYOMAARAYS" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
+		if ($estetaankomyynti == '' and $muokkauslukko == "" and $rivilaskuri == 0 and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
 			//katotaan eka halutaanko asiakkaan jt-rivejä näkyviin
 			$asjtq = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]' and jtrivit = 1";
 			$asjtapu = mysql_query($asjtq) or pupe_error($asjtq);
@@ -2662,6 +2702,10 @@ if ($tee == '') {
 		}
 	}
 }
+
+echo js_popup(500);
+
+echo "<div id='1' class='popup'>$out1<br><br><a href='#' onclick=\"popUp(event,'1')\">Sulje</a></div>";
 
 if (file_exists("../inc/footer.inc")) {
 	require ("../inc/footer.inc");

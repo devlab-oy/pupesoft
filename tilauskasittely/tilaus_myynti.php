@@ -334,19 +334,8 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS") {
 	// Kopsataan valitut rivit uudelle myyntitilaukselle
 	require("tilauksesta_myyntitilaus.inc");
 
-
-	//Ensin kaikki rivit paitsi käsiraha
-	$tilrivilisa = " and (tuoteno!='$yhtiorow[ennakkomaksu_tuotenumero]' or (tuoteno='$yhtiorow[ennakkomaksu_tuotenumero]' and varattu < 0 )) ";
-
-	$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $tilrivilisa, '', '');
+	$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], '', '', '');
 	if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
-
-	//Ja sitten käsiraha omalle otsikolle
-	$tilrivilisa = " and tuoteno='$yhtiorow[ennakkomaksu_tuotenumero]' and varattu > 0 ";
-
-	$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $tilrivilisa, '', '');
-	if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
-
 
 	$query = "UPDATE lasku SET alatila='B' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -455,7 +444,6 @@ if ($tee == 'POISTA') {
 		$sarjares = mysql_query($query) or pupe_error($query);
 	}
 
-
 	$query = "UPDATE lasku SET tila='D', alatila='L', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -517,69 +505,47 @@ if ($tee == "VALMIS") {
 
 	// Tulostetaan tarjous
 	if($kukarow["extranet"] == "" and $toim == "TARJOUS") {
-		//Tulostetaan valitut paperit
-		// $otunnus = $laskurow["tunnus"];
-		// $komento["Tarjous"] 			= "email";
-		// $komento["Myyntisopimus"]		= "email";
-		// $komento["Osamaksusopimus"]		= "email";
-		// $komento["Luovutustodistus"]	= "email";
-		// 
-		// require_once ("tulosta_tarjous.inc");
-		// 
-		// tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee);
-		// 
-		// require_once ("tulosta_myyntisopimus.inc");
-		// 
-		// tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee);
-		// 
-		// require_once ("tulosta_luovutustodistus.inc");
-		// 
-		// tulosta_luovutustodistus($otunnus, $komento["Luovutustodistus"], $kieli, $tee);
-		// 
-		// require_once ("tulosta_osamaksusoppari.inc");
-		// 
-		// tulosta_osamaksusoppari($otunnus, $komento["Osamaksusopimus"], $kieli, $tee);
-		
+
 		if (count($komento) == 0) {
 			echo "<font class='head'>".t("Tarjous").":</font><hr><br>";
-			
+
 			$otunnus = $tilausnumero;
 			$tulostimet[0] = "Tarjous";
 			require("../inc/valitse_tulostin.inc");
 		}
-		
+
 		require_once ('tulosta_tarjous.inc');
 		tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee);
-		
+
 		$query = "UPDATE lasku SET alatila='A' where yhtio='$kukarow[yhtio]' and alatila='' and tunnus='$kukarow[kesken]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		// Tehdään asiakasmemotapahtuma
-		// $kysely = "	INSERT INTO kalenteri
-// 					SET tapa 		= 'Tarjous asiakkaalle',
-// 					asiakas  	 	= '$laskurow[ytunnus]',
-// 					liitostunnus	= '$laskurow[liitostunnus]',
-// 					henkilo  		= '',
-// 					kuka     		= '$kukarow[kuka]',
-// 					yhtio    		= '$kukarow[yhtio]',
-// 					tyyppi   		= 'Memo',
-// 					pvmalku  		= now(),
-// 					kentta01 		='Tarjous $laskurow[tunnus] tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]'";
-// 		$result = mysql_query($kysely) or pupe_error($kysely);
+		//Tehdään asiakasmemotapahtuma
+		 $kysely = "	INSERT INTO kalenteri
+						SET tapa 		= 'Tarjous asiakkaalle',
+						asiakas  	 	= '$laskurow[ytunnus]',
+						liitostunnus	= '$laskurow[liitostunnus]',
+						henkilo  		= '',
+						kuka     		= '$kukarow[kuka]',
+						yhtio    		= '$kukarow[yhtio]',
+						tyyppi   		= 'Memo',
+						pvmalku  		= now(),
+						kentta01 		='Tarjous $laskurow[tunnus] tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]'";
+ 		$result = mysql_query($kysely) or pupe_error($kysely);
 
-		// Tehdään myyjälle muistutus
-		// $kysely = "	INSERT INTO kalenteri
-		// 			SET
-		// 			asiakas  	 	= '$laskurow[ytunnus]',
-		// 			liitostunnus	= '$laskurow[liitostunnus]',
-		// 			kuka     		= '$kukarow[kuka]',
-		// 			yhtio    		= '$kukarow[yhtio]',
-		// 			tyyppi   		= 'Muistutus',
-		// 			tapa     		= 'Tarjous asiakkaalle',
-		// 			kentta01 		= 'Muista tarjous $laskurow[tunnus]!',
-		// 			kuittaus 		= 'K',
-		// 			pvmalku  		= date_add(now(), INTERVAL 7 day)";
-		// $result = mysql_query($kysely) or pupe_error($kysely);
+		 //Tehdään myyjälle muistutus
+		 $kysely = "	INSERT INTO kalenteri
+						SET
+						asiakas  	 	= '$laskurow[ytunnus]',
+						liitostunnus	= '$laskurow[liitostunnus]',
+						kuka     		= '$kukarow[kuka]',
+						yhtio    		= '$kukarow[yhtio]',
+						tyyppi   		= 'Muistutus',
+						tapa     		= 'Tarjous asiakkaalle',
+						kentta01 		= 'Muista tarjous $laskurow[tunnus]!',
+						kuittaus 		= 'K',
+						pvmalku  		= date_add(now(), INTERVAL 7 day)";
+		 $result = mysql_query($kysely) or pupe_error($kysely);
 
 		$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -829,7 +795,7 @@ if ($tee == '') {
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='tee' value='MAKSUSOPIMUS'>
 				<input type='hidden' name='toim' value='$toim'>
-				<td class='back'><input type='Submit' value='".t("Laskutuspositiot")."'></td>
+				<td class='back'><input type='Submit' value='".t("Maksusuunnitelma")."'></td>
 				</form>";
 			}
 		}
@@ -1307,6 +1273,8 @@ if ($tee == '') {
 
 			$rivinumero	= $tilausrivi['tilaajanrivinro'];
 
+			$jaksotettu = $tilausrivi['jaksotettu'];
+
 			if ($tilausrivi['hinta'] == '0.00') $hinta = '';
 
 			//Tämä oli huono idea
@@ -1367,32 +1335,6 @@ if ($tee == '') {
 		}
 	}
 
-	//Lisätään ennakkomaksurivit
-	if($ennakkomaksu > 0 and $tila == "lisaa_ennakkomaksu") {
-		$tuoteno_array = array();
-		$hinta_array   = array();
-		$kpl_array	   = array();
-
-		$tuoteno_array[] = $yhtiorow["ennakkomaksu_tuotenumero"];
-		$tuoteno_array[] = $yhtiorow["ennakkomaksu_tuotenumero"];
-
-		$hinta_array[$yhtiorow["ennakkomaksu_tuotenumero"]] = $ennakkomaksu;
-
-		$kpl_array[$yhtiorow["ennakkomaksu_tuotenumero"]] =  1;
-
-		$ennakkomaksu = 0;
-	}
-
-	if($ennakkomaksu == 0 and $tila == "lisaa_ennakkomaksu") {
-		$query = "	UPDATE tilausrivi set tyyppi='D'
-					WHERE yhtio='$kukarow[yhtio]'
-					and otunnus = '$kukarow[kesken]'
-					and tuoteno='$yhtiorow[ennakkomaksu_tuotenumero]'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		$tila = "";
-	}
-
 	//Lisätään rivi
 	if ((trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array)) and $tila != "MUUTA" and $ulos == '') {
 
@@ -1410,12 +1352,6 @@ if ($tee == '') {
 		$lisatty 			= 0;
 
 		foreach($tuoteno_array as $tuoteno) {
-
-			//Ennakkomaskun toinen rivi käännetään aina negatiiviseksi
-			if($lisatty == 1 and trim(strtoupper($tuoteno)) == trim(strtoupper($yhtiorow["ennakkomaksu_tuotenumero"]))) {
-				$kpl_array[$yhtiorow["ennakkomaksu_tuotenumero"]] = $kpl_array[$yhtiorow["ennakkomaksu_tuotenumero"]] * -1;
-			}
-
 			$query	= "	select *
 						from tuote
 						where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
@@ -1639,12 +1575,7 @@ if ($tee == '') {
 			$tilrivity	= "'L','E'";
 		}
 
-		$ennakkolisa = "";
-		if($yhtiorow["ennakkomaksu_tuotenumero"] != '' and $toim == "TARJOUS") {
-			$ennakkolisa = " and tilausrivi.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]' ";
-		}
-
-		// Tilausrivit (yhtiön ennakkomaksutuotetta ei aina näytetä)
+		// Tilausrivit
 		$query  = "	SELECT tilausrivi.*,
 					if (tuotetyyppi='K','Työ','Varaosa') tuotetyyppi,
 					if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) as sorttauskentta,
@@ -1656,7 +1587,6 @@ if ($tee == '') {
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					and tilausrivi.otunnus='$kukarow[kesken]'
 					and tilausrivi.tyyppi in ($tilrivity)
-					$ennakkolisa
 					$order";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -2465,75 +2395,6 @@ if ($tee == '') {
 						<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."'></td>
 						</tr>
 						</form>";
-			}
-
-			//annetaan ennakkomaksukenttä
-			if ($kukarow["extranet"] == "" and $yhtiorow["ennakkomaksu_tuotenumero"] != '' and $toim == "TARJOUS") {
-				echo "<form name='valmis' action='tulostakopio.php' method='post'>
-					<input type='hidden' name='tee' value='NAYTATILAUS'>
-					<input type='hidden' name='otunnus' value='$tilausnumero'>";
-
-				echo "<td class='back' colspan='$ycspan' nowrap>";
-				echo "<select name='toim' onchange='submit();'>";
-				echo "<option value=''>Näytä lomake ruudulla</value>";
-				echo "<option value='TARJOUS'>Tarjous</value>";
-				echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</value>";
-				echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";
-				echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</value>";
-				echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
-				echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
-				echo "</select>";
-				echo "</td>";
-				echo "</form>";
-
-				$query = "	SELECT *, round((varattu+jt+kpl) * hinta * (1-(ale/100)),2) rivihinta
-							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]'
-							and otunnus = '$kukarow[kesken]'
-							and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'
-							and tyyppi != 'D'";
-				$yresult = mysql_query($query) or pupe_error($query);
-
-				$ennakkosumma 		= 0;
-				$ennakkokpl			= 0;
-				$ennakkosumma_plus	= 0;
-				$ennakkoerror		= 0;
-
-				while ($row = mysql_fetch_array($yresult)) {
-					$ennakkosumma += $row["rivihinta"];
-
-					if($row["rivihinta"] > 0) {
-						$ennakkosumma_plus += $row["rivihinta"];
-					}
-
-					$ennakkokpl++;
-				}
-
-				if(round($ennakkosumma,2) != 0) {
-					echo "Käsirahaongelmia!<br>";
-					$ennakkoerror++;
-				}
-				if($ennakkokpl !=0 and $ennakkokpl != 2) {
-					echo "Käsirahaongelmia taas!<br>";
-					$ennakkoerror++;
-				}
-
-				if($ennakkosumma_plus >= 0 and $ennakkoerror == 0) {
-
-					echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
-							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-							<input type='hidden' name='tila' value='lisaa_ennakkomaksu'>
-							<input type='hidden' name='toim' value='$toim'>";
-
-					echo "	<th colspan='4'>".t("Ennakkomaksu/Käsiraha").":</th>
-							<td><input type='text' name='ennakkomaksu' value='$ennakkosumma_plus' size='7'></td>
-							<td class='spec'>$laskurow[valkoodi]</td>";
-
-					//echo "<td class='back' colspan='2'><input type='submit' value='".t("Tallenna")."'></td>";
-
-					echo "	</tr>
-							</form>";
-				}
 			}
 
 			echo "</table>";

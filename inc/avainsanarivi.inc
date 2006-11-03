@@ -82,6 +82,9 @@
 		if ($trow[$i] == 'MYSQLALIAS') {
 			$sel25 = "selected";
 		}
+		if ($trow[$i] == 'LASKUKUVAUS') {
+			$sel26 = "selected";
+		}
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
@@ -110,58 +113,59 @@
 		$ulos .= "<option value='TOIMEHTO'"      .$sel23.">".t("Toimitusehto")."</option>";
 		$ulos .= "<option value='RAHTIKIRJA'"    .$sel24.">".t("Rahtikirjatyyppi")."</option>";
 		$ulos .= "<option value='MYSQLALIAS'"    .$sel25.">".t("Tietokantasarakkeen nimialias")."</option>";
+		$ulos .= "<option value='LASKUKUVAUS'"   .$sel26.">".t("Maksuposition kuvaus")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "selite" and $sel24 == "selected") {
-		
+
 		$handle = opendir("tilauskasittely");
-		
+
 		$ulos  = "<td><select name='$nimi'>";
-	
+
 		$ulos .= "<option value=''></option>";
-		
-		while ($file = readdir($handle)) {								
+
+		while ($file = readdir($handle)) {
 			if (substr($file,0,10) == 'rahtikirja') {
 				$sel = "";
-				
+
 				if ($file == $trow[$i]) {
 					$sel = "SELECTED";
 				}
-				
+
 				$ulos .= "<option value='$file' $sel>".t($file)."</option>";
 			}
 		}
 		closedir($handle);
-		
+
 		$ulos .= "</select></td>";
-		$jatko = 0;		
-	}		
-	
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "selite" and $sel18 == "selected") {
-		
+
 		$handle = opendir("tilauskasittely");
-		
+
 		$ulos  = "<td><select name='$nimi'>";
-	
+
 		$ulos .= "<option value=''></option>";
-		
-		while ($file = readdir($handle)) {								
+
+		while ($file = readdir($handle)) {
 			if (substr($file,0,14) == 'tulosta_lahete') {
 				$sel = "";
-				
+
 				if ($file == $trow[$i]) {
 					$sel = "SELECTED";
 				}
-				
+
 				$ulos .= "<option value='$file' $sel>".t($file)."</option>";
 			}
 		}
 		closedir($handle);
-		
+
 		$ulos .= "</select></td>";
-		$jatko = 0;		
+		$jatko = 0;
 	}
-	
+
 ?>

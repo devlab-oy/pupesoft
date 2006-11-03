@@ -232,6 +232,7 @@
 			$lasklisa .= " and tunnus in ($laskutettavat) ";
 		}
 
+		$tulos_ulos_maksusoppari = "";
 
 		//haetaan kaikki laskutettavat tilaukset ja tehd‰‰n maksuehtosplittaukset jos niit‰ on
 		$query = "	select *
@@ -245,7 +246,29 @@
 
 		//ja katotaan vaatiiko joku maksuehto uusia tilauksia
 		while ($laskurow = mysql_fetch_array($res)) {
-			require("maksuehtosplittaus.inc");
+			$query = " 	select *
+						from maksuehto
+						where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+			$maresult = mysql_query($query) or pupe_error($query);
+			$maksuehtorow = mysql_fetch_array($maresult);
+
+			if ($maksuehtorow['jaksotettu'] != '') {
+				$query = "	UPDATE lasku SET alatila='J'
+							WHERE tunnus = '$laskurow[tunnus]'";
+				$updres = mysql_query($query) or pupe_error($query);
+
+				if ($silent == "") {
+					$tulos_ulos_maksusoppari .= t("Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $laskurow[tunnus] $laskurow[nimi]<br>\n<table>";
+				}
+			}
+			else {
+				require("maksuehtosplittaus.inc");
+			}
+		}
+
+		if ($tulos_ulos_maksusoppari != '' and $silent == "") {
+			$tulos_ulos .= "<br>\n".t("Maksusopimustilausket").":<br>\n";
+			$tulos_ulos .= $tulos_ulos_maksusoppari;
 		}
 
 		if ($tulos_ulos_ehtosplit != '' and $silent == "") {

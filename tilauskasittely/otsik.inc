@@ -281,25 +281,42 @@
 
 
 			if ($toim == "TARJOUS") {
-
-			echo "<table>";
-			echo "<tr><td>";
-				echo "<table cellpadding='1' cellspacing='1'>";
-				echo "<tr>
-						<th colspan='2' align='left' valign='top'>&nbsp; ".t("Rinnakkaisostaja").":</td></tr>";
-				echo "<tr>
-						<td valign='top'> ".t("Nimi").": </td>
-						<td><input type='text' name='kolm_nimi' size='35' maxlength='31' value='$srow[kolm_nimi]'></td></tr>";
-				echo "<tr>
-						<td></td>
-						<td><input type='text' name='kolm_nimitark' size='35' maxlength='31'  value='$srow[kolm_nimitark]'></td></tr>";
-				echo "<tr>
-						<td valign='top'>".t("Osoite").": </td>
-						<td><input type='text' name='kolm_osoite' size='35' maxlength='31' value='$srow[kolm_osoite]'></td></tr>";
-				echo "<tr>
-						<td valign='top'>".t("Postitp").": </td>
-						<td><input type='text' name='kolm_postino' size='6' maxlength='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' maxlength='20' value='$srow[kolm_postitp]'></td></tr>";
-				echo "</table>";
+				echo "<table>";
+				echo "<tr><td>";
+					echo "<table cellpadding='1' cellspacing='1'>";
+					echo "<tr>
+							<th colspan='2' align='left' valign='top'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
+					echo "<tr>
+							<td valign='top'> ".t("Nimi").": </td>
+							<td><input type='text' name='kolm_nimi' size='35' maxlength='31' value='$srow[kolm_nimi]'></td></tr>";
+					echo "<tr>
+							<td></td>
+							<td><input type='text' name='kolm_nimitark' size='35' maxlength='31'  value='$srow[kolm_nimitark]'></td></tr>";
+					echo "<tr>
+							<td valign='top'>".t("Osoite").": </td>
+							<td><input type='text' name='kolm_osoite' size='35' maxlength='31' value='$srow[kolm_osoite]'></td></tr>";
+					echo "<tr>
+							<td valign='top'>".t("Postitp").": </td>
+							<td><input type='text' name='kolm_postino' size='6' maxlength='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' maxlength='20' value='$srow[kolm_postitp]'></td></tr>";
+					echo "</table>";
+				echo "</td><td>";
+					echo "<table cellpadding='1' cellspacing='1'>";
+					echo "<tr>
+							<td valign='top'> ".t("Sähköpostiosoite").": </td>
+							<td>$srow[email]</td></tr>";
+					echo "<tr>
+							<td valign='top'>Kotipuhelin</td>
+							<td>$srow[puhelin]</td></tr>";
+					echo "<tr>
+							<td valign='top'>".t("Työpuhelin").": </td>
+							<td>$srow[fax]</td></tr>";
+					echo "<tr>
+							<td valign='top'>&nbsp;</td>
+							<td></td></tr>";
+					echo "<tr>
+							<td valign='top'></td>
+							<td></td></tr>";	
+					echo "</table>";		
 				echo "</td></tr></table><br>";
 			}
 

@@ -235,6 +235,21 @@
 			else {
 				$al_lisa = " and (selitetarktark = '$alias_set' or selitetarktark = '') ";
 			}
+			
+			$query = "	SELECT count(*) countti
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji='MYSQLALIAS'
+						and selite like '$toim.%'
+						$al_lisa";
+			$al_res = mysql_query($query) or pupe_error($query);
+			$aliarow = mysql_fetch_array($al_res);
+			
+			if ($aliarow['countti'] == 0) {
+				$alias_set = '';
+				$rajattu_nakyma = '';
+			}
+			
 		}
 
 
@@ -284,9 +299,9 @@
 				$otsikko = t(mysql_field_name($result, $i));
 
 				if ($rajattu_nakyma != '') {
-					$ulos = "";
-					$tyyppi = 0;
-				}
+ 					$ulos = "";
+ 					$tyyppi = 0;
+ 				}
 			}
 
 			// $tyyppi --> 0 riviä ei näytetä ollenkaan

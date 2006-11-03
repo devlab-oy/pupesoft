@@ -474,12 +474,13 @@
 
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Ei ryhm‰‰")."</option>";
-
+		
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['selite']) {
 				$sel = "selected";
 			}
+			
 			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 		}
 
@@ -494,12 +495,29 @@
 
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Ei myyj‰‰")."</option>";
-
+		
+		if ($lopetus != '') {
+			$kukamyyja='';
+			
+			$query = "	SELECT myyja
+						FROM kuka
+						WHERE yhtio='$kukarow[yhtio]' and kuka = '$kukarow[kuka]' and myyja != 0";
+			$myyjaresult = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($myyjaresult) > 0) {
+				$myyjarow=mysql_fetch_array($myyjaresult);
+				$kukamyyja = $myyjarow['myyja'];
+			}
+		}
+		
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['myyja']) {
 				$sel = "selected";
 			}
+			elseif ($kukamyyja != '' and $kukamyyja == $vrow['myyja']) {
+				$sel = "selected";
+			}
+			
 			$ulos .= "<option value = '$vrow[myyja]' $sel>$vrow[myyja] - $vrow[nimi]</option>";
 		}
 

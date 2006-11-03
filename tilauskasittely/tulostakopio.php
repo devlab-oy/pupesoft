@@ -649,7 +649,7 @@
 				$komento["Lasku"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "TARJOUS" and $komento["Tarjous"] != 'email') {
+		if ($toim == "TARJOUS" and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
 			$tulostimet[0] = 'Tarjous';
 			if ($kappaleet > 0) {
 				$komento["Tarjous"] .= " -# $kappaleet ";
@@ -945,7 +945,7 @@
 				$otunnus = $laskurow["tunnus"];
 
 				require_once ("tulosta_tarjous.inc");
-
+				
 				tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee);
 
 				$tee = '';

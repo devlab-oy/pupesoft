@@ -70,6 +70,7 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$edytunnus = 0;
+		$tunnukset = "";
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$ytunnus = $vrow["ytunnus"];
@@ -113,6 +114,66 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "ytunnus") {
+
+		$ulos = "<td><input type='text' name='$nimi' value='$trow[$i]'>";
+
+		if ($alias_set == "VAHITTAISMYYNTI") {
+			$query = "	SELECT lpad(ytunnus,15,0) as ytunnus
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]'
+						and ytunnus < 100000
+						ORDER BY ytunnus";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			$edytunnus = 0;
+			$tunnukset = "";
+
+			while ($vrow = mysql_fetch_array($vresult)) {
+				$ytunnus = $vrow["ytunnus"];
+
+				if ($ytunnus - $edytunnus > 1000) {
+
+					$vapaa = $edytunnus+1;
+
+					$tunnukset .= $vapaa."#";
+				}
+
+				$edytunnus = $ytunnus;
+
+			}
+
+			$query = "	SELECT max(lpad(ytunnus,15,0)) as ytunnus
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]'
+						and ytunnus < 100000";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_array($vresult);
+			$vapaa = $vrow['ytunnus']+1;
+
+			$tunnukset .= $vapaa."#";
+
+			$tunnukset = substr($tunnukset,0,-1);
+			$tunnukset = split("#",$tunnukset);
+
+			$ulos .= "<select name='ytunnus_select'>";
+			$ulos .= "<option value = ''></option>";
+
+			foreach($tunnukset as $xtunnus) {
+
+				$xtunnus = (int) $xtunnus;
+
+				$ulos .= "<option value = '$xtunnus'>$xtunnus</option>";
+			}
+
+			$ulos .= "</select>";
+		}
+
+		$ulos .= "</td>";
+		$jatko = 0;
+	}
+
 
 	if (mysql_field_name($result, $i) == "maa") {
 		$query = "	SELECT distinct koodi, nimi
@@ -474,13 +535,13 @@
 
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Ei ryhm‰‰")."</option>";
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['selite']) {
 				$sel = "selected";
 			}
-			
+
 			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
 		}
 
@@ -495,10 +556,10 @@
 
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Ei myyj‰‰")."</option>";
-		
+
 		if ($lopetus != '') {
 			$kukamyyja='';
-			
+
 			$query = "	SELECT myyja
 						FROM kuka
 						WHERE yhtio='$kukarow[yhtio]' and kuka = '$kukarow[kuka]' and myyja != 0";
@@ -508,7 +569,7 @@
 				$kukamyyja = $myyjarow['myyja'];
 			}
 		}
-		
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow['myyja']) {
@@ -517,7 +578,7 @@
 			elseif ($kukamyyja != '' and $kukamyyja == $vrow['myyja']) {
 				$sel = "selected";
 			}
-			
+
 			$ulos .= "<option value = '$vrow[myyja]' $sel>$vrow[myyja] - $vrow[nimi]</option>";
 		}
 

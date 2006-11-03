@@ -5,6 +5,12 @@
 	}
 
 	if (mysql_field_name($result, $i) == "ytunnus") {
+		if ($ytunnus_select != '') {
+			$t[$i] = $ytunnus_select;
+		}
+	}
+
+	if (mysql_field_name($result, $i) == "ytunnus") {
 
 		$ytunnus = trim($t[$i]);
 

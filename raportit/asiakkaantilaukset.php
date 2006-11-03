@@ -6,12 +6,44 @@
 
 	if ($toim == 'MYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tilaukset").":</font><hr>";
+		
+		$til = " tila in ('L','U','N') ";
 	}
 	if ($toim == 'OSTO') {
 		echo "<font class='head'>".t("Toimittajan tilaukset").":</font><hr>";
+		
+		$til = " tila ='O' ";
 	}
 	if ($toim == 'TARJOUS') {
 		echo "<font class='head'>".t("Asiakkaan tarjoukset").":</font><hr>";
+		
+		$til = " tila = 'T' ";
+	}
+	
+	if ($ytunnus == '' and $otunnus == '' and $laskunro == '' and $kukarow['kesken'] != 0 and $til != '') {
+	
+		$query = "SELECT ytunnus, liitostunnus FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[kesken]' and $til";
+		$keskenresult = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($keskenresult) == 1) {
+			$keskenrow = mysql_fetch_array($keskenresult);	
+		
+			$ytunnus = $keskenrow['ytunnus'];
+			$asiakasid = $keskenrow['liitostunnus'];
+		
+			if (!isset($kka))
+				$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+			if (!isset($vva))
+				$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+			if (!isset($ppa))
+				$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+			
+			if (!isset($kkl))
+				$kkl = date("m");
+			if (!isset($vvl))
+				$vvl = date("Y");
+			if (!isset($ppl))
+				$ppl = date("d");
+		}
 	}
 
 	if ($tee == 'NAYTATILAUS') {
@@ -75,11 +107,12 @@
 		echo "<hr>";
 		$tee = "TULOSTA";
 	}
-
+	
 	if ($ytunnus != '' and ($otunnus == '' and $laskunro == '')) {
 		if ($toim == 'MYYNTI' or $toim == "TARJOUS") {
 			require ("../inc/asiakashaku.inc");
 		}
+		
 		if ($toim == 'OSTO') {
 			require ("../inc/kevyt_toimittajahaku.inc");
 		}
@@ -152,15 +185,8 @@
 		else {
 			$jarj = "ORDER BY lasku.laskunro desc";
 		}
-
-		if ($toim == 'MYYNTI') {
-			$til = " tila in ('L','U','N') ";
-		}
-		elseif ($toim == 'TARJOUS') {
-			$til = " tila = 'T' ";
-		}
-		elseif ($toim == 'OSTO') {
-			$til = " tila ='O' ";
+		
+		if ($toim == 'OSTO') {
 			$asiakasid = $toimittajaid;
 		}
 
@@ -203,7 +229,7 @@
 			else {
 				$query .= "	and lasku.liitostunnus	= '$asiakasid'";
 			}
-
+			
 			$query .= "	and $til
 						and lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'
 						and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'

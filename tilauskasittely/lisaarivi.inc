@@ -19,6 +19,7 @@
 	// $varataan_saldoa --> Jos == EI niin ei varata saldoa (tietyiss‰ keisseiss‰), tai siis ei ainakan tehd‰ saldotsekki‰
 	// $kutsuja			--> Kuka t‰t‰ skripti‰ kutsuu
 	// $myy_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+	// $jaksotettu		--> Kuuluuko tilausrivi mukaan jaksotukseen
 
 	//palauttaa arrayn $lisatyt_rivit jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si
 
@@ -544,7 +545,8 @@
 											osasto		= '$trow[osasto]',
 											perheid		= '$perheid',
 											tunnus 		= '$rivitunnus',
-											nimitys 	= '$trow[nimitys]'";
+											nimitys 	= '$trow[nimitys]',
+											jaksotettu	= '$jaksotettu'";
 
 								if ($trow['ei_saldoa']!='') {
 									$query .= ", kerattyaika = now()";
@@ -970,7 +972,8 @@
 						osasto		= '$trow[osasto]',
 						perheid		= '$perheid',
 						tunnus 		= '$rivitunnus',
-						nimitys 	= '$trow[nimitys]'";
+						nimitys 	= '$trow[nimitys]',
+						jaksotettu	= '$jaksotettu'";
 
 			if ($trow['ei_saldoa']!='') {
 				$query .= ", kerattyaika = now()";

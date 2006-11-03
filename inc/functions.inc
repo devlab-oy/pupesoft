@@ -178,6 +178,32 @@ if (!function_exists("t")) {
 	}
 }
 
+if (!function_exists("alias")) {
+
+	function alias($stringi, $taulu, $setti = '') {
+
+		// tarvitaan yhtiörowta, kukarowta
+		global $yhtiorow, $kukarow;
+
+		$hakustringi = $taulu.".".$stringi;
+
+		$aliasquery  = "SELECT selitetark FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and selitetarktark = '$setti' and selite = '$hakustringi'";
+		$aliasresult = mysql_query($aliasquery) or pupe_error($aliasquery);
+
+		if (mysql_num_rows($aliasresult) > 0) {
+			$aliasrow = mysql_fetch_array($aliasresult);
+			
+			$stringi = $aliasrow['selitetark'];
+			
+		}
+		
+		$stringi = t($stringi);
+
+		return $stringi;
+	}
+}
+
+
 if (!function_exists("kuuluukovarastoon")) {
 
 	function kuuluukovarastoon($hyllyalue, $hyllynro, $varasto = '', $yhtio = '') {

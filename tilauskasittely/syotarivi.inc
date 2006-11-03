@@ -51,6 +51,7 @@
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
+			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
 		echo "</form>";
@@ -141,6 +142,7 @@
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
+			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
@@ -183,6 +185,7 @@
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
+			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}

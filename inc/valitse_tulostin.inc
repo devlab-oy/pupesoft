@@ -76,7 +76,7 @@
 		$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
 		$asrow = mysql_fetch_array($resultkieli);
 
-		$querykieli = "	SELECT kieli
+		$querykieli = "	SELECT kieli, email
 						FROM $mista
 						WHERE
 						ytunnus='$asrow[ytunnus]'
@@ -102,7 +102,7 @@
 	echo "<td><select name='kieli'>";
 
 	while ($apurow = mysql_fetch_array($fields)) {
-		if ($apurow[0] != "tunnus") {
+		if ($apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty") {
 			$query = "select distinct nimi from maat where koodi='$apurow[0]'";
 			$maare = mysql_query($query);
 
@@ -122,7 +122,11 @@
 		echo "<tr><td>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</td>";
 		echo "<td><select name='komento[$tulostin]'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-
+		
+		if ($toim == 'TARJOUS' and $asrow['email'] != '') {
+			echo "<option value='asiakasemail:$asrow[email]'>".t("Asiakkaan sähköpostiin")."</option>";
+		}
+		
 		$querykieli = "	select *
 					from kirjoittimet
 					where yhtio='$kukarow[yhtio]'

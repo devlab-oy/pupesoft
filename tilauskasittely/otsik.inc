@@ -307,23 +307,39 @@
 
 			echo "<table>";
 			echo "<tr><th colspan='4'>".t("Tilauksen tiedot").":</th></tr>";
+
+
+			//Tutkitaan onko laskulla maksupositioita
+			$query = "	SELECT *
+						FROM maksupositio
+						WHERE maksupositio.yhtio ='$kukarow[yhtio]'
+						and maksupositio.otunnus ='$kukarow[kesken]'";
+			$result = mysql_query($query) or pupe_error($query);
+
 			echo "<tr><td>".t("Maksuehto").":</td>";
-			echo "<td><select name='maksuehto'>";
 
-			$query = "	SELECT tunnus, concat_ws(' ', kassa_teksti, teksti)
-						FROM maksuehto
-						WHERE yhtio = '$kukarow[yhtio]' order by jarjestys,concat_ws(' ', kassa_teksti, teksti), tunnus";
-			$mresult = mysql_query($query) or pupe_error($query);
-
-			while($row=mysql_fetch_array($mresult)) {
-				$sel = "";
-				if ($row[0] == $srow["maksuehto"]) {
-					$sel = 'selected';
-				}
-				echo "<option value='$row[0]' $sel>$row[1]";
+			if(mysql_num_rows($result) > 0) {
+				echo "<td>$srow[maksuehto]</td>";
+				echo "<input type='hidden' name='maksuehto' value = '$srow[maksuehto]'>";
 			}
-			echo "</select></td>";
+			else {
 
+				echo "<td><select name='maksuehto'>";
+
+				$query = "	SELECT tunnus, concat_ws(' ', kassa_teksti, teksti)
+							FROM maksuehto
+							WHERE yhtio = '$kukarow[yhtio]' order by jarjestys,concat_ws(' ', kassa_teksti, teksti), tunnus";
+				$mresult = mysql_query($query) or pupe_error($query);
+
+				while($row=mysql_fetch_array($mresult)) {
+					$sel = "";
+					if ($row[0] == $srow["maksuehto"]) {
+						$sel = 'selected';
+					}
+					echo "<option value='$row[0]' $sel>$row[1]";
+				}
+				echo "</select></td>";
+			}
 			echo "<td>".t("Erikoisalennus").":</td>
 				<td><input type='text' name='erikoisale' value='$srow[erikoisale]'></td>
 				</tr>";
@@ -522,7 +538,7 @@
 			elseif ($toim == "TARJOUS") {
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 
-				//Jos kyseessä on työmääräys
+				//Jos kyseessä on tarjous
 				echo "<input type='hidden' name='tilaustyyppi' value='T'>";
 
 				echo "<td>".t("Tarjous")."</td>";

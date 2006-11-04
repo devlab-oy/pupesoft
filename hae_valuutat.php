@@ -32,7 +32,7 @@
 			$valuutta = explode("/", $arvot[1]);
 
 			// haetaan kurssi
-			$kurssi = (float) $arvot[2];
+			$kurssi = (float) 1 / $arvot[2];
 
 			// varmistetaan, että oli yhtiö kurssi on sama ku tuli boffin saitilta
 			if ($yhtiorow["valkoodi"] == $valutta[1]) {

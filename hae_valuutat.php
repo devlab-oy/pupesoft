@@ -2,7 +2,7 @@
 
 	require ("inc/parametrit.inc");
 
-	echo "<font class='head'>Valuuttakurssien p√§ivitys<hr></font>";
+	echo "<font class='head'>Valuuttakurssien p‰ivitys<hr></font>";
 
 	ob_start();
 
@@ -22,7 +22,7 @@
 		// splitataan rivit rivinvaihdosta
 		$rivit = explode("\n",$val_palautus);
 
-		// k√§yd√§√§n l√§pi riveitt√§in
+		// k‰yd‰‰n l‰pi riveitt‰in
 		foreach ($rivit as $rivi) {
 
 			// splitataan rivi spacesta
@@ -34,21 +34,21 @@
 			// haetaan kurssi
 			$kurssi = (float) 1 / $arvot[2];
 
-			// varmistetaan, ett√§ oli yhti√∂ kurssi on sama ku tuli boffin saitilta
+			// varmistetaan, ett‰ oli yhtiˆ kurssi on sama ku tuli boffin saitilta
 			if ($yhtiorow["valkoodi"] == $valutta[1]) {
 
 				$query = "update valuu set kurssi='$kurssi' where yhtio='$kukarow[yhtio]' and nimi='$valuutta[0]'";
 				$result = mysql_query($oikeuquery) or pupe_error($oikeuquery);
 
 				if (mysql_affected_rows($result) != 0) {
-					echo "<font class='message'>P√§ivitettiin $arvot[0] kurssi valuutalle $valuutta[0]: $kurssi</font><br>";
+					echo "<font class='message'>P‰ivitettiin $arvot[0] kurssi valuutalle $valuutta[0]: $kurssi</font><br>";
 				}
 			}
 
 		}
 	}
 	else {
-		echo "<font class='error'>Valuuttakurssien p√§ivitys ep√§onnistui!</font><br>";
+		echo "<font class='error'>Valuuttakurssien p‰ivitys ep‰onnistui!</font><br>";
 	}
 
 	require ("inc/footer.inc");

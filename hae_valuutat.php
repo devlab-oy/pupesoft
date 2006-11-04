@@ -38,7 +38,7 @@
 			if ($yhtiorow["valkoodi"] == $valuutta[1]) {
 
 				$query = "update valuu set kurssi='$kurssi' where yhtio='$kukarow[yhtio]' and nimi='$valuutta[0]'";
-				$result = mysql_query($oikeuquery) or pupe_error($oikeuquery);
+				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_affected_rows($result) != 0) {
 					echo "<font class='message'>Päivitettiin $arvot[0] kurssi valuutalle $valuutta[0]: $kurssi</font><br>";

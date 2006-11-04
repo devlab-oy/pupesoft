@@ -28,27 +28,28 @@
 			// splitataan rivi spacesta
 			$arvot = explode(" ", $rivi);
 
-			// haetaan valuuttakoodi
-			$valuutta = explode("/", $arvot[1]);
+			if ((float) $arvot[2] != 0) {
+				// haetaan valuuttakoodi
+				$valuutta = explode("/", $arvot[1]);
 
-			// haetaan kurssi
-			$kurssi = round(1 / (float) $arvot[2], 6);
+				// haetaan kurssi
+				$kurssi = round(1 / (float) $arvot[2], 6);
 
-			// varmistetaan, että oli yhtiö kurssi on sama ku tuli boffin saitilta
-			if ($yhtiorow["valkoodi"] == $valuutta[1]) {
+				// varmistetaan, että oli yhtiö kurssi on sama ku tuli boffin saitilta
+				if ($yhtiorow["valkoodi"] == $valuutta[1]) {
 
-				$query = "update valuu set kurssi='$kurssi' where yhtio='$kukarow[yhtio]' and nimi='$valuutta[0]'";
-				$result = mysql_query($query) or pupe_error($query);
+					$query = "update valuu set kurssi='$kurssi' where yhtio='$kukarow[yhtio]' and nimi='$valuutta[0]'";
+					$result = mysql_query($query) or pupe_error($query);
 
-				echo "<font class='message'>Haettiin $arvot[0] kurssi valuutalle $valuutta[0]: $kurssi</font>";
+					echo "<font class='message'>Haettiin $arvot[0] kurssi valuutalle $valuutta[0]: $kurssi</font>";
 
-				if (mysql_affected_rows() != 0) {
-					echo "<font class='message'> ... Kurssi päivitetty.</font>";
+					if (mysql_affected_rows() != 0) {
+						echo "<font class='message'> ... Kurssi päivitetty.</font>";
+					}
+
+					echo "<br>";
 				}
-
-				echo "<br>";
 			}
-
 		}
 	}
 	else {

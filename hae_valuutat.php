@@ -35,7 +35,7 @@
 			$kurssi = (float) 1 / $arvot[2];
 
 			// varmistetaan, että oli yhtiö kurssi on sama ku tuli boffin saitilta
-			if ($yhtiorow["valkoodi"] == $valutta[1]) {
+			if ($yhtiorow["valkoodi"] == $valuutta[1]) {
 
 				$query = "update valuu set kurssi='$kurssi' where yhtio='$kukarow[yhtio]' and nimi='$valuutta[0]'";
 				$result = mysql_query($oikeuquery) or pupe_error($oikeuquery);

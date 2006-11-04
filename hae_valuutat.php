@@ -32,7 +32,7 @@
 			$valuutta = explode("/", $arvot[1]);
 
 			// haetaan kurssi
-			$kurssi = (float) 1 / $arvot[2];
+			$kurssi = round(1 / (float) $arvot[2], 6);
 
 			// varmistetaan, että oli yhtiö kurssi on sama ku tuli boffin saitilta
 			if ($yhtiorow["valkoodi"] == $valuutta[1]) {
@@ -40,9 +40,13 @@
 				$query = "update valuu set kurssi='$kurssi' where yhtio='$kukarow[yhtio]' and nimi='$valuutta[0]'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				if (mysql_affected_rows($result) != 0) {
-					echo "<font class='message'>Päivitettiin $arvot[0] kurssi valuutalle $valuutta[0]: $kurssi</font><br>";
+				echo "<font class='message'>Haettiin $arvot[0] kurssi valuutalle $valuutta[0]: $kurssi</font>";
+
+				if (mysql_affected_rows() != 0) {
+					echo "<font class='message'> ... Kurssi päivitetty.</font>";
 				}
+
+				echo "<br>";
 			}
 
 		}

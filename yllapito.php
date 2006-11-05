@@ -226,7 +226,7 @@
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
 
-		$al_lisa = "";
+		$al_lisa = " and selitetarktark = '' ";
 
 		if ($alias_set != '') {
 			if ($rajattu_nakyma != '') {

@@ -30,7 +30,7 @@ $sivu = 1;
 // laskun alku ja loppu functiot...
 if (!function_exists('alku')) {
 	function alku () {
-		global $yhtiorow, $kukarow, $kutsuja, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kieli, $boldi;
+		global $yhtiorow, $kukarow, $kutsuja, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kieli, $boldi, $kala;
 
 		$firstpage = $pdf->new_page("a4");
 
@@ -191,6 +191,30 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(410, 563, "",							$firstpage, $pieni);
 		$pdf->draw_text(470, 563, t("Verollinen arvo", $kieli),	$firstpage, $pieni);
 
+		//tehdään viestejä ja lasketaan niitten pituuksia
+		if ($laskurow['sisviesti1'] != '') {
+
+			$pdf->draw_text(35, 543, t("Huomautukset", $kieli).":", $firstpage, $norm);
+			$pohja = $pdf->draw_paragraph(543, 35, 60, 550, trim($laskurow["sisviesti1"])."\n", $firstpage, $norm); // top, left, bottom, right
+
+			$laskurow['sisviesti1'] = "";
+
+			if (!is_numeric($pohja)) {
+				$laskurow['sisviesti1'] = $pohja;
+				loppu($firstpage, 0);
+				$firstpage = alku();
+			}
+			else {
+				// viivat rivien väliin...
+				$x[0] = 20;
+				$x[1] = 580;
+				$y[0] = $y[1] = $pohja - 4;
+				$pdf->draw_line($x, $y, $firstpage, $rectparam);
+				$kala = $pohja - 15;
+			}
+
+		}
+
 		return($firstpage);
 	}
 }
@@ -321,10 +345,6 @@ if (!function_exists('loppu')) {
 
 		if ($laskurow["vienti"] != "") {
 			$vientikala = 20;
-		}
-
-		if ($laskurow["sisviesti1"] != ''){
-			$pohja = $pdf->draw_paragraph(165, 35, 115+$vientikala, 340, $laskurow["sisviesti1"], 		$firstpage, $pieni_boldi);
 		}
 
 		//yhteensärivi

@@ -100,15 +100,15 @@
 
 
 		if ($ahyllyalue != '') {
-			$apaikka = strtoupper($ahyllyalue).sprintf("%02s",$ahyllynro).sprintf("%02s",$ahyllyvali).sprintf("%02s",$ahyllytaso);
-			$lisaa .= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,2,'0'),lpad(tuotepaikat.hyllyvali,2,'0'),lpad(tuotepaikat.hyllytaso,2,'0')) >= '$apaikka' ";
+			$apaikka = strtoupper($ahyllyalue).sprintf("%05s",$ahyllynro).sprintf("%05s",$ahyllyvali).sprintf("%05s",$ahyllytaso);
+			$lisaa .= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) >= '$apaikka' ";
 		}
 
 		if ($lhyllyalue != '') {
-			$lpaikka = strtoupper($lhyllyalue).sprintf("%02s",$lhyllynro).sprintf("%02s",$lhyllyvali).sprintf("%02s",$lhyllytaso);
-			$lisaa .= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,2,'0'),lpad(tuotepaikat.hyllyvali,2,'0'),lpad(tuotepaikat.hyllytaso,2,'0')) <= '$lpaikka' ";
+			$lpaikka = strtoupper($lhyllyalue).sprintf("%05s",$lhyllynro).sprintf("%05s",$lhyllyvali).sprintf("%05s",$lhyllytaso);
+			$lisaa .= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) <= '$lpaikka' ";
 		}
-
+#TODO palauttaa varaston väärin
 		$query = "	SELECT tuotepaikat.*, tuote.nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, varastopaikat.nimitys varasto, tuotepaikat.tunnus paikkatun
 					FROM tuotepaikat
 					LEFT JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno

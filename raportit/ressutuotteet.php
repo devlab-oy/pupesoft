@@ -23,7 +23,7 @@
 		else {
 			$nollatlisa = " tuotepaikat.saldo ";
 		}
-		
+#TODO t‰m‰ palauttaa varaston v‰‰rin		
 		$query = "	SELECT tuotepaikat.tuoteno, 
 					sum(if(tuotepaikat.oletus='X',tuotepaikat.saldo,0)) oletuspaikalla, 
 					sum(if(tuotepaikat.oletus='',$nollatlisa,0)) muillapaikoilla, 
@@ -46,6 +46,7 @@
 		echo "	<table><tr><th>Tuoteno</th><th>Nimitys</th><th>Toim_tuoteno</th><th>Varastopaikka</th><th>Oletus</th><th>Saldo</th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
+#TODO varastov‰‰rin
 			$query = "	SELECT tuotepaikat.tuoteno, 
 						concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka, 
 						tuotepaikat.saldo, tuotepaikat.oletus,

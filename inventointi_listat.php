@@ -118,13 +118,13 @@
 					$join 		= " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' $lisa ";
 					$lefttoimi 	= " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
 					
-					$where		= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,2,'0'),lpad(tuotepaikat.hyllyvali,2,'0'),lpad(tuotepaikat.hyllytaso,2,'0')) >= '$apaikka'
-									and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,2,'0'),lpad(tuotepaikat.hyllyvali,2,'0'),lpad(tuotepaikat.hyllytaso,2,'0')) <= '$lpaikka'												
+					$where		= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) >= '$apaikka'
+									and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) <= '$lpaikka'												
 									and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $extra ";
 				}
 				else {
-					$join		.= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,2,'0'),lpad(tuotepaikat.hyllyvali,2,'0'),lpad(tuotepaikat.hyllytaso,2,'0')) >= '$apaikka'
-									and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,2,'0'),lpad(tuotepaikat.hyllyvali,2,'0'),lpad(tuotepaikat.hyllytaso,2,'0')) <= '$lpaikka' ";
+					$join		.= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) >= '$apaikka'
+									 and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) <= '$lpaikka' ";
 				}
 				
 			}

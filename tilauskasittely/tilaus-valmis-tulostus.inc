@@ -98,8 +98,8 @@
 		$query = "	SELECT tilausrivi.*,
 					round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
 					if(perheid = 0,
-					(select concat(rpad(upper(hyllyalue), 3, '0'), lpad(hyllynro, 2, '0'), lpad(hyllyvali, 2, '0'), lpad(hyllytaso, 2, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-					(select concat(rpad(upper(hyllyalue), 3, '0'), lpad(hyllynro, 2, '0'), lpad(hyllyvali, 2, '0'), lpad(hyllytaso, 2, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+					(select concat(rpad(upper(hyllyalue), 5, '0'), lpad(hyllynro, 5, '0'), lpad(hyllyvali, 5, '0'), lpad(hyllytaso, 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+					(select concat(rpad(upper(hyllyalue), 5, '0'), lpad(hyllynro, 5, '0'), lpad(hyllyvali, 5, '0'), lpad(hyllytaso, 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
 					) as sorttauskentta,
 					$lisa2
 					FROM tilausrivi, tuote

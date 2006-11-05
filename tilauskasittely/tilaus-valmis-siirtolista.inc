@@ -67,6 +67,7 @@
 			$edvarasto = 'x';
 
 			while ($row = mysql_fetch_array($result)) {
+#TODO varasto v‰‰rin				
 				$query = "	SELECT * 
 							FROM varastopaikat 
 							WHERE yhtio='$kukarow[yhtio]' 

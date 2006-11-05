@@ -22,7 +22,7 @@
 			$varastot = substr($varastot,0,-1);
 			$varastot = " and varastopaikat.tunnus in ($varastot) ";
 		}
-
+#TODO t‰m‰ palauttaa v‰‰rin varaston
 		$query = "	SELECT tuote.osasto, tuote.try, tuotepaikat.tuoteno, tuote.nimitys, tuotepaikat.saldoaika,
 					concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka,
 					tuote.yksikko, tuotepaikat.inventointiaika, tuote.tahtituote, tuote.hinnastoon, tuote.status,

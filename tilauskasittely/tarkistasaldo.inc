@@ -48,7 +48,7 @@
 			$qwresult = mysql_query($query) or pupe_error($query);
 			$trow=mysql_fetch_array($qwresult);
 		}
-
+#TODO kattoo varastot v‰‰rin
 		$query = "	SELECT *, varastopaikat.tunnus varasto, tuotepaikat.tunnus tuotepaikka
 					FROM tuotepaikat
 					LEFT JOIN varastopaikat

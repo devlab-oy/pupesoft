@@ -104,7 +104,7 @@
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) == 1) {
-
+#TODO palauttaa varaston v‰‰rin
 						//Yritet‰‰n p‰‰tt‰‰ l‰hdepaikka
 						$query = "	SELECT *
 									FROM tuotepaikat
@@ -131,6 +131,7 @@
 						}
 
 						if ($lahde == 1) {
+#TODO palauttaa vaarston v‰‰rin
 							//Yritet‰‰n p‰‰tt‰‰ kohdepaikka
 							$query = "	SELECT *
 										FROM tuotepaikat

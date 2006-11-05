@@ -21,6 +21,7 @@
 		$kirjoitin	= "";
 		
 		while ($turow = mysql_fetch_array($turesult)) {
+#TODO antaa varaston väärin
 			$lis .= " sum(if(tilausrivi.hyllyalue>='$turow[alkuhyllyalue]' and tilausrivi.hyllyalue<='$turow[loppuhyllyalue]' and tilausrivi.hyllynro>='$turow[alkuhyllynro]' and tilausrivi.hyllynro<='$turow[loppuhyllynro]',1,0)) '$turow[printteri]',";					
 			$pri++;
 		}

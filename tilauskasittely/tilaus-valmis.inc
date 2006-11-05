@@ -384,19 +384,8 @@ else {
 			$edvarasto = 'x';
 
 			while ($row = mysql_fetch_array($result)) {
-				$query = "	SELECT *
-							FROM varastopaikat
-							WHERE yhtio			= '$kukarow[yhtio]'
-							and alkuhyllyalue  <= '$row[hyllyalue]'
-							and loppuhyllyalue >= '$row[hyllyalue]'
-							and alkuhyllynro   <= '$row[hyllynro]'
-							and loppuhyllynro  >= '$row[hyllynro]'";
-				$vares = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($vares)!=0) {
-					$varow = mysql_fetch_array($vares);
-					$varasto = $varow['tunnus'];
-				}
+				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
 				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti
 				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["hetiera"] != 'H')) {

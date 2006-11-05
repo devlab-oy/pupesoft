@@ -335,8 +335,8 @@
 						$query = "	SELECT *
 									FROM varastopaikat
 									WHERE
-									concat(rpad(upper(alkuhyllyalue) ,3,'0'),lpad(alkuhyllynro ,2,'0')) <= concat(rpad(upper('$saldorow[hyllyalue]') ,3,'0'),lpad('$saldorow[hyllynro]' ,2,'0'))
-									and concat(rpad(upper(loppuhyllyalue) ,3,'0'),lpad(loppuhyllynro ,2,'0')) >= concat(rpad(upper('$saldorow[hyllyalue]') ,3,'0'),lpad('$saldorow[hyllynro]' ,2,'0'))
+									concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0')) <= concat(rpad(upper('$saldorow[hyllyalue]') ,5,'0'),lpad('$saldorow[hyllynro]' ,5,'0')) and
+									concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0')) >= concat(rpad(upper('$saldorow[hyllyalue]') ,5,'0'),lpad('$saldorow[hyllynro]' ,5,'0'))
 									and yhtio = '$kukarow[yhtio]'";
 						$varcheckres = mysql_query($query) or pupe_error($query);
 						$varcheckrow = mysql_fetch_array($varcheckres);
@@ -395,8 +395,8 @@
 									from tuotepaikat
 									join yhtio on yhtio.yhtio=tuotepaikat.yhtio
 									join varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
-									and concat(rpad(upper(tuotepaikat.hyllyalue) ,3,'0'),lpad(tuotepaikat.hyllynro ,2,'0')) >= concat(rpad(upper(alkuhyllyalue) ,3,'0'),lpad(alkuhyllynro ,2,'0'))
-									and concat(rpad(upper(tuotepaikat.hyllyalue) ,3,'0'),lpad(tuotepaikat.hyllynro ,2,'0')) <= concat(rpad(upper(loppuhyllyalue) ,3,'0'),lpad(loppuhyllynro ,2,'0'))
+									and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
+									and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))
 									where tuotepaikat.yhtio = '$superrow[tyyppi_tieto]'
 									and tuoteno = '$tuoteno'
 									and varastopaikat.tyyppi = ''
@@ -415,8 +415,8 @@
 											tyyppi='L' and
 											varattu>0 and
 											tuoteno='$tuoteno'
-											and concat(rpad(upper(hyllyalue), 3, '0'),lpad(hyllynro, 2, '0')) >= concat(rpad(upper('$krow[alkuhyllyalue]'),  3, '0'),lpad(upper('$krow[alkuhyllynro]'),  2, '0'))
-											and concat(rpad(upper(hyllyalue), 3, '0'),lpad(hyllynro, 2, '0')) <= concat(rpad(upper('$krow[loppuhyllyalue]'), 3, '0'),lpad(upper('$krow[loppuhyllynro]'), 2, '0'))";
+											and concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0')) >= concat(rpad(upper('$krow[alkuhyllyalue]'),  5, '0'),lpad(upper('$krow[alkuhyllynro]'),  5, '0'))
+											and concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0')) <= concat(rpad(upper('$krow[loppuhyllyalue]'), 5, '0'),lpad(upper('$krow[loppuhyllynro]'), 5, '0'))";
 								$krtre = mysql_query($query) or pupe_error($query);
 								$krtur = mysql_fetch_array($krtre);
 

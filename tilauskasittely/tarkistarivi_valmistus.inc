@@ -141,6 +141,7 @@
 	}
 
 	if ($tee == 'UV') {
+#TODO palauttaa varaston v‰‰rin
 		//etsit‰‰n tuotteelle varastopaikka
 		$query = "	SELECT *, varastopaikat.tunnus varasto, tuotepaikat.tunnus tuotepaikka
 					FROM tuotepaikat

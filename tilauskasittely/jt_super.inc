@@ -91,12 +91,13 @@
 						//tilausnumerot talteen, nämä pitää sitten lopuks lähettää ja merkata valmiiks
 						if (!in_array($tunnus, $superostot)) $superostot[] = $tunnus;
 
+#TODO kuuluis käyttää kuuluukovarastoon?
 						// katotaan mikä varasto on kysessä mistä halutaan tilata, niin laitetaan se hyllyalue kenttään
 						$varastoquery = "select tunnus
 									from varastopaikat
 									where yhtio = '$tiltoi[tyyppi_tieto]'
-									and concat(rpad(upper('$rivi[hyllyalue]') ,3,'0'),lpad('$rivi[hyllynro]' ,2,'0')) >= concat(rpad(upper(alkuhyllyalue) ,3,'0'),lpad(alkuhyllynro ,2,'0'))
-									and concat(rpad(upper('$rivi[hyllyalue]') ,3,'0'),lpad('$rivi[hyllynro]' ,2,'0')) <= concat(rpad(upper(loppuhyllyalue) ,3,'0'),lpad(loppuhyllynro ,2,'0'))";
+									and concat(rpad(upper('$rivi[hyllyalue]') ,5,'0'),lpad('$rivi[hyllynro]' ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
+									and concat(rpad(upper('$rivi[hyllyalue]') ,5,'0'),lpad('$rivi[hyllynro]' ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))";
 						$varastoresult = mysql_query($varastoquery) or pupe_error($varastoquery);
 						$varastoro = mysql_fetch_array($varastoresult);
 

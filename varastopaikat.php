@@ -6,42 +6,42 @@ echo "<font class='head'>".t("Varastopaikat")."</font><hr>";
 
 // Tarkistetaan syˆtetyt tieedot
 if ($tee=='update') {
-	
+
 	//Katotaan osuuko alkuhyllyalue johonkin varastoon
 	$query = "	SELECT tunnus
-				FROM varastopaikat 
+				FROM varastopaikat
 				WHERE
-				tunnus != '$tunnus' 
-				and concat(rpad(upper(alkuhyllyalue) ,3,'0'),lpad(alkuhyllynro ,2,'0')) <= concat(rpad(upper('$alkuhyllyalue') ,3,'0'),lpad('$alkuhyllynro' ,2,'0'))
-				and concat(rpad(upper(loppuhyllyalue) ,3,'0'),lpad(loppuhyllynro ,2,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,3,'0'),lpad('$alkuhyllynro' ,2,'0'))
+				tunnus != '$tunnus'
+				and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0')) <= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad('$alkuhyllynro' ,5,'0'))
+				and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad('$alkuhyllynro' ,5,'0'))
 				and yhtio = '$kukarow[yhtio]'";
 	$vares = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($vares) == 0) {
 		//Katotaan osuuko loppuhyllyalue johonkin varastoon
 		$query = "	SELECT tunnus
-					FROM varastopaikat 
+					FROM varastopaikat
 					WHERE
-					tunnus != '$tunnus' 
-					and concat(rpad(upper(alkuhyllyalue) ,3,'0'),lpad(alkuhyllynro ,2,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,3,'0'),lpad('$loppuhyllynro' ,2,'0'))
-					and concat(rpad(upper(loppuhyllyalue) ,3,'0'),lpad(loppuhyllynro ,2,'0')) >= concat(rpad(upper('$loppuhyllyalue') ,3,'0'),lpad('$loppuhyllynro' ,2,'0'))
+					tunnus != '$tunnus'
+					and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad('$loppuhyllynro' ,5,'0'))
+					and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0')) >= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad('$loppuhyllynro' ,5,'0'))
 					and yhtio = '$kukarow[yhtio]'";
 		$vares = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($vares) == 0) {
 			//Katotaan onko jo joku varasto syˆtetyn alueen sis‰ll‰
 			$query = "	SELECT tunnus
-						FROM varastopaikat 
+						FROM varastopaikat
 						WHERE
-						tunnus != '$tunnus' 
-						and concat(rpad(upper(alkuhyllyalue) ,3,'0'),lpad(alkuhyllynro ,2,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,3,'0'),lpad('$alkuhyllynro' ,2,'0'))
-						and concat(rpad(upper(loppuhyllyalue) ,3,'0'),lpad(loppuhyllynro ,2,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,3,'0'),lpad('$loppuhyllynro' ,2,'0'))
+						tunnus != '$tunnus'
+						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue')  ,5,'0'),lpad('$alkuhyllynro'  ,5,'0'))
+						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad('$loppuhyllynro' ,5,'0'))
 						and yhtio = '$kukarow[yhtio]'";
 			$vares = mysql_query($query) or pupe_error($query);
 		}
 	}
-		
-	if (mysql_num_rows($vares) != 0) {		
+
+	if (mysql_num_rows($vares) != 0) {
 		echo "<br><font class='error'>".t("VIRHE: P‰‰llekk‰isi‰ varastoalueita")."!</font><br>";
 		$tee = "edit";
 	}
@@ -113,12 +113,12 @@ if ($tee=='edit') {
 		if (substr(mysql_field_name($result,$i),0,9)=='printteri') {
 
 			echo "<tr><th>";
-			
+
 			switch (mysql_field_name($result,$i)) {
 				// tehd‰‰n selkokieliset nimet... t‰m‰ tietysti olisi pit‰nyt tehd‰ tietokantaan suoraan mutta en jaksa en‰‰ muuttaa. :)
 				case "printteri1":
 					echo t("L‰hete/Ker‰yslista");
-					break;				
+					break;
 				case "printteri2":
 					echo t("Rahtikirja matriisi");
 					break;
@@ -127,7 +127,7 @@ if ($tee=='edit') {
 					break;
 				case "printteri4":
 					echo t("Rahtikirja A5");
-					break;					
+					break;
 				case "printteri5":
 					echo t("Lasku");
 					break;
@@ -190,9 +190,9 @@ if ($tee=='edit') {
 						ORDER BY koodi";
 			$vresult = mysql_query($query) or pupe_error($query);
 			echo "<tr><th>".t("Maa")."</th><td><select name='maa'>";
-	
+
 			echo "<option value = '' ></option>";
-	
+
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";
 				if (strtoupper($row['maa']) == strtoupper($vrow[0])) {
@@ -203,7 +203,7 @@ if ($tee=='edit') {
 				}
 				echo "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
 			}
-	
+
 			echo "</select></td></tr>";
 			echo "kala $trow[$i]<br>";
 		}
@@ -235,7 +235,7 @@ if ($tee=='') {
 			// tehd‰‰n selkokieliset nimet... t‰m‰ tietysti olisi pit‰nyt tehd‰ tietokantaan suoraan mutta en jaksa en‰‰ muuttaa. :)
 			case "printteri1":
 				echo t("L‰hete/Ker‰yslista");
-				break;				
+				break;
 			case "printteri2":
 				echo t("Rahtikirja matriisi");
 				break;
@@ -244,7 +244,7 @@ if ($tee=='') {
 				break;
 			case "printteri4":
 				echo t("Rahtikirja A5");
-				break;					
+				break;
 			case "printteri5":
 				echo t("Lasku");
 				break;

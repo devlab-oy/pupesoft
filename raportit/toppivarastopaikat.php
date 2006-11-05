@@ -8,8 +8,8 @@
 	if ($tee != '') {
 		echo "<table>";
 
-		$apaikka = substr(strtoupper($ahyllyalue),0,3).sprintf("%02s",$ahyllynro).sprintf("%02s",$ahyllyvali).sprintf("%02s",$ahyllytaso);
-		$lpaikka = substr(strtoupper($lhyllyalue),0,3).sprintf("%02s",$lhyllynro).sprintf("%02s",$lhyllyvali).sprintf("%02s",$lhyllytaso);
+		$apaikka = substr(strtoupper($ahyllyalue),0,3).sprintf("%05s",$ahyllynro).sprintf("%05s",$ahyllyvali).sprintf("%05s",$ahyllytaso);
+		$lpaikka = substr(strtoupper($lhyllyalue),0,3).sprintf("%05s",$lhyllynro).sprintf("%05s",$lhyllyvali).sprintf("%05s",$lhyllytaso);
 
 		$lisa = "";
 
@@ -23,8 +23,8 @@
 					and tilausrivi.tyyppi='L'
 					and tilausrivi.laskutettuaika >='$vva-$kka-$ppa'
 					and tilausrivi.laskutettuaika <='$vvl-$kkl-$ppl'
-					and concat(upper(tilausrivi.hyllyalue),lpad(tilausrivi.hyllynro ,2,'0'),lpad(tilausrivi.hyllyvali,2,'0'),lpad(tilausrivi.hyllytaso,2,'0')) >= '$apaikka'
-					and concat(upper(tilausrivi.hyllyalue),lpad(tilausrivi.hyllynro ,2,'0'),lpad(tilausrivi.hyllyvali,2,'0'),lpad(tilausrivi.hyllytaso,2,'0')) <= '$lpaikka'
+					and concat(upper(tilausrivi.hyllyalue),lpad(tilausrivi.hyllynro ,5,'0'),lpad(tilausrivi.hyllyvali,5,'0'),lpad(tilausrivi.hyllytaso,5,'0')) >= '$apaikka'
+					and concat(upper(tilausrivi.hyllyalue),lpad(tilausrivi.hyllynro ,5,'0'),lpad(tilausrivi.hyllyvali,5,'0'),lpad(tilausrivi.hyllytaso,5,'0')) <= '$lpaikka'
 					and tuotepaikat.yhtio=tilausrivi.yhtio
 					and tuotepaikat.tuoteno=tilausrivi.tuoteno
 					and tuotepaikat.hyllyalue=tilausrivi.hyllyalue

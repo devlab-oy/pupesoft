@@ -261,7 +261,7 @@
 				$total = 0;
 
 				for ($i=1; $i <= count($hyllyalue); $i++) {
-
+#TODO antaa varaston väärin
 					$query = "	SELECT *
 								FROM varastopaikat
 								WHERE yhtio			=  '$kukarow[yhtio]'

@@ -134,7 +134,7 @@ if (-f $nimi) {
 				next;
 			}
 
-			#TODO arkistointitunnus
+			#arkistointitunnus
 			#
 			$sth->execute($company,int($account),$payer_name,int($reference),$sum,$payment_date,$entry_date);
 			$sth->finish;

@@ -1517,6 +1517,7 @@ if ($tee == '') {
 			$tres  = mysql_query($query) or pupe_error($query);
 
 			while ($salrow = mysql_fetch_array($tres)) {
+#TODO palauttaa varaston v‰‰rin
 				$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and alkuhyllyalue<='$salrow[hyllyalue]' and loppuhyllyalue>='$salrow[hyllyalue]' and alkuhyllynro<='$salrow[hyllynro]' and loppuhyllynro>='$salrow[hyllynro]'";
 				$nimre = mysql_query($query) or pupe_error($query);
 				$nimro = mysql_fetch_array($nimre);
@@ -1809,8 +1810,8 @@ if ($tee == '') {
 					$query = "	SELECT maa
 								FROM varastopaikat
 								WHERE yhtio = '$srow1[tyyppi_tieto]'
-								and concat(rpad(upper('$row[hyllyalue]'), 3, '0'),lpad('$row[hyllynro]', 2, '0')) >= concat(rpad(upper(alkuhyllyalue) ,3,'0'),lpad(alkuhyllynro ,2,'0'))
-								and concat(rpad(upper('$row[hyllyalue]'), 3, '0'),lpad('$row[hyllynro]', 2, '0')) <= concat(rpad(upper(loppuhyllyalue) ,3,'0'),lpad(loppuhyllynro ,2,'0'))";
+								and concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad('$row[hyllynro]', 5, '0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
+								and concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad('$row[hyllynro]', 5, '0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))";
 					$sres2  = mysql_query($query) or pupe_error($query);
 					$srow2 = mysql_fetch_array($sres2);
 
@@ -1939,6 +1940,7 @@ if ($tee == '') {
 						echo "</form>";
 					}
 					else {
+#TODO palauttaa varaston v‰‰rin
 						$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and alkuhyllyalue<='$row[hyllyalue]' and loppuhyllyalue>='$row[hyllyalue]' and alkuhyllynro<='$row[hyllynro]' and loppuhyllynro>='$row[hyllynro]'";
 						$varastore = mysql_query($query) or pupe_error($query);
 						$varastoro = mysql_fetch_array($varastore);

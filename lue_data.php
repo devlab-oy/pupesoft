@@ -102,6 +102,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$pakolliset = array("TILINO");
 			$kielletyt = array("");
 			break;
+		case "maksuehto" :
+			$pakolliset = array("TEKSTI");
+			$kielletyt = array("");
+			break;
 		case "asiakashinta" :
 			$pakolliset = array("HINTA");
 			$kielletyt = array("MUUTOSPVM");
@@ -807,6 +811,7 @@ else
 					<option value='sanakirja'>".t("Sanakirja")."</option>
 					<option value='tuotteen_toimittajat'>".t("Tuotteen toimittajat")."</option>
 					<option value='todo'>".t("Todo-lista")."</option>
+					<option value='maksuehto'>".t("Maksuehto")."</option>
 					</select></td>
 			</tr>
 

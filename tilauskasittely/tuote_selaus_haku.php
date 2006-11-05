@@ -364,7 +364,7 @@
 				valitut.sarjatunnus, valitut.sarjanumero, valitut.sarjayhtio,  valitut.sarjaperhe,
 				valitut.toimitiedot
 				FROM tuote tuote_wrapper,
-				(	SELECT if(korvaavat.id>0,(select tuoteno from korvaavat korva2 where korva2.yhtio=korvaavat.yhtio and korva2.id=korvaavat.id ORDER BY jarjestys LIMIT 1),tuote.tuoteno) sorttauskentta,
+				(	SELECT if(korvaavat.id>0,(select tuoteno from korvaavat korva2 use index (yhtio_id) where korva2.yhtio=korvaavat.yhtio and korva2.id=korvaavat.id ORDER BY jarjestys LIMIT 1),tuote.tuoteno) sorttauskentta,
 					ifnull(korvaavat.tuoteno, tuote.tuoteno) tuoteno,
 					sarjanumeroseuranta.tunnus sarjatunnus, sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.yhtio sarjayhtio, sarjanumeroseuranta.perheid sarjaperhe,
 					group_concat(concat(toimi.tyyppi_tieto,'##',tuotteen_toimittajat.liitostunnus)) toimitiedot,
@@ -381,7 +381,7 @@
 										and toimi.edi_salasana != ''
 										and toimi.edi_polku    != ''
 										and toimi.oletus_vienti in ('C','F','I')
-					LEFT JOIN korvaavat ON korvaavat.yhtio=tuote.yhtio and korvaavat.id = (select id from korvaavat where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1)
+					LEFT JOIN korvaavat use index (yhtio_id) ON korvaavat.yhtio=tuote.yhtio and korvaavat.id = (select id from korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					$lisa
 					$poislisa

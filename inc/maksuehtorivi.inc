@@ -28,13 +28,13 @@
 		$sel2 = '';
 		$sel3 = '';
 		
-		if ($trow[$i] == '') {
+		if (strtoupper($trow[$i]) == '') {
 			$sel1 = "SELECTED";
 		}
-		if ($trow[$i] == 'o') {
+		if (strtoupper($trow[$i]) == 'O') {
 			$sel2 = "SELECTED";
 		}
-		if ($trow[$i] == 'p') {
+		if (strtoupper($trow[$i]) == 'P') {
 			$sel3 = "SELECTED";
 		}
 		
@@ -53,13 +53,13 @@
 		$sel2 = '';
 		$sel3 = '';
 		
-		if ($trow[$i] == '') {
+		if (strtoupper($trow[$i]) == '') {
 			$sel1 = "SELECTED";
 		}
-		if ($trow[$i] == 'N') {
+		if (strtoupper($trow[$i]) == 'N') {
 			$sel2 = "SELECTED";
 		}
-		if ($trow[$i] == 'S') {
+		if (strtoupper($trow[$i]) == 'S') {
 			$sel3 = "SELECTED";
 		}
 		

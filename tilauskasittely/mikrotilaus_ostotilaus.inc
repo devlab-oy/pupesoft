@@ -28,7 +28,7 @@ if ($tee == "file") {
 			$tuoteerror 	= 0;
 
 			// luetaan rivi tiedostosta..
-			$poista	  	= array("\"", "'", "\\", " ");
+			$poista	  	= array("\"", "'", "\\");
 			$rivi	  	= str_replace($poista,"",$rivi);
 			$rivi	  	= explode("\t", trim($rivi));
 

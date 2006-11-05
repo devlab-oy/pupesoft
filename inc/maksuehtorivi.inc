@@ -12,7 +12,7 @@
 		or (mysql_field_name($result, $i) == "suoraveloitus") 
 		or (mysql_field_name($result, $i) == "erapvmkasin") 
 		or (mysql_field_name($result, $i) == "itsetulostus") 
-		or (mysql_field_name($result, $i) == "factoring")) {
+		or (mysql_field_name($result, $i) == "jaksotettu")) {
 		$sel = '';
 		if ($trow[$i] == 'o') {
 			$sel = "checked";
@@ -29,23 +29,49 @@
 		$sel3 = '';
 		
 		if ($trow[$i] == '') {
-			$sel1 = "checked";
+			$sel1 = "SELECTED";
 		}
 		if ($trow[$i] == 'o') {
-			$sel2 = "checked";
+			$sel2 = "SELECTED";
 		}
 		if ($trow[$i] == 'p') {
-			$sel3 = "checked";
+			$sel3 = "SELECTED";
 		}
 		
-		$ulos  = "<td>";				
-		$ulos .= "<input type='radio' name='$nimi' value=''  $sel1> ".t("Tämä ei ole käteismaksuehto.")."<br>";
-		$ulos .= "<input type='radio' name='$nimi' value='o' $sel2> ".t("Käteismaksuehto, ei pyöristetä.")."<br>";
-		$ulos .= "<input type='radio' name='$nimi' value='p' $sel3> ".t("Käteismaksuehto, pyöristetään.")."";		
-		$ulos .= "</td>";
+		$ulos  = "<td><select name='$nimi'>";					
+		$ulos .= "<option value=''  $sel1> ".t("Tämä ei ole käteismaksuehto.")."</option>";
+		$ulos .= "<option value='o' $sel2> ".t("Käteismaksuehto, ei pyöristetä.")."</option>";
+		$ulos .= "<option value='p' $sel3> ".t("Käteismaksuehto, pyöristetään.")."</option>";		
+		$ulos .= "</select></td>";
 		
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "factoring") {
+		
+		$sel1 = '';
+		$sel2 = '';
+		$sel3 = '';
+		
+		if ($trow[$i] == '') {
+			$sel1 = "SELECTED";
+		}
+		if ($trow[$i] == 'N') {
+			$sel2 = "SELECTED";
+		}
+		if ($trow[$i] == 'S') {
+			$sel3 = "SELECTED";
+		}
+		
+		$ulos  = "<td><select name='$nimi'>";				
+		$ulos .= "<option value=''  $sel1> ".t("Ei factoroida")."</option>";
+		$ulos .= "<option value='N' $sel2> ".t("Nordea Factoring")."</option>";
+		$ulos .= "<option value='S' $sel3> ".t("SEB Factoring")."</option>";		
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
+	
 	
 	if (mysql_field_name($result, $i) == "osamaksuehto1") {
 		$query = "	SELECT tunnus, concat(teksti,' ',kassa_teksti)

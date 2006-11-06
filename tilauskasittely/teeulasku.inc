@@ -103,9 +103,13 @@ $lisa_comments 	= "";
 $lisa_viestit	= "";
 
 //Laitetaan laskun kommenttiin talteen tiettyjä lisätietoja
-if ($mehtorow["factoring"] != '') {
+if (strtoupper($mehtorow["factoring"]) == 'S') {
 	$lisa_comments .= "Vår fordran enligt denna faktura har överlåtits till S E B Finans AB (publ). \n";
 	$lisa_comments .= "Fakturan skall därför betalas direkt till S E B Finans AB(publ), 167 81  BROMMA. \n";
+}
+elseif(strtoupper($mehtorow["factoring"]) == 'N') {
+	$lisa_comments .= "Tämä saatava on siirretty Nordea Rahoitus Suomi Oy:lle. Lasku on maksettava \n";
+	$lisa_comments .= "Nordea rahoitus Suomi Oy:n tilille Merita Pankki 155930-1070 laskulla olevalla viitenumerolla.\n";	
 }
 
 if ($lasrow["vienti"] == 'E') {

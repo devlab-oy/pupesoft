@@ -2,16 +2,23 @@
 
 	require ("functions.inc");
 
+	$yhtio   = trim ($_GET['yhtio']);
 	$tuoteno = trim ($_GET['tuoteno']);
-	$maara = (int) $_GET['maara'];
-	$kukarow["yhtio"] = "artr";
+	$maara   = (int) $_GET['maara'];
+
+	if ($yhtio != "") {
+		$kukarow["yhtio"] = $yhtio;
+	}
+	else {
+		$kukarow["yhtio"] = "artr";
+	}
 
 	if ($tuoteno != '') {
 
 		$con = mysql_connect("d60.arwidson.fi", "pupeweb","web1") or die("Tietokantaongelma1!");
 		mysql_select_db("pupesoft") or die ("Tietokantaongelma2!");
 
-		$query = "select * from tuote WHERE yhtio='artr' and tuoteno='$tuoteno'";
+		$query = "select * from tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 		$result = mysql_query($query) or die($query);
 
 		if (mysql_num_rows($result) == 1) {
@@ -31,14 +38,14 @@
 			}
 
 			// haetaan korvaavia tuotteita
-			$query  = "select * from korvaavat use index (yhtio_tuoteno) where yhtio='artr' and tuoteno='$tuoteno'";
+			$query  = "select * from korvaavat use index (yhtio_tuoteno) where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 			$kores  = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($kores) > 0) {
 
 				$kkrow  = mysql_fetch_array($kores);
 				$query  = "	select tuoteno from korvaavat use index (yhtio_id)
-							where yhtio='artr' and id='$kkrow[id]'
+							where yhtio='$kukarow[yhtio]' and id='$kkrow[id]'
 							order by jarjestys, tuoteno";
 				$kores  = mysql_query($query) or pupe_error($query);
 				$nexti  = 0;
@@ -57,7 +64,7 @@
 				// ei löydetty nextiä vaikka ois pitäny, oltiin ilmeisesti sitte vikassa tuotteessa, haetaan eka korvaava
 				if ($nexti == 1) {
 					$query = "	select tuoteno from korvaavat use index (yhtio_id)
-								where yhtio='artr' and id='$kkrow[id]' and tuoteno!='$tuoteno'
+								where yhtio='$kukarow[yhtio]' and id='$kkrow[id]' and tuoteno!='$tuoteno'
 								order by jarjestys, tuoteno
 								limit 1";
 					$kores  = mysql_query($query) or pupe_error($query);

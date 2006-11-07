@@ -474,44 +474,22 @@
 		// 4. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasaleryhmän tuotealeryhmän alennus)
 		if ($ale == 0) {
 			
-			if (substr($trow["aleryhma"], -1) == "*") {			
+			for($aasi = strlen($trow["aleryhma"]); $aasi>0; $aasi--) {
 				
-				$hakuavain = substr($trow["aleryhma"], 0, -1);
-				
-				for($aasi = $hakuavain; $aasi>0; $aasi--) {
-					
-					$hakuavain_hae = substr($hakuavain, 0, $aasi);
-					
-					$query = "	SELECT alennus
-								FROM asiakasalennus
-								WHERE yhtio = '$kukarow[yhtio]'
-								and asiakas_ryhma = '$alehi_asrow[ryhma]'
-								and asiakas_ryhma != ''
-								and ryhma like '$hakuavain_hae%'
-								and ryhma != ''
-								and ytunnus = ''
-								and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-								and alennus > 0
-								and alennus <= 100
-								ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999)
-								LIMIT 1";
-					$hresult = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($hresult) > 0) {
-						$hrow = mysql_fetch_array ($hresult);
-						$ale  = $hrow[0];
-						$aperuste .= " Asiakasaleryhmän tuotealeryhmän alennus";
-						break;
-					}
+				if ($aasi == strlen($trow["aleryhma"])) {
+					$hakuavain_hae = "and ryhma  = '$trow[aleryhma]'";
 				}
-			}
-			else{
+				else {
+					$hakuavain_hae = "	and right(ryhma,1) = '*'
+										and substring(ryhma, 1, char_length(ryhma)-1) = '".substr($trow["aleryhma"], 0, $aasi)."' ";
+				}
+				
 				$query = "	SELECT alennus
 							FROM asiakasalennus
 							WHERE yhtio = '$kukarow[yhtio]'
 							and asiakas_ryhma = '$alehi_asrow[ryhma]'
 							and asiakas_ryhma != ''
-							and ryhma = '$trow[aleryhma]'
+							$hakuavain_hae
 							and ryhma != ''
 							and ytunnus = ''
 							and ((alkupvm <= now() and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= now()) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
@@ -520,13 +498,14 @@
 							ORDER BY IFNULL(TO_DAYS(now())-TO_DAYS(alkupvm),9999999999999)
 							LIMIT 1";
 				$hresult = mysql_query($query) or pupe_error($query);
-
+				
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow = mysql_fetch_array ($hresult);
 					$ale  = $hrow[0];
 					$aperuste .= " Asiakasaleryhmän tuotealeryhmän alennus";
-				}	
-			}	
+					break;
+				}				
+			}
 		}
 
 		// 5. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus)

@@ -224,6 +224,7 @@ if ($session != '') {
 		if ($phpnimi != 'index.php') {
 
 			$charset = "iso-8859-1";
+//			$charset = "utf-8";
 
 			if ($kukarow["kieli"] == "ru" or $kukarow["kieli"] == "ee") {
 				$charset = "utf-8";

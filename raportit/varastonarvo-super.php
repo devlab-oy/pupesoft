@@ -219,7 +219,7 @@ if ($tee == "tee") {
 		// lähetetään meili
 		$bound = uniqid(time()."_") ;
 
-		$header  = "From: <mailer@pupesoft.com>\n";
+		$header  = "From: <$yhtiorow[postittaja_email]>\n";
 		$header .= "MIME-Version: 1.0\n" ;
 		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 

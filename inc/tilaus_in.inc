@@ -456,7 +456,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
 			$bound = uniqid(time()."_") ;
 			$ny = date("d-m-Y");
 			
-			$header   = "From: <mailer@pupesoft.com>\r\n";
+			$header   = "From: <$yhtiorow[postittaja_email]>\r\n";
 	        $header  .= "MIME-Version: 1.0\r\n" ;
 	        $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
 			

@@ -77,7 +77,7 @@ else {
 		$rivi .= "\n";
 		$rivi .= "$syy\n";
 
-		$boob = mail($yhtiorow['admin_email'], "".t("Tiedostonsiirto epäonnistui")."!", $rivi, "From: mailer@pupesoft.com\n");
+		$boob = mail($yhtiorow['admin_email'], "".t("Tiedostonsiirto epäonnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n");
 
 		if ($boob===FALSE) {
 			$tulos_ulos_ftp .= "<font class='error'>\n";

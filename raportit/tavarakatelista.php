@@ -42,7 +42,7 @@
 
 			$bound     = uniqid(time()."_") ;
 
-			$headeri   = "From: <mailer@pupesoft.com>\r\n";
+			$headeri   = "From: <$yhtiorow[postittaja_email]>\r\n";
 			$headeri  .= "MIME-Version: 1.0\r\n" ;
 			$headeri  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
 

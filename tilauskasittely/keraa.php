@@ -437,7 +437,7 @@
 						$result = mysql_query($query) or pupe_error($query);
 						$laskurow = mysql_fetch_array($result);
 
-						$header  = "From: <mailer@pupesoft.com>\r\n";
+						$header  = "From: <$yhtiorow[postittaja_email]>\r\n";
 
 						$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								."".t("Keräyspoikkeamat")."\r\n";
 						$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\r\n";

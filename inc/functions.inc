@@ -18,7 +18,7 @@ if (!function_exists("pupe_error")) {
 		$puperror = "File: $_SERVER[PHP_SELF]\nUser: $kukarow[kuka]\n\n$query\n\n".mysql_error();
 
 		// l‰hetet‰‰n se meilitse adminille
-		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: mailer@pupesoft.com\r\n");
+		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: $yhtiorow[postittaja_email]\r\n");
 
 		// kuollaan pois
 		exit("Kysely ei onnistunut tiedostossa $_SERVER[PHP_SELF].<br><br>$query<br><br>".mysql_error());

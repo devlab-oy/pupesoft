@@ -163,7 +163,7 @@
 					system("mv " . $laskut . "/" . $file . " " . $errlaskut . "/" . $file);
 				}
 				//echo $meili;	
-			    $tulos = mail($yhtiorow['admin_email'], $sub, $meili, "From: <mailer@pupesoft.com>\n");
+			    $tulos = mail($yhtiorow['admin_email'], $sub, $meili, "From: <$yhtiorow[postittaja_email]>\n");
 
 				if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[admin_email]<br>";
 				//echo "\nFrom: $yhtiorow[admin_email]\n$sub\n$meili\n";

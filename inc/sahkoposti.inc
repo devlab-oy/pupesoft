@@ -43,7 +43,7 @@
 	$content .= chunk_split(base64_encode($sisalto));
 	$content .= "\n" ;
 	
-	$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - $kutsu", $content, $header);
+	$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - $kutsu", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";
 

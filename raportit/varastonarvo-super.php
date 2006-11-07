@@ -234,7 +234,7 @@ if ($tee == "tee") {
 
 		$content .= "--$bound\n";
 
-		$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Varastonarvo"), $content, $header);
+		$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Varastonarvo"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		echo "<font class='message'>".t("Lähetetään sähköposti");
 		if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui!")."<br>";

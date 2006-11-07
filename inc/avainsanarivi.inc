@@ -85,6 +85,9 @@
 		if ($trow[$i] == 'LASKUKUVAUS') {
 			$sel26 = "selected";
 		}
+		if ($trow[$i] == 'KERAYSLISTA') {
+			$sel27 = "selected";
+		}
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
@@ -114,10 +117,34 @@
 		$ulos .= "<option value='RAHTIKIRJA'"    .$sel24.">".t("Rahtikirjatyyppi")."</option>";
 		$ulos .= "<option value='MYSQLALIAS'"    .$sel25.">".t("Tietokantasarakkeen nimialias")."</option>";
 		$ulos .= "<option value='LASKUKUVAUS'"   .$sel26.">".t("Maksuposition kuvaus")."</option>";
+		$ulos .= "<option value='KERAYSLISTA'"   .$sel27.">".t("Keräyslista")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "selite" and $sel27 == "selected") {
+
+		$handle = opendir("tilauskasittely");
+
+		$ulos  = "<td><select name='$nimi'>";
+
+		while ($file = readdir($handle)) {
+			if (strpos($file,"kerayslista") !== FALSE) {
+				$sel = "";
+
+				if ($file == $trow[$i]) {
+					$sel = "SELECTED";
+				}
+
+				$ulos .= "<option value='$file' $sel>".t($file)."</option>";
+			}
+		}
+		closedir($handle);
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "selite" and $sel24 == "selected") {
 
 		$handle = opendir("tilauskasittely");

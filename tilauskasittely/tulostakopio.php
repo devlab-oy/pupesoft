@@ -1324,8 +1324,13 @@
 			if ($toim == "KERAYSLISTA") {
 
 				//ker‰yslistan tulostusta varten
-				require ("tulosta_lahete_kerayslista.inc");
-
+				if ($yhtiorow["kerailylistatyyppi"] != "" and file_exists($yhtiorow["kerailylistatyyppi"])) {
+					require_once ($yhtiorow["kerailylistatyyppi"]);
+				}
+				else {
+					require_once ("tulosta_lahete_kerayslista.inc");	
+				}
+				
 				$otunnus = $laskurow["tunnus"];
 
 				//tehd‰‰n uusi PDF failin olio

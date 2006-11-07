@@ -322,7 +322,13 @@
 				//korjataan t‰‰ p‰iv‰m‰‰r‰ kuntoon jota ei viel‰ ole
 				$laskurow["lahetepvm"] = date("Y-m-d");
 										
-				require_once ("tulosta_lahete_kerayslista.inc");
+				//ker‰yslistan tulostusta varten
+				if ($yhtiorow["kerailylistatyyppi"] != "" and file_exists($yhtiorow["kerailylistatyyppi"])) {
+					require_once ($yhtiorow["kerailylistatyyppi"]);
+				}
+				else {
+					require_once ("tulosta_lahete_kerayslista.inc");	
+				}
 				
 				//tehd‰‰n uusi PDF failin olio
 				$pdf= new pdffile;

@@ -38,8 +38,13 @@
 	if($chk_row["ok"] == $chk_row["kaikki"]) {
 
 		if ($kerayslista == 'K') {
-			//tulostetaan kerayslista
-			require_once ("tulosta_lahete_kerayslista.inc");
+			//keräyslistan tulostusta varten
+			if ($yhtiorow["kerailylistatyyppi"] != "" and file_exists($yhtiorow["kerailylistatyyppi"])) {
+				require_once ($yhtiorow["kerailylistatyyppi"]);
+			}
+			else {
+				require_once ("tulosta_lahete_kerayslista.inc");	
+			}
 		}
 		else {
 			//hatetaan asiakkaan lähetetyyppi

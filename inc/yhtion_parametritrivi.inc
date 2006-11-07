@@ -415,7 +415,7 @@
 
 		$query = "	SELECT selite, selitetark
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'KERAYSLISTA'
 					ORDER BY jarjestys, selite";
 		$kires = mysql_query($query) or pupe_error($query);
 

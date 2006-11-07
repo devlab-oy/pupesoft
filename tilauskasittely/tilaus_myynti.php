@@ -161,7 +161,7 @@ if ($tee == "" and ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0
 }
 
 //Luodaan otsikko
-if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or ((int) $kukarow["kesken"] != 0 and $asiakasid != '')) or ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)) {
+if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or ((int) $kukarow["kesken"] != 0 and $asiakasid != '' and $kukarow["extranet"] == "")) or ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)) {
 
 	if ($asiakasid != '') {
 		$nimi 			= $asiakasrow["nimi"];
@@ -273,7 +273,7 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 	}
 
 	$jatka	= "JATKA";
-	$tee 	= "OTSIK";
+	$tee	= "OTSIK";
 	$override_ytunnus_check = "YES";
 
 	require ("otsik.inc");

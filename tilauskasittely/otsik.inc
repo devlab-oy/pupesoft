@@ -50,7 +50,7 @@
 
 		require ("../inc/tyomaarayshaku.inc");
 	}
-	elseif ($toim != "TYOMAARAYS" and $nimi != '' and !isset($jatka)) {
+	elseif ($toim != "TYOMAARAYS" and $nimi != '' and !isset($jatka) and $asiakasid == 0) {
 
 		//tehd‰‰n asiakashaku yhteensopivuus
 		$ytunnus 	= $nimi;
@@ -843,7 +843,7 @@
 		$kentta = "nimi";
 	}
 
-	if(isset($jatka)) {
+	if (isset($jatka)) {
 
 		//otetaan laskun Ytunnus talteen
 		$apuqu = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";

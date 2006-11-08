@@ -12,7 +12,7 @@ if ($toimittajaid != '') {
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }
-elseif (is_numeric($ytunnus)) {
+if ($monta==0 and $ytunnus != '') {
 	//etsit‰‰n eka koko ytunnuksella
 	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -25,7 +25,8 @@ elseif (is_numeric($ytunnus)) {
 		$monta  = mysql_num_rows($result);
 	}
 }
-elseif (is_string($ytunnus)) {
+
+if ($monta==0 and $ytunnus != '') {
 	// kokeillaan nimen osalla
 	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and nimi like '%$ytunnus%'";
 	$result = mysql_query($query) or pupe_error($query);

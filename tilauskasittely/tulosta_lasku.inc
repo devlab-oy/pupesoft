@@ -2,12 +2,6 @@
 
 require_once('../pdflib/phppdflib.class.php');
 
-//PDF parametrit
-$pdf = new pdffile;
-$pdf->set_default('margin-top', 	0);
-$pdf->set_default('margin-bottom', 	0);
-$pdf->set_default('margin-left', 	0);
-$pdf->set_default('margin-right', 	0);
 $rectparam["width"] = 0.3;
 
 $norm["height"] = 10;
@@ -26,12 +20,20 @@ $pieni_boldi["font"] = "Times-Bold";
 $kala = 540;
 $sivu = 1;
 
-
 // laskun alku ja loppu functiot...
 if (!function_exists('alku')) {
 	function alku () {
 		global $yhtiorow, $kukarow, $kutsuja, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kieli, $boldi, $kala;
 
+		//PDF parametrit
+		if (!isset($pdf)) {
+			$pdf = new pdffile;
+			$pdf->set_default('margin-top', 	0);
+			$pdf->set_default('margin-bottom', 	0);
+			$pdf->set_default('margin-left', 	0);
+			$pdf->set_default('margin-right', 	0);
+		}
+		
 		$firstpage = $pdf->new_page("a4");
 
 		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {

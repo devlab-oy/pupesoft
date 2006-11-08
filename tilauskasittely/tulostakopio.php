@@ -73,6 +73,28 @@
 
 	if($tee != 'NAYTATILAUS') echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
 
+	if ($laskunro > 0 and $laskunroloppu > 0 and $laskunro < $laskunroloppu) {
+		$tee = "TULOSTA";
+		
+		$tulostukseen = array();
+		
+		for($las = $laskunro; $las<=$laskunroloppu; $las++) {
+			//hateaan laskun kaikki tiedot
+			$query = "  SELECT tunnus
+						FROM lasku
+						WHERE tila		= 'U' 
+						and alatila		= 'X'
+						and laskunro	= '$las'
+						and yhtio 		= '$kukarow[yhtio]'";
+			$rrrresult = mysql_query($query) or pupe_error($query);
+			$laskurow = mysql_fetch_array($rrrresult);
+			
+			$tulostukseen[] = $laskurow["tunnus"];
+		}
+		$laskunro		= "";
+		$laskunroloppu	= "";
+	}
+
 	if ($tee == "" or $tee == 'ETSILASKU'){
 		if ($ytunnus != '') {
 
@@ -150,9 +172,9 @@
 				//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
 				$where = "tila = 'O' ";
 
-				$where .= "	and lasku.liitostunnus='$toimittajaid'";
+				$where .= " and lasku.liitostunnus='$toimittajaid'";
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
 				$use = " use index (yhtio_tila_luontiaika) ";
@@ -161,9 +183,9 @@
 				//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa purkulista
 				$where = " tila = 'K' ";
 
-				$where .= "	and lasku.liitostunnus='$toimittajaid'";
+				$where .= " and lasku.liitostunnus='$toimittajaid'";
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
 				$use = " use index (yhtio_tila_luontiaika) ";
@@ -172,9 +194,9 @@
 				//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa tariffilista
 				$where = " tila in ('H','Y','M','P','Q') and kohdistettu in ('K','X') ";
 
-				$where .= "	and lasku.liitostunnus='$toimittajaid'";
+				$where .= " and lasku.liitostunnus='$toimittajaid'";
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = " use index (yhtio_tila_luontiaika) ";
@@ -183,9 +205,9 @@
 				//Ostolasku, tuotetarrat. Tälle oliolle voidaan tulostaa tuotetarroja
 				$where = " tila in ('H','Y','M','P','Q') and kohdistettu in ('K','X') ";
 
-				$where .= "	and lasku.liitostunnus='$toimittajaid'";
+				$where .= " and lasku.liitostunnus='$toimittajaid'";
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = " use index (yhtio_tila_luontiaika) ";
@@ -197,17 +219,17 @@
 				$where = " tila = 'G' ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = " use index (yhtio_tila_luontiaika) ";
@@ -217,17 +239,17 @@
 				$where = " tila = 'V' ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = " use index (yhtio_tila_luontiaika) ";
@@ -237,17 +259,17 @@
 				$where = " tila = 'U' ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
 							and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59' ";
 
 				$use = " use index (yhtio_tila_tapvm) ";
@@ -257,17 +279,17 @@
 				$where = " tila = 'U' and vienti = 'K' ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
 							and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = " use index (yhtio_tila_tapvm) ";
@@ -277,17 +299,17 @@
 				$where = " tila in ('L','N') ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.lahetepvm >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.lahetepvm >='$vva-$kka-$ppa 00:00:00'
 							and lasku.lahetepvm <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = "";
@@ -297,17 +319,17 @@
 				$where = " tila in ('L','N') ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = " use index (yhtio_tila_luontiaika) ";
@@ -317,17 +339,17 @@
 				$where = " tila = 'L' ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = " use index (yhtio_tila_luontiaika) ";
@@ -338,17 +360,17 @@
 				$where = " tila = 'U' and vienti != '' ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
 							and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = " use index (yhtio_tila_tapvm) ";
@@ -359,17 +381,17 @@
 				$where = " tila in ('L','U') and vienti != '' ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.lahetepvm >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.lahetepvm >='$vva-$kka-$ppa 00:00:00'
 							and lasku.lahetepvm <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = "";
@@ -379,17 +401,17 @@
 				$where = " tila = 'T' and tilaustyyppi='T' ";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = "";
@@ -399,17 +421,17 @@
 				$where = " tila in ('L','A','N') and tilaustyyppi='A'";
 
 				if ($ytunnus{0} == '£') {
-					$where .= "	and lasku.nimi		= '$asiakasrow[nimi]'
-								and lasku.nimitark	= '$asiakasrow[nimitark]'
-								and lasku.osoite	= '$asiakasrow[osoite]'
-								and lasku.postino	= '$asiakasrow[postino]'
-								and lasku.postitp	= '$asiakasrow[postitp]' ";
+					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
+								and lasku.nimitark  = '$asiakasrow[nimitark]'
+								and lasku.osoite    = '$asiakasrow[osoite]'
+								and lasku.postino   = '$asiakasrow[postino]'
+								and lasku.postitp   = '$asiakasrow[postitp]' ";
 				}
 				else {
-					$where .= "	and lasku.liitostunnus	= '$asiakasid'";
+					$where .= " and lasku.liitostunnus  = '$asiakasid'";
 				}
 
-				$where .= "	and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+				$where .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 							and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 				$use = " use index (yhtio_tila_luontiaika) ";
@@ -423,7 +445,7 @@
 
 		if ($otunnus > 0) {
 			//katotaan löytyykö lasku ja sen kaikki tilaukset
-			$query = "	SELECT laskunro
+			$query = "  SELECT laskunro
 						FROM lasku
 						WHERE tunnus = '$otunnus' and lasku.yhtio = '$kukarow[yhtio]'";
 			$laresult = mysql_query($query) or pupe_error($query);
@@ -448,7 +470,7 @@
 		}
 
 		// Etsitään muutettavaa tilausta
-		$query = "	SELECT lasku.tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, tapvm, laatija, summa, tila, alatila
+		$query = "  SELECT lasku.tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, tapvm, laatija, summa, tila, alatila
 					FROM lasku $use
 					WHERE $where and lasku.yhtio = '$kukarow[yhtio]' and tila != 'D'
 					$jarj";
@@ -487,7 +509,7 @@
 			if ($tila == 'monta') {
 				echo "<th>".t("Tulosta")."</th>";
 
-				echo "	<form method='post' action='$PHP_SELF' autocomplete='off'>
+				echo "  <form method='post' action='$PHP_SELF' autocomplete='off'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='TULOSTA'>";
 			}
@@ -508,7 +530,7 @@
 				}
 
 				$laskutyyppi = $row["tila"];
-				$alatila	 = $row["alatila"];
+				$alatila     = $row["alatila"];
 
 				//tehdään selväkielinen tila/alatila
 				require "../inc/laskutyyppi.inc";
@@ -710,7 +732,7 @@
 		}
 
 		//hateaan laskun kaikki tiedot
-		$query = "	SELECT *
+		$query = "  SELECT *
 					FROM lasku
 					WHERE";
 
@@ -857,7 +879,7 @@
 
 				if (mysql_num_rows($result) == 0) {
 					$masrow = array();
-				 	if ($laskurow["erpcm"] == "0000-00-00") {
+					if ($laskurow["erpcm"] == "0000-00-00") {
 						echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy")."! $laskurow[maksuehto]!</font>";
 					}
 				}
@@ -866,8 +888,8 @@
 				}
 
 				//maksuehto tekstinä
-				$maksuehto 		= $masrow["teksti"]." ".$masrow["kassa_teksti"];
-				$kateistyyppi	= $masrow["kateinen"];
+				$maksuehto      = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+				$kateistyyppi   = $masrow["kateinen"];
 
 				if ($yhtiorow['laskutyyppi'] == 0) {
 					require_once("tulosta_lasku.inc");
@@ -886,7 +908,7 @@
 				}
 
 				// haetaan tilauksen kaikki rivit
-				$query = "	SELECT *
+				$query = "  SELECT *
 							FROM tilausrivi
 							WHERE $where and yhtio='$kukarow[yhtio]'
 							ORDER BY $laskujarj";
@@ -897,6 +919,11 @@
 					echo t("Laskurivejä ei löytynyt");
 					exit;
 				}
+				
+				$kala = 540;
+				$sivu = 1;
+				$lask = 1;
+				
 				// aloitellaan laskun teko
 				$firstpage = alku();
 
@@ -934,6 +961,8 @@
 
 				//poistetaan tmp file samantien kuleksimasta...
 				system("rm -f $pdffilenimi");
+				
+				unset($pdf);
 
 				if ($tee != 'NAYTATILAUS') {
 					echo t("Lasku tulostuu")."...<br>";
@@ -1010,7 +1039,7 @@
 
 			if ($toim == "TYOMAARAYS") {
 				//Tehdään joini
-				$query = "	SELECT *
+				$query = "  SELECT *
 							FROM lasku
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.yhtio='$kukarow[yhtio]'
@@ -1024,7 +1053,7 @@
 
 				if (mysql_num_rows($result) == 0) {
 					$masrow = array();
-				 	if ($laskurow["erpcm"] == "0000-00-00") {
+					if ($laskurow["erpcm"] == "0000-00-00") {
 						echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy")."! $laskurow[maksuehto]!</font>";
 					}
 				}
@@ -1033,8 +1062,8 @@
 				}
 
 				//maksuehto tekstinä
-				$maksuehto 		= $masrow["teksti"]." ".$masrow["kassa_teksti"];
-				$kateistyyppi	= $masrow["kateinen"];
+				$maksuehto      = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+				$kateistyyppi   = $masrow["kateinen"];
 
 				require_once('../tyomaarays/tulosta_tyomaarays.inc');
 
@@ -1050,7 +1079,7 @@
 				tyokommentit($firstpage);
 
 				// haetaan tilauksen kaikki rivit
-				$query = "	SELECT tilausrivi.*, round(tilausrivi.varattu*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta,
+				$query = "  SELECT tilausrivi.*, round(tilausrivi.varattu*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta,
 							if (tuotetyyppi='K','TT','VV') tuotetyyppi
 							FROM tilausrivi
 							LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
@@ -1111,7 +1140,7 @@
 				$pdf->set_default('margin', 0);
 
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
-				$query = "	SELECT *
+				$query = "  SELECT *
 							FROM tilausrivi
 							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
 							ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";
@@ -1162,7 +1191,7 @@
 				$pdf_valm->set_default('margin', 0);
 
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
-				$query = "	SELECT *
+				$query = "  SELECT *
 							FROM tilausrivi
 							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
 							ORDER BY perheid desc, tunnus";
@@ -1214,7 +1243,7 @@
 
 			if ($toim == "LAHETE") {
 				//hatetaan asiakkaan lähetetyyppi
-				$query = "	SELECT lahetetyyppi, luokka, puhelin
+				$query = "  SELECT lahetetyyppi, luokka, puhelin
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -1225,7 +1254,7 @@
 				}
 				else {
 					//Haetaan yhtiön oletuslähetetyyppi
-					$query = "	SELECT selite
+					$query = "  SELECT selite
 								FROM avainsana
 								WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
 								ORDER BY jarjestys, selite
@@ -1256,7 +1285,7 @@
 				}
 
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
-				$query = "	SELECT tilausrivi.*,
+				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
 							if(perheid = 0,
 							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0'),lpad(hyllyvali, 5, '0'),lpad(hyllytaso, 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
@@ -1328,7 +1357,7 @@
 					require_once ($yhtiorow["kerailylistatyyppi"]);
 				}
 				else {
-					require_once ("tulosta_lahete_kerayslista.inc");	
+					require_once ("tulosta_lahete_kerayslista.inc");    
 				}
 				
 				$otunnus = $laskurow["tunnus"];
@@ -1346,7 +1375,7 @@
 				}
 
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
-				$query = "	SELECT tilausrivi.*,
+				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
 							if(perheid = 0,
 							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0'),lpad(hyllyvali, 5, '0'),lpad(hyllytaso, 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
@@ -1409,7 +1438,7 @@
 				$tunnus = $laskurow["tunnus"];
 				$oslapp = $komento["Osoitelappu"];
 
-				$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ', ') tunnukset
+				$query = "  SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ', ') tunnukset
 							FROM lasku
 							WHERE yhtio='$kukarow[yhtio]' and tila='L' and kerayslista='$laskurow[kerayslista]' and kerayslista != 0";
 				$toimresult = mysql_query($query) or pupe_error($query);
@@ -1445,7 +1474,10 @@
 				echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
 			}
 			echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
-			echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";
+			echo "<tr>
+					<th>".t("Laskunumero")."</th>
+					<td class='back'></td><td><input type='text' size='10' name='laskunro'></td>
+					<td><input type='text' size='10' name='laskunroloppu'></td></tr>";
 		}
 
 		echo "</table>";
@@ -1456,3 +1488,16 @@
 
 	require ('../inc/footer.inc');
 ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta name="generator" content="HTML Tidy for Mac OS X (vers 1st December 2004), see www.w3.org" />
+
+	<title></title>
+</head>
+
+<body>
+</body>
+</html>

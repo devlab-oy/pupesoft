@@ -99,7 +99,36 @@ if ($tee == 'I') {
 		$errormsg .=  "<font class='error'>".t("Laskun kuvan lähetys epäonnistui")."! (Error: ".$_FILES['userfile']['error'].")</font><br>";
 		$tee = "E";
 	}
+		
+	if (isset($toitilinumero)) {
+		$query = "SELECT * FROM toimi WHERE tunnus = '$ytunnus'";
+		$result = mysql_query($query) or pupe_error($query);
 
+		if (mysql_num_rows($result) != 1) {
+			echo t("Toimittajaa")." $ytunnus ".t("ei löytynytkään")."!";
+			exit;
+		}
+
+		$trow = mysql_fetch_array ($result);
+
+		if (isset($toitilinumero) and (strtoupper($trow['maakoodi'])) == 'FI') {
+			$pankkitili = $toitilinumero;
+			require("inc/pankkitilinoikeellisuus.php");
+			$tilino = $pankkitili; //Jos tämä ei siis onnistu puuttuu tilinumero ja se huomataan myöhemmin
+			if ($tilino == '') unset($toitilinumero); //Ei päivitetä
+		}
+		
+		if (strtoupper($trow['maakoodi']) == strtoupper($yhtiorow['maakoodi'])) {
+			$query = "update toimi set tilinumero='$toitilinumero' where yhtio='$kukarow[yhtio]' and tunnus='$ytunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+		else {
+			$query = "update toimi set ultilno='$toitilinumero', swift='$toiswift' where yhtio='$kukarow[yhtio]' and tunnus='$ytunnus'";
+			$trow['ultilno']=$toitilinumero;
+			$trow['swift']=$toiswift;
+			$result = mysql_query($query) or pupe_error($query);
+		}
+	}	
 	// Hoidetaan pilkut pisteiksi....
 	$kassaale = str_replace ( ",", ".", $kassaale);
 	$summa    = str_replace ( ",", ".", $summa);
@@ -500,6 +529,8 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Tilitiedot")."</th></tr>";
 
+		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&ytunnus=$ytunnus' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+
 		if (strtoupper($trow['maakoodi']) != strtoupper($yhtiorow['maakoodi'])) {
 
 			$pankki = $trow['pankki1'];
@@ -508,12 +539,23 @@ if ($tee == 'P' or $tee == 'E') {
 			if ($trow['pankki3']!='') $pankki .= "<br>$trow[pankki3]";
 			if ($trow['pankki4']!='') $pankki .= "<br>$trow[pankki4]";
 
-			echo "<tr><td>".t("Ultilino")."</td>	<td>$trow[ultilno]</td></tr>";
-			echo "<tr><td>".t("SWIFT")."</td>		<td>$trow[swift]</td></tr>";
-			echo "<tr><td>".t("SWIFT")."</td>		<td>$pankki</td></tr>";
+			if ($trow['ultilno']=='') { //Toimittajan tilinumero puuttuu. Annetaan sen syöttö
+				echo "<tr><td>".t("Ultilino")."</td><td><input type='text' name='toitilinumero' size=10 value='$toitilinumero'></td></tr>";
+				echo "<tr><td>".t("SWIFT")."</td><td><input type='text' name='toiswift' size=10 value='$toiswift'></td></tr>";
+			}
+			else {
+				echo "<tr><td>".t("Ultilino")."</td><td>$trow[ultilno]</td></tr>";
+				echo "<tr><td>".t("SWIFT")."</td><td>$trow[swift]</td></tr>";
+				echo "<tr><td>".t("Pankki")."</td><td>$pankki</td></tr>";
+			}
 		}
 		else {
-			echo "<tr><td>".t("Tilinumero")."</td><td>$trow[tilinumero]</td></tr>";
+			if ($trow['tilinumero']=='') { //Toimittajan tilinumero puuttuu. Annetaan sen syöttö
+				echo "<tr><td>".t("Tilinumero")."</td><td><input type='text' name='toitilinumero' size=10 value='$toitilinumero'></td></tr>";
+			}
+			else {
+				echo "<tr><td>".t("Tilinumero")."</td><td>$trow[tilinumero]</td></tr>";
+			}
 		}
 		echo "</table>";
 		echo "</td>";
@@ -560,8 +602,6 @@ if ($tee == 'P' or $tee == 'E') {
 			echo "</td>";
 		}
 		echo "</tr></table>";
-
-		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&ytunnus=$ytunnus' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
 	}
 	else {
 

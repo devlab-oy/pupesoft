@@ -294,7 +294,7 @@
 	
 		if ($toimittaja != '') {
 			$tolisa1 = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ";
-			$tolisa2 = " and tuotteen_toimittajat.toimittaja = '$toimittaja' ";
+			$tolisa2 = " and tuotteen_toimittajat.liitostunnus = '$toimittajaid' ";
 		}
 		
 		

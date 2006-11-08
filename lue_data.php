@@ -409,8 +409,20 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							$cnres = mysql_query($cnque) or pupe_error($cnque);
 
 							if (mysql_num_rows($cnres) == 0) {
-								$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
-								echo t("Tullinimike")." '$rivi[$r]' ".t("on v‰‰rin! Rivi‰ ei p‰ivitetty/lis‰tty")."!<br>";
+								//Kokeillaan viel‰ yht‰ tasoa ylemp‰‰ ja ollaan k‰ytt‰j‰yst‰v‰llisi‰
+								$varafat = $rivi[$r];
+								$rivi[$r] = substr($rivi[$r],0,-2)."00";
+								
+								$cnque = "select cn from tullinimike where cn = '$rivi[$r]'";
+								$cnres = mysql_query($cnque) or pupe_error($cnque);
+								
+								if (mysql_num_rows($cnres) == 0) {
+									$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
+									echo t("Tullinimike")." '$rivi[$r]' ".t("on v‰‰rin! Rivi‰ ei p‰ivitetty/lis‰tty")."!<br>";
+								}
+								else {
+									echo t("Tullinimike")." '$varafat' ".t("on v‰‰rin! Se muokattiin muotoon:")." ".$rivi[$r]."!<br>";	
+								}
 							}
 						}
 					}

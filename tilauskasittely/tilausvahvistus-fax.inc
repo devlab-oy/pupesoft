@@ -7,12 +7,17 @@ $query         = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus
 $tilvahresult  = mysql_query($query) or pupe_error($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
 
-if ($tilvahasiakas['fax']=='')
-{
-	echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalta puuttuu faxinumero")."!</font><br><br>";
+if ($tilvahasiakas['fax'] == '') {
+
+	$tilvah_nimi = $tilvahasiakas["nimi"];
+	if ($tilvahasiakas["toim_nimi"] != "" and $tilvahasiakas["toim_nimi"] != $tilvahasiakas["nimi"]) {
+		$tilvah_nimi .= " / ".$tilvahasiakas["toim_nimi"];
+	}
+
+	echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalta puuttuu faxinumero")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
 }
-else
-{
+else {
+
 	if ($kukarow['extranet'] == '') {
 		$nimi = "../dataout/tilvafax-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 	}

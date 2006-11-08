@@ -10,7 +10,13 @@ $tilvahasiakas = mysql_fetch_array($tilvahresult);
 $virexx = 0;
 if (strpos(" ".$laskurow['tilausvahvistus'],'S')) {
 	if ($tilvahasiakas['email']=='') {
-		echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole sähköpostiosoitetta")."!</font><br><br>";
+
+		$tilvah_nimi = $tilvahasiakas["nimi"];
+		if ($tilvahasiakas["toim_nimi"] != "" and $tilvahasiakas["toim_nimi"] != $tilvahasiakas["nimi"]) {
+			$tilvah_nimi .= " / ".$tilvahasiakas["toim_nimi"];
+		}
+
+		echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole sähköpostiosoitetta")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
 		$virexx++;
 	}
 }
@@ -59,7 +65,7 @@ if ($virexx == 0) {
 		$ulos .= "\r\n";
 		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])	.t("Tilausnumero", $kieli).": ".$laskurow['tunnus']."\r\n";
 		$ulos .= sprintf("%-50.s",t("Tilausviite", $kieli).": ".$laskurow['viesti'])		.t("Myyjä", $kieli).": ".$krow['nimi']."\r\n";
-		
+
 		if ($laskurow['erikoisale'] > 0) {
 			$ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");
 		}

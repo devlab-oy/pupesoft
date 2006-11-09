@@ -122,26 +122,28 @@
 
 		$kilot  = 0;
 		$kollit = 0;
+		$pakkaus = "";
+		$pakkauskuvaus = "";
 
 		while($rahtirow = mysql_fetch_array($rahtiresult)) {
 			if ($kilot == 0 and $kollit == 0) {
-				$pakkaus = $rahtirow["pakkaus"];
-				$pakkauskuvaus = $rahtirow["pakkauskuvaus"];
+				$pakkaus .= $rahtirow["pakkaus"];
+				$pakkauskuvaus .= $rahtirow["pakkauskuvaus"];
 			}
 			$kilot  += $rahtirow["kilot"];
 			$kollit += $rahtirow["kollit"];
 		}
-
-		// T‰m‰ otetaan jokus k‰yttˆˆn...
-		//GROUP_CONCAT(distinct trim(tuote.nimitys) ORDER BY tuote.nimitys SEPARATOR '##') nimitys,
 
 		$query = "	SELECT
 					tuote.tullinimike1,
 					tuote.tullinimike2,
 					tuote.tullikohtelu,
 					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
-					tilausrivi.nimitys nimitys,
 					tullinimike.su,
+					tullinimike.su_vientiilmo,
+					tullinimike.dm,
+					min(tilausrivi.nimitys) nimitys,
+					GROUP_CONCAT(distinct trim(tuote.nimitys) ORDER BY tuote.nimitys SEPARATOR '##') nimitys_hieno,
 					sum(tilausrivi.rivihinta) rivihinta,
 					sum(tilausrivi.kpl) kpl,
 					round(sum((tilausrivi.rivihinta/$laskurow[summa])*$kilot),0) nettop
@@ -151,11 +153,11 @@
 					WHERE tilausrivi.uusiotunnus	= '$uusiotunnus'
 					and tilausrivi.yhtio			= '$kukarow[yhtio]'
 					and tilausrivi.kpl				> 0
-					GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";
+					GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa, tullinimike.su, tullinimike.su_vientiilmo, tullinimike.dm";
 		$riviresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($riviresult) < 1) {
-			echo "P‰rkkele ku ei ollu yht‰‰n tilausrivi‰/nimikett‰!<br>";
+			echo "VIRHE: Laskulla ei ollut yht‰‰n tilausrivi‰/nimikett‰!<br>";
 		}
 		elseif (mysql_num_rows($riviresult) == 1) {
 			$rivirow = mysql_fetch_array($riviresult);
@@ -188,9 +190,9 @@
 
 			//Kentt‰ 41 Muu paljous
 			if ($rivirow["su"] != '') {
-				$pdf2->draw_text(385, 397, $rivirow["kpl"]." ".$rivirow["su"],		$pages[0], $kymppi);
+				$pdf2->draw_text(385, 397, $rivirow["kpl"]." ".$rivirow["su_vientiilmo"],		$pages[0], $kymppi);
 			}
-
+			
 			//Kentt‰ 5 tavaraerien kokonaism‰‰r‰
 			$pdf2->draw_text(322, 740, "1", 										$pages[0], $kymppi);
 
@@ -322,7 +324,7 @@
 						$pdf2->draw_text(mm_pt(155),  mm_pt(20), $yhtiorow["nimi"], 					$lisalehti[0], $kasi);
 						$pdf2->draw_text(mm_pt(155),  mm_pt(15), $kukarow["nimi"], 						$lisalehti[0], $kasi);
 						$pdf2->draw_text(mm_pt(155),  mm_pt(10), $yhtiorow["puhelin"], 					$lisalehti[0], $kasi);
-
+	
 						return($lisalehti[0]);
 					}
 				}
@@ -345,8 +347,7 @@
 			while ($rivirow = mysql_fetch_array($riviresult)) {
 				if (($lask2 >= 18 and trim($yhtiorow["kotitullauslupa"]) != "") or ($lask2 > 3 and trim($yhtiorow["kotitullauslupa"]) == "")) {
 					$sivu++;
-					$lask1  			= 1;
-					$lask2				= 1;
+					$lask2= 1;
 
 					if (trim($yhtiorow["kotitullauslupa"]) != "") {
 						$rivikohta = 675;
@@ -386,7 +387,7 @@
 
 					//Kentt‰ 41 Muu paljous
 					if ($rivirow["su"] != '') {
-						$pdf2->draw_text(287, $rivikohta-12, $rivirow["kpl"]." ".$rivirow["su"], $lisalehti[$sivu], $kymppi);
+						$pdf2->draw_text(287, $rivikohta-12, $rivirow["kpl"]." ".$rivirow["su_vientiilmo"], $lisalehti[$sivu], $kymppi);
 					}
 
 					//Kentt‰ 46 Vientiarvo, tilastollinen!
@@ -422,7 +423,7 @@
 
 					//Kentt‰ 41 Muu paljous
 					if ($rivirow["su"] != '') {
-						$pdf2->draw_text(mm_pt(135), mm_pt($rivikohta-34), $rivirow["kpl"]." ".$rivirow["su"],	$lisalehti[$sivu], $kymppi);
+						$pdf2->draw_text(mm_pt(135), mm_pt($rivikohta-34), $rivirow["kpl"]." ".$rivirow["su_vientiilmo"],	$lisalehti[$sivu], $kymppi);
 					}
 
 					//Kentt‰ 46 Vientiarvo, tilastollinen!
@@ -432,13 +433,13 @@
 					$pdf2->draw_text(mm_pt(170),  mm_pt($rivikohta-50), sprintf("%01.2f", $tullarvo),			$lisalehti[$sivu], $kymppi);
 
 					//Kentt‰ 31 Kollit ja tavaran kuvaus
-					$nimitykset = explode("##", $rivirow["nimitys"]);
+					$nimitykset = explode("##", $rivirow["nimitys_hieno"]);
 
 					$rivikohta_bck = $rivikohta;
 					$nimilask = 0;
 
 					foreach($nimitykset as $nimitys) {
-						$pdf2->draw_text(mm_pt(30),  mm_pt($rivikohta), substr($nimitys,0,20),					$lisalehti[$sivu], $kymppi);
+						$pdf2->draw_text(mm_pt(22),  mm_pt($rivikohta), substr($nimitys,0,30),					$lisalehti[$sivu], $kymppi);
 						$rivikohta -= 5;
 						$nimilask++;
 
@@ -447,6 +448,10 @@
 						}
 					}
 					$rivikohta = $rivikohta_bck;
+					
+					$pdf2->draw_text(61,  mm_pt($rivikohta-36), "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), 	$lisalehti[$sivu], $kymppi);
+					$pdf2->draw_text(61,  mm_pt($rivikohta-41), "RET.EXP.", 																$lisalehti[$sivu], $kymppi);
+					
 					$rivikohta -= 59;
 				}
 				$lask1++;
@@ -559,7 +564,22 @@
 		$pdf2->draw_text(61, 520, $laskurow["poistumistoimipaikka_koodi"], 			$pages[0], $kymppi);
 
 		//Kentt‰ 30 Tavaran sijaintipaikka
-		$pdf2->draw_text(195,  520, $yhtiorow["postitp"], 							$pages[0], $kymppi);
+		$query = "	SELECT osoite
+					FROM varastopaikat
+					WHERE tunnus = '$laskurow[varasto]'
+					and yhtio = '$kukarow[yhtio]'
+					and osoite != ''";
+		$varresult = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($varresult) > 0) {
+			$varrow = mysql_fetch_array($varresult);
+			$sijaintipaikka = $varrow["osoite"];
+		}
+		else {
+			$sijaintipaikka = $yhtiorow["osoite"];
+		}
+		
+		$pdf2->draw_text(195,  520, "O ".$sijaintipaikka, 							$pages[0], $kymppi);
 
 		//Kentt‰ 35 Bruttopaino
 		$pdf2->draw_text(480,  472, $kilot, 										$pages[0], $kymppi);
@@ -580,7 +600,8 @@
 		//T‰t‰ ei t‰ss‰ t‰ytet‰
 
 		//Kentt‰ 44 Lis‰tietoja
-		$pdf2->draw_text(61,  390, "RET.EXP.", 										$pages[0], $kymppi);
+		$pdf2->draw_text(61,  395, "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), $pages[0], $kymppi);
+		$pdf2->draw_text(61,  380, "RET.EXP.", 										$pages[0], $kymppi);
 
 		if ($yhtiorow["kotitullauslupa"] != "") {
 			$pdf2->draw_text(61,  378, "Kotitullauslupa ".$yhtiorow["kotitullauslupa"].", Etel‰inen tullipiiri",	$pages[0], $kymppi);
@@ -620,10 +641,10 @@
 		$pvm = $pp.".".$kk.".".$vv;
 
 		//Kentt‰ 54 Tullausilmoituksen allekirjoitus
-		$pdf2->draw_text(400,  90, $yhtiorow["kotipaikka"]." ".$pvm,				$pages[0], $kymppi);
-		$pdf2->draw_text(400,  66, $yhtiorow["nimi"], 								$pages[0], $kymppi);
-		$pdf2->draw_text(400,  54, $kukarow["nimi"], 								$pages[0], $kymppi);
-		$pdf2->draw_text(400,  42, $yhtiorow["puhelin"], 							$pages[0], $kymppi);
+		$pdf2->draw_text(400,  90, $yhtiorow["kotipaikka"]." ".$pvm,				$pages[0], $kasi);
+		$pdf2->draw_text(400,  66, $yhtiorow["nimi"], 								$pages[0], $kasi);
+		$pdf2->draw_text(400,  54, $kukarow["nimi"], 								$pages[0], $kasi);
+		$pdf2->draw_text(400,  42, $yhtiorow["puhelin"], 							$pages[0], $kasi);
 
 		//Kentt‰ B Merkinn‰t kirjanpitoa varten
 		if ($yhtiorow["kotitullauslupa"] != "") {

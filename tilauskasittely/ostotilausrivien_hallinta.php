@@ -22,7 +22,7 @@
 		$query = "	SELECT max(lasku.tunnus) maxtunnus, GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ', ') tunnukset
 					FROM lasku, tilausrivi
 					WHERE 
-					lasku.ytunnus = '$ytunnus'
+					lasku.liitostunnus = '$toimittajaid'
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'O'
 					and lasku.alatila = 'A'

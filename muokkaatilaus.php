@@ -14,7 +14,7 @@
 	elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
 		$otsikko = t("valmistusta");
 	}
-	elseif ($toim == "SIIRTOLISTA") {
+	elseif ($toim == "SIIRTOLISTA" or $toim == "SIIRTOLISTASUPER") {
 		$otsikko = t("varastosiirtoa");
 	}
 	elseif ($toim == "MYYNTITILI" or $toim == "MYYNTITILISUPER" or $toim == "MYYNTITILITOIMITA") {
@@ -85,6 +85,13 @@
 			}
 			elseif ($toim == "MYYNTITILISUPER") {
 				$aputoim1 = "MYYNTITILI";
+				$lisa1 = t("Muokkaa");
+
+				$aputoim2 = "";
+				$lisa2 = "";
+			}
+			elseif ($toim == "SIIRTOLISTASUPER") {
+				$aputoim1 = "SIIRTOLISTA";
 				$lisa1 = t("Muokkaa");
 
 				$aputoim2 = "";
@@ -362,6 +369,13 @@
 			}
 			elseif ($toim == "MYYNTITILISUPER" or $toim == "MYYNTITILITOIMITA") {
 				$aputoim1 = "MYYNTITILI";
+				$lisa1 = t("Muokkaa");
+
+				$aputoim2 = "";
+				$lisa2 = "";
+			}
+			elseif ($toim == "SIIRTOLISTASUPER") {
+				$aputoim1 = "SIIRTOLISTA";
 				$lisa1 = t("Muokkaa");
 
 				$aputoim2 = "";

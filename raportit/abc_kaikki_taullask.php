@@ -166,7 +166,7 @@
 		while($row = mysql_fetch_array($res)) {
 
 			//tuotenimi
-			$query = "	SELECT tuote.nimitys, group_concat(tuotteen_toimittajat.toim_tuoteno) toim_tuoteno
+			$query = "	SELECT tuote.nimitys, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno
 						FROM tuotteen_toimittajat
 						JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno
 						WHERE tuotteen_toimittajat.tuoteno='$row[tuoteno]'

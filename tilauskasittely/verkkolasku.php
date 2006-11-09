@@ -646,14 +646,10 @@
 		//laskuri
 		$lask 		= 0;
 		$edilask 	= 0;
-		$factlask 	= 0;
 
 		if ($silent == "") {
-			$tulos_ulos .= "<br><br>\n".t("Tehdään u-laskut ja factoring aineisto:")."<br>\n";
+			$tulos_ulos .= "<br><br>\n".t("Tehdään u-laskut:")."<br>\n";
 		}
-
-		//factoring siirtoa varten
-		$factoring_sisalto = "";
 
 		// jos on jotain laskutettavaa ...
 		if (count($ketjut) != 0) {
@@ -747,19 +743,6 @@
 				}
 				else {
 					$masrow = mysql_fetch_array($result);
-				}
-
-				//jos maksuehdolla on factoring täppä trigattu
-				if ($lasrow["sisainen"] == "" and $masrow["kateinen"] == "" and $masrow["jv"] == "" and $masrow["factoring"] != '') {
-					//kerätään factoring aineiston sisältö
-					$sisalto 		= "";
-					$fakt_lahetys 	= "";
-					$sivu 			= 1;
-
-					//require("seb_factoring.inc");
-
-					$factoring_sisalto .= $sisalto;
-					$factlask++;
 				}
 
 				// tässä pohditaan laitetaanko verkkolaskuputkeen
@@ -1471,25 +1454,6 @@
 			}
 			elseif($silent == "") {
 				$tulos_ulos .= t("Verkkolaskuja ei lähetetty Elma EDI-inhouse muodossa")."!<br>\n";
-			}
-
-			//siirretään factoring aineisto factorointiyhtiölle
-			if ($factlask > 0 and $factoring_sisalto != '') {
-				if ($silent == "") {
-					$tulos_ulos .= "<br><br>\n".t("Factoring-siirto:")."<br>\n";
-				}
-
-				$fakt_lahetys = "OK";
-				$sisalto = $factoring_sisalto;
-
-				require("seb_factoring.inc");
-
-				if ($silent == "") {
-					$tulos_ulos .= $sebfact_ulos;
-				}
-			}
-			elseif($silent == "") {
-				$tulos_ulos .= t("Factoring aineistoa ei lähetetty")."!<br>\n";
 			}
 
 			// jos yhtiöllä on laskuprintteri on määritelty tai halutaan jostain muusta syystä tulostella laskuja paperille

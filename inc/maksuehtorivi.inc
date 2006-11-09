@@ -3,15 +3,15 @@
 	$ulos = "";
 	$jatko = 1; // oletetaan normaali käsittely
 	$tyyppi = 1; // oletetaan rivin näkyvyys
-	
+
 	if ($i == 0) { //yhtiötä ei näytetä
-		$tyyppi = 0; 
+		$tyyppi = 0;
 	}
-	
-	if ((mysql_field_name($result, $i) == "jv") 
-		or (mysql_field_name($result, $i) == "suoraveloitus") 
-		or (mysql_field_name($result, $i) == "erapvmkasin") 
-		or (mysql_field_name($result, $i) == "itsetulostus") 
+
+	if ((mysql_field_name($result, $i) == "jv")
+		or (mysql_field_name($result, $i) == "suoraveloitus")
+		or (mysql_field_name($result, $i) == "erapvmkasin")
+		or (mysql_field_name($result, $i) == "itsetulostus")
 		or (mysql_field_name($result, $i) == "jaksotettu")) {
 		$sel = '';
 		if ($trow[$i] == 'o') {
@@ -21,13 +21,13 @@
 		$ulos .= "</td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kateinen") {
-		
+
 		$sel1 = '';
 		$sel2 = '';
 		$sel3 = '';
-		
+
 		if (strtoupper($trow[$i]) == '') {
 			$sel1 = "SELECTED";
 		}
@@ -37,42 +37,46 @@
 		if (strtoupper($trow[$i]) == 'P') {
 			$sel3 = "SELECTED";
 		}
-		
-		$ulos  = "<td><select name='$nimi'>";					
+
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''  $sel1> ".t("Tämä ei ole käteismaksuehto.")."</option>";
 		$ulos .= "<option value='o' $sel2> ".t("Käteismaksuehto, ei pyöristetä.")."</option>";
-		$ulos .= "<option value='p' $sel3> ".t("Käteismaksuehto, pyöristetään.")."</option>";		
+		$ulos .= "<option value='p' $sel3> ".t("Käteismaksuehto, pyöristetään.")."</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "factoring") {
-		
+
 		$sel1 = '';
 		$sel2 = '';
 		$sel3 = '';
-		
+
 		if (strtoupper($trow[$i]) == '') {
 			$sel1 = "SELECTED";
 		}
 		if (strtoupper($trow[$i]) == 'N') {
 			$sel2 = "SELECTED";
 		}
-		if (strtoupper($trow[$i]) == 'S') {
+		if (strtoupper($trow[$i]) == 'A') {
 			$sel3 = "SELECTED";
 		}
-		
-		$ulos  = "<td><select name='$nimi'>";				
+		if (strtoupper($trow[$i]) == 'S') {
+			$sel4 = "SELECTED";
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''  $sel1> ".t("Ei factoroida")."</option>";
 		$ulos .= "<option value='N' $sel2> ".t("Nordea Factoring")."</option>";
-		$ulos .= "<option value='S' $sel3> ".t("SEB Factoring")."</option>";		
+		$ulos .= "<option value='A' $sel3> ".t("Sampo Factoring")."</option>";
+		$ulos .= "<option value='S' $sel4> ".t("SEB Factoring")."</option>";
 		$ulos .= "</select></td>";
-		
+
 		$jatko = 0;
 	}
-	
-	
+
+
 	if (mysql_field_name($result, $i) == "osamaksuehto1") {
 		$query = "	SELECT tunnus, concat(teksti,' ',kassa_teksti)
 					FROM maksuehto
@@ -92,7 +96,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "osamaksuehto2") {
 		$query = "	SELECT tunnus, concat(teksti,' ',kassa_teksti)
 					FROM maksuehto
@@ -100,9 +104,9 @@
 					ORDER BY jarjestys";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
-		
+
 		$ulos .= "<option value = ''>".t("Tämä ei ole moniehto-maksuehto");
-		
+
 		while ($vrow=mysql_fetch_row($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow[0]) {
@@ -113,5 +117,5 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 ?>

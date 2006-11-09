@@ -302,8 +302,31 @@ if (!function_exists('rivi')) {
 			$row["kommentti"] .= "\nEi sisällä vähennettävää veroa.";
 		}
 
+		//Hetaan sarjanumeron tiedot
+		if ($row["kpl"]+$row["varattu"] > 0){
+			$sarjanutunnus = "myyntirivitunnus";
+		}
+		else {
+			$sarjanutunnus = "ostorivitunnus";
+		}
+		
+		$query = "	select * 
+					from sarjanumeroseuranta 
+					where yhtio = '$kukarow[yhtio]' 
+					and tuoteno = '$row[tuoteno]' 
+					and $sarjanutunnus='$row[tunnus]'
+					and sarjanumero != ''";
+		$sarjares = mysql_query($query) or pupe_error($query);
+		
+		if ($row["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
+			$row["kommentti"] .= "\n";
+		}
+		while($sarjarow = mysql_fetch_array($sarjares)) {
+			$row["kommentti"] .= "# $sarjarow[sarjanumero]\n";
+		}
+		
 		if ($row["kommentti"] != ''){
-			$pohja = $pdf->draw_paragraph($kala+8, 35, 160, 280, $row["otunnus"]."/".$row["kommentti"].$marginaalilisa, $firstpage, $pieni);
+			$pohja = $pdf->draw_paragraph($kala+8, 35, 160, 280, $row["otunnus"]."\n".$row["kommentti"]."\n".$marginaalilisa, $firstpage, $pieni);
 
 			if (!is_numeric($pohja)) {
 				$pohja = 160;

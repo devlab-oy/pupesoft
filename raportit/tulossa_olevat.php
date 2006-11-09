@@ -31,7 +31,7 @@ if ($ytunnus!='') {
 	$query = 	"select a.tunnus, a.nimi, tuoteno, b.toimaika, count(*) maara, sum(b.varattu) tilattu, sum(b.varattu * b.hinta) arvo, a.valkoodi
 				from lasku a, tilausrivi b
 				where a.yhtio = b.yhtio and a.tunnus = b.otunnus
-				and a.yhtio='$kukarow[yhtio]' and a.ytunnus = $toimittajarow[ytunnus] and b.varattu > '0' and b.tyyppi = 'O' and a.tila = 'O'
+				and a.yhtio='$kukarow[yhtio]' and a.ytunnus = '$toimittajarow[ytunnus]' and b.varattu > '0' and b.tyyppi = 'O' and a.tila = 'O'
 				group by 1
 				order by 4";
 

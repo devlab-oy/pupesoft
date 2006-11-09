@@ -12,9 +12,10 @@
 		// N‰ytet‰‰n muuten vaan sopivia tilauksia
 		echo "<br><table>";
 		echo "<form action = '$PHP_SELF' method = 'post'>";
-		echo t("Toimittaja").": <input type='text' size='10' name='ytunnus'>";
-		echo " <input type='submit' value='".t("Etsi")."'>";
+		echo "<tr><td>".t("Toimittaja").": <input type='text' size='10' name='ytunnus'></td>";
+		echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
 		echo "</form>";
+		echo "</table><br>";
 	}
 	
 	
@@ -213,9 +214,10 @@
 			echo "</tr>";
 		}
 		echo "<tr>
-				<td class='back' colspan='4' align='right'></td>
+				<td class='back' colspan='3' align='right'></td>
 				<td colspan='3' class='spec'>Tilauksen arvo:</td>
 				<td align='right' class='spec'>".sprintf("%.2f",$yhteensa)."</td>
+				<td class='back'></td>
 				<td align='right'>".t("Ruksaa kaikki").":</td>
 				<td><input type='checkbox' onclick='toggleAll(this);'></td>
 			</tr>";

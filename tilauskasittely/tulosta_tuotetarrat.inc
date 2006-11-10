@@ -8,7 +8,7 @@
 				and tuote.yhtio='$kukarow[yhtio]' and tilausrivi.yhtio='$kukarow[yhtio]'
 				ORDER BY tuote.tuoteno";
 	$res= mysql_query($query) or pupe_error($query);
-echo "$query<br>";
+	//echo "$query<br>";
 	list($usec, $sec) = explode(' ', microtime());
 	mt_srand((float) $sec + ((float) $usec * 100000));
 	$filenimi = "/tmp/Tuotetarrat-".md5(uniqid(mt_rand(), true)).".txt";

@@ -416,8 +416,9 @@
 					$pdf2->draw_text(mm_pt(160),  mm_pt($rivikohta-17), $rivirow["nettop"],						$lisalehti[$sivu], $kymppi);
 
 					//Kenttä 37 Kohtelukoodi
-					$pdf2->draw_text(mm_pt(135),  mm_pt($rivikohta-17), $rivirow["tullikohtelu"], 				$lisalehti[$sivu], $kymppi);
-
+					$pdf2->draw_text(mm_pt(140),  mm_pt($rivikohta-17), substr($rivirow["tullikohtelu"],0,2), 	$lisalehti[$sivu], $kymppi);
+					$pdf2->draw_text(mm_pt(149),  mm_pt($rivikohta-17), substr($rivirow["tullikohtelu"],2,2), 	$lisalehti[$sivu], $kymppi);
+					
 					//Kenttä 34 Alkuperämaan koodi
 					$pdf2->draw_text(mm_pt(138),  mm_pt($rivikohta-9), $rivirow["alkuperamaa"], 				$lisalehti[$sivu], $kymppi);
 
@@ -439,7 +440,7 @@
 					$nimilask = 0;
 
 					foreach($nimitykset as $nimitys) {
-						$pdf2->draw_text(mm_pt(22),  mm_pt($rivikohta), substr($nimitys,0,30),					$lisalehti[$sivu], $kymppi);
+						$pdf2->draw_text(mm_pt(22),  mm_pt($rivikohta), substr($nimitys,0,35),					$lisalehti[$sivu], $kymppi);
 						$rivikohta -= 5;
 						$nimilask++;
 

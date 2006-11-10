@@ -102,22 +102,9 @@ $kassaale = round($summa*$mehtorow['kassa_alepros']/100,2);
 $lisa_comments 	= "";
 $lisa_viestit	= "";
 
-//Laitetaan laskun kommenttiin talteen tiettyjä lisätietoja
-if (strtoupper($mehtorow["factoring"]) == 'S') {
-	$lisa_comments .= "Vår fordran enligt denna faktura har överlåtits till S E B Finans AB (publ). \n";
-	$lisa_comments .= "Fakturan skall därför betalas direkt till S E B Finans AB(publ), 167 81  BROMMA. \n";
-}
-elseif(strtoupper($mehtorow["factoring"]) == 'N') {
-	$lisa_comments .= "Tämä saatava on siirretty Nordea Rahoitus Suomi Oy:lle. Lasku on maksettava \n";
-	$lisa_comments .= "Nordea rahoitus Suomi Oy:n tilille Merita Pankki 155930-1070 laskulla olevalla viitenumerolla.\n";
-}
-elseif(strtoupper($mehtorow["factoring"]) == 'A') {
-	$lisa_comments .= "Tämä saatava on sopimuksen perusteella sitovasti siirretty Sampo Pankki Oyj:lle. Lasku on \n";
-	$lisa_comments .= "maksettava ja voidaan pätevästi maksaa vain Sampo Pankki Oyj:lle, tilille $yhtiorow[factoring_pankkitili1] \n";
-	$lisa_comments .= "Tämä siirto on peruutettavissa vain Sampo Pankki Oyj:n suostumuksella. Tähän saatavaan tai \n";
-	$lisa_comments .= "sen perusteeseen kohdistuvista huomautuksista on välittömästi ilmoitettava \n";
-	$lisa_comments .= "Sampo Rahoitus/Sampo Pankki Oyj:lle, PL 1274, 00075 SAMPO, puh. 010 515 210, \n";
-	$lisa_comments .= "faksi (09) 608 723. \n";
+// Jos kyseessä on factoring niin laitetaan laskun kommenttiin talteen factorinc siirtoteksti jos sellainen on
+if (strtoupper($mehtorow["factoring"]) != "" and $yhtiorow["factoring_siirtoteksti"] != "") {
+	$lisa_comments .= $yhtiorow["factoring_siirtoteksti"]." \n";
 }
 
 if ($lasrow["vienti"] == 'E') {

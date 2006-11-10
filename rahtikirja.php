@@ -1,5 +1,5 @@
 <?php
-	require "inc/parametrit.inc";
+	require ("inc/parametrit.inc");
 
 	if ($id=='') $id=0;
 
@@ -78,8 +78,9 @@
 						$tilaukset = explode(',', $tunnukset);
 
 						foreach ($tilaukset as $otsikkonro) {
-							$query  = "insert into rahtikirjat (rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,yhtio) values
-										('$rakirno','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$kukarow[yhtio]')";
+							$query  = "insert into rahtikirjat 
+										(rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,yhtio) values
+										('$rakirno','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$kukarow[yhtio]')";
 							$result = mysql_query($query) or pupe_error($query);
 
 							if ($kollit[$i]=='') 	$kollit[$i]		= 0;
@@ -88,7 +89,7 @@
 							if ($kuutiot[$i]=='')	$kuutiot[$i]	= 0;
 
 							if ($kilot[$i]!=0 or $kollit[$i]!=0 or $kuutiot[$i]!=0 or $lavametri[$i]!=0) {
-								echo "<tr><td>$pakkauskuvaus[$i]</td><td>$pakkaus[$i]</td><td align='right'>$kollit[$i] kll</td><td align='right'>$kilot[$i] kg</td><td align='right'>$kuutiot[$i] m&sup3;</td><td align='right'>$lavametri[$i] m</td></tr>";
+								echo "<tr><td>$pakkauskuvaus[$i]</td><td>$pakkaus[$i]</td><td>$pakkauskuvaustark[$i]</td><td align='right'>$kollit[$i] kll</td><td align='right'>$kilot[$i] kg</td><td align='right'>$kuutiot[$i] m&sup3;</td><td align='right'>$lavametri[$i] m</td></tr>";
 							}
 
 							// Vain ekalle tilaukselle lis‰t‰‰n kilot
@@ -630,12 +631,12 @@
 
 		echo "<table>";
 
-		echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='2'>".t("Pakkaus")."</th></tr>";
+		echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";
 
 		$i = 0;
 
 		while ($row = mysql_fetch_array($result)) {
-			$query = "	select sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri
+			$query = "	select sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
 						from rahtikirjat use index (otsikko_index)
 						where yhtio			= '$kukarow[yhtio]'
 						and otsikkonro		= '$id'
@@ -646,10 +647,11 @@
 
 			if (mysql_num_rows($rarrr)==1) {
 				$roror = mysql_fetch_array($rarrr);
-				if ($roror['kollit']>0)		$kollit[$i]		= $roror['kollit'];
-				if ($roror['kilot']>0)		$kilot[$i]		= $roror['kilot'];
-				if ($roror['kuutiot']>0)	$kuutiot[$i]	= $roror['kuutiot'];
-				if ($roror['lavametri']>0)	$lavametri[$i]	= $roror['lavametri'];
+				if ($roror['kollit']>0)					$kollit[$i]				= $roror['kollit'];
+				if ($roror['kilot']>0)					$kilot[$i]				= $roror['kilot'];
+				if ($roror['kuutiot']>0)				$kuutiot[$i]			= $roror['kuutiot'];
+				if ($roror['lavametri']>0)				$lavametri[$i]			= $roror['lavametri'];
+				if ($roror['pakkauskuvaustark']!='')	$pakkauskuvaustark[$i]	= $roror['pakkauskuvaustark'];
 			}
 
 			echo "<tr>
@@ -660,8 +662,29 @@
 			<td><input type='text' size='3' value='$kuutiot[$i]' name='kuutiot[$i]'></td>
 			<td><input type='text' size='3' value='$lavametri[$i]' name='lavametri[$i]'></td>
 			<td>$row[selite]</td>
-			<td>$row[selitetark]</td>
-			</tr>";
+			<td>$row[selitetark]</td>";
+			
+			$query = "	SELECT distinct selite, selitetark
+						FROM avainsana
+						WHERE yhtio='$kukarow[yhtio]' and laji='PAKKAUSKUVAUS'
+						ORDER BY selite+0";
+			$pksresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($pksresult) > 0) {
+				echo "<td><select name='pakkauskuvaustark[$i]'>";
+				echo "<option value=''>".t("Ei tarkennetta")."</option>";
+			
+				while ($pksrow = mysql_fetch_array($pksresult)) {
+					$sel = '';
+					if ($pakkauskuvaustark[$i] == $pksrow[0]) {
+						$sel = "selected";
+					}
+					echo "<option value='$pksrow[0]' $sel>$pksrow[0]</option>";
+				}
+				echo "</select></td>";
+			}
+			
+			echo "</tr>";
 
 			$i++;
 		}

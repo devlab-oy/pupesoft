@@ -116,11 +116,11 @@ if ($lasrow["vienti"] == 'K') {
 
 if ($lasrow["vienti"] != '') {
 	//Laitetaan kollimäärät ja kilot mukaan kommenttiin vientilaskuille
-	$query = "	SELECT pakkaus, pakkauskuvaus, sum(kilot) kilot, sum(kollit) kollit
+	$query = "	SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit
 				FROM rahtikirjat
 				WHERE otsikkonro in ($tunnukset)
 				and yhtio='$kukarow[yhtio]'
-				group by pakkaus, pakkauskuvaus
+				group by pakkaus, pakkauskuvaus, pakkauskuvaustark
 				having kollit > 0";
 	$rahtiresult = mysql_query($query) or pupe_error($query);
 
@@ -128,6 +128,10 @@ if ($lasrow["vienti"] != '') {
 
 		if($rahtirow["pakkaus"] != $rahtirow["pakkauskuvaus"]) {
 			$rahtirow["pakkaus"] .= " ".$rahtirow["pakkauskuvaus"];
+		}
+		
+		if($rahtirow["pakkauskuvaustark"] != '') {
+			$rahtirow["pakkaus"] .= " ".$rahtirow["pakkauskuvaustark"];
 		}
 
 		$lisa_comments .= "$rahtirow[kollit] ".t("kpl").". $rahtirow[pakkaus] $rahtirow[kilot] kg. \n";

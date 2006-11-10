@@ -88,6 +88,9 @@
 		if ($trow[$i] == 'KERAYSLISTA') {
 			$sel27 = "selected";
 		}
+		if ($trow[$i] == 'PAKKAUSKUVAUS') {
+			$sel28 = "selected";
+		}
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
@@ -118,6 +121,7 @@
 		$ulos .= "<option value='MYSQLALIAS'"    .$sel25.">".t("Tietokantasarakkeen nimialias")."</option>";
 		$ulos .= "<option value='LASKUKUVAUS'"   .$sel26.">".t("Maksuposition kuvaus")."</option>";
 		$ulos .= "<option value='KERAYSLISTA'"   .$sel27.">".t("Keräyslista")."</option>";
+		$ulos .= "<option value='PAKKAUSKUVAUS'" .$sel28.">".t("Pakkauskuvauksen tarkenne")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

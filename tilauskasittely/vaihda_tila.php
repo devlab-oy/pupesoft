@@ -131,6 +131,26 @@
 
 				$query = "delete from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$tunnus'";
 				$tila_result = mysql_query($query) or pupe_error($query);
+				
+				//Nollataan sarjanumerolinkit
+			   $query    = "    SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu
+			                   FROM tilausrivi
+			                   JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+			                   WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+			                   and tilausrivi.otunnus='$tunnus'";
+			   $sres = mysql_query($query) or pupe_error($query);
+
+			   while($srow = mysql_fetch_array($sres)) {
+			       if ($srow["varattu"] > 0) {
+			           $tunken = "myyntirivitunnus";
+			       }
+			       else {
+			           $tunken = "ostorivitunnus";
+			       }
+
+			       $query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and $tunken='$srow[tunnus]'";
+			       $sarjares = mysql_query($query) or pupe_error($query);
+				}
 			}
 
 		}

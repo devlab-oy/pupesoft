@@ -120,6 +120,7 @@ while (!feof ($fd)) {
 	switch ($tunnus) {
 		case 'ICHG_RCPT':
 		case 'OSTOTIL.OT_TOIMITTAJANRO':
+		case 'OSTOTIL.OT_OVTTUNNUS':
 		//Tilauksen vastaanottaja
 
 			// Arwidson häkki Arwidson Automotivea varten

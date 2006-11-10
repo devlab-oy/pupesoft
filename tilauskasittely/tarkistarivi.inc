@@ -33,6 +33,16 @@
 		$riviok++;
 		$tilausok++;
 	}
+	if (($row["jt"] < 0 and $row['var'] = 'J') or ($row["varattu"] < 0 and $row["tyyppi"] == "E")) {
+		$varaosavirhe .= t("VIRHE: Määrä ei saa olla negatiivinen!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
+	if ($row["jt"] != 0 and $row["tyyppi"] == "E") {
+		$varaosavirhe .= t("VIRHE: Et voi syöttää jt-riviä ennakkotilaukseen!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
 
 	if (!in_array($row["var"], array('','P','J','H','S','O','T','U','V','A','B'))) {
 		// Tässä varrien selitykset

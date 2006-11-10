@@ -45,6 +45,12 @@ if ($tee=='update') {
 		echo "<br><font class='error'>".t("VIRHE: P‰‰llekk‰isi‰ varastoalueita")."!</font><br>";
 		$tee = "edit";
 	}
+	else {
+		if ($printteri1 == '' or $printteri2 == '' or $printteri3 == '' or $printteri4 == '' or $printteri5 == '' or $printteri6 == '' or $printteri7 == '') {
+			echo "<br><font class='error'>".t("VIRHE: Mik‰‰n tulostin ei saa olla tyhj‰")."!</font><br>";
+			$tee = "edit";
+		}
+	}
 }
 
 // p‰ivitet‰‰n varastopaikat...
@@ -205,7 +211,7 @@ if ($tee=='edit') {
 			}
 
 			echo "</select></td></tr>";
-			echo "kala $trow[$i]<br>";
+			//echo "kala $trow[$i]<br>";
 		}
 		else {
 			echo "<tr><th>".t(mysql_field_name($result,$i))."</th><td><input type='text' name='".mysql_field_name($result,$i)."' value='$row[$i]'></td></tr>\n";

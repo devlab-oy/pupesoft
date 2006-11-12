@@ -110,7 +110,6 @@
 	$tunnukset = substr($tunnukset,0,-1);
 
 	// varmistetaan, että löydettiin otsikoita
-
 	if ($tunnukset != "") {
 
 		//haetaan kollimäärä ja bruttopaino
@@ -162,16 +161,14 @@
 		elseif (mysql_num_rows($riviresult) == 1) {
 			$rivirow = mysql_fetch_array($riviresult);
 
-			$tavarankuvaus = $kollit." ".$pakkaus." ".$pakkauskuvaus;
+			//Kenttä 31 Kollit ja tavaran kuvaus
+			$nimitykset = explode("##", $rivirow["nimitys_hieno"]);
 
-			//Kenttä 31 Kollit ja tavaran kuvausk
-			$pdf2->draw_text(61,  491, $tavarankuvaus,								$pages[0], $kymppi);
-
-
-
-			$nimitykset = explode("##", $rivirow["nimitys"]);
-
-			$pdf2->draw_text(61,  479, substr($nimitykset[0], 0, 20),				$pages[0], $kymppi);
+			$apinalask = 495;
+			foreach($nimitykset as $nimitys) {
+				$pdf2->draw_text(61,  $apinalask, substr($nimitys,0,35),			$pages[0], $kymppi);
+				$apinalask -= 12;
+			}			
 
 			//Kenttä 32 Tavaraerän järjestysnumero
 			$pdf2->draw_text(350, 496, "1", 										$pages[0], $kymppi);
@@ -180,11 +177,12 @@
 			$pdf2->draw_text(385, 496, $rivirow["tullinimike1"], 					$pages[0], $kymppi);
 
 			//Kenttä 34 Alkuperämaan koodi
-			$pdf2->draw_text(390, 470, $rivirow["alkuperamaa"], 					$pages[0], $kymppi);
+			$pdf2->draw_text(392, 473, $rivirow["alkuperamaa"], 					$pages[0], $kymppi);
 
 			//Kenttä 37 Tullimenettely
-			$pdf2->draw_text(385, 448, $rivirow["tullikohtelu"], 					$pages[0], $kymppi);
-
+			$pdf2->draw_text(395,  448, substr($rivirow["tullikohtelu"],0,2), 		$pages[0], $kymppi);
+			$pdf2->draw_text(425,  448, substr($rivirow["tullikohtelu"],2,2), 		$pages[0], $kymppi);
+			
 			//Kenttä 38 Nettopaino
 			$pdf2->draw_text(480, 446, $rivirow["nettop"], 							$pages[0], $kymppi);
 

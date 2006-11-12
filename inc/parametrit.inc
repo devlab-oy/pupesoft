@@ -22,6 +22,7 @@ $starttime = $timeparts[1].substr($timeparts[0],1);
 
 // luodaan tietokantayhteys
 require("salasanat.php");
+
 $link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
 
@@ -141,9 +142,7 @@ if ($session != '') {
 			echo t("Selaimesi ei ilmeisesti tue cookieta").".";
 		}
 		else {
-			echo "<script>
-				setTimeout(\"parent.location.href='$palvelin2'\",0);
-				</script>";
+			echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
 		}
 		exit;
 	}
@@ -205,89 +204,80 @@ if ($session != '') {
 
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
-
-	if ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
-		$css = $yhtiorow["css_extranet"];
-	}
-	elseif ($kukarow['resoluutio'] == 'P' and $yhtiorow['css_pieni'] != "") {
-		$css = $yhtiorow['css_pieni'];
-	}
-	else {
-		$css = $yhtiorow['css'];
-	}
-
+	
 	if ($nayta_pdf == 1) {
 		header("Content-Type: application/pdf");
 		header('Content-Disposition: inline; filename="pupesoft.pdf"');
 	}
-	else {
-		if ($phpnimi != 'index.php') {
-
-			$charset = "iso-8859-1";
-//			$charset = "utf-8";
-
-			if ($kukarow["kieli"] == "ru" or $kukarow["kieli"] == "ee") {
-				$charset = "utf-8";
-			}
-
-			header("Content-Type: text/html; charset=$charset");
-
-			echo "<html>
-<head>
-<META Http-Equiv='Cache-Control' Content='no-cache'>
-<META Http-Equiv='Pragma' Content='no-cache'>
-<META Http-Equiv='Expires' Content='0'>
-<meta http-equiv='Content-Type' content='text/html; charset=$charset'>
-<style type='text/css'>
-$css
-</style>
-<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>
-</head>
-<body>
-";
-			if (basename($phpnimi) != 'indexvas.php') {
-				if ($toim != '') {
-					if (basename($phpnimi) == 'varauskalenteri.php') {
-						$urltoim = "";
-					}
-					else {
-						$urltoim = "/".$toim;
-					}
-				}
-				else {
-					$urltoim = "";
-				}
-
-				if (basename($phpnimi) == 'tervetuloa.php' and $kukarow['extranet'] != '') {
-					$urltoim = "/EXTRANET";
-				}
-
-				$hreffi = "http://www.pupesoft.com/trac/wiki/$kukarow[kieli]/".basename($phpnimi).$urltoim;
-
-//				ob_start();
-// 				$ohjeval = @readfile("$hreffi");
-// 				if (false !== $ohjeval) {
-// 					$ohjeval = ob_get_contents();
-// 				}
-// 				ob_end_clean();
-//
-// 				//$etsinta = 'Describe "'.$kukarow["kieli"].'/'.basename($phpnimi).$urltoim.'" here';
-// 				$etsinta = "Describe ";
-//
-// 				echo "$hreffi<br>$etsinta<br>".strlen($ohjeval)."<br>";
-//
-// 				if (strpos($ohjeval,$etsinta)) {
-// 					echo "kala<br>";
-// 				}
-// 				else {
-//
-// 				}
-echo "<div align='right'><a class='menu' target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
-			}
-
+	elseif($lataa_tiedosto == 1) {
+		header('HTTP/1.1 200 OK');
+		header('Status: 200 OK');
+		header('Accept-Ranges: bytes');
+		header('Content-Transfer-Encoding: Binary');
+		header('Content-Type: application/force-download');
+		
+		if ($filenimi != '') {
+			header('Content-Disposition: inline; filename='.$kaunisnimi);		
+		}
+		else {
+			header('Content-Disposition: inline; filename=pupesoft.txt');	
 		}
 	}
+	elseif ($phpnimi != 'index.php') {
+		
+		if ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
+			$css = $yhtiorow["css_extranet"];
+		}
+		elseif ($kukarow['resoluutio'] == 'P' and $yhtiorow['css_pieni'] != "") {
+			$css = $yhtiorow['css_pieni'];
+		}
+		else {
+			$css = $yhtiorow['css'];
+		}
+		
+		$charset = "iso-8859-1";
+		//$charset = "utf-8";
 
+		if ($kukarow["kieli"] == "ru" or $kukarow["kieli"] == "ee") {
+			$charset = "utf-8";
+		}
+
+		header("Content-Type: text/html; charset=$charset");
+
+		echo "<html>";
+		echo "<head>";
+		echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";
+		echo "<META Http-Equiv='Pragma' Content='no-cache'>";
+		echo "<META Http-Equiv='Expires' Content='0'>";
+		echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
+		echo "<style type='text/css'>";
+		echo $css;
+		echo "</style>";
+		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
+		echo "</head>";
+		echo "<body>";
+		
+		if (basename($phpnimi) != 'indexvas.php') {
+			if ($toim != '') {
+				if (basename($phpnimi) == 'varauskalenteri.php') {
+					$urltoim = "";
+				}
+				else {
+					$urltoim = "/".$toim;
+				}
+			}
+			else {
+				$urltoim = "";
+			}
+
+			if (basename($phpnimi) == 'tervetuloa.php' and $kukarow['extranet'] != '') {
+				$urltoim = "/EXTRANET";
+			}
+
+			$hreffi = "http://www.pupesoft.com/trac/wiki/$kukarow[kieli]/".basename($phpnimi).$urltoim;
+
+			echo "<div align='right'><a class='menu' target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
+		}
+	}
 }
-
 ?>

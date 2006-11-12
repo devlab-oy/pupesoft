@@ -232,8 +232,16 @@ if ($tee == 'go') {
 	}
 
 	if ($asiakasryhma  != "") $lisa .= " and asiakas.ryhma     = '$asiakasryhma' ";
+	
 	if ($asiakasosasto != "") $lisa .= " and asiakas.osasto    = '$asiakasosasto' ";
-	if ($tuoteryhma    != "") $lisa .= " and tuote.try         = '$tuoteryhma' ";
+	
+	if ($tuoteryhma != "" and strpos($tuoteryhma, "*") !== FALSE) {
+		$lisa .= " and tuote.try like '".substr($tuoteryhma,0,-1)."%' ";
+	}
+	elseif ($tuoteryhma != "") {
+		$lisa .= " and tuote.try = '$tuoteryhma' ";
+	}
+	
 	if ($tuoteosasto   != "") $lisa .= " and tuote.osasto      = '$tuoteosasto' ";
 
 	if ($toimittaja != "") {

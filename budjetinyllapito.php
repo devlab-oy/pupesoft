@@ -2,17 +2,31 @@
 require ("inc/parametrit.inc");
 
 if (is_array($luvut)) {
+	$paiv=0;
+	$lisaa=0;
 	foreach ($luvut as $rind => $rivi) {
 		foreach ($rivi as $sind => $solu) {
 			$solu = (float) $solu;
 			if ($solu <> 0) {
-				$query="SELECT * from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind'";
-				echo "$query<br>";
-				$query="UPDATE budjetti set summa = $solu where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind'";
-				echo "$query<br>";
+				$query="SELECT summa from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustannuspaikka='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
+				$result = mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($result) == 1) {
+					$budjrow=mysql_fetch_array($result);
+					if ($budjrow['summa'] != $solu) {
+						$query="UPDATE budjetti set summa = $solu where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustannuspaikka='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
+						$result = mysql_query($query) or pupe_error($query);
+						$paiv++;
+					}
+				}
+				else {
+					$query="INSERT into budjetti set summa = $solu, yhtio='$kukarow[yhtio]', kausi = '$sind', taso = '$rind', kustannuspaikka='$vkustp', kohde='$vkohde', projekti='$vproj'";
+					$result = mysql_query($query) or pupe_error($query);
+					$lisaa++;
+				}
 			}
 		}
 	}
+	echo "<font class='message'>".t("Päivitin ").$paiv.t("Lisäsin ").$lisaa."</font><br>";
 }
 
 if (isset($tyyppi)) {
@@ -26,7 +40,7 @@ if (isset($tyyppi)) {
 		case (3): $sel3 = 'selected';
 		case (4): $sel4 = 'selected';
 	}
-}		
+}
 echo "<font class='head'>".t("Budjetin ylläpito")."<hr></font>";
 echo "<table>";
 echo "<form action = '' method='post'>
@@ -63,10 +77,10 @@ $vresult = mysql_query($query) or pupe_error($query);
 echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
 while ($vrow=mysql_fetch_array($vresult)) {
 	$sel="";
-	if ($trow[$i] == $vrow['tunnus']) {
+	if ($kustp == $vrow['tunnus']) {
 		$sel = "selected";
 	}
-	echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
+	echo "<option value = '$vrow[tunnus]' $sel>$vrow[tunnus] $vrow[nimi]";
 }
 echo "</select></td>";
 echo "</tr>";
@@ -79,7 +93,7 @@ $vresult = mysql_query($query) or pupe_error($query);
 echo "<td><select name='kohde'><option value=' '>Ei valintaa";
 while ($vrow=mysql_fetch_array($vresult)) {
 	$sel="";
-	if ($trow[$i] == $vrow['tunnus']) {
+	if ($kohde == $vrow['tunnus']) {
 		$sel = "selected";
 	}
 	echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
@@ -95,7 +109,7 @@ $vresult = mysql_query($query) or pupe_error($query);
 echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
 while ($vrow=mysql_fetch_array($vresult)) {
 	$sel="";
-	if ($trow[$i] == $vrow['tunnus']) {
+	if ($proj == $vrow['tunnus']) {
 		$sel = "selected";
 	}
 	echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
@@ -115,6 +129,10 @@ if (isset($tkausi)) {
 }
 
 if (is_array($tilikaudetrow)) {
+	//Parametrit mihin tämä taulukko liittyy
+	echo "<input type='hidden' name = 'vkustp' value='$kustp'>";
+	echo "<input type='hidden' name = 'vkohde' value='$kohde'>";
+	echo "<input type='hidden' name = 'vproj' value='$proj'>";
 	echo "<table>";
 	echo "<tr><td></td>";
 	$raja = '0000-00';
@@ -152,7 +170,7 @@ if (is_array($tilikaudetrow)) {
 		for ($k=0;$k<$j;$k++) {
 			$itaso = $tasorow['taso'];
 			$ik = $rajataulu[$k];
-			$query="SELECT * from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$ik' and taso = '$itaso'";
+			$query="SELECT * from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$ik' and taso = '$itaso' and kustannuspaikka='$kustp' and kohde='$kohde' and projekti='$proj'";
 			$xresult = mysql_query($query) or pupe_error($query);
 			$nro='';
 			if (mysql_num_rows($xresult) == 1) {

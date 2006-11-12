@@ -196,7 +196,7 @@ if (!function_exists('alku')) {
 		//tehdään viestejä ja lasketaan niitten pituuksia
 		if ($laskurow['sisviesti1'] != '') {
 
-			$pdf->draw_text(35, 543, t("Huomautukset", $kieli).":", $firstpage, $norm);
+			$pdf->draw_text(35, 546, t("Huomautukset", $kieli).":", $firstpage, $norm);
 			$pohja = $pdf->draw_paragraph(543, 35, 60, 550, trim($laskurow["sisviesti1"])."\n", $firstpage, $norm); // top, left, bottom, right
 
 			$laskurow['sisviesti1'] = "";
@@ -208,11 +208,11 @@ if (!function_exists('alku')) {
 			}
 			else {
 				// viivat rivien väliin...
-				$x[0] = 20;
-				$x[1] = 580;
-				$y[0] = $y[1] = $pohja - 4;
+				$x[0] = 35;
+				$x[1] = 550;
+				$y[0] = $y[1] = $pohja - 10;
 				$pdf->draw_line($x, $y, $firstpage, $rectparam);
-				$kala = $pohja - 15;
+				$kala = $pohja - 25;
 			}
 
 		}

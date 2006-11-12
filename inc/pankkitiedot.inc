@@ -31,15 +31,16 @@ function pankkitiedot($tilino, $asiakastunnus) {
 	$ytunnus 				= $yhtiorow["ytunnus"];
 
 	$pankki = array();
-	$pankki["lum_maksutapa"]	= "M";	//maksum‰‰r‰ys
-	$pankki["ytunnus"] = $ytunnus;
 	
+	$pankki["lum_maksutapa"]	= "M";	//maksum‰‰r‰ys
+	$pankki["ytunnus"] 			= $ytunnus;
+	$pankki["lmp_mt_4kentta"]	= "$tilino";
+	$pankki["lmp_st_4kentta"]	= "$tilino";
+
 	switch ($tmp_tilino) {
 		case (1) : //Nordea
 			$pankki["rahalaitos"]		= '1 ';
 			$pankki["pankkilaitos"] 	= "Nordea";
-			
-			$pankki["lmp_st_4kentta"]	= "$tilino";
 			break;
 		case (2) : //Nordea
 			$pankki["rahalaitos"]		= '2 ';
@@ -94,7 +95,7 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			break;
 		case (8) : //Sampo Pankki
 			$pankki["rahalaitos"]		= ' 8';
-			$pankki["pankkilaitos"] 	= "Sampo";			
+			$pankki["pankkilaitos"] 	= "Sampo";
 			break;
 	}	
 	

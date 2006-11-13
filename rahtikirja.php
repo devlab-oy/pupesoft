@@ -334,26 +334,22 @@
 
 				echo "<td>$tiedot</td>";
 
-				echo "<td class='back'>
-						<form method='post' action='$PHP_SELF'>
+				echo "<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='change'>
 						<input type='hidden' name='rakirno' value='$row[rakirno]'>
 						<input type='hidden' name='id' value='$row[tilaus]'>
 						<input type='hidden' name='tunnukset' value='$row[tilaus]'>
-						<input type='submit' value='".t("Muokkaa rahtikirjaa")."'>
-						</form>
-						</td>";
+						<td class='back'><input type='submit' value='".t("Muokkaa rahtikirjaa")."'></td>
+						</form>";
 
 				if ($row["tilaus"] != $edotsikkonro) {
-					echo "<td class='back'>
-							<form method='post' action='$PHP_SELF'>
+					echo "<form method='post' action='$PHP_SELF'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='id' value='$row[tilaus]'>
 							<input type='hidden' name='tunnukset' value='$row[tilaus]'>
-							<input type='submit' value='".t("Lisää rahtikirja tilaukselle")."'>
-							</form>
-							</td>";
+							<td class='back'><input type='submit' value='".t("Lisää rahtikirja tilaukselle")."'></td>
+							</form>";
 				}
 				else {
 					echo "<td class='back'></td>";

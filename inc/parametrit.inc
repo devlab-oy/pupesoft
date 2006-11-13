@@ -210,20 +210,32 @@ if ($session != '') {
 		header('Content-Disposition: inline; filename="pupesoft.pdf"');
 	}
 	elseif($lataa_tiedosto == 1) {
-		header('HTTP/1.1 200 OK');
-		header('Status: 200 OK');
-		header('Accept-Ranges: bytes');
-		header('Content-Description: File Transfer'); 
-		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-		header('Content-Transfer-Encoding: Binary');
-		header('Content-Type: application/force-download');
+		// Kerrotaan selaimelle, että käyttäjän kuuluu downloadata tämä tiedosto
+		// Hardcoodattu polku dataout/
+		
+		if(ini_get('zlib.output_compression')) {
+		  ini_set('zlib.output_compression', 'Off');
+		}
+		
+		header("Pragma: public");
+		header("Expires: 0");
+		header("HTTP/1.1 200 OK");
+		header("Status: 200 OK");
+		header("Accept-Ranges: bytes");
+		header("Content-Description: File Transfer");
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header("Cache-Control: private", false);
+		header("Content-Type: application/force-download");
 		
 		if ($filenimi != '') {
-			header('Content-Disposition: inline; filename='.$kaunisnimi);		
+			header('Content-Disposition: attachment; filename='.$kaunisnimi);		
 		}
 		else {
-			header('Content-Disposition: inline; filename=pupesoft.txt');	
+			header('Content-Disposition: attachment; filename=pupesoft.txt');	
 		}
+				
+		header("Content-Transfer-Encoding: binary");
+		header("Content-Length: ".filesize("dataout/".$filenimi));
 	}
 	elseif ($phpnimi != 'index.php') {
 		

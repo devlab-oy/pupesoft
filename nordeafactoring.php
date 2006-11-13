@@ -6,7 +6,7 @@
 	require('inc/parametrit.inc');
 	
 	if ($tee == "lataa_tiedosto") {
-		echo file_get_contents($filenimi);
+		readfile("dataout/".$filenimi);
 	}
 	else {
 		echo "<font class='head'>".t("Nordea Factoring siirtotiedosto").":</font><hr><br>";
@@ -284,9 +284,7 @@
 			$ulos .= "\r\n";
 			
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$filenimi = "dataout/Nordeasiirto-$factoringsiirtonumero-".md5(uniqid(mt_rand(), true)).".txt";
+			$filenimi = "Nordeasiirto-$factoringsiirtonumero.txt";
 			
 			//kirjoitetaan faili levylle..
 			$fh = fopen($filenimi, "w");
@@ -304,7 +302,7 @@
 			echo "<tr><th>Tallenna siirtoaineisto levylle:</th>";
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='".substr($filenimi,8)."'>";
+			echo "<input type='hidden' name='kaunisnimi' value='SOLOMYSA.DAT'>";
 			echo "<input type='hidden' name='filenimi' value='$filenimi'>";
 			echo "<td><input type='submit' value='Tallenna'></td></form>";
 			echo "</tr></table>";

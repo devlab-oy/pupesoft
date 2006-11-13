@@ -1,12 +1,13 @@
 <?php
 
-	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-	if($_POST["filenimi"] != '') $kaunisnimi=$_POST["filenimi"];
+	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+	if($_POST["filenimi"] != '') $kaunisnimi = "SOLOMYSA.DAT";
 
 	require("inc/parametrit.inc");
 
 	if ($tee == "lataa_tiedosto") {
-		echo file_get_contents("dataout/".$filenimi);
+		readfile("dataout/".$filenimi);
+		exit;
 	}
 	else {
 	

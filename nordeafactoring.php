@@ -125,7 +125,8 @@
 					DATE_FORMAT(lasku.tapvm, '%y%m%d') tapvm,
 					DATE_FORMAT(lasku.erpcm, '%y%m%d') erpcm,
 					lasku.tunnus,
-					lasku.valkoodi
+					lasku.valkoodi,
+					lasku.liitostunnus
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='N'
 					WHERE lasku.yhtio	= '$kukarow[yhtio]' 
@@ -156,11 +157,19 @@
 							and tunnus		= '$laskurow[tunnus]'";
 				$dresult = mysql_query ($dquery) or pupe_error($dquery);
 				
+				
+				$query  = "	SELECT *
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$laskurow[liitostunnus]'";
+				$asires = mysql_query($query) or pupe_error($query);
+				$asirow = mysql_fetch_array($asires);
+				
 				//luodaan ostajatietue
 				$ulos .= sprintf ('%-4.4s', 	"KRFL");										//sovellustunnus
 				$ulos .= sprintf ('%01d',	 	"1");											//tietuetunnus
-				$ulos .= sprintf ('%06d',	 	$yhtiorow["rahoitussopnro"]);					//sopimusnumero
-				$ulos .= sprintf ('%06d',	 	$laskurow["asiakasnro"]);						//ostajan numero aka asiakasnumero
+				$ulos .= sprintf ('%06d',	 	$yhtiorow["factoringsopimus"]);					//sopimusnumero
+				$ulos .= sprintf ('%06d',	 	$asirow["asiakasnro"]);							//ostajan numero aka asiakasnumero
 				$ulos .= sprintf ('%-4.4s', 	"");
 				$ulos .= sprintf ('%-10.10s', 	str_replace('-','',$laskurow["ytunnus"]));		//ostajan ytunnus
 				$ulos .= sprintf ('%-30.30s', 	$laskurow["nimi"]);								//ostajan nimi
@@ -190,8 +199,8 @@
 				//luodaan laskutietue
 				$ulos .= sprintf ('%-4.4s', 	"KRFL");													//sovellustunnus
 				$ulos .= sprintf ('%01d',	 	"3");														//tietuetunnus
-				$ulos .= sprintf ('%06d',	 	$yhtiorow["rahoitussopnro"]);								//sopimusnumero
-				$ulos .= sprintf ('%06d',	 	$laskurow["asiakasnro"]);									//ostajan numero aka asiakasnumero
+				$ulos .= sprintf ('%06d',	 	$yhtiorow["factoringsopimus"]);								//sopimusnumero
+				$ulos .= sprintf ('%06d',	 	$asirow["asiakasnro"]);										//ostajan numero aka asiakasnumero
 				$ulos .= sprintf ('%-4.4s',   	"");														//varalla
 				$ulos .= sprintf ('%010d',	 	$laskurow["laskunro"]);										//laskunro
 				$ulos .= sprintf ('%06d',	 	$laskurow["tapvm"]);										//laskun päiväys
@@ -218,7 +227,7 @@
 				$ulos .= sprintf ('%010d',  	"0");
 				$ulos .= sprintf ('%04d',   	"0");														//alv (ei välitetä)
 				$ulos .= sprintf ('%-30.30s', 	$laskurow["toim_nimi"]);									//toimituspaikan nimi
-				$ulos .= sprintf ('%06d',	 	$laskurow["asiakasnro"]);									//asiakasnro
+				$ulos .= sprintf ('%06d',	 	$asirow["asiakasnro"]);										//asiakasnro
 				$ulos .= sprintf ('%010d', 		str_replace('-','',$laskurow["ytunnus"]));					//toim  ytunnus
 				$ulos .= sprintf ('%-20.20s', 	$laskurow["toim_osoite"]);									//toim osoite
 				$ulos .= sprintf ('%-20.20s', 	$laskurow["toim_postino"]." ".$laskurow["toim_postitp"]);	//toim postitp ja postino

@@ -7,8 +7,6 @@
 	$pdf2->set_default('margin-left', 0);
 	$pdf2->set_default('margin-right', 0);
 
-
-
 	$pdf2->enable('import');
 
 	ob_start();
@@ -148,7 +146,7 @@
 					round(sum((tilausrivi.rivihinta/$laskurow[summa])*$kilot),0) nettop
 					FROM tilausrivi
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = ''
-					LEFT JOIN tullinimike ON tuote.tullinimike1 = tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
+					JOIN tullinimike ON tuote.tullinimike1 = tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tuote.tullinimike1!=''
 					WHERE tilausrivi.uusiotunnus	= '$uusiotunnus'
 					and tilausrivi.yhtio			= '$kukarow[yhtio]'
 					and tilausrivi.kpl				> 0
@@ -650,9 +648,6 @@
 			$pdf2->draw_text(330,  300, "ATK TULLAUS", 									$pages[0], $kymppi);
 			$pdf2->draw_text(330,  288, $laskurow["tullausnumero"], 					$pages[0], $kymppi);
 		}
-
-		$sadilmo =  $pdf2->generate();
-
 	}
 	else {
 		echo "<font class='error'>".t("Tilausta ei löytynyt")."!<br>$query<br></font>";

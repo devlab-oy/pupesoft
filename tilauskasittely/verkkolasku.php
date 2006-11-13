@@ -666,10 +666,28 @@
 				$lrow  = mysql_fetch_array($result);
 
 				$lasno = $lrow[0] + 1;
-				$viite = $lasno;
-
+				
+				// Tutkitaan onko ketju Nordean factorinkia
+				$query  = "	SELECT maksuehto.factoring 
+							FROM lasku, maksuehto
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.tunnus in ($tunnukset)
+							and lasku.yhtio = maksuehto.yhtio
+							and lasku.maksuehto = maksuehto.tunnus
+							and maksuehto.factoring = 'N'
+							group by (maksuehto.factoring)";
+				$mkjres = mysql_query($query) or pupe_error($query);
+				
+				//Nordean viitenumero rakentuu hieman eri lailla ku normmalisti
+				if (mysql_num_rows($mkjres) == 1) {
+					$viite = $yhtiorow["factoringsopimus"]."0".sprintf('%08d', $lasno);
+				}
+				else {
+					$viite = $lasno;
+				}
+				
 				require('../inc/generoiviite.inc');
-
+				
 				// p‰ivitet‰‰n ketjuun kuuluville laskuille sama laskunumero ja viite..
 				$query  = "update lasku set laskunro='$lasno', viite='$viite' where yhtio='$kukarow[yhtio]' and tunnus in ($tunnukset)";
 				$result = mysql_query($query) or pupe_error($query);

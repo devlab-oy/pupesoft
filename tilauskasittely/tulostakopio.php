@@ -889,7 +889,7 @@
 
 				if ($yhtiorow['laskutyyppi'] == 0) {
 					require_once("tulosta_lasku.inc");
-					$laskujarj = 'otunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno';
+					$laskujarj = 'otunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, tunnus';
 				}
 				else {
 					require_once("tulosta_lasku_plain.inc");
@@ -916,9 +916,7 @@
 					exit;
 				}
 				
-				$kala = 540;
 				$sivu = 1;
-				$lask = 1;
 				
 				// aloitellaan laskun teko
 				$firstpage = alku();
@@ -928,7 +926,7 @@
 				}
 
 				loppu($firstpage);
-				alvierittely ($firstpage, $kala);
+				alvierittely ($firstpage);
 
 				//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
@@ -959,6 +957,7 @@
 				system("rm -f $pdffilenimi");
 				
 				unset($pdf);
+				unset($firstpage);
 
 				if ($tee != 'NAYTATILAUS') {
 					echo t("Lasku tulostuu")."...<br>";

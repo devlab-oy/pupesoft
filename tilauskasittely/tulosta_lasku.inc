@@ -17,7 +17,6 @@ $pieni_boldi["height"] = 8;
 $pieni_boldi["font"] = "Times-Bold";
 
 // defaultteja
-$kala = 540;
 $sivu = 1;
 
 // laskun alku ja loppu functiot...
@@ -176,63 +175,67 @@ if (!function_exists('alku')) {
 
 		$pdf->draw_text(310, 595, t("Mahdolliset muistutukset tehtävä 8 päivän kuluessa", $kieli), $firstpage, $pieni);
 
-		//Laskurivien otsikkotiedot
-		//eka rivi
-		$pdf->draw_text(35,  572, t("Tuotenimi", $kieli),		$firstpage, $pieni);
-		$pdf->draw_text(190, 572, t("Tuotenumero", $kieli),		$firstpage, $pieni);
-		$pdf->draw_text(290, 572, t("Määrä", $kieli),			$firstpage, $pieni);
-		$pdf->draw_text(350, 572, t("A-hinta", $kieli),			$firstpage, $pieni);
-		$pdf->draw_text(410, 572, t("Alennus", $kieli)."-%",	$firstpage, $pieni);
-		$pdf->draw_text(470, 572, t("Veroton arvo", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(530, 572, t("Alv", $kieli)."-%",		$firstpage, $pieni);
-		//toka rivi
-		$pdf->draw_text(35,  563, t("Tilausnumero", $kieli)."/".t("Lisätietoja", $kieli),		$firstpage, $pieni);
-		$pdf->draw_text(190, 563, "",							$firstpage, $pieni);
-		$pdf->draw_text(290, 563, t("Yksikkö", $kieli),			$firstpage, $pieni);
-		$pdf->draw_text(350, 563, t("Toimituspvm", $kieli),		$firstpage, $pieni);
-		$pdf->draw_text(410, 563, "",							$firstpage, $pieni);
-		$pdf->draw_text(470, 563, t("Verollinen arvo", $kieli),	$firstpage, $pieni);
-
-		//tehdään viestejä ja lasketaan niitten pituuksia
-		if (trim($laskurow['sisviesti1']) != '') {
-
-			$pdf->draw_text(35, 546, t("Huomautukset", $kieli).":", $firstpage, $norm);
-			$pohja = $pdf->draw_paragraph(543, 35, 60, 550, trim($laskurow["sisviesti1"])."\n", $firstpage, $norm); // top, left, bottom, right
-
-			$laskurow['sisviesti1'] = "";
-
-			if (!is_numeric($pohja)) {
-				$laskurow['sisviesti1'] = $pohja;
-				loppu($firstpage, 0);
-				$firstpage = alku();
+		//Tulostetaan laskun kommentti
+		if (trim($laskurow['sisviesti1']) != '') {					
+			$pdf->draw_text(35, 577, t("Huomautukset", $kieli).":", $firstpage, $norm);
+			
+			$kommentit = explode("\n", trim($laskurow['sisviesti1']));
+			
+			$pohja = 565;
+						
+			foreach($kommentit as $kommentti) {
+				$pdf->draw_text(35, $pohja, trim($kommentti), $firstpage, $norm);
+				$pohja = $pohja - 10;
 			}
-			else {
-				// viivat rivien väliin...
-				$x[0] = 35;
-				$x[1] = 550;
-				$y[0] = $y[1] = $pohja - 10;
-				$pdf->draw_line($x, $y, $firstpage, $rectparam);
-				$kala = $pohja - 25;
-			}
-
+			
+			// viivat rivien väliin...
+			$x[0] = 35;
+			$x[1] = 550;
+			$y[0] = $y[1] = $pohja+5;
+			$pdf->draw_line($x, $y, $firstpage, $rectparam);
+			
+			$kala = $pohja - 35;
+			
+		}
+		else {
+			$pohja = 582;
+			$kala  = 540;
 		}
 
+		//Laskurivien otsikkotiedot
+		//eka rivi
+		
+		$pdf->draw_text(35,  $pohja-10, t("Tuotenimi", $kieli),		$firstpage, $pieni);
+		$pdf->draw_text(190, $pohja-10, t("Tuotenumero", $kieli),		$firstpage, $pieni);
+		$pdf->draw_text(290, $pohja-10, t("Määrä", $kieli),			$firstpage, $pieni);
+		$pdf->draw_text(350, $pohja-10, t("A-hinta", $kieli),			$firstpage, $pieni);
+		$pdf->draw_text(410, $pohja-10, t("Alennus", $kieli)."-%",	$firstpage, $pieni);
+		$pdf->draw_text(470, $pohja-10, t("Veroton arvo", $kieli),	$firstpage, $pieni);
+		$pdf->draw_text(530, $pohja-10, t("Alv", $kieli)."-%",		$firstpage, $pieni);
+		//toka rivi
+		$pdf->draw_text(35,  $pohja-19, t("Tilausnumero", $kieli)."/".t("Lisätietoja", $kieli),		$firstpage, $pieni);
+		$pdf->draw_text(190, $pohja-19, "",							$firstpage, $pieni);
+		$pdf->draw_text(290, $pohja-19, t("Yksikkö", $kieli),			$firstpage, $pieni);
+		$pdf->draw_text(350, $pohja-19, t("Toimituspvm", $kieli),		$firstpage, $pieni);
+		$pdf->draw_text(410, $pohja-19, "",							$firstpage, $pieni);
+		$pdf->draw_text(470, $pohja-19, t("Verollinen arvo", $kieli),	$firstpage, $pieni);
+	
 		return($firstpage);
 	}
 }
 
 if (!function_exists('rivi')) {
 	function rivi ($firstpage) {
-		global $yhtiorow, $kukarow, $kutsuja, $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $summa, $arvo, $pieni, $lask, $kieli, $laskurow;
+		global $yhtiorow, $kukarow, $kutsuja, $firstpage, $pdf, $row, $kala, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $lask, $kieli, $laskurow;
 
+		
+		
 		if ($kala <= 180) {
 			$sivu++;
 
 			loppu($firstpage);
 
 			$firstpage = alku();
-
-			$kala = 540;
 		}
 
 		$rivihinta_veroton = 0;
@@ -325,15 +328,23 @@ if (!function_exists('rivi')) {
 			$row["kommentti"] .= "# $sarjarow[sarjanumero]\n";
 		}
 		
-		if ($row["kommentti"] != ''){
-			$pohja = $pdf->draw_paragraph($kala+8, 35, 160, 280, $row["otunnus"]."\n".$row["kommentti"]."\n".$marginaalilisa, $firstpage, $pieni);
-
-			if (!is_numeric($pohja)) {
-				$pohja = 160;
+		if (trim($row["kommentti"]) != '') {
+			
+			$kommentit = explode("\n", trim($row["kommentti"]));
+			
+			$pohja = $kala;
+									
+			foreach($kommentit as $kommentti) {
+				$pdf->draw_text(35, $pohja, $row["otunnus"]."/".$kommentti, $firstpage, $pieni);
+				$pohja = $pohja - 10;
 			}
+			
+			$pohja += 10;		
 		}
 		else {
-			$pdf->draw_text(35,  $kala, $row["otunnus"],	$firstpage, $pieni);
+			$pdf->draw_text(35, $kala, $row["otunnus"],	$firstpage, $pieni);
+			
+			$pohja = $kala;
 		}
 
 		$pdf->draw_text(290, $kala, $row["yksikko"],	$firstpage, $pieni);
@@ -353,7 +364,7 @@ if (!function_exists('rivi')) {
 			$pdf->draw_text(470, $kala, $verollinenhinta, $firstpage, $pieni);
 		}
 
-		if ($pohja > 0) {
+		if ($pohja < $kala) {
 			$kala = $pohja;
 		}
 
@@ -475,16 +486,16 @@ if (!function_exists('loppu')) {
 }
 
 if (!function_exists('alvierittely')) {
-	function alvierittely ($firstpage, $kala) {
-		global $yhtiorow, $kukarow, $kutsuja, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kala, $lask, $kieli, $boldi;
+	function alvierittely ($firstpage) {
+		global $yhtiorow, $kukarow, $kutsuja, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $summa, $arvo, $kala, $kieli, $boldi;
 
-		if ($lask >= 29) {
-			$sivu++;
+		if ($kala <= 200) {
 			loppu($firstpage);
-			$firstpage = alku();
-			$kala = 540;
-			$lask = 1;
-			$loppumyos = 1;
+			
+			$sivu++;
+			$loppumyos 	= 1;
+
+			$firstpage 	= alku();
 		}
 
 		$kala -=10;

@@ -785,6 +785,7 @@
 				$uusiotunnus = $laskurow["tunnus"];
 
 				require_once('../pdflib/phppdflib.class.php');
+				
 				require('tulosta_sadvientiilmo.inc');
 
 				//keksitään uudelle failille joku varmasti uniikki nimi:
@@ -816,15 +817,8 @@
 				system("rm -f $pdffilenimi");
 
 				if ($tee != 'NAYTATILAUS') {
-					echo t("Työmääräys tulostuu")."...<br>";
-					$tee = '';
+					echo t("SAD-lomake tulostuu")."...<br>";
 				}
-
-
-				//poistetaan tmp file samantien kuleksimasta...
-				system("rm -f $pdffilenimi");
-
-				echo t("SAD-lomake tulostuu")."...<br>";
 				$tee = '';
 			}
 
@@ -861,7 +855,9 @@
 				//poistetaan tmp file samantien kuleksimasta...
 				system("rm -f $pdffilenimi");
 
-				echo t("Vientierittely tulostuu")."...<br>";
+				if ($tee != 'NAYTATILAUS') {
+					echo t("Vientierittely tulostuu")."...<br>";
+				}
 				$tee = '';
 			}
 

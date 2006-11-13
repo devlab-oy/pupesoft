@@ -366,7 +366,7 @@
 
 		$haku = '';
 
-		if (is_string($etsi) and $etsi != '') {
+		if (!is_numeric($etsi) and $etsi != '') {
 			$haku .= "and lasku.nimi LIKE '%$etsi%'";
 		}
 

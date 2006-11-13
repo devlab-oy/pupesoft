@@ -46,7 +46,7 @@
 						LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila = 'L'
-						and lasku.alatila = 'C'
+						and lasku.alatila in ('C','E')
 						and lasku. tunnus in ($tunnukset)
 						HAVING rahtikirjat.otsikkonro is null and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')";
 			$tilre = mysql_query($query) or pupe_error($query);

@@ -213,6 +213,8 @@ if ($session != '') {
 		header('HTTP/1.1 200 OK');
 		header('Status: 200 OK');
 		header('Accept-Ranges: bytes');
+		header('Content-Description: File Transfer'); 
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Content-Transfer-Encoding: Binary');
 		header('Content-Type: application/force-download');
 		

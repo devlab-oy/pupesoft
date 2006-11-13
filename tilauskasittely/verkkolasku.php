@@ -1527,6 +1527,10 @@
 								ORDER BY $laskujarj";
 					$result = mysql_query($query) or pupe_error($query);
 
+					$kala = 540;
+					$sivu = 1;
+					$lask = 1;
+					
 					// aloitellaan laskun teko
 					$firstpage = alku();
 
@@ -1562,8 +1566,7 @@
 					$fh = fopen($pdffilenimi, "w");
 					if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 					fclose($fh);
-
-
+					
 					//haetaan varaston tiedot
 					if($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA") {
 						if ($varasto != 0) {
@@ -1606,7 +1609,7 @@
 
 					//poistetaan tmp file samantien kuleksimasta...
 					system("rm -f $pdffilenimi");
-
+					unset($pdf);
 
 					if ($laskurow["vienti"] == "K" and $hyvitys == "EI") {
 
@@ -1629,6 +1632,9 @@
 
 						//poistetaan tmp file samantien kuleksimasta...
 						system("rm -f $pdffilenimi");
+						
+						unset($pdf2);
+						unset($sadilmo);
 
 						$tulos_ulos .= t("SAD-lomake tulostuu")."...<br>\n";
 					}
@@ -1655,6 +1661,8 @@
 						system("rm -f $pdffilenimi");
 
 						$tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
+						
+						unset($Xpdf);
 					}
 
 					// ei exhaustata muistia

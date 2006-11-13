@@ -151,8 +151,8 @@
 
 				echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'></td></tr>";
 				echo "<tr><th>".t("Lisätieto")."</th><td><input type='text' size='30' name='lisatieto' value='$muutarow[lisatieto]'></td>";
-				echo "<td class='back'><input type='submit' name='PAIVITA' value='".t("Päivitä")."'></form></td>";
-				echo "</tr></table><br><br>";
+				echo "<td class='back'><input type='submit' name='PAIVITA' value='".t("Päivitä")."'></td>";
+				echo "</tr></form></table><br><br>";
 
 				if ($muutarow["perheid"] == $muutarow["tunnus"] or $muutarow["perheid"] == 0) {
 					$voidaan_liittaa = "YES";
@@ -564,7 +564,8 @@
 
 		echo "<td>$lasrow2[tunnus] $lasrow2[nimi]</td>";
 
-		echo "<td>$sarjarow[lisatieto]</td>";
+		//echo "<td>$sarjarow[lisatieto]</td>";
+		echo "<td></td>";
 
 		if (($sarjarow[$tunnuskentta] == 0 or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
 			$chk = "";
@@ -693,7 +694,8 @@
 				<input type='hidden' name='toiminto' value='LISAA'>";
 		echo "<td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td></tr>";
 		echo "<tr><th>".t("Lisätieto")."</th><td><input type='text' size='30' name='lisatieto' value='$lisatieto'></td>";
-		echo "<td class='back'><input type='submit' value='".t("Lisää")."'></form></td>";
+		echo "<td class='back'><input type='submit' value='".t("Lisää")."'></td>";
+		echo "</form>";
 		echo "</tr></table>";
 	}
 

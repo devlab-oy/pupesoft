@@ -1,5 +1,9 @@
 <?php
 
+if ($tulostakopio == 'kylla') {
+	$lotsikot = $otsikot;
+}
+
 // rahtikirjanumero on ensimmäisen tilauksen tilausnumero...
 $rahtikirjanro = $lotsikot[0];
 

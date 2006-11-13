@@ -194,7 +194,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(470, 563, t("Verollinen arvo", $kieli),	$firstpage, $pieni);
 
 		//tehdään viestejä ja lasketaan niitten pituuksia
-		if ($laskurow['sisviesti1'] != '') {
+		if (trim($laskurow['sisviesti1']) != '') {
 
 			$pdf->draw_text(35, 546, t("Huomautukset", $kieli).":", $firstpage, $norm);
 			$pohja = $pdf->draw_paragraph(543, 35, 60, 550, trim($laskurow["sisviesti1"])."\n", $firstpage, $norm); // top, left, bottom, right

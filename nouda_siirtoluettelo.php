@@ -10,9 +10,6 @@
 		exit;
 	}
 	else {
-	
-
-
 		echo "<font class='head'>".t("Nouda tallennettu siirtoluettelo")."</font><hr><br><br>";
 
 		$handle = opendir("dataout");

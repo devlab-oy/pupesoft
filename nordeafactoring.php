@@ -7,6 +7,7 @@
 	
 	if ($tee == "lataa_tiedosto") {
 		readfile("dataout/".$filenimi);
+		exit;
 	}
 	else {
 		echo "<font class='head'>".t("Nordea Factoring siirtotiedosto").":</font><hr><br>";
@@ -287,7 +288,7 @@
 			$filenimi = "Nordeasiirto-$factoringsiirtonumero.txt";
 			
 			//kirjoitetaan faili levylle..
-			$fh = fopen($filenimi, "w");
+			$fh = fopen("dataout/".$filenimi, "w");
 			if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus epäonnistui $filenimi");
 			fclose($fh);
 			

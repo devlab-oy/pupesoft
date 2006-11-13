@@ -6,7 +6,8 @@
 	require("inc/parametrit.inc");
 
 	if ($tee == "lataa_tiedosto") {
-		echo file_get_contents("dataout/".$filenimi);
+		readfile("dataout/".$filenimi);
+		exit;
 	}
 	else {
 	
@@ -41,7 +42,7 @@
 		while ($file = readdir($handle)) {
 			
 			if (($kotimaa == "FI" and substr($file,0, 4) == "lm03") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
-				echo "<option value='$file' $sel>".t($file)."</option>";
+				echo "<option value='$file' $sel>$file</option>";
 			}
 		}
 		closedir($handle);
@@ -70,7 +71,7 @@
 		while ($file = readdir($handle)) {
 			
 			if (($kotimaa == "FI" and substr($file,0, 4) == "lum3") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
-				echo "<option value='$file' $sel>".t($file)."</option>";
+				echo "<option value='$file' $sel>$file</option>";
 			}
 		}
 		closedir($handle);

@@ -408,6 +408,10 @@
 									WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus' and tyyppi in ('L','G')";
 						$tresult = mysql_query($query) or pupe_error($query);
 					}
+					
+					//jos ollaan p‰‰sty n‰in pitk‰lle voidaan varmaan olettaa ett‰ $varaosavirheen voi yhjent‰‰
+					$varaosavirhe = '';
+					
 				}
 				else {
 					echo t("Syˆtit liian ison numeron! Ei voitu tehd‰ mit‰‰n").".<br>";

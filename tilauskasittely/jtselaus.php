@@ -57,9 +57,11 @@
 		
 		foreach($rivitunnus as $tunnus) {									
 			if ($kpl[$tunnus] > 0 or $loput[$tunnus] != '') {						
-				//mennään aina tänne ja sit tuolla inkissä katotaan aiheuttaako toimenpiteitä.
-				$mista = 'jtrivit_tilaukselle.inc';
-				require("laskealetuudestaan.inc");
+				//mennään aina tänne, paitsi varastosiirroissa ja sit tuolla inkissä katotaan aiheuttaako toimenpiteitä.
+				if ($toim != 'SIIRTOLISTA') {
+					$mista = 'jtrivit_tilaukselle.inc';
+					require("laskealetuudestaan.inc");
+				}
 				
 				require ('tee_jt_tilaus.inc');				
 			}
@@ -309,8 +311,12 @@
 		if ($tuotenumero != '') {
 			$tuotlisa = " and tilausrivi.tuoteno='$tuotenumero' ";
 		}
-		
+						
+		if ($toim == 'SIIRTOLISTA' and $laskurow['varasto'] > 0) {
+			$siirtolisa = " and lasku.varasto = '$laskurow[varasto]' ";
+		}
 	
+
 		$query = "";
 	
 		if ($automaaginen == '') {
@@ -331,7 +337,7 @@
 		if ($tyyppi == 'P') {
 			$order = " ORDER BY lasku.luontiaika, tuote.tuoteno, lasku.ytunnus ";
 		}
-	
+
 		if (($tyyppi == 'A') or ($tyyppi == 'T') or ($tyyppi == 'P')) {
 			//haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
 			$query = "	SELECT distinct otunnus, if(perheid!=0, concat('JOPERHE',tilausrivi.perheid), concat('EIPERHE',tilausrivi.tunnus)) perheid, tilaajanrivinro, tilausrivi.tuoteno 
@@ -351,6 +357,7 @@
 						$tolisa2
 						$aslisa
 						$tuotlisa
+						$siirtlisa
 						$order
 						$limit";
 			$isaresult = mysql_query($query) or pupe_error($query);
@@ -457,7 +464,7 @@
 									if (mysql_num_rows($vares)!=0) {
 										$varow = mysql_fetch_array($vares);
 	
-										if ($tilaus_on_jo == "") {
+										if ($tilaus_on_jo == "" or is_array($varastosta)) {
 											foreach ($varastosta as $vara) {
 												if ($varow["tunnus"] == $vara) {
 													if ($saldo[$i] < 0) {

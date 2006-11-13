@@ -2447,6 +2447,14 @@ if ($tee == '') {
 				$toimi			= "";
 				$tilaus_on_jo 	= "KYLLA";
 				$superit		= "";
+				
+				if ($toim == 'SIIRTOLISTA') {
+					if ($laskurow['varasto'] > 0) {
+						$varastosta = array();
+						$varastosta[] = $laskurow["varasto"];
+					}
+					$toimi = "JOO";
+				}
 
 				require ('jtselaus.php');
 			}

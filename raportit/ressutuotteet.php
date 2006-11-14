@@ -23,7 +23,7 @@
 		else {
 			$nollatlisa = " tuotepaikat.saldo ";
 		}
-#TODO t‰m‰ palauttaa varaston v‰‰rin		
+		
 		$query = "	SELECT tuotepaikat.tuoteno, 
 					sum(if(tuotepaikat.oletus='X',tuotepaikat.saldo,0)) oletuspaikalla, 
 					sum(if(tuotepaikat.oletus='',$nollatlisa,0)) muillapaikoilla, 
@@ -32,10 +32,8 @@
 					FROM tuotepaikat
 					LEFT JOIN varastopaikat
 					ON varastopaikat.yhtio = tuotepaikat.yhtio
-					and varastopaikat.alkuhyllyalue	 <= tuotepaikat.hyllyalue
-					and varastopaikat.loppuhyllyalue >= tuotepaikat.hyllyalue
-					and varastopaikat.alkuhyllynro	 <= tuotepaikat.hyllynro
-					and varastopaikat.loppuhyllynro	 >= tuotepaikat.hyllynro
+					and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+					and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					WHERE tuotepaikat.yhtio='$kukarow[yhtio]'
 					$varastot
 					GROUP BY tuotepaikat.tuoteno
@@ -46,7 +44,6 @@
 		echo "	<table><tr><th>Tuoteno</th><th>Nimitys</th><th>Toim_tuoteno</th><th>Varastopaikka</th><th>Oletus</th><th>Saldo</th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
-#TODO varastov‰‰rin
 			$query = "	SELECT tuotepaikat.tuoteno, 
 						concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka, 
 						tuotepaikat.saldo, tuotepaikat.oletus,
@@ -56,10 +53,8 @@
 						JOIN tuote ON tuote.tuoteno=tuotepaikat.tuoteno and tuote.yhtio=tuotepaikat.yhtio
 						LEFT JOIN varastopaikat
 						ON varastopaikat.yhtio = tuotepaikat.yhtio
-						and varastopaikat.alkuhyllyalue	 <= tuotepaikat.hyllyalue
-						and varastopaikat.loppuhyllyalue >= tuotepaikat.hyllyalue
-						and varastopaikat.alkuhyllynro	 <= tuotepaikat.hyllynro
-						and varastopaikat.loppuhyllynro	 >= tuotepaikat.hyllynro
+						and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+						and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 						WHERE tuotepaikat.yhtio='$kukarow[yhtio]'
 						and tuotepaikat.tuoteno='$row[tuoteno]'
 						$varastot

@@ -8,23 +8,23 @@
 	if ($tee != '') {
 		echo "<table>";
 
-		$apaikka = substr(strtoupper($ahyllyalue),0,3).sprintf("%05s",$ahyllynro).sprintf("%05s",$ahyllyvali).sprintf("%05s",$ahyllytaso);
-		$lpaikka = substr(strtoupper($lhyllyalue),0,3).sprintf("%05s",$lhyllynro).sprintf("%05s",$lhyllyvali).sprintf("%05s",$lhyllytaso);
+		$apaikka = strtoupper(sprintf("%05s",$ahyllyalue)).strtoupper(sprintf("%05s",$ahyllynro)).strtoupper(sprintf("%05s",$ahyllyvali)).strtoupper(sprintf("%05s",$ahyllytaso));
+		$lpaikka = strtoupper(sprintf("%05s",$lhyllyalue)).strtoupper(sprintf("%05s",$lhyllynro)).strtoupper(sprintf("%05s",$lhyllyvali)).strtoupper(sprintf("%05s",$lhyllytaso));
 
 		$lisa = "";
 
 		if ($toppi != '') {
 			$lisa = " LIMIT $toppi ";
 		}
-#TODO varastopaikkojen zekkaus
+
 		$query = "	SELECT tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tuotepaikat.saldo, tuotepaikat.tunnus paikkatun, tilausrivi.nimitys, count(*) kpl, sum(tilausrivi.kpl) tuokpl
 					FROM tilausrivi, tuotepaikat
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					and tilausrivi.tyyppi='L'
 					and tilausrivi.laskutettuaika >='$vva-$kka-$ppa'
 					and tilausrivi.laskutettuaika <='$vvl-$kkl-$ppl'
-					and concat(upper(tilausrivi.hyllyalue),lpad(tilausrivi.hyllynro ,5,'0'),lpad(tilausrivi.hyllyvali,5,'0'),lpad(tilausrivi.hyllytaso,5,'0')) >= '$apaikka'
-					and concat(upper(tilausrivi.hyllyalue),lpad(tilausrivi.hyllynro ,5,'0'),lpad(tilausrivi.hyllyvali,5,'0'),lpad(tilausrivi.hyllytaso,5,'0')) <= '$lpaikka'
+					and concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) >= '$apaikka'
+					and concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) <= '$lpaikka'
 					and tuotepaikat.yhtio=tilausrivi.yhtio
 					and tuotepaikat.tuoteno=tilausrivi.tuoteno
 					and tuotepaikat.hyllyalue=tilausrivi.hyllyalue

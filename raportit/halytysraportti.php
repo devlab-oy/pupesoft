@@ -458,7 +458,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	}
 	//Ajetaan raportti tuotteittain, varastopaikoittain
 	else {
-#TODO varastopaikkojen zekkaus		
+		
 		$query = "	select
 					tuote.yhtio,
 					tuote.tuoteno,
@@ -481,8 +481,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					$lisaa2
 					JOIN tuotepaikat ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-					and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0'))
-					and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0'))
+					and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+					and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
 					WHERE
 					tuote.$yhtiot
@@ -657,13 +657,12 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
 
 		if ($paikoittain == '') {
-#TODO varastopaikkojen zekkaus			
 			// Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
 			$query = "	SELECT sum(saldo) saldo, varastopaikat.tunnus
 						FROM tuotepaikat
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0'))
-						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0'))
+						and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+						and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 						WHERE tuotepaikat.$varastot_yhtiot
 						and tuotepaikat.tuoteno='$row[tuoteno]'
 						GROUP BY varastopaikat.tunnus
@@ -931,13 +930,12 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
 		//tulostetaan korvaavat
 		while ($korvarow = mysql_fetch_array($korvaresult)) {
-		#TODO varastopaikkojen zekkaus
 			// Korvaavien paikkojen valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
 			$query = "	SELECT sum(saldo) saldo, varastopaikat.tunnus
 						FROM tuotepaikat
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0'))
-						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0'))
+						and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+						and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 						WHERE tuotepaikat.$varastot_yhtiot
 						and tuotepaikat.tuoteno='$korvarow[tuoteno]'
 						GROUP BY varastopaikat.tunnus

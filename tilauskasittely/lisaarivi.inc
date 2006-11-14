@@ -223,17 +223,15 @@
 
 		// Sitten käydään kaikkien tuotteiden saldot läpi kaikilta varastopaikoilta
 		foreach ($kaikkituotteet as $tuoteno) {
-
 			// katotaan jos meillä on tuotteita varaamassa saldoa joiden varastopaikkaa ei enää ole olemassa...
 			$orvot = saldo_myytavissa($tuoteno, "ORVOT") * -1;
-#TODO varastopaikkojen zekkaus
 			// lasketaan saldo tuotepaikoille (ORDER BY TÄRKEE!)
 			$query = "	SELECT tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, tuotepaikat.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, sum(tuotepaikat.saldo) saldo
 						FROM tuote
 						LEFT JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio
-						and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
-						and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))
+						and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+						and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 						WHERE tuote.yhtio='$kukarow[yhtio]'
 						and tuote.tuoteno='$tuoteno'
 						GROUP BY 1,2,3,4,5,6,7,8
@@ -869,12 +867,11 @@
 			else {
 				// haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
 				//jos laskurow[varasto] on setattu niin yritetään löytää paikka siitä varastosta
-#TODO varastopaikkojen zekkaus
 				$query  = "	SELECT tuotepaikat.*, varastopaikat.tunnus varastotunnus
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio
-							and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
-							and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))
+							and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+							and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 							where tuotepaikat.yhtio = '$kukarow[yhtio]'
 							and tuotepaikat.tuoteno = '$trow[tuoteno]'
 							ORDER BY tuotepaikat.oletus DESC";

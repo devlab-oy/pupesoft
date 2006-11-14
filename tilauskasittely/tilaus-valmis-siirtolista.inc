@@ -66,15 +66,12 @@
 			$varasto   = 'x';
 			$edvarasto = 'x';
 
-			while ($row = mysql_fetch_array($result)) {
-#TODO varasto v‰‰rin				
+			while ($row = mysql_fetch_array($result)) {				
 				$query = "	SELECT * 
 							FROM varastopaikat 
 							WHERE yhtio='$kukarow[yhtio]' 
-							and alkuhyllyalue<='$row[hyllyalue]' 
-							and loppuhyllyalue>='$row[hyllyalue]' 
-							and alkuhyllynro<='$row[hyllynro]' 
-							and loppuhyllynro>='$row[hyllynro]'";
+							and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0'))
+							and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0'))";
 				$vares = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($vares)!=0) {

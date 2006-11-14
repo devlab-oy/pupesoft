@@ -31,14 +31,13 @@
 
 	// Kääydään läpi suoratoimittajan paikat
 	while ($superrow = mysql_fetch_array($superjtres)) {
-#TODO varastopaikkojen zekkaus
 		$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso,
 					if(varastopaikat.maa = '$yhtiorow[maakoodi]', 1,2) as sorttaus, sum(saldo) saldo, varastopaikat.maa varastomaa
 					from tuotepaikat
 					join yhtio on yhtio.yhtio=tuotepaikat.yhtio
 					join varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
-					and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
-					and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))
+					and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+					and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					where tuotepaikat.yhtio 	= '$superrow[tyyppi_tieto]'
 					and tuoteno 				= '$superrow[toim_tuoteno]'
 					and varastopaikat.tyyppi 	= ''

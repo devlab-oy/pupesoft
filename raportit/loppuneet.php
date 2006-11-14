@@ -22,7 +22,7 @@
 			$varastot = substr($varastot,0,-1);
 			$varastot = " and varastopaikat.tunnus in ($varastot) ";
 		}
-#TODO t‰m‰ palauttaa v‰‰rin varaston
+		
 		$query = "	SELECT tuote.osasto, tuote.try, tuotepaikat.tuoteno, tuote.nimitys, tuotepaikat.saldoaika,
 					concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka,
 					tuote.yksikko, tuotepaikat.inventointiaika, tuote.tahtituote, tuote.hinnastoon, tuote.status,
@@ -32,10 +32,8 @@
 					JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio	and tuote.tuoteno=tuotepaikat.tuoteno
 					LEFT JOIN varastopaikat
 					ON varastopaikat.yhtio = tuotepaikat.yhtio
-					and varastopaikat.alkuhyllyalue	 <= tuotepaikat.hyllyalue
-					and varastopaikat.loppuhyllyalue >= tuotepaikat.hyllyalue
-					and varastopaikat.alkuhyllynro	 <= tuotepaikat.hyllynro
-					and varastopaikat.loppuhyllynro	 >= tuotepaikat.hyllynro
+					and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+					and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno
 					WHERE tuotepaikat.yhtio='$kukarow[yhtio]'
 					and saldoaika>='$vv-$kk-$pp 00:00:00'

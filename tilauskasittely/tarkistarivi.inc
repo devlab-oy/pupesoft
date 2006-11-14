@@ -131,13 +131,12 @@
 
 	//Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille
 	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0) {
-#TODO varastopaikkojen zekkaus
 		// tarkistetaan varaston tyyppi
 		$query = "	SELECT *
 					FROM varastopaikat
 					WHERE
-					concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0')) <= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad('$row[hyllynro]' ,5,'0')) and
-					concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0')) >= concat(rpad(upper('$row[hyllyalue]') ,5,'0'),lpad('$row[hyllynro]' ,5,'0'))
+					concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0')) and 
+					concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper('$row[hyllyalue]') ,5,'0'),lpad(upper('$row[hyllynro]') ,5,'0'))
 					and yhtio = '$kukarow[yhtio]'";
 		$varesult = mysql_query($query) or pupe_error($query);
 		$varow = mysql_fetch_array($varesult);
@@ -179,13 +178,13 @@
 		$kotipaikatlask = 0;
 
 		$omapaikatraja 	= 2;
-#TODO varastopaikkojen zekkaus
+
 		//Katotaan voidaanko tämä myydä joltain toiselta paikalta
 		$query = "  select tuotepaikat.*, varastopaikat.tyyppi varastotyyppi, varastopaikat.tunnus varastotunnus, varastopaikat.maa varastomaa
 					FROM tuotepaikat
 					LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio
-					and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
-					and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))
+					and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+					and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					WHERE tuotepaikat.tuoteno	= '$row[tuoteno]'
 					and tuotepaikat.yhtio		= '$kukarow[yhtio]'
 					and tuotepaikat.hyllyalue  != '!!M'";

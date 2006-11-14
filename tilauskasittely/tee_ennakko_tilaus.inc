@@ -174,14 +174,11 @@
 				$total = 0;
 	
 				for ($i=1; $i <= count($hyllyalue); $i++) {
-#TODO palauttaa varaston väärin!	
 					$query = "	SELECT * 
 								FROM varastopaikat 
 								WHERE yhtio			=  '$kukarow[yhtio]' 
-								and alkuhyllyalue	<= '$hyllyalue[$i]' 
-								and loppuhyllyalue	>= '$hyllyalue[$i]' 
-								and alkuhyllynro	<= '$hyllynro[$i]' 
-								and loppuhyllynro	>= '$hyllynro[$i]'";
+								and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper('$hyllyalue[$i]') ,5,'0'),lpad(upper('$hyllynro[$i]') ,5,'0'))
+								and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper('$hyllyalue[$i]') ,5,'0'),lpad(upper('$hyllynro[$i]') ,5,'0'))";
 					$vares = mysql_query($query) or pupe_error($query);
 	
 					if (mysql_num_rows($vares)!=0) {

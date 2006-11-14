@@ -108,15 +108,13 @@
 			$lpaikka = strtoupper($lhyllyalue).sprintf("%05s",$lhyllynro).sprintf("%05s",$lhyllyvali).sprintf("%05s",$lhyllytaso);
 			$lisaa .= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) <= '$lpaikka' ";
 		}
-#TODO palauttaa varaston väärin
+
 		$query = "	SELECT tuotepaikat.*, tuote.nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, varastopaikat.nimitys varasto, tuotepaikat.tunnus paikkatun
 					FROM tuotepaikat
 					LEFT JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-					and varastopaikat.alkuhyllyalue	 <= tuotepaikat.hyllyalue
-					and varastopaikat.loppuhyllyalue >= tuotepaikat.hyllyalue
-					and varastopaikat.alkuhyllynro	 <= tuotepaikat.hyllynro
-					and varastopaikat.loppuhyllynro	 >= tuotepaikat.hyllynro
+					and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+					and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					WHERE
 					tuotepaikat.yhtio='$kukarow[yhtio]'
 					and tuotepaikat.saldo $lisaa2 0

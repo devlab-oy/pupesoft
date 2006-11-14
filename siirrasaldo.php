@@ -104,15 +104,12 @@
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) == 1) {
-#TODO palauttaa varaston väärin
 						//Yritetään päättää lähdepaikka
 						$query = "	SELECT *
 									FROM tuotepaikat
 									WHERE tuoteno = '$tuoteno'
-									and hyllyalue >= '$lahderow[alkuhyllyalue]'
-									and hyllynro  >= '$lahderow[alkuhyllynro]'
-									and hyllyalue <= '$lahderow[loppuhyllyalue]'
-									and hyllynro  <= '$lahderow[loppuhyllynro]'
+									and concat(lpad(upper('$lahderow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$lahderow[alkuhyllynro]')  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+									and concat(lpad(upper('$lahderow[loppuhyllyalue]') ,5,'0'),lpad(upper('$lahderow[loppuhyllynro]') ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 									and yhtio = '$kukarow[yhtio]'
 									ORDER BY oletus desc
 									LIMIT 1";
@@ -131,15 +128,12 @@
 						}
 
 						if ($lahde == 1) {
-#TODO palauttaa vaarston väärin
 							//Yritetään päättää kohdepaikka
 							$query = "	SELECT *
 										FROM tuotepaikat
 										WHERE tuoteno = '$tuoteno'
-										and hyllyalue >= '$kohderow[alkuhyllyalue]'
-										and hyllynro  >= '$kohderow[alkuhyllynro]'
-										and hyllyalue <= '$kohderow[loppuhyllyalue]'
-										and hyllynro  <= '$kohderow[loppuhyllynro]'
+										and concat(lpad(upper('$kohderow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$kohderow[alkuhyllynro]')  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+										and concat(lpad(upper('$kohderow[loppuhyllyalue]') ,5,'0'),lpad(upper('$kohderow[loppuhyllynro]') ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 										and yhtio 	   = '$kukarow[yhtio]'
 										ORDER BY oletus desc
 										LIMIT 1";

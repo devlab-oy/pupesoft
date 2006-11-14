@@ -1278,13 +1278,13 @@
 				else {
 					$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
 				}
-#TODO varastopaikkojen zekkaus
+
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
 				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
 							if(perheid = 0,
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0'),lpad(hyllyvali, 5, '0'),lpad(hyllytaso, 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0'),lpad(hyllyvali, 5, '0'),lpad(hyllytaso, 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+							(select concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+							(select concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
 							) as sorttauskentta,
 							$lisa2
 							FROM tilausrivi, tuote
@@ -1368,13 +1368,13 @@
 				else {
 					$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
 				}
-#TODO varastopaikkojen zekkaus
+				
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
 				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
 							if(perheid = 0,
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0'),lpad(hyllyvali, 5, '0'),lpad(hyllytaso, 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0'),lpad(hyllyvali, 5, '0'),lpad(hyllytaso, 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+								(select concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+								(select concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
 							) as sorttauskentta,
 							$lisa2
 							FROM tilausrivi, tuote

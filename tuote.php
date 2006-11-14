@@ -330,13 +330,13 @@
 						$kokonaissaldo += $saldorow["saldo"];
 						$kokonaishyllyssa += $hyllyssa;
 						$kokonaismyytavissa += $myytavissa;
-#TODO varastopaikkojen zekkaus
+
 						// haetaan varaston nimi
 						$query = "	SELECT *
 									FROM varastopaikat
 									WHERE
-									concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0')) <= concat(rpad(upper('$saldorow[hyllyalue]') ,5,'0'),lpad('$saldorow[hyllynro]' ,5,'0')) and
-									concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0')) >= concat(rpad(upper('$saldorow[hyllyalue]') ,5,'0'),lpad('$saldorow[hyllynro]' ,5,'0'))
+									concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper('$saldorow[hyllyalue]') ,5,'0'),lpad(upper('$saldorow[hyllynro]') ,5,'0')) and
+									concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper('$saldorow[hyllyalue]') ,5,'0'),lpad(upper('$saldorow[hyllynro]') ,5,'0'))
 									and yhtio = '$kukarow[yhtio]'";
 						$varcheckres = mysql_query($query) or pupe_error($query);
 						$varcheckrow = mysql_fetch_array($varcheckres);
@@ -390,13 +390,12 @@
 					$firmanimi = '';
 
 					while ($superrow = mysql_fetch_array($kres)) {
-#TODO varastopaikkojen zekkaus
 						$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso, alkuhyllyalue, loppuhyllyalue, alkuhyllynro, loppuhyllynro, sum(saldo) saldo
 									from tuotepaikat
 									join yhtio on yhtio.yhtio=tuotepaikat.yhtio
 									join varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
-									and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
-									and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))
+									and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+									and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 									where tuotepaikat.yhtio = '$superrow[tyyppi_tieto]'
 									and tuoteno = '$tuoteno'
 									and varastopaikat.tyyppi = ''
@@ -407,7 +406,6 @@
 						if (mysql_num_rows($kres2) > 0) {
 
 							while ($krow  = mysql_fetch_array($kres2)) {
-#TODO varastopaikkojen zekkaus
 								// katotaan ennakkopoistot toimittavalta yritykseltä
 								$query = "	select sum(varattu) varattu
 											from tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -415,8 +413,8 @@
 											tyyppi='L' and
 											varattu>0 and
 											tuoteno='$tuoteno'
-											and concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0')) >= concat(rpad(upper('$krow[alkuhyllyalue]'),  5, '0'),lpad(upper('$krow[alkuhyllynro]'),  5, '0'))
-											and concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0')) <= concat(rpad(upper('$krow[loppuhyllyalue]'), 5, '0'),lpad(upper('$krow[loppuhyllynro]'), 5, '0'))";
+											and concat(lpad(upper('$krow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$krow[alkuhyllynro]')  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+											and concat(lpad(upper('$krow[loppuhyllyalue]') ,5,'0'),lpad(upper('$krow[loppuhyllynro]') ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))";
 								$krtre = mysql_query($query) or pupe_error($query);
 								$krtur = mysql_fetch_array($krtre);
 

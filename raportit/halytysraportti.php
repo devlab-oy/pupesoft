@@ -496,8 +496,14 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	if ($valitut["poistetut"] != '') {
 		echo "<font class='message'>".t("Vain aktiiviset tuotteet").".<br>";
 	}
-
+	
+	
 	echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>";
+	
+	if ($valitut["EHDOTETTAVAT"] != '') {
+		echo "<font class='message'>".t("Josta ne j‰tet‰‰n raportista pois ei ehdoteta ostettavaksi").".<br>";
+	}
+	
 	flush();
 
 	$rivi = "";
@@ -797,104 +803,115 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 			$asrow = mysql_fetch_array($asresult);
 		}
 
-
-
-		// kirjotettaan rivi
-		$rivi .= "\"$row[tuoteno]\"\t";
-
-		if ($paikoittain != '') {
-			$rivi .= "\"$row[varastopaikka]\"\t";
-		}
-
-		if($valitut["SARAKE1"] != '') $rivi .= "\"$row[osasto]\"\t";
-		if($valitut["SARAKE2"] != '') $rivi .= "\"$row[try]\"\t";
-		if($valitut["SARAKE3"] != '') $rivi .= "\"$row[tuotemerkki]\"\t";
-		if($valitut["SARAKE4"] != '') $rivi .= "\"$row[tahtituote]\"\t";
-		if($valitut["SARAKE4B"] != '')$rivi .= "\"$row[status]\"\t";
-		if($valitut["SARAKE5"] != '') $rivi .= str_replace(".",",",$saldo['saldo'])."\t";
-		if($valitut["SARAKE6"] != '') $rivi .= str_replace(".",",",$row['halytysraja'])."\t";
-		if($valitut["SARAKE7"] != '') $rivi .= str_replace(".",",",$ennp['tilattu'])."\t";
-		if($valitut["SARAKE8"] != '') $rivi .= str_replace(".",",",$ennp['ennpois'])."\t";
-		if($valitut["SARAKE9"] != '') $rivi .= str_replace(".",",",$ennp['jt'])."\t";
-		if($valitut["SARAKE10"] != '') $rivi .= "$ostettava1kk\t";
-		if($valitut["SARAKE11"] != '') $rivi .= "$ostettava3kk\t";
-		if($valitut["SARAKE12"] != '') $rivi .= "$ostettava4kk\t";
-		if($valitut["SARAKE13"] != '') $rivi .= "$ostettavahaly\t";
-		if($valitut["SARAKE14"] != '') $rivi .= str_replace(".",",",$row['osto_era'])."\t";
-		if($valitut["SARAKE15"] != '') $rivi .= str_replace(".",",",$row['myynti_era'])."\t";
-		if($valitut["SARAKE16"] != '') $rivi .= "\"$row[toimittaja]\"\t";
-		if($valitut["SARAKE17"] != '') $rivi .= "\"$row[toim_tuoteno]\"\t";
-		if($valitut["SARAKE18"] != '') $rivi .= "\"$row[nimitys]\"\t";
-		if($valitut["SARAKE18B"] != '') $rivi .= "\"$row[toim_nimitys]\"\t";
-		if($valitut["SARAKE19"] != '') $rivi .= str_replace(".",",",$row['ostohinta'])."\t";
-		if($valitut["SARAKE20"] != '') $rivi .= str_replace(".",",",$row['myyntihinta'])."\t";
-
-		if ($row['epakurantti1pvm']!='0000-00-00') {
-			if($valitut["SARAKE21"] != '') $rivi .= "$row[epakurantti1pvm]\t";
+		if ($valitut['EHDOTETTAVAT'] != '') {
+			$rivinaytetaan = 0;			
 		}
 		else {
-			if($valitut["SARAKE21"] != '') $rivi .= "\t";
+			$rivinaytetaan = 1;
+		}
+
+		$apurivi = '';
+		
+		// kirjotettaan rivi
+		$apurivi .= "\"$row[tuoteno]\"\t";
+
+		if ($paikoittain != '') {
+			$apurivi .= "\"$row[varastopaikka]\"\t";
+		}
+
+		if($valitut["SARAKE1"] != '') $apurivi .= "\"$row[osasto]\"\t";
+		if($valitut["SARAKE2"] != '') $apurivi .= "\"$row[try]\"\t";
+		if($valitut["SARAKE3"] != '') $apurivi .= "\"$row[tuotemerkki]\"\t";
+		if($valitut["SARAKE4"] != '') $apurivi .= "\"$row[tahtituote]\"\t";
+		if($valitut["SARAKE4B"] != '')$apurivi .= "\"$row[status]\"\t";
+		if($valitut["SARAKE5"] != '') $apurivi .= str_replace(".",",",$saldo['saldo'])."\t";
+		if($valitut["SARAKE6"] != '') $apurivi .= str_replace(".",",",$row['halytysraja'])."\t";
+		if($valitut["SARAKE7"] != '') $apurivi .= str_replace(".",",",$ennp['tilattu'])."\t";
+		if($valitut["SARAKE8"] != '') $apurivi .= str_replace(".",",",$ennp['ennpois'])."\t";
+		if($valitut["SARAKE9"] != '') $apurivi .= str_replace(".",",",$ennp['jt'])."\t";
+		if($valitut["SARAKE10"] != '') $apurivi .= "$ostettava1kk\t";
+		if($valitut["SARAKE11"] != '') $apurivi .= "$ostettava3kk\t";
+		if($valitut["SARAKE12"] != '') $apurivi .= "$ostettava4kk\t";
+		if($valitut["SARAKE13"] != '') $apurivi .= "$ostettavahaly\t";
+		if($valitut["SARAKE14"] != '') $apurivi .= str_replace(".",",",$row['osto_era'])."\t";
+		if($valitut["SARAKE15"] != '') $apurivi .= str_replace(".",",",$row['myynti_era'])."\t";
+		if($valitut["SARAKE16"] != '') $apurivi .= "\"$row[toimittaja]\"\t";
+		if($valitut["SARAKE17"] != '') $apurivi .= "\"$row[toim_tuoteno]\"\t";
+		if($valitut["SARAKE18"] != '') $apurivi .= "\"$row[nimitys]\"\t";
+		if($valitut["SARAKE18B"] != '') $apurivi .= "\"$row[toim_nimitys]\"\t";
+		if($valitut["SARAKE19"] != '') $apurivi .= str_replace(".",",",$row['ostohinta'])."\t";
+		if($valitut["SARAKE20"] != '') $apurivi .= str_replace(".",",",$row['myyntihinta'])."\t";
+		
+		if ($ostettavahaly > 0 or $ostettava1kk > 0) {
+			$rivinaytetaan++;
+		}
+		
+		if ($row['epakurantti1pvm']!='0000-00-00') {
+			if($valitut["SARAKE21"] != '') $apurivi .= "$row[epakurantti1pvm]\t";
+		}
+		else {
+			if($valitut["SARAKE21"] != '') $apurivi .= "\t";
 		}
 
 		if ($row['epakurantti2pvm']!='0000-00-00') {
-			if($valitut["SARAKE22"] != '') $rivi .= "$row[epakurantti2pvm]\t";
+			if($valitut["SARAKE22"] != '') $apurivi .= "$row[epakurantti2pvm]\t";
 		}
 		else {
-			if($valitut["SARAKE22"] != '') $rivi .= "\t";
+			if($valitut["SARAKE22"] != '') $apurivi .= "\t";
 		}
 
-		if($valitut["SARAKE23"] != '') $rivi .= str_replace(".",",",$osaldo['osaldo'])."\t";
-		if($valitut["SARAKE24"] != '') $rivi .= "\"$osaldo[hyllyalue]-$osaldo[hyllynro]-$osaldo[hyllyvali]-$osaldo[hyllytaso]\"\t";
-		if($valitut["SARAKE25"] != '') $rivi .= str_replace(".",",",$laskurow['puutekpl1'])."\t";
-		if($valitut["SARAKE26"] != '') $rivi .= str_replace(".",",",$laskurow['puutekpl2'])."\t";
-		if($valitut["SARAKE27"] != '') $rivi .= str_replace(".",",",$laskurow['puutekpl3'])."\t";
-		if($valitut["SARAKE28"] != '') $rivi .= str_replace(".",",",$laskurow['puutekpl4'])."\t";
+		if($valitut["SARAKE23"] != '') $apurivi .= str_replace(".",",",$osaldo['osaldo'])."\t";
+		if($valitut["SARAKE24"] != '') $apurivi .= "\"$osaldo[hyllyalue]-$osaldo[hyllynro]-$osaldo[hyllyvali]-$osaldo[hyllytaso]\"\t";
+		if($valitut["SARAKE25"] != '') $apurivi .= str_replace(".",",",$laskurow['puutekpl1'])."\t";
+		if($valitut["SARAKE26"] != '') $apurivi .= str_replace(".",",",$laskurow['puutekpl2'])."\t";
+		if($valitut["SARAKE27"] != '') $apurivi .= str_replace(".",",",$laskurow['puutekpl3'])."\t";
+		if($valitut["SARAKE28"] != '') $apurivi .= str_replace(".",",",$laskurow['puutekpl4'])."\t";
 
 		//Myydyt kappaleet
-		if($valitut["SARAKE29"] != '') $rivi .= str_replace(".",",",$laskurow['kpl1'])."\t";
-		if($valitut["SARAKE30"] != '') $rivi .= str_replace(".",",",$laskurow['kpl2'])."\t";
-		if($valitut["SARAKE31"] != '') $rivi .= str_replace(".",",",$laskurow['kpl3'])."\t";
-		if($valitut["SARAKE32"] != '') $rivi .= str_replace(".",",",$laskurow['kpl4'])."\t";
-		if($valitut["SARAKE33"] != '') $rivi .= str_replace(".",",",$laskurow['EDkpl1'])."\t";
-		if($valitut["SARAKE34"] != '') $rivi .= str_replace(".",",",$laskurow['EDkpl2'])."\t";
-		if($valitut["SARAKE35"] != '') $rivi .= str_replace(".",",",$laskurow['EDkpl3'])."\t";
-		if($valitut["SARAKE36"] != '') $rivi .= str_replace(".",",",$laskurow['EDkpl4'])."\t";
+		if($valitut["SARAKE29"] != '') $apurivi .= str_replace(".",",",$laskurow['kpl1'])."\t";
+		if($valitut["SARAKE30"] != '') $apurivi .= str_replace(".",",",$laskurow['kpl2'])."\t";
+		if($valitut["SARAKE31"] != '') $apurivi .= str_replace(".",",",$laskurow['kpl3'])."\t";
+		if($valitut["SARAKE32"] != '') $apurivi .= str_replace(".",",",$laskurow['kpl4'])."\t";
+		if($valitut["SARAKE33"] != '') $apurivi .= str_replace(".",",",$laskurow['EDkpl1'])."\t";
+		if($valitut["SARAKE34"] != '') $apurivi .= str_replace(".",",",$laskurow['EDkpl2'])."\t";
+		if($valitut["SARAKE35"] != '') $apurivi .= str_replace(".",",",$laskurow['EDkpl3'])."\t";
+		if($valitut["SARAKE36"] != '') $apurivi .= str_replace(".",",",$laskurow['EDkpl4'])."\t";
 
 		//Kulutetut kappaleet
-		if($valitut["SARAKE29K"] != '') $rivi .= str_replace(".",",",$kulutrow['kpl1'])."\t";
-		if($valitut["SARAKE30K"] != '') $rivi .= str_replace(".",",",$kulutrow['kpl2'])."\t";
-		if($valitut["SARAKE31K"] != '') $rivi .= str_replace(".",",",$kulutrow['kpl3'])."\t";
-		if($valitut["SARAKE32K"] != '') $rivi .= str_replace(".",",",$kulutrow['kpl4'])."\t";
-		if($valitut["SARAKE33K"] != '') $rivi .= str_replace(".",",",$kulutrow['EDkpl1'])."\t";
-		if($valitut["SARAKE34K"] != '') $rivi .= str_replace(".",",",$kulutrow['EDkpl2'])."\t";
-		if($valitut["SARAKE35K"] != '') $rivi .= str_replace(".",",",$kulutrow['EDkpl3'])."\t";
-		if($valitut["SARAKE36K"] != '') $rivi .= str_replace(".",",",$kulutrow['EDkpl4'])."\t";
+		if($valitut["SARAKE29K"] != '') $apurivi .= str_replace(".",",",$kulutrow['kpl1'])."\t";
+		if($valitut["SARAKE30K"] != '') $apurivi .= str_replace(".",",",$kulutrow['kpl2'])."\t";
+		if($valitut["SARAKE31K"] != '') $apurivi .= str_replace(".",",",$kulutrow['kpl3'])."\t";
+		if($valitut["SARAKE32K"] != '') $apurivi .= str_replace(".",",",$kulutrow['kpl4'])."\t";
+		if($valitut["SARAKE33K"] != '') $apurivi .= str_replace(".",",",$kulutrow['EDkpl1'])."\t";
+		if($valitut["SARAKE34K"] != '') $apurivi .= str_replace(".",",",$kulutrow['EDkpl2'])."\t";
+		if($valitut["SARAKE35K"] != '') $apurivi .= str_replace(".",",",$kulutrow['EDkpl3'])."\t";
+		if($valitut["SARAKE36K"] != '') $apurivi .= str_replace(".",",",$kulutrow['EDkpl4'])."\t";
 
-		if($valitut["SARAKE37"] != '') $rivi .= str_replace(".",",",$laskurow['kate1'])."\t";
-		if($valitut["SARAKE38"] != '') $rivi .= str_replace(".",",",$laskurow['kate2'])."\t";
-		if($valitut["SARAKE39"] != '') $rivi .= str_replace(".",",",$laskurow['kate3'])."\t";
-		if($valitut["SARAKE40"] != '') $rivi .= str_replace(".",",",$laskurow['kate4'])."\t";
-		if($valitut["SARAKE41"] != '') $rivi .= str_replace(".",",",$katepros1)."\t";
-		if($valitut["SARAKE42"] != '') $rivi .= str_replace(".",",",$katepros2)."\t";
-		if($valitut["SARAKE43"] != '') $rivi .= str_replace(".",",",$katepros3)."\t";
-		if($valitut["SARAKE44"] != '') $rivi .= str_replace(".",",",$katepros4)."\t";
-		if($valitut["SARAKE45"] != '') $rivi .= str_replace(".",",",$row['tuotekerroin'])."\t";
-		if($valitut["SARAKE46"] != '') $rivi .= str_replace(".",",",$ennarow['tilkpl'])."\t";
-		if($valitut["SARAKE47"] != '') $rivi .= "\"$row[aleryhma]\"\t";
+		if($valitut["SARAKE37"] != '') $apurivi .= str_replace(".",",",$laskurow['kate1'])."\t";
+		if($valitut["SARAKE38"] != '') $apurivi .= str_replace(".",",",$laskurow['kate2'])."\t";
+		if($valitut["SARAKE39"] != '') $apurivi .= str_replace(".",",",$laskurow['kate3'])."\t";
+		if($valitut["SARAKE40"] != '') $apurivi .= str_replace(".",",",$laskurow['kate4'])."\t";
+		if($valitut["SARAKE41"] != '') $apurivi .= str_replace(".",",",$katepros1)."\t";
+		if($valitut["SARAKE42"] != '') $apurivi .= str_replace(".",",",$katepros2)."\t";
+		if($valitut["SARAKE43"] != '') $apurivi .= str_replace(".",",",$katepros3)."\t";
+		if($valitut["SARAKE44"] != '') $apurivi .= str_replace(".",",",$katepros4)."\t";
+		if($valitut["SARAKE45"] != '') $apurivi .= str_replace(".",",",$row['tuotekerroin'])."\t";
+		if($valitut["SARAKE46"] != '') $apurivi .= str_replace(".",",",$ennarow['tilkpl'])."\t";
+		if($valitut["SARAKE47"] != '') $apurivi .= "\"$row[aleryhma]\"\t";
 
-		if($valitut["SARAKE47B"] != '') $rivi .= str_replace(".",",",$row["kehahin"])."\t";
+		if($valitut["SARAKE47B"] != '') $apurivi .= str_replace(".",",",$row["kehahin"])."\t";
 
 		if ($asiakasosasto != '') {
-			if($valitut["SARAKE48"] != '') $rivi .= str_replace(".",",",$asosrow['kpl1'])."\t";
-			if($valitut["SARAKE49"] != '') $rivi .= str_replace(".",",",$asosrow['kpl2'])."\t";
-			if($valitut["SARAKE50"] != '') $rivi .= str_replace(".",",",$asosrow['kpl3'])."\t";
-			if($valitut["SARAKE51"] != '') $rivi .= str_replace(".",",",$asosrow['kpl4'])."\t";
+			if($valitut["SARAKE48"] != '') $apurivi .= str_replace(".",",",$asosrow['kpl1'])."\t";
+			if($valitut["SARAKE49"] != '') $apurivi .= str_replace(".",",",$asosrow['kpl2'])."\t";
+			if($valitut["SARAKE50"] != '') $apurivi .= str_replace(".",",",$asosrow['kpl3'])."\t";
+			if($valitut["SARAKE51"] != '') $apurivi .= str_replace(".",",",$asosrow['kpl4'])."\t";
 		}
 		if ($asiakasno != '') {
-			if($valitut["SARAKE52"] != '') $rivi .= str_replace(".",",",$asrow['kpl1'])."\t";
-			if($valitut["SARAKE53"] != '') $rivi .= str_replace(".",",",$asrow['kpl2'])."\t";
-			if($valitut["SARAKE54"] != '') $rivi .= str_replace(".",",",$asrow['kpl3'])."\t";
-			if($valitut["SARAKE55"] != '') $rivi .= str_replace(".",",",$asrow['kpl4'])."\t";
+			if($valitut["SARAKE52"] != '') $apurivi .= str_replace(".",",",$asrow['kpl1'])."\t";
+			if($valitut["SARAKE53"] != '') $apurivi .= str_replace(".",",",$asrow['kpl2'])."\t";
+			if($valitut["SARAKE54"] != '') $apurivi .= str_replace(".",",",$asrow['kpl3'])."\t";
+			if($valitut["SARAKE55"] != '') $apurivi .= str_replace(".",",",$asrow['kpl4'])."\t";
 		}
 
 		//korvaavat tuotteet
@@ -914,7 +931,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
 		//tulostetaan korvaavat
 		while ($korvarow = mysql_fetch_array($korvaresult)) {
-#TODO varastopaikkojen zekkaus
+		#TODO varastopaikkojen zekkaus
 			// Korvaavien paikkojen valittujen varastojen paikkojen saldo yhteens‰, mukaan tulee myˆs aina ne saldot jotka ei kuulu mihink‰‰n varastoalueeseen
 			$query = "	SELECT sum(saldo) saldo, varastopaikat.tunnus
 						FROM tuotepaikat
@@ -962,20 +979,25 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 			$asresult = mysql_query($query) or pupe_error($query);
 			$kasrow = mysql_fetch_array($asresult);
 
-			if($valitut["SARAKE56"] != '') $rivi .= "\"$korvarow[tuoteno]\"\t";
-			if($valitut["SARAKE57"] != '') $rivi .= str_replace(".",",",$korvasaldorow['saldo'])."\t";
-			if($valitut["SARAKE58"] != '') $rivi .= str_replace(".",",",$prow['varattu'])."\t";
-		    if($valitut["SARAKE59"] != '') $rivi .= str_replace(".",",",$prow['tilattu'])."\t";
+			if($valitut["SARAKE56"] != '') $apurivi .= "\"$korvarow[tuoteno]\"\t";
+			if($valitut["SARAKE57"] != '') $apurivi .= str_replace(".",",",$korvasaldorow['saldo'])."\t";
+			if($valitut["SARAKE58"] != '') $apurivi .= str_replace(".",",",$prow['varattu'])."\t";
+		    if($valitut["SARAKE59"] != '') $apurivi .= str_replace(".",",",$prow['tilattu'])."\t";
 
-			if($valitut["SARAKE60"] != '') $rivi .= str_replace(".",",",$kasrow['kpl1'])."\t";
-			if($valitut["SARAKE61"] != '') $rivi .= str_replace(".",",",$kasrow['kpl2'])."\t";
-			if($valitut["SARAKE62"] != '') $rivi .= str_replace(".",",",$kasrow['kpl3'])."\t";
-			if($valitut["SARAKE63"] != '') $rivi .= str_replace(".",",",$kasrow['kpl4'])."\t";
+			if($valitut["SARAKE60"] != '') $apurivi .= str_replace(".",",",$kasrow['kpl1'])."\t";
+			if($valitut["SARAKE61"] != '') $apurivi .= str_replace(".",",",$kasrow['kpl2'])."\t";
+			if($valitut["SARAKE62"] != '') $apurivi .= str_replace(".",",",$kasrow['kpl3'])."\t";
+			if($valitut["SARAKE63"] != '') $apurivi .= str_replace(".",",",$kasrow['kpl4'])."\t";
 		}
 
 
 
-		$rivi .= "\r\n";
+		$apurivi .= "\r\n";
+		
+		if ($rivinaytetaan > 0) {
+			$rivi .= $apurivi;
+		}
+		
 
 		// tehd‰‰n arvio kauan t‰m‰ kest‰‰.. wau! :)
 		if (count($arvio)<=$joukko) {
@@ -1050,7 +1072,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
 	$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Halytysraportti osasto").": $osasto ".t("tuoteryhma").": $tuoryh", $content, $header);
 
-	if ($boob===FALSE) echo " - ".t("Email l‰hetys ep‰onnistui!")."<br>";
+	if ($boob===FALSE) echo " - ".t("Email l‰hetys ep‰onnistui!")." $yhtiorow[postittaja_email] --> $kukarow[eposti]<br>";
 	else echo " $kukarow[eposti].<br>";
 
 	//N‰‰ muuttujat voi olla aika isoja joten unsetataan ne
@@ -1528,6 +1550,23 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
 	echo "<tr><th>".t("ƒl‰ n‰yt‰ tuotteita joita ei n‰ytet‰ hinnastossa")."</th><td colspan='3'><input type='checkbox' name='valitut[EIHINNASTOON]' value='EIHINNASTOON' $chk></td></tr>";
 
+
+	//N‰ytet‰‰nkˆ poistetut tuotteet
+	$query = "	SELECT selitetark
+				FROM avainsana
+				WHERE yhtio = '$kukarow[yhtio]'
+				and laji = 'HALYRAP'
+				and selite	= '$rappari'
+				and selitetark = 'EHDOTETTAVAT'";
+	$sresult = mysql_query($query) or pupe_error($query);
+	$srow = mysql_fetch_array($sresult);
+
+	$chk = "";
+	if (($srow["selitetark"] == "EHDOTETTAVAT" and $tee == "JATKA") or $valitut["EHDOTETTAVAT"] != '') {
+		$chk = "CHECKED";
+	}
+
+	echo "<tr><th>".t("N‰yt‰ vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='valitut[EHDOTETTAVAT]' value='EHDOTETTAVAT' $chk></td></tr>";
 
 
 	echo "<tr><td class='back'><br></td></tr>";

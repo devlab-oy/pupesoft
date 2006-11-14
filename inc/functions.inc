@@ -239,12 +239,12 @@ if (!function_exists("kuuluukovarastoon")) {
 		else {
 			$yhtiolisa = $kukarow["yhtio"];
 		}
-#TODO varastopaikkojen zekkaus
+
 		$query = "	SELECT tunnus
 					FROM varastopaikat
 					WHERE
-					concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(alkuhyllynro,  5, '0')) <= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad('$hyllynro', 5, '0')) and
-					concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(loppuhyllynro, 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad('$hyllynro', 5, '0')) and
+					concat(lpad(upper(alkuhyllyalue),  5, ' '),lpad(upper(alkuhyllynro),  5, ' ')) <= concat(lpad(upper('$hyllyalue'), 5, ' '),lpad(upper('$hyllynro'), 5, ' ')) and
+					concat(lpad(upper(loppuhyllyalue), 5, ' '),lpad(upper(loppuhyllynro), 5, ' ')) >= concat(lpad(upper('$hyllyalue'), 5, ' '),lpad(upper('$hyllynro'), 5, ' ')) and
 					yhtio = '$yhtiolisa'
 					$varastolisa";
 		$varcheckres = mysql_query($query) or pupe_error($query);
@@ -360,13 +360,13 @@ if (!function_exists("saldo_myytavissa")) {
 			if ($varasto != 0) {
 				$valinta = " varastopaikat.tunnus = '$varasto' and ";
 			}
-#TODO varastopaikkojen zekkaus
+
 			//saldo sallituista varastoista
 			$query = "	SELECT tuotepaikat.*
 						FROM tuotepaikat
 						JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio and $valinta
-						concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(alkuhyllynro,  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(tuotepaikat.hyllynro, 5, '0')) and
-						concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(loppuhyllynro, 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(tuotepaikat.hyllynro, 5, '0'))
+						concat(lpad(upper(alkuhyllyalue),  5, ' '),lpad(upper(alkuhyllynro),  5, ' ')) <= concat(lpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' ')) and
+						concat(lpad(upper(loppuhyllyalue), 5, ' '),lpad(upper(loppuhyllynro), 5, ' ')) >= concat(lpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' '))
 						WHERE tuotepaikat.yhtio = '$yhtiolisa'
 						and tuotepaikat.tuoteno = '$tuoteno'";
 			$result = mysql_query($query) or die($query);
@@ -392,10 +392,10 @@ if (!function_exists("saldo_myytavissa")) {
 				$saldo += $row["saldo"];
 				$ennakkopois += $ennrow["varattu"];
 			}
-#TODO varastopaikkojen zekkaus
+			
 			// katsotaan löytyykö tuotetta varattuna joltain muulta paikalta, jota ei ole enää olemassa tuotepaikoissa
 			// ekaks haetaan ihan kaikki nykyiset paikat suoraan mysql muotoon
-			$query = "	SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0'),lpad(hyllyvali, 5, '0'),lpad(hyllytaso, 5, '0'),\"'\") paikat
+			$query = "	SELECT group_concat(\"'\",lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
 						FROM tuotepaikat
 						WHERE yhtio='$yhtiolisa' and tuoteno='$tuoteno'";
 			$ennresult = mysql_query($query) or die($query);
@@ -404,14 +404,13 @@ if (!function_exists("saldo_myytavissa")) {
 			// jos paikkoja löytyi
 			if ($ennrow["paikat"] != "") {
 				// etsitään varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
-#TODO varastopaikkojen zekkaus
 				$query = "	SELECT sum(varattu) varattu
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 							WHERE tilausrivi.yhtio = '$yhtiolisa' and
 							tilausrivi.tyyppi in ('L','G','V') and
 							tilausrivi.tuoteno = '$tuoteno' and
 							tilausrivi.varattu > 0 and
-							concat(rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0'),lpad(hyllyvali, 5, '0'),lpad(hyllytaso, 5, '0')) NOT IN ($ennrow[paikat])";
+							concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($ennrow[paikat])";
 				$ennresult = mysql_query($query) or die($query);
 				$ennrow = mysql_fetch_array($ennresult);
 				$ennakkopois += $ennrow["varattu"];

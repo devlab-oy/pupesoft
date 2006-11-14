@@ -293,6 +293,7 @@
 		$tolisa1  = '';
 		$tolisa2  = '';
 		$tuotlisa = '';
+		$siirtolisa = '';
 	
 		if ($toimittaja != '') {
 			$tolisa1 = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ";
@@ -312,8 +313,8 @@
 			$tuotlisa = " and tilausrivi.tuoteno='$tuotenumero' ";
 		}
 						
-		if ($toim == 'SIIRTOLISTA' and $laskurow['varasto'] > 0) {
-			$siirtolisa = " and lasku.varasto = '$laskurow[varasto]' ";
+		if ($tilaus_on_jo == "KYLLA" and $toim == 'SIIRTOLISTA' and $laskurow['clearing'] != '') {
+		 	$siirtolisa = " and lasku.clearing = '$laskurow[clearing]' ";
 		}
 	
 
@@ -357,7 +358,7 @@
 						$tolisa2
 						$aslisa
 						$tuotlisa
-						$siirtlisa
+						$siirtolisa
 						$order
 						$limit";
 			$isaresult = mysql_query($query) or pupe_error($query);
@@ -415,7 +416,7 @@
 						}
 	
 						$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus, tilausrivi.jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl,
-									lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.otunnus
+									lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.otunnus, lasku.clearing, lasku.varasto
 									FROM tilausrivi use index (yhtio_otunnus), lasku use index (PRIMARY), tuote use index (tuoteno_index)
 									WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 									and tilausrivi.tyyppi in ('L','G')

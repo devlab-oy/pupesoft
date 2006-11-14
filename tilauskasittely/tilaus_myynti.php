@@ -2449,10 +2449,6 @@ if ($tee == '') {
 				$superit		= "";
 				
 				if ($toim == 'SIIRTOLISTA') {
-					if ($laskurow['varasto'] > 0) {
-						$varastosta = array();
-						$varastosta[] = $laskurow["varasto"];
-					}
 					$toimi = "JOO";
 				}
 

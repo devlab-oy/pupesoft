@@ -474,5 +474,26 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "laskutuskielto") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == '0') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == '1') {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value = '0' $sel1>".t("Ei k‰ytet‰ laskutuskieltoa")."";
+		$ulos .= "<option value = '1' $sel2>".t("K‰ytet‰‰n laskutuskieltoa")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

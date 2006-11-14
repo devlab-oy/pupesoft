@@ -501,7 +501,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>";
 	
 	if ($valitut["EHDOTETTAVAT"] != '') {
-		echo "<font class='message'>".t("Josta ne j‰tet‰‰n raportista pois ei ehdoteta ostettavaksi").".<br>";
+		echo "<font class='message'>".t("Joista j‰tet‰‰n pois ne tuotteet joita ei ehdoteta ostettavaksi").".<br>";
 	}
 	
 	flush();

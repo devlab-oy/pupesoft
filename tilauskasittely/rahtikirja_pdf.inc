@@ -35,12 +35,12 @@
 	//tsekataan kuka maksaa rahdin ja laitetaan oikeat tiedot rahdinmaksajan ruutuun
 	if ($rahdinmaksaja == 'Vastaanottaja') {
 		$rahdinmaksajan_nr 	= $rahsoprow['rahtisopimus'];
-		$rahdinmaksaja 		= $rakir_row["nimi"];
+		//$rahdinmaksaja 		= $rakir_row["nimi"];
 	}
 	
 	if ($rahdinmaksaja == 'Lähettäjä') {
 		$rahdinmaksajan_nr 	= $toitarow['sopimusnro'];
-		$rahdinmaksaja 		= $yhtiorow["nimi"];
+		//$rahdinmaksaja 		= $yhtiorow["nimi"];
 	}
 	
 	// postiennakko

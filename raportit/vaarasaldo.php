@@ -6,12 +6,13 @@
 	echo "<font class='head'>".t("V‰‰r‰t saldot").":</font><hr>";
 
 	if ($tee != '') {
-		$query = "	SELECT tuoteno, nimitys, tilkpl, kpl, keratty, concat_ws(' ',hyllyalue, hyllynro, hyllyvali, hyllytaso) tuotepaikka, nimitys, yksikko, hyllyalue, hyllynro, hyllytaso, hyllyvali
+		$query = "	SELECT tuoteno, nimitys, tilkpl, kpl, keratty, concat_ws(' ',hyllyalue, hyllynro, hyllyvali, hyllytaso) tuotepaikka, nimitys, yksikko, hyllyalue, hyllynro, hyllytaso, hyllyvali,
+					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 					FROM tilausrivi
 					WHERE yhtio='$kukarow[yhtio]' and laadittu>='$vva-$kka-$ppa 00:00:00'
 					and laadittu<='$vvl-$kkl-$ppl 23:59:59' and tyyppi='L' and laskutettu!='' and var!='J' and var!='P'
 					and tilkpl<>kpl
-					ORDER BY hyllyalue, hyllynro, hyllytaso, hyllyvali, tuoteno";
+					ORDER BY sorttauskentta, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0 ) {

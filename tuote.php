@@ -301,7 +301,10 @@
 				$kokonaismyytavissa = 0;
 
 				//saldot per varastopaikka
-				$query = "select * from tuotepaikat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]' order by hyllyalue, hyllynro, hyllyvali, hyllytaso";
+				$query = "	select *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+				 			from tuotepaikat 
+							where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]' 
+							order by sorttauskentta";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) > 0) {

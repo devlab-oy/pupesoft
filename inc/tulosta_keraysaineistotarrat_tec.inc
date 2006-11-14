@@ -14,15 +14,16 @@ elseif ($tee == 'vanhat') {
 	$lisa = "and laadittu >= '$vva-$kka-$ppa 00:00:00' and laadittu <= '$vvl-$kkl-$ppl 23:59:59'";
 }
 
-$query =	"select ytunnus, viitetxt tiltunnus, tilkpl, sisviesti2 astunnus, 
-			DATE_FORMAT(laadittu, '%d-%m-%y') laadittu, tuote.eankoodi eankoodi, kommentti tuoteno, 
-			aktiivinen_kuljetus suunnistus, lasku.tunnus xtunnus
-			from lasku 
-			join tilausrivi on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus 
+$query =	"select ytunnus, viitetxt tiltunnus, tilkpl, sisviesti2 astunnus,
+			DATE_FORMAT(laadittu, '%d-%m-%y') laadittu, tuote.eankoodi eankoodi, kommentti tuoteno,
+			aktiivinen_kuljetus suunnistus, lasku.tunnus xtunnus,
+			concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+			from lasku
+			join tilausrivi on lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 			left join tuote on lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 			where lasku.yhtio = '$kukarow[yhtio]' and tila = 'Z' and alatila = '$alatila' and tyyppi = 'Z'
 			$lisa
-			order by tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.tunnus";
+			order by sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
 $tarrares = mysql_query($query) or pupe_error($query);
 
 if ($debug == 1) {
@@ -32,7 +33,7 @@ if ($debug == 1) {
 
 if (mysql_num_rows($tarrares) > 0) {
 	while($tarrarow = mysql_fetch_array($tarrares)) {
-		
+
 		$toim_nimi		=$tarrarow['toim_nimi'];
 		$tiltunnus		=ltrim($tarrarow['tiltunnus'],'0');
 		$tilkpl			=$tarrarow['tilkpl'];
@@ -40,16 +41,16 @@ if (mysql_num_rows($tarrares) > 0) {
 		$eankoodi		=$tarrarow['eankoodi'];
 		$suunnistus		=$tarrarow['suunnistus'];
 		$xtunnus		=$tarrarow['xtunnus'];
-		
+
 		list($tuoteno,$nimitys) = split("#",$tarrarow['tuoteno']);
 		list($asnro,$asnimi) = split("#",$tarrarow['astunnus']);
-		
+
 		$asnimi = substr($asnimi,0,25);
-		
+
 		for($kerroin = 1; $kerroin < $tilkpl+1; $kerroin++) {
-		
+
 			$tukpl = "1/  ".round($kerroin,0);
-		
+
 			//tässä tehdään aineisto jota TEC tulostin tajuaa
 			$sivu = "
 	*** ETIKETIN KOKO ***
@@ -77,7 +78,7 @@ if (mysql_num_rows($tarrares) > 0) {
 	{RC007;$tuoteno|}
 	{PC008;0020,0400,05,05,K,00,B|}
 	{RC008;$suunnistus|}
-	
+
 	*** TULOSTUS  ***
 	{XS;I,0001,0002C3210|}
 

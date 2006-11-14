@@ -109,7 +109,8 @@
 			$lisaa .= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) <= '$lpaikka' ";
 		}
 
-		$query = "	SELECT tuotepaikat.*, tuote.nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, varastopaikat.nimitys varasto, tuotepaikat.tunnus paikkatun
+		$query = "	SELECT tuotepaikat.*, tuote.nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, varastopaikat.nimitys varasto, tuotepaikat.tunnus paikkatun,
+					concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 					FROM tuotepaikat
 					LEFT JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -119,7 +120,7 @@
 					tuotepaikat.yhtio='$kukarow[yhtio]'
 					and tuotepaikat.saldo $lisaa2 0
 					$lisaa
-					ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";
+					ORDER BY sorttauskentta, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {

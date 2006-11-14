@@ -257,12 +257,12 @@ $ulasr = mysql_query($query) or pupe_error($query);
 
 
 //laitetaan välisummat rivin kommenttiin aina kun otunnus vaihtuu
-$query = "	select otunnus, tunnus 
+$query = "	select otunnus, tunnus, concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 			from tilausrivi 
 			where yhtio='$kukarow[yhtio]' 
 			and otunnus in ($tunnukset)
 			and kpl != 0
-			order by otunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, tunnus";
+			order by otunnus, sorttauskentta, tuoteno, tunnus";
 $valsures = mysql_query($query) or pupe_error($query);
 
 $edotunnus = '';

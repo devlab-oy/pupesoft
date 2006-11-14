@@ -98,7 +98,10 @@
 				while ($ostotilausrivit = mysql_fetch_array($result)) {
 
 					// k‰yd‰‰n l‰pi kaikki tuotteen varastopaikat
-					$query = "select * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$ostotilausrivit[tuoteno]' order by hyllyalue, hyllynro, hyllytaso, hyllyvali";
+					$query = "	select *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+					 			from tuotepaikat
+								where yhtio='$kukarow[yhtio]' and tuoteno='$ostotilausrivit[tuoteno]'
+								order by sorttauskentta";
 					$tuopaires = mysql_query($query) or pupe_error($query);
 
 					// apulaskuri

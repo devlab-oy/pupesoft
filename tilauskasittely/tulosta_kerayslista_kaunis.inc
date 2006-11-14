@@ -108,7 +108,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage, $p);
 		$pdf->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage, $p);
 		$pdf->draw_text(390, 690, t("Tilausviite", $kieli).": ".substr($laskurow["viesti"],0,18), $firstpage, $p);
-		
+
 		//viivakoodin arvo
 		$barcode  = $laskurow["tunnus"];
 
@@ -309,7 +309,7 @@ if (!function_exists('rivi')) {
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			//katotaan mihin varastooon tilausrivillä tuotepaikka kuuluu
-			$rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"], "");
+			$rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
 			$rivipaikkahyllyssa = 0;
 			$rivivarastohyllyssa = 0;
@@ -354,14 +354,14 @@ if (!function_exists('rivi')) {
 
 
 			$pdf->draw_text(330, $kala, $trow["toim_tuoteno"], 	$firstpage, $p);
-			
+
 			if ($rivipaikkahyllyssa != $rivivarastohyllyssa) {
 				$pdf->draw_text(430, $kala, $rivipaikkahyllyssa." (".$rivivarastohyllyssa.")",	$firstpage, $p);
 			}
 			else {
 				$pdf->draw_text(430, $kala, $rivipaikkahyllyssa,		 		$firstpage, $p);
 			}
-			
+
 			$pdf->draw_text(480, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$firstpage, $p);
 
 			if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
@@ -380,15 +380,15 @@ if (!function_exists('rivi')) {
 			}
 
 			$kala = $kala - $rivinkorkeus + 5;
-			
+
 			$pdf->draw_text(125, $kala, $row["nimitys"], 	$firstpage, $p);
 
 			$kala = $kala - $rivinkorkeus;
 
 			if (trim($row["kommentti"]) != '' or $row["tilaajanrivinro"] != 0) {
-				
+
 				$kala += 5;
-				
+
 				if ($row["tilaajanrivinro"] != 0) {
 					$futur = t("Rivinumero", $kieli).": ".$row["tilaajanrivinro"].". ";
 				}

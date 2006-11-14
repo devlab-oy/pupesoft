@@ -385,12 +385,13 @@ else {
 			$maehrowx = mysql_fetch_array($result);
 
 			//haetaan kaikkien tilausrivien varastopaikat
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
+			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
+						concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
 						LEFT JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 						WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
-						ORDER BY tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso";
+						ORDER BY sorttauskentta";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//tässä muuttujassa on sit kaikki tunnukset splitin jälkeen

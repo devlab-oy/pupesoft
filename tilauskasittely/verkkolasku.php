@@ -1236,10 +1236,10 @@
 					}
 
 					// Kirjoitetaan rivitietoja tilausriveiltä
-					$query = "	select *
+					$query = "	select *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 								from tilausrivi
 								where yhtio='$kukarow[yhtio]' and otunnus in ($tunnukset) and kpl<>0
-								order by otunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, tunnus";
+								order by otunnus, sorttauskentta, tuoteno, tunnus";
 					$tilres = mysql_query($query) or pupe_error($query);
 
 					$rivinumero = 1;
@@ -1517,7 +1517,7 @@
 
 					if ($yhtiorow['laskutyyppi'] == 0) {
 						require_once("tulosta_lasku.inc");
-						$laskujarj = 'otunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno';
+						$laskujarj = 'otunnus, sorttauskentta, tuoteno';
 					}
 					else {
 						require_once("tulosta_lasku_plain.inc");
@@ -1525,7 +1525,7 @@
 					}
 
 					// haetaan tilauksen kaikki rivit
-					$query = "	SELECT *
+					$query = "	SELECT *, concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 								FROM tilausrivi
 								WHERE uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
 								ORDER BY $laskujarj";

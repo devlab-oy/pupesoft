@@ -75,20 +75,20 @@
 
 	if ($laskunro > 0 and $laskunroloppu > 0 and $laskunro < $laskunroloppu) {
 		$tee = "TULOSTA";
-		
+
 		$tulostukseen = array();
-		
+
 		for($las = $laskunro; $las<=$laskunroloppu; $las++) {
 			//hateaan laskun kaikki tiedot
 			$query = "  SELECT tunnus
 						FROM lasku
-						WHERE tila		= 'U' 
+						WHERE tila		= 'U'
 						and alatila		= 'X'
 						and laskunro	= '$las'
 						and yhtio 		= '$kukarow[yhtio]'";
 			$rrrresult = mysql_query($query) or pupe_error($query);
 			$laskurow = mysql_fetch_array($rrrresult);
-			
+
 			$tulostukseen[] = $laskurow["tunnus"];
 		}
 		$laskunro		= "";
@@ -785,7 +785,7 @@
 				$uusiotunnus = $laskurow["tunnus"];
 
 				require_once('../pdflib/phppdflib.class.php');
-				
+
 				require('tulosta_sadvientiilmo.inc');
 
 				//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -889,7 +889,7 @@
 
 				if ($yhtiorow['laskutyyppi'] == 0) {
 					require_once("tulosta_lasku.inc");
-					$laskujarj = 'otunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, tunnus';
+					$laskujarj = 'otunnus, sorttauskentta, tuoteno, tunnus';
 				}
 				else {
 					require_once("tulosta_lasku_plain.inc");
@@ -904,7 +904,7 @@
 				}
 
 				// haetaan tilauksen kaikki rivit
-				$query = "  SELECT *
+				$query = "  SELECT *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 							FROM tilausrivi
 							WHERE $where and yhtio='$kukarow[yhtio]'
 							ORDER BY $laskujarj";
@@ -915,9 +915,9 @@
 					echo t("Laskurivej‰ ei lˆytynyt");
 					exit;
 				}
-				
+
 				$sivu = 1;
-				
+
 				// aloitellaan laskun teko
 				$firstpage = alku();
 
@@ -955,7 +955,7 @@
 
 				//poistetaan tmp file samantien kuleksimasta...
 				system("rm -f $pdffilenimi");
-				
+
 				unset($pdf);
 				unset($firstpage);
 
@@ -1135,10 +1135,10 @@
 				$pdf->set_default('margin', 0);
 
 				//generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
-				$query = "  SELECT *
+				$query = "  SELECT *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 							FROM tilausrivi
 							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
-							ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";
+							ORDER BY sorttauskentta, tuoteno";
 				$result = mysql_query($query) or pupe_error($query);
 
 				//generoidaan rivinumerot
@@ -1352,9 +1352,9 @@
 					require_once ($yhtiorow["kerailylistatyyppi"]);
 				}
 				else {
-					require_once ("tulosta_lahete_kerayslista.inc");    
+					require_once ("tulosta_lahete_kerayslista.inc");
 				}
-				
+
 				$otunnus = $laskurow["tunnus"];
 
 				//tehd‰‰n uusi PDF failin olio
@@ -1368,7 +1368,7 @@
 				else {
 					$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
 				}
-				
+
 				//generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
 				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,

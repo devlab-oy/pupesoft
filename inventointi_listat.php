@@ -31,7 +31,8 @@
 		$kutsu = "";
 		
 		//hakulause, tämä on samam kaikilla vaihtoehdolilla  ja gorup by lauyse joka on sama kaikilla
-		$select  = " tuote.tuoteno, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo ";		
+		$select  = " tuote.tuoteno, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo,
+		concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";		
 		$groupby = " tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, varastopaikka, inventointiaika, tuotepaikat.saldo ";
 		
 		if(($try != '' and $osasto != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
@@ -155,7 +156,7 @@
 						WHERE $yhtiotaulu.yhtio	= '$kukarow[yhtio]'
 						$where
 						group by $groupby
-						ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";						
+						ORDER BY sorttauskentta, tuoteno";						
 			$saldoresult = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($saldoresult) == 0) {
@@ -181,7 +182,7 @@
 							$datesubnow							
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
 							group by $groupby
-							ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";
+							ORDER BY sorttauskentta, tuoteno";
 				$saldoresult = mysql_query($query) or pupe_error($query);
             }
 			
@@ -206,7 +207,7 @@
 							and tuotepaikat.hyllytaso		= tilausrivi.hyllytaso
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
 							group by $groupby
-							ORDER BY tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuotepaikat.tuoteno";
+							ORDER BY sorttauskentta, tuotepaikat.tuoteno";
 				$saldoresult = mysql_query($query) or pupe_error($query);
 			}
 			
@@ -223,7 +224,7 @@
 							$datesubnow	
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' 
 							group by $groupby
-							ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";
+							ORDER BY sorttauskentta, tuoteno";
 				$saldoresult = mysql_query($query) or pupe_error($query);
             }
 			
@@ -243,7 +244,7 @@
 							$datesubnow							
 							and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' 
 							group by $groupby
-							ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";
+							ORDER BY sorttauskentta, tuoteno";
 				$saldoresult = mysql_query($query) or pupe_error($query);
 		}
 		else {

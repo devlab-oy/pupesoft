@@ -6,7 +6,7 @@
 	echo "<font class='head'>Varastotilannetarkistus (loppu oletuspaikalla, saldoa jossain muualla):</font><hr>";
 
 	if ($tee != '') {
-		
+
 		$varastot = "";
 
 		if (is_array($varastosta)) {
@@ -16,17 +16,17 @@
 			$varastot = substr($varastot,0,-1);
 			$varastot = " and varastopaikat.tunnus in ($varastot) ";
 		}
-		
+
 		if ($nollat != '') {
 			$nollatlisa = " 1 ";
 		}
 		else {
 			$nollatlisa = " tuotepaikat.saldo ";
 		}
-		
-		$query = "	SELECT tuotepaikat.tuoteno, 
-					sum(if(tuotepaikat.oletus='X',tuotepaikat.saldo,0)) oletuspaikalla, 
-					sum(if(tuotepaikat.oletus='',$nollatlisa,0)) muillapaikoilla, 
+#TODO ei sortaa varastopaikkoja oikein
+		$query = "	SELECT tuotepaikat.tuoteno,
+					sum(if(tuotepaikat.oletus='X',tuotepaikat.saldo,0)) oletuspaikalla,
+					sum(if(tuotepaikat.oletus='',$nollatlisa,0)) muillapaikoilla,
 					sum(if(tuotepaikat.oletus='X',1,0)) oletuspaikkoja,
 					GROUP_CONCAT(if(tuotepaikat.oletus='X', concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso), '') SEPARATOR '') paikka
 					FROM tuotepaikat
@@ -44,10 +44,11 @@
 		echo "	<table><tr><th>Tuoteno</th><th>Nimitys</th><th>Toim_tuoteno</th><th>Varastopaikka</th><th>Oletus</th><th>Saldo</th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
-			$query = "	SELECT tuotepaikat.tuoteno, 
-						concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka, 
+#TODO ei sorttaa varastopaikkoja oikein
+			$query = "	SELECT tuotepaikat.tuoteno,
+						concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka,
 						tuotepaikat.saldo, tuotepaikat.oletus,
-						tuote.nimitys, 
+						tuote.nimitys,
 						(SELECT tuoteno FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno LIMIT 1) toim_tuoteno
 						FROM tuotepaikat
 						JOIN tuote ON tuote.tuoteno=tuotepaikat.tuoteno and tuote.yhtio=tuotepaikat.yhtio
@@ -73,7 +74,7 @@
 	echo "<br>";
 	echo "<form method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
-	
+
 	echo "<table>";
 	$query = "	SELECT *
 				FROM varastopaikat
@@ -86,20 +87,20 @@
 		if ($varastosta[$vrow["tunnus"]] != '') {
 			$sel = "CHECKED";
 		}
-		
+
 		echo "<tr><th>".t("Huomioi saldot varastossa:")." $vrow[nimitys]</th><td><input type='checkbox' name='varastosta[$vrow[tunnus]]' value='$vrow[tunnus]' $sel></td></tr>";
 	}
-	
+
 	echo "<tr><td class='back'><br></td></tr>";
-	
-	
+
+
 	$sel = "";
 
 	if ($nollat != '') {
 		$sel = "CHECKED";
 	}
 	echo "<tr><th>".t("Näytä myös tuotteet joiden saldo on nolla kaikilla paikoilla:")."</th><td><input type='checkbox' name='nollat' $sel></td></tr>";
-	
+
 	echo "</table><br><input type='submit' value='Aja raportti'>";
 
 	require ("../inc/footer.inc");

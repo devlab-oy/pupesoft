@@ -17,10 +17,10 @@
 		require_once('tulosta_lasku_text.inc');
 			
 		// haetaan tilauksen kaikki rivit
-		$query = "	SELECT *
+		$query = "	SELECT *, concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 					FROM tilausrivi
 					WHERE uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
-					ORDER BY otunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";
+					ORDER BY otunnus, sorttauskentta, tuoteno";
 		$ffaktresult = mysql_query($query) or pupe_error($query);
 		
 		//kuollaan jos yhtään riviä ei löydy

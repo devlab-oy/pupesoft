@@ -305,7 +305,7 @@ if (!function_exists('rivi')) {
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			//katotaan mihin varastooon tilausrivillä tuotepaikka kuuluu
-			$rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"], "");
+			$rivipaikka = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
 			$rivipaikkahyllyssa = 0;
 			$rivivarastohyllyssa = 0;
@@ -329,7 +329,7 @@ if (!function_exists('rivi')) {
 					$rivipaikkahyllyssa += $vrow['saldo'] - $vvrow['keratty'];
 					$rivivarastohyllyssa += $vrow['saldo'] - $vvrow['keratty'];
 				}
-				elseif (kuuluukovarastoon($vrow["hyllyalue"], $vrow["hyllynro"], "") == $rivipaikka) {
+				elseif (kuuluukovarastoon($vrow["hyllyalue"], $vrow["hyllynro"]) == $rivipaikka) {
 					$query = "	SELECT sum(varattu) keratty
 								FROM tilausrivi	use index (yhtio_tyyppi_tuoteno_varattu)
 								WHERE yhtio = '$kukarow[yhtio]'

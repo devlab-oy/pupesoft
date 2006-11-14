@@ -41,7 +41,8 @@
 			}
 
 			$query = "	SELECT tuote.tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, nimitys, yksikko, inventointiaika, inventointipoikkeama, selite, tapahtuma.kpl,
-						group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno
+						group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
+						concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 						FROM tuote
 						JOIN tuotepaikat USING (yhtio, tuoteno)
 						JOIN tapahtuma ON tapahtuma.yhtio = tuote.yhtio
@@ -56,7 +57,7 @@
 						and inventointiaika <= '$vvl-$kkl-$ppl 23:59:59'
 						$lisa
 						GROUP BY 1,2,3,4,5,6,7,8,9,10,11
-						ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso";
+						ORDER BY sorttauskentta";
 			$saldoresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($saldoresult) == 0) {

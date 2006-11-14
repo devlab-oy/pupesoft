@@ -98,7 +98,7 @@
 	}
 
 	if ($sorttaus == 'paikka') {
-		$orde = " ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso ";
+		$orde = " ORDER BY sorttauskentta ";
 	}
 	elseif ($sorttaus == 'tuote') {
 		$orde = " ORDER BY tuote.tuoteno ";
@@ -126,7 +126,8 @@
 
 		$query = "	SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, hyllyalue, hyllynro, hyllyvali,
 					hyllytaso, tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta, tuotteen_toimittajat.tuotekerroin,
-					round(tuotteen_toimittajat.tuotekerroin*(tilausrivi.varattu+tilausrivi.kpl),2) toimmaara, tuote.nimitys
+					round(tuotteen_toimittajat.tuotekerroin*(tilausrivi.varattu+tilausrivi.kpl),2) toimmaara, tuote.nimitys,
+					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 					FROM lasku
 					JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus $mitkalisa
 					JOIN tuote ON lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -140,7 +141,8 @@
 	else {
 		$query = "	SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, hyllyalue, hyllynro, hyllyvali,
 					hyllytaso, tilausrivi.yksikko, tilausrivi.varattu+tilausrivi.kpl varattu, tilausrivi.hinta, tuotteen_toimittajat.tuotekerroin,
-					round(tuotteen_toimittajat.tuotekerroin*(tilausrivi.varattu+tilausrivi.kpl),2) toimmaara, tuote.nimitys
+					round(tuotteen_toimittajat.tuotekerroin*(tilausrivi.varattu+tilausrivi.kpl),2) toimmaara, tuote.nimitys,
+					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					JOIN tuotteen_toimittajat ON tilausrivi.yhtio = tuotteen_toimittajat.yhtio and tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'

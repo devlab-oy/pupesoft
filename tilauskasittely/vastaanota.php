@@ -652,14 +652,15 @@
 		//siirtolistan rivit
 		$query = "	SELECT tilausrivi.nimitys, tilausrivi.tuoteno, tilausrivi.tunnus,  tilausrivi.varattu,
 					concat_ws(' ',  tilausrivi.hyllyalue,  tilausrivi.hyllynro,  tilausrivi.hyllyvali,  tilausrivi.hyllytaso) paikka,
-					tilausrivi.toimitettu, tuote.ei_saldoa
+					tilausrivi.toimitettu, tuote.ei_saldoa,
+					concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.otunnus = '$id'
 					and tilausrivi.tyyppi  = 'G'
 					and tilausrivi.varattu != 0
-					ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";
+					ORDER BY sorttauskentta, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
@@ -685,12 +686,13 @@
 		while ($rivirow = mysql_fetch_array ($result)) {
 
 			if ($rivirow["ei_saldoa"] == "") {
-				$query = "	SELECT tuotepaikat.hyllyalue t1, tuotepaikat.hyllynro t2, tuotepaikat.hyllyvali t3, tuotepaikat.hyllytaso t4
+				$query = "	SELECT tuotepaikat.hyllyalue t1, tuotepaikat.hyllynro t2, tuotepaikat.hyllyvali t3, tuotepaikat.hyllytaso t4,
+							concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 							FROM tuotepaikat
 							WHERE yhtio='$kukarow[yhtio]'
 							and tuoteno='$rivirow[tuoteno]'
 							$lisa
-							ORDER BY t1, t2, t3, t4";
+							ORDER BY sorttauskentta";
 				$presult = mysql_query($query) or pupe_error($query);
 				$privirow = mysql_fetch_array ($presult);
 			}

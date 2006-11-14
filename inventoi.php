@@ -430,7 +430,8 @@
 	if ($tee == 'INVENTOI') {
 
 		//hakulause, tämä on samam kaikilla vaihtoehdolilla 
-		$select = " tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, tuotepaikat.inventointilista, tuotepaikat.inventointilista_aika";		
+		$select = " tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) varastopaikka, inventointiaika, tuotepaikat.saldo, tuotepaikat.inventointilista, tuotepaikat.inventointilista_aika,
+		concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";
 		
 		if ($tuoteno != '') {
 			///* Inventoidaan tuotenumeron perusteella *///
@@ -443,7 +444,7 @@
 						WHERE tuote.yhtio 		= '$kukarow[yhtio]'
 						and tuote.tuoteno		= '$tuoteno'
 						and tuote.ei_saldoa		= ''
-						ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno";
+						ORDER BY sorttauskentta, tuoteno";
 			$saldoresult = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($saldoresult) == 0) {
@@ -466,7 +467,7 @@
 						WHERE tuote.yhtio 		 = '$kukarow[yhtio]'
 						and tuote.ei_saldoa		 = ''
 						and tuotepaikat.inventointilista = '$lista'						
-						ORDER BY hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno
+						ORDER BY sorttauskentta, tuoteno
 						LIMIT $alku, 18";
 			$saldoresult = mysql_query($query) or pupe_error($query);
 			

@@ -107,24 +107,25 @@
 			
 			if ($ahyllyalue != '' and $lhyllyalue != '') {
 				///* Inventoidaan tietty varastoalue *///
-				$apaikka = strtoupper($ahyllyalue).sprintf("%02s",$ahyllynro).sprintf("%02s",$ahyllyvali).sprintf("%02s",$ahyllytaso);
-				$lpaikka = strtoupper($lhyllyalue).sprintf("%02s",$lhyllynro).sprintf("%02s",$lhyllyvali).sprintf("%02s",$lhyllytaso);
+				$apaikka = strtoupper(sprintf("%5s",$ahyllyalue)).strtoupper(sprintf("%5s",$ahyllynro)).strtoupper(sprintf("%5s",$ahyllyvali)).strtoupper(sprintf("%5s",$ahyllytaso));
+				$lpaikka = strtoupper(sprintf("%5s",$lhyllyalue)).strtoupper(sprintf("%5s",$lhyllynro)).strtoupper(sprintf("%5s",$lhyllyvali)).strtoupper(sprintf("%5s",$lhyllytaso));
 
 				$kutsu .= " ".t("Varastopaikat").": $apaikka - $lpaikka ";
-#TODO varastopaikkojen zekkaus				
+			
 				if ($from == '') {
 					$yhtiotaulu = "tuotepaikat";
 					$from 		= " FROM tuotepaikat ";
 					$join 		= " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' $lisa ";
 					$lefttoimi 	= " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
 					
-					$where		= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) >= '$apaikka'
-									and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) <= '$lpaikka'												
-									and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $extra ";
-				}
-				else {
-					$join		.= " and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) >= '$apaikka'
-									 and concat(upper(tuotepaikat.hyllyalue),lpad(tuotepaikat.hyllynro ,5,'0'),lpad(tuotepaikat.hyllyvali,5,'0'),lpad(tuotepaikat.hyllytaso,5,'0')) <= '$lpaikka' ";
+						$where		= " and concat(lpad(upper(tuotepaikat.hyllyalue) ,5,' '),lpad(upper(tuotepaikat.hyllynro) ,5,' '),lpad(upper(tuotepaikat.hyllyvali) ,5,' '),lpad(upper(tuotepaikat.hyllytaso) ,5,' ')) >= '$apaikka'
+										and concat(lpad(upper(tuotepaikat.hyllyalue) ,5,' '),lpad(upper(tuotepaikat.hyllynro) ,5,' '),lpad(upper(tuotepaikat.hyllyvali) ,5,' '),lpad(upper(tuotepaikat.hyllytaso) ,5,' ')) <= '$lpaikka'												
+										and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $datesubnow $extra ";
+
+					}
+					else {
+						$join		.= " and concat(lpad(upper(tuotepaikat.hyllyalue) ,5,' '),lpad(upper(tuotepaikat.hyllynro) ,5,' '),lpad(upper(tuotepaikat.hyllyvali) ,5,' '),lpad(upper(tuotepaikat.hyllytaso) ,5,' ')) >= '$apaikka'
+										 and concat(lpad(upper(tuotepaikat.hyllyalue) ,5,' '),lpad(upper(tuotepaikat.hyllynro) ,5,' '),lpad(upper(tuotepaikat.hyllyvali) ,5,' '),lpad(upper(tuotepaikat.hyllytaso) ,5,' ')) <= '$lpaikka' ";
 				}
 				
 			}

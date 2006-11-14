@@ -179,7 +179,7 @@
 		$pdf->draw_rectangle(777,60,755,300,											$firstpage, $rectparam);
 		$pdf->draw_text(65,  758,  $yhtiorow["osoite"],									$firstpage, $kirj);	
 		$pdf->draw_rectangle(755,60,733,300,											$firstpage, $rectparam);
-		$pdf->draw_text(65,  736,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"],		$firstpage, $kirj);
+		$pdf->draw_text(65,  736,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"]."    ".$yhtiorow["puhelin"],		$firstpage, $kirj);
 		//oikeeta
 		$pdf->draw_text(302,  803,  "Lähetyspäivämäärä Avsändningsdatum",				$firstpage, $norm);
 		$pdf->draw_text(302,  788,  date("d.m.Y"),										$firstpage, $kirj);

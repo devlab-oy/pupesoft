@@ -99,7 +99,7 @@ if ($korjataan != '') {
 		}
 
 
-
+#TODO varastopaikkojen zekkaus
 		$query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka,
 					tuote.nimitys, varastopaikat.tunnus, tuotepaikat.oletus, tuotepaikat.halytysraja, tilausmaara, tuotepaikat.tunnus,
 					concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) ihmepaikka

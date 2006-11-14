@@ -31,7 +31,7 @@
 
 	// K‰‰yd‰‰n l‰pi suoratoimittajan paikat
 	while ($superrow = mysql_fetch_array($superjtres)) {
-
+#TODO varastopaikkojen zekkaus
 		$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso,
 					if(varastopaikat.maa = '$yhtiorow[maakoodi]', 1,2) as sorttaus, sum(saldo) saldo, varastopaikat.maa varastomaa
 					from tuotepaikat

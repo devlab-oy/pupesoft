@@ -1805,7 +1805,7 @@ if ($tee == '') {
 						$srow1["tyyppi_tieto"] 	= $yhtiorow["yhtio"];
 						$srow1["maa"] 			= $yhtiorow["maakoodi"];
 					}
-
+#TODO varastopaikkojen zekkaus
 					// Luetaan varaston tiedoista missä maassa se sijaitsee
 					$query = "	SELECT maa
 								FROM varastopaikat

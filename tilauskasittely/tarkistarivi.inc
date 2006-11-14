@@ -131,6 +131,7 @@
 
 	//Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille
 	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0) {
+#TODO varastopaikkojen zekkaus
 		// tarkistetaan varaston tyyppi
 		$query = "	SELECT *
 					FROM varastopaikat
@@ -178,7 +179,7 @@
 		$kotipaikatlask = 0;
 
 		$omapaikatraja 	= 2;
-
+#TODO varastopaikkojen zekkaus
 		//Katotaan voidaanko tämä myydä joltain toiselta paikalta
 		$query = "  select tuotepaikat.*, varastopaikat.tyyppi varastotyyppi, varastopaikat.tunnus varastotunnus, varastopaikat.maa varastomaa
 					FROM tuotepaikat

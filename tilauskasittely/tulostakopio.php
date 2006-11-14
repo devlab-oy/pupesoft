@@ -1278,7 +1278,7 @@
 				else {
 					$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
 				}
-
+#TODO varastopaikkojen zekkaus
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
 				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
@@ -1368,7 +1368,7 @@
 				else {
 					$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
 				}
-
+#TODO varastopaikkojen zekkaus
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
 				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,

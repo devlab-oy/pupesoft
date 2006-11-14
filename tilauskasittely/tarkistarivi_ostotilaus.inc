@@ -153,7 +153,7 @@
 
 		if (mysql_num_rows($kres) > 0) {
 			$superrow = mysql_fetch_array($kres);
-
+#TODO varastopaikkojen zekkaus
 			$query = "	select yhtio.yhtio, yhtio.tunnus,sum(saldo) saldo
 						from tuotepaikat
 						join yhtio on yhtio.yhtio=tuotepaikat.yhtio
@@ -167,7 +167,7 @@
 			$kres2  = mysql_query($query) or pupe_error($query);
 
 			$krow  = mysql_fetch_array($kres2);
-
+#TODO varastopaikkojen zekkaus
 			// katotaan ennakkopoistot toimittavalta yritykseltä
 			$query = "	SELECT
 						ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,

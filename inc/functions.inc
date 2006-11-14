@@ -239,7 +239,7 @@ if (!function_exists("kuuluukovarastoon")) {
 		else {
 			$yhtiolisa = $kukarow["yhtio"];
 		}
-
+#TODO varastopaikkojen zekkaus
 		$query = "	SELECT tunnus
 					FROM varastopaikat
 					WHERE
@@ -360,7 +360,7 @@ if (!function_exists("saldo_myytavissa")) {
 			if ($varasto != 0) {
 				$valinta = " varastopaikat.tunnus = '$varasto' and ";
 			}
-
+#TODO varastopaikkojen zekkaus
 			//saldo sallituista varastoista
 			$query = "	SELECT tuotepaikat.*
 						FROM tuotepaikat
@@ -392,7 +392,7 @@ if (!function_exists("saldo_myytavissa")) {
 				$saldo += $row["saldo"];
 				$ennakkopois += $ennrow["varattu"];
 			}
-
+#TODO varastopaikkojen zekkaus
 			// katsotaan löytyykö tuotetta varattuna joltain muulta paikalta, jota ei ole enää olemassa tuotepaikoissa
 			// ekaks haetaan ihan kaikki nykyiset paikat suoraan mysql muotoon
 			$query = "	SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(hyllynro, 5, '0'),lpad(hyllyvali, 5, '0'),lpad(hyllytaso, 5, '0'),\"'\") paikat
@@ -404,6 +404,7 @@ if (!function_exists("saldo_myytavissa")) {
 			// jos paikkoja löytyi
 			if ($ennrow["paikat"] != "") {
 				// etsitään varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
+#TODO varastopaikkojen zekkaus
 				$query = "	SELECT sum(varattu) varattu
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 							WHERE tilausrivi.yhtio = '$yhtiolisa' and

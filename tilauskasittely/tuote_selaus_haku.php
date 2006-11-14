@@ -496,6 +496,7 @@
 				}
 				else {
 					// k‰yd‰‰n katotaan tuotteen varastot
+#TODO varastopaikkojen zekkaus					
 					$query = "	SELECT varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi, varastopaikat.yhtio
 								FROM tuotepaikat
 								JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio and

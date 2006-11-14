@@ -226,7 +226,7 @@
 
 			// katotaan jos meillä on tuotteita varaamassa saldoa joiden varastopaikkaa ei enää ole olemassa...
 			$orvot = saldo_myytavissa($tuoteno, "ORVOT") * -1;
-
+#TODO varastopaikkojen zekkaus
 			// lasketaan saldo tuotepaikoille (ORDER BY TÄRKEE!)
 			$query = "	SELECT tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, tuotepaikat.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, sum(tuotepaikat.saldo) saldo
 						FROM tuote
@@ -869,6 +869,7 @@
 			else {
 				// haetaan vielä tuotteen oletuspaikka puuteriville, jotta seuranta ois helpompaa
 				//jos laskurow[varasto] on setattu niin yritetään löytää paikka siitä varastosta
+#TODO varastopaikkojen zekkaus
 				$query  = "	SELECT tuotepaikat.*, varastopaikat.tunnus varastotunnus
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio

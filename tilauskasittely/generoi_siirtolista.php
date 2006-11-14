@@ -111,7 +111,7 @@
 				if ($pairow['tilausmaara'] > 0 and $pairow['tarve'] > 0 and $pairow['tilausmaara'] > $pairow['tarve']) {
 					$pairow['tarve'] = $pairow['tilausmaara'];
 				}
-
+#TODO varastopaikkojen zekkaus
 				$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka,
 							varastopaikat.nimitys, varastopaikat.tunnus, tuotepaikat.oletus,
 							if(saldo >= $pairow[tarve],0,1) tarpeeks, saldo,

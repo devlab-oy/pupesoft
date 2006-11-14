@@ -111,7 +111,7 @@
 				$lpaikka = strtoupper($lhyllyalue).sprintf("%02s",$lhyllynro).sprintf("%02s",$lhyllyvali).sprintf("%02s",$lhyllytaso);
 
 				$kutsu .= " ".t("Varastopaikat").": $apaikka - $lpaikka ";
-				
+#TODO varastopaikkojen zekkaus				
 				if ($from == '') {
 					$yhtiotaulu = "tuotepaikat";
 					$from 		= " FROM tuotepaikat ";

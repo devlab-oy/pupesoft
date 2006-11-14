@@ -458,6 +458,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	}
 	//Ajetaan raportti tuotteittain, varastopaikoittain
 	else {
+#TODO varastopaikkojen zekkaus		
 		$query = "	select
 					tuote.yhtio,
 					tuote.tuoteno,
@@ -650,6 +651,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
 
 		if ($paikoittain == '') {
+#TODO varastopaikkojen zekkaus			
 			// Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
 			$query = "	SELECT sum(saldo) saldo, varastopaikat.tunnus
 						FROM tuotepaikat
@@ -912,7 +914,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
 		//tulostetaan korvaavat
 		while ($korvarow = mysql_fetch_array($korvaresult)) {
-
+#TODO varastopaikkojen zekkaus
 			// Korvaavien paikkojen valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
 			$query = "	SELECT sum(saldo) saldo, varastopaikat.tunnus
 						FROM tuotepaikat

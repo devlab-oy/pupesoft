@@ -330,7 +330,7 @@
 						$kokonaissaldo += $saldorow["saldo"];
 						$kokonaishyllyssa += $hyllyssa;
 						$kokonaismyytavissa += $myytavissa;
-
+#TODO varastopaikkojen zekkaus
 						// haetaan varaston nimi
 						$query = "	SELECT *
 									FROM varastopaikat
@@ -390,7 +390,7 @@
 					$firmanimi = '';
 
 					while ($superrow = mysql_fetch_array($kres)) {
-
+#TODO varastopaikkojen zekkaus
 						$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso, alkuhyllyalue, loppuhyllyalue, alkuhyllynro, loppuhyllynro, sum(saldo) saldo
 									from tuotepaikat
 									join yhtio on yhtio.yhtio=tuotepaikat.yhtio
@@ -407,7 +407,7 @@
 						if (mysql_num_rows($kres2) > 0) {
 
 							while ($krow  = mysql_fetch_array($kres2)) {
-
+#TODO varastopaikkojen zekkaus
 								// katotaan ennakkopoistot toimittavalta yritykseltä
 								$query = "	select sum(varattu) varattu
 											from tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)

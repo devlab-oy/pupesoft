@@ -16,7 +16,7 @@
 		if ($toppi != '') {
 			$lisa = " LIMIT $toppi ";
 		}
-
+#TODO varastopaikkojen zekkaus
 		$query = "	SELECT tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tuotepaikat.saldo, tuotepaikat.tunnus paikkatun, tilausrivi.nimitys, count(*) kpl, sum(tilausrivi.kpl) tuokpl
 					FROM tilausrivi, tuotepaikat
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'

@@ -7,6 +7,7 @@ echo "<font class='head'>".t("Varastopaikat")."</font><hr>";
 // Tarkistetaan syötetyt tieedot
 if ($tee=='update') {
 
+	#TODO varastopaikkojen zekkaus väärin
 	//Katotaan osuuko alkuhyllyalue johonkin varastoon
 	$query = "	SELECT tunnus
 				FROM varastopaikat
@@ -17,7 +18,8 @@ if ($tee=='update') {
 				and yhtio = '$kukarow[yhtio]'";
 	$vares = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($vares) == 0) {
+if (mysql_num_rows($vares) == 0) {
+		#TODO varastopaikkojen zekkaus väärin
 		//Katotaan osuuko loppuhyllyalue johonkin varastoon
 		$query = "	SELECT tunnus
 					FROM varastopaikat
@@ -29,6 +31,7 @@ if ($tee=='update') {
 		$vares = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($vares) == 0) {
+			#TODO varastopaikkojen zekkaus väärin
 			//Katotaan onko jo joku varasto syötetyn alueen sisällä
 			$query = "	SELECT tunnus
 						FROM varastopaikat

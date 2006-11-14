@@ -86,8 +86,26 @@ elseif ($laskurow["tila"] == 'T') {
 }
 else {
 	// Tässä on normaalit tilaukset
-
-	// katotaan ihan aluksi, onko tämä jo kerätty...
+	
+	// Aktivoituiko "Odottaa jt-rivejä" tilaus?
+	if (($laskurow["tila"] == 'N' or $laskurow["tila"] == 'G') and $laskurow["alatila"] == 'T') {
+		// Onko jotain tulostettavaa?
+		$query = "	select *
+					from tilausrivi 
+					where yhtio = '$kukarow[yhtio]' 
+					and otunnus = '$laskurow[tunnus]' 
+					and keratty = '' 
+					and varattu > 0";
+		$keres = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($keres) > 0) {
+			//Muutetaan tulostettavaksi
+			$query = "UPDATE lasku SET alatila = '' where yhtio='$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
+			$result = mysql_query($query) or pupe_error($query);	
+		}
+	}	
+	
+	// Katotaan, onko tämä jo kerätty...
 	$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and keratty!=''";
 	$keres = mysql_query($query) or pupe_error($query);
 

@@ -49,8 +49,8 @@ if (mysql_num_rows($vares) == 0) {
 		$tee = "edit";
 	}
 	else {
-		if ($printteri1 == '' or $printteri2 == '' or $printteri3 == '' or $printteri4 == '' or $printteri5 == '' or $printteri6 == '' or $printteri7 == '') {
-			echo "<br><font class='error'>".t("VIRHE: Mik‰‰n tulostin ei saa olla tyhj‰")."!</font><br>";
+		if ($printteri2 == '' or $printteri4 == '' $printteri6 == '') {
+			echo "<br><font class='error'>".t("VIRHE: Rahtikirja tulostimet ei saa olla tyhji‰")."!</font><br>";
 			$tee = "edit";
 		}
 	}

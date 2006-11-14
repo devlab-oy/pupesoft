@@ -49,7 +49,7 @@ if (mysql_num_rows($vares) == 0) {
 		$tee = "edit";
 	}
 	else {
-		if ($printteri2 == '' or $printteri4 == '' $printteri6 == '') {
+		if ($printteri2 == '' or $printteri4 == '' or $printteri6 == '') {
 			echo "<br><font class='error'>".t("VIRHE: Rahtikirja tulostimet ei saa olla tyhjiä")."!</font><br>";
 			$tee = "edit";
 		}

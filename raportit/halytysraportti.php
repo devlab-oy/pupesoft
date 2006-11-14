@@ -842,7 +842,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		if($valitut["SARAKE19"] != '') $apurivi .= str_replace(".",",",$row['ostohinta'])."\t";
 		if($valitut["SARAKE20"] != '') $apurivi .= str_replace(".",",",$row['myyntihinta'])."\t";
 		
-		if ($ostettavahaly > 0 or $ostettava1kk > 0) {
+		if ($ostettavahaly > 0 or $ostettava4kk > 0) {
 			$rivinaytetaan++;
 		}
 		

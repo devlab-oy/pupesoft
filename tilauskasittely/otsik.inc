@@ -655,10 +655,12 @@
 			$eiket = '';
 			$sisah = '';
 			$osath = '';
+			$laskkielto = '';
 			if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah = 'CHECKED';
 			if ($srow['osatoimitus'] != '') $osath = 'CHECKED';
+			if ($srow['chn'] == '999') $laskkielto = 'CHECKED';
 
 			echo "<td>".t("Sis‰inen lasku")."</td><td><input type='checkbox' name='sisainen' $sisah></td>";
 			echo "</tr>";
@@ -739,6 +741,13 @@
 			}
 
 			echo "<td>".t("Tilausta ei osatoimiteta")."</td><td><input type='checkbox' name='osatoimitus' $osath></td>";
+			
+			if ($yhtiorow['laskutuskielto'] != 0) {
+				echo "</tr><tr>";
+				echo "<td></td><td></td>";
+				echo "<td>".t("Laskutuskieltoon")."</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
+			}
+
 			echo "</tr>";
 			echo "</table><br>";
 
@@ -1026,6 +1035,7 @@
 			// T‰ss‰ ceississ‰ myyd‰‰n vain kotimaanmyynti‰
 			$vienti = "";
 		}
+		
 
 
 		$crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
@@ -1035,7 +1045,23 @@
 
 		// liitostunnusfixaus
 		if ((int) $liitostunnus == 0) $liitostunnus = $asiakasid;
-
+		
+		//jos oollaan haluttu laskutuskielto laitetaan chn kentt‰‰n 999
+		if ($laskutuskielto != '') {
+			//$srow['chn'] = '999';
+			$chn = '999';
+		}
+		else {
+			$apuqu = "select chn from asiakas where yhtio='$kukarow[yhtio]' and tunnus = $liitostunnus";
+			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+			$apuro = mysql_fetch_array($meapu);
+			$chn = $apuro['chn'];
+			if ($chn == '') {
+				$chn = '100';
+			}
+		}
+		
+		
 		$query .= "	lasku SET
 					ytunnus			= '$ytunnus',
 					nimi 			= '$nimi',

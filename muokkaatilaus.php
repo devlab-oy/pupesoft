@@ -23,6 +23,12 @@
 	elseif ($toim == "TARJOUS") {
 		$otsikko = t("tarjousta");
 	}
+	elseif ($toim == "LASKUTUSKIELTO") {
+		$otsikko = t("laskutuskieltoa");
+	}
+	elseif ($toim == "EXTRANET") {
+		$otsikko = t("extranet-tilausta");
+	}
 
 	echo "<font class='head'>".t("Muokkaa")." $otsikko:<hr></font>";
 
@@ -65,11 +71,18 @@
 					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and alatila='' and tila in ('N','E')";
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
+	elseif ($toim == "LASKUTUSKIELTO") {
+		$query = "	SELECT lasku.*
+					FROM lasku use index (tila_index)
+					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila in ('N','L') and alatila != 'X'";
+		$eresult = mysql_query($query) or pupe_error($query);
+	}
 
 	if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET") {
 		if (mysql_num_rows($eresult) > 0) {
 			// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-			if ($toim == "" or $toim == "super" or $toim == "ennakko") {
+			if ($toim == "" or $toim == "super" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
 				$aputoim1 = "RIVISYOTTO";
 				$aputoim2 = "PIKATILAUS";
 
@@ -123,7 +136,7 @@
 
 			echo "</select></td>";
 
-			if ($toim == "" or $toim == "super" or $toim == "ennakko") {
+			if ($toim == "" or $toim == "super" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
 				echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
 			}
 
@@ -311,6 +324,15 @@
 
 		$miinus = 2;
 	}
+	elseif ($toim == "LASKUTUSKIELTO") {
+		$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, luontiaika, laatija, alatila, tila
+					FROM lasku
+					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila in ('N','L') and alatila != 'X' $haku
+					order by luontiaika desc";
+
+		$miinus = 2;
+	}
 	else {
 		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila, kuka.extranet extra
 					FROM lasku use index (tila_index)
@@ -353,7 +375,7 @@
 			echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
 
 			// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-			if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko") {
+			if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
 				$aputoim1 = "RIVISYOTTO";
 				$aputoim2 = "PIKATILAUS";
 
@@ -394,7 +416,7 @@
 					<input type='hidden' name='tee' value='AKTIVOI'>
 					<input type='hidden' name='tilausnumero' value='$row[tilaus]'>";
 
-			if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko") {
+			if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
 				echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
 			}
 

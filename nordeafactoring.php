@@ -59,20 +59,20 @@
 	
 	if ($tee == 'TULOSTA') {
 
-		$luontipvm	= date("Ymd");
+		$luontipvm	= date("ymd");
 		$luontiaika	= date("Hi");
 				
 		//Luodaan erätietue
 		$ulos  = sprintf ('%-4.4s', 	"KRFL");									//sovellustunnus
-		$ulos .= sprintf ('%01d',	 	"0");										//tietuetunnus
+		$ulos .= sprintf ('%01.1s',	 	"0");										//tietuetunnus
 		$ulos .= sprintf ('%-17.17s', 	str_replace('-','',$yhtiorow["ytunnus"]));	//myyjän ytunnus
-		$ulos .= sprintf ('%06d',	 	$luontipvm);								//aineiston luontipvm
-		$ulos .= sprintf ('%04d',   	$luontiaika);								//luontikaika
-		$ulos .= sprintf ('%06d',	 	$yhtiorow["factoringsopimus"]);				//sopimusnumero
+		$ulos .= sprintf ('%06.6s',	 	$luontipvm);								//aineiston luontipvm
+		$ulos .= sprintf ('%04.4s',   	$luontiaika);								//luontikaika
+		$ulos .= sprintf ('%06.6s',	 	$yhtiorow["factoringsopimus"]);				//sopimusnumero
 		$ulos .= sprintf ('%-3.3s', 	$yhtiorow["valkoodi"]);						//valuutta
 		$ulos .= sprintf ('%-2.2s', 	"MR");										//rahoitusyhtiön tunnus
 		$ulos .= sprintf ('%-30.30s', 	$kukarow["nimi"]);							//siirtäjän nimi
-		$ulos .= sprintf ('%06d', 		$factoringsiirtonumero);					//siirtoluettelon numero						
+		$ulos .= sprintf ('%06.6s', 	$factoringsiirtonumero);					//siirtoluettelon numero						
 		$ulos .= sprintf ('%-37.37s', 	"");										//
 		$ulos .= sprintf ('%-63.63s', 	"");										//
 		$ulos .= sprintf ('%-221.221s', "");										//
@@ -116,6 +116,7 @@
 					lasku.laskunro,
 					round(lasku.viikorkopros*100,0) viikorkopros,
 					round(abs(lasku.summa*100),0) summa,
+					round(abs(lasku.kasumma*100),0) kasumma,
 					lasku.toim_nimi,
 					lasku.toim_nimitark,
 					lasku.toim_osoite,
@@ -125,6 +126,7 @@
 					lasku.viite,
 					DATE_FORMAT(lasku.tapvm, '%y%m%d') tapvm,
 					DATE_FORMAT(lasku.erpcm, '%y%m%d') erpcm,
+					DATE_FORMAT(lasku.kapvm, '%y%m%d') kapvm,
 					lasku.tunnus,
 					lasku.valkoodi,
 					lasku.liitostunnus
@@ -168,9 +170,9 @@
 				
 				//luodaan ostajatietue
 				$ulos .= sprintf ('%-4.4s', 	"KRFL");										//sovellustunnus
-				$ulos .= sprintf ('%01d',	 	"1");											//tietuetunnus
-				$ulos .= sprintf ('%06d',	 	$yhtiorow["factoringsopimus"]);					//sopimusnumero
-				$ulos .= sprintf ('%06d',	 	$asirow["asiakasnro"]);							//ostajan numero aka asiakasnumero
+				$ulos .= sprintf ('%01.1s',	 	"1");											//tietuetunnus
+				$ulos .= sprintf ('%06.6s',	 	$yhtiorow["factoringsopimus"]);					//sopimusnumero
+				$ulos .= sprintf ('%06.6s',	 	$asirow["asiakasnro"]);							//ostajan numero aka asiakasnumero
 				$ulos .= sprintf ('%-4.4s', 	"");
 				$ulos .= sprintf ('%-10.10s', 	str_replace('-','',$laskurow["ytunnus"]));		//ostajan ytunnus
 				$ulos .= sprintf ('%-30.30s', 	$laskurow["nimi"]);								//ostajan nimi
@@ -183,9 +185,9 @@
 				$ulos .= sprintf ('%-13.13s', 	"");
 				$ulos .= sprintf ('%-2.2s', 	"FI");											//kieli
 				$ulos .= sprintf ('%-3.3s', 	$laskurow["valkoodi"]);							//valuutta
-				$ulos .= sprintf ('%04d', 		$laskurow["viikorkopros"]);						//viivastyskorko
-				$ulos .= sprintf ('%03d', 		"0");
-				$ulos .= sprintf ('%06d',   	"0");
+				$ulos .= sprintf ('%04.4s', 	$laskurow["viikorkopros"]);						//viivastyskorko
+				$ulos .= sprintf ('%03.3s', 	"0");
+				$ulos .= sprintf ('%06.6s',   	"0");
 				
 				if ($laskurow["maa"] != $yhtiorow["maakoodi"] and $laskurow["maa"] != '') {
 					$ulos .= sprintf ('%-10.10s', $laskurow["maa"]);
@@ -199,43 +201,67 @@
 				
 				//luodaan laskutietue
 				$ulos .= sprintf ('%-4.4s', 	"KRFL");													//sovellustunnus
-				$ulos .= sprintf ('%01d',	 	"3");														//tietuetunnus
-				$ulos .= sprintf ('%06d',	 	$yhtiorow["factoringsopimus"]);								//sopimusnumero
-				$ulos .= sprintf ('%06d',	 	$asirow["asiakasnro"]);										//ostajan numero aka asiakasnumero
+				$ulos .= sprintf ('%01.1s',	 	"3");														//tietuetunnus
+				$ulos .= sprintf ('%06.6s',	 	$yhtiorow["factoringsopimus"]);								//sopimusnumero
+				$ulos .= sprintf ('%06.6s',	 	$asirow["asiakasnro"]);										//ostajan numero aka asiakasnumero
 				$ulos .= sprintf ('%-4.4s',   	"");														//varalla
-				$ulos .= sprintf ('%010d',	 	$laskurow["laskunro"]);										//laskunro
-				$ulos .= sprintf ('%06d',	 	$laskurow["tapvm"]);										//laskun päiväys
+				$ulos .= sprintf ('%010.10s',	$laskurow["laskunro"]);										//laskunro
+				$ulos .= sprintf ('%06.6s',	 	$laskurow["tapvm"]);										//laskun päiväys
 				$ulos .= sprintf ('%-3.3s', 	$laskurow["valkoodi"]);										//valuutta
-				$ulos .= sprintf ('%06d', 		$laskurow["tapvm"]);										//laskun arvopäivä
-				$ulos .= sprintf ('%02d', 		$laskurow["tyyppi"]);										//laskun tyyppi 01-veloitus 02-hyvitys 03-viivästyskorkolasku jne...
-				$ulos .= sprintf ('%012d', 		$laskurow["summa"]);										//summa etumerkitön, sentteinä
-				$ulos .= sprintf ('%06d', 		$laskurow["erpcm"]);										//eräpäivä
-				$ulos .= sprintf ('%06d', 		"0");														//kassa-ale1 pvm
-				$ulos .= sprintf ('%06d', 		"0");
-				$ulos .= sprintf ('%06d', 		"0");
-				$ulos .= sprintf ('%06d', 		"0");
-				$ulos .= sprintf ('%012d',		"0");
-				$ulos .= sprintf ('%012d', 		"0");														//kassa-ale1 valuutassa
-				$ulos .= sprintf ('%012d',		"0");
-				$ulos .= sprintf ('%012d', 		"0");
-				$ulos .= sprintf ('%012d', 		"0");
-				$ulos .= sprintf ('%024d',  	"0");
-				$ulos .= sprintf ('%01d', 		"0");														//kassa-ale1 koodi 01-ei alennus 1-alennus
-				$ulos .= sprintf ('%01d', 		"0");
-				$ulos .= sprintf ('%01d', 		"0");
-				$ulos .= sprintf ('%01d', 		"0");
-				$ulos .= sprintf ('%02d',   	"0");
-				$ulos .= sprintf ('%010d',  	"0");
-				$ulos .= sprintf ('%04d',   	"0");														//alv (ei välitetä)
+				$ulos .= sprintf ('%06.6s', 	$laskurow["tapvm"]);										//laskun arvopäivä
+				$ulos .= sprintf ('%02.2s', 	$laskurow["tyyppi"]);										//laskun tyyppi 01-veloitus 02-hyvitys 03-viivästyskorkolasku jne...
+				$ulos .= sprintf ('%012.12s', 	$laskurow["summa"]);										//summa etumerkitön, sentteinä
+				$ulos .= sprintf ('%06.6s', 	$laskurow["erpcm"]);										//eräpäivä
+				
+				if($laskurow["kasumma"] > 0) {
+					$ulos .= sprintf ('%06.6s', $laskurow["kapvm"]);										//kassa-ale1 pvm
+				}
+				else{
+					$ulos .= sprintf ('%06.6s', "0");
+				}
+				
+				$ulos .= sprintf ('%06.6s', 	"0");
+				$ulos .= sprintf ('%06.6s', 	"0");
+				$ulos .= sprintf ('%06.6s', 	"0");
+				
+				$ulos .= sprintf ('%012.12s',	"0");
+				
+				if($laskurow["kasumma"] > 0) {
+					$ulos .= sprintf ('%012.12s', $laskurow["kasumma"]);									//kassa-ale1 valuutassa
+				}
+				else {
+					$ulos .= sprintf ('%012.12s', "0");
+				}
+				
+				$ulos .= sprintf ('%012.12s',	"0");
+				$ulos .= sprintf ('%012.12s', 	"0");
+				$ulos .= sprintf ('%012.12s', 	"0");
+				
+				$ulos .= sprintf ('%024.24s',  	"0");
+				
+				if($laskurow["kasumma"] > 0) {
+					$ulos .= sprintf ('%01.1s', "1");														//kassa-ale1 koodi 0-ei alennusta, 1-alennus
+				}
+				else {
+					$ulos .= sprintf ('%01.1s', "0");
+				}
+				
+				$ulos .= sprintf ('%01.1s', 	"0");
+				$ulos .= sprintf ('%01.1s', 	"0");
+				$ulos .= sprintf ('%01.1s', 	"0");
+				
+				$ulos .= sprintf ('%02.2s',   	"0");
+				$ulos .= sprintf ('%010.10s',  	"0");
+				$ulos .= sprintf ('%04.4s',   	"0");														//alv (ei välitetä)
 				$ulos .= sprintf ('%-30.30s', 	$laskurow["toim_nimi"]);									//toimituspaikan nimi
-				$ulos .= sprintf ('%06d',	 	$asirow["asiakasnro"]);										//asiakasnro
-				$ulos .= sprintf ('%010d', 		str_replace('-','',$laskurow["ytunnus"]));					//toim  ytunnus
+				$ulos .= sprintf ('%06.6s',	 	$asirow["asiakasnro"]);										//asiakasnro
+				$ulos .= sprintf ('%010.10s', 	str_replace('-','',$laskurow["ytunnus"]));					//toim  ytunnus
 				$ulos .= sprintf ('%-20.20s', 	$laskurow["toim_osoite"]);									//toim osoite
 				$ulos .= sprintf ('%-20.20s', 	$laskurow["toim_postino"]." ".$laskurow["toim_postitp"]);	//toim postitp ja postino
 				$ulos .= sprintf ('%-30.30s', 	"");
-				$ulos .= sprintf ('%013d', 		"0");
+				$ulos .= sprintf ('%013.13s', 	"0");
 				$ulos .= sprintf ('%-30.30s', 	"");
-				$ulos .= sprintf ('%06d', 		"0");
+				$ulos .= sprintf ('%06.6s', 	"0");
 				
 				if ($laskurow["toim_maa"] != $yhtiorow["maakoodi"] and $laskurow["toim_maa"] != '') {
 					$ulos .= sprintf ('%-10.10s', $laskurow["toim_maa"]);
@@ -244,8 +270,8 @@
 					$ulos .= sprintf ('%-10.10s', 	"");
 				}
 				
-				$ulos .= sprintf ('%03d', 		"0");
-				$ulos .= sprintf ('%020d', 	$laskurow["viite"]);
+				$ulos .= sprintf ('%03.3s', 	"0");
+				$ulos .= sprintf ('%020.20s', 	$laskurow["viite"]);
 				$ulos .= sprintf ('%-8.8s', 	"");
 				$ulos .= "\r\n";
 			
@@ -267,20 +293,20 @@
 			
 			//luodaan summatietue
 			$ulos .= sprintf ('%-4.4s', 	"KRFL");
-			$ulos .= sprintf ('%01d', 		"9");
+			$ulos .= sprintf ('%01.1s', 	"9");
 			$ulos .= sprintf ('%-17.17s', 	str_replace('-','',$yhtiorow["ytunnus"]));
-			$ulos .= sprintf ('%06d', 		$luontipvm);
-			$ulos .= sprintf ('%04d',   	$luontiaika);
-			$ulos .= sprintf ('%06d', 		$laskukpl);
-			$ulos .= sprintf ('%06d', 		$vlaskukpl);
-			$ulos .= sprintf ('%013d', 		$vlaskusum);
-			$ulos .= sprintf ('%06d', 		$hlaskukpl);
-			$ulos .= sprintf ('%013d', 		$hlaskusum);
-			$ulos .= sprintf ('%06d', 		"0");
-			$ulos .= sprintf ('%013d', 		"0");
-			$ulos .= sprintf ('%06d', 		"0");
-			$ulos .= sprintf ('%013d', 		"0");
-			$ulos .= sprintf ('%013d', 		"0");
+			$ulos .= sprintf ('%06.6s', 	$luontipvm);
+			$ulos .= sprintf ('%04.4s',   	$luontiaika);
+			$ulos .= sprintf ('%06.6s', 	$laskukpl);
+			$ulos .= sprintf ('%06.6s', 	$vlaskukpl);
+			$ulos .= sprintf ('%013.13s', 	$vlaskusum);
+			$ulos .= sprintf ('%06.6s', 	$hlaskukpl);
+			$ulos .= sprintf ('%013.13s', 	$hlaskusum);
+			$ulos .= sprintf ('%06.6s', 	"0");
+			$ulos .= sprintf ('%013.13s', 	"0");
+			$ulos .= sprintf ('%06.6s', 	"0");
+			$ulos .= sprintf ('%013.13s', 	"0");
+			$ulos .= sprintf ('%013.13s', 	"0");
 			$ulos .= sprintf ('%-273.273s',	"");
 			$ulos .= "\r\n";
 			

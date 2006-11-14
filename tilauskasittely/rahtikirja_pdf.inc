@@ -8,11 +8,14 @@
 	//
 	// muuttujat:
 	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
+	// mehto sisältää maksuehdon tiedot
 	// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
 	//
 	// tulostetaan rahtikirja
 	
-	
+	if ($tulostakopio == 'kylla') {
+		$lotsikot = $otsikot;
+	}
 	
 	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
 	$tempr = mysql_query($query) or pupe_error($query);
@@ -24,8 +27,8 @@
 	
 	
 	
-	if ($rahsoprow['rahtisopimus']=='')	$rahsoprow['rahtisopimus']	= "000000";
-	if ($toitarow['sopimusnro']=='')	$toitarow['sopimusnro']		= "000000";
+	//if ($rahsoprow['rahtisopimus']=='')	$rahsoprow['rahtisopimus']	= "000000";
+	//if ($toitarow['sopimusnro']=='')	$toitarow['sopimusnro']		= "000000";
 	
 	
 	
@@ -41,7 +44,7 @@
 	}
 	
 	// postiennakko
-	if ($rakir_row["jv"] != '') {
+	if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
 		$postiennakkomaara  = "$yhteensa $yhtiorow[valkoodi]";
 		$postiennakkotilino = "$yhtiorow[pankkitili1]";
 		$postiennakkoviite  = "$viite";
@@ -74,7 +77,8 @@
 	$norm["font"] = "Times-Roman";
 	
 	$kirj["height"] = 8;
-	$kirj["font"] = "Times-Roman";
+	//$kirj["font"] = "Times-Roman";
+	$kirj["font"] = "Times-Bold";
 	
 	$iso["height"] = 12;
 	$iso["font"] = "Helvetica-Bold";
@@ -84,6 +88,8 @@
 				
 	//tulostetaan 3 sivua
 	$tulostakolli = 3;
+	//$tulostakolli = 1; 
+	
 	
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			
@@ -94,7 +100,9 @@
 		$lahete	= sprintf("%04d", $otsikot[0]); //Laitetaan laheteen numero rahtikirjan alkuun
 		$aika	= sprintf("%05d", date("mds"));	//Loppuun laitetaan päiväys
 		
-		$toitarow['sopimusnro'] = sprintf("%06d",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitkä
+		if ($toitarow['sopimusnro'] != '') {
+			$toitarow['sopimusnro'] = sprintf("%06d",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitkä			
+		}
 	
 		//tehdään viivakoodi joka 9 merkkiä pitkä.
 		$viiva 	= $lahete.$aika;
@@ -171,11 +179,12 @@
 		$pdf->draw_rectangle(777,60,755,300,											$firstpage, $rectparam);
 		$pdf->draw_text(65,  758,  $yhtiorow["osoite"],									$firstpage, $kirj);	
 		$pdf->draw_rectangle(755,60,733,300,											$firstpage, $rectparam);
-		$pdf->draw_text(65,  736,  $yhtiorow["postino"]."   ".$yhtiorow["postip"],		$firstpage, $kirj);
+		$pdf->draw_text(65,  736,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"],		$firstpage, $kirj);
 		//oikeeta
 		$pdf->draw_text(302,  803,  "Lähetyspäivämäärä Avsändningsdatum",				$firstpage, $norm);
 		$pdf->draw_text(302,  788,  date("d.m.Y"),										$firstpage, $kirj);
 		$pdf->draw_text(302,  782,  "Lähettäjän viite Avsändarens referens",			$firstpage, $norm);
+		$pdf->draw_text(302,  767,  $lotsikot[0],										$firstpage, $kirj);
 		$pdf->draw_text(302,  761,  "Vastaanottajan viite Mottagarens referens",		$firstpage, $norm);
 	
 		$pdf->draw_rectangle(733,60,733,545,											$firstpage, $rectparam);
@@ -184,15 +193,17 @@
 		$pdf->draw_rectangle(733,60,711,300,											$firstpage, $rectparam);
 		$pdf->draw_text(62,  726,  "Vastaanottaja Mottagare",							$firstpage, $norm);
 		$pdf->draw_text(240, 726,  "Asiakasnro Kundnr",									$firstpage, $norm);
-		$pdf->draw_text(65,  714,  $rakir_row["toim_nimi"],								$firstpage, $kirj);
+		$pdf->draw_text(65,  714,  $rakir_row["nimi"],								$firstpage, $kirj);
 		$pdf->draw_text(240, 714,  $rahsoprow['rahtisopimus'],							$firstpage, $kirj);
-		
 		$pdf->draw_rectangle(711,60,689,300,											$firstpage, $rectparam);
-		//$pdf->draw_text(65,  692,  $rakir_row["osoite"],								$firstpage, $kirj);
+		$pdf->draw_text(65,  692,  $rakir_row["osoite"],								$firstpage, $kirj);
 		$pdf->draw_rectangle(689,60,667,300,											$firstpage, $rectparam);
-		//$pdf->draw_text(65,  670,  $rakir_row["postino"]." ".$rakir_row["postitp"],	$firstpage, $kirj);
+		$pdf->draw_text(65,  670,  $rakir_row["postino"]."  ".$rakir_row["postitp"],	$firstpage, $kirj);
 		
 		//oikee
+		if ($toitarow['rahdinkuljettaja'] == '') {
+			$toitarow['rahdinkuljettaja'] = $toitarow['selite'];
+		}
 		$pdf->draw_text(302,  726,  "Rahdinkuljettaja ja / tai huolitsijaTransportföretag och / eller Speditör", $firstpage, $norm);
 		$pdf->draw_text(302, 670,  $toitarow['rahdinkuljettaja'],						$firstpage, $kirj);
 	
@@ -201,7 +212,8 @@
 		//toimitusosoite
 		$pdf->draw_rectangle(667,60,645,300,											$firstpage, $rectparam); 
 		$pdf->draw_text(62,  661, "Tavaran toimitusosoite",								$firstpage, $norm);
-		$pdf->draw_text(65,  648,  $rakir_row['toim_nimi']."  ".$rakir_row["toim_osoite"],	$firstpage, $kirj); 
+		$pdf->draw_text(65,  648,  $rakir_row['toim_nimi'],	$firstpage, $kirj); 
+		$pdf->draw_text(65,  626,  $rakir_row['toim_osoite'],	$firstpage, $kirj); 
 		$pdf->draw_rectangle(645,60,623,300,											$firstpage, $rectparam);
 		//oikee
 		
@@ -220,8 +232,8 @@
 		$pdf->draw_rectangle(579,300,579,545,											$firstpage, $rectparam);
 		$pdf->draw_text(302,  573, "Rahdinmaksaja Fraktbetalare",						$firstpage, $norm);
 		$pdf->draw_text(302,  559, $rahdinmaksaja,										$firstpage, $kirj);
-		$pdf->draw_text(390,  573, "Asiakasnro Kundnr",									$firstpage, $norm);
-		$pdf->draw_text(390,  559, $rahdinmaksajan_nr,									$firstpage, $kirj);  
+		$pdf->draw_text(450,  573, "Asiakasnro Kundnr",									$firstpage, $norm);
+		$pdf->draw_text(450,  559, $rahdinmaksajan_nr,									$firstpage, $kirj);  
 		
 		$pdf->draw_rectangle(557,300,557,545,											$firstpage, $rectparam);
 		$pdf->draw_rectangle(557,300,535,420,											$firstpage, $rectparam);
@@ -244,30 +256,34 @@
 		$pdf->draw_text(486,  523, "Tilavuus, m3",										$firstpage, $norm);
 				
 		//kollit
-		$pdf->draw_text(62, 510, $merkki,												$firstpage, $kirj);
+		$pdf->draw_text(62, 510, $lotsikot[0],										$firstpage, $kirj);
 		$pdf->draw_text(183, 510, $kollit[0]."  ". $pakkaus[0],							$firstpage, $kirj); 
 		$pdf->draw_text(246, 503, $vakit[0],											$firstpage, $kirj);	
 		$pdf->draw_text(422, 510, $kilot[0],											$firstpage, $kirj);
 		$pdf->draw_text(486, 510, $kuutiot[0],											$firstpage, $kirj);
 		
+		$pdf->draw_text(62, 490, $lotsikot[1],										$firstpage, $kirj);
 		$pdf->draw_text(183, 490, $kollit[1]."  ". $pakkaus[1],							$firstpage, $kirj);
 		//$pdf->draw_text(246, 490, "ulkomitat",										$firstpage, $kirj);  
 		$pdf->draw_text(246, 484, $vakit[1],											$firstpage, $kirj);
 		$pdf->draw_text(422, 490, $kilot[1],											$firstpage, $kirj); 
 		$pdf->draw_text(486, 490 , $kuutiot[1],											$firstpage, $kirj); 	
 		
+		$pdf->draw_text(62, 470, $lotsikot[2],										$firstpage, $kirj);
 		$pdf->draw_text(183, 470, $kollit[2]."  ". $pakkaus[2],							$firstpage, $kirj);
 		//$pdf->draw_text(246, 470, "ulkomitat",										$firstpage, $kirj);
 		$pdf->draw_text(246, 464, $vakit[2],											$firstpage, $kirj);
 		$pdf->draw_text(422, 470, $kilot[2],											$firstpage, $kirj);
 		$pdf->draw_text(486, 470, $kuutiot[2],											$firstpage, $kirj);
 		
+		$pdf->draw_text(62, 450, $lotsikot[3],										$firstpage, $kirj);
 		$pdf->draw_text(183, 450, $kollit[3]."  ". $pakkaus[3],							$firstpage, $kirj);
 		//$pdf->draw_text(246, 450, "ulkomitat",										$firstpage, $kirj);
 		$pdf->draw_text(246, 444, $vakit[3],											$firstpage, $kirj);
 		$pdf->draw_text(422, 450, $kilot[3],											$firstpage, $kirj);
 		$pdf->draw_text(486, 450, $kuutiot[3],											$firstpage, $kirj);
 		
+		$pdf->draw_text(62, 430, $lotsikot[4],										$firstpage, $kirj);
 		$pdf->draw_text(183, 430, $kollit[4]."  ". $pakkaus[4],							$firstpage, $kirj);
 		//$pdf->draw_text(246, 430, "ulkomitat",										$firstpage, $kirj);
 		$pdf->draw_text(246, 424, $vakit[4],											$firstpage, $kirj);
@@ -303,13 +319,13 @@
 		//oikee eli jäkivaatimus
 		$pdf->draw_rectangle(388,420,322,420,											$firstpage, $rectparam);
 		$pdf->draw_text(422, 382 , "Jälkivaatimus, maksuviite Bet.ref. För efterkrav",	$firstpage, $norm);
-		$pdf->draw_text(422, 369 , $jvrviite,											$firstpage, $norm);
+		$pdf->draw_text(422, 369 , $postiennakkoviite,									$firstpage, $kirj);
 		$pdf->draw_rectangle(366,420,366,545,											$firstpage, $rectparam);
 		$pdf->draw_text(422, 360 , "Jälkivaatimus, tilinro Kontonr för efterkrav", 	    $firstpage, $norm); 
-		$pdf->draw_text(422, 347 , $jvrtilino,											$firstpage, $norm);
+		$pdf->draw_text(422, 347 , $postiennakkotilino,									$firstpage, $kirj);
 		$pdf->draw_rectangle(344,420,344,545,											$firstpage, $rectparam);
 		$pdf->draw_text(422, 338 , "Jälkivaat. Efterkrav",                        		$firstpage, $norm); 
-		$pdf->draw_text(422, 325 , $jvrmaara,											$firstpage, $norm);
+		$pdf->draw_text(422, 325 , $postiennakkomaara,									$firstpage, $kirj);
 		$pdf->draw_rectangle(322,420,322,545,											$firstpage, $rectparam);
 		$pdf->draw_text(422, 316 , "Rahti Frakt", 					             		$firstpage, $norm);  
 		$pdf->draw_rectangle(300,420,300,545,											$firstpage, $rectparam);

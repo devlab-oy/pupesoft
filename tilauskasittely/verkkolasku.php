@@ -16,6 +16,8 @@
 	// $eilinen			--> optional parametri on jollon ajetaan laskutus eiliselle p‰iv‰lle
 	//
 	// $silent muuttujalla voidaan hiljent‰‰ kaikki outputti
+	
+	//jos chn = 999 se tarkoittaa ett‰ lasku on laskutuskiellossa eli ei saa k‰sitell‰ t‰‰ll‰!!!!!
 
 	//$silent = '';
 
@@ -241,6 +243,7 @@
 					and tila	= 'L'
 					and alatila	= 'D'
 					and viite	= ''
+					and chn	!= '999' 
 					$lasklisa";
 		$res   = mysql_query($query) or pupe_error($query);
 
@@ -283,6 +286,7 @@
 					and tila	= 'L'
 					and alatila	= 'D'
 					and viite	= ''
+					and chn	!= '999' 
 					$lasklisa";
 		$res   = mysql_query($query) or pupe_error($query);
 
@@ -1771,7 +1775,8 @@
 					where yhtio	= '$kukarow[yhtio]'
 					and tila	= 'L'
 					and alatila	= 'D'
-					and viite	= ''";
+					and viite	= ''
+					and chn	!= '999'";
 		$res = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($res);
 

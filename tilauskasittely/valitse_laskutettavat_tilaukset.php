@@ -291,6 +291,7 @@
 					and lasku.tila = 'L'
 					and tuote.yhtio	= tilausrivi.yhtio
 					and tuote.tuoteno = tilausrivi.tuoteno
+					and chn	!= '999' 
 					$alatilat
 					$vientilisa
 					$muutlisa

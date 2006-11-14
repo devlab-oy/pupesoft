@@ -91,15 +91,8 @@
 						//tilausnumerot talteen, nämä pitää sitten lopuks lähettää ja merkata valmiiks
 						if (!in_array($tunnus, $superostot)) $superostot[] = $tunnus;
 
-#TODO kuuluis käyttää kuuluukovarastoon?
-						// katotaan mikä varasto on kysessä mistä halutaan tilata, niin laitetaan se hyllyalue kenttään
-						$varastoquery = "select tunnus
-									from varastopaikat
-									where yhtio = '$tiltoi[tyyppi_tieto]'
-									and concat(rpad(upper('$rivi[hyllyalue]') ,5,'0'),lpad('$rivi[hyllynro]' ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
-									and concat(rpad(upper('$rivi[hyllyalue]') ,5,'0'),lpad('$rivi[hyllynro]' ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))";
-						$varastoresult = mysql_query($varastoquery) or pupe_error($varastoquery);
-						$varastoro = mysql_fetch_array($varastoresult);
+						// katotaan mikä varasto on kysessä mistä halutaan tilata, niin laitetaan sen tunnus hyllyalue kenttään (#TODO tämä kusee jos varaston tunnus on yli 5 merkkiä!)
+						$varastorotunnus = kuuluukovarastoon($rivi["hyllyalue"], $rivi["hyllynro"], "", $tiltoi["tyyppi_tieto"]);
 
 						// katotaan onko tämä myyntirivi tunnus linkattu johonkin sarjanumeroon
 						$sarjaquery = "select * from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and myyntirivitunnus='$rivi[tunnus]'";
@@ -117,7 +110,7 @@
 						// lisätään ostotilausrivi
 						$query = "	insert into tilausrivi
 									(tuoteno, hinta, tilkpl, varattu, otunnus, yhtio, tyyppi, kommentti, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
-									('$rivi[tuoteno]', '$rivi[hinta]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O', '$sarjacomment', '$varastoro[tunnus]','0','0','0','$rivi[tunnus]')";
+									('$rivi[tuoteno]', '$rivi[hinta]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O', '$sarjacomment', '$varastorotunnus','0','0','0','$rivi[tunnus]')";
 						$updre = mysql_query($query) or pupe_error($query);
 						$rivitunnus = (string) mysql_insert_id();
 

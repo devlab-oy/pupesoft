@@ -240,7 +240,17 @@ if (!function_exists('rivi')) {
 
 		$rivihinta_veroton = 0;
 		$rivihinta_verolli = 0;
-
+		
+		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
+			$laji = 'nimitys_'.strtolower($kieli);
+			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
+			$nimresult = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($nimresult)>0) {
+				$nimrow=mysql_fetch_array($nimresult);
+				$row['nimitys']=$nimrow['selite'];
+			}
+		}
+		
 		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,22),	$firstpage, $norm);
 		$pdf->draw_text(190, $kala, $row["tuoteno"], 				$firstpage, $norm);
 

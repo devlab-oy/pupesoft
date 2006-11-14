@@ -30,14 +30,21 @@
 			$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
 			$pres  = mysql_query($query) or pupe_error($query);
 			$print = mysql_fetch_array($pres);
+			if (strpos($toitarow['rahtikirja'],'pdf') === false) {
+				$printteri = $print["printteri2"]; //matriisi
+			}
+			else {
+				$printteri = $print["printteri6"]; //laser
+			}
 		}
 		else {
-			$print["printteri2"] = $valittu_tulostin;
+			$printteri = $valittu_tulostin;
 		}
-
+		
+		
 
 		// haetaan printteri 2:lle tulostuskomento
-		$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$print[printteri2]'";
+		$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$printteri'";
 		$pres  = mysql_query($query) or pupe_error($query);
 		$print = mysql_fetch_array($pres);
 

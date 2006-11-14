@@ -44,8 +44,14 @@
 
 			if ($toitarow['hetiera'] == 'H') // jos pit‰‰ tulostaa heti
 				$mika="printteri4"; // valitaan tarraprintteri
-			else
-				$mika="printteri2"; // muuten erarahtiprintteri
+			else {
+				if (strpos($toitarow['rahtikirja'],'pdf') === false) {
+					$mika = "printteri2"; //matriisi
+				}
+				else {
+					$mika = "printteri6"; //laser
+				}
+			}
 		}
 		else {
 			//hetitulostukset voidaan ohjata k‰ytt‰j‰n valitsemalle printterille

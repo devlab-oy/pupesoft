@@ -436,4 +436,56 @@ if (!function_exists("saldo_myytavissa")) {
 	}
 }
 
+if (!function_exists("lpr")) {
+
+	function lpr($str,$prn) {
+
+		global $kukarow;
+
+		$query = "	SELECT *
+					FROM kirjoittimet
+					WHERE
+					yhtio = '$kukarow[yhtio]' and
+					tunnus = '$prn'
+					ORDER by kirjoitin";
+		$kirre = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($kirre) != 1) {
+			echo "printer not found";
+			return;
+		}
+
+		$kirjoitin = mysql_fetch_array($kirre);
+		$pipe = popen("$kirjoitin[komento]", 'w');
+
+		if (!$pipe) {
+			echo "pipe failed";
+			return;
+		}
+
+		$from = array ('ä','å','ö','Ä','Å','Ö','|');
+
+		if ($kirjoitin["merkisto"] == 1) {
+			$to	= array ('{','}','|','[',']','\\',chr(179));								// 7 bittiset
+			$str = str_replace($from, $to, $str);											// Tehdään käännös
+		}
+		elseif ($kirjoitin["merkisto"] == 2) {
+			$to	= array (chr(132),chr(134),chr(148),chr(142),chr(143),chr(153),chr(179));	// DOS charset
+			$str = str_replace($from, $to, $str);											// Tehdään käännös
+		}
+		elseif ($kirjoitin["merkisto"] == 3) {
+			$to	= array (chr(228),chr(229),chr(246),chr(196),chr(197),chr(214),chr(124));	// ANSI charset
+			$str = str_replace($from, $to, $str);											// Tehdään käännös
+		}
+		elseif ($kirjoitin["merkisto"] == 4) {
+			$str = utf8_encode($str);														// UTF8 charset käännös suoraan yhellä rivillä
+		}
+
+		fputs($pipe,$str);
+		pclose($pipe);
+
+	}
+
+}
+
 ?>

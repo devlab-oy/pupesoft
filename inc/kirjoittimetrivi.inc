@@ -7,7 +7,7 @@
 	    mysql_field_name($result, $i) == "yhtio") {
 		$tyyppi = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "merkisto") {
 			$sel		= array();
 			$pv			= $trow[$i];
@@ -19,6 +19,7 @@
 				<option value='1' $sel[1]>7 Bit</option>
 				<option value='2' $sel[2]>DOS</option>
 				<option value='3' $sel[3]>ANSI</option>
+				<option value='4' $sel[4]>UTF8</option>
 				</select></td>";
 			$jatko = 0;
 	}

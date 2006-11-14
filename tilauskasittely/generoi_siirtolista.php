@@ -22,7 +22,7 @@
 			}
 
 			if ($toimittaja != "") {
-				$query = "select tuoteno from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and toimittaja='$toimittaja'";
+				$query = "select distinct tuoteno from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and toimittaja='$toimittaja'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
@@ -44,13 +44,13 @@
 			$query = "SELECT * FROM varastopaikat WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kohdevarasto'";
 			$result = mysql_query($query) or pupe_error($query);
 			$varow = mysql_fetch_array($result);
-#TODO palauttaa väärän varaston
+
 			$query = "SELECT tuotepaikat.*, tuotepaikat.halytysraja-saldo tarve, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka, tuote.nimitys
 						FROM tuotepaikat, tuote
 						WHERE tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						and tuotepaikat.yhtio = '$kukarow[yhtio]'
-						and hyllyalue >= '$varow[alkuhyllyalue]' and hyllynro >= '$varow[alkuhyllynro]'
-						and hyllyalue <= '$varow[loppuhyllyalue]' and hyllynro <= '$varow[loppuhyllynro]'
+						and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, ' '),lpad(upper('$varow[alkuhyllynro]'),  5, ' ')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' ')) 
+						and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, 'Ö'),lpad(upper('$varow[loppuhyllynro]'), 5, 'Ö')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, 'Ö'),lpad(upper(tuotepaikat.hyllynro), 5, 'Ö'))
 						and tuotepaikat.halytysraja != 0
 						and tuotepaikat.halytysraja > saldo
 						$lisa
@@ -107,7 +107,22 @@
 					$otsikoita ++;
 
 				}
-
+				
+				//katotaan paljonko sinne on jo menossa
+				$query = "SELECT sum(varattu) varattu
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$pairow[tuoteno]'
+							and varattu > 0
+							and tyyppi = 'G'
+							and lasku.clearing = '$kohdevarasto'";
+				$vanresult = mysql_query($query) or pupe_error($query);
+				$vanhatrow = mysql_fetch_array($vanresult);
+				
+				//ja vähennetään se tarpeesta
+				$pairow['tarve'] = $pairow['tarve'] - $vanhatrow['varattu'];
+				
 				if ($pairow['tilausmaara'] > 0 and $pairow['tarve'] > 0 and $pairow['tilausmaara'] > $pairow['tarve']) {
 					$pairow['tarve'] = $pairow['tilausmaara'];
 				}
@@ -118,8 +133,8 @@
 							concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) ihmepaikka
 							FROM tuotepaikat, varastopaikat
 							WHERE tuotepaikat.yhtio = varastopaikat.yhtio
-							and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) >= concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(alkuhyllynro  ,5,'0'))
-							and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) <= concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(loppuhyllynro ,5,'0'))
+							and concat(rpad(upper(alkuhyllyalue),  5, ' '),lpad(upper(alkuhyllynro),  5, ' ')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' ')) 
+							and concat(rpad(upper(loppuhyllyalue), 5, 'Ö'),lpad(upper(loppuhyllynro), 5, 'Ö')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, 'Ö'),lpad(upper(tuotepaikat.hyllynro), 5, 'Ö')) 
 							and tuotepaikat.yhtio = '$kukarow[yhtio]'
 							and tuotepaikat.tuoteno = '$pairow[tuoteno]'
 							and varastopaikat.tunnus = '$lahdevarasto'

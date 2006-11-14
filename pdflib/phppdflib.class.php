@@ -979,7 +979,8 @@ class pdffile
     function strlen($string , $params = false, $tabwidth = 4)
     {
         if ($this->needsset) {
-            require_once(dirname(__FILE__) . '/strlen.inc.php');
+//            require_once(dirname(__FILE__) . '/strlen.inc.php');
+            require(dirname(__FILE__) . '/strlen.inc.php'); 
         }
         if (empty($params["font"])) {
             $font = $this->default['font'];

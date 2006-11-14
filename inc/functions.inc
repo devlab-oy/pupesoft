@@ -243,8 +243,8 @@ if (!function_exists("kuuluukovarastoon")) {
 		$query = "	SELECT tunnus
 					FROM varastopaikat
 					WHERE
-					concat(lpad(upper(alkuhyllyalue),  5, ' '),lpad(upper(alkuhyllynro),  5, ' ')) <= concat(lpad(upper('$hyllyalue'), 5, ' '),lpad(upper('$hyllynro'), 5, ' ')) and
-					concat(lpad(upper(loppuhyllyalue), 5, ' '),lpad(upper(loppuhyllynro), 5, ' ')) >= concat(lpad(upper('$hyllyalue'), 5, ' '),lpad(upper('$hyllynro'), 5, ' ')) and
+					concat(lpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(lpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) and
+					concat(lpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(lpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) and
 					yhtio = '$yhtiolisa'
 					$varastolisa";
 		$varcheckres = mysql_query($query) or pupe_error($query);
@@ -365,8 +365,8 @@ if (!function_exists("saldo_myytavissa")) {
 			$query = "	SELECT tuotepaikat.*
 						FROM tuotepaikat
 						JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio and $valinta
-						concat(lpad(upper(alkuhyllyalue),  5, ' '),lpad(upper(alkuhyllynro),  5, ' ')) <= concat(lpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' ')) and
-						concat(lpad(upper(loppuhyllyalue), 5, ' '),lpad(upper(loppuhyllynro), 5, ' ')) >= concat(lpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' '))
+						concat(lpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+						concat(lpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 						WHERE tuotepaikat.yhtio = '$yhtiolisa'
 						and tuotepaikat.tuoteno = '$tuoteno'";
 			$result = mysql_query($query) or die($query);

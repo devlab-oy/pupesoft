@@ -174,8 +174,8 @@
 						ifnull(sum(if(tilausrivi.keratty ='', tilausrivi.varattu, 0)),0) ennpois
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 						JOIN varastopaikat on tilausrivi.yhtio = varastopaikat.yhtio
-						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
+						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
 						and varastopaikat.tyyppi = ''
 						WHERE tilausrivi.yhtio = '$krow[yhtio]'
 						and tilausrivi.tyyppi in ('L','G','V')

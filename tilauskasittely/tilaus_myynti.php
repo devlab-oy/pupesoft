@@ -126,7 +126,7 @@ $ale 	= str_replace(',','.',$ale);
 $kpl 	= str_replace(',','.',$kpl);
 
 // jos ei olla postattu mit‰‰n, niin halutaan varmaan tehd‰ kokonaan uusi tilaus..
-if ($kukarow["extranet"] == "" and count($_POST) == 0) {
+if ($kukarow["extranet"] == "" and count($_POST) == 0 and $from != "LASKUTATILAUS") {
 	$tila				= '';
 	$tilausnumero		= '';
 	$laskurow			= '';
@@ -1296,6 +1296,11 @@ if ($tee == '') {
 				$paikka	= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
 				$tila	= "";
 			}
+			elseif ($tapa == "POISJTSTA") {
+				$var 	= "";
+				$paikka	= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
+				$tila	= "";
+			}
 			elseif ($tapa == "VAIHDA") {
 				$perheid = $tilausrivi['perheid'];
 				$tila	 = "";
@@ -2067,6 +2072,19 @@ if ($tee == '') {
 								<input type='hidden' name='perheid' value = '$row[perheid]'>
 								<td class='back'><input type='Submit' Style='{font-size: 8pt;}' value='".t("Lis‰‰ reseptiin")."'></td>
 								</form>";
+					}
+					
+					if ($row["var"] == "J" and $laskurow["alatila"] == "T") {
+						if(saldo_myytavissa($row["tuoteno"], "", 0, "") >= $kpl_ruudulle) {
+							echo "	<form action='$PHP_SELF' method='post'>
+									<input type='hidden' name='toim' value='$toim'>
+									<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+									<input type='hidden' name='tila' value = 'MUUTA'>
+									<input type='hidden' name='tapa' value = 'POISJTSTA'>
+									<td class='back' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("Toimita")."'></td>
+									</form>";
+						}
 					}
 
 

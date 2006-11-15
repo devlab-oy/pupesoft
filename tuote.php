@@ -334,12 +334,13 @@
 						$kokonaishyllyssa += $hyllyssa;
 						$kokonaismyytavissa += $myytavissa;
 
+						// katotaan kuuluuko johonki varastoon
+						$varastotunnus = kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"]);
+
 						// haetaan varaston nimi
 						$query = "	SELECT *
 									FROM varastopaikat
-									WHERE
-									concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper('$saldorow[hyllyalue]') ,5,'0'),lpad(upper('$saldorow[hyllynro]') ,5,'0')) and
-									concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper('$saldorow[hyllyalue]') ,5,'0'),lpad(upper('$saldorow[hyllynro]') ,5,'0'))
+									WHERE tunnus = '$varastotunnus'
 									and yhtio = '$kukarow[yhtio]'";
 						$varcheckres = mysql_query($query) or pupe_error($query);
 						$varcheckrow = mysql_fetch_array($varcheckres);

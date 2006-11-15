@@ -97,18 +97,18 @@
 		$firstpage = $pdf->new_page("a4");
 		
 	
-		$lahete	= sprintf("%04d", $otsikot[0]); //Laitetaan laheteen numero rahtikirjan alkuun
-		$aika	= sprintf("%05d", date("mds"));	//Loppuun laitetaan p‰iv‰ys
+		$lahete	= sprintf("%09d", $lotsikot[0]); //Laitetaan laheteen numero rahtikirjan alkuun
+		//$aika	= sprintf("%05d", date("mds"));	//Loppuun laitetaan p‰iv‰ys
 		
 		if ($toitarow['sopimusnro'] != '') {
 			$toitarow['sopimusnro'] = sprintf("%06d",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitk‰			
 		}
 	
 		//tehd‰‰n viivakoodi joka 9 merkki‰ pitk‰.
-		$viiva 	= $lahete.$aika;
+		$viiva 	= $lahete;
 	
 		// erotellaan spacella jokainen rahtikirjanumero
-		$rahtikirjanro = "$viiva ";
+		$rahtikirjanro = $lotsikot[0];
 			
 		//Duusataan viivakoodia 
 		$output   = "png";

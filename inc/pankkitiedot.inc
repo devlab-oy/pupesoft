@@ -36,15 +36,18 @@ function pankkitiedot($tilino, $asiakastunnus) {
 	$pankki["ytunnus"] 			= $ytunnus;
 	$pankki["lmp_mt_4kentta"]	= "$tilino";
 	$pankki["lmp_st_4kentta"]	= "$tilino";
+	$pankki["tiedostonimi"] 	= "XXXXXXXX.DAT";
 
 	switch ($tmp_tilino) {
 		case (1) : //Nordea
 			$pankki["rahalaitos"]		= '1 ';
 			$pankki["pankkilaitos"] 	= "Nordea";
+			$pankki["tiedostonimi"] 	= "SOLOLMP.DAT";
 			break;
 		case (2) : //Nordea
 			$pankki["rahalaitos"]		= '2 ';
-			$pankki["pankkilaitos"] 	= "Nordea";			
+			$pankki["pankkilaitos"] 	= "Nordea";
+			$pankki["tiedostonimi"] 	= "SOLOLMP.DAT";			
 			break;
 		case (3) : 
 			$tmp_tilino=substr($yritystilino,1,1);
@@ -88,14 +91,18 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			
 			$pankki["lmp_mt_4kentta"]	= "$tilino";			
 			$pankki["lmp_st_4kentta"]	= "$tilino";
+			
+			$pankki["tiedostonimi"] 	= "OKOMP.DAT";
+			
 			break;
 		case (6) : //Ålandsbanken
 			$pankki["rahalaitos"]		= '  ';
 			$pankki["pankkilaitos"] 	= "Ålandsbanken";			
 			break;
 		case (8) : //Sampo Pankki
-			$pankki["rahalaitos"]		= ' 8';
+			$pankki["rahalaitos"]		= '8 ';
 			$pankki["pankkilaitos"] 	= "Sampo";
+			$pankki["tiedostonimi"] 	= "LEOL2L.DAT";
 			break;
 	}	
 	

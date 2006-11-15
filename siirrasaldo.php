@@ -108,8 +108,8 @@
 						$query = "	SELECT *
 									FROM tuotepaikat
 									WHERE tuoteno = '$tuoteno'
-									and concat(lpad(upper('$lahderow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$lahderow[alkuhyllynro]')  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-									and concat(lpad(upper('$lahderow[loppuhyllyalue]') ,5,'0'),lpad(upper('$lahderow[loppuhyllynro]') ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+									and concat(rpad(upper('$lahderow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$lahderow[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+									and concat(rpad(upper('$lahderow[loppuhyllyalue]') ,5,'0'),lpad(upper('$lahderow[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 									and yhtio = '$kukarow[yhtio]'
 									ORDER BY oletus desc
 									LIMIT 1";
@@ -132,8 +132,8 @@
 							$query = "	SELECT *
 										FROM tuotepaikat
 										WHERE tuoteno = '$tuoteno'
-										and concat(lpad(upper('$kohderow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$kohderow[alkuhyllynro]')  ,5,'0')) <= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-										and concat(lpad(upper('$kohderow[loppuhyllyalue]') ,5,'0'),lpad(upper('$kohderow[loppuhyllynro]') ,5,'0')) >= concat(lpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+										and concat(rpad(upper('$kohderow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$kohderow[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+										and concat(rpad(upper('$kohderow[loppuhyllyalue]') ,5,'0'),lpad(upper('$kohderow[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 										and yhtio 	   = '$kukarow[yhtio]'
 										ORDER BY oletus desc
 										LIMIT 1";

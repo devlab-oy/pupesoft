@@ -24,7 +24,7 @@ if ($postirow['rahtisopimus']=='') $postirow['rahtisopimus'] = "000000";
 if ($toitarow['sopimusnro']=='')   $toitarow['sopimusnro']	 = "000000";
 
 // postiennakko
-if ($rakir_row["jv"] != '') {
+if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
 	$postiennakkomaara  = "$yhteensa $postirow[valkoodi]";
 	$postiennakkotilino = "$yhtiorow[pankkitili1]";
 	$postiennakkoviite  = "$viite";
@@ -121,7 +121,7 @@ if ($tulostakopio == "kylla") {
 	$splitti = array();
 	$splitti = split(' ',trim($rakir));
 	$tulostakolli = count($splitti);
-	echo "kala $tulostakolli<br>";
+	//echo "kala $tulostakolli<br>";
 }
 else {
 	if ($tulostuskpl == 0) {

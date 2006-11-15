@@ -1051,8 +1051,8 @@
 			//$srow['chn'] = '999';
 			$chn = '999';
 		}
-		else {
-			$apuqu = "select chn from asiakas where yhtio='$kukarow[yhtio]' and tunnus = $liitostunnus";
+		elseif ($liitostunnus != "") {
+			$apuqu = "select chn from asiakas where yhtio='$kukarow[yhtio]' and tunnus = '$liitostunnus'";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 			$apuro = mysql_fetch_array($meapu);
 			$chn = $apuro['chn'];

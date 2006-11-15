@@ -119,8 +119,9 @@
 		}
 	}
 
-	if ((mysql_field_name($result, $i) == "factoring_siirtoteksti")) {
-		$ulos = "<td><textarea cols='80' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
+	if (mysql_field_name($result, $i) == "factoring_siirtoteksti" or
+		mysql_field_name($result, $i) == "factoring_vientiteksti") {
+		$ulos = "<td><textarea cols='85' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
 

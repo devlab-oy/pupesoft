@@ -149,18 +149,13 @@
 			$hlaskukpl = 0;
 			$hlaskusum = 0;
 			
+			$laskuvirh = 0;
+			
 			echo "<table>";
 			echo "<tr><th>Tyyppi</th><th>Laskunumero</th><th>Nimi</th><th>Summa</th><th>Valuutta</th></tr>";
 						
 			while ($laskurow = mysql_fetch_array($laskures)) {
-			
-				$dquery = "	UPDATE lasku
-							SET factoringsiirtonumero = '$factoringsiirtonumero'
-							WHERE  yhtio	= '$kukarow[yhtio]' 
-							and tunnus		= '$laskurow[tunnus]'";
-				$dresult = mysql_query ($dquery) or pupe_error($dquery);
-				
-				
+					
 				$query  = "	SELECT *
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -168,6 +163,10 @@
 				$asires = mysql_query($query) or pupe_error($query);
 				$asirow = mysql_fetch_array($asires);
 				
+				if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
+					$laskuvirh++;
+				}	
+					
 				//luodaan ostajatietue
 				$ulos .= sprintf ('%-4.4s', 	"KRFL");										//sovellustunnus
 				$ulos .= sprintf ('%01.1s',	 	"1");											//tietuetunnus
@@ -275,64 +274,87 @@
 				$ulos .= sprintf ('%-8.8s', 	"");
 				$ulos .= "\r\n";
 			
+				echo "<tr>";
+				
 				$laskukpl++;
 				if ($laskurow["tyyppi"] == "01") {
 					$vlaskukpl++;
 					$vlaskusum += $laskurow["summa"];
 					
-					echo "<tr><td>Veloituslasku</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".($laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+					echo "<td>Veloituslasku</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".($laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td>";
 				}
 				if ($laskurow["tyyppi"] == "02") {
 					$hlaskukpl++;
 					$hlaskusum += $laskurow["summa"];
 					
-					echo "<tr><td>Hyvityslasku:</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".($laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+					echo "<td>Hyvityslasku:</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".($laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td>";
 				}
-			
+				
+				if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
+					echo "<td><font class='error'>VIRHE: Asiakasnumero: $asirow[asiakasnro] ei kelpaa!</font></td>";
+				}
 			}
 			
-			//luodaan summatietue
-			$ulos .= sprintf ('%-4.4s', 	"KRFL");
-			$ulos .= sprintf ('%01.1s', 	"9");
-			$ulos .= sprintf ('%-17.17s', 	str_replace('-','',$yhtiorow["ytunnus"]));
-			$ulos .= sprintf ('%06.6s', 	$luontipvm);
-			$ulos .= sprintf ('%04.4s',   	$luontiaika);
-			$ulos .= sprintf ('%06.6s', 	$laskukpl);
-			$ulos .= sprintf ('%06.6s', 	$vlaskukpl);
-			$ulos .= sprintf ('%013.13s', 	$vlaskusum);
-			$ulos .= sprintf ('%06.6s', 	$hlaskukpl);
-			$ulos .= sprintf ('%013.13s', 	$hlaskusum);
-			$ulos .= sprintf ('%06.6s', 	"0");
-			$ulos .= sprintf ('%013.13s', 	"0");
-			$ulos .= sprintf ('%06.6s', 	"0");
-			$ulos .= sprintf ('%013.13s', 	"0");
-			$ulos .= sprintf ('%013.13s', 	"0");
-			$ulos .= sprintf ('%-273.273s',	"");
-			$ulos .= "\r\n";
-			
-			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-			$filenimi = "Nordeasiirto-$factoringsiirtonumero.txt";
-			
-			//kirjoitetaan faili levylle..
-			$fh = fopen("dataout/".$filenimi, "w");
-			if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus ep‰onnistui $filenimi");
-			fclose($fh);
-			
-			echo "<tr><td class='back'><br></td></tr>";
-			
-			echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $vlaskukpl veloituslaskua</th><td align='right'>".round($vlaskusum/100,2)."</td><td>$laskurow[valkoodi]</td></tr>";
-			echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $hlaskukpl hyvityslaskua</th><td align='right'> ".round($hlaskusum/100,2)."</td><td>$laskurow[valkoodi]</td></tr>";
-			
-			echo "</table>";
-			echo "<br><br>";
-			echo "<table>";
-			echo "<tr><th>Tallenna siirtoaineisto levylle:</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
-			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='SOLOMYSA.DAT'>";
-			echo "<input type='hidden' name='filenimi' value='$filenimi'>";
-			echo "<td><input type='submit' value='Tallenna'></td></form>";
-			echo "</tr></table>";
+			if ($laskuvirh > 0) {
+				echo "</table>";
+				echo "<br><br>";
+				echo "Aineistossa oli virheit‰! Korjaa ne ja aja uudestaan!";
+			}
+			else {
+				$dquery = "	UPDATE lasku
+							SET factoringsiirtonumero = '$factoringsiirtonumero'
+							WHERE lasku.yhtio	= '$kukarow[yhtio]' 
+							and lasku.tila	  	= 'U' 
+							and lasku.alatila	= 'X' 
+							and lasku.summa		!= 0
+							and lasku.laskunro >= '$ppa'
+							and lasku.laskunro <= '$ppl'
+							and lasku.factoringsiirtonumero = 0";
+				$dresult = mysql_query ($dquery) or pupe_error($dquery);
+		
+				//luodaan summatietue
+				$ulos .= sprintf ('%-4.4s', 	"KRFL");
+				$ulos .= sprintf ('%01.1s', 	"9");
+				$ulos .= sprintf ('%-17.17s', 	str_replace('-','',$yhtiorow["ytunnus"]));
+				$ulos .= sprintf ('%06.6s', 	$luontipvm);
+				$ulos .= sprintf ('%04.4s',   	$luontiaika);
+				$ulos .= sprintf ('%06.6s', 	$laskukpl);
+				$ulos .= sprintf ('%06.6s', 	$vlaskukpl);
+				$ulos .= sprintf ('%013.13s', 	$vlaskusum);
+				$ulos .= sprintf ('%06.6s', 	$hlaskukpl);
+				$ulos .= sprintf ('%013.13s', 	$hlaskusum);
+				$ulos .= sprintf ('%06.6s', 	"0");
+				$ulos .= sprintf ('%013.13s', 	"0");
+				$ulos .= sprintf ('%06.6s', 	"0");
+				$ulos .= sprintf ('%013.13s', 	"0");
+				$ulos .= sprintf ('%013.13s', 	"0");
+				$ulos .= sprintf ('%-273.273s',	"");
+				$ulos .= "\r\n";
+		
+				//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+				$filenimi = "Nordeasiirto-$factoringsiirtonumero.txt";
+		
+				//kirjoitetaan faili levylle..
+				$fh = fopen("dataout/".$filenimi, "w");
+				if (fwrite($fh, $ulos) === FALSE) die("Kirjoitus ep‰onnistui $filenimi");
+				fclose($fh);
+		
+				echo "<tr><td class='back'><br></td></tr>";
+		
+				echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $vlaskukpl veloituslaskua</th><td align='right'>".round($vlaskusum/100,2)."</td><td>$laskurow[valkoodi]</td></tr>";
+				echo "<tr><td class='back' colspan='2'></td><th>Yhteens‰ $hlaskukpl hyvityslaskua</th><td align='right'> ".round($hlaskusum/100,2)."</td><td>$laskurow[valkoodi]</td></tr>";
+		
+				echo "</table>";
+				echo "<br><br>";
+				echo "<table>";
+				echo "<tr><th>Tallenna siirtoaineisto levylle:</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='SOLOMYSA.DAT'>";
+				echo "<input type='hidden' name='filenimi' value='$filenimi'>";
+				echo "<td><input type='submit' value='Tallenna'></td></form>";
+				echo "</tr></table>";
+			}
 		}
 		else {
 			echo "<br><br>Yht‰‰n siirrett‰v‰‰ laskua ei ole!<br>";

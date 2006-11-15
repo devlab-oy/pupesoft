@@ -9,6 +9,14 @@
 		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
 						and tilausrivi.varattu  != 0";
 	}
+	elseif ($toim == "VAINLASKUTA") {
+		echo "<font class='head'>".t("Laskuta tilaus").":</font><hr>";
+
+		$alatilat = " 	and lasku.alatila='D' ";
+		$vientilisa = " and lasku.vienti = '' ";
+		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
+						and tilausrivi.varattu  != 0";	
+	}
 	else {
 		echo "<font class='head'>".t("Tulosta vientilaskuja").":</font><hr>";
 
@@ -23,6 +31,13 @@
 		echo "<hr>";
 		$tee = "VALITSE";
 	}
+
+	if ($tee == 'MAKSUEHTO') {
+		require ("../raportit/naytatilaus.inc");
+		echo "<hr>";
+		$tee = "VALITSE";
+	}
+
 
 	if ($tee=='TOIMITA') {
 
@@ -82,15 +97,14 @@
 
 	if ($tee == "VALITSE") {
 
-		$query = "	SELECT lasku.*
-					from lasku use index (tila_index), tilausrivi use index (yhtio_otunnus), tuote
-					where tilausrivi.yhtio = '$kukarow[yhtio]'
-					and lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tunnus = tilausrivi.otunnus
+		$query = "	SELECT lasku.*, maksuehto.teksti meh, maksuehto.kassa_teksti mehka
+					FROM lasku use index (tila_index) 
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus
+					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
+					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
 					and lasku.tunnus in ($tunnukset)
-					and tuote.yhtio	= tilausrivi.yhtio
-					and tuote.tuoteno = tilausrivi.tuoteno
 					$alatilat
 					$vientilisa
 					$muutlisa
@@ -129,6 +143,8 @@
 			echo "<th>".t("Laatija")."</th>";
 			echo "<th>".t("Laadittu")."</th>";
 			echo "<th>".t("Tyyppi")."</th>";
+			echo "<th>".t("Maksuehto")."</th>";
+			echo "<th>".t("Muokkaa tilausta")."</th>";
 
 			while ($row = mysql_fetch_array($res)) {
 				$query = "	select sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*(1-ale/100)=0 and var!='P' and var!='J',1,0)) nollarivi
@@ -153,6 +169,9 @@
 					$teksti = "Hyvitys";
 				}
 				echo "<td>".t("$teksti")."</td>";
+				echo "<td>$row[mehka] $row[meh]</td>";
+
+				echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$row[tunnus]'>Pikatilaukseen</a></td>";
 
 				if ($hyvrow["nollarivi"] > 0) {
 					echo "<td class='back'>&nbsp;<font class='error'>".t("Huom! Tilauksella on nollahintaisia rivejä!")."</font></td>";

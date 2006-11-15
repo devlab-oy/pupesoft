@@ -75,8 +75,17 @@
 	}
 
 	$erpcm_virhe = ""; // apumuuttuja
+	$erpcm_kasin = ""; // apumuuttuja
+	$meapurow    = array();
 
-	if ($erpcmvv != "" and $erpcmkk != "" and $erpcmpp != "") {
+	if ($maksuehto != "") {
+		// haetaan maksuehdoen tiedot tarkastuksia varten
+		$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
+		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+		$meapurow = mysql_fetch_array($meapu);
+	}
+
+	if (($erpcmvv != "" and $erpcmkk != "" and $erpcmpp != "") or $meapurow["erapvmkasin"] != '') {
 
 		$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' order by tunnus limit 1";
 		$erpres = mysql_query($erpquery) or pupe_error($erpquery);
@@ -97,8 +106,7 @@
 			$erpcm_virhe = "X"; // apumuuttuja
 		}
 		else {
-			$erprow = mysql_fetch_array($erpres);
-			$maksuehto = $erprow["tunnus"]; // valitaan t‰‰ maksuehdoks
+			$erpcm_kasin = "KYLLA";
 		}
 	}
 
@@ -315,8 +323,8 @@
 							<td></td></tr>";
 					echo "<tr>
 							<td valign='top'></td>
-							<td></td></tr>";	
-					echo "</table>";		
+							<td></td></tr>";
+					echo "</table>";
 				echo "</td></tr></table><br>";
 			}
 
@@ -364,6 +372,9 @@
 			// otetaan erpcm kannasta jos mit‰‰n ei ole syˆtetty ruudulle
 			if ($srow["erpcm"] != "" and (int) $erpcmpp == 0 and (int) $ercpmkk == 0 and (int) $erpcmvv == 0 and $erpcm_virhe == "") {
 				list($erpcmvv, $erpcmkk, $erpcmpp) = split('-', $srow["erpcm"]);
+			}
+			else {
+				$erpcm_kasin = "KYLLA";
 			}
 
 			// jos p‰iv‰m‰‰r‰ on nollaa laitetaan tyhj‰‰
@@ -741,7 +752,7 @@
 			}
 
 			echo "<td>".t("Tilausta ei osatoimiteta")."</td><td><input type='checkbox' name='osatoimitus' $osath></td>";
-			
+
 			if ($yhtiorow['laskutuskielto'] != 0) {
 				echo "</tr><tr>";
 				echo "<td></td><td></td>";
@@ -995,7 +1006,7 @@
 			$postquery3 = " WHERE otunnus = '$kukarow[kesken]'";
 		}
 
-		if(strlen(trim($tnimi)) == 0) {
+		if (strlen(trim($tnimi)) == 0) {
 			$tnimi     = $nimi;
 			$tnimitark = $nimitark;
 			$tosoite   = $osoite;
@@ -1004,26 +1015,37 @@
 			$toim_maa  = $maa;
 		}
 
-		// katotaan, ettei olla valittu k‰teismyynti‰ joka menee rahtikirjalla.. se on no-no.
-		$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto' and kateinen!=''";
+		// haetaan maksuehdoen tiedot tarkastuksia varten
+		$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+		$meapurow = mysql_fetch_array($meapu);
 
-		// katotaan, onko valittu toimitustapa nouto
-		$apuqu2 = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa' and nouto != ''";
-		$meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
+		// jos kyseess‰ oli k‰teinen
+		if ($meapurow["kateinen"] != "") {
+			// haetaan toimitustavan tiedot tarkastuksia varten
+			$apuqu2 = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+			$meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
+			$meapu2row = mysql_fetch_array($meapu2);
 
-		if (mysql_num_rows($meapu2)<1) {
-			// jos kyseess‰ oli k‰teinen laitetaan toimitustavaksi nouto... hakee j‰rjestyksess‰ ekan
-			if (mysql_num_rows($meapu)>0) {
-				$apuqu = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and nouto!='' order by jarjestys limit 1";
+			// ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee j‰rjestyksess‰ ekan
+			if ($meapu2row["nouto"] == "") {
+				$apuqu = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and nouto != '' order by jarjestys limit 1";
 				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 				$apuro = mysql_fetch_array($meapu);
 				$toimitustapa = $apuro['selite'];
 			}
 		}
 
+		// jos kyseess‰ oli k‰sin syˆtetty er‰p‰iv‰ ja maksuehto on v‰‰rin laitetaan oikea maksuehto... hakee j‰rjestyksess‰ ekan
+		if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "") {
+			$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' order by tunnus limit 1";
+			$erpres = mysql_query($erpquery) or pupe_error($erpquery);
+			$erprow = mysql_fetch_array($erpres);
+			$maksuehto = $erprow["tunnus"]; // valitaan t‰‰ maksuehdoks
+		}
+
 		// jos ollaan valittu rahdinmaksajaksi oletus, haetaan oletusmaksaja toimitustavalta
-		if ($maksaja=='O') {
+		if ($maksaja == 'O') {
 			$apuqu = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 			$apuro = mysql_fetch_array($meapu);
@@ -1035,7 +1057,7 @@
 			// T‰ss‰ ceississ‰ myyd‰‰n vain kotimaanmyynti‰
 			$vienti = "";
 		}
-		
+
 
 
 		$crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
@@ -1045,7 +1067,7 @@
 
 		// liitostunnusfixaus
 		if ((int) $liitostunnus == 0) $liitostunnus = $asiakasid;
-		
+
 		//jos oollaan haluttu laskutuskielto laitetaan chn kentt‰‰n 999
 		if ($laskutuskielto != '') {
 			//$srow['chn'] = '999';
@@ -1060,8 +1082,8 @@
 				$chn = '100';
 			}
 		}
-		
-		
+
+
 		$query .= "	lasku SET
 					ytunnus			= '$ytunnus',
 					nimi 			= '$nimi',

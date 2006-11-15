@@ -1236,7 +1236,7 @@
 					}
 
 					// Kirjoitetaan rivitietoja tilausriveiltä
-					$query = "	select *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+					$query = "	select *, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 								from tilausrivi
 								where yhtio='$kukarow[yhtio]' and otunnus in ($tunnukset) and kpl<>0
 								order by otunnus, sorttauskentta, tuoteno, tunnus";
@@ -1525,7 +1525,7 @@
 					}
 
 					// haetaan tilauksen kaikki rivit
-					$query = "	SELECT *, concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
+					$query = "	SELECT *, concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 								FROM tilausrivi
 								WHERE uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
 								ORDER BY $laskujarj";

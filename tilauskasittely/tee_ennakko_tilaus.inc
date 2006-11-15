@@ -177,8 +177,8 @@
 					$query = "	SELECT * 
 								FROM varastopaikat 
 								WHERE yhtio			=  '$kukarow[yhtio]' 
-								and concat(lpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(lpad(upper('$hyllyalue[$i]') ,5,'0'),lpad(upper('$hyllynro[$i]') ,5,'0'))
-								and concat(lpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(lpad(upper('$hyllyalue[$i]') ,5,'0'),lpad(upper('$hyllynro[$i]') ,5,'0'))";
+								and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$hyllyalue[$i]') ,5,'0'),lpad(upper('$hyllynro[$i]') ,5,'0'))
+								and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$hyllyalue[$i]') ,5,'0'),lpad(upper('$hyllynro[$i]') ,5,'0'))";
 					$vares = mysql_query($query) or pupe_error($query);
 	
 					if (mysql_num_rows($vares)!=0) {

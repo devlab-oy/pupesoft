@@ -57,13 +57,13 @@
 						$sel="";
 						if ($trow[$i] == $vrow[0]) {
 							$sel = "selected";
-						}	
+						}
 						$ulosarray[$i] .= "<option value = '$vrow[tilino]' $sel>$vrow[tilino] $vrow[nimi]</option>";
 					}
 					$ulosarray[$i] .= "</select></td>";
 					$virhe[$i] = t("Valitse tili");
 				}
-				
+
 			}
 			if ($virhe[$i] == '') $virhe[$i] = t("Tili puuttuu tai sitä ei löydy");
 			$errori = 1;
@@ -80,6 +80,30 @@
 		}
 		else {
 			$t[$i] = $ytunnus;
+		}
+	}
+
+
+	if (mysql_field_name($result, $i) == "pankkitili1" or
+		mysql_field_name($result, $i) == "pankkitili2" or
+		mysql_field_name($result, $i) == "pankkitili3" or
+		mysql_field_name($result, $i) == "factoring_pankkitili1" or
+		mysql_field_name($result, $i) == "factoring_pankkitili2" or
+		mysql_field_name($result, $i) == "factoring_pankkitili3") {
+
+		if (strtoupper($yhtiorow['maakoodi']) == "FI" and trim($t[$i]) != "") {
+
+			$pankkitili = $t[$i];
+
+			require ('pankkitilinoikeellisuus.php');
+
+			if ($pankkitili == '') {
+				$virhe[$i] = t("Pankkitili on virheellinen");
+				$errori = 1;
+			}
+			else {
+				$t[$i] = $pankkitili;
+			}
 		}
 	}
 

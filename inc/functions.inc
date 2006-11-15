@@ -392,7 +392,7 @@ if (!function_exists("saldo_myytavissa")) {
 				$saldo += $row["saldo"];
 				$ennakkopois += $ennrow["varattu"];
 			}
-			
+
 			// katsotaan löytyykö tuotetta varattuna joltain muulta paikalta, jota ei ole enää olemassa tuotepaikoissa
 			// ekaks haetaan ihan kaikki nykyiset paikat suoraan mysql muotoon
 			$query = "	SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
@@ -483,6 +483,25 @@ if (!function_exists("lpr")) {
 		fputs($pipe,$str);
 		pclose($pipe);
 
+	}
+
+}
+
+// tehdään vertailukelponen stringi varastopaikasta
+if (!function_exists("varastopaikka")) {
+
+	function varastopaikka($str) {
+
+		$str = strtoupper(trim($str));
+
+		if (is_numeric($str)) {
+			$str = sprintf("%5.5s", $str); // numerot lpaddataan 5 merkkiä
+		}
+		else {
+			$str = sprintf("%-5.5s", $str); // stringit rpaddataan 5 merkkiä
+		}
+
+		return $str;
 	}
 
 }

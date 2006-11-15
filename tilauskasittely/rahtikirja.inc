@@ -32,26 +32,26 @@ $sivu = "                              ".sprintf("%-11.s",$toitarow["sopimusnro"
       
       
       
-         ".sprintf("%-10.s",$lotsikot[0])."     ".sprintf("%10.s",$kollit[0])." ".sprintf("%-10.s",$pakkaus[0])."              ".sprintf("%10.s",$kilot[0]).sprintf("%10.s",$kuutiot[0])."
-         ".sprintf("%-10.s",$lotsikot[1])."     ".sprintf("%10.s",$kollit[1])." ".sprintf("%-10.s",$pakkaus[1])."              ".sprintf("%10.s",$kilot[1]).sprintf("%10.s",$kuutiot[1])."
-         ".sprintf("%-10.s",$lotsikot[2])."     ".sprintf("%10.s",$kollit[2])." ".sprintf("%-10.s",$pakkaus[2])."              ".sprintf("%10.s",$kilot[2]).sprintf("%10.s",$kuutiot[2])."
-         ".sprintf("%-10.s",$lotsikot[3])."     ".sprintf("%10.s",$kollit[3])." ".sprintf("%-10.s",$pakkaus[3])."              ".sprintf("%10.s",$kilot[3]).sprintf("%10.s",$kuutiot[3])."
-         ".sprintf("%-10.s",$lotsikot[4])."     ".sprintf("%10.s",$kollit[4])." ".sprintf("%-10.s",$pakkaus[4])."              ".sprintf("%10.s",$kilot[4]).sprintf("%10.s",$kuutiot[4])."
-         ".sprintf("%-10.s",$lotsikot[5])."     ".sprintf("%10.s",$kollit[5])." ".sprintf("%-10.s",$pakkaus[5])."              ".sprintf("%10.s",$kilot[5]).sprintf("%10.s",$kuutiot[5])."
-         ".sprintf("%-10.s",$lotsikot[6])."     ".sprintf("%10.s",$kollit[6])." ".sprintf("%-10.s",$pakkaus[6])."              ".sprintf("%10.s",$kilot[6]).sprintf("%10.s",$kuutiot[6])."
-         ".sprintf("%-10.s",$lotsikot[7])."     ".sprintf("%10.s",$kollit[7])." ".sprintf("%-10.s",$pakkaus[7])."              ".sprintf("%10.s",$kilot[7]).sprintf("%10.s",$kuutiot[7])."
-         ".sprintf("%-10.s",$lotsikot[8])."     ".sprintf("%10.s",$kollit[8])." ".sprintf("%-10.s",$pakkaus[8])."              ".sprintf("%10.s",$kilot[8]).sprintf("%10.s",$kuutiot[8])."
-         ".sprintf("%-10.s",$lotsikot[9])."     ".sprintf("%10.s",$kollit[9])." ".sprintf("%-10.s",$pakkaus[9])."              ".sprintf("%10.s",$kilot[9]).sprintf("%10.s",$kuutiot[9])."
+         ".sprintf("%-10.s",$lotsikot[0])." ".sprintf("%5.s",$kollit[0])." ".sprintf("%-10.s",$pakkaus[0])." ".sprintf("%-22.s",substr($vakit[0],0,22))." ".sprintf("%10.s",$kilot[0]).sprintf("%10.s",$kuutiot[0])."
+         ".sprintf("%-10.s",$lotsikot[1])." ".sprintf("%5.s",$kollit[1])." ".sprintf("%-10.s",$pakkaus[1])." ".sprintf("%-22.s",substr($vakit[1],0,22))." ".sprintf("%10.s",$kilot[1]).sprintf("%10.s",$kuutiot[1])."
+         ".sprintf("%-10.s",$lotsikot[2])." ".sprintf("%5.s",$kollit[2])." ".sprintf("%-10.s",$pakkaus[2])." ".sprintf("%-22.s",substr($vakit[2],0,22))." ".sprintf("%10.s",$kilot[2]).sprintf("%10.s",$kuutiot[2])."
+         ".sprintf("%-10.s",$lotsikot[3])." ".sprintf("%5.s",$kollit[3])." ".sprintf("%-10.s",$pakkaus[3])." ".sprintf("%-22.s",substr($vakit[3],0,22))." ".sprintf("%10.s",$kilot[3]).sprintf("%10.s",$kuutiot[3])."
+         ".sprintf("%-10.s",$lotsikot[4])." ".sprintf("%5.s",$kollit[4])." ".sprintf("%-10.s",$pakkaus[4])." ".sprintf("%-22.s",substr($vakit[4],0,22))." ".sprintf("%10.s",$kilot[4]).sprintf("%10.s",$kuutiot[4])."
+         ".sprintf("%-10.s",$lotsikot[5])." ".sprintf("%5.s",$kollit[5])." ".sprintf("%-10.s",$pakkaus[5])." ".sprintf("%-22.s",substr($vakit[5],0,22))." ".sprintf("%10.s",$kilot[5]).sprintf("%10.s",$kuutiot[5])."
+         ".sprintf("%-10.s",$lotsikot[6])." ".sprintf("%5.s",$kollit[6])." ".sprintf("%-10.s",$pakkaus[6])." ".sprintf("%-22.s",substr($vakit[6],0,22))." ".sprintf("%10.s",$kilot[6]).sprintf("%10.s",$kuutiot[6])."
+         ".sprintf("%-10.s",$lotsikot[7])." ".sprintf("%5.s",$kollit[7])." ".sprintf("%-10.s",$pakkaus[7])." ".sprintf("%-22.s",substr($vakit[7],0,22))." ".sprintf("%10.s",$kilot[7]).sprintf("%10.s",$kuutiot[7])."
+         ".sprintf("%-10.s",$lotsikot[8])." ".sprintf("%5.s",$kollit[8])." ".sprintf("%-10.s",$pakkaus[8])." ".sprintf("%-22.s",substr($vakit[8],0,22))." ".sprintf("%10.s",$kilot[8]).sprintf("%10.s",$kuutiot[8])."
+         ".sprintf("%-10.s",$lotsikot[9])." ".sprintf("%5.s",$kollit[9])." ".sprintf("%-10.s",$pakkaus[9])." ".sprintf("%-22.s",substr($vakit[9],0,22))." ".sprintf("%10.s",$kilot[9]).sprintf("%10.s",$kuutiot[9])."
       
                             $kollityht                                  $kilotyht
       
-         ".sprintf("%-30.s",$vakit[0])."                         $viite
-         ".sprintf("%-30.s",$vakit[1])."
-         ".sprintf("%-30.s",$vakit[2])."                         $yhtiorow[pankkitili1_eitulosteta]
-         ".sprintf("%-30.s",$vakit[3])."
-         ".sprintf("%-30.s",$vakit[4])."                         $yhteensa
-         ".sprintf("%-30.s",$vakit[5])."                         $summa_eitulosteta
-         ".sprintf("%-30.s",$vakit[6])."                         $rahinta_eitulosteta
+                                                                $viite
+                                       
+                                                                $yhtiorow[pankkitili1_eitulosteta]
+                                       
+                                                                $yhteensa
+                                                                $summa_eitulosteta
+                                                                $rahinta_eitulosteta
       
                                                                 $jvhinta_eitulosteta
       

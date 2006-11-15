@@ -301,15 +301,18 @@
 				echo "Aineistossa oli virheitä! Korjaa ne ja aja uudestaan!";
 			}
 			else {
-				$dquery = "	UPDATE lasku
-							SET factoringsiirtonumero = '$factoringsiirtonumero'
+				$dquery = "	UPDATE lasku, maksuehto
+							SET lasku.factoringsiirtonumero = '$factoringsiirtonumero'
 							WHERE lasku.yhtio	= '$kukarow[yhtio]' 
 							and lasku.tila	  	= 'U' 
 							and lasku.alatila	= 'X' 
 							and lasku.summa		!= 0
 							and lasku.laskunro >= '$ppa'
 							and lasku.laskunro <= '$ppl'
-							and lasku.factoringsiirtonumero = 0";
+							and lasku.factoringsiirtonumero = 0
+							and lasku.yhtio = maksuehto.yhtio 
+							and lasku.maksuehto = maksuehto.tunnus 
+							and maksuehto.factoring = 'N'";
 				$dresult = mysql_query ($dquery) or pupe_error($dquery);
 		
 				//luodaan summatietue

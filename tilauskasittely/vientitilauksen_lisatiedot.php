@@ -240,7 +240,7 @@
 		
 		//listataan laskuttamattomat tilausket
 		$query = "	select tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
-					maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi
+					maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
 					from lasku
 					where yhtio='$kukarow[yhtio]' and tila='L' and alatila in ('B','D','E')
 					and (vienti='K' or vienti='E')
@@ -256,7 +256,7 @@
 
 	 	if (mysql_num_rows($tilre) > 0) {
 			echo "<tr>";
-			for ($i=0; $i<mysql_num_fields($tilre)-17; $i++)
+			for ($i=0; $i<mysql_num_fields($tilre)-18; $i++)
 				echo "<th align='left'>".t(mysql_field_name($tilre,$i))."</th>";
 
 			echo "<th>".t("Tyyppi")."</th>";
@@ -310,7 +310,7 @@
 
 				echo "\n\n<tr>";
 
-				for ($i=0; $i<mysql_num_fields($tilre)-17; $i++)
+				for ($i=0; $i<mysql_num_fields($tilre)-18; $i++)
 					echo "<td>$tilrow[$i]</td>";
 
 				if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {
@@ -324,10 +324,10 @@
 				}
 				echo "<td>$teksti</td>";
 				
-				if ($tilrow['vienti'] == 'K' and $tilrow['maa_maara'] != '' and $tilrow['kuljetusmuoto'] != '' and $tilrow['kauppatapahtuman_luonne'] != '' and $tilrow['sisamaan_kuljetus'] != '' and $tilrow['sisamaan_kuljetusmuoto'] != '' and $tilrow['poistumistoimipaikka'] != '' and $tilrow['poistumistoimipaikka_koodi'] != '') {
+				if ($tilrow['alatila'] == 'E' and $tilrow['vienti'] == 'K' and $tilrow['maa_maara'] != '' and $tilrow['kuljetusmuoto'] != '' and $tilrow['kauppatapahtuman_luonne'] != '' and $tilrow['sisamaan_kuljetus'] != '' and $tilrow['sisamaan_kuljetusmuoto'] != '' and $tilrow['poistumistoimipaikka'] != '' and $tilrow['poistumistoimipaikka_koodi'] != '') {
 					echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
 				}
-				elseif ($tilrow['vienti'] == 'E' and $tilrow['maa_maara'] != '' and $tilrow['kuljetusmuoto'] != '' and $tilrow['kauppatapahtuman_luonne'] != '') {
+				elseif ($tilrow['alatila'] == 'E' and $tilrow['vienti'] == 'E' and $tilrow['maa_maara'] != '' and $tilrow['kuljetusmuoto'] != '' and $tilrow['kauppatapahtuman_luonne'] != '') {
 					echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
 				}
 				else {

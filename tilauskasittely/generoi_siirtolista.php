@@ -49,8 +49,8 @@
 						FROM tuotepaikat, tuote
 						WHERE tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						and tuotepaikat.yhtio = '$kukarow[yhtio]'
-						and concat(lpad(upper('$varow[alkuhyllyalue]'),  5, ' '),lpad(upper('$varow[alkuhyllynro]'),  5, ' ')) <= concat(lpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' ')) 
-						and concat(lpad(upper('$varow[loppuhyllyalue]'), 5, ' '),lpad(upper('$varow[loppuhyllynro]'), 5, ' ')) >= concat(lpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' '))
+						and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, ' '),lpad(upper('$varow[alkuhyllynro]'),  5, ' ')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' ')) 
+						and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, ' '),lpad(upper('$varow[loppuhyllynro]'), 5, ' ')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' '))
 						and tuotepaikat.halytysraja != 0
 						and tuotepaikat.halytysraja > saldo
 						$lisa
@@ -133,8 +133,8 @@
 							concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) ihmepaikka
 							FROM tuotepaikat, varastopaikat
 							WHERE tuotepaikat.yhtio = varastopaikat.yhtio
-							and concat(rpad(upper(alkuhyllyalue),  5, ' '),lpad(upper(alkuhyllynro),  5, ' ')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' ')) 
-							and concat(rpad(upper(loppuhyllyalue), 5, 'Ö'),lpad(upper(loppuhyllynro), 5, 'Ö')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, 'Ö'),lpad(upper(tuotepaikat.hyllynro), 5, 'Ö')) 
+							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) 
+							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) 
 							and tuotepaikat.yhtio = '$kukarow[yhtio]'
 							and tuotepaikat.tuoteno = '$pairow[tuoteno]'
 							and varastopaikat.tunnus = '$lahdevarasto'

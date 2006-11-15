@@ -904,7 +904,7 @@
 				}
 
 				// haetaan tilauksen kaikki rivit
-				$query = "  SELECT *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+				$query = "  SELECT *, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 							FROM tilausrivi
 							WHERE $where and yhtio='$kukarow[yhtio]'
 							ORDER BY $laskujarj";
@@ -1135,7 +1135,7 @@
 				$pdf->set_default('margin', 0);
 
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
-				$query = "  SELECT *, concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+				$query = "  SELECT *, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 							FROM tilausrivi
 							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
 							ORDER BY sorttauskentta, tuoteno";

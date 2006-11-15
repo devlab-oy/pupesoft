@@ -22,8 +22,8 @@
 		
 		while ($turow = mysql_fetch_array($turesult)) {
 			$lis .= "	sum(if(
-						concat(lpad(upper('$turow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$turow[alkuhyllynro]')  ,5,'0')) <= concat(lpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')) and
-						concat(lpad(upper('$turow[loppuhyllyalue]') ,5,'0'),lpad(upper('$turow[loppuhyllynro]') ,5,'0')) >= concat(lpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')),1,0)) '$turow[printteri]',";					
+						concat(rpad(upper('$turow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$turow[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')) and
+						concat(rpad(upper('$turow[loppuhyllyalue]') ,5,'0'),lpad(upper('$turow[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')),1,0)) '$turow[printteri]',";					
 			$pri++;
 		}
 							

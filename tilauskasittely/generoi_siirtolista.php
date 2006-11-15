@@ -49,8 +49,8 @@
 						FROM tuotepaikat, tuote
 						WHERE tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 						and tuotepaikat.yhtio = '$kukarow[yhtio]'
-						and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, ' '),lpad(upper('$varow[alkuhyllynro]'),  5, ' ')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' ')) 
-						and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, ' '),lpad(upper('$varow[loppuhyllynro]'), 5, ' ')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, ' '),lpad(upper(tuotepaikat.hyllynro), 5, ' '))
+						and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, '0'),lpad(upper('$varow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) 
+						and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, '0'),lpad(upper('$varow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 						and tuotepaikat.halytysraja != 0
 						and tuotepaikat.halytysraja > saldo
 						$lisa

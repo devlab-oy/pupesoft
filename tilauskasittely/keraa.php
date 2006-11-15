@@ -816,7 +816,7 @@
 					tilausrivi.tuoteno puhdas_tuoteno,
 					tilausrivi.varattu, tilausrivi.jt, tilausrivi.keratty, tilausrivi.tunnus, tilausrivi.var, tilausrivi.tilkpl,
 					tuote.ei_saldoa, tuote.sarjanumeroseuranta, tuote.tuoteno tuote,
-					concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+					concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 					FROM tilausrivi, tuote
 					WHERE tuote.yhtio=tilausrivi.yhtio
 					and tuote.tuoteno=tilausrivi.tuoteno

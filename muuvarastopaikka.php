@@ -425,6 +425,10 @@
 	if ($tee == 'U') { // Uusi varstopaikka
 		// Tarkistetaan lis‰‰
 		$ahyllyalue = strtoupper($ahyllyalue);
+		$ahyllynro  = strtoupper($ahyllynro);
+		$ahyllyvali = strtoupper($ahyllyvali);
+		$ahyllytaso = strtoupper($ahyllytaso);
+		
 		$query = "	SELECT *
 					FROM tuotepaikat
 					WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
@@ -589,10 +593,10 @@
 				<input type='hidden' name='tuoteno' value='$tuoteno'>
 				<tr><th>".t("Lis‰‰ uusi varastopaikka")."</th></tr>
 				<tr><td>
-				".t("Alue")." <input type = 'text' name = 'ahyllyalue' size = '3' maxlength='3' value = '$ahyllyalue'>
-				".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '3' maxlength='2' value = '$ahyllynro'>
-				".t("V‰li")." <input type = 'text' name = 'ahyllyvali' size = '3' maxlength='2' value = '$ahyllyvali'>
-				".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '3' maxlength='2' value = '$ahyllytaso'>
+				".t("Alue")." <input type = 'text' name = 'ahyllyalue' size = '5' maxlength='5' value = '$ahyllyalue'>
+				".t("Nro")."  <input type = 'text' name = 'ahyllynro'  size = '5' maxlength='5' value = '$ahyllynro'>
+				".t("V‰li")." <input type = 'text' name = 'ahyllyvali' size = '5' maxlength='5' value = '$ahyllyvali'>
+				".t("Taso")." <input type = 'text' name = 'ahyllytaso' size = '5' maxlength='5' value = '$ahyllytaso'>
 				</td></tr>
 				<tr><td><input type = 'submit' value = '".t("Lis‰‰")."'></td></tr>
 				</table></form>";

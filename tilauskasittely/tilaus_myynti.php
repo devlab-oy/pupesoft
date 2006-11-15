@@ -750,6 +750,28 @@ if ($tee == '') {
 			}
 		}
 
+		// haetaan maksuehdoen tiedot tarkastuksia varten
+		$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+		$meapurow = mysql_fetch_array($meapu);
+
+		// jos kyseessä oli käteinen
+		if ($meapurow["kateinen"] != "") {
+			// haetaan toimitustavan tiedot tarkastuksia varten
+			$apuqu2 = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+			$meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
+			$meapu2row = mysql_fetch_array($meapu2);
+
+			// ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
+			if ($meapu2row["nouto"] == "") {
+				$apuqu = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and nouto != '' order by jarjestys limit 1";
+				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+				$apuro = mysql_fetch_array($meapu);
+				$toimitustapa = $apuro['selite'];
+				echo "<font class='error'>".t("Toimitustapa on oltava nouto, koska maksuehto on käteinen")."!</font><br><br>";
+			}
+		}
+
 		$query  = "	update lasku set
 					toimitustapa	= '$toimitustapa',
 					viesti 			= '$viesti',
@@ -1522,8 +1544,8 @@ if ($tee == '') {
 			$tres  = mysql_query($query) or pupe_error($query);
 
 			while ($salrow = mysql_fetch_array($tres)) {
-				$query =	"select * from varastopaikat where yhtio='$kukarow[yhtio]' 
-							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0')) 
+				$query =	"select * from varastopaikat where yhtio='$kukarow[yhtio]'
+							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0'))
 							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0')) ";
 				$nimre = mysql_query($query) or pupe_error($query);
 				$nimro = mysql_fetch_array($nimre);
@@ -1816,7 +1838,7 @@ if ($tee == '') {
 					$query = "	SELECT maa
 								FROM varastopaikat
 								WHERE yhtio = '$srow1[tyyppi_tieto]'
-								and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0')) 
+								and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))
 								and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))";
 					$sres2  = mysql_query($query) or pupe_error($query);
 					$srow2 = mysql_fetch_array($sres2);
@@ -1947,8 +1969,8 @@ if ($tee == '') {
 					}
 					else {
 
-						$query =	"select * from varastopaikat where yhtio='$kukarow[yhtio]' 
-									and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0')) 
+						$query =	"select * from varastopaikat where yhtio='$kukarow[yhtio]'
+									and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))
 									and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))";
 						$varastore = mysql_query($query) or pupe_error($query);
 						$varastoro = mysql_fetch_array($varastore);
@@ -2073,7 +2095,7 @@ if ($tee == '') {
 								<td class='back'><input type='Submit' Style='{font-size: 8pt;}' value='".t("Lisää reseptiin")."'></td>
 								</form>";
 					}
-					
+
 					if ($row["var"] == "J" and $laskurow["alatila"] == "T") {
 						if(saldo_myytavissa($row["tuoteno"], "", 0, "") >= $kpl_ruudulle) {
 							echo "	<form action='$PHP_SELF' method='post'>
@@ -2468,7 +2490,7 @@ if ($tee == '') {
 				$toimi			= "";
 				$tilaus_on_jo 	= "KYLLA";
 				$superit		= "";
-				
+
 				if ($toim == 'SIIRTOLISTA') {
 					$toimi = "JOO";
 				}

@@ -1766,17 +1766,20 @@
 		echo "<br>\n<table>";
 		$today = date("w") + 1;
 
+
 		$query = "	select
-					sum(if(laskutusvkopv='0',1,0)) normaali,
-					sum(if(laskutusvkopv='$today',1,0)) paiva,
-					sum(if(laskutusvkopv!='$today' and laskutusvkopv!='0',1,0)) muut,
-					count(*) kaikki
+					sum(if(lasku.laskutusvkopv='0',1,0)) normaali,
+					sum(if(lasku.laskutusvkopv='$today',1,0)) paiva,
+					sum(if(lasku.laskutusvkopv!='$today' and lasku.laskutusvkopv!='0',1,0)) muut,
+					sum(if(maksuehto.factoring!='',1,0)) factoroitavat,
+					count(lasku.tunnus) kaikki
 					from lasku
-					where yhtio	= '$kukarow[yhtio]'
-					and tila	= 'L'
-					and alatila	= 'D'
-					and viite	= ''
-					and chn	!= '999'";
+					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
+					where lasku.yhtio	= '$kukarow[yhtio]'
+					and lasku.tila	= 'L'
+					and lasku.alatila	= 'D'
+					and lasku.viite	= ''
+					and lasku.chn	!= '999'";
 		$res = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($res);
 
@@ -1788,6 +1791,7 @@
 		echo "<tr><th>".t("Laskutettavia tilauksia joilla on laskutusviikonp‰iv‰ t‰n‰‰n").":</th><td colspan='3'>$row[paiva]</td></tr>\n";
 		echo "<tr><th>".t("Laskutettavia tilauksia joiden laskutusviikonp‰iv‰ ei ole t‰n‰‰n").":</th><td colspan='3'>$row[muut]</td></tr>\n";
 		echo "<tr><th>".t("Laskutettavia tilauksia joilla EI ole laskutusviikonp‰iv‰‰").":</th><td colspan='3'>$row[normaali]</td></tr>\n";
+		echo "<tr><th>".t("Laskutettavia tilauksia jotka siirret‰‰n rahoitukseen").":</th><td colspan='3'>$row[factoroitavat]</td></tr>\n";
 		echo "<tr><th>".t("Laskutettavia tilauksia kaikkiaan").":</th><td colspan='3'>$row[kaikki]</td></tr>\n";
 
 		echo "<tr><th>".t("Syˆt‰ poikkeava laskutusp‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>

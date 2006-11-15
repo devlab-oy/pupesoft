@@ -60,6 +60,7 @@
 					tila in ('L') and
 					luontiaika >= '$vv-$kk-01' and
 					luontiaika < '$nkv-$nkk-01'
+					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";
 
@@ -100,6 +101,7 @@
 					tila in ('O') and
 					luontiaika >= '$vv-$kk-01' and
 					luontiaika < '$nkv-$nkk-01'
+					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";
 
@@ -139,6 +141,7 @@
 					vanhatunnus = 0 and
 					luontiaika >= '$vv-$kk-01' and
 					luontiaika < '$nkv-$nkk-01'
+					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";
 
@@ -180,6 +183,7 @@
 					tila in ('V') and
 					luontiaika >= '$vv-$kk-01' and
 					luontiaika < '$nkv-$nkk-01'
+					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";
 
@@ -220,6 +224,7 @@
 					tila in ('T') and
 					luontiaika >= '$vv-$kk-01' and
 					luontiaika < '$nkv-$nkk-01'
+					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";
 
@@ -252,12 +257,31 @@
 	if ($tee == "paiva") {
 		$result = mysql_query($query2) or pupe_error($query2);
 		echo "<a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$epv&kk=$epk&pp=$epp&haku=$haku'>".t("Edellinen päivä")."</a> - <a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$npv&kk=$npk&pp=$npp&haku=$haku'>".t("Seuraava päivä")."</a>";
-		echo " - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
+		echo " - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk&haku=$haku>".t("Kuukausinäkymä")."</a>";
 		echo "<br><br>";
-
+		//echo "$query2<br><br>";
+	}
+	elseif ($tee == "kk") {
+		$result = mysql_query($query1) or pupe_error($query1);
+		echo "<a href='$PHP_SELF?toim=$toim&tee=kk&vv=$ekv&kk=$ekk&pp=$ekp&haku=$haku'>".t("Edellinen kuukausi")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$nkv&kk=$nkk&pp=$nkp&haku=$haku'>".t("Seuraava kuukausi")."</a>";
+		echo "<br><br>";
+		//echo "$query1<br><br>";
+	}
+	elseif ($tee == "tilaus") {
+		$result = mysql_query($query3) or pupe_error($query3);
+		echo "<a href=$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp>".t("Päivänäkymä")."</a> - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
+		echo "<br><br>";
+		//echo "$query3<br><br>";
+	}
+	else {
+		echo "Kaboom!";
+		unset($result);
+	}
+	
+	if ($tee == "paiva" or $tee == "kk") {
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
-		echo "<input type='hidden' name='tee' value='paiva'>";
+		echo "<input type='hidden' name='tee' value='$tee'>";
 		echo "<input type='hidden' name='pp' value='$pp'>";
 		echo "<input type='hidden' name='kk' value='$kk'>";
 		echo "<input type='hidden' name='vv' value='$vv'>";
@@ -271,24 +295,6 @@
 		echo "</table>";
 
 		echo "</form>";
-
-		//echo "$query2<br><br>";
-	}
-	elseif ($tee == "kk") {
-		$result = mysql_query($query1) or pupe_error($query1);
-		echo "<a href='$PHP_SELF?toim=$toim&tee=kk&vv=$ekv&kk=$ekk&pp=$ekp'>".t("Edellinen kuukausi")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$nkv&kk=$nkk&pp=$nkp'>".t("Seuraava kuukausi")."</a>";
-		echo "<br><br>";
-		//echo "$query1<br><br>";
-	}
-	elseif ($tee == "tilaus") {
-		$result = mysql_query($query3) or pupe_error($query3);
-		echo "<a href=$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp>".t("Päivänäkymä")."</a> - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
-		echo "<br><br>";
-		//echo "$query3<br><br>";
-	}
-	else {
-		echo "Kaboom!";
-		unset($result);
 	}
 
 	if (mysql_num_rows($result) > 0) {
@@ -341,6 +347,7 @@
 				echo "<input type='hidden' name='vv' value='$vv'>";
 				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
+				echo "<input type='hidden' name='haku' value='$haku'>";
 				echo "<td class='back'><input type='submit' value='".t("Näytä")."'></td>";
 				echo "</form>";
 			}

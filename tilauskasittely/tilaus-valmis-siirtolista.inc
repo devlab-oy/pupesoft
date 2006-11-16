@@ -124,7 +124,7 @@
 							viikorkopros	= '$laskurow[viikorkopros]',
 							viite			= '$laskurow[viite]',
 							viitetxt		= '$laskurow[viitetxt]',
-							varasto 		= '$varow[tunnus]',
+							varasto 		= '$varasto',
 							liitostunnus    = '$laskurow[liitostunnus]',
 							yhtio			= '$laskurow[yhtio]',
 							clearing		= '$laskurow[clearing]',
@@ -138,12 +138,12 @@
 				elseif ($laskurow["varasto"] == 0) {
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
 					$query  ="	update lasku set
-								varasto = '$varow[tunnus]'
+								varasto = '$varasto'
 								where yhtio='$kukarow[yhtio]'
 								and tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);
 
-					$laskurow["varasto"] = $varow["tunnus"];
+					$laskurow["varasto"] = $varasto;
 				}
 				//edellinen varasto talteen
 				$edvarasto=$varasto;

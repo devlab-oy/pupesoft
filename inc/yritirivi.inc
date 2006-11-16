@@ -9,6 +9,15 @@
 	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti 
 		$maxsize++; //Tilaa mahdolliselle viivalle
 	}
+	if (mysql_field_name($result, $i) == "factoring") {
+		$sel = '';
+		if ($trow[$i] == 'o') {
+			$sel = "checked";
+		}
+		$ulos = "<td><input type='checkbox' name='$nimi' $sel>";
+		$ulos .= "</td>";
+		$jatko = 0;
+	}
  	if (mysql_field_name($result, $i) == "hyvak") { //hyväksyjät
 		$query = "SELECT kuka, nimi
                           FROM kuka

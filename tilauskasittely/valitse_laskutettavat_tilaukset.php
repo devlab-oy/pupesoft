@@ -298,18 +298,19 @@
 		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maksuehto,
+					maksuehto.teksti meh, 
+					maksuehto.kassa_teksti mehka,
 					group_concat(distinct lasku.tunnus) tunnukset,
 					group_concat(distinct lasku.tunnus separator '<br>') tunnukset_ruudulle,
 					count(distinct lasku.tunnus) tilauksia,
 					count(tilausrivi.tunnus) riveja,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
-					from lasku use index (tila_index), tilausrivi use index (yhtio_otunnus), tuote
-					where tilausrivi.yhtio = '$kukarow[yhtio]'
-					and lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tunnus = tilausrivi.otunnus
+					FROM lasku use index (tila_index) 
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus
+					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
+					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
-					and tuote.yhtio	= tilausrivi.yhtio
-					and tuote.tuoteno = tilausrivi.tuoteno
 					and chn	!= '999' 
 					$alatilat
 					$vientilisa
@@ -324,7 +325,7 @@
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
-			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivejä")."</th><th>".t("Arvo")."</th><tr>";
+			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivejä")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th><tr>";
 
 			$arvoyhteensa = 0;
 			$tilauksiayhteensa = 0;
@@ -336,7 +337,8 @@
 						<td valign='top'>$tilrow[nimi] $tilrow[nimitark]</td>
 						<td valign='top'>$tilrow[tilauksia]</td>
 						<td valign='top'>$tilrow[riveja]</td>
-						<td valign='top' align='right'>$tilrow[arvo]</td>";
+						<td valign='top' align='right'>$tilrow[arvo]</td>
+						<td valign='top'>$tilrow[mehka] $tilrow[meh]</td>";
 
 				echo "	<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='tee' value='VALITSE'>

@@ -100,10 +100,16 @@ if (!function_exists('alku')) {
 		//maksuehto tekstinä
 		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 		
+		$query  = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+		$asresult = mysql_query($query) or pupe_error($query);
+		$asrow = mysql_fetch_array($asresult);
+		
 		$pdf->draw_rectangle(780, 380, 680, 580, $firstpage, $rectparam);
-		$pdf->draw_text(390, 760, t("Asiakasnumero", $kieli).": ".$laskurow["ytunnus"], $firstpage, $p);
-		$pdf->draw_text(390, 750, t("Päiväys", $kieli).": ".substr($laskurow["lahetepvm"],0,10) , $firstpage, $p);
-		$pdf->draw_text(390, 740, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], $firstpage, $p);
+		
+		$pdf->draw_text(390, 760, t("Y-tunnus", $kieli).": ".$laskurow["ytunnus"], $firstpage, $p);
+		$pdf->draw_text(390, 750, t("Asiakasnumero", $kieli).": ".$asrow["asiakasnro"], $firstpage, $p);
+		$pdf->draw_text(390, 740, t("Päivämäärä", $kieli).": ".substr($laskurow["lahetepvm"],0,10) , $firstpage, $p);
+		$pdf->draw_text(390, 730, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], $firstpage, $p);
 		$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage, $p);
 		$pdf->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage, $p);
 		$pdf->draw_text(390, 690, t("Tilausviite", $kieli).": ".substr($laskurow["viesti"],0,18), $firstpage, $p);
@@ -151,18 +157,18 @@ if (!function_exists('alku')) {
 		}
 	
 		$pdf->draw_rectangle(670, 20,  650, 40,  $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 40,  650, 80,  $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 80,  650, 180, $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 180, 650, 320, $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 320, 650, 420, $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 370, 650, 420, $firstpage, $rectparam);
+		$pdf->draw_rectangle(670, 40,  650, 180,  $firstpage, $rectparam);
+		//$pdf->draw_rectangle(670, 80,  650, 180, $firstpage, $rectparam);
+		$pdf->draw_rectangle(670, 180, 650, 480, $firstpage, $rectparam);
+		$pdf->draw_rectangle(670, 480, 650, 530, $firstpage, $rectparam);
+		$pdf->draw_rectangle(670, 530, 650, 580, $firstpage, $rectparam);
 	
 		$pdf->draw_text(25,  657, "#",							$firstpage, $p);
-		$pdf->draw_text(45,  657, t("Paikka", $kieli),			$firstpage, $p);
-		$pdf->draw_text(90,  657, t("Tuotenumero", $kieli),		$firstpage, $p);
+		//$pdf->draw_text(45,  657, t("Paikka", $kieli),			$firstpage, $p);
+		$pdf->draw_text(45,  657, t("Tuotenumero", $kieli),		$firstpage, $p);
 		$pdf->draw_text(190, 657, t("Tuotenimi", $kieli),		$firstpage, $p);
-		$pdf->draw_text(330, 657, t("Tilattu", $kieli),			$firstpage, $p);
-		$pdf->draw_text(375, 657, t("Toimitus", $kieli),		$firstpage, $p);
+		$pdf->draw_text(490, 657, t("Tilattu", $kieli),			$firstpage, $p);
+		$pdf->draw_text(540, 657, t("Toimitus", $kieli),		$firstpage, $p);
 		
 		$pdf->draw_rectangle(650, 20, 60, 580, $firstpage, $rectparam);
 	
@@ -260,7 +266,7 @@ if (!function_exists('rivi')) {
 					}
 					$litania = substr($litania,0,-2);
 				
-					$pdf->draw_text(42,  $kala, "# ".t("Tuoteperhe", $kieli).": ".$litania,	$firstpage, $p);
+					$pdf->draw_text(45,  $kala, "# ".t("Tuoteperhe", $kieli).": ".$litania,	$firstpage, $p);
 		
 					$kala = $kala - $rivinkorkeus;
 					$lask++;
@@ -270,26 +276,26 @@ if (!function_exists('rivi')) {
 		}
 		
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$firstpage, $pp);
-		$pdf->draw_text(42,  $kala, $varastopaikka,	$firstpage, $p);
-		$pdf->draw_text(99,  $kala, $row["tuoteno"],	$firstpage, $p);
-		$pdf->draw_text(330, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$firstpage, $p);
+		//$pdf->draw_text(42,  $kala, $varastopaikka,	$firstpage, $p);
+		$pdf->draw_text(45,  $kala, $row["tuoteno"],	$firstpage, $p);
+		$pdf->draw_text(490, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$firstpage, $p);
 		
 		if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-			$pdf->draw_text(380, $kala, $row['varattu'], 	$firstpage, $p);
+			$pdf->draw_text(540, $kala, $row['varattu'], 	$firstpage, $p);
 		}
 		else {	
 			if ($row["jt"] != 0) { // jälkitoimitus
-				$pdf->draw_text(380, $kala, t("**JT**", $kieli), 	$firstpage, $p);
+				$pdf->draw_text(540, $kala, t("**JT**", $kieli), 	$firstpage, $p);
 			}
 			elseif ($row["var"] == 'P') { // puute
-				$pdf->draw_text(380, $kala, t("PUUTE", $kieli), 	$firstpage, $p);
+				$pdf->draw_text(540, $kala, t("PUUTE", $kieli), 	$firstpage, $p);
 			}
 			elseif ($row["var"] == 'H') { // väkisin hyväksytty
-				$pdf->draw_text(380, $kala, "...........", 	$firstpage, $p);
+				$pdf->draw_text(540, $kala, "...........", 	$firstpage, $p);
 			}
 		}	
 		
-		if (strlen($row["nimitys"]) > 22) {
+		if (strlen($row["nimitys"]) > 45) {
 			$kala = $kala - $rivinkorkeus;
 			$lask++;
 		}
@@ -307,7 +313,7 @@ if (!function_exists('rivi')) {
 				$futur = "";
 			}
 					
-			$pdf->draw_text(90,  $kala, "* $futur".$row["kommentti"],	$firstpage, $p);
+			$pdf->draw_text(45,  $kala, "* $futur".$row["kommentti"],	$firstpage, $p);
 			
 			$kala = $kala - $rivinkorkeus;
 			$lask++;

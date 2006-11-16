@@ -1127,9 +1127,10 @@
 			}
 
 			if ($toim == "SIIRTOLISTA") {
-
-				require_once ("tulosta_siirtolista.inc");
-
+#todo pitää lisätä tulosta_siirtolista.inc:iin toimitustapa, tilausviite ja katsoa että varastot menee oikein.
+				//require_once ("tulosta_siirtolista.inc");
+				require_once ("tulosta_lahete_kerayslista.inc");
+				
 				//tehdään uusi PDF failin olio
 				$pdf= new pdffile;
 				$pdf->set_default('margin', 0);

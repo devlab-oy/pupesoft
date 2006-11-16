@@ -149,7 +149,7 @@ else {
 				}
 			}
 			
-			if ($turow['ei_saldoa'] == '' and ($turow["sarjanumeroseuranta"] == "S" or ($trow["alv"] >= 500 and $trow["varattu"] > 0))) {
+			if ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] > 0) {
 				//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
 				$query = "	SELECT GROUP_CONCAT(ostorivitunnus SEPARATOR ',') ostotunnukset
 							FROM sarjanumeroseuranta 
@@ -162,14 +162,21 @@ else {
 				if(mysql_num_rows($sarjares1) > 0) {
 					$sarjarow1 = mysql_fetch_array($sarjares1);
 					
-					$query = "	SELECT round(sum(hinta*(1-ale/100)),2) ostosumma					
-								FROM tilausrivi 
-								WHERE yhtio='$kukarow[yhtio]' 
-								and tunnus in ($sarjarow1[ostotunnukset])";
-					$sarjares2 = mysql_query($query) or pupe_error($query);
-					$sarjarow2 = mysql_fetch_array($sarjares2);
+					//Tätä pitää fiilata koska jos ostorivi onkin myyntitilauksella niin hintaan voi kuulua esim erikoisalennus
+					if ($sarjarow1["ostotunnukset"]  != '') {
+						$query = "	SELECT round(sum(hinta*(1-ale/100)),2) ostosumma					
+									FROM tilausrivi 
+									WHERE yhtio='$kukarow[yhtio]' 
+									and tunnus in ($sarjarow1[ostotunnukset])";
+						$sarjares2 = mysql_query($query) or pupe_error($query);
+						$sarjarow2 = mysql_fetch_array($sarjares2);
 									
-					$ostohinta += $sarjarow2["ostosumma"];				
+						$ostohinta += $sarjarow2["ostosumma"];	
+					}
+					else {
+						// Ei löydetty ostohintaa
+						$ostohinta += 0;	
+					}			
 				}
 																			
 				// Kate = Hinta - Ostohinta
@@ -181,8 +188,8 @@ else {
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";
 			}
-			elseif ($turow['ei_saldoa'] == '' and $trow["alv"] >= 500 and $trow["varattu"] < 0) {
-				//Tässä meillä on ostorivi marginaaliverotuksen alaisena
+			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] < 0) {
+				//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on ostoa
 				
 				// Kate = Hinta
 				$kate 				= round($hinta/$trow["varattu"],2);

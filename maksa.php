@@ -490,7 +490,7 @@
 		$query = "	SELECT tunnus, nimi, maksulimitti, tunnus
 	                 FROM yriti 
 					WHERE yhtio='$kukarow[yhtio]' 
-					and maksulimitti > 0";
+					and maksulimitti > 0 and factoring = ''";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($result) == 0) {
@@ -523,7 +523,7 @@
 		$query = "	SELECT tunnus, nimi, maksulimitti
 				 	FROM yriti
 				 	WHERE yhtio='$kukarow[yhtio]' 
-					and tunnus = '$oltilrow[tunnus]'";
+					and tunnus = '$oltilrow[tunnus]' and factoring = ''";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($result) != 1) {
@@ -628,12 +628,13 @@
 		}
 		
 		echo "<br>".t("Pankkiin lähtevät maksut")."<hr>";
-
+		$summa=0;
 		echo "<table><tr>";
 		for ($i = 0; $i < mysql_num_fields($result); $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
 		}
 		while ($trow=mysql_fetch_array ($result)) {
+	        $summa += $trow['kotivaluutassa'];
 	        echo "<tr>";
 	        for ($i=0; $i<mysql_num_fields($result); $i++) {
 	        	if ($i==mysql_num_fields($result)-1) {
@@ -655,6 +656,7 @@
 	        }
 	        echo "</tr>";
 		}
+		echo "<tr><td colspan='5'></td><td>$summa</td><td></td></tr>";
 		echo "</table>";
 		$tee='V';
 	}
@@ -672,7 +674,10 @@
 				$lisa = " olmapvm <= '" . $erapvm ."'";
 			}
 		}
-		
+		if ($tapa == 'N') {
+			$lisa = " lasku.nimi like '%" . $nimihaku ."%'";
+		}
+				
 		echo "<form action = '$PHP_SELF' method='post'>
 				<input type='hidden' name = 'tili' value='$tili'>
 				<input type='hidden' name = 'tee' value='NV'>
@@ -858,7 +863,13 @@
 		
 		echo "</select></td>";
 		echo "<td>".t("Näytä myös vanhemmat")." <input type='Checkbox' name='kaikki'></td>";
-		echo "<td><input type='Submit' value='".t("valitse")."'></td></form><td></td></tr></table>";
+		echo "<td><input type='Submit' value='".t("valitse")."'></td></form><td></td></tr>";
+		echo "<tr><form action = 'maksa.php' method='post'>
+				<input type='hidden' name = 'tee' value='S'>
+				<input type='hidden' name = 'tapa' value='N'><td>";
+		echo t("Etsi nimellä")."</td><td><input type='text' name='nimihaku' size=''8'></td><td></td>";
+		echo "<td><input type='Submit' value='".t("valitse")."'></td></form><td></td></tr>";
+		echo "</table>";
 	}
 
 ?>

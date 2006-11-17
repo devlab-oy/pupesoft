@@ -360,7 +360,7 @@ if($tee=="") {
 						sum(if(toimitettu='',1,0)) toimittamatta,
 						count(*) toimituksia
 						FROM lasku
-						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tyyppi != 'D'
+						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='$row[tilaus]'
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu = '$row[tilaus]'
 						GROUP BY lasku.jaksotettu";

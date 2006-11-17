@@ -207,7 +207,9 @@ if (-f $nimi) {
 						yhtio.pyoristys,
 						lasku.tapvm,
 						lasku.summa,
-						yhtio.konsernimyyntisaamiset
+						yhtio.konsernimyyntisaamiset,
+						yhtio.factoringsaamiset,
+						yriti.factoring
 						FROM yhtio, lasku use index (yhtio_tila_mapvm), suoritus use index (yhtio_viite), yriti
 						WHERE yhtio.yhtio=lasku.yhtio and
 						yriti.yhtio=lasku.yhtio and
@@ -243,11 +245,13 @@ if (-f $nimi) {
 		$tapvm			= $row[13];
 		$laskusumma		= $row[14];
 		$konsernimyyntisaamiset	= $row[15];
+		$factoringsaamiset = $row[16];
+		$factoring = $row[17];
 		$alennus		= $laskutettu-$suoritettu;
 
 		#Katsotaan ensin, ettei tätä laskua ole jo suoritettu/maksettu
 		#Eli keissi jossa asiakas maksaa saman laskun kahteen kertaan samassa viiteaineistossa
-		$query = "	SELECT tunnus, ytunnus
+		$query = "	SELECT tunnus, ytunnus, maksuehto
 					FROM lasku
 					WHERE tunnus = '$lasku'
 					and mapvm = '0000-00-00'";
@@ -257,9 +261,10 @@ if (-f $nimi) {
 		$num_rows  = $masth->rows;
 
 		if ($num_rows == 1) {
-			#Etsitään asiakas, jos se olisi konsernin jäsen
 			@malaskurow = $masth->fetchrow_array();
 			$malasytunnus = $malaskurow[1];
+			$malasmehto = $malaskurow[2];
+			#Etsitään asiakas, jos se olisi konsernin jäsen
 			$query = "	SELECT konserniyhtio
 						FROM asiakas
 						WHERE ytunnus 	 = '$malasytunnus'
@@ -272,6 +277,10 @@ if (-f $nimi) {
 				if ($asiakasrow[0] eq "o") {
 					$myyntisaamiset = $konsernimyyntisaamiset;
 				}
+			}
+			#Onko tämä sittenkin factoringia
+			if ($factoring eq "o") {
+				$myyntisaamiset = $factoringsaamiset;
 			}
 
 			#Myyntisaamiset
@@ -413,7 +422,7 @@ if (-f $nimi) {
 
 	print "Tehdään kohdistamattomista laskuja...\n";
 
-	$matchstatement = "	SELECT suoritus.tunnus tunnus, suoritus.yhtio yhtio, yhtio.myyntisaamiset, suoritus.summa summa, suoritus.kirjpvm, yriti.oletus_rahatili,suoritus.nimi_maksaja
+	$matchstatement = "	SELECT suoritus.tunnus tunnus, suoritus.yhtio yhtio, yhtio.myyntisaamiset, suoritus.summa summa, suoritus.kirjpvm, yriti.oletus_rahatili,suoritus.nimi_maksaja, yhtio.factoringsaamiset, yriti.factoring
 						FROM yhtio, suoritus, yriti
 						WHERE suoritus.kohdpvm = '0000-00-00'
 						AND suoritus.tilino=yriti.tilino
@@ -438,7 +447,9 @@ if (-f $nimi) {
 		$kirjpvm 		= $row[4];
 		$kassatili		= $row[5];
 		$maksaja		= $row[6];
-
+		$factoringsaamiset = $row[7];
+		$factoring 		= $row[8];
+		
 		if (!$laskut{$yhtio}) {
 			$sth_lasku->execute($yhtio);
 			$sth_lasku->finish;
@@ -451,7 +462,10 @@ if (-f $nimi) {
 		my $lasku=$laskut{$yhtio} or die;
 		#warn "lasku $lasku";
 
-
+		#Onko tämä sittenkin factoringia
+		if ($factoring eq "o") {
+			$myyntisaamiset = $factoringsaamiset;
+		}
 		#Myyntisaamiset
 		$statement="INSERT INTO tiliointi(yhtio, laatija,laadittu,tapvm,ltunnus,tilino,summa,selite,lukko) values ('$yhtio','automaattikohdistus',now(),'$kirjpvm','$lasku','$myyntisaamiset',-$suoritettu,' maksoi viitteellä väärin','1')";
 		$stmt_tilioi_myyntisaamisiin=$dbh->prepare($statement);

@@ -387,7 +387,7 @@
 				$sel = 'selected';
 			}
 
-			$ulos .= "<option value='$row[selite]' $sel>$row[selite]</option>";
+			$ulos .= "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";

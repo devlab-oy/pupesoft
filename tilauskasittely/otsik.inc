@@ -717,7 +717,7 @@
 				$sel = "";
 				if ($row["selite"] == $srow["toimitusehto"] or ($srow["toimitusehto"] == '' and $yhtiorow['oletus_toimitusehto'] == $row["selite"])) $sel = 'selected';
 
-				echo "<option value='$row[selite]' $sel>$row[0]</option>";
+				echo "<option value='$row[selite]' $sel>$row[0] $row[1]</option>";
 			}
 			echo "</select>";
 			echo "</td>";

@@ -91,7 +91,7 @@
 
 		$query = "	SELECT tuote.tuoteno
 					FROM tuote
-					WHERE $where tuote.yhtio='$kukarow[yhtio]' and a.status in ('','a') and hinnastoon != 'E'
+					WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status in ('','a') and hinnastoon != 'E'
 					ORDER BY tuote.osasto+0, tuote.try+0";
 		$result = mysql_query($query) or pupe_error($query);
 		

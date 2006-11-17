@@ -341,9 +341,7 @@
 			echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).".</font><br><br>";
 		}
 	}
-
-
-
+	
 	// poistetaan t‰‰ perheid
 	if (count($linkit) > 0) {
 		foreach ($linkit as $link1) {
@@ -407,7 +405,7 @@
 	else {
 		$lisa  = "";
 		$lisa2 = "";
-
+		
 		if ($ostotilaus_haku != "") {
 			if (is_numeric($ostotilaus_haku)) {
 				$lisa .= " and lasku.tunnus='$ostotilaus_haku' ";
@@ -488,7 +486,7 @@
 	echo "<th>".t("Nimitys")."</th>";
 	echo "<th>".t("Ostotilaus")."</th>";
 	echo "<th>".t("Myyntitilaus")."</th>";
-	echo "<th>".t("Sis‰inen viesti")."</th>";
+	//echo "<th>".t("Sis‰inen viesti")."</th>";
 	echo "<th>".t("Valitse")."</th>";
 	echo "<th>".t("Muokkaa")."</th>";
 	echo "<th>".t("Poista")."</th>";
@@ -508,8 +506,8 @@
 	echo "<td><input type='text' size='10' name='nimitys_haku' 			value='$nimitys_haku'></td>";
 	echo "<td><input type='text' size='10' name='ostotilaus_haku' 		value='$ostotilaus_haku'></td>";
 	echo "<td><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
-	echo "<td><input type='text' size='10' name='lisatieto_haku' 		value='$lisatieto_haku'></td>";
-	echo "<td></td><td></td><td></td><td></td><td><input type='submit' value='Hae'></td>";
+	//echo "<td><input type='text' size='10' name='lisatieto_haku' 		value='$lisatieto_haku'></td>";
+	echo "<td></td><td></td><td></td><td></td><td class='back'><input type='submit' value='Hae'></td>";
 	echo "</tr>";
 	echo "</form>";
 
@@ -535,9 +533,8 @@
 		}
 
 		echo "<tr>";
-		echo "<td>$sarjarow[sarjanumero]</td>";
-		echo "<td>$sarjarow[tuoteno]</td>";
-		echo "<td>$sarjarow[nimitys]</td>";
+		echo "<td valign='top'>$sarjarow[sarjanumero]</td>";
+		echo "<td colspan='2' valign='top'>$sarjarow[tuoteno]<br>$sarjarow[nimitys]</td>";
 
 		if ($sarjarow["ostorivitunnus"] == 0) {
 			$sarjarow["ostorivitunnus"] = "";
@@ -553,8 +550,6 @@
 		$lasres	= mysql_query($query) or pupe_error($query);
 		$lasrow1	= mysql_fetch_array($lasres);
 
-		echo "<td>$lasrow1[tunnus] $lasrow1[nimi]</td>";
-
 		$query 	= "	SELECT lasku.*
 					FROM tilausrivi
 					JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
@@ -562,10 +557,10 @@
 		$lasres	= mysql_query($query) or pupe_error($query);
 		$lasrow2	= mysql_fetch_array($lasres);
 
-		echo "<td>$lasrow2[tunnus] $lasrow2[nimi]</td>";
+		echo "<td colspan='2' valign='top'>$lasrow1[tunnus] $lasrow1[nimi]<br>$lasrow2[tunnus] $lasrow2[nimi]</td>";
 
 		//echo "<td>$sarjarow[lisatieto]</td>";
-		echo "<td></td>";
+		//echo "<td></td>";
 
 		if (($sarjarow[$tunnuskentta] == 0 or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
 			$chk = "";
@@ -643,7 +638,7 @@
 					$divit .= sarjanumeronlisatiedot_popup ($lisarow["tunnus"]);
 				}
 
-				echo "<td class='spec' colspan='4' align='right'>$sarjarow[nimitys] ja $lisarow[nimitys] liitetty toisiinsa</td>";
+				echo "<td class='spec' colspan='3' align='right'>$sarjarow[nimitys] ja $lisarow[nimitys] liitetty toisiinsa</td>";
 				echo "<td class='spec'>x</td>";
 				echo "<td class='spec'></td>";
 				echo "<td class='spec'></td>";

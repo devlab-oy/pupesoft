@@ -400,35 +400,35 @@ if (!function_exists("saldo_myytavissa")) {
 						WHERE yhtio='$yhtiolisa' and tuoteno='$tuoteno'";
 			$ennresult = mysql_query($query) or die($query);
 			$ennrow = mysql_fetch_array($ennresult);
-
-			// jos paikkoja löytyi
-			if ($ennrow["paikat"] != "") {
-				// etsitään varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
-				$query = "	SELECT sum(varattu) varattu
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-							WHERE tilausrivi.yhtio = '$yhtiolisa' and
-							tilausrivi.tyyppi in ('L','G','V') and
-							tilausrivi.tuoteno = '$tuoteno' and
-							tilausrivi.varattu > 0 and
-							concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($ennrow[paikat])";
-				$ennresult = mysql_query($query) or die($query);
-				$ennrow = mysql_fetch_array($ennresult);
-				$ennakkopois += $ennrow["varattu"];
+			if ($varasto == 0) {
+				// jos paikkoja löytyi
+				if ($ennrow["paikat"] != "") {
+					// etsitään varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
+					$query = "	SELECT sum(varattu) varattu
+								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+								WHERE tilausrivi.yhtio = '$yhtiolisa' and
+								tilausrivi.tyyppi in ('L','G','V') and
+								tilausrivi.tuoteno = '$tuoteno' and
+								tilausrivi.varattu > 0 and
+								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($ennrow[paikat])";
+					$ennresult = mysql_query($query) or die($query);
+					$ennrow = mysql_fetch_array($ennresult);
+					$ennakkopois += $ennrow["varattu"];
+				}
+				else {
+					// tuotteella ei ole yhtään paikkaa.. katotaan silti varatus
+					// etsitään varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
+					$query = "	SELECT sum(varattu) varattu
+								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+								WHERE tilausrivi.yhtio = '$yhtiolisa' and
+								tilausrivi.tyyppi in ('L','G','V') and
+								tilausrivi.tuoteno = '$tuoteno' and
+								tilausrivi.varattu > 0";
+					$ennresult = mysql_query($query) or die($query);
+					$ennrow = mysql_fetch_array($ennresult);
+					$ennakkopois += $ennrow["varattu"];
+				}
 			}
-			else {
-				// tuotteella ei ole yhtään paikkaa.. katotaan silti varatus
-				// etsitään varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
-				$query = "	SELECT sum(varattu) varattu
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-							WHERE tilausrivi.yhtio = '$yhtiolisa' and
-							tilausrivi.tyyppi in ('L','G','V') and
-							tilausrivi.tuoteno = '$tuoteno' and
-							tilausrivi.varattu > 0";
-				$ennresult = mysql_query($query) or die($query);
-				$ennrow = mysql_fetch_array($ennresult);
-				$ennakkopois += $ennrow["varattu"];
-			}
-
 			$myytavissa = $saldo - $ennakkopois;
 		}
 		return $myytavissa;

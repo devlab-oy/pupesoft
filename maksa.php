@@ -422,6 +422,7 @@
 		}
 		else {		
 			if ($valuu!='') $lisa = " valkoodi = '" . $valuu ."'";
+			elseif ($nimihaku!='') $lisa = " lasku.nimi like '%" . $nimihaku ."%'";
 			else {
 				$lisa = " olmapvm = '" . $erapvm ."'";
 				if ($kaikki == 'on') {
@@ -684,6 +685,7 @@
 				<input type='hidden' name = 'kaikki' value='$kaikki'>
 				<input type='hidden' name = 'valuu' value='$valuu'>
 				<input type='hidden' name = 'erapvm' value='$erapvm'>
+				<input type='hidden' name = 'nimihaku' value='$nimihaku'>
 				<input type='Submit' value='".t('Maksa valitut laskut')."'>
 				</form>";
 				
@@ -800,6 +802,7 @@
 					<input type='hidden' name = 'valuu' value='$valuu'>
 					<input type='hidden' name = 'erapvm' value='$erapvm'>
 					<input type='hidden' name = 'kaikki' value='$kaikki'>
+					<input type='hidden' name = 'nimihaku' value='$nimihaku'>
 					<input type='hidden' name = 'tapa' value='$tapa'>
 					<input type='Submit' value='".t("Maksa")."'></td></form>";
 			}

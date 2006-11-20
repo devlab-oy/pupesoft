@@ -36,8 +36,12 @@
 					$t[$i]=$result[0]['e3251'];
 				if (mysql_field_name($resultx, $i) == "postitp")
 					$t[$i]=utf8_decode($result[0]['e3164']);
-				if (mysql_field_name($resultx, $i) == "tilinumero")
+				if (mysql_field_name($resultx, $i) == "tilinumero") {
 					$t[$i]=$result4[0]['eC078.3194'];
+					if ((int) substr($t[$i],0,2) == 0) {  //Tuolla oli maakoodi --> T‰m‰ on iban
+						$t[$i] = substr($t[$i],4); // J‰tet‰‰n 4 ekaa pois.
+					}
+				}
 				if (mysql_field_name($resultx, $i) == "maakoodi")
 					$t[$i]='FI';
 			}

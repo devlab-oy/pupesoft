@@ -209,10 +209,10 @@ if (!function_exists('alku')) {
 			//toka rivi
 			$kala = $kala - 9;
 			$pdf->draw_text(35,  $kala, t("Lisätietoja", $kieli),		$firstpage, $pieni);
-			$pdf->draw_text(210, $kala, "",							$firstpage, $pieni);
-			$pdf->draw_text(350, $kala, t("Yksikkö", $kieli),			$firstpage, $pieni);
+			$pdf->draw_text(210, $kala, "",								$firstpage, $pieni);
+			$pdf->draw_text(350, $kala, "",								$firstpage, $pieni);
 			//$pdf->draw_text(410, $kala, t("Toimituspvm", $kieli),		$firstpage, $pieni);
-			$pdf->draw_text(470, $kala, "",							$firstpage, $pieni);
+			$pdf->draw_text(470, $kala, "",								$firstpage, $pieni);
 
 			$kala = $kala - 25;
 		}
@@ -241,10 +241,9 @@ if (!function_exists('rivi')) {
 		$pdf->draw_text(530, $kala, $row["rivihinta"], 	$firstpage, $norm);
 		$kala = $kala - 10;
 
-
 		$pdf->draw_text(35,  $kala, $row["kommentti"],	$firstpage, $pieni);
 
-		$pdf->draw_text(350, $kala, $row["yksikko"],	$firstpage, $pieni);
+//		$pdf->draw_text(350, $kala, $row["yksikko"],	$firstpage, $pieni);
 
 /*
 		$row["toimitettuaika"] = substr($row["toimitettuaika"],0,10);
@@ -311,15 +310,15 @@ if (!function_exists('loppu')) {
 
 		$pdf->draw_text(30, 55, $yhtiorow["nimi"],		$firstpage, $pieni);
 		$pdf->draw_text(30, 45, $yhtiorow["osoite"],	$firstpage, $pieni);
-		$pdf->draw_text(30, 35, $yhtiorow["postino"]."  ".$yhtiorow["postitp"],	$firstpage, $pieni);
-		$pdf->draw_text(30, 25, $yhtiorow["maa"],		$firstpage, $pieni);
+		$pdf->draw_text(30, 35, $yhtiorow["postino"]."  ".$yhtiorow["postitp"].", ".$yhtiorow["maa"], $firstpage, $pieni);
+//		$pdf->draw_text(30, 25, "",						$firstpage, $pieni);
 
 		$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",			$firstpage, $pieni);
 		$pdf->draw_text(257, 55, $yhtiorow["puhelin"],				$firstpage, $pieni);
-		$pdf->draw_text(217, 45, t("Telefax", $kieli).":",			$firstpage, $pieni);
-		$pdf->draw_text(257, 45, $yhtiorow["fax"],					$firstpage, $pieni);
-		$pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",		$firstpage, $pieni);
-		$pdf->draw_text(257, 35, $yhtiorow["email"],				$firstpage, $pieni);
+		$pdf->draw_text(217, 45, t("Sähköposti", $kieli).":",		$firstpage, $pieni);
+		$pdf->draw_text(257, 45, $yhtiorow["email"],				$firstpage, $pieni);
+		$pdf->draw_text(217, 35, t("Fax", $kieli).":",				$firstpage, $pieni);
+		$pdf->draw_text(257, 35, $yhtiorow["fax"],					$firstpage, $pieni);
 
 		//jos on suomalainen yritys tehdään ytunnus nätiks
 		if (strtoupper($yhtiorow["maakoodi"])== 'FI') {
@@ -400,4 +399,5 @@ if (!function_exists('alvierittely')) {
 		}
 	}
 }
+
 ?>

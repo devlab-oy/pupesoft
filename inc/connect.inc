@@ -1,43 +1,32 @@
 <?php
 
-if (!isset($palvelin)) {
-	require("salasanat.php");
+require("salasanat.php");
+
+$useslave = (int) $useslave;
+
+// katsotaan onko haluttu useslave setattu, jos ei ole tai se on tyhjää laitetaan ykkönen
+if (!isset($slavedb[$useslave])) {
+	$useslave = 1;
+}
+elseif ($slavedb[$useslave] == '') {
+	$useslave = 1;
 }
 
-if (isset($useslave)) {
-
-	$useslave = (int) $useslave;
-
-	if ($useslave != 0) {
-
-		if (!isset($slavedb[$useslave])) {
-			$useslave = 1;
-		}
-		elseif ($slavedb[$useslave] == '') {
-			$useslave = 1;
-		}
-
-		if (!isset($slavedb[$useslave])) {
-			$useslave = 0;
-		}
-		elseif ($slavedb[$useslave] == '') {
-			$useslave = 0;
-		}
-
-	}
-
-	if ($useslave > 0) {
-		$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die ("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
-		mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
-		//echo "Käytössä slave[$useslave]<br>";
-	}
-
+// katsotaan onko haluttu useslave setattu, jos ei ole tai se on tyhjää laitetaan nolla eli masteri
+if (!isset($slavedb[$useslave])) {
+	$useslave = 0;
+}
+elseif ($slavedb[$useslave] == '') {
+	$useslave = 0;
 }
 
-if (!isset($link)) {
-	$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-	mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
-	//echo "Käytössä master<br>";
+if ($useslave > 0) {
+	$link = mysql_connect($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die ("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
 }
+else {
+	$link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
+}
+
+mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
 
 ?>

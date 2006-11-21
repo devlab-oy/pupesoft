@@ -2,12 +2,6 @@
 
 require_once('../pdflib/phppdflib.class.php');
 
-//PDF parametrit
-$pdf = new pdffile;
-$pdf->set_default('margin-top', 	0);
-$pdf->set_default('margin-bottom', 	0);
-$pdf->set_default('margin-left', 	0);
-$pdf->set_default('margin-right', 	0);
 $rectparam["width"] = 0.3;
 
 $norm["height"] = 10;
@@ -33,10 +27,20 @@ if (!function_exists('alku')) {
 	function alku () {
 		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kieli, $boldi, $sispit, $sispit2, $italic, $lask, $kala;
 
+		//PDF parametrit
+		if (!isset($pdf)) {
+			$pdf = new pdffile;
+			$pdf->set_default('margin-top', 	0);
+			$pdf->set_default('margin-bottom', 	0);
+			$pdf->set_default('margin-left', 	0);
+			$pdf->set_default('margin-right', 	0);
+		}
+
 		$firstpage = $pdf->new_page("a4");
-		$pdf->enable('template');
-		$tid = $pdf->template->create();
-		$pdf->template->size($tid, 600, 830);
+
+//		$pdf->enable('template');
+//		$tid = $pdf->template->create();
+//		$pdf->template->size($tid, 600, 830);
 
 		//Otsikko
 		//$pdf->draw_rectangle(830, 20,  800, 580, $firstpage, $rectparam);

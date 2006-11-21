@@ -31,7 +31,7 @@
 
 	// Kääydään läpi suoratoimittajan paikat
 	while ($superrow = mysql_fetch_array($superjtres)) {
-		$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso,
+		$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus vartunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso,
 					if(varastopaikat.maa = '$yhtiorow[maakoodi]', 1,2) as sorttaus, sum(saldo) saldo, varastopaikat.maa varastomaa
 					from tuotepaikat
 					join yhtio on yhtio.yhtio=tuotepaikat.yhtio
@@ -46,17 +46,9 @@
 		$kres2  = mysql_query($query) or pupe_error($query);
 
 		while ($krow  = mysql_fetch_array($kres2)) {
-
-			// katotaan ennakkopoistot toimittavalta yritykseltä
-			$query = "	select sum(varattu) varattu
-						from tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-						where yhtio = '$krow[yhtio]'
-						and tyyppi  = 'L'
-						and varattu > 0
-						and tuoteno = '$superrow[toim_tuoteno]'";
-			$krtre = mysql_query($query) or pupe_error($query);
-			$krtur = mysql_fetch_array($krtre);
-
+			
+			$krturvarattu = saldo_myytavissa($superrow['toim_tuoteno'], $tyyppi = 'KAIKKI', $varasto = $krow['vartunnus'], $yhtio = $krow['yhtio']);
+			
 			// sitten katotaan ollaanko me jo varattu niitä JT rivejä toimittajalta
 			$query ="	select sum(jt) varattu
 						from tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
@@ -74,7 +66,7 @@
 			$krtu2 = mysql_fetch_array($krtre);
 
 			// katotaan tuotteen saldo
-			$saldo = sprintf("%.02f",$krow["saldo"] - $krtur["varattu"] - $krtu2["varattu"]);
+			$saldo = sprintf("%.02f",$krturvarattu - $krtu2["varattu"]);
 
 			// näytetään drop-downi vain jos on tarpeeksi saldoa..
 			if ($saldo > 0 or ($row["tilaajanrivinro"] == $superrow["liitostunnus"] and $krow["hyllyalue"] == $row["hyllyalue"] and $krow["hyllynro"] == $row["hyllynro"] and $krow["hyllyvali"] == $row["hyllyvali"] and $krow["hyllytaso"] == $row["hyllytaso"])) {

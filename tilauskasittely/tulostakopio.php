@@ -1127,6 +1127,9 @@
 			}
 
 			if ($toim == "SIIRTOLISTA") {
+				if ($tilausnumeroita == '') {
+					$tilausnumeroita = $laskurow['tunnus'];
+				}
 #todo pit‰‰ lis‰t‰ tulosta_siirtolista.inc:iin toimitustapa, tilausviite ja katsoa ett‰ varastot menee oikein.
 				//require_once ("tulosta_siirtolista.inc");
 				require_once ("tulosta_lahete_kerayslista.inc");

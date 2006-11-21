@@ -315,7 +315,9 @@
 
 				//korjataan t‰‰ p‰iv‰m‰‰r‰ kuntoon jota ei viel‰ ole
 				$laskurow["lahetepvm"] = date("Y-m-d");
-
+				
+				$tilausnumeroita = $laskurow['tunnus'];
+				
 				//ker‰yslistan tulostusta varten
 				if ($yhtiorow["kerailylistatyyppi"] != "" and file_exists($yhtiorow["kerailylistatyyppi"])) {
 					require_once ($yhtiorow["kerailylistatyyppi"]);

@@ -1,10 +1,19 @@
 <?php
 
+	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-pitk‰listaus")."<hr></font>";
+
+	if ($toim == "kate") {
+		$abcwhat = "kate";
+		$abcchar = "AK";
+	}
+	else {
+		$abcwhat = "summa";
+		$abcchar = "AM";
+	}
+
 	//ryhm‰jako
 	$ryhmanimet   = array('A-50','B-30','C-20');
 	$ryhmaprossat = array(50.00,30.00,20.00);
-
-	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-pitk‰listaus")."<hr></font>";
 
 	// tutkaillaan saadut muuttujat
 	$osasto = trim($osasto);
@@ -19,6 +28,7 @@
 	// piirrell‰‰n formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='tee' value='PITKALISTA'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<table>";
 
 	echo "<tr>";
@@ -67,15 +77,12 @@
 	echo "</table>";
 	echo "</form>";
 
-
 	if ($osasto != '') {
 		$osastolisa = " and osasto='$osasto' ";
 	}
 	if ($try != '') {
 		$trylisa = " and try='$try' ";
 	}
-
-
 
 	echo "<pre>";
 	echo "ABC\t";
@@ -106,7 +113,7 @@
 				distinct luokka
 				FROM abc_aputaulu
 				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi='A'
+				and tyyppi='$abcchar'
 				ORDER BY luokka";
 	$luokkares = mysql_query($query) or pupe_error($query);
 
@@ -119,7 +126,7 @@
 					sum(kate)  yhtkate
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='A'
+					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa
 					and luokka = '$luokkarow[luokka]'";
@@ -147,7 +154,7 @@
 					kustannus_yht
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='A'
+					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa
 					and luokka = '$luokkarow[luokka]'

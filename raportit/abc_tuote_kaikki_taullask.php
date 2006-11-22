@@ -5,7 +5,16 @@
 
 	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-pitk‰listaus")."<hr></font>";
 
-		// tutkaillaan saadut muuttujat
+	if ($toim == "kate") {
+		$abcwhat = "kate";
+		$abcchar = "TK";
+	}
+	else {
+		$abcwhat = "summa";
+		$abcchar = "TM";
+	}
+
+	// tutkaillaan saadut muuttujat
 	$osasto = trim($osasto);
 	$try    = trim($try);
 
@@ -18,6 +27,7 @@
 	// piirrell‰‰n formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='tee' value='PITKALISTA'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<table>";
 
 	echo "<tr>";
@@ -105,7 +115,7 @@
 				distinct luokka
 				FROM abc_aputaulu
 				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi='T'
+				and tyyppi='$abcchar'
 				ORDER BY luokka";
 	$luokkares = mysql_query($query) or pupe_error($query);
 
@@ -118,7 +128,7 @@
 					sum(kate)  yhtkate
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='T'
+					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa
 					and luokka = '$luokkarow[luokka]'";
@@ -126,7 +136,7 @@
 		$sumrow = mysql_fetch_array($sumres);
 		$sumrow['yhtkate'] = (float) $sumrow['yhtkate'];
 		$sumrow['yhtmyynti'] = (float) $sumrow['yhtmyynti'];
-		 
+
 		//haetaan rivien arvot
 		$query = "	SELECT
 					luokka,
@@ -155,7 +165,7 @@
 					kustannus_yht
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='T'
+					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa
 					and luokka = '$luokkarow[luokka]'

@@ -1,173 +1,75 @@
 <?php
 
-require ("inc/parametrit.inc");
+if (trim($argv[1]) != '') {
 
+	if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
 
-echo "<font class='head'>".t("ABC-Aputaulun rakennus")."<hr></font>";
+	// otetaan tietokanta connect
+	require ("inc/connect.inc");
+	require ("inc/functions.inc");
 
-// piirrell‰‰n formi
-echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
-echo "<input type='hidden' name='tee' value='YHTEENVETO'>";
-echo "<table>";
+	$kukarow['yhtio'] = trim($argv[1]);
 
-print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-		<!--
+	if (trim($argv[2]) != "") {
+		$abctyyppi = trim($argv[2]);
+	}
 
-		function toggleAll(toggleBox) {
+	$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
+	$yhtiores = mysql_query($query) or pupe_error($query);
 
-			var currForm = toggleBox.form;
-			var isChecked = toggleBox.checked;
+	if (mysql_num_rows($yhtiores) == 1) {
+		$yhtiorow = mysql_fetch_array($yhtiores);
+	}
+	else {
+		die ("Yhtiˆ $kukarow[yhtio] ei lˆydy!");
+	}
 
-			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
-				if (currForm.elements[elementIdx].type == 'checkbox') {
-					currForm.elements[elementIdx].checked = isChecked;
-				}
-			}
-		}
-
-		//-->
-		</script>";
-
-
-if (!isset($kka))
-	$kka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
-if (!isset($vva))
-	$vva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
-if (!isset($ppa))
-	$ppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
-
-if (!isset($kkl))
-	$kkl = date("m");
-if (!isset($vvl))
-	$vvl = date("Y");
-if (!isset($ppl))
-	$ppl = date("d");
-
-echo "<th colspan='4'>".t("Valitse kausi").":</th>";
-
-echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-		<td><input type='text' name='ppa' value='$ppa' size='3'></td>
-		<td><input type='text' name='kka' value='$kka' size='3'></td>
-		<td><input type='text' name='vva' value='$vva' size='5'></td>
-		</tr><tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
-		<td><input type='text' name='ppl' value='$ppl' size='3'></td>
-		<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-		<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
-
-echo "<tr><td colspan='4' class='back'><br></td></tr>";
-
-echo "<tr><th colspan='4'>".t("Valitse osastot").":</th>";
-
-
-$query = "	SELECT distinct selite, selitetark
-			FROM avainsana
-			WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'";
-$sresult = mysql_query($query) or pupe_error($query);
-
-$i = 0;
-
-while ($srow = mysql_fetch_array($sresult)) {
-	echo "<tr>";
-
-	if ($osasto[$i] == $srow[0]) $sel = "CHECKED";
-	else $sel = "";
-
-	echo "<td><input type='checkbox' name='osasto[$i]' value='$srow[0]' $sel></td><td  colspan='3'>$srow[0] $srow[1]</td>";
-
-	echo "</tr>";
-
-	$i++;
+	$tee = "YHTEENVETO";
+}
+else {
+	require ("inc/parametrit.inc");
+	echo "<font class='head'>".t("ABC-Aputaulun rakennus")."<hr></font>";
 }
 
-echo "<tr><th colspan='4'>".t("Valitse asiakasosastot").":</th>";
+if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
+if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
+if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
 
+if (!isset($kkl)) $kkl = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($vvl)) $vvl = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($ppl)) $ppl = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
-$query = "	SELECT distinct selite, selitetark
-			FROM avainsana
-			WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASOSASTO'";
-$sresult = mysql_query($query) or pupe_error($query);
-
-$i = 0;
-
-while ($srow = mysql_fetch_array($sresult)) {
-	echo "<tr>";
-
-	if ($asosasto[$i] == $srow[0]) $sel = "CHECKED";
-	else $sel = "";
-
-	echo "<td><input type='checkbox' name='asosasto[$i]' value='$srow[0]' $sel></td><td  colspan='3'>$srow[0] $srow[1]</td>";
-
-	echo "</tr>";
-
-	$i++;
-}
-
-echo "<td colspan='4'>".t("Ruksaa kaikki").":<input type='checkbox' name='chbox' onclick='toggleAll(this)'></td></tr>";
-
-echo "<tr><td colspan='4' class='back'><br></td></tr>";
-echo "<th colspan='4'>".t("Kustannukset per vuosi").":</th>";
-
-echo "<tr><th colspan='3'>".t("Myynnin kustannukset").":</th>
-		<td><input type='text' name='myynninkustayht' value='$myynninkustavuosi' size='10'></td></tr>";
-
-echo "</table>";
-echo "<br><input type='submit' value='".t("Rakenna")."'>";
-echo "</form><br><br><br>";
-
-
+if (!isset($abctyyppi)) $abctyyppi = "kate";
 
 // rakennetaan tiedot
 if ($tee == 'YHTEENVETO') {
 
-	echo "".t("ABC-aputaulua rakennetaan")."...<br>";
-
-	if (!is_array($osasto)) {
-		echo "<br><br><font class='error'>".t("VIRHE: Valitse osastot")."!</font>";
-		exit;
+	if ($abctyyppi == "kate") {
+		$abcwhat = "kate";
+		$abcchar = "AK";
 	}
-	if (!is_array($asosasto)) {
-		echo "<br><br><font class='error'>".t("VIRHE: Valitse asiakkaan osastot")."!</font>";
-		exit;
+	else {
+		$abcwhat = "summa";
+		$abcchar = "AM";
 	}
-
-	$osastot = '';
-	foreach ($osasto as $osa) {
-		$osastot .= "'".$osa."',";
-	}
-	$osastot = substr($osastot, 0,-1);
-
-	$asosastot = '';
-	foreach ($asosasto as $asosa) {
-		$asosastot .= "'".$asosa."',";
-	}
-	$asosastot = substr($asosastot, 0,-1);
 
 	//siivotaan ensin aputaulu tyhj‰ksi
 	$query = "	DELETE from abc_aputaulu
 				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi ='A'";
+				and tyyppi = '$abcchar'";
 	$res = mysql_query($query) or pupe_error($query);
 
-
-
 	///* sitten l‰het‰‰n rakentamaan uutta aputaulua *///
-
 	//haetaan ensin koko kauden yhteisnmyynti ja ostot
 	$query = "	SELECT
 				sum(if(tilausrivi.tyyppi='L', 1, 0))					yhtrivia,
 				sum(if(tilausrivi.tyyppi='L', tilausrivi.rivihinta, 0))	yhtmyynti,
 				sum(if(tilausrivi.tyyppi='L', tilausrivi.kate, 0)) 		yhtkate
-				FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika), lasku use index (PRIMARY), asiakas use index (ytunnus_index)
+				FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'L'
 				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-				and tilausrivi.osasto in ($osastot)
-				and lasku.yhtio=tilausrivi.yhtio
-				and lasku.tunnus=tilausrivi.otunnus
-				and asiakas.ytunnus=lasku.ytunnus
-				and asiakas.yhtio=lasku.yhtio
-				and asiakas.osasto in ($asosastot)";
+				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'";
 	$res = mysql_query($query) or pupe_error($query);
 	$row = mysql_fetch_array($res);
 
@@ -176,45 +78,37 @@ if ($tee == 'YHTEENVETO') {
 	$kaudenkateyht 		= $row["yhtkate"];
 	$kaudenmyyriviyht 	= $row["yhtrivia"];
 
-
 	// t‰ss‰ on kayttajan syottamat kustannukset per vuosi, jyvitet‰‰n ne per p‰iv‰ ja sit katotaan p‰iv‰m‰‰r‰v‰liin kuuluvien p‰ivien lukum‰‰r‰‰
-
 	$query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
 	$result = mysql_query($query) or pupe_error($query);
 	$row    = mysql_fetch_array($result);
 	$paivat = abs($row["ero"]);
 
-
 	$myynninkustapaiva = $myynninkustavuosi / 365;
-
 	$myynninkustayht = $myynninkustapaiva * $ero;
-
 	$kustapermyyrivi = $myynninkustayht / $kaudenmyyriviyht;
 
-
-	// rakennetaan perus ABC-luokat myynnin peusteella
+	// rakennetaan perus ABC-luokat
 	$query = "	SELECT
-				lasku.ytunnus,
+				lasku.liitostunnus,
+				ifnull(asiakas.osasto,'#') osasto,
+				ifnull(asiakas.ryhma,'#') ryhma,
 				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='H' or tilausrivi.var=''), 1, 0))						rivia,
 				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='H' or tilausrivi.var=''), tilausrivi.kpl, 0))			kpl,
 				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='H' or tilausrivi.var=''), tilausrivi.rivihinta, 0))	summa,
 				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='H' or tilausrivi.var=''), tilausrivi.kate, 0))		kate,
 				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='P'), tilausrivi.tilkpl, 0))							puutekpl,
 				sum(if(tilausrivi.tyyppi='L' and (tilausrivi.var='P'), 1, 0))											puuterivia
-				FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika), lasku use index (PRIMARY), asiakas use index (ytunnus_index)
+				FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
+				JOIN lasku use index (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+				LEFT JOIN asiakas use index (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi = 'L'
 				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
 				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-				and tilausrivi.osasto in ($osastot)
-				and lasku.yhtio=tilausrivi.yhtio
-				and lasku.tunnus=tilausrivi.otunnus
-				and asiakas.ytunnus=lasku.ytunnus
-				and asiakas.yhtio=lasku.yhtio
-				and asiakas.osasto in ($asosastot)
-				GROUP BY ytunnus
-				HAVING summa > 0
-	   			ORDER BY kate desc";
+				GROUP BY 1,2,3
+				HAVING kpl > 0
+	   			ORDER BY $abcwhat desc";
 	$res = mysql_query($query) or pupe_error($query);
 
 	$i					= 0;
@@ -223,47 +117,46 @@ if ($tee == 'YHTEENVETO') {
 	$ryhmanimet   = array('A-50','B-30','C-20');
 	$ryhmaprossat = array(50.00,30.00,20.00);
 
-	while($row = mysql_fetch_array($res)) {
+	while ($row = mysql_fetch_array($res)) {
 
-		//tuotteen suhteellinen myynti totaalimyynnist‰
-		$tuoteprossa = ($row["kate"] / $kaudenkateyht) * 100;
+		if ($abctyyppi == "kate") {
+			//tuotteen suhteellinen kate totaalikatteesta
+			if ($kaudenkateyht != 0) $tuoteprossa = ($row["kate"] / $kaudenkateyht) * 100;
+			else $tuoteprossa = 0;
+		}
+		else {
+			//tuotteen suhteellinen myynti totaalimyynnist‰
+			if ($kaudenmyynyht != 0) $tuoteprossa = ($row["summa"] / $kaudenmyynyht) * 100;
+			else $tuoteprossa = 0;
+		}
 
 		//muodostetaan ABC-luokka rym‰prossan mukaan
 		$ryhmaprossa += $tuoteprossa;
 
-
-		if ($row["summa"] != 0)			$kateprosentti = round($row["kate"] / $row["summa"] * 100,2);
+		if ($row["summa"] != 0) $kateprosentti = round($row["kate"] / $row["summa"] * 100,2);
 		else $kateprosentti = 0;
 
-		if ($row["rivia"] != 0)			$myyntieranarvo = round($row["summa"] / $row["rivia"],2);
+		if ($row["rivia"] != 0)	$myyntieranarvo = round($row["summa"] / $row["rivia"],2);
 		else $myyntieranarvo = 0;
 
-		if ($row["rivia"] != 0)			$myyntieranakpl = round($row["kpl"] / $row["rivia"],2);
+		if ($row["rivia"] != 0)	$myyntieranakpl = round($row["kpl"] / $row["rivia"],2);
 		else $myyntieranakpl = 0;
 
-		if ($row["puuterivia"] + $row["rivia"] != 0)	$palvelutaso = round(100 - ($row["puuterivia"] / ($row["puuterivia"] + $row["rivia"]) * 100),2);
+		if ($row["puuterivia"] + $row["rivia"] != 0) $palvelutaso = round(100 - ($row["puuterivia"] / ($row["puuterivia"] + $row["rivia"]) * 100),2);
 		else $palvelutaso = 0;
 
 		//rivin kustannus
 		$kustamyy = round($kustapermyyrivi * $row["rivia"],2);
 		$kustayht = $kustamyy;
 
-		//haetaan asiakkaan tiedot
-		$query = "	SELECT *
-					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]'
-					and ytunnus = '$row[ytunnus]'";
-		$asres = mysql_query($query) or pupe_error($query);
-		$asrow = mysql_fetch_array($asres);
-
 		$query = "	INSERT INTO abc_aputaulu
 					SET yhtio			= '$kukarow[yhtio]',
-					tyyppi				= 'A',
+					tyyppi				= '$abcchar',
 					luokka				= '$i',
 					osto_rivia			= '$asrow[myyjanro]',
 					tuoteno				= '$row[ytunnus]',
-					osasto				= '$asrow[osasto]',
-					try					= '$asrow[piiri]',
+					osasto				= '$row[osasto]',
+					try					= '$row[ryhma]',
 					summa				= '$row[summa]',
 					kate				= '$row[kate]',
 					katepros			= '$kateprosentti',
@@ -288,109 +181,32 @@ if ($tee == 'YHTEENVETO') {
 		}
 	}
 
-	/*
-	/// luodaan I-ryhm‰, eli tuotteet joilla ei ole ollut myynti‰ kaudella, mutta joilla on varastonarvoa ///
+	// haetaan kaikki osastot
+	$query = "SELECT distinct osasto FROM abc_aputaulu use index (yhtio_tyyppi_osasto_try)
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tyyppi = '$abcchar'
+				order by osasto";
+	$res = mysql_query($query) or pupe_error($query);
 
-	// etsit‰‰n kaikki tuotteet joilla on varastonarvoa
-	$query  = "	SELECT tuote.tuoteno, tuote.osasto, tuote.try, ifnull(round(sum(saldo)*if(epakurantti1pvm='0000-00-00', kehahin, kehahin/2),2),0) vararvo
-				FROM tuotepaikat, tuote
-				WHERE tuote.yhtio			= '$kukarow[yhtio]'
-				and tuote.ei_saldoa			= ''
-				and tuote.epakurantti2pvm	= '0000-00-00'
-				and tuote.osasto 			in ($osastot)
-				and tuotepaikat.tuoteno		= tuote.tuoteno
-				and tuotepaikat.yhtio		= tuote.yhtio
-				group by 1,2,3
-				HAVING vararvo > 0";
-	$result = mysql_query($query) or pupe_error($query);
-
-	while ($tuoterow = mysql_fetch_array($result)) {
-
-		// tutkitaan onko tuotetta myyty
-		$query = "	SELECT
-					sum(if(tyyppi='L' and (var='H' or var=''), 1, 0))			rivia,
-					sum(if(tyyppi='L' and (var='H' or var=''), kpl, 0))			kpl,
-					sum(if(tyyppi='L' and (var='H' or var=''), rivihinta, 0))	summa,
-					sum(if(tyyppi='L' and (var='H' or var=''), kate, 0))		kate,
-					sum(if(tyyppi='L' and (var='P'), tilkpl, 0))				puutekpl,
-					sum(if(tyyppi='L' and (var='P'), 1, 0))						puuterivia,
-					sum(if(tyyppi='O', 1, 0))									osto_rivia,
-					sum(if(tyyppi='O', kpl, 0))									osto_kpl,
-					sum(if(tyyppi='O', rivihinta, 0))							osto_summa
-					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi in ('L','O')
-					and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-					and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-					and tuoteno	= '$tuoterow[tuoteno]'
-					and try		= '$tuoterow[try]'
-					and osasto	= '$tuoterow[osasto]'
-					HAVING summa is null or summa <= 0";
-		$res = mysql_query($query) or pupe_error($query);
-
-		while($row = mysql_fetch_array($res)) {
-
-			if ($row["summa"] != 0)			$kateprosentti = round($row["kate"] / $row["summa"] * 100,2);
-			else $kateprosentti = 0;
-
-			if ($tuoterow["vararvo"] != 0)	$kiertonopeus  = round(($row["summa"] - $row["kate"]) / $tuoterow["vararvo"],2);
-			else $kiertonopeus = 0;
-
-			if ($row["rivia"] != 0)			$myyntieranarvo = round($row["summa"] / $row["rivia"],2);
-			else $myyntieranarvo = 0;
-
-			if ($row["rivia"] != 0)			$myyntieranakpl = round($row["kpl"] / $row["rivia"],2);
-			else $myyntieranakpl = 0;
-
-			if ($row["puuterivia"] + $row["rivia"] != 0)	$palvelutaso = round(100 - ($row["puuterivia"] / ($row["puuterivia"] + $row["rivia"]) * 100),2);
-			else $palvelutaso = 0;
-
-			if ($row["osto_rivia"] != 0)	$ostoeranarvo 	= round ($row["osto_summa"] / $row["osto_rivia"],2);
-			else $ostoeranarvo = 0;
-
-			if ($row["osto_rivia"] != 0)	$ostoeranakpl 	= round ($row["osto_kpl"] / $row["osto_rivia"],2);
-			else $ostoeranakpl = 0;
-
-
-			//rivin kustannus
-			$kustamyy = round($kustapermyyrivi * $row["rivia"],2);
-			$kustaost = round($kustaperostrivi * $row["osto_rivia"],2);
-			$kustayht = $kustamyy + $kustaost;
-
-			$query = "	INSERT INTO abc_aputaulu
-						SET yhtio			= '$kukarow[yhtio]',
-						luokka				= '8',
-						tuoteno				= '$tuoterow[tuoteno]',
-						osasto				= '$tuoterow[osasto]',
-						try					= '$tuoterow[try]',
-						summa				= '$row[summa]',
-						kate				= '$row[kate]',
-						katepros			= '$kateprosentti',
-						vararvo				= '$tuoterow[vararvo]',
-						varaston_kiertonop 	= '$kiertonopeus',
-						myyntierankpl 		= '$myyntieranakpl',
-						myyntieranarvo 		= '$myyntieranarvo',
-						rivia				= '$row[rivia]',
-						kpl					= '$row[kpl]',
-						puutekpl			= '$row[puutekpl]',
-						puuterivia			= '$row[puuterivia]',
-						palvelutaso 		= '$palvelutaso',
-						osto_rivia			= '$row[osto_rivia]',
-						osto_kpl			= '$row[osto_kpl]',
-						ostoerankpl 		= '$ostoeranakpl',
-						ostoeranarvo 		= '$ostoeranarvo',
-						osto_summa			= '$row[osto_summa]',
-						kustannus			= '$kustamyy',
-						kustannus_osto		= '$kustaost',
-						kustannus_yht		= '$kustayht'";
-			$insres = mysql_query($query) or pupe_error($query);
-		}
+	$apuosastot = array();
+	while ($apurivi = mysql_fetch_array($res)) {
+		$apuosastot[] = $apurivi["osasto"];
 	}
-	*/
 
+	// haetaan kaikki tryt
+	$query = "SELECT distinct try FROM abc_aputaulu use index (yhtio_tyyppi_osasto_try)
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tyyppi = '$abcchar'
+				order by try";
+	$res = mysql_query($query) or pupe_error($query);
+
+	$aputryt = array();
+	while ($apurivi = mysql_fetch_array($res)) {
+		$aputryt[] = $apurivi["try"];
+	}
 
 	//rakennetaan osastokohtainen luokka
-	for ($a = 0; $a <= 99; $a++) {
+	foreach ($apuosastot as $a) {
 		//rakennetaan aliluokat
 		$query = "	SELECT
 					summa,
@@ -398,9 +214,9 @@ if ($tee == 'YHTEENVETO') {
 					tunnus
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi = 'A'
+					and tyyppi = '$abcchar'
 					and osasto = '$a'
-					ORDER BY kate desc";
+					ORDER BY $abcwhat desc";
 		$res = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($res) > 0) {
@@ -411,7 +227,7 @@ if ($tee == 'YHTEENVETO') {
 						sum(kate) yhtkate
 						FROM abc_aputaulu
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tyyppi = 'A'
+						and tyyppi = '$abcchar'
 						and osasto = '$a'";
 			$resi 	= mysql_query($query) or pupe_error($query);
 			$yhtrow = mysql_fetch_array($resi);
@@ -424,8 +240,16 @@ if ($tee == 'YHTEENVETO') {
 
 			while($row = mysql_fetch_array($res)) {
 
-				//tuotteen suhteellinen myynti totaalimyynnist‰
-				$tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+				if ($abctyyppi == "kate") {
+					//tuotteen suhteellinen kate totaalikatteesta
+					if ($kaudenkateyht != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+					else $tuoteprossa = 0;
+				}
+				else {
+					//tuotteen suhteellinen myynti totaalimyynnist‰
+					if ($kaudenmyynyht != 0) $tuoteprossa = ($row["summa"] / $yhtrow["yhtmyynti"]) * 100;
+					else $tuoteprossa = 0;
+				}
 
 				//muodostetaan ABC-luokka rym‰prossan mukaan
 				$ryhmaprossa += $tuoteprossa;
@@ -433,7 +257,7 @@ if ($tee == 'YHTEENVETO') {
 				$query = "	UPDATE abc_aputaulu
 							SET luokka_osasto = '$i'
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tyyppi = 'A'
+							and tyyppi = '$abcchar'
 							and tunnus  = '$row[tunnus]'";
 				$insres = mysql_query($query) or pupe_error($query);
 
@@ -452,11 +276,11 @@ if ($tee == 'YHTEENVETO') {
 
 
 	//rakennetaan piirikohtainen luokka
-	for ($a = 0; $a <= 99; $a++) {
+	foreach ($aputryt as $a) {
 		$query = "	SELECT tunnus
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi = 'A'
+					and tyyppi = '$abcchar'
 					and try	   = '$a'";
 		$res = mysql_query($query) or pupe_error($query);
 
@@ -468,9 +292,9 @@ if ($tee == 'YHTEENVETO') {
 						tunnus
 						FROM abc_aputaulu
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tyyppi = 'A'
+						and tyyppi = '$abcchar'
 						and try		= '$a'
-						ORDER BY kate desc";
+						ORDER BY $abcwhat desc";
 			$res = mysql_query($query) or pupe_error($query);
 
 
@@ -480,7 +304,7 @@ if ($tee == 'YHTEENVETO') {
 						sum(kate) yhtkate
 						FROM abc_aputaulu
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tyyppi = 'A'
+						and tyyppi = '$abcchar'
 						and try		= '$a'";
 			$resi 	= mysql_query($query) or pupe_error($query);
 			$yhtrow = mysql_fetch_array($resi);
@@ -491,11 +315,18 @@ if ($tee == 'YHTEENVETO') {
 			$ryhmanimet   = array('A-50','B-30','C-20');
 			$ryhmaprossat = array(50.00,30.00,20.00);
 
-			while($row = mysql_fetch_array($res)) {
+			while ($row = mysql_fetch_array($res)) {
 
-				//tuotteen suhteellinen myynti totaalimyynnist‰
-				if ($yhtrow["yhtkate"] != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
-				else $tuoteprossa = 0;
+				if ($abctyyppi == "kate") {
+					//tuotteen suhteellinen kate totaalikatteesta
+					if ($kaudenkateyht != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+					else $tuoteprossa = 0;
+				}
+				else {
+					//tuotteen suhteellinen myynti totaalimyynnist‰
+					if ($kaudenmyynyht != 0) $tuoteprossa = ($row["summa"] / $yhtrow["yhtmyynti"]) * 100;
+					else $tuoteprossa = 0;
+				}
 
 				//muodostetaan ABC-luokka rym‰prossan mukaan
 				$ryhmaprossa += $tuoteprossa;
@@ -503,7 +334,7 @@ if ($tee == 'YHTEENVETO') {
 				$query = "	UPDATE abc_aputaulu
 							SET luokka_try = '$i'
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tyyppi = 'A'
+							and tyyppi = '$abcchar'
 							and tunnus  = '$row[tunnus]'";
 				$insres = mysql_query($query) or pupe_error($query);
 
@@ -520,7 +351,6 @@ if ($tee == 'YHTEENVETO') {
 		}
 	}
 
-
 	//rakennetaan tuoteryhm‰grouppikohtainen abc-ryhm‰
 	$query = "	SELECT
 				osasto,
@@ -529,9 +359,9 @@ if ($tee == 'YHTEENVETO') {
 				sum(kate) kate
 				FROM abc_aputaulu
 				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi = 'A'
+				and tyyppi = '$abcchar'
 				GROUP BY osasto, try
-				ORDER BY kate desc";
+				ORDER BY summa desc";
 	$res = mysql_query($query) or pupe_error($query);
 
 	//haetaan myynti yhteens‰
@@ -540,7 +370,7 @@ if ($tee == 'YHTEENVETO') {
 				sum(kate) yhtkate
 				FROM abc_aputaulu
 				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi = 'A'";
+				and tyyppi = '$abcchar'";
 	$resi 	= mysql_query($query) or pupe_error($query);
 	$yhtrow = mysql_fetch_array($resi);
 
@@ -550,10 +380,18 @@ if ($tee == 'YHTEENVETO') {
 	$ryhmanimet   = array('A-50','B-30','C-20');
 	$ryhmaprossat = array(50.00,30.00,20.00);
 
-	while($row = mysql_fetch_array($res)) {
+	while ($row = mysql_fetch_array($res)) {
 
-		//tuotteen suhteellinen myynti totaalimyynnist‰
-		$tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+		if ($abctyyppi == "kate") {
+			//tuotteen suhteellinen kate totaalikatteesta
+			if ($kaudenkateyht != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+			else $tuoteprossa = 0;
+		}
+		else {
+			//tuotteen suhteellinen myynti totaalimyynnist‰
+			if ($kaudenmyynyht != 0) $tuoteprossa = ($row["summa"] / $yhtrow["yhtmyynti"]) * 100;
+			else $tuoteprossa = 0;
+		}
 
 		//muodostetaan ABC-luokka rym‰prossan mukaan
 		$ryhmaprossa += $tuoteprossa;
@@ -561,7 +399,7 @@ if ($tee == 'YHTEENVETO') {
 		$query = "	UPDATE abc_aputaulu
 					SET luokka_trygroup = '$i'
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi = 'A'
+					and tyyppi = '$abcchar'
 					and osasto  = '$row[osasto]'
 					and try 	= '$row[try]'";
 		$insres = mysql_query($query) or pupe_error($query);
@@ -576,8 +414,47 @@ if ($tee == 'YHTEENVETO') {
 			}
 		}
 	}
+
 }
 
-require ("inc/footer.inc");
+if ($tee == "") {
+
+	// piirrell‰‰n formi
+	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<input type='hidden' name='tee' value='YHTEENVETO'>";
+	echo "<table>";
+
+	echo "<th colspan='4'>".t("Valitse kausi").":</th>";
+
+	echo "<tr><th>".t("Alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
+			<td><input type='text' name='kka' value='$kka' size='3'></td>
+			<td><input type='text' name='vva' value='$vva' size='5'></td>
+			</tr><tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
+			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
+			<td><input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
+
+	echo "<tr><th>ABC-luokkien laskentatapa</th>";
+	echo "<td colspan='3'><select name='abctyyppi'>";
+	echo "<option value='kate'>Katteen mukaan</option>";
+	echo "<option value='myynti'>Myynnin mukaan</option>";
+	echo "</select></td></tr>";
+
+	echo "<tr><td colspan='4' class='back'><br></td></tr>";
+	echo "<th colspan='4'>".t("Kustannukset per vuosi").":</th>";
+
+	echo "<tr><th colspan='3'>".t("Myynnin kustannukset").":</th>
+			<td><input type='text' name='myynninkustayht' value='$myynninkustavuosi' size='10'></td></tr>";
+
+	echo "</table>";
+	echo "<br><input type='submit' value='".t("Rakenna")."'>";
+	echo "</form><br><br><br>";
+
+}
+
+if (trim($argv[1]) == '') {
+	require ("inc/footer.inc");
+}
 
 ?>

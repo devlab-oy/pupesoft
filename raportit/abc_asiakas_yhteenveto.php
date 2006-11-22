@@ -2,6 +2,15 @@
 
 	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
 
+	if ($toim == "kate") {
+		$abcwhat = "kate";
+		$abcchar = "AK";
+	}
+	else {
+		$abcwhat = "summa";
+		$abcchar = "AM";
+	}
+
 	//ryhm‰jako
 	$ryhmanimet   = array('A-50','B-30','C-20');
 	$ryhmaprossat = array(50.00,30.00,20.00);
@@ -19,6 +28,7 @@
 	// piirrell‰‰n formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='tee' value='YHTEENVETO'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<table>";
 
 	echo "<tr>";
@@ -67,8 +77,7 @@
 	echo "</table>";
 	echo "</form>";
 
-
-	if ($os = 1) {
+	if ($tee = "YHTEENVETO") {
 
 		echo "<table>";
 
@@ -104,7 +113,7 @@
 					sum(kate)  yhtkate
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='A'
+					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa";
 		$sumres = mysql_query($query) or pupe_error($query);
@@ -136,7 +145,7 @@
 					100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='A'
+					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa
 					GROUP BY luokka
@@ -149,7 +158,7 @@
 
 			$l = $row["luokka"];
 
-			echo "<td><a href='$PHP_SELF?tee=LUOKKA&luokka=$row[luokka]'>$ryhmanimet[$l]</a></td>";
+			echo "<td><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]'>$ryhmanimet[$l]</a></td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["max"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["min"]))."</td>";

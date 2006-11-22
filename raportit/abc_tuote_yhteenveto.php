@@ -2,6 +2,15 @@
 
 	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
 
+	if ($toim == "kate") {
+		$abcwhat = "kate";
+		$abcchar = "TK";
+	}
+	else {
+		$abcwhat = "summa";
+		$abcchar = "TM";
+	}
+
 	// tutkaillaan saadut muuttujat
 	$osasto = trim($osasto);
 	$try    = trim($try);
@@ -15,6 +24,7 @@
 	// piirrell‰‰n formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='tee' value='YHTEENVETO'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
 	echo "<table>";
 
 	echo "<tr>";
@@ -26,7 +36,7 @@
 				WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'";
 	$sresult = mysql_query($query) or pupe_error($query);
 
-	echo "<td><select name='osasto2' onChange='submit()'>";
+	echo "<td><select name='osasto2'>";
 	echo "<option value=''>".t("Osasto")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
@@ -47,7 +57,7 @@
 				WHERE yhtio='$kukarow[yhtio]' and laji='TRY'";
 	$sresult = mysql_query($query) or pupe_error($query);
 
-	echo "<td><select name='try2' onChange='submit()'>";
+	echo "<td><select name='try2'>";
 	echo "<option value=''>".t("Tuoteryhm‰")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
@@ -56,13 +66,16 @@
 		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 	}
 
-	echo "</select></td><td><input type='submit' value='".t("Aja raportti")."'></td>";
-	echo "</tr>";
+	echo "</select></td><tr>";
+
 	echo "</table>";
+
+	echo "<br><input type='submit' value='".t("Aja raportti")."'>";
+
 	echo "</form>";
 
 
-	if ($os = 1) {
+	if ($tee == "YHTEENVETO") {
 
 		echo "<table>";
 
@@ -91,6 +104,7 @@
 
 		echo "</tr>\n";
 
+		$osastolisa = $trylisa = "";
 
 		if ($osasto != '') {
 			$osastolisa = " and osasto='$osasto' ";
@@ -105,7 +119,7 @@
 					sum(kate)  yhtkate
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='T'
+					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa";
 		$sumres = mysql_query($query) or pupe_error($query);
@@ -144,25 +158,23 @@
 					100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tyyppi='T'
+					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa
 					GROUP BY luokka
-					ORDER BY luokka, summa desc";
+					ORDER BY luokka, $abcwhat desc";
 		$res = mysql_query($query) or pupe_error($query);
-
-
 
 		$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 		$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
 
-		while($row = mysql_fetch_array($res)) {
+		while ($row = mysql_fetch_array($res)) {
 
 			echo "<tr>";
 
 			$l = $row["luokka"];
 
-			echo "<td><a href='$PHP_SELF?tee=LUOKKA&luokka=$row[luokka]'>$ryhmanimet[$l]</a></td>";
+			echo "<td><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]'>$ryhmanimet[$l]</a></td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["max"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["min"]))."</td>";
@@ -240,4 +252,5 @@
 
 		echo "</table>";
 	}
+
 ?>

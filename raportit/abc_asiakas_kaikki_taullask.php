@@ -54,17 +54,17 @@
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<th>".t("Syötä tai valitse piiri").":</th>";
+	echo "<th>".t("Syötä tai valitse ryhmä").":</th>";
 	echo "<td><input type='text' name='try' size='10'></td>";
 
-	$query = "	SELECT distinct piiri
-				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and piiri!=0
-				ORDER BY piiri";
+	$query = "	SELECT distinct selite, selitetark
+				FROM avainsana
+				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASRYHMA'
+				ORDER BY selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='try2' onChange='submit()'>";
-	echo "<option value=''>".t("Piiri")."</option>";
+	echo "<option value=''>".t("Ryhmä")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
 		if ($try == $srow[0]) $sel = "selected";
@@ -88,13 +88,13 @@
 	echo "ABC\t";
 
 	if ($trylisa != '') {
-		echo "Piirin luokka";
+		echo "Ryhmän luokka";
 	}
 
 	echo "Ytunnus\t";
 	echo "Nimi\t";
 	echo "Osasto\t";
-	echo "Piiri\t";
+	echo "Ryhmä\t";
 	echo "Myyjä\t";
 	echo "Myynti$yhtiorow[valkoodi]\t";
 	echo "Kate\t";

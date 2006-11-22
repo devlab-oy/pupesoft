@@ -1,6 +1,6 @@
 <?php
 
-	echo "<font class='head'>".t("ABC-Analyysiä: Osasto/Piiri")."<hr></font>";
+	echo "<font class='head'>".t("ABC-Analyysiä: Osasto/Ryhmä")."<hr></font>";
 
 	if ($toim == "kate") {
 		$abcwhat = "kate";
@@ -54,17 +54,17 @@
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<th>".t("Syötä tai valitse tuoteryhmä").":</th>";
+	echo "<th>".t("Syötä tai valitse ryhmä").":</th>";
 	echo "<td><input type='text' name='try' size='10'></td>";
 
-	$query = "	SELECT distinct piiri
-				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and piiri!=0
-				ORDER BY piiri";
+	$query = "	SELECT distinct selite, selitetark
+				FROM avainsana
+				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASRYHMA'
+				ORDER BY selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
-
+	
 	echo "<td><select name='try2' onChange='submit()'>";
-	echo "<option value=''>".t("Piiri")."</option>";
+	echo "<option value=''>".t("Ryhmä")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
 		if ($try == $srow[0]) $sel = "selected";
@@ -165,12 +165,12 @@
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&order=luokka&sort=asc$ulisa'>".t("ABC")."<br>".t("Luokka")."</th>";
 
 		if ($valinta == 'luokka_osasto')	$otsikko = "Osaston";
-		if ($valinta == 'luokka_try') 		$otsikko = "Piirin";
+		if ($valinta == 'luokka_try') 		$otsikko = "Ryhmän";
 
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=$valinta&sort=asc$ulisa'>$otsikko<br>".t("Luokka")."</a></th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=tuoteno&sort=asc$ulisa'>".t("Asiakas")."</a><br>&nbsp;</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=osasto&sort=asc$ulisa'>".t("Osasto")."</a><br>&nbsp;</th>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=try&sort=asc$ulisa'>".t("Piiri")."</a><br>&nbsp;</th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=try&sort=asc$ulisa'>".t("Ryhmä")."</a><br>&nbsp;</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=osto_rivia&sort=asc$ulisa'>".t("Myyjä")."</a><br>&nbsp;</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=summa&sort=desc$ulisa'>".t("Myynti")."<br>".t("tot")."</a></th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=kate&sort=desc$ulisa'>".t("Kate")."<br>".t("tot")."</a></th>";

@@ -84,7 +84,7 @@
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=luokka&sort=asc$ulisa'>".t("ABC")."<br>".t("Luokka")."</th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=tuoteno&sort=asc$ulisa'>".t("Asiakas")."</a><br>&nbsp;</th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=osasto&sort=asc$ulisa'>".t("Osasto")."</a><br>&nbsp;</th>";
-	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=try&sort=asc$ulisa'>".t("Piiri")."</a><br>&nbsp;</th>";
+	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=try&sort=asc$ulisa'>".t("Ryhmä")."</a><br>&nbsp;</th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=osto_rivia&sort=asc$ulisa'>".t("Myyjä")."</a><br>&nbsp;</th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=summa&sort=desc$ulisa'>".t("Myynti")."<br>".t("tot")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=kate&sort=desc$ulisa'>".t("Kate")."<br>".t("tot")."</a></th>";

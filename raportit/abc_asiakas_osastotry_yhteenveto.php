@@ -1,6 +1,6 @@
 <?php
 
-	echo "<font class='head'>".t("ABC-Analyysiä: Osasto-/Piiriyhteenveto")."<hr></font>";
+	echo "<font class='head'>".t("ABC-Analyysiä: Osasto-/Ryhmäyhteenveto")."<hr></font>";
 
 	if ($toim == "kate") {
 		$abcwhat = "kate";
@@ -54,17 +54,17 @@
 	echo "</tr>";
 
 	echo "<tr>";
-	echo "<th>".t("Syötä tai valitse piiri").":</th>";
+	echo "<th>".t("Syötä tai valitse ryhmä").":</th>";
 	echo "<td><input type='text' name='try' size='10'></td>";
 
-	$query = "	SELECT distinct piiri
-				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and piiri!=0
-				ORDER BY piiri";
+	$query = "	SELECT distinct selite, selitetark
+				FROM avainsana
+				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASRYHMA'
+				ORDER BY selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='try2' onChange='submit()'>";
-	echo "<option value=''>".t("Piiri")."</option>";
+	echo "<option value=''>".t("Ryhmä")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
 		if ($try == $srow[0]) $sel = "selected";
@@ -163,7 +163,7 @@
 	echo "<tr>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=luokka_trygroup&sort=asc$ulisa'>".t("ABC")."<br>".t("Luokka")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=osasto&sort=asc$ulisa'>".t("Osasto")."</a><br>&nbsp;</th>";
-	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=try&sort=asc$ulisa'>".t("Piiri")."</a><br>&nbsp;</th>";
+	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=try&sort=asc$ulisa'>".t("Ryhmä")."</a><br>&nbsp;</th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=summa&sort=desc$ulisa'>".t("Myynti")."<br>".t("tot")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=max&sort=desc$ulisa'>".t("Myynti")."<br>".t("max")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=min&sort=desc$ulisa'>".t("Myynti")."<br>".t("min")."</a></th>";

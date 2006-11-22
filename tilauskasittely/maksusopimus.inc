@@ -13,7 +13,7 @@ if($tila == "uusi") {
 	if ($laskurow["jaksotettu"] == 0) {
 		$query = "	UPDATE lasku
 					SET jaksotettu=tunnus
-					WHERE yhtio = '$kukarow[yhtio]' 
+					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$laskurow[tunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -31,14 +31,14 @@ if($tila == "tallenna") {
 				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),2) summa
 	 			FROM  lasku
 				JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='J'
-				WHERE lasku.yhtio ='$kukarow[yhtio]' 
+				WHERE lasku.yhtio ='$kukarow[yhtio]'
 				and lasku.tunnus ='$laskurow[tunnus]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$rivrow = mysql_fetch_array($result);
 
 	$query = "	SELECT *
 				FROM maksupositio
-				WHERE yhtio ='$kukarow[yhtio]' 
+				WHERE yhtio ='$kukarow[yhtio]'
 				and tunnus ='$maksupositio'";
 	$result = mysql_query($query) or pupe_error($query);
 	$posrow = mysql_fetch_array($result);
@@ -59,8 +59,8 @@ if($tila == "tallenna") {
 				maksuehto 	= '$mehto',
 				lisatiedot 	= '".addslashes($lisatiedot)."',
 				ohje 		= '".addslashes($ohje)."'
-				WHERE  yhtio ='$kukarow[yhtio]' 
-				and otunnus = '$laskurow[tunnus]' 
+				WHERE  yhtio ='$kukarow[yhtio]'
+				and otunnus = '$laskurow[tunnus]'
 				and tunnus='$maksupositio'";
 	$result = mysql_query($query) or pupe_error($query);
 }
@@ -141,7 +141,7 @@ if(mysql_num_rows($result) == 1) {
 
 		$query = "	SELECT tunnus, concat_ws(' ', kassa_teksti, teksti)
 					FROM maksuehto
-					WHERE yhtio = '$kukarow[yhtio]' 
+					WHERE yhtio = '$kukarow[yhtio]'
 					and jaksotettu=''
 					ORDER BY jarjestys";
 		$mresult = mysql_query($query) or pupe_error($query);
@@ -234,8 +234,10 @@ if(mysql_num_rows($result) == 1) {
 		}
 
 		if($tot != $rivrow["jaksotettavaa"]) {
-			$osuusvippaus = ($osuus - 100) * -1;
-			$summavippaus = $rivrow["jaksotettavaa"]-$tot;
+			$osuusvippaus 	= round(($osuus - 100) * -1,2);
+			$summavippaus 	= round($rivrow["jaksotettavaa"]-$tot,2);
+			$osuus 			= round($osuus,2);
+			$tot			= round($tot,2);
 
 			echo "<tr>";
 			echo "<th><font class='error'>#</font></th>

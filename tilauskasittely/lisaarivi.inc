@@ -20,6 +20,7 @@
 	// $kutsuja			--> Kuka tätä skriptiä kutsuu
 	// $myy_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
 	// $jaksotettu		--> Kuuluuko tilausrivi mukaan jaksotukseen
+	// $perheid2		--> Lisävarusteryhmän perheid
 
 	//palauttaa arrayn $lisatyt_rivit jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi
 
@@ -542,6 +543,7 @@
 											try			= '$trow[try]',
 											osasto		= '$trow[osasto]',
 											perheid		= '$perheid',
+											perheid2	= '$perheid2',
 											tunnus 		= '$rivitunnus',
 											nimitys 	= '$trow[nimitys]',
 											jaksotettu	= '$jaksotettu'";
@@ -969,6 +971,7 @@
 						try			= '$trow[try]',
 						osasto		= '$trow[osasto]',
 						perheid		= '$perheid',
+						perheid2	= '$perheid2',
 						tunnus 		= '$rivitunnus',
 						nimitys 	= '$trow[nimitys]',
 						jaksotettu	= '$jaksotettu'";

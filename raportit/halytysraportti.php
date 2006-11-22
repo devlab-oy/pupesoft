@@ -127,6 +127,7 @@ $sarakkeet["SARAKE2"] = t("tuoteryhma")."\t";
 $sarakkeet["SARAKE3"] = t("tuotemerkki")."\t";
 $sarakkeet["SARAKE4"] = t("tahtituote")."\t";
 $sarakkeet["SARAKE4B"] = t("status")."\t";
+$sarakkeet["SARAKE4C"] = t("abc")."\t";
 $sarakkeet["SARAKE5"] = t("saldo")."\t";
 $sarakkeet["SARAKE6"] = t("halytysraja")."\t";
 $sarakkeet["SARAKE7"] = t("tilauksessa")."\t";
@@ -327,11 +328,22 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		$trow2 = mysql_fetch_array($sresult);
 	}
 
+	if ($abcrajaus == 0) $abcnimi = "A";
+	if ($abcrajaus == 1) $abcnimi = "B";
+	if ($abcrajaus == 2) $abcnimi = "C";
+	if ($abcrajaus == 3) $abcnimi = "D";
+	if ($abcrajaus == 4) $abcnimi = "E";
+	if ($abcrajaus == 5) $abcnimi = "F";
+	if ($abcrajaus == 6) $abcnimi = "G";
+	if ($abcrajaus == 7) $abcnimi = "H";
+	if ($abcrajaus == 8) $abcnimi = "I";
+
 	echo "	<table>
 			<tr><th>".t("Osasto")."</th><td colspan='3'>$osasto $trow[selitetark]</td></tr>
 			<tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>$tuoryh $srow[selitetark]</td></tr>
 			<tr><th>".t("Toimittaja")."</th><td colspan='3'>$ytunnus $trow1[nimi]</td></tr>
 			<tr><th>".t("Tuotemerkki")."</th><td colspan='3'>$tuotemerkki</td></tr>
+			<tr><th>".t("ABC-rajaus")."</th><td colspan='3'>$abcnimi</td></tr>
 			<tr><th>".t("Asiakasosasto")."</th><td colspan='3'>$asiakasosasto</td></tr>
 			<tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasno $trow2[nimi]</td></tr>";
 
@@ -341,6 +353,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	$lisaa = "";
 	$lisaa2 = "";
 	$lisaa3 = "";
+	$abcjoin = "";
+	$abclisa = "";
 
 	if ($osasto != '') {
 		$lisaa .= " and tuote.osasto = '$osasto' ";
@@ -362,6 +376,11 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		$lisaa .= " and tuote.hinnastoon != 'E' ";
 	}
 
+	if ($abcrajaus != "") {
+		// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
+		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = 'TK' and abc_aputaulu.luokka <= '$abcrajaus') ";
+		$abclisa = ", abc_aputaulu.luokka abcluokka ";
+	}
 
 	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 	$useslave = 1;
@@ -447,8 +466,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					tuote.try,
 					tuote.aleryhma,
 					tuote.kehahin
+					$abclisa 
 					FROM tuote
 					$lisaa2
+					$abcjoin
 					LEFT JOIN korvaavat ON tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno
 					WHERE
 					tuote.$yhtiot
@@ -458,7 +479,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	}
 	//Ajetaan raportti tuotteittain, varastopaikoittain
 	else {
-		
+
 		$query = "	select
 					tuote.yhtio,
 					tuote.tuoteno,
@@ -477,8 +498,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					tuote.aleryhma,
 					tuote.kehahin,
 					varastopaikat.tunnus
+					$abclisa 
 					FROM tuote
 					$lisaa2
+					$abcjoin
 					JOIN tuotepaikat ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 					and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
@@ -496,14 +519,14 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	if ($valitut["poistetut"] != '') {
 		echo "<font class='message'>".t("Vain aktiiviset tuotteet").".<br>";
 	}
-	
-	
+
+
 	echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>";
-	
+
 	if ($valitut["EHDOTETTAVAT"] != '') {
 		echo "<font class='message'>".t("Joista j‰tet‰‰n pois ne tuotteet joita ei ehdoteta ostettavaksi").".<br>";
 	}
-	
+
 	flush();
 
 	$rivi = "";
@@ -803,14 +826,14 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		}
 
 		if ($valitut['EHDOTETTAVAT'] != '') {
-			$rivinaytetaan = 0;			
+			$rivinaytetaan = 0;
 		}
 		else {
 			$rivinaytetaan = 1;
 		}
 
 		$apurivi = '';
-		
+
 		// kirjotettaan rivi
 		$apurivi .= "\"$row[tuoteno]\"\t";
 
@@ -818,11 +841,22 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 			$apurivi .= "\"$row[varastopaikka]\"\t";
 		}
 
+		if ($row["abcluokka"] == 0) $abcnimi = "A";
+		if ($row["abcluokka"] == 1) $abcnimi = "B";
+		if ($row["abcluokka"] == 2) $abcnimi = "C";
+		if ($row["abcluokka"] == 3) $abcnimi = "D";
+		if ($row["abcluokka"] == 4) $abcnimi = "E";
+		if ($row["abcluokka"] == 5) $abcnimi = "F";
+		if ($row["abcluokka"] == 6) $abcnimi = "G";
+		if ($row["abcluokka"] == 7) $abcnimi = "H";
+		if ($row["abcluokka"] == 8) $abcnimi = "I";
+
 		if($valitut["SARAKE1"] != '') $apurivi .= "\"$row[osasto]\"\t";
 		if($valitut["SARAKE2"] != '') $apurivi .= "\"$row[try]\"\t";
 		if($valitut["SARAKE3"] != '') $apurivi .= "\"$row[tuotemerkki]\"\t";
 		if($valitut["SARAKE4"] != '') $apurivi .= "\"$row[tahtituote]\"\t";
 		if($valitut["SARAKE4B"] != '')$apurivi .= "\"$row[status]\"\t";
+		if($valitut["SARAKE4C"] != '')$apurivi .= "\"$abcnimi\"\t";
 		if($valitut["SARAKE5"] != '') $apurivi .= str_replace(".",",",$saldo['saldo'])."\t";
 		if($valitut["SARAKE6"] != '') $apurivi .= str_replace(".",",",$row['halytysraja'])."\t";
 		if($valitut["SARAKE7"] != '') $apurivi .= str_replace(".",",",$ennp['tilattu'])."\t";
@@ -840,11 +874,11 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		if($valitut["SARAKE18B"] != '') $apurivi .= "\"$row[toim_nimitys]\"\t";
 		if($valitut["SARAKE19"] != '') $apurivi .= str_replace(".",",",$row['ostohinta'])."\t";
 		if($valitut["SARAKE20"] != '') $apurivi .= str_replace(".",",",$row['myyntihinta'])."\t";
-		
+
 		if ($ostettavahaly > 0 or $ostettava4kk > 0) {
 			$rivinaytetaan++;
 		}
-		
+
 		if ($row['epakurantti1pvm']!='0000-00-00') {
 			if($valitut["SARAKE21"] != '') $apurivi .= "$row[epakurantti1pvm]\t";
 		}
@@ -991,11 +1025,11 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
 
 		$apurivi .= "\r\n";
-		
+
 		if ($rivinaytetaan > 0) {
 			$rivi .= $apurivi;
 		}
-		
+
 
 		// tehd‰‰n arvio kauan t‰m‰ kest‰‰.. wau! :)
 		if (count($arvio)<=$joukko) {
@@ -1218,6 +1252,24 @@ if ($tee == "") {
 	echo "</td></tr>
 			<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
 
+			$sel = array();
+			$sel[$abcrajaus] = "SELECTED";
+
+			echo "<tr><th>".t("ABC-luokkarajaus")."</th><td>
+			<select name='abcrajaus'>
+			<option value=''>Ei rajausta</option>
+			<option $sel[0] value='0'>Luokka A-30</option>
+			<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
+			<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
+			<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
+			<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
+			<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
+			<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
+			<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
+			<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
+			</select>
+			</td></tr>";
+
 	echo "<tr><td colspan='2' class='back'><br></td></tr>";
 	echo "<tr><td colspan='2' class='back'>".t("Valitse jos haluat tulostaa asiakaan myynnit").":</td></tr>";
 
@@ -1305,6 +1357,15 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 		$defaultit = "PƒƒLLE";
 	}
 
+	if ($abcrajaus == 0) $abcnimi = "A";
+	if ($abcrajaus == 1) $abcnimi = "B";
+	if ($abcrajaus == 2) $abcnimi = "C";
+	if ($abcrajaus == 3) $abcnimi = "D";
+	if ($abcrajaus == 4) $abcnimi = "E";
+	if ($abcrajaus == 5) $abcnimi = "F";
+	if ($abcrajaus == 6) $abcnimi = "G";
+	if ($abcrajaus == 7) $abcnimi = "H";
+	if ($abcrajaus == 8) $abcnimi = "I";
 
 	echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
 			<input type='hidden' name='tee' value='RAPORTOI'>
@@ -1317,11 +1378,14 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 			<input type='hidden' name='tuotemerkki' value='$tuotemerkki'>
 			<input type='hidden' name='asiakasno' value='$asiakasno'>
 			<input type='hidden' name='asiakasosasto' value='$asiakasosasto'>
+			<input type='hidden' name='abcrajaus' value='$abcrajaus'>
+
 			<table>
 			<tr><th>".t("Osasto")."</th><td colspan='3'>$osasto $trow[selitetark]</td></tr>
 			<tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>$tuoryh $srow[selitetark]</td></tr>
 			<tr><th>".t("Toimittaja")."</th><td colspan='3'>$ytunnus $trow1[nimi]</td></tr>
 			<tr><th>".t("Tuotemerkki")."</th><td colspan='3'>$tuotemerkki</td></tr>
+			<tr><th>".t("ABC-rajaus")."</th><td colspan='3'>$abcnimi</td></tr>
 			<tr><th>".t("Asiakasosasto")."</th><td colspan='3'>$asiakasosasto</td></tr>
 			<tr><th>".t("Asiakas")."</th><td colspan='3'>$asiakasno $trow2[nimi]</td></tr>";
 

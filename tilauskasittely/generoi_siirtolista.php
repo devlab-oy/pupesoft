@@ -8,6 +8,7 @@
 			$lask = 0;
 
 			$lisa = "";
+			$abcjoin = "";
 
 			if ($osasto != "") {
 				$lisa .= " and tuote.osasto='$osasto' ";
@@ -19,6 +20,11 @@
 
 			if ($tuotemerkki != "") {
 				$lisa .= " and tuote.tuotemerkki='$tuotemerkki' ";
+			}
+
+			if ($abcrajaus != "") {
+				// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
+				$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = 'TK' and abc_aputaulu.luokka <= '$abcrajaus') ";
 			}
 
 			if ($toimittaja != "") {
@@ -46,14 +52,14 @@
 			$varow = mysql_fetch_array($result);
 
 			$query = "SELECT tuotepaikat.*, tuotepaikat.halytysraja-saldo tarve, concat_ws('-',hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka, tuote.nimitys
-						FROM tuotepaikat, tuote
-						WHERE tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-						and tuotepaikat.yhtio = '$kukarow[yhtio]'
-						and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, '0'),lpad(upper('$varow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) 
+						FROM tuotepaikat
+						JOIN tuote on (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno $lisa)
+						$abcjoin
+						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+						and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, '0'),lpad(upper('$varow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 						and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, '0'),lpad(upper('$varow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 						and tuotepaikat.halytysraja != 0
 						and tuotepaikat.halytysraja > saldo
-						$lisa
 						order by tuotepaikat.tuoteno";
 			$resultti = mysql_query($query) or pupe_error($query);
 			$luku = mysql_num_rows($result);
@@ -107,7 +113,7 @@
 					$otsikoita ++;
 
 				}
-				
+
 				//katotaan paljonko sinne on jo menossa
 				$query = "SELECT sum(varattu) varattu
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -119,10 +125,10 @@
 							and lasku.clearing = '$kohdevarasto'";
 				$vanresult = mysql_query($query) or pupe_error($query);
 				$vanhatrow = mysql_fetch_array($vanresult);
-				
+
 				//ja vähennetään se tarpeesta
 				$pairow['tarve'] = $pairow['tarve'] - $vanhatrow['varattu'];
-				
+
 				if ($pairow['tilausmaara'] > 0 and $pairow['tarve'] > 0 and $pairow['tilausmaara'] > $pairow['tarve']) {
 					$pairow['tarve'] = $pairow['tilausmaara'];
 				}
@@ -133,8 +139,8 @@
 							concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(tuotepaikat.hyllynro ,5,'0')) ihmepaikka
 							FROM tuotepaikat, varastopaikat
 							WHERE tuotepaikat.yhtio = varastopaikat.yhtio
-							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) 
-							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) 
+							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 							and tuotepaikat.yhtio = '$kukarow[yhtio]'
 							and tuotepaikat.tuoteno = '$pairow[tuoteno]'
 							and varastopaikat.tunnus = '$lahdevarasto'
@@ -296,7 +302,7 @@
 
 		echo "</select></td></tr>";
 
-		echo "<tr><th>".t("Rivejä per tilaus (tyhjä = 20)").":</th><td><input type='text' size='8' value='' name='olliriveja'></td>";
+		echo "<tr><th>".t("Rivejä per tilaus (tyhjä = 20)").":</th><td><input type='text' size='8' value='$olliriveja' name='olliriveja'></td>";
 
 		echo "<tr><th>".t("Osasto")."</th><td>";
 
@@ -365,6 +371,24 @@
 
 		echo "</td></tr>
 			<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='toimittaja' value='$toimittaja'></td></tr>";
+
+		$sel = array();
+		$sel[$abcrajaus] = "SELECTED";
+		
+		echo "<tr><th>".t("ABC-luokkarajaus")."</th><td>
+		<select name='abcrajaus'>
+		<option value=''>Ei rajausta</option>
+		<option $sel[0] value='0'>Luokka A-30</option>
+		<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
+		<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
+		<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
+		<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
+		<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
+		<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
+		<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
+		<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
+		</select>
+		</td></tr>";
 
 		echo "</table><br>
 		<input type = 'submit' value = '".t("Generoi siirtolista")."'>

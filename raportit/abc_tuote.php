@@ -27,6 +27,7 @@ if ($tee == '') {
 	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Osasto/Ryhmä")."</a><br>";
 	echo "<li><a class='menu' href='$PHP_SELF?tee=PITKALISTA&toim=$toim'         >".t("Kaikki luokat tekstinä")."</a><br>";
 }
+
 // jos kaikki tarvittavat tiedot löytyy mennään queryyn
 if ($tee == 'YHTEENVETO') {
 	require ("abc_tuote_yhteenveto.php");

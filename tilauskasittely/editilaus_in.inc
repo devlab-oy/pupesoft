@@ -571,10 +571,11 @@ while (!feof ($fd)) {
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsi‰ tuote tuotenumerolla
 			if ($tuoteno == "" and $tieto != "") {
 
-				// poistetaan jos kolmas merkki jos se on viiva
-				if (substr($tieto, 2, 1) == '-') {
-//					ei poisteta en‰‰.. saas n‰h‰ miten k‰y! -joni
-//					$tieto = substr($tieto, 0, 2) . substr($tieto, 3, 15);
+				if ($edi_tyyppi != "futursoft") {
+					// poistetaan jos kolmas merkki jos se on viiva
+					if (substr($tieto, 2, 1) == '-') {
+						$tieto = substr($tieto, 0, 2) . substr($tieto, 3, 15);
+					}
 				}
 
 				//Poistetaan spacet

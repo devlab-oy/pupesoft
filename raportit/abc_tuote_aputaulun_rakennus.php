@@ -5,8 +5,8 @@ if (trim($argv[1]) != '') {
 	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
 	// otetaan tietokanta connect
-	require ("inc/connect.inc");
-	require ("inc/functions.inc");
+	require ("../inc/connect.inc");
+	require ("../inc/functions.inc");
 
 	$kukarow['yhtio'] = trim($argv[1]);
 
@@ -27,7 +27,7 @@ if (trim($argv[1]) != '') {
 	$tee = "YHTEENVETO";
 }
 else {
-	require ("inc/parametrit.inc");
+	require ("../inc/parametrit.inc");
 	echo "<font class='head'>".t("ABC-Aputaulun rakennus")."<hr></font>";
 }
 
@@ -81,23 +81,52 @@ if ($tee == 'YHTEENVETO') {
 	$kaudenmyyriviyht 	= $row["yhtrivia"];
 	$kaudenostriviyht 	= $row["yhtriviaosto"];
 
-	// tässä on kayttajan syottamat kustannukset per vuosi, jyvitetään ne per päivä ja sit katotaan päivämääräväliin kuuluvien päivien lukumäärää
-	$query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
-	$result = mysql_query($query) or pupe_error($query);
-	$row    = mysql_fetch_array($result);
-	$paivat = abs($row["ero"]);
+	if ($kustannuksetyht == "") {
+		// etsitään kirjanpidosta mitkä on meidän kulut samalta ajanjaksolta
+		$query  = "select sum(summa) summa
+					from tiliointi use index (tapvm_index)
+					join tili use index (tili_index) on (tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino and sisainen_taso like '34%')
+					where tiliointi.yhtio = '$kukarow[yhtio]' and
+					tiliointi.tapvm >= '$vva-$kka-$ppa' and
+					tiliointi.tapvm <= '$vvl-$kkl-$ppl' and
+					tiliointi.korjattu = ''";
+		$result = mysql_query($query) or pupe_error($query);
+		$kprow  = mysql_fetch_array($result);
+		$kustannuksetyht = $kprow["summa"];
+	}
 
-	$myynninkustapaiva = $myynninkustavuosi / 365;
-	$ostojenkustapaiva = $ostojenkustavuosi / 365;
+	// paljonko on rivejä kaikenkaikkiaan
+	$rivityht = $kaudenmyyriviyht + $kaudenostriviyht;
 
-	$myynninkustayht = $myynninkustapaiva * $ero;
-	$ostojenkustayht = $ostojenkustapaiva * $ero;
+	if ($rivityht != 0) {
+		// lasketaan myynti- ja ostorivien osuus kokonaisriveistä
+		$myynti_osuus = $kaudenmyyriviyht / $rivityht;
+		$osto_osuus   = $kaudenostriviyht / $rivityht;
+	}
+	else {
+		$myynti_osuus = 0;
+		$osto_osuus   = 0;
+	}
 
-	if ($kaudenmyyriviyht != 0) $kustapermyyrivi = $myynninkustayht / $kaudenmyyriviyht;
-	else $kustapermyyrivi = 0;
+	// lasketaan myynnin ja oston kustannusten osuus kokonaiskustannuksista
+	$myynninkustayht = $kustannuksetyht * $myynti_osuus;
+	$ostojenkustayht = $kustannuksetyht * $osto_osuus;
 
-	if ($kaudenostriviyht != 0) $kustaperostrivi = $ostojenkustayht / $kaudenostriviyht;
-	else $kustaperostrivi = 0;
+	// sitten lasketaan vielä yhden myyntirivin kulu
+	if ($kaudenmyyriviyht != 0) {
+		$kustapermyyrivi = $myynninkustayht / $kaudenmyyriviyht;
+	}
+	else {
+		$kustapermyyrivi = 0;
+	}
+
+	// ja lasketaan yhden ostorivin kulu
+	if ($kaudenostriviyht != 0) {
+		$kustaperostrivi = $ostojenkustayht / $kaudenostriviyht;
+	}
+	else {
+		$kustaperostrivi = 0;
+	}
 
 	// rakennetaan perus ABC-luokat
 	$query = "	SELECT
@@ -598,13 +627,8 @@ if ($tee == "") {
 
 
 	echo "<tr><td colspan='4' class='back'><br></td></tr>";
-	echo "<th colspan='4'>".t("Kustannukset per vuosi").":</th>";
-
-	echo "<tr><th colspan='3'>".t("Myynnin kustannukset").":</th>
-			<td><input type='text' name='myynninkustayht' value='$myynninkustavuosi' size='10'></td></tr>";
-
-	echo "<tr><th colspan='3'>".t("Oston kustannukset").":</th>
-			<td><input type='text' name='ostojenkustayht' value='$ostojenkustavuosi' size='10'></td></tr>";
+	echo "<tr><th colspan='1'>".t("Kustannukset valitulla kaudella").":</th>
+			<td colspan='3'><input type='text' name='kustannuksetyht' value='$kustannuksetyht' size='15'></td></tr>";
 
 	echo "</table>";
 	echo "<br><input type='submit' value='".t("Rakenna")."'>";
@@ -613,7 +637,7 @@ if ($tee == "") {
 }
 
 if (trim($argv[1]) == '') {
-	require ("inc/footer.inc");
+	require ("../inc/footer.inc");
 }
 
 ?>

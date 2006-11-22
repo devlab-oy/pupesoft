@@ -5,8 +5,8 @@ if (trim($argv[1]) != '') {
 	if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
 	// otetaan tietokanta connect
-	require ("inc/connect.inc");
-	require ("inc/functions.inc");
+	require ("../inc/connect.inc");
+	require ("../inc/functions.inc");
 
 	$kukarow['yhtio'] = trim($argv[1]);
 
@@ -27,7 +27,7 @@ if (trim($argv[1]) != '') {
 	$tee = "YHTEENVETO";
 }
 else {
-	require ("inc/parametrit.inc");
+	require ("../inc/parametrit.inc");
 	echo "<font class='head'>".t("ABC-Aputaulun rakennus")."<hr></font>";
 }
 
@@ -456,7 +456,7 @@ if ($tee == "") {
 }
 
 if (trim($argv[1]) == '') {
-	require ("inc/footer.inc");
+	require ("../inc/footer.inc");
 }
 
 ?>

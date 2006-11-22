@@ -101,6 +101,7 @@
 		echo "<th nowrap>".t("Myynn").".<br>".t("kustan").".</th>";
 		echo "<th nowrap>".t("Oston")."<br>".t("kustan").".</th>";
 		echo "<th nowrap>".t("Kustan").".<br>".t("yht")."</th>";
+		echo "<th nowrap>".t("Kate -")."<br>".t("Kustanus")."</th>";
 
 		echo "</tr>\n";
 
@@ -155,7 +156,8 @@
 					sum(kate)/sum(summa)*100 			kateprosentti,
 					(sum(summa)-sum(kate))/sum(vararvo) kiertonopeus,
 					sum(kate)/$sumrow[yhtkate] * 100	kateosuus,
-					100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso
+					100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso,
+					sum(kate)-sum(kustannus_yht)		total
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'
@@ -195,6 +197,7 @@
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kustannus"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kustannus_osto"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kustannus_yht"]))."</td>";
+			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["total"]))."</td>";
 			echo "</tr>\n";
 
 			$tuotelkmyht			+= $row["tuotelkm"];
@@ -211,6 +214,7 @@
 			$ryhmakustamyyyht		+= $row["kustannus"];
 			$ryhmakustaostyht		+= $row["kustannus_osto"];
 			$ryhmakustayhtyht		+= $row["kustannus_yht"];
+			$totalyht				+= $row["total"];
 
 		}
 
@@ -248,6 +252,7 @@
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakustamyyyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakustaostyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakustayhtyht))."</td>";
+		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$totalyht))."</td>";
 		echo "</tr>\n";
 
 		echo "</table>";

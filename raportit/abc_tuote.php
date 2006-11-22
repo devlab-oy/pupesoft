@@ -23,8 +23,9 @@ if ($tee == '') {
 	echo "<br><br>".t("Valitse toiminto").":<br><br>";
 	echo "</font>";
 	echo "<li><a class='menu' href='$PHP_SELF?tee=YHTEENVETO&toim=$toim'         >".t("ABC-luokkayhteenveto")."</a><br>";
-	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRYYHTEENVETO&toim=$toim'>".t("Osasto/Ryhmä yhteenveto")."</a><br>";
-	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Osasto/Ryhmä")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRYYHTEENVETO&toim=$toim'>".t("Tuoteosasto/tuoteryhmäyhteenveto")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Tuoteosaston ja/tai tuoteryhmän luokat")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=LUOKKA&toim=$toim'             >".t("Luokan tuotteet")."</a><br>";
 	echo "<li><a class='menu' href='$PHP_SELF?tee=PITKALISTA&toim=$toim'         >".t("Kaikki luokat tekstinä")."</a><br>";
 }
 
@@ -43,10 +44,6 @@ if ($tee == 'OSASTOTRY') {
 
 if ($tee == 'OSASTOTRYYHTEENVETO') {
 	require ("abc_tuote_osastotry_yhteenveto.php");
-}
-
-if ($tee == 'TUOTE') {
-	require ("abc_tuote_tuotehistoria.php");
 }
 
 if ($tee == 'PITKALISTA') {

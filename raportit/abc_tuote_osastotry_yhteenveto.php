@@ -1,6 +1,6 @@
 <?php
 
-	echo "<font class='head'>".t("ABC-Analyysiä: Osasto-/Tuoteryhmäyhteenveto")."<hr></font>";
+	echo "<font class='head'>".t("ABC-Analyysi: Osasto/tuoteryhmäyhteenveto")."<hr></font>";
 
 	if ($toim == "kate") {
 		$abcwhat = "kate";

@@ -74,7 +74,6 @@
 	echo "</table>";
 	echo "</form>";
 
-
 	echo "<pre>";
 	echo "ABC\t";
 	echo "Tuoteno\t";
@@ -99,6 +98,7 @@
 	echo "KustannusMyynti\t";
 	echo "KustannusOsto\t";
 	echo "KustannusYht\t";
+	echo "Kate-Kustannus\t";
 	echo "Tuotepaikka\t";
 	echo "Saldo\t";
 	echo "\n";
@@ -109,7 +109,6 @@
 	if ($try != '') {
 		$trylisa = " and try='$try' ";
 	}
-
 
 	$query = "	SELECT
 				distinct luokka
@@ -162,7 +161,8 @@
 					osto_summa,
 					kustannus,
 					kustannus_osto,
-					kustannus_yht
+					kustannus_yht,
+					kate - kustannus_yht total
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'
@@ -172,8 +172,7 @@
 					ORDER BY summa desc";
 		$res = mysql_query($query) or pupe_error($query);
 
-
-		while($row = mysql_fetch_array($res)) {
+		while ($row = mysql_fetch_array($res)) {
 
 			//tuotenimi
 			$query = "	SELECT tuote.nimitys, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno
@@ -192,7 +191,7 @@
 						and yhtio='$kukarow[yhtio]'";
 			$paikresult = mysql_query($query) or pupe_error($query);
 
-			while($paikrow = mysql_fetch_array($paikresult)) {
+			while ($paikrow = mysql_fetch_array($paikresult)) {
 
 				$l = $row["luokka"];
 
@@ -219,6 +218,7 @@
 				echo str_replace(".",",",sprintf('%.1f',$row["kustannus"]))."\t";
 				echo str_replace(".",",",sprintf('%.1f',$row["kustannus_osto"]))."\t";
 				echo str_replace(".",",",sprintf('%.1f',$row["kustannus_yht"]))."\t";
+				echo str_replace(".",",",sprintf('%.1f',$row["total"]))."\t";
 				echo "$paikrow[paikka]\t";
 				echo str_replace(".",",",sprintf('%.0f',$paikrow["saldo"]))."\t";
 				echo "\n";

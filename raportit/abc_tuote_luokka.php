@@ -14,7 +14,32 @@
 	$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 	$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
 
-	$kentat = array('luokka','tuoteno','osasto','try','summa','kate','katepros','kateosuus','vararvo','varaston_kiertonop','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht');
+	// piirrell‰‰n formi
+	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<input type='hidden' name='tee' value='LUOKKA'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
+	echo "<table>";
+
+	echo "<tr>";
+	echo "<th>".t("Valitse luokka").":</th>";
+	echo "<td><select name='luokka'>";
+	echo "<option value=''>Valitse luokka</option>";
+
+	$sel = array();
+	$sel[$luokka] = "selected";
+
+	$i=0;
+	foreach ($ryhmanimet as $nimi) {
+		echo "<option value='$i' $sel[$i]>$nimi</option>";
+		$i++;
+	}
+
+	echo "</select></td><td><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "</form>";
+
+	$kentat = array('luokka','tuoteno','osasto','try','summa','kate','katepros','kateosuus','vararvo','varaston_kiertonop','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht','total');
 
 	for ($i=0; $i<=count($kentat); $i++) {
 		if (strlen($haku[$i]) > 0 and $kentat[$i] != 'kateosuus') {
@@ -33,7 +58,6 @@
 	else {
 		$jarjestys = "luokka, $abcwhat desc";
 	}
-
 
 	//kauden yhteismyynnit ja katteet
 	$query = "	SELECT
@@ -75,7 +99,8 @@
 				osto_summa,
 				kustannus,
 				kustannus_osto,
-				kustannus_yht
+				kustannus_yht,
+				kate-kustannus_yht total
 				FROM abc_aputaulu
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi='$abcchar'
@@ -109,6 +134,7 @@
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=kustannus&sort=desc$ulisa'>".t("Myynn").".<br>".t("kustan").".</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=kustannus_osto&sort=desc$ulisa'>".t("Oston")."<br>".t("kustan").".</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=kustannus_yht&sort=desc$ulisa'>".t("Kustan").".<br>".t("yht")."</a></th>";
+	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&order=total&sort=desc$ulisa'>".t("Kate -")."<br>".t("Kustannus")."</a></th>";
 
 	echo "<form action='$PHP_SELF?tee=LUOKKA&luokka=$luokka' method='post'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -133,7 +159,7 @@
 			$l = $row["luokka"];
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO'>$ryhmanimet[$l]</a></td>";
 
-			echo "<td><a href='$PHP_SELF?toim=$toim&tee=TUOTE&teekutsu=LUOKKA&luokka=$luokka&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
+			echo "<td><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
 			echo "<td>$row[osasto]</td>";
 			echo "<td>$row[try]</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
@@ -153,8 +179,8 @@
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kustannus"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kustannus_osto"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kustannus_yht"]))."</td>";
+			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["total"]))."</td>";
 			echo "</tr>\n";
-
 
 			$ryhmamyyntiyht 		+= $row["summa"];
 			$ryhmakateyht   		+= $row["kate"];
@@ -169,9 +195,9 @@
 			$ryhmakustamyyyht		+= $row["kustannus"];
 			$ryhmakustaostyht		+= $row["kustannus_osto"];
 			$ryhmakustayhtyht		+= $row["kustannus_yht"];
+			$totalyht				+= $row["total"];
 
 		}
-
 
 		//yhteens‰rivi
 		if ($ryhmamyyntiyht != 0)	$kateprosenttiyht = round ($ryhmakateyht / $ryhmamyyntiyht * 100,2);
@@ -218,6 +244,7 @@
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakustamyyyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakustaostyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakustayhtyht))."</td>";
+		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$totalyht))."</td>";
 
 		echo "</tr>\n";
 

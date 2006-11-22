@@ -182,7 +182,7 @@
 				echo "$ryhmanimet[$a]\t";
 			}
 
-			echo "$row[tuoteno]\t";
+			echo "$asrow[ytunnus]\t";
 			echo "$asrow[nimi]\t";
 			echo "$row[osasto]\t";
 			echo "$row[try]\t";

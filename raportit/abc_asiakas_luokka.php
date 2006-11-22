@@ -127,7 +127,7 @@
 			$l = $row["luokka"];
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO'>$ryhmanimet[$l]</a></td>";
 
-			echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$row[tuoteno]'>$row[tuoteno] $asrow[nimi]</a></td>";
+			echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$asrow[ytunnus]'>$asrow[ytunnus] $asrow[nimi]</a></td>";
 			echo "<td>$row[osasto]</td>";
 			echo "<td>$row[try]</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.0f',$row["osto_rivia"]))."</td>";

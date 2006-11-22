@@ -571,10 +571,12 @@ while (!feof ($fd)) {
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsi‰ tuote tuotenumerolla
 			if ($tuoteno == "" and $tieto != "") {
 
-				//Poistetaan siell‰ mahdollisesti majaava ylim‰‰r‰inen viiva
+				// poistetaan jos kolmas merkki jos se on viiva
 				if (substr($tieto, 2, 1) == '-') {
-					$tieto = substr($tieto, 0, 2) . substr($tieto, 3, 15);
+//					ei poisteta en‰‰.. saas n‰h‰ miten k‰y! -joni
+//					$tieto = substr($tieto, 0, 2) . substr($tieto, 3, 15);
 				}
+
 				//Poistetaan spacet
 				$tieto = str_replace(" ", "", $tieto);
 

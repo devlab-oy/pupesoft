@@ -79,8 +79,7 @@
 		$trylisa = " and try='$try' ";
 	}
 
-
-	$kentat = array('luokka_trygroup','osasto','try','summa','max','min','kate','kateprosentti','kateosuus','tuotelkm','vararvo','varaston_kiertonop','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht');
+	$kentat = array('luokka_trygroup','osasto','try','summa','max','min','kate','kateprosentti','kateosuus','tuotelkm','vararvo','varaston_kiertonop','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht','total');
 
 	for ($i=0; $i<=count($kentat); $i++) {
 		if (strlen($haku[$i]) > 0 and $i <= 2) {
@@ -150,14 +149,15 @@
 				sum(kate)/sum(summa)*100 			kateprosentti,
 				(sum(summa)-sum(kate))/sum(vararvo) kiertonopeus,
 				sum(kate)/$sumrow[yhtkate] * 100	kateosuus,
-				100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso
+				100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso,
+				sum(kate)-sum(kustannus_yht)		total
 				FROM abc_aputaulu
-				WHERE yhtio = '$kukarow[yhtio]'
+				WHERE abc_aputaulu.yhtio = '$kukarow[yhtio]'
 				and tyyppi='$abcchar'
 				$osastolisa
 				$trylisa
 				$lisa
-				GROUP BY osasto, try
+				GROUP BY luokka_trygroup, osasto, try
 				$hav
 				ORDER BY $jarjestys";
 	$res = mysql_query($query) or pupe_error($query);
@@ -187,6 +187,7 @@
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=kustannus&sort=desc$ulisa'>".t("Myynn").".<br>".t("kustan").".</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=kustannus_osto&sort=desc$ulisa'>".t("Oston")."<br>".t("kustan").".</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=kustannus_yht&sort=desc$ulisa'>".t("Kustan").".<br>".t("yht")."</a></th>";
+	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto&order=total&sort=desc$ulisa'>".t("Kate -")."<br>".t("Kustannus")."</a></th>";
 	echo "</tr>\n";
 
 	echo "<form action='$PHP_SELF?toim=$toim&tee=OSASTOTRYYHTEENVETO&luokka=$luokka&try=$try&osasto=$osasto' method='post'>";
@@ -198,19 +199,30 @@
 
 	echo "<td class='back'><input type='Submit' value='".t("Etsi")."'></td></form></tr>";
 
-
 	$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 	$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
 
-	while($row = mysql_fetch_array($res)) {
+	while ($row = mysql_fetch_array($res)) {
 
 		echo "<tr>";
 
 		$l = $row["luokka_trygroup"];
 
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio='$kukarow[yhtio]' and laji='TRY' and selite='$row[try]'";
+		$keyres = mysql_query($query) or pupe_error($query);
+		$keytry = mysql_fetch_array($keyres);	
+
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO' and selite='$row[osasto]'";
+		$keyres = mysql_query($query) or pupe_error($query);
+		$keyosa = mysql_fetch_array($keyres);	
+					
 		echo "<td>$ryhmanimet[$l]</td>";
-		echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]'>$row[osasto]</a></td>";
-		echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&try=$row[try]'>$row[try]</a></td>";
+		echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]'>$row[osasto] $keyosa[selitetark]</a></td>";
+		echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&try=$row[try]'>$row[try] $keytry[selitetark]</a></td>";
 		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
 		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["max"]))."</td>";
 		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["min"]))."</td>";
@@ -231,6 +243,7 @@
 		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kustannus"]))."</td>";
 		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kustannus_osto"]))."</td>";
 		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kustannus_yht"]))."</td>";
+		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["total"]))."</td>";
 		echo "</tr>\n";
 
 		$tuotelkmyht			+= $row["tuotelkm"];
@@ -247,6 +260,7 @@
 		$ryhmakustamyyyht		+= $row["kustannus"];
 		$ryhmakustaostyht		+= $row["kustannus_osto"];
 		$ryhmakustayhtyht		+= $row["kustannus_yht"];
+		$totalyht				+= $row["total"];
 
 	}
 
@@ -284,6 +298,7 @@
 	echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakustamyyyht))."</td>";
 	echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakustaostyht))."</td>";
 	echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakustayhtyht))."</td>";
+	echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$totalyht))."</td>";
 	echo "</tr>\n";
 
 	echo "</table>";

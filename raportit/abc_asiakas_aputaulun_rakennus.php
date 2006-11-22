@@ -242,12 +242,12 @@ if ($tee == 'YHTEENVETO') {
 
 				if ($abctyyppi == "kate") {
 					//tuotteen suhteellinen kate totaalikatteesta
-					if ($kaudenkateyht != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+					if ($yhtrow["yhtkate"] != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
 					else $tuoteprossa = 0;
 				}
 				else {
 					//tuotteen suhteellinen myynti totaalimyynnistä
-					if ($kaudenmyynyht != 0) $tuoteprossa = ($row["summa"] / $yhtrow["yhtmyynti"]) * 100;
+					if ($yhtrow["yhtmyynti"] != 0) $tuoteprossa = ($row["summa"] / $yhtrow["yhtmyynti"]) * 100;
 					else $tuoteprossa = 0;
 				}
 
@@ -319,12 +319,12 @@ if ($tee == 'YHTEENVETO') {
 
 				if ($abctyyppi == "kate") {
 					//tuotteen suhteellinen kate totaalikatteesta
-					if ($kaudenkateyht != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+					if ($yhtrow["yhtkate"] != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
 					else $tuoteprossa = 0;
 				}
 				else {
 					//tuotteen suhteellinen myynti totaalimyynnistä
-					if ($kaudenmyynyht != 0) $tuoteprossa = ($row["summa"] / $yhtrow["yhtmyynti"]) * 100;
+					if ($yhtrow["yhtmyynti"] != 0) $tuoteprossa = ($row["summa"] / $yhtrow["yhtmyynti"]) * 100;
 					else $tuoteprossa = 0;
 				}
 
@@ -384,12 +384,12 @@ if ($tee == 'YHTEENVETO') {
 
 		if ($abctyyppi == "kate") {
 			//tuotteen suhteellinen kate totaalikatteesta
-			if ($kaudenkateyht != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+			if ($yhtrow["yhtkate"] != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
 			else $tuoteprossa = 0;
 		}
 		else {
 			//tuotteen suhteellinen myynti totaalimyynnistä
-			if ($kaudenmyynyht != 0) $tuoteprossa = ($row["summa"] / $yhtrow["yhtmyynti"]) * 100;
+			if ($yhtrow["yhtmyynti"] != 0) $tuoteprossa = ($row["summa"] / $yhtrow["yhtmyynti"]) * 100;
 			else $tuoteprossa = 0;
 		}
 

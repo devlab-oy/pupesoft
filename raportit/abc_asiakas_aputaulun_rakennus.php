@@ -153,8 +153,8 @@ if ($tee == 'YHTEENVETO') {
 					SET yhtio			= '$kukarow[yhtio]',
 					tyyppi				= '$abcchar',
 					luokka				= '$i',
-					osto_rivia			= '$asrow[myyjanro]',
-					tuoteno				= '$row[ytunnus]',
+					osto_rivia			= '$row[myyja]',
+					tuoteno				= '$row[liitostunnus]',
 					osasto				= '$row[osasto]',
 					try					= '$row[ryhma]',
 					summa				= '$row[summa]',
@@ -275,7 +275,7 @@ if ($tee == 'YHTEENVETO') {
 	}
 
 
-	//rakennetaan piirikohtainen luokka
+	//rakennetaan ryhmäkohtainen luokka
 	foreach ($aputryt as $a) {
 		$query = "	SELECT tunnus
 					FROM abc_aputaulu

@@ -168,7 +168,7 @@
 			$query = "	SELECT *
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]'
-						and ytunnus = '$row[tuoteno]'";
+						and tunnus = '$row[tuoteno]'";
 			$asres = mysql_query($query) or pupe_error($query);
 			$asrow = mysql_fetch_array($asres);
 

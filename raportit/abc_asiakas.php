@@ -11,11 +11,21 @@ if ($toim == "") {
 
 if ($tee == '') {
 	echo "<font class='head'>".t("ABC-Analysointia asiakkaille")."<hr></font>";
-	echo "<br><br><b>".t("Valitse toiminto").":</b><br><br>";
-	echo "<a href='$PHP_SELF?tee=YHTEENVETO&toim=$toim'         >1. ".t("ABC-luokkayhteenveto")."</a><br>";
-	echo "<a href='$PHP_SELF?tee=OSASTOTRYYHTEENVETO&toim=$toim'>2. ".t("Osasto/Ryhmä yhteenveto")."</a><br>";
-	echo "<a href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >3. ".t("Osasto/Ryhmä")."</a><br>";
-	echo "<a href='$PHP_SELF?tee=PITKALISTA&toim=$toim'         >4. ".t("Kaikki luokat tekstinä")."</a><br>";
+	echo "<font class='message'>";
+
+	if ($toim == "myynti") {
+		echo "ABC-luokat myynnin mukaan.";
+	}
+	else {
+		echo "ABC-luokat katteen mukaan.";
+	}
+
+	echo "<br><br>".t("Valitse toiminto").":<br><br>";
+	echo "</font>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=YHTEENVETO&toim=$toim'         >".t("ABC-luokkayhteenveto")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRYYHTEENVETO&toim=$toim'>".t("Osasto/Ryhmä yhteenveto")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Osasto/Ryhmä")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=PITKALISTA&toim=$toim'         >".t("Kaikki luokat tekstinä")."</a><br>";
 }
 
 // jos kaikki tarvittavat tiedot löytyy mennään queryyn

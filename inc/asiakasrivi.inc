@@ -31,12 +31,16 @@
 	}
 
 	if (mysql_field_name($result, $i) == "konserniyhtio") {
+
 		$sel = '';
-		if ($trow[$i] == 'o') {
-			$sel = "checked";
+		if ($trow[$i] != '') {
+			$sel = "SELECTED";
 		}
-		$ulos = "<td><input type='checkbox' name='$nimi' $sel>";
-		$ulos .= "</td>";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei")."</option>";
+		$ulos .= "<option value = 'o' $sel>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 

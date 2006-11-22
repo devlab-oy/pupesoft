@@ -119,11 +119,14 @@
 	if (mysql_field_name($result, $i) == "ei_saldoa") {
 
 		$sel = '';
-		if ($trow[$i] != "") {
-			$sel = "checked";
+		if ($trow[$i] != '') {
+			$sel = "SELECTED";
 		}
-		$ulos = "<td><input type='checkbox' name='$nimi' $sel>";
-		$ulos .= "</td>";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Saldollinen tuote")."</option>";
+		$ulos .= "<option value = 'o' $sel>".t("Saldoton tuote")."</option>";
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 

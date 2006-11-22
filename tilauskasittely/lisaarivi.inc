@@ -479,8 +479,14 @@
 									require ("alv.inc");
 								}
 								else {
-									require ("../inc/alehinta.inc");
-									require ("alv.inc");
+									if (file_exists("../inc/alehinta.inc")) {
+										require ("../inc/alehinta.inc");
+										require ("alv.inc");
+									}
+									else {
+										require ("inc/alehinta.inc");
+										require ("tilauskasittely/alv.inc");
+									}
 								}
 
 								// jos ollaan laittamassa muuta tuotetta kun mit‰ tilattiin, lis‰t‰‰n rivikommentti

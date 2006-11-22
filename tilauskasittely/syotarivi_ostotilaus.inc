@@ -1,7 +1,7 @@
 <?php
-	
+
 	require ('../inc/alvpopup.inc');
-	
+
 	// Annetaan mahdollisuus tehdä uusi tilausrivi tai näytetään virhe
 	echo "<table border='0' cellspacing='1' cellpadding='2'>
 			<tr><th align='left'>".t("tuoteno")."</th>
@@ -13,9 +13,9 @@
 			<th align='left'>".t("viestit")."</th>
 			<td class='back'></td>
 			</tr>";
-	
+
 	// Kursorinohjausta
-	$formi='rivi'; 
+	$formi='rivi';
 	if ($kentta == '') {
 		$kentta='tuoteno';
 	}
@@ -26,7 +26,7 @@
 			<input type='hidden' name='tee' value = 'TI'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 			<input type='hidden' name='rivitunnus' value='$rivitunnus'>
-			<input type='hidden' name='perheid' value='$perheid'>
+			<input type='hidden' name='perheid2' value='$perheid2'>
 			<input type='hidden' name='muuta' value = '$muuta'>
 			<input type='hidden' name='otunnus' value = '$otunnus'>
 			<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
@@ -57,7 +57,7 @@
 			<option value='LOP#$kpl'>".t("Lisää syötetyt ja merkkaa erotus puutteeksi")."</option>";
 		echo "</select>";
 	}
-	
+
 	// Ostohinnan päivityskysely
 	if ($paiv == 'X') {
 		echo "	<input type='radio' name='paiv' value='K'>".t("Päivitä")."<br>";
@@ -77,16 +77,17 @@
 			<td><input type='text' size='12' name='toimaika' value='$toimaika'></td>
 			<td colspan='6'><input type='text' size='50' name='kommentti' value = '$kommentti'></td>
 			</form>";
-			
+
 
 	//Tyhjennetään kentät
-	echo "<form action = '$PHP_SELF' method='post'>
-		<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-		<input type='hidden' name='toiminto' value='kohdista'>
-		<input type='hidden' name='tee' value = 'TY'>
-		<input type='hidden' name='otunnus' value = '$otunnus'>
-		<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
-		<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Tyhjennä")."'></td></form></tr>";
+	echo "	<form name='rivi' action = '$PHP_SELF' method='post' autocomplete='off'>
+			<input type='hidden' name='toiminto' value='$toiminto'>
+			<input type='hidden' name='tee' value = 'TY'>
+			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+			<input type='hidden' name='muuta' value = '$muuta'>
+			<input type='hidden' name='otunnus' value = '$otunnus'>
+			<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
+			<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Tyhjennä")."'></td></form></tr>";
 
 	echo "</table><br>";
 ?>

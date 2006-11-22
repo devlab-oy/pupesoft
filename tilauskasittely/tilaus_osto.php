@@ -223,7 +223,7 @@
 			$kerayspvm 		= $tilausrivirow["kerayspvm"];
 			$alv 			= $tilausrivirow["alv"];
 			$kommentti 		= $tilausrivirow["kommentti"];
-			$perheid 		= $tilausrivirow["perheid"];
+			$perheid2 		= $tilausrivirow["perheid2"];
 			$rivitunnus 	= $tilausrivirow["tunnus"];
 			$automatiikka 	= "ON";
 			$tee 			= "Y";
@@ -234,6 +234,7 @@
 			$tee 		= "Y";
 			$tuoteno			= '';
 			$perheid 			= '';
+			$perheid2 			= '';
 			$kpl				= '';
 			$var				= '';
 			$hinta				= '';
@@ -250,11 +251,11 @@
 		}
 
 		if ($tee == "LISLISAV") {
-			//P‰ivitet‰‰n is‰lle perheid jotta tiedet‰‰n, ett‰ lis‰varusteet on nyt lis‰tty
+			//P‰ivitet‰‰n is‰n perheid jotta voidaan lis‰t‰ lis‰‰ lis‰varusteita
 			$query = "	update tilausrivi set
-						perheid=0
+						perheid2	= 0
 						where yhtio = '$kukarow[yhtio]'
-						and tunnus = '$rivitunnus'
+						and tunnus 	= '$rivitunnus'
 						LIMIT 1";
 			$updres = mysql_query($query) or pupe_error($query);
 			$tee = "Y";
@@ -359,18 +360,17 @@
 				$paikka	= '';
 			}
 
-			if ($lisavarusteita == "ON" and $perheid != '') {
+			if ($lisavarusteita == "ON" and $perheid2 > 0) {
 				//P‰ivitet‰‰n is‰lle perheid jotta tiedet‰‰n, ett‰ lis‰varusteet on nyt lis‰tty
 				$query = "	update tilausrivi set
-							perheid		= '$perheid'
+							perheid2	= '$perheid2'
 							where yhtio = '$kukarow[yhtio]'
-							and tunnus 	= '$perheid'";
+							and tunnus 	= '$perheid2'";
 				$updres = mysql_query($query) or pupe_error($query);
 			}
 
 			$tee 				= "Y";
 			$tuoteno			= '';
-			$perheid 			= '';
 			$kpl				= '';
 			$var				= '';
 			$hinta				= '';
@@ -388,6 +388,8 @@
 			$kayttajan_var		= '';
 			$kayttajan_kpl		= '';
 			$kayttajan_alv		= '';
+			$perheid			= '';
+			$perheid2			= '';
 		}
 
 		//lis‰t‰‰n rivej‰ tiedostosta
@@ -473,8 +475,8 @@
 			$query = "	SELECT tilausrivi.nimitys, concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 						tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu',
 						round((varattu+jt)*tilausrivi.hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),2) rivihinta,
-						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid, tilausrivi.hinta, tilausrivi.ale,
-						if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) as sorttauskentta,
+						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale,
+						if(tilausrivi.perheid2=0, tilausrivi.tunnus, tilausrivi.perheid2) as sorttauskentta,
 						tilausrivi.var
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -516,7 +518,7 @@
 
 					echo "<tr>";
 
-					if ($prow["perheid"] == 0 or $prow["perheid"] == $prow["tunnus"]) {
+					if ($prow["perheid2"] == 0 or $prow["perheid2"] == $prow["tunnus"]) {
 						echo "<td class='$class'>$lask</td>";
 						$lask++;
 						$class = "";
@@ -559,44 +561,44 @@
 
 						echo "	<form action='$PHP_SELF' method='post'>
 								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-								<td class='back'>
+								<td class='back' nowrap>
 								<input type='hidden' name='rivitunnus' value = '$prow[tunnus]'>
 								<input type='hidden' name='tee' value = 'PV'>
 								<input type='Submit' value='".t("Muuta")."'>
 								</td></form>";
 
-								if ($varaosavirhe != '') {
-									echo "<td class='back'>$varaosavirhe</td>";
-								}
+						if ($varaosavirhe != '') {
+							echo "<td class='back'>$varaosavirhe</td>";
+						}
 
 						if ($varaosavirhe == "") {
 							//Tutkitaan tuotteiden lis‰varusteita
-							$query  = "	select *
-										from tuoteperhe
-										JOIN tuote on tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno
-										where tuoteperhe.yhtio = '$kukarow[yhtio]'
-										and tuoteperhe.isatuoteno = '$prow[tuoteno]'
-										and tuoteperhe.tyyppi = 'L'
+							$query  = "	SELECT *
+										FROM tuoteperhe
+										JOIN tuote ON tuote.yhtio=tuoteperhe.yhtio and tuote.tuoteno=tuoteperhe.tuoteno
+										WHERE tuoteperhe.yhtio 		= '$kukarow[yhtio]'
+										and tuoteperhe.isatuoteno 	= '$prow[tuoteno]'
+										and tuoteperhe.tyyppi 		= 'L'
 										order by tuoteperhe.tuoteno";
 							$lisaresult = mysql_query($query) or pupe_error($query);
 
-							if (mysql_num_rows($lisaresult) > 0 and $prow["perheid"] == 0) {
+							if (mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] == 0) {
 
 								echo "</tr>";
 
 								echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
-											<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-											<input type='hidden' name='toim' value='$toim'>
-											<input type='hidden' name='tee' value='TI'>
-											<input type='hidden' name='lisavarusteita' value='ON'>
-											<input type='hidden' name='perheid' value='$prow[tunnus]'>";
+										<input type='hidden' name='tilausnumero' 	value='$tilausnumero'>
+										<input type='hidden' name='toim' 			value='$toim'>
+										<input type='hidden' name='tee' 			value='TI'>
+										<input type='hidden' name='lisavarusteita' 	value='ON'>
+										<input type='hidden' name='perheid2'	 	value='$prow[tunnus]'>";
 
 								if ($alv=='') $alv=$laskurow['alv'];
 								$lask = 0;
 
 								while ($xprow = mysql_fetch_array($lisaresult)) {
 									echo "<tr><td class='back'></td><td class='spec'>$xprow[nimitys]</td><td></td>";
-									echo "<td><input type='text' name='tuoteno_array[$xprow[tuoteno]]' size='15' maxlength='20' value='$xprow[tuoteno]'></td>";
+									echo "<td><input type='hidden' name='tuoteno_array[$xprow[tuoteno]]' value='$xprow[tuoteno]'>$xprow[tuoteno]</td>";
 									echo "<td></td>";
 									echo "<td><input type='text' name='kpl_array[$xprow[tuoteno]]' size='5' maxlength='5'></td>
 											<td><input type='text' name='hinta_array[$xprow[tuoteno]]' size='5' maxlength='12'></td>
@@ -606,33 +608,33 @@
 									$lask++;
 
 									if ($lask == mysql_num_rows($lisaresult)) {
-										echo "	<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
-												<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td>";
+										echo "<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>";
 										echo "</form>";
 									}
 									echo "</tr>";
 								}
 							}
-							elseif(mysql_num_rows($lisaresult) > 0 and $prow["perheid"] == $prow["tunnus"]) {
+							elseif(mysql_num_rows($lisaresult) > 0 and $prow["perheid2"] == $prow["tunnus"]) {
 								echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
-										<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-										<input type='hidden' name='toim' value='$toim'>
-										<input type='hidden' name='tee' value='LISLISAV'>
-										<input type='hidden' name='rivitunnus' value='$prow[tunnus]'>
+										<input type='hidden' name='tilausnumero' 	value='$tilausnumero'>
+										<input type='hidden' name='toim' 			value='$toim'>
+										<input type='hidden' name='tee' 			value='LISLISAV'>
+										<input type='hidden' name='rivitunnus' 		value='$prow[tunnus]'>
 										<td class='back'><input type='submit' value='".t("Lis‰‰ lis‰varusteita tuotteelle")."'></td>
 										</form>";
-
 								echo "</tr>";
 							}
+						}
+						else {
+							echo "</tr>";
 						}
 					}
 					else {
 						echo "<td class='back'>".t("Lukittu")."</td>";
 						$eimitatoi = "EISAA";
-						echo "<tr>";
+						echo "</tr>";
 					}
 				}
-
 			}
 
 			echo "<tr>

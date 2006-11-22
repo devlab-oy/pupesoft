@@ -415,6 +415,8 @@ if ($tee == 'YHTEENVETO') {
 		}
 	}
 
+	$query = "OPTIMIZE table abc_aputaulu";
+	$optir = mysql_query($query) or pupe_error($query);
 }
 
 if ($tee == "") {

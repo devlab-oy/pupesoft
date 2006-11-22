@@ -134,7 +134,7 @@
 	if ($tee2 == 'VALITSE') {
 
 		//Haetaan sopivat tilaukset
-		$query = "	SELECT lasku.tunnus, lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto,
+		$query = "	SELECT lasku.tunnus, lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto,
 					if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos) prioriteetti,
 					if(min(lasku.clearing)='','N',if(min(lasku.clearing)='JT-TILAUS','J',if(min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
 					left(min(lasku.kerayspvm),10) kerayspvm,
@@ -218,7 +218,12 @@
 					echo "<$ero>$tilrow[varastonimi]</$ero>";
 					echo "<$ero>$tilrow[tunnus]</$ero>";
 					echo "<$ero>$tilrow[ytunnus]</$ero>";
-					echo "<$ero>$tilrow[toim_nimi]</$ero>";
+					if ($toim == 'SIIRTOLISTA') {
+						echo "<$ero>$tilrow[nimi]</$ero>";		
+					}
+					else {
+						echo "<$ero>$tilrow[toim_nimi]</$ero>";		
+					}
 					echo "<$ero>$tilrow[viesti]</$ero>";
 					echo "<$ero>$tilrow[kerayspvm]</$ero>";
 					echo "<$ero>$tilrow[riveja]</$ero>";
@@ -404,13 +409,18 @@
 
 		// Vain keräyslistat saa groupata
 		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
-			$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
+			if ($toim == 'SIIRTOLISTA') {
+				$grouppi = "GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
+			}
+			else {
+				$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";				
+			}
 		}
 		else {
 			$grouppi = "GROUP BY lasku.tunnus";
 		}
 
-		$query = "	SELECT lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, if(maksuehto.jv!='', lasku.tunnus, '') jvgrouppi, if(lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
+		$query = "	SELECT lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, if(maksuehto.jv!='', lasku.tunnus, '') jvgrouppi, if(lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
 					if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos) prioriteetti,
 					if(min(lasku.clearing)='','N',if(min(lasku.clearing)='JT-TILAUS','J',if(min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
 					left(min(lasku.kerayspvm),10) kerayspvm,
@@ -470,7 +480,12 @@
 				echo "<$ero>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";
 				echo "<$ero>$tilrow[varastonimi]</$ero>";
 				echo "<$ero>$tilrow[ytunnus]</$ero>";
-				echo "<$ero>$tilrow[toim_nimi]</$ero>";
+				if ($toim == 'SIIRTOLISTA') {
+					echo "<$ero>$tilrow[nimi]</$ero>";					
+				}
+				else {
+					echo "<$ero>$tilrow[toim_nimi]</$ero>";					
+				}
 				echo "<$ero>$tilrow[kerayspvm]</$ero>";
 				echo "<$ero>$tilrow[toimitustapa]</$ero>";
 				echo "<$ero>$tilrow[tilauksia]</$ero>";

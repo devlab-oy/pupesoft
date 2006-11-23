@@ -16,7 +16,7 @@
 	// $eilinen			--> optional parametri on jollon ajetaan laskutus eiliselle p‰iv‰lle
 	//
 	// $silent muuttujalla voidaan hiljent‰‰ kaikki outputti
-	
+
 	//jos chn = 999 se tarkoittaa ett‰ lasku on laskutuskiellossa eli ei saa k‰sitell‰ t‰‰ll‰!!!!!
 
 	//$silent = '';
@@ -150,42 +150,52 @@
 
 	if ($tee == "LASKUTA") {
 
-		function xml_add ($joukko, $tieto, $handle) {
-			$ulos = "<$joukko>";
+		if (!function_exists("xml_add")) {
+			function xml_add ($joukko, $tieto, $handle) {
+				$ulos = "<$joukko>";
 
-			if (strlen($tieto) > 0) {
-				//K‰sitell‰‰n xml-entiteetit
-				$serc = array("&", ">", "<", "'", "\"", "¥", "`");
-				$repl = array("&amp;", "&gt;", "&lt;", "&apos;", "&quot;", " ", " ");
-				$tieto = str_replace($serc, $repl, $tieto);
+				if (strlen($tieto) > 0) {
+					//K‰sitell‰‰n xml-entiteetit
+					$serc = array("&", ">", "<", "'", "\"", "¥", "`");
+					$repl = array("&amp;", "&gt;", "&lt;", "&apos;", "&quot;", " ", " ");
+					$tieto = str_replace($serc, $repl, $tieto);
 
-				$ulos .= $tieto;
+					$ulos .= $tieto;
 
+				}
+
+				$ulos .= "</$joukko>\n";
+
+				fputs($handle, $ulos);
 			}
-
-			$ulos .= "</$joukko>\n";
-
-			fputs($handle, $ulos);
 		}
 
-		function dateconv ($date) {
-			//k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
-			return substr($date,0,4).substr($date,5,2).substr($date,8,2);
+		if (!function_exists("dateconv")) {
+			function dateconv ($date) {
+				//k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
+				return substr($date,0,4).substr($date,5,2).substr($date,8,2);
+			}
 		}
 
 		//tehd‰‰n viitteest‰ SPY standardia eli 20 merkki‰ etunollilla
-		function spyconv ($spy) {
-			return $spy = sprintf("%020.020s",$spy);
+		if (!function_exists("spyconv")) {
+			function spyconv ($spy) {
+				return $spy = sprintf("%020.020s",$spy);
+			}
 		}
 
 		//pilkut pisteiksi
-		function pp ($muuttuja) {
-			return $muuttuja = str_replace(".",",",$muuttuja);
+		if (!function_exists("pp")) {
+			function pp ($muuttuja) {
+				return $muuttuja = str_replace(".",",",$muuttuja);
+			}
 		}
 
-		function ymuuta ($ytunnus) {
-			$ytunnus = sprintf("%08.8s",$ytunnus);
-			return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
+		if (!function_exists("ymuuta")) {
+			function ymuuta ($ytunnus) {
+				$ytunnus = sprintf("%08.8s",$ytunnus);
+				return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
+			}
 		}
 
 		$today = date("w") + 1; // mik‰ viikonp‰iv‰ t‰n‰‰n on 1-7.. 1=sunnuntai, 2=maanantai, jne...
@@ -243,7 +253,7 @@
 					and tila	= 'L'
 					and alatila	= 'D'
 					and viite	= ''
-					and chn	!= '999' 
+					and chn	!= '999'
 					$lasklisa";
 		$res   = mysql_query($query) or pupe_error($query);
 
@@ -286,7 +296,7 @@
 					and tila	= 'L'
 					and alatila	= 'D'
 					and viite	= ''
-					and chn	!= '999' 
+					and chn	!= '999'
 					$lasklisa";
 		$res   = mysql_query($query) or pupe_error($query);
 
@@ -670,9 +680,9 @@
 				$lrow  = mysql_fetch_array($result);
 
 				$lasno = $lrow[0] + 1;
-				
+
 				// Tutkitaan onko ketju Nordean factorinkia
-				$query  = "	SELECT maksuehto.factoring 
+				$query  = "	SELECT maksuehto.factoring
 							FROM lasku, maksuehto
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.tunnus in ($tunnukset)
@@ -681,7 +691,7 @@
 							and maksuehto.factoring = 'N'
 							group by (maksuehto.factoring)";
 				$mkjres = mysql_query($query) or pupe_error($query);
-				
+
 				//Nordean viitenumero rakentuu hieman eri lailla ku normmalisti
 				if (mysql_num_rows($mkjres) == 1) {
 					$viite = $yhtiorow["factoringsopimus"]."0".sprintf('%08d', $lasno);
@@ -689,9 +699,9 @@
 				else {
 					$viite = $lasno;
 				}
-				
+
 				require('../inc/generoiviite.inc');
-				
+
 				// p‰ivitet‰‰n ketjuun kuuluville laskuille sama laskunumero ja viite..
 				$query  = "update lasku set laskunro='$lasno', viite='$viite' where yhtio='$kukarow[yhtio]' and tunnus in ($tunnukset)";
 				$result = mysql_query($query) or pupe_error($query);
@@ -1534,7 +1544,7 @@
 					$kala = 540;
 					$sivu = 1;
 					$lask = 1;
-					
+
 					// aloitellaan laskun teko
 					$firstpage = alku();
 
@@ -1570,7 +1580,7 @@
 					$fh = fopen($pdffilenimi, "w");
 					if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
 					fclose($fh);
-					
+
 					//haetaan varaston tiedot
 					if($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA") {
 						if ($varasto != 0) {
@@ -1636,7 +1646,7 @@
 
 						//poistetaan tmp file samantien kuleksimasta...
 						system("rm -f $pdffilenimi");
-						
+
 						unset($pdf2);
 						unset($sadilmo);
 
@@ -1665,7 +1675,7 @@
 						system("rm -f $pdffilenimi");
 
 						$tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
-						
+
 						unset($Xpdf);
 					}
 

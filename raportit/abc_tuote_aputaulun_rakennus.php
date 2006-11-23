@@ -293,7 +293,7 @@ if ($tee == 'YHTEENVETO') {
 					and tilausrivi.tyyppi in ('L','O')
 					and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
 					and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-					and tuoteno	= '$tuoterow[tuoteno]'
+					and tilausrivi.tuoteno = '$tuoterow[tuoteno]'
 					GROUP BY 1,2,3
 					HAVING kpl is null or kpl <= 0";
 		$res = mysql_query($query) or pupe_error($query);

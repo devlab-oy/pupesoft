@@ -129,7 +129,7 @@ if ($lasrow["vienti"] != '') {
 		if($rahtirow["pakkaus"] != $rahtirow["pakkauskuvaus"]) {
 			$rahtirow["pakkaus"] .= " ".$rahtirow["pakkauskuvaus"];
 		}
-		
+
 		if($rahtirow["pakkauskuvaustark"] != '') {
 			$rahtirow["pakkaus"] .= " ".$rahtirow["pakkauskuvaustark"];
 		}
@@ -226,6 +226,7 @@ $query = "INSERT into lasku SET
 		tullausnumero						= '$lasrow[tullausnumero]',
 		vahennettava_era					= '$lasrow[vahennettava_era]',
 		valkoodi							= '$lasrow[valkoodi]',
+		vienti_kurssi						= '$lasrow[vienti_kurssi]',
 		verkkotunnus						= '$lasrow[verkkotunnus]',
 		vienti 								= '$lasrow[vienti]',
 		viesti								= '$viestit',
@@ -258,8 +259,8 @@ $ulasr = mysql_query($query) or pupe_error($query);
 
 //laitetaan v‰lisummat rivin kommenttiin aina kun otunnus vaihtuu
 $query = "	select otunnus, tunnus, concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
-			from tilausrivi 
-			where yhtio='$kukarow[yhtio]' 
+			from tilausrivi
+			where yhtio='$kukarow[yhtio]'
 			and otunnus in ($tunnukset)
 			and kpl != 0
 			order by otunnus, sorttauskentta, tuoteno, tunnus";
@@ -286,7 +287,7 @@ while ($valsurow = mysql_fetch_array($valsures)) {
 
 		//jos k‰ytet‰‰n pelkistetty‰ lasku niin ei haluta n‰it‰ kommentteja
 		if ($yhtiorow['laskutyyppi']!= 1) {
-			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, ' ', '$sumskommentti: $sumsrow[summa] $sumsrow[valkoodi].') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
+			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti: $sumsrow[summa] $sumsrow[valkoodi].') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
 			$paivres = mysql_query($query) or pupe_error($query);
 		}
 	}
@@ -312,7 +313,12 @@ if ($edtunnus != "") {
 
 	//jos k‰ytet‰‰n pelkistetty‰ lasku niin ei haluta n‰it‰ kommentteja
 	if ($yhtiorow['laskutyyppi']!= 1) {
-		$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, ' ', '$sumskommentti: $sumsrow[summa] $sumsrow[valkoodi].') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
+
+		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+			//$sumsrow["summa"] = laskuval($sumsrow["summa"], $laskurow["vienti_kurssi"]);
+		}
+
+		$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti: $sumsrow[summa] $sumsrow[valkoodi].') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
 		$paivres = mysql_query($query) or pupe_error($query);
 	}
 }

@@ -15,7 +15,7 @@
 		$alatilat = " 	and lasku.alatila='D' ";
 		$vientilisa = " and lasku.vienti = '' ";
 		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
-						and tilausrivi.varattu  != 0";	
+						and tilausrivi.varattu  != 0";
 	}
 	else {
 		echo "<font class='head'>".t("Tulosta vientilaskuja").":</font><hr>";
@@ -41,7 +41,7 @@
 
 	if ($tee=='TOIMITA') {
 
-		//k‰yd‰‰n kaikki ruksatut tilausket l‰pi
+		//k‰yd‰‰n kaikki ruksatut tilaukset l‰pi
 		if (sizeof($tunnus) != 0) {
 
 			$laskutettavat = "";
@@ -84,6 +84,55 @@
 
 			require("verkkolasku.php");
 
+			//k‰yd‰‰n kaikki ruksatut maksusopimukset l‰pi
+			if (sizeof($positiotunnus) != 0) {
+
+				require("../maksusopimus_laskutukseen.php");
+
+				foreach ($positiotunnus as $postun) {
+					$query = "	SELECT count(*)-1 as ennakko_kpl
+								FROM maksupositio
+								JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
+								WHERE maksupositio.yhtio ='$kukarow[yhtio]'
+								and otunnus = '$postun'
+								and uusiotunnus = 0
+								ORDER BY maksupositio.tunnus";
+					$rahres = mysql_query($query) or pupe_error($query);
+					$posrow = mysql_fetch_array($rahres);
+
+					for($ie=0; $ie < $posrow["ennakko_kpl"]; $ie++) {
+						$laskutettavat = 0;
+						echo "<br>";
+
+						// Tehd‰‰n ennakkolasku
+						$laskutettavat = ennakkolaskuta($postun);
+
+						if ($laskutettavat > 0) {
+							$tee 			= "TARKISTA";
+							$laskutakaikki 	= "KYLLA";
+							$silent		 	= "VIENTI";
+
+							require("verkkolasku.php");
+						}
+					}
+
+
+					$laskutettavat = 0;
+					echo "<br>";
+
+					// Ja loppulaskutus samaan syssyyn
+					$laskutettavat = loppulaskuta($postun);
+
+					if ($laskutettavat > 0) {
+						$tee 			= "TARKISTA";
+						$laskutakaikki 	= "KYLLA";
+						$silent		 	= "VIENTI";
+
+						require("verkkolasku.php");
+					}
+				}
+			}
+
 			echo "<br><br>";
         }
         else {
@@ -97,8 +146,12 @@
 
 	if ($tee == "VALITSE") {
 
-		$query = "	SELECT lasku.*, maksuehto.teksti meh, maksuehto.kassa_teksti mehka
-					FROM lasku use index (tila_index) 
+		$query = "	SELECT lasku.*,
+					maksuehto.teksti meh,
+					maksuehto.kassa_teksti mehka,
+					maksuehto.itsetulostus,
+					maksuehto.kateinen
+					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
@@ -145,6 +198,7 @@
 			echo "<th>".t("Tyyppi")."</th>";
 			echo "<th>".t("Maksuehto")."</th>";
 			echo "<th>".t("Muokkaa tilausta")."</th>";
+			echo "<th>".t("Laskuta kaikki positiot")."</th>";
 
 			while ($row = mysql_fetch_array($res)) {
 				$query = "	select sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*(1-ale/100)=0 and var!='P' and var!='J',1,0)) nollarivi
@@ -153,7 +207,7 @@
 				$hyvre = mysql_query($query) or pupe_error($query);
 				$hyvrow = mysql_fetch_array($hyvre);
 
-				echo "<tr><td><input type='checkbox' name='tunnus[]' value='$row[tunnus]' checked></td>";
+				echo "<tr><td><input type='checkbox' name='tunnus[$row[tunnus]]' value='$row[tunnus]' checked></td>";
 
 				echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&toim=$toim&tunnukset=$tunnukset&tunnus=$row[tunnus]'>$row[tunnus]</a></td>";
 				echo "<td>$row[laatija]</td>";
@@ -171,7 +225,15 @@
 				echo "<td>".t("$teksti")."</td>";
 				echo "<td>$row[mehka] $row[meh]</td>";
 
-				echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$row[tunnus]'>Pikatilaukseen</a></td>";
+				echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$row[tunnus]'>".t("Pikatilaukseen")."</a></td>";
+
+				if ($row["jaksotettu"] > 0) {
+					echo "<td><input type='checkbox' name='positiotunnus[$row[tunnus]]' value='$row[tunnus]'></td>";
+				}
+				else {
+					echo "<td>".t("Ei positioita")."</td>";
+				}
+
 
 				if ($hyvrow["nollarivi"] > 0) {
 					echo "<td class='back'>&nbsp;<font class='error'>".t("Huom! Tilauksella on nollahintaisia rivej‰!")."</font></td>";
@@ -181,58 +243,7 @@
 			}
 			echo "</table><br>";
 
-
-			//haetaan ekan tilauksen toimitustavan tiedot
-			$query = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$ekarow[toimitustapa]'";
-			$tores = mysql_query($query) or pupe_error($query);
-			$toita = mysql_fetch_array($tores);
-
-			//tulostetaan faili ja valitaan sopivat printterit
-			if ($ekarow["varasto"] == '') {
-				$query = "	select *
-							from varastopaikat
-							where yhtio='$kukarow[yhtio]'
-							order by alkuhyllyalue,alkuhyllynro
-							limit 1";
-			}
-			else {
-				$query = "	select *
-							from varastopaikat
-							where yhtio='$kukarow[yhtio]' and tunnus='$ekarow[varasto]'
-							order by alkuhyllyalue,alkuhyllynro";
-			}
-			$prires= mysql_query($query) or pupe_error($query);
-			$prirow= mysql_fetch_array($prires);
-
-			$query = "	SELECT *
-						FROM kirjoittimet
-						WHERE
-						yhtio='$kukarow[yhtio]'
-						ORDER by kirjoitin";
-			$kirre = mysql_query($query) or pupe_error($query);
-
-
-			//haetaan maksuehdon tiedot
-			$query = "	SELECT itsetulostus, kateinen
-						FROM maksuehto
-						WHERE
-						yhtio='$kukarow[yhtio]'
-						and tunnus = '$ekarow[maksuehto]'";
-			$marre = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($marre) == 0) {
-				$marro = array();
-			 	if ($ekarow["erpcm"] == "0000-00-00") {
-					echo "<font class='error'>".t("VIRHE: Maksuehtoa ei lˆydy")."! $ekarow[maksuehto]!</font>";
-				}
-			}
-			else {
-				$marro = mysql_fetch_array($marre);
-			}
-
-
 			echo "<table>";
-
 
 			///* Haetaan asiakkaan kieli *///
 			$query = "	SELECT kieli
@@ -264,9 +275,35 @@
 
 			echo "<tr><th>".t("Valitse kirjoitin").":</th><td><select name='valittu_tulostin'>";
 			echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+
+
+			//tulostetaan faili ja valitaan sopivat printterit
+			if ($ekarow["varasto"] == '') {
+				$query = "	select *
+							from varastopaikat
+							where yhtio='$kukarow[yhtio]'
+							order by alkuhyllyalue,alkuhyllynro
+							limit 1";
+			}
+			else {
+				$query = "	select *
+							from varastopaikat
+							where yhtio='$kukarow[yhtio]' and tunnus='$ekarow[varasto]'
+							order by alkuhyllyalue,alkuhyllynro";
+			}
+			$prires= mysql_query($query) or pupe_error($query);
+			$prirow= mysql_fetch_array($prires);
+
+			$query = "	SELECT *
+						FROM kirjoittimet
+						WHERE
+						yhtio = '$kukarow[yhtio]'
+						ORDER by kirjoitin";
+			$kirre = mysql_query($query) or pupe_error($query);
+
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
-				if ($kirrow["tunnus"] == $prirow["printteri5"]) {
+				if (($kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or $kirow["tunnus"] == $kukarow["kirjoitin"]) {
 					$sel = "SELECTED";
 				}
 
@@ -283,7 +320,6 @@
 		$formi	= "find";
 		$kentta	= "etsi";
 
-
 		// tehd‰‰n etsi valinta
 		echo "<form action='$PHP_SELF' name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
@@ -298,20 +334,20 @@
 		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maksuehto,
-					maksuehto.teksti meh, 
+					maksuehto.teksti meh,
 					maksuehto.kassa_teksti mehka,
 					group_concat(distinct lasku.tunnus) tunnukset,
 					group_concat(distinct lasku.tunnus separator '<br>') tunnukset_ruudulle,
 					count(distinct lasku.tunnus) tilauksia,
 					count(tilausrivi.tunnus) riveja,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
-					FROM lasku use index (tila_index) 
+					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = 'L'
-					and chn	!= '999' 
+					and chn	!= '999'
 					$alatilat
 					$vientilisa
 					$muutlisa
@@ -366,5 +402,5 @@
 		}
 	}
 
-	require "../inc/footer.inc";
+	require("../inc/footer.inc");
 ?>

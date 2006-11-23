@@ -117,7 +117,7 @@
 	}
 
 
-	// Otataan oieka kappalem‰‰r k‰sittelyyn
+	// Otataan oieka kappalem‰‰r‰ k‰sittelyyn
 	if ($row["var"] == 'J' or $row["var"] == 'S' or $row["var"] == 'T' or $row["var"] == 'U') {
 		$kpl_st = $row['jt'];
 	}
@@ -255,7 +255,7 @@
 		}
 
 		// K‰‰yd‰‰n l‰pi tuotteen toimittajat
-		if (in_array($row["var"], array('','H','S','T','U','J')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '')) {
+		if (in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '')) {
 			if ($kotipaikatlask == 0) {
 				$paikat = "<option value=''></option>".$paikat;
 			}

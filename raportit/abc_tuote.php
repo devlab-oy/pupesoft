@@ -29,6 +29,9 @@ if ($tee == '') {
 	if ($toim == "myynti") {
 		echo "ABC-luokat myynnin mukaan.";
 	}
+	elseif ($toim == "kpl") {
+		echo "ABC-luokat kappaleiden mukaan.";
+	}
 	else {
 		echo "ABC-luokat katteen mukaan.";
 	}

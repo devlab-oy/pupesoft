@@ -122,11 +122,11 @@
 		echo "<tr><td>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</td>";
 		echo "<td><select name='komento[$tulostin]'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-		
+
 		if ($toim == 'TARJOUS' and $asrow['email'] != '') {
 			echo "<option value='asiakasemail:$asrow[email]'>".t("Asiakkaan sähköpostiin")."</option>";
 		}
-		
+
 		$querykieli = "	select *
 					from kirjoittimet
 					where yhtio='$kukarow[yhtio]'
@@ -134,7 +134,13 @@
 		$kires = mysql_query($querykieli) or pupe_error($querykieli);
 
 		while ($kirow=mysql_fetch_array($kires)) {
-			echo "<option value='$kirow[komento]'>$kirow[kirjoitin]</option>";
+
+			$sel = "";
+			if ($kirow["tunnus"] == $kukarow["kirjoitin"]) {
+				$sel = "SELECTED";
+			}
+
+			echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
 		}
 
 		echo "</select></td>";

@@ -9,6 +9,19 @@ if ($toim == "") {
 	$toim = "myynti";
 }
 
+if ($toim == "kate") {
+	$abcwhat = "kate";
+	$abcchar = "TK";
+}
+elseif ($toim == "kpl") {
+	$abcwhat = "kpl";
+	$abcchar = "TP";
+}
+else {
+	$abcwhat = "summa";
+	$abcchar = "TM";
+}
+
 if ($tee == '') {
 	echo "<font class='head'>".t("ABC-Analysointia tuotteille")."<hr></font>";
 	echo "<font class='message'>";
@@ -24,7 +37,7 @@ if ($tee == '') {
 	echo "</font>";
 	echo "<li><a class='menu' href='$PHP_SELF?tee=YHTEENVETO&toim=$toim'         >".t("ABC-luokkayhteenveto")."</a><br>";
 	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRYYHTEENVETO&toim=$toim'>".t("Tuoteosasto/tuoteryhmäyhteenveto")."</a><br>";
-	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Tuoteosaston ja/tai tuoteryhmän luokat")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Tuoteosaston tai tuoteryhmän luokat")."</a><br>";
 	echo "<li><a class='menu' href='$PHP_SELF?tee=LUOKKA&toim=$toim'             >".t("Luokan tuotteet")."</a><br>";
 	echo "<li><a class='menu' href='$PHP_SELF?tee=PITKALISTA&toim=$toim'         >".t("Kaikki luokat tekstinä")."</a><br>";
 }
@@ -47,7 +60,7 @@ if ($tee == 'OSASTOTRYYHTEENVETO') {
 }
 
 if ($tee == 'PITKALISTA') {
-	require ("abc_kaikki_taullask.php");
+	require ("abc_tuote_kaikki_taullask.php");
 }
 
 require ("../inc/footer.inc");

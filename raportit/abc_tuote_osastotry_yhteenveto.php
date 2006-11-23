@@ -2,15 +2,6 @@
 
 	echo "<font class='head'>".t("ABC-Analyysi: Osasto/tuoteryhmäyhteenveto")."<hr></font>";
 
-	if ($toim == "kate") {
-		$abcwhat = "kate";
-		$abcchar = "TK";
-	}
-	else {
-		$abcwhat = "summa";
-		$abcchar = "TM";
-	}
-
 	// tutkaillaan saadut muuttujat
 	$osasto = trim($osasto);
 	$try    = trim($try);
@@ -66,7 +57,7 @@
 		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 	}
 
-	echo "</select></td><td><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</select></td><td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
 	echo "</table>";
 	echo "</form>";
@@ -221,8 +212,8 @@
 		$keyosa = mysql_fetch_array($keyres);	
 					
 		echo "<td>$ryhmanimet[$l]</td>";
-		echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]'>$row[osasto] $keyosa[selitetark]</a></td>";
-		echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&try=$row[try]'>$row[try] $keytry[selitetark]</a></td>";
+		echo "<td nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]'>$row[osasto] $keyosa[selitetark]</a></td>";
+		echo "<td nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&try=$row[try]'>$row[try] $keytry[selitetark]</a></td>";
 		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
 		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["max"]))."</td>";
 		echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["min"]))."</td>";

@@ -2,19 +2,35 @@
 
 	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-luokka")." $ryhmanimet[$luokka]<hr></font>";
 
-	if ($toim == "kate") {
-		$abcwhat = "kate";
-		$abcchar = "AK";
-	}
-	else {
-		$abcwhat = "summa";
-		$abcchar = "AM";
-	}
-
 	//ryhm‰jako
 	$ryhmanimet   = array('A-50','B-30','C-20');
 	$ryhmaprossat = array(50.00,30.00,20.00);
 
+	// piirrell‰‰n formi
+	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+	echo "<input type='hidden' name='tee' value='LUOKKA'>";
+	echo "<input type='hidden' name='toim' value='$toim'>";
+	echo "<table>";
+
+	echo "<tr>";
+	echo "<th>".t("Valitse luokka").":</th>";
+	echo "<td><select name='luokka'>";
+	echo "<option value=''>Valitse luokka</option>";
+
+	$sel = array();
+	$sel[$luokka] = "selected";
+
+	$i=0;
+	foreach ($ryhmanimet as $nimi) {
+		echo "<option value='$i' $sel[$i]>$nimi</option>";
+		$i++;
+	}
+
+	echo "</select></td><td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</tr>";
+	echo "</table>";
+	echo "</form>";
+	
 	$kentat = array('luokka','tuoteno','osasto','try','osto_rivia','summa','kate','katepros','kateosuus','palvelutaso');
 
 	for ($i=0; $i<=count($kentat); $i++) {

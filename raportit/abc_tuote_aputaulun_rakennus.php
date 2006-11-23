@@ -48,6 +48,10 @@ if ($tee == 'YHTEENVETO') {
 		$abcwhat = "kate";
 		$abcchar = "TK";
 	}
+	elseif ($abctyyppi == "kpl") {
+		$abcwhat = "kpl";
+		$abcchar = "TP";
+	}
 	else {
 		$abcwhat = "summa";
 		$abcchar = "TM";
@@ -179,6 +183,11 @@ if ($tee == 'YHTEENVETO') {
 			if ($abctyyppi == "kate") {
 				//tuotteen suhteellinen kate totaalikatteesta
 				if ($kaudenkateyht != 0) $tuoteprossa = ($row["kate"] / $kaudenkateyht) * 100;
+				else $tuoteprossa = 0;
+			}
+			elseif ($abctyyppi == "kpl") {
+				//tuotteen suhteellinen kpl totaalikappaleista
+				if ($kaudenmyyriviyht != 0) $tuoteprossa = ($row["kpl"] / $kaudenmyyriviyht) * 100;
 				else $tuoteprossa = 0;
 			}
 			else {
@@ -388,6 +397,7 @@ if ($tee == 'YHTEENVETO') {
 		$query = "	SELECT
 					summa,
 					kate,
+					kpl,
 					tunnus
 					FROM abc_aputaulu use index (yhtio_tyyppi_osasto_try)
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -401,6 +411,7 @@ if ($tee == 'YHTEENVETO') {
 			//haetaan luokan myynti yhteensä
 			$query = "	SELECT
 						sum(summa) yhtmyynti,
+						sum(kpl) yhtkpl,
 						sum(kate) yhtkate
 						FROM abc_aputaulu use index (yhtio_tyyppi_osasto_try)
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -420,6 +431,11 @@ if ($tee == 'YHTEENVETO') {
 				if ($abctyyppi == "kate") {
 					//tuotteen suhteellinen kate totaalikatteesta
 					if ($yhtrow["yhtkate"] != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+					else $tuoteprossa = 0;
+				}
+				elseif ($abctyyppi == "kpl") {
+					//tuotteen suhteellinen kpl totaalikappaleista
+					if ($yhtrow["yhtkpl"] != 0) $tuoteprossa = ($row["kpl"] / $yhtrow["yhtkpl"]) * 100;
 					else $tuoteprossa = 0;
 				}
 				else {
@@ -458,6 +474,7 @@ if ($tee == 'YHTEENVETO') {
 		$query = "	SELECT
 					summa,
 					kate,
+					kpl,
 					tunnus
 					FROM abc_aputaulu use index (yhtio_tyyppi_try)
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -471,6 +488,7 @@ if ($tee == 'YHTEENVETO') {
 			//haetaan luokan myynti yhteensä
 			$query = "	SELECT
 						sum(summa) yhtmyynti,
+						sum(kpl) yktkpl,
 						sum(kate) yhtkate
 						FROM abc_aputaulu use index (yhtio_tyyppi_try)
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -490,6 +508,11 @@ if ($tee == 'YHTEENVETO') {
 				if ($abctyyppi == "kate") {
 					//tuotteen suhteellinen kate totaalikatteesta
 					if ($yhtrow["yhtkate"] != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+					else $tuoteprossa = 0;
+				}
+				elseif ($abctyyppi == "kpl") {
+					//tuotteen suhteellinen kpl totaalikappaleista
+					if ($yhtrow["yhtkpl"] != 0) $tuoteprossa = ($row["kpl"] / $yhtrow["yhtkpl"]) * 100;
 					else $tuoteprossa = 0;
 				}
 				else {
@@ -526,6 +549,7 @@ if ($tee == 'YHTEENVETO') {
 				osasto,
 				try,
 				sum(summa) summa,
+				sum(kpl) kpl,
 				sum(kate) kate
 				FROM abc_aputaulu use index (yhtio_tyyppi_osasto_try)
 				WHERE yhtio = '$kukarow[yhtio]'
@@ -537,6 +561,7 @@ if ($tee == 'YHTEENVETO') {
 	//haetaan myynti yhteensä
 	$query = "	SELECT
 				sum(summa) yhtmyynti,
+				sum(kpl) yhtkpl,
 				sum(kate) yhtkate
 				FROM abc_aputaulu use index (yhtio_tyyppi_osasto_try)
 				WHERE yhtio = '$kukarow[yhtio]'
@@ -555,6 +580,11 @@ if ($tee == 'YHTEENVETO') {
 		if ($abctyyppi == "kate") {
 			//tuotteen suhteellinen kate totaalikatteesta
 			if ($yhtrow["yhtkate"] != 0) $tuoteprossa = ($row["kate"] / $yhtrow["yhtkate"]) * 100;
+			else $tuoteprossa = 0;
+		}
+		elseif ($abctyyppi == "kpl") {
+			//tuotteen suhteellinen kpl totaalikappaleista
+			if ($yhtrow["yhtkpl"] != 0) $tuoteprossa = ($row["kpl"] / $yhtrow["yhtkpl"]) * 100;
 			else $tuoteprossa = 0;
 		}
 		else {

@@ -1,25 +1,14 @@
 <?php
 
-	echo "<font class='head'>".t("ABC-Analyysi: Osasto ja/tai ryhm‰")."<hr></font>";
-
-	if ($toim == "kate") {
-		$abcwhat = "kate";
-		$abcchar = "TK";
-	}
-	else {
-		$abcwhat = "summa";
-		$abcchar = "TM";
-	}
+	echo "<font class='head'>".t("ABC-Analyysi: Tuoteosasto tai tuoteryhm‰")."<hr></font>";
 
 	// tutkaillaan saadut muuttujat
 	$osasto = trim($osasto);
 	$try    = trim($try);
 
-	if ($osasto == "")	$osasto = trim($osasto2);
-	if ($try    == "")	$try = trim($try2);
-
-	if ($ed == 'on')	$chk = "CHECKED";
-	else				$chk = "";
+	if ($osasto == "") $osasto = trim($osasto2);
+	if ($try    == "") $try = trim($try2);
+	if ($try    != "") $osasto = "";
 
 	// piirrell‰‰n formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
@@ -66,7 +55,7 @@
 		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 	}
 
-	echo "</select></td><td><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</select></td><td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
 	echo "</table>";
 	echo "</form>";
@@ -75,17 +64,18 @@
 	if ($osasto != '' or $try != '') {
 
 		$valinta = 'luokka';
-		
+		$valintalisa = "";
+
 		if ($osasto != '') {
-			$osastolisa = " and osasto='$osasto' ";
+			$valintalisa = " and osasto='$osasto' ";
 			$valinta = "luokka_osasto";
 		}
 		if ($try != '') {
-			$trylisa = " and try='$try' ";
+			$valintalisa = " and try='$try' ";
 			$valinta = "luokka_try";
 		}
 
-		$kentat = array($valinta,'tuoteno','osasto','try','summa','kate','katepros','kateosuus','vararvo','varaston_kiertonop','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht','total');
+		$kentat = array($valinta,'luokka','tuoteno','osasto','try','summa','kate','katepros','kateosuus','vararvo','varaston_kiertonop','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht','total');
 
 		for ($i=0; $i<=count($kentat); $i++) {
 			if (strlen($haku[$i]) > 0 and $kentat[$i] != 'kateosuus') {
@@ -102,7 +92,7 @@
 			$jarjestys = $order." ".$sort;
 		}
 		else {
-			$jarjestys = "$valinta, summa desc";
+			$jarjestys = "$valinta, $abcwhat desc";
 		}
 
 		//kauden yhteismyynnit ja katteet
@@ -112,8 +102,7 @@
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'
-					$osastolisa
-					$trylisa";
+					$valintalisa";
 		$sumres = mysql_query($query) or pupe_error($query);
 		$sumrow = mysql_fetch_array($sumres);
 
@@ -154,8 +143,7 @@
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'
-					$osastolisa
-					$trylisa
+					$valintalisa
 					$lisa
 					$hav
 					ORDER BY $jarjestys";
@@ -163,7 +151,7 @@
 
 		echo "<table>";
 		echo "<tr>";
-		
+
 		if ($valinta == 'luokka_osasto')	$otsikko = "Osaston";
 		if ($valinta == 'luokka_try') 		$otsikko = "Tuoryn";
 
@@ -215,14 +203,14 @@
 							FROM avainsana
 							WHERE yhtio='$kukarow[yhtio]' and laji='TRY' and selite='$row[try]'";
 				$keyres = mysql_query($query) or pupe_error($query);
-				$keytry = mysql_fetch_array($keyres);	
+				$keytry = mysql_fetch_array($keyres);
 
 				$query = "	SELECT selite, selitetark
 							FROM avainsana
 							WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO' and selite='$row[osasto]'";
 				$keyres = mysql_query($query) or pupe_error($query);
 				$keyosa = mysql_fetch_array($keyres);
-				
+
 				echo "<tr>";
 
 				$l = $row[$valinta];

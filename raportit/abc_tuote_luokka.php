@@ -2,15 +2,7 @@
 
 	echo "<font class='head'>".t("ABC-Analyysiä: ABC-luokka")." $ryhmanimet[$luokka]<hr></font>";
 
-	if ($toim == "kate") {
-		$abcwhat = "kate";
-		$abcchar = "TK";
-	}
-	else {
-		$abcwhat = "summa";
-		$abcchar = "TM";
-	}
-
+	//ryhmäjako
 	$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 	$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
 
@@ -34,7 +26,7 @@
 		$i++;
 	}
 
-	echo "</select></td><td><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</select></td><td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
 	echo "</table>";
 	echo "</form>";

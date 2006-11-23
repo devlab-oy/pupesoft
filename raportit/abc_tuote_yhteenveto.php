@@ -2,15 +2,6 @@
 
 	echo "<font class='head'>".t("ABC-Analyysiä: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
 
-	if ($toim == "kate") {
-		$abcwhat = "kate";
-		$abcchar = "TK";
-	}
-	else {
-		$abcwhat = "summa";
-		$abcchar = "TM";
-	}
-
 	// tutkaillaan saadut muuttujat
 	$osasto = trim($osasto);
 	$try    = trim($try);
@@ -66,12 +57,10 @@
 		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 	}
 
-	echo "</select></td><tr>";
-
+	echo "</select></td>";
+	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</tr>";
 	echo "</table>";
-
-	echo "<br><input type='submit' value='".t("Aja raportti")."'>";
-
 	echo "</form>";
 
 

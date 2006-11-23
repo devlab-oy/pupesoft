@@ -2,15 +2,6 @@
 
 	echo "<font class='head'>".t("ABC-Analyysi‰: Osasto/Ryhm‰")."<hr></font>";
 
-	if ($toim == "kate") {
-		$abcwhat = "kate";
-		$abcchar = "AK";
-	}
-	else {
-		$abcwhat = "summa";
-		$abcchar = "AM";
-	}
-
 	//ryhm‰jako
 	$ryhmanimet   = array('A-50','B-30','C-20');
 	$ryhmaprossat = array(50.00,30.00,20.00);
@@ -19,11 +10,9 @@
 	$osasto = trim($osasto);
 	$try    = trim($try);
 
-	if ($osasto == "")	$osasto = trim($osasto2);
-	if ($try    == "")	$try = trim($try2);
-
-	if ($ed == 'on')	$chk = "CHECKED";
-	else				$chk = "";
+	if ($osasto == "") $osasto = trim($osasto2);
+	if ($try    == "") $try = trim($try2);
+	if ($try    != "") $osasto = "";
 
 	// piirrell‰‰n formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
@@ -62,7 +51,7 @@
 				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASRYHMA'
 				ORDER BY selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
-	
+
 	echo "<td><select name='try2' onChange='submit()'>";
 	echo "<option value=''>".t("Ryhm‰")."</option>";
 
@@ -72,7 +61,7 @@
 		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 	}
 
-	echo "</select></td><td><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</select></td><td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
 	echo "</table>";
 	echo "</form>";
@@ -80,18 +69,19 @@
 
 	if ($osasto != '' or $try != '') {
 
-		$valinta = '';
+		$valinta = 'luokka';
+		$valintalisa = "";
+
 		if ($osasto != '') {
-			$osastolisa = " and osasto='$osasto' ";
+			$valintalisa = " and osasto='$osasto' ";
 			$valinta = "luokka_osasto";
 		}
 		if ($try != '') {
-			$trylisa = " and try='$try' ";
+			$valintalisa = " and try='$try' ";
 			$valinta = "luokka_try";
 		}
 
-
-		$kentat = array('luokka',$valinta,'tuoteno','osasto','try','osto_rivia','summa','kate','katepros','kateosuus','palvelutaso');
+		$kentat = array($valinta,'luokka','tuoteno','osasto','try','osto_rivia','summa','kate','katepros','kateosuus','palvelutaso');
 
 		for ($i=0; $i<=count($kentat); $i++) {
 			if (strlen($haku[$i]) > 0 and $kentat[$i] != 'kateosuus') {
@@ -104,15 +94,12 @@
 			}
 		}
 
-
-
 		if (strlen($order) > 0) {
 			$jarjestys = $order." ".$sort;
 		}
 		else {
-			$jarjestys = "kate desc";
+			$jarjestys = "$valinta, $abcwhat desc";
 		}
-
 
 		//kauden yhteismyynnit ja katteet
 		$query = "	SELECT
@@ -121,8 +108,7 @@
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'
-					$osastolisa
-					$trylisa";
+					$valintalisa";
 		$sumres = mysql_query($query) or pupe_error($query);
 		$sumrow = mysql_fetch_array($sumres);
 
@@ -153,8 +139,7 @@
 					FROM abc_aputaulu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'
-					$osastolisa
-					$trylisa
+					$valintalisa
 					$lisa
 					$hav
 					ORDER BY $jarjestys";
@@ -162,12 +147,12 @@
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&order=luokka&sort=asc$ulisa'>".t("ABC")."<br>".t("Luokka")."</th>";
 
 		if ($valinta == 'luokka_osasto')	$otsikko = "Osaston";
 		if ($valinta == 'luokka_try') 		$otsikko = "Ryhm‰n";
 
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=$valinta&sort=asc$ulisa'>$otsikko<br>".t("Luokka")."</a></th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&order=luokka&sort=asc$ulisa'>".t("ABC")."<br>".t("Luokka")."</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=tuoteno&sort=asc$ulisa'>".t("Asiakas")."</a><br>&nbsp;</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=osasto&sort=asc$ulisa'>".t("Osasto")."</a><br>&nbsp;</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&valinta=$valinta&order=try&sort=asc$ulisa'>".t("Ryhm‰")."</a><br>&nbsp;</th>";
@@ -210,10 +195,10 @@
 
 				echo "<tr>";
 
-				$l = $row["luokka"];
+				$l = $row[$valinta];
 				echo "<td>$ryhmanimet[$l]</td>";
 
-				$l = $row[$valinta];
+				$l = $row["luokka"];
 				echo "<td>$ryhmanimet[$l]</td>";
 
 				echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$asrow[ytunnus]'>$asrow[ytunnus] $asrow[nimi]</a></td>";
@@ -269,4 +254,5 @@
 			echo "</table>";
 		}
 	}
+
 ?>

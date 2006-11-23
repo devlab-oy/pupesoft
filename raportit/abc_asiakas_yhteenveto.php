@@ -2,15 +2,6 @@
 
 	echo "<font class='head'>".t("ABC-Analyysiä: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
 
-	if ($toim == "kate") {
-		$abcwhat = "kate";
-		$abcchar = "AK";
-	}
-	else {
-		$abcwhat = "summa";
-		$abcchar = "AM";
-	}
-
 	//ryhmäjako
 	$ryhmanimet   = array('A-50','B-30','C-20');
 	$ryhmaprossat = array(50.00,30.00,20.00);
@@ -72,7 +63,8 @@
 		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 	}
 
-	echo "</select></td><td><input type='submit' value='".t("Aja raportti")."'></td>";
+	echo "</select></td>";
+	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
 	echo "</table>";
 	echo "</form>";
@@ -149,7 +141,7 @@
 					$osastolisa
 					$trylisa
 					GROUP BY luokka
-					ORDER BY luokka, kate desc";
+					ORDER BY luokka, $abcwhat desc";
 		$res = mysql_query($query) or pupe_error($query);
 
 		while($row = mysql_fetch_array($res)) {
@@ -186,14 +178,12 @@
 
 		}
 
-
 		//yhteensärivi
 		$kateprosenttiyht 	= round ($ryhmakateyht / $ryhmamyyntiyht * 100,2);
 		$kateosuusyht     	= round ($ryhmakateyht / $sumrow["yhtkate"] * 100,2);
 		$myyntieranarvoyht  = round ($ryhmamyyntiyht / $rivilkmyht,2);
 		$myyntieranakplyht  = round ($ryhmakplyht / $rivilkmyht,2);
 		$palvelutasoyht 	= round (100 - ($ryhmapuuterivityht / ($ryhmapuuterivityht + $rivilkmyht) * 100),2);
-
 
 		echo "<tr>";
 		echo "<td>".t("Yhteensä").":</td>";

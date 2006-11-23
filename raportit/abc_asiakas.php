@@ -9,6 +9,19 @@ if ($toim == "") {
 	$toim = "myynti";
 }
 
+if ($toim == "kate") {
+	$abcwhat = "kate";
+	$abcchar = "AK";
+}
+elseif ($toim == "kpl") {
+	$abcwhat = "kpl";
+	$abcchar = "AP";
+}
+else {
+	$abcwhat = "summa";
+	$abcchar = "AM";
+}
+
 if ($tee == '') {
 	echo "<font class='head'>".t("ABC-Analysointia asiakkaille")."<hr></font>";
 	echo "<font class='message'>";
@@ -23,8 +36,9 @@ if ($tee == '') {
 	echo "<br><br>".t("Valitse toiminto").":<br><br>";
 	echo "</font>";
 	echo "<li><a class='menu' href='$PHP_SELF?tee=YHTEENVETO&toim=$toim'         >".t("ABC-luokkayhteenveto")."</a><br>";
-	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRYYHTEENVETO&toim=$toim'>".t("Osasto/Ryhmä yhteenveto")."</a><br>";
-	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Osasto/Ryhmä")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRYYHTEENVETO&toim=$toim'>".t("Asiakasosasto/asiakasryhmäyhteenveto")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=OSASTOTRY&toim=$toim'          >".t("Asiakasosaston tai asiakasryhmän luokat")."</a><br>";
+	echo "<li><a class='menu' href='$PHP_SELF?tee=LUOKKA&toim=$toim'             >".t("Luokan tuotteet")."</a><br>";
 	echo "<li><a class='menu' href='$PHP_SELF?tee=PITKALISTA&toim=$toim'         >".t("Kaikki luokat tekstinä")."</a><br>";
 }
 

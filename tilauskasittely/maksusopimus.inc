@@ -59,9 +59,9 @@ if($tila == "tallenna") {
 				maksuehto 	= '$mehto',
 				lisatiedot 	= '".addslashes($lisatiedot)."',
 				ohje 		= '".addslashes($ohje)."'
-				WHERE  yhtio ='$kukarow[yhtio]'
+				WHERE yhtio = '$kukarow[yhtio]'
 				and otunnus = '$laskurow[tunnus]'
-				and tunnus='$maksupositio'";
+				and tunnus  = '$maksupositio'";
 	$result = mysql_query($query) or pupe_error($query);
 }
 
@@ -175,7 +175,7 @@ if(mysql_num_rows($result) == 1) {
 
 				while($prow = mysql_fetch_array($mresult)) {
 					if($row["maksuehto"] == $prow["tunnus"]) $sel = "SELECTED";
-					elseif($asiakasrow["maksuehto"] == $prow["tunnus"]) $sel = "SELECTED";
+					elseif($asiakasrow["maksuehto"] == $prow["tunnus"] and $row["maksuehto"] == "") $sel = "SELECTED";
 					else $sel = "";
 
 					echo "<option value='$prow[0]' $sel>$prow[1]</option>";

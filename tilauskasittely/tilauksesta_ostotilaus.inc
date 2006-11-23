@@ -18,14 +18,15 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$myytilrow = mysql_fetch_array($result);
 
+			//otetaan ensin vain lis‰varusteettomat tuotteet tai lis‰varusteperheiden is‰t
 			$query = "	select *
 						from tilausrivi
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus	='$otunnus'
 						and tyyppi != 'D'
 						and var 	= '$tyyppi'
-						and (perheid = tunnus or perheid = 0)
-						order by tunnus";
+						and (perheid2 = tunnus or perheid2 = 0)
+						order by perheid2, tunnus";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
@@ -141,8 +142,8 @@
 									where yhtio = '$kukarow[yhtio]'
 									and otunnus = '$otunnus'
 									and tyyppi != 'D'
-									and (tunnus='$rivi[tunnus]' or perheid='$rivi[tunnus]')
-									order by tunnus";
+									and (tunnus='$rivi[tunnus]' or perheid2='$rivi[tunnus]')
+									order by perheid2, tunnus";
 						$tilrivires = mysql_query($query) or pupe_error($query);
 
 						$pid = 0;
@@ -160,22 +161,23 @@
 
 							// lis‰t‰‰n ostotilausrivi
 							$query = "	insert into tilausrivi
-										(perheid, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, hyllyalue, hyllynro, hyllyvali, hyllytaso) values
+										(perheid2, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, hyllyalue, hyllynro, hyllyvali, hyllytaso) values
 										('$pid','$osstu[ostohinta]','$tilrivirow[nimitys]','$tilrivirow[tuoteno]', '$tilrivirow[kpl]', '$tilrivirow[jt]', '$tunnus', '$kukarow[yhtio]', 'O','$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]')";
 							$updre = mysql_query($query) or pupe_error($query);
 
 							$tilauksesta_ostotilaus .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lis‰tty ostotilaukselle: $tunnus</font><br>";
 
-							if($tilrivirow["tunnus"] == $tilrivirow["perheid"] and mysql_num_rows($tilrivires) > 1) {
+							if($tilrivirow["tunnus"] == $tilrivirow["perheid2"] and mysql_num_rows($tilrivires) > 1) {
 								$pid = mysql_insert_id();
 
 								$query = "	update tilausrivi
-											set perheid = $pid
+											set perheid2 = $pid
 											where yhtio = '$kukarow[yhtio]' and tunnus=$pid";
 								$perheres = mysql_query($query) or pupe_error($query);
 							}
 						}
 					}
+
 					// tehd‰‰n rivist‰ tavallinen JT
 					$query = "update tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
 					$updre = mysql_query($query) or pupe_error($query);

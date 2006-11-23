@@ -254,6 +254,7 @@
 			echo "<tr>";
 			echo "<th>".t("Rahtikirjanro")."</th>";
 			echo "<th>".t("Tilausnumero")."</th>";
+			echo "<th>".t("Tulostettu")."</th>";
 			echo "<th>".t("Asiakas")."</th>";
 			echo "<th>".t("Osoite")."</th>";
 			echo "<th>".t("Postino")."</th>";
@@ -262,7 +263,7 @@
 
 			while ($row = mysql_fetch_array($result)) {
 
-				$query = "select otsikkonro from rahtikirjat where yhtio='$kukarow[yhtio]' and rahtikirjanro='$row[rahtikirjanro]' limit 1";
+				$query = "select otsikkonro, tulostettu from rahtikirjat where yhtio='$kukarow[yhtio]' and rahtikirjanro='$row[rahtikirjanro]' limit 1";
 				$ores  = mysql_query($query) or pupe_error($query);
 				$rrow  = mysql_fetch_array($ores);
 
@@ -273,6 +274,7 @@
 				echo "<tr>";
 				echo "<td>$row[rahtikirjanro]</td>";
 				echo "<td>$orow[tunnus]</td>";
+				echo "<td>$rrow[tulostettu]</td>";
 				echo "<td>$orow[nimi] $orow[nimitark]</td>";
 				echo "<td>$orow[toim_osoite]</td>";
 				echo "<td>$orow[toim_postino] $orow[toim_postitp]</td>";

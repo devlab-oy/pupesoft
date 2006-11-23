@@ -310,7 +310,7 @@ if ($tee == 'YHTEENVETO') {
 					sum(if(tyyppi='O', kpl, 0))									osto_kpl,
 					sum(if(tyyppi='O', rivihinta, 0))							osto_summa
 					FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
-					LEFT JOIN tuote USE INDEX (tuoteno_index) USING (yhtio, tuoteno)
+					JOIN tuote USE INDEX (tuoteno_index) USING (yhtio, tuoteno)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.tyyppi in ('L','O')
 					and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'

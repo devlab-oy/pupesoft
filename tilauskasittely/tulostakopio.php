@@ -867,6 +867,8 @@
 				if ($toim == 'PROFORMA') {
 					//kerrotaan laskuntulostukselle, että on proforma
 					$kutsuja = 'proforma';
+					$summa = 0;
+					$arvo = 0;
 				}
 
 				// haetaan maksuehdon tiedot

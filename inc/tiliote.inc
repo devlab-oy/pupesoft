@@ -75,7 +75,7 @@
 						$query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma',
 				round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 									FROM lasku
-									WHERE left(nimi,25) = left('$maksaa',25) and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01)) and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
+									WHERE left(nimi,35) = left('$maksaa',35) and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01)) and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
 	
 						$result = mysql_query($query) or pupe_error($query);
 	
@@ -87,7 +87,7 @@
 							$query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma',
 				round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 									FROM lasku
-									WHERE left(nimi,25) LIKE '%$maksaa%' and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01)) and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
+									WHERE left(nimi,35) LIKE '%$maksaa%' and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01)) and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
 	
 							$result = mysql_query($query) or pupe_error($query);
 	
@@ -157,13 +157,13 @@
 			$tpk = substr($pvm,2,2);
 			$tpp = substr($pvm,4,2);
 				
-			$query = "SELECT ytunnus FROM toimi WHERE yhtio = '$yritirow[yhtio]' and left(nimi,25) LIKE '%$maksaa%'";
+			$query = "SELECT ytunnus FROM toimi WHERE yhtio = '$yritirow[yhtio]' and left(nimi,35) LIKE '%$maksaa%'";
 			$suotoiresult = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($suotoiresult) > 0) {
 				echo "<font class='message'><a href='".$polku."suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=". -1*$maara . "'>".t("Ostosuoritus")."</a></font><br>";
 			}
 			//Olisiko tämä meidän asiakas
-			$query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and left(nimi,25) LIKE '%$maksaa%'";
+			$query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and left(nimi,35) LIKE '%$maksaa%'";
 			$suoasiresult = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($suoasiresult) > 0) {
 				$suoasirow = mysql_fetch_array ($suoasiresult);

@@ -116,7 +116,7 @@
 					echo "<font class='message'>Pupesoft: ".t("maksukanditaatti nimi & määrä")."</font><br>";
 					$query = "SELECT *
 								FROM lasku
-								WHERE left(nimi,25) = left('$maksaa',25) and summa = $maara * -1 and yhtio = '$yritirow[4]' and tila = 'Q'";
+								WHERE left(nimi,35) = left('$maksaa',35) and summa = $maara * -1 and yhtio = '$yritirow[4]' and tila = 'Q'";
 					$result = mysql_query($query) or pupe_error($query);
 					if (mysql_num_rows($result) != 1) {
 						echo "<font class='message'>Pupesoft: ".t("Sopivaa maksua")." '$maksaa' & '$maara' ".t("ei löytynyt")."</font><br>";

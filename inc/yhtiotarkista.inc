@@ -39,12 +39,14 @@
 		(mysql_field_name($result, $i) == "konsernivelat") or
 		(mysql_field_name($result, $i) == "konserniostovelat") or
 		(mysql_field_name($result, $i) == "konsernimyyntisaamiset")) {
+		
 		$query = "	SELECT nimi
 					FROM tili
 					WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
 		$sresult = mysql_query($query) or pupe_error($query);
+		
 		if (mysql_num_rows($sresult) != 1) {
-//Olisiko siellä nimi
+			//Olisiko siellä nimi
 			if ($t[$i] != '') {
 				$query = "	SELECT nimi, tilino
 							FROM tili
@@ -100,9 +102,6 @@
 			if ($pankkitili == '') {
 				$virhe[$i] = t("Pankkitili on virheellinen");
 				$errori = 1;
-			}
-			else {
-				$t[$i] = $pankkitili;
 			}
 		}
 	}

@@ -77,6 +77,10 @@ if ($tee == 'YHTEENVETO') {
 		$tuotejoin = " JOIN tuote on (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno) ";
 	}
 
+	// otetaan isot queryt slavelta
+	$useslave = 1;
+	require ("../inc/connect.inc");
+
 	//haetaan ensin koko kauden yhteisnmyynti ja ostot
 	$query = "	SELECT
 				sum(if(tyyppi='O', 1, 0))			yhtriviaosto,
@@ -238,6 +242,10 @@ if ($tee == 'YHTEENVETO') {
 			$kustaost = round($kustaperostrivi * $row["osto_rivia"],2);
 			$kustayht = $kustamyy + $kustaost;
 
+			// otetaan takasin master yhteys
+			$useslave = 0;
+			require ("../inc/connect.inc");
+
 			$query = "	INSERT INTO abc_aputaulu
 						SET yhtio			= '$kukarow[yhtio]',
 						tyyppi				= '$abcchar',
@@ -266,6 +274,10 @@ if ($tee == 'YHTEENVETO') {
 						kustannus_osto		= '$kustaost',
 						kustannus_yht		= '$kustayht'";
 			$insres = mysql_query($query) or pupe_error($query);
+
+			// otetaan slave yhteys takas
+			$useslave = 1;
+			require ("../inc/connect.inc");
 
 			//luokka vaihtuu
 			if ($ryhmaprossa >= $ryhmaprossat[$i]) {
@@ -348,6 +360,10 @@ if ($tee == 'YHTEENVETO') {
 			$kustaost = round($kustaperostrivi * $row["osto_rivia"],2);
 			$kustayht = $kustamyy + $kustaost;
 
+			// otetaan takasin master yhteys
+			$useslave = 0;
+			require ("../inc/connect.inc");
+
 			$query = "	INSERT INTO abc_aputaulu
 						SET yhtio			= '$kukarow[yhtio]',
 						tyyppi				= '$abcchar',
@@ -376,8 +392,17 @@ if ($tee == 'YHTEENVETO') {
 						kustannus_osto		= '$kustaost',
 						kustannus_yht		= '$kustayht'";
 			$insres = mysql_query($query) or pupe_error($query);
+
+			// otetaan takasin slave yhteys
+			$useslave = 1;
+			require ("../inc/connect.inc");
+
 		}
 	}
+
+	// loput on vaan ABC aputaulu queryja, niin hoidataan ne masterilla kaikki niin ei tule aikaikkunoita
+	$useslave = 0;
+	require ("../inc/connect.inc");
 
 	// haetaan kaikki osastot
 	$query = "SELECT distinct osasto FROM abc_aputaulu use index (yhtio_tyyppi_osasto_try)

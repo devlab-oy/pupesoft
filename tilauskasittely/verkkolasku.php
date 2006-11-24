@@ -1257,7 +1257,8 @@
 					while ($tilrow = mysql_fetch_array($tilres)) {
 						$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);
 						$totalvat  = round($tilrow['rivihinta']+$vatamount, 2);
-
+						$tilrow['kommentti'] = str_replace(array("\r\n","\r","\n")," ", $tilrow['kommentti']);
+						
 						if ($lasrow["chn"] == "111") {
 							$query = "	select eankoodi
 										from tuote
@@ -1287,7 +1288,6 @@
 								xml_add("RowIdentifier",                                    		$tilrow['tilaajanrivinro'], 	$tootfinvoice); // tänne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
 							}
 							if ($tilrow['kommentti']!='') {
-								$tilrow['kommentti'] = str_replace(array("\r\n","\r","\n")," ", $tilrow['kommentti']);
 								xml_add("RowFreeText",    											$tilrow['kommentti'],			$tootfinvoice);
 							}
 

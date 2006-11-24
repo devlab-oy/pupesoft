@@ -89,12 +89,12 @@ if ($subnappi != '') {
 	}
 
 	// etsitään saldolliset tuotteet
-	$query  = "	select tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, tuote.kehahin, tuote.vihapvm,
+	$query  = "	select tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, if(epakurantti1pvm='0000-00-00', tuote.kehahin, round(tuote.kehahin/2,4)) kehahin, tuote.vihapvm,
 				(select group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') from tuotteen_toimittajat where tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno) toimittaja, ifnull(sum(saldo),0) saldo
 				from tuote
 				LEFT JOIN tuotepaikat on tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
 				where tuote.yhtio='$kukarow[yhtio]' and tuote.ei_saldoa='' $epakuranttipvm $lisa
-				group by tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, tuote.kehahin, tuote.vihapvm
+				group by tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, kehahin, tuote.vihapvm
 				having saldo > 0";
 	$result = mysql_query($query) or pupe_error($query);
 

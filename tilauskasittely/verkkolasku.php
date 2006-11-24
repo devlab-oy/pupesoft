@@ -1287,7 +1287,7 @@
 								xml_add("RowIdentifier",                                    		$tilrow['tilaajanrivinro'], 	$tootfinvoice); // tänne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
 							}
 							if ($tilrow['kommentti']!='') {
-								$tilrow['kommentti'] = str_replace(array("\r\n","\r","\n"),"|", $tilrow['kommentti']);
+								$tilrow['kommentti'] = str_replace(array("\r\n","\r","\n")," ", $tilrow['kommentti']);
 								xml_add("RowFreeText",    											$tilrow['kommentti'],			$tootfinvoice);
 							}
 

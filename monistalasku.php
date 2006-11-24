@@ -38,7 +38,7 @@ if ($tee == "mikrotila" or $tee == "file") {
 if ($tee == "ETSILASKU") {
 	echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
 			<input type='hidden' name='toim' value='$toim'>
-			<input type='hidden' name='ytunnus' value='$ytunnus'>
+			<input type='hidden' name='asiakasid' value='$asiakasid'>
 			<input type='hidden' name='tunnukset' value='$tunnukset'>
 			<input type='hidden' name='tee' value='ETSILASKU'>";
 
@@ -72,56 +72,60 @@ if ($tee == "ETSILASKU") {
 
 
 	if ($tunnukset != '') {
-		$where = "tila = 'U'
-				and lasku.tunnus in ($tunnukset)";
+		$where 	= " tila = 'U' and lasku.tunnus in ($tunnukset) ";
+		$use 	= " ";
 	}
 	elseif ($laskunro > 0) {
-		$where = "tila = 'U'
-				and lasku.laskunro='$laskunro'";
+		$where 	= " tila = 'U' and laskunro = '$laskunro' ";
+		$use 	= " use index (lasno_index) ";
 	}
 	elseif ($otunnus > 0) {
-		$where = "tila = 'U'
-				and lasku.tunnus='$otunnus'";
+		//katotaan lˆytyykˆ lasku ja sen kaikki tilaukset
+		$query = "  SELECT laskunro
+					FROM lasku
+					WHERE tunnus = '$otunnus' and lasku.yhtio = '$kukarow[yhtio]'";
+		$laresult = mysql_query($query) or pupe_error($query);
+		$larow = mysql_fetch_array($laresult);
+
+		if ($larow["laskunro"] > 0) {
+			$where 	= " tila = 'U' and laskunro = '$larow[laskunro]' ";
+			$use 	= " use index (lasno_index) ";
+		}
+		else {
+			$where 	= " tila = 'U' and tunnus = '$otunnus' ";
+			$use 	= " ";
+		}
 	}
 	else {
-
-		$use = " use index (yhtio_tila_ytunnus_tapvm) ";
-
-		$where = "tila = 'U'
-				and lasku.ytunnus='$ytunnus'
-				and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
-				and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59' ";
-	}
-
-	if ($jarj != ''){
-		$jarj = "ORDER BY $jarj";
-	}
-	else {
-		$jarj = "ORDER BY toimaika, lasku.tunnus desc";
+		$where = "	tila = 'U'
+					and lasku.liitostunnus = '$asiakasid'
+					and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
+					and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59' ";
+		$use 	= " use index (yhtio_tila_liitostunnus_tapvm) ";
 	}
 
 	// Etsit‰‰n muutettavaa tilausta
 	$query = "	SELECT lasku.tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, summa, tapvm, laatija, tila, alatila
 				FROM lasku $use
 				WHERE $where and lasku.yhtio = '$kukarow[yhtio]'
-				$jarj";
+				ORDER BY tapvm, lasku.tunnus desc";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
 		echo "<table border='0' cellpadding='2' cellspacing='1'>";
 		echo "<tr>";
-		
+
 		for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
 			$jarj = $i+1;
 			echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
 		}
-		
+
 		echo "<th>".t("Tyyppi")."</th>";
-		
+
 		echo "<th>".t("Monista")."</th>";
 		echo "<th>".t("Hyvit‰")."</th>";
-		
-		echo "<th>".t("Korjaa alvit")."</th>";		
+
+		echo "<th>".t("Korjaa alvit")."</th>";
 		echo "<th>".t("Suoraan laskutukseen")."</th>";
 		echo "<th>".t("N‰yt‰")."</th></tr>";
 
@@ -147,36 +151,36 @@ if ($tee == "ETSILASKU") {
 			require ("inc/laskutyyppi.inc");
 
 			echo "<$ero>$laskutyyppi $alatila</$ero>";
-			
+
 			$sel = "";
 			if ($monistettavat[$row["tilaus"]] == 'MONISTA') {
 				$sel = "CHECKED";
-			}			
+			}
 			echo "<$ero><input type='radio' name='monistettavat[$row[tilaus]]' value='MONISTA' $sel></$ero>";
-			
-			
+
+
 			$sel = "";
 			if ($monistettavat[$row["tilaus"]] == 'HYVITA') {
 				$sel = "CHECKED";
-			}		
+			}
 			echo "<$ero><input type='radio' name='monistettavat[$row[tilaus]]' value='HYVITA' $sel></$ero>";
-									
+
 			$sel = "";
 			if ($korjaaalvit[$row["tilaus"]] != '') {
 				$sel = "CHECKED";
 			}
 			echo "<$ero><input type='checkbox' name='korjaaalvit[$row[tilaus]]' value='on' $sel></$ero>";
-						
+
 			$sel = "";
 			if ($suoraanlasku[$row["tilaus"]] != '') {
 				$sel = "CHECKED";
-			}			
+			}
 			echo "<$ero><input type='checkbox' name='suoraanlasku[$row[tilaus]]' value='on' $sel></$ero>";
-									
-			echo "<$ero><a href='$PHP_SELF?tunnus=$row[tilaus]&tunnukset=$tunnukset&ytunnus=$ytunnus&otunnus=$otunnus&laskunro=$laskunro&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tee=NAYTATILAUS'>".t("N‰yt‰")."</a></$ero>";
-			echo "</tr>";								
+
+			echo "<$ero><a href='$PHP_SELF?tunnus=$row[tilaus]&tunnukset=$tunnukset&asiakasid=$asiakasid&otunnus=$otunnus&laskunro=$laskunro&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tee=NAYTATILAUS'>".t("N‰yt‰")."</a></$ero>";
+			echo "</tr>";
 		}
-									
+
 		echo "</table><br>";
 		echo "<input type='submit' value='".t("Monista")."'></form>";
 	}
@@ -194,13 +198,13 @@ if ($tee=='MONISTA') {
 	// $suoraanlasku array sanoo ett‰ tilausta ei ker‰t‰ vaan se menee suoraan laskutusjonoon
 
 	foreach($monistettavat as $lasku => $kumpi) {
-				
+
 		$alvik 		= "";
 		$slask 		= "";
-							
-		if ($korjaaalvit[$lasku] != '')  $alvik = "on";		
+
+		if ($korjaaalvit[$lasku] != '')  $alvik = "on";
 		if ($suoraanlasku[$lasku] != '') $slask = "on";
-				
+
 		if ($kumpi == 'HYVITA') {
 				$kklkm = 1;
 				echo t("Hyvitet‰‰n")." ";
@@ -208,23 +212,23 @@ if ($tee=='MONISTA') {
 		else {
 				echo t("Kopioidaan")." ";
 		}
-	
+
 		echo "$kklkm ".t("lasku(a)").".<br><br>";
-	
+
 		for($monta=1; $monta <= $kklkm; $monta++) {
-	
+
 			$query = "SELECT * FROM lasku WHERE tunnus='$lasku' and yhtio ='$kukarow[yhtio]'";
-	
+
 			$monistares = mysql_query($query) or pupe_error($query);
 			$monistarow = mysql_fetch_array($monistares);
-	
+
 			$fields = mysql_field_name($monistares,0);
 			$values = "'".$monistarow[0]."'";
-	
+
 			for($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
-	
+
 				$fields .= ", ".mysql_field_name($monistares,$i);
-	
+
 				switch (mysql_field_name($monistares,$i)) {
 					case 'kerayspvm':
 					case 'toimaika':
@@ -266,7 +270,7 @@ if ($tee=='MONISTA') {
 					case 'kauppatapahtuman_luonne':
 					case 'sisamaan_kuljetus':
 					case 'sisamaan_kuljetusmuoto':
-					case 'poistumistoimipaikka':					
+					case 'poistumistoimipaikka':
 					case 'poistumistoimipaikka_koodi':
 						$values .= ", ''";
 						break;
@@ -290,17 +294,17 @@ if ($tee=='MONISTA') {
 										WHERE yhtio='$kukarow[yhtio]' and tunnus = '$monistarow[liitostunnus]'";
 							$asiakres = mysql_query($squery) or pupe_error($squery);
 							$asiakrow = mysql_fetch_array($asiakres);
-							
+
 							$values .= ", '$asiakrow[alv]'";
-							
+
 							$laskurow["vienti"]	 = $monistarow["vienti"];
 							$laskurow["ytunnus"] = $monistarow["ytunnus"];
 							$laskurow["tila"]	 = $monistarow["tila"];
 							$laskurow["alv"] 	 = $asiakrow["alv"];
-							
+
 							echo t("Korjataan laskun ALVia").":  $monistarow[alv] --> $asiakrow[alv]<br>";
 						}
-						else {					
+						else {
 							$values .= ", '".$monistarow[$i]."'";
 						}
 						break;
@@ -308,7 +312,7 @@ if ($tee=='MONISTA') {
 						if ($kumpi == 'HYVITA' or $alvik == "on") {
 							echo t("Hyvityst‰/ALV-korjausta ei ketjuteta")."<br>";
 							$values .= ", 'x'";
-						}						
+						}
 						else {
 							$values .= ", '".$monistarow[$i]."'";
 						}
@@ -331,53 +335,53 @@ if ($tee=='MONISTA') {
 						$values .= ", '".$monistarow[$i]."'";
 				}
 			}
-	
+
 			$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 			$insres  = mysql_query($kysely) or pupe_error($kysely);
 			$utunnus = mysql_insert_id($link);
-	
+
 			echo t("Uusi tilausnumero on")." $utunnus<br><br>";
-	
-	
+
+
 			$query = "SELECT * from tilausrivi where uusiotunnus='$lasku' and kpl<>0 and yhtio ='$kukarow[yhtio]'";
 			$rivires = mysql_query($query) or pupe_error($query);
-	
+
 			while ($rivirow = mysql_fetch_array($rivires)) {
 				$paikkavaihtu = 0;
-				
-				$pquery = "	SELECT tunnus 
-							FROM tuotepaikat 
-							WHERE yhtio =	'$kukarow[yhtio]' 
-							and tuoteno =	'$rivirow[tuoteno]' 
-							and hyllyalue =	'$rivirow[hyllyalue]' 
-							and hyllynro =	'$rivirow[hyllynro]' 
+
+				$pquery = "	SELECT tunnus
+							FROM tuotepaikat
+							WHERE yhtio =	'$kukarow[yhtio]'
+							and tuoteno =	'$rivirow[tuoteno]'
+							and hyllyalue =	'$rivirow[hyllyalue]'
+							and hyllynro =	'$rivirow[hyllynro]'
 							and hyllyvali =	'$rivirow[hyllyvali]'
-							and hyllytaso =	'$rivirow[hyllytaso]' 
+							and hyllytaso =	'$rivirow[hyllytaso]'
 							LIMIT 1";
 				$presult = mysql_query($pquery) or pupe_error($pquery);
-				
+
 				if (mysql_num_rows($presult) == 0) {
-					$p2query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso 
-								FROM tuotepaikat 
-								WHERE yhtio = '$kukarow[yhtio]' 
-								and tuoteno = '$rivirow[tuoteno]' 
-								and oletus != '' 
+					$p2query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
+								FROM tuotepaikat
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$rivirow[tuoteno]'
+								and oletus != ''
 								LIMIT 1";
 					$p2result = mysql_query($p2query) or pupe_error($p2query);
-					
+
 					if (mysql_num_rows($p2result) == 1) {
 						$paikka2row = mysql_fetch_array($p2result);
 						$paikkavaihtu = 1;
-					}              
-				}                   
-									
+					}
+				}
+
 				$rfields = mysql_field_name($rivires,0);
 				$rvalues = "'".$monistarow[0]."'";
-	
+
 				for($i=1; $i < mysql_num_fields($rivires)-1; $i++) { // Ei tunnusta
-	
+
 					$rfields .= ", ".mysql_field_name($rivires,$i);
-	
+
 					switch (mysql_field_name($rivires,$i)) {
 						case 'kerayspvm':
 						case 'toimaika':
@@ -456,54 +460,54 @@ if ($tee=='MONISTA') {
 							$rvalues .= ", '".$rivirow[$i]."'";
 					}
 				}
-				
+
 				$kysely = "INSERT into tilausrivi ($rfields) VALUES ($rvalues)";
 				$insres = mysql_query($kysely) or pupe_error($kysely);
 				$insid  = mysql_insert_id();
-				
+
 				//tehd‰‰n alvikorjaus jos k‰ytt‰j‰ on pyyt‰nyt sit‰
 				if ($alvik == "on" and $rivirow["hinta"] != 0) {
-					
+
 					$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]'";
 					$tres  = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($tres);
-					
+
 					$vanhahinta = $rivirow["hinta"];
-					
+
 					if ($yhtiorow["alv_kasittely"] == "") {
 						$uusihinta = sprintf('%.2f',round($rivirow['hinta'] / (1+$rivirow['alv']/100) * (1+$trow["alv"]/100),2));
 					}
 					else {
 						$uusihinta = $rivirow['hinta'];
-					}				
-				
+					}
+
 					//lasketaan alvit
 					$hinta 	= $uusihinta;
 					$alv 	= "";
-	
+
 					require ("tilauskasittely/alv.inc");
 					$uusihinta = $hinta;
-	
+
 					if ($vanhahinta != $uusihinta) {
 						echo t("Korjataan hinta").": $vanhahinta --> $uusihinta<br>";
-		
+
 						$query = "update tilausrivi set hinta='$uusihinta', alv='$alv' where yhtio='$kukarow[yhtio]' and otunnus='$utunnus' and tunnus='$insid'";
 						$tres  = mysql_query($query) or pupe_error($query);
 					}
 				}
 			}
-						
+
 			if($slask == "on") {
 				$query = "	select *
 							from lasku
-							where yhtio = '$kukarow[yhtio]' 
+							where yhtio = '$kukarow[yhtio]'
 							and tunnus	= '$utunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_array($result);
-			
+
 				$kukarow["kesken"] = $laskurow["tunnus"];
-			
-				require("tilauskasittely/tilaus-valmis.inc");		
+
+				require("tilauskasittely/tilaus-valmis.inc");
 			}
 		} # end for $monta
 	}
@@ -516,17 +520,17 @@ if ($tee == '') {
 	echo "<form action = '$PHP_SELF' method = 'post'>";
 	echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
 	echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
-	echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";	
+	echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";
 	echo "</table>";
 
 	echo "<br><input type='submit' value='".t("Jatka")."'>";
 	echo "</form>";
-	
+
 	echo "<form action = '$PHP_SELF' method = 'post'>";
 	echo "<input type='hidden' name='tee' value='mikrotila'>";
 	echo "<br><input type='submit' value='".t("Lue monistettavat laskut tiedostosta")."'>";
 	echo "</form>";
-	
+
 }
 
 require ('inc/footer.inc');

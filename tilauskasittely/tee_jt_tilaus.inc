@@ -2,11 +2,12 @@
 
 	// tarvitaan arrayt jossa indexinumero on tilausrivin tunnus
 	// $kpl[tunnus]   = monta toimitetaan
-	// $loput[tunnus] = KAIKKI/POISTA/JATA/MITA mit‰ tehd‰‰n lopuille
+	// $loput[tunnus] = KAIKKI/POISTA/JATA/MITA/SUORA mit‰ tehd‰‰n lopuille
 	// sek‰ $tunnus jossa on tilausrivin tunnus
-
+	
 	if ($loput[$tunnus] == 'MITA') {
-		$query = "	UPDATE tilausrivi SET tyyppi='D'
+		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆi ohjelmassa tee_jt_tilaus.inc (1)")."<br>";
+		$query = "	UPDATE tilausrivi SET tyyppi='D', kommentti = '$komm'
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus' and varattu=0 and kpl=0 and var='J' and tyyppi in ('L','G')";
 		$tresult = mysql_query($query) or pupe_error($query);
 	}
@@ -227,7 +228,7 @@
 				$trow = $rivitrow;
 			}
 		}
-
+		
 		//t‰ss‰ haarassa k‰ytt‰j‰ on syˆtt‰nyt jonkun kappalem‰‰r‰n
 		if ($kpl[$tunnus] > 0 or $loput[$tunnus] == 'KAIKKI') {
 
@@ -245,8 +246,7 @@
 			$taaltaloytyy  = array();
 			$voiollajotain = array();
 
-			if ($trow["ei_saldoa"] == '' and $ohitasaldotarkistus != 'ON') {
-
+			if ($trow["ei_saldoa"] == '' and $ohitasaldotarkistus != 'ON' and $suoratoim[$tunnus] != 'SUORA') {
 				// otetaan tilausrivirow talteen
 				$rivitrow = $trow;
 				// laitetaan tuoteno kentt‰‰n tuoteno
@@ -347,7 +347,7 @@
 
 
 			if ($voidaankolisata == 1) {
-
+				
 				//katotaan, ettei yritet‰ toimittaa enemm‰n kuin rivill‰ oli tilauksessa
 				$varattu = $trow["jt"]-$kpl[$tunnus];
 
@@ -356,13 +356,29 @@
 
 					for ($i=0; $i < count($kappaleet); $i++) {
 						//t‰ss‰ tehd‰‰n uusi rivi
-						$query = "	INSERT into tilausrivi set
-									$updatehyllyt[$i]
-									varattu 		= '$kappaleet[$i]',
-									tilkpl 			= '$kappaleet[$i]',
-									jt				= 0,
-									otunnus 		= '$id',
-									var				= '',
+						$query = "	INSERT into tilausrivi set ";
+						
+						if ($suoratoim[$tunnus] == 'SUORA') {
+							$query .= "	hyllyalue 		= '$hyllyalue[$tunnus]',
+										hyllynro  		= '$hyllynro[$tunnus]',
+										hyllyvali 		= '$hyllyvali[$tunnus]',
+										hyllytaso 		= '$hyllytaso[$tunnus]',
+										tilaajanrivinro = '$rivinumero[$tunnus]',
+										varattu	 		= 0,
+										tilkpl 	 		= '$kappaleet[$i]',
+										jt		 		= '$kappaleet[$i]',
+										var				= '$var[$tunnus]',";
+						}
+						else {
+							$query .= " $updatehyllyt[$i] 
+										varattu = '$kappaleet[$i]',
+										tilkpl 	= '$kappaleet[$i]',
+										jt		= 0,
+										var		= '',";
+						}
+						
+						
+						$query .= "	otunnus 		= '$id',
 									keratty			= '',
 									kerattyaika		= '',
 									kerayspvm 		= now(),
@@ -401,7 +417,8 @@
 
 					}
 					elseif ($loput[$tunnus] == 'POISTA' or $varattu == 0) {
-						$query = "	UPDATE tilausrivi SET tyyppi='D'
+						$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆi ohjelmassa tee_jt_tilaus.inc (2)")."<br>";
+						$query = "	UPDATE tilausrivi SET tyyppi='D', kommentti = '$komm'
 									WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus' and tyyppi in ('L','G')";
 						$tresult = mysql_query($query) or pupe_error($query);
 					}

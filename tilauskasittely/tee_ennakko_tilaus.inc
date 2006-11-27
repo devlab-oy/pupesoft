@@ -1,5 +1,10 @@
 <?php
-
+	
+	// tarvitaan arrayt jossa indexinumero on tilausrivin tunnus
+	// $kpl[tunnus]   = monta toimitetaan
+	// $loput[tunnus] = KAIKKI/POISTA/JATA/MITA/SUORA mitä tehdään lopuille
+	// sekä $tunnus jossa on tilausrivin tunnus
+	
 	if ($loput[$tunnus] == 'MITA') {
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tee_ennakko_tilaus.inc (1)")."<br>";
 		$query = "	UPDATE tilausrivi SET tyyppi='D' , kommentti = '$komm'
@@ -167,7 +172,7 @@
 			$taaltaloytyy  = array();
 			$voiollajotain = array();
 			
-			if ($trow["ei_saldoa"] == '') {
+			if ($trow["ei_saldoa"] == '' and $suoratoim[$tunnus] != 'SUORA') {
 			
 				require("tarkistasaldo.inc");
 			
@@ -254,13 +259,29 @@
 					
 					for ($i=0; $i < count($kappaleet); $i++) {
 						//tässä tehdään uusi rivi
-						$query = "	INSERT into tilausrivi set
-									$updatehyllyt[$i]
-									varattu 		= '$kappaleet[$i]',
-									tilkpl 			= '$kappaleet[$i]',
-									jt				= 0,
-									otunnus 		= '$id',
-									var				= '',
+						$query = "	INSERT into tilausrivi set ";
+						
+						if ($suoratoim[$tunnus] == 'SUORA') {
+							$query .= "	hyllyalue 		= '$hyllyalue[$tunnus]',
+										hyllynro  		= '$hyllynro[$tunnus]',
+										hyllyvali 		= '$hyllyvali[$tunnus]',
+										hyllytaso 		= '$hyllytaso[$tunnus]',
+										tilaajanrivinro = '$rivinumero[$tunnus]',
+										varattu	 		= 0,
+										tilkpl 	 		= '$kappaleet[$i]',
+										jt		 		= '$kappaleet[$i]',
+										var				= '$var[$tunnus]',";
+						}
+						else {
+							$query .= " $updatehyllyt[$i] 
+										varattu = '$kappaleet[$i]',
+										tilkpl 	= '$kappaleet[$i]',
+										jt		= 0,
+										var		= '',";
+						}
+						
+						
+						$query .= " otunnus 		= '$id',
 									keratty			= '',
 									kerattyaika		= '',
 									kerayspvm 		= now(),

@@ -12,9 +12,19 @@
 		while ($laskurow = mysql_fetch_array($jtrest)) {
 			$query  = "UPDATE lasku SET tila='N', alatila='A' WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]'";
 			$apure  = mysql_query($query) or pupe_error($query);
+			
+			// katsotaan ollaanko tehty JT-supereita..
+			require("jt_super.inc");
+			$jt_super = jt_super($laskurow["tunnus"]);
 
+			echo "$jt_super<br><br>";
+			
+			//Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
+			$silent = "SILENT";
+			
 			// tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
 			$kukarow["kesken"] = $laskurow["tunnus"];
+			
 			require("tilaus-valmis.inc");
 		}
 
@@ -23,6 +33,43 @@
 		
 	if ($tee == 'POIMI') {
 		foreach($rivitunnus as $tunnus) {
+			
+			//setataan ja nollataan kaikki suoratoimitukseen tarvittavat muttujat
+			$var[$tunnus] 			= '';
+			$hyllyalue[$tunnus] 	= '';
+			$hyllynro[$tunnus] 		= '';
+			$hyllyvali[$tunnus] 	= '';
+			$hyllytaso[$tunnus] 	= '';
+			$rivinumero[$tunnus]	= '';
+			$toimitetaan[$tunnus]	= '';
+
+			if ($suoratoim[$tunnus] == 'SUORA' and $paikka[$tunnus] != '') {
+				if (substr($paikka[$tunnus],0,3) == "@@@") {
+					$var[$tunnus] = "S";
+
+					list($rivinumero[$tunnus],$hyllyalue[$tunnus],$hyllynro[$tunnus],$hyllyvali[$tunnus],$hyllytaso[$tunnus],$toimitetaan[$tunnus]) = split("#",substr($paikka[$tunnus],3));
+
+					if ($kpl[$tunnus] > $toimitetaan[$tunnus]) {
+						$kpl[$tunnus] = $toimitetaan[$tunnus];
+						$loput[$tunnus] = "JATA";
+					}
+					else {
+						$loput[$tunnus] = "KAIKKI";
+					}
+				}
+			}
+			elseif ($suoratoim[$tunnus] == 'SUORA' and $loput[$tunnus] == 'MITA') {
+				$suoratoim[$tunnus] = '';
+			}
+			elseif ($suoratoim[$tunnus] == 'SUORA' and $paikka[$tunnus] == '') {
+				$kpl[$tunnus] = 0;
+				$loput[$tunnus] = '';
+				$suoratoim[$tunnus] = '';	
+			}
+			else {
+				$suoratoim[$tunnus] = '';
+			}
+			
 			if ($kpl[$tunnus] > 0 or $loput[$tunnus] != '') {
 				require ('tee_ennakko_tilaus.inc');
 			}
@@ -144,7 +191,7 @@
 	if ($tee == "" or $tee == "JATKA") {
 				
 		if (isset($muutparametrit)) {
-			list($tuotenumero,$tyyppi,$toimi,$automaaginen,$ytunnus,$asiakasno,$toimittaja) = explode('#', $muutparametrit);
+			list($tuotenumero,$tyyppi,$toimi,$automaaginen,$ytunnus,$asiakasno,$toimittaja,$suorana) = explode('#', $muutparametrit);
 		
 			$varastot = explode('##', $tilausnumero);
 		
@@ -153,7 +200,7 @@
 			}		
 		}
 		
-		$muutparametrit = $tuotenumero."#".$tyyppi."#".$toimi."#".$automaaginen."#".$ytunnus."#".$asiakasno."#";				
+		$muutparametrit = $tuotenumero."#".$tyyppi."#".$toimi."#".$automaaginen."#".$ytunnus."#".$asiakasno."#".$toimittaja."#".$suorana."#";				
 		
 		if(is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -181,7 +228,7 @@
 			}
 		}
 		
-		$muutparametrit = $tuotenumero."#".$tyyppi."#".$toimi."#".$automaaginen."#".$ytunnus."#".$asiakasno."#";
+		$muutparametrit = $tuotenumero."#".$tyyppi."#".$toimi."#".$automaaginen."#".$ytunnus."#".$asiakasno."#".$toimittaja."#".$suorana."#";
 		
 		if(is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -376,10 +423,25 @@
 									}
 								}
 							}
+							//jos ei ole automaaginen ja halutaan suoratoimittaa ja omasta varastosta ei lˆydy yht‰‰n niin katotaan suoratoimitusmahdollisuus
+							if ($automaaginen == '' and $kukarow["extranet"] == '' and $toim != 'SIIRTOLISTA' and ($suorana != '' or $tilaus_on_jo = 'KYLLA')) {
+								$suora_tuoteno 	= $tuoteno;
+								$suora_kpl 		= $atil;
+								$paikatlask = 0;
+								$paikat = '';
+								$mista = 'selaus';
+								
+								require("suoratoimitusvalinta.inc");
+								
+							}
+							else {
+								$paikatlask = 0;
+								$paikat = '';
+							}
 						}
 						
 						// saldo riitt‰‰ tai halutaan n‰hd‰ kaikki rivit
-						if ($total > 0 or $toimi == '' or $jtrow["ei_saldoa"] != "") {
+						if ($total > 0 or $toimi == '' or $jtrow["ei_saldoa"] != "" or ($paikatlask != '' and $paikatlask > 0)) {
 							if ($automaaginen == '') {
 								
 	
@@ -447,6 +509,29 @@
 											<td align='center'>".t("J")."<input type='radio' name='loput[$jtrow[tunnus]]' value='JATA'></td>
 											<td align='center'>".t("M")."<input type='radio' name='loput[$jtrow[tunnus]]' value='MITA'></td>";
 								}
+							}
+							//suoratoimitus
+							elseif ($paikatlask > 0 and $automaaginen == ''and $kukarow['extranet'] == '') {
+								echo "<input type='hidden' name='rivitunnus[]' value='$jtrow[tunnus]'>";
+								echo "<input type='hidden' name='suoratoim[$jtrow[tunnus]]' value='SUORA'>";
+								echo "<input type='hidden' name='kpl[$jtrow[tunnus]]' value='$jtrow[jt]'>";
+								
+								if ($suoratoim_totaali >= $jurow["jt"]) {
+									echo "<td><font color='#00FF00'>".t("Riitt‰‰ kaikille")."!</font></td>";
+								}
+								elseif ($suoratoim_totaali >= $jtrow["jt"]) {
+									echo "<td><font color='#FF4444'>".t("Ei riit‰ kaikille")."!</font></td>";
+								}
+								else {
+									echo "<td><font color='#00FFFF'>".t("Ei riit‰ koko riville")."!</font></td>";
+								}
+								
+								//suoratoimituksille annetaan dropdowni
+								$ddpaikat = "<option value=''>".t("Ei toimiteta")."</option>".$paikat;
+
+								echo "<td colspan='5'><select Style='{font-size: 8pt; padding:0;}' name='paikka[$jtrow[tunnus]]'".$ddpaikat."</select></td>";
+								
+								echo "<td align='center'>".t("M")."<input type='radio' name='loput[$jtrow[tunnus]]' value='MITA'></td>";
 							}
 							elseif ($total > 0) {
 								if ($automaaginen == '') {
@@ -518,6 +603,25 @@
 				echo "<tr><th>".t("Toimita varastosta:")." $vrow[nimitys]</th><td><input type='checkbox' name='varastosta[$vrow[tunnus]]' value='$vrow[tunnus]' $sel></td></tr>";
 			}
 		}				
+
+		$query = "	select tyyppi_tieto
+					from toimi
+					where toimi.yhtio = '$kukarow[yhtio]'
+					and toimi.tyyppi        = 'S'
+					and toimi.tyyppi_tieto != ''
+					and toimi.edi_palvelin != ''
+					and toimi.edi_kayttaja != ''
+					and toimi.edi_salasana != ''
+					and toimi.edi_polku    != ''
+					and toimi.oletus_vienti in ('C','F','I')";
+		$superjtres  = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($superjtres) > 0) {
+			
+			$sel = "";
+			if ($suorana != '') $sel = 'CHECKED';
+			echo "<tr><th>".t("Toimita suoratoimituksena")."</th><td><input type='checkbox' name='suorana' value='suora' $sel></td></tr>";
+			
+		}
 
 		$selt = "";
 		$sela = "";

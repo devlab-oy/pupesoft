@@ -6,7 +6,7 @@
 	//$row jossa on tilausrivi kaikki tiedot
 
 	$suoratoim_array = array();
-
+	
 	// Katsotaan onko t‰lle tuotteelle yht‰‰n sis‰ist‰ toimittajaa
 	// ja ett‰ toimittajan tiedoissa on varmasti kaikki EDI mokkulat p‰‰ll‰
 	// ja oletusvienti on jotain vaihto-omaisuutta
@@ -44,6 +44,8 @@
 					group by 1,2,3,4
 					order by sorttaus, varastopaikat.nimitys";
 		$kres2  = mysql_query($query) or pupe_error($query);
+
+		$suoratoim_totaali = 0;
 
 		while ($krow  = mysql_fetch_array($kres2)) {
 			
@@ -85,12 +87,26 @@
 				if (strtoupper($krow['varastomaa']) != strtoupper($yhtiorow['maakoodi'])) {
 					$varastomaa = strtoupper($krow['varastomaa']);
 				}
+				
+				if ($mista == 'selaus') {
+					if ($saldo < $suora_kpl) {
+						$montako = $saldo;
+					}
+					else {
+						$montako = $suora_kpl;
+					}
+					
+					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]#$montako'>".t("Toimita")." $montako ($varastomaa $krow[nimi] - $krow[nimitys])</option>";
+					$paikatlask=$paikatlask+1;
+					$suoratoim_totaali+=$saldo;
+				}
+				else {
+					// tallennetaan riville toimittajan tunnus
+					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]$lisa' $sel>$varastomaa $krow[nimi] - $krow[nimitys] ($saldo)</option>";
+					$paikatlask=$paikatlask+2;
 
-				// tallennetaan riville toimittajan tunnus
-				$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]$lisa' $sel>$varastomaa $krow[nimi] - $krow[nimitys] ($saldo)</option>";
-				$paikatlask=$paikatlask+2;
-
-				$suoratoim_array[] = "@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]$lisa";
+					$suoratoim_array[] = "@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]$lisa";
+				}
 			}
 		}
 	}

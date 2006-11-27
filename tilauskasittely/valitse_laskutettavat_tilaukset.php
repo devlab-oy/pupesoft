@@ -282,6 +282,7 @@
 				$query = "	select *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]'
+							and printteri5 != ''
 							order by alkuhyllyalue,alkuhyllynro
 							limit 1";
 			}

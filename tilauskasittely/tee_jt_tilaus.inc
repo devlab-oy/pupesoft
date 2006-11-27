@@ -355,6 +355,9 @@
 					///* jos kappalemäärä on syötetty niin splitataan rivi *///
 
 					for ($i=0; $i < count($kappaleet); $i++) {
+						
+						$kommentti = trim($otsikkorivi['viesti']." ".$trow['kommentti']);
+						
 						//tässä tehdään uusi rivi
 						$query = "	INSERT into tilausrivi set ";
 						
@@ -402,7 +405,7 @@
 									hinta 			= '$trow[hinta]',
 									nimitys 		= '$trow[nimitys]',
 									tyyppi 			= '$trow[tyyppi]',
-									kommentti 		= '$otsikkorivi[viesti] $trow[kommentti]'";
+									kommentti 		= '$kommentti'";
 						$result = mysql_query($query) or pupe_error($query);
 
 						//echo "$query Perustetaan uusi!<br><br>";

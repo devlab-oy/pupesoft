@@ -93,8 +93,7 @@ if ($tee == 'YHTEENVETO') {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi in ('L','O')
 				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
-				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-				HAVING $abcwhat > 0";
+				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'";
 	$res = mysql_query($query) or pupe_error($query);
 	$row = mysql_fetch_array($res);
 
@@ -166,10 +165,9 @@ if ($tee == 'YHTEENVETO') {
 				sum(if(tyyppi='O', 1, 0))									osto_rivia,
 				sum(if(tyyppi='O', kpl, 0))									osto_kpl,
 				sum(if(tyyppi='O', rivihinta, 0))							osto_summa,
-				ifnull(sum(saldo) * if(epakurantti2pvm = '0000-00-00', if(epakurantti1pvm = '0000-00-00', kehahin, kehahin / 2), 0), 0) vararvo
+				(select ifnull(sum(saldo) * if(epakurantti2pvm = '0000-00-00', if(epakurantti1pvm = '0000-00-00', kehahin, kehahin / 2), 0), 0) from tuote, tuotepaikat where tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) vararvo
 				FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
 				$tuotejoin
-				LEFT JOIN tuotepaikat USE INDEX (tuote_index) ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 				and tilausrivi.tyyppi in ('L','O')
 				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'

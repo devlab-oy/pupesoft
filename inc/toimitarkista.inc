@@ -56,6 +56,13 @@
 				$errori = 1;
 			}
 		}
+		//Vaaditaan isot kirjaimet
+		$t[$i] = strtoupper($t[$i]);
+	}
+
+	if (mysql_field_name($result, $i) == "swift") {
+		//Vaaditaan isot kirjaimet
+		$t[$i] = strtoupper($t[$i]);
 	}
 
 	if ((mysql_field_name($result, $i) == "ytunnus") and (trim($t[$i])!='')) {

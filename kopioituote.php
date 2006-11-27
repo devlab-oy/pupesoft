@@ -1,46 +1,50 @@
 <?php
-	require "inc/parametrit.inc";
-	if ($tee != 'PERUSTA') {
-		echo "<font class='head'>".t("Kopioi tuote")."</font><hr>";
-	}
 
-	
-	$orkkistee = $tee;
-	
-	if ($tee== 'HAKU') {
-		require "inc/tuotehaku.inc";
-	}
-	
+	require ("inc/parametrit.inc");
+
 	if ($tee== 'PERUSTA') {
+
+		if(strpos($tuoteno, '####') !== FALSE) {
+			$hakyhtio	= substr($tuoteno, strpos($tuoteno, '####')+4);
+			$tuoteno 	= substr($tuoteno, 0, strpos($tuoteno, '####'));
+		}
+		else {
+			$hakyhtio = $kukarow["yhtio"];
+		}
+
 		$query = "	SELECT tunnus
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($result) != 0 ) {
-			$orkkistee = 'HAKU';
-			$tee = 'Y';
+			$tee = 'HAKU';
 			$varaosavirhe = t("VIRHE: Uudella tuotenumerolla")." $uustuoteno ".t("löytyy jo tuote, ei voida perustaa")."!";
 		}
 		else {
 			$query = "	SELECT *
 						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+						WHERE yhtio = '$hakyhtio' and tuoteno = '$tuoteno'";
 			$stresult = mysql_query($query) or pupe_error($query);
+
 			if (mysql_num_rows($stresult) == 0 ) {
-				$orkkistee = '';
-				$tee = 'Y';
+				$tee = 'HAKU';
 				$varaosavirhe = t("VIRHE: Vanha tuote")." $tuoteno ".t("on kadonnut, ei uskalleta tehdä mitään")."!";
 			}
 			else {
 				$otsikkorivi = mysql_fetch_array($stresult);
-				
+
 				// tehdään vanhasta tuotteesta 1:1 kopio...
 				$query = "insert into tuote set ";
+
 				for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
+
+					if (mysql_field_name($stresult,$i)=='yhtio') {
+						$query .= "yhtio='$kukarow[yhtio]',";
+					}
 					// tuotenumeroksi tietenkin uustuoteno
-					if (mysql_field_name($stresult,$i)=='tuoteno') {
+					elseif (mysql_field_name($stresult,$i)=='tuoteno') {
 						$query .= "tuoteno='$uustuoteno',";
 					}
 					// laatijaksi klikkaaja
@@ -69,11 +73,12 @@
 
 				$stresult = mysql_query($query) or pupe_error($query);
 				$id = mysql_insert_id();
-				
+
 				$query = "	SELECT *
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 				$stresult = mysql_query($query) or pupe_error($query);
+
 				if (mysql_num_rows($stresult) != 0 ) {
 					while ($otsikkorivi = mysql_fetch_array($stresult)) {
 						// tehdään vanhoista tuotteen_toimittajista 1:1 kopio...
@@ -93,82 +98,89 @@
 
 						$astresult = mysql_query($query) or pupe_error($query);
 						$id2 = mysql_insert_id();
-					}	
+					}
 				}
-				
-				$tee = 'VALMIS';
+				$query = "	SELECT tunnus
+							FROM tuote
+							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+				$result = mysql_query($query) or pupe_error($query);
+				$rivi = mysql_fetch_array($result);
+
+				$toim 	= 'tuote';
+				$tunnus = $rivi['tunnus'];
+				$tee 	= '';
+
+				require ("yllapito.php");
+
+				exit;
 			}
 		}
 	}
-	
-	if ($tee == 'VALMIS') {
-		//yllapito.php?toim=tuote&tunnus=359062
-		echo "<font class='message'>".t("Kopioitiin onnistuneesti tämä tuote. Nyt voit muutella tietoja.")."</font><br>";
-		
-		$query = "	SELECT tunnus
-					FROM tuote
-					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-		$result = mysql_query($query) or pupe_error($query);
-		$rivi = mysql_fetch_array($result);
-		
-		$orkkistee = 'VALMIS';
-		
-		$toim = 'tuote';
-		$tunnus = $rivi['tunnus'];
-		$tee = '';
-		
-		require "yllapito.php";
-		
-		$tee = 'VALMIS';
-	}
-	
-	if ($ulos != "" and $tee != 'VALMIS') {
-			$formi  = 'hakua';
-			echo "<form action = '$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
-			echo "<input type='hidden' name='tee' value='HAKU'>";
-			echo "<table><tr>";
-			echo "<td>".t("Valitse listasta").":</td>";
-			echo "<td>$ulos</td>";
-			echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
-			echo "</tr></table>";
-			echo "</form>";
-	}
-	
-	if ($tee=='Y') {
-		echo "<font class='error'>$varaosavirhe</font>";
-		$tee = $orkkistee;
-	}
-	
-	if ($tee == 'HAKU' and $ulos == '') {
-		$formi  = 'performi';
-		$kentta = 'uustuoteno';	
 
-		echo "<table><tr>";
-		echo "<th>".t("Anna uusi tuotenumero")."<br>".t("joka perustetaan")."</th>";
-		
+	if ($tee != 'PERUSTA') {
+		echo "<font class='head'>".t("Kopioi tuote")."</font><hr>";
+	}
+
+	if ($tee == 'HAKU') {
+		$konsernihaku = "KYLLA";
+
+		require("inc/tuotehaku.inc");
+	}
+
+	if ($tee == 'HAKU' and $tuoteno != '') {
+		$formi  = 'performi';
+		$kentta = 'uustuoteno';
+
+		echo "<table>";
+		echo "<tr><th>".t("Kopioitava tuote")."</th></tr>";
+
+		if(strpos($tuoteno, '####') !== FALSE) {
+			$tu = substr($tuoteno, strpos($tuoteno, '####')+4)." - ".substr($tuoteno, 0, strpos($tuoteno, '####'));
+		}
+		else {
+			$tu = $tuoteno;
+		}
+
+		echo "<tr><td>$tu</td>";
+
+		echo "<tr><th>".t("Anna uusi tuotenumero")."<br>".t("joka perustetaan")."</th></tr>";
 		echo "<tr><form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='PERUSTA'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		echo "<td><input type='text' name='uustuoteno' size='22' maxlength='20' value=''></td>";
 		echo "<td class='back'><input type='Submit' value='".t("Kopioi")."'></td>";
+		echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
 		echo "</form></tr></table>";
 	}
-	
-	if($tee == '' and $orkkistee != 'VALMIS'){
+
+	if (($tee == 'HAKU' or $tee == "Y") and $ulos != '') {
+			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='tee' value='HAKU'>";
+			echo "<table><tr>";
+			echo "<th>".t("Valitse listasta").":</th></tr>";
+			echo "<tr><td>$ulos</td>";
+			echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+			echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
+			echo "</tr></table>";
+			echo "</form>";
+
+			$varaosavirhe = "";
+	}
+
+	if($tee == '' or $tee == "Y") {
 		$formi  = 'formi';
-		$kentta = 'tuoteno';	
+		$kentta = 'tuoteno';
 
 		echo "<table><tr>";
 		echo "<th>".t("Anna tuotenumero josta")."<br>".t("haluat kopioda tiedot")."</th>";
-		
+
 		echo "<tr><form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='HAKU'>";
 		echo "<td><input type='text' name='tuoteno' size='22' maxlength='20' value=''></td>";
 		echo "<td class='back'><input type='Submit' value='".t("Jatka")."'></td>";
+		echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
 		echo "</form></tr></table>";
 	}
-	
-	if ($tee != 'VALMIS') {
-		require "inc/footer.inc";
-	}
+
+	require("inc/footer.inc");
 ?>

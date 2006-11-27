@@ -6,7 +6,7 @@
 		$lisa1 = '';
 		$ulos  = '';
 
-		 // jos eka merkki on tähti etsitään teksteistä
+		// jos eka merkki on tähti etsitään teksteistä
 		if (substr($tuoteno,0,1) == '*') {
 
 			$tuoteno = substr($tuoteno,1);
@@ -15,7 +15,6 @@
 			foreach ($sanat as $sana) {
 				$lisa1 .= " and concat_ws(' ', tuote.nimitys, tuote.lyhytkuvaus, tuote.tuotemerkki) like '%" . trim($sana) . "%' ";
 			}
-
 		}
 
 		// jos vika merkki on tähti niin etsitään osittainen tuotenumero
@@ -24,21 +23,51 @@
 			$lisa1 = "and tuote.tuoteno like '" . $tuoteno . "%'";
 		}
 
+
+		//Yhtiövalinnat
+		$query	= "	SELECT distinct yhtio, nimi
+					from yhtio
+					where konserni = '$yhtiorow[konserni]' and konserni != ''";
+		$presult = mysql_query($query) or pupe_error($query);
+
+		$yhtiot 	= "";
+		$konsyhtiot = array();
+
+		if (mysql_num_rows($presult) > 0) {
+			while ($prow = mysql_fetch_array($presult)) {
+				$yhtiot .= "'".$prow["yhtio"]."',";
+				$konsyhtiot[] = $prow["yhtio"];
+			}
+			$yhtiot = substr($yhtiot,0,-1);
+			$yhtiot = "yhtio in ($yhtiot) ";
+
+		}
+		else {
+			$yhtiot = "yhtio = '$kukarow[yhtio]' ";
+			$konsyhtiot[] = $kukarow["yhtio"];
+		}
+
+
+		//Voidaan hakea myös koko konsernin tuotteista
+		if($konsernihaku != "KYLLA") {
+			$yhtiot = "yhtio = '$kukarow[yhtio]' ";
+		}
+
 		// Poistettuja tuotteita ei näytetä paitsi jos niillä on saldoa
 		// Joinataan korvaavat mukaan
 		$query = "	SELECT tuote_wrapper.*, valitut.sorttauskentta
 					FROM tuote tuote_wrapper,
-					(SELECT if(korvaavat.id>0,(select tuoteno from korvaavat korva2 use index (yhtio_id) where korva2.yhtio=korvaavat.yhtio and korva2.id=korvaavat.id ORDER BY jarjestys LIMIT 1),tuote.tuoteno) sorttauskentta,
-					ifnull(korvaavat.tuoteno, tuote.tuoteno) tuoteno, sum(tuotepaikat.saldo) saldo
+					(SELECT if(korvaavat.id>0,(select concat(korvaavat.tuoteno,korvaavat.yhtio) from korvaavat korva2 use index (yhtio_id) where korva2.yhtio=korvaavat.yhtio and korva2.id=korvaavat.id ORDER BY jarjestys LIMIT 1),concat(tuote.tuoteno,tuote.yhtio)) sorttauskentta,
+					ifnull(korvaavat.tuoteno, tuote.tuoteno) tuoteno, tuote.yhtio, sum(tuotepaikat.saldo) saldo
 					FROM tuote
 					LEFT JOIN korvaavat use index (yhtio_id) ON korvaavat.yhtio=tuote.yhtio and korvaavat.id = (select id from korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1)
 					LEFT JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno
-					WHERE tuote.yhtio = '$kukarow[yhtio]'
+					WHERE tuote.$yhtiot
 					$lisa1
-					GROUP BY 1,2
+					GROUP BY 1,2,3
 					ORDER BY sorttauskentta, tuoteno) valitut
-					WHERE tuote_wrapper.yhtio = '$kukarow[yhtio]'
-					and valitut.tuoteno=tuote_wrapper.tuoteno
+					WHERE tuote_wrapper.yhtio = valitut.yhtio
+					and tuote_wrapper.tuoteno = valitut.tuoteno
 					LIMIT 201";
 		$thresult = mysql_query($query) or pupe_error($query);
 
@@ -68,22 +97,13 @@
 				$ulos = "<select name='tuoteno_array[]' multiple='TRUE' size='6'>";
 			}
 
-
-			//Otetaan konserniyhtiöt hanskaan jotta voidaan laskea konserniyhtiöiden saldoja
-			$query	= "	SELECT GROUP_CONCAT(distinct yhtio) yhtiot
-						FROM yhtio
-						WHERE yhtio='$kukarow[yhtio]' or (konserni = '$yhtiorow[konserni]' and konserni != '')";
-			$pres = mysql_query($query) or pupe_error($query);
-			$prow = mysql_fetch_array($pres);
-
-			$konsyhtiot = explode(",", $prow["yhtiot"]);
-
 			// Loopataan tuotteet läpi
 			while ($trow = mysql_fetch_array($thresult)) {
 
-				$lisakala = "";
+				$lisakala1 = "";
+
 				if ($trow["sorttauskentta"] == $edtuoteno) {
-					$lisakala = "* ";
+					$lisakala1 = "* ";
 				}
 
 				$saldo = 0;
@@ -99,7 +119,15 @@
 					$saldo = t("Ei");
 				}
 
-				$ulos .= "<option value='$trow[tuoteno]'>$lisakala $trow[tuoteno] $trow[nimitys] ($saldo)</option>";
+				$lisakala2 = "";
+				$lisakala3 = "";
+
+				if($konsernihaku == "KYLLA") {
+					$lisakala2 = " $trow[yhtio] - ";
+					$lisakala3 = "####$trow[yhtio]";
+				}
+
+				$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] $trow[nimitys] ($saldo)</option>";
 
 				$edtuoteno = $trow["sorttauskentta"];
 			}
@@ -169,9 +197,19 @@
 			}
 		}
 
+
+
+		if(strpos($tuoteno, '####') !== FALSE and $konsernihaku == "KYLLA") {
+			$hakyhtio	= substr($tuoteno, strpos($tuoteno, '####')+4);
+			$tuoteno 	= substr($tuoteno, 0, strpos($tuoteno, '####'));
+		}
+		else {
+			$hakyhtio 	= $kukarow["yhtio"];
+		}
+
 		$query = "	SELECT *
 					FROM tuote
-					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+					WHERE yhtio = '$hakyhtio' and tuoteno = '$tuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -181,7 +219,13 @@
 		}
 		else {
 			$trow = mysql_fetch_array($result);
-			$tuoteno = $trow['tuoteno'];
+
+			if($konsernihaku == "KYLLA") {
+				$tuoteno = $trow['tuoteno']."####".$trow["yhtio"];
+			}
+			else {
+				$tuoteno = $trow['tuoteno'];
+			}
 		}
 	}
 

@@ -235,7 +235,7 @@
 			else {
 				$al_lisa = " and (selitetarktark = '$alias_set' or selitetarktark = '') ";
 			}
-			
+
 			$query = "	SELECT count(*) countti
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -244,12 +244,12 @@
 						$al_lisa";
 			$al_res = mysql_query($query) or pupe_error($query);
 			$aliarow = mysql_fetch_array($al_res);
-			
+
 			if ($aliarow['countti'] == 0) {
 				$alias_set = '';
 				$rajattu_nakyma = '';
 			}
-			
+
 		}
 
 
@@ -342,10 +342,10 @@
 		echo "</table>";
 
 		if ($uusi == 1) {
-			$nimi = "".t("Perusta $otsikko_nappi")."";
+			$nimi = t("Perusta $otsikko_nappi");
 		}
 		else {
-			$nimi = "".t("Päivitä $otsikko_nappi")."";
+			$nimi = t("Päivitä $otsikko_nappi");
 		}
 
 		echo "<br><input type = 'submit' value = '$nimi'>";

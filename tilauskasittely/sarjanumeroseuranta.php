@@ -26,14 +26,14 @@
 	// haetaan tilausrivin tiedot
 	if ($from != '' and $rivitunnus != "") {
 		$query    = "	SELECT *
-						FROM tilausrivi
+						FROM tilausrivi use index (PRIMARY)
 						WHERE yhtio='$kukarow[yhtio]'
 						and tunnus='$rivitunnus'";
 		$sarjares = mysql_query($query) or pupe_error($query);
 		$rivirow  = mysql_fetch_array($sarjares);
 
 		$query    = "	SELECT *
-						FROM lasku
+						FROM lasku use index (PRIMARY)
 						WHERE yhtio='$kukarow[yhtio]'
 						and tunnus='$rivirow[otunnus]'";
 		$sarjares = mysql_query($query) or pupe_error($query);
@@ -53,42 +53,12 @@
 			$rivirow["varattu"] = abs($rivirow["varattu"]);
 			$hyvitysrivi 		= "ON";
 		}
-
-		/*
-		// Katsotaan onko sarjanumerot vielä käytössä, tilausrivi on voitu poistaa
-		$query = "	SELECT sarjanumeroseuranta.tunnus sarjatunnus, tilausrivi.tunnus rivitunnus
-					FROM sarjanumeroseuranta
-					LEFT JOIN tilausrivi ON sarjanumeroseuranta.yhtio=tilausrivi.yhtio and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus and tilausrivi.tyyppi!='D'
-					WHERE sarjanumeroseuranta.yhtio='$kukarow[yhtio]'
-					and sarjanumeroseuranta.tuoteno='$rivirow[tuoteno]'
-					HAVING tilausrivi.tunnus is null";
-		$sres = mysql_query($query) or pupe_error($query);
-
-		while($srow = mysql_fetch_array($sres)) {
-			$query = "update sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tunnus='$srow[sarjatunnus]'";
-			$sarjares = mysql_query($query) or pupe_error($query);
-		}
-
-		// Katsotaan onko sarjanumerot vielä käytössä, tilausrivi on voitu poistaa
-		$query = "	SELECT sarjanumeroseuranta.tunnus sarjatunnus, tilausrivi.tunnus rivitunnus
-					FROM sarjanumeroseuranta
-					LEFT JOIN tilausrivi ON sarjanumeroseuranta.yhtio=tilausrivi.yhtio and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus and tilausrivi.tyyppi!='D'
-					WHERE sarjanumeroseuranta.yhtio='$kukarow[yhtio]'
-					and sarjanumeroseuranta.tuoteno='$rivirow[tuoteno]'
-					HAVING tilausrivi.tunnus is null";
-		$sres = mysql_query($query) or pupe_error($query);
-
-		while($srow = mysql_fetch_array($sres)) {
-			$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tunnus='$srow[sarjatunnus]'";
-			$sarjares = mysql_query($query) or pupe_error($query);
-		}
-		*/
 	}
 
 	//ollaan poistamassa sarjanumero-olio kokonaan
 	if ($toiminto == 'POISTA') {
 		$query = "	DELETE
-					FROM sarjanumeroseuranta
+					FROM sarjanumeroseuranta use index (PRIMARY)
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$sarjatunnus'
 					and myyntirivitunnus=0
@@ -109,7 +79,8 @@
 			$query = "	UPDATE sarjanumeroseuranta
 						SET lisatieto = '$lisatieto',
 						sarjanumero = '$sarjanumero'
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus='$sarjatunnus'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus='$sarjatunnus'";
 			$sarjares = mysql_query($query) or pupe_error($query);
 
 			echo "<font class='message'>".t("Pävitettiin sarjanumeron tiedot")."!</font><br><br>";
@@ -122,7 +93,7 @@
 		else {
 			$query = "	SELECT sarjanumeroseuranta.* , tuote.tuoteno, tuote.nimitys
 						FROM sarjanumeroseuranta
-						LEFT JOIN tuote ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
+						LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
 						WHERE sarjanumeroseuranta.yhtio='$kukarow[yhtio]'
 						and sarjanumeroseuranta.tunnus='$sarjatunnus'";
 			$muutares = mysql_query($query) or pupe_error($query);
@@ -171,7 +142,7 @@
 	if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
 
 		$query = "	SELECT *
-					FROM sarjanumeroseuranta
+					FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
 					WHERE yhtio = '$kukarow[yhtio]'
 					and sarjanumero = '$sarjanumero'
 					and tuoteno = '$rivirow[tuoteno]'
@@ -206,11 +177,18 @@
 
 			$query = "	update sarjanumeroseuranta
 						set $tunnuskentta=''
-						WHERE yhtio='$kukarow[yhtio]'
-						and tunnus='$sarrow[tunnus]' or (perheid='$sarrow[perheid]' and perheid!=0)";
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tunnus	= '$sarrow[tunnus]'";
 			$sarjares = mysql_query($query) or pupe_error($query);
 
-
+			if ($sarrow["perheid"] > 0) {
+				$query = "	update sarjanumeroseuranta
+							set $tunnuskentta=''
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and perheid = '$sarrow[perheid]'
+							and perheid > 0";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}
 		}
 
 		if ($rivirow["varattu"] >= count($sarjataan)) {
@@ -233,7 +211,8 @@
 					$query = "	UPDATE sarjanumeroseuranta
 								SET $tunnuskentta='$rivitunnus'
 								$paikkalisa
-								WHERE yhtio='$kukarow[yhtio]' and tunnus='$sarjatun'";
+								WHERE yhtio='$kukarow[yhtio]'
+								and tunnus='$sarjatun'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 
 					// Tutkitaan pittääkö meidän liittää muita tilausrivejä jos sarjanumerolla on perhe
@@ -244,15 +223,16 @@
 						$rivitunnus 		= "";
 
 						$query = "	SELECT *
-									FROM sarjanumeroseuranta
-									WHERE tunnus = '$sarjatun' and perheid != 0";
+									FROM sarjanumeroseuranta use index (PRIMARY)
+									WHERE tunnus = '$sarjatun'
+									and perheid != 0";
 						$sarres = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($sarres) > 0) {
 							$sarrow = mysql_fetch_array($sarres);
 
 							$query = "	SELECT tuoteno, tunnus
-										FROM sarjanumeroseuranta
+										FROM sarjanumeroseuranta use index (perheid)
 										WHERE yhtio = '$sarrow[yhtio]'
 										and perheid = '$sarrow[perheid]'
 										and tunnus != '$sarrow[tunnus]'";
@@ -261,8 +241,8 @@
 							while($sarrow1 = mysql_fetch_array($sarres1)) {
 								// Katsotaan onko tilauksella vapaata tilausriviä jossa on tämä tuote
 								$query    = "	SELECT tilausrivi.tunnus ttunnus, sarjanumeroseuranta.tunnus stunnus
-												FROM tilausrivi
-												LEFT JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus
+												FROM tilausrivi use index (yhtio_otunnus)
+												LEFT JOIN sarjanumeroseuranta use index  (yhtio_myyntirivi) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus
 												WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 												and tilausrivi.tuoteno='$sarrow1[tuoteno]'
 												and tilausrivi.otunnus='$kukarow[kesken]'
@@ -341,11 +321,11 @@
 			echo "<font class='error'>".sprintf(t('Riviin voi liittää enintään %s sarjanumeroa'), abs($rivirow["varattu"])).".</font><br><br>";
 		}
 	}
-	
+
 	// poistetaan tää perheid
 	if (count($linkit) > 0) {
 		foreach ($linkit as $link1) {
-			$query = "	UPDATE sarjanumeroseuranta
+			$query = "	UPDATE sarjanumeroseuranta use index (perheid)
 						SET perheid  = ''
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and perheid  = '$link1'";
@@ -379,58 +359,63 @@
 		$mlisa = "";
 		if($tuoterow["sarjanumeroseuranta"] == "M") {
 			$mlisa = "	and sarjanumeroseuranta.ostorivitunnus != 0
-						and tilausrivi.laskutettuaika > '0000-00-00' ";
+						and tilausrivi_osto.laskutettuaika > '0000-00-00' ";
 		}
 
-		$query    = "	SELECT sarjanumeroseuranta.*, tilausrivi.nimitys
-						FROM sarjanumeroseuranta
-						LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus
-						WHERE sarjanumeroseuranta.yhtio='$kukarow[yhtio]'
-						and sarjanumeroseuranta.tuoteno='$rivirow[tuoteno]'
-						and sarjanumeroseuranta.myyntirivitunnus in (0,$rivitunnus)
-						$mlisa
-						order by sarjanumero";
+		$query	= "	SELECT sarjanumeroseuranta.*,
+					tilausrivi_osto.nimitys nimitys,
+					lasku_osto.tunnus		osto_tunnus,
+					lasku_osto.nimi			osto_nimi,
+					lasku_myynti.tunnus		myynti_tunnus,
+					lasku_myynti.nimi		myynti_nimi
+					FROM sarjanumeroseuranta use index (yhtio_myyntirivi)
+					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+					LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+					LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
+					WHERE sarjanumeroseuranta.yhtio='$kukarow[yhtio]'
+					and sarjanumeroseuranta.tuoteno='$rivirow[tuoteno]'
+					and sarjanumeroseuranta.myyntirivitunnus in (0,$rivitunnus)
+					$mlisa
+					order by sarjanumeroseuranta.sarjanumero";
 	}
 	elseif($from == "riviosto" or $from == "kohdista" or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA") and $hyvitysrivi == "ON")) {
 		// Haetaan vain sellaiset sarjanumerot jotka on vielä vapaita
-		$query    = "	SELECT sarjanumeroseuranta.*, tilausrivi.nimitys, tilausrivi.varattu, tilausrivi.kpl, lasku.tunnus otunnus
-						FROM sarjanumeroseuranta
-						LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus
-						LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus
-						WHERE sarjanumeroseuranta.yhtio='$kukarow[yhtio]'
-						and sarjanumeroseuranta.tuoteno='$rivirow[tuoteno]'
-						and sarjanumeroseuranta.ostorivitunnus in (0,$rivitunnus)
-						order by sarjanumero";
+		$query	= "	SELECT sarjanumeroseuranta.*,
+					tilausrivi_osto.nimitys nimitys,
+					lasku_osto.tunnus		osto_tunnus,
+					lasku_osto.nimi			osto_nimi,
+					lasku_myynti.tunnus		myynti_tunnus,
+					lasku_myynti.nimi		myynti_nimi
+					FROM sarjanumeroseuranta use index (yhtio_ostorivi)
+					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+					LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+					LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
+					WHERE sarjanumeroseuranta.yhtio='$kukarow[yhtio]'
+					and sarjanumeroseuranta.tuoteno='$rivirow[tuoteno]'
+					and sarjanumeroseuranta.ostorivitunnus in (0,$rivitunnus)
+					order by sarjanumero";
 	}
 	else {
 		$lisa  = "";
-		$lisa2 = "";
-		
+
 		if ($ostotilaus_haku != "") {
 			if (is_numeric($ostotilaus_haku)) {
-				$lisa .= " and lasku.tunnus='$ostotilaus_haku' ";
+				$lisa .= " and lasku_osto.tunnus='$ostotilaus_haku' ";
 			}
 			else {
-				$lisa .= " and match (lasku.nimi) against ('$ostotilaus_haku*' IN BOOLEAN MODE) ";
+				$lisa .= " and match (lasku_osto.nimi) against ('$ostotilaus_haku*' IN BOOLEAN MODE) ";
 			}
 		}
 
 		if ($myyntitilaus_haku != "") {
 			if (is_numeric($myyntitilaus_haku)) {
-				$lisa .= " and lasku.tunnus='$myyntitilaus_haku' ";
+				$lisa .= " and lasku_myynti.tunnus='$myyntitilaus_haku' ";
 			}
 			else {
-				$lisa .= " and match (lasku.nimi) against ('$myyntitilaus_haku*' IN BOOLEAN MODE) ";
+				$lisa .= " and match (lasku_myynti.nimi) against ('$myyntitilaus_haku*' IN BOOLEAN MODE) ";
 			}
-		}
-
-		if ($ostotilaus_haku != "" and $myyntitilaus_haku != "") {
-			$lisa .= " and lasku.tunnus in ('$ostotilaus_haku','$myyntitilaus_haku') ";
-		}
-
-		if ($ostotilaus_haku != "" or $myyntitilaus_haku != "") {
-			$lisa2 = "	LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and (sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus or sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus)
-						LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus ";
 		}
 
 		if ($lisatieto_haku) {
@@ -454,11 +439,19 @@
 		}
 
 		// Näytetään kaikki
-		$query = "	SELECT distinct sarjanumeroseuranta.*, tuote.nimitys
+		$query	= "	SELECT sarjanumeroseuranta.*,
+					tilausrivi_osto.nimitys nimitys,
+					lasku_osto.tunnus		osto_tunnus,
+					lasku_osto.nimi			osto_nimi,
+					lasku_myynti.tunnus		myynti_tunnus,
+					lasku_myynti.nimi		myynti_nimi
 					FROM sarjanumeroseuranta
-					LEFT JOIN tuote ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
-					$lisa2
-					WHERE sarjanumeroseuranta.yhtio='$kukarow[yhtio]'
+					LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
+					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+					LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+					LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
+					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					$lisa
 					ORDER BY tuoteno, myyntirivitunnus
 					LIMIT 100";
@@ -486,7 +479,6 @@
 	echo "<th>".t("Nimitys")."</th>";
 	echo "<th>".t("Ostotilaus")."</th>";
 	echo "<th>".t("Myyntitilaus")."</th>";
-	//echo "<th>".t("Sisäinen viesti")."</th>";
 	echo "<th>".t("Valitse")."</th>";
 	echo "<th>".t("Muokkaa")."</th>";
 	echo "<th>".t("Poista")."</th>";
@@ -506,7 +498,6 @@
 	echo "<td><input type='text' size='10' name='nimitys_haku' 			value='$nimitys_haku'></td>";
 	echo "<td><input type='text' size='10' name='ostotilaus_haku' 		value='$ostotilaus_haku'></td>";
 	echo "<td><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
-	//echo "<td><input type='text' size='10' name='lisatieto_haku' 		value='$lisatieto_haku'></td>";
 	echo "<td></td><td></td><td></td><td></td><td class='back'><input type='submit' value='Hae'></td>";
 	echo "</tr>";
 	echo "</form>";
@@ -543,24 +534,7 @@
 			$sarjarow["myyntirivitunnus"] = "";
 		}
 
-		$query 	= "	SELECT lasku.*
-					FROM tilausrivi
-					JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
-					WHERE tilausrivi.tunnus='$sarjarow[ostorivitunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'";
-		$lasres	= mysql_query($query) or pupe_error($query);
-		$lasrow1	= mysql_fetch_array($lasres);
-
-		$query 	= "	SELECT lasku.*
-					FROM tilausrivi
-					JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
-					WHERE tilausrivi.tunnus='$sarjarow[myyntirivitunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'";
-		$lasres	= mysql_query($query) or pupe_error($query);
-		$lasrow2	= mysql_fetch_array($lasres);
-
-		echo "<td colspan='2' valign='top'>$lasrow1[tunnus] $lasrow1[nimi]<br>$lasrow2[tunnus] $lasrow2[nimi]</td>";
-
-		//echo "<td>$sarjarow[lisatieto]</td>";
-		//echo "<td></td>";
+		echo "<td colspan='2' valign='top'>$sarjarow[osto_tunnus] $sarjarow[osto_nimi]<br>$sarjarow[myynti_tunnus] $sarjarow[myynti_nimi]</td>";
 
 		if (($sarjarow[$tunnuskentta] == 0 or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
 			$chk = "";
@@ -569,11 +543,11 @@
 			}
 
 			if ($tunnuskentta == "ostorivitunnus" and $sarjarow["kpl"] != 0) {
-				echo "<td>".t("Lukittu")."</td>";
+				echo "<td valign='top'>".t("Lukittu")."</td>";
 			}
 			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA") or ($from == "riviosto" or $from == "kohdista")) {
 				echo "<input type='hidden' name='sarjat[]' value='$sarjarow[tunnus]'>";
-				echo "<td><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit()'></td>";
+				echo "<td valign='top'><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit()'></td>";
 			}
 		}
 		elseif($toiminto == 'MUOKKAA' and $voidaan_liittaa == "YES" and $sarjatunnus != '' and $sarjatunnus != $sarjarow["tunnus"]) {
@@ -583,25 +557,25 @@
 			}
 
 			echo "<input type='hidden' name='linkit[]' value='$sarjatunnus'>";
-			echo "<td class='spec'><input type='checkbox' name='linkataan[$sarjatunnus###$sarjarow[tunnus]]' value='$sarjatunnus###$sarjarow[tunnus]' $chk onclick='submit()'></td>";
+			echo "<td valign='top' class='spec'><input type='checkbox' name='linkataan[$sarjatunnus###$sarjarow[tunnus]]' value='$sarjatunnus###$sarjarow[tunnus]' $chk onclick='submit()'></td>";
 		}
 		else {
-			echo "<td></td>";
+			echo "<td valign='top'></td>";
 		}
 
 
 		//jos saa muuttaa niin näytetään muokkaa linkki
-		echo "<td><a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku'>".t("Muokkaa")."</a></td>";
+		echo "<td valign='top'><a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku'>".t("Muokkaa")."</a></td>";
 
 		if ($sarjarow['ostorivitunnus'] == "" and $sarjarow['myyntirivitunnus'] == "") {
-			echo "<td><a href='$PHP_SELF?toiminto=POISTA&$tunnuskentta=$rivitunnus&from=$from&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]'>".t("Poista")."</a></td>";
+			echo "<td valign='top'><a href='$PHP_SELF?toiminto=POISTA&$tunnuskentta=$rivitunnus&from=$from&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]'>".t("Poista")."</a></td>";
 		}
 		else {
-			echo "<td></td>";
+			echo "<td valign='top'></td>";
 		}
 
 		$query = "	SELECT *
-					FROM sarjanumeron_lisatiedot
+					FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
 					WHERE yhtio		 = '$kukarow[yhtio]'
 					and liitostunnus = '$sarjarow[tunnus]'";
 		$lisares = mysql_query($query) or pupe_error($query);
@@ -614,18 +588,18 @@
 			$ylisa = "&liitostunnus=$sarjarow[tunnus]&uusi=1";
 		}
 
-		echo "<td class='menu' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\"><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF!!!!$tunnuskentta=$rivitunnus!!from=$from!!otunnus=$otunnus!!sarjanumero_haku=$sarjanumero_haku!!tuoteno_haku=$tuoteno_haku!!nimitys_haku=$nimitys_haku!!ostotilaus_haku=$ostotilaus_haku!!myyntitilaus_haku=$myyntitilaus_haku!!lisatieto_haku=$lisatieto_haku'>".t("Lisätiedot")."</a></td>";
+		echo "<td valign='top' class='menu' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\"><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF!!!!$tunnuskentta=$rivitunnus!!from=$from!!otunnus=$otunnus!!sarjanumero_haku=$sarjanumero_haku!!tuoteno_haku=$tuoteno_haku!!nimitys_haku=$nimitys_haku!!ostotilaus_haku=$ostotilaus_haku!!myyntitilaus_haku=$myyntitilaus_haku!!lisatieto_haku=$lisatieto_haku'>".t("Lisätiedot")."</a></td>";
 
 		echo "</tr>";
 
 		if (($sarjarow["perheid"] != 0 and $sarjarow["tunnus"] == $sarjarow["perheid"]) or ($from != '' and $sarjarow["perheid"] > 0)) {
 			// Haetaan sarjanumerot perhe
 			$query = "	SELECT distinct sarjanumeroseuranta.*, tuote.nimitys
-						FROM sarjanumeroseuranta
-						JOIN tuote ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
+						FROM sarjanumeroseuranta use index (perheid)
+						JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
 						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-						and sarjanumeroseuranta.tunnus != '$sarjarow[tunnus]'
 						and sarjanumeroseuranta.perheid = '$sarjarow[perheid]'
+						and sarjanumeroseuranta.tunnus != '$sarjarow[tunnus]'
 						ORDER BY sarjanumero";
 			$lisares = mysql_query($query) or pupe_error($query);
 
@@ -645,7 +619,7 @@
 
 				//Haetaan sarjanumeron lisätiedot
 				$query    = "	SELECT *
-								FROM sarjanumeron_lisatiedot
+								FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
 								WHERE yhtio		 = '$kukarow[yhtio]'
 								and liitostunnus = '$lisarow[tunnus]'";
 				$lisares1 = mysql_query($query) or pupe_error($query);

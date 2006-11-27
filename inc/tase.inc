@@ -682,7 +682,7 @@
 		if ($alvv == "") $alvv = date("Y");
 		$sel[$alvv] = "SELECTED";
 
-		for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+		for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
 			echo "<option value='$i' $sel[$i]>$i</option>";
 		}
 

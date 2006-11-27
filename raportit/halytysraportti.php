@@ -337,6 +337,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	if ($abcrajaus == 6) $abcnimi = "G";
 	if ($abcrajaus == 7) $abcnimi = "H";
 	if ($abcrajaus == 8) $abcnimi = "I";
+	if ($abcrajaus == "") $abcnimi = "";
 
 	echo "	<table>
 			<tr><th>".t("Osasto")."</th><td colspan='3'>$osasto $trow[selitetark]</td></tr>
@@ -353,8 +354,6 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	$lisaa = "";
 	$lisaa2 = "";
 	$lisaa3 = "";
-	$abcjoin = "";
-	$abclisa = "";
 
 	if ($osasto != '') {
 		$lisaa .= " and tuote.osasto = '$osasto' ";
@@ -379,7 +378,9 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	if ($abcrajaus != "") {
 		// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
 		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = 'TK' and abc_aputaulu.luokka <= '$abcrajaus') ";
-		$abclisa = ", abc_aputaulu.luokka abcluokka ";
+	}
+	else {
+		$abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = 'TK') ";
 	}
 
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
@@ -465,8 +466,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					tuote.osasto,
 					tuote.try,
 					tuote.aleryhma,
-					tuote.kehahin
-					$abclisa 
+					tuote.kehahin,
+					abc_aputaulu.luokka abcluokka
 					FROM tuote
 					$lisaa2
 					$abcjoin
@@ -497,8 +498,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					tuote.try,
 					tuote.aleryhma,
 					tuote.kehahin,
-					varastopaikat.tunnus
-					$abclisa 
+					varastopaikat.tunnus,
+					abc_aputaulu.luokka abcluokka
 					FROM tuote
 					$lisaa2
 					$abcjoin
@@ -1255,20 +1256,28 @@ if ($tee == "") {
 			$sel = array();
 			$sel[$abcrajaus] = "SELECTED";
 
-			echo "<tr><th>".t("ABC-luokkarajaus")."</th><td>
-			<select name='abcrajaus'>
-			<option value=''>Ei rajausta</option>
-			<option $sel[0] value='0'>Luokka A-30</option>
-			<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
-			<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
-			<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
-			<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
-			<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
-			<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
-			<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
-			<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
-			</select>
-			</td></tr>";
+			// katotaan onko abc aputaulu rakennettu
+			$query  = "select count(*) from abc_aputaulu where yhtio='$kukarow[yhtio]' and tyyppi = 'TK'";
+			$abcres = mysql_query($query) or pupe_error($query);
+			$abcrow = mysql_fetch_array($abcres);
+
+			// jos on niin näytetään tällänen vaihtoehto
+			if ($abcrow[0] > 0) {
+				echo "<tr><th>".t("ABC-luokkarajaus")."</th><td>
+				<select name='abcrajaus'>
+				<option value=''>Ei rajausta</option>
+				<option $sel[0] value='0'>Luokka A-30</option>
+				<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
+				<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
+				<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
+				<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
+				<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
+				<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
+				<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
+				<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
+				</select>
+				</td></tr>";
+			}
 
 	echo "<tr><td colspan='2' class='back'><br></td></tr>";
 	echo "<tr><td colspan='2' class='back'>".t("Valitse jos haluat tulostaa asiakaan myynnit").":</td></tr>";
@@ -1366,6 +1375,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 	if ($abcrajaus == 6) $abcnimi = "G";
 	if ($abcrajaus == 7) $abcnimi = "H";
 	if ($abcrajaus == 8) $abcnimi = "I";
+	if ($abcrajaus == "") $abcnimi = "";
 
 	echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
 			<input type='hidden' name='tee' value='RAPORTOI'>

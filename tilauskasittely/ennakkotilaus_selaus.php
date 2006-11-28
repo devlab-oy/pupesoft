@@ -424,7 +424,7 @@
 								}
 							}
 							//jos ei ole automaaginen ja halutaan suoratoimittaa ja omasta varastosta ei löydy yhtään niin katotaan suoratoimitusmahdollisuus
-							if ($automaaginen == '' and $kukarow["extranet"] == '' and $toim != 'SIIRTOLISTA' and ($suorana != '' or $tilaus_on_jo = 'KYLLA')) {
+							if ($automaaginen == '' and $kukarow["extranet"] == '' and $toim != 'SIIRTOLISTA' and ($suorana != '' or $tilaus_on_jo == 'KYLLA')) {
 								$suora_tuoteno 	= $tuoteno;
 								$suora_kpl 		= $atil;
 								$paikatlask = 0;

@@ -71,7 +71,7 @@
 						and toimitettu = ''";
 			$result = mysql_query($query) or pupe_error($query);
 
-			//jap‰ivitet‰‰n laskujen otsikot laskutusjonoon
+			//ja p‰ivitet‰‰n laskujen otsikot laskutusjonoon
 			$query = "	update lasku
 						set alatila='D'
 						where tunnus in ($laskutettavat)
@@ -123,7 +123,7 @@
 					// Ja loppulaskutus samaan syssyyn
 					$laskutettavat = loppulaskuta($postun);
 
-					if ($laskutettavat > 0) {
+					if ($laskutettavat != "" and $laskutettavat != 0) {
 						$tee 			= "TARKISTA";
 						$laskutakaikki 	= "KYLLA";
 						$silent		 	= "VIENTI";
@@ -200,7 +200,10 @@
 			echo "<th>".t("Muokkaa tilausta")."</th>";
 			echo "<th>".t("Laskuta kaikki positiot")."</th>";
 
+			$maksu_positiot = array();
+
 			while ($row = mysql_fetch_array($res)) {
+
 				$query = "	select sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*(1-ale/100)=0 and var!='P' and var!='J',1,0)) nollarivi
 							from tilausrivi
 							where yhtio='$kukarow[yhtio]' and otunnus='$row[tunnus]'";
@@ -227,8 +230,32 @@
 
 				echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$row[tunnus]'>".t("Pikatilaukseen")."</a></td>";
 
+				//Tsekataan voidaanko antaa mahdollisuus laskuttaa kaikki maksupotitiot kerralla
 				if ($row["jaksotettu"] > 0) {
-					echo "<td><input type='checkbox' name='positiotunnus[$row[tunnus]]' value='$row[tunnus]'></td>";
+					$query = "	SELECT
+								sum(if(lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
+								sum(if(tilausrivi.toimitettu='',1,0)) toimittamatta,
+								count(*) toimituksia
+								FROM lasku
+								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D'
+								WHERE lasku.yhtio 		= '$kukarow[yhtio]'
+								and lasku.jaksotettu 	= '$row[jaksotettu]'
+								GROUP BY lasku.jaksotettu";
+					$tarkres = mysql_query($query) or pupe_error($query);
+					$tarkrow = mysql_fetch_array($tarkres);
+				}
+
+				if ($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and !in_array($row["jaksotettu"], $maksu_positiot)) {
+					//Pidet‰‰n muistissa mitk‰ maksusopparit me ollaan jo tulostettu ruudulle
+					$maksu_positiot[] = $row["jaksotettu"];
+
+					echo "<td>".t("Sopimus")." $row[jaksotettu]: <input type='checkbox' name='positiotunnus[$row[jaksotettu]]' value='$row[jaksotettu]'></td>";
+				}
+				elseif($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] == 0 and $tarkrow["toimituksia"] > 0 and in_array($row["jaksotettu"], $maksu_positiot)) {
+					echo "<td>".t("Kuuluu sopimukseen")." $row[jaksotettu]</td>";
+				}
+				elseif($row["jaksotettu"] > 0 and $tarkrow["toimittamatta"] > 0) {
+					echo "<td>".t("Ei valmis")."</td>";
 				}
 				else {
 					echo "<td>".t("Ei positioita")."</td>";
@@ -278,7 +305,7 @@
 
 
 			//tulostetaan faili ja valitaan sopivat printterit
-			if ($ekarow["varasto"] == '') {
+			if ($ekarow["varasto"] == 0) {
 				$query = "	select *
 							from varastopaikat
 							where yhtio='$kukarow[yhtio]'
@@ -304,7 +331,7 @@
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = "";
-				if (($kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or $kirow["tunnus"] == $kukarow["kirjoitin"]) {
+				if (($kirrow["tunnus"] == $prirow["printteri5"] and $kukarow["kirjoitin"] == 0) or $kirrow["tunnus"] == $kukarow["kirjoitin"]) {
 					$sel = "SELECTED";
 				}
 

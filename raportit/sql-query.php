@@ -11,7 +11,7 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	require("inc/parametrit.inc");
+	require("../inc/parametrit.inc");
 
 	//Ja t‰ss‰ laitetaan ne takas
 	$sqlhaku = $sqlapu;
@@ -39,7 +39,7 @@
 		echo "<tr><td><textarea cols='70' rows='10' name='sqlhaku'>$sqlhaku</textarea></td></tr>";
 		echo "<tr><td class='back'><input type='submit' value='".t("Suorita")."'></td></tr>";
 		echo "</table>";
-		echo "</form><br>";
+		echo "</form>";
 
 		// eka sana pit‰‰ olla select... safe enough kai.
 		if (substr($sqlhaku, 0, strpos($sqlhaku, " ")) != 'select') {
@@ -50,8 +50,6 @@
 		if ($sqlhaku != '') {
 
 			$result = mysql_query($sqlhaku) or die ("<font class='error'>".mysql_error()."</font>");
-
-			echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("rivi‰").".</font><br>";
 
 			$file = "";
 
@@ -79,8 +77,10 @@
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='sqlhaku.txt'>";
 			echo "<input type='hidden' name='file' value='$file'>";
-			echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";
+
+			echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("rivi‰").".</font><br>";
 
 			mysql_data_seek($result,0);
 

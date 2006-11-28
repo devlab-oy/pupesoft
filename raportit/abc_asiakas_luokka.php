@@ -3,8 +3,8 @@
 	echo "<font class='head'>".t("ABC-Analyysi‰: ABC-luokka")." $ryhmanimet[$luokka]<hr></font>";
 
 	//ryhm‰jako
-	$ryhmanimet   = array('A-50','B-30','C-20');
-	$ryhmaprossat = array(50.00,30.00,20.00);
+	$ryhmanimet   = array('A-50','B-30','C-20', 'I-00');
+	$ryhmaprossat = array(50.00,30.00,20.00,0.00);
 
 	// piirrell‰‰n formi
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";

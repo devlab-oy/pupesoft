@@ -3,8 +3,8 @@
 	echo "<font class='head'>".t("ABC-Analyysiä: Osasto/Ryhmä")."<hr></font>";
 
 	//ryhmäjako
-	$ryhmanimet   = array('A-50','B-30','C-20');
-	$ryhmaprossat = array(50.00,30.00,20.00);
+	$ryhmanimet   = array('A-50','B-30','C-20', 'I-00');
+	$ryhmaprossat = array(50.00,30.00,20.00,0.00);
 
 	// tutkaillaan saadut muuttujat
 	$osasto = trim($osasto);
@@ -81,7 +81,7 @@
 			$valinta = "luokka_try";
 		}
 
-		$kentat = array($valinta,'luokka','tuoteno','osasto','try','osto_rivia','summa','kate','katepros','kateosuus','palvelutaso');
+		$kentat = array($valinta,'luokka','tuoteno','osasto','try','osto_rivia','summa','kate','katepros','kateosuus','myyntierankpl','palvelutaso');
 
 		for ($i=0; $i<=count($kentat); $i++) {
 			if (strlen($haku[$i]) > 0 and $kentat[$i] != 'kateosuus') {
@@ -209,7 +209,7 @@
 				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kate"]))."</td>";
 				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["katepros"]))."</td>";
 				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kateosuus"]))."</td>";
-				//echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["myyntierankpl"]))."</td>";
+				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["myyntierankpl"]))."</td>";
 				//echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["myyntieranarvo"]))."</td>";
 				//echo "<td align='right'>".str_replace(".",",",sprintf('%.0f',$row["rivia"]))."</td>";
 				//echo "<td align='right'>".str_replace(".",",",sprintf('%.0f',$row["puuterivia"]))."</td>";
@@ -227,7 +227,6 @@
 
 			}
 
-
 			//yhteensärivi
 			$kateprosenttiyht 	= round ($ryhmakateyht / $ryhmamyyntiyht * 100,2);
 			$kateosuusyht     	= round ($ryhmakateyht / $sumrow["yhtkate"] * 100,2);
@@ -235,15 +234,13 @@
 			$myyntieranakplyht 	= round ($ryhmakplyht / $rivilkmyht,2);
 			$palvelutasoyht 	= round (100 - ($ryhmapuuterivityht / ($ryhmapuuterivityht + $rivilkmyht) * 100),2);
 
-
-
 			echo "<tr>";
 			echo "<td colspan='6' class='spec'>".t("Yhteensä").":</td>";
 			echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmamyyntiyht))."</td>";
 			echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakateyht))."</td>";
 			echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$kateprosenttiyht))."</td>";
 			echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$kateosuusyht))."</td>";
-			//echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$myyntieranakplyht))."</td>";
+			echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$myyntieranakplyht))."</td>";
 			//echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$myyntieranarvoyht))."</td>";
 			//echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.0f',$rivilkmyht))."</td>";
 			//echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.0f',$ryhmapuuterivityht))."</td>";

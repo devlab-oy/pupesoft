@@ -204,7 +204,7 @@ if ($session != '') {
 
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
-	
+
 	if ($nayta_pdf == 1) {
 		header("Content-Type: application/pdf");
 		header('Content-Disposition: inline; filename="pupesoft.pdf"');
@@ -212,11 +212,11 @@ if ($session != '') {
 	elseif($lataa_tiedosto == 1) {
 		// Kerrotaan selaimelle, että käyttäjän kuuluu downloadata tämä tiedosto
 		// Hardcoodattu polku dataout/
-		
+
 		if(ini_get('zlib.output_compression')) {
 		  ini_set('zlib.output_compression', 'Off');
 		}
-		
+
 		header("Pragma: public");
 		header("Expires: 0");
 		header("HTTP/1.1 200 OK");
@@ -226,19 +226,25 @@ if ($session != '') {
 		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 		header("Cache-Control: private", false);
 		header("Content-Type: application/force-download");
-		
-		if ($filenimi != '') {
-			header('Content-Disposition: attachment; filename='.$kaunisnimi);		
+
+		if ($kaunisnimi != '') {
+			header('Content-Disposition: attachment; filename='.$kaunisnimi);
 		}
 		else {
-			header('Content-Disposition: attachment; filename=pupesoft.txt');	
+			header('Content-Disposition: attachment; filename=pupesoft.txt');
 		}
-				
+
 		header("Content-Transfer-Encoding: binary");
-		header("Content-Length: ".filesize("dataout/".$filenimi));
+
+		if ($filenimi != '') {
+			header("Content-Length: ".filesize("dataout/".$filenimi));
+		}
+		else {
+			header("Content-Length: ".strlen($file));
+		}
 	}
 	elseif ($phpnimi != 'index.php') {
-		
+
 		if ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
 			$css = $yhtiorow["css_extranet"];
 		}
@@ -248,7 +254,7 @@ if ($session != '') {
 		else {
 			$css = $yhtiorow['css'];
 		}
-		
+
 		$charset = "iso-8859-1";
 		//$charset = "utf-8";
 
@@ -270,7 +276,7 @@ if ($session != '') {
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
 		echo "</head>";
 		echo "<body>";
-		
+
 		if (basename($phpnimi) != 'indexvas.php') {
 			if ($toim != '') {
 				if (basename($phpnimi) == 'varauskalenteri.php') {

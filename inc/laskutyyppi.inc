@@ -45,6 +45,9 @@
 				case "D":
 					$alatila = "Tilaus toimitettu";
 					break;
+				case "J":
+					$alatila = "Odottaa loppulaskutusta";
+					break;
 				case "E":
 					$alatila = "Vientitiedot syötetty";
 					break;
@@ -112,7 +115,7 @@
 					break;
 				case "A":
 					$alatila = "Tulostettu";
-					break;				
+					break;
 				case "B":
 					$alatila = "Hyväksytty";
 					break;

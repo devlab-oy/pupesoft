@@ -126,7 +126,6 @@ if (!function_exists("tv2dateconv")) {
 }
 
 if (!function_exists("t")) {
-
 	function t($stringi, $kieli = "") {
 
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
@@ -179,7 +178,6 @@ if (!function_exists("t")) {
 }
 
 if (!function_exists("alias")) {
-
 	function alias($stringi, $taulu, $setti = '') {
 
 		// tarvitaan yhtiörowta, kukarowta
@@ -205,9 +203,7 @@ if (!function_exists("alias")) {
 
 
 if (!function_exists("kuuluukovarastoon")) {
-
 	function kuuluukovarastoon($hyllyalue, $hyllynro, $varasto = '', $yhtio = '') {
-
 		global $kukarow, $yhtiorow;
 
 		$varastolisa = "";
@@ -216,8 +212,6 @@ if (!function_exists("kuuluukovarastoon")) {
 		if ($varasto != "") {
 			$varastolisa = " and tunnus='$varasto'";
 		}
-
-
 
 		//Jos yhtiö tulee parametrinä niin katsotaa, ettei se ole ihan mitä sattuu
 		if ($yhtio != "") {
@@ -267,7 +261,6 @@ if (!function_exists("mm_pt")) {
 }
 
 if (!function_exists("saldo_myytavissa")) {
-
 	function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '') {
 
 		// tämä funktio palauttaa myytävissä olevan saldon sallituista varastoista (tyyppi='')
@@ -436,9 +429,7 @@ if (!function_exists("saldo_myytavissa")) {
 }
 
 if (!function_exists("lpr")) {
-
 	function lpr($str,$prn) {
-
 		global $kukarow;
 
 		$query = "	SELECT *
@@ -484,14 +475,11 @@ if (!function_exists("lpr")) {
 		pclose($pipe);
 
 	}
-
 }
 
 // tehdään vertailukelponen stringi varastopaikasta
 if (!function_exists("varastopaikka")) {
-
 	function varastopaikka($str) {
-
 		$str = strtoupper(trim($str));
 
 		if (is_numeric($str)) {
@@ -503,7 +491,31 @@ if (!function_exists("varastopaikka")) {
 
 		return $str;
 	}
-
 }
+
+// Tehdään valuuttamuunnos laskun valuutasta yhtiön valuuttaan.
+if (!function_exists("yhtioval")) {
+	function yhtioval($summa, $kurssi) {
+		if($kurssi <= 0 or !is_numeric($kurssi)) {
+			$kurssi = 1;
+		}
+
+		$sum = round($summa*$kurssi,2);
+		return $sum;
+	}
+}
+
+// Tehdään valuuttamuunnos yhtiön valuutasta laskun valuuttaan.
+if (!function_exists("laskuval")) {
+	function laskuval($summa, $kurssi) {
+		if($kurssi <= 0 or !is_numeric($kurssi)) {
+			$kurssi = 1;
+		}
+
+		$sum = round($summa/$kurssi,2);
+		return $sum;
+	}
+}
+
 
 ?>

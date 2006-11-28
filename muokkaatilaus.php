@@ -360,69 +360,85 @@
 		echo "<th align='left'>".t("tyyppi")."</th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
-			echo "<tr>";
 
-			for ($i=0; $i<mysql_num_fields($result)-$miinus; $i++) {
-				echo "<td>$row[$i]</td>";
+			$piilotarivi = "";
+
+			// jos kyseessä on "odottaa JT tuotteita rivi"
+			if ($row["tila"] == "N" and $row["alatila"] == "T") {
+				$query = "select tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and tyyppi='L' and otunnus='$row[tilaus]'";
+				$countres = mysql_query($query) or pupe_error($query);
+
+				// ja sillä ei ole yhtään riviä
+				if (mysql_num_rows($countres) == 0) {
+					$piilotarivi = "kylla";
+				}
 			}
 
-			$laskutyyppi=$row["tila"];
-			$alatila=$row["alatila"];
+			if ($piilotarivi == "") {
+				echo "<tr>";
 
-			//tehdään selväkielinen tila/alatila
-			require "inc/laskutyyppi.inc";
+				for ($i=0; $i<mysql_num_fields($result)-$miinus; $i++) {
+					echo "<td>$row[$i]</td>";
+				}
 
-			echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
+				$laskutyyppi=$row["tila"];
+				$alatila=$row["alatila"];
 
-			// tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
-			if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
-				$aputoim1 = "RIVISYOTTO";
-				$aputoim2 = "PIKATILAUS";
+				//tehdään selväkielinen tila/alatila
+				require "inc/laskutyyppi.inc";
 
-				$lisa1 = t("Rivisyöttöön");
-				$lisa2 = t("Pikatilaukseen");
+				echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
+
+				// tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
+				if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
+					$aputoim1 = "RIVISYOTTO";
+					$aputoim2 = "PIKATILAUS";
+
+					$lisa1 = t("Rivisyöttöön");
+					$lisa2 = t("Pikatilaukseen");
+				}
+				elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
+					$aputoim1 = "VALMISTAASIAKKAALLE";
+					$lisa1 = t("Muokkaa");
+
+					$aputoim2 = "";
+					$lisa2 = "";
+				}
+				elseif ($toim == "MYYNTITILISUPER" or $toim == "MYYNTITILITOIMITA") {
+					$aputoim1 = "MYYNTITILI";
+					$lisa1 = t("Muokkaa");
+
+					$aputoim2 = "";
+					$lisa2 = "";
+				}
+				elseif ($toim == "SIIRTOLISTASUPER") {
+					$aputoim1 = "SIIRTOLISTA";
+					$lisa1 = t("Muokkaa");
+
+					$aputoim2 = "";
+					$lisa2 = "";
+				}
+				else {
+					$aputoim1 = $toim;
+					$aputoim2 = "";
+
+					$lisa1 = t("Muokkaa");
+					$lisa2 = "";
+				}
+
+				echo "	<form method='post' action='tilauskasittely/tilaus_myynti.php'>
+						<input type='hidden' name='toim' value='$aputoim1'>
+						<input type='hidden' name='tee' value='AKTIVOI'>
+						<input type='hidden' name='tilausnumero' value='$row[tilaus]'>";
+
+				if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
+					echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
+				}
+
+				echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
+				echo "</form>";
+				echo "</tr>";
 			}
-			elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
-				$aputoim1 = "VALMISTAASIAKKAALLE";
-				$lisa1 = t("Muokkaa");
-
-				$aputoim2 = "";
-				$lisa2 = "";
-			}
-			elseif ($toim == "MYYNTITILISUPER" or $toim == "MYYNTITILITOIMITA") {
-				$aputoim1 = "MYYNTITILI";
-				$lisa1 = t("Muokkaa");
-
-				$aputoim2 = "";
-				$lisa2 = "";
-			}
-			elseif ($toim == "SIIRTOLISTASUPER") {
-				$aputoim1 = "SIIRTOLISTA";
-				$lisa1 = t("Muokkaa");
-
-				$aputoim2 = "";
-				$lisa2 = "";
-			}
-			else {
-				$aputoim1 = $toim;
-				$aputoim2 = "";
-
-				$lisa1 = t("Muokkaa");
-				$lisa2 = "";
-			}
-
-			echo "	<form method='post' action='tilauskasittely/tilaus_myynti.php'>
-					<input type='hidden' name='toim' value='$aputoim1'>
-					<input type='hidden' name='tee' value='AKTIVOI'>
-					<input type='hidden' name='tilausnumero' value='$row[tilaus]'>";
-
-			if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
-				echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
-			}
-
-			echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
-			echo "</form>";
-			echo "</tr>";
 		}
 
 		echo "</table>";

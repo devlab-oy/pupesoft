@@ -173,6 +173,7 @@ if ($tee == 'YHTEENVETO') {
 				tilausrivi.tuoteno,
 				ifnull(tuote.try,'#') try,
 				ifnull(tuote.osasto,'#') osasto,
+				tuote.luontiaika,
 				sum(if(tyyppi='L' and (var='H' or var=''), 1, 0))			rivia,
 				sum(if(tyyppi='L' and (var='H' or var=''), kpl, 0))			kpl,
 				sum(if(tyyppi='L' and (var='H' or var=''), rivihinta, 0))	summa,
@@ -189,7 +190,7 @@ if ($tee == 'YHTEENVETO') {
 				and tilausrivi.tyyppi in ('L','O')
 				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
 				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-				GROUP BY 1,2,3
+				GROUP BY 1,2,3,4
 	   			ORDER BY $abcwhat desc";
 	$res = mysql_query($query) or pupe_error($query);
 
@@ -264,7 +265,8 @@ if ($tee == 'YHTEENVETO') {
 					osto_kpl			= '$row[osto_kpl]',
 					ostoerankpl 		= '$ostoeranakpl',
 					ostoeranarvo 		= '$ostoeranarvo',
-					osto_summa			= '$row[osto_summa]'";
+					osto_summa			= '$row[osto_summa]',
+					tuote_luontiaika	= '$row[luontiaika]'";
 		$insres = mysql_query($query) or pupe_error($query);
 
 		// luokka vaihtuu
@@ -284,6 +286,7 @@ if ($tee == 'YHTEENVETO') {
 				tuote.tuoteno,
 				tuote.try,
 				tuote.osasto,
+				tuote.luontiaika,
 				abc_aputaulu.luokka,
 				sum(saldo) saldo,
 				sum(saldo) * if(epakurantti2pvm='0000-00-00', if(epakurantti1pvm='0000-00-00', kehahin, kehahin/2), 0) vararvo
@@ -293,7 +296,7 @@ if ($tee == 'YHTEENVETO') {
 				and abc_aputaulu.tuoteno = tuotepaikat.tuoteno
 				and tyyppi = '$abcchar')
 				WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-				GROUP BY 1,2,3,4
+				GROUP BY 1,2,3,4,5
 				HAVING saldo > 0 and luokka is null";
 	$tuores = mysql_query($query) or pupe_error($query);
 
@@ -307,7 +310,8 @@ if ($tee == 'YHTEENVETO') {
 					tuoteno				= '$row[tuoteno]',
 					osasto				= '$row[osasto]',
 					try					= '$row[try]',
-					vararvo				= '$row[vararvo]'";
+					vararvo				= '$row[vararvo]',
+					tuote_luontiaika	= '$row[luontiaika]'";
 		$insres = mysql_query($query) or pupe_error($query);
 
 	}

@@ -25,6 +25,25 @@
 		$tyyppi = "'L'";
 		$tilaustyyppi = "";
 	}
+	
+	if ($toim != '') {
+		$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
+	}
+	else {
+		$query =	"SELECT toimitustapa.tunnus 
+					FROM toimitustapa, lasku, maksuehto
+					WHERE toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa 
+					and lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+					and toimitustapa.yhtio = '$kukarow[yhtio]'
+					and lasku.tunnus = '$id' 
+					and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')
+					and hetiera != 'H'
+					and maksuehto.jv = ''";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) == 0) {
+			$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
+		}
+	}
 
 	$var_lisa = "";
 
@@ -668,7 +687,12 @@
 						//tulostetaan osoitelappu
 						//jos osoitelappuprintteri löytyy tulostetaan osoitelappu..
 						$tunnus = $laskurow["tunnus"];
-
+						
+						if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
+							$oslapp = '';
+							$oslappkpl = 0;
+						}
+						
 						if ($oslapp != '' and $oslappkpl != 0) {
 							if ($oslappkpl > 0) {
 								$oslapp .= " -#$oslappkpl ";
@@ -680,12 +704,34 @@
 				} //tulostetaan uusi lähete jos käyttäjä ruksasi ruudun. lopuu tähän
 			}
 
-			$tilausnumeroita 	= '';
+			
 			$boob    			= '';
 			$header  			= '';
 			$content 			= '';
 			$rivit   			= '';
-			$id      			= 0;
+			
+			
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
+				$query =	"SELECT tunnus FROM lasku
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.tila = 'L'
+							and lasku.alatila = 'C'
+							and tunnus = '$id'";
+				$result = mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($result) > 0) {
+					$rahtikirjaan = 'mennaan';
+				}
+				else {
+					$tilausnumeroita 	= '';
+					$rahtikirjaan = '';
+					$id = 0;
+				}
+			}
+			else {
+				$tilausnumeroita 	= '';
+				$rahtikirjaan = '';
+				$id = 0;
+			}
 		}
 	}
 
@@ -764,7 +810,7 @@
 	}
 
 
-	if($id != 0) {
+	if($id != 0 and $rahtikirjaan == '') {
 
 		//päivitä kerätyt formi
 		$formi="rivit";
@@ -932,8 +978,14 @@
 				$sel = 'SELECTED';
 				$oslappkpl = 1;
 			}
-
-			echo "<tr><th colspan='2'>".t("Tulosta uusi lähete").": ";
+			
+			$spanni = 2;
+			
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
+				$spanni = 3;
+			}
+			
+			echo "<tr><th colspan='$spanni'>".t("Tulosta uusi lähete").": ";
 
 			$query = "	SELECT *
 						FROM kirjoittimet
@@ -952,14 +1004,30 @@
 			}
 
 			echo "</select>";
-			echo t(" Osoitelappumäärä").":</th>";
-			echo "<th><input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th>";
+			
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '') {
+				echo t(" Osoitelappumäärä").":</th>";
+				echo "<th><input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th>";
+			}
+			else {
+				echo "</th>";
+			}
+			
 			echo "<th><input type='submit' value='".t("Merkkaa kerätyksi")."'></th></form></tr>";
 			echo "</table>";
+			
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
+				echo "<br><font class='message'>".t("Siirryt automaattisesti rahtikirjan syöttöön")."!</font>";
+			}
 		}
 		else {
 			echo t("Tällä tilauksella ei ole yhtään kerättävää riviä!");
 		}
+	}
+
+	if ($rahtikirjaan == 'mennaan') {
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=../rahtikirja.php?toim=lisaa&id=$id&rakirno=$id&tunnukset=$tilausnumeroita&mista=keraa.php'>";
+		exit;
 	}
 
 	require ("../inc/footer.inc");

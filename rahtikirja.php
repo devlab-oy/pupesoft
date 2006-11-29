@@ -1,6 +1,6 @@
 <?php
-	require ("inc/parametrit.inc");
-
+	require ("inc/parametrit.inc");	
+	
 	if ($id=='') $id=0;
 
 
@@ -156,7 +156,22 @@
 
 				} // end if tulostetaanko heti
 			} // end if lˆytykˆ toimitustapa
-
+			
+			
+			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php') {
+				$query = "SELECT sum(kollit) kolleroiset FROM rahtikirjat WHERE yhtio = '$kukarow[yhtio]' and otsikkonro in ($tunnukset)";
+				$result = mysql_query($query) or pupe_error($query);
+				$oslaprow = mysql_fetch_array($result);
+				
+				if ($oslaprow['kolleroiset'] > 0) {
+					$oslappkpl = $oslaprow['kolleroiset'];
+				}
+				else {
+					$oslappkpl = 0;
+				}
+				$keraaseen = 'mennaan';
+			}
+			
 			//katotaan haluttiinko osoitelappuja
 			$oslappkpl = (int) $oslappkpl;
 			if ($oslappkpl > 0 ) {
@@ -185,6 +200,7 @@
 					} //end if voidaan tulostaa
 				} //end if varastopaikat
 			} // end if oslappkpl
+
 		} // end if apu>0
 	}
 
@@ -395,6 +411,7 @@
 		echo "<input type='hidden' name='tee' value='add'>";
 		echo "<input type='hidden' name='otsikkonro' value='$otsik[tunnus]'>";
 		echo "<input type='hidden' name='tunnukset' value='$tunnukset'>";
+		echo "<input type='hidden' name='mista' value='$mista'>";
 
 		echo "<tr><th align='left'>".t("Tilaus")."</th><td>$otsik[tunnus]</td>";
 		echo "<th align='left'>".t("Ytunnus")."</th><td>$otsik[ytunnus]</td></tr>";
@@ -569,11 +586,14 @@
 			echo "</select></td></tr>";
 
 		}
+		
+		if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' or $mista != 'keraa.php') {
+			echo "<tr>";
+			echo "<th colspan='3'>".t("Osoitelappum‰‰r‰")."</th>";
+			echo "<td><input type='text' size='4' name='oslappkpl' value='$oslappkpl'>";
+			echo "</td></tr>";
+		}
 
-		echo "<tr>";
-		echo "<th colspan='3'>".t("Osoitelappum‰‰r‰")."</th>";
-		echo "<td><input type='text' size='4' name='oslappkpl' value='$oslappkpl'>";
-		echo "</td></tr>";
 
 		echo "</table>";
 
@@ -695,6 +715,15 @@
 		<input type='hidden' name='id' value='$id'>
 		<input name='subnappi' type='submit' value='".t("Valmis")."'>";
 		echo "</form>";
+		
+		if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php') {
+			echo "<font class='message'>".t("Siirryt automaattisesti takaisin ker‰‰ ohjelmaan")."!</font>";
+		}
+	}
+	
+	if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' and $keraaseen == 'mennaan') {
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/keraa.php'>";
+		exit;
 	}
 
 	require ("inc/footer.inc");

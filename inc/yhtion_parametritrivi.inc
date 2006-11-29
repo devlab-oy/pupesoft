@@ -249,6 +249,27 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "karayksesta_rahtikirjasyottoon") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "Y") {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Keräyksestä ei siirrytä suoraan rahtikirjan syöttöön")."</option>";
+		$ulos .= "<option value='Y' $sel2>".t("Keräyksestä siirrytään suoraan rahtikirjan syöttöön")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "tee_osto_myyntitilaukselta") {
 

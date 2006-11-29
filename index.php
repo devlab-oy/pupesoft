@@ -3,16 +3,20 @@
 require ("inc/parametrit.inc");
 
 $go = $_POST['go'];
+
 if ($go=='') $go = $_GET['go'];
 $go2 = $go; // ei laiteta tervetuloa.phptä oletukseksi indexvassiin
+
 if ($go=='') $go = 'tervetuloa.php';
 $colwidth = '180';
-if ($kukarow['resoluutio']== 'P') {
+
+if ($kukarow['resoluutio'] == 'P') {
 	$colwidth = '45';
 }
+
 echo "<html>
 	<head>
-	<title>".t("pupesoft.com",$browkieli)."</title>
+	<title>$yhtiorow[nimi]</title>
 	<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>
 	<meta http-equiv='Pragma' content='no-cache'>
 	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>

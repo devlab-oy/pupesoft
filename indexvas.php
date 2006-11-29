@@ -78,8 +78,7 @@ if (mysql_num_rows($result) > 1) {
 
 	echo "</select></form>";
 }
-else
-{
+else {
 	// löytyi vaan yksi sovellus, otetaan se
 	$orow = mysql_fetch_array($result);
 	$sovellus = $orow['sovellus'];
@@ -87,7 +86,7 @@ else
 
 
 //Näytetään aina exit-nappi
-echo "<a class='menu' href='logout.php' target='main'>".t("Exit")."</a><br>";
+echo "<br><a class='menu' href='logout.php' target='main'>".t("Exit")."</a><br>";
 
 
 // Mitä käyttäjä saa tehdä?
@@ -99,8 +98,8 @@ $query = "SELECT nimi, jarjestys
 		ORDER BY jarjestys";
 $result = mysql_query($query) or pupe_error($query);
 
-while ($orow = mysql_fetch_array($result))
-{
+while ($orow = mysql_fetch_array($result)) {
+
 	// tutkitaan onko meillä alamenuja
 	$query = "SELECT nimi, nimitys, alanimi
 			FROM oikeu
@@ -110,29 +109,25 @@ while ($orow = mysql_fetch_array($result))
 	$mrow = mysql_fetch_array($xresult);
 
 	// alamenuja löytyy, eli tämä on menu
-	if (mysql_num_rows($xresult) > 1)
-	{
+	if (mysql_num_rows($xresult) > 1) {
+
 		// jos ykkönen niin näytetään avattu menu itemi
-		if($menu[$mrow['nimitys']] == 1)
-		{
+		if($menu[$mrow['nimitys']] == 1) {
 			echo "- <a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>".t("$mrow[nimitys]")."</a><br>";
 
 			// tehdään submenu itemit
-			while ($mrow = mysql_fetch_array($xresult))
-			{
+			while ($mrow = mysql_fetch_array($xresult)) {
 				echo "&nbsp;&bull; <a class='menu' href='$mrow[nimi]";
 				if ($mrow['alanimi'] != '') echo "?toim=$mrow[alanimi]";
 				echo "' target='main'>".t("$mrow[nimitys]")."</a><br>";
 			}
 		}
-		else
-		{
+		else {
 			// muuten näytetään suljettu menuotsikko
 			echo "+ <a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>".t("$mrow[nimitys]")."</a><br>";
 		}
 	}
-	else
-	{
+	else {
 		// normaali menuitem
 		echo "<a class='menu' href='$mrow[nimi]";
 		if ($mrow['alanimi'] != '') echo "?toim=$mrow[alanimi]";
@@ -141,6 +136,6 @@ while ($orow = mysql_fetch_array($result))
 
 }
 
-require("inc/footer.inc");
+echo "</body></html>";
 
 ?>

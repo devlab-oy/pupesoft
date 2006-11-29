@@ -8,7 +8,7 @@
 		function ennakkolaskuta($tunnus) {
 			global $kukarow, $yhtiorow;
 
-			///* Etsitään alkuperäisen-rivin laskun kaikki tiedot *///
+			///* Etsitään laskun kaikki tiedot jolle maksusopimus on tehty *///
 			$query = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -135,9 +135,13 @@
 				elseif (mysql_field_name($stresult,$i)=='maksuehto') {
 					$query .= "maksuehto ='$posrow[maksuehto]',";
 				}
-				// maksuehto tulee tältä positiolta						/*	Tätä ei kai tullut käytettyä, mutta siitä ei ollut haittaakaan voisi kai raportoida -tuomas 	*/
 				elseif (mysql_field_name($stresult,$i)=='clearing') {
-					$query .= "clearing ='ennakkolasku',";
+					$query .= "clearing ='ENNAKKOLASKU',";
+				}
+				elseif (mysql_field_name($stresult,$i)=='jaksotettu') {
+					// Käännetän ennakkolaskun jaksotettukenttä negatiiviseksi jotta me löydetään ne yksiselitteisesti,
+					// mutta kuitenkin niin, etteivät ne sekoitu maksusopimuksen alkuperäisiin tilauksiin
+					$query .= "jaksotettu ='".($laskurow[$i]*-1)."',";
 				}
 				// ja kaikki muut paitsi tunnus sellaisenaan
 				elseif (mysql_field_name($stresult,$i)!='tunnus') {
@@ -158,26 +162,26 @@
 			$trow = mysql_fetch_array($tresult);
 			$nimitys = $trow["nimitys"];
 
-			//Lasketaan tilauksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
+			//Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
 			// ja lisätään ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
 			$query = "	SELECT
-						round(sum(if(tilausrivi.jaksotettu='J', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa
+						round(sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa
 						FROM lasku
-						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.jaksotettu='J'
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tunnus  = '$tunnus'
-						GROUP by lasku.tunnus";
+						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.jaksotettu=lasku.jaksotettu
+						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
+						and lasku.jaksotettu  	= '$tunnus'
+						GROUP by lasku.jaksotettu";
 			$result = mysql_query($query) or pupe_error($query);
 			$sumrow = mysql_fetch_array($result);
 
 			$query = "	SELECT
-						round(sum(if(tilausrivi.jaksotettu='J', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) summa,
+						round(sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) summa,
 						if(tilausrivi.alv>=500, tilausrivi.alv-500, tilausrivi.alv) alv
 						FROM lasku
-						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.jaksotettu='J'
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tunnus  = '$tunnus'
-						GROUP BY lasku.tunnus, alv";
+						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.jaksotettu=lasku.jaksotettu
+						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
+						and lasku.jaksotettu  	= '$tunnus'
+						GROUP BY lasku.jaksotettu, alv";
 			$sresult = mysql_query($query) or pupe_error($query);
 			$tot = 0;
 
@@ -241,7 +245,7 @@
 			$stresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($stresult) == 0) {
-				echo "Otsikkoa '$tunnus' ei löytynyt, tai se on väärässä tilassa.";
+				echo "<font class='error'>Otsikkoa '$tunnus' ei löytynyt, tai se on väärässä tilassa.</font><br><br>";
 				return 0;
 			}
 
@@ -259,11 +263,10 @@
 			if ($debug==1) echo t("Löydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
 
 			if ($posrow["summa"] <= 0 or $posrow["maksuehto"] == 0 or (int) $posrow["tunnus"] == 0) {
-				echo $query." ".t("VIRHE: laskutusposition summa on nolla tai sen alle. Korjaa tämä!<br>");
-				break;
+				echo "<font class='error'>".t("VIRHE: laskutusposition summa on nolla tai sen alle. Korjaa tämä!")."</font><br><br>";
+				return 0;
 			}
 
-			// Tilausrivin kommentti-kenttään menevä kommentti
 			// Tilausrivin kommentti-kenttään menevä kommentti
 			$query = "	SELECT
 						sum(if(uusiotunnus > 0, 1, 0)) laskutettu,
@@ -278,8 +281,8 @@
 
 			// varmistetaan että laskutus näyttäisi olevan OK!!
 			if($aburow["yhteensa"] - $aburow["laskutettu"] != 1) {
-				echo t("VIRHE: Koitetaan loppulaskuttaa mutta positioita on jäljellä enemmäin kuin yksi!<br>");
-				break;
+				echo "<font class='error'>".t("VIRHE: Koitetaan loppulaskuttaa mutta positioita on jäljellä enemmän kuin yksi!")."</font><br><br>";
+				return 0;
 			}
 
 			echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." $tunnus<br></font><br>";
@@ -297,7 +300,7 @@
 						FROM lasku
 						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and kpl <> 0 and uusiotunnus > 0
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.jaksotettu = '$tunnus'
+						and lasku.jaksotettu = '".($tunnus*-1)."'
 						GROUP BY alv";
 			$sresult = mysql_query($query) or pupe_error($query);
 
@@ -313,14 +316,21 @@
 			$query = "update maksupositio set uusiotunnus='$tunnus' where tunnus = '$posrow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			// Alkuperäinen tilaus menee laskutukseen
-			$query = "	update lasku
-						set maksuehto = '$posrow[maksuehto]', clearing = 'loppulasku', ketjutus = 'o', alatila = 'D'
-						where yhtio = '$kukarow[yhtio]'
-						and tunnus = '$tunnus'";
+			// Alkuperäinen tilaus/tilaukset menee laskutukseen
+			$query = "	UPDATE lasku
+						SET maksuehto = '$posrow[maksuehto]', clearing = 'loppulasku', ketjutus = 'o', alatila = 'D'
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						and jaksotettu 	= '$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			return $tunnus;
+			$query = "	SELECT group_concat(distinct tunnus) tunnukset
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
+						and jaksotettu 	= '$tunnus'";
+			$lres = mysql_query($query) or pupe_error($query);
+			$lrow = mysql_fetch_array($lres);
+
+			return $lrow["tunnukset"];
 		}
 	}
 
@@ -332,7 +342,7 @@
 		$tresult = mysql_query($query) or pupe_error($query);
 
 		if(mysql_num_rows($tresult) == 0) die(t("VIRHE: Yhtiöllä EI OLE ennakkolaskutustuotetta, sopimuslaskutusta ei voida toteuttaa!"));
-		echo "<font class='head'>".t("Sopimuslaskutus").":</font><hr><br><br>";
+		echo "<font class='head'>".t("Sopimuslaskutus").":</font><hr><br>";
 
 
 		if($tee == "ennakkolaskuta") {
@@ -380,21 +390,20 @@
 					</SCRIPT>";
 
 			$query = "	SELECT
-						lasku.jaksotettu,
-						min(lasku.tunnus) tilaus,
-						group_concat(distinct concat_ws(' ',lasku.nimi, lasku.nimitark)) nimi,
-						sum(if(maksupositio.uusiotunnus != '0', 1,0)) laskutettu_kpl,
+						lasku.jaksotettu jaksotettu,
+						concat_ws(' ',lasku.nimi, lasku.nimitark) nimi,
+						sum(if(maksupositio.uusiotunnus > 0, 1,0)) laskutettu_kpl,
 						count(*) yhteensa_kpl,
-						sum(if(maksupositio.uusiotunnus  = '0', maksupositio.summa,0)) laskuttamatta,
-						sum(if(maksupositio.uusiotunnus != '0', maksupositio.summa,0)) laskutettu,
+						sum(if(maksupositio.uusiotunnus = 0, maksupositio.summa,0)) laskuttamatta,
+						sum(if(maksupositio.uusiotunnus > 0, maksupositio.summa,0)) laskutettu,
 						sum(maksupositio.summa) yhteensa
 						FROM lasku
 						JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
 						JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.jaksotettu != ''
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu > 0
-						GROUP BY lasku.jaksotettu
-						ORDER BY lasku.jaksotettu desc";
+						GROUP BY jaksotettu, nimi
+						ORDER BY jaksotettu desc";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<table><tr>";
@@ -414,8 +423,8 @@
 				$query = "	SELECT maksupositio.*, maksuehto.teksti
 							FROM maksupositio
 							JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
-							WHERE maksupositio.yhtio ='$kukarow[yhtio]'
-							and otunnus = '$row[tilaus]'
+							WHERE maksupositio.yhtio = '$kukarow[yhtio]'
+							and otunnus = '$row[jaksotettu]'
 							and uusiotunnus = 0
 							ORDER BY maksupositio.tunnus
 							LIMIT 1";
@@ -425,12 +434,21 @@
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus  = '$row[tilaus]'";
+							and tunnus  = '$row[jaksotettu]'
+							ORDER BY tunnus
+							LIMIT 1";
 				$rahres = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_array($rahres);
 
+				$query = "	SELECT group_concat(tunnus SEPARATOR '<br>') tunnukset
+							FROM lasku
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and jaksotettu  = '$row[jaksotettu]'";
+				$rahres = mysql_query($query) or pupe_error($query);
+				$laskurow2 = mysql_fetch_array($rahres);
+
 				echo "<tr>";
-				echo "<td valign='top'>$row[tilaus]</td>";
+				echo "<td valign='top'>$laskurow2[tunnukset]</td>";
 				echo "<td valign='top'>$row[nimi]</td>";
 				echo "<td valign='top'>$row[laskutettu_kpl] / $row[yhteensa_kpl]</td>";
 				echo "	<td valign='top' align='right'>$row[laskuttamatta]</td>
@@ -447,14 +465,14 @@
 				// loppulaskutetaan maksusopimus
 				if($row["yhteensa_kpl"] - $row["laskutettu_kpl"] == 1) {
 					// tarkastetaan onko kaikki jo toimitettu ja tämä on good to go
-					$query = "	SELECT lasku.tunnus,
-								sum(if(tila='L' and alatila IN ('J','X'),1,0)) tilaok,
-								sum(if(toimitettu='',1,0)) toimittamatta,
+					$query = "	SELECT
+								sum(if(lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,
+								sum(if(tilausrivi.toimitettu='',1,0)) toimittamatta,
 								count(*) toimituksia
 								FROM lasku
-								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='J'
-								WHERE lasku.yhtio = '$kukarow[yhtio]'
-								and lasku.jaksotettu = '$row[tilaus]'
+								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D'
+								WHERE lasku.yhtio 		= '$kukarow[yhtio]'
+								and lasku.jaksotettu 	= '$row[jaksotettu]'
 								GROUP BY lasku.jaksotettu";
 					$tarkres = mysql_query($query) or pupe_error($query);
 					$tarkrow = mysql_fetch_array($tarkres);
@@ -463,11 +481,11 @@
 						echo "<td class='back'>Ei valmis</td>";
 					}
 					else {
-						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[tilaus]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: $posrow[teksti]";
+						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: $posrow[teksti]";
 
 						echo "	<form method='post' action='$PHP_SELF' onSubmit='return verify(\"$msg\");'>
 								<input type='hidden' name='toim' value='$toim'>
-								<input type='hidden' name='tunnus' value='$row[tilaus]'>
+								<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 								<input type='hidden' name='tee' value='loppulaskuta'>
 								<td class='back'><input type='submit' name = 'submit' value='".t("Laskuta")."'></td>
 								</form>";
@@ -482,7 +500,7 @@
 					echo "<td class='back'>
 							<form method='post' action='$PHP_SELF' onSubmit='return verify(\"$msg\");'>
 							<input type='hidden' name = 'toim' value='$toim'>
-							<input type='hidden' name = 'tunnus' value='$row[tilaus]'>
+							<input type='hidden' name = 'tunnus' value='$row[jaksotettu]'>
 							<input type='hidden' name = 'tee' value='sulje'>
 							<input type='submit' name = 'submit' value='".t("Sulje projekti")."'>
 							</form></td>";
@@ -492,21 +510,21 @@
 				}
 				else {
 					// muuten tämä on vain ennakkolaskutusta
-					$msg = t("Oletko varma, että haluat tehdä ennakkolaskun tilaukselle").": $row[tilaus]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: $posrow[teksti]";
+					$msg = t("Oletko varma, että haluat tehdä ennakkolaskun tilaukselle").": $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: $posrow[teksti]";
 
 					echo "<td class='back'><form method='post' name='case' action='$PHP_SELF' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
 							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='tunnus' value='$row[tilaus]'>
+							<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 							<input type='hidden' name='tee' value='ennakkolaskuta'>
 							<input type='submit' name = 'submit' value='".t("Laskuta")."'>
 							</form></td>";
 
 					// muuten tämä on vain ennakkolaskutusta
-					$msg = t("Oletko varma, että haluat tehdä kaikki ennakkolaskut tilaukselle").": $row[tilaus]";
+					$msg = t("Oletko varma, että haluat tehdä kaikki ennakkolaskut tilaukselle").": $row[jaksotettu]";
 
 					echo "<td class='back'><form method='post' name='case' action='$PHP_SELF' enctype='multipart/form-data'  autocomplete='off' onSubmit = 'return verify(\"$msg\");'>
 							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='tunnus' value='$row[tilaus]'>
+							<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 							<input type='hidden' name='tee' value='ennakkolaskuta_kaikki'>
 							<input type='submit' name = 'submit' value='".t("Laskuta kaikki ennakot")."'>
 							</form></td>";

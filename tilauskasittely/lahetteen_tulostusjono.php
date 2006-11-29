@@ -3,22 +3,22 @@
 
 	if ($toim == 'SIIRTOLISTA') {
 		$tila 		= "G";
-		$alatila	= "J";
+		$lalatila	= "J";
 		$tilaustyyppi = " and tilaustyyppi!='M' ";
 	}
 	elseif ($toim == 'MYYNTITILI') {
 		$tila 		= "G";
-		$alatila	= "J";
+		$lalatila	= "J";
 		$tilaustyyppi = " and tilaustyyppi='M' ";
 	}
 	elseif ($toim == 'VALMISTUS') {
 		$tila 		= "V";
-		$alatila	= "J";
+		$lalatila	= "J";
 		$tilaustyyppi = "";
 	}
 	else {
 		$tila 		= "N";
-		$alatila	= "A";
+		$lalatila	= "A";
 		$tilaustyyppi = "";
 	}
 
@@ -81,7 +81,7 @@
 									from lasku
 									where tunnus in ($tilausnumeroita)
 									and tila	= '$tila'
-									and alatila	= '$alatila'
+									and alatila	= '$lalatila'
 									and yhtio	= '$kukarow[yhtio]'
 									LIMIT 1";
 					$result   = mysql_query($query) or pupe_error($query);
@@ -435,13 +435,13 @@
 					WHERE
 					lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tila = '$tila'
-					and lasku.alatila = '$alatila'
+					and lasku.alatila = '$lalatila'
 					$haku
 					$tilaustyyppi
 					$grouppi
 					$jarjx";
 		$tilre = mysql_query($query) or pupe_error($query);
-
+		
 		if (mysql_num_rows($tilre)==0) {
 			echo "<br><br><font class='message'>".t("Tulostusjonossa ei ole yht‰‰n tilausta")."...</font>";
 		}

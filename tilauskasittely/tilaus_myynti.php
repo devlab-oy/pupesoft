@@ -1467,7 +1467,7 @@ if ($tee == '') {
 	}
 
 	 // erikoisceisi, jos halutaan pieni tuotekysely tilaustaulussa...
-	if ($tuoteno != '' and $kpl == '') {
+	if ($tuoteno != '' and $kpl == '' and $kukarow['extranet'] == '') {
 		$query	= "select * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 

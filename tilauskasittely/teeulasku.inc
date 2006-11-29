@@ -315,7 +315,7 @@ if ($edtunnus != "") {
 	if ($yhtiorow['laskutyyppi']!= 1) {
 
 		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			//$sumsrow["summa"] = laskuval($sumsrow["summa"], $laskurow["vienti_kurssi"]);
+			$sumsrow["summa"] = laskuval($sumsrow["summa"], $laskurow["vienti_kurssi"]);
 		}
 
 		$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti: $sumsrow[summa] $sumsrow[valkoodi].') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";

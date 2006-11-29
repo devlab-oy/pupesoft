@@ -170,14 +170,6 @@
 			$srow = mysql_fetch_array($sresult);
 		}
 
-		//laskun valuuttakoodi
-		$valkoodi = $srow["valkoodi"];
-		if ($valkoodi == '') {
-			$valkoodi = $srow["oletus_valkoodi"];
-		}
-		if ($valkoodi == '') {
-			$valkoodi = $yhtiorow["valkoodi"];
-		}
 
 		//Tutkitaan onko tilauksella rivejä
 		if ($kukarow["kesken"] != 0) {
@@ -216,7 +208,6 @@
 				<input type='hidden' name='chn' 							 value = '$srow[chn]'>
 				<input type='hidden' name='verkkotunnus' 					 value = '$srow[verkkotunnus]'>
 				<input type='hidden' name='ytunnus' 						 value = '$srow[ytunnus]'>
-				<input type='hidden' name='valkoodi' 						 value = '$valkoodi'>
 				<input type='hidden' name='maa' 							 value = '$srow[maa]'>
 				<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
 				<input type='hidden' name='kolm_maa' 						 value = '$srow[kolm_maa]'>
@@ -751,11 +742,35 @@
 				echo "<td></td><td></td>";
 			}
 
-			echo "<td>".t("Tilausta ei osatoimiteta")."</td><td><input type='checkbox' name='osatoimitus' $osath></td>";
+			echo "<td>".t("Tilausta ei osatoimiteta")."</td><td><input type='checkbox' name='osatoimitus' $osath></td></tr>";
+
+			echo "<tr>";
+
+			//laskun valuuttakoodi
+			if ($srow["valkoodi"] == '') {
+				$srow["valkoodi"] = $yhtiorow["valkoodi"];
+			}
+
+			$query = "	SELECT nimi, kurssi, tunnus
+						FROM valuu
+						WHERE yhtio = '$kukarow[yhtio]'
+						ORDER BY jarjestys";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			echo "<td>".t("Valuutta")."</td><td><select name='valkoodi'>";
+
+			while ($vrow=mysql_fetch_array($vresult)) {
+				$sel="";
+				if ($srow["valkoodi"] == $vrow['nimi']) {
+					$sel = "selected";
+				}
+
+				echo "<option value = '$vrow[nimi]##$vrow[kurssi]' $sel>$vrow[nimi]</option>";
+			}
+
+			echo "</select></td>";
 
 			if ($yhtiorow['laskutuskielto'] != 0) {
-				echo "</tr><tr>";
-				echo "<td></td><td></td>";
 				echo "<td>".t("Laskutuskieltoon")."</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 			}
 
@@ -1083,6 +1098,8 @@
 			}
 		}
 
+		//Otetaan valuutan kurssi
+		list($valkoodi, $kurssi) = explode('##', $valkoodi);
 
 		$query .= "	lasku SET
 					ytunnus			= '$ytunnus',
@@ -1130,6 +1147,7 @@
 					sisainen 		= '$sisainen',
 					eilahetetta 	= '$eilahe',
 					valkoodi 		= '$valkoodi',
+					vienti_kurssi	= '$kurssi',
 					hyvaksynnanmuutos = '$luokka',
 					liitostunnus    = '$liitostunnus',
 					viikorkopros 	= '$yhtiorow[viivastyskorko]',

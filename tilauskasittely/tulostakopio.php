@@ -867,8 +867,6 @@
 				if ($toim == 'PROFORMA') {
 					//kerrotaan laskuntulostukselle, että on proforma
 					$kutsuja = 'proforma';
-					$summa = 0;
-					$arvo = 0;
 				}
 
 				// haetaan maksuehdon tiedot
@@ -918,7 +916,9 @@
 					exit;
 				}
 
-				$sivu = 1;
+				$sivu 	= 1;
+				$summa 	= 0;
+				$arvo 	= 0;
 
 				// aloitellaan laskun teko
 				$firstpage = alku();
@@ -1135,7 +1135,7 @@
 #todo pitää lisätä tulosta_siirtolista.inc:iin toimitustapa, tilausviite ja katsoa että varastot menee oikein.
 				//require_once ("tulosta_siirtolista.inc");
 				require_once ("tulosta_lahete_kerayslista.inc");
-				
+
 				//tehdään uusi PDF failin olio
 				$pdf= new pdffile;
 				$pdf->set_default('margin', 0);

@@ -273,21 +273,30 @@ while ($valsurow = mysql_fetch_array($valsures)) {
 
 	if ($valsurow["otunnus"] != $edotunnus and $edotunnus != '') {
 
-		$query 		= "SELECT summa, valkoodi, nimi, toim_nimi, toim_osoite FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$edotunnus'";
+		$query 		= "SELECT summa, valkoodi, nimi, toim_nimi, toim_osoite, vienti_kurssi FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$edotunnus'";
 		$sumsresult = mysql_query($query) or pupe_error($query);
 		$sumsrow	= mysql_fetch_array($sumsresult);
 
+		if ($sumsrow["valkoodi"] != '' and trim(strtoupper($sumsrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $sumsrow["vienti_kurssi"] != 0) {
+			$query 		= "SELECT sum(round((rivihinta/$sumsrow[vienti_kurssi])*(1+alv/100), 2)) summa FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and otunnus='$edotunnus'";
+			$sumsresult = mysql_query($query) or pupe_error($query);
+			$sumsrow2	= mysql_fetch_array($sumsresult);
+
+			$sumsrow["summa"] = sprintf('%.2f', $sumsrow2["summa"]);
+		}
+
+
 		// jos meill‰ on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteens‰riville kommenttiin...
 		if (strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) and $sumsrow["toim_nimi"] != "") {
-			$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteens‰");
+			$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteens‰").": $sumsrow[summa] $sumsrow[valkoodi].";
 		}
 		else {
-			$sumskommentti = t("Tilaus")." $edotunnus ".t("yhteens‰");
+			$sumskommentti = t("Tilaus")." $edotunnus ".t("yhteens‰").": $sumsrow[summa] $sumsrow[valkoodi].";
 		}
 
 		//jos k‰ytet‰‰n pelkistetty‰ lasku niin ei haluta n‰it‰ kommentteja
 		if ($yhtiorow['laskutyyppi']!= 1) {
-			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti: $sumsrow[summa] $sumsrow[valkoodi].') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
+			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
 			$paivres = mysql_query($query) or pupe_error($query);
 		}
 	}
@@ -298,27 +307,29 @@ while ($valsurow = mysql_fetch_array($valsures)) {
 
 if ($edtunnus != "") {
 	//laitetaan v‰lisumma vikallekin tilaukselle
-	$query 		= "SELECT summa, valkoodi, nimi, toim_nimi, toim_osoite FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$edotunnus'";
+	$query 		= "SELECT summa, valkoodi, nimi, toim_nimi, toim_osoite, vienti_kurssi FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$edotunnus'";
 	$sumsresult = mysql_query($query) or pupe_error($query);
 	$sumsrow	= mysql_fetch_array($sumsresult);
 
+	if ($sumsrow["valkoodi"] != '' and trim(strtoupper($sumsrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $sumsrow["vienti_kurssi"] != 0) {
+		$query 		= "SELECT sum(round((rivihinta/$sumsrow[vienti_kurssi])*(1+alv/100), 2)) summa FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and otunnus='$edotunnus'";
+		$sumsresult = mysql_query($query) or pupe_error($query);
+		$sumsrow2	= mysql_fetch_array($sumsresult);
+
+		$sumsrow["summa"] = sprintf('%.2f', $sumsrow2["summa"]);
+	}
 
 	// jos meill‰ on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteens‰riville kommenttiin...
 	if (strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) and $sumsrow["toim_nimi"] != "") {
-		$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteens‰");
+		$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteens‰").": $sumsrow[summa] $sumsrow[valkoodi].";
 	}
 	else {
-		$sumskommentti = t("Tilaus")." $edotunnus ".t("yhteens‰");
+		$sumskommentti = t("Tilaus")." $edotunnus ".t("yhteens‰").": $sumsrow[summa] $sumsrow[valkoodi].";
 	}
 
 	//jos k‰ytet‰‰n pelkistetty‰ lasku niin ei haluta n‰it‰ kommentteja
 	if ($yhtiorow['laskutyyppi']!= 1) {
-
-		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$sumsrow["summa"] = laskuval($sumsrow["summa"], $laskurow["vienti_kurssi"]);
-		}
-
-		$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti: $sumsrow[summa] $sumsrow[valkoodi].') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
+		$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
 		$paivres = mysql_query($query) or pupe_error($query);
 	}
 }

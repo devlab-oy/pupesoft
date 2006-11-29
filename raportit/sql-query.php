@@ -65,7 +65,7 @@
 						$file .= str_replace(".",",", $row[$i])."\t";
 					}
 					else {
-						$file .= "$row[$i]\t";
+						$file .= "\"$row[$i]\"\t";
 					}
 				}
 				$file .= "\r\n";

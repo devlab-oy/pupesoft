@@ -6,10 +6,28 @@ require ("functions.inc");
 //katsotaan millon www roottia on viimeks modifioitu.. otetaan siit‰ versionumero.
 $polku=dirname($_SERVER['SCRIPT_FILENAME'])."/.";
 
-$logo = "http://www.pupesoft.com/pupesoft.gif";
+if ($yhtiorow["logo"] != '') {
 
-echo "<a href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' height='70'></a><br>";
-echo "<font class='info'>pupesoft.com v.".date("d/m/y@H:i", filemtime($polku))."</font><br><br>";
+	$image = getimagesize($yhtiorow["logo"]);
+	$ix    = $image[0];			// kuvan x
+	$iy    = $image[1];			// kuvan y
+
+	if ($ix > $iy) {
+		$koko = "width='150'";
+	}
+	else {
+		$koko = "height='70'";
+	}
+
+	$logo = $yhtiorow["logo"];
+}
+else {
+	$logo = "http://www.pupesoft.com/pupesoft.gif";
+	$koko = "height='70'";
+}
+
+echo "<a href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko style='padding:0px 3px 7px 3px;'></a><br>";
+//echo "<font class='info'>pupesoft.com v.".date("d/m/y@H:i", filemtime($polku))."</font><br><br>";
 
 echo "$yhtiorow[nimi]<br>";
 echo "$kukarow[nimi]<br><br>";
@@ -28,7 +46,7 @@ $orow = mysql_fetch_array($result);
 $sovellus = $orow['sovellus'];
 
 //N‰ytet‰‰n aina exit-nappi
-echo "<a class='menu' href='logout.php' target='main'>".t("Exit")."</a><br>";
+echo "<br><a class='menu' href='logout.php' target='main'>".t("Exit")."</a><br>";
 
 
 // Mit‰ k‰ytt‰j‰ saa tehd‰?
@@ -40,8 +58,8 @@ $query = "SELECT nimi, jarjestys
 		ORDER BY jarjestys";
 $result = mysql_query($query) or pupe_error($query);
 
-while ($orow = mysql_fetch_array($result))
-{
+while ($orow = mysql_fetch_array($result)) {
+
 	// tutkitaan onko meill‰ alamenuja
 	$query = "SELECT nimi, nimitys, alanimi
 			FROM oikeu
@@ -51,29 +69,25 @@ while ($orow = mysql_fetch_array($result))
 	$mrow = mysql_fetch_array($xresult);
 
 	// alamenuja lˆytyy, eli t‰m‰ on menu
-	if (mysql_num_rows($xresult) > 1)
-	{
+	if (mysql_num_rows($xresult) > 1) {
+
 		// jos ykkˆnen niin n‰ytet‰‰n avattu menu itemi
-		if($menu[$mrow['nimitys']] == 1)
-		{
+		if($menu[$mrow['nimitys']] == 1) {
 			echo "- <a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>".t("$mrow[nimitys]")."</a><br>";
 
 			// tehd‰‰n submenu itemit
-			while ($mrow = mysql_fetch_array($xresult))
-			{
+			while ($mrow = mysql_fetch_array($xresult)) {
 				echo "&nbsp;&bull; <a class='menu' href='$mrow[nimi]";
 				if ($mrow['alanimi'] != '') echo "?toim=$mrow[alanimi]";
 				echo "' target='main'>".t("$mrow[nimitys]")."</a><br>";
 			}
 		}
-		else
-		{
+		else {
 			// muuten n‰ytet‰‰n suljettu menuotsikko
-			echo "+ <a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>$mrow[nimitys]</a><br>";
+			echo "+ <a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>".t("$mrow[nimitys]")."</a><br>";
 		}
 	}
-	else
-	{
+	else {
 		// normaali menuitem
 		echo "<a class='menu' href='$mrow[nimi]";
 		if ($mrow['alanimi'] != '') echo "?toim=$mrow[alanimi]";
@@ -82,6 +96,6 @@ while ($orow = mysql_fetch_array($result))
 
 }
 
-require("footer.inc");
+echo "</body></html>";
 
 ?>

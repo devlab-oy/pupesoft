@@ -1,10 +1,13 @@
 <?php
 
-require ("inc/parametrit.inc");
-require ("inc/functions.inc");
-
-//katsotaan millon www roottia on viimeks modifioitu.. otetaan siitä versionumero.
-$polku=dirname($_SERVER['SCRIPT_FILENAME'])."/.";
+if (file_exists("inc/parametrit.inc")) {
+	require ("inc/parametrit.inc");
+	require ("inc/functions.inc");
+}
+else {
+	require ("parametrit.inc");
+	require ("functions.inc");
+}
 
 if ($yhtiorow["logo"] != '') {
 
@@ -27,7 +30,6 @@ else {
 }
 
 echo "<a href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko style='padding:0px 3px 7px 3px;'></a><br>";
-//echo "<font class='info'>pupesoft.com v.".date("d/m/y@H:i", filemtime($polku))."</font><br><br>";
 
 echo "$yhtiorow[nimi]<br>";
 echo "$kukarow[nimi]<br><br>";
@@ -35,10 +37,17 @@ echo "$kukarow[nimi]<br><br>";
 // estetään errorit tyhjästä arraystä
 if (!isset($menu)) $menu = array();
 
+if ($kukarow["extranet"] != "") {
+	$extralisa = " and sovellus='extranet' ";
+}
+else {
+	$extralisa = " ";
+}
+
 // mitä sovelluksia käyttäjä saa käyttää
 $query = "	SELECT distinct sovellus
 			FROM oikeu
-			WHERE yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'
+			WHERE yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' $extralisa
 			order by sovellus";
 $result = mysql_query($query) or pupe_error($query);
 
@@ -76,7 +85,7 @@ if (mysql_num_rows($result) > 1) {
 		if ($sovellus == '') $sovellus = $key;
 	}
 
-	echo "</select></form>";
+	echo "</select></form><br>";
 }
 else {
 	// löytyi vaan yksi sovellus, otetaan se
@@ -84,14 +93,11 @@ else {
 	$sovellus = $orow['sovellus'];
 }
 
-
 //Näytetään aina exit-nappi
-echo "<br><a class='menu' href='logout.php' target='main'>".t("Exit")."</a><br>";
-
+echo "<a class='menu' href='logout.php' target='main'>".t("Exit")."</a><br>";
 
 // Mitä käyttäjä saa tehdä?
 // Valitaan ensin vain ylätaso jarjestys2='0'
-
 $query = "SELECT nimi, jarjestys
 		FROM oikeu
 		WHERE yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and sovellus='$sovellus' and jarjestys2='0'

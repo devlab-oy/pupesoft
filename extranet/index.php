@@ -10,7 +10,7 @@ if ($go=='') $go = 'tervetuloa.php';
 
 echo "<html>
 	<head>
-	<title>$yhtiorpw[nimi] ".t("Extranet")."</title>
+	<title>$yhtiorow[nimi] ".t("Extranet")."</title>
 	<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>
 	<meta http-equiv='Pragma' content='no-cache'>
 	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>

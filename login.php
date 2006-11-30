@@ -220,6 +220,10 @@ echo "
 </table>
 ";
 
-require("inc/footer.inc");
+echo "<script LANGUAGE='JavaScript'>
+window.document.$formi.$kentta.focus();
+</script>";
+
+echo "</body></html>";
 
 ?>

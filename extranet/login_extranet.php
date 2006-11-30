@@ -73,6 +73,13 @@ $formi = "login"; // Kursorin ohjaus
 $kentta = "user";
 
 echo "
+<html>
+	<head>
+	<title>Login</title>
+	<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>
+	<meta http-equiv='Pragma' content='no-cache'>
+	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
+	</head>
 
 <style type='text/css'>
 <!--
@@ -152,6 +159,10 @@ echo "
 </table>
 ";
 
-require("footer.inc");
+echo "<script LANGUAGE='JavaScript'>
+window.document.$formi.$kentta.focus();
+</script>";
+
+echo "</body></html>";
 
 ?>

@@ -16,6 +16,7 @@
 	// $paikka 			--> myydään vain tältä paikalta
 	// $rivitunnus		--> tietokannan tunnus jolle rivi lisätään
 	// $korvaavakielto	--> Jos erisuuri kuin tyhjä niin ei myydä korvaavia
+	// $perhekielto     --> Jos erisuuri kuin tyhjä niin ei etsitä ollenkaan perheitä
 	// $varataan_saldoa --> Jos == EI niin ei varata saldoa (tietyissä keisseissä), tai siis ei ainakan tehdä saldotsekkiä
 	// $kutsuja			--> Kuka tätä skriptiä kutsuu
 	// $myy_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
@@ -196,7 +197,7 @@
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä
 		// tai jos muokataan tuoteperheen lasta ei mennä uudestaan tähän haaraan
-		if ($paikka == "" and $perheid == "") {
+		if ($paikka == "" and $perheid == "" and $perhekielto == "") {
 
 			foreach($kaikkituotteet as $isatuoteno) {
 

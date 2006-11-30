@@ -48,6 +48,7 @@ $loppostitp           = "";
 $loppostino           = "";
 $loposoite            = "";
 $lopviesti            = "";
+$ketjutus             = "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror      = 1; // oletetaan aina ettei  tuotetta löydy
@@ -675,7 +676,13 @@ while (!feof ($fd)) {
 					$paikka		= "";
 					$varasto 	= $olinvarasto;
 					$kukarow["kesken"] = $laskurow["tunnus"];
-
+					
+					if ($ketjutus == 'o') {
+						// kielletään kaikki muutokset alkuperäiseen tilausriviin, jos ketjutus = 'o' eli pupesoft --> pupesoft
+						$korvaavakielto = 'KIELLETTY';
+						$perhekielto    = 'KIELLETTY';
+					}
+					
 					// jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sekä laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
 					if ($editilaus_tila == "Z") {
 						$var = "Y";
@@ -750,6 +757,8 @@ while (!feof ($fd)) {
 			$edi_nimitys     = "";
 			$edi_sarjanumero = "";
 			$edi_hinta       = "";
+			$korvaavakielto  = "";
+			$perhekielto     = "";
 
 			break;
 
@@ -838,6 +847,7 @@ while (!feof ($fd)) {
 			$lopviesti            = "";
 			$edi_sarjanumero      = "";
 			$edi_hinta            = "";
+			$ketjutus             = "";
 
 			break;
 	}

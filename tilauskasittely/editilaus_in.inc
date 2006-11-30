@@ -62,6 +62,8 @@ $olinvarasto     = "";
 $edi_nimitys     = "";
 $edi_sarjanumero = "";
 $edi_hinta       = "";
+$korvaavakielto  = "";
+$perhekielto     = "";
 
 // fiilataan parametrejä joita tarvitaan require fileissä
 $tulos_ulos = "edi"; // tää on ftp-send.incissä
@@ -676,13 +678,13 @@ while (!feof ($fd)) {
 					$paikka		= "";
 					$varasto 	= $olinvarasto;
 					$kukarow["kesken"] = $laskurow["tunnus"];
-					
+
 					if ($ketjutus == 'o') {
 						// kielletään kaikki muutokset alkuperäiseen tilausriviin, jos ketjutus = 'o' eli pupesoft --> pupesoft
 						$korvaavakielto = 'KIELLETTY';
 						$perhekielto    = 'KIELLETTY';
 					}
-					
+
 					// jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sekä laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
 					if ($editilaus_tila == "Z") {
 						$var = "Y";

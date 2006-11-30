@@ -445,7 +445,7 @@ echo "</table><br>";
 echo "<font class='message'>".t("Vientiin keikan")." $laskurow[laskunro] ".t("rivit varastoon")."! $rivia ".t("riviä").".</font><br><br>";
 
 // jos ei olla virallisessa toimitellaan suoratoimituksia
-if ($toiminto != "kaikkiok" $superirivit != "") {
+if ($toiminto != "kaikkiok" and $superirivit != "") {
 	$superirivit = substr($superirivit,0,-1);
 	$mista = 'varastoon.inc';
 	require('jt_super_laskuta.inc');

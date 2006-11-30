@@ -5,7 +5,7 @@
 	// tarvitaan keikan tunnus muuttujassa $otunnus
 	// jos $mista ei ole tyhjä tullaan käyttöliittymästä, jolloin aina kutsutaan tätä failia eikä haluta pilata käyttäjän päivää echoamalla että epäonnistui
 	
-	if ($mista != '' and $superirivit != '') {
+	if ($mista == 'varastoon.inc' and $superirivit != '') {
 		$alkulisa = " tilausrivi.tunnus in ($superirivit) and ";
 	}
 	else {
@@ -134,14 +134,14 @@
 			require ("tilaus-valmis.inc");
 		}
 	}
-	elseif ($mista != '') {
+	elseif ($mista == 'varastoon.inc') {
 		$laskuvirhe .= t("Ei suoratoimitettavaa keikalta!")." ($otunnus)\n";
 	}
 	else {
 		$laskuvirhe .= t("Suoratoimituksen laskutus epäonnistui! Yhtään riviä ei voitu toimittaa keikalta!")." ($otunnus)\n";
 	}
 	
-	if ($mista != '') {
+	if ($mista == 'varastoon.inc') {
 		$laskuvirhe = str_replace("\n","<br>",$laskuvirhe);
 	}
 

@@ -24,7 +24,7 @@
 	}
 	
 	function alku () {
-		global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli;
+		global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli;
 	
 		$firstpage = $pdf->new_page("a4");
 		$pdf->enable('template');
@@ -90,15 +90,16 @@
 		
 		if ($sivu == 1) {
 			//Rivit alkaa täsä kohtaa
-			$kala = 500;	
+			$kala = 490;	
 		
-			$pdf->draw_text(100,  650, t("Arvoisa asiakkaamme.", $kieli),														$firstpage, $norm);
-			$pdf->draw_text(100,  630, t("Huomautamme kohteliaimmin, että allaolevan laskelman mukainen saatavamme on erääntynyt.", $kieli),	$firstpage, $norm);
-			$pdf->draw_text(100,  610, t("Pyydämme ystävällisesti suoritustanne viikon kuluessa.", $kieli),						$firstpage, $norm);
-			$pdf->draw_text(100,  600, t("Muussa tapauksessa katsomme teidän suostuvan siihen, että voimme periä", $kieli),		$firstpage, $norm);
-			$pdf->draw_text(100,  590, t("saatavamme perimiskuluineen Lakimiesten Perintätoimiston kautta.", $kieli),			$firstpage, $norm);
-			$pdf->draw_text(100,  570, t("Jos suorituksenne on jo matkalla, on tämä kirje aiheeton.", $kieli),					$firstpage, $norm);
-			$pdf->draw_text(100,  550, t("Yhteyshenkilömme", $kieli).": $yrow[nimi] / $yrow[puhno]",							$firstpage, $norm);	
+			$pdf->draw_text(80,  650, t("Arvoisa asiakkaamme.", $kieli),														$firstpage, $norm);
+			$pdf->draw_text(80,  630, t("Huomautamme kohteliaimmin, että allaolevan laskelman mukainen saatavamme on erääntynyt.", $kieli),	$firstpage, $norm);
+			$pdf->draw_text(80,  610, t("Pyydämme ystävällisesti suoritustanne viikon kuluessa.", $kieli),						$firstpage, $norm);
+			$pdf->draw_text(80,  600, t("Muussa tapauksessa katsomme teidän suostuvan siihen, että", $kieli),		$firstpage, $norm);
+			$pdf->draw_text(80,  590, t("voimme periä saatavamme perimiskuluineen Lakimiesten Perintätoimiston kautta ja", $kieli),			$firstpage, $boldi);
+			$pdf->draw_text(80,  580, t("siirretään teidät jälkivaatimusasiakkaaksi.", $kieli),			$firstpage, $norm);
+			$pdf->draw_text(80,  560, t("Jos suorituksenne on jo matkalla, on tämä kirje aiheeton.", $kieli),					$firstpage, $boldi);
+			$pdf->draw_text(80,  540, t("Yhteyshenkilömme", $kieli).": $yrow[nimi] / $yrow[puhno]",							$firstpage, $norm);	
 		}
 		else {
 			$kala = 620;
@@ -224,6 +225,9 @@
 	
 	$norm["height"] = 10;
 	$norm["font"] = "Times-Roman";
+	
+	$boldi["height"] = 10;
+	$boldi["font"] = "Times-Bold";
 	
 	$pieni["height"] = 8;
 	$pieni["font"] = "Times-Roman";

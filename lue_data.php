@@ -176,6 +176,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$pakolliset = array("KUVAUS","PRIORITEETTI","PYYTAJA");
 			$kielletyt = array("");
 			break;
+		case "hinnasto" :
+			$pakolliset = array("TUOTENO","HINTA");
+			$kielletyt = array("");
+			break;
 		default :
 			echo t("Miten t‰nne p‰‰sit!");
 			exit;
@@ -824,6 +828,7 @@ else
 					<option value='tuotteen_toimittajat'>".t("Tuotteen toimittajat")."</option>
 					<option value='todo'>".t("Todo-lista")."</option>
 					<option value='maksuehto'>".t("Maksuehto")."</option>
+					<option value='hinnasto'>".t("Hinnasto")."</option>
 					</select></td>
 			</tr>
 

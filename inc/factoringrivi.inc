@@ -11,7 +11,7 @@
 	if ((mysql_field_name($result, $i) == "teksti_fi") or
 		(mysql_field_name($result, $i) == "teksti_en") or
 		(mysql_field_name($result, $i) == "teksti_se")) {
-		$ulos = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
+		$ulos = "<td><textarea cols='85' rows='8' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
 

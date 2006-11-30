@@ -129,6 +129,8 @@ $sarakkeet["SARAKE3"] = t("tuotemerkki")."\t";
 $sarakkeet["SARAKE4"] = t("tahtituote")."\t";
 $sarakkeet["SARAKE4B"] = t("status")."\t";
 $sarakkeet["SARAKE4C"] = t("abc")."\t";
+$sarakkeet["SARAKE4CA"] = t("abc osasto")."\t";
+$sarakkeet["SARAKE4CB"] = t("abc try")."\t";
 $sarakkeet["SARAKE4D"] = t("luontiaika")."\t";
 $sarakkeet["SARAKE5"] = t("saldo")."\t";
 $sarakkeet["SARAKE6"] = t("halytysraja")."\t";
@@ -340,19 +342,14 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	echo "	</table><br>";
 	flush();
 
-	$lisaa = "";
-	$lisaa2 = "";
-	$lisaa3 = "";
+	$lisaa  = ""; // tuote-rajauksia
+	$lisaa2 = ""; // toimittaja-rajauksia
 
 	if ($osasto != '') {
 		$lisaa .= " and tuote.osasto = '$osasto' ";
 	}
 	if ($tuoryh != '') {
 		$lisaa .= " and tuote.try = '$tuoryh' ";
-	}
-	if ($toimittajaid != '') {
-		$lisaa 	.= " and liitostunnus = '$toimittajaid' ";
-		$lisaa2 .= " JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno ";
 	}
 	if ($tuotemerkki != '') {
 		$lisaa .= " and tuote.tuotemerkki = '$tuotemerkki' ";
@@ -363,7 +360,6 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	if ($valitut["EIHINNASTOON"] != '') {
 		$lisaa .= " and tuote.hinnastoon != 'E' ";
 	}
-
 	// Listaa vain äskettäin perustetut tuotteet:
 	if ($valitut["VAINUUDETTUOTTEET"] != '') {
 		$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
@@ -373,15 +369,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
 	}
 
-	if ($abcrajaus != "") {
-		// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
-		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
-					and abc_aputaulu.tuoteno = tuote.tuoteno
-					and abc_aputaulu.tyyppi = 'TK'
-					and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month))) ";
-	}
-	else {
-		$abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = 'TK') ";
+	if ($toimittajaid != '') {
+		$lisaa2 .= " JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid' ";
 	}
 
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
@@ -446,6 +435,33 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		exit;
 	}
 
+	// katotaan JT:ssä olevat tuotteet
+	$query = "	SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
+				FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+				JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
+				WHERE tilausrivi.$yhtiot
+				and tyyppi = 'L'
+				and var = 'J'
+				and jt > 0";
+	$vtresult = mysql_query($query) or pupe_error($query);
+	$vrow = mysql_fetch_array($vtresult);
+
+	$jt_tuotteet = "''";
+	if ($vrow[0] != "") {
+		$jt_tuotteet = $vrow[0];
+	}
+
+	if ($abcrajaus != "") {
+		// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
+		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
+					and abc_aputaulu.tuoteno = tuote.tuoteno
+					and abc_aputaulu.tyyppi = 'TK'
+					and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
+	}
+	else {
+		$abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = 'TK') ";
+	}
+
 	$varastot 		 = " HAVING varastopaikat.tunnus in ($varastot) or varastopaikat.tunnus is null ";
 	$varastot_yhtiot = " yhtio in ($varastot_yhtiot) ";
 
@@ -468,6 +484,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					tuote.aleryhma,
 					tuote.kehahin,
 					abc_aputaulu.luokka abcluokka,
+					abc_aputaulu.luokka_osasto abcluokka_osasto,
+					abc_aputaulu.luokka_try abcluokka_try,
 					tuote.luontiaika
 					FROM tuote
 					$lisaa2
@@ -501,6 +519,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					tuote.kehahin,
 					varastopaikat.tunnus,
 					abc_aputaulu.luokka abcluokka,
+					abc_aputaulu.luokka_osasto abcluokka_osasto,
+					abc_aputaulu.luokka_try abcluokka_try,
 					tuote.luontiaika
 					FROM tuote
 					$lisaa2
@@ -522,7 +542,24 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	if ($valitut["poistetut"] != '') {
 		echo "<font class='message'>".t("Vain aktiiviset tuotteet").".<br>";
 	}
+	if ($valitut["VAINUUDETTUOTTEET"] != '') {
+		echo "<font class='message'>".t("Listaa vain 12kk sisällä perustetut tuotteet").".<br>";
+	}
+	if ($valitut["UUDETTUOTTEET"] != '') {
+		echo "<font class='message'>".t("Ei listata 12kk sisällä perustettuja tuotteita").".<br>";
+	}
 
+	if ($abcrajaus != "") {
+
+		echo "<font class='message'>".t("ABC-luokka tai ABC-osastoluokka tai ABC-tuoteryhmäluokka >=")." $ryhmanimet[$abcrajaus] ".t("tai sitä on jälkitoimituksessa");
+
+		if ($valitut["VAINUUDETTUOTTEET"] == '' and $valitut["UUDETTUOTTEET"] == '') {
+			echo " ".t("tai tuote on perustettu viimeisen 12kk sisällä").".<br>";
+		}
+		else {
+			echo ".<br>";
+		}
+	}
 
 	echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>";
 
@@ -848,6 +885,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		if ($row["luontiaika"] == "0000-00-00 00:00:00") $row["luontiaika"] = "";
 
 		$abcnimi = $ryhmanimet[$row["abcluokka"]];
+		$abcnimi2 = $ryhmanimet[$row["abcluokka_osasto"]];
+		$abcnimi3 = $ryhmanimet[$row["abcluokka_try"]];
 
 		if($valitut["SARAKE1"] != '') $apurivi .= "\"$row[osasto]\"\t";
 		if($valitut["SARAKE2"] != '') $apurivi .= "\"$row[try]\"\t";
@@ -855,6 +894,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		if($valitut["SARAKE4"] != '') $apurivi .= "\"$row[tahtituote]\"\t";
 		if($valitut["SARAKE4B"] != '')$apurivi .= "\"$row[status]\"\t";
 		if($valitut["SARAKE4C"] != '')$apurivi .= "\"$abcnimi\"\t";
+		if($valitut["SARAKE4CA"] != '')$apurivi .= "\"$abcnimi2\"\t";
+		if($valitut["SARAKE4CB"] != '')$apurivi .= "\"$abcnimi3\"\t";
 		if($valitut["SARAKE4D"] != '')$apurivi .= "\"$row[luontiaika]\"\t";
 		if($valitut["SARAKE5"] != '') $apurivi .= str_replace(".",",",$saldo['saldo'])."\t";
 		if($valitut["SARAKE6"] != '') $apurivi .= str_replace(".",",",$row['halytysraja'])."\t";
@@ -1642,13 +1683,12 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 		$sresult = mysql_query($query) or pupe_error($query);
 		$srow = mysql_fetch_array($sresult);
 
-
 		$chk = "";
 		if (($srow["selitetark"] == "UUDETTUOTTEET" and $tee == "JATKA") or $valitut["UUDETTUOTTEET"] != '') {
 			$chk = "CHECKED";
 		}
 
-		echo "<tr><th>".t("Älä listaa äskettäin perustettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[UUDETTUOTTEET]' value='UUDETTUOTTEET' $chk></td></tr>";
+		echo "<tr><th>".t("Älä listaa 12kk sisällä perustettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[UUDETTUOTTEET]' value='UUDETTUOTTEET' $chk></td></tr>";
 
 		//näytetäänkö uudet tuotteet
 		$query = "	SELECT selitetark
@@ -1660,13 +1700,12 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 		$sresult = mysql_query($query) or pupe_error($query);
 		$srow = mysql_fetch_array($sresult);
 
-
 		$chk = "";
 		if (($srow["selitetark"] == "VAINUUDETTUOTTEET" and $tee == "JATKA") or $valitut["VAINUUDETTUOTTEET"] != '') {
 			$chk = "CHECKED";
 		}
 
-		echo "<tr><th>".t("Listaa vain äskettäin perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
+		echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
 	}
 
 	echo "<tr><td class='back'><br></td></tr>";

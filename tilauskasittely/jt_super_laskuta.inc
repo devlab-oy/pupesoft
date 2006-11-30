@@ -3,14 +3,23 @@
 	// jos ollaan saavuttamassa tuotteita varastoon, jota on ollu JT-SUPER j‰lkk‰riss‰ tehd‰‰n niist‰ automaattisesti tilaus joka laskutetaan
 	// eli t‰pp‰ l‰hetett‰ ei tulosteta p‰‰lle vaan tilaukselle...
 	// tarvitaan keikan tunnus muuttujassa $otunnus
-
+	// jos $mista ei ole tyhj‰ tullaan k‰yttˆliittym‰st‰, jolloin aina kutsutaan t‰t‰ failia eik‰ haluta pilata k‰ytt‰j‰n p‰iv‰‰ echoamalla ett‰ ep‰onnistui
+	
+	if ($mista != '' and $superirivit != '') {
+		$alkulisa = " tilausrivi.tunnus in ($superirivit) and ";
+	}
+	else {
+		$alkulisa = " tilausrivi.uusiotunnus='$otunnus' and ";
+	}
+	
 	// haetaan eka keikan kaikki rivit (ostotilauksen verkkotunnus kent‰ss‰ on alkuper‰isen myyntitilauksen lasku.liitostunnus)
 	$query = "	select tilausrivi.*, verkkotunnus from
 				tilausrivi use index (uusiotunnus_index)
 				join lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 				where tilausrivi.yhtio='$kukarow[yhtio]' and
-				tilausrivi.uusiotunnus='$otunnus' and
-				tilausrivi.tyyppi='O'";
+				$alkulisa
+				tilausrivi.tyyppi='O' and
+				tilausrivi.tilaajanrivinro <> 0";
 	$superres = mysql_query($query) or pupe_error($query);
 
 	$jt_otsikot = array(); // otetaan talteen kaikki otsikot
@@ -125,8 +134,15 @@
 			require ("tilaus-valmis.inc");
 		}
 	}
+	elseif ($mista != '') {
+		$laskuvirhe .= t("Ei suoratoimitettavaa keikalta!")." ($otunnus)\n";
+	}
 	else {
 		$laskuvirhe .= t("Suoratoimituksen laskutus ep‰onnistui! Yht‰‰n rivi‰ ei voitu toimittaa keikalta!")." ($otunnus)\n";
+	}
+	
+	if ($mista != '') {
+		$laskuvirhe = str_replace("\n","<br>",$laskuvirhe);
 	}
 
 ?>

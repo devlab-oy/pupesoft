@@ -102,6 +102,8 @@ echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]<
 echo "<font class='message'>".t("Rahdin määrä yhteensä").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 
 $summa = 0;
+$superirivit = '';
+$rivia = 0;
 
 while ($tilrivirow = mysql_fetch_array($presult)) {
 	// lasketaan keskihankintahinta, tarvitaan tuotteen saldo ja tuotteen tiedot
@@ -313,6 +315,15 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					laskutettu = '$kukarow[kuka]'
 					WHERE yhtio='$kukarow[yhtio]' and otunnus='$tilrivirow[otunnus]' and (tunnus='$tilrivirow[tunnus]' or perheid='$tilrivirow[tunnus]')";
 		$varastoon_result = mysql_query($query) or pupe_error($query);
+		
+		$rivia ++;
+		
+		// nämä halutaan koittaa suoratoimittaa
+		if ($tilrivirow['tilaajanrivinro'] <> 0) {
+			$superirivit .= "'$tilrivirow[tunnus]',";
+		}
+
+		
 	}
 
 	// näytetään ruudulla
@@ -421,7 +432,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("En löytänyt keikan vaihto-omaisuuslaskua! MAJOR ASSFUCK!")."<br><br>$query</font><br>";
+		echo "<font class='error'>".t("En löytänyt keikan vaihto-omaisuuslaskua! PAHA VIRHE!")."<br><br>$query</font><br>";
 	}
 }
 
@@ -432,6 +443,14 @@ echo "<tr>
 echo "</table><br>";
 
 echo "<font class='message'>".t("Vientiin keikan")." $laskurow[laskunro] ".t("rivit varastoon")."! $rivia ".t("riviä").".</font><br><br>";
+
+// jos ei olla virallisessa toimitellaan suoratoimituksia
+if ($toiminto != "kaikkiok") {
+	$superirivit = substr($superirivit,0,-1);
+	$mista = 'varastoon.inc';
+	require('jt_super_laskuta.inc');
+	echo "<br><font class='message'>$laskuvirhe</font><br><br>";
+}
 
 echo "<hr>";
 echo "<form action='$PHP_SELF' method='post'>";

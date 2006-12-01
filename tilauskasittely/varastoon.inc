@@ -444,8 +444,12 @@ echo "</table><br>";
 
 echo "<font class='message'>".t("Vientiin keikan")." $laskurow[laskunro] ".t("rivit varastoon")."! $rivia ".t("riviä").".</font><br><br>";
 
+$query = "SELECT automaatti_toimitus FROM toimi where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
+$result   = mysql_query($query) or pupe_error($query);
+$atrow = mysql_fetch_array($result);
+
 // jos ei olla virallisessa toimitellaan suoratoimituksia
-if ($toiminto != "kaikkiok" and $superirivit != "" and $suoratoimitus == '') {
+if ($toiminto != "kaikkiok" and $superirivit != "" and $suoratoimitus == '' and $atrow['automaatti_toimitus'] == 'S') {
 	$superirivit = substr($superirivit,0,-1);
 	$mista = 'varastoon.inc';
 	require('jt_super_laskuta.inc');

@@ -14,6 +14,27 @@
 		$ulos = "<td><textarea cols='85' rows='8' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "factoringyhtio") {
+		
+		if (strtoupper($trow[$i]) == 'NORDEA') {
+			$sel2 = "SELECTED";
+		}
+		if (strtoupper($trow[$i]) == 'SAMPO') {
+			$sel3 = "SELECTED";
+		}
+		if (strtoupper($trow[$i]) == 'SEB') {
+			$sel4 = "SELECTED";
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='NORDEA' $sel2> ".t("Nordea Factoring")."</option>";
+		$ulos .= "<option value='SAMPO' $sel3> ".t("Sampo Factoring")."</option>";
+		$ulos .= "<option value='SEB' $sel4> ".t("SEB Factoring")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
 		$query = "	SELECT nimi, tunnus

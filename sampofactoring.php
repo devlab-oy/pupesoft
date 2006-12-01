@@ -9,12 +9,13 @@
 
 		// haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
 		$query = "	SELECT count(*) kpl, sum(arvo) arvo, sum(summa) summa
-					FROM lasku
+					FROM lasku USE INDEX (yhtio_tila_mapvm)
 					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'A')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					lasku.tila = 'U' and
 					lasku.alatila = 'X' and
 					lasku.summa != 0 and
+					lasku.mapvm = '0000-00-00' and
 					lasku.sisainen = '' and
 					lasku.factoringsiirtonumero = ''";
 		$result = mysql_query ($query) or pupe_error($query);

@@ -47,7 +47,7 @@ if ($tee == "file") {
 				$var  		= strtoupper(trim($rivi[6]));
 
 				if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
-					echo t("V‰‰r‰ arvo kent‰ss‰ 'var'! Sallitut arvot ovat: 'P', 'J' ja 'H'").".<br>";
+					echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").".<br>";
 					$var = '';
 				}
 

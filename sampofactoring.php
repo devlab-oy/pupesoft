@@ -78,14 +78,16 @@
 
 		// haetaan kaikki sampo factoroidut laskut jota ei ole viel‰ liitetty mihink‰‰n siirtolistalle
 		$query = "	SELECT ifnull(group_concat(lasku.tunnus),0) tunnukset
-					FROM lasku
+					FROM lasku USE INDEX (yhtio_tila_mapvm)
 					JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.factoring = 'A')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					lasku.tila = 'U' and
 					lasku.alatila = 'X' and
 					lasku.summa != 0 and
 					lasku.sisainen = '' and
-					lasku.factoringsiirtonumero = ''";
+					lasku.mapvm = '0000-00-00' and
+					lasku.factoringsiirtonumero = ''
+					order by laskunro";
 		$result = mysql_query ($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 
@@ -129,6 +131,19 @@
 
 			$edytunnus    = "";
 			$ulos         = "";
+
+			$ulos .= "\n";
+			$ulos .= sprintf("%-15.15s", "Y-tunnus");
+			$ulos .= sprintf("%-65.65s", "Yhteystiedot");
+			$ulos .= "\n";
+
+			$ulos .= sprintf("%-15.15s", "Laskunro");
+			$ulos .= sprintf("%-15.15s", "Tapvm");
+			$ulos .= sprintf("%-15.15s", "Erpvm");
+			$ulos .= sprintf("%20.20s",  "Summa");
+			$ulos .= sprintf("%4.4s",    "Val");
+			$ulos .= "\n--------------------------------------------------------------------------------";
+			$ulos .= "\n";
 
 			while ($laskurow = mysql_fetch_array($result)) {
 

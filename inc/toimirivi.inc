@@ -232,6 +232,20 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "automaatti_toimitus") {
+
+		$selo = $sels = "";
+		if ($trow[$i] == 'S') $sels = "selected";
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>Ei automaattitoimitusta</option>";
+		$ulos .= "<option value='S' $sels>Suoratoimitukset toimitetaan automaattisesti</option>";
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
+	
+	
 	if (mysql_field_name($result, $i) == "tyyppi") {
 
 		$selo = $sels = "";

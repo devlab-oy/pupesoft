@@ -34,8 +34,8 @@
 		require("taydentava_vientiilmo_atktietue.inc");
 
 		//laskujen tulostuksen funktiot
-		require('../pdflib/phppdflib.class.php');
-		require("tulosta_lasku.inc");
+		//require('../pdflib/phppdflib.class.php');
+		//require("tulosta_lasku.inc");
 
 		$query = "	SELECT *
 					FROM lasku
@@ -51,7 +51,7 @@
 		$laskuresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($laskuresult) == 0)  {
-			echo "".t("VIRHE: Aineisto on tyhj‰, t‰ydent‰v‰‰ vienti-ilmoitusta ei voida l‰hett‰‰")."!";
+			echo t("VIRHE: Aineisto on tyhj‰, t‰ydent‰v‰‰ vienti-ilmoitusta ei voida l‰hett‰‰")."!";
 			exit;
 		}
 
@@ -116,7 +116,7 @@
 
 			///* Laskun tietoja tarkistetaan*///
 			if ($laskurow["maa_maara"] == '') {
-				echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("M‰‰r‰maa puuttuu")."!<br>";
+				echo t("Laskunumero").": $laskurow[laskunro]. ".t("M‰‰r‰maa puuttuu")."!<br>";
 				$virhe++;
 			}
 			else {
@@ -126,28 +126,28 @@
 				$maaresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($maaresult) == 0) {
-					echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("M‰‰r‰maa on virheellinen")."!<br>";
+					echo t("Laskunumero").": $laskurow[laskunro]. ".t("M‰‰r‰maa on virheellinen")."!<br>";
 					$virhe++;
 				}
 			}
 
 			if ($laskurow["kauppatapahtuman_luonne"] == '') {
-			   	echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
+			   	echo t("Laskunumero").": $laskurow[laskunro]. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
 				$virhe++;
 			}
 
 			if ($laskurow["kuljetusmuoto"] == '') {
-			    echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Kuljetusmuoto puuttuu")."!<br>";
+			    echo t("Laskunumero").": $laskurow[laskunro]. ".t("Kuljetusmuoto puuttuu")."!<br>";
 				$virhe++;
 			}
 
 			if ($laskurow["sisamaan_kuljetus"] == '') {
-			    echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetus puuttuu")."!<br>";
+			    echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetus puuttuu")."!<br>";
 				$virhe++;
 			}
 
 			if ($laskurow["sisamaan_kuljetusmuoto"] == '') {
-			   	echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetusmuoto puuttuu")."!<br>";
+			   	echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetusmuoto puuttuu")."!<br>";
 				$virhe++;
 			}
 
@@ -162,18 +162,18 @@
 				$maaresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($maaresult) == 0) {
-					echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetuksen kansallisuus on virheellinen")."!<br>";
+					echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetuksen kansallisuus on virheellinen")."!<br>";
 					$virhe++;
 				}
 			}
 
 			if ($laskurow["kontti"] == '') {
-			    echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Konttitieto puuttuu")."!<br>";
+			    echo t("Laskunumero").": $laskurow[laskunro]. ".t("Konttitieto puuttuu")."!<br>";
 				$virhe++;
 			}
 
 			if ($laskurow["aktiivinen_kuljetus_kansallisuus"]  == '') {
-			   	echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Aktiivisen kuljetuksen kansallisuus puuttuu")."!<br>";
+			   	echo t("Laskunumero").": $laskurow[laskunro]. ".t("Aktiivisen kuljetuksen kansallisuus puuttuu")."!<br>";
 				$virhe++;
 			}
 			else {
@@ -183,28 +183,28 @@
 				$maaresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($maaresult) == 0) {
-					echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Aktiivisen kuljetuksen kansallisuus on virheellinen")."!<br>";
+					echo t("Laskunumero").": $laskurow[laskunro]. ".t("Aktiivisen kuljetuksen kansallisuus on virheellinen")."!<br>";
 					$virhe++;
 				}
 			}
 
 			if ($laskurow["poistumistoimipaikka_koodi"] == '') {
-			   	echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Poistumistoimipaikkakoodi puuttuu")."!<br>";
+			   	echo t("Laskunumero").": $laskurow[laskunro]. ".t("Poistumistoimipaikkakoodi puuttuu")."!<br>";
 				$virhe++;
 			}
 
 			if ($laskurow["bruttopaino"] == '') {
-			  	echo "".t("Laskunumero").": $laskurow[laskunro]. ".t("Bruttopaino puuttuu")."!<br>";
+			  	echo t("Laskunumero").": $laskurow[laskunro]. ".t("Bruttopaino puuttuu")."!<br>";
 				$virhe++;
 			}
 			///* Laskun tietojen tarkistus loppuu*///
 
 
 			///* katsotaan, ett‰ laskulla on rivej‰, hyvitysrivej‰ ei huolita mukaan vienti-ilmoitukseen, silloin er‰ hyl‰t‰‰n tullissa *///
-			$cquery = "	SELECT 
-						tuote.tullinimike1, 
-						tuote.tullinimike2, 
-						tuote.tullikohtelu,							
+			$cquery = "	SELECT
+						tuote.tullinimike1,
+						tuote.tullinimike2,
+						tuote.tullikohtelu,
 						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
 						if(sum(tilausrivi.rivihinta)>0,sum(tilausrivi.rivihinta),0.01) rivihinta
 						FROM tilausrivi use index (uusiotunnus_index)
@@ -213,7 +213,7 @@
 						WHERE tilausrivi.uusiotunnus 	= '$laskurow[tunnus]'
 						and tilausrivi.yhtio			= '$kukarow[yhtio]'
 						and tilausrivi.kpl 				> 0
-						GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";						
+						GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";
 			$cresult = mysql_query($cquery) or pupe_error($cquery);
 
 			if (mysql_num_rows($cresult) == 0) {
@@ -256,11 +256,11 @@
 
 						$pdf->draw_text(50,  810, $yhtiorow["nimi"], $firstpage);
 
-						$pdf->draw_text(50,  790, "".t("P‰iv‰m‰‰r‰").":", $firstpage);
+						$pdf->draw_text(50,  790, t("P‰iv‰m‰‰r‰").":", $firstpage);
 						$pdf->draw_text(150, 790, $tapvm, $firstpage);
-						$pdf->draw_text(50,  770, "".t("Laskunumerot").":", $firstpage);
+						$pdf->draw_text(50,  770, t("Laskunumerot").":", $firstpage);
 						$pdf->draw_text(150, 770, $csrow[0]."-".$csrow[1], $firstpage);
-						$pdf->draw_text(50,  750, "".t("Kappaleet").":", $firstpage);
+						$pdf->draw_text(50,  750, t("Kappaleet").":", $firstpage);
 						$pdf->draw_text(150, 750, $csrow[2], $firstpage);
 				}
 				$speclask++;
@@ -332,21 +332,21 @@
 				while($rahtirow = mysql_fetch_array($rahtiresult)) {
 					$kilot  += $rahtirow["kilot"];
 				}
-				
+
 
 				//Haetaan kaikki tilausrivit
-				$query = "	SELECT 							
+				$query = "	SELECT
 							tuote.tullinimike1,
 							tuote.tullinimike2,
 							tuote.tullikohtelu,
-							(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,							
+							(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
 							if(sum(tilausrivi.rivihinta)>0,sum(tilausrivi.rivihinta),0.01) rivihinta,
 							sum(tilausrivi.kpl) kpl,
-							round(sum((tilausrivi.rivihinta/$laskunarvo)*$kilot),0) nettop,																								
-							tullinimike.su, 
-							tullinimike.su_vientiilmo, 
+							round(sum((tilausrivi.rivihinta/$laskunarvo)*$kilot),0) nettop,
+							tullinimike.su,
+							tullinimike.su_vientiilmo,
 							tilausrivi.nimitys,
-							tilausrivi.tuoteno, 
+							tilausrivi.tuoteno,
 							tilausrivi.tunnus
 							FROM tilausrivi use index (uusiotunnus_index)
 							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
@@ -385,7 +385,7 @@
 				while($rivirow = mysql_fetch_array($riviresult)) {
 					//v‰h‰n tarkistuksia
 					if ($rivirow["tullinimike1"] == '') {
-						echo "".t("1. Rivin tunnus").":$rivirow[tunnus]. ".t("Tuoteno").": $rivirow[tuoteno]. ".t("Tullinimike puuttuu")."!<br>";
+						echo t("1. Rivin tunnus").":$rivirow[tunnus]. ".t("Tuoteno").": $rivirow[tuoteno]. ".t("Tullinimike puuttuu")."!<br>";
 						$virhe++;
 					}
 					else {
@@ -395,7 +395,7 @@
 						$cnresult = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($cnresult) != 1) {
-							echo "".t("1. Rivin tunnus").":$rivirow[tunnus]. ".t("Tuoteno").": $rivirow[tuoteno]. ".t("Tullinimike on virheellinen")."!<br>";
+							echo t("1. Rivin tunnus").":$rivirow[tunnus]. ".t("Tuoteno").": $rivirow[tuoteno]. ".t("Tullinimike on virheellinen")."!<br>";
 							$virhe++;
 						}
 
@@ -417,8 +417,8 @@
 
 
 					//laskun rivi
-					$row = $rivirow;
-					rivi($firstpage);
+					//$row = $rivirow;
+					//rivi($firstpage);
 
 					//tullausarvo lis‰erineen
 					$tullarvo = round(($rivirow["rivihinta"] / $laskunarvo * $extrat) + $rivirow["rivihinta"],2);
@@ -506,11 +506,11 @@
 		$csrow = mysql_fetch_array($csresult);
 
 		$pdf->draw_text(50,  810, $yhtiorow["nimi"], $firstpage);
-		$pdf->draw_text(50,  790, "".t("P‰iv‰m‰‰r‰").":", $firstpage);
+		$pdf->draw_text(50,  790, t("P‰iv‰m‰‰r‰").":", $firstpage);
 		$pdf->draw_text(150, 790, $tapvm, $firstpage);
-		$pdf->draw_text(50,  770, "".t("Laskunumerot").":", $firstpage);
+		$pdf->draw_text(50,  770, t("Laskunumerot").":", $firstpage);
 		$pdf->draw_text(150, 770, $csrow[0]."-".$csrow[1], $firstpage);
-		$pdf->draw_text(50,  750, "".t("Kappaleet").":", $firstpage);
+		$pdf->draw_text(50,  750, t("Kappaleet").":", $firstpage);
 		$pdf->draw_text(150, 750, $csrow[2], $firstpage);
 
 		*/
@@ -623,19 +623,19 @@
 		$content .= "\r\n" ;
 
 		$content .= "--$bound--\r\n";
-		
-		mail($kukarow["eposti"],  "".t("T‰ydent‰v‰ vienti-ilmoitus")."", $content, $header);
+
+		mail($kukarow["eposti"],  t("T‰ydent‰v‰ vienti-ilmoitus")."", $content, $header);
 
 
 		///* T‰ss‰ teh‰‰n t‰ydent‰v‰ ilmoitus s‰hkˆiseen muotoon *///
 		//PGP-encryptaus atklabeli
 		$label  = '';
-		$label .= "".t("l‰hett‰j‰").": $yhtiorow[nimi]\n";
-		$label .= "".t("sis‰ltˆ").": vientitullaus/sis‰kaupantilasto\n";
-		$label .= "".t("kieli").": ASCII\n";
-		$label .= "".t("jakso").": $alku - $loppu\n";
-		$label .= "".t("koko aineiston tietuem‰‰r‰").": $tietuemaara\n";
-		$label .= "".t("koko aineiston vienti-, verotus- tai laskutusarvo").": $laskutusarvo\n";
+		$label .= t("l‰hett‰j‰").": $yhtiorow[nimi]\n";
+		$label .= t("sis‰ltˆ").": vientitullaus/sis‰kaupantilasto\n";
+		$label .= t("kieli").": ASCII\n";
+		$label .= t("jakso").": $alku - $loppu\n";
+		$label .= t("koko aineiston tietuem‰‰r‰").": $tietuemaara\n";
+		$label .= t("koko aineiston vienti-, verotus- tai laskutusarvo").": $laskutusarvo\n";
 
 		$message = '';
 

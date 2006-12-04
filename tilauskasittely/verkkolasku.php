@@ -222,7 +222,7 @@
 
 
 		// lock tables
-		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ";
+		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ";
 		$locre = mysql_query($query) or pupe_error($query);
 
 		// haetaan kaikki tilaukset jotka on toimitettu ja kuuluu laskuttaa tänään (tätä resulttia käytetään alhaalla lisää)
@@ -682,19 +682,19 @@
 				$lasno = $lrow[0] + 1;
 
 				// Tutkitaan onko ketju Nordean factorinkia
-				$query  = "	SELECT maksuehto.factoring
-							FROM lasku, maksuehto
+				$query  = "	SELECT factoring.sopimusnumero
+							FROM lasku
+							JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='NORDEA'
+							JOIN factoring ON maksuehto.yhtio=factoring.yhtio and maksuehto.factoring=factoring.factoringyhtio and lasku.valkoodi=factoring.valkoodi
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
 							and lasku.tunnus in ($tunnukset)
-							and lasku.yhtio = maksuehto.yhtio
-							and lasku.maksuehto = maksuehto.tunnus
-							and maksuehto.factoring = 'N'
-							group by (maksuehto.factoring)";
-				$mkjres = mysql_query($query) or pupe_error($query);
+							GROUP BY factoring.sopimusnumero";
+				$fres = mysql_query($query) or pupe_error($query);
+				$frow = mysql_fetch_array($fres);
 
-				//Nordean viitenumero rakentuu hieman eri lailla ku normmalisti
-				if (mysql_num_rows($mkjres) == 1) {
-					$viite = $yhtiorow["factoringsopimus"]."0".sprintf('%08d', $lasno);
+				//Nordean viitenumero rakentuu hieman eri lailla ku normaalisti
+				if ($frow["sopimusnumero"] > 0) {
+					$viite = $frow["sopimusnumero"]."0".sprintf('%08d', $lasno);
 				}
 				else {
 					$viite = $lasno;
@@ -775,6 +775,17 @@
 				}
 				else {
 					$masrow = mysql_fetch_array($result);
+				}
+
+				//Haetaan factoringsopimuksen tiedot
+				if ($masrow["factoring"] != '') {
+					$query = "	SELECT *
+								FROM factoring
+								WHERE yhtio 		= '$kukarow[yhtio]'
+								and factoringyhtio 	= '$masrow[factoring]'
+								and valkoodi 		= '$lasrow[valkoodi]'";
+					$fres = mysql_query($query) or pupe_error($query);
+					$frow = mysql_fetch_array($fres);
 				}
 
 				// tässä pohditaan laitetaanko verkkolaskuputkeen
@@ -1140,12 +1151,12 @@
 							xml_add("SellerAccountID3", 				$yhtiorow['pankkitili3'],	$tootxml);
 						}
 						else {
-							xml_add("SellerAccountName1", 				$yhtiorow['factoring_pankkinimi1'],	$tootxml);
-							xml_add("SellerAccountID1", 				$yhtiorow['factoring_pankkitili1'],	$tootxml);
-							xml_add("SellerAccountName2", 				$yhtiorow['factoring_pankkinimi2'],	$tootxml);
-							xml_add("SellerAccountID2", 				$yhtiorow['factoring_pankkitili2'],	$tootxml);
-							xml_add("SellerAccountName3", 				$yhtiorow['factoring_pankkinimi3'],	$tootxml);
-							xml_add("SellerAccountID3", 				$yhtiorow['factoring_pankkitili3'],	$tootxml);
+							xml_add("SellerAccountName1", 				$frow['pankkinimi1'],		$tootxml);
+							xml_add("SellerAccountID1", 				$frow['pankkitili1'],		$tootxml);
+							xml_add("SellerAccountName2", 				$frow['pankkinimi2'],		$tootxml);
+							xml_add("SellerAccountID2", 				$frow['pankkitili2'],		$tootxml);
+							xml_add("SellerAccountName3", 				"",							$tootxml);
+							xml_add("SellerAccountID3", 				"",							$tootxml);
 						}
 
 						xml_add("SellerVatRegistrationText", 			t("Alv.Rek"), 		$tootxml);

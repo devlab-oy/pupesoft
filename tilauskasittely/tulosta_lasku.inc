@@ -447,33 +447,34 @@ if (!function_exists('loppu')) {
 
 	    if ($masrow["factoring"] != '') {
 			// jos factoroidaan tulostaan eri kentät
+			$query = "	SELECT *
+						FROM factoring
+						WHERE yhtio 		= '$kukarow[yhtio]'
+						and factoringyhtio 	= '$masrow[factoring]'
+						and valkoodi 		= '$laskurow[valkoodi]'";
+			$fres = mysql_query($query) or pupe_error($query);
+			$frow = mysql_fetch_array($fres);
 
 			if ($laskurow["vienti"] != "") {
 				// jos on vienti
-				$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),													$firstpage, $pieni);
-				$pdf->draw_text(30,  92, $yhtiorow["factoring_pankkinimi1"]."  ".$yhtiorow["factoring_pankkitili1"],	$firstpage, $norm);
-				$pdf->draw_text(217, 92, "IBAN: " .$yhtiorow["factoring_pankkiiban1"],									$firstpage, $norm);
-				$pdf->draw_text(404, 92, "SWIFT: ".$yhtiorow["factoring_pankkiswift1"],									$firstpage, $norm);
+				$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),						$firstpage, $pieni);
+				$pdf->draw_text(30,  92, $frow["pankkinimi1"]."  ".$frow["pankkitili1"],	$firstpage, $norm);
+				$pdf->draw_text(217, 92, "IBAN: " .$frow["pankkiiban1"],					$firstpage, $norm);
+				$pdf->draw_text(404, 92, "SWIFT: ".$frow["pankkiswift1"],					$firstpage, $norm);
 
-				$pdf->draw_text(30,  82, $yhtiorow["factoring_pankkinimi2"]."  ".$yhtiorow["factoring_pankkitili2"],	$firstpage, $norm);
-				$pdf->draw_text(217, 82, "IBAN: " .$yhtiorow["factoring_pankkiiban2"],									$firstpage, $norm);
-				$pdf->draw_text(404, 82, "SWIFT: ".$yhtiorow["factoring_pankkiswift2"],									$firstpage, $norm);
-
-				$pdf->draw_text(30,  72, $yhtiorow["factoring_pankkinimi3"]."  ".$yhtiorow["factoring_pankkitili3"],	$firstpage, $norm);
-				$pdf->draw_text(217, 72, "IBAN: " .$yhtiorow["factoring_pankkiiban3"],									$firstpage, $norm);
-				$pdf->draw_text(404, 72, "SWIFT: ".$yhtiorow["factoring_pankkiswift3"],									$firstpage, $norm);
+				$pdf->draw_text(30,  82, $frow["pankkinimi2"]."  ".$frow["pankkitili2"],	$firstpage, $norm);
+				$pdf->draw_text(217, 82, "IBAN: " .$frow["pankkiiban2"],					$firstpage, $norm);
+				$pdf->draw_text(404, 82, "SWIFT: ".$frow["pankkiswift2"],					$firstpage, $norm);
 			}
 			else {
 				// ja kotimaisissa tällästä
-				$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),														$firstpage, $pieni);
-	        	$pdf->draw_text(30, 72,  $yhtiorow["factoring_pankkinimi1"]." ".$yhtiorow["factoring_pankkitili1"],		$firstpage, $norm);
-	        	$pdf->draw_text(217, 72, $yhtiorow["factoring_pankkinimi2"]." ".$yhtiorow["factoring_pankkitili2"],		$firstpage, $norm);
-	        	$pdf->draw_text(404, 72, $yhtiorow["factoring_pankkinimi3"]." ".$yhtiorow["factoring_pankkitili3"],		$firstpage, $norm);
+				$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),							$firstpage, $pieni);
+	        	$pdf->draw_text(30, 72,  $frow["pankkinimi1"]." ".$frow["pankkitili1"],		$firstpage, $norm);
+	        	$pdf->draw_text(217, 72, $frow["pankkinimi2"]." ".$frow["pankkitili2"],		$firstpage, $norm);
 			}
 		}
 		else {
 			// ei factoroida niin normitiedot
-
 			if ($laskurow["vienti"] != "") {
 				// viennissä tällästä
 				$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),													$firstpage, $pieni);

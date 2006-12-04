@@ -49,30 +49,24 @@
 
 	if (mysql_field_name($result, $i) == "factoring") {
 
-		$sel1 = '';
-		$sel2 = '';
-		$sel3 = '';
+		$query = "	SELECT distinct factoringyhtio
+					FROM factoring
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY factoringyhtio";
+		$vresult = mysql_query($query) or pupe_error($query);
 
-		if (strtoupper($trow[$i]) == '') {
-			$sel1 = "SELECTED";
-		}
-		if (strtoupper($trow[$i]) == 'N') {
-			$sel2 = "SELECTED";
-		}
-		if (strtoupper($trow[$i]) == 'A') {
-			$sel3 = "SELECTED";
-		}
-		if (strtoupper($trow[$i]) == 'S') {
-			$sel4 = "SELECTED";
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Ei factoroida");
+
+		while ($vrow=mysql_fetch_row($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[0]";
 		}
 
-		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''  $sel1> ".t("Ei factoroida")."</option>";
-		$ulos .= "<option value='N' $sel2> ".t("Nordea Factoring")."</option>";
-		$ulos .= "<option value='A' $sel3> ".t("Sampo Factoring")."</option>";
-		$ulos .= "<option value='S' $sel4> ".t("SEB Factoring")."</option>";
 		$ulos .= "</select></td>";
-
 		$jatko = 0;
 	}
 

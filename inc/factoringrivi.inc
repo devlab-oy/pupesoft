@@ -11,12 +11,12 @@
 	if ((mysql_field_name($result, $i) == "teksti_fi") or
 		(mysql_field_name($result, $i) == "teksti_en") or
 		(mysql_field_name($result, $i) == "teksti_se")) {
-		$ulos = "<td><textarea cols='85' rows='8' name='$nimi'>$trow[$i]</textarea></td>";
+		$ulos = "<td><textarea cols='100' rows='8' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "factoringyhtio") {
-		
+
 		if (strtoupper($trow[$i]) == 'NORDEA') {
 			$sel2 = "SELECTED";
 		}
@@ -56,7 +56,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "pankki_tili") { //valuutta
 		$query = "	SELECT nimi, tilino
 	                FROM yriti
@@ -77,5 +77,5 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 ?>

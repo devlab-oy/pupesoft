@@ -102,9 +102,19 @@ $kassaale = round($summa*$mehtorow['kassa_alepros']/100,2);
 $lisa_comments 	= "";
 $lisa_viestit	= "";
 
-// Jos kyseess‰ on factoring niin laitetaan laskun kommenttiin talteen factorinc siirtoteksti jos sellainen on
-if (strtoupper($mehtorow["factoring"]) != "" and $yhtiorow["factoring_siirtoteksti"] != "") {
-	$lisa_comments .= $yhtiorow["factoring_siirtoteksti"]." \n";
+// Jos kyseess‰ on factoring niin laitetaan laskun kommenttiin talteen factoring siirtoteksti
+if (strtoupper($mehtorow["factoring"]) != "") {
+	$query = "	SELECT *
+				FROM factoring
+				WHERE yhtio 		= '$kukarow[yhtio]'
+				and factoringyhtio 	= '$mehtorow[factoring]'
+				and valkoodi 		= '$lasrow[valkoodi]'";
+	$fres = mysql_query($query) or pupe_error($query);
+
+	if(mysql_num_rows($fres) > 0) {
+		$frow = mysql_fetch_array($fres);
+		$lisa_comments .= $frow["teksti_fi"]." \n";
+	}
 }
 
 if ($lasrow["vienti"] == 'E') {
@@ -166,80 +176,79 @@ $viitetxt		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|%\r\n]", "", $viitetxt);
 
 
 // kirjotetaan kokonaan uusi lasku-olio laskusta.. helpottaa myyntireskontraa! tilaksi: U alatila: tyhj‰
-$query = "INSERT into lasku SET
-		aktiivinen_kuljetus 				= '$lasrow[aktiivinen_kuljetus]',
-		aktiivinen_kuljetus_kansallisuus	= '$lasrow[aktiivinen_kuljetus_kansallisuus]',
-		alv									= '$lasrow[alv]',
-		arvo								= '$arvo',
-		bruttopaino							= '$bruttopaino',
-		chn									= '$lasrow[chn]',
-		comments							= '$comments',
-		erikoisale							= '$lasrow[erikoisale]',
-		erpcm								= '$lasrow[erpcm]',
-		kapvm								= '$lasrow[kapvm]',
-		kasumma								= '$kassaale',
-		kate								= '$kate',
-		kauppatapahtuman_luonne			 	= '$lasrow[kauppatapahtuman_luonne]',
-		kerayspvm							= '$lasrow[kerayspvm]',
-		kontti								= '$lasrow[kontti]',
-		kuljetusmuoto						= '$lasrow[kuljetusmuoto]',
-		laatija								= '$lasrow[laatija]',
-		laskunro							= '$lasrow[laskunro]',
-		laskutettu							=  now(),
-		laskuttaja							= '$kukarow[kuka]',
-		laskutusvkopv						= '$lasrow[laskutusvkopv]',
-		lisattava_era 						= '$lasrow[lisattava_era]',
-		luontiaika							= '$lasrow[luontiaika]',
-		maa 								= '$lasrow[maa]',
-		maa_lahetys							= '$lasrow[maa_lahetys]',
-		maa_maara							= '$lasrow[maa_maara]',
-		maksaja								=  $maksaja,
-		maksuehto							= '$lasrow[maksuehto]',
-		mapvm								=  $maksupaiva,
-		myyja								= '$lasrow[myyja]',
-		nimi								= '$lasrow[nimi]',
-		nimitark							= '$lasrow[nimitark]',
-		osoite								= '$lasrow[osoite]',
-		ovttunnus							= '$lasrow[ovttunnus]',
-		poistumistoimipaikka 				= '$lasrow[poistumistoimipaikka]',
-		poistumistoimipaikka_koodi 			= '$lasrow[poistumistoimipaikka_koodi]',
-		postino								= '$lasrow[postino]',
-		postitp								= '$lasrow[postitp]',
-		sisainen							= '$lasrow[sisainen]',
-		sisamaan_kuljetus 					= '$lasrow[sisamaan_kuljetus]',
-		sisamaan_kuljetus_kansallisuus		= '$lasrow[sisamaan_kuljetus_kansallisuus]',
-		sisamaan_kuljetusmuoto 				= '$lasrow[sisamaan_kuljetusmuoto]',
-		summa								= '$summa',
-		tapvm								= '$lasrow[tapvm]',
-		tilausvahvistus						= '$lasrow[tilausvahvistus]',
-		toim_maa							= '$lasrow[toim_maa]',
-		toim_nimi							= '$lasrow[toim_nimi]',
-		toim_nimitark						= '$lasrow[toim_nimitark]',
-		toim_osoite							= '$lasrow[toim_osoite]',
-		toim_ovttunnus						= '$lasrow[toim_ovttunnus]',
-		toim_postino						= '$lasrow[toim_postino]',
-		toim_postitp						= '$lasrow[toim_postitp]',
-		toimaika							= '$lasrow[toimaika]',
-		toimitusehto						= '$lasrow[toimitusehto]',
-		kohdistettu							= '$lasrow[kohdistettu]',
-		toimitustapa						= '$lasrow[toimitustapa]',
-		tullausnumero						= '$lasrow[tullausnumero]',
-		vahennettava_era					= '$lasrow[vahennettava_era]',
-		valkoodi							= '$lasrow[valkoodi]',
-		vienti_kurssi						= '$lasrow[vienti_kurssi]',
-		verkkotunnus						= '$lasrow[verkkotunnus]',
-		vienti 								= '$lasrow[vienti]',
-		viesti								= '$viestit',
-		viikorkopros						= '$lasrow[viikorkopros]',
-		viite								= '$lasrow[viite]',
-		yhtio								= '$lasrow[yhtio]',
-		ytunnus								= '$lasrow[ytunnus]',
-		liitostunnus						= '$lasrow[liitostunnus]',
-		viitetxt							= '$viitetxt',
-		sisviesti1							= '$sisviestit1',
-		alatila								= '',
-		tila								= 'U'";
-
+$query = "	INSERT into lasku SET
+			aktiivinen_kuljetus 				= '$lasrow[aktiivinen_kuljetus]',
+			aktiivinen_kuljetus_kansallisuus	= '$lasrow[aktiivinen_kuljetus_kansallisuus]',
+			alv									= '$lasrow[alv]',
+			arvo								= '$arvo',
+			bruttopaino							= '$bruttopaino',
+			chn									= '$lasrow[chn]',
+			comments							= '$comments',
+			erikoisale							= '$lasrow[erikoisale]',
+			erpcm								= '$lasrow[erpcm]',
+			kapvm								= '$lasrow[kapvm]',
+			kasumma								= '$kassaale',
+			kate								= '$kate',
+			kauppatapahtuman_luonne			 	= '$lasrow[kauppatapahtuman_luonne]',
+			kerayspvm							= '$lasrow[kerayspvm]',
+			kontti								= '$lasrow[kontti]',
+			kuljetusmuoto						= '$lasrow[kuljetusmuoto]',
+			laatija								= '$lasrow[laatija]',
+			laskunro							= '$lasrow[laskunro]',
+			laskutettu							=  now(),
+			laskuttaja							= '$kukarow[kuka]',
+			laskutusvkopv						= '$lasrow[laskutusvkopv]',
+			lisattava_era 						= '$lasrow[lisattava_era]',
+			luontiaika							= '$lasrow[luontiaika]',
+			maa 								= '$lasrow[maa]',
+			maa_lahetys							= '$lasrow[maa_lahetys]',
+			maa_maara							= '$lasrow[maa_maara]',
+			maksaja								=  $maksaja,
+			maksuehto							= '$lasrow[maksuehto]',
+			mapvm								=  $maksupaiva,
+			myyja								= '$lasrow[myyja]',
+			nimi								= '$lasrow[nimi]',
+			nimitark							= '$lasrow[nimitark]',
+			osoite								= '$lasrow[osoite]',
+			ovttunnus							= '$lasrow[ovttunnus]',
+			poistumistoimipaikka 				= '$lasrow[poistumistoimipaikka]',
+			poistumistoimipaikka_koodi 			= '$lasrow[poistumistoimipaikka_koodi]',
+			postino								= '$lasrow[postino]',
+			postitp								= '$lasrow[postitp]',
+			sisainen							= '$lasrow[sisainen]',
+			sisamaan_kuljetus 					= '$lasrow[sisamaan_kuljetus]',
+			sisamaan_kuljetus_kansallisuus		= '$lasrow[sisamaan_kuljetus_kansallisuus]',
+			sisamaan_kuljetusmuoto 				= '$lasrow[sisamaan_kuljetusmuoto]',
+			summa								= '$summa',
+			tapvm								= '$lasrow[tapvm]',
+			tilausvahvistus						= '$lasrow[tilausvahvistus]',
+			toim_maa							= '$lasrow[toim_maa]',
+			toim_nimi							= '$lasrow[toim_nimi]',
+			toim_nimitark						= '$lasrow[toim_nimitark]',
+			toim_osoite							= '$lasrow[toim_osoite]',
+			toim_ovttunnus						= '$lasrow[toim_ovttunnus]',
+			toim_postino						= '$lasrow[toim_postino]',
+			toim_postitp						= '$lasrow[toim_postitp]',
+			toimaika							= '$lasrow[toimaika]',
+			toimitusehto						= '$lasrow[toimitusehto]',
+			kohdistettu							= '$lasrow[kohdistettu]',
+			toimitustapa						= '$lasrow[toimitustapa]',
+			tullausnumero						= '$lasrow[tullausnumero]',
+			vahennettava_era					= '$lasrow[vahennettava_era]',
+			valkoodi							= '$lasrow[valkoodi]',
+			vienti_kurssi						= '$lasrow[vienti_kurssi]',
+			verkkotunnus						= '$lasrow[verkkotunnus]',
+			vienti 								= '$lasrow[vienti]',
+			viesti								= '$viestit',
+			viikorkopros						= '$lasrow[viikorkopros]',
+			viite								= '$lasrow[viite]',
+			yhtio								= '$lasrow[yhtio]',
+			ytunnus								= '$lasrow[ytunnus]',
+			liitostunnus						= '$lasrow[liitostunnus]',
+			viitetxt							= '$viitetxt',
+			sisviesti1							= '$sisviestit1',
+			alatila								= '',
+			tila								= 'U'";
 $uusiotsikko = mysql_query($query) or pupe_error($query);
 
 // otetaan uuden otsikon tunnus talteen
@@ -333,9 +342,6 @@ if ($edtunnus != "") {
 		$paivres = mysql_query($query) or pupe_error($query);
 	}
 }
-
-
-
 
 // tehd‰‰n laskun tiliˆinnit.. tarvitaan $lasku array
 $lasku = $laskurow;

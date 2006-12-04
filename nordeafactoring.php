@@ -225,7 +225,7 @@
 				//luodaan ostajatietue
 				$ulos .= sprintf ('%-4.4s', 	"KRFL");										//sovellustunnus
 				$ulos .= sprintf ('%01.1s',	 	"1");											//tietuetunnus
-				$ulos .= sprintf ('%06.6s',	 	$frow["sopimusnumero"]]);						//sopimusnumero
+				$ulos .= sprintf ('%06.6s',	 	$frow["sopimusnumero"]);						//sopimusnumero
 				$ulos .= sprintf ('%06.6s',	 	$asirow["asiakasnro"]);							//ostajan numero aka asiakasnumero
 				$ulos .= sprintf ('%-4.4s', 	"");
 				$ulos .= sprintf ('%-10.10s', 	str_replace('-','',$laskurow["ytunnus"]));		//ostajan ytunnus

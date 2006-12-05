@@ -29,6 +29,9 @@
 	elseif ($toim == "EXTRANET") {
 		$otsikko = t("extranet-tilausta");
 	}
+	elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
+		$otsikko = t("osto-tilausta");
+	}
 
 	echo "<font class='head'>".t("Muokkaa")." $otsikko:<hr></font>";
 
@@ -55,6 +58,12 @@
 		$query = "	SELECT *
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='T' and alatila in ('','A') and tilaustyyppi='T'";
+		$eresult = mysql_query($query) or pupe_error($query);
+	}
+	elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila in ('','A')";
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
 	elseif (strtoupper($toim) == "ENNAKKO") {
@@ -110,6 +119,13 @@
 				$aputoim2 = "";
 				$lisa2 = "";
 			}
+			elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
+				$aputoim1 = "";
+				$lisa1 = t("Muokkaa");
+
+				$aputoim2 = "";
+				$lisa2 = "";
+			}
 			else {
 				$aputoim1 = $toim;
 				$aputoim2 = "";
@@ -118,10 +134,19 @@
 				$lisa2 = "";
 			}
 
+			
+			if ($toim == "OSTO" or $toim == "OSTOSUPER") {
+				echo "<form method='post' action='tilauskasittely/tilaus_osto.php'>";
+			}
+			else {
+				echo "<form method='post' action='tilauskasittely/tilaus_myynti.php'>";	
+			}
+			
+			echo "	<input type='hidden' name='toim' value='$aputoim1'>
+					<input type='hidden' name='tee' value='AKTIVOI'>";
+
 			echo "<table>
-					<tr><form method='post' action='tilauskasittely/tilaus_myynti.php'>
-					<input type='hidden' name='toim' value='$aputoim1'>
-					<input type='hidden' name='tee' value='AKTIVOI'>
+					<tr>
 					<th>".t("Kesken olevat tilauksesi").":</th>
 					<td class='back'><select name='tilausnumero'>";
 
@@ -141,9 +166,7 @@
 			}
 
 			echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
-			echo "</form>
-					</tr>
-					</table>";
+			echo "</tr></table></form>";
 		}
 		else {
 			echo t("Sinulla ei ole aktiivisia eik‰ kesken olevia tilauksia").".<br>";
@@ -170,10 +193,11 @@
 	if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%')";
 
 	// Etsit‰‰n muutettavaa tilausta
-	if ($toim=='super') {
+	if ($toim == 'super') {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika, laatija, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila in ('L', 'N') and alatila in ('a','b','c','d','e','j','e','t','') $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila in ('L', 'N') and alatila in ('a','b','c','d','e','j','e','t','') 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
 
@@ -189,137 +213,127 @@
 		$sumrow = mysql_fetch_array($sumresult);
 
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
-	elseif ($toim=='ennakko') {
+	elseif ($toim == 'ennakko') {
 		$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, luontiaika, lasku.laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index), tilausrivi
 					WHERE lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-					and lasku.yhtio = '$kukarow[yhtio]' and tila='E' and tilausrivi.tyyppi = 'E' $haku
+					and lasku.yhtio = '$kukarow[yhtio]' and tila='E' and tilausrivi.tyyppi = 'E' 
+					$haku
 					GROUP BY lasku.tunnus
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "SIIRTOLISTA") {
 		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and alatila in ('','A','B','J') $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and alatila in ('','A','B','J') 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "MYYNTITILI") {
 		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and tilaustyyppi = 'M' and alatila in ('','A','B','J') $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and tilaustyyppi = 'M' and alatila in ('','A','B','J') 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "SIIRTOLISTASUPER") {
 		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and alatila in ('','A','B','C','J','T') $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and alatila in ('','A','B','C','J','T') 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "MYYNTITILISUPER") {
 		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and tilaustyyppi = 'M' and alatila in ('','A','B','C','J') $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and tilaustyyppi = 'M' and alatila in ('','A','B','C','J') 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "MYYNTITILITOIMITA") {
 		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and tilaustyyppi = 'M' and alatila = 'V' $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and tilaustyyppi = 'M' and alatila = 'V' 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim=='VALMISTUS') {
 		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, luontiaika, laatija, viesti tilausviite, alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='V' and alatila in ('','A','B','J') $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='V' and alatila in ('','A','B','J') 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 3;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "VALMISTUSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, luontiaika, laatija, viesti tilausviite, alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='V' and alatila in ('','A','B','C','J') $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='V' and alatila in ('','A','B','C','J') 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 3;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "TYOMAARAYS") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika, laatija, alatila, tila
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tila in ('A','L','N') and tilaustyyppi='A' and alatila in ('','A','B','C','J') $haku
+					WHERE yhtio = '$kukarow[yhtio]' and tila in ('A','L','N') and tilaustyyppi='A' and alatila in ('','A','B','C','J') 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
 
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "TYOMAARAYSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika, laatija, alatila, tila
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tila in ('A','L','N') and alatila in ('','A','B','C','J') and tilaustyyppi='A' $haku
+					WHERE yhtio = '$kukarow[yhtio]' and tila in ('A','L','N') and alatila in ('','A','B','C','J') and tilaustyyppi='A' 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
-
 	elseif ($toim == "TARJOUS") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika,
 					if(date_add(luontiaika, interval 14 day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
 					DATEDIFF(luontiaika, date_sub(now(), INTERVAL 14 day)) pva,
 					laatija, alatila, tila
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A') $haku
+					WHERE yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A') 
+					$haku
 					ORDER BY tunnus desc
 					LIMIT 50";
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "TARJOUSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika, laatija, alatila, tila
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('A','','X') $haku
+					WHERE yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('A','','X') 
+					$haku
 					order by luontiaika desc
 					LIMIT 50";
 
 		$miinus = 2;
-		//HUOMATKAA LIMITTI!
 	}
 	elseif ($toim == "EXTRANET") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika, laatija, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'N' and alatila = 'F' $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'N' and alatila = 'F' 
+					$haku
 					order by luontiaika desc";
 
 		$miinus = 2;
@@ -328,22 +342,46 @@
 		$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, luontiaika, laatija, alatila, tila
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila in ('N','L') and alatila != 'X' $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila in ('N','L') and alatila != 'X' 
+					$haku
 					order by luontiaika desc";
 
+		$miinus = 2;
+	}	
+	elseif ($toim == 'OSTOSUPER') {
+		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila
+					FROM lasku use index (tila_index), tilausrivi use index (yhtio_otunnus)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'O'
+					and lasku.alatila != ''
+					and tilausrivi.yhtio = lasku.yhtio
+					and tilausrivi.otunnus = lasku.tunnus
+					and tilausrivi.uusiotunnus = 0
+					$haku
+					GROUP by 1
+					ORDER by luontiaika desc
+					LIMIT 50";
+		$miinus = 2;
+	}
+	elseif ($toim == 'OSTO') {
+		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila
+					FROM lasku use index (tila_index)
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='O' and alatila='' 
+					$haku
+					ORDER by luontiaika desc
+					LIMIT 50";
 		$miinus = 2;
 	}
 	else {
 		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila, kuka.extranet extra
 					FROM lasku use index (tila_index)
 					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in('L','N') and lasku.alatila in('A','') $haku
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in('L','N') and lasku.alatila in('A','') 
+					$haku
 					HAVING extra = '' or extra is null
 					order by luontiaika desc
 					LIMIT 50";
-
 		$miinus = 3;
-		//HUOMATKAA LIMITTI!
 	}
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -418,6 +456,13 @@
 					$aputoim2 = "";
 					$lisa2 = "";
 				}
+				elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
+					$aputoim1 = "";
+					$lisa1 = t("Muokkaa");
+
+					$aputoim2 = "";
+					$lisa2 = "";
+				}
 				else {
 					$aputoim1 = $toim;
 					$aputoim2 = "";
@@ -426,8 +471,14 @@
 					$lisa2 = "";
 				}
 
-				echo "	<form method='post' action='tilauskasittely/tilaus_myynti.php'>
-						<input type='hidden' name='toim' value='$aputoim1'>
+				if ($toim == "OSTO" or $toim == "OSTOSUPER") {
+					echo "<form method='post' action='tilauskasittely/tilaus_osto.php'>";
+				}
+				else {
+					echo "<form method='post' action='tilauskasittely/tilaus_myynti.php'>";	
+				}
+				
+				echo "	<input type='hidden' name='toim' value='$aputoim1'>
 						<input type='hidden' name='tee' value='AKTIVOI'>
 						<input type='hidden' name='tilausnumero' value='$row[tilaus]'>";
 

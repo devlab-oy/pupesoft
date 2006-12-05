@@ -4,24 +4,25 @@
 	// $rivinumero kentässä on joko tilaajan rivinumero tai konserninsisäisissä kaupoissa sisäinen toimittajanumero
 	// kukarow[kesken] --> jossa on käyttäjällä keskenoleva tilausnumero
 
-	// $kpl 			--> jossa on tilattu kappalemäärä
-	// $tuoteno 		--> jossa on tilattava tuotenumero
-	// $toimaika		--> arvioitu toimitusaika
-	// $kerayspvm		--> toivottu keräysaika
-	// $hinta 			--> käyttäjän syöttämä hinta
-	// $netto 			--> käyttäjän syöttämä netto
-	// $ale 			--> käyttäjän syöttämä ale
-	// $var 			--> H,J,P varrit
-	// $varasto 		--> myydään vain tästä varastosta
-	// $paikka 			--> myydään vain tältä paikalta
-	// $rivitunnus		--> tietokannan tunnus jolle rivi lisätään
-	// $korvaavakielto	--> Jos erisuuri kuin tyhjä niin ei myydä korvaavia
-	// $perhekielto     --> Jos erisuuri kuin tyhjä niin ei etsitä ollenkaan perheitä
-	// $varataan_saldoa --> Jos == EI niin ei varata saldoa (tietyissä keisseissä), tai siis ei ainakan tehdä saldotsekkiä
-	// $kutsuja			--> Kuka tätä skriptiä kutsuu
-	// $myy_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
-	// $jaksotettu		--> Kuuluuko tilausrivi mukaan jaksotukseen
-	// $perheid2		--> Lisävarusteryhmän perheid
+	// $kpl 			 --> jossa on tilattu kappalemäärä
+	// $tuoteno 		 --> jossa on tilattava tuotenumero
+	// $toimaika		 --> arvioitu toimitusaika
+	// $kerayspvm		 --> toivottu keräysaika
+	// $hinta 			 --> käyttäjän syöttämä hinta
+	// $netto 			 --> käyttäjän syöttämä netto
+	// $ale 			 --> käyttäjän syöttämä ale
+	// $var 			 --> H,J,P varrit
+	// $varasto 		 --> myydään vain tästä varastosta
+	// $paikka 			 --> myydään vain tältä paikalta
+	// $rivitunnus		 --> tietokannan tunnus jolle rivi lisätään
+	// $korvaavakielto	 --> Jos erisuuri kuin tyhjä niin ei myydä korvaavia
+	// $perhekielto      --> Jos erisuuri kuin tyhjä niin ei etsitä ollenkaan perheitä
+	// $varataan_saldoa  --> Jos == EI niin ei varata saldoa (tietyissä keisseissä), tai siis ei ainakan tehdä saldotsekkiä
+	// $kutsuja			 --> Kuka tätä skriptiä kutsuu
+	// $myy_sarjatunnus  --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+	// $osto_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+	// $jaksotettu		 --> Kuuluuko tilausrivi mukaan jaksotukseen
+	// $perheid2		 --> Lisävarusteryhmän perheid
 
 	//palauttaa arrayn $lisatyt_rivit jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi
 
@@ -995,13 +996,17 @@
 				// lapsille oikea perheid
 				$perheid_lisaarivi = $lisatty_tun;
 
-				if ($varattu+$jt != 0 and $myy_sarjatunnus > 0 and $trow["tuoteno"] == $alkupera_trow["tuoteno"]) {
+				if ($varattu+$jt != 0 and ($myy_sarjatunnus > 0 or $osto_sarjatunnus > 0) and $trow["tuoteno"] == $alkupera_trow["tuoteno"]) {
 
-					if ($varattu+$jt > 0) {
-						$tunken = "myyntirivitunnus";
+					if ($osto_sarjatunnus > 0 or $varattu+$jt < 0) {
+						$tunken = "ostorivitunnus";
+						
+						if ($osto_sarjatunnus > 0) {
+							$myy_sarjatunnus = $osto_sarjatunnus;
+						}
 					}
 					else {
-						$tunken = "ostorivitunnus";
+						$tunken = "myyntirivitunnus";
 					}
 
 					$query = "	SELECT *
@@ -1030,7 +1035,9 @@
 									and $tunken 		 = 0";
 					}
 					$sres = mysql_query($query) or pupe_error($query);
-					$myy_sarjatunnus = 0;
+
+					$osto_sarjatunnus = 0;
+					$myy_sarjatunnus  = 0;
 				}
 			}
 

@@ -232,9 +232,12 @@
 
 		// Olemassaolevaa rivi‰ muutetaan, joten poistetaan se ja annetaan perustettavaksi
 		if ($tee == 'PV') {
-			$query = "	SELECT *
-						FROM tilausrivi
-						WHERE tunnus = '$rivitunnus' and yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+			$query = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta
+						FROM tilausrivi use index (PRIMARY)
+						LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+						WHERE tilausrivi.tunnus = '$rivitunnus' 
+						and tilausrivi.yhtio	= '$kukarow[yhtio]' 
+						and tilausrivi.otunnus	= '$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 0) {
@@ -248,6 +251,22 @@
 						WHERE tunnus = '$rivitunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 
+			
+			// Tehd‰‰n pari juttua jos tuote on sarjanuerosaurannassa
+			if($tilausrivirow["sarjanumeroseuranta"] != '') {
+				//Nollataan sarjanumero
+				$query = "SELECT tunnus FROM sarjanumeroseuranta WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivirow[tuoteno]' and ostorivitunnus='$tilausrivirow[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjarow = mysql_fetch_array($sarjares);
+
+				//Pidet‰‰n sarjatunnus muistissa
+				$osto_sarjatunnus = $sarjarow["tunnus"];
+
+				$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivirow[tuoteno]' and ostorivitunnus='$tilausrivirow[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}
+			
+			
 			$hinta 			= $tilausrivirow["hinta"];
 			$tuoteno 		= $tilausrivirow["tuoteno"];
 			$kpl 			= $tilausrivirow["tilkpl"];
@@ -264,7 +283,7 @@
 
 		// Tyhjennet‰‰n tilausrivikent‰t n‰ytˆll‰
 		if ($tee == 'TY') {
-			$tee 		= "Y";
+			$tee 				= "Y";
 			$tuoteno			= '';
 			$perheid 			= '';
 			$perheid2 			= '';
@@ -279,7 +298,8 @@
 			$alv				= '';
 			$paikka 			= '';
 			$paikat				= '';
-			$kommentti	= '';
+			$osto_sarjatunnus	= '';
+			$kommentti			= '';
 
 		}
 
@@ -509,7 +529,7 @@
 			$query = "	SELECT tilausrivi.nimitys, concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 						tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu',
 						round((varattu+jt)*tilausrivi.hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),2) rivihinta,
-						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale,
+						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale, tilausrivi.varattu varattukpl,
 						if(tilausrivi.perheid2=0, tilausrivi.tunnus, tilausrivi.perheid2) as sorttauskentta,
 						tilausrivi.var
 						FROM tilausrivi
@@ -574,7 +594,18 @@
 					echo "<td><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a>";
 
 					if ($sarjarow["sarjanumeroseuranta"] != "") {
-						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto'>sarjanro</a>)";
+						$query = "	select count(*) kpl 
+									from sarjanumeroseuranta 
+									where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]' and ostorivitunnus='$prow[tunnus]'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+						$sarjarow = mysql_fetch_array($sarjares);
+
+						if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto' style='color:00FF00'>sarjanro OK</font></a>)";
+						}
+						else {
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto'>sarjanro</a>)";
+						}						
 					}
 
 					echo "</td>";

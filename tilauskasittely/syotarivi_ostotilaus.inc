@@ -31,6 +31,7 @@
 			<input type='hidden' name='otunnus' value = '$otunnus'>
 			<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
 			<input type='hidden' name='rivinotunnus' value = '$rivinotunnus'>
+			<input type='hidden' name='osto_sarjatunnus' value = '$osto_sarjatunnus'>
 			<input type='hidden' name='rivinvar' value = '$var'>";
 
 	if($ulos != '') { // Nyt me selataan

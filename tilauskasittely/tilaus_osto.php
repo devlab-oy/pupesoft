@@ -74,9 +74,22 @@
 
 		if ($tee == 'poista') {
 			// poistetaan tilausrivit, mutta jätetään PUUTE rivit analyysejä varten...
-			$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
+			$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 
+			//Nollataan sarjanumerolinkit
+			$query    = "	SELECT tilausrivi.tunnus
+							FROM tilausrivi
+							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.otunnus = '$kukarow[kesken]'";
+			$sres = mysql_query($query) or pupe_error($query);
+
+			while($srow = mysql_fetch_array($sres)) {
+				$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and ostorivitunnus='$srow[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}
+			
 			$query = "UPDATE lasku SET tila='D', alatila='$laskurow[tila]', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 

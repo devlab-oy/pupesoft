@@ -12,12 +12,12 @@
 			$kukarow['kesken'] 	= 0;
 			$tilausnumero 		= 0;
 		}
-
-		//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
-		if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-			echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
-			exit;
-		}
+	}
+	
+	//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
+	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
+		echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+		exit;
 	}
 
 	// Halutaan vaihtaa asiakas tilauksella

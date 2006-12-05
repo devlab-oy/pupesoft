@@ -20,17 +20,18 @@ if (($kukarow["extranet"] != '' and $toim != 'EXTRANET') or ($kukarow["extranet"
 }
 
 // aktivoidaan saatu id
-if ($tee=='AKTIVOI') {
+if ($tee == 'AKTIVOI') {
 	// katsotaan onko muilla aktiivisena
 	$query = "select * from kuka where yhtio='$kukarow[yhtio]' and kesken='$tilausnumero' and kesken!=0";
 	$result = mysql_query($query) or pupe_error($query);
 
-	$row="";
+	unset($row);
+	
 	if (mysql_num_rows($result) != 0) {
 		$row=mysql_fetch_array($result);
 	}
 
-	if (($row!="") and ($row['kuka']!=$kukarow['kuka'])) {
+	if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
 		echo "<font class='error'>".t("Tilaus on aktiivisena käyttäjällä")." $row[nimi]. ".t("Tilausta ei voi tällä hetkellä muokata").".</font><br>";
 
 		// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli

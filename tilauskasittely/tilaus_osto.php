@@ -1,44 +1,76 @@
 <?php
 
 	require('../inc/parametrit.inc');
+	
+	// jos ei olla postattu mitään, niin halutaan varmaan tehdä kokonaan uusi tilaus..
+	if (count($_POST) == 0) {
+		$tila				= '';
+		$tilausnumero		= '';
+		$laskurow			= '';
+		$kukarow["kesken"]	= '';
 
-	if ($tee == "") {
-		require("otsik_ostotilaus.inc");
+		//varmistellaan ettei vanhat kummittele...
+		$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+		$result = mysql_query($query) or pupe_error($query);
 	}
-	if ($tee != "") {
-		if ($aktivoinnista == "true") {
-			$query = "UPDATE kuka SET kesken='$tilausnumero' WHERE session='$session'";
+
+	if ($tee == 'AKTIVOI') {
+		// katsotaan onko muilla aktiivisena
+		$query = "select * from kuka where yhtio='$kukarow[yhtio]' and kesken='$tilausnumero' and kesken!=0";
+		$result = mysql_query($query) or pupe_error($query);
+
+		unset($row);
+		
+		if (mysql_num_rows($result) != 0) {
+			$row=mysql_fetch_array($result);
+		}
+
+		if (isset($row) and $row['kuka'] != $kukarow['kuka']) {
+			echo "<font class='error'>".t("Tilaus on aktiivisena käyttäjällä")." $row[nimi]. ".t("Tilausta ei voi tällä hetkellä muokata").".</font><br>";
+
+			// poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
+			$query = "update kuka set kesken='' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$kukarow["kesken"] = $tilausnumero;
+			exit;
 		}
+		else {
+			$query = "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$result = mysql_query($query) or pupe_error($query);
 
-		if ($kukarow["kesken"] == '' or $kukarow["kesken"] == 0) {
-			die(t("Sä et saa muuttaa rivejä jos sulla ei ole tilausta kesken")."");
+			$kukarow['kesken'] 	 = $tilausnumero;
+			$tee = "Y";
 		}
-
-		//katsotaan että kukarow kesken ja $tilausnumero stemmaavat keskenään
-		if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
+	}
+	
+	if ($tee != "") {
+		//katsotaan että kukarow kesken ja $kukarow[kesken] stemmaavat keskenään
+		if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 			echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("Käy aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
 			exit;
 		}
-
 		if ($kukarow['kesken'] != '0') {
-			$tilausnumero = $kukarow['kesken'];
+			$tilausnumero=$kukarow['kesken'];
 		}
+	}
+	
+	if ((int) $kukarow['kesken'] == 0 or $tee == "MUUOTAOSTIKKOA") {
+		require("otsik_ostotilaus.inc");
+	}
+		
+	if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
+		// Hateaan tilauksen tiedot
+		$query = "	SELECT *
+					FROM lasku
+					WHERE tunnus = '$kukarow[kesken]'";
+		$aresult = mysql_query($query) or pupe_error($query);
 
-		if ($tee != '') {
-			$query = "	SELECT *
-						FROM lasku
-						WHERE tunnus = '$kukarow[kesken]'";
-			$aresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($aresult) == 0) {
-				echo "<font class='message'>".t("VIRHE: Tilausta ei löydy")."!<br><br></font>";
-				exit;
-			}
-			$laskurow = mysql_fetch_array($aresult);
+		if (mysql_num_rows($aresult) == 0) {
+			echo "<font class='message'>".t("VIRHE: Tilausta ei löydy")."!<br><br></font>";
+			exit;
 		}
+		$laskurow = mysql_fetch_array($aresult);
+		
 
 		if ($tee == 'poista') {
 			// poistetaan tilausrivit, mutta jätetään PUUTE rivit analyysejä varten...
@@ -193,6 +225,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			$kukarow["kesken"] 	= '';
+			$tilausnumero 		= 0;
 			$tee 				= '';
 		}
 
@@ -415,6 +448,7 @@
 				<td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]</td>";
 			echo "<form action = 'tilaus_osto.php' method='post'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+				<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>
 				<input type='hidden' name='tila' value='Muuta'>
 				<td class='back'><input type='Submit' value='".t("Muuta otsikkoa")."'></td></form></tr>";
 

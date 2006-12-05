@@ -2037,9 +2037,9 @@ if ($tee == '') {
 				}
 
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "	<td $class align='right' valign='top'>".sprintf('%.2f',$kate)."</td>";
+					echo "	<td $class align='right' valign='top' nowrap>".sprintf('%.2f',100*$kate/$summa_alviton)."%</td>";
 				}
-
+				
 				echo "	<td $class align='right' valign='top'>$row[alv]</td>";
 
 				if ($muokkauslukko == "") {
@@ -2263,7 +2263,7 @@ if ($tee == '') {
 					<td class='spec' align='right'>".sprintf("%.2f",$arvo_kotimaa)."</td>";
 
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<td class='spec' align='right'>".sprintf("%.2f",$kate_kotimaa)."</td>";
+					echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kotimaa/$arvo_kotimaa)."%</td>";
 				}
 
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -2274,7 +2274,7 @@ if ($tee == '') {
 					<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa)."</td>";
 
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<td class='spec' align='right'>".sprintf("%.2f",$kate_ulkomaa)."</td>";
+					echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_ulkomaa/$arvo_ulkomaa)."%</td>";
 				}
 
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -2286,7 +2286,7 @@ if ($tee == '') {
 				<td class='spec' align='right'>".sprintf("%.2f",$arvo)."</td>";
 
 			if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-				echo "<td class='spec' align='right'>".sprintf("%.2f",$kate)."</td>";
+				echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate/$arvo)."%</td>";
 			}
 
 			echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -2333,7 +2333,7 @@ if ($tee == '') {
 						<td class='spec' align='right'>".sprintf("%.2f",$apu2)."</td>";
 
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<td class='spec' align='right'>".sprintf("%.2f",$veroton_apu2)."</td>";
+					echo "<td class='spec' align='right'></td>";
 				}
 
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -2356,7 +2356,7 @@ if ($tee == '') {
 						<td class='spec' align='right'>".sprintf("%.2f",$kotimaa_kaikkiyhteensa)."</td>";
 
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td class='spec' align='right'>".sprintf("%.2f",$kate_kotimaa_kaikkiyhteensa)."</td>";
+						echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kotimaa_kaikkiyhteensa/$kotimaa_kaikkiyhteensa)."%</td>";
 					}
 
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -2367,7 +2367,7 @@ if ($tee == '') {
 						<td class='spec' align='right'>".sprintf("%.2f",$ulkomaa_kaikkiyhteensa)."</td>";
 
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td class='spec' align='right'>".sprintf("%.2f",$kate_ulkomaa_kaikkiyhteensa)."</td>";
+						echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_ulkomaa_kaikkiyhteensa/$ulkomaa_kaikkiyhteensa)."%</td>";
 					}
 
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -2379,7 +2379,7 @@ if ($tee == '') {
 					<td class='spec' align='right'>".sprintf("%.2f",$kaikkiyhteensa)."</td>";
 
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<td class='spec' align='right'>".sprintf("%.2f",$kate_kaikkiyhteensa)."</td>";
+					echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kaikkiyhteensa/$kaikkiyhteensa)."%</td>";
 				}
 
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";

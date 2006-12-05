@@ -64,6 +64,8 @@ if (($monta>1) and ($monta<=$limit)) {
 
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittaja[tunnus]'>";
+		echo "<input type='hidden' name='tee' value='$tee'>";
+		echo "<input type='hidden' name='tila' value='$tila'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";

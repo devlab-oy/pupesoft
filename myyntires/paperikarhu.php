@@ -97,8 +97,8 @@
 			$pdf->draw_text(80,  610, t("Pyydämme ystävällisesti suoritustanne viikon kuluessa.", $kieli),						$firstpage, $norm);
 			$pdf->draw_text(80,  600, t("Muussa tapauksessa katsomme teidän suostuvan siihen, että", $kieli),		$firstpage, $norm);
 			$pdf->draw_text(80,  590, t("voimme periä saatavamme perimiskuluineen Lakimiesten Perintätoimiston kautta ja", $kieli),			$firstpage, $boldi);
-			$pdf->draw_text(80,  580, t("siirretään teidät jälkivaatimusasiakkaaksi.", $kieli),			$firstpage, $norm);
-			$pdf->draw_text(80,  560, t("Jos suorituksenne on jo matkalla, on tämä kirje aiheeton.", $kieli),					$firstpage, $boldi);
+			$pdf->draw_text(80,  580, t("siirtämään teidät jälkivaatimusasiakkaaksi.", $kieli),			$firstpage, $boldi);
+			$pdf->draw_text(80,  560, t("Jos suorituksenne on jo matkalla, on tämä kirje aiheeton.", $kieli),					$firstpage, $norm);
 			$pdf->draw_text(80,  540, t("Yhteyshenkilömme", $kieli).": $yrow[nimi] / $yrow[puhno]",							$firstpage, $norm);	
 		}
 		else {

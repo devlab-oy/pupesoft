@@ -38,7 +38,7 @@
 					laatija = '$kukarow[kuka]',
 					laadittu = now()";
 	$result = mysql_query($query) or pupe_error($query);
-	$isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
+	$isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
 
 	if ($vero != 0) { // Tiliöidään alv
 	        $query = "INSERT into tiliointi set

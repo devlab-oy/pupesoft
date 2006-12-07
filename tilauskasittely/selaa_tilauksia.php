@@ -52,8 +52,8 @@
 		$query1 = "	SELECT DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
 					count(distinct lasku.tunnus) tilauksia,
 					count(distinct tilausrivi.tunnus) riveja,
-					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) summa,
-					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
+					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)),2) summa,
+					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -66,8 +66,8 @@
 
 		// päivänäkymä
 		$query2 = "	SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
-					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) summa,
-					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
+					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)),2) summa,
+					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -80,8 +80,8 @@
 
 		// tilausnäkymä
 		$query3 = "	SELECT otunnus tunnus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta, ale, erikoisale, tilausrivi.alv,
-					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl),2) summa,
-					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1),2) arvo
+					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl),2) summa,
+					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1),2) arvo
 					FROM tilausrivi use index (yhtio_otunnus)
 					JOIN lasku on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and

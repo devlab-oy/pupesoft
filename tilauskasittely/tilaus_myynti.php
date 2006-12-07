@@ -911,6 +911,14 @@ if ($tee == '') {
 
 		echo "</tr></table><br>\n";
 	}
+	
+	//Oletetaan, että tilaus on ok, $tilausok muuttujaa summataan alempana jos jotain virheitä ilmenee
+	$tilausok = 0;
+	
+	if ($laskurow["liitostunnus"] > 0 and ($laskurow["nimi"] == '' or $laskurow["osoite"] == '' or $laskurow["postino"] == '' or $laskurow["postitp"] == '')) {
+		echo "<font class='error'>".t("VIRHE: Tilauksen laskutusosoitteen tiedot ovat puutteelliset")."!</font><br><br>";
+		$tilausok++;
+	}
 
 	// kirjoitellaan otsikko
 	echo "<table>";
@@ -1592,10 +1600,8 @@ if ($tee == '') {
 					and tilausrivi.tyyppi in ($tilrivity)
 					$order";
 		$result = mysql_query($query) or pupe_error($query);
-
-		//Oletetaan, että tilaus on ok, $tilausok muuttujaa summataan alempana jos jotain virheitä ilmenee
-		$tilausok 		= 0;
-		$rivilaskuri 	= mysql_num_rows($result);
+		
+		$rivilaskuri = mysql_num_rows($result);
 
 		if ($rivilaskuri != 0) {
 			$rivino = $rivilaskuri+1;

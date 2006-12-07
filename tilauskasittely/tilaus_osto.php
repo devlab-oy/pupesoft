@@ -479,6 +479,7 @@
 			echo "<tr><th>".t("Ytunnus")."</th><th colspan='2'>".t("Toimittaja")."</th></tr>";
 			echo "<tr><td>$laskurow[ytunnus]</td>
 				<td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]</td>";
+			
 			echo "<form action = 'tilaus_osto.php' method='post'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>
@@ -597,8 +598,6 @@
 
 					echo "<td class='$class'>$prow[nimitys]</td>";
 					echo "<td class='$class'>$prow[paikka]</td>";
-
-
 
 					$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
@@ -754,8 +753,7 @@
 		if ($tee == "") {
 			require("otsik_ostotilaus.inc");
 		}
-
 	}
 
-	require "../inc/footer.inc";
+	require("../inc/footer.inc");
 ?>

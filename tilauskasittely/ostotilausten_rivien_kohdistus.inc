@@ -108,6 +108,7 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TY' and $tee != 'TI') {
 	$automatiikka = 'ON';
 
 	require('syotarivi_ostotilaus.inc');
+	require('../inc/footer.inc');
 	exit;
 }
 

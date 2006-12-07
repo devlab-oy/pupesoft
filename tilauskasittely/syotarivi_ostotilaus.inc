@@ -14,12 +14,6 @@
 			<td class='back'></td>
 			</tr>";
 
-	// Kursorinohjausta
-	$formi='rivi';
-	if ($kentta == '') {
-		$kentta='tuoteno';
-	}
-
 	// Syötetään rivi
 	echo "	<tr><form name='rivi' action = '$PHP_SELF#$rivitunnus' method='post' autocomplete='off'>
 			<input type='hidden' name='toiminto' value='$toiminto'>
@@ -81,7 +75,7 @@
 
 
 	//Tyhjennetään kentät
-	echo "	<form name='rivi' action = '$PHP_SELF' method='post' autocomplete='off'>
+	echo "	<form action = '$PHP_SELF' method='post' autocomplete='off'>
 			<input type='hidden' name='toiminto' value='$toiminto'>
 			<input type='hidden' name='tee' value = 'TY'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -91,4 +85,14 @@
 			<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Tyhjennä")."'></td></form></tr>";
 
 	echo "</table><br>";
+	
+	// Kursorinohjausta
+	if ($formi == '') {
+		$formi = 'rivi';
+	}
+
+   if ($kentta == '') {
+       $kentta = 'tuoteno';
+   }
+	
 ?>

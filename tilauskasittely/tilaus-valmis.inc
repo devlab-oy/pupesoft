@@ -112,12 +112,18 @@ else {
 	//tila L ja alatila C, B, D, E niin tilaus on kerätty otsikko
 	//jos otsikko sanoo, että tilaus on kerätty mutta rivit kuitenkaan ei ole kerätty niin merkataan ne kumminkin kerätyiksi
 	//tai jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan)...
-	if (mysql_num_rows($keres)>0 or ($laskurow["tila"] == 'L' and ($laskurow["alatila"] == 'C' or $laskurow["alatila"] == 'B' or $laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E'))) {
+	if (mysql_num_rows($keres) > 0 or ($laskurow["tila"] == 'L' and ($laskurow["alatila"] == 'C' or $laskurow["alatila"] == 'B' or $laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E'))) {
 
 		//...niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
 		$query = "UPDATE tilausrivi SET keratty='$kukarow[kuka]', kerattyaika=now() where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and keratty='' and var != 'J'";
 		$result = mysql_query($query) or pupe_error($query);
 
+		//Laitetaan rivit toimitetuiksi jos otsikko sanoo toimitettu
+		if ($laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E') {
+			$query = "UPDATE tilausrivi SET toimitettu='$kukarow[kuka]', toimitettuaika=now() where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and keratty!='' and toimitettu='' and var != 'J'";
+			$result = mysql_query($query) or pupe_error($query);	
+		}
+		
 		$tilaus_valmis_ulos .= "<font class='message'>".t("Tilauksella oli jo kerättyjä rivejä, joten lähetettä ei tulosteta").".<br>".t("Jos haluat lähetteen tulosta lähetteen kopio. Tilausnumero on")." $laskurow[tunnus].</font><br><br>";
 	}
 	else {

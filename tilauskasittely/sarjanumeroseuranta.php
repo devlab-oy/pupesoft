@@ -215,7 +215,7 @@
 								and tunnus='$sarjatun'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 
-					// Tutkitaan pittääkö meidän liittää muita tilausrivejä jos sarjanumerolla on perhe
+					// Tutkitaan pittääkö meidän liittää muita tilausrivejä jos sarjanumerolla on perhe tai lisävarusteita
 					//Haetaan sarjanumeron ja siihen liitettyjen sarjanumeroiden kaikki tiedot.
 					if ($tunnuskentta == 'myyntirivitunnus') {
 						//$rivitunnus rikkoontuu lisaarivi.incissä
@@ -484,8 +484,12 @@
 	echo "<th>".t("Poista")."</th>";
 	echo "<th>".t("Lisätiedot")."</th>";
 	echo "</tr>";
+	
+	//Kursorinohjaus
+	$formi	= "haku";
+	$kentta = "sarjanumero_haku";
 
-	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<form name='haku' action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='$tunnuskentta' 	value = '$rivitunnus'>";
 	echo "<input type='hidden' name='from' 				value = '$from'>";
 	echo "<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>";

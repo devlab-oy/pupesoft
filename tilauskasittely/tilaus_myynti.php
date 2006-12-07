@@ -1312,6 +1312,7 @@ if ($tee == '') {
 	//Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
 	if ($kukarow["extranet"] == "" and $tila == "LISAARESEPTIIN") {
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";
+		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
 	}
 
 	if ($tuoteno != '') {
@@ -1580,7 +1581,7 @@ if ($tee == '') {
 		// Tilausrivit
 		$query  = "	SELECT tilausrivi.*,
 					if (tuotetyyppi='K','Tyˆ','Varaosa') tuotetyyppi,
-					if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) as sorttauskentta,
+					if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, tilausrivi.tunnus, if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskentta,
 					tuote.myyntihinta,
 					tuote.kehahin,
 					tuote.sarjanumeroseuranta
@@ -1667,8 +1668,7 @@ if ($tee == '') {
 			$kate_nettokotimaan_varastot_yhteensa 		= 0;
 			$kate_nettoulkomaan_varastot_yhteensa 		= 0;
 
-
-			$toimitetaan_ulkomaailta 			= 0;
+			$toimitetaan_ulkomaailta 					= 0;
 
 			while ($row = mysql_fetch_array($result)) {
 
@@ -1909,16 +1909,48 @@ if ($tee == '') {
 				}
 
 				// Tuoteperheiden lapsille ei n‰ytet‰ rivinumeroa
-				if ($row["perheid"] == 0 or $row["perheid"] == $row["tunnus"]) {
-					echo "<tr><td valign='top'>$rivino</td>";
+				if ($row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0)) {
+					
+					if ($row["perheid"] == 0) {
+						$pklisa = " and perheid2 = '$row[perheid2]'";
+					}
+					else {
+						$pklisa = " and perheid = '$row[perheid]'";
+					}
+					
+					$query = "	select yhtio 
+								from tilausrivi 
+								where yhtio = '$kukarow[yhtio]'
+								and otunnus = '$kukarow[kesken]'
+								$pklisa";
+					$pkres = mysql_query($query) or pupe_error($query);										
+					echo "<tr><td valign='top' rowspan='".mysql_num_rows($pkres)."'>$rivino</td>";
 				}
-				else {
-					echo "<tr><td class='back' valign='top'></td>";
+				elseif($row["perheid"] == 0 and $row["perheid2"] == 0) {
+					echo "<tr><td valign='top'>$rivino</td>";
 				}
 
 				// Tuotteen nimitys n‰ytet‰‰n vain jos k‰ytt‰j‰n resoluution on iso
 				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-					echo "<td $class align='left' valign='top'>$row[nimitys]</td>";
+					if (strtolower($kukarow["kieli"]) != strtolower($yhtiorow["kieli"])) {
+						$query = "	select selite 
+									from tuotteen_avainsanat 
+									where yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$row[tuoteno]'
+									and laji	= 'nimitys_".$kukarow["kieli"]."'
+									LIMIT 1";
+						$pkres = mysql_query($query) or pupe_error($query);	
+
+						if (mysql_num_rows($pkres) > 0) {
+							$pkrow = mysql_fetch_array($pkres);
+							$nimitys = $pkrow["selite"];
+						}
+					}
+					else {
+						$nimitys = $row["nimitys"];
+					}
+					
+					echo "<td $class align='left' valign='top'>$nimitys</td>";
 				}
 
 				if ($kukarow['extranet'] == '' and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {
@@ -2062,13 +2094,22 @@ if ($tee == '') {
 							<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("Poista")."'></td>
 							</form>";
 
-					if ($laskurow["tila"] == "V" and $row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) {
+					if (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0)) {
+						
+						if($laskurow["tila"] == "V") {
+							$nappulanteksti = t("Lis‰‰ reseptiin");
+						}
+						else {
+							$nappulanteksti = t("Lis‰‰ tuote");
+						}
+						
 						echo "	<form action='$PHP_SELF' method='post'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 								<input type='hidden' name='tila' value = 'LISAARESEPTIIN'>
 								<input type='hidden' name='perheid' value = '$row[perheid]'>
-								<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("Lis‰‰ reseptiin")."'></td>
+								<input type='hidden' name='perheid2' value = '$row[perheid2]'>
+								<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='$nappulanteksti'></td>
 								</form>";
 					}
 
@@ -2196,13 +2237,12 @@ if ($tee == '') {
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tila' value='LISLISAV'>
 								<input type='hidden' name='rivitunnus' value='$row[tunnus]'>
-								<td class='back' valign='top' nowrap><input type='submit' Style='{font-size: 8pt;}' value='".t("Lis‰‰ lis‰varusteita tuotteelle")."'></td>
+								<td class='back' valign='top' nowrap><input type='submit' Style='{font-size: 8pt;}' value='".t("Lis‰‰ lis‰varusteita")."'></td>
 								</form>";
 					}
 				}
 				echo "</tr>";
 			}
-
 
 			//kaikki yhteens‰ ARVO
 			if ($kukarow['hinnat'] == 1 and $kukarow['extranet'] != '') {

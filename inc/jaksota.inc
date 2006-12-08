@@ -48,7 +48,7 @@
 		$kk = substr($tiliointirow['tapvm'], 5,2); // Tämä on kausi
 		$vv = substr($tiliointirow['tapvm'], 0,4); // Tämä on vuosi
 
-		for ($i = 2; $i < 14; $i++) {
+		for ($i = 2; $i < 20; $i++) {
 			$kk++;
 			if ($kk > 12) {
 				$kk = 1;
@@ -153,7 +153,7 @@
 					$pvv = substr($tiliointirow['tapvm'], 0,4); // Tämä on vuosi
 
 					$pkk += $mille - 1; // Oletus tapvm
-					if ($pkk > 12) {
+					while ($pkk > 12) {
 						$pkk -= 12;
 						$pvv++;
 					}

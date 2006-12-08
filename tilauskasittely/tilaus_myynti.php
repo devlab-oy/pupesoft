@@ -920,8 +920,10 @@ if ($tee == '') {
 	$meapurow = mysql_fetch_array($meapu);
 	
 	if ($laskurow["liitostunnus"] > 0 and $meapurow["kateinen"] == "" and ($laskurow["nimi"] == '' or $laskurow["osoite"] == '' or $laskurow["postino"] == '' or $laskurow["postitp"] == '')) {
-		echo "<font class='error'>".t("VIRHE: Tilauksen laskutusosoitteen tiedot ovat puutteelliset")."!</font><br><br>";
-		$tilausok++;
+		if ($toim != 'VALMISTAVARASTOON' and $toim != 'SIIRTOLISTA') {
+			echo "<font class='error'>".t("VIRHE: Tilauksen laskutusosoitteen tiedot ovat puutteelliset")."!</font><br><br>";
+			$tilausok++;
+		}
 	}
 
 	// kirjoitellaan otsikko

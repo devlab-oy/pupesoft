@@ -98,7 +98,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "valuutta") { //valuutta
+	if (mysql_field_name($result, $i) == "valuutta") {
 		$query = "	SELECT nimi, tunnus
 					FROM valuu
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -134,7 +134,7 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$sel1=$sel2=$sel3=$sel4="";
+		$sel1=$sel2="";
 
 		if ($trow[$i] == '') {
 			$sel1 = "selected";
@@ -142,13 +142,9 @@
 		if ($trow[$i] == 'S') {
 			$sel2 = "selected";
 		}
-		if ($trow[$i] == 'M') {
-			$sel3 = "selected";
-		}
 
-		$ulos .= "<option value = ''  $sel1>".t("Ei seurantaa/Normaali verotus")."</option>";
-		$ulos .= "<option value = 'S' $sel2>".t("Sarjanumeroseuranta/Normaali verotus")."</option>";
-		$ulos .= "<option value = 'M' $sel3>".t("Sarjanumeroseuranta/Marginaaliverotus")."</option>";
+		$ulos .= "<option value = ''  $sel1>".t("Ei seurantaa")."</option>";
+		$ulos .= "<option value = 'S' $sel2>".t("Sarjanumeroseuranta")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

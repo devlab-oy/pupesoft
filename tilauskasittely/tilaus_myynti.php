@@ -394,11 +394,11 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS") {
 	$sres = mysql_query($query) or pupe_error($query);
 
 	while($srow = mysql_fetch_array($sres)) {
-		if ($srow["varattu"] > 0) {
-			$tunken = "myyntirivitunnus";
+		if ($srow["varattu"] < 0) {
+			$tunken = "ostorivitunnus";
 		}
 		else {
-			$tunken = "ostorivitunnus";
+			$tunken = "myyntirivitunnus";
 		}
 
 		$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and $tunken='$srow[tunnus]'";
@@ -451,11 +451,11 @@ if ($tee == 'POISTA') {
 	$sres = mysql_query($query) or pupe_error($query);
 
 	while($srow = mysql_fetch_array($sres)) {
-		if ($srow["varattu"] > 0) {
-			$tunken = "myyntirivitunnus";
+		if ($srow["varattu"] < 0) {
+			$tunken = "ostorivitunnus";
 		}
 		else {
-			$tunken = "ostorivitunnus";
+			$tunken = "myyntirivitunnus";
 		}
 
 		$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and $tunken='$srow[tunnus]'";
@@ -545,31 +545,31 @@ if ($tee == "VALMIS") {
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Tehdään asiakasmemotapahtuma
-		 $kysely = "	INSERT INTO kalenteri
-						SET tapa 		= 'Tarjous asiakkaalle',
-						asiakas  	 	= '$laskurow[ytunnus]',
-						liitostunnus	= '$laskurow[liitostunnus]',
-						henkilo  		= '',
-						kuka     		= '$kukarow[kuka]',
-						yhtio    		= '$kukarow[yhtio]',
-						tyyppi   		= 'Memo',
-						pvmalku  		= now(),
-						kentta01 		='Tarjous $laskurow[tunnus] tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]'";
+		$kysely = "	INSERT INTO kalenteri
+					SET tapa 		= 'Tarjous asiakkaalle',
+					asiakas  	 	= '$laskurow[ytunnus]',
+					liitostunnus	= '$laskurow[liitostunnus]',
+					henkilo  		= '',
+					kuka     		= '$kukarow[kuka]',
+					yhtio    		= '$kukarow[yhtio]',
+					tyyppi   		= 'Memo',
+					pvmalku  		= now(),
+					kentta01 		='Tarjous $laskurow[tunnus] tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]'";
  		$result = mysql_query($kysely) or pupe_error($kysely);
 
 		 //Tehdään myyjälle muistutus
-		 $kysely = "	INSERT INTO kalenteri
-						SET
-						asiakas  	 	= '$laskurow[ytunnus]',
-						liitostunnus	= '$laskurow[liitostunnus]',
-						kuka     		= '$kukarow[kuka]',
-						yhtio    		= '$kukarow[yhtio]',
-						tyyppi   		= 'Muistutus',
-						tapa     		= 'Tarjous asiakkaalle',
-						kentta01 		= 'Muista tarjous $laskurow[tunnus]!',
-						kuittaus 		= 'K',
-						pvmalku  		= date_add(now(), INTERVAL 7 day)";
-		 $result = mysql_query($kysely) or pupe_error($kysely);
+		$kysely = "	INSERT INTO kalenteri
+					SET
+					asiakas  	 	= '$laskurow[ytunnus]',
+					liitostunnus	= '$laskurow[liitostunnus]',
+					kuka     		= '$kukarow[kuka]',
+					yhtio    		= '$kukarow[yhtio]',
+					tyyppi   		= 'Muistutus',
+					tapa     		= 'Tarjous asiakkaalle',
+					kentta01 		= 'Muista tarjous $laskurow[tunnus]!',
+					kuittaus 		= 'K',
+					pvmalku  		= date_add(now(), INTERVAL 7 day)";
+		$result = mysql_query($kysely) or pupe_error($kysely);
 
 		$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -1178,11 +1178,11 @@ if ($tee == '') {
 			// Tehdään pari juttua jos tuote on sarjanuerosaurannassa
 			if($tilausrivi["sarjanumeroseuranta"] != '') {
 				//Nollataan sarjanumero
-				if ($tilausrivi["varattu"]+$tilausrivi["jt"] > 0) {
-					$tunken = "myyntirivitunnus";
+				if ($tilausrivi["varattu"] < 0) {
+					$tunken = "ostorivitunnus";
 				}
 				else {
-					$tunken = "ostorivitunnus";
+					$tunken = "myyntirivitunnus";
 				}
 
 				$query = "SELECT tunnus FROM sarjanumeroseuranta WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivi[tuoteno]' and $tunken='$tilausrivi[tunnus]'";
@@ -2016,12 +2016,14 @@ if ($tee == '') {
 
 				// Näytetäänkö sarjanumerolinkki
 				if ($row["sarjanumeroseuranta"] != "" and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
-					if ($row["sarjanumeroseuranta"] == "M" and $row["varattu"] < 0) {
-						$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and ostorivitunnus='$row[tunnus]'";
+					if ($row["varattu"] < 0) {
+						$tunken = "ostorivitunnus";
 					}
 					else {
-						$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and myyntirivitunnus='$row[tunnus]'";
+						$tunken = "myyntirivitunnus";
 					}
+					
+					$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and $tunken='$row[tunnus]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 

@@ -1745,17 +1745,22 @@ if ($tee == '') {
 				}
 
 				//Käännetään tän rivin hinta oikeeseen valuuttaan
+				$row["kotihinta"] = $row["hinta"];
 				$row["hinta"] = laskuval($row["hinta"], $laskurow["vienti_kurssi"]);
+				
 
 				// Tän rivin rivihinta
-				$summa	= $row["hinta"]*($row["varattu"]+$row["jt"])*(1-$row["ale"]/100);
+				$summa		= $row["hinta"]*($row["varattu"]+$row["jt"])*(1-$row["ale"]/100);
+				$kotisumma	= $row["kotihinta"]*($row["varattu"]+$row["jt"])*(1-$row["ale"]/100);
 
 				// Tän rivin alviton rivihinta
 				if ($yhtiorow["alv_kasittely"] == '') {
 					$summa_alviton = $summa / (1+$row["alv"]/100);
+					$kotisumma_alviton = $kotisumma / (1+$row["alv"]/100);
 				}
 				else {
 					$summa_alviton = $summa;
+					$kotisumma_alviton = $kotisumma;
 				}
 
 				// Tän rivin kate
@@ -1780,12 +1785,12 @@ if ($tee == '') {
 						if (mysql_num_rows($sarjares) > 0) {
 							$sarjarow = mysql_fetch_array($sarjares);
 
-							$kate = $summa_alviton - $sarjarow["rivihinta"];
+							$kate = $kotisumma_alviton - $sarjarow["rivihinta"];
 						}
 					}
 				}
 				elseif ($row["ei_saldoa"] == "" and $kukarow['extranet'] == '') {
-					$kate = $summa_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"]));
+					$kate = $kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"]));
 				}
 
 				// Jos halutaan tulostaa tietyille extranettaajille bruttomyyntihintoja ruudulle

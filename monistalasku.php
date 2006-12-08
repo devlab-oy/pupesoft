@@ -171,12 +171,25 @@ if ($tee == "ETSILASKU") {
 			}
 			echo "<$ero><input type='checkbox' name='korjaaalvit[$row[tilaus]]' value='on' $sel></$ero>";
 
-			$sel = "";
-			if ($suoraanlasku[$row["tilaus"]] != '') {
-				$sel = "CHECKED";
-			}
-			echo "<$ero><input type='checkbox' name='suoraanlasku[$row[tilaus]]' value='on' $sel></$ero>";
+			// Katotaan ettei yksikään tuote ole sarjanumeroseurannassa, silloin ei voida turvallisesti laittaa suoraan laskutukseen
+			$query = "	SELECT tuote.sarjanumeroseuranta
+						FROM tilausrivi
+						JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.sarjanumeroseuranta!=''
+						WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+						and tilausrivi.uusiotunnus='$row[tilaus]'";
+			$res = mysql_query($query) or pupe_error($query);
 
+			if (mysql_num_rows($res) == 0) {
+				$sel = "";
+				if ($suoraanlasku[$row["tilaus"]] != '') {
+					$sel = "CHECKED";
+				}
+				echo "<$ero><input type='checkbox' name='suoraanlasku[$row[tilaus]]' value='on' $sel></$ero>";
+			}
+			else {
+				echo "<$ero></$ero>";
+			}
+			
 			echo "<$ero><a href='$PHP_SELF?tunnus=$row[tilaus]&tunnukset=$tunnukset&asiakasid=$asiakasid&otunnus=$otunnus&laskunro=$laskunro&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tee=NAYTATILAUS'>".t("Näytä")."</a></$ero>";
 			echo "</tr>";
 		}
@@ -348,6 +361,7 @@ if ($tee=='MONISTA') {
 
 			while ($rivirow = mysql_fetch_array($rivires)) {
 				$paikkavaihtu = 0;
+				$uusikpl = 0;
 
 				$pquery = "	SELECT tunnus
 							FROM tuotepaikat
@@ -411,9 +425,11 @@ if ($tee=='MONISTA') {
 						case 'varattu':
 							if ($kumpi == 'HYVITA') {
 								$rvalues .= ", $rivirow[kpl] * -1";
+								$uusikpl = $rivirow["kpl"] * -1;
 							}
 							else {
 								$rvalues .= ", '$rivirow[kpl]'";
+								$uusikpl = $rivirow["kpl"];
 							}
 							break;
 						case 'tilkpl':
@@ -464,6 +480,62 @@ if ($tee=='MONISTA') {
 				$kysely = "INSERT into tilausrivi ($rfields) VALUES ($rvalues)";
 				$insres = mysql_query($kysely) or pupe_error($kysely);
 				$insid  = mysql_insert_id();
+				
+				
+				//Kopsataan sarjanumerot kuntoon jos tilauskella oli sellaisia
+				if ($kumpi == 'HYVITA') {
+					if ($rivirow["kpl"] > 0) {
+						$tunken = "myyntirivitunnus";
+					}
+					else {
+						$tunken = "ostorivitunnus";
+					}
+
+					$query = "SELECT * FROM sarjanumeroseuranta WHERE yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]' and $tunken='$rivirow[tunnus]'";
+					$sarjares = mysql_query($query) or pupe_error($query);
+					
+					if (mysql_num_rows($sarjares) == 1) {
+						$sarjarow = mysql_fetch_array($sarjares);
+
+						if ($uusikpl > 0) {
+							$uusi_tunken = "myyntirivitunnus";
+						}
+						else {
+							$uusi_tunken = "ostorivitunnus";
+						}
+						
+						//Tutkitaan löytyykö tällanen vapaa sarjanumero jo?
+						$query = "	SELECT tunnus 
+									FROM sarjanumeroseuranta 
+									WHERE yhtio			= '$kukarow[yhtio]' 
+									and tuoteno			= '$rivirow[tuoteno]' 
+									and sarjanumero 	= '$sarjarow[sarjanumero]' 
+									and $uusi_tunken	= 0 
+									LIMIT 1";
+						$sarjares = mysql_query($query) or pupe_error($query);
+						
+						if (mysql_num_rows($sarjares) == 1) {
+							$sarjarow = mysql_fetch_array($sarjares);
+							
+							$query = "	UPDATE sarjanumeroseuranta
+										SET $uusi_tunken= '$insid'
+										WHERE tunnus 	= '$sarjarow[tunnus]'
+										and yhtio		= '$kukarow[yhtio]'";
+							$sres = mysql_query($query) or pupe_error($query);
+						}
+						else {
+							$query = "	INSERT INTO sarjanumeroseuranta
+										SET
+										yhtio			= '$kukarow[yhtio]',
+										tuoteno			= '$rivirow[tuoteno]',
+										sarjanumero		= '$sarjarow[sarjanumero]',
+										lisatieto		= '$sarjarow[lisatieto]',
+										kaytetty		= '$sarjarow[kaytetty]',
+										$uusi_tunken	= '$insid'";
+							$sres = mysql_query($query) or pupe_error($query);
+						}
+					}
+				}
 
 				//tehdään alvikorjaus jos käyttäjä on pyytänyt sitä
 				if ($alvik == "on" and $rivirow["hinta"] != 0) {

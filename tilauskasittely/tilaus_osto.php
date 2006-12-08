@@ -265,7 +265,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			
-			// Tehd‰‰n pari juttua jos tuote on sarjanuerosaurannassa
+			// Tehd‰‰n pari juttua jos tuote on sarjanumeroseurannassa
 			if($tilausrivirow["sarjanumeroseuranta"] != '') {
 				//Nollataan sarjanumero
 				$query = "SELECT tunnus FROM sarjanumeroseuranta WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivirow[tuoteno]' and ostorivitunnus='$tilausrivirow[tunnus]'";

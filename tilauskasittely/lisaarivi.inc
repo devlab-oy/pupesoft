@@ -591,10 +591,6 @@
 									$sres = mysql_query($query) or pupe_error($query);
 
 									$myy_sarjatunnus = 0;
-
-									if(mysql_affected_rows() == 1) {
-										//echo "Sarjanumero linkattu tilausriviin!<br>";
-									}
 								}
 
 								if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {
@@ -1024,6 +1020,7 @@
 									tuoteno				= '$trow[tuoteno]',
 									lisatieto			= 'Suoratoimitetaan yhtiöstä: $srow[yhtio]. $srow[lisatieto]',
 									sarjanumero			= '$srow[sarjanumero]',
+									kaytetty			= '$srow[kaytetty]',
 									myyntirivitunnus 	= '$lisatty_tun'";
 					}
 					else {

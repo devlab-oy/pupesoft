@@ -175,10 +175,6 @@
 				}
 				echo "</select></td><td class='back'>".t("Pakollinen kenttä")."</td></tr>";
 
-				if ($laskurow["lisattava_era"] == 0) {
-						$laskurow["lisattava_era"] = "15.94";
-				}
-
 				echo "	<tr><td>28. ".t("Vähennettävä erä, ulkomaiset kustannukset")."</td><td colspan='2'><input type='text' name='vahennettava_era' size='25' value='$laskurow[vahennettava_era]'></td></tr>";
 				echo "	<tr><td>28. ".t("Toimitusehdon mukainen lisättävä erä")."</td><td colspan='2'><input type='text' name='lisattava_era' size='25' value='$laskurow[lisattava_era]'></td></tr>";
 			}

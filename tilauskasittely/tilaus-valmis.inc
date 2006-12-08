@@ -455,6 +455,7 @@ else {
 							kohdistettu 	= '$laskurow[kohdistettu]',
 							toimitustapa	= '$laskurow[toimitustapa]',
 							valkoodi		= '$laskurow[valkoodi]',
+							vienti_kurssi	= '$laskurow[vienti_kurssi]',
 							vanhatunnus		= '$laskurow[tunnus]',
 							verkkotunnus	= '$laskurow[verkkotunnus]',
 							vienti 			= '$laskurow[vienti]',

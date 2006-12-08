@@ -86,7 +86,9 @@
 						alv		 		= '$otsikkorivi[alv]' and
 						ketjutus 		= '$otsikkorivi[ketjutus]' and
 						kohdistettu		= '$otsikkorivi[kohdistettu]' and
-						toimitusehto	= '$otsikkorivi[toimitusehto]'";
+						toimitusehto	= '$otsikkorivi[toimitusehto]' and 
+						valkoodi 		= '$otsikkorivi[valkoodi]' and
+						vienti_kurssi	= '$otsikkorivi[vienti_kurssi]'";
 			$stresult = mysql_query($query) or pupe_error($query);
 		}
 

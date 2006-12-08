@@ -235,7 +235,7 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 		$vienti 		= $asiakasrow["vienti"];
 		$ketjutus 		= $asiakasrow["ketjutus"];
 		$valkoodi 		= $asiakasrow["valkoodi"];
-
+		$sisviesti1		= $asiakasrow["sisviesti1"];
 
 		//annetaan extranet-tilaukselle aina paras prioriteetti, tämä on hyvä porkkana.
 		if ($kukarow["extranet"] != '') {

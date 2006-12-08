@@ -84,12 +84,14 @@
 
 		while ($toimrow = mysql_fetch_array($toimresult)) {
 
-			if ($toimrow["sarjanumeroseuranta"] == "M" and $toimrow["varattu"] < 0) {
-				$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and ostorivitunnus='$toimrow[tunnus]'";
+			if ($toimrow["varattu"] < 0) {
+				$tunken = "ostorivitunnus";
 			}
 			else {
-				$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and myyntirivitunnus='$toimrow[tunnus]'";
+				$tunken = "myyntirivitunnus";
 			}
+			
+			$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and $tunken='$toimrow[tunnus]'";
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$sarjarow = mysql_fetch_array($sarjares);
 
@@ -945,13 +947,15 @@
 							<td>$row[varattu]</td>
 							<td><input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]'> $puute";
 
-					if ($row["sarjanumeroseuranta"] != "") {
-						if ($row["sarjanumeroseuranta"] == "M" and $row["varattu"] < 0) {
-							$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[puhdas_tuoteno]' and ostorivitunnus='$row[tunnus]'";
+					if ($row["sarjanumeroseuranta"] != "") {						
+						if ($row["varattu"] < 0) {
+							$tunken = "ostorivitunnus";
 						}
 						else {
-							$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[puhdas_tuoteno]' and myyntirivitunnus='$row[tunnus]'";
+							$tunken = "myyntirivitunnus";
 						}
+						
+						$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[puhdas_tuoteno]' and $tunken='$row[tunnus]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 						$sarjarow = mysql_fetch_array($sarjares);
 

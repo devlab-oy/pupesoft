@@ -716,6 +716,8 @@ while (!feof ($fd)) {
 										tuoteno				= '$sarjarow[tuoteno]',
 										lisatieto			= 'Suoratoimitustilaus $arow[nimi] --> $tnimi',
 										sarjanumero			= '$sarjarow[sarjanumero]',
+										lisatieto			= '$sarjarow[lisatieto]',
+										kaytetty			= '$sarjarow[kaytetty]',
 										myyntirivitunnus 	= '$lisatty_tun'";
 							$sres = mysql_query($query) or pupe_error($query);
 						}

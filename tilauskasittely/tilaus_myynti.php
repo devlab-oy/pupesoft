@@ -1659,29 +1659,6 @@ if ($tee == '') {
 			$varaosatyyppi	= "";
 			$vanhaid 		= "KALA";
 
-			$nettoyhteensa								= 0;
-			$yhteensa									= 0;
-			$kotimaan_varastot_yhteensa 				= 0;
-			$ulkomaan_varastot_yhteensa 				= 0;
-			$nettokotimaan_varastot_yhteensa 			= 0;
-			$nettoulkomaan_varastot_yhteensa 			= 0;
-
-			$veroton_nettoyhteensa						= 0;
-			$veroton_yhteensa							= 0;
-			$veroton_kotimaan_varastot_yhteensa 		= 0;
-			$veroton_ulkomaan_varastot_yhteensa 		= 0;
-			$veroton_nettokotimaan_varastot_yhteensa 	= 0;
-			$veroton_nettoulkomaan_varastot_yhteensa 	= 0;
-
-			$kate_nettoyhteensa							= 0;
-			$kate_yhteensa								= 0;
-			$kate_kotimaan_varastot_yhteensa 			= 0;
-			$kate_ulkomaan_varastot_yhteensa 			= 0;
-			$kate_nettokotimaan_varastot_yhteensa 		= 0;
-			$kate_nettoulkomaan_varastot_yhteensa 		= 0;
-
-			$toimitetaan_ulkomaailta 					= 0;
-
 			while ($row = mysql_fetch_array($result)) {
 
 				if ($toim == "TYOMAARAYS") {
@@ -1762,47 +1739,7 @@ if ($tee == '') {
 					$summa_alviton = $summa;
 					$kotisumma_alviton = $kotisumma;
 				}
-
-				// Tän rivin kate
-				$kate = 0;
-
-				if ($row["ei_saldoa"] == "" and $kukarow['extranet'] == '' and $row["sarjanumeroseuranta"] != "" and $row["var"] != 'T') {
-
-					$query = "select ostorivitunnus from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and myyntirivitunnus='$row[tunnus]'";
-					$sarjares = mysql_query($query) or pupe_error($query);
-					$sarjarow = mysql_fetch_array($sarjares);
-
-					if ($sarjarow["ostorivitunnus"] != 0 and $sarjarow["ostorivitunnus"] != $row["tunnus"] and $row["varattu"]+$row["jt"] > 0) {
-
-						$limitti = $row["varattu"]+$row["jt"];
-
-						$query = "	select sum(rivihinta) rivihinta
-									from tilausrivi
-									where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and tunnus='$sarjarow[ostorivitunnus]'
-									LIMIT $limitti";
-						$sarjares = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($sarjares) > 0) {
-							$sarjarow = mysql_fetch_array($sarjares);
-
-							$kate = $kotisumma_alviton - $sarjarow["rivihinta"];
-						}
-					}
-				}
-				elseif ($row["ei_saldoa"] == "" and $kukarow['extranet'] == '') {
-					$kate = $kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"]));
-				}
-
-				// Jos halutaan tulostaa tietyille extranettaajille bruttomyyntihintoja ruudulle
-				$brutto = 0;
-				if ($kukarow['hinnat'] == 1 and $kukarow['extranet'] != '') {
-					$hinta = $row["myyntihinta"];
-
-					require('alv.inc');
-
-					$brutto = $hinta*($row["varattu"]+$row["jt"]);
-				}
-
+				
 				if ($row["var"] == "P" or $row["var"] == "V") {
 					$class = " class='spec' ";
 				}
@@ -1810,88 +1747,7 @@ if ($tee == '') {
 					$class = " class='green' ";
 				}
 				else {
-					//Jos rivi ei ole puute eikä jt niin tutkitaan sen hintaa ja maata josta se myydään
-					//Suoratoimitusriveille joudumme tutkimaan hieman toimittajan kautta mistä maasta ne myydään
-					if ($row["tilaajanrivinro"] > 0 and $row["var"] == "S") {
-						$query = "	SELECT tyyppi_tieto, maa, maakoodi
-									FROM toimi
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '$row[tilaajanrivinro]'";
-						$sres1 = mysql_query($query) or pupe_error($query);
-						$srow1 = mysql_fetch_array($sres1);
-					}
-					else {
-						$srow1 = array();
-
-						$srow1["tyyppi_tieto"] 	= $yhtiorow["yhtio"];
-						$srow1["maa"] 			= $yhtiorow["maakoodi"];
-					}
-
-					// Luetaan varaston tiedoista missä maassa se sijaitsee
-					$query = "	SELECT maa
-								FROM varastopaikat
-								WHERE yhtio = '$srow1[tyyppi_tieto]'
-								and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))
-								and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))";
-					$sres2  = mysql_query($query) or pupe_error($query);
-					$srow2 = mysql_fetch_array($sres2);
-
-					//Jos varastoalueen maakoodi on tyhjä niin käytetään toimittajan maakoodia
-					if (trim($srow2["maa"]) == "") {
-						$srow2["maa"] = trim($srow1["maakoodi"]);
-					}
-
-					//Jos toimittajan maakoodi on tyhjä niin käytetään yhtiön maakoodia
-					if (trim($srow2["maa"]) == "") {
-						$srow2["maa"] = trim($yhtiorow["maakoodi"]);
-					}
-
 					$class = '';
-
-					// Summailaan tilauksen loppusummaa
-					if ($row["netto"] != 'N') {
-						$yhteensa 	   		+= $summa;			// lasketaan tilauksen loppusummaa ei N-nettorivit
-						$veroton_yhteensa	+= $summa_alviton;	// lasketaan tilauksen veroton loppusumma ei N-nettorivit
-						$kate_yhteensa 		+= $kate;			// lasketaan tilauksen katetta ei N-nettorivit
-
-						//Kotimaiset varastot EI-nettorivit
-						if(strtoupper($srow2["maa"]) == strtoupper(trim($yhtiorow["maakoodi"]))) {
-							$kotimaan_varastot_yhteensa 		+= $summa;
-							$veroton_kotimaan_varastot_yhteensa += $summa_alviton;
-							$kate_kotimaan_varastot_yhteensa 	+= $kate;
-						}
-						//Ulkomaiset varastot EI-nettorivit
-						else {
-							$ulkomaan_varastot_yhteensa      	+= $summa;
-							$veroton_ulkomaan_varastot_yhteensa	+= $summa_alviton;
-							$kate_ulkomaan_varastot_yhteensa 	+= $kate;
-						}
-					}
-					else {
-						$nettoyhteensa      	+= $summa; 	// lasketaan tilauksen loppusummaa NETTORIVIT..
-						$veroton_nettoyhteensa  += $summa_alviton; 	// lasketaan tilauksen veroton loppusumma NETTORIVIT..
-						$kate_nettoyhteensa 	+= $kate;	// lasketaan tilauksen katetta NETTORIVIT..
-
-						//Kotimaiset varastot nettorivit
-						if(strtoupper($srow2["maa"]) == strtoupper(trim($yhtiorow["maakoodi"]))) {
-							$nettokotimaan_varastot_yhteensa      		+= $summa;
-							$veroton_nettokotimaan_varastot_yhteensa	+= $summa_alviton;
-							$kate_nettokotimaan_varastot_yhteensa 		+= $kate;
-						}
-						//Ulkomaiset varastot nettorivit
-						else {
-							$nettoulkomaan_varastot_yhteensa      		+= $summa;
-							$veroton_nettoulkomaan_varastot_yhteensa	+= $summa_alviton;
-							$kate_nettoulkomaan_varastot_yhteensa 		+= $kate;
-						}
-					}
-
-					//tutkitaan yleisesti onko käyttäjä tilannut tuotteita ulkomaassa sijaitsevasta varastosta
-					if(strtoupper($srow2["maa"]) != strtoupper(trim($yhtiorow["maakoodi"]))) {
-						$toimitetaan_ulkomaailta++;
-					}
-
-					$bruttoyhteensa += $brutto;
 				}
 
 				if ($row["hinta"] == 0.00) 	$row["hinta"] = '';
@@ -1994,14 +1850,16 @@ if ($tee == '') {
 					}
 					else {
 
-						$query =	"select * from varastopaikat where yhtio='$kukarow[yhtio]'
+						$query = "	select * 
+									from varastopaikat 
+									where yhtio='$kukarow[yhtio]'
 									and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))
 									and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))";
 						$varastore = mysql_query($query) or pupe_error($query);
 						$varastoro = mysql_fetch_array($varastore);
 
 						if (strtoupper($varastoro['maa']) != strtoupper($yhtiorow['maakoodi'])) {
-							echo "<td $class align='left' valign='top'><font color='#0000FF'>".strtoupper($varastoro['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
+							echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varastoro['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
 						}
 						else {
 							echo "<td $class align='left' valign='top'>$row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
@@ -2069,29 +1927,65 @@ if ($tee == '') {
 				}
 
 				echo "<td $class align='center' valign='top'>$row[var]</td>";
-
+				
 				if ($kukarow['hinnat'] == 1 and $kukarow['extranet'] != '') {
-					echo "<td $class align='right' valign='top'>$bruttohinta</td>";
+					echo "<td $class align='right' valign='top'>$row[myyntihinta]</td>";
 				}
 				else {
 					echo "<td $class align='right' valign='top'>$row[hinta]</td>";
 					echo "<td $class align='right' valign='top'>$row[ale]</td>";
 				}
 
-				echo "	<td $class align='center' valign='top'>$row[netto]</td>";
+				echo "<td $class align='center' valign='top'>$row[netto]</td>";
 
 				if ($kukarow['hinnat'] == 1 and $kukarow['extranet'] != '') {
-					echo "	<td $class align='right' valign='top'>".sprintf('%.2f',$brutto)."</td>";
+					$hinta = $row["myyntihinta"];
+
+					require('alv.inc');
+
+					$brutto = $hinta*($row["varattu"]+$row["jt"]);
+					
+					echo "<td $class align='right' valign='top'>".sprintf('%.2f',$brutto)."</td>";
 				}
 				else {
-					echo "	<td $class align='right' valign='top'>".sprintf('%.2f',$summa)."</td>";
+					echo "<td $class align='right' valign='top'>".sprintf('%.2f',$summa)."</td>";
 				}
 
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "	<td $class align='right' valign='top' nowrap>".sprintf('%.2f',100*$kate/$summa_alviton)."%</td>";
+					// Tän rivin kate
+					$kate = 0;
+
+					if ($row["ei_saldoa"] == "" and $kukarow['extranet'] == '' and $row["sarjanumeroseuranta"] != "" and $row["var"] != 'T') {
+
+						$query = "select ostorivitunnus from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and myyntirivitunnus='$row[tunnus]'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+						$sarjarow = mysql_fetch_array($sarjares);
+
+						if ($sarjarow["ostorivitunnus"] != 0 and $sarjarow["ostorivitunnus"] != $row["tunnus"] and $row["varattu"]+$row["jt"] > 0) {
+
+							$limitti = $row["varattu"]+$row["jt"];
+
+							$query = "	select sum(rivihinta) rivihinta
+										from tilausrivi
+										where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and tunnus='$sarjarow[ostorivitunnus]'
+										LIMIT $limitti";
+							$sarjares = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($sarjares) > 0) {
+								$sarjarow = mysql_fetch_array($sarjares);
+
+								$kate = 100*($kotisumma_alviton - $sarjarow["rivihinta"])/$kotisumma_alviton;
+							}
+						}
+					}
+					elseif ($row["ei_saldoa"] == "" and $kukarow['extranet'] == '') {
+						$kate = 100*($kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"])))/$kotisumma_alviton;
+					}
+					
+					echo "<td $class align='right' valign='top' nowrap>".sprintf('%.2f',$kate)."%</td>";
 				}
 				
-				echo "	<td $class align='right' valign='top'>$row[alv]</td>";
+				echo "<td $class align='right' valign='top'>$row[alv]</td>";
 
 				if ($muokkauslukko == "") {
 
@@ -2173,7 +2067,7 @@ if ($tee == '') {
 				}
 
 				if ($row['kommentti'] != '') {
-					$cspan="";
+					$cspan=0;
 					if ($kukarow['hinnat'] == 1 and $kukarow['extranet'] != '') {
 						$cspan=7;
 					}
@@ -2263,49 +2157,162 @@ if ($tee == '') {
 				echo "</tr>";
 			}
 
-			//kaikki yhteensä ARVO
-			if ($kukarow['hinnat'] == 1 and $kukarow['extranet'] != '') {
-				$arvo 					= $bruttoyhteensa;
-				$arvo_kotimaa 			= $bruttoyhteensa;
-				$arvo_ulkomaa 			= $bruttoyhteensa;
-
-				$veroton_arvo 			= 0;
-				$veroton_arvo_kotimaa 	= 0;
-				$veroton_arvo_ulkomaa	= 0;
-
-				$kate 					= 0;
-				$kate_kotimaa 			= 0;
-				$kate_ulkomaa			= 0;
-			}
-			else {
-				$arvo 					= $yhteensa + $nettoyhteensa;
-				$arvo_kotimaa 			= $kotimaan_varastot_yhteensa + $nettokotimaan_varastot_yhteensa;
-				$arvo_ulkomaa			= $ulkomaan_varastot_yhteensa + $nettoulkomaan_varastot_yhteensa;
-
-				$veroton_arvo 			= $veroton_yhteensa + $veroton_nettoyhteensa;
-				$veroton_arvo_kotimaa 	= $veroton_kotimaan_varastot_yhteensa + $veroton_nettokotimaan_varastot_yhteensa;
-				$veroton_arvo_ulkomaa	= $veroton_ulkomaan_varastot_yhteensa + $veroton_nettoulkomaan_varastot_yhteensa;
-
-				$kate 					= $kate_yhteensa + $kate_nettoyhteensa;
-				$kate_kotimaa 			= $kate_kotimaan_varastot_yhteensa + $kate_nettokotimaan_varastot_yhteensa;
-				$kate_ulkomaa			= $kate_ulkomaan_varastot_yhteensa + $kate_nettoulkomaan_varastot_yhteensa;
-			}
-
-			$ycspan="";
+			$ycspan=0;
 
 			if ($kukarow['hinnat'] == 1 and $kukarow['extranet'] != '') {
-				$ycspan=3;
+				$ycspan=2;
 			}
 			elseif ($kukarow['hinnat'] == 0 and $kukarow['extranet'] != '') {
-				$ycspan=4;
+				$ycspan=3;
 			}
 			elseif($kukarow["resoluutio"] == "I") {
-				$ycspan=5;
-			}
-			else{
 				$ycspan=4;
 			}
+			else{
+				$ycspan=3;
+			}
+					
+			//Laskeskellaan tilauksen loppusummaa
+			$alvquery = "	SELECT if(isnull(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maakoodi]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
+							FROM tilausrivi
+							LEFT JOIN varastopaikat ON varastopaikat.yhtio = if(tilausrivi.var='S', if((SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro)!='', (SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro), tilausrivi.yhtio), tilausrivi.yhtio)
+		                    and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
+		                    and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) 
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.otunnus = '$kukarow[kesken]'
+							GROUP BY 1
+							ORDER BY 1";
+			$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
+					
+			$summa 					= 0; 	// Tilauksen verollinen loppusumma tilauksen valuutassa
+			$summa_eieri			= 0;	// Tilauksen verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$arvo  					= 0;	// Tilauksen veroton loppusumma tilauksen valuutassa
+			$arvo_eieri				= 0;	// Tilauksen veroton loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$kotiarvo				= 0;	// Tilauksen veroton loppusumma yhtiön valuutassa
+			$kotiarvo_eieri			= 0;	// Tilauksen veroton loppusumma yhtiön valuutassa ilman erikoisalennusta
+			$kate					= 0;	// Tilauksen kate yhtiön valuutassa
+			$kate_eieri				= 0;	// Tilauksen kate yhtiön valuutassa ilman erikoisalennusta
+			
+			$summa_kotimaa 			= 0;	// Kotimaan toimitusten verollinen loppusumma tilauksen valuutassa
+			$summa_kotimaa_eieri 	= 0;	// Kotimaan toimitusten verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$arvo_kotimaa			= 0;	// Kotimaan toimitusten veroton loppusumma tilauksen valuutassa
+			$arvo_kotimaa_eieri		= 0;	// Kotimaan toimitusten veroton loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$kotiarvo_kotimaa		= 0;	// Kotimaan toimitusten veroton loppusumma yhtiön valuutassa	
+			$kotiarvo_kotimaa_eieri	= 0;	// Kotimaan toimitusten veroton loppusumma yhtiön valuutassa ilman erikoisalennusta	
+			$kate_kotimaa			= 0;	// Kotimaan toimitusten kate yhtiön valuutassa
+			$kate_kotimaa_eieri		= 0;	// Kotimaan toimitusten kate yhtiön valuutassa ilman erikoisalennusta
+			
+			$summa_ulkomaa			= 0;	// Ulkomaan toimitusten verollinen loppusumma tilauksen valuutassa
+			$summa_ulkomaa_eieri	= 0;	// Ulkomaan toimitusten verollinen loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$arvo_ulkomaa			= 0;	// Ulkomaan toimitusten veroton loppusumma tilauksen valuutassa
+			$arvo_ulkomaa_eieri		= 0;	// Ulkomaan toimitusten veroton loppusumma tilauksen valuutassa ilman erikoisalennusta
+			$kotiarvo_ulkomaa		= 0;	// Ulkomaan toimitusten veroton loppusumma yhtiön valuutassa
+			$kotiarvo_ulkomaa_eieri	= 0;	// Ulkomaan toimitusten veroton loppusumma yhtiön valuutassa ilman erikoisalennusta		
+			$kate_ulkomaa			= 0;	// Ulkomaan toimitusten katee yhtiön valuutassa
+			$kate_ulkomaa_eieri		= 0;	// Ulkomaan toimitusten katee yhtiön valuutassa ilman erikoisalennusta
+			
+			while ($alvrow = mysql_fetch_array($alvresult)) {
+				
+				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+					$hinta_q = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
+				}
+				else {
+					$hinta_q = "tilausrivi.hinta";
+				}
+				
+				if ($alvrow["alv"] >= 500) {
+					$lisat = "	'0' alv,
+								$hinta_q * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
+								'0' alv_ei_erikoisaletta,
+								$hinta_q * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), 1) rivihinta_ei_erikoisaletta,								
+								tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) kotirivihinta,
+								tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), 1) kotirivihinta_ei_erikoisaletta";
+				}
+				else {
+					$lisat = "	$hinta_q / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) * (tilausrivi.alv/100) alv,
+								$hinta_q / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
+								$hinta_q / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), 1) * (tilausrivi.alv/100) alv_ei_erikoisaletta,
+								$hinta_q / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), 1) rivihinta_ei_erikoisaletta,
+								tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) kotirivihinta,
+								tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), 1) kotirivihinta_ei_erikoisaletta";
+				}
+				
+				$aquery = "	SELECT
+							tuote.sarjanumeroseuranta,
+							tuote.ei_saldoa,
+							tuote.tuoteno,
+							tuote.kehahin,
+							tilausrivi.tunnus,
+							tilausrivi.varattu+tilausrivi.jt varattu,
+							$lisat
+							FROM tilausrivi
+							JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+							WHERE tilausrivi.otunnus = '$kukarow[kesken]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus in ($alvrow[rivit])";
+				$aresult = mysql_query($aquery) or pupe_error($aquery);
+				
+				while($arow = mysql_fetch_array($aresult)) {					
+					$rivikate 		= 0;	// Rivin kate yhtiön valuutassa
+					$rivikate_eieri	= 0;	// Rivin kate yhtiön valuutassa ilman erikoisalennusta
+					
+					if ($arow["ei_saldoa"] == "" and $arow["sarjanumeroseuranta"] != "") {
 
+						$query = "select ostorivitunnus from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$arow[tuoteno]' and myyntirivitunnus='$arow[tunnus]'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+						$sarjarow = mysql_fetch_array($sarjares);
+
+						if ($sarjarow["ostorivitunnus"] != 0 and $sarjarow["ostorivitunnus"] != $arow["tunnus"] and $arow["varattu"] > 0) {
+							$query = "	select sum(rivihinta) rivihinta
+										from tilausrivi
+										where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and tunnus='$sarjarow[ostorivitunnus]'
+										LIMIT $arow[varattu]";
+							$sarjares = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($sarjares) > 0) {
+								$sarjarow = mysql_fetch_array($sarjares);
+
+								$rivikate 		= $arow["kotirivihinta"] - $sarjarow["rivihinta"];
+								$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $sarjarow["rivihinta"];
+							}
+						}
+					}
+					else {
+						$rivikate 		= $arow["kotirivihinta"]  - ($arow["kehahin"]*$arow["varattu"]);
+						$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - ($arow["kehahin"]*$arow["varattu"]);
+					}
+					
+					if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($yhtiorow["maakoodi"]))) {
+						$summa_kotimaa			+= $arow["rivihinta"]+$arow["alv"];
+						$summa_kotimaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
+						$arvo_kotimaa			+= $arow["rivihinta"];
+						$arvo_kotimaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
+						$kotiarvo_kotimaa		+= $arow["kotirivihinta"];
+						$kotiarvo_kotimaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
+						$kate_kotimaa			+= $rivikate;
+						$kate_kotimaa_eieri		+= $rivikate_eieri;	
+					
+					}
+					else {
+						$summa_ulkomaa			+= $arow["rivihinta"]+$arow["alv"];
+						$summa_ulkomaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
+						$arvo_ulkomaa			+= $arow["rivihinta"];
+						$arvo_ulkomaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
+						$kotiarvo_ulkomaa		+= $arow["kotirivihinta"];
+						$kotiarvo_ulkomaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
+						$kate_ulkomaa			+= $rivikate;
+						$kate_ulkomaa_eieri		+= $rivikate_eieri;
+					}
+					
+					$summa			+= $arow["rivihinta"]+$arow["alv"];
+					$summa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
+					$arvo			+= $arow["rivihinta"];
+					$arvo_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
+					$kotiarvo		+= $arow["kotirivihinta"];
+					$kotiarvo_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
+					$kate			+= $rivikate;
+					$kate_eieri		+= $rivikate_eieri;
+				}
+			}	
+						
 			//Jos myyjä on myymässä olkomaan varastoista liian pienellä summalla
 			if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
 				$ulkom_huom = "<font class='error'>".t("HUOM! Summa on liian pieni ulkomaantoimitukselle. Raja on").": $yhtiorow[suoratoim_ulkomaan_alarajasumma] $yhtiorow[valkoodi] --></font>";
@@ -2314,141 +2321,93 @@ if ($tee == '') {
 				$ulkom_huom = "";
 			}
 
-			//Jos myyjä ei ole extranetaaja ja hän myy useasta eri varastosta jotka sijaitsee useissa eri maissa niin näytetään maakohtaiset summat
-			if ($kukarow['extranet'] == '' and $arvo_ulkomaa != 0) {
-				echo "<tr>
-					<td class='back' colspan='$ycspan'></td>
-					<th colspan='4' align='right'>".t("Kotimaan varastoista").":</th>
-					<td class='spec' align='right'>".sprintf("%.2f",$arvo_kotimaa)."</td>";
-
-				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kotimaa/$arvo_kotimaa)."%</td>";
-				}
-
-				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
-
-				echo "<tr>
-					<td class='back' colspan='$ycspan' align='right'>$ulkom_huom</td>
-					<th colspan='4' align='right'>".t("Ulkomaan varastoista").":</th>
-					<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa)."</td>";
-
-				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_ulkomaa/$arvo_ulkomaa)."%</td>";
-				}
-
-				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
-			}
-
-			echo "<tr>
-				<td class='back' colspan='$ycspan'></td>
-				<th colspan='4' align='right'>".t("Tilaus yhteensä").":</th>
-				<td class='spec' align='right'>".sprintf("%.2f",$arvo)."</td>";
-
-			if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-				echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate/$arvo)."%</td>";
-			}
-
-			echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
-
-
-			//erikoisalennus annetaan vain riveille joilla EI ole NETTOHINTAA
-			if ($laskurow['erikoisale'] > 0 and $kukarow['hinnat'] != 1) {
-
-				//Kaikki myynti josta lasketaan erikoisalennus
-				$apu1 = (float) $laskurow['erikoisale']/100;	// erikoisale prosentti
-				$apu2 = round($yhteensa*$apu1,2); 				// erikoisalen määrä
-				$apu3 = round((1-$apu1)*$yhteensa,2);			// loppusumma
-
-				//Pelkästään kotimaan myynti josta lasketaan erikoisalennus
-				$kotimaa_apu1 = (float) $laskurow['erikoisale']/100;					// erikoisale prosentti
-				$kotimaa_apu2 = round($kotimaan_varastot_yhteensa*$kotimaa_apu1,2); 	// erikoisalen määrä
-				$kotimaa_apu3 = round((1-$kotimaa_apu1)*$kotimaan_varastot_yhteensa,2);	// loppusumma
-
-				//Pelkästään ulkomaan myynti josta lasketaan erikoisalennus
-				$ulkomaa_apu1 = (float) $laskurow['erikoisale']/100;					// erikoisale prosentti
-				$ulkomaa_apu2 = round($ulkomaan_varastot_yhteensa*$ulkomaa_apu1,2); 	// erikoisalen määrä
-				$ulkomaa_apu3 = round((1-$ulkomaa_apu1)*$ulkomaan_varastot_yhteensa,2);	// loppusumma
-
-
-				//Verottomat summat
-				//Kaikki myynti josta lasketaan erikoisalennus
-				$veroton_apu1 = (float) $laskurow['erikoisale']/100;			// erikoisale prosentti
-				$veroton_apu2 = round($veroton_yhteensa*$veroton_apu1,2); 		// erikoisalen määrä
-				$veroton_apu3 = round((1-$veroton_apu1)*$veroton_yhteensa,2);	// loppusumma
-
-				//Pelkästään kotimaan myynti josta lasketaan erikoisalennus
-				$veroton_kotimaa_apu1 = (float) $laskurow['erikoisale']/100;									// erikoisale prosentti
-				$veroton_kotimaa_apu2 = round($veroton_kotimaan_varastot_yhteensa*$veroton_kotimaa_apu1,2); 	// erikoisalen määrä
-				$veroton_kotimaa_apu3 = round((1-$veroton_kotimaa_apu1)*$veroton_kotimaan_varastot_yhteensa,2);	// loppusumma
-
-				//Pelkästään ulkomaan myynti josta lasketaan erikoisalennus
-				$veroton_ulkomaa_apu1 = (float) $laskurow['erikoisale']/100;									// erikoisale prosentti
-				$veroton_ulkomaa_apu2 = round($veroton_ulkomaan_varastot_yhteensa*$veroton_ulkomaa_apu1,2); 	// erikoisalen määrä
-				$veroton_ulkomaa_apu3 = round((1-$veroton_ulkomaa_apu1)*$veroton_ulkomaan_varastot_yhteensa,2);	// loppusumma
-
+			if ($arvo_ulkomaa > 0) {
 				echo "<tr>
 						<td class='back' colspan='$ycspan'></td>
-						<th colspan='4' align='right'>".t("Erikoisalennus")." ($laskurow[erikoisale]%):</th>
-						<td class='spec' align='right'>".sprintf("%.2f",$apu2)."</td>";
+						<th colspan='5' align='right'>".t("Kotimaan varastoista").":</th>
+						<td class='spec' align='right'>".sprintf("%.2f",$arvo_kotimaa_eieri)."</td>";
+
+				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kotimaa_eieri/$kotiarvo_kotimaa_eieri)."%</td>";
+				}
+				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
+		
+				echo "<tr>
+					<td class='back' colspan='$ycspan' align='right'>$ulkom_huom</td>
+					<th colspan='5' align='right'>".t("Ulkomaan varastoista").":</th>
+					<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa_eieri)."</td>";
+
+				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_ulkomaa_eieri/$kotiarvo_ulkomaa_eieri)."%</td>";
+				}
+				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
+			}
+			else {
+				echo "<tr>
+						<td class='back' colspan='$ycspan'></td>
+						<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
+						<td class='spec' align='right'>".sprintf("%.2f",$arvo_eieri)."</td>";
+
+				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_eieri/$kotiarvo_eieri)."%</td>";
+				}
+				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";	
+			}
+			
+			if ($laskurow["erikoisale"] > 0) {
+				echo "<tr>
+					<td class='back' colspan='$ycspan'></td>
+					<th colspan='5' align='right'>".t("Erikoisalennus")." $laskurow[erikoisale]%:</th>
+					<td class='spec' align='right'>".sprintf("%.2f",$arvo_eieri-$arvo)."</td>";
 
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 					echo "<td class='spec' align='right'></td>";
 				}
-
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
-
-				//Kaikki yhteensä
-				$kaikkiyhteensa 		= $apu3 + $nettoyhteensa;
-				$kotimaa_kaikkiyhteensa = $kotimaa_apu3 + $nettokotimaan_varastot_yhteensa;
-				$ulkomaa_kaikkiyhteensa = $ulkomaa_apu3 + $nettoulkomaan_varastot_yhteensa;
-
-
-				$kate_kaikkiyhteensa 		 = $kate_yhteensa - $veroton_apu2 + $kate_nettoyhteensa;
-				$kate_kotimaa_kaikkiyhteensa = $kate_kotimaan_varastot_yhteensa - $veroton_kotimaa_apu2 + $kate_nettokotimaan_varastot_yhteensa;
-				$kate_ulkomaa_kaikkiyhteensa = $kate_ulkomaan_varastot_yhteensa - $veroton_ulkomaa_apu3 + $kate_nettoulkomaan_varastot_yhteensa;
-
-
-				if ($kukarow['extranet'] == '' and $ulkomaa_kaikkiyhteensa != 0) {
+			
+				if ($arvo_ulkomaa > 0) {
 					echo "<tr>
-						<td class='back' colspan='$ycspan'></td>
-						<th colspan='4' align='right'>".t("Yhteensä kotimaa").":</th>
-						<td class='spec' align='right'>".sprintf("%.2f",$kotimaa_kaikkiyhteensa)."</td>";
+							<td class='back' colspan='$ycspan'></td>
+							<th colspan='5' align='right'>".t("Kotimaan varastoista").":</th>
+							<td class='spec' align='right'>".sprintf("%.2f",$arvo_kotimaa)."</td>";
 
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kotimaa_kaikkiyhteensa/$kotimaa_kaikkiyhteensa)."%</td>";
+						echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kotimaa/$kotiarvo_kotimaa)."%</td>";
 					}
-
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
-
+		
 					echo "<tr>
 						<td class='back' colspan='$ycspan' align='right'>$ulkom_huom</td>
-						<th colspan='4' align='right'>".t("Yhteensä ulkomaa").":</th>
-						<td class='spec' align='right'>".sprintf("%.2f",$ulkomaa_kaikkiyhteensa)."</td>";
+						<th colspan='5' align='right'>".t("Ulkomaan varastoista").":</th>
+						<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa)."</td>";
 
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_ulkomaa_kaikkiyhteensa/$ulkomaa_kaikkiyhteensa)."%</td>";
+						echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_ulkomaa/$kotiarvo_ulkomaa)."%</td>";
 					}
-
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
+				else {
+					echo "<tr>
+							<td class='back' colspan='$ycspan'></td>
+							<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
+							<td class='spec' align='right'>".sprintf("%.2f",$arvo)."</td>";
 
-				echo "<tr>
-					<td class='back' colspan='$ycspan'></td>
-					<th colspan='4' align='right'>".t("Yhteensä").":</th>
-					<td class='spec' align='right'>".sprintf("%.2f",$kaikkiyhteensa)."</td>";
-
-				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kaikkiyhteensa/$kaikkiyhteensa)."%</td>";
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate/$kotiarvo)."%</td>";
+					}
+					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";	
 				}
-
-				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
-
 			}
-			else {
-				$kaikkiyhteensa 		= $arvo;
-				$kotimaa_kaikkiyhteensa = $arvo_kotimaa;
-				$ulkomaa_kaikkiyhteensa = $arvo_ulkomaa;
+			
+			echo "<tr>
+					<td class='back' colspan='$ycspan'></td>
+					<th colspan='5' align='right'>".t("Verollinen yhteensä").":</th>
+					<td class='spec' align='right'>".sprintf("%.2f",$summa)."</td>";
+
+			if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+				echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate/$kotiarvo)."%</td>";
 			}
+			echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
 			//annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
 			if ($kukarow["extranet"] == "" and ($kukarow['kassamyyja'] != '' or $toim == "TARJOUS")) {
@@ -2456,9 +2415,7 @@ if ($tee == '') {
 				if ($jyvsumma== '') {
 					$jyvsumma='0.00';
 				}
-
-
-
+				
 				if ($toim == "TARJOUS") {
 					echo "<form name='valmis' action='tulostakopio.php' method='post'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
@@ -2486,7 +2443,7 @@ if ($tee == '') {
 						<input type='hidden' name='tee' value='jyvita'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='arvo' value='$arvo'>
-						<th colspan='4'>".t("Pyöristä loppusummaa").":</th>
+						<th colspan='5'>".t("Pyöristä loppusummaa").":</th>
 						<td class='spec'><input type='text' size='7' name='jyvsumma' value='$jyvsumma'></td>
 						<td class='spec'>$laskurow[valkoodi]</td>
 						<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."'></td>

@@ -3,7 +3,19 @@
 // Tämä skripti käyttää slave-tietokantapalvelinta
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+if (isset($_POST["tee"])) {
+	if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+	if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+}
+
+require("../inc/parametrit.inc");
+
+if (isset($tee)) {
+	if ($tee == "lataa_tiedosto") {
+		echo $file;
+		exit;
+	}
+}
 
 echo "<font class='head'>".t("Ostoehdotus")."</font><hr>";
 
@@ -421,16 +433,18 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	   					sum(if (laskutettuaika >= '$vva2ed-$kka2ed-$ppa2ed' and laskutettuaika <= '$vvl2ed-$kkl2ed-$ppl2ed' ,kpl,0)) EDkpl2,
 	   					sum(if (laskutettuaika >= '$vva3ed-$kka3ed-$ppa3ed' and laskutettuaika <= '$vvl3ed-$kkl3ed-$ppl3ed' ,kpl,0)) EDkpl3,
 	   					sum(if (laskutettuaika >= '$vva4ed-$kka4ed-$ppa4ed' and laskutettuaika <= '$vvl4ed-$kkl4ed-$ppl4ed' ,kpl,0)) EDkpl4,
-	   					sum(if (laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,kate,0)) kate1,
-	   					sum(if (laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,kate,0)) kate2,
-	   					sum(if (laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,kate,0)) kate3,
-	   					sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kate,0)) kate4,
+	   					sum(if (laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.kate,0)) kate1,
+	   					sum(if (laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,tilausrivi.kate,0)) kate2,
+	   					sum(if (laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,tilausrivi.kate,0)) kate3,
+	   					sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.kate,0)) kate4,
 	   					sum(if (laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,rivihinta,0)) rivihinta1,
 	   					sum(if (laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,rivihinta,0)) rivihinta2,
 	   					sum(if (laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,rivihinta,0)) rivihinta3,
 	   					sum(if (laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,rivihinta,0)) rivihinta4
 	   					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-	   					WHERE yhtio = '$valittuyhtio'
+						JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+						JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and konserniyhtio = '')
+	   					WHERE tilausrivi.yhtio = '$valittuyhtio'
 	   					and tyyppi='L'
 	   					and tuoteno = '$row[tuoteno]'
 	   					and ((laskutettuaika >= '$apvm' and laskutettuaika <= '$lpvm') or laskutettuaika = '0000-00-00')";
@@ -466,12 +480,13 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$tuoterivi .= str_replace(".",",",$laskurow['EDkpl4'])."\t";
 
 			// Kate
-			$tuoterivi .= str_replace(".",",",$laskurow['kate1'])."\t";
 			$headerivi .= "$valittuyhtio kate1\t";
-			$tuoterivi .= str_replace(".",",",$laskurow['kate2'])."\t";
+			$tuoterivi .= str_replace(".",",",$laskurow['kate1'])."\t";
 			$headerivi .= "$valittuyhtio kate2\t";
-			$tuoterivi .= str_replace(".",",",$laskurow['kate3'])."\t";
+			$tuoterivi .= str_replace(".",",",$laskurow['kate2'])."\t";
 			$headerivi .= "$valittuyhtio kate3\t";
+			$tuoterivi .= str_replace(".",",",$laskurow['kate3'])."\t";
+			$headerivi .= "$valittuyhtio kate4\t";
 			$tuoterivi .= str_replace(".",",",$laskurow['kate4'])."\t";
 			$headerivi .= "$valittuyhtio katepro1\t";
 			$tuoterivi .= str_replace(".",",",$katepros1)."\t";
@@ -492,6 +507,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$headerivi .= "$valittuyhtio puutekpl4\t";
 			$tuoterivi .= str_replace(".",",",$laskurow['puutekpl4'])."\t";
 
+/*
+			// kommentoidaan kuluts nyt näin aluksi turhana
 			// lasketaan tuotteen kulutus
 			$query = "	SELECT
 						sum(if (toimitettuaika >= '$vva1-$kka1-$ppa1' and toimitettuaika <= '$vvl1-$kkl1-$ppl1' ,kpl,0)) kpl1,
@@ -527,14 +544,16 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$tuoterivi .= str_replace(".",",",$kulutrow['EDkpl3'])."\t";
 			$headerivi .= "$valittuyhtio kulu edkpl4\t";
 			$tuoterivi .= str_replace(".",",",$kulutrow['EDkpl4'])."\t";
-
+*/
 			//tilauksessa, ennakkopoistot ja jt
-			$query = "	SELECT yhtio,
+			$query = "	SELECT tilausrivi.yhtio,
 						sum(if(tyyppi='O', varattu, 0)) tilattu,
 						sum(if(tyyppi='L' or tyyppi='V', varattu, 0)) ennpois,
 						sum(if(tyyppi='L' or tyyppi='G', jt, 0)) jt
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-						WHERE yhtio = '$valittuyhtio'
+						JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+						JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and konserniyhtio = '')
+						WHERE tilausrivi.yhtio = '$valittuyhtio'
 	 					and tyyppi in ('L','V','O','G')
 						and tuoteno = '$row[tuoteno]'
 						and laskutettuaika = '0000-00-00'
@@ -552,12 +571,15 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$headerivi .= "$valittuyhtio jt kpl\t";
 			$tuoterivi .= str_replace(".",",",$ennp['jt'])."\t";
 
-			if ($varastot_maittain == "kylla") {
+			if ($varastot_maittain == "KYLLA") {
+
 				foreach ($valitutmaat as $maarivi) {
+
 					list($yhtio, $maa) = split("#",$maarivi);
+
 					if ($yhtio == $valittuyhtio) {
 						// Kaikkien valittujen varastojen saldo per maa
-						$query = "	SELECT sum(saldo) saldo
+						$query = "	SELECT ifnull(sum(saldo),0) saldo
 									FROM tuotepaikat
 									JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 									and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
@@ -567,11 +589,45 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 									and tuotepaikat.tuoteno = '$row[tuoteno]'";
 						$result = mysql_query($query) or pupe_error($query);
 
-						while ($varrow = mysql_fetch_array($result)) {
+						if (mysql_num_rows($result) > 0) {
+							while ($varrow = mysql_fetch_array($result)) {
+								$headerivi .= "$valittuyhtio $maa saldo\t";
+								$tuoterivi .= str_replace(".",",",$varrow['saldo'])."\t";
+							}
+						}
+						else {
 							$headerivi .= "$valittuyhtio $maa saldo\t";
-							$tuoterivi .= $varrow['saldo']."\t";
+							$tuoterivi .= "0\t";
 						}
 					}
+				}
+			}
+
+		}
+
+		if ($varastot_paikoittain == "KYLLA") {
+
+			foreach ($valitutvarastot as $varastotunnus) {
+
+				// saldot per varasto
+				$query = "	SELECT nimitys, ifnull(sum(saldo),0) saldo
+							FROM varastopaikat
+							JOIN tuotepaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+							and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+							and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+							and tuotepaikat.tuoteno = '$row[tuoteno]'
+							WHERE varastopaikat.tunnus = '$varastotunnus'
+							GROUP BY 1";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) > 0) {
+					$varrow = mysql_fetch_array($result);
+					$headerivi .= "$varrow[nimitys] saldo\t";
+					$tuoterivi .= str_replace(".",",",$varrow['saldo'])."\t";
+				}
+				else {
+					$headerivi .= "$varrow[nimitys] saldo\t";
+					$tuoterivi .= "0\t";
 				}
 			}
 
@@ -604,7 +660,28 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
 	}
 
-	echo "<pre>$headerivi\n$rivi</pre>";
+	$timeparts = explode(" ",microtime());
+	$loppu     = $timeparts[1].substr($timeparts[0],1);
+	$aika      = round($loppu-$alkuaika,4);
+
+	echo t("Toteutunut ajon kesto")." $aika sec.<br><br>";
+
+	$file = "$headerivi\n$rivi";
+
+	echo "<form method='post' action='$PHP_SELF'>";
+
+	echo "<table>";
+	echo "<tr><th>".t("Tallenna tulos")."</th>";
+	echo "<td>";
+	echo "<input type='radio' name='kaunisnimi' value='ostoehdotus.xls' checked> Excel-muodossa<br>";
+	echo "<input type='radio' name='kaunisnimi' value='ostoehdotus.csv'> OpenOffice-muodossa<br>";
+	echo "<input type='radio' name='kaunisnimi' value='ostoehdotus.txt'> Tekstitiedostona";
+	echo "</td>";
+	echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+	echo "<input type='hidden' name='file' value='$file'>";
+	echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
+	echo "</table>";
+	echo "</form>";
 }
 
 
@@ -849,7 +926,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 			}
 
 			if ($vlask == 0) {
-				echo "<tr><th rowspan='".mysql_num_rows($presult)."'>Huomioi yhtiön tiedot:</th>";
+				echo "<tr><th rowspan='".mysql_num_rows($presult)."'>Huomioi yhtiön tiedot/myynnit:</th>";
 			}
 			else {
 				echo "<tr>";

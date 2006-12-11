@@ -2261,10 +2261,13 @@ if ($tee == '') {
 						$sarjarow = mysql_fetch_array($sarjares);
 
 						if ($sarjarow["ostorivitunnus"] != 0 and $sarjarow["ostorivitunnus"] != $arow["tunnus"] and $arow["varattu"] > 0) {
+							
+							$limitti = (int) round($arow["varattu"],0);
+							
 							$query = "	select sum(rivihinta) rivihinta
 										from tilausrivi
-										where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and tunnus='$sarjarow[ostorivitunnus]'
-										LIMIT $arow[varattu]";
+										where yhtio='$kukarow[yhtio]' and tuoteno='$arow[tuoteno]' and tunnus='$sarjarow[ostorivitunnus]'
+										LIMIT $limitti";
 							$sarjares = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($sarjares) > 0) {

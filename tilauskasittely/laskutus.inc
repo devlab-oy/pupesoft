@@ -27,7 +27,6 @@ if (mysql_num_rows($laskutusres) == 0) {
 else {
 
 	// tilaus löytyi kaikki hyvin....
-
 	$orow = mysql_fetch_array($laskutusres);
 
 	if ($orow['erikoisale'] != 0) {
@@ -310,7 +309,15 @@ else {
 	$viivastyskorko = $yhtiorow['viivastyskorko'];
 	if($korkolasku == "kylla") $viivastyskorko = $orow['viivastyskorko'];
 	
-	if ($yhtiorow["laskunsummapyoristys"] == 'o') {
+	
+	// Etsitään asiakas
+	$query = "	SELECT laskunsummapyoristys
+				FROM asiakas
+				WHERE tunnus='$orow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+	$asres = mysql_query($query) or pupe_error($query);
+	$asrow = mysql_fetch_array($asres);
+	
+	if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
         $loppusumma = round($loppusumma,0);
 	}
 	

@@ -156,6 +156,11 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(695, 300, 674, 580, $firstpage, $rectparam);
 		$pdf->draw_rectangle(695, 420, 674, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 687, t("Asiakkaan Y-tunnus", $kieli), 	$firstpage, $pieni);
+		
+		if (substr(trim(strtoupper($laskurow["ytunnus"]))),0,2) != strtoupper($laskurow["maa"]) and trim(strtoupper($laskurow["maa"])) != trim(strtoupper($yhtiorow["maakoodi"]))) {
+			$laskurow["ytunnus"] = strtoupper($laskurow["maa"])."-".$laskurow["ytunnus"];
+		}
+		
 		$pdf->draw_text(310, 677, $laskurow["ytunnus"], 			$firstpage, $norm);
 		$pdf->draw_text(430, 687, t("Asiakasnumero", $kieli), 		$firstpage, $pieni);
 		$pdf->draw_text(430, 677, $laskurow["ytunnus"], 			$firstpage, $norm);

@@ -1811,12 +1811,16 @@ if ($tee == '') {
 									where yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$row[tuoteno]'
 									and laji	= 'nimitys_".$kukarow["kieli"]."'
+									and selite != ''
 									LIMIT 1";
 						$pkres = mysql_query($query) or pupe_error($query);	
 
 						if (mysql_num_rows($pkres) > 0) {
 							$pkrow = mysql_fetch_array($pkres);
 							$nimitys = $pkrow["selite"];
+						}
+						else {
+							$nimitys = $row["nimitys"];
 						}
 					}
 					else {

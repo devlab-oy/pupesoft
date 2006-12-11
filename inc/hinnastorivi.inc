@@ -40,9 +40,9 @@
 		}
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Normaali hinta")."</option>";
-		$ulos .= "<option value='N' $chkn>".t("N-Netto hinta")."</option>";
-		$ulos .= "<option value='E' $chke>".t("E-Netto hinta")."</option>";
+		$ulos .= "<option value=''>".t("Bruttohinta")."</option>";
+		$ulos .= "<option value='N' $chkn>".t("N-Nettohinta")."</option>";
+		$ulos .= "<option value='E' $chke>".t("E-Nettohinta")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

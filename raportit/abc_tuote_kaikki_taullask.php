@@ -71,6 +71,7 @@
 		echo "Tuoteno\t";
 		echo "Toim_tuoteno\t";
 		echo "Nimitys\t";
+		echo "Merkki\t";
 		echo "Osasto\t";
 		echo "Try\t";
 		echo "Myynti$yhtiorow[valkoodi]\t";
@@ -167,7 +168,7 @@
 			while ($row = mysql_fetch_array($res)) {
 
 				//tuotenimi
-				$query = "	SELECT tuote.nimitys, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno
+				$query = "	SELECT tuote.nimitys, tuote.tuotemerkki, group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno
 							FROM tuotteen_toimittajat
 							JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno
 							WHERE tuotteen_toimittajat.tuoteno='$row[tuoteno]'
@@ -191,6 +192,7 @@
 					echo "$row[tuoteno]\t";
 					echo "$tuorow[toim_tuoteno]\t";
 					echo "$tuorow[nimitys]\t";
+					echo "$tuorow[tuotemerkki]\t";
 					echo "$row[osasto]\t";
 					echo "$row[try]\t";
 					echo str_replace(".",",",sprintf('%.1f',$row["summa"]))."\t";

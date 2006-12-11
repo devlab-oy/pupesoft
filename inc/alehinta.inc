@@ -17,6 +17,9 @@
 
 	$aperuste = "";
 
+	// oletetaan yhtiön valuutta jos sitä ei tiedetä
+	if ($laskurow["valkoodi"] == "") $laskurow["valkoodi"] = $yhtiorow["valkoodi"];
+
 	// haetaan asiakkaan tiedot
 	$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 	$alhire = mysql_query($query) or pupe_error($query);
@@ -40,7 +43,7 @@
 			$aperuste .= "Käyttäjän antama hinta ";
 		}
 
-		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+		if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$hinta = yhtioval($hinta, $laskurow["vienti_kurssi"]);
 		}
 	}
@@ -48,79 +51,60 @@
 
 		$hinta = 0;
 
-		// 2. tuote.hinnastohinta laskun valuutassa
-		if ($hinta == 0 and $laskurow["valkoodi"] != '') {
+		// 2. asiakas.ytunnus tuote.aleryhmä negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
+		if ($hinta == 0) {
 
-			$query = "	SELECT hinta, laji
-						FROM hinnasto
-						WHERE yhtio  = '$kukarow[yhtio]'
-						and tuoteno  = '$trow[tuoteno]'
-						and tuoteno != ''
-						and valkoodi = '$laskurow[valkoodi]'
+			$query = "	SELECT alennus
+						FROM asiakasalennus
+						WHERE yhtio = '$kukarow[yhtio]'
+						and ytunnus = '$laskurow[ytunnus]'
+						and ytunnus != ''
+						and asiakas_ryhma = ''
+						and ryhma = '$trow[aleryhma]'
+						and ryhma != ''
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						and (alennus < 0 or left(alennus,1) = '-')
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow       = mysql_fetch_array ($hresult);
-				$hinta 		= yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
-				$netto		= $hrow["laji"];
-				$aperuste  .= "Tuotteen hinnastohinta laskun valuutassa. ";
+
+				$hrow = mysql_fetch_array($hresult);
+
+				//Tässä katotaan onko epäkuranttiutta
+				$kokoepakurantti = "";
+
+				if ($trow["epakurantti2pvm"] != "0000-00-00") {
+					$trow["kehahin"] = 0;
+					$kokoepakurantti = "ON";
+				}
+				elseif ($trow["epakurantti1pvm"] != "0000-00-00") {
+					$trow["kehahin"] = $trow["kehahin"]/2;
+				}
+
+				// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
+				if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
+					$hinta 		= 0.01;
+					$ale		= 0;
+					$netto		= "";
+					$aperuste 	.= "Katemyyntihinta (kokoepäkurantti). ";
+				}
+				elseif ($trow['kehahin'] > 0) {
+					if ($yhtiorow['alv_kasittely']=='')
+						$hinta	= round(($trow['kehahin'] * (1+($trow['alv']/100))) * (1+(abs($hrow["alennus"])/100)) ,2);
+					else
+						$hinta	= round(($trow['kehahin']  * (1+(abs($hrow["alennus"])/100))) ,2);
+
+					$ale		= 0;
+					$netto		= "";
+					$aperuste 	.= "Katemyyntihinta. ";
+				}
 			}
+
 		}
 
-		// 3. asiakas.ytunnus tuote.aleryhmä negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
-		$query = "	SELECT alennus
-					FROM asiakasalennus
-					WHERE yhtio = '$kukarow[yhtio]'
-					and ytunnus = '$laskurow[ytunnus]'
-					and ytunnus != ''
-					and asiakas_ryhma = ''
-					and ryhma = '$trow[aleryhma]'
-					and ryhma != ''
-					and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-					and (alennus < 0 or left(alennus,1) = '-')
-					ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
-					LIMIT 1";
-		$hresult = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($hresult) > 0) {
-
-			$hrow = mysql_fetch_array($hresult);
-
-			//Tässä katotaan onko epäkuranttiutta
-			$kokoepakurantti = "";
-
-			if ($trow["epakurantti2pvm"] != "0000-00-00") {
-				$trow["kehahin"] = 0;
-				$kokoepakurantti = "ON";
-			}
-			elseif ($trow["epakurantti1pvm"] != "0000-00-00") {
-				$trow["kehahin"] = $trow["kehahin"]/2;
-			}
-
-			// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
-			if ($trow['kehahin'] == 0 and $kokoepakurantti == "ON") {
-				$hinta 		= 0.01;
-				$ale		= 0;
-				$netto		= "";
-				$aperuste 	.= "Katemyyntihinta (kokoepäkurantti). ";
-			}
-			elseif ($trow['kehahin'] > 0) {
-				if ($yhtiorow['alv_kasittely']=='')
-					$hinta	= round(($trow['kehahin'] * (1+($trow['alv']/100))) * (1+(abs($hrow["alennus"])/100)) ,2);
-				else
-					$hinta	= round(($trow['kehahin']  * (1+(abs($hrow["alennus"])/100))) ,2);
-
-				$ale		= 0;
-				$netto		= "";
-				$aperuste 	.= "Katemyyntihinta. ";
-			}
-		}
-
-		// 4. asiakas.ryhmä tuote.aleryhmä negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
+		// 3. asiakas.ryhmä tuote.aleryhmä negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
 		if ($hinta == 0) {
 
 			$query = "	SELECT alennus
@@ -169,9 +153,10 @@
 					$aperuste 	.= "Asiakasryhmä Katemyyntihinta. ";
 				}
 			}
+
 		}
 
-		// 5. asiakas.ytunnus tuote.aleryhmä aleprosentti == 999.99 (asiakkaan myymälähinta)
+		// 4. asiakas.ytunnus tuote.aleryhmä aleprosentti == 999.99 (asiakkaan myymälähinta)
 		if ($hinta == 0) {
 
 			$query = "	SELECT alennus
@@ -210,7 +195,55 @@
 			}
 		}
 
-		// 6. asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta)
+		// 5. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
+		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT hinta, laji
+						FROM hinnasto
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tuoteno  = '$trow[tuoteno]'
+						and tuoteno != ''
+						and laji in ('N', 'E')
+						and valkoodi = '$laskurow[valkoodi]'
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow       = mysql_fetch_array ($hresult);
+				$hinta 		= yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+				$netto		= $hrow["laji"];
+				$aperuste  .= "Tuotteen hinnastohinta laskun valuutassa";
+			}
+		}
+
+		// 6. hinnasto.hinta tuotteen nettohinta hinnastosta yhtiön valuutassa
+		if ($hinta == 0) {
+
+			$query = "	SELECT hinta, laji
+						FROM hinnasto
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tuoteno  = '$trow[tuoteno]'
+						and tuoteno != ''
+						and laji in ('N', 'E')
+						and valkoodi = '$yhtiorow[valkoodi]'
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow       = mysql_fetch_array ($hresult);
+				$hinta 		= $hrow["hinta"];
+				$netto		= $hrow["laji"];
+				$aperuste  .= "Tuotteen hinnastohinta yhtiön valuutassa";
+			}
+		}
+
+		// 7. asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta)
 		if ($hinta == 0) {
 
 			$query = "	SELECT hinta
@@ -249,7 +282,7 @@
 			}
 		}
 
-		// 7. asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta)
+		// 8. asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta)
 		if ($hinta == 0) {
 
 			$query = "	SELECT hinta
@@ -288,7 +321,7 @@
 			}
 		}
 
-		// 8. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta)
+		// 9. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta)
 		if ($hinta == 0) {
 
 			$query = "	SELECT hinta
@@ -328,7 +361,7 @@
 			}
 		}
 
-		// 9. asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta)
+		// 10. asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta)
 		if ($hinta == 0) {
 
 			$query = "	SELECT hinta
@@ -368,7 +401,7 @@
 			}
 		}
 
-		// 10. tuote.nettohinta (tuotteen nettohinta)
+		// 11. tuote.nettohinta (tuotteen nettohinta)
 		if ($hinta == 0 and $netto != 'E' and $trow['nettohinta'] > 0) {
 			$hinta 			= $trow['nettohinta'];
 			$aperuste 		.= "Tuotteen nettohinta. ";
@@ -376,11 +409,60 @@
 			$ale			= 0;
 		}
 
-		// 11. tuote.myyntihinta (tuotteen bruttohinta)
+		// 12. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
+		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT hinta, laji
+						FROM hinnasto
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tuoteno  = '$trow[tuoteno]'
+						and tuoteno != ''
+						and laji     = ''
+						and valkoodi = '$laskurow[valkoodi]'
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow       = mysql_fetch_array ($hresult);
+				$hinta 		= yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+				$netto		= $hrow["laji"];
+				$aperuste  .= "Tuotteen hinnastohinta laskun valuutassa";
+			}
+		}
+
+		// 13. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtion valuutassa
+		if ($hinta == 0) {
+
+			$query = "	SELECT hinta, laji
+						FROM hinnasto
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tuoteno  = '$trow[tuoteno]'
+						and tuoteno != ''
+						and laji     = ''
+						and valkoodi = '$yhtiorow[valkoodi]'
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow       = mysql_fetch_array ($hresult);
+				$hinta 		= $hrow["hinta"];
+				$netto		= $hrow["laji"];
+				$aperuste  .= "Tuotteen hinnastohinta yhtiön valuutassa";
+			}
+		}
+
+		// 14. tuote.myyntihinta (tuotteen bruttohinta)
 		if ($hinta == 0) {
 			$hinta		= $trow['myyntihinta'];
 			$aperuste	.= "Tuotteen myyntihinta. ";
 		}
+
 	}
 
 	if (substr($ale,-1) == "+") {
@@ -539,7 +621,7 @@
 		$ale = 0;
 	}
 
-	//$debug=1;
-	if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: $ale ".t("% HINTA")." $hinta $laskurow[valkoodi]<br>";
+	// $debug = 1;
+	if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: $ale ".t("% HINTA")." $hinta $yhtiorow[valkoodi]<br><br>";
 
 ?>

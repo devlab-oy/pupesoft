@@ -86,7 +86,13 @@
 		}
 		elseif (mysql_num_rows($thresult) == 1) {
 			$trow = mysql_fetch_array($thresult);
-			$tuoteno = $trow['tuoteno'];
+			
+			if($konsernihaku == "KYLLA") {
+				$tuoteno = $trow['tuoteno']."####$trow[yhtio]";
+			}
+			else {
+				$tuoteno = $trow['tuoteno'];
+			}
 		}
 		elseif (mysql_num_rows($thresult) != 1) {
 
@@ -196,8 +202,6 @@
 				$tuoteno = $trivi['tuoteno'];
 			}
 		}
-
-
 
 		if(strpos($tuoteno, '####') !== FALSE and $konsernihaku == "KYLLA") {
 			$hakyhtio	= substr($tuoteno, strpos($tuoteno, '####')+4);

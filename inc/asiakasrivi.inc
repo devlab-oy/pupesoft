@@ -475,6 +475,27 @@
 		$ulos = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "laskunsummapyoristys") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1="";
+		$sel2="";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		else {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value='' $sel1>".t("Laskun loppusummaa ei pyöristetä")."</option>";
+		$ulos .= "<option value='o' $sel2>".t("Laskun loppusumma pyöristetään lahimpään kokonaislukuun")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "kieli") {
 

@@ -368,14 +368,16 @@
 					$ures  = mysql_query($query) or pupe_error($query);
 
 					// verkkolaskutettavat EU-viennit menee alatilaan D, jos niillä on tarpeeksi lisätietoja
-					$query = "	update lasku set alatila = 'D' where
-								yhtio='$kukarow[yhtio]' and
-								tunnus in ($otunnukset) and
-								vienti = 'E' and
-								chn = '020' and
-								maa_maara != '' and
-								kauppatapahtuman_luonne != '' and
-								kuljetusmuoto != ''";
+					$query = "	update lasku set 
+								alatila = 'D',
+								bruttopaino = '$kilotyht' 
+								where yhtio = '$kukarow[yhtio]' 
+								and tunnus in ($otunnukset) 
+								and vienti = 'E' 
+								and chn = '020' 
+								and maa_maara != '' 
+								and kauppatapahtuman_luonne != '' 
+								and kuljetusmuoto != ''";
 					$ures  = mysql_query($query) or pupe_error($query);
 				}
 			}

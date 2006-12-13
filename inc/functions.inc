@@ -125,6 +125,13 @@ if (!function_exists("tv2dateconv")) {
 	}
 }
 
+if (!function_exists("dateconv")) {
+	function dateconv ($date) {
+		//k‰‰nt‰‰ vvkkmm muodon muotoon vv-kk-mm
+		return substr($date,0,2). "-" . substr($date,2,2) . "-". substr($date,4,2);
+	}
+}
+
 if (!function_exists("t")) {
 	function t($stringi, $kieli = "") {
 

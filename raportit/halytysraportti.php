@@ -253,15 +253,6 @@ if ($temp_asiakasno != '' or $asiakasno != '') {
 	$sarakkeet["SARAKE55"] = t("myynti asiakas")." $asiakasno $kausi4\t";
 }
 
-$sarakkeet["SARAKE56"] = t("Korvaavat Tuoteno")."\t";
-$sarakkeet["SARAKE57"] = t("Korvaavat Saldo")."\t";
-$sarakkeet["SARAKE58"] = t("Korvaavat Ennpois")."\t";
-$sarakkeet["SARAKE59"] = t("Korvaavat Tilauksessa")."\t";
-$sarakkeet["SARAKE60"] = t("Korvaavat Myyty")." $kausi1\t";
-$sarakkeet["SARAKE61"] = t("Korvaavat Myyty")." $kausi2\t";
-$sarakkeet["SARAKE62"] = t("Korvaavat Myyty")." $kausi3\t";
-$sarakkeet["SARAKE63"] = t("Korvaavat Myyty")." $kausi4\t";
-
 // aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
 $query = "describe yhteensopivuus_rekisteri";
 $res = mysql_query($query);
@@ -274,6 +265,15 @@ if (mysql_error() == "") {
 		$sarakkeet["SARAKE64"] = "Rekisteröidyt kpl\t";
 	}
 }
+
+$sarakkeet["SARAKE56"] = t("Korvaavat Tuoteno")."\t";
+$sarakkeet["SARAKE57"] = t("Korvaavat Saldo")."\t";
+$sarakkeet["SARAKE58"] = t("Korvaavat Ennpois")."\t";
+$sarakkeet["SARAKE59"] = t("Korvaavat Tilauksessa")."\t";
+$sarakkeet["SARAKE60"] = t("Korvaavat Myyty")." $kausi1\t";
+$sarakkeet["SARAKE61"] = t("Korvaavat Myyty")." $kausi2\t";
+$sarakkeet["SARAKE62"] = t("Korvaavat Myyty")." $kausi3\t";
+$sarakkeet["SARAKE63"] = t("Korvaavat Myyty")." $kausi4\t";
 
 //Jos halutaan tallentaa päivämäärät profiilin taakse
 if ($valitut["TALLENNAPAIVAM"] == "TALLENNAPAIVAM") {
@@ -1000,6 +1000,16 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 			if($valitut["SARAKE55"] != '') $apurivi .= str_replace(".",",",$asrow['kpl4'])."\t";
 		}
 
+		if($valitut["SARAKE64"] != '') {
+			$query = "	select count(*) kpl
+						from yhteensopivuus_tuote
+						join yhteensopivuus_rekisteri on (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio and yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
+						where yhteensopivuus_tuote.yhtio='$kukarow[yhtio]' and yhteensopivuus_tuote.tuoteno='$row[tuoteno]'";
+			$asresult = mysql_query($query) or pupe_error($query);
+			$kasrow = mysql_fetch_array($asresult);
+			$apurivi .= $kasrow['kpl']."\t";
+		}
+
 		//korvaavat tuotteet
 		$query  = "	SELECT id
 					FROM korvaavat
@@ -1073,17 +1083,6 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 			if($valitut["SARAKE61"] != '') $apurivi .= str_replace(".",",",$kasrow['kpl2'])."\t";
 			if($valitut["SARAKE62"] != '') $apurivi .= str_replace(".",",",$kasrow['kpl3'])."\t";
 			if($valitut["SARAKE63"] != '') $apurivi .= str_replace(".",",",$kasrow['kpl4'])."\t";
-
-			if($valitut["SARAKE64"] != '') {
-				$query = "	select count(*) kpl
-							from yhteensopivuus_tuote
-							join yhteensopivuus_rekisteri on (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio and yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
-							where yhteensopivuus_tuote.yhtio='$kukarow[yhtio]' and yhteensopivuus_tuote.tuoteno='$row[tuoteno]'";
-				$asresult = mysql_query($query) or pupe_error($query);
-				$kasrow = mysql_fetch_array($asresult);
-				$apurivi .= $kasrow['kpl']."\t";
-			}
-
 		}
 
 		$apurivi .= "\r\n";

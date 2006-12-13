@@ -1,6 +1,6 @@
 <?php
 
-require "../inc/parametrit.inc";
+require("../inc/parametrit.inc");
 
 //HUOMHUOM!!
 $query = "SET SESSION group_concat_max_len = 100000";
@@ -20,7 +20,7 @@ if ($kukarow["kirjoitin"] == 0) {
 if ($tee == 'LAHETA') {
 
 	//tulostetaan korkoerittely
-	require('paperikorkolasku.php');
+	require('tulosta_korkoerittely.inc');
 
 	//tehdään itse korkolasku (tämä skripti kutsuu tilaus-valmis ohjelmaa joka tekee melekin kaiken meille)
 	require('tee_korkolasku.inc');
@@ -340,6 +340,6 @@ if ($tee == "") {
 	echo "</table>";
 }
 
-require "../inc/footer.inc";
+require("../inc/footer.inc");
 
 ?>

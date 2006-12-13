@@ -1268,8 +1268,10 @@
 					while ($tilrow = mysql_fetch_array($tilres)) {
 						$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);
 						$totalvat  = round($tilrow['rivihinta']+$vatamount, 2);
+						
 						$tilrow['kommentti'] = str_replace(array("\r\n","\r","\n")," ", $tilrow['kommentti']);
-
+						$tilrow['nimitys'] = ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|%\r\n]", "", $tilrow['nimitys']);
+						
 						if ($lasrow["chn"] == "111") {
 							$query = "	select eankoodi
 										from tuote
@@ -1379,6 +1381,12 @@
 				} // end if lasrow.summa != 0
 				elseif ($lasrow["sisainen"] != '') {
 					$tulos_ulos .= "<br>\n".t("Tehtiin sis‰inen lasku")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+					
+					// Sis‰isi‰ laskuja ei normaaalisti tuloseta paitski jos meill‰ on valittu_tulostin
+					if ($valittu_tulostin != '') {
+						$tulostettavat[] = $lasrow["laskunro"];
+						$lask++;
+					}
 				}
 				elseif ($masrow["kateinen"] != '') {
 					if ($silent == "") {

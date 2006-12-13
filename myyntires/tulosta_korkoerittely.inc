@@ -172,8 +172,6 @@
 
 	}
 
-	require('../inc/parametrit.inc');
-
 	require('../pdflib/phppdflib.class.php');
 
 	//echo "<font class='message'>Karhukirje tulostuu...</font>";
@@ -260,7 +258,7 @@
 	//keksitään uudelle failille joku varmasti uniikki nimi:
 	list($usec, $sec) = explode(' ', microtime());
 	mt_srand((float) $sec + ((float) $usec * 100000));
-	$pdffilenimi = "/tmp/karhukirje-".md5(uniqid(mt_rand(), true)).".pdf";
+	$pdffilenimi = "/tmp/korkoerittely-".md5(uniqid(mt_rand(), true)).".pdf";
 
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");
@@ -272,8 +270,15 @@
 				from kirjoittimet
 				where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
 	$kires = mysql_query($query) or pupe_error($query);
+	
 	if (mysql_num_rows($kires) == 1) {
-		$kirow=mysql_fetch_array($kires);
-		$line = exec("$kirow[komento] $pdffilenimi");
+		$kirow = mysql_fetch_array($kires);
+		$line  = exec("$kirow[komento] $pdffilenimi");
+		
+		//system("rm -f $pdffilenimi");
+		unset($pdffilenimi);
 	}
+	
+	unset($pdf);
+	unset($firstpage);
 ?>

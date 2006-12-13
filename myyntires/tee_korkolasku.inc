@@ -37,6 +37,31 @@
 
 		$tuorow = mysql_fetch_array($result);
 
+		if(trim($asrow["valkoodi"]) != '') {
+			$query = "	SELECT nimi, kurssi, tunnus
+						FROM valuu
+						WHERE yhtio = '$kukarow[yhtio]'
+						and nimi = '$yhtiorow[valkoodi]'
+						and kurssi > 0
+						LIMIT 1";
+			$vres = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($vres) == 1) {
+				$vrow = mysql_fetch_array($vres);
+				
+				$valkoodi	= $vrow["nimi"];
+				$kurssi 	= $vrow["kurssi"];
+			}
+			else {
+				$valkoodi	= $yhtiorow["valkoodi"];
+				$kurssi		= 1;
+			}
+		}
+		else {
+			$valkoodi	= $yhtiorow["valkoodi"];
+			$kurssi		= 1;
+		}
+
 
 		$query = "	INSERT into lasku
 					SET
@@ -70,10 +95,11 @@
 					vienti 			= '$asrow[vienti]',
 					tilaustyyppi	= 'N',
 					toimaika		= now(),
-					ketjutus 		= '',
-					sisainen 		= '',
-					eilahetetta 	= '',
-					valkoodi 		= '$yhtiorow[valkoodi]',
+					ketjutus 		= 'o',
+					sisainen 		= 'o',
+					eilahetetta 	= 'o',
+					valkoodi 		= '$valkoodi',
+					vienti_kurssi	= '$kurssi',
 					viikorkopros 	= '0',
 					laatija 		= '$kukarow[kuka]',
 					liitostunnus    = '$asrow[tunnus]',
@@ -111,7 +137,9 @@
 		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
-
+		
+		$valittu_tulostin = $kukarow["kirjoitin"];
+		
 		require ("../tilauskasittely/tilaus-valmis.inc");
 	}
 	else {

@@ -86,7 +86,8 @@
 					lasku.summa != 0 and
 					lasku.sisainen = '' and
 					lasku.mapvm = '0000-00-00' and
-					lasku.factoringsiirtonumero = ''
+					lasku.factoringsiirtonumero = '' and
+					lasku.valkoodi = '$yhtiorow[valkoodi]'
 					order by laskunro";
 		$result = mysql_query ($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
@@ -133,13 +134,14 @@
 			$ulos         = "";
 
 			$ulos .= "\n";
-			$ulos .= sprintf("%-15.15s", "Y-tunnus");
+			$ulos .= sprintf("%-14.14s", "Y-tunnus");
 			$ulos .= sprintf("%-65.65s", "Yhteystiedot");
 			$ulos .= "\n";
 
-			$ulos .= sprintf("%-15.15s", "Laskunro");
-			$ulos .= sprintf("%-15.15s", "Tapvm");
-			$ulos .= sprintf("%-15.15s", "Erpvm");
+			$ulos .= sprintf("%-14.14s", "Laskunro");
+			$ulos .= sprintf("%-14.14s", "Tapvm");
+			$ulos .= sprintf("%-14.14s", "Erpvm");
+			$ulos .= sprintf("%-14.14s", "Kapvm");
 			$ulos .= sprintf("%20.20s",  "Summa");
 			$ulos .= sprintf("%4.4s",    "Val");
 			$ulos .= "\n--------------------------------------------------------------------------------";
@@ -149,14 +151,17 @@
 
 				if ($edytunnus != $laskurow["ytunnus"]) {
 					$ulos .= "\n";
-					$ulos .= sprintf("%-15.15s", $laskurow["ytunnus"]);
+					$ulos .= sprintf("%-14.14s", $laskurow["ytunnus"]);
 					$ulos .= sprintf("%-65.65s", $laskurow["nimi"].", ".$laskurow["osoite"].", ".$laskurow["postino"]." ".$laskurow["postitp"]);
 					$ulos .= "\n";
 				}
 
-				$ulos .= sprintf("%-15.15s", $laskurow["laskunro"]);
-				$ulos .= sprintf("%-15.15s", $laskurow["tapvm"]);
-				$ulos .= sprintf("%-15.15s", $laskurow["erpcm"]);
+				if ($laskurow["kapvm"] == '0000-00-00') $laskurow["kapvm"] = "";
+
+				$ulos .= sprintf("%-14.14s", $laskurow["laskunro"]);
+				$ulos .= sprintf("%-14.14s", $laskurow["tapvm"]);
+				$ulos .= sprintf("%-14.14s", $laskurow["erpcm"]);
+				$ulos .= sprintf("%-14.14s", $laskurow["kapvm"]);
 				$ulos .= sprintf("%20.20s",  $laskurow["summa"]);
 				$ulos .= sprintf("%4.4s",    $laskurow["valkoodi"]);
 				$ulos .= "\n";
@@ -176,12 +181,17 @@
 				$kaikki_kpl++;
 			}
 
+			// sitte k‰yd‰‰n vasta laskut l‰pi..
+			$query  = "select * from factoring where yhtio='$kukarow[yhtio]' and factoringyhtio = 'SAMPO' and valkoodi='$yhtiorow[valkoodi]'";
+			$result = mysql_query ($query) or pupe_error($query);
+			$soprow = mysql_fetch_array($result);
+
 			// v‰h‰n siirtolistainfoa ruudulle
 			echo "<table>";
 
 			echo "<tr>";
 			echo "<th>Sopimusnumero</th>";
-			echo "<td>$yhtiorow[factoring_sopimus]</td>";
+			echo "<td>$soprow[sopimusnumero]</td>";
 			echo "</tr>";
 
 			echo "<tr>";
@@ -221,7 +231,7 @@
 			echo "</table>";
 
 			$otsikkoulos  = "\n\n\n";
-			$otsikkoulos .= "Sopimusnumero      $yhtiorow[factoring_sopimus]\n";
+			$otsikkoulos .= "Sopimusnumero      $soprow[sopimusnumero]\n";
 			$otsikkoulos .= "Siirtolistanumero  $facrow[0]\n";
 			$otsikkoulos .= "\n\n";
 			$otsikkoulos .= sprintf("%-15.15s", "Veloituslaskut");

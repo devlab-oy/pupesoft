@@ -2,12 +2,18 @@
 
 require ("inc/parametrit.inc");
 
-$go = $_POST['go'];
+if(isset($_POST['go'])) 		$go		= $_POST['go'];
+else 							$go		= "";
 
-if ($go=='') $go = $_GET['go'];
+if ($go == '') {
+	if(isset($_GET['go'])) 		$go		= $_GET['go'];
+	else 						$go		= "";	
+}
+
+
 $go2 = $go; // ei laiteta tervetuloa.phptä oletukseksi indexvassiin
+if ($go == '') $go = 'tervetuloa.php';
 
-if ($go=='') $go = 'tervetuloa.php';
 $colwidth = '180';
 
 if ($kukarow['resoluutio'] == 'P') {

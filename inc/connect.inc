@@ -2,7 +2,12 @@
 
 require("salasanat.php");
 
-$useslave = (int) $useslave;
+if(isset($useslave)) {
+	$useslave = (int) $useslave;
+}
+else {
+	$useslave = 0;
+}
 
 // tarkistetaan onko annettu slave oikea
 if ($useslave > 0) {
@@ -30,6 +35,6 @@ else {
 	$link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 }
 
-mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
+mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (connect.inc)!");
 
 ?>

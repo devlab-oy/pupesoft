@@ -55,7 +55,7 @@ $result = mysql_query($query) or pupe_error($query);
 if (mysql_num_rows($result) > 1) {
 
 	// jos ollaan tulossa loginista, valitaan oletussovellus...
-	if ($go != "") {
+	if (isset($go) and $go != "") {
 		$query = "select sovellus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='$go' order by sovellus, jarjestys limit 1";
 		$gores = mysql_query($query) or pupe_error($query);
 		$gorow = mysql_fetch_array($gores);

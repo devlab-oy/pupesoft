@@ -2,15 +2,19 @@
 
 require ("inc/parametrit.inc");
 
-if ($tee == '') {
+if (!isset($tee) or $tee == '') {
 	echo "<table>";
 	echo "<tr>";
-
-	if ($limit=="all") $limit = "";
-	elseif ($limit=="50") $limit = "limit 50";
-	elseif ($limit=="10") $limit = "limit 10";
-	else $limit = "limit 5";
-
+	
+	if (isset($limit)) {
+		if ($limit=="all") 		$limit = "";
+		elseif ($limit=="50") 	$limit = "limit 50";
+		elseif ($limit=="10") 	$limit = "limit 10";
+	}
+	else { 
+		$limit = "limit 5";
+	}
+	
 	if ($yhtiorow['konserni'] != "") {
 		$ehto = "(kalenteri.yhtio='$kukarow[yhtio]' or kalenteri.konserni='$yhtiorow[konserni]')";
 	}
@@ -176,7 +180,7 @@ if ($tee == '') {
 	echo "</table>";
 }
 
-if ($tee == "PRINTTAA") {
+if (isset($tee) and $tee == "PRINTTAA") {
 
 	echo "
 		<script language=\"JavaScript\">

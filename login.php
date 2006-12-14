@@ -1,11 +1,17 @@
 <?php
 
-$user     = $_POST['user'];
-$yhtio    = $_POST['yhtio'];
-$salamd5  = $_POST['salamd5'];
-$salasana = $_POST['salasana'];
-$uusi1    = $_POST['uusi1'];
-$uusi2    = $_POST['uusi2'];
+if(isset($_POST['user'])) 		$user		= $_POST['user'];
+else 							$user		= "";
+if(isset($_POST['yhtio'])) 		$yhtio		= $_POST['yhtio'];
+else 							$yhtio		= "";
+if(isset($_POST['salamd5'])) 	$salamd5	= $_POST['salamd5'];
+else 							$salamd5	= "";
+if(isset($_POST['salasana'])) 	$salasana	= $_POST['salasana'];
+else 							$salasana	= "";
+if(isset($_POST['uusi1'])) 		$uusi1		= $_POST['uusi1'];
+else 							$uusi1		= "";
+if(isset($_POST['uusi2'])) 		$uusi2		= $_POST['uusi2'];
+else 							$uusi2		= "";
 
 require ("inc/functions.inc");
 
@@ -60,8 +66,7 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 				$err = 1;
 				$usea = 0;
 			}
-			else
-			{
+			else {
 				$uusi1=md5(trim($uusi1));
 				$query = "	UPDATE kuka
 							SET salasana = '$uusi1'
@@ -76,11 +81,9 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 		}
 
 		// Kaikki ok!
-		if ($err != 1)
-		{
+		if (!isset($err) or $err != 1) {
 			// Pitääkö vielä kysyä yritystä???
-			if (($usea != 1) or (strlen($yhtio) > 0))
-			{
+			if ($usea != 1 or strlen($yhtio) > 0) {
 				for ($i=0; $i<25; $i++) {
 					$session = $session . chr(rand(65,90)) ;
 				}
@@ -153,7 +156,7 @@ echo "
 
 ";
 
-if ($usea=='1') {
+if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio
 				FROM kuka, yhtio
 				WHERE kuka='$user' and yhtio.yhtio=kuka.yhtio";
@@ -161,7 +164,7 @@ if ($usea=='1') {
 		or die ("Kysely ei onnistu $query");
 
 	if (mysql_num_rows($result) == 0) {
-		echo "".t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä",$browkieli)."!";
+		echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä",$browkieli)."!";
 		exit;
 	}
 
@@ -169,14 +172,16 @@ if ($usea=='1') {
 	echo "<tr><td colspan='2'><font class='menu'>".t("Valitse käsiteltävä yritys",$browkieli).":</font></td></tr>";
 	echo "<tr>";
 
-	while ($yrow=mysql_fetch_array ($result))
-	{
-		for ($i=0; $i<mysql_num_fields($result)-1; $i++)
-		{
+	while ($yrow=mysql_fetch_array ($result)) {
+		for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
 			echo "<td><font class='menu'>$yrow[$i]</font></td>";
 		}
 		echo "<form action = 'login.php' method='post'>";
-		echo "<input type='hidden' name='errormsg' value='$errormsg'>";
+		
+		if (isset($errormsg)) {
+			echo "<input type='hidden' name='errormsg' value='$errormsg'>";
+		}
+		
 		echo "<input type='hidden' name='user'     value='$user'>";
 		echo "<input type='hidden' name='salamd5' value='$vertaa'>";
 		echo "<input type='hidden' name='yhtio'    value='$yrow[yhtio]'>";
@@ -184,46 +189,37 @@ if ($usea=='1') {
 	}
 	echo "</table><br>";
 
-	if ($errormsg != "") {
+	if (isset($errormsg) and $errormsg != "") {
 		echo "<font class='error'>$errormsg</font><br><br>";
 	}
 	echo "<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>";
 }
 else {
 
-	echo "
-			<table class='login'>
-				<form name='login' target='_top' action='index.php' method='post'>
+	echo "<table class='login'>
+			<form name='login' target='_top' action='index.php' method='post'>
 
-				<tr><td><font class='menu'>".t("Käyttäjätunnus",$browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
-				<tr><td><font class='menu'>".t("Salasana",$browkieli).":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
+			<tr><td><font class='menu'>".t("Käyttäjätunnus",$browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
+			<tr><td><font class='menu'>".t("Salasana",$browkieli).":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
 
-				<tr><td colspan='2'><font class='menu'>".t("Jos haluat vaihtaa salasanasi",$browkieli).",<br>".t("anna se kahteen kertaan alla olevin kenttiin",$browkieli)."</font></td></tr>
+			<tr><td colspan='2'><font class='menu'>".t("Jos haluat vaihtaa salasanasi",$browkieli).",<br>".t("anna se kahteen kertaan alla olevin kenttiin",$browkieli)."</font></td></tr>
 
-				<tr><td><font class='menu'>".t("Uusi salasana",$browkieli).":</font></td><td><input type='password' name='uusi1' size='15' maxlength='30'></td></tr>
-				<tr><td><font class='menu'>".t("ja uudestaan",$browkieli).":</font></td><td><input type='password' name='uusi2' size='15' maxlength='30'></td></tr>
-			</table>";
-	if ($errormsg != "") {
+			<tr><td><font class='menu'>".t("Uusi salasana",$browkieli).":</font></td><td><input type='password' name='uusi1' size='15' maxlength='30'></td></tr>
+			<tr><td><font class='menu'>".t("ja uudestaan",$browkieli).":</font></td><td><input type='password' name='uusi2' size='15' maxlength='30'></td></tr>
+		</table>";
+	
+	if (isset($errormsg) and $errormsg != "") {
 			echo "<br><font class='error'>$errormsg</font><br>";
 	}
-	echo "
-			<br><input type='submit' value='".t("Sisään",$browkieli)."'>
+	
+	echo "	<br><input type='submit' value='".t("Sisään",$browkieli)."'>
 			<br><br>
 			<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>
-			</form>
-	";
+			</form>";
 }
-echo "
 
-</td>
-</tr>
-</table>
-";
-
-echo "<script LANGUAGE='JavaScript'>
-window.document.$formi.$kentta.focus();
-</script>";
-
+echo "</td></tr></table>";
+echo "<script LANGUAGE='JavaScript'>window.document.$formi.$kentta.focus();</script>";
 echo "</body></html>";
 
 ?>

@@ -140,11 +140,16 @@ if (!function_exists("t")) {
 
 		require("salasanat.php");
 
-		if ($slavedb[$useslave]=='') $useslave=0;
-
+		if (isset($slavedb)) {
+			if ($slavedb[$useslave]=='') $useslave = 0;
+		}
+		else {
+			$useslave = 0;
+		}
+		
 		if ($useslave > 0) { //Voi olla, että käytämme slavea ja INSERT ei siis onnistu
 			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
+			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
 		}
 
 		$sanakirjaquery  = "SELECT * FROM sanakirja WHERE fi = BINARY '$stringi'";
@@ -160,7 +165,7 @@ if (!function_exists("t")) {
 				$indeksi = strtolower($kukarow["kieli"]);
 			}
 
-			if (trim($sanakirjarow[$indeksi]) != '') {
+			if (isset($sanakirjarow[$indeksi]) and trim($sanakirjarow[$indeksi]) != '') {
 				$stringi = $sanakirjarow[$indeksi];
 			}
 			else {
@@ -177,7 +182,7 @@ if (!function_exists("t")) {
 
 		if ($useslave > 0) { //Palautetaan slave käyttöön
 			$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
-			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
+			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 2)!");
 		}
 
 		return $stringi;

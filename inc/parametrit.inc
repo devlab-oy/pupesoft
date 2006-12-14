@@ -43,30 +43,40 @@ $apunimi = str_replace($alut, "", $palvelin);
 $tark    = $_SERVER['SERVER_NAME'].$portti.$_SERVER['SCRIPT_NAME'];
 $phpnimi = str_replace($apunimi, "", $tark);
 
-$session = $_COOKIE["pupesoft_session"];
-
-if ($_SERVER["HTTPS"] == 'on') {
-	$palvelin2 = "https://$apunimi";
+if (isset($_COOKIE["pupesoft_session"])) {
+	$session = $_COOKIE["pupesoft_session"];
 }
 else {
-	$palvelin2 = "http://$apunimi";
+	$session = "";
+}
+
+$palvelin2 = "http://$apunimi";
+
+//Onko sittenkin https käytössä
+if (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on') {
+	$palvelin2 = "https://$apunimi";
 }
 
 //haetaan browserin oletuskieli
 $browkieli = substr($_SERVER["HTTP_ACCEPT_LANGUAGE"],0,2);
+
 if ($browkieli == 'sv') {
 	$browkieli = 'se';
 }
-elseif ($kieli == 'fi') {
+elseif (isset($kieli) and $kieli == 'fi') {
 	$browkieli = 'fi';
 }
 else {
 	$browkieli = 'en';
 }
 
+//Initioidaan pari muuttujaa
+if(!isset($login))		$login = "";
+if(!isset($extranet)) 	$extranet = "";
+
 
 // jos saamme nämä muuttujat getissä, kokeillaan logata niillä sisään
-if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
+if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
 
 	$query = "select * from kuka where yhtio='$_GET[yhtio]' and kuka='$_GET[user]' and salasana=md5('$_GET[pass]')";
 	$result = mysql_query($query) or die ("Sisäänkirjaus epäonnistui!");
@@ -129,17 +139,17 @@ if ($session != '') {
 	$query = "	SELECT *
 				FROM kuka
 				WHERE session='$session'";
-	$result = mysql_query($query) or die ("Kysely ei onnistu kuka");
+	$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
 
 	if (mysql_num_rows($result) != 1 or strlen($session) != 25) {
-		if ($nayta_pdf == 1) {
-			echo t("Pyydettiin pdf-tiedostoa, mutta cookie oli viallinen, jokseenkin paha juttu");
+		if (isset($nayta_pdf) and $nayta_pdf == 1) {
+			echo "Your browser does not seem to support cookies.";
 			exit;
 		}
 		$bool = setcookie("pupesoft_session", "", time()-432000);
 
 		if ($bool === FALSE) {
-			echo t("Selaimesi ei ilmeisesti tue cookieta").".";
+			echo "Your browser does not seem to support cookies.";
 		}
 		else {
 			echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
@@ -152,11 +162,20 @@ if ($session != '') {
 	if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
 
 		// No niin nyt meillä on käyttäjä, mutta saako hän tehdä tätä????
+		if(isset($toim)) {
+			$toimlisa = " and alanimi='$toim'";
+		}
+		else {
+			$toimlisa = "";
+		}
+		
 		$query = "	SELECT *
 					FROM oikeu
-					WHERE yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='$phpnimi' and alanimi='$toim'";
-		$result = mysql_query($query)
-			or die ("Kysely ei onnistu kuka $query");
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kuka = '$kukarow[kuka]' 
+					and nimi = '$phpnimi' 
+					$toimlisa";
+		$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
 
 		if (mysql_num_rows($result) == 0) {
 
@@ -205,11 +224,11 @@ if ($session != '') {
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
 
-	if ($nayta_pdf == 1) {
+	if (isset($nayta_pdf) and $nayta_pdf == 1) {
 		header("Content-Type: application/pdf");
 		header('Content-Disposition: inline; filename="pupesoft.pdf"');
 	}
-	elseif($lataa_tiedosto == 1) {
+	elseif(isset($lataa_tiedosto) and $lataa_tiedosto == 1) {
 		// Kerrotaan selaimelle, että käyttäjän kuuluu downloadata tämä tiedosto
 		// Hardcoodattu polku dataout/
 
@@ -236,7 +255,7 @@ if ($session != '') {
 
 		header("Content-Transfer-Encoding: binary");
 
-		if ($filenimi != '') {
+		if (isset($filenimi) and $filenimi != '') {
 			header("Content-Length: ".filesize("dataout/".$filenimi));
 		}
 		else {
@@ -278,7 +297,7 @@ if ($session != '') {
 		echo "<body>";
 
 		if (basename($phpnimi) != 'indexvas.php') {
-			if ($toim != '') {
+			if (isset($toim) and $toim != '') {
 				if (basename($phpnimi) == 'varauskalenteri.php') {
 					$urltoim = "";
 				}

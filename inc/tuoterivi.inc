@@ -130,6 +130,34 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "kommentoitava") {
+
+		$sel = '';
+		if ($trow[$i] != '') {
+			$sel = "SELECTED";
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Normaalikäsittely")."</option>";
+		$ulos .= "<option value = 'o' $sel>".t("Tuotteelle on annettava rivikommentti")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "vaaditaan_kpl2") {
+
+		$sel = '';
+		if ($trow[$i] != '') {
+			$sel = "SELECTED";
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Normaalikäsittely")."</option>";
+		$ulos .= "<option value = 'o' $sel>".t("Tuotteelle on annettava kpl2")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
 		$ulos = "<td><select name='$nimi'>";

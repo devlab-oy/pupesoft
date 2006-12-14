@@ -7,7 +7,7 @@ else {
 	require ("connect.inc");
 }
 
-$id = (int) $id;
+$id = (int) $_GET["id"];
 
 $query = "select * from liitetiedostot where tunnus='$id'";
 $liiteres = mysql_query($query) or pupe_error($query);

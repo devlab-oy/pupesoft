@@ -5,7 +5,7 @@
 
 	require('inc/parametrit.inc');
 
-	if ($tee == "lataa_tiedosto") {
+	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("dataout/".$filenimi);
 		exit;
 	}
@@ -13,7 +13,7 @@
 		echo "<font class='head'>".t("Nordea Factoring siirtotiedosto").":</font><hr><br>";
 	}
 
-	if ($tee == 'TARKISTA') {
+	if (isset($tee) and $tee == 'TARKISTA') {
 		if (strtoupper($valkoodi) != strtoupper($ed_valkoodi)) {
 			$tee = "";
 		}
@@ -22,14 +22,14 @@
 		}
 	}
 
-	if ($tee == '') {
+	if (!isset($tee) or $tee == '') {
 		//Käyttöliittymä
 		echo "<br>";
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<table>";
 		echo "<input type='hidden' name='tee' value='TARKISTA'>";
 
-		if ($valkoodi == '') {
+		if (!isset($valkoodi) or $valkoodi == '') {
 			$valkoodi = $yhtiorow["valkoodi"];
 		}
 
@@ -100,7 +100,7 @@
 		echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></table><br><br>";
 	}
 
-	if ($tee == 'TULOSTA') {
+	if (isset($tee) and $tee == 'TULOSTA') {
 
 		$luontipvm	= date("ymd");
 		$luontiaika	= date("Hi");
@@ -441,7 +441,7 @@
 		}
 	}
 
-	if ($tee != "lataa_tiedosto") {
+	if (!isset($tee) or $tee != "lataa_tiedosto") {
 		require ("inc/footer.inc");
 	}
 ?>

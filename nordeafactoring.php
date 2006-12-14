@@ -1,11 +1,15 @@
 <?php
 
-	if(isset($_POST["tee"]) and $_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-	if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $kaunisnimi=$_POST["kaunisnimi"];
+	if(isset($_POST["tee"])) $tee = $_POST["tee"];
+	else $tee = "";	
+	if(isset($_POST["kaunisnimi"])) $kaunisnimi = $_POST["kaunisnimi"];
+	else $kaunisnimi = "";
+	if(isset($_POST["valkoodi"])) $kaunisnimi = $_POST["valkoodi"];
+	else $valkoodi = "";
 
 	require('inc/parametrit.inc');
 
-	if (isset($tee) and $tee == "lataa_tiedosto") {
+	if ($tee == "lataa_tiedosto") {
 		readfile("dataout/".$filenimi);
 		exit;
 	}
@@ -13,7 +17,7 @@
 		echo "<font class='head'>".t("Nordea Factoring siirtotiedosto").":</font><hr><br>";
 	}
 
-	if (isset($tee) and $tee == 'TARKISTA') {
+	if ($tee == 'TARKISTA') {
 		if (strtoupper($valkoodi) != strtoupper($ed_valkoodi)) {
 			$tee = "";
 		}
@@ -22,14 +26,14 @@
 		}
 	}
 
-	if (!isset($tee) or $tee == '') {
+	if ($tee == '') {
 		//Käyttöliittymä
 		echo "<br>";
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<table>";
 		echo "<input type='hidden' name='tee' value='TARKISTA'>";
 
-		if (!isset($valkoodi) or $valkoodi == '') {
+		if ($valkoodi == '') {
 			$valkoodi = $yhtiorow["valkoodi"];
 		}
 
@@ -100,7 +104,7 @@
 		echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></table><br><br>";
 	}
 
-	if (isset($tee) and $tee == 'TULOSTA') {
+	if ($tee == 'TULOSTA') {
 
 		$luontipvm	= date("ymd");
 		$luontiaika	= date("Hi");
@@ -441,7 +445,7 @@
 		}
 	}
 
-	if (!isset($tee) or $tee != "lataa_tiedosto") {
+	if ($tee != "lataa_tiedosto") {
 		require ("inc/footer.inc");
 	}
 ?>

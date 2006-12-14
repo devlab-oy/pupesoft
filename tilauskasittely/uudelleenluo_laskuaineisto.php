@@ -16,6 +16,10 @@
 		echo "$file";
 	}
 	else {
+		
+		
+		echo "<font class='head'>".t("Luo laskutusaineisto")."</font><hr>\n";
+		
 		if (isset($tee) and $tee == "GENEROI" and $laskunumerot!='') {
 			if (!function_exists("xml_add")) {
 				function xml_add ($joukko, $tieto, $handle) {
@@ -107,6 +111,11 @@
 						and laskunro in ($laskunumerot)";
 			$res   = mysql_query($query) or pupe_error($query);
 
+			$lkm = count(explode(',', $laskunumerot));
+			
+			echo "<br><font class='message'>".t("Syötit")." $lkm ".t("laskua").".</font><br>";
+			echo "<font class='message'>".t("Aineistoon lisätään")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
+			
 			while ($lasrow = mysql_fetch_array($res)) {
 		
 				// haetaan maksuehdon tiedot
@@ -255,9 +264,6 @@
 			fclose($tootedi);
 			fclose($tootfinvoice);
 
-
-			echo "<table>";
-
 			//dellataan failit jos ne on tyhjiä
 			if(filesize($nimixml) == 0) {
 				unlink($nimixml);
@@ -271,15 +277,16 @@
 				$ftpfile = realpath($nimixml);
 
 				// tätä ei ajata eikä käytetä, mutta jos tulee ftp errori niin echotaan tää meiliin, niin ei tartte käsin kirjotella resendiä
-				echo "<tr><th colspan='2'>ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile</th></tr>";
+				echo "<pre>ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile</pre>";
 			
+				echo "<table>";
 				echo "<tr><th>".t("Tallenna pupevoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimixml)."'>";
 				echo "<input type='hidden' name='file' value='$nimixml'>";
-				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-		
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table>";
 			}
 	
 	
@@ -287,30 +294,32 @@
 				unlink($nimifinvoice);
 			}
 			else {
+				echo "<table>";
 				echo "<tr><th>".t("Tallenna finnvoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimifinvoice)."'>";
 				echo "<input type='hidden' name='file' value='$nimifinvoice'>";
-				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";	
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";	
+				echo "</table>";
 			}
 	
 			if(filesize($nimiedi) == 0) {
 				unlink($nimiedi);
 			}
 			else{
+				echo "<table>";
 				echo "<tr><th>".t("Tallenna Elmaedi-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimiedi)."'>";
 				echo "<input type='hidden' name='file' value='$nimiedi'>";
-				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table>";
 			}
-	
-			echo "</table>";
 		}
 		else {
-			echo "<font class='message'>Anna laskunumeot joista aineisto muodostetaan pilkulla eroteltuna:</font><br>";
+			echo "<font class='message'>".t("Anna laskunumerot, pilkulla eroteltuina, joista aineisto muodostetaan:")."</font><br>";
 			echo "<form method='post'>";
 			echo "<input type='hidden' name='tee' value='GENEROI'>";
 			echo "<textarea name='laskunumerot' rows='10' cols='60'></textarea>";

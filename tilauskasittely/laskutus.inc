@@ -53,7 +53,6 @@ else {
 	$tothinta   = 0;
 	$totkate    = 0;
 	
-
 	while ($trow = mysql_fetch_array ($presult)) {
 					
 		// Marginaaliverotus
@@ -97,8 +96,8 @@ else {
 			$apuhinta1 = round($hinta,2);
 			$apuhinta2 = round($trow['varattu'] * $hinta,2);
 						
-			//Paivitetaan tuotteen saldo, jos saldollinen tuote ja ei PUUTE eikä JT
-			if ($turow['ei_saldoa'] == '' and $turow['var'] != 'P' and $turow['var'] != 'J' and $trow['varattu'] != 0) {
+			//Paivitetaan tuotteen saldo jos saldoa on varattu
+			if ($turow['ei_saldoa'] == '' and $trow['varattu'] != 0) {
 				///* Päivitetään saldo tilausrivin osoittamalla paikalla *///
 				$query = "	UPDATE tuotepaikat
 							SET saldo = saldo-$trow[varattu],
@@ -289,7 +288,7 @@ else {
 	$tothinta += 0;
 	$totkate  += 0;
 	
-	if ($kateistyyppi == 'p') {
+	if (isset($kateistyyppi) and $kateistyyppi == 'p') {
 		//pöristetään käteismyynti lähimpään viiteen senttiin
 		
 		$ei_pyorist = round($loppusumma,2);
@@ -307,8 +306,10 @@ else {
 	}
 	
 	$viivastyskorko = $yhtiorow['viivastyskorko'];
-	if($korkolasku == "kylla") $viivastyskorko = $orow['viivastyskorko'];
 	
+	if(isset($korkolasku) and $korkolasku == "kylla") {
+		$viivastyskorko = $orow['viivastyskorko'];
+	}
 	
 	// Etsitään asiakas
 	$query = "	SELECT laskunsummapyoristys
@@ -317,7 +318,8 @@ else {
 	$asres = mysql_query($query) or pupe_error($query);
 	$asrow = mysql_fetch_array($asres);
 	
-	if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
+	// Laskun loppusumma pyöristetään vain jos laskun valuutta on yhtiön kotivaluutassa (Valuuuttalaskujen loppusummat rundataan vain tulosteeseen)
+	if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"])) and ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o')) {
         $loppusumma = round($loppusumma,0);
 	}
 	

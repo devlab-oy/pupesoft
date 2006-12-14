@@ -897,8 +897,8 @@
 						$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);
 						$totalvat  = round($tilrow['rivihinta']+$vatamount, 2);
 						
-						$tilrow['kommentti'] = str_replace(array("\r\n","\r","\n")," ", $tilrow['kommentti']);
-						$tilrow['nimitys'] = ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|%\r\n]", "", $tilrow['nimitys']);
+						$tilrow['kommentti'] 	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%]", " ", $tilrow['kommentti']);
+						$tilrow['nimitys'] 		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%]", " ", $tilrow['nimitys']);
 						
 						if ($lasrow["chn"] == "111") {
 							elmaedi_rivi($tootedi, $tilrow, $rivinumero);

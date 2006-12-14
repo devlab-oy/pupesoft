@@ -169,10 +169,10 @@ if ($lisa_comments != "") {
 
 
 //Siivotaan kommenteista kaikki kummalliset merkit pois
-$comments 		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|%\r\n]", "", $comments);
-$viestit		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|%\r\n]", "", $viestit);
-$sisviestit1	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|%\r\n]", "", $sisviestit1);
-$viitetxt		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|%\r\n]", "", $viitetxt);
+$comments 		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $comments);
+$viestit		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viestit);
+$sisviestit1	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $sisviestit1);
+$viitetxt		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viitetxt);
 
 
 // kirjotetaan kokonaan uusi lasku-olio laskusta.. helpottaa myyntireskontraa! tilaksi: U alatila: tyhjä

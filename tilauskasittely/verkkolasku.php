@@ -21,7 +21,7 @@
 
 	//$silent = '';
 
-	if (trim($argv[1]) != '') {
+	if (isset($argv[1]) and trim($argv[1]) != '') {
 
 		if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
 
@@ -91,6 +91,19 @@
 	//Nollataan muuttujat
 	$tulostettavat = array();
 	$tulos_ulos = "";
+	
+	if (!isset($silent)) {
+		$silent = "";
+	}
+	if (!isset($tee)) {
+		$tee = "";
+	}
+	if (!isset($kieli)) {
+		$kieli = "";
+	}
+	if (!isset($komentorivilta)) {
+		$komentorivilta = "";
+	}
 
 	if ($silent == "") {
 		$tulos_ulos .= "<font class='head'>".t("Laskutusajo")."</font><hr>\n";
@@ -224,23 +237,28 @@
 		// lock tables
 		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ";
 		$locre = mysql_query($query) or pupe_error($query);
-
+		
+		//Haetaan tarvittavat funktiot aineistojen tekoa varten
+		require("verkkolasku_elmaedi.inc");
+		require("verkkolasku_finvoice.inc");
+		require("verkkolasku_pupevoice.inc");
+	
 		// haetaan kaikki tilaukset jotka on toimitettu ja kuuluu laskuttaa t‰n‰‰n (t‰t‰ resulttia k‰ytet‰‰n alhaalla lis‰‰)
 		$lasklisa = "";
 
 		// tarkistetaan t‰ss‰ tuleeko laskutusviikonp‰iv‰t ohittaa
 		// ohitetaan jos ruksi on ruksattu tai poikkeava laskutusp‰iv‰m‰‰r‰ on syˆtetty
-		if ($laskutakaikki == "") {
+		if (!isset($laskutakaikki) or $laskutakaikki == "") {
 			$lasklisa .= " and (laskutusvkopv='0' or laskutusvkopv='$today')";
 		}
 
 		// katotaan halutaanko laskuttaa vaan laskut joita *EI SAA* ketjuttaa
-		if ($eiketjut == "KYLLA") {
+		if (isset($eiketjut) and $eiketjut == "KYLLA") {
 			$lasklisa .= " and ketjutus != '' ";
 		}
 
 		// laskutetaan vain tietyt tilausket
-		if ($laskutettavat != "") {
+		if (isset($laskutettavat) and $laskutettavat != "") {
 			$lasklisa .= " and tunnus in ($laskutettavat) ";
 		}
 
@@ -279,12 +297,12 @@
 			}
 		}
 
-		if ($tulos_ulos_maksusoppari != '' and $silent == "") {
+		if (isset($tulos_ulos_maksusoppari) and $tulos_ulos_maksusoppari != '' and $silent == "") {
 			$tulos_ulos .= "<br>\n".t("Maksusopimustilausket").":<br>\n";
 			$tulos_ulos .= $tulos_ulos_maksusoppari;
 		}
 
-		if ($tulos_ulos_ehtosplit != '' and $silent == "") {
+		if (isset($tulos_ulos_ehtosplit) and $tulos_ulos_ehtosplit != '' and $silent == "") {
 			$tulos_ulos .= "<br>\n".t("Tilauksia joilla on moniehto-maksuehto").":<br>\n";
 			$tulos_ulos .= $tulos_ulos_ehtosplit;
 		}
@@ -789,11 +807,7 @@
 				}
 
 				// t‰ss‰ pohditaan laitetaanko verkkolaskuputkeen
-				if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and
-					$masrow["itsetulostus"] == "" and
-					$lasrow["sisainen"] == "" and
-					$masrow["kateinen"] == "" and
-					abs($lasrow["summa"]) != 0) {
+				if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == "" and abs($lasrow["summa"]) != 0) {
 
 					// Nyt meill‰ on:
 					// $lasrow array on U-laskun tiedot
@@ -808,10 +822,9 @@
 					$myyrow = mysql_fetch_array($myyresult);
 
 					if ($lasrow['chn'] == '') {
-						// Estet‰‰n KUMMALLISUUDET (paperi by default)
+						//Paperi by default
 						$lasrow['chn'] = 100;
 					}
-
 					if ($lasrow['chn'] == "020") {
 						$lasrow['chn'] = "010";
 					}
@@ -825,381 +838,22 @@
 						$tyyppi='381';
 					}
 
-					// Laskukohtaisen kommentit kuntoon
+					// Laskukohtaiset kommentit kuntoon
 					// T‰m‰ merkki | eli pystyviiva on rivinvaihdon merkki elmalla
 					// Laskun kommentti on stripattu erikoismerkeist‰ jo aikaisemmin joten se on nyt puhdas t‰ss‰
 					if (trim($lasrow['sisviesti1']) != '') {
-						$laskunkommentit = str_replace(array("\r\n","\r","\n"),"|", $lasrow['sisviesti1']);
+						$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $lasrow['sisviesti1']);
 					}
-					else {
-						$laskunkommentit = "";
-					}
-
+					
+					//Kirjoitetaan failiin laskun otsikkotiedot
 					if ($lasrow["chn"] == "111") {
-
-						$fstat = fstat($tootedi);
-
-						if ($fstat["size"] == 0) {
-							fputs($tootedi, "ICHGSTART:$timestamppi\n");
-							fputs($tootedi, "ICHG_TYPE:POS\n");
-							fputs($tootedi, "ICHG_SNDR:".sprintf("%-35.35s",str_replace('-','', $yhtiorow["ovttunnus"]))."@30\n");
-							fputs($tootedi, "ICHG_RCPT:003705655815                       @30\n");
-							fputs($tootedi, "ICHG_DATA:EIH-1.4.0\n");
-							fputs($tootedi, "ICHG_TEST:1\n");
-							fputs($tootedi, "ICHG_INFO:TESTITULOKSET PUPESOFTILLE\n");
-						}
-
-						// Kirjotetaan laskun tietoja Elman inhouse EDI muotoon
-						fputs($tootedi, "IMSGSTART:".substr($lasrow["tunnus"], -6)."\n");
-						fputs($tootedi, "IHDRSTART:".substr($lasrow["tunnus"], -6)."\n");
-						fputs($tootedi, "IBGMITYPE:$tyyppi\n");
-						fputs($tootedi, "IBGMINUMB:$lasrow[laskunro]\n");
-						fputs($tootedi, "IDTM3__DT:".sprintf("%-35.35s",vlas_dateconv($lasrow["tapvm"]))."@102\n");
-						fputs($tootedi, "IDTM171DT:".sprintf("%-35.35s",vlas_dateconv($lasrow["tapvm"]))."@102\n");
-						fputs($tootedi, "IRFFPK_NU:$lasrow[tunnus]\n");
-						fputs($tootedi, "IRFFVN_NU:$lasrow[viesti]\n");
-						fputs($tootedi, "INADSE_CC:$lasrow[viesti]\n");
-						fputs($tootedi, "IRFFCO_NU:$lasrow[viitetxt]\n");
-						fputs($tootedi, "IFTXAAITX:\n");
-						fputs($tootedi, "IFTXAAITX:\n");
-						fputs($tootedi, "IFTXAAITX:\n");
-						fputs($tootedi, "IFTXAAITX:\n");
-						fputs($tootedi, "INADSE_PC:".sprintf("%-17.17s",$yhtiorow["ovttunnus"])."@100\n");
-						fputs($tootedi, "INADSE_PC:".sprintf("%-17.17s","7002479")."@92\n");
-						fputs($tootedi, "INADSE_NA:$yhtiorow[nimi]\n");
-						fputs($tootedi, "INADSE_SA:$yhtiorow[osoite]\n");
-						fputs($tootedi, "INADSE_CI:$yhtiorow[postitp]\n");
-						fputs($tootedi, "INADSE_PO:$yhtiorow[postino]\n");
-						fputs($tootedi, "INADPL_RF:IT @$lasrow[toim_ovttunnus]\n");
-						fputs($tootedi, "INADPL_RF:ZZ @$lasrow[ytunnus]\n");
-						fputs($tootedi, "INADPL_NA:$lasrow[toim_nimi]\n");
-						fputs($tootedi, "INADPL_NX:$lasrow[toim_nimitark]\n");
-						fputs($tootedi, "INADPL_SA:$lasrow[toim_osoite]\n");
-						fputs($tootedi, "INADPL_CI:$lasrow[toim_postitp]\n");
-						fputs($tootedi, "INADPL_PO:$lasrow[toim_postino]\n");
-						fputs($tootedi, "INADIV_NA:$lasrow[nimi]\n");
-						fputs($tootedi, "INADIV_NX:$lasrow[nimitark]\n");
-						fputs($tootedi, "INADIV_SA:$lasrow[osoite]\n");
-						fputs($tootedi, "INADIV_CI:$lasrow[postitp]\n");
-						fputs($tootedi, "INADIV_PO:$lasrow[postino]\n");
-						fputs($tootedi, "INADDP_NA:$lasrow[toim_nimi]\n");
-						fputs($tootedi, "INADDP_NX:$lasrow[toim_nimitark]\n");
-						fputs($tootedi, "INADDP_SA:$lasrow[toim_osoite]\n");
-						fputs($tootedi, "INADDP_CI:$lasrow[toim_postitp]\n");
-						fputs($tootedi, "INADDP_PO:$lasrow[toim_postino]\n");
-						fputs($tootedi, "ICUX1__CR:$yhtiorow[valkoodi]\n");
-						fputs($tootedi, "IPAT1__DT:13 @".sprintf("%-35.35s",vlas_dateconv($lasrow["erpcm"]))."@102\n");
-						fputs($tootedi, "IPAT1__PC:15 @$lasrow[viikorkopros]\n");
-						fputs($tootedi, "IPAT1__TP:$masrow[teksti] $masrow[kassa_teksti]\n");
-
-						if ($lasrow["kasumma"] != 0) {
-							fputs($tootedi, "IPAT8__DT:12 @".sprintf("%-35.35s",vlas_dateconv($lasrow["kapvm"]))."@102\n");
-							fputs($tootedi, "IPAT8__PC:12 @$masrow[kassa_alepros]\n");
-							fputs($tootedi, "IPAT8__MA:12 @".sprintf("%018.2f", $lasrow["kasumma"])."@$yhtiorow[valkoodi]\n");
-						}
-
-						fputs($tootedi, "IRFFPQ_NU:$lasrow[viite]\n");
-						fputs($tootedi, "IMOA39_MA:$lasrow[summa]\n");
-					}
-					// Finvoice
+						elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi);
+					}					
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
-
-						//varmuudeksi alku aina puhtaalta pˆyd‰lt‰
-						$senderpartyid 			= '';
-						$senderintermediator 	= '';
-						$receiverpartyid 		= '';
-						$receiverintermediator 	= '';
-						$val 					= $lasrow['valkoodi'];
-
-						if($yhtiorow["verkkolasku_lah"] == "iban+soap") {
-							//tehd‰‰n Finvoicen SOAP-Envelope ibantunnuksella
-
-							$senderpartyid 			= str_replace(" ", "", $yhtiorow['pankkiiban1']);
-							$senderintermediator	= $yhtiorow['pankkiswift1'];
-						}
-						elseif($yhtiorow["verkkolasku_lah"] == "ovt+soap") {
-							//tehd‰‰n Finvoicen SOAP-Envelope ibantunnuksella
-
-							$senderpartyid 			= str_replace(" ", "", $yhtiorow['ovttunnus']);
-							$senderintermediator	= $yhtiorow['pankkiswift1'];
-						}
-
-						//	Aloitellaan aineiston luontia
-						if($senderpartyid != "" and $senderintermediator != "") {
-
-							list($receiverpartyid, $receiverintermediator) = explode("@",$lasrow["verkkotunnus"]);
-
-							// jos t‰nne ei saada mit‰‰n arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
-							if($receiverpartyid == "" or $receiverintermediator == "" or $lasrow["chn"] == 100) {
-								$receiverpartyid 		= "tulostukseen";
-								$receiverintermediator 	= $yhtiorow['pankkiswift1'];
-
-								if($lasrow["chn"] != 100 and $silent == "") {
-									$tulos_ulos .= "<font class='error'>".t("Asiakkaalta puuttuu verkkotunnus, lasku menee tulostukseen.")." $lasrow[nimi] $lasrow[laskunro]</font><br>\n<br>\n";
-								}
-							}
-
-							// 	Tehd‰‰n SOAP
-							fputs ($tootfinvoice, "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:eb=\"http://www.oasis-open.org/committees/ebxml-msg/schema/msg-header-2_0.xsd\">\n");
-							fputs ($tootfinvoice, "<SOAP-ENV:Header>\n");
-							fputs ($tootfinvoice, "<eb:MessageHeader xmlns:eb=\"http://www.oasis-open.org/committees/ebxml-msg/schema/msg-header-2_0.xsd\" SOAP-ENV:mustUnderstand=\"1\" eb:version=\"2.0\">\n");
-
-							fputs ($tootfinvoice, "<eb:From>\n");
-							xml_add("eb:PartyId", $senderpartyid ,								$tootfinvoice);
-							xml_add("eb:Role", "Sender", 										$tootfinvoice);
-							fputs ($tootfinvoice, "</eb:From>\n");
-
-							fputs ($tootfinvoice, "<eb:From>\n");
-							xml_add("eb:PartyId", $senderintermediator ,						$tootfinvoice);
-							xml_add("eb:Role", "Intermediator",									$tootfinvoice);
-							fputs ($tootfinvoice, "</eb:From>\n");
-
-							fputs ($tootfinvoice, "<eb:To>\n");
-							xml_add("eb:PartyId", $receiverpartyid ,							$tootfinvoice);
-							xml_add("eb:Role", "Receiver",										$tootfinvoice);
-							fputs ($tootfinvoice, "</eb:To>\n");
-
-							fputs ($tootfinvoice, "<eb:To>\n");
-							xml_add("eb:PartyId", $receiverintermediator ,						$tootfinvoice);
-							xml_add("eb:Role", "Intermediator",									$tootfinvoice);
-							fputs ($tootfinvoice, "</eb:To>\n");
-
-							xml_add("eb:CPAId", "yoursand-mycpa", 								$tootfinvoice); //	Ei ilmeisesti juuri merkitt‰v‰
-							xml_add("eb:ConversationId", "nnnnn", 								$tootfinvoice);	// 	Ei ilmeisesti juuri merkitt‰v‰
-							xml_add("eb:Service", "Routing",									$tootfinvoice); //	Ei ilmeisesti juuri merkitt‰v‰
-							xml_add("eb:Action", "ProcessInvoice",								$tootfinvoice);
-							fputs ($tootfinvoice, "<eb:MessageData>\n");
-							xml_add("eb:MessageId", date("YmdHis")."-".$lasrow['laskunro'], 	$tootfinvoice);
-							xml_add("eb:Timestamp", date("Y-m-d")."T".date("H:i:s")."+02", 		$tootfinvoice);
-							fputs ($tootfinvoice, "<eb:RefToMessageId/>\n");
-							fputs ($tootfinvoice, "</eb:MessageData>\n");
-							fputs ($tootfinvoice, "</eb:MessageHeader>\n");
-							fputs ($tootfinvoice, "</SOAP-ENV:Header>\n");
-							fputs ($tootfinvoice, "<SOAP-ENV:Body>\n");
-							fputs ($tootfinvoice, "<eb:Manifest eb:id=\"Manifest\" eb:version=\"2.0\">\n");
-							fputs ($tootfinvoice, "<eb:Reference eb:id=\"Finvoice\" xlink:href=\"$mid\">\n");
-							fputs ($tootfinvoice, "<eb:schema eb:location=\"http://www.pankkiyhdistys.fi/verkkolasku/finvoice/finvoice.xsd\" eb:version=\"2.0\"/>\n");
-							fputs ($tootfinvoice, "</eb:Reference>\n");
-							fputs ($tootfinvoice, "</eb:Manifest>\n");
-							fputs ($tootfinvoice, "</SOAP-ENV:Body>\n");
-							fputs ($tootfinvoice, "</SOAP-ENV:Envelope>\n");
-
-							//laitetaan setit kuntoon..
-							fputs($tootfinvoice, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
-							fputs($tootfinvoice, "<!DOCTYPE Finvoice SYSTEM \"Finvoice.dtd\">\n");
-							fputs($tootfinvoice, "<?xml-stylesheet type=\"text/xsl\" href=\"Finvoice.xsl\"?>\n");
-
-							//t‰st‰ l‰htee Finvoice koodi
-							fputs($tootfinvoice, "<Finvoice Version=\"1.2\">\n");
-							fputs($tootfinvoice, "<SellerPartyDetails>\n");
-							xml_add("SellerPartyIdentifier",											ymuuta($yhtiorow['ytunnus']), 							$tootfinvoice);
-							xml_add("SellerPartyIdentifierUrlText",										"http://www.ytj.fi/yrit_sel2.asp?kielikoodi=1",			$tootfinvoice);
-							xml_add("SellerOrganisationName",											$yhtiorow['nimi'],	$tootfinvoice);
-							xml_add("SellerOrganisationTaxCode", 										ymuuta($yhtiorow['ytunnus']),	$tootfinvoice);
-							xml_add("SellerOrganisationTaxCodeUrlText",									"http://europa.eu.int/comm/taxation_customs/vies/fi/vieshome.htm", 	$tootfinvoice);
-
-							fputs($tootfinvoice, "<SellerPostalAddressDetails>\n");
-							xml_add("SellerStreetName", 												$yhtiorow['osoite'], 									$tootfinvoice);
-							xml_add("SellerTownName", 													$yhtiorow['postitp'], 									$tootfinvoice);
-							xml_add("SellerPostCodeIdentifier", 										$yhtiorow['postino'], 									$tootfinvoice);
-							xml_add("CountryCode",														$yhtiorow['maakoodi'],									$tootfinvoice);
-							xml_add("CountryName",														$yhtiorow['maa'], 										$tootfinvoice);
-							fputs($tootfinvoice, "</SellerPostalAddressDetails>\n");
-
-							fputs($tootfinvoice, "</SellerPartyDetails>\n");
-
-							//xml_add("SellerOrganisationUnitNumber",									$yhtiorow["ovttunnus"], 								$tootfinvoice);
-
-							xml_add("SellerContactPersonName",											$lasrow["laatija"], 									$tootfinvoice);
-
-							fputs($tootfinvoice, "<SellerCommunicationDetails>\n");
-							xml_add("SellerEmailaddressIdentifier",										$yhtiorow['email'], 									$tootfinvoice);
-							fputs($tootfinvoice, "</SellerCommunicationDetails>\n");
-
-							fputs($tootfinvoice, "<SellerInformationDetails>\n");
-							xml_add("SellerHomeTownName",												$yhtiorow['kotipaikka'],								$tootfinvoice);
-							xml_add("SellerPhoneNumber", 												$yhtiorow['puhelin'], 									$tootfinvoice);
-							xml_add("SellerFaxNumber", 													$yhtiorow['fax'], 										$tootfinvoice);
-							xml_add("SellerCommonEmailaddressIdentifier",								$yhtiorow['email'], 									$tootfinvoice);
-							xml_add("SellerWebaddressIdentifier",										$yhtiorow['www'],   									$tootfinvoice);
-							xml_add("SellerFreeText",   		                     					$yhtiorow['laskun_vapaakentta'],      					$tootfinvoice);
-
-							fputs($tootfinvoice, "<SellerAccountDetails>\n");
-							xml_add('SellerAccountID IdentificationSchemeName="IBAN"',					$yhtiorow['pankkiiban1'],								$tootfinvoice);
-							xml_add('SellerBic IdentificationSchemeName="BIC"',							$yhtiorow['pankkiswift1'],								$tootfinvoice);
-							fputs($tootfinvoice, "</SellerAccountDetails>\n");
-
-							if ($yhtiorow['pankkiiban2']!='') {
-								fputs($tootfinvoice, "<SellerAccountDetails>\n");
-								xml_add('SellerAccountID IdentificationSchemeName="IBAN"',				$yhtiorow['pankkiiban2'],       						$tootfinvoice);
-								xml_add('SellerBic IdentificationSchemeName="BIC"',						$yhtiorow['pankkiswift2'],      						$tootfinvoice);
-								fputs($tootfinvoice, "</SellerAccountDetails>\n");
-							}
-							if ($yhtiorow['pankkiiban3']!='') {
-								fputs($tootfinvoice, "<SellerAccountDetails>\n");
-								xml_add('SellerAccountID IdentificationSchemeName="IBAN"',				$yhtiorow['pankkiiban3'],       						$tootfinvoice);
-								xml_add('SellerBic IdentificationSchemeName="BIC"',						$yhtiorow['pankkiswift3'],     							$tootfinvoice);
-								fputs($tootfinvoice, "</SellerAccountDetails>\n");
-							}
-
-
-							fputs($tootfinvoice, "<InvoiceRecipientDetails>\n");
-							xml_add("InvoiceRecipientAddress",											$yhtiorow['pankkiiban1'],		  						$tootfinvoice);
-							xml_add("InvoiceRecipientIntermediatorAddress",								$yhtiorow['pankkiswift1'],                 				$tootfinvoice);
-							fputs($tootfinvoice, "</InvoiceRecipientDetails>\n");
-
-							fputs($tootfinvoice, "</SellerInformationDetails>\n");
-
-							fputs($tootfinvoice, "<BuyerPartyDetails>\n");
-							xml_add("BuyerPartyIdentifier",				  								ymuuta($lasrow['ytunnus']), 							$tootfinvoice);
-							xml_add("BuyerOrganisationName",                     						$lasrow['nimi'],    									$tootfinvoice);
-							xml_add("BuyerOrganisationTaxCode",                     					$asiakarow['maa']."".ymuuta($lasrow['ytunnus']),    	$tootfinvoice);
-							//xml_add("BuyerOrganisationUnitNumber",                    				$asiakasrow['ovttunnus'],    							$tootfinvoice);
-
-							fputs($tootfinvoice, "<BuyerPostalAddressDetails>\n");
-							xml_add("BuyerStreetName",													$lasrow['osoite'],     									$tootfinvoice);
-							xml_add("BuyerTownName",                                  					$lasrow['postitp'],      								$tootfinvoice);
-							xml_add("BuyerPostCodeIdentifier",                         					$lasrow['postino'],     								$tootfinvoice);
-							fputs($tootfinvoice, "</BuyerPostalAddressDetails>\n");
-
-							fputs($tootfinvoice, "</BuyerPartyDetails>\n");
-
-							fputs($tootfinvoice, "<DeliveryPartyDetails>\n");
-
-							fputs($tootfinvoice, "<DeliveryPartyIdentifier/>\n");
-							xml_add("DeliveryOrganisationName",                            				$lasrow['toim_nimi'],     								$tootfinvoice);
-
-							fputs($tootfinvoice, "<DeliveryPostalAddressDetails>\n");
-							xml_add("DeliveryStreetName",                             					$lasrow['toim_osoite'],     							$tootfinvoice);
-							xml_add("DeliveryTownName",                                 				$lasrow['toim_postitp'],     							$tootfinvoice);
-							xml_add("DeliveryPostCodeIdentifier",                     					$lasrow['toim_postino'],								$tootfinvoice);
-							fputs($tootfinvoice, "</DeliveryPostalAddressDetails>\n");
-
-							fputs($tootfinvoice, "</DeliveryPartyDetails>\n");
-
-							fputs($tootfinvoice, "<DeliveryDetails>\n");
-							xml_add('DeliveryDate Format="CCYYMMDD"',                   				vlas_dateconv($lasrow['toimaika']),							$tootfinvoice);
-							xml_add("DeliveryMethodText",                                     			$lasrow['toimitustapa'],          						$tootfinvoice);
-							fputs($tootfinvoice, "</DeliveryDetails>\n");
-
-							fputs($tootfinvoice, "<InvoiceDetails>\n");
-							//tsekataan laskun tyyppikoodi INV
-							if ($lasrow['arvo']>=0)	{
-								xml_add("InvoiceTypeCode",												"INV01",      		      								$tootfinvoice);
-								xml_add("InvoiceTypeText",												"LASKU",      		      								$tootfinvoice);
-							}
-							else {
-								xml_add("InvoiceTypeCode",												"INV02",      		      								$tootfinvoice);
-								xml_add("InvoiceTypeText",												"HYVITYSLASKU",      		      						$tootfinvoice);
-							}
-
-							xml_add("OriginCode",              	                   						"Original",                  					 		$tootfinvoice);
-							xml_add("InvoiceNumber",       	 	                     					$lasrow['laskunro'],  									$tootfinvoice);
-							xml_add('InvoiceDate Format="CCYYMMDD"',									vlas_dateconv($lasrow['tapvm']),								$tootfinvoice);
-							xml_add("OrderIdentifier",													$lasrow['tunnus'],										$tootfinvoice);
-							xml_add("InvoiceTotalVatExcludedAmount AmountCurrencyIdentifier=\"$val\"", 	pp($lasrow['arvo']),									$tootfinvoice);
-							xml_add("InvoiceTotalVatAmount AmountCurrencyIdentifier=\"$val\"",			pp(round($lasrow['summa']-$lasrow['arvo'], 2)),			$tootfinvoice);
-							xml_add("InvoiceTotalVatIncludedAmount AmountCurrencyIdentifier=\"$val\"",	pp($lasrow['summa']),									$tootfinvoice);
-
-						}
-						elseif($silent == "") {
-							$tulos_ulos .= t("Finvoiceaineistoa ei voitu luoda. Yhtiolta puuttuu ovttunnus, SWIFT tai IBAN tunnus. Tulosta lasku manuaalisesti!")." ".$lasrow["laskunro"]."<br>\n<br>\n";
-						}
+						finvoice_otsik($tootfinvoice, $lasrow, $silent, $tulos_ulos);
 					}
 					else {
-
-						$fstat = fstat($tootxml);
-
-						if ($fstat["size"] == 0) {
-							//tehd‰‰n verkkolasku oliot
-							fputs($tootxml, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
-							fputs($tootxml, "<Pupevoice Version=\"0.99\">\n");
-						}
-
-						// Kirjotetaan laskun tietoja pupevoice XML-muotoon
-						fputs($tootxml, "<Invoice>\n");
-						fputs($tootxml, "<CHN>\n");
-
-						xml_add("Paper", 								substr($lasrow['chn'], 0, 1), 	$tootxml);
-						xml_add("Einvoice", 							substr($lasrow['chn'], 1, 1), 	$tootxml);
-						xml_add("Edi", 									substr($lasrow['chn'], 2, 1), 	$tootxml);
-						xml_add("Email", 								$yhtiorow['admin_email'],		$tootxml);
-
-						if (strtoupper($yhtiorow['kieli']) == 'SE' or $kieli == "SE") {
-							xml_add("Language",							"SV",							$tootxml);
-						}
-
-						fputs($tootxml, "</CHN>\n");
-						fputs($tootxml, "<SellerPartyInformation>\n");
-
-						xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],		$tootxml);
-						xml_add("SellerPartyDomicile", 					$yhtiorow['kotipaikka'], 	$tootxml);
-						xml_add("SellerOrganisationName", 				$yhtiorow['nimi'], 			$tootxml);
-						xml_add("SellerStreetName", 					$yhtiorow['osoite'], 		$tootxml);
-						xml_add("SellerPostCode", 						$yhtiorow['postino'], 		$tootxml);
-						xml_add("SellerTownName", 						$yhtiorow['postitp'], 		$tootxml);
-						xml_add("SellerCountryName", 					$yhtiorow['maakoodi'],		$tootxml);
-						xml_add("SellerPhoneNumber", 					$yhtiorow['puhelin'], 		$tootxml);
-						xml_add("SellerFaxNumber", 						$yhtiorow['fax'], 			$tootxml);
-
-						if ($masrow["factoring"] == "") {
-							xml_add("SellerAccountName1", 				$yhtiorow['pankkinimi1'],	$tootxml);
-							xml_add("SellerAccountID1", 				$yhtiorow['pankkitili1'],	$tootxml);
-							xml_add("SellerAccountName2", 				$yhtiorow['pankkinimi2'],	$tootxml);
-							xml_add("SellerAccountID2", 				$yhtiorow['pankkitili2'],	$tootxml);
-							xml_add("SellerAccountName3", 				$yhtiorow['pankkinimi3'],	$tootxml);
-							xml_add("SellerAccountID3", 				$yhtiorow['pankkitili3'],	$tootxml);
-						}
-						else {
-							xml_add("SellerAccountName1", 				$frow['pankkinimi1'],		$tootxml);
-							xml_add("SellerAccountID1", 				$frow['pankkitili1'],		$tootxml);
-							xml_add("SellerAccountName2", 				$frow['pankkinimi2'],		$tootxml);
-							xml_add("SellerAccountID2", 				$frow['pankkitili2'],		$tootxml);
-							xml_add("SellerAccountName3", 				"",							$tootxml);
-							xml_add("SellerAccountID3", 				"",							$tootxml);
-						}
-
-						xml_add("SellerVatRegistrationText", 			t("Alv.Rek"), 		$tootxml);
-						xml_add("SellerContactPerson", 					$myyrow['nimi'],	$tootxml);
-
-						fputs($tootxml, "</SellerPartyInformation>\n");
-						fputs($tootxml, "<InvoiceDetails>\n");
-
-						xml_add("InvoiceType",							$tyyppi, 										$tootxml);
-						xml_add("InvoicedPartyIdentifier",				$lasrow['ytunnus'], 							$tootxml);
-						xml_add("InvoicedPartyOVT",						$lasrow['ovttunnus'],							$tootxml);
-						xml_add("InvoicedPartyEBA",						$lasrow['verkkotunnus'], 						$tootxml);
-						xml_add("InvoicedOrganisationName",				"$lasrow[nimi] $lasrow[nimitark]", 				$tootxml);
-						xml_add("InvoicedStreetName",					$lasrow['osoite'], 								$tootxml);
-						xml_add("InvoicedPostCode",						$lasrow['postino'],								$tootxml);
-						xml_add("InvoicedTownName",						$lasrow['postitp'],								$tootxml);
-						xml_add("InvoicedCountryName",					$lasrow['maa'], 								$tootxml);
-						xml_add("InvoiceNumber",						$lasrow['laskunro'],							$tootxml);
-						xml_add("InvoiceCurrency",						$yhtiorow['valkoodi'],							$tootxml);
-						xml_add("InvoicePaymentReference",				$lasrow['viite'], 								$tootxml);
-						xml_add("InvoiceDate",							vlas_dateconv($lasrow['tapvm']), 					$tootxml);
-						xml_add("OrderIdentifier",						'', 											$tootxml); //Ostajan tilausnumero, eii oo viel‰ olemassa
-						xml_add("DeliveredPartyName",					"$lasrow[toim_nimi] $lasrow[toim_nimitark]",	$tootxml);
-						xml_add("DeliveredPartyStreetName",				$lasrow['toim_osoite'], 						$tootxml);
-						xml_add("DeliveredPartyPostCode",				$lasrow['toim_postino'], 						$tootxml);
-						xml_add("DeliveredPartyTownName",				$lasrow['toim_postitp'], 						$tootxml);
-						xml_add("DeliveredPartyCountryName",			$lasrow['toim_maa'], 							$tootxml);
-						xml_add("DeliveredPartyOVT",					$lasrow['toim_ovttunnus'], 						$tootxml);
-						xml_add("DueDate",								vlas_dateconv($lasrow['erpcm']),						$tootxml);
-						xml_add("InvoiceTotalVatExcludedAmount",		$lasrow['arvo'],								$tootxml);
-						xml_add("InvoiceTotalVatAmount",				round($lasrow['summa']-$lasrow['arvo'], 2),		$tootxml);
-						xml_add("InvoiceTotalVatIncludedAmount",		$lasrow['summa'],								$tootxml);
-						xml_add("PaymentTerms",							$masrow['teksti']." ".$masrow['kassa_teksti'],	$tootxml);
-						xml_add("PaymentOverDueFinePercent",			$lasrow['viikorkopros'], 						$tootxml);
-						xml_add("InvoiceDeliveryMethod",				$lasrow['toimitustapa'], 						$tootxml);
-
-						//Laitetaan kassa-alennustietoja
-						xml_add("CashDiscountDate",						vlas_dateconv($lasrow['kapvm']), 					$tootxml);
-						xml_add("CashDiscountBaseAmount",				$lasrow['summa'],			 					$tootxml);
-						xml_add("CashDiscountPercent",					$masrow['kassa_alepros'],	 					$tootxml);
-						xml_add("CashDiscountAmount",					$lasrow['kasumma'],			 					$tootxml);
-						xml_add("InvoiceReferenceFreeText",				$lasrow['viesti'],								$tootxml);
-						xml_add("InvoiceFreeText",						$laskunkommentit,								$tootxml);
+						pupevoice_otsik($tootxml, $lasrow, $kieli, $frow, $masrow, $myyrow, $tyyppi);
 					}
 
 
@@ -1212,48 +866,22 @@
 					while ($alvrow = mysql_fetch_array($alvres)) {
 						// Kirjotetaan failiin arvierittelyt
 						if ($lasrow["chn"] == "111") {
-							fputs($tootedi, "ITAXVATTX:$alvrow[0]\n");
-							fputs($tootedi, "ITAXVATMA:125@$alvrow[1]\n");
-							fputs($tootedi, "ITAXVATMA:150@$alvrow[2]\n");
+							elmaedi_alvierittely($tootedi, $alvrow);
 						}
 						elseif($yhtiorow["verkkolasku_lah"] != "") {
-							fputs($tootfinvoice, "<VatSpecificationDetails>\n");
-							xml_add("VatBaseAmount AmountCurrencyIdentifier=\"$val\"",	pp($alvrow[1]), 				$tootfinvoice);
-							xml_add("VatRatePercent",									pp($alvrow[0]), 				$tootfinvoice);
-							xml_add("VatRateAmount AmountCurrencyIdentifier=\"$val\"",	pp($alvrow[2]), 				$tootfinvoice);
-							fputs($tootfinvoice, "</VatSpecificationDetails>\n");
+							finvoice_alvierittely($tootfinvoice, $lasrow, $alvrow);
 						}
 						else {
-							fputs($tootxml, "<VatSpecificationDetails>\n");
-							xml_add("VatRatePercent",					$alvrow[0], $tootxml);
-							xml_add("VatBaseAmount",					$alvrow[1], $tootxml);
-							xml_add("VatRateAmount",					$alvrow[2], $tootxml);
-							fputs($tootxml, "</VatSpecificationDetails>\n");
+							pupevoice_alvierittely($tootxml, $alvrow);
 						}
 					}
 
+					//Kirjoitetaan otsikkojen lopputiedot
 					if ($lasrow["chn"] == "111") {
-						//Otsikko on saatu valmiiksi
-						fputs($tootedi, "IHDR__END:".substr($lasrow["tunnus"], -6)."\n");
+						elmaedi_otsikko_loput($tootedi, $lasrow);
 					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
-						// finvoicelle pit‰‰ viel‰ kirjoittaa jaddajadda
-						fputs($tootfinvoice, "<PaymentTermsDetails>\n");
-						xml_add("PaymentTermsFreeText",       											pp($masrow['teksti']." ".$masrow['kassa_teksti']),		$tootfinvoice);
-						xml_add('InvoiceDueDate Format="CCYYMMDD"',               						pp(vlas_dateconv($lasrow['tapvm'])),   	       				$tootfinvoice);
-
-						fputs($tootfinvoice, "<PaymentOverDueFineDetails>\n");
-						xml_add("PaymentOverDueFineFreeText",											"viiv‰styskorko ".pp($lasrow['viikorkopros']),				$tootfinvoice);
-						xml_add("PaymentOverDueFinePercent",                 						 	pp($lasrow['viikorkopros']),   							$tootfinvoice);
-						fputs($tootfinvoice, "</PaymentOverDueFineDetails>\n");
-
-						fputs($tootfinvoice, "</PaymentTermsDetails>\n");
-
-						fputs($tootfinvoice, "</InvoiceDetails>\n");
-
-						fputs($tootfinvoice, "<PaymentStatusDetails>\n");
-						xml_add("PaymentStatusCode", 													"NOTPAID", 												$tootfinvoice);
-						fputs($tootfinvoice, "</PaymentStatusDetails>\n");
+						finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
 					}
 
 					// Kirjoitetaan rivitietoja tilausriveilt‰
@@ -1273,112 +901,34 @@
 						$tilrow['nimitys'] = ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|%\r\n]", "", $tilrow['nimitys']);
 						
 						if ($lasrow["chn"] == "111") {
-							$query = "	select eankoodi
-										from tuote
-										where yhtio='$kukarow[yhtio]' and tuoteno='$tilrow[tuoteno]'";
-							$eanres = mysql_query($query) or pupe_error($query);
-							$eanrow = mysql_fetch_array($eanres);
-
-							fputs($tootedi, "ILINSTART:$rivinumero\n");
-							fputs($tootedi, "ILINEN_NU:$eanrow[eankoodi]\n");
-							fputs($tootedi, "ILINMF_PI:".sprintf("%-35.35s", $tilrow['tuoteno'])."@5\n");
-							fputs($tootedi, "ILIN8__IF:       @   @   @   @".sprintf("%-35.35s", $tilrow['nimitys'])."\n");
-							fputs($tootedi, "ILIN47_QT:".sprintf("%017.2f", $tilrow["kpl"])."@$tilrow[yksikko]\n");
-							fputs($tootedi, "ILININVIV:".sprintf("%017.2f", $tilrow["hinta"])."@   @   @   @          1@PCE\n");
-							fputs($tootedi, "ILIN203MA:$tilrow[rivihinta]\n");
-							fputs($tootedi, "ILIN___PA:$tilrow[ale]\n");
-							fputs($tootedi, "ILINVATTX:$tilrow[alv]\n");
-							fputs($tootedi, "ILIN__END:$rivinumero\n");
+							elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 						}
 						elseif($yhtiorow["verkkolasku_lah"] != "") {
-							fputs($tootfinvoice, "<InvoiceRow>\n");
-							xml_add("ArticleIdentifier",                                   			$tilrow['tuoteno'],         	$tootfinvoice);
-							xml_add("ArticleName",                                    				$tilrow['nimitys'],  			$tootfinvoice);
-							xml_add("DeliveredQuantity QuantityUnitCode=\"$tilrow[yksikko]\"",		pp($tilrow['kpl']),      		$tootfinvoice);
-							xml_add("UnitPriceAmount AmountCurrencyIdentifier=\"$val\"",  			pp($tilrow['hinta']),        	$tootfinvoice);
-
-							if($tilrow["tilaajanrivinro"] != 0) {
-								xml_add("RowIdentifier",                                    		$tilrow['tilaajanrivinro'], 	$tootfinvoice); // t‰nne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
-							}
-							if ($tilrow['kommentti']!='') {
-								xml_add("RowFreeText",    											$tilrow['kommentti'],			$tootfinvoice);
-							}
-
-							xml_add("RowVatRatePercent",                                    		pp($tilrow['alv']),           	$tootfinvoice);
-							xml_add("RowVatAmount AmountCurrencyIdentifier=\"$val\"",          		pp($vatamount),      			$tootfinvoice);	// veron m‰‰r‰
-							xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$val\"",  		pp($tilrow['rivihinta']),      	$tootfinvoice);	// veroton rivihinta
-							xml_add("RowAmount AmountCurrencyIdentifier=\"$val\"",             		pp($totalvat),     				$tootfinvoice);	// verollinen rivihinta
-							fputs($tootfinvoice, "</InvoiceRow>\n");
-
+							finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 						}
 						else {
-							fputs($tootxml, "<Row>\n");
-							xml_add("OrderIdentifier",					$tilrow['otunnus'], 			$tootxml); // t‰m‰ on tilauksen numero meill‰, ei kuulu standardiin mutta se on pakko lis‰t‰
-							xml_add("ArticleIdentifier",				$tilrow['tuoteno'], 			$tootxml);
-							xml_add("ArticleName",						$tilrow['nimitys'], 			$tootxml);
-							xml_add("DeliveredQuantity",				$tilrow['kpl'], 				$tootxml);
-							xml_add("DeliveredQuantityUnitCode",		$tilrow['yksikko'],				$tootxml);
-							xml_add("DeliveryDate",						vlas_dateconv($tilrow['toimaika']),	$tootxml);
-							xml_add("UnitPrice",						$tilrow['hinta'], 				$tootxml);
-							xml_add("RowIdentifier",					$tilrow['tilaajanrivinro'], 	$tootxml); // t‰nne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
-							xml_add("RowDiscountPercent",				$tilrow['ale'], 				$tootxml);
-							xml_add("RowVatRatePercent",				$tilrow['alv'], 				$tootxml);
-							xml_add("RowVatAmount",						$vatamount, 					$tootxml); // veron m‰‰r‰
-							xml_add("RowTotalVatExcludedAmount",		$tilrow['rivihinta'],		 	$tootxml); // veroton rivihinta
-							xml_add("RowTotalVatIncludedAmount",		$totalvat, 						$tootxml); // verollinen rivihinta
-							xml_add("RowFreeText",						$tilrow['kommentti'],		 	$tootxml);
-							fputs($tootxml, "</Row>\n");
+							pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat);
 						}
 						$rivinumero++;
 					}
 
-
+					//Lopetetaan lasku
 					if ($lasrow["chn"] == "111") {
-						fputs($tootedi, "IMSG__END:".substr($lasrow["tunnus"], -6)."\n");
+						elmaedi_lasku_loppu($tootedi, $lasrow);
+						
 						$edilask++;
 					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
-						fputs($tootfinvoice, "<EpiDetails>\n");
-
-						fputs($tootfinvoice, "<EpiIdentificationDetails>\n");
-						xml_add('EpiDate Format="CCYYMMDD"',                   							vlas_dateconv($lasrow['tapvm']),		$tootfinvoice);
-						xml_add("EpiReference",                               							$lasrow['viite'],				$tootfinvoice);
-						fputs($tootfinvoice, "</EpiIdentificationDetails>\n");
-
-						fputs($tootfinvoice, "<EpiPartyDetails>\n");
-
-						fputs($tootfinvoice, "<EpiBfiPartyDetails>\n");
-						xml_add('EpiBfiIdentifier IdentificationSchemeName="BIC"',						$yhtiorow['pankkiswift1'],		$tootfinvoice);
-						fputs($tootfinvoice, "</EpiBfiPartyDetails>\n");
-
-						fputs($tootfinvoice, "<EpiBeneficiaryPartyDetails>\n");
-						xml_add("EpiNameAddressDetails",    											$yhtiorow['nimi'],				$tootfinvoice);
-						xml_add("EpiBei",                         										ymuuta($yhtiorow['ytunnus']),  	$tootfinvoice);
-						xml_add("EpiAccountID IdentificationSchemeName=\"BBAN\"",						$yhtiorow['pankkitili1'],		$tootfinvoice);
-						fputs($tootfinvoice, "</EpiBeneficiaryPartyDetails>\n");
-
-						fputs($tootfinvoice, "</EpiPartyDetails>\n");
-
-						fputs($tootfinvoice, "<EpiPaymentInstructionDetails>\n");
-						xml_add("EpiRemittanceInfoIdentifier IdentificationSchemeName=\"SPY\"",			spyconv($lasrow['viite']),    	$tootfinvoice);
-						xml_add("EpiInstructedAmount AmountCurrencyIdentifier=\"$valuutta\"", 			pp($lasrow['summa']),         	$tootfinvoice);
-						xml_add("EpiCharge ChargeOption=\"SHA\"", 										"SHA",							$tootfinvoice);
-						xml_add('EpiDateOptionDate Format="CCYYMMDD"',                					vlas_dateconv($lasrow['erpcm']),		$tootfinvoice);
-						fputs($tootfinvoice, "</EpiPaymentInstructionDetails>\n");
-
-						fputs($tootfinvoice, "</EpiDetails>\n");
-
-						fputs($tootfinvoice, "</Finvoice>\n");
+						finvoice_lasku_loppu($tootfinvoice, $lasrow);
 					}
 					else {
-						fputs($tootxml, "</InvoiceDetails>\n");
-						fputs($tootxml, "</Invoice>\n");
+						pupevoice_lasku_loppu($tootxml);
 					}
 
 					// Otetaan talteen jokainen laskunumero joka l‰hetet‰‰n jotta voidaan tulostaa paperilaskut
 					$tulostettavat[] = $lasrow["laskunro"];
 					$lask++;
-				} // end if lasrow.summa != 0
+				}
 				elseif ($lasrow["sisainen"] != '') {
 					$tulos_ulos .= "<br>\n".t("Tehtiin sis‰inen lasku")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
 					
@@ -1420,18 +970,9 @@
 				$tulos_ulos .= "<br><br>\n\n";
 			}
 
-			//Lopput‰git mukaan, paitsi jos failit on tyhji‰
-			$fstat = fstat($tootedi);
-
-			if ($fstat["size"] > 0) {
-				fputs($tootedi, "ICHG__END:$timestamppi\n");
-			}
-
-			$fstat = fstat($tootxml);
-
-			if ($fstat["size"] > 0) {
-				fputs($tootxml, "</Pupevoice>\n");
-			}
+			//Aineistojen lopput‰git
+			elmaedi_aineisto_loppu($tootedi, $timestamppi);
+			pupevoice_aineisto_loppu($tootxml);
 		}
 
 		// suljetaan faili
@@ -1509,7 +1050,7 @@
 			}
 
 			// jos yhtiˆll‰ on laskuprintteri on m‰‰ritelty tai halutaan jostain muusta syyst‰ tulostella laskuja paperille
-			if ($yhtiorow['lasku_tulostin'] != 0 or $valittu_tulostin != "") {
+			if ($yhtiorow['lasku_tulostin'] != 0 or (isset($valittu_tulostin) and $valittu_tulostin != "")) {
 
 				//K‰sin valittu tulostin
 				if ($valittu_tulostin != "") {

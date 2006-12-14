@@ -7,6 +7,9 @@
 	if(isset($_POST["valkoodi"])) $kaunisnimi = $_POST["valkoodi"];
 	else $valkoodi = "";
 
+
+	if($tee == 'lataa_tiedosto') $lataa_tiedosto = 1;
+
 	require('inc/parametrit.inc');
 
 	if ($tee == "lataa_tiedosto") {
@@ -180,6 +183,7 @@
 					lasku.toim_postino,
 					lasku.toim_postitp,
 					lasku.toim_maa,
+					lasku.maa,
 					lasku.viite,
 					DATE_FORMAT(lasku.tapvm, '%y%m%d') tapvm,
 					DATE_FORMAT(lasku.erpcm, '%y%m%d') erpcm,
@@ -239,7 +243,7 @@
 					}
 					
 					$laskurow["summa"] 		= round($arow["summa"] * 100, 0);
-					$laskurow["kasumma"]	= round($arow["kasumma"] / $laskurow["vienti_kurssi"] * 100, 0);
+					$laskurow["kasumma"]	= round($laskurow["kasumma"] / $laskurow["vienti_kurssi"] * 100, 0);
 				}
 
 				if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {

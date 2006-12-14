@@ -89,8 +89,7 @@
 					and lasku.tila	  	= 'U'
 					and lasku.alatila	= 'X'
 					and lasku.summa		!= 0
-					and lasku.factoringsiirtonumero > 0
-					and lasku.valkoodi	= '$valkoodi'";
+					and lasku.factoringsiirtonumero > 0";
 		$aresult = mysql_query ($query) or pupe_error($query);
 		$arow = mysql_fetch_array($aresult);
 

@@ -124,7 +124,13 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 750, t("Maksuehto", $kieli), $firstpage, $pieni);
 		$pdf->draw_text(310, 740, $maksuehto, $firstpage, $norm);
 		$pdf->draw_text(430, 750, t("Kassa-alennus", $kieli)." ".$laskurow["valkoodi"], $firstpage, $pieni);
+		
 		if ($laskurow["kasumma"] != 0.00) {
+			
+			if ($laskurow["vienti_kurssi"] != 0 and $laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$laskurow["kasumma"] = round($arow["kasumma"] / $laskurow["vienti_kurssi"], 2);
+			}
+			
 			$pdf->draw_text(430, 740, $laskurow["kasumma"], $firstpage, $norm);
 		}
 
@@ -250,6 +256,7 @@ if (!function_exists('rivi')) {
 			$laji = 'nimitys_'.strtolower($kieli);
 			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
 			$nimresult = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($nimresult)>0) {
 				$nimrow=mysql_fetch_array($nimresult);
 				$row['nimitys']=$nimrow['selite'];
@@ -327,6 +334,12 @@ if (!function_exists('rivi')) {
 			}
 			else {
 				$rivihinta_verolli  = $rivihinta_veroton * (1+$row["alv"]/100);
+			}
+			
+			//Jos proformalasku on toisessa valuutassa
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$rivihinta_verolli = laskuval($rivihinta_verolli, $laskurow["vienti_kurssi"]);
+				$rivihinta_veroton = laskuval($rivihinta_veroton, $laskurow["vienti_kurssi"]);
 			}
 
 			$summa += $rivihinta_verolli;
@@ -439,7 +452,18 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(404, 92+$vientikala,  t("Yhteensä", $kieli).":",$firstpage, $norm);
 
 		if ($kutsuja == 'proforma' or ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])))) {
-			$pdf->draw_text(464, 92+$vientikala,  sprintf('%.2f',round($summa, 2)),	$firstpage, $boldi);
+			// Etsitään asiakas
+			$query = "	SELECT laskunsummapyoristys
+						FROM asiakas
+						WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+			$asres = mysql_query($query) or pupe_error($query);
+			$asrow = mysql_fetch_array($asres);
+
+			if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
+		        $summa = round($summa,0);
+			}
+			
+			$pdf->draw_text(464, 92+$vientikala,  sprintf('%.2f', $summa),	$firstpage, $boldi);
 		}
 		else {
 			$pdf->draw_text(464, 92+$vientikala,  $laskurow["summa"],	$firstpage, $boldi);
@@ -577,7 +601,7 @@ if (!function_exists('alvierittely')) {
 			$pdf->draw_text(470, $kala, $laskurow["arvo"], 					$firstpage, $norm);
 		}
 
-		$pdf->draw_text(530, $kala, $laskurow["valkoodi"], 						$firstpage, $norm);
+		$pdf->draw_text(530, $kala, $laskurow["valkoodi"], 					$firstpage, $norm);
 
 
 		if ($kutsuja != 'proforma') {
@@ -646,11 +670,11 @@ if (!function_exists('alvierittely')) {
 
 		$pdf->draw_text(360, $kala, t("Lasku Yhteensä", $kieli).":",		$firstpage, $norm);
 
-		if ($kutsuja == 'proforma' or ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])))) {
-			$pdf->draw_text(470, $kala, sprintf('%.2f',round($summa,2)),$firstpage, $boldi);
+		if ($kutsuja == 'proforma' or ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])))) {		
+			$pdf->draw_text(470, $kala, sprintf('%.2f', $summa),			$firstpage, $boldi);
 		}
 		else {
-			$pdf->draw_text(470, $kala, $laskurow["summa"], 			$firstpage, $boldi);
+			$pdf->draw_text(470, $kala, $laskurow["summa"], 				$firstpage, $boldi);
 		}
 
 		$pdf->draw_text(530, $kala, $laskurow["valkoodi"], 					$firstpage, $boldi);

@@ -1,7 +1,7 @@
 <?php
 
-	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-	if($_POST["kaunisnimi"] != '') $kaunisnimi=$_POST["kaunisnimi"];
+	if(isset($_POST["tee"]) and $_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+	if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $kaunisnimi=$_POST["kaunisnimi"];
 
 	require('inc/parametrit.inc');
 

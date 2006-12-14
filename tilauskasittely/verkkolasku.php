@@ -170,8 +170,8 @@
 			}
 		}
 
-		if (!function_exists("dateconv")) {
-			function dateconv ($date) {
+		if (!function_exists("vlas_dateconv")) {
+			function vlas_dateconv ($date) {
 				//k‰‰nt‰‰ mysqln vvvv-kk-mm muodon muotoon vvvvkkmm
 				return substr($date,0,4).substr($date,5,2).substr($date,8,2);
 			}
@@ -854,8 +854,8 @@
 						fputs($tootedi, "IHDRSTART:".substr($lasrow["tunnus"], -6)."\n");
 						fputs($tootedi, "IBGMITYPE:$tyyppi\n");
 						fputs($tootedi, "IBGMINUMB:$lasrow[laskunro]\n");
-						fputs($tootedi, "IDTM3__DT:".sprintf("%-35.35s",dateconv($lasrow["tapvm"]))."@102\n");
-						fputs($tootedi, "IDTM171DT:".sprintf("%-35.35s",dateconv($lasrow["tapvm"]))."@102\n");
+						fputs($tootedi, "IDTM3__DT:".sprintf("%-35.35s",vlas_dateconv($lasrow["tapvm"]))."@102\n");
+						fputs($tootedi, "IDTM171DT:".sprintf("%-35.35s",vlas_dateconv($lasrow["tapvm"]))."@102\n");
 						fputs($tootedi, "IRFFPK_NU:$lasrow[tunnus]\n");
 						fputs($tootedi, "IRFFVN_NU:$lasrow[viesti]\n");
 						fputs($tootedi, "INADSE_CC:$lasrow[viesti]\n");
@@ -888,12 +888,12 @@
 						fputs($tootedi, "INADDP_CI:$lasrow[toim_postitp]\n");
 						fputs($tootedi, "INADDP_PO:$lasrow[toim_postino]\n");
 						fputs($tootedi, "ICUX1__CR:$yhtiorow[valkoodi]\n");
-						fputs($tootedi, "IPAT1__DT:13 @".sprintf("%-35.35s",dateconv($lasrow["erpcm"]))."@102\n");
+						fputs($tootedi, "IPAT1__DT:13 @".sprintf("%-35.35s",vlas_dateconv($lasrow["erpcm"]))."@102\n");
 						fputs($tootedi, "IPAT1__PC:15 @$lasrow[viikorkopros]\n");
 						fputs($tootedi, "IPAT1__TP:$masrow[teksti] $masrow[kassa_teksti]\n");
 
 						if ($lasrow["kasumma"] != 0) {
-							fputs($tootedi, "IPAT8__DT:12 @".sprintf("%-35.35s",dateconv($lasrow["kapvm"]))."@102\n");
+							fputs($tootedi, "IPAT8__DT:12 @".sprintf("%-35.35s",vlas_dateconv($lasrow["kapvm"]))."@102\n");
 							fputs($tootedi, "IPAT8__PC:12 @$masrow[kassa_alepros]\n");
 							fputs($tootedi, "IPAT8__MA:12 @".sprintf("%018.2f", $lasrow["kasumma"])."@$yhtiorow[valkoodi]\n");
 						}
@@ -1078,7 +1078,7 @@
 							fputs($tootfinvoice, "</DeliveryPartyDetails>\n");
 
 							fputs($tootfinvoice, "<DeliveryDetails>\n");
-							xml_add('DeliveryDate Format="CCYYMMDD"',                   				dateconv($lasrow['toimaika']),							$tootfinvoice);
+							xml_add('DeliveryDate Format="CCYYMMDD"',                   				vlas_dateconv($lasrow['toimaika']),							$tootfinvoice);
 							xml_add("DeliveryMethodText",                                     			$lasrow['toimitustapa'],          						$tootfinvoice);
 							fputs($tootfinvoice, "</DeliveryDetails>\n");
 
@@ -1095,7 +1095,7 @@
 
 							xml_add("OriginCode",              	                   						"Original",                  					 		$tootfinvoice);
 							xml_add("InvoiceNumber",       	 	                     					$lasrow['laskunro'],  									$tootfinvoice);
-							xml_add('InvoiceDate Format="CCYYMMDD"',									dateconv($lasrow['tapvm']),								$tootfinvoice);
+							xml_add('InvoiceDate Format="CCYYMMDD"',									vlas_dateconv($lasrow['tapvm']),								$tootfinvoice);
 							xml_add("OrderIdentifier",													$lasrow['tunnus'],										$tootfinvoice);
 							xml_add("InvoiceTotalVatExcludedAmount AmountCurrencyIdentifier=\"$val\"", 	pp($lasrow['arvo']),									$tootfinvoice);
 							xml_add("InvoiceTotalVatAmount AmountCurrencyIdentifier=\"$val\"",			pp(round($lasrow['summa']-$lasrow['arvo'], 2)),			$tootfinvoice);
@@ -1177,7 +1177,7 @@
 						xml_add("InvoiceNumber",						$lasrow['laskunro'],							$tootxml);
 						xml_add("InvoiceCurrency",						$yhtiorow['valkoodi'],							$tootxml);
 						xml_add("InvoicePaymentReference",				$lasrow['viite'], 								$tootxml);
-						xml_add("InvoiceDate",							dateconv($lasrow['tapvm']), 					$tootxml);
+						xml_add("InvoiceDate",							vlas_dateconv($lasrow['tapvm']), 					$tootxml);
 						xml_add("OrderIdentifier",						'', 											$tootxml); //Ostajan tilausnumero, eii oo viel‰ olemassa
 						xml_add("DeliveredPartyName",					"$lasrow[toim_nimi] $lasrow[toim_nimitark]",	$tootxml);
 						xml_add("DeliveredPartyStreetName",				$lasrow['toim_osoite'], 						$tootxml);
@@ -1185,7 +1185,7 @@
 						xml_add("DeliveredPartyTownName",				$lasrow['toim_postitp'], 						$tootxml);
 						xml_add("DeliveredPartyCountryName",			$lasrow['toim_maa'], 							$tootxml);
 						xml_add("DeliveredPartyOVT",					$lasrow['toim_ovttunnus'], 						$tootxml);
-						xml_add("DueDate",								dateconv($lasrow['erpcm']),						$tootxml);
+						xml_add("DueDate",								vlas_dateconv($lasrow['erpcm']),						$tootxml);
 						xml_add("InvoiceTotalVatExcludedAmount",		$lasrow['arvo'],								$tootxml);
 						xml_add("InvoiceTotalVatAmount",				round($lasrow['summa']-$lasrow['arvo'], 2),		$tootxml);
 						xml_add("InvoiceTotalVatIncludedAmount",		$lasrow['summa'],								$tootxml);
@@ -1194,7 +1194,7 @@
 						xml_add("InvoiceDeliveryMethod",				$lasrow['toimitustapa'], 						$tootxml);
 
 						//Laitetaan kassa-alennustietoja
-						xml_add("CashDiscountDate",						dateconv($lasrow['kapvm']), 					$tootxml);
+						xml_add("CashDiscountDate",						vlas_dateconv($lasrow['kapvm']), 					$tootxml);
 						xml_add("CashDiscountBaseAmount",				$lasrow['summa'],			 					$tootxml);
 						xml_add("CashDiscountPercent",					$masrow['kassa_alepros'],	 					$tootxml);
 						xml_add("CashDiscountAmount",					$lasrow['kasumma'],			 					$tootxml);
@@ -1240,7 +1240,7 @@
 						// finvoicelle pit‰‰ viel‰ kirjoittaa jaddajadda
 						fputs($tootfinvoice, "<PaymentTermsDetails>\n");
 						xml_add("PaymentTermsFreeText",       											pp($masrow['teksti']." ".$masrow['kassa_teksti']),		$tootfinvoice);
-						xml_add('InvoiceDueDate Format="CCYYMMDD"',               						pp(dateconv($lasrow['tapvm'])),   	       				$tootfinvoice);
+						xml_add('InvoiceDueDate Format="CCYYMMDD"',               						pp(vlas_dateconv($lasrow['tapvm'])),   	       				$tootfinvoice);
 
 						fputs($tootfinvoice, "<PaymentOverDueFineDetails>\n");
 						xml_add("PaymentOverDueFineFreeText",											"viiv‰styskorko ".pp($lasrow['viikorkopros']),				$tootfinvoice);
@@ -1318,7 +1318,7 @@
 							xml_add("ArticleName",						$tilrow['nimitys'], 			$tootxml);
 							xml_add("DeliveredQuantity",				$tilrow['kpl'], 				$tootxml);
 							xml_add("DeliveredQuantityUnitCode",		$tilrow['yksikko'],				$tootxml);
-							xml_add("DeliveryDate",						dateconv($tilrow['toimaika']),	$tootxml);
+							xml_add("DeliveryDate",						vlas_dateconv($tilrow['toimaika']),	$tootxml);
 							xml_add("UnitPrice",						$tilrow['hinta'], 				$tootxml);
 							xml_add("RowIdentifier",					$tilrow['tilaajanrivinro'], 	$tootxml); // t‰nne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
 							xml_add("RowDiscountPercent",				$tilrow['ale'], 				$tootxml);
@@ -1341,7 +1341,7 @@
 						fputs($tootfinvoice, "<EpiDetails>\n");
 
 						fputs($tootfinvoice, "<EpiIdentificationDetails>\n");
-						xml_add('EpiDate Format="CCYYMMDD"',                   							dateconv($lasrow['tapvm']),		$tootfinvoice);
+						xml_add('EpiDate Format="CCYYMMDD"',                   							vlas_dateconv($lasrow['tapvm']),		$tootfinvoice);
 						xml_add("EpiReference",                               							$lasrow['viite'],				$tootfinvoice);
 						fputs($tootfinvoice, "</EpiIdentificationDetails>\n");
 
@@ -1363,7 +1363,7 @@
 						xml_add("EpiRemittanceInfoIdentifier IdentificationSchemeName=\"SPY\"",			spyconv($lasrow['viite']),    	$tootfinvoice);
 						xml_add("EpiInstructedAmount AmountCurrencyIdentifier=\"$valuutta\"", 			pp($lasrow['summa']),         	$tootfinvoice);
 						xml_add("EpiCharge ChargeOption=\"SHA\"", 										"SHA",							$tootfinvoice);
-						xml_add('EpiDateOptionDate Format="CCYYMMDD"',                					dateconv($lasrow['erpcm']),		$tootfinvoice);
+						xml_add('EpiDateOptionDate Format="CCYYMMDD"',                					vlas_dateconv($lasrow['erpcm']),		$tootfinvoice);
 						fputs($tootfinvoice, "</EpiPaymentInstructionDetails>\n");
 
 						fputs($tootfinvoice, "</EpiDetails>\n");

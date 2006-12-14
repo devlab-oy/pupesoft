@@ -37,15 +37,14 @@
 		$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
 		$yhtiores = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($yhtiores)==1) {
+		if (mysql_num_rows($yhtiores) == 1) {
 			$yhtiorow = mysql_fetch_array($yhtiores);
 
 			// haetaan yhtiˆn parametrit
 			$query = "	SELECT *
 						FROM yhtion_parametrit
 						WHERE yhtio='$yhtiorow[yhtio]'";
-			$result = mysql_query($query)
-					or die ("Kysely ei onnistu yhtio $query");
+			$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
 			if (mysql_num_rows($result) == 1) {
 				$yhtion_parametritrow = mysql_fetch_array($result);
@@ -91,7 +90,7 @@
 	//Nollataan muuttujat
 	$tulostettavat = array();
 	$tulos_ulos = "";
-	
+
 	if (!isset($silent)) {
 		$silent = "";
 	}
@@ -237,12 +236,12 @@
 		// lock tables
 		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ";
 		$locre = mysql_query($query) or pupe_error($query);
-		
+
 		//Haetaan tarvittavat funktiot aineistojen tekoa varten
 		require("verkkolasku_elmaedi.inc");
 		require("verkkolasku_finvoice.inc");
 		require("verkkolasku_pupevoice.inc");
-	
+
 		// haetaan kaikki tilaukset jotka on toimitettu ja kuuluu laskuttaa t‰n‰‰n (t‰t‰ resulttia k‰ytet‰‰n alhaalla lis‰‰)
 		$lasklisa = "";
 
@@ -336,7 +335,7 @@
 		// haetaan laskutettavista tilauksista kaikki distinct toimitustavat per asiakas per p‰iv‰
 		// j‰lkivaatimukset omalle riville ja tutkitaan tarvimmeko lis‰ill‰ JV-kuluja
 		if ($silent == "") {
-			$tulos_ulos .= "<br>\n".t("J‰lkivaatimuskulut").":<br>\n<table>";
+			$tulos_ulos .= "<br>\n".t("J‰lkivaatimuskulut").":<br>\n";
 		}
 
 		$query   = "select group_concat(distinct lasku.tunnus) tunnukset
@@ -356,6 +355,12 @@
 		while ($row = mysql_fetch_array($result)) {
 			$yhdista[] = $row["tunnukset"];
 		}
+
+		if (count($yhdista) == 0) {
+			$tulos_ulos .= t("Ei j‰lkivaatimuksia")."!<br>\n";
+		}
+
+		$tulos_ulos .= "<table>";
 
 		foreach ($yhdista as $otsikot) {
 
@@ -580,19 +585,26 @@
 		$ketjut = array();
 
 		//haetaan kaikki laskutusvalmiit tilaukset jotka saa ketjuttaa, viite pit‰‰ olla tyhj‰‰ muuten ei laskuteta
-		$query  = "	select ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
+		$query  = "	SELECT ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
 					lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
 					sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
-					sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn, count(*) yht
-					from lasku
-					where yhtio		= '$kukarow[yhtio]'
+					sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn,
+					count(*) yht, group_concat(tunnus) tunnukset
+					FROM lasku
+					WHERE yhtio		= '$kukarow[yhtio]'
 					and alatila		= 'V'
 					and tila		= 'L'
 					and ketjutus	= ''
 					and viite		= ''
 					$lasklisa
-					group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22
-					order by 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22";
+					GROUP BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
+					lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
+					sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
+					sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn
+					ORDER BY ytunnus, nimi, nimitark, osoite, postino, postitp, maksuehto, erpcm, vienti,
+					lisattava_era, vahennettava_era, maa_maara, kuljetusmuoto, kauppatapahtuman_luonne,
+					sisamaan_kuljetus, aktiivinen_kuljetus, kontti, aktiivinen_kuljetus_kansallisuus,
+					sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, chn";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if ($silent == "") {
@@ -601,50 +613,12 @@
 
 		while ($row = mysql_fetch_array($result)) {
 
-			$query    = "	select tunnus
-							from lasku
-							where yhtio				= '$kukarow[yhtio]'
-							and alatila				= 'V'
-							and tila				= 'L'
-							and ketjutus			= ''
-							and viite				= ''
-							and ytunnus				= '$row[ytunnus]'
-							and nimi				= '$row[nimi]'
-							and nimitark			= '$row[nimitark]'
-							and osoite				= '$row[osoite]'
-							and postino				= '$row[postino]'
-							and postitp				= '$row[postitp]'
-							and maksuehto			= '$row[maksuehto]'
-							and erpcm				= '$row[erpcm]'
-							and vienti				= '$row[vienti]'
-							and lisattava_era		= '$row[lisattava_era]'
-							and vahennettava_era	= '$row[vahennettava_era]'
-							and maa_maara 			= '$row[maa_maara]'
-							and kuljetusmuoto 		= '$row[kuljetusmuoto]'
-							and kauppatapahtuman_luonne = '$row[kauppatapahtuman_luonne]'
-							and sisamaan_kuljetus 	= '$row[sisamaan_kuljetus]'
-							and aktiivinen_kuljetus = '$row[aktiivinen_kuljetus]'
-							and kontti 				= '$row[kontti]'
-							and aktiivinen_kuljetus_kansallisuus = '$row[aktiivinen_kuljetus_kansallisuus]'
-							and sisamaan_kuljetusmuoto 	= '$row[sisamaan_kuljetusmuoto]'
-							and poistumistoimipaikka 	= '$row[poistumistoimipaikka]'
-							and poistumistoimipaikka_koodi = '$row[poistumistoimipaikka_koodi]'
-							and chn					= '$row[chn]'";
-			$lares    = mysql_query($query) or pupe_error($query);
-
-			$tunnukset= "";
-
-			while ($larow = mysql_fetch_array($lares)) {
-				$tunnukset .= "'$larow[tunnus]',";
-			}
-
 			if ($silent == "") {
 				$tulos_ulos .= "<tr><td>$row[ytunnus]</td><td>$row[nimi]<br>$row[nimitark]</td><td>$row[osoite]</td><td>$row[postino]</td>\n
 								<td>$row[postitp]</td><td>$row[maksuehto]</td><td>$row[erpcm]</td><td>Ketjutettu $row[yht] kpl</td></tr>\n";
 			}
 
-			$tunnukset = substr($tunnukset,0,-1);
-			$ketjut[]  = $tunnukset;
+			$ketjut[]  = $row["tunnukset"];
 		}
 
 		//haetaan kaikki laskutusvalmiit tilaukset joita *EI SAA* ketjuttaa, viite pit‰‰ olla tyhj‰‰ muuten ei laskuteta..
@@ -663,7 +637,7 @@
 			$ketjukpl  = 1;
 
 			// lis‰t‰‰n mukaan ketjuun
-			$ketjut[]  = "'$row[tunnus]'";
+			$ketjut[]  = $row["tunnus"];
 
 			if ($silent == "") {
 				$tulos_ulos .= "<tr><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[nimitark] </td><td>$row[postino]</td>\n
@@ -678,10 +652,6 @@
 		//laskuri
 		$lask 		= 0;
 		$edilask 	= 0;
-
-		if ($silent == "") {
-			$tulos_ulos .= "<br><br>\n".t("Tehd‰‰n u-laskut:")."<br>\n";
-		}
 
 		// jos on jotain laskutettavaa ...
 		if (count($ketjut) != 0) {
@@ -844,11 +814,11 @@
 					if (trim($lasrow['sisviesti1']) != '') {
 						$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $lasrow['sisviesti1']);
 					}
-					
+
 					//Kirjoitetaan failiin laskun otsikkotiedot
 					if ($lasrow["chn"] == "111") {
 						elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi);
-					}					
+					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
 						finvoice_otsik($tootfinvoice, $lasrow, $silent, $tulos_ulos);
 					}
@@ -896,10 +866,10 @@
 					while ($tilrow = mysql_fetch_array($tilres)) {
 						$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);
 						$totalvat  = round($tilrow['rivihinta']+$vatamount, 2);
-						
+
 						$tilrow['kommentti'] 	= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+()%]", " ", $tilrow['kommentti']);
 						$tilrow['nimitys'] 		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+()%]", " ", $tilrow['nimitys']);
-						
+
 						if ($lasrow["chn"] == "111") {
 							elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 						}
@@ -915,7 +885,7 @@
 					//Lopetetaan lasku
 					if ($lasrow["chn"] == "111") {
 						elmaedi_lasku_loppu($tootedi, $lasrow);
-						
+
 						$edilask++;
 					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
@@ -931,7 +901,7 @@
 				}
 				elseif ($lasrow["sisainen"] != '') {
 					$tulos_ulos .= "<br>\n".t("Tehtiin sis‰inen lasku")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
-					
+
 					// Sis‰isi‰ laskuja ei normaaalisti tuloseta paitski jos meill‰ on valittu_tulostin
 					if ($valittu_tulostin != '') {
 						$tulostettavat[] = $lasrow["laskunro"];
@@ -957,7 +927,7 @@
 					$lask++;
 				}
 				elseif($silent == "") {
-					$tulos_ulos .= "<br>\n".t("Nollasummaista laskua ei l‰hetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+					$tulos_ulos .= "\n".t("Nollasummaista laskua ei l‰hetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
 				}
 
 				// p‰ivitet‰‰n kaikki laskut l‰hetetyiksi...
@@ -995,7 +965,7 @@
 		if ($lask > 0) {
 
 			if ($silent == "" or $silent == "VIENTI") {
-				$tulos_ulos .= t("L‰hetettiin")." $lask ".t("laskua").".<br>\n";
+				$tulos_ulos .= t("Luotiin")." $lask ".t("laskua").".<br>\n";
 			}
 
 			//jos verkkotunnus lˆytyy niin
@@ -1044,9 +1014,6 @@
 				if ($silent == "") {
 					$tulos_ulos .= $tulos_ulos_ftp;
 				}
-			}
-			elseif($silent == "") {
-				$tulos_ulos .= t("Verkkolaskuja ei l‰hetetty Elma EDI-inhouse muodossa")."!<br>\n";
 			}
 
 			// jos yhtiˆll‰ on laskuprintteri on m‰‰ritelty tai halutaan jostain muusta syyst‰ tulostella laskuja paperille
@@ -1265,7 +1232,7 @@
 			}
 		}
 		elseif($silent == "") {
-			$tulos_ulos .= t("Sinulla ei ollut yht‰‰n laskua siirrett‰v‰n‰!")."<br>\n";
+			$tulos_ulos .= t("Yht‰‰n laskua ei siirretty/tulostettu!")."<br>\n";
 		}
 
 		$query = "UNLOCK TABLES";

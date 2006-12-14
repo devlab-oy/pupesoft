@@ -182,6 +182,7 @@
 					DATE_FORMAT(lasku.kapvm, '%y%m%d') kapvm,
 					lasku.tunnus,
 					lasku.valkoodi,
+					lasku.vienti_kurssi,
 					lasku.liitostunnus
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='NORDEA'
@@ -209,13 +210,33 @@
 			echo "<tr><th>Tyyppi</th><th>Laskunumero</th><th>Nimi</th><th>Summa</th><th>Valuutta</th></tr>";
 
 			while ($laskurow = mysql_fetch_array($laskures)) {
-
+				
+				// Haetaan asiakkaan tiedot
 				$query  = "	SELECT *
 							FROM asiakas
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$laskurow[liitostunnus]'";
 				$asires = mysql_query($query) or pupe_error($query);
 				$asirow = mysql_fetch_array($asires);
+
+
+				//Valuuttalaskuissa laskun loppusummma lasketaan tilausriveiltä
+				if ($laskurow["vienti_kurssi"] != 0 and $laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {					
+					$aquery = "	SELECT
+								sum(round(if(alv<500, (1+(alv/100)), (1+((alv-500)/100))) * tilausrivi.rivihinta / $laskurow[vienti_kurssi], 2)) summa
+								FROM tilausrivi
+								WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' 
+								and tilausrivi.yhtio = '$kukarow[yhtio]'";
+					$ares = mysql_query($aquery) or pupe_error($aquery);
+					$arow = mysql_fetch_array($ares);
+				
+					if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asirow["laskunsummapyoristys"] == 'o') {
+				        $arow["summa"] = round($arow["summa"],0);
+					}
+					
+					$laskurow["summa"] 		= round($arow["summa"] * 100, 0);
+					$laskurow["kasumma"]	= round($arow["kasumma"] / $laskurow["vienti_kurssi"] * 100, 0);
+				}
 
 				if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
 					$laskuvirh++;
@@ -335,13 +356,13 @@
 					$vlaskukpl++;
 					$vlaskusum += $laskurow["summa"];
 
-					echo "<td>Veloituslasku</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".($laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td>";
+					echo "<td>Veloituslasku</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".sprintf('%.2f', $laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td>";
 				}
 				if ($laskurow["tyyppi"] == "02") {
 					$hlaskukpl++;
 					$hlaskusum += $laskurow["summa"];
 
-					echo "<td>Hyvityslasku:</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".($laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td>";
+					echo "<td>Hyvityslasku:</td><td>$laskurow[laskunro]</td><td>$laskurow[nimi]</td><td align='right'>".sprintf('%.2f', $laskurow["summa"]/100)."</td><td>$laskurow[valkoodi]</td>";
 				}
 
 				if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
@@ -399,8 +420,8 @@
 
 				echo "<tr><td class='back'><br></td></tr>";
 
-				echo "<tr><td class='back' colspan='2'></td><th>Yhteensä $vlaskukpl veloituslaskua</th><td align='right'>".round($vlaskusum/100,2)."</td><td>$laskurow[valkoodi]</td></tr>";
-				echo "<tr><td class='back' colspan='2'></td><th>Yhteensä $hlaskukpl hyvityslaskua</th><td align='right'> ".round($hlaskusum/100,2)."</td><td>$laskurow[valkoodi]</td></tr>";
+				echo "<tr><td class='back' colspan='2'></td><th>Yhteensä $vlaskukpl veloituslaskua</th><td align='right'>".sprintf('%.2f', $vlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
+				echo "<tr><td class='back' colspan='2'></td><th>Yhteensä $hlaskukpl hyvityslaskua</th><td align='right'> ".sprintf('%.2f', $hlaskusum/100)."</td><td>$laskurow[valkoodi]</td></tr>";
 
 				echo "</table>";
 				echo "<br><br>";

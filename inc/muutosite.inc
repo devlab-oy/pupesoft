@@ -108,7 +108,13 @@ if ($kukarow['taso'] != 1) { // Tasolla 1 ei saa muuttaa tapvm_‰‰ tai maksutili‰
 		
 		$pvm = date("Y-m-d", mktime (0,0,0,$kk,$pp,$vv));
 		if ($pvm < $yhtiorow['tilikausi_alku']) {
-			echo "<font class='error'>".t("Tapahtumapvm ei ole kuluvalla tilikaudella")." $pvm, $trow[tapvm]</font><br>";
+			echo "<font class='error'>".t("Tapahtumapvm ei ole kuluvalla tilikaudella")." $pvm</font><br>";
+			$tee = 'E';
+			$tila = '';
+		}
+
+		if ($trow['tapvm'] < $yhtiorow['tilikausi_alku']) {
+			echo "<font class='error'>".t("Lasku ei ole kuluvalla tilikaudella")." $trow[tapvm]</font><br>";
 			$tee = 'E';
 			$tila = '';
 		}
@@ -154,6 +160,11 @@ if ($tila=='R') { //T‰‰ll‰ tarkistetaan laskun uusi er‰pvm
 			$tila = '';
 		}
 	}
+	if ($trow['mapvm'] != '0000-00-00') {
+		echo "<font class='error'>".t("Lasku on  maksettu!")." $trow[mapvm]</font><br>";
+		$tee = 'E';
+		$tila = '';
+	}
 }
 
 if ($tila=='R') { //T‰‰ll‰ p‰ivitet‰‰n laskun uusi er‰pvm
@@ -190,6 +201,11 @@ if ($tila=='B') { //T‰‰ll‰ tarkistetaan laskun uusi kassa-alepvm
 			$tila = '';
 		}
 	}
+	if ($trow['mapvm'] != '0000-00-00') {
+		echo "<font class='error'>".t("Lasku on  maksettu!")." $trow[mapvm]</font><br>";
+		$tee = 'E';
+		$tila = '';
+	}
 }
 
 if ($tila=='B') { //T‰‰ll‰ p‰ivitet‰‰n laskun uusi kassa-alepvm
@@ -216,6 +232,11 @@ if ($tila=='C') { //T‰‰ll‰ tarkistetaan kapvm ja muutenkin
 		$vv='0000';
 		$kk='00';
 		$pp='00';
+	}
+	if ($trow['mapvm'] != '0000-00-00') {
+		echo "<font class='error'>".t("Lasku on  maksettu!")." $trow[mapvm]</font><br>";
+		$tee = 'E';
+		$tila = '';
 	}
 }
 
@@ -295,6 +316,11 @@ if ($tila=='S') { //T‰‰ll‰ tarkistetaan laskun uusi maksupvm
 					$tila = '';
 			}
 	}
+	if ($trow['mapvm'] == '0000-00-00') {
+		echo "<font class='error'>".t("Laskua ei ole maksettu!")."</font><br>";
+		$tee = 'E';
+		$tila = '';
+	}
 }
 
 if ($tila=='S') { //T‰‰ll‰ p‰ivitet‰‰n laskun uusi maksupvm
@@ -343,7 +369,7 @@ if ($tila=='S') { //T‰‰ll‰ p‰ivitet‰‰n laskun uusi maksupvm
 	$tila = 'X';
 }
 
-if ($tila == 'W') {
+if ($tila == 'W') { //Muutetaan laskun tila
 	if ($trow['tapvm'] < $yhtiorow['tilikausi_alku']) {
 		echo "<font class='error'>".t("Tapahtuma ei ole kuluvalla tilikaudella")." $trow[tapvm]</font><br>";
 		$tee = 'E';
@@ -513,7 +539,7 @@ if ($tila=='') {
 		}
 //		}
 		if (($trow['tila'] < 'N') or ($trow['suoraveloitus']!='')) { // Lasku on maksamatta tai suoraveloitus
-			if  ($trow['tila'] != 'L') { // ei myyntitilaus
+			if  ($trow['tila'] != 'L' and $trow['tila'] != 'U') { // ei myyntitilaus
 				if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
 					echo "<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name='tila' value='Q'>
@@ -535,7 +561,7 @@ if ($tila=='') {
 						<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr></form>";
 			}
 		}
-		if (($trow['tila'] < 'N') or ($trow['tila'] == 'U')) { // Lasku on maksamatta tai myyntilasku
+		if (($trow['tila'] < 'N') or ($trow['tila'] == 'U' and $trow['mapvm']=='0000-00-00')) { // Lasku on maksamatta tai myyntilasku
 			$pvm=erottele($trow['erpcm']);		
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name='tila' value='R'>
@@ -563,7 +589,7 @@ if ($tila=='') {
 		}
 	}
 	if ((($trow['tila'] == 'Y') or ($trow['tila'] == 'U')) and ($trow['mapvm'] != '0000-00-00')) { // Lasku on suoritettu
-		if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
+		if ($trow['mapvm'] >= $yhtiorow['tilikausi_alku']) {
 			$pvm=erottele($trow['mapvm']);
 			echo "<form action = '$PHP_SELF' method='post'>
 				<input type = 'hidden' name='tila' value='S'>

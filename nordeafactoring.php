@@ -128,7 +128,7 @@
 		$ulos .= sprintf ('%06.6s',	 	$luontipvm);								//aineiston luontipvm
 		$ulos .= sprintf ('%04.4s',   	$luontiaika);								//luontikaika
 		$ulos .= sprintf ('%06.6s',	 	$frow["sopimusnumero"]);					//sopimusnumero
-		$ulos .= sprintf ('%-3.3s', 	$yhtiorow["valkoodi"]);						//valuutta
+		$ulos .= sprintf ('%-3.3s', 	$valkoodi);									//valuutta
 		$ulos .= sprintf ('%-2.2s', 	"MR");										//rahoitusyhtiön tunnus
 		$ulos .= sprintf ('%-30.30s', 	$kukarow["nimi"]);							//siirtäjän nimi
 		$ulos .= sprintf ('%06.6s', 	$factoringsiirtonumero);					//siirtoluettelon numero

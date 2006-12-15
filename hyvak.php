@@ -22,7 +22,8 @@
 		}
 	}
 
-	if (($tee=='D') and ($oikeurow['paivitys'] == '1')) { // Jaaha poistamme laskun!
+ 	// Jaaha poistamme laskun!
+	if (($tee=='D') and ($oikeurow['paivitys'] == '1')) {
 
 		$query = "SELECT comments, nimi FROM lasku
 			WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
@@ -59,7 +60,8 @@
 		$tee='';
 	}
 
-	if ($tee == 'Z') { //Lasku laitetaan holdiin käyttöliittymä
+	//Lasku laitetaan holdiin käyttöliittymä
+	if ($tee == 'Z') {
 		$query = "SELECT tunnus, tapvm, erpcm 'eräpvm', ytunnus, nimi, postitp,
 				round(summa * vienti_kurssi, 2) 'kotisumma', summa, valkoodi, comments
 				FROM lasku
@@ -102,7 +104,8 @@
 		exit;
 	}
 
-	if ($tee == 'W') { //Lasku laitetaan holdiin
+	//Lasku laitetaan holdiin
+	if ($tee == 'W') {
 		$query = "SELECT comments
 				FROM lasku
 				WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
@@ -119,7 +122,8 @@
 		$tee='';
 	}
 
-	if ($tee == 'V') { //Laskua kommentoidaan
+	//Laskua kommentoidaan
+	if ($tee == 'V') {
 		$query = "SELECT comments
 				FROM lasku
 				WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
@@ -135,7 +139,8 @@
 		$tee='';
 	}
 
-	if ($tee == 'L') { //Hyväksyntälistaa muutetaan
+	//Hyväksyntälistaa muutetaan
+	if ($tee == 'L') {
 		$query = "SELECT hyvak1, hyvaksyja_nyt, hyvaksynnanmuutos
 						FROM lasku
 						WHERE tunnus='$tunnus' and hyvaksyja_nyt='$kukarow[kuka]'";
@@ -259,7 +264,6 @@
 		$tee='';
 	}
 
-
 	if ($tee == 'P') {
 		// Olemassaolevaa tiliöintiä muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
 		$query = "SELECT tilino, kustp, kohde, projekti, summa, vero, selite
@@ -302,7 +306,6 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$tee = "E"; // Näytetään miltä tosite nyt näyttää
 	}
-
 
 	if ($tee == 'U') {
 		// Lisätään tiliöintirivi
@@ -363,7 +366,6 @@
 			require "inc/teetiliointi.inc";
 		}
 	}
-
 
 	if (strlen($tunnus) != 0) {
 		// Lasku on valittu ja sitä tiliöidään
@@ -496,7 +498,9 @@
 			$ulos='';
 
 			echo "<tr><td>";
-			for ($i=2; $i<6; $i++) { // Täytetään 4 hyväksyntäkenttää (ensinmäinen on jo käytössä)
+
+			// Täytetään 4 hyväksyntäkenttää (ensinmäinen on jo käytössä)
+			for ($i=2; $i<6; $i++) {
 				while ($vrow=mysql_fetch_array($vresult)) {
 					$sel="";
 					if ($hyvak[$i] == $vrow['kuka']) {
@@ -505,7 +509,8 @@
 					$ulos .= "<option value ='$vrow[kuka]' $sel>$vrow[nimi]";
 				}
 
-				if (!mysql_data_seek ($vresult, 0)) { // Käydään sama data läpi uudestaan
+				// Käydään sama data läpi uudestaan
+				if (!mysql_data_seek ($vresult, 0)) {
 					echo "mysql_data_seek failed!";
 					exit;
 				}
@@ -556,7 +561,8 @@
 			$vero = alv_oletus();
 		}
 
-		if ($kukarow['taso'] != 9) { // Tätä ei siis tehdä jos kyseessä on kevenetty versio
+		// Tätä ei siis tehdä jos kyseessä on kevenetty versio
+		if ($kukarow['taso'] != 9) {
 			echo "<br>
 					<table>
 					<tr>
@@ -664,7 +670,8 @@
 			$kentta = "tili";
 		}
 
-		if ($kukarow['taso'] != 9) { // Tätä ei siis tehdä jos kyseessä on kevenetty versio
+		// Tätä ei siis tehdä jos kyseessä on kevenetty versio
+		if ($kukarow['taso'] != 9) {
 			// Näytetään vanhat tiliöinnit muutosta varten
 			$naytalisa = '';
 			if ($nayta == '') $naytalisa = "and tapvm='" . $laskurow['tapvm'] . "'";
@@ -776,10 +783,11 @@
 
 			// Näytetään alv-erittely, jos on useita kantoja.
 			if ($naytalisa != '') {
-				$query="SELECT vero, sum(summa) veroton, round(sum(summa*vero/100),2) 'veron määrä', round(sum(summa*(1+vero/100)),2) verollinen from tiliointi
-						    WHERE ltunnus = '$tunnus' and
-								tiliointi.yhtio = '$kukarow[yhtio]' and
-								korjattu='' and tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')
+				$query = "	SELECT vero, sum(summa) veroton, round(sum(summa*vero/100),2) 'veron määrä', round(sum(summa*(1+vero/100)),2) verollinen from tiliointi
+							WHERE ltunnus = '$tunnus' and
+							tiliointi.yhtio = '$kukarow[yhtio]' and
+							korjattu='' and
+							tilino not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkallaolevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]')
 							GROUP BY 1";
 				$result = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($result) > 1) {
@@ -800,30 +808,42 @@
 			}
 			echo "</tr></table>";
 
-			if (($url!='') and ($iframe==''))
-		  		echo "<form action = '$PHP_SELF' method='post'>
-		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-		  				<input type='hidden' name = 'iframe' value='yes'>
-		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
-		  				<input type='Submit' value='".t("Avaa lasku tähän ikkunaan")."'>";
-		} //
-		else { // Kevennetyn käyttöliittymä alkaa tästä
+		}
+		else {
+			// Kevennetyn käyttöliittymä alkaa tästä
 			echo "<br><table><form action = '$PHP_SELF' method='post'>
 							<input type='hidden' name = 'tunnus' value='$tunnus'>
 							<input type='hidden' name = 'tee' value='H'>
-							<tr><td><input type='Submit' value='".t("Hyväksy lasku")."'></td>
+							<tr><td class='back'><input type='Submit' value='".t("Hyväksy lasku")."'></td>
 							</form>";
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='Z'>
 					<input type='hidden' name='tunnus' value='$tunnus'>
-					<td><input type='Submit' value='".t("Pysäytä laskun käsittely")."'></td></tr>";
-			echo "</table><br>";
+					<td class='back'><input type='Submit' value='".t("Pysäytä laskun käsittely")."'></td>";
+
+			if ($url != '' and $iframe == '') {
+		  		echo "<form action = '$PHP_SELF' method='post'>
+		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+		  				<input type='hidden' name = 'iframe' value='yes'>
+		  				<input type='hidden' name = 'nayta' value='$nayta'>
+		  				<input type='hidden' name = 'url' value='$url'>
+		  				<input type='hidden' name = 'tee' value = ''>
+		  				<td class='back'><input type='Submit' value='".t("Avaa lasku tähän ikkunaan")."'></td>";
+			}
+			elseif ($iframe == 'yes' and $url != '' and $kukarow['taso'] == 9) {
+		  		echo "<form action = '$PHP_SELF' method='post'>
+		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+		  				<input type='hidden' name = 'iframe' value=''>
+		  				<input type='hidden' name = 'nayta' value='$nayta'>
+		  				<input type='hidden' name = 'url' value='$url'>
+		  				<input type='hidden' name = 'tee' value = ''>
+		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>";
+			}
+
+			echo "</tr></table><br>";
 		}
 
-
-
-		if (($iframe=='yes') or (($url!='') and ($kukarow['taso']==9))) {
+		if ($iframe == 'yes' and $url != '' and $kukarow['taso'] == 9) {
 			echo "<iframe src='$url' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
 		}
 
@@ -909,7 +929,8 @@
 					else $nappi=t("Avaa");
 
 					echo "<form action='$PHP_SELF' method='post'>";
-					echo "<input type='hidden' name='iframe' value='$url'>
+					echo "<input type='hidden' name='iframe' value='yes'>
+						<input type='hidden' name='url' value='$url'>
 							<input type='hidden' name='tama' value='$ebid'>
 							<td valign='top'><input type='submit' value='$nappi'></td></form>";
 				}
@@ -920,12 +941,12 @@
 				echo "<td valign='top'>".t("Paperilasku")."</td>";
 			}
 
-
-
 			echo "<form action = '$PHP_SELF' method='post'>
-				<input type='hidden' name='tunnus' value='$trow[tunnus]'>";
+				<input type='hidden' name='tunnus' value='$trow[tunnus]'>
+				<input type='hidden' name='url' value='$url'>";
 
-			switch ($kukarow['taso']) { // jotain tähän tyyliin
+			// jotain tähän tyyliin
+			switch ($kukarow['taso']) {
 				case 1 :
 					echo "<input type='hidden' name='tee' value='H'>
 						<td class='back' valign='top'><input type='Submit' value='".t("Hyväksy")."'>";
@@ -939,7 +960,8 @@
 
 			echo "</td></form>";
 
-			if ($kukarow['taso'] != 9) { // Helpotetussa tämä hoidetaan muualla
+ 			// Helpotetussa tämä hoidetaan muualla
+			if ($kukarow['taso'] != 9) {
 				if ($trow['alatila']!='H') {
 					//Mahdollisuus laittaa lasku "hold"iin
 					echo "<form action = '$PHP_SELF' method='post'>
@@ -968,8 +990,6 @@
 		}
 		echo "</table>";
 
-
-
 		if (($oikeurow['paivitys'] == '1') and ($kukarow['taso']==1)) {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 	                        function verify(){
@@ -977,10 +997,9 @@
 	                                return confirm(msg);
 							}
 					</SCRIPT>";
-			}
-		if ($iframe!='') {
-			echo "<br><br><iframe src='$iframe' name='alaikkuna' width='98%' height='70%' align='bottom' scrolling='auto'></iframe>";
 		}
+
 	}
+
 	require "inc/footer.inc";
 ?>

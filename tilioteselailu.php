@@ -1,5 +1,6 @@
 <?php
 	require "inc/parametrit.inc";
+	
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	if ($tee == 'Z') { //Olemme tulossa takain suorituksista
@@ -38,15 +39,15 @@
 	}
 
 	if ($tee == 'S') {
-	// Tarkistetaan oliko pvm ok
-			$val = checkdate($kk, $pp, $vv);
-			if (!$val) {
-				echo "<b>".t("Virheellinen pvm")."</b><br>";
-				$tee = '';
-			}
-			else {
-				$pvm = $vv . "-" . $kk . "-" . $pp;
-			}
+		// Tarkistetaan oliko pvm ok
+		$val = checkdate($kk, $pp, $vv);
+		if (!$val) {
+			echo "<b>".t("Virheellinen pvm")."</b><br>";
+			$tee = '';
+		}
+		else {
+			$pvm = $vv . "-" . $kk . "-" . $pp;
+		}
 	}
 
 
@@ -56,22 +57,22 @@
 
 	if ($tee == 'S') {
 		if ($tyyppi=='3') {
-			$query= "SELECT * FROM tiliotedata
+			$query = "	SELECT * FROM tiliotedata
 						WHERE alku = '$pvm' and tilino = '$tilino' and tyyppi ='$tyyppi'
 						ORDER BY tieto";
 		}
 		else {
-			$query= "SELECT * FROM tiliotedata
+			$query = "	SELECT * FROM tiliotedata
 						WHERE alku = '$pvm' and tilino = '$tilino' and tyyppi ='$tyyppi'
 						ORDER BY tunnus";
 		}
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
+		
 		if (mysql_num_rows($tiliotedataresult) == 0) {
 			echo "<font class='message'>".t("Tuollaista aineistoa ei löytynyt")."! $query</font><br>";
 			$tee = '';
 		}
-		else
-		{
+		else {
 			while ($tiliotedatarow=mysql_fetch_array ($tiliotedataresult)) {
 				$tietue = $tiliotedatarow['tieto'];
 

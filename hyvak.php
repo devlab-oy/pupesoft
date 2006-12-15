@@ -107,18 +107,21 @@
 		echo "<tr>";
 
 		for ($i=1; $i<mysql_num_fields($result); $i++) {
-			if ($i == mysql_num_fields($result)-1)
-				echo "<tr><td colspan='".mysql_num_fields($result)."'><font class='error'>$trow[$i]</font></td>";
-			else
+			if ($i == mysql_num_fields($result)-1) {
+				if ($trow[$i] != "") {
+					echo "<tr><td colspan='".mysql_num_fields($result)."'><font class='error'>$trow[$i]</font></td>";
+				}
+			}
+			else {
 				echo "<td>$trow[$i]</td>";
+			}
 		}
 
 		echo "</tr></table>";
 
-		echo "<table><tr><td>".t("Anna syy kierron pysäytykselle")."</td>";
+		echo "<br><table><tr><td>".t("Anna syy kierron pysäytykselle")."</td>";
 		echo "	<form action = '$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='W'>
-				<input type='hidden' name = 'iframe' value='$iframe'>
 				<input type='hidden' name = 'nayta' value='$nayta'>
 				<input type='hidden' name='tunnus' value='$trow[tunnus]'>";
 
@@ -482,12 +485,12 @@
 	}
 
 	if (strlen($tunnus) != 0) {
-		// Lasku on valittu ja sitä tiliöidään
 
-		$query = "	SELECT concat_ws('@', laatija, luontiaika) kuka, tapvm, if(kapvm != '0000-00-00', concat_ws('<br>',kapvm,erpcm),erpcm) erpcmkapcm,
-					ytunnus, nimi, postitp,
-					round(summa * vienti_kurssi, 2) kotisumma, summa, valkoodi, ebid,
-					hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, hyvaksynnanmuutos, suoraveloitus, maakoodi, tilinumero, comments
+		// Lasku on valittu ja sitä tiliöidään
+		$query = "	SELECT *,
+					concat_ws('@', laatija, luontiaika) kuka, if(kapvm != '0000-00-00',
+					concat_ws('<br>',kapvm,erpcm),erpcm) erpcmkapcm,
+					round(summa * vienti_kurssi, 2) kotisumma
 					FROM lasku
 					WHERE tunnus='$tunnus' and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -548,41 +551,66 @@
 		echo "<td>$laskurow[kotisumma] $yhtiorow[valkoodi]</td>";
 		echo "<td>$laskurow[summa] $laskurow[valkoodi]</td>";
 
-		if (strlen($laskurow[$i]) > 0) {
-			$ebid = $laskurow[$i];
+		if ($laskurow["ebid"] != "") {
+			$ebid = $laskurow["ebid"];
 			require ("inc/ebid.inc");
 			echo "<td><a href='$url'>".t("Näytä lasku")."</a></td>";
 		}
 		else {
 			echo "<td>".t("Paperilasku")."</td>";
 		}
+
+		// Näytetään poistonappi, jos se on sallittu
+		if (($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $oikeurow['paivitys'] == '1') {
+
+			echo "	<td class='back'><form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
+					<input type='hidden' name='tee' value='D'>
+					<input type='hidden' name = 'nayta' value='$nayta'>
+					<input type='hidden' name='tunnus' value = '$tunnus'>
+					<input type='Submit' value='".t("Poista lasku")."'>
+					</form></td>";
+
+			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+						function verify(){
+							msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit? Tämä voi olla kirjanpitorikos!")."';
+							return confirm(msg);
+						}
+					</SCRIPT>";
+		}
+
 		echo "</tr>";
+		echo "</table>";
 
-		echo "</table><br><table>";
+		if ($laskurow["comments"] != "") {
+			echo "<br><table>";
+			echo "<tr><th colspan='2'>".t("Kommentit")."</th></tr>";
+			echo "<tr><td colspan='2'>$laskurow[comments]</td></tr>";
+			echo "</table>";
+		}
 
-		echo "<tr><th colspan='2'>".t("Kommentit")."</th></tr>";
-
-		echo "<tr>";
-		echo "<td colspan='2'>$laskurow[comments]</td>";
-		echo "</tr>";
-
-		// Tätä ei siis tehdä jos kyseessä on kevennetty versio
-		if ($kukarow['taso'] != 9) {
+		// ykkös ja kakkostasolla voidaan antaa kommentti
+		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) {
+			echo "<br><table>";
 			// Mahdollisuus antaa kommentti
 			echo "	<form name='kommentti' action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='V'>
-					<input type='hidden' name = 'iframe' value='$iframe'>
 					<input type='hidden' name = 'nayta' value='$nayta'>
 					<input type='hidden' name='tunnus' value = '$tunnus'>";
 
 			echo "	<tr>
+					<th colspan='2'>Lisää kommentti</th>
+					</tr>";
+
+			echo "	<tr>
 					<td><input type='text' name='komm' value='' size='50'></td>
 					<td><input type='Submit' value='".t("Lisää kommentti")."'></td>
-					</form>
 					</tr>";
-		}
-		echo "</table><br><table>";
 
+			echo "</form>";
+			echo "</table>";
+		}
+
+		echo "<br><table>";
 		echo "<tr>";
 
 		// Jos laskua hyvaksyy ensimmäinen henkilö ja laskulla on annettu mahdollisuus hyvksyntälistan muutokseen näytetään se!";
@@ -598,7 +626,6 @@
 
 			echo "<form name='uusi' action = '$PHP_SELF' method='post'>
 					 <input type='hidden' name='tee' value='L'>
-					 <input type='hidden' name = 'iframe' value='$iframe'>
 					 <input type='hidden' name = 'nayta' value='$nayta'>
 					 <input type='hidden' name='tunnus' value='$tunnus'><tr>";
 
@@ -645,29 +672,7 @@
 			echo "</table></td><td width='30px' class='back'></td>";
 		}
 
-		echo "<td class='back' valign='top'><table>";
-
-		if ($kukarow['taso'] != 9 and $oikeurow['paivitys'] == '1') {
-
-			echo "<tr><th>".t("Poista lasku")."</th></tr>";
-
-			// Näytetään poistonappi, jos se on sallittu
-			echo "	<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
-					<input type='hidden' name='tee' value='D'>
-					<input type='hidden' name = 'iframe' value='$iframe'>
-					<input type='hidden' name = 'nayta' value='$nayta'>
-					<input type='hidden' name='tunnus' value = '$tunnus'>
-					<tr><td class='back'><input type='Submit' value='".t("Poista lasku")."'></td></tr>
-					</form>";
-
-			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
-						function verify(){
-							msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit? Tämä voi olla kirjanpitorikos!")."';
-							return confirm(msg);
-						}
-					</SCRIPT>";
-		}
-		echo "</table></td></tr></table>";
+		echo "</tr></table>";
 
 		if ($ok != 1) {
 			// Annetaan tyhjät tiedot, jos rivi oli virheetön
@@ -681,9 +686,9 @@
 		}
 
 		// Tätä ei siis tehdä jos kyseessä on kevenetty versio
-		if ($kukarow['taso'] != 9) {
-			echo "<br>
-					<table>
+		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) {
+
+			echo "<table>
 					<tr>
 					<th colspan='2'>".t("Tili")."</th>
 					<th>".t("Tarkenne")."</th>
@@ -692,110 +697,110 @@
 					<th>".t("Selite")."</th>
 					<th>".t("Tee")."</th></tr>";
 
-			$query = "	SELECT tunnus, nimi
-						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and
-						tyyppi = 'K' and
-						kaytossa <> 'E'
-						ORDER BY nimi";
-			$result = mysql_query($query) or pupe_error($query);
+			// vaan kakkostasolla saa tehdä muutoksia
+			if ($kukarow["taso"] == 2) {
 
-			$ulos = "<select name = 'kustp'><option value = ' '>".t("Ei kustannuspaikkaa")."";
+				$query = "	SELECT tunnus, nimi
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]' and
+							tyyppi = 'K' and
+							kaytossa <> 'E'
+							ORDER BY nimi";
+				$result = mysql_query($query) or pupe_error($query);
 
-			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
-				$valittu = "";
-				if ($kustannuspaikkarow['tunnus'] == $kustp) {
-					$valittu = "selected";
+				$ulos = "<select name = 'kustp'><option value = ' '>".t("Ei kustannuspaikkaa")."";
+
+				while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
+					$valittu = "";
+					if ($kustannuspaikkarow['tunnus'] == $kustp) {
+						$valittu = "selected";
+					}
+					$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
 				}
-				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
-			}
 
-			$ulos .= "</select><br>";
+				$ulos .= "</select><br>";
 
-			$query = "	SELECT tunnus, nimi
-						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and
-						tyyppi = 'O' and
-						kaytossa <> 'E'
-						ORDER BY nimi";
-			$result = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT tunnus, nimi
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]' and
+							tyyppi = 'O' and
+							kaytossa <> 'E'
+							ORDER BY nimi";
+				$result = mysql_query($query) or pupe_error($query);
 
-			$ulos .= "<select name = 'kohde'><option value = ' '>".t("Ei kohdetta")."";
+				$ulos .= "<select name = 'kohde'><option value = ' '>".t("Ei kohdetta")."";
 
-			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
-				$valittu = "";
-				if ($kustannuspaikkarow['tunnus'] == $kohde) {
-					$valittu = "selected";
+				while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
+					$valittu = "";
+					if ($kustannuspaikkarow['tunnus'] == $kohde) {
+						$valittu = "selected";
+					}
+					$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
 				}
-				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
-			}
 
-			$ulos .= "</select><br>";
+				$ulos .= "</select><br>";
 
-			$query = "	SELECT tunnus, nimi
-						FROM kustannuspaikka
-						WHERE yhtio = '$kukarow[yhtio]' and
-						tyyppi = 'P' and
-						kaytossa <> 'E'
-						ORDER BY nimi";
-			$result = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT tunnus, nimi
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]' and
+							tyyppi = 'P' and
+							kaytossa <> 'E'
+							ORDER BY nimi";
+				$result = mysql_query($query) or pupe_error($query);
 
-			$ulos .= "<select name = 'projekti'><option value = ' '>".t("Ei projektia")."";
+				$ulos .= "<select name = 'projekti'><option value = ' '>".t("Ei projektia")."";
 
-			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
-				$valittu = "";
-				if ($kustannuspaikkarow['tunnus'] == $projekti) {
-					$valittu = "selected";
+				while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
+					$valittu = "";
+					if ($kustannuspaikkarow['tunnus'] == $projekti) {
+						$valittu = "selected";
+					}
+					$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
 				}
-				$ulos .= "<option value = '$kustannuspaikkarow[tunnus]' $valittu>$kustannuspaikkarow[nimi]";
-			}
-			$ulos .= "</select>";
+				$ulos .= "</select>";
 
-			echo "	<form name='uusi' action = '$PHP_SELF' method='post'>
-					<input type='hidden' name='tee' value = 'U'>
-					<input type='hidden' name = 'iframe' value='$iframe'>
-					<input type='hidden' name = 'nayta' value='$nayta'>
-					<input type='hidden' name='tunnus' value = '$tunnus'>";
+				echo "	<form name='uusi' action = '$PHP_SELF' method='post'>
+						<input type='hidden' name='tee' value = 'U'>
+						<input type='hidden' name = 'nayta' value='$nayta'>
+						<input type='hidden' name='tunnus' value = '$tunnus'>";
 
-			echo "<tr><td colspan='2'>";
+				echo "<tr><td colspan='2'>";
 
-			if ($tiliulos == '') {
-				echo "<input type='text' name='tili' value = '$tili' size='12'>";
-			}
-			else {
-				echo "$tiliulos";
-			}
-			echo "	</td>
-					<td>
-						$ulos
-					</td>
-					<td>
-						<input type='text' name='summa' value = '$summa'>
-					</td>";
+				if ($tiliulos == '') {
+					echo "<input type='text' name='tili' value = '$tili' size='12'>";
+				}
+				else {
+					echo "$tiliulos";
+				}
+				echo "	</td>
+						<td>
+							$ulos
+						</td>
+						<td>
+							<input type='text' name='summa' value = '$summa'>
+						</td>";
 
-			// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ssä
-			// on määritettävä $hardcoded_alv=1;
-			if ($hardcoded_alv != 1) {
-				echo "<td>".alv_popup('vero',$vero)."</td>";
-			}
-			else {
-				echo "<td></td>";
+				// Jos alvit on hardkoodattu tileihin (hui, kauheaa, mutta joku niin tahtoo), niin salasanat.php:ssä
+				// on määritettävä $hardcoded_alv=1;
+				if ($hardcoded_alv != 1) {
+					echo "<td>".alv_popup('vero',$vero)."</td>";
+				}
+				else {
+					echo "<td></td>";
+				}
+
+				echo "
+						<td>
+							<input type='text' name='selite' size = '8' value = '$selite'>
+						</td>
+						<td align='center'>
+							$virhe <input type='Submit' value = '".t("Lisää")."'>
+						</td>
+					</tr></form>";
 			}
 
-			echo "
-					<td>
-						<input type='text' name='selite' size = '8' value = '$selite'>
-					</td>
-					<td align='center'>
-						$virhe <input type='Submit' value = '".t("Lisää")."'>
-					</td>
-				</tr></form>";
 			$formi = "uusi";
 			$kentta = "tili";
-		}
-
-		// Tätä ei siis tehdä jos kyseessä on kevenetty versio
-		if ($kukarow['taso'] != 9) {
 
 			// Näytetään vanhat tiliöinnit muutosta varten
 			$naytalisa = '';
@@ -872,14 +877,13 @@
 
 				}
 
-				// Riviä saa muuttaa
-				if ($tiliointirow['lukko'] != 1 and $tiliointirow['tapvm'] == $laskurow['tapvm']) {
+				// Riviä saa muuttaa vaan jos taso 2
+				if ($tiliointirow['lukko'] != 1 and $tiliointirow['tapvm'] == $laskurow['tapvm'] and $kukarow["taso"] == 2) {
 					echo "	<form action = '$PHP_SELF' method='post'>
 							<input type='hidden' name = 'nayta' value='$nayta'>
 							<input type='hidden' name='tunnus' value = '$tunnus'>
 							<input type='hidden' name='rtunnus' value = '$tiliointirow[tunnus]'>
 							<input type='hidden' name='tee' value = 'P'>
-							<input type='hidden' name = 'iframe' value='$iframe'>
 							<input type='hidden' name = 'nayta' value='$nayta'>
 							<td align='center'><input type='Submit' value = '".t("Muuta")."'></td>
 							</tr></form>";
@@ -965,51 +969,77 @@
 				}
 			}
 
-			echo "</tr></table>";
-
-		}
-		else {
-			// Kevennetyn käyttöliittymä alkaa tästä
-
-			echo "<br><table><form action = '$PHP_SELF' method='post'>
-							<input type='hidden' name = 'tunnus' value='$tunnus'>
-							<input type='hidden' name = 'tee' value='H'>
-							<tr><td class='back'><input type='Submit' value='".t("Hyväksy lasku")."'></td>
-							</form>";
-
-			echo "<form action = '$PHP_SELF' method='post'>
-					<input type='hidden' name='tee' value='Z'>
-					<input type='hidden' name='tunnus' value='$tunnus'>
-					<td class='back'><input type='Submit' value='".t("Pysäytä laskun käsittely")."'></td>";
-
-			if ($url != '' and $iframe == '') {
+			if ($iframe == "" and $laskurow["ebid"] != "") {
 		  		echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
 		  				<input type='hidden' name = 'iframe' value='yes'>
 		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'url' value='$url'>
 		  				<input type='hidden' name = 'tee' value = ''>
-		  				<td class='back'><input type='Submit' value='".t("Avaa lasku tähän ikkunaan")."'></td>";
+		  				<td class='back'><input type='Submit' value='".t("Avaa lasku tähän ikkunaan")."'></td>
+						</form>";
 			}
-			elseif ($iframe == 'yes' and $url != '' and $kukarow['taso'] == 9) {
+			elseif ($iframe == 'yes' and $laskurow["ebid"] != "") {
 		  		echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
 		  				<input type='hidden' name = 'iframe' value=''>
 		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'url' value='$url'>
 		  				<input type='hidden' name = 'tee' value = ''>
-		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>";
+		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>
+						</form>";
+			}
+
+			echo "</tr></table>";
+
+		}
+
+		if ($kukarow['taso'] == 9) {
+
+			// Kevennetyn käyttöliittymä alkaa tästä
+			echo "<table><tr>";
+
+			echo "<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name = 'tunnus' value='$tunnus'>
+					<input type='hidden' name = 'tee' value='H'>
+					<td class='back'><input type='Submit' value='".t("Hyväksy lasku")."'></td>
+					</form>";
+
+			echo "<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name='tee' value='Z'>
+					<input type='hidden' name='tunnus' value='$tunnus'>
+					<td class='back'><input type='Submit' value='".t("Pysäytä laskun käsittely")."'></td>
+					</form>";
+
+			if ($iframe == "" and $laskurow["ebid"] != "") {
+		  		echo "<form action = '$PHP_SELF' method='post'>
+		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+		  				<input type='hidden' name = 'iframe' value='yes'>
+		  				<input type='hidden' name = 'nayta' value='$nayta'>
+		  				<input type='hidden' name = 'tee' value = ''>
+		  				<td class='back'><input type='Submit' value='".t("Avaa lasku tähän ikkunaan")."'></td>
+						</form>";
+			}
+			elseif ($iframe == 'yes' and $laskurow["ebid"] != "") {
+		  		echo "<form action = '$PHP_SELF' method='post'>
+		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+		  				<input type='hidden' name = 'iframe' value=''>
+		  				<input type='hidden' name = 'nayta' value='$nayta'>
+		  				<input type='hidden' name = 'tee' value = ''>
+		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>
+						</form>";
 			}
 
 			echo "</tr></table><br>";
 		}
 
-		if ($iframe == 'yes' and $url != '' and $kukarow['taso'] == 9) {
+		if ($iframe == 'yes' and $laskurow["ebid"] != "") {
+			$ebid = $laskurow["ebid"];
+			require ("inc/ebid.inc");
 			echo "<iframe src='$url' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
 		}
 
 	}
 	else {
+
 		// Tällä ollaan, jos olemme vasta valitsemassa laskua
 		if ($nayta == '') {
 			$query = "	SELECT count(*) FROM lasku
@@ -1019,15 +1049,14 @@
 			$trow = mysql_fetch_array ($result);
 
 			if ($trow[0] > 0) {
-				echo "<a href='$PHP_SELF?nayta=1'>". sprintf(t('Sinulla on %d pysäytettyä laskua'), $trow[0]) . "</a><br>";
+				echo "<a href='$PHP_SELF?nayta=1'><font class='error'>". sprintf(t('Sinulla on %d pysäytettyä laskua'), $trow[0]) . "</font></a><br><br>";
 			}
 		}
 
-		if ($nayta!='') $nayta = '';
+		if ($nayta != '') $nayta = '';
 		else $nayta = "and alatila != 'H'";
 
-		$query = "	SELECT tunnus, tapvm, if(kapvm!='0000-00-00',concat_ws('<br>',kapvm,erpcm),erpcm) erpcmkapcm,
-					ytunnus, nimi, postitp, round(summa * vienti_kurssi, 2) kotisumma, summa, valkoodi, ebid, alatila, comments, hyvak1
+		$query = "	SELECT *, if(kapvm!='0000-00-00',concat_ws('<br>',kapvm,erpcm),erpcm) erpcmkapcm
 				 	FROM lasku
 				  	WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
 					yhtio = '$kukarow[yhtio]' and
@@ -1053,11 +1082,12 @@
 		echo "<th>".t("Tyyppi")."</th>";
 		echo "</tr>";
 
-		while ($trow=mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_array ($result)) {
+
 			echo "<tr>";
 
 			 // Eli vain tasolla 1/2 ja ensimmäiselle hyväksyjälle.
-			if (mysql_field_name($result, $i) == 'tapvm' and ($kukarow['taso'] == '1' or $kukarow["taso"] == '2') and $trow['hyvak1'] == $kukarow['kuka']) {
+			if (($kukarow['taso'] == '1' or $kukarow["taso"] == '2') and $trow['hyvak1'] == $kukarow['kuka']) {
 				echo "<td valign='top'><a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>$trow[tapvm]</a></td>";
 			}
 			else {
@@ -1075,64 +1105,28 @@
 			}
 
 			echo "<td valign='top'>$trow[postitp]</td>";
-
 			echo "<td valign='top'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
 			echo "<td valign='top'>$trow[summa] $trow[valkoodi]</td>";
 
-			if (strlen($trow["ebid"]) > 0) {
-
+			if ($trow["ebid"] != "") {
 				$ebid = $trow["ebid"];
 				require ("inc/ebid.inc");
-
-				if ($kukarow['taso'] == '1') {
-
-					if ($tama==$ebid) {
-						$url   = '';
-						$ebid  = '';
-						$nappi = t("Sulje");
-					}
-					else {
-						$nappi = t("Avaa");
-					}
-
-					echo "<form action='$PHP_SELF' method='post'>";
-					echo "<input type='hidden' name='iframe' value='yes'>
-						<input type='hidden' name='url' value='$url'>
-							<input type='hidden' name='tama' value='$ebid'>
-							<td valign='top'><input type='submit' value='$nappi'></td></form>";
-				}
-				else {
-					echo "<td valign='top'><a href='$url'>".t("Näytä")."</a></td>";
-				}
+				echo "<td valign='top'><a href='$url'>".t("Näytä lasku")."</a></td>";
 			}
 			else {
 				echo "<td valign='top'>".t("Paperilasku")."</td>";
 			}
 
-			echo "<form action = '$PHP_SELF' method='post'>
-				<input type='hidden' name='tunnus' value='$trow[tunnus]'>
-				<input type='hidden' name='url' value='$url'>";
+			echo "	<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name='tunnus' value='$trow[tunnus]'>
+					<td class='back' valign='top'><input type='Submit' value='".t("Valitse")."'></td>
+					</form>";
 
-			// jotain tähän tyyliin
-			switch ($kukarow['taso']) {
-				case 1 :
-					echo "	<input type='hidden' name='tee' value='H'>
-							<td class='back' valign='top'><input type='Submit' value='".t("Hyväksy")."'>";
-					break;
-				case 9 :
-					echo "<td class='back' valign='top'><input type='Submit' value='".t("Valitse")."'>";
-					break;
-				default :
-					echo "<td class='back' valign='top'><input type='Submit' value='".t("Tiliöi")."'>";
-			}
+			// ykkös ja kakkos tason spessuja
+			if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) {
 
-			echo "</td></form>";
-
- 			// Helpotetussa tämä hoidetaan muualla
-			if ($kukarow['taso'] != 9) {
-
+				// Mahdollisuus laittaa lasku holdiin
 				if ($trow['alatila'] != 'H') {
-					// Mahdollisuus laittaa lasku "hold"iin
 					echo "<form action = '$PHP_SELF' method='post'>
 						<input type='hidden' name='tee' value='Z'>
 						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
@@ -1144,15 +1138,14 @@
 						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 						<td class='back' valign='top'><input type='Submit' value='".t("Lisää kommentti")."'></td></form>";
 				}
-			}
 
-			if ($oikeurow['paivitys'] == '1' and $kukarow['taso'] == 1) {
-				echo "<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
-						 <input type='hidden' name='tee' value='D'>
-						 <input type='hidden' name = 'iframe' value='$iframe'>
-						 <input type='hidden' name = 'nayta' value='$nayta'>
-						 <input type='hidden' name='tunnus' value = '$trow[tunnus]'>
-						 <td class='back' valign='top'><input type='Submit' value='".t("Poista")."'></td></form>";
+				if ($oikeurow['paivitys'] == '1') {
+					echo "<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
+							 <input type='hidden' name='tee' value='D'>
+							 <input type='hidden' name = 'nayta' value='$nayta'>
+							 <input type='hidden' name='tunnus' value = '$trow[tunnus]'>
+							 <td class='back' valign='top'><input type='Submit' value='".t("Poista")."'></td></form>";
+				}
 			}
 
 			echo "</tr>";

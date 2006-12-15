@@ -10,7 +10,7 @@
 	if ($tee == 'J') { // Jaksotus
 		require "inc/jaksota.inc";
 	}
-	if ($tee == 'M') { // Otsikon muutose
+	if ($tee == 'M') { // Otsikon muutokseen
 		require "inc/muutosite.inc";
 	}
 	if ($tee == 'G') { // Seuraava "tosite"
@@ -574,16 +574,12 @@
 		}
 		echo "<tr>";
 		if ($oikeurow['paivitys'] == 1) { // N‰ytet‰‰n nappi vain jos siihen on oikeus
-			list($tapvm, $mapvm) = split(" ",$trow['tapvm mapvm']);
-			if (($tapvm >= $yhtiorow['tilikausi_alku']) or ($mapvm >= $yhtiorow['tilikausi_alku'])) {
-				// Tosite pit‰‰ olla kuluvalta kaudelta
-				echo "<form action = '$PHP_SELF' method='post'>
+			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name = 'tee' value='M'>
 					<input type = 'hidden' name = 'tila' value=''>
 					<input type = 'hidden' name = 'tunnus' value='$tunnus'>
 					<td><input type = 'submit' value = '".t("Muuta tietoja")."'></td>
 					</form>";
-			}
 		}
 		else {
 			echo "<td></td>";

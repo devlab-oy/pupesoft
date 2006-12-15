@@ -45,8 +45,11 @@
 		$aineistores = mysql_query($query) or pupe_error($query);
 		$aineistorow = mysql_fetch_array($aineistores);
 
-		$tietue = fgets($fd);
-
+		$tietue = fgets($fd);	
+		
+		$xtyyppi = 0;
+		$virhe	 = 0;	
+		
 		while (!feof($fd)) {
 			$tietue = str_replace ("{", "ä", $tietue);
 			$tietue = str_replace ("|", "ö", $tietue);
@@ -94,6 +97,7 @@
 				if (mysql_num_rows($yritiresult) != 1) {
 					echo "<font class='error'> Tiliä '$tilino' ei löytynyt!</font><br>";
 					$xtyyppi = 0;
+					$virhe++;
 				}
 				else {
 					$yritirow = mysql_fetch_array ($yritiresult);
@@ -106,22 +110,47 @@
 							and alku 	 = '$alkupvm'
 							and loppu 	 = '$loppupvm'
 							and tyyppi 	 = $xtyyppi";
-				$tiliotedataresult = mysql_query($query) or pupe_error($query);
+				$tiliotedatares = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($tiliotedataresult) > 0) {
-					echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty! Tili = $tilino Ajalta $alkupvm - $loppupvm Yritystunnus $yritirow[yhtio]</font><br>";
+				if (mysql_num_rows($tiliotedatares) > 0) {
+					$tiliotedatarow = mysql_fetch_array($tiliotedatares);
+					
+					if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
+						echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteyttä helpdeskiin!<br>Tili = $tilino Ajalta $alkupvm - $loppupvm Yritystunnus $yritirow[yhtio]</font><br><br>";	
+					}
+					else {
+						echo "<font class='error'>Tämä aineisto on jo aiemmin käsitelty! Tili = $tilino Ajalta $alkupvm - $loppupvm Yritystunnus $yritirow[yhtio]</font><br><br>";
+					}
+					
 					$xtyyppi=0;
+					$virhe++;
 				}
 			}
 
 			if ($xtyyppi > 0 and $xtyyppi <= 3) {
 				// Kirjoitetaan tiedosto kantaan
-				$query = "INSERT into tiliotedata (yhtio, aineisto, tilino, alku, loppu, tyyppi, tieto) values ('$yritirow[yhtio]', '$aineistorow[aineisto]', '$tilino', '$alkupvm', '$loppupvm', '$xtyyppi', '$tietue')";
+				$query = "INSERT into tiliotedata (yhtio, aineisto, tilino, alku, loppu, tyyppi, tieto,kasitelty) values ('$yritirow[yhtio]', '$aineistorow[aineisto]', '$tilino', '$alkupvm', '$loppupvm', '$xtyyppi', '$tietue', now())";
 				$tiliotedataresult = mysql_query($query) or pupe_error($query);
 			}
 
 			$tietue = fgets($fd, 4096);
 		}
+		
+		
+		//Jos meillä tuli virheitä 
+		if ($virhe > 0) {
+			echo "<font class='error'>Aineisto oli virheellinen. Sitä ei voitu tallentaa järjestelmään.</font>";
+			
+			//Poistetaan aineistot tiliotedatasta
+			$query = "delete from tiliotedata where aineisto ='$aineistorow[aineisto]'";
+			$tiliotedataresult = mysql_query($query) or pupe_error($query);
+			
+			require("inc/footer.inc");	
+			exit;
+		}
+		
+		
+		
 		$query= "UNLOCK TABLES";
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
 

@@ -29,11 +29,15 @@
 				yhtio.varasto varasto,
 				yhtio.varastonmuutos varastomuu,
 				yhtio.pyoristys pyoristys,
-				yriti.oletus_rahatili kassatili
+				yriti.oletus_rahatili kassatili,
+				suoritus.tilino stilino,
+				factoring.pankki_tili ftilino
 				FROM yhtio
-				JOIN lasku use index (yhtio_tila_mapvm) ON lasku.yhtio=yhtio.yhtio and lasku.tila = 'U' and lasku.alatila = 'X' and lasku.mapvm = '0000-00-00'
-				JOIN yriti ON yriti.yhtio=yhtio.yhtio
-				JOIN suoritus use index (yhtio_viite) ON suoritus.yhtio=lasku.yhtio and suoritus.viite=lasku.viite and suoritus.tilino=yriti.tilino and suoritus.kohdpvm = '0000-00-00'
+				JOIN lasku use index (yhtio_tila_mapvm) ON (lasku.yhtio = yhtio.yhtio and lasku.tila = 'U' and lasku.alatila = 'X' and lasku.mapvm = '0000-00-00')
+				JOIN yriti ON (yriti.yhtio = yhtio.yhtio)
+				JOIN suoritus use index (yhtio_viite) ON (suoritus.yhtio = lasku.yhtio and suoritus.viite = lasku.viite and suoritus.tilino = yriti.tilino and suoritus.kohdpvm = '0000-00-00')
+				JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
+				LEFT JOIN factoring ON (factoring.yhtio = lasku.yhtio and factoring.valkoodi = lasku.valkoodi and factoring.factoringyhtio = maksuehto.factoring)
 				HAVING (kapvm >= adddate(kirjpvm,-4) and abs(laskusumma-saldo_maksettu-kasumma-suoritettu) < 0.01) or (abs(laskusumma-saldo_maksettu-suoritettu) < 0.01)";
 	$suorires = mysql_query($query) or pupe_error($query);
 
@@ -58,6 +62,8 @@
 		$factoringsaamiset 		= $row["factoringsaamiset"];
 		$factoring 				= $row["factoring"];
 		$alennus				= $laskutettu-$suoritettu;
+		$factoring_tilino		= $row["ftilino"];
+		$suoritus_tilino		= $row["stilino"];
 
 		#Katsotaan ensin, ettei tätä laskua ole jo suoritettu/maksettu
 		#Eli keissi jossa asiakas maksaa saman laskun kahteen kertaan samassa viiteaineistossa
@@ -67,7 +73,7 @@
 					and mapvm = '0000-00-00'";
 		$lasresult = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($lasresult) == 1) {
+		if (mysql_num_rows($lasresult) == 1 and ($factoring_tilino == $suoritus_tilino or $factoring_tilino == "")) {
 
 			$malaskurow = mysql_fetch_array($lasresult);
 

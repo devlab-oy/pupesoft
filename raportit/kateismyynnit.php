@@ -78,7 +78,7 @@
 		$query = "	SELECT lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa,
 					if(kuka.kassamyyja is null or kuka.kassamyyja='', 'Muut', kuka.kassamyyja) kassa, kuka.nimi myyja,
 					if(!isnull(avainsana.selitetark),avainsana.selitetark, 'Muut') kassanimi
-					FROM lasku
+					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen!=''
 					LEFT JOIN kuka ON lasku.laskuttaja=kuka.kuka and lasku.yhtio=kuka.yhtio
 					LEFT JOIN avainsana ON avainsana.yhtio=lasku.yhtio and avainsana.laji='KASSA' and avainsana.selite=kuka.kassamyyja
@@ -189,13 +189,13 @@
 		if ($katsuori != '') {
 			//Haetaan kassatilille laitetut suoritukset
 			$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa
-						FROM lasku 
-						JOIN tiliointi ON tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino='$yhtiorow[kassa]'
-						JOIN suoritus ON suoritus.yhtio=tiliointi.yhtio and suoritus.ltunnus=tiliointi.aputunnus
+						FROM lasku use index (yhtio_tila_tapvm)
+						JOIN tiliointi use index (tositerivit_index) ON tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino='$yhtiorow[kassa]'
+						JOIN suoritus use index (tositerivit_index) ON suoritus.yhtio=tiliointi.yhtio and suoritus.ltunnus=tiliointi.aputunnus
 						LEFT JOIN kuka ON lasku.laatija=kuka.kuka and lasku.yhtio=kuka.yhtio
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tapvm = '$vv-$kk-$pp'
 						and lasku.tila	= 'X'
+						and lasku.tapvm = '$vv-$kk-$pp'
 						ORDER BY laskunro";
 			$result = mysql_query($query) or pupe_error($query);
 			
@@ -292,7 +292,6 @@
 				FROM kuka
 				WHERE yhtio = '$kukarow[yhtio]'
 				ORDER BY nimi";
-
 	$yresult = mysql_query($query) or pupe_error($query);
 
 	echo "<tr><th>".t("TAI valitse käyttäjä")."</th><td colspan='3'><select name='myyja'>";
@@ -313,7 +312,11 @@
 	echo "<tr><td class='back'><br></td></tr>";
 
 
-	$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='KASSA' order by selite";
+	$query  = "	SELECT *
+				FROM avainsana 
+				WHERE yhtio='$kukarow[yhtio]' 
+				and laji='KASSA' 
+				order by selite";
 	$vares = mysql_query($query) or pupe_error($query);
 
 	while ($varow = mysql_fetch_array($vares)) {

@@ -5,7 +5,7 @@
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>";
 
 	if ($tee == 'I') { // Tarkistetetaan syötteet perustusta varten
-
+		$totsumma = 0;
 		$summa = str_replace ( ",", ".", $summa);
 
 		$tpk += 0;
@@ -89,11 +89,12 @@
 					$ivirhe[$i] .= t('Riviltä puuttuu summa').'<br>';
 					$gok = 1;
 				}
-
+				
 				$ulos='';
 				$virhe = '';
 				$tili = $itili[$i];
 				$summa = $isumma[$i];
+				$totsumma += $summa;
 				$selausnimi = 'itili[' . $i .']'; // Minka niminen mahdollinen popup on?
 				$vero='';
 				require "inc/tarkistatiliointi.inc";
@@ -124,6 +125,10 @@
 				$gok=1;
 				echo "<font class='error'>".t("Kuitille on annettava nimi")."</font><br>";
 			}
+		}
+		if (abs($totsumma) >= 0.01 and $heittook  == '') {
+				$gok=1;
+				echo "<font class='error'>".t("Tositteen summat eivät mene tasan")."</font><br>";
 		}
 		if ($gok == 1) { // Jossain tapahtui virhe
 			echo "<font class='error'>".t("Jossain oli virheitä/muutoksia")."!</font><br>";
@@ -330,7 +335,19 @@
 		for ($i=1; $i<$maara; $i++) {
 			echo "<tr>";
 			if ($iulos[$i] == '') {
-				echo "<td><input type='text' name='itili[$i]' value='$itili[$i]''></td>";
+				//Annetaan selväkielinen nimi
+				$tilinimi='';
+				if ($itili[$i] != '') {
+					$query = "SELECT nimi
+								FROM tili
+								WHERE yhtio = '$kukarow[yhtio]' and tilino = '$itili[$i]'";
+					$vresult = mysql_query($query) or pupe_error($query);
+					if (mysql_num_rows($vresult) == 1) {
+						$vrow=mysql_fetch_array($vresult);
+						$tilinimi = $vrow['nimi'] . "<br>";
+					}
+				}
+				echo "<td>$tilinimi<input type='text' name='itili[$i]' value='$itili[$i]''></td>";
 			}
 			else {
 				echo "<td>$iulos[$i]</td>";
@@ -401,6 +418,16 @@
 
 			echo "<tr><td colspan = '5'>
 			      ".t("Selite").":<input type='text' name='iselite[$i]' value='$iselite[$i]' maxlength='150' size=60><br><br></td></tr>";
+		}
+		if ($gok==1) {
+			echo "<tr><td>".t("Tosite yhteensä")."</td><td>";
+			$heittotila == '';
+			if ($heittook != '') $heittotila = 'checked';
+			if (abs($totsumma) >= 0.01) echo t("Hyväksy heitto")."<input type='checkbox' name='heittook' $heittotila>";
+			echo "</td><td>";
+			if (abs($totsumma) >= 0.01) echo "<font class='error'>$totsumma</font>";
+			else echo "$totsumma";
+			echo "</td><td></td><td></td></tr>";
 		}
 		echo "</table><input type='Submit' value = '".t("Tee tosite")."'></form>";
 	}

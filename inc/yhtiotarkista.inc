@@ -88,10 +88,7 @@
 
 	if (mysql_field_name($result, $i) == "pankkitili1" or
 		mysql_field_name($result, $i) == "pankkitili2" or
-		mysql_field_name($result, $i) == "pankkitili3" or
-		mysql_field_name($result, $i) == "factoring_pankkitili1" or
-		mysql_field_name($result, $i) == "factoring_pankkitili2" or
-		mysql_field_name($result, $i) == "factoring_pankkitili3") {
+		mysql_field_name($result, $i) == "pankkitili3") {
 
 		if (strtoupper($yhtiorow['maakoodi']) == "FI" and trim($t[$i]) != "") {
 

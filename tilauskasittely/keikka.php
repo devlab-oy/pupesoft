@@ -306,7 +306,7 @@ if ($toiminto == "" and $ytunnus != "") {
 
 	// etsitään vanhoja keikkoja, vanhatunnus pitää olla tyhjää niin ei listata liitettyjä laskuja
 	$query = "	select *
-				from lasku
+				from lasku use index (tila_index)
 				where yhtio='$kukarow[yhtio]' 
 				and liitostunnus='$toimittajaid' 
 				and tila='K' 
@@ -348,7 +348,7 @@ if ($toiminto == "" and $ytunnus != "") {
 		while ($row = mysql_fetch_array($result)) {
 
 			// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
-			$query  = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$row[tunnus]' and tyyppi='O'";
+			$query  = "select * from tilausrivi use index (uusiotunnus_index) where yhtio='$kukarow[yhtio]' and uusiotunnus='$row[tunnus]' and tyyppi='O'";
 			$tilres = mysql_query($query) or pupe_error($query);
 
 			$kplyhteensa = 0;  // apumuuttuja
@@ -372,7 +372,9 @@ if ($toiminto == "" and $ytunnus != "") {
 					//jos rivi on jo viety varastoon niin ei enää katota sen paikkaa
 					if ($rivirow["kpl"] == 0 and $rivirow["varattu"] != 0) {
 						// katotaan löytyykö tuotteelta varastopaikka joka on tilausriville tallennettu
-						$query = "select * from tuotepaikat where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]' and hyllyalue='$rivirow[hyllyalue]' and hyllynro='$rivirow[hyllynro]' and hyllytaso='$rivirow[hyllytaso]' and hyllyvali='$rivirow[hyllyvali]'";
+						$query = "	select * 
+									from tuotepaikat use index (tuote_index)
+									where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]' and hyllyalue='$rivirow[hyllyalue]' and hyllynro='$rivirow[hyllynro]' and hyllytaso='$rivirow[hyllytaso]' and hyllyvali='$rivirow[hyllyvali]'";
 						$tpres = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($tpres)==0) {
@@ -393,7 +395,7 @@ if ($toiminto == "" and $ytunnus != "") {
 
 			// tutkitaan onko kaikki lisätiedot syötetty vai ei...
 			$query = "	select *
-						from lasku
+						from lasku use index (PRIMARY)
 						where lasku.yhtio='$kukarow[yhtio]'
 						and tunnus='$row[tunnus]'
 						and maakoodi != '$yhtiorow[maakoodi]'
@@ -434,7 +436,7 @@ if ($toiminto == "" and $ytunnus != "") {
 
 			while ($toimrow = mysql_fetch_array($toimresult)) {
 				// tilausrivin tunnus pitää löytyä sarjanumeroseurannasta
-				$query = "select * from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and ostorivitunnus='$toimrow[tunnus]'";
+				$query = "select * from sarjanumeroseuranta use index (yhtio_ostorivi) where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and ostorivitunnus='$toimrow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon
@@ -454,8 +456,11 @@ if ($toiminto == "" and $ytunnus != "") {
 						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',1,0)) kulasku,
 						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',summa,0)) vosumma,
 						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',arvo,0)) kusumma
-						from lasku
-						where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus<>0 and laskunro='$row[laskunro]'";
+						from lasku use index (yhtio_tila_laskunro)
+						where yhtio='$kukarow[yhtio]' 
+						and tila='K' 
+						and vanhatunnus<>0 
+						and laskunro='$row[laskunro]'";
 			$llres = mysql_query($query) or pupe_error($query);
 			$llrow = mysql_fetch_array($llres);
 

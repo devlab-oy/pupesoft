@@ -9,11 +9,14 @@
 
 	}
 
+	//	TODO ale ja ennakkomaksutuotteet voisi tarkastaa vain jos tarpeellista
 	if (mysql_field_name($result, $i) == "maksuehto_tuotenumero" or
-	    mysql_field_name($result, $i) == "rahti_tuotenumero") {
-
+	    mysql_field_name($result, $i) == "rahti_tuotenumero" or
+	    mysql_field_name($result, $i) == "alennus_tuotenumero" or
+		mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero") {
+		
 		$tuote = trim($t[$i]);
-
+		
 		// katotaan löytyykö tällänen saldoton tuote
 		if ($tuote != "") {
 

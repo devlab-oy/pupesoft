@@ -20,6 +20,7 @@
 			<input type='hidden' name='tee' value = 'TI'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 			<input type='hidden' name='rivitunnus' value='$rivitunnus'>
+			<input type='hidden' name='menutila' value = '$menutila'>
 			<input type='hidden' name='perheid2' value='$perheid2'>
 			<input type='hidden' name='muuta' value = '$muuta'>
 			<input type='hidden' name='otunnus' value = '$otunnus'>

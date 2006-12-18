@@ -517,4 +517,55 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "jyvita_alennus") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 'T') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == 'P') {
+			$sel2 = "selected";
+		}
+		else {
+			$sel = "selected";
+		}
+
+		$ulos .= "<option value = '' $sel>".t("Alennus jyvitet‰‰n tilausriveille")."";
+		$ulos .= "<option value = 'T' $sel1>".t("Alennus jyvitet‰‰n aina tuotteella")."";
+		$ulos .= "<option value = 'P' $sel2>".t("Alennus jyvitet‰‰n Projektilla tuotteella")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "salli_jyvitys_myynnissa") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 'K') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == 'V') {
+			$sel2 = "selected";
+		}
+		else {
+			$sel = "selected";
+		}
+
+		$ulos .= "<option value = '' $sel>".t("Kassamyyj‰ saa hyvitt‰‰ myyntitilauksella")."";
+		$ulos .= "<option value = 'K' $sel1>".t("Kaikki saa hyvitt‰‰ myyntitilauksella")."";
+		$ulos .= "<option value = 'V' $sel2>".t("Vain valitut k‰ytt‰j‰t saa hyvitt‰‰ myyntitilauksella")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+
 ?>

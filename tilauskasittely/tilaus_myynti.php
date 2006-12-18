@@ -1117,7 +1117,7 @@ if ($tee == '') {
 		}
 	}
 
-	echo "<hr><br>";
+	echo "<br>";
 
 	if($kukarow["extranet"] == "" and $toim == "TYOMAARAYS") {
 		$tee_tyomaarays = "MAARAAIKAISHUOLLOT";
@@ -1509,6 +1509,95 @@ if ($tee == '') {
 
 	//Syˆttˆrivi
 	if ($muokkauslukko == "") {
+		if(file_exists("myyntimenu.inc")){
+			
+			/*
+				Customoidut menuratkaisut onnistuu nyt myyntimenu.inc tiedostolla
+				myyntimenu.inc tiedosto sis‰lt‰‰n $myyntimenu array jonka perusteella rakennetaan valikko sek‰ suoritetaan kyselyt.
+				
+				Tuloksena on $ulos muuttuja joka liitet‰‰n syotarivi.inc tiedostossa tuoteno kentt‰‰n
+				
+				myyntimenut sis‰lt‰‰ aina tuotehakuvalinnan jolla voi palata normaaliin tuotehakuun.
+				
+			*/	
+
+			
+			//	Haetaan myyntimenu Array ja kysely Array
+			//	Jos menutilaa ei ole laitetaan oletus
+			if(!isset($menutila)) $menutila = "oletus";
+			require("myyntimenu.inc");
+			
+			//suoritetaan kysely ja tehd‰‰n menut jos aihetta
+			if(is_array($myyntimenu)){
+
+				//	Tehd‰‰n menuset				
+				$menuset = "<select name='menutila' onChange='submit()'>";
+				foreach($myyntimenu as $key => $value){
+					$sel = "";
+					if($key == $menutila) {
+						$sel = "SELECTED";
+					}
+
+					$menuset .= "<option value='$key' $sel>$value[menuset]</option>";
+				}				
+				
+				//	Jos ei olla myyntimenussa n‰ytet‰‰n aina haku
+				$sel = "";
+				if(!isset($myyntimenu[$menutila])) {
+					$sel = "SELECTED";
+				}
+				
+				$menuset .= "<option value='haku' $sel>Tuotehaku</option>";
+				$menuset .= "</select>";
+				
+				//	Tehd‰‰n paikka menusetille
+				echo "
+							<table>
+								<tr>
+									<td class='back' align = 'left'><b>".t("Lis‰‰ rivi").": </b></td><td class='back' align = 'left'>$menuset</td>
+								</tr>
+							</table><hr>";
+				
+								
+				//	Tarkastetaan viel‰, ett‰ menutila on m‰‰ritelty ja luodaan lista
+				if($myyntimenu[$menutila]["query"] != "") {
+					unset($ulos);
+					
+					// varsinainen kysely ja menu
+					$query = " SELECT distinct(tuote.tuoteno), nimitys
+								FROM tuote
+								LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
+								WHERE tuote.yhtio ='$kukarow[yhtio]' and ".$myyntimenu[$menutila]["query"];
+								$tuoteresult = mysql_query($query) or pupe_error($query);
+
+					$ulos = "<select Style=\"width: 230px; font-size: 8pt; padding: 0\" name='tuoteno' multiple ='TRUE'><option value=''>Valitse tuote</option>";
+
+					if(mysql_num_rows($tuoteresult) > 0) {	
+						while($row=mysql_fetch_array($tuoteresult)) {
+							$sel='';
+							if($tuoteno==$row['tuoteno']) $sel='SELECTED';
+							$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - $row[nimitys]</option>";
+						}
+						$ulos .= "</select>";
+					}
+					else {
+						echo "Valinnan antama haku oli tyhj‰<br>";
+					}
+				}
+				//	Jos haetaan niin ei ilmoitella turhia
+				elseif($menutila != "haku" and $menutila != "") {
+					echo "HUOM! Koitettiin hakea myyntimenua '$menutila' jota ei ollut m‰‰ritelty!<br>";
+				}
+				
+			}
+			else {
+				echo "HUOM! Koitettiin hakea myyntimenuja, mutta tiedot olivat puutteelliset.<br>";
+			}				
+		}
+		else {
+			echo "<b>".t("Lis‰‰ rivi").": </b><hr>";
+		}
+		
 		require ("syotarivi.inc");
 	}
 
@@ -1848,6 +1937,7 @@ if ($tee == '') {
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 								<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tila' value = 'MUUTA'>
 								<input type='hidden' name='tapa' value = 'VAIHDA'>";
 						echo "<td $class align='left' valign='top'>$paikat</td>";
@@ -1998,6 +2088,7 @@ if ($tee == '') {
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 							<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+							<input type='hidden' name='menutila' value='$menutila'>
 							<input type='hidden' name='tila' value = 'MUUTA'>
 							<input type='hidden' name='tapa' value = 'MUOKKAA'>
 							<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("Muokkaa")."'></td>
@@ -2007,6 +2098,7 @@ if ($tee == '') {
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 							<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+							<input type='hidden' name='menutila' value='$menutila'>
 							<input type='hidden' name='tila' value = 'MUUTA'>
 							<input type='hidden' name='tapa' value = 'POISTA'>
 							<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("Poista")."'></td>
@@ -2037,6 +2129,7 @@ if ($tee == '') {
 									<input type='hidden' name='toim' value='$toim'>
 									<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' name='tila' value = 'MUUTA'>
 									<input type='hidden' name='tapa' value = 'POISJTSTA'>
 									<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("Toimita")."'></td>
@@ -2050,6 +2143,7 @@ if ($tee == '') {
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 								<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tila' value = 'MUUTA'>
 								<input type='hidden' name='tapa' value = 'JT'>
 								<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("J‰lkitoim")."'></td>
@@ -2061,6 +2155,7 @@ if ($tee == '') {
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 								<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tila' value = 'OOKOOAA'>
 								<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("Hyv‰ksy")."'></td>
 								</form>";
@@ -2150,6 +2245,7 @@ if ($tee == '') {
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tila' value='LISLISAV'>
 								<input type='hidden' name='rivitunnus' value='$row[tunnus]'>
+								<input type='hidden' name='menutila' value='$menutila'>
 								<td class='back' valign='top' nowrap><input type='submit' Style='{font-size: 8pt;}' value='".t("Lis‰‰ lis‰varusteita")."'></td>
 								</form>";
 					}
@@ -2428,7 +2524,11 @@ if ($tee == '') {
 			
 			
 			//annetaan mahdollisuus antaa loppusumma joka jyvitet‰‰n riveille arvoosuuden mukaan
-			if ($kukarow["extranet"] == "" and ($kukarow['kassamyyja'] != '' or $toim == "TARJOUS")) {
+			if ($kukarow["extranet"] == "" and (
+				   ($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '')
+				or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '')
+				or ($yhtiorow["salli_jyvitys_myynnissa"] == "K")
+				or $toim == "TARJOUS")) {
 
 				if ($jyvsumma== '') {
 					$jyvsumma='0.00';
@@ -2467,6 +2567,16 @@ if ($tee == '') {
 						<td class='back' colspan='2'><input type='submit' value='".t("Jyvit‰")."'></td>
 						</tr>
 						</form>";
+						
+						//N‰ytet‰‰n toi edelinen summa
+						if($ed_arvo != "") {
+							echo "<tr>
+									<td class='back' colspan='$ycspan' nowrap></td>
+									<th colspan='5'><em>".t("Edellinen summa")."</em></th>
+									<td class='spec'><em>$ed_arvo</em></td>
+									<td class='spec'><em>$laskurow[valkoodi]</em></td>
+								</tr>";
+						}
 			}
 
 			echo "</table>";

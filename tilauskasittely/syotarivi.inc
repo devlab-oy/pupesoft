@@ -49,6 +49,7 @@
 			echo "<tr><td class='back' colspan='7'>".t("Rivikommentti").":</td></tr>";
 			echo "<tr><td class='back' colspan='7'><input type='text' value='$kommentti' name='kommentti' size='50' maxlength='255'></td></tr>";
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='menutila' value='$menutila'>";						
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
@@ -141,6 +142,7 @@
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='menutila' value='$menutila'>";			
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
@@ -184,6 +186,7 @@
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
+			echo "<input type='hidden' name='menutila' value='$menutila'>";						
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";

@@ -45,6 +45,13 @@
 		$riviok++;
 		$tilausok++;
 	}
+	
+	//	Pakkokommentoitava tuote
+	if ($trow["kommentoitava"] != "" and $row["kommentti"] == "") {
+		$varaosavirhe .= t("VIRHE: Tuotetta on kommentoitava!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
 
 	if (!in_array($row["var"], array('','P','J','H','S','T','U','V','A','B'))) {
 		// Tässä varrien selitykset

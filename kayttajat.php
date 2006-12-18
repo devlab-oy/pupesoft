@@ -97,6 +97,7 @@
 			//$varasto 						= $monta['varasto'];
 			//$kirjoitin					= $monta['kirjoitin'];
 			$kassamyyja 					= $monta['kassamyyja'];
+			$jyvitys 					= $monta['jyvitys'];			
 			//$oletus_asiakas				= $monta['oletus_asiakas'];
 			$oletus_ohjelma 				= $monta['oletus_ohjelma'];
 			$resoluutio 					= $monta['resoluutio'];
@@ -137,6 +138,7 @@
 						varasto 		= '$varasto',
 						kirjoitin 		= '$kirjoitin',
 						kassamyyja 		= '$kassamyyja',
+						jyvitys			= '$jyvitys',
 						oletus_asiakas 	= '$oletus_asiakas',
 						oletus_ohjelma 	= '$oletus_ohjelma',
 						resoluutio		= '$resoluutio',
@@ -282,6 +284,7 @@
 						extranet		= '$extranet',
 						hyvaksyja		= '$hyvaksyja',
 						kassamyyja 		= '$kassamyyja',
+						jyvitys			= '$jyvitys',
 						oletus_ohjelma 	= '$oletus_ohjelma',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
 						profiilit 		= '$profile'
@@ -553,7 +556,6 @@
 
 				echo "</select></td></tr>";
 
-
 				echo "<tr><th align='left'>".t("Hyv‰ksyj‰").":</td>";
 
 				if ($krow["hyvaksyja"] != '') {
@@ -663,6 +665,25 @@
 						<option value='Y' $sel2>".t("Kate n‰ytet‰‰n")."</option>
 						<option value='N' $sel3>".t("Katetta ei n‰ytet‰")."</option>
 						</select></td></tr>";
+			
+				//	Jos vain valitut henkilˆt saa jyvitell‰ hintoja n‰ytet‰‰n t‰m‰n valinta
+				if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {
+					
+					if ($krow['jyvitys'] == "") {
+						$sel1 = "SELECTED";
+						$sel2 = "";
+					}
+					else {
+						$sel1 = "";
+						$sel2 = "SELECTED";
+					}
+					
+					echo "<tr><th align='left'>".t("Jyvitys").":</td>";
+					echo "<td><select name='jyvitys'>
+							<option value='' $sel1>".t("Ei saa jyvitt‰‰ myyntitilauksella")."</option>
+							<option value='X' $sel2>".t("Saa jyvitt‰‰ myyntitilauksella")."</option>";
+					echo "</select></td></tr>";					
+				}
 			}
 			$andextra = "";
 

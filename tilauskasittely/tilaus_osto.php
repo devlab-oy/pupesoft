@@ -497,9 +497,99 @@
 				<tr><th>".t("Fakta")."</th><td colspan='2'>$faktarow[fakta]&nbsp;</td></tr>";
 			echo "</table><br>";
 
-			echo "<b>".t("Lis‰‰ rivi").":</b><hr>";
-
 			//anntetaan mahdollisuus syottaa uusi/muokata tilausrivi/korjata virhelliset rivit
+			if(file_exists("ostomenu.inc")){
+
+				/*
+					sama kuin myyntimenut @ tilaus_myynti.php
+					paitti, ett‰ t‰‰ll‰ tarttetaan toi form
+					
+				*/	
+
+
+				//	Haetaan ostomenu Array ja kysely Array
+				//	Jos menutilaa ei ole laitetaan oletus
+				if(!isset($menutila)) $menutila = "oletus";
+				
+				require("ostomenu.inc");
+
+				//suoritetaan kysely ja tehd‰‰n menut jos aihetta
+				if(is_array($ostomenu)){
+
+					//	Tehd‰‰n menuset				
+					$menuset = "<select name='menutila' onChange='submit()'>";
+					foreach($ostomenu as $key => $value){
+						$sel = "";
+						if($key == $menutila) {
+							$sel = "SELECTED";
+						}
+
+						$menuset .= "<option value='$key' $sel>$value[menuset]</option>";
+					}				
+
+					//	Jos ei olla ostomenussa n‰ytet‰‰n aina haku
+					$sel = "";
+					if(!isset($ostomenu[$menutila])) {
+						$sel = "SELECTED";
+					}
+
+					$menuset .= "<option value='haku' $sel>Tuotehaku</option>";
+					$menuset .= "</select>";
+
+					//	Tehd‰‰n paikka menusetille
+					echo  "
+								<form name='myyntimenu' action = '$PHP_SELF' method='post' autocomplete='off'>
+									<input type='hidden' name='toiminto' value='$toiminto'>
+									<input type='hidden' name='tee' value = 'Y'>
+									<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+								<table>								
+									<tr>
+										<td class='back' align = 'left'><b>".t("Lis‰‰ rivi").":</b> </td><td class='back' align = 'left'>$menuset</td>
+									</tr>
+								</table><hr>
+								</form>";
+
+
+					//	Tarkastetaan viel‰, ett‰ menutila on m‰‰ritelty ja luodaan lista
+					if($ostomenu[$menutila]["query"] != "") {
+						unset($ulos);
+
+						// varsinainen kysely ja menu
+						$query = " SELECT distinct(tuote.tuoteno), nimitys
+									FROM tuote
+									LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
+									WHERE tuote.yhtio ='$kukarow[yhtio]' and ".$ostomenu[$menutila]["query"];
+									$tuoteresult = mysql_query($query) or pupe_error($query);	
+
+						$ulos = "<select Style=\"width: 230px; font-size: 8pt; padding: 0\" name='tuoteno' multiple ='TRUE'><option value=''>Valitse tuote</option>";
+
+						if(mysql_num_rows($tuoteresult) > 0) {	
+							while($row=mysql_fetch_array($tuoteresult)) {
+								$sel='';
+								if($tuoteno==$row['tuoteno']) $sel='SELECTED';
+								$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - $row[nimitys]</option>";
+							}
+							$ulos .= "</select>";
+						}
+						else {
+							echo "Valinnan antama haku oli tyhj‰<br>";
+						}
+					}
+					//	Jos haetaan niin ei ilmoitella turhia
+					elseif($menutila != "haku" and $menutila != "") {
+						echo "HUOM! Koitettiin hakea ostomenua '$menutila' jota ei ollut m‰‰ritelty!<br>";
+					}
+
+				}
+				else {
+					echo "HUOM! Koitettiin hakea ostomenuja, mutta tiedot olivat puutteelliset.<br>";
+				}				
+			}
+			else {
+				echo "<b>".t("Lis‰‰ rivi").": </b><hr>";
+			}
+			
+			
 			require('syotarivi_ostotilaus.inc');
 
 			if ($huomio != '') {
@@ -640,6 +730,7 @@
 								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 								<td class='back' nowrap>
 								<input type='hidden' name='rivitunnus' value = '$prow[tunnus]'>
+								<input type='hidden' name='menutila' value = '$menutila'>
 								<input type='hidden' name='tee' value = 'PV'>
 								<input type='Submit' value='".t("Muuta")."'>
 								</td></form>";
@@ -697,6 +788,7 @@
 										<input type='hidden' name='toim' 			value='$toim'>
 										<input type='hidden' name='tee' 			value='LISLISAV'>
 										<input type='hidden' name='rivitunnus' 		value='$prow[tunnus]'>
+										<input type='hidden' name='menutila' value = '$menutila'>
 										<td class='back'><input type='submit' value='".t("Lis‰‰ lis‰varusteita tuotteelle")."'></td>
 										</form>";
 								echo "</tr>";

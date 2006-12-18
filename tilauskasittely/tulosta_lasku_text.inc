@@ -210,23 +210,18 @@ if (!function_exists('text_rivi')) {
 if (!function_exists('text_loppu')) {
 	function text_loppu () {
 	
-		global $sisalto, $laskurow, $yhtiorow, $kukarow, $sivu, $kieli, $factoringlask;
+		global $sisalto, $laskurow, $yhtiorow, $kukarow, $sivu, $kieli, $factoringlask,$frow;
 	
 		
 		while ($factoringlask < 71) {
 			$sisalto .= "\r\n";
 			$factoringlask++;
 		}
-		
-		//Tämä on nyt hardcoodattu tähän, varmaan voi kohta laittaa jonnekin parempaan talteen
-		$sisalto .= "Vår fordran enligt denna faktura har överlåtits till S E B Finans AB (publ).";
+
+		//Factoringkommentti
+		$sisalto .= trim($frow["teksti_se"]);
 		$sisalto .= "\r\n";
-		$sisalto .= "Fakturan skall därför betalas direkt till S E B Finans AB(publ), 167 81  BROMMA."; 
-		$sisalto .= "\r\n";
-		$sisalto .= "Ange alltid kund och fakturanummer vid betalning.";
-		$sisalto .= "\r\n";
-		
-		
+			
 		//Yhteensärivi	
 		$sisalto .= sprintf('%-25.25s', t("Eräpäivä", $kieli).": ".$laskurow["erpcm"]);
 		$sisalto .= sprintf('%-25.25s', t("Viitenumero", $kieli).": ".$laskurow["viite"]);
@@ -234,10 +229,11 @@ if (!function_exists('text_loppu')) {
 		$sisalto .= "\r\n";
 	
 		//Pankkiyhteystiedot	
-		$sisalto .= sprintf('%-25.25s', $yhtiorow["factoring_pankkinimi1"]." ".$yhtiorow["factoring_pankkitili1"]);
-		$sisalto .= sprintf('%-25.25s', $yhtiorow["factoring_pankkinimi2"]." ".$yhtiorow["factoring_pankkitili2"]);
+		$sisalto .= sprintf('%-25.25s', $frow["pankkinimi1"]." ".$frow["pankkitili1"]);
+		$sisalto .= sprintf('%-25.25s', $frow["pankkinimi2"]." ".$frow["pankkitili2"]);
 		$sisalto .= "\r\n";
 		$sisalto .= "\r\n";
+		
 		//Alimmat kolme laatikkoa, yhtiötietoja	
 		$sisalto .= sprintf('%-25.25s', $yhtiorow["nimi"]);
 		$sisalto .= sprintf('%-50.50s', t("Puhelin", $kieli).": ".$yhtiorow["puhelin"]);

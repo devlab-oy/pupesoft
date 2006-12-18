@@ -57,13 +57,13 @@
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\r\n" ;
 	
-		$subjekti = "5819 aire1142 ".$pdffilenimi;
+		$subjekti = $frow["sopimusnumero"]." ".$pdffilenimi;
 		
-		if($yhtiorow["factoring_email"] == '' or !mail($yhtiorow["factoring_email"], $subjekti, $content, $header)) {
-			$sebfact_ulos .= sprintf(t("VIRHE: Laskutuksen factoring-sähköpostisiirtoa ei voitu suorittaa osoitteeseen: %s"),$yhtiorow['factoring_email'])."<br>\r\n";	
+		if($frow["email"] == '' or !mail($frow["email"], $subjekti, $content, $header)) {
+			$sebfact_ulos .= sprintf(t("VIRHE: Laskutuksen factoring-sähköpostisiirtoa ei voitu suorittaa osoitteeseen: %s"),$frow["email"])."<br>\r\n";	
 		}
 		else {
-			$sebfact_ulos .= sprintf(t("Laskutuksen factoring-sähköpostisiirto lähetettiin osoitteeseen: %s"),$yhtiorow['factoring_email'])."<br><br>\r\n";
+			$sebfact_ulos .= sprintf(t("Laskutuksen factoring-sähköpostisiirto lähetettiin osoitteeseen: %s"),$frow["email"])."<br><br>\r\n";
 		}
 		
 		//lähetetään meili myös yhtiön adminille

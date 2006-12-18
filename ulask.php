@@ -1525,7 +1525,8 @@ if ($tee == 'I') {
 			$tee = "";
 			$PHP_SELF = "tilauskasittely/keikka.php";
 			$alku = "";
-
+			$toimittajaid = $trow["tunnus"];
+			
 			require("tilauskasittely/ostotilausten_rivien_kohdistus.inc");
 			exit;
 		}

@@ -390,8 +390,13 @@ if ($tila == '') {
 
 	$query    = "SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale $alvit) hinta
 				FROM tilausrivi use index (uusiotunnus_index), tuote use index (tuoteno_index), tuotteen_toimittajat
-				WHERE uusiotunnus='$otunnus' AND tilausrivi.yhtio ='$kukarow[yhtio]' AND liitostunnus = '$toimittajaid'
-				AND tuote.yhtio=tilausrivi.yhtio AND tilausrivi.yhtio = tuotteen_toimittajat.yhtio AND tuote.tuoteno=tilausrivi.tuoteno AND tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno";
+				WHERE uusiotunnus = '$otunnus' 
+				AND tilausrivi.yhtio ='$kukarow[yhtio]' 
+				AND liitostunnus = '$toimittajaid'
+				AND tuote.yhtio = tilausrivi.yhtio 
+				AND tilausrivi.yhtio = tuotteen_toimittajat.yhtio 
+				AND tuote.tuoteno = tilausrivi.tuoteno 
+				AND tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno";
 	$result   = mysql_query($query) or pupe_error($query);
 	$hintarow = mysql_fetch_array($result);
 

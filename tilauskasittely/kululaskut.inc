@@ -12,8 +12,37 @@ if (mysql_num_rows($result) == 1) {
 	$laskurow = mysql_fetch_array($result);
 }
 else {
-	echo "<font class='error'>".t("Tilaus katosi!")."</font>";
-	exit;
+	if ($luouusikeikka == "OK") {
+		// haetaan seuraava vapaa keikkaid
+		$query  = "select max(laskunro)+1 from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
+		$result = mysql_query($query) or pupe_error($query);
+		$row    = mysql_fetch_array($result);
+		$id		= $row[0];
+		
+		$query  = "	INSERT into lasku
+					SET	yhtio	= '$kukarow[yhtio]',
+					laskunro	= '$id',
+					tila		= 'K',
+					alatila		= '',
+					liitostunnus= '$liitostunnus',
+					ytunnus 	= '$liitostunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+			
+		$otunnus = mysql_insert_id();
+				
+		$query  = "	select *
+					from lasku
+					where tunnus	= '$otunnus'
+					and yhtio		= '$kukarow[yhtio]'
+					and tila		= 'K'
+					and alatila		= ''";
+		$result = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($result);	
+	}
+	else {
+		echo "<font class='error'>".t("Tilaus katosi!")."</font>";
+		exit;
+	}
 }
 
 if ($tee == "liita") {
@@ -314,7 +343,6 @@ if ($tee == "haku") {
 				<th>".t("Vienti")."</th>
 				<th>".t("Liitettävissä")."</th>
 				<th>".t("Summa")."</th>
-				<th></th>
 				</tr>";
 
 		while($llrow = mysql_fetch_array($result)) {

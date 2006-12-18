@@ -61,10 +61,10 @@
 		$query = "INSERT INTO suoritus (yhtio,tilino,nimi_maksaja,viite,summa,valkoodi,maksupvm,kirjpvm) VALUES ('$company[yhtio]','$account','$payer_name','$reference',$sum,'$valkoodi','$payment_date','$entry_date')";
 		$result = mysql_query($query) or pupe_error($query);
 		$tiliointitunnus = mysql_insert_id();
-		
-		#p‰ivitet‰‰n suorituksen tunnnus tiliotedataan	
+
+		#p‰ivitet‰‰n suorituksen tunnnus tiliotedataan ja tiliotedata k‰sitellyksi	
 		$query = "	update tiliotedata
-		 			set tiliointitunnus = '$tiliointitunnus'
+		 			set tiliointitunnus = '$tiliointitunnus', kasitelty = now()
 					where tunnus = '$tiliotedatarow[tunnus]'";
 		$dataupdres = mysql_query($query) or pupe_error($query);
 

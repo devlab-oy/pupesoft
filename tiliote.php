@@ -129,7 +129,7 @@
 
 			if ($xtyyppi > 0 and $xtyyppi <= 3) {
 				// Kirjoitetaan tiedosto kantaan
-				$query = "INSERT into tiliotedata (yhtio, aineisto, tilino, alku, loppu, tyyppi, tieto,kasitelty) values ('$yritirow[yhtio]', '$aineistorow[aineisto]', '$tilino', '$alkupvm', '$loppupvm', '$xtyyppi', '$tietue', now())";
+				$query = "INSERT into tiliotedata (yhtio, aineisto, tilino, alku, loppu, tyyppi, tieto) values ('$yritirow[yhtio]', '$aineistorow[aineisto]', '$tilino', '$alkupvm', '$loppupvm', '$xtyyppi', '$tietue')";
 				$tiliotedataresult = mysql_query($query) or pupe_error($query);
 			}
 
@@ -149,9 +149,7 @@
 			exit;
 		}
 		
-		
-		
-		$query= "UNLOCK TABLES";
+		$query = "UNLOCK TABLES";
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
 
 

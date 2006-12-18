@@ -5,11 +5,13 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "myyntires")  !== FALSE) $polku='../';
 	
 	$tunnus = substr($tietue, 0,3);
-	if (($tunnus != 'T11') and ($maksu == 1)) {
+	
+	if ($tunnus != 'T11' and $maksu == 1) {
 		echo "<tr><td></td><td></td><td>";
 		
 		// Tämä on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
-		if ((substr($tietue, 187, 1) > $omataso) and ($tunnus == 'T10')) { // eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä
+		// eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä
+		if (substr($tietue, 187, 1) > $omataso and $tunnus == 'T10') { 
 			$kuittikoodi='E';
 		}
 		// Jossain erityistapauksissa täytyy erittely käsitellä. Niille löytyy syötetyt säännöt
@@ -17,14 +19,13 @@
 			require $polku. "inc/kasitteleerittelysaanto.inc";
 		}
 			
-		if (($toim == 'K') and ($kuittikoodi == ' ') and ($tiliotedataka == '0000-00-00')) {
+		if ($toim == 'K' and $kuittikoodi == ' ' and $tiliotedataka == '0000-00-00') {
 			if ($sisviite != 0) { //Tämän pitiäisi toimia nyt aina!
 				echo "<font class='message'> ".t("maksukanditaatti sisäinen viite & määrä")."</font><br>";
-				$query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma',
-				round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-								FROM lasku
-								WHERE tunnus = '$sisviite' and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))  and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
-
+				
+				$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+							FROM lasku
+							WHERE tunnus = '$sisviite' and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01))  and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) == 0) {
@@ -43,11 +44,10 @@
 				case '702' : // Maksettu jotain tililtä, etsitään tilinolla ja summalla....
 					if (strlen(trim($tilino)) > 0) {
 						echo "<font class='message'> ".t("maksukanditaatti tilino & määrä")."</font><br>";
-						$query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma',
-				round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+						
+						$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 									FROM lasku
 									WHERE tilinumero = '$tilino' and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01)) and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
-	
 						$result = mysql_query($query) or pupe_error($query);
 	
 						if (mysql_num_rows($result) == 0) {
@@ -72,8 +72,7 @@
 					if (strlen(trim($maksaa)) > 0) {
 						echo "<font class='message'>".t("Maksukanditaatti nimi & määrä")."</font><br>";
 	
-						$query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma',
-				round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+						$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 									FROM lasku
 									WHERE left(nimi,35) = left('$maksaa',35) and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01)) and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
 	
@@ -84,44 +83,47 @@
 	
 							//Poistetaan Oyt ja Abt ja katsotaan miten sitten käy....
 							$maksaa = trim(preg_replace('/\b(oy|ab)\b/i', '', strtolower($maksaa)));
-							$query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma',
-				round(kasumma * vienti_kurssi, 2) 'vietykasumma'
-									FROM lasku
-									WHERE left(nimi,35) LIKE '%$maksaa%' and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01)) and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
-	
+							$query = "	SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
+										FROM lasku
+										WHERE left(nimi,35) LIKE '%$maksaa%' and ((summa = $maara * -1) or (abs(summa + $maara - kasumma) < 0.01)) and yhtio = '$yritirow[yhtio]' and tila = 'Q'";
 							$result = mysql_query($query) or pupe_error($query);
 	
 							if (mysql_num_rows($result) == 0) {
 								echo "<font class='message'>".t("Sopivaa maksua")." $maksaa & $maara ".t("vieläkään ei löytynyt")."</font><br>";					
 								echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
+								
 								require $polku . "inc/teeselvittely.inc";
 							}
 							else {
 								$trow = mysql_fetch_array ($result);
 								echo "<font class='message'>".t("Maksu löytyi")." $trow[tunnus]</font><br>";
+								
 								require $polku . "inc/teemaksutosite.inc";
 							}						
 						}
 						else {
 							$trow = mysql_fetch_array ($result);
 							echo "<font class='message'>".t("Maksu löytyi")." $trow[tunnus]</font><br>";
+							
 							require $polku . "inc/teemaksutosite.inc";
 						}
 					}
 					else {
-							echo "<font class='message'>".t("Meillä ei ole tietoa millä tämä tapahtuma voidaan kohdistaa")."</font><br>";
-							echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
-							require $polku . "inc/teeselvittely.inc";
+						echo "<font class='message'>".t("Meillä ei ole tietoa millä tämä tapahtuma voidaan kohdistaa")."</font><br>";
+						echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
+						require $polku . "inc/teeselvittely.inc";
 					}
 					$koodi = "";
 					break;
 				case '730' : // Pankin kulu Nordean limiittikorko näyttää olevan 740 hoidetaan ylempänä
 					echo "<font class='message'>".t("Maksukanditaatti pankinkulu")."</font><br>";
 					echo "<font class='message'>".t("Rahat")." $yritirow[oletus_rahatili] ".t("kulut")." $yritirow[oletus_kulutili] ".t("summa")." $maara</font><br>";
+					
 					require $polku . "inc/teekulutosite.inc";
 					break;
 				default :
 					echo "<font class='message'>".t("Tiliöidään tiliotesääntöjen mukaan")."</font><br>";
+					
 					require $polku . "inc/teeselvittely.inc";
 				}
 			}
@@ -130,28 +132,29 @@
 			if ($kuittikoodi != ' ') echo "<font class='message'>".t("Hylätty, koska erittely tulossa")." ($kuittikoodi)</font><br>";
 			if ($toim != 'K') echo "<font class='message'>".t("Tili, raha- tai kulutili puuttuu")."!</font><br>";
 			if ($tiliotedataka != '0000-00-00') {
-					$query = "SELECT tiliointi.tilino tilino, tili.nimi nimi, concat_ws('@',korjattu, korjausaika) korjattu, ltunnus
-								FROM tiliointi
-								LEFT JOIN tili on tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
-								WHERE tiliointi.tunnus = '$tiliotedatatu'";
-					$tiliointiresult = mysql_query($query) or pupe_error($query);
-					$tiliointirow = mysql_fetch_array ($tiliointiresult);
-					echo "<font class='message'>".t("Tapahtuma on käsitelty")." $tiliotedataka<br>";
-					echo "".t("Alkuperäinen tiliöinti on")." <a href='".$polku."muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
-					if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
-						echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font>";
-					}
-					else {
-						echo "</font>";
-					}
-					
+				$query = "	SELECT tiliointi.tilino tilino, tili.nimi nimi, concat_ws('@',korjattu, korjausaika) korjattu, ltunnus
+							FROM tiliointi
+							LEFT JOIN tili on tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
+							WHERE tiliointi.tunnus = '$tiliotedatatu'";
+				$tiliointiresult = mysql_query($query) or pupe_error($query);
+				$tiliointirow = mysql_fetch_array ($tiliointiresult);
+				
+				echo "<font class='message'>".t("Tapahtuma on käsitelty")." $tiliotedataka<br>";
+				echo "".t("Alkuperäinen tiliöinti on")." <a href='".$polku."muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
+				
+				if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
+					echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font>";
+				}
+				else {
+					echo "</font>";
+				}	
 			}
 		}
+		
 		echo "<td></td><td>";
+		
 		//Jos tämä on selvittelyssä, niin annetaan mahdollisuus suorittaa!
-		if ((($tiliointirow['korjattu'] == "0000-00-00 00:00:00") or
-			($tiliointirow['korjattu'] == "@0000-00-00 00:00:00")) and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili']) and
-			($kuittikoodi==' ')) {
+		if ((($tiliointirow['korjattu'] == "0000-00-00 00:00:00") or ($tiliointirow['korjattu'] == "@0000-00-00 00:00:00")) and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili']) and ($kuittikoodi==' ')) {
 			//Olisiko tämä meidän toimittaja
 			$tpv = substr($pvm,0,2);
 			$tpk = substr($pvm,2,2);
@@ -159,22 +162,27 @@
 				
 			$query = "SELECT ytunnus FROM toimi WHERE yhtio = '$yritirow[yhtio]' and left(nimi,35) LIKE '%$maksaa%'";
 			$suotoiresult = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($suotoiresult) > 0) {
 				echo "<font class='message'><a href='".$polku."suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=". -1*$maara . "'>".t("Ostosuoritus")."</a></font><br>";
 			}
+			
 			//Olisiko tämä meidän asiakas
 			$query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and left(nimi,35) LIKE '%$maksaa%'";
 			$suoasiresult = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($suoasiresult) > 0) {
 				$suoasirow = mysql_fetch_array ($suoasiresult);
 				echo "<font class='message'><a href='".$polku."myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z'>".t("Myyntisuoritus")."</a></font>";
 			}
 		}
 		echo "</td><td>";
+		
 		if ($kuittikoodi==' ') {
 			if ($eiselitetta==1) $selite='';
 			echo "<font class='message'><a href='".$polku."tiliotesaannot.php?tee=U&pankkitili=$yritirow[tilino]&koodi=$koodi&koodiselite=$koodiselite&nimitieto=$maksaa&selite=$selite&pvm=$pvm'>".t("Tee tiliointisääntö")."</a></font>";
 		}
+		
 		echo "</td></tr>";
 		$maksu = 0; // Maksu on käsitelty
 		$maara = 0;
@@ -225,10 +233,9 @@
 			echo "<td>".t("Myönnetty määrä")."<br>". substr($tietue, 117, 30) * 1 . "</td>";
 			echo "</tr>";
 
-			$query = "SELECT *
+			$query = "	SELECT *
 						FROM yriti
 						WHERE tilino = '$pankkitilino'";
-
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<tr><td colspan='3'>";
@@ -249,10 +256,9 @@
 					echo "<font class='message'> ".t("Tilin rahatili on")." '$yritirow[oletus_rahatili]' ".t("ja kulutili")." '$yritirow[oletus_kulutili]'</font><br>";
 				}
 
-				$query = "SELECT *
+				$query = "	SELECT *
 							FROM yhtio
 							WHERE yhtio = '$yritirow[yhtio]'";
-
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) != 1) {
@@ -403,22 +409,23 @@
 			echo "<td>$selite</td><td></td><td></td><td></td></tr>";
 			$vientiselite .= $selite;
 			break;
-
 		case 'T40':
 			echo "<tr><td></td><td></td><td></td><td></td><td>".t("Saldo")." " . substr($tietue,6,6) . "</td>";
 			echo "<td>" . substr($tietue,31,19) / 100 . "</td></tr>";
-// Päivitetään saldo yriti-tauluun, jos sellainen löytyi
-			if (($toim == 'K') and ($tiliotedatarow['kasitelty'] == '0000-00-00')) {
+			
+			// Päivitetään saldo yriti-tauluun, jos sellainen löytyi
+			if ($toim == 'K' and $tiliotedatarow['kasitelty'] == '0000-00-00') {
 				$query = "UPDATE yriti SET maksulimitti = '".  substr($tietue,31,19) / 100 . "' WHERE tunnus = '$yritirow[tunnus]'";
 				$result = mysql_query($query) or pupe_error($query);
+				
 				$query = "UPDATE tiliotedata SET kasitelty = now() WHERE tunnus='$tiliotedatarow[tunnus]'";
 				$result = mysql_query($query) or pupe_error($query);
+				
 				echo "<tr><td></td><td></td><td>";
 				echo "<font class='message'>".t("Tilin saldo päivitettiin")."</font>";
 				echo "</td><td></td><td></td><td></td></tr>";
 			}
 			break;
-
 		case 'T50':
 			if (substr($tietue,6,1) == 1) $jakso = "päivän";
 			if (substr($tietue,6,1) == 2) $jakso = "tiliotteen";
@@ -431,8 +438,6 @@
 			echo "".t("Otot")." $jakso ".t("alusta")." kpl " . substr($tietue,40,8) * 1 . "</td>";
 			echo "<td></td><td></td><td>" . substr($tietue,48,19) / 100 . "</td></tr>";
 			break;
-
-
 		default:
 			if (trim($tunnus) != '') {
 				echo "<tr><td colspan='6'>";

@@ -1,31 +1,45 @@
 <?php
-	// tarvitaan $trow jossa on toimittajan tiedot
-	// tarvitaan $tpv-$tpk-$tpp jossa on tapvm
-	// tarvitaan $omasumma jossa on laskun verollinen summa
-	// tarvitaan $verkkolaskuveroton jossa on laskun veroton summa
-	// $ytunnus josaa on ulaskun ytunnus
-	// tarvitaan $viite jossa on laskun viite
-	
-	//haetaan seuraava vapaa keikkaid
-	$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE";
+	// Tarvitaan $tunnus jossa on ostoreskontralaskun tunnus
+	// Tarvitaan $trow jossa on toimittajan tiedot
+		
+	$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE, tiliointi READ";
 	$result = mysql_query($query) or pupe_error($query);
 	
-	$query  = "select max(laskunro) from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
+	// Haetaan seuraava vapaa keikkaid
+	$query  = "	select max(laskunro)+1
+				from lasku 
+				where yhtio='$kukarow[yhtio]' and tila='K'";
 	$result = mysql_query($query) or pupe_error($query);
 	$row    = mysql_fetch_array($result);
-	$id		= $row[0]+1; // tämä on meidän keikannumero
+	
+	$id	= $row[0]; 			// tämä on meidän keikannumero
 	$keikkanumeroapu = $id; // talteen
 	
-	// meillä on trow haettuna ylhäällä
+	// Haetaan ostoreskontralaskun tiedot
+	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$osres = mysql_query($query) or pupe_error($query);
+	$osrow = mysql_fetch_array($osres);
+	
+	// Haetaan laskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
+	$query = "	select sum(summa) summa
+				from tiliointi
+				where yhtio	= '$kukarow[yhtio]'
+				and ltunnus	= '$osrow[tunnus]'
+				and tilino  = '$yhtiorow[alv]'
+				and korjattu = ''";
+	$alvires = mysql_query($query) or pupe_error($query);
+	$alvirow = mysql_fetch_array($alvires);
+
+	// Ostoreskontralaskun veroton arvo
+	$osrow["arvo"] = $osrow["summa"] - $alvirow["summa"];
+	
+	
+	// Tehdään itse keikkaotsikko
 	$query = "	insert into lasku set
 				yhtio        = '$kukarow[yhtio]',
 				laskunro     = '$id',
 				ytunnus	     = '$trow[ytunnus]',
 				nimi         = '$trow[nimi]',
-				valkoodi     = 'EUR',
-				vienti       = '$trow[oletus_vienti]',
-				maksu_kurssi = '1',
-				vienti_kurssi= '1',
 				toimitusehto = '$trow[toimitusehto]',
 				osoite       = '$trow[osoite]',
 				postitp      = '$trow[postitp]', 
@@ -33,13 +47,17 @@
 				maakoodi	 = '$trow[maakoodi]',
 				maa_lahetys  = '$trow[maakoodi]',
 				swift        = '$trow[swift]',
-				liitostunnus = '$trow[tunnus]',
+				liitostunnus = '$trow[tunnus]',				
+				tapvm		 = '$osrow[tapvm]',
+				valkoodi     = '$osrow[valkoodi]',
+				vienti       = '$osrow[vienti]',
+				maksu_kurssi = '$osrow[maksu_kurssi]',
+				vienti_kurssi= '$osrow[vienti_kurssi]',
+				summa		 = '$osrow[summa]',
+				arvo		 = '$osrow[arvo]',
 				tila         = 'K',
 				luontiaika	 = now(),
-				laatija		 = 'verkkolas',
-				tapvm		 = '$tpv-$tpk-$tpp',
-				summa		 = '$omasumma',
-				arvo		 = '$verkkolaskuveroton'";
+				laatija		 = 'verkkolas'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$keikantunnus = mysql_insert_id(); // tätä tarvitaan tilausrivien uusiotunnukseen
@@ -48,30 +66,31 @@
 
 	$query  = "UNLOCK TABLE";
 	$result = mysql_query($query) or pupe_error($query);
+	
 	// Liitetään vastaanotettu verkkolasku uuteen keikkaan
-
-	// tehdään liitosotsikko
+	// Tehdään liitosotsikko ostoreskontralaskulle
 	$query = "	insert into lasku set
 				yhtio        = '$kukarow[yhtio]',
 				laskunro     = '$id',
-				ytunnus	     = '$ytunnus',
+				ytunnus	     = '$trow[ytunnus]',
 				nimi         = '$trow[nimi]',
-				valkoodi     = 'EUR',
-				maksu_kurssi = '1',
-				vienti_kurssi= '1',
 				toimitusehto = '$trow[toimitusehto]',
-				vanhatunnus  = '$tunnus',
-				arvo 		 = '$verkkolaskuveroton',
-				viite		 = '$viite',
-				summa        = '$omasumma',
-				vienti       = '$trow[oletus_vienti]',
-				liitostunnus = '$trow[tunnus]',
+				vanhatunnus  = '$tunnus',				
+				liitostunnus = '$trow[tunnus]',				
+				viite		 = '$osrow[viite]',
+				tapvm		 = '$osrow[tapvm]',
+				valkoodi     = '$osrow[valkoodi]',
+				vienti       = '$osrow[vienti]',
+				maksu_kurssi = '$osrow[maksu_kurssi]',
+				vienti_kurssi= '$osrow[vienti_kurssi]',
+				summa		 = '$osrow[summa]',
+				arvo		 = '$osrow[arvo]',			
 				luontiaika	 = now(),
 				laatija 	 = 'verkkolas',
 				tila         = 'K'";
 	$result = mysql_query($query) or pupe_error($query);
 
-	$laskuvirhe .= t("Liitettiin lasku").": $trow[nimi] $omasumma EUR\n";
+	$laskuvirhe .= t("Liitettiin lasku").": $trow[nimi] $osrow[summa] $osrow[valkoodi]\n";
 
 	$kohdistettujariveja = 0;
 	$suoratoimitus       = "";
@@ -116,6 +135,7 @@
 				if ($rivirow["uusiotunnus"] == 0) {
 					$query = "UPDATE tilausrivi SET uusiotunnus='$keikantunnus', varattu='$kpl', hinta='$hinta' WHERE tunnus='$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";
 					$result = mysql_query($query) or pupe_error($query);
+					
 					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("kohdistettu laskuun")."! ($keikantunnus/$rrivino[$i])\n";
 				}
 				// jos rivi löytyi, mutta se on jo kohdistettu.. lisätään uus samoilla tiedoilla
@@ -130,9 +150,7 @@
 			else {
 				$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("Ei voitu kohdistaa laskuun")."! ($keikantunnus/$rrivino[$i])\n";
 			}
-
 		} // end if rivitunnus erisuuri ku nolla
-
 	} // end for looppi
 	
 
@@ -146,10 +164,11 @@
 
 		$laskuvirhe .= t("Viedään suoratoimitus varastoon").". ($laskurow[laskunro])\n";
 
-		// viedään varastoon... bufferit kiinni etteiechoilla mitää ruudulle
+		// viedään varastoon... bufferit kiinni ettei echoilla mitää ruudulle
 		ob_start();
 		require ("tilauskasittely/varastoon.inc");
 		ob_end_clean();
+		
 		// laskutetaan suoratoimitetut jtrivit jos niitä oli tällä keikalla...
 		require ("tilauskasittely/jt_super_laskuta.inc");
 	}
@@ -157,6 +176,7 @@
 		// dellataan perustettu keikka ku ei kerran löytyny rivejä.. jos ei olla asetettu ÄLÄDELLAA muuttujaaa
 		$query = "delete from lasku WHERE yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkanumeroapu'";
 		$result = mysql_query($query) or pupe_error($query);
+		
 		$laskuvirhe .= t("Poistettiin")." ".t("keikka")." $keikkanumeroapu ".t("Yhtään riviä ei löytynyt")."!\n";
 	}
 	else {

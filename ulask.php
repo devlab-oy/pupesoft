@@ -1479,25 +1479,22 @@ if ($tee == 'I') {
 		$query = "UNLOCK TABLES";
 		$result = mysql_query($query) or pupe_error($query);
 		echo "<font class='message'>".t("Lasku perustettiin asiakkalle")." $trow[nimi]<br>";
-		echo t("Summa")." $yleissumma $valkoodi = $omasumma ".t('Tositenro on')." $tositenro<br></font><hr>";
+		echo t("Summa")." $yleissumma $valkoodi = $omasumma $yhtiorow[valkoodi]".t('Tositenro on')." $tositenro<br></font><hr>";
 	}
 	else {
 		echo "<font class='message'>".t("Lasku perustettiin asiakkalle")." $trow[nimi]<br>";
-		echo t("Summa")." $yleissumma $valkoodi = $omasumma<br></font><hr>";
+		echo t("Summa")." $yleissumma $valkoodi = $omasumma $yhtiorow[valkoodi]<br></font><hr>";
 	}
 
 	// Näytettään käyttöliittymä
 	$tee = '';
 
-	//Kuodaan uusi keikka jos käyttäjä ruksasi keikkaruksin
+	//Luodaan uusi keikka jos käyttäjä ruksasi keikkaruksin
 	if ($luouusikeikka == "LUO") {
 
 		//Luodaan uusi keikka
 		$aladellaa = "En haluu dellata!";
-		$verkkolaskuveroton = $veroton;
-		$ytunnus = $trow["ytunnus"];
-		$trow["oletus_vienti"] = $vienti;
-
+		
 		require("inc/verkkolasku-in-luo-keikkafile.inc");
 
 		echo "$laskuvirhe<br><br>";

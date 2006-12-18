@@ -278,49 +278,71 @@ if ($toiminto == "" and $ytunnus != "") {
 	// n‰ytet‰‰n v‰h‰ toimittajan tietoja
 	echo "<table>";
 	echo "<tr>";
-	echo "<th colspan='5'>".t("Toimittaja")."</th>";
+	echo "<th colspan='5'>".t("Toimittaja")."</th><th>".t("Uusi keikka")."</th>";
 	echo "</tr><tr>";
 	echo "<td>$toimittajarow[ytunnus]</td>";
 	echo "<td>$toimittajarow[nimi]</td>";
 	echo "<td>$toimittajarow[osoite]</td>";
 	echo "<td>$toimittajarow[postino]</td>";
 	echo "<td>$toimittajarow[postitp]</td>";
-	echo "</tr></table>";
-
-	echo "<br>";
+	
+	echo "<td>";
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='toiminto' value='uusi'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
 	echo "<input type='submit' value='".t("Perusta uusi keikka")."'>";
 	echo "</form>";
+	echo "</td>";
+	
+	echo "</tr></table><br>";
+	
+	if ($naytakaikki == "YES") {
+		$limitti = " ";
+	}
+	else {
+		$limitti = " LIMIT 50";
+	}
 
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
 	$query = "	select *
 				from lasku
-				where yhtio='$kukarow[yhtio]' and liitostunnus='$toimittajaid' and tila='K' and alatila='' and vanhatunnus=0
-				order by laskunro desc";
-
+				where yhtio='$kukarow[yhtio]' 
+				and liitostunnus='$toimittajaid' 
+				and tila='K' 
+				and alatila='' 
+				and vanhatunnus=0
+				order by laskunro desc
+				$limitti";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
 
 		echo "<font class='head'>".t("Keskener‰iset keikat")."</font><hr>";
 
+		if (mysql_num_rows($result) == 50 and $naytakaikki == "") {
+			echo "<table><tr><td class='back'><font class='error'>".t("HUOM: Toimittajalla on yli 50 avointa keikkaa! Vain 50 viimeisint‰ n‰ytet‰‰n.")."</font></td>";
+			
+			echo "<td class='back'>";
+			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+			echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+			echo "<input type='hidden' name='naytakaikki' value='YES'>";
+			echo "<input type='submit' value='N‰yt‰ kaikki'>";
+			echo "</form>";
+			echo "</td>";
+			echo "</tr></table><br>";
+		}
+
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>".t("keikka")."</th>";
-		echo "<th>".t("ytunnus")."</th>";
-		echo "<th>".t("nimi")."</th>";
-		echo "<th>".t("lis‰tiedot")."</th>";
-		echo "<th>".t("kohdistus")."</th>";
-		echo "<th>".t("paikat")."</th>";
-		echo "<th>".t("sarjanrot")."</th>";
-		echo "<th>".t("kohdistettu")."</th>";
-		echo "<th>".t("varastossa")."</th>";
-		echo "<th>".t("kululaskuja")."</th>";
-		echo "<th>".t("ostolaskuja")."</th>";
-		echo "<th>".t("toiminto")."</th>";
+		echo "<th valign='top'>".t("keikka")."</th>";
+		echo "<th valign='top'>".t("ytunnus")." /<br>".t("nimi")."</th>";
+		echo "<th valign='top'>".t("kohdistus")." /<br>".t("lis‰tiedot")."</th>";
+		echo "<th valign='top'>".t("paikat")." /<br>".t("sarjanrot")."</th>";
+		echo "<th valign='top'>".t("kohdistettu")." /<br>".t("varastossa")."</th>";
+		echo "<th valign='top'>".t("ostolaskuja")." /<br>".t("kululaskuja")."</th>";
+		echo "<th valign='top'>".t("toiminto")."</th>";
 		echo "</tr>";
 
 		while ($row = mysql_fetch_array($result)) {
@@ -450,25 +472,20 @@ if ($toiminto == "" and $ytunnus != "") {
 				echo t("Keikka").": $row[laskunro] / $row[nimi]<br><br>";
 				echo $row["comments"];
 				echo "</div>";
-				echo "<td><a class='menu' onmouseout=\"popUp(event,'$row[laskunro]')\" onmouseover=\"popUp(event,'$row[laskunro]')\">$row[laskunro]</a></td>";
+				echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'$row[laskunro]')\" onmouseover=\"popUp(event,'$row[laskunro]')\">$row[laskunro]</a></td>";
 			}
 			else {
-				echo "<td>$row[laskunro]</td>";
+				echo "<td valign='top'>$row[laskunro]</td>";
 			}
 
-			echo "<td>$row[ytunnus]</td>";
-			echo "<td>$row[nimi]</td>";
-			echo "<td>$lisatiedot</td>";
-			echo "<td>$kohdistus</td>";
-			echo "<td>$varastopaikat</td>";
-			echo "<td>$sarjanrot</td>";
-			echo "<td>$kplyhteensa</td>";
-			echo "<td>$kplvarasto</td>";
-			echo "<td>$llrow[kulasku] $llrow[kusumma]</td>";
-			echo "<td>$llrow[volasku] $llrow[vosumma]</td>";
+			echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
+			echo "<td valign='top'>$kohdistus<br>$lisatiedot</td>";
+			echo "<td valign='top'>$varastopaikat<br>$sarjanrot</td>";
+			echo "<td valign='top'>$kplyhteensa<br>$kplvarasto</td>";
+			echo "<td valign='top'>$llrow[volasku] $llrow[vosumma]<br>$llrow[kulasku] $llrow[kusumma]</td>";
 
 			echo "<form action='$PHP_SELF' method='post'>";
-			echo "<td>";
+			echo "<td align='right'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='otunnus' value='$row[tunnus]'>";
 			echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";

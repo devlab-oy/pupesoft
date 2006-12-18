@@ -328,7 +328,7 @@ if ($toiminto == "" and $ytunnus != "") {
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
 			echo "<input type='hidden' name='naytakaikki' value='YES'>";
-			echo "<input type='submit' value='Näytä kaikki'>";
+			echo "<input type='submit' value='".t("Näytä kaikki")."'>";
 			echo "</form>";
 			echo "</td>";
 			echo "</tr></table><br>";

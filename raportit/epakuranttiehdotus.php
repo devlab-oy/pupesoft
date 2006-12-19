@@ -129,6 +129,11 @@ if ($subnappi != '') {
 			$myyres = mysql_query($query) or pupe_error($query);
 			$myyrow = mysql_fetch_array($myyres);
 
+			// haetaan tuotteen kulutetut kappaleet
+			$query  = "SELECT ifnull(sum(kpl),0) kpl FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) WHERE yhtio='$kukarow[yhtio]' and tyyppi='V' and tuoteno='$row[tuoteno]' and toimitettuaika >= '$alkupvm' and toimitettuaika <= '$loppupvm'";
+			$kulres = mysql_query($query) or pupe_error($query);
+			$kulrow = mysql_fetch_array($kulres);
+
 			// haetaan tuotteen ennakkopoistot
 			$query  = "SELECT ifnull(sum(varattu),0) ennpois FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu) WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and tyyppi='L' and varattu<>0";
 			$ennres = mysql_query($query) or pupe_error($query);
@@ -139,7 +144,7 @@ if ($subnappi != '') {
 
 			// lasketaan varaston kiertonopeus
 			if ($saldo > 0) {
-				$kierto = round($myyrow["kpl"] / $saldo, 2);
+				$kierto = round(($myyrow["kpl"] + $kulrow["kpl"]) / $saldo, 2);
 			}
 			else {
 				$kierto = 0;

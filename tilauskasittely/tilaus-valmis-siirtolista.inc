@@ -4,15 +4,15 @@
 		$tvs_tila 	= "V";
 		$tvs_tyyppi	= "'V','W'";
 	}
-	else {
+	elseif ($toim == "SIIRTOLISTA") {
 		$tvs_tila 	= "G";
 		$tvs_tyyppi	= "'G'";
 	}
-
-	// p‰ivitet‰‰n var kent‰t riveille, ei v‰ltt‰m‰tt‰ paras mahdollinen tapa tehd‰ se t‰ss‰, mutta en nyt jaksa mietti‰ parempaakaan
-	$query  = "update tilausrivi set var='' where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and var='O'";
-	$oldtur = mysql_query($query) or pupe_error($query);
-
+	elseif ($toim == "SIIRTOTYOMAARAYS") {
+		$tvs_tila 	= "S";
+		$tvs_tyyppi	= "'G'";
+	}
+	
 	// katotaan ihan aluksi, onko t‰m‰ jo ker‰tty...
 	$query = "	select *
 				from tilausrivi use index (yhtio_otunnus)
@@ -46,6 +46,7 @@
 			$query = "select hetiera from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$totarowx = mysql_fetch_array($result);
+			
 			// Maksuehdon jv tieto tarvitaan
 			$query = "select jv from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -78,6 +79,7 @@
 				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti
 				if ($varasto != $edvarasto and $edvarasto != 'x' and $maehrowx["jv"] == '' and $totarowx["hetiera"] != 'H') {
 					//tehd‰‰n uusi otsikko
+					//tehd‰‰n uusi otsikko
 					$query = "INSERT into lasku SET
 							alatila			= '$laskurow[alatila]',
 							alv				= '$laskurow[alv]',
@@ -103,7 +105,7 @@
 							postino			= '$laskurow[postino]',
 							postitp			= '$laskurow[postitp]',
 							tapvm			= '$laskurow[tapvm]',
-							tila			= '$laskurow[tila]',
+							tila			= 'N',
 							tilausvahvistus	= '$laskurow[tilausvahvistus]',
 							toim_maa		= '$laskurow[toim_maa]',
 							toim_nimi		= '$laskurow[toim_nimi]',
@@ -117,6 +119,7 @@
 							kohdistettu 	= '$laskurow[kohdistettu]',
 							toimitustapa	= '$laskurow[toimitustapa]',
 							valkoodi		= '$laskurow[valkoodi]',
+							vienti_kurssi	= '$laskurow[vienti_kurssi]',
 							vanhatunnus		= '$laskurow[tunnus]',
 							verkkotunnus	= '$laskurow[verkkotunnus]',
 							vienti 			= '$laskurow[vienti]',
@@ -129,8 +132,11 @@
 							yhtio			= '$laskurow[yhtio]',
 							clearing		= '$laskurow[clearing]',
 							tilaustyyppi	= '$laskurow[tilaustyyppi]',
-							ytunnus			= '$laskurow[ytunnus]'";
-
+							ytunnus			= '$laskurow[ytunnus]',
+							jaksotettu		= '$laskurow[jaksotettu]',
+							kuljetusmuoto			= '$laskurow[kuljetusmuoto]',
+							kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
+							maa_maara				= '$laskurow[maa_maara]'";
 					$uusires = mysql_query($query) or pupe_error($query);
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tvs_tilausnumerot[] = $laskurow["tunnus"];

@@ -17,9 +17,6 @@
 
 		if (mysql_num_rows($result) == 0) {
 			$masrow = array();
-		 	if ($laskurow["erpcm"] == "0000-00-00") {
-				echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy")."! $laskurow[maksuehto]!</font>";
-			}
 		}
 		else {
 			$masrow = mysql_fetch_array($result);
@@ -49,7 +46,7 @@
 					LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 					WHERE $where
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.tyyppi= 'L'
+					and tilausrivi.tyyppi in ('L','G')
 					ORDER BY tuotetyyppi, tunnus";
 		$presult = mysql_query($query) or pupe_error($query);
 
@@ -86,7 +83,7 @@
 		system("rm -f $pdffilenimi");
 	}
 
-	if ($tee == 'LEPAA') {
+	if ($toim == "TYOMAARAYS" and $tee == 'LEPAA') {
 		$query = "UPDATE kuka SET kesken=0 WHERE session='$session'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -97,7 +94,7 @@
 
 	}
 
-	if ($tee == 'VALMIS') {	
+	if ($toim == "TYOMAARAYS" and $tee == 'VALMIS') {	
 		$query  = "	UPDATE lasku 
 					SET tila='L'	
 					WHERE tunnus='$laskurow[tunnus]'
@@ -123,8 +120,35 @@
 		}
 		$tee = "";
 	}
+	
+	if ($toim == "SIIRTOTYOMAARAYS" and $tee == 'VALMIS') {	
+		$query  = "	UPDATE lasku 
+					SET alatila = 'J'	
+					WHERE tunnus = '$laskurow[tunnus]'
+					and tila = 'S'
+					and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+	
+		//Katotaan löytyykö tilausrivejä
+		$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$keres = mysql_query($query) or pupe_error($query);
+		
+		//Yhtään riviä ei ole
+		if(mysql_num_rows($keres) == 0) {
+			$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			// tilaus ei enää kesken...
+			$query	= "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+		else {
+			require("tilaus-valmis-siirtolista.inc");
+		}
+		$tee = "";
+	}
 						
-	if ($tee == 'HUOLTO' and $malli != '' and $huolto != '') {
+	if ($toim == "TYOMAARAYS" and $tee == 'HUOLTO' and $malli != '' and $huolto != '') {
 	
 		$query = "	SELECT tuoteno, maara
 					FROM huollot
@@ -153,13 +177,12 @@
 		else {
 			$tee = "";
 		}
-		
 	}
-	elseif ($tee == 'HUOLTO') {
+	elseif ($toim == "TYOMAARAYS" and $tee == 'HUOLTO') {
 		$tee = "";
 	}
 	
-	if ($tee == "VAHINKO") {
+	if ($toim == "TYOMAARAYS" and $tee == "VAHINKO") {
 
 		$polku = "kuvat/";
 		
@@ -280,7 +303,7 @@
 		}	
 	}
 	
-	if ($tee_tyomaarays == "MAARAAIKAISHUOLLOT") {	
+	if ($toim == "TYOMAARAYS" and $tee_tyomaarays == "MAARAAIKAISHUOLLOT") {	
 		//määräaikaishuollot
 		echo "<table>";
 		echo "<form action = '$PHP_SELF' method='post'>

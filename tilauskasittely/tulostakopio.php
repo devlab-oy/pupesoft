@@ -418,7 +418,7 @@
 			}
 			if ($toim == "TYOMAARAYS") {
 				//myyntitilaus. Tulostetaan proforma.
-				$where = " tila in ('L','A','N') and tilaustyyppi='A'";
+				$where = " tila in ('L','A','N','S') and tilaustyyppi in ('A','S')";
 
 				if ($ytunnus{0} == '£') {
 					$where .= " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -1050,9 +1050,6 @@
 
 				if (mysql_num_rows($result) == 0) {
 					$masrow = array();
-					if ($laskurow["erpcm"] == "0000-00-00") {
-						echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy")."! $laskurow[maksuehto]!</font>";
-					}
 				}
 				else {
 					$masrow = mysql_fetch_array($result);
@@ -1082,7 +1079,7 @@
 							LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 							WHERE $where
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi= 'L'
+							and tilausrivi.tyyppi in ('L','G')
 							ORDER BY tuotetyyppi, tunnus";
 				$presult = mysql_query($query) or pupe_error($query);
 

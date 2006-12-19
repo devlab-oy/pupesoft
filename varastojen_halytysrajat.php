@@ -127,7 +127,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	$lisaa  = ""; // tuote-rajauksia
 	$lisaa2 = ""; // toimittaja-rajauksia
 	$divit  = "";
-	
+
 	if ($osasto != '') {
 		echo "<tr><th>Osasto</th><td>$osasto</td></tr>";
 		$lisaa .= " and tuote.osasto = '$osasto' ";
@@ -150,32 +150,15 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	if ($eihinnastoon != '') {
 		$lisaa .= " and tuote.hinnastoon != 'E' ";
 	}
-	if ($vainuudet != '') {
-		$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
+	if ($uudettuotteet == "vainuudet") {
+		$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval $uusienika month) ";
 	}
-	if ($eiuusia != '') {
-		$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval 12 month) ";
+	if ($uudettuotteet == "eiuusia") {
+		$lisaa .= " and tuote.luontiaika < date_sub(current_date, interval $uusienika month) ";
 	}
 	if ($toimittajaid != '') {
 		$lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
 	}
-
-	// katotaan JT:ssä olevat tuotteet
-	$query = "	SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
-				FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-				JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
-				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-				and tyyppi = 'L'
-				and var = 'J'
-				and jt > 0";
-	$vtresult = mysql_query($query) or pupe_error($query);
-	$vrow = mysql_fetch_array($vtresult);
-
-	$jt_tuotteet = "''";
-	if ($vrow[0] != "") {
-		$jt_tuotteet = $vrow[0];
-	}
-
 	if ($abcrajaus != "") {
 		echo "<tr><th>Abc</th><td>$ryhmanimet[$abcrajaus] +</td></tr>";
 
@@ -183,7 +166,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
 					and abc_aputaulu.tuoteno = tuote.tuoteno
 					and abc_aputaulu.tyyppi = 'TK'
-					and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
+					and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus')) ";
 	}
 	else {
 		$abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = 'TK') ";
@@ -207,9 +190,9 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				tuote.tuoteno,
 				tuote.nimitys,
 				tuote.status,
-				abc_aputaulu.luokka abcluokka,
-				abc_aputaulu.luokka_osasto abcluokka_osasto,
-				abc_aputaulu.luokka_try abcluokka_try,
+				ifnull(abc_aputaulu.luokka, 8) abcluokka,
+				ifnull(abc_aputaulu.luokka_osasto, 8) abcluokka_osasto,
+				ifnull(abc_aputaulu.luokka_try, 8) abcluokka_try,
 				varastopaikat.alkuhyllyalue,
 				varastopaikat.alkuhyllynro,
 				varastopaikat.loppuhyllyalue,
@@ -242,15 +225,17 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	echo "<th>Tuoteno</th>";
 	echo "<th>Nimitys</th>";
 	echo "<th>S</th>";
-	echo "<th>Abc</th>";
+	if ($abcpaalla == "kylla") {
+		echo "<th>Abc</th>";
+	}
 	echo "<th>Puute</th>";
 	echo "<th>Kok.Saldo</th>";
 	echo "<th>Kok.Myynti</th>";
 	echo "<th>Var.Saldo</th>";
 	echo "<th>Var.Myynti</th>";
-	echo "<th>Hälyehdotus</th>";
-	echo "<th>Tilausmäärä</th>";
 	echo "<th>Hälytysraja</th>";
+	echo "<th>Tilausmäärä</th>";
+	echo "<th>Hälyehdotus</th>";
 
 	echo "</tr>\n";
 
@@ -266,7 +251,10 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		echo "<td>$row[tuoteno]</td>";
 		echo "<td>$row[nimitys]</td>";
 		echo "<td>$row[status]</td>";
-		echo "<td>$ryhmanimet[$a] $ryhmanimet[$b] $ryhmanimet[$c]</td>";
+
+		if ($abcpaalla == "kylla") {
+			echo "<td>$ryhmanimet[$a] $ryhmanimet[$b] $ryhmanimet[$c]</td>";
+		}
 
 		// tutkaillaan myynti
 		// tutkaillaan myynti
@@ -315,11 +303,17 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 		// tässä lasketaan ehdotettava hälytysraja: lasketaan päivän myynti ja kerrotaan haluituilla päivillä
 		$halyehdotus = ceil($summarow["varastonkpl1"] / $erorow["ero"] * $tarve);
-		echo "<td align='right'>$halyehdotus</td>";
+
+		// jos käytössä on abc analyysi ja hälyehdotus on nolla ja tuote kuuluu A,B,C,D luokkaan niin laitetaan aina yksi
+		if ($abcpaalla == "kylla" and $halyehdotus == 0 and $row["abcluokka"] < 4) {
+			$halyehdotus = 1;
+		}
+
+		echo "<td align='right'>$row[halytysraja]</td>";
 
 		// sitten input kentät
 		echo "<td align='right'><input type='text' name='tilausmaara[$row[paikkatunnus]]' value='$row[tilausmaara]' size='5'></td>";
-		echo "<td align='right'><input type='text' name='halytysraja[$row[paikkatunnus]]' value='$row[halytysraja]' size='5'></td>";
+		echo "<td align='right'><input type='text' name='halytysraja[$row[paikkatunnus]]' value='$halyehdotus' size='5'></td>";
 
 		echo "</tr>\n";
 
@@ -390,9 +384,12 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	echo "<tr><th>".t("Hälytysrajan laskenta")."</th>\n";
 	echo "<td><select name='tarve'>\n";
 	echo "<option value='7'>7 pv tarve</option>";
+	echo "<option value='14' selected>14 pv tarve</option>";
+	echo "<option value='21'>21 pv tarve</option>";
 	echo "<option value='30'>30 pv tarve</option>";
-	echo "<option value='180'>180 pv tarve</option>";
-	echo "<option value='360'>360 pv tarve</option>";
+	echo "<option value='45'>45 pv tarve</option>";
+	echo "<option value='60'>60 pv tarve</option>";
+	echo "<option value='90'>90 pv tarve</option>";
 	echo "</select></td></tr>\n";
 
 	echo "<tr><th>".t("Osasto")."</th><td>";
@@ -472,6 +469,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	// jos on niin näytetään tällänen vaihtoehto
 	if ($abcrow[0] > 0) {
+		echo "<input type='hidden' name='abcpaalla' value='kylla'>";
 		echo "<tr><th>".t("ABC-luokkarajaus")."</th><td>
 		<select name='abcrajaus'>
 		<option value=''>Ei rajausta</option>
@@ -488,6 +486,21 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 		</td></tr>";
 	}
 
+	echo "<tr><th>Uusi tuote on</th>";
+	echo "<td><select name='uusienika'>";
+	echo "<option value='12'>alle 12 kk vanha</option>";
+	echo "<option value='6' selected>alle 6 kk vanha</option>";
+	echo "<option value='3'>alle 3 kk vanha</option>";
+	echo "<option value='1'>alle 1 kk vanha</option>";
+	echo "</select>";
+	echo "</td></tr>";
+
+	echo "<tr><th>Uusien tuotteiden näkyvyys</th>";
+	echo "<td><select name='uudettuotteet'>";
+	echo "<option value='eiuusia'>".t("Älä listaa uusia tuotteita")."</option>";
+	echo "<option value='vainuudet'>".t("Listaa vain uudet tuotteet")."</option>";
+	echo "</select>";
+	echo "</td></tr>";
 
 	echo "<tr><th>".t("Tuotenumero")."</th><td><input type='text' size='20' name='tuoteno' value='$tuoteno'></td></tr>";
 
@@ -507,19 +520,6 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	$chk = "";
 	if ($ehdotettavat != "") $chk = "checked";
 	echo "<tr><th>".t("Näytä vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='ehdotettavat' $chk></td></tr>";
-
-		if ($abcrajaus != "") {
-		echo "<tr><td class='back'><br></td></tr>";
-		echo "<tr><th colspan='4'>".t("ABC-rajaus")." $ryhmanimet[$abcrajaus]</th></tr>";
-
-		$chk = "";
-		if ($eiuusia != "") $chk = "checked";
-		echo "<tr><th>".t("Älä listaa 12kk sisällä perustettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='eiuusia' $chk></td></tr>";
-
-		$chk = "";
-		if ($vainuudet != "") $chk = "checked";
-		echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='vainuudet' $chk></td></tr>";
-	}
 */
 
 	echo "</table>";

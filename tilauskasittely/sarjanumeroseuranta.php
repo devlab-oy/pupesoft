@@ -618,7 +618,7 @@
 		}
 		if ($sarjarow["myyntirivitunnus"] == 0) {
 			$sarjarow["myyntirivitunnus"] = "";
-		}
+		} 
 
 		//echo "<td colspan='2' valign='top'>$sarjarow[osto_tunnus] $sarjarow[osto_nimi]<br>$sarjarow[myynti_tunnus] $sarjarow[myynti_nimi]</td>";
 		

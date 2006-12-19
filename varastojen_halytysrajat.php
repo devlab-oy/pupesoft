@@ -126,7 +126,8 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 	$lisaa  = ""; // tuote-rajauksia
 	$lisaa2 = ""; // toimittaja-rajauksia
-
+	$divit  = "";
+	
 	if ($osasto != '') {
 		echo "<tr><th>Osasto</th><td>$osasto</td></tr>";
 		$lisaa .= " and tuote.osasto = '$osasto' ";
@@ -323,29 +324,29 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		echo "</tr>\n";
 
 		// tehään popup divi myynneistä
-		echo "<div id='$row[paikkatunnus]' style='position:absolute; z-index:100; visibility:hidden; background:#555555; color:#FFFFFF; border: 1px solid; padding:0px;'>";
-		echo "<table><tr>";
-		echo "<th nowrap>Kok.Myynti 1</th>";
-		echo "<th nowrap>Var.Myynti 1</th>";
-		echo "<th nowrap>Kok.Myynti 2</th>";
-		echo "<th nowrap>Var.Myynti 2</th>";
-		echo "<th nowrap>Kok.Myynti 3</th>";
-		echo "<th nowrap>Var.Myynti 3</th>";
-		echo "<th nowrap>Kok.Myynti 4</th>";
-		echo "<th nowrap>Var.Myynti 5</th>";
-		echo "<th><a href='#' onclick=\"popUp(event,'$row[paikkatunnus]')\">X</a></th>";
-		echo "</tr><tr>";
-		echo "<td align='right'>$summarow[kpl1]</td>";
-		echo "<td align='right'>$summarow[varastonkpl1]</td>";
-		echo "<td align='right'>$summarow[kpl2]</td>";
-		echo "<td align='right'>$summarow[varastonkpl2]</td>";
-		echo "<td align='right'>$summarow[kpl3]</td>";
-		echo "<td align='right'>$summarow[varastonkpl3]</td>";
-		echo "<td align='right'>$summarow[kpl4]</td>";
-		echo "<td align='right'>$summarow[varastonkpl4]</td>";
-		echo "<td class='back'></td>";
-		echo "</tr></table>";
-		echo "</div>\n";
+		$divit .= "<div id='$row[paikkatunnus]' style='position:absolute; z-index:100; visibility:hidden; background:#555555; color:#FFFFFF; border: 1px solid; padding:0px;'>";
+		$divit .= "<table><tr>";
+		$divit .= "<th nowrap>Kok.Myynti 1</th>";
+		$divit .= "<th nowrap>Var.Myynti 1</th>";
+		$divit .= "<th nowrap>Kok.Myynti 2</th>";
+		$divit .= "<th nowrap>Var.Myynti 2</th>";
+		$divit .= "<th nowrap>Kok.Myynti 3</th>";
+		$divit .= "<th nowrap>Var.Myynti 3</th>";
+		$divit .= "<th nowrap>Kok.Myynti 4</th>";
+		$divit .= "<th nowrap>Var.Myynti 5</th>";
+		$divit .= "<th><a href='#' onclick=\"popUp(event,'$row[paikkatunnus]')\">X</a></th>";
+		$divit .= "</tr><tr>";
+		$divit .= "<td align='right'>$summarow[kpl1]</td>";
+		$divit .= "<td align='right'>$summarow[varastonkpl1]</td>";
+		$divit .= "<td align='right'>$summarow[kpl2]</td>";
+		$divit .= "<td align='right'>$summarow[varastonkpl2]</td>";
+		$divit .= "<td align='right'>$summarow[kpl3]</td>";
+		$divit .= "<td align='right'>$summarow[varastonkpl3]</td>";
+		$divit .= "<td align='right'>$summarow[kpl4]</td>";
+		$divit .= "<td align='right'>$summarow[varastonkpl4]</td>";
+		$divit .= "<td class='back'></td>";
+		$divit .= "</tr></table>";
+		$divit .= "</div>\n";
 
 	}
 
@@ -354,6 +355,8 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	echo "<br><input type='submit' value = '".t("Päivitä")."'>
 		</form>";
 
+	// echotaan divit filen loppuun
+	echo $divit;
 }
 
 // näytetään käyttöliittymä..

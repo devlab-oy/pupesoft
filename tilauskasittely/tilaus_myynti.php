@@ -51,8 +51,10 @@ if ($tee == 'AKTIVOI') {
 		elseif ($toim == "VALMISTAASIAKKAALLE" and $tilausnumero != "") {
 			$tyyppiquery = "select tilaustyyppi from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
 			$tyyppiresult = mysql_query($tyyppiquery) or pupe_error($tyyppiquery);
+			
 			if (mysql_num_rows($tyyppiresult) != 0) {
 				$tyyppirow=mysql_fetch_array($tyyppiresult);
+				
 				if (strtoupper($tyyppirow['tilaustyyppi']) == 'W') {
 					$toim = "VALMISTAVARASTOON";
 				}
@@ -107,6 +109,9 @@ elseif ($toim == "VALMISTAVARASTOON") {
 }
 elseif ($toim == "SIIRTOLISTA") {
 	$otsikko = t("Varastosiirto");
+}
+elseif ($toim == "SIIRTOTYOMAARAYS") {
+	$otsikko = t("Sisäinen työmääräys");
 }
 elseif ($toim == "MYYNTITILI") {
 	$otsikko = t("Myyntitili");
@@ -574,12 +579,16 @@ if ($tee == "VALMIS") {
 		$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
+	// Sisäinen työmääräys valmis
+	elseif($kukarow["extranet"] == "" and $toim == "SIIRTOTYOMAARAYS") {
+		require("../tyomaarays/tyomaarays.inc");
+	}
 	// Työmääräys valmis
 	elseif ($kukarow["extranet"] == "" and $toim == "TYOMAARAYS") {
 		require("../tyomaarays/tyomaarays.inc");
 	}
 	// Siirtolista, myyntitili, valmistus valmis
-	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI")) {
+	elseif ($kukarow["extranet"] == "" and ($toim == "SIIRTOTYOMAARAYS" or $toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI")) {
 		require ("tilaus-valmis-siirtolista.inc");
 	}
 	// Myyntitilaus valmis
@@ -690,7 +699,7 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 	//Tämä jotta myös rivisyötön alkuhomma toimisi
 	$tee = "OTSIK";
 
-	if ($toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA") {
+	if ($toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 		require("otsik_siirtolista.inc");
 	}
 	else {
@@ -708,7 +717,7 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 //lisätään rivejä tiedostosta
 if ($tee == 'mikrotila' or $tee == 'file') {
 
-	if ($kukarow["extranet"] == "" and $toim == "SIIRTOLISTA") {
+	if ($kukarow["extranet"] == "" and $toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 		require('mikrotilaus_siirtolista.inc');
 	}
 	else {
@@ -920,7 +929,7 @@ if ($tee == '') {
 	$meapurow = mysql_fetch_array($meapu);
 	
 	if ($laskurow["liitostunnus"] > 0 and $meapurow["kateinen"] == "" and ($laskurow["nimi"] == '' or $laskurow["osoite"] == '' or $laskurow["postino"] == '' or $laskurow["postitp"] == '')) {
-		if ($toim != 'VALMISTAVARASTOON' and $toim != 'SIIRTOLISTA') {
+		if ($toim != 'VALMISTAVARASTOON' and $toim != 'SIIRTOLISTA' and $toim != 'SIIRTOTYOMAARAYS') {
 			echo "<font class='error'>".t("VIRHE: Tilauksen laskutusosoitteen tiedot ovat puutteelliset")."!</font><br><br>";
 			$tilausok++;
 		}
@@ -1679,7 +1688,7 @@ if ($tee == '') {
 			$order = "ORDER by sorttauskentta desc, tunnus";
 			$tilrivity	= "'T'";
 		}
-		elseif ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") {
+		elseif ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS" or $toim == "MYYNTITILI") {
 			$order = "ORDER by sorttauskentta desc, tunnus";
 			$tilrivity	= "'G'";
 		}
@@ -1984,22 +1993,30 @@ if ($tee == '') {
 
 				// Näytetäänkö sarjanumerolinkki
 				if ($row["sarjanumeroseuranta"] != "" and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
-					if ($row["varattu"] < 0) {
-						$tunken = "ostorivitunnus";
+					
+					if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
+						$tunken1 = "siirtorivitunnus";
+						$tunken2 = "siirtorivitunnus";
+					}
+					elseif ($row["varattu"] < 0) {
+						$tunken1 = "ostorivitunnus";
+						$tunken2 = "myyntirivitunnus";
 					}
 					else {
-						$tunken = "myyntirivitunnus";
+						$tunken1 = "myyntirivitunnus";
+						$tunken2 = "myyntirivitunnus";
 					}
 					
-					$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and $tunken='$row[tunnus]'";
+					$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and $tunken1='$row[tunnus]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 
+					
 					if ($sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
-						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&myyntirivitunnus=$row[tunnus]&from=$toim' style='color:00FF00'>sarjanro OK</font></a>)";
+						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim' style='color:00FF00'>sarjanro OK</font></a>)";
 					}
 					else {
-						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&myyntirivitunnus=$row[tunnus]&from=$toim'>sarjanro</a>)";
+						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim'>sarjanro</a>)";
 
 						if ($laskurow['sisainen'] != '' or $laskurow['ei_lahetetta'] != '') {
 							$tilausok++;
@@ -2114,7 +2131,7 @@ if ($tee == '') {
 							<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("Poista")."'></td>
 							</form>";
 
-					if (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or ($toim == 'SIIRTOLISTA' and $row["perheid2"] == 0 and $row["perheid"] == 0)) {
+					if (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS") and $row["perheid2"] == 0 and $row["perheid"] == 0)) {
 						
 						if ($row["perheid2"] == 0 and $row["perheid"] == 0) {
 							$nappulanteksti = t("Lisää tuote");

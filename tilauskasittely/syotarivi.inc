@@ -151,17 +151,31 @@
 		echo "</form>";
 		echo "</table>";
 	}
-	elseif($kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON")) {
+	elseif($kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
-				<tr>
-				<th align='left'>".t("Tuoteno")."</th>
+				<tr>";
+		
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<th align='left'>".t("Perhe")."</th>";
+		}
+				
+		echo "	<th align='left'>".t("Tuoteno")."</th>
 				<th align='left'>".t("Kpl")."</th>
 				</tr>";
 
 
 		echo "<tr>";
 
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<td>$perheid $perheid2</td>";
+			$csp = "3";
+		}
+		else {
+			$csp = "2";	
+		}
+		
+		
 		if ($ulos == '') {
 			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
 		}
@@ -175,12 +189,12 @@
 		echo "<td class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>
-				<th colspan='2' align='left'>".t("Kommentti")."</th>
+				<th colspan='$csp' align='left'>".t("Kommentti")."</th>
 				<td class='back'></td>
 				</tr>";
 
 		echo "<tr>
-				<td colspan='2'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>
+				<td colspan='$csp'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>
 				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'></td></tr>";
 
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..

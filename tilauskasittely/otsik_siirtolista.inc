@@ -31,10 +31,19 @@
 		elseif ($toim == "VALMISTAVARASTOON") {
 			echo "<font class='head'>".t("Valmistuksen otsikko")."</font><hr><br>";
 		}
+		elseif ($toim == "SIIRTOTYOMAARAYS") {
+			echo "<font class='head'>".t("Sisäinen työmääräys")."</font><hr><br>";
+		}
+		
+		$qlisa = "";
+		if ($toim == "SIIRTOTYOMAARAYS") {
+			$qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
+		}
 		
 		if ($kukarow["kesken"] != 0) {
 			$squery = "	SELECT *, hyvaksynnanmuutos as luokka
 						FROM lasku
+						$qlisa
 						WHERE tunnus = '$kukarow[kesken]'";
 			$sresult = mysql_query($squery) or pupe_error($squery);
 			$srow = mysql_fetch_array($sresult);
@@ -53,6 +62,9 @@
 		}
 		elseif ($toim == "VALMISTAVARASTOON") {
 			echo "<tr><th>".t("Käytä raaka-aineita varastosta").":</th>";
+		}
+		elseif ($toim == "SIIRTOTYOMAARAYS") {
+			echo "<tr><th>".t("Valitse lähdevarasto").":</th>";
 		}
 		
 		$query = "	SELECT *
@@ -75,6 +87,9 @@
 		elseif ($toim == "VALMISTAVARASTOON") {
 			echo "<option value=''>".t("Käytä kaikista")."</option>";
 		}
+		elseif ($toim == "SIIRTOTYOMAARAYS") {
+			echo "<option value=''>".t("Käytä kaikista")."</option>";
+		}
 								
 		while ($vrow = mysql_fetch_array($vtresult)) {
 			$sel='';
@@ -94,6 +109,9 @@
 		}
 		elseif ($toim == "VALMISTAVARASTOON") {
 			echo "<tr><th>".t("Valmisteiden kohdevarasto").":</th>";
+		}
+		elseif ($toim == "SIIRTOTYOMAARAYS") {
+			echo "<tr><th>".t("Valitse kohdevarasto").":</th>";
 		}
 				
 		echo "<td><select name='clearing'>";
@@ -143,6 +161,9 @@
 		elseif ($toim == "VALMISTAVARASTOON") {
 			echo "<tr><th>".t("Toivottu valmistusajankohta").": </th>";
 		}
+		elseif ($toim == "SIIRTOTYOMAARAYS") {
+			echo "<tr><th>".t("Toivottu toimitusajankohta").": </th>";
+		}
 		
 		echo "	<td valign='middle'>
 				<input type='text' name='toimpp' value='$toimpp' size='3'>
@@ -157,6 +178,9 @@
 		}
 		elseif ($toim == "VALMISTAVARASTOON") {
 			echo "<th>".t("Valmistusprioriteetti")."</th><td>";		
+		}
+		elseif ($toim == "SIIRTOTYOMAARAYS") {
+			echo "<th>".t("Asennusprioriteetti")."</th><td>";
 		}
 		
 		$query = "	SELECT selite, selitetark
@@ -184,9 +208,83 @@
 				<input type='text' size='53' name='viesti' value='$srow[viesti]'></td>";
 		echo "</tr>";
 		echo "<tr><th>".t("Kommentit").":</th><td colspan='3'><textarea name='comments' rows='2' cols='60'>$srow[comments]</textarea></td></tr>";
-		
-		
 		echo "</table>";
+		
+		if ($toim == "SIIRTOTYOMAARAYS") {
+			echo "<br><table>";
+			echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot")."</th></tr>";
+			echo "<tr>
+					<td>Rek. no:</td><td><input type='text' name='rekno' size='15' value='$srow[rekno]'></td>
+					<td>Kotipuh:</td><td><input type='text' name='kotipuh' size='35' value='$srow[kotipuh]'></td></tr>";
+			echo "<tr>
+					<td>Valm. nro:</td><td><input type='text' name='valmnro' size='35' value='$srow[valmnro]'></td>
+					<td>Työpuh:</td><td><input type='text' name='tyopuh' size='35' value='$srow[tyopuh]'></td></tr>";
+			echo "<tr>
+					<td>Mittarilukema:</td><td><input type='text' name='mittarilukema' size='35' value='$srow[mittarilukema]'></td>
+					<td>Myyjäliike:</td><td><input type='text' name='myyjaliike' size='35' value='$srow[myyjaliike]'></td></tr>";
+
+			if ($srow["ostopvm"] == "" or $srow["ostopvm"] == "0000-00-00") {
+				$luvattupp = date("d");
+				$luvattukk = date("m");
+				$luvattuvv = date("Y");
+			}
+			else {
+				list($ostopvmvv, $ostopvmkk, $ostopvmpp) = split('-', $srow["ostopvm"]);
+			}
+			if ($srow["tuotu"] == "" or $srow["tuotu"] == "0000-00-00") {
+				$tuotupp = date("d");
+				$tuotukk = date("m");
+				$tuotuvv = date("Y");
+			}
+			else {
+				list($tuotuvv, $tuotukk, $tuotupp) = split('-', $srow["tuotu"]);
+			}
+
+			if ($srow["luvattu"] == "" or $srow["luvattu"] == "0000-00-00") {
+				$luvattupp = date("d");
+				$luvattukk = date("m");
+				$luvattuvv = date("Y");
+			}
+			else {
+				list($luvattuvv, $luvattukk, $luvattupp) = split('-', $srow["luvattu"]);
+			}
+
+			echo "<tr><td>Ostopvm:</td>
+					<td>
+					<input type='text' name='ostopvmpp' size='3' value='$ostopvmpp'>-
+					<input type='text' name='ostopvmkk' size='3' value='$ostopvmkk'>-
+					<input type='text' name='ostopvmvv' size='6' value='$ostopvmvv'>
+					</td>
+					<td>Merkki ja malli:</td><td><input type='text' name='merkki' size='11' value='$srow[merkki]'>&nbsp;";
+			echo "<select name='merkki2'><option value='eimenu'>Valitse malli";
+
+
+			$query = "	SELECT distinct malli
+						FROM huollot order by malli";
+			$result = mysql_query($query) or pupe_error($query);
+
+			while($row = mysql_fetch_array($result)){
+				echo "<option value = '$row[0]'>$row[0]";
+			}
+
+			echo "</select></td></tr>";
+			echo "<tr><td>Tuotu:</td>
+					<td>
+					<input type='text' name='tuotupp' size='3' value='$tuotupp'>-
+					<input type='text' name='tuotukk' size='3' value='$tuotukk'>-
+					<input type='text' name='tuotuvv' size='6' value='$tuotuvv'>
+					</td>
+					<td>Malli/Värikoodi:</td><td><input type='text' name='mallivari' size='35' value='$srow[mallivari]'></td></tr>";
+			echo "<tr><td>Luvattu:</td><td>
+					<input type='text' name='luvattupp' size='3' value='$luvattupp'>-
+					<input type='text' name='luvattukk' size='3' value='$luvattukk'>-
+					<input type='text' name='luvattuvv' size='6' value='$luvattuvv'>
+					</td>
+					<td>Työn suorittaja:</td><td><input type='text' name='suorittaja' size='35' maxlengtd='15' value='$srow[suorittaja]'></td></tr>";
+			echo "<tr><td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='4' cols='40'>$srow[komm1]</textarea></td></tr>";
+			echo "<tr><td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='4' cols='40'>$srow[komm2]</textarea></td></tr>";
+			echo "</table><br>";
+		}
 			
 		echo "<br><input type='submit' name='jatka' value='".t("Jatka")."'></form>";
 	}
@@ -198,6 +296,9 @@
 		if ($kukarow["kesken"] == 0) {
 			$query = "INSERT into ";
 			$postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+			
+			$query2 = "INSERT into ";
+			$postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
 		}
 		else {
 			// Pidetään huolta tilausrivien toimituspäivistä ja kerayspaivasta
@@ -213,6 +314,9 @@
 
 			$query = "UPDATE ";
 			$postquery = " WHERE tunnus = '$kukarow[kesken]'";
+			
+			$query2 = "UPDATE ";
+			$postquery2 = " WHERE otunnus = '$kukarow[kesken]'";
 		}
 		
 		$crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
@@ -243,15 +347,20 @@
 			
 			$tee = "";
 		}
-		if ($toim == "SIIRTOLISTA") {
+		elseif ($toim == "SIIRTOLISTA") {
 			$query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='99999999999'";		
+			
+			$tee = "";
+		}
+		elseif ($toim == "SIIRTOTYOMAARAYS") {
+			$query .= ",tilaustyyppi = 'S', tila='S', ytunnus='SISAINEN', liitostunnus='99999999999'";		
 			
 			$tee = "";
 		}				
 				
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		if ($kukarow["kesken"] == 0) {
 			$id = mysql_insert_id();
 
@@ -262,6 +371,34 @@
 			
 			$kukarow["kesken"] = $id;
 			$tilausnumero = $id;
+		}
+
+		if ($toim == "SIIRTOTYOMAARAYS") {
+			//otetaan kantaa pyörän malliin
+			if($merkki2 != 'eimenu'){
+				$merkki = $merkki2;
+			}
+
+			$query2 .= "tyomaarays SET
+						yhtio			= '$kukarow[yhtio]',
+						kotipuh 		= '$kotipuh',
+						tyopuh 			= '$tyopuh',
+						myyjaliike 		= '$myyjaliike',
+						ostopvm 		= '$ostopvmvv-$ostopvmkk-$ostopvmpp',
+						rekno 			= '$rekno',
+						mittarilukema 	= '$mittarilukema',
+						merkki 			= '$merkki',
+						mallivari 		= '$mallivari',
+						valmnro 		= '$valmnro',
+						tuotu 			= '$tuotuvv-$tuotukk-$tuotupp',
+						luvattu 		= '$luvattuvv-$luvattukk-$luvattupp',
+						komm1 			= '$komm1',
+						komm2 			= '$komm2',
+						suorittaja 		= '$suorittaja',
+						viite	 		= '$viite',
+						otunnus 		= '$kukarow[kesken]'";
+			$query2 .= $postquery2;
+			$result = mysql_query($query2) or pupe_error($query2);
 		}
 	}
 ?>

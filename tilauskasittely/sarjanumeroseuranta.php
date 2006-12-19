@@ -22,6 +22,11 @@
 		$tunnuskentta 	= "ostorivitunnus";
 		$rivitunnus	 	= $ostorivitunnus;
 	}
+	
+	if ($siirtorivitunnus != "") {
+		$tunnuskentta 	= "siirtorivitunnus";
+		$rivitunnus	 	= $siirtorivitunnus;
+	}
 
 	// haetaan tilausrivin tiedot
 	if ($from != '' and $rivitunnus != "") {
@@ -389,14 +394,14 @@
 		}
 	}
 
-	if (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA") and $hyvitysrivi != "ON") {
+	if (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi != "ON") {
 		//Jos tuote on marginaaliverotuksen alainen niin sen pit‰‰ olla onnistuneesti ostettu jotta sen voi myyd‰
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus		osto_tunnus,
-					lasku_osto.nimi			osto_nimi,
-					lasku_myynti.tunnus		myynti_tunnus,
-					lasku_myynti.nimi		myynti_nimi,
+					lasku_osto.tunnus				osto_tunnus,
+					lasku_osto.nimi					osto_nimi,
+					lasku_myynti.tunnus				myynti_tunnus,
+					lasku_myynti.nimi				myynti_nimi,
 					tilausrivi_osto.rivihinta		ostohinta,
 					tilausrivi_myynti.rivihinta		myyntihinta
 					FROM sarjanumeroseuranta use index (yhtio_myyntirivi)
@@ -415,14 +420,14 @@
 					and tilausrivi_osto.laskutettuaika > '0000-00-00'))
 					ORDER BY sarjanumeroseuranta.sarjanumero";
 	}
-	elseif($from == "riviosto" or $from == "kohdista" or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA") and $hyvitysrivi == "ON")) {
+	elseif($from == "riviosto" or $from == "kohdista" or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi == "ON")) {
 		// Haetaan vain sellaiset sarjanumerot jotka on viel‰ vapaita
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus		osto_tunnus,
-					lasku_osto.nimi			osto_nimi,
-					lasku_myynti.tunnus		myynti_tunnus,
-					lasku_myynti.nimi		myynti_nimi,
+					lasku_osto.tunnus				osto_tunnus,
+					lasku_osto.nimi					osto_nimi,
+					lasku_myynti.tunnus				myynti_tunnus,
+					lasku_myynti.nimi				myynti_nimi,
 					tilausrivi_osto.rivihinta		ostohinta,
 					tilausrivi_myynti.rivihinta		myyntihinta
 					FROM sarjanumeroseuranta use index (yhtio_ostorivi)
@@ -480,10 +485,10 @@
 		// N‰ytet‰‰n kaikki
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus		osto_tunnus,
-					lasku_osto.nimi			osto_nimi,
-					lasku_myynti.tunnus		myynti_tunnus,
-					lasku_myynti.nimi		myynti_nimi,
+					lasku_osto.tunnus				osto_tunnus,
+					lasku_osto.nimi					osto_nimi,
+					lasku_myynti.tunnus				myynti_tunnus,
+					lasku_myynti.nimi				myynti_nimi,
 					tilausrivi_osto.rivihinta		ostohinta,
 					tilausrivi_myynti.rivihinta		myyntihinta
 					FROM sarjanumeroseuranta
@@ -642,7 +647,7 @@
 			if ($tunnuskentta == "ostorivitunnus" and $sarjarow["kpl"] != 0) {
 				echo "<td valign='top'>".t("Lukittu")."</td>";
 			}
-			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "KERAA") or ($from == "riviosto" or $from == "kohdista")) {
+			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") or ($from == "riviosto" or $from == "kohdista")) {
 				echo "<input type='hidden' name='sarjat[]' value='$sarjarow[tunnus]'>";
 				echo "<td valign='top'><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit()'></td>";
 			}
@@ -806,7 +811,7 @@
 
 	echo "<br>";
 
-	if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA") {
+	if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS") {
 		echo "<form method='post' action='tilaus_myynti.php'>
 			<input type='hidden' name='toim' value='$from'>
 			<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>

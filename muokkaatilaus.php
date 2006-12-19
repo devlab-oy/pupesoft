@@ -11,6 +11,9 @@
 	elseif ($toim == "TYOMAARAYS") {
 		$otsikko = t("työmääräystä");
 	}
+	elseif ($toim == "SIIRTOTYOMAARAYS") {
+		$otsikko = t("sisäistä työmääräystä");
+	}
 	elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
 		$otsikko = t("valmistusta");
 	}
@@ -46,6 +49,12 @@
 		$query = "	SELECT *
 					FROM lasku use index (tila_index)
 					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'V'";
+		$eresult = mysql_query($query) or pupe_error($query);
+	}
+	elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
+		$query = "	SELECT *
+					FROM lasku use index (tila_index)
+					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'S'";
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
 	elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
@@ -306,6 +315,15 @@
 					order by luontiaika desc
 					LIMIT 50";
 		$miinus = 2;
+	}
+	elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
+			$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
+						FROM lasku use index (tila_index)
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='S' and alatila in ('','A','B','J') 
+						$haku
+						order by luontiaika desc
+						LIMIT 50";
+			$miinus = 2;
 	}
 	elseif ($toim == "TARJOUS") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika,

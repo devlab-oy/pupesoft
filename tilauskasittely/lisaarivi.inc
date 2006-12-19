@@ -77,6 +77,9 @@
 	elseif($laskurow["tila"] == 'G') {
 		$rivityyppi = 'G';	// Siirtolistatilausrivi
 	}
+	elseif($laskurow["tila"] == 'S') {
+		$rivityyppi = 'G';	// Sisäinen työmääräysrivi
+	}
 	elseif($laskurow["tila"] == 'V') {
 		$rivityyppi = 'V';	// Valmistustilausrivi
 	}

@@ -6,6 +6,11 @@
 		$lalatila	= "J";
 		$tilaustyyppi = " and tilaustyyppi!='M' ";
 	}
+	elseif ($toim == 'SIIRTOTYOMAARAYS') {
+		$tila 		= "S";
+		$lalatila	= "J";
+		$tilaustyyppi = " and tilaustyyppi='S' ";
+	}
 	elseif ($toim == 'MYYNTITILI') {
 		$tila 		= "G";
 		$lalatila	= "J";
@@ -33,7 +38,7 @@
 
 		unset($tilausnumerorypas);
 
-		if (isset($tulostukseen) and ($toim == 'VALMISTUS' or $toim == 'SIIRTOLISTA' or $toim == 'MYYNTITILI')) {
+		if (isset($tulostukseen) and ($toim == 'VALMISTUS' or $toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS' or $toim == 'MYYNTITILI')) {
 			$lask 	= 0;
 
 			foreach ($tulostukseen as $tun) {
@@ -90,7 +95,7 @@
 
 						$laskurow = mysql_fetch_array($result);
 
-						if ($laskurow["tila"] == 'G') {
+						if ($laskurow["tila"] == 'G' or $laskurow["tila"] == 'S') {
 							$tilausnumero	= $laskurow["tunnus"];
 							$tee			= "valmis";
 							$tulostetaan	= "OK";
@@ -173,6 +178,9 @@
 				if ($toim == 'SIIRTOLISTA') {
 					echo "<font class='head'>".t("Tulosta siirtolista").":</font><hr>";
 				}
+				elseif ($toim == 'SIIRTOTYOMAARAYS') {
+					echo "<font class='head'>".t("Tulosta sisäinen työmääräys").":</font><hr>";
+				}
 				elseif ($toim == 'VALMISTUS') {
 					echo "<font class='head'>".t("Tulosta valmistuslista").":</font><hr>";
 				}
@@ -218,12 +226,14 @@
 					echo "<$ero>$tilrow[varastonimi]</$ero>";
 					echo "<$ero>$tilrow[tunnus]</$ero>";
 					echo "<$ero>$tilrow[ytunnus]</$ero>";
-					if ($toim == 'SIIRTOLISTA') {
+					
+					if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
 						echo "<$ero>$tilrow[nimi]</$ero>";		
 					}
 					else {
 						echo "<$ero>$tilrow[toim_nimi]</$ero>";		
 					}
+					
 					echo "<$ero>$tilrow[viesti]</$ero>";
 					echo "<$ero>$tilrow[kerayspvm]</$ero>";
 					echo "<$ero>$tilrow[riveja]</$ero>";
@@ -289,6 +299,9 @@
 
 		if ($toim == 'SIIRTOLISTA') {
 			echo "<font class='head'>".t("Tulosta siirtolista").":</font><hr>";
+		}
+		elseif ($toim == 'SIIRTOTYOMAARAYS') {
+			echo "<font class='head'>".t("Tulosta sisäinen työmääräys").":</font><hr>";
 		}
 		elseif ($toim == 'VALMISTUS') {
 			echo "<font class='head'>".t("Tulosta valmistuslista").":</font><hr>";
@@ -409,7 +422,7 @@
 
 		// Vain keräyslistat saa groupata
 		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
-			if ($toim == 'SIIRTOLISTA') {
+			if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
 				$grouppi = "GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
 			}
 			else {
@@ -480,12 +493,14 @@
 				echo "<$ero>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";
 				echo "<$ero>$tilrow[varastonimi]</$ero>";
 				echo "<$ero>$tilrow[ytunnus]</$ero>";
-				if ($toim == 'SIIRTOLISTA') {
+				
+				if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
 					echo "<$ero>$tilrow[nimi]</$ero>";					
 				}
 				else {
 					echo "<$ero>$tilrow[toim_nimi]</$ero>";					
 				}
+				
 				echo "<$ero>$tilrow[kerayspvm]</$ero>";
 				echo "<$ero>$tilrow[toimitustapa]</$ero>";
 				echo "<$ero>$tilrow[tilauksia]</$ero>";

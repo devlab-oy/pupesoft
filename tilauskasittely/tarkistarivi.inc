@@ -15,7 +15,7 @@
 		$tilausok++;
 	}
 
-	if ($row["hinta"] == 0 and $row["var2"] != "OK" and strtoupper($trow["tuotetyyppi"]) != 'R') {
+	if ($row["hinta"] == 0 and $row["var2"] != "OK" and strtoupper($trow["tuotetyyppi"]) != 'R' and $toim != "SIIRTOLISTA") {
 		$varaosavirhe .= t("HUOM: Hinta puuttuu!")."<br>";
 		$riviok++;
 		$tilausok++;

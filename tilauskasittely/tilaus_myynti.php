@@ -1326,6 +1326,16 @@ if ($tee == '') {
 
 	//Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
 	if ($kukarow["extranet"] == "" and $tila == "LISAARESEPTIIN") {
+		
+		if ($teeperhe == "OK") {
+			$query = "	UPDATE tilausrivi
+						SET perheid2 = '$isatunnus'
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tunnus   = '$isatunnus'";
+			$presult = mysql_query($query) or pupe_error($query);
+			$perheid2 = $isatunnus;
+		}
+		
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";
 		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
 	}
@@ -2104,19 +2114,28 @@ if ($tee == '') {
 							<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='".t("Poista")."'></td>
 							</form>";
 
-					if (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0)) {
+					if (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or ($toim == 'SIIRTOLISTA' and $row["perheid2"] == 0 and $row["perheid"] == 0)) {
 						
-						if($laskurow["tila"] == "V") {
+						if ($row["perheid2"] == 0 and $row["perheid"] == 0) {
+							$nappulanteksti = t("Lis‰‰ tuote");
+							
+							$plisax = "	<input type='hidden' name='teeperhe'  value = 'OK'>
+										<input type='hidden' name='isatunnus' value = '$row[tunnus]'>";	
+						}
+						elseif($laskurow["tila"] == "V") {
 							$nappulanteksti = t("Lis‰‰ reseptiin");
+							$plisax = "";
 						}
 						else {
 							$nappulanteksti = t("Lis‰‰ tuote");
+							$plisax = "";
 						}
 						
 						echo "	<form action='$PHP_SELF' method='post'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 								<input type='hidden' name='tila' value = 'LISAARESEPTIIN'>
+								$plisax
 								<input type='hidden' name='perheid' value = '$row[perheid]'>
 								<input type='hidden' name='perheid2' value = '$row[perheid2]'>
 								<td class='back' valign='top' nowrap><input type='Submit' Style='{font-size: 8pt;}' value='$nappulanteksti'></td>

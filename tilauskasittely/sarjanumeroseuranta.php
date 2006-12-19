@@ -544,7 +544,7 @@
 	echo "<td><input type='text' size='10' name='nimitys_haku' 			value='$nimitys_haku'></td>";
 	echo "<td><input type='text' size='10' name='ostotilaus_haku' 		value='$ostotilaus_haku'></td>";
 	echo "<td><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
-	echo "<td></td><td></td><td></td><td></td><td class='back'><input type='submit' value='Hae'></td>";
+	echo "<td></td><td></td><td></td><td></td><td></td><td class='back'><input type='submit' value='Hae'></td>";
 	echo "</tr>";
 	echo "</form>";
 

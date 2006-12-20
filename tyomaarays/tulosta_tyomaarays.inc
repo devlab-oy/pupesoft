@@ -102,12 +102,15 @@
 			$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 			
 			$pdf->draw_rectangle(780, 380, 680, 580, $firstpage, $rectparam);
-			$pdf->draw_text(390, 760, t("Asiakasnumero", $kieli).": ".$laskurow["ytunnus"], $firstpage, $p);
-			$pdf->draw_text(390, 750, t("Päiväys", $kieli).": ".substr($laskurow["lahetepvm"],0,10) , $firstpage, $p);
-			$pdf->draw_text(390, 740, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], $firstpage, $p);
+			
+			$pdf->draw_text(390, 760, t("Y-tunnus", $kieli).": ".$laskurow["ytunnus"], $firstpage, $p);
+			$pdf->draw_text(390, 750, t("Asiakasnumero", $kieli).": ".$asrow["asiakasnro"], $firstpage, $p);
+			$pdf->draw_text(390, 740, t("Päivämäärä", $kieli).": ".tv1dateconv(substr($laskurow["lahetepvm"],0,10)) , $firstpage, $p);
+			$pdf->draw_text(390, 730, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], $firstpage, $p);
 			$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage, $p);
 			$pdf->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage, $p);
 			$pdf->draw_text(390, 690, t("Tilausviite", $kieli).": ".substr($laskurow["viesti"],0,18), $firstpage, $p);
+			
 			
 			$pdf->draw_rectangle(680, 20,  650, 200, $firstpage, $rectparam);
 			
@@ -135,18 +138,17 @@
 				mt_srand((float) $sec + ((float) $usec * 100000));
 				$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
 		
-				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
+				//passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 		
-				$fh = fopen($nimi2, "r");
-				$data = fread($fh, filesize($nimi2));
-				fclose($fh);
-				$image = $pdf->png_embed($data);
+				//$fh = fopen($nimi2, "r");
+				//$data = fread($fh, filesize($nimi2));
+				//fclose($fh);
+				//$image = $pdf->png_embed($data);
 		
 				if(!$image) {
-					echo t("Viivakoodivirhe").": ".$image.$data;
-					exit;
+					//echo t("Viivakoodivirhe").": ".$image.$data;
 				}
-				$placement = $pdf->image_place($image, 783, 420, $firstpage);
+				//$placement = $pdf->image_place($image, 783, 420, $firstpage);
 		
 				unset($obj);
 		
@@ -366,16 +368,16 @@
 			$pdf->draw_text(30, 35, $yhtiorow["postino"]."  ".$yhtiorow["postitp"],	$firstpage, $p);
 			$pdf->draw_text(30, 25, $yhtiorow["maa"],		$firstpage, $p);
 		
-			$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",			$firstpage, $p);
+			$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",			$firstpage, $pp);
 			$pdf->draw_text(257, 55, $yhtiorow["puhelin"],				$firstpage, $p);
-			$pdf->draw_text(217, 45, t("Telefax", $kieli).":",			$firstpage, $p);
+			$pdf->draw_text(217, 45, t("Telefax", $kieli).":",			$firstpage, $pp);
 			$pdf->draw_text(257, 45, $yhtiorow["fax"],					$firstpage, $p);
-			$pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",		$firstpage, $p);
+			$pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",		$firstpage, $pp);
 			$pdf->draw_text(257, 35, $yhtiorow["email"],				$firstpage, $p);
 		
-			$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$firstpage, $p);
+			$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$firstpage, $pp);
 			$pdf->draw_text(444, 55, $yhtiorow["ytunnus"],				$firstpage, $p);
-			$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$firstpage, $p);
+			$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$firstpage, $pp);
 			$pdf->draw_text(444, 45, $yhtiorow["kotipaikka"],			$firstpage, $p);
 			$pdf->draw_text(404, 35, t("Enn.per.rek", $kieli),			$firstpage, $p);
 			$pdf->draw_text(404, 25, t("Alv.rek", $kieli),				$firstpage, $p);

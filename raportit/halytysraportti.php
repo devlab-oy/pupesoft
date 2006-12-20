@@ -499,7 +499,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					abc_aputaulu.luokka abcluokka,
 					abc_aputaulu.luokka_osasto abcluokka_osasto,
 					abc_aputaulu.luokka_try abcluokka_try,
-					tuote.luontiaika
+					tuote.luontiaika,
+					tuote.sarjanumeroseuranta
 					FROM tuote
 					$lisaa2
 					$abcjoin
@@ -534,7 +535,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					abc_aputaulu.luokka abcluokka,
 					abc_aputaulu.luokka_osasto abcluokka_osasto,
 					abc_aputaulu.luokka_try abcluokka_try,
-					tuote.luontiaika
+					tuote.luontiaika,
+					tuote.sarjanumeroseuranta
 					FROM tuote
 					$lisaa2
 					$abcjoin
@@ -985,8 +987,35 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		if($valitut["SARAKE46"] != '') $apurivi .= str_replace(".",",",$ennarow['tilkpl'])."\t";
 		if($valitut["SARAKE47"] != '') $apurivi .= "\"$row[aleryhma]\"\t";
 
-		if($valitut["SARAKE47B"] != '') $apurivi .= str_replace(".",",",$row["kehahin"])."\t";
-
+		
+		if($valitut["SARAKE47B"] != '') { 
+			$kehahin = 0;
+			
+			//Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
+			if ($row["sarjanumeroseuranta"] != '') {
+				$query	= "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
+							FROM sarjanumeroseuranta
+							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+							LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+							and (tilausrivi_myynti.tunnus is null or (lasku_myynti.tila in ('N','L') and lasku_myynti.alatila != 'X'))
+							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
+				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjarow = mysql_fetch_array($sarjares);
+				
+				$kehahin = sprintf('%.2f', $sarjarow["kehahin"]);
+			}
+			else {
+				$kehahin = sprintf('%.2f', $row["kehahin"]);
+			}
+			
+			$apurivi .= str_replace(".",",",$kehahin)."\t";
+		}
+		
+		
+		
 		if ($asiakasosasto != '') {
 			if($valitut["SARAKE48"] != '') $apurivi .= str_replace(".",",",$asosrow['kpl1'])."\t";
 			if($valitut["SARAKE49"] != '') $apurivi .= str_replace(".",",",$asosrow['kpl2'])."\t";

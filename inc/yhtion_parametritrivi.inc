@@ -567,5 +567,26 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "sad_lomake_tyyppi") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 'T') {
+			$sel2 = "selected";
+		}
+		else {
+			$sel1 = "selected";
+		}
+		
+		$ulos .= "<option value = 'P' $sel1>".t("SAD-lomake pdf-muodossa")."";
+		$ulos .= "<option value = 'T' $sel2>".t("SAD-lomake tekstimuodossa")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 
 ?>

@@ -587,6 +587,7 @@
 		$keikkares = mysql_query($query) or pupe_error($query);
 		
 		unset($kulurow);
+		unset($keikkarow);
 		
 		if (mysql_num_rows($keikkares) == 1) {
 			$keikkarow = mysql_fetch_array($keikkares);

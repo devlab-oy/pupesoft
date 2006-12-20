@@ -300,7 +300,7 @@
 			echo "<option value='dk' $sel[dk]>".t("Tanska")."</option>";
 			echo "</select></td></tr>";
 
-			echo "<tr><th>".t("Valitse kirjoitin").":</th><td><select name='valittu_tulostin'>";
+			echo "<tr><th>".t("Tulosta lasku").":</th><td><select name='valittu_tulostin'>";
 			echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
 
@@ -338,8 +338,34 @@
 				echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 			}
 
-			echo "</select></td><td><input type='submit' value='".t("Laskuta")."'></form></td></tr>";
+			echo "</select></td></tr>";
+
+			if ($yhtiorow["sad_lomake_tyyppi"] == "T" and $ekarow["vienti"] == "K") {
+				echo "<tr><th>".t("Tulosta SAD-lomake").":</th><td><select name='valittu_sadtulostin'>";
+				
+				echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+				
+				mysql_data_seek($kirre,0);
+
+				while ($kirrow = mysql_fetch_array($kirre)) {
+					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+				}
+				echo "</select></td></tr>";
+				
+				echo "<tr><th>".t("Tulosta SAD-lomakkeen lisäsivut").":</th><td><select name='valittu_sadlitulostin'>";
+				
+				echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+				
+				mysql_data_seek($kirre,0);
+
+				while ($kirrow = mysql_fetch_array($kirre)) {
+					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
+				}
+				echo "</select></td></tr>";
+			}
+			
 			echo "</table>";
+			echo "<br><input type='submit' value='".t("Laskuta")."'>";
 		}
 	}
 

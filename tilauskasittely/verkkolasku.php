@@ -1157,28 +1157,47 @@
 
 						$uusiotunnus = $laskurow["tunnus"];
 
-						require('tulosta_sadvientiilmo.inc');
+						if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
+							// Tulostetaan Teksti-versio SAD-lomakkeeesta
+							require('tulosta_sadvientiilmo_teksti.inc');				
 
-						//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-						list($usec, $sec) = explode(' ', microtime());
-						mt_srand((float) $sec + ((float) $usec * 100000));
-						$pdffilenimi = "/tmp/SAD_Lomake_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
+							if ($paalomake != '') {
+								lpr($paalomake, $valittu_sadtulostin);
 
-						//kirjoitetaan pdf faili levylle..
-						$fh = fopen($pdffilenimi, "w");
-						if (fwrite($fh, $pdf2->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
-						fclose($fh);
+								$tulos_ulos .=  t("SAD-lomake tulostuu")."...<br>\n";
 
-						//itse print komento
-						$line = exec("$kirow[komento] $pdffilenimi");
+								if ($lisalomake != "") {
+									lpr($lisalomake, $valittu_sadlitulostin);
 
-						//poistetaan tmp file samantien kuleksimasta...
-						system("rm -f $pdffilenimi");
+									$tulos_ulos .=  t("SAD-lomakkeen lis‰sivu tulostuu")."...<br>\n";
+								}
+							}
+						}
+						else {
+							// Tulostetaan PDF-versio SAD-lomakkeeesta
+							require('tulosta_sadvientiilmo.inc');
 
-						unset($pdf2);
-						unset($sadilmo);
+							//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+							list($usec, $sec) = explode(' ', microtime());
+							mt_srand((float) $sec + ((float) $usec * 100000));
+							$pdffilenimi = "/tmp/SAD_Lomake_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
 
-						$tulos_ulos .= t("SAD-lomake tulostuu")."...<br>\n";
+							//kirjoitetaan pdf faili levylle..
+							$fh = fopen($pdffilenimi, "w");
+							if (fwrite($fh, $pdf2->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
+							fclose($fh);
+
+							//itse print komento
+							$line = exec("$kirow[komento] $pdffilenimi");
+
+							//poistetaan tmp file samantien kuleksimasta...
+							system("rm -f $pdffilenimi");
+
+							unset($pdf2);
+							unset($sadilmo);
+
+							$tulos_ulos .= t("SAD-lomake tulostuu")."...<br>\n";
+						}
 					}
 
 					if ($laskurow["vienti"] == "E") {

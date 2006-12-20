@@ -637,8 +637,19 @@
 		}
 		if ($toim == "SAD") {
 			$tulostimet[0] = 'SAD-lomake';
+			
+			if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
+				$tulostimet[1] = 'SAD-lomake lisäsivu';
+			}
+			
 			if ($kappaleet > 0 and $komento["SAD-lomake"] != 'email') {
 				$komento["SAD-lomake"] .= " -# $kappaleet ";
+			}
+			
+			if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
+				if ($kappaleet > 0 and $komento["SAD-lomake lisäsivu"] != 'email') {
+					$komento["SAD-lomake lisäsivu"] .= " -# $kappaleet ";
+				}			
 			}
 		}
 		if ($toim == "LAHETE") {
@@ -784,41 +795,60 @@
 			if ($toim == "SAD") {
 				$uusiotunnus = $laskurow["tunnus"];
 
-				require_once('../pdflib/phppdflib.class.php');
-
-				require('tulosta_sadvientiilmo.inc');
-
-				//keksitään uudelle failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$pdffilenimi = "/tmp/SAD_Lomake_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
-
-				//kirjoitetaan pdf faili levylle..
-				$fh = fopen($pdffilenimi, "w");
-				if (fwrite($fh, $pdf2->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-				fclose($fh);
-
-				// itse print komento...
-				if ($komento["SAD-lomake"] == 'email') {
-					$liite = $pdffilenimi;
-					$kutsu = "SAD-lomake";
-
-					require("../inc/sahkoposti.inc");
+				if ($yhtiorow["sad_lomake_tyyppi"] == "T" and $tee != 'NAYTATILAUS') {
+					
+					require('tulosta_sadvientiilmo_teksti.inc');				
+					
+					if ($paalomake != '') {
+						lpr($paalomake,0, $komento["SAD-lomake"]);
+						
+						echo t("SAD-lomake tulostuu")."...<br>";
+					
+						if ($lisalomake != "") {
+							lpr($lisalomake,0, $komento["SAD-lomake lisäsivu"]);
+							
+							echo t("SAD-lomakkeen lisäsivu tulostuu")."...<br>";
+						}
+					}
 				}
-				elseif ($tee == 'NAYTATILAUS') {
-					//Työnnetään tuo pdf vaan putkeen!
-					echo file_get_contents($pdffilenimi);
-				}
-				elseif ($komento["SAD-lomake"] != '' and $komento["SAD-lomake"] != 'edi') {
-					$line = exec($komento["SAD-lomake"]." ".$pdffilenimi);
-				}
+				else {
+					require_once('../pdflib/phppdflib.class.php');
 
-				//poistetaan tmp file samantien kuleksimasta...
-				system("rm -f $pdffilenimi");
+					require('tulosta_sadvientiilmo.inc');
 
-				if ($tee != 'NAYTATILAUS') {
-					echo t("SAD-lomake tulostuu")."...<br>";
+					//keksitään uudelle failille joku varmasti uniikki nimi:
+					list($usec, $sec) = explode(' ', microtime());
+					mt_srand((float) $sec + ((float) $usec * 100000));
+					$pdffilenimi = "/tmp/SAD_Lomake_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
+
+					//kirjoitetaan pdf faili levylle..
+					$fh = fopen($pdffilenimi, "w");
+					if (fwrite($fh, $pdf2->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+					fclose($fh);
+
+					// itse print komento...
+					if ($komento["SAD-lomake"] == 'email') {
+						$liite = $pdffilenimi;
+						$kutsu = "SAD-lomake";
+
+						require("../inc/sahkoposti.inc");
+					}
+					elseif ($tee == 'NAYTATILAUS') {
+						//Työnnetään tuo pdf vaan putkeen!
+						echo file_get_contents($pdffilenimi);
+					}
+					elseif ($komento["SAD-lomake"] != '' and $komento["SAD-lomake"] != 'edi') {
+						$line = exec($komento["SAD-lomake"]." ".$pdffilenimi);
+					}
+
+					//poistetaan tmp file samantien kuleksimasta...
+					system("rm -f $pdffilenimi");
+
+					if ($tee != 'NAYTATILAUS') {
+						echo t("SAD-lomake tulostuu")."...<br>";
+					}
 				}
+			
 				$tee = '';
 			}
 

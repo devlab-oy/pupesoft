@@ -15,6 +15,7 @@
 		$tulosulos .= "\r\n";
 		$tulosulos .= "\r\n";
 		$tulosulos .= "\r\n";
+		$tulosulos .= "\r\n";
 		
 		//Kenttä 1 Imoitustyyppi, Ilmoitus
 		//Kenttä 2 Viejä
@@ -275,7 +276,6 @@
 		
 		$tulosulos .= "\r\n";
 		$tulosulos .= "\r\n";
-		$tulosulos .= "\r\n";
 			
 		//Kenttä 1 Imoitustyyppi, Ilmoitus
 		//Kenttä 2 Viejä
@@ -420,23 +420,44 @@
 			$sivu  = 1;
 			$tjarj = 1;
 			
-			$tulosulos = sadteksti_alku ($tulosulos, $laskurow, $sivut, $tavaraerittelyt, $kollit);
+			$paalomake  = "";
+			$lisalomake = "";
+			
+			$paalomake = sadteksti_alku ($paalomake, $laskurow, $sivut, $tavaraerittelyt, $kollit);
 			
 			while ($rivirow = mysql_fetch_array($riviresult)) {
 				if ($lask == 3) {
-					$tulosulos = sadteksti_loppu ($tulosulos, $sivu, $lask);
+					
+					if ($sivu == 1) {
+						$paalomake  = sadteksti_loppu ($paalomake, $sivu, $lask);
+					}
+					else {
+						$lisalomake = sadteksti_loppu ($lisalomake, $sivu, $lask);	
+					}
+					
 					$lask = 0;
 					$sivu++;
-					$tulosulos = sadteksti_lisasivu ($tulosulos, $sivu);
+					
+					$lisalomake = sadteksti_lisasivu ($lisalomake, $sivu);
 				}
 				
-				$tulosulos = sadteksti_rivi ($tulosulos, $laskurow, $rivirow, $tjarj, $extrat, $lask);
+				if ($sivu == 1) {
+					$paalomake  = sadteksti_rivi ($paalomake, $laskurow, $rivirow, $tjarj, $extrat, $lask);
+				}
+				else {
+					$lisalomake = sadteksti_rivi ($lisalomake, $laskurow, $rivirow, $tjarj, $extrat, $lask);	
+				}
 				
 				$lask++;
 				$tjarj++;
 			}
 			
-			$tulosulos = sadteksti_loppu ($tulosulos, $sivu, $lask);
+			if ($sivu == 1) {
+				$paalomake  = sadteksti_loppu ($paalomake, $sivu, $lask);
+			}
+			else {
+				$lisalomake = sadteksti_loppu ($lisalomake, $sivu, $lask);
+			}
 		}
 	}
 ?>

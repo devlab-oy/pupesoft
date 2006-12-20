@@ -441,23 +441,29 @@ if (!function_exists("saldo_myytavissa")) {
 }
 
 if (!function_exists("lpr")) {
-	function lpr($str,$prn) {
+	function lpr($str,$prn,$prnkomento = "") {
 		global $kukarow;
 
-		$query = "	SELECT *
-					FROM kirjoittimet
-					WHERE
-					yhtio = '$kukarow[yhtio]' and
-					tunnus = '$prn'
-					ORDER by kirjoitin";
-		$kirre = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($kirre) != 1) {
-			echo "printer not found";
-			return;
+		if ($prnkomento != "") {
+			$kirjoitin["komento"] = $prnkomento;
 		}
+		else {
+			$query = "	SELECT *
+						FROM kirjoittimet
+						WHERE
+						yhtio = '$kukarow[yhtio]' and
+						tunnus = '$prn'
+						ORDER by kirjoitin";
+			$kirre = mysql_query($query) or pupe_error($query);
 
-		$kirjoitin = mysql_fetch_array($kirre);
+			if (mysql_num_rows($kirre) != 1) {
+				echo "printer not found";
+				return;
+			}
+
+			$kirjoitin = mysql_fetch_array($kirre);
+		}
+		
 		$pipe = popen("$kirjoitin[komento]", 'w');
 
 		if (!$pipe) {

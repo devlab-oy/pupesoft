@@ -702,7 +702,7 @@
 				// saadaan takaisin $laskurow
 				$lasrow = $laskurow;
 
-				// Luodaan tullusnumero jos sellainen tarvitaan
+				// Luodaan tullausnumero jos sellainen tarvitaan
 				//Jos on esim puhtaasti hyvitystä niin ei generoida tullausnumeroa
 				if ($lasrow["vienti"] == 'K' and $lasrow["sisainen"] == "") {
 					$query = "	SELECT yhtio
@@ -728,7 +728,7 @@
 						$v = date('Y');
 						$pvm = $v."-".$k."-".$p;
 
-						$query = "SELECT count(*) FROM lasku use index (yhtio_tila_tapvm) WHERE vienti='K' and tila='U' and tapvm='$pvm' and yhtio='$kukarow[yhtio]'";
+						$query = "SELECT count(*)+1 FROM lasku use index (yhtio_tila_tapvm) WHERE vienti='K' and tila='U' and alatila='X' and tullausnumero!='' and tapvm='$pvm' and yhtio='$kukarow[yhtio]'";
 						$result= mysql_query($query) or pupe_error($query);
 						$lrow  = mysql_fetch_array($result);
 

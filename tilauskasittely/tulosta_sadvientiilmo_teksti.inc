@@ -386,8 +386,19 @@
 		$rahtirow = mysql_fetch_array($rahtiresult);
 	
 		//Rahtikirjan mukaiset kilot ja kollimäärät
-		$kilot  = $rahtirow["kilot"];
-		$kollit = $rahtirow["kollit"];
+		if ($rahtirow["kilot"] > 0) {
+			$kilot  = $rahtirow["kilot"];
+		}
+		else {
+			$kilot  = 0;
+		}
+		
+		if ($rahtirow["kollit"] > 0) {
+			$kollit = $rahtirow["kollit"];
+		}
+		else {
+			$kollit = 0;
+		}
 		
 		//ylimääräisten erien vaikutus
 		$extrat = abs($laskurow["lisattava_era"])-abs($laskurow["vahennettava_era"]);

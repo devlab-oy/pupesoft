@@ -110,6 +110,8 @@ if ($tee == "file") {
 		$paikka		= '';
 		$alv		= '';
 		$varasto 	= '';
+		$perheid 	= '';
+		$perheid2  	= '';
 		$tee 		= 'Y';
 	}
 	else {
@@ -126,6 +128,8 @@ if ($tee == "file") {
 		$paikka		= '';
 		$alv		= '';
 		$varasto 	= '';
+		$perheid 	= '';
+		$perheid2  	= '';
 		$tee 		= 'Y';
 	}
 }

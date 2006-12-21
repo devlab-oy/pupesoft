@@ -1280,12 +1280,12 @@ if ($tee == '') {
 
 				//Jos lasta muokataan, niin s‰ilytet‰‰n sen perheid
 				if ($tilausrivi["tunnus"] != $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
-					echo "<input type='hidden' name='perheid' value = '$tilausrivi[perheid]'>";
+					$perheid = $tilausrivi["perheid"];
 				}
 
 				//Jos lis‰varustetta muokataan, niin s‰ilytet‰‰n sen perheid2
 				if ($tilausrivi["tunnus"] != $tilausrivi["perheid2"] and $tilausrivi["perheid2"] != 0) {
-					echo "<input type='hidden' name='perheid2' value = '$tilausrivi[perheid2]'>";
+					$perheid2 = $tilausrivi["perheid2"];
 				}
 
 				$tila	= "MUUTA";
@@ -1335,7 +1335,6 @@ if ($tee == '') {
 
 	//Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
 	if ($kukarow["extranet"] == "" and $tila == "LISAARESEPTIIN") {
-		
 		if ($teeperhe == "OK") {
 			$query = "	UPDATE tilausrivi
 						SET perheid2 = '$isatunnus'
@@ -1344,11 +1343,8 @@ if ($tee == '') {
 			$presult = mysql_query($query) or pupe_error($query);
 			$perheid2 = $isatunnus;
 		}
-		
-		echo "<input type='hidden' name='perheid' value = '$perheid'>";
-		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
 	}
-
+	
 	if ($tuoteno != '') {
 		$multi = "TRUE";
 

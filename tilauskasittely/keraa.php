@@ -7,6 +7,12 @@
 		$tyyppi = "'G'";
 		$tilaustyyppi = " and tilaustyyppi!='M' ";
 	}
+	elseif ($toim == 'SIIRTOTYOMAARAYS') {
+		echo "<font class='head'>".t("Ker‰‰ sis‰inen tyˆm‰‰r‰ys").":</font><hr>";
+		$tila = "S";
+		$tyyppi = "'G'";
+		$tilaustyyppi = " and tilaustyyppi='S' ";
+	}
 	elseif ($toim == 'MYYNTITILI') {
 		echo "<font class='head'>".t("Ker‰‰ myyntitili").":</font><hr>";
 		$tila = "G";
@@ -79,12 +85,15 @@
 					JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
 					tilausrivi.otunnus in ($tilausnumeroita) and
-					tilausrivi.tyyppi='L'";
+					tilausrivi.tyyppi in ('L','G')";
 		$toimresult = mysql_query($query) or pupe_error($query);
 
 		while ($toimrow = mysql_fetch_array($toimresult)) {
 
-			if ($toimrow["varattu"] < 0) {
+			if ($toim == 'SIIRTOTYOMAARAYS') {
+				$tunken = "siirtorivitunnus";
+			}
+			elseif ($toimrow["varattu"] < 0) {
 				$tunken = "ostorivitunnus";
 			}
 			else {
@@ -948,22 +957,28 @@
 							<td><input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]'> $puute";
 
 					if ($row["sarjanumeroseuranta"] != "") {						
-						if ($row["varattu"] < 0) {
-							$tunken = "ostorivitunnus";
+						if ($toim == 'SIIRTOTYOMAARAYS') {
+							$tunken1 = "siirtorivitunnus";
+							$tunken2 = "siirtorivitunnus";
+						}
+						elseif ($row["varattu"] < 0) {
+							$tunken1 = "ostorivitunnus";
+							$tunken2 = "myyntirivitunnus";
 						}
 						else {
-							$tunken = "myyntirivitunnus";
+							$tunken1 = "myyntirivitunnus";
+							$tunken2 = "myyntirivitunnus";
 						}
 						
-						$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[puhdas_tuoteno]' and $tunken='$row[tunnus]'";
+						$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[puhdas_tuoteno]' and $tunken1='$row[tunnus]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 						$sarjarow = mysql_fetch_array($sarjares);
 
 						if ($sarjarow["kpl"] == abs($row["varattu"])) {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&myyntirivitunnus=$row[tunnus]&from=KERAA&otunnus=$id' style='color:00FF00'>sarjanro OK</font></a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&otunnus=$id' style='color:00FF00'>sarjanro OK</font></a>)";
 						}
 						else {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&myyntirivitunnus=$row[tunnus]&from=KERAA&otunnus=$id'>sarjanro</a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&otunnus=$id'>sarjanro</a>)";
 						}
 					}
 

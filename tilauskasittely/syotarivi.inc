@@ -62,6 +62,10 @@
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
+		
+		echo "<input type='hidden' name='perheid' value = '$perheid'>";
+		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
+		
 		echo "</form>";
 		echo "</table>";
 	}
@@ -161,6 +165,10 @@
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
+		
+		echo "<input type='hidden' name='perheid' value = '$perheid'>";
+		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
+		
 		echo "</form>";
 		echo "</table>";
 	}
@@ -219,6 +227,10 @@
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
+		
+		echo "<input type='hidden' name='perheid' value = '$perheid'>";
+		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
+		
 		echo "</form>";
 		echo "</table>";
 	}

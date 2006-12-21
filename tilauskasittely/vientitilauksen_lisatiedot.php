@@ -372,127 +372,129 @@
 		}
 		echo "</table><br>";
 
-		//listataan myös laskutetut joille on jo syötetty tietoja, mutta mme ovat puutteelliset
-		$query = "	select tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus
-					from lasku
-					where yhtio='$kukarow[yhtio]' and tila='U' and tullausnumero != ''
-					and (	(vienti='K' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne = '' or sisamaan_kuljetus = '' or sisamaan_kuljetusmuoto = '' or poistumistoimipaikka = '' or poistumistoimipaikka_koodi = ''))
-						or  (vienti='E' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne = '' ))
-					) and kauppatapahtuman_luonne != '999'
-					$haku
-					ORDER by 5,6,7,8,9,10,11,12,13,14";
-		$tilre = mysql_query($query) or pupe_error($query);
+		if ($yhtiorow["kotitullauslupa"] != '') {
+			//listataan myös laskutetut joille on jo syötetty tietoja, mutta ne ovat puutteelliset
+			$query = "	select tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus
+						from lasku
+						where yhtio='$kukarow[yhtio]' and tila='U' and tullausnumero != ''
+						and (	(vienti='K' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne = '' or sisamaan_kuljetus = '' or sisamaan_kuljetusmuoto = '' or poistumistoimipaikka = '' or poistumistoimipaikka_koodi = ''))
+							or  (vienti='E' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne = '' ))
+						) and kauppatapahtuman_luonne != '999'
+						$haku
+						ORDER by 5,6,7,8,9,10,11,12,13,14";
+			$tilre = mysql_query($query) or pupe_error($query);
 
-		echo "<br><br>";
-		echo "<table>";
-		echo "<tr>";
-		echo "<td class='back' colspan='6'>".t("Laskutetut tilaukset joilla on puutteelliset tiedot (korjattava ennen täydentävän ilmoituksen lähettämistä)")."</th>";
-		echo "</tr>";
-
-		if (mysql_num_rows($tilre) > 0) {
+			echo "<br><br>";
+			echo "<table>";
 			echo "<tr>";
-			for ($i=0; $i<mysql_num_fields($tilre)-10; $i++)
-				echo "<th align='left'>".t(mysql_field_name($tilre,$i))."</th>";
-
-			echo "<th>".t("Tyyppi")."</th>";
+			echo "<td class='back' colspan='6'>".t("Laskutetut tilaukset joilla on puutteelliset tiedot (korjattava ennen täydentävän ilmoituksen lähettämistä)")."</th>";
 			echo "</tr>";
 
-			$lask = -1;
-			$tunnukset 			= '';
-			$ketjutus			= '';
-			$erpcm				= '';
-			$ytunnus			= '';
-			$nimi				= '';
-			$nimitark			= '';
-			$postino			= '';
-			$postitp			= '';
-			$maksuehto			= '';
-			$lisattava_era		= '';
-			$vahennettava_era	= '';
+			if (mysql_num_rows($tilre) > 0) {
+				echo "<tr>";
+				for ($i=0; $i<mysql_num_fields($tilre)-10; $i++)
+					echo "<th align='left'>".t(mysql_field_name($tilre,$i))."</th>";
 
-			while ($tilrow = mysql_fetch_array($tilre))
-			{
-				$query = "	select sum(if(kpl>0,1,0)) veloitus, sum(if(kpl<0,1,0)) hyvitys
-							from tilausrivi
-							where yhtio='$kukarow[yhtio]' and uusiotunnus='$tilrow[tilaus]'";
-				$hyvre = mysql_query($query) or pupe_error($query);
-				$hyvrow = mysql_fetch_array($hyvre);
+				echo "<th>".t("Tyyppi")."</th>";
+				echo "</tr>";
+
+				$lask = -1;
+				$tunnukset 			= '';
+				$ketjutus			= '';
+				$erpcm				= '';
+				$ytunnus			= '';
+				$nimi				= '';
+				$nimitark			= '';
+				$postino			= '';
+				$postitp			= '';
+				$maksuehto			= '';
+				$lisattava_era		= '';
+				$vahennettava_era	= '';
+
+				while ($tilrow = mysql_fetch_array($tilre))
+				{
+					$query = "	select sum(if(kpl>0,1,0)) veloitus, sum(if(kpl<0,1,0)) hyvitys
+								from tilausrivi
+								where yhtio='$kukarow[yhtio]' and uusiotunnus='$tilrow[tilaus]'";
+					$hyvre = mysql_query($query) or pupe_error($query);
+					$hyvrow = mysql_fetch_array($hyvre);
 
 
-				if ($ketjutus =='' and $erpcm==$tilrow["erpcm"] and $ytunnus==$tilrow["ytunnus"]
-					and $nimi==$tilrow["nimi"] and $nimitark==$tilrow["nimitark"] and $postino==$tilrow["postino"]
-					and $postitp==$tilrow["postitp"] and $maksuehto==$tilrow["maksuehto"]
-					and $lisattava_era==$tilrow["lisattava_era"] and $vahennettava_era==$tilrow["vahennettava_era"]) {
-					$tunnukset .= $tilrow["tilaus"].",";
-					$lask++;
-					echo "</tr>\n";
-				}
-				else {
-					if ($lask >= 1) {
-						echo "<form method='post' action='$PHP_SELF'><td class='back'>
-							<input type='hidden' name='otunnus' value='$tunnukset'>
-							<input type='hidden' name='tee' value='K'>
-							<input type='submit' name='tila' value='".t("Ketjuta lisätiedot")."'></td></form>";
-					}
-					$tunnukset = $tilrow["tilaus"].",";
-					if ($lask != -1) {
+					if ($ketjutus =='' and $erpcm==$tilrow["erpcm"] and $ytunnus==$tilrow["ytunnus"]
+						and $nimi==$tilrow["nimi"] and $nimitark==$tilrow["nimitark"] and $postino==$tilrow["postino"]
+						and $postitp==$tilrow["postitp"] and $maksuehto==$tilrow["maksuehto"]
+						and $lisattava_era==$tilrow["lisattava_era"] and $vahennettava_era==$tilrow["vahennettava_era"]) {
+						$tunnukset .= $tilrow["tilaus"].",";
+						$lask++;
 						echo "</tr>\n";
 					}
-					$lask = 0;
+					else {
+						if ($lask >= 1) {
+							echo "<form method='post' action='$PHP_SELF'><td class='back'>
+								<input type='hidden' name='otunnus' value='$tunnukset'>
+								<input type='hidden' name='tee' value='K'>
+								<input type='submit' name='tila' value='".t("Ketjuta lisätiedot")."'></td></form>";
+						}
+						$tunnukset = $tilrow["tilaus"].",";
+						if ($lask != -1) {
+							echo "</tr>\n";
+						}
+						$lask = 0;
+					}
+
+
+
+					echo "\n\n<tr>";
+
+					for ($i=0; $i<mysql_num_fields($tilre)-10; $i++)
+						echo "<td>$tilrow[$i]</td>";
+
+					if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {
+						$teksti = "".t("Veloitus")."";
+					}
+					if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] > 0) {
+						$teksti = "".t("Veloitusta ja hyvitystä")."";
+					}
+					if ($hyvrow["hyvitys"] > 0  and $hyvrow["veloitus"] == 0) {
+						$teksti = "".t("Hyvitys")."";
+					}
+					echo "<td>$teksti</td>";
+
+						echo "<form method='post' action='$PHP_SELF'><td class='back'>
+								<input type='hidden' name='otunnus' value='$tilrow[tilaus],'>
+								<input type='hidden' name='tee' value='K'>
+								<input type='submit' name='tila' value='".t("Valitse")."'></td></form>";
+
+						$ketjutus			= $tilrow["ketjutus"];
+						$erpcm				= $tilrow["erpcm"];
+						$ytunnus			= $tilrow["ytunnus"];
+						$nimi				= $tilrow["nimi"];
+						$nimitark			= $tilrow["nimitark"];
+						$postino			= $tilrow["postino"];
+						$postitp			= $tilrow["postitp"];
+						$maksuehto			= $tilrow["maksuehto"];
+						$lisattava_era		= $tilrow["lisattava_era"];
+						$vahennettava_era	= $tilrow["vahennettava_era"];
 				}
 
-
-
-				echo "\n\n<tr>";
-
-				for ($i=0; $i<mysql_num_fields($tilre)-10; $i++)
-					echo "<td>$tilrow[$i]</td>";
-
-				if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] == 0) {
-					$teksti = "".t("Veloitus")."";
-				}
-				if ($hyvrow["veloitus"] > 0 and $hyvrow["hyvitys"] > 0) {
-					$teksti = "".t("Veloitusta ja hyvitystä")."";
-				}
-				if ($hyvrow["hyvitys"] > 0  and $hyvrow["veloitus"] == 0) {
-					$teksti = "".t("Hyvitys")."";
-				}
-				echo "<td>$teksti</td>";
-
+				if ($tunnukset != '' and $lask >= 1) {
 					echo "<form method='post' action='$PHP_SELF'><td class='back'>
-							<input type='hidden' name='otunnus' value='$tilrow[tilaus],'>
-							<input type='hidden' name='tee' value='K'>
-							<input type='submit' name='tila' value='".t("Valitse")."'></td></form>";
+						<input type='hidden' name='otunnus' value='$tunnukset'>
+						<input type='hidden' name='tee' value='K'>
+						<input type='hidden' name='extra' value='K'>
+						<input type='submit' name='tila' value='".t("Ketjuta lisätiedot")."'></td></form>";
 
-					$ketjutus			= $tilrow["ketjutus"];
-					$erpcm				= $tilrow["erpcm"];
-					$ytunnus			= $tilrow["ytunnus"];
-					$nimi				= $tilrow["nimi"];
-					$nimitark			= $tilrow["nimitark"];
-					$postino			= $tilrow["postino"];
-					$postitp			= $tilrow["postitp"];
-					$maksuehto			= $tilrow["maksuehto"];
-					$lisattava_era		= $tilrow["lisattava_era"];
-					$vahennettava_era	= $tilrow["vahennettava_era"];
+						$tunnukset = '';
+				}
+				echo "</tr>";
 			}
-
-			if ($tunnukset != '' and $lask >= 1) {
-				echo "<form method='post' action='$PHP_SELF'><td class='back'>
-					<input type='hidden' name='otunnus' value='$tunnukset'>
-					<input type='hidden' name='tee' value='K'>
-					<input type='hidden' name='extra' value='K'>
-					<input type='submit' name='tila' value='".t("Ketjuta lisätiedot")."'></td></form>";
-
-					$tunnukset = '';
+			else {
+				echo "<tr>";
+				echo "<th colspan='5'>".t("Ei puutteellisia tilauksia")."!</th>";
+				echo "</tr>";
 			}
-			echo "</tr>";
+			echo "</table>";
 		}
-		else {
-			echo "<tr>";
-			echo "<th colspan='5'>".t("Ei puutteellisia tilauksia")."!</th>";
-			echo "</tr>";
-		}
-		echo "</table>";
 	}
 
 	require "../inc/footer.inc";

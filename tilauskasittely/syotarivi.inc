@@ -48,6 +48,13 @@
 		if ($rivitunnus!='') {
 			echo "<tr><td class='back' colspan='7'>".t("Rivikommentti").":</td></tr>";
 			echo "<tr><td class='back' colspan='7'><input type='text' value='$kommentti' name='kommentti' size='50' maxlength='255'></td></tr>";
+			
+			
+			//Jos emillä on marginaalimyyntiä niin pitää muistaa ja kertoa se myös lisääriville
+			if (isset($alv) and $alv >= 500) {
+				echo "<input type='hidden' name='alv' value='$alv'>";
+			}
+			
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
 			echo "<input type='hidden' name='menutila' value='$menutila'>";						
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
@@ -122,8 +129,14 @@
 		echo "<option value='E' $chke>".t("E-Netto")."</option>";
 		echo "</select></td>";
 
-		echo "<td>".alv_popup_oletus('alv',$alv)."</td>";
-
+		if (isset($alv) and $alv >= 500) {
+			echo "<td>".t("M.V.")."</td>";
+			echo "<input type='hidden' name='alv' value='$alv'>";
+		}
+		else {
+			echo "<td>".alv_popup_oletus('alv',$alv)."</td>";
+		}
+		
 		echo "<td class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>

@@ -920,7 +920,7 @@
 					}
 					else {
 						//Alvihinta korjataan vain jos yhtiölla on verolliset myyntihinnat
-						if ($row["alv"] != '' and $yhtiorow["alv_kasittely"] == "") {
+						if ($row["alv"] != '' and $row["alv"] < 500 and $yhtiorow["alv_kasittely"] == "" ) {
 							$hinta = sprintf('%.2f',round($row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100),2));
 						}
 						else {
@@ -949,8 +949,8 @@
 					}
 				}
 				else {
-					//Asiakas ei vaihtunut hinnat pysyvät samoina, avia joudumme ehkä korjaamaan
-					if ($row["alv"] != '' and $yhtiorow["alv_kasittely"] == "") {
+					//Asiakas ei vaihtunut hinnat pysyvät samoina, alvia joudumme ehkä korjaamaan
+					if ($row["alv"] != '' and $row["alv"] < 500 and $yhtiorow["alv_kasittely"] == "") {
 						$uusihinta = sprintf('%.2f',round($row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100),2));
 					}
 					else {
@@ -961,8 +961,14 @@
 
 				//lasketaan alvit
 				$hinta 	= $uusihinta;
-				$alv 	= "";
-
+				
+				if($row["alv"] < 500) {
+					$alv = "";
+				}
+				else {
+					$alv = 500;
+				}
+				
 				require ("alv.inc");
 				$uusihinta = $hinta;
 

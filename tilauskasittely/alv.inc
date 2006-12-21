@@ -28,6 +28,15 @@ if ($laskurow["tila"] == "O") {
 
 	$alv = 0; //ostotilaus --> ei alvia riveille
 }
+elseif ($alv >= 500) {
+	//T‰ss‰ keississ‰ on marginaalimyynti‰
+	if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 500;											// Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰	
+	if ($laskurow["vienti"] == ""  and $laskurow["alv"] == $wtrow["selite"]) $alv = $trow["alv"]+500;				// Otsikolla on valittu verollinen kotimaan myynti
+	if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 500; 										// EU-vienti ytunnuksella --> alviton
+	if ($laskurow["vienti"] == "K") $alv = 500; 																	// Vienti eu:n ulkopuolelle on aina verotonta
+	
+	$alv = $alv * 1;
+}
 elseif ($yhtiorow["alv_kasittely"] != "") {
 	//T‰ss‰ keississ‰ kaikki hinnat ovat aina verottomia ja vero lis‰t‰‰n vasta laskutuksessa
 	if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;												// Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰	

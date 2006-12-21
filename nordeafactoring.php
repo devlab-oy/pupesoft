@@ -227,7 +227,6 @@
 				$asires = mysql_query($query) or pupe_error($query);
 				$asirow = mysql_fetch_array($asires);
 
-
 				//Valuuttalaskuissa laskun loppusummma lasketaan tilausriveiltä
 				if ($laskurow["vienti_kurssi"] != 0 and $laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {					
 					$aquery = "	SELECT
@@ -242,8 +241,8 @@
 				        $arow["summa"] = round($arow["summa"],0);
 					}
 					
-					$laskurow["summa"] 		= round($arow["summa"] * 100, 0);
-					$laskurow["kasumma"]	= round($laskurow["kasumma"] / $laskurow["vienti_kurssi"] * 100, 0);
+					$laskurow["summa"] 		= abs(round($arow["summa"] * 100, 0));
+					$laskurow["kasumma"]	= abs(round($laskurow["kasumma"] / $laskurow["vienti_kurssi"] * 100, 0));
 				}
 
 				if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {

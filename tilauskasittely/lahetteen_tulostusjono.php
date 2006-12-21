@@ -163,6 +163,7 @@
 			$tee2 		= "";
 			$tuytunnus 	= "";
 			$tuvarasto	= "";
+			$tumaa		= "";
 		}
 		else {
 			// katsotaan, ettei tilaus ole kenell‰k‰‰n auki ruudulla
@@ -226,14 +227,14 @@
 					echo "<$ero>$tilrow[varastonimi]</$ero>";
 					echo "<$ero>$tilrow[tunnus]</$ero>";
 					echo "<$ero>$tilrow[ytunnus]</$ero>";
-					
+
 					if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
-						echo "<$ero>$tilrow[nimi]</$ero>";		
+						echo "<$ero>$tilrow[nimi]</$ero>";
 					}
 					else {
-						echo "<$ero>$tilrow[toim_nimi]</$ero>";		
+						echo "<$ero>$tilrow[toim_nimi]</$ero>";
 					}
-					
+
 					echo "<$ero>$tilrow[viesti]</$ero>";
 					echo "<$ero>$tilrow[kerayspvm]</$ero>";
 					echo "<$ero>$tilrow[riveja]</$ero>";
@@ -326,15 +327,38 @@
 
 		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
 
-		while($row = mysql_fetch_array($result)){
+		while ($row = mysql_fetch_array($result)){
 			$sel = '';
-			if(($row[0] == $tuvarasto) or ($kukarow['varasto'] == $row[0] and $tuvarasto=='')) {
+			if (($row[0] == $tuvarasto) or ($kukarow['varasto'] == $row[0] and $tuvarasto=='')) {
 				$sel = 'selected';
 				$tuvarasto = $row[0];
 			}
 			echo "<option value='$row[0]' $sel>$row[1]</option>";
 		}
-		echo "</select></td>";
+		echo "</select>";
+
+		$query = "	SELECT distinct maa
+					FROM varastopaikat
+					WHERE maa != '' and yhtio = '$kukarow[yhtio]'
+					ORDER BY maa";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 1) {
+			echo "<select name='tumaa' onchange='submit()'>";
+			echo "<option value=''>".t("Kaikki")."</option>";
+
+			while ($row = mysql_fetch_array($result)){
+				$sel = '';
+				if ($row[0] == $tumaa) {
+					$sel = 'selected';
+					$tumaa = $row[0];
+				}
+				echo "<option value='$row[0]' $sel>$row[0]</option>";
+			}
+			echo "</select>";
+		}
+
+		echo "</td>";
 
 		echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
 
@@ -396,6 +420,15 @@
 			$haku .= " and lasku.varasto='$tuvarasto' ";
 		}
 
+		if ($tumaa != '') {
+			$query = "	SELECT group_concat(tunnus) tunnukset
+						FROM varastopaikat
+						WHERE maa != '' and yhtio = '$kukarow[yhtio]' and maa = '$tumaa'";
+			$maare = mysql_query($query) or pupe_error($query);
+			$maarow = mysql_fetch_array($maare);
+			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
+		}
+
 		if ($tutoimtapa != '' and $tutoimtapa != 'KAIKKI') {
 			$haku .= " and lasku.toimitustapa='$tutoimtapa' ";
 		}
@@ -426,7 +459,7 @@
 				$grouppi = "GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
 			}
 			else {
-				$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";				
+				$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
 			}
 		}
 		else {
@@ -454,7 +487,7 @@
 					$grouppi
 					$jarjx";
 		$tilre = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($tilre)==0) {
 			echo "<br><br><font class='message'>".t("Tulostusjonossa ei ole yht‰‰n tilausta")."...</font>";
 		}
@@ -493,14 +526,14 @@
 				echo "<$ero>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";
 				echo "<$ero>$tilrow[varastonimi]</$ero>";
 				echo "<$ero>$tilrow[ytunnus]</$ero>";
-				
+
 				if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
-					echo "<$ero>$tilrow[nimi]</$ero>";					
+					echo "<$ero>$tilrow[nimi]</$ero>";
 				}
 				else {
-					echo "<$ero>$tilrow[toim_nimi]</$ero>";					
+					echo "<$ero>$tilrow[toim_nimi]</$ero>";
 				}
-				
+
 				echo "<$ero>$tilrow[kerayspvm]</$ero>";
 				echo "<$ero>$tilrow[toimitustapa]</$ero>";
 				echo "<$ero>$tilrow[tilauksia]</$ero>";

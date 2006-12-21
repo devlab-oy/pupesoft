@@ -145,6 +145,14 @@ if ($tee == 'go') {
 			$gluku++;
 		}
 
+		if ($mukaan == "asiakasmyyja") {
+			if ($group!="") $group .= ",asiakas.myyjanro";
+			else $group  .= "asiakas.myyjanro";
+			$select .= "asiakas.myyjanro asiakasmyyja, ";
+			$order  .= "asiakas.myyjanro,";
+			$gluku++;
+		}
+
 		if ($mukaan == "tuoteostaja") {
 			if ($group!="") $group .= ",tuote.ostajanro";
 			else $group  .= "tuote.ostajanro";
@@ -232,16 +240,16 @@ if ($tee == 'go') {
 	}
 
 	if ($asiakasryhma  != "") $lisa .= " and asiakas.ryhma     = '$asiakasryhma' ";
-	
+
 	if ($asiakasosasto != "") $lisa .= " and asiakas.osasto    = '$asiakasosasto' ";
-	
+
 	if ($tuoteryhma != "" and strpos($tuoteryhma, "*") !== FALSE) {
 		$lisa .= " and tuote.try like '".substr($tuoteryhma,0,-1)."%' ";
 	}
 	elseif ($tuoteryhma != "") {
 		$lisa .= " and tuote.try = '$tuoteryhma' ";
 	}
-	
+
 	if ($tuoteosasto   != "") $lisa .= " and tuote.osasto      = '$tuoteosasto' ";
 
 	if ($toimittaja != "") {
@@ -411,7 +419,8 @@ if ($tee == 'go') {
 				}
 
 				// jos kyseessa on myyjä, haetaan sen nimi
-				if (mysql_field_name($result, $i) == "tuotemyyja") {
+				if (mysql_field_name($result, $i) == "tuotemyyja" or
+					mysql_field_name($result, $i) == "asiakasmyyja") {
 					$query = "	SELECT nimi
 								FROM kuka
 								WHERE yhtio in ($yhtio) and myyja='$row[$i]' and myyja!='0' limit 1";
@@ -749,28 +758,33 @@ echo "<table>
 	<td><input type='checkbox' name='ruksit[4]' value='tuotemyyja'></td>
 	</tr>
 	<tr>
-	<th>".t("Listaa tuoteostajittain")."</th>
+	<th>".t("Listaa asiakasmyyjittäin")."</th>
 	<td><input type='text' name='jarjestys[5]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[5]' value='tuoteostaja'></td>
+	<td><input type='checkbox' name='ruksit[5]' value='asiakasmyyja'></td>
+	</tr>
+	<tr>
+	<th>".t("Listaa tuoteostajittain")."</th>
+	<td><input type='text' name='jarjestys[6]' size='2'></td>
+	<td><input type='checkbox' name='ruksit[6]' value='tuoteostaja'></td>
 	</tr>
 	<tr>
 	<th>".t("Listaa maittain")."</th>
-	<td><input type='text' name='jarjestys[6]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[6]' value='maa'></td>
+	<td><input type='text' name='jarjestys[7]' size='2'></td>
+	<td><input type='checkbox' name='ruksit[7]' value='maa'></td>
 	</tr>
 	<tr>
 	<th>".t("Listaa merkeittäin")."</th>
-	<td><input type='text' name='jarjestys[7]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[7]' value='merkki'></td>
+	<td><input type='text' name='jarjestys[8]' size='2'></td>
+	<td><input type='checkbox' name='ruksit[8]' value='merkki'></td>
 	</tr>
 	<tr>
 	<th>".t("Listaa toimittajittain")."</th>
-	<td><input type='text' name='jarjestys[8]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[8]' value='toimittaja'></td>
+	<td><input type='text' name='jarjestys[9]' size='2'></td>
+	<td><input type='checkbox' name='ruksit[9]' value='toimittaja'></td>
 	</tr>
 	<th>".t("Listaa tilaustyypeittäin")."</th>
-	<td><input type='text' name='jarjestys[9]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[9]' value='tilaustyyppi'></td><td class='back'>".t("(Toimii vain jos ajat raporttia tilauksista)")."</td>
+	<td><input type='text' name='jarjestys[10]' size='2'></td>
+	<td><input type='checkbox' name='ruksit[10]' value='tilaustyyppi'></td><td class='back'>".t("(Toimii vain jos ajat raporttia tilauksista)")."</td>
 	</tr>
 	</table><br>";
 

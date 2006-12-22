@@ -151,7 +151,7 @@
 							left(concat_ws(' ', lasku.nimi, nimitark),30),
 							left(concat_ws(' ', osoite, osoitetark),20),
 							left(concat_ws(' ', postino, postitp),20),
-							summa, valkoodi, viite, viesti, tilinumero,
+							summa, lasku.valkoodi, viite, viesti, tilinumero,
 							lasku.tunnus, sisviesti2, yriti.tilino, alatila, kasumma
 							FROM lasku, yriti
 							WHERE lasku.yhtio = '$kukarow[yhtio]' 
@@ -245,7 +245,7 @@
 				left(concat_ws(' ', osoite, osoitetark),45),
 				left(concat_ws(' ', postino, postitp),45),
 				summa,
-				valkoodi,
+				lasku.valkoodi,
 				viite,
 				viesti,
 				ultilno,
@@ -261,7 +261,7 @@
 				valuu.nimi = lasku.valkoodi and
 				valuu.yhtio = lasku.yhtio and
 				maksaja = '$kukarow[kuka]'
-				ORDER BY maksu_tili, valkoodi, ytunnus";
+				ORDER BY maksu_tili, lasku.valkoodi, ytunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {

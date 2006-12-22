@@ -79,6 +79,7 @@
 		echo "<th nowrap>".t("Tuotteita")."<br>".t("KPL")."</th>";
 		echo "<th nowrap>".t("Varast").".<br>".t("arvo")."</th>";
 		echo "<th nowrap>".t("Varast").".<br>".t("kiert").".</th>";
+		echo "<th nowrap>".t("Myydyt")."<br>".t("KPL")."</th>";
 		echo "<th nowrap>".t("Myyerä")."<br>".t("KPL")."</th>";
 		echo "<th nowrap>".t("Myyerä")."<br>$yhtiorow[valkoodi]</th>";
 		echo "<th nowrap>".t("Myyty")."<br>".t("rivejä")."</th>";
@@ -175,6 +176,7 @@
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.0f',$row["tuotelkm"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["vararvo"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kiertonopeus"]))."</td>";
+			echo "<td align='right'>".str_replace(".",",",sprintf('%.0f',$row["kpl"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["myyntieranakpl"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["myyntieranarvo"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.0f',$row["rivia"]))."</td>";
@@ -230,6 +232,7 @@
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.0f',$tuotelkmyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmanvarastonarvoyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$kiertonopeusyht))."</td>";
+		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.0f',$ryhmakplyht))."</td>";		
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$myyntieranakplyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$myyntieranarvoyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.0f',$rivilkmyht))."</td>";

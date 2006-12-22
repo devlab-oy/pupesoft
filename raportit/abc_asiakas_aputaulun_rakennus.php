@@ -59,6 +59,10 @@ if ($tee == 'YHTEENVETO') {
 		$abcwhat = "kpl";
 		$abcchar = "AP";
 	}
+	elseif ($abctyyppi == "rivia") {
+		$abcwhat = "rivia";
+		$abcchar = "AR";
+	}
 	else {
 		$abcwhat = "summa";
 		$abcchar = "AM";
@@ -87,7 +91,8 @@ if ($tee == 'YHTEENVETO') {
 	//haetaan ensin koko kauden yhteisnmyynti ja ostot
 	$query = "	SELECT
 				lasku.liitostunnus,
-				sum(if(tyyppi='L', 1, 0))						kpl,
+				sum(if(tyyppi='L', 1, 0))						rivia,
+				sum(if(tyyppi='L', tilausrivi.kpl, 0))			kpl,
 				sum(if(tyyppi='L', tilausrivi.rivihinta, 0))	summa,
 				sum(if(tyyppi='L', tilausrivi.kate, 0)) 		kate
 				FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
@@ -112,7 +117,7 @@ if ($tee == 'YHTEENVETO') {
 			$kausiyhteensa += $row["${abcwhat}"];
 		}
 
-		$kaudenmyyriviyht += $row["kpl"];
+		$kaudenmyyriviyht += $row["rivia"];
 
 	}
 
@@ -260,6 +265,7 @@ if ($tee == 'YHTEENVETO') {
 
 		//haetaan luokan myynti yhteensä
 		$query = "	SELECT
+					sum(rivia) rivia,
 					sum(summa) summa,
 					sum(kpl)   kpl,
 					sum(kate)  kate
@@ -273,6 +279,7 @@ if ($tee == 'YHTEENVETO') {
 
 		//rakennetaan aliluokat
 		$query = "	SELECT
+					rivia,
 					summa,
 					kate,
 					kpl,
@@ -329,6 +336,7 @@ if ($tee == 'YHTEENVETO') {
 
 		//haetaan luokan myynti yhteensä
 		$query = "	SELECT
+					sum(rivia) rivia,
 					sum(summa) summa,
 					sum(kpl) kpl,
 					sum(kate) kate
@@ -342,6 +350,7 @@ if ($tee == 'YHTEENVETO') {
 
 		//rakennetaan aliluokat
 		$query = "	SELECT
+					rivia,
 					summa,
 					kate,
 					kpl,

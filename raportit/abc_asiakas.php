@@ -17,6 +17,10 @@ elseif ($toim == "kpl") {
 	$abcwhat = "kpl";
 	$abcchar = "AP";
 }
+elseif ($toim == "rivia") {
+	$abcwhat = "rivia";
+	$abcchar = "AR";
+}
 else {
 	$abcwhat = "summa";
 	$abcchar = "AM";
@@ -31,6 +35,9 @@ if ($tee == '') {
 	}
 	elseif ($toim == "kpl") {
 		echo "ABC-luokat kappaleiden mukaan.";
+	}
+	elseif ($toim == "rivia") {
+		echo "ABC-luokat myyntirivien mukaan.";
 	}
 	else {
 		echo "ABC-luokat katteen mukaan.";

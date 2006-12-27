@@ -271,13 +271,13 @@
 				$trow[$i] = $t[$i];
 			}
 
-			require ("inc/$toim"."rivi.inc");
-
 			if 	(mysql_field_len($result,$i)>10) 	$size='35';
 			elseif	(mysql_field_len($result,$i)<5)	$size='5';
 			else	$size='10';
 
 			$maxsize = mysql_field_len($result,$i); // Jotta tätä voidaan muuttaa
+
+			require ("inc/$toim"."rivi.inc");
 
 			//Haetaan tietokantasarakkeen nimialias
 			$al_nimi   = mysql_field_name($result, $i);

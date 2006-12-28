@@ -87,7 +87,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "laskutyyppi") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -249,7 +249,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "karayksesta_rahtikirjasyottoon") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -266,6 +266,27 @@
 
 		$ulos .= "<option value=''  $sel1>".t("Keräyksestä ei siirrytä suoraan rahtikirjan syöttöön")."</option>";
 		$ulos .= "<option value='Y' $sel2>".t("Keräyksestä siirrytään suoraan rahtikirjan syöttöön")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "rahtikirjojen_esisyotto") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "M") {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Ei rahtikirjojen esisyöttöä")."</option>";
+		$ulos .= "<option value='M' $sel2>".t("Rahtikirjojen esisyöttö mahdollista myynnin yhteydessä")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -452,7 +473,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kerailylistatyyppi") {
 
 		$query = "	SELECT selite, selitetark
@@ -495,7 +516,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "laskutuskielto") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -566,7 +587,7 @@
 
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "sad_lomake_tyyppi") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -580,13 +601,13 @@
 		else {
 			$sel1 = "selected";
 		}
-		
+
 		$ulos .= "<option value = 'P' $sel1>".t("SAD-lomake pdf-muodossa")."";
 		$ulos .= "<option value = 'T' $sel2>".t("SAD-lomake tekstimuodossa")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
 	}
-	
+
 
 ?>

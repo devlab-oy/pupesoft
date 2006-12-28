@@ -67,7 +67,6 @@
 								<th>".t("Rahdinmaksaja")."</th>
 								<th>".t("Pakkaus")."</th>
 								<th>".t("Pakkauskuvaus")."</th>
-								<th>".t("Poikkeava")."</th>
 								<th>".t("Rahtisopimus")."</th>
 								<th>".t("Tulostettu")."</th>
 								<th>".t("Tulostuspaikka")."</th>
@@ -95,7 +94,6 @@
 
 					echo "		<td>$rahtirow[pakkaus]</td>
 								<td>$rahtirow[pakkauskuvaus]</td>
-								<td>$rahtirow[poikkeava]</td>
 								<td>$rahtirow[rahtisopimus]</td>
 								<td>$rahtirow[tulostettu]</td>
 								<td>$varnimrow[nimitys]</td>

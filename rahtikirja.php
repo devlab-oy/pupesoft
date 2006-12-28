@@ -1,11 +1,50 @@
 <?php
-	require ("inc/parametrit.inc");	
-	
-	if ($id=='') $id=0;
+	require ("inc/parametrit.inc");
 
+	if ($id == '') $id=0;
+
+	// jos ollaan rahtikirjan esisyötössä niin tehdään lisäys vähän helpommin
+	if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_esisyotto"] == "M") {
+
+		// esisyöttö sallittu vain N tilassa oleville tilauksille
+		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otsikkonro' and tila='N'";
+		$tilre = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($tilre) == 0) {
+			echo "<br><br><font class='error'>".t("Esisyöttö sallittu vain kesken oleville myyntitilauksille")."! </font><br>";
+			exit;
+		}
+
+		$tutkimus = 0;
+
+		// dellataan kaikki rahtikirjat tällä otsikolla
+		$query = "delete from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		// katotaan ollaanko syötetty jotain
+		for ($i = 0; $i < count($pakkaus); $i++) {
+			if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
+				// lisätään rahtikirjatiedot (laitetaan poikkeava kenttään -9 niin tiedetään että esisyötetty)
+				$query  = "insert into rahtikirjat
+							(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,yhtio) values
+							('-9','$otsikkonro','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$kukarow[yhtio]')";
+				$result = mysql_query($query) or pupe_error($query);
+				$tutkimus++;
+			}
+		}
+
+		if ($tutkimus > 0) {
+			// rullataan läpi ja mennään myyntiin
+			$tee  = "";
+			$toim = "";
+			$id   = 0;
+			// karsee häkki mutta pitää sanoa, että from on laskutatilaus niin päästään takasin muokkaukseen
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/tilaus_myynti.php?toim=$rahtikirjan_esisyotto&aktivoinnista=true&from=LASKUTATILAUS'>";
+		}
+	}
 
 	//lisätään syötetty kama rahtikirja-tauluun
-	if ($tee=='add') {
+	if ($tee == 'add') {
 		$apu=0; //apumuuttuja
 		$tutkimus = 0; // tänne tulee luku
 
@@ -37,6 +76,7 @@
 			$query = "	SELECT
 						lasku.yhtio,
 						rahtikirjat.otsikkonro,
+						rahtikirjat.poikkeava,
 						toimitustapa.nouto,
 						lasku.vienti
 						FROM lasku use index (tila_index)
@@ -48,7 +88,7 @@
 						and lasku.tila = 'L'
 						and lasku.alatila in ('C','E')
 						and lasku. tunnus in ($tunnukset)
-						HAVING rahtikirjat.otsikkonro is null and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')";
+						HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')";
 			$tilre = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($tilre) == 0) {
@@ -78,9 +118,9 @@
 						$tilaukset = explode(',', $tunnukset);
 
 						foreach ($tilaukset as $otsikkonro) {
-							$query  = "insert into rahtikirjat 
-										(rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,yhtio) values
-										('$rakirno','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$kukarow[yhtio]')";
+							$query  = "insert into rahtikirjat
+										(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,yhtio) values
+										('','$rakirno','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$kukarow[yhtio]')";
 							$result = mysql_query($query) or pupe_error($query);
 
 							if ($kollit[$i]=='') 	$kollit[$i]		= 0;
@@ -113,6 +153,7 @@
 
 		// jos lisättiin jotain, merkataan rahtikirjatiedot syötetyksi..
 		if ($apu > 0) {
+
 			echo "<br>";
 
 			// Haetaan laskun kaikki tiedot ja katsotaan onko kyseessä jäkivaatimus
@@ -156,13 +197,13 @@
 
 				} // end if tulostetaanko heti
 			} // end if löytykö toimitustapa
-			
-			
+
+
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php') {
 				$query = "SELECT sum(kollit) kolleroiset FROM rahtikirjat WHERE yhtio = '$kukarow[yhtio]' and otsikkonro in ($tunnukset)";
 				$result = mysql_query($query) or pupe_error($query);
 				$oslaprow = mysql_fetch_array($result);
-				
+
 				if ($oslaprow['kolleroiset'] > 0) {
 					$oslappkpl = $oslaprow['kolleroiset'];
 				}
@@ -171,7 +212,7 @@
 				}
 				$keraaseen = 'mennaan';
 			}
-			
+
 			//katotaan haluttiinko osoitelappuja
 			$oslappkpl = (int) $oslappkpl;
 			if ($oslappkpl > 0 ) {
@@ -200,8 +241,8 @@
 					} //end if voidaan tulostaa
 				} //end if varastopaikat
 			} // end if oslappkpl
-
 		} // end if apu>0
+
 	}
 
 	// meillä ei ole valittua tilausta
@@ -233,7 +274,8 @@
 					if(toimitustapa.hetiera='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti,
 					lasku.vienti,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
-					rahtikirjat.otsikkonro
+					rahtikirjat.otsikkonro,
+					rahtikirjat.poikkeava
 					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
 					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
@@ -244,7 +286,7 @@
 					and lasku.alatila = 'C'
 					$haku
 					GROUP BY lasku.toimitustapa, toimitustapa.nouto, jvgrouppi, kimppakyyti, lasku.vienti, laadittux, rahtikirjat.otsikkonro
-					HAVING rahtikirjat.otsikkonro is null and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')
+					HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
 
@@ -406,6 +448,7 @@
 
 		echo "<table>";
 		echo "<form name='rahtikirjainfoa' action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='rahtikirjan_esisyotto' value='$rahtikirjan_esisyotto'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='rakirno' value='$rakirno'>";
 		echo "<input type='hidden' name='tee' value='add'>";
@@ -586,7 +629,7 @@
 			echo "</select></td></tr>";
 
 		}
-		
+
 		if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' or $mista != 'keraa.php') {
 			echo "<tr>";
 			echo "<th colspan='3'>".t("Osoitelappumäärä")."</th>";
@@ -679,7 +722,7 @@
 			<td><input type='text' size='3' value='$lavametri[$i]' name='lavametri[$i]'></td>
 			<td>$row[selite]</td>
 			<td>$row[selitetark]</td>";
-			
+
 			$query = "	SELECT distinct selite, selitetark
 						FROM avainsana
 						WHERE yhtio='$kukarow[yhtio]' and laji='PAKKAUSKUVAUS'
@@ -689,7 +732,7 @@
 			if (mysql_num_rows($pksresult) > 0) {
 				echo "<td><select name='pakkauskuvaustark[$i]'>";
 				echo "<option value=''>".t("Ei tarkennetta")."</option>";
-			
+
 				while ($pksrow = mysql_fetch_array($pksresult)) {
 					$sel = '';
 					if ($pakkauskuvaustark[$i] == $pksrow[0]) {
@@ -699,7 +742,7 @@
 				}
 				echo "</select></td>";
 			}
-			
+
 			echo "</tr>";
 
 			$i++;
@@ -715,12 +758,12 @@
 		<input type='hidden' name='id' value='$id'>
 		<input name='subnappi' type='submit' value='".t("Valmis")."'>";
 		echo "</form>";
-		
+
 		if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php') {
 			echo "<font class='message'>".t("Siirryt automaattisesti takaisin kerää ohjelmaan")."!</font>";
 		}
 	}
-	
+
 	if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '' and $mista == 'keraa.php' and $keraaseen == 'mennaan') {
 		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tilauskasittely/keraa.php'>";
 		exit;

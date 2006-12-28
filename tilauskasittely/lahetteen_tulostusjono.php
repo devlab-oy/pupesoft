@@ -625,7 +625,6 @@
 			$kirre = mysql_query($query) or pupe_error($query);
 
 			echo "<tr><td><select name='valittu_tulostin'>";
-			echo "<option value=''>".t("Oletustulostimelle")."</option>";
 
 			while ($kirrow = mysql_fetch_array($kirre)) {
 				$sel = '';

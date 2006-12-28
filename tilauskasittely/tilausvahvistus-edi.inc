@@ -3,7 +3,12 @@
 // tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
-$nimi = "../dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+if ($kukarow['extranet'] == '') {
+	$nimi = "../dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+}
+else {
+	$nimi = "dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+}
 
 if (!$toot = fopen($nimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 

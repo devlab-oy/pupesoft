@@ -3,7 +3,12 @@
 // tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
-$nimi = "../dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
+if ($kukarow['extranet'] == '') {
+	$nimi = "../dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
+}
+else {
+	$nimi = "dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
+}
 
 if (!$toot = fopen($nimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 

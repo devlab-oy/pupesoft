@@ -1110,7 +1110,7 @@
 					fclose($fh);
 
 					//haetaan varaston tiedot
-					if($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA") {
+					if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA") {
 						if ($varasto != 0) {
 							$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto' order by alkuhyllyalue,alkuhyllynro";
 						}
@@ -1132,10 +1132,18 @@
 
 					$tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
 
-					// itse print komento...
-					$line = exec("$kirow[komento] $pdffilenimi");
+					if ($kirow["komento"] != "email") {
+						// itse print komento...
+						$line = exec("$kirow[komento] $pdffilenimi");
+					}
+					elseif ($kukarow["eposti"] != '') {
+						// l‰hetet‰‰n meili
+						$kutsu = "lasku-$lasku";
+						$liite = $pdffilenimi;
+						include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
+					}
 
-					if($valittu_kopio_tulostin != '') {
+					if ($valittu_kopio_tulostin != '') {
 						$querykieli = "	select *
 										from kirjoittimet
 										where yhtio='$kukarow[yhtio]' and tunnus='$valittu_kopio_tulostin'";
@@ -1144,8 +1152,16 @@
 
 						$tulos_ulos .= t("Laskukopio tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
 
-						// itse print komento...
-						$line = exec("$kirow[komento] $pdffilenimi");
+						if ($kirow["komento"] != "email") {
+							// itse print komento...
+							$line = exec("$kirow[komento] $pdffilenimi");
+						}
+						elseif ($kukarow["eposti"] != '') {
+							// l‰hetet‰‰n meili
+							$kutsu = "lasku-$lasku";
+							$liite = $pdffilenimi;
+							include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
+						}
 					}
 
 
@@ -1159,7 +1175,7 @@
 
 						if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
 							// Tulostetaan Teksti-versio SAD-lomakkeeesta
-							require('tulosta_sadvientiilmo_teksti.inc');				
+							require('tulosta_sadvientiilmo_teksti.inc');
 
 							if ($paalomake != '') {
 								lpr($paalomake, $valittu_sadtulostin);

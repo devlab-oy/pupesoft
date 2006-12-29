@@ -82,7 +82,7 @@
 		}
 	}
 
-/*  
+/*
 	// debug
 	echo "puute_jt_kerataanko: $yhtiorow[puute_jt_kerataanko]<br>";
 	echo "kerataanko_jos_vain_puute_jt: $yhtiorow[kerataanko_jos_vain_puute_jt]<br>";
@@ -105,7 +105,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tilaus-valmis-valitsetila.php (1)")."<br>";
-		
+
 		$query  = "	UPDATE lasku
 					SET tila='D', alatila='$laskurow[tila]', comments = '$komm'
 					where tunnus='$laskurow[tunnus]'
@@ -123,9 +123,9 @@
 			$query  = "	DELETE FROM tilausrivi
 						WHERE otunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tilaus-valmis-valitsetila.php (2)")."<br>";
-			
+
 			$query  = "	UPDATE lasku
 						SET tila='D', alatila='$laskurow[tila]', comments = '$komm'
 						where tunnus='$laskurow[tunnus]'
@@ -220,31 +220,30 @@
 	elseif($kerattavia > 0 and $kutsuja != 'keraa.php') {
 		// Tässä meillä ON jotain kerättävää
 
+		// laitetaan lähete tulostusjonoon
+		$query  = "	UPDATE lasku SET
+					tila    = 'N',
+					alatila = 'A'
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnus = '$laskurow[tunnus]'
+					and tila in ('N','L')
+					and alatila in ('','A','F')";
+		$result = mysql_query($query) or pupe_error($query);
+
 		///* Tähän mennään jos lähete tosiaan tulostetaan *///
 		if ($yhtiorow["lahetteen_tulostustapa"] != "K") {
-
 			$tilausnumeroita = $laskurow["tunnus"];
-
 			require("tilaus-valmis-tulostus.inc");
 		}
 		///* Tähän mennään jos lähete vain siirretään tulostusjonoon *///
 		else {
 			$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s siirretty tulostusjonoon"), $laskurow["tunnus"])."!</font><br><br>\n";
-
-			$query  ="	update lasku set
-						tila = 'N',
-						alatila = 'A'
-						where yhtio = '$kukarow[yhtio]'
-						and tunnus = '$laskurow[tunnus]'
-						and tila in ('N','L')
-						and alatila in ('','A','F')";
-			$result = mysql_query($query) or pupe_error($query);
 		}
 	}
 	elseif($kutsuja != 'keraa.php') {
 		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("VIRHE: Tilausta %s ei voitu merkata valmiiksi. Aktivoi tilaus ja korjaa virheet"), $laskurow["tunnus"])."! (2)</font><br><br>\n";
 	}
-	
+
 	if ($silent == "") {
 		echo $tilaus_valmis_message;
 	}

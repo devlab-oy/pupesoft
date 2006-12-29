@@ -1,0 +1,1236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XML Spy v4.2 U (http://www.xmlspy.com) by Jussi Paasikallio (OKOBANK Group) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="AccountDimensionText" type="genericStringType035"/>
+	<xs:element name="AgreementIdentifier" type="genericStringType035"/>
+	<xs:element name="AgreementIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="ArticleIdentifier" type="genericStringType035"/>
+	<xs:element name="ArticleInfoUrlText" type="genericStringType0512"/>
+	<xs:element name="ArticleName" type="genericStringType070"/>
+	<xs:element name="BuyerArticleIdentifier" type="genericStringType035"/>
+	<xs:element name="BuyerCommunicationDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="BuyerPhoneNumberIdentifier" minOccurs="0"/>
+				<xs:element ref="BuyerEmailaddressIdentifier" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="BuyerContactPersonName" type="genericStringType035"/>
+	<xs:element name="BuyerEmailaddressIdentifier" type="genericStringType048"/>
+	<xs:element name="BuyerOrganisationName" type="genericStringType235"/>
+	<xs:element name="BuyerOrganisationTaxCode" type="genericNMtokenType035"/>
+	<xs:element name="BuyerOrganisationUnitNumber" type="genericStringType035"/>
+	<xs:element name="BuyerPartyDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="BuyerPartyIdentifier" minOccurs="0"/>
+				<xs:element ref="BuyerOrganisationName" maxOccurs="unbounded"/>
+				<xs:element ref="BuyerOrganisationTaxCode" minOccurs="0"/>
+				<xs:element ref="BuyerPostalAddressDetails" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="BuyerPartyIdentifier" type="genericStringType035"/>
+	<xs:element name="BuyerPhoneNumberIdentifier" type="genericStringType035"/>
+	<xs:element name="BuyerPostCodeIdentifier" type="genericStringType235"/>
+	<xs:element name="BuyerPostOfficeBoxIdentifier" type="genericStringType035"/>
+	<xs:element name="BuyerPostalAddressDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="BuyerStreetName"/>
+				<xs:element ref="BuyerTownName"/>
+				<xs:element ref="BuyerPostCodeIdentifier"/>
+				<xs:element ref="CountryCode" minOccurs="0"/>
+				<xs:element ref="CountryName" minOccurs="0"/>
+				<xs:element ref="BuyerPostOfficeBoxIdentifier" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="BuyerStreetName" type="genericStringType235"/>
+	<xs:element name="BuyerTownName" type="genericStringType235"/>
+	<xs:element name="CashDiscountAmount" type="amount"/>
+	<xs:element name="CashDiscountBaseAmount" type="amount"/>
+	<xs:element name="CashDiscountDate" type="date"/>
+	<xs:element name="CashDiscountPercent" type="percentage"/>
+	<xs:element name="ConfirmedQuantity">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="QuantityType">
+					<xs:minLength value="0"/>
+					<xs:maxLength value="14"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="CountryCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:maxLength value="2"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="CountryName" type="genericStringType035"/>
+	<xs:element name="DeliveredQuantity">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="QuantityType">
+					<xs:minLength value="0"/>
+					<xs:maxLength value="14"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DelivererCountryCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:maxLength value="2"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="DelivererCountryName" type="genericStringType035"/>
+	<xs:element name="DelivererIdentifier" type="genericStringType035"/>
+	<xs:element name="DelivererName" type="genericStringType035"/>
+	<xs:element name="DeliveryCommunicationDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DeliveryPhoneNumberIdentifier" minOccurs="0"/>
+				<xs:element ref="DeliveryEmailaddressIdentifier" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DeliveryContactPersonName" type="genericStringType035"/>
+	<xs:element name="DeliveryDate" type="date"/>
+	<xs:element name="DeliveryDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DeliveryDate" minOccurs="0"/>
+				<xs:element ref="DeliveryPeriodDetails" minOccurs="0"/>
+				<xs:element ref="DeliveryMethodText" minOccurs="0"/>
+				<xs:element ref="DeliveryTermsText" minOccurs="0"/>
+				<xs:element ref="TerminalAddressText" minOccurs="0"/>
+				<xs:element ref="WaybillIdentifier" minOccurs="0"/>
+				<xs:element ref="WaybillTypeCode" minOccurs="0"/>
+				<xs:element ref="DelivererIdentifier" minOccurs="0"/>
+				<xs:element ref="DelivererName" minOccurs="0" maxOccurs="3"/>
+				<xs:element ref="DelivererCountryCode" minOccurs="0"/>
+				<xs:element ref="DelivererCountryName" minOccurs="0"/>
+				<xs:element ref="ManufacturerIdentifier" minOccurs="0"/>
+				<xs:element ref="ManufacturerName" minOccurs="0" maxOccurs="3"/>
+				<xs:element ref="ManufacturerCountryCode" minOccurs="0"/>
+				<xs:element ref="ManufacturerCountryName" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DeliveryEmailaddressIdentifier" type="genericStringType070"/>
+	<xs:element name="DeliveryMethodText" type="genericStringType0512"/>
+	<xs:element name="DeliveryOrganisationName" type="genericStringType235"/>
+	<xs:element name="DeliveryOrganisationTaxCode" type="genericNMtokenType035"/>
+	<xs:element name="DeliveryOrganisationUnitNumber" type="genericStringType035"/>
+	<xs:element name="DeliveryPartyDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DeliveryPartyIdentifier" minOccurs="0"/>
+				<xs:element ref="DeliveryOrganisationName" maxOccurs="unbounded"/>
+				<xs:element ref="DeliveryOrganisationTaxCode" minOccurs="0"/>
+				<xs:element ref="DeliveryPostalAddressDetails"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DeliveryPartyIdentifier" type="genericStringType035"/>
+	<xs:element name="DeliveryPeriodDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="StartDate"/>
+				<xs:element ref="EndDate"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DeliveryPhoneNumberIdentifier" type="genericStringType035"/>
+	<xs:element name="DeliveryPostCodeIdentifier" type="genericStringType235"/>
+	<xs:element name="DeliveryPostalAddressDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DeliveryStreetName"/>
+				<xs:element ref="DeliveryTownName"/>
+				<xs:element ref="DeliveryPostCodeIdentifier"/>
+				<xs:element ref="CountryCode" minOccurs="0"/>
+				<xs:element ref="CountryName" minOccurs="0"/>
+				<xs:element ref="DeliveryPostofficeBoxIdentifier" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DeliveryPostofficeBoxIdentifier" type="genericStringType035"/>
+	<xs:element name="DeliveryStreetName" type="genericStringType235"/>
+	<xs:element name="DeliveryTermsText" type="genericStringType0512"/>
+	<xs:element name="DeliveryTownName" type="genericStringType235"/>
+	<xs:element name="EndDate" type="date"/>
+	<xs:complexType name="EpiAccountIDType">
+		<xs:simpleContent>
+			<xs:extension base="xs:NMTOKEN">
+				<xs:attribute name="IdentificationSchemeName" use="required">
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:enumeration value="IBAN"/>
+							<xs:enumeration value="BBAN"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:element name="EpiAccountID">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="EpiAccountIDType">
+					<xs:minLength value="1"/>
+					<xs:maxLength value="34"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EpiBei">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:minLength value="8"/>
+				<xs:maxLength value="11"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="EpiBeneficiaryPartyDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EpiNameAddressDetails" minOccurs="0"/>
+				<xs:element ref="EpiBei" minOccurs="0"/>
+				<xs:element ref="EpiAccountID"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="EpiBfiIdentifierType">
+		<xs:simpleContent>
+			<xs:extension base="xs:NMTOKEN">
+				<xs:attribute name="IdentificationSchemeName" use="required">
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:enumeration value="BIC"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:element name="EpiBfiIdentifier">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="EpiBfiIdentifierType">
+					<xs:minLength value="8"/>
+					<xs:maxLength value="11"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EpiBfiPartyDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EpiBfiIdentifier" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EpiCharge">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:token">
+					<xs:attribute name="ChargeOption" use="required">
+						<xs:simpleType>
+							<xs:restriction base="xs:NMTOKEN">
+								<xs:enumeration value="SHA"/>
+								<xs:enumeration value="OUR"/>
+								<xs:enumeration value="BEN"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:attribute>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EpiDate" type="date"/>
+	<xs:element name="EpiDateOptionDate" type="date"/>
+	<xs:element name="EpiDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EpiIdentificationDetails"/>
+				<xs:element ref="EpiPartyDetails"/>
+				<xs:element ref="EpiPaymentInstructionDetails"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EpiEmail" type="genericStringType048"/>
+	<xs:element name="EpiIdentificationDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EpiDate"/>
+				<xs:element ref="EpiReference"/>
+				<xs:element ref="EpiUrl" minOccurs="0"/>
+				<xs:element ref="EpiEmail" minOccurs="0"/>
+				<xs:element ref="EpiOrderInfo" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EpiInstructedAmount" type="amount"/>
+	<xs:element name="EpiInstructionCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:minLength value="0"/>
+				<xs:maxLength value="35"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="EpiNameAddressDetails">
+		<xs:simpleType>
+			<xs:restriction base="xs:token">
+				<xs:minLength value="2"/>
+				<xs:maxLength value="35"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="EpiOrderInfo" type="xs:token"/>
+	<xs:element name="EpiPartyDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EpiBfiPartyDetails"/>
+				<xs:element ref="EpiBeneficiaryPartyDetails"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EpiPaymentInstructionDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="EpiPaymentInstructionId" minOccurs="0"/>
+				<xs:element ref="EpiTransactionTypeCode" minOccurs="0"/>
+				<xs:element ref="EpiInstructionCode" minOccurs="0"/>
+				<xs:element ref="EpiRemittanceInfoIdentifier"/>
+				<xs:element ref="EpiInstructedAmount"/>
+				<xs:element ref="EpiCharge"/>
+				<xs:element ref="EpiDateOptionDate"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EpiPaymentInstructionId">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:minLength value="0"/>
+				<xs:maxLength value="35"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="EpiReference" type="genericNMtokenType035"/>
+	<xs:complexType name="EpiRemittanceInfoIdentifierType">
+		<xs:simpleContent>
+			<xs:extension base="xs:NMTOKEN">
+				<xs:attribute name="IdentificationSchemeName" use="required">
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:enumeration value="SPY"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:element name="EpiRemittanceInfoIdentifier">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="EpiRemittanceInfoIdentifierType">
+					<xs:minLength value="2"/>
+					<xs:maxLength value="35"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="EpiTransactionTypeCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:token">
+				<xs:length value="3"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="EpiUrl" type="genericNMtokenType0512"/>
+	<xs:element name="Finvoice">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SellerPartyDetails"/>
+				<xs:element ref="SellerOrganisationUnitNumber" minOccurs="0"/>
+				<xs:element ref="SellerContactPersonName" minOccurs="0"/>
+				<xs:element ref="SellerCommunicationDetails" minOccurs="0"/>
+				<xs:element ref="SellerInformationDetails" minOccurs="0"/>
+				<xs:element ref="InvoiceSenderPartyDetails" minOccurs="0"/>
+				<xs:element ref="InvoiceRecipientPartyDetails" minOccurs="0"/>
+				<xs:element ref="InvoiceRecipientOrganisationUnitNumber" minOccurs="0"/>
+				<xs:element ref="InvoiceRecipientContactPersonName" minOccurs="0"/>
+				<xs:element ref="InvoiceRecipientCommunicationDetails" minOccurs="0"/>
+				<xs:element ref="BuyerPartyDetails"/>
+				<xs:element ref="BuyerOrganisationUnitNumber" minOccurs="0"/>
+				<xs:element ref="BuyerContactPersonName" minOccurs="0"/>
+				<xs:element ref="BuyerCommunicationDetails" minOccurs="0"/>
+				<xs:element ref="DeliveryPartyDetails" minOccurs="0"/>
+				<xs:element ref="DeliveryOrganisationUnitNumber" minOccurs="0"/>
+				<xs:element ref="DeliveryContactPersonName" minOccurs="0"/>
+				<xs:element ref="DeliveryCommunicationDetails" minOccurs="0"/>
+				<xs:element ref="DeliveryDetails" minOccurs="0"/>
+				<xs:element ref="InvoiceDetails"/>
+				<xs:element ref="PaymentStatusDetails" minOccurs="0"/>
+				<xs:element ref="PartialPaymentDetails" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="VirtualBankBarcode" minOccurs="0"/>
+				<xs:element ref="InvoiceRow" maxOccurs="unbounded"/>
+				<xs:element ref="SpecificationDetails" minOccurs="0"/>
+				<xs:element ref="EpiDetails"/>
+				<xs:element ref="InvoiceUrlNameText" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="InvoiceUrlText" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="Version">
+				<xs:simpleType>
+					<xs:restriction base="xs:NMTOKEN">
+						<xs:enumeration value="1.0"/>
+						<xs:enumeration value="1.1"/>
+						<xs:enumeration value="1.2"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InterestPercent" type="percentage"/>
+	<xs:element name="InvoiceDate" type="date"/>
+	<xs:element name="InvoiceDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="InvoiceTypeCode"/>
+				<xs:element ref="InvoiceTypeText"/>
+				<xs:element ref="OriginCode"/>
+				<xs:element ref="OriginText" minOccurs="0"/>
+				<xs:element ref="InvoiceNumber"/>
+				<xs:element ref="InvoiceDate"/>
+				<xs:element ref="SellerReferenceIdentifier" minOccurs="0"/>
+				<xs:element ref="SellerReferenceIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="OrderIdentifier" minOccurs="0"/>
+				<xs:element ref="OrderIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="AgreementIdentifier" minOccurs="0"/>
+				<xs:element ref="AgreementIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="InvoiceTotalVatExcludedAmount"/>
+				<xs:element ref="InvoiceTotalVatAmount"/>
+				<xs:element ref="InvoiceTotalVatIncludedAmount"/>
+				<xs:element ref="ShortProposedAccountIdentifier" minOccurs="0"/>
+				<xs:element ref="NormalProposedAccountIdentifier" minOccurs="0"/>
+				<xs:element ref="AccountDimensionText" minOccurs="0"/>
+				<xs:element ref="SellerAccountText" minOccurs="0"/>
+				<xs:element ref="VatSpecificationDetails" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="InvoiceFreeText" minOccurs="0"/>
+				<xs:element ref="PaymentTermsDetails" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InvoiceDueDate" type="date"/>
+	<xs:element name="InvoiceFreeText" type="genericStringType0512"/>
+	<xs:element name="InvoiceNumber">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="1"/>
+				<xs:maxLength value="20"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="InvoiceRecipientAddress" type="genericStringType135"/>
+	<xs:element name="InvoiceRecipientCommunicationDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="InvoiceRecipientPhoneNumberIdentifier" minOccurs="0"/>
+				<xs:element ref="InvoiceRecipientEmailaddressIdentifier" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InvoiceRecipientContactPersonName" type="genericStringType035"/>
+	<xs:element name="InvoiceRecipientDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="InvoiceRecipientAddress"/>
+				<xs:element ref="InvoiceRecipientIntermediatorAddress"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InvoiceRecipientEmailaddressIdentifier" type="genericStringType048"/>
+	<xs:element name="InvoiceRecipientIntermediatorAddress">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="8"/>
+				<xs:maxLength value="11"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="InvoiceRecipientOrganisationName" type="genericStringType135"/>
+	<xs:element name="InvoiceRecipientOrganisationUnitNumber" type="genericStringType035"/>
+	<xs:element name="InvoiceRecipientOrganisationTaxCode" type="genericNMtokenType035"/>
+	<xs:element name="InvoiceRecipientPartyDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="InvoiceRecipientPartyIdentifier" minOccurs="0"/>
+				<xs:element ref="InvoiceRecipientOrganisationName" maxOccurs="unbounded"/>
+				<xs:element ref="InvoiceRecipientOrganisationTaxCode" minOccurs="0"/>
+				<xs:element ref="InvoiceRecipientPostalAddressDetails"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InvoiceRecipientPartyIdentifier" type="genericStringType035"/>
+	<xs:element name="InvoiceRecipientPhoneNumberIdentifier" type="genericStringType035"/>
+	<xs:element name="InvoiceRecipientPostCodeIdentifier" type="genericStringType135"/>
+	<xs:element name="InvoiceRecipientPostOfficeBoxIdentifier" type="genericStringType035"/>
+	<xs:element name="InvoiceRecipientPostalAddressDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="InvoiceRecipientStreetName"/>
+				<xs:element ref="InvoiceRecipientTownName"/>
+				<xs:element ref="InvoiceRecipientPostCodeIdentifier"/>
+				<xs:element ref="CountryCode" minOccurs="0"/>
+				<xs:element ref="CountryName" minOccurs="0"/>
+				<xs:element ref="InvoiceRecipientPostOfficeBoxIdentifier" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InvoiceRecipientStreetName" type="genericStringType235"/>
+	<xs:element name="InvoiceRecipientTownName" type="genericStringType235"/>
+	<xs:element name="InvoiceRow">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="RowSubIdentifier" minOccurs="0"/>
+				<xs:element ref="ArticleIdentifier" minOccurs="0"/>
+				<xs:element ref="ArticleName" minOccurs="0"/>
+				<xs:element ref="ArticleInfoUrlText" minOccurs="0"/>
+				<xs:element ref="BuyerArticleIdentifier" minOccurs="0"/>
+				<xs:element ref="DeliveredQuantity" minOccurs="0"/>
+				<xs:element ref="OrderedQuantity" minOccurs="0"/>
+				<xs:element ref="ConfirmedQuantity" minOccurs="0"/>
+				<xs:element ref="StartDate" minOccurs="0"/>
+				<xs:element ref="EndDate" minOccurs="0"/>
+				<xs:element ref="UnitPriceAmount" minOccurs="0"/>
+				<xs:element ref="RowIdentifier" minOccurs="0"/>
+				<xs:element ref="RowIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="RowIdentifierDate" minOccurs="0"/>
+				<xs:element ref="OriginalInvoiceNumber" minOccurs="0"/>
+				<xs:element ref="RowDeliveryIdentifier" minOccurs="0"/>
+				<xs:element ref="RowDeliveryIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="RowDeliveryDate" minOccurs="0"/>
+				<xs:element ref="RowQuotationIdentifier" minOccurs="0"/>
+				<xs:element ref="RowQuotationIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="RowAgreementIdentifier" minOccurs="0"/>
+				<xs:element ref="RowAgreementIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="RowRequestOfQuotationIdentifier" minOccurs="0"/>
+				<xs:element ref="RowRequestOfQuotationIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="RowPriceListIdentifier" minOccurs="0"/>
+				<xs:element ref="RowPriceListIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="RowDeliveryDetails" minOccurs="0"/>
+				<xs:element ref="RowShortProposedAccountIdentifier" minOccurs="0"/>
+				<xs:element ref="RowNormalProposedAccountIdentifier" minOccurs="0"/>
+				<xs:element ref="RowAccountDimensionText" minOccurs="0"/>
+				<xs:element ref="RowSellerAccountText" minOccurs="0"/>
+				<xs:element ref="RowFreeText" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="RowDiscountPercent" minOccurs="0"/>
+				<xs:element ref="RowVatRatePercent" minOccurs="0"/>
+				<xs:element ref="RowVatAmount" minOccurs="0"/>
+				<xs:element ref="RowVatExcludedAmount" minOccurs="0"/>
+				<xs:element ref="RowAmount" minOccurs="0"/>
+				<xs:element ref="SubInvoiceRow" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InvoiceSenderPartyDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="InvoiceSenderPartyIdentifier" minOccurs="0"/>
+				<xs:element ref="InvoiceSenderOrganisationName" maxOccurs="unbounded"/>
+				<xs:element ref="InvoiceSenderOrganisationTaxCode" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InvoiceSenderPartyIdentifier" type="genericStringType035"/>
+	<xs:element name="InvoiceSenderOrganisationName" type="genericStringType135"/>
+	<xs:element name="InvoiceSenderOrganisationTaxCode" type="genericNMtokenType035"/>
+	<xs:element name="InvoiceTotalVatAmount" type="amount"/>
+	<xs:element name="InvoiceTotalVatExcludedAmount" type="amount"/>
+	<xs:element name="InvoiceTotalVatIncludedAmount" type="amount"/>
+	<xs:complexType name="InvoiceTypeCodeType">
+		<xs:simpleContent>
+			<xs:extension base="xs:NMTOKEN">
+				<xs:attribute name="CodeListAgencyIdentifier">
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:enumeration value="SPY"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:element name="InvoiceTypeCode">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="InvoiceTypeCodeType">
+					<xs:pattern value="(REQ|QUO|ORD|INV|DEV|TES|INF|PRI)[0-9]{2}"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InvoiceTypeText" type="genericStringType135"/>
+	<xs:element name="InvoiceUrlText" type="genericStringType0512"/>
+	<xs:element name="InvoiceUrlNameText" type="genericStringType0512"/>
+	<xs:element name="ManufacturerIdentifier" type="genericStringType035"/>
+	<xs:element name="ManufacturerName" type="genericStringType035"/>
+	<xs:element name="ManufacturerCountryCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:maxLength value="2"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="ManufacturerCountryName" type="genericStringType035"/>
+	<xs:element name="NormalProposedAccountIdentifier">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:minLength value="0"/>
+				<xs:maxLength value="4"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="OrderIdentifier" type="genericStringType035"/>
+	<xs:element name="OrderIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="OrderedQuantity">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="QuantityType">
+					<xs:minLength value="0"/>
+					<xs:maxLength value="14"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="OriginalInvoiceNumber" type="genericStringType035"/>
+	<xs:element name="OriginCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:enumeration value="Copy"/>
+				<xs:enumeration value="Original"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="OriginText" type="genericStringType035"/>
+	<xs:element name="PaidAmount" type="amount"/>
+	<xs:element name="PartialPaymentDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="PaidAmount"/>
+				<xs:element ref="UnPaidAmount"/>
+				<xs:element ref="InterestPercent" minOccurs="0"/>
+				<xs:element ref="ProsessingCostsAmount" minOccurs="0"/>
+				<xs:element ref="PartialPaymentVatIncludedAmount" maxOccurs="unbounded"/>
+				<xs:element ref="PartialPaymentVatExcludedAmount" maxOccurs="unbounded"/>
+				<xs:element ref="PartialPaymentDueDate" maxOccurs="unbounded"/>
+				<xs:element ref="PartialPaymentReferenceIdentifier" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PartialPaymentDueDate" type="date"/>
+	<xs:element name="PartialPaymentReferenceIdentifier" type="genericStringType135"/>
+	<xs:element name="PartialPaymentVatExcludedAmount" type="amount"/>
+	<xs:element name="PartialPaymentVatIncludedAmount" type="amount"/>
+	<xs:element name="PaymentMethodText" type="genericStringType035"/>
+	<xs:element name="PaymentOverDueFineDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="PaymentOverDueFineFreeText" minOccurs="0"/>
+				<xs:element ref="PaymentOverDueFinePercent" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PaymentOverDueFineFreeText" type="genericStringType0512"/>
+	<xs:element name="PaymentOverDueFinePercent" type="percentage"/>
+	<xs:element name="PaymentStatusCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:enumeration value="NOTPAID"/>
+				<xs:enumeration value="PAID"/>
+				<xs:enumeration value="PARTLYPAID"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="PaymentStatusDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="PaymentStatusCode" minOccurs="0"/>
+				<xs:element ref="PaymentMethodText" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PaymentTermsDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="PaymentTermsFreeText" maxOccurs="2"/>
+				<xs:element ref="InvoiceDueDate" minOccurs="0"/>
+				<xs:element ref="CashDiscountDate" minOccurs="0"/>
+				<xs:element ref="CashDiscountBaseAmount" minOccurs="0"/>
+				<xs:element ref="CashDiscountPercent" minOccurs="0"/>
+				<xs:element ref="CashDiscountAmount" minOccurs="0"/>
+				<xs:element ref="PaymentOverDueFineDetails" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="PaymentTermsFreeText" type="xs:string"/>
+	<xs:element name="ProsessingCostsAmount" type="amount"/>
+	<xs:element name="RowAgreementIdentifier" type="genericStringType035"/>
+	<xs:element name="RowAgreementIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="RowAccountDimensionText" type="genericStringType035"/>
+	<xs:element name="RowAmount" type="amount"/>
+	<xs:element name="RowDelivererIdentifier" type="genericStringType035"/>
+	<xs:element name="RowDelivererName" type="genericStringType035"/>
+	<xs:element name="RowDelivererCountryCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:maxLength value="2"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="RowDelivererCountryName" type="genericStringType035"/>
+	<xs:element name="RowDeliveryDate" type="date"/>
+	<xs:element name="RowDeliveryDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="RowTerminalAddressText" minOccurs="0"/>
+				<xs:element ref="RowWaybillIdentifier" minOccurs="0"/>
+				<xs:element ref="RowWaybillTypeCode" minOccurs="0"/>
+				<xs:element ref="RowDelivererIdentifier" minOccurs="0"/>
+				<xs:element ref="RowDelivererName" minOccurs="0" maxOccurs="3"/>
+				<xs:element ref="RowDelivererCountryCode" minOccurs="0"/>
+				<xs:element ref="RowDelivererCountryName" minOccurs="0"/>
+				<xs:element ref="RowManufacturerIdentifier" minOccurs="0"/>
+				<xs:element ref="RowManufacturerName" minOccurs="0" maxOccurs="3"/>
+				<xs:element ref="RowManufacturerCountryCode" minOccurs="0"/>
+				<xs:element ref="RowManufacturerCountryName" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RowDeliveryIdentifier" type="genericStringType035"/>
+	<xs:element name="RowDeliveryIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="RowDiscountPercent" type="percentage"/>
+	<xs:element name="RowFreeText" type="genericStringType0512"/>
+	<xs:element name="RowIdentifier" type="genericStringType035"/>
+	<xs:element name="RowIdentifierDate" type="date"/>
+	<xs:element name="RowIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="RowManufacturerIdentifier" type="genericStringType035"/>
+	<xs:element name="RowManufacturerName" type="genericStringType035"/>
+	<xs:element name="RowManufacturerCountryCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:maxLength value="2"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="RowManufacturerCountryName" type="genericStringType035"/>
+	<xs:element name="RowNormalProposedAccountIdentifier">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:minLength value="0"/>
+				<xs:maxLength value="4"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="RowPriceListIdentifier" type="genericStringType035"/>
+	<xs:element name="RowPriceListIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="RowQuotationIdentifier" type="genericStringType035"/>
+	<xs:element name="RowQuotationIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="RowRequestOfQuotationIdentifier" type="genericStringType035"/>
+	<xs:element name="RowRequestOfQuotationIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="RowSellerAccountText" type="genericStringType035"/>
+	<xs:element name="RowShortProposedAccountIdentifier">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:minLength value="0"/>
+				<xs:maxLength value="4"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="RowSubIdentifier" type="genericStringType035"/>
+	<xs:element name="RowTerminalAddressText" type="genericStringType070"/>
+	<xs:element name="RowVatAmount" type="amount"/>
+	<xs:element name="RowVatExcludedAmount" type="amount"/>
+	<xs:element name="RowVatRatePercent" type="percentage"/>
+	<xs:element name="RowWaybillIdentifier" type="genericStringType035"/>
+	<xs:element name="RowWaybillTypeCode" type="genericStringType035"/>
+	<xs:element name="SellerAccountDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SellerAccountID"/>
+				<xs:element ref="SellerBic"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="SellerAccountIDType">
+		<xs:simpleContent>
+			<xs:extension base="xs:NMTOKEN">
+				<xs:attribute name="IdentificationSchemeName">
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:enumeration value="IBAN"/>
+							<xs:enumeration value="BBAN"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:element name="SellerAccountID">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="SellerAccountIDType">
+					<xs:minLength value="2"/>
+					<xs:maxLength value="35"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="SellerBicType">
+		<xs:simpleContent>
+			<xs:extension base="xs:NMTOKEN">
+				<xs:attribute name="IdentificationSchemeName">
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:enumeration value="BIC"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:element name="SellerBic">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="SellerBicType">
+					<xs:minLength value="8"/>
+					<xs:maxLength value="11"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SellerAccountText" type="genericStringType035"/>
+	<xs:element name="SellerCommonEmailaddressIdentifier" type="genericStringType048"/>
+	<xs:element name="SellerCommunicationDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SellerPhoneNumberIdentifier" minOccurs="0"/>
+				<xs:element ref="SellerEmailaddressIdentifier" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SellerContactPersonName" type="genericStringType035"/>
+	<xs:element name="SellerEmailaddressIdentifier" type="genericStringType048"/>
+	<xs:element name="SellerFaxNumber" type="genericStringType035"/>
+	<xs:element name="SellerFreeText" type="genericStringType0512"/>
+	<xs:element name="SellerHomeTownName" type="genericStringType035"/>
+	<xs:element name="SellerInformationDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SellerHomeTownName" minOccurs="0"/>
+				<xs:element ref="SellerVatRegistrationText" minOccurs="0"/>
+				<xs:element ref="SellerVatRegistrationDate" minOccurs="0"/>
+				<xs:element ref="SellerPhoneNumber" minOccurs="0"/>
+				<xs:element ref="SellerFaxNumber" minOccurs="0"/>
+				<xs:element ref="SellerCommonEmailaddressIdentifier" minOccurs="0"/>
+				<xs:element ref="SellerWebaddressIdentifier" minOccurs="0"/>
+				<xs:element ref="SellerFreeText" minOccurs="0"/>
+				<xs:element ref="SellerAccountDetails" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="InvoiceRecipientDetails" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SellerOrganisationName" type="genericStringType235"/>
+	<xs:element name="SellerOrganisationTaxCode" type="genericStringType035"/>
+	<xs:element name="SellerOrganisationTaxCodeUrlText" type="genericStringType0512"/>
+	<xs:element name="SellerOrganisationUnitNumber" type="genericStringType035"/>
+	<xs:element name="SellerPartyDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SellerPartyIdentifier" minOccurs="0"/>
+				<xs:element ref="SellerPartyIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="SellerOrganisationName" maxOccurs="unbounded"/>
+				<xs:element ref="SellerOrganisationTaxCode" minOccurs="0"/>
+				<xs:element ref="SellerOrganisationTaxCodeUrlText" minOccurs="0"/>
+				<xs:element ref="SellerPostalAddressDetails" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SellerPartyIdentifier" type="genericStringType035"/>
+	<xs:element name="SellerPartyIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="SellerPhoneNumber" type="genericStringType035"/>
+	<xs:element name="SellerPhoneNumberIdentifier" type="genericStringType035"/>
+	<xs:element name="SellerPostCodeIdentifier" type="genericStringType235"/>
+	<xs:element name="SellerPostOfficeBoxIdentifier" type="genericStringType035"/>
+	<xs:element name="SellerPostalAddressDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SellerStreetName"/>
+				<xs:element ref="SellerTownName"/>
+				<xs:element ref="SellerPostCodeIdentifier"/>
+				<xs:element ref="CountryCode" minOccurs="0"/>
+				<xs:element ref="CountryName" minOccurs="0"/>
+				<xs:element ref="SellerPostOfficeBoxIdentifier" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SellerReferenceIdentifier" type="genericStringType035"/>
+	<xs:element name="SellerReferenceIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="SellerStreetName" type="genericStringType235"/>
+	<xs:element name="SellerTownName" type="genericStringType235"/>
+	<xs:element name="SellerVatRegistrationDate" type="date"/>
+	<xs:element name="SellerVatRegistrationText" type="genericStringType035"/>
+	<xs:element name="SellerWebaddressIdentifier" type="genericStringType035"/>
+	<xs:element name="ShortProposedAccountIdentifier">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:minLength value="0"/>
+				<xs:maxLength value="4"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="SpecificationDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SpecificationFreeText" minOccurs="0" maxOccurs="unbounded"/>
+				<!--                <xs:any namespace="##any" minOccurs="0" maxOccurs="unbounded"/>-->
+			</xs:sequence>
+			<xs:anyAttribute namespace="##any"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SpecificationFreeText" type="genericStringType0120"/>
+	<xs:element name="StartDate" type="date"/>
+	<xs:element name="SubArticleIdentifier" type="genericStringType035"/>
+	<xs:element name="SubArticleInfoUrlText" type="genericStringType0512"/>
+	<xs:element name="SubArticleName" type="genericStringType070"/>
+	<xs:element name="SubBuyerArticleIdentifier" type="genericStringType035"/>
+	<xs:element name="SubConfirmedQuantity">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="QuantityType">
+					<xs:minLength value="0"/>
+					<xs:maxLength value="14"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SubDeliveredQuantity">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="QuantityType">
+					<xs:minLength value="0"/>
+					<xs:maxLength value="14"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SubEndDate" type="date"/>
+	<xs:element name="SubIdentifier" type="genericStringType035"/>
+	<xs:element name="SubInvoiceRow">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SubIdentifier" minOccurs="0"/>
+				<xs:element ref="SubArticleIdentifier" minOccurs="0"/>
+				<xs:element ref="SubArticleName" minOccurs="0"/>
+				<xs:element ref="SubArticleInfoUrlText" minOccurs="0"/>
+				<xs:element ref="SubBuyerArticleIdentifier" minOccurs="0"/>
+				<xs:element ref="SubDeliveredQuantity" minOccurs="0"/>
+				<xs:element ref="SubOrderedQuantity" minOccurs="0"/>
+				<xs:element ref="SubConfirmedQuantity" minOccurs="0"/>
+				<xs:element ref="SubStartDate" minOccurs="0"/>
+				<xs:element ref="SubEndDate" minOccurs="0"/>
+				<xs:element ref="SubUnitPriceAmount" minOccurs="0"/>
+				<xs:element ref="SubRowIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="SubRowIdentifierDate" minOccurs="0"/>
+				<xs:element ref="SubOriginalInvoiceNumber" minOccurs="0"/>
+				<xs:element ref="SubRowDeliveryIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowDeliveryIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="SubRowDeliveryDate" minOccurs="0"/>
+				<xs:element ref="SubRowQuotationIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowQuotationIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="SubRowAgreementIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowAgreementIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="SubRowRequestOfQuotationIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowRequestOfQuotationIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="SubRowPriceListIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowPriceListIdentifierUrlText" minOccurs="0"/>
+				<xs:element ref="SubRowDeliveryDetails" minOccurs="0"/>
+				<xs:element ref="SubRowShortProposedAccountIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowNormalProposedAccountIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowAccountDimensionText" minOccurs="0"/>
+				<xs:element ref="SubRowSellerAccountText" minOccurs="0"/>
+				<xs:element ref="SubRowFreeText" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="SubRowDiscountPercent" minOccurs="0"/>
+				<xs:element ref="SubRowVatRatePercent" minOccurs="0"/>
+				<xs:element ref="SubRowVatAmount" minOccurs="0"/>
+				<xs:element ref="SubRowVatExcludedAmount" minOccurs="0"/>
+				<xs:element ref="SubRowAmount" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SubOriginalInvoiceNumber" type="genericStringType035"/>
+	<xs:element name="SubOrderedQuantity">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:restriction base="QuantityType">
+					<xs:minLength value="0"/>
+					<xs:maxLength value="14"/>
+				</xs:restriction>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SubRowAccountDimensionText" type="genericStringType035"/>
+	<xs:element name="SubRowAgreementIdentifier" type="genericStringType035"/>
+	<xs:element name="SubRowAgreementIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="SubRowAmount" type="amount"/>
+	<xs:element name="SubRowDelivererIdentifier" type="genericStringType035"/>
+	<xs:element name="SubRowDelivererName" type="genericStringType035"/>
+	<xs:element name="SubRowDelivererCountryCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:maxLength value="2"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="SubRowDelivererCountryName" type="genericStringType035"/>
+	<xs:element name="SubRowDeliveryDate" type="date"/>
+	<xs:element name="SubRowDeliveryDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SubRowTerminalAddressText" minOccurs="0"/>
+				<xs:element ref="SubRowWaybillIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowWaybillTypeCode" minOccurs="0"/>
+				<xs:element ref="SubRowDelivererIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowDelivererName" minOccurs="0" maxOccurs="3"/>
+				<xs:element ref="SubRowDelivererCountryCode" minOccurs="0"/>
+				<xs:element ref="SubRowDelivererCountryName" minOccurs="0"/>
+				<xs:element ref="SubRowManufacturerIdentifier" minOccurs="0"/>
+				<xs:element ref="SubRowManufacturerName" minOccurs="0" maxOccurs="3"/>
+				<xs:element ref="SubRowManufacturerCountryCode" minOccurs="0"/>
+				<xs:element ref="SubRowManufacturerCountryName" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SubRowDeliveryIdentifier" type="genericStringType035"/>
+	<xs:element name="SubRowDeliveryIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="SubRowDiscountPercent" type="percentage"/>
+	<xs:element name="SubRowFreeText" type="genericStringType0512"/>
+	<xs:element name="SubRowIdentifier">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:minLength value="0"/>
+				<xs:maxLength value="14"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="SubRowIdentifierDate" type="date"/>
+	<xs:element name="SubRowIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="SubRowManufacturerIdentifier" type="genericStringType035"/>
+	<xs:element name="SubRowManufacturerName" type="genericStringType035"/>
+	<xs:element name="SubRowManufacturerCountryCode">
+		<xs:simpleType>
+			<xs:restriction base="xs:NMTOKEN">
+				<xs:maxLength value="2"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:element>
+	<xs:element name="SubRowManufacturerCountryName" type="genericStringType035"/>
+	<xs:element name="SubRowNormalProposedAccountIdentifier" type="genericStringType04"/>
+	<xs:element name="SubRowPriceListIdentifier" type="genericStringType035"/>
+	<xs:element name="SubRowPriceListIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="SubRowQuotationIdentifier" type="genericStringType035"/>
+	<xs:element name="SubRowQuotationIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="SubRowRequestOfQuotationIdentifier" type="genericStringType035"/>
+	<xs:element name="SubRowRequestOfQuotationIdentifierUrlText" type="genericStringType0512"/>
+	<xs:element name="SubRowSellerAccountText" type="genericStringType035"/>
+	<xs:element name="SubRowShortProposedAccountIdentifier" type="genericStringType04"/>
+	<xs:element name="SubRowTerminalAddressText" type="genericStringType070"/>
+	<xs:element name="SubRowVatAmount" type="amount"/>
+	<xs:element name="SubRowVatExcludedAmount" type="amount"/>
+	<xs:element name="SubRowVatRatePercent" type="percentage"/>
+	<xs:element name="SubRowWaybillIdentifier" type="genericStringType035"/>
+	<xs:element name="SubRowWaybillTypeCode" type="genericNMtokenType035"/>
+	<xs:element name="SubStartDate" type="date"/>
+	<xs:element name="SubUnitPriceAmount" type="unitamount"/>
+	<xs:element name="TerminalAddressText" type="genericStringType0512"/>
+	<xs:element name="UnPaidAmount" type="amount"/>
+	<xs:element name="UnitPriceAmount" type="unitamount"/>
+	<xs:element name="VatBaseAmount" type="amount"/>
+	<xs:element name="VatFreeText" type="xs:string"/>
+	<xs:element name="VatRateAmount" type="amount"/>
+	<xs:element name="VatRatePercent" type="percentage"/>
+	<xs:element name="VatSpecificationDetails">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="VatBaseAmount"/>
+				<xs:element ref="VatRatePercent"/>
+				<xs:element ref="VatRateAmount"/>
+				<xs:element ref="VatFreeText" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="VirtualBankBarcode" type="genericStringType0512"/>
+	<xs:element name="WaybillIdentifier" type="genericStringType035"/>
+	<xs:element name="WaybillTypeCode" type="genericStringType035"/>
+	<!-- Common types -->
+	<xs:complexType name="QuantityType">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="QuantityUnitCode">
+					<xs:simpleType>
+						<xs:restriction base="xs:token">
+							<xs:minLength value="0"/>
+							<xs:maxLength value="14"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="genericNMtokenType014">
+		<xs:restriction base="xs:NMTOKEN">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="14"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericNMtokenType035">
+		<xs:restriction base="xs:NMTOKEN">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="35"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericNMtokenType0512">
+		<xs:restriction base="xs:NMTOKEN">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="35"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType04">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="4"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType020">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="20"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType035">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="35"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType048">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="48"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType070">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="70"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType080">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="80"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType0120">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="120"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType0512">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="512"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType135">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="35"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="genericStringType235">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="2"/>
+			<xs:maxLength value="35"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="percentage">
+		<xs:restriction base="xs:string">
+			<xs:pattern value="[1-9]?[0-9]{1,2}(,[0-9]{0,3})?"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="date">
+		<xs:simpleContent>
+			<xs:extension base="dateType">
+				<xs:attribute name="Format" use="optional">
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:enumeration value="CCYYMMDD"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="dateType">
+		<xs:restriction base="xs:integer">
+			<xs:pattern value="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="amount">
+		<xs:simpleContent>
+			<xs:extension base="monetaryAmount">
+				<xs:attribute name="AmountCurrencyIdentifier">
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:length value="3"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="monetaryAmount">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="-?[0-9]+(,[0-9]{2})?"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="unitamount">
+		<xs:simpleContent>
+			<xs:extension base="unitAmountType">
+				<xs:attribute name="AmountCurrencyIdentifier">
+					<xs:simpleType>
+						<xs:restriction base="xs:NMTOKEN">
+							<xs:length value="3"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:attribute>
+				<xs:attribute name="UnitPriceUnitCode" type="xs:string"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="unitAmountType">
+		<xs:restriction base="xs:token">
+			<xs:pattern value="-?[0-9]+(,[0-9]{2,5})?"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

@@ -24,7 +24,10 @@
 
 			if ($abcrajaus != "") {
 				// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
-				$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = 'TK' and abc_aputaulu.luokka <= '$abcrajaus') ";
+				$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and
+							abc_aputaulu.tuoteno = tuote.tuoteno and
+							abc_aputaulu.tyyppi = '$abcrajaustapa' and
+							(abc_aputaulu.luokka <= '$abcrajaus' or abc_aputaulu.luokka_osasto <= '$abcrajaus' or abc_aputaulu.luokka_try <= '$abcrajaus'))";
 			}
 
 			if ($toimittaja != "") {
@@ -372,23 +375,41 @@
 		echo "</td></tr>
 			<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='toimittaja' value='$toimittaja'></td></tr>";
 
-		$sel = array();
-		$sel[$abcrajaus] = "SELECTED";
-		
-		echo "<tr><th>".t("ABC-luokkarajaus")."</th><td>
-		<select name='abcrajaus'>
-		<option value=''>Ei rajausta</option>
-		<option $sel[0] value='0'>Luokka A-30</option>
-		<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
-		<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
-		<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
-		<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
-		<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
-		<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
-		<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
-		<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
-		</select>
-		</td></tr>";
+		// katotaan onko abc aputaulu rakennettu
+		$query  = "select count(*) from abc_aputaulu where yhtio='$kukarow[yhtio]' and tyyppi in ('TK','TR','TP')";
+		$abcres = mysql_query($query) or pupe_error($query);
+		$abcrow = mysql_fetch_array($abcres);
+
+		// jos on niin näytetään tällänen vaihtoehto
+		if ($abcrow[0] > 0) {
+			echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td>";
+
+			$sel = array();
+			$sel[$abcrajaus] = "SELECTED";
+
+			echo "<select name='abcrajaus'>
+			<option value=''>Ei rajausta</option>
+			<option $sel[0] value='0'>Luokka A-30</option>
+			<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
+			<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
+			<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
+			<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
+			<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
+			<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
+			<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
+			<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
+			</select>";
+
+			$sel = array();
+			$sel[$abcrajaustapa] = "SELECTED";
+
+			echo "<select name='abcrajaustapa'>
+			<option $sel[TK] value='TK'>Myyntikate</option>
+			<option $sel[TR] value='TR'>Myyntirivit</option>
+			<option $sel[TP] value='TK'>Myyntikappaleet</option>
+			</select>
+			</td></tr>";
+		}
 
 		echo "</table><br>
 		<input type = 'submit' value = '".t("Generoi siirtolista")."'>

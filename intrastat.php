@@ -271,14 +271,16 @@
 			fclose($fh);
 
 			$message = '';
-			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>";
+			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; // tämä on tullin virallinen osoite
+			// $recipient = "pgp-key Customs Finland <test.ascii.intrastat@tulli.fi>"; // tämä on tullin testiosoite
 			$message = $label;
 			require("inc/gpg.inc");
 			$label = $encrypted_message;
 
 			//PGP-encryptaus atktietue
 			$message = '';
-			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>";
+			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; // tämä on tullin virallinen osoite
+			// $recipient = "pgp-key Customs Finland <test.ascii.intrastat@tulli.fi>"; // tämä on tullin testitunnus
 			$message = $lah.$ots.$nim.$sum;
 			require("inc/gpg.inc");
 

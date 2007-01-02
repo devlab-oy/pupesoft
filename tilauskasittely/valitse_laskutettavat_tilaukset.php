@@ -342,20 +342,20 @@
 
 			if ($yhtiorow["sad_lomake_tyyppi"] == "T" and $ekarow["vienti"] == "K") {
 				echo "<tr><th>".t("Tulosta SAD-lomake").":</th><td><select name='valittu_sadtulostin'>";
-				
+
 				echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-				
+
 				mysql_data_seek($kirre,0);
 
 				while ($kirrow = mysql_fetch_array($kirre)) {
 					echo "<option value='$kirrow[tunnus]' $sel>$kirrow[kirjoitin]</option>";
 				}
 				echo "</select></td></tr>";
-				
+
 				echo "<tr><th>".t("Tulosta SAD-lomakkeen lisäsivut").":</th><td><select name='valittu_sadlitulostin'>";
-				
+
 				echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-				
+
 				mysql_data_seek($kirre,0);
 
 				while ($kirrow = mysql_fetch_array($kirre)) {
@@ -363,7 +363,7 @@
 				}
 				echo "</select></td></tr>";
 			}
-			
+
 			echo "</table>";
 			echo "<br><input type='submit' value='".t("Laskuta")."'>";
 		}
@@ -378,7 +378,7 @@
 		echo "<form action='$PHP_SELF' name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value=''>";
-		echo t("Etsi asiakasta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
+		echo "<table><tr><th>".t("Etsi asiakasta")."</th><td><input type='text' name='etsi'></td><td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr></table></form><br>";
 
 		$haku='';
 		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";

@@ -169,8 +169,9 @@ if ($tee == "SYOTTO") {
 		fclose($fh);
 
 		// itse print komento...
-		$line = exec("$tulostakuitti -# 2 $pdffilenimi");
-
+		$line = exec("$tulostakuitti $pdffilenimi");
+		$line = exec("$tulostakuitti $pdffilenimi");
+	
 		//poistetaan tmp file samantien kuleksimasta...
 		$line = exec("rm -f $pdffilenimi");
 

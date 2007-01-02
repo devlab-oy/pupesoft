@@ -1138,7 +1138,7 @@
 					}
 					elseif ($kukarow["eposti"] != '') {
 						// l‰hetet‰‰n meili
-						$kutsu = "lasku-$lasku";
+						$kutsu = "lasku $lasku";
 						$liite = $pdffilenimi;
 						include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 					}
@@ -1158,7 +1158,7 @@
 						}
 						elseif ($kukarow["eposti"] != '') {
 							// l‰hetet‰‰n meili
-							$kutsu = "lasku-$lasku";
+							$kutsu = "lasku $lasku";
 							$liite = $pdffilenimi;
 							include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 						}

@@ -271,16 +271,16 @@
 			fclose($fh);
 
 			$message = '';
-			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; // tämä on tullin virallinen osoite
-			// $recipient = "pgp-key Customs Finland <test.ascii.intrastat@tulli.fi>"; // tämä on tullin testiosoite
+			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; // tämä on tullin virallinen avain
+			// $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; // tämä on tullin testiavain
 			$message = $label;
 			require("inc/gpg.inc");
 			$label = $encrypted_message;
 
 			//PGP-encryptaus atktietue
 			$message = '';
-			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; // tämä on tullin virallinen osoite
-			// $recipient = "pgp-key Customs Finland <test.ascii.intrastat@tulli.fi>"; // tämä on tullin testitunnus
+			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; // tämä on tullin virallinen avain
+			// $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; // tämä on tullin testiavain
 			$message = $lah.$ots.$nim.$sum;
 			require("inc/gpg.inc");
 
@@ -293,9 +293,9 @@
 
 			$bound = uniqid(time()."_") ;
 
-			$header  = "From: <juppe@arwidson.fi>\r\n";
-			$header .= "MIME-Version: 1.0\r\n" ;
-			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
+			$header  = "From: <$yhtiorow[admin_email]>\r\n";
+			$header .= "MIME-Version: 1.0\r\n";
+			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n";
 
 			$content = "--$bound\r\n";
 
@@ -307,16 +307,17 @@
 
 			$content .= "--$bound\r\n";
 
-			$content .= "Content-Type: application/pgp-encrypted;\r\n" ;
-			$content .= "Content-Transfer-Encoding: base64\r\n" ;
+			$content .= "Content-Type: application/pgp-encrypted;\r\n";
+			$content .= "Content-Transfer-Encoding: base64\r\n";
 			$content .= "Content-Disposition: attachment; filename=\"tietue.pgp\"\r\n\r\n";
 			$content .= chunk_split(base64_encode($atk));
-			$content .= "\r\n" ;
+			$content .= "\r\n";
 
 			$content .= "--$bound\r\n";
 
-			$to = 'ascii.intrastat@tulli.fi';
-			mail($to, "", $content, $header, "-f juppe@arwidson.fi");
+			$to = 'ascii.intrastat@tulli.fi'; // tämä on tullin virallinen osoite
+			// $to = 'test.ascii.intrastat@tulli.fi'; // tämä on tullin testiosoite
+			mail($to, "", $content, $header, "-f $yhtiorow[admin_email]");
 
 			$to = $yhtiorow["admin_email"];
 			mail($to, "", $content, $header);

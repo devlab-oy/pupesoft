@@ -49,9 +49,10 @@
 			if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 			fclose($fh);
     		
-			// itse print komento...
-			$line = exec("$tulostakuitti -# 2 $pdffilenimi");
-    		
+			// itse print komento...Koska ei ole luotettavaa tapaa tehdä kahta kopiota, niin printataan kahdesti
+			$line = exec("$tulostakuitti $pdffilenimi");
+    			$line = exec("$tulostakuitti $pdffilenimi");
+
 			//poistetaan tmp file samantien kuleksimasta...
 			$line = exec("rm -f $pdffilenimi");
     		

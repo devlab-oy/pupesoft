@@ -2,12 +2,16 @@
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Lasku onkin faktoroitu")."</font><hr>";
+echo "<font class='head'>".t("Muuta factorointia")."</font><hr>";
 
 if (isset($maksuehto) and isset($tunnus)) {
 
 	// tutkaillaan maksuehtoa
 	$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto' and factoring!=''";
+	if ($laji == 'pois') {
+		$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto' and factoring=''";
+	}
+
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -20,7 +24,7 @@ if (isset($maksuehto) and isset($tunnus)) {
 	}
 	
 	// tutkaillaan laskua
-	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and mapvm = '0000-00-00'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
@@ -75,10 +79,13 @@ if (isset($maksuehto) and isset($tunnus)) {
 
 	// tehdään kirjanpitomuutokset
 	$query = "update tiliointi set tilino='$yhtiorow[factoringsaamiset]' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[myyntisaamiset]' and tapvm='$laskurow[tapvm]'";
+	if ($laji == 'pois') {
+		$query = "update tiliointi set tilino='$yhtiorow[myyntisaamiset]' where yhtio='$kukarow[yhtio]' and ltunnus='$tunnus' and tilino='$yhtiorow[factoringsaamiset]' and tapvm='$laskurow[tapvm]'";
+	}
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_affected_rows() > 0) {
-		echo "<font class='message'>".t("Korjattiin kirjanpitoviennit")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";	
+		echo "<font class='message'>".t("Korjattiin kirjanpitoviennit")." (".mysql_affected_rows()." ".t("kpl").").</font><br>";
 	}
 	else {
 		echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
@@ -97,11 +104,27 @@ if (isset($laskuno)) {
 				and lasku.laskunro='$laskuno' 
 				and tila='U' 
 				and alatila='X' 
-				and factoring=''";
+				and factoring=''
+				and mapvm = '0000-00-00'";
+	if ($laji == 'pois') {
+		$query = "select *, lasku.tunnus ltunnus 
+			from lasku, maksuehto 
+			where lasku.yhtio='$kukarow[yhtio]' 
+			and lasku.yhtio=maksuehto.yhtio
+			and lasku.maksuehto=maksuehto.tunnus
+			and lasku.laskunro='$laskuno' 
+			and tila='U' 
+			and alatila='X' 
+			and factoring!=''
+			and mapvm = '0000-00-00'";
+	}
 	$result = mysql_query($query) or pupe_error($query);
 	
 	if (mysql_num_rows($result) == 0) {
-		echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei löydy normaalia laskua")."!</font><br><br>";
+		if ($laji == 'pois')
+			echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei löydy factoroitua laskua")."!</font><br><br>";
+		else 
+			echo "<font class='error'>".t("Laskunumerolla")." '$laskuno' ".t("ei löydy normaalia laskua")."!</font><br><br>";
 		unset($laskuno);
 	}
 	else {
@@ -109,7 +132,7 @@ if (isset($laskuno)) {
 
 		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "<input name='tunnus' type='hidden' value='$laskurow[ltunnus]'>";
-		
+		echo "<input name='laji' type='hidden' value='$laji'>";
 		echo "<table>
 			<tr><th>".t("Laskutusosoite")."</th><th>".t("Toimitusosoite")."</th></tr>
 			<tr><td>$laskurow[ytunnus]<br> $laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]</td><td>$laskurow[ytunnus]<br> $laskurow[toim_nimi] $laskurow[toim_nimitark]<br> $laskurow[toim_osoite]<br> $laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>
@@ -122,10 +145,18 @@ if (isset($laskuno)) {
 			<td>";
 
 		// haetaan kaikki factoringmaksuehdot
-		$query = "	SELECT tunnus, concat_ws(' ', kassa_teksti, teksti) selite
+		$query = "SELECT tunnus, concat_ws(' ', kassa_teksti, teksti) selite
+				FROM maksuehto
+				WHERE yhtio = '$kukarow[yhtio]' and factoring!=''
+				ORDER BY jarjestys, teksti";
+
+		if ($laji == 'pois') {
+			$query = "SELECT tunnus, concat_ws(' ', kassa_teksti, teksti) selite
 					FROM maksuehto
-					WHERE yhtio = '$kukarow[yhtio]' and factoring!=''
+					WHERE yhtio = '$kukarow[yhtio]' and factoring=''
 					ORDER BY jarjestys, teksti";
+		}
+
 		$vresult = mysql_query($query) or pupe_error($query);
 		
 		echo "<select name='maksuehto'>";
@@ -146,7 +177,9 @@ if (isset($laskuno)) {
 if (!isset($laskuno)) {
 	echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
 	echo "<table><tr>";
-	echo "<th>".t("Syötä laskunumero")."</th>";
+	echo "<td><input type='radio' name='laji' value='paalle' checked> ".t("Lisää factoring")."</td>";
+	echo "<td><input type='radio' name='laji' value='pois'> ".t("Poista factoring")."</td></tr>";
+	echo "<tr><th>".t("Syötä laskunumero")."</th>";
 	echo "<td><input type='text' name='laskuno'></td>";
 	echo "<td class='back'><input name='subnappi' type='submit' value='".t("Hae lasku")."'></td>";
 	echo "</tr></table>";

@@ -125,7 +125,7 @@
 		}
 		else {
 			$query .= "	if(round(sum((tilausrivi.kpl*tilausrivi.hinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.kpl*tilausrivi.hinta/lasku.summa)*lasku.bruttopaino),0), 1) paino,
-						if(round(sum(tilausrivi.kpl*tuote.kehahin),0) > 0.50, round(sum(tilausrivi.kpl*tuote.kehahin),0), 1) rivihinta
+						if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta
 						FROM lasku use index (yhtio_tila_mapvm)";
 		}
 

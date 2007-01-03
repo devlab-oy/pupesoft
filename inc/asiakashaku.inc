@@ -80,14 +80,14 @@ elseif ($ytunnus != '') {
 	}
 
 	if ($monta == 0) {
-		// Ytunnushaku
-		$query	= "	(SELECT * FROM asiakas WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='')
+		// exactihaku
+		$query	= "	(SELECT * FROM asiakas use index (ytunnus_index) WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='')
 					UNION
-					(SELECT * FROM asiakas WHERE $konsyhtiot and asiakasnro = '$ytunnus' and asiakasnro!=0)
+					(SELECT * FROM asiakas use index (asno_index) WHERE $konsyhtiot and asiakasnro = '$ytunnus' and asiakasnro!=0)
 					UNION
-					(SELECT * FROM asiakas WHERE $konsyhtiot and ovttunnus = '$ytunnus' and ovttunnus!='')
+					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus = '$ytunnus' and ovttunnus!='')
 					UNION
-					(SELECT * FROM asiakas WHERE $konsyhtiot and toim_ovttunnus = '$ytunnus' and toim_ovttunnus!='')
+					(SELECT * FROM asiakas use index (toim_ovttunnus_index) WHERE $konsyhtiot and toim_ovttunnus = '$ytunnus' and toim_ovttunnus!='')
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
@@ -104,51 +104,19 @@ elseif ($ytunnus != '') {
 	}
 
 	if ($monta == 0 and is_string($ytunnus)) {
-		// kokeillaan nimen osalla
-		$query	= "	SELECT *
-					FROM asiakas use index (asiakasnimi)
-					WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!=''
-					ORDER BY asiakas.nimi";
-		$result = mysql_query($query) or pupe_error($query);
-		$monta  = mysql_num_rows($result);
-	}
-
-	if ($monta == 0 and is_string($ytunnus)) {
-		// kokeillaan toim_nimen osalla
-		$query	= "	SELECT *
-					FROM asiakas use index (asiakastoim_nimi)
-					WHERE $konsyhtiot and toim_nimi like '%$ytunnus%' and toim_nimi!=''
-					ORDER BY asiakas.nimi";
-		$result = mysql_query($query) or pupe_error($query);
-		$monta  = mysql_num_rows($result);
-	}
-
-	if ($monta == 0 and is_string($ytunnus)) {
-		// kokeillaan nimen ja toim_nimen osalla
-		$query	= "	SELECT *
-					FROM asiakas use index (asiakasnimitark)
-					WHERE $konsyhtiot and nimitark like '%$ytunnus%' and nimitark!=''
-					ORDER BY asiakas.nimi";
-		$result = mysql_query($query) or pupe_error($query);
-		$monta  = mysql_num_rows($result);
-	}
-
-	if ($monta == 0 and is_string($ytunnus)) {
-		// kokeillaan nimen ja toim_nimen osalla
-		$query	= "	SELECT *
-					FROM asiakas use index (asiakastoim_nimitark)
-					WHERE $konsyhtiot and toim_nimitark like '%$ytunnus%' and toim_nimitark!=''
-					ORDER BY asiakas.nimi";
-		$result = mysql_query($query) or pupe_error($query);
-		$monta  = mysql_num_rows($result);
-	}
-
-	if ($monta == 0 and is_string($ytunnus)) {
-		// kokeillaan nimen ja ovt_tunnukset osalla
-		$query	= "	SELECT *
-					FROM asiakas use index (ovttunnus_index)
-					WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!=''
-					ORDER BY asiakas.nimi";
+		// arvailuhaku
+		$query	= "	(SELECT * FROM asiakas use index (asiakasnimi) WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!='')
+					UNION
+					(SELECT * FROM asiakas use index (asiakasnimitark) WHERE $konsyhtiot and nimitark like '%$ytunnus%' and nimitark!='')
+					UNION
+					(SELECT * FROM asiakas use index (asiakastoim_nimi) WHERE $konsyhtiot and toim_nimi like '%$ytunnus%' and toim_nimi!='')
+					UNION
+					(SELECT * FROM asiakas use index (asiakastoim_nimitark) WHERE $konsyhtiot and toim_nimitark like '%$ytunnus%' and toim_nimitark!='')
+					UNION
+					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!='')
+					UNION
+					(SELECT * FROM asiakas WHERE $konsyhtiot and postitp like '%$ytunnus%' and postitp!='')
+					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}

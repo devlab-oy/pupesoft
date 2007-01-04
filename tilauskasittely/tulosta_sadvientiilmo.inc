@@ -46,8 +46,8 @@
 	$rectparambold["width"] = 3.3;
 	$rectparamleima["width"] = 1.0;
 
-	if (!function_exists('dateconv')) {
-		function dateconv ($date) {
+	if (!function_exists('sad_dateconv')) {
+		function sad_dateconv ($date) {
 			//kääntää mysqln vvvv-kk-mm muodon muotoon pp.kk.vv
 			return substr($date,8,2).".".substr($date,5,2).".".substr($date,2,2);
 		}
@@ -70,7 +70,7 @@
 		$pdf2->draw_rectangle(800, 405,  780, 470,								$pages[0], $rectparamleima);
 		$pdf2->draw_text(415, 785, $laskurow["laskunro"],						$pages[0], $ky);
 		$pdf2->draw_rectangle(800, 470,  780, 568,								$pages[0], $rectparamleima);
-		$pdf2->draw_text(497, 785, dateconv($laskurow["tapvm"]),				$pages[0], $ky);
+		$pdf2->draw_text(497, 785, sad_dateconv($laskurow["tapvm"]),				$pages[0], $ky);
 
 		$pdf2->draw_rectangle(780, 405,  755, 518, 								$pages[0], $rectparamleima);
 		$pdf2->draw_text(407, 762, $yhtiorow["nimi"], 							$pages[0], $kasi);
@@ -166,7 +166,7 @@
 			foreach($nimitykset as $nimitys) {
 				$pdf2->draw_text(61,  $apinalask, substr($nimitys,0,35),			$pages[0], $kymppi);
 				$apinalask -= 12;
-			}			
+			}
 
 			//Kenttä 32 Tavaraerän järjestysnumero
 			$pdf2->draw_text(350, 496, "1", 										$pages[0], $kymppi);
@@ -180,7 +180,7 @@
 			//Kenttä 37 Tullimenettely
 			$pdf2->draw_text(395,  448, substr($rivirow["tullikohtelu"],0,2), 		$pages[0], $kymppi);
 			$pdf2->draw_text(425,  448, substr($rivirow["tullikohtelu"],2,2), 		$pages[0], $kymppi);
-			
+
 			//Kenttä 38 Nettopaino
 			$pdf2->draw_text(480, 446, $rivirow["nettop"], 							$pages[0], $kymppi);
 
@@ -188,7 +188,7 @@
 			if ($rivirow["su"] != '') {
 				$pdf2->draw_text(385, 397, $rivirow["kpl"]." ".$rivirow["su_vientiilmo"],		$pages[0], $kymppi);
 			}
-			
+
 			//Kenttä 5 tavaraerien kokonaismäärä
 			$pdf2->draw_text(322, 740, "1", 										$pages[0], $kymppi);
 
@@ -214,7 +214,7 @@
 						$pdf2->draw_rectangle(800, 405,  780, 470,							$lisalehti, $rectparamleima);
 						$pdf2->draw_text(415, 785, $laskurow["laskunro"],					$lisalehti, $ky);
 						$pdf2->draw_rectangle(800, 470,  780, 568,							$lisalehti, $rectparamleima);
-						$pdf2->draw_text(497, 785, dateconv($laskurow["tapvm"]),			$lisalehti, $ky);
+						$pdf2->draw_text(497, 785, sad_dateconv($laskurow["tapvm"]),			$lisalehti, $ky);
 						$pdf2->draw_rectangle(780, 405,  755, 518, 							$lisalehti, $rectparamleima);
 						$pdf2->draw_text(407, 762, $yhtiorow["nimi"], 						$lisalehti, $kasi);
 						$pdf2->draw_rectangle(780, 518,  755, 568, 							$lisalehti, $rectparamleima);
@@ -320,7 +320,7 @@
 						$pdf2->draw_text(mm_pt(155),  mm_pt(20), $yhtiorow["nimi"], 					$lisalehti[0], $kasi);
 						$pdf2->draw_text(mm_pt(155),  mm_pt(15), $kukarow["nimi"], 						$lisalehti[0], $kasi);
 						$pdf2->draw_text(mm_pt(155),  mm_pt(10), $yhtiorow["puhelin"], 					$lisalehti[0], $kasi);
-	
+
 						return($lisalehti[0]);
 					}
 				}
@@ -414,7 +414,7 @@
 					//Kenttä 37 Kohtelukoodi
 					$pdf2->draw_text(mm_pt(140),  mm_pt($rivikohta-17), substr($rivirow["tullikohtelu"],0,2), 	$lisalehti[$sivu], $kymppi);
 					$pdf2->draw_text(mm_pt(149),  mm_pt($rivikohta-17), substr($rivirow["tullikohtelu"],2,2), 	$lisalehti[$sivu], $kymppi);
-					
+
 					//Kenttä 34 Alkuperämaan koodi
 					$pdf2->draw_text(mm_pt(138),  mm_pt($rivikohta-9), $rivirow["alkuperamaa"], 				$lisalehti[$sivu], $kymppi);
 
@@ -445,10 +445,10 @@
 						}
 					}
 					$rivikohta = $rivikohta_bck;
-					
+
 					$pdf2->draw_text(61,  mm_pt($rivikohta-36), "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), 	$lisalehti[$sivu], $kymppi);
 					$pdf2->draw_text(61,  mm_pt($rivikohta-41), "RET.EXP.", 																$lisalehti[$sivu], $kymppi);
-					
+
 					$rivikohta -= 59;
 				}
 				$lask1++;
@@ -567,7 +567,7 @@
 					and yhtio = '$kukarow[yhtio]'
 					and osoite != ''";
 		$varresult = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($varresult) > 0) {
 			$varrow = mysql_fetch_array($varresult);
 			$sijaintipaikka = $varrow["osoite"];
@@ -575,7 +575,7 @@
 		else {
 			$sijaintipaikka = $yhtiorow["osoite"];
 		}
-		
+
 		$pdf2->draw_text(195,  520, "O ".$sijaintipaikka, 							$pages[0], $kymppi);
 
 		//Kenttä 35 Bruttopaino

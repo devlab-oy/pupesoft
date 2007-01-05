@@ -1,9 +1,5 @@
 <?php
 
-	if (mysql_field_name($result, $i) == "maa") {
-		$tmp_maa = $t[$i];
-	}
-
 	if (mysql_field_name($result, $i) == "ytunnus") {
 		if ($ytunnus_select != '') {
 			$t[$i] = $ytunnus_select;
@@ -19,7 +15,7 @@
 			$errori = 1;
 		}
 		else {
-			if (strtoupper($tmp_maa) == 'FI') {
+			if (strtoupper($trow["maa"]) == 'FI') {
 				require ("tarkistaytunnus.inc");
 			}
 

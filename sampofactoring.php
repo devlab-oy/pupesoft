@@ -16,8 +16,8 @@
 					lasku.alatila = 'X' and
 					lasku.summa != 0 and
 					lasku.mapvm = '0000-00-00' and
-					lasku.sisainen = '' and
-					lasku.factoringsiirtonumero = ''";
+					lasku.factoringsiirtonumero = '' and
+					lasku.valkoodi = '$yhtiorow[valkoodi]'";
 		$result = mysql_query ($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 
@@ -84,7 +84,6 @@
 					lasku.tila = 'U' and
 					lasku.alatila = 'X' and
 					lasku.summa != 0 and
-					lasku.sisainen = '' and
 					lasku.mapvm = '0000-00-00' and
 					lasku.factoringsiirtonumero = '' and
 					lasku.valkoodi = '$yhtiorow[valkoodi]'

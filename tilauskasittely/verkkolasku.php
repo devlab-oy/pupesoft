@@ -234,7 +234,7 @@
 
 
 		// lock tables
-		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ";
+		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ";
 		$locre = mysql_query($query) or pupe_error($query);
 
 		//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -854,11 +854,14 @@
 						finvoice_otsikko_loput($tootfinvoice, $lasrow, $masrow);
 					}
 
+					// katotaan miten halutaan sortattavan
+					$sorttauskentta = generoi_sorttauskentta();
+					
 					// Kirjoitetaan rivitietoja tilausriveilt‰
-					$query = "	select *, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-								from tilausrivi
-								where yhtio='$kukarow[yhtio]' and otunnus in ($tunnukset) and kpl<>0
-								order by otunnus, sorttauskentta, tuoteno, tunnus";
+					$query = "	SELECT *, $sorttauskentta
+								FROM tilausrivi
+								WHERE yhtio='$kukarow[yhtio]' and otunnus in ($tunnukset) and kpl<>0
+								ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
 					$tilres = mysql_query($query) or pupe_error($query);
 
 					$rivinumero = 1;
@@ -961,6 +964,10 @@
 			unlink($nimiedi);
 		}
 
+		// poistetaan lukot
+		$query = "UNLOCK TABLES";
+		$locre = mysql_query($query) or pupe_error($query);
+
 		// jos laskutettiin jotain
 		if ($lask > 0) {
 
@@ -1055,18 +1062,19 @@
 
 					if ($yhtiorow['laskutyyppi'] == 0) {
 						require_once("tulosta_lasku.inc");
-						$laskujarj = 'otunnus, sorttauskentta, tuoteno';
 					}
 					else {
 						require_once("tulosta_lasku_plain.inc");
-						$laskujarj = 'otunnus, tilaajanrivinro, tunnus';
 					}
 
+					// katotaan miten halutaan sortattavan
+					$sorttauskentta = generoi_sorttauskentta();
+
 					// haetaan tilauksen kaikki rivit
-					$query = "	SELECT *, concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
+					$query = "	SELECT *, $sorttauskentta
 								FROM tilausrivi
 								WHERE uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
-								ORDER BY $laskujarj";
+								ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 
 					$sivu 	= 1;
@@ -1269,9 +1277,6 @@
 		elseif($silent == "") {
 			$tulos_ulos .= t("Yht‰‰n laskua ei siirretty/tulostettu!")."<br>\n";
 		}
-
-		$query = "UNLOCK TABLES";
-		$locre = mysql_query($query) or pupe_error($query);
 
 		// l‰hetet‰‰n meili vaan jos on jotain laskutettavaa
 		if ($lask > 0) {

@@ -609,5 +609,29 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "lahetteen_jarjestys") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sela = $trow[$i];
+		$sel = array();
+		$sel[$sela] = "selected";
+
+		$ulos .= "<option value = '0' $sel[0]>".t("Varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun");
+		$ulos .= "<option value = '1' $sel[1]>".t("Varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
+		$ulos .= "<option value = '2' $sel[2]>".t("Varastopaikkaj‰rjestys, erikoistuotteet loppuun");
+		$ulos .= "<option value = '3' $sel[3]>".t("Varastopaikkaj‰rjestys");
+		$ulos .= "<option value = '4' $sel[4]>".t("Tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun");
+		$ulos .= "<option value = '5' $sel[5]>".t("Tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
+		$ulos .= "<option value = '6' $sel[6]>".t("Tuotenumeroj‰rjestys, erikoistuotteet loppuun");
+		$ulos .= "<option value = '7' $sel[7]>".t("Tuotenumeroj‰rjestys");
+		$ulos .= "<option value = '8' $sel[8]>".t("Tilausj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
+		$ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys");
+
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 
 ?>

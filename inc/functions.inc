@@ -535,5 +535,96 @@ if (!function_exists("laskuval")) {
 	}
 }
 
+// Tehdään lähetteen ja laskun sorttauskentät
+if (!function_exists("generoi_sorttauskentta")) {
+
+	function generoi_sorttauskentta() {
+
+		global $kukarow, $yhtiorow;
+
+		$jarjestys = (int) $yhtiorow["lahetteen_jarjestys"];
+		$sorttauskentta = "";
+		
+		// varastopaikkajärjestys, tuoteperheet pidetään yhdessä, erikoistuotteet loppuun
+		if ($jarjestys == "0") {
+			$sorttauskentta = "if (tilausrivi.perheid = 0,
+								if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '',
+									concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno),
+									concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)
+								),
+								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tilausrivi.tuoteno, perheid) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid)
+								) as sorttauskentta";
+		}
+
+		// varastopaikkajärjestys, tuoteperheet pidetään yhdessä
+		if ($jarjestys == "1") {
+			$sorttauskentta = "if (perheid = 0,
+								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno),
+								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tilausrivi.tuoteno, perheid) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid)
+								) as sorttauskentta";
+		}
+
+		// varastopaikkajärjestys, erikoistuotteet loppuun
+		if ($jarjestys == "2") {
+			$sorttauskentta = "if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '',
+								concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno),
+								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)
+								) as sorttauskentta";
+		}
+
+		// varastopaikkajärjestys
+		if ($jarjestys == "3") {
+			$sorttauskentta = "concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) as sorttauskentta";
+		}
+
+		// tuotenumerojärjestys, tuoteperheet pidetään yhdessä, erikoistuotteet loppuun
+		if ($jarjestys == "4") {
+			$sorttauskentta = "if (tilausrivi.perheid = 0,
+								if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '',
+									concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno),
+									tilausrivi.tuoteno
+								),
+								(select concat(tuoteno, perheid) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid)
+								) as sorttauskentta";
+		}
+		
+		// tuotenumerojärjestys, tuoteperheet pidetään yhdessä
+		if ($jarjestys == "5") {
+			$sorttauskentta = "if (tilausrivi.perheid = 0,
+								tilausrivi.tuoteno,
+								(select concat(tilausrivi.tuoteno, perheid) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid)
+								) as sorttauskentta";
+		}
+
+		// tuotenumerojärjestys, erikoistuotteet loppuun
+		if ($jarjestys == "6") {
+			$sorttauskentta = "if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '',
+									concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno),
+									tilausrivi.tuoteno
+								) as sorttauskentta";
+		}
+
+		// tuotenumerojärjestys
+		if ($jarjestys == "7") {
+			$sorttauskentta = "tilausrivi.tuoteno as sorttauskentta";
+		}
+
+		// tilausjärjestys, tuoteperheet pidetään yhdessä
+		if ($jarjestys == "8") {
+			$sorttauskentta = "if (tilausrivi.perheid = 0,
+								tilausrivi.tunnus,
+								(select concat(tilausrivi.tunnus, perheid) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid)
+								) as sorttauskentta";
+		}
+
+		// tilausjärjestys
+		if ($jarjestys == "9") {
+			$sorttauskentta = "tilausrivi.tunnus as sorttauskentta";
+		}
+
+		return $sorttauskentta;
+	}
+}
+
 
 ?>

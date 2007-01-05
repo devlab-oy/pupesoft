@@ -61,8 +61,7 @@
 		$var_lisa .= ",'P'";
 	}
 
-
-	if ($tee == "P") {
+	if ($tee == 'P') {
 		//haetaan kaikki tälle klöntille kuuluvat otsikot
 		$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
 					FROM lasku
@@ -634,13 +633,13 @@
 							$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
 						}
 
+						// katotaan miten halutaan sortattavan
+						$sorttauskentta = generoi_sorttauskentta();
+
 						//generoidaan lähetteelle ja keräyslistalle rivinumerot
 						$query = "	SELECT tilausrivi.*,
 									round((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
-									if(perheid = 0,
-									(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-									(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
-									) as sorttauskentta,
+									$sorttauskentta,
 									$lisa2
 									FROM tilausrivi left join tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 									WHERE tilausrivi.otunnus = '$otunnus'
@@ -746,10 +745,10 @@
 		}
 	}
 
-	if ($id=='') $id=0;
+	if ($id == '') $id = 0;
 
 	// meillä ei ole valittua tilausta
-	if ($id=='0') {
+	if ($id == 0) {
 
 		$formi	= "find";
 		$kentta	= "etsi";
@@ -820,8 +819,7 @@
 		}
 	}
 
-
-	if($id != 0 and $rahtikirjaan == '') {
+	if ($id != 0 and $rahtikirjaan == '') {
 
 		//päivitä kerätyt formi
 		$formi="rivit";

@@ -106,9 +106,9 @@ if ($tee == 'go') {
 	foreach ($apu as $mukaan) {
 
 		if ($mukaan == "ytunnus") {
-			if ($group!="") $group .= ",asiakas.ytunnus";
-			else $group  .= "asiakas.ytunnus";
-			$select .= "asiakas.ytunnus ytunnus, ";
+			if ($group!="") $group .= ",asiakas.liitostunnus";
+			else $group  .= "asiakas.tunnus";
+			$select .= "concat(asiakas.ytunnus, asiakas.toim_ovttunnus) ytunnus, ";
 			$order  .= "asiakas.ytunnus,";
 			$gluku++;
 		}

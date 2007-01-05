@@ -108,7 +108,7 @@ if ($tee == 'go') {
 		if ($mukaan == "ytunnus") {
 			if ($group!="") $group .= ",asiakas.liitostunnus";
 			else $group  .= "asiakas.tunnus";
-			$select .= "concat(asiakas.ytunnus, asiakas.toim_ovttunnus) ytunnus, ";
+			$select .= "concat_ws(' ', asiakas.ytunnus, asiakas.toim_ovttunnus, asiakas.nimi) ytunnus, ";
 			$order  .= "asiakas.ytunnus,";
 			$gluku++;
 		}

@@ -186,7 +186,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 		
 	$query = "	SELECT maksu_tili, lasku.nimi, nimitark, osoite, osoitetark, maakoodi, postino, postitp,
-				summa, valkoodi, viite, viesti, ultilno, lasku.tunnus, sisviesti2, yriti.tilino,
+				summa, lasku.valkoodi, viite, viesti, ultilno, lasku.tunnus, sisviesti2, yriti.tilino,
 				maa, maakoodi,
 				pankki1, pankki2, pankki3, pankki4,
 				swift, alatila, kasumma,
@@ -199,7 +199,7 @@
 				valuu.yhtio = lasku.yhtio and
 				valuu.nimi = lasku.valkoodi and
 				maksaja = '$kukarow[kuka]'
-				ORDER BY maksu_tili, valkoodi, ytunnus";
+				ORDER BY maksu_tili, lasku.valkoodi, ytunnus";
 
 	$result = mysql_query($query) or pupe_error($query);
 

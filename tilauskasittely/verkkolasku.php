@@ -1211,8 +1211,16 @@
 							if (fwrite($fh, $pdf2->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
 							fclose($fh);
 
-							//itse print komento
-							$line = exec("$kirow[komento] $pdffilenimi");
+							if ($kirow["komento"] != "email") {
+								// itse print komento...
+								$line = exec("$kirow[komento] $pdffilenimi");
+							}
+							elseif ($kukarow["eposti"] != '') {
+								// l‰hetet‰‰n meili
+								$kutsu = "lasku $lasku SAD-lomake";
+								$liite = $pdffilenimi;
+								include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
+							}
 
 							//poistetaan tmp file samantien kuleksimasta...
 							system("rm -f $pdffilenimi");
@@ -1239,8 +1247,16 @@
 						if (fwrite($fh, $Xpdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
 						fclose($fh);
 
-						//itse print komento
-						$line = exec("$kirow[komento] $pdffilenimi");
+						if ($kirow["komento"] != "email") {
+							// itse print komento...
+							$line = exec("$kirow[komento] $pdffilenimi");
+						}
+						elseif ($kukarow["eposti"] != '') {
+							// l‰hetet‰‰n meili
+							$kutsu = "lasku $lasku Vientierittely";
+							$liite = $pdffilenimi;
+							include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
+						}
 
 						//poistetaan tmp file samantien kuleksimasta...
 						system("rm -f $pdffilenimi");

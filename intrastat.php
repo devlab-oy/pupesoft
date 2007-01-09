@@ -27,7 +27,7 @@
 
 */
 
-	echo "<font class='head'>".t("Intrastat")." $toim-".t("ilmoitus").":</font><hr>";
+	echo "<font class='head'>Intrastat $toim-ilmoitus:</font><hr>";
 
 	//tuoti vai vienti
 	if ($toim == "tuonti") {
@@ -42,7 +42,7 @@
 		$tilastoloppu = '002';
 	}
 	else {
-		echo t("Koita nyt päättää, haluutko tuontia vai vientiä")."!";
+		echo "Koita nyt päättää, haluutko tuontia vai vientiä!";
 		exit;
 	}
 
@@ -98,7 +98,7 @@
 		$ots .= sprintf ('%-4.4s',		$vuosi.$kuuka);				//tilastointijakso
 		$ots .= sprintf ('%-3.3s',		"T"); 						//tietokäsittelykoodi
 		$ots .= sprintf ('%-13.13s',	""); 						//virheellisen tilastonro, tyhjäksi jätetään....
-		$ots .= sprintf ('%-17.17s', 	t("FI").$ytunnus.$ylisatunnus);//tiedoantovelvollinen
+		$ots .= sprintf ('%-17.17s', 	"FI".$ytunnus.$ylisatunnus);//tiedoantovelvollinen
 		$ots .= sprintf ('%-17.17s', 	"");						//tähän vois laittaa asiamiehen tiedot...
 		$ots .= sprintf ('%-10.10s', 	"");						//tähän vois laittaa asiamiehen lisätiedot...
 		$ots .= sprintf ('%-17.17s', 	$yhtiorow["tilastotullikamari"]);	//tilastotullikamari
@@ -258,24 +258,20 @@
 
 			//PGP-encryptaus labeli
 			$label  = '';
-			$label .= "lähettäjä: $yhtiorow[nimi]\n";
-			$label .= "".t("sisältö: vientitullaus/sisäkaupantilasto")."\n";
-			$label .= "kieli: ASCII\n";
-			$label .= "jakso: $vv$kk\n";
-			$label .= "".t("koko aineiston tietuemäärä").": $lask-1\n";
-			$label .= "".t("koko aineiston vienti-, verotus- tai laskutusarvo").": $arvoyht\n";
-
-			//kirjoitetaan  faili levylle..
-			$fh = fopen("/tmp/INTRASTATlabel.txt", "w+");
-			fwrite($fh, $label);
-			fclose($fh);
+			$label .= "lähettäjä: $yhtiorow[nimi]\r\n";
+			$label .= "sisältö: vientitullaus/sisäkaupantilasto\r\n";
+			$label .= "kieli: ASCII\r\n";
+			$label .= "jakso: $vv$kk\r\n";
+			$label .= "koko aineiston tietuemäärä: $lask-1\r\n";
+			$label .= "koko aineiston vienti-, verotus- tai laskutusarvo: $arvoyht\r\n";
 
 			$message = '';
 			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; // tämä on tullin virallinen avain
 			// $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; // tämä on tullin testiavain
 			$message = $label;
 			require("inc/gpg.inc");
-			$label = $encrypted_message;
+			$otsikko_gpg = $encrypted_message;
+			$otsikko_plain = $message;
 
 			//PGP-encryptaus atktietue
 			$message = '';
@@ -283,69 +279,99 @@
 			// $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; // tämä on tullin testiavain
 			$message = $lah.$ots.$nim.$sum;
 			require("inc/gpg.inc");
-
-			$atk = $encrypted_message;
-
-			//kirjoitetaan  faili levylle..
-			$fh = fopen("/tmp/INTRASTATtietueet.pgp", "w+");
-			fwrite($fh, $atk);
-			fclose($fh);
+			$tietue_gpg = $encrypted_message;
+			$tietue_plain = $message;
 
 			$bound = uniqid(time()."_") ;
 
-			$header  = "From: <$yhtiorow[admin_email]>\r\n";
-			$header .= "MIME-Version: 1.0\r\n";
-			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n";
+			$header  = "From: <$yhtiorow[admin_email]>\n";
+			$header .= "MIME-Version: 1.0\n";
+			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
 
-			$content = "--$bound\r\n";
+			$content = "--$bound\n";
 
-			$content .= "Content-Type: application/pgp-encrypted;\r\n" ;
-			$content .= "Content-Transfer-Encoding: base64\r\n" ;
-			$content .= "Content-Disposition: attachment; filename=\"otsikko.pgp\"\r\n\r\n";
-			$content .= chunk_split(base64_encode($label));
-			$content .= "\r\n";
+			$content .= "Content-Type: application/pgp-encrypted;\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"otsikko.pgp\"\n\n";
+			$content .= chunk_split(base64_encode($otsikko_gpg));
+			$content .= "\n";
 
-			$content .= "--$bound\r\n";
+			$content .= "--$bound\n";
 
-			$content .= "Content-Type: application/pgp-encrypted;\r\n";
-			$content .= "Content-Transfer-Encoding: base64\r\n";
-			$content .= "Content-Disposition: attachment; filename=\"tietue.pgp\"\r\n\r\n";
-			$content .= chunk_split(base64_encode($atk));
-			$content .= "\r\n";
+			$content .= "Content-Type: application/pgp-encrypted;\n";
+			$content .= "Content-Transfer-Encoding: base64\n";
+			$content .= "Content-Disposition: attachment; filename=\"tietue.pgp\"\n\n";
+			$content .= chunk_split(base64_encode($tietue_gpg));
+			$content .= "\n";
 
-			$content .= "--$bound\r\n";
+			$content .= "--$bound\n";
 
-			$to = 'ascii.intrastat@tulli.fi'; // tämä on tullin virallinen osoite
-			// $to = 'test.ascii.intrastat@tulli.fi'; // tämä on tullin testiosoite
-			mail($to, "", $content, $header, "-f $yhtiorow[admin_email]");
+			if ($eitulliin == "") {
+				// lähetetään meili tulliin
+				$to = 'ascii.intrastat@tulli.fi'; // tämä on tullin virallinen osoite
+				// $to = 'test.ascii.intrastat@tulli.fi'; // tämä on tullin testiosoite
+				mail($to, "", $content, $header, "-f $yhtiorow[admin_email]");
+				echo "<font class='message'>Tiedot lähetettiin tulliin.</font><br><br>";
+			}
+			else {
+				echo "<font class='message'>Tietoja EI lähetetty tulliin.</font><br><br>";
+			}
 
-			$to = $yhtiorow["admin_email"];
-			mail($to, "", $content, $header);
+			// liitetään mukaan myös salaamattomat tiedostot
+			$content .= "Content-Type: text/plain;\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: attachment; filename=\"otsikko.txt\"\n\n";
+			$content .= chunk_split(base64_encode($otsikko_plain));
+			$content .= "\n";
 
-			echo "<font class='message'>".t("Lähetys onnistui")."!</font><br>";
+			$content .= "--$bound\n";
+
+			$content .= "Content-Type: text/plain;\n";
+			$content .= "Content-Transfer-Encoding: base64\n";
+			$content .= "Content-Disposition: attachment; filename=\"tietue.txt\"\n\n";
+			$content .= chunk_split(base64_encode($tietue_plain));
+			$content .= "\n";
+
+			$content .= "--$bound\n";
+
+			// jä lähetetään adminille
+			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - Intrastat $toim-ilmoitus", $content, $header, "-f $yhtiorow[admin_email]");
 		}
 		else {
-			echo "<font class='error'>".t("Lähetys epäonnistui")."! ".t("Korjaa virheesi")."!</font><br><br>";
+			echo "<font class='error'>Lähetys epäonnistui! Korjaa virheesi!</font><br><br>";
 		}
 
 		// echotaan taulukko ruudulle
-		echo "$ulos<br>";
+		echo "$ulos";
 	}
 
 	//Käyttöliittymä
 	echo "<br>";
 	echo "<table><form method='post' action='$PHP_SELF'>";
 
-	if (!isset($kk)) $kk = date(m);
-	if (!isset($vv)) $vv = date(Y);
+	if (!isset($kk)) $kk = date("m");
+	if (!isset($vv)) $vv = date("Y");
+
+	$chk = "";
+	if ($eitulliin != "") $chk = "checked";
 
 	echo "<input type='hidden' name='tee' value='tulosta'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
-	echo "<tr><th>".t("Syötä päivämäärä (kk-vvvv)")."</th>
+	echo "
+		<tr>
+			<th>Syötä kausi (kk-vvvv)</th>
 			<td><input type='text' name='kk' value='$kk' size='3'></td>
-			<td><input type='text' name='vv' value='$vv' size='5'></td>";
-	echo "<td class='back'><input type='submit' value='".t("Lähetä tulliin")."'></td></tr></table>";
+			<td><input type='text' name='vv' value='$vv' size='5'></td>
+		</tr>
+		<tr>
+			<th>Älä lähetä tietoja tulliin</th>
+			<td colspan='2'><input type='checkbox' name='eitulliin' $chk></td>
+		</tr>
+	</table>
 
+	<br>
+	<input type='submit' value='Luo aineisto'>
+	</form>";
 
 	require("inc/footer.inc");
 ?>

@@ -284,7 +284,7 @@
 
 			$bound = uniqid(time()."_") ;
 
-			$header  = "From: <$yhtiorow[admin_email]>\n";
+			$header  = "From: <$yhtiorow[postittaja_email]>\n";
 			$header .= "MIME-Version: 1.0\n";
 			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
 
@@ -310,7 +310,7 @@
 				// l‰hetet‰‰n meili tulliin
 				$to = 'ascii.intrastat@tulli.fi'; // t‰m‰ on tullin virallinen osoite
 				// $to = 'test.ascii.intrastat@tulli.fi'; // t‰m‰ on tullin testiosoite
-				mail($to, "", $content, $header, "-f $yhtiorow[admin_email]");
+				mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
 				echo "<font class='message'>Tiedot l‰hetettiin tulliin.</font><br><br>";
 			}
 			else {
@@ -335,7 +335,7 @@
 			$content .= "--$bound\n";
 
 			// j‰ l‰hetet‰‰n adminille
-			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - Intrastat $toim-ilmoitus", $content, $header, "-f $yhtiorow[admin_email]");
+			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - Intrastat $toim-ilmoitus", $content, $header, "-f $yhtiorow[postittaja_email]");
 		}
 		else {
 			echo "<font class='error'>L‰hetys ep‰onnistui! Korjaa virheesi!</font><br><br>";

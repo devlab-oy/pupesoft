@@ -18,7 +18,7 @@ if (!function_exists("pupe_error")) {
 		$puperror = "File: $_SERVER[PHP_SELF]\nUser: $kukarow[kuka]\n\n$query\n\n".mysql_error();
 
 		// l‰hetet‰‰n se meilitse adminille
-		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: $yhtiorow[postittaja_email]\r\n");
+		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: $yhtiorow[postittaja_email]\r\n", "-f $yhtiorow[postittaja_email]");
 
 		// kuollaan pois
 		exit("Kysely ei onnistunut tiedostossa $_SERVER[PHP_SELF].<br><br>$query<br><br>".mysql_error());
@@ -146,7 +146,7 @@ if (!function_exists("t")) {
 		else {
 			$useslave = 0;
 		}
-		
+
 		if ($useslave > 0) { //Voi olla, ett‰ k‰yt‰mme slavea ja INSERT ei siis onnistu
 			$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta lˆydy palvelimelta (functions.inc 1)!");
@@ -463,7 +463,7 @@ if (!function_exists("lpr")) {
 
 			$kirjoitin = mysql_fetch_array($kirre);
 		}
-		
+
 		$pipe = popen("$kirjoitin[komento]", 'w');
 
 		if (!$pipe) {
@@ -544,7 +544,7 @@ if (!function_exists("generoi_sorttauskentta")) {
 
 		$jarjestys = (int) $yhtiorow["lahetteen_jarjestys"];
 		$sorttauskentta = "";
-		
+
 		// varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun
 		if ($jarjestys == "0") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0,
@@ -587,7 +587,7 @@ if (!function_exists("generoi_sorttauskentta")) {
 								(select concat(tuoteno, perheid) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid)
 								) as sorttauskentta";
 		}
-		
+
 		// tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰
 		if ($jarjestys == "5") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0,

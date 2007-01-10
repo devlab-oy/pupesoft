@@ -6,108 +6,372 @@ require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Varastonarvo")."</font><hr>";
 
-// tutkaillaan saadut muuttujat
-$osasto = trim($osasto);
-$try    = trim($try);
+// näitä käytetään queryssä
+$sel_osasto = "";
+$sel_tuoteryhma = "";
 
-if ($osasto == "") $osasto = trim($osasto2);
-if ($try    == "")    $try = trim($try2);
+echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+	<!--
+
+	function toggleAll(toggleBox) {
+
+		var currForm = toggleBox.form;
+		var isChecked = toggleBox.checked;
+		var nimi = toggleBox.name;
+
+		for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+			if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi) {
+				currForm.elements[elementIdx].checked = isChecked;
+			}
+		}
+	}
+
+	//-->
+	</script>";
 
 // piirrellään formi
-echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
+echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
+
+if ($valitaan_useita == "") {
+	
+	echo "<table>";
+	
+	// näytetään soveltuvat osastot
+	$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO' order by selite+0";
+	$res2  = mysql_query($query) or die($query);
+
+	$sel = "";
+	if ($osasto == "kaikki") $sel = "selected";
+	
+	echo "<tr><th>Osasto:</th><td>";
+	echo "<select name='osasto'>";
+	echo "<option value=''>Valitse osasto</option>";
+	echo "<option value='kaikki' $sel>Näytä kaikki</option>";
+
+	while ($rivi = mysql_fetch_array($res2)) {
+		$sel = "";
+		if ($osasto == $rivi["selite"]) {
+			$sel = "selected";
+			$sel_osasto = $rivi["selite"];
+		}
+		echo "<option value='$rivi[selite]' $sel>$rivi[selite] - $rivi[selitetark]</option>";
+	}
+
+	echo "</select></td></tr>";
+
+	$trylisa = "";
+	$sort_osastot = "";
+	if ($osasto != "kaikki" and $sel_osasto != "") {
+		$trylisa = " and osasto='$sel_osasto' ";
+		$sort_osastot = "&osasto=$sel_osasto";
+	}
+
+	// näytetään soveltuvat tuoteryhmät
+	$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='TRY' order by selite+0";
+	$res2   = mysql_query($query) or die($query);
+
+	echo "<tr><th>Tuoteryhmä:</th><td>";
+	echo "<select name='tuoteryhma'>";
+	echo "<option value=''>Valitse tuoteryhmä</option>";
+
+	$sel = "";
+	if ($tuoteryhma == "kaikki") $sel = "selected";
+	echo "<option value='kaikki' $sel>Näytä kaikki</option>";
+
+	while ($rivi = mysql_fetch_array($res2)) {
+		$sel = "";
+		if ($tuoteryhma == $rivi["selite"]) {
+			$sel = "selected";
+			$sel_tuoteryhma = $rivi["selite"];
+		}
+
+		echo "<option value='$rivi[selite]' $sel>$rivi[selite] - $rivi[selitetark]</option>";
+	}
+
+	echo "</select></td>";
+
+	$sort_tryt = "";
+	if ($tuoteryhma != "kaikki" and $sel_tuoteryhma != "") {
+		$sort_tryt = "&tuoteryhma=$sel_tuoteryhma";
+	}
+	
+	echo "<td class='back'><input type='submit' name='valitaan_useita' value='Valitse useita'></td></tr>";
+	echo "</table>";
+}
+else {
+	if ($mul_osasto == "") {
+
+		echo "<table><tr><td valign='top' class='back'>";
+		
+		// näytetään soveltuvat osastot
+		$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO' order by selite+0";
+		$res2  = mysql_query($query) or die($query);
+		
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+	
+		echo "<table>";
+		echo "<tr><th colspan='2'>Valitse osasto(t):</th></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td>Ruksaa kaikki</td></tr>";
+		
+		
+		while ($rivi = mysql_fetch_array($res2)) {
+			echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]'></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+		}
+
+		echo "</table>";
+		
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+		
+		echo "<br>";
+		echo "<input type='submit' name='valitaan_useita' value='Jatka'>";
+
+		echo "</td><td valign='top' class='back'><input type='submit' name='dummy' value='Valitse yksittäin'></td></tr></table>";
+
+	}
+	elseif ($mul_try == "") {
+
+		echo "<table><tr><td valign='top' class='back'>";
+		
+		if (count($mul_osasto) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+		
+		echo "<table>";
+		echo "<tr><th>Osasto(t):</th></tr>";
+
+		$osastot = "";
+		foreach ($mul_osasto as $kala) {
+			echo "<input type='hidden' name='mul_osasto[]' value='$kala'>";
+
+			$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO' and selite='$kala'";
+			$res3   = mysql_query($query) or die($query);
+			$selrow = mysql_fetch_array($res3);
+
+			echo "<tr><td>$kala - $selrow[selitetark]</td></tr>";
+			$osastot .= "'$kala',";
+		}
+		$osastot = substr($osastot,0,-1);
+
+		echo "</table>";
+		
+		if (count($mul_osasto) > 11) {
+			echo "</div>";
+		}
+		
+		echo "</td><td valign='top' class='back'>";
+		
+		// näytetään soveltuvat osastot
+		$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='TRY' order by selite+0";
+		$res2  = mysql_query($query) or die($query);
+		
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+		
+		echo "<table>";
+		echo "<tr><th colspan='2'>Valitse tuoteryhmä(t):</th></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td>Ruksaa kaikki</td></tr>";
+		
+		while ($rivi = mysql_fetch_array($res2)) {
+			echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]'></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+		}
+
+		echo "</table>";
+		
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+			
+		echo "<br>";
+		echo "<input type='submit' name='valitaan_useita' value='Jatka'>";
+
+		echo "</td><td valign='top' class='back'><input type='submit' name='dummy' value='Valitse yksittäin'></td></tr></table>";
+
+
+	}
+	else {
+
+		echo "<table><tr><td valign='top' class='back'>";
+
+		if (count($mul_osasto) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+		
+		echo "<table>";
+		echo "<tr><th>Osasto(t):</th></tr>";
+
+		$osastot = "";
+		$sort_osastot = "";
+
+		foreach ($mul_osasto as $kala) {
+			echo "<input type='hidden' name='mul_osasto[]' value='$kala'>";
+			
+			$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO' and selite='$kala'";
+			$res3   = mysql_query($query) or die($query);
+			$selrow = mysql_fetch_array($res3);
+
+			echo "<tr><td>$kala - $selrow[selitetark]</td></tr>";
+			$osastot .= "'$kala',";
+			$sort_osastot .= "&mul_osasto[]=$kala";
+		}
+		$osastot = substr($osastot,0,-2); // vika pilkku ja vika hipsu pois
+		$osastot = substr($osastot, 1);   // eka hipsu pois
+
+		echo "</table>";
+		
+		if (count($mul_osasto) > 11) {
+			echo "</div>";
+		}
+
+		echo "</td><td valign='top' class='back'>";
+
+		if (count($mul_try) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+		
+		echo "<table>";
+		echo "<tr><th colspan='2'>Tuoteryhmä(t):</th></tr>";
+
+		$tryt = "";
+		$sort_tryt = "";
+
+		foreach ($mul_try as $kala) {
+			echo "<input type='hidden' name='mul_try[]' value='$kala'>";
+			
+			$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='TRY' and selite='$kala'";
+			$res3   = mysql_query($query) or die($query);
+			$selrow = mysql_fetch_array($res3);
+
+			echo "<tr><td>$kala - $selrow[selitetark]</td></tr>";
+			$tryt .= "'$kala',";
+			$sort_tryt .= "&mul_try[]=$kala";
+		}
+		$tryt = substr($tryt,0,-2);  // vika pilkku ja vika hipsu pois
+		$tryt = substr($tryt, 1);    // eka hipsu pois
+
+		$sel_osasto = $osastot;
+		$sel_tuoteryhma = $tryt;
+
+		echo "</table>";
+		
+		if (count($mul_try) > 11) {
+			echo "</div>";
+		}
+		
+		echo "<br>";
+
+		echo "</td><td valign='top' class='back'>";
+
+		echo "<input type='submit' name='valitaan_useita' value='Valitse useita'>";
+		echo "<input type='submit' name='dummy' value='Valitse yksittäin'>";
+
+		echo "</td></tr></table>";
+	}
+}
+
 echo "<table>";
-
-echo "<tr>";
-echo "<th>".t("Syötä tai valitse osasto").":</th>";
-echo "<td><input type='text' name='osasto' size='10'></td>";
-
-$query = "	SELECT distinct selite, selitetark
-			FROM avainsana
-			WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'
-			order by selite+0";
-$sresult = mysql_query($query) or pupe_error($query);
-
-echo "<td><select name='osasto2'>";
-echo "<option value=''>".t("Osasto")."</option>";
-
-while ($srow = mysql_fetch_array($sresult)) {
-	if ($osasto == $srow[0]) $sel = "selected";
-	else $sel = "";
-	echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
-}
-
-echo "</select></td>";
-echo "</tr>";
-
-echo "<tr>";
-echo "<th>".t("Syötä tai valitse tuoteryhmä").":</th>";
-echo "<td><input type='text' name='try' size='10'></td>";
-
-$query = "	SELECT distinct selite, selitetark
-			FROM avainsana
-			WHERE yhtio='$kukarow[yhtio]' and laji='TRY'
-			order by selite+0";
-$sresult = mysql_query($query) or pupe_error($query);
-
-echo "<td><select name='try2'>";
-echo "<option value=''>".t("Tuoteryhmä")."</option>";
-
-while ($srow = mysql_fetch_array($sresult)) {
-	if ($try == $srow[0]) $sel = "selected";
-	else $sel = "";
-	echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
-}
-
-echo "</select></td>";
-echo "</tr>";
 
 if ($merkki != '') {
 	$chk = 'checked';
 }
+else {
+	$chk = '';	
+}
 
 echo "<tr>";
-echo "<th colspan = '3'>".t("Tai aja tuotemerkeittäin (HUOM! kumoaa muut valinnat)").": <input type='checkbox' name='merkki' $chk></th>";
+echo "<th>".t("Aja tuotemerkeittäin").":</th><td><input type='checkbox' name='merkki' $chk></td>";
 echo "</tr>";
 
-echo "</table>";
 
+echo "</table>";
 echo "<br>";
-echo "<input type='hidden' name='tee' value='tee'>";
-echo "<input type='submit' value='".t("Laske varastonarvot")."'>";
+
+if($valitaan_useita == '') {
+	echo "<input type='submit' value='Laske varastonarvot'>";
+}
+else {
+	echo "<input type='submit' name='valitaan_useita' value='Laske varastonarvot'>";
+}
+
 echo "</form>";
 
-if ($tee == "tee") {
+if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoteryhma == "kaikki") {
 
-	if ($merkki == '') {
+	$trylisa 		= "";
+	$merkkilisa1	= "";
+	$merkkilisa2	= "";
 
-		$lisa = ""; /// no hacking
+	if ($tuoteryhma != "kaikki" and $sel_tuoteryhma != "") {
+		$trylisa .= " and tuote.try in ('$sel_tuoteryhma') ";
+	}
+	if ($osasto != "kaikki" and $sel_osasto != "") {
+		$trylisa .= " and tuote.osasto in ('$sel_osasto') ";
+	}
 
-		if ($osasto != "") {
-			$lisa .= "and tuote.osasto = '$osasto'";
-		}
 
-		if ($try != "") {
-			$lisa .= "and tuote.try = '$try'";
-		}
+	if ($merkki != '') {
+		$merkkilisa1 = "tuote.tuotemerkki,";
+		$merkkilisa2 = " GROUP BY tuote.tuotemerkki ORDER BY tuote.tuotemerkki";
+	}
 
-		//varaston arvo
-		$query = "	SELECT sum(tuotepaikat.saldo*if(epakurantti1pvm='0000-00-00', kehahin, kehahin/2)) varasto
-					FROM tuotepaikat, tuote
-					WHERE tuote.tuoteno 	  = tuotepaikat.tuoteno
-					and tuote.yhtio 		  = tuotepaikat.yhtio
-					and tuotepaikat.yhtio 	  = '$kukarow[yhtio]'
-					and tuote.ei_saldoa 	  = ''
-					and tuotepaikat.saldo    <> 0
-					and tuote.epakurantti2pvm = '0000-00-00'
-					$lisa";
-
-		$result = mysql_query($query) or pupe_error($query);
-		$row    = mysql_fetch_array($result);
+	// kuus kuukautta taakseppäin kuun eka päivä
+	$kausi = date("Y-m-d", mktime(0, 0, 0, date("m")-12, 1, date("Y")));
+	
+	//varaston arvo
+	$query = "	SELECT
+				$merkkilisa1
+				sum(
+					if(	tuote.sarjanumeroseuranta = '', tuotepaikat.saldo*if(tuote.epakurantti1pvm='0000-00-00', tuote.kehahin, tuote.kehahin/2), 
+						(	SELECT tuotepaikat.saldo*if(tuote.epakurantti1pvm='0000-00-00', avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl), avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)/2)
+							FROM sarjanumeroseuranta
+							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+							LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+							WHERE sarjanumeroseuranta.yhtio = tuotepaikat.yhtio and sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno
+							and (tilausrivi_myynti.tunnus is null or (lasku_myynti.tila in ('N','L') and lasku_myynti.alatila != 'X'))
+							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))
+						)
+					)
+				) varasto
+				FROM tuotepaikat, tuote
+				WHERE tuote.tuoteno 	  = tuotepaikat.tuoteno
+				and tuote.yhtio 		  = tuotepaikat.yhtio
+				and tuotepaikat.yhtio 	  = '$kukarow[yhtio]'
+				and tuote.ei_saldoa 	  = ''
+				and tuotepaikat.saldo    <> 0
+				and tuote.epakurantti2pvm = '0000-00-00'
+				$trylisa
+				$merkkilisa2";
+	$result = mysql_query($query) or pupe_error($query);
+	
+	echo "<table>";
+	
+	echo "<tr>";
+	
+	if ($merkki != '') {
+		echo "<th>".t("Tuotemerkki")."</th>";
+	}
+	
+	echo "<th>".t("Pvm")."</th><th>".t("Varastonarvo")."</th><th>".t("Tarkkuus")."</th></tr>";
+	$varvo = 0;
+		
+	while ($row = mysql_fetch_array($result)) {
+	
 		$varvo  = $row["varasto"];
 
-		// kuus kuukautta taakseppäin kuun eka päivä
-		$kausi = date("Y-m-d", mktime(0, 0, 0, date("m")-12, 1, date("Y")));
-
+		echo "<tr>";
+		
+		if ($merkki != '') {
+			echo "<td>$row[merkki]</td>";
+		}
+		
+		echo "<td>".date("Y-m-d")."</td><td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td><td>virallinen</td></tr>";
+		
 		// tuotteen varastonarvon muutos
 		$query  = "	SELECT date_format(laadittu, '%Y-%m') kausi, sum(kpl*hinta) muutos, date_format(laadittu, '%Y') yy, date_format(laadittu, '%m') mm
 					FROM tuote use index (osasto_try_index)
@@ -117,84 +381,26 @@ if ($tee == "tee") {
 					and tapahtuma.laadittu > '$kausi 00:00:00'
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.ei_saldoa = ''
-					$lisa
+					$trylisa
 					group by kausi
 					order by kausi desc";
-		$result = mysql_query($query) or pupe_error($query);
+		$xresult = mysql_query($query) or pupe_error($query);
 
-		echo "<table>";
-		echo "<tr><th>".t("Pvm")."</th><th>".t("Varastonarvo")."</th><th>".t("Tarkkuus")."</th></tr>";
-
-		echo "<tr><td>".date("Y-m-d")."</td><td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td><td>virallinen</td></tr>";
-
-		while ($row = mysql_fetch_array($result)) {
-			$varvo = $varvo - $row["muutos"];
-			$apukausi = date("Y-m-d", mktime(0, 0, 0, $row["mm"], 0, $row["yy"]));
-			echo "<tr><td>$apukausi</td><td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td><td>arvio</td></tr>";
+		while ($xrow = mysql_fetch_array($xresult)) {
+			$varvo = $varvo - $xrow["muutos"];
+			$apukausi = date("Y-m-d", mktime(0, 0, 0, $xrow["mm"], 0, $xrow["yy"]));
+			
+			echo "<tr>";
+			
+			if ($merkki != '') {
+				echo "<td>$row[merkki]</td>";
+			}
+			
+			echo "<td>$apukausi</td><td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td><td>arvio</td></tr>";
 		}
-
-		echo "</table>";
 	}
 
-	if ($merkki != '') {
-
-		//varaston arvo
-		$query = "	SELECT tuotemerkki, sum(tuotepaikat.saldo*if(epakurantti1pvm='0000-00-00', kehahin, kehahin/2)) varasto
-					FROM tuotepaikat, tuote
-					WHERE tuote.tuoteno 	  = tuotepaikat.tuoteno
-					and tuote.yhtio 		  = tuotepaikat.yhtio
-					and tuotepaikat.yhtio 	  = '$kukarow[yhtio]'
-					and tuote.ei_saldoa 	  = ''
-					and tuotepaikat.saldo    <> 0
-					and tuote.epakurantti2pvm = '0000-00-00'
-					group by 1
-					order by 1";
-		$result = mysql_query($query) or pupe_error($query);
-
-		$varvo = '';
-
-		// 12 kuukautta taakseppäin kuun eka päivä
-		$kausi = date("Y-m-d", mktime(0, 0, 0, date("m")-12, 1, date("Y")));
-
-		echo "<table>";
-		echo "<tr><th>Pvm<br>".t("Tarkkuus")."</th><th>".date("Y-m-d")."<br>".t("virallinen")."</th>";
-
-		for ($i = 0; $i < 13; $i ++) {
-			echo "<th>".date("Y-m-d", mktime(0, 0, 0, date("m")-$i, 1, date("Y")))."<br>".t("arvio")."</th>";
-		}
-
-		echo "</tr>";
-
-		while ($row = mysql_fetch_array($result)) {
-
-			$varvo  = $row["varasto"];
-
-			echo "<tr><td>$row[tuotemerkki]</td><td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td>";
-
-			for ($i = 0; $i < 13; $i ++) {
-		        //tuotteen varastonarvon muutos
-		        $query  = "	SELECT sum(kpl*hinta) muutos
-	 	        			FROM tuote
-	 	           			JOIN tapahtuma
-	 	           			ON tapahtuma.yhtio = tuote.yhtio
-	 	           			and tapahtuma.tuoteno = tuote.tuoteno
-							and tapahtuma.laadittu < '".date("Y-m-d", mktime(0, 0, 0, date("m")-$i+1, 1, date("Y")))." 00:00:00'
-							and tapahtuma.laadittu > '".date("Y-m-d", mktime(0, 0, 0, date("m")-$i,   1, date("Y")))." 00:00:00'
-	 	           			WHERE tuote.yhtio = '$kukarow[yhtio]'
-	 	           			and tuotemerkki = '$row[tuotemerkki]'
-							and tuote.ei_saldoa = ''";
-
-	 			$result2 = mysql_query($query) or pupe_error($query);
-				$alarow    = mysql_fetch_array($result2);
-
-				$varvo = $varvo - $alarow["muutos"];
-				echo "<td align='right'>".str_replace(".",",",sprintf("%.2f",$varvo))."</td>";
-	    	}
-			echo "</tr>";
-		}
-		echo "</table>";
-	}
-
+	echo "</table>";
 }
 
 require ("../inc/footer.inc");

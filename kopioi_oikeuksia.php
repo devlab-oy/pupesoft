@@ -53,7 +53,7 @@
 		{
 			// tehdään yhtiolistaukset
 
-			$query = "select distinct yhtio from kuka where kuka='$fromkuka' and extranet='' ";
+			$query = "select distinct kuka.yhtio, yhtio.nimi from kuka, yhtio where kuka.kuka='$fromkuka' and kuka.extranet='' and yhtio.yhtio=kuka.yhtio ";
 			$yhres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($yhres) > 1)
@@ -66,7 +66,7 @@
 					if ($fromyhtio==$yhrow[0]) $select='selected';
 					else $select='';
 
-					echo "<option $select value='$yhrow[yhtio]'>$yhrow[yhtio]</option>";
+					echo "<option $select value='$yhrow[yhtio]'>$yhrow[nimi]</option>";
 				}
 
 				echo "</select></td></tr>";
@@ -109,7 +109,7 @@
 		if ($tokuka!='') {
 			// tehdään yhtiolistaukset
 
-			$query = "select distinct yhtio from kuka where kuka='$tokuka' and extranet='' ";
+			$query = "select distinct kuka.yhtio, yhtio.nimi from kuka, yhtio where kuka.kuka='$tokuka' and kuka.extranet='' and yhtio.yhtio=kuka.yhtio ";
 			$yhres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($yhres) > 1) {
@@ -119,7 +119,7 @@
 					if ($toyhtio==$yhrow[0]) $select='selected';
 					else $select='';
 
-					echo "<option $select value='$yhrow[yhtio]'>$yhrow[yhtio]";
+					echo "<option $select value='$yhrow[yhtio]'>$yhrow[nimi]</option>";
 				}
 
 				echo "</select></td></tr>";

@@ -395,8 +395,9 @@ else {
 						concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
 						LEFT JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-						WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
+						and tilausrivi.hyllyalue != ''
 						ORDER BY sorttauskentta";
 			$result = mysql_query($query) or pupe_error($query);
 

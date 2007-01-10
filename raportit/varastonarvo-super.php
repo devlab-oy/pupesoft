@@ -118,14 +118,16 @@ else {
 
 		echo "<table><tr><td valign='top' class='back'>";
 		
-		echo "<div style='height:265;overflow:auto;'>";
-		echo "<table>";
-		echo "<tr><th colspan='2'>Valitse osasto(t):</th></tr>";
-
 		// näytetään soveltuvat osastot
 		$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO' order by selite+0";
 		$res2  = mysql_query($query) or die($query);
 		
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+	
+		echo "<table>";
+		echo "<tr><th colspan='2'>Valitse osasto(t):</th></tr>";
 		echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td>Ruksaa kaikki</td></tr>";
 		
 		
@@ -133,7 +135,13 @@ else {
 			echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]'></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
 		}
 
-		echo "</table></div><br>";
+		echo "</table>";
+		
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+		
+		echo "<br>";
 		echo "<input type='submit' name='valitaan_useita' value='Jatka'>";
 
 		echo "</td><td valign='top' class='back'><input type='submit' name='dummy' value='Valitse yksittäin'></td></tr></table>";
@@ -143,7 +151,10 @@ else {
 
 		echo "<table><tr><td valign='top' class='back'>";
 		
-		echo "<div style='height:265;overflow:auto;'>";
+		if (count($mul_osasto) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+		
 		echo "<table>";
 		echo "<tr><th>Osasto(t):</th></tr>";
 
@@ -160,25 +171,37 @@ else {
 		}
 		$osastot = substr($osastot,0,-1);
 
-		echo "</table></div>";
-
+		echo "</table>";
+		
+		if (count($mul_osasto) > 11) {
+			echo "</div>";
+		}
+		
 		echo "</td><td valign='top' class='back'>";
-
-		echo "<div style='height:265;overflow:auto;'>";
-		echo "<table>";
-		echo "<tr><th colspan='2'>Valitse tuoteryhmä(t):</th></tr>";
-
+		
 		// näytetään soveltuvat osastot
 		$query = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='TRY' order by selite+0";
 		$res2  = mysql_query($query) or die($query);
-
+		
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+		
+		echo "<table>";
+		echo "<tr><th colspan='2'>Valitse tuoteryhmä(t):</th></tr>";
 		echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td>Ruksaa kaikki</td></tr>";
 		
 		while ($rivi = mysql_fetch_array($res2)) {
 			echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]'></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
 		}
 
-		echo "</table></div><br>";
+		echo "</table>";
+		
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+			
+		echo "<br>";
 		echo "<input type='submit' name='valitaan_useita' value='Jatka'>";
 
 		echo "</td><td valign='top' class='back'><input type='submit' name='dummy' value='Valitse yksittäin'></td></tr></table>";
@@ -189,7 +212,10 @@ else {
 
 		echo "<table><tr><td valign='top' class='back'>";
 
-		echo "<div style='height:265;overflow:auto;'>";
+		if (count($mul_osasto) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+		
 		echo "<table>";
 		echo "<tr><th>Osasto(t):</th></tr>";
 
@@ -210,11 +236,18 @@ else {
 		$osastot = substr($osastot,0,-2); // vika pilkku ja vika hipsu pois
 		$osastot = substr($osastot, 1);   // eka hipsu pois
 
-		echo "</table></div>";
+		echo "</table>";
+		
+		if (count($mul_osasto) > 11) {
+			echo "</div>";
+		}
 
 		echo "</td><td valign='top' class='back'>";
 
-		echo "<div style='height:265;overflow:auto;'>";
+		if (count($mul_try) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+		
 		echo "<table>";
 		echo "<tr><th colspan='2'>Tuoteryhmä(t):</th></tr>";
 
@@ -238,7 +271,13 @@ else {
 		$sel_osasto = $osastot;
 		$sel_tuoteryhma = $tryt;
 
-		echo "</table></div><br>";
+		echo "</table>";
+		
+		if (count($mul_try) > 11) {
+			echo "</div>";
+		}
+		
+		echo "<br>";
 
 		echo "</td><td valign='top' class='back'>";
 

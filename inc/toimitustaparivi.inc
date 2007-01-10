@@ -9,15 +9,51 @@
 		$tyyppi = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "nouto" or
-		mysql_field_name($result, $i) == "lauantai" or
-		mysql_field_name($result, $i) == "multi_jv" or
-		mysql_field_name($result, $i) == "kuljyksikko") {
+	if (mysql_field_name($result, $i) == "nouto") {
 
 		$sel='';
-		if ($trow[$i]!='') $sel = 'CHECKED';
+		if ($trow[$i]!='') $sel = 'SELECTED';
 
-		$ulos = "<td><input type='checkbox' name='$nimi' $sel></td>";
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei noutoa")."</option>";
+		$ulos .= "<option value='o' $sel>".t("Asiakas noutaa")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "lauantai") {
+
+		$sel='';
+		if ($trow[$i]!='') $sel = 'SELECTED';
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei lauantaijakelua")."</option>";
+		$ulos .= "<option value='o' $sel>".t("Lauantaijakelu")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "multi_jv") {
+
+		$sel='';
+		if ($trow[$i]!='') $sel = 'SELECTED';
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei käytössä")."</option>";
+		$ulos .= "<option value='o' $sel>".t("Ei käytössä")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "kuljyksikko") {
+
+		$sel='';
+		if ($trow[$i]!='') $sel = 'SELECTED';
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei")."</option>";
+		$ulos .= "<option value='o' $sel>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 	

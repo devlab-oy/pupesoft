@@ -4,7 +4,7 @@
 		$tvs_tila 	= "V";
 		$tvs_tyyppi	= "'V','W'";
 	}
-	elseif ($toim == "SIIRTOLISTA") {
+	elseif ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") {
 		$tvs_tila 	= "G";
 		$tvs_tyyppi	= "'G'";
 	}

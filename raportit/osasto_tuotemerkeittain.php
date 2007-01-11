@@ -12,6 +12,7 @@ else {
 echo "<font class='head'>".t("Osastoseuranta tuotemerkeittäin")."</font><hr>";
 echo "<p>".t("Tässä ajetaan annettu kausi ja verrataan sitä edellisen vuoden vastaavaan kauteen").".<br>";
 
+$asiakasytunnus = "";
 
 if ($asiakas != '' and $kukarow["extranet"] == "") {
 
@@ -27,6 +28,7 @@ if ($asiakas != '' and $kukarow["extranet"] == "") {
 
 	 	//asiakasmuuttujassa menee asiakkaan tunnus
 	 	$asiakas = $asiakasid;
+		$asiakasytunnus = $ytunnus;
 	}
 	else {
 		$tee = "";
@@ -260,8 +262,6 @@ if ($tee == 'go') {
 					echo "</tr>";
 				}
 
-
-
 				if (($yhtrow['myynticuryht'] != 0) and ($yhtrow['myyntiedyht'] != 0))
 					$indlv = sprintf('%.2f',$yhtrow['myynticuryht'] / $yhtrow['myyntiedyht']);
 				else $indlv = "n/a";
@@ -285,7 +285,7 @@ if ($tee == 'go') {
 				if (($osastokatecuryht[$i] != 0) and ($yhtrow['katecuryht'] != 0))
 					$kateosuus = sprintf('%.2f',($yhtrow['katecuryht'] / $osastokatecuryht[$i]) * 100);
 				else $kateosuus = 0;
-
+				echo "<tr>";
 				echo "<td>--> $yhtrow[tuotemerkki]</td>";
 				echo "<td align='right'>".str_replace(".",",",$yhtrow["myynticuryht"])."</td>";
 				echo "<td align='right'>".str_replace(".",",",$indlv)."</td>";
@@ -323,6 +323,47 @@ if ($tee == 'go') {
 
 				$edosasto = $yhtrow["osasto"];
 			}
+			
+			
+			if ($kaikkimyynticuryht != 0 and $kaikkimyyntiedyht != 0)
+				$indlv = sprintf('%.2f',$kaikkimyynticuryht / $kaikkimyyntiedyht);
+			else $indlv = "n/a";
+			
+			echo "<tr>";
+			echo "<th>Yhteensä</th>";
+			echo "<th align='right'>".str_replace(".",",",$kaikkimyynticuryht)."</th>";
+			echo "<th align='right'>".str_replace(".",",",$indlv)."</th>";
+
+			if ($kukarow["extranet"] == '') {
+				echo "<th></th>";
+			}
+
+			if ($kaikkikplcuryht != 0 and $kaikkikpledyht != 0)
+				$indlv = sprintf('%.2f',$kaikkikplcuryht / $kaikkikpledyht);
+			else $indlv = "n/a";
+
+			echo "<th align='right'>".str_replace(".",",",$kaikkikplcuryht)."</th>";
+			echo "<th align='right'>".str_replace(".",",",$indlv)."</th>";
+
+			if ($kukarow["extranet"] == '') {
+
+				if ($kaikkikatecuryht != 0 and $kaikkikateedyht != 0)
+					$indlv = sprintf('%.2f',$kaikkikatecuryht / $kaikkikateedyht);
+				else $indlv = "n/a";
+
+				if ($kaikkimyynticuryht != 0 and $kaikkikatecuryht != 0)
+					$katepros = sprintf('%.2f',($kaikkikatecuryht / $kaikkimyynticuryht) * 100);
+				else $katepros = 0;
+
+				echo "<th align='right'>".str_replace(".",",",$kaikkikatecuryht)."</th>";
+				echo "<th align='right'>".str_replace(".",",",$katepros)."%</th>";
+				echo "<th align='right'>".str_replace(".",",",$indlv)."</th>";
+				echo "<th align='right'>".str_replace(".",",","")."</th>";
+				echo "<th align='right'>".str_replace(".",",","")."</th>";
+			}
+
+			echo "</tr>";
+			
 			echo "</table><br>";
 		}
 		else {
@@ -403,6 +444,8 @@ if ($kukarow["extranet"] == '') {
 	}
 	echo "</select>";
 
+	if ($asiakasytunnus != "") $asiakas = $asiakasytunnus;
+	
 	echo "</td></tr>
 			<tr><th>".t("tai anna asiakkaan ytunnus (jos et, ajetaan kaikki yhteensä)")."</th><td colspan = '3'><input type='text' name='asiakas' value='$asiakas' size='15'></td></tr>";
 }

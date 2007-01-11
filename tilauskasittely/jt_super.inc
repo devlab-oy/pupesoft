@@ -53,7 +53,7 @@
 										maa 				= '$tiltoi[maa]',
 										toim_ovttunnus		= '$tiltoi[ovttunnus]',
 										toim_nimi 			= '$myytilrow[toim_nimi]',
-										toim_nimitark 		= '$myytilrow[toim_nimitark]',
+										toim_nimitark 		= '$myytilrow[toim_nimitark] ($myytilrow[ytunnus])',
 										toim_osoite 		= '$myytilrow[toim_osoite]',
 										toim_postino 		= '$myytilrow[toim_postino]',
 										toim_postitp 		= '$myytilrow[toim_postitp]',

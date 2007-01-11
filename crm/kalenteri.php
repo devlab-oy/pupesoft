@@ -191,6 +191,8 @@ if($tee == 'LISAA') {
 					pvmloppu 	= '$lyear-$lkuu-$lpaiva $lkello:00',
 					asiakas 	= '$ytunnus',
 					kentta01 	= '$viesti',
+					kentta09    = '$kilometrit',
+					kentta10    = '$paivarahat',
 					tapa 		= '$tapa',
 					tyyppi 		= 'kalenteri'";
 		mysql_query($query) or pupe_error($query);	
@@ -209,18 +211,12 @@ if ($tee == "POISTA") {
 ///* tehd‰‰n lis‰ys ruutu ja laitetaan kaikki muuttujaan jotta voidaan echota sit oikeessa kohdassa  *///
 if($tee == "SYOTA") {
 	if ($tunnus != '') {
-		$query = "	SELECT 
-					pvmalku,
-					pvmloppu,
+		$query = "	SELECT *,
 					if(asiakas=0,'',asiakas) asiakas,
 					Year(pvmloppu) lyear,
 					Month(pvmloppu) lkuu,
 					Day(pvmloppu) lpaiva,
-					right(pvmloppu,8) lkello,					
-					kentta01,
-					tapa,
-					yhtio, 
-					kuka
+					right(pvmloppu,8) lkello
 					FROM kalenteri
 					WHERE tunnus = '$tunnus' 
 					$konsernit
@@ -229,6 +225,8 @@ if($tee == "SYOTA") {
 		$irow = mysql_fetch_array($res);
 		
 		$viesti 	= $irow["kentta01"];
+		$kilometrit	= $irow["kentta09"];
+		$paivarahat = $irow["kentta10"];
 		$tapa   	= $irow["tapa"];
 		$ytunnus 	= $irow["asiakas"];
 		$lkello 	= $irow["lkello"];
@@ -320,6 +318,18 @@ if($tee == "SYOTA") {
 	$lisays .= "<tr><td valign='top'>".t("Kommentti").":</td>";
 	$lisays .= "<td>
 		  		<textarea name='viesti' cols='50' rows='5'>$viesti</textarea><br>
+		  		</td>
+		  		</tr>";
+
+	$lisays .= "<tr><td valign='top'>".t("Kilometrit").":</td>";
+	$lisays .= "<td>
+		  		<input name='kilometrit' value='$kilometrit'><br>
+		  		</td>
+		  		</tr>";
+
+	$lisays .= "<tr><td valign='top'>".t("P‰iv‰rahat").":</td>";
+	$lisays .= "<td>
+		  		<input name='paivarahat' value='$paivarahat'><br>
 		  		</td>
 		  		</tr>";
 

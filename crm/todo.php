@@ -124,7 +124,7 @@ elseif ($sort == "projekti")	$sort = "order by projekti,prioriteetti,deadline,ai
 elseif ($sort == "kesto_arvio")	$sort = "order by kesto_arvio,prioriteetti,deadline,aika";
 elseif ($sort == "kuvaus")		$sort = "order by kuvaus,prioriteetti,deadline,aika";
 elseif ($sort == "deadline")	$sort = "order by deadline,prioriteetti,aika";
-else 							$sort = "order by prioriteetti,deadline,aika,projekti";
+else 							$sort = "order by prioriteetti,deadline,kesto_arvio desc,aika,projekti";
 
 if ($tee == "") {
 

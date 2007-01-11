@@ -169,6 +169,7 @@ $sarakkeet["SARAKE16"] = t("toimittaja")."\t";
 $sarakkeet["SARAKE17"] = t("toim_tuoteno")."\t";
 $sarakkeet["SARAKE18"] = t("nimitys")."\t";
 $sarakkeet["SARAKE18B"] = t("toim_nimitys")."\t";
+$sarakkeet["SARAKE18C"] = t("kuvaus")."\t";
 $sarakkeet["SARAKE19"] = t("ostohinta")."\t";
 $sarakkeet["SARAKE20"] = t("myyntihinta")."\t";
 $sarakkeet["SARAKE21"] = t("epakurantti1pvm")."\t";
@@ -522,6 +523,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					tuote.tahtituote,
 					tuote.status,
 					tuote.nimitys,
+					tuote.kuvaus,
 					tuote.myynti_era,
 					tuote.myyntihinta,
 					tuote.epakurantti1pvm,
@@ -927,6 +929,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		if($valitut["SARAKE17"] != '') $apurivi .= "\"$row[toim_tuoteno]\"\t";
 		if($valitut["SARAKE18"] != '') $apurivi .= "\"$row[nimitys]\"\t";
 		if($valitut["SARAKE18B"] != '') $apurivi .= "\"$row[toim_nimitys]\"\t";
+		if($valitut["SARAKE18C"] != '') $apurivi .= "\"$row[kuvaus]\"\t";
 		if($valitut["SARAKE19"] != '') $apurivi .= str_replace(".",",",$row['ostohinta'])."\t";
 		if($valitut["SARAKE20"] != '') $apurivi .= str_replace(".",",",$row['myyntihinta'])."\t";
 
@@ -987,10 +990,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		if($valitut["SARAKE46"] != '') $apurivi .= str_replace(".",",",$ennarow['tilkpl'])."\t";
 		if($valitut["SARAKE47"] != '') $apurivi .= "\"$row[aleryhma]\"\t";
 
-		
-		if($valitut["SARAKE47B"] != '') { 
+
+		if($valitut["SARAKE47B"] != '') {
 			$kehahin = 0;
-			
+
 			//Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
 			if ($row["sarjanumeroseuranta"] != '') {
 				$query	= "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
@@ -1004,18 +1007,18 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
 				$sarjares = mysql_query($query) or pupe_error($query);
 				$sarjarow = mysql_fetch_array($sarjares);
-				
+
 				$kehahin = sprintf('%.2f', $sarjarow["kehahin"]);
 			}
 			else {
 				$kehahin = sprintf('%.2f', $row["kehahin"]);
 			}
-			
+
 			$apurivi .= str_replace(".",",",$kehahin)."\t";
 		}
-		
-		
-		
+
+
+
 		if ($asiakasosasto != '') {
 			if($valitut["SARAKE48"] != '') $apurivi .= str_replace(".",",",$asosrow['kpl1'])."\t";
 			if($valitut["SARAKE49"] != '') $apurivi .= str_replace(".",",",$asosrow['kpl2'])."\t";

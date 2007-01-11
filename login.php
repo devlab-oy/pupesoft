@@ -159,7 +159,8 @@ echo "
 if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio
 				FROM kuka, yhtio
-				WHERE kuka='$user' and yhtio.yhtio=kuka.yhtio";
+				WHERE kuka='$user' and yhtio.yhtio=kuka.yhtio 
+				ORDER BY nimi";
 	$result = mysql_query($query)
 		or die ("Kysely ei onnistu $query");
 

@@ -3,15 +3,14 @@
 	if (!function_exists('print_ytunnus')) {
 		function print_ytunnus ($ytunnus) {
 			//k‰‰nt‰‰ ytunnuksen kauniseen muotoon
-			$ytunnus = sprintf('%-08d', $ytunnus);
+			$ytunnus = sprintf('%08d', $ytunnus);
 			return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
 		}
 	}
 
 	function sadteksti_alku ($tulosulos, $laskurow, $sivut, $tavaraerittelyt, $kollit) {
 		global $yhtiorow;
-		
-		$tulosulos .= "\r\n";
+	
 		$tulosulos .= "\r\n";
 		$tulosulos .= "\r\n";
 		$tulosulos .= "\r\n";
@@ -34,17 +33,18 @@
 		$tulosulos .= sprintf('%-8.8s', "");		
 		$tulosulos .= sprintf('%-36.36s', $yhtiorow["postino"]." ".$yhtiorow["postino"]);
 		$tulosulos .= sprintf('%-3.3s', "1");
-		$tulosulos .= sprintf('%-3.3s', $sivu)."\r\n";
+		$tulosulos .= sprintf('%-3.3s', $sivut)."\r\n";
 		
 		//Kentt‰ 5 tavaraerien kokonaism‰‰r‰
 		//Kentt‰ 6 Kollim‰‰r‰
 		//Kentt‰ 7 Ilmoittajan viitenumero
+		
+		$tulosulos .= "\r\n";
+		
 		$tulosulos .= sprintf('%-47.47s', "");
 		$tulosulos .= sprintf('%-6.6s', $tavaraerittelyt);
 		$tulosulos .= sprintf('%-9.9s', $kollit);
 		$tulosulos .= sprintf('%-18.18s', $laskurow["laskunro"])."\r\n";
-		
-		$tulosulos .= "\r\n";
 		$tulosulos .= "\r\n";
 
 		//Kentt‰ 8
@@ -271,20 +271,23 @@
 	}
 	
 	
-	function sadteksti_lisasivu ($tulosulos, $sivu) {
+	function sadteksti_lisasivu ($tulosulos, $sivu, $sivut) {
 		global $yhtiorow, $kukarow;
 		
+		$tulosulos .= "\r\n";
 		$tulosulos .= "\r\n";
 		$tulosulos .= "\r\n";
 			
 		//Kentt‰ 1 Imoitustyyppi, Ilmoitus
 		//Kentt‰ 2 Viej‰
 		//Kentt‰ 3 Lomakenro
-		$tulosulos .= sprintf('%-27.27s', "");
-		$tulosulos .= sprintf('%-15.15s', $yhtiorow["maakoodi"].print_ytunnus($yhtiorow["ytunnus"]))."\r\n";
+		$tulosulos .= "\r\n";
 		
 		$tulosulos .= sprintf('%-8.8s', "");
-		$tulosulos .= sprintf('%-36.36s', $yhtiorow["nimi"]);
+		$tulosulos .= sprintf('%-21.21s', $yhtiorow["nimi"]);
+		
+		$tulosulos .= sprintf('%-15.15s', $yhtiorow["maakoodi"].print_ytunnus($yhtiorow["ytunnus"]));
+		
 		$tulosulos .= sprintf('%-4.4s', "EX");
 		$tulosulos .= sprintf('%-1.1s', "A")."\r\n";
 
@@ -293,8 +296,8 @@
 		
 		$tulosulos .= sprintf('%-8.8s', "");		
 		$tulosulos .= sprintf('%-36.36s', $yhtiorow["postino"]." ".$yhtiorow["postino"]);
-		$tulosulos .= sprintf('%-3.3s', "1");
-		$tulosulos .= sprintf('%-3.3s', $sivu)."\r\n";
+		$tulosulos .= sprintf('%-3.3s', $sivu);
+		$tulosulos .= sprintf('%-3.3s', $sivut)."\r\n";
 		$tulosulos .= "\r\n";
 		
 		return $tulosulos;
@@ -340,12 +343,13 @@
 			$tulosulos .= "\r\n";
 			$tulosulos .= "\r\n";
 			$tulosulos .= "\r\n";
+			$tulosulos .= "\r\n";
 		}
 		else {
 			
-			if($lask == 1) $y = 47;
-			if($lask == 2) $y = 33;
-			if($lask == 3) $y = 19;
+			if($lask == 1) $y = 45;
+			if($lask == 2) $y = 31;
+			if($lask == 3) $y = 17;
 			
 			for($x = 0; $x<$y; $x++) {
 				$tulosulos .= "\r\n";
@@ -359,6 +363,7 @@
 
 			$tulosulos .= sprintf('%-61.61s', "");
 			$tulosulos .= sprintf('%-18.18s', $yhtiorow["puhelin"])."\r\n";
+			$tulosulos .= "\r\n";
 			$tulosulos .= "\r\n";
 		}
 
@@ -433,6 +438,11 @@
 			
 			$paalomake  = "";
 			$lisalomake = "";
+			$sivut = 1;
+			
+			$sivut += ceil((mysql_num_rows($riviresult)-1)/3);
+			
+			$tavaraerittelyt = mysql_num_rows($riviresult);
 			
 			$paalomake = sadteksti_alku ($paalomake, $laskurow, $sivut, $tavaraerittelyt, $kollit);
 			
@@ -449,7 +459,7 @@
 					$lask = 0;
 					$sivu++;
 					
-					$lisalomake = sadteksti_lisasivu ($lisalomake, $sivu);
+					$lisalomake = sadteksti_lisasivu ($lisalomake, $sivu, $sivut);
 				}
 				
 				if ($sivu == 1) {

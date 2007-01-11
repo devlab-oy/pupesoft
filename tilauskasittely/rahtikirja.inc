@@ -14,7 +14,7 @@ $sivu = "                              ".sprintf("%-11.s",$toitarow["sopimusnro"
          Puh. $yhtiorow[puhelin]
       
                                $rakir_row[ytunnus]
-                                              $toimitustapa
+                                              $toitarow[rahdinkuljettaja]
          ".sprintf("%-25.s",$rakir_row['toim_nimi'])." $rahsoprow[rahtisopimus]
          ".sprintf("%-36.s",$rakir_row['toim_osoite'])." $aputeksti
          ".sprintf("%-36.s",$rakir_row['toim_postino']." ".$rakir_row['toim_postitp'])."

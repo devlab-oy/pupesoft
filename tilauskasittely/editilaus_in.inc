@@ -574,7 +574,7 @@ while (!feof ($fd)) {
 			// jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsiä tuote tuotenumerolla
 			if ($tuoteno == "" and $tieto != "") {
 
-				if ($edi_tyyppi != "futursoft") {
+				if ($edi_tyyppi != "futursoft" and $yhtiorow["yhtio"] == "artr") {
 					// poistetaan jos kolmas merkki jos se on viiva
 					if (substr($tieto, 2, 1) == '-') {
 						$tieto = substr($tieto, 0, 2) . substr($tieto, 3, 15);

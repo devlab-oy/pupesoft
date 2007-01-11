@@ -122,7 +122,12 @@
 							$sres = mysql_query($query) or pupe_error($query);
 						}
 
-						$supercommentti .= "$tiltoi[nimi] - $rivi[tuoteno] $rivi[jt] kpl\n";
+						// haetaan vielä varaston nimi kommenttia varten
+						$query = "select nimitys from varastopaikat where tunnus='$varastorotunnus'";
+						$vrnimire = mysql_query($query) or pupe_error($query);
+						$vrnimiro = mysql_fetch_array($vrnimire);
+
+						$supercommentti .= "$tiltoi[nimi]: $vrnimiro[nimitys] - $rivi[tuoteno] $rivi[jt] kpl\n";
 
 					}
 

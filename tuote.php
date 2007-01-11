@@ -301,10 +301,16 @@
 				$kokonaismyytavissa = 0;
 
 				//saldot per varastopaikka
-				$query = "	select *, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-				 			from tuotepaikat 
-							where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]' 
-							order by sorttauskentta";
+				$query = "	SELECT tuotepaikat.*, varastopaikat.nimitys, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+				 			FROM tuotepaikat
+							LEFT JOIN varastopaikat	ON (
+								concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) and
+								concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) and
+								varastopaikat.yhtio = tuotepaikat.yhtio
+							)
+							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' and
+							tuotepaikat.tuoteno = '$tuoteno'
+							ORDER BY nimitys,sorttauskentta";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) > 0) {

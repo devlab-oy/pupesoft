@@ -69,6 +69,7 @@
 						laatija			= '$kukarow[kuka]' and
 						alatila			= '$alatila' and
 						tila 			= '$tila' and
+						myyja			= '$otsikkorivi[myyja]' and
 						ytunnus			= '$otsikkorivi[ytunnus]' and
 						nimi 			= '$otsikkorivi[nimi]' and
 						nimitark 		= '$otsikkorivi[nimitark]' and

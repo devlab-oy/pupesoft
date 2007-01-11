@@ -1,20 +1,23 @@
 <?php
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
+
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 
 	if ($tee != '') {
 
+		$vvl = $vv + 1;
+
 		//myynnit vuoden alusta
-		$query = "	SELECT sum(summa) summa, sum(kate) kate, lasku.laatija, month(tapvm) kk, kuka.nimi
+		$query = "	SELECT lasku.myyja, kuka.nimi, month(tapvm) kk, sum(summa) summa, sum(kate) kate
 					FROM lasku use index (yhtio_tila_tapvm)
-					LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
-					WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila='U' and lasku.alatila='X' and tapvm >= '$vv-01-01' and tapvm <= '$vv-12-31'
-					GROUP BY 3,4,5
+					LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja
+					WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila='L' and lasku.alatila='X' and tapvm >= '$vv-01-01' and tapvm < '$vvl-01-01'
+					GROUP BY myyja, nimi, kk
 					HAVING summa <> 0 or kate <> 0
-					ORDER BY laatija";
+					ORDER BY myyja";
 		$result3 = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
@@ -33,33 +36,35 @@
 		echo "<th>".t("Joulu")."</th>";
 		echo "<th>".t("Yhteensä")."</th></tr>";
 
-
-
-
 		$summa= array();
 		$kate = array();
 		$lask = 0;
 
-		while ($row=mysql_fetch_array ($result3)) {
-			if ($lask == 0 or $edlaatija != $row["laatija"]) {
+		while ($row = mysql_fetch_array ($result3)) {
+
+			if ($lask == 0 or $edlaatija != $row["myyja"]) {
 				$lask++;
-				$nimi[$lask] = $row["nimi"]."(".$row["laatija"].")";
+				$nimi[$lask] = $row["nimi"]."(".$row["myyja"].")";
 			}
 
 			$kk = $row["kk"];
 			$kate[$lask][$kk]  = $row["kate"];
 			$summa[$lask][$kk] = $row["summa"];
 
-			$edlaatija = $row["laatija"];
+			$edlaatija = $row["myyja"];
 		}
+
 		$lask--;
 
 		for ($i=1; $i<=$lask+1; $i++) {
-			$sumyht=$katyht='';
+
+			$sumyht = $katyht = '';
 
 			echo "<tr><td>$nimi[$i]</td>";
 			for ($j=1; $j<13; $j++) {
+
 				echo "<td align='right'>";
+
 				if ($summa[$i][$j] != 0.00 or $kate[$i][$j] != 0.00) {
 					echo str_replace(".",",",$summa[$i][$j]);
 					echo "<br>";
@@ -80,9 +85,7 @@
 	echo "<br>";
 	echo "<table><form method='post' action='$PHP_SELF'>";
 
-
-	if (!isset($vv))
-		$vv = date("Y");
+	if (!isset($vv)) $vv = date("Y");
 
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 	echo "<tr><th>".t("Syötä vuosi (vvvv)")."</th><td><input type='text' name='vv' value='$vv' size='5'></td>";

@@ -101,6 +101,7 @@ else {
 	$ulos .= "ONADBY_PC:$yhtiorow[ovttunnus]$edioro[ovtlisa]\n";	// Meidän ovttunnus + toimipaikan ovtlisa jos sellanen on
 	$ulos .= "ONADBY_RF:\n";										// Meidän asiakasnumero toimittajalla
 	$ulos .= "ONADDP_NA:$laskurow[toim_nimi]\n";					// Poikkeava toimitusnimi
+	$ulos .= "ONADDP_NB:$laskurow[toim_nimitark]\n";				// Poikkeava toimitusnimitark
 	$ulos .= "ONADDP_SA:$laskurow[toim_osoite]\n";					// Poikkeava toimitusosoite
 	$ulos .= "ONADDP_CI:$laskurow[toim_postitp]\n";					// Poikkeava toimituspostitoimipaikka
 	$ulos .= "ONADDP_PO:$laskurow[toim_postino]\n";					// Poikkeava toimituspostinro

@@ -39,6 +39,7 @@ $viitetxt             = "";
 $editilaus_otsikko_ok = "";
 $suunnistus           = "";
 $tnimi                = "";
+$tnimitark            = "";
 $tpostitp             = "";
 $tpostino             = "";
 $tosoite              = "";
@@ -436,6 +437,11 @@ while (!feof ($fd)) {
 		case 'OSTOTIL.OT_TOIMITUS_YRITYS' :
 		// toimitusasiakkaan nimi
 			$tnimi = $tieto;
+			break;
+
+		case 'ONADDP_NB' :
+		// toimitusasiakkaan nimitark
+			$tnimitark = $tieto;
 			break;
 
 		case 'ONADDP_SA' :
@@ -837,6 +843,7 @@ while (!feof ($fd)) {
 			$editilaus_otsikko_ok = "";
 			$suunnistus           = "";
 			$tnimi                = "";
+			$tnimitark            = "";
 			$tpostitp             = "";
 			$tpostino             = "";
 			$tosoite              = "";

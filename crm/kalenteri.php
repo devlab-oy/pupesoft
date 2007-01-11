@@ -191,8 +191,8 @@ if($tee == 'LISAA') {
 					pvmloppu 	= '$lyear-$lkuu-$lpaiva $lkello:00',
 					asiakas 	= '$ytunnus',
 					kentta01 	= '$viesti',
-					kentta09    = '$kilometrit',
-					kentta10    = '$paivarahat',
+					kentta03    = '$kilometrit',
+					kentta04    = '$paivarahat',
 					tapa 		= '$tapa',
 					tyyppi 		= 'kalenteri'";
 		mysql_query($query) or pupe_error($query);	
@@ -225,8 +225,8 @@ if($tee == "SYOTA") {
 		$irow = mysql_fetch_array($res);
 		
 		$viesti 	= $irow["kentta01"];
-		$kilometrit	= $irow["kentta09"];
-		$paivarahat = $irow["kentta10"];
+		$kilometrit	= $irow["kentta03"];
+		$paivarahat = $irow["kentta04"];
 		$tapa   	= $irow["tapa"];
 		$ytunnus 	= $irow["asiakas"];
 		$lkello 	= $irow["lkello"];

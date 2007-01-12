@@ -6,14 +6,18 @@ if (is_array($luvut)) {
 	$lisaa=0;
 	foreach ($luvut as $rind => $rivi) {
 		foreach ($rivi as $sind => $solu) {
-			$solu = (float) $solu;
-			if ($solu <> 0) {
+			$solu = str_replace ( ",", ".", $solu);
+			if ($solu == '!' or $solu = (float) $solu) {
+				if ($solu == '!') $solu = 0;
+				$solu = (float) $solu;
 				$query="SELECT summa from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustannuspaikka='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
 				$result = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($result) == 1) {
 					$budjrow=mysql_fetch_array($result);
 					if ($budjrow['summa'] != $solu) {
-						$query="UPDATE budjetti set summa = $solu where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustannuspaikka='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
+						if ($solu == 0.00) 
+							$query="DELETE from budjetti where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustannuspaikka='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
+						else $query="UPDATE budjetti set summa = $solu where yhtio='$kukarow[yhtio]' and kausi = '$sind' and taso = '$rind' and kustannuspaikka='$vkustp' and kohde='$vkohde' and projekti='$vproj'";
 						$result = mysql_query($query) or pupe_error($query);
 						$paiv++;
 					}
@@ -26,7 +30,7 @@ if (is_array($luvut)) {
 			}
 		}
 	}
-	echo "<font class='message'>".t("Päivitin ").$paiv.t("Lisäsin ").$lisaa."</font><br>";
+	echo "<font class='message'>".t("Päivitin ").$paiv.t(" Lisäsin ").$lisaa."</font><br>";
 }
 
 if (isset($tyyppi)) {
@@ -115,7 +119,7 @@ while ($vrow=mysql_fetch_array($vresult)) {
 	echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
 }
 echo "</select></td></tr>";
-echo "<td><input type='submit' VALUE='valmis'></td>";
+echo "<td><input type='submit' VALUE='valmis'></td><td>".t("Budjettiluvun voi poistaa huutomerkillä (!)")."</td></tr>";
 echo "</table>";
 
 		

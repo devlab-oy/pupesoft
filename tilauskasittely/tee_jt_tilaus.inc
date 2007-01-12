@@ -163,12 +163,15 @@
 						mysql_field_name($stresult,$i)=='sisamaan_kuljetusmuoto' or
 						mysql_field_name($stresult,$i)=='poistumistoimipaikka' or
 						mysql_field_name($stresult,$i)=='vanhatunnus' or
+						mysql_field_name($stresult,$i)=='viesti' or
+						mysql_field_name($stresult,$i)=='sisviesti1' or
+						mysql_field_name($stresult,$i)=='sisviesti2' or
 						mysql_field_name($stresult,$i)=='poistumistoimipaikka_koodi') {
 					$query .= mysql_field_name($stresult,$i)."='',";
 				}
 				// kommenttii speciaalia
 				elseif (mysql_field_name($stresult,$i)=='comments') {
-					$query .= "comments='$otsikkorivi[comments] ".t("JÄLKITOIMITUS")."',";
+					$query .= "comments='".t("JÄLKITOIMITUS")."',";
 				}
 				//HUOM HUOM: Laitetaan clearing kenttään JT-TILAUS kun tiedetään että nämä ovat jt-rivejä jotka nyt toimitetaan
 				// tämä mähdollistaa raportoinninjt-riveistä!

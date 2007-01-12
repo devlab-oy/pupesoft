@@ -33,6 +33,6 @@ echo "<html>
 		<frame src='$go' name='main'>
 		<noframes>Your browser does not support frames!</noframes>
 	</frameset>
-	</html>";
+	</html>"; 
 
 ?>

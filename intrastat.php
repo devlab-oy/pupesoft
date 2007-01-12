@@ -335,7 +335,7 @@
 			$content .= "--$bound\n";
 
 			// j‰ l‰hetet‰‰n adminille
-			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - Intrastat $toim-ilmoitus", $content, $header, "-f $yhtiorow[postittaja_email]");
+			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - Intrastat $toim-ilmoitus $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[postittaja_email]");
 		}
 		else {
 			echo "<font class='error'>L‰hetys ep‰onnistui! Korjaa virheesi!</font><br><br>";

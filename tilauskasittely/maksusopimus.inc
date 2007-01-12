@@ -8,7 +8,7 @@
 						SET jaksotettu = tunnus
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  = $laskurow[tunnus]
-						and tila in ('N','L')
+						and tila in ('N','L','T')
 						and alatila != 'X'";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -21,7 +21,7 @@
 							SET jaksotettu = '$laskurow[jaksotettu]'
 							WHERE yhtio 	= '$kukarow[yhtio]'
 							and vanhatunnus = '$laskurow[vanhatunnus]'
-							and tila in ('N','L')
+							and tila in ('N','L','T')
 							and alatila != 'X'";
 				$result = mysql_query($query) or pupe_error($query);
 
@@ -29,7 +29,7 @@
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							and jaksotettu  = '$laskurow[jaksotettu]'
-							and tila in ('N','L')
+							and tila in ('N','L','T')
 							and alatila != 'X'";
 				$result = mysql_query($query) or pupe_error($query);
 				$posrow = mysql_fetch_array($result);

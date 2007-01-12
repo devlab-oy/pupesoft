@@ -1184,6 +1184,40 @@ if ($tee == '') {
 		$tapa 		= "";
 		$rivitunnus = "";
 	}
+	
+	
+	//Muokataan tilausrivin lit‰tietoa
+	if ($kukarow["extranet"] == "" and $tila == "LISATIETOJA_RIVILLE") {
+		
+		$query  = "	SELECT *
+					FROM tilausrivin_lisatiedot
+					WHERE yhtio			 = '$kukarow[yhtio]'
+					and tilausrivitunnus = '$rivitunnus'";
+		$lisatied_res = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($lisatied_res) > 0) {
+			$lisatied_row = mysql_fetch_array($lisatied_res);
+			
+			$query = "	UPDATE tilausrivin_lisatiedot
+						SET positio = '$positio'
+						WHERE tunnus = '$lisatied_row[tunnus]'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+		else {
+			$query = "	INSERT INTO tilausrivin_lisatiedot
+						SET yhtio	= '$kukarow[yhtio]',
+						tilausrivitunnus = '$rivitunnus',
+						positio		= '$positio',
+						lisatty		= now(),
+						lisannyt 	= '$kukarow[kuka]'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+	
+		$tila 		= "";
+		$rivitunnus = "";
+		$positio 	= "";
+	}
+	
 
 	if ($kukarow["extranet"] == "" and $tila == "LISLISAV") {
 		//P‰ivitet‰‰n is‰n perheid jotta voidaan lis‰t‰ lis‰‰ lis‰varusteita
@@ -1769,6 +1803,10 @@ if ($tee == '') {
 
 				echo "<tr><th>".t("#")."</th>";
 
+				if ($toim == "TARJOUS") {
+					echo "<th>".t("Tyyppi")."</th>";
+				}
+				
 				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
 					echo "<th>".t("Nimitys")."</th>";
 				}
@@ -1805,6 +1843,14 @@ if ($tee == '') {
 			$vanhaid 		= "KALA";
 
 			while ($row = mysql_fetch_array($result)) {
+
+				//Hetaaan tilausrivin_lisatiedot
+				$query  = "	SELECT *
+							FROM tilausrivin_lisatiedot
+							WHERE yhtio			 = '$kukarow[yhtio]'
+							and tilausrivitunnus = '$row[tunnus]'";
+				$lisatied_res = mysql_query($query) or pupe_error($query);
+				$lisatied_row = mysql_fetch_array($lisatied_res);
 
 				if ($toim == "TYOMAARAYS") {
 					if ($tuotetyyppi == "" and $row["tuotetyyppi"] == 'Tyˆ') {
@@ -1950,6 +1996,34 @@ if ($tee == '') {
 					echo "<tr><td valign='top'>$rivino</td>";
 				}
 
+				
+				if ($toim == "TARJOUS") {
+					//annetaan valita tilausrivin tyyppi
+					$sel1 = $sel2 = $sel3 = $sel4 = "";
+					 
+					if ($lisatied_row["positio"] == 'Muu') 			$sel1 = "SELECTED";
+					if ($lisatied_row["positio"] == 'Vene')			$sel2 = "SELECTED";
+					if ($lisatied_row["positio"] == 'Moottori')		$sel3 = "SELECTED";
+					if ($lisatied_row["positio"] == 'Vaihtovene')	$sel4 = "SELECTED";
+					
+					
+					echo "<td>
+							<form action='$PHP_SELF' method='post'>
+							<input type='hidden' name='toim' value='$toim'>
+							<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+							<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+							<input type='hidden' name='menutila' value='$menutila'>
+							<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
+							<select name='positio' onchange='submit();'>		
+							<option value='Muu' $sel1>Muu</option>
+							<option value='Vene' $sel2>Vene</option>
+							<option value='Moottori' $sel3>Moottori</option>
+							<option value='Vaihtovene' $sel4>Vaihtovene</option>
+							</select>
+							</form>
+							</td>";					
+				}
+			
 				// Tuotteen nimitys n‰ytet‰‰n vain jos k‰ytt‰j‰n resoluution on iso
 				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
 					if (strtolower($kukarow["kieli"]) != strtolower($yhtiorow["kieli"])) {
@@ -2590,14 +2664,10 @@ if ($tee == '') {
 
 
 			//annetaan mahdollisuus antaa loppusumma joka jyvitet‰‰n riveille arvoosuuden mukaan
-			if ($kukarow["extranet"] == "" and (
-				   ($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '')
-				or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '')
-				or ($yhtiorow["salli_jyvitys_myynnissa"] == "K")
-				or $toim == "TARJOUS")) {
+			if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS")) {
 
-				if ($jyvsumma== '') {
-					$jyvsumma='0.00';
+				if ($jyvsumma == '') {
+					$jyvsumma = '0.00';
 				}
 
 				if ($toim == "TARJOUS") {
@@ -2621,26 +2691,34 @@ if ($tee == '') {
 				else {
 					echo "<td class='back' colspan='$ycspan' nowrap></td>";
 				}
+				
+				if (strlen($summa) > 7) {
+					$koko = strlen($summa)+1;
+				}
+				else {
+					$koko = '7';
+				}
 
 				echo "	<form name='pyorista' action='$PHP_SELF' method='post' autocomplete='off'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 						<input type='hidden' name='tee' value='jyvita'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='arvo' value='$arvo'>
+						<input type='hidden' name='summa' value='$summa'>
 						<th colspan='5'>".t("Pyˆrist‰ loppusummaa").":</th>
-						<td class='spec'><input type='text' size='7' name='jyvsumma' value='$jyvsumma'></td>
+						<td class='spec'><input type='text' size='$koko' name='jyvsumma' value='".sprintf("%.2f",$summa)."' style='text-align:right'></td>
 						<td class='spec'>$laskurow[valkoodi]</td>
 						<td class='back' colspan='2'><input type='submit' value='".t("Jyvit‰")."'></td>
 						</tr>
 						</form>";
 
-						//N‰ytet‰‰n toi edelinen summa
+						//N‰ytet‰‰n toi edellinen summa
 						if($ed_arvo != "") {
 							echo "<tr>
 									<td class='back' colspan='$ycspan' nowrap></td>
-									<th colspan='5'><em>".t("Edellinen summa")."</em></th>
-									<td class='spec'><em>$ed_arvo</em></td>
-									<td class='spec'><em>$laskurow[valkoodi]</em></td>
+									<th colspan='5'>".t("Edellinen summa")."</th>
+									<td class='spec' align='right'>".sprintf("%.2f",$ed_arvo)."</td>
+									<td class='spec'>$laskurow[valkoodi]</td>
 								</tr>";
 						}
 			}

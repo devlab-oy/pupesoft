@@ -329,8 +329,6 @@ if ($kukarow["extranet"] == "" and $toim == "MYYNTITILI" and $laskurow["alatila"
 	$muokkauslukko = "LUKOSSA";
 }
 
-
-
 // Hyväksytään tajous ja tehdään tilaukset
 if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS") {
 
@@ -733,7 +731,6 @@ if ($tee == 'mikrotila' or $tee == 'file') {
 	}
 }
 
-
 // Tehdään rahoituslaskuelma
 if ($tee == 'osamaksusoppari') {
 	require('osamaksusoppari.inc');
@@ -744,11 +741,9 @@ if ($tee == 'vakuutushakemus') {
 	require('vakuutushakemus.inc');
 }
 
-
 if ($kukarow["extranet"] == "" and $tee == 'jyvita') {
 	require("jyvita_riveille.inc");
 }
-
 
 // näytetään tilaus-ruutu...
 if ($tee == '') {
@@ -825,7 +820,8 @@ if ($tee == '') {
 		$laskurow   = mysql_fetch_array($result);
 	}
 
-	if ($laskurow["liitostunnus"] > 0) { // jos asiakasnumero on annettu
+ 	// jos asiakasnumero on annettu
+	if ($laskurow["liitostunnus"] > 0) {
 		echo "<table>";
 		echo "<tr>";
 
@@ -838,6 +834,35 @@ if ($tee == '') {
 					<input type='hidden' name='asiakasid' value='$laskurow[liitostunnus]'>
 					<td class='back'><input type='submit' ACCESSKEY='m' value='".t("Muuta Otsikkoa")."'></td>
 					</form>";
+		}
+
+		$query  = "	SELECT count(*) kpl from tilausrivi
+					JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.tyyppi in ('L','G')
+					and tilausrivi.var = 'J'
+					and tilausrivi.keratty = ''
+					and tilausrivi.uusiotunnus = 0
+					and tilausrivi.varattu = 0
+					and tilausrivi.kpl = 0
+					and tilausrivi.jt <> 0";
+		$jtapuresult = mysql_query($query) or pupe_error($query);
+		$jtapurow = mysql_fetch_array($jtapuresult);
+
+		if ($jtapurow["kpl"] > 0) {
+			echo "	<form action='$PHP_SELF' method='post'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='aktivoinnista' value='true'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+			if ($jt_kayttoliittyma == "kylla") {
+				echo "	<input type='hidden' name='jt_kayttoliittyma' value=''>
+						<td class='back'><input type='submit' value='".t("Piilota JT-rivit")."'></td>";
+			}
+			else {
+				echo "	<input type='hidden' name='jt_kayttoliittyma' value='kylla'>
+						<td class='back'><input type='submit' value='".t("Näytä JT-rivit")."'></td>";
+			}
+			echo "</form>";
 		}
 
 		// otetaan maksuehto selville.. jaksotus muuttaa asioita
@@ -1917,7 +1942,9 @@ if ($tee == '') {
 								and otunnus = '$kukarow[kesken]'
 								$pklisa";
 					$pkres = mysql_query($query) or pupe_error($query);
-					echo "<tr><td valign='top' rowspan='".mysql_num_rows($pkres)."'>$rivino</td>";
+					$pknum = mysql_num_rows($pkres);
+
+					echo "<tr><td valign='top' rowspan='$pknum'>$rivino</td>";
 				}
 				elseif($row["perheid"] == 0 and $row["perheid2"] == 0) {
 					echo "<tr><td valign='top'>$rivino</td>";
@@ -2625,12 +2652,14 @@ if ($tee == '') {
 		}
 
 		// JT-rivikäyttöliittymä
-		if ($estetaankomyynti == '' and $muokkauslukko == "" and $rivilaskuri == 0 and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
-			//katotaan eka halutaanko asiakkaan jt-rivejä näkyviin
-			$asjtq = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]' and jtrivit = 1";
-			$asjtapu = mysql_query($asjtq) or pupe_error($asjtq);
+		if ($jt_kayttoliittyma == "kylla" and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
 
-			if (mysql_num_rows($asjtapu) == 0) {
+			//katotaan eka halutaanko asiakkaan jt-rivejä näkyviin
+			$asjtq = "select jtrivit from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
+			$asjtapu = mysql_query($asjtq) or pupe_error($asjtq);
+			$asjtrow = mysql_fetch_array($asjtapu);
+
+			if (mysql_num_rows($asjtapu) == 1 and $asjtrow["jtrivit"] == 0) {
 
 				echo "<br>";
 

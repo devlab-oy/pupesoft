@@ -669,7 +669,7 @@
 						</select></td></tr>";
 						
 				echo "<tr><th align='left'>".t("Lomaoikeus").":</th>
-						<td><input type='text' name='lomaoikeus' size='3' value='$lomaoikeus'></td></tr>";
+						<td><input type='text' name='lomaoikeus' size='3' value='$krow[lomaoikeus]'></td></tr>";
 			
 				//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
 				if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {

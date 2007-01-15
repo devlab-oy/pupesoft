@@ -34,13 +34,18 @@
 	echo "</select></td></tr>";
 	echo "</form></table><br><br>"; 
 
-	echo "<table>";
-	echo "<tr>";
-	echo "<th>".t("Lomaoikeus").":</th>";
-	echo "<td>$kukarow[lomaoikeus]</td></tr>";
-	echo "</table><br><br>";
-
 	if ($kuka != '') {
+		
+		$query  = "SELECT max(lomaoikeus) lomaoikeus FROM kuka WHERE $lisa2 and kuka='$kuka'";
+		$vares = mysql_query($query) or pupe_error($query);
+		$varow = mysql_fetch_array($vares);
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Lomaoikeus").":</th>";
+		echo "<td>$varow[lomaoikeus]</td></tr>";
+		echo "</table><br><br>";
+		
 		//* listataan muistutukset *///
 		$query = "	SELECT kalenteri.tunnus, left(pvmalku,10) pvmalku, right(pvmalku,8) aikaalku, 
 					left(pvmloppu,10) pvmloppu, right(pvmloppu,8) aikaloppu, kuka.nimi, kalenteri.tapa, kentta01, kuka.osasto, kuittaus, kalenteri.yhtio,

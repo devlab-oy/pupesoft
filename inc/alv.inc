@@ -70,7 +70,84 @@
 			exit;
 	}
 	if ($tee == 1) {
+		$lokk = $alvk + 1;
+		$lovv = $alvv;
+		if ($lokk > 12) {
+			$lokk -= 12;
+			$lovv++;
+		}
+		$alloppu = $lovv . "-" . $lokk . "-01";
+		
 		echo "<b>".t("Arvonlisäverolaskelma kaudelta")." $alvv-$alvk</b><hr>";
+		
+		if ($ruotsi != 'on') {
+			$query = "SELECT if(lasku.tila='U','".t("myyntireskontra")."', if(lasku.tila='X','".t("muu")."','".t("ostoreskontra")."')) tyyppi, vero,
+						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
+						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
+					FROM tiliointi, tili, lasku
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tili.yhtio = tiliointi.yhtio and
+						tiliointi.tilino = tili.tilino and
+						tiliointi.korjattu='' and
+						tiliointi.tapvm >= '" . $alvv  . "-" . $alvk . "-01' and
+						tiliointi.tapvm < '" . $alloppu  . "' and
+						vero > 0 and
+						lasku.yhtio=tiliointi.yhtio and
+						lasku.tunnus = tiliointi.ltunnus
+						group by tyyppi, vero";
+			$result = mysql_query($query) or pupe_error($query);		
+
+			echo "<table><tr>";
+			for ($i = 0; $i < mysql_num_fields($result); $i++) {
+				echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
+			}
+			echo "</tr>";
+			while ($trow=mysql_fetch_array ($result)) {
+				echo "<tr>
+					<td>$trow[tyyppi]</td>
+					<td align = 'right'>$trow[vero]</td>
+					<td align = 'right'>$trow[Bruttosumma]</td>
+					<td align = 'right'>$trow[Verot]</td>
+					<td align = 'right'>$trow[Kpl]</td></tr>";
+				
+			}
+			echo "</table><br><br>";
+		}
+		
+		echo "".t("Käsiviennit")."<br>";
+		$query = "SELECT ltunnus, tapvm, summa, selite
+					FROM tiliointi
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tiliointi.korjattu='' and
+						aputunnus='' and
+						tiliointi.tapvm >= '" . $alvv  . "-" . $alvk . "-01' and
+						tiliointi.tapvm < '" . $alloppu  . "' and
+						tilino = $yhtiorow[alv]";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<table><tr>";
+		for ($i = 0; $i < mysql_num_fields($result); $i++) {
+			echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
+		}
+
+		while ($trow=mysql_fetch_array ($result)) {
+			echo "<tr>";
+			for ($i = 0; $i < mysql_num_fields($result); $i++) {
+				if ($i == 0) {
+					if ($kukarow['taso'] < 2) {
+						echo "<td>$trow[tapvm]</td>";
+					}
+					else {
+						echo "<td>";
+						echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'>";
+						echo "$trow[$i]</td>";
+					}
+				} else {
+					echo "<td>$trow[$i]</td>";
+				}
+			}
+			echo "</tr>";
+		}
+		echo "</table><br><br>";
+		
 		if ($ruotsi != 'on') 
 			$query = "SELECT vero, tiliointi.tilino, nimi, round(sum(summa * (1+vero/100)),2) Bruttosumma,
 						round(sum(summa * vero / 100),2) Verot, count(*) Kpl
@@ -78,19 +155,21 @@
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tili.yhtio = tiliointi.yhtio and
 						tiliointi.tilino = tili.tilino and
 						tiliointi.korjattu='' and
-						left(tapvm,7) = '" . $alvv  . "-" . $alvk . "' and
+						tiliointi.tapvm >= '" . $alvv  . "-" . $alvk . "-01' and
+						tiliointi.tapvm < '" . $alloppu  . "' and
 						vero > 0
 					GROUP BY vero, tiliointi.tilino
 					ORDER BY vero, tiliointi.tilino";
 		else
-			$query = "SELECT concat_ws(' ',vero, if(lasku.tila='U','".t("ulos")."','".t(sisään)."')) vero, tiliointi.tilino, tili.nimi,
+			$query = "SELECT concat_ws(' ',vero, if(lasku.tila='U','".t("ulos")."','".t("sisään")."')) vero, tiliointi.tilino, tili.nimi,
 						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
 						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
 					FROM tiliointi, tili, lasku
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tili.yhtio = tiliointi.yhtio and
 						tiliointi.tilino = tili.tilino and
 						tiliointi.korjattu='' and
-						left(tiliointi.tapvm,7) = '" . $alvv  . "-" . $alvk . "' and
+						tiliointi.tapvm >= '" . $alvv  . "-" . $alvk . "-01' and
+						tiliointi.tapvm < '" . $alloppu  . "' and
 						vero > 0 and
 						lasku.yhtio=tiliointi.yhtio and
 						lasku.tunnus = tiliointi.ltunnus

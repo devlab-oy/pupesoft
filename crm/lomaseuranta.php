@@ -20,7 +20,7 @@
 	
 	
 	echo "<form action='$PHP_SELF' method='POST'>";
-	echo "<td><select name='kuka' onchange='submit()'><option value=''>".t("Ei osastoa")."</option>";
+	echo "<td><select name='kuka' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
 	$query  = "SELECT distinct kuka, nimi FROM kuka WHERE $lisa2";
 	$vares = mysql_query($query) or pupe_error($query);
@@ -32,7 +32,7 @@
 	}
 
 	echo "</select></td></tr>";
-	echo "</form></table><br>"; 
+	echo "</form></table><br><br>"; 
 
 	if ($kuka != '') {
 		//* listataan muistutukset *///
@@ -40,7 +40,7 @@
 					left(pvmloppu,10) pvmloppu, right(pvmloppu,8) aikaloppu, kuka.nimi, kalenteri.tapa, kentta01, kuka.osasto, kuittaus, kalenteri.yhtio,
 					datediff(pvmalku,now()) ero
 					FROM kalenteri, kuka
-					where $lisa2
+					where kalenteri.$lisa2
 					and kuka.yhtio=kalenteri.yhtio
 					and kalenteri.tyyppi = 'kalenteri'
 					and kalenteri.tapa in ('Kesäloma','Talviloma') 

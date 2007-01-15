@@ -83,6 +83,7 @@
 		(mysql_field_name($result, $i) == "luottotappiot") or
 		(mysql_field_name($result, $i) == "ostovelat") or
 		(mysql_field_name($result, $i) == "valuuttaero") or
+		(mysql_field_name($result, $i) == "myynninvaluuttaero") or
 		(mysql_field_name($result, $i) == "matkalla_olevat") or
 		(mysql_field_name($result, $i) == "kassaale") or
 		(mysql_field_name($result, $i) == "myynninkassaale") or

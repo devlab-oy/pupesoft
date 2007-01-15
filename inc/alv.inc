@@ -114,13 +114,13 @@
 		}
 		
 		echo "".t("Käsiviennit")."<br>";
-		$query = "SELECT ltunnus, tapvm, summa, selite
-					FROM tiliointi
+		$query = "SELECT ltunnus, tiliointi.tapvm, tiliointi.summa, concat_ws(' ',selite, lasku.nimi) selite
+					FROM tiliointi, lasku
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tiliointi.korjattu='' and
 						aputunnus='' and
 						tiliointi.tapvm >= '" . $alvv  . "-" . $alvk . "-01' and
 						tiliointi.tapvm < '" . $alloppu  . "' and
-						tilino = $yhtiorow[alv]";
+						tilino = $yhtiorow[alv] and lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";

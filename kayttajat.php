@@ -97,7 +97,7 @@
 			//$varasto 						= $monta['varasto'];
 			//$kirjoitin					= $monta['kirjoitin'];
 			$kassamyyja 					= $monta['kassamyyja'];
-			$jyvitys 					= $monta['jyvitys'];			
+			$jyvitys 						= $monta['jyvitys'];			
 			//$oletus_asiakas				= $monta['oletus_asiakas'];
 			$oletus_ohjelma 				= $monta['oletus_ohjelma'];
 			$resoluutio 					= $monta['resoluutio'];
@@ -144,6 +144,7 @@
 						resoluutio		= '$resoluutio',
 						extranet		= '$extranet',
 						hyvaksyja		= '$hyvaksyja',
+						lomaoikeus		= '$lomaoikeus',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
 						profiilit 		= '$profile',
 						yhtio 			= '$yhtio'";
@@ -283,6 +284,7 @@
 						resoluutio 		= '$resoluutio',
 						extranet		= '$extranet',
 						hyvaksyja		= '$hyvaksyja',
+						lomaoikeus		= '$lomaoikeus',
 						kassamyyja 		= '$kassamyyja',
 						jyvitys			= '$jyvitys',
 						oletus_ohjelma 	= '$oletus_ohjelma',
@@ -665,6 +667,9 @@
 						<option value='Y' $sel2>".t("Kate näytetään")."</option>
 						<option value='N' $sel3>".t("Katetta ei näytetä")."</option>
 						</select></td></tr>";
+						
+				echo "<tr><th align='left'>".t("Lomaoikeus").":</th>
+						<td><input type='text' name='lomaoikeus' size='3' value='$lomaoikeus'></td></tr>";
 			
 				//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
 				if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {

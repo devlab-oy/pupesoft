@@ -16,13 +16,13 @@
 	
 	echo "<table>";
 	echo "<tr>";
-	echo "<td>".t("Valitse käyttäjä").":</td>";
+	echo "<th>".t("Valitse käyttäjä").":</th>";
 	
 	
 	echo "<form action='$PHP_SELF' method='POST'>";
 	echo "<td><select name='kuka' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-	$query  = "SELECT distinct kuka, nimi FROM kuka WHERE $lisa2";
+	$query  = "SELECT distinct kuka, nimi FROM kuka WHERE $lisa2 and extranet=''";
 	$vares = mysql_query($query) or pupe_error($query);
 
 	while ($varow = mysql_fetch_array($vares)) {
@@ -33,6 +33,12 @@
 
 	echo "</select></td></tr>";
 	echo "</form></table><br><br>"; 
+
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Lomaoikeus").":</th>";
+	echo "<td>$kukarow[lomaoikeus]</td></tr>";
+	echo "</table><br><br>";
 
 	if ($kuka != '') {
 		//* listataan muistutukset *///
@@ -45,19 +51,20 @@
 					and kalenteri.tyyppi = 'kalenteri'
 					and kalenteri.tapa in ('Kesäloma','Talviloma') 
 					and kalenteri.kuka=kuka.kuka
-					and kuka.kuka='$kuka' 
+					and kuka.kuka='$kuka'
 					ORDER BY kalenteri.kuka, kalenteri.tapa, kalenteri.pvmalku";
 		$result = mysql_query($query) or pupe_error($query);
 					
 		if (mysql_num_rows($result) > 0) {
 			echo "<table>";
+			
 			echo "<tr>
 					<th>".("Tyyppi")."</th><th>".("Nimi")."</th>
 					<th>".("Osasto")."</th><th>".("Pvmalku")."</th>
 					<th>".("Aikaalku")."</th><th>".("Pvmloppu")."</th>
 					<th>".("Aikaloppu")."</th><th>".("Kommentti")."</th>";
 			echo "<th>".t("Hyväksyjä")."</th>";
-			echo "<th>".t("Yhtiö")."</th>";
+			echo "<th>".t("Pituus")."</th>";
 			echo "</tr>";
 			
 			while ($row = mysql_fetch_array($result)) {			
@@ -67,7 +74,7 @@
 						<td>$row[aikaalku]</td><td>$row[pvmloppu]</td>
 						<td>$row[aikaloppu]</td><td>$row[kentta01]</td>";
 				echo "<td>$row[kuittaus]</td>";
-				echo "<td>$row[yhtio]</td>";				
+				echo "<td>$row[ero]</td>";				
 				echo "</tr>";
 			}
 			echo "</table>";

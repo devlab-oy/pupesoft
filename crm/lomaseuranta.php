@@ -49,7 +49,7 @@
 		//* listataan muistutukset *///
 		$query = "	SELECT kalenteri.tunnus, left(pvmalku,10) pvmalku, right(pvmalku,8) aikaalku, 
 					left(pvmloppu,10) pvmloppu, right(pvmloppu,8) aikaloppu, kuka.nimi, kalenteri.tapa, kentta01, kuka.osasto, kuittaus, kalenteri.yhtio,
-					datediff(pvmalku,pvmloppu) ero
+					(datediff(pvmalku,pvmloppu)*-1)+1 ero
 					FROM kalenteri, kuka
 					where kalenteri.$lisa2
 					and kuka.yhtio=kalenteri.yhtio

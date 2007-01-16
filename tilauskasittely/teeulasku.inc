@@ -6,16 +6,22 @@
 $tulos_ulos_ulasku = "";
 
 // lasketaan laskulle loppusumma.. ja otetaan kaikki mahdolliset eriävät tiedot talteen
-$arvo			= 0;
-$summa			= 0;
-$kate			= 0;
-$bruttopaino	= 0;
-$viestit		= "";
-$comments		= "";
-$sisviestit1	= "";
-$viitetxt		= "";
+$arvo				= 0;
+$summa				= 0;
+$summa_valuutassa 	= 0;
+$kate				= 0;
+$bruttopaino		= 0;
+$viestit			= "";
+$comments			= "";
+$sisviestit1		= "";
+$viitetxt			= "";
 
-$query  = "	select sum(arvo) arvo, sum(summa) summa, sum(kate) kate, sum(bruttopaino) bruttopaino,
+$query  = "	select 
+			sum(arvo) arvo, 
+			sum(summa) summa,
+			sum(summa_valuutassa) summa_valuutassa,
+			sum(kate) kate, 
+			sum(bruttopaino) bruttopaino,
 			group_concat(distinct trim(comments) SEPARATOR ' / ') comments,
 			group_concat(distinct trim(sisviesti1) SEPARATOR ' / ') sisviestit1,
 			group_concat(distinct trim(viesti) SEPARATOR ' / ') viestit,
@@ -28,21 +34,22 @@ $uusiuresult = mysql_query($query) or pupe_error($query);
 if (mysql_num_rows($uusiuresult) > 0) {
 	$sumrow = mysql_fetch_array($uusiuresult);
 
-	$arvo			= round($sumrow["arvo"], 2);
-	$summa			= round($sumrow["summa"], 2);
-	$kate			= round($sumrow["kate"], 2);
-	$bruttopaino	= round($sumrow["bruttopaino"], 2);
+	$arvo				= round($sumrow["arvo"], 2);
+	$summa				= round($sumrow["summa"], 2);
+	$summa_valuutassa	= round($sumrow["summa_valuutassa"], 2);
+	$kate				= round($sumrow["kate"], 2);
+	$bruttopaino		= round($sumrow["bruttopaino"], 2);
 
-	$viestit		= $sumrow["viestit"];
-	$comments		= $sumrow["comments"];
-	$sisviestit1	= $sumrow["sisviestit1"];
-	$viitetxt		= $sumrow["viitetxt"];
+	$viestit			= $sumrow["viestit"];
+	$comments			= $sumrow["comments"];
+	$sisviestit1		= $sumrow["sisviestit1"];
+	$viitetxt			= $sumrow["viitetxt"];
 
 	//Onko tämä mysql-bugi vai group_concatin ominaisuus?
-	if ($viestit == " / ") 		$viestit = "";
-	if ($comments == " / ") 	$comments = "";
-	if ($sisviestit1 == " / ") 	$sisviestit1 = "";
-	if ($viitetxt == " / ") 	$viitetxt = "";
+	if ($viestit == " / ") 		$viestit 		= "";
+	if ($comments == " / ") 	$comments 		= "";
+	if ($sisviestit1 == " / ") 	$sisviestit1 	= "";
+	if ($viitetxt == " / ") 	$viitetxt 		= "";
 }
 
 // haetaan laskulle otsikkotiedot ketjun ekalta laskulta
@@ -96,7 +103,8 @@ if ($mehtorow['kateinen']!='') {
 }
 
 ///* Lasketaan Kassa-alennus *///
-$kassaale = round($summa*$mehtorow['kassa_alepros']/100,2);
+$kassaale 				= round($summa*$mehtorow['kassa_alepros']/100,2);
+$kassaale_valuutassa 	= round($summa_valuutassa*$mehtorow['kassa_alepros']/100,2);
 
 
 $lisa_comments 	= "";
@@ -154,9 +162,6 @@ if ($mehtorow["jv"] != '') {
 	$lisa_comments 	.= t("Kuitataan jälkivaatimuksella saaduksi. TÄTÄ LASKUA EI TULE MAKSAA!")."\n";
 }
 
-
-
-
 // Lisätään järjestelmän generoimat kommentit laskun kommenttikenttään
 if ($lisa_comments != "") {
 	$sisviestit1 = $lisa_comments." ".$sisviestit1;
@@ -188,6 +193,7 @@ $query = "	INSERT into lasku SET
 			erpcm								= '$lasrow[erpcm]',
 			kapvm								= '$lasrow[kapvm]',
 			kasumma								= '$kassaale',
+			kasumma_valuutassa					= '$kassaale_valuutassa',
 			kate								= '$kate',
 			kauppatapahtuman_luonne			 	= '$lasrow[kauppatapahtuman_luonne]',
 			kerayspvm							= '$lasrow[kerayspvm]',
@@ -220,6 +226,7 @@ $query = "	INSERT into lasku SET
 			sisamaan_kuljetus_kansallisuus		= '$lasrow[sisamaan_kuljetus_kansallisuus]',
 			sisamaan_kuljetusmuoto 				= '$lasrow[sisamaan_kuljetusmuoto]',
 			summa								= '$summa',
+			summa_valuutassa					= '$summa_valuutassa',
 			tapvm								= '$lasrow[tapvm]',
 			tilausvahvistus						= '$lasrow[tilausvahvistus]',
 			toim_maa							= '$lasrow[toim_maa]',

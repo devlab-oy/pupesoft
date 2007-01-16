@@ -23,6 +23,7 @@
 	// $osto_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
 	// $jaksotettu		 --> Kuuluuko tilausrivi mukaan jaksotukseen
 	// $perheid2		 --> Lis‰varusteryhm‰n perheid
+	// $orvoteikiinnosta --> Meit‰ ei kiinnosta orvot jos t‰m‰ ei ole tyhj‰.
 
 	//palauttaa arrayn $lisatyt_rivit jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si
 
@@ -114,7 +115,7 @@
 		$var 		= "";
 		$rivinumero	= "";
 	}
-
+	
 	// Jos kyseess‰ on suoratoimitus joka tilataan toisesta firmasta suoraan
 	if (substr($paikka,0,3) == "@@@") {
 
@@ -138,10 +139,6 @@
 		$rivinumero	= "";
 		$suoratoimeikiitos = "ei";
 	}
-
-	//echo "$paikka<br>";
-	//echo "$var<br>";
-	//echo "$rivinumero<br>";
 
 	$perhelisa  = "";
 	$perhelisa2 = "";
@@ -229,8 +226,15 @@
 
 		// Sitten k‰yd‰‰n kaikkien tuotteiden saldot l‰pi kaikilta varastopaikoilta
 		foreach ($kaikkituotteet as $tuoteno) {
-			// katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
-			$orvot = saldo_myytavissa($tuoteno, "ORVOT") * -1;
+			
+			if ($orvoteikiinnosta != '') {
+				$orvot = 0;
+			}
+			else {
+				// katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
+				$orvot = saldo_myytavissa($tuoteno, "ORVOT") * -1;
+			}
+
 			// lasketaan saldo tuotepaikoille (ORDER BY TƒRKEE!)
 			$query = "	SELECT tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, tuotepaikat.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, sum(tuotepaikat.saldo) saldo
 						FROM tuote

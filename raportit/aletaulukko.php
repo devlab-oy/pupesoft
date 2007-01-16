@@ -11,13 +11,13 @@ if ($tee == 'eposti') {
 
 	if ($komento == '') {
 		$tulostimet[] = "Alennustaulukko";
-		$raportti = $from;
+		$raportti = $lopetus;
 		$toimas = $ytunnus;
 
 		require("../inc/valitse_tulostin.inc");
 	}
 
-	$from = $raportti;
+	$lopetus = $raportti;
 	$ytunnus = $toimas;
 
 	require('../pdflib/phppdflib.class.php');
@@ -114,8 +114,12 @@ if ($tee == 'eposti') {
 }
 
 
-if ($from != '') {
-	echo "<a href='../crm/asiakasmemo.php?ytunnus=$ytunnus'>".t("Palaa asiakasn‰kym‰‰n")."</a><br><br>";
+if ($lopetus != '') {
+	// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+	$lopetus = str_replace('!!!!','?', $lopetus);
+	$lopetus = str_replace('!!','&',  $lopetus);
+	echo "<br><br>";
+	echo "<a href='$lopetus'>".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";	
 }
 
 echo "<a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&from=$from'>".t("Tulosta alennustaulukko")."</a><br><br>";
@@ -263,11 +267,6 @@ echo "<table><tr>
 		<td class='back'></td>
 		<td valign='top' class='back'>$ashin</td>
 		</tr></table>";
-
-
-
-
-
 
 if ($tee == 'eposti') {
 	//keksit‰‰n uudelle failille joku varmasti uniikki nimi:

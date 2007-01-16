@@ -571,242 +571,252 @@ if ($tee == 'go') {
 	}
 }
 
-//Käyttöliittymä
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($kkl)) $kkl = date("m");
-if (!isset($vvl)) $vvl = date("Y");
-if (!isset($ppl)) $ppl = date("d");
-if (!isset($yhtio)) $yhtio = "'$kukarow[yhtio]'";
 
-echo "<br>\n\n\n";
-echo "<form method='post' action='$PHP_SELF'>";
-echo "<input type='hidden' name='tee' value='go'>";
+if ($lopetus == "") {
+	//Käyttöliittymä
+	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($kkl)) $kkl = date("m");
+	if (!isset($vvl)) $vvl = date("Y");
+	if (!isset($ppl)) $ppl = date("d");
+	if (!isset($yhtio)) $yhtio = "'$kukarow[yhtio]'";
 
-// tässä on tämä "perusnäkymä" mikä tulisi olla kaikissa myynnin raportoinneissa..
+	echo "<br>\n\n\n";
+	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<input type='hidden' name='tee' value='go'>";
 
-echo "<table>";
-echo "<tr>";
-echo "<th>".t("Valitse ajotapa:")."</th>";
-echo "<td><input type='radio' name='ajotapa' value='lasku' checked>".t("Laskuista")."</td>";
-echo "<td><input type='radio' name='ajotapa' value='tilaus'>".t("Tilauksista")."</td>";
-echo "<td class='back'>".t("(HUOM! Raportin tulos todennäköisesti eroaa ajotavasta riippuen)")."</td>";
+	// tässä on tämä "perusnäkymä" mikä tulisi olla kaikissa myynnin raportoinneissa..
 
-echo "</tr>";
-echo "</table><br>";
-
-$query = "	SELECT *
-			FROM yhtio
-			WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
-$result = mysql_query($query) or pupe_error($query);
-
-// voidaan valita listaukseen useita konserniyhtiöitä, jos käyttäjällä on "PÄIVITYS" oikeus tähän raporttiin
-if (mysql_num_rows($result) > 0 and $oikeurow['paivitys'] != "") {
 	echo "<table>";
 	echo "<tr>";
-	echo "<th>".t("Valitse yhtiö")."</th>";
-
-	if (!isset($yhtiot)) $yhtiot = array();
-
-	while ($row = mysql_fetch_array($result)) {
-		$sel = "";
-
-		if ($kukarow["yhtio"] == $row["yhtio"] and count($yhtiot) == 0) $sel = "CHECKED";
-		if (in_array($row["yhtio"], $yhtiot)) $sel = "CHECKED";
-
-		echo "<td><input type='checkbox' name='yhtiot[]' onchange='submit()' value='$row[yhtio]' $sel>$row[nimi]</td>";
-	}
+	echo "<th>".t("Valitse ajotapa:")."</th>";
+	echo "<td><input type='radio' name='ajotapa' value='lasku' checked>".t("Laskuista")."</td>";
+	echo "<td><input type='radio' name='ajotapa' value='tilaus'>".t("Tilauksista")."</td>";
+	echo "<td class='back'>".t("(HUOM! Raportin tulos todennäköisesti eroaa ajotavasta riippuen)")."</td>";
 
 	echo "</tr>";
 	echo "</table><br>";
+
+	$query = "	SELECT *
+				FROM yhtio
+				WHERE konserni='$yhtiorow[konserni]' and konserni != ''";
+	$result = mysql_query($query) or pupe_error($query);
+
+	// voidaan valita listaukseen useita konserniyhtiöitä, jos käyttäjällä on "PÄIVITYS" oikeus tähän raporttiin
+	if (mysql_num_rows($result) > 0 and $oikeurow['paivitys'] != "") {
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Valitse yhtiö")."</th>";
+
+		if (!isset($yhtiot)) $yhtiot = array();
+
+		while ($row = mysql_fetch_array($result)) {
+			$sel = "";
+
+			if ($kukarow["yhtio"] == $row["yhtio"] and count($yhtiot) == 0) $sel = "CHECKED";
+			if (in_array($row["yhtio"], $yhtiot)) $sel = "CHECKED";
+
+			echo "<td><input type='checkbox' name='yhtiot[]' onchange='submit()' value='$row[yhtio]' $sel>$row[nimi]</td>";
+		}
+
+		echo "</tr>";
+		echo "</table><br>";
+	}
+	else {
+		echo "<input type='hidden' name='yhtiot[]' value='$kukarow[yhtio]'>";
+	}
+
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Syötä asiakasosasto")."</th>";
+	echo "<td><input type='text' name='asiakasosasto' size='10'></td>";
+
+	$query = "	SELECT *
+				FROM avainsana
+				WHERE yhtio in ($yhtio) and laji='ASIAKASOSASTO'
+				ORDER BY selite+0";
+	$result = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='asiakasosasto2'>";
+	echo "<option value=''>".t("Asiakasosasto")."</option>";
+	echo "<option value='kaikki' $asiakasosastosel>".t("Kaikki")."</option>";
+
+	while ($row = mysql_fetch_array($result)) {
+		if ($asiakasosasto == $row["selite"]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
+	}
+
+	echo "</select></td>";
+	echo "<th>".t("ja/tai asiakasryhmä")."</th>";
+	echo "<td><input type='text' name='asiakasryhma' size='10'></td>";
+
+	$query = "	SELECT *
+				FROM avainsana
+				WHERE yhtio in ($yhtio) and laji='ASIAKASRYHMA'
+				ORDER BY selite+0";
+	$result = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='asiakasryhma2'>";
+	echo "<option value=''>".t("Asiakasryhmä")."</option>";
+	echo "<option value='kaikki' $asiakasryhmasel>".t("Kaikki")."</option>";
+
+	while ($row = mysql_fetch_array($result)) {
+		if ($asiakasryhma == $row["selite"]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
+	}
+
+	echo "</select></td>";
+	echo "</tr>\n";
+
+	echo "<tr>";
+	echo "<th>".t("Syötä tuoteosasto")."</th>";
+	echo "<td><input type='text' name='tuoteosasto' size='10'></td>";
+
+	$query = "	SELECT *
+				FROM avainsana
+				WHERE yhtio in ($yhtio) and laji='OSASTO'
+				ORDER BY selite+0";
+	$result = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='tuoteosasto2'>";
+	echo "<option value=''>".t("Tuoteosasto")."</option>";
+	echo "<option value='kaikki' $tuoteosastosel>".t("Kaikki")."</option>";
+
+	while ($row = mysql_fetch_array($result)) {
+		if ($tuoteosasto == $row["selite"]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
+	}
+
+	echo "</select></td>";
+	echo "<th>".t("ja/tai tuoteryhmä")."</th>";
+	echo "<td><input type='text' name='tuoteryhma' size='10'></td>";
+
+	$query = "	SELECT *
+				FROM avainsana
+				WHERE yhtio in ($yhtio) and laji='TRY'
+				ORDER BY selite+0";
+	$result = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='tuoteryhma2'>";
+	echo "<option value=''>".t("Tuoteryhmä")."</option>";
+	echo "<option value='kaikki' $tuoteryhmasel>".t("Kaikki")."</option>";
+
+	while ($row = mysql_fetch_array($result)) {
+		if ($tuoteryhma == $row["selite"]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
+	}
+
+	echo "</select></td>";
+	echo "</tr>\n";
+	echo "</table><br>";
+
+	// tähän loppuu "perusnäkymä"...
+
+	echo "<table>
+	<tr>
+	<th>".t("Vain asiakas ytunnus")."</th>
+	<td><input type='text' name='asiakas' value='$asiakas'></td>
+	</tr>";
+
+	echo "<tr>
+	<th>".t("Vain toimittaja ytunnus")."</th>
+	<td><input type='text' name='toimittaja' value='$toimittaja'></td>
+	</tr>";
+
+	echo "</table><br>";
+
+
+
+	// lisärajaukset näkymä..
+	echo "<table>
+		<tr>
+		<th>".t("Lisärajaus")."</th>
+		<th>".t("Prio")."</th>
+		<th> x</th>
+		</tr>
+		<tr>
+		<th>".t("Listaa asiakkaittain")."</th>
+		<td><input type='text' name='jarjestys[1]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[1]' value='ytunnus'></td><td class='back'>".t("(Rajaa ylhäältä mahdollisimman pieni ryhmä, muuten lista on todella pitkä)")."</td>
+		</tr>
+		<tr>
+		<th>".t("Listaa tuotteittain")."</th>
+		<td><input type='text' name='jarjestys[2]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[2]' value='tuote'></td><td class='back'>".t("(Rajaa ylhäältä mahdollisimman pieni ryhmä, muuten lista on todella pitkä)")."</td>
+		</tr>
+		<tr>
+		<th>".t("Listaa piireittäin")."</th>
+		<td><input type='text' name='jarjestys[3]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[3]' value='piiri'></td>
+		</tr>
+		<tr>
+		<th>".t("Listaa tuotemyyjittäin")."</th>
+		<td><input type='text' name='jarjestys[4]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[4]' value='tuotemyyja'></td>
+		</tr>
+		<tr>
+		<th>".t("Listaa asiakasmyyjittäin")."</th>
+		<td><input type='text' name='jarjestys[5]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[5]' value='asiakasmyyja'></td>
+		</tr>
+		<tr>
+		<th>".t("Listaa tuoteostajittain")."</th>
+		<td><input type='text' name='jarjestys[6]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[6]' value='tuoteostaja'></td>
+		</tr>
+		<tr>
+		<th>".t("Listaa maittain")."</th>
+		<td><input type='text' name='jarjestys[7]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[7]' value='maa'></td>
+		</tr>
+		<tr>
+		<th>".t("Listaa merkeittäin")."</th>
+		<td><input type='text' name='jarjestys[8]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[8]' value='merkki'></td>
+		</tr>
+		<tr>
+		<th>".t("Listaa toimittajittain")."</th>
+		<td><input type='text' name='jarjestys[9]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[9]' value='toimittaja'></td>
+		</tr>
+		<th>".t("Listaa tilaustyypeittäin")."</th>
+		<td><input type='text' name='jarjestys[10]' size='2'></td>
+		<td><input type='checkbox' name='ruksit[10]' value='tilaustyyppi'></td><td class='back'>".t("(Toimii vain jos ajat raporttia tilauksista)")."</td>
+		</tr>
+		</table><br>";
+
+
+	// päivämäärärajaus
+	echo "<table>";
+	echo "<tr>
+		<th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
+		<td><input type='text' name='ppa' value='$ppa' size='3'></td>
+		<td><input type='text' name='kka' value='$kka' size='3'></td>
+		<td><input type='text' name='vva' value='$vva' size='5'></td>
+		</tr>\n
+		<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
+		<td><input type='text' name='ppl' value='$ppl' size='3'></td>
+		<td><input type='text' name='kkl' value='$kkl' size='3'></td>
+		<td><input type='text' name='vvl' value='$vvl' size='5'></td>
+		</tr>\n";
+	echo "</table>";
+
+	echo "<br>";
+	echo "<input type='submit' value='".t("Aja raportti")."'>";
+	echo "</form>";
 }
 else {
-	echo "<input type='hidden' name='yhtiot[]' value='$kukarow[yhtio]'>";
+	// Jotta urlin parametrissa voisi päässätä toisen urlin parametreineen
+	$lopetus = str_replace('!!!!','?', $lopetus);
+	$lopetus = str_replace('!!','&',  $lopetus);
+	echo "<br><br>";
+	echo "<a href='$lopetus'>".t("Palaa edelliseen näkymään")."</a>";
 }
-
-echo "<table>";
-echo "<tr>";
-echo "<th>".t("Syötä asiakasosasto")."</th>";
-echo "<td><input type='text' name='asiakasosasto' size='10'></td>";
-
-$query = "	SELECT *
-			FROM avainsana
-			WHERE yhtio in ($yhtio) and laji='ASIAKASOSASTO'
-			ORDER BY selite+0";
-$result = mysql_query($query) or pupe_error($query);
-
-echo "<td><select name='asiakasosasto2'>";
-echo "<option value=''>".t("Asiakasosasto")."</option>";
-echo "<option value='kaikki' $asiakasosastosel>".t("Kaikki")."</option>";
-
-while ($row = mysql_fetch_array($result)) {
-	if ($asiakasosasto == $row["selite"]) $sel = "selected";
-	else $sel = "";
-	echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
-}
-
-echo "</select></td>";
-echo "<th>".t("ja/tai asiakasryhmä")."</th>";
-echo "<td><input type='text' name='asiakasryhma' size='10'></td>";
-
-$query = "	SELECT *
-			FROM avainsana
-			WHERE yhtio in ($yhtio) and laji='ASIAKASRYHMA'
-			ORDER BY selite+0";
-$result = mysql_query($query) or pupe_error($query);
-
-echo "<td><select name='asiakasryhma2'>";
-echo "<option value=''>".t("Asiakasryhmä")."</option>";
-echo "<option value='kaikki' $asiakasryhmasel>".t("Kaikki")."</option>";
-
-while ($row = mysql_fetch_array($result)) {
-	if ($asiakasryhma == $row["selite"]) $sel = "selected";
-	else $sel = "";
-	echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
-}
-
-echo "</select></td>";
-echo "</tr>\n";
-
-echo "<tr>";
-echo "<th>".t("Syötä tuoteosasto")."</th>";
-echo "<td><input type='text' name='tuoteosasto' size='10'></td>";
-
-$query = "	SELECT *
-			FROM avainsana
-			WHERE yhtio in ($yhtio) and laji='OSASTO'
-			ORDER BY selite+0";
-$result = mysql_query($query) or pupe_error($query);
-
-echo "<td><select name='tuoteosasto2'>";
-echo "<option value=''>".t("Tuoteosasto")."</option>";
-echo "<option value='kaikki' $tuoteosastosel>".t("Kaikki")."</option>";
-
-while ($row = mysql_fetch_array($result)) {
-	if ($tuoteosasto == $row["selite"]) $sel = "selected";
-	else $sel = "";
-	echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
-}
-
-echo "</select></td>";
-echo "<th>".t("ja/tai tuoteryhmä")."</th>";
-echo "<td><input type='text' name='tuoteryhma' size='10'></td>";
-
-$query = "	SELECT *
-			FROM avainsana
-			WHERE yhtio in ($yhtio) and laji='TRY'
-			ORDER BY selite+0";
-$result = mysql_query($query) or pupe_error($query);
-
-echo "<td><select name='tuoteryhma2'>";
-echo "<option value=''>".t("Tuoteryhmä")."</option>";
-echo "<option value='kaikki' $tuoteryhmasel>".t("Kaikki")."</option>";
-
-while ($row = mysql_fetch_array($result)) {
-	if ($tuoteryhma == $row["selite"]) $sel = "selected";
-	else $sel = "";
-	echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
-}
-
-echo "</select></td>";
-echo "</tr>\n";
-echo "</table><br>";
-
-// tähän loppuu "perusnäkymä"...
-
-echo "<table>
-<tr>
-<th>".t("Vain asiakas ytunnus")."</th>
-<td><input type='text' name='asiakas' value='$asiakas'></td>
-</tr>";
-
-echo "<tr>
-<th>".t("Vain toimittaja ytunnus")."</th>
-<td><input type='text' name='toimittaja' value='$toimittaja'></td>
-</tr>";
-
-echo "</table><br>";
-
-
-
-// lisärajaukset näkymä..
-echo "<table>
-	<tr>
-	<th>".t("Lisärajaus")."</th>
-	<th>".t("Prio")."</th>
-	<th> x</th>
-	</tr>
-	<tr>
-	<th>".t("Listaa asiakkaittain")."</th>
-	<td><input type='text' name='jarjestys[1]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[1]' value='ytunnus'></td><td class='back'>".t("(Rajaa ylhäältä mahdollisimman pieni ryhmä, muuten lista on todella pitkä)")."</td>
-	</tr>
-	<tr>
-	<th>".t("Listaa tuotteittain")."</th>
-	<td><input type='text' name='jarjestys[2]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[2]' value='tuote'></td><td class='back'>".t("(Rajaa ylhäältä mahdollisimman pieni ryhmä, muuten lista on todella pitkä)")."</td>
-	</tr>
-	<tr>
-	<th>".t("Listaa piireittäin")."</th>
-	<td><input type='text' name='jarjestys[3]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[3]' value='piiri'></td>
-	</tr>
-	<tr>
-	<th>".t("Listaa tuotemyyjittäin")."</th>
-	<td><input type='text' name='jarjestys[4]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[4]' value='tuotemyyja'></td>
-	</tr>
-	<tr>
-	<th>".t("Listaa asiakasmyyjittäin")."</th>
-	<td><input type='text' name='jarjestys[5]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[5]' value='asiakasmyyja'></td>
-	</tr>
-	<tr>
-	<th>".t("Listaa tuoteostajittain")."</th>
-	<td><input type='text' name='jarjestys[6]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[6]' value='tuoteostaja'></td>
-	</tr>
-	<tr>
-	<th>".t("Listaa maittain")."</th>
-	<td><input type='text' name='jarjestys[7]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[7]' value='maa'></td>
-	</tr>
-	<tr>
-	<th>".t("Listaa merkeittäin")."</th>
-	<td><input type='text' name='jarjestys[8]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[8]' value='merkki'></td>
-	</tr>
-	<tr>
-	<th>".t("Listaa toimittajittain")."</th>
-	<td><input type='text' name='jarjestys[9]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[9]' value='toimittaja'></td>
-	</tr>
-	<th>".t("Listaa tilaustyypeittäin")."</th>
-	<td><input type='text' name='jarjestys[10]' size='2'></td>
-	<td><input type='checkbox' name='ruksit[10]' value='tilaustyyppi'></td><td class='back'>".t("(Toimii vain jos ajat raporttia tilauksista)")."</td>
-	</tr>
-	</table><br>";
-
-
-// päivämäärärajaus
-echo "<table>";
-echo "<tr>
-	<th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
-	<td><input type='text' name='ppa' value='$ppa' size='3'></td>
-	<td><input type='text' name='kka' value='$kka' size='3'></td>
-	<td><input type='text' name='vva' value='$vva' size='5'></td>
-	</tr>\n
-	<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
-	<td><input type='text' name='ppl' value='$ppl' size='3'></td>
-	<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-	<td><input type='text' name='vvl' value='$vvl' size='5'></td>
-	</tr>\n";
-echo "</table>";
-
-echo "<br>";
-echo "<input type='submit' value='".t("Aja raportti")."'>";
-echo "</form>";
 
 require ("../inc/footer.inc")
 

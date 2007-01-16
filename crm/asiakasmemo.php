@@ -24,7 +24,6 @@
 
 	///* Asiakas on valittu *///
 	if ($ytunnus != '') {
-
 		///* Jos ollaan käyty ylläpidossa *///
 		if ($yllapidossa == 'asiakas') {
 			$yhtunnus = '';
@@ -41,6 +40,7 @@
 			echo "<form action='$PHP_SELF' method='POST'>
 					<input type='hidden' name='tee' value='LISAAASANALYYSI'>
 					<input type='hidden' name='ytunnus' value='$ytunnus'>
+					<input type='hidden' name='asiakasid' value='$asiakasid'>
 					<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
 
 			echo "<tr><th colspan='2' align='left'><br>".t("Asiakasvertailu:")."</th></tr>";
@@ -66,6 +66,7 @@
 					$kysely = "	INSERT INTO kalenteri
 								SET tapa = '$tapa',
 								asiakas  = '$ytunnus',
+								liitostunnus = '$asiakasid',
 								henkilo  = '$yhtunnus',
 								kuka     = '$kukarow[kuka]',
 								yhtio    = '$kukarow[yhtio]',
@@ -80,6 +81,7 @@
 				$kysely = "	UPDATE kalenteri
 							SET tapa = '$tapa',
 							asiakas  = '$ytunnus',
+							liitostunnus = '$asiakasid',
 							henkilo  = '$kyhtunnus',
 							kuka     = '$kukarow[kuka]',
 							yhtio    = '$kukarow[yhtio]',
@@ -98,6 +100,7 @@
 				$kysely = "	INSERT INTO kalenteri
 							SET tapa = 'asiakasanalyysi',
 							asiakas  = '$ytunnus',
+							liitostunnus = '$asiakasid',
 							henkilo  = '$yhtunnus',
 							kuka     = '$kukarow[kuka]',
 							yhtio    = '$kukarow[yhtio]',
@@ -123,7 +126,7 @@
 						tyyppi = concat('DELETED ',tyyppi)
 						WHERE tunnus='$tunnus'
 						and yhtio='$kukarow[yhtio]'
-						and asiakas='$ytunnus'";
+						and asiakas='$ytunnus' and liitostunnus = '$asiakasid'";
 			$result = mysql_query($kysely) or pupe_error($kysely);
 
 			$tee = '';
@@ -134,7 +137,11 @@
 			// Haetaan viimeisin muistiinpano
 			$query = "	SELECT tapa tapa, asiakas ytunnus, henkilo yhtunnus, kuka laatija, kentta01 viesti, pvmalku paivamaara, tunnus
 						FROM kalenteri
-						WHERE asiakas='$ytunnus' and tyyppi='Memo' and tapa!='asiakasanalyysi' and yhtio='$kukarow[yhtio]'
+						WHERE asiakas='$ytunnus' 
+						and liitostunnus = '$asiakasid' 
+						and tyyppi='Memo' 
+						and tapa!='asiakasanalyysi' 
+						and yhtio='$kukarow[yhtio]'
 						ORDER BY tunnus desc
 						LIMIT 1";
 			$res = mysql_query($query) or pupe_error($query);
@@ -154,16 +161,15 @@
 			///* Yhteyshenkilön tiedot, otetaan valitun yhteyshenkilön tiedot talteen  *///
 			$query = "	SELECT *
 						FROM yhteyshenkilo
-						WHERE asiakas='$ytunnus'
+						WHERE asiakas='$asiakasid'
 						ORDER BY nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$yhenkilo = "<form action='$PHP_SELF' method='POST'>
 						<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='hidden' name='asiakasid' value='$asiakasid'>
 						<select name='yhtunnus' Onchange='submit()'>
 						<option value='kaikki'>".t("Yleistiedot")."</option>";
-
-
 
 			while ($row = mysql_fetch_array($result)) {
 
@@ -178,10 +184,10 @@
 					$ytitteli = $row["titteli"];
 					$yfakta   = $row["fakta"];
 				}
-
 				else {
 					$sel = '';
 				}
+				
 				$yhenkilo .= "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
 			}
 			$yhenkilo .= "</select></form>";
@@ -232,7 +238,7 @@
 
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../yllapito.php?toim=yhteyshenkilo&uusi=1&liitostunnus=$ytunnus&lopetus=$PHP_SELF!!!!ytunnus=$ytunnus'>".t("Luo uusi yhteyshenkilö")."</a></td>";
+				echo "<td><a href='../yllapito.php?toim=yhteyshenkilo&uusi=1&liitostunnus=$asiakasid&lopetus=crm/asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Luo uusi yhteyshenkilö")."</a></td>";
 			}
 			else {
 				echo "<td>".t("(Luo uusi yhteyshenkilö)")."</td>";
@@ -244,7 +250,7 @@
 
 
 			if (mysql_num_rows($result) > 0 and $yhtunnus != '') {
-				echo "<td><a href='../yllapito.php?toim=yhteyshenkilo&tunnus=$yhtunnus&lopetus=$PHP_SELF!!!!ytunnus=$ytunnus'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
+				echo "<td><a href='../yllapito.php?toim=yhteyshenkilo&tunnus=$yhtunnus&lopetus=crm/asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
 			}
 			else {
 				echo "<td></td>";
@@ -262,20 +268,9 @@
 			$vvl = date("Y");
 			$ppl = date("d");
 
-			$query = "	SELECT yhtio
-						FROM oikeu
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and kuka	= '$kukarow[kuka]'
-						and nimi	= 'raportit/osastoseuranta.php'
-						and alanimi = ''";
-			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../raportit/osastoseuranta.php?ytunnus=$ytunnus&from=asiakasmemo.php&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl'>".t("Osastoseuranta")."</a></td>";
-			}
-			else {
-				echo "<td>".t("(Osastoseuranta)")."</td>";
-			}
+			
+			echo "<td></td>";
+			
 
 			echo "</tr>";
 			echo "<tr>";
@@ -286,15 +281,15 @@
 						FROM oikeu
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and kuka	= '$kukarow[kuka]'
-						and nimi	= 'raportit/tuoryseuranta.php'
+						and nimi	= 'raportit/myyntiseuranta.php'
 						and alanimi = ''";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../raportit/tuoryseuranta.php?ytunnus=$ytunnus&from=asiakasmemo.php&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl'>".t("Tuoteryhmäseuranta")."</a></td>";
+				echo "<td><a href='../raportit/myyntiseuranta.php?asiakas=$ytunnus&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=../crm/asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Myynninseuranta")."</a></td>";
 			}
 			else {
-				echo "<td>".t("(Tuoteryhmäseuranta)")."</td>";
+				echo "<td>".t("Myynninseuranta")."</td>";
 			}
 
 			echo "</tr>";
@@ -310,7 +305,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../raportit/aletaulukko.php?ytunnus=$ytunnus&from=asiakasmemo.php'>".t("Näytä alennustaulukko")."</a></td>";
+				echo "<td><a href='../raportit/aletaulukko.php?ytunnus=$ytunnus&lopetus=../crm/asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
 			}
 			else {
 				echo "<td><u>".t("(Näytä alennustaulukko)")."</u></td>";
@@ -344,6 +339,7 @@
 						<input type='hidden' name='korjaus' value='$ktunnus'>
 						<input type='hidden' name='kyhtunnus' value='$kyhtunnus'>
 						<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='hidden' name='asiakasid' value='$asiakasid'>
 						<input type='hidden' name='yhtunnus' value='$yhtunnus'>
 						<textarea cols='83' rows='3' name='viesti' wrap='hard'>$kviesti</textarea></td>
 						</tr>
@@ -383,6 +379,7 @@
 						<input type='hidden' name='tee' value='KORJAAMEMO'>
 						<input type='hidden' name='yhtunnus' value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='hidden' name='asiakasid' value='$asiakasid'>
 						<input type='submit' name='submit' value='".t("Korjaa viimeisintä")."'>
 						</form>
 						</td>";
@@ -407,7 +404,8 @@
 						FROM kalenteri
 						LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus
 						LEFT JOIN kuka ON kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka
-						WHERE kalenteri.asiakas='$ytunnus'
+						WHERE kalenteri.asiakas		= '$ytunnus'
+						and kalenteri.liitostunnus	= '$asiakasid'
 						$lisadel
 						and kalenteri.yhtio='$kukarow[yhtio]'";
 
@@ -440,21 +438,13 @@
 							<th>".t("Yhteyshenkilö:")." $memorow[yhteyshenkilo]</th>";
 
 					if (substr($memorow['tyyppi'],0,7) != 'DELETED') {
-						echo "	<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&yhtunnus=$yhtunnus&tee=POISTAMEMO'>Poista</a></th>";
+						echo "	<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO'>Poista</a></th>";
 					}
 					else {
 						echo "<th></th>";
 					}
 
-					echo "	</tr>
-							<tr>
-							<td colspan='6'>";
-
-					echo "$memorow[viesti]";
-
-					echo "
-							</td>
-						</tr>";
+					echo "	</tr><tr><td colspan='6'>$memorow[viesti]</td></tr>";
 				}
 			}
 
@@ -462,7 +452,7 @@
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
 				echo "<br>";
-				echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&yhtunnus=$yhtunnus'>Näytä poistetut</a>";
+				echo "<a href='$PHP_SELF?naytapoistetut=OK&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus'>Näytä poistetut</a>";
 			}
 		}
    	}

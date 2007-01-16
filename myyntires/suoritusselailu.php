@@ -238,8 +238,8 @@
 		echo "<br><font class='message'>".t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("tästä")."</a> ".t("kaikki helpot").".</font><br><br>";
 
 		$tila = '';
-		$kentat = 'nimi_maksaja, kirjpvm, summa, tilino, viite, viesti, asiakas_tunnus, tunnus';
-	    $kentankoko = array(15,10,8,15,15,20,10,10);
+		$kentat = 'nimi_maksaja, kirjpvm, summa, valkoodi, tilino, viite, viesti, asiakas_tunnus, tunnus';
+	    $kentankoko = array(15,10,8,5,15,15,20,10,10);
 		$array = split(",", $kentat);
 		$count = count($array);
 		for ($i=0; $i<=$count; $i++) {
@@ -286,11 +286,11 @@
 			for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
 				switch ($i) {
 				case 0:
-					if ($maksurow[6]!=0) {
-						echo "<td></td><td><a href='$PHP_SELF?tunnus=$maksurow[7]&tila=tarkenna'>$maksurow[$i]</a></td>";
+					if ($maksurow["asiakas_tunnus"]!=0) {
+						echo "<td></td><td><a href='$PHP_SELF?tunnus=$maksurow[tunnus]&tila=tarkenna'>$maksurow[$i]</a></td>";
 					}
 					else {
-						echo "<td><a href='$PHP_SELF?tunnus=$maksurow[7]&tila=tarkenna'>x</a></td><td>$maksurow[$i]</td>";
+						echo "<td><a href='$PHP_SELF?tunnus=$maksurow[tunnus]&tila=tarkenna'>x</a></td><td>$maksurow[$i]</td>";
 					}
 					break;
 				case 3:
@@ -299,12 +299,12 @@
 	                echo "</td>";
 					break;
 				case 1:
-					if ($maksurow[6]!=0) {
-						echo "<td><a href='../asiakas.php?tila=memo&tunnus=$maksurow[6]'>$maksurow[$i]</a></td>";
-					}
-					else {
+					//if ($maksurow["asiakas_tunnus"]!=0) {
+						//echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$maksurow[asiakas_tunnus]'>$maksurow[$i]</a></td>";
+					//}
+					//else {
 						echo "<td>$maksurow[$i]</td>";
-					}
+					//}
 					break;
 			 	default:
 		    		echo "<td>$maksurow[$i]</td>";

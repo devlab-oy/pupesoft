@@ -33,6 +33,31 @@
 			$yhtunnus = $yllapidontunnus;
 		}
 
+		if ($tee == "SAHKOPOSTI") {
+			
+			// Haetaan viimeisin muistiinpano
+			$query = "	SELECT kalenteri.tapa, kalenteri.asiakas ytunnus, asiakas.nimi nimi, kalenteri.henkilo yhtunnus, kalenteri.kuka laatija, kalenteri.kentta01 viesti, kalenteri.pvmalku paivamaara
+						FROM kalenteri
+						LEFT join asiakas on asiakas.yhtio=kalenteri.yhtio and asiakas.tunnus=kalenteri.liitostunnus
+						WHERE kalenteri.tunnus='$tunnus'";
+			$res = mysql_query($query) or pupe_error($query);
+			$row = mysql_fetch_array($res);
+
+			$meili = "\n\n\n$kukarow[nimi] on lähettänyt sinulle asiakasmemon\n";
+			$meili .= "##################################################\n\n";
+			$meili .= "Tapa:       $row[tapa]\n";
+			$meili .= "Asiakas:    $row[ytunnus] $row[nimi]\n";
+			$meili .= "Pävämäärä:  $row[paivamaara]\n\n\n";
+			$meili .= "Viesti:     $row[viesti]\n\n";
+			
+			$tulos = mail($email, "Asiakasmemo", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n");			
+			
+			echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
+			
+			$tee 	= "";
+			$meili 	= "";
+		}
+		
 		///* Allrightin asiakasanalyysi*///
 		if ($tee == "ASANALYYSI") {
 
@@ -458,6 +483,26 @@
 					}
 
 					echo "	</tr><tr><td colspan='6'>$memorow[viesti]</td></tr>";
+					echo "	<tr><td colspan='4' align='right'>Lähetä käyttäjälle:</td><td colspan='2'>";
+					
+					echo "<form action='$PHP_SELF' method='POST'>";
+					echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
+					echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
+					echo "<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
+					echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+					echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
+					echo "<select name='email' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
+
+					$query  = "SELECT distinct kuka, nimi, eposti FROM kuka WHERE yhtio='$kukarow[yhtio]' and extranet=''";
+					$vares = mysql_query($query) or pupe_error($query);
+					
+					while ($varow = mysql_fetch_array($vares)) {
+						echo "<option value='$varow[eposti]'>$varow[nimi]</option>";
+					}
+
+					echo "</select>";
+					echo "</form>";
+					echo "</td></tr>";
 				}
 			}
 

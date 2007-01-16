@@ -176,7 +176,13 @@
 			// tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
 			$kukarow["kesken"] = $laskurow["tunnus"];
 			if ($laskurow['tila']== 'G') {
+				$vanhatoim = $toim;
+				$toim = "SIIRTOLISTA";
+				
 				require("tilaus-valmis-siirtolista.inc");
+				
+				$toim = $vanhatoim;
+				$vanhatoim = "";
 			}
 			else {
 				require("tilaus-valmis.inc");

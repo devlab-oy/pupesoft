@@ -518,7 +518,7 @@ if (!function_exists("yhtioval")) {
 			$kurssi = 1;
 		}
 
-		$sum = round($summa*$kurssi,2);
+		$sum = $summa*$kurssi;
 		return $sum;
 	}
 }
@@ -530,7 +530,7 @@ if (!function_exists("laskuval")) {
 			$kurssi = 1;
 		}
 
-		$sum = round($summa/$kurssi,2);
+		$sum = $summa/$kurssi;
 		return $sum;
 	}
 }

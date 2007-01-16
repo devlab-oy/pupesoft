@@ -190,6 +190,7 @@ if($tee == 'LISAA') {
 					pvmalku 	= '$year-$kuu-$paiva $kello:00',
 					pvmloppu 	= '$lyear-$lkuu-$lpaiva $lkello:00',
 					asiakas 	= '$ytunnus',
+					liitostunnus = '$asiakasid',
 					kentta01 	= '$viesti',
 					kentta03    = '$kilometrit',
 					kentta04    = '$paivarahat',
@@ -213,6 +214,7 @@ if($tee == "SYOTA") {
 	if ($tunnus != '') {
 		$query = "	SELECT *,
 					if(asiakas=0,'',asiakas) asiakas,
+					if(liitostunnus=0,'',liitostunnus) liitostunnus,
 					Year(pvmloppu) lyear,
 					Month(pvmloppu) lkuu,
 					Day(pvmloppu) lpaiva,
@@ -229,6 +231,7 @@ if($tee == "SYOTA") {
 		$paivarahat = $irow["kentta04"];
 		$tapa   	= $irow["tapa"];
 		$ytunnus 	= $irow["asiakas"];
+		$asiakasid 	= $irow["liitostunnus"];
 		$lkello 	= $irow["lkello"];
 		$lyear 		= $irow["lyear"];
 		$lkuu 		= $irow["lkuu"];
@@ -359,7 +362,7 @@ $query = "	SELECT kalenteri.tunnus tunnus, left(pvmalku,10) Muistutukset, asiaka
 			FROM kalenteri
 			LEFT JOIN kuka ON kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
 			LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
-			LEFT JOIN asiakas ON asiakas.ytunnus=kalenteri.asiakas and asiakas.yhtio=kalenteri.yhtio and asiakas.ytunnus!='' and kalenteri.asiakas!=0
+			LEFT JOIN asiakas ON asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio=kalenteri.yhtio
 			WHERE kalenteri.kuka in ($vertaa)
 			and kalenteri.tyyppi='Muistutus' 
 			and kalenteri.kuittaus='K'
@@ -585,7 +588,7 @@ echo "</tr>";
 //listataan whole-day eventit
 echo "<tr>";
 echo "<td class='back' valign='top' width='500' nowrap>";
-$query = "	SELECT kalenteri.asiakas, kentta01, tapa, kuka.nimi, kalenteri.tunnus, pvmalku, pvmloppu, kalenteri.yhtio				
+$query = "	SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuka.nimi, kalenteri.tunnus, pvmalku, pvmloppu, kalenteri.yhtio				
 			FROM kalenteri, kuka
 			WHERE kalenteri.kuka in ($vertaa)
 			and kalenteri.kuka  = kuka.kuka 
@@ -607,7 +610,10 @@ if (mysql_num_rows($result) > 0) {
         while ($prow = mysql_fetch_array ($result)) {
             
             //haetaan asiakkaan tiedot
-			$query = "select * from asiakas where yhtio='$prow[yhtio]' and ytunnus='$prow[asiakas]'";
+			$query = "	select * 
+						from asiakas 
+						where yhtio = '$prow[yhtio]' 
+						and tunnus  = '$prow[liitostunnus]'";
 			$asres = mysql_query($query) or pupe_error($query);
 			$asiak = mysql_fetch_array($asres);
                 
@@ -615,7 +621,7 @@ if (mysql_num_rows($result) > 0) {
             echo "<td>$prow[tapa]</td>";
            	
            	if ($kukarow["yhtio"] == $prow["yhtio"]) {
-            	echo "<td><a href='asiakasmemo.php?ytunnus=$prow[asiakas]'>$asiak[nimi]</a></td>";
+            	echo "<td><a href='asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asiak[nimi]</a></td>";
             }
             else {
             	echo "<td>$asiak[nimi]</td>";
@@ -693,15 +699,15 @@ $mm   = 0;
 //kalenterin taulukko alkaa tästä
 echo "<table width='100%'>\n";
 
-while ($kello_nyt != '18:00') //loopataan klo 19:00 asti..
-{
+ //loopataan klo 19:00 asti..
+while ($kello_nyt != '18:00') {
 	$hh    = date("H",mktime($hh, $mm+30, 0));
 	$mm    = date("i",mktime($hh, $mm+30, 0));
 	$kello_nyt  = date("H:i",mktime($hh, $mm+30, 0));
 	$paiva = sprintf("%02d", $paiva);
 	$kuu   = sprintf("%02d", $kuu);
 
-	$query = "	SELECT kalenteri.asiakas, kentta01, tapa, kuka.nimi, kalenteri.kuka, kalenteri.tunnus, 				
+	$query = "	SELECT kalenteri.asiakas, kalenteri.liitostunnus, kentta01, tapa, kuka.nimi, kalenteri.kuka, kalenteri.tunnus, 				
 				if( (pvmalku < '$year-$kuu-$paiva 08:00:00' and pvmalku > '$year-$kuu-$paiva 00:00:00') or 
 					(pvmalku < '$year-$kuu-$paiva 00:00:00' and pvmloppu > '$year-$kuu-$paiva 00:00:00'), '$year-$kuu-$paiva 08:00:00', pvmalku) pvmalku,
 				if( (pvmloppu > '$year-$kuu-$paiva 18:00:00' and pvmloppu < '$year-$kuu-$paiva 23:59:59') or 
@@ -764,15 +770,14 @@ while ($kello_nyt != '18:00') //loopataan klo 19:00 asti..
 				//haetaan asiakkaan tiedot
 				$query = "	select * 
 							from asiakas 
-							where ytunnus='$row[asiakas]'
-							and yhtio='$row[yhtio]'";
+							where tunnus = '$row[liitostunnus]'
+							and yhtio = '$row[yhtio]'";
 				$asres = mysql_query($query) or pupe_error($query);
 				$asiak = mysql_fetch_array($asres);			
 				
 				if ($kons == 1) {
 					$ko = "(".$row["yhtio"]."), ";
 				}
-				
 				
 				//katsotaan näytetäänkö montaa kalenteria
 				if ((($ruksattuja!=1) or ($ruksattuja==1 and $row['nimi']!=$kukarow['nimi'])) or ($kons == 1))
@@ -801,7 +806,7 @@ while ($kello_nyt != '18:00') //loopataan klo 19:00 asti..
 												
 				if ($row["asiakas"] != 0) {
 					if ($kukarow["yhtio"] == $row["yhtio"]) {
-						echo "<a href='asiakasmemo.php?ytunnus=$row[asiakas]'>$asiak[nimi]</a>";
+						echo "<a href='asiakasmemo.php?ytunnus=$row[asiakas]&asiakasid=$row[liitostunnus]'>$asiak[nimi]</a>";
 					}
 					else {
 						echo "$asiak[nimi]";

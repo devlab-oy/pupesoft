@@ -1294,11 +1294,13 @@ if ($tee == '') {
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, S,T,V niin laitetaan $paikka-muuttuja kuntoon
 			if ($tapa != "VAIHDA" and $tilausrivi["var"] == "S" and substr($paikka,0,3) != "@@@") {
-				$paikka = "@@@".$tilausrivi["tilaajanrivinro"];
+				$paikka = "@@@".$tilausrivi["tilaajanrivinro"]."#".$tilausrivi["hyllyalue"]."#".$tilausrivi["hyllynro"]."#".$tilausrivi["hyllyvali"]."#".$tilausrivi["hyllytaso"];
 			}
+			
 			if ($tapa != "VAIHDA" and $tilausrivi["var"] == "T" and substr($paikka,0,3) != "###") {
 				$paikka = "###".$tilausrivi["tilaajanrivinro"];
 			}
+			
 			if ($tapa != "VAIHDA" and $tilausrivi["var"] == "U" and substr($paikka,0,3) != "!!!") {
 				$paikka = "!!!".$tilausrivi["tilaajanrivinro"];
 			}

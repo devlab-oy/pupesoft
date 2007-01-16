@@ -75,6 +75,14 @@ else {
 
 echo "<font class='head'>".t("Kalenteri")."</font><hr>";
 
+if ($lopetus != '') {
+	// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+	$lopetus1 = str_replace('!!!!','?', $lopetus);
+	$lopetus1 = str_replace('!!','&',  $lopetus1);
+	echo "<br><br>";
+	echo "<a href='$lopetus1'>".t("Palaa edelliseen n‰kym‰‰n")."</a>";
+}
+
 $kuukaudet = $MONTH_ARRAY;
 $paivat    = $DAY_ARRAY;
 
@@ -99,6 +107,7 @@ if($tee == 'LISAA') {
 								$lkuu."#".
 								$lpaiva."#".								
 								$tapa."#".
+								$lopetus."#".
 								$viesti;
 		}
 		
@@ -128,7 +137,8 @@ if($tee == 'LISAA') {
 		$lkuu 		= $muut[11];
 		$lpaiva 	= $muut[12];						
 		$tapa 		= $muut[13];
-		$viesti 	= $muut[14];
+		$lopetus	= $muut[14];
+		$viesti 	= $muut[15];
 		
 		$ok = "OK";
 	}
@@ -150,7 +160,8 @@ if($tee == 'LISAA') {
 		$lkuu 		= $muut[11];
 		$lpaiva 	= $muut[12];						
 		$tapa 		= $muut[13];
-		$viesti 	= $muut[14];
+		$lopetus	= $muut[14];
+		$viesti 	= $muut[15];
 		
 	}
 	else {
@@ -251,6 +262,7 @@ if($tee == "SYOTA") {
 	$lisays =  "
 		<td colspan='10'><form action='$PHP_SELF' method='POST'>
 		<input type='hidden' name='tee' value='LISAA'>
+		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='valitut' value='$valitut'>
 		<input type='hidden' name='kenelle' value='$kenelle'>
 		<input type='hidden' name='asyhtio' value='$asyhtio'>
@@ -339,6 +351,7 @@ if($tee == "SYOTA") {
 	$lisays .= "<tr><td><input type='submit' value='".t("Lis‰‰")."'></td></form>
 				<form action='$PHP_SELF' method='POST'>
 				<input type='hidden' name='tee' value='POISTA'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='valitut' value='$valitut'>
 				<input type='hidden' name='year' value='$year'>
 				<input type='hidden' name='kuu' value='$kuu'>
@@ -378,7 +391,9 @@ if (mysql_num_rows($result) > 0) {
 
 
         while ($prow = mysql_fetch_array ($result)) {
-                echo "<form action='kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]' method='post'><tr>";
+                echo "	<form action='kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]' method='post'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
+						<tr>";
                 
                	echo "<td nowrap>$prow[Muistutukset]</td>";
                 echo "<td nowrap>$prow[Asiakas]</td>";
@@ -427,23 +442,24 @@ function weekday_number($paiva, $kuu, $year)
 
 echo "<table width='250'>\n";
 
-echo "<form action='$PHP_SELF?valitut=$valitut&year=$year&paiva=1&konserni=$konserni' method='post'>
-<tr><td class='back' align='center' colspan='8'>
-<select name='kuu' onchange='submit()'>";
+echo "	<form action='$PHP_SELF?valitut=$valitut&year=$year&paiva=1&konserni=$konserni' method='post'>
+		<input type='hidden' name='lopetus' value='$lopetus'>
+		<tr><td class='back' align='center' colspan='8'>
+		<select name='kuu' onchange='submit()'>";
 
-	$i=1;
-	foreach($kuukaudet as $val) {
-		if($i == $kuu) {
-			$sel = "selected";
-		}
-		else {
-			$sel = "";
-		}
-		echo "<option value='$i' $sel>$val $year</option>";
-		$i++;
+$i=1;
+foreach($kuukaudet as $val) {
+	if($i == $kuu) {
+		$sel = "selected";
 	}
+	else {
+		$sel = "";
+	}
+	echo "<option value='$i' $sel>$val $year</option>";
+	$i++;
+}
 
-	echo "	</select></td></tr></form>";
+echo "	</select></td></tr></form>";
 
 echo "<tr><th>".t("Vk.")."</th><th>".t("Ma")."</th><th>".t("Ti")."</th><th>".t("Ke")."</th><th>".t("To")."</th><th>".t("Pe")."</th><th>".t("La")."</th><th>".t("Su")."</th></tr>\n";
 echo "<tr><th>".date("W",mktime(0, 0, 0, $kuu, 1, $year))."</th>";
@@ -493,7 +509,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
 	}
 
 	echo "<td align='center' style='$style' class='$class'>
-	<a href='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$i&konserni=$konserni'>$fn1 $i $fn2</a>
+	<a href='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$i&konserni=$konserni&lopetus=$lopetus'>$fn1 $i $fn2</a>
 	</td>";
 
 	// tehd‰‰n rivinvaihto jos kyseess‰ on sunnuntai ja seuraava p‰iv‰ on olemassa..
@@ -511,7 +527,7 @@ for ($i=0; $i<6 - weekday_number(days_in_month($kuu, $year), $kuu, $year); $i++)
 
 echo "</tr>\n";
 
-echo "<tr><td class='back' align='center' colspan='8'><a href='$PHP_SELF?valitut=$valitut&kuu=$backmonth&year=$backyear&paiva=1&konserni=$konserni'>".t("Edellinen")."</a>  - <a href='$PHP_SELF?valitut=$valitut&kuu=$nextmonth&year=$nextyear&paiva=1&konserni=$konserni'>".t("Seuraava")."</a><br><br></td></tr>\n";
+echo "<tr><td class='back' align='center' colspan='8'><a href='$PHP_SELF?valitut=$valitut&kuu=$backmonth&year=$backyear&paiva=1&konserni=$konserni&lopetus=$lopetus'>".t("Edellinen")."</a>  - <a href='$PHP_SELF?valitut=$valitut&kuu=$nextmonth&year=$nextyear&paiva=1&konserni=$konserni&lopetus=$lopetus'>".t("Seuraava")."</a><br><br></td></tr>\n";
 
 echo "</table>\n";
 echo "</td></tr>";
@@ -522,7 +538,8 @@ if (trim($konserni) != '') {
 }
 //konsernivalinta
 echo "<tr><td>";
-echo "<form action='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>";
+echo "	<form action='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
+		<input type='hidden' name='lopetus' value='$lopetus'>";
 echo "<input type='checkbox' name='konserni' $ckhk onclick='submit();'>".t("Kaikkien konserniyritysten merkinn‰t")."";
 echo "</form>";
 echo "</td></tr>";
@@ -542,6 +559,7 @@ if (in_array("$kukarow[kuka]", $ruksatut)) { // Oletko valinnut itsesi
 
 echo "<tr>
 		<form action='$PHP_SELF?year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni' method='post'>
+		<input type='hidden' name='lopetus' value='$lopetus'>
 		<td class='back' valign='bottom' align='left'>".t("N‰yt‰ kalenterit").":
 		<div style='width:250;height:265;overflow:auto;'>
 		
@@ -549,7 +567,7 @@ echo "<tr>
 		<td><input type='checkbox' name='kalen[]' value = '$kukarow[kuka]' $checked onclick='submit()'></td>
 		<td>".t("Oma")."</td></tr>";
 
-$query = "	SELECT kuka.tunnus, kuka.nimi, kuka.kuka
+$query = "	SELECT distinct kuka.nimi, kuka.kuka
 			FROM kuka, oikeu
 			WHERE kuka.yhtio	= '$kukarow[yhtio]'
 			and oikeu.yhtio		= kuka.yhtio
@@ -564,7 +582,7 @@ while ($row = mysql_fetch_array($result)) {
 	if (in_array("$row[kuka]", $ruksatut)) {
 		$checked = 'checked';
 	}
-	echo "<tr><td nowrap><input type='checkbox' name='kalen[]' value='$row[kuka]' $checked onclick='submit()'></td><td>$row[1]</td></tr>";
+	echo "<tr><td nowrap><input type='checkbox' name='kalen[]' value='$row[kuka]' $checked onclick='submit()'></td><td>$row[nimi]</td></tr>";
 }
 
 
@@ -645,9 +663,9 @@ echo "<td class='back' valign='top' width='500' nowrap>";
 
 echo "	<table width='100%'>
 		<tr>
-			<th nowrap><a href='$PHP_SELF?valitut=$valitut&year=$edelyear&kuu=$edelmonth&paiva=$edelday&konserni=$konserni'><< ".t("Edellinen")."</a></th>
+			<th nowrap><a href='$PHP_SELF?valitut=$valitut&year=$edelyear&kuu=$edelmonth&paiva=$edelday&konserni=$konserni&lopetus=$lopetus'><< ".t("Edellinen")."</a></th>
 			<th style='text-align:center' nowrap>$paiva. $kuukaudet[$kuu] $year</th>
-			<th style='text-align:right' nowrap><a href='$PHP_SELF?valitut=$valitut&year=$seuryear&kuu=$seurmonth&paiva=$seurday&konserni=$konserni'>".t("Seuraava")." >></a></th>
+			<th style='text-align:right' nowrap><a href='$PHP_SELF?valitut=$valitut&year=$seuryear&kuu=$seurmonth&paiva=$seurday&konserni=$konserni&lopetus=$lopetus'>".t("Seuraava")." >></a></th>
 		</tr>
 		</table>";
 
@@ -752,7 +770,7 @@ while ($kello_nyt != '18:00') {
 		
 	//kirjoitetaan tiedot tauluun (paitsi jos ollaa lis‰‰m‰ss‰ uutta t‰h‰n ja taulu oisi tyhj‰)
 	echo "<tr>\n";
-	echo "<td width='80' nowrap>$kello_nyt <a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni'>".t("Lis‰‰")."</a></td>\n";
+	echo "<td width='80' nowrap>$kello_nyt <a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni&lopetus=$lopetus'>".t("Lis‰‰")."</a></td>\n";
 	
 	if ($kello_nyt == $lisayskello) {
 		echo $lisays;
@@ -798,7 +816,7 @@ while ($kello_nyt != '18:00') {
 		
 				// Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata 
 				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "") {
-					echo "<th rowspan='$kesto' style='border:1px solid #FF0000;'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni'>$row[tapa]</a> : ";
+					echo "<th rowspan='$kesto' style='border:1px solid #FF0000;'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&lopetus=$lopetus'>$row[tapa]</a> : ";
 				}
 				else {
 					echo "<th rowspan='$kesto' style='border:1px solid #FF0000;'>$kukanimi $row[tapa]: ";

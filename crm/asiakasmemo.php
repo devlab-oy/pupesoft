@@ -269,7 +269,20 @@
 			$ppl = date("d");
 
 			
-			echo "<td></td>";
+			$query = "	SELECT yhtio
+						FROM oikeu
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and kuka	= '$kukarow[kuka]'
+						and nimi	= 'crm/kalenteri.php'
+						and alanimi = ''";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) > 0) {
+				echo "<td><a href='kalenteri.php?lopetus=asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Kalenteri")."</a></td>";
+			}
+			else {
+				echo "<td>".t("Kalenteri")."</td>";
+			}
 			
 
 			echo "</tr>";

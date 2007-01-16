@@ -89,12 +89,27 @@
 		}
 		fclose($fh);
 
+		
 		$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=3 -R --medium=a4 --chars-per-line=28 --margin=0 --major=columns --borders=0 $filenimi");
-		$line = exec($komento["Tarrat"]." ".$filenimi.".ps");
+		
+		// itse print komento...
+		if ($komento["Tarrat"] == 'email') {
+			
+			$line = exec("ps2pdf ".$filenimi.".ps");
+			
+			$liite = $filenimi.".pdf";
+			$kutsu = "Tarrat";
 
+			require("../inc/sahkoposti.inc");
+		}
+		else {
+			$line = exec($komento["Tarrat"]." ".$filenimi.".ps");
+		}
+		
 		//poistetaan tmp file samantien kuleksimasta...
 		system("rm -f $filenimi");
 		system("rm -f ".$filenimi.".ps");
+		system("rm -f ".$filenimi.".pdf");
 
 		echo "<br>".t("Tarrat tulostuu")."!<br><br>";
 		$tee='';
@@ -124,7 +139,7 @@
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]' and nimi!='' $lisa
 					ORDER BY $jarjestys
-					LIMIT 300";
+					LIMIT 1000";
 
 		$result = mysql_query($query) or pupe_error($query);
 		echo "<table><tr><form action = '$PHP_SELF' method = 'post'>";

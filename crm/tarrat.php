@@ -95,7 +95,7 @@
 		// itse print komento...
 		if ($komento["Tarrat"] == 'email') {
 			
-			$line = exec("ps2pdf ".$filenimi.".ps");
+			$line = exec("ps2pdf ".$filenimi.".ps ".$filenimi.".pdf");
 			
 			$liite = $filenimi.".pdf";
 			$kutsu = "Tarrat";

@@ -493,7 +493,16 @@
 					echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 					echo "<select name='email' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-					$query  = "SELECT distinct kuka, nimi, eposti FROM kuka WHERE yhtio='$kukarow[yhtio]' and extranet=''";
+					$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";			
+					$result = mysql_query($query) or pupe_error($query);
+					$konsernit = "";
+
+					while ($row = mysql_fetch_array($result)) {	
+						$konsernit .= " '".$row["yhtio"]."' ,";
+					}		
+					$lisa2 = " yhtio in (".substr($konsernit, 0, -1).") ";
+						
+					$query  = "SELECT distinct kuka, nimi, eposti FROM kuka WHERE $lisa2 and extranet='' ORDER BY nimi";
 					$vares = mysql_query($query) or pupe_error($query);
 					
 					while ($varow = mysql_fetch_array($vares)) {

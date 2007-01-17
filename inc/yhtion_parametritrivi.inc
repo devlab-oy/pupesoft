@@ -386,6 +386,27 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "nimityksen_muutos_tilauksella") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "Y") {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Tuotteen nimitystä ei voi muokata tilauksentekovaiheessa")."</option>";
+		$ulos .= "<option value='Y' $sel2>".t("Tuotteen nimitystä voi muokata tilauksentekovaiheessa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "laskunsummapyoristys") {
 
 		$ulos = "<td><select name='$nimi'>";

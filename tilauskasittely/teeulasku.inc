@@ -16,11 +16,11 @@ $comments			= "";
 $sisviestit1		= "";
 $viitetxt			= "";
 
-$query  = "	select 
-			sum(arvo) arvo, 
+$query  = "	select
+			sum(arvo) arvo,
 			sum(summa) summa,
 			sum(summa_valuutassa) summa_valuutassa,
-			sum(kate) kate, 
+			sum(kate) kate,
 			sum(bruttopaino) bruttopaino,
 			group_concat(distinct trim(comments) SEPARATOR ' / ') comments,
 			group_concat(distinct trim(sisviesti1) SEPARATOR ' / ') sisviestit1,
@@ -271,10 +271,10 @@ $laskurow = mysql_fetch_array($uusiuresult);
 $query = "UPDATE tilausrivi SET uusiotunnus='$laskurow[tunnus]' WHERE otunnus in ($tunnukset) and yhtio='$kukarow[yhtio]' and var not in ('P','J')";
 $ulasr = mysql_query($query) or pupe_error($query);
 
-
+$sorttauskentta = generoi_sorttauskentta();
 
 //laitetaan välisummat rivin kommenttiin aina kun otunnus vaihtuu
-$query = "	select otunnus, tunnus, concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
+$query = "	select otunnus, tunnus, $sorttauskentta
 			from tilausrivi
 			where yhtio='$kukarow[yhtio]'
 			and otunnus in ($tunnukset)

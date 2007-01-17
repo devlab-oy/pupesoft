@@ -155,7 +155,7 @@
 				<td colspan='2'><input type='text' size='12' name='kerayspvm' value = '$kerayspvm'></td>
 				<td colspan='4'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>";
 
-		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and $toim == "RIVISYOTTO") {
+		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS")) {
 			echo "</tr>
 				<tr>
 					<th colspan='7' align='left'>".t("Tuotteen nimitys")."</th>

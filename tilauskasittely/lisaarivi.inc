@@ -532,7 +532,7 @@
 								}
 
 								// jos olemme saaneet tuotenimityksen syotarivist‰ ja sallimme nimityksen muutoksen
-								if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys != "") and $toim == "RIVISYOTTO") {
+								if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys != "") and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS")) {
 									// lis‰t‰‰n saatu nimitys kaikille tuotteille
 									$trow["nimitys"] = addslashes($tuotenimitys);
 								}

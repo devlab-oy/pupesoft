@@ -115,7 +115,7 @@
 		$var 		= "";
 		$rivinumero	= "";
 	}
-	
+
 	// Jos kyseessä on suoratoimitus joka tilataan toisesta firmasta suoraan
 	if (substr($paikka,0,3) == "@@@") {
 
@@ -226,7 +226,7 @@
 
 		// Sitten käydään kaikkien tuotteiden saldot läpi kaikilta varastopaikoilta
 		foreach ($kaikkituotteet as $tuoteno) {
-			
+
 			if ($orvoteikiinnosta != '') {
 				$orvot = 0;
 			}
@@ -529,6 +529,12 @@
 								//Jos ei varata saldoa niin ei varata saldoa
 								if($varataan_saldoa == "EI" and $rivityyppi == 'G') {
 									$varattu = 0;
+								}
+
+								// jos olemme saaneet tuotenimityksen syotarivistä ja sallimme nimityksen muutoksen
+								if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys != "") and $toim == "RIVISYOTTO") {
+									// lisätään saatu nimitys kaikille tuotteille
+									$trow["nimitys"] = addslashes($tuotenimitys);
 								}
 
 								$query = "	INSERT into tilausrivi set
@@ -1003,7 +1009,7 @@
 
 					if ($osto_sarjatunnus > 0 or $varattu+$jt < 0) {
 						$tunken = "ostorivitunnus";
-						
+
 						if ($osto_sarjatunnus > 0) {
 							$myy_sarjatunnus = $osto_sarjatunnus;
 						}

@@ -48,24 +48,24 @@
 		if ($rivitunnus!='') {
 			echo "<tr><td class='back' colspan='7'>".t("Rivikommentti").":</td></tr>";
 			echo "<tr><td class='back' colspan='7'><input type='text' value='$kommentti' name='kommentti' size='50' maxlength='255'></td></tr>";
-			
-			
+
+
 			//Jos emillä on marginaalimyyntiä niin pitää muistaa ja kertoa se myös lisääriville
 			if (isset($alv) and $alv >= 500) {
 				echo "<input type='hidden' name='alv' value='$alv'>";
 			}
-			
+
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
-			echo "<input type='hidden' name='menutila' value='$menutila'>";						
+			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
-		
+
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";
 		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
-		
+
 		echo "</form>";
 		echo "</table>";
 	}
@@ -140,7 +140,7 @@
 		else {
 			echo "<td>".alv_popup_oletus('alv',$alv)."</td>";
 		}
-		
+
 		echo "<td class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>
@@ -153,22 +153,32 @@
 		echo "<tr>
 				<td><input type='text' size='12' name='toimaika' value='$toimaika'></td>
 				<td colspan='2'><input type='text' size='12' name='kerayspvm' value = '$kerayspvm'></td>
-				<td colspan='4'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>
-				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'></td></tr>";
+				<td colspan='4'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>";
+
+		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and $toim == "RIVISYOTTO") {
+			echo "</tr>
+				<tr>
+					<th colspan='7' align='left'>".t("Tuotteen nimitys")."</th>
+					</tr>
+				<tr>
+					<td colspan='7'><input type='text' maxlength='35' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
+		}
+
+		echo "<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'></td></tr>";
 
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
-			echo "<input type='hidden' name='menutila' value='$menutila'>";			
+			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
-		
+
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";
 		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
-		
+
 		echo "</form>";
 		echo "</table>";
 	}
@@ -176,11 +186,11 @@
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>";
-		
+
 		if ($tila == "LISAARESEPTIIN") {
 			echo "<th align='left'>".t("Perhe")."</th>";
 		}
-				
+
 		echo "	<th align='left'>".t("Tuoteno")."</th>
 				<th align='left'>".t("Kpl")."</th>
 				</tr>";
@@ -193,10 +203,10 @@
 			$csp = "3";
 		}
 		else {
-			$csp = "2";	
+			$csp = "2";
 		}
-		
-		
+
+
 		if ($ulos == '') {
 			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
 		}
@@ -221,16 +231,16 @@
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
 		if ($rivitunnus!='') {
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";
-			echo "<input type='hidden' name='menutila' value='$menutila'>";						
+			echo "<input type='hidden' name='menutila' value='$menutila'>";
 			echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
 			echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
 			echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
-		
+
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";
 		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
-		
+
 		echo "</form>";
 		echo "</table>";
 	}

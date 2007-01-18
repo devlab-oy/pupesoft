@@ -1294,6 +1294,12 @@ if ($tee == '') {
 							and otunnus		= '$kukarow[kesken]'
 							and yhtio		= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
+				
+				$query = "	DELETE from tilausrivi
+							WHERE perheid2 	= '$rivitunnus'
+							and otunnus		= '$kukarow[kesken]'
+							and yhtio		= '$kukarow[yhtio]'";
+				$result = mysql_query($query) or pupe_error($query);
 			}
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, S,T,V niin laitetaan $paikka-muuttuja kuntoon
@@ -2393,6 +2399,8 @@ if ($tee == '') {
 								  <td valign='top'><input type='text' name='hinta_array[$prow[tuoteno]]' size='5' maxlength='12' 	Style='{font-size: 8pt;}'></td>
 								  <td valign='top'><input type='text' name='ale_array[$prow[tuoteno]]'   size='5' maxlength='6' 	Style='{font-size: 8pt;}'></td>
 								  <td valign='top'><input type='text' name='netto_array[$prow[tuoteno]]' size='2' maxlength='1' 	Style='{font-size: 8pt;}'></td>";
+							echo "<td valign='top'></td>";
+							echo "<td valign='top'></td>";
 
 							$lislask++;
 

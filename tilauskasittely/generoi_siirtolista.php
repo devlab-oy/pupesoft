@@ -135,7 +135,12 @@
 				}
 				
 				//ja v‰hennet‰‰n se tarpeesta
-				$pairow['tarve'] = $pairow['tarve'] - $vanhatrow['varattu'];
+				//$pairow['tarve'] = $pairow['tarve'] - $vanhatrow['varattu'];
+				
+				//ei l‰hetet‰ lis‰‰ jos on jo matkalla
+				if ($vanhatrow['varattu'] > 0) {
+					$pairow['tarve'] = 0;
+				}
 
 				//katotaan myyt‰viss‰ m‰‰r‰
 				$saldo_myytavissa = (float) saldo_myytavissa($pairow["tuoteno"], "KAIKKI", "$lahdevarasto");

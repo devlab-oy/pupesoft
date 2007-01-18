@@ -403,6 +403,7 @@
 					lasku_myynti.tunnus				myynti_tunnus,
 					lasku_myynti.nimi				myynti_nimi,
 					tilausrivi_osto.rivihinta		ostohinta,
+					tilausrivi_osto.perheid2		osto_perheid2,
 					tilausrivi_myynti.rivihinta		myyntihinta
 					FROM sarjanumeroseuranta use index (yhtio_myyntirivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -429,6 +430,7 @@
 					lasku_myynti.tunnus				myynti_tunnus,
 					lasku_myynti.nimi				myynti_nimi,
 					tilausrivi_osto.rivihinta		ostohinta,
+					tilausrivi_osto.perheid2		osto_perheid2,
 					tilausrivi_myynti.rivihinta		myyntihinta
 					FROM sarjanumeroseuranta use index (yhtio_ostorivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -490,6 +492,7 @@
 					lasku_myynti.tunnus				myynti_tunnus,
 					lasku_myynti.nimi				myynti_nimi,
 					tilausrivi_osto.rivihinta		ostohinta,
+					tilausrivi_osto.perheid2		osto_perheid2,
 					tilausrivi_myynti.rivihinta		myyntihinta
 					FROM sarjanumeroseuranta
 					LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
@@ -625,17 +628,33 @@
 		
 		echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$sarjarow[osto_tunnus]'>$sarjarow[osto_tunnus] $sarjarow[osto_nimi]</a><br><a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$sarjarow[myynti_tunnus]'>$sarjarow[myynti_tunnus] $sarjarow[myynti_nimi]</a></td>";
 		
+		//Haetaan myös ns. lisävarusteiden hinnat
+		if ($sarjarow["osto_perheid2"] != 0) {
+			$query = "	select sum(rivihinta) rivihinta
+						from tilausrivi
+						where yhtio 	= '$yhtiorow[yhtio]'
+						and perheid2 	= '$sarjarow[osto_perheid2]'
+						and tyyppi 	   != 'D'
+						and tunnus     != perheid2
+						order by tunnus";
+			$tilrivires = mysql_query($query) or pupe_error($query);
+			$tilrivirow = mysql_fetch_array($tilrivires);
+		}
+		else {
+			$tilrivirow = "";
+		}
 		
 		$sarjarow["ostohinta"] 		= sprintf('%.2f', $sarjarow["ostohinta"]);
 		$sarjarow["myyntihinta"] 	= sprintf('%.2f', $sarjarow["myyntihinta"]);
 		$kulurow["summa"] 			= sprintf('%.2f', $kulurow["summa"]);
-		$yhteensa = $sarjarow["myyntihinta"] - $sarjarow["ostohinta"] - $kulurow["summa"];
+		$yhteensa = $sarjarow["myyntihinta"] - $sarjarow["ostohinta"] - $kulurow["summa"] - $tilrivirow["rivihinta"];
 		
 		echo "<td valign='top' align='right' nowrap>";
 		if ($sarjarow["ostohinta"] != 0) 	echo "-$sarjarow[ostohinta]<br>";
+		if ($tilrivirow["rivihinta"] != 0) 	echo "-$tilrivirow[rivihinta]<br>";
 		if ($kulurow["summa"] != 0) 		echo "-$kulurow[summa]<br>";
 		if ($sarjarow["myyntihinta"] != 0) 	echo "+$sarjarow[myyntihinta]<br>";
-		echo "=$yhteensa";
+		if ($sarjarow["ostohinta"] != 0 or $kulurow["summa"] != 0 or $sarjarow["myyntihinta"] != 0) echo "=$yhteensa";
 		
 		echo "</td>";
 
@@ -701,22 +720,19 @@
 			$lisares = mysql_query($query) or pupe_error($query);
 			$lisarow = mysql_fetch_array($lisares);
 			
+			if ($lisarow["tunnus"] != 0) {
+				$ylisa = "&tunnus=$lisarow[tunnus]";
+			}
+			else {
+				$ylisa = "&liitostunnus=$sarjarow[tunnus]&uusi=1";
+			}
+			
 			echo "<td valign='top' class='menu' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\"><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF!!!!$tunnuskentta=$rivitunnus!!from=$from!!otunnus=$otunnus!!sarjanumero_haku=$sarjanumero_haku!!tuoteno_haku=$tuoteno_haku!!nimitys_haku=$nimitys_haku!!ostotilaus_haku=$ostotilaus_haku!!myyntitilaus_haku=$myyntitilaus_haku!!lisatieto_haku=$lisatieto_haku'>".t("Lisätiedot")."</a></td>";
 			
 		}
 		else {
-			$lisarow = array();
 			echo "<td></td>";			
 		}
-
-		if ($lisarow["tunnus"] != 0) {
-			$ylisa = "&tunnus=$lisarow[tunnus]";
-		}
-		else {
-			$ylisa = "&liitostunnus=$sarjarow[tunnus]&uusi=1";
-		}
-
-
 		echo "</tr>";
 
 		if (($sarjarow["perheid"] != 0 and $sarjarow["tunnus"] == $sarjarow["perheid"]) or ($from != '' and $sarjarow["perheid"] > 0)) {
@@ -768,7 +784,7 @@
 					$ylisa = "&liitostunnus=$lisarow[tunnus]&uusi=1";
 				}
 
-				echo "<td class='menu' onmouseout=\"popUp(event,'$lisarow[tunnus]')\" onmouseover=\"popUp(event,'$lisarow[tunnus]')\"><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF!!!!$tunnuskentta=$rivitunnus!!from=$from!!otunnus=$otunnus'>".t("Lisätiedot")."</a></td>";
+				echo "<td class='menu' onmouseout=\"popUp(event,'$lisarow[tunnus]')\" onmouseover=\"popUp(event,'$lisarow[tunnus]')\"><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF!!!!$tunnuskentta=$rivitunnus!!from=$from!!otunnus=$otunnus!!sarjanumero_haku=$sarjanumero_haku!!tuoteno_haku=$tuoteno_haku!!nimitys_haku=$nimitys_haku!!ostotilaus_haku=$ostotilaus_haku!!myyntitilaus_haku=$myyntitilaus_haku!!lisatieto_haku=$lisatieto_haku'>".t("Lisätiedot")."</a></td>";
 				echo "</tr>";
 			}
 		}

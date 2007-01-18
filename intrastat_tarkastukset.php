@@ -37,7 +37,12 @@
 						FROM lasku use index (yhtio_tila_tapvm)";
 		}
 		else {
-			$query .= "	if(round(sum((tilausrivi.kpl*tilausrivi.hinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.kpl*tilausrivi.hinta/lasku.summa)*lasku.bruttopaino),0), 1) paino,
+			$query .= "	if (round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi * 
+						(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
+						/ lasku.summa) * lasku.bruttopaino), 0) > 0.5, 
+						round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi * 
+						(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
+						/ lasku.summa) * lasku.bruttopaino), 0), 1) as paino,
 						if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta
 						FROM lasku use index (yhtio_tila_mapvm)";
 		}

@@ -36,7 +36,8 @@
 		if ($tee == "SAHKOPOSTI") {
 			
 			// Haetaan viimeisin muistiinpano
-			$query = "	SELECT kalenteri.tapa, kalenteri.asiakas ytunnus, asiakas.nimi nimi, kalenteri.henkilo yhtunnus, kalenteri.kuka laatija, kalenteri.kentta01 viesti, kalenteri.pvmalku paivamaara
+			$query = "	SELECT kalenteri.tapa, kalenteri.asiakas, asiakas.nimi, kalenteri.henkilo, kalenteri.kuka, kalenteri.kentta01, kalenteri.pvmalku,
+						kalenteri.liitostunnus, kalenteri.tunnus
 						FROM kalenteri
 						LEFT join asiakas on asiakas.yhtio=kalenteri.yhtio and asiakas.tunnus=kalenteri.liitostunnus
 						WHERE kalenteri.tunnus='$tunnus'";
@@ -46,11 +47,24 @@
 			$meili = "\n\n\n$kukarow[nimi] on lähettänyt sinulle asiakasmemon\n";
 			$meili .= "##################################################\n\n";
 			$meili .= "Tapa:       $row[tapa]\n";
-			$meili .= "Asiakas:    $row[ytunnus] $row[nimi]\n";
-			$meili .= "Pävämäärä:  $row[paivamaara]\n\n\n";
-			$meili .= "Viesti:     $row[viesti]\n\n";
+			$meili .= "Asiakas:    $row[asiakas] $row[nimi]\n";
+			$meili .= "Pävämäärä:  $row[pvmalku]\n\n\n";
+			$meili .= "Viesti:     $row[kentta01]\n\n";
 			
-			$tulos = mail($email, "Asiakasmemo", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n");			
+			$tulos = mail($email, "Asiakasmemo", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n");
+			
+			$kysely = "	INSERT INTO kalenteri
+						SET tapa 	= '$row[tapa]',
+						asiakas  	= '$row[asiakas]',
+						liitostunnus = '$row[liitostunnus]',
+						henkilo  	= '$row[henkilo]',
+						kuka     	= '$kukarow[kuka]',
+						yhtio    	= '$kukarow[yhtio]',
+						tyyppi   	= 'Memo',
+						pvmalku  	= now(),
+						kentta01 	= '$kukarow[nimi] lähetti memon osoitteeseen: $email',
+						perheid 	= '$row[tunnus]'";
+			$result = mysql_query($kysely) or pupe_error($kysely);
 			
 			echo "<br>Sähköposti lähetetty osoitteeseen: $email<br><br>";
 			
@@ -438,7 +452,7 @@
 			}
 
 			$query = "	SELECT tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,
-						kentta02, kentta03, kentta04, kentta05, kentta06, kentta07, kentta08, kalenteri.tunnus
+						kentta02, kentta03, kentta04, kentta05, kentta06, kentta07, kentta08, kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
 						FROM kalenteri
 						LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus
 						LEFT JOIN kuka ON kalenteri.yhtio=kuka.yhtio and kalenteri.kuka=kuka.kuka
@@ -451,7 +465,7 @@
 				$query .= " and henkilo='$yhtunnus'";
 			}
 
-			$query .= "	ORDER by kalenteri.tunnus desc";
+			$query .= "	ORDER by sorttauskentta desc, kalenteri.tunnus";
 			$res = mysql_query($query) or pupe_error($query);
 
 
@@ -468,50 +482,55 @@
 				}
 				else{
 
-					echo "<tr>
-							<th>$memorow[tyyppi]</th>
-							<th>$memorow[laatija]</th>
-							<th>$memorow[paivamaara]</th>
-							<th>".t("Tapa:")." $memorow[tapa]</th>
-							<th>".t("Yhteyshenkilö:")." $memorow[yhteyshenkilo]</th>";
-
-					if (substr($memorow['tyyppi'],0,7) != 'DELETED') {
-						echo "	<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO'>Poista</a></th>";
-					}
-					else {
-						echo "<th></th>";
-					}
-
-					echo "	</tr><tr><td colspan='6'>$memorow[viesti]</td></tr>";
-					echo "	<tr><td colspan='4' align='right'>Lähetä käyttäjälle:</td><td colspan='2'>";
+					if ($memorow["perheid"] == 0) {
+						echo "<tr>";
+						echo "	<th>$memorow[tyyppi]</th>
+								<th>$memorow[laatija]</th>
+								<th>$memorow[paivamaara]</th>
+								<th>".t("Tapa:")." $memorow[tapa]</th>
+								<th>".t("Yhteyshenkilö:")." $memorow[yhteyshenkilo]</th>";
 					
-					echo "<form action='$PHP_SELF' method='POST'>";
-					echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
-					echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
-					echo "<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
-					echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
-					echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
-					echo "<select name='email' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
+						if (substr($memorow['tyyppi'],0,7) != 'DELETED') {
+							echo "	<th><a href='$PHP_SELF?tunnus=$memorow[tunnus]&ytunnus=$ytunnus&asiakasid=$asiakasid&yhtunnus=$yhtunnus&tee=POISTAMEMO'>Poista</a></th>";
+						}
+						else {
+							echo "<th></th>";
+						}
+						echo "</tr>";
+					}	
 
-					$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";			
-					$result = mysql_query($query) or pupe_error($query);
-					$konsernit = "";
+					echo "<tr><td colspan='6'>$memorow[viesti]</td></tr>";
+					
+					if ($memorow["perheid"] == 0) {
+						echo "<tr><td colspan='4' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='2'>";
+						echo "<form action='$PHP_SELF' method='POST'>";
+						echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
+						echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
+						echo "<input type='hidden' name='yhtunnus' value='$yhtunnus'>";
+						echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+						echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
+						echo "<select name='email' onchange='submit()'><option value=''>".t("Valitse käyttäjä")."</option>";
 
-					while ($row = mysql_fetch_array($result)) {	
-						$konsernit .= " '".$row["yhtio"]."' ,";
-					}		
-					$lisa2 = " yhtio in (".substr($konsernit, 0, -1).") ";
+						$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";			
+						$result = mysql_query($query) or pupe_error($query);
+						$konsernit = "";
+
+						while ($row = mysql_fetch_array($result)) {	
+							$konsernit .= " '".$row["yhtio"]."' ,";
+						}		
+						$lisa2 = " yhtio in (".substr($konsernit, 0, -1).") ";
 						
-					$query  = "SELECT distinct kuka, nimi, eposti FROM kuka WHERE $lisa2 and extranet='' ORDER BY nimi";
-					$vares = mysql_query($query) or pupe_error($query);
+						$query  = "SELECT distinct nimi, eposti FROM kuka WHERE $lisa2 and extranet='' and eposti != '' ORDER BY nimi";
+						$vares = mysql_query($query) or pupe_error($query);
 					
-					while ($varow = mysql_fetch_array($vares)) {
-						echo "<option value='$varow[eposti]'>$varow[nimi]</option>";
-					}
+						while ($varow = mysql_fetch_array($vares)) {
+							echo "<option value='$varow[eposti]'>$varow[nimi]</option>";
+						}
 
-					echo "</select>";
-					echo "</form>";
-					echo "</td></tr>";
+						echo "</select>";
+						echo "</form>";
+						echo "</td></tr>";
+					}
 				}
 			}
 

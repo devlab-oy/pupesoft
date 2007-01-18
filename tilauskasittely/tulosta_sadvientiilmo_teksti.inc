@@ -31,7 +31,7 @@
 		$tulosulos .= sprintf('%-36.36s', $yhtiorow["osoite"])."\r\n";
 		
 		$tulosulos .= sprintf('%-8.8s', "");		
-		$tulosulos .= sprintf('%-36.36s', $yhtiorow["postino"]." ".$yhtiorow["postino"]);
+		$tulosulos .= sprintf('%-36.36s', $yhtiorow["postino"]." ".$yhtiorow["postitp"]);
 		$tulosulos .= sprintf('%-3.3s', "1");
 		$tulosulos .= sprintf('%-3.3s', $sivut)."\r\n";
 		
@@ -114,9 +114,9 @@
 		//Kenttä 22 Valuutta ja kokonaissumma
 		//Kenttä 24 Kauppatapahtuman luonne
 		$tulosulos .= sprintf('%-8.8s', "");
-		$tulosulos .= sprintf('%-28.28s', $laskurow["aktiivinen_kuljetus"]);
+		$tulosulos .= sprintf('%-32.32s', $laskurow["aktiivinen_kuljetus"]);
 		$tulosulos .= sprintf('%-5.5s', $laskurow["aktiivinen_kuljetus_kansallisuus"]);
-		$tulosulos .= sprintf('%-8.8s', $laskurow["valkoodi"]);
+		$tulosulos .= sprintf('%-4.4s', $laskurow["valkoodi"]);
 		$tulosulos .= sprintf('%-22.22s', $laskurow["summa"]);
 		$tulosulos .= sprintf('%-2.2s', substr($laskurow["kauppatapahtuman_luonne"],0,1));
 		$tulosulos .= sprintf('%-2.2s', substr($laskurow["kauppatapahtuman_luonne"],1,1))."\r\n";
@@ -209,7 +209,8 @@
 		$tulosulos .= sprintf('%-8.8s', "");
 		$tulosulos .= sprintf('%-46.46s', substr($nimitykset[2],0,35));
 		$tulosulos .= sprintf('%-2.2s', $rivirow["alkuperamaa"]);
-		$tulosulos .= sprintf('%-9.9s', $kilot)."\r\n";
+		//$tulosulos .= sprintf('%-9.9s', $kilot)."\r\n";
+		$tulosulos .= sprintf('%-9.9s', "")."\r\n";
 
 		$tulosulos .= sprintf('%-8.8s', "");
 		$tulosulos .= sprintf('%-40.40s', substr($nimitykset[3],0,35))."\r\n";
@@ -420,7 +421,7 @@
 					GROUP_CONCAT(distinct trim(tuote.nimitys) ORDER BY tuote.nimitys SEPARATOR '##') nimitys_hieno,
 					sum(tilausrivi.rivihinta) rivihinta,
 					sum(tilausrivi.kpl) kpl,
-					round(sum((tilausrivi.rivihinta/$laskurow[summa])*$kilot),0) nettop
+					round(sum(if(tuote.tuotemassa!=0, tilausrivi.kpl*tuote.tuotemassa, (tilausrivi.rivihinta/$laskurow[summa])*$kilot)),0) nettop
 					FROM tilausrivi
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = ''
 					JOIN tullinimike ON tuote.tullinimike1 = tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tuote.tullinimike1!=''

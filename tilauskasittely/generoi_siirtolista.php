@@ -147,8 +147,8 @@
 				
 				if ($saldo_myytavissa > 0 and $pairow['tarve'] > 0) {
 			
-					if ($pairow['tarve'] > $saldo_myytavissa) {
-						$siirretaan = $saldo_myytavissa;
+					if ($pairow['tarve'] >= $saldo_myytavissa) {
+						$siirretaan = floor($saldo_myytavissa / 2);
 					}
 					else {
 						$siirretaan = $pairow['tarve'];

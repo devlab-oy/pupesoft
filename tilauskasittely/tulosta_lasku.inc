@@ -281,7 +281,7 @@ if (!function_exists('rivi')) {
 		}
 		
 		//Alennus
-		$pdf->draw_text(410, $kala, sprintf('%.2f', $ale),							$firstpage, $norm);
+		$pdf->draw_text(410, $kala, sprintf('%.2f', $row["ale"]),					$firstpage, $norm);
 
 		//Rivihinta valuutassa
 		if ($toim != "PROFORMA" and $laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {

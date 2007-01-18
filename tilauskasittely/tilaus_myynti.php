@@ -446,7 +446,7 @@ if ($tee == 'POISTA') {
 	$result = mysql_query($query) or pupe_error($query);
 
 	//Nollataan sarjanumerolinkit
-	$query    = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu
+	$query    = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno
 					FROM tilausrivi
 					JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
@@ -454,14 +454,17 @@ if ($tee == 'POISTA') {
 	$sres = mysql_query($query) or pupe_error($query);
 
 	while($srow = mysql_fetch_array($sres)) {
-		if ($srow["varattu"] < 0) {
+		if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
+			$tunken = "siirtorivitunnus";
+		}
+		elseif ($row["varattu"] < 0) {
 			$tunken = "ostorivitunnus";
 		}
 		else {
 			$tunken = "myyntirivitunnus";
 		}
 
-		$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and $tunken='$srow[tunnus]'";
+		$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and $tunken='$srow[tunnus]'";
 		$sarjares = mysql_query($query) or pupe_error($query);
 	}
 
@@ -1001,7 +1004,7 @@ if ($tee == '') {
 
 
 			if ($kukarow["extranet"] == "") {
-				echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$laskurow[ytunnus]'>$laskurow[ytunnus] $laskurow[nimi]</a><br>$laskurow[toim_nimi]</td>";
+				echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$laskurow[ytunnus]&asiakasid=$laskurow[liitostunnus]'>$laskurow[ytunnus] $laskurow[nimi]</a><br>$laskurow[toim_nimi]</td>";
  			}
 			else {
 				echo "<td>$laskurow[ytunnus] $laskurow[nimi]<br>$laskurow[toim_nimi]</td>";
@@ -2365,7 +2368,11 @@ if ($tee == '') {
 						while ($prow = mysql_fetch_array($lisaresult)) {
 
 							echo "<tr><td class='back' valign='top'></td>";
-
+							
+							if ($toim == 'TARJOUS') {
+								echo "<td valign='top'></td>";
+							}
+							
 							if ($kukarow["resoluutio"] == 'I') {
 								echo "<td valign='top'>$prow[nimitys]</td>";
 							}

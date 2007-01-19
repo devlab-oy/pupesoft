@@ -164,6 +164,8 @@
 
 		if (!function_exists("xml_add")) {
 			function xml_add ($joukko, $tieto, $handle) {
+				global $yhtiorow, $lasrow;
+				
 				$ulos = "<$joukko>";
 
 				if (strlen($tieto) > 0) {
@@ -176,7 +178,25 @@
 
 				}
 
-				$ulos .= "</$joukko>\n";
+				$pos = strpos($joukko, " ");
+	            if ($pos === false) {
+					//	Jos tehd‰‰n finvoicea rivilopu on \r\n
+					if($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
+						$ulos .= "</$joukko>\r\n";
+					}
+					else {
+						$ulos .= "</$joukko>\n";
+					}
+	                
+	            }
+	            else {
+					if($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
+						$ulos .= "</".substr($joukko,0,$pos).">\r\n";
+					}
+					else {
+						$ulos .= "</".substr($joukko,0,$pos).">\n";
+					}
+	            }
 
 				fputs($handle, $ulos);
 			}

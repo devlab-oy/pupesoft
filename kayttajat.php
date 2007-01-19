@@ -17,7 +17,7 @@
 		$ytunnus = "";
 	}
 
-	if ($tee == "MUUTA" and $ytunnus != "") {
+	if ($tee == "MUUTA" and $ytunnus != "" and $ytunnus != '0') {
 		$muutparametrit = "MUUTA#$selkuka#$selyhtio";
 		$asiakasid = "";
 		require ("inc/asiakashaku.inc");
@@ -30,6 +30,15 @@
 		else {
 			$tee = "eimit‰‰n";
 		}
+	}
+	elseif ($ytunnus == '0') {
+		// Nollalla saa poistettua aletus_asiakkaan
+		$krow["oletus_asiakas"] = "";
+		$tee = "MUUTA";
+		$firname = "";
+		
+		$query = "UPDATE kuka SET oletus_asiakas = '' WHERE tunnus='$selkuka'";
+		$result = mysql_query($query) or pupe_error($query);
 	}
 
 	// Poistetaan koko k‰ytt‰j‰ t‰lt‰ yriykselt‰!!

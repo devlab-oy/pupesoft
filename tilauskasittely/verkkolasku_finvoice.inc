@@ -120,7 +120,7 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("SellerContactPersonName",											$lasrow["laatija"], 									$tootfinvoice);
 
 			fputs($tootfinvoice, "<SellerCommunicationDetails>\r\n");
-			if($yhtiorow["email"] != "") {
+			if($yhtiorow["email"] != "") {
 				xml_add("SellerEmailaddressIdentifier",										$yhtiorow['email'], 									$tootfinvoice);
 			}
 			

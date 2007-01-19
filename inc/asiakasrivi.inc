@@ -66,10 +66,9 @@
 
 	if (mysql_field_name($result, $i) == "asiakasnro") {
 
-		$query = "	SELECT lpad(ytunnus,15,0) as ytunnus
+		$query = "	SELECT lpad(asiakasnro,15,0) as asiakasnro
 					FROM asiakas
 					WHERE yhtio='$kukarow[yhtio]'
-					and ytunnus < 100000
 					ORDER BY ytunnus";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -77,7 +76,7 @@
 		$tunnukset = "";
 
 		while ($vrow = mysql_fetch_array($vresult)) {
-			$ytunnus = $vrow["ytunnus"];
+			$ytunnus = $vrow["asiakasnro"];
 
 			if ($ytunnus - $edytunnus > 1000) {
 
@@ -90,13 +89,12 @@
 
 		}
 
-		$query = "	SELECT max(lpad(ytunnus,15,0)) as ytunnus
+		$query = "	SELECT max(lpad(asiakasnro,15,0)) as asiakasnro
 					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]'
-					and ytunnus < 100000";
+					WHERE yhtio='$kukarow[yhtio]'";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$vrow = mysql_fetch_array($vresult);
-		$vapaa = $vrow['ytunnus']+1;
+		$vapaa = $vrow['asiakasnro']+1;
 
 		$tunnukset .= $vapaa."#";
 
@@ -127,7 +125,6 @@
 			$query = "	SELECT lpad(ytunnus,15,0) as ytunnus
 						FROM asiakas
 						WHERE yhtio='$kukarow[yhtio]'
-						and ytunnus < 100000
 						ORDER BY ytunnus";
 			$vresult = mysql_query($query) or pupe_error($query);
 
@@ -150,10 +147,10 @@
 
 			$query = "	SELECT max(lpad(ytunnus,15,0)) as ytunnus
 						FROM asiakas
-						WHERE yhtio='$kukarow[yhtio]'
-						and ytunnus < 100000";
+						WHERE yhtio='$kukarow[yhtio]'";
 			$vresult = mysql_query($query) or pupe_error($query);
 			$vrow = mysql_fetch_array($vresult);
+			
 			$vapaa = $vrow['ytunnus']+1;
 
 			$tunnukset .= $vapaa."#";

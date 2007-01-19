@@ -92,18 +92,13 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$sel1 = "";
-		$sel2 = "";
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
 
-		if ($trow[$i] == '0') {
-			$sel1 = "selected";
-		}
-		if ($trow[$i] == '1') {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value = '0' $sel1>".t("Normaali lasku")."";
-		$ulos .= "<option value = '1' $sel2>".t("Pelkistetty lasku")."";
+		$ulos .= "<option value = '0' $sel[0]>".t("Normaali lasku");
+		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty lasku");
+		$ulos .= "<option value = '2' $sel[2]>".t("Normaali lasku (Tuoteperheet yhdistetty)");
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

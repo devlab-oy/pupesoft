@@ -74,7 +74,10 @@
 			if ($yhtiorow['laskutyyppi'] == 0) {
 				require_once("tulosta_lasku.inc");
 			}
-			elseif ($yhtiorow['laskutyyppi'] == 1) {
+			elseif ($yhtiorow['laskutyyppi'] == 2) {
+				require_once("tulosta_lasku_perhe.inc");
+			}
+			else {
 				require_once("tulosta_lasku_plain.inc");
 			}
 
@@ -181,7 +184,7 @@
 		echo "<tr><th></th><td colspan='3'><input type='submit' value='".t("Tulosta")."'></td></tr>";
 		echo "</table>";
 		echo "</form>";
-		
+
 	}
 
 ?>

@@ -856,7 +856,7 @@
 
 					// katotaan miten halutaan sortattavan
 					$sorttauskentta = generoi_sorttauskentta();
-					
+
 					// Kirjoitetaan rivitietoja tilausriveiltä
 					$query = "	SELECT *, $sorttauskentta
 								FROM tilausrivi
@@ -1062,6 +1062,9 @@
 
 					if ($yhtiorow['laskutyyppi'] == 0) {
 						require_once("tulosta_lasku.inc");
+					}
+					elseif ($yhtiorow['laskutyyppi'] == 2) {
+						require_once("tulosta_lasku_perhe.inc");
 					}
 					else {
 						require_once("tulosta_lasku_plain.inc");

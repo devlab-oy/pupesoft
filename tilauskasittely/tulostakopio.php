@@ -170,7 +170,7 @@
 
 			$where1 = "";
 		$where2 = "";
-		
+
 		if ($toim == "OSTO") {
 			//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
 			$where1 = " tila = 'O' ";
@@ -469,8 +469,8 @@
 		// Etsitään muutettavaa tilausta
 		$query = "  SELECT lasku.tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, tapvm, laatija, summa, tila, alatila
 					FROM lasku $use
-					WHERE $where1 $where2 
-					and lasku.yhtio = '$kukarow[yhtio]' 
+					WHERE $where1 $where2
+					and lasku.yhtio = '$kukarow[yhtio]'
 					and tila != 'D'
 					$jarj";
 
@@ -636,19 +636,19 @@
 		}
 		if ($toim == "SAD") {
 			$tulostimet[0] = 'SAD-lomake';
-			
+
 			if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
 				$tulostimet[1] = 'SAD-lomake lisäsivu';
 			}
-			
+
 			if ($kappaleet > 0 and $komento["SAD-lomake"] != 'email') {
 				$komento["SAD-lomake"] .= " -# $kappaleet ";
 			}
-			
+
 			if ($yhtiorow["sad_lomake_tyyppi"] == "T") {
 				if ($kappaleet > 0 and $komento["SAD-lomake lisäsivu"] != 'email') {
 					$komento["SAD-lomake lisäsivu"] .= " -# $kappaleet ";
-				}			
+				}
 			}
 		}
 		if ($toim == "LAHETE") {
@@ -795,17 +795,17 @@
 				$uusiotunnus = $laskurow["tunnus"];
 
 				if ($yhtiorow["sad_lomake_tyyppi"] == "T" and $tee != 'NAYTATILAUS') {
-					
-					require('tulosta_sadvientiilmo_teksti.inc');				
-					
+
+					require('tulosta_sadvientiilmo_teksti.inc');
+
 					if ($paalomake != '') {
 						lpr($paalomake,0, $komento["SAD-lomake"]);
-						
+
 						echo t("SAD-lomake tulostuu")."...<br>";
-					
+
 						if ($lisalomake != "") {
 							lpr($lisalomake,0, $komento["SAD-lomake lisäsivu"]);
-							
+
 							echo t("SAD-lomakkeen lisäsivu tulostuu")."...<br>";
 						}
 					}
@@ -847,7 +847,7 @@
 						echo t("SAD-lomake tulostuu")."...<br>";
 					}
 				}
-			
+
 				$tee = '';
 			}
 
@@ -914,6 +914,9 @@
 				if ($yhtiorow['laskutyyppi'] == 0) {
 					require_once("tulosta_lasku.inc");
 				}
+				elseif ($yhtiorow['laskutyyppi'] == 2) {
+					require_once("tulosta_lasku_perhe.inc");
+				}
 				else {
 					require_once("tulosta_lasku_plain.inc");
 				}
@@ -935,18 +938,18 @@
 					else {
 						$hinta_riv = "tilausrivi.hinta";
 					}
-					
-					$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta, 
+
+					$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
 								varattu kpl, ";
 				}
 				else {
 					$lisa = "";
 				}
-				
+
 				// haetaan tilauksen kaikki rivit
 				$query = "  SELECT *, $lisa $sorttauskentta
 							FROM tilausrivi
-							WHERE $where 
+							WHERE $where
 							and yhtio='$kukarow[yhtio]'
 							ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
 				$result = mysql_query($query) or pupe_error($query);
@@ -1325,7 +1328,7 @@
 
 				// katotaan miten halutaan sortattavan
 				$sorttauskentta = generoi_sorttauskentta();
-				
+
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
 				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,

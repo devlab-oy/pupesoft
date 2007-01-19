@@ -1,4 +1,5 @@
 <?php
+
 	require ("inc/parametrit.inc");
 
 	// Muutetaanko jonkun muun oikeuksia??

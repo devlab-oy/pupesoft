@@ -108,11 +108,6 @@
 
 		echo "<tr><th colspan='2' align='left' valign='top'>&nbsp;".t("Toimittajan tiedot").":</td></tr>";
 
-		//jos käyttäjällä on oletusaiskas
-		if ($kukarow["oletus_asiakas"] != 0 and $srow["nimi"] == '') {
-			$srow["nimi"] = $kukarow["oletus_asiakas"];
-		}
-
 		echo "<tr><td valign='top'>".t("Nimi").": </td><td><input type='text' name='nimi' size='35' maxlength='31' value='$srow[nimi]'></td></tr>";
 		echo "<tr><td></td><td><input type='text' name='nimitark' size='35' maxlength='31'  value='$srow[nimitark]'></td></tr>";
 		echo "<tr><td valign='top'>".t("Osoite").": </td><td><input type='text' name='osoite' size='35' maxlength='31' value='$srow[osoite]'></td></tr>";

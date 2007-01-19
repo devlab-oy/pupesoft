@@ -1140,10 +1140,18 @@ if ($tee == '') {
 	}
 	elseif ($kukarow["extranet"] == "") {
 		// asiakasnumeroa ei ole vielä annettu, näytetään täyttökentät
-
 		if ($kukarow["oletus_asiakas"] != 0) {
-			$yt = $kukarow["oletus_asiakas"];
+			$query  = "	SELECT *
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$extra_asiakas = mysql_fetch_array($result);
+				$yt 	= $extra_asiakas["ytunnus"];
+			}
 		}
+		
 		if ($kukarow["myyja"] != 0) {
 			$my = $kukarow["myyja"];
 		}

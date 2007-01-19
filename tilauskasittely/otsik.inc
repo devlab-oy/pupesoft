@@ -216,7 +216,15 @@
 
 		//jos käyttäjällä on oletusaiskas
 		if ($kukarow["oletus_asiakas"] != 0 and $srow["nimi"] == '') {
-			$srow["nimi"] = $kukarow["oletus_asiakas"];
+			$query  = "	SELECT *
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$extra_asiakas = mysql_fetch_array($result);
+				$srow["nimi"]  = $extra_asiakas["ytunnus"];
+			}
 		}
 
 		echo "<table>";

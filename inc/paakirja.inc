@@ -275,6 +275,9 @@
 		echo "<td align='right'>".sprintf("%.2f",$kumsumma)."</td></tr>";
 	}
 	
+	$summaplus = 0.0;
+	$summamiinus = 0.0;
+	
 	while ($trow=mysql_fetch_array ($result)) {
 		echo "<tr>";
 		
@@ -330,8 +333,11 @@
 					}
 					echo "</td>";
 					
-					$summa += $trow[$i];
-
+					if ($trow[$i] < 0 )
+						$summamiinus += $trow[$i];
+					else
+						$summaplus += $trow[$i];
+						
 				 }
 				 else {
 					echo "<td align = 'right'>";
@@ -364,6 +370,29 @@
 	}
 
 	if ($excel=='') { // Jos halutaan excel muotoa niin ei tehdä tätä..
+		echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteensä")."</td>";
+		echo "<td align = 'right'>";
+		printf("%.2f", $summamiinus);
+		echo "</td><td>*</td>";
+		
+		if (strlen(trim($tili)) > 0) {
+			echo "<td></td>";
+		}
+		
+		echo "</tr>";
+		
+		echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteensä")."</td>";
+		echo "<td align = 'right'>";
+		printf("%.2f", $summaplus);
+		echo "</td><td>*</td>";
+		
+		if (strlen(trim($tili)) > 0) {
+			echo "<td></td>";
+		}
+		
+		echo "</tr>";
+		
+		$summa += $summaplus + $summamiinus;
 		echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")."</td>";
 		echo "<td align = 'right'>";
 		printf("%.2f", $summa);

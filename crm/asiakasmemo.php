@@ -502,7 +502,7 @@
 					echo "<tr><td colspan='6'>$memorow[viesti]</td></tr>";
 					
 					if ($memorow["perheid"] == 0) {
-						echo "<tr><td colspan='4' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='2'>";
+						echo "<tr><td colspan='3' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='3'>";
 						echo "<form action='$PHP_SELF' method='POST'>";
 						echo "<input type='hidden' name='tee' value='SAHKOPOSTI'>";
 						echo "<input type='hidden' name='tunnus' value='$memorow[tunnus]'>";
@@ -524,7 +524,7 @@
 						$vares = mysql_query($query) or pupe_error($query);
 					
 						while ($varow = mysql_fetch_array($vares)) {
-							echo "<option value='$varow[eposti]'>$varow[nimi]</option>";
+							echo "<option value='$varow[eposti]'>$varow[nimi] ($varow[eposti])</option>";
 						}
 
 						echo "</select>";

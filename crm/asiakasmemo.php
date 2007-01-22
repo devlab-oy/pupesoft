@@ -35,7 +35,7 @@
 
 		if ($tee == "SAHKOPOSTI") {
 			
-			// Haetaan viimeisin muistiinpano
+			// Haetaan muistiinpano
 			$query = "	SELECT kalenteri.tapa, kalenteri.asiakas, asiakas.nimi, kalenteri.henkilo, kalenteri.kuka, kalenteri.kentta01, kalenteri.pvmalku,
 						kalenteri.liitostunnus, kalenteri.tunnus
 						FROM kalenteri
@@ -181,6 +181,7 @@
 						and tyyppi='Memo' 
 						and tapa!='asiakasanalyysi' 
 						and yhtio='$kukarow[yhtio]'
+						and (perheid=0 or tunnus=perheid)
 						ORDER BY tunnus desc
 						LIMIT 1";
 			$res = mysql_query($query) or pupe_error($query);

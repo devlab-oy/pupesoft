@@ -499,7 +499,7 @@
 						echo "</tr>";
 					}	
 
-					echo "<tr><td colspan='6'>$memorow[viesti]</td></tr>";
+					echo "<tr><td colspan='6'>".str_replace("\n", "<br>", trim($memorow["viesti"]))."</td></tr>";
 					
 					if ($memorow["perheid"] == 0) {
 						echo "<tr><td colspan='3' align='right'>".t("Lähetä käyttäjälle").":</td><td colspan='3'>";

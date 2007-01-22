@@ -46,9 +46,15 @@
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
-			echo "<tr><td class='back' colspan='7'>".t("Rivikommentti").":</td></tr>";
-			echo "<tr><td class='back' colspan='7'><input type='text' value='$kommentti' name='kommentti' size='50' maxlength='255'></td></tr>";
+			echo "<tr><th colspan='6' align='left'>".t("Rivikommentti").":</tg></tr>";
+			echo "<tr><td class='back' colspan='6'><input type='text' value='$kommentti' name='kommentti' size='75' maxlength='255'></td></tr>";
 
+			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and $toim == "TARJOUS") {
+				echo "<tr>
+						<th colspan='6' align='left'>".t("Tuotteen nimitys")."</th>
+						</tr><tr>
+						<td class='back' colspan='6'><input type='text' maxlength='35' size='75' name='tuotenimitys' value = '$tuotenimitys'></td></tr>";
+			}
 
 			//Jos emill‰ on marginaalimyynti‰ niin pit‰‰ muistaa ja kertoa se myˆs lis‰‰riville
 			if (isset($alv) and $alv >= 500) {

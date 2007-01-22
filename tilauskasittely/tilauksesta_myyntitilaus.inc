@@ -12,7 +12,6 @@
 
 			$tilauksesta_myyntitilaus = "";
 
-
 			$query = "	SELECT *
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -168,6 +167,7 @@
 				$perheid2	= $coprivirow['perheid2'];
 
 				$jaksotettu = $coprivirow['jaksotettu'];
+				$tuotenimitys = $coprivirow['nimitys'];
 
 				$paikka		= "";
 				$paikat		= "";

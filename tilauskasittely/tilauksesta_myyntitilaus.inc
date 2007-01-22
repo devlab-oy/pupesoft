@@ -165,6 +165,7 @@
 				$rivinumero = $coprivirow['tilaajanrivinro'];
 
 				$perheid	= $coprivirow['perheid'];
+				$perheid2	= $coprivirow['perheid2'];
 
 				$jaksotettu = $coprivirow['jaksotettu'];
 
@@ -268,6 +269,24 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus = '$utunnus'
 							and perheid = '$coprivirow[perheid]'";
+				$cores = mysql_query($query) or pupe_error($query);
+			}
+			
+			//Korjataan perheid2:t uusilla riveillä
+			$query = "	SELECT perheid2, min(tunnus) uusiperheid2
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$utunnus'
+						and perheid2 != 0
+						GROUP by perheid2";
+			$copresult = mysql_query($query) or pupe_error($query);
+
+			while ($coprivirow = mysql_fetch_array($copresult)) {
+				$query = "	UPDATE tilausrivi
+							SET perheid2 = '$coprivirow[uusiperheid2]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and otunnus = '$utunnus'
+							and perheid2 = '$coprivirow[perheid2]'";
 				$cores = mysql_query($query) or pupe_error($query);
 			}
 

@@ -50,6 +50,14 @@
 					case 'tilaustyyppi':
 						$values .= ", ''";
 						break;
+					case 'clearing':
+						if ($monistarow["tila"] == "T") {
+							$values .= ", 'TARJOUSTILAUS'";
+						}
+						else {
+							$values .= ", ''";
+						}
+						break;
 					case 'tunnus':
 					case 'kapvm':
 					case 'tapvm':
@@ -92,6 +100,31 @@
 			$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 			$insres  = mysql_query($kysely) or pupe_error($kysely);
 			$utunnus = mysql_insert_id();
+
+
+			//Kopioidaan otsikon lisatiedot
+			$query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
+			$monistares2 = mysql_query($query) or pupe_error($query);
+			$monistarow2 = mysql_fetch_array($monistares2);
+
+			$fields = mysql_field_name($monistares2,0);
+			$values = "'".$monistarow2[0]."'";
+
+			for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+
+				$fields .= ", ".mysql_field_name($monistares2,$i);
+
+				switch (mysql_field_name($monistares2,$i)) {
+					case 'otunnus':
+						$values .= ", '$utunnus'";
+						break;
+					default:
+						$values .= ", '".$monistarow2[$i]."'";
+				}
+			}
+
+			$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
+			$insres2 = mysql_query($kysely) or pupe_error($kysely);
 
 			//Siirretään maksusuunnitelma
 			$query = "	SELECT *
@@ -242,6 +275,31 @@
 										LIMIT $lisrow[varattu]";
 							$cores = mysql_query($query) or pupe_error($query);
 						}
+						
+						//Kopioidaan tilausrivin lisatiedot (laitetaan nää nyt kaikille uusille riveille) 
+						$query = "SELECT * FROM tilausrivin_lisatiedot WHERE tilausrivitunnus='$coprivirow[tunnus]' and yhtio ='$kukarow[yhtio]'";
+						$monistares2 = mysql_query($query) or pupe_error($query);
+						$monistarow2 = mysql_fetch_array($monistares2);
+
+						$fields = mysql_field_name($monistares2,0);
+						$values = "'".$monistarow2[0]."'";
+
+						for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+
+							$fields .= ", ".mysql_field_name($monistares2,$i);
+
+							switch (mysql_field_name($monistares2,$i)) {
+								case 'tilausrivitunnus':
+									$values .= ", '$lisrow[tunnus]'";
+									break;
+								default:
+									$values .= ", '".$monistarow2[$i]."'";
+							}
+						}
+
+						$kysely  = "INSERT into tilausrivin_lisatiedot ($fields) VALUES ($values)";
+						$insres2 = mysql_query($kysely) or pupe_error($kysely);
+						
 					}
 
 					//Jos jotakin kopioitavan rivin sarjanumeroista ei saatu kopioitua niin irrotetaan se siltä riviltä

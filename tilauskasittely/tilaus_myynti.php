@@ -944,7 +944,7 @@ if ($tee == '') {
 				</form>";
 		}
 
-		if ($kukarow["extranet"] == "" and $toim == "TARJOUS" and file_exists("osamaksusoppari.inc")) {
+		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") and file_exists("osamaksusoppari.inc")) {
 			echo "<form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='osamaksusoppari'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -953,7 +953,7 @@ if ($tee == '') {
 				</form>";
 		}
 
-		if ($kukarow["extranet"] == "" and $toim == "TARJOUS" and file_exists("vakuutushakemus.inc")) {
+		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") and file_exists("vakuutushakemus.inc")) {
 			echo "<form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='vakuutushakemus'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -2714,13 +2714,13 @@ if ($tee == '') {
 
 
 			//annetaan mahdollisuus antaa loppusumma joka jyvitet‰‰n riveille arvoosuuden mukaan
-			if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS")) {
+			if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS")) {
 
 				if ($jyvsumma == '') {
 					$jyvsumma = '0.00';
 				}
 
-				if ($toim == "TARJOUS") {
+				if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
 					echo "<form name='valmis' action='tulostakopio.php' method='post'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
 							<input type='hidden' name='otunnus' value='$tilausnumero'>

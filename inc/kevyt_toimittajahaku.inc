@@ -1,6 +1,5 @@
 <?php
-///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-$useslave = 1;
+
 // tarvitaan $ytunnus ja $kukarow
 // palautetaan $toimittajarow
 
@@ -14,7 +13,7 @@ if ($toimittajaid != '') {
 }
 if ($monta==0 and $ytunnus != '') {
 	//etsitään eka koko ytunnuksella
-	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus'";
+	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' kala";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 

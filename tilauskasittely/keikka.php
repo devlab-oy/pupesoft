@@ -19,13 +19,13 @@ if ($toiminto == "yhdista") {
 // poistetaan vanha keikka numerolla $keikkaid
 if ($toiminto == "poista") {
 	$eisaapoistaa = 0;
-	
+
 	$query  = "select tunnus from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$tunnus' and tyyppi='O'";
 	$delres = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($delres) != 0) {
 		$eisaapoistaa++;
 	}
-	
+
 	$query = "	select tunnus
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus<>0 and laskunro='$laskunro'";
@@ -33,7 +33,7 @@ if ($toiminto == "poista") {
 	if (mysql_num_rows($delres2) != 0) {
 		$eisaapoistaa++;
 	}
-	
+
 	if ($eisaapoistaa == 0) {
 		$query  = "delete from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkaid'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -285,7 +285,7 @@ if ($toiminto == "" and $ytunnus != "") {
 	echo "<td>$toimittajarow[osoite]</td>";
 	echo "<td>$toimittajarow[postino]</td>";
 	echo "<td>$toimittajarow[postitp]</td>";
-	
+
 	echo "<td>";
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='toiminto' value='uusi'>";
@@ -294,9 +294,14 @@ if ($toiminto == "" and $ytunnus != "") {
 	echo "<input type='submit' value='".t("Perusta uusi keikka")."'>";
 	echo "</form>";
 	echo "</td>";
-	
-	echo "</tr></table><br>";
-	
+	echo "</tr>";
+
+	if (trim($toimittajarow["fakta"]) != "") {
+		echo "<tr><td colspan='5'>$toimittajarow[fakta]</td></tr>";
+	}
+
+	echo "</table><br>";
+
 	if ($naytakaikki == "YES") {
 		$limitti = " ";
 	}
@@ -307,10 +312,10 @@ if ($toiminto == "" and $ytunnus != "") {
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
 	$query = "	select *
 				from lasku use index (tila_index)
-				where yhtio='$kukarow[yhtio]' 
-				and liitostunnus='$toimittajaid' 
-				and tila='K' 
-				and alatila='' 
+				where yhtio='$kukarow[yhtio]'
+				and liitostunnus='$toimittajaid'
+				and tila='K'
+				and alatila=''
 				and vanhatunnus=0
 				order by laskunro desc
 				$limitti";
@@ -322,7 +327,7 @@ if ($toiminto == "" and $ytunnus != "") {
 
 		if (mysql_num_rows($result) == 50 and $naytakaikki == "") {
 			echo "<table><tr><td class='back'><font class='error'>".t("HUOM: Toimittajalla on yli 50 avointa keikkaa! Vain 50 viimeisint‰ n‰ytet‰‰n.")."</font></td>";
-			
+
 			echo "<td class='back'>";
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -372,7 +377,7 @@ if ($toiminto == "" and $ytunnus != "") {
 					//jos rivi on jo viety varastoon niin ei en‰‰ katota sen paikkaa
 					if ($rivirow["kpl"] == 0 and $rivirow["varattu"] != 0) {
 						// katotaan lˆytyykˆ tuotteelta varastopaikka joka on tilausriville tallennettu
-						$query = "	select * 
+						$query = "	select *
 									from tuotepaikat use index (tuote_index)
 									where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]' and hyllyalue='$rivirow[hyllyalue]' and hyllynro='$rivirow[hyllynro]' and hyllytaso='$rivirow[hyllytaso]' and hyllyvali='$rivirow[hyllyvali]'";
 						$tpres = mysql_query($query) or pupe_error($query);
@@ -457,9 +462,9 @@ if ($toiminto == "" and $ytunnus != "") {
 						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',summa,0)) vosumma,
 						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',arvo,0)) kusumma
 						from lasku use index (yhtio_tila_laskunro)
-						where yhtio='$kukarow[yhtio]' 
-						and tila='K' 
-						and vanhatunnus<>0 
+						where yhtio='$kukarow[yhtio]'
+						and tila='K'
+						and vanhatunnus<>0
 						and laskunro='$row[laskunro]'";
 			$llres = mysql_query($query) or pupe_error($query);
 			$llrow = mysql_fetch_array($llres);

@@ -11,7 +11,7 @@
 		$virtu= "";
 
 		// tehdään tullin aineisto
-		$query  = "select tullinimike1, alkuperamaa, tuoteno, nimitys
+		$query  = "select tullinimike1, (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno LIMIT 1) alkuperamaa, tuoteno, nimitys
 					from tuote 
 					where yhtio='$kukarow[yhtio]' 
 					and tullinimike1 > 0

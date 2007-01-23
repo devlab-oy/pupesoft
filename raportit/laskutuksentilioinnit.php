@@ -49,15 +49,14 @@ if ($tee == "tee") {
 				concat_ws('/',t.kohde,ko.nimi) kohde,
 				concat_ws('/',t.projekti,p.nimi) projekti,
 				sum(t.summa) summa, count(*) kpl
-				FROM lasku l, tiliointi t
+				FROM lasku l
+				JOIN tiliointi t on l.yhtio=t.yhtio and l.tunnus=t.ltunnus and l.tapvm=t.tapvm and korjattu=''
 				LEFT JOIN tili ti on l.yhtio=ti.yhtio and t.tilino=ti.tilino
 				LEFT JOIN kustannuspaikka k on l.yhtio=k.yhtio and t.kustp=k.tunnus
 				LEFT JOIN kustannuspaikka ko on l.yhtio=ko.yhtio and t.kohde=ko.tunnus
 				LEFT JOIN kustannuspaikka p on l.yhtio=p.yhtio and t.projekti=p.tunnus
 				WHERE l.yhtio = '$kukarow[yhtio]' and l.tapvm >= '$vv-$kk-$pp' and
-						l.tapvm <= '$vv1-$kk1-$pp1' and l.tila='U' and
-						l.yhtio=t.yhtio and l.tunnus=t.ltunnus and
-						l.tapvm=t.tapvm and korjattu=''				 
+						l.tapvm <= '$vv1-$kk1-$pp1' and l.tila='U'
 				GROUP BY 1,2,3,4";
 	$result = mysql_query($query) or pupe_error($query);
 	echo "<table>";

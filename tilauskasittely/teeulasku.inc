@@ -86,7 +86,7 @@ if (mysql_num_rows($xresult) == 0) {
 	$mehtorow = array();
 
 	if ($lasrow["erpcm"] == "0000-00-00") {
-		$tulos_ulos_ulasku .= "<font class='message'><br>".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy")."! Tunnus $lasrow[tunnus] ".t("Laskunro")." $lasrow[laskunro] ".t("meni nyt pahasti vituiks").".</font><br><br>\r\n";
+		$tulos_ulos_ulasku .= "<font class='message'><br>".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy")."! Tunnus $lasrow[tunnus] ".t("Laskunro")." $lasrow[laskunro] ".t("epäonnistui pahasti")."!</font><br><br>\r\n";
 	}
 }
 else {

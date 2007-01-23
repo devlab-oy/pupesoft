@@ -778,7 +778,7 @@
 					$masrow = array();
 
 					if ($lasrow["erpcm"] == "0000-00-00") {
-						$tulos_ulos .= "<font class='message'><br>\n".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy!")." Tunnus $lasrow[tunnus] ".t("Laskunumero")." $lasrow[laskunro] ".t("meni nyt pahasti vituiks").".</font><br>\n<br>\n";
+						$tulos_ulos .= "<font class='message'><br>\n".t("Maksuehtoa")." $lasrow[maksuehto] ".t("ei löydy!")." Tunnus $lasrow[tunnus] ".t("Laskunumero")." $lasrow[laskunro] ".t("epäonnistui pahasti")."!</font><br>\n<br>\n";
 					}
 				}
 				else {

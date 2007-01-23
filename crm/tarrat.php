@@ -26,79 +26,98 @@
 		if (count($komento) == 0) {
 			require("../inc/valitse_tulostin.inc");
 		}
+		if ($toimas == "") {
+			$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
+		}
+		else {
+			$query = "	SELECT toim_nimi nimi, toim_nimitark nimitark, toim_osoite osoite, toim_postino postino, toim_postitp postitp, toim_maa maa
+						FROM asiakas
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
+		}
+		$res = mysql_query($query) or pupe_error($query);
 
+		$laskuri = 1;
+		$sarake  = 1;	
+		$sisalto = "";
+				
+		if ($raportti == 33) {
+			$rivinpituus_ps	= 28;
+			$rivinpituus	= 27;
+			$sarakkeet 		= 3;
+			$rivit 			= 11;
+			$sisalto .= "\n";
+			$sisalto .= "\n";
+			$sisalto .= "\n";
+		}
+		elseif ($raportti == 24) {
+			$rivinpituus_ps	= 28;
+			$rivinpituus	= 27;
+			$sarakkeet 		= 3;
+			$rivit 			= 8;
+		}
+		
+		
+		while ($row = mysql_fetch_array($res)) {
+			
+			if ($sarake == 3) {
+				$lisa = " ";
+			}
+			else {
+				$lisa = "";
+			}
+			
+			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimi"]))."\n";
+			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimitark"]))."\n";
+			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["osoite"]))."\n";
+			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["postino"]." ".$row["postitp"]))."\n";
+			$sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["maa"]))."\n";
+			
+			$sisalto .= "\n\n";
+			
+			if ($raportti == 24 and $laskuri != $rivit) {
+				$sisalto .= "\n\n\n";
+			}
+			
+			if ($raportti == 33 and $laskuri == ($rivit-1)) {
+				$sisalto .= "\n";
+				$sisalto .= "\n";
+				$sisalto .= "\n";
+				$sisalto .= "\n";
+				$laskuri++;	
+			}
+			
+			
+			if ($laskuri == $rivit) {
+				if ($raportti == 33) {
+					$sisalto .= "\n";
+					$sisalto .= "\n";
+					$sisalto .= "\n";
+				}
+				
+				$laskuri = 0;
+				$sarake++;
+			}
+			$laskuri++;
+		}
+				
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
 		$filenimi = "/tmp/CRM-Osoitetarrat-".md5(uniqid(mt_rand(), true)).".txt";
 		$fh = fopen($filenimi, "w+");
-
-		$sisalto1 = "";
-		$sisalto2 = "";
-		$sisalto3 = "";
-		$sisalto4 = "";
-		$sisalto5 = "";
-		$sisalto  = sprintf ('%-28.28s',"");
-		$laskuri  = 0;
-
-		if ($toimas == "") {
-			$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
-								FROM asiakas
-								WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
-		}
-		else {
-			$query = "	SELECT toim_nimi nimi, toim_nimitark nimitark, toim_osoite osoite, toim_postino postino, toim_postitp postitp, toim_maa maa
-								FROM asiakas
-								WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
-		}
-		$res = mysql_query($query) or pupe_error($query);
-
-		while ($row = mysql_fetch_array($res)) {
-
-			$sisalto1 .= sprintf ('%-26.26s'," ".$row["nimi"]);
-			$sisalto2 .= sprintf ('%-26.26s'," ".$row["nimitark"]);
-			$sisalto3 .= sprintf ('%-26.26s'," ".$row["osoite"]);
-			$sisalto4 .= sprintf ('%-26.26s'," ".$row["postino"]." ".$row["postitp"]);
-			$sisalto5 .= sprintf ('%-26.26s'," ".$row["maa"]);
-
-			$sisalto  = sprintf ('%-28.28s',$sisalto1);
-			$sisalto .= sprintf ('%-28.28s',$sisalto2);
-			$sisalto .= sprintf ('%-28.28s',$sisalto3);
-			$sisalto .= sprintf ('%-28.28s',$sisalto4);
-			$sisalto .= sprintf ('%-28.28s',$sisalto5);
-
-			if ($laskuri == 7) {
-				$sisalto .= sprintf ('%-28.28s',"");
-				$sisalto .= sprintf ('%-28.28s',"");
-				$laskuri = -1;
-			}
-			else {
-				$sisalto .= sprintf ('%-28.28s',"");
-				$sisalto .= sprintf ('%-28.28s',"");
-			}
-
-			fputs($fh, $sisalto);
-			$sisalto1 = "";
-			$sisalto2 = "";
-			$sisalto3 = "";
-			$sisalto4 = "";
-			$sisalto5 = "";
-			$sisalto  = sprintf ('%-28.28s',"");
-
-			$laskuri++;
-		}
+		fputs($fh, $sisalto);
 		fclose($fh);
 
-		
-		$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=3 -R --medium=a4 --chars-per-line=28 --margin=0 --major=columns --borders=0 $filenimi");
+		$line = exec("a2ps -o ".$filenimi.".ps --no-header --columns=$sarakkeet -R --medium=a4 --chars-per-line=$rivinpituus_ps --margin=0 --major=columns --borders=0 $filenimi");
 		
 		// itse print komento...
 		if ($komento["Tarrat"] == 'email') {
-			
-			$line = exec("ps2pdf ".$filenimi.".ps ".$filenimi.".pdf");
-			
-			$liite = $filenimi.".pdf";
-			$kutsu = "Tarrat";
+						
+			$liite = $filenimi.".ps";
+			$kutsu = "Tarrat.ps";
+			$ctype = "ps";
 
 			require("../inc/sahkoposti.inc");
 		}
@@ -109,7 +128,6 @@
 		//poistetaan tmp file samantien kuleksimasta...
 		system("rm -f $filenimi");
 		system("rm -f ".$filenimi.".ps");
-		system("rm -f ".$filenimi.".pdf");
 
 		echo "<br>".t("Tarrat tulostuu")."!<br><br>";
 		$tee='';
@@ -186,7 +204,14 @@
 		echo "<table><form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-		echo "<tr><th>".t("Tulosta toim_asiakkaan tiedot").":</th><th><input type='checkbox' name='toimas'></th></tr>";
+
+		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas'></td></tr>";
+		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
+				<td><select name='raportti'>
+				<option value='33'>33 ".t("Tarraa")."</option>
+				<option value='24'>24 ".t("Tarraa")."</option>
+				</select></td></tr>";
+		
 		echo "<tr><td class='back'><input type='Submit' value = '".t("Tulosta")."'></td><td class='back'></td></tr></table></form>";
 	}
 

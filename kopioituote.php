@@ -123,6 +123,10 @@
 
 	if ($tee == 'HAKU') {
 		$konsernihaku = "KYLLA";
+		
+		if (strpos($tuoteno, '*') === FALSE) {
+			$tuoteno = $tuoteno."*";
+		}
 
 		require("inc/tuotehaku.inc");
 	}

@@ -264,7 +264,6 @@
 						if (mysql_num_rows($sarjares) == 1) {
 							$sarjarow = mysql_fetch_array($sarjares);
 												
-							
 							$query = "	SELECT tunnus, perheid2
 										FROM tilausrivi 
 										WHERE yhtio  = '$kukarow[yhtio]' 
@@ -696,16 +695,27 @@
 	}
 
 	if ($rivirow["tuoteno"] != '') {
-		echo "	<form action='$PHP_SELF' method='post'>
+		echo "	<form name='sarjaformi' action='$PHP_SELF' method='post'>
 				<input type='hidden' name='$tunnuskentta' value='$rivitunnus'>
 				<input type='hidden' name='from' value='$from'>
 				<input type='hidden' name='otunnus' value='$otunnus'>
 				<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>
 				<input type='hidden' name='toiminto' value='LISAA'>";
 
+
+		$query = "	SELECT max(sarjanumero) sarjanumero
+					FROM sarjanumeroseuranta
+					WHERE yhtio='$kukarow[yhtio]'
+					and sarjanumero like '".t("PUUTTUU")."-%'";
+		$vresult = mysql_query($query) or pupe_error($query);
+		$vrow = mysql_fetch_array($vresult);
+		
+		$nro = substr($vrow["sarjanumero"], strpos($vrow["sarjanumero"], '-')+1)+1;
+		$nxt = t("PUUTTUU")."-".$nro;
+		
 		echo "<br><table>";
 		echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";
-		echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td></tr>";
+		echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td><td class='back'><a href='#' onclick='document.sarjaformi.sarjanumero.value=\"$nxt\";'>".t("Sarjanumero ei tiedossa")."</a></td></tr>";
 		echo "<tr><th>".t("Lis‰tieto")."</th><td><input type='text' size='30' name='lisatieto' value='$lisatieto'></td></tr>";
 
 		$chk = "";

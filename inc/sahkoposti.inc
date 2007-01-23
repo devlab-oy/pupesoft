@@ -30,6 +30,11 @@
 		$content .= "Content-Transfer-Encoding: base64\n" ;
 		$content .= "Content-Disposition: inline; filename=\"".$kutsu."\"\n\n";
 	}
+	elseif ($ctype == "ps") {
+		$content .= "Content-Type: application/ps; name=\"".$kutsu."\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: inline; filename=\"".$kutsu."\"\n\n";
+	}
 	else {
 		$content .= "Content-Type: application/pdf; name=\"".$kutsu.".pdf\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;

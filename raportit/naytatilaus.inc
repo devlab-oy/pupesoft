@@ -36,7 +36,7 @@
 			<th colspan='2'>".t("Laskutusosoite")."</th>
 			<th colspan='3'>".t("Toimitusosoite")."</th>
 			<th colspan='2'>".t("Toimitustapa")."</th>
-			<th>".t("Kommentti")."</th>";	
+			<th>".t("Kommentti")."</th>";
 	echo "</tr>";
 
 	if ($laskurow['kohdistettu']=='K') {
@@ -66,12 +66,12 @@
 			<th>".t("Erikoisalennus")."</th>
 			<th>".t("Toimitusaika")."</th>
 			<th colspan='2'>".t("Rahtikirjanro")."</th>
-			<th>".t("Tilausviite")."</th>";	
+			<th>".t("Tilausviite")."</th>";
 	echo "</tr>";
 
 	echo "<tr>
 			<td>$laskurow[tunnus]</td>";
-				
+
 	$laskutyyppi = $laskurow["tila"];
 	$alatila	 = $laskurow["alatila"];
 
@@ -83,7 +83,7 @@
 		require ("inc/laskutyyppi.inc");
 	}
 
-		
+
 	if ($laskurow["vienti"] == "K") {
 		$vteksti=t("Vienti ei-EU");
 	}
@@ -93,8 +93,8 @@
 	else {
 		$vteksti=t("Kotimaa");
 	}
-			
-	echo "	<td colspan='2'>".t("$laskutyyppi")." ".t("$alatila")."</td>			
+
+	echo "	<td colspan='2'>".t("$laskutyyppi")." ".t("$alatila")."</td>
 			<td>$vteksti</td>
 			<td>".str_replace(".",",",$laskurow['erikoisale'])."</td>
 			<td>$laskurow[toimaika]</td>";
@@ -105,7 +105,7 @@
 		$jjfi = split("<br>", trim($rakirrow['rahtikirjanro']));
 
 		foreach ($jjfi as $nro) {
-			$linkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_trackId=$nro&LOTUS_hae=Hae'>$nro</a><br>";
+			$linkurl .= "<a target=newikkuna href='http://www.verkkoposti.com/e3/TrackinternetServlet?lang=fi&LOTUS_hae=Hae&LOTUS_side=1&LOTUS_trackId=$nro&LOTUS_hae=Hae'>$nro</a><br>";
 		}
 
 		$linkurl = substr($linkurl,0,-4); // vika br pois
@@ -115,7 +115,7 @@
 	}
 
 	echo "	<td colspan='2'>$linkurl</td>
-			<td>$laskurow[viesti]</td>";	
+			<td>$laskurow[viesti]</td>";
 	echo "</tr>";
 
 
@@ -125,7 +125,7 @@
 			<th colspan='2'>".t("Eräpäivä")."</th>
 			<th colspan='2'>".t("Maksupäivä")."</th>
 			<th colspan='2'>".t("ALV")."</th>";
-	
+
 	if ($laskurow["tila"] == "O") {
 		echo "<th>".t("Eturahti")."</th>";
 		echo "<th>".t("Rahti")."</th>";
@@ -180,7 +180,7 @@
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
-					WHERE $where 
+					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					and tyyppi='O'
 					ORDER BY $jarjestys";

@@ -34,8 +34,8 @@ echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 		var isChecked = toggleBox.checked;
 		var nimi = toggleBox.name;
 
-		for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
-			if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi) {
+		for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+			if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
 				currForm.elements[elementIdx].checked = isChecked;
 			}
 		}
@@ -128,7 +128,9 @@ else {
 	
 		echo "<table>";
 		echo "<tr><th colspan='2'>Valitse osasto(t):</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td>Ruksaa kaikki</td></tr>";
+		
+		echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='".t("Ei valintaa")."'></td><td>".t("Ei valintaa")."</td></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
 		
 		
 		while ($rivi = mysql_fetch_array($res2)) {
@@ -189,6 +191,7 @@ else {
 		
 		echo "<table>";
 		echo "<tr><th colspan='2'>Valitse tuoteryhmä(t):</th></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_try[]' value='".t("Ei valintaa")."'></td><td>".t("Ei valintaa")."</td></tr>";
 		echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td>Ruksaa kaikki</td></tr>";
 		
 		while ($rivi = mysql_fetch_array($res2)) {
@@ -323,10 +326,10 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 
 	$trylisa = "";
 
-	if ($tuoteryhma != "kaikki" and $sel_tuoteryhma != "") {
+	if ($tuoteryhma != "kaikki" and $sel_tuoteryhma != "" and $sel_tuoteryhma != t("Ei valintaa")) {
 		$trylisa .= " and tuote.try in ('$sel_tuoteryhma') ";
 	}
-	if ($osasto != "kaikki" and $sel_osasto != "") {
+	if ($osasto != "kaikki" and $sel_osasto != "" and $sel_osasto != t("Ei valintaa")) {
 		$trylisa .= " and tuote.osasto in ('$sel_osasto') ";
 	}
 
@@ -338,6 +341,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 				$trylisa
 				ORDER BY osasto, try, tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
+		
 	echo "<font class='message'>".t("Löytyi"). " ";
 	flush();
 	echo mysql_num_rows($result)." ".t("tuotetta")."...</font><br><br>";

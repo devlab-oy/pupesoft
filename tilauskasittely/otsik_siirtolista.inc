@@ -104,38 +104,38 @@
 		}
 		echo "</select></td></tr>";
 		
-		if ($toim == "SIIRTOLISTA") {
-			echo "<tr><th>".t("Valitse kohdevarasto").":</th>";
-		}
-		elseif ($toim == "VALMISTAVARASTOON") {
-			echo "<tr><th>".t("Valmisteiden kohdevarasto").":</th>";
-		}
-		elseif ($toim == "SIIRTOTYOMAARAYS") {
-			echo "<tr><th>".t("Valitse kohdevarasto").":</th>";
-		}
-				
-		echo "<td><select name='clearing'>";
-
-		$query  = "	SELECT *
-					FROM varastopaikat
-					WHERE yhtio='$kukarow[yhtio]' order by nimitys";
-		$vares = mysql_query($query) or pupe_error($query);
-
-		while ($varow = mysql_fetch_array($vares)) {
-
-			$sel='';
-			if ($varow['tunnus']==$srow["clearing"]) $sel = 'selected';
-			
-			$varastomaa = '';
-			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maakoodi'])) {
-				$varastomaa = strtoupper($varow['maa']);
+		
+		if ($toim != "SIIRTOTYOMAARAYS") {
+			if ($toim == "SIIRTOLISTA") {
+				echo "<tr><th>".t("Valitse kohdevarasto").":</th>";
 			}
+			elseif ($toim == "VALMISTAVARASTOON") {
+				echo "<tr><th>".t("Valmisteiden kohdevarasto").":</th>";
+			}
+				
+			echo "<td><select name='clearing'>";
+
+			$query  = "	SELECT *
+						FROM varastopaikat
+						WHERE yhtio='$kukarow[yhtio]' order by nimitys";
+			$vares = mysql_query($query) or pupe_error($query);
+
+			while ($varow = mysql_fetch_array($vares)) {
+
+				$sel='';
+				if ($varow['tunnus']==$srow["clearing"]) $sel = 'selected';
 			
-			echo "<option value='$varow[tunnus]' $sel>$varow[maa] $varow[nimitys]</option>";			
+				$varastomaa = '';
+				if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maakoodi'])) {
+					$varastomaa = strtoupper($varow['maa']);
+				}
+			
+				echo "<option value='$varow[tunnus]' $sel>$varow[maa] $varow[nimitys]</option>";			
+			}
+
+			echo "</select></td></tr>";
 		}
-
-		echo "</select></td></tr>";
-
+		
 		if ($kukarow['kesken'] == 0) {
 			$toimpp = $kerpp = date(j);
 			$toimkk = $kerkk = date(n);

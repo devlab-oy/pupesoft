@@ -600,6 +600,12 @@
 				echo "<td>".t("Valmistus-Tilaus")."</td>";
 			}
 			elseif ($srow["tilaustyyppi"] != 'E' or $templ == 0) {
+				
+				//Tarvitaan ainakin tarjoustilauksilla
+				if($srow["clearing"] != '') {
+					echo "<input type='hidden' name='clearing' value='$srow[clearing]'>";
+				}
+								
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 				echo "<td><select name='tilaustyyppi'>";
 

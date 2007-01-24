@@ -594,7 +594,7 @@ if ($tee == "VALMIS") {
 		require("../tyomaarays/tyomaarays.inc");
 	}
 	// Siirtolista, myyntitili, valmistus valmis
-	elseif ($kukarow["extranet"] == "" and ($toim == "SIIRTOTYOMAARAYS" or $toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI")) {
+	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI")) {
 		require ("tilaus-valmis-siirtolista.inc");
 	}
 	// Myyntitilaus valmis
@@ -2356,7 +2356,7 @@ if ($tee == '') {
 
 				$varaosavirhe = "";
 
-				if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and ($row["var"] == "T" or $row["var"] == "U") and $riviok == 0) {
+				if ($kukarow["extranet"] == "" and ((($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and ($row["var"] == "T" or $row["var"] == "U")) or $toim == "SIIRTOTYOMAARAYS") and $riviok == 0) {
 					//Tutkitaan tuotteiden lisävarusteita
 					$query  = "	SELECT *
 								FROM tuoteperhe

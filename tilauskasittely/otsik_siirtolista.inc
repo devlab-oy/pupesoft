@@ -171,6 +171,12 @@
 				<input type='text' name='toimvv' value='$toimvv' size='6'>
 				<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'></td></tr>";
 
+		if ($toim == "SIIRTOTYOMAARAYS") {
+			if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
+			
+			echo "<tr><th>".t("Suoraan valmiiksi")."</th><td><input type='checkbox' name='eilahe' $eilah></td></tr>";
+		}
+		
 		echo "<tr>";
 		
 		if ($toim == "SIIRTOLISTA") {
@@ -335,7 +341,8 @@
 					nimi 			= '$vtrow[nimitys]',	
 					toimaika 		= '".$toimvv."-".$toimkk."-".$toimpp."',
 					kerayspvm 		= '".$kervv."-".$kerkk."-".$kerpp."',						
-					comments 		= '$comments',						
+					comments 		= '$comments',
+					eilahetetta 	= '$eilahe',					
 					viesti 			= '$viesti',						
 					yhtio 			= '$kukarow[yhtio]',
 					alatila 		= '$alatila',						

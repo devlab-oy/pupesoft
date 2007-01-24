@@ -128,6 +128,13 @@
 				$aputoim2 = "";
 				$lisa2 = "";
 			}
+			elseif ($toim == "TARJOUSSUPER") {
+				$aputoim1 = "TARJOUS";
+				$lisa1 = t("Muokkaa");
+
+				$aputoim2 = "";
+				$lisa2 = "";
+			}
 			elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
 				$aputoim1 = "";
 				$lisa1 = t("Muokkaa");
@@ -469,6 +476,13 @@
 				}
 				elseif ($toim == "SIIRTOLISTASUPER") {
 					$aputoim1 = "SIIRTOLISTA";
+					$lisa1 = t("Muokkaa");
+
+					$aputoim2 = "";
+					$lisa2 = "";
+				}
+				elseif ($toim == "TARJOUSSUPER") {
+					$aputoim1 = "TARJOUS";
 					$lisa1 = t("Muokkaa");
 
 					$aputoim2 = "";

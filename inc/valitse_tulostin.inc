@@ -123,8 +123,8 @@
 		echo "<td><select name='komento[$tulostin]'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-		if ($toim == 'TARJOUS' and $asrow['email'] != '') {
-			echo "<option value='asiakasemail:$asrow[email]'>".t("Asiakkaan sähköpostiin")."</option>";
+		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS') and $asrow['email'] != '') {
+			echo "<option value='asiakasemail:$asrow[email]'>".t("Asiakkaan sähköpostiin")." $asrow[email]</option>";
 		}
 
 		$querykieli = "	select *

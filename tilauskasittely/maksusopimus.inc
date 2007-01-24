@@ -262,9 +262,8 @@
 				else {
 					echo "<tr><td>$i</td>";
 					echo "<td>$row[osuus]</td>";
-					echo "<td>$row[mehto_teksti]<br>-$row[kuvaus]</td>";
-					echo "<td>$row[lisatiedot]</td>";
-					echo "<td>$row[ohje]</td>";
+					echo "<td>$row[mehto_teksti]<br>$row[kuvaus]</td>";
+					echo "<td>$row[lisatiedot]<br>$row[ohje]</td>";
 					echo "<td align ='right'>$row[summa]</td></tr>";
 				}
 			}

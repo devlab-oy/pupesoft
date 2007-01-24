@@ -175,7 +175,7 @@
 
 				$tuoteno	= $coprivirow['tuoteno'];
 
-				if ($coprivirow["var"] == "J" or $coprivirow["var"] == "S" or $coprivirow["var"] == "T") {
+				if ($coprivirow["var"] == "J" or $coprivirow["var"] == "S" or $coprivirow["var"] == "T" or $coprivirow["var"] == "U") {
 					$kpl	= $coprivirow['jt'];
 				}
 				elseif ($tilausrivi["var"] == "P") {

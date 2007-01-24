@@ -956,9 +956,14 @@
 				}
 			}
 
-
 			$trow["tuoteno"] = strtoupper($trow["tuoteno"]);
 
+			// jos olemme saaneet tuotenimityksen syotarivist‰ ja sallimme nimityksen muutoksen
+			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys != "")) {
+				// lis‰t‰‰n saatu nimitys kaikille tuotteille
+				$trow["nimitys"] = addslashes($tuotenimitys);
+			}
+			
 			// lis‰t‰‰n puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue   = '$p_hyllyalue',

@@ -22,7 +22,8 @@
 	$keres = mysql_query($query) or pupe_error($query);
 
 	// jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan)...
-	if (mysql_num_rows($keres) > 0) {
+	// tai jos ollaan ruksattu suoraan valmiiksi (sisäiset työmääräykset)
+	if (mysql_num_rows($keres) > 0 or $laskurow["eilahetetta"] != '') {
 
 		//...niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
 		$query = "	UPDATE tilausrivi use index (yhtio_otunnus)
@@ -33,6 +34,15 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<font class='message'>".t("Siirtolistalla oli jo kerättyjä rivejä, joten lähetettä ei tulosteta").".<br>".t("Jos haluat lähetteen tulosta lähetteen kopio, siirtolistanumero on")." $laskurow[tunnus].</font><br><br>";
+	
+		if ($laskurow["eilahetetta"] != '') {
+			$query  = "	update lasku 
+						set alatila = 'C'
+						where yhtio='$kukarow[yhtio]'
+						and tunnus = '$laskurow[tunnus]'";
+			$varresult = mysql_query($query) or pupe_error($query);
+		}
+		
 	}
 	else {
 

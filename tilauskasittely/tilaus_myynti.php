@@ -1825,7 +1825,7 @@ if ($tee == '') {
 
 				echo "<tr><th>".t("#")."</th>";
 
-				if ($toim == "TARJOUS") {
+				if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
 					echo "<th>".t("Tyyppi")."</th>";
 				}
 
@@ -2019,7 +2019,7 @@ if ($tee == '') {
 				}
 
 
-				if ($toim == "TARJOUS") {
+				if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS" ) {
 					//annetaan valita tilausrivin tyyppi
 					$sel1 = $sel2 = $sel3 = $sel4 = "";
 
@@ -2347,7 +2347,7 @@ if ($tee == '') {
 					if($kukarow["resoluutio"] == "I") {
 						$cspan++;
 					}
-					if($toim == "TARJOUS") {
+					if($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
 						$cspan++;
 					}
 
@@ -2595,7 +2595,7 @@ if ($tee == '') {
 			if($kukarow["resoluutio"] == "I") {
 				$ycspan++;
 			}
-			if($toim == "TARJOUS") {
+			if($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
 				$ycspan++;
 			}
 

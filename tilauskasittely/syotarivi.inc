@@ -49,7 +49,7 @@
 			echo "<tr><th colspan='6' align='left'>".t("Rivikommentti").":</tg></tr>";
 			echo "<tr><td class='back' colspan='6'><input type='text' value='$kommentti' name='kommentti' size='75' maxlength='255'></td></tr>";
 
-			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and $toim == "TARJOUS") {
+			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS")) {
 				echo "<tr>
 						<th colspan='6' align='left'>".t("Tuotteen nimitys")."</th>
 						</tr><tr>

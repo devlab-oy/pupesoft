@@ -232,11 +232,7 @@
 						echo "<option value='$prow[selitetark]' $sel>$prow[selitetark]</option>";
 					}
 					echo "</select></td>";
-
-					//alkuun tämä resultti
-					mysql_data_seek($kuvares,0);
-					mysql_data_seek($mresult,0);
-
+					
 					echo "<td><textarea rows='2' cols='30' name='ohje'>$row[ohje]</textarea></td>";
 					echo "<td></td>";
 
@@ -262,10 +258,21 @@
 				else {
 					echo "<tr><td>$i</td>";
 					echo "<td>$row[osuus]</td>";
-					echo "<td>$row[mehto_teksti]<br>$row[kuvaus]</td>";
+					
+					echo "<td>";
+					
+					while($prow = mysql_fetch_array($mresult)) {
+						if($row["maksuehto"] == $prow["tunnus"]) echo $prow[1];
+					}
+					
+					echo "<br>$row[kuvaus]</td>";
 					echo "<td>$row[lisatiedot]<br>$row[ohje]</td>";
 					echo "<td align ='right'>$row[summa]</td></tr>";
 				}
+				
+				//alkuun tämä resultti
+				mysql_data_seek($kuvares,0);
+				mysql_data_seek($mresult,0);
 			}
 
 			if(round($tot,2) != $rivrow["jaksotettavaa"]) {

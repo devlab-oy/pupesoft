@@ -165,7 +165,7 @@
 			//Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
 			// ja lisätään ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
 			$query = "	SELECT
-						round(sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa
+						sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) jaksotettavaa
 						FROM lasku
 						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.jaksotettu=lasku.jaksotettu
 						WHERE lasku.yhtio 		= '$kukarow[yhtio]'
@@ -175,7 +175,7 @@
 			$sumrow = mysql_fetch_array($result);
 
 			$query = "	SELECT
-						round(sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) summa,
+						sum(if(tilausrivi.jaksotettu=lasku.jaksotettu, tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)) summa,
 						if(tilausrivi.alv>=500, tilausrivi.alv-500, tilausrivi.alv) alv
 						FROM lasku
 						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'L' and tilausrivi.jaksotettu=lasku.jaksotettu
@@ -197,8 +197,15 @@
 			else {
 				while($row = mysql_fetch_array($sresult)) {
 
-					$summa = round($row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"],2);
+					$summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
+					//Jos yhtiön myyntihinnat ovat verollisia
+					if($yhtiorow["alv_kasittely"] == '') {
+						$summa = round($summa * (1+($row["alv"]/100)),2);	
+					}
+					else {
+						$summa = round($summa,2);
+					}
 
 					$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values ('$summa', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '".t("Ennakkolasku")." $lahteva_lasku ".t("tilaukselle")." $tunnus ".t("Osuus")." $posrow[osuus]%')";
 					$addtil = mysql_query($query) or pupe_error($query);

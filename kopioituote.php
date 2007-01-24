@@ -127,11 +127,11 @@
 		if (strpos($tuoteno, '*') === FALSE) {
 			$tuoteno = $tuoteno."*";
 		}
-
+		
 		require("inc/tuotehaku.inc");
 	}
 
-	if ($tee == 'HAKU' and $tuoteno != '') {
+	if ($tee == 'AVALITTU' and $tuoteno != '') {
 		$formi  = 'performi';
 		$kentta = 'uustuoteno';
 
@@ -159,7 +159,7 @@
 
 	if (($tee == 'HAKU' or $tee == "Y") and $ulos != '') {
 			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
-			echo "<input type='hidden' name='tee' value='HAKU'>";
+			echo "<input type='hidden' name='tee' value='AVALITTU'>";
 			echo "<table><tr>";
 			echo "<th>".t("Valitse listasta").":</th></tr>";
 			echo "<tr><td>$ulos</td>";

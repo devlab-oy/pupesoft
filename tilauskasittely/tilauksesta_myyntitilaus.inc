@@ -64,7 +64,6 @@
 					case 'olmapvm':
 					case 'summa':
 					case 'kasumma':
-					case 'hinta':
 					case 'kate':
 					case 'arvo':
 					case 'maksuaika':

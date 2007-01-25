@@ -174,6 +174,50 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji='KT'
+					ORDER BY jarjestys, selite";
+		$vresult = mysql_query($query) or pupe_error($query);
+		$ulos = "<td><select name='$nimi'>";
+
+		$ulos .= "<option value = '' >".t("Ei valintaa")."</option>";
+
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "kuljetusmuoto") {
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji='KM'
+					ORDER BY jarjestys, selite";
+		$vresult = mysql_query($query) or pupe_error($query);
+		$ulos = "<td><select name='$nimi'>";
+
+		$ulos .= "<option value = '' >".t("Ei valintaa")."</option>";
+
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "maakoodi") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat

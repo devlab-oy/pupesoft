@@ -124,7 +124,11 @@ if ($tee == "") {
 		$vv = date('Y');
 		$laskurow["tuontipvm"] = $vv."-".$kk."-".$pp;
 	}
-
+	
+	$query  = "select * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$toimittaja = mysql_fetch_array($result);
+	
 	echo "<tr><td>".t("Kauppatapahtuman luonne").":</td><td colspan='3'>
 		<select NAME='ktapahtuman_luonne'>";
 	echo "<option value=''>".t("Valitse")."</option>";
@@ -139,6 +143,9 @@ if ($tee == "") {
 		$sel = '';
 		if($row[0] == $laskurow["kauppatapahtuman_luonne"]) {
 			$sel = 'selected';
+		}
+		elseif($laskurow["kauppatapahtuman_luonne"] == "0" and $row[0] == $toimittaja["kauppatapahtuman_luonne"]) {
+			$sel = "selected";
 		}
 		echo "<option value='$row[0]' $sel>$row[1]</option>";
 	}
@@ -160,6 +167,9 @@ if ($tee == "") {
 		if($row[0] == $laskurow["kuljetusmuoto"]) {
 			$sel = 'selected';
 		}
+		elseif($laskurow["kuljetusmuoto"] == "0" and $row[0] == $toimittaja["kuljetusmuoto"]) {
+			$sel = "selected";
+		}
 		echo "<option value='$row[0]' $sel>$row[1]</option>";
 	}
 	echo "</select></td>";
@@ -167,9 +177,6 @@ if ($tee == "") {
 
 	if ($laskurow["rahti"] == 0) {
 		// katotaan onko toimittajalla joku defaultti kuluprosentti
-		$query  = "select * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
-		$result = mysql_query($query) or pupe_error($query);
-		$toimittaja = mysql_fetch_array($result);
 		$laskurow["rahti"] = $toimittaja["oletus_kulupros"];
 	}
 	

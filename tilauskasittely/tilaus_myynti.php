@@ -646,7 +646,7 @@ if ($tee == "VALMIS") {
 		}
 		else {
 			//Luodaan valituista riveistä suoraan normaali ostotilaus
-			if($yhtiorow["tee_osto_myyntitilaukselta"] != '') {
+			if($kukarow["extranet"] == "" and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
 				require("tilauksesta_ostotilaus.inc");
 
 				$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');

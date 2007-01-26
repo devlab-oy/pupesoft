@@ -198,7 +198,7 @@
 					and tuotepaikat.hyllyalue  != '!!M'";
 		$omavarastores = mysql_query($query) or pupe_error($query);
 
-		if (($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V') {
+		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V') {
 			// Katsotaan onko t‰lle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta
 			$query = "	select tyyppi_tieto, liitostunnus, toimi.nimi
 						from tuotteen_toimittajat, toimi
@@ -262,7 +262,7 @@
 		}
 
 		// K‰‰yd‰‰n l‰pi tuotteen toimittajat
-		if (in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '')) {
+		if ($kukarow["extranet"] == "" and in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '')) {
 			if ($kotipaikatlask == 0) {
 				$paikat = "<option value=''></option>".$paikat;
 			}

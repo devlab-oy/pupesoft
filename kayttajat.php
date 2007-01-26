@@ -520,23 +520,23 @@
 				}
 
 				echo "</select></td></tr>";
+			}
 
+			echo "<tr><th align='left'>".t("Myy varastosta").":</td>";
+			echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
 
-				echo "<tr><th align='left'>".t("Optimoi varastoon").":</td>";
-				echo "<td><select name='varasto'><option value='0'>".t("Oletus")."</option>";
+			$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+			$vares = mysql_query($query) or pupe_error($query);
 
-				$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
-				$vares = mysql_query($query) or pupe_error($query);
+			while ($varow = mysql_fetch_array($vares)) {
+				$sel='';
+				if ($varow['tunnus']==$krow["varasto"]) $sel = 'selected';
+				echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
+			}
 
-				while ($varow = mysql_fetch_array($vares))
-				{
-					$sel='';
-					if ($varow['tunnus']==$krow["varasto"]) $sel = 'selected';
-					echo "<option value='$varow[tunnus]' $sel>$varow[nimitys]</option>";
-				}
-
-				echo "</select></td></tr>";
-
+			echo "</select></td></tr>";
+			
+			if ($toim != 'extranet') {
 				echo "<tr><th align='left'>".t("Henkilökohtainen tulostin:")."</td>";
 				echo "<td><select name='kirjoitin'><option value=''>".t("Ei oletuskirjoitinta")."</option>";
 

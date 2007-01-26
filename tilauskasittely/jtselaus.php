@@ -688,36 +688,38 @@
 									}
 									else {
 
+										if ($kukarow["extranet"] == "") {
+											$query = "	SELECT *
+														FROM varastopaikat
+														WHERE yhtio = '$kukarow[yhtio]'";
+											$vtresult = mysql_query($query) or pupe_error($query);
 
-										$query = "	SELECT *
-													FROM varastopaikat
-													WHERE yhtio = '$kukarow[yhtio]'";
-										$vtresult = mysql_query($query) or pupe_error($query);
+											if (mysql_num_rows($vtresult) > 1) {
+												echo "<b>".t("Näytä saatavuus vain varastosta").": </b> <select name='vainvarastosta' onchange='submit();'>";
+												echo "<option value=''>Kaikki varastot</option>";
 
-										if (mysql_num_rows($vtresult) > 1) {
-											echo "<b>".t("Näytä saatavuus vain varastosta").": </b> <select name='vainvarastosta' onchange='submit();'>";
-											echo "<option value=''>Kaikki varastot</option>";
+												while ($vrow = mysql_fetch_array($vtresult)) {
+													if ($vrow["tyyppi"] != 'E' or $kukarow["varasto"] == $vrow["tunnus"]) {
 
-											while ($vrow = mysql_fetch_array($vtresult)) {
-												if ($vrow["tyyppi"] != 'E' or $kukarow["varasto"] == $vrow["tunnus"]) {
+														$sel = "";
+														if ($vainvarastosta == $vrow["tunnus"]) {
+															$sel = 'SELECTED';
+														}
 
-													$sel = "";
-													if ($vainvarastosta == $vrow["tunnus"]) {
-														$sel = 'SELECTED';
+														echo "<option value='$vrow[tunnus]' $sel>$vrow[nimitys]</option>";
 													}
-
-													echo "<option value='$vrow[tunnus]' $sel>$vrow[nimitys]</option>";
 												}
-											}
 
-											echo "</select>";
+												echo "</select>";
+
+											}
+											echo "<input type='hidden' name='jt_kayttoliittyma' value='kylla'>";
 										}
 
 										echo "	<input type='hidden' name='toim' value='$toim'>
 												<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 												<input type='hidden' name='tee'  value='JT_TILAUKSELLE'>
-												<input type='hidden' name='tila' value='jttilaukseen'>
-												<input type='hidden' name='jt_kayttoliittyma' value='kylla'>";
+												<input type='hidden' name='tila' value='jttilaukseen'>";
 									}
 								}
 

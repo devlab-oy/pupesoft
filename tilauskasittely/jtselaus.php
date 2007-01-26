@@ -11,6 +11,10 @@
 
 	if ($tee != "JT_TILAUKSELLE") {
 		echo "<font class='head'>".t("JT rivit")."</font><hr>";
+
+		if (!is_array($varastosta) and $vainvarastosta != "") {
+			$varastosta[$vainvarastosta] = $vainvarastosta;
+		}
 	}
 
 	//Extranet käyttäjille pakotetaan aina tiettyjä arvoja
@@ -178,9 +182,9 @@
 			if ($laskurow['tila']== 'G') {
 				$vanhatoim = $toim;
 				$toim = "SIIRTOLISTA";
-				
+
 				require("tilaus-valmis-siirtolista.inc");
-				
+
 				$toim = $vanhatoim;
 				$vanhatoim = "";
 			}
@@ -387,7 +391,7 @@
 		$tuotlisa = '';
 		$siirtolisa = '';
 		$tuotelisa = '';
-		
+
 		if ($toimittaja != '') {
 			$tolisa1 = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ";
 			$tolisa2 = " and tuotteen_toimittajat.liitostunnus = '$toimittajaid' ";
@@ -408,7 +412,7 @@
 		if ($tilaus_on_jo == "KYLLA" and $toim == 'SIIRTOLISTA' and $laskurow['clearing'] != '') {
 		 	$siirtolisa = " and lasku.clearing = '$laskurow[clearing]' ";
 		}
-		
+
 		if ($tuoteryhma != '') {
 			$tuotelisa .= " and tuote.try = '$tuoteryhma' ";
 		}
@@ -683,10 +687,37 @@
 										}
 									}
 									else {
+
+
+										$query = "	SELECT *
+													FROM varastopaikat
+													WHERE yhtio = '$kukarow[yhtio]'";
+										$vtresult = mysql_query($query) or pupe_error($query);
+
+										if (mysql_num_rows($vtresult) > 1) {
+											echo "<b>".t("Näytä saatavuus vain varastosta").": </b> <select name='vainvarastosta' onchange='submit();'>";
+											echo "<option value=''>Kaikki varastot</option>";
+
+											while ($vrow = mysql_fetch_array($vtresult)) {
+												if ($vrow["tyyppi"] != 'E' or $kukarow["varasto"] == $vrow["tunnus"]) {
+
+													$sel = "";
+													if ($vainvarastosta == $vrow["tunnus"]) {
+														$sel = 'SELECTED';
+													}
+
+													echo "<option value='$vrow[tunnus]' $sel>$vrow[nimitys]</option>";
+												}
+											}
+
+											echo "</select>";
+										}
+
 										echo "	<input type='hidden' name='toim' value='$toim'>
 												<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 												<input type='hidden' name='tee'  value='JT_TILAUKSELLE'>
-												<input type='hidden' name='tila' value='jttilaukseen'>";
+												<input type='hidden' name='tila' value='jttilaukseen'>
+												<input type='hidden' name='jt_kayttoliittyma' value='kylla'>";
 									}
 								}
 

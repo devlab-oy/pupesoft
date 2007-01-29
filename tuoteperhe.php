@@ -372,6 +372,7 @@
 						$error="<font class='error'>(".t("Tuote ei en‰‰ rekisteriss‰")."!)</font>";
 					}
 					else {
+						$error = "";
 						$tuoterow = mysql_fetch_array($res1);
 					
 						//Tehd‰‰n muuttujat jotta voidaan tarvittaessa kopioida resepti

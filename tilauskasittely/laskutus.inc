@@ -192,10 +192,10 @@ else {
 				$tapahtumattyyppi = "laskutus";
 			}
 			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] < 0) {
-				//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on ostoa
+				//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on ostoa (aka. hyvitystä)
 				
-				// Kate = Hinta
-				$kate 				= round($hinta/$trow["varattu"],2);
+				// Kate = 0
+				$kate 				= 0;
 				$turow["kehahin"] 	= round($hinta/$trow["varattu"],4);	
 											
 				//tapahtuman otsikko

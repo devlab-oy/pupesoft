@@ -129,6 +129,11 @@
 		}
 		
 		require("inc/tuotehaku.inc");
+		
+		//on vaan löytynyt 1 muuten tulis virhettä ja ulosta
+		if ($tee == 'HAKU' and $ulos == '' and $varaosavirhe == '' and $tuoteno != '') {
+			$tee = 'AVALITTU';
+		}
 	}
 
 	if ($tee == 'AVALITTU' and $tuoteno != '') {

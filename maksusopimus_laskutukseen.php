@@ -197,15 +197,8 @@
 			else {
 				while($row = mysql_fetch_array($sresult)) {
 
+					// $summa on verollinen tai veroton riippuen yhtiön myyntihinnoista
 					$summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
-
-					//Jos yhtiön myyntihinnat ovat verollisia
-					if($yhtiorow["alv_kasittely"] == '') {
-						$summa = round($summa * (1+($row["alv"]/100)),2);	
-					}
-					else {
-						$summa = round($summa,2);
-					}
 
 					$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values ('$summa', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '".t("Ennakkolasku")." $lahteva_lasku ".t("tilaukselle")." $tunnus ".t("Osuus")." $posrow[osuus]%')";
 					$addtil = mysql_query($query) or pupe_error($query);
@@ -215,7 +208,7 @@
 					$tot += $summa;
 				}
 
-				echo "<font class = 'message'>".t("Tehtiin ennakkolasku tilaukselle")." $tunnus ".t("tunnus").": $id ".t("osuus").": ".($posrow["osuus"] * 100)."% ".t("summa").": $tot</font><br>";
+				echo "<font class = 'message'>".t("Tehtiin ennakkolasku tilaukselle")." $tunnus ".t("tunnus").": $id ".t("osuus").": $posrow[osuus]% ".t("summa").": $tot</font><br>";
 			}
 
 			// Päivitetään positiolle tämän laskun tunnus
@@ -302,8 +295,8 @@
 			$trow = mysql_fetch_array($tresult);
 			$nimitys = $trow["nimitys"];
 
-			//	Lasketaan paljonko ollaan jo laskutettu ja millä verokannoilla
-			$query = "	SELECT round(sum(rivihinta),2) laskutettu, tilausrivi.alv
+			//Lasketaan paljonko ollaan jo laskutettu ja millä verokannoilla
+			$query = "	SELECT round(sum(rivihinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) laskutettu, tilausrivi.alv
 						FROM lasku
 						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and kpl <> 0 and uusiotunnus > 0
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -477,7 +470,7 @@
 								sum(if(tilausrivi.toimitettu='',1,0)) toimittamatta,
 								count(*) toimituksia
 								FROM lasku
-								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D'
+								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P'
 								WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 								and lasku.jaksotettu 	= '$row[jaksotettu]'
 								GROUP BY lasku.jaksotettu";

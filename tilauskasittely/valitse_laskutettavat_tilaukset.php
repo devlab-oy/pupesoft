@@ -237,7 +237,7 @@
 								sum(if(tilausrivi.toimitettu='',1,0)) toimittamatta,
 								count(*) toimituksia
 								FROM lasku
-								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D'
+								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P'
 								WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 								and lasku.jaksotettu 	= '$row[jaksotettu]'
 								GROUP BY lasku.jaksotettu";

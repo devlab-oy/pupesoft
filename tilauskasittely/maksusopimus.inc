@@ -58,8 +58,9 @@
 	if($tila == "tallenna") {
 
 		$query = "	SELECT
-					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),2) summa
-					FROM  lasku
+					sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) jaksotettavaa_veroton,
+					sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))) jaksotettavaa_verolli					
+					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='$laskurow[jaksotettu]'
 					WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 					and lasku.jaksotettu 	= '$laskurow[jaksotettu]'";
@@ -73,13 +74,23 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$posrow = mysql_fetch_array($result);
 
+		$summa = str_replace(",", ".", $summa);
+		$osuus = str_replace(",", ".", $osuus);
+		
+		if($yhtiorow["alv_kasittely"] == '') {
+			$laskunsumma = $rivrow["jaksotettavaa_verolli"];
+		}
+		else {
+			$laskunsumma = $rivrow["jaksotettavaa_veroton"];
+		}
+		
 		if ($posrow["summa"] != $summa and $summa > 0) {
 			//Lasketaan prossa annetun summan perusteella
-			$osuus = round($summa / $rivrow["summa"] * 100,4);
+			$osuus = round($summa / $laskunsumma * 100,4);
 		}
 		elseif($posrow["osuus"] != $osuus and $osuus > 0) {
 			//Lasketaan summa annetun prossan perusteella
-			$summa = round($osuus/100 * $rivrow["summa"],2);
+			$summa = round($osuus/100 * $laskunsumma,2);
 		}
 
 		$query = "	UPDATE maksupositio SET
@@ -143,9 +154,11 @@
 
 		// Haetaan laskun summat
 		$query = "	SELECT
-					group_concat(distinct lasku.tunnus) tilaukset,
-					round(sum(if(tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa,
-					round(sum(if(tilausrivi.jaksotettu=0 , tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput
+					group_concat(distinct lasku.tunnus) tilaukset,					
+					round(sum(if(tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_veroton,
+					round(sum(if(tilausrivi.jaksotettu='$laskurow[jaksotettu]', tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) jaksotettavaa_verolli,
+					round(sum(if(tilausrivi.jaksotettu=0 , tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_veroton,
+					round(sum(if(tilausrivi.jaksotettu=0 , tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_verolli
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D'
 					WHERE lasku.yhtio		= '$kukarow[yhtio]'
@@ -155,7 +168,18 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$rivrow = mysql_fetch_array($result);
 
-		// Haetaan kaikki tämän tilauksen laskutuspositiot (käytetään alvittomia rivihintoja)
+		
+		if($yhtiorow["alv_kasittely"] == '') {
+			$jaksotettavaa 	= $rivrow["jaksotettavaa_verolli"];
+			$loput 			= $rivrow["loput_verolli"];
+		}
+		else {
+			$jaksotettavaa 	= $rivrow["jaksotettavaa_veroton"];
+			$loput 			= $rivrow["loput_veroton"];
+		}
+		
+		
+		// Haetaan kaikki tämän tilauksen laskutuspositiot (HUOM! Positioiden summ on veroton tai verollinen riippuen yhtiön myyntihinnoista)
 		$query = "	SELECT *
 					FROM maksupositio
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -219,6 +243,16 @@
 					echo "</select></td>";
 
 					echo "<td><input type='text' size='30' name='lisatiedot' value='$row[lisatiedot]'></td>";
+					
+					
+					if($yhtiorow["alv_kasittely"] == '') {
+						$row["summa"] = round($row["summa"] * (1+($row["alv"]/100)),2);	
+					}
+					else {
+						$row["summa"] = round($row["summa"],2);
+					}
+					
+					
 					echo "<td align ='right'><input type='text' size='6'  name='summa' value='".sprintf('%.2f', $row["summa"])."'></td>";
 					echo "</tr>";
 
@@ -274,10 +308,21 @@
 				mysql_data_seek($kuvares,0);
 				mysql_data_seek($mresult,0);
 			}
-
-			if(round($tot,2) != $rivrow["jaksotettavaa"]) {
+			
+			$ihakaikki = $loput + $jaksotettavaa;
+			
+			//Käsin syötetty summa johon lasku pyöristetään
+			if (abs($laskurow["hinta"]-$ihakaikki) <= 0.5) {
+				$ihakaikki = sprintf("%.2f",$laskurow["hinta"]);
+			}
+			//Käsin syötetty summa johon lasku pyöristetään
+			if (abs($laskurow["hinta"]-$loput-$jaksotettavaa) <= 0.5) {
+				$jaksotettavaa = $laskurow["hinta"]-$loput;
+			}
+						
+			if(round($tot,2) != $jaksotettavaa) {
 				$osuusvippaus 	= round(($osuus - 100) * -1,2);
-				$summavippaus 	= round($rivrow["jaksotettavaa"]-$tot,2);
+				$summavippaus 	= round($jaksotettavaa-$tot,2);
 				$osuus 			= round($osuus,2);
 				$tot			= round($tot,2);
 
@@ -287,11 +332,8 @@
 					<th colspan='3'><font class='error'>".t("Laskutettavana")." ".$osuus."% : $tot $yhtiorow[valkoodi]<br>".t("Muuta jotain positiota")." $osuusvippaus% : $summavippaus $yhtiorow[valkoodi]</th>";
 				echo "</tr>";
 			}
-
-			$ihakaikki = $rivrow["loput"] + $rivrow["jaksotettavaa"];
-
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $tot)."</td></tr>";
-			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $rivrow["loput"])."</td></tr>";
+			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput)."</td></tr>";
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Tilaus yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $ihakaikki)."</td></tr>";
 			echo "</table>";
 		}

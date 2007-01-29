@@ -3,49 +3,30 @@
 require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tuotenumeroiden vaihto")."</font><hr>";
-
-if ($oikeurow['paivitys'] != '1') { // Saako päivittää
-	if ($uusi == 1) {
-		echo "<b>".t("Sinulla ei ole oikeutta lisätä")."</b><br>";
-		$uusi = '';
-	}
-	if ($del == 1) {
-		echo "<b>".t("Sinulla ei ole oikeuttaa poistaa")."</b><br>";
-		$del = '';
-		$tunnus = 0;
-	}
-	if ($upd == 1) {
-		echo "<b>".t("Sinulla ei ole oikeuttaa muuttaa")."</b><br>";
-		$upd = '';
-		$uusi = 0;
-		$tunnus = 0;
-	}
-}
-
 flush();
 
-$vikaa=0;
-$tarkea=0;
-$kielletty=0;
-$lask=0;
-$postoiminto = 'X';
-$tyhjatok  = "";
-$kentta = 'tuoteno';
-$chekatut = 0;
-$taulut = '';
-$error = 0;
+$vikaa			= 0;
+$tarkea			= 0;
+$kielletty		= 0;
+$lask			= 0;
+$postoiminto 	= 'X';
+$tyhjatok  		= "";
+$kentta 		= 'tuoteno';
+$chekatut 		= 0;
+$taulut 		= '';
+$error 			= 0;
+$failista		= "";
+$uusi_on_jo		= "";
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
-
+if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE and $tee == "file") {
+	//Tuotenumerot tulevat tiedostosta
 	list($name,$ext) = split("\.", $_FILES['userfile']['name']);
 
-	if (strtoupper($ext) !="TXT" and strtoupper($ext)!="CSV")
-	{
+	if (strtoupper($ext) !="TXT" and strtoupper($ext)!="CSV") {
 		die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
 	}
 
-	if ($_FILES['userfile']['size']==0)
-	{
+	if ($_FILES['userfile']['size']==0) {
 		die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
 	}
 	
@@ -60,167 +41,244 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		$rivi	  = str_replace($poista,"",$rivi);
 		$rivi	  = explode("\t", $rivi);
 
-		if((trim($rivi[0]) != '') and (trim($rivi[1]) != '')) {
+		if(trim($rivi[0]) != '' and trim($rivi[1]) != '') {
 			
-			$vantuoteno = $rivi[0];
-			$uustuoteno = $rivi[1];
+			$vantuoteno = strtoupper(trim($rivi[0]));
+			$uustuoteno = strtoupper(trim($rivi[1]));
+			
 			$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
 			$tuoteresult = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($tuoteresult) != '0') {
 				$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
 				$tuoteuresult = mysql_query($query) or pupe_error($query);
+				
 				if (mysql_num_rows($tuoteuresult) != '0') {
 					$error++;
-					echo "".t("UUSI TUOTENUMERO LÖYTYY JO")." $uustuoteno<br>";
+					echo "<font class='message'>".t("UUSI TUOTENUMERO LÖYTYY JO").": $uustuoteno</font><br>";
 				}
 			}
 			else {
 				$error++;
-				echo "".t("VANHAA TUOTENUMEROA EI LÖYDY")." $vantuoteno<br>";
+				echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";
 			}
 		}
 		else {
 			if (trim($rivi[0]) == '' and trim($rivi[1]) != '') {
 				$error++;
-				echo "".t("Vanha tuotenumero puuttuu tiedostosta").": (tyhjä) --> $rivi[1]<br>";
+				echo "<font class='message'>".t("Vanha tuotenumero puuttuu tiedostosta").": (tyhjä) --> $rivi[1]</font><br>";
 			}
 			elseif (trim($rivi[1]) == '' and trim($rivi[0]) != '') {
 				$error++;
-				echo "".t("Uusi tuotenumero puuttuu tiedostosta").": $rivi[0] --> (tyhjä)<br>";
+				echo "<font class='message'>".t("Uusi tuotenumero puuttuu tiedostosta").": $rivi[0] --> (tyhjä)</font><br>";
 			}
 		}
 		$rivi = fgets($file, 4096);
-	} // end while eof
-
+	}
+	
+	$failista = "JOO";
 	fclose($file);
+}
+elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "file") {
+	//Tuotenumerot tulevat käyttöliittymästä
+	$query  = "select tunnus, kehahin from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
+	$tuoteresult = mysql_query($query) or pupe_error($query);
 	
-	if ($error== 0) {
+	if (mysql_num_rows($tuoteresult) != 0) {
+		$vantuoterow = mysql_fetch_array($tuoteresult);
 		
-		echo "".t("Tiedosto oli ok")."<br><br>";
-		flush();
+		$query  = "select tunnus, kehahin from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+		$tuoteuresult = mysql_query($query) or pupe_error($query);
 		
-		$file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
-
-		echo "<font class='message'>".t("Aloitellaan päivitys, tämä voi kestää hetken").".<br></font>";
-		flush();
-		
-		$tulos = array();
-	
-		$query  = "SHOW TABLES FROM pupesoft";
-		$tabresult = mysql_query($query) or pupe_error($query);
-		while ($tables = mysql_fetch_array($tabresult)) {
-			$query  = "describe $tables[0]";
-			$fieldresult = mysql_query($query) or pupe_error($query);
-			while ($fields = mysql_fetch_array($fieldresult)) {
-				$pos = strpos($fields[0], $kentta);
-				if ($pos !== false and $tables[0] != 'tuote_muutokset' and $fields[0] != 'toim_tuoteno') {
-				//if ($fields[0] == $kentta) {
-					//echo "$tables[0] $fields[0]<br>";
-					$taulut .= $tables[0].' WRITE,';
-					$tulos[] = $tables[0];
-				}
+		if (mysql_num_rows($tuoteuresult) != 0) {
+			$uustuoterow = mysql_fetch_array($tuoteresult);		
+			
+			echo "<font class='message'>".t("UUSI TUOTENUMERO LÖYTYY JO").": $uustuoteno</font><br>";
+			
+			//Jos molempien tuotteiden varastonarvo on nolla niin ei haittaa vaikka uusi tuote löytyy jo
+			$query = "	SELECT sum(saldo) saldo
+						FROM tuotepaikat
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and tuoteno = '$vantuoteno'";
+			$result = mysql_query($query) or pupe_error($query);
+			$vansaldorow = mysql_fetch_array($result);
+			
+			$query = "	SELECT sum(saldo) saldo
+						FROM tuotepaikat
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and tuoteno = '$uustuoteno'";
+			$result = mysql_query($query) or pupe_error($query);
+			$uussaldorow = mysql_fetch_array($result);
+			
+			if (($uustuoterow["kehahin"] == 0 and $vantuoterow["kehahin"] == 0) or ($vansaldorow["saldo"] == 0 and $uussaldorow["saldo"] == 0)) {
+				$uusi_on_jo = "OK";
+			}
+			else {
+				$error++;
 			}
 		}
-		$taulut .= 'tuote_muutokset WRITE';
-		//echo "$taulut<br>";
-		$montako =count($tulos);
-		//echo "countti = $montako<br>";
-		if ($montako > 0) {
-			echo "".t("Löydettiin paikat joita pitää muuttaa")."<br>";
-			flush();
-		}
-		else {
-			die ("<font class='error'><br>".t("Ei löydetty muutettavia paikkoja, ei uskalleta tehdä mitään")."!</font>");
-		}
-		$tyyppi = "(";
-
-		$query  = "select distinct tyyppi from tilausrivi where yhtio = '$kukarow[yhtio]' and tuoteno != ''";
-		$tyypitresult = mysql_query($query) or pupe_error($query);
-		while ($tyypitrow = mysql_fetch_array($tyypitresult)) {
-			$tyyppi .= "'"."$tyypitrow[tyyppi]"."'".",";
-		}
-		$tyyppi = substr($tyyppi, 0, -1).")";
+	}
+	else {
+		$error++;
+		echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";
+	}
 	
-		echo "".t("Nyt ollan kerätty tietokannasta kaikki tarpeellinen")."<br>".t("Aloitellaan muutos")."<br>";
+	$failista 	= "EI";
+}
+
+if ($error == 0 and $tee == "file") {
+	
+	echo "<font class='message'>".t("Syötetyt tiedot ovat ok")."</font><br><br>";
+	flush();
+	
+	echo "<font class='message'>".t("Aloitellaan päivitys, tämä voi kestää hetken").".<br></font>";
+	flush();
+	
+	$tulos = array();
+
+	//$dbkanta --> tulee salasanat.php:stä
+
+	$query  = "SHOW TABLES FROM $dbkanta";
+	$tabresult = mysql_query($query) or pupe_error($query);
+	
+	while ($tables = mysql_fetch_array($tabresult)) {
+		$query  = "describe $tables[0]";
+		$fieldresult = mysql_query($query) or pupe_error($query);
+		
+		while ($fields = mysql_fetch_array($fieldresult)) {						
+			if (strpos($fields[0], $kentta) !== false and $tables[0] != 'tuote_muutokset' and $fields[0] != 'toim_tuoteno' and !in_array($tables[0], $tulos)) {
+				$taulut .= $tables[0].' WRITE,';
+				$tulos[] = $tables[0];
+			}
+		}
+	}
+	$taulut .= 'tuote_muutokset WRITE, sanakirja WRITE';
+		
+	$montako =count($tulos);
+
+	if ($montako > 0) {
+		echo "<font class='message'>".t("Löydettiin paikat joita pitää muuttaa").": $montako kappaletta.</font><br>";
 		flush();
+	}
+	else {
+		die ("<font class='error'><br>".t("Ei löydetty muutettavia paikkoja, ei uskalleta tehdä mitään")."!</font>");
+	}
+	
+	$tyyppi = "(";
 
-		while (!feof($file)) {
-			// luetaan rivi tiedostosta..
-			$poista	  = array("'", "\\","\"");
-			$rivi	  = str_replace($poista,"",$rivi);
-			$rivi	  = explode("\t", trim($rivi));
+	$query  = "select distinct tyyppi from tilausrivi where yhtio = '$kukarow[yhtio]' and tuoteno != ''";
+	$tyypitresult = mysql_query($query) or pupe_error($query);
+	
+	while ($tyypitrow = mysql_fetch_array($tyypitresult)) {
+		$tyyppi .= "'"."$tyypitrow[tyyppi]"."'".",";
+	}
+	$tyyppi = substr($tyyppi, 0, -1).")";
 
-			if((trim($rivi[0]) != '') and (trim($rivi[1]) != '')) {
+	echo "<font class='message'>".t("Nyt ollan kerätty tietokannasta kaikki tarpeellinen")."<br>".t("Aloitellaan muutos")."...</font><br>";
+	flush();
+
+	if ($failista == "JOO") {
+		$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
+		$rivi = fgets($file, 4096);
+	}
+	else {
+		$rivi = "$vantuoteno	$uustuoteno";
+		$lask_kaks = 0;
+	}
+
+	
+	while (!feof($file) and $lask_kaks == 0) {
+		// luetaan rivi tiedostosta..
+		$poista	  = array("'", "\\","\"");
+		$rivi	  = str_replace($poista,"",$rivi);
+		$rivi	  = explode("\t", trim($rivi));
+
+		if(trim($rivi[0]) != '' and trim($rivi[1]) != '') {
+		
+			$lokki = "LOCK TABLES $taulut";
+			$res   = mysql_query($lokki) or pupe_error($lokki);
 			
-				$lokki = "LOCK TABLES $taulut";
-				$vantuoteno = $rivi[0];
-				$uustuoteno = $rivi[1];
-				$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
-				$tuoteresult = mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($tuoteresult) == '1') {
-					$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-					$tuoteuresult = mysql_query($query) or pupe_error($query);
-					if (mysql_num_rows($tuoteuresult) == '0') {
+			
+			$vantuoteno = strtoupper(trim($rivi[0]));
+			$uustuoteno = strtoupper(trim($rivi[1]));
+			
+			$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
+			$tuoteresult = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($tuoteresult) == 1) {
+				
+				$query  = "select tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+				$tuoteuresult = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($tuoteuresult) == 0 or $uusi_on_jo == "OK") {
+				
+					$query = "	INSERT INTO tuote_muutokset
+								SET 
+								yhtio = '$kukarow[yhtio]',
+								tuoteno = '$uustuoteno',
+								alkup_tuoteno = '$vantuoteno',
+								muutospvm = now(),
+								kuka = '$kukarow[kuka]'";
+					$result2 = mysql_query($query) or pupe_error($query);
 					
-						$query = "INSERT INTO tuote_muutokset
-									SET 
-									yhtio = '$kukarow[yhtio]',
-									tuoteno = '$uustuoteno',
-									alkup_tuoteno = '$vantuoteno',
-									muutospvm = now(),
-									kuka = '$kukarow[kuka]'";
-						$result2 = mysql_query($query) or pupe_error($query);
-					
-						foreach ($tulos as $tulos2) {
-							if ($tulos2 == 'tilausrivi') {
-								$query = "UPDATE $tulos2
-											SET
-											tuoteno	= '$uustuoteno'
-											WHERE
-											yhtio = '$kukarow[yhtio]'
-											and tyyppi in $tyyppi
-											and tuoteno	= '$vantuoteno'
-											ORDER BY yhtio";
-								$result2 = mysql_query($query) or pupe_error($query);
-							}
-							elseif ($tulos2 == 'tuoteperhe') {
-								$query = "UPDATE $tulos2
-											SET
-											tuoteno	= '$uustuoteno'
-											WHERE
-											yhtio = '$kukarow[yhtio]'
-											and tuoteno	= '$vantuoteno'
-											ORDER BY yhtio";
-								$result2 = mysql_query($query) or pupe_error($query);
-								$query = "UPDATE $tulos2
-											SET
-											isatuoteno = '$uustuoteno'
-											WHERE
-											yhtio = '$kukarow[yhtio]'
-											and isatuoteno = '$vantuoteno'
-											ORDER BY yhtio";
-								$result2 = mysql_query($query) or pupe_error($query);
-							}
-							else {
-								$query = "UPDATE $tulos2
-											SET
-											tuoteno	= '$uustuoteno'
-											WHERE
-											yhtio = '$kukarow[yhtio]'
-											and tuoteno	= '$vantuoteno'
-											ORDER BY yhtio";
-								$result2 = mysql_query($query) or pupe_error($query);
-							}	
+					echo "<font class='message'>".t("Vaihdetaan tuotenumero ja siirretään historiatiedot").": $vantuoteno --> $uustuoteno.</font><br>";
+					flush();
+				
+					foreach ($tulos as $tulos2) {
+						if ($tulos2 == 'tilausrivi') {
+							$query = "	UPDATE $tulos2
+										SET
+										tuoteno	= '$uustuoteno'
+										WHERE
+										yhtio = '$kukarow[yhtio]'
+										and tyyppi in $tyyppi
+										and tuoteno	= '$vantuoteno'
+										ORDER BY yhtio";
+							$result2 = mysql_query($query) or pupe_error($query);
 						}
-						if ($jatavanha != '') {
+						elseif ($tulos2 == 'tuoteperhe') {
+							$query = "	UPDATE $tulos2
+										SET
+										tuoteno	= '$uustuoteno'
+										WHERE
+										yhtio = '$kukarow[yhtio]'
+										and tuoteno	= '$vantuoteno'
+										ORDER BY yhtio";
+							$result2 = mysql_query($query) or pupe_error($query);
+														
+							$query = "	UPDATE $tulos2
+										SET
+										isatuoteno = '$uustuoteno'
+										WHERE
+										yhtio = '$kukarow[yhtio]'
+										and isatuoteno = '$vantuoteno'
+										ORDER BY yhtio";
+							$result2 = mysql_query($query) or pupe_error($query);
+						}
+						elseif($uusi_on_jo == "" or ($uusi_on_jo == "OK" and $tulos2 != 'tuote')) {
+							$query = "	UPDATE $tulos2
+										SET
+										tuoteno	= '$uustuoteno'
+										WHERE
+										yhtio = '$kukarow[yhtio]'
+										and tuoteno	= '$vantuoteno'
+										ORDER BY yhtio";
+							$result2 = mysql_query($query) or pupe_error($query);							
+						}						
+					}
+					
+					if ($jatavanha != '') {
+						if($uusi_on_jo == "") {
 							$query = "select * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark = 'o' LIMIT 1";
 							$alvresult = mysql_query($query) or pupe_error($query);
 							$alv = '0.00';
+						
 							if (mysql_num_rows($alvresult) != '0') {
 								$alvrow = mysql_fetch_array($alvresult);
 								$alv = $alvrow['selite'];
 							}
-							$query = "INSERT INTO tuote
+						
+							$query = "	INSERT INTO tuote
 										SET
 										tuoteno 		= '$vantuoteno',
 										nimitys			= '-->--> $uustuoteno',
@@ -231,86 +289,110 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 										hinnastoon		= 'E',
 										yhtio			= '$kukarow[yhtio]'";
 							$result3 = mysql_query($query) or pupe_error($query);
+						}
+						
+						$querykorv = "select max(id)+1 maxi from korvaavat where yhtio = '$kukarow[yhtio]'";
+						$korvresult = mysql_query($querykorv) or pupe_error($querykorv);
+						$korvid = mysql_fetch_array($korvresult);
 
-							$querykorv = "select max(id)+1 maxi from korvaavat where yhtio = '$kukarow[yhtio]'";
-							$korvresult = mysql_query($querykorv) or pupe_error($querykorv);
-							$korvid = mysql_fetch_array($korvresult);
+						$loytyikorv = '';
 
-							$loytyikorv = '';
-
-							$querykorvv  = "select id maxi from korvaavat where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-							$korvvresult = mysql_query($querykorvv) or pupe_error($querykorvv);
-							if (mysql_num_rows($korvvresult) != '0') {
-								$korvid = mysql_fetch_array($korvvresult);
-								//echo "löytyi korvid"."$korvid[maxi]"." $vantuoteno --> $uustuoteno<br>";
-								$loytyikorv = '1';
-							}
-							$query = "INSERT INTO korvaavat
+						$querykorvv  = "select id maxi from korvaavat where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+						$korvvresult = mysql_query($querykorvv) or pupe_error($querykorvv);
+					
+						if (mysql_num_rows($korvvresult) != '0') {
+							$korvid = mysql_fetch_array($korvvresult);
+							//echo "löytyi korvid"."$korvid[maxi]"." $vantuoteno --> $uustuoteno<br>";
+							$loytyikorv = '1';
+						}
+						
+						$query = "	INSERT INTO korvaavat
+									SET
+									tuoteno 			= '$vantuoteno',
+									id					= '$korvid[maxi]',
+									yhtio				= '$kukarow[yhtio]'";
+						$result4 = mysql_query($query) or pupe_error($query);
+						
+						if ($loytyikorv != '1') {
+							$query = "	INSERT INTO korvaavat
 										SET
-										tuoteno 			= '$vantuoteno',
+										tuoteno 			= '$uustuoteno',
 										id					= '$korvid[maxi]',
 										yhtio				= '$kukarow[yhtio]'";
 							$result4 = mysql_query($query) or pupe_error($query);
-							if ($loytyikorv != '1') {
-								$query = "INSERT INTO korvaavat
-											SET
-											tuoteno 			= '$uustuoteno',
-											id					= '$korvid[maxi]',
-											yhtio				= '$kukarow[yhtio]'";
-								$result4 = mysql_query($query) or pupe_error($query);
-							}
 						}
-						$lask++;
 					}
-					else {
-						echo "".t("UUSI TUOTENUMERO LÖYTYY JO")." $uustuoteno<br>";
-					}
+					$lask++;
 				}
 				else {
-					echo "".t("VANHAA TUOTENUMEROA EI LÖYDY")." $vantuoteno<br>";
+					echo t("UUSI TUOTENUMERO LÖYTYY JO")." $uustuoteno<br>";
 				}
 			}
-			$unlokki = "UNLOCK TABLES";
+			else {
+				echo t("VANHAA TUOTENUMEROA EI LÖYDY")." $vantuoteno<br>";
+			}
+		}
+		
+		$unlokki = "UNLOCK TABLES";
+		$res     = mysql_query($unlokki) or pupe_error($unlokki);
+		
+		if ($failista == "JOO") {
 			$rivi = fgets($file, 4096);
-		} // end while eof
-
+		}
+		else {
+			$lask_kaks++;
+		}
+	}
+	
+	if ($failista == "JOO") {
 		fclose($file);
-
-		echo "<br><font class='message'>".t("Valmis, muutettiin")." $lask ".t("tuotetta")."!<br></font>";
 	}
-	else {
-		echo "<font class='error'>".t("Edellämainitut viat pitää korjata ennenkuin voidaan jatkaa")."!!!<br>".t("Mitään ei päivitetty")."!!!<br><br>";
-	}
-
+	
+	echo "<br><font class='message'>".t("Valmis, muutettiin")." $lask ".t("tuotetta")."!<br><br><br></font>";
+	$tee = "";
 }
-else
-{
-	echo	"<font class='message'>".t("Tiedostomuoto").":</font><br>
+elseif ($tee == "file") {
+	echo "<font class='error'>".t("Edellämainitut viat pitää korjata ennenkuin voidaan jatkaa")."!!!<br>".t("Mitään ei päivitetty")."!!!<br><br>";
+	$tee = "";
+}
 
-			<table border='0' cellpadding='3' cellspacing='2'>
+
+if ($tee == "") {
+	echo	"<font class='message'>".t("Tiedostomuoto").":</font><br>
+			<table>
 			<tr><th colspan='2'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
-			<tr><td>".t("VANHA tuotenumero")."</td><td>".t("UUSI tuotenumero")."</td></tr>
-			</table>	
-			<br><br><br>";
+			<tr><td>".t("VANHA tuotenumero")."</td><td>".t("UUSI tuotenumero")."</td></tr>";
 			
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
-			<table>
 			<tr>
-				<td colspan='2'>".t("Jätetäänkö vanha ja lisätään korvaavuus")."?</td>
-				<td align='center'><input type='checkbox' name='jatavanha' value='jatavanha'</td>
+				<th>".t("Valitse tiedosto").":</th>
+				<td><input name='userfile' type='file'></td>
 			</tr>
 			<tr>
-				<td colspan='3' class='back'>&nbsp;</td>
+				<td class='back'><br></td>
+			</tr>
+				<th colspan='2'>".t("Tai syöta tuotenumerot").":</th>
 			</tr>
 			
-			<input type='hidden' name='tee' value='file'>
-
-			<tr><td>".t("Valitse tiedosto").":</td>
-				<td><input name='userfile' type='file'></td>
-				<td class='back'><input type='submit' value='".t("Lähetä")."'></td>
+			<tr>
+				<th>".t("Vanha tuotenumero").":</th>
+				<td><input type='text' name='vantuoteno' size='25'></td>
 			</tr>
-
+			<tr>
+				<th>".t("Uusi tuotenumero").":</th>
+				<td><input type='text' name='uustuoteno' size='25'></td>
+			</tr>
+			<tr>
+				<td class='back'><br></td>
+			</tr>
+			<tr>
+				<th>".t("Jätetäänkö vanha ja lisätään korvaavuus")."?</th>
+				<td><input type='checkbox' name='jatavanha' value='jatavanha'</td>
+			</tr>
 			</table>
+			<br>
+			<input type='hidden' name='tee' value='file'>
+			<input type='submit' value='".t("Siirrä tuotteen historia")."'>
 			</form>";
 }
 

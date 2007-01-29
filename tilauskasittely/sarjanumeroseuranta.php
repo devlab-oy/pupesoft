@@ -281,7 +281,7 @@
 								$myyrow["perheid2"] = $myyrow["tunnus"];	
 							}
 							
-							$query = "	SELECT tuoteno, kpl
+							$query = "	SELECT tuoteno, kpl, tilkpl, var
 										FROM tilausrivi 
 										WHERE yhtio  = '$kukarow[yhtio]' 
 										and perheid2 = '$sarjarow[perheid2]'
@@ -307,15 +307,23 @@
 									$trow = mysql_fetch_array($tuoteres);
 
 									$ytunnus         = $laskurow["ytunnus"];
-									$kpl             = $sarjarow["kpl"];
+									
+									if ($sarjarow["var"] != 'P') {
+										$kpl		 = $sarjarow["kpl"];
+										$var		 = "";
+									}
+									else {
+										$kpl		 = $sarjarow["tilkpl"];
+										$var		 = "P";	
+									}
+									
 									$tuoteno         = $sarjarow["tuoteno"];
 									$toimaika 	     = $laskurow["toimaika"];
 									$kerayspvm	     = $laskurow["kerayspvm"];
 									$hinta 		     = "";
 									$netto 		     = "";
 									$ale 		     = "";
-									$alv		     = "";
-									$var			 = "";
+									$alv		     = "";									
 									$varasto 	     = "";
 									$rivitunnus		 = "";
 									$korvaavakielto	 = "";

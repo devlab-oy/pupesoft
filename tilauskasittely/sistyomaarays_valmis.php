@@ -95,7 +95,13 @@
 									SET toimitettu='$kukarow[kuka]', toimitettuaika = now(), perheid2=$sarjarow[ostorivitunnus], rivihinta=round(varattu*$ostohinta,2)
 									WHERE yhtio='$kukarow[yhtio]' and tunnus='$lisarow[tunnus]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
-
+						
+						//P‰ivitet‰‰n varmiuuden vuoksi alkuper‰isen ostorivin perheid2
+						$query = "	UPDATE tilausrivi 
+									SET perheid2=$sarjarow[ostorivitunnus]
+									WHERE yhtio='$kukarow[yhtio]' and tunnus=$sarjarow[ostorivitunnus]";
+						$sarjares = mysql_query($query) or pupe_error($query);
+						
 						if ($lisarow["sarjanumeroseuranta"] != '') {
 							//Irroitetaan lis‰varusteen sarjanumero
 							$query = "	UPDATE sarjanumeroseuranta 

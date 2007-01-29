@@ -180,6 +180,7 @@ if ($error == 0 and $tee == "file") {
 	if ($failista == "JOO") {
 		$file = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
 		$rivi = fgets($file, 4096);
+		$lask_kaks = 0;
 	}
 	else {
 		$rivi = "$vantuoteno	$uustuoteno";

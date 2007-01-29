@@ -189,7 +189,7 @@
 			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>$vrow[1]</option>";
 		}
 
 		$ulos .= "</select></td>";
@@ -211,7 +211,7 @@
 			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>$vrow[1]</option>";
 		}
 
 		$ulos .= "</select></td>";

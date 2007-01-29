@@ -128,30 +128,27 @@
 			//Siirret‰‰n maksusuunnitelma
 			$query = "	SELECT *
 						FROM maksupositio
-						WHERE maksupositio.yhtio ='$kukarow[yhtio]'
-						and maksupositio.otunnus ='$otunnus'
-						ORDER BY tunnus";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$otunnus'";
 			$copresult = mysql_query($query) or pupe_error($query);
-
-			if(mysql_num_rows($copresult) > 0) {
-				$tilauksesta_myyntitilaus .= "<font class='message'>Siirret‰‰n maksusuunnitelma tilaukselle: $utunnus</font><br>";
-
-				while ($coprivirow = mysql_fetch_array($copresult)) {
-					$query = "	INSERT INTO maksupositio
-								SET yhtio 	= '$kukarow[yhtio]',
-								otunnus 	= '$utunnus',
-								luotu		= '$coprivirow[luotu]',
-								luonut		= '$coprivirow[luonut]',
-								osuus 		= '$coprivirow[osuus]',
-								summa  		= '$coprivirow[summa]',
-								kuvaus 		= '$coprivirow[kuvaus]',
-								maksuehto 	= '$coprivirow[maksuehto]',
-								lisatiedot 	= '$coprivirow[lisatiedot]',
-								ohje 		= '$coprivirow[ohje]'";
-					$result = mysql_query($query) or pupe_error($query);
-				}
+						
+			if (mysql_num_rows($copresult) > 0) {					
+				$query = "	UPDATE maksupositio
+							SET otunnus = '$utunnus'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and otunnus = '$otunnus'";
+				$result = mysql_query($query) or pupe_error($query);
+			
+				//P‰ivitet‰‰n lasku
+				$query = "	UPDATE lasku
+							SET jaksotettu 	= '$utunnus'
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and tunnus 		= '$utunnus'";
+				$result = mysql_query($query) or pupe_error($query);
 			}
-
+			
+			
+			//Siirret‰‰n tilausrivit
 			$kukarowkesken 		= $kukarow["kesken"];
 			$kukarow["kesken"]	= $utunnus;
 
@@ -161,7 +158,6 @@
 			$laskures = mysql_query($query);
 			$laskurow = mysql_fetch_array($laskures);
 
-			//Siirret‰‰n tilausrivit
 			$query = "	SELECT *
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -198,7 +194,13 @@
 				$perheid	= $coprivirow['perheid'];
 				$perheid2	= $coprivirow['perheid2'];
 
-				$jaksotettu = $coprivirow['jaksotettu'];
+				if($coprivirow['jaksotettu'] != 0) {
+					$jaksotettu = $utunnus;
+				}
+				else {
+					$jaksotettu	= 0;
+				}
+				
 				$tuotenimitys = $coprivirow['nimitys'];
 
 				$paikka		= "";

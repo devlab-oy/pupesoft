@@ -136,7 +136,7 @@
 						<input type='hidden' name='lisatieto_haku' 		value='$lisatieto_haku'>";
 
 				echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'></td></tr>";
-				echo "<tr><th>".t("Lis‰tieto")."</th><td><input type='text' size='30' name='lisatieto' value='$muutarow[lisatieto]'></td></tr>";
+				echo "<tr><th>".t("Lis‰tieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$muutarow[lisatieto]</textarea></td></tr>";
 
 				$chk = "";
 				if ($muutarow["kaytetty"] == 'K') {
@@ -724,7 +724,7 @@
 		echo "<br><table>";
 		echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";
 		echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td><td class='back'><a href='#' onclick='document.sarjaformi.sarjanumero.value=\"$nxt\";'>".t("Sarjanumero ei tiedossa")."</a></td></tr>";
-		echo "<tr><th>".t("Lis‰tieto")."</th><td><input type='text' size='30' name='lisatieto' value='$lisatieto'></td></tr>";
+		echo "<tr><th>".t("Lis‰tieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$lisatieto</textarea></td></tr>";
 
 		$chk = "";
 		if ($kaytetty == "K") {

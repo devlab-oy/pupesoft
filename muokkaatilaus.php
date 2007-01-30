@@ -69,10 +69,16 @@
 					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='T' and alatila in ('','A') and tilaustyyppi='T'";
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
-	elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
+	elseif ($toim == "OSTO") {
 		$query = "	SELECT *
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila in ('','A')";
+					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila = ''";
+		$eresult = mysql_query($query) or pupe_error($query);
+	}
+	elseif ($toim == "OSTOSUPER") {
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila = 'A'";
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
 	elseif (strtoupper($toim) == "ENNAKKO") {

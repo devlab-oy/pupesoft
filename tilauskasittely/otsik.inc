@@ -747,7 +747,7 @@
 					$sel = "";
 					if ($row["selite"] == $srow["toimitusehto2"] or ($srow["toimitusehto2"] == '' and $yhtiorow['oletus_toimitusehto2'] == $row["selite"])) $sel = 'selected';
 
-					echo "<option value='$row[selite]' $sel>$row[0]</option>";
+					echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
 				}
 				echo "</select>";
 				echo "</td>";
@@ -1277,6 +1277,7 @@
 						otunnus 		= '$kukarow[kesken]'";
 			$query3 .= $postquery3;
 			$result = mysql_query($query3) or pupe_error($query3);
+			echo "$query3<br>";
 		}
 	}
 

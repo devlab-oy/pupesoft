@@ -1277,7 +1277,6 @@
 						otunnus 		= '$kukarow[kesken]'";
 			$query3 .= $postquery3;
 			$result = mysql_query($query3) or pupe_error($query3);
-			echo "$query3<br>";
 		}
 	}
 

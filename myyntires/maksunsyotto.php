@@ -132,9 +132,9 @@ if ($tee == "SYOTTO") {
 
 	// Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa. (Kuten alv-vienti)
 	$query = "INSERT INTO suoritus (yhtio, tilino, nimi_maksaja, summa,";
-	$query .= " maksupvm, kirjpvm, asiakas_tunnus, ltunnus, viesti)";
+	$query .= " maksupvm, kirjpvm, asiakas_tunnus, ltunnus, viesti, valkoodi)";
 	$query .= " VALUES ( '$kukarow[yhtio]', '$tilistr', '$asiakasstr',";
-	$query .= "$pistesumma, '$tapvm', '$tapvm', $asiakasid, $ttunnus, '$selite')";
+	$query .= "$pistesumma, '$tapvm', '$tapvm', $asiakasid, $ttunnus, '$selite', '$yhtiorow[valkoodi]')";
 
 	if (!($result = mysql_query($query))) {
 		$result = mysql_query($unlockquery);

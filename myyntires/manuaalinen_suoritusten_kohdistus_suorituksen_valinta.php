@@ -10,16 +10,15 @@ if (!empty($HTTP_GET_VARS["oikeus"]) ||
   exit;
 }
 
-$query = "SELECT concat(summa,if(valkoodi!='$yhtiorow[valkoodi]', valkoodi,'')) summa, viite, viesti,tilino,maksupvm,kirjpvm,nimi_maksaja,asiakas_tunnus, tunnus FROM suoritus WHERE yhtio ='$kukarow[yhtio]' AND kohdpvm='0000-00-00' and asiakas_tunnus='$asiakas_tunnus' ";
-
-//echo "<p>$query";
-//echo "<font class='head'> suoritus tunnus: $suoritus_tunnus</font>";
-
+$query = "	SELECT concat(summa,if(valkoodi!='$yhtiorow[valkoodi]', valkoodi,'')) summa, viite, viesti,tilino,maksupvm,kirjpvm,nimi_maksaja,asiakas_tunnus, tunnus 
+			FROM suoritus 
+			WHERE yhtio ='$kukarow[yhtio]' AND kohdpvm='0000-00-00' and asiakas_tunnus='$asiakas_tunnus'";
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) > 1) {
 	echo "<font class='head'>".t("Manuaalinen suoritusten kohdistaminen (suorituksen valinta)")."</font><hr>";
 	echo "<table><tr><th>Valitse</th>";
+	
 	for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
 		echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
 	}

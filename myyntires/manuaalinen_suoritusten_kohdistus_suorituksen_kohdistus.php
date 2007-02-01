@@ -11,7 +11,7 @@ if (!empty($HTTP_GET_VARS["oikeus"]) ||
 }
 
 echo "<font class='head'>".t("Manuaalinen suoritusten kohdistaminen (laskujen valinta)")."</font><hr>";
-$query = "	SELECT suoritus.summa, concat(viite, viesti) tieto, suoritus.tilino, maksupvm, kirjpvm, nimi_maksaja, asiakas_tunnus, suoritus.tunnus, tiliointi.tilino ttilino
+$query = "	SELECT suoritus.summa, suoritus.valkoodi valkoodi, concat(viite, viesti) tieto, suoritus.tilino, maksupvm, kirjpvm, nimi_maksaja, asiakas_tunnus, suoritus.tunnus, tiliointi.tilino ttilino
 			FROM suoritus, tiliointi
 			 WHERE suoritus.yhtio ='$kukarow[yhtio]'
 			 and suoritus.tunnus='$suoritus_tunnus'
@@ -41,6 +41,7 @@ $asiakas_tunnus = $suoritus['asiakas_tunnus'];
 $suoritus_summa= $suoritus['summa'];
 $suoritus_tunnus = $suoritus['tunnus'];
 $suoritus_ttilino = $suoritus['ttilino'];
+$valkoodi = $suoritus['valkoodi'];
 
 /* haetaan kaatotilin summa ja n‰ytet‰‰n osak‰yttˆliittym‰‰
 
@@ -111,12 +112,12 @@ if ($asiakas_nimi=='') { // Etsit‰‰n ytunnuksella
 	}
 	$query = "SELECT summa-saldo_maksettu summa, kasumma, laskunro, erpcm, kapvm, viite, lasku.tunnus
 				FROM lasku
-            	WHERE lasku.yhtio ='$kukarow[yhtio]' and tila = 'U' AND ytunnus='$ytunnus' AND mapvm='0000-00-00' $lisa
+            	WHERE lasku.yhtio ='$kukarow[yhtio]' and tila = 'U' AND ytunnus='$ytunnus' and mapvm='0000-00-00' and valkoodi='$valkoodi' $lisa
 				ORDER BY $jarjestys";
 } else {
 	$query = "SELECT summa-saldo_maksettu summa, kasumma, laskunro, erpcm, kapvm, viite, lasku.tunnus
 					FROM lasku
-            		WHERE yhtio ='$kukarow[yhtio]' and tila = 'U' AND nimi='$asiakas_nimi' AND mapvm='0000-00-00' $lisa
+            		WHERE yhtio ='$kukarow[yhtio]' and tila = 'U' AND nimi='$asiakas_nimi' and mapvm='0000-00-00' and valkoodi='$valkoodi' $lisa
 					ORDER BY $jarjestys";
 }
 $result = mysql_query($query) or pupe_error($query);

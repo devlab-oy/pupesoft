@@ -114,9 +114,9 @@
 		//Kenttä 22 Valuutta ja kokonaissumma
 		//Kenttä 24 Kauppatapahtuman luonne
 		$tulosulos .= sprintf('%-8.8s', "");
-		$tulosulos .= sprintf('%-32.32s', $laskurow["aktiivinen_kuljetus"]);
-		$tulosulos .= sprintf('%-5.5s', $laskurow["aktiivinen_kuljetus_kansallisuus"]);
-		$tulosulos .= sprintf('%-4.4s', $laskurow["valkoodi"]);
+		$tulosulos .= sprintf('%-33.33s', $laskurow["aktiivinen_kuljetus"]);
+		$tulosulos .= sprintf('%-3.3s', $laskurow["aktiivinen_kuljetus_kansallisuus"]);
+		$tulosulos .= sprintf('%-6.6s', $laskurow["valkoodi"]);
 		$tulosulos .= sprintf('%-22.22s', $laskurow["summa"]);
 		$tulosulos .= sprintf('%-2.2s', substr($laskurow["kauppatapahtuman_luonne"],0,1));
 		$tulosulos .= sprintf('%-2.2s', substr($laskurow["kauppatapahtuman_luonne"],1,1))."\r\n";
@@ -221,7 +221,7 @@
 		$tulosulos .= sprintf('%-45.45s', substr($nimitykset[4],0,35));
 		$tulosulos .= sprintf('%-6.6s', $rivirow["tullikohtelu"]);
 		$tulosulos .= sprintf('%-5.5s', "");
-		$tulosulos .= sprintf('%-2.2s', $rivirow["nettop"])."\r\n";
+		$tulosulos .= sprintf('%.0f', 	$rivirow["nettop"])."\r\n";
 		
 		$tulosulos .= sprintf('%-8.8s', "");
 		$tulosulos .= sprintf('%-40.40s', substr($nimitykset[5],0,35))."\r\n";

@@ -115,7 +115,6 @@
 						mysql_field_name($stresult,$i)=='viikorkoeur' or
 						mysql_field_name($stresult,$i)=='tullausnumero' or
 						mysql_field_name($stresult,$i)=='laskutuspvm' or
-						mysql_field_name($stresult,$i)=='erpcm' or
 						mysql_field_name($stresult,$i)=='laskuttaja' or
 						mysql_field_name($stresult,$i)=='laskutettu' or
 						mysql_field_name($stresult,$i)=='lahetepvm' or
@@ -134,6 +133,15 @@
 				// maksuehto tulee tältä positiolta
 				elseif (mysql_field_name($stresult,$i)=='maksuehto') {
 					$query .= "maksuehto ='$posrow[maksuehto]',";
+				}
+				// erpcm voi tulla tältä positiolta
+				elseif (mysql_field_name($stresult,$i)=='erpcm') {
+					if ($posrow["erpcm"] != '0000-00-00') {
+						$query .= "erpcm ='$posrow[erpcm]',";
+					}
+					else {
+						$query .= "erpcm ='0000-00-00',";
+					}
 				}
 				elseif (mysql_field_name($stresult,$i)=='clearing') {
 					$query .= "clearing ='ENNAKKOLASKU',";
@@ -316,9 +324,20 @@
 			$query = "update maksupositio set uusiotunnus='$tunnus' where tunnus = '$posrow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 
+			if ($posrow["erpcm"] != "0000-00-00") {
+				$erlisa = " erpcm = '$posrow[erpcm]',";
+			}
+			else {
+				$erlisa = "";
+			}
+			
 			// Alkuperäinen tilaus/tilaukset menee laskutukseen
 			$query = "	UPDATE lasku
-						SET maksuehto = '$posrow[maksuehto]', clearing = 'loppulasku', ketjutus = 'o', alatila = 'D'
+						SET maksuehto 	= '$posrow[maksuehto]', 
+						clearing 		= 'loppulasku', 
+						ketjutus 		= 'o',
+						$erlisa
+						alatila 		= 'D'
 						WHERE yhtio 	= '$kukarow[yhtio]'
 						and jaksotettu 	= '$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);

@@ -92,11 +92,42 @@
 			//Lasketaan summa annetun prossan perusteella
 			$summa = round($osuus/100 * $laskunsumma,2);
 		}
+		
+		
+		if ($mehto != "") {
+			// haetaan maksuehdoen tiedot tarkastuksia varten
+			$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$mehto'";
+			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+			$meapurow = mysql_fetch_array($meapu);
+		}
 
+		if (($erpcmvv != "" and $erpcmkk != "" and $erpcmpp != "") or $meapurow["erapvmkasin"] != '') {
+
+			$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' order by tunnus limit 1";
+			$erpres = mysql_query($erpquery) or pupe_error($erpquery);
+
+			$erpcmvv = (int) $erpcmvv;
+			$erpcmkk = (int) $erpcmkk;
+			$erpcmpp = (int) $erpcmpp;
+
+			if (!checkdate($erpcmkk, $erpcmpp, $erpcmvv) or mysql_num_rows($erpres) == 0) {
+				if (mysql_num_rows($erpres) == 0) {
+					echo "<font class='error'>".t("VIRHE: Yritykseltä ei löydy sopivaa maksuehtoa eräpäivän käsinsyöttöön")."!</font><br>";
+				}
+				else {
+					echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+				}
+				$erpcmvv = 0;
+				$erpcmkk = 0;
+				$erpcmpp = 0;
+			}
+		}
+		
 		$query = "	UPDATE maksupositio SET
 					osuus 		= '$osuus',
 					summa  		= '$summa',
 					kuvaus 		= '$kuvaus',
+					erpcm		= '$erpcmvv-$erpcmkk-$erpcmpp',
 					maksuehto 	= '$mehto',
 					lisatiedot 	= '".addslashes($lisatiedot)."',
 					ohje 		= '".addslashes($ohje)."'
@@ -104,6 +135,10 @@
 					and otunnus = '$laskurow[jaksotettu]'
 					and tunnus  = '$maksupositio'";
 		$result = mysql_query($query) or pupe_error($query);
+		
+		$erpcmpp = "";
+		$erpcmkk = "";
+		$erpcmvv = "";
 	}
 
 	if($tila == "poista") {
@@ -240,7 +275,25 @@
 
 						echo "<option value='$prow[0]' $sel>$prow[1]</option>";
 					}
-					echo "</select></td>";
+					echo "</select><br>";
+					
+					
+					// otetaan erpcm kannasta jos mitään ei ole syötetty ruudulle
+					if ($row["erpcm"] != "" and (int) $erpcmpp == 0 and (int) $ercpmkk == 0 and (int) $erpcmvv == 0 and $erpcm_virhe == "") {
+						list($erpcmvv, $erpcmkk, $erpcmpp) = split('-', $row["erpcm"]);
+					}
+
+					// jos päivämäärä on nollaa laitetaan tyhjää
+					if ((int) $erpcmpp == 0 and (int) $erpcmkk == 0 and (int) $erpcmvv == 0) {
+						$erpcmpp = "";
+						$erpcmkk = "";
+						$erpcmvv = "";
+					}
+
+					echo "	<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
+							<input type='text' name='erpcmkk' value='$erpcmkk' size='3'>
+							<input type='text' name='erpcmvv' value='$erpcmvv' size='6'>";
+					echo "</td>";
 
 					echo "<td><input type='text' size='30' name='lisatiedot' value='$row[lisatiedot]'></td>";
 					
@@ -303,6 +356,10 @@
 					echo "<td>$row[lisatiedot]<br>$row[ohje]</td>";
 					echo "<td align ='right'>$row[summa]</td></tr>";
 				}
+				
+				$erpcmpp = "";
+				$erpcmkk = "";
+				$erpcmvv = "";
 				
 				//alkuun tämä resultti
 				mysql_data_seek($kuvares,0);

@@ -158,7 +158,7 @@
 	
 	function loppu ($firstpage, $summa) {
 	
-		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli;
+		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $factoringrow;
 	
 		//yhteensärivi
 		$pdf->draw_rectangle(110, 20, 90, 580,	$firstpage, $rectparam);
@@ -172,15 +172,17 @@
 	
 		//Pankkiyhteystiedot
 		$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
-	
-		$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"],	$firstpage, $norm);
-		$pdf->draw_text(80, 72,  $yhtiorow["pankkitili1"],	$firstpage, $norm);
-		$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"],	$firstpage, $norm);
-		$pdf->draw_text(257, 72, $yhtiorow["pankkitili2"],	$firstpage, $norm);
-		$pdf->draw_text(404, 72, $yhtiorow["pankkinimi3"],	$firstpage, $norm);
-		$pdf->draw_text(444, 72, $yhtiorow["pankkitili3"],	$firstpage, $norm);
-	
+
+		if ($ktunnus != 0) {
+			$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
+			$pdf->draw_text(30, 72,  $factoringrow["pankkinimi1"]." ".$factoringrow["pankkitili1"],	$firstpage, $norm);
+		}
+		else {
+			$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
+			$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$firstpage, $norm);
+			$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"],	$firstpage, $norm);
+			$pdf->draw_text(404, 72, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkitili3"],	$firstpage, $norm);
+		}
 	
 		//Alimmat kolme laatikkoa, yhtiötietoja
 		$pdf->draw_rectangle(70, 20, 20, 580,	$firstpage, $rectparam);

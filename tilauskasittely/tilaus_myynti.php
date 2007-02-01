@@ -1302,12 +1302,6 @@ if ($tee == '') {
 							and otunnus		= '$kukarow[kesken]'
 							and yhtio		= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
-				
-				$query = "	DELETE from tilausrivi
-							WHERE perheid2 	= '$rivitunnus'
-							and otunnus		= '$kukarow[kesken]'
-							and yhtio		= '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
 			}
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, S,T,V niin laitetaan $paikka-muuttuja kuntoon
@@ -1378,11 +1372,8 @@ if ($tee == '') {
 				}
 
 				//Jos lis‰varustetta muokataan, niin s‰ilytet‰‰n sen perheid2
-				if ($tilausrivi["tunnus"] != $tilausrivi["perheid2"] and $tilausrivi["perheid2"] != 0) {
-					$perheid2 = $tilausrivi["perheid2"];
-				}
-
-				$tila	= "MUUTA";
+				$perheid2 	= $tilausrivi["perheid2"];
+				$tila		= "MUUTA";
 			}
 			elseif ($tapa == "JT") {
 				$var 		= "J";

@@ -10,7 +10,7 @@ if (!empty($HTTP_GET_VARS["oikeus"]) ||
   exit;
 }
 
-$query = "SELECT summa, viite, viesti,tilino,maksupvm,kirjpvm,nimi_maksaja,asiakas_tunnus, tunnus FROM suoritus WHERE yhtio ='$kukarow[yhtio]' AND kohdpvm='0000-00-00' and asiakas_tunnus='$asiakas_tunnus' ";
+$query = "SELECT concat(summa,if(valkoodi!='$yhtiorow[valkoodi]', valkoodi,'')) summa, viite, viesti,tilino,maksupvm,kirjpvm,nimi_maksaja,asiakas_tunnus, tunnus FROM suoritus WHERE yhtio ='$kukarow[yhtio]' AND kohdpvm='0000-00-00' and asiakas_tunnus='$asiakas_tunnus' ";
 
 //echo "<p>$query";
 //echo "<font class='head'> suoritus tunnus: $suoritus_tunnus</font>";

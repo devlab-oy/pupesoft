@@ -21,6 +21,42 @@ if ($kukarow["kirjoitin"] == 0) {
 	$tee = "";
 }
 
+if (isset($ktunnus)){
+	$maksuehtolista = "";
+	$ktunnus = (int) $ktunnus;
+	if ($ktunnus != 0) {
+		$query = "	SELECT *
+					FROM factoring
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus=$ktunnus";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) == 1) {
+			$factoringrow = mysql_fetch_array($result);
+			$query = "SELECT GROUP_CONCAT(tunnus) karhuttavat 
+						FROM maksuehto
+						WHERE yhtio = '$kukarow[yhtio]' and factoring = '$factoringrow[factoringyhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($result) == 1) {
+				$maksuehdotrow = mysql_fetch_array($result);
+				$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
+			}
+		}
+		else {
+			echo "Valittu factoringsopimus ei löydy";
+			exit;
+		}
+	}
+	else {
+		$query = "SELECT GROUP_CONCAT(tunnus) karhuttavat 
+						FROM maksuehto
+						WHERE yhtio = '$kukarow[yhtio]' and factoring = ''";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) == 1) {
+			$maksuehdotrow = mysql_fetch_array($result);
+			$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat])";
+		}
+	}
+}
+
 if ($tee == 'LAHETA') {
 	require('paperikarhu.php');
 	
@@ -44,7 +80,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 	if ($syot_ytunnus != '') {
 		$asiakaslisa = " and asiakas.ytunnus >= '$syot_ytunnus' ";
 	}
-	
+
 	$query = "	SELECT GROUP_CONCAT(distinct lasku.tunnus) karhuttavat, sum(summa) karhuttava_summa
 				FROM lasku
 				JOIN (	SELECT lasku.tunnus,
@@ -60,6 +96,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 						and lasku.mapvm	= '0000-00-00'
 						and (lasku.erpcm < date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
 						and lasku.summa	!= 0
+						$maksuehtolista
 						group by lasku.tunnus
 						HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))
 						and (maksuehto.jv is null or maksuehto.jv = '')) as laskut																			
@@ -225,7 +262,8 @@ if ($tee == 'KARHUA')  {
 
 	echo "<input name='tee' type='hidden' value='LAHETA'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
-					
+	echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
+	
 	foreach($karhuttavat as $tunnukset) {
 		echo "\n<input type='hidden' name='karhuttavat[]' value='$tunnukset'>";		
 	}
@@ -235,7 +273,8 @@ if ($tee == 'KARHUA')  {
 	echo "<form name='ohitaformi' action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='tee' value='KARHUA'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
-	
+	echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
+		
 	foreach($karhuttavat as $tunnukset) {
 		echo "\n<input type='hidden' name='karhuttavat[]' value='$tunnukset'>";		
 	}
@@ -253,6 +292,19 @@ if ($tee == "") {
 	echo t("Syötä ytunnus jos haluat karhuta tiettyä asiakasta").".<br>".t("Jätä kenttä tyhjäksi jos haluat aloittaa karhuamisen ensimmäisestä asiakkaasta").".<br><br>";
 	
 	echo "<table>";
+	
+	$apuqu = "	select concat(nimitys,' ', valkoodi, ' (',sopimusnumero,')') nimi, tunnus
+				from factoring
+				where yhtio='$kukarow[yhtio]'";
+	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+	
+	echo "<tr><th>".t("Karhujen tyyppi").":</th>";		
+	echo "<td><select name='ktunnus'>";
+	echo "<option value='0'>".t("Ei factoroidut")."</option>";
+	while($row = mysql_fetch_array($meapu)) {			
+		echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
+	}
+	echo "</select></td></tr>";
 	
 	$apuqu = "	select kuka, nimi, puhno, eposti, tunnus
 				from kuka 

@@ -37,28 +37,54 @@
 
 		$currency_code = substr($tietue,75,1);
 
-		if ($currency_code != 1) {
-			$valkoodi = "MUU";
-		}
-		else {
-			$valkoodi = "EUR";
-		}
-
 		# Muodossa vvkkpp
 		$entry_date	  = "20".dateconv(substr($tietue,15,6));
 		$payment_date = "20".dateconv(substr($tietue,21,6));
 
-		$query = "SELECT yhtio FROM yriti WHERE tilino = '$account'";
+		$query = "SELECT * FROM yriti WHERE tilino = '$account'";
 		$result = mysql_query($query) or pupe_error($query);
-		$company = mysql_fetch_array($result);
+		$yritirow = mysql_fetch_array($result);
 
-		if ($company["yhtio"] == "") {
+		if ($yritirow["yhtio"] == "") {
 			echo "<font class='error'>Tilille $account ei löytynyt yritystä.</font><br>";
 			next;
 		}
+		
+		if ($yritirow["valkoodi"] != "") {
+			$query = "	SELECT *
+						FROM valuu
+						WHERE yhtio = '$yritirow[yhtio]'
+						and nimi	= '$yritirow[valkoodi]'";
+			$valresult = mysql_query($query) or pupe_error($query);
 
+			if (mysql_num_rows($valresult) != 1) {
+				echo "<font class='error'> Valuuttaa '$yritirow[valkoodi]' ei löytynyt!</font><br>";
+				next;
+			}
+			else {
+				$valrow = mysql_fetch_array ($valresult);
+				
+				$valkoodi	= $valrow["nimi"];
+				$kurssi 	= $valrow["kurssi"];
+			}
+		}
+		else {
+			$query = "SELECT valkoodi FROM yhtio WHERE yhtio = '$yritirow[yhtio]'";
+			$valresult = mysql_query($query) or pupe_error($query);
+			$valrow = mysql_fetch_array ($valresult);
+			
+			if ($valrow["valkoodi"] == '') {
+				echo "<font class='error'> Yhtiöllä ei ole valuuttaa!</font><br>";
+				next;
+			}
+			else {
+				$valkoodi	= $valrow["valkoodi"];
+				$kurssi 	= 1;
+			}
+		}
+		
 		#arkistointitunnus
-		$query = "INSERT INTO suoritus (yhtio,tilino,nimi_maksaja,viite,summa,valkoodi,maksupvm,kirjpvm) VALUES ('$company[yhtio]','$account','$payer_name','$reference',$sum,'$valkoodi','$payment_date','$entry_date')";
+		$query = "INSERT INTO suoritus (yhtio,tilino,nimi_maksaja,viite,summa,valkoodi,kurssi,maksupvm,kirjpvm) VALUES ('$yritirow[yhtio]','$account','$payer_name','$reference',$sum,'$valkoodi','$kurssi','$payment_date','$entry_date')";
 		$result = mysql_query($query) or pupe_error($query);
 		$tiliointitunnus = mysql_insert_id();
 

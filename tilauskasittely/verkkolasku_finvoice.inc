@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists('finvoice_otsik')) {
-	function finvoice_otsik($tootfinvoice, $lasrow, $silent, $tulos_ulos) {
+	function finvoice_otsik($tootfinvoice, $lasrow, $silent="", $tulos_ulos="") {
 		global $yhtiorow, $err_finvoice, $tulos_ulos;
 		
 		//	Koitetaan ollaanko virheettömiä
@@ -114,14 +114,17 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "</SellerPostalAddressDetails>\r\n");
 
 			fputs($tootfinvoice, "</SellerPartyDetails>\r\n");
-
-			//xml_add("SellerOrganisationUnitNumber",									$yhtiorow["ovttunnus"], 								$tootfinvoice);
+			
+			if($yhtiorow["ovttunnus"] != "") {
+				xml_add("SellerOrganisationUnitNumber",									$yhtiorow["ovttunnus"], 								$tootfinvoice);
+			}
+			
 
 			xml_add("SellerContactPersonName",											$lasrow["laatija"], 									$tootfinvoice);
 
 			fputs($tootfinvoice, "<SellerCommunicationDetails>\r\n");
 			if($yhtiorow["email"] != "") {
-				xml_add("SellerEmailaddressIdentifier",										$yhtiorow['email'], 									$tootfinvoice);
+				xml_add("SellerEmailaddressIdentifier",									$yhtiorow['email'], 									$tootfinvoice);
 			}
 			
 			fputs($tootfinvoice, "</SellerCommunicationDetails>\r\n");
@@ -130,16 +133,16 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("SellerHomeTownName",												$yhtiorow['kotipaikka'],								$tootfinvoice);
 			xml_add("SellerPhoneNumber", 												$yhtiorow['puhelin'], 									$tootfinvoice);
 			if($yhtiorow["fax"] != "") {
-				xml_add("SellerFaxNumber", 													$yhtiorow['fax'], 										$tootfinvoice);
+				xml_add("SellerFaxNumber", 												$yhtiorow['fax'], 										$tootfinvoice);
 			}
 			if($yhtiorow["email"] != "") {
-				xml_add("SellerCommonEmailaddressIdentifier",								$yhtiorow['email'], 									$tootfinvoice);
+				xml_add("SellerCommonEmailaddressIdentifier",							$yhtiorow['email'], 									$tootfinvoice);
 			}
 			if($yhtiorow["www"] != "") {
-				xml_add("SellerWebaddressIdentifier",										$yhtiorow['www'],   									$tootfinvoice);
+				xml_add("SellerWebaddressIdentifier",									$yhtiorow['www'],   									$tootfinvoice);
 			}
 			if($yhtiorow["laskun_vapaakentta"] != "") {
-				xml_add("SellerFreeText",   		                     					$yhtiorow['laskun_vapaakentta'],      					$tootfinvoice);
+				xml_add("SellerFreeText",   		                     				$yhtiorow['laskun_vapaakentta'],      					$tootfinvoice);
 			}
 
 			fputs($tootfinvoice, "<SellerAccountDetails>\r\n");
@@ -172,8 +175,7 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("BuyerPartyIdentifier",				  								ymuuta($lasrow['ytunnus']), 							$tootfinvoice);
 			xml_add("BuyerOrganisationName",                     						$lasrow['nimi'],    									$tootfinvoice);
 			xml_add("BuyerOrganisationTaxCode",                     					$lasrow['maa']."".ymuuta($lasrow['ytunnus']),    		$tootfinvoice);
-			//xml_add("BuyerOrganisationUnitNumber",                    				$lasrow['ovttunnus'],    								$tootfinvoice);
-
+			
 			fputs($tootfinvoice, "<BuyerPostalAddressDetails>\r\n");
 			xml_add("BuyerStreetName",													$lasrow['osoite'],     									$tootfinvoice);
 			xml_add("BuyerTownName",                                  					$lasrow['postitp'],      								$tootfinvoice);
@@ -181,6 +183,10 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "</BuyerPostalAddressDetails>\r\n");
 
 			fputs($tootfinvoice, "</BuyerPartyDetails>\r\n");
+
+			if($lasrow['ovttunnus'] != "") {
+				xml_add("BuyerOrganisationUnitNumber",                    				$lasrow['ovttunnus'],    								$tootfinvoice);
+			}
 
 			fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
 
@@ -249,7 +255,7 @@ if (!function_exists('finvoice_otsikko_loput')) {
 		if($err_finvoice == 0)	{
 			fputs($tootfinvoice, "<PaymentTermsDetails>\r\n");
 			xml_add("PaymentTermsFreeText",       											pp($masrow['teksti']." ".$masrow['kassa_teksti']),			$tootfinvoice);
-			xml_add('InvoiceDueDate Format="CCYYMMDD"',               						pp(vlas_dateconv($lasrow['tapvm'])),   	       				$tootfinvoice);
+			xml_add('InvoiceDueDate Format="CCYYMMDD"',               						pp(vlas_dateconv($lasrow['erpcm'])),   	       				$tootfinvoice);
 
 			fputs($tootfinvoice, "<PaymentOverDueFineDetails>\r\n");
 			xml_add("PaymentOverDueFineFreeText",											"viivästyskorko ".pp($lasrow['viikorkopros']),				$tootfinvoice);
@@ -286,9 +292,9 @@ if (!function_exists('finvoice_rivi')) {
 			}
 
 			xml_add("RowVatRatePercent",                                    			pp($tilrow['alv']),           	$tootfinvoice);
-			xml_add("RowVatAmount AmountCurrencyIdentifier=\"$val\"",          			pp($vatamount),      			$tootfinvoice);	// veron määrä
-			xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$val\"",  			pp($tilrow['rivihinta']),      	$tootfinvoice);	// veroton rivihinta
-			xml_add("RowAmount AmountCurrencyIdentifier=\"$val\"",             			pp($totalvat),     				$tootfinvoice);	// verollinen rivihinta
+			xml_add("RowVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",          			pp($vatamount),      			$tootfinvoice);	// veron määrä
+			xml_add("RowVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",  			pp($tilrow['rivihinta']),      	$tootfinvoice);	// veroton rivihinta
+			xml_add("RowAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",             			pp($totalvat),     				$tootfinvoice);	// verollinen rivihinta
 			fputs($tootfinvoice, "</InvoiceRow>\r\n");			
 		}
 	}

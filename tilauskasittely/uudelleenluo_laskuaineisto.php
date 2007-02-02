@@ -23,6 +23,8 @@
 		if (isset($tee) and $tee == "GENEROI" and $laskunumerot!='') {
 			if (!function_exists("xml_add")) {
 				function xml_add ($joukko, $tieto, $handle) {
+					global $yhtiorow, $lasrow;
+
 					$ulos = "<$joukko>";
 
 					if (strlen($tieto) > 0) {
@@ -35,7 +37,25 @@
 
 					}
 
-					$ulos .= "</$joukko>\n";
+					$pos = strpos($joukko, " ");
+		            if ($pos === false) {
+						//	Jos tehd‰‰n finvoicea rivilopu on \r\n
+						if($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
+							$ulos .= "</$joukko>\r\n";
+						}
+						else {
+							$ulos .= "</$joukko>\n";
+						}
+
+		            }
+		            else {
+						if($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
+							$ulos .= "</".substr($joukko,0,$pos).">\r\n";
+						}
+						else {
+							$ulos .= "</".substr($joukko,0,$pos).">\n";
+						}
+		            }
 
 					fputs($handle, $ulos);
 				}
@@ -64,6 +84,9 @@
 
 			if (!function_exists("ymuuta")) {
 				function ymuuta ($ytunnus) {
+					// stripataan kaikki - merkit
+					$ytunnus = str_replace("-","", $ytunnus);
+
 					$ytunnus = sprintf("%08.8s",$ytunnus);
 					return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
 				}

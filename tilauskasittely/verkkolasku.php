@@ -225,6 +225,9 @@
 
 		if (!function_exists("ymuuta")) {
 			function ymuuta ($ytunnus) {
+				// stripataan kaikki - merkit
+				$ytunnus = str_replace("-","", $ytunnus);
+				
 				$ytunnus = sprintf("%08.8s",$ytunnus);
 				return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
 			}

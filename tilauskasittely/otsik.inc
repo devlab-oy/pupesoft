@@ -45,10 +45,24 @@
 
 	// Etsit‰‰n asiakasta
 	if ($toim == "TYOMAARAYS" and ($nimi != '' or $rekno!='' or $valmnro!='') and !isset($jatka)) {
+		//tehd‰‰n asiakashaku yhteensopivuus
+		$ytunnus 	= $nimi;
+		$asiakasid	= "";
+		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
+
+		require ("../inc/asiakashaku.inc");
+
+		if ($asiakasid == '' and $monta > 1) {
+			//Lˆytyi monta sopivaa, n‰ytet‰‰n formi, mutta ei otsikkoa
+			$tila = 'EI_NAYTETA';
+		}
+		
+		/*
 		$ytunnus	= $nimi;
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
 		require ("../inc/tyomaarayshaku.inc");
+		*/
 	}
 	elseif ($toim != "TYOMAARAYS" and $nimi != '' and !isset($jatka) and $asiakasid == 0) {
 

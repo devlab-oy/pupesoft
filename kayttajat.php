@@ -574,7 +574,7 @@
 				$sel1="";
 				$sel2="";
 
-				if ($trow[$i] == "") {
+				if ($krow["dynaaminen_kassamyynti"] == "") {
 					$sel1 = "selected";
 				}
 				else {

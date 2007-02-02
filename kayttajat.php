@@ -106,6 +106,7 @@
 			//$varasto 						= $monta['varasto'];
 			//$kirjoitin					= $monta['kirjoitin'];
 			$kassamyyja 					= $monta['kassamyyja'];
+			$dynaaminen_kassamyynti			= $monta['dynaaminen_kassamyynti'];
 			$jyvitys 						= $monta['jyvitys'];			
 			//$oletus_asiakas				= $monta['oletus_asiakas'];
 			$oletus_ohjelma 				= $monta['oletus_ohjelma'];
@@ -147,6 +148,7 @@
 						varasto 		= '$varasto',
 						kirjoitin 		= '$kirjoitin',
 						kassamyyja 		= '$kassamyyja',
+						dynaaminen_kassamyynti = '$dynaaminen_kassamyynti',
 						jyvitys			= '$jyvitys',
 						oletus_asiakas 	= '$oletus_asiakas',
 						oletus_ohjelma 	= '$oletus_ohjelma',
@@ -295,6 +297,7 @@
 						hyvaksyja		= '$hyvaksyja',
 						lomaoikeus		= '$lomaoikeus',
 						kassamyyja 		= '$kassamyyja',
+						dynaaminen_kassamyynti = '$dynaaminen_kassamyynti',
 						jyvitys			= '$jyvitys',
 						oletus_ohjelma 	= '$oletus_ohjelma',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
@@ -558,14 +561,29 @@
 				$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='KASSA' order by selite";
 				$vares = mysql_query($query) or pupe_error($query);
 
-				while ($varow = mysql_fetch_array($vares))
-				{
+				while ($varow = mysql_fetch_array($vares)) {
 					$sel='';
 					if ($varow['selite']==$krow["kassamyyja"]) $sel = 'selected';
 					echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
 				}
 
 				echo "</select></td></tr>";
+				
+				echo "<tr><th align='left'>".t("Dynaaminen kassamyyjä").":</td>";
+
+				$sel1="";
+				$sel2="";
+
+				if ($trow[$i] == "") {
+					$sel1 = "selected";
+				}
+				else {
+					$sel2 = "selected";
+				}
+				echo "<td><select name='dynaaminen_kassamyynti'>";
+				echo "<option value='' $sel1>".t("Normaalimyyjä ei toimi kassamyyjänä")."</option>";
+				echo "<option value='o' $sel2>".t("Normaalimyyjä voi toimia tarpeen mukaan kassamyyjänä")."</option>";
+				echo "</select></td>";
 
 				echo "<tr><th align='left'>".t("Hyväksyjä").":</td>";
 

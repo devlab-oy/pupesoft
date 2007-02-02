@@ -443,6 +443,27 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "dynaaminen_kassamyynti") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1="";
+		$sel2="";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		else {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value='' $sel1>".t("Normaalimyyjä ei toimi kassamyyjänä")."</option>";
+		$ulos .= "<option value='o' $sel2>".t("Normaalimyyjä voi toimia tarpeen mukaan kassamyyjänä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "oletus_toimitusehto") {
 

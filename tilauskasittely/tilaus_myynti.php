@@ -1806,49 +1806,49 @@ if ($tee == '') {
 
 			echo "<br><table>";
 
-			if ($toim != "TYOMAARAYS") {
-				if ($toim == "VALMISTAVARASTOON") {
-					echo "<tr><td class='back' colspan='10'>".t("Valmistusrivit").":</td></tr>";
-				}
-				else {
-					echo "<tr><td class='back' colspan='10'>".t("Tilausrivit").":</td></tr>";
-				}
-
-				echo "<tr><th>".t("#")."</th>";
-
-				if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
-					echo "<th>".t("Tyyppi")."</th>";
-				}
-
-				if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-					echo "<th>".t("Nimitys")."</th>";
-				}
-
-				if($kukarow['extranet'] == '') {
-					echo "	<th>".t("Paikka")."</th>";
-				}
-
-				echo "	<th>".t("Tuotenumero")."</th>
-						<th>".t("Kpl")."</th>
-						<th>".t("Var")."</th>
-						<th>".t("Hinta")."</th>";
-
-				if ($kukarow['hinnat'] == 0) {
-					echo "<th>".t("Ale%")."</th>";
-				}
-
-				echo "	<th>".t("Netto")."</th>
-						<th>".t("Summa")."</th>";
-
-				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<th>".t("Kate")."</th>";
-				}
-
-				echo "	<th>".t("Alv")."</th>
-						<td class='back'></td>
-						<td class='back'></td>
-						</tr>";
+			if ($toim == "VALMISTAVARASTOON") {
+				echo "<tr><td class='back' colspan='10'>".t("Valmistusrivit").":</td></tr>";
 			}
+			else {
+				echo "<tr><td class='back' colspan='10'>".t("Tilausrivit").":</td></tr>";
+			}
+
+			echo "<tr><th>".t("#")."</th>";
+
+			if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
+				echo "<th>".t("Tyyppi")."</th>";
+			}
+
+			if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
+				echo "<th>".t("Nimitys")."</th>";
+			}
+
+			if($kukarow['extranet'] == '') {
+				echo "	<th>".t("Paikka")."</th>";
+			}
+
+			echo "	<th>".t("Tuotenumero")."</th>
+					<th>".t("Kpl")."</th>
+					<th>".t("Var")."</th>
+					<th>".t("Hinta")."</th>";
+
+			if ($kukarow['hinnat'] == 0) {
+				echo "<th>".t("Ale%")."</th>";
+			}
+
+			echo "	<th>".t("Netto")."</th>
+					<th>".t("Summa")."</th>";
+
+			
+			if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+				echo "<th>".t("Kate")."</th>";
+			}
+
+			echo "	<th>".t("Alv")."</th>
+					<td class='back'></td>
+					<td class='back'></td>
+					</tr>";
+			
 
 			$bruttoyhteensa	= 0;
 			$tuotetyyppi	= "";
@@ -1869,53 +1869,8 @@ if ($tee == '') {
 					if ($tuotetyyppi == "" and $row["tuotetyyppi"] == 'Työ') {
 						$tuotetyyppi = 1;
 
+						echo "<tr><td class='back' colspan='10'><br></td></tr>";
 						echo "<tr><td class='back' colspan='10'>".t("Työt").":</td></tr>";
-						echo "<tr><th>".t("#")."</th>";
-
-						if ($kukarow["resoluutio"] == 'I') {
-							echo "<th>".t("Nimitys")."</th>";
-						}
-
-						echo "	<th>".t("Paikka")."</th>
-								<th>".t("Tuotenumero")."</th>
-								<th>".t("Kpl")."</th>
-								<th>".t("Var")."</th>
-								<th>".t("Hinta")."</th>
-								<th>".t("Ale%")."</th>
-								<th>".t("Netto")."</th>
-								<th>".t("Summa")."</th>
-								<th>".t("Alv")."</th>
-								<td class='back'></td>
-								<td class='back'></td>
-								</tr>";
-					}
-
-					if ($varaosatyyppi == "" and $row["tuotetyyppi"] == 'Varaosa') {
-						$varaosatyyppi = 1;
-
-						if ($tuotetyyppi == 1) {
-							echo "<tr><td class='back' colspan='10'><br></td></tr>";
-						}
-
-						echo "<tr><td class='back' colspan='10'>".t("Varaosat ja Tarvikkeet").":</td></tr>";
-						echo "<tr><th>".t("#")."</th>";
-
-						if ($kukarow["resoluutio"] == 'I') {
-							echo "<th>".t("Nimitys")."</th>";
-						}
-
-						echo "	<th>".t("Paikka")."</th>
-								<th>".t("Tuotenumero")."</th>
-								<th>".t("Kpl")."</th>
-								<th>".t("Var")."</th>
-								<th>".t("Hinta")."</th>
-								<th>".t("Ale%")."</th>
-								<th>".t("Netto")."</th>
-								<th>".t("Summa")."</th>
-								<th>".t("Alv")."</th>
-								<td class='back'></td>
-								<td class='back'></td>
-								</tr>";
 					}
 				}
 
@@ -2225,7 +2180,7 @@ if ($tee == '') {
 							$kate = "N/A";
 						}
 					}
-					elseif ($kukarow['extranet'] == '') {
+					elseif ($kukarow['extranet'] == '' and $kotisumma_alviton != 0) {
 						$kate = sprintf('%.2f',100*($kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
 					}
 
@@ -2619,8 +2574,13 @@ if ($tee == '') {
 						<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
 						<td class='spec' align='right'>".sprintf("%.2f",$arvo_eieri)."</td>";
 
-				if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_eieri/$kotiarvo_eieri)."%</td>";
+				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					if ($kotiarvo_eieri != 0) {
+						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_eieri/$kotiarvo_eieri)."%</td>";
+					}
+					else {
+						echo "<td class='spec' align='right' nowrap></td>";
+					}
 				}
 
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -2667,15 +2627,20 @@ if ($tee == '') {
 							<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$arvo)."</td>";
 
-					if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate/$kotiarvo)."%</td>";
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						if($kotiarvo != 0) {
+							echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate/$kotiarvo)."%</td>";
+						}
+						else {
+							echo "<td class='spec' align='right' nowrap></td>";
+						}
 					}
 
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
 			}
 
-			 // Etsitään asiakas
+			// Etsitään asiakas
 			$query = "	SELECT laskunsummapyoristys
 						FROM asiakas
 						WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
@@ -2803,7 +2768,7 @@ if ($tee == '') {
 
 	// tulostetaan loppuun parit napit..
 	if ((int) $kukarow["kesken"] != 0) {
-		echo "<br><br><table width='100%'><tr>";
+		echo "<br><table width='100%'><tr>";
 
 		if ($kukarow["extranet"] == "" and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {
 			echo "	<td class='back'>
@@ -2916,10 +2881,25 @@ if ($tee == '') {
 					echo "<input type='hidden' name='toimitetaan_ulkomaailta' value='NO'>";
 				}
 
-				if ($kukarow["extranet"] == "" and $kateinen == 'X' and $kukarow["kassamyyja"] != '') {
-					echo t("Valitse kuittikopion tulostuspaikka").":<br>";
+				if ($kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or ($kukarow["dynaaminen_kassamyynti"] != "" or ($kukarow["dynaaminen_kassamyynti"] == "" and $yhtiorow["dynaaminen_kassamyynti"] != "")))) {
+					
+					if ($kukarow["dynaaminen_kassamyynti"] != "" or ($kukarow["dynaaminen_kassamyynti"] == "" and $yhtiorow["dynaaminen_kassamyynti"] != "")) {
+						echo "<select name='kertakassa'><option value=''>".t("Ei kassaan")."</option>";
+
+						$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='KASSA' order by selite";
+						$vares = mysql_query($query) or pupe_error($query);
+
+						while ($varow = mysql_fetch_array($vares)) {
+							$sel='';
+							if ($varow['selite']==$kukarow["kassamyyja"]) $sel = 'selected';
+							echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
+						}
+
+						echo "</select>";
+					}
+
 					echo "<select name='valittu_kopio_tulostin'>";
-					echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+					echo "<option value=''>".t("Valitse kuittikopion tulostuspaikka")."</option>";
 
 					$querykieli = "	select *
 									from kirjoittimet

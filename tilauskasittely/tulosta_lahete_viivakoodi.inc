@@ -170,7 +170,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(490, 657, t("Tilattu", $kieli),			$firstpage, $p);
 		$pdf->draw_text(540, 657, t("Toimitus", $kieli),		$firstpage, $p);
 		
-		$pdf->draw_rectangle(650, 20, 60, 580, $firstpage, $rectparam);
+		$pdf->draw_rectangle(650, 20, 54, 580, $firstpage, $rectparam);
 	
 		return($firstpage);
 	}

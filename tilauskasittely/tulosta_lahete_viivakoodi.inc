@@ -197,7 +197,7 @@ if (!function_exists('rivi')) {
 		}
 				
 		//jos on paljon rivejä tehdään uusi otsikko...
-		if ($lask > 38) {
+		if ($lask > 30) {
 			loppu($firstpage, 0);
 			$firstpage = alku();
 		}

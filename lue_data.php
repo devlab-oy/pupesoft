@@ -404,7 +404,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				if ($r != $postoiminto) {
 					$rivi[$r] = trim($rivi[$r]);
 
-					if(substr($ityyppi[$r],0,7) == "decimal") {
+					if(substr($ityyppi[$r],0,7) == "decimal" or substr($ityyppi[$r],0,4) == "real") {
 						//korvataan decimal kenttien pilkut pisteillä...
 						$rivi[$r] = str_replace(",",".",$rivi[$r]);
 					}

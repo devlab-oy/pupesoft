@@ -94,8 +94,39 @@
 						sarjanumero = '$sarjanumero',
 						kaytetty	= '$kaytetty'
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnus='$sarjatunnus'";
+						and tunnus  = '$sarjatunnus'";
 			$sarjares = mysql_query($query) or pupe_error($query);
+			
+			if ($kaytetty != '') {
+				$query = "	SELECT tunnus, kaytetty, $tunnuskentta trivitunnus
+							FROM sarjanumeroseuranta
+							WHERE tunnus = '$sarjatunnus'";
+				$sarres = mysql_query($query) or pupe_error($query);
+				$sarrow = mysql_fetch_array($sarres);
+
+				$query = "	UPDATE tilausrivi
+							SET alv=alv+500
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$sarrow[trivitunnus]'
+							and (tyyppi='O' or uusiotunnus = 0)
+							and alv <= 500";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}
+			else {
+				$query = "	SELECT tunnus, kaytetty, $tunnuskentta trivitunnus
+							FROM sarjanumeroseuranta
+							WHERE tunnus = '$sarjatunnus'";
+				$sarres = mysql_query($query) or pupe_error($query);
+				$sarrow = mysql_fetch_array($sarres);
+
+				$query = "	UPDATE tilausrivi
+							SET alv=alv-500
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$sarrow[trivitunnus]'
+							and (tyyppi='O' or uusiotunnus = 0)
+							and alv >= 500";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}
 
 			echo "<font class='message'>".t("P‰vitettiin sarjanumeron tiedot")."!</font><br><br>";
 
@@ -168,12 +199,13 @@
 			//jos ollaan syˆtetty kokonaan uusi sarjanuero
 			$query = "insert into sarjanumeroseuranta (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty) VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty')";
 			$sarjares = mysql_query($query) or pupe_error($query);
-
+			$tun = mysql_insert_id();
+			
 			echo "<font class='message'>".t("Lis‰ttiin sarjanumero")." $sarjanumero.</font><br><br>";
 
 			$sarjanumero	= "";
 			$lisatieto		= "";
-			$kaytetty		= "";
+			$kaytetty		= "";			
 		}
 		else {
 			$sarjarow = mysql_fetch_array($sarjares);
@@ -184,29 +216,34 @@
 	// ollaan valittu joku tunnus listasta ja halutaan liitt‰‰ se tilausriviin tai poistaa se tilausrivilt‰
 	if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
 		// jos olemme ruksanneet v‰hemm‰n tai yht‰ paljon kuin tuotteita on rivill‰, voidaan p‰ivitt‰‰ muutokset
-		foreach ($sarjat as $sarjatun) {
-			$query = "	SELECT tunnus, kaytetty, $tunnuskentta trivitunnus
-						FROM sarjanumeroseuranta
-						WHERE tunnus = '$sarjatun'";
-			$sarres = mysql_query($query) or pupe_error($query);
-			$sarrow = mysql_fetch_array($sarres);
+		if ($rivirow["varattu"] >= count($sarjataan)) {
+			foreach ($sarjat as $sarjatun) {
+				$query = "	SELECT tunnus, kaytetty, $tunnuskentta trivitunnus
+							FROM sarjanumeroseuranta
+							WHERE tunnus = '$sarjatun'";
+				$sarres = mysql_query($query) or pupe_error($query);
+				$sarrow = mysql_fetch_array($sarres);
 
-			$query = "	update sarjanumeroseuranta
-						set $tunnuskentta=''
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and tunnus	= '$sarrow[tunnus]'";
-			$sarjares = mysql_query($query) or pupe_error($query);
-
-			if ($sarrow["kaytetty"] == 'K') {
-				$query = "	UPDATE tilausrivi
-							SET alv=alv-500
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus  = '$sarrow[trivitunnus]'
-							and alv >= 500";
+				$query = "	update sarjanumeroseuranta
+							set $tunnuskentta=''
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and tunnus	= '$sarrow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
+
+				if ($sarrow["kaytetty"] == 'K') {
+					$query = "	UPDATE tilausrivi
+								SET alv=alv-500
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus  = '$sarrow[trivitunnus]'
+								and alv >= 500";
+					$sarjares = mysql_query($query) or pupe_error($query);
+				}
 			}
 		}
-
+		else {
+			echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).".</font><br><br>";
+		}
+				
 		if ($rivirow["varattu"] >= count($sarjataan)) {
 			//jos mik‰‰n ei ole ruksattu niin ei tietenk‰‰n halutakkaan lis‰t‰ mit‰‰n sarjanumeroa
 			if (count($sarjataan) > 0) {
@@ -318,33 +355,45 @@
 									}
 									
 									$tuoteno         = $sarjarow["tuoteno"];
-									$toimaika 	     = $laskurow["toimaika"];
-									$kerayspvm	     = $laskurow["kerayspvm"];
-									$hinta 		     = "";
-									$netto 		     = "";
-									$ale 		     = "";
-									$alv		     = "";									
-									$varasto 	     = "";
-									$rivitunnus		 = "";
-									$korvaavakielto	 = "";
-									$varataan_saldoa = "";
-									$myy_sarjatunnus = ""; // Pit‰‰ fixata
-									$perheid 		 = 0;
 									$perheid2		 = $myyrow["perheid2"];
+									
+									//Tutkitaan viel‰ ettei t‰m‰ lis‰varuste ole jo t‰n tuotteen alla
+									$query = "	SELECT tunnus
+												FROM tilausrivi 
+												WHERE yhtio  = '$kukarow[yhtio]' 
+												and tuoteno  = '$tuoteno'
+												and perheid2 = '$perheid2'";
+									$tarkres = mysql_query($query) or pupe_error($query);
+									 
+									if (mysql_num_rows($tarkres) == 0) {
+									
+										$toimaika 	     = $laskurow["toimaika"];
+										$kerayspvm	     = $laskurow["kerayspvm"];
+										$hinta 		     = "";
+										$netto 		     = "";
+										$ale 		     = "";
+										$alv		     = "";									
+										$varasto 	     = "";
+										$rivitunnus		 = "";
+										$korvaavakielto	 = "";
+										$varataan_saldoa = "";
+										$myy_sarjatunnus = ""; // Pit‰‰ fixata
+										$perheid 		 = 0;
+								
+										// jos meill‰ on ostoskori muuttujassa numero, niin halutaan lis‰t‰ tuotteita siihen ostoskoriin
+										if (is_numeric($ostoskori)) {
+											lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
+											$kukarow["kesken"] = "";
+										}
+										elseif (file_exists("../tilauskasittely/lisaarivi.inc")) {
+											require ("../tilauskasittely/lisaarivi.inc");
+										}
+										else {
+											require ("lisaarivi.inc");
+										}
 
-									// jos meill‰ on ostoskori muuttujassa numero, niin halutaan lis‰t‰ tuotteita siihen ostoskoriin
-									if (is_numeric($ostoskori)) {
-										lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
-										$kukarow["kesken"] = "";
+										echo "<font class='message'>Lis‰ttiin $kpl kpl tuotetta $tuoteno.</font><br>";
 									}
-									elseif (file_exists("../tilauskasittely/lisaarivi.inc")) {
-										require ("../tilauskasittely/lisaarivi.inc");
-									}
-									else {
-										require ("lisaarivi.inc");
-									}
-
-									echo "<font class='message'>Lis‰ttiin $kpl kpl tuotetta $tuoteno.</font><br>";
 								}
 							}
 						}
@@ -355,9 +404,6 @@
 					}
 				}
 			}
-		}
-		else {
-			echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).".</font><br><br>";
 		}
 	}
 
@@ -533,7 +579,7 @@
 	echo "<input type='hidden' name='ostotilaus_haku' 	value='$ostotilaus_haku'>";
 	echo "<input type='hidden' name='myyntitilaus_haku'	value='$myyntitilaus_haku'>";
 	echo "<input type='hidden' name='lisatieto_haku' 	value='$lisatieto_haku'>";
-
+	
 	while ($sarjarow = mysql_fetch_array($sarjares)) {
 
 		if (function_exists("sarjanumeronlisatiedot_popup")) {
@@ -711,15 +757,14 @@
 				<input type='hidden' name='toiminto' value='LISAA'>";
 
 
-		$query = "	SELECT max(sarjanumero) sarjanumero
+		$query = "	SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
 					FROM sarjanumeroseuranta
 					WHERE yhtio='$kukarow[yhtio]'
 					and sarjanumero like '".t("PUUTTUU")."-%'";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$vrow = mysql_fetch_array($vresult);
 		
-		$nro = substr($vrow["sarjanumero"], strpos($vrow["sarjanumero"], '-')+1)+1;
-		$nxt = t("PUUTTUU")."-".$nro;
+		$nxt = t("PUUTTUU")."-".$vrow["sarjanumero"];
 		
 		echo "<br><table>";
 		echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";

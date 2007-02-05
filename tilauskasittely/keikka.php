@@ -181,7 +181,7 @@ if ($toiminto == "" and $ytunnus == "") {
 	$toiminto = "";
 
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
-	$query = "	select ytunnus, nimi, osoite, postitp, swift, count(*) kpl
+	$query = "	select ytunnus, nimi, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br>') comments, count(*) kpl
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0
 				group by 1,2,3,4,5
@@ -193,7 +193,7 @@ if ($toiminto == "" and $ytunnus == "") {
 		echo "<br><font class='head'>".t("Keskener‰iset keikat")."</font><hr>";
 
 		echo "<table>";
-		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("kpl")."</th><th></th></tr>";
+		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("kommentti")."</th><th>".t("kpl")."</th><th></th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
 
@@ -207,7 +207,7 @@ if ($toiminto == "" and $ytunnus == "") {
 			}
 			else $toimittajaid = "";
 
-			echo "<tr><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[kpl]</td>";
+			echo "<tr><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[comments]</td><td>$row[kpl]</td>";
 
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";

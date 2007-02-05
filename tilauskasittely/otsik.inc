@@ -689,7 +689,10 @@
 			if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah = 'CHECKED';
-			if ($srow['osatoimitus'] != '') $osath = 'CHECKED';
+			
+			// Tarjouksia ei oletuksena osatoimiteta
+			if ($srow['osatoimitus'] != '' or ($toim == "TARJOUS" and $kukarow["kesken"] == 0)) $osath = 'CHECKED';
+			
 			if ($srow['chn'] == '999') $laskkielto = 'CHECKED';
 
 			echo "<td>".t("Sisäinen lasku")."</td><td><input type='checkbox' name='sisainen' $sisah></td>";

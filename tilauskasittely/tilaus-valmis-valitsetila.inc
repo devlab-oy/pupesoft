@@ -1,4 +1,4 @@
-<?php
+'<?php
 
 	//Tarvitsemme
 	//$laskurow jossa on laskun tiedot
@@ -114,6 +114,16 @@
 
 		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s mit‰tˆitiin koska tilauksella ei ollut yht‰‰n ker‰tt‰v‰‰/laskutettavaa rivi‰."), $laskurow["tunnus"])."</font><br><br>\n";
 
+	}
+	elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
+		// Jos tilauksella oli yksikin jt-rivi ja osatoimitus on kielletty
+		$query  = "	UPDATE lasku
+					SET tila='N', alatila='U'
+					where tunnus='$laskurow[tunnus]'
+					and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		$tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli JT-rivej‰ ja osatoimitusta ei tehd‰, eli se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
 	}
 	elseif ($kerattavia == 0) {
 		// Tilauskella on pelk‰st‰‰n puuterivej‰ joita ei ker‰t‰

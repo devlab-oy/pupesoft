@@ -104,7 +104,7 @@
 	}
 
 	if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET") {
-		if (mysql_num_rows($eresult) > 0) {
+		if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
 			// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
 			if ($toim == "" or $toim == "super" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
 				$aputoim1 = "RIVISYOTTO";
@@ -218,7 +218,7 @@
 	if ($toim == 'super') {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika, laatija, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila in ('L', 'N') and alatila in ('a','b','c','d','e','j','e','t','') 
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila in ('L', 'N') and alatila in ('a','b','c','d','e','j','t','u','') 
 					$haku
 					order by luontiaika desc
 					LIMIT 50";
@@ -227,10 +227,10 @@
 		$sumquery = "	SELECT round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo, count(distinct lasku.tunnus) kpl
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and
-						tila in ('L', 'N') and
-						tapvm = '0000-00-00' and
-						alatila in ('a','b','c','d','e','j','e','t','')";
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and tila in ('L', 'N')
+						and tapvm = '0000-00-00'
+						and alatila in ('a','b','c','d','e','j','t','u','')";
 		$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 		$sumrow = mysql_fetch_array($sumresult);
 
@@ -290,6 +290,14 @@
 					$haku
 					order by luontiaika desc
 					LIMIT 50";
+		$miinus = 2;
+	}
+	elseif ($toim == "JTTOIMITA") {
+		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika, laatija, alatila, tila
+					FROM lasku use index (tila_index)
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='N' and alatila='U' 
+					$haku
+					order by luontiaika desc";
 		$miinus = 2;
 	}
 	elseif ($toim=='VALMISTUS') {
@@ -444,22 +452,48 @@
 			}
 
 			if ($piilotarivi == "") {
+				
+				// jos kyseess‰ on "odottaa JT tuotteita rivi ja kyseessa on toim=JTTOIMITA"
+				if ($row["tila"] == "N" and $row["alatila"] == "U") {
+					$query = "select tuoteno, jt from tilausrivi where yhtio='$kukarow[yhtio]' and tyyppi='L' and otunnus='$row[tilaus]'";
+					$countres = mysql_query($query) or pupe_error($query);
+					
+					$jtok = 0;
+					while($countrow = mysql_fetch_array($countres)) {
+						if(saldo_myytavissa($countrow["tuoteno"], "", 0, "") < $countrow["jt"]) {
+							$jtok--;
+						}
+					}
+				}
+				
+				
 				echo "<tr>";
 
 				for ($i=0; $i<mysql_num_fields($result)-$miinus; $i++) {
 					echo "<td>$row[$i]</td>";
 				}
+				
+				if ($row["tila"] == "N" and $row["alatila"] == "U") {
+					if ($jtok==0) {
+						echo "<td><font color='#00FF00'>Voidaan toimittaa</font></td>";
+					}
+					else {
+						echo "<td><font color='#FF0000'>Ei voida toimittaa</font></td>";
+					}
+				}
+				else {
 
-				$laskutyyppi=$row["tila"];
-				$alatila=$row["alatila"];
+					$laskutyyppi=$row["tila"];
+					$alatila=$row["alatila"];
 
-				//tehd‰‰n selv‰kielinen tila/alatila
-				require "inc/laskutyyppi.inc";
+					//tehd‰‰n selv‰kielinen tila/alatila
+					require "inc/laskutyyppi.inc";
 
-				echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
-
+					echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
+				}
+			
 				// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-				if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
+				if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "JTTOIMITA" or $toim == "LASKUTUSKIELTO") {
 					$aputoim1 = "RIVISYOTTO";
 					$aputoim2 = "PIKATILAUS";
 
@@ -520,7 +554,7 @@
 						<input type='hidden' name='tee' value='AKTIVOI'>
 						<input type='hidden' name='tilausnumero' value='$row[tilaus]'>";
 
-				if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "LASKUTUSKIELTO") {
+				if ($toim == "" or $toim == "super" or $toim == "EXTRANET" or $toim == "ennakko" or $toim == "JTTOIMITA" or $toim == "LASKUTUSKIELTO") {
 					echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
 				}
 

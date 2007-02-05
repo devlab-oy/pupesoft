@@ -450,17 +450,17 @@
 			//haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
 			$query = "	SELECT distinct otunnus, if(perheid!=0, concat('JOPERHE',tilausrivi.perheid), concat('EIPERHE',tilausrivi.tunnus)) perheid, tilaajanrivinro, tilausrivi.tuoteno
 						FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
-						JOIN lasku use index (PRIMARY) ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
+						JOIN lasku use index (PRIMARY) ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.osatoimitus=''
 						JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa
 						$tolisa1
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
 						and tilausrivi.tyyppi in ('L','G')
-						and tilausrivi.var = 'J'
-						and tilausrivi.keratty = ''
-						and tilausrivi.uusiotunnus = 0
-						and tilausrivi.varattu = 0
-						and tilausrivi.kpl = 0
-						and tilausrivi.jt <> 0
+						and tilausrivi.var 			= 'J'
+						and tilausrivi.keratty 		= ''
+						and tilausrivi.uusiotunnus 	= 0
+						and tilausrivi.varattu 		= 0
+						and tilausrivi.kpl 			= 0
+						and tilausrivi.jt 		   <> 0
 						and (tilausrivi.tunnus = tilausrivi.perheid or tilausrivi.perheid=0)
 						$tolisa2
 						$aslisa
@@ -524,14 +524,12 @@
 
 						$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus, tilausrivi.jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
 									lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.otunnus, lasku.clearing, lasku.varasto
-									FROM tilausrivi use index (yhtio_otunnus), lasku use index (PRIMARY), tuote use index (tuoteno_index)
+									FROM tilausrivi use index (yhtio_otunnus)
+									JOIN lasku use index (PRIMARY) ON lasku.yhtio=tilausrivi.yhtio and tilausrivi.otunnus=lasku.tunnus and lasku.osatoimitus=''
+									JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 									WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 									and tilausrivi.tyyppi in ('L','G')
 									and tilausrivi.var = 'J'
-									and lasku.yhtio=tilausrivi.yhtio
-									and tilausrivi.otunnus=lasku.tunnus
-									and tuote.yhtio=tilausrivi.yhtio
-									and tuote.tuoteno=tilausrivi.tuoteno
 									and tilausrivi.varattu = 0
 									and tilausrivi.kpl = 0
 									and tilausrivi.jt <> 0

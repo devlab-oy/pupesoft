@@ -77,6 +77,9 @@
 				case "T":
 					$alatila = "odottaa JT tuotteita";
 					break;
+				case "U":
+					$alatila = "odottaa JT tuotteita";
+					break;
 			}
 			break;
 		case "A":

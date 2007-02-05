@@ -1386,6 +1386,14 @@ if ($tee == '') {
 			}
 			elseif ($tapa == "POISJTSTA") {
 				$var 		= "";
+				
+				//Jos lasta muokataan, niin s‰ilytet‰‰n sen perheid
+				if ($tilausrivi["tunnus"] != $tilausrivi["perheid"] and $tilausrivi["perheid"] != 0) {
+					$perheid = $tilausrivi["perheid"];
+				}
+
+				//Jos lis‰varustetta muokataan, niin s‰ilytet‰‰n sen perheid2
+				$perheid2 	= $tilausrivi["perheid2"];
 
 				if ($hyllyalue != '') {
 					$paikka		= $hyllyalue."#".$hyllynro."#".$hyllyvali."#".$hyllytaso;
@@ -2240,7 +2248,7 @@ if ($tee == '') {
 								</form>";
 					}
 
-					if ($row["var"] == "J" and $laskurow["alatila"] == "T") {
+					if ($row["var"] == "J" and ($laskurow["alatila"] == "T" or $laskurow["alatila"] == "U")) {
 						if(saldo_myytavissa($row["tuoteno"], "", 0, "") >= $kpl_ruudulle) {
 							echo "	<form action='$PHP_SELF' method='post'>
 									<input type='hidden' name='toim' value='$toim'>
@@ -2294,6 +2302,9 @@ if ($tee == '') {
 						$cspan++;
 					}
 					if($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
+						$cspan++;
+					}
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 						$cspan++;
 					}
 

@@ -262,17 +262,39 @@
 			<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
 	echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
-	echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[0]$ulisa'>".t("$arraynimet[0]")."</a>";
-	echo "<br><input type='text' size='10' name = 'haku[0]' value = '$haku[0]'>";
-	echo "</th>";
+	echo "<th nowrap valign='top'>
+		<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[0]$ulisa'>".t("$arraynimet[0]")."</a><br>
+		<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[1]$ulisa'>".t("$arraynimet[1]")."</a></th>";
+	
+	echo "<th nowrap valign='top'><br><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[2]$ulisa'>".t("$arraynimet[2]")."</a></th>";
+	
+	echo "<th nowrap valign='top'>
+		<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[3]$ulisa'>".t("$arraynimet[3]")."</a><br>
+		<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[4]$ulisa'>".t("$arraynimet[4]")."</a></th>";
+	
+	echo "<th nowrap valign='top'>";
+	echo "<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[5]$ulisa'>".t("$arraynimet[5]")."</a>";
 
-	echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[1]$ulisa'>".t("$arraynimet[1]")."</a>";
-	echo "<br><input type='text' size='10' name = 'haku[1]' value = '$haku[1]'>";
-	echo "</th>";
 
-	echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[2]$ulisa'>".t("$arraynimet[2]")."</a>";
-	echo "<br><input type='text' size='10' name = 'haku[2]' value = '$haku[2]'>";
+	if ($kukarow["extranet"] == "") {
+		echo "<br><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[5]$ulisa'>".t("N‰yt‰ poistuvat")."</a>";
+	}
 	echo "</th>";
+	
+	echo "</tr><tr>";
+		
+	
+	echo "<td nowrap valign='top'>";
+	echo "<input type='text' size='10' name = 'haku[0]' value = '$haku[0]'><br>";
+	echo "<input type='text' size='10' name = 'haku[1]' value = '$haku[1]'>";
+	echo "</td>";
+
+	echo "<td nowrap valign='top'>";
+	echo "<input type='text' size='10' name = 'haku[2]' value = '$haku[2]'>";
+	echo "</td>";
+	
+
+	
 
 	$query = "	SELECT distinct selite, selitetark
 				FROM avainsana
@@ -282,8 +304,8 @@
 				ORDER BY jarjestys, selite";
 	$sresult = mysql_query($query) or pupe_error($query);
 
-	echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[3]$ulisa'>".t("$arraynimet[3]")."</a>";
-	echo "<br><select name='haku[3]'>";
+
+	echo "<td nowrap valign='top'><select name='haku[3]'>";
 	echo "<option value='' $sel>".t("Ei valintaa")."</option>";
 
 	while($srow = mysql_fetch_array ($sresult)){
@@ -295,7 +317,7 @@
 		}
 		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 	}
-	echo "</select></th>";
+	echo "</select><br>";
 
 	$query = "	SELECT distinct selite, selitetark
 				FROM avainsana
@@ -305,8 +327,7 @@
 				ORDER BY jarjestys, selite";
 	$sresult = mysql_query($query) or pupe_error($query);
 
-	echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[4]$ulisa'>".t("$arraynimet[4]")."</a>";
-	echo "<br><select name='haku[4]'>";
+	echo "<select name='haku[4]'>";
 	echo "<option value='' $sel>".t("Ei valintaa")."</option>";
 
 	while($srow = mysql_fetch_array ($sresult)){
@@ -318,8 +339,8 @@
 		}
 		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 	}
-	echo "</select></th>";
-
+	echo "</select></td>";
+	
 
 	$query = "	SELECT distinct tuotemerkki
 				FROM tuote use index (yhtio_tuotemerkki)
@@ -329,8 +350,8 @@
 				ORDER BY tuotemerkki";
 	$sresult = mysql_query($query) or pupe_error($query);
 
-	echo "<th><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[5]$ulisa'>".t("$arraynimet[5]")."</a>";
-	echo "<br><select name='haku[5]'>";
+	echo "<td nowrap valign='top'>";
+	echo "<select name='haku[5]'>";
 	echo "<option value='' $sel>".t("Ei valintaa")."</option>";
 
 	while($srow = mysql_fetch_array ($sresult)){
@@ -343,15 +364,16 @@
 		echo "<option value='$srow[0]' $sel>$srow[0]</option>";
 	}
 
-	echo "</select></th>";
-
+	echo "</select><br>";
+	
 	if ($kukarow["extranet"] == "") {
-		echo "<th>P";
-		echo "<br><input type='checkbox' name='poistetut' $poischeck>";
-		echo "</th>";
+		echo "<input type='checkbox' name='poistetut' $poischeck>";
 	}
+	
+	echo "</td>";
 
-	echo "<td class='back' valign='bottom'><input type='Submit' value = '".t("Etsi")."'></td></form></tr>";
+
+	echo "<td class='back' valign='bottom' nowrap><input type='Submit' value = '".t("Etsi")."'></td></form></tr>";
 	echo "</table><br>";
 
 	// Ei listata mit‰‰n jos k‰ytt‰j‰ ei ole tehnyt mit‰‰n rajauksia

@@ -130,11 +130,20 @@ if ($tee == 'go') {
 		}
 
 		if ($mukaan == "tuote") {
-			if ($group!="") $group .= ",tuote.tuoteno";
-			else $group  .= "tuote.tuoteno";
-			$select .= "tuote.tuoteno tuoteno, ";
-			$order  .= "tuote.tuoteno,";
-			$gluku++;
+			if ($nimitykset == "") {
+				if ($group!="") $group .= ",tuote.tuoteno";
+				else $group  .= "tuote.tuoteno";
+				$select .= "tuote.tuoteno tuoteno, ";
+				$order  .= "tuote.tuoteno,";
+				$gluku++;
+			}
+			else {
+				if ($group!="") $group .= ",tuote.tuoteno, tuote.nimitys";
+				else $group  .= "tuote.tuoteno, tuote.nimitys";
+				$select .= "tuote.tuoteno tuoteno, tuote.nimitys nimitys, ";
+				$order  .= "tuote.tuoteno, ";
+				$gluku++;
+			}
 		}
 
 		if ($mukaan == "tuotemyyja") {
@@ -788,8 +797,14 @@ if ($lopetus == "") {
 		<td><input type='text' name='jarjestys[10]' size='2'></td>
 		<td><input type='checkbox' name='ruksit[10]' value='tilaustyyppi'></td><td class='back'>".t("(Toimii vain jos ajat raporttia tilauksista)")."</td>
 		</tr>
-		</table><br>";
-
+		<tr>
+		<td class='back'><br></td>
+		</tr>
+		<tr>
+		<th>".t("N‰yt‰ nimitykset")."</th>
+		<td><input type='checkbox' name='nimitykset'></td>
+		</tr>
+		</table><br>";	
 
 	// p‰iv‰m‰‰r‰rajaus
 	echo "<table>";

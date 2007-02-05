@@ -81,7 +81,7 @@
 			$tyyppi =  "L";
 		}
 
-		$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, nimi, postitp, tuoteno, REPLACE(kpl+varattu,'.',',') kpl, REPLACE(tilausrivi.hinta,'.',',') hinta, REPLACE(rivihinta,'.',',') rivihinta, lasku.lahetepvm, lasku.tila, lasku.alatila
+		$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, if(nimi!=toim_nimi,concat(toim_nimi,'<br>(',nimi,')'), nimi) nimi, if(postitp!=toim_postitp,concat(toim_postitp,'<br>(',postitp,')'), postitp) postitp, tuoteno, REPLACE(kpl+varattu,'.',',') kpl, REPLACE(tilausrivi.hinta,'.',',') hinta, REPLACE(rivihinta,'.',',') rivihinta, lasku.lahetepvm, lasku.tila, lasku.alatila
 					FROM tilausrivi, lasku
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and lasku.yhtio=tilausrivi.yhtio

@@ -22,6 +22,7 @@
 				echo "
 				</select>
 				<select name='alvk'>
+				<option value = '0'>".t("koko kalenterivuosi")."
 				<option value = '1'>01
 				<option value = '2'>02
 				<option value = '3'>03
@@ -90,7 +91,7 @@
 
 		echo "<tr>
 				<td>Vain tili</td>
-				<td><input type = 'text' name = 'tili' value = ''></td>
+				<td><input type = 'text' name = 'tili' value = ''> - <input type = 'text' name = 'tili2' value = ''></td>
 				</tr>";
 
 		echo "<tr><td>".t("Vain kustannuspaikka")."</td>";	
@@ -192,23 +193,27 @@
 	}
 
 	if ($tkausi != '0') {
-        	echo "<font class='message'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><hr>";
-			$lisa  = "tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
-			$lisa2 = "tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
+        echo "<font class='message'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><hr>";
+		$lisa  = "tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
+		$lisa2 = "tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
+	}
+	elseif ($alvk == '0') {
+		echo "<font class='message'>$nimi ".t("kalenterivuodelta")." $alvv</font><hr>";
+		$lisa  = "YEAR(tiliointi.tapvm) = '$alvv'";
+		$apualvv = $alvv + 1;
+		$lisa2 = "tiliointi.tapvm < '$apualvv-01-01'";
+	}
+	elseif ($alvp == '0') {
+		echo "<font class='message'>$nimi ".t("kaudelta")." $alvv-$alvk</font><hr>";
+		$lisa  = "CONCAT_WS(' ',YEAR(tiliointi.tapvm),MONTH(tiliointi.tapvm)) = '$alvv $alvk'";
+		$lisa2 = "tiliointi.tapvm < '$alvv-$alvk-01'";
 	}
 	else {
-		if ($alvp == '0') {
-			echo "<font class='message'>$nimi ".t("kaudelta")." $alvv-$alvk</font><hr>";
-			$lisa  = "CONCAT_WS(' ',YEAR(tiliointi.tapvm),MONTH(tiliointi.tapvm)) = '$alvv $alvk'";
-			$lisa2 = "CONCAT(YEAR(tiliointi.tapvm),MONTH(tiliointi.tapvm)) < '$alvv$alvk'";
-			$lisa2 = "tiliointi.tapvm < '$alvv-$alvk-01'";
-		}
-		else {
-			echo "<font class='message'>$nimi ".t("päivältä")." $alvv-$alvk-$alvp</font><hr>";
-			$lisa  = "tiliointi.tapvm = '$alvv-$alvk-$alvp'";
-			$lisa2 = "tiliointi.tapvm < '$alvv-$alvk-$alvp'";
-		}
+		echo "<font class='message'>$nimi ".t("päivältä")." $alvv-$alvk-$alvp</font><hr>";
+		$lisa  = "tiliointi.tapvm = '$alvv-$alvk-$alvp'";
+		$lisa2 = "tiliointi.tapvm < '$alvv-$alvk-$alvp'";
 	}
+	
 	if (strlen(trim($kohde)) > 0) {
 		$lisa .= " and kohde = '" . $kohde . "'";
 		$lisa2 .= " and kohde = '" . $kohde . "'";
@@ -225,27 +230,27 @@
 		$lisa .= " and tiliointi.projekti = '" . $proj . "'";
 		$lisa2 .= " and tiliointi.projekti = '" . $proj . "'";
 	}
+
+	if ($tili2 == 0) $tili2 = $tili;
+
 	if (strlen(trim($tili)) > 0) {
-		$lisa .= " and tiliointi.tilino = '" . $tili . "'";
-		$lisa2 .= " and tiliointi.tilino = '" . $tili . "'";
+		$lisa .= " and tiliointi.tilino >= '" . $tili . "' and  tiliointi.tilino <= '" . $tili2 . "'";
+		$lisa2 .= " and tiliointi.tilino >= '" . $tili . "' and  tiliointi.tilino <= '" . $tili2 . "'";
 	}
-	
-	
+
 	//jos tili on valittu lasketaan sen alkusaldo	
 	if (strlen(trim($tili)) > 0) {
 		$query = "	SELECT sum(summa) saldo
 					FROM tiliointi
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]' 
 					and tiliointi.korjattu=''
-					and tiliointi.tilino  ='$tili'
 					and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]' 
 					and $lisa2";
 		$result   = mysql_query($query) or pupe_error($query);
 		$alkurow  = mysql_fetch_array ($result);
 		$kumsumma = $alkurow["saldo"];
 	}
-	
-	
+
 	$query = "	SELECT $alku , kustp, kohde, tiliointi.projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus
 				FROM tiliointi, tili, lasku
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]' and

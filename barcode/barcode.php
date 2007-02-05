@@ -56,10 +56,12 @@ define("BCD_DEFAULT_WIDTH"           , 460);
 define("BCD_DEFAULT_HEIGHT"          , 120);
 define("BCD_DEFAULT_FONT"            ,   5);
 define("BCD_DEFAULT_XRES"            ,   2);
+
 /* Margins */
-define("BCD_DEFAULT_MAR_Y1"          ,  10);
-define("BCD_DEFAULT_MAR_Y2"          ,  10);
-define("BCD_DEFAULT_TEXT_OFFSET"     ,   2);
+define("BCD_DEFAULT_MAR_Y1"          ,   1);
+define("BCD_DEFAULT_MAR_Y2"          ,   1);
+define("BCD_DEFAULT_TEXT_OFFSET"     ,   1);
+
 /* For the I25 Only */
 define("BCD_I25_NARROW_BAR" 		 ,   1);
 define("BCD_I25_WIDE_BAR" 	     	 ,   2);

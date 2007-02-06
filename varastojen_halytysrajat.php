@@ -129,22 +129,22 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	$divit  = "";
 
 	if ($osasto != '') {
-		echo "<tr><th>Osasto</th><td>$osasto</td></tr>";
+		echo "<tr><th>".t("Osasto")."</th><td>$osasto</td></tr>";
 		$lisaa .= " and tuote.osasto = '$osasto' ";
 	}
 	if ($tuoryh != '') {
-		echo "<tr><th>Try</th><td>$tuoryh</td></tr>";
+		echo "<tr><th>".t("Try")."</th><td>$tuoryh</td></tr>";
 		$lisaa .= " and tuote.try = '$tuoryh' ";
 	}
 	if ($tuotemerkki != '') {
-		echo "<tr><th>Tuotemerkki</th><td>$tuotemerkki</td></tr>";
+		echo "<tr><th>".t("Tuotemerkki")."</th><td>$tuotemerkki</td></tr>";
 		$lisaa .= " and tuote.tuotemerkki = '$tuotemerkki' ";
 	}
 	if ($poistetut != '') {
 		$lisaa .= " and tuote.status != 'P' ";
 	}
 	if ($tuoteno != '') {
-		echo "<tr><th>Tuoteno</th><td>$tuoteno</td></tr>";
+		echo "<tr><th>".t("Tuoteno")."</th><td>$tuoteno</td></tr>";
 		$lisaa .= " and tuote.tuoteno = '$tuoteno' ";
 	}
 	if ($eihinnastoon != '') {
@@ -160,7 +160,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		$lisaa2 .= " JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and liitostunnus = '$toimittajaid') ";
 	}
 	if ($abcrajaus != "") {
-		echo "<tr><th>Abc</th><td>$ryhmanimet[$abcrajaus] +</td></tr>";
+		echo "<tr><th>".t("Abc")."</th><td>$ryhmanimet[$abcrajaus] +</td></tr>";
 
 		// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
 		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
@@ -173,10 +173,10 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	}
 
 	echo "</table></td><td class='back' valign='top'><table>";
-	echo "<tr><th>Kausi 1</th><td>$vva1-$kka1-$ppa1 - $vvl1-$kkl1-$ppl1</td><td class='back'> <-- k‰ytet‰‰n h‰lytysrajaehdotuksen laskentaan</td></tr>";
-	echo "<tr><th>Kausi 2</th><td>$vva2-$kka2-$ppa2 - $vvl2-$kkl2-$ppl2</td></tr>";
-	echo "<tr><th>Kausi 3</th><td>$vva3-$kka3-$ppa3 - $vvl3-$kkl3-$ppl3</td></tr>";
-	echo "<tr><th>Kausi 4</th><td>$vva4-$kka4-$ppa4 - $vvl4-$kkl4-$ppl4</td></tr>";
+	echo "<tr><th>".t("Kausi 1")."</th><td>$vva1-$kka1-$ppa1 - $vvl1-$kkl1-$ppl1</td><td class='back'> <-- ".t("k‰ytet‰‰n h‰lytysrajaehdotuksen laskentaan")."</td></tr>";
+	echo "<tr><th>".t("Kausi 2")."</th><td>$vva2-$kka2-$ppa2 - $vvl2-$kkl2-$ppl2</td></tr>";
+	echo "<tr><th>".t("Kausi 3")."</th><td>$vva3-$kka3-$ppa3 - $vvl3-$kkl3-$ppl3</td></tr>";
+	echo "<tr><th>".t("Kausi 4")."</th><td>$vva4-$kka4-$ppa4 - $vvl4-$kkl4-$ppl4</td></tr>";
 	echo "</table>";
 	echo "</td></tr></table>";
 
@@ -222,20 +222,20 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	echo "\n<table>";
 
 	echo "<tr>";
-	echo "<th>Tuoteno</th>";
-	echo "<th>Nimitys</th>";
-	echo "<th>S</th>";
+	echo "<th>".t("Tuoteno")."</th>";
+	echo "<th>".t("Nimitys")."</th>";
+	echo "<th>".t("S")."</th>";
 	if ($abcpaalla == "kylla") {
-		echo "<th>Abc</th>";
+		echo "<th>".t("Abc")."</th>";
 	}
-	echo "<th>Puute</th>";
-	echo "<th>Kok.Saldo</th>";
-	echo "<th>Kok.Myynti</th>";
-	echo "<th>Var.Saldo</th>";
-	echo "<th>Var.Myynti</th>";
-	echo "<th>H‰lytysraja</th>";
-	echo "<th>Tilausm‰‰r‰</th>";
-	echo "<th>H‰lyehdotus</th>";
+	echo "<th>".t("Puute")."</th>";
+	echo "<th>".t("Kok.Saldo")."</th>";
+	echo "<th>".t("Kok.Myynti")."</th>";
+	echo "<th>".t("Var.Saldo")."</th>";
+	echo "<th>".t("Var.Myynti")."</th>";
+	echo "<th>".t("H‰lytysraja")."</th>";
+	echo "<th>".t("Tilausm‰‰r‰")."</th>";
+	echo "<th>".t("H‰lyehdotus")."</th>";
 
 	echo "</tr>\n";
 
@@ -320,14 +320,14 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		// teh‰‰n popup divi myynneist‰
 		$divit .= "<div id='$row[paikkatunnus]' style='position:absolute; z-index:100; visibility:hidden; background:#555555; color:#FFFFFF; border: 1px solid; padding:0px;'>";
 		$divit .= "<table><tr>";
-		$divit .= "<th nowrap>Kok.Myynti 1</th>";
-		$divit .= "<th nowrap>Var.Myynti 1</th>";
-		$divit .= "<th nowrap>Kok.Myynti 2</th>";
-		$divit .= "<th nowrap>Var.Myynti 2</th>";
-		$divit .= "<th nowrap>Kok.Myynti 3</th>";
-		$divit .= "<th nowrap>Var.Myynti 3</th>";
-		$divit .= "<th nowrap>Kok.Myynti 4</th>";
-		$divit .= "<th nowrap>Var.Myynti 5</th>";
+		$divit .= "<th nowrap>".t("Kok.Myynti 1")."</th>";
+		$divit .= "<th nowrap>".t("Var.Myynti 1")."</th>";
+		$divit .= "<th nowrap>".t("Kok.Myynti 2")."</th>";
+		$divit .= "<th nowrap>".t("Var.Myynti 2")."</th>";
+		$divit .= "<th nowrap>".t("Kok.Myynti 3")."</th>";
+		$divit .= "<th nowrap>".t("Var.Myynti 3")."</th>";
+		$divit .= "<th nowrap>".t("Kok.Myynti 4")."</th>";
+		$divit .= "<th nowrap>".t("Var.Myynti 5")."</th>";
 		$divit .= "<th><a href='#' onclick=\"popUp(event,'$row[paikkatunnus]')\">X</a></th>";
 		$divit .= "</tr><tr>";
 		$divit .= "<td align='right'>$summarow[kpl1]</td>";
@@ -383,13 +383,13 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	echo "<tr><th>".t("H‰lytysrajan laskenta")."</th>\n";
 	echo "<td><select name='tarve'>\n";
-	echo "<option value='7'>7 pv tarve</option>";
-	echo "<option value='14' selected>14 pv tarve</option>";
-	echo "<option value='21'>21 pv tarve</option>";
-	echo "<option value='30'>30 pv tarve</option>";
-	echo "<option value='45'>45 pv tarve</option>";
-	echo "<option value='60'>60 pv tarve</option>";
-	echo "<option value='90'>90 pv tarve</option>";
+	echo "<option value='7'>".t("7 pv tarve")."</option>";
+	echo "<option value='14' selected>".t("14 pv tarve")."</option>";
+	echo "<option value='21'>".t("21 pv tarve")."</option>";
+	echo "<option value='30'>".t("30 pv tarve")."</option>";
+	echo "<option value='45'>".t("45 pv tarve")."</option>";
+	echo "<option value='60'>".t("60 pv tarve")."</option>";
+	echo "<option value='90'>".t("90 pv tarve")."</option>";
 	echo "</select></td></tr>\n";
 
 	echo "<tr><th>".t("Osasto")."</th><td>";
@@ -473,35 +473,35 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 		$sel[$abcrajaus] = "SELECTED";
 
 		echo "<select name='abcrajaus'>
-		<option value=''>Ei rajausta</option>
-		<option $sel[0] value='0'>Luokka A-30</option>
-		<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
-		<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
-		<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
-		<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
-		<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
-		<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
-		<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
-		<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
+		<option value=''>".t("Ei rajausta")."</option>
+		<option $sel[0] value='0'>".t("Luokka")." A-30</option>
+		<option $sel[1] value='1'>".t("Luokka")." B-20 ".t("ja paremmat")."</option>
+		<option $sel[2] value='2'>".t("Luokka")." C-15 ".t("ja paremmat")."</option>
+		<option $sel[3] value='3'>".t("Luokka")." D-15 ".t("ja paremmat")."</option>
+		<option $sel[4] value='4'>".t("Luokka")." E-10 ".t("ja paremmat")."</option>
+		<option $sel[5] value='5'>".t("Luokka")." F-05 ".t("ja paremmat")."</option>
+		<option $sel[6] value='6'>".t("Luokka")." G-03 ".t("ja paremmat")."</option>
+		<option $sel[7] value='7'>".t("Luokka")." H-02 ".t("ja paremmat")."</option>
+		<option $sel[8] value='8'>".t("Luokka")." I-00 ".t("ja paremmat")."</option>
 		</select>";
 
 		$sel = array();
 		$sel[$abcrajaustapa] = "SELECTED";
 
 		echo "<select name='abcrajaustapa'>
-		<option $sel[TK] value='TK'>Myyntikate</option>
-		<option $sel[TR] value='TR'>Myyntirivit</option>
-		<option $sel[TP] value='TK'>Myyntikappaleet</option>
+		<option $sel[TK] value='TK'>".t("Myyntikate")."</option>
+		<option $sel[TR] value='TR'>".t("Myyntirivit")."</option>
+		<option $sel[TP] value='TK'>".t("Myyntikappaleet")."</option>
 		</select>
 		</td></tr>";
 	}
 
 	echo "<tr><th>Uusi tuote on</th>";
 	echo "<td><select name='uusienika'>";
-	echo "<option value='12'>alle 12 kk vanha</option>";
-	echo "<option value='6' selected>alle 6 kk vanha</option>";
-	echo "<option value='3'>alle 3 kk vanha</option>";
-	echo "<option value='1'>alle 1 kk vanha</option>";
+	echo "<option value='12'>".t("alle 12 kk vanha")."</option>";
+	echo "<option value='6' selected>".t("alle 6 kk vanha")."</option>";
+	echo "<option value='3'>".t("alle 3 kk vanha")."</option>";
+	echo "<option value='1'>".t("alle 1 kk vanha")."</option>";
 	echo "</select>";
 	echo "</td></tr>";
 
@@ -547,7 +547,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 			<td> - </td>
 			<td><input type='text' name='ppl1' value='$ppl1' size='5'></td>
 			<td><input type='text' name='kkl1' value='$kkl1' size='5'></td>
-			<td><input type='text' name='vvl1' value='$vvl1' size='5'></td><td class='back'> <-- k‰ytet‰‰n h‰lytysrajaehdotuksen laskentaan</td>
+			<td><input type='text' name='vvl1' value='$vvl1' size='5'></td><td class='back'> <-- ".t("k‰ytet‰‰n h‰lytysrajaehdotuksen laskentaan")."</td>
 			</tr>";
 
 	echo "	<tr><th>".t("Kausi 2")."</th>

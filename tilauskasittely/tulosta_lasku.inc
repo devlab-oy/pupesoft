@@ -319,6 +319,34 @@ if (!function_exists('rivi')) {
 		if ($row["alv"] < 500) {
 			$pdf->draw_text(470, $kala, sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100))),	$firstpage, $pieni);
 		}
+		
+		
+		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
+		if (strlen($row["kommentti"]) >= 40) {
+			
+			$row["kommentti"] = str_replace(' ' ,' ##', $row["kommentti"]);
+			$row["kommentti"] = str_replace('.' ,'.##', $row["kommentti"]);
+			$row["kommentti"] = str_replace(',' ,',##', $row["kommentti"]);
+			
+			$sanat = explode('##', $row["kommentti"]);
+			
+			$lauseet = array();
+			$ind = 0;
+			foreach($sanat as $sana) {
+				if (strlen($lauseet[$ind]) >= 40) {
+					$lauseet[$ind] .= "\n";
+					$ind++;
+					
+				}
+				$lauseet[$ind] .= $sana;
+			}
+			
+			$row["kommentti"] = "";
+			
+			foreach($lauseet as $lause) {
+				$row["kommentti"] .= $lause;
+			}
+		}
 
 		// Jos ALV no yli 500 niin tiedämme että tämä on marginaaliverotusta
 		if ($row["alv"] >= 500) {

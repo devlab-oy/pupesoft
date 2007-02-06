@@ -328,7 +328,12 @@
 		}
 
 		// Rivi on lisataan tietokantaan
-		if ($tee == 'TI') {
+		if ($tee == 'TI' and $tuoteno != "") {
+			$multi = "TRUE";
+			require("../inc/tuotehaku.inc");
+		}
+		
+		if ($tee == 'TI' and (trim($tuoteno) != "" or is_array($tuoteno_array))) {
 
 			if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
 				$tuoteno_array[] = $tuoteno;
@@ -457,7 +462,10 @@
 			$perheid			= '';
 			$perheid2			= '';
 		}
-
+		elseif ($tee == 'TI' and trim($tuoteno) == "" and !is_array($tuoteno_array)) {
+			$tee = "Y";
+		}
+		
 		//lis‰t‰‰n rivej‰ tiedostosta
 		if ($tee == 'mikrotila' or $tee == 'file') {
 			require('mikrotilaus_ostotilaus.inc');

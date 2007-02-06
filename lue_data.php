@@ -184,6 +184,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$pakolliset = array("TUOTENO","HINTA");
 			$kielletyt = array("");
 			break;
+		case "rahtisopimukset" :
+			$pakolliset = array("YTUNNUS","RAHTISOPIMUS","TOIMITUSTAPA");
+			$kielletyt = array("");
+				break;
+		case "toimitustapa" :
+			$pakolliset = array("SELITE","HETIERA");
+			$kielletyt = array("");
+			break;
 		default :
 			echo t("Miten t‰nne p‰‰sit!");
 			exit;
@@ -834,6 +842,8 @@ else
 					<option value='todo'>".t("Todo-lista")."</option>
 					<option value='maksuehto'>".t("Maksuehto")."</option>
 					<option value='hinnasto'>".t("Hinnasto")."</option>
+					<option value='rahtisopimukset'>".t("Rahtisopimukset")."</option>
+					<option value='toimitustapa'>".t("Toimitustapoja")."</option>
 					</select></td>
 			</tr>
 
@@ -844,7 +854,7 @@ else
 				<td class='back'><input type='submit' value='".t("L‰het‰")."'></td>
 			</tr>
 
-			</table>
+			</table>	
 			</form>";
 }
 

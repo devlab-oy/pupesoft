@@ -1,7 +1,7 @@
 <?php
 
 // käytetään slavea
-$useslave = 1;
+// $useslave = 1;
 
 require ("inc/parametrit.inc");
 

@@ -83,8 +83,8 @@ if ($tee =='UV') {
 		$perheresult = mysql_query($query) or pupe_error($query);
 	}
 	
-	
-	if (mysql_num_rows($perheresult) > 0) {	 //jos tuoteperhe on olemassa
+	//jos tuoteperhe on olemassa
+	if (mysql_num_rows($perheresult) > 0) {	 
 		while ($perherow = mysql_fetch_array($perheresult)) {
 			if ($perherow["ei_saldoa"] == "") {
 				

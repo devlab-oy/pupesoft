@@ -492,6 +492,11 @@
 		if ($sarjanumero_haku) {
 			$lisa .= " and sarjanumeroseuranta.sarjanumero like '$sarjanumero_haku%' ";
 		}
+		
+		
+		if ($lisa == "") {
+			$lisa = " HAVING osto_tunnus is null or myynti_tunnus is null";
+		}
 
 		// N‰ytet‰‰n kaikki
 		$query	= "	SELECT sarjanumeroseuranta.*,
@@ -512,7 +517,7 @@
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					$lisa
 					ORDER BY tuoteno, myyntirivitunnus
-					LIMIT 100";
+					LIMIT 50";
 	}
 	$sarjares = mysql_query($query) or pupe_error($query);
 	
@@ -583,7 +588,7 @@
 	while ($sarjarow = mysql_fetch_array($sarjares)) {
 
 		if (function_exists("sarjanumeronlisatiedot_popup")) {
-			$divit .= sarjanumeronlisatiedot_popup ($sarjarow["tunnus"]);
+			$divit .= sarjanumeronlisatiedot_popup ($sarjarow["tunnus"], '', 'popup');
 		}
 
 		$sarjarow["nimitys"] = str_replace("\n", "<br>", $sarjarow["nimitys"]);

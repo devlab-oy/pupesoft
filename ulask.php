@@ -727,8 +727,13 @@ if ($tee == 'P' or $tee == 'E') {
 			<input type='text' name='kapro' maxlength='6' size=6 value='$kapro'>%</td>
 		</tr>
 		<tr>
-			<td>".t("Viesti")."</td><td><input type='text' maxlength='70' size=60 name='viesti' value='$viesti'></td>
+			<td>".t("Viesti")."</td><td><input type='text' maxlength='70' size='60' name='viesti' value='$viesti'></td>
 		</tr>";
+		
+		echo "<tr>
+			<td>".t("Kommentti")."</td><td><input type='text' name='komm' size='60' value='$komm'></td>
+		</tr>";
+		
 /*
 		echo "<tr>
 			<td>".t("Sisäinen tieto1")."</td><td><input type='text' maxlength='20' name='sis1' value='$sis1'></td>
@@ -1067,7 +1072,11 @@ if ($tee == 'I') {
 		if ($tositenrorow['nro'] < $alaraja) $tositenrorow['nro'] = 41000001;
 		$tositenro=$tositenrorow['nro'];
 	}
-
+	
+	if ($komm != "") {
+		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm);
+	}
+	
 	// Kirjoitetaan lasku
 	$query = "INSERT into lasku set
 			yhtio = '$kukarow[yhtio]',
@@ -1110,7 +1119,8 @@ if ($tee == 'I') {
 			liitostunnus = '$ytunnus',
 			hyvaksynnanmuutos = '$ohyvaksynnanmuutos',
 			suoraveloitus = '$osuoraveloitus',
-			luontiaika = now()";
+			luontiaika = now(),
+			comments = '$komm'";
 
 // Poistin nämä toistaiseksi insertistä
 //			sisviesti1 = '$sis1',

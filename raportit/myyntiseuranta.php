@@ -373,7 +373,7 @@ if ($tee == 'go') {
 
 		while ($row = mysql_fetch_array($result)) {
 			
-			if ($osoitetarrat != "") {
+			if ($osoitetarrat != "" and $row[0] > 0) {
 				$tarra_aineisto .= $row[0].",";
 			}
 			

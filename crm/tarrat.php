@@ -23,6 +23,16 @@
 	if ($tee == "TULOSTA") {
 		$tulostimet[0] = 'Tarrat';
 
+		if (is_array($otunnus)) {
+			$otunnu = "";
+			
+			foreach($otunnus as $otun) {
+				$otunnu .= $otun.",";
+			}
+			
+			$otunnus = substr($otunnu, 0, -1);
+		}
+
 		if (count($komento) == 0) {
 			require("../inc/valitse_tulostin.inc");
 		}
@@ -42,7 +52,7 @@
 						if(toim_maa!='', toim_maa, maa) maa
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
-		}
+		}		
 		$res = mysql_query($query) or pupe_error($query);
 
 		$laskuri = 1;
@@ -152,7 +162,8 @@
 				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 			}
         }
-        if (strlen($ojarj) > 0) {
+        
+		if (strlen($ojarj) > 0) {
         	$jarjestys = $ojarj;
         }
 		else {
@@ -161,8 +172,11 @@
 
 		if ($tarra_aineisto != "") {
 			$lisa = " and tunnus in ($tarra_aineisto) ";
+			$limit = "";
 		}
-		
+		else {
+			$limit = "LIMIT 1000";
+		}
 		
 		//haetaan omat asiakkaat
 		$query = "	SELECT nimi, osoite, postino, postitp, maa, ryhma, piiri, tunnus
@@ -171,53 +185,48 @@
 					and nimi != '' 
 					$lisa
 					ORDER BY $jarjestys
-					LIMIT 1000";
-
+					$limit";
 		$result = mysql_query($query) or pupe_error($query);
-		echo "<table><tr><form action = '$PHP_SELF' method = 'post'>";
-
+			
+		echo "<form action = '$PHP_SELF' method = 'post'>";
+				
+		echo "<table><tr>";
+		echo "<th></th>";
+		
 		for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
 			echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_table($result,$i).".".mysql_field_name($result,$i).$ulisa."'>".t(mysql_field_name($result,$i))."</a>";
 
 			echo "<br><input type='text' size='10' name = 'haku[$i]' value = '$haku[$i]'></th>";
 		}
 
-		echo "<th valign='bottom'><input type='Submit' value = '".t("Etsi")."'></th></form></tr>";
+		echo "<th valign='bottom'><input type='Submit' value = '".t("Etsi")."'></th></tr>";
+		echo "</form>";
 
-		$otunnus = '';
+
+		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
 		while ($trow = mysql_fetch_array ($result)) {
+			
 			echo "<tr>";
+			echo "<td><input type='checkbox' name = 'otunnus[]' value = '$trow[tunnus]' CHECKED></td>";
+			
 			for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
-				if ($i == 1) {
-					if(strlen($trow[$i]) <= 25){
-						echo "<td nowrap>$trow[$i]</td>";
-					}
-					else {
-						echo "<td nowrap>".substr($trow[$i],0,24)."...</td>";
-					}
+				if(strlen($trow[$i]) <= 40){
+					echo "<td nowrap>$trow[$i]</td>";
 				}
 				else {
-					if(strlen($trow[$i]) <= 15){
-						echo "<td nowrap>$trow[$i]</td>";
-					}
-					else {
-						echo "<td nowrap>".substr($trow[$i],0,14)."...</td>";
-					}
+					echo "<td nowrap>".substr($trow[$i],0,39)."...</td>";
 				}
 			}
 			echo "</tr>";
-
-			$otunnus .= $trow["tunnus"].",";
 		}
 		echo "</table>";
 		echo "<br><br>";
 
 		$otunnus = substr($otunnus,0,-1);
 
-		echo "<table><form action='$PHP_SELF' method='post'>";
-		echo "<input type='hidden' name='tee' value='TULOSTA'>";
-		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		echo "<table>";
 		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas'></td></tr>";
 		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
 				<td><select name='raportti'>

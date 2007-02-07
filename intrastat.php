@@ -269,19 +269,22 @@
 			$label .= "jakso: $vv$kk\r\n";
 			$label .= "koko aineiston tietuem‰‰r‰: $lask-1\r\n";
 			$label .= "koko aineiston vienti-, verotus- tai laskutusarvo: $arvoyht\r\n";
-
+			
+			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; 				// t‰m‰ on tullin virallinen avain
+			//$recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; 	// t‰m‰ on tullin testiavain
+			
 			$message = '';
-			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; // t‰m‰ on tullin virallinen avain
-			// $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; // t‰m‰ on tullin testiavain
 			$message = $label;
 			require("inc/gpg.inc");
 			$otsikko_gpg = $encrypted_message;
 			$otsikko_plain = $message;
 
+			
 			//PGP-encryptaus atktietue
+			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; 				// t‰m‰ on tullin virallinen avain
+			// $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; 	// t‰m‰ on tullin testiavain
+
 			$message = '';
-			$recipient = "pgp-key Customs Finland <ascii.intra@tulli.fi>"; // t‰m‰ on tullin virallinen avain
-			// $recipient = "pgp-testkey Customs Finland <test.ascii.intra@tulli.fi>"; // t‰m‰ on tullin testiavain
 			$message = $lah.$ots.$nim.$sum;
 			require("inc/gpg.inc");
 			$tietue_gpg = $encrypted_message;
@@ -289,7 +292,7 @@
 
 			$bound = uniqid(time()."_") ;
 
-			$header  = "From: <$yhtiorow[postittaja_email]>\n";
+			$header  = "From: <$yhtiorow[admin_email]>\n";
 			$header .= "MIME-Version: 1.0\n";
 			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
 
@@ -313,9 +316,10 @@
 
 			if ($eitulliin == "") {
 				// l‰hetet‰‰n meili tulliin
-				$to = 'ascii.intrastat@tulli.fi'; // t‰m‰ on tullin virallinen osoite
-				// $to = 'test.ascii.intrastat@tulli.fi'; // t‰m‰ on tullin testiosoite
-				mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+				$to = 'ascii.intrastat@tulli.fi'; 			// t‰m‰ on tullin virallinen osoite
+				//$to = 'test.ascii.intrastat@tulli.fi'; 	// t‰m‰ on tullin testiosoite
+				
+				mail($to, "", $content, $header, "-f $yhtiorow[admin_email]");
 				echo "<font class='message'>Tiedot l‰hetettiin tulliin.</font><br><br>";
 			}
 			else {
@@ -340,7 +344,7 @@
 			$content .= "--$bound\n";
 
 			// j‰ l‰hetet‰‰n adminille
-			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - Intrastat $toim-ilmoitus $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[postittaja_email]");
+			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - Intrastat $toim-ilmoitus $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[admin_email]");
 		}
 		else {
 			echo "<font class='error'>L‰hetys ep‰onnistui! Korjaa virheesi!</font><br><br>";

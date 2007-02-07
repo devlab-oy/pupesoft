@@ -45,7 +45,8 @@
 								and trim(ytunnus)	= '$ytunnus'
 								and trim(toim_nimi) = '$nimi'";
 					$res = mysql_query($query) or pupe_error($query);
-					
+										
+
 					if (mysql_num_rows($res) != 0) {
 						$row = mysql_fetch_array($res);
 						
@@ -54,7 +55,7 @@
 				}
 			}
 			
-			$otunnus = substr($otunnus,-1);
+			$otunnus = substr($otunnus, 0, -1);
 		}
 		
 		

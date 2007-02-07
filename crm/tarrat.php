@@ -27,45 +27,19 @@
 			require("../inc/valitse_tulostin.inc");
 		}
 		
-		if ($laskunro != "") {
-			$otunnus = "";
-			
-			$asiakkaat = explode("\n", $laskunro);
-			
-			foreach($asiakkaat as $asiakas) {
-				$asiakas = trim($asiakas);
-				
-				if (strpos($asiakas, t("yhteensä")) === FALSE) {
-					$ytunnus 	= trim(substr($asiakas, 0, strpos($asiakas, " ")));
-					$nimi 		= trim(substr($asiakas, strpos($asiakas, " ")));
-					
-					$query = "	SELECT tunnus
-								FROM asiakas
-								WHERE yhtio 		= '$kukarow[yhtio]' 
-								and trim(ytunnus)	= '$ytunnus'
-								and trim(toim_nimi) = '$nimi'";
-					$res = mysql_query($query) or pupe_error($query);
-										
-
-					if (mysql_num_rows($res) != 0) {
-						$row = mysql_fetch_array($res);
-						
-						$otunnus .= $row["tunnus"].",";
-					}
-				}
-			}
-			
-			$otunnus = substr($otunnus, 0, -1);
-		}
-		
-		
 		if ($toimas == "") {
 			$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
 		}
 		else {
-			$query = "	SELECT toim_nimi nimi, toim_nimitark nimitark, toim_osoite osoite, toim_postino postino, toim_postitp postitp, toim_maa maa
+			$query = "	SELECT 
+						if(toim_nimi!='', toim_nimi, nimi) nimi, 
+						if(toim_nimitark!='', toim_nimitark, nimitark) nimitark, 
+						if(toim_osoite!='', toim_osoite, osoite) osoite, 
+						if(toim_postino!='', toim_postino, postino) postino, 
+						if(toim_postitp!='', toim_postitp, postitp) postitp, 
+						if(toim_maa!='', toim_maa, maa) maa
 						FROM asiakas
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
 		}
@@ -179,16 +153,23 @@
 			}
         }
         if (strlen($ojarj) > 0) {
-                $jarjestys = $ojarj;
+        	$jarjestys = $ojarj;
         }
-		else{
-				$jarjestys = 'asiakas.nimi';
+		else {
+			$jarjestys = 'asiakas.nimi';
 		}
 
+		if ($tarra_aineisto != "") {
+			$lisa = " and tunnus in ($tarra_aineisto) ";
+		}
+		
+		
 		//haetaan omat asiakkaat
 		$query = "	SELECT nimi, osoite, postino, postitp, maa, ryhma, piiri, tunnus
 					FROM asiakas
-					WHERE yhtio = '$kukarow[yhtio]' and nimi!='' $lisa
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and nimi != '' 
+					$lisa
 					ORDER BY $jarjestys
 					LIMIT 1000";
 
@@ -237,12 +218,6 @@
 		echo "<table><form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-		
-		echo "<tr><th colspan='2'>".t("Nimilista myynninseurannasta").":</th>";
-		echo "<tr><td colspan='2'><textarea name='laskunro' rows='20' cols='100'></textarea></td></tr>";
-		
-
-
 		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas'></td></tr>";
 		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
 				<td><select name='raportti'>

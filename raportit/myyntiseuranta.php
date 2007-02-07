@@ -105,10 +105,17 @@ if ($tee == 'go') {
 
 	foreach ($apu as $mukaan) {
 
-		if ($mukaan == "ytunnus") {
+		if ($mukaan == "ytunnus" and $osoitetarrat == "") {
 			if ($group!="") $group .= ",asiakas.tunnus";
 			else $group  .= "asiakas.tunnus";
 			$select .= "concat_ws(' ', asiakas.ytunnus, asiakas.toim_ovttunnus, asiakas.toim_nimi) ytunnus, ";
+			$order  .= "asiakas.ytunnus,";
+			$gluku++;
+		}
+		elseif ($mukaan == "ytunnus" and $osoitetarrat != "") {
+			if ($group!="") $group .= ",asiakas.tunnus";
+			else $group  .= "asiakas.tunnus";
+			$select .= "asiakas.tunnus, concat_ws(' ', asiakas.ytunnus, asiakas.toim_ovttunnus, asiakas.toim_nimi) ytunnus, ";
 			$order  .= "asiakas.ytunnus,";
 			$gluku++;
 		}
@@ -362,11 +369,18 @@ if ($tee == 'go') {
 		$myyntinyt = $myyntied = $katenyt = $kateed = $nettokatenyt = $nettokateed = $myyntikplnyt = $myyntikpled = 0;
 		$totmyyntinyt = $totmyyntied = $totkatenyt = $totkateed = $totnettokatenyt = $totnettokateed = $totmyyntikplnyt = $totmyyntikpled = 0;
 
+		$tarra_aineisto = "";
+
 		while ($row = mysql_fetch_array($result)) {
+			
+			if ($osoitetarrat != "") {
+				$tarra_aineisto .= $row[0].",";
+			}
+			
 			echo "<tr>";
 			// echotaan kenttien sisältö
 			for ($i=0; $i < mysql_num_fields($result); $i++) {
-
+				
 				// jos kyseessa on asiakasosasto, haetaan sen nimi
 				if (mysql_field_name($result, $i) == "asos") {
 					$query = "	SELECT *
@@ -577,6 +591,15 @@ if ($tee == 'go') {
 		echo "<th align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</th></tr>\n";
 
 		echo "</table>";
+		
+		
+		if ($osoitetarrat != "" and $tarra_aineisto != '')  {
+			$tarra_aineisto = substr($tarra_aineisto, 0, -1);
+			echo "<br>";
+			echo "<a href='../crm/tarrat.php?tee=&tarra_aineisto=$tarra_aineisto'>".t("Tulosta tarrat")."</a>";
+			echo "<br>";
+			echo "<br>";
+		}
 	}
 }
 
@@ -801,8 +824,13 @@ if ($lopetus == "") {
 		<td class='back'><br></td>
 		</tr>
 		<tr>
-		<th>".t("Näytä nimitykset")."</th>
+		<th>".t("Näytä tuotteiden nimitykset")."</th>
 		<td><input type='checkbox' name='nimitykset'></td>
+		</tr>
+		
+		<tr>
+		<th>".t("Tulosta osoitetarrat")."</th>
+		<td><input type='checkbox' name='osoitetarrat'></td>
 		</tr>
 		</table><br>";	
 

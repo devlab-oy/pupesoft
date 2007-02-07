@@ -26,6 +26,38 @@
 		if (count($komento) == 0) {
 			require("../inc/valitse_tulostin.inc");
 		}
+		
+		if ($laskunro != "") {
+			$otunnus = "";
+			
+			$asiakkaat = explode("\n", $laskunro);
+			
+			foreach($asiakkaat as $asiakas) {
+				$asiakas = trim($asiakas);
+				
+				if (strpos($asiakas, t("yhteensä")) === FALSE) {
+					$ytunnus 	= trim(substr($asiakas, 0, strpos($asiakas, " ")));
+					$nimi 		= trim(substr($asiakas, strpos($asiakas, " ")));
+					
+					$query = "	SELECT tunnus
+								FROM asiakas
+								WHERE yhtio 		= '$kukarow[yhtio]' 
+								and trim(ytunnus)	= '$ytunnus'
+								and trim(toim_nimi) = '$nimi'";
+					$res = mysql_query($query) or pupe_error($query);
+					
+					if (mysql_num_rows($res) != 0) {
+						$row = mysql_fetch_array($res);
+						
+						$otunnus .= $row["tunnus"].",";
+					}
+				}
+			}
+			
+			$otunnus = substr($otunnus,-1);
+		}
+		
+		
 		if ($toimas == "") {
 			$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
 						FROM asiakas
@@ -204,6 +236,11 @@
 		echo "<table><form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+		
+		echo "<tr><th colspan='2'>".t("Nimilista myynninseurannasta").":</th>";
+		echo "<tr><td colspan='2'><textarea name='laskunro' rows='20' cols='100'></textarea></td></tr>";
+		
+
 
 		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas'></td></tr>";
 		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>

@@ -588,7 +588,8 @@
 	while ($sarjarow = mysql_fetch_array($sarjares)) {
 
 		if (function_exists("sarjanumeronlisatiedot_popup")) {
-			$divit .= sarjanumeronlisatiedot_popup ($sarjarow["tunnus"], '', 'popup');
+			list($divitx, $text_output) .= sarjanumeronlisatiedot_popup ($sarjarow["tunnus"], '', 'popup');
+			$divit .= $divitx;
 		}
 
 		$sarjarow["nimitys"] = str_replace("\n", "<br>", $sarjarow["nimitys"]);

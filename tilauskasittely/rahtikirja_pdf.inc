@@ -113,7 +113,7 @@
 		//Duusataan viivakoodia 
 		$output   = "png";
 		$width    = "180";
-		$height   = "49";
+		$height   = "35";
 		$xres     = "1";
 		$font     = "2";
 		$drawtext = "off";
@@ -153,7 +153,7 @@
 				exit;
 			}
 			// piirretään viivakoodi paprulle
-			$pdf->image_place($image, 626, 300, $firstpage); // Y, X
+			$pdf->image_place($image, 631, 300, $firstpage); // Y, X
 			$pdf->draw_text(390, 625,  $viiva,							$firstpage, $norm);
 	
 			unset($obj);

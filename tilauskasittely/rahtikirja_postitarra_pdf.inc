@@ -160,7 +160,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	//oletukset viivakoodeille
 	$output   = "png";
 	$width    = "275";
-	$height   = "105";
+	$height   = "85";
 	$xres     = "1";
 	$font     = "2";
 	$drawtext = "off";
@@ -200,7 +200,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			exit;
 		}
 		// piirretään viivakoodi paprulle
-		$pdf->image_place($image, 260, 75, $firstpage); // Y, X
+		$pdf->image_place($image, 270, 75, $firstpage); // Y, X
 
 		unset($obj);
 
@@ -216,7 +216,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	//oletukset viivakoodeille
 	$output   = "png";
 	$width    = "120";
-	$height   = "60";
+	$height   = "45";
 	$xres     = "1";
 	$font     = "2";
 	$drawtext = "off";
@@ -257,7 +257,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		}
 
 		// piirretään viivakoodi
-		$pdf->image_place($tuoteviiva, 530, 270, $firstpage); // Y, X
+		$pdf->image_place($tuoteviiva, 540, 270, $firstpage); // Y, X
 
 		unset($obj);
 

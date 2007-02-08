@@ -15,75 +15,70 @@ if ($tyyppi == 'yct') {
 	$result = mysql_query($query) or pupe_error($query);
 		
 	if (mysql_num_rows($result) != 1) {
-		echo "".t("Asiakasta ei löydy tai järjestelmässä on usea asiakas samalla ytunnuksella")."<br>";
+		echo t("Asiakasta ei löydy tai järjestelmässä on usea asiakas samalla ytunnuksella")."<br>";
 	}
 	
 	else {
 		$asiakasrow = mysql_fetch_array($result);
 					
-					$tnimi = $asiakasrow['nimi'];
-					$tnimitark = $asiakasrow['nimitark'];
-					$tosoite = $asiakasrow['osoite'];
-					$tpostino = $asiakasrow['postino'];
-					$tpostitp = $asiakasrow['postitp'];
-					$toim_maa = $asiakasrow['maa'];
-		
-					$query = "INSERT into lasku SET
-						laatija = '$kukarow[kuka]',
-						luontiaika=NOW(),
-						ytunnus= '$asiakasrow[ytunnus]',
-						nimi = '$asiakasrow[nimi]',
-						nimitark = '$asiakasrow[nimitark]',
-						osoite = '$asiakasrow[osoite]',
-						postino = '$asiakasrow[postino]',
-						postitp = '$asiakasrow[postitp]',
-						maa = '$asiakasrow[maa]',
-						toim_nimi = '$tnimi',
-						toim_nimitark = '$tnimitark',
-						toim_osoite = '$tosoite',
-						toim_postino = '$tpostino',
-						toim_postitp = '$tpostitp',
-						toim_maa = '$toim_maa',
-						verkkotunnus='$asiakasrow[verkkotunnus]',
-						tila = 'L',
-						alatila = '',
-						tilaustyyppi = 'N',
-						valkoodi = '$yhiorow[valkoodi]',
-						kohdistettu = 'K',
-						erikoisale = '0',
-						varasto = '14',
-						eilahetetta = 'o',
-						laskutusvkopv = '$asiakasrow[laskutusvkopv]',
-						toimaika = '$toimpvm',
-						kerayspvm = '$toimpvm',
-						maksuehto = '$asiakasrow[maksuehto]',
-						toimitustapa = '$asiakasrow[toimitustapa]',
-						toimitusehto = '$asiakasrow[toimitusehto]',
-						myyja = '$kukarow[tunnus]',
-						alv = '$asiakasrow[alv]',
-						ovttunnus = '$asiakasrow[ovttunnus]',
-						toim_ovttunnus = '$asiakasrow[toim_ovttunnus]',
-						chn='$asiakasrow[chn]',
-						liitostunnus='$asiakasrow[tunnus]',
-						yhtio = '$kukarow[yhtio]'";
+		$tnimi 		= $asiakasrow['nimi'];
+		$tnimitark 	= $asiakasrow['nimitark'];
+		$tosoite 	= $asiakasrow['osoite'];
+		$tpostino 	= $asiakasrow['postino'];
+		$tpostitp 	= $asiakasrow['postitp'];
+		$toim_maa 	= $asiakasrow['maa'];
+
+		$query = "	INSERT into lasku SET
+					laatija 		= '$kukarow[kuka]',
+					luontiaika		= NOW(),
+					ytunnus			= '$asiakasrow[ytunnus]',
+					nimi 			= '$asiakasrow[nimi]',
+					nimitark 		= '$asiakasrow[nimitark]',
+					osoite 			= '$asiakasrow[osoite]',
+					postino 		= '$asiakasrow[postino]',
+					postitp 		= '$asiakasrow[postitp]',
+					maa 			= '$asiakasrow[maa]',
+					toim_nimi 		= '$tnimi',
+					toim_nimitark 	= '$tnimitark',
+					toim_osoite 	= '$tosoite',
+					toim_postino 	= '$tpostino',
+					toim_postitp 	= '$tpostitp',
+					toim_maa 		= '$toim_maa',
+					verkkotunnus	= '$asiakasrow[verkkotunnus]',
+					tila 			= 'L',
+					alatila 		= '',
+					tilaustyyppi 	= 'N',
+					valkoodi 		= '$yhtiorow[valkoodi]',
+					kohdistettu 	= 'K',
+					erikoisale 		= '0',
+					varasto 		= '14',
+					eilahetetta 	= 'o',
+					laskutusvkopv 	= '$asiakasrow[laskutusvkopv]',
+					toimaika 		= '$toimpvm',
+					kerayspvm 		= '$toimpvm',
+					maksuehto 		= '$asiakasrow[maksuehto]',
+					toimitustapa 	= '$asiakasrow[toimitustapa]',
+					toimitusehto 	= '$asiakasrow[toimitusehto]',
+					myyja 			= '$kukarow[tunnus]',
+					alv 			= '$asiakasrow[alv]',
+					ovttunnus 		= '$asiakasrow[ovttunnus]',
+					toim_ovttunnus 	= '$asiakasrow[toim_ovttunnus]',
+					chn				= '$asiakasrow[chn]',
+					liitostunnus	= '$asiakasrow[tunnus]',
+					yhtio 			= '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$id = mysql_insert_id();
 		$kukarow['kesken'] = $id;
 		//$laskurow['tunnus'] = $id
 		
-		$query = "SELECT * FROM lasku
+		$query = "	SELECT * 
+					FROM lasku
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$id'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 		
-		echo "".t("nro")." $id<br>";
+		echo t("nro")." $id<br>";
 	}
-	
-	
-	
-	
-	
-	
 }
 
 while ((!feof ($fd)) and ($error!=1)) {

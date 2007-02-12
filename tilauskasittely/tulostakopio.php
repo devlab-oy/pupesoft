@@ -1,4 +1,9 @@
 <?php
+		
+	if(isset($_POST[komento]) and in_array("PDF_RUUDULLE",$_POST[komento]) !== false) {
+		$_POST[tee] = "NAYTATILAUS";
+	}
+	
 	if($_POST[tee] == 'NAYTATILAUS') $nayta_pdf=1; //Generoidaan .pdf-file
 
 	require('../inc/parametrit.inc');
@@ -1013,9 +1018,9 @@
 
 			if ($toim == "TARJOUS") {
 				$otunnus = $laskurow["tunnus"];
-
+				
 				require_once ("tulosta_tarjous.inc");
-
+				
 				tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee);
 
 				$tee = '';

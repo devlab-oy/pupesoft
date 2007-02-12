@@ -53,7 +53,7 @@
         $mista = 'asiakas';
     }
 	echo "<tr><td>".t("Kpl")."</td><td><input type='text' name='kappaleet' size='3'></td></tr>";
-
+	
 	echo "<tr><td>".t("Valitse kieli")."</td>";
 	///* Haetaan asiakkaan kieli *///
 	if ($otunnus != '' or $laskunro != '') {
@@ -122,11 +122,12 @@
 		echo "<tr><td>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</td>";
 		echo "<td><select name='komento[$tulostin]'>";
 		echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-
+		echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+		
 		if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS') and $asrow['email'] != '') {
 			echo "<option value='asiakasemail:$asrow[email]'>".t("Asiakkaan sähköpostiin")." $asrow[email]</option>";
 		}
-
+		
 		$querykieli = "	select *
 					from kirjoittimet
 					where yhtio='$kukarow[yhtio]'

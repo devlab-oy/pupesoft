@@ -1,6 +1,29 @@
 <?php
 	require ("inc/parametrit.inc");
+	
+	if (strpos($toim,'_') !== false) {
+		$toim = substr($toim,0,strpos($toim,'_'));
+		$tila = 'G';
+	}
+	else {
+		$tila = 'L';
+	}
+	
+	if ((int) $otsikkonro > 0 or (int) $id > 0) {
+		if ((int) $otsikkonro > 0) {
+			$hakutunnus	= $otsikkonro;
+		}
+		else {
+			$hakutunnus	= $id;
+		}
 
+		$query = "SELECT tila FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus='$hakutunnus' LIMIT 1";
+		$result = mysql_query($query) or pupe_error($query);
+		$row = mysql_fetch_array($result);
+		
+		$tila = $row["tila"];
+	}
+	
 	if ($id == '') $id=0;
 
 	// jos ollaan rahtikirjan esisyötössä niin tehdään lisäys vähän helpommin
@@ -68,10 +91,18 @@
 
 				//Voi käydä niin, että rahtikirja on jo tulostunut. Poistetaan mahdolliset tulostusflagit
 				$query = "	update tilausrivi set toimitettu = '', toimitettuaika=''
-							where otunnus = '$otsikkonro' and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='L'";
+							where otunnus = '$otsikkonro' and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
 				$result  = mysql_query($query) or pupe_error($query);
 			}
-
+			
+			if ($tila == 'L') {
+				$alatilassa = " and lasku.alatila in ('C','E') ";
+				$joinmaksuehto = " JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus ";
+			}
+			else {
+				$alatilassa = " and lasku.alatila = 'C' ";
+			}
+			
 			// saadaanko näille tilauksille syöttää rahtikirjoja
 			$query = "	SELECT
 						lasku.yhtio,
@@ -81,12 +112,12 @@
 						lasku.vienti
 						FROM lasku use index (tila_index)
 						JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
-						JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+						$joinmaksuehto
 						LEFT JOIN toimitustapa use index (selite_index) ON toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
 						LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tila = 'L'
-						and lasku.alatila in ('C','E')
+						and lasku.tila = '$tila'
+						$alatilassa
 						and lasku. tunnus in ($tunnukset)
 						HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')";
 			$tilre = mysql_query($query) or pupe_error($query);
@@ -261,16 +292,26 @@
 		$haku = '';
 		if (is_string($etsi))  $haku = "and lasku.nimi LIKE '%$etsi%'";
 		if (is_numeric($etsi)) $haku = "and lasku.tunnus='$etsi'";
-
+		
+		//jos myyntitilaus niin halutaan maksuehto mukaan
+		if ($tila == 'L') {
+			$joinmaksuehto = "JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus";
+			$selectmaksuehto = "if(maksuehto.jv='', 'OK', lasku.tunnus) jvgrouppi,";
+			$groupmaksuehto = "jvgrouppi,";
+		}
+		else {
+			$wherelasku = " and lasku.toim_nimi != '' ";
+		}
+		
 		// Haetaan sopivia tilauksia
 		$query = "	SELECT
 					min(lasku.tunnus) tunnus,
 					GROUP_CONCAT(distinct lasku.tunnus order by lasku.tunnus SEPARATOR ',') tunnukset,
-					GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>') nimi,
+					if(lasku.tila='L',GROUP_CONCAT(distinct concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) order by concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) SEPARATOR '<br>'),nimi) nimi,
 					GROUP_CONCAT(distinct lasku.laatija order by lasku.laatija SEPARATOR '<br>') laatija,
 					lasku.toimitustapa toimitustapa,
 					toimitustapa.nouto nouto,
-					if(maksuehto.jv='', 'OK', lasku.tunnus) jvgrouppi,
+					$selectmaksuehto
 					if(toimitustapa.hetiera='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti,
 					lasku.vienti,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
@@ -278,14 +319,15 @@
 					rahtikirjat.poikkeava
 					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != ''
-					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+					$joinmaksuehto
 					LEFT JOIN toimitustapa use index (selite_index) ON toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
 					LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila = 'L'
+					and lasku.tila = '$tila'
 					and lasku.alatila = 'C'
+					$wherelasku
 					$haku
-					GROUP BY lasku.toimitustapa, toimitustapa.nouto, jvgrouppi, kimppakyyti, lasku.vienti, laadittux, rahtikirjat.otsikkonro
+					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, rahtikirjat.otsikkonro
 					HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
@@ -357,7 +399,7 @@
 					rahtikirjat use index (otsikko_index),
 					varastopaikat use index (PRIMARY)
 					where lasku.yhtio='$kukarow[yhtio]'
-					and	tila='L'
+					and	tila='$tila'
 					and (alatila in ('B','E') or (alatila='D' and hetiera='H'))
 					and toimitustapa.yhtio=lasku.yhtio
 					and toimitustapa.selite=lasku.toimitustapa
@@ -432,18 +474,20 @@
 		}
 
 		$otsik = mysql_fetch_array($resul);
+		
+		if ($tila == 'L') {
+			$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$otsik[maksuehto]'";
+			$resul = mysql_query($query) or pupe_error($query);
 
-		$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$otsik[maksuehto]'";
-		$resul = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($resul) == 0) {
-			$marow = array();
-		 	if ($otsik["erpcm"] == "0000-00-00") {
-				echo ("<font class='error'>".t("VIRHE: Maksuehtoa ei löydy")."! $otsik[maksuehto]!</font>");
+			if (mysql_num_rows($resul) == 0) {
+				$marow = array();
+			 	if ($otsik["erpcm"] == "0000-00-00") {
+					echo ("<font class='error'>".t("VIRHE: Maksuehtoa ei löydy")."! $otsik[maksuehto]!</font>");
+				}
 			}
-		}
-		else {
-			$marow = mysql_fetch_array($resul);
+			else {
+				$marow = mysql_fetch_array($resul);
+			}
 		}
 
 		echo "<table>";

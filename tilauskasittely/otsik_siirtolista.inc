@@ -210,6 +210,33 @@
 
 		echo "</td></tr>";
 		
+		echo "<tr>";
+		
+		if ($toim == "SIIRTOLISTA") {
+			echo "<th>".t("Toimitustapa")."</th><td>";
+		
+			$query = "	SELECT selite
+						FROM toimitustapa
+						WHERE yhtio = '$kukarow[yhtio]'
+						ORDER BY jarjestys, selite";
+			$tresult = mysql_query($query) or pupe_error($query);
+
+			echo "<select name='toimitustapa'>";
+
+			while($row = mysql_fetch_array($tresult)) {
+				$sel = "";
+
+				if ($row[0] == $srow["toimitustapa"]) $sel = 'selected';
+
+
+				echo "<option value='$row[0]' $sel>$row[0]</option>";
+			}
+			echo "</select>";
+
+
+			echo "</td></tr>";
+		}
+		
 		echo "<tr><th>".t("Viite").":</th><td colspan='3'>
 				<input type='text' size='53' name='viesti' value='$srow[viesti]'></td>";
 		echo "</tr>";
@@ -337,8 +364,19 @@
 		
 		
 		$query .= "	lasku SET
-					clearing		= '$clearing',					
-					nimi 			= '$vtrow[nimitys]',	
+					clearing		= '$clearing',
+					maa				= '$vtrow[maa]',
+					nimi 			= '$vtrow[nimitys]',
+					nimitark		= '$vtrow[nimi]',
+					osoite			= '$vtrow[osoite]',
+					postino			= '$vtrow[postino]',
+					postitp			= '$vtrow[postitp]',
+					toim_maa		= '$vtrow[maa]',
+					toim_nimi		= '$vtrow[nimi]',
+					toim_nimitark	= '$vtrow[nimitark]',
+					toim_osoite		= '$vtrow[osoite]',
+					toim_postino	= '$vtrow[postino]',
+					toim_postitp	= '$vtrow[postitp]',
 					toimaika 		= '".$toimvv."-".$toimkk."-".$toimpp."',
 					kerayspvm 		= '".$kervv."-".$kerkk."-".$kerpp."',						
 					comments 		= '$comments',
@@ -347,7 +385,8 @@
 					yhtio 			= '$kukarow[yhtio]',
 					alatila 		= '$alatila',						
 					varasto 		= '$varasto',											
-					hyvaksynnanmuutos = '$luokka'";
+					hyvaksynnanmuutos = '$luokka',
+					toimitustapa	= '$toimitustapa'";
 					
 		if ($toim == "VALMISTAVARASTOON") {
 			$query .= ",tilaustyyppi = 'W', tila='V', ytunnus='$vtrow[nimitys]', liitostunnus='99999999999'";
@@ -356,6 +395,8 @@
 		}
 		elseif ($toim == "SIIRTOLISTA") {
 			$query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='99999999999'";		
+			$query .= ",kohdistettu = 'K'";		
+			
 			
 			$tee = "";
 		}

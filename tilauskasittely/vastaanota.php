@@ -1,4 +1,5 @@
 <?php
+
 	require ("../inc/parametrit.inc");
 
 	if ($toim == "MYYNTITILI") {
@@ -466,7 +467,7 @@
 					and lasku.yhtio='$kukarow[yhtio]'
 					and lasku.tunnus=tilausrivi.otunnus
 					and lasku.tila='G'
-					and lasku.alatila='C'
+					and lasku.alatila in ('C','D')
 					and toimitettu=''
 					and keratty!=''";
 		$tilre = mysql_query($query) or pupe_error($query);
@@ -489,7 +490,7 @@
 						$haku
 						$myytili
 						and yhtio = '$kukarow[yhtio]'
-						and alatila = 'C'
+						and alatila in ('C','D')
 						ORDER by laadittu desc";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -554,7 +555,7 @@
 					WHERE tunnus = '$id'
 					and tila = 'G'
 					and yhtio = '$kukarow[yhtio]'
-					and alatila = 'C'";
+					and alatila in ('C','D')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$row = mysql_fetch_array($result);

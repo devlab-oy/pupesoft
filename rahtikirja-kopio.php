@@ -1,5 +1,5 @@
 <?php
-
+	
 	require("inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
@@ -135,7 +135,7 @@
 			while ($vak = mysql_fetch_array($vres)) $vakit[] = $vak[0];
 
 			// haetaan laskun tiedot
-			$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) limit 1";
+			$query = "select lasku.*, '$merahtix' merahti from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) limit 1";
 			$res   = mysql_query($query) or pupe_error($query);
 			$rakir_row = mysql_fetch_array($res);
 

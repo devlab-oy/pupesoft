@@ -142,8 +142,14 @@
 				case "A":
 					$alatila = "tulostettu";
 					break;
+				case "B":
+					$alatila = "Rahtikirjatiedot syötetty";
+					break;
 				case "C":
 					$alatila = "kerätty";
+					break;
+				case "D":
+					$alatila = "toimitettu";
 					break;
 				case "V":
 					$alatila = "vastaanotettu";

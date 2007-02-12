@@ -18,17 +18,6 @@
 
 		echo "<font class='message'>".t("Tulostetaan rahtikirjat toimitustavalle").": $toimitustapa.";
 
-		if ($jv == 'vainjv') {
-			echo t("Vain jälkivaatimukset").".";
-			$jvehto = " and maksuehto.jv!='' ";
-		}
-		elseif ($jv == 'eivj') {
-			echo t("Ei jälkivaatimuksia").".";
-			$jvehto = " and maksuehto.jv='' ";
-		}
-		else {
-			$jvehto = " ";
-		}
 		echo "</font><hr>";
 
 		// haetaan toimitustavan tiedot
@@ -82,21 +71,29 @@
 		// emuloidaan transactioita mysql LOCK komennolla
 		$query ="LOCK TABLES rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ";
 		$res   = mysql_query($query) or pupe_error($query);
-
+		
+		if ($jv == 'vainjv') {
+			echo t("Vain jälkivaatimukset").".";
+			$jvehto = " having jv!='' ";
+		}
+		elseif ($jv == 'eivj') {
+			echo t("Ei jälkivaatimuksia").".";
+			$jvehto = " having jv='' ";
+		}
+		else {
+			$jvehto = " ";
+		}
+		
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	select distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
-					rahtikirjat.merahti, rahtikirjat.rahtisopimus, maksuehto.jv, lasku.alv, lasku.vienti
-					from rahtikirjat, lasku, maksuehto
-					where lasku.yhtio				= maksuehto.yhtio
-					and lasku.maksuehto				= maksuehto.tunnus
-					and rahtikirjat.otsikkonro		= lasku.tunnus
-					and rahtikirjat.yhtio			= lasku.yhtio
-					and rahtikirjat.tulostettu		= '0000-00-00 00:00:00'
+					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti
+					from rahtikirjat
+					join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
+					left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+					where rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
 					and rahtikirjat.yhtio			= '$kukarow[yhtio]'
 					and rahtikirjat.toimitustapa	= '$toimitustapa'
 					and rahtikirjat.tulostuspaikka	= '$varasto'
-					and lasku.tila					= 'L'
-					and lasku.alatila				= 'B'
 					$jvehto
 					order by lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus";
 		$rakir_res = mysql_query($query) or pupe_error($query);
@@ -131,7 +128,6 @@
 				$rahdinmaksaja = "Vastaanottaja"; //tämä on defaultti
 			}
 
-
 			// Katsotaan onko tämä koontikuljetus
 			if ($toitarow["hetiera"] == "K") {
 				// Monen asiakkaan rahtikirjat tulostuu aina samalle paperille
@@ -146,7 +142,7 @@
 				$rakir_row["toim_postitp"]	= $toitarow["toim_postitp"];
 
 			}
-			else {
+			else {	
 				// Normaalissa keississä ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
 				$asiakaslisa = "and lasku.ytunnus			= '$rakir_row[ytunnus]'
 								and lasku.toim_maa			= '$rakir_row[toim_maa]'
@@ -157,25 +153,27 @@
 								and lasku.toim_postino		= '$rakir_row[toim_postino]'
 								and lasku.toim_postitp		= '$rakir_row[toim_postitp]' ";
 			}
-
-
+			
+			if ($rakir_row['jv'] != '') {
+				$jvehto = " having jv!='' ";
+			}
+			else {
+				$jvehto = " having jv='' ";
+			}
+			
 			// haetaan tälle rahtikirjalle kuuluvat tunnukset
-			$query = "	select rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus
-						from rahtikirjat, lasku, maksuehto
-						where lasku.yhtio				= maksuehto.yhtio
-						and lasku.maksuehto				= maksuehto.tunnus
-						and rahtikirjat.otsikkonro		= lasku.tunnus
-						and rahtikirjat.yhtio			= lasku.yhtio
-						and rahtikirjat.tulostettu		= '0000-00-00 00:00:00'
+			$query = "	select rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv
+						from rahtikirjat
+						join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
+						left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+						where rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
 						and rahtikirjat.yhtio			= '$kukarow[yhtio]'
 						and rahtikirjat.toimitustapa	= '$toimitustapa'
 						and rahtikirjat.tulostuspaikka	= '$varasto'
 						$asiakaslisa
 						and rahtikirjat.merahti			= '$rakir_row[merahti]'
 						and rahtikirjat.rahtisopimus	= '$rakir_row[rahtisopimus]'
-						and maksuehto.jv				= '$rakir_row[jv]'
-						and lasku.tila					= 'L'
-						and lasku.alatila				= 'B'";
+						$jvehto";
 			$res   = mysql_query($query) or pupe_error($query);
 
 			while ($rivi = mysql_fetch_array($res)) {
@@ -248,7 +246,7 @@
 							and vakkoodi <> '0'
 							and vakkoodi <> ' '
 							and var in ('','H')
-							and tilausrivi.tyyppi = 'L'";
+							and tilausrivi.tyyppi in ('L','G')";
 				$vres = mysql_query($query) or pupe_error($query);
 				while ($vak = mysql_fetch_array($vres)) $vakit[] = $vak[0];
 
@@ -403,22 +401,15 @@
 
 
 	if($tee == '') {
-
+		
 		// haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
 		$query = "	select distinct lasku.toimitustapa
-					from rahtikirjat, lasku, maksuehto, toimitustapa
-					where lasku.yhtio				= maksuehto.yhtio
-					and lasku.maksuehto				= maksuehto.tunnus
-					and rahtikirjat.otsikkonro		= lasku.tunnus
-					and rahtikirjat.yhtio			= lasku.yhtio
-					and rahtikirjat.tulostettu		= '0000-00-00 00:00:00'
-					and rahtikirjat.yhtio			= '$kukarow[yhtio]'
-					and lasku.tila					= 'L'
-					and lasku.alatila				= 'B'
-					and lasku.yhtio					= toimitustapa.yhtio
-					and lasku.toimitustapa			= toimitustapa.selite
-					and toimitustapa.hetiera		= 'E'
-					and toimitustapa.nouto			= ''
+					from rahtikirjat
+					join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
+					join toimitustapa on lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite and toimitustapa.hetiera = 'E' and toimitustapa.nouto = ''
+					left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+					where rahtikirjat.tulostettu = '0000-00-00 00:00:00'
+					and rahtikirjat.yhtio = '$kukarow[yhtio]'
 					ORDER BY lasku.toimitustapa";
 		$result = mysql_query($query) or pupe_error($query);
 

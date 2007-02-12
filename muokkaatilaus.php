@@ -250,7 +250,7 @@
 	elseif ($toim == "SIIRTOLISTA") {
 		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and alatila in ('','A','B','J') 
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and alatila in ('','A','J') 
 					$haku
 					order by luontiaika desc
 					LIMIT 50";
@@ -268,7 +268,7 @@
 	elseif ($toim == "SIIRTOLISTASUPER") {
 		$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, luontiaika, laatija, viesti tilausviite, alatila, tila
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and alatila in ('','A','B','C','J','T') 
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='G' and alatila in ('','A','B','C','D','J','T') 
 					$haku
 					order by luontiaika desc
 					LIMIT 50";

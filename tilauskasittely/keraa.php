@@ -36,7 +36,7 @@
 		$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
 	}
 	else {
-		$query =	"SELECT toimitustapa.tunnus 
+		$query = "	SELECT toimitustapa.tunnus 
 					FROM toimitustapa, lasku, maksuehto
 					WHERE toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa 
 					and lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
@@ -109,7 +109,7 @@
 			}
 		}
 	}
-
+	
 	if ($tee == 'P') {
 
 		if ((int) $keraajanro == 0) $keraajanro=$keraajalist;
@@ -182,172 +182,306 @@
 							//Siivotaan hieman käyttäjän syöttämää kappalemäärää
 							$maara[$apui] = str_replace ( ",", ".", $maara[$apui]);
 							$maara[$apui] = (float) $maara[$apui];
-
+														
+							$rotunnus = 0;
+							
 							if ($tilrivirow["var"] == 'P' and $maara[$apui] > 0) {
-								// puuterivi löytyi poistetaan VAR
+								// Puuterivi löytyi poistetaan VAR
 								$query .= "	, var		= ''
 											, varattu	= '".$maara[$apui]."'";
 
-								//Poistetaan tuote loppukommentti jos tuotetta sittenkin löytyi
+								//Poistetaan 'tuote loppu'-kommentti jos tuotetta sittenkin löytyi
 								$korvataan_pois = t("Tuote Loppu.");
 								$query .= "	, kommentti	= replace(kommentti, '$korvataan_pois', '') ";
-
+								
+								
+								// PUUTE-riville tehdään osatoimitus ja loput jätetään puuteriviksi
+								if($maara[$apui] < $tilrivirow['tilkpl']) {									
+									$rotunnus	= $tilrivirow['otunnus'];
+									$rtyyppi	= $tilrivirow['tyyppi'];
+									$rtilkpl 	= round($tilrivirow['tilkpl']-$maara[$apui],2);
+									$rvarattu	= 0;
+									$rjt  		= 0;
+									$rvar		= $tilrivirow['var'];
+									$keratty	= "'$who'";
+									$kerattyaik	= "now()";
+									$rkomm 		= $tilrivirow["kommentti"];
+								}
 							}
 							elseif($tilrivirow["var"] == 'J' and $maara[$apui] > 0) {
-								//JT-rivi löytyi, poistetaan VAR ja merkataan rivi kerätyksi
-								$query .= "	, keratty 	= '$who'
-											, kerattyaika = now()
+								// JT-rivi löytyi, poistetaan VAR ja merkataan rivi kerätyksi
+								$query .= "	, keratty 		= '$who'
+											, kerattyaika 	= now()
 											, var			= ''
 											, jt			= 0
-											, varattu	= '".$maara[$apui]."'";
-
+											, varattu		= '".$maara[$apui]."'";
+								
+								// JT-riville tehdään osatoimitus ja loput jätetään jälkitoimitukseen
 								if($maara[$apui] < $tilrivirow['jt']) {
-									//JT-riville tehdään osatoimitus ja loput jätetään jälkitoimitukseen
-									$jatetaan = round($tilrivirow['jt']-$maara[$apui],2);
-
-									// ja tehdään uusi JT-rivi
-									$inquery = "INSERT into tilausrivi set
-												hyllyalue		= '$tilrivirow[hyllyalue]',
-												hyllynro		= '$tilrivirow[hyllynro]',
-												hyllyvali		= '$tilrivirow[hyllyvali]',
-												hyllytaso		= '$tilrivirow[hyllytaso]',
-												varattu 		= '0',
-												kpl 			= 0,
-												tilkpl 			= '$jatetaan',
-												jt				= '$jatetaan',
-												otunnus 		= '$tilrivirow[otunnus]',
-												var				= '$tilrivirow[var]',
-												keratty			= '',
-												kerattyaika		= '',
-												kerayspvm 		= now(),
-												laatija			= '$kukarow[kuka]',
-												perheid			= '$tilrivirow[perheid]',
-												laadittu		= now(),
-												toimitettu		= '',
-												toimitettuaika	= '',
-												toimaika 		= now(),
-												laskutettu		= '',
-												laskutettuaika	= '',
-												yhtio 			= '$tilrivirow[yhtio]',
-												tuoteno 		= '$tilrivirow[tuoteno]',
-												ale 			= '$tilrivirow[ale]',
-												netto 			= '$tilrivirow[netto]',
-												yksikko 		= '$tilrivirow[yksikko]',
-												try 			= '$tilrivirow[try]',
-												osasto 			= '$tilrivirow[osasto]',
-												alv 			= '$tilrivirow[alv]',
-												hinta 			= '$tilrivirow[hinta]',
-												nimitys 		= '$tilrivirow[nimitys]',
-												tyyppi 			= '$tilrivirow[tyyppi]',
-												kommentti 		= '$tilrivirow[kommentti]'";
-									$jtres = mysql_query($inquery) or pupe_error($inquery);
+									$rotunnus	= $tilrivirow['otunnus'];
+									$rtyyppi	= $tilrivirow['tyyppi'];
+									$rtilkpl 	= round($tilrivirow['jt']-$maara[$apui],2);
+									$rvarattu	= 0;
+									$rjt  		= round($tilrivirow['jt']-$maara[$apui],2);
+									$rvar		= $tilrivirow['var'];
+									$keratty	= "''";
+									$kerattyaik	= "''";
+									$rkomm 		= $tilrivirow["kommentti"];
 								}
 							}
-							elseif($tilrivirow["var"] == 'J' and $maara[$apui] == 0) {
-								//JT-riviä ei löytynyt, ei tehdä sille mitään (ei ainakaan mitään fiksua)
-								$query .= ", jt = jt ";
-							}
-							elseif ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS' or $otsikkorivi['clearing'] == 'JT-TILAUS') {
+							elseif ($maara[$apui] >= 0 and $maara[$apui] < $tilrivirow['varattu'] and ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS' or $otsikkorivi['clearing'] == 'JT-TILAUS')) {
 								// Jos tämä on toimitettava ennakkotilaus tai jt-tilaus
-								// ja meillä syntyy negatiivista keräyspoikkeamaa, niin laitetaan erotus takaisin ennakkoriviksi/jt-riviksi
+								if($maara[$apui] == 0) {
+									//Mitätöidään rivi jos kerääjä kuittaa nollan
+									$query .= " , tyyppi	= 'D'
+												, kommentti	= '".t("Rivi mitätöitiin keräyspoikkeamana").": $who'";
+								}
+								else {
+									$query .= ", varattu='".$maara[$apui]."'";
+								}
 
-								$query .= ", varattu='".$maara[$apui]."'";
+								if($otsikkorivi['clearing'] == 'ENNAKKOTILAUS') {
+									$ejttila    = "('E')";
+									$ejtalatila = "('A')";
+								
+									$rotunnus	= 0;
+									$rtyyppi	= "E";
+									$rtilkpl 	= round($tilrivirow['varattu']-$maara[$apui],2);
+									$rvarattu	= round($tilrivirow['varattu']-$maara[$apui],2);
+									$rjt  		= 0;
+									$rvar		= "";
+									$keratty	= "''";
+									$kerattyaik	= "''";
+									$rkomm 		= $tilrivirow["kommentti"];
+								}
+								if($otsikkorivi['clearing'] == 'JT-TILAUS') {
+									$ejttila    = "('N','L')";
+									$ejtalatila = "('T','X')";
+								
+									$rotunnus	= 0;
+									$rtyyppi	= "L";
+									$rtilkpl 	= round($tilrivirow['varattu']-$maara[$apui],2);
+									$rvarattu	= 0;
+									$rjt  		= round($tilrivirow['varattu']-$maara[$apui],2);
+									$rvar		= "J";
+									$keratty	= "''";
+									$kerattyaik	= "''";
+									$rkomm 		= $tilrivirow["kommentti"];
+								}
+								
+								//Etsitään ennakko/jt-otsikko jolle rivi laitetaan
+								$query1 = "	SELECT tunnus
+											FROM lasku
+											WHERE tila		in $ejttila
+											and alatila		in $ejtalatila
+											and yhtio		= '$kukarow[yhtio]'
+											and ytunnus		= '$otsikkorivi[ytunnus]' and
+											nimi 			= '$otsikkorivi[nimi]' and
+											nimitark 		= '$otsikkorivi[nimitark]' and
+											osoite 			= '$otsikkorivi[osoite]' and
+											postino			= '$otsikkorivi[postino]' and
+											postitp 		= '$otsikkorivi[postitp]' and
+											toim_nimi		= '$otsikkorivi[toim_nimi]' and
+											toim_nimitark	= '$otsikkorivi[toim_nimitark]' and
+											toim_osoite 	= '$otsikkorivi[toim_osoite]' and
+											toim_postino 	= '$otsikkorivi[toim_postino]' and
+											toim_postitp 	= '$otsikkorivi[toim_postitp]' and
+											toimitustapa 	= '$otsikkorivi[toimitustapa]' and
+											maksuehto 		= '$otsikkorivi[maksuehto]' and
+											vienti	 		= '$otsikkorivi[vienti]' and
+											alv		 		= '$otsikkorivi[alv]' and
+											ketjutus 		= '$otsikkorivi[ketjutus]' and
+											kohdistettu		= '$otsikkorivi[kohdistettu]' and
+											toimitusehto	= '$otsikkorivi[toimitusehto]'";
+								$stresult = mysql_query($query1) or pupe_error($query1);
 
-								if ($maara[$apui] < $tilrivirow['varattu']) {
+								// Sopiva otsikko löytyi
+								if (mysql_num_rows($stresult) > 0) {
+									$strow = mysql_fetch_array($stresult);
 
-									//Etsitään ennakko/jt-otsikko jolle rivi laitetaan
-									if($otsikkorivi['clearing'] == 'ENNAKKOTILAUS') {
-										$ejttila    = "('E')";
-										$ejtalatila = "('A')";
-										$ejttyyppi  = "E";
-
-										$til = $tilrivirow['varattu'] - $maara[$apui];
-										$kpl = $tilrivirow['varattu'] - $maara[$apui];
-										$jt  = 0;
-										$vr  = "";
-									}
-									if($otsikkorivi['clearing'] == 'JT-TILAUS') {
-										$ejttila    = "('N','L')";
-										$ejtalatila = "('T','X')";
-										$ejttyyppi  = "L";
-
-										$til = $tilrivirow['varattu'] - $maara[$apui];
-										$kpl = 0;
-										$jt  = $tilrivirow['varattu'] - $maara[$apui];
-										$vr  = "J";
-									}
-
-									$query1 = "	SELECT *
-												FROM lasku
-												WHERE tila		in $ejttila
-												and alatila		in $ejtalatila
-												and yhtio		= '$kukarow[yhtio]'
-												and ytunnus		= '$otsikkorivi[ytunnus]' and
-												nimi 			= '$otsikkorivi[nimi]' and
-												nimitark 		= '$otsikkorivi[nimitark]' and
-												osoite 			= '$otsikkorivi[osoite]' and
-												postino			= '$otsikkorivi[postino]' and
-												postitp 		= '$otsikkorivi[postitp]' and
-												toim_nimi		= '$otsikkorivi[toim_nimi]' and
-												toim_nimitark	= '$otsikkorivi[toim_nimitark]' and
-												toim_osoite 	= '$otsikkorivi[toim_osoite]' and
-												toim_postino 	= '$otsikkorivi[toim_postino]' and
-												toim_postitp 	= '$otsikkorivi[toim_postitp]' and
-												toimitustapa 	= '$otsikkorivi[toimitustapa]' and
-												maksuehto 		= '$otsikkorivi[maksuehto]' and
-												vienti	 		= '$otsikkorivi[vienti]' and
-												alv		 		= '$otsikkorivi[alv]' and
-												ketjutus 		= '$otsikkorivi[ketjutus]' and
-												kohdistettu		= '$otsikkorivi[kohdistettu]' and
-												toimitusehto	= '$otsikkorivi[toimitusehto]'";
-									$stresult = mysql_query($query1) or pupe_error($query1);
-
-									//sopiva otsikko löytyi
-									if (mysql_num_rows($stresult) > 0) {
-										$strow = mysql_fetch_array($stresult);
-
-										//tässä tehdään uusi ennakko-rivi ja varattukenttään laitetaan keräyspoikkeama
-										$querys = "	INSERT into tilausrivi set
-													hyllyalue		= '$tilrivirow[hyllyalue]',
-													hyllynro		= '$tilrivirow[hyllynro]',
-													hyllyvali		= '$tilrivirow[hyllyvali]',
-													hyllytaso		= '$tilrivirow[hyllytaso]',
-													varattu 		= '$kpl',
-													tilkpl 			= '$til',
-													jt				= '$jt',
-													otunnus 		= '$strow[tunnus]',
-													var				= '$vr',
-													keratty			= '',
-													kerattyaika		= '',
-													kerayspvm 		= now(),
-													laatija			= '$kukarow[kuka]',
-													laadittu		= now(),
-													toimitettu		= '',
-													toimitettuaika	= '',
-													toimaika 		= now(),
-													laskutettu		= '',
-													laskutettuaika	= '',
-													yhtio 			= '$tilrivirow[yhtio]',
-													tuoteno 		= '$tilrivirow[tuoteno]',
-													ale 			= '$tilrivirow[ale]',
-													netto 			= '$tilrivirow[netto]',
-													yksikko 		= '$tilrivirow[yksikko]',
-													try 			= '$tilrivirow[try]',
-													osasto 			= '$tilrivirow[osasto]',
-													kpl 			= 0,
-													alv 			= '$tilrivirow[alv]',
-													hinta 			= '$tilrivirow[hinta]',
-													nimitys 		= '$tilrivirow[nimitys]',
-													tyyppi 			= '$ejttyyppi',
-													kommentti 		= '$tilrivirow[kommentti]'";
-										$riviresult = mysql_query($querys) or pupe_error($querys);
-									}
+									$rotunnus	= $strow["tunnus"];
 								}
 							}
-							else {
-								$query .= ", varattu='".$maara[$apui]."'";
+							elseif($tilrivirow["var"] != 'J' and $tilrivirow["var"] != 'P') {
+								// Jos tämä on normaali rivi
+								if($maara[$apui] < 0) {
+									// Jos kerääjä kuittaa alle nollan niin ei tehdä mitään
+									$query .= ", varattu = varattu";
+								}
+								elseif($maara[$apui] >= 0 and $maara[$apui] < $tilrivirow['varattu']) {
+									if($maara[$apui] == 0) {
+										//Mitätöidään rivi jos kerääjä kuittaa nollan
+										$query .= " , tyyppi	= 'D'
+													, kommentti	= '".t("Rivi mitätöitiin keräyspoikkeamana").": $who'";
+									}
+									else {
+										$query .= ", varattu = '".$maara[$apui]."'";
+									}
+									
+									if($poikkeama_kasittely[$apui] != "") {
+										$rotunnus	= $tilrivirow['otunnus'];
+										$rtyyppi	= $tilrivirow['tyyppi'];
+										$rtilkpl 	= round($tilrivirow['varattu']-$maara[$apui],2);
+										$rvarattu	= round($tilrivirow['varattu']-$maara[$apui],2);
+										$rjt  		= 0;
+										$rvar		= $tilrivirow['var'];
+										$keratty	= "''";
+										$kerattyaik	= "''";
+										$rkomm 		= $tilrivirow['kommentti'];
+									}
+								}
+								else {
+									//Päivitetään vain määrä jos se on isompi kuin alkuperäinen varattumäärä
+									$query .= ", varattu = '".$maara[$apui]."'";
+								}
 							}
+							
+							
+							if($poikkeama_kasittely[$apui] != "" and $rotunnus != 0) {
+								// Käyttäjän valitsemia poikkeamakäsittelysääntöjä
+								if ($poikkeama_kasittely[$apui] == "PU") {
+									// Riville tehdään osatoimitus ja loput jätetään puuteriviksi
+									$rvarattu	= 0;
+									$rjt  		= 0;
+									$rvar		= "P";
+									$keratty	= "'$who'";
+									$kerattyaik	= "now()";
+									$rkomm 		= t("Tuote Loppu.");
+								}
+								elseif($poikkeama_kasittely[$apui] == "JT") {
+									// Riville tehdään osatoimitus ja loput jätetään jälkkäriin (ennakkotilauksilla takaisin ennakkoon)							
+									if($otsikkorivi['clearing'] == 'ENNAKKOTILAUS') {
+										$rvarattu	= $rtilkpl;
+										$rjt  		= 0;
+										$rvar		= "";	
+									}
+									else {
+										$rvarattu	= 0;
+										$rjt  		= $rtilkpl;
+										$rvar		= "J";	
+									}
+									
+									$keratty	= "''";
+									$kerattyaik	= "''";
+									$rkomm 		= $tilrivirow["kommentti"];
+								}
+								elseif($poikkeama_kasittely[$apui] == "MI") {
+									// Riville tehdään osatoimitus ja loput mitätöidään			
+									$rotunnus	= 0;
+								}
+								elseif($poikkeama_kasittely[$apui] == "UT") {
+									// Riville tehdään osatoimitus ja loput siirretään ihan uudelle tilaukselle
+									$querym = "SELECT * FROM lasku WHERE tunnus='$tilrivirow[otunnus]' and yhtio ='$kukarow[yhtio]'";
+									$monistares = mysql_query($querym) or pupe_error($querym);
+									$monistarow = mysql_fetch_array($monistares);
 
+									$fields = mysql_field_name($monistares,0);
+									$values = "'".$monistarow[0]."'";
+
+									for($iii=1; $iii < mysql_num_fields($monistares)-1; $iii++) { // Ei monisteta tunnusta
+
+										$fields .= ", ".mysql_field_name($monistares,$iii);
+
+										switch (mysql_field_name($monistares,$iii)) {
+											case 'kerayspvm':
+											case 'toimaika':
+											case 'luontiaika':
+												$values .= ", now()";
+												break;
+											case 'alatila':
+												$values .= ", ''";
+												break;
+											case 'tila':
+												$values .= ", 'N'";
+												break;
+											case 'tunnus':
+											case 'kapvm':
+											case 'tapvm':
+											case 'olmapvm':
+											case 'summa':
+											case 'kasumma':
+											case 'hinta':
+											case 'kate':
+											case 'arvo':
+											case 'maksuaika':
+											case 'lahetepvm':
+											case 'viite':
+											case 'laskunro':
+											case 'mapvm':
+											case 'tilausvahvistus':
+											case 'viikorkoeur':
+											case 'tullausnumero':
+											case 'laskutuspvm':
+											case 'erpcm':
+											case 'laskuttaja':
+											case 'laskutettu':
+											case 'lahetepvm':
+											case 'maksaja':
+											case 'maksettu':
+											case 'maa_maara':
+											case 'kuljetusmuoto':
+											case 'kauppatapahtuman_luonne':
+											case 'sisamaan_kuljetus':
+											case 'sisamaan_kuljetusmuoto':
+											case 'poistumistoimipaikka':
+											case 'poistumistoimipaikka_koodi':
+												$values .= ", ''";
+												break;
+											case 'laatija':
+												$values .= ", '$kukarow[kuka]'";
+												break;
+											default:
+												$values .= ", '".$monistarow[$iii]."'";
+										}
+									}
+
+									$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
+									$insres  = mysql_query($kysely) or pupe_error($kysely);
+									$utunnus = mysql_insert_id($link);
+									
+									$rotunnus	= $utunnus;	
+									$rvarattu	= $rtilkpl;
+									$rjt  		= 0;
+									$rvar		= "";
+									$keratty	= "''";
+									$kerattyaik	= "''";
+									$rkomm 		= $tilrivirow["kommentti"];
+								}
+							}
+							
+							// Tässä tehdään uusi rivi
+							if ($rotunnus != 0) {
+								$querys = "	INSERT into tilausrivi set
+											hyllyalue		= '$tilrivirow[hyllyalue]',
+											hyllynro		= '$tilrivirow[hyllynro]',
+											hyllyvali		= '$tilrivirow[hyllyvali]',
+											hyllytaso		= '$tilrivirow[hyllytaso]',
+											varattu 		= '$rvarattu',
+											tilkpl 			= '$rtilkpl',
+											jt				= '$rjt',
+											otunnus 		= '$rotunnus',
+											var				= '$rvar',
+											keratty			= $keratty,
+											kerattyaika		= $kerattyaik,
+											kerayspvm 		= now(),
+											laatija			= '$kukarow[kuka]',
+											laadittu		= now(),
+											toimaika 		= now(),
+											yhtio 			= '$tilrivirow[yhtio]',
+											tuoteno 		= '$tilrivirow[tuoteno]',
+											ale 			= '$tilrivirow[ale]',
+											netto 			= '$tilrivirow[netto]',
+											yksikko 		= '$tilrivirow[yksikko]',
+											try 			= '$tilrivirow[try]',
+											osasto 			= '$tilrivirow[osasto]',
+											alv 			= '$tilrivirow[alv]',
+											hinta 			= '$tilrivirow[hinta]',
+											nimitys 		= '$tilrivirow[nimitys]',
+											tyyppi 			= '$rtyyppi',
+											kommentti 		= '$rkomm'";
+								$riviresult = mysql_query($querys) or pupe_error($querys);
+							}
+							
 							//päivitetään tuoteperheiden saldottomat jäsenet oikeisiin määriin
 							if ($tilrivirow["perheid"] != 0) {
 								$query1 = "	SELECT tilausrivi.tunnus
@@ -385,6 +519,7 @@
 							if ($taprow['varattu'] != 0) {
 								$tapsiirto = $taprow['varattu'] * -1;
 								$mista = $taprow['hyllyalue']."-".$taprow['hyllynro']."-".$taprow['hyllyvali']."-".$taprow['hyllytaso'];
+								
 								$query = "	INSERT into tapahtuma set
 											yhtio 		= '$kukarow[yhtio]',
 											tuoteno 	= '$taprow[tuoteno]',
@@ -512,7 +647,7 @@
 						}
 					}
 				}
-
+				
 				// Tutkitaan vielä aivan lopuksi mihin tilaan me laitetaan tämä otsikko
 				// Keräysvaiheessahan tilausrivit muuttuvat ja tarkastamme nyt tilanteen uudestaan
 				// Tämä tehdään vain myyntitilauksille
@@ -530,7 +665,7 @@
 						require("tilaus-valmis-valitsetila.inc");
 					}
 				}
-
+				
 				//Tulostetaan uusi lähete jos käyttäjä valitsi drop-downista printterin
 				//Paitsi jos tilauksen tila päivitettiin sellaiseksi, että lähetettä ei kuulu tulostaa
 				if ($valittu_tulostin != '') {
@@ -853,13 +988,15 @@
 			$query = "	SELECT concat_ws(' ',lasku.nimi, lasku.nimitark) nimi,
 						concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) toim_nimi,
 						osoite, concat_ws(' ', postino, postitp) postitp,
-						toim_osoite, concat_ws(' ', toim_postino, toim_postitp) toim_postitp, tila
+						toim_osoite, concat_ws(' ', toim_postino, toim_postitp) toim_postitp,
+						clearing,
+						tila
 						FROM lasku LEFT JOIN kuka ON lasku.myyja = kuka.tunnus
 						WHERE lasku.tunnus in ($tilausnumeroita) and lasku.yhtio='$kukarow[yhtio]' and tila='$tila' and alatila='A'";
 			$result = mysql_query($query) or pupe_error($query);
 			$row    = mysql_fetch_array($result);
 
-			echo "<tr><th>" . t("Tilaus") ."</th><td>$tilausnumeroita</td></tr>";
+			echo "<tr><th>" . t("Tilaus") ."</th><td>$tilausnumeroita $row[clearing]</td></tr>";
 			echo "<tr><th>" . t("Asiakas") ."</th><td>$row[nimi]<br>$row[toim_nimi]</td></tr>";
 			echo "<tr><th>" . t("Laskutusosoite") ."</th><td>$row[osoite], $row[postitp]</td></tr>";
 			echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$row[toim_osoite], $row[toim_postitp]</td></tr>";
@@ -889,7 +1026,7 @@
 			echo "	<input type='hidden' name='tee' value='P'>
 					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='id'  value='$id'>";
-			echo "<th>".t("kerääjä")."</th><td><input type='text' size='5' name='keraajanro'> ".t("tai")." ";
+			echo "<th>".t("Kerääjä")."</th><td><input type='text' size='5' name='keraajanro'> ".t("tai")." ";
 			echo "<select name='keraajalist'>";
 
 			if ($kukarow["keraajanro"] != 0) {
@@ -911,8 +1048,13 @@
 					<th>".t("Varastopaikka")."</th>
 					<th>".t("Tuoteno")."</th>
 					<th>".t("Kpl")."</th>
-					<th>".t("Poikkeava määrä")."</th>
-					</tr>";
+					<th>".t("Poikkeava määrä")."</th>";
+
+			if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {		
+				echo "<th>".t("Poikkeaman käsittely")."</th>";
+			}	
+					
+			echo "</tr>";
 
 			$i=0;
 
@@ -979,10 +1121,20 @@
 							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&otunnus=$id'>sarjanro</a>)";
 						}
 					}
-
-					echo "	</td>
-							<input type='hidden' name='kerivi[]' value='$row[tunnus]'>
-							</tr>";
+					
+					echo "</td>";
+					
+					if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {					
+						echo "<td><select name='poikkeama_kasittely[$row[tunnus]]'>";
+						echo "<option value=''>".t("Oletus")."</option>";
+						echo "<option value='JT'>".t("JT")."</option>";
+						echo "<option value='PU'>".t("Puute")."</option>";
+						echo "<option value='UT'>".t("Uusi tilaus")."</option>";
+						echo "<option value='MI'>".t("Mitätöi")."</option>";
+						echo "</select></td>";
+					}
+					
+					echo "<input type='hidden' name='kerivi[]' value='$row[tunnus]'></tr>";
 				}
 				$i++;
 			}
@@ -1028,6 +1180,10 @@
 			}
 			else {
 				echo "</th>";
+			}
+			
+			if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {	
+				echo "<th></th>";
 			}
 			
 			echo "<th><input type='submit' value='".t("Merkkaa kerätyksi")."'></th></form></tr>";

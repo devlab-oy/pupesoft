@@ -459,7 +459,8 @@
 				$grouppi = "GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
 			}
 			else {
-				$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
+				//t‰nne on nyt toistaiseksi lis‰tty toim_ovttunnus. Pit‰‰ ehk‰ keksi jotain muuta
+				$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
 			}
 		}
 		else {

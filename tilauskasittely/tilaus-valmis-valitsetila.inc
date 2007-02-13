@@ -27,7 +27,7 @@
 	$kerattavia = $rivirow["normaalit_kerataan"];
 	$ei_kerattavia = $rivirow["saldottomat"] + $rivirow["hyvitykset"];
 
-/*
+	/*
 	puute_jt_kerataanko
 	''  Puuterivej‰ ja JT-rivej‰ EI ker‰t‰
 	'P' Puuterivit ker‰t‰‰n
@@ -39,51 +39,47 @@
 	'P' Tilaus ker‰t‰‰n jos listalla on vain Puuterivej‰
 	'J' Tilaus ker‰t‰‰n jos listalla on vain JT-rivej‰
 	'Q' Tilaus ker‰t‰‰n jos listalla on vain Puuterivej‰ JA/TAI JT-rivej‰
-*/
+	*/
 
 	// ei lasketa ker‰tt‰vi‰/eiker‰tt‰vi‰ m‰‰ri‰ jos ollaan ker‰‰.phpssa, koska silloin kaikki on varmasti ker‰tt‰vi‰ jos ne siell‰ n‰ky
-	if ($kutsuja != 'keraa.php') {
+	if (($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q") and $kutsuja != 'keraa.php') {
+		//Jos yhtio haluaa ker‰t‰ Puuterivit
+		$kerattavia += $rivirow["puutteet"];
+	}
+	else {
+		$ei_kerattavia += $rivirow["puutteet"];
+	}
 
-		if ($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q") {
-			//Jos yhtio haluaa ker‰t‰ Puuterivit
-			$kerattavia += $rivirow["puutteet"];
-		}
-		else {
+	if (($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q") and $kutsuja != 'keraa.php') {
+		// Jos yhtiˆ haluaa ker‰t‰ JT-rivit
+		$kerattavia += $rivirow["jteet"];
+	}
+	else {
+		$ei_kerattavia += $rivirow["jteet"];
+	}
+
+	// jos yhtiˆ haluaa ker‰t‰ puuterivej‰ niin katotaan onko meill‰ pelk‰st‰‰n tilauksella jt/puuterivej‰
+	if ($yhtiorow["puute_jt_kerataanko"] != "" and $kutsuja != 'keraa.php') {
+		if ($rivirow["puutteet"] == $kerattavia and ($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q") and ($yhtiorow["kerataanko_jos_vain_puute_jt"] == "" or $yhtiorow["kerataanko_jos_vain_puute_jt"] == "J")) {
+			//Meill‰ on pelk‰st‰‰n puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
 			$ei_kerattavia += $rivirow["puutteet"];
+			$kerattavia	   -= $rivirow["puutteet"];
 		}
-
-		if ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q") {
-			// Jos yhtiˆ haluaa ker‰t‰ JT-rivit
-			$kerattavia += $rivirow["jteet"];
-		}
-		else {
+		elseif ($rivirow["jteet"] == $kerattavia and ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q") and ($yhtiorow["kerataanko_jos_vain_puute_jt"] == "" or $yhtiorow["kerataanko_jos_vain_puute_jt"] == "P")) {
+			//Meill‰ on pelk‰st‰‰n JT-rivej‰ ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
 			$ei_kerattavia += $rivirow["jteet"];
+			$kerattavia	   -= $rivirow["jteet"];
 		}
-
-		// jos yhti‰ haluaa ker‰t‰ puuterivej‰ niin katotaan onko meill‰ pelk‰st‰‰n tilauksella jt/puuterivej‰
-		if ($yhtiorow["puute_jt_kerataanko"] != "") {
-
-			if ($rivirow["puutteet"] == $kerattavia and ($yhtiorow["puute_jt_kerataanko"] == "P" or $yhtiorow["puute_jt_kerataanko"] == "Q") and ($yhtiorow["kerataanko_jos_vain_puute_jt"] == "" or $yhtiorow["kerataanko_jos_vain_puute_jt"] == "J")) {
-				//Meill‰ on pelk‰st‰‰n puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
-				$ei_kerattavia += $rivirow["puutteet"];
-				$kerattavia	   -= $rivirow["puutteet"];
-			}
-			elseif ($rivirow["jteet"] == $kerattavia and ($yhtiorow["puute_jt_kerataanko"] == "J" or $yhtiorow["puute_jt_kerataanko"] == "Q") and ($yhtiorow["kerataanko_jos_vain_puute_jt"] == "" or $yhtiorow["kerataanko_jos_vain_puute_jt"] == "P")) {
-				//Meill‰ on pelk‰st‰‰n JT-rivej‰ ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
-				$ei_kerattavia += $rivirow["jteet"];
-				$kerattavia	   -= $rivirow["jteet"];
-			}
-			elseif ($rivirow["jteet"] + $rivirow["puutteet"] == $kerattavia and $yhtiorow["puute_jt_kerataanko"] == "Q" and $yhtiorow["kerataanko_jos_vain_puute_jt"] == "") {
-				//Meill‰ on pelk‰st‰‰n JT-rivej‰ + puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
-				$ei_kerattavia += $rivirow["jteet"] + $rivirow["puutteet"];
-				$kerattavia	   -= $rivirow["jteet"] + $rivirow["puutteet"];
-			}
-
+		elseif ($rivirow["jteet"] + $rivirow["puutteet"] == $kerattavia and $yhtiorow["puute_jt_kerataanko"] == "Q" and $yhtiorow["kerataanko_jos_vain_puute_jt"] == "") {
+			//Meill‰ on pelk‰st‰‰n JT-rivej‰ + puutteita ker‰tt‰v‰n‰ ja niit‰ ei t‰ss‰ tapauksessa ker‰t‰
+			$ei_kerattavia += $rivirow["jteet"] + $rivirow["puutteet"];
+			$kerattavia	   -= $rivirow["jteet"] + $rivirow["puutteet"];
 		}
 	}
 
-/*
+
 	// debug
+	/*
 	echo "puute_jt_kerataanko: $yhtiorow[puute_jt_kerataanko]<br>";
 	echo "kerataanko_jos_vain_puute_jt: $yhtiorow[kerataanko_jos_vain_puute_jt]<br>";
 	echo "R: $rivirow[riveja]<br>";
@@ -94,7 +90,7 @@
 	echo "S: $rivirow[saldottomat]<br>";
 	echo "KER: $kerattavia<br>";
 	echo "EIKER: $ei_kerattavia<br>";
-*/
+	*/
 
 	//Tutkitaan mit‰ tehd‰‰n tilaukselle
 	if ($rivirow["riveja"] == 0 or ($kerattavia == 0 and $ei_kerattavia == 0 and $kutsuja == 'keraa.php')) {

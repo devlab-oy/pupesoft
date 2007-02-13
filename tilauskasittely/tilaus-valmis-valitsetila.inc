@@ -1,4 +1,4 @@
-'<?php
+<?php
 
 	//Tarvitsemme
 	//$laskurow jossa on laskun tiedot

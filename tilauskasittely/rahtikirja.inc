@@ -4,6 +4,8 @@ if ($tulostakopio == 'kylla') {
 	$lotsikot = $otsikot;
 }
 
+$tulostusnimi = $rakir_row['toim_nimi']." ".$rakir_row['toim_nimitark'];
+
 // rahtikirjanumero on ensimmäisen tilauksen tilausnumero...
 $rahtikirjanro = $lotsikot[0];
 
@@ -15,7 +17,7 @@ $sivu = "                              ".sprintf("%-11.s",$toitarow["sopimusnro"
       
                                $rakir_row[ytunnus]
                                               $toitarow[rahdinkuljettaja]
-         ".sprintf("%-25.s",$rakir_row['toim_nimi'])." $rahsoprow[rahtisopimus]
+         ".sprintf("%-25.s",$tulostusnimi)." $rahsoprow[rahtisopimus]
          ".sprintf("%-36.s",$rakir_row['toim_osoite'])." $aputeksti
          ".sprintf("%-36.s",$rakir_row['toim_postino']." ".$rakir_row['toim_postitp'])."
       

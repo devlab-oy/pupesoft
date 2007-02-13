@@ -17,7 +17,7 @@
 
 			// luetaan tiedosto alusta loppuun...
 			$rivi = fgets($file, 4096);
-
+			
 			while (!feof($file)) {
 				// luetaan rivi tiedostosta..
 				$poista	  = array("\"", "'", "\\", " ");
@@ -49,7 +49,7 @@
 						$tuoteno 	= $trow["tuoteno"];
 						$toimaika 	= $laskurow["toimaika"];
 						$kerayspvm 	= $laskurow["kerayspvm"];
-						$varasto 	= $laskurow["varasto"];
+						$varasto 	= $taalta;
 
 						require('lisaarivi.inc');
 
@@ -102,6 +102,7 @@
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='tee' value='file'>
 				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='taalta' value='$laskurow[varasto]'>
 				<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 
 				<table border='0' cellpadding='3' cellspacing='2'>

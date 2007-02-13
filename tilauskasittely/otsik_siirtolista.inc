@@ -134,6 +134,13 @@
 			}
 
 			echo "</select></td></tr>";
+			
+			echo "<tr><th>".t("Nimi").":</th><td colspan='3'><input type='text' size='35' name='toim_nimi' value='$srow[toim_nimi]'></td>";
+			echo "<tr><th>".t("Nimitark").":</th><td colspan='3'><input type='text' size='35' name='toim_nimitark' value='$srow[toim_nimitark]'></td>";
+			echo "<tr><th>".t("Osoite").":</th><td colspan='3'><input type='text' size='35' name='toim_osoite' value='$srow[toim_osoite]'></td>";
+			echo "<tr><th>".t("Postino").":</th><td colspan='3'><input type='text' size='8' name='toim_postino' value='$srow[toim_postino]'></td>";
+			echo "<tr><th>".t("Postitp").":</th><td colspan='3'><input type='text' size='15' name='toim_postitp' value='$srow[toim_postitp]'></td>";
+			echo "<tr><th>".t("Maa").":</th><td colspan='3'><input type='text' size='15' name='toim_maa' value='$srow[toim_maa]'></td>";
 		}
 		
 		if ($kukarow['kesken'] == 0) {
@@ -362,6 +369,29 @@
 		$vtresult = mysql_query($aquery) or pupe_error($aquery);
 		$vtrow = mysql_fetch_array($vtresult);
 		
+		if ($toim_nimi == '') {
+			$toim_nimi = $vtrow['nimi'];
+		}
+		
+		if ($toim_nimitark == '') {
+			$toim_nimitark = $vtrow['nimitark'];
+		}
+		
+		if ($toim_osoite == '') {
+			$toim_osoite = $vtrow['osoite'];
+		}
+		
+		if ($toim_postino == '') {
+			$toim_postino = $vtrow['postino'];
+		}
+		
+		if ($toim_postitp == '') {
+			$toim_postitp = $vtrow['postitp'];
+		}
+		
+		if ($toim_maa == '') {
+			$toim_maa = $vtrow['maa'];
+		}
 		
 		$query .= "	lasku SET
 					clearing		= '$clearing',
@@ -371,12 +401,12 @@
 					osoite			= '$vtrow[osoite]',
 					postino			= '$vtrow[postino]',
 					postitp			= '$vtrow[postitp]',
-					toim_maa		= '$vtrow[maa]',
-					toim_nimi		= '$vtrow[nimi]',
-					toim_nimitark	= '$vtrow[nimitark]',
-					toim_osoite		= '$vtrow[osoite]',
-					toim_postino	= '$vtrow[postino]',
-					toim_postitp	= '$vtrow[postitp]',
+					toim_maa		= '$toim_maa',
+					toim_nimi		= '$toim_nimi',
+					toim_nimitark	= '$toim_nimitark',
+					toim_osoite		= '$toim_osoite',
+					toim_postino	= '$toim_postino',
+					toim_postitp	= '$toim_postitp',
 					toimaika 		= '".$toimvv."-".$toimkk."-".$toimpp."',
 					kerayspvm 		= '".$kervv."-".$kerkk."-".$kerpp."',						
 					comments 		= '$comments',

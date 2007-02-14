@@ -35,7 +35,9 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 	echo "<th align='right'>".t("0-15 pv")."</th>";
 	echo "<th align='right'>".t("16-30 pv")."</th>";
 	echo "<th align='right'>".t("31-60 pv")."</th>";
-	echo "<th align='right'>".t("Yli 60 pv")."</th>";
+	echo "<th align='right'>".t("61-90 pv")."</th>";
+	echo "<th align='right'>".t("91-120 pv")."</th>";
+	echo "<th align='right'>".t("yli 121 pv")."</th>";
 	echo "<th align='right'>".t("Kaatotili")."</th>";
 	echo "<th align='right'>".t("Yhteensä")."</th>";
 	echo "<th align='right'>".t("Luottoraja")."</th>";
@@ -63,7 +65,9 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 				sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) >  0 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 15, summa-saldo_maksettu, 0)) aabb,
 				sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 15 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 30, summa-saldo_maksettu, 0)) bb,
 				sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 30 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 60, summa-saldo_maksettu, 0)) cc,
-				sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 60, summa-saldo_maksettu, 0)) dd
+				sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 60 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 90, summa-saldo_maksettu, 0)) dd,
+				sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 90 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 120, summa-saldo_maksettu, 0)) ee,
+				sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 120, summa-saldo_maksettu, 0)) ff
 				FROM lasku use index (yhtio_tila_mapvm)
 				WHERE tila='U'
 				AND alatila='X'
@@ -81,6 +85,8 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 	$bby = 0;
 	$ccy = 0;
 	$ddy = 0;
+	$eey = 0;
+	$ffy = 0;
 	$kky = 0;
 	$lly = 0;
 	$ylikolkyt = 0;
@@ -116,6 +122,8 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 			echo "<td align='right'>".str_replace(".",",",$row["bb"])."</td>";
 			echo "<td align='right'>".str_replace(".",",",$row["cc"])."</td>";
 			echo "<td align='right'>".str_replace(".",",",$row["dd"])."</td>";
+			echo "<td align='right'>".str_replace(".",",",$row["ee"])."</td>";
+			echo "<td align='right'>".str_replace(".",",",$row["ff"])."</td>";
 			echo "<td align='right'>".str_replace(".",",",$surow["summa"])."</td>";
 			echo "<td align='right'>".str_replace(".",",",$row["ll"])."</td>";
 			echo "<td align='right'>".str_replace(".",",",$asrow["luottoraja"])."</td>";
@@ -126,12 +134,15 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 			$bby += $row["bb"];
 			$ccy += $row["cc"];
 			$ddy += $row["dd"];
+			$eey += $row["ee"];
+			$ffy += $row["ff"];
 			$kky += $surow["summa"];
 			$lly += $row["ll"];
 			
 			$ylikolkyt += $row["cc"];
 			$ylikolkyt += $row["dd"];
-			
+			$ylikolkyt += $row["ee"];
+			$ylikolkyt += $row["ff"];			
 			$rivilask++;
 		}
 	}
@@ -144,6 +155,8 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 		echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$bby))."</td>";
 		echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ccy))."</td>";
 		echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ddy))."</td>";
+		echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$eey))."</td>";
+		echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ffy))."</td>";
 		echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$kky))."</td>";
 		echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$lly))."</td>";
 		echo "<td class='tumma'></td>";

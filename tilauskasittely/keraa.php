@@ -231,14 +231,7 @@
 							}
 							elseif ($maara[$apui] >= 0 and $maara[$apui] < $tilrivirow['varattu'] and ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS' or $otsikkorivi['clearing'] == 'JT-TILAUS')) {
 								// Jos tämä on toimitettava ennakkotilaus tai jt-tilaus
-								if($maara[$apui] == 0) {
-									//Mitätöidään rivi jos kerääjä kuittaa nollan
-									$query .= " , tyyppi	= 'D'
-												, kommentti	= '".t("Rivi mitätöitiin keräyspoikkeamana").": $who'";
-								}
-								else {
-									$query .= ", varattu='".$maara[$apui]."'";
-								}
+								$query .= ", varattu='".$maara[$apui]."'";
 
 								if($otsikkorivi['clearing'] == 'ENNAKKOTILAUS') {
 									$ejttila    = "('E')";
@@ -309,14 +302,7 @@
 									$query .= ", varattu = varattu";
 								}
 								elseif($maara[$apui] >= 0 and $maara[$apui] < $tilrivirow['varattu']) {
-									if($maara[$apui] == 0) {
-										//Mitätöidään rivi jos kerääjä kuittaa nollan
-										$query .= " , tyyppi	= 'D'
-													, kommentti	= '".t("Rivi mitätöitiin keräyspoikkeamana").": $who'";
-									}
-									else {
-										$query .= ", varattu = '".$maara[$apui]."'";
-									}
+									$query .= ", varattu = '".$maara[$apui]."'";
 									
 									if($poikkeama_kasittely[$apui] != "") {
 										$rotunnus	= $tilrivirow['otunnus'];

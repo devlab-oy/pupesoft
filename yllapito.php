@@ -88,7 +88,19 @@
 
 		// Tarkistetaan
 		$errori = '';
-		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
+		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
+			if (isset($tpp[$i])) {
+				
+				if ($tvv[$i] < 1000 and $tvv[$i] > 0) $tvv[$i] += 2000;
+				
+				$t[$i] = sprintf('%04d', $tvv[$i])."-".sprintf('%02d', $tkk[$i])."-".sprintf('%02d', $tpp[$i]);
+			
+				if(!checkdate($tkk[$i],$tpp[$i],$tvv[$i]) and ($tkk[$i]!= 0 or $tpp[$i] != 0)) {
+					$virhe[$i] = "".t("Virheellinen p‰iv‰m‰‰r‰")."";
+					$errori = 1;
+				}
+			}
+			
 			require "inc/".$toim."tarkista.inc";
 		}
 
@@ -306,6 +318,7 @@
 
 			// $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
 			// $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti
+			// $tyyppi --> 1.5 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰
 			// $tyyppi --> 2 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, eik‰ sen arvoa p‰vitet‰
 			// $tyyppi --> 3 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, mutta sen arvo p‰ivitet‰‰n
 			// $tyyppi --> 4 rivi‰ ei n‰ytet‰ ollenkaan, mutta sen arvo p‰ivitet‰‰n
@@ -320,6 +333,16 @@
 			}
 			elseif ($tyyppi == 1) {
 				echo "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
+			}
+			elseif ($tyyppi == 1.5) {
+				$vva = substr($trow[$i],0,4);		
+				$kka = substr($trow[$i],5,2);
+				$ppa = substr($trow[$i],8,2);
+				
+				echo "<td>
+						<input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
+						<input type = 'text' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
+						<input type = 'text' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
 			}
 			elseif ($tyyppi == 2) {
 				echo "<td>$trow[$i]</td>";

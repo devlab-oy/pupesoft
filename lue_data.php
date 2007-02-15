@@ -83,7 +83,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			break;
 		case "asiakas" :
 			if (strtoupper($yhtiorow['maakoodi']) == 'FI') {
-				$pakolliset = array("YTUNNUS", "OVTTUNNUS");
+				$pakolliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
 			}
 			else {
 				$pakolliset = array("YTUNNUS");

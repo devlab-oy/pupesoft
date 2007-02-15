@@ -3,6 +3,7 @@
 	if ((mysql_field_name($result, $i) == "nimi") or
 		(mysql_field_name($result, $i) == "maakoodi") or
 		(mysql_field_name($result, $i) == "ytunnus") or
+		(mysql_field_name($result, $i) == "oletus_hyvak1") or
 		(mysql_field_name($result, $i) == "pankkinimi1")) {
 		if (trim($t[$i]) == '') {
 			$virhe[$i] = "".t("Tieto puuttuu")."";

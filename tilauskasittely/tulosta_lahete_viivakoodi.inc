@@ -329,13 +329,13 @@ if (!function_exists('rivi')) {
 		if ($eanrow["eankoodi"] != 0) {
 			//oletukset viivakoodeille
 			$output   = "png";
-			$width    = "140";
+			$width    = "220";
 			$height   = "20";
 			$xres     = "1";
-			$font     = "1";
-			$drawtext = "on";
+			$font     = "2";
+			$drawtext = "off";
 			
-			$style  = BCS_ALIGN_RIGHT;
+			$style  = BCS_ALIGN_CENTER;
 			$style |= ($output  == "png") 	? BCS_IMAGE_PNG  	: 0;
 			$style |= ($output  == "jpeg") 	? BCS_IMAGE_JPEG 	: 0;
 			$style |= ($border  == "on") 	? BCS_BORDER 		: 0;
@@ -379,7 +379,7 @@ if (!function_exists('rivi')) {
 					$lask++;	
 				}
 			
-				$placement = $pdf->image_place($image, $kala+16, 435, $firstpage);
+				$placement = $pdf->image_place($image, $kala+16, 350, $firstpage);
 	
 				unset($obj);
 	

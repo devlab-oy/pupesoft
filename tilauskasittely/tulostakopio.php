@@ -220,16 +220,16 @@
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa tariffilista
 			$where1 = " tila = 'G' ";
 
-			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
-			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
-			}
+			// if ($ytunnus{0} == '£') {
+// 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
+// 							and lasku.nimitark  = '$asiakasrow[nimitark]'
+// 							and lasku.osoite    = '$asiakasrow[osoite]'
+// 							and lasku.postino   = '$asiakasrow[postino]'
+// 							and lasku.postitp   = '$asiakasrow[postitp]' ";
+// 			}
+// 			else {
+// 				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+// 			}
 
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";

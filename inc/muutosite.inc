@@ -260,7 +260,7 @@ if ($tila=='Q') { //T‰‰ll‰ tarkistetaan laskun uusi summa
 		$tee = 'E';
 		$tila = ''; 
 	}
-	if ($trow['mapvm'] != '0000-00-00') {
+	if ($trow['mapvm'] != '0000-00-00' and $trow['suoraveloitus'] == "") {
 		echo "<font class='error'>".t("Lasku on maksettu. Summaa ei voi en‰‰ muuttaa")." $trow[mapvm]</font><br>";
 		$tee = 'E';
 		$tila = ''; 
@@ -526,7 +526,7 @@ if ($tila=='') {
 	else {
 //		if (($trow['h1time'] == '') && ($trow['h2time'] == '') && ($trow['h3time'] == '') && ($trow['h4time'] == '')) { // Lasku on hyv‰ksym‰tt‰
 		if (($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) and ($kukarow['taso']!=1)) {
-			$pvm=erottele($trow['tapvm']);
+			$pvm = erottele($trow['tapvm']);
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name='tila' value='P'>
 					<input type = 'hidden' name='tee' value='M'>
@@ -538,8 +538,10 @@ if ($tila=='') {
 					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr></form>";
 		}
 //		}
+		
 		if (($trow['tila'] < 'N') or ($trow['suoraveloitus']!='')) { // Lasku on maksamatta tai suoraveloitus
 			if  ($trow['tila'] != 'L' and $trow['tila'] != 'U') { // ei myyntitilaus
+				
 				if ($trow['tapvm'] >= $yhtiorow['tilikausi_alku']) {
 					echo "<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name='tila' value='Q'>
@@ -548,7 +550,9 @@ if ($tila=='') {
 						<tr><th>".t("Muuta summa")."</th><td><input type = 'text' name = 'summa' value='$trow[summa]'>
 						<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr></form>";
 				}
-				$pvm=erottele($trow['kapvm']);
+				
+				$pvm = erottele($trow['kapvm']);
+				
 				echo "<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name='tila' value='C'>
 						<input type = 'hidden' name='tee' value='M'>
@@ -562,7 +566,8 @@ if ($tila=='') {
 			}
 		}
 		if (($trow['tila'] < 'N') or ($trow['tila'] == 'U' and $trow['mapvm']=='0000-00-00')) { // Lasku on maksamatta tai myyntilasku
-			$pvm=erottele($trow['erpcm']);		
+			$pvm = erottele($trow['erpcm']);		
+			
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type = 'hidden' name='tila' value='R'>
 					<input type = 'hidden' name='tee' value='M'>
@@ -574,7 +579,8 @@ if ($tila=='') {
 					<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr></form>";
 
 			if (($trow['kapvm'] != '0000-00-00') and ($trow['tila'] == 'U')) {
-				$pvm=erottele($trow['kapvm']);
+				$pvm = erottele($trow['kapvm']);
+				
 				echo "<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name='tila' value='B'>
 						<input type = 'hidden' name='tee' value='M'>

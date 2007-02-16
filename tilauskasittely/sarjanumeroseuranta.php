@@ -411,13 +411,13 @@
 		//Jos tuote on marginaaliverotuksen alainen niin sen pit‰‰ olla onnistuneesti ostettu jotta sen voi myyd‰
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus				osto_tunnus,
-					lasku_osto.nimi					osto_nimi,
-					lasku_myynti.tunnus				myynti_tunnus,
-					lasku_myynti.nimi				myynti_nimi,
-					tilausrivi_osto.rivihinta		ostohinta,
-					tilausrivi_osto.perheid2		osto_perheid2,
-					tilausrivi_myynti.rivihinta		myyntihinta
+					lasku_osto.tunnus									osto_tunnus,
+					lasku_osto.nimi										osto_nimi,
+					lasku_myynti.tunnus									myynti_tunnus,
+					lasku_myynti.nimi									myynti_nimi,
+					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
+					tilausrivi_osto.perheid2							osto_perheid2,
+					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta
 					FROM sarjanumeroseuranta use index (yhtio_myyntirivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -438,13 +438,13 @@
 		// Haetaan vain sellaiset sarjanumerot jotka on viel‰ vapaita
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus				osto_tunnus,
-					lasku_osto.nimi					osto_nimi,
-					lasku_myynti.tunnus				myynti_tunnus,
-					lasku_myynti.nimi				myynti_nimi,
-					tilausrivi_osto.rivihinta		ostohinta,
-					tilausrivi_osto.perheid2		osto_perheid2,
-					tilausrivi_myynti.rivihinta		myyntihinta
+					lasku_osto.tunnus									osto_tunnus,
+					lasku_osto.nimi										osto_nimi,
+					lasku_myynti.tunnus									myynti_tunnus,
+					lasku_myynti.nimi									myynti_nimi,
+					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
+					tilausrivi_osto.perheid2							osto_perheid2,
+					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta
 					FROM sarjanumeroseuranta use index (yhtio_ostorivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -501,13 +501,13 @@
 		// N‰ytet‰‰n kaikki
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
-					lasku_osto.tunnus				osto_tunnus,
-					lasku_osto.nimi					osto_nimi,
-					lasku_myynti.tunnus				myynti_tunnus,
-					lasku_myynti.nimi				myynti_nimi,
-					tilausrivi_osto.rivihinta		ostohinta,
-					tilausrivi_osto.perheid2		osto_perheid2,
-					tilausrivi_myynti.rivihinta		myyntihinta
+					lasku_osto.tunnus									osto_tunnus,
+					lasku_osto.nimi										osto_nimi,
+					lasku_myynti.tunnus									myynti_tunnus,
+					lasku_myynti.nimi									myynti_nimi,
+					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
+					tilausrivi_osto.perheid2							osto_perheid2,
+					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta
 					FROM sarjanumeroseuranta
 					LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus

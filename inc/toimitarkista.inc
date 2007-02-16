@@ -3,10 +3,9 @@
 	if ((mysql_field_name($result, $i) == "nimi") or
 		(mysql_field_name($result, $i) == "maakoodi") or
 		(mysql_field_name($result, $i) == "ytunnus") or
-		(mysql_field_name($result, $i) == "oletus_hyvak1") or
-		(mysql_field_name($result, $i) == "pankkinimi1")) {
+		(mysql_field_name($result, $i) == "oletus_hyvak1")) {
 		if (trim($t[$i]) == '') {
-			$virhe[$i] = "".t("Tieto puuttuu")."";
+			$virhe[$i] = t("Tieto puuttuu");
 			$errori = 1;
 		}
 		if (mysql_field_name($result, $i) == "maakoodi") {
@@ -22,7 +21,7 @@
 				WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
 			$sresult = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($sresult) != 1) {
-				$virhe[$i] = "".t("Tilia ei loydy")."";
+				$virhe[$i] = t("Tilia ei loydy");
 				$errori = 1;
 			}
 		}
@@ -35,7 +34,7 @@
 				if ($tmp_maakoodi == 'FI') {
 					require 'pankkitilinoikeellisuus.php';
 					if ($pankkitili == '') {
-						$virhe[$i] = "".t("Pankkitili on virheellinen")."";
+						$virhe[$i] = t("Pankkitili on virheellinen");
 						$errori = 1;
 					}
 					else {
@@ -44,7 +43,7 @@
 				}
 			}
 			else {
-				$virhe[$i] = "".t("Tieto puuttuu")."";
+				$virhe[$i] = t("Tieto puuttuu");
 				$errori = 1;
 			}
 		}
@@ -116,7 +115,7 @@
 				$srowapu = mysql_fetch_array($sresult);
 				// ei löydetty itteämme
 				if ($srowapu['tunnus'] != $tunnus) {
-					$virhe[$i] = "".t("Samalla ytunnuksella on useita toimittajia! Lisää tarkenne ovt-tunnkseen.")."";
+					$virhe[$i] = t("Samalla ytunnuksella on useita toimittajia! Lisää tarkenne ovt-tunnkseen.");
 					$errori = 1;
 				}
 			}

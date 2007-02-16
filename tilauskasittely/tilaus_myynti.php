@@ -2175,7 +2175,7 @@ if ($tee == '') {
 
 							$limitti = $row["varattu"]+$row["jt"];
 
-							$query = "	select sum(rivihinta) rivihinta
+							$query = "	select sum(rivihinta/kpl) rivihinta
 										from tilausrivi
 										where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and tunnus='$sarjarow[ostorivitunnus]'
 										LIMIT $limitti";
@@ -2484,7 +2484,7 @@ if ($tee == '') {
 
 							$limitti = (int) round($arow["varattu"],0);
 
-							$query = "	select sum(rivihinta) rivihinta
+							$query = "	select sum(rivihinta/kpl) rivihinta
 										from tilausrivi
 										where yhtio='$kukarow[yhtio]' and tuoteno='$arow[tuoteno]' and tunnus='$sarjarow[ostorivitunnus]'
 										LIMIT $limitti";

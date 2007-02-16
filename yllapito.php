@@ -15,6 +15,23 @@
 		require ("inc/parametrit.inc");
 	}
 
+	//Jotta m‰‰ritelty rajattu n‰kym‰ olisi myˆs k‰yttˆoikeudellisesti tiukka
+	$aputoim = $toim;
+	list($toim, $alias_set, $rajattu_nakyma) = explode('!!!', $toim);
+	
+	
+	// Tutkitaan v‰h‰n alias_settej‰ ja rajattua n‰kym‰‰
+	$al_lisa = " and selitetarktark = '' ";
+
+	if ($alias_set != '') {
+		if ($rajattu_nakyma != '') {
+			$al_lisa = " and selitetarktark = '$alias_set' ";
+		}
+		else {
+			$al_lisa = " and (selitetarktark = '$alias_set' or selitetarktark = '') ";
+		}
+	}
+	
 	// pikkuh‰kki, ettei rikota css kentt‰‰
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucss)) {
 		$t[$cssi] = $apucss;
@@ -89,16 +106,33 @@
 		// Tarkistetaan
 		$errori = '';
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
+			
+			//P‰iv‰m‰‰r‰ spesiaali
 			if (isset($tpp[$i])) {
-				
 				if ($tvv[$i] < 1000 and $tvv[$i] > 0) $tvv[$i] += 2000;
 				
 				$t[$i] = sprintf('%04d', $tvv[$i])."-".sprintf('%02d', $tkk[$i])."-".sprintf('%02d', $tpp[$i]);
 			
 				if(!checkdate($tkk[$i],$tpp[$i],$tvv[$i]) and ($tkk[$i]!= 0 or $tpp[$i] != 0)) {
-					$virhe[$i] = "".t("Virheellinen p‰iv‰m‰‰r‰")."";
+					$virhe[$i] = t("Virheellinen p‰iv‰m‰‰r‰");
 					$errori = 1;
 				}
+			}
+			
+			// Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
+			$al_nimi   = mysql_field_name($result, $i);
+
+			$query = "	SELECT *
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji='MYSQLALIAS'
+						and selite='$toim.$al_nimi'
+						$al_lisa";
+			$al_res = mysql_query($query) or pupe_error($query);
+
+			if(mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '' and isset($t[$i])) {
+				$virhe[$i] = t("Sinulla ei ole oikeutta p‰ivitt‰‰ t‰t‰ kentt‰‰");
+				$errori = 1;
 			}
 			
 			require "inc/".$toim."tarkista.inc";
@@ -149,7 +183,7 @@
 				$lopetus = str_replace('!!!!','?', $lopetus);
 				$lopetus = str_replace('!!','&',  $lopetus);
 
-				$lopetus .= "&yllapidossa=$toim&yllapidontunnus=$tunnus";
+				$lopetus .= "&yllapidossa=$aputoim&yllapidontunnus=$tunnus";
 
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;
@@ -181,12 +215,10 @@
 
 		echo "	<table><tr>
 				<form action='yllapito.php' method='post'>
-				<input type='hidden' name='toim' value='$toim'>
-				<input type='hidden' name='rajattu_nakyma' value='$rajattu_nakyma'>
-				<input type='hidden' name='alias_set' value='$alias_set'>";
+				<input type='hidden' name='toim' value='$aputoim'>";
 
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
-			echo "<th><a href='yllapito.php?toim=$toim&rajattu_nakyma=$rajattu_nakyma&alias_set=$alias_set&ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
+			echo "<th><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
 
 			if 	(mysql_field_len($result,$i)>10) $size='20';
 			elseif	(mysql_field_len($result,$i)<5)  $size='5';
@@ -201,9 +233,7 @@
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
 			echo "	<form action = 'yllapito.php' method = 'post'>
 					<input type='hidden' name='uusi' value='1'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='rajattu_nakyma' value='$rajattu_nakyma'>
-					<input type='hidden' name='alias_set' value='$alias_set'>
+					<input type='hidden' name='toim' value='$aputoim'>
 					<td class='back' valign='bottom'><input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></td></form>";
 		}
 
@@ -214,7 +244,7 @@
 			for ($i=1; $i<mysql_num_fields($result); $i++) {
 				if ($i == 1) {
 					if (trim($trow[1]) == '') $trow[1] = "".t("*tyhj‰*")."";
-					echo "<td><a href='yllapito.php?toim=$toim&rajattu_nakyma=$rajattu_nakyma&alias_set=$alias_set&tunnus=$trow[0]'>$trow[1]</a></td>";
+					echo "<td><a href='yllapito.php?toim=$aputoim&tunnus=$trow[0]'>$trow[1]</a></td>";
 				}
 				else {
 					echo "<td>$trow[$i]</td>";
@@ -231,39 +261,10 @@
 			echo "<b>".t("Sinulla ei ole oikeuksia p‰ivitt‰‰ t‰t‰ tietoa")."</b><br>";
 		}
 		echo "<form action = 'yllapito.php' method = 'post'>";
-		echo "<input type = 'hidden' name = 'toim' value = '$toim'>";
-		echo "<input type = 'hidden' name = 'rajattu_nakyma' value = '$rajattu_nakyma'>";
-		echo "<input type = 'hidden' name = 'alias_set' value = '$alias_set'>";
+		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
-
-		$al_lisa = " and selitetarktark = '' ";
-
-		if ($alias_set != '') {
-			if ($rajattu_nakyma != '') {
-				$al_lisa = " and selitetarktark = '$alias_set' ";
-			}
-			else {
-				$al_lisa = " and (selitetarktark = '$alias_set' or selitetarktark = '') ";
-			}
-
-			$query = "	SELECT count(*) countti
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]'
-						and laji='MYSQLALIAS'
-						and selite like '$toim.%'
-						$al_lisa";
-			$al_res = mysql_query($query) or pupe_error($query);
-			$aliarow = mysql_fetch_array($al_res);
-
-			if ($aliarow['countti'] == 0) {
-				$alias_set = '';
-				$rajattu_nakyma = '';
-			}
-
-		}
-
 
 		// Kokeillaan geneerist‰
 		$query = "	SELECT *
@@ -386,9 +387,7 @@
 
 				echo "<br><br>
 					<form action = 'yllapito.php' method = 'post' onSubmit = 'return verify()'>
-					<input type = 'hidden' name = 'toim' value='$toim'>
-					<input type = 'hidden' name = 'rajattu_nakyma' value = '$rajattu_nakyma'>
-					<input type = 'hidden' name = 'alias_set' value = '$alias_set'>
+					<input type = 'hidden' name = 'toim' value='$aputoim'>
 					<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 					<input type = 'hidden' name = 'del' value ='1'>
@@ -420,10 +419,8 @@
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit") {
 		echo "<br>
 				<form action = 'yllapito.php' method = 'post'>
-				<input type = 'hidden' name = 'toim' value='$toim'>
+				<input type = 'hidden' name = 'toim' value='$aputoim'>
 				<input type = 'hidden' name = 'uusi' value ='1'>
-				<input type = 'hidden' name = 'rajattu_nakyma' value = '$rajattu_nakyma'>
-				<input type = 'hidden' name = 'alias_set' value = '$alias_set'>
 				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 	}
 

@@ -258,6 +258,9 @@ if ($session != '') {
 		if (isset($filenimi) and $filenimi != '') {
 			header("Content-Length: ".filesize("dataout/".$filenimi));
 		}
+		elseif (isset($tmpfilenimi) and $tmpfilenimi != '') {
+			header("Content-Length: ".filesize("/tmp/".$tmpfilenimi));
+		}
 		else {
 			header("Content-Length: ".strlen($file));
 		}

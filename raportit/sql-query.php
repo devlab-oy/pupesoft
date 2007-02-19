@@ -18,7 +18,7 @@
 
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
-			echo $file;
+			readfile("/tmp/".$tmpfilenimi);	
 			exit;
 		}
 	}
@@ -51,35 +51,59 @@
 
 			$result = mysql_query($sqlhaku) or die ("<font class='error'>".mysql_error()."</font>");
 
-			$file = "";
-
-			for ($i=0; $i<mysql_num_fields($result); $i++) {
-				$file .= mysql_field_name($result,$i)."\t";
+			if(include('Spreadsheet/Excel/Writer.php')) {
+				
+				//keksitään failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+				
+				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+				$worksheet =& $workbook->addWorksheet('Sheet 1');
+			
+				$format_bold =& $workbook->addFormat();
+				$format_bold->setBold();
+			
+				$excelrivi = 0;
 			}
-			$file .= "\r\n";
+
+			if(isset($workbook)) {
+				for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+				$excelrivi++;
+			}
 
 			while ($row = mysql_fetch_array($result)) {
 				for ($i=0; $i<mysql_num_fields($result); $i++) {
-					// desimaaliluvuissa muutetaan pisteet pilkuiks...
-					if (mysql_field_type($result, $i) == 'real') {
-						$file .= str_replace(".",",", $row[$i])."\t";
+					if (mysql_field_type($result,$i) == 'real') {
+						if(isset($workbook)) {
+							$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+						}
 					}
-					else {
-						$file .= "\"$row[$i]\"\t";
+					else {						
+						if(isset($workbook)) {
+							$worksheet->writeString($excelrivi, $i, $row[$i]);
+						}
 					}
 				}
-				$file .= "\r\n";
+				$excelrivi++;
 			}
 
-			echo "<table>";
-			echo "<tr><th>".t("Tallenna tulos").":</th>";
-			echo "<form method='post' action='$PHP_SELF'>";
-			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='sqlhaku.txt'>";
-			echo "<input type='hidden' name='file' value='$file'>";
-			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-			echo "</table><br>";
-
+			if(isset($workbook)) {
+				
+				// We need to explicitly close the workbook
+				$workbook->close();
+				
+				echo "<table>";
+				echo "<tr><th>".t("Tallenna tulos").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xls'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br>";
+			}
+			
+			
 			echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
 
 			mysql_data_seek($result,0);

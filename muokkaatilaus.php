@@ -348,8 +348,8 @@
 	}
 	elseif ($toim == "TARJOUS") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, luontiaika,
-					if(date_add(luontiaika, interval 14 day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
-					DATEDIFF(luontiaika, date_sub(now(), INTERVAL 14 day)) pva,
+					if(date_add(luontiaika, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
+					DATEDIFF(luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
 					laatija, alatila, tila
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A') 

@@ -691,5 +691,12 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tarjouksen_voimaika") {
+
+		$ulos = "<td><input type='text' name='$nimi' value = '$trow[$i]' size='5'> (P‰iv‰‰ luontiajasta)</td>";
+
+		$jatko = 0;
+	}
+
 
 ?>

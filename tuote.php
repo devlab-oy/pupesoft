@@ -188,7 +188,7 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 				$sarjarow = mysql_fetch_array($sarjares);
 			
-				$tuoterow["kehahin"] = $sarjarow["kehahin"];
+				$tuoterow["kehahin"] = sprintf('%.4f', $sarjarow["kehahin"]);
 			}
 			
 			if ($tuoterow['epakurantti1pvm'] != '0000-00-00') $tuoterow['kehahin'] = $tuoterow['kehahin'] / 2;

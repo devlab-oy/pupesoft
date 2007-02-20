@@ -812,13 +812,13 @@
 				echo "<table>";
 				echo "<tr>
 						<td>Rek. no:</td><td><input type='text' name='rekno' size='15' value='$srow[rekno]'> <input type='submit' value='Hae'></td>
-						<td>Kotipuh:</td><td><input type='text' name='kotipuh' size='35' value='$srow[kotipuh]'></td></tr>";
+						<td>Kotipuh:</td><td><input type='text' name='kotipuh' size=20' value='$srow[kotipuh]'></td></tr>";
 				echo "<tr>
-						<td>Valm. nro:</td><td><input type='text' name='valmnro' size='35' value='$srow[valmnro]'></td>
-						<td>Työpuh:</td><td><input type='text' name='tyopuh' size='35' value='$srow[tyopuh]'></td></tr>";
+						<td>Valm. nro:</td><td><input type='text' name='valmnro' size='20' value='$srow[valmnro]'></td>
+						<td>Työpuh:</td><td><input type='text' name='tyopuh' size='20' value='$srow[tyopuh]'></td></tr>";
 				echo "<tr>
-						<td>Mittarilukema:</td><td><input type='text' name='mittarilukema' size='35' value='$srow[mittarilukema]'></td>
-						<td>Myyjäliike:</td><td><input type='text' name='myyjaliike' size='35' value='$srow[myyjaliike]'></td></tr>";
+						<td>Mittarilukema:</td><td><input type='text' name='mittarilukema' size='20' value='$srow[mittarilukema]'></td>
+						<td>Myyjäliike:</td><td><input type='text' name='myyjaliike' size='20' value='$srow[myyjaliike]'></td></tr>";
 
 				if ($srow["ostopvm"] == "" or $srow["ostopvm"] == "0000-00-00") {
 					$luvattupp = date("d");
@@ -852,34 +852,42 @@
 						<input type='text' name='ostopvmkk' size='3' value='$ostopvmkk'>-
 						<input type='text' name='ostopvmvv' size='6' value='$ostopvmvv'>
 						</td>
-						<td>Merkki ja malli:</td><td><input type='text' name='merkki' size='11' value='$srow[merkki]'>&nbsp;";
-				echo "<select name='merkki2'><option value='eimenu'>Valitse malli";
+						<td>Merkki ja malli:</td><td>";
+				echo "<select name='merkki2'><option value='eimenu'>Valitse merkki";
 
 
-				$query = "	SELECT distinct malli
-							FROM huollot order by malli";
-				$result = mysql_query($query) or pupe_error($query);
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio='$kukarow[yhtio]' and laji = 'sarjanumeron_li' and selite = 'MERKKI'
+							ORDER BY jarjestys, selitetarktark";
+				$vresult = mysql_query($query) or pupe_error($query);
 
-				while($row = mysql_fetch_array($result)){
-					echo "<option value = '$row[0]'>$row[0]";
+				echo "<option value = ''>".t("Valitse merkki")."</option>";
+
+				while ($vrow=mysql_fetch_array($vresult)) {
+					$sel="";
+					if ($trow[$i] == $vrow['selitetark']) {
+						$sel = "selected";
+					}
+					echo "<option value = '$vrow[selitetark]' $sel>$vrow[selitetarktark]</option>";
 				}
-
-				echo "</select></td></tr>";
+				
+				echo "</select> ja <input type='text' name='merkki' size='11' value='$srow[merkki]'></td></tr>";
 				echo "<tr><td>Tuotu:</td>
 						<td>
 						<input type='text' name='tuotupp' size='3' value='$tuotupp'>-
 						<input type='text' name='tuotukk' size='3' value='$tuotukk'>-
 						<input type='text' name='tuotuvv' size='6' value='$tuotuvv'>
 						</td>
-						<td>Malli/Värikoodi:</td><td><input type='text' name='mallivari' size='35' value='$srow[mallivari]'></td></tr>";
+						<td>Malli/Värikoodi:</td><td><input type='text' name='mallivari' size='20' value='$srow[mallivari]'></td></tr>";
 				echo "<tr><td>Luvattu:</td><td>
 						<input type='text' name='luvattupp' size='3' value='$luvattupp'>-
 						<input type='text' name='luvattukk' size='3' value='$luvattukk'>-
 						<input type='text' name='luvattuvv' size='6' value='$luvattuvv'>
 						</td>
-						<td>Työn suorittaja:</td><td><input type='text' name='suorittaja' size='35' maxlengtd='15' value='$srow[suorittaja]'></td></tr>";
-				echo "<tr><td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='4' cols='40'>$srow[komm1]</textarea></td></tr>";
-				echo "<tr><td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='4' cols='40'>$srow[komm2]</textarea></td></tr>";
+						<td>Työn suorittaja:</td><td><input type='text' name='suorittaja' size='20' maxlengtd='15' value='$srow[suorittaja]'></td></tr>";
+				echo "<tr><td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td></tr>";
+				echo "<tr><td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td></tr>";
 				echo "</table><br>";
 			}
 

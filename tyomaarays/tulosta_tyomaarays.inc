@@ -105,7 +105,7 @@
 			
 			$pdf->draw_text(390, 760, t("Y-tunnus", $kieli).": ".$laskurow["ytunnus"], $firstpage, $p);
 			$pdf->draw_text(390, 750, t("Asiakasnumero", $kieli).": ".$asrow["asiakasnro"], $firstpage, $p);
-			$pdf->draw_text(390, 740, t("Päivämäärä", $kieli).": ".tv1dateconv(substr($laskurow["lahetepvm"],0,10)) , $firstpage, $p);
+			$pdf->draw_text(390, 740, t("Päivämäärä", $kieli).": ".tv1dateconv(substr($laskurow["luontiaika"],0,10)) , $firstpage, $p);
 			$pdf->draw_text(390, 730, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], $firstpage, $p);
 			$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage, $p);
 			$pdf->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage, $p);
@@ -350,7 +350,7 @@
 															
 			$pdf->draw_rectangle(100, 20, 85, 580, $firstpage, $rectparam);
 			$pdf->draw_text(22, 90, "Teitä palveli:", $firstpage, $p);
-			$pdf->draw_text(102, 90, $kukarow["nimi"], $firstpage, $p);
+			$pdf->draw_text(102, 90, $kukarow["nimi"]."  ".$kukarow["puhno"], $firstpage, $p);
 			$pdf->draw_rectangle(100, 290, 85, 580, $firstpage, $rectparam);
 			$pdf->draw_text(300, 90, "Työn suorittaja:", $firstpage, $p);
 			$pdf->draw_text(380, 90, $laskurow["suorittaja"], $firstpage, $p);

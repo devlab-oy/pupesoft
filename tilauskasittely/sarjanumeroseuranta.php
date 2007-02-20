@@ -51,12 +51,18 @@
 		if ($rivirow["varattu"] == 0 and $rivirow["kpl"] != 0) {
 			$rivirow["varattu"] = $rivirow["kpl"];
 		}
-
-		// t‰ss‰ muutetaan myyntirivitunnus ostorivitunnukseksi jos $rivirow["varattu"] eli kappalem‰‰r‰ on negatiivinen
-		if ($rivirow["varattu"] < 0 and $tunnuskentta = "myyntirivitunnus") {
+		
+		if ($rivirow["varattu"] < 0 and ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA")) {
+			// t‰ss‰ muutetaan myyntirivitunnus ostorivitunnukseksi jos $rivirow["varattu"] eli kappalem‰‰r‰ on negatiivinen
 			$tunnuskentta 		= "ostorivitunnus";
 			$rivirow["varattu"] = abs($rivirow["varattu"]);
 			$hyvitysrivi 		= "ON";
+		}
+		elseif ($rivirow["varattu"] < 0 and ($from == "riviosto" or $from == "kohdista")) {
+			// t‰ss‰ muutetaan ostorivitunnus myyntirivitunnukseksi jos $rivirow["varattu"] eli kappalem‰‰r‰ on negatiivinen
+			$tunnuskentta 		= "myyntirivitunnus";
+			$rivirow["varattu"] = abs($rivirow["varattu"]);
+			$ostonhyvitysrivi 	= "ON";
 		}
 	}
 
@@ -407,7 +413,7 @@
 		}
 	}
 
-	if (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi != "ON") {
+	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi != "ON")) {
 		//Jos tuote on marginaaliverotuksen alainen niin sen pit‰‰ olla onnistuneesti ostettu jotta sen voi myyd‰
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
@@ -434,7 +440,7 @@
 					and tilausrivi_osto.laskutettuaika > '0000-00-00'))
 					ORDER BY sarjanumeroseuranta.sarjanumero";
 	}
-	elseif($from == "riviosto" or $from == "kohdista" or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi == "ON")) {
+	elseif((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi == "ON")) {
 		// Haetaan vain sellaiset sarjanumerot jotka on viel‰ vapaita
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,

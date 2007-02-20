@@ -428,7 +428,7 @@ if ($toiminto == "" and $ytunnus != "") {
 			}
 
 			// katotaan onko kaikki sarjanumerot ok
-			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl
+			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, abs(tilausrivi.varattu+tilausrivi.kpl) kpl
 						FROM tilausrivi use index (uusiotunnus_index)
 						JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 						WHERE tilausrivi.yhtio='$kukarow[yhtio]' and

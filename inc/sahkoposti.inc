@@ -15,9 +15,6 @@
 
 	$bound = uniqid(time()."_") ;
 
-	$kutsu = $yhtiorow["nimi"]." ".$kutsu;
-	$kutsu = str_replace(" ", "_", $kutsu);
-
 	$header  = "From: <$yhtiorow[postittaja_email]>\n";
 	$header .= "MIME-Version: 1.0\n" ;
 	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;

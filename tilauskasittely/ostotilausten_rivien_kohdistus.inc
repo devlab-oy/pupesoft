@@ -776,7 +776,14 @@ if ($tila == '') {
 		$sarjarow = mysql_fetch_array($sarjares);
 
 		if ($sarjarow["sarjanumeroseuranta"] != "") {
-			$query = "select * from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]' and ostorivitunnus='$rivirow[rivitunnus]'";
+			if ($rivirow["siskpl"] < 0) {
+				$tunken = "myyntirivitunnus";
+			}
+			else {
+				$tunken = "ostorivitunnus";
+			}
+		
+			$query = "select * from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]' and $tunken='$rivirow[rivitunnus]'";
 			$sarjares = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sarjares) == abs($rivirow["siskpl"])) {

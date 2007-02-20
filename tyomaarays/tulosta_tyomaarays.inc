@@ -348,6 +348,18 @@
 		
 			global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $masrow, $p, $pp;
 															
+			$query  = "	SELECT *
+						FROM kuka
+						WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[myyja]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$extra_asiakas = mysql_fetch_array($result);
+				
+				$kukarow["nimi"]  = $extra_asiakas["nimi"];
+				$kukarow["puhno"]  = $extra_asiakas["puhno"];
+			}
+			
 			$pdf->draw_rectangle(100, 20, 85, 580, $firstpage, $rectparam);
 			$pdf->draw_text(22, 90, "Teitä palveli:", $firstpage, $p);
 			$pdf->draw_text(102, 90, $kukarow["nimi"]."  ".$kukarow["puhno"], $firstpage, $p);

@@ -602,7 +602,8 @@
 
 					//Tehd‰‰n popupdivi jossa on sarjanumeron lis‰tietoja
 					if (function_exists("sarjanumeronlisatiedot_popup")) {
-						$divit .= sarjanumeronlisatiedot_popup ($sarrow["tunnus"], $sarrow["yhtio"]);
+						list($divitx, $text_output) = sarjanumeronlisatiedot_popup ($sarrow["tunnus"], $sarrow["yhtio"], 'popup', '');
+						$divit .= $divitx;
 					}
 
 					//Tutkitaan mihin varastoon tuote kuuluu

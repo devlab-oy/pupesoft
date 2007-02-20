@@ -123,7 +123,6 @@
 						mysql_field_name($stresult,$i)=='viikorkoeur' or
 						mysql_field_name($stresult,$i)=='tullausnumero' or
 						mysql_field_name($stresult,$i)=='laskutuspvm' or
-						mysql_field_name($stresult,$i)=='erpcm' or
 						mysql_field_name($stresult,$i)=='laskuttaja' or
 						mysql_field_name($stresult,$i)=='laskutettu' or
 						mysql_field_name($stresult,$i)=='lahetepvm' or

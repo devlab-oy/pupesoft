@@ -219,8 +219,9 @@ if (!function_exists('finvoice_otsik')) {
 
 			xml_add("OriginCode",              	                   						"Original",                  					 		$tootfinvoice);
 			xml_add("InvoiceNumber",       	 	                     					$lasrow['laskunro'],  									$tootfinvoice);
-			xml_add('InvoiceDate Format="CCYYMMDD"',									vlas_dateconv($lasrow['tapvm']),										$tootfinvoice);
-			xml_add("OrderIdentifier",													$lasrow['tunnus'],														$tootfinvoice);
+			xml_add('InvoiceDate Format="CCYYMMDD"',									vlas_dateconv($lasrow['tapvm']),						$tootfinvoice);
+			xml_add("OrderIdentifier",													$lasrow['viesti'],										$tootfinvoice);
+			xml_add("SellerReferenceIdentifier",										$lasrow['tunnus'],										$tootfinvoice);			
 			xml_add("InvoiceTotalVatExcludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($lasrow['arvo']),									$tootfinvoice);
 			xml_add("InvoiceTotalVatAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",			pp(round($lasrow['summa']-$lasrow['arvo'], 2)),			$tootfinvoice);
 			xml_add("InvoiceTotalVatIncludedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($lasrow['summa']),									$tootfinvoice);

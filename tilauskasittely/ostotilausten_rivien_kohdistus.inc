@@ -860,7 +860,11 @@ if ($tila == '') {
 			}
 		}
 		elseif ($rivirow["rivitunnus"] == $rivirow["perheid2"]) {
-			echo "<td valign='top'><input type='checkbox' name='lisaa_lisavarusteita[$rivirow[rivitunnus]]' value='$rivirow[rivitunnus]' onclick='submit()'> ".t("Lis‰‰ lis‰varusteita tuotteelle")."</td>";
+			echo "<$td valign='top'><input type='checkbox' name='lisaa_lisavarusteita[$rivirow[rivitunnus]]' value='$rivirow[rivitunnus]' onclick='submit()'> ".t("Lis‰varusteet")."</$td>";
+		}
+		
+		if ($rivirow["rivitunnus"] == $rivirow["perheid2"] or $rivirow["perheid2"] == 0) {
+			echo "<$td valign='top'><a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=uusirivi&perheid2=$rivirow[rivitunnus]&nimitykset=$nimitykset'>Liit‰ rivi</a></$td>";
 		}
 	}
 

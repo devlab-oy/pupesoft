@@ -481,6 +481,24 @@
 				}
 			}
 
+			// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
+			if ($row["sarjatunnus"] != 0) {
+				$query	= "	SELECT tilausrivi_osto.nimitys nimitys
+							FROM sarjanumeroseuranta
+							LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+							LEFT JOIN lasku lasku_osto use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
+							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+							and sarjanumeroseuranta.tunnus = '$row[sarjatunnus]'
+							HAVING nimitys is not null and nimitys != ''";
+				$sarjares = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($sarjares) > 0) {
+					$sarjarow = mysql_fetch_array($sarjares);
+				
+					$row["nimitys"] = $sarjarow["nimitys"];
+				}
+			}
+			
 			echo "<td class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a></td>";
 			echo "<td class='$vari'>$row[nimitys]</td>";
 			echo "<td class='$vari'>$row[toim_tuoteno]</td>";

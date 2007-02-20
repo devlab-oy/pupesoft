@@ -641,6 +641,47 @@
 
 			echo "</table><br>";
 
+			if ($tuoterow["sarjanumeroseuranta"] != "") {
+				$query	= "	SELECT tilausrivi_osto.tunnus, if(tilausrivi_osto.rivihinta=0 and tilausrivi_osto.tyyppi='L', tilausrivi_osto.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi_osto.alv<500, (1+tilausrivi_osto.alv/100), 1) * if(tilausrivi_osto.netto='N', (1-tilausrivi_osto.ale/100), (1-(tilausrivi_osto.ale+lasku_osto.erikoisale-(tilausrivi_osto.ale*lasku_osto.erikoisale/100))/100)), if(tilausrivi_osto.rivihinta!=0 and tilausrivi_osto.kpl!=0, tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 0)) ostosumma, 
+							tilausrivi_osto.nimitys nimitys
+							FROM sarjanumeroseuranta
+							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+							LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+							and sarjanumeroseuranta.tuoteno = '$tuoterow[tuoteno]'
+							and (tilausrivi_myynti.tunnus is null or (lasku_myynti.tila in ('N','L') and lasku_myynti.alatila != 'X'))
+							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
+				$sarjares = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($sarjares) > 0) {
+					echo "<table>";
+					echo "<tr><th colspan='2'>".t("Varasto").":</th></tr>";
+					echo "<tr><th>".t("Nimitys")."</th>";
+					echo "<th>".t("Ostohinta")."</th></tr>";
+				
+					while($sarjarow = mysql_fetch_array($sarjares)) {
+						echo "<tr><td>$sarjarow[nimitys]</td><td align='right'>".sprintf('%.2f', $sarjarow["ostosumma"])."</td></tr>";
+					}
+				
+					echo "</table><br>";
+				}
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			// Varastotapahtumat
 			echo "<table>";
 			echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";

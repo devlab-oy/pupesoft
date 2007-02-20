@@ -779,7 +779,7 @@ if ($tila == '') {
 			$query = "select * from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]' and ostorivitunnus='$rivirow[rivitunnus]'";
 			$sarjares = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($sarjares) == $rivirow["siskpl"]) {
+			if (mysql_num_rows($sarjares) == abs($rivirow["siskpl"])) {
 				echo " (<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa&nimitykset=$nimitykset' style='color:00FF00'>sarjanro OK</font></a>)";
 			}
 			else {

@@ -20,7 +20,7 @@
 	$oltilrow=mysql_fetch_array($result);
 
 	if ((mysql_num_rows($result) == 0) || (strlen($oltilrow[0]) == 0)) {
-		echo "".t("Käyttäjällä ei ollut oletustiliä")."!<br><br>";
+		echo t("Käyttäjällä ei ollut oletustiliä")."!<br><br>";
 		$tee = 'W';
 	}
 
@@ -30,7 +30,7 @@
 					oletustili = ''
 					WHERE kuka ='$kukarow[kuka]' and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
-		$tee='W';
+		$tee = 'W';
 	}
 
 	if ($tee == 'Z') {
@@ -534,6 +534,53 @@
 		echo "<br>";
 		$tee = 'DM';
 	}
+	
+	// Jaaha poistamme laskun!
+	if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
+
+		$query = "	SELECT *
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tunnus = '$tunnus'
+					and h1time = '0000-00-00 00:00:00'
+					and h2time = '0000-00-00 00:00:00'
+					and h3time = '0000-00-00 00:00:00'
+					and h4time = '0000-00-00 00:00:00'
+					and h5time = '0000-00-00 00:00:00'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) != 1) {
+			echo t('lasku kateissa') . "$tunnus</font>";
+			exit;
+		}
+
+		$trow = mysql_fetch_array ($result);
+
+		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
+
+		// Ylikirjoitetaan tiliöinnit
+		$query = "	UPDATE tiliointi SET
+					korjattu = '$kukarow[kuka]',
+					korjausaika = now()
+					WHERE ltunnus = '$tunnus' and
+					yhtio = '$kukarow[yhtio]' and
+					tiliointi.korjattu = ''";
+		$result = mysql_query($query) or pupe_error($query);
+
+		// Merkataan lasku poistetuksi
+		$query = "	UPDATE lasku SET
+					alatila = 'H',
+					tila = 'D',
+					comments = '$komm'
+					WHERE tunnus = '$tunnus' and
+					yhtio = '$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'],$tunnus)."</font><br><br>";
+
+		$tunnus = '';
+		$tee 	= 'S';
+	}
 
 	if ($tee == 'W') {
 		// Ei oletustiliä, jotern annetaan käyttäjän valita
@@ -716,12 +763,12 @@
 
 	if ($tee == 'S') {
 
-		
 		if ($tapa == 'V') {
 			$lisa = " valkoodi = '" . $valuu ."'";
 		}
 		if ($tapa == 'E') {
 			$lisa = " olmapvm = '" . $erapvm ."'";
+			
 			if ($kaikki == 'on') {
 				$lisa = " olmapvm <= '" . $erapvm ."'";
 			}
@@ -735,7 +782,13 @@
 					lasku.summa - lasku.kasumma 'kassa-alella',
 					round((lasku.summa - lasku.kasumma) * valuu.kurssi,2) 'kotivaluutassa',
 					lasku.summa, round(lasku.summa * valuu.kurssi,2) 'kotivaluutassa',
-					lasku.ebid, lasku.tunnus, lasku.olmapvm, if(lasku.maakoodi='$yhtiorow[maakoodi]',lasku.tilinumero, lasku.ultilno) tilinumero
+					lasku.ebid, lasku.tunnus, lasku.olmapvm, 
+					if(lasku.maakoodi='$yhtiorow[maakoodi]',lasku.tilinumero, lasku.ultilno) tilinumero,
+					h1time,
+					h2time,
+					h3time,
+					h4time,
+					h5time
 					FROM lasku, valuu
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					valuu.yhtio = '$kukarow[yhtio]' and
@@ -833,31 +886,57 @@
 					
 					if (($trow[4] != $trow[6]) and ($trow['summa'] > 0)) {
 						$ruksi='checked';
+						
 						if ($trow['kapvm'] < date("Y-m-d")) {
-								$ruksi=''; // Ooh, maksamme myösässä
+							$ruksi = ''; // Ooh, maksamme myösässä
 						}
-						echo "".t("Käytä kassa-ale")." <input type='Checkbox' name='kaale' $ruksi><br>";
+						echo t("Käytä kassa-ale")." <input type='Checkbox' name='kaale' $ruksi><br>";
 					}
+					
 					if ($trow['olmapvm'] != date("Y-m-d")) {
 						if ($trow['olmapvm'] < date("Y-m-d")) {
-								echo "<font class='error'>".t("Erääntynyt maksetaan heti")."</font><br>";
+							echo "<font class='error'>".t("Erääntynyt maksetaan heti")."</font><br>";
 						}
 						else {
 							echo t("Maksetaan heti")."<input type='Checkbox' name='poikkeus'><br>";
 						}
 					}
+					
 					if ($trow['summa'] < 0) { //Hyvitykset voi hoitaa ilman pankkiinlähetystä
 						echo t("Älä lähetä pankkiin")."<input type='Checkbox' name='eipankkiin'><br>";
 					}
 
-					echo "<input type='hidden' name = 'tee' value='H'>
-						<input type='hidden' name = 'tunnus' value='$trow[9]'>
-						<input type='hidden' name = 'valuu' value='$valuu'>
-						<input type='hidden' name = 'erapvm' value='$erapvm'>
-						<input type='hidden' name = 'kaikki' value='$kaikki'>
-						<input type='hidden' name = 'nimihaku' value='$nimihaku'>
-						<input type='hidden' name = 'tapa' value='$tapa'>
-						<input type='Submit' value='".t("Maksa")."'></td></form>";
+					echo "	<input type='hidden' name = 'tee' value='H'>
+							<input type='hidden' name = 'tunnus' value='$trow[9]'>
+							<input type='hidden' name = 'valuu' value='$valuu'>
+							<input type='hidden' name = 'erapvm' value='$erapvm'>
+							<input type='hidden' name = 'kaikki' value='$kaikki'>
+							<input type='hidden' name = 'nimihaku' value='$nimihaku'>
+							<input type='hidden' name = 'tapa' value='$tapa'>
+							<input type='Submit' value='".t("Maksa")."'></form>";
+						
+					if ($trow['h1time'] == '0000-00-00 00:00:00' and $trow['h2time'] == '0000-00-00 00:00:00' and $trow['h3time'] == '0000-00-00 00:00:00' and $trow['h4time'] == '0000-00-00 00:00:00' and $trow['h5time'] == '0000-00-00 00:00:00') {
+						echo "	<form action = 'maksa.php' method='post' onSubmit = 'return verify()'>
+								<input type='hidden' name='tee' value='D'>
+								<input type='hidden' name = 'tunnus' value='$trow[9]'>
+								<input type='hidden' name = 'valuu' value='$valuu'>
+								<input type='hidden' name = 'tapa' value='$tapa'>
+								<input type='hidden' name = 'erapvm' value='$erapvm'>
+								<input type='hidden' name = 'kaikki' value='$kaikki'>
+								<input type='hidden' name = 'nimihaku' value='$nimihaku'>
+								<input type='hidden' name = 'tapa' value='$tapa'>
+								<input type='Submit' value='".t("Poista lasku")."'>
+								</form>";
+					}
+					
+					echo "</td>";
+					
+					echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+								function verify(){
+									msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit? Tämä voi olla kirjanpitorikos!")."';
+									return confirm(msg);
+								}
+							</SCRIPT>";
 				}
 				else {
 					// ei ollutkaan varaa!!

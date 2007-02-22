@@ -7,7 +7,39 @@
 	if ($kutsuja == '') {
 		echo "<font class='head'>".t("Tuotteen varastopaikat")."</font><hr>";
 	}
+	
+	if (($tee == 'S') or ($tee == 'E')) {
+		if ($tee == 'S') {
+			$oper='>';
+			$suun='';
+		}
+		else {
+			$oper='<';
+			$suun='desc';
+		}
 
+		$query = "	SELECT tuote.tuoteno, sum(saldo) saldo, status
+					FROM tuote
+					LEFT JOIN tuotepaikat ON tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.yhtio=tuote.yhtio
+					WHERE tuote.yhtio = '$kukarow[yhtio]'
+					and tuote.tuoteno " . $oper . " '$tuoteno'
+					GROUP BY tuote.tuoteno
+					HAVING status != 'P' or saldo > 0
+					ORDER BY tuote.tuoteno " . $suun . "
+					LIMIT 1";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) > 0) {
+			$trow = mysql_fetch_array ($result);
+			$tuoteno = $trow['tuoteno'];
+			$tee='M';
+		}
+		else {
+			$varaosavirhe = t("Yhtään tuotetta ei löytynyt")."!";
+			$tuoteno = '';
+			$tee='Y';
+		}
+	}
+	
 	if ($tee == 'N') { //Siirretään saldo, jos se on vielä olemassa
 		if ($mista == $minne) {
 			echo "<font class='error'>".t("Kummatkin paikat ovat samat")."!</font><br><br>";
@@ -532,9 +564,31 @@
 		}
 		$ulos.= "</select>";
 
+		echo "<table><tr>";
+		
+		//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='tee' value='E'>";
+		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+		echo "<td class='back'>";
+		echo "<input type='Submit' value='".t("Edellinen tuote")."'>";
+		echo "</td>";
+		echo "</form>";
+
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type='hidden' name='tee' value='S'>";
+		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+		echo "<td class='back'>";
+		echo "<input type='Submit' value='".t("Seuraava tuote")."'>";
+		echo "</td>";
+		echo "</form>";
+		echo "</tr>";
+		echo "<tr>";
+				
 		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
 				<input type = 'hidden' name = 'tee' value ='N'>
-				<table><tr>
 				<th colspan='6'><font class='message'>$tuoteno</font> $trow[nimitys]<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'></th></tr>
 				<tr><td>".t("Lähettävä")."<br>".t("varastopaikka")."</td>
 				<td><select name='mista'>$ulos1</td>

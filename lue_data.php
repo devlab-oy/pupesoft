@@ -44,8 +44,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	if ($_FILES['userfile']['size']==0){
 		die ("<font class='error'><br>".t("Tiedosto on tyhj‰")."!</font>");
 	}
-	
-	
+
+
 	if (strtoupper($ext)=="XLS") {
 		require_once ('excel_reader/reader.php');
 
@@ -57,24 +57,24 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		$data->setRowColOffset(0);
 		$data->read($_FILES['userfile']['tmp_name']);
 	}
-	
+
 	echo "<font class='message'>".t("Tutkaillaan mit‰ olet l‰hett‰nyt").".<br></font>";
 
 	// luetaan eka rivi tiedostosta..
 	if (strtoupper($ext) == "XLS") {
 		$otsikot = array();
-	
+
 		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
 			$otsikot[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
 		}
 	}
 	else {
 		$file	 = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
-		
+
 		$rivi    = fgets($file);
 		$otsikot = explode("\t", strtoupper(trim($rivi)));
 	}
-	
+
 	// haetaan valitun taulun sarakkeet
 	$query = "SHOW COLUMNS FROM $table";
 	$fres  = mysql_query($query) or pupe_error($query);
@@ -222,7 +222,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	foreach ($otsikot as $column) {
 
 		$column = strtoupper(trim($column));
-		
+
 		if ($column != '') {
 			//laitetaan kaikki paitsi valintasarake talteen.
 			if ($column != "TOIMINTO") {
@@ -278,12 +278,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 	// oli virheellisi‰ sarakkeita tai pakollisia ei lˆytynyt..
 	if ($vikaa != 0 or $tarkea != count($pakolliset) or $postoiminto == 'X' or $kielletty > 0) {
-		
+
 		if (strtoupper($ext) != "XLS") {
 			// suljetaan avattu faili..
 			fclose ($file);
 		}
-		
+
 		if ($vikaa != 0) {
 			echo "<font class='error'>".t("V‰‰ri‰ sarakkeita tai yritit muuttaa yhtio/tunnus saraketta")."!</font><br>";
 		}
@@ -304,17 +304,15 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	}
 
 	//pit‰‰ kuolla pois jos ollaan annettu molemmat
-	if ($table == 'asiakashinta' or $table == 'asiakasalennus') {
-		
+	if (($table == 'asiakashinta' or $table == 'asiakasalennus') and ($ashinaleas == 0 or $ashinaletuo == 0)) {
+
 		if (strtoupper($ext) != "XLS") {
 			// suljetaan avattu faili..
 			fclose ($file);
 		}
-		
-		if ($ashinaleas == 0 or $ashinaletuo == 0) {
-			// ja kuollaan pois
-			die("<br><br><font class='error'>".t("Virheit‰ lˆytyi. Sinun on annettava joko ytunnuksen tai asiakasryhm‰n, ja tuotenumeron tai tuotteen alennusryhm‰n")."!<br></font>");
-		}
+
+		// ja kuollaan pois
+		die("<br><br><font class='error'>".t("Virheit‰ lˆytyi. Sinun on annettava joko ytunnuksen tai asiakasryhm‰n, ja tuotenumeron tai tuotteen alennusryhm‰n")."!<br></font>");
 	}
 
 	echo "<br><font class='message'>".t("Tiedosto ok, aloitetaan p‰ivitys")."...<br></font>";
@@ -322,7 +320,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 	// luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
 	$excelrivi[][] = array();
-	
+
 	if (strtoupper($ext) == "XLS") {
 		for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
 			for ($excej = 0; $excej <= $data->sheets[0]['numCols']; $excej++) {
@@ -332,7 +330,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	}
 	else {
 		$rivi = fgets($file);
-		
+
 		$excei = 0;
 
 		while (!feof($file)) {
@@ -340,16 +338,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$poista	 = array("'", "\\");
 			$rivi	 = str_replace($poista,"",$rivi);
 			$rivi	 = explode("\t", trim($rivi));
-			
+
 			$excej = 0;
 			foreach ($rivi as $riv) {
 				$excelrivi[$excei][$excej] = $riv;
 				$excej++;
 			}
 			$excei++;
-			
+
 			// luetaan seuraava rivi failista
-			$rivi = fgets($file);	
+			$rivi = fgets($file);
 		}
 		fclose($file);
 	}
@@ -377,7 +375,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		elseif($eiyhtiota == "TRIP") {
 			$valinta   = " TUNNUS>0 ";
 		}
-		
+
 		// Rakennetaan rivikohtainen array
 		$rivi = array();
 		foreach ($erivi as $eriv) {
@@ -419,7 +417,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						FROM $table
 						WHERE $valinta";
 			$fresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 				if (mysql_num_rows($fresult) != 0 ) {
 					if ($table != 'asiakasalennus' and $table != 'asiakashinta') {
@@ -484,16 +482,16 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 								//Kokeillaan viel‰ yht‰ tasoa ylemp‰‰ ja ollaan k‰ytt‰j‰yst‰v‰llisi‰
 								$varafat = $rivi[$r];
 								$rivi[$r] = substr($rivi[$r],0,-2)."00";
-								
+
 								$cnque = "select cn from tullinimike where cn = '$rivi[$r]'";
 								$cnres = mysql_query($cnque) or pupe_error($cnque);
-								
+
 								if (mysql_num_rows($cnres) == 0) {
 									$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
 									echo t("Tullinimike")." '$rivi[$r]' ".t("on v‰‰rin! Rivi‰ ei p‰ivitetty/lis‰tty")."!<br>";
 								}
 								else {
-									echo t("Tullinimike")." '$varafat' ".t("on v‰‰rin! Se muokattiin muotoon:")." ".$rivi[$r]."!<br>";	
+									echo t("Tullinimike")." '$varafat' ".t("on v‰‰rin! Se muokattiin muotoon:")." ".$rivi[$r]."!<br>";
 								}
 							}
 						}
@@ -903,7 +901,7 @@ else
 				<td class='back'><input type='submit' value='".t("L‰het‰")."'></td>
 			</tr>
 
-			</table>	
+			</table>
 			</form>";
 }
 

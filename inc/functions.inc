@@ -152,22 +152,23 @@ if (!function_exists("t")) {
 			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta lˆydy palvelimelta (functions.inc 1)!");
 		}
 
-		if (trim($kieli) == "") $kieli = "fi";
+		if (trim($kieli) != '') {
+			$indeksi = trim(strtolower($kieli));
+		}
+		elseif (trim($kukarow["kieli"]) != '') {
+			$indeksi = trim(strtolower($kukarow["kieli"]));
+		}
+		else {
+			$indeksi = "fi";
+		}
 		
-		if (strtolower($kieli) != 'fi') {
-			$sanakirjaquery  = "SELECT * FROM sanakirja WHERE fi = BINARY '$stringi'";
+		if ($indeksi != 'fi') {
+			$sanakirjaquery  = "SELECT $indeksi FROM sanakirja WHERE fi = BINARY '$stringi'";
 			$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 
 			if (mysql_num_rows($sanakirjaresult) > 0) {
 				$sanakirjarow = mysql_fetch_array($sanakirjaresult);
-
-				if ($kieli != '') {
-					$indeksi = strtolower($kieli);
-				}
-				else {
-					$indeksi = strtolower($kukarow["kieli"]);
-				}
-
+				
 				if (isset($sanakirjarow[$indeksi]) and trim($sanakirjarow[$indeksi]) != '') {
 					$stringi = $sanakirjarow[$indeksi];
 				}
@@ -175,7 +176,7 @@ if (!function_exists("t")) {
 					$stringi = $sanakirjarow["fi"];
 				}
 				//P‰ivitet‰‰n aikaleima
-				$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
+				//$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
 				//$sanakirjaresultupd = mysql_query($sanakirjaqueryupd, $link) or pupe_error($sanakirjaqueryupd);
 			}
 			else {

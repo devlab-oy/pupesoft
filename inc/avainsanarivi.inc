@@ -91,6 +91,9 @@
 		if ($trow[$i] == 'PAKKAUSKUVAUS') {
 			$sel28 = "selected";
 		}
+		if ($trow[$i] == 'ALVULK') {
+			$sel29 = "selected";
+		}
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
@@ -122,6 +125,7 @@
 		$ulos .= "<option value='LASKUKUVAUS'"   .$sel26.">".t("Maksuposition kuvaus")."</option>";
 		$ulos .= "<option value='KERAYSLISTA'"   .$sel27.">".t("Keräyslista")."</option>";
 		$ulos .= "<option value='PAKKAUSKUVAUS'" .$sel28.">".t("Pakkauskuvauksen tarkenne")."</option>";
+		$ulos .= "<option value='ALVULK'"        .$sel29.">".t("Ulkomaan ALV%")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -194,6 +198,32 @@
 			}
 		}
 		closedir($handle);
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "selitetark" and $sel29 == "selected") {
+
+		$query = "	SELECT distinct koodi, nimi
+					FROM maat
+					WHERE nimi != ''
+					ORDER BY koodi";
+		$vresult = mysql_query($query) or pupe_error($query);
+		$ulos = "<td><select name='$nimi'>";
+
+		$ulos .= "<option value = '' ></option>";
+
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
+				$sel = "selected";
+			}
+			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maakoodi"])) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+		}
 
 		$ulos .= "</select></td>";
 		$jatko = 0;

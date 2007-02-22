@@ -234,7 +234,7 @@
 		//Kenttä 41 Muu paljous
 		if ($rivirow["su"] != '') {
 			$tulosulos .= sprintf('%-54.54s', "");
-			$tulosulos .= sprintf('%-10.10s', $rivirow["kpl"]." ".$rivirow["su_vientiilmo"])."\r\n";
+			$tulosulos .= sprintf('%-10.10s', round($rivirow["kpl"],0)." ".$rivirow["su_vientiilmo"])."\r\n";
 		}
 		else {
 			$tulosulos .= "\r\n";
@@ -296,7 +296,7 @@
 		$tulosulos .= sprintf('%-36.36s', $yhtiorow["osoite"])."\r\n";
 		
 		$tulosulos .= sprintf('%-8.8s', "");		
-		$tulosulos .= sprintf('%-36.36s', $yhtiorow["postino"]." ".$yhtiorow["postino"]);
+		$tulosulos .= sprintf('%-36.36s', $yhtiorow["postino"]." ".$yhtiorow["postitp"]);
 		$tulosulos .= sprintf('%-3.3s', $sivu);
 		$tulosulos .= sprintf('%-3.3s', $sivut)."\r\n";
 		$tulosulos .= "\r\n";

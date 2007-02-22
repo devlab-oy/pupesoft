@@ -152,34 +152,38 @@ if (!function_exists("t")) {
 			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 1)!");
 		}
 
-		$sanakirjaquery  = "SELECT * FROM sanakirja WHERE fi = BINARY '$stringi'";
-		$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
-
-		if (mysql_num_rows($sanakirjaresult) > 0) {
-			$sanakirjarow = mysql_fetch_array($sanakirjaresult);
-
-			if ($kieli != '') {
-				$indeksi = strtolower($kieli);
-			}
-			else {
-				$indeksi = strtolower($kukarow["kieli"]);
-			}
-
-			if (isset($sanakirjarow[$indeksi]) and trim($sanakirjarow[$indeksi]) != '') {
-				$stringi = $sanakirjarow[$indeksi];
-			}
-			else {
-				$stringi = $sanakirjarow["fi"];
-			}
-			//Päivitetään aikaleima
-			$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
-			$sanakirjaresultupd = mysql_query($sanakirjaqueryupd, $link) or pupe_error($sanakirjaqueryupd);
-		}
-		else {
-			$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi', aikaleima=now(), kysytty=1";
+		if (trim($kieli) == "") $kieli = "fi";
+		
+		if (strtolower($kieli) != 'fi') {
+			$sanakirjaquery  = "SELECT * FROM sanakirja WHERE fi = BINARY '$stringi'";
 			$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
-		}
 
+			if (mysql_num_rows($sanakirjaresult) > 0) {
+				$sanakirjarow = mysql_fetch_array($sanakirjaresult);
+
+				if ($kieli != '') {
+					$indeksi = strtolower($kieli);
+				}
+				else {
+					$indeksi = strtolower($kukarow["kieli"]);
+				}
+
+				if (isset($sanakirjarow[$indeksi]) and trim($sanakirjarow[$indeksi]) != '') {
+					$stringi = $sanakirjarow[$indeksi];
+				}
+				else {
+					$stringi = $sanakirjarow["fi"];
+				}
+				//Päivitetään aikaleima
+				$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
+				//$sanakirjaresultupd = mysql_query($sanakirjaqueryupd, $link) or pupe_error($sanakirjaqueryupd);
+			}
+			else {
+				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi', aikaleima=now(), kysytty=1";
+				$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
+			}
+		}
+		
 		if ($useslave > 0) { //Palautetaan slave käyttöön
 			$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
 			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 2)!");

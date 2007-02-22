@@ -213,6 +213,13 @@
 
 		$result = mysql_query($query) or pupe_error($query);
 
+		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
+			echo "	<form action = 'yllapito.php' method = 'post'>
+					<input type='hidden' name='uusi' value='1'>
+					<input type='hidden' name='toim' value='$aputoim'>
+					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
+		}
+		
 		echo "	<table><tr>
 				<form action='yllapito.php' method='post'>
 				<input type='hidden' name='toim' value='$aputoim'>";
@@ -229,14 +236,6 @@
 		}
 
 		echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form>";
-
-		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
-			echo "	<form action = 'yllapito.php' method = 'post'>
-					<input type='hidden' name='uusi' value='1'>
-					<input type='hidden' name='toim' value='$aputoim'>
-					<td class='back' valign='bottom'><input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></td></form>";
-		}
-
 		echo "</tr>";
 
 		while ($trow=mysql_fetch_array ($result)) {

@@ -163,7 +163,7 @@ if (!function_exists("t")) {
 		}
 		
 		if ($indeksi != 'fi') {
-			$sanakirjaquery  = "SELECT $indeksi FROM sanakirja WHERE fi = BINARY '$stringi'";
+			$sanakirjaquery  = "SELECT fi, $indeksi FROM sanakirja WHERE fi = BINARY '$stringi'";
 			$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 
 			if (mysql_num_rows($sanakirjaresult) > 0) {

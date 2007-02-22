@@ -202,7 +202,7 @@ if (!function_exists("alias")) {
 
 		$hakustringi = $taulu.".".$stringi;
 
-		$aliasquery  = "SELECT selitetark FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and selitetarktark = '$setti' and selite = '$hakustringi'";
+		$aliasquery  = "SELECT selitetark FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and selitetark_2 = '$setti' and selite = '$hakustringi'";
 		$aliasresult = mysql_query($aliasquery) or pupe_error($aliasquery);
 
 		if (mysql_num_rows($aliasresult) > 0) {

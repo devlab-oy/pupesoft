@@ -21,14 +21,14 @@
 	
 	
 	// Tutkitaan vähän alias_settejä ja rajattua näkymää
-	$al_lisa = " and selitetarktark = '' ";
+	$al_lisa = " and selitetark_2 = '' ";
 
 	if ($alias_set != '') {
 		if ($rajattu_nakyma != '') {
-			$al_lisa = " and selitetarktark = '$alias_set' ";
+			$al_lisa = " and selitetark_2 = '$alias_set' ";
 		}
 		else {
-			$al_lisa = " and (selitetarktark = '$alias_set' or selitetarktark = '') ";
+			$al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') ";
 		}
 	}
 	

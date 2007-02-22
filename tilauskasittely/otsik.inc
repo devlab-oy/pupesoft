@@ -859,7 +859,7 @@
 				$query = "	SELECT *
 							FROM avainsana
 							WHERE yhtio='$kukarow[yhtio]' and laji = 'sarjanumeron_li' and selite = 'MERKKI'
-							ORDER BY jarjestys, selitetarktark";
+							ORDER BY jarjestys, selitetark_2";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				echo "<option value = ''>".t("Valitse merkki")."</option>";
@@ -869,7 +869,7 @@
 					if ($trow[$i] == $vrow['selitetark']) {
 						$sel = "selected";
 					}
-					echo "<option value = '$vrow[selitetark]' $sel>$vrow[selitetarktark]</option>";
+					echo "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
 				}
 				
 				echo "</select> ja <input type='text' name='merkki' size='11' value='$srow[merkki]'></td></tr>";

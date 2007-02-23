@@ -94,6 +94,15 @@
 		if ($trow[$i] == 'ALVULK') {
 			$sel29 = "selected";
 		}
+		if ($trow[$i] == 'KUKAASEMA') {
+			$sel30 = "selected";
+		}
+		if ($trow[$i] == 'SEURANTA') {
+			$sel31 = "selected";
+		}
+		if ($trow[$i] == 'TRIVITYYPPI') {
+			$sel32 = "selected";
+		}
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
@@ -126,6 +135,9 @@
 		$ulos .= "<option value='KERAYSLISTA'"   .$sel27.">".t("Keräyslista")."</option>";
 		$ulos .= "<option value='PAKKAUSKUVAUS'" .$sel28.">".t("Pakkauskuvauksen tarkenne")."</option>";
 		$ulos .= "<option value='ALVULK'"        .$sel29.">".t("Ulkomaan ALV%")."</option>";
+		$ulos .= "<option value='KUKAASEMA'"     .$sel30.">".t("Käytäjän asema")."</option>";
+		$ulos .= "<option value='SEURANTA'"      .$sel31.">".t("Tilauksen seurantaluokka")."</option>";
+		$ulos .= "<option value='TRIVITYYPPI'"   .$sel32.">".t("Tilausrivin tyyppi")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

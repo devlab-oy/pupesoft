@@ -60,6 +60,7 @@
 	$myy_kpl_myyty = array();
 	$myy_hintakerr = array();
 	$myy_alekerroi = array();
+	$myy_lapsi_ein = array();
 
 	$lisatyt_rivit = array();
 
@@ -423,6 +424,7 @@
 										// laitetaan lasten kertoimet kuntoon
 										$myy_hintakerr[$j] = $perherow["hintakerroin"];
 										$myy_alekerroi[$j] = $perherow["alekerroin"];
+										$myy_lapsi_ein[$j] = $perherow["ei_nayteta"];
 
 										// jos ei olla vielä toimitettu kaikkea, niin lisätään tilausrivi
 										if ($lapsitoimittamatta > 0 and (($myy_kpl[$j] - $myy_kpl_myyty[$j]) > 0 or $varataan_saldoa == "EI")) {
@@ -624,6 +626,33 @@
 										$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi' where yhtio='$kukarow[yhtio]' and tunnus in ('$perheid_lisaarivi','$lisatty_tun')";
 										$result = mysql_query($query) or pupe_error($query);
 									}
+									
+									
+									if ($myy_lapsi_ein[$indeksi] != "") {
+										$query  = "	SELECT *
+													FROM tilausrivin_lisatiedot
+													WHERE yhtio			 = '$kukarow[yhtio]'
+													and tilausrivitunnus = '$lisatty_tun'";
+										$lisatied_res = mysql_query($query) or pupe_error($query);
+										
+										if (mysql_num_rows($lisatied_res) > 0) {
+											$lisatied_row = mysql_fetch_array($lisatied_res);
+
+											$query = "	UPDATE tilausrivin_lisatiedot
+														SET ei_nayteta 	= '$myy_lapsi_ein[$indeksi]'
+														WHERE tunnus 	= '$lisatty_tun'";
+											$result = mysql_query($query) or pupe_error($query);
+										}
+										else {
+											$query = "	INSERT INTO tilausrivin_lisatiedot
+														SET yhtio		= '$kukarow[yhtio]',
+														tilausrivitunnus= '$lisatty_tun',
+														ei_nayteta 		= '$myy_lapsi_ein[$indeksi]',
+														lisatty			= now(),
+														lisannyt 		= '$kukarow[kuka]'";
+											$result = mysql_query($query) or pupe_error($query);
+										}
+									}
 								}
 
 								$rivitunnus	= "";
@@ -639,14 +668,6 @@
 					} // Jos vilä on toimittamatta kappaleita
 				} // end if toimittamatta > 0
 			} // end foreach myy_tuoteno
-
-			// Tyhjennetään mahdolliset hinnat , ennen puutehaaraa
-// kommentoidaan tää niin arkistoidaan puutehinta joka olisi oikeesti menny
-//			$hinta	= "";
-//			$ale	= "";
-//			$netto	= "";
-//			$alv 	= "";
-
 		} // end saadaanko myydä osatoimitus
 	}
 

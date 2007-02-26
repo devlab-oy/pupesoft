@@ -367,7 +367,21 @@ if ($tee == "haku") {
 			$verotonsumma = $verosumma - $vero;
 
 
-			echo "<tr><td>$llrow[nimi]</td><td>$llrow[tapvm]</td><td align='right'>".sprintf('%.2f',$verosumma)."</td><td align='right'>".sprintf('%.2f',$verotonsumma)."</td><td>$llrow[valkoodi]</td><td>$llrow[viite]</td><td>$llrow[vienti]</td>";
+			echo "<tr><td>$llrow[nimi]";
+			
+			if ($llrow["comments"] != '') {
+				echo "<br>$llrow[comments]";
+			}
+			
+			echo "</td>";
+			
+			
+			echo "	<td valign='top'>$llrow[tapvm]</td>
+					<td align='right' valign='top'>".sprintf('%.2f',$verosumma)."</td>
+					<td align='right' valign='top'>".sprintf('%.2f',$verotonsumma)."</td>
+					<td valign='top'>$llrow[valkoodi]</td>
+					<td valign='top'>$llrow[viite]</td>
+					<td valign='top'>$llrow[vienti]</td>";
 
 			$query = "	select sum(arvo) arvo, GROUP_CONCAT(DISTINCT laskunro ORDER BY laskunro SEPARATOR ', ') laskunrot
 						from lasku
@@ -390,7 +404,7 @@ if ($tee == "haku") {
 
 				$summa_kaytettavissa = $summa_kaytettavissa * $lw;
 
-				echo "<td class='green' align='right'>".sprintf('%.2f',$summa_kaytettavissa)."</td>";
+				echo "<td class='green' align='right' valign='top'>".sprintf('%.2f',$summa_kaytettavissa)."</td>";
 
 				$voikolisata = "";
 
@@ -409,16 +423,16 @@ if ($tee == "haku") {
 				if ($voikolisata == "OK") {
 
 					if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
-						echo "<td><form name='haku' action='$PHP_SELF' method='post'>
+						echo "<td valign='top'><form name='haku' action='$PHP_SELF' method='post'>
 								<input type='text' name='liitasumma' size='8'>
 								</td>";
 					}
 					else {
-						echo "<td><form name='haku' action='$PHP_SELF' method='post'> </td>";
+						echo "<td valign='top'><form name='haku' action='$PHP_SELF' method='post'> </td>";
 					}
 
 
-					echo "<td class='back'>";
+					echo "<td class='back' valign='top'>";
 					echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 					echo "<input type='hidden' name='toiminto' value='kululaskut'>";
 					echo "<input type='hidden' name='hakutapa' value='$hakutapa'>";
@@ -431,13 +445,13 @@ if ($tee == "haku") {
 					echo "</form>";
 				}
 				else {
-					echo "<td class='spec' colspan='2'>";
+					echo "<td class='spec' colspan='2' valign='top'>";
 					echo t("Tätä vaihto-omaisuuslaskua ei voida lisätä tälle keikalle")."!";
 					echo "</td></tr>";
 				}
 			}
 			else {
-				echo "<td colspan='3'>";
+				echo "<td colspan='2' valign='top'>";
 				echo t("Laskun summa on jo käytetty keikalla/keikoilla")." $apurow[laskunrot]!";
 				echo "</td></tr>";
 			}

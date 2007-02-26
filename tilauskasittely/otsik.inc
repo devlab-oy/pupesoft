@@ -155,7 +155,7 @@
 			if ($toim == "TYOMAARAYS") {
 				$qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
 			}
-			elseif($toim == "TARJOUS") {
+			elseif($toim == "TARJOUS" or $toim == "RIVISYOTTO") {
 				$qlisa = " LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus ";
 			}
 
@@ -546,7 +546,7 @@
 			echo "<td>".t("Myyjänro").": <input type='text' size='8' name='myyjanro' value='$myyjanro'> ".t("tai")."</td>";
 			echo "<td><select name='myyja'>";
 
-			$query = "	SELECT tunnus, kuka, nimi, myyja
+			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
 						FROM kuka
 						WHERE yhtio = '$kukarow[yhtio]'
 						ORDER BY nimi";
@@ -567,7 +567,118 @@
 				echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
 			}
 			echo "</select></td></tr>";
+			
+			//	Jos halutaan niin voidaan liittää hieman yhteyshenkilöitä
+			if($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
+				echo "<tr><td>".t("Yhteyshenkilö").":</td>
+				<td><select name='yhteyshenkilo_tekninen'>";
 
+				$query = "	SELECT tunnus, if(titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
+							FROM yhteyshenkilo
+							WHERE asiakas = '$srow[liitostunnus]'
+							ORDER BY nimi";
+				$yhresult = mysql_query($query) or pupe_error($query);
+
+				//duusaan näihin javascript handlerin myöhemmin
+				echo "	<option value=''>Ei teknistä yhteyshenkilöä</option>";
+				
+				while($row = mysql_fetch_array($yhresult)) {
+					$sel = "";
+					if ($row[0] == $srow["yhteyshenkilo_tekninen"]) {
+						$sel = 'selected';
+					}
+					echo "<option value='$row[0]' $sel>$row[1]</option>";
+				}
+
+				echo "	<optgroup label='Toiminto'>
+							<option value=''>Luo uusi yhteyshenkilö</option>
+						</optgroup>";
+
+				echo "</select>";
+
+
+				echo "</td>";
+
+				echo "<td>".t("Projektipaallikko").":</td>
+					<td><select name='projektipaallikko'>";
+
+				echo "<option value=''>".t("Ei projektipäällikköä")."</option>";
+
+				$query = "	SELECT tunnus, kuka, nimi, myyja, asema
+							FROM kuka
+							WHERE yhtio = '$kukarow[yhtio]'
+							and asema	= 'PP'
+							ORDER BY nimi";
+				$yresult = mysql_query($query) or pupe_error($query);
+				
+				while($row = mysql_fetch_array($yresult)) {
+					$sel = "";
+					if ($row["kuka"] == $srow["projektipaallikko"]) {
+						$sel = 'selected';
+					}
+					echo "<option value='$row[kuka]' $sel>$row[nimi]</option>";	
+				}
+				echo "</select>";
+
+				echo "</td></tr>";
+
+				echo "<tr><td>".t("Asiakkaan kaupallinen käsittelijä").":</td>
+				<td><select name='yhteyshenkilo_kaupallinen'>";
+
+				echo "	<option value=''>Ei kaupallista käsittelijää</option>";
+				mysql_data_seek($yhresult,0);
+				while($row = mysql_fetch_array($yhresult)) {
+					$sel = "";
+					if ($row[0] == $srow["yhteyshenkilo_kaupallinen"]) {
+						$sel = 'selected';
+					}
+					echo "<option value='$row[0]' $sel>$row[1]</option>";
+				}
+				
+				//duusaan näihin javascript handlerin myöhemmin
+				echo "	<optgroup label='Toiminto'>
+							<option value=''>Luo uusi yhteyshenkilö</option>
+						</optgroup>";
+				
+				echo "</select>";
+				echo "</td>";
+				
+			}
+						
+			if($yhtiorow["tilauksen_kohteet"] == "K") {
+				$query = "	SELECT tunnus, kohde
+							FROM asiakkaan_kohde
+							WHERE yhtio = '$kukarow[yhtio]' and asiakas = '$srow[liitostunnus]'
+							ORDER BY kohde";
+				$kohderesult = mysql_query($query) or pupe_error($query);
+
+				echo "<td>".t("Kohde").":</td>
+					<td><select name='asiakkaan_kohde'>";
+
+				echo "<option value=''>Asiakkaalla ei ole kohdetta</option>";
+
+				while($row = mysql_fetch_array($kohderesult)) {
+					$sel = "";
+					if ($row[0] == $srow["asiakkaan_kohde"]) {
+						$sel = 'selected';
+					}
+					echo "<option value='$row[0]' $sel>$row[0] - $row[1]</option>";
+				}
+					
+				//duusaan näihin javascript handlerin myöhemmin
+				echo "	<optgroup label='Toiminto'>
+							<option value=''>Luo uusi asiakkaan kohde</option>
+						</optgroup>";
+
+				echo "</select>";
+										
+				echo "</td></tr>";
+				
+			}
+			elseif($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
+				//	Fiksataan HTML
+				echo "<td></td><td></td></tr>";
+			}
 			if ($toim == "TYOMAARAYS") {
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 
@@ -774,9 +885,32 @@
 			}
 
 			echo "<td>".t("Tilausta ei osatoimiteta")."</td><td><input type='checkbox' name='osatoimitus' $osath></td></tr>";
+			
+			if($yhtiorow["tilauksen_seuranta"] == "K") {
+				//seuranta
+				$query = "	SELECT selite, concat_ws(' - ',selite, selitetark)
+							FROM avainsana
+							WHERE yhtio='$kukarow[yhtio]' and laji='SEURANTA'
+							ORDER BY jarjestys, selitetark";
+				$mryresult = mysql_query($query) or pupe_error($query);
+				
+				echo "<tr><td>".t("Seuranta")."</td><td><select name='seuranta'>
+					<option value=''>".t("Valitse")."</option>";
+				while($row = mysql_fetch_array($mryresult)) {
+					$sel = "";
+					if ($row[0] == $srow["seuranta"]) {
+						$sel = 'selected';
+					}
+					echo "<option value='$row[0]' $sel>$row[1]</option>";
+				}
+				echo "</select></td>";
 
+				echo "</tr>";
+				
+			}
+			
 			echo "<tr>";
-
+			
 			//laskun valuuttakoodi
 			if ($srow["valkoodi"] == '') {
 				$srow["valkoodi"] = $yhtiorow["valkoodi"];
@@ -812,7 +946,7 @@
 				echo "<table>";
 				echo "<tr>
 						<td>Rek. no:</td><td><input type='text' name='rekno' size='15' value='$srow[rekno]'> <input type='submit' value='Hae'></td>
-						<td>Kotipuh:</td><td><input type='text' name='kotipuh' size=20' value='$srow[kotipuh]'></td></tr>";
+						<td>Kotipuh:</td><td><input type='text' name='kotipuh' size='20' value='$srow[kotipuh]'></td></tr>";
 				echo "<tr>
 						<td>Valm. nro:</td><td><input type='text' name='valmnro' size='20' value='$srow[valmnro]'></td>
 						<td>Työpuh:</td><td><input type='text' name='tyopuh' size='20' value='$srow[tyopuh]'></td></tr>";
@@ -846,13 +980,13 @@
 					list($luvattuvv, $luvattukk, $luvattupp) = split('-', $srow["luvattu"]);
 				}
 
-				echo "<tr><td>Ostopvm:</td>
+				echo "<tr><td>".t("Ostopvm").":</td>
 						<td>
 						<input type='text' name='ostopvmpp' size='3' value='$ostopvmpp'>-
 						<input type='text' name='ostopvmkk' size='3' value='$ostopvmkk'>-
 						<input type='text' name='ostopvmvv' size='6' value='$ostopvmvv'>
 						</td>
-						<td>Merkki ja malli:</td><td>";
+						<td>".t("Merkki ja malli").":</td><td>";
 				echo "<select name='merkki2'><option value='eimenu'>Valitse merkki";
 
 
@@ -871,7 +1005,7 @@
 					}
 					echo "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
 				}
-				
+
 				echo "</select> ja <input type='text' name='merkki' size='11' value='$srow[merkki]'></td></tr>";
 				echo "<tr><td>Tuotu:</td>
 						<td>
@@ -1118,13 +1252,6 @@
 			$vienti = "";
 		}
 
-
-
-		$crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
-		$comments = str_replace($crlf, " ", $comments);
-		$sisviesti1 = str_replace($crlf, " ", $sisviesti1);
-		$sisviesti2 = str_replace($crlf, " ", $sisviesti2);
-
 		// liitostunnusfixaus
 		if ((int) $liitostunnus == 0) $liitostunnus = $asiakasid;
 
@@ -1288,7 +1415,19 @@
 			$result = mysql_query($query2) or pupe_error($query2);
 		}
 
-		if ($toim == "TARJOUS") {
+		if ($toim == "RIVISYOTTO") {
+			$query3 .= "laskun_lisatiedot SET
+						yhtio						= '$kukarow[yhtio]',
+						projektipaallikko			= '$projektipaallikko',
+						yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
+						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
+						seuranta					= '$seuranta',
+						asiakkaan_kohde				= '$asiakkaan_kohde',
+						otunnus 					= '$kukarow[kesken]'";
+			$query3 .= $postquery3;
+			$result = mysql_query($query3) or pupe_error($query3);
+		}
+		elseif ($toim == "TARJOUS") {
 			$query3 .= "laskun_lisatiedot SET
 						yhtio			= '$kukarow[yhtio]',
 						kolm_ovttunnus	= '$kolm_ovttunnus',
@@ -1299,6 +1438,11 @@
 						kolm_postitp	= '$kolm_postitp',
 						kolm_maa		= '$kolm_maa',
 						toimitusehto2	= '$toimitusehto2',
+						projektipaallikko			= '$projektipaallikko',
+						yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
+						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
+						seuranta					= '$seuranta',
+						asiakkaan_kohde				= '$asiakkaan_kohde',						
 						otunnus 		= '$kukarow[kesken]'";
 			$query3 .= $postquery3;
 			$result = mysql_query($query3) or pupe_error($query3);

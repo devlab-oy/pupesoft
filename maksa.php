@@ -815,7 +815,7 @@
 				</form>";
 			echo "<table><tr>";
 			
-			for ($i = 0; $i < mysql_num_fields($result)-3; $i++) {
+			for ($i = 0; $i < mysql_num_fields($result)-8; $i++) {
 				if ((mysql_field_name($result,$i) == "kapvm") or
 						(mysql_field_name($result,$i) == "kassa-alella") or
 						(mysql_field_name($result,$i) == "summa")) {
@@ -830,7 +830,7 @@
 
 			while ($trow=mysql_fetch_array ($result)) {
 		        echo "<tr>";
-		        for ($i=0; $i<mysql_num_fields($result)-3; $i++) { // ei näytetä tunnusta
+		        for ($i=0; $i<mysql_num_fields($result)-8; $i++) { // ei näytetä tunnusta
 					if (mysql_field_name($result,$i) == 'nimi') { // Näytetään nimi errorvärillä, jos on hyvityksiä samalle asiakkaalle
 						$query = "	SELECT count(*) 
 									from lasku 
@@ -842,9 +842,9 @@
 						$hyvitysrow=mysql_fetch_array ($hyvitysresult);
 						
 						if ($hyvitysrow[0] > 0)
-							echo "<td><font class='error'>$trow[$i]</td>";
+							echo "<td><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'><font class='error'>$trow[$i]</font></a></td>";
 						else
-							echo "<td>$trow[$i]</td>";
+							echo "<td><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[$i]</a></td>";
 					}
 					elseif (mysql_field_name($result,$i) == 'ebid') {
 						if (strlen($trow[$i]) > 0) {
@@ -915,7 +915,14 @@
 							<input type='hidden' name = 'tapa' value='$tapa'>
 							<input type='Submit' value='".t("Maksa")."'></form>";
 						
-					if ($trow['h1time'] == '0000-00-00 00:00:00' and $trow['h2time'] == '0000-00-00 00:00:00' and $trow['h3time'] == '0000-00-00 00:00:00' and $trow['h4time'] == '0000-00-00 00:00:00' and $trow['h5time'] == '0000-00-00 00:00:00') {
+					
+					//Tutkitaan voidaanko lasku poistaa
+					$query = "	select tunnus
+								from lasku
+								where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$trow[tunnus]'";
+					$delres2 = mysql_query($query) or pupe_error($query);
+					
+					if (mysql_num_rows($delres2) == 0 and $trow['h1time'] == '0000-00-00 00:00:00' and $trow['h2time'] == '0000-00-00 00:00:00' and $trow['h3time'] == '0000-00-00 00:00:00' and $trow['h4time'] == '0000-00-00 00:00:00' and $trow['h5time'] == '0000-00-00 00:00:00') {
 						echo "	<form action = 'maksa.php' method='post' onSubmit = 'return verify()'>
 								<input type='hidden' name='tee' value='D'>
 								<input type='hidden' name = 'tunnus' value='$trow[9]'>
@@ -927,16 +934,16 @@
 								<input type='hidden' name = 'tapa' value='$tapa'>
 								<input type='Submit' value='".t("Poista lasku")."'>
 								</form>";
-					}
 					
-					echo "</td>";
-					
-					echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+						echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 								function verify(){
 									msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit? Tämä voi olla kirjanpitorikos!")."';
 									return confirm(msg);
 								}
 							</SCRIPT>";
+					}
+					
+					echo "</td>";
 				}
 				else {
 					// ei ollutkaan varaa!!

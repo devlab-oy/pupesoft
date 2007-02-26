@@ -698,5 +698,68 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tilauksen_yhteyshenkilot") {
+
+		$sela = "";
+		$selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+		
+		$ulos = "<td><select name='$nimi'>
+					<option value='' $sela>".t("Ei yhteyshenkilöitä")."</option>
+					<option value='K' $selb>".t("Tilaukselle saa liittää yhteyshenkilöitä")."</option>		
+				</select><td>";
+		
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "tilauksen_seuranta") {
+
+		$sela = "";
+		$selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+		
+		$ulos = "<td><select name='$nimi'>
+					<option value='' $sela>".t("Ei tilauksen seurantaluokkia")."</option>
+					<option value='K' $selb>".t("Tilaukset lajitellaan seurantaluokkiin")."</option>		
+				</select><td>";
+		
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "tilauksen_kohteet") {
+
+		$sela = "";
+		$selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+		
+		$ulos = "<td><select name='$nimi'>
+					<option value='' $sela>".t("Tilauksille ei liitetä kohteita")."</option>
+					<option value='K' $selb>".t("Tilaukset liitetään asiakkaan kohde ja tilausriville positio")."</option>
+				</select><td>";
+		
+
+		$jatko = 0;
+	}
+
 
 ?>

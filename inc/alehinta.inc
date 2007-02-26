@@ -44,7 +44,7 @@
 		}
 
 		if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$hinta = yhtioval($hinta, $laskurow["vienti_kurssi"]);
+			$hinta = round(yhtioval($hinta, $laskurow["vienti_kurssi"]),2);
 		}
 	}
 	elseif ($hinta == '') {
@@ -213,7 +213,7 @@
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow       = mysql_fetch_array ($hresult);
-				$hinta 		= yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+				$hinta 		= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
 				$netto		= $hrow["laji"];
 				$aperuste  .= "Tuotteen hinnastohinta laskun valuutassa";
 			}
@@ -593,7 +593,7 @@
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow       = mysql_fetch_array ($hresult);
-				$hinta 		= yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+				$hinta 		= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
 				$netto		= $hrow["laji"];
 				$aperuste  .= "Tuotteen hinnastohinta laskun valuutassa";
 			}
@@ -787,7 +787,7 @@
 		$ale = 0;
 	}
 
-	// $debug = 1;
+	//$debug = 1;
 	if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: $ale ".t("% HINTA")." $hinta $yhtiorow[valkoodi]<br><br>";
 
 ?>

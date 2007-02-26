@@ -189,39 +189,49 @@
 				exit;
 			}
 
-			$uusi = 0;
-			$tunnus = 0;
+			$uusi 	 = 0;
+			
+			if (isset($yllapitonappi)) {
+				$tunnus  = 0;
+				$kikkeli = 0;
+			}
+			else {
+				$kikkeli = 1;
+			}
 		}
 	}
+	
+	// Rakennetaan hakumuuttujat kuntoon
+	$array = split(",", $kentat);
+    $count = count($array);
+    
+	for ($i=0; $i<=$count; $i++) {
+    	if (strlen($haku[$i]) > 0) {
+        	$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+    		$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+    	}
+    }
+    if (strlen($ojarj) > 0) {
+    	$jarjestys = $ojarj;
+    }
 
 	// Nyt selataan
-	if (($tunnus == 0) and ($uusi == 0) and ($errori == '')) {
-        $array = split(",", $kentat);
-        $count = count($array);
-        for ($i=0; $i<=$count; $i++) {
-                if (strlen($haku[$i]) > 0) {
-                        $lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-                        $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
-                }
-        }
-        if (strlen($ojarj) > 0) {
-                $jarjestys = $ojarj;
-        }
-
+	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
+		
         $query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa ";
         $query .= "$ryhma ORDER BY $jarjestys LIMIT 350";
 
 		$result = mysql_query($query) or pupe_error($query);
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
-			echo "	<form action = 'yllapito.php' method = 'post'>
+			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type='hidden' name='uusi' value='1'>
-					<input type='hidden' name='toim' value='$aputoim'>
+					<input type='hidden' name='toim' value='$aputoim'>					
 					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 		}
 		
 		echo "	<table><tr>
-				<form action='yllapito.php' method='post'>
+				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 				<input type='hidden' name='toim' value='$aputoim'>";
 
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
@@ -243,7 +253,7 @@
 			for ($i=1; $i<mysql_num_fields($result); $i++) {
 				if ($i == 1) {
 					if (trim($trow[1]) == '') $trow[1] = "".t("*tyhj‰*")."";
-					echo "<td><a href='yllapito.php?toim=$aputoim&tunnus=$trow[0]'>$trow[1]</a></td>";
+					echo "<td><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]'>$trow[1]</a></td>";
 				}
 				else {
 					echo "<td>$trow[$i]</td>";
@@ -255,11 +265,12 @@
 	}
 
 	// Nyt n‰ytet‰‰n vanha tai tehd‰‰n uusi(=tyhj‰)
-	if (($tunnus > 0) or ($uusi != 0) or ($errori != '')) {
+	if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 		if ($oikeurow['paivitys'] != 1) {
 			echo "<b>".t("Sinulla ei ole oikeuksia p‰ivitt‰‰ t‰t‰ tietoa")."</b><br>";
 		}
-		echo "<form action = 'yllapito.php' method = 'post'>";
+		
+		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa' name='mainform' method = 'post'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
@@ -371,7 +382,7 @@
 			$nimi = t("P‰ivit‰ $otsikko_nappi");
 		}
 
-		echo "<br><input type = 'submit' value = '$nimi'>";
+		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 		echo "</form>";
 
 		if ($saakopoistaa == "") {
@@ -385,7 +396,7 @@
 					</SCRIPT>";
 
 				echo "<br><br>
-					<form action = 'yllapito.php' method = 'post' onSubmit = 'return verify()'>
+					<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()'>
 					<input type = 'hidden' name = 'toim' value='$aputoim'>
 					<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
 					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -396,7 +407,7 @@
 
 		echo "</td><td class='back' valign='top'>";
 
-		if ($errori == '' and $uusi != 1 and $toim == "tuote") {
+		if ($errori == '' and $toim == "tuote") {
 			require ("inc/tuotteen_toimittajat.inc");
 		}
 
@@ -417,7 +428,7 @@
 	}
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit") {
 		echo "<br>
-				<form action = 'yllapito.php' method = 'post'>
+				<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 				<input type = 'hidden' name = 'toim' value='$aputoim'>
 				<input type = 'hidden' name = 'uusi' value ='1'>
 				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";

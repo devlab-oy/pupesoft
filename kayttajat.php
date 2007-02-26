@@ -156,6 +156,7 @@
 						extranet		= '$extranet',
 						hyvaksyja		= '$hyvaksyja',
 						lomaoikeus		= '$lomaoikeus',
+						asema			= '$asema',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
 						profiilit 		= '$profile',
 						yhtio 			= '$yhtio'";
@@ -296,6 +297,7 @@
 						extranet		= '$extranet',
 						hyvaksyja		= '$hyvaksyja',
 						lomaoikeus		= '$lomaoikeus',
+						asema			= '$asema',
 						kassamyyja 		= '$kassamyyja',
 						dynaaminen_kassamyynti = '$dynaaminen_kassamyynti',
 						jyvitys			= '$jyvitys',
@@ -697,6 +699,20 @@
 						
 				echo "<tr><th align='left'>".t("Lomaoikeus").":</th>
 						<td><input type='text' name='lomaoikeus' size='3' value='$krow[lomaoikeus]'></td></tr>";
+						
+				echo "<tr><th align='left'>".t("Asema").":</td>";
+				echo "<td><select name='asema'><option value=''>".t("Ei asemaa")."</option>";
+
+				$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='KUKAASEMA' order by jarjestys, selite";
+				$vares = mysql_query($query) or pupe_error($query);
+
+				while ($varow = mysql_fetch_array($vares)) {
+					$sel='';
+					if ($varow['selite']==$krow["asema"]) $sel = 'selected';
+					echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
+				}
+
+				echo "</select></td></tr>";
 			
 				//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
 				if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {

@@ -25,7 +25,15 @@
 		echo "<br><br><font class='message'>".t("Faktatieto tallennettu")."!</font><br>";
 		
 		$tee = '';
+	}
+	
+	if ($tee == 'TALLENNAESITYSMUOTO') {
+		$query = "UPDATE tuoteperhe SET ei_nayteta = '$ei_nayteta' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno'";
+		$result = mysql_query($query) or pupe_error($query);
 		
+		echo "<br><br><font class='message'>".t("Esitysmuoto tallennettu")."!</font><br>";
+		
+		$tee = '';	
 	}
 				
 	if ($tee == "KOPIOI") {
@@ -190,7 +198,8 @@
 									hintakerroin= '$hintakerroin',
 									alekerroin 	= '$alekerroin',
 									yhtio 		= '$kukarow[yhtio]',
-									tyyppi 		= '$hakutyyppi'
+									tyyppi 		= '$hakutyyppi',
+									ei_nayteta	= '$ei_nayteta'
 									$postq";
 					$result = mysql_query($query) or pupe_error($query);
 					
@@ -308,31 +317,69 @@
 					echo "<th>".t("Tuotereseptin valmiste").": </th>";
 				}
 				
-				echo "</td><td class='back'></td></tr>";
-				echo "<tr><td>$isatuoteno $error</td><td class='back'></td></tr>";
-				echo "</table><br>";
+				echo "<th>".t("Esitysmuoto").": </th>";
 				
-				if ($toim == 'RESEPTI') {
-					$query = "SELECT fakta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' and fakta is not null ORDER BY isatuoteno, tuoteno LIMIT 1";
-					$ressu = mysql_query($query) or pupe_error($query);
-					$faktarow = mysql_fetch_array($ressu);
-					
-					echo "<table><form action='$PHP_SELF' method='post'>";
-					echo "<tr>";
-					echo "<th>".t("Reseptin faktat").": </th></tr>";
-					echo "<td><textarea cols='35' rows='7' name='fakta'>$faktarow[fakta]</textarea></td>";
-					
-					echo "<td class='back'>
-						  <input type='hidden' name='toim' value='$toim'>
-						  <input type='hidden' name='tee' value='TALLENNAFAKTA'>
-						  <input type='hidden' name='tunnus' value='$prow[tunnus]'>
-						  <input type='hidden' name='isatuoteno' value='$isatuoteno'>	
-						  <input type='hidden' name='hakutuoteno' value='$hakutuoteno'>					
-						  <input type='submit' value='".t("Tallenna")."'>
-						  </td></form>";
-							
-					echo "</tr></table><br>";
+				echo "</td><td class='back'></td></tr>";
+				echo "<tr><td>$isatuoteno $error</td><td>";
+				
+				
+				$query = "SELECT fakta, ei_nayteta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
+				$ressu = mysql_query($query) or pupe_error($query);
+				$faktarow = mysql_fetch_array($ressu);
+				
+				
+				if ($faktarow["ei_nayteta"] == "") {
+					$sel1 = "SELECTED";
 				}
+				elseif($faktarow["ei_nayteta"] == "P") {
+					$sel2 = "SELECTED";
+				}
+				
+				echo "<form action='$PHP_SELF' method='post'>
+						<input type='hidden' name='toim' value='$toim'>
+				  		<input type='hidden' name='tee' value='TALLENNAESITYSMUOTO'>
+				  		<input type='hidden' name='tunnus' value='$prow[tunnus]'>
+				  		<input type='hidden' name='isatuoteno' value='$isatuoteno'>	
+				  		<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
+				
+				echo "	<select name='ei_nayteta'>
+						<option value='' $sel1>".t("Kaikki rivit n‰yet‰‰n")."</option>
+						<option value='P' $sel2>".t("Lapsirivej‰ ei n‰ytet‰")."</option>
+						</select>";
+				
+				echo "</td><td class='back'>  				
+					  <input type='submit' value='".t("Tallenna")."'>
+					  </form></td></tr>";
+				
+				echo "</table><br>";
+		
+				echo "<form action='$PHP_SELF' method='post'>
+						<input type='hidden' name='toim' value='$toim'>
+				  		<input type='hidden' name='tee' value='TALLENNAFAKTA'>
+				  		<input type='hidden' name='tunnus' value='$prow[tunnus]'>
+				  		<input type='hidden' name='isatuoteno' value='$isatuoteno'>	
+				  		<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
+	
+				echo "<table>";
+				echo "<tr>";
+				
+				if ($toim == "PERHE") {
+					echo "<th>".t("Tuoteperheen faktat").": </th></tr>";
+				}
+				elseif ($toim == "LISAVARUSTE") {
+					echo "<th>".t("Lis‰varusteiden faktat").": </th></tr>";
+				}
+				else {
+					echo "<th>".t("Reseptin faktat").": </th></tr>";
+				}
+				
+				echo "<td><textarea cols='35' rows='7' name='fakta'>$faktarow[fakta]</textarea></td>";
+				
+				echo "<td class='back'>  				
+					  <input type='submit' value='".t("Tallenna")."'>
+					  </td></form>";		
+				echo "</tr></table><br>";
+				
 				
 				echo "<table><tr>";
 				

@@ -55,7 +55,7 @@
 		// uuden syöttö
 		if ($tee == "uusi") {
 
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 
 			echo "<table>";
 
@@ -85,7 +85,7 @@
 
 			while ($trow = mysql_fetch_array($result)) {
 
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 				echo "<table>";
 				
 				echo "<tr><th>".t("nimi")."</th>			<td><input type='text' name='henkilonimi' 		value='$trow[nimi]'></tr>";
@@ -104,7 +104,7 @@
 				echo "<input type='hidden' name='henkilotunnus'  value='$trow[tunnus]'>";
 				echo "<input type='submit' value='".t("Päivitä yhteyshenkilo")."'></td></form>";
 
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 
 				echo "<td class='back'>";
 				echo "<input type='hidden' name='tee' value='poista'>";
@@ -118,7 +118,7 @@
 				echo "<hr>";
 			}
 
-			echo "<br><form action='$PHP_SELF' method='post'>
+			echo "<br><form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 			<input type='hidden' name='tee' value='uusi'>
 			<input type='hidden' name='toim' value='toimi'>
 			<input type='hidden' name='tunnus' value='$tunnus'>

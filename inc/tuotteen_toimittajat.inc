@@ -7,17 +7,28 @@
 		exit;
 	}
 
-	if ($tuoteno == "") {
-		echo "<font class='error'>".t("Tuote katosi")."!</font>";
+	if ($tuoteno == "" and $uusi == 1) {
+		
+		echo "	
+		<form action='#' method='POST'>
+		<input type='button' onclick='javascript:document.mainform.submit();' name='kikkeli' value='".t("Lis‰‰ uusi toimittaja")."'>
+		</form>";
+	}
+	elseif($tuoteno == "") {
+		echo "<font class='error'>".t("Tuote katosi")."!</font>";	
 	}
 	else {
 
 		$ostohinta = str_replace(',','.', $ostohinta);
 
+		if ($kikkeli == 1) {			
+			$tee = "uusi";
+		}
+
 		// tehd‰‰n tarkastuksia ja muuta kivaa
 		if ($tee != "uusi" and $tee != "poista" and $tee != "") {
 
-			$toimerrorit = array();
+			$toimerrorit  = array();
 			$toim_valinta = array();
 
 			if ($toimtunnus == "") $toimtunnus = 0;
@@ -177,7 +188,7 @@
 			}
 			$valuu .= "</select>";
 
-			echo "<form action='$PHP_SELF' method='post'>";
+			echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 
 			echo "<table>";
 			echo "<tr><th>".t("toimittaja")."</th>	<td>";
@@ -211,8 +222,6 @@
 
 		// selataan vanhoja
 		if ($tee == "") {
-
-
 			$query  = "select * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -260,7 +269,7 @@
 					$tvrosw  = array();
 				}
 
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 				echo "<table>";
 				echo "<tr><th>".t("toimittaja")."</th>	<td>";
 
@@ -292,7 +301,7 @@
 				echo "<input type='hidden' name='toimittajatunnus'  value='$trow[liitostunnus]'>";
 				echo "<input type='submit' value='".t("P‰ivit‰ toimittaja")."'></td></form>";
 
-				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 
 				echo "<td class='back'>";
 				echo "<input type='hidden' name='tee' value='poista'>";
@@ -307,7 +316,7 @@
 				echo "<hr>";
 			}
 
-			echo "<br><form action='$PHP_SELF' method='post'>
+			echo "<br><form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 			<input type='hidden' name='tee' value='uusi'>
 			<input type='hidden' name='toim' value='tuote'>
 			<input type='hidden' name='tunnus' value='$tunnus'>
@@ -315,7 +324,6 @@
 			<input type='submit' value='".t("Lis‰‰ uusi toimittaja")."'></form>";
 
 		}
-
 	}
 
 ?>

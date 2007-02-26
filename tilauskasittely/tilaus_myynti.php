@@ -1882,7 +1882,7 @@ if ($tee == '') {
 
 			echo "<tr><th>".t("#")."</th>";
 
-			if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
+			if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS" or $yhtiorow['tilauksen_kohteet'] == 'K') {
 				echo "<th>".t("Tyyppi")."</th>";
 			}
 
@@ -1978,40 +1978,6 @@ if ($tee == '') {
 					$row["hyllytaso"] = "";
 				}
 				
-				$rivino--;
-				
-				// Tuoteperheiden lapsille ei näytetä rivinumeroa
-				if ($row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0)) {
-
-					if ($row["perheid"] == 0) {
-						$pklisa = " and perheid2 = '$row[perheid2]'";
-					}
-					else {
-						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
-					}
-
-					$query = "	select sum(if(kommentti != '',1,0)), count(*)
-								from tilausrivi
-								where yhtio = '$kukarow[yhtio]'
-								and otunnus = '$kukarow[kesken]'
-								$pklisa";
-					$pkres = mysql_query($query) or pupe_error($query);
-					$pkrow = mysql_fetch_array($pkres);
-										
-					$pknum = $pkrow[0] + $pkrow[1];
-					$borderlask = $pkrow[1];
-					
-					echo "<tr><td valign='top' rowspan='$pknum' style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$rivino</td>";
-				}
-				elseif($row["perheid"] == 0 and $row["perheid2"] == 0) {
-					if($row["kommentti"] != "") {
-						echo "<tr><td valign='top' rowspan='2'>$rivino</td>";
-					}	
-					else {
-						echo "<tr><td valign='top'>$rivino</td>";	
-					}				
-				}
-				
 				if ($row["var"] == "P") {
 					$class = " class='spec' ";
 				}
@@ -2035,10 +2001,44 @@ if ($tee == '') {
 					}
 				}
 				
+				$rivino--;
+				
+				// Tuoteperheiden lapsille ei näytetä rivinumeroa
+				if ($row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0)) {
+
+					if ($row["perheid"] == 0) {
+						$pklisa = " and perheid2 = '$row[perheid2]'";
+					}
+					else {
+						$pklisa = " and (perheid = '$row[perheid]' or perheid2 = '$row[perheid]')";
+					}
+
+					$query = "	select sum(if(kommentti != '',1,0)), count(*)
+								from tilausrivi
+								where yhtio = '$kukarow[yhtio]'
+								and otunnus = '$kukarow[kesken]'
+								$pklisa";
+					$pkres = mysql_query($query) or pupe_error($query);
+					$pkrow = mysql_fetch_array($pkres);
+										
+					$pknum = $pkrow[0] + $pkrow[1];
+					$borderlask = $pkrow[1];
+					
+					echo "<tr><td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$rivino</td>";
+				}
+				elseif($row["perheid"] == 0 and $row["perheid2"] == 0) {
+					if($row["kommentti"] != "") {
+						echo "<tr><td valign='top' rowspan='2'>$rivino</td>";
+					}	
+					else {
+						echo "<tr><td valign='top'>$rivino</td>";	
+					}				
+				}
+					
 				$classlisa = "";
 								
 				if($borderlask == $pkrow[1] and $pkrow[1] > 0) {
-					$classlisa = " style='border-top: 1px solid; border-right: 1px solid;' ";
+					$classlisa = $class." style='border-top: 1px solid; border-right: 1px solid;' ";
 					$class    .= " style='border-top: 1px solid; ";
 					$borderlask--;
 				}
@@ -2310,7 +2310,13 @@ if ($tee == '') {
 							$sarjares = mysql_query($query) or pupe_error($query);
 							$sarjarow = mysql_fetch_array($sarjares);
 
-							$kate = sprintf('%.2f',100*($kotisumma_alviton - $sarjarow["rivihinta"])/$kotisumma_alviton)."%";
+							
+							if ($kotisumma_alviton != 0) {
+								$kate = sprintf('%.2f',100*($kotisumma_alviton - $sarjarow["rivihinta"])/$kotisumma_alviton)."%";
+							}
+							else {
+								$kate = "0%";
+							}
 						}
 						else {
 							$kate = "N/A";

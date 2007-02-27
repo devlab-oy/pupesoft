@@ -324,7 +324,18 @@
 								$myyrow["perheid2"] = $myyrow["tunnus"];	
 							}
 							
-							$query = "	SELECT tuoteno, kpl, tilkpl, var
+							
+							// Ostorivi
+							$query = "	SELECT if(kpl!=0, kpl, tilkpl) kpl
+										FROM tilausrivi 
+										WHERE yhtio  = '$kukarow[yhtio]' 
+										and tunnus   = '$sarjarow[perheid2]'
+										and perheid2!= 0";
+							$sarjares = mysql_query($query) or pupe_error($query);
+							$ostorow = mysql_fetch_array($sarjares);
+														
+							// Haetaan muut lisävarusteet
+							$query = "	SELECT tuoteno, round(kpl/$ostorow[kpl]) kpl, round(tilkpl/$ostorow[kpl]) tilkpl, var
 										FROM tilausrivi 
 										WHERE yhtio  = '$kukarow[yhtio]' 
 										and perheid2 = '$sarjarow[perheid2]'
@@ -332,7 +343,7 @@
 										and tunnus  != '$sarjarow[perheid2]'
 										and perheid2!= 0";
 							$sarjares = mysql_query($query) or pupe_error($query);
-						
+												
 							while ($sarjarow = mysql_fetch_array($sarjares)) {
 						
 								// haetaan tuotteen tiedot

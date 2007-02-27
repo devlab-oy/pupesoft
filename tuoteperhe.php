@@ -331,7 +331,7 @@
 				if ($faktarow["ei_nayteta"] == "") {
 					$sel1 = "SELECTED";
 				}
-				elseif($faktarow["ei_nayteta"] == "P") {
+				elseif($faktarow["ei_nayteta"] == "E") {
 					$sel2 = "SELECTED";
 				}
 				
@@ -344,7 +344,7 @@
 				
 				echo "	<select name='ei_nayteta'>
 						<option value='' $sel1>".t("Kaikki rivit n‰yet‰‰n")."</option>
-						<option value='P' $sel2>".t("Lapsirivej‰ ei n‰ytet‰")."</option>
+						<option value='E' $sel2>".t("Lapsirivej‰ ei n‰ytet‰")."</option>
 						</select>";
 				
 				echo "</td><td class='back'>  				

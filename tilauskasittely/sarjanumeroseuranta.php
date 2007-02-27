@@ -464,6 +464,7 @@
 	}
 	else {
 		$lisa  = "";
+		$lisa2 = "";
 
 		if ($ostotilaus_haku != "") {
 			if (is_numeric($ostotilaus_haku)) {
@@ -494,24 +495,23 @@
 		}
 
 		if ($lisatieto_haku) {
-			$lisa .= " and sarjanumeroseuranta.lisatieto like '$lisatieto_haku%' ";
+			$lisa .= " and sarjanumeroseuranta.lisatieto like '%$lisatieto_haku%' ";
 		}
 
 		if ($tuoteno_haku) {
-			$lisa .= " and sarjanumeroseuranta.tuoteno like '$tuoteno_haku%' ";
-		}
-
-		if ($nimitys_haku) {
-			$lisa .= " and tuote.nimitys like '$nimitys_haku%' ";
+			$lisa .= " and sarjanumeroseuranta.tuoteno like '%$tuoteno_haku%' ";
 		}
 
 		if ($sarjanumero_haku) {
-			$lisa .= " and sarjanumeroseuranta.sarjanumero like '$sarjanumero_haku%' ";
+			$lisa .= " and sarjanumeroseuranta.sarjanumero like '%$sarjanumero_haku%' ";
 		}
+			
+		if ($nimitys_haku) {
+			$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
+		}		
 		
-		
-		if ($lisa == "") {
-			$lisa = " HAVING osto_tunnus is null or myynti_tunnus is null";
+		if ($lisa == "" and $lisa2 == "") {
+			$lisa2 = " HAVING osto_tunnus is null or myynti_tunnus is null";
 		}
 
 		// Näytetään kaikki
@@ -532,6 +532,7 @@
 					LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					$lisa
+					$lisa2
 					ORDER BY tuoteno, myyntirivitunnus
 					LIMIT 50";
 	}

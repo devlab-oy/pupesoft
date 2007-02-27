@@ -467,7 +467,12 @@
 
 		if ($ostotilaus_haku != "") {
 			if (is_numeric($ostotilaus_haku)) {
-				$lisa .= " and lasku_osto.tunnus='$ostotilaus_haku' ";
+				if ($ostotilaus_haku == 0) {
+					$lisa .= " and lasku_osto.tunnus is null ";
+				}
+				else {
+					$lisa .= " and lasku_osto.tunnus='$ostotilaus_haku' ";
+				}
 			}
 			else {
 				$lisa .= " and match (lasku_osto.nimi) against ('$ostotilaus_haku*' IN BOOLEAN MODE) ";
@@ -475,8 +480,13 @@
 		}
 
 		if ($myyntitilaus_haku != "") {
-			if (is_numeric($myyntitilaus_haku)) {
-				$lisa .= " and lasku_myynti.tunnus='$myyntitilaus_haku' ";
+			if (is_numeric($myyntitilaus_haku)) {				
+				if ($myyntitilaus_haku == 0) {
+					$lisa .= " and lasku_myynti.tunnus is null ";
+				}
+				else {
+					$lisa .= " and lasku_myynti.tunnus='$myyntitilaus_haku' ";
+				}
 			}
 			else {
 				$lisa .= " and match (lasku_myynti.nimi) against ('$myyntitilaus_haku*' IN BOOLEAN MODE) ";
@@ -506,7 +516,7 @@
 
 		// N‰ytet‰‰n kaikki
 		$query	= "	SELECT sarjanumeroseuranta.*,
-					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
+					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
 					lasku_osto.tunnus									osto_tunnus,
 					lasku_osto.nimi										osto_nimi,
 					lasku_myynti.tunnus									myynti_tunnus,

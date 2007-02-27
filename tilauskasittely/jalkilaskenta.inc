@@ -476,13 +476,11 @@ if ($tuoteno != '') {
 
 						while (($trow = mysql_fetch_array($result)) and ($jlerror == 0)) {
 
-
 							// kun löydetään eka tulo, voidaan alkaa hommiin...
 							if (($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') and $eka == 1) {
 								$vlaadittu = $trow['laadittu'];
 								$eka = 0;
 							}
-
 
 							// jos kyseessä on tulo ja ollaan jo löydetty eka tulo
 							if (($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') and $eka == 0) {
@@ -500,8 +498,8 @@ if ($tuoteno != '') {
 
 								if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Tulo. $trow[kpl] kappaletta. Saldo ennen tuloa: $uusisaldo Kehahin ennen tuloa: $uusikehahin Sort: Asc</font><br>";
 
-								// lasketaan uusi kehahin
-								if ($uusisaldo + $trow['kpl'] > 0) {
+								// kehahin matikka. lasketaan uusi kehahin jos päädytään plussalle ja lähdetään plussalta
+								if ($uusisaldo + $trow['kpl'] > 0 and $uusisaldo > 0) {
 									if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Uusi kehahin (Matikka): uusikehahin = ($uusikehahin * $uusisaldo + $trow[kplhinta] * $trow[kpl]) / ($uusisaldo + $trow[kpl])</font><br>";
 									$uusikehahin = round(($uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl']) / ($uusisaldo + $trow['kpl']),4);
 								}

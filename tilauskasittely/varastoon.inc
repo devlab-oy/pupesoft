@@ -120,7 +120,15 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 	if ($tuorow['tuotekerroin'] <= 0) $tuorow['tuotekerroin'] = 1;
 
-	$osuus   = $erikoisale*$tilrivirow['hinta']*abs($tilrivirow['varattu'])*$tuorow['tuotekerroin']/$laskurow['summa'];	// kuinka paljon t‰m‰ rivi on koko tilauksesta
+	// jos kysess‰ on kotimainen vaihto-omaisuuslasku, pit‰‰ lis‰t‰ tuotteen hintaan alvi
+	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
+		$alvit = 1 + $tuorow["alv"] / 100;
+	}
+	else {
+		$alvit = 1;
+	}
+
+	$osuus   = $erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$tuorow['tuotekerroin']/$laskurow['summa'];	// kuinka paljon t‰m‰ rivi on koko tilauksesta
 	$rahtios = $osuus*$rahtikulut;	// lasketaan sama osuus rahtikuluista t‰lle riville
 
 	if ($tilrivirow['varattu'] < 0) {
@@ -151,8 +159,8 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 	//Keskihankintahintaa yll‰pidet‰‰n vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
 	if ($tuorow["sarjanumeroseuranta"] == "") {
-		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0) {
-			// Kehahin matikka, tuotteella pit‰‰ olla saldoa ett‰ edes tehd‰‰n matikkaa
+		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0) {
+			// kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa
 			if ($debug >= 1) echo "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: kehahin = ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu])</font><br>";
 			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']),4);
 		}
@@ -315,15 +323,15 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					laskutettu = '$kukarow[kuka]'
 					WHERE yhtio='$kukarow[yhtio]' and otunnus='$tilrivirow[otunnus]' and (tunnus='$tilrivirow[tunnus]' or perheid='$tilrivirow[tunnus]')";
 		$varastoon_result = mysql_query($query) or pupe_error($query);
-		
+
 		$rivia ++;
-		
+
 		// n‰m‰ halutaan koittaa suoratoimittaa
 		if ($tilrivirow['tilaajanrivinro'] <> 0) {
 			$superirivit .= "'$tilrivirow[tunnus]',";
 		}
 
-		
+
 	}
 
 	// n‰ytet‰‰n ruudulla

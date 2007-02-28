@@ -47,7 +47,7 @@ if ($toim == 'vienti') {
 
 	}
 
-	if ((int) $row["kauppatapahtuman_luonne"] == 0) {
+	if ((int) $row["kauppatapahtuman_luonne"] <= 0) {
 	   	$virhetxt .= t("Laskunumero").": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$toim&tee=K&otunnus=$intrkeikk[tunnus]'>$row[laskunro]</a>. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
 		$virhe++;
 	}
@@ -112,7 +112,7 @@ if ($toim == 'tuonti') {
 		}
 	}
 
-	if ((int) $row["kauppatapahtuman_luonne"] == 0) {
+	if ((int) $row["kauppatapahtuman_luonne"] <= 0) {
 	   	$virhetxt .= t("Keikka").": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$toim&tee=K&otunnus=$intrkeikk[tunnus]'>$row[laskunro]</a>. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
 		$virhe++;
 	}

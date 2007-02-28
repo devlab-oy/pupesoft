@@ -13,7 +13,7 @@
 			$tilausnumero 		= 0;
 		}
 	}
-	
+
 	//katsotaan että kukarow kesken ja $tilausnumero stemmaavat keskenään
 	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 		echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("Käy aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
@@ -56,7 +56,7 @@
 			//Löytyi monta sopivaa, näytetään formi, mutta ei otsikkoa
 			$tila = 'EI_NAYTETA';
 		}
-		
+
 		/*
 		$ytunnus	= $nimi;
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
@@ -567,7 +567,7 @@
 				echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
 			}
 			echo "</select></td></tr>";
-			
+
 			//	Jos halutaan niin voidaan liittää hieman yhteyshenkilöitä
 			if($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
 				echo "<tr><td>".t("Yhteyshenkilö").":</td>
@@ -581,7 +581,7 @@
 
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<option value=''>Ei teknistä yhteyshenkilöä</option>";
-				
+
 				while($row = mysql_fetch_array($yhresult)) {
 					$sel = "";
 					if ($row[0] == $srow["yhteyshenkilo_tekninen"]) {
@@ -610,13 +610,13 @@
 							and asema	= 'PP'
 							ORDER BY nimi";
 				$yresult = mysql_query($query) or pupe_error($query);
-				
+
 				while($row = mysql_fetch_array($yresult)) {
 					$sel = "";
 					if ($row["kuka"] == $srow["projektipaallikko"]) {
 						$sel = 'selected';
 					}
-					echo "<option value='$row[kuka]' $sel>$row[nimi]</option>";	
+					echo "<option value='$row[kuka]' $sel>$row[nimi]</option>";
 				}
 				echo "</select>";
 
@@ -634,17 +634,17 @@
 					}
 					echo "<option value='$row[0]' $sel>$row[1]</option>";
 				}
-				
+
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<optgroup label='Toiminto'>
 							<option value=''>Luo uusi yhteyshenkilö</option>
 						</optgroup>";
-				
+
 				echo "</select>";
 				echo "</td>";
-				
+
 			}
-						
+
 			if($yhtiorow["tilauksen_kohteet"] == "K") {
 				$query = "	SELECT tunnus, kohde
 							FROM asiakkaan_kohde
@@ -664,16 +664,16 @@
 					}
 					echo "<option value='$row[0]' $sel>$row[0] - $row[1]</option>";
 				}
-					
+
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<optgroup label='Toiminto'>
 							<option value=''>Luo uusi asiakkaan kohde</option>
 						</optgroup>";
 
 				echo "</select>";
-										
+
 				echo "</td></tr>";
-				
+
 			}
 			elseif($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
 				//	Fiksataan HTML
@@ -725,12 +725,12 @@
 				echo "<td>".t("Valmistus-Tilaus")."</td>";
 			}
 			elseif ($srow["tilaustyyppi"] != 'E' or $templ == 0) {
-				
+
 				//Tarvitaan ainakin tarjoustilauksilla
 				if($srow["clearing"] != '') {
 					echo "<input type='hidden' name='clearing' value='$srow[clearing]'>";
 				}
-								
+
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 				echo "<td><select name='tilaustyyppi'>";
 
@@ -800,10 +800,10 @@
 			if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah = 'CHECKED';
-			
+
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ($toim == "TARJOUS" and $kukarow["kesken"] == 0)) $osath = 'CHECKED';
-			
+
 			if ($srow['chn'] == '999') $laskkielto = 'CHECKED';
 
 			echo "<td>".t("Sisäinen lasku")."</td><td><input type='checkbox' name='sisainen' $sisah></td>";
@@ -885,7 +885,7 @@
 			}
 
 			echo "<td>".t("Tilausta ei osatoimiteta")."</td><td><input type='checkbox' name='osatoimitus' $osath></td></tr>";
-			
+
 			if($yhtiorow["tilauksen_seuranta"] == "K") {
 				//seuranta
 				$query = "	SELECT selite, concat_ws(' - ',selite, selitetark)
@@ -893,7 +893,7 @@
 							WHERE yhtio='$kukarow[yhtio]' and laji='SEURANTA'
 							ORDER BY jarjestys, selitetark";
 				$mryresult = mysql_query($query) or pupe_error($query);
-				
+
 				echo "<tr><td>".t("Seuranta")."</td><td><select name='seuranta'>
 					<option value=''>".t("Valitse")."</option>";
 				while($row = mysql_fetch_array($mryresult)) {
@@ -906,11 +906,11 @@
 				echo "</select></td>";
 
 				echo "</tr>";
-				
+
 			}
-			
+
 			echo "<tr>";
-			
+
 			//laskun valuuttakoodi
 			if ($srow["valkoodi"] == '') {
 				$srow["valkoodi"] = $yhtiorow["valkoodi"];
@@ -1134,14 +1134,14 @@
 
 				//lasketaan alvit
 				$hinta 	= $uusihinta;
-				
+
 				if($row["alv"] < 500) {
 					$alv = "";
 				}
 				else {
 					$alv = 500;
 				}
-				
+
 				require ("alv.inc");
 				$uusihinta = $hinta;
 
@@ -1274,68 +1274,68 @@
 		list($valkoodi, $kurssi) = explode('##', $valkoodi);
 
 		$query .= "	lasku SET
-					ytunnus			= '$ytunnus',
-					nimi 			= '$nimi',
-					nimitark 		= '$nimitark',
-					osoite 			= '$osoite',
-					postino 		= '$postino',
-					postitp 		= '$postitp',
-					maa 			= '$maa',
-					toim_nimi 		= '$tnimi',
-					toim_nimitark 	= '$tnimitark',
-					toim_osoite 	= '$tosoite',
-					toim_postino 	= '$tpostino',
-					toim_postitp 	= '$tpostitp',
-					toim_maa 		= '$toim_maa',
-					verkkotunnus	= '$verkkotunnus',
-					toimaika 		= '$toimvv-$toimkk-$toimpp',
-					kerayspvm 		= '$kervv-$kerkk-$kerpp',
-					erpcm			= '$erpcmvv-$erpcmkk-$erpcmpp',
-					maksuehto 		= '$maksuehto',
-					toimitustapa 	= '$toimitustapa',
-					toimitusehto 	= '$toimitusehto',
-					kohdistettu 	= '$maksaja',
-					myyja 			= '$myyja',
-					alv 			= '$alv',
-					comments 		= '$comments',
-					ovttunnus 		= '$ovttunnus',
-					toim_ovttunnus 	= '$toim_ovttunnus',
-					viesti 			= '$viesti',
-					chn				= '$chn',
-					kuljetus 		= '$kuljetus',
-					huolitsija 		= '$huolitsija',
-					maksuteksti 	= '$maksuteksti',
-					clearing		= '$clearing',
-					jakelu 			= '$jakelu',
-					tilausvahvistus = '$tilausvahvistus',
-					laskutusvkopv 	= '$laskutusvkopv',
-					erikoisale 		= '$erikoisale',
-					yhtio 			= '$kukarow[yhtio]',
-					alatila 		= '$alatila',
-					vienti 			= '$vienti',
-					varasto 		= '$varasto',
-					tilaustyyppi	= '$tilaustyyppi',
-					ketjutus 		= '$ketjutus',
-					sisainen 		= '$sisainen',
-					eilahetetta 	= '$eilahe',
-					valkoodi 		= '$valkoodi',
-					vienti_kurssi	= '$kurssi',
-					hyvaksynnanmuutos = '$luokka',
-					liitostunnus    = '$liitostunnus',
-					viikorkopros 	= '$yhtiorow[viivastyskorko]',
-					osatoimitus		= '$osatoimitus',
-					sisviesti1 		= '$sisviesti1',
-					sisviesti2		= '$sisviesti2',
-					poistumistoimipaikka_koodi       = '$poistumistoimipaikka_koodi',
-					kuljetusmuoto                    = '$kuljetusmuoto',
-					kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
-					aktiivinen_kuljetus_kansallisuus = '$aktiivinen_kuljetus_kansallisuus',
-					aktiivinen_kuljetus              = '$aktiivinen_kuljetus',
-					kontti                           = '$kontti',
-					sisamaan_kuljetusmuoto           = '$sisamaan_kuljetusmuoto',
-					sisamaan_kuljetus_kansallisuus   = '$sisamaan_kuljetus_kansallisuus',
-					sisamaan_kuljetus                = '$sisamaan_kuljetus',
-					maa_maara                        = '$maa_maara'";
+					ytunnus								= '$ytunnus',
+					nimi 								= '$nimi',
+					nimitark 							= '$nimitark',
+					osoite 								= '$osoite',
+					postino 							= '$postino',
+					postitp 							= '$postitp',
+					maa 								= '$maa',
+					toim_nimi 							= '$tnimi',
+					toim_nimitark 						= '$tnimitark',
+					toim_osoite 						= '$tosoite',
+					toim_postino 						= '$tpostino',
+					toim_postitp 						= '$tpostitp',
+					toim_maa 							= '$toim_maa',
+					verkkotunnus						= '$verkkotunnus',
+					toimaika 							= '$toimvv-$toimkk-$toimpp',
+					kerayspvm 							= '$kervv-$kerkk-$kerpp',
+					erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
+					maksuehto 							= '$maksuehto',
+					toimitustapa 						= '$toimitustapa',
+					toimitusehto 						= '$toimitusehto',
+					kohdistettu 						= '$maksaja',
+					myyja 								= '$myyja',
+					alv 								= '$alv',
+					comments 							= '$comments',
+					ovttunnus 							= '$ovttunnus',
+					toim_ovttunnus 						= '$toim_ovttunnus',
+					viesti 								= '$viesti',
+					chn									= '$chn',
+					kuljetus 							= '$kuljetus',
+					huolitsija 							= '$huolitsija',
+					maksuteksti 						= '$maksuteksti',
+					clearing							= '$clearing',
+					jakelu 								= '$jakelu',
+					tilausvahvistus 					= '$tilausvahvistus',
+					laskutusvkopv 						= '$laskutusvkopv',
+					erikoisale 							= '$erikoisale',
+					yhtio 								= '$kukarow[yhtio]',
+					alatila 							= '$alatila',
+					vienti 								= '$vienti',
+					varasto 							= '$varasto',
+					tilaustyyppi						= '$tilaustyyppi',
+					ketjutus 							= '$ketjutus',
+					sisainen 							= '$sisainen',
+					eilahetetta 						= '$eilahe',
+					valkoodi 							= '$valkoodi',
+					vienti_kurssi						= '$kurssi',
+					hyvaksynnanmuutos 					= '$luokka',
+					liitostunnus						= '$liitostunnus',
+					viikorkopros 						= '$yhtiorow[viivastyskorko]',
+					osatoimitus							= '$osatoimitus',
+					sisviesti1 							= '$sisviesti1',
+					sisviesti2							= '$sisviesti2',
+					poistumistoimipaikka_koodi			= '$poistumistoimipaikka_koodi',
+					kuljetusmuoto						= '$kuljetusmuoto',
+					kauppatapahtuman_luonne				= '$kauppatapahtuman_luonne',
+					aktiivinen_kuljetus_kansallisuus	= '$aktiivinen_kuljetus_kansallisuus',
+					aktiivinen_kuljetus					= '$aktiivinen_kuljetus',
+					kontti								= '$kontti',
+					sisamaan_kuljetusmuoto				= '$sisamaan_kuljetusmuoto',
+					sisamaan_kuljetus_kansallisuus		= '$sisamaan_kuljetus_kansallisuus',
+					sisamaan_kuljetus					= '$sisamaan_kuljetus',
+					maa_maara							= '$maa_maara'";
 
 		if ($toim == "MYYNTITILI") {
 			if ($ylatila=='') {
@@ -1442,7 +1442,7 @@
 						yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
 						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
 						seuranta					= '$seuranta',
-						asiakkaan_kohde				= '$asiakkaan_kohde',						
+						asiakkaan_kohde				= '$asiakkaan_kohde',
 						otunnus 		= '$kukarow[kesken]'";
 			$query3 .= $postquery3;
 			$result = mysql_query($query3) or pupe_error($query3);

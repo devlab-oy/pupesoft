@@ -71,7 +71,7 @@
 		// emuloidaan transactioita mysql LOCK komennolla
 		$query ="LOCK TABLES rahtikirjat WRITE, tilausrivi WRITE, tapahtuma WRITE, tuote WRITE, lasku WRITE, tiliointi WRITE, tuotepaikat WRITE, sanakirja WRITE, rahtisopimukset READ, rahtimaksut READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka READ, avainsana READ";
 		$res   = mysql_query($query) or pupe_error($query);
-		
+
 		if ($jv == 'vainjv') {
 			echo t("Vain jälkivaatimukset").".";
 			$jvehto = " having jv!='' ";
@@ -83,7 +83,7 @@
 		else {
 			$jvehto = " ";
 		}
-		
+
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	select distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti
@@ -142,7 +142,7 @@
 				$rakir_row["toim_postitp"]	= $toitarow["toim_postitp"];
 
 			}
-			else {	
+			else {
 				// Normaalissa keississä ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
 				$asiakaslisa = "and lasku.ytunnus			= '$rakir_row[ytunnus]'
 								and lasku.toim_maa			= '$rakir_row[toim_maa]'
@@ -153,14 +153,14 @@
 								and lasku.toim_postino		= '$rakir_row[toim_postino]'
 								and lasku.toim_postitp		= '$rakir_row[toim_postitp]' ";
 			}
-			
+
 			if ($rakir_row['jv'] != '') {
 				$jvehto = " having jv!='' ";
 			}
 			else {
 				$jvehto = " having jv='' ";
 			}
-			
+
 			// haetaan tälle rahtikirjalle kuuluvat tunnukset
 			$query = "	select rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv
 						from rahtikirjat
@@ -366,15 +366,15 @@
 					$ures  = mysql_query($query) or pupe_error($query);
 
 					// verkkolaskutettavat EU-viennit menee alatilaan D, jos niillä on tarpeeksi lisätietoja
-					$query = "	update lasku set 
+					$query = "	update lasku set
 								alatila = 'D',
-								bruttopaino = '$kilotyht' 
-								where yhtio = '$kukarow[yhtio]' 
-								and tunnus in ($otunnukset) 
-								and vienti = 'E' 
-								and chn = '020' 
-								and maa_maara != '' 
-								and kauppatapahtuman_luonne != '' 
+								bruttopaino = '$kilotyht'
+								where yhtio = '$kukarow[yhtio]'
+								and tunnus in ($otunnukset)
+								and vienti = 'E'
+								and chn = '020'
+								and maa_maara != ''
+								and kauppatapahtuman_luonne > 0
 								and kuljetusmuoto != ''";
 					$ures  = mysql_query($query) or pupe_error($query);
 				}
@@ -401,7 +401,7 @@
 
 
 	if($tee == '') {
-		
+
 		// haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
 		$query = "	select distinct lasku.toimitustapa
 					from rahtikirjat

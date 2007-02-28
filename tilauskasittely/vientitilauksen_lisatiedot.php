@@ -240,7 +240,7 @@
 		$haku='';
 		if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
 		if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
-		
+
 		//listataan laskuttamattomat tilausket
 		$query = "	select tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus,
 					maa_maara, kuljetusmuoto, kauppatapahtuman_luonne, sisamaan_kuljetus, sisamaan_kuljetusmuoto, poistumistoimipaikka, poistumistoimipaikka_koodi, alatila
@@ -249,7 +249,7 @@
 					and (vienti='K' or vienti='E')
 					$haku
 					ORDER by 5,6,7,8,9,10,11,12,13,14";
-		
+
 		$tilre = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
@@ -326,11 +326,11 @@
 				 $teksti = "Hyvitys";
 				}
 				echo "<td>$teksti</td>";
-				
-				if ($tilrow['alatila'] == 'E' and $tilrow['vienti'] == 'K' and $tilrow['maa_maara'] != '' and $tilrow['kuljetusmuoto'] != '' and $tilrow['kauppatapahtuman_luonne'] != '' and $tilrow['sisamaan_kuljetus'] != '' and $tilrow['sisamaan_kuljetusmuoto'] != '' and $tilrow['poistumistoimipaikka'] != '' and $tilrow['poistumistoimipaikka_koodi'] != '') {
+
+				if ($tilrow['alatila'] == 'E' and $tilrow['vienti'] == 'K' and $tilrow['maa_maara'] != '' and $tilrow['kuljetusmuoto'] != '' and $tilrow['kauppatapahtuman_luonne'] > 0 and $tilrow['sisamaan_kuljetus'] != '' and $tilrow['sisamaan_kuljetusmuoto'] != '' and $tilrow['poistumistoimipaikka'] != '' and $tilrow['poistumistoimipaikka_koodi'] != '') {
 					echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
 				}
-				elseif ($tilrow['alatila'] == 'E' and $tilrow['vienti'] == 'E' and $tilrow['maa_maara'] != '' and $tilrow['kuljetusmuoto'] != '' and $tilrow['kauppatapahtuman_luonne'] != '') {
+				elseif ($tilrow['alatila'] == 'E' and $tilrow['vienti'] == 'E' and $tilrow['maa_maara'] != '' and $tilrow['kuljetusmuoto'] != '' and $tilrow['kauppatapahtuman_luonne'] > 0) {
 					echo "<td><font color='#00FF00'>".t("OK")."</font></td>";
 				}
 				else {
@@ -377,8 +377,8 @@
 			$query = "	select tunnus tilaus, nimi asiakas, luontiaika laadittu, laatija, vienti, erpcm, ytunnus, nimi, nimitark, postino, postitp, maksuehto, lisattava_era, vahennettava_era, ketjutus
 						from lasku
 						where yhtio='$kukarow[yhtio]' and tila='U' and tullausnumero != ''
-						and (	(vienti='K' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne = '' or sisamaan_kuljetus = '' or sisamaan_kuljetusmuoto = '' or poistumistoimipaikka = '' or poistumistoimipaikka_koodi = ''))
-							or  (vienti='E' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne = '' ))
+						and (	(vienti='K' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne <= 0 or sisamaan_kuljetus = '' or sisamaan_kuljetusmuoto = '' or poistumistoimipaikka = '' or poistumistoimipaikka_koodi = ''))
+							or  (vienti='E' and (maa_maara = '' or kuljetusmuoto = '' or kauppatapahtuman_luonne <= 0 ))
 						) and kauppatapahtuman_luonne != '999'
 						$haku
 						ORDER by 5,6,7,8,9,10,11,12,13,14";

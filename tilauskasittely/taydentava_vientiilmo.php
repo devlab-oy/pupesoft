@@ -131,7 +131,7 @@
 				}
 			}
 
-			if ($laskurow["kauppatapahtuman_luonne"] == '') {
+			if ($laskurow["kauppatapahtuman_luonne"] <= 0) {
 			   	echo t("Laskunumero").": $laskurow[laskunro]. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
 				$virhe++;
 			}

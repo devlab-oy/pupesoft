@@ -99,7 +99,14 @@
 						$laskurow["kauppatapahtuman_luonne"] = '999'; // intrastattia ei lähetetä tulliin kun varasto ja toimitusosoite on samassa maassa
 					}
 					elseif ($laskurow["kauppatapahtuman_luonne"] == "" or $laskurow["kauppatapahtuman_luonne"] == "999") {
-						$laskurow["kauppatapahtuman_luonne"] = '-1'; // miinus yks tarkoittaa, että lisätiedot pitää syöttää ja intrastat pitää lähettää
+
+						if ($varaston_row["maa"] == $yhtiorow["maakoodi"]) {
+							$laskurow["kauppatapahtuman_luonne"] = '-1'; // miinus yks tarkoittaa, että lisätiedot pitää syöttää ja VIENTI-intrastat pitää lähettää
+						}
+						elseif ($laskurow["toim_maa"] == $yhtiorow["maakoodi"]) {
+							$laskurow["kauppatapahtuman_luonne"] = '-2'; // miinus kaks tarkoittaa, että lisätiedot pitää syöttää ja TUONTI-intrastat pitää lähettää
+						}
+
 					}
 
 				}

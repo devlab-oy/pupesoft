@@ -46,10 +46,10 @@ if ($tee == 'VIIVA') {
 			$tee = "";
 		}
 		else {
-			$trow = mysql_fetch_array($result);
-			$ytunnus = $trow["tunnus"];
-			$tee = "P";
-			$tee2 = "V"; // Meillä on eroja virheentarkastuksissa, jos tiedot tuli viivakoodista
+			$trow		 	= mysql_fetch_array($result);
+			$toimittajaid 	= $trow["tunnus"];
+			$tee 			= "P";
+			$tee2 			= "V"; // Meillä on eroja virheentarkastuksissa, jos tiedot tuli viivakoodista
 		}
 	}
 }
@@ -101,7 +101,7 @@ if ($tee == 'I') {
 	}
 		
 	if (isset($toitilinumero)) {
-		$query = "SELECT * FROM toimi WHERE tunnus = '$ytunnus'";
+		$query = "SELECT * FROM toimi WHERE tunnus = '$toimittajaid'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -119,11 +119,11 @@ if ($tee == 'I') {
 		}
 		
 		if (strtoupper($trow['maakoodi']) == strtoupper($yhtiorow['maakoodi'])) {
-			$query = "update toimi set tilinumero='$toitilinumero' where yhtio='$kukarow[yhtio]' and tunnus='$ytunnus'";
+			$query = "update toimi set tilinumero='$toitilinumero' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 		else {
-			$query = "update toimi set ultilno='$toitilinumero', swift='$toiswift' where yhtio='$kukarow[yhtio]' and tunnus='$ytunnus'";
+			$query = "update toimi set ultilno='$toitilinumero', swift='$toiswift' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$trow['ultilno']=$toitilinumero;
 			$trow['swift']=$toiswift;
 			$result = mysql_query($query) or pupe_error($query);
@@ -298,8 +298,8 @@ if ($tee == 'I') {
 	}
 
 	// Jos toimittaja löytyy se haetaan, muuten tiedot tulee formista
-	if (strlen($ytunnus) > 0) {
-		$query = "SELECT * FROM toimi WHERE tunnus = '$ytunnus'";
+	if ($toimittajaid > 0) {
+		$query = "SELECT * FROM toimi WHERE tunnus = '$toimittajaid'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -353,53 +353,14 @@ if ($tee == 'I') {
 }
 
 
-if ($tee == 'N' or $tee == 'Y' or $tee == 'X') {
-
-	$lisat='';
-	if ($tee == 'N') $lisat = "and nimi like '%$nimi%'";
-	if ($tee == 'Y') $lisat = "and ytunnus = '$ytunnus'";
-	if ($tee == 'X') $lisat = "and tunnus = $tunnus";
-
-	$query = "SELECT * FROM toimi
-			  WHERE yhtio='$kukarow[yhtio]' $lisat
-			  ORDER BY selaus";
-
-	$result = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($result) == 0) {
-		echo "<font class='error'>".t("Haulla ei löytynyt yhtään toimittajaa")."</font><br><br>";
-		$tee="";
-	}
-	else {
-		// Vain 1 löytyi syöttöön!
-		if (mysql_num_rows($result) == 1) {
-			$tee="P";
-			$trow = mysql_fetch_array($result);
-			$ytunnus = $trow['tunnus'];
-		}
-		else {
-			echo "<table>";
-			echo "<tr>";
-			echo "<th>".t("tunnus")."</th>";
-			echo "<th>".t("ytunnus")."</th>";
-			echo "<th>".t("nimi")."</th>";
-			echo "<th>".t("postitp")."</th>";
-			echo "<th></th>";
-			echo "</tr>";
-
-			while ($trow = mysql_fetch_array($result)) {
-				echo "<tr>";
-				echo "<td>$trow[tunnus]</td>";
-				echo "<td>$trow[ytunnus]</td>";
-				echo "<td>$trow[nimi]</td>";
-				echo "<td>$trow[postitp]</td>";
-				echo "<td><form action='$PHP_SELF?tee=P&ytunnus=$trow[tunnus]&maara=$maara' method='post'><input type='submit' value='".t("Valitse")."'></td></form>";
-				echo "</tr>";
-			}
-
-			echo "</table><br>";
-			$tee='';
-		}
+if ($tee == 'Y') {
+	
+	require ("inc/kevyt_toimittajahaku.inc");
+	
+	// Toimittaja löytyi
+	if ($toimittajaid != 0) {
+		$tee 	= "P";
+		$trow 	= $toimittajarow;
 	}
 }
 
@@ -478,9 +439,9 @@ if ($tee == 'P' or $tee == 'E') {
 			</SCRIPT>";
 
 
-	if (strlen($ytunnus) > 0) {
+	if ($toimittajaid > 0) {
 
-		$query = "SELECT * FROM toimi WHERE tunnus = '$ytunnus'";
+		$query = "SELECT * FROM toimi WHERE tunnus = '$toimittajaid'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -519,7 +480,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
 		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus])</td></tr>";
 		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maakoodi]-$trow[postino] $trow[postitp], $trow[maa]</td></tr>";
-		echo "<tr><td><form action='yllapito.php?toim=toimi&tunnus=$ytunnus' method='post'>";
+		echo "<tr><td><form action='yllapito.php?toim=toimi&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara' method='post'>";
 		echo "<input type = 'submit' value = '".t("Muuta toimittajan tietoja")."'></form>";
 		echo "</td></tr></table>";
 		echo "</td>";
@@ -529,7 +490,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Tilitiedot")."</th></tr>";
 
-		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&ytunnus=$ytunnus' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
 
 		if (strtoupper($trow['maakoodi']) != strtoupper($yhtiorow['maakoodi'])) {
 
@@ -606,7 +567,7 @@ if ($tee == 'P' or $tee == 'E') {
 	else {
 
  		// jaaha, ei ollut toimittajaa, joten pyydetään syöttämään tiedot
-		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&ytunnus=$ytunnus' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
+		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
 		echo "<input type='hidden' name='oma' value='1'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 
@@ -994,9 +955,8 @@ if ($tee == 'P' or $tee == 'E') {
 
 	echo "</td></tr>
 		</table>
-
 		<br>
-		<input type = 'hidden' name = 'xtunnus' value = '$ytunnus'>
+		<input type = 'hidden' name = 'toimittajaid' value = '$toimittajaid'>
 		<input type = 'hidden' name = 'maara' value = '$maara'>
 		<input type = 'submit' value = '".t("Perusta")."'></form>";
 
@@ -1116,7 +1076,7 @@ if ($tee == 'I') {
 			pankki4 = '$trow[pankki4]',
 			vienti_kurssi = '$vrow[kurssi]',
 			laatija = '$kukarow[kuka]',
-			liitostunnus = '$ytunnus',
+			liitostunnus = '$toimittajaid',
 			hyvaksynnanmuutos = '$ohyvaksynnanmuutos',
 			suoraveloitus = '$osuoraveloitus',
 			luontiaika = now(),
@@ -1550,64 +1510,49 @@ if (strlen($tee) == 0) {
 
 	echo "<table>";
 
-	echo "<tr><td><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>
-	".t("Perusta lasku viivakoodilukijalla")."</td>
-	<td><input type = 'text' name = 'nimi' size='8'></td>
-	<td>".t("tiliöintirivejä").":</td>
-	<td><select name='maara'><option value ='2'>1
-	<option value ='4'>3
-	<option value ='8'>7
-	<option value ='16'>15</select></td>
-	<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
+	echo "<tr><td><form name = 'viivat' action = '$PHP_SELF?tee=VIIVA' method='post'>".t("Perusta lasku viivakoodilukijalla")."</td>
+		<td><input type = 'text' name = 'nimi' size='8'></td>
+		<td>".t("tiliöintirivejä").":</td>
+		<td><select name='maara'><option value ='2'>1
+		<option value ='4'>3
+		<option value ='8'>7
+		<option value ='16'>15</select></td>
+		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<tr><td><form name = 'valikko' action = '$PHP_SELF?tee=N' method='post'>
-	".t("Perusta lasku toimittajan nimellä")."</td>
-	<td><input type = 'text' name = 'nimi' size='8'></td>
-	<td>".t("tiliöintirivejä").":</td>
-	<td><select name='maara'><option value ='2'>1
-	<option value ='4'>3
-	<option value ='8'>7
-	<option value ='16'>15</select></td>
-	<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
+	echo "<tr><td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</td>
+		<td><input type = 'text' name = 'ytunnus' size='8' maxlength='15'></td>
+		<td>".t("tiliöintirivejä").":</td>
+		<td><select name='maara'><option value ='2'>1
+		<option value ='4'>3
+		<option value ='8'>7
+		<option value ='16'>15</select></td>
+		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<tr><td><form action = '$PHP_SELF?tee=Y' method='post'>
-	".t("Perusta lasku toimittajan Y-tunnuksen perusteella")."</td>
-	<td><input type = 'text' name = 'ytunnus' value = '0' size='8' maxlength='15'></td>
-	<td>".t("tiliöintirivejä").":</td>
-	<td><select name='maara'><option value ='2'>1
-	<option value ='4'>3
-	<option value ='8'>7
-	<option value ='16'>15</select></td>
-	<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
+	echo "<td><form action = '$PHP_SELF?tee=P' method='post'>".t("Perusta lasku ilman toimittajatietoja")."</td>
+		<td>
+		<select name='tyyppi'>
+		<option value =".strtoupper($yhtiorow['maakoodi']).">".t("Kotimaa")."
+		<option value ='nonfi'>".t("Ulkomaa")."
+		</select></td>
+		<td>".t("tiliöintirivejä").":</td>
+		<td><select name='maara'><option value ='2'>1
+		<option value ='4'>3
+		<option value ='8'>7
+		<option value ='16'>15</select></td>
+		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
-	echo "<form action = '$PHP_SELF?tee=P' method='post'>
-	<td>".t("Perusta lasku ilman toimittajatietoja")."</td>
-	<td>
-	<select name='tyyppi'>
-	<option value =".strtoupper($yhtiorow['maakoodi']).">".t("Kotimaa")."
-	<option value ='nonfi'>".t("Ulkomaa")."
-	</select>
-	</td>
-	<td>".t("tiliöintirivejä").":</td>
-	<td><select name='maara'><option value ='2'>1
-	<option value ='4'>3
-	<option value ='8'>7
-	<option value ='16'>15</select></td>
-	<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
-
-	if ($xtunnus > 0) {
+	if ($toimittajaid > 0) {
 		$query = "	SELECT nimi
 					FROM toimi
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$xtunnus'";
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$toimittajaid'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 0) {
 
 			$row = mysql_fetch_array($result);
 
-			echo "<td><form action = '$PHP_SELF?tee=X' method='post'>
-			".t("Perusta lasku toimittajalle")." $row[nimi]</td>
-			<td><input type='hidden'  name='tunnus' value='$xtunnus'></td>
+			echo "<td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajalle")." $row[nimi]</td>
+			<td><input type='hidden'  name='toimittajaid' value='$toimittajaid'></td>
 			<td>".t("tiliöintirivejä").":</td>
 			<td><select name='maara'><option value ='2'>1
 			<option value ='4'>3

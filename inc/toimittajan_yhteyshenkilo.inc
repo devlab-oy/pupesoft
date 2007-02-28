@@ -59,6 +59,7 @@
 		if ($tee == "insert") {
 			$query = "	insert into yhteyshenkilo set
 						yhtio			= '$kukarow[yhtio]',
+						$tyyppilisa
 						liitostunnus 	= '$tunnus',
 						nimi 			= '$henkilonimi',
 						titteli		 	= '$titteli',

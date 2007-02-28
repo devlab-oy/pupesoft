@@ -35,14 +35,14 @@ if ($tee=='T') {
 						// Nyt kaikki on hyvin ja voimme tehdä päivitykset
 						// Kirjataan päittäinmeno selvittelytilin kautta
 						// Tiliöinniltä otetaan selvittelytilin vastatili
-						$query="INSERT tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite) values ('$kukarow[yhtio]', '$tiliointi1row[ltunnus]', '$tapvm', $tiliointi1row[summa], '$yhtiorow[selvittelytili]', '".t('Suoritettu päittäin')."')";
+						$query="INSERT tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu) values ('$kukarow[yhtio]', '$tiliointi1row[ltunnus]', '$tapvm', $tiliointi1row[summa], '$yhtiorow[selvittelytili]', '".t('Suoritettu päittäin')."',1,'$kukarow[kuka]',now())";
 						if ($debug==1) echo "$query<br>"; else $result = mysql_query($query) or pupe_error($query);
-						$query="INSERT tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite) values ('$kukarow[yhtio]', '$tiliointi1row[ltunnus]', '$tapvm', $tiliointi1row[summa] * -1, '$tiliointi1row[tilino]', '".t('Suoritettu päittäin')."')";
+						$query="INSERT tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu) values ('$kukarow[yhtio]', '$tiliointi1row[ltunnus]', '$tapvm', $tiliointi1row[summa] * -1, '$tiliointi1row[tilino]', '".t('Suoritettu päittäin')."',1,'$kukarow[kuka]',now())";
 						if ($debug==1) echo "$query<br>"; else $result = mysql_query($query) or pupe_error($query);
 						
-						$query="INSERT tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite) values ('$kukarow[yhtio]', '$tiliointi2row[ltunnus]', '$tapvm', $tiliointi2row[summa], '$yhtiorow[selvittelytili]', '".t('Suoritettu päittäin')."')";
+						$query="INSERT tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu) values ('$kukarow[yhtio]', '$tiliointi2row[ltunnus]', '$tapvm', $tiliointi2row[summa], '$yhtiorow[selvittelytili]', '".t('Suoritettu päittäin')."',1,'$kukarow[kuka]',now())";
 						if ($debug==1) echo "$query<br>"; else $result = mysql_query($query) or pupe_error($query);
-						$query="INSERT tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite) values ('$kukarow[yhtio]', '$tiliointi2row[ltunnus]', '$tapvm', $tiliointi2row[summa] * -1, '$tiliointi1row[tilino]', '".t('Suoritettu päittäin')."')";
+						$query="INSERT tiliointi (yhtio, ltunnus, tapvm, summa, tilino, selite, lukko, laatija, laadittu) values ('$kukarow[yhtio]', '$tiliointi2row[ltunnus]', '$tapvm', $tiliointi2row[summa] * -1, '$tiliointi1row[tilino]', '".t('Suoritettu päittäin')."', 1,'$kukarow[kuka]',now())";
 						if ($debug==1) echo "$query<br>"; else $result = mysql_query($query) or pupe_error($query);
 						
 						//Kirjataan suoritukset käytetyksi

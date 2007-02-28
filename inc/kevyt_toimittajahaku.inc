@@ -44,15 +44,16 @@ if ($monta==1) {
 	$toimittajaid = $toimittajarow['tunnus'];
 }
 
-if (($monta>1) and ($monta<=$limit)) {
+if ($monta > 1 and $monta <= $limit) {
 	//tämä vain otsik.php:tä varten
 	echo $lause;
 
 	echo "<table border='0'>";
 	echo "<tr>
-			<th>".t("ytunnus")."</th>
-			<th>".t("nimi")."</th>
-			<th colspan='3'>".t("osoite")."</th>
+			<th>".t("Ytunnus")."</th>
+			<th>".t("Nimi")."</th>
+			<th colspan='3'>".t("Osoite")."</th>
+			<th>".t("Tilinumero")."</th>
 			<td class='back'></td>
 		</tr>";
 
@@ -65,18 +66,26 @@ if (($monta>1) and ($monta<=$limit)) {
 		echo "<input type='hidden' name='toimittajaid' value='$toimittaja[tunnus]'>";
 		echo "<input type='hidden' name='tee' value='$tee'>";
 		echo "<input type='hidden' name='tila' value='$tila'>";
+		echo "<input type='hidden' name='maara' value='$maara'>";	
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='ytunnus' value='$numero'>";
 		echo "<tr>
-				<td>$toimittaja[ytunnus] ($toimittaja[tunnus])</td>
+				<td>$toimittaja[ytunnus]</td>
 				<td>$toimittaja[nimi]</td>
 				<td>$toimittaja[osoite]</td>
 				<td>$toimittaja[postino]</td>
-				<td>$toimittaja[postitp]</td>
-				<td class='back'><input type='submit' value='".t("Valitse")."'></td>
-			</tr>";
+				<td>$toimittaja[postitp]</td>";
+				
+		if (strtoupper($toimittaja['maakoodi']) != strtoupper($yhtiorow['maakoodi'])) {
+			echo "<td>$toimittaja[ultilno]</td>";
+		}
+		else {
+			echo "<td>$toimittaja[tilinumero]</td>";	
+		}
+			
+		echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td></tr>";
 		echo "</form>";
 	}
 	echo "</table><br>";

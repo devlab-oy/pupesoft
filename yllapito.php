@@ -86,8 +86,8 @@
 		// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 		if ($lopetus != '') {
 			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-			$lopetus = str_replace('!!!!','?', $lopetus);
-			$lopetus = str_replace('!!','&',  $lopetus);
+			$lopetus = str_replace('////','?', $lopetus);
+			$lopetus = str_replace('//','&',  $lopetus);
 
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 			exit;
@@ -180,11 +180,18 @@
 			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 			if ($lopetus != '') {
 				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-				$lopetus = str_replace('!!!!','?', $lopetus);
-				$lopetus = str_replace('!!','&',  $lopetus);
+				$lopetus = str_replace('////','?', $lopetus);
+				$lopetus = str_replace('//','&',  $lopetus);
 
-				$lopetus .= "&yllapidossa=$aputoim&yllapidontunnus=$tunnus";
-
+				if (strpos($lopetus, "?") === FALSE) {
+					$lopetus .= "?";
+				}
+				else {
+					$lopetus .= "&";	
+				}
+				
+				$lopetus .= "yllapidossa=$toim&yllapidontunnus=$tunnus";	
+				
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;
 			}
@@ -415,11 +422,11 @@
 			require ("inc/yhtion_toimipaikat.inc");
 		}
 
-		if ($errori == '' and $uusi != 1 and $toim == "toimi") {
+		if ($errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
 			require ("inc/toimittajan_yhteyshenkilo.inc");
 		}
 
-		if ($errori == '' and $uusi != 1 and $toim == "sarjanumeron_lisatiedot") {
+		if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
 			require ("inc/sarjanumeron_lisatiedot_kuvat.inc");
 		}
 

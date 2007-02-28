@@ -116,8 +116,8 @@ if ($tee == 'eposti') {
 
 if ($lopetus != '') {
 	// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-	$lopetus = str_replace('!!!!','?', $lopetus);
-	$lopetus = str_replace('!!','&',  $lopetus);
+	$lopetus = str_replace('////','?', $lopetus);
+	$lopetus = str_replace('//','&',  $lopetus);
 	echo "<br><br>";
 	echo "<a href='$lopetus'>".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";	
 }

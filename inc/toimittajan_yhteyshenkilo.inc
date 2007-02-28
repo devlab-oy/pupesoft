@@ -1,20 +1,35 @@
 <?php
 
-	echo "<font class='head'>".t("Toimittajan yhteyshenkilot")."</font><hr>";
-
+	if (strtoupper($toim) == "ASIAKAS") {
+		echo "<font class='head'>".t("Asiakkaan yhteyshenkilöt")."</font><hr>";
+		$tyyppilisa = " tyyppi = 'A', ";
+	}
+	else {
+		echo "<font class='head'>".t("Toimittajan yhteyshenkilöt")."</font><hr>";
+		$tyyppilisa = " tyyppi = 'T', ";	
+	}
+	
+	
 	if ($oikeurow['paivitys'] != '1') { // Saako päivittää
 		echo "<br><font class='error'>".t("Sun natsat ei riitä tähä hommaan poika")."!</font><br>";
 		exit;
 	}
-
-	if ($tunnus == "") {
-		echo "<font class='error'>".t("Toimittaja katosi")."!</font>";
+	
+	if ($tunnus == "" and $uusi == 1) {
+		echo "	<form action='#' method='POST'>
+				<input type='button' onclick='javascript:document.mainform.submit();' name='kikkeli' value='".t("Lisää uusi yhteyshenkilö")."'>
+				</form>";
+	}
+	elseif ($tunnus == "") {
+		echo "<font class='error'>".t("Tietue katosi")."!</font>";
 	}
 	else {
 
 		// päivitetään toimittaja
 		if ($tee == "update") {
-			$query = "	update toimittajan_yhteyshenkilo set
+			
+			$query = "	update yhteyshenkilo set
+						$tyyppilisa
 						nimi 			= '$henkilonimi',
 						titteli		 	= '$titteli',
 						email 			= '$email',
@@ -23,21 +38,26 @@
 						fax 			= '$fax',
 						www 			= '$www',
 						fakta 			= '$fakta'
-						where yhtio = '$kukarow[yhtio]' and tunnus = '$henkilotunnus' and liitostunnus='$tunnus'";
+						where yhtio = '$kukarow[yhtio]' 
+						and tunnus  = '$henkilotunnus' 
+						and liitostunnus='$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$tee = "";
 		}
 
 		// poistetaan toimittaja
 		if ($tee == "poista") {
-			$query = "delete from toimittajan_yhteyshenkilo where yhtio='$kukarow[yhtio]' and tunnus='$henkilotunnus' and liitostunnus='$tunnus'";
+			$query = "	delete from yhteyshenkilo 
+						where yhtio		= '$kukarow[yhtio]' 
+						and tunnus		= '$henkilotunnus' 
+						and liitostunnus= '$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$tee = "";
 		}
 
 		// lisätään toimittaja
 		if ($tee == "insert") {
-			$query = "	insert into toimittajan_yhteyshenkilo set
+			$query = "	insert into yhteyshenkilo set
 						yhtio			= '$kukarow[yhtio]',
 						liitostunnus 	= '$tunnus',
 						nimi 			= '$henkilonimi',
@@ -71,16 +91,17 @@
 			echo "</table><hr>";
 
 			echo "<input type='hidden' name='tee' value='insert'>";
-			echo "<input type='hidden' name='toim' value='toimi'>";
+			echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
+			echo "<input type='hidden' name='toim' value='$aputoim'>";
 			echo "<input type='hidden' name='tunnus' value='$tunnus'>";
-			echo "<input type='submit' value='".t("Perusta yhteyshenkilo")."'></form>";
+			echo "<input type='submit' value='".t("Perusta yhteyshenkilö")."'></form>";
 		}
 
 		// selataan vanhoja
 		if ($tee == "") {
 
 
-			$query  = "select * from toimittajan_yhteyshenkilo where yhtio='$kukarow[yhtio]' and liitostunnus='$tunnus'";
+			$query  = "select * from yhteyshenkilo where yhtio='$kukarow[yhtio]' and liitostunnus='$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			while ($trow = mysql_fetch_array($result)) {
@@ -99,19 +120,21 @@
 
 				echo "<tr><td class='back'>";
 				echo "<input type='hidden' name='tee' value='update'>";
-				echo "<input type='hidden' name='toim' value='toimi'>";
+				echo "<input type='hidden' name='toim' value='$aputoim'>";
+				echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
 				echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 				echo "<input type='hidden' name='henkilotunnus'  value='$trow[tunnus]'>";
-				echo "<input type='submit' value='".t("Päivitä yhteyshenkilo")."'></td></form>";
+				echo "<input type='submit' value='".t("Päivitä yhteyshenkilö")."'></td></form>";
 
 				echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 
 				echo "<td class='back'>";
 				echo "<input type='hidden' name='tee' value='poista'>";
-				echo "<input type='hidden' name='toim' value='toimi'>";
+				echo "<input type='hidden' name='toim' value='$aputoim'>";
+				echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
 				echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 				echo "<input type='hidden' name='henkilotunnus'  value='$trow[tunnus]'>";
-				echo "<input type='submit' value='".t("Poista yhteyshenkilo")."'></td></form>";
+				echo "<input type='submit' value='".t("Poista yhteyshenkilö")."'></td></form>";
 				echo "</tr>";
 
 				echo "</table>";
@@ -120,9 +143,10 @@
 
 			echo "<br><form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 			<input type='hidden' name='tee' value='uusi'>
-			<input type='hidden' name='toim' value='toimi'>
+			<input type='hidden' name='toim' value='$aputoim'>
+			<input type='hidden' name='lopetus' value = '$lopetus'>
 			<input type='hidden' name='tunnus' value='$tunnus'>
-			<input type='submit' value='".t("Lisää uusi yhteyshenkilo")."'></form>";
+			<input type='submit' value='".t("Lisää uusi yhteyshenkilö")."'></form>";
 
 		}
 

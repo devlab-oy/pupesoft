@@ -29,10 +29,6 @@
 			$yhtunnus = '';
 		}
 
-		if  ($yllapidossa == 'yhteyshenkilo') {
-			$yhtunnus = $yllapidontunnus;
-		}
-
 		if ($tee == "SAHKOPOSTI") {
 			
 			// Haetaan muistiinpano
@@ -201,7 +197,7 @@
 			///* Yhteyshenkilön tiedot, otetaan valitun yhteyshenkilön tiedot talteen  *///
 			$query = "	SELECT *
 						FROM yhteyshenkilo
-						WHERE asiakas='$asiakasid'
+						WHERE yhtio='$kukarow[yhtio]' and liitostunnus='$asiakasid'
 						ORDER BY nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -273,12 +269,12 @@
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and kuka	= '$kukarow[kuka]'
 						and nimi	= 'yllapito.php'
-						and alanimi = 'yhteyshenkilo'";
+						and alanimi = 'asiakas'";
 			$result = mysql_query($query) or pupe_error($query);
 
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../yllapito.php?toim=yhteyshenkilo&uusi=1&liitostunnus=$asiakasid&lopetus=crm/asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Luo uusi yhteyshenkilö")."</a></td>";
+				echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Luo uusi yhteyshenkilö")."</a></td>";
 			}
 			else {
 				echo "<td>".t("(Luo uusi yhteyshenkilö)")."</td>";
@@ -290,7 +286,7 @@
 
 
 			if (mysql_num_rows($result) > 0 and $yhtunnus != '') {
-				echo "<td><a href='../yllapito.php?toim=yhteyshenkilo&tunnus=$yhtunnus&lopetus=crm/asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
+				echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$asiakasid&lopetus=crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Muuta yhteyshenkilön tietoja")."</a></td>";
 			}
 			else {
 				echo "<td></td>";
@@ -318,7 +314,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='kalenteri.php?lopetus=asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Kalenteri")."</a></td>";
+				echo "<td><a href='kalenteri.php?lopetus=asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Kalenteri")."</a></td>";
 			}
 			else {
 				echo "<td>".t("Kalenteri")."</td>";
@@ -339,7 +335,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../raportit/myyntiseuranta.php?asiakas=$ytunnus&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=../crm/asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Myynninseuranta")."</a></td>";
+				echo "<td><a href='../raportit/myyntiseuranta.php?asiakas=$ytunnus&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Myynninseuranta")."</a></td>";
 			}
 			else {
 				echo "<td>".t("Myynninseuranta")."</td>";
@@ -358,7 +354,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../raportit/aletaulukko.php?ytunnus=$ytunnus&lopetus=../crm/asiakasmemo.php!!!!ytunnus=$ytunnus!!asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
+				echo "<td><a href='../raportit/aletaulukko.php?ytunnus=$ytunnus&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
 			}
 			else {
 				echo "<td><u>".t("(Näytä alennustaulukko)")."</u></td>";
@@ -446,13 +442,13 @@
 
 
 			if ($naytapoistetut == '') {
-				$lisadel = " and left(tyyppi,7) != 'DELETED'";
+				$lisadel = " and left(kalenteri.tyyppi,7) != 'DELETED'";
 			}
 			else {
 				$lisadel = "";
 			}
 
-			$query = "	SELECT tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,
+			$query = "	SELECT kalenteri.tyyppi, tapa, kalenteri.asiakas ytunnus, yhteyshenkilo.nimi yhteyshenkilo, if(kuka.nimi!='',kuka.nimi, kalenteri.kuka) laatija, kentta01 viesti, left(pvmalku,10) paivamaara,
 						kentta02, kentta03, kentta04, kentta05, kentta06, kentta07, kentta08, kalenteri.tunnus, kalenteri.perheid, if(kalenteri.perheid!=0, kalenteri.perheid, kalenteri.tunnus) sorttauskentta
 						FROM kalenteri
 						LEFT JOIN yhteyshenkilo ON kalenteri.yhtio=yhteyshenkilo.yhtio and kalenteri.henkilo=yhteyshenkilo.tunnus

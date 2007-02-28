@@ -254,7 +254,7 @@
 				echo "<td><a href='asiakasmemo.php?ytunnus=$trow[ytunnus]'>$trow[1]</a></td>";
 			}
 			elseif(mysql_field_name($result,$i) == 'ytunnus') {
-				echo "<td><a href='../yllapito.php?lopetus=crm/asiakaslista.php&toim=asiakas&tunnus=$trow[tunnus]'>$trow[$i]</a></td>";
+				echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=crm/asiakaslista.php'>$trow[$i]</a></td>";
 			}
 			else {
 				echo "<td>$trow[$i]</td>";

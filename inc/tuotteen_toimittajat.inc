@@ -212,6 +212,7 @@
 			echo "<tr><th>".t("alkuperamaa")."</th>			<td>$maat																</td><td class='back'>".$toimerrorit[0]["alkuperamaa"]."</td></tr>";
 			echo "</table><hr>";
 
+			echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
 			echo "<input type='hidden' name='tee' value='insert'>";
 			echo "<input type='hidden' name='toim' value='tuote'>";
 			echo "<input type='hidden' name='tunnus' value='$tunnus'>";
@@ -293,6 +294,7 @@
 				echo "<tr><th>".t("alkuperamaa")."</th>		<td>$maat</td>																	<td class='back'>".$toimerrorit[$trow["tunnus"]]["alkuperamaa"]."</td></tr>";
 
 				echo "<tr><td class='back'>";
+				echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
 				echo "<input type='hidden' name='tee' value='update'>";
 				echo "<input type='hidden' name='toim' value='tuote'>";
 				echo "<input type='hidden' name='tunnus' value='$tunnus'>";
@@ -305,6 +307,7 @@
 
 				echo "<td class='back'>";
 				echo "<input type='hidden' name='tee' value='poista'>";
+				echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
 				echo "<input type='hidden' name='toim' value='tuote'>";
 				echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 				echo "<input type='hidden' name='tuoteno' value='$trow[tuoteno]'>";
@@ -318,6 +321,7 @@
 
 			echo "<br><form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 			<input type='hidden' name='tee' value='uusi'>
+			<input type='hidden' name='lopetus' value = '$lopetus'>
 			<input type='hidden' name='toim' value='tuote'>
 			<input type='hidden' name='tunnus' value='$tunnus'>
 			<input type='hidden' name='tuoteno' value='$tuoteno'>

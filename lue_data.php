@@ -26,12 +26,14 @@ flush();
 
 $vikaa			= 0;
 $tarkea			= 0;
+$wheretarkea	= 0;
 $kielletty		= 0;
 $lask			= 0;
 $postoiminto	= 'X';
-$tyhjatok  		= "";
 $ashinaleas 	= 0;
 $ashinaletuo	= 0;
+$indeksi		= array();
+$indeksi_where	= array();
 
 if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
@@ -147,6 +149,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			break;
 		case "avainsana" :
 			$pakolliset = array("LAJI","SELITE");
+			$wherelliset = array("LAJI","SELITE","SELITETARK","SELITETARK_2");
 			$kielletyt = array("");
 			break;
 		case "tuoteperhe" :
@@ -168,7 +171,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		case "yhteensopivuus_auto" :
 			$pakolliset = array("MERKKI","MALLI","MALLITARKENNE","KORITYYPPI","CC","MOOTTORITYYPPI","POLTTOAINE","SYLINTERIMAARA","SYLINTERINHALKAISIJA","TEHO_KW","TEHO_HV","ALKUKK","ALKUVUOSI","LOPPUKK","LOPPUVUOSI","LISATIEDOT","AUTODATA");
 			$kielletyt = array("");
-			$tyhjatok  = "yes";
+			$wherelliset = array("MERKKI","MALLI","MALLITARKENNE","KORITYYPPI","CC","MOOTTORITYYPPI","POLTTOAINE","SYLINTERIMAARA","SYLINTERINHALKAISIJA","TEHO_KW","TEHO_HV","ALKUKK","ALKUVUOSI","LOPPUKK","LOPPUVUOSI","LISATIEDOT","AUTODATA");
 			break;
 		case "yhteensopivuus_tuote" :
 			$pakolliset = array("ATUNNUS","TUOTENO");
@@ -257,14 +260,21 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$viesti .= t("Sarake").": $column ".t("on kielletty sarake")."!<br>";
 					$kielletty++;
 				}
+				
+				if (is_array($wherelliset) and in_array($column, $wherelliset)) {
+					// katotaan että määritellyt where lausekeen ehdot löytyvät
+					$pos = array_search($column, $otsikot);
+					$indeksi_where[] = $pos;
+					$wheretarkea++;
+				}
 
 				//asiakashinta ja asiakasalennus keisseissä ei voida laittaa pakollisiin kenttiin näitä koska riittää että jompikumpi on annettu
 				if ($table == 'asiakashinta' or $table == 'asiakasalennus') {
 					if ($column == 'ASIAKAS_RYHMA' or $column == 'YTUNNUS') {
-						$ashinaleas ++;
+						$ashinaleas++;
 					}
 					if ($column == 'RYHMA' or $column == 'TUOTENO') {
-						$ashinaletuo ++;
+						$ashinaletuo++;
 					}
 				}
 			}
@@ -277,7 +287,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	}
 
 	// oli virheellisiä sarakkeita tai pakollisia ei löytynyt..
-	if ($vikaa != 0 or $tarkea != count($pakolliset) or $postoiminto == 'X' or $kielletty > 0) {
+	if ($vikaa != 0 or $tarkea != count($pakolliset) or $postoiminto == 'X' or $kielletty > 0 or (is_array($wherelliset) and $wheretarkea != count($wherelliset))) {
 
 		if (strtoupper($ext) != "XLS") {
 			// suljetaan avattu faili..
@@ -300,6 +310,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		if ($kielletty > 0) {
 			echo "<font class='error'>".t("Yrität päivittää kiellettyjä sarakkeita")."!</font><br>";
 		}
+		
+		if(is_array($wherelliset) and $wheretarkea != count($wherelliset)) {
+			echo "<font class='error'>".t("Sinulta puuttui jokin pakollisista sarakkeista")." (";
+			
+			foreach ($wherelliset as $apupako) {
+				echo "$apupako ";
+			}
+			
+			echo ") !</font><br>";
+		}
+		
+		
 		die("<font class='error'>".t("Virheitä löytyi. Ei voida jatkaa")."!<br></font>");
 	}
 
@@ -382,30 +404,38 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$rivi[] = $eriv;
 		}
 
-		for($j=0; $j<count($indeksi); $j++) {
-			if ($otsikot[$indeksi[$j]] == "TUOTENO") {
+		//Jos eri where-ehto array on määritelty
+		if (is_array($wherelliset)) {
+			$indeksi = array_merge($indeksi, $indeksi_where);
+			$indeksi = array_unique($indeksi);	
+		}
+		
+		foreach($indeksi as $j) {			
+						
+			if ($otsikot[$j] == "TUOTENO") {
 
-				$tuoteno = trim($rivi[$indeksi[$j]]);
+				$tuoteno = trim($rivi[$j]);
 
 				$valinta .= " and TUOTENO='$tuoteno'";
 			}
-			elseif ($table == 'sanakirja' and $otsikot[$indeksi[$j]] == "FI") {
+			elseif ($table == 'sanakirja' and $otsikot[$j] == "FI") {
 				// jos ollaan mulkkaamassa RU tai EE ni tehdään utf-8 -> latin-1 konversio FI kentällä
 				if (in_array("RU", $otsikot) or in_array("EE", $otsikot)) {
 					//$rivi[$r] = recode_string("utf-8..latin1", $rivi[$r]);
-					$rivi[$indeksi[$j]] = iconv("UTF-8", "ISO-8859-1", $rivi[$indeksi[$j]]);
+					$rivi[$j] = iconv("UTF-8", "ISO-8859-1", $rivi[$j]);
 
-					$valinta .= " and ".$otsikot[$indeksi[$j]]."='".trim($rivi[$indeksi[$j]])."'";
+					$valinta .= " and ".$otsikot[$j]."='".trim($rivi[$j])."'";
 				}
 			}
-			elseif ($table == 'tuotepaikat' and $otsikot[$indeksi[$j]] == "OLETUS") {
+			elseif ($table == 'tuotepaikat' and $otsikot[$j] == "OLETUS") {
 				//ei haluta tätä tänne
 			}
 			else {
-				$valinta .= " and ".$otsikot[$indeksi[$j]]."='".trim($rivi[$indeksi[$j]])."'";
+				$valinta .= " and ".$otsikot[$j]."='".trim($rivi[$j])."'";
 			}
-			// jos tieto puuttuu kokonaan
-			if (strlen(trim($rivi[$indeksi[$j]])) == 0 and $tyhjatok != "yes") {
+			
+			// jos pakollinen tieto puuttuu kokonaan
+			if (strlen(trim($rivi[$j])) == 0 and in_array($otsikot[$j], $pakolliset)) {
 				$tila = 'ohita';
 			}
 		}
@@ -417,7 +447,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						FROM $table
 						WHERE $valinta";
 			$fresult = mysql_query($query) or pupe_error($query);
-
+			
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 				if (mysql_num_rows($fresult) != 0 ) {
 					if ($table != 'asiakasalennus' and $table != 'asiakashinta') {
@@ -435,8 +465,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				}
 			}
 			else {
-					echo " ".t("Riviä ei voida käsitellä koska siltä puuttuu toiminto!")." $valinta<br>";
-					$tila = 'ohita';
+				echo " ".t("Riviä ei voida käsitellä koska siltä puuttuu toiminto!")." $valinta<br>";
+				$tila = 'ohita';
 			}
 		}
 		else {
@@ -817,7 +847,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 				$aquery = "	SELECT tunnus
 							FROM $table
-							WHERE yhtio='$kukarow[yhtio]'$and";
+							WHERE yhtio='$kukarow[yhtio]' $and";
 				$dsresult = mysql_query($aquery) or pupe_error($aquery);
 
 				if (mysql_num_rows($dsresult) > 0 and strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {

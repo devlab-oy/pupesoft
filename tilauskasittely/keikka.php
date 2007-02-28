@@ -138,7 +138,6 @@ if ($toiminto == "kalkyyli") {
 
 // jos ollaan annettu $ytunnus haetaan toimittajan tiedot arrayseen $toimittajarow
 if ($ytunnus != "" or $toimittajaid != "") {
-
 	$keikkamonta = 0;
 	$hakutunnus = $ytunnus;
 
@@ -150,15 +149,15 @@ if ($ytunnus != "" or $toimittajaid != "") {
 		$ytunnus = $hakutunnus;
 		require ("../inc/asiakashaku.inc");
 
-		$toimittajaid = $asiakasid;
+		$toimittajaid  = $asiakasid;
 		$toimittajarow = $asiakasrow;
-		$keikkamonta += $monta;
+		$keikkamonta  += $monta;
 	}
 
 	if ($keikkamonta > 1) {
-		$toimittajaid = "";
+		$toimittajaid  = "";
 		$toimittajarow = "";
-		$ytunnus = "";
+		$ytunnus 	   = "";
 	}
 }
 
@@ -181,7 +180,7 @@ if ($toiminto == "" and $ytunnus == "") {
 	$toiminto = "";
 
 	// näytetään millä toimittajilla on keskeneräisiä keikkoja
-	$query = "	select ytunnus, nimi, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br>') comments, count(*) kpl
+	$query = "	select ytunnus, nimi, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br>') comments, liitostunnus, count(*) kpl
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0
 				group by 1,2,3,4,5
@@ -196,23 +195,9 @@ if ($toiminto == "" and $ytunnus == "") {
 		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("kommentti")."</th><th>".t("kpl")."</th><th></th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
-
-			// haetaan varmuudenvuoksi vielä toimittajan tunnus jos se löytyy näin, niin ei mene sekasin jos on monta toimittajaa samalla ytunnuksella.. uuh.
-			$query = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$row[ytunnus]' and nimi='$row[nimi]' and swift='$row[swift]'";
-			$toare = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($toare) == 1) {
-				$toaro = mysql_fetch_array($toare);
-				$toimittajaid = $toaro["tunnus"];
-			}
-			else $toimittajaid = "";
-
 			echo "<tr><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[comments]</td><td>$row[kpl]</td>";
-
 			echo "<form action='$PHP_SELF' method='post'>";
-			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-			echo "<input type='hidden' name='ytunnus' value='$row[ytunnus]'>";
-
+			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
 			echo "<td><input type='submit' value='".t("Valitse")."'></td>";
 			echo "</form>";
 			echo "</tr>";

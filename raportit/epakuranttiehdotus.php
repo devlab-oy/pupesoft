@@ -116,7 +116,7 @@ if ($subnappi != '') {
 		$taprow = mysql_fetch_array($tapres);
 
 		// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
-		list($vv1,$kk1,$pp1) = split("-",$taprow["min"]);
+		list($vv1,$kk1,$pp1) = split("-",$taprow["max"]);
 		list($vv2,$kk2,$pp2) = split("-",$alkupvm);
 		$saapunut = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 		$alaraja  = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));

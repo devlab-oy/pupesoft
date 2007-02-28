@@ -229,7 +229,7 @@
 											$perheid	 = "";
 										}
 										
-										$kommentti		 = t("JT-rivi, toimitettu automaattisesti");
+										//$kommentti		 = t("JT-rivi, toimitettu automaattisesti");
 
 										require ("lisaarivi.inc");
 

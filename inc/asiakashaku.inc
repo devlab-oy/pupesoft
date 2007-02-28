@@ -238,17 +238,25 @@ if ($monta != 1 and mysql_num_rows($oikeuresult) > 0) {
 
 	echo "<table border='0'>";
 
-	echo "<tr>
-		<td>".t("Oikeaa asiakasta ei löytynyt. Perusta uusi asiakas")."</td>";
-
-	echo "<form action='../yllapito.php' method='post'>";
+	echo "<tr><td>".t("Oikeaa asiakasta ei löytynyt. Perusta uusi asiakas")."</td>";
 	echo "<td class='back'>";
+	echo "<form action='../yllapito.php' method='post'>";
 	echo "<input type='hidden' name='lopetus' 	value='tilauskasittely/tilaus_myynti.php////toim=$toim'>";
 	echo "<input type='hidden' name='toim'		value='asiakas!!!VAHITTAISMYYNTI!!!true'>";
 	echo "<input type='hidden' name='uusi'		value='1'>";
-	echo "<input type='submit' value='".t("Valitse")."'>";
-	echo "</td>";
+	echo "<input type='submit' value='".t("Uusi henkilöasiakas")."'>";
 	echo "</form>";
+	echo "</td>";
+	
+	echo "<td class='back'>";
+	echo "<form action='../yllapito.php' method='post'>";
+	echo "<input type='hidden' name='lopetus' 	value='tilauskasittely/tilaus_myynti.php////toim=$toim'>";
+	echo "<input type='hidden' name='toim'		value='asiakas'>";
+	echo "<input type='hidden' name='uusi'		value='1'>";
+	echo "<input type='submit' value='".t("Uusi yritysasiakas")."'>";
+	echo "</form>";
+	echo "</td>";
+	
 	echo "</tr>";
 
 	echo "</table><br>";

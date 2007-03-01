@@ -44,34 +44,54 @@
 	
 		if ($debug==1) echo t("Perusotsikko löytyi")." $otsikkorivi[nimi]<br>";
 	
+		
+		// Tutkitaan perusotsikon eräpäivämäärää
+		$erpcmlisa1 = "";
+		$erpcmlisa2 = "";
+		
+		$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and tunnus='$otsikkorivi[maksuehto]'";
+		$erpres = mysql_query($erpquery) or pupe_error($erpquery);
+		$meapurow = mysql_fetch_array($erpres);
+		
+		list($erpcmvv, $erpcmkk, $erpcmpp) = split('-', $otsikkorivi["erpcm"]);
+		
+		$nyt = (int) date("Ymd"); 
+		$erp = (int) $erpcmvv.$erpcmkk.$erpcmpp;
+
+		//Jos alkuperäisellä tilauksella on eräpäivämäärä syötetty käsin niin huomioidaan se nyt rivien poiminnassa
+		if ($meapurow["erapvmkasin"] != "" and checkdate($erpcmkk, $erpcmpp, $erpcmvv) and $erp > $nyt) {
+			$erpcmlisa1 = " and erpcm = '$otsikkorivi[erpcm]' ";
+			$erpcmlisa2 = " erpcm = '$otsikkorivi[erpcm]', ";
+		}
+		
 		// Tarvitsemmeko uuden otsikon?
 		$query = "	SELECT * 
 					FROM lasku 
-					WHERE
-					yhtio			= '$kukarow[yhtio]' and
-					laatija			= '$kukarow[kuka]' and
-					alatila			= 'E' and
-					tila 			= 'N' and
-					ytunnus			= '$otsikkorivi[ytunnus]' and
-					nimi 			= '$otsikkorivi[nimi]' and
-					nimitark 		= '$otsikkorivi[nimitark]' and
-					osoite 			= '$otsikkorivi[osoite]' and
-					postino			= '$otsikkorivi[postino]' and
-					postitp 		= '$otsikkorivi[postitp]' and
-					toim_nimi		= '$otsikkorivi[toim_nimi]' and
-					toim_nimitark	= '$otsikkorivi[toim_nimitark]' and
-					toim_osoite 	= '$otsikkorivi[toim_osoite]' and
-					toim_postino 	= '$otsikkorivi[toim_postino]' and
-					toim_postitp 	= '$otsikkorivi[toim_postitp]' and
-					toimitustapa 	= '$otsikkorivi[toimitustapa]' and
-					maksuehto 		= '$otsikkorivi[maksuehto]' and
-					vienti	 		= '$otsikkorivi[vienti]' and
-					alv		 		= '$otsikkorivi[alv]' and
-					ketjutus 		= '$otsikkorivi[ketjutus]' and
-					kohdistettu		= '$otsikkorivi[kohdistettu]' and
-					toimitusehto	= '$otsikkorivi[toimitusehto]'";
+					WHERE yhtio			= '$kukarow[yhtio]'
+					and laatija			= '$kukarow[kuka]'
+					and alatila			= 'E'
+					and tila 			= 'N'
+					and ytunnus			= '$otsikkorivi[ytunnus]'
+					and nimi 			= '$otsikkorivi[nimi]'
+					and nimitark 		= '$otsikkorivi[nimitark]'
+					and osoite 			= '$otsikkorivi[osoite]'
+					and postino			= '$otsikkorivi[postino]'
+					and postitp 		= '$otsikkorivi[postitp]'
+					and toim_nimi		= '$otsikkorivi[toim_nimi]'
+					and toim_nimitark	= '$otsikkorivi[toim_nimitark]'
+					and toim_osoite 	= '$otsikkorivi[toim_osoite]'
+					and toim_postino 	= '$otsikkorivi[toim_postino]'
+					and toim_postitp 	= '$otsikkorivi[toim_postitp]'
+					and toimitustapa 	= '$otsikkorivi[toimitustapa]'
+					and maksuehto 		= '$otsikkorivi[maksuehto]'
+					and vienti	 		= '$otsikkorivi[vienti]'
+					and alv		 		= '$otsikkorivi[alv]'
+					and ketjutus 		= '$otsikkorivi[ketjutus]'
+					and kohdistettu		= '$otsikkorivi[kohdistettu]'
+					and toimitusehto	= '$otsikkorivi[toimitusehto]'
+					$erpcmlisa1";
 		$stresult = mysql_query($query) or pupe_error($query);
-	
+				
 		if (mysql_num_rows($stresult)!=0) { // Wow, sopiva löytyi
 			$otsikkorivi=mysql_fetch_array ($stresult);
 			$id = $otsikkorivi['tunnus'];
@@ -104,6 +124,15 @@
 						mysql_field_name($stresult,$i)=='luontiaika' or
 						mysql_field_name($stresult,$i)=='toimaika') {
 					$query .= mysql_field_name($stresult,$i)."=now(),";
+				}
+				// Katotaan oisko käsinsyötetty eräpäivämäärä
+				elseif (mysql_field_name($stresult,$i)=='erpcm') {
+					if ($erpcmlisa2 != '') {
+						$query .= $erpcmlisa2;
+					}
+					else {
+						$query .= "erpcm='',";
+					}
 				}
 				// nämä kentät tyhjennetään
 				elseif (mysql_field_name($stresult,$i)=='kapvm' or
@@ -146,9 +175,9 @@
 				}												 
 			}
 			$query = substr($query,0,-1);
-	
 			$stresult = mysql_query($query) or pupe_error($query);
 			$id = mysql_insert_id();
+			
 			if ($debug==1) echo t("Perustin laskun")." $otsikkorivi[nimi] $id<br>";
 		}
 		

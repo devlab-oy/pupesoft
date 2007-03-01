@@ -135,6 +135,7 @@
 				// n‰m‰ kent‰t tyhjennet‰‰n
 				elseif (mysql_field_name($stresult,$i)=='kapvm' or
 						mysql_field_name($stresult,$i)=='tapvm' or
+						mysql_field_name($stresult,$i)=='erpcm' or
 						mysql_field_name($stresult,$i)=='olmapvm' or
 						mysql_field_name($stresult,$i)=='summa' or
 						mysql_field_name($stresult,$i)=='kasumma' or

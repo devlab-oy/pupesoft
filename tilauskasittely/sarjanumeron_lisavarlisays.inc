@@ -1,6 +1,6 @@
 <?php
 
-	if (!function_exists('alvierittely')) {
+	if (!function_exists('lisavarlisays')) {
 		function lisavarlisays ($sarjatun, $lisatty_tun) {
 			global $kukarow, $yhtiorow;
 			

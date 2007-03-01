@@ -272,12 +272,18 @@
 		echo "<td>";		
 		// Tehd‰‰n boxi, jolla saadaan poistetut n‰kyviin
 		echo "<form action = '$PHP_SELF#$tunnus' method='post'><input type='hidden' name=tee value='E'>
-		<input type='hidden' name=tunnus value = '$tunnus'>";
+			<input type='hidden' name=tunnus value = '$tunnus'>";
+		
 		echo t('N‰yt‰ poistetut');
-		if ($viivatut == 'on') $viivatut='checked'; else $viivatut='';
-		echo "<input type='checkbox' name=viivatut $viivatut onchange='submit();'></form>";
+		
+		if ($viivatut == 'on') $viivatut='checked'; 
+		else $viivatut='';
+		
+		echo "<input type='checkbox' name='viivatut' onclick='submit();' $viivatut></form>";
 		echo "</td>";
+		
 		if ($viivatut != '') echo "<td></td>";
+		
 		echo "<td></td></tr>";
 		echo "</table><br><br>";
 ?>

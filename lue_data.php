@@ -144,7 +144,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$kielletyt = array("");
 			break;
 		case "yhteyshenkilo" :
-			$pakolliset = array("ASIAKAS","NIMI");
+			$pakolliset = array("LIITOSTUNNUS","TYYPPI","NIMI");
 			$kielletyt = array("");
 			break;
 		case "avainsana" :

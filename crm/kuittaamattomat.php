@@ -100,7 +100,7 @@
 			$query = "	SELECT yhtio
 						FROM yhteyshenkilo
 						WHERE yhtio = '$kukarow[yhtio]' 
-						and asiakas = '$ytunnus'
+						and liitostunnus = '$ytunnus'
 						ORDER BY nimi";
 			$result = mysql_query($query) or pupe_error($query);
 			
@@ -280,7 +280,7 @@
 			
 			$query = "	SELECT *
 						FROM yhteyshenkilo
-						WHERE asiakas='$ytunnus'
+						WHERE liitostunnus='$ytunnus'
 						ORDER BY nimi";
 			$result = mysql_query($query) or pupe_error($query);
 			
@@ -330,13 +330,13 @@
 				<td><select name='kuka' onchange='submit()'>
 				<option value='$kukarow[kuka]'>$kukarow[nimi]</option>";
 		
-		$query = "	SELECT kuka.tunnus, kuka.nimi, kuka.kuka
+		$query = "	SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
 					FROM kuka, oikeu
 					WHERE kuka.yhtio	= '$kukarow[yhtio]'
 					and oikeu.yhtio		= kuka.yhtio
 					and oikeu.kuka		= kuka.kuka
 					and oikeu.nimi		= 'crm/kalenteri.php' 
-					and kuka.tunnus <> '$kukarow[kuka]'
+					and kuka.tunnus <> '$kukarow[tunnus]'
 					ORDER BY kuka.nimi";	
 		$result = mysql_query($query) or pupe_error($query);
 		

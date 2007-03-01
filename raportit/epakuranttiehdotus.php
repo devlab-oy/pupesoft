@@ -79,13 +79,13 @@ if ($subnappi != '') {
 	if ($tyyppi == 'puoli') {
 		// puoliep‰kurantteja etsitt‰ess‰ tuote ei saa olla puoli eik‰ t‰ysiep‰kurantti
 		$epakuranttipvm = "and epakurantti1pvm='0000-00-00' and epakurantti2pvm='0000-00-00'";
-		echo "<font class='message'>".t("Puoliep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Ensimm‰inen saapuminen ennen")." $alkupvm.</font><br><br>";
+		echo "<font class='message'>".t("Puoliep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
 	}
 
 	if ($tyyppi == 'taysi') {
 		// t‰ysiep‰kurantteja etsitt‰ess‰ tuotteen pit‰‰ olla puoliep‰kurantti mutta ei t‰ysep‰kurantti
 		$epakuranttipvm = "and epakurantti1pvm!='0000-00-00' and epakurantti2pvm='0000-00-00'";
-		echo "<font class='message'>".t("T‰ysiep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Ensimm‰inen saapuminen ennen")." $alkupvm.</font><br><br>";
+		echo "<font class='message'>".t("T‰ysiep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
 	}
 
 	// etsit‰‰n saldolliset tuotteet

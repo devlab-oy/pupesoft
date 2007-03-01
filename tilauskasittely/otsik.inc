@@ -575,7 +575,7 @@
 
 				$query = "	SELECT tunnus, if(titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
 							FROM yhteyshenkilo
-							WHERE asiakas = '$srow[liitostunnus]'
+							WHERE liitostunnus = '$srow[liitostunnus]'
 							ORDER BY nimi";
 				$yhresult = mysql_query($query) or pupe_error($query);
 

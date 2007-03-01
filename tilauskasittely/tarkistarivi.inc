@@ -291,7 +291,7 @@
 		}
 
 		if ($paikat != "" and $paikatlask > 1) {
-			$paikat = "<select Style='{font-size: 8pt; padding:0;}' name='paikka' onchange='submit();'>".$paikat."</select>";
+			$paikat = "<select Style='font-size: 8pt; padding:0;' name='paikka' onchange='submit();'>".$paikat."</select>";
 		}
 		else {
 			$paikat = "";

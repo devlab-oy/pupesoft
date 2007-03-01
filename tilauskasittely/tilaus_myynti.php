@@ -2039,7 +2039,7 @@ if ($tee == '') {
 								
 				if($borderlask == $pkrow[1] and $pkrow[1] > 0) {
 					$classlisa = $class." style='border-top: 1px solid; border-right: 1px solid;' ";
-					$class    .= " style='border-top: 1px solid; ";
+					$class    .= " style='border-top: 1px solid;' ";
 					$borderlask--;
 				}
 				elseif($borderlask == 1) {

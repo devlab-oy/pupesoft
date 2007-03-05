@@ -173,12 +173,15 @@
 
 				if ($coprivirow["var"] == "J" or $coprivirow["var"] == "S" or $coprivirow["var"] == "T" or $coprivirow["var"] == "U") {
 					$kpl	= $coprivirow['jt'];
+					$var	= "J";
 				}
 				elseif ($tilausrivi["var"] == "P") {
 					$kpl	= $coprivirow['tilkpl'];
+					$var	= "";
 				}
 				else {
 					$kpl	= $coprivirow['varattu'];
+					$var	= "";
 				}
 
 				$hinta		= $coprivirow['hinta'];
@@ -209,9 +212,6 @@
 
 				if ($syot_var != "") {
 					$var	= $syot_var;
-				}
-				else {
-					$var	= $coprivirow['var'];
 				}
 
 				if ((int) $syot_varasto > 0) {

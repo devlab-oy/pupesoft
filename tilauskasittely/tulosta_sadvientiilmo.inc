@@ -441,7 +441,7 @@
 					$rivikohta = $rivikohta_bck;
 
 					$pdf2->draw_text(61,  mm_pt($rivikohta-36), "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), 	$lisalehti[$sivu], $kymppi);
-					$pdf2->draw_text(61,  mm_pt($rivikohta-41), "RET.EXP.", 																$lisalehti[$sivu], $kymppi);
+					$pdf2->draw_text(61,  mm_pt($rivikohta-41), "RET.EXP.", 															$lisalehti[$sivu], $kymppi);
 
 					$rivikohta -= 59;
 				}
@@ -592,7 +592,7 @@
 
 		//Kenttä 44 Lisätietoja
 		$pdf2->draw_text(61,  395, "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), $pages[0], $kymppi);
-		$pdf2->draw_text(61,  380, "RET.EXP.", 										$pages[0], $kymppi);
+		$pdf2->draw_text(61,  385, "RET.EXP.", 										$pages[0], $kymppi);
 
 		if ($yhtiorow["kotitullauslupa"] != "") {
 			$pdf2->draw_text(61,  378, "Kotitullauslupa ".$yhtiorow["kotitullauslupa"].", Eteläinen tullipiiri",	$pages[0], $kymppi);

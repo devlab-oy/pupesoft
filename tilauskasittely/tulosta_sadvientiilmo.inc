@@ -383,7 +383,7 @@
 
 					//Kenttä 41 Muu paljous
 					if ($rivirow["su"] != '') {
-						$pdf2->draw_text(287, $rivikohta-12, $rivirow["kpl"]." ".$rivirow["su_vientiilmo"], $lisalehti[$sivu], $kymppi);
+						$pdf2->draw_text(287, $rivikohta-11, $rivirow["kpl"]." ".$rivirow["su_vientiilmo"], $lisalehti[$sivu], $kymppi);
 					}
 
 					//Kenttä 46 Vientiarvo, tilastollinen!
@@ -591,7 +591,7 @@
 		//Tätä ei tässä täytetä
 
 		//Kenttä 44 Lisätietoja
-		$pdf2->draw_text(61,  395, "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), $pages[0], $kymppi);
+		$pdf2->draw_text(61,  396, "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), $pages[0], $kymppi);
 		$pdf2->draw_text(61,  386, "RET.EXP.", 										$pages[0], $kymppi);
 
 		if ($yhtiorow["kotitullauslupa"] != "") {

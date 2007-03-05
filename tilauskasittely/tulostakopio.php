@@ -474,11 +474,11 @@
 		}
 
 		// Etsit‰‰n muutettavaa tilausta
-		$query = "  SELECT lasku.tunnus 'tilaus', if(lasku.laskunro=0, '', laskunro) laskunro, 
-					concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, 
-					if(lasku.tapvm='0000-00-00', '', DATE_FORMAT(lasku.tapvm, '%d.%m.%Y')) tapvm, 
-					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija, 
-					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) summa, 
+		$query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro, 
+					concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus, 
+					if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.luontiaika, '%d.%m.%Y'), DATE_FORMAT(lasku.tapvm, '%d.%m.%Y')) Pvm, 
+					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija, 
+					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa, 
 					lasku.tila, lasku.alatila
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
@@ -530,7 +530,7 @@
 				echo "<tr>";
 				$ero="td";
 
-				if ($tunnus==$row['tilaus']) $ero="th";
+				if ($tunnus==$row['Tilaus']) $ero="th";
 
 				echo "<tr>";
 
@@ -554,7 +554,7 @@
 							<form method='post' action='$PHP_SELF'>
 							<input type='hidden' name='tee' value='NAYTAHTML'>
 							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='tunnus' value='$row[tilaus]'>
+							<input type='hidden' name='tunnus' value='$row[Tilaus]'>
 							<input type='hidden' name='ytunnus' value='$ytunnus'>
 							<input type='hidden' name='asiakasid' value='$asiakasid'>
 							<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -570,21 +570,21 @@
 
 					echo "<td class='back'>
 							<form method='post' action='$PHP_SELF' autocomplete='off'>
-							<input type='hidden' name='otunnus' value='$row[tilaus]'>
+							<input type='hidden' name='otunnus' value='$row[Tilaus]'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
 							<input type='submit' value='".t("N‰yt‰ pdf")."'></form></td>";
 
 					echo "<td class='back'>
 							<form method='post' action='$PHP_SELF' autocomplete='off'>
-							<input type='hidden' name='otunnus' value='$row[tilaus]'>
+							<input type='hidden' name='otunnus' value='$row[Tilaus]'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='TULOSTA'>
 							<input type='submit' value='".t("Tulosta")."'></form></td>";
 				}
 
 				if ($tila == 'monta') {
-					echo "<td><input type='checkbox' name='tulostukseen[]' value='$row[tilaus]'></td>";
+					echo "<td><input type='checkbox' name='tulostukseen[]' value='$row[Tilaus]'></td>";
 				}
 
 				echo "</tr>";
@@ -597,7 +597,7 @@
 			echo "</table>";
 		}
 		else {
-			echo "".t("Ei tilauksia")."...<br><br>";
+			echo t("Ei tilauksia")."...<br><br>";
 		}
 	}
 

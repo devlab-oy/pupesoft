@@ -163,8 +163,8 @@
 			$nimitykset = explode("##", $rivirow["nimitys_hieno"]);
 
 			$apinalask = 495;
-			foreach($nimitykset as $nimitys) {
-				$pdf2->draw_text(61,  $apinalask, substr($nimitys,0,35),			$pages[0], $kymppi);
+			for($nim=0; $nim<8; $nim++) {
+				$pdf2->draw_text(61,  $apinalask, substr($nimitykset[$nim],0,35),	$pages[0], $kymppi);
 				$apinalask -= 12;
 			}
 
@@ -433,16 +433,10 @@
 					$nimitykset = explode("##", $rivirow["nimitys_hieno"]);
 
 					$rivikohta_bck = $rivikohta;
-					$nimilask = 0;
 
-					foreach($nimitykset as $nimitys) {
-						$pdf2->draw_text(mm_pt(22),  mm_pt($rivikohta), substr($nimitys,0,35),					$lisalehti[$sivu], $kymppi);
+					for($nim=0; $nim<8; $nim++) {
+						$pdf2->draw_text(mm_pt(22),  mm_pt($rivikohta), substr($nimitykset[$nim],0,35),			$lisalehti[$sivu], $kymppi);
 						$rivikohta -= 5;
-						$nimilask++;
-
-						if ($nimilask >= 7) {
-							break;
-						}
 					}
 					$rivikohta = $rivikohta_bck;
 

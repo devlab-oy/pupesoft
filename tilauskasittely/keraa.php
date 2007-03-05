@@ -89,7 +89,7 @@
 
 		while ($toimrow = mysql_fetch_array($toimresult)) {
 
-			if ($toim == 'SIIRTOTYOMAARAYS') {
+			if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
 				$tunken = "siirtorivitunnus";
 			}
 			elseif ($toimrow["varattu"] < 0) {
@@ -1083,7 +1083,7 @@
 							<td><input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]'> $puute";
 
 					if ($row["sarjanumeroseuranta"] != "") {						
-						if ($toim == 'SIIRTOTYOMAARAYS') {
+						if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
 							$tunken1 = "siirtorivitunnus";
 							$tunken2 = "siirtorivitunnus";
 						}
@@ -1101,10 +1101,10 @@
 						$sarjarow = mysql_fetch_array($sarjares);
 
 						if ($sarjarow["kpl"] == abs($row["varattu"])) {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&otunnus=$id' style='color:00FF00'>sarjanro OK</font></a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id' style='color:00FF00'>sarjanro OK</font></a>)";
 						}
 						else {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&otunnus=$id'>sarjanro</a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id'>sarjanro</a>)";
 						}
 					}
 					

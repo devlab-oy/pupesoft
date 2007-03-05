@@ -311,7 +311,7 @@
 
 			$t1[$tun]=strtoupper($t1[$tun]);
 
-			$query = "	SELECT tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.varattu, tuote.ei_saldoa
+			$query = "	SELECT tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.varattu, tuote.ei_saldoa, tuote.sarjanumeroseuranta
 						FROM tilausrivi
 						JOIN tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 						WHERE tilausrivi.tunnus		= '$tun'
@@ -374,6 +374,21 @@
 
 						$minne = $prow["tunnus"];
 						$uusiol = $prow["tunnus"];
+					}
+					
+					//laitetaan sarjanumerot kuntoon
+					if ($tilausrivirow["sarjanumeroseuranta"] != "") {
+						$query = "	SELECT tunnus
+									FROM sarjanumeroseuranta
+									WHERE siirtorivitunnus		= '$tun'
+									and yhtio					= '$kukarow[yhtio]'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+						
+						$sarjano_array = array();
+						
+						while($sarjarow = mysql_fetch_array($sarjares)) {
+							$sarjano_array[] = $sarjarow["tunnus"];
+						}
 					}
 
 					// muuvarastopaikka.php palauttaa tee=X jos törmättiin johonkin virheeseen

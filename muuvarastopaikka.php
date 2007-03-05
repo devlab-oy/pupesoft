@@ -8,7 +8,7 @@
 		echo "<font class='head'>".t("Tuotteen varastopaikat")."</font><hr>";
 	}
 	
-	if (($tee == 'S') or ($tee == 'E')) {
+	if ($tee == 'S' or $tee == 'E') {
 		if ($tee == 'S') {
 			$oper='>';
 			$suun='';
@@ -28,6 +28,7 @@
 					ORDER BY tuote.tuoteno " . $suun . "
 					LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
+	
 		if (mysql_num_rows($result) > 0) {
 			$trow = mysql_fetch_array ($result);
 			$tuoteno = $trow['tuoteno'];
@@ -40,7 +41,8 @@
 		}
 	}
 	
-	if ($tee == 'N') { //Siirret‰‰n saldo, jos se on viel‰ olemassa
+	//Siirret‰‰n saldo, jos se on viel‰ olemassa
+	if ($tee == 'N') { 
 		if ($mista == $minne) {
 			echo "<font class='error'>".t("Kummatkin paikat ovat samat")."!</font><br><br>";
 
@@ -52,6 +54,7 @@
 			}
 		}
 		$asaldo = (float) str_replace( ",", ".", $asaldo);
+		
 		if ($asaldo == 0) {
 			echo "<font class='error'>".t("Anna siirrett‰v‰ m‰‰r‰")."!</font><br><br>";
 
@@ -64,7 +67,8 @@
 		}
 	}
 
-	if ($tee == 'C') { // Itse varastopaikkoja muutellaan (Tarkistus)
+	// Itse varastopaikkoja muutellaan (Tarkistus)
+	if ($tee == 'C') {
 		$atil=0.01;
 		$naytakaikkipaikat = "ON";
 
@@ -160,18 +164,18 @@
 				}
 			}
 		}
-
 	}
 
 	$lock = "";
 
 	if ($tee == 'U' or $tee == 'N' or $tee == 'C') {
 		$lock   = "X";
-		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tuote READ, varastopaikat READ, tilausrivi READ";
+		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tuote READ, varastopaikat READ, tilausrivi READ, sarjanumeroseuranta WRITE";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-	if ($tee == 'C') { // Itse varastopaikkoja muutellaan
+ 	// Itse varastopaikkoja muutellaan
+	if ($tee == 'C') {
 		$varasto = 0;
 		$vanhaoletus = $hyllytunnus[$oletuspaikka];
 
@@ -199,7 +203,8 @@
 		}
 	}
 
-	if ($tee == 'C') {	// Muutetaan h‰lytysrajoja (tarkistus)
+	// Muutetaan h‰lytysrajoja (tarkistus)
+	if ($tee == 'C') {	
 		for ($i=0; $i < count($halyraja1); $i++) {
 			$query = "	SELECT *
 						FROM tuotepaikat
@@ -216,7 +221,8 @@
 		}
 	}
 
-	if ($tee == 'C') {	// Muutetaan tilausm‰‰r‰ (tarkistus)
+	// Muutetaan tilausm‰‰r‰ (tarkistus)
+	if ($tee == 'C') {	
 		for ($i=0; $i < count($tilausmaara1); $i++) {
 			$query = "	SELECT *
 						FROM tuotepaikat
@@ -233,7 +239,8 @@
 		}
 	}
 
-	if ($tee == 'C') {	// Poistetaan varastopaikkoja (tarkistus)
+	// Poistetaan varastopaikkoja (tarkistus)
+	if ($tee == 'C') {	
 		for ($i=0; $i < count($poista); $i++) {
 			$query = "	SELECT *
 						FROM tuotepaikat
@@ -287,9 +294,7 @@
 		}
 
 		for ($i=0; $i < count($halyraja1); $i++) {
-
 			//echo "<font class='message'>H‰lytysraja p‰ivitettiin!</font><br><br>";
-
 			$query = "	UPDATE tuotepaikat SET halytysraja = '$halyraja2[$i]'
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$halyraja1[$i]'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -379,7 +384,18 @@
 			echo "<font class='error'>".t("T‰m‰ varastopaikka katosi tuotteelta")." $mista</font><br><br>";
 			$tee = $uusitee;
 		}
+		
+		
+		//Tarkistetaan sarjanumeroseuranta
+		$query = "	SELECT tunnus
+					FROM tuote
+					WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and sarjanumeroseuranta!=''";
+		$sarjaresult = mysql_query($query) or pupe_error($query);
 
+		if (mysql_num_rows($sarjaresult) > 0 and (!is_array($sarjano_array) or count($sarjano_array) != $asaldo)) {
+			echo "<font class='error'>".t("Tarkista sarjanumerovalintasi")."!</font><br><br>";
+			$tee = $uusitee;
+		}
 	}
 	if ($tee == 'N') {
 
@@ -402,6 +418,7 @@
 
 		$minne = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
 		$mista = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
+		
 		if (($kutsuja == 'vastaanota.php' and $toim == 'MYYNTITILI') or ($kutsuja != 'vastaanota.php')) {
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',
@@ -426,6 +443,22 @@
 					laadittu 	= now()";
 		$result = mysql_query($query) or pupe_error($query);
 
+		
+		//P‰ivitet‰‰n sarjanumerot
+		if (mysql_num_rows($sarjaresult) > 0) {
+			foreach($sarjano_array as $sarjano) {
+				$query = "	UPDATE sarjanumeroseuranta 
+							set hyllyalue	= '$minnerow[hyllyalue]',
+							hyllynro 		= '$minnerow[hyllynro]',
+							hyllyvali 		= '$minnerow[hyllyvali]',
+							hyllytaso		= '$minnerow[hyllytaso]'
+							WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$sarjano'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+		}
+		
+		
+		
 		$ahyllyalue = '';
 		$ahyllynro  = '';
 		$ahyllyvali = '';
@@ -520,9 +553,9 @@
 	}
 
 	if ($tee == 'M' or $tee == 'Q') { // Muutetaan varastopaikkoja tai saldoja
-		//$query = "select tuoteno from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
-		//$result = mysql_query($query) or pupe_error($query);
+
 		require "inc/tuotehaku.inc";
+		
 		if ($ulos != "") {
 			$formi  = 'hakua';
    			echo "<form action = '$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
@@ -571,7 +604,9 @@
 		echo "<input type='hidden' name='tee' value='E'>";
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-		echo "<td class='back'>";
+		
+		echo "<th>$tuoteno - $trow[nimitys]</th>";
+		echo "<td>";
 		echo "<input type='Submit' value='".t("Edellinen tuote")."'>";
 		echo "</td>";
 		echo "</form>";
@@ -580,29 +615,66 @@
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tee' value='S'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-		echo "<td class='back'>";
+		echo "<td>";
 		echo "<input type='Submit' value='".t("Seuraava tuote")."'>";
 		echo "</td>";
 		echo "</form>";
 		echo "</tr>";
+		echo "</table><br>";
+		
+		echo "<table>";
 		echo "<tr>";
 				
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		echo "	<form name = 'valinta' action = '$PHP_SELF' method='post'>
+				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>
 				<input type = 'hidden' name = 'tee' value ='N'>
-				<th colspan='6'><font class='message'>$tuoteno</font> $trow[nimitys]<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'></th></tr>
-				<tr><td>".t("L‰hett‰v‰")."<br>".t("varastopaikka")."</td>
-				<td><select name='mista'>$ulos1</td>
-				<td>".t("Vastaanottava")."<br>".t("varastopaikka")."</td>
-				<td><select name='minne'>$ulos</td>
-				<td>".t("Siirret‰‰n")."<br>".t("kpl")."</td>
-				<td><input type = 'text' name = 'asaldo' size = '3' value ='$asaldo'></td></tr>
-				<tr><td colspan='6'><input type = 'submit' value = '".t("Siirr‰")."'></td>
-				</tr></table></form>";
+				<tr>
+				<th>".t("L‰hett‰v‰")."<br>".t("varastopaikka").":</th>
+				<th>".t("Vastaanottava")."<br>".t("varastopaikka").":</th>
+				<th>".t("Siirret‰‰n")."<br>".t("kpl").":</th>";
+				
+		if($trow["sarjanumeroseuranta"] != '') {
+			echo "<th>".t("Valitse")."<br>".t("sarjanumerot").":</th>";	
+		}
+				
+		echo "	</tr>";
+				
+		echo "	<tr>
+				<td valign='top'><select name='mista'>$ulos1</td>
+				<td valign='top'><select name='minne'>$ulos</td>";	
+		echo "	<td valign='top'><input type = 'text' name = 'asaldo' size = '3' value ='$asaldo'></td>";
+				
+		if($trow["sarjanumeroseuranta"] != '') {
+			$query	= "	SELECT tilausrivi_osto.nimitys nimitys, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, 
+						concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
+						FROM sarjanumeroseuranta
+						LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+						LEFT JOIN lasku lasku_osto use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+						and sarjanumeroseuranta.tuoteno = '$trow[tuoteno]'
+						and sarjanumeroseuranta.myyntirivitunnus = 0
+						and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
+			$sarjares = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sarjares) > 0) {			
+				echo "<td valign='top' class='back'>";
+				echo "<div style='height:265;width:500;overflow:auto;'>";
+				echo "<table width='100%'>";
+				
+				while($sarjarow = mysql_fetch_array($sarjares)) {
+					echo "<tr><td nowrap>$sarjarow[nimitys]</td><td nowrap>$sarjarow[sarjanumero]</td><td nowrap>$sarjarow[tuotepaikka]</td><td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td></tr>";
+				}
+				echo "</table></div></td>";
+			}
+		}
+		echo "</tr>";
+		echo "	<tr><td colspan='6'><input type = 'submit' value = '".t("Siirr‰")."'></td>
+				</tr></table></form><br>";
 
 		// Tehd‰‰n k‰yttˆliittym‰ paikkojen muutoksille (otetus tai pois)
-		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
-					<input type = 'hidden' name = 'tee' value ='C'>
-					<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
+		echo "	<form name = 'valinta' action = '$PHP_SELF' method='post'>
+				<input type = 'hidden' name = 'tee' value ='C'>
+				<input type = 'hidden' name = 'tuoteno' value = '$tuoteno'>";
 
 		echo "<table>";
 		echo "<tr><th>".t("Varastopaikka")."</th><th>".t("Saldo")."</th><th>".t("Oletuspaikka")."</th><th>".t("H‰lyraja")."</th><th>".t("Tilausm‰‰r‰")."</th><th>".t("Poista")."</th></tr>";
@@ -626,6 +698,7 @@
 			echo "<td><input type='text' size='6' name='halyraja2[]' value='$halyrow[halytysraja]'></td>";
 			echo "<input type='hidden' name='tilausmaara1[]' value='$hyllytunnus[$i]'>";
 			echo "<td><input type='text' size='6' name='tilausmaara2[]' value='$halyrow[tilausmaara]'></td>";
+			
 			if ($varastosaldo[$i] != 0) { // Ei n‰ytet‰ boxia, jos sit‰ ei saa k‰ytt‰‰
 				echo "<td></td>";
 			}
@@ -635,12 +708,12 @@
 
 			echo "</tr>";
 		}
-		echo "<tr><td colspan='4'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></table></form>";
+		echo "<tr><td colspan='6'><input type = 'submit' value = '".t("P‰ivit‰")."'></td></table></form><br>";
 
-		$ahyllyalue='';
-		$ahyllynro='';
-		$ahyllyvali='';
-		$ahyllytaso='';
+		$ahyllyalue	= '';
+		$ahyllynro	= '';
+		$ahyllyvali	= '';
+		$ahyllytaso	= '';
 
 		echo "<table><form name = 'valinta' action = '$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='U'>

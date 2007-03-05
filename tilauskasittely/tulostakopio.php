@@ -478,7 +478,7 @@
 					concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, 
 					if(lasku.tapvm='0000-00-00', '', DATE_FORMAT(lasku.tapvm, '%d.%m.%Y')) tapvm, 
 					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija, 
-					if(lasku.summa=0, '', summa) summa, 
+					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) summa, 
 					lasku.tila, lasku.alatila
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija

@@ -592,10 +592,10 @@
 
 		//Kenttä 44 Lisätietoja
 		$pdf2->draw_text(61,  395, "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), $pages[0], $kymppi);
-		$pdf2->draw_text(61,  385, "RET.EXP.", 										$pages[0], $kymppi);
+		$pdf2->draw_text(61,  386, "RET.EXP.", 										$pages[0], $kymppi);
 
 		if ($yhtiorow["kotitullauslupa"] != "") {
-			$pdf2->draw_text(61,  378, "Kotitullauslupa ".$yhtiorow["kotitullauslupa"].", Eteläinen tullipiiri",	$pages[0], $kymppi);
+			$pdf2->draw_text(61,  377, "Kotitullauslupa ".$yhtiorow["kotitullauslupa"].", Eteläinen tullipiiri",	$pages[0], $kymppi);
 			$pdf2->draw_text(61,  366, "Yksinkertaistettu vienti", 					$pages[0], $kymppi);
 		}
 

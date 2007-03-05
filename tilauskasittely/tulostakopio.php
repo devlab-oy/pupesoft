@@ -178,7 +178,7 @@
 
 		if ($toim == "OSTO") {
 			//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
-			$where1 = " tila = 'O' ";
+			$where1 = " lasku.tila = 'O' ";
 
 			$where2 = " and lasku.liitostunnus='$toimittajaid'
 						and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
@@ -189,7 +189,7 @@
 		}
 		if ($toim == "PURKU") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa purkulista
-			$where1 = " tila = 'K' ";
+			$where1 = " lasku.tila = 'K' ";
 
 			$where2 = " and lasku.liitostunnus='$toimittajaid'
 						and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
@@ -200,7 +200,7 @@
 		}
 		if ($toim == "TARIFFI") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa tariffilista
-			$where1 = " tila in ('H','Y','M','P','Q') and kohdistettu in ('K','X') ";
+			$where1 = " lasku.tila in ('H','Y','M','P','Q') and lasku.kohdistettu in ('K','X') ";
 
 			$where2 = " and lasku.liitostunnus='$toimittajaid'
 						and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
@@ -211,7 +211,7 @@
 		}
 		if ($toim == "TUOTETARRA") {
 			//Ostolasku, tuotetarrat. Tälle oliolle voidaan tulostaa tuotetarroja
-			$where1 = " tila in ('H','Y','M','P','Q') and kohdistettu in ('K','X') ";
+			$where1 = " lasku.tila in ('H','Y','M','P','Q') and lasku.kohdistettu in ('K','X') ";
 
 			$where2 = " and lasku.liitostunnus='$toimittajaid'
 						and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
@@ -222,7 +222,7 @@
 		}
 		if ($toim == "SIIRTOLISTA") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa tariffilista
-			$where1 = " tila = 'G' ";
+			$where1 = " lasku.tila = 'G' ";
 
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
@@ -232,7 +232,7 @@
 		}
 		if ($toim == "VALMISTUS") {
 			//valmistuslista
-			$where1 = " tila = 'V' ";
+			$where1 = " lasku.tila = 'V' ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -253,7 +253,7 @@
 		}
 		if ($toim == "LASKU") {
 			//myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
-			$where1 = " tila = 'U' ";
+			$where1 = " lasku.tila = 'U' ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -274,7 +274,7 @@
 		}
 		if ($toim == "SAD") {
 			//myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
-			$where1 = " tila = 'U' and vienti = 'K' ";
+			$where1 = " lasku.tila = 'U' and lasku.vienti = 'K' ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -295,7 +295,7 @@
 		}
 		if ($toim == "LAHETE") {
 			//myyntitilaus. Tulostetaan lähete.
-			$where1 = " tila in ('L','N') ";
+			$where1 = " lasku.tila in ('L','N') ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -316,7 +316,7 @@
 		}
 		if ($toim == "KERAYSLISTA") {
 			//myyntitilaus. Tulostetaan lähete.
-			$where1 = " tila in ('L','N') ";
+			$where1 = " lasku.tila in ('L','N') ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -337,7 +337,7 @@
 		}
 		if ($toim == "OSOITELAPPU") {
 			//myyntitilaus. Tulostetaan osoitelappuja.
-			$where1 = " tila = 'L' ";
+			$where1 = " lasku.tila = 'L' ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -358,7 +358,7 @@
 		}
 		if ($toim == "VIENTIERITTELY") {
 			//myyntitilaus. Tulostetaan vientieruttely.
-			$where1 = " tila = 'U' and vienti != '' ";
+			$where1 = " lasku.tila = 'U' and lasku.vienti != '' ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -379,7 +379,7 @@
 		}
 		if ($toim == "PROFORMA") {
 			//myyntitilaus. Tulostetaan proforma.
-			$where1 = " tila in ('L','U') and vienti != '' ";
+			$where1 = " lasku.tila in ('L','U') and lasku.vienti != '' ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -400,7 +400,7 @@
 		}
 		if ($toim == "TARJOUS" or $toim == "MYYNTISOPIMUS" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 			// Tulostellaan venemyyntiin liittyviä osia
-			$where1 = " tila in ('L','T','N') ";
+			$where1 = " lasku.tila in ('L','T','N') ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -421,7 +421,7 @@
 		}
 		if ($toim == "TYOMAARAYS") {
 			//myyntitilaus. Tulostetaan proforma.
-			$where1 = " tila in ('L','A','N','S') and tilaustyyppi in ('A','S')";
+			$where1 = " lasku.tila in ('L','A','N','S') and lasku.tilaustyyppi in ('A','S')";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -442,7 +442,7 @@
 		}
 
 		if ($laskunro > 0) {
-			$where2 = " and laskunro = '$laskunro' ";
+			$where2 = " and lasku.laskunro = '$laskunro' ";
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (lasno_index) ";
 		}
@@ -456,12 +456,12 @@
 			$larow = mysql_fetch_array($laresult);
 
 			if ($larow["laskunro"] > 0) {
-				$where2 = " and laskunro = '$larow[laskunro]' ";
+				$where2 = " and lasku.laskunro = '$larow[laskunro]' ";
 				if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 				$use = " use index (lasno_index) ";
 			}
 			else {
-				$where1 = " tunnus = '$otunnus' ";
+				$where1 = " lasku.tunnus = '$otunnus' ";
 				$where2 = "";
 				if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 				$use = " use index (PRIMARY) ";
@@ -474,14 +474,18 @@
 		}
 
 		// Etsitään muutettavaa tilausta
-		$query = "  SELECT lasku.tunnus 'tilaus', laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, tapvm, laatija, summa, tila, alatila
+		$query = "  SELECT lasku.tunnus 'tilaus', if(lasku.laskunro=0, '', laskunro) laskunro, 
+					concat_ws(' ', lasku.nimi, lasku.nimitark) asiakas, lasku.ytunnus, 
+					if(lasku.tapvm='0000-00-00', '', DATE_FORMAT(lasku.tapvm, '%d.%m.%Y')) tapvm, 
+					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija, 
+					if(lasku.summa=0, '', summa) summa, 
+					lasku.tila, lasku.alatila
 					FROM lasku $use
+					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
 					WHERE $where1 $where2
 					and lasku.yhtio = '$kukarow[yhtio]'
-					and tila != 'D'
+					and lasku.tila != 'D'
 					$jarj";
-
-
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -530,8 +534,9 @@
 
 				echo "<tr>";
 
-				for ($i=0; $i<mysql_num_fields($result)-2; $i++)
-				{
+				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
+					
+					
 					echo "<$ero>$row[$i]</$ero>";
 				}
 

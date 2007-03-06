@@ -748,24 +748,27 @@
 			//tapahtumat
 			if ($historia == '1' or $historia == '') {
 				$maara = "LIMIT 20";
-				$ehto = ' and laadittu >= date_sub(now(), interval 6 month)';
+				$ehto = ' and tapahtuma.laadittu >= date_sub(now(), interval 6 month)';
 			}
 			if ($historia == '2') {
 				$maara = "";
-				$ehto = " and laadittu > '$yhtiorow[tilikausi_alku]'";
+				$ehto = " and tapahtuma.laadittu > '$yhtiorow[tilikausi_alku]'";
 			}
 			if ($historia == '3') {
 				$maara = "LIMIT 2500";
 				$ehto = "";
 			}
 
-			$query = "	SELECT concat_ws('@', laatija, laadittu) kuka, laji, kpl, kplhinta, hinta, if(laji in ('tulo','valmistus'), kplhinta, hinta)*kpl arvo, selite
+			$query = "	SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta, 
+						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tuoteno = '$tuoteno'
-						and laadittu > '0000-00-00 00:00:00'
+						LEFT JOIN tilausrivi ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus
+						LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
+						WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
+						and tapahtuma.tuoteno = '$tuoteno'
+						and tapahtuma.laadittu > '0000-00-00 00:00:00'
 						$ehto
-						ORDER BY laadittu desc $maara";
+						ORDER BY tapahtuma.laadittu desc $maara";
 			$qresult = mysql_query($query) or pupe_error($query);
 
 			$vararvo_nyt = sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"]);
@@ -785,7 +788,20 @@
 				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
 					echo "<tr>";
 					echo "<td nowrap>$prow[kuka]</td>";
-					echo "<td nowrap>".t("$prow[laji]")."</td>";
+					echo "<td nowrap>";
+					
+					if ($prow["laji"] == "laskutus") {
+						echo "<a href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
+					}
+					elseif($prow["laji"] == "tulo") {
+						echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";	
+					}
+					else {
+						echo t("$prow[laji]");
+					}
+					
+					echo "</td>";
+					
 					echo "<td nowrap align='right'>$prow[kpl]</td>";
 					echo "<td nowrap align='right'>$prow[kplhinta]</td>";
 					echo "<td nowrap align='right'>$prow[hinta]</td>";

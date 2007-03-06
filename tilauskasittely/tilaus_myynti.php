@@ -1268,8 +1268,15 @@ if ($tee == '') {
 
 	if ($kukarow["extranet"] == "" and $tila == "LISLISAV") {
 		//Päivitetään isän perheid jotta voidaan lisätä lisää lisävarusteita
+		if ($spessuceissi == "OK") {
+			$xperheidkaks = -1;
+		}
+		else {
+			$xperheidkaks =  0;
+		}
+		
 		$query = "	update tilausrivi set
-					perheid2	= 0
+					perheid2	= $xperheidkaks
 					where yhtio = '$kukarow[yhtio]'
 					and tunnus 	= '$rivitunnus'
 					LIMIT 1";
@@ -1999,9 +2006,12 @@ if ($tee == '') {
 				$rivino--;
 				
 				// Tuoteperheiden lapsille ei näytetä rivinumeroa
-				if ($row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0)) {
+				if ($row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0) or ($row["perheid2"] == -1 or ($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")))) {
 
-					if ($row["perheid"] == 0) {
+					if (($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
+						$pklisa = " and (perheid = '$row[tunnus]' or perheid2 = '$row[tunnus]')";		
+					}
+					elseif ($row["perheid"] == 0) {
 						$pklisa = " and perheid2 = '$row[perheid2]'";
 					}
 					else {
@@ -2016,6 +2026,21 @@ if ($tee == '') {
 					$pkres = mysql_query($query) or pupe_error($query);
 					$pkrow = mysql_fetch_array($pkres);
 										
+					if (($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
+						$query  = "	SELECT tuoteperhe.tunnus
+									FROM tuoteperhe
+									WHERE tuoteperhe.yhtio 		= '$kukarow[yhtio]'
+									and tuoteperhe.isatuoteno 	= '$row[tuoteno]'
+									and tuoteperhe.tyyppi 		= 'L'";
+						$lisaresult = mysql_query($query) or pupe_error($query);
+						$lisays = mysql_num_rows($lisaresult)+1;
+					}
+					else {
+						$lisays = 0;
+					}
+					
+					$pkrow[1] += $lisays;
+								
 					$pknum = $pkrow[0] + $pkrow[1];
 					$borderlask = $pkrow[1];
 					
@@ -2031,8 +2056,14 @@ if ($tee == '') {
 				}
 					
 				$classlisa = "";
-													
-				if($borderlask == $pkrow[1] and $pkrow[1] > 0) {
+								
+				if($borderlask == 1 and $pkrow[1] == 1 and $pknum == 1) {
+					$classlisa = $class." style='border-top: 1px solid; border-bottom: 1px solid; border-right: 1px solid;' ";
+					$class    .= " style=' border-top: 1px solid; border-bottom: 1px solid;' ";
+					
+					$borderlask--;
+				}
+				elseif($borderlask == $pkrow[1] and $pkrow[1] > 0) {
 					$classlisa = $class." style='border-top: 1px solid; border-right: 1px solid;' ";
 					$class    .= " style='border-top: 1px solid;' ";
 					$borderlask--;
@@ -2432,32 +2463,10 @@ if ($tee == '') {
 				if ($varaosavirhe != '') {
 					echo "<td class='back' valign='top'><font class='error'>$varaosavirhe</font></td>";
 				}
-
-				if ($row['kommentti'] != '') {
-					$cspan=9;
-
-					if ($kukarow['hinnat'] == 1) {
-						$cspan--;
-					}
-					if($kukarow["resoluutio"] == "I") {
-						$cspan++;
-					}
-					if($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
-						$cspan++;
-					}
-					
-					echo "</tr><tr>";
-					
-					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td $classx>&nbsp;</td>";
-					}
-					
-					echo "<td $classx colspan='$cspan' valign='top'>".t("Kommentti").": $row[kommentti]</td>";
-				}
-
+				
 				$varaosavirhe = "";
 
-				if ($kukarow["extranet"] == "" and ((($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and ($row["var"] == "T" or $row["var"] == "U")) or $toim == "SIIRTOTYOMAARAYS") and $riviok == 0) {
+				if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "SIIRTOTYOMAARAYS") and $riviok == 0) {
 					//Tutkitaan tuotteiden lisävarusteita
 					$query  = "	SELECT *
 								FROM tuoteperhe
@@ -2468,7 +2477,7 @@ if ($tee == '') {
 								order by tuoteperhe.tuoteno";
 					$lisaresult = mysql_query($query) or pupe_error($query);
 
-					if (mysql_num_rows($lisaresult) > 0 and $row["perheid2"] == 0) {
+					if (mysql_num_rows($lisaresult) > 0 and ($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
 						echo "</tr>";
 
 						echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
@@ -2482,7 +2491,7 @@ if ($tee == '') {
 
 						while ($prow = mysql_fetch_array($lisaresult)) {
 
-							echo "<tr><td class='back' valign='top'>&nbsp;</td>";
+							echo "<tr>";
 							
 							if ($toim == 'TARJOUS') {
 								echo "<td valign='top'>&nbsp;</td>";
@@ -2508,8 +2517,6 @@ if ($tee == '') {
 								  <td valign='top'><input type='text' name='hinta_array[$prow[tuoteno]]' size='5' maxlength='12' 	Style='font-size: 8pt; padding:0;'></td>
 								  <td valign='top'><input type='text' name='ale_array[$prow[tuoteno]]'   size='5' maxlength='6' 	Style='font-size: 8pt; padding:0;'></td>
 								  <td valign='top'><input type='text' name='netto_array[$prow[tuoteno]]' size='2' maxlength='1' 	Style='font-size: 8pt; padding:0;'></td>";
-							echo "<td valign='top'>&nbsp;</td>";
-							echo "<td valign='top'>&nbsp;</td>";
 
 							$lislask++;
 
@@ -2521,11 +2528,16 @@ if ($tee == '') {
 							echo "</tr>";
 						}
 					}
-					elseif($kukarow["extranet"] == "" and mysql_num_rows($lisaresult) > 0 and $row["perheid2"] > 0) {
+					elseif($kukarow["extranet"] == "" and mysql_num_rows($lisaresult) > 0) {
 						echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
 								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-								<input type='hidden' name='toim' value='$toim'>
-								<input type='hidden' name='tila' value='LISLISAV'>
+								<input type='hidden' name='toim' value='$toim'>";
+								
+						if ($row["perheid2"] == 0 or ($row["var"] != "T" and $row["var"] != "U")) {
+							echo "<input type='hidden' name='spessuceissi' value='OK'>";
+						}
+								
+						echo "	<input type='hidden' name='tila' value='LISLISAV'>
 								<input type='hidden' name='rivitunnus' value='$row[tunnus]'>
 								<input type='hidden' name='menutila' value='$menutila'>
 								<td class='back' valign='top' nowrap><input type='submit' Style='font-size: 8pt; padding:0;' value='".t("Lisää lisävarusteita")."'></td>
@@ -2533,6 +2545,30 @@ if ($tee == '') {
 					}
 				}
 				echo "</tr>";
+				
+				if ($row['kommentti'] != '') {
+					$cspan=9;
+
+					if ($kukarow['hinnat'] == 1) {
+						$cspan--;
+					}
+					if($kukarow["resoluutio"] == "I") {
+						$cspan++;
+					}
+					if($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
+						$cspan++;
+					}
+					
+					echo "<tr>";
+					
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td>&nbsp;</td>";
+					}
+					
+					echo "<td colspan='$cspan' valign='top'>".t("Kommentti").": $row[kommentti]</td>";
+				
+					echo "</tr>";
+				}
 			}
 
 			//Laskeskellaan tilauksen loppusummaa

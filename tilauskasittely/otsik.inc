@@ -740,12 +740,16 @@
 				if ($srow["tilaustyyppi"] == 'E') {
 					$selenna = 'selected';
 				}
+				elseif ($srow["tilaustyyppi"] == 'T') {
+					$seltarj = 'selected';
+				}
 				else {
 					$selnorm = 'selected';
 				}
 
 				echo "<option value='N' $selnorm>".t("Normaalitilaus")."</option>";
 				echo "<option value='E' $selenna>".t("Ennakkotilaus")."</option>";
+				echo "<option value='T' $seltarj>".t("Tarjoustilaus")."</option>";
 
 				echo "</select></td>";
 			}

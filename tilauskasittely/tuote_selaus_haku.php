@@ -557,8 +557,6 @@
 				
 				if ($kukarow["kesken"] != 0 or is_numeric($ostoskori)) {
 					
-					if (mysql_num_rows($sarjares) == 0) {
-
 						echo "<td valign='top' align='right' class='$vari' nowrap>";
 						echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 						echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
@@ -566,10 +564,7 @@
 						$yht_i++;
 
 						echo "</td>";
-					}
-					else {
-						echo "<td align='right' valign='bottom'><input type='submit' value = '".t("Lisää")."'></td>";
-					}
+			
 				}
 				
 				echo "</td>";

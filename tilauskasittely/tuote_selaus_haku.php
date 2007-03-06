@@ -602,7 +602,7 @@
 			}
 			
 			
-			if ($row["sarjanumeroseuranta"] == "" and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
+			if (($row["sarjanumeroseuranta"] == "" or $kukarow["extranet"] != "") and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
 
 				echo "<td valign='top' align='right' class='$vari' nowrap>";
 				echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";

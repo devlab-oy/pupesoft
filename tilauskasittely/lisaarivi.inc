@@ -142,7 +142,6 @@
 	}
 
 	$perhelisa  = "";
-	$perhelisa2 = "";
 
 	//Haetaan myös tuoteperheet tai reseptit, tässä parametrit niille
 	if ($laskurow['tila'] == 'V') {
@@ -152,10 +151,17 @@
 		$perhelisa = " and tuoteperhe.tyyppi in ('P','') ";
 	}
 
-	if ($laskurow['vienti'] != '') {
-		$perhelisa2 = " and tuote.vienti != 'K' ";
+	$kieltolisa = "";
+	
+	if ($kukarow['extranet'] != '') {
+		if (strtoupper($laskurow['toim_maa']) == strtoupper($yhtiorow['maakoodi'])) {
+			//kotimaan myyntiä
+			$kieltolisa = " and (tuote.vienti = '' or (tuote.vienti not like '%$laskurow[toim_maa]%' and tuote.vienti not like '%!all%') or tuote.vienti like '%!$laskurow[toim_maa]%')";
+		}
+		else {
+			$kieltolisa = " and (tuote.vienti = '' or (tuote.vienti not like '%$laskurow[toim_maa]%' and tuote.vienti not like '%all%') or tuote.vienti like '%!$laskurow[toim_maa]%' or tuote.vienti like '%!all%')";
+		}
 	}
-
 
 	//Tutkitaan onko tämä hyvitysrivi
 	if ((float) $kpl < 0 and trim($var) == "") {
@@ -186,7 +192,13 @@
 
 				while ($krow1 = mysql_fetch_array($kres1)) {
 					// Käydään läpi kaikki korvaavat...
-					$query = "select * from korvaavat where id='$krow1[id]' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
+					$query = 	"select korvaavat.* 
+								from korvaavat, tuote
+								where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno 
+								and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]' 
+								order by jarjestys,
+								$kieltolisa 
+								korvaavat.tuoteno";
 					$kres2  = mysql_query($query) or die($query);
 
 					while ($krow2 = mysql_fetch_array($kres2)) {
@@ -210,7 +222,7 @@
 							and isatuoteno = '$isatuoteno'
 							and tuoteperhe.yhtio = '$kukarow[yhtio]'
 							$perhelisa
-							$perhelisa2
+							$kieltolisa
 							ORDER by tuoteno";
 				$perheresult = mysql_query($query) or pupe_error($query);
 

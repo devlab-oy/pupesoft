@@ -102,10 +102,47 @@
 		$tilausok++;
 	}
 
-	if ($trow["vienti"] == 'K' and $laskurow["vienti"] != '') {
-		$varaosavirhe .= t("VIRHE: Tämä on vientikiellossa oleva tuote, ei voida myydä vientiasiakkaalle!")."<br>";
-		$riviok++;
-		$tilausok++;
+	if ($trow["vienti"] != '') {
+		$trow["vienti"] = strtoupper(str_replace(' ','',$trow["vienti"]));
+		$vientikielto = array();
+		$vientikielto = explode(',',$trow["vienti"]);
+		
+		$kielletty = 0;
+		foreach ($vientikielto as $kielto) {
+			if ($kielletty == 0) {
+				if ($kielto == '!ALL' and strtoupper($laskurow['toim_maa']) == strtoupper($yhtiorow['maakoodi'])) {
+					//kotimaanmyynti kielletty
+					$varaosavirhe .= t("VIRHE: Tämä on kotimaanmyyntikiellossa oleva tuote, voidaan myydä vain vientiasiakkaalle!")."<br>";
+			 		$riviok++;
+			 		$tilausok++;
+					$kielletty++;
+				}
+				elseif ($kielto == 'ALL' and strtoupper($laskurow['toim_maa']) != strtoupper($yhtiorow['maakoodi'])) {
+					//vienti kielletty
+					$varaosavirhe .= t("VIRHE: Tämä on vientikiellossa oleva tuote, ei voida myydä vientiasiakkaalle!")."<br>";
+			 		$riviok++;
+			 		$tilausok++;
+					$kielletty++;
+				}
+				elseif (strpos($kielto,'!') !== FALSE and $kielto != '!ALL') {
+					//saa myydä vain tähän maahan
+					$kieltomaa = str_replace('!','',$kielto);
+					if ($kieltomaa != $laskurow['toim_maa']) {
+						$varaosavirhe .= t("VIRHE: Tätä tuotetta saa myydä vain asiakkaalle maahan")." $kieltomaa!<br>";
+				 		$riviok++;
+				 		$tilausok++;
+						$kielletty++;
+					}
+				}
+				elseif ($kielto == $laskurow['toim_maa']) {
+					//ei saa myydä tähän maahan
+					$varaosavirhe .= t("VIRHE: Tätä tuotetta ei saa myydä asiakkaalle maahan")." $laskurow[toim_maa]!<br>";
+			 		$riviok++;
+			 		$tilausok++;
+					$kielletty++;
+				}
+			}
+		}
 	}
 
 	if ($row["var"] == 'S') {

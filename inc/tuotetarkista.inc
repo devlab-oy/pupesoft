@@ -73,6 +73,30 @@
 			}
 		}
 	}
+	
+	if (mysql_field_name($result, $i) == "vienti") {
+		if ($t[$i] != '') {
+			$vientikielto = array();
+			$vientikielto = explode(',',strtoupper(str_replace(' ','',$t[$i])));
+			
+			foreach( $vientikielto as $kielto) {
+				if (substr($kielto,0,1) == '!') {
+					$kielto = str_replace('!','',$kielto);
+				}
+
+				if ($kielto != strtoupper('all')) {
+					$query = "SELECT *
+							FROM maat
+							WHERE koodi = '$kielto'";
+					$sresult = mysql_query($query) or pupe_error($query);
+					if (mysql_num_rows($sresult) == 0) {
+						$virhe[$i] = "$kielto".t(" Ei ole maa! ")."";
+						$errori = 1;
+					}
+				}
+			}
+		}
+	}
 
 /*
 	if (mysql_field_name($result, $i) == "tuotekuva" and $t[$i] != '') {

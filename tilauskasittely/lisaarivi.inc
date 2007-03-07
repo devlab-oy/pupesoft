@@ -626,15 +626,15 @@
 										$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi' where yhtio='$kukarow[yhtio]' and tunnus in ('$perheid_lisaarivi','$lisatty_tun')";
 										$result = mysql_query($query) or pupe_error($query);
 									}
-									
-									
+
+
 									if ($myy_lapsi_ein[$indeksi] != "") {
 										$query  = "	SELECT *
 													FROM tilausrivin_lisatiedot
 													WHERE yhtio			 = '$kukarow[yhtio]'
 													and tilausrivitunnus = '$lisatty_tun'";
 										$lisatied_res = mysql_query($query) or pupe_error($query);
-										
+
 										if (mysql_num_rows($lisatied_res) > 0) {
 											$lisatied_row = mysql_fetch_array($lisatied_res);
 
@@ -657,6 +657,7 @@
 
 								$rivitunnus	= "";
 								$kommentti 	= "";
+								$tuotenimitys = "";
 
 								$hinta = $saasto_hinta;
 								$ale   = $saasto_ale;
@@ -985,7 +986,7 @@
 				// lisätään saatu nimitys kaikille tuotteille
 				$trow["nimitys"] = addslashes($tuotenimitys);
 			}
-			
+
 			// lisätään puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue   = '$p_hyllyalue',
@@ -1099,6 +1100,7 @@
 			}
 			$rivitunnus	= "";
 			$kommentti 	= "";
+			$tuotenimitys = "";
 		}
 	}
 ?>

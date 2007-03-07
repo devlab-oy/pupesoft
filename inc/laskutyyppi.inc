@@ -100,13 +100,19 @@
 			}
 			break;
 		case "R":
-			$laskutyyppi = "Projektitilaus";
+			$laskutyyppi = "Projekti";
 			switch($alatila) {
+				case "":
+					$alatila = "Kesken";
+					break;
 				case "A":
-					$alatila = "Käsittelemättä";
+					$alatila = "Aktiivi";
 					break;
 				case "B":
-					$alatila = "Odottaa valmistusta";
+					$alatila = "Valmis";
+					break;
+				case "X":
+					$alatila = "Suljettu";
 					break;
 			}
 			break;

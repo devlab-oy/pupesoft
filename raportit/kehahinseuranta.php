@@ -66,7 +66,7 @@
 					$eropros = 100;
 				}
 
-				if (abs($eropros) <= $pros1 and abs($eropros) >= $pros2) {
+				if ((abs($eropros) <= $pros1 and abs($eropros) >= $pros2) or ($lrow["hinta"] < 0)) {
 					$rivit1[] = abs($eropros);
 					$rivit2[] = "<tr><td><a href='../tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>$lrow[nimitys]</td><td>$lrow[hinta]</td><td>$erow[hinta]</td><td>".sprintf('%.1f',$eropros)."</td><td>".substr($lrow["laadittu"],0,10)."</td><td>".substr($erow["laadittu"],0,10)."</td><td>$lrow[laji] - $erow[laji]</td></tr>";
 				}

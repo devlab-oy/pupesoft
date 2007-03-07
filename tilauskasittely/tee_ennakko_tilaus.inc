@@ -6,8 +6,7 @@
 	// sekä $tunnus jossa on tilausrivin tunnus
 	
 	if ($loput[$tunnus] == 'MITA') {
-		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tee_ennakko_tilaus.inc (1)")."<br>";
-		$query = "	UPDATE tilausrivi SET tyyppi='D' , kommentti = '$komm'
+		$query = "	DELETE FROM tilausrivi
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus' and kpl=0 and tyyppi='E'";																						
 		$tresult = mysql_query($query) or pupe_error($query);
 	}
@@ -345,8 +344,7 @@
 						$tresult = mysql_query($query) or pupe_error($query);
 					}
 					elseif (($loput[$tunnus] == 'POISTA') or ($varattu == 0)) {
-						$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tee_ennakko_tilaus.inc (2)")."<br>";
-						$query = "	UPDATE tilausrivi SET tyyppi='D', kommentti = '$komm'
+						$query = "	DELETE FROM tilausrivi
 									WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus' and kpl=0 and tyyppi='E'";						
 						$tresult = mysql_query($query) or pupe_error($query);												
 					} 					

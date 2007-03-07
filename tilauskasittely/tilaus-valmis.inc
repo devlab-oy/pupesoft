@@ -13,10 +13,13 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 $query  = "update lasku set vanhatunnus=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and vanhatunnus=0";
 $oldtur = mysql_query($query) or pupe_error($query);
 
+// p‰ivitet‰‰n tunnusnippu laskulle
+$query  = "update lasku set tunnusnippu=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and tunnusnippu=0";
+$oldtur = mysql_query($query) or pupe_error($query);
+
 // p‰ivitet‰‰n var kent‰t riveille
 $query  = "update tilausrivi set var='' where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and var='O'";
 $oldtur = mysql_query($query) or pupe_error($query);
-
 
 if ($laskurow["tilaustyyppi"] == 'E') {
 	//Ennakkotilaukset
@@ -425,7 +428,7 @@ else {
 					if ($laskurow["toim_maa"] == $varaston_row["maa"]) {
 						$laskurow["kauppatapahtuman_luonne"] = '999'; // intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
 					}
-					elseif ($laskurow["kauppatapahtuman_luonne"] == "" or $laskurow["kauppatapahtuman_luonne"] == "999") {
+					elseif ($laskurow["kauppatapahtuman_luonne"] == 0 or $laskurow["kauppatapahtuman_luonne"] == 999) {
 
 						if ($varaston_row["maa"] == $yhtiorow["maakoodi"]) {
 							$laskurow["kauppatapahtuman_luonne"] = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
@@ -433,7 +436,6 @@ else {
 						elseif ($laskurow["toim_maa"] == $yhtiorow["maakoodi"]) {
 							$laskurow["kauppatapahtuman_luonne"] = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
 						}
-
 					}
 
 				}
@@ -483,6 +485,7 @@ else {
 							valkoodi				= '$laskurow[valkoodi]',
 							vienti_kurssi			= '$laskurow[vienti_kurssi]',
 							vanhatunnus				= '$laskurow[tunnus]',
+							tunnusnippu				= '$laskurow[tunnus]',
 							verkkotunnus			= '$laskurow[verkkotunnus]',
 							vienti 					= '$laskurow[vienti]',
 							viesti					= '$laskurow[viesti]',

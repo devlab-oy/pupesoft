@@ -4,7 +4,7 @@
 	// $kpl[tunnus]   = monta toimitetaan
 	// $loput[tunnus] = KAIKKI/POISTA/JATA/MITA/SUORA mitä tehdään lopuille
 	// sekä $tunnus jossa on tilausrivin tunnus
-	
+
 	if ($loput[$tunnus] == 'MITA') {
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mitätöi ohjelmassa tee_jt_tilaus.inc (1)")."<br>";
 		$query = "	UPDATE tilausrivi SET tyyppi='D', kommentti = '$komm'
@@ -87,7 +87,7 @@
 						alv		 		= '$otsikkorivi[alv]' and
 						ketjutus 		= '$otsikkorivi[ketjutus]' and
 						kohdistettu		= '$otsikkorivi[kohdistettu]' and
-						toimitusehto	= '$otsikkorivi[toimitusehto]' and 
+						toimitusehto	= '$otsikkorivi[toimitusehto]' and
 						valkoodi 		= '$otsikkorivi[valkoodi]' and
 						vienti_kurssi	= '$otsikkorivi[vienti_kurssi]'";
 			$stresult = mysql_query($query) or pupe_error($query);
@@ -170,8 +170,13 @@
 					$query .= mysql_field_name($stresult,$i)."='',";
 				}
 				// kommenttii speciaalia
-				elseif (mysql_field_name($stresult,$i)=='comments') {
-					$query .= "comments='".t("JÄLKITOIMITUS")."',";
+				elseif (mysql_field_name($stresult,$i) == 'comments') {
+					if ($otsikkorivi['tila'] == 'G') { // jos siirtolista niin concatenoidaan
+						$query .= "comments=concat('".t("JÄLKITOIMITUS")." ', comments),";
+					}
+					else {
+						$query .= "comments='".t("JÄLKITOIMITUS")."',";
+					}
 				}
 				//HUOM HUOM: Laitetaan clearing kenttään JT-TILAUS kun tiedetään että nämä ovat jt-rivejä jotka nyt toimitetaan
 				// tämä mähdollistaa raportoinninjt-riveistä!
@@ -234,7 +239,7 @@
 				$trow = $rivitrow;
 			}
 		}
-		
+
 		//tässä haarassa käyttäjä on syöttänyt jonkun kappalemäärän
 		if ($kpl[$tunnus] > 0 or $loput[$tunnus] == 'KAIKKI') {
 
@@ -353,7 +358,7 @@
 
 
 			if ($voidaankolisata == 1) {
-				
+
 				//katotaan, ettei yritetä toimittaa enemmän kuin rivillä oli tilauksessa
 				$varattu = $trow["jt"]-$kpl[$tunnus];
 
@@ -361,12 +366,12 @@
 					///* jos kappalemäärä on syötetty niin splitataan rivi *///
 
 					for ($i=0; $i < count($kappaleet); $i++) {
-						
+
 						$kommentti = trim($otsikkorivi['viesti']." ".$trow['kommentti']);
-						
+
 						//tässä tehdään uusi rivi
 						$query = "	INSERT into tilausrivi set ";
-						
+
 						if ($suoratoim[$tunnus] == 'SUORA') {
 							$query .= "	hyllyalue 		= '$hyllyalue[$tunnus]',
 										hyllynro  		= '$hyllynro[$tunnus]',
@@ -379,14 +384,14 @@
 										var				= '$var[$tunnus]',";
 						}
 						else {
-							$query .= " $updatehyllyt[$i] 
+							$query .= " $updatehyllyt[$i]
 										varattu = '$kappaleet[$i]',
 										tilkpl 	= '$kappaleet[$i]',
 										jt		= 0,
 										var		= '',";
 						}
-						
-						
+
+
 						$query .= "	otunnus 		= '$id',
 									keratty			= '',
 									kerattyaika		= '',
@@ -431,10 +436,10 @@
 									WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus' and tyyppi in ('L','G')";
 						$tresult = mysql_query($query) or pupe_error($query);
 					}
-					
+
 					//jos ollaan päästy näin pitkälle voidaan varmaan olettaa että $varaosavirheen voi yhjentää
 					$varaosavirhe = '';
-					
+
 				}
 				else {
 					echo t("Syötit liian ison numeron! Ei voitu tehdä mitään").".<br>";

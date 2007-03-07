@@ -92,4 +92,28 @@
 		}
 
 	}
+	
+	if (mysql_field_name($result, $i) == "maksuehto" and trim($t[$i]) != '') {
+
+		$query   = "select tunnus from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$t[$i]'
+					and (sallitut_maat = '' or sallitut_maat like '%$trow[maa]%')";
+		$sresult = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($sresult) == 0) {
+			$virhe[$i] = t("Tätä maksuehtoa ei saa käyttää asiakkaalla tässä maassa.");
+			$errori = 1;
+		}
+	}
+	
+	if (mysql_field_name($result, $i) == "toimitustapa" and trim($t[$i]) != '') {
+
+		$query   = "select tunnus from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$t[$i]'
+					and (sallitut_maat = '' or sallitut_maat like '%$trow[toim_maa]%')";
+		$sresult = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($sresult) == 0) {
+			$virhe[$i] = t("Tätä toimitustapaa ei saa käyttää asiakkaalla tässä maassa.");
+			$errori = 1;
+		}
+	}
 ?>

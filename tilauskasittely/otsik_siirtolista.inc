@@ -225,6 +225,7 @@
 			$query = "	SELECT selite
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]'
+						and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
 						ORDER BY jarjestys, selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 

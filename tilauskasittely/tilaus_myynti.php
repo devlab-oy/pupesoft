@@ -1037,6 +1037,7 @@ if ($tee == '') {
 			$query = "	SELECT tunnus, selite
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]' $extralisa
+						and (sallitut_maat = '' or sallitut_maat like '%$laskurow[toim_maa]%')
 						ORDER BY jarjestys,selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 
@@ -1543,6 +1544,52 @@ if ($tee == '') {
 					$trow 	 = "";
 					$tuoteno = "";
 					$kpl	 = 0;
+				}
+				elseif ($kukarow["extranet"] != '' and $trow["vienti"] != '') {
+					$trow["vienti"] = strtoupper(str_replace(' ','',$trow["vienti"]));
+					$vientikielto = array();
+					$vientikielto = explode(',',$trow["vienti"]);
+
+					$kielletty = 0;
+					foreach ($vientikielto as $kielto) {
+						if ($kielletty == 0) {
+							if ($kielto == '!ALL' and strtoupper($laskurow['toim_maa']) == strtoupper($yhtiorow['maakoodi'])) {
+								//kotimaanmyynti kielletty
+								$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
+						 		$trow 	 = "";
+								$tuoteno = "";
+								$kpl	 = 0;
+								$kielletty++;
+							}
+							elseif ($kielto == 'ALL' and strtoupper($laskurow['toim_maa']) != strtoupper($yhtiorow['maakoodi'])) {
+								//vienti kielletty
+								$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
+						 		$trow 	 = "";
+								$tuoteno = "";
+								$kpl	 = 0;
+								$kielletty++;
+							}
+							elseif (strpos($kielto,'!') !== FALSE and $kielto != '!ALL') {
+								//saa myydä vain tähän maahan
+								$kieltomaa = str_replace('!','',$kielto);
+								if ($kieltomaa != $laskurow['toim_maa']) {
+									$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
+							 		$trow 	 = "";
+									$tuoteno = "";
+									$kpl	 = 0;
+									$kielletty++;
+								}
+							}
+							elseif ($kielto == $laskurow['toim_maa']) {
+								//ei saa myydä tähän maahan
+								$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
+						 		$trow 	 = "";
+								$tuoteno = "";
+								$kpl	 = 0;
+								$kielletty++;
+							}
+						}
+					}
 				}
 			}
 			elseif ($kukarow["extranet"] != '') {

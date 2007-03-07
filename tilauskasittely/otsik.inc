@@ -366,7 +366,9 @@
 
 				$query = "	SELECT tunnus, concat_ws(' ', kassa_teksti, teksti)
 							FROM maksuehto
-							WHERE yhtio = '$kukarow[yhtio]' order by jarjestys,concat_ws(' ', kassa_teksti, teksti), tunnus";
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and (sallitut_maat = '' or sallitut_maat like '%$srow[maa]%')
+							order by jarjestys,concat_ws(' ', kassa_teksti, teksti), tunnus";
 				$mresult = mysql_query($query) or pupe_error($query);
 
 				while($row=mysql_fetch_array($mresult)) {
@@ -420,6 +422,7 @@
 			$query = "	SELECT tunnus, selite
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]'
+						and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
 						ORDER BY jarjestys,selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 

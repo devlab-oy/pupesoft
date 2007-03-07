@@ -20,7 +20,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "lauantai") {
 
 		$sel='';
@@ -32,7 +32,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "multi_jv") {
 
 		$sel='';
@@ -44,7 +44,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kuljyksikko") {
 
 		$sel='';
@@ -56,11 +56,11 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "merahti") {
 		$sel1='';
 		$sel2='';
-		if ($trow[$i]=='K') 
+		if ($trow[$i]=='K')
 			$sel1 = 'SELECTED';
 		else
 			$sel2 = 'SELECTED';
@@ -71,7 +71,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "hetiera") {
 			$sel		= array();
 			$pv			= $trow[$i];
@@ -85,11 +85,11 @@
 				</select></td>";
 			$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "extranet") {
 		$sel1='';
 		$sel2='';
-		if ($trow[$i]=='') 
+		if ($trow[$i]=='')
 			$sel1 = 'SELECTED';
 		else
 			$sel2 = 'SELECTED';
@@ -100,9 +100,9 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "rahtikirja") {
-		
+
 		$query = "	SELECT selite, selitetark
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA'
@@ -120,5 +120,97 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
+	if (mysql_field_name($result, $i) == "sisamaan_kuljetusmuoto" or mysql_field_name($result, $i) == "kuljetusmuoto") {
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value = '' >".t("Valitse")."</option>";
+
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji='KM'
+					ORDER BY jarjestys, selite";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow['selite']) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+
+	if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value = '' >".t("Valitse")."</option>";
+
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji='KT'
+					ORDER BY jarjestys, selite";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow['selite']) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "poistumistoimipaikka_koodi") {
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Valitse")."</option>";
+
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji='TULLI'
+					ORDER BY jarjestys, selite";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow['selite']) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "kontti") {
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value = ''>".t("Valitse")."</option>";
+
+		$chk1 = '';
+		$chk2 = '';
+
+		if ($trow[$i] == "1") {
+			$chk1 = 'selected';
+		}
+		if ($trow[$i] == "0") {
+			$chk2 = 'selected';
+		}
+
+		$ulos .= "<option value='1' $chk1>".t("Kyllä")."</option>";
+		$ulos .= "<option value='0' $chk2>".t("Ei")."</option>";
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 ?>

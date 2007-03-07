@@ -57,9 +57,32 @@ else {
 	$trow['alv'] = $trow['alv'] * 1;
 		
 	// Jos alvit t‰sm‰‰v‰t, ei tarvitse tehd‰ mit‰‰n. Muuten lasketaan uuden alvin sis‰lt‰v‰ myyntihinta.
-	if ($alv != $trow['alv']) {
-		// echo "alvi eri, lasketaan uus hinta... ";
-		$hinta = round($hinta / (1+$trow['alv']/100) * (1+$alv/100),2);
+	if ($alv != $trow['alv']) {		
+		// Huomioidaan hinnaston alviprossa
+		if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$vquery = "	select selitetark_3 
+						from avainsana 
+						where yhtio			= '$kukarow[yhtio]' 
+						and laji			= 'alvulk' 
+						and selite 			= '$trow[alv]' 
+						and selitetark		= '$laskurow[maa]' 
+						and selitetark_2	= '$laskurow[valkoodi]'";
+			$vtres  = mysql_query($vquery) or pupe_error($vquery);
+
+			if (mysql_num_rows($vtres) == 1) {
+				$vtrow  = mysql_fetch_array($vtres);
+				
+				$tuotealvi = $vtrow['selitetark_3'];
+			}
+			else {
+				$tuotealvi = $trow['alv'];
+			}
+		}
+		else {
+			$tuotealvi = $trow['alv'];
+		}
+		
+		$hinta = round($hinta / (1+$tuotealvi/100) * (1+$alv/100),2);
 	}
 }
 

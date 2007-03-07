@@ -1,7 +1,7 @@
 <?php
 
 	//tässä joko tehdään uutta otsikkoa tai muutetaan olemassa olevaa
-	if ($tee == '') {
+	if ($tee == '' or $kopioitava_otsikko != 0) {
 		//päivitetään kukarow[kesken] kun käyttäjä tekee uutta tilausta
 		if ($tila == '' and !isset($jatka)) {
 			$query = "	UPDATE kuka
@@ -140,6 +140,9 @@
 		elseif ($toim == "TARJOUS") {
 			echo "<font class='head'>".t("Tarjouksen otsikko")."</font><hr>";
 		}
+		elseif ($toim == "PROJEKTI") {
+			echo "<font class='head'>".t("Projektin otsikko")."</font><hr>";
+		}
 		else {
 			echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
 		}
@@ -149,7 +152,7 @@
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 
-		if ($asiakasid != "" or $kukarow["kesken"] != 0) {
+		if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 
 			$qlisa = "";
 			if ($toim == "TYOMAARAYS") {
@@ -172,6 +175,12 @@
 				$squery = "	SELECT *, tunnus liitostunnus
 							FROM asiakas
 							WHERE tunnus = '$asiakasid'";
+			}
+			elseif ($kopioitava_otsikko != 0) {
+				$squery = "	SELECT *, hyvaksynnanmuutos as luokka
+							FROM lasku
+							$qlisa
+							WHERE lasku.tunnus = '$kopioitava_otsikko'";
 			}
 			else {
 				$squery = "	SELECT *, hyvaksynnanmuutos as luokka
@@ -225,6 +234,7 @@
 				<input type='hidden' name='maa' 							 value = '$srow[maa]'>
 				<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
 				<input type='hidden' name='kolm_maa' 						 value = '$srow[kolm_maa]'>
+				<input type='hidden' name='tunnusnippu' 					 value = '$srow[tunnusnippu]'>
 				<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
 
 
@@ -344,8 +354,34 @@
 
 
 			echo "<table>";
-			echo "<tr><th colspan='4'>".t("Tilauksen tiedot").":</th></tr>";
-
+			
+			if ($toim == "TYOMAARAYS") {
+				echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").":</th></tr>";
+			}
+			elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
+				echo "<tr><th colspan='4'>".t("Valmistuksen tiedot").":</th></tr>";
+				
+			}
+			elseif ($toim == "SIIRTOLISTA") {
+				echo "<tr><th colspan='4'>".t("Siirtolistan tiedot").":</th></tr>";
+				
+			}
+			elseif ($toim == "MYYNTITILI") {
+				echo "<tr><th colspan='4'>".t("Myyntitilin tiedot").":</th></tr>";
+				
+			}
+			elseif ($toim == "TARJOUS") {
+				echo "<tr><th colspan='4'>".t("Tarjouksen tiedot").":</th></tr>";
+				
+			}
+			elseif ($toim == "PROJEKTI") {
+				echo "<tr><th colspan='4'>".t("Projektin tiedot").":</th></tr>";
+				
+			}
+			else {
+				echo "<tr><th colspan='4'>".t("Tilauksen tiedot").":</th></tr>";
+			}
+			
 
 			//Tutkitaan onko laskulla maksupositioita
 			$query = "	SELECT *
@@ -698,6 +734,14 @@
 
 				echo "<td>".t("Tarjous")."</td>";
 			}
+			elseif ($toim == "PROJEKTI") {
+				echo "<tr><td>".t("Tilaustyyppi").":</td>";
+
+				//Jos kyseessä on tarjous
+				echo "<input type='hidden' name='tilaustyyppi' value='P'>";
+
+				echo "<td>".t("Projekti")."</td>";
+			}
 			elseif ($toim == "MYYNTITILI") {
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 
@@ -945,6 +989,9 @@
 			if ($yhtiorow['laskutuskielto'] != 0) {
 				echo "<td>".t("Laskutuskieltoon")."</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 			}
+			else{
+				echo "<td></td><td></td>";
+			}
 
 			echo "</tr>";
 			echo "</table><br>";
@@ -1033,7 +1080,30 @@
 			}
 
 			echo "<table>";
-			echo "<tr><th colspan='3'>".t("Tilauksen kommentit").":</th></tr>";
+			
+			if ($toim == "TYOMAARAYS") {
+				echo "<tr><th colspan='3'>".t("Työmääräyksen kommentit").":</th></tr>";
+			}
+			elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
+				echo "<tr><th colspan='3'>".t("Valmistuksen kommentit").":</th></tr>";
+			}
+			elseif ($toim == "SIIRTOLISTA") {
+				echo "<tr><th colspan='3'>".t("Siirtolistan kommentit").":</th></tr>";
+			}
+			elseif ($toim == "MYYNTITILI") {
+				echo "<tr><th colspan='3'>".t("Myyntitilin kommentit").":</th></tr>";	
+			}
+			elseif ($toim == "TARJOUS") {
+				echo "<tr><th colspan='3'>".t("Tarjouksen kommentit").":</th></tr>";
+			}
+			elseif ($toim == "PROJEKTI") {
+				echo "<tr><th colspan='3'>".t("Projektin kommentit").":</th></tr>";
+			}
+			else {
+				echo "<tr><th colspan='3'>".t("Tilauksen kommentit").":</th></tr>";
+			}
+			
+			
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='40' name='viesti' value='$srow[viesti]'></td><td>(".t("keräyslista + lähete + lasku").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>(".t("keräyslista + lähete").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";
@@ -1342,6 +1412,7 @@
 					sisamaan_kuljetusmuoto				= '$sisamaan_kuljetusmuoto',
 					sisamaan_kuljetus_kansallisuus		= '$sisamaan_kuljetus_kansallisuus',
 					sisamaan_kuljetus					= '$sisamaan_kuljetus',
+					tunnusnippu							= '$tunnusnippu',
 					maa_maara							= '$maa_maara'";
 
 		if ($toim == "MYYNTITILI") {
@@ -1368,6 +1439,12 @@
 			}
 			$tee = "";
 		}
+		elseif ($toim == "PROJEKTI") {
+			if ($ylatila=='') {
+				$ylatila='R';
+			}
+			$tee = "";
+		}
 		else {
 			if ($ylatila=='') {
 				$ylatila='N';
@@ -1375,10 +1452,7 @@
 			$tee = "";
 		}
 
-
 		$query .= ", tila = '$ylatila'";
-
-
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1392,6 +1466,13 @@
 
 			$kukarow["kesken"] = $id;
 			$tilausnumero = $id;
+		}
+		
+		if ($toim == "PROJEKTI") {
+			$query = "	UPDATE lasku
+						SET tunnusnippu = '$tilausnumero'
+						WHERE tunnus = '$tilausnumero'";
+			$result = mysql_query($query) or pupe_error($query);
 		}
 
 		if ($toim == "TYOMAARAYS") {

@@ -17,15 +17,16 @@
 			$lisaa .= " and tuote.try = '$tuoryh' ";
 		}
 
+		// haetaan kaikki tulot ja valmistukset
 		$query = "	SELECT tapahtuma.*, tuote.nimitys
-					FROM tapahtuma, tuote
-					WHERE
-					tapahtuma.yhtio='$kukarow[yhtio]'
-					and tapahtuma.laji='tulo'
-					and tapahtuma.laadittu >= '$vva-$kka-$ppa'
-					and tapahtuma.laadittu <= '$vvl-$kkl-$ppl'
-					and tuote.yhtio=tapahtuma.yhtio
-					and tuote.tuoteno=tapahtuma.tuoteno
+					FROM tuote
+					JOIN tapahtuma USE INDEX (yhtio_tuote_laadittu) ON
+					tapahtuma.yhtio = tuote.yhtio and
+					tapahtuma.tuoteno = tuote.tuoteno and
+					tapahtuma.laadittu >= '$vva-$kka-$ppa' and
+					tapahtuma.laadittu <= '$vvl-$kkl-$ppl' and
+					tapahtuma.laji in ('tulo', 'valmistus')
+					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					$lisaa
 					ORDER BY tuoteno, laadittu";
 		$result = mysql_query($query) or pupe_error($query);
@@ -37,20 +38,21 @@
 		echo "<th>".t("Edkeha")."</th>";
 		echo "<th>".t("Eropros")."</th>";
 		echo "<th>".t("Uusikehapvm")."</th>";
-		echo "<th>".t("Edkehapvm")."</th></tr>";
+		echo "<th>".t("Edkehapvm")."</th>";
+		echo "<th>".t("Laskenta")."</th></tr>";
 
 		$rivit1 = array();
 		$rivit2 = array();
 
 		while ($lrow = mysql_fetch_array($result)) {
-			//haetaan edellinen myyntitapahtuma
+			//haetaan edellinen kulutus- tai myyntitapahtuma
 			$query = "	SELECT *
-						FROM tapahtuma
-						WHERE yhtio='$kukarow[yhtio]'
-						and tuoteno='$lrow[tuoteno]'
-						and laji='laskutus'
-						and tunnus < $lrow[tunnus]
-						ORDER BY tunnus desc
+						FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$lrow[tuoteno]'
+						and laadittu < '$lrow[laadittu]'
+						and laji in ('laskutus', 'kulutus')
+						ORDER BY laadittu desc
 						LIMIT 1";
 			$eresult = mysql_query($query) or pupe_error($query);
 
@@ -66,11 +68,10 @@
 
 				if (abs($eropros) <= $pros1 and abs($eropros) >= $pros2) {
 					$rivit1[] = abs($eropros);
-					$rivit2[] = "<tr><td><a href='../tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>$lrow[nimitys]</td><td>$lrow[hinta]</td><td>$erow[hinta]</td><td>".sprintf('%.1f',$eropros)."</td><td>".substr($lrow["laadittu"],0,10)."</td><td>".substr($erow["laadittu"],0,10)."</td></tr>";
+					$rivit2[] = "<tr><td><a href='../tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>$lrow[nimitys]</td><td>$lrow[hinta]</td><td>$erow[hinta]</td><td>".sprintf('%.1f',$eropros)."</td><td>".substr($lrow["laadittu"],0,10)."</td><td>".substr($erow["laadittu"],0,10)."</td><td>$lrow[laji] - $erow[laji]</td></tr>";
 				}
 			}
 		}
-
 
 		array_multisort($rivit1, SORT_DESC, $rivit2);
 
@@ -83,24 +84,19 @@
 
 
 	//Käyttöliittymä
-
 	echo "<table><form name='piiri' method='post' action='$PHP_SELF'>";
 	echo "<input type='hidden' name='tee' value='kaikki'>";
 
-	if (!isset($kka))
-		$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-	if (!isset($vva))
-		$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-	if (!isset($ppa))
-		$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
-	if (!isset($kkl))
-		$kkl = date("m");
-	if (!isset($vvl))
-		$vvl = date("Y");
-	if (!isset($ppl))
-		$ppl = date("d");
+	if (!isset($kkl)) $kkl = date("m");
+	if (!isset($vvl)) $vvl = date("Y");
+	if (!isset($ppl)) $ppl = date("d");
 
+	if (!isset($pros1)) $pros1 = 50;
+	if (!isset($pros2)) $pros2 = 5;
 
 	echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
 			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
@@ -113,7 +109,6 @@
 
 	echo "<tr><th>".t("Muutosprosentin yläraja").":</th>
 			<td colspan='3'><input type='text' name='pros1' value='$pros1' size='15'></td></tr>";
-
 
 	echo "<tr><th>".t("Muutosprosentin alaraja").":</th>
 			<td colspan='3'><input type='text' name='pros2' value='$pros2' size='15'></td></tr>";
@@ -138,11 +133,9 @@
 	}
 	echo "</select>";
 
-
 	echo "</td></tr>
 			<tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>";
 
-	//Tehdään osasto & tuoteryhmä pop-upit
 	$query = "	SELECT distinct selite, selitetark
 				FROM avainsana
 				WHERE yhtio='$kukarow[yhtio]' and laji='TRY'
@@ -168,7 +161,7 @@
 
 	// kursorinohjausta
 	$formi  = "piiri";
-	$kentta = "piiri";
+	$kentta = "ppa";
 
 	require ("../inc/footer.inc");
 

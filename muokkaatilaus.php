@@ -411,6 +411,17 @@
 					LIMIT 50";
 		$miinus = 2;
 	}
+	elseif ($toim == 'PROJEKTI') {
+		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila
+					FROM lasku use index (tila_index)
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='R'
+					$haku
+					ORDER by luontiaika desc
+					LIMIT 50";
+		$miinus = 2;
+	}
+	
+	
 	else {
 		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila, kuka.extranet extra
 					FROM lasku use index (tila_index)

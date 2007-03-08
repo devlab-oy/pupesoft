@@ -351,6 +351,11 @@ if ((int) $kukarow["kesken"] != 0) {
 		$result  	= mysql_query($query) or pupe_error($query);
 		$lasklisatied_row  = mysql_fetch_array($result);
 	}
+	
+	if ($yhtiorow["suoratoim_ulkomaan_alarajasumma"] > 0 and $laskurow["vienti_kurssi"] != 0) {
+		$yhtiorow["suoratoim_ulkomaan_alarajasumma"] = round(laskuval($yhtiorow["suoratoim_ulkomaan_alarajasumma"], $laskurow["vienti_kurssi"]),0);
+	}
+	
 }
 
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
@@ -2846,7 +2851,7 @@ if ($tee == '') {
 						$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - ($arow["kehahin"]*$arow["varattu"]);
 					}
 
-					if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($yhtiorow["maakoodi"]))) {
+					if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
 						$summa_kotimaa			+= $arow["rivihinta"]+$arow["alv"];
 						$summa_kotimaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
 						$arvo_kotimaa			+= $arow["rivihinta"];
@@ -2878,10 +2883,23 @@ if ($tee == '') {
 					$kate_eieri		+= $rivikate_eieri;
 				}
 			}
-
+			
 			//Jos myyjä on myymässä ulkomaan varastoista liian pienellä summalla
 			if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
-				$ulkom_huom = "<font class='error'>".t("HUOM! Summa on liian pieni ulkomaantoimitukselle. Raja on").": $yhtiorow[suoratoim_ulkomaan_alarajasumma] $yhtiorow[valkoodi] --></font>";
+				$ulkom_huom = "<font class='error'>".t("HUOM! Summa on liian pieni ulkomaantoimitukselle. Raja on").": $yhtiorow[suoratoim_ulkomaan_alarajasumma] $laskurow[valkoodi] --></font>";
+			}
+			elseif ($kukarow["extranet"] != "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
+				
+				$query = "SELECT ulkomaanlisa FROM toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
+				$ulklisres = mysql_query($query) or pupe_error($query);
+				$ulklisrow = mysql_fetch_array($ulklisres);
+				if ($ulklisrow['ulkomaanlisa'] > 0) {
+					$ulkom_huom = "<font class='message'>".t("Olet tilaamassa ulkomaanvarastosta, rahtikulut nousevat")." ".round(laskuval($ulklisrow["ulkomaanlisa"],$laskurow["vienti_kurssi"]),0)." $laskurow[valkoodi] ".t("verran")." </font><br>";
+				}
+				else {
+					$ulkom_huom = "";
+				}
+				
 			}
 			else {
 				$ulkom_huom = "";
@@ -3080,6 +3098,10 @@ if ($tee == '') {
 			}
 
 			echo "</table>";
+			
+			if ($kukarow["extranet"] != "" and $arvo_ulkomaa != 0 and $ulkom_huom != '') {
+				echo "$ulkom_huom";
+			}
 		}
 		else {
 			$tilausok++;

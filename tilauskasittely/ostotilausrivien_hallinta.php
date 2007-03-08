@@ -136,7 +136,7 @@
 			$jarjestys = $ojarj;
 		}
 
-		$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
+		$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
 					concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
 					hinta, ale, round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),2) rivihinta, 
 					toimaika, tilausrivi.tunnus,
@@ -214,7 +214,7 @@
 			echo "</tr>";
 		}
 		echo "<tr>
-				<td class='back' colspan='3' align='right'></td>
+				<td class='back' colspan='4' align='right'></td>
 				<td colspan='3' class='spec'>Tilauksen arvo:</td>
 				<td align='right' class='spec'>".sprintf("%.2f",$yhteensa)."</td>
 				<td class='back'></td>

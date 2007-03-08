@@ -227,7 +227,7 @@ if (!function_exists('alku')) {
 
 if (!function_exists('rivi')) {
 	function rivi ($firstpage) {
-		global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
+		global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $yhtiorow, $kukarow;
 
 		if ($lask == 16) {
 			$sivu++;

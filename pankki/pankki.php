@@ -41,7 +41,7 @@ function lahetys ($nro, $nimi) {
 	// Tehd‰‰n ESI-tiedosto
 	passthru($esi);
 	echo "Suojataan ESI-tiedosto $osoite/$etiedosto<br>";
-    $esi = "perl sala.pl ESIa $osoite/$etiedosto $dbhost $dbuser $dbpass $dbkanta $tunnus";
+	$esi = "perl sala.pl ESIa $osoite/$etiedosto $dbhost $dbuser $dbpass $dbkanta $tunnus";
 	passthru($esi);
 
 	// Jos ei haluta avainvaihtoa, lis‰t‰‰n sanoman per‰‰n nolla
@@ -187,7 +187,7 @@ function siirto ($nro) {
 	passthru($esi, $retval);
 	if ($retval != 0) die ("ESI sanoman luonti ei onnistu");
 	echo "Suojataan ESI-tiedosto $osoite/$etiedosto<br>";
-    $esi = "perl sala.pl ESIa $osoite/$etiedosto $dbhost $dbuser $dbpass $dbkanta $tunnus";
+	$esi = "perl sala.pl ESIa $osoite/$etiedosto $dbhost $dbuser $dbpass $dbkanta $tunnus";
 	passthru($esi);
 	
 	// Jos ei haluta avainvaihtoa, lis‰t‰‰n sanoman per‰‰n nolla
@@ -320,19 +320,19 @@ if (isset($maksu_tunnus)) {
 		$result = mysql_query($query) or pupe_error($query);
 	}
 	else {
-				echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
-				<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
-				<input type = 'hidden' name = 'tee' value = 'S'>
-				<table>
-				<tr><th>Anna avaimen ensimminen osa</th>
-				<td><input type = 'text' name = 'osa1' value=''></td></tr>
-				<tr><th>Anna avaimen toinen osa</th>
-				<td><input type = 'text' name = 'osa2' value=''></td></tr>
-				<tr><th>Anna tarkiste</th>
-				<td><input type = 'text' name = 'osa3' value=''></td></tr>
-				<tr><td></td></td><td><input type = 'submit' value = 'Valitse'></td></tr>
-				</table>
-				</form>";
+		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
+		<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
+		<input type = 'hidden' name = 'tee' value = 'S'>
+		<table>
+		<tr><th>Anna avaimen ensimminen osa</th>
+		<td><input type = 'text' name = 'osa1' value=''></td></tr>
+		<tr><th>Anna avaimen toinen osa</th>
+		<td><input type = 'text' name = 'osa2' value=''></td></tr>
+		<tr><th>Anna tarkiste</th>
+		<td><input type = 'text' name = 'osa3' value=''></td></tr>
+		<tr><td></td></td><td><input type = 'submit' value = 'Valitse'></td></tr>
+		</table>
+		</form>";
 	}
 }
 	
@@ -343,15 +343,15 @@ if (!isset($tunnus)) {
 					and maakoodi = 'fi' and maksaja = '$kukarow[kuka]' and olmapvm < now()";
 	$result = mysql_query($query) or pupe_error($query);
 					
-	$query = "	SELECT maksu_tili, yriti.tilino, olmapvm, sum(if(alatila='K', summa-kasumma, summa)), count(*)
-				FROM lasku, yriti
-				WHERE lasku.yhtio = '$kukarow[yhtio]' 
-				and tila = 'P' 
-				and maakoodi = 'fi' 
-				and maksaja = '$kukarow[kuka]'
-				and lasku.yhtio=yriti.yhtio
-				and lasku.maksu_tili=yriti.tunnus
-				GROUP BY 1,2";
+	$query = "SELECT maksu_tili, yriti.tilino, olmapvm, sum(if(alatila='K', summa-kasumma, summa)), count(*)
+			FROM lasku, yriti
+			WHERE lasku.yhtio = '$kukarow[yhtio]' 
+			and tila = 'P' 
+			and maakoodi = 'fi' 
+			and maksaja = '$kukarow[kuka]'
+			and lasku.yhtio=yriti.yhtio
+			and lasku.maksu_tili=yriti.tunnus
+			GROUP BY 1,2";
 	$result = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($result) != 0) {
 		echo "L‰het‰ kotimaan maksuja<br><form name = 'maksut' action = '$PHP_SELF' method='post'>";

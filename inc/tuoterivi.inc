@@ -324,26 +324,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "vienti") {
-
-		$ulos = "<td><select name='$nimi'>";
-
-		$sel1=$sel2="";
-
-		if ($trow[$i] == '') {
-			$sel1 = "selected";
-		}
-		if ($trow[$i] == 'S') {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value = ''  $sel1>".t("Normaali (Saa viedä)")."</option>";
-		$ulos .= "<option value = 'K' $sel2>".t("Vientikielto")."</option>";
-
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "alv") {
 			require ('alvpopup.inc');
 			if ($trow[$i]=='') $trow[$i]=alv_oletus();

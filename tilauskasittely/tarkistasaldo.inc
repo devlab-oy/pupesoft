@@ -189,7 +189,7 @@
 			}
 			
 			//tämä tehdään vain jos on joku tilaus kyseessä, ei esim varastopaikkojen muutos
-			if ($tilausnumero != 0 and $laskurow["tila"] != 'G' and $varataan != 'EI') {
+			if ($tilausnumero != 0 and $laskurow["tila"] != 'G' and $varataan_saldoa != 'EI') {
 				//tsekataan jtssä olevat $vrsum on myytäsvissä oleva määrä $jtsum on jtssä oleva määrä
 				$query = "	SELECT sum(jt) jt, lasku.ytunnus ytunnus
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus), lasku use index (PRIMARY)
@@ -228,7 +228,7 @@
 			
 		}
 		// Ei missään varastossa eikä tilauksessa --> puute, paitsi jos varataan flägi on triggeröity --> varastosiirtojuttuja
-		if ($ahyvaksy == '' and $loytyy == 0 and $varataan != 'EI') {
+		if ($ahyvaksy == '' and $loytyy == 0 and $varataan_saldoa != 'EI') {
 			$varaosavirhe .= t("Saldo ei riitä, tilauksessakaan ei ole tavaraa").".<br>";
 			$ahyvaksy = 'P';
 		}

@@ -1095,7 +1095,7 @@ if ($tee == '') {
 		echo "<tr>";
 		echo "<th align='left'>".t("Tilausnumero").":</th>";
 		
-		if ($toim == "PROJEKTI" or $laskurow["tunnusnippu"] != 0) {
+		if (($toim == "PROJEKTI" or $laskurow["tunnusnippu"] != 0) and ($kala == "TÄÄNNE EISAAMENNÄKUN EI TOIMI")) {
 			
 			echo "<td>$kukarow[kesken]
 					<select name='uusitoimitus' onchange='submit();'>

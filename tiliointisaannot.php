@@ -19,15 +19,15 @@
 		$query = "SELECT tunnus, ytunnus, nimi, postitp
 					FROM toimi
 					WHERE yhtio = '$kukarow[yhtio]' $lisat
-					ORDER BY selaus";
+					ORDER BY nimi";
 
 		$result = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($result) == 0) {
-			echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
+			echo "<font class='error'>".t("Haulla ei löytynyt yhtään toimittajaa")."</font>";
 		}
 
 		if (mysql_num_rows($result) > 40) {
-			echo "<b>".t("Haulla löytyi liikaa toimittajia. Tarkenna hakua")."</b>";
+			echo "<font class='error'>".t("Haulla löytyi liikaa toimittajia. Tarkenna hakua")."</font>";
 		}
 		else {
 			echo "<table><tr>";
@@ -58,7 +58,7 @@
 					WHERE tunnus = '$rtunnus' and yhtio = '$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($result) == 0) {
-			echo "".t("Tiliöintiä ei löydy")."! $query";
+			echo "".t("Tiliöintisääntöä ei löydy")."! $query";
 			exit;
 		}
 
@@ -76,41 +76,88 @@
 	if ($tee == 'U') {
 // Tarkistetaan sääntö
 		if ($tyyppi=='t') {
+		
+			$query = "SELECT tunnus	FROM toimi WHERE yhtio = '$kukarow[yhtio]' $lisat ORDER BY selaus";
+
+			$result = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($result) == 0) {
+				echo "<font class='error'>".t("Haulla ei löytynyt yhtään toimittajaa")."</font>";
+			}
+			
+			if ($mintuote != '' and $maxtuote == '') $maxtuote = $mintuote;
+			if ($maxtuote != '' and $mintuote == '') $mintuote = $maxtuote;
+			
+			if ($mintuote != '') {
+				if ($mintuote > $maxtuote) {
+					$virhe = "<font class='error'>".t("Minimituote on pienempi kuin maksimituote")."!</font>";
+					$ok = 1;
+					$tee = '';
+				}
+			}
+			
 			$query = "SELECT tilino
 						FROM tili
 						WHERE tilino = '$tilino' and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($result) == 0) {
-				$virhe = "".t("Tiliä ei löydy")."!";
+				$virhe = "<font class='error'>".t("Tiliä ei löydy")."!</font>";
 				$ok = 1;
 				$tee = '';
 			}
+			
 			if ($kustp != 0) {
 				$query = "SELECT tunnus
 							FROM kustannuspaikka
 							WHERE tunnus = '$kustp' and yhtio = '$kukarow[yhtio]' and tyyppi='K'";
 				$result = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($result) == 0) {
-					$virhe = "".t("Kustannuspaikkaa ei löydy")."!";
+					$virhe = "<font class='error'>".t("Kustannuspaikkaa ei löydy")."!</font>";
 					$ok = 1;
 					$tee = '';
 				}
 			}
+			
+			//Onko tälle välille jo sääntö?
+			if ($mintuote != '') {
+				$query = "SELECT mintuote, maxtuote FROM tiliointisaanto
+									WHERE ttunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and
+									mintuote <= '$mintuote' and maxtuote >= '$mintuote' and tilino != 0";
+				$result = mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($result) == 0) {
+					$query = "SELECT mintuote, maxtuote FROM tiliointisaanto
+									WHERE ttunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and
+									mintuote <= '$maxtuote' and maxtuote >= '$maxtuote' and tilino != 0";
+					$result = mysql_query($query) or pupe_error($query);
+					if (mysql_num_rows($result) != 0) {
+						$virhe = "<font class='error'>".t("Tälle välille on jo sääntö")." 1</font>";
+						$ok = 1;
+						$tee = '';
+					}
+				}
+				else {
+					$virhe = "<font class='error'>".t("Tälle välille on jo sääntö")." 2</font>";
+					$ok = 1;
+					$tee = '';
+				}
+			} 
 		}
 		else {
 			if (($mintuote!='') or ($maxtuote!='') or ($tilino != '')) {
-				$virhe = "".t("Sisäinen virhe")."!";
+				$virhe = t("Sisäinen virhe")."!";
 				$ok = 1;
 				$tee = '';
 			}
 			else {
 				if ($kuvaus == '') {
-					$virhe = "".t("Asiakastunnnus on pakollinen tieto")."!";
+					$virhe = t("Asiakastunnnus on pakollinen tieto")."!";
 					$ok = 1;
 					$tee = '';
 				}
 			}
 		}
+		//Onko tälle välille jo sääntö? 
 	}
 
 	if ($tee == 'U') {
@@ -127,7 +174,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-	if (strlen($tunnus) != 0) {
+	if (isset($tunnus)) {
 // Toimittaja on valittu ja sille annetaan sääntöjä
 		$query = "SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, concat_ws(' ', postino, postitp) osoite
 					FROM toimi
@@ -136,7 +183,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<b>".t("Toimittaja katosi")."</b><br>";
+			echo "<font class='error'>".t("Toimittaja katosi")."</font><br>";
 			exit;
 		}
 		echo "<table><tr>";
@@ -167,9 +214,11 @@
 				<input type='submit' value='Päivitä'></form><table>";
 	// Näytetään vanhat säännöt muutosta varten
 		if ($tyyppi=='t')
-			$query = "SELECT tunnus, mintuote, maxtuote, kuvaus, tilino, kustp
+			$query = "SELECT tiliointisaanto.tunnus, mintuote, maxtuote, kuvaus, concat(tili.tilino,'/',tili.nimi) tilinumero, kustp
 					  FROM tiliointisaanto
-					  WHERE ttunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tilino != 0";
+					  LEFT JOIN tili ON tili.yhtio=tiliointisaanto.yhtio and tili.tilino = tiliointisaanto.tilino
+					  WHERE ttunnus = '$tunnus' and tiliointisaanto.yhtio = '$kukarow[yhtio]' and tiliointisaanto.tilino != 0
+					  order by mintuote";
 		else 
 			$query = "SELECT tunnus, kuvaus, kustp
 					  FROM tiliointisaanto

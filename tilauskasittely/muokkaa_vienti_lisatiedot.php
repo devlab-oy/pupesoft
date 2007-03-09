@@ -5,6 +5,19 @@
 
 	if ($tapa == "vienti") {
 
+		$query = "SELECT *
+				  FROM lasku
+				  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "laskua ei löydy";
+			$tee = "";
+		}
+		else {
+			$laskurow = mysql_fetch_array ($result);
+		}
+
 		if ($tee == 'L') {
 
 			list($poistumistoimipaikka, $poistumistoimipaikka_koodi) = split("##", $poistumistoimipaikka, 2);
@@ -46,20 +59,11 @@
 					<input type='hidden' name='otunnus' value='$otunnus'>
 					<input type='hidden' name='tee' value='L'>";
 
-
-			$query = "SELECT *
-					  FROM lasku
-					  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$laskurow = mysql_fetch_array ($result);
-
 			$query = "SELECT sum(kollit) kollit, sum(kilot) kilot
 					  FROM rahtikirjat
 					  WHERE otsikkonro ='$otunnus' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$rahtirow = mysql_fetch_array ($result);
-
-
 
 			echo "	<tr><td>6.  ".t("Kollimäärä").":</td>
 					<td colspan='2'>$rahtirow[kollit]</td></tr>";
@@ -168,7 +172,7 @@
 
 				while ($vrow = mysql_fetch_array($vresult)) {
 					$sel = "";
-					if ($laskurow["poistumistoimipaikka"] == $vrow[1] && $laskurow["poistumistoimipaikka_koodi"] == $vrow[0]) {
+					if ($laskurow["poistumistoimipaikka"] == $vrow[1] and $laskurow["poistumistoimipaikka_koodi"] == $vrow[0]) {
 						$sel = "selected";
 					}
 					echo "<option value = '$vrow[1]##$vrow[0]' $sel>$vrow[1] $vrow[0]";
@@ -184,7 +188,7 @@
 					<input type='hidden' name='bruttopaino' value='$rahtirow[kilot]'></tr>";
 
 			echo "</table>";
-			
+
 			echo "<br><input type='submit' value='".t("Päivitä tiedot")."'>";
 			echo "<input type='hidden' name='tapa' value='$tapa'>";
 			echo "</form>";
@@ -194,10 +198,23 @@
 
 	if ($tapa == "tuonti") {
 
+		$query = "SELECT *
+				  FROM lasku
+				  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "laskua ei löydy";
+			$tee = "";
+		}
+		else {
+			$laskurow = mysql_fetch_array ($result);
+		}
+
 		if ($tee == "update") {
 
 			$query = "	UPDATE lasku
-						SET maa_lahetys = '$maa_lahetys',						
+						SET maa_lahetys = '$maa_lahetys',
 						kauppatapahtuman_luonne = '$ktapahtuman_luonne',
 						kuljetusmuoto = '$kuljetusmuoto'
 						WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
@@ -206,15 +223,8 @@
 
 			$tee = "";
 		}
-		
 
 		if ($tee == "K") {
-
-			$query = "SELECT *
-					  FROM lasku
-					  WHERE tunnus = '$otunnus' and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$laskurow = mysql_fetch_array ($result);
 
 			// näytetään vielä laskun tiedot, ettei kohdisteta päin berberiä
 			echo "<table>";
@@ -240,7 +250,7 @@
 
 			$query = "	SELECT distinct koodi, nimi
 						FROM maat
-						where nimi != '' 
+						where nimi != ''
 						ORDER BY koodi";
 			$result = mysql_query($query) or pupe_error($query);
 			echo "<option value=''>".t("Valitse")."</option>";
@@ -308,7 +318,7 @@
 		}
 
 	}
-	
+
 	if ($tee == "lista") {
 
 		$haku='';
@@ -319,7 +329,7 @@
 		else $tila = " and tila='U' and alatila='X' ";
 
 		if (trim($etsi) == "") $tee = "";
-		
+
 		//listataan tuoreet tilausket
 		if (trim($etsi) != "") {
 			$query = "	select laskunro, nimi asiakas, luontiaika laadittu, laatija, vienti, tapvm, tunnus
@@ -381,8 +391,8 @@
 		echo "</select>";
 		echo "</td>";
 		echo "</tr>";
-		echo "<tr>";		
-		echo "<th>";		
+		echo "<tr>";
+		echo "<th>";
 		echo t("Syötä nimi")." / ".t("Laskunumero")." / ".t("Keikkanumero");
 		echo "</th>";
 		echo "<td>";
@@ -394,6 +404,6 @@
 		echo "<br><input type='Submit' value='".t("Etsi")."'>";
 		echo "</form>";
 	}
-	
+
 	require "../inc/footer.inc";
 ?>

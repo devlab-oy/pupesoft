@@ -356,6 +356,8 @@ if ((int) $kukarow["kesken"] != 0) {
 		$yhtiorow["suoratoim_ulkomaan_alarajasumma"] = round(laskuval($yhtiorow["suoratoim_ulkomaan_alarajasumma"], $laskurow["vienti_kurssi"]),0);
 	}
 	
+	if ($laskurow["toim_maa"] == "") $laskurow["toim_maa"] = $yhtiorow['maakoodi'];
+	
 }
 
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
@@ -2850,7 +2852,7 @@ if ($tee == '') {
 						$rivikate 		= $arow["kotirivihinta"]  - ($arow["kehahin"]*$arow["varattu"]);
 						$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - ($arow["kehahin"]*$arow["varattu"]);
 					}
-
+					
 					if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
 						$summa_kotimaa			+= $arow["rivihinta"]+$arow["alv"];
 						$summa_kotimaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];

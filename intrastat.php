@@ -386,7 +386,7 @@
 				$to = 'ascii.intrastat@tulli.fi'; 			// tämä on tullin virallinen osoite
 				//$to = 'test.ascii.intrastat@tulli.fi'; 	// tämä on tullin testiosoite
 
-				//mail($to, "", $content, $header, "-f $yhtiorow[admin_email]");
+				mail($to, "", $content, $header, "-f $yhtiorow[admin_email]");
 				echo "<font class='message'>Tiedot lähetettiin tulliin.</font><br><br>";
 			}
 			else {

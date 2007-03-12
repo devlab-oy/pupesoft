@@ -35,8 +35,12 @@
 			<th>".t("Ytunnus")."</th>
 			<th colspan='2'>".t("Laskutusosoite")."</th>
 			<th colspan='3'>".t("Toimitusosoite")."</th>
-			<th colspan='2'>".t("Toimitustapa")."</th>
-			<th>".t("Kommentti")."</th>";
+			<th>".t("Toimitustapa")."</th>";
+
+	if ($laskurow["tila"] == "O") {
+		echo "<th>".t("Eturahti")."</th>";
+	}		
+			
 	echo "</tr>";
 
 	if ($laskurow['kohdistettu']=='K') {
@@ -50,13 +54,12 @@
 			<td>$laskurow[ytunnus]</td>
 			<td colspan='2'>$laskurow[nimi] $laskurow[nimitark]<br> $laskurow[osoite]<br> $laskurow[postino] $laskurow[postitp]</td>
 			<td colspan='3'>$laskurow[toim_nimi] $laskurow[toim_nimitark]<br> $laskurow[toim_osoite]<br> $laskurow[toim_postino] $laskurow[toim_postitp]</td>
-			<td colspan='2'>$laskurow[toimitustapa]</td>
-			<td>$laskurow[comments]";
-
-	if ($laskurow["noutaja"] != '') {
-		echo "<br>".t("Noutaja").": $laskurow[noutaja]";
+			<td>$laskurow[toimitustapa]</td>";
+	
+	if ($laskurow["tila"] == "O") {
+		echo "<td>$laskurow[rahti_etu]</td>";
 	}
-	echo "</td>";
+
 	echo "</tr>";
 
 	echo "<tr>
@@ -65,8 +68,12 @@
 			<th>".t("Vienti")."</th>
 			<th>".t("Erikoisalennus")."</th>
 			<th>".t("Toimitusaika")."</th>
-			<th colspan='2'>".t("Rahtikirjanro")."</th>
-			<th>".t("Tilausviite")."</th>";
+			<th>".t("Rahtikirjanro")."</th>";
+	
+	if ($laskurow["tila"] == "O") {
+		echo "<th>".t("Rahti")."</th>";
+	}
+	
 	echo "</tr>";
 
 	echo "<tr>
@@ -83,7 +90,6 @@
 		require ("inc/laskutyyppi.inc");
 	}
 
-
 	if ($laskurow["vienti"] == "K") {
 		$vteksti=t("Vienti ei-EU");
 	}
@@ -97,7 +103,7 @@
 	echo "	<td colspan='2'>".t("$laskutyyppi")." ".t("$alatila")."</td>
 			<td>$vteksti</td>
 			<td>".str_replace(".",",",$laskurow['erikoisale'])."</td>
-			<td>$laskurow[toimaika]</td>";
+			<td>".tv1dateconv($laskurow["toimaika"])."</td>";
 
 	// postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
 	if (strpos($rakirrow['rahtikirjanro'],"JFI")) {
@@ -114,35 +120,57 @@
 		$linkurl = $rakirrow['rahtikirjanro'];
 	}
 
-	echo "	<td colspan='2'>$linkurl</td>
-			<td>$laskurow[viesti]</td>";
+	echo "	<td>$linkurl</td>";
+	
+	if ($laskurow["tila"] == "O") {
+		echo "<td>$laskurow[rahti]</td>";
+	}
+	
 	echo "</tr>";
 
 
 	echo "<tr>
 			<th>".t("Laskunro")."</th>
-			<th>".t("Laskun pvm")."</th>
-			<th colspan='2'>".t("Er‰p‰iv‰")."</th>
+			<th colspan='2'>".t("Laskun pvm")."</th>
+			<th>".t("Er‰p‰iv‰")."</th>
 			<th colspan='2'>".t("Maksup‰iv‰")."</th>
-			<th colspan='2'>".t("ALV")."</th>";
+			<th>".t("ALV")."</th>";
 
 	if ($laskurow["tila"] == "O") {
-		echo "<th>".t("Eturahti")."</th>";
-		echo "<th>".t("Rahti")."</th>";
 		echo "<th>".t("Huolinta")."</th>";
 	}
 
 	echo "<tr>
 			<td>$laskurow[laskunro]</td>
-			<td>$laskurow[tapvm]</td>
-			<td colspan='2'>$laskurow[erpcm]</td>
-			<td colspan='2'>$laskurow[mapvm]</td>
-			<td colspan='2'>".str_replace(".",",",$laskurow['alv'])." %</td>";
+			<td colspan='2'>".tv1dateconv($laskurow["tapvm"])."</td>
+			<td>".tv1dateconv($laskurow["erpcm"])."</td>
+			<td colspan='2'>".tv1dateconv($laskurow["mapvm"])."</td>
+			<td>".str_replace(".",",",$laskurow['alv'])." %</td>";
 
 	if ($laskurow["tila"] == "O") {
-		echo "<td>$laskurow[rahti_etu]</td>";
-		echo "<td>$laskurow[rahti]</td>";
-		echo "<td colspan='2'>$laskurow[rahti_huolinta]</td>";
+		echo "<td>$laskurow[rahti_huolinta]</td>";
+	}
+	
+	$comments = "";
+
+	if ($laskurow["comments"] != "")
+		$comments .= $laskurow["comments"]."\n";
+	
+	if ($laskurow["sisviesti2"] != "")
+		$comments .= $laskurow["sisviesti2"]."\n";
+	
+	if ($laskurow["sisviesti1"] != "")
+		$comments .= $laskurow["sisviesti1"]."\n";
+	
+	if ($laskurow["noutaja"] != '') {
+		$comments .= "\n".t("Noutaja").": $laskurow[noutaja]";
+	}
+	
+	if ($comments != "") {
+		echo "<tr><th colspan='9'>".t("Kommentit:")."</th></tr>";
+		echo "<tr><td colspan='9'>";
+		echo str_replace("\n", "<br>", $comments);
+		echo "</td></tr>";
 	}
 
 	echo "</table>";
@@ -157,16 +185,22 @@
 		$where = " otunnus = '$tunnus' ";
 	}
 
-	$jarjestys = "toimaika, tilausrivi.tunnus";
+	$jarjestys = " toimaika, tilausrivi.tunnus ";
 
 	if (strlen($ojarj) > 0) {
 		$jarjestys = $ojarj;
 	}
+	elseif ($laskurow["tila"] != 'O') {
+		// katotaan miten halutaan sortattavan
+		$jarjestys = " otunnus, sorttauskentta, tuoteno, tunnus ";
+	}
+	
+	$sorttauskentta = ", ".generoi_sorttauskentta();
 
 	//Listataan tilauksessa olevat tuotteet
 	if ($laskurow["tila"] != 'O') {
 		$query = "	SELECT otunnus tilausnumero, nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tuoteno, tilkpl, varattu+kpl kpl, jt,
-					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti $sorttauskentta
 					FROM tilausrivi
 					WHERE $where and yhtio='$kukarow[yhtio]'
 					and tilausrivi.tyyppi in ('E','L','G','V','W','T')
@@ -190,9 +224,9 @@
 	echo "<table><tr>";
 
 
-	for ($i = 0; $i < mysql_num_fields($presult)-1; $i++) {
+	for ($i = 0; $i < mysql_num_fields($presult)-2; $i++) {
 		$ojarj=$i+1; // sortti numeron mukaan niin ei tuu onglemia
-		echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&tunnus=$tunnus&ytunnus=$ytunnus&nimi=$nimi&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";
+		echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&ytunnus=$ytunnus&nimi=$nimi&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";
 	}
 
 	echo "</tr>";
@@ -202,14 +236,41 @@
 	while ($prow = mysql_fetch_array ($presult)) {
 
 		echo "<tr>";
-		for ($i=0; $i < mysql_num_fields($presult)-1; $i++) {
+		for ($i=0; $i < mysql_num_fields($presult)-2; $i++) {
 			echo "<td>".str_replace(".",",",$prow[$i])."</td>";
 		}
 		echo "</tr>";
 
+		
+		//Haetaan sarjanumeron tiedot
+		if ($prow["kpl"]+$prow["varattu"] > 0){
+			$sarjanutunnus = "myyntirivitunnus";
+		}
+		else {
+			$sarjanutunnus = "ostorivitunnus";
+		}
+
+		$query = "	select *
+					from sarjanumeroseuranta
+					where yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$prow[tuoteno]'
+					and $sarjanutunnus='$prow[tunnus]'
+					and sarjanumero != ''";
+		$sarjares = mysql_query($query) or pupe_error($query);
+		
+		$prow["kommentti"] = str_replace("\n", "<br>", $prow["kommentti"]);
+
+		if ($prow["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
+			$prow["kommentti"] .= "<br>";
+		}
+		while($sarjarow = mysql_fetch_array($sarjares)) {
+			$prow["kommentti"] .= "# <a href='sarjanumeroseuranta.php?tuoteno_haku=$prow[tuoteno]&sarjanumero_haku=$sarjarow[sarjanumero]'>$sarjarow[sarjanumero]</a><br>";
+		}
+		
+		
 		if ($prow["kommentti"] != '') {
 			echo "<tr>";
-			echo "<td>".t("Kommentti").":</td>";
+			echo "<td valign='top'>".t("Kommentti").":</td>";
 			echo "<td colspan='13'>$prow[kommentti]</td>";
 			echo "</tr>";
 		}

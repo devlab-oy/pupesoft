@@ -11,6 +11,13 @@
 		require('vakuutushakemus.inc');
 	}
 		
+	if ($tee == 'NAYTAHTML' or $tee == 'NAYTATILAUS') {
+		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		require ("../raportit/naytatilaus.inc");
+		echo "<br><br>";
+		$tee = "ETSILASKU";
+	}
+		
 	if ($tee != 'osamaksusoppari' and $tee != 'vakuutushakemus') {
 		echo "<font class='head'>".t("Lisätietojen korjaus").":</font><hr><br>";
 	}
@@ -71,7 +78,7 @@
 		$where2 = "";
 			
 		//myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
-		$where1 = " lasku.tila in ('U','L') ";
+		$where1 = " lasku.tila='L' ";
 
 		if ($ytunnus{0} == '£') {
 			$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'

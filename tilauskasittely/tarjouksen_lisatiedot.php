@@ -82,7 +82,8 @@
 			require_once ("tulosta_rekisteriilmoitus.inc");
 			tulosta_rekisteriilmoitus($otunnus, $komento["Rekisteröinti_ilmoitus"], $kieli, $tee);
 		}
-		$tee = "";
+		$otunnus	= "";
+		$tee 		= "";
 	}
 	
 		
@@ -274,16 +275,6 @@
 						<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='tee' value='TULOSTA'>
 						<input type='hidden' name='otunnus' value='$row[Tilaus]'>
-						<input type='hidden' name='ytunnus' value='$ytunnus'>
-						<input type='hidden' name='asiakasid' value='$asiakasid'>
-						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-						<input type='hidden' name='laskunro' value='$laskunro'>
-						<input type='hidden' name='ppa' value='$ppa'>
-						<input type='hidden' name='kka' value='$kka'>
-						<input type='hidden' name='vva' value='$vva'>
-						<input type='hidden' name='ppl' value='$ppl'>
-						<input type='hidden' name='kkl' value='$kkl'>
-						<input type='hidden' name='vvl' value='$vvl'>
 						<input type='submit' value='".t("Tulosta Lomakkeita")."'></form>
 						</td>";
 

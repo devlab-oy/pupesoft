@@ -78,7 +78,7 @@
 		$where2 = "";
 			
 		//myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
-		$where1 = " lasku.tila='L' ";
+		$where1 = " lasku.tila in ('L','N') ";
 
 		if ($ytunnus{0} == '£') {
 			$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'

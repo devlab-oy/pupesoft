@@ -674,7 +674,7 @@
 				$ylisa = "&liitostunnus=$sarjarow[tunnus]&uusi=1";
 			}
 			
-			echo "<br><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF!!!!$tunnuskentta=$rivitunnus!!from=$from!!aputoim=$aputoim!!otunnus=$otunnus!!sarjanumero_haku=$sarjanumero_haku!!tuoteno_haku=$tuoteno_haku!!nimitys_haku=$nimitys_haku!!varasto_haku=$varasto_haku!!ostotilaus_haku=$ostotilaus_haku!!myyntitilaus_haku=$myyntitilaus_haku!!lisatieto_haku=$lisatieto_haku' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\">".t("Lisätiedot")."</a>";
+			echo "<br><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF////$tunnuskentta=$rivitunnus//from=$from//aputoim=$aputoim//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku//lisatieto_haku=$lisatieto_haku' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\">".t("Lisätiedot")."</a>";
 			
 		}
 		

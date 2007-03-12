@@ -200,7 +200,7 @@
 	//Listataan tilauksessa olevat tuotteet
 	if ($laskurow["tila"] != 'O') {
 		$query = "	SELECT otunnus tilausnumero, nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tuoteno, tilkpl, varattu+kpl kpl, jt,
-					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti $sorttauskentta
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti $sorttauskentta, tunnus
 					FROM tilausrivi
 					WHERE $where and yhtio='$kukarow[yhtio]'
 					and tilausrivi.tyyppi in ('E','L','G','V','W','T')
@@ -210,7 +210,8 @@
 		$query = "	SELECT otunnus tilausnumero, tilausrivi.nimitys, concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 					tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
 					concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', jt,
-					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),2) rivihinta, tilausrivi.alv, tilausrivi.kommentti
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),2) rivihinta, 
+					tilausrivi.alv, tilausrivi.kommentti $sorttauskentta, tunnus
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
@@ -224,7 +225,7 @@
 	echo "<table><tr>";
 
 
-	for ($i = 0; $i < mysql_num_fields($presult)-2; $i++) {
+	for ($i = 0; $i < mysql_num_fields($presult)-3; $i++) {
 		$ojarj=$i+1; // sortti numeron mukaan niin ei tuu onglemia
 		echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&ytunnus=$ytunnus&nimi=$nimi&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";
 	}
@@ -236,7 +237,7 @@
 	while ($prow = mysql_fetch_array ($presult)) {
 
 		echo "<tr>";
-		for ($i=0; $i < mysql_num_fields($presult)-2; $i++) {
+		for ($i=0; $i < mysql_num_fields($presult)-3; $i++) {
 			echo "<td>".str_replace(".",",",$prow[$i])."</td>";
 		}
 		echo "</tr>";

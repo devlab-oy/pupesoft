@@ -3,6 +3,14 @@
 
 	echo "<font class='head'>".t("Lisätietojen korjaukset")."</font><hr>";
 
+	if ($tapa == "vientituonti") {
+		$tapa = "vienti";
+	}
+
+	if ($tapa == "tuontivienti") {
+		$tapa = "tuonti";
+	}
+
 	if ($tapa == "vienti") {
 
 		$query = "SELECT *

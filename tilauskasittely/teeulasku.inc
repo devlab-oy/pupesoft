@@ -196,6 +196,7 @@ $query = "	INSERT into lasku SET
 			kasumma_valuutassa					= '$kassaale_valuutassa',
 			kate								= '$kate',
 			kauppatapahtuman_luonne			 	= '$lasrow[kauppatapahtuman_luonne]',
+			ultilno								= '$lasrow[kauppatapahtuman_luonne]',
 			kerayspvm							= '$lasrow[kerayspvm]',
 			kontti								= '$lasrow[kontti]',
 			kuljetusmuoto						= '$lasrow[kuljetusmuoto]',

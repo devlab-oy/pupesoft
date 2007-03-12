@@ -98,7 +98,7 @@
 					if ($laskurow["toim_maa"] == $varaston_row["maa"]) {
 						$laskurow["kauppatapahtuman_luonne"] = '999'; // intrastattia ei lähetetä tulliin kun varasto ja toimitusosoite on samassa maassa
 					}
-					elseif ($laskurow["kauppatapahtuman_luonne"] == "" or $laskurow["kauppatapahtuman_luonne"] == "999") {
+					elseif ($laskurow["kauppatapahtuman_luonne"] == 0 or $laskurow["kauppatapahtuman_luonne"] == 999) {
 
 						if ($varaston_row["maa"] == $yhtiorow["maakoodi"]) {
 							$laskurow["kauppatapahtuman_luonne"] = '-1'; // miinus yks tarkoittaa, että lisätiedot pitää syöttää ja VIENTI-intrastat pitää lähettää
@@ -106,13 +106,13 @@
 						elseif ($laskurow["toim_maa"] == $yhtiorow["maakoodi"]) {
 							$laskurow["kauppatapahtuman_luonne"] = '-2'; // miinus kaks tarkoittaa, että lisätiedot pitää syöttää ja TUONTI-intrastat pitää lähettää
 						}
-
 					}
 
 				}
 
 				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti
-				if ($varasto != $edvarasto and $edvarasto != 'x' and $maehrowx["jv"] == '' and $totarowx["hetiera"] != 'H') {
+				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["hetiera"] != 'H')) {
+
 					//tehdään uusi otsikko
 					$query = "INSERT into lasku SET
 							alatila					= '$laskurow[alatila]',
@@ -170,7 +170,9 @@
 							jaksotettu				= '$laskurow[jaksotettu]',
 							kuljetusmuoto			= '$laskurow[kuljetusmuoto]',
 							kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
+							ultilno					= '$laskurow[kauppatapahtuman_luonne]', 
 							maa_maara				= '$laskurow[maa_maara]'";
+
 					$uusires = mysql_query($query) or pupe_error($query);
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tvs_tilausnumerot[] = $laskurow["tunnus"];
@@ -179,7 +181,8 @@
 					//päivitetään laskulle tieto mihin varastoon se kuuluu
 					$query  ="	update lasku set
 								varasto = '$varasto',
-								kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]'
+								kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
+								ultilno	= '$laskurow[kauppatapahtuman_luonne]'
 								where yhtio='$kukarow[yhtio]'
 								and tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);
@@ -251,8 +254,8 @@
 				else {
 					//Laitetaan lista tulostusjonoon
 					$query = "	UPDATE lasku
-								SET alatila='J'
-								WHERE yhtio='$kukarow[yhtio]'
+								SET alatila = 'J'
+								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$laskurow[tunnus]'
 								and tila='$tvs_tila'";
 					$result = mysql_query($query) or pupe_error($query);
@@ -433,10 +436,10 @@
 								where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
 								order by alkuhyllyalue,alkuhyllynro";
 				}
-				$prires= mysql_query($query) or pupe_error($query);
+				$prires = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($prires)>0) {
-					$prirow= mysql_fetch_array($prires);
+					$prirow = mysql_fetch_array($prires);
 
 					if ($valittu_tulostin == "oletukselle") {
 						$apuprintteri = $prirow['printteri1']; // läheteprintteri
@@ -444,7 +447,6 @@
 					else {
 						$apuprintteri = $valittu_tulostin;
 					}
-
 
 					//haetaan lähetteen tulostuskomento
 					$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
@@ -465,7 +467,6 @@
 				if ($returnvalue != 0) {
 					echo "<font class='error'>".t("Lähetteen tulostus epäonnistui")."! ".t("Tilaus $laskurow[tunnus]")." ".t("siirrettiin tulostusjonoon").".
 							".t("Käy tulostamassa lähete")." <a href='lahetteen_tulostusjono.php'>".t("tulostusjonosta")."</a>.</font><br>";
-
 					$virheellinen = "X"; //Merkataan epäonnistuneeksi
 				}
 

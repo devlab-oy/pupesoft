@@ -54,12 +54,14 @@
 		//tuonti vai vienti
 		if ($tapa == "tuonti") {
 			$where1 = " and lasku.vienti = 'F' ";
-			$where2 = " and kauppatapahtuman_luonne = '-2' ";
+			$where2 = " and lasku.ultilno = '-2' ";
+			$where3 = " and lasku.ultilno = '-2' ";
 		}
 		else {
 			$tapa = "vienti";
-			$where1 = " and kauppatapahtuman_luonne = '-1' ";
+			$where1 = " and lasku.ultilno = '-1' ";
 			$where2 = " and lasku.vienti = 'E' ";
+			$where3 = " and lasku.ultilno = '-1' ";
 		}
 
 		// tässä tulee sitten nimiketietueet unionilla
@@ -85,7 +87,7 @@
 					JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
-					WHERE lasku.kohdistettu='X'
+					WHERE lasku.kohdistettu = 'X'
 					and lasku.tila = 'K'
 					$where1
 					and lasku.kauppatapahtuman_luonne != '999'
@@ -117,6 +119,33 @@
 					and lasku.alatila = 'X'
 					$where2
 					and lasku.kauppatapahtuman_luonne != '999'
+					and lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tapvm >= '$vva-$kka-$ppa'
+					and lasku.tapvm <= '$vvl-$kkl-$ppl'
+					GROUP BY tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
+
+					UNION
+
+					(SELECT
+					tuote.tullinimike1,
+					lasku.maa_lahetys,
+					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
+					lasku.maa_maara,
+					lasku.tunnus laskunro,
+					tuote.tuoteno,
+					lasku.kauppatapahtuman_luonne,
+					lasku.kuljetusmuoto,
+					round(sum(tilausrivi.kpl),0) kpl,
+					tullinimike.su_vientiilmo su,
+					if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
+					round(sum(tilausrivi.rivihinta), 0) rivihinta
+					FROM lasku use index (yhtio_tila_tapvm)
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
+					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
+					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
+					WHERE lasku.tila = 'G'
+					and lasku.alatila = 'V'
+					$where3
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tapvm >= '$vva-$kka-$ppa'
 					and lasku.tapvm <= '$vvl-$kkl-$ppl'
@@ -440,6 +469,9 @@
 	// Käyttöliittymä
 	if (!isset($kk)) $kk = date("m");
 	if (!isset($vv)) $vv = date("Y");
+
+	if ($tapa == "vientituonti") $tapa = "vienti";
+	if ($tapa == "tuontivienti") $tapa = "tuonti";
 
 	$sel1[$outputti] = "SELECTED";
 	$sel2[$tapa]     = "SELECTED";

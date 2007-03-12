@@ -501,6 +501,7 @@ else {
 							jaksotettu				= '$laskurow[jaksotettu]',
 							kuljetusmuoto			= '$laskurow[kuljetusmuoto]',
 							kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
+							ultilno					= '$laskurow[kauppatapahtuman_luonne]', 
 							maa_maara				= '$laskurow[maa_maara]'";
 
 					$uusires = mysql_query($query) or pupe_error($query);
@@ -511,7 +512,8 @@ else {
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
 					$query  ="	update lasku set
 								varasto = '$varasto',
-								kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]'
+								kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
+								ultilno = '$laskurow[kauppatapahtuman_luonne]'
 								where yhtio='$kukarow[yhtio]'
 								and tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);

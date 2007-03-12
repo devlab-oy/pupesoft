@@ -91,12 +91,12 @@
 			$where2 = " and lasku.liitostunnus  = '$asiakasid'";
 		}
 
-		$where2 .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
-					 and lasku.tapvm <='$vvl-$kkl-$ppl 23:59:59' ";
+		$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+					 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
 		if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 		
-		$use = " use index (yhtio_tila_tapvm) ";
+		$use = " use index (yhtio_tila_luontiaika) ";
 		
 		if ($laskunro > 0) {
 			$where2 = " and lasku.laskunro = '$laskunro' ";

@@ -2,6 +2,10 @@
 
 	require ("../inc/parametrit.inc");
 
+	if ($tee != 'osamaksusoppari' and $tee != 'vakuutushakemus') {
+		echo "<font class='head'>".t("Lisätietojen korjaus").":</font><hr><br>";
+	}
+	
 	if ($tee == 'osamaksusoppari') {
 		// Tehdään rahoituslaskuelma
 		require('osamaksusoppari.inc');
@@ -10,16 +14,83 @@
 		// Tehdään vakuutushakemus
 		require('vakuutushakemus.inc');
 	}
+	
+
+	if ($tee == "TULOSTA") {
+		$tulostimet[0] = 'Tarjous';
+		if ($kappaleet > 0 and $komento["Tarjous"] != '' and $komento["Tarjous"] != 'email') {
+			$komento["Tarjous"] .= " -# $kappaleet ";
+		}
+	
+		$tulostimet[1] = 'Myyntisopimus';
+		if ($kappaleet > 0 and $komento["Myyntisopimus"] != '' and $komento["Myyntisopimus"] != 'email') {
+			$komento["Myyntisopimus"] .= " -# $kappaleet ";
+		}
+	
+		$tulostimet[2] = 'Osamaksusopimus';
+		if ($kappaleet > 0 and $komento["Osamaksusopimus"] != '' and $komento["Osamaksusopimus"] != 'email') {
+			$komento["Osamaksusopimus"] .= " -# $kappaleet ";
+		}
+	
+		$tulostimet[3] = 'Luovutustodistus';
+		if ($kappaleet > 0 and $komento["Luovutustodistus"] != '' and $komento["Luovutustodistus"] != 'email') {
+			$komento["Luovutustodistus"] .= " -# $kappaleet ";
+		}
+	
+		$tulostimet[4] = 'Vakuutushakemus';
+		if ($kappaleet > 0 and $komento["Vakuutushakemus"] != '' and $komento["Vakuutushakemus"] != 'email') {
+			$komento["Vakuutushakemus"] .= " -# $kappaleet ";
+		}
+
+		$tulostimet[5] = 'Rekisteröinti_ilmoitus';
+		if ($kappaleet > 0 and $komento["Rekisteröinti_ilmoitus"] != '' and $komento["Rekisteröinti_ilmoitus"] != 'email') {
+			$komento["Rekisteröinti_ilmoitus"] .= " -# $kappaleet ";
+		}
+		
+		if (count($komento) == 0 and $tee == 'TULOSTA') {
+			require("../inc/valitse_tulostin.inc");
+		}
+	}
+	
+	if ($tee == "TULOSTA") {
+		if ($komento["Tarjous"] != "") {			
+			require_once ("tulosta_tarjous.inc");
+			tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee);
+		}
+
+		if ($komento["Myyntisopimus"] != "") {
+			require_once ("tulosta_myyntisopimus.inc");
+			tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee);
+		}
+
+		if ($komento["Osamaksusopimus"] != "") {
+			require_once ("tulosta_osamaksusoppari.inc");
+			tulosta_osamaksusoppari($otunnus, $komento["Osamaksusopimus"], $kieli, $tee);
+		}
+
+		if ($komento["Luovutustodistus"] != "") {
+			require_once ("tulosta_luovutustodistus.inc");
+			tulosta_luovutustodistus($otunnus, $komento["Luovutustodistus"], $kieli, $tee);
+		}
+
+		if ($komento["Vakuutushakemus"] != "") {
+			require_once ("tulosta_vakuutushakemus.inc");
+			tulosta_vakuutushakemus($otunnus, $komento["Vakuutushakemus"], $kieli, $tee);
+		}
+
+		if ($komento["Rekisteröinti_ilmoitus"] != "") {
+			require_once ("tulosta_rekisteriilmoitus.inc");
+			tulosta_rekisteriilmoitus($otunnus, $komento["Rekisteröinti_ilmoitus"], $kieli, $tee);
+		}
+		$tee = "";
+	}
+	
 		
 	if ($tee == 'NAYTAHTML' or $tee == 'NAYTATILAUS') {
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		require ("../raportit/naytatilaus.inc");
 		echo "<br><br>";
 		$tee = "ETSILASKU";
-	}
-		
-	if ($tee != 'osamaksusoppari' and $tee != 'vakuutushakemus') {
-		echo "<font class='head'>".t("Lisätietojen korjaus").":</font><hr><br>";
 	}
 	
 	if ($tee == "" or $tee == 'ETSILASKU'){
@@ -176,38 +247,45 @@
 
 				echo "<$ero>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
 
-				if ($tila != 'monta') {
-
-					echo "<td class='back'>
-							<form method='post' action='$PHP_SELF'>
-							<input type='hidden' name='tee' value='NAYTAHTML'>
-							<input type='hidden' name='tunnus' value='$row[Tilaus]'>
-							<input type='hidden' name='ytunnus' value='$ytunnus'>
-							<input type='hidden' name='asiakasid' value='$asiakasid'>
-							<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-							<input type='hidden' name='otunnus' value='$otunnus'>
-							<input type='hidden' name='laskunro' value='$laskunro'>
-							<input type='hidden' name='ppa' value='$ppa'>
-							<input type='hidden' name='kka' value='$kka'>
-							<input type='hidden' name='vva' value='$vva'>
-							<input type='hidden' name='ppl' value='$ppl'>
-							<input type='hidden' name='kkl' value='$kkl'>
-							<input type='hidden' name='vvl' value='$vvl'>
-							<input type='submit' value='".t("Näytä ruudulla")."'></form></td>";
-
-					echo "<form action='$PHP_SELF' method='post'>
+				echo "	<td class='back'>
+						<form method='post' action='$PHP_SELF'>
+						<input type='hidden' name='tee' value='NAYTAHTML'>
+						<input type='hidden' name='tunnus' value='$row[Tilaus]'>
+						<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='hidden' name='asiakasid' value='$asiakasid'>
+						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+						<input type='hidden' name='laskunro' value='$laskunro'>
+						<input type='hidden' name='ppa' value='$ppa'>
+						<input type='hidden' name='kka' value='$kka'>
+						<input type='hidden' name='vva' value='$vva'>
+						<input type='hidden' name='ppl' value='$ppl'>
+						<input type='hidden' name='kkl' value='$kkl'>
+						<input type='hidden' name='vvl' value='$vvl'>
+						<input type='submit' value='".t("Näytä ruudulla")."'></form>
+						<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name='tee' value='osamaksusoppari'>
 						<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
-						<td class='back'><input type='Submit' value='".t("Rahoituslaskelma")."' Style='font-size: 8pt; padding:0;'></td>
-						</form>";
-
-					echo "<form action='$PHP_SELF' method='post'>
+						<input type='Submit' value='".t("Rahoituslaskelma")."' Style='font-size: 8pt; padding:0;'>
+						</form>
+						<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name='tee' value='vakuutushakemus'>
 						<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
-						<td class='back'><input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."' Style='font-size: 8pt; padding:0;'></td>
-						</form>";
-							
-				}
+						<input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."' Style='font-size: 8pt; padding:0;'></form>
+						<form method='post' action='$PHP_SELF'>
+						<input type='hidden' name='tee' value='TULOSTA'>
+						<input type='hidden' name='otunnus' value='$row[Tilaus]'>
+						<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='hidden' name='asiakasid' value='$asiakasid'>
+						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+						<input type='hidden' name='laskunro' value='$laskunro'>
+						<input type='hidden' name='ppa' value='$ppa'>
+						<input type='hidden' name='kka' value='$kka'>
+						<input type='hidden' name='vva' value='$vva'>
+						<input type='hidden' name='ppl' value='$ppl'>
+						<input type='hidden' name='kkl' value='$kkl'>
+						<input type='hidden' name='vvl' value='$vvl'>
+						<input type='submit' value='".t("Tulosta Lomakkeita")."'></form>
+						</td>";
 
 				echo "</tr>";
 			}

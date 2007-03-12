@@ -1512,7 +1512,7 @@
 	if ($tee == '') {
 		//syötetään tilausnumero
 		echo "<br><table>";
-		echo "<form action = '$PHP_SELF' method = 'post'>
+		echo "<form action = '$PHP_SELF' method = 'post' name='hakuformi'>
 			<input type='hidden' name='toim' value='$toim'>";
 
 
@@ -1538,6 +1538,9 @@
 
 		echo "<br><input type='submit' value='".t("Jatka")."'>";
 		echo "</form>";
+		
+		$formi  = 'hakuformi';
+		$kentta = 'ytunnus';
 	}
 
 	require ('../inc/footer.inc');

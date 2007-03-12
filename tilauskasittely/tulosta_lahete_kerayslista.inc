@@ -146,8 +146,8 @@ if (!function_exists('alku')) {
 
 		$kala = 650;
 
-		$pdf->draw_rectangle(670, 20,  $kala, 40,  $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 40,  $kala, 80,  $firstpage, $rectparam);
+		$pdf->draw_rectangle(670, 20,  $kala, 36,  $firstpage, $rectparam);
+		$pdf->draw_rectangle(670, 36,  $kala, 80,  $firstpage, $rectparam);
 		$pdf->draw_rectangle(670, 80,  $kala, 180, $firstpage, $rectparam);
 		$pdf->draw_rectangle(670, 180, $kala, 320, $firstpage, $rectparam);
 		$pdf->draw_rectangle(670, 320, $kala, 420, $firstpage, $rectparam);
@@ -286,7 +286,7 @@ if (!function_exists('rivi')) {
 
 			$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$firstpage, $pp);
 //			$pdf->draw_text(23,  $kala, $kala,	$firstpage, $pp);
-			$pdf->draw_text(42,  $kala, $varastopaikka,					$firstpage, $p);
+			$pdf->draw_text(38,  $kala, $varastopaikka,					$firstpage, $p);
 			$pdf->draw_text(90,  $kala, $row["tuoteno"],				$firstpage, $p);
 
 

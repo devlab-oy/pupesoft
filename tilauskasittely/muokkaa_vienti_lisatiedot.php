@@ -1,5 +1,5 @@
 <?php
-	require('../inc/parametrit.inc');
+	require ('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Lisätietojen korjaukset")."</font><hr>";
 
@@ -11,22 +11,22 @@
 		$tapa = "tuonti";
 	}
 
-	if ($tapa == "vienti") {
+	if ($tapa == "vienti" and $tee != "lista") {
+
+		$query = "SELECT *
+				  FROM lasku
+				  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "laskua ei löydy";
+			exit;
+		}
+		else {
+			$laskurow = mysql_fetch_array ($result);
+		}
 
 		if ($tee == 'L') {
-
-			$query = "SELECT *
-					  FROM lasku
-					  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) == 0) {
-				echo "laskua ei löydy";
-				exit;
-			}
-			else {
-				$laskurow = mysql_fetch_array ($result);
-			}
 
 			list($poistumistoimipaikka, $poistumistoimipaikka_koodi) = split("##", $poistumistoimipaikka, 2);
 
@@ -96,9 +96,9 @@
 
 				echo "<option value=''>".t("Valitse")."</option>";
 
-				while($row = mysql_fetch_array($result)){
+				while ($row = mysql_fetch_array($result)){
 					$sel = '';
-					if($row[0] == $laskurow["sisamaan_kuljetusmuoto"]) {
+					if ($row[0] == $laskurow["sisamaan_kuljetusmuoto"]) {
 						$sel = 'selected';
 					}
 					echo "<option value='$row[0]' $sel>$row[1]</option>";
@@ -108,10 +108,10 @@
 
 				$chk1 = '';
 				$chk2 = '';
-				if($laskurow["kontti"] == 1) {
+				if ($laskurow["kontti"] == 1) {
 					$chk1 = 'checked';
 				}
-				if($laskurow["kontti"] == 0) {
+				if ($laskurow["kontti"] == 0) {
 					$chk2 = 'checked';
 				}
 
@@ -134,9 +134,9 @@
 
 			echo "<option value=''>".t("Valitse")."</option>";
 
-			while($row = mysql_fetch_array($result)){
+			while ($row = mysql_fetch_array($result)) {
 				$sel = '';
-				if($row[0] == $laskurow["kauppatapahtuman_luonne"]) {
+				if ($row[0] == $laskurow["kauppatapahtuman_luonne"]) {
 					$sel = 'selected';
 				}
 				echo "<option value='$row[0]' $sel>$row[1]</option>";
@@ -156,13 +156,14 @@
 
 			echo "<option value=''>".t("Valitse")."</option>";
 
-			while($row = mysql_fetch_array($result)){
+			while ($row = mysql_fetch_array($result)) {
 				$sel = '';
-				if($row[0] == $laskurow["kuljetusmuoto"]) {
+				if ($row[0] == $laskurow["kuljetusmuoto"]) {
 					$sel = 'selected';
 				}
 				echo "<option value='$row[0]' $sel>$row[1]</option>";
 			}
+
 			echo "</select></td><td class='back'>".t("Pakollinen kenttä")."</td>";
 			echo "</tr>";
 
@@ -204,22 +205,22 @@
 
 	}
 
-	if ($tapa == "tuonti") {
+	if ($tapa == "tuonti" and $tee != "lista") {
+
+		$query = "SELECT *
+				  FROM lasku
+				  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "laskua ei löydy";
+			exit;
+		}
+		else {
+			$laskurow = mysql_fetch_array ($result);
+		}
 
 		if ($tee == "update") {
-
-			$query = "SELECT *
-					  FROM lasku
-					  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) == 0) {
-				echo "laskua ei löydy";
-				exit;
-			}
-			else {
-				$laskurow = mysql_fetch_array ($result);
-			}
 
 			$query = "	UPDATE lasku
 						SET maa_lahetys = '$maa_lahetys',
@@ -329,9 +330,9 @@
 
 	if ($tee == "lista") {
 
-		$haku='';
-		if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
-		if (is_numeric($etsi)) $haku="and laskunro='$etsi'";
+		$haku = '';
+		if (is_string($etsi))  $haku = "and nimi LIKE '%$etsi%'";
+		if (is_numeric($etsi)) $haku = "and laskunro='$etsi'";
 
 		if ($tapa == "tuonti") $tila = " and tila='K' and vanhatunnus=0 ";
 		else $tila = " and tila='U' and alatila='X' ";
@@ -340,6 +341,7 @@
 
 		//listataan tuoreet tilausket
 		if (trim($etsi) != "") {
+
 			$query = "	select laskunro, nimi asiakas, luontiaika laadittu, laatija, vienti, tapvm, tunnus
 						from lasku where yhtio='$kukarow[yhtio]' and vienti!='' $tila
 						$haku
@@ -348,18 +350,24 @@
 			$tilre = mysql_query($query) or pupe_error($query);
 
 			echo "<table>";
+
 			if (mysql_num_rows($tilre) > 0) {
+
 				echo "<tr>";
-				for ($i=0; $i<mysql_num_fields($tilre)-1; $i++)
+
+				for ($i=0; $i<mysql_num_fields($tilre)-1; $i++) {
 					echo "<th align='left'>".t(mysql_field_name($tilre,$i))."</th>";
+				}
+
 				echo "</tr>";
 
-				while ($tilrow = mysql_fetch_array($tilre))
-				{
+				while ($tilrow = mysql_fetch_array($tilre)) {
+
 					echo "<tr>";
 
-					for ($i=0; $i<mysql_num_fields($tilre)-1; $i++)
+					for ($i=0; $i<mysql_num_fields($tilre)-1; $i++) {
 						echo "<td>$tilrow[$i]</td>";
+					}
 
 					echo "<form method='post' action='$PHP_SELF'><td class='back'>
 							<input type='hidden' name='otunnus' value='$tilrow[tunnus]'>
@@ -381,8 +389,9 @@
 
 	// meillä ei ole valittua tilausta
 	if ($tee == '') {
-		$formi="find";
-		$kentta="etsi";
+
+		$formi  = "find";
+		$kentta = "etsi";
 
 		// tehdään etsi valinta
 		echo "<form action='$PHP_SELF' name='find' method='post'>";
@@ -413,5 +422,6 @@
 		echo "</form>";
 	}
 
-	require "../inc/footer.inc";
+	require ("../inc/footer.inc");
+
 ?>

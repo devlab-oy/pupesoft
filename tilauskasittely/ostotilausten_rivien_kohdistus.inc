@@ -393,14 +393,16 @@ if ($tila == '') {
 	}
 
 	$query    = "SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale $alvit) hinta
-				FROM tilausrivi use index (uusiotunnus_index), tuote use index (tuoteno_index), tuotteen_toimittajat
-				WHERE uusiotunnus = '$otunnus' 
-				AND tilausrivi.yhtio ='$kukarow[yhtio]' 
-				AND liitostunnus = '$toimittajaid'
+				FROM tilausrivi use index (uusiotunnus_index), 
+				tuote use index (tuoteno_index), 
+				tuotteen_toimittajat
+				WHERE tilausrivi.yhtio ='$kukarow[yhtio]' 
+				AND tilausrivi.uusiotunnus = '$otunnus' 
 				AND tuote.yhtio = tilausrivi.yhtio 
-				AND tilausrivi.yhtio = tuotteen_toimittajat.yhtio 
 				AND tuote.tuoteno = tilausrivi.tuoteno 
-				AND tilausrivi.tuoteno = tuotteen_toimittajat.tuoteno";
+				AND tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+				AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+				AND tuotteen_toimittajat.liitostunnus = '$toimittajaid'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$hintarow = mysql_fetch_array($result);
 
@@ -514,14 +516,13 @@ if ($tila == '') {
 				tilausrivi.tunnus rivitunnus,
 				tilausrivi.uusiotunnus
 				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro
+				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
 				JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
 				WHERE lasku.liitostunnus='$laskurow[liitostunnus]'
 				and lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tila in ('O','K')
 				and lasku.alatila not in ('X','B')
-				$lisa2
 				GROUP BY tilausrivi.tunnus
 				$lisa1
 				ORDER BY $jarjestys

@@ -13,20 +13,20 @@
 
 	if ($tapa == "vienti") {
 
-		$query = "SELECT *
-				  FROM lasku
-				  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) == 0) {
-			echo "laskua ei löydy";
-			$tee = "";
-		}
-		else {
-			$laskurow = mysql_fetch_array ($result);
-		}
-
 		if ($tee == 'L') {
+
+			$query = "SELECT *
+					  FROM lasku
+					  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+				echo "laskua ei löydy";
+				exit;
+			}
+			else {
+				$laskurow = mysql_fetch_array ($result);
+			}
 
 			list($poistumistoimipaikka, $poistumistoimipaikka_koodi) = split("##", $poistumistoimipaikka, 2);
 
@@ -206,20 +206,20 @@
 
 	if ($tapa == "tuonti") {
 
-		$query = "SELECT *
-				  FROM lasku
-				  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) == 0) {
-			echo "laskua ei löydy";
-			$tee = "";
-		}
-		else {
-			$laskurow = mysql_fetch_array ($result);
-		}
-
 		if ($tee == "update") {
+
+			$query = "SELECT *
+					  FROM lasku
+					  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+				echo "laskua ei löydy";
+				exit;
+			}
+			else {
+				$laskurow = mysql_fetch_array ($result);
+			}
 
 			$query = "	UPDATE lasku
 						SET maa_lahetys = '$maa_lahetys',

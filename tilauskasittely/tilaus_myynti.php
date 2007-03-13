@@ -284,7 +284,13 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 		$erikoisale		= $asiakasrow["erikoisale"];
 
 		$varasto = (int) $kukarow["varasto"];
-
+		
+		if ($yhtiorow["splittauskielto"] != '') {
+			$splittauskielto = "E";
+		}
+		else {
+			$splittauskielto = "";
+		}
 	}
 	else {
 		//yhtiön oletusalvi!

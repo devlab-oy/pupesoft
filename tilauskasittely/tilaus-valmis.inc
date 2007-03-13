@@ -383,7 +383,7 @@ else {
 			//tyhjennet‰‰n laskun varastokentt‰, siell‰ oli tieto varastoon optimoinnista mutta nyt se kertoo mihin varastoon l‰hete kuuluu laittaa
 			$laskurow['varasto'] = 0;
 
-			//Toimitustava hetier‰ tarvitaan
+			//Toimitustavan hetier‰ tarvitaan
 			$query = "select hetiera from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$totarowx = mysql_fetch_array($result);
@@ -440,8 +440,8 @@ else {
 
 				}
 
-				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti
-				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["hetiera"] != 'H')) {
+				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
+				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["hetiera"] != 'H') and $laskurow["splittauskielto"] != "E") {
 
 					//tehd‰‰n uusi otsikko
 					$query = "INSERT into lasku SET
@@ -497,6 +497,7 @@ else {
 							yhtio					= '$laskurow[yhtio]',
 							clearing				= '$laskurow[clearing]',
 							tilaustyyppi			= '$laskurow[tilaustyyppi]',
+							osatoimitus				= '$laskurow[osatoimitus]',
 							ytunnus					= '$laskurow[ytunnus]',
 							jaksotettu				= '$laskurow[jaksotettu]',
 							kuljetusmuoto			= '$laskurow[kuljetusmuoto]',
@@ -529,9 +530,10 @@ else {
 					$ohno  = mysql_query($query) or pupe_error($query);
 				}
 			}
+			
 			//tyhjennet‰‰n muuttujat
-			$varasto = '';
-			$edvarasto = '';
+			$varasto 	= '';
+			$edvarasto 	= '';
 
 			//loopataan kaikki yhdest‰ tilausesta syntyneet l‰hetteet
 			foreach ($tilausnumerot as $tilausnumero) {

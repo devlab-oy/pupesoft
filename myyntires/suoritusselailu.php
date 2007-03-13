@@ -214,19 +214,24 @@
 					<input type='hidden' name='tila' value='kohdista'>
 					<input type='hidden' name='atunnus' value='$trow[0]'>
 					<input type='hidden' name='tunnus' value='$tunnus'>";
+
+			$sel1='checked';
+			$sel2='';
+
+			if ($yhtiorow['factoringsaamiset'] == $trow['ttilino']) {
+				$sel2 = $sel1;
+				$sel1 = '';
+			}
+
 			if ($trow['konserniyhtio'] != '') {
-				echo "<input type='hidden' name='vastatili' value='konserni'>".t("Konsernisaamiset")."<br>";
+				$sel1 = '';
+				$sel2 = '';
+				echo "<input type='radio' name='vastatili' value='konserni' checked>".t("Konsernisaamiset")."<br>";
 			}
-			else {
-				$sel1='checked';
-				$sel2='';
-				if ($yhtiorow['factoringsaamiset'] == $trow['ttilino']) {
-					$sel2=$sel1;
-					$sel1='';
-				}
-				echo "<input type='radio' name='vastatili' value='myynti' $sel1> ".t("Myyntisaamiset")."<br>
-					<input type='radio' name='vastatili' value='factoring' $sel2> ".t("Factoringsaamiset")."<br>";
-			}
+			
+			echo "<input type='radio' name='vastatili' value='myynti' $sel1> ".t("Myyntisaamiset")."<br>
+				<input type='radio' name='vastatili' value='factoring' $sel2> ".t("Factoringsaamiset")."<br>";
+
 			echo "<input type='submit' value='".t("kohdista")."'></form></td>";
 			echo "</tr>";
 		}

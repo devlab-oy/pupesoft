@@ -994,6 +994,17 @@
 			}
 
 			echo "</tr>";
+			
+			if ($yhtiorow["splittauskielto"] != "") {
+				$laskkielto = "";
+				if (($yhtiorow["splittauskielto"] != '' and !isset($srow["splittauskielto"])) or $srow["splittauskielto"] != '') $laskkielto = 'CHECKED';
+				
+				echo "<tr>";
+				echo "<td></td><td></td>";
+				echo "<td>".t("Splittauskielto")."</td><td><input type='checkbox' value='E' name='splittauskielto' $laskkielto></td>";
+				echo "</tr>";
+			}
+			
 			echo "</table><br>";
 
 			if ($toim == "TYOMAARAYS") {
@@ -1413,6 +1424,7 @@
 					sisamaan_kuljetus_kansallisuus		= '$sisamaan_kuljetus_kansallisuus',
 					sisamaan_kuljetus					= '$sisamaan_kuljetus',
 					tunnusnippu							= '$tunnusnippu',
+					splittauskielto						= '$splittauskielto',
 					maa_maara							= '$maa_maara'";
 
 		if ($toim == "MYYNTITILI") {

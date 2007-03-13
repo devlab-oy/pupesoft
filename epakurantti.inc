@@ -39,7 +39,7 @@ if ($tee == "paalle" or $tee == "puolipaalle" or $tee == "pois") {
 	if ($tee == 'paalle')      $muutos = $muutos * -1;
 	if ($tee == 'puolipaalle') $muutos = $muutos / 2 * -1;
 	$muutos = round($muutos,2);
-	
+
 	if ($tee == 'pois' or $tee == 'paalle' or $tee == 'puolipaalle') {
 
 		// katotaan onko tilauksessa
@@ -174,7 +174,7 @@ if ($tee == "paalle" or $tee == "puolipaalle" or $tee == "pois") {
 							summa    = '$muutos',
 							vero     = '0',
 							lukko    = '',
-							selite   = 'Tuote $tuoterow[tuoteno] epäkurantttimuutos',
+							selite   = 'Tuote $tuoterow[tuoteno] epäkuranttimuutos',
 							laatija  = '$kukarow[kuka]',
 							laadittu = now()";
 				$result = mysql_query($query) or pupe_error($query);

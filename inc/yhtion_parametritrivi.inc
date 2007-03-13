@@ -595,6 +595,27 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "splittauskielto") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == '') {
+			$sel1 = "selected";
+		}
+		if ($trow[$i] == 'E') {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value = ''  $sel1>".t("Tilaukset splitataan varastoittain")."";
+		$ulos .= "<option value = 'E' $sel2>".t("Tilauksia ei oletuksena splitata varastoittain")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "jyvita_alennus") {
 

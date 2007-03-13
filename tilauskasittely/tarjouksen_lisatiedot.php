@@ -275,7 +275,7 @@
 						<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='tee' value='TULOSTA'>
 						<input type='hidden' name='otunnus' value='$row[Tilaus]'>
-						<input type='submit' value='".t("Tulosta Lomakkeita")."'></form>
+						<input type='Submit' value='".t("Tulosta Lomakkeita")."' Style='font-size: 8pt; padding:0;'></form>
 						</td>";
 
 				echo "</tr>";

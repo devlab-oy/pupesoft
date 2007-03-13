@@ -187,13 +187,13 @@
 							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
 				$sarjares = mysql_query($query) or pupe_error($query);
 				$sarjarow = mysql_fetch_array($sarjares);
-			
+
 				$tuoterow["kehahin"] = sprintf('%.4f', $sarjarow["kehahin"]);
 			}
-			
+
 			if ($tuoterow['epakurantti1pvm'] != '0000-00-00') $tuoterow['kehahin'] = $tuoterow['kehahin'] / 2;
 			if ($tuoterow['epakurantti2pvm'] != '0000-00-00') $tuoterow['kehahin'] = 0;
-			
+
 			//tullinimike
 			$cn1 = $tuoterow["tullinimike1"];
 			$cn2 = substr($tuoterow["tullinimike1"],0,6);
@@ -642,7 +642,7 @@
 			echo "</table><br>";
 
 			if ($tuoterow["sarjanumeroseuranta"] != "") {
-				$query	= "	SELECT tilausrivi_osto.tunnus, if(tilausrivi_osto.rivihinta=0 and tilausrivi_osto.tyyppi='L', tilausrivi_osto.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi_osto.alv<500, (1+tilausrivi_osto.alv/100), 1) * if(tilausrivi_osto.netto='N', (1-tilausrivi_osto.ale/100), (1-(tilausrivi_osto.ale+lasku_osto.erikoisale-(tilausrivi_osto.ale*lasku_osto.erikoisale/100))/100)), if(tilausrivi_osto.rivihinta!=0 and tilausrivi_osto.kpl!=0, tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 0)) ostosumma, 
+				$query	= "	SELECT tilausrivi_osto.tunnus, if(tilausrivi_osto.rivihinta=0 and tilausrivi_osto.tyyppi='L', tilausrivi_osto.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi_osto.alv<500, (1+tilausrivi_osto.alv/100), 1) * if(tilausrivi_osto.netto='N', (1-tilausrivi_osto.ale/100), (1-(tilausrivi_osto.ale+lasku_osto.erikoisale-(tilausrivi_osto.ale*lasku_osto.erikoisale/100))/100)), if(tilausrivi_osto.rivihinta!=0 and tilausrivi_osto.kpl!=0, tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 0)) ostosumma,
 							tilausrivi_osto.nimitys nimitys
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -654,34 +654,34 @@
 							and (tilausrivi_myynti.tunnus is null or (lasku_myynti.tila in ('N','L') and lasku_myynti.alatila != 'X'))
 							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
 				$sarjares = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($sarjares) > 0) {
 					echo "<table>";
 					echo "<tr><th colspan='2'>".t("Varasto").":</th></tr>";
 					echo "<tr><th>".t("Nimitys")."</th>";
 					echo "<th>".t("Ostohinta")."</th></tr>";
-				
+
 					while($sarjarow = mysql_fetch_array($sarjares)) {
 						echo "<tr><td>$sarjarow[nimitys]</td><td align='right'>".sprintf('%.2f', $sarjarow["ostosumma"])."</td></tr>";
 					}
-				
+
 					echo "</table><br>";
 				}
 			}
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			// Varastotapahtumat
 			echo "<table>";
 			echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";
@@ -759,7 +759,7 @@
 				$ehto = "";
 			}
 
-			$query = "	SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta, 
+			$query = "	SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
 						LEFT JOIN tilausrivi ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus
@@ -789,19 +789,19 @@
 					echo "<tr>";
 					echo "<td nowrap>$prow[kuka]</td>";
 					echo "<td nowrap>";
-					
-					if ($prow["laji"] == "laskutus") {
+
+					if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {
 						echo "<a href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
 					}
-					elseif($prow["laji"] == "tulo") {
-						echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";	
+					elseif ($prow["laji"] == "tulo" and $prow["laskutunnus"] != "") {
+						echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
 					}
 					else {
 						echo t("$prow[laji]");
 					}
-					
+
 					echo "</td>";
-					
+
 					echo "<td nowrap align='right'>$prow[kpl]</td>";
 					echo "<td nowrap align='right'>$prow[kplhinta]</td>";
 					echo "<td nowrap align='right'>$prow[hinta]</td>";

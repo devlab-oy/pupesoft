@@ -105,6 +105,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		case "asiakas" :
 			if (strtoupper($yhtiorow['maakoodi']) == 'FI') {
 				$pakolliset = array("YTUNNUS", "OVTTUNNUS");
+				$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
 			}
 			else {
 				$pakolliset = array("YTUNNUS");
@@ -260,7 +261,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$viesti .= t("Sarake").": $column ".t("on kielletty sarake")."!<br>";
 					$kielletty++;
 				}
-				
+
 				if (is_array($wherelliset) and in_array($column, $wherelliset)) {
 					// katotaan että määritellyt where lausekeen ehdot löytyvät
 					$pos = array_search($column, $otsikot);
@@ -310,18 +311,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		if ($kielletty > 0) {
 			echo "<font class='error'>".t("Yrität päivittää kiellettyjä sarakkeita")."!</font><br>";
 		}
-		
+
 		if(is_array($wherelliset) and $wheretarkea != count($wherelliset)) {
 			echo "<font class='error'>".t("Sinulta puuttui jokin pakollisista sarakkeista")." (";
-			
+
 			foreach ($wherelliset as $apupako) {
 				echo "$apupako ";
 			}
-			
+
 			echo ") !</font><br>";
 		}
-		
-		
+
+
 		die("<font class='error'>".t("Virheitä löytyi. Ei voida jatkaa")."!<br></font>");
 	}
 
@@ -407,11 +408,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		//Jos eri where-ehto array on määritelty
 		if (is_array($wherelliset)) {
 			$indeksi = array_merge($indeksi, $indeksi_where);
-			$indeksi = array_unique($indeksi);	
+			$indeksi = array_unique($indeksi);
 		}
-		
-		foreach($indeksi as $j) {			
-						
+
+		foreach($indeksi as $j) {
+
 			if ($otsikot[$j] == "TUOTENO") {
 
 				$tuoteno = trim($rivi[$j]);
@@ -433,7 +434,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			else {
 				$valinta .= " and ".$otsikot[$j]."='".trim($rivi[$j])."'";
 			}
-			
+
 			// jos pakollinen tieto puuttuu kokonaan
 			if (strlen(trim($rivi[$j])) == 0 and in_array($otsikot[$j], $pakolliset)) {
 				$tila = 'ohita';
@@ -447,7 +448,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						FROM $table
 						WHERE $valinta";
 			$fresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 				if (mysql_num_rows($fresult) != 0 ) {
 					if ($table != 'asiakasalennus' and $table != 'asiakashinta') {

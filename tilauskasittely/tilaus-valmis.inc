@@ -249,6 +249,7 @@ else {
 		$result = mysql_query($query) or pupe_error($query);
 
 		$kateinen = "";
+		$jaksotettu = "";
 		$itsetulostus = "";
 
 		if (mysql_num_rows($result)==1) {
@@ -257,6 +258,10 @@ else {
 			// jos kyseess‰ on k‰teiskauppaa
 			if ($maksuehtorow['kateinen']!='') {
 				$kateinen = "X";
+			}
+			// jos kyseess‰ on jaksotusta
+			if ($maksuehtorow['jaksotettu']!='') {
+				$jaksotettu = "X";
 			}
 			//jos kyseess‰ on itsetulostusmaksuehto
 			if ($maksuehtorow['itsetulostus']!='') {
@@ -346,10 +351,20 @@ else {
 							and toimitettu	= ''";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query  = "	UPDATE lasku set tila='L', alatila='D', lahetepvm=now()
-							WHERE tunnus = '$laskurow[tunnus]'
-							and yhtio = '$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
+				if ($jaksotettu == 'X') {
+					$query = "	UPDATE lasku SET tila='L', alatila='J', lahetepvm=now()
+								WHERE tunnus = '$laskurow[tunnus]'
+								and yhtio = '$kukarow[yhtio]'";
+					$result = mysql_query($query) or pupe_error($query);
+
+					$tilaus_valmis_ulos .= t("Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $laskurow[tunnus] $laskurow[nimi]<br>\n";
+				}
+				else {
+					$query  = "	UPDATE lasku set tila='L', alatila='D', lahetepvm=now()
+								WHERE tunnus = '$laskurow[tunnus]'
+								and yhtio = '$kukarow[yhtio]'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
 			}
 
 			if ($laskurow["sisainen"] != '') {
@@ -494,7 +509,7 @@ else {
 							jaksotettu				= '$laskurow[jaksotettu]',
 							kuljetusmuoto			= '$laskurow[kuljetusmuoto]',
 							kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
-							ultilno					= '$laskurow[kauppatapahtuman_luonne]', 
+							ultilno					= '$laskurow[kauppatapahtuman_luonne]',
 							maa_maara				= '$laskurow[maa_maara]'";
 
 					$uusires = mysql_query($query) or pupe_error($query);
@@ -522,7 +537,7 @@ else {
 					$ohno  = mysql_query($query) or pupe_error($query);
 				}
 			}
-			
+
 			//tyhjennet‰‰n muuttujat
 			$varasto 	= '';
 			$edvarasto 	= '';

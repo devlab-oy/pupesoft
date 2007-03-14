@@ -7,18 +7,34 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "abs_pvm" or 
+		mysql_field_name($result, $i) == "kassa_abspvm") {
+		$tyyppi = 1.5;
+	}
 
 	if ((mysql_field_name($result, $i) == "jv")
 		or (mysql_field_name($result, $i) == "suoraveloitus")
 		or (mysql_field_name($result, $i) == "erapvmkasin")
 		or (mysql_field_name($result, $i) == "itsetulostus")
 		or (mysql_field_name($result, $i) == "jaksotettu")) {
-		$sel = '';
-		if ($trow[$i] == 'o') {
-			$sel = "checked";
+
+		$ulos  = "<td><select name='$nimi'>";
+		
+		$chk1 = '';
+		$chk2 = '';
+
+		if ($trow[$i] == "") {
+			$chk1 = 'selected';
 		}
-		$ulos = "<td><input type='checkbox' name='$nimi' $sel>";
-		$ulos .= "</td>";
+		else {
+			$chk2 = 'selected';
+		}
+
+		$ulos .= "<option value=''  $chk1>".t("Ei")."</option>";
+		$ulos .= "<option value='o' $chk2>".t("Kyllä")."</option>";
+		
+		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
 

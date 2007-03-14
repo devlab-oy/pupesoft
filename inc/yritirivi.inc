@@ -3,17 +3,20 @@
 	$ulos = "";
 	$jatko = 1; // oletetaan normaali käsittely
 	$tyyppi = 1; // oletetaan rivin näkyvyys
+
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
-	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti 
+
+	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti
 		$maxsize++; //Tilaa mahdolliselle viivalle
 	}
+
 	if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
 		$query = "	SELECT nimi, tunnus
-	                FROM valuu
-	             	WHERE yhtio = '$kukarow[yhtio]'
-	               	ORDER BY jarjestys";
+					FROM valuu
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY jarjestys";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -29,32 +32,51 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+
 	if (mysql_field_name($result, $i) == "factoring") {
-		$sel = '';
-		if ($trow[$i] == 'o') {
-			$sel = "checked";
+
+		$ulos  = "<td><select name='$nimi'>";
+
+		$chk1 = '';
+		$chk2 = '';
+
+		if ($trow[$i] == "") {
+			$chk1 = 'selected';
 		}
-		$ulos = "<td><input type='checkbox' name='$nimi' $sel>";
-		$ulos .= "</td>";
+		else {
+			$chk2 = 'selected';
+		}
+
+		$ulos .= "<option value=''  $chk1>".t("Ei")."</option>";
+		$ulos .= "<option value='o' $chk2>".t("Kyllä")."</option>";
+
+		$ulos .= "</select></td>";
 		$jatko = 0;
+
 	}
+
  	if (mysql_field_name($result, $i) == "hyvak") { //hyväksyjät
 		$query = "SELECT kuka, nimi
-                          FROM kuka
-                          WHERE yhtio = '$kukarow[yhtio]'
-                          ORDER BY nimi";
+					FROM kuka
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'><option value=''>".t("Ei kukaan")."";
+
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-                        if ($trow[$i] == $vrow[0]) {
-                                $sel = "selected";
+
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
 			}
-                        $ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]";
+
+			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]";
 		}
+
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+
 	if (mysql_field_name($result, $i) == "oletus_kustp") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -73,6 +95,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+
 	if (mysql_field_name($result, $i) == "oletus_kohde") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -91,6 +114,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+
 	if (mysql_field_name($result, $i) == "oletus_projekti") {
 		$query = "	SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -130,4 +154,5 @@
 			}
 		}
 	}
+
 ?>

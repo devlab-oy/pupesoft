@@ -13,14 +13,6 @@ if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
 $query  = "update lasku set vanhatunnus=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and vanhatunnus=0";
 $oldtur = mysql_query($query) or pupe_error($query);
 
-// p‰ivitet‰‰n tunnusnippu laskulle
-$query  = "update lasku set tunnusnippu=tunnus where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[tunnus]' and tunnusnippu=0";
-$oldtur = mysql_query($query) or pupe_error($query);
-
-// p‰ivitet‰‰n var kent‰t riveille
-$query  = "update tilausrivi set var='' where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and var='O'";
-$oldtur = mysql_query($query) or pupe_error($query);
-
 if ($laskurow["tilaustyyppi"] == 'E') {
 	//Ennakkotilaukset
 
@@ -485,7 +477,7 @@ else {
 							valkoodi				= '$laskurow[valkoodi]',
 							vienti_kurssi			= '$laskurow[vienti_kurssi]',
 							vanhatunnus				= '$laskurow[tunnus]',
-							tunnusnippu				= '$laskurow[tunnus]',
+							tunnusnippu				= '$laskurow[tunnusnippu]',
 							verkkotunnus			= '$laskurow[verkkotunnus]',
 							vienti 					= '$laskurow[vienti]',
 							viesti					= '$laskurow[viesti]',

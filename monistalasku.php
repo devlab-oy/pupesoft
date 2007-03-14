@@ -536,7 +536,7 @@ if ($tee=='MONISTA') {
 						}
 					}
 				}
-
+				
 				//tehd‰‰n alvikorjaus jos k‰ytt‰j‰ on pyyt‰nyt sit‰
 				if ($alvik == "on" and $rivirow["hinta"] != 0) {
 
@@ -569,6 +569,42 @@ if ($tee=='MONISTA') {
 				}
 			}
 
+			//Korjataan perheid:t uusilla riveill‰
+			$query = "	SELECT perheid, min(tunnus) uusiperheid
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$utunnus'
+						and perheid != 0
+						GROUP by perheid";
+			$copresult = mysql_query($query) or pupe_error($query);
+
+			while ($coprivirow = mysql_fetch_array($copresult)) {
+				$query = "	UPDATE tilausrivi
+							SET perheid = '$coprivirow[uusiperheid]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and otunnus = '$utunnus'
+							and perheid = '$coprivirow[perheid]'";
+				$cores = mysql_query($query) or pupe_error($query);
+			}
+
+			//Korjataan perheid2:t uusilla riveill‰
+			$query = "	SELECT perheid2, min(tunnus) uusiperheid2
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]'
+						and otunnus = '$utunnus'
+						and perheid2 != 0
+						GROUP by perheid2";
+			$copresult = mysql_query($query) or pupe_error($query);
+
+			while ($coprivirow = mysql_fetch_array($copresult)) {
+				$query = "	UPDATE tilausrivi
+							SET perheid2 = '$coprivirow[uusiperheid2]'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and otunnus = '$utunnus'
+							and perheid2 = '$coprivirow[perheid2]'";
+				$cores = mysql_query($query) or pupe_error($query);
+			}
+			
 			if($slask == "on") {
 				$query = "	select *
 							from lasku

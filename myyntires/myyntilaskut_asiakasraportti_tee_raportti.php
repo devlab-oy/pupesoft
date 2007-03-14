@@ -183,7 +183,7 @@ else {
 }
 
 
-$query = "	SELECT laskunro, tapvm, erpcm, summa-saldo_maksettu summa, kapvm, kasumma, mapvm, TO_DAYS(mapvm) - TO_DAYS(erpcm) ika, viikorkoeur korko, olmapvm korkolaspvm, lasku.tunnus
+$query = "	SELECT laskunro, tapvm, erpcm, summa-saldo_maksettu summa, kapvm, kasumma, mapvm, TO_DAYS(mapvm) - TO_DAYS(erpcm) ika, viikorkoeur korko, olmapvm korkolaspvm, lasku.tunnus, saldo_maksettu
 			FROM lasku,
 			(select tunnus from asiakas where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus') as valittu
 			WHERE yhtio ='$kukarow[yhtio]' and tila = 'U' AND liitostunnus = valittu.tunnus AND mapvm $kala='0000-00-00' $lisa
@@ -201,14 +201,14 @@ echo "<table>";
 echo "<tr>";
 echo "<form action = '$PHP_SELF?tila=$tila&tunnus=$tunnus&valintra=$valintra' method = 'post'>";
 
-for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
+for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
   echo "<th><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&ojarj=".$i.$ulisa."'>" . t(mysql_field_name($result,$i))."</a></th>";
 }
 
 echo "<td class='back'></td></tr>";
 echo "<tr>";
 
-for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
+for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
   echo "<td><input type='text' size='$kentankoko[$i]' name = 'haku[$i]' value = '$haku[$i]'></td>";
 }
 
@@ -220,13 +220,18 @@ $summa = 0;
 while ($maksurow=mysql_fetch_array ($result)) {
 
   echo "<tr>";
-  for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
+  for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
     if (mysql_field_name($result,$i) == 'laskunro') {
 		/* laskunrosta linkki laskun tietoihin */
     	echo "<td><a href=\"../muutosite.php?tee=E&tunnus=$maksurow[tunnus]\">$maksurow[$i]</a></td>";
     } 
     else {
-	echo "<td>$maksurow[$i]</td>";
+    	if (mysql_field_name($result,$i) == 'summa') {
+    		if (($maksurow["saldo_maksettu"] != 0) and ($valintra == '')) {
+    			$maksurow[$i] .= "*";
+    		}
+    	}
+		echo "<td>$maksurow[$i]</td>";
     }
   }
   $summa+=$maksurow["summa"];

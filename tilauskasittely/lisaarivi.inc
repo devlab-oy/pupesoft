@@ -152,7 +152,7 @@
 	}
 
 	$kieltolisa = "";
-	
+
 	if ($kukarow['extranet'] != '') {
 		if (strtoupper($laskurow['toim_maa']) == strtoupper($yhtiorow['maakoodi'])) {
 			//kotimaan myynti‰
@@ -192,12 +192,12 @@
 
 				while ($krow1 = mysql_fetch_array($kres1)) {
 					// K‰yd‰‰n l‰pi kaikki korvaavat...
-					$query = 	"select korvaavat.* 
+					$query = 	"select korvaavat.*
 								from korvaavat, tuote
-								where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno 
-								and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]' 
+								where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
+								and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]'
+								$kieltolisa
 								order by jarjestys,
-								$kieltolisa 
 								korvaavat.tuoteno";
 					$kres2  = mysql_query($query) or die($query);
 

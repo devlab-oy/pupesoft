@@ -2859,26 +2859,28 @@ if ($tee == '') {
 						$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - ($arow["kehahin"]*$arow["varattu"]);
 					}
 					
-					if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
-						$summa_kotimaa			+= $arow["rivihinta"]+$arow["alv"];
-						$summa_kotimaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
-						$arvo_kotimaa			+= $arow["rivihinta"];
-						$arvo_kotimaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
-						$kotiarvo_kotimaa		+= $arow["kotirivihinta"];
-						$kotiarvo_kotimaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
-						$kate_kotimaa			+= $rivikate;
-						$kate_kotimaa_eieri		+= $rivikate_eieri;
+					if ($arow['ei_saldoa'] == '' and $arow['varattu'] > 0) {
+						if (trim(strtoupper($alvrow["maa"])) == trim(strtoupper($laskurow["toim_maa"]))) {
+							$summa_kotimaa			+= $arow["rivihinta"]+$arow["alv"];
+							$summa_kotimaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
+							$arvo_kotimaa			+= $arow["rivihinta"];
+							$arvo_kotimaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
+							$kotiarvo_kotimaa		+= $arow["kotirivihinta"];
+							$kotiarvo_kotimaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
+							$kate_kotimaa			+= $rivikate;
+							$kate_kotimaa_eieri		+= $rivikate_eieri;
 
-					}
-					else {
-						$summa_ulkomaa			+= $arow["rivihinta"]+$arow["alv"];
-						$summa_ulkomaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
-						$arvo_ulkomaa			+= $arow["rivihinta"];
-						$arvo_ulkomaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
-						$kotiarvo_ulkomaa		+= $arow["kotirivihinta"];
-						$kotiarvo_ulkomaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
-						$kate_ulkomaa			+= $rivikate;
-						$kate_ulkomaa_eieri		+= $rivikate_eieri;
+						}
+						else {
+							$summa_ulkomaa			+= $arow["rivihinta"]+$arow["alv"];
+							$summa_ulkomaa_eieri	+= $arow["rivihinta_ei_erikoisaletta"]+$arow["alv_ei_erikoisaletta"];
+							$arvo_ulkomaa			+= $arow["rivihinta"];
+							$arvo_ulkomaa_eieri		+= $arow["rivihinta_ei_erikoisaletta"];
+							$kotiarvo_ulkomaa		+= $arow["kotirivihinta"];
+							$kotiarvo_ulkomaa_eieri	+= $arow["kotirivihinta_ei_erikoisaletta"];
+							$kate_ulkomaa			+= $rivikate;
+							$kate_ulkomaa_eieri		+= $rivikate_eieri;
+						}
 					}
 
 					$summa			+= $arow["rivihinta"]+$arow["alv"];

@@ -128,7 +128,7 @@
 				echo "<td class='$vari'>$row[try]</td>";
 				echo "<td class='$vari'><a href='asiakasinfo.php?ytunnus=$row[ytunnus]'>$row[ytunnus]</a></td>";
 				echo "<td class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$row[tuoteno]</td>";
-				echo "<td class='$vari'>$row[nimitys]</td>";
+				echo "<td class='$vari'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 			}
 
 			echo "<td style='text-align:right' class='$vari'>".str_replace(".",",",$row['puutekpl'])."</td>

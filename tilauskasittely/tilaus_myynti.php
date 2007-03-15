@@ -2930,7 +2930,7 @@ if ($tee == '') {
 			if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0) {
 				echo "<tr>
 						<td class='back' colspan='$ycspan'>&nbsp;</td>
-						<th colspan='5' align='right'>".t("Kotimaan varastoista").":</th>
+						<th colspan='5' align='right'>".t("Kotimaan myynti").":</th>
 						<td class='spec' align='right'>".sprintf("%.2f",$arvo_kotimaa_eieri)."</td>";
 
 				if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
@@ -2941,7 +2941,7 @@ if ($tee == '') {
 
 				echo "<tr>
 					<td class='back' colspan='$ycspan' align='right'>$ulkom_huom</td>
-					<th colspan='5' align='right'>".t("Ulkomaan varastoista").":</th>
+					<th colspan='5' align='right'>".t("Ulkomaan myynti").":</th>
 					<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa_eieri)."</td>";
 
 				if ($kukarow['extranet'] == '' and $kotiarvo_ulkomaa_eieri != 0  and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
@@ -2983,7 +2983,7 @@ if ($tee == '') {
 				if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0) {
 					echo "<tr>
 							<td class='back' colspan='$ycspan'>&nbsp;</td>
-							<th colspan='5' align='right'>".t("Kotimaan varastoista").":</th>
+							<th colspan='5' align='right'>".t("Kotimaan myynti").":</th>
 							<td class='spec' align='right' nowrap>".sprintf("%.2f",$arvo_kotimaa)."</td>";
 
 					if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
@@ -2994,7 +2994,7 @@ if ($tee == '') {
 
 					echo "<tr>
 						<td class='back' colspan='$ycspan' align='right'>$ulkom_huom</td>
-						<th colspan='5' align='right'>".t("Ulkomaan varastoista").":</th>
+						<th colspan='5' align='right'>".t("Ulkomaan myynti").":</th>
 						<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa)."</td>";
 
 					if ($kukarow['extranet'] == '' and $kotiarvo_ulkomaa != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {

@@ -192,28 +192,30 @@
 	}
 	elseif ($laskurow["tila"] != 'O') {
 		// katotaan miten halutaan sortattavan
-		$jarjestys = " otunnus, sorttauskentta, tuoteno, tunnus ";
+		$jarjestys = " otunnus, sorttauskentta, tuoteno, tilausrivi.tunnus ";
 	}
 	
 	$sorttauskentta = ", ".generoi_sorttauskentta();
 
 	//Listataan tilauksessa olevat tuotteet
 	if ($laskurow["tila"] != 'O') {
-		$query = "	SELECT otunnus tilausnumero, nimitys, concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tuoteno, tilkpl, varattu+kpl kpl, jt,
-					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti $sorttauskentta, tunnus
+		$query = "	SELECT otunnus tilausnumero, ".nimitys('select').", concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl, varattu+kpl kpl, jt,
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti $sorttauskentta , tilausrivi.tunnus
 					FROM tilausrivi
-					WHERE $where and yhtio='$kukarow[yhtio]'
+					".nimitys('join','tilausrivi')."
+					WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]'
 					and tilausrivi.tyyppi in ('E','L','G','V','W','T')
 					ORDER BY $jarjestys";
 	}
 	else {
-		$query = "	SELECT otunnus tilausnumero, tilausrivi.nimitys, concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 					tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
 					concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', jt,
 					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),2) rivihinta, 
 					tilausrivi.alv, tilausrivi.kommentti $sorttauskentta, tilausrivi.tunnus
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
+					".nimitys('join','tilausrivi')."
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus='$laskurow[liitostunnus]'
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'

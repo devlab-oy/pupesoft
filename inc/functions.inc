@@ -540,6 +540,126 @@ if (!function_exists("laskuval")) {
 	}
 }
 
+// Haetaan tuotteen avainsanoista/avainsanoista korvaavuuksia.
+if (!function_exists("asana")) {
+	function asana($laji, $sana, $sana2 = '') {
+		
+		global $kukarow, $yhtiorow;
+		
+		$laji = $laji.$kukarow["kieli"];
+		
+		if (substr($laji,0,8) == 'nimitys_') {
+			$tarvitaan = 0;
+			if ($kukarow["kieli"] != $yhtiorow["kieli"]) {
+				$query = "select selite from tuotteen_avainsanat where yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$sana' LIMIT 1";
+				$result = mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($result) > 0) {
+					$row = mysql_fetch_array($result);
+					return $row["selite"];
+				}
+				elseif ($sana2 == '') {
+					$tarvitaan++;
+				}
+			}
+			elseif ($sana2 == '') {
+				$tarvitaan++;
+			}
+			
+			if ($tarvitaan > 0) {
+				$query = "select nimitys from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$sana' LIMIT 1";
+				$result = mysql_query($query) or pupe_error($query);
+				$row = mysql_fetch_array($result);
+				return $row["nimitys"];
+			}
+			elseif ($sana2 != '') {
+				//return $row["selite"];
+				return $sana2;
+			}
+		}	
+	}
+}
+
+// helpotetaan queryn tekoa.
+if (!function_exists("nimitys")) {
+	function nimitys($laji, $joini = '', $kieli = '') {
+		
+		global $kukarow, $yhtiorow;
+		
+		$returni = "";			
+		
+		if ($laji == 'select') {
+			$returni = " nimitys ";	
+		}
+		
+		if ($kieli == '') {
+			$kieli = $kukarow["kieli"];
+		}
+		
+		if ($kieli != $yhtiorow["kieli"]) {
+			if ($laji == 'join') {
+				if ($joini != '') {
+					$returni = " LEFT JOIN tuotteen_avainsanat on $joini.yhtio = tuotteen_avainsanat.yhtio and $joini.tuoteno = tuotteen_avainsanat.tuoteno and tuotteen_avainsanat.laji = 'nimitys_$kieli' ";
+				}
+			}
+			elseif ($laji == 'select') {
+				if ($joini == '') {
+					$mika = "nimitys";
+				}
+				else {
+					$mika = "$joini.nimitys";
+				}
+				
+				$returni = " if(isnull(tuotteen_avainsanat.selite) or tuotteen_avainsanat.selite='', $mika, tuotteen_avainsanat.selite) nimitys ";
+			}
+		}
+				
+		return $returni;
+	}
+	
+	/*esimerkki
+	".nimitys('select')."
+	".nimitys('join','tilausrivi')."
+	*/
+	
+}
+
+// helpotetaan queryn tekoa.
+if (!function_exists("avain")) {
+	function avain($laji, $joini = '', $kieli = '') {
+		
+		global $kukarow, $yhtiorow;
+		
+		$returni = "";			
+		
+		if ($laji == 'select') {
+			$returni = " selitetark ";	
+		}
+		
+		if ($kieli == '') {
+			$kieli = $kukarow["kieli"];
+		}
+		
+		if ($kieli != $yhtiorow["kieli"]) {
+			if ($laji == 'join') {
+				if ($joini != '') {
+					$returni = " LEFT JOIN avainsana AS a on avainsana.yhtio = a.yhtio and avainsana.selite = a.selite and a.laji = '".$joini.$kieli."' ";
+				}
+			}
+			elseif ($laji == 'select') {
+				$returni = " if(isnull(a.selite) or a.selite='', avainsana.selitetark, a.selitetark) selitetark ";
+			}
+		}
+				
+		return $returni;
+	}
+	
+	/*esimerkki
+	".avain('select')."
+	".avain('join','TRY_')."
+	*/
+	
+}
+
 // Tehd‰‰n l‰hetteen ja laskun sorttauskent‰t
 if (!function_exists("generoi_sorttauskentta")) {
 

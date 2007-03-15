@@ -483,17 +483,17 @@
 			$myytili = " and tilaustyyppi='M' ";
 		}
 
-		$query = "	select distinct otunnus
-					from tilausrivi, lasku
+		$query = "	select distinct otunnus, count(rahtikirjat.tunnus) rtunnuksia, ultilno
+					from tilausrivi
+					JOIN lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='G' and lasku.alatila in ('C','D')
+					LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
 					where tilausrivi.yhtio='$kukarow[yhtio]'
-					and lasku.yhtio='$kukarow[yhtio]'
-					and lasku.tunnus=tilausrivi.otunnus
-					and lasku.tila='G'
-					and lasku.alatila in ('C','D')
 					and toimitettu=''
-					and keratty!=''";
+					and keratty!=''
+					GROUP BY 1
+					HAVING ultilno not in ('-1','-2') or rtunnuksia > 0";
 		$tilre = mysql_query($query) or pupe_error($query);
-
+		
 		while ($tilrow = mysql_fetch_array($tilre)) {
 
 			if ($toim == "MYYNTITILI") {

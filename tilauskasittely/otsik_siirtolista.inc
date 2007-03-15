@@ -132,15 +132,8 @@
 			
 				echo "<option value='$varow[tunnus]' $sel>$varow[maa] $varow[nimitys]</option>";			
 			}
-
-			echo "</select></td></tr>";
 			
-			echo "<tr><th>".t("Nimi").":</th><td colspan='3'><input type='text' size='35' name='toim_nimi' value='$srow[toim_nimi]'></td>";
-			echo "<tr><th>".t("Nimitark").":</th><td colspan='3'><input type='text' size='35' name='toim_nimitark' value='$srow[toim_nimitark]'></td>";
-			echo "<tr><th>".t("Osoite").":</th><td colspan='3'><input type='text' size='35' name='toim_osoite' value='$srow[toim_osoite]'></td>";
-			echo "<tr><th>".t("Postino").":</th><td colspan='3'><input type='text' size='8' name='toim_postino' value='$srow[toim_postino]'></td>";
-			echo "<tr><th>".t("Postitp").":</th><td colspan='3'><input type='text' size='15' name='toim_postitp' value='$srow[toim_postitp]'></td>";
-			echo "<tr><th>".t("Maa").":</th><td colspan='3'><input type='text' size='15' name='toim_maa' value='$srow[toim_maa]'></td>";
+			echo "</select></td></tr>";
 		}
 		
 		if ($kukarow['kesken'] == 0) {

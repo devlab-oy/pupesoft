@@ -217,6 +217,15 @@
 			$peralresult = mysql_query($query) or pupe_error($query);
 			$peralrow = mysql_fetch_array($peralresult);
 
+			// katotaan onko tuotteelle valuuttahintoja
+			$query = "select * from hinnasto where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+			$hintaresult = mysql_query($query) or pupe_error($query);
+
+			$valuuttalisa = "";
+			while ($hintarow = mysql_fetch_array($hintaresult)) {
+				$valuuttalisa .= "<br>$hintarow[hinta] $hintarow[valkoodi] ";
+			}
+
 			//eka laitetaan tuotteen yleiset (aika staattiset) tiedot
 			echo "<table>";
 
@@ -232,7 +241,7 @@
 			//3
 			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Netto/Ovh")."</th><th>".t("Ostohinta")."</th><th>".t("Kehahinta")."</th><th>".t("Vihahinta")."</th>";
 			echo "<tr><td>$tuoterow[toim_tuoteno]</td>
-					<td>$tuoterow[myyntihinta]</td><td>$tuoterow[nettohinta]/$tuoterow[myymalahinta]</td><td>$tuoterow[ostohinta]</td>
+					<td>$tuoterow[myyntihinta] $yhtiorow[valkoodi] $valuuttalisa</td><td>$tuoterow[nettohinta]/$tuoterow[myymalahinta]</td><td>$tuoterow[ostohinta]</td>
 					<td>$tuoterow[kehahin]</td><td>$tuoterow[vihahin] $tuoterow[vihapvm]</td></tr>";
 
 			//4

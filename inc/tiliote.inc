@@ -115,7 +115,7 @@
 					}
 					$koodi = "";
 					break;
-				case '730' : // Pankin kulu Nordean limiittikorko näyttää olevan 740 hoidetaan ylempänä
+				case '730' : // Pankin kulu
 					echo "<font class='message'>".t("Maksukanditaatti pankinkulu")."</font><br>";
 					echo "<font class='message'>".t("Rahat")." $yritirow[oletus_rahatili] ".t("kulut")." $yritirow[oletus_kulutili] ".t("summa")." $maara</font><br>";
 					
@@ -305,10 +305,10 @@
 			if ($koodi == '700') {
 				$koodi = '702';
 			}
-			// Nordea limiittikorko häkki
-			if ($koodi == '740') {
-				$koodi = '730';
-			}
+			// Nordea limiittikorko häkki (Hoidetaan tiliöintisäännöllä)
+			//if ($koodi == '740') {
+			//	$koodi = '730';
+			//}
 			// Suoraveloitukset kohdistetaan kuin maksumääräykset
 			if ($koodi == '704') {
 				$koodi = '720';

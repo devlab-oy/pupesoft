@@ -193,29 +193,29 @@ if ($tee == "" and ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0
 if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or ((int) $kukarow["kesken"] != 0 and $asiakasid != '' and $kukarow["extranet"] == "")) or ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)) {
 
 	if ($asiakasid != '') {
-		$nimi 			= $asiakasrow["nimi"];
-		$nimitark 		= $asiakasrow["nimitark"];
-		$osoite 		= $asiakasrow["osoite"];
-		$postino 		= $asiakasrow["postino"];
-		$postitp 		= $asiakasrow["postitp"];
-		$maa 			= $asiakasrow["maa"];
-		$tnimi 			= $asiakasrow["toim_nimi"];
-		$tnimitark 		= $asiakasrow["toim_nimitark"];
-		$tosoite 		= $asiakasrow["toim_osoite"];
-		$tpostino 		= $asiakasrow["toim_postino"];
-		$tpostitp 		= $asiakasrow["toim_postitp"];
-		$toim_maa 		= $asiakasrow["toim_maa"];
-		$verkkotunnus 	= $asiakasrow["verkkotunnus"];
-		$poistumistoimipaikka_koodi       = $asiakasrow["poistumistoimipaikka_koodi"];
-		$kuljetusmuoto                    = $asiakasrow["kuljetusmuoto"];
-		$kauppatapahtuman_luonne          = $asiakasrow["kauppatapahtuman_luonne"];
-		$aktiivinen_kuljetus_kansallisuus = $asiakasrow["aktiivinen_kuljetus_kansallisuus"];
-		$aktiivinen_kuljetus              = $asiakasrow["aktiivinen_kuljetus"];
-		$kontti                           = $asiakasrow["kontti"];
-		$sisamaan_kuljetusmuoto           = $asiakasrow["sisamaan_kuljetusmuoto"];
-		$sisamaan_kuljetus_kansallisuus   = $asiakasrow["sisamaan_kuljetus_kansallisuus"];
-		$sisamaan_kuljetus                = $asiakasrow["sisamaan_kuljetus"];
-		$maa_maara                        = $asiakasrow["maa_maara"];
+		$nimi 			   	   	   			= $asiakasrow["nimi"];
+		$nimitark 		   	   	   			= $asiakasrow["nimitark"];
+		$osoite 		   	   	   			= $asiakasrow["osoite"];
+		$postino 		   	   	   			= $asiakasrow["postino"];
+		$postitp 		   	   	   			= $asiakasrow["postitp"];
+		$maa 			   	   	   			= $asiakasrow["maa"];
+		$tnimi 			   	   	   			= $asiakasrow["toim_nimi"];
+		$tnimitark 		   	   	   			= $asiakasrow["toim_nimitark"];
+		$tosoite 		   	   	   			= $asiakasrow["toim_osoite"];
+		$tpostino 		   	   	   			= $asiakasrow["toim_postino"];
+		$tpostitp 		   	   	   			= $asiakasrow["toim_postitp"];
+		$toim_maa 		   	   	   			= $asiakasrow["toim_maa"];
+		$verkkotunnus 	   	   	   			= $asiakasrow["verkkotunnus"];
+		$poistumistoimipaikka_koodi			= $asiakasrow["poistumistoimipaikka_koodi"];
+		$kuljetusmuoto                    	= $asiakasrow["kuljetusmuoto"];
+		$kauppatapahtuman_luonne          	= $asiakasrow["kauppatapahtuman_luonne"];
+		$aktiivinen_kuljetus_kansallisuus 	= $asiakasrow["aktiivinen_kuljetus_kansallisuus"];
+		$aktiivinen_kuljetus              	= $asiakasrow["aktiivinen_kuljetus"];
+		$kontti                           	= $asiakasrow["kontti"];
+		$sisamaan_kuljetusmuoto           	= $asiakasrow["sisamaan_kuljetusmuoto"];
+		$sisamaan_kuljetus_kansallisuus   	= $asiakasrow["sisamaan_kuljetus_kansallisuus"];
+		$sisamaan_kuljetus                	= $asiakasrow["sisamaan_kuljetus"];
+		$maa_maara                        	= $asiakasrow["maa_maara"];
 
 		if($asiakasrow["spec_ytunnus"] != '') {
 			$ytunnus 				= $asiakasrow["spec_ytunnus"];
@@ -253,17 +253,17 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 			$myyja = $kukarow["myyja"];
 		}
 
-		$alv 			= $asiakasrow["alv"];
-		$ovttunnus 		= $asiakasrow["ovttunnus"];
-		$toim_ovttunnus = $asiakasrow["toim_ovttunnus"];
-		$chn 			= $asiakasrow["chn"];
-		$maksuteksti 	= $asiakasrow[""];
-		$tilausvahvistus= $asiakasrow["tilausvahvistus"];
-		$laskutusvkopv 	= $asiakasrow["laskutusvkopv"];
-		$vienti 		= $asiakasrow["vienti"];
-		$ketjutus 		= $asiakasrow["ketjutus"];
-		$valkoodi 		= $asiakasrow["valkoodi"];
-		$sisviesti1		= $asiakasrow["sisviesti1"];
+		$alv 				= $asiakasrow["alv"];
+		$ovttunnus 			= $asiakasrow["ovttunnus"];
+		$toim_ovttunnus 	= $asiakasrow["toim_ovttunnus"];
+		$chn 				= $asiakasrow["chn"];
+		$maksuteksti 		= $asiakasrow[""];
+		$tilausvahvistus	= $asiakasrow["tilausvahvistus"];
+		$laskutusvkopv 		= $asiakasrow["laskutusvkopv"];
+		$vienti 			= $asiakasrow["vienti"];
+		$ketjutus 			= $asiakasrow["ketjutus"];
+		$valkoodi 			= $asiakasrow["valkoodi"];
+		$sisviesti1			= $asiakasrow["sisviesti1"];
 
 		//annetaan extranet-tilaukselle aina paras prioriteetti, t‰m‰ on hyv‰ porkkana.
 		if ($kukarow["extranet"] != '') {
@@ -2568,7 +2568,7 @@ if ($tee == '') {
 							<td class='back' valign='top' nowrap><input type='Submit' Style='font-size: 8pt; padding:0;' value='".t("Poista")."'></td>
 							</form>";
 
-					if (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS") and $row["perheid2"] == 0 and $row["perheid"] == 0)) {
+					if (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" ) and $row["perheid2"] == 0 and $row["perheid"] == 0)) {
 
 						if ($row["perheid2"] == 0 and $row["perheid"] == 0) {
 							$nappulanteksti = t("Lis‰‰ tuote");

@@ -60,7 +60,7 @@
 	if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL") {
 		$fuse = t("Tarjous");
 	}
-	if ($toim == "MYYNTISOPIMUS") {
+	if ($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL") {
 		$fuse = t("Myyntisopimus");
 	}
 	if ($toim == "OSAMAKSUSOPIMUS") {
@@ -398,7 +398,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = "";
 		}
-		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "MYYNTISOPIMUS" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
+		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 			// Tulostellaan venemyyntiin liittyviä osia
 			$where1 = " lasku.tila in ('L','T','N') ";
 
@@ -699,7 +699,7 @@
 				$komento["Tarjous"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "MYYNTISOPIMUS" and $komento["Myyntisopimus"] != 'email') {
+		if (($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL") and $komento["Myyntisopimus"] != 'email') {
 			$tulostimet[0] = 'Myyntisopimus';
 			if ($kappaleet > 0) {
 				$komento["Myyntisopimus"] .= " -# $kappaleet ";
@@ -1035,13 +1035,14 @@
 			}
 
 
-			if ($toim == "MYYNTISOPIMUS") {
+			if ($toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL") {
 
 				$otunnus = $laskurow["tunnus"];
-
+				list ($toimalku, $hinnat) = explode("!!!", $toim);
+				
 				require_once ("tulosta_myyntisopimus.inc");
 
-				tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee);
+				tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee, $hinnat);
 
 				$tee = '';
 			}

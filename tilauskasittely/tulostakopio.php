@@ -1,10 +1,10 @@
 <?php
 		
-	if(isset($_POST[komento]) and in_array("PDF_RUUDULLE",$_POST[komento]) !== false) {
-		$_POST[tee] = "NAYTATILAUS";
+	if(isset($_POST["komento"]) and in_array("PDF_RUUDULLE", $_POST["komento"]) !== false) {
+		$_POST["tee"] = "NAYTATILAUS";
 	}
 	
-	if($_POST[tee] == 'NAYTATILAUS') $nayta_pdf=1; //Generoidaan .pdf-file
+	if($_POST["tee"] == 'NAYTATILAUS') $nayta_pdf=1; //Generoidaan .pdf-file
 
 	require('../inc/parametrit.inc');
 
@@ -57,7 +57,7 @@
 	if ($toim == "PROFORMA") {
 		$fuse = t("Proforma");
 	}
-	if ($toim == "TARJOUS") {
+	if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL") {
 		$fuse = t("Tarjous");
 	}
 	if ($toim == "MYYNTISOPIMUS") {
@@ -398,7 +398,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = "";
 		}
-		if ($toim == "TARJOUS" or $toim == "MYYNTISOPIMUS" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
+		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "MYYNTISOPIMUS" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 			// Tulostellaan venemyyntiin liittyviä osia
 			$where1 = " lasku.tila in ('L','T','N') ";
 
@@ -693,7 +693,7 @@
 				$komento["Lasku"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "TARJOUS" and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
+		if (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
 			$tulostimet[0] = 'Tarjous';
 			if ($kappaleet > 0) {
 				$komento["Tarjous"] .= " -# $kappaleet ";
@@ -1023,12 +1023,13 @@
 				}
 			}
 
-			if ($toim == "TARJOUS") {
+			if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL") {
 				$otunnus = $laskurow["tunnus"];
+				list ($toimalku, $hinnat) = explode("!!!", $toim);
 				
 				require_once ("tulosta_tarjous.inc");
 				
-				tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee);
+				tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat);
 
 				$tee = '';
 			}

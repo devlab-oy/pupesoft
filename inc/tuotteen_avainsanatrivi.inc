@@ -12,14 +12,17 @@
 	if (mysql_field_name($result, $i) == "laji") {
 
 		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value='nimitys_en'>".t("Tuotteen englanninkielinen nimitys")."</option>";
-		$ulos .= "<option value='nimitys_se'>".t("Tuotteen ruotsinkielinen nimitys")."</option>";
 
 		$query = "	SELECT distinct selite, selitetark
 					FROM avainsana
 					WHERE yhtio='$kukarow[yhtio]' and laji='TUOTEULK'";
 		$sresult = mysql_query($query) or pupe_error($query);
-
+		
+		if (mysql_num_rows($sresult) == 0) {
+			$ulos .= "<option value='nimitys_en'>".t("Tuotteen englanninkielinen nimitys")."</option>";
+			$ulos .= "<option value='nimitys_se'>".t("Tuotteen ruotsinkielinen nimitys")."</option>";
+		}
+		
 		while ($srow = mysql_fetch_array($sresult)) {
 			$sel = '';
 			if ($trow[$i] == $srow[0]) {

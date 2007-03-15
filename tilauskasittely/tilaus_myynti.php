@@ -1900,7 +1900,7 @@ if ($tee == '') {
 						while($row=mysql_fetch_array($tuoteresult)) {
 							$sel='';
 							if($tuoteno==$row['tuoteno']) $sel='SELECTED';
-							$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - $row[nimitys]</option>";
+							$ulos .= "<option value='$row[tuoteno]' $sel>$row[tuoteno] - ".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</option>";
 						}
 						$ulos .= "</select>";
 					}
@@ -1941,7 +1941,7 @@ if ($tee == '') {
 
 			echo "<br>
 				<table>
-				<tr><th>".t("Nimitys")."</th><td align='right'>$tuote[nimitys]</td></tr>
+				<tr><th>".t("Nimitys")."</th><td align='right'>".asana('nimitys_',$tuote['tuoteno'],$tuote['nimitys'])."</td></tr>
 				<tr><th>".t("Hinta")."</th><td align='right'>$tuote[myyntihinta] $yhtiorow[valkoodi]</td></tr>
 				<tr><th>".t("Nettohinta")."</th><td align='right'>$tuote[nettohinta] $yhtiorow[valkoodi]</td></tr>";
 
@@ -2672,7 +2672,7 @@ if ($tee == '') {
 							}
 							
 							if ($kukarow["resoluutio"] == 'I') {
-								echo "<td valign='top'>$prow[nimitys]</td>";
+								echo "<td valign='top'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
 							}
 
 							echo "<input type='hidden' name='tuoteno_array[$prow[tuoteno]]' value='$prow[tuoteno]'>";

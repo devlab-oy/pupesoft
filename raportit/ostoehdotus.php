@@ -145,7 +145,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	if ($tuoryh != '') {
 		$query = "	SELECT distinct selite, selitetark
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='TRY'
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TRY'
 					and selite  = '$tuoryh'";
 		$sresult = mysql_query($query) or pupe_error($query);
 		$trow1 = mysql_fetch_array($sresult);
@@ -367,53 +367,53 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		$abcnimi3 = $ryhmanimet[$row["abcluokka_try"]];
 
 		// kirjoitetaan itse riviä
-		$headerivi  = "tuoteno\t";
+		$headerivi  = "".t("tuoteno")."\t";
 		$tuoterivi  = "\"$row[tuoteno]\"\t";
-		$headerivi .= "osasto\t";
+		$headerivi .= "".t("osasto")."\t";
 		$tuoterivi .= "\"$row[osasto]\"\t";
-		$headerivi .= "try\t";
+		$headerivi .= "".t("try")."\t";
 		$tuoterivi .= "\"$row[try]\"\t";
-		$headerivi .= "tuotemerkki\t";
+		$headerivi .= "".t("tuotemerkki")."\t";
 		$tuoterivi .= "\"$row[tuotemerkki]\"\t";
-		$headerivi .= "tähtituote\t";
+		$headerivi .= "".t("tähtituote")."\t";
 		$tuoterivi .= "\"$row[tahtituote]\"\t";
-		$headerivi .= "status\t";
+		$headerivi .= "".t("status")."\t";
 		$tuoterivi .= "\"$row[status]\"\t";
-		$headerivi .= "abc\t";
+		$headerivi .= "".t("abc")."\t";
 		$tuoterivi .= "\"$abcnimi\"\t";
-		$headerivi .= "abc osasto\t";
+		$headerivi .= "".t("abc osasto")."\t";
 		$tuoterivi .= "\"$abcnimi2\"\t";
-		$headerivi .= "abc try\t";
+		$headerivi .= "".t("abc try")."\t";
 		$tuoterivi .= "\"$abcnimi3\"\t";
-		$headerivi .= "luontiaika\t";
+		$headerivi .= "".t("luontiaika")."\t";
 		$tuoterivi .= "\"$row[luontiaika]\"\t";
-		$headerivi .= "hälytysraja\t";
+		$headerivi .= "".t("hälytysraja")."\t";
 		$tuoterivi .= str_replace(".",",",$row['halytysraja'])."\t";
-		$headerivi .= "ostoerä\t";
+		$headerivi .= "".t("ostoerä")."\t";
 		$tuoterivi .= str_replace(".",",",$row['osto_era'])."\t";
-		$headerivi .= "myyntierä\t";
+		$headerivi .= "".t("myyntierä")."\t";
 		$tuoterivi .= str_replace(".",",",$row['myynti_era'])."\t";
-		$headerivi .= "toimittaja\t";
+		$headerivi .= "".t("toimittaja")."\t";
 		$tuoterivi .= "\"$toimirow[toimittaja]\"\t";
-		$headerivi .= "toim tuoteno\t";
+		$headerivi .= "".t("toim tuoteno")."\t";
 		$tuoterivi .= "\"$toimirow[toim_tuoteno]\"\t";
-		$headerivi .= "nimitys\t";
-		$tuoterivi .= "\"$row[nimitys]\"\t";
-		$headerivi .= "toim nimitys\t";
+		$headerivi .= "".t("nimitys")."\t";
+		$tuoterivi .= "\"".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\"\t";
+		$headerivi .= "".t("toim nimitys")."\t";
 		$tuoterivi .= "\"$toimirow[toim_nimitys]\"\t";
-		$headerivi .= "ostohinta\t";
+		$headerivi .= "".t("ostohinta")."\t";
 		$tuoterivi .= str_replace(".",",",$toimirow['ostohinta'])."\t";
-		$headerivi .= "myyntihinta\t";
+		$headerivi .= "".t("myyntihinta")."\t";
 		$tuoterivi .= str_replace(".",",",$row['myyntihinta'])."\t";
-		$headerivi .= "epäkurantti1\t";
+		$headerivi .= "".t("epäkurantti1")."\t";
 		$tuoterivi .= "$row[epakurantti1pvm]\t";
-		$headerivi .= "epäkurantti2\t";
+		$headerivi .= "".t("epäkurantti2")."\t";
 		$tuoterivi .= "$row[epakurantti2pvm]\t";
-		$headerivi .= "tuotekerroin\t";
+		$headerivi .= "".t("tuotekerroin")."\t";
 		$tuoterivi .= str_replace(".",",",$toimirow['tuotekerroin'])."\t";
-		$headerivi .= "aleryhmä\t";
+		$headerivi .= "".t("aleryhmä")."\t";
 		$tuoterivi .= "\"$row[aleryhma]\"\t";
-		$headerivi .= "keskihankintahinta\t";
+		$headerivi .= "".t("keskihankintahinta")."\t";
 		$tuoterivi .= str_replace(".",",",$row["kehahin"])."\t";
 
 		// sitten lasketaan myynnit, kulutukset jne per valittu yhtiö
@@ -698,10 +698,11 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 			<table>
 			<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'
-				ORDER BY selite+0";
+				".avain('join','OSASTO_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
+				ORDER BY avainsana.selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<select name='osasto'>";
@@ -720,10 +721,11 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 			<tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>";
 
 	//Tehdään osasto & tuoteryhmä pop-upit
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='TRY'
-				ORDER BY selite+0";
+				".avain('join','TRY_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'TRY'
+				ORDER BY avainsana.selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<select name='tuoryh'>";
@@ -775,25 +777,25 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 		$sel[$abcrajaus] = "SELECTED";
 
 		echo "<select name='abcrajaus'>
-		<option value=''>Ei rajausta</option>
-		<option $sel[0] value='0'>Luokka A-30</option>
-		<option $sel[1] value='1'>Luokka B-20 ja paremmat</option>
-		<option $sel[2] value='2'>Luokka C-15 ja paremmat</option>
-		<option $sel[3] value='3'>Luokka D-15 ja paremmat</option>
-		<option $sel[4] value='4'>Luokka E-10 ja paremmat</option>
-		<option $sel[5] value='5'>Luokka F-05 ja paremmat</option>
-		<option $sel[6] value='6'>Luokka G-03 ja paremmat</option>
-		<option $sel[7] value='7'>Luokka H-02 ja paremmat</option>
-		<option $sel[8] value='8'>Luokka I-00 ja paremmat</option>
+		<option value=''>".t("Ei rajausta")."</option>
+		<option $sel[0] value='0'>".t("Luokka A-30")."</option>
+		<option $sel[1] value='1'>".t("Luokka B-20 ja paremmat")."</option>
+		<option $sel[2] value='2'>".t("Luokka C-15 ja paremmat")."</option>
+		<option $sel[3] value='3'>".t("Luokka D-15 ja paremmat")."</option>
+		<option $sel[4] value='4'>".t("Luokka E-10 ja paremmat")."</option>
+		<option $sel[5] value='5'>".t("Luokka F-05 ja paremmat")."</option>
+		<option $sel[6] value='6'>".t("Luokka G-03 ja paremmat")."</option>
+		<option $sel[7] value='7'>".t("Luokka H-02 ja paremmat")."</option>
+		<option $sel[8] value='8'>".t("Luokka I-00 ja paremmat")."</option>
 		</select>";
 
 		$sel = array();
 		$sel[$abcrajaustapa] = "SELECTED";
 
 		echo "<select name='abcrajaustapa'>
-		<option $sel[TK] value='TK'>Myyntikate</option>
-		<option $sel[TR] value='TR'>Myyntirivit</option>
-		<option $sel[TP] value='TK'>Myyntikappaleet</option>
+		<option $sel[TK] value='TK'>".t("Myyntikate")."</option>
+		<option $sel[TR] value='TR'>".t("Myyntirivit")."</option>
+		<option $sel[TP] value='TK'>".t("Myyntikappaleet")."</option>
 		</select>
 		</td></tr>";
 	}
@@ -864,7 +866,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	foreach ($kaudet_oletus as $kausi1) {
 
-		echo "<tr><th>Ostoehdotus $kaulas:</th><td colspan='3'><select name='varastotarve[]'>";
+		echo "<tr><th>".t("Ostoehdotus")." $kaulas:</th><td colspan='3'><select name='varastotarve[]'>";
 
 		foreach ($kaudet_kaikki as $kausi2) {
 
@@ -877,7 +879,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 			echo "<option value='$kausi1#$kausi2' $chk>$kausi2</option>";
 		}
 
-		echo "</select> kk varastotarve</td></tr>";
+		echo "</select> ".t("kk varastotarve")."</td></tr>";
 
 		$kaulas++;
 	}

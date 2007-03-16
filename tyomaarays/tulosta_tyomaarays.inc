@@ -202,7 +202,7 @@
 								and selite 		= 'MERKKI' 
 								and selitetark	= '$laskurow[merkki]'";
 					$vresult = mysql_query($query) or pupe_error($query);
-				echo "$query<br>";	
+
 					if (mysql_num_rows($vresult) == 1) {
 						$vrow=mysql_fetch_array($vresult);
 						$kommentit[] = "Merkki ja malli:!!!!$vrow[selitetark_2]\n";
@@ -214,10 +214,10 @@
 				if ($laskurow["mallivari"] != "") {
 					$kommentit[] = "Malli/Värikoodi:!!!!$laskurow[mallivari]\n";
 				}
-				if ($laskurow["tuotu"] != "0000-00-00") {
+				if ($laskurow["tuotu"] != "--") {
 					$kommentit[] = "Tuotu:!!!!".tv1dateconv($laskurow["tuotu"])."\n";
 				}
-				if ($laskurow["luvattu"] != "0000-00-00") {
+				if ($laskurow["luvattu"] != "--") {
 					$kommentit[] = "Luvattu:!!!!".tv1dateconv($laskurow["luvattu"])."\n";
 				}
 				

@@ -1007,7 +1007,7 @@ if ($tee == '') {
 				</form>";
 		}
 
-		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") and file_exists("osamaksusoppari.inc")) {
+		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") and file_exists("osamaksusoppari.inc")) {
 			echo "<form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='osamaksusoppari'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -1016,7 +1016,7 @@ if ($tee == '') {
 				</form>";
 		}
 
-		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") and file_exists("vakuutushakemus.inc")) {
+		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") and file_exists("vakuutushakemus.inc")) {
 			echo "<form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='vakuutushakemus'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -2058,7 +2058,7 @@ if ($tee == '') {
 
 			echo "<tr><th>".t("#")."</th>";
 
-			if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS" or $yhtiorow['tilauksen_kohteet'] == 'K') {
+			if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
 				echo "<th>".t("Tyyppi")."</th>";
 			}
 
@@ -2267,7 +2267,7 @@ if ($tee == '') {
 					require('tarkistarivi.inc');
 				}
 
-				if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS" or $yhtiorow['tilauksen_kohteet'] == 'K') {
+				if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
 					
 					if($lisatied_row["ei_nayteta"] == "") {
 						//annetaan valita tilausrivin tyyppi
@@ -2729,7 +2729,7 @@ if ($tee == '') {
 					if($kukarow["resoluutio"] == "I") {
 						$cspan++;
 					}
-					if($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
+					if($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
 						$cspan++;
 					}
 					
@@ -2923,7 +2923,7 @@ if ($tee == '') {
 			if($kukarow["resoluutio"] == "I") {
 				$ycspan++;
 			}
-			if($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
+			if($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
 				$ycspan++;
 			}
 
@@ -3052,13 +3052,13 @@ if ($tee == '') {
 
 
 			//annetaan mahdollisuus antaa loppusumma joka jyvitet‰‰n riveille arvoosuuden mukaan
-			if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") and $toim != "PROJEKTI") {
+			if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") and $toim != "PROJEKTI") {
 
 				if ($jyvsumma == '') {
 					$jyvsumma = '0.00';
 				}
 
-				if ($toim == "TARJOUS" or $laskurow["clearing"] == "TARJOUSTILAUS") {
+				if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
 					echo "<form name='valmis' action='tulostakopio.php' method='post'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
 							<input type='hidden' name='otunnus' value='$tilausnumero'>

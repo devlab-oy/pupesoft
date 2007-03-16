@@ -48,7 +48,12 @@
 						$values .= ", 'N'";
 						break;
 					case 'tilaustyyppi':
-						$values .= ", ''";
+						if ($monistarow["tila"] == "T") {
+							$values .= ", 'T'";
+						}
+						else {
+							$values .= ", 'N'";
+						}
 						break;
 					case 'clearing':
 						if ($monistarow["tila"] == "T") {

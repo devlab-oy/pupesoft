@@ -7,9 +7,9 @@ echo "
 <body>
 <form action='#'>
 <input type='text'>
-<input type='checkbox'	name="1">
-<input type='radio' 	name="2">
-<input type='radio' 	name="2">
+<input type='checkbox'	name='1'>
+<input type='radio' 	name='2'>
+<input type='radio' 	name='2'>
 <input type='submit'>
 </form>
 <br>

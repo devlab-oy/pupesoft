@@ -214,10 +214,10 @@
 				if ($laskurow["mallivari"] != "") {
 					$kommentit[] = "Malli/Värikoodi:!!!!$laskurow[mallivari]\n";
 				}
-				if ($laskurow["tuotu"] != "") {
+				if ($laskurow["tuotu"] != "0000-00-00") {
 					$kommentit[] = "Tuotu:!!!!".tv1dateconv($laskurow["tuotu"])."\n";
 				}
-				if ($laskurow["luvattu"] != "") {
+				if ($laskurow["luvattu"] != "0000-00-00") {
 					$kommentit[] = "Luvattu:!!!!".tv1dateconv($laskurow["luvattu"])."\n";
 				}
 				

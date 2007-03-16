@@ -275,7 +275,7 @@
 			$ulos .= "<tr>";
 			$ulos .= "<td>".$row["laskunro"]."</td>";
 			$ulos .= "<td>".$row["tuoteno"]."</td>";
-			$ulos .= "<td>".$row["nimitys"]."</td>";
+			$ulos .= "<td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 			$ulos .= "<td>".$row["tullinimike1"]."</td>";
 			$ulos .= "<td>".$row["kauppatapahtuman_luonne"]."</td>";
 			$ulos .= "<td>".$row["alkuperamaa"]."</td>";

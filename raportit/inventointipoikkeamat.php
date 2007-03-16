@@ -74,7 +74,7 @@
 
 				while ($tuoterow = mysql_fetch_array($saldoresult)) {
 					echo "<tr>";
-					echo "<td>$tuoterow[tuoteno]</td><td>$tuoterow[nimitys]</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>$tuoterow[inventointiaika]</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td><td>$tuoterow[selite]</td>";
+					echo "<td>$tuoterow[tuoteno]</td><td>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])."</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>$tuoterow[inventointiaika]</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td><td>$tuoterow[selite]</td>";
 					echo "</tr>";
 				}
 				echo "</table>";

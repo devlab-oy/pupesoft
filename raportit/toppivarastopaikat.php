@@ -58,7 +58,7 @@
 		while ($row = mysql_fetch_array($result)) {
 			echo "<tr>";
 			echo "<td>$row[tuoteno]</td>";
-			echo "<td>$row[nimitys]</td>";
+			echo "<td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 			echo "<td>$row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
 			echo "<td>$row[saldo]</td>";
 			echo "<td>$row[kpl]</td>";

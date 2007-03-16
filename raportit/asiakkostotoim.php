@@ -121,7 +121,7 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
 
 			while ($row = mysql_fetch_array($result)) {
 
-				echo "<tr><td>$row[tuoteno]</td><td>$row[nimitys]</td><td>$row[kpl]</td><td>$row[summa]</td><td>$row[summa2]</td></tr>";
+				echo "<tr><td>$row[tuoteno]</td><td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td><td>$row[kpl]</td><td>$row[summa]</td><td>$row[summa2]</td></tr>";
 			}
 			echo "</table>";
 		}

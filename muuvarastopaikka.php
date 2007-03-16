@@ -605,7 +605,7 @@
 		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
 		
-		echo "<th>$tuoteno - $trow[nimitys]</th>";
+		echo "<th>$tuoteno - ".asana('nimitys_',$tuoteno,$trow['nimitys'])."</th>";
 		echo "<td>";
 		echo "<input type='Submit' value='".t("Edellinen tuote")."'>";
 		echo "</td>";
@@ -662,7 +662,7 @@
 				echo "<table width='100%'>";
 				
 				while($sarjarow = mysql_fetch_array($sarjares)) {
-					echo "<tr><td nowrap>$sarjarow[nimitys]</td><td nowrap>$sarjarow[sarjanumero]</td><td nowrap>$sarjarow[tuotepaikka]</td><td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td></tr>";
+					echo "<tr><td nowrap>".asana('nimitys_',$trow['tuoteno'],$sarjarow['nimitys'])."</td><td nowrap>$sarjarow[sarjanumero]</td><td nowrap>$sarjarow[tuotepaikka]</td><td><input type='checkbox' name='sarjano_array[]' value='$sarjarow[tunnus]'></td></tr>";
 				}
 				echo "</table></div></td>";
 			}

@@ -362,7 +362,7 @@
 				$prn  = sprintf ('%-14.14s', 	$tuoterow["varastopaikka"]);
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["tuoteno"]);
 				$prn .= sprintf ('%-21.21s', 	$tuoterow["toim_tuoteno"]);
-				$prn .= sprintf ('%-30.30s', 	$tuoterow["nimitys"]);
+				$prn .= sprintf ('%-30.30s', 	asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']));
 				
 				if ($naytasaldo != '') {
 					$prn .= sprintf ('%-10.10s', 		$hyllyssa);

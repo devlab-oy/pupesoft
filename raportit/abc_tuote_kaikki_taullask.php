@@ -191,7 +191,7 @@
 					echo "$ryhmanimet[$l]\t";
 					echo "$row[tuoteno]\t";
 					echo "$tuorow[toim_tuoteno]\t";
-					echo "$tuorow[nimitys]\t";
+					echo asana('nimitys_',$row['tuoteno'],$tuorow['nimitys'])."\t";
 					echo "$tuorow[tuotemerkki]\t";
 					echo "$row[osasto]\t";
 					echo "$row[try]\t";

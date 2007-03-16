@@ -155,7 +155,7 @@ if ($subnappi != '') {
 
 			// katellaan ollaanko alle rajan
 			if ($kierto < $raja) {
-				echo "$row[osasto]\t$row[try]\t".str_replace(".",",",$myyrow['kpl']+$kulrow['kpl'])."\t".str_replace(".",",",$saldo)."\t".str_replace(".",",",$kierto)."\t$row[tahtituote]\t$taprow[min]\t$taprow[max]\t".str_replace(".",",",$row['myyntihinta'])."\t".str_replace(".",",",$row['kehahin'])."\t$row[tuoteno]\t$row[nimitys]\t$row[toimittaja]\n";
+				echo "$row[osasto]\t$row[try]\t".str_replace(".",",",$myyrow['kpl']+$kulrow['kpl'])."\t".str_replace(".",",",$saldo)."\t".str_replace(".",",",$kierto)."\t$row[tahtituote]\t$taprow[min]\t$taprow[max]\t".str_replace(".",",",$row['myyntihinta'])."\t".str_replace(".",",",$row['kehahin'])."\t$row[tuoteno]\t".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\t$row[toimittaja]\n";
 			}
 
 		} // end saapunut ennen alarajaa

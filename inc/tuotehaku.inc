@@ -133,7 +133,7 @@
 					$lisakala3 = "####$trow[yhtio]";
 				}
 
-				$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] $trow[nimitys] ($saldo)</option>";
+				$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] ".asana('nimitys_',$trow['tuoteno'],$trow['nimitys'])." ($saldo)</option>";
 
 				$edtuoteno = $trow["sorttauskentta"];
 			}

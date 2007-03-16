@@ -42,11 +42,12 @@
 		}
 		
 		$rivi = '';
-		$query = "	select a.tuoteno, a.nimitys, a.lyhytkuvaus, a.tuotemerkki, a.myyntihinta hinta_veroll, a.alv,
+		$query = "	select a.tuoteno, ".nimitys('select').", a.lyhytkuvaus, a.tuotemerkki, a.myyntihinta hinta_veroll, a.alv,
 					if(b.alennus is null,'0,00', alennus) 'alepros', a.aleryhma
 					from tuote a
 					join asiakas c on a.yhtio = c.yhtio and c.ytunnus = '$ytunnus'
 					left join asiakasalennus b on a.yhtio = b.yhtio and a.aleryhma = b.ryhma and b.ytunnus = c.ytunnus
+					".nimitys('join','a')."
 					where a.yhtio = '$kukarow[yhtio]' and a.status in ('','a') and hinnastoon != 'E'
 					$lisa
 					order by 1";
@@ -141,10 +142,11 @@
 	echo "<tr>";
 	echo "<th>".t("Valitse tuoteosasto")."</th>";
 
-	$query = "	SELECT *
+	$query = "	SELECT avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio = '$kukarow[yhtio]' and laji='OSASTO'
-				ORDER BY selite+0";
+				".avain('join','OSASTO_')."
+				WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='OSASTO'
+				ORDER BY avainsana.selite+0";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='tuoteosasto'>";
@@ -159,10 +161,11 @@
 	echo "</select></td></tr>";
 	echo "<tr><th>".t("tai tuoteryhmä")."</th>";
 
-	$query = "	SELECT *
+	$query = "	SELECT avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio = '$kukarow[yhtio]' and laji='TRY'
-				ORDER BY selite+0";
+				".avain('join','OSASTO_')."
+				WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='TRY'
+				ORDER BY avainsana.selite+0";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='tuoteryhma'>";

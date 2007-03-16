@@ -100,7 +100,7 @@ if ($tee == 'go') {
 		echo "\n";
 		while ($row = mysql_fetch_array($result)) {
 			echo "$row[tuoteno]\t";
-			echo "$row[nimitys]\t";
+			echo asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\t";
 			echo "".str_replace('.',',',$row['summa'])."\t";
 			echo "".str_replace('.',',',$row['kate'])."\t";
 			echo "".str_replace('.',',',$row['kpl'])."\t";

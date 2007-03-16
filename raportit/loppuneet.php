@@ -65,7 +65,7 @@
 			$result1 = mysql_query($query) or pupe_error($query);
 			$prow    = mysql_fetch_array($result1);
 
-			echo "	<tr><td>$row[osasto]</td><td>$row[try]</td><td>$row[tuoteno]</td><td>$row[nimitys]</td>
+			echo "	<tr><td>$row[osasto]</td><td>$row[try]</td><td>$row[tuoteno]</td><td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>
 					<td>".substr($row["saldoaika"],0,10)."</td><td>$prow[varattu]</td><td>$prow[toimaika]</td>
 					<td>$row[varastopaikka]</td><td>$row[toim_tuoteno]</td>
 					<td>$row[tahtituote]</td><td>$row[hinnastoon]</td>

@@ -103,41 +103,61 @@
 		if ($trow[$i] == 'TRIVITYYPPI') {
 			$sel32 = "selected";
 		}
+		if ($trow[$i] == 'OSASTO_SE') {
+			$sel33 = "selected";
+		}
+		if ($trow[$i] == 'TRY_SE') {
+			$sel34 = "selected";
+		}
+		if ($trow[$i] == 'TOIMITUSTAPA_SE') {
+			$sel35 = "selected";
+		}
+		if ($trow[$i] == 'MEHTOTXT_SE') {
+			$sel36 = "selected";
+		}
+		if ($trow[$i] == 'MEHTOKATXT_SE') {
+			$sel37 = "selected";
+		}
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
-		$ulos .= "<option value='T'"			 .$sel01.">".t("Toimitustapa")."</option>";
-		$ulos .= "<option value='Y'"			 .$sel03.">".t("Yksikko")."</option>";
-		$ulos .= "<option value='C'"			 .$sel04.">".t("CHN tietue")."</option>";
-		$ulos .= "<option value='ASIAKASLUOKKA'" .$sel05.">".t("Asiakasluokka")."</option>";
-		$ulos .= "<option value='ASIAKASOSASTO'" .$sel15.">".t("Asiakasosasto")."</option>";
-		$ulos .= "<option value='ASIAKASRYHMA'"  .$sel16.">".t("Asiakasryhma")."</option>";
-		$ulos .= "<option value='S'"			 .$sel06.">".t("Tuotteen status")."</option>";
-		$ulos .= "<option value='KM'"			 .$sel07.">".t("Kuljetusmuoto")."</option>";
-		$ulos .= "<option value='KT'"			 .$sel08.">".t("Kauppatapahtuman luonne")."</option>";
-		$ulos .= "<option value='pakkaus'"		 .$sel09.">".t("Pakkaus")."</option>";
-		$ulos .= "<option value='TV'"			 .$sel10.">".t("Tilausvahvistus")."</option>";
-		$ulos .= "<option value='TRY'"			 .$sel11.">".t("Tuoteryhmä")."</option>";
-		$ulos .= "<option value='OSASTO'"		 .$sel12.">".t("Tuoteosasto")."</option>";
-		$ulos .= "<option value='KALETAPA'"		 .$sel13.">".t("CRM yhteydenottotapa")."</option>";
-		$ulos .= "<option value='TUOTEULK'"		 .$sel14.">".t("Tuotteiden avainsanojen laji")."</option>";
-		$ulos .= "<option value='ALV'"			 .$sel17.">".t("ALV%")."</option>";
-		$ulos .= "<option value='LAHETETYYPPI'"	 .$sel18.">".t("Lähetetyyppi")."</option>";
-		$ulos .= "<option value='TULLI'"		 .$sel19.">".t("Poistumistoimipaikka")."</option>";
-		$ulos .= "<option value='KASSA'"		 .$sel20.">".t("Kassa")."</option>";
-		$ulos .= "<option value='HENKILO_OSASTO'".$sel21.">".t("Henkilöosasto")."</option>";
-		$ulos .= "<option value='TOIMEHTO'"      .$sel22.">".t("Toimitusehto")."</option>";
-		$ulos .= "<option value='PIIRI'"         .$sel22.">".t("Asiakkaan piiri")."</option>";
-		$ulos .= "<option value='TOIMEHTO'"      .$sel23.">".t("Toimitusehto")."</option>";
-		$ulos .= "<option value='RAHTIKIRJA'"    .$sel24.">".t("Rahtikirjatyyppi")."</option>";
-		$ulos .= "<option value='MYSQLALIAS'"    .$sel25.">".t("Tietokantasarakkeen nimialias")."</option>";
-		$ulos .= "<option value='LASKUKUVAUS'"   .$sel26.">".t("Maksuposition kuvaus")."</option>";
-		$ulos .= "<option value='KERAYSLISTA'"   .$sel27.">".t("Keräyslista")."</option>";
-		$ulos .= "<option value='PAKKAUSKUVAUS'" .$sel28.">".t("Pakkauskuvauksen tarkenne")."</option>";
-		$ulos .= "<option value='ALVULK'"        .$sel29.">".t("Ulkomaan ALV%")."</option>";
-		$ulos .= "<option value='KUKAASEMA'"     .$sel30.">".t("Käytäjän asema")."</option>";
-		$ulos .= "<option value='SEURANTA'"      .$sel31.">".t("Tilauksen seurantaluokka")."</option>";
-		$ulos .= "<option value='TRIVITYYPPI'"   .$sel32.">".t("Tilausrivin tyyppi")."</option>";
+		$ulos .= "<option value='T'"			  .$sel01.">".t("Toimitustapa")."</option>";
+		$ulos .= "<option value='Y'"			  .$sel03.">".t("Yksikko")."</option>";
+		$ulos .= "<option value='C'"			  .$sel04.">".t("CHN tietue")."</option>";
+		$ulos .= "<option value='ASIAKASLUOKKA'"  .$sel05.">".t("Asiakasluokka")."</option>";
+		$ulos .= "<option value='ASIAKASOSASTO'"  .$sel15.">".t("Asiakasosasto")."</option>";
+		$ulos .= "<option value='ASIAKASRYHMA'"   .$sel16.">".t("Asiakasryhma")."</option>";
+		$ulos .= "<option value='S'"			  .$sel06.">".t("Tuotteen status")."</option>";
+		$ulos .= "<option value='KM'"			  .$sel07.">".t("Kuljetusmuoto")."</option>";
+		$ulos .= "<option value='KT'"			  .$sel08.">".t("Kauppatapahtuman luonne")."</option>";
+		$ulos .= "<option value='pakkaus'"		  .$sel09.">".t("Pakkaus")."</option>";
+		$ulos .= "<option value='TV'"			  .$sel10.">".t("Tilausvahvistus")."</option>";
+		$ulos .= "<option value='TRY'"			  .$sel11.">".t("Tuoteryhmä")."</option>";
+		$ulos .= "<option value='OSASTO'"		  .$sel12.">".t("Tuoteosasto")."</option>";
+		$ulos .= "<option value='KALETAPA'"		  .$sel13.">".t("CRM yhteydenottotapa")."</option>";
+		$ulos .= "<option value='TUOTEULK'"		  .$sel14.">".t("Tuotteiden avainsanojen laji")."</option>";
+		$ulos .= "<option value='ALV'"			  .$sel17.">".t("ALV%")."</option>";
+		$ulos .= "<option value='LAHETETYYPPI'"	  .$sel18.">".t("Lähetetyyppi")."</option>";
+		$ulos .= "<option value='TULLI'"		  .$sel19.">".t("Poistumistoimipaikka")."</option>";
+		$ulos .= "<option value='KASSA'"		  .$sel20.">".t("Kassa")."</option>";
+		$ulos .= "<option value='HENKILO_OSASTO'" .$sel21.">".t("Henkilöosasto")."</option>";
+		$ulos .= "<option value='TOIMEHTO'"       .$sel22.">".t("Toimitusehto")."</option>";
+		$ulos .= "<option value='PIIRI'"          .$sel22.">".t("Asiakkaan piiri")."</option>";
+		$ulos .= "<option value='TOIMEHTO'"       .$sel23.">".t("Toimitusehto")."</option>";
+		$ulos .= "<option value='RAHTIKIRJA'"     .$sel24.">".t("Rahtikirjatyyppi")."</option>";
+		$ulos .= "<option value='MYSQLALIAS'"     .$sel25.">".t("Tietokantasarakkeen nimialias")."</option>";
+		$ulos .= "<option value='LASKUKUVAUS'"    .$sel26.">".t("Maksuposition kuvaus")."</option>";
+		$ulos .= "<option value='KERAYSLISTA'"    .$sel27.">".t("Keräyslista")."</option>";
+		$ulos .= "<option value='PAKKAUSKUVAUS'"  .$sel28.">".t("Pakkauskuvauksen tarkenne")."</option>";
+		$ulos .= "<option value='ALVULK'"         .$sel29.">".t("Ulkomaan ALV%")."</option>";
+		$ulos .= "<option value='KUKAASEMA'"      .$sel30.">".t("Käytäjän asema")."</option>";
+		$ulos .= "<option value='SEURANTA'"       .$sel31.">".t("Tilauksen seurantaluokka")."</option>";
+		$ulos .= "<option value='TRIVITYYPPI'"    .$sel32.">".t("Tilausrivin tyyppi")."</option>";
+		$ulos .= "<option value='OSASTO_SE'"   	  .$sel33.">".t("Ruotsinkielinen tuoteosasto")."</option>";
+		$ulos .= "<option value='TRY_SE'"   	  .$sel34.">".t("Ruotsinkielinen tuoteryhmä")."</option>";
+		$ulos .= "<option value='TOIMITUSTAPA_SE'".$sel35.">".t("Ruotsinkielinen toimitustapa")."</option>";
+		$ulos .= "<option value='MEHTOTXT_SE'"	  .$sel36.">".t("Ruotsinkielinen maksuehdon teksti")."</option>";
+		$ulos .= "<option value='MEHTOKATXT_SE'"  .$sel37.">".t("Ruotsinkielinen maksuehdon kassateksti")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

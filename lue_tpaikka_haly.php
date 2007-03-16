@@ -126,7 +126,7 @@ if ($korjataan != '') {
 				if ($error== '') {
 					$error = "".t("Paikkaa ei löytynyt tästä varastosta, anna uusi paikka")."";
 				}
-				echo	"<td>$nimrow[nimitys]</td><td>$halytysraja[$id]</td><td>$tilattava[$id]</td><td>$error</td>
+				echo	"<td>".asana('nimitys_',$nimrow['tuoteno'],$nimrow['nimitys'])."</td><td>$halytysraja[$id]</td><td>$tilattava[$id]</td><td>$error</td>
 						<td><input type='text' name='hyllyalue[$id]' value='$hyllyalue[$id]' maxzise='3' size='3'>
 						<input type='text' name='hyllynro[$id]' value='$hyllynro[$id]' maxzise='2' size='2'>
 						<input type='text' name='hyllyvali[$id]' value='$hyllyvali[$id]' maxzise='2' size='2'>
@@ -154,7 +154,7 @@ if ($korjataan != '') {
 				$nimresult = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($nimresult) == 1) {
 					$nimrow = mysql_fetch_array($nimresult);
-					echo "<td>$nimrow[nimitys]</td><td>$halytysraja[$id]</td><td>$tilattava[$id]</td><td>".t("Valitse paikka jota haluat päivittää")."</td>";
+					echo "<td>".asana('nimitys_',$nimrow['tuoteno'],$nimrow['nimitys'])."</td><td>$halytysraja[$id]</td><td>$tilattava[$id]</td><td>".t("Valitse paikka jota haluat päivittää")."</td>";
 
 					echo "<td><select name='rivipaikka[$id]'><option value=''>".t("Ei Valintaa")."";
 					while ($varow = mysql_fetch_array($result2)) {

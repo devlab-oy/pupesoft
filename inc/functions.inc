@@ -577,6 +577,10 @@ if (!function_exists("asana")) {
 			}
 		}	
 	}
+	
+	/*esimerkki
+	".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."
+	*/
 }
 
 // helpotetaan queryn tekoa.

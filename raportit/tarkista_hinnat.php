@@ -51,7 +51,7 @@
 						and $tilausrivirow["var"] != 'P' 
 						and $hinta > 0
 						and $tilausrivirow["hinta"] == 0) {
-						echo sprintf('%04d',$lask1)." V‰‰r‰ hinta | ".sprintf('%15.15s',$tilausrivirow["otunnus"])." | ".sprintf('%6.6s',$laskurow["laatija"])." | ".sprintf('%15s',$tilausrivirow["tuoteno"])." | ".sprintf('%30.30s',$tilausrivirow["nimitys"])." | ".sprintf('%10s',$tilausrivirow["hinta"])." | ".sprintf('%10s',$hinta)." | ".sprintf('%1s',$tilausrivirow["var"])." | ".sprintf('%1s',$tilausrivirow["netto"])." | ".sprintf('%02.2f',$tilausrivirow["ale"])." | ".sprintf('%02.2f',$ale)." |<br>";
+						echo sprintf('%04d',$lask1)." V‰‰r‰ hinta | ".sprintf('%15.15s',$tilausrivirow["otunnus"])." | ".sprintf('%6.6s',$laskurow["laatija"])." | ".sprintf('%15s',$tilausrivirow["tuoteno"])." | ".sprintf('%30.30s',asana('nimitys_',$tilausrivirow['tuoteno'],$tilausrivirow['nimitys']))." | ".sprintf('%10s',$tilausrivirow["hinta"])." | ".sprintf('%10s',$hinta)." | ".sprintf('%1s',$tilausrivirow["var"])." | ".sprintf('%1s',$tilausrivirow["netto"])." | ".sprintf('%02.2f',$tilausrivirow["ale"])." | ".sprintf('%02.2f',$ale)." |<br>";
 						$lask1++;
 						
 						//p‰ivitet‰‰n ale
@@ -73,7 +73,7 @@
 									LIMIT 1";
 						//$aleresult = mysql_query($query) or pupe_error($query);
 						
-						echo sprintf('%04d',$lask4)." V‰‰r‰ ALE   | ".sprintf('%15.15s',$tilausrivirow["otunnus"])." | ".sprintf('%6.6s',$laskurow["laatija"])." | ".sprintf('%15s',$tilausrivirow["tuoteno"])." | ".sprintf('%30.30s',$tilausrivirow["nimitys"])." | ".sprintf('%10s',$tilausrivirow["hinta"])." | ".sprintf('%10s',$hinta)." | ".sprintf('%1s',$tilausrivirow["var"])." | ".sprintf('%1s',$tilausrivirow["netto"])." | ".sprintf('%02.2f',$tilausrivirow["ale"])." | ".sprintf('%02.2f',$ale)." |<br>";
+						echo sprintf('%04d',$lask4)." V‰‰r‰ ALE   | ".sprintf('%15.15s',$tilausrivirow["otunnus"])." | ".sprintf('%6.6s',$laskurow["laatija"])." | ".sprintf('%15s',$tilausrivirow["tuoteno"])." | ".sprintf('%30.30s',asana('nimitys_',$tilausrivirow['tuoteno'],$tilausrivirow['nimitys']))." | ".sprintf('%10s',$tilausrivirow["hinta"])." | ".sprintf('%10s',$hinta)." | ".sprintf('%1s',$tilausrivirow["var"])." | ".sprintf('%1s',$tilausrivirow["netto"])." | ".sprintf('%02.2f',$tilausrivirow["ale"])." | ".sprintf('%02.2f',$ale)." |<br>";
 						$lask4++;                                                                                                      
 					}
 					

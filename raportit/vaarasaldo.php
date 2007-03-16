@@ -67,7 +67,7 @@
 				$result2 = mysql_query($query) or pupe_error($query);
 				$prow = mysql_fetch_array($result2);
 
-				echo "	<tr><td>$row[tuotepaikka]</td><td>$row[tuoteno]</td><td>$row[nimitys]</td><td>$srow[toim_tuoteno]</td><td>".str_replace(".",",",$row['tilkpl'])."</td><td>".str_replace(".",",",$row['kpl'])."</td>
+				echo "	<tr><td>$row[tuotepaikka]</td><td>$row[tuoteno]</td><td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td><td>$srow[toim_tuoteno]</td><td>".str_replace(".",",",$row['tilkpl'])."</td><td>".str_replace(".",",",$row['kpl'])."</td>
 						<td>".str_replace(".",",",$prow['varattu'])."</td><td>$prow[toimaika]</td><td>".str_replace(".",",",sprintf("%.2f",$hyllyssa))."</td><td>".str_replace(".",",",$srow['saldo'])."</td><td>$row[keratty]</td></tr>";
 
 			}

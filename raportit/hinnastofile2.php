@@ -157,7 +157,7 @@
 				}
 
 				$rivi  = sprintf('%-20.20s'	,$row["tuoteno"]);
-				$rivi .= sprintf('%-60.60s'	,$row["nimitys"]);
+				$rivi .= sprintf('%-60.60s'	,asana('nimitys_',$row['tuoteno'],$row['nimitys']));
 				$rivi .= sprintf('%-10.10s'	,$row["yksikko"]);
 				$rivi .= sprintf('%-15.15s'	,$aletun);
 				$rivi .= sprintf('%08d'		,str_replace('.','',$row["myyntihinta"]));

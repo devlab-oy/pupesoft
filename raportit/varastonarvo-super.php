@@ -467,7 +467,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
    			$ulos .= "$row[osasto]\t";
    			$ulos .= "$row[try]\t";
    			$ulos .= "$row[tuoteno]\t";
-   			$ulos .= "$row[nimitys]\t";
+   			$ulos .= "".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\t";
    			$ulos .= str_replace(".",",",$muutoskpl)."\t";
    			$ulos .= str_replace(".",",",$kehasilloin)."\t";
    			$ulos .= str_replace(".",",",$muutoshinta)."$kehalisa\n";

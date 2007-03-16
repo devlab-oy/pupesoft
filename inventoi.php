@@ -82,7 +82,7 @@
 	}
 
 	// lukitaan tableja
-	$query = "lock tables tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tuote read, tilausrivi read";
+	$query = "lock tables tuotepaikat write, tapahtuma write, lasku write, tiliointi write, sanakirja write, tuote read, tilausrivi read, tuotteen_avainsanat read";
 	$result = mysql_query($query) or pupe_error($query);
 	
 	//tuotteen varastostatus
@@ -520,7 +520,7 @@
 				if (($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] != '0000-00-00 00:00:00')) {
 					
 					echo "<tr>";
-					echo "<td>$tuoterow[tuoteno]</td><td nowrap>$tuoterow[nimitys] </td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
+					echo "<td>$tuoterow[tuoteno]</td><td nowrap>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])." </td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
 					echo "<input type='hidden' name='tuote[]' value='$tuoterow[tuoteno]#$tuoterow[hyllyalue]#$tuoterow[hyllynro]#$tuoterow[hyllyvali]#$tuoterow[hyllytaso]'>";
 					echo "<td><input type='text' size='7' name='maara[]'></td>";
 					echo "</tr>";
@@ -549,7 +549,7 @@
 					}		
 					
 					echo "<tr>";
-					echo "<td>$tuoterow[tuoteno]</td><td nowrap>$tuoterow[nimitys] </td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
+					echo "<td>$tuoterow[tuoteno]</td><td nowrap>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])." </td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
 										
 					if ($viesti == '') {
 						echo "<td class='green'>".t("Tuote on inventoitu!")."</td>";
@@ -561,7 +561,7 @@
 				}				
 				else {
 					echo "<tr>";
-					echo "<td>$tuoterow[tuoteno]</td><td nowrap>$tuoterow[nimitys] </td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
+					echo "<td>$tuoterow[tuoteno]</td><td nowrap>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])." </td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
 					echo "<td>".sprintf(t("Tätä tuotetta inventoidaan listalla %s. Inventointi estetty"), $tuoterow['inventointilista']).".</td>";
 					echo "</tr>";
 				}

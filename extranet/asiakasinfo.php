@@ -86,7 +86,7 @@ if ($ashin!='') {
 	while ($row = mysql_fetch_array($result)) {
 		$ashin .= "<tr>
 			<td><font class='info'>$row[tuoteno]<font></td>
-			<td><font class='info'>$row[nimitys]<font></td>
+			<td><font class='info'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."<font></td>
 			<td><font class='info'>$row[hinta]	<font></td>
 			</tr>";
 	}

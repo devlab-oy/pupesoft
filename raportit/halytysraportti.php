@@ -927,7 +927,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		if($valitut["SARAKE15"] != '') $apurivi .= str_replace(".",",",$row['myynti_era'])."\t";
 		if($valitut["SARAKE16"] != '') $apurivi .= "\"$row[toimittaja]\"\t";
 		if($valitut["SARAKE17"] != '') $apurivi .= "\"$row[toim_tuoteno]\"\t";
-		if($valitut["SARAKE18"] != '') $apurivi .= "\"$row[nimitys]\"\t";
+		if($valitut["SARAKE18"] != '') $apurivi .= "\"".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\"\t";
 		if($valitut["SARAKE18B"] != '') $apurivi .= "\"$row[toim_nimitys]\"\t";
 		if($valitut["SARAKE18C"] != '') $apurivi .= "\"$row[kuvaus]\"\t";
 		if($valitut["SARAKE19"] != '') $apurivi .= str_replace(".",",",$row['ostohinta'])."\t";

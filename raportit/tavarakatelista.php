@@ -31,7 +31,7 @@
 			}
 
 			// kirjoitetaan rivi
-			$rivi .= "$row[tullinimike1]\t$row[alkuperamaa]\t$row[tuoteno]\t$row[nimitys]\r\n";
+			$rivi .= "$row[tullinimike1]\t$row[alkuperamaa]\t$row[tuoteno]\t".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\r\n";
 		}
 
 		if ($virtu == "") {
@@ -81,7 +81,7 @@
 				echo "<td>$row[osasto]</td>";
 				echo "<td>$row[try]</td>";
 				echo "<td>$row[tuoteno]</td>";
-				echo "<td>$row[nimitys]</td>";
+				echo "<td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 				echo "<td>$row[tullinimike1]</td>";
 				echo "</tr>";
 			}

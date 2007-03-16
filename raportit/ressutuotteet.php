@@ -63,7 +63,7 @@
 			$aresult = mysql_query($query) or pupe_error($query);
 
 			while ($arow = mysql_fetch_array($aresult)) {
-				echo "<tr><td>$arow[tuoteno]</td><td>$arow[nimitys]</td><td>$arow[toim_tuoteno]</td><td>$arow[tuotepaikka]</td><td>$arow[oletus]</td><td>$arow[saldo]</td></tr>";
+				echo "<tr><td>$arow[tuoteno]</td><td>".asana('nimitys_',$arow['tuoteno'],$arow['nimitys'])."</td><td>$arow[toim_tuoteno]</td><td>$arow[tuotepaikka]</td><td>$arow[oletus]</td><td>$arow[saldo]</td></tr>";
 			}
 			echo "<tr><td colspan='4' class='back'></td></tr>";
 		}

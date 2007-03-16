@@ -689,11 +689,12 @@
 
 		echo "<table>";
 
-		$query  = "	SELECT *
+		$query  = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio	= '$kukarow[yhtio]'
-					and laji	= 'pakkaus'
-					order by jarjestys";
+					".avain('join','PAKKAUS_')."
+					WHERE avainsana.yhtio	= '$kukarow[yhtio]'
+					and avainsana.laji	= 'pakkaus'
+					order by avainsana.jarjestys";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$query  = "	SELECT tuotemassa, varattu

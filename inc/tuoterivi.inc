@@ -61,10 +61,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "try") {
-		$query = "	SELECT distinct selite, selitetark
+		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='TRY'
-					ORDER BY selite+0";
+					".avain('join','TRY_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'
+					ORDER BY avainsana.selite+0";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -80,10 +81,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "osasto") {
-		$query = "	SELECT distinct selite, selitetark
+		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'
-					ORDER BY selite+0";
+					".avain('join','OSASTO_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
+					ORDER BY avainsana.selite+0";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -208,10 +210,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "yksikko") {
-		$query = "	SELECT tunnus, selite, selitetark
+		$query = "	SELECT avainsana.tunnus, avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'Y'
-					ORDER BY selite";
+					".avain('join','Y_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'Y'
+					ORDER BY avainsana.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
 
@@ -249,10 +252,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "status") {
-		$query = "	SELECT tunnus, selite, selitetark
+		$query = "	SELECT avainsana.tunnus, avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'S'
-					ORDER BY selite";
+					".avain('join','S_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'S'
+					ORDER BY avainsana.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
 

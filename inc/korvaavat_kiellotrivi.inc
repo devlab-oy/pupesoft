@@ -9,9 +9,10 @@
 	}
 
 	if (mysql_field_name($result, $i) == "try") {
-		$query = "	SELECT distinct selite, selitetark
+		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='TRY'";
+					".avain('join','TRY_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -35,9 +36,10 @@
 	}
 
 	if (mysql_field_name($result, $i) == "osasto") {
-		$query = "	SELECT distinct selite, selitetark
+		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'";
+					".avain('join','OSASTO_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";

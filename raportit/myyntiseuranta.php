@@ -442,9 +442,10 @@
 				
 						// jos kyseessa on asiakasosasto, haetaan sen nimi
 						if (mysql_field_name($result, $i) == "asos") {
-							$query = "	SELECT *
+							$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 										FROM avainsana
-										WHERE yhtio in ($yhtio) and laji='ASIAKASOSASTO' and selite='$row[$i]' limit 1";
+										".avain('join','ASOSASTO_')."
+										WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO' and avainsana.selite='$row[$i]' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
 								$osrow= mysql_fetch_array($osre);
@@ -454,9 +455,10 @@
 
 						// jos kyseessa on asiakasryhma, haetaan sen nimi
 						if (mysql_field_name($result, $i) == "asry") {
-							$query = "	SELECT *
+							$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 										FROM avainsana
-										WHERE yhtio in ($yhtio) and laji='ASIAKASRYHMA' and selite='$row[$i]' limit 1";
+										".avain('join','ASRYHMA_')."
+										WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA' and avainsana.selite='$row[$i]' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
 								$osrow= mysql_fetch_array($osre);
@@ -466,9 +468,10 @@
 
 						// jos kyseessa on tuoteosasto, haetaan sen nimi
 						if (mysql_field_name($result, $i) == "tuos") {
-							$query = "	SELECT *
+							$query = "	SELECT avainsana.selite, ".avain('select')."
 										FROM avainsana
-										WHERE yhtio in ($yhtio) and laji='OSASTO' and selite='$row[$i]' limit 1";
+										".avain('join','OSASTO_')."
+										WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='OSASTO' and avainsana.selite='$row[$i]' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
 								$osrow= mysql_fetch_array($osre);
@@ -478,9 +481,10 @@
 
 						// jos kyseessa on tuoteosasto, haetaan sen nimi
 						if (mysql_field_name($result, $i) == "tury") {
-							$query = "	SELECT *
+							$query = "	SELECT avainsana.selite, ".avain('select')."
 										FROM avainsana
-										WHERE yhtio in ($yhtio) and laji='TRY' and selite='$row[$i]' limit 1";
+										".avain('join','TRY_')."
+										WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='TRY' and avainsana.selite='$row[$i]' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
 								$osrow= mysql_fetch_array($osre);
@@ -911,10 +915,11 @@
 			echo "<th>".t("Syötä asiakasosasto")."</th>";
 			echo "<td><input type='text' name='asiakasosasto' size='10'></td>";
 
-			$query = "	SELECT *
+			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 						FROM avainsana
-						WHERE yhtio in ($yhtio) and laji='ASIAKASOSASTO'
-						ORDER BY selite+0";
+						".avain('join','ASOSASTO_')."
+						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO'
+						ORDER BY avainsana.selite+0";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<td><select name='asiakasosasto2'>";
@@ -931,10 +936,11 @@
 			echo "<th>".t("ja/tai asiakasryhmä")."</th>";
 			echo "<td><input type='text' name='asiakasryhma' size='10'></td>";
 
-			$query = "	SELECT *
+			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 						FROM avainsana
-						WHERE yhtio in ($yhtio) and laji='ASIAKASRYHMA'
-						ORDER BY selite+0";
+						".avain('join','ASRYHMA_')."
+						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA'
+						ORDER BY avainsana.selite+0";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<td><select name='asiakasryhma2'>";
@@ -954,10 +960,11 @@
 			echo "<th>".t("Syötä tuoteosasto")."</th>";
 			echo "<td><input type='text' name='tuoteosasto' size='10'></td>";
 
-			$query = "	SELECT *
+			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 						FROM avainsana
-						WHERE yhtio in ($yhtio) and laji='OSASTO'
-						ORDER BY selite+0";
+						".avain('join','OSASTO_')."
+						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='OSASTO'
+						ORDER BY avainsana.selite+0";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<td><select name='tuoteosasto2'>";
@@ -974,10 +981,11 @@
 			echo "<th>".t("ja/tai tuoteryhmä")."</th>";
 			echo "<td><input type='text' name='tuoteryhma' size='10'></td>";
 
-			$query = "	SELECT *
+			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 						FROM avainsana
-						WHERE yhtio in ($yhtio) and laji='TRY'
-						ORDER BY selite+0";
+						".avain('join','TRY_')."
+						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='TRY'
+						ORDER BY avainsana.selite+0";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<td><select name='tuoteryhma2'>";

@@ -180,19 +180,21 @@ if ($ytunnus!='') {
 
 		echo "<td valign='bottom' class='back'>";
 
-		$query = "	select selite, selitetark
+		$query = "	select avainsana.selite, ".avain('select')."
 					from avainsana
-					where yhtio	= '$kukarow[yhtio]'
-					and laji	= 'try'
-					and selite	= '$sumrow[try]'";
+					".avain('join','TRY_')."
+					where avainsana.yhtio	= '$kukarow[yhtio]'
+					and avainsana.laji	= 'try'
+					and avainsana.selite	= '$sumrow[try]'";
 		$avainresult = mysql_query($query) or pupe_error($query);
 		$tryrow = mysql_fetch_array($avainresult);
 
-		$query = "	select selite, selitetark
+		$query = "	select avainsana.selite, ".avain('select')."
 					from avainsana
-					where yhtio	= '$kukarow[yhtio]'
-					and laji	= 'osasto'
-					and selite	= '$sumrow[osasto]'";
+					".avain('join','OSASTO_')."
+					where avainsana.yhtio	= '$kukarow[yhtio]'
+					and avainsana.laji	= 'osasto'
+					and avainsana.selite	= '$sumrow[osasto]'";
 		$avainresult = mysql_query($query) or pupe_error($query);
 		$osastorow = mysql_fetch_array($avainresult);
 
@@ -405,12 +407,22 @@ if ($ytunnus!='') {
 					$alerow['aleryhma'] = $alerow['tuoteno'];
 				}
 			}
-
-			$query = "select selitetark from avainsana where yhtio='$kukarow[yhtio]' and laji='try' and selite='$alerow[try]'";
+			
+			$query = "	select avainsana.selite, ".avain('select')."
+						from avainsana
+						".avain('join','TRY_')."
+						where avainsana.yhtio	= '$kukarow[yhtio]'
+						and avainsana.laji	= 'try'
+						and avainsana.selite	= '$alerow[try]'";
 			$tryre = mysql_query($query) or pupe_error($query);
 			$tryro = mysql_fetch_array($tryre);
-
-			$query = "select selitetark from avainsana where yhtio='$kukarow[yhtio]' and laji='osasto' and selite='$alerow[osasto]'";
+			
+			$query = "	select avainsana.selite, ".avain('select')."
+						from avainsana
+						".avain('join','OSASTO_')."
+						where avainsana.yhtio	= '$kukarow[yhtio]'
+						and avainsana.laji	= 'osasto'
+						and avainsana.selite	= '$alerow[osasto]'";
 			$osare = mysql_query($query) or pupe_error($query);
 			$osaro = mysql_fetch_array($osare);
 			

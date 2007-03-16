@@ -24,10 +24,11 @@
 	echo "<th>".t("Syötä tai valitse osasto").":</th>";
 	echo "<td><input type='text' name='osasto' size='10'></td>";
 
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASOSASTO'
-				ORDER BY selite+0";
+				".avain('join','ASOSASTO_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASOSASTO'
+				ORDER BY avainsana.selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='osasto2' onChange='submit()'>";
@@ -46,10 +47,11 @@
 	echo "<th>".t("Syötä tai valitse ryhmä").":</th>";
 	echo "<td><input type='text' name='try' size='10'></td>";
 
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASRYHMA'
-				ORDER BY selite+0";
+				".avain('join','ASRYHMA_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASRYHMA'
+				ORDER BY avainsana.selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='try2' onChange='submit()'>";

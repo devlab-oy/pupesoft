@@ -63,9 +63,10 @@ if ($tee == '') {
 			<form action='$PHP_SELF' method='post'>";
 	
 	
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASOSASTO' order by selite+0";
+				".avain('join','ASOSASTO_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASOSASTO' order by avainsana.selite+0";
 	$asosresult = mysql_query($query) or pupe_error($query);
 	
 	echo "<tr><th>".t("Valitse asiakkaan osasto").":</th><td colspan='3'><select name='asos'>";
@@ -97,9 +98,10 @@ if ($tee == '') {
 	}
 	echo "</select></td></tr>";
 	
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASRYHMA' order by selite+0";
+				".avain('join','ASRYHMA_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASRYHMA' order by avainsana.selite+0";
 	$asosresult = mysql_query($query) or pupe_error($query);
 	
 	echo "<tr><th>".t("Valitse asiakkaan ryhmä").":</th><td colspan='3'><select name='asryhma'>";

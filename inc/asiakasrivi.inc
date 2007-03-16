@@ -359,10 +359,11 @@
 
 	if (mysql_field_name($result, $i) == "lahetetyyppi") {
 
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
-					ORDER BY jarjestys, selite";
+					".avain('join','LAHETETYYPPI_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'LAHETETYYPPI'
+					ORDER BY avainsana.jarjestys, avainsana.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -378,10 +379,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tilausvahvistus") {
-			$query = "	SELECT selite, selitetark
+			$query = "	SELECT avainsana.selite, ".avain('select')."
 						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TV'
-						ORDER BY jarjestys, selite";
+						".avain('join','TV_')."
+						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'TV'
+						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei vahvistusta")."</option>";
@@ -475,10 +477,11 @@
 
 			// tässä pitäs selectata aktiivinen, muttakun en tiedä mitä tämän sisältö pitäisi olla.. :)
 
-			$query = "	SELECT selite, selitetark
+			$query = "	SELECT avainsana.selite, ".avain('select')."
 						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'ASIAKASLUOKKA'
-						ORDER BY jarjestys, selite";
+						".avain('join','ASLUOKKA_')."
+						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'ASIAKASLUOKKA'
+						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei luokkaa")."</option>";
@@ -566,10 +569,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "osasto") {
-		$query = "	SELECT *
+		$query = "	SELECT avainsana.selite, ".avain('select')." 
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji = 'ASIAKASOSASTO'
-					ORDER BY jarjestys";
+					".avain('join','ASOSASTO_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'ASIAKASOSASTO'
+					ORDER BY avainsana.jarjestys";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -588,10 +592,11 @@
 	}
 
 	if (mysql_field_name($result, $i) == "ryhma") {
-		$query = "	SELECT *
+		$query = "	SELECT avainsana.selite, ".avain('select')." 
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji = 'ASIAKASRYHMA'
-					ORDER BY jarjestys";
+					".avain('join','ASRYHMA_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'ASIAKASRYHMA'
+					ORDER BY avainsana.jarjestys";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -675,10 +680,11 @@
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Valitse")."</option>";
 
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='KM'
-					ORDER BY jarjestys, selite";
+					".avain('join','KM_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KM'
+					ORDER BY avainsana.jarjestys, avainsana.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		while ($vrow=mysql_fetch_array($vresult)) {
@@ -699,10 +705,11 @@
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' >".t("Valitse")."</option>";
 
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='KT'
-					ORDER BY jarjestys, selite";
+					".avain('join','KT_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KT'
+					ORDER BY avainsana.jarjestys, avainsana.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		while ($vrow=mysql_fetch_array($vresult)) {

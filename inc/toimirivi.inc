@@ -198,10 +198,11 @@
 	
 	if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
 
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='KT'
-					ORDER BY jarjestys, selite";
+					".avain('join','KT_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KT'
+					ORDER BY avainsana.jarjestys, avainsana.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
 
@@ -220,10 +221,11 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "kuljetusmuoto") {
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='KM'
-					ORDER BY jarjestys, selite";
+					".avain('join','KM_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KM'
+					ORDER BY avainsana.jarjestys, avainsana.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
 

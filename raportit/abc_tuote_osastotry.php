@@ -20,9 +20,10 @@
 	echo "<th>".t("Syötä tai valitse osasto").":</th>";
 	echo "<td><input type='text' name='osasto' size='10'></td>";
 
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'";
+				".avain('join','OSASTO_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='osasto2' onChange='submit()'>";
@@ -41,9 +42,10 @@
 	echo "<th>".t("Syötä tai valitse tuoteryhmä").":</th>";
 	echo "<td><input type='text' name='try' size='10'></td>";
 
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='TRY'";
+				".avain('join','TRY_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='try2' onChange='submit()'>";
@@ -200,15 +202,17 @@
 
 			while ($row = mysql_fetch_array($res)) {
 
-				$query = "	SELECT selite, selitetark
+				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 							FROM avainsana
-							WHERE yhtio='$kukarow[yhtio]' and laji='TRY' and selite='$row[try]'";
+							".avain('join','TRY_')."
+							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' and selite='$row[try]'";
 				$keyres = mysql_query($query) or pupe_error($query);
 				$keytry = mysql_fetch_array($keyres);
 
-				$query = "	SELECT selite, selitetark
+				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 							FROM avainsana
-							WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO' and selite='$row[osasto]'";
+							".avain('join','OSASTO_')."
+							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' and selite='$row[osasto]'";
 				$keyres = mysql_query($query) or pupe_error($query);
 				$keyosa = mysql_fetch_array($keyres);
 

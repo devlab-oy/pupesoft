@@ -118,7 +118,40 @@
 		if ($trow[$i] == 'MEHTOKATXT_SE') {
 			$sel37 = "selected";
 		}
-
+		if ($trow[$i] == 'ASOSASTO_SE') {
+			$sel38 = "selected";
+		}
+		if ($trow[$i] == 'ASRYHMA_SE') {
+			$sel39 = "selected";
+		}
+		if ($trow[$i] == 'LAHETETYYPPI_SE') {
+			$sel40 = "selected";
+		}
+		if ($trow[$i] == 'TV_SE') {
+			$sel41 = "selected";
+		}
+		if ($trow[$i] == 'ASLUOKKA_SE') {
+			$sel42 = "selected";
+		}
+		if ($trow[$i] == 'KM_SE') {
+			$sel43 = "selected";
+		}
+		if ($trow[$i] == 'KT_SE') {
+			$sel44 = "selected";
+		}
+		if ($trow[$i] == 'RAHTIKIRJA_SE') {
+			$sel45 = "selected";
+		}
+		if ($trow[$i] == 'Y_SE') {
+			$sel46 = "selected";
+		}
+		if ($trow[$i] == 'S_SE') {
+			$sel47 = "selected";
+		}
+		if ($trow[$i] == 'PAKKAUS_SE') {
+			$sel48 = "selected";
+		}
+		
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
 		$ulos .= "<option value='T'"			  .$sel01.">".t("Toimitustapa")."</option>";
@@ -158,6 +191,17 @@
 		$ulos .= "<option value='TOIMITUSTAPA_SE'".$sel35.">".t("Ruotsinkielinen toimitustapa")."</option>";
 		$ulos .= "<option value='MEHTOTXT_SE'"	  .$sel36.">".t("Ruotsinkielinen maksuehdon teksti")."</option>";
 		$ulos .= "<option value='MEHTOKATXT_SE'"  .$sel37.">".t("Ruotsinkielinen maksuehdon kassateksti")."</option>";
+		$ulos .= "<option value='ASOSASTO_SE'"	  .$sel38.">".t("Ruotsinkielinen asiakasosasto")."</option>";
+		$ulos .= "<option value='ASRYHMA_SE'"	  .$sel39.">".t("Ruotsinkielinen asiakasryhma")."</option>";
+		$ulos .= "<option value='LAHETETYYPPI_SE'".$sel40.">".t("Ruotsinkielinen lähetetyyppi")."</option>";
+		$ulos .= "<option value='TV_SE'"		  .$sel41.">".t("Ruotsinkielinen tilausvahvistus")."</option>";
+		$ulos .= "<option value='ASLUOKKA_SE'"    .$sel42.">".t("Ruotsinkielinen asiakasluokka")."</option>";
+		$ulos .= "<option value='KM_SE'"	      .$sel43.">".t("Ruotsinkielinen kuljetusmuoto")."</option>";
+		$ulos .= "<option value='KT_SE'"	      .$sel44.">".t("Ruotsinkielinen kauppatapahtuman luonne")."</option>";
+		$ulos .= "<option value='RAHTIKIRJA_SE'"  .$sel45.">".t("Ruotsinkielinen rahtikirjatyyppi")."</option>";
+		$ulos .= "<option value='Y_SE'" 		  .$sel46.">".t("Ruotsinkielinen yksikkö")."</option>";
+		$ulos .= "<option value='S_SE'" 		  .$sel47.">".t("Ruotsinkielinen tuotteen status")."</option>";
+		$ulos .= "<option value='PAKKAUS_SE'" 	  .$sel48.">".t("Ruotsinkielinen pakkaus")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

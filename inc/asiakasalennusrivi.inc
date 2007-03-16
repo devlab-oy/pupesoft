@@ -27,10 +27,11 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "asiakas_ryhma") {
-		$query = "	SELECT *
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji = 'ASIAKASRYHMA'
-					ORDER BY jarjestys";
+					".avain('join','ASRYHMA_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'ASIAKASRYHMA'
+					ORDER BY avainsana.jarjestys";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";

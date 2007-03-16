@@ -143,18 +143,20 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
 	// haetaan nimitietoa
 	if ($tuoryh != '') {
-		$query = "	SELECT distinct selite, selitetark
+		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TRY'
-					and selite  = '$tuoryh'";
+					".avain('join','TRY_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'TRY'
+					and avainsana.selite  = '$tuoryh'";
 		$sresult = mysql_query($query) or pupe_error($query);
 		$trow1 = mysql_fetch_array($sresult);
 	}
 	if ($osasto != '') {
-		$query = "	SELECT distinct selite, selitetark
+		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='OSASTO'
-					and selite  = '$osasto'";
+					".avain('join','OSASTO_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='OSASTO'
+					and avainsana.selite  = '$osasto'";
 		$sresult = mysql_query($query) or pupe_error($query);
 		$trow2 = mysql_fetch_array($sresult);
 	}

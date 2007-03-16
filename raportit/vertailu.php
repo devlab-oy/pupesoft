@@ -40,11 +40,12 @@ if (($kausi1!='') and ($kausi2!='') and ($osasto!='') and ($try!=''))
     $trynimet    = array();
 
 
-	$query = "	select distinct selite, selitetark
+	$query = "	select distinct avainsana.selite, ".avain('select')."
 				from avainsana
-				where yhtio='$kukarow[yhtio]' and laji = 'OSASTO'
-				and selite>='$osasto' and selite<='$osastol'
-				order by jarjestys";
+				".avain('join','OSASTO_')."
+				where avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'OSASTO'
+				and avainsana.selite>='$osasto' and avainsana.selite<='$osastol'
+				order by avainsana.jarjestys";
 	$res   = mysql_query ($query) or die("$query<br><br>".mysql_error());
 
 	while ($row=mysql_fetch_array($res)) {
@@ -52,11 +53,12 @@ if (($kausi1!='') and ($kausi2!='') and ($osasto!='') and ($try!=''))
 		$osastonimet[$row['selite']] = $row["selitetark"];
 	}
 
-	$query = "	select distinct selite, selitetark
+	$query = "	select distinct avainsana.selite, ".avain('select')."
 				from avainsana
-				where yhtio='$kukarow[yhtio]' and laji = 'TRY'
-				and selite>='$try' and selite<='$tryl'
-				order by jarjestys";
+				".avain('join','TRY_')."
+				where avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'TRY'
+				and avainsana.selite>='$try' and avainsana.selite<='$tryl'
+				order by avainsana.jarjestys";
 	$res   = mysql_query ($query) or die("$query<br><br>".mysql_error());
 
 	while ($row=mysql_fetch_array($res)) {

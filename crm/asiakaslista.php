@@ -145,9 +145,10 @@
 			<input type='hidden' name='voipcall' value='kala'>";
 	
 	
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASOSASTO' order by selite+0";
+				".avain('join','ASOSASTO_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASOSASTO' order by avainsana.selite+0";
 	$asosresult = mysql_query($query) or pupe_error($query);
 	
 	echo "<tr><th>".t("Valitse asiakkaan osasto").":</th><td><select name='asos' onchange='submit();'>";
@@ -188,9 +189,10 @@
 	}
 	echo "</select></td>";
 	
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='ASIAKASRYHMA' order by selite+0";
+				".avain('join','ASRYHMA_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='ASIAKASRYHMA' order by avainsana.selite+0";
 	$asosresult = mysql_query($query) or pupe_error($query);
 	
 	echo "<th>".t("Valitse asiakkaan ryhmä").":</th><td><select name='asryhma' onchange='submit();'>";

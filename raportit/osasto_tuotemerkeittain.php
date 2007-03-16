@@ -217,11 +217,12 @@ if ($tee == 'go') {
 						$kateosuus = sprintf('%.2f',($osastokatecuryht[$i] / $kaikkikatecuryht) * 100);
 					else $kateosuus = 0;
 
-					$query = "	SELECT distinct selite, selitetark
+					$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 								FROM avainsana
-								WHERE yhtio='$kukarow[yhtio]'
-								and laji='OSASTO'
-								and selite='$yhtrow[osasto]'";
+								".avain('join','OSASTO_')."
+								WHERE avainsana.yhtio='$kukarow[yhtio]'
+								and avainsana.laji='OSASTO'
+								and avainsana.selite='$yhtrow[osasto]'";
 					$sresult = mysql_query($query) or pupe_error($query);
 					$srow = mysql_fetch_array($sresult);
 

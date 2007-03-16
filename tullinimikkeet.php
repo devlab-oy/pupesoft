@@ -102,17 +102,19 @@ if ($tullinimike1 != "") {
 
 		while ($rivi = mysql_fetch_array($resul)) {
 			
-			$query = "	SELECT distinct selite, selitetark
+			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 						FROM avainsana
-						WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO' and selite='$rivi[osasto]'
-						ORDER BY jarjestys";
+						".avain('join','OSASTO_')."
+						WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' and avainsana.selite='$rivi[osasto]'
+						ORDER BY avainsana.jarjestys";
 			$oresult = mysql_query($query) or pupe_error($query);
 			$os = mysql_fetch_array($oresult);
 			
-			$query = "	SELECT distinct selite, selitetark
+			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 						FROM avainsana
-						WHERE yhtio='$kukarow[yhtio]' and laji='TRY' and selite='$rivi[try]'
-						ORDER BY jarjestys";
+						".avain('join','TRY_')."
+						WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' and avainsana.selite='$rivi[try]'
+						ORDER BY avainsana.jarjestys";
 			$tresult = mysql_query($query) or pupe_error($query);
 			$try = mysql_fetch_array($tresult);
 			

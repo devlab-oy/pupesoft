@@ -189,10 +189,11 @@
 			echo "<th>".t("Asennusprioriteetti")."</th><td>";
 		}
 		
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'ASIAKASLUOKKA'
-					ORDER BY jarjestys, selite";
+					".avain('join','ASLUOKKA_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'ASIAKASLUOKKA'
+					ORDER BY avainsana.jarjestys, avainsana.selite";
 		$tresult = mysql_query($query) or pupe_error($query);
 
 		echo "<select name='luokka'><option value=''>".t("Oletus")."</option>";

@@ -110,10 +110,11 @@
 			echo "	<tr><td>26. ".t("Sisämaan kuljetusmuoto").":</td>
 					<td colspan='2'><select NAME='sisamaan_kuljetusmuoto'>";
 
-			$query = "	SELECT selite, selitetark
+			$query = "	SELECT avainsana.selite, ".avain('select')."
 						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji='KM'
-						ORDER BY jarjestys, selite";
+						".avain('join','KM_')."
+						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KM'
+						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<option value=''>".t("Valitse")."</option>";
@@ -148,10 +149,11 @@
 		echo "	<tr><td>24. ".t("Kauppatapahtuman luonne").":</td>
 				<td colspan='2'><select NAME='kauppatapahtuman_luonne'>";
 
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='KT'
-					ORDER BY jarjestys, selite";
+					".avain('join','KT_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KT'
+					ORDER BY avainsana.jarjestys, avainsana.selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value=''>".t("Valitse")."</option>";
@@ -170,10 +172,11 @@
 		echo "	<tr><td>25 ".t("Kuljetusmuoto rajalla").":</td>
 				<td colspan='2'><select NAME='kuljetusmuoto'>";
 
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='KM'
-					ORDER BY jarjestys, selite";
+					".avain('join','KM_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='KM'
+					ORDER BY avainsana.jarjestys, avainsana.selite";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<option value=''>".t("Valitse")."</option>";

@@ -394,10 +394,11 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	echo "<tr><th>".t("Osasto")."</th><td>";
 
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'
-				ORDER BY selite+0";
+				".avain('join','OSASTO_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
+				ORDER BY avainsana.selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<select name='osasto'>\n";
@@ -417,10 +418,11 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	echo "<tr><th>".t("Tuoteryhm‰")."</th><td>";
 
 	//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]' and laji='TRY'
-				ORDER BY selite+0";
+				".avain('join','TRY_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'
+				ORDER BY avainsana.selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<select name='tuoryh'>\n";

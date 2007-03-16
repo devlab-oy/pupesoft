@@ -1188,10 +1188,11 @@ if ($tee == '') {
 				}
 			}
 
-			$query = "	SELECT selite, selitetark
+			$query = "	SELECT avainsana.selite, ".avain('select')."
 						FROM avainsana use index (yhtio_laji_selite)
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TV' $extralisa $hinnatlisa
-						ORDER BY jarjestys, selite";
+						".avain('join','TV_')."
+						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'TV' $extralisa $hinnatlisa
+						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 
 			echo "<td><select name='tilausvahvistus' onchange='submit()'>";

@@ -1018,10 +1018,11 @@
 		echo "<tr>";
 		echo "<th>".t("Tuoteosasto")."</th>";
 
-		$query = "	SELECT *
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='OSASTO'
-					ORDER BY selite+0";
+					".avain('join','OSASTO_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='OSASTO'
+					ORDER BY avainsana.selite+0";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<td><select name='tuoteosasto'>";
@@ -1039,10 +1040,11 @@
 		echo "<tr>";
 		echo "<th>".t("Tuoteryhmä")."</th>";
 
-		$query = "	SELECT *
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji='TRY'
-					ORDER BY selite+0";
+					".avain('join','TRY_')."
+					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji='TRY'
+					ORDER BY avainsana.selite+0";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<td><select name='tuoteryhma'>";

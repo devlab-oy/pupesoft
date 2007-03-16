@@ -155,7 +155,7 @@
 		if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 
 			$qlisa = "";
-			if ($toim == "TYOMAARAYS") {
+			if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
 				$qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
 			}
 			elseif($toim == "TARJOUS" or $toim == "RIVISYOTTO") {
@@ -1062,13 +1062,20 @@
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				echo "<option value = ''>".t("Valitse merkki")."</option>";
-
+				
+				$zxk = "";
+				
 				while ($vrow=mysql_fetch_array($vresult)) {
 					$sel="";
-					if ($trow[$i] == $vrow['selitetark']) {
+					if ($srow["merkki"] == $vrow['selitetark']) {
 						$sel = "selected";
+						$zxk = "OK";
 					}
 					echo "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark_2]</option>";
+				}
+				
+				if ($zxk == "OK") {
+					$srow["merkki"] = "";
 				}
 
 				echo "</select> ja <input type='text' name='merkki' size='11' value='$srow[merkki]'></td></tr>";
@@ -1115,10 +1122,16 @@
 			}
 			
 			
-			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='40' name='viesti' value='$srow[viesti]'></td><td>(".t("keräyslista + lähete + lasku").")</td></tr>";
+			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>(".t("keräyslista + lähete + lasku").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>(".t("keräyslista + lähete").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>(".t("lasku").")</td></tr>";
+			
+			if ($toim != "TYOMAARAYS" and ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T")) {
+				echo "<tr><td>".t("Työn kuvaus").":</td><td colspan='2'><textarea name='komm1' rows='6' cols='60'>$srow[komm1]</textarea></td></tr>";
+			}
+			
+			
 			echo "</table><br>";
 
 			echo "<table>";
@@ -1281,8 +1294,19 @@
 			$query = "UPDATE ";
 			$postquery = " WHERE tunnus = '$kukarow[kesken]'";
 
-			$query2 = "UPDATE ";
-			$postquery2 = " WHERE otunnus = '$kukarow[kesken]'";
+			
+			//Tsekataan vielä, että olio varmasi löytyy, muuten lisätään se
+			$apuqu = "select yhtio from tyomaarays where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
+			$mexapu = mysql_query($apuqu) or pupe_error($apuqu);
+			
+			if (mysql_num_rows($mexapu) == 0) {
+				$query2 = "INSERT into ";
+				$postquery2 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+			}
+			else {
+				$query2 = "UPDATE ";
+				$postquery2 = " WHERE otunnus = '$kukarow[kesken]'";
+			}
 
 			$query3 = "UPDATE ";
 			$postquery3 = " WHERE otunnus = '$kukarow[kesken]'";
@@ -1487,7 +1511,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
-		if ($toim == "TYOMAARAYS") {
+		if ($toim == "TYOMAARAYS" or trim($komm1) != "") {
 			//otetaan kantaa pyörän malliin
 			if($merkki2 != 'eimenu'){
 				$merkki = $merkki2;
@@ -1512,7 +1536,7 @@
 						viite	 		= '$viite',
 						otunnus 		= '$kukarow[kesken]'";
 			$query2 .= $postquery2;
-			$result = mysql_query($query2) or pupe_error($query2);
+			$result = mysql_query($query2) or pupe_error($query2);			
 		}
 
 		if ($toim == "RIVISYOTTO") {

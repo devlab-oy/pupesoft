@@ -199,7 +199,7 @@
 
 	//Listataan tilauksessa olevat tuotteet
 	if ($laskurow["tila"] != 'O') {
-		$query = "	SELECT otunnus tilausnumero, ".nimitys('select').", concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl, varattu+kpl kpl, jt,
+		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl, varattu+kpl kpl, jt,
 					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti $sorttauskentta , tilausrivi.tunnus
 					FROM tilausrivi
 					".nimitys('join','tilausrivi')."

@@ -592,7 +592,12 @@ if (!function_exists("nimitys")) {
 		$returni = "";			
 		
 		if ($laji == 'select') {
-			$returni = " nimitys ";	
+			if ($joini == '') {
+				$returni = " nimitys ";	
+			}
+			else {
+				$returni = "$joini.nimitys";
+			}
 		}
 		
 		if ($kieli == '') {

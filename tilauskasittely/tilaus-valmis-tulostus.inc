@@ -24,7 +24,7 @@
 	$virheellinen = '';
 
 	// emuloidaan transactioita mysql LOCK komennolla
-	$query = "LOCK TABLES tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ";
+	$query = "LOCK TABLES tilausrivi WRITE, tilausrivi AS t2 READ, tilausrivi AS t3 READ, lasku WRITE, sanakirja WRITE, avainsana READ, varaston_tulostimet READ, tuotepaikat READ, tuote READ, tuoteperhe READ, maksuehto READ, varastopaikat READ, kirjoittimet READ, asiakas READ, kuka WRITE, asiakaskommentti READ, tuotteen_toimittajat READ, tuotteen_avainsanat READ";
 	$res   = mysql_query($query) or pupe_error($query);
 
 	$queryc = "	SELECT sum(if(tila='N' and alatila='A', 1, 0)) ok, count(*) kaikki

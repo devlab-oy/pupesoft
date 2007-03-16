@@ -192,11 +192,11 @@ if (!function_exists('rivi')) {
 				$hash = '#';
 			}
 		
-			if (strlen($row["nimitys"]) > 32) {
+			if (strlen(asana('nimitys_',$row['tuoteno'],$row['nimitys'])) > 32) {
 				$kala = $kala - $rivinkorkeus;
 				$lask++;
 			}
-			$pdf->draw_text(225, $kala, $hash.$row["nimitys"], 	$firstpage, $p);
+			$pdf->draw_text(225, $kala, $hash.asana('nimitys_',$row['tuoteno'],$row['nimitys']), 	$firstpage, $p);
 	
 			$kala = $kala - $rivinkorkeus;
 			$lask++;	

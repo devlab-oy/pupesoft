@@ -129,7 +129,7 @@
 
 		$pdf->draw_text(30,  $kala, $row["tuoteno"],		$firstpage, $pieni);
 		$pdf->draw_text(155, $kala, $row["toim_tuoteno"], 	$firstpage, $pieni);
-		$pdf->draw_text(270, $kala, substr($row["nimitys"],0,25),		$firstpage, $pieni);
+		$pdf->draw_text(270, $kala, substr(asana('nimitys_',$row['tuoteno'],$row['nimitys']),0,25),		$firstpage, $pieni);
 		$pdf->draw_text(420, $kala, $row["varattu"], 		$firstpage, $pieni);
 		$pdf->draw_text(490, $kala, $row["hinta"], 			$firstpage, $pieni);
 		$pdf->draw_text(560, $kala, $row["rivihinta"],		$firstpage, $pieni);

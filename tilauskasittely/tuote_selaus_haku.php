@@ -269,12 +269,13 @@
 	echo "<input type='text' size='10' name = 'haku[2]' value = '$haku[2]'>";
 	echo "</td>";
 
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]'
-				and laji='OSASTO'
+				".avain('join','OSASTO_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]'
+				and avainsana.laji='OSASTO'
 				$avainlisa
-				ORDER BY jarjestys, selite";
+				ORDER BY avainsana.jarjestys, avainsana.selite";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 
@@ -292,12 +293,13 @@
 	}
 	echo "</select><br>";
 
-	$query = "	SELECT distinct selite, selitetark
+	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
-				WHERE yhtio='$kukarow[yhtio]'
-				and laji='TRY'
+				".avain('join','TRY_')."
+				WHERE avainsana.yhtio='$kukarow[yhtio]'
+				and avainsana.laji='TRY'
 				$avainlisa
-				ORDER BY jarjestys, selite";
+				ORDER BY avainsana.jarjestys, avainsana.selite";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<select name='haku[4]'>";
@@ -481,7 +483,7 @@
 			}
 
 			echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a></td>";
-			echo "<td valign='top' class='$vari'>$row[nimitys]</td>";
+			echo "<td valign='top' class='$vari'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 
 			if ($lisatiedot != "") {
 				echo "<td valign='top' class='$vari'>$row[toim_tuoteno]</td>";

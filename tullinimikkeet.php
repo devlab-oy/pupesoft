@@ -121,7 +121,7 @@ if ($tullinimike1 != "") {
 			echo "<td>$rivi[osasto] $os[selitetark]</td>";
 			echo "<td>$rivi[try] $try[selitetark]</td>";
 			echo "<td>$rivi[tuotemerkki]</td>";			
-			echo "<td>$rivi[nimitys]</td>";
+			echo "<td>".asana('nimitys_',$rivi['tuoteno'],$rivi['nimitys'])."</td>";
 			echo "<td>$rivi[tullinimike1]</td>";
 			echo "<td>$rivi[tullinimike2]</td>";
 			echo "</tr>";

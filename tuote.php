@@ -238,7 +238,7 @@
 
 			//1
 			echo "<tr><th>".t("Tuotenumero")."</th><th>".t("Yksikkö")."</th><th colspan='4'>".t("Nimitys")."</th>";
-			echo "<tr><td>$tuoterow[tuoteno]</td><td>$tuoterow[yksikko]</td><td colspan='4'>".substr($tuoterow["nimitys"],0,100)."</td></tr>";
+			echo "<tr><td>$tuoterow[tuoteno]</td><td>$tuoterow[yksikko]</td><td colspan='4'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td></tr>";
 
 			//2
 			echo "<tr><th>".t("Osasto/try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th>".t("Perusalennus")."</th><th>".t("VAK")."</th></tr>";

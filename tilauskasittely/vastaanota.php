@@ -752,7 +752,7 @@
 
 			echo "<tr>";
 			echo "<input type='hidden' name='tunnus[]' value='$rivirow[tunnus]'>";
-			echo "<td>$rivirow[nimitys]</td>";
+			echo "<td>".asana('nimitys_',$rivirow['tuoteno'],$rivirow['nimitys'])."</td>";
 			echo "<td>$rivirow[tuoteno]</td>";
 
 			if ($rivirow["ei_saldoa"] != "") {

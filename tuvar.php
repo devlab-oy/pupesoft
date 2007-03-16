@@ -110,7 +110,7 @@
 			//eka laitetaan tuotteen yleiset (aika staattiset) tiedot
 			echo "<table>";
 			echo "<tr><th>".t("Tuoteno")."</th><th colspan='5'>".t("Nimitys")."</th>";
-			echo "<tr><td>$tuoterow[tuoteno]</td><td colspan='5'>".substr($tuoterow["nimitys"],0,100)."</td></tr>";
+			echo "<tr><td>$tuoterow[tuoteno]</td><td colspan='5'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td></tr>";
 
 			echo "<tr><th>".t("Os/Try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th colspan='2'>".t("VAK")."</th></tr>";
 			echo "<td>$tuoterow[osasto]/$tuoterow[try]</td><td>$tuoterow[toimittaja]</td>

@@ -841,7 +841,7 @@ if ($tila == '') {
 
 
 		if ($nimitykset != '') {
-			echo "<$td valign='top'>$rivirow[nimitys]</$td>";
+			echo "<$td valign='top'>".asana('nimitys_',$rivirow['tuoteno'],$rivirow['nimitys'])."</$td>";
 		}
 
 		// jos riviä ei ole vielä viety varastoon, voidaan muuttaa kappaleita
@@ -895,7 +895,7 @@ if ($tila == '') {
 						<$td valign='top'>$lisavar_row[tuoteno]<br>$lisavar_row[toim_tuoteno]</$td>";
 
 				if ($nimitykset != '') {
-					echo "<$td valign='top'>$lisavar_row[nimitys]</$td>";
+					echo "<$td valign='top'>".asana('nimitys_',$lisavar_row['tuoteno'],$lisavar_row['nimitys'])."</$td>";
 				}
 
 				echo "<$td valign='top' align='right'><input size='5' type='text' name='lisavarusterivi_kpl[$rivirow[rivitunnus]##$lisavar_row[tuoteno]#*#$rivirow[otunnus]]' style='text-align:right'></$td>";

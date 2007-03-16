@@ -217,7 +217,7 @@ if (!function_exists('rivi_valm')) {
 				$lask_valm++;
 			}
 			
-			$pdf_valm->draw_text(225, $kala_valm, $row["nimitys"], 	$firstpage_valm, $p);
+			$pdf_valm->draw_text(225, $kala_valm, asana('nimitys_',$row['tuoteno'],$row['nimitys']), 	$firstpage_valm, $p);
 	
 			$kala_valm = $kala_valm - $rivinkorkeus;
 			$lask_valm++;

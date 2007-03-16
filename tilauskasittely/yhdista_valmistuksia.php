@@ -145,7 +145,7 @@
 			
 			echo "<tr>";
 			echo "<td>$prow[otunnus]</td>";			
-			echo "<td align='right'>$prow[nimitys]</td>";
+			echo "<td align='right'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
 			echo "<td><a href='../tuote.php?tee=Z&tuoteno=$prow[$i]'>$prow[tuoteno]</a></td>";
 			echo "<td align='right'>$prow[tilattu]</td>";
 			echo "<td align='right'>$prow[kerayspvm]</td>";

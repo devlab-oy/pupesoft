@@ -179,7 +179,7 @@
 			$row2 = mysql_fetch_array($res2);
 			
 			echo "	<tr>
-					<td>$row2[nimitys]</td>
+					<td>".asana('nimitys_',$row['tuoteno'],$row2['nimitys'])."</td>
 					<td>$row[tuoteno]</td>
 					<td>$row[maara]</td>
 					<td>

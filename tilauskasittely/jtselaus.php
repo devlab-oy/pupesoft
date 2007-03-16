@@ -737,7 +737,7 @@
 									}
 
 									if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-										echo "<td>$jtrow[nimitys]</td>";
+										echo "<td>".asana('nimitys_',$jtrow['tuoteno'],$jtrow['nimitys'])."</td>";
 									}
 
 									if ($tilaus_on_jo == "") {

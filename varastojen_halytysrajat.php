@@ -249,7 +249,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 		echo "<tr>";
 		echo "<td>$row[tuoteno]</td>";
-		echo "<td>$row[nimitys]</td>";
+		echo "<td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 		echo "<td>$row[status]</td>";
 
 		if ($abcpaalla == "kylla") {

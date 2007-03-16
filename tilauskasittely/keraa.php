@@ -561,9 +561,9 @@
 
 							$nimitysloput = '';
 
-							if (strlen($tvtilausrivirow['nimitys']) > 27) {
-								$nimitysloput = substr($tvtilausrivirow['nimitys'],28);
-								$tvtilausrivirow['nimitys'] = substr($tvtilausrivirow['nimitys'],0,28);
+							if (strlen(asana('nimitys_',$tvtilausrivirow['tuoteno'],$tvtilausrivirow['nimitys'])) > 27) {
+								$nimitysloput = substr(asana('nimitys_',$tvtilausrivirow['tuoteno'],$tvtilausrivirow['nimitys']),28);
+								$tvtilausrivirow['nimitys'] = substr(asana('nimitys_',$tvtilausrivirow['tuoteno'],$tvtilausrivirow['nimitys']),0,28);
 							}
 
 							$rivit .= sprintf("%-30.s",$tvtilausrivirow['nimitys']);

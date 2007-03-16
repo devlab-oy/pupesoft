@@ -430,7 +430,7 @@
 			echo "<td class='$class'>$rivkpl</td>";
 			$rivkpl--;
 
-			echo "<td class='$class' align='right'>$prow[nimitys]</td>";
+			echo "<td class='$class' align='right'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
 			echo "<td class='$class'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a></td>";
 			echo "<td class='$class' align='right'>$prow[tilattu]</td>";
 

@@ -375,10 +375,10 @@ if (!function_exists('rivi')) {
 				}
 			}
 
-			if (strlen($row["nimitys"]) > 22) {
+			if (strlen(asana('nimitys_',$row['tuoteno'],$row['nimitys'])) > 22) {
 				$kala = $kala - $rivinkorkeus;
 			}
-			$pdf->draw_text(190, $kala, $row["nimitys"], 	$firstpage, $p);
+			$pdf->draw_text(190, $kala, asana('nimitys_',$row['tuoteno'],$row['nimitys']), 	$firstpage, $p);
 
 			$kala = $kala - $rivinkorkeus;
 

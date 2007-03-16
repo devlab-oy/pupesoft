@@ -208,7 +208,7 @@
 
 		$pdf->draw_text(30,  $kala, $row["toim_tuoteno"],	$firstpage, $p);
 		$pdf->draw_text(155, $kala, $row["tuoteno"], 		$firstpage, $p);
-		$pohja = $pdf->draw_paragraph($kala+10, 280, 5, 440, $row["nimitys"], $firstpage, $pieni);
+		$pohja = $pdf->draw_paragraph($kala+10, 280, 5, 440, asana('nimitys_',$row['tuoteno'],$row['nimitys']), $firstpage, $pieni);
 		$lisaa = 0;
 		
 		if ($pohja < $kala){

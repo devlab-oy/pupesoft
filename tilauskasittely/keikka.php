@@ -183,7 +183,7 @@ if ($toiminto == "" and $ytunnus == "") {
 	$query = "	select ytunnus, nimi, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br>') comments, liitostunnus, count(*) kpl
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0
-				group by 1,2,3,4,5
+				group by liitostunnus, ytunnus, nimi, osoite, postitp, swift
 				order by nimi, ytunnus";
 	$result = mysql_query($query) or pupe_error($query);
 

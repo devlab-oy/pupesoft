@@ -420,8 +420,8 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "TYOMAARAYS") {
-			//myyntitilaus. Tulostetaan proforma.
-			$where1 = " lasku.tila in ('L','A','N','S') and lasku.tilaustyyppi in ('A','S')";
+			/// Työmääräys
+			$where1 = " lasku.tila in ('L','A','N','S','T')";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -1094,7 +1094,7 @@
 
 			if ($toim == "TYOMAARAYS") {
 				//Tehdään joini
-				$query = "  SELECT *
+				$query = "  SELECT tyomaarays.*, lasku.* 
 							FROM lasku
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.yhtio='$kukarow[yhtio]'
@@ -1102,23 +1102,15 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_array($result);
 
-				// haetaan maksuehdon tiedot
-				$query  = "select * from maksuehto where tunnus='$laskurow[maksuehto]'";
-				$result = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($result) == 0) {
-					$masrow = array();
-				}
-				else {
-					$masrow = mysql_fetch_array($result);
-				}
-
-				//maksuehto tekstinä
-				$maksuehto      = $masrow["teksti"]." ".$masrow["kassa_teksti"];
-				$kateistyyppi   = $masrow["kateinen"];
-
 				require_once('../tyomaarays/tulosta_tyomaarays.inc');
 
+				$query  = "	SELECT *
+							FROM asiakas
+							WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+				$result = mysql_query($query) or pupe_error($query);
+				$asiakasrow = mysql_fetch_array($result);
+				
+				
 				if ($laskurow["tila"] == 'U') {
 					$where = " uusiotunnus='$laskurow[tunnus]' ";
 				}
@@ -1128,17 +1120,19 @@
 
 				// aloitellaan laskun teko
 				$firstpage = alku();
+				
 				tyokommentit($firstpage);
 
 				// haetaan tilauksen kaikki rivit
 				$query = "  SELECT tilausrivi.*, round(tilausrivi.varattu*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta,
-							if (tuotetyyppi='K','TT','VV') tuotetyyppi
+							if (tuotetyyppi='K','TT','VV') tuotetyyppi,
+							if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, tilausrivi.tunnus, if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskentta
 							FROM tilausrivi
 							LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 							WHERE $where
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi in ('L','G')
-							ORDER BY tuotetyyppi, tunnus";
+							and tilausrivi.tyyppi in ('L','G','T')
+							ORDER by tuotetyyppi, sorttauskentta desc, tunnus";
 				$presult = mysql_query($query) or pupe_error($query);
 
 				$rivino = 1;

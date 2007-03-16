@@ -1,17 +1,17 @@
 <?php
 
-require("inc/papametrit.inc");
+require("inc/parametrit.inc");
 
 echo "
-<html>
-<body>
+<br>
+<br>Tässä näkee miten formit käyttäytyy: 
 <form action='#'>
 <input type='text'>
 <input type='checkbox'	name='1'>
 <input type='radio' 	name='2'>
 <input type='radio' 	name='2'>
 <input type='submit'>
-</form>
+</form> pitäisi pysyä nipussa ilman suurempia aukkoja.
 <br>
 <br>
 <table>
@@ -24,25 +24,25 @@ echo "
 </table>
 <br>
 <br>
-<a href='#'>Default linkki</a><br>
-<a.td href='#'>TD:class linkki (Tässä on hover toiminto)</a><br>
-<a.menu href='#'>Menu:class linkki</a><br>
+<a href='#'>Default linkki</a>
+<a class='td' href='#'>TD:class linkki (Tässä on hover toiminto)</a>
+<a class='menu' href='#'>Menu:class linkki</a>
 <br>
 <br>
-Default tekstiä: bla bla bla bla!!!<br>
-<font class='info'>INFO tekstiä: bla bla bla bla!!!</font><br>
-<font class='head'>HEAD tekstiä: bla bla bla bla!!!</font><br>
-<font class='menu'>MENU tekstiä: bla bla bla bla!!!</font><br>
-<font class='error'>ERROR tekstiä: bla bla bla bla!!!</font><br>
-<font class='message'>MESSAGE tekstiä: bla bla bla bla!!!</font><br>
+Default tekstiä: bla bla bla bla!!!
+<font class='info'>INFO tekstiä: bla bla bla bla!!!</font>
+<font class='head'>HEAD tekstiä: bla bla bla bla!!!</font>
+<font class='menu'>MENU tekstiä: bla bla bla bla!!!</font>
+<font class='error'>ERROR tekstiä: bla bla bla bla!!!</font>
+<font class='message'>MESSAGE tekstiä: bla bla bla bla!!!</font>
+<br>
+<br>
 <pre>PRE-tekstiä: bla bla bla bla!!!</pre>
 <br>
 <br>
 <div class='popup' style='visibility:visible'>DIV:POPUP kannataa vaan kattoa, rttä on hyvän näköinen suhteessa muihin väreihin</div>
 <br>
-<br>
-</body>
-</html>";
+<br>";
 
 require("inc/footer.inc");
 

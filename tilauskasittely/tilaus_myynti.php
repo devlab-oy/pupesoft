@@ -3071,6 +3071,7 @@ if ($tee == '') {
 					echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";
 					echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</value>";
 					echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
+					echo "<option value='TYOMAARAYS'>Työmäärys</value>";
 					echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
 					echo "</select><input type='submit' value='".t("Näytä")."' Style='font-size: 8pt; padding:0;'>";
 					echo "</td>";

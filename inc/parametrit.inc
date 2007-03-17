@@ -318,7 +318,7 @@ if ($session != '') {
 
 			$hreffi = "http://www.pupesoft.com/trac/wiki/$kukarow[kieli]/".basename($phpnimi).$urltoim;
 
-			echo "<div align='right'><a class='menu' target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
+			echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
 		}
 	}
 }

@@ -234,7 +234,7 @@
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type='hidden' name='uusi' value='1'>
 					<input type='hidden' name='toim' value='$aputoim'>					
-					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
+					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form><br>";
 		}
 		
 		echo "	<table><tr>

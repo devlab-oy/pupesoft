@@ -213,7 +213,7 @@
 			$u = 1;
 
 			for($r = $y; $r < sizeof($DAY_ARRAY); $r++) {
-				echo "<th><b>$DAY_ARRAY[$r]<br>$u</b></th>";
+				echo "<th>$DAY_ARRAY[$r]<br>$u</th>";
 
 				if ($r == 6) {
 					$r = -1;
@@ -329,7 +329,7 @@
 			$u = 1;
 
 			for($r = $y; $r < sizeof($DAY_ARRAY); $r++) {
-				echo "<th><b>$DAY_ARRAY[$r]<br>$u</b></th>";
+				echo "<th>$DAY_ARRAY[$r]<br>$u</th>";
 
 				if ($r == 6) {
 					$r = -1;

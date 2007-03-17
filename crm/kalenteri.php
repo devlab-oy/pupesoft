@@ -386,7 +386,7 @@ $result = mysql_query($query) or pupe_error($query);
 if (mysql_num_rows($result) > 0) {
         echo "<table width='100%'>";
         echo "<tr>";
-       	echo "<th colspan='7'>".t("Muistutukset")."</th>";
+       	echo "<th colspan='6'>".t("Muistutukset")."</th>";
         echo "</tr>";
 
 
@@ -491,7 +491,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
 
 	//väritetään tämän päivän pvm omalla värillä...
 	if ((date("j")==$i) and (date("n")==$kuu) and (date("Y")==$year)) {
-		$fn1 = "<font color='#DD0000'>";
+		$fn1 = "<font class='message'>";
 		$fn2 = "</font>";
 	}
 	else {

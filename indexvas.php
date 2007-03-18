@@ -29,7 +29,7 @@ else {
 	$koko = "height='70'";
 }
 
-echo "<a href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko style='padding:0px 3px 7px 3px;'></a><br>";
+echo "<a href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko style='padding:1px 3px 7px 3px;'></a><br>";
 
 echo "$yhtiorow[nimi]<br>";
 echo "$kukarow[nimi]<br><br>";
@@ -93,8 +93,10 @@ else {
 	$sovellus = $orow['sovellus'];
 }
 
+echo "<table width='100%'>";
+
 //N‰ytet‰‰n aina exit-nappi
-echo "<a class='menu' href='logout.php' target='main'>".t("Exit")."</a><br>";
+echo "<tr><td class='back'><a class='menu' href='logout.php' target='main'>".t("Exit")."</a></td></tr>";
 
 // Mit‰ k‰ytt‰j‰ saa tehd‰?
 // Valitaan ensin vain yl‰taso jarjestys2='0'
@@ -119,29 +121,30 @@ while ($orow = mysql_fetch_array($result)) {
 
 		// jos ykkˆnen niin n‰ytet‰‰n avattu menu itemi
 		if($menu[$mrow['nimitys']] == 1) {
-			echo "- <a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>".t("$mrow[nimitys]")."</a><br>";
+			echo "<a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
 
 			// tehd‰‰n submenu itemit
 			while ($mrow = mysql_fetch_array($xresult)) {
-				echo "&nbsp;&bull; <a class='menu' href='$mrow[nimi]";
+				echo "<tr><td class='back'><a class='menu' href='$mrow[nimi]";
 				if ($mrow['alanimi'] != '') echo "?toim=$mrow[alanimi]";
-				echo "' target='main'>".t("$mrow[nimitys]")."</a><br>";
+				echo "' target='main'>  &bull; ".t("$mrow[nimitys]")."</a></td></tr>";
 			}
 		}
 		else {
 			// muuten n‰ytet‰‰n suljettu menuotsikko
-			echo "+ <a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>".t("$mrow[nimitys]")."</a><br>";
+			echo "<tr><td class='back'><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>+ ".t("$mrow[nimitys]")."</a></td></tr>";
 		}
 	}
 	else {
 		// normaali menuitem
-		echo "<a class='menu' href='$mrow[nimi]";
+		echo "<tr><td class='back'><a class='menu' href='$mrow[nimi]";
 		if ($mrow['alanimi'] != '') echo "?toim=$mrow[alanimi]";
-		echo "' target='main'>".t("$mrow[nimitys]")."</a><br>";
+		echo "' target='main'>".t("$mrow[nimitys]")."</a></td></tr>";
 	}
 
 }
 
+echo "</table>";
 echo "</body></html>";
 
 ?>

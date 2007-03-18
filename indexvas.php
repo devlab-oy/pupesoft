@@ -29,7 +29,7 @@ else {
 	$koko = "height='70'";
 }
 
-echo "<a href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko style='padding:1px 3px 7px 3px;'></a><br>";
+echo "<a class='menu' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko style='padding:1px 3px 7px 3px;'></a><br>";
 
 echo "$yhtiorow[nimi]<br>";
 echo "$kukarow[nimi]<br><br>";

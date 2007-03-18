@@ -1513,20 +1513,20 @@
 
 
 		if (trim($toim) == "SIIRTOLISTA") {
-			echo "<tr><th>".t("Varaston tunnus")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
-			echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
+			echo "<tr><th>".t("Varaston tunnus")."</th><input type='text' size='10' name='ytunnus'></td></tr>";
+			echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
 		}
 		else {
 			if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA") {
-				echo "<tr><th>".t("Toimittajan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+				echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
 			}
 			else {
-				echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+				echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
 			}
-			echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
+			echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
 			echo "<tr>
 					<th>".t("Laskunumero")."</th>
-					<td class='back'></td><td><input type='text' size='10' name='laskunro'></td>
+					<td><input type='text' size='10' name='laskunro'></td>
 					<td><input type='text' size='10' name='laskunroloppu'></td></tr>";
 		}
 

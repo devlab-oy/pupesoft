@@ -336,8 +336,8 @@ if ($tila == 'tee_kohdistus') {
 			$hinta 	  = $lisavarusterivi_hinta[$tunnus];
 			$potunnus = substr($tunnus, strpos($tunnus,'#*#')+3);
 
-			if ($kpl > 0 or strtoupper($kpl) == "DEL") {
-				if ($kpl > 0) {
+			if (abs($kpl) > 0 or strtoupper($kpl) == "DEL") {
+				if (abs($kpl) > 0) {
 					$query  = "	SELECT *
 								FROM tuote
 								LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus='$toimittajaid'
@@ -351,8 +351,8 @@ if ($tila == 'tee_kohdistus') {
 					}
 
 					$query = "	insert into tilausrivi
-								(perheid2, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi) values
-								('$perheid2','$hinta','$lisarow[nimitys]','$tuoteno', '$kpl', '$kpl', '$potunnus', '$kukarow[yhtio]', 'O')";
+								(perheid2, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, laatija, laadittu) values
+								('$perheid2','$hinta','$lisarow[nimitys]','$tuoteno', '$kpl', '$kpl', '$potunnus', '$kukarow[yhtio]', 'O', '$kukarow[kuka]', now())";
 					$updre = mysql_query($query) or pupe_error($query);
 				}
 			}
@@ -392,29 +392,28 @@ if ($tila == '') {
 		$alvit = "";
 	}
 
-	$query    = "SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale $alvit) hinta
-				FROM tilausrivi use index (uusiotunnus_index), 
-				tuote use index (tuoteno_index), 
-				tuotteen_toimittajat
-				WHERE tilausrivi.yhtio ='$kukarow[yhtio]' 
-				AND tilausrivi.uusiotunnus = '$otunnus' 
-				AND tuote.yhtio = tilausrivi.yhtio 
-				AND tuote.tuoteno = tilausrivi.tuoteno 
-				AND tuotteen_toimittajat.yhtio = tilausrivi.yhtio
-				AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-				AND tuotteen_toimittajat.liitostunnus = '$toimittajaid'";
-	$result   = mysql_query($query) or pupe_error($query);
+	$query    = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale $alvit) hinta
+					FROM tilausrivi use index (uusiotunnus_index), 
+					tuote use index (tuoteno_index), 
+					tuotteen_toimittajat
+					WHERE tilausrivi.yhtio ='$kukarow[yhtio]' 
+					AND tilausrivi.uusiotunnus = '$otunnus' 
+					AND tuote.yhtio = tilausrivi.yhtio 
+					AND tuote.tuoteno = tilausrivi.tuoteno 
+					AND tuotteen_toimittajat.yhtio = tilausrivi.yhtio
+					AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
+					AND tuotteen_toimittajat.liitostunnus = '$toimittajaid'";
+	$result   = mysql_query($query) or pupe_error($query);	
 	$hintarow = mysql_fetch_array($result);
 
 	// p‰ivitet‰‰n samantien t‰m‰ tieto laskulle
 	$query   = "update lasku set summa='$hintarow[hinta]', kohdistettu='' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
 	$hinresu = mysql_query($query) or pupe_error($query);
 
-	$valittusumma = $hintarow["hinta"];
-	$laskunsumma  = sprintf("%.2f",round($kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma,2));
-	$checksumma   = $kulurow["summa"]-$laskurow["rahti_etu"]-$hintarow["hinta"];
-	$kohdistettava_summa = sprintf("%.2f",round($kulurow["summa"] - $laskurow["rahti_etu"],2));
-	$valittusumma = sprintf("%.2f",round($valittusumma,2));
+	$valittusumma 			= sprintf("%.2f", $hintarow["hinta"]);
+	$laskunsumma  			= sprintf("%.2f", $kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma);
+	$checksumma   			= $kulurow["summa"]-$laskurow["rahti_etu"]-$hintarow["hinta"];
+	$kohdistettava_summa 	= sprintf("%.2f", $kulurow["summa"] - $laskurow["rahti_etu"]);
 
 	if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
 		$laskunsumma = '0.00';

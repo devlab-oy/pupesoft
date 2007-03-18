@@ -85,7 +85,7 @@ if (mysql_num_rows($result) > 1) {
 		if ($sovellus == '') $sovellus = $key;
 	}
 
-	echo "</select></form><br>";
+	echo "</select></form><br><br>";
 }
 else {
 	// löytyi vaan yksi sovellus, otetaan se

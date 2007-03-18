@@ -1341,14 +1341,14 @@ if ($tee == '') {
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
 					and (tilausrivi.tunnus = '$rivitunnus' or (tilausrivi.perheid!=0 and tilausrivi.perheid = '$rivitunnus' and tilausrivin_lisatiedot.ei_nayteta = 'P') or (tilausrivi.perheid2!=0 and tilausrivi.perheid2 = '$rivitunnus' and tilausrivin_lisatiedot.ei_nayteta = 'P'))";
 		$lapsires = mysql_query($query) or pupe_error($query);
-				
+						
 		while($lapsi = mysql_fetch_array($lapsires)) {
 			$query  = "	SELECT *
 						FROM tilausrivin_lisatiedot
 						WHERE yhtio			 = '$kukarow[yhtio]'
 						and tilausrivitunnus = '$lapsi[tunnus]'";
 			$lisatied_res = mysql_query($query) or pupe_error($query);
-			
+						
 			if (mysql_num_rows($lisatied_res) > 0) {
 				$lisatied_row = mysql_fetch_array($lisatied_res);
 
@@ -3063,8 +3063,8 @@ if ($tee == '') {
 					echo "<form name='valmis' action='tulostakopio.php' method='post'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
 							<input type='hidden' name='otunnus' value='$tilausnumero'>
-							<th class='back' colspan='".(floor($ycspan/2))."' nowrap>".t("Näytä lomake").":</th>
-							<td class='back' colspan='".(ceil($ycspan/2))."' nowrap>";
+							<th colspan='".(floor($ycspan/2))."' nowrap>".t("Näytä lomake").":</th>
+							<td colspan='".(ceil($ycspan/2)-1)."' nowrap>";
 
 					echo "<select name='toim' Style='font-size: 8pt; padding:0;'>";
 					echo "<option value='TARJOUS'>Tarjous</value>";
@@ -3074,7 +3074,8 @@ if ($tee == '') {
 					echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
 					echo "<option value='TYOMAARAYS'>Työmäärys</value>";
 					echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
-					echo "</select><input type='submit' value='".t("Näytä")."' Style='font-size: 8pt; padding:0;'>";
+					echo "</select></td>";
+					echo "<td class='back'><input type='submit' value='".t("Näytä")."' Style='font-size: 8pt; padding:0;'>";
 					echo "</td>";
 					echo "</form>";
 				}

@@ -3,6 +3,8 @@
 require("inc/parametrit.inc");
 
 echo "
+<font class='head'>CSS-testing:</font>
+<hr>
 <br>
 <br>Tässä näkee miten formit käyttäytyy: 
 <form action='#'>
@@ -15,8 +17,8 @@ echo "
 <br>
 <br>
 <table>
-<tr><td>TH</td></tr>
-<tr><td>TD</td></tr>
+<tr><th>TH</th><th>TH</th><th>TH</th></tr>
+<tr><td>TD</td><td>TD</td><td>TD</td></tr>
 <tr><td class='tumma'>TD.tumma: Fontti ja tausta samanväriset kuin TH:ssa</td><td class='tumma'>TD.tumma</td><td class='tumma'>TD.tumma</td></tr>
 <tr><td class='green'>TD.green: Fontti vihreä. Tausta sama kuin TD:ssä</td><td class='green'>TD.green</td><td class='green'>TD.green</td></tr>
 <tr><td class='spec'>TD.spec: Tausta sama kuin TD:ssä mutta fontinväri sama ku TH:ssa</td><td class='spec'>TD.spec</td><td class='spec'>TD.spec</td></tr>
@@ -24,9 +26,9 @@ echo "
 </table>
 <br>
 <br>
-<a href='#'>Default linkki</a>
+<a href='#'>Default linkki (Tässä on hover toiminto)</a>
 <a class='td' href='#'>TD:class linkki (Tässä on hover toiminto)</a>
-<a class='menu' href='#'>Menu:class linkki</a>
+<a class='menu' href='#'>Menu:class linkki (Tässä on hover toiminto)</a>
 <br>
 <br>
 Default tekstiä: bla bla bla bla!!!

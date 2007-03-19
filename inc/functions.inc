@@ -701,6 +701,9 @@ if (!function_exists("avain")) {
 				$returni = " if(isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) ";
 			}
 		}
+		elseif ($laji == 'join' or $laji == 'join2') {
+			$returni = '';
+		}
 						
 		return $returni;
 	}

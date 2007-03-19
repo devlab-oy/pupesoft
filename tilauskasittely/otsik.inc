@@ -400,13 +400,13 @@
 
 				echo "<td><select name='maksuehto'>";
 
-				$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').")
+				$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').") mehto
 							FROM maksuehto
 							".avain('join','MEHTOKATXT_')."
 							".avain('join2','MEHTOTXT_')."
 							WHERE maksuehto.yhtio = '$kukarow[yhtio]' 
 							and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$srow[maa]%')
-							order by maksuehto.jarjestys, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_')."), maksuehto.tunnus";
+							order by maksuehto.jarjestys, mehto, maksuehto.tunnus";
 				$mresult = mysql_query($query) or pupe_error($query);
 
 				while($row=mysql_fetch_array($mresult)) {

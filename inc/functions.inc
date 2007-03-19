@@ -575,7 +575,23 @@ if (!function_exists("asana")) {
 				//return $row["selite"];
 				return $sana2;
 			}
-		}	
+		}
+		elseif (substr($laji,0,13) == 'TOIMITUSTAPA_') {
+			if ($kukarow["kieli"] != $yhtiorow["kieli"]) {
+				$query = "select selitetark from avainsana where yhtio = '$kukarow[yhtio]' and laji = '$laji' and selite = '$sana' LIMIT 1";
+				$result = mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($result) > 0) {
+					$row = mysql_fetch_array($result);
+					return $row["selitetark"];
+				}
+				else {
+					return $sana;
+				}
+			}
+			else {
+				return $sana;	
+			}
+		}
 	}
 	
 	/*esimerkki

@@ -292,9 +292,8 @@
 		$jatko = 0;
 	}
 	if (mysql_field_name($result, $i) == "toimitustapa") {
-		$query = "	SELECT toimitustapa.tunnus, ".avain('select','TOIMITUSTAPA_')."
+		$query = "	SELECT toimitustapa.tunnus, selite
 						FROM toimitustapa
-						".avain('join','TOIMITUSTAPA_')."
 						WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
 						ORDER BY toimitustapa.jarjestys, toimitustapa.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
@@ -305,7 +304,7 @@
 			if ($trow[$i] == $vrow['selite']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite]";
+			$ulos .= "<option value = '$vrow[selite]' $sel>".asana('TOIMITUSTAPA_',$vrow['selite'])."";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

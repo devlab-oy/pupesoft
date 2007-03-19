@@ -340,7 +340,7 @@
 			if ($toimitustapa==$row['selite']) $sel=" selected ";
 			else $sel = "";
 
-			echo "<option value='$row[selite]' $sel>$row[selite]";
+			echo "<option value='$row[selite]' $sel>".asana('TOIMITUSTAPA_',$row['selite'])."";
 		}
 
 		echo "</select></td></tr>";

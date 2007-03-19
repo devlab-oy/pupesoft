@@ -10,7 +10,8 @@
 	}
 
 	if (mysql_field_name($result, $i) == "toimitustapa") {
-		$query = "	SELECT * from toimitustapa
+		$query = "	SELECT *
+					from toimitustapa
 					WHERE yhtio='$kukarow[yhtio]'";
 		$sresult = mysql_query($query) or pupe_error($query);
 
@@ -20,7 +21,7 @@
 			if ($trow[$i] == $srow['selite']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value='$srow[selite]' $sel>$srow[selite]</option>";
+			$ulos .= "<option value='$srow[selite]' $sel>".asana('TOIMITUSTAPA_',$srow['selite'])."</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

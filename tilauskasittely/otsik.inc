@@ -469,7 +469,7 @@
 				if ($row[1] == $srow["toimitustapa"]) {
 					$sel = 'selected';
 				}
-				echo "<option value='$row[1]' $sel>$row[1]";
+				echo "<option value='$row[1]' $sel>".asana('TOIMITUSTAPA_',$row[1])."";
 			}
 			echo "</select></td>";
 

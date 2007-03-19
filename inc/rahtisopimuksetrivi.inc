@@ -21,7 +21,7 @@
 			if ($trow[$i] == $srow['selite']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value='$srow[selite]' $sel>$srow[selite]</option>";
+			$ulos .= "<option value='$srow[selite]' $sel>".asana('TOIMITUSTAPA_',$srow['selite'])."</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

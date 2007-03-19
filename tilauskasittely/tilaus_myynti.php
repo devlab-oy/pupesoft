@@ -1094,7 +1094,7 @@ if ($tee == '') {
 				if ($row["selite"] == $laskurow["toimitustapa"]) {
 					$sel = 'selected';
 				}
-				echo "<option value='$row[selite]' $sel>$row[selite]";
+				echo "<option value='$row[selite]' $sel>".asana('TOIMITUSTAPA_',$row['selite'])."";
 			}
 			echo "</select></td>";
 		}

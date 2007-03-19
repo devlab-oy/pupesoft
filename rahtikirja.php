@@ -536,7 +536,7 @@
 			}
 			else $select = '';
 
-			echo "<option $select value='$row[selite]'>$row[selite]</option>\n";
+			echo "<option $select value='$row[selite]'>".asana('TOIMITUSTAPA_',$row['selite'])."</option>\n";
 		}
 
 		echo "</select></td></tr>\n";

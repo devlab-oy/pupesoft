@@ -396,7 +396,7 @@
 				$sel = 'selected';
 				$tutoimtapa = $row[0];
 			}
-			echo "<option value='$row[0]' $sel>$row[0]</option>";
+			echo "<option value='$row[0]' $sel>".asana('TOIMITUSTAPA_',$row[0])."</option>";
 		}
 
 		echo "</select></td>";

@@ -3149,6 +3149,17 @@ if ($tee == '') {
 				if ($toim == 'SIIRTOLISTA') {
 					$toimi = "JOO";
 				}
+				
+				$query = "	SELECT *
+							FROM varastopaikat
+							WHERE yhtio = '$kukarow[yhtio]'";
+				$vtresult = mysql_query($query) or pupe_error($query);
+
+				while ($vrow = mysql_fetch_array($vtresult)) {
+					if ($vrow["tyyppi"] != 'E' or $laskurow["varasto"] == $vrow["tunnus"]) {
+						$varastosta[$vrow["tunnus"]] = $vrow["tunnus"];
+					}
+				}
 
 				require ('jtselaus.php');
 			}

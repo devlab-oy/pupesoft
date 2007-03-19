@@ -35,11 +35,18 @@ if ($tee == '') {
 	else {
 		$ehto = "kalenteri.yhtio='$kukarow[yhtio]'";
 	}
-
+	
+	if ($kukarow['kieli'] == $yhtiorow['kieli']) {
+		$lisa = " and (kalenteri.kieli = '$kukarow[kieli]' or kalenteri.kieli = '') ";
+	}
+	else {
+		$lisa = " and kalenteri.kieli = '$kukarow[kieli]' ";
+	}
+	
 	$query = "	select *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-				where tyyppi='extranet_uutinen' and $ehto
+				where tyyppi='extranet_uutinen' $lisa and $ehto
 				order by pvmalku desc, kalenteri.tunnus desc
 				$limit";
 

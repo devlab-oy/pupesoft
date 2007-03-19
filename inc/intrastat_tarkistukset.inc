@@ -161,6 +161,28 @@ if ($tapa == 'tuonti') {
 			}
 		}
 
+		if ($row["maa_maara"] == '') {
+			$virhetxt .= t("Laskunumero").": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrkeikk[tunnus]'>$row[laskunro]</a>. ".t("M‰‰r‰maa puuttuu")."!<br>";
+			$virhe++;
+		}
+		else {
+			$query = "	SELECT distinct koodi, eu
+						FROM maat
+						WHERE koodi='$row[maa_maara]'";
+			$maaresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($maaresult) == 0) {
+				$virhetxt .= t("Laskunumero").": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrkeikk[tunnus]'>$row[laskunro]</a>. ".t("M‰‰r‰maa on virheellinen")."!<br>";
+				$virhe++;
+			}
+			else {
+				$eurow = mysql_fetch_array($maaresult);
+				if ($eurow["eu"] == "") {
+					$virhetxt .= t("Laskunumero").": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrkeikk[tunnus]'>$row[laskunro]</a>. ".t("M‰‰r‰maa on virheellinen").": NON-EU!<br>";
+					$virhe++;
+				}
+			}
+		}
 		if ((int) $row["kauppatapahtuman_luonne"] <= 0) {
 		   	$virhetxt .= t("Keikka").": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrkeikk[tunnus]'>$row[laskunro]</a>. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
 			$virhe++;

@@ -26,14 +26,25 @@ if ($tee == "update") {
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale = str_replace ( ",", ".", $erikoisale);
 	$toimaika = $vv."-".$kk."-".$pp;
-	
+
 	//Jos k‰ytt‰j‰ on syˆtt‰nyt alvillisen hinnan niin poistetaan alvi
 	if ((int) $alv != 0) {
 		$rahti_etu = round($rahti_etu/(1+($alv/100)),2);
 	}
-		
+
+	// kokeillaan arpoa intrastat k‰sittely‰
+	if ($maa_lahetys != "" and $maa_maara != "") {
+		if ($maa_lahetys == $yhtiorow["maakoodi"] and $maa_maara != $yhtiorow["maakoodi"]) {
+			$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+		}
+		elseif ($maa_maara == $yhtiorow["maakoodi"] and $maa_lahetys != $yhtiorow["maakoodi"]) {
+			$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+		}
+	}
+
 	$query = "	UPDATE lasku
 				SET maa_lahetys = '$maa_lahetys',
+				maa_maara = '$maa_maara',
 				kauppatapahtuman_luonne = '$ktapahtuman_luonne',
 				kuljetusmuoto = '$kuljetusmuoto',
 				bruttopaino = '$bruttopaino',
@@ -43,11 +54,12 @@ if ($tee == "update") {
 				erikoisale = '$erikoisale',
 				toimaika = '$toimaika',
 				kohdistettu = '$kohdistettu',
-				comments = '$kommentti'
+				comments = '$kommentti',
+				ultilno = '$ultilno'
 				WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	$toiminto = "";
 }
 
@@ -61,10 +73,10 @@ if ($tee == "") {
 
 	// lasketaan keikan ostolaskujen summat yhteen
 	$query = "	select sum(summa) vosumma
-				from lasku 
-				where yhtio='$kukarow[yhtio]' 
-				and tila='K' 
-				and vanhatunnus<>0 
+				from lasku
+				where yhtio='$kukarow[yhtio]'
+				and tila='K'
+				and vanhatunnus<>0
 				and laskunro='$laskurow[laskunro]'
 				and vienti in ('C','F','I','J','K','L')";
 	$llres = mysql_query($query) or pupe_error($query);
@@ -100,14 +112,14 @@ if ($tee == "") {
 			<input type='hidden' name='tee' value='update'>";
 	echo "<tr><td>".t("L‰hetysmaa").":</td><td colspan='3'>
 			<select name='maa_lahetys'>";
-	
+
 	$query = "	SELECT distinct koodi, nimi
 				FROM maat
-				where nimi != '' 
+				where nimi != ''
 				ORDER BY koodi";
 	$result = mysql_query($query) or pupe_error($query);
 	echo "<option value=''>".t("Valitse")."</option>";
-	
+
 	while($row = mysql_fetch_array($result)){
 		$sel = '';
 		if($row[0] == $laskurow["maa_lahetys"]) {
@@ -117,18 +129,39 @@ if ($tee == "") {
 	}
 	echo "</select></td>";
 	echo "</tr>";
-	
+
+	echo "	<tr><td>".t("M‰‰r‰maan koodi").":</td>
+			<td colspan='3'><select name='maa_maara'>";
+
+	$query = "	SELECT distinct koodi, nimi
+				FROM maat
+				where nimi != ''
+				ORDER BY koodi";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if ($laskurow["maa_maara"] == "") $laskurow["maa_maara"] = $yhtiorow["maakoodi"];
+
+	while ($row = mysql_fetch_array($result)) {
+		$sel = '';
+		if($row[0] == $laskurow["maa_maara"]) {
+			$sel = 'selected';
+		}
+		echo "<option value='$row[0]' $sel>$row[1]</option>";
+	}
+	echo "</select></td>";
+	echo "</tr>";
+
 	if ($laskurow["tuontipvm"] == '0000-00-00') {
 		$pp = date('d');
 		$kk = date('m');
 		$vv = date('Y');
 		$laskurow["tuontipvm"] = $vv."-".$kk."-".$pp;
 	}
-	
+
 	$query  = "select * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$toimittaja = mysql_fetch_array($result);
-	
+
 	echo "<tr><td>".t("Kauppatapahtuman luonne").":</td><td colspan='3'>
 		<select NAME='ktapahtuman_luonne'>";
 	echo "<option value=''>".t("Valitse")."</option>";
@@ -181,7 +214,7 @@ if ($tee == "") {
 		// katotaan onko toimittajalla joku defaultti kuluprosentti
 		$laskurow["rahti"] = $toimittaja["oletus_kulupros"];
 	}
-	
+
 	//Haetaan alvifunktio
 	require ('../inc/alvpopup.inc');
 
@@ -190,7 +223,7 @@ if ($tee == "") {
 	echo "<tr><td>".t("Arvioitu kuluprosentti").":</td><td colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
 	echo "<tr><td>".t("Kulusumma")." $yhtiorow[valkoodi]:</td><td colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
 	echo "<tr><td>".t("Erikoisalennus").":</td><td colspan='3'><input type='text' name='erikoisale' value='$laskurow[erikoisale]'></td></tr>";
-	
+
 	if ($laskurow["toimaika"] != '0000-00-00') {
 		$vv = substr($laskurow["toimaika"],0,4);
 		$kk = substr($laskurow["toimaika"],5,2);
@@ -201,14 +234,14 @@ if ($tee == "") {
 		$kk = date("m");
 		$pp = date("d");
 	}
-	
-	echo "<tr><td>".t("Toimitusaika").":</td>	
+
+	echo "<tr><td>".t("Toimitusaika").":</td>
 			<td>".t("pp")." <input type='text' name='pp' value='$pp' size='3'></td>
 			<td>".t("kk")." <input type='text' name='kk' value='$kk' size='3'></td>
 			<td>".t("vvvv")." <input type='text' name='vv' value='$vv' size='5'></td></tr>";
 
 	echo "<tr><td>".t("Kommentti").":</td><td colspan='3'><input type='text' name='kommentti' size='40' value='$laskurow[comments]'></td></tr>";
-	
+
 	echo "</table>";
 
 

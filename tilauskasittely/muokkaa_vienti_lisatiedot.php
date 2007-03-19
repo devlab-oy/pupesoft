@@ -38,8 +38,9 @@
 			$sisamaan_kuljetus_kansallisuus = strtoupper($sisamaan_kuljetus_kansallisuus);
 			$maa_maara = strtoupper($maa_maara);
 
-			$query = " UPDATE lasku
+			$query = "	UPDATE lasku
 						SET maa_maara = '$maa_maara',
+						maa_lahetys = '$maa_lahetys',
 						kauppatapahtuman_luonne = '$kauppatapahtuman_luonne',
 						kuljetusmuoto = '$kuljetusmuoto',
 						sisamaan_kuljetus = '$sisamaan_kuljetus',
@@ -227,11 +228,23 @@
 
 		if ($tee == "update") {
 
+			// kokeillaan arpoa intrastat k‰sittely‰
+			if ($maa_lahetys != "" and $maa_maara != "") {
+				if ($maa_lahetys == $yhtiorow["maakoodi"] and $maa_maara != $yhtiorow["maakoodi"]) {
+					$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+				}
+				elseif ($maa_maara == $yhtiorow["maakoodi"] and $maa_lahetys != $yhtiorow["maakoodi"]) {
+					$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+				}
+			}
+
 			$query = "	UPDATE lasku
 						SET maa_lahetys = '$maa_lahetys',
 						kauppatapahtuman_luonne = '$ktapahtuman_luonne',
 						kuljetusmuoto = '$kuljetusmuoto',
-						bruttopaino = '$bruttopaino'
+						bruttopaino = '$bruttopaino',
+						maa_maara = '$maa_maara',
+						ultilno = '$ultilno'
 						WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 
 			$result = mysql_query($query) or pupe_error($query);
@@ -266,9 +279,9 @@
 					  WHERE otsikkonro ='$otunnus' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$rahtirow = mysql_fetch_array ($result);
-			
+
 			if ($laskurow["bruttopaino"] == 0) $laskurow["bruttopaino"] = $rahtirow["kilot"];
-			
+
 			echo "	<tr><td>".t("Bruttopaino").":</td>
 					<td colspan='2'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td>
 					</tr>";
@@ -286,6 +299,27 @@
 			while($row = mysql_fetch_array($result)){
 				$sel = '';
 				if($row[0] == $laskurow["maa_lahetys"]) {
+					$sel = 'selected';
+				}
+				echo "<option value='$row[0]' $sel>$row[1]</option>";
+			}
+			echo "</select></td>";
+			echo "</tr>";
+
+			echo "	<tr><td>".t("M‰‰r‰maan koodi").":</td>
+					<td colspan='3'><select name='maa_maara'>";
+
+			$query = "	SELECT distinct koodi, nimi
+						FROM maat
+						where nimi != ''
+						ORDER BY koodi";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if ($laskurow["maa_maara"] == "") $laskurow["maa_maara"] = $yhtiorow["maakoodi"];
+
+			while ($row = mysql_fetch_array($result)) {
+				$sel = '';
+				if($row[0] == $laskurow["maa_maara"]) {
 					$sel = 'selected';
 				}
 				echo "<option value='$row[0]' $sel>$row[1]</option>";

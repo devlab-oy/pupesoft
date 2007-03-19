@@ -139,7 +139,7 @@
 							postino					= '$laskurow[postino]',
 							postitp					= '$laskurow[postitp]',
 							tapvm					= '$laskurow[tapvm]',
-							tila					= 'N',
+							tila					= '$laskurow[tila]',
 							tilausvahvistus			= '$laskurow[tilausvahvistus]',
 							toim_maa				= '$laskurow[toim_maa]',
 							toim_nimi				= '$laskurow[toim_nimi]',

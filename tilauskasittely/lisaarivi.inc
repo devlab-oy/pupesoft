@@ -152,15 +152,13 @@
 	}
 
 	$kieltolisa = "";
-
-	if ($kukarow['extranet'] != '') {
-		if (strtoupper($laskurow['toim_maa']) == strtoupper($yhtiorow['maakoodi'])) {
-			//kotimaan myyntiä
-			$kieltolisa = " and (tuote.vienti = '' or (tuote.vienti not like '%$laskurow[toim_maa]%' and tuote.vienti not like '%!all%') or tuote.vienti like '%!$laskurow[toim_maa]%')";
-		}
-		else {
-			$kieltolisa = " and (tuote.vienti = '' or (tuote.vienti not like '%$laskurow[toim_maa]%' and tuote.vienti not like '%all%') or tuote.vienti like '%!$laskurow[toim_maa]%' or tuote.vienti like '%!all%')";
-		}
+	
+	if (strtoupper($laskurow['toim_maa']) == strtoupper($yhtiorow['maakoodi'])) {
+		//kotimaan myyntiä
+		$kieltolisa = " and (tuote.vienti = '' or (tuote.vienti not like '%$laskurow[toim_maa]%' and tuote.vienti not like '%!all%') or tuote.vienti like '%!$laskurow[toim_maa]%')";
+	}
+	else {
+		$kieltolisa = " and (tuote.vienti = '' or (tuote.vienti not like '%$laskurow[toim_maa]%' and tuote.vienti not like '%all%') or tuote.vienti like '%!$laskurow[toim_maa]%' or tuote.vienti like '%!all%')";
 	}
 
 	//Tutkitaan onko tämä hyvitysrivi

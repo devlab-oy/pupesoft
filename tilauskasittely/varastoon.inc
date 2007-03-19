@@ -219,6 +219,13 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		// muuten tässä ollaan sitten viemässä kamaa ihan oikeesti saldoille.. tehdään siihen liittyvät hommat.
 		$uusikehahin = "";
 
+		if($tilrivirow["tunnus"] != $tilrivirow["perheid2"] and $tilrivirow["perheid2"]>0) {
+			$lisavartlisa = " ".t("Saldo on varattu.");
+		}
+		else {
+			$lisavartlisa = "";
+		}
+		
 		// lisätään tapahtuma
 		$query = "	INSERT into tapahtuma set
 					yhtio      = '$kukarow[yhtio]',
@@ -227,7 +234,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					hinta      = '$kehahin',
 					kplhinta   = '$ohinta',
 					laji       = 'tulo',
-					selite     = '$laskurow[nimi] $laskurow[nimitark], ".t("Tilaus").": $tilrivirow[otunnus], ".t("Ostohinta").": $ohinta',
+					selite     = '$laskurow[nimi] $laskurow[nimitark], ".t("Tilaus").": $tilrivirow[otunnus], ".t("Ostohinta").": $ohinta $lisavartlisa',
 					laatija    = '$kukarow[kuka]',
 					rivitunnus = '$tilrivirow[tunnus]',
 					laadittu   = now()";
@@ -235,14 +242,15 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 		// päivitetään saldo tuoterivillä olevalle paikalle
 		$query = "	UPDATE tuotepaikat set
-					saldo       = saldo+$tilrivirow[varattu],
-					saldoaika   = now()
-					where yhtio = '$kukarow[yhtio]' and
-					tuoteno     = '$tilrivirow[tuoteno]' and
-					hyllyalue   = '$tilrivirow[hyllyalue]' and
-					hyllynro    = '$tilrivirow[hyllynro]' and
-					hyllytaso   = '$tilrivirow[hyllytaso]' and
-					hyllyvali   = '$tilrivirow[hyllyvali]'
+					saldo       	= saldo+$tilrivirow[varattu],
+					saldo_varattu 	= saldo_varattu + if($tilrivirow[tunnus] != $tilrivirow[perheid2] and $tilrivirow[perheid2]>0, $tilrivirow[varattu], 0),
+					saldoaika   	= now()
+					where yhtio 	= '$kukarow[yhtio]' and
+					tuoteno     	= '$tilrivirow[tuoteno]' and
+					hyllyalue   	= '$tilrivirow[hyllyalue]' and
+					hyllynro    	= '$tilrivirow[hyllynro]' and
+					hyllytaso   	= '$tilrivirow[hyllytaso]' and
+					hyllyvali   	= '$tilrivirow[hyllyvali]'
 					limit 1";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -250,11 +258,12 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 			echo "<font class='error'>".t("Varastopaikka")." $tilrivirow[hyllyalue]-$tilrivirow[hyllynro]-$tilrivirow[hyllytaso]-$tilrivirow[hyllyvali] ".t("ei löydy vaikka se on syötetty tilausriville! Koitetaan päivittää oletustapaikkaa!")."</font>";
 
 			$query = "	UPDATE tuotepaikat set
-	   		 			saldo       = saldo+$tilrivirow[varattu],
-	   		 			saldoaika   = now()
-	   		 			where yhtio = '$kukarow[yhtio]' and
-	   		 			tuoteno     = '$tilrivirow[tuoteno]' and
-	   		 			oletus     != ''
+	   		 			saldo       	= saldo+$tilrivirow[varattu],
+						saldo_varattu 	= saldo_varattu + if($tilrivirow[tunnus] != $tilrivirow[perheid2] and $tilrivirow[perheid2]>0, $tilrivirow[varattu], 0),
+	   		 			saldoaika   	= now()
+	   		 			where yhtio 	= '$kukarow[yhtio]' and
+	   		 			tuoteno     	= '$tilrivirow[tuoteno]' and
+	   		 			oletus     	   != ''
 	   		 			limit 1";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -285,15 +294,16 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 				// lisätään paikka
 				$query = "	INSERT INTO tuotepaikat set
-	 						yhtio		= '$kukarow[yhtio]',
-				 			tuoteno     = '$tilrivirow[tuoteno]',
-				 			oletus      = 'X',
-		   		 			saldo       = '$tilrivirow[varattu]',
-		   		 			saldoaika   = now(),
-							hyllyalue   = '$hyllyrow[alkuhyllyalue]',
-							hyllynro    = '$hyllyrow[alkuhyllynro]',
-							hyllytaso   = '0',
-							hyllyvali   = '0'";
+	 						yhtio			= '$kukarow[yhtio]',
+				 			tuoteno     	= '$tilrivirow[tuoteno]',
+				 			oletus      	= 'X',
+		   		 			saldo       	= '$tilrivirow[varattu]',
+							saldo_varattu 	= if($tilrivirow[tunnus] != $tilrivirow[perheid2] and $tilrivirow[perheid2]>0, $tilrivirow[varattu], 0),
+		   		 			saldoaika   	= now(),
+							hyllyalue   	= '$hyllyrow[alkuhyllyalue]',
+							hyllynro    	= '$hyllyrow[alkuhyllynro]',
+							hyllytaso   	= '0',
+							hyllyvali   	= '0'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				// tehdään tapahtuma

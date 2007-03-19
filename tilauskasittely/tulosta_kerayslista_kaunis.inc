@@ -205,14 +205,14 @@ if (!function_exists('alku')) {
 
 if (!function_exists('rivi')) {
 	function rivi($firstpage) {
-		global $pdf, $row, $kala, $rivinkorkeus, $lask, $total, $rectparam, $kukarow, $yhtiorow, $rivinumerot, $kieli, $laskurow, $perheid;
+		global $pdf, $row, $kala, $rivinkorkeus, $lask, $total, $rectparam, $kukarow, $yhtiorow, $rivinumerot, $kieli, $laskurow, $perheid, $paino;
 
 		$p["height"]	= 10;
 		$p["font"]		= "Times-Roman";
 		$pp["height"]	= 8;
 		$pp["font"]		= "Times-Roman";
 
-		$rivinkorkeus	= 15;
+		$rivinkorkeus	= 18;
 
 		// viivat rivien väliin...
 		$x[0] = 20;
@@ -359,7 +359,7 @@ if (!function_exists('rivi')) {
 				$pdf->draw_text(430, $kala, $rivipaikkahyllyssa." (".$rivivarastohyllyssa.")",	$firstpage, $p);
 			}
 			else {
-				$pdf->draw_text(430, $kala, $rivipaikkahyllyssa,		 		$firstpage, $p);
+				$pdf->draw_text(430, $kala, $rivipaikkahyllyssa,		 					$firstpage, $p);
 			}
 
 			$pdf->draw_text(480, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$firstpage, $p);
@@ -381,8 +381,12 @@ if (!function_exists('rivi')) {
 
 			$kala = $kala - $rivinkorkeus + 5;
 
-			$pdf->draw_text(125, $kala, $row["nimitys"], 	$firstpage, $p);
-
+			$pdf->draw_text(125, $kala, $row["nimitys"], 															$firstpage, $p);
+			$pdf->draw_text(480, $kala, $trow["tuotemassa"]." kg",								 					$firstpage, $p);
+			$pdf->draw_text(530, $kala, sprintf('%.2f',($row['varattu']+$row['kpl'])*$trow["tuotemassa"])." kg",	$firstpage, $p);
+			
+			$paino += sprintf('%.2f',($row['varattu']+$row['kpl'])*$trow["tuotemassa"]);
+			
 			$kala = $kala - $rivinkorkeus;
 
 			if (trim($row["kommentti"]) != '' or $row["tilaajanrivinro"] != 0) {
@@ -396,7 +400,7 @@ if (!function_exists('rivi')) {
 					$futur = "";
 				}
 
-				$pdf->draw_text(108,  $kala, "*** $futur".$row["kommentti"],	$firstpage, $p);
+				$pdf->draw_text(105,  $kala, "*** $futur".$row["kommentti"],	$firstpage, $p);
 
 				$kala = $kala - $rivinkorkeus;
 			}
@@ -409,10 +413,10 @@ if (!function_exists('rivi')) {
 
 if (!function_exists('loppu')) {
 	function loppu ($firstpage, $tots) {
-		global $pdf, $laskurow, $viite, $p, $total, $rectparam, $kieli;
+		global $pdf, $laskurow, $viite, $p, $total, $rectparam, $kieli, $paino;
 
 		$pdf->draw_rectangle(50, 20, 20, 580, $firstpage, $rectparam);
-
+		$pdf->draw_text(530, 37, sprintf('%.2f',$paino)." kg",	$firstpage, $p);
 		$pdf->draw_text(30, 37,  t("Tilausviite", $kieli).": ".$laskurow["viesti"], $firstpage, $p);
 		$pdf->draw_text(30, 25,  t("Kommentti", $kieli).":   ".$laskurow["comments"], $firstpage, $p);
 

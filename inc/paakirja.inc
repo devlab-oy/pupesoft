@@ -4,12 +4,12 @@
 				<form name = 'valinta' action = 'raportit.php' method='post'>
 				<input type = 'hidden' name = 'toim' value = 'paakirja'>
 				<table><tr>
-				<td>".t("Tyyppi")."</td>
+				<th>".t("Tyyppi")."</th>
 				<td><select name='tee'>
 				<option value = 'K'>".t("P‰‰kirja")."
 				<option value = 'P'>".t("P‰iv‰kirja")."
 				</select></td></tr>
-				<td>".t("Ajalta")."</td>
+				<th>".t("Ajalta")."</th>
 				<td><select name='alvv'>
 				";
 
@@ -72,7 +72,7 @@
 				</select></td>
 				</tr>";
 		
-		echo "<tr><td>".t("tai koko tilikausi")."</td>";
+		echo "<tr><th>".t("tai koko tilikausi")."</th>";
 	 	$query = "SELECT *
 					FROM tilikaudet
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -90,11 +90,11 @@
 		echo "</tr>";
 
 		echo "<tr>
-				<td>Vain tili</td>
+				<th>Vain tili</th>
 				<td><input type = 'text' name = 'tili' value = ''> - <input type = 'text' name = 'tili2' value = ''></td>
 				</tr>";
 
-		echo "<tr><td>".t("Vain kustannuspaikka")."</td>";	
+		echo "<tr><th>".t("Vain kustannuspaikka")."</th>";	
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
@@ -110,7 +110,7 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
-		echo "<tr><td>".t("Vain kohde")."</td>";
+		echo "<tr><th>".t("Vain kohde")."</th>";
 	 	$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
@@ -126,7 +126,7 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
-		echo "<tr><td>".t("Vain projekti")."</td>";
+		echo "<tr><th>".t("Vain projekti")."</th>";
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
@@ -142,9 +142,9 @@
 		}
 		echo "</select></td>";
 		echo "</tr>";
-		echo "<tr><td>".t("Excel muoto")."</td><td><input type='checkbox' name='excel'></td></tr>";
-		echo "<tr><td></td>
-		      <td><input type = 'submit' value = '".t("N‰yt‰")."'></td></tr></table></form>";
+		echo "<tr><th>".t("Excel muoto")."</th><td><input type='checkbox' name='excel'></td></tr>";
+		echo "</table></form><br>
+		      <input type = 'submit' value = '".t("N‰yt‰")."'>";
 		$formi = 'valinta';
 		$kentta = 'tili';
 		require "inc/footer.inc";

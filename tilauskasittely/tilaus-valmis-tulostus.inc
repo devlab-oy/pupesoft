@@ -147,7 +147,8 @@
 
 		//pdf:n header..
 		$firstpage = alku();
-
+		$paino = 0;
+		
 		while ($row = mysql_fetch_array($result)) {
 			//piirrä rivi
 			$firstpage = rivi($firstpage);

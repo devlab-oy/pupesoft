@@ -9,24 +9,13 @@
 	if (mysql_field_name($result, $i) == "ytunnus") {
 
 		$ytunnus = trim($t[$i]);
+		$ytunnus_tunnus = $i;
 
 		if ($ytunnus == "") {
 			$virhe[$i] = t("Y-tunnus puuttuu")."!";
 			$errori = 1;
 		}
-		else {
-			if (strtoupper($trow["maa"]) == 'FI') {
-				require ("tarkistaytunnus.inc");
-			}
 
-			if ($ok == 0) {
-				$virhe[$i] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
-				#$errori = 1;
-			}
-			else {
-				$t[$i] = $ytunnus;
-			}
-		}
 	}
 
 	if (mysql_field_name($result, $i) == "laatija") {
@@ -92,7 +81,7 @@
 		}
 
 	}
-	
+
 	if (mysql_field_name($result, $i) == "maksuehto" and trim($t[$i]) != '') {
 
 		$query   = "select tunnus from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$t[$i]'
@@ -104,7 +93,7 @@
 			$errori = 1;
 		}
 	}
-	
+
 	if (mysql_field_name($result, $i) == "toimitustapa" and trim($t[$i]) != '') {
 
 		$query   = "select tunnus from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$t[$i]'
@@ -115,5 +104,25 @@
 			$virhe[$i] = t("Tätä toimitustapaa ei saa käyttää asiakkaalla tässä maassa.");
 			$errori = 1;
 		}
+	}
+
+	if (mysql_field_name($result, $i) == "maa") {
+
+		if (strtoupper($t[$i]) == 'FI') {
+			require ("tarkistaytunnus.inc");
+
+			if ($ok == 0) {
+				//$virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
+				//$errori = 1;
+			}
+			else {
+				$t[$ytunnus_tunnus] = $ytunnus;
+			}
+		}
+		elseif ($yhtiorow["maakoodi"] == 'FI' and strtoupper($t[$i]) == 'SE' and strtoupper(substr($t[$ytunnus_tunnus], 0, 2)) != "SE") {
+			$virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! Laskutusosoite ruotsissa. Ytunnus pitää alkaa SE!";
+			$errori = 1;
+		}
+
 	}
 ?>

@@ -638,27 +638,54 @@ if (!function_exists("avain")) {
 		
 		global $kukarow, $yhtiorow;
 		
-		$returni = "";			
-		
-		if ($laji == 'select') {
-			$returni = " selitetark ";	
-		}
+		$returni = "";	
 		
 		if ($kieli == '') {
 			$kieli = $kukarow["kieli"];
-		}
+		}		
 		
+		if ($joini == 'TOIMITUSTAPA_') {
+			$returni = " selite ";
+			$joinaa = "toimitustapa";
+		}
+		elseif ($joini == 'MEHTOTXT_') {
+			$returni = " teksti ";
+			$joinaa = "maksuehto";
+		}
+		elseif ($joini == 'MEHTOKATXT_') {
+			$returni = " kassa_teksti ";
+			$joinaa = "maksuehto";
+		}
+		else {
+			$returni = " selitetark ";	
+			$joinaa = "avainsana";
+		}
+
 		if ($kieli != $yhtiorow["kieli"]) {
 			if ($laji == 'join') {
 				if ($joini != '') {
-					$returni = " LEFT JOIN avainsana AS a on avainsana.yhtio = a.yhtio and avainsana.selite = a.selite and a.laji = '".$joini.$kieli."' ";
+					$returni = " LEFT JOIN avainsana AS a on ".$joinaa.".yhtio = a.yhtio and ".$joinaa.".".trim($returni)." = a.selite and a.laji = '".$joini.$kieli."' ";
+				}
+			}
+			elseif ($laji == 'join2') {
+				if ($joini != '') {
+					$returni = " LEFT JOIN avainsana AS b on ".$joinaa.".yhtio = b.yhtio and ".$joinaa.".".trim($returni)." = b.selite and b.laji = '".$joini.$kieli."' ";
 				}
 			}
 			elseif ($laji == 'select') {
-				$returni = " if(isnull(a.selite) or a.selite='', avainsana.selitetark, a.selitetark) selitetark ";
+				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) ".trim($returni)." ";
+			}
+			elseif ($laji == 'select2') {
+				$returni = " if(isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) ".trim($returni)." ";
+			}
+			elseif ($laji == 'selectcon') {
+				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) ";
+			}
+			elseif ($laji == 'selectcon2') {
+				$returni = " if(isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) ";
 			}
 		}
-				
+						
 		return $returni;
 	}
 	

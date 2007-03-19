@@ -145,16 +145,20 @@ if (isset($laskuno)) {
 			<td>";
 
 		// haetaan kaikki factoringmaksuehdot
-		$query = "SELECT tunnus, concat_ws(' ', kassa_teksti, teksti) selite
+		$query = "SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').") selite
 				FROM maksuehto
-				WHERE yhtio = '$kukarow[yhtio]' and factoring!=''
-				ORDER BY jarjestys, teksti";
+				".avain('join','MEHTOKATXT_')."
+				".avain('join2','MEHTOTXT_')."
+				WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.factoring!=''
+				ORDER BY maksuehto.jarjestys, maksuehto.teksti";
 
 		if ($laji == 'pois') {
-			$query = "SELECT tunnus, concat_ws(' ', kassa_teksti, teksti) selite
+			$query = "SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').") selite
 					FROM maksuehto
-					WHERE yhtio = '$kukarow[yhtio]' and factoring=''
-					ORDER BY jarjestys, teksti";
+					".avain('join','MEHTOKATXT_')."
+					".avain('join2','MEHTOTXT_')."
+					WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.factoring=''
+					ORDER BY maksuehto.jarjestys, maksuehto.teksti";
 		}
 
 		$vresult = mysql_query($query) or pupe_error($query);

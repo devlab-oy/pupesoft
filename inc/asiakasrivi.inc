@@ -59,10 +59,12 @@
 	}
 
 	if (mysql_field_name($result, $i) == "maksuehto") {
-		$query = "	SELECT tunnus, concat_ws(' ', kassa_teksti, teksti)
+		$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').")
 					FROM maksuehto
-					WHERE yhtio = '$kukarow[yhtio]'
-					ORDER BY jarjestys, teksti";
+					".avain('join','MEHTOKATXT_')."
+					".avain('join2','MEHTOTXT_')."
+					WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+					ORDER BY maksuehto.jarjestys, maksuehto.teksti";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>";
@@ -290,10 +292,11 @@
 		$jatko = 0;
 	}
 	if (mysql_field_name($result, $i) == "toimitustapa") {
-		$query = "	SELECT tunnus, selite
+		$query = "	SELECT toimitustapa.tunnus, ".avain('select','TOIMITUSTAPA_')."
 						FROM toimitustapa
-						WHERE yhtio = '$kukarow[yhtio]'
-						ORDER BY jarjestys, selite";
+						".avain('join','TOIMITUSTAPA_')."
+						WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
+						ORDER BY toimitustapa.jarjestys, toimitustapa.selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
 

@@ -132,10 +132,12 @@ if ((int) $laskuno != 0) {
 			<td>";
 
 		// haetaan kaikki maksuehdot (paitsi käteinen)
-		$query = "	SELECT tunnus, concat_ws(' ', kassa_teksti, teksti) selite
+		$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOTXT_').",  ".avain('selectcon2','MEHTOKATXT_').") selite
 					FROM maksuehto
-					WHERE yhtio = '$kukarow[yhtio]' and kateinen=''
-					ORDER BY jarjestys, teksti";
+					".avain('join','MEHTOTXT_')."
+					".avain('join2','MEHTOKATXT_')."
+					WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.kateinen=''
+					ORDER BY maksuehto.jarjestys, maksuehto.teksti";
 		$vresult = mysql_query($query) or pupe_error($query);
 		
 		echo "<select name='maksuehto'>";

@@ -234,11 +234,13 @@
 						ORDER BY jarjestys, selite";
 			$kuvares = mysql_query($query) or pupe_error($query);
 
-			$query = "	SELECT tunnus, concat_ws(' ', kassa_teksti, teksti)
+			$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').")
 						FROM maksuehto
-						WHERE yhtio = '$kukarow[yhtio]'
-						and jaksotettu=''
-						ORDER BY jarjestys";
+						".avain('join','MEHTOKATXT_')."
+						".avain('join2','MEHTOTXT_')."
+						WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+						and maksuehto.jaksotettu=''
+						ORDER BY maksuehto.jarjestys";
 			$mresult = mysql_query($query) or pupe_error($query);
 
 			echo "<table cellspacing='1' cellpadding='2'>

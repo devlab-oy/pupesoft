@@ -47,6 +47,14 @@
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='TULOSTA'>";
 
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>Tulosta uudestaan siirtolista numero</th>";
+		echo "<td><input type='text' name='numero' size='10'></td>";
+		echo "<td class='back'> (jättämällä tämä tyhjäksi luodaan aina uusi aineisto lähettämättömistä laskuista)</td>";
+		echo "</tr>";
+		echo "</table><br>";
+
 		echo "<table><tr><th>Valitse tulostin</th><td>";
 
 		$query = "	SELECT *
@@ -76,6 +84,8 @@
 
 	if ($tee == 'TULOSTA') {
 
+		$numero = (int) $numero;
+
 		// haetaan kaikki sampo factoroidut laskut jota ei ole vielä liitetty mihinkään siirtolistalle
 		$query = "	SELECT ifnull(group_concat(lasku.tunnus),0) tunnukset
 					FROM lasku USE INDEX (yhtio_tila_mapvm)
@@ -85,7 +95,7 @@
 					lasku.alatila = 'X' and
 					lasku.summa != 0 and
 					lasku.mapvm = '0000-00-00' and
-					lasku.factoringsiirtonumero = '' and
+					lasku.factoringsiirtonumero = '$numero' and
 					lasku.valkoodi = '$yhtiorow[valkoodi]'
 					order by laskunro";
 		$result = mysql_query ($query) or pupe_error($query);
@@ -94,26 +104,31 @@
 		// jos löytyi jotain factoroitavaa tallennetaan ni siirtonumero ekaks laskuille, minimoidaan aikaikkunat ja tablejen lukitusaika
 		if ($laskurow["tunnukset"] != 0) {
 
-			// lukitaan, ettei muut pääse sörkkimään väliin
-			$query  = "	LOCK TABLES lasku WRITE";
-			$result = mysql_query ($query) or pupe_error($query);
+			// ei olla tulostamassa kopiota
+			if ($numero == 0) {
+				// lukitaan, ettei muut pääse sörkkimään väliin
+				$query  = "	LOCK TABLES lasku WRITE";
+				$result = mysql_query ($query) or pupe_error($query);
 
-			// haetaan seuraava vapaa listanumero
-			$query = "	SELECT max(factoringsiirtonumero) + 1
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]'";
-			$result = mysql_query ($query) or pupe_error($query);
-			$facrow = mysql_fetch_array($result);
+				// haetaan seuraava vapaa listanumero
+				$query = "	SELECT max(factoringsiirtonumero) + 1
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'";
+				$result = mysql_query ($query) or pupe_error($query);
+				$facrow = mysql_fetch_array($result);
 
-			// päivitetään se laskuille
-			$query = "	UPDATE lasku
-						SET factoringsiirtonumero = '$facrow[0]'
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
-			$result = mysql_query ($query) or pupe_error($query);
+				// päivitetään se laskuille
+				$query = "	UPDATE lasku
+							SET factoringsiirtonumero = '$facrow[0]'
+							WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
+				$result = mysql_query ($query) or pupe_error($query);
 
-			// lukko pois
-			$query  = "	UNLOCK TABLES";
-			$result = mysql_query ($query) or pupe_error($query);
+				$numero = $facrow[0];
+
+				// lukko pois
+				$query  = "	UNLOCK TABLES";
+				$result = mysql_query ($query) or pupe_error($query);
+			}
 
 			// sitte käydään vasta laskut läpi..
 			$query = "	SELECT *
@@ -195,7 +210,7 @@
 
 			echo "<tr>";
 			echo "<th>Siirtolistan numero</th>";
-			echo "<td>$facrow[0]</td>";
+			echo "<td>$numero</td>";
 			echo "</tr>";
 
 			echo "</table><br>";
@@ -231,7 +246,7 @@
 
 			$otsikkoulos  = "\n\n\n";
 			$otsikkoulos .= "Sopimusnumero      $soprow[sopimusnumero]\n";
-			$otsikkoulos .= "Siirtolistanumero  $facrow[0]\n";
+			$otsikkoulos .= "Siirtolistanumero  $numero\n";
 			$otsikkoulos .= "\n\n";
 			$otsikkoulos .= sprintf("%-15.15s", "Veloituslaskut");
 			$otsikkoulos .= sprintf("%10.10s",  "$veloitus_kpl kpl");

@@ -212,12 +212,30 @@ if ($session != '') {
 
 	if (mysql_num_rows($result) == 1) {
 		$yhtion_parametritrow = mysql_fetch_array($result);
-		// lisätään kaikki yhtiorow arrayseen, niin ollaan taaksepäinyhteensopivia
+		
+		// lisätään kaikki yhtiorow arrayseen
 		foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
 			$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
 		}
 	}
+	
+	
+	if ($kukarow["toimipaikka"] != 0) {
+		$query = "	SELECT *
+					FROM yhtion_toimipaikat
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[toimipaikka]'";
+		$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
+		if (mysql_num_rows($result) == 1) {
+			$yhtion_toimipaikkarow = mysql_fetch_array($result);
+			
+			// lisätään kaikki yhtiorow arrayseen
+			foreach ($yhtion_toimipaikkarow as $parametrit_nimi => $parametrit_arvo) {
+				$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+			}
+	 	}
+	}
+	
 	// haetaan jotain tarpeellisia funktioita mukaan..
 	require ("functions.inc");
 

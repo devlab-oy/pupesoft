@@ -20,7 +20,8 @@
 					maakoodi 		= '$toim_maakoodi',
 					fax 			= '$toim_fax',
 					puhelin 		= '$toim_puhelin',
-					email 			= '$toim_email'
+					email 			= '$toim_email',
+					lasku_logo		= '$lasku_logo'
 					where yhtio = '$kukarow[yhtio]' and tunnus = '$toim_tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tee = "";
@@ -46,7 +47,8 @@
 					maakoodi 		= '$toim_maakoodi',
 					fax 			= '$toim_fax',
 					puhelin 		= '$toim_puhelin',
-					email 			= '$toim_email'";
+					email 			= '$toim_email',
+					lasku_logo		= '$lasku_logo'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tee = "";
 	}
@@ -57,16 +59,17 @@
 		echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Ovtlisa")."</th>	<td><input type='text' name='toim_ovtlisa'  value='$toim_ovtlisa'></td></tr>";
-		echo "<tr><th>".t("Nimi")."</th>	<td><input type='text' name='toim_nimi'     value='$toim_nimi'></td></tr>";
-		echo "<tr><th>".t("Osoite")."</th>	<td><input type='text' name='toim_osoite'   value='$toim_osoite'></td></tr>";
-		echo "<tr><th>".t("Postino")."</th>	<td><input type='text' name='toim_postino'  value='$toim_postino'></td></tr>";
-		echo "<tr><th>".t("Postitp")."</th>	<td><input type='text' name='toim_postitp'  value='$toim_postitp'></td></tr>";
-		echo "<tr><th>".t("Maa")."</th>		<td><input type='text' name='toim_maa'      value='$toim_maa'></td></tr>";
-		echo "<tr><th>".t("Maakoodi")."</th><td><input type='text' name='toim_maakoodi' value='$toim_maakoodi'></td></tr>";
-		echo "<tr><th>".t("Fax")."</th>		<td><input type='text' name='toim_fax'      value='$toim_fax'></td></tr>";
-		echo "<tr><th>".t("Puhelin")."</th>	<td><input type='text' name='toim_puhelin'  value='$toim_puhelin'></td></tr>";
-		echo "<tr><th>".t("Email")."</th>	<td><input type='text' name='toim_email'    value='$toim_email'></td></tr>";
+		echo "<tr><th>".t("Ovtlisa")."</th>	<td><input type='text' 		name='toim_ovtlisa'  value='$toim_ovtlisa'></td></tr>";
+		echo "<tr><th>".t("Nimi")."</th>	<td><input type='text' 		name='toim_nimi'     value='$toim_nimi'></td></tr>";
+		echo "<tr><th>".t("Osoite")."</th>	<td><input type='text' 		name='toim_osoite'   value='$toim_osoite'></td></tr>";
+		echo "<tr><th>".t("Postino")."</th>	<td><input type='text' 		name='toim_postino'  value='$toim_postino'></td></tr>";
+		echo "<tr><th>".t("Postitp")."</th>	<td><input type='text' 		name='toim_postitp'  value='$toim_postitp'></td></tr>";
+		echo "<tr><th>".t("Maa")."</th>		<td><input type='text' 		name='toim_maa'      value='$toim_maa'></td></tr>";
+		echo "<tr><th>".t("Maakoodi")."</th><td><input type='text' 		name='toim_maakoodi' value='$toim_maakoodi'></td></tr>";
+		echo "<tr><th>".t("Fax")."</th>		<td><input type='text' 		name='toim_fax'      value='$toim_fax'></td></tr>";
+		echo "<tr><th>".t("Puhelin")."</th>	<td><input type='text' 		name='toim_puhelin'  value='$toim_puhelin'></td></tr>";
+		echo "<tr><th>".t("Email")."</th>	<td><input type='text' 		name='toim_email'    value='$toim_email'></td></tr>";
+		echo "<tr><th>".t("Lasku logo")."</th><td><input type='text' 	name='lasku_logo'    value='$lasku_logo'></td></tr>";
 		echo "</table><hr>";
 
 		echo "<input type='hidden' name='tee' value='insert'>";
@@ -98,6 +101,7 @@
 			echo "<tr><th>".t("Fax")."</th>		<td><input type='text' name='toim_fax'      value='$trow[fax]'></td></tr>";
 			echo "<tr><th>".t("Puhelin")."</th>	<td><input type='text' name='toim_puhelin'  value='$trow[puhelin]'></td></tr>";
 			echo "<tr><th>".t("Email")."</th>	<td><input type='text' name='toim_email'    value='$trow[email]'></td></tr>";
+			echo "<tr><th>".t("Lasku logo")."</th><td><input type='text' name='lasku_logo'  value='$trow[lasku_logo]'></td></tr>";
 
 			echo "<tr><td class='back'>";
 			echo "<input type='hidden' name='tee' value='update'>";

@@ -157,6 +157,7 @@
 						hyvaksyja		= '$hyvaksyja',
 						lomaoikeus		= '$lomaoikeus',
 						asema			= '$asema',
+						toimipaikka		= '$toimipaikka',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
 						profiilit 		= '$profile',
 						yhtio 			= '$yhtio'";
@@ -298,6 +299,7 @@
 						hyvaksyja		= '$hyvaksyja',
 						lomaoikeus		= '$lomaoikeus',
 						asema			= '$asema',
+						toimipaikka		= '$toimipaikka',
 						kassamyyja 		= '$kassamyyja',
 						dynaaminen_kassamyynti = '$dynaaminen_kassamyynti',
 						jyvitys			= '$jyvitys',
@@ -710,6 +712,21 @@
 					$sel='';
 					if ($varow['selite']==$krow["asema"]) $sel = 'selected';
 					echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
+				}
+
+				echo "</select></td></tr>";
+				
+				
+				echo "<tr><th align='left'>".t("Toimipaikka").":</td>";
+				echo "<td><select name='toimipaikka'><option value=''>".t("Oletustoimipaikka")."</option>";
+
+				$query  = "SELECT * FROM yhtion_toimipaikat WHERE yhtio='$kukarow[yhtio]' order by nimi";
+				$vares = mysql_query($query) or pupe_error($query);
+
+				while ($varow = mysql_fetch_array($vares)) {
+					$sel='';
+					if ($varow['tunnus']==$krow["toimipaikka"]) $sel = 'selected';
+					echo "<option value='$varow[tunnus]' $sel>$varow[ovtlisa] $varow[nimi]</option>";
 				}
 
 				echo "</select></td></tr>";

@@ -16,12 +16,12 @@ $intrtuote = mysql_fetch_array($maaresult);
 ///* Laskun tietoja tarkistetaan*///
 if ($tapa == 'vienti') {
 
-	$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and laskunro='$row[laskunro]' and tila='U' and alatila='X' and vienti='E'";
+	$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and laskunro='$row[laskunro]' and tila='L' and alatila='X' and (vienti='E' or ultilno='-1')";
 	$maaresult = mysql_query($query) or pupe_error($query);
 	$intrkeikk = mysql_fetch_array($maaresult);
 
 	if (mysql_num_rows($maaresult) == 0) {
-		$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and laskunro='$row[laskunro]' and lasku.kohdistettu='X' and lasku.tila = 'K' and lasku.ultilno = '-1'";
+		$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and laskunro='$row[laskunro]' and kohdistettu='X' and tila='K' and ultilno='-1'";
 		$maaresult = mysql_query($query) or pupe_error($query);
 		$intrkeikk = mysql_fetch_array($maaresult);
 		$specutxt  = "Tämä on keikka joka on viety kotimaasta ulkomaanvarastoon.<br>";
@@ -29,7 +29,7 @@ if ($tapa == 'vienti') {
 	}
 
 	if (mysql_num_rows($maaresult) == 0) {
-		$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnus='$row[laskunro]' and tila='G' and alatila='V' and lasku.ultilno = '-1'";
+		$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnus='$row[laskunro]' and tila='G' and alatila='V' and lasku.ultilno='-1'";
 		$maaresult = mysql_query($query) or pupe_error($query);
 		$intrkeikk = mysql_fetch_array($maaresult);
 		$specutxt  = "Tämä on siirtolista joka on viety kotimaasta ulkomaanvarastoon.<br>";
@@ -87,12 +87,12 @@ if ($tapa == 'vienti') {
 
 if ($tapa == 'tuonti') {
 
-	$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and laskunro='$row[laskunro]' and tila='K' and vanhatunnus=0";
+	$query = "select tunnus from lasku where yhtio = '$kukarow[yhtio]' and laskunro = '$row[laskunro]' and tila = 'K' and kohdistettu = 'X' and vanhatunnus = 0 and (vienti = 'F' or ultilno = '-2')";
 	$maaresult = mysql_query($query) or pupe_error($query);
 	$intrkeikk = mysql_fetch_array($maaresult);
 
 	if (mysql_num_rows($maaresult) == 0) {
-		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and laskunro='$row[laskunro]' and tila='U' and alatila='X' and lasku.ultilno = '-2'";
+		$query = "select * from lasku where yhtio = '$kukarow[yhtio]' and laskunro = '$row[laskunro]' and tila = 'L' and alatila = 'X' and ultilno = '-2'";
 		$maaresult = mysql_query($query) or pupe_error($query);
 		$intrkeikk = mysql_fetch_array($maaresult);
 		$specutxt  = "Tämä on myyntilasku joka on myyty ulkomaanvarastosta kotimaahan.<br>";
@@ -100,7 +100,7 @@ if ($tapa == 'tuonti') {
 	}
 
 	if (mysql_num_rows($maaresult) == 0) {
-		$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnus='$row[laskunro]' and tila='G' and alatila='V' and lasku.ultilno = '-2'";
+		$query = "select tunnus from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$row[laskunro]' and tila = 'G' and alatila = 'V' and ultilno = '-2'";
 		$maaresult = mysql_query($query) or pupe_error($query);
 		$intrkeikk = mysql_fetch_array($maaresult);
 		$specutxt  = "Tämä on siirtolista joka on tuotu ulkomaanvarastosta kotimaahan.<br>";
@@ -176,9 +176,9 @@ if ($tapa == 'tuonti') {
 		$virhetxt = t("Lasku/keikka")." $row[laskunro] ".t("ei löydy")."!<br>";
 		$virhe++;
 	}
-	
+
 	$tapa = "tuonti";
-	
+
 }
 
 if ((float) $row["paino"] == 0) {

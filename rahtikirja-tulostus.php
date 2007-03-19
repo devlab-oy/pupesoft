@@ -331,7 +331,6 @@
 					}
 				}
 
-
 				echo "<font class='message'>".t("Asiakas")." $rakir_row[toim_nimi]</font><li>".t("Yhdistet‰‰n tilaukset").": ";
 
 				foreach($lotsikot as $doit) echo "$doit ";
@@ -378,6 +377,32 @@
 								and kuljetusmuoto != ''";
 					$ures  = mysql_query($query) or pupe_error($query);
 				}
+
+				// p‰ivitet‰‰n laskuille oletus intrastat tiedot toimittajan takaa jos sellaisia lˆytyy ja mit‰‰n ei ole viel‰ p‰ivitetty
+				$query = "	UPDATE lasku SET
+							maa_maara						     = '$toitarow[maa_maara]',
+							sisamaan_kuljetus                    = '$toitarow[sisamaan_kuljetus]',
+							sisamaan_kuljetus_kansallisuus       = '$toitarow[sisamaan_kuljetus_kansallisuus]',
+							sisamaan_kuljetusmuoto               = '$toitarow[sisamaan_kuljetusmuoto]',
+							kontti                               = '$toitarow[kontti]',
+							aktiivinen_kuljetus                  = '$toitarow[aktiivinen_kuljetus]',
+							aktiivinen_kuljetus_kansallisuus     = '$toitarow[aktiivinen_kuljetus_kansallisuus]',
+							kauppatapahtuman_luonne              = '$toitarow[kauppatapahtuman_luonne]',
+							kuljetusmuoto                        = '$toitarow[kuljetusmuoto]',
+							poistumistoimipaikka_koodi           = '$toitarow[poistumistoimipaikka_koodi]'
+							WHERE yhtio = '$kukarow[yhtio]' and
+							tunnus in ($otunnukset) and
+							maa_maara = '' and
+							sisamaan_kuljetus = '' and
+							sisamaan_kuljetus_kansallisuus = '' and
+							sisamaan_kuljetusmuoto = '' and
+							kontti = '' and
+							aktiivinen_kuljetus = '' and
+							aktiivinen_kuljetus_kansallisuus = '' and
+							kuljetusmuoto = '' and
+							poistumistoimipaikka_koodi = ''";
+				$ures  = mysql_query($query) or pupe_error($query);
+
 			}
 			echo "<br>";
 

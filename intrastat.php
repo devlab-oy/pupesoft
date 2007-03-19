@@ -53,14 +53,14 @@
 
 		//tuonti vai vienti
 		if ($tapa == "tuonti") {
-			$where1 = " and lasku.vienti = 'F' ";
+			$where1 = " and (lasku.vienti = 'F' or lasku.ultilno = '-2') ";
 			$where2 = " and lasku.ultilno = '-2' ";
 			$where3 = " and lasku.ultilno = '-2' ";
 		}
 		else {
 			$tapa = "vienti";
 			$where1 = " and lasku.ultilno = '-1' ";
-			$where2 = " and lasku.vienti = 'E' ";
+			$where2 = " and (lasku.vienti = 'E' or lasku.ultilno = '-1') ";
 			$where3 = " and lasku.ultilno = '-1' ";
 		}
 
@@ -89,6 +89,7 @@
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
 					WHERE lasku.kohdistettu = 'X'
 					and lasku.tila = 'K'
+					and lasku.vanhatunnus = 0
 					$where1
 					and lasku.kauppatapahtuman_luonne != '999'
 					and lasku.yhtio = '$kukarow[yhtio]'
@@ -112,10 +113,10 @@
 					if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
 					if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta
 					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
-					WHERE lasku.tila = 'U'
+					WHERE lasku.tila = 'L'
 					and lasku.alatila = 'X'
 					$where2
 					and lasku.kauppatapahtuman_luonne != '999'
@@ -146,6 +147,7 @@
 					WHERE lasku.tila = 'G'
 					and lasku.alatila = 'V'
 					$where3
+					and lasku.kauppatapahtuman_luonne != '999'
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tapvm >= '$vva-$kka-$ppa'
 					and lasku.tapvm <= '$vvl-$kkl-$ppl'

@@ -195,9 +195,11 @@
 				echo "	<tr><td>28. ".t("Toimitusehdon mukainen lisättävä erä")."</td><td colspan='2'><input type='text' name='lisattava_era' size='25' value='$laskurow[lisattava_era]'></td></tr>";
 			}
 
+			if ($laskurow["bruttopaino"] == 0) $laskurow["bruttopaino"] = $rahtirow["kilot"];
+
 			echo "	<tr><td>35. ".t("Bruttopaino").":</td>
-					<td colspan='2'>$rahtirow[kilot]</td>
-					<input type='hidden' name='bruttopaino' value='$rahtirow[kilot]'></tr>";
+					<td colspan='2'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td>
+					</tr>";
 
 			echo "</table>";
 
@@ -228,7 +230,8 @@
 			$query = "	UPDATE lasku
 						SET maa_lahetys = '$maa_lahetys',
 						kauppatapahtuman_luonne = '$ktapahtuman_luonne',
-						kuljetusmuoto = '$kuljetusmuoto'
+						kuljetusmuoto = '$kuljetusmuoto',
+						bruttopaino = '$bruttopaino'
 						WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 
 			$result = mysql_query($query) or pupe_error($query);
@@ -257,6 +260,19 @@
 					<input type='hidden' name='otunnus' value='$otunnus'>
 					<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>
 					<input type='hidden' name='tee' value='update'>";
+
+			$query = "SELECT sum(kollit) kollit, sum(kilot) kilot
+					  FROM rahtikirjat
+					  WHERE otsikkonro ='$otunnus' and yhtio='$kukarow[yhtio]'";
+			$result = mysql_query($query) or pupe_error($query);
+			$rahtirow = mysql_fetch_array ($result);
+			
+			if ($laskurow["bruttopaino"] == 0) $laskurow["bruttopaino"] = $rahtirow["kilot"];
+			
+			echo "	<tr><td>".t("Bruttopaino").":</td>
+					<td colspan='2'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td>
+					</tr>";
+
 			echo "<tr><td>".t("Lähetysmaa").":</td><td colspan='3'>
 					<select name='maa_lahetys'>";
 
@@ -340,7 +356,7 @@
 		if (is_numeric($etsi)) $haku = "and laskunro='$etsi'";
 
 		if ($tapa == "tuonti") $tila = " and tila='K' and vanhatunnus=0 ";
-		else $tila = " and tila='U' and alatila='X' ";
+		else $tila = " and tila='L' and alatila='X' ";
 
 		if (trim($etsi) == "") $tee = "";
 

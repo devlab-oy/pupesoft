@@ -121,7 +121,7 @@ while ($orow = mysql_fetch_array($result)) {
 
 		// jos ykkönen niin näytetään avattu menu itemi
 		if($menu[$mrow['nimitys']] == 1) {
-			echo "<a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
+			echo "<tr><td class='back'><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
 
 			// tehdään submenu itemit
 			while ($mrow = mysql_fetch_array($xresult)) {

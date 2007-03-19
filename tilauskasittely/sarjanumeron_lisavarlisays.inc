@@ -50,7 +50,7 @@
 				$ostorow = mysql_fetch_array($sarjares);
 								
 				// Haetaan muut lisävarusteet
-				$query = "	SELECT tuoteno, round(kpl/$ostorow[kpl]) kpl, round(tilkpl/$ostorow[kpl]) tilkpl, var
+				$query = "	SELECT tuoteno, round(kpl/$ostorow[kpl]) kpl, round(tilkpl/$ostorow[kpl]) tilkpl, tilkpl sistyomaarayskpl, var, tyyppi, concat_ws('#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka
 							FROM tilausrivi 
 							WHERE yhtio  = '$kukarow[yhtio]' 
 							and perheid2 = '$sarjarow[perheid2]'
@@ -77,7 +77,11 @@
 
 						$ytunnus         = $laskurow["ytunnus"];
 			
-						if ($sarjarow["var"] != 'P') {
+						if ($sarjarow["tyyppi"] == 'G') {
+							$kpl		 = $sarjarow["sistyomaarayskpl"];
+							$var		 = "";
+						}
+						elseif ($sarjarow["var"] != 'P') {
 							$kpl		 = $sarjarow["kpl"];
 							$var		 = "";
 						}
@@ -104,7 +108,8 @@
 							$hinta 		     = "";
 							$netto 		     = "";
 							$ale 		     = "";
-							$alv		     = "";									
+							$alv		     = "";	
+							$paikka			 = $sarjarow["paikka"];
 							$varasto 	     = "";
 							$rivitunnus		 = "";
 							$korvaavakielto	 = "";

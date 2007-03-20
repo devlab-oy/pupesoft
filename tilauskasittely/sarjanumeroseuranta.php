@@ -70,8 +70,7 @@
 	if ($toiminto == "kululaskut") {
 		require('kululaskut.inc');
 		exit;
-	}
-	
+	}	
 	
 	//ollaan poistamassa sarjanumero-olio kokonaan
 	if ($toiminto == 'POISTA') {
@@ -310,7 +309,7 @@
 	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi != "ON")) {
 		//Jos tuote on marginaaliverotuksen alainen niin sen pit‰‰ olla onnistuneesti ostettu jotta sen voi myyd‰
 		$query	= "	SELECT sarjanumeroseuranta.*,
-					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
+					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
 					lasku_osto.tunnus									osto_tunnus,
 					lasku_osto.nimi										osto_nimi,
 					lasku_myynti.tunnus									myynti_tunnus,
@@ -342,7 +341,7 @@
 	elseif((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi == "ON")) {
 		// Haetaan vain sellaiset sarjanumerot jotka on viel‰ vapaita
 		$query	= "	SELECT sarjanumeroseuranta.*,
-					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
+					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
 					lasku_osto.tunnus									osto_tunnus,
 					lasku_osto.nimi										osto_nimi,
 					lasku_myynti.tunnus									myynti_tunnus,

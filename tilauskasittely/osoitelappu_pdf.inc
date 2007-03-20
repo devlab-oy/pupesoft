@@ -155,7 +155,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		}
 		// piirretään viivakoodi paprulle
 		$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
-		$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(4), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
 		unset($obj);
 
 		//dellataan tmp filet kuleksimasta
@@ -212,7 +212,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 		// piirretään viivakoodi paprulle
 		$pdf->image_place($image, mm_pt(10), mm_pt(40), $firstpage); // Y, X
-		$pdf->draw_text(mm_pt(5), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
+		$pdf->draw_text(mm_pt(4), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
 		unset($obj);
 
 		//dellataan tmp filet kuleksimasta
@@ -245,7 +245,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(70), mm_pt(165), "Viite - Referens - Reference: ",				$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(70), mm_pt(160), "$laskurow[viesti]" ,							$firstpage, $kirj);
 
-	$pdf->draw_text(mm_pt(5), mm_pt(155), "Tilaukset - Order - Orders: ",					$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(4), mm_pt(155), "Tilaukset - Order - Orders: ",					$firstpage, $otsik);
 	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
 	$pdf->draw_text(mm_pt(50), mm_pt(155), $tilausnumeroita, $firstpage, $kirj);
 
@@ -283,7 +283,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),	$firstpage, $rectparam);
 
 	//Kuljetusohjeet = viivakoodi tulee tähän
-	$pdf->draw_text(mm_pt(5), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(20), mm_pt(55), $laskurow["toimitustapa"],											$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow['viesti'],													$firstpage, $kirj);
 
@@ -298,7 +298,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
 	}
 	// ylhäällä on "oikee" tapa tehdä, mutta me ei tiedetä tässä vaiheessa kollien määrää eikä painoa
-	$pdf->draw_text(mm_pt(5), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(4), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
 	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
 	$pdf->draw_text(mm_pt(50), mm_pt(30), $tilausnumeroita, $firstpage, $kirj);
 }

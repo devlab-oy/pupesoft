@@ -43,7 +43,7 @@
 				require_once ($yhtiorow["kerailylistatyyppi"]);
 			}
 			else {
-				require_once ("tulosta_lahete_kerayslista.inc");	
+				require_once ("tulosta_lahete_kerayslista.inc");
 			}
 		}
 		else {
@@ -148,7 +148,7 @@
 		//pdf:n header..
 		$firstpage = alku();
 		$paino = 0;
-		
+
 		while ($row = mysql_fetch_array($result)) {
 			//piirrä rivi
 			$firstpage = rivi($firstpage);
@@ -235,7 +235,7 @@
 			//jos osoitelappuprintteri löytyy tulostetaan osoitelappu..
 			$tunnus = $laskurow["tunnus"];
 			if ($oslapp!='') {
-				require ("osoitelappu.inc");
+				require ("osoitelappu_pdf.inc");
 			}
 		}
 

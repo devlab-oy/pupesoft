@@ -103,7 +103,7 @@
 			$sarjares = mysql_query($query) or pupe_error($query);
 			
 			if ($kaytetty != '') {
-				$query = "	SELECT tunnus, kaytetty, $tunnuskentta trivitunnus
+				$query = "	SELECT tunnus, kaytetty, ostorivitunnus, myyntirivitunnus
 							FROM sarjanumeroseuranta
 							WHERE tunnus = '$sarjatunnus'";
 				$sarres = mysql_query($query) or pupe_error($query);
@@ -112,13 +112,13 @@
 				$query = "	UPDATE tilausrivi
 							SET alv=alv+500
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus  = '$sarrow[trivitunnus]'
-							and (tyyppi='O' or uusiotunnus = 0)
+							and tunnus in ($sarrow[ostorivitunnus], $sarrow[myyntirivitunnus])
+							and laskutettuaika='0000-00-00'
 							and alv <= 500";
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 			else {
-				$query = "	SELECT tunnus, kaytetty, $tunnuskentta trivitunnus
+				$query = "	SELECT tunnus, kaytetty, ostorivitunnus, myyntirivitunnus
 							FROM sarjanumeroseuranta
 							WHERE tunnus = '$sarjatunnus'";
 				$sarres = mysql_query($query) or pupe_error($query);
@@ -127,8 +127,8 @@
 				$query = "	UPDATE tilausrivi
 							SET alv=alv-500
 							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus  = '$sarrow[trivitunnus]'
-							and (tyyppi='O' or uusiotunnus = 0)
+							and tunnus in ($sarrow[ostorivitunnus], $sarrow[myyntirivitunnus])
+							and laskutettuaika='0000-00-00'
 							and alv >= 500";
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}

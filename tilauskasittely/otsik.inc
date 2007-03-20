@@ -1632,11 +1632,6 @@
 		if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T") {
 			$query3 .= "laskun_lisatiedot SET
 						yhtio						= '$kukarow[yhtio]',
-						projektipaallikko			= '$projektipaallikko',
-						yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
-						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
-						seuranta					= '$seuranta',
-						asiakkaan_kohde				= '$asiakkaan_kohde',
 						kolm_ovttunnus				= '$kolm_ovttunnus',
 						kolm_nimi					= '$kolm_nimi',
 						kolm_nimitark				= '$kolm_nimitark',

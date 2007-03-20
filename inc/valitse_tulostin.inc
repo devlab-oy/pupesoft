@@ -2,6 +2,7 @@
 	///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 	$useslave = 1;
 	echo "<form method='post' action='$PHP_SELF'>
+		<input type='hidden' name='lopetus' value='$lopetus'>
 		<input type='hidden' name='toim' value='$toim'>
 		<input type='hidden' name='tila' value='$tila'>
 		<input type='hidden' name='raportti' value='$raportti'>

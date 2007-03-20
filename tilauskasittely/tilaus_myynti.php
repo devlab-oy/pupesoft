@@ -3060,9 +3060,10 @@ if ($tee == '') {
 				}
 
 				if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
-					echo "<form name='valmis' action='tulostakopio.php' method='post'>
-							<input type='hidden' name='tee' value='NAYTATILAUS'>
+					echo "<form name='valmis' action='tulostakopio.php' method='post'>							
 							<input type='hidden' name='otunnus' value='$tilausnumero'>
+							<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//tee='>
+							
 							<th colspan='".(floor($ycspan/2))."' nowrap>".t("Näytä lomake").":</th>
 							<td colspan='".(ceil($ycspan/2)-1)."' nowrap>";
 
@@ -3075,7 +3076,8 @@ if ($tee == '') {
 					echo "<option value='TYOMAARAYS'>Työmäärys</value>";
 					echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
 					echo "</select></td>";
-					echo "<td class='back'><input type='submit' value='".t("Näytä")."' Style='font-size: 8pt; padding:0;'>";
+					echo "<td class='back'><input type='submit' name='tee' value='".t("NAYTATILAUS")."' Style='font-size: 8pt; padding:0;'>
+					<input type='submit' name='tee' value='".t("TULOSTA")."' Style='font-size: 8pt; padding:0;'>";
 					echo "</td>";
 					echo "</form>";
 				}

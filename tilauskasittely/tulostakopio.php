@@ -129,11 +129,12 @@
 
 	if ($tee == "ETSILASKU") {
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
-			<input type='hidden' name='toim' value='$toim'>
-			<input type='hidden' name='ytunnus' value='$ytunnus'>
-			<input type='hidden' name='asiakasid' value='$asiakasid'>
-			<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-			<input type='hidden' name='tee' value='ETSILASKU'>";
+				<input type='hidden' name='lopetus' value='$lopetus'>
+				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='ytunnus' value='$ytunnus'>
+				<input type='hidden' name='asiakasid' value='$asiakasid'>
+				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+				<input type='hidden' name='tee' value='ETSILASKU'>";
 
 		echo "<table>";
 
@@ -492,6 +493,7 @@
 
 			echo "<td class='back'>
 						<form method='post' action='$PHP_SELF'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='tee' value='$tee'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tila' value='monta'>
@@ -520,6 +522,7 @@
 				echo "<th>".t("Tulosta")."</th>";
 
 				echo "  <form method='post' action='$PHP_SELF' autocomplete='off'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tee' value='TULOSTA'>";
 			}
@@ -552,6 +555,7 @@
 
 					echo "<td class='back'>
 							<form method='post' action='$PHP_SELF'>
+							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tee' value='NAYTAHTML'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tunnus' value='$row[Tilaus]'>
@@ -570,6 +574,7 @@
 
 					echo "<td class='back'>
 							<form method='post' action='$PHP_SELF' autocomplete='off'>
+							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='otunnus' value='$row[Tilaus]'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
@@ -578,6 +583,7 @@
 					echo "<td class='back'>
 							<form method='post' action='$PHP_SELF' autocomplete='off'>
 							<input type='hidden' name='otunnus' value='$row[Tilaus]'>
+							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='TULOSTA'>
 							<input type='submit' value='".t("Tulosta")."'></form></td>";
@@ -1501,6 +1507,16 @@
 				}
 				$tee = '';
 			}
+			
+			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
+			if ($lopetus != '') {
+				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+				$lopetus = str_replace('////','?', $lopetus);
+				$lopetus = str_replace('//','&',  $lopetus);
+
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
+				exit;
+			}
 		}
 	}
 
@@ -1509,7 +1525,8 @@
 		//syˆtet‰‰n tilausnumero
 		echo "<br><table>";
 		echo "<form action = '$PHP_SELF' method = 'post' name='hakuformi'>
-			<input type='hidden' name='toim' value='$toim'>";
+				<input type='hidden' name='lopetus' value='$lopetus'>
+				<input type='hidden' name='toim' value='$toim'>";
 
 
 		if (trim($toim) == "SIIRTOLISTA") {

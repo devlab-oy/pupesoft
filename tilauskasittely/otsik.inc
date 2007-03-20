@@ -378,7 +378,7 @@
 			echo "</table><br>";
 
 
-			if ($toim == "TARJOUS") {
+			if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
 				echo "<table>";
 				echo "<tr><td>";
 					echo "<table cellpadding='1' cellspacing='1'>";
@@ -990,7 +990,7 @@
 
 			echo "<tr>";
 
-			if ($toim == "TARJOUS") {
+			if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
 				echo "<td>".t("Vaihtokohteen toimitusehto")."</td><td>";
 
 				$query = "	SELECT selite, selitetark
@@ -1387,9 +1387,19 @@
 				$query2 = "UPDATE ";
 				$postquery2 = " WHERE otunnus = '$kukarow[kesken]'";
 			}
-
-			$query3 = "UPDATE ";
-			$postquery3 = " WHERE otunnus = '$kukarow[kesken]'";
+			
+			//Tsekataan vielä, että olio varmasi löytyy, muuten lisätään se
+			$apuqu = "select yhtio from laskun_lisatiedot where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
+			$mexapu = mysql_query($apuqu) or pupe_error($apuqu);
+			
+			if (mysql_num_rows($mexapu) == 0) {
+				$query3 = "INSERT into ";
+				$postquery3 = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
+			}
+			else {
+				$query3 = "UPDATE ";
+				$postquery3 = " WHERE otunnus = '$kukarow[kesken]'";	
+			}
 		}
 
 		if (strlen(trim($tnimi)) == 0) {
@@ -1619,9 +1629,22 @@
 			$result = mysql_query($query2) or pupe_error($query2);			
 		}
 
-		if ($toim == "RIVISYOTTO") {
+		if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T") {
 			$query3 .= "laskun_lisatiedot SET
 						yhtio						= '$kukarow[yhtio]',
+						projektipaallikko			= '$projektipaallikko',
+						yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
+						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
+						seuranta					= '$seuranta',
+						asiakkaan_kohde				= '$asiakkaan_kohde',
+						kolm_ovttunnus				= '$kolm_ovttunnus',
+						kolm_nimi					= '$kolm_nimi',
+						kolm_nimitark				= '$kolm_nimitark',
+						kolm_osoite					= '$kolm_osoite',
+						kolm_postino				= '$kolm_postino',
+						kolm_postitp				= '$kolm_postitp',
+						kolm_maa					= '$kolm_maa',
+						toimitusehto2				= '$toimitusehto2',
 						projektipaallikko			= '$projektipaallikko',
 						yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
 						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
@@ -1631,28 +1654,6 @@
 			$query3 .= $postquery3;
 			$result = mysql_query($query3) or pupe_error($query3);
 		}
-		elseif ($toim == "TARJOUS") {
-			$query3 .= "laskun_lisatiedot SET
-						yhtio			= '$kukarow[yhtio]',
-						kolm_ovttunnus	= '$kolm_ovttunnus',
-						kolm_nimi		= '$kolm_nimi',
-						kolm_nimitark	= '$kolm_nimitark',
-						kolm_osoite		= '$kolm_osoite',
-						kolm_postino	= '$kolm_postino',
-						kolm_postitp	= '$kolm_postitp',
-						kolm_maa		= '$kolm_maa',
-						toimitusehto2	= '$toimitusehto2',
-						projektipaallikko			= '$projektipaallikko',
-						yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
-						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
-						seuranta					= '$seuranta',
-						asiakkaan_kohde				= '$asiakkaan_kohde',
-						otunnus 		= '$kukarow[kesken]'";
-			$query3 .= $postquery3;
-			$result = mysql_query($query3) or pupe_error($query3);
-		}
 	}
-
 	unset($alv);
-
 ?>

@@ -3062,7 +3062,7 @@ if ($tee == '') {
 				if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
 					echo "<form name='valmis' action='tulostakopio.php' method='post'>							
 							<input type='hidden' name='otunnus' value='$tilausnumero'>
-							<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//tee='>
+							<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//tee='>
 							
 							<th colspan='".(floor($ycspan/2))."' nowrap>".t("Näytä lomake").":</th>
 							<td colspan='".(ceil($ycspan/2)-1)."' nowrap>";

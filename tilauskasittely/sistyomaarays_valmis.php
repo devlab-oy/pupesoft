@@ -4,7 +4,6 @@
 
 	echo "<font class='head'>".t("Kuittaa sisäinen työmääräys valmiiksi").":<hr></font>";
 
-	
 	if ($tee == "VALMIS") {
 		// katsotaan onko muilla aktiivisena
 		$query = "select * from kuka where yhtio='$kukarow[yhtio]' and kesken='$tilausnumero' and kesken!=0";
@@ -90,9 +89,11 @@
 							$ostohinta = $lisarow["kehahin"];
 						}
 						
+						$ostohinta = (int) $ostohinta;
+						
 						//Ruuvataan liitetyt lisävarusteet kiinni laitteen alkuperäiseen ostoriviin
 						$query = "	UPDATE tilausrivi 
-									SET perheid2=$sarjarow[ostorivitunnus], rivihinta=round(varattu*$ostohinta,2), toimitettu='$kukarow[kuka]', toimitettuaika = now(), tilkpl=varattu, varattu = 0 
+									SET perheid2='$sarjarow[ostorivitunnus]', rivihinta=round(varattu*$ostohinta,2), toimitettu='$kukarow[kuka]', toimitettuaika = now(), tilkpl=varattu, varattu = 0 
 									WHERE yhtio='$kukarow[yhtio]' and tunnus='$lisarow[rivitunnus]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 
@@ -108,20 +109,19 @@
 										and hyllytaso 	= '$lisarow[hyllytaso]'
 										LIMIT 1";
 							$sarjares = mysql_query($query) or pupe_error($query);
-							echo "$query<br><br>";
 						}
 						
 						//Päivitetään varmuuden vuoksi alkuperäisen ostorivin perheid2 (se voi olla nolla)
 						$query = "	UPDATE tilausrivi 
-									SET perheid2=$sarjarow[ostorivitunnus]
-									WHERE yhtio='$kukarow[yhtio]' 
-									and tunnus=$sarjarow[ostorivitunnus]";
+									SET perheid2 = '$sarjarow[ostorivitunnus]'
+									WHERE yhtio = '$kukarow[yhtio]' 
+									and tunnus  = '$sarjarow[ostorivitunnus]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 						
 						if ($lisarow["sarjanumeroseuranta"] != '') {
 							//Irroitetaan lisävarusteen sarjanumero
 							$query = "	UPDATE sarjanumeroseuranta 
-										SET siirtorivitunnus=0 
+										SET siirtorivitunnus = 0 
 										WHERE yhtio='$kukarow[yhtio]' and tuoteno='$lisarow[tuoteno]' and siirtorivitunnus='$lisarow[rivitunnus]'";
 							$sarjares = mysql_query($query) or pupe_error($query);
 						}

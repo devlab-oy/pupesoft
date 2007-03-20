@@ -23,19 +23,42 @@
 	// Halutaan vaihtaa asiakas tilauksella
 	if ($tila == "vaihdaasiakas") {
 		$query = "	UPDATE lasku
-					SET liitostunnus = 0,
-					ytunnus		= '',
-					nimi		= '',
-					nimitark	= '',
-					osoite		= '',
-					postino		= '',
-					postitp		= ''
-					WHERE tunnus = '$kukarow[kesken]'";
+					SET liitostunnus 	= 0,
+					ytunnus				= '',         
+					ovttunnus			= '',
+					nimi				= '',
+					nimitark			= '',        
+					osoite 				= '',         
+					postino 			= '',        
+					postitp				= '',         
+					maa   				= '',          
+					toim_ovttunnus 		= '', 
+					toim_nimi      		= '', 
+					toim_nimitark  		= '', 
+					toim_osoite    		= '', 
+					toim_postino  		= '',  
+					toim_postitp 		= '',   
+					toim_maa    		= ''
+					WHERE yhtio 		= '$kukarow[yhtio]'
+					and tunnus	 		= '$kukarow[kesken]'";   
+		$result = mysql_query($query) or pupe_error($query);
+		
+		$query = "	UPDATE laskun_lisatiedot    
+					SET kolm_ovttunnus	= '',  
+					kolm_nimi   		= '',    
+					kolm_nimitark		= '',   
+					kolm_osoite  		= '',   
+					kolm_postino  		= '',  
+					kolm_postitp 		= '',   
+					kolm_maa    		= ''
+					WHERE yhtio 		= '$kukarow[yhtio]'
+					and otunnus 		= '$kukarow[kesken]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$tila 		= '';
 		$nimi 		= '';
 		$asiakasid	= '';
+		$from 		= 'vaihdaasiakas';
 	}
 
 	//Jos ylläpidossa on luotu uusi asiakas
@@ -150,10 +173,56 @@
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='paaformi'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='from' value='$from'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 
 		if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 
+			//Asiakas vaihtuu
+			if ($from == "vaihdaasiakas" and $asiakasid != "") {				
+				$squery = "	SELECT *
+							FROM asiakas
+							WHERE tunnus = '$asiakasid'";
+				$assresult = mysql_query($squery) or pupe_error($squery);
+				$assrow = mysql_fetch_array($assresult);
+							
+				$query = "	UPDATE lasku
+							SET liitostunnus 	= '$assrow[tunnus]',
+							ytunnus				= '$assrow[ytunnus]',         
+							ovttunnus			= '$assrow[ovttunnus]',
+							nimi				= '$assrow[nimi]',
+							nimitark			= '$assrow[nimitark]',        
+							osoite 				= '$assrow[osoite]',         
+							postino 			= '$assrow[postino]',        
+							postitp				= '$assrow[postitp]',         
+							maa   				= '$assrow[maa]',          
+							toim_ovttunnus 		= '$assrow[toim_ovttunnus]', 
+							toim_nimi      		= '$assrow[toim_nimi]', 
+							toim_nimitark  		= '$assrow[toim_nimitark]', 
+							toim_osoite    		= '$assrow[toim_osoite]', 
+							toim_postino  		= '$assrow[toim_postino]',  
+							toim_postitp 		= '$assrow[toim_postitp]',   
+							toim_maa    		= '$assrow[toim_maa]'
+							WHERE yhtio 		= '$kukarow[yhtio]'
+							and tunnus	 		= '$kukarow[kesken]'
+							and liitostunnus	= 0";   
+				$result = mysql_query($query) or pupe_error($query);
+				
+				$query = "	UPDATE laskun_lisatiedot			
+							SET kolm_ovttunnus	= '$assrow[kolm_ovttunnus]',  
+							kolm_nimi   		= '$assrow[kolm_nimi]',    
+							kolm_nimitark		= '$assrow[kolm_nimitark]',   
+							kolm_osoite  		= '$assrow[kolm_osoite]',   
+							kolm_postino  		= '$assrow[kolm_postino]',  
+							kolm_postitp 		= '$assrow[kolm_postitp]',   
+							kolm_maa    		= '$assrow[kolm_maa]'
+							WHERE yhtio 		= '$kukarow[yhtio]'
+							and otunnus 		= '$kukarow[kesken]'";
+				$result = mysql_query($query) or pupe_error($query);
+	
+				$tiedot_laskulta = "YES";
+			}
+			
 			$qlisa = "";
 			if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
 				$qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
@@ -161,7 +230,7 @@
 			elseif($toim == "TARJOUS" or $toim == "RIVISYOTTO") {
 				$qlisa = " LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus ";
 			}
-
+			
 			if (substr($asiakasid,0,1) == "£") {
 
 				$asiakasid = substr($asiakasid,1);
@@ -1166,6 +1235,7 @@
 		//otetaan käyttöliittymästä tullut alv talteen
 		$laskunalv = $alv;
 
+		// HUOM!!! Asiakkaanvaihto ei nyt tällä hetkellä mene tähän haaraan. Vaatii redesignin!!!!!
 		//tutkitaan onko ytunnus-, alvi- tai vienti-kenttä vaihtunut
 		if ((int) $kukarow["kesken"] != 0 and ($apuro['liitostunnus'] != $asiakasid or $apuro['alv'] != $alv or $apuro['vienti'] != $vienti)) {
 			// Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan

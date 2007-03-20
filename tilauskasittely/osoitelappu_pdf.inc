@@ -63,13 +63,17 @@ if (!function_exists('tarkiste')) {
 }
 
 //tehdään SSCC (00) 1 ytunnus(8)lähetenro(6)kollityht(2)tarkiste(1)
+
+$apu_kollityht = $kollityht;
+if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkkiä
+
 $prefix = "(00)";
 $sscc = 1;
 $sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-$sscc .= sprintf('%06d', $laskurow["tunnus"]);
-$sscc .= sprintf('%02d', $kollityht);
+$sscc .= sprintf('%06.06d', $laskurow["tunnus"]);
+$sscc .= sprintf('%02.02d', $apu_kollityht);
 $loppu = tarkiste($sscc);
-$sscc = "$prefix$sscc$loppu";
+$sscc = $prefix.$sscc.$loppu;
 
 //PDF:n luonti ja defaultit
 define (__TRACE_ENABLED__, false);
@@ -282,7 +286,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(5), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(20), mm_pt(55), $laskurow["toimitustapa"],											$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow['viesti'],													$firstpage, $kirj);
-	
+
 	//tänne ohjeisiin tulee lopullisen asiakkaan tiedot jos kyseessä on koontikuljetus
 	$query = "	select hetiera
 				from toimitustapa

@@ -149,11 +149,18 @@ echo "
 
 <table width='550' border='0'>
 <tr>
-<td valign='top'><br><a target='_top' href='/'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'></a></td>
+<td valign='top'><br>";
+
+if (file_exists("pics/pupesoft_logo.jpg")) {
+	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.jpg' border='0'>";
+}
+else {
+	echo "<a target='_top' href='/'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
+}
+
+echo "</a></td>
 <td>
-
 <font class='head'>".t("Sis‰‰nkirjautuminen",$browkieli)."</font><br><br>
-
 ";
 
 if (isset($usea) and $usea == 1) {

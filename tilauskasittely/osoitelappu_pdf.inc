@@ -155,7 +155,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		}
 		// piirret‰‰n viivakoodi paprulle
 		$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
-		$pdf->draw_text(mm_pt(5), mm_pt(78), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(5), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
 		unset($obj);
 
 		//dellataan tmp filet kuleksimasta
@@ -211,7 +211,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
 
 		// piirret‰‰n viivakoodi paprulle
-		$pdf->image_place($image, mm_pt(7), mm_pt(40), $firstpage); // Y, X
+		$pdf->image_place($image, mm_pt(10), mm_pt(40), $firstpage); // Y, X
 		$pdf->draw_text(mm_pt(5), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
 		unset($obj);
 
@@ -245,7 +245,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(70), mm_pt(165), "Viite - Referens - Reference: ",				$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(70), mm_pt(160), "$laskurow[viesti]" ,							$firstpage, $kirj);
 
-	$pdf->draw_text(mm_pt(5), mm_pt(155), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(5), mm_pt(155), "Tilaukset - Order - Orders: ",					$firstpage, $otsik);
 	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
 	$pdf->draw_text(mm_pt(50), mm_pt(155), $tilausnumeroita, $firstpage, $kirj);
 
@@ -298,9 +298,9 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
 	}
 	// ylh‰‰ll‰ on "oikee" tapa tehd‰, mutta me ei tiedet‰ t‰ss‰ vaiheessa kollien m‰‰r‰‰ eik‰ painoa
-	$pdf->draw_text(mm_pt(5), mm_pt(23), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(5), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
 	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
-	$pdf->draw_text(mm_pt(50), mm_pt(23), $tilausnumeroita, $firstpage, $kirj);
+	$pdf->draw_text(mm_pt(50), mm_pt(30), $tilausnumeroita, $firstpage, $kirj);
 }
 
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:

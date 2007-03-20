@@ -140,6 +140,9 @@ while ((!feof ($fd)) and ($error!=1)) {
 					echo "".t("Perustetaan tuotepaikka")." Y01-0-0-0 ".t("tuotteelle")." $trow[tuoteno]<br>";
 					$query = "	INSERT into tuotepaikat set
 								hyllyalue	= 'Y01',
+								hyllynro	= '0',
+								hyllytaso	= '0',
+								hyllyvali	= '0',
 								tuoteno		= '$trow[tuoteno]',
 								yhtio		= '$trow[yhtio]'";
 					$result = mysql_query($query) or pupe_error($query);

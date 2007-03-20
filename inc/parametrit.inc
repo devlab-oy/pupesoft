@@ -26,10 +26,6 @@ require("salasanat.php");
 $link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
 mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
 
-// HUOMHUOM!!
-$query = "SET SESSION group_concat_max_len = 100000, max_allowed_packet = 2095104";
-$result = mysql_query($query) or pupe_error($query);
-
 // jos käytetään jotain kummallista porttia (ei http eikä https)
 $portti = "";
 if ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') {
@@ -168,12 +164,12 @@ if ($session != '') {
 		else {
 			$toimlisa = "";
 		}
-		
+
 		$query = "	SELECT *
 					FROM oikeu
 					WHERE yhtio = '$kukarow[yhtio]'
-					and kuka = '$kukarow[kuka]' 
-					and nimi = '$phpnimi' 
+					and kuka = '$kukarow[kuka]'
+					and nimi = '$phpnimi'
 					$toimlisa";
 		$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
 
@@ -212,14 +208,14 @@ if ($session != '') {
 
 	if (mysql_num_rows($result) == 1) {
 		$yhtion_parametritrow = mysql_fetch_array($result);
-		
+
 		// lisätään kaikki yhtiorow arrayseen
 		foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
 			$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
 		}
 	}
-	
-	
+
+
 	if ($kukarow["toimipaikka"] != 0) {
 		$query = "	SELECT *
 					FROM yhtion_toimipaikat
@@ -228,14 +224,14 @@ if ($session != '') {
 
 		if (mysql_num_rows($result) == 1) {
 			$yhtion_toimipaikkarow = mysql_fetch_array($result);
-			
+
 			// lisätään kaikki yhtiorow arrayseen
 			foreach ($yhtion_toimipaikkarow as $parametrit_nimi => $parametrit_arvo) {
 				$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
 			}
 	 	}
 	}
-	
+
 	// haetaan jotain tarpeellisia funktioita mukaan..
 	require ("functions.inc");
 

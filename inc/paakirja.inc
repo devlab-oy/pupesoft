@@ -143,8 +143,8 @@
 		echo "</select></td>";
 		echo "</tr>";
 		echo "<tr><th>".t("Excel muoto")."</th><td><input type='checkbox' name='excel'></td></tr>";
-		echo "</table></form><br>
-		      <input type = 'submit' value = '".t("Näytä")."'>";
+		echo "</table><br>
+		      <input type = 'submit' value = '".t("Näytä")."'></form>";
 		$formi = 'valinta';
 		$kentta = 'tili';
 		require "inc/footer.inc";

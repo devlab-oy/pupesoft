@@ -29,7 +29,7 @@
 		mysql_field_name($result, $i) == "luontiaika") {
 		$tyyppi = 2;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "laji") {
 
 		$sel = '';
@@ -82,51 +82,28 @@
 
 	if (mysql_field_name($result, $i) == "asiakasnro") {
 
-		$query = "	SELECT lpad(asiakasnro,15,0) as asiakasnro
-					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]'
-					ORDER BY ytunnus";
-		$vresult = mysql_query($query) or pupe_error($query);
-
-		$edytunnus = 0;
-		$tunnukset = "";
-
-		while ($vrow = mysql_fetch_array($vresult)) {
-			$ytunnus = $vrow["asiakasnro"];
-
-			if ($ytunnus - $edytunnus > 1000) {
-
-				$vapaa = $edytunnus+1;
-
-				$tunnukset .= $vapaa."#";
-			}
-
-			$edytunnus = $ytunnus;
-
-		}
-
-		$query = "	SELECT max(lpad(asiakasnro,15,0)) as asiakasnro
-					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]'";
-		$vresult = mysql_query($query) or pupe_error($query);
-		$vrow = mysql_fetch_array($vresult);
-		$vapaa = $vrow['asiakasnro']+1;
-
-		$tunnukset .= $vapaa."#";
-
-		$tunnukset = substr($tunnukset,0,-1);
-		$tunnukset = split("#",$tunnukset);
-
 		$ulos = "<td><input type='text' name='$nimi' value='$trow[$i]'>";
 
 		$ulos .= "<select name='asiakasnro_select'>";
 		$ulos .= "<option value = ''></option>";
 
-		foreach($tunnukset as $xtunnus) {
+		$apu_asiakasnumero = 1;
 
-			$xtunnus = (int) $xtunnus;
+		for ($monta = 0; $monta < 5;) {
 
-			$ulos .= "<option value = '$xtunnus'>$xtunnus</option>";
+			$query = "	SELECT asiakasnro
+						FROM asiakas USE INDEX (asno_index)
+						WHERE yhtio='$kukarow[yhtio]'
+						and asiakasnro='$apu_asiakasnumero'";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($vresult) == 0) {
+				$ulos .= "<option value = '$apu_asiakasnumero'>$apu_asiakasnumero</option>";
+				$monta++;
+			}
+
+			$apu_asiakasnumero++;
+
 		}
 
 		$ulos .= "</select></td>";
@@ -138,50 +115,27 @@
 		$ulos = "<td><input type='text' name='$nimi' value='$trow[$i]'>";
 
 		if ($alias_set == "VAHITTAISMYYNTI") {
-			$query = "	SELECT lpad(ytunnus,15,0) as ytunnus
-						FROM asiakas
-						WHERE yhtio='$kukarow[yhtio]'
-						ORDER BY ytunnus";
-			$vresult = mysql_query($query) or pupe_error($query);
-
-			$edytunnus = 0;
-			$tunnukset = "";
-
-			while ($vrow = mysql_fetch_array($vresult)) {
-				$ytunnus = $vrow["ytunnus"];
-
-				if ($ytunnus - $edytunnus > 1000) {
-
-					$vapaa = $edytunnus+1;
-
-					$tunnukset .= $vapaa."#";
-				}
-
-				$edytunnus = $ytunnus;
-
-			}
-
-			$query = "	SELECT max(lpad(ytunnus,15,0)) as ytunnus
-						FROM asiakas
-						WHERE yhtio='$kukarow[yhtio]'";
-			$vresult = mysql_query($query) or pupe_error($query);
-			$vrow = mysql_fetch_array($vresult);
-			
-			$vapaa = $vrow['ytunnus']+1;
-
-			$tunnukset .= $vapaa."#";
-
-			$tunnukset = substr($tunnukset,0,-1);
-			$tunnukset = split("#",$tunnukset);
 
 			$ulos .= "<select name='ytunnus_select'>";
 			$ulos .= "<option value = ''></option>";
 
-			foreach($tunnukset as $xtunnus) {
+			$apu_asiakasnumero = 1;
 
-				$xtunnus = (int) $xtunnus;
+			for ($monta = 0; $monta < 5;) {
 
-				$ulos .= "<option value = '$xtunnus'>$xtunnus</option>";
+				$query = "	SELECT ytunnus
+							FROM asiakas USE INDEX (ytunnus_index)
+							WHERE yhtio='$kukarow[yhtio]'
+							and ytunnus='$apu_asiakasnumero'";
+				$vresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($vresult) == 0) {
+					$ulos .= "<option value = '$apu_asiakasnumero'>$apu_asiakasnumero</option>";
+					$monta++;
+				}
+
+				$apu_asiakasnumero++;
+
 			}
 
 			$ulos .= "</select>";
@@ -216,7 +170,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "kansalaisuus") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
@@ -516,7 +470,7 @@
 		$ulos = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "laskunsummapyoristys") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -571,7 +525,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "osasto") {
-		$query = "	SELECT avainsana.selite, ".avain('select')." 
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
 					".avain('join','ASOSASTO_')."
 					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'ASIAKASOSASTO'
@@ -594,7 +548,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "ryhma") {
-		$query = "	SELECT avainsana.selite, ".avain('select')." 
+		$query = "	SELECT avainsana.selite, ".avain('select')."
 					FROM avainsana
 					".avain('join','ASRYHMA_')."
 					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji = 'ASIAKASRYHMA'
@@ -632,7 +586,7 @@
 						FROM kuka
 						WHERE yhtio='$kukarow[yhtio]' and kuka = '$kukarow[kuka]' and myyja != 0";
 			$myyjaresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($myyjaresult) > 0) {
 				$myyjarow  = mysql_fetch_array($myyjaresult);
 				$kukamyyja = $myyjarow['myyja'];

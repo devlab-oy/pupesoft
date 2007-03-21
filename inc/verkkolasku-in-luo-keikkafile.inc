@@ -1,6 +1,7 @@
 <?php
 	// Tarvitaan $tunnus jossa on ostoreskontralaskun tunnus
 	// Tarvitaan $trow jossa on toimittajan tiedot
+	// Tarvitaan $tuoteno jossa on array kaikista ostoreskontralaskun tuotteista
 		
 	$query  = "LOCK TABLE lasku WRITE, sanakirja WRITE, tiliointi READ";
 	$result = mysql_query($query) or pupe_error($query);
@@ -133,19 +134,19 @@
 					$query = "UPDATE tilausrivi SET uusiotunnus='$keikantunnus', varattu='$kpl', hinta='$hinta' WHERE tunnus='$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";
 					$result = mysql_query($query) or pupe_error($query);
 					
-					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("kohdistettu laskuun")."! ($keikantunnus/$rrivino[$i])\n";
+					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("kohdistettu keikkaan")."! ($keikantunnus/$rrivino[$i])\n";
 				}
 				// jos rivi löytyi, mutta se on jo kohdistettu.. lisätään uus samoilla tiedoilla
 				else {
 					$query = "	insert into tilausrivi 
-								(uusiotunnus, hinta, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, hyllyalue, hyllynro, hyllyvali, hyllytaso) values
-								('$keikantunnus', '$hinta', '$rivirow[tuoteno]', '$rivirow[tilkpl]', '$kpl', '$rivirow[otunnus]', '$kukarow[yhtio]', 'O', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]')";
+								(uusiotunnus, hinta, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
+								('$keikantunnus', '$hinta', '$rivirow[tuoteno]', '$rivirow[tilkpl]', '$kpl', '$rivirow[otunnus]', '$kukarow[yhtio]', 'O', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]','$rivirow[tilaajanrivinro]')";
 					$result = mysql_query($query) or pupe_error($query);
-					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("lisätty laskuun")."! ($keikantunnus/$rrivino[$i])\n";
+					$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("lisätty keikkaan")."! ($keikantunnus/$rrivino[$i])\n";
 				}
 			}
 			else {
-				$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("Ei voitu kohdistaa laskuun")."! ($keikantunnus/$rrivino[$i])\n";
+				$laskuvirhe .= t("Tuotenumero").": $toim_tuoteno ".t("Kpl").": $kpl ".t("Ei voitu kohdistaa keikkaan")."! ($keikantunnus/$rrivino[$i])\n";
 			}
 		} // end if rivitunnus erisuuri ku nolla
 	} // end for looppi

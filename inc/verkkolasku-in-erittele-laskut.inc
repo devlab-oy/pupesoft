@@ -22,7 +22,7 @@
 			$ln = trim($ln); // varmistaan että ei jää roskia
 
 			//	Haetaan Finvoicen tunnusmerkkejä
-			if ($type == "") {
+			if (isset($type) and $type == "") {
 
 				if (strpos($ln, "<SOAP-ENV:Envelope ") and strpos($ln, ">")) {
 					echo "Löydettiin SOAP-ENV:Envelope aloitus!\n";
@@ -44,18 +44,18 @@
 			}
 
 			// samaa bugikorjausta kuin edellä..
-			if ($type == "SOAP" and strpos($ln, "eb:MessageHeader ")) {
+			if (isset($type) and $type == "SOAP" and strpos($ln, "eb:MessageHeader ")) {
 				$ln = "<eb:MessageHeader>";
 			}
 
 			// meillä on tietueen tyyppi tiedossa, lisätään se muuttujaan
-			if ($type != "") {
+			if (isset($type) and $type != "") {
 				$boob .= $ln."\n";
 			}
 
 			// 	etsitään lopputagia
 			//	Meillä oli SOAP kehys, täältä me saadaan EBID valittaja@sender-messageid
-			if ($type == "SOAP" and strpos($ln, "</SOAP-ENV:Envelope>")) {
+			if (isset($type) and $type == "SOAP" and strpos($ln, "</SOAP-ENV:Envelope>")) {
 
 				//	Ladataan vaan tämä luotu aineisto
 				$xml = simplexml_load_string($boob);
@@ -92,7 +92,7 @@
 			}
 
 			// 	Tiedostosta löytyi finvoiceaineisto
-			if ($type == "FINVOICE" and strpos($ln, "</Finvoice>")) {
+			if (isset($type) and $type == "FINVOICE" and strpos($ln, "</Finvoice>")) {
 
 				echo "Finvoiceaineisto päättyy, tallennetaan aineisto\n";
 

@@ -3,9 +3,10 @@
 	//Tarvitsemme parametrinä
 	//$suora_tuoteno jossa on käsiteltävä tuotenumero
 	//$suora_kpl jossa on tilattava määrä
-	//$row jossa on tilausrivi kaikki tiedot
+	//$row jossa on tilausrivin kaikki tiedot
 
-	$suoratoim_array = array();
+	$suoratoim_array 	= array();
+	$suoratoim_totaali 	= 0;
 	
 	// Katsotaan onko tälle tuotteelle yhtään sisäistä toimittajaa
 	// ja että toimittajan tiedoissa on varmasti kaikki EDI mokkulat päällä
@@ -45,11 +46,9 @@
 					order by sorttaus, varastopaikat.nimitys";
 		$kres2  = mysql_query($query) or pupe_error($query);
 
-		$suoratoim_totaali = 0;
-
 		while ($krow  = mysql_fetch_array($kres2)) {
-			
-			$krturvarattu = saldo_myytavissa($superrow['toim_tuoteno'], $tyyppi = 'KAIKKI', $varasto = $krow['vartunnus'], $yhtio = $krow['yhtio']);
+
+			list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($superrow['toim_tuoteno'], '', $krow['vartunnus'], $krow['yhtio']);
 			
 			// sitten katotaan ollaanko me jo varattu niitä JT rivejä toimittajalta
 			$query ="	select sum(jt) varattu
@@ -67,11 +66,11 @@
 			$krtre = mysql_query($query) or pupe_error($query);
 			$krtu2 = mysql_fetch_array($krtre);
 
-			// katotaan tuotteen saldo
-			$saldo = sprintf("%.02f",$krturvarattu - $krtu2["varattu"]);
+			// Katotaan myytävissä oleva määrä
+			$myytavissa = sprintf("%.02f", $myytavissa - $krtu2["varattu"]);
 
 			// näytetään drop-downi vain jos on tarpeeksi saldoa..
-			if ($saldo > 0 or ($row["tilaajanrivinro"] == $superrow["liitostunnus"] and $krow["hyllyalue"] == $row["hyllyalue"] and $krow["hyllynro"] == $row["hyllynro"] and $krow["hyllyvali"] == $row["hyllyvali"] and $krow["hyllytaso"] == $row["hyllytaso"])) {
+			if ($myytavissa > 0 or ($row["tilaajanrivinro"] == $superrow["liitostunnus"] and $krow["hyllyalue"] == $row["hyllyalue"] and $krow["hyllynro"] == $row["hyllynro"] and $krow["hyllyvali"] == $row["hyllyvali"] and $krow["hyllytaso"] == $row["hyllytaso"])) {
 				$sel = "";
 
 				if ($row["tilaajanrivinro"] == $superrow["liitostunnus"] and $krow["hyllyalue"] == $row["hyllyalue"] and $krow["hyllynro"] == $row["hyllynro"] and $krow["hyllyvali"] == $row["hyllyvali"] and $krow["hyllytaso"] == $row["hyllytaso"]) {
@@ -79,8 +78,8 @@
 				}
 
 				$lisa = "";
-				if ($saldo < $suora_kpl) {
-					$lisa = "&&&$saldo";
+				if ($myytavissa < $suora_kpl) {
+					$lisa = "&&&$myytavissa";
 				}
 
 				$varastomaa = '';
@@ -89,20 +88,20 @@
 				}
 				
 				if ($mista == 'selaus') {
-					if ($saldo < $suora_kpl) {
-						$montako = $saldo;
+					if ($myytavissa < $suora_kpl) {
+						$montako = $myytavissa;
 					}
 					else {
 						$montako = $suora_kpl;
 					}
 					
-					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]#$montako'>".t("Toimita")." $montako ($varastomaa $krow[nimi] - $krow[nimitys])</option>";
+					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]&&&$montako'>".t("Toimita")." $montako ($varastomaa $krow[nimi] - $krow[nimitys])</option>";
 					$paikatlask=$paikatlask+1;
-					$suoratoim_totaali+=$saldo;
+					$suoratoim_totaali+=$myytavissa;
 				}
 				else {
 					// tallennetaan riville toimittajan tunnus
-					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]$lisa' $sel>$varastomaa $krow[nimi] - $krow[nimitys] ($saldo)</option>";
+					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]$lisa' $sel>$varastomaa $krow[nimi] - $krow[nimitys] ($myytavissa)</option>";
 					$paikatlask=$paikatlask+2;
 
 					$suoratoim_array[] = "@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]$lisa";

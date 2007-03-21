@@ -261,23 +261,10 @@
 
 			while($alkurow = mysql_fetch_array($omavarastores)) {
 				if ($alkurow["varastotyyppi"] != "E" or $laskurow["varasto"] == $alkurow["varastotunnus"] or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])) {
-					//ennakkopoistot
-					$query = "	SELECT sum(varattu) varattu
-								FROM tilausrivi
-								WHERE tyyppi in ('L','G','V')
-								and yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$row[tuoteno]'
-								and varattu > 0
-								and hyllyalue = '$alkurow[hyllyalue]'
-								and hyllynro  = '$alkurow[hyllynro]'
-								and hyllyvali = '$alkurow[hyllyvali]'
-								and hyllytaso = '$alkurow[hyllytaso]'";
-					$varatutresult = mysql_query($query) or pupe_error($query);
-					$varatutrow = mysql_fetch_array($varatutresult);
+					
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"]);
 
-					$vapaana = $alkurow["saldo"] - $varatutrow["varattu"];
-
-					if ($vapaana >= $kpl_st or ($row["var"] != "P" and $toim != "TARJOUS" and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])) {
+					if ($myytavissa >= $kpl_st or ($row["var"] != "P" and $toim != "TARJOUS" and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])) {
 
 						$sel = "";
 
@@ -290,7 +277,7 @@
 							$varastomaa = strtoupper($alkurow['varastomaa']);
 						}
 
-						$paikat .= "<option value='$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]' $sel>$varastomaa $alkurow[hyllyalue] $alkurow[hyllynro] $alkurow[hyllyvali] $alkurow[hyllytaso] ($vapaana)</option>";
+						$paikat .= "<option value='$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]' $sel>$varastomaa $alkurow[hyllyalue] $alkurow[hyllynro] $alkurow[hyllyvali] $alkurow[hyllytaso] ($myytavissa)</option>";
 						$paikatlask++;
 						$kotipaikatlask++;
 					}

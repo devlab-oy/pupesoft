@@ -1,7 +1,7 @@
 <?php
 
 	// jos ollaan saavuttamassa tuotteita varastoon, jota on ollu JT-SUPER jälkkärissä tehdään niistä automaattisesti tilaus joka laskutetaan
-	// eli täppä lähetettä ei tulosteta päälle vaan tilaukselle...
+	// eli täppä "suoraan laskutukseen" päälle tilaukselle...
 	// tarvitaan keikan tunnus muuttujassa $otunnus
 	// jos $mista ei ole tyhjä tullaan käyttöliittymästä, jolloin aina kutsutaan tätä failia eikä haluta pilata käyttäjän päivää echoamalla että epäonnistui
 	
@@ -54,18 +54,16 @@
 
 			$jtrivit = mysql_fetch_array($jtres);
 			$laskuvirhe .= "$jtrivit[nimi] ($jtrivit[ytunnus]): ".t("Täysin oikea rivi löytyi").". $jtrivit[tuoteno] ".t("toimitetaan")." $jtrivit[jt] ".t("kpl")." ($jtrivit[tunnus])\n";
-
-			$kpl = array();
-			$loput = array();
-			$tunnus = $jtrivit["tunnus"];
-			$kpl[$tunnus] = $jtrivit["jt"];
-			$loput[$tunnus] = "JATA";
-			$naytakaikkipaikat = "ON"; // pakotetaan myynti kaikista varastoista (myyntikiellot yms)
-			$ohitasaldotarkistus = "ON"; // pakotetaan myynti saldosta välittämättä
+			
+			$tunnukset 			= $jtrivit["tunnus"];
+			$tunnusarray		= array(0 => $jtrivit["tunnus"]);
+			$kpl	 			= array($tunnukset => $jtrivit["jt"]);
+			$loput 				= array($tunnukset => "JATA");
+			$varataan_saldoa 	= "EI"; // pakotetaan myynti saldosta välittämättä kaikista varastoista
 
 			require ("tee_jt_tilaus.inc");
 
-			//jt-tilausten laskutunnukset talteen, nämä pitää sitten merkata valmiiksi lopus
+			//jt-tilausten laskutunnukset talteen, nämä pitää sitten merkata valmiiksi lopussa
 			if (!in_array($id, $jt_otsikot)) $jt_otsikot[] = $id;
 		}
 		// ei löytyny oikeella määrällä.. osatoimitetaan
@@ -84,33 +82,33 @@
 			$jtres = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($jtres) == 0) {
+				// #TODO tässä voi käydä niin, että jos joku on dellannut JT rivit ja otsikot jää lasku lähettämättä kokonaan asiakkaalle.. me ei vaan tiedetä otsikkoa kenelle tää pitäs lisätä niin pattitilanne
 				$laskuvirhe .= t("Tuotteen suoratoimitus epäonnistui!")." ".sprintf (t("Asiakkaalle (%s) ei ole yhtään tuotetta (%s) jälkitoimituksessa!"), $rivi["verkkotunnus"], $rivi["tuoteno"])."\n";
 			}
 
 			while ($jtrivit = mysql_fetch_array($jtres)) {
-
-				$kpl = array();
-				$loput = array();
-
-				$tunnus = $jtrivit["tunnus"];
-				$loput[$tunnus] = "JATA";
-				$naytakaikkipaikat = "ON"; // pakotetaan myynti kaikista varastoista (myyntikiellot yms)
-				$ohitasaldotarkistus = "ON"; // pakotetaan myynti saldosta välittämättä
-
+				
+				$tunnukset 			= $jtrivit["tunnus"];
+				$tunnusarray		= array(0 => $jtrivit["tunnus"]);
+				$loput 				= array($tunnukset => "JATA");
+				$varataan_saldoa 	= "EI"; // pakotetaan myynti saldosta välittämättä kaikista varastoista
+				
 				// yritetään myydä niin paljon kun ollaan viemässä varastoon tai sitten koko JT rivi kerralla
-				if ($rivi["kpl"] > $jtrivit["jt"]) $kpl[$tunnus] = $jtrivit["jt"];
-				else $kpl[$tunnus] = $rivi["kpl"];
+				if ($rivi["kpl"] > $jtrivit["jt"]) {
+					$kpl = array($tunnukset => $jtrivit["jt"]);
+				}
+				else {
+					$kpl = array($tunnukset => $rivi["kpl"]);
+				}
 
-				$laskuvirhe .= "$jtrivit[nimi] ($jtrivit[ytunnus]): ".t("Toimitetaan osatoimitus").". $jtrivit[tuoteno] ".t("yritetään toimittaa")." $kpl[$tunnus] ".t("kpl")." ".t("jtssä rivillä")." $jtrivit[jt] ".t("kpl")." ".t("viemässä varastoon")." $rivi[kpl] ".t("kpl")." ($jtrivit[tunnus])\n";
+				$laskuvirhe .= "$jtrivit[nimi] ($jtrivit[ytunnus]): ".t("Toimitetaan osatoimitus").". $jtrivit[tuoteno] ".t("yritetään toimittaa")." $kpl[$tunnukset] ".t("kpl")." ".t("jtssä rivillä")." $jtrivit[jt] ".t("kpl")." ".t("viemässä varastoon")." $rivi[kpl] ".t("kpl")." ($jtrivit[tunnus])\n";
 
 				require ("tee_jt_tilaus.inc");
 
 				//jt-tilausten laskutunnukset talteen, nämä pitää sitten merkata valmiiksi lopus
 				if (!in_array($id, $jt_otsikot)) $jt_otsikot[] = $id;
 			}
-
 		}
-
 	}
 
 	if (count($jt_otsikot) > 0) {

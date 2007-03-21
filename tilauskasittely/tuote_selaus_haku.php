@@ -465,21 +465,31 @@
 
 			// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausrivilt‰
 			if ($row["sarjanumeroseuranta"] != "") {
-				$query	= "	SELECT tilausrivi_osto.nimitys nimitys
+				$query	= "	SELECT sarjanumeroseuranta.*, tilausrivi_osto.nimitys nimitys
 							FROM sarjanumeroseuranta
-							LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-							LEFT JOIN lasku lasku_osto use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
-							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-							and sarjanumeroseuranta.tunnus = '$row[sarjatunnus]'
-							and nimitys is not null
-							and nimitys != ''";
+							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+							LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
+							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+							and (tilausrivi_myynti.tunnus is null or (lasku_myynti.tila in ('N','L') and lasku_myynti.alatila != 'X'))
+							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
 				$sarjares = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($sarjares) > 0) {
-					$sarjarow = mysql_fetch_array($sarjares);
+				$nimitys = "<table width='100%'>";
 
-					$row["nimitys"] = $sarjarow["nimitys"];
+				while ($sarjarow = mysql_fetch_array($sarjares)) {
+					if($sarjarow["nimitys"] != "") {
+						$nimitys .= "<tr><td>$sarjarow[nimitys]</td></tr>";
+					}
+					else {
+						$nimitys .= "<tr><td>$row[nimitys]</td></tr>";
+					}
 				}
+				
+				$nimitys .= "</table>";
+				
+				$row["nimitys"] = $nimitys;
 			}
 
 			echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a></td>";
@@ -569,13 +579,14 @@
 			elseif ($kukarow["extranet"] != "") {
 
 				// katotaan paljonko on myyt‰viss‰
-				$saldo = 0;
+				$kokonaismyytavissa = 0;
 
 				foreach($konsyhtiot as $yhtio) {
-					$saldo += saldo_myytavissa($row["tuoteno"], "", 0, $yhtio);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $yhtio);
+					$kokonaismyytavissa += $myytavissa;
 				}
 
-				if ($saldo > 0) {
+				if ($kokonaismyytavissa > 0) {
 					echo "<td valign='top' class='green'>".t("On")."</td>";
 				}
 				else {
@@ -583,17 +594,11 @@
 				}
 			}
 			elseif ($row["sarjanumeroseuranta"] != "") {
-				$query	= "	SELECT sarjanumeroseuranta.*
-							FROM sarjanumeroseuranta
-							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-							LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
-							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
-							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
-							and (tilausrivi_myynti.tunnus is null or (lasku_myynti.tila in ('N','L') and lasku_myynti.alatila != 'X'))
-							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
-				$sarjares = mysql_query($query) or pupe_error($query);
 
+				if (is_resource($sarjares) and mysql_num_rows($sarjares)) {
+					mysql_data_seek($sarjares, 0);
+				}
+				
 				echo "<td valign='top' $csp><table width='100%'>";
 
 				while ($sarjarow = mysql_fetch_array($sarjares)) {
@@ -631,37 +636,56 @@
 				echo "</td>";
 			}
 			else {
-				// k‰yd‰‰n katotaan tuotteen varastot
-				$query = "	SELECT varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi, varastopaikat.yhtio
-							FROM tuotepaikat
-							JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
-							and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-							and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-							WHERE tuotepaikat.$yhtiot and tuotepaikat.tuoteno='$row[tuoteno]'
-							group by 1,2
-							order by nimitys";
-				$varresult = mysql_query($query) or die($query);
+				// K‰yd‰‰n l‰pi tuotepaikat
+				$query = "	SELECT tuotepaikat.*, 
+							varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+							concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+				 			FROM tuotepaikat
+							JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+							WHERE tuotepaikat.$yhtiot
+							and tuotepaikat.tuoteno = '$row[tuoteno]'
+							ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+				$varresult = mysql_query($query) or pupe_error($query);
+				
+				echo "<td valign='top'>";
+				
+				if (mysql_num_rows($varresult) > 0) {
+					
+					echo "<table width='100%'>";
+					
+					// katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
+					list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($row["tuoteno"], "ORVOT");
+					$orvot *= -1;
+					
+					while ($saldorow = mysql_fetch_array ($varresult)) {
+						
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
-				echo "<td valign='top'><table width='100%'>";
-
-				while ($varastorivi = mysql_fetch_array($varresult)) {
-					// katotaan sen varaston saldo
-					$saldo = saldo_myytavissa($row["tuoteno"], "KAIKKI", $varastorivi["tunnus"], $varastorivi["yhtio"]);
-
-					if ($varastorivi["tyyppi"] != "") {
-						$vartyyppi = "($varastorivi[tyyppi])";
+						// hoidetaan pois problematiikka jos meill‰ on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
+						if ($orvot > 0) {
+							if ($myytavissa >= $orvot and $saldorow["yhtio"] == $kukarow["yhtio"]) {
+						    	// poistaan orpojen varaamat tuotteet t‰lt‰ paikalta
+						    	$myytavissa = $myytavissa - $orvot;
+						    	$orvot = 0;
+							}
+							elseif ($orvot > $myytavissa and $saldorow["yhtio"] == $kukarow["yhtio"]) {
+						    	// poistetaan niin paljon orpojen saldoa ku voidaan
+						    	$orvot = $orvot - $myytavissa;
+						    	$myytavissa = 0;
+							}
+						}
+						
+						echo "<tr>
+								<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
+								<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." $row[yksikko]</td>
+								</tr>";
 					}
-					else {
-						$vartyyppi = "";
-					}
-
-					if ($saldo != 0) {
-						echo "<tr><td class='$vari' nowrap>$varastorivi[nimitys] $vartyyppi</td><td class='$vari' align='right' nowrap>$saldo $row[yksikko]</td></tr>";
-					}
+					echo "</table></td>";
 				}
-				echo "</table></td>";
+				echo "</td>";
 			}
-
 
 			if (($row["sarjanumeroseuranta"] == "" or $kukarow["extranet"] != "") and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
 

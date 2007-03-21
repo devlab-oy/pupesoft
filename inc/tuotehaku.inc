@@ -112,17 +112,19 @@
 					$lisakala1 = "* ";
 				}
 
-				$saldo = 0;
+				$kokonaismyytavissa = 0;
 
 				foreach($konsyhtiot as $yhtio) {
-					$saldo += saldo_myytavissa($trow["tuoteno"], "", 0, $yhtio);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($trow["tuoteno"], "", 0, $yhtio);
+					
+					$kokonaismyytavissa += $myytavissa;
 				}
 
-				if ($kukarow['extranet'] != '' and $saldo > 0) {
-					$saldo = t("On");
+				if ($kukarow['extranet'] != '' and $kokonaismyytavissa > 0) {
+					$kokonaismyytavissa = t("On");
 				}
 				elseif ($kukarow['extranet'] != '') {
-					$saldo = t("Ei");
+					$kokonaismyytavissa = t("Ei");
 				}
 
 				$lisakala2 = "";
@@ -133,7 +135,7 @@
 					$lisakala3 = "####$trow[yhtio]";
 				}
 
-				$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] ".asana('nimitys_',$trow['tuoteno'],$trow['nimitys'])." ($saldo)</option>";
+				$ulos .= "<option value='$trow[tuoteno]$lisakala3'>$lisakala2 $lisakala1 $trow[tuoteno] ".asana('nimitys_',$trow['tuoteno'],$trow['nimitys'])." ($kokonaismyytavissa)</option>";
 
 				$edtuoteno = $trow["sorttauskentta"];
 			}

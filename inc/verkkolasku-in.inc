@@ -7,6 +7,8 @@
 
 		function verkkolasku_in ($file) {
 
+			global $kukarow;
+			
 			if (!is_file($file)) {
 				echo ("Tiedostoa $file ei löydy!\n");
 				return ("Tiedostoa $file ei löydy!");
@@ -791,10 +793,8 @@
 	    	$meili = "Verkkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
 		    $tulos = mail($yhtiorow['admin_email'], $sub, $meili, "From: <$yhtiorow[postittaja_email]>\n");
 
-			if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[admin_email]<br>";
-
+			if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[admin_email]<br>";			
 			return 0;
-
 		}
 	}
 

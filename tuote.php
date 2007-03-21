@@ -294,25 +294,9 @@
 				$korva2result = mysql_query($query) or pupe_error($query);
 
 				while ($row = mysql_fetch_array($korva2result)) {
-					//hateaan vielä korvaaville niiden saldot.
-					//saldot per varastopaikka
-					$query = "select sum(saldo) alkusaldo from tuotepaikat where tuoteno='$row[tuoteno]' and yhtio='$kukarow[yhtio]'";
-					$alkuresult = mysql_query($query) or pupe_error($query);
-					$alkurow = mysql_fetch_array($alkuresult);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
-					//ennakkopoistot
-					$query = "	SELECT sum(varattu) varattu
-								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-								WHERE tyyppi in ('L','G','V')
-								and yhtio    = '$kukarow[yhtio]'
-								and tuoteno  = '$row[tuoteno]'
-								and varattu	<> 0";
-					$varatutresult = mysql_query($query) or pupe_error($query);
-					$varatutrow = mysql_fetch_array($varatutresult);
-
-					$vapaana = $alkurow["alkusaldo"] - $varatutrow["varattu"];
-
-					echo "<tr><td><a href='$PHP_SELF?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td><td>$vapaana</td></tr>";
+					echo "<tr><td><a href='$PHP_SELF?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td><td>$myytavissa</td></tr>";
 				}
 			}
 
@@ -334,76 +318,59 @@
 				$kokonaismyytavissa = 0;
 
 				//saldot per varastopaikka
-				$query = "	SELECT tuotepaikat.*, varastopaikat.nimitys, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+				$query = "	SELECT tuotepaikat.*, 
+							varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
+							concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 				 			FROM tuotepaikat
-							LEFT JOIN varastopaikat	ON (
-								concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) and
-								concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) and
-								varastopaikat.yhtio = tuotepaikat.yhtio
-							)
-							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' and
-							tuotepaikat.tuoteno = '$tuoteno'
-							ORDER BY nimitys,sorttauskentta";
+							JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' 
+							and tuotepaikat.tuoteno = '$tuoteno'
+							ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
-
-						//jo kerätyt mutta ei laskutettu
-						$query = "	SELECT
-									ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,
-									ifnull(sum(if(tilausrivi.keratty ='', tilausrivi.varattu, 0)),0) ennpois
-									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-									WHERE yhtio 	= '$kukarow[yhtio]'
-									and tyyppi 		in ('L','G','V')
-									and tuoteno		= '$tuoteno'
-									and varattu    <> 0
-									and hyllyalue   = '$saldorow[hyllyalue]'
-                                   	and hyllynro    = '$saldorow[hyllynro]'
-									and hyllyvali   = '$saldorow[hyllyvali]'
-									and hyllytaso   = '$saldorow[hyllytaso]'";
-						$kerresult = mysql_query($query) or pupe_error($query);
-						$kerrow = mysql_fetch_array ($kerresult);
-
-						$hyllyssa = $saldorow['saldo'] - $kerrow['keratty'];
-						$myytavissa = $saldorow['saldo'] - $kerrow["ennpois"] - $kerrow['keratty'];
-
+						
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
+						
 						//summataan kokonaissaldoa
-						$kokonaissaldo += $saldorow["saldo"];
+						$kokonaissaldo += $saldo;
 						$kokonaishyllyssa += $hyllyssa;
 						$kokonaismyytavissa += $myytavissa;
 
-						// katotaan kuuluuko johonki varastoon
-						$varastotunnus = kuuluukovarastoon($saldorow["hyllyalue"], $saldorow["hyllynro"]);
-
-						// haetaan varaston nimi
-						$query = "	SELECT *
-									FROM varastopaikat
-									WHERE tunnus = '$varastotunnus'
-									and yhtio = '$kukarow[yhtio]'";
-						$varcheckres = mysql_query($query) or pupe_error($query);
-						$varcheckrow = mysql_fetch_array($varcheckres);
-
-						if ($varcheckrow["tyyppi"] != "") {
-							$vartyyppi = "($varcheckrow[tyyppi])";
-						}
-						else {
-							$vartyyppi = "";
-						}
-
-						echo "<tr><td>$varcheckrow[nimitys] $vartyyppi</td><td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>";
-						echo "<td align='right'>$saldorow[saldo]</td><td align='right'>".sprintf("%.2f",$hyllyssa)."</td><td align='right'>".sprintf("%.2f",$myytavissa)."</td></tr>";
+						echo "<tr>
+								<td>$saldorow[nimitys] $saldorow[tyyppi]</td>
+								<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
+								<td align='right'>".sprintf("%.2f", $saldo)."</td>
+								<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
+								<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
+								</tr>";
 					}
 				}
 
-				$orvot = saldo_myytavissa($tuoteno, "ORVOT");
-
-				if ($orvot != 0) {
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, "ORVOT");
+				
+				if ($saldo != 0) {
 					echo "<tr><td>".t("Tuntematon")."</td><td>?</td>";
-					echo "<td align='right'>0.00</td><td align='right'>0.00</td><td align='right'>".sprintf("%.2f",$orvot)."</td></tr>";
+					echo "<td align='right'>".sprintf("%.2f", $saldo)."</td>
+							<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
+							<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
+							</tr>";
+					
+					//summataan kokonaissaldoa
+					$kokonaissaldo += $saldo;
+					$kokonaishyllyssa += $hyllyssa;
+					$kokonaismyytavissa += $myytavissa;
 				}
 
-				echo "<tr><th colspan='2'>".t("Yhteensä")."</th><td align='right'>".sprintf("%.2f",$kokonaissaldo)."</td><td align='right'>".sprintf("%.2f",$kokonaishyllyssa)."</td><td align='right'>".sprintf("%.2f",saldo_myytavissa($tuoteno, "KAIKKI"))."</td></tr></td>";
+				echo "<tr>
+						<th colspan='2'>".t("Yhteensä")."</th>
+						<td align='right'>".sprintf("%.2f", $kokonaissaldo)."</td>
+						<td align='right'>".sprintf("%.2f", $kokonaishyllyssa)."</td>
+						<td align='right'>".sprintf("%.2f", $kokonaismyytavissa)."</td>
+						</tr></td>";
 
 				echo "</table>";
 
@@ -664,13 +631,13 @@
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 							LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
-							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.otunnus
 							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 							and sarjanumeroseuranta.tuoteno = '$tuoterow[tuoteno]'
 							and (tilausrivi_myynti.tunnus is null or (lasku_myynti.tila in ('N','L') and lasku_myynti.alatila != 'X'))
-							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
+							and (lasku_osto.tila='U' or (lasku_osto.tila='K' and tilausrivi_osto.laskutettuaika != '0000-00-00'))";			
 				$sarjares = mysql_query($query) or pupe_error($query);
-
+			
 				if (mysql_num_rows($sarjares) > 0) {
 					echo "<table>";
 					echo "<tr><th colspan='2'>".t("Varasto").":</th></tr>";
@@ -684,19 +651,6 @@
 					echo "</table><br>";
 				}
 			}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 			// Varastotapahtumat
 			echo "<table>";

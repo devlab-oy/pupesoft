@@ -35,34 +35,31 @@ if (mysql_num_rows($pres) > 0) {
 }
 
 if (!function_exists('tarkiste')) {
+
 	function tarkiste($sscc) {
 
-		$epatasan ='';
-		$tasan='';
+		$kerroin = 3; // kerroin aluks 3
+		$summa   = 0; // summa nolla tietty
 
-		for ($oslappi = 0 ; $oslappi <=17; $oslappi=$oslappi+2) {
-			$number = substr($sscc, $oslappi, 1);
-			$tasan += $number;
+		// loopataan luvut oikeelta vasemmalle
+		for ($i = 16; $i >= 0; $i--) { 
+			$summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
+			$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
 		}
 
-		$oslappi=0;
+		$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
 
-		for ($oslappi = 1 ; $oslappi <=15; $oslappi=$oslappi+2) {
-			$number = substr($sscc, $oslappi, 1);
-			$epatasan += $number;
-		}
-
-		$epatasan = 3 * $epatasan;
-		$muuttuja = $tasan + $epatasan;
-		$muuttuja = $muuttuja / 10;
-		$abu = substr($muuttuja,-1,1);
-		$muuttuja = number_format($muuttuja,0);
-
-		return $sscc = $muuttuja-$abu;
+		return $sscc;
 	}
 }
 
-//tehd‰‰n SSCC (00) 1 ytunnus(8)l‰hetenro(6)kollityht(2)tarkiste(1)
+// tehd‰‰n SSCC :
+// (00) 
+// 1 
+// ytunnus (8)
+// l‰hetenro (6)
+// kollityht (2)
+// tarkiste (1)
 
 $apu_kollityht = $kollityht;
 if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkki‰
@@ -70,7 +67,7 @@ if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla k
 $prefix = "(00)";
 $sscc = 1;
 $sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-$sscc .= sprintf('%06.06d', $laskurow["tunnus"]);
+$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
 $sscc .= sprintf('%02.02d', $apu_kollityht);
 $loppu = tarkiste($sscc);
 $sscc = $prefix.$sscc.$loppu;

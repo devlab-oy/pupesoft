@@ -292,7 +292,7 @@
 
 		echo "<table width='100%'><tr><td class='back' valign='top'>";
 		echo "<table>";
-
+		
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 
 			$nimi = "t[$i]";
@@ -402,13 +402,15 @@
 							}
 					</SCRIPT>";
 
-				echo "<br><br>
-					<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()'>
-					<input type = 'hidden' name = 'toim' value='$aputoim'>
-					<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
-					<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-					<input type = 'hidden' name = 'del' value ='1'>
-					<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'></form>";
+				if ($rajattu_nakyma == '') {
+					echo "<br><br>
+						<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()'>
+						<input type = 'hidden' name = 'toim' value='$aputoim'>
+						<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
+						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'del' value ='1'>
+						<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'></form>";
+				}
 			}
 		}
 

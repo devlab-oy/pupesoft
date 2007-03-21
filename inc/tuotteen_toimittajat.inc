@@ -202,7 +202,7 @@
 
 			echo "</td><td class='back'>".$toimerrorit[0]["toimittaja"]."</td></tr>";
 
-
+			
 			echo "<tr><th>".t("osto_era")."</th>			<td><input type='text' name='osto_era' 		value='$osto_era'>			</td><td class='back'>".$toimerrorit[0]["osto_era"]."</td></tr>";
 			echo "<tr><th>".t("ostohinta")."</th>			<td><input type='text' name='ostohinta' 	value='$ostohinta'>			</td><td class='back'>".$toimerrorit[0]["ostohinta"]."</td></tr>";
 			echo "<tr><th>".t("valuutta")."</th>			<td>$valuu																</td><td class='back'>".$toimerrorit[0]["valuutta"]."</td></tr>";
@@ -214,7 +214,7 @@
 
 			echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
 			echo "<input type='hidden' name='tee' value='insert'>";
-			echo "<input type='hidden' name='toim' value='tuote'>";
+			echo "<input type='hidden' name='toim' value='$aputoim'>";
 			echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 			echo "<input type='hidden' name='toimtunnus' value='$toimtunnus'>";
 			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
@@ -283,49 +283,194 @@
 				}
 
 				echo "</td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toimittaja"]."</td></tr>";
+				
+				if ($alias_set != '') {
+					if ($rajattu_nakyma != '') {
+						$al_lisa = " and selitetark_2 = '$alias_set' ";
+					}
+					else {
+						$al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') ";
+					}
+				}
 
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.osto_era'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
 
-				echo "<tr><th>".t("osto_era")."</th>		<td><input type='text' name='osto_era' 		value='$trow[osto_era]'></td>		<td class='back'>".$toimerrorit[$trow["tunnus"]]["osto_era"]."</td></tr>";
-				echo "<tr><th>".t("ostohinta")."</th>		<td><input type='text' name='ostohinta' 	value='$trow[ostohinta]'></td>		<td class='back'>".$toimerrorit[$trow["tunnus"]]["ostohinta"]."</td></tr>";
-				echo "<tr><th>".t("valuutta")."</th>		<td>$valuu</td>																	<td class='back'>".$toimerrorit[$trow["tunnus"]]["valuutta"]."</td></tr>";
-				echo "<tr><th>".t("toim_tuoteno")."</th>	<td><input type='text' name='toim_tuoteno'	value='$trow[toim_tuoteno]'></td>	<td class='back'>".$toimerrorit[$trow["tunnus"]]["toim_tuoteno"]."</td></tr>";
-				echo "<tr><th>".t("toim_nimitys")."</th>	<td><input type='text' name='toim_nimitys'	value='$trow[toim_nimitys]'></td>	<td class='back'>".$toimerrorit[$trow["tunnus"]]["toim_nimitys"]."</td></tr>";
-				echo "<tr><th>".t("tuotekerroin")."</th>	<td><input type='text' name='tuotekerroin'	value='$trow[tuotekerroin]'>		<td class='back'>".$toimerrorit[$trow["tunnus"]]["tuotekerroin"]."</td></tr>";
-				echo "<tr><th>".t("alkuperamaa")."</th>		<td>$maat</td>																	<td class='back'>".$toimerrorit[$trow["tunnus"]]["alkuperamaa"]."</td></tr>";
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td><input type='text' name='osto_era'value='$trow[osto_era]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["osto_era"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("osto_era")."</th><td><input type='text' name='osto_era'value='$trow[osto_era]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["osto_era"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='osto_era'value='$trow[osto_era]'>";
+				}
+				
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.ostohinta'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td><input type='text' name='ostohinta' value='$trow[ostohinta]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["ostohinta"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("ostohinta")."</th><td><input type='text' name='ostohinta' value='$trow[ostohinta]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["ostohinta"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='ostohinta'value='$trow[ostohinta]'>";
+				}
+				
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.valuutta'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td>$valuu</td><td class='back'>".$toimerrorit[$trow["tunnus"]]["valuutta"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("valuutta")."</th><td>$valuu</td><td class='back'>".$toimerrorit[$trow["tunnus"]]["valuutta"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='valuutta' value='$trow[valuutta]'>";
+				}
+				
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.toim_tuoteno'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td><input type='text' name='toim_tuoteno' value='$trow[toim_tuoteno]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toim_tuoteno"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("toim_tuoteno")."</th><td><input type='text' name='toim_tuoteno' value='$trow[toim_tuoteno]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toim_tuoteno"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='toim_tuoteno' value='$trow[toim_tuoteno]'>";
+				}
+				
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.toim_nimitys'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td><input type='text' name='toim_nimitys' value='$trow[toim_nimitys]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toim_nimitys"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("toim_nimitys")."</th><td><input type='text' name='toim_nimitys' value='$trow[toim_nimitys]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toim_nimitys"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='toim_nimitys' value='$trow[toim_nimitys]'>";
+				}
+				
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.tuotekerroin'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td><input type='text' name='tuotekerroin'	value='$trow[tuotekerroin]'><td class='back'>".$toimerrorit[$trow["tunnus"]]["tuotekerroin"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("tuotekerroin")."</th><td><input type='text' name='tuotekerroin'	value='$trow[tuotekerroin]'><td class='back'>".$toimerrorit[$trow["tunnus"]]["tuotekerroin"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='tuotekerroin'value='$trow[tuotekerroin]'>";
+				}
+				
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.tuotekerroin'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td>$maat</td><td class='back'>".$toimerrorit[$trow["tunnus"]]["alkuperamaa"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("alkuperamaa")."</th><td>$maat</td><td class='back'>".$toimerrorit[$trow["tunnus"]]["alkuperamaa"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='alkuperamaa'value='$trow[alkuperamaa]'>";
+				}
+				
 
 				echo "<tr><td class='back'>";
 				echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
 				echo "<input type='hidden' name='tee' value='update'>";
-				echo "<input type='hidden' name='toim' value='tuote'>";
+				echo "<input type='hidden' name='toim' value='$aputoim'>";
 				echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 				echo "<input type='hidden' name='tuoteno' value='$trow[tuoteno]'>";
 				echo "<input type='hidden' name='toimtunnus'  value='$trow[tunnus]'>";
 				echo "<input type='hidden' name='toimittajatunnus'  value='$trow[liitostunnus]'>";
 				echo "<input type='submit' value='".t("Päivitä toimittaja")."'></td></form>";
+				
+				if ($rajattu_nakyma == '') {
+					echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
+					echo "<td class='back'>";
+					echo "<input type='hidden' name='tee' value='poista'>";
+					echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
+					echo "<input type='hidden' name='toim' value='$aputoim'>";
+					echo "<input type='hidden' name='tunnus' value='$tunnus'>";
+					echo "<input type='hidden' name='tuoteno' value='$trow[tuoteno]'>";
+					echo "<input type='hidden' name='toimtunnus'  value='$trow[tunnus]'>";
+					echo "<input type='submit' value='".t("Poista toimittaja")."'></td></form>";
+				}
 
-				echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
-
-				echo "<td class='back'>";
-				echo "<input type='hidden' name='tee' value='poista'>";
-				echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
-				echo "<input type='hidden' name='toim' value='tuote'>";
-				echo "<input type='hidden' name='tunnus' value='$tunnus'>";
-				echo "<input type='hidden' name='tuoteno' value='$trow[tuoteno]'>";
-				echo "<input type='hidden' name='toimtunnus'  value='$trow[tunnus]'>";
-				echo "<input type='submit' value='".t("Poista toimittaja")."'></td></form>";
 				echo "</tr>";
 
 				echo "</table>";
 				echo "<hr>";
 			}
-
-			echo "<br><form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
-			<input type='hidden' name='tee' value='uusi'>
-			<input type='hidden' name='lopetus' value = '$lopetus'>
-			<input type='hidden' name='toim' value='tuote'>
-			<input type='hidden' name='tunnus' value='$tunnus'>
-			<input type='hidden' name='tuoteno' value='$tuoteno'>
-			<input type='submit' value='".t("Lisää uusi toimittaja")."'></form>";
+			
+			if ($rajattu_nakyma == '') {
+				echo "<br><form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
+				<input type='hidden' name='tee' value='uusi'>
+				<input type='hidden' name='lopetus' value = '$lopetus'>
+				<input type='hidden' name='toim' value='$aputoim'>
+				<input type='hidden' name='tunnus' value='$tunnus'>
+				<input type='hidden' name='tuoteno' value='$tuoteno'>
+				<input type='submit' value='".t("Lisää uusi toimittaja")."'></form>";
+			}
 
 		}
 	}

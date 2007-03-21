@@ -130,16 +130,72 @@ while ((!feof ($fd)) and ($error!=1)) {
 			$result = mysql_query($query) or pupe_error($query);
 			$trow = mysql_fetch_array($result);
 			
+			$loyty = 0;
+			$alue = 'Y00';
+			
 			if ($trow['ei_saldoa'] == '') {
 				$query = 	"SELECT * FROM tuotepaikat
 							WHERE yhtio='$trow[yhtio]' and tuoteno='$trow[tuoteno]' 
-							and hyllyalue = 'Y01' and hyllynro	= '0' and hyllytaso	= '0' and hyllyvali	= '0'";
+							and hyllyalue = 'Y00' and hyllynro	= '0' and hyllytaso	= '0' and hyllyvali	= '0' and saldo > 0";
 				$result = mysql_query($query) or pupe_error($query);
 				
 				if (mysql_num_rows($result) == 0) {
-					echo "".t("Perustetaan tuotepaikka")." Y01-0-0-0 ".t("tuotteelle")." $trow[tuoteno]<br>";
+					$loyty = 0;
+				}
+				else {
+					$alue = 'Y00';
+					$loyty = 1;
+				}
+				
+				if ($loyty == 0) {
+					$query = 	"SELECT * FROM tuotepaikat
+								WHERE yhtio='$trow[yhtio]' and tuoteno='$trow[tuoteno]' 
+								and hyllyalue = 'Y01' and hyllynro	= '0' and hyllytaso	= '0' and hyllyvali	= '0' and saldo > 0";
+					$result = mysql_query($query) or pupe_error($query);
+					if (mysql_num_rows($result) == 0) {
+						$loyty = 0;
+					}
+					else {
+						$alue = 'Y01';
+						$loyty = 1;
+					}
+				}
+				
+				if ($loyty == 0) {
+					$query = 	"SELECT * FROM tuotepaikat
+								WHERE yhtio='$trow[yhtio]' and tuoteno='$trow[tuoteno]' 
+								and hyllyalue = 'Y00' and hyllynro	= '0' and hyllytaso	= '0' and hyllyvali	= '0'";
+					$result = mysql_query($query) or pupe_error($query);
+					if (mysql_num_rows($result) == 0) {
+						$loyty = 0;
+					}
+					else {
+						$alue = 'Y00';
+						$loyty = 1;
+					}
+				}
+				
+				if ($loyty == 0) {
+					$query = 	"SELECT * FROM tuotepaikat
+								WHERE yhtio='$trow[yhtio]' and tuoteno='$trow[tuoteno]' 
+								and hyllyalue = 'Y01' and hyllynro	= '0' and hyllytaso	= '0' and hyllyvali	= '0'";
+					$result = mysql_query($query) or pupe_error($query);
+					if (mysql_num_rows($result) == 0) {
+						$loyty = 0;
+					}
+					else {
+						$alue = 'Y01';
+						$loyty = 1;
+					}
+				}
+				
+				if ($loyty == 0) {
+					
+					$alue = 'Y00';
+					
+					echo "".t("Perustetaan tuotepaikka")." $alue-0-0-0 ".t("tuotteelle")." $trow[tuoteno]<br>";
 					$query = "	INSERT into tuotepaikat set
-								hyllyalue	= 'Y01',
+								hyllyalue	= '$alue',
 								hyllynro	= '0',
 								hyllytaso	= '0',
 								hyllyvali	= '0',
@@ -147,6 +203,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 								yhtio		= '$trow[yhtio]'";
 					$result = mysql_query($query) or pupe_error($query);
 				}
+
 			}
 			$query = "	INSERT into tilausrivi set
 						varattu 		= '$maara',
@@ -182,7 +239,7 @@ while ((!feof ($fd)) and ($error!=1)) {
 			//	$query .= ", kerattyaika = now()";
 			//}
 			if ($trow['ei_saldoa'] == '') {	
-				$query .= ", hyllyalue	= 'Y01'";
+				$query .= ", hyllyalue	= '$alue'";
 				$query .= ", hyllynro	= '0'";
 				$query .= ", hyllytaso	= '0'";
 				$query .= ", hyllyvali	= '0'";

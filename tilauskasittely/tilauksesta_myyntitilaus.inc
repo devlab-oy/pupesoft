@@ -240,7 +240,7 @@
 
 				require('lisaarivi.inc');
 
-				$lisatyt_rivit = array_merge($lisatyt_rivit2, $lisatyt_rivit2);
+				$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
 
 				// Korjataan sarjanumero-oliot, eli siirretään ne tarjousriviltä tilausriville, jos kopioitava tilaus on tarjous
 				if ($monistarow["tila"] == "T" and count($lisatyt_rivit) > 0) {

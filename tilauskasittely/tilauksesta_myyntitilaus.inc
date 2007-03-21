@@ -240,9 +240,10 @@
 
 				require('lisaarivi.inc');
 
+				$lisatyt_rivit = array_merge($lisatyt_rivit2, $lisatyt_rivit2);
 
 				// Korjataan sarjanumero-oliot, eli siirret‰‰n ne tarjousrivilt‰ tilausriville, jos kopioitava tilaus on tarjous
-				if ($monistarow["tila"] == "T") {
+				if ($monistarow["tila"] == "T" and count($lisatyt_rivit) > 0) {
 					if ($coprivirow["varattu"] > 0) {
 
 						$lisax = "myyntirivitunnus";
@@ -259,7 +260,6 @@
 								group by $lisax";
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
-
 
 					foreach($lisatyt_rivit as $lisatty_tun) {
 						$query = "	SELECT *
@@ -282,10 +282,10 @@
 							$cores = mysql_query($query) or pupe_error($query);
 						}
 						
-						//Kopioidaan tilausrivin lisatiedot (laitetaan n‰‰ nyt kaikille uusille riveille) 
+						//Kopioidaan tilausrivin lisatiedot
 						$query = "SELECT * FROM tilausrivin_lisatiedot WHERE tilausrivitunnus='$coprivirow[tunnus]' and yhtio ='$kukarow[yhtio]'";
 						$monistares2 = mysql_query($query) or pupe_error($query);
-						
+
 						if (mysql_num_rows($monistares2) == 1) {
 							$monistarow2 = mysql_fetch_array($monistares2);
 

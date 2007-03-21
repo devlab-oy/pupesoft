@@ -1,5 +1,5 @@
 <?php
 	$otsikko = 'Tuotteet';
-	$kentat = 'tunnus, tuoteno, nimitys, myyntihinta, kehahin, vihahin';
+	$kentat = 'tunnus, tuoteno, nimitys, myyntihinta';
 	$jarjestys = 'tuoteno';
 ?>

@@ -102,6 +102,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage, $p);
 		$pdf->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage, $p);
 		$pdf->draw_text(390, 690, t("Tilausviite", $kieli).": ".substr($laskurow["viesti"],0,18), $firstpage, $p);
+		
 		//viivakoodin arvo
 		$barcode  = $laskurow["tunnus"];
 
@@ -231,8 +232,7 @@ if (!function_exists('rivi')) {
 			$varastopaikka = $row["hyllyalue"] . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 
 			if ($row["perheid"] > 0 and $perheid != $row["perheid"]) {
-				$numrows = 0;
-
+				
 				$query = "	SELECT vanhatunnus
 							FROM lasku use index (PRIMARY)
 							WHERE yhtio	= '$kukarow[yhtio]'
@@ -240,52 +240,45 @@ if (!function_exists('rivi')) {
 				$vtunres = mysql_query($query) or pupe_error($query);
 				$vtunrow = mysql_fetch_array($vtunres);
 
-				if ($vtunrow["vanhatunnus"] != 0) {
-					$query = " SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-							FROM lasku use index (yhtio_vanhatunnus)
-							WHERE yhtio         = '$kukarow[yhtio]'
-							and vanhatunnus     = '$vtunrow[vanhatunnus]'";
+				if ($vtunrow["vanhatunnus"] > 0) {
+					$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+								FROM lasku use index (yhtio_vanhatunnus)
+								WHERE yhtio		= '$kukarow[yhtio]'
+								and vanhatunnus	= '$vtunrow[vanhatunnus]'";
 					$perheresult = mysql_query($query) or pupe_error($query);
-					$numrows = mysql_num_rows($perheresult);
-				}
-
-				if ($numrows == 0 or $vtunrow["vanhatunnus"] == 0) {
-					$query = "  SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-								FROM lasku use index (PRIMARY)
-								WHERE yhtio    = '$kukarow[yhtio]'
-								and tunnus    = '$row[otunnus]'";
-					$perheresult = mysql_query($query) or pupe_error($query);
-				}
-
-				if (mysql_num_rows($perheresult) > 0) {
 					$perherow = mysql_fetch_array($perheresult);
-
-					$query = "	SELECT tuoteno, nimitys
-								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]'
-								and otunnus in ($perherow[tunnukset])
-								and perheid = '$row[perheid]'
-								ORDER by tunnus";
-					$perheresult = mysql_query($query) or pupe_error($query);
-
-					$litania = '';
-					while ($perherow = mysql_fetch_array($perheresult)) {
-						if ($litania == "") {
-							$litania .= $perherow["nimitys"].":  ";
-						}
-
-						$litania .= strtoupper($perherow["tuoteno"]).", ";
-					}
-					$litania = substr($litania,0,-2);
+				}
+				
+				if ($perherow["tunnukset"] != "") {
+					$otunlisa = " and tilausrivi.otunnus in ($perherow[tunnukset]) ";
+				}
+				else {
+					$otunlisa = " and tilausrivi.otunnus = '$row[otunnus]' ";
 				}
 
-				$pdf->draw_text(42,  $kala, "# ".t("Tuoteperhe", $kieli).": ".$litania,	$firstpage, $p);
+				$query = "	SELECT tuoteno, nimitys
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
+							$otunlisa
+							and perheid = '$row[perheid]'
+							ORDER by tunnus";
+				$perheresult = mysql_query($query) or pupe_error($query);
 
+				$litania = '';
+				while ($perherow = mysql_fetch_array($perheresult)) {
+					if ($litania == "") {
+						$litania .= $perherow["nimitys"].":  ";
+					}
+
+					$litania .= strtoupper($perherow["tuoteno"]).", ";
+				}
+				$litania = substr($litania,0,-2);
+				
+				$pdf->draw_text(42,  $kala, "# ".t("Tuoteperhe", $kieli).": ".$litania,	$firstpage, $p);
 				$kala = $kala - $rivinkorkeus;
 			}
 
 			$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$firstpage, $pp);
-//			$pdf->draw_text(23,  $kala, $kala,	$firstpage, $pp);
 			$pdf->draw_text(38,  $kala, $varastopaikka,					$firstpage, $p);
 			$pdf->draw_text(90,  $kala, $row["tuoteno"],				$firstpage, $p);
 

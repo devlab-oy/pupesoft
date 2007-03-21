@@ -332,7 +332,7 @@ echo "<td>
 		<select name='tyyppi'>
 		<option value='A' $sel1>".t("N‰ytet‰‰n tuotteet joilla on saldoa")."</option>
 		<option value='B' $sel2>".t("N‰ytet‰‰n tuotteet joilla ei ole saldoa")."</option>
-		<option value='C' $sel3>".t("N‰ytet‰‰n tuotteet joilla ei on saldoa, mutta ei arvoa")."</option>
+		<option value='C' $sel3>".t("N‰ytet‰‰n tuotteet joilla on saldoa, mutta ei arvoa")."</option>
 		</select>
 		</td>";
 

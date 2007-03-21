@@ -291,7 +291,7 @@ else {
 	}
 }
 
-echo "<table>";
+echo "<br><table>";
 echo "<tr>";
 echo "<th>Syötä vvvv-kk-pp:</th>";
 echo "<td colspan='2'><input type='text' name='vv' size='7' value='$vv'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='pp' size='5' value='$pp'></td>";
@@ -308,6 +308,34 @@ else {
 }
 
 echo "<td colspan='2'><input type='checkbox' name='naytarivit' $chk> (Listaus lähetetään sähköpostiisi)</td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>Tyyppi:</th>";
+
+$sel1 = "";
+$sel2 = "";
+$sel3 = "";
+
+if ($tyyppi == "A") {
+	$sel1 = "SELECTED";
+}
+elseif($tyyppi == "B") {
+	$sel2 = "SELECTED";
+}
+elseif($tyyppi == "C") {
+	$sel3 = "SELECTED";
+}
+
+
+echo "<td>
+		<select name='tyyppi'>
+		<option value='A' $sel1>".t("Näytetään tuotteet joilla on saldoa")."</option>
+		<option value='B' $sel2>".t("Näytetään tuotteet joilla ei ole saldoa")."</option>
+		<option value='C' $sel3>".t("Näytetään tuotteet joilla ei on saldoa, mutta ei arvoa")."</option>
+		</select>
+		</td>";
+
 echo "</tr>";
 echo "</table>";
 echo "<br>";
@@ -342,11 +370,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 				ORDER BY osasto, try, tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
 		
-	echo "<font class='message'>".t("Löytyi"). " ";
-	flush();
-	echo mysql_num_rows($result)." ".t("tuotetta")."...</font><br><br>";
-	flush();
-
+	$lask  = 0;
 	$varvo = 0; // tähän summaillaan
 
 	if ($naytarivit != "") {
@@ -380,8 +404,8 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 						LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus
 						LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
 						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
-						and (tilausrivi_myynti.tunnus is null or (lasku_myynti.tila in ('N','L') and lasku_myynti.alatila != 'X'))
-						and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
+						and (tilausrivi_myynti.tunnus is null or (lasku_myynti.tila in ('N','L','T') and lasku_myynti.alatila != 'X'))
+						and (lasku_osto.tila='U' or (lasku_osto.tila='K' and tilausrivi_osto.laskutettuaika!='0000-00-00'))";
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$sarjarow = mysql_fetch_array($sarjares);
 						
@@ -415,43 +439,43 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		// saldo historiassa: lasketaan nykyiset kpl - muutoskpl
 		$muutoskpl = $vrow["varasto"] - $mrow["muutoskpl"];
 
-		// summataan varastonarvoa
-		$varvo += $muutoshinta;
+		
+		if ($tyyppi == "A" and $muutoskpl != 0) {
+			$ok = "GO";
+		}
+		elseif ($tyyppi == "B" and $muutoskpl == 0) {
+			$ok = "GO";
+		}
+		elseif ($tyyppi == "C" and $muutoskpl!=0 and $muutoshinta==0) {
+			$ok = "GO";
+		}
+		else {
+			$ok = "NO-GO";
+		}
+		
+		if ($ok == "GO") {
+			
+			$lask++;
+			
+			// summataan varastonarvoa
+			$varvo += $muutoshinta;
 
-		if ($naytarivit != "" and $muutoskpl != 0) {
+			if ($naytarivit != "") {
 
-			// yritetään kaivaa listaan vielä sen hetkinen kehahin jos se halutaan kerran nähdä
-			$kehasilloin = $kehahin * $kerroin; // nykyinen kehahin
-			$kehalisa = "\t~"; // laitetaan about merkki failiin jos ei löydetä tapahtumista mitää
+				// yritetään kaivaa listaan vielä sen hetkinen kehahin jos se halutaan kerran nähdä
+				$kehasilloin = $kehahin * $kerroin; // nykyinen kehahin
+				$kehalisa = "\t~"; // laitetaan about merkki failiin jos ei löydetä tapahtumista mitää
 
-			// jos ollaan annettu tämä päivä niin ei ajeta tätä , koska nykyinen kehahin on oikein ja näin on nopeempaa! wheee!
-			if ($pp != date("d") or $kk != date("m") or $vv != date("Y")) {
-				// katotaan mikä oli tuotteen viimeisin hinta annettuna päivänä tai sitten sitä ennen
-				$query = "	SELECT hinta
-							FROM tapahtuma use index (yhtio_tuote_laadittu)
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$row[tuoteno]'
-							and laadittu <= '$vv-$kk-$pp 23:59:59'
-							and hinta <> 0
-							ORDER BY laadittu desc
-							LIMIT 1";
-				$ares = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($ares) == 1) {
-					// löydettiin keskihankintahinta tapahtumista käytetään
-					$arow = mysql_fetch_array($ares);
-					$kehasilloin = $arow["hinta"];
-					$kehalisa = "";
-				}
-				else {
-					// ei löydetty alaspäin, kokeillaan kattoo lähin hinta ylöspäin
+				// jos ollaan annettu tämä päivä niin ei ajeta tätä , koska nykyinen kehahin on oikein ja näin on nopeempaa! wheee!
+				if ($pp != date("d") or $kk != date("m") or $vv != date("Y")) {
+					// katotaan mikä oli tuotteen viimeisin hinta annettuna päivänä tai sitten sitä ennen
 					$query = "	SELECT hinta
 								FROM tapahtuma use index (yhtio_tuote_laadittu)
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$row[tuoteno]'
-								and laadittu >= '$vv-$kk-$pp 23:59:59'
+								and laadittu <= '$vv-$kk-$pp 23:59:59'
 								and hinta <> 0
-								ORDER BY laadittu
+								ORDER BY laadittu desc
 								LIMIT 1";
 					$ares = mysql_query($query) or pupe_error($query);
 
@@ -459,24 +483,44 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 						// löydettiin keskihankintahinta tapahtumista käytetään
 						$arow = mysql_fetch_array($ares);
 						$kehasilloin = $arow["hinta"];
-						$kehalisa = "\t!";
+						$kehalisa = "";
+					}
+					else {
+						// ei löydetty alaspäin, kokeillaan kattoo lähin hinta ylöspäin
+						$query = "	SELECT hinta
+									FROM tapahtuma use index (yhtio_tuote_laadittu)
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$row[tuoteno]'
+									and laadittu >= '$vv-$kk-$pp 23:59:59'
+									and hinta <> 0
+									ORDER BY laadittu
+									LIMIT 1";
+						$ares = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($ares) == 1) {
+							// löydettiin keskihankintahinta tapahtumista käytetään
+							$arow = mysql_fetch_array($ares);
+							$kehasilloin = $arow["hinta"];
+							$kehalisa = "\t!";
+						}
 					}
 				}
-			}
 
-   			$ulos .= "$row[osasto]\t";
-   			$ulos .= "$row[try]\t";
-   			$ulos .= "$row[tuoteno]\t";
-   			$ulos .= "".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\t";
-   			$ulos .= str_replace(".",",",$muutoskpl)."\t";
-   			$ulos .= str_replace(".",",",$kehasilloin)."\t";
-   			$ulos .= str_replace(".",",",$muutoshinta)."$kehalisa\n";
+	   			$ulos .= "$row[osasto]\t";
+	   			$ulos .= "$row[try]\t";
+	   			$ulos .= "$row[tuoteno]\t";
+	   			$ulos .= "".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\t";
+	   			$ulos .= str_replace(".",",",$muutoskpl)."\t";
+	   			$ulos .= str_replace(".",",",$kehasilloin)."\t";
+	   			$ulos .= str_replace(".",",",$muutoshinta)."$kehalisa\n";
+			}
 		}
 
 	} // end while
+	
+	echo "<br><br>Löytyi $lask tuotetta.<br><br>";
 
-	if ($naytarivit != "") {
-
+	if ($naytarivit != "") {		
 		// lähetetään meili
 		$bound = uniqid(time()."_") ;
 

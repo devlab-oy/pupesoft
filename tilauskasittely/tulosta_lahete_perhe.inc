@@ -289,6 +289,12 @@ if (!function_exists('rivi')) {
 					$pdf->draw_text(380, $kala, "...........", 	$firstpage, $p);
 				}
 			}
+			
+			if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
+				$row["hinta"] 	  = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]),2);
+				$row["rivihinta"] = round(laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]),2);
+			}
+			
 			$pdf->draw_text(430, $kala, $row["hinta"], 		$firstpage, $p);
 			$pdf->draw_text(480, $kala, $row["ale"],		$firstpage, $p);
 			$pdf->draw_text(530, $kala, $row["rivihinta"], 	$firstpage, $p);

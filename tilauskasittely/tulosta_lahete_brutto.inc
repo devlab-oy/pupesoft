@@ -282,7 +282,11 @@ if (!function_exists('rivi')) {
 			}
 		}
 		
-		//tässä käytetään ruotsin standardien mukaisesti ovh-hintoja-veroineen		
+		//tässä käytetään ruotsin standardien mukaisesti ovh-hintoja-veroineen
+		if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
+			$row["ovhhinta"] 	  = round(laskuval($row["ovhhinta"], $laskurow["vienti_kurssi"]),2);
+		}
+				
 		$pdf->draw_text(525, $kala, $row["ovhhinta"], $firstpage, $p);
 		
 		if (strlen($row["nimitys"]) > 32) {

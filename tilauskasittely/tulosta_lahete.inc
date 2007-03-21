@@ -294,6 +294,12 @@ if (!function_exists('rivi')) {
 				$pdf->draw_text(380, $kala, "...........", 	$firstpage, $p);
 			}
 		}
+		
+		if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
+			$row["hinta"] 	  = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]),2);
+			$row["rivihinta"] = round(laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]),2);
+		}
+		
 		$pdf->draw_text(430, $kala, $row["hinta"], 		$firstpage, $p);
 		$pdf->draw_text(480, $kala, $row["ale"],		$firstpage, $p);
 		$pdf->draw_text(530, $kala, $row["rivihinta"], 	$firstpage, $p);
@@ -345,7 +351,7 @@ if (!function_exists('rivi')) {
 
 if (!function_exists('loppu')) {
 	function loppu ($firstpage, $tots) {
-		global $pdf, $laskurow, $viite, $p, $total, $total_netto, $rectparam, $kieli;
+		global $pdf, $laskurow, $viite, $p, $total, $total_netto, $rectparam, $kieli, $yhtiorow;
 	
 		$pdf->draw_rectangle(50, 20, 20, 580, $firstpage, $rectparam);
 		$pdf->draw_text(30, 37,  t("Tilausviite", $kieli).": ".$laskurow["viesti"], $firstpage, $p);

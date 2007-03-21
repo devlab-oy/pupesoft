@@ -216,7 +216,7 @@ if ($session != '') {
 	}
 
 
-	if ($kukarow["toimipaikka"] != 0) {
+	if (isset($kukarow["toimipaikka"]) and $kukarow["toimipaikka"] != 0) {
 		$query = "	SELECT *
 					FROM yhtion_toimipaikat
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[toimipaikka]'";

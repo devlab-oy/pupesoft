@@ -31,7 +31,6 @@
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 
-
 	//Jos saamme vain yksi valittu varasto, niin tehd‰‰n siit‰ yhteensopiva array
 	if (!is_array($varasto) and (int) $varasto > 0) {
 		$varasto = array($varasto);
@@ -398,12 +397,16 @@
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
 		if ((mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta or $varataan_saldoa == "EI") {
 
+			if ($debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
+			
 			// nyt meill‰ on $myy_ arrayperheess‰ kaikki tuotteet ja varastopaikat jolta voidaan myyd‰ jotain..
 			// loopataan kaikki tuotteet l‰pi
 
 			//Myyd‰‰n tietylt‰ paikalta
 			if ($paikka != '') {
 				$paikat = split('#',$paikka);
+
+				if ($debug==1) echo "Halutaan myyd‰ paikalta $paikka<br>";
 
 				foreach ($myy_tuoteno as $i => $tuoteno) {
 					if ($myy_kpl[$i] >= $toimittamatta and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1]  == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i]) {
@@ -431,6 +434,9 @@
 
 			// Myyd‰‰n tietyst‰ varastosta
 			if (is_array($varasto) and $paikka == '') {
+
+				if ($debug==1) echo "Halutaan myyd‰ varastoista $varasto<br>";
+
 				foreach ($myy_tuoteno as $i => $tuoteno) {
 					if (!in_array($myy_varasto[$i], $varasto) and $myy_varasto[$i] != "") {
 
@@ -455,9 +461,15 @@
 
 			foreach ($myy_tuoteno as $i => $tuoteno) {
 				//T‰ss‰ loopataan vain is‰/normaleja tuotteita
+				
+				if ($debug==1) echo "Loopataan $tuoteno<br>";
+				
 				if ($myy_tyyppi[$i] == "NORMAALI") {
 					// jos ei olla viel‰ toimitettu kaikkea, niin lis‰t‰‰n tilausrivi
 					if ($toimittamatta > 0) {
+
+						if ($debug==1) echo "Normaalituote $tuoteno, toimittamatta $toimittamatta<br>";
+
 						if ($myy_kpl[$i] >= $toimittamatta or $varataan_saldoa == "EI") {
 							$myy_kpl[$i] = $toimittamatta; // jos t‰ll‰ paikalla on saldoa enemm‰n kun tarvitaan, otetaan sitten vaan tarvittava m‰‰r‰
 						}

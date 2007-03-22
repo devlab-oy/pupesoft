@@ -473,7 +473,8 @@
 
 					$jtok = 0;
 					while($countrow = mysql_fetch_array($countres)) {
-						if(saldo_myytavissa($countrow["tuoteno"], "", 0, "") < $countrow["jt"]) {
+						list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "", 0, "");
+						if($jtapu_myytavissa < $countrow["jt"]) {
 							$jtok--;
 						}
 					}

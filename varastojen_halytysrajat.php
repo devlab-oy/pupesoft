@@ -290,7 +290,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		echo "<td align='right'>$summarow[puutekpl1]</td>";
 
 		// saldo myytävissa kaikki varastot
-		$saldo = saldo_myytavissa($row["tuoteno"], "KAIKKI");
+		list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI");
 		echo "<td align='right'>".sprintf("%.2f",$saldo)."</td>";
 
 		echo "<td align='right'><a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[kpl1]</a></td>";

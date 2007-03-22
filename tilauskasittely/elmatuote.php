@@ -78,7 +78,8 @@ if ($aja=='run') {
 			$row['eankoodi'] = "";
 		}
 
-		$saldo = saldo_myytavissa($row["tuoteno"]);
+		// katotaan paljon myytävissä
+		list( , , $saldo) = saldo_myytavissa($row["tuoteno"]);
 
 		if ($saldo > 1) $saldo = 1;
 		if ($saldo < 1) $saldo = 0;

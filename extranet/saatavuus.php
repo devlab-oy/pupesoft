@@ -24,7 +24,7 @@
 		if (mysql_num_rows($result) == 1) {
 
 			// katotaan paljonko on myytävissä
-			$myytavissa = saldo_myytavissa($tuoteno);
+			list(, , $myytavissa) = saldo_myytavissa($tuoteno);
 
 			// jos meillä on tarpeeksi myytävää
 			if ($myytavissa >= $maara and $myytavissa > 0) {

@@ -272,7 +272,8 @@
 			mysql_select_db ($dbkanta, $link) or die ("Tietokanta ei löydy palvelimelta..");
 
 			foreach($konsyhtiot as $yhtio) {
-				$saldo += saldo_myytavissa($tuote["tuoteno"], "", 0, $yhtio);
+				list(, , $myytavissa) = saldo_myytavissa($tuote["tuoteno"], "", 0, $yhtio);
+				$saldo += $myytavissa;
 			}
 
 			if ($tuote["myyntihinta"] > 0) {

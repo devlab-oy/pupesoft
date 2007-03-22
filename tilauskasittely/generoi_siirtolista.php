@@ -143,7 +143,7 @@
 				}
 
 				//katotaan myytävissä määrä
-				$saldo_myytavissa = (float) saldo_myytavissa($pairow["tuoteno"], "KAIKKI", "$lahdevarasto");
+				list(, , $saldo_myytavissa) = (float) saldo_myytavissa($pairow["tuoteno"], "KAIKKI", "$lahdevarasto");
 				
 				if ($saldo_myytavissa > 0 and $pairow['tarve'] > 0) {
 			

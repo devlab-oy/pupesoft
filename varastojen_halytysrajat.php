@@ -296,7 +296,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		echo "<td align='right'><a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[kpl1]</a></td>";
 
 		// saldo myytävissa tämä varasto
-		$saldo = saldo_myytavissa($row["tuoteno"], "KAIKKI", $varasto);
+		list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $varasto);
 		echo "<td align='right'>".sprintf("%.2f",$saldo)."</td>";
 
 		echo "<td align='right'><a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[varastonkpl1]</a></td>";

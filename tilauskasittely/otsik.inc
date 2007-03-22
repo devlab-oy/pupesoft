@@ -116,7 +116,7 @@
 	$meapurow    = array();
 
 	if ($maksuehto != "") {
-		// haetaan maksuehdoen tiedot tarkastuksia varten
+		// haetaan maksuehdon tiedot tarkastuksia varten
 		$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 		$meapurow = mysql_fetch_array($meapu);
@@ -223,19 +223,14 @@
 				$tiedot_laskulta = "YES";
 			}
 			
-			$qlisa = "";
-			if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
-				$qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
-			}
-			
 			if (substr($asiakasid,0,1) == "£") {
 
 				$asiakasid = substr($asiakasid,1);
 
-				$squery = "	SELECT laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
+				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*,  lasku.hyvaksynnanmuutos as luokka
 							FROM lasku
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-							$qlisa
+							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.tunnus = '$asiakasid'";
 			}
 			elseif ($asiakasid != "" and $tiedot_laskulta == "") {
@@ -244,21 +239,21 @@
 							WHERE tunnus = '$asiakasid'";
 			}
 			elseif ($kopioitava_otsikko != 0) {
-				$squery = "	SELECT laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
+				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
 							FROM lasku
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-							$qlisa
+							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.tunnus = '$kopioitava_otsikko'";
 			}
 			else {
-				$squery = "	SELECT laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
+				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
 							FROM lasku
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-							$qlisa
+							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.tunnus = '$kukarow[kesken]'";
 			}
 			$sresult = mysql_query($squery) or pupe_error($squery);
-			$srow = mysql_fetch_array($sresult);
+			$srow = mysql_fetch_array($sresult);			
 		}
 
 		//Tutkitaan onko tilauksella rivejä
@@ -1626,7 +1621,7 @@
 						viite	 		= '$viite',
 						otunnus 		= '$kukarow[kesken]'";
 			$query2 .= $postquery2;
-			$result = mysql_query($query2) or pupe_error($query2);			
+			$result = mysql_query($query2) or pupe_error($query2);
 		}
 
 		if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T") {

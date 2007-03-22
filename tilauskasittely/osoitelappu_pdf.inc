@@ -164,7 +164,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	//Duusataan SSCC
 	$output      = "png";
-	$width       = "220";
+	$width       = "500";
 	$height      = "50";
 	$xres        = "1";
 	$font        = "2";
@@ -208,7 +208,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 		$sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
 
 		// piirretään viivakoodi paprulle
-		$pdf->image_place($image, mm_pt(10), mm_pt(40), $firstpage); // Y, X
+		$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
 		$pdf->draw_text(mm_pt(4), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
 		unset($obj);
 

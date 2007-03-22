@@ -45,7 +45,7 @@
 		$riviok++;
 		$tilausok++;
 	}
-	
+
 	//	Pakkokommentoitava tuote
 	if ($trow["kommentoitava"] != "" and $row["kommentti"] == "") {
 		$varaosavirhe .= t("VIRHE: Tuotetta on kommentoitava!")."<br>";
@@ -102,47 +102,29 @@
 		$tilausok++;
 	}
 
-	if ($trow["vienti"] != '') {
-		$trow["vienti"] = strtoupper(str_replace(' ','',$trow["vienti"]));
-		$vientikielto = array();
-		$vientikielto = explode(',',$trow["vienti"]);
-		
-		$kielletty = 0;
-		foreach ($vientikielto as $kielto) {
-			if ($kielletty == 0) {
-				if ($kielto == '!ALL' and strtoupper($laskurow['toim_maa']) == strtoupper($yhtiorow['maakoodi'])) {
-					//kotimaanmyynti kielletty
-					$varaosavirhe .= t("VIRHE: T‰m‰ on kotimaanmyyntikiellossa oleva tuote, voidaan myyd‰ vain vientiasiakkaalle!")."<br>";
-			 		$riviok++;
-			 		$tilausok++;
-					$kielletty++;
-				}
-				elseif ($kielto == 'ALL' and strtoupper($laskurow['toim_maa']) != strtoupper($yhtiorow['maakoodi'])) {
-					//vienti kielletty
-					$varaosavirhe .= t("VIRHE: T‰m‰ on vientikiellossa oleva tuote, ei voida myyd‰ vientiasiakkaalle!")."<br>";
-			 		$riviok++;
-			 		$tilausok++;
-					$kielletty++;
-				}
-				elseif (strpos($kielto,'!') !== FALSE and $kielto != '!ALL') {
-					//saa myyd‰ vain t‰h‰n maahan
-					$kieltomaa = str_replace('!','',$kielto);
-					if ($kieltomaa != $laskurow['toim_maa']) {
-						$varaosavirhe .= t("VIRHE: T‰t‰ tuotetta saa myyd‰ vain asiakkaalle maahan")." $kieltomaa!<br>";
-				 		$riviok++;
-				 		$tilausok++;
-						$kielletty++;
-					}
-				}
-				elseif ($kielto == $laskurow['toim_maa']) {
-					//ei saa myyd‰ t‰h‰n maahan
-					$varaosavirhe .= t("VIRHE: T‰t‰ tuotetta ei saa myyd‰ asiakkaalle maahan")." $laskurow[toim_maa]!<br>";
-			 		$riviok++;
-			 		$tilausok++;
-					$kielletty++;
-				}
-			}
+	if (trim($trow["vienti"]) != '') {
+
+		// vientikieltok‰sittely:
+		// +maa tarkoittaa ett‰ myynti on kielletty t‰h‰n maahan
+		// -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
+		// eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
+
+		if (strpos(strtoupper($trow["vienti"]), strtoupper("+$laskurow[toim_maa]")) !== FALSE and strpos($trow["vienti"], "+") !== FALSE) {
+			//ei saa myyd‰ t‰h‰n maahan
+			$varaosavirhe .= t("VIRHE: T‰t‰ tuotetta ei saa myyd‰ maahan")." $laskurow[toim_maa]!<br>";
+	 		$riviok++;
+	 		$tilausok++;
+			$kielletty++;
 		}
+
+		if (strpos(strtoupper($trow["vienti"]), strtoupper("-$laskurow[toim_maa]")) === FALSE and strpos($trow["vienti"], "-") !== FALSE) {
+			//ei saa myyd‰ t‰h‰n maahan
+			$varaosavirhe .= t("VIRHE: T‰t‰ tuotetta ei saa myyd‰ maahan")." $laskurow[toim_maa]!!<br>";
+	 		$riviok++;
+	 		$tilausok++;
+			$kielletty++;
+		}
+
 	}
 
 	if ($row["var"] == 'S') {
@@ -261,7 +243,7 @@
 
 			while($alkurow = mysql_fetch_array($omavarastores)) {
 				if ($alkurow["varastotyyppi"] != "E" or $laskurow["varasto"] == $alkurow["varastotunnus"] or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])) {
-					
+
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"]);
 
 					if ($myytavissa >= $kpl_st or ($row["var"] != "P" and $toim != "TARJOUS" and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])) {

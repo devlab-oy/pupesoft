@@ -1653,51 +1653,31 @@ if ($tee == '') {
 					$tuoteno = "";
 					$kpl	 = 0;
 				}
-				elseif ($kukarow["extranet"] != '' and $trow["vienti"] != '') {
-					$trow["vienti"] = strtoupper(str_replace(' ','',$trow["vienti"]));
-					$vientikielto = array();
-					$vientikielto = explode(',',$trow["vienti"]);
+				elseif ($kukarow["extranet"] != '' and trim($trow["vienti"]) != '') {
 
-					$kielletty = 0;
-					foreach ($vientikielto as $kielto) {
-						if ($kielletty == 0) {
-							if ($kielto == '!ALL' and strtoupper($laskurow['toim_maa']) == strtoupper($yhtiorow['maakoodi'])) {
-								//kotimaanmyynti kielletty
-								$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
-						 		$trow 	 = "";
-								$tuoteno = "";
-								$kpl	 = 0;
-								$kielletty++;
-							}
-							elseif ($kielto == 'ALL' and strtoupper($laskurow['toim_maa']) != strtoupper($yhtiorow['maakoodi'])) {
-								//vienti kielletty
-								$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
-						 		$trow 	 = "";
-								$tuoteno = "";
-								$kpl	 = 0;
-								$kielletty++;
-							}
-							elseif (strpos($kielto,'!') !== FALSE and $kielto != '!ALL') {
-								//saa myydä vain tähän maahan
-								$kieltomaa = str_replace('!','',$kielto);
-								if ($kieltomaa != $laskurow['toim_maa']) {
-									$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
-							 		$trow 	 = "";
-									$tuoteno = "";
-									$kpl	 = 0;
-									$kielletty++;
-								}
-							}
-							elseif ($kielto == $laskurow['toim_maa']) {
-								//ei saa myydä tähän maahan
-								$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
-						 		$trow 	 = "";
-								$tuoteno = "";
-								$kpl	 = 0;
-								$kielletty++;
-							}
-						}
+					// vientikieltokäsittely:
+					// +maa tarkoittaa että myynti on kielletty tähän maahan
+					// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
+					// eli näytetään vaan tuotteet jossa vienti kentässä on tyhjää tai -maa.. ja se ei saa olla +maa
+
+					if (strpos(strtoupper($trow["vienti"]), strtoupper("+$laskurow[toim_maa]")) !== FALSE and strpos($trow["vienti"], "+") !== FALSE) {
+						//ei saa myydä tähän maahan
+						$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
+				 		$trow 	 = "";
+						$tuoteno = "";
+						$kpl	 = 0;
+						$kielletty++;
 					}
+
+					if (strpos(strtoupper($trow["vienti"]), strtoupper("-$laskurow[toim_maa]")) === FALSE and strpos($trow["vienti"], "-") !== FALSE) {
+						//ei saa myydä tähän maahan
+						$varaosavirhe = t("VIRHE: Tuotenumeroa ei löydy järjestelmästä!");
+				 		$trow 	 = "";
+						$tuoteno = "";
+						$kpl	 = 0;
+						$kielletty++;
+					}
+
 				}
 			}
 			elseif ($kukarow["extranet"] != '') {

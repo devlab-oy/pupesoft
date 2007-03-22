@@ -155,15 +155,11 @@
 		$perhelisa = " and tuoteperhe.tyyppi in ('P','') ";
 	}
 
-	$kieltolisa = "";
-
-	if (strtoupper($laskurow['toim_maa']) == strtoupper($yhtiorow['maakoodi'])) {
-		//kotimaan myynti‰
-		$kieltolisa = " and (tuote.vienti = '' or (tuote.vienti not like '%$laskurow[toim_maa]%' and tuote.vienti not like '%!all%') or tuote.vienti like '%!$laskurow[toim_maa]%')";
-	}
-	else {
-		$kieltolisa = " and (tuote.vienti = '' or (tuote.vienti not like '%$laskurow[toim_maa]%' and tuote.vienti not like '%all%') or tuote.vienti like '%!$laskurow[toim_maa]%' or tuote.vienti like '%!all%')";
-	}
+	// vientikieltok‰sittely:
+	// +maa tarkoittaa ett‰ myynti on kielletty t‰h‰n maahan
+	// -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
+	// eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
+	$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$laskurow[toim_maa]%') and tuote.vienti not like '%+$laskurow[toim_maa]%' ";
 
 	//Tutkitaan onko t‰m‰ hyvitysrivi
 	if ((float) $kpl < 0 and trim($var) == "") {

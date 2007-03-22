@@ -211,7 +211,204 @@
 				}
 
 			}
+			
 			echo "</table></td></tr></table><br>";
+
+
+			$query = "	SELECT tilausrivi.*, lasku.ytunnus, tilausrivi.varattu+tilausrivi.jt kpl, lasku.nimi, tilausrivi.toimaika, round((tilausrivi.varattu+tilausrivi.jt)*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta
+						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.tyyppi = 'G'
+						and tilausrivi.tuoteno = '$tuoteno'
+						and tilausrivi.laadittu > '0000-00-00 00:00:00'
+						and tilausrivi.laskutettuaika = '0000-00-00'
+						and (tilausrivi.varattu != 0 or jt != 0)
+						and tilausrivi.var not in ('P')
+						ORDER BY tyyppi, var";
+			$jtresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($jtresult) != 0) {
+
+				// Avoimet rivit
+				echo "</td></tr><tr><td class='back' valign='top'><br><table>";
+
+				echo "<tr>
+						<th>".t("Asiakas/Toimittaja")."</th>
+						<th>".t("Tilaus/Keikka")."</th>
+						<th>".t("Tyyppi")."</th>
+						<th>".t("Toimaika")."</th>
+						<th>".t("Kpl")."</th>
+						</tr>";
+
+				// jtrivejä löytyi
+				while ($jtrow = mysql_fetch_array($jtresult)) {
+
+					$tyyppi = "";
+					$merkki = "";
+					$keikka = "";
+
+					if ($jtrow["tyyppi"] == "O") {
+						$tyyppi = t("Ostotilaus");
+						$merkki = "+";
+
+						$query = "	SELECT laskunro
+									FROM lasku
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus='$jtrow[uusiotunnus]'";
+						$keikkares = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($keikkares) > 0) {
+							$keikkarow = mysql_fetch_array($keikkares);
+							$keikka = " / ".$keikkarow["laskunro"];
+						}
+					}
+					elseif($jtrow["tyyppi"] == "E") {
+						$tyyppi = t("Ennakkotilaus");
+						$merkki = "-";
+					}
+					elseif($jtrow["tyyppi"] == "G") {
+						$tyyppi = t("Varastosiirto");
+						$merkki = "-";
+					}
+					elseif($jtrow["tyyppi"] == "V") {
+						$tyyppi = t("Valmistus");
+						$merkki = "-";
+					}
+					elseif($jtrow["tyyppi"] == "L" and $jtrow["var"] == "J") {
+						$tyyppi = t("Jälkitoimitus");
+						$merkki = "-";
+					}
+					elseif(($jtrow["tyyppi"] == "L" or $jtrow["tyyppi"] == "N") and $jtrow["varattu"] > 0) {
+						$tyyppi = t("Myynti");
+						$merkki = "-";
+					}
+					elseif(($jtrow["tyyppi"] == "L" or $jtrow["tyyppi"] == "N") and $jtrow["varattu"] < 0) {
+						$tyyppi = t("Hyvitys");
+						$merkki = "+";
+					}
+					echo "<tr>
+							<td>$jtrow[nimi]</td>
+							<td>$jtrow[otunnus] $keikka</td>";
+					echo "	<td>$tyyppi</td>
+							<td>".substr($jtrow["toimaika"],0,10)."</td>
+							<td>$merkki".abs($jtrow["kpl"])."</td>
+							</tr>";
+				}
+
+				echo "</table>";
+			}
+			
+			echo "</td></tr><tr><td class='back' valign='top'><br>";
+			echo "<table>";
+			echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";
+
+			if ($historia == "") $historia=1;
+			$chk[$historia] = "SELECTED";
+
+			echo "<input type='hidden' name='tee' value='Z'>";
+			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+
+			echo "<a href='#' name='Tapahtumat'>";
+
+			echo "<tr>";
+			echo "<th colspan='2'>".t("Näytä tapahtumat").": ";
+			echo "<select name='historia' onchange='submit();'>'";
+			echo "<option value='1' $chk[1]> ".t("20 viimeisintä")."</option>";
+			echo "<option value='2' $chk[2]> ".t("Tilivuoden alusta")."</option>";
+			echo "<option value='3' $chk[3]> ".t("Lähes kaikki")."</option>";
+			echo "</select>";
+			echo "</th>";
+
+
+			if ($tapahtumalaji == "laskutus") 			$sel1="SELECTED";
+			if ($tapahtumalaji == "tulo") 				$sel2="SELECTED";
+			if ($tapahtumalaji == "valmistus") 			$sel3="SELECTED";
+			if ($tapahtumalaji == "siirto") 			$sel4="SELECTED";
+			if ($tapahtumalaji == "kulutus") 			$sel5="SELECTED";
+			if ($tapahtumalaji == "Inventointi") 		$sel6="SELECTED";
+			if ($tapahtumalaji == "Epäkurantti") 		$sel7="SELECTED";
+			if ($tapahtumalaji == "poistettupaikka") 	$sel8="SELECTED";
+			if ($tapahtumalaji == "uusipaikka") 		$sel9="SELECTED";
+
+			echo "<th colspan='2'>".t("Tapahtumalaji").": ";
+			echo "<select name='tapahtumalaji' onchange='submit();'>'";
+			echo "<option value=''>".t("Näytä kaikki")."</option>";
+			echo "<option value='laskutus' $sel1>".t("Laskutukset")."</option>";
+			echo "<option value='tulo' $sel2>".t("Tulot")."</option>";
+			echo "<option value='valmistus' $sel3>".t("Valmistukset")."</option>";
+			echo "<option value='siirto' $sel4>".t("Siirrot")."</option>";
+			echo "<option value='kulutus' $sel5>".t("Kulutukset")."</option>";
+			echo "<option value='Inventointi' $sel6>".t("Inventoinnit")."</option>";
+			echo "<option value='Epäkurantti' $sel7>".t("Epäkuranttiusmerkinnät")."</option>";
+			echo "<option value='poistettupaikka' $sel8>".t("Poistetut tuotepaikat")."</option>";
+			echo "<option value='uusipaikka' $sel9>".t("Perustetut tuotepaikat")."</option>";
+			echo "</select>";
+			echo "</th>";
+
+			echo "<tr>";
+			echo "<th>".t("Käyttäjä@Pvm")."</th>";
+			echo "<th>".t("Tyyppi")."</th>";
+			echo "<th>".t("Kpl")."</th>";
+			echo "<th>".t("Selite")."";
+
+			echo "</th></form>";
+			echo "</tr>";
+
+
+			//tapahtumat
+			if ($historia == '1' or $historia == '') {
+				$maara = "LIMIT 20";
+				$ehto = ' and tapahtuma.laadittu >= date_sub(now(), interval 6 month)';
+			}
+			if ($historia == '2') {
+				$maara = "";
+				$ehto = " and tapahtuma.laadittu > '$yhtiorow[tilikausi_alku]'";
+			}
+			if ($historia == '3') {
+				$maara = "LIMIT 2500";
+				$ehto = "";
+			}
+
+			$query = "	SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
+						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus
+						FROM tapahtuma use index (yhtio_tuote_laadittu)
+						LEFT JOIN tilausrivi ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus
+						LEFT JOIN lasku ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
+						WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
+						and tapahtuma.tuoteno = '$tuoteno'
+						and tapahtuma.laadittu > '0000-00-00 00:00:00'
+						and tapahtuma.laji = 'siirto'
+						$ehto
+						ORDER BY tapahtuma.laadittu desc $maara";
+			$qresult = mysql_query($query) or pupe_error($query);
+
+			$vararvo_nyt = sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"]);
+
+			while ($prow = mysql_fetch_array ($qresult)) {
+
+				$vararvo_nyt -= $prow["arvo"];
+
+				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
+					echo "<tr>";
+					echo "<td nowrap>$prow[kuka]</td>";
+					echo "<td nowrap>";
+
+					
+					
+					echo t("$prow[laji]");
+					
+
+					echo "</td>";
+
+					echo "<td nowrap align='right'>$prow[kpl]</td>";
+					echo "<td>$prow[selite]</td>";
+					echo "</tr>";
+				}
+			}
+			echo "</table>";
+			
+			
 		}
 		else {
 			echo "<font class='message'>".t("Yhtään tuotetta ei löytynyt")."!<br></font>";

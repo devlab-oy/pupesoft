@@ -321,11 +321,22 @@
 			}
 			
 			if (!function_exists('zzrowcmp')) {
-				function zzrowcmp($a, $b) {
-					if ($a["myytavissa"] == $b["myytavissa"] and $a["oletus"] == $b["oletus"]) {
+				function zzrowcmp($a, $b) {					
+					if (strcmp($a["oletus"], $b["oletus"]) < 0) {
+						return 1;
+					}
+					elseif (strcmp($a["oletus"], $b["oletus"]) > 0) {
+						return -1;
+					}
+					elseif ($a["myytavissa"] < $b["myytavissa"]) {
+						return 1;
+					}
+					elseif ($a["myytavissa"] > $b["myytavissa"]) {
+						return -1;
+					}
+					else {
 						return 0;
 					}
-					return ($a["myytavissa"] > $b["myytavissa"] and $a["oletus"] == $b["oletus"] or strcmp($a["oletus"], $b["oletus"]) > 1) ? -1 : 1;
 				}
 			}
 		

@@ -161,14 +161,14 @@ if (!function_exists("t")) {
 		else {
 			$indeksi = "fi";
 		}
-		
+
 		if ($indeksi != 'fi') {
 			$sanakirjaquery  = "SELECT fi, $indeksi FROM sanakirja WHERE fi = BINARY '$stringi'";
 			$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 
 			if (mysql_num_rows($sanakirjaresult) > 0) {
 				$sanakirjarow = mysql_fetch_array($sanakirjaresult);
-				
+
 				if (isset($sanakirjarow[$indeksi]) and trim($sanakirjarow[$indeksi]) != '') {
 					$stringi = $sanakirjarow[$indeksi];
 				}
@@ -184,7 +184,7 @@ if (!function_exists("t")) {
 				$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 			}
 		}
-		
+
 		if ($useslave > 0) { //Palautetaan slave k‰yttˆˆn
 			$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
 			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta lˆydy palvelimelta (functions.inc 2)!");
@@ -284,9 +284,9 @@ if (!function_exists("saldo_myytavissa")) {
 		// Laskuttamattomia hyvityksi‰ ei katsota myyt‰viksi vaan ne pit‰‰ laskuttaa ennenkuin n‰kyv‰t t‰‰ll‰ (varattu > 0)
 
 		global $kukarow, $yhtiorow;
-		
+
 		$varasto = (int) $varasto;
-		
+
 		$query  = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 		$result = mysql_query($query) or die($query.mysql_error());
 		$tuote  = mysql_fetch_array($result);
@@ -345,41 +345,48 @@ if (!function_exists("saldo_myytavissa")) {
 			else {
 				$yhtiolisa = $kukarow["yhtio"];
 			}
-			
-			$valinta1 = "";
-			$valinta2 = "";
-			$valinta3 = "";
-			
+
+			$valinta1 = ""; // varaston tyyppi
+			$valinta2 = ""; // tietty varastopaikka special case
+			$valinta3 = ""; // p‰‰tet‰‰n joinin stricteys
+
 			// katotaan ollaanko annettu parametriksi joku tietty varastotyyppi
 			if ($tyyppi == "E") {
 				$valinta1 = " varastopaikat.tyyppi = 'E' and ";
+				$valinta2 = "";
 				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 			}
 			elseif ($tyyppi == "V") {
 				$valinta1 = " varastopaikat.tyyppi = 'V' and ";
+				$valinta2 = "";
 				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 			}
 			elseif ($tyyppi == "KAIKKI") {
-				$valinta1 = " ";
-				$valinta2 = " ";
-				$valinta3 = " ";
+				$valinta1 = "";
+				$valinta2 = "";
+				$valinta3 = "";
 			}
 			elseif ($tyyppi == "ORVOT") {
+				$valinta1 = "";
+				$valinta2 = "";
 				$valinta3 = " HAVING varastopaikat.tyyppi is null ";
 			}
 			else {
 				$valinta1 = " varastopaikat.tyyppi = '' and ";
+				$valinta2 = "";
 				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 			}
 
 			// Katotaan halutaanko saldo vaan jostain tietyst‰ varastosta (varastopaikat.tunnus), silloin unohdetaan edell‰ annettu tyyppi kokonaan
 			if ($varasto != 0) {
 				$valinta1 = " varastopaikat.tunnus = '$varasto' and ";
+				$valinta2 = "";
 				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 			}
-			
-			// Katotaan halutaanko saldo vaan joltain tietylt‰ varasopaikalta
+
+			// Katotaan halutaanko saldo vaan joltain tietylt‰ varasopaikalta, silloinkin unohdetaan edell‰ annettu tyyppi kokonaan
 			if ($hyllyalue != "" and $hyllynro != "") {
+				$valinta1 = "";
 				$valinta2 = " 	and tuotepaikat.hyllyalue = '$hyllyalue'
 								and tuotepaikat.hyllynro  = '$hyllynro'
 								and tuotepaikat.hyllyvali = '$hyllyvali'
@@ -390,7 +397,7 @@ if (!function_exists("saldo_myytavissa")) {
 			// Saldo varastoista
 			$query = "	SELECT tuotepaikat.*, varastopaikat.tyyppi
 						FROM tuotepaikat
-						LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio 
+						LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
 						and $valinta1
 						concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
 						concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
@@ -402,16 +409,16 @@ if (!function_exists("saldo_myytavissa")) {
 
 			$saldo			= 0;
 			$hyllyssa		= 0;
-			$myytavissa		= 0;	
+			$myytavissa		= 0;
 			$ennakkopois 	= 0;
-			
+
 			while ($row = mysql_fetch_array($result)) {
-				
+
 				// Saldot
 				$saldo += $row["saldo"];
-				
+
 				// Myyntirivien, varastosiirtojen ja valmistusten ennakkopoistot ja ker‰tyt rivit
-				$query = "	SELECT	
+				$query = "	SELECT
 							ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,
 							ifnull(sum(tilausrivi.varattu),0) varattu
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -426,7 +433,7 @@ if (!function_exists("saldo_myytavissa")) {
 							and tilausrivi.hyllytaso = '$row[hyllytaso]'";
 				$ennresult = mysql_query($query) or die($query);
 				$ennrow = mysql_fetch_array($ennresult);
-				
+
 				$myytavissa += $row["saldo"] - $ennrow["varattu"] - $row["saldo_varattu"];
 				$hyllyssa   += $row["saldo"] - $ennrow["keratty"];
 			}
@@ -438,14 +445,14 @@ if (!function_exists("saldo_myytavissa")) {
 						WHERE yhtio='$yhtiolisa' and tuoteno='$tuoteno'";
 			$ennresult = mysql_query($query) or die($query);
 			$ennrow = mysql_fetch_array($ennresult);
-			
-			if ($varasto == 0 and $hyllyalue == "" and $hyllynro == "") {				
-				
+
+			if ($varasto == 0 and $hyllyalue == "" and $hyllynro == "") {
+
 				$orposaldomyytavissa = 0;
-				
+
 				// jos paikkoja lˆytyi
 				if ($ennrow["paikat"] != "") {
-					
+
 					if ($tyyppi != "KAIKKI" and $tyyppi != "ORVOT") {
 						$query = "	SELECT sum(saldo) saldo, varastopaikat.tyyppi
 									FROM tuotepaikat
@@ -461,7 +468,7 @@ if (!function_exists("saldo_myytavissa")) {
 						$ennsaldorow = mysql_fetch_array($ennsaldoresult);
 						$orposaldomyytavissa = $ennsaldorow["saldo"];
 					}
-					
+
 					// etsit‰‰n varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
 					$query = "	SELECT sum(varattu) varattu
 								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -472,7 +479,7 @@ if (!function_exists("saldo_myytavissa")) {
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($ennrow[paikat])";
 					$ennresult = mysql_query($query) or die($query);
 					$ennrow = mysql_fetch_array($ennresult);
-					
+
 					$orposaldomyytavissa -= $ennrow["varattu"];
 				}
 				else {
@@ -486,13 +493,13 @@ if (!function_exists("saldo_myytavissa")) {
 								tilausrivi.varattu > 0";
 					$ennresult = mysql_query($query) or die($query);
 					$ennrow = mysql_fetch_array($ennresult);
-					
+
 					$orposaldomyytavissa -= $ennrow["varattu"];
 				}
 
 				$myytavissa += $orposaldomyytavissa;
-				
-			}			
+
+			}
 		}
 		return array($saldo, $hyllyssa, $myytavissa);
 	}
@@ -596,11 +603,11 @@ if (!function_exists("laskuval")) {
 // Haetaan tuotteen avainsanoista/avainsanoista korvaavuuksia.
 if (!function_exists("asana")) {
 	function asana($laji, $sana, $sana2 = '') {
-		
+
 		global $kukarow, $yhtiorow;
-		
+
 		$laji = $laji.$kukarow["kieli"];
-		
+
 		if (substr($laji,0,8) == 'nimitys_') {
 			$tarvitaan = 0;
 			if ($kukarow["kieli"] != $yhtiorow["kieli"]) {
@@ -617,7 +624,7 @@ if (!function_exists("asana")) {
 			elseif ($sana2 == '') {
 				$tarvitaan++;
 			}
-			
+
 			if ($tarvitaan > 0) {
 				$query = "select nimitys from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$sana' LIMIT 1";
 				$result = mysql_query($query) or pupe_error($query);
@@ -642,11 +649,11 @@ if (!function_exists("asana")) {
 				}
 			}
 			else {
-				return $sana;	
+				return $sana;
 			}
 		}
 	}
-	
+
 	/*esimerkki
 	".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."
 	*/
@@ -655,24 +662,24 @@ if (!function_exists("asana")) {
 // helpotetaan queryn tekoa.
 if (!function_exists("nimitys")) {
 	function nimitys($laji, $joini = '', $kieli = '') {
-		
+
 		global $kukarow, $yhtiorow;
-		
-		$returni = "";			
-		
+
+		$returni = "";
+
 		if ($laji == 'select') {
 			if ($joini == '') {
-				$returni = " nimitys ";	
+				$returni = " nimitys ";
 			}
 			else {
 				$returni = "$joini.nimitys";
 			}
 		}
-		
+
 		if ($kieli == '') {
 			$kieli = $kukarow["kieli"];
 		}
-		
+
 		if ($kieli != $yhtiorow["kieli"]) {
 			if ($laji == 'join') {
 				if ($joini != '') {
@@ -686,33 +693,33 @@ if (!function_exists("nimitys")) {
 				else {
 					$mika = "$joini.nimitys";
 				}
-				
+
 				$returni = " if(isnull(tuotteen_avainsanat.selite) or tuotteen_avainsanat.selite='', $mika, tuotteen_avainsanat.selite) nimitys ";
 			}
 		}
-				
+
 		return $returni;
 	}
-	
+
 	/*esimerkki
 	".nimitys('select')."
 	".nimitys('join','tilausrivi')."
 	*/
-	
+
 }
 
 // helpotetaan queryn tekoa.
 if (!function_exists("avain")) {
 	function avain($laji, $joini = '', $kieli = '') {
-		
+
 		global $kukarow, $yhtiorow;
-		
-		$returni = "";	
-		
+
+		$returni = "";
+
 		if ($kieli == '') {
 			$kieli = $kukarow["kieli"];
-		}		
-		
+		}
+
 		if ($joini == 'TOIMITUSTAPA_') {
 			$returni = " selite ";
 			$joinaa = "toimitustapa";
@@ -726,7 +733,7 @@ if (!function_exists("avain")) {
 			$joinaa = "maksuehto";
 		}
 		else {
-			$returni = " selitetark ";	
+			$returni = " selitetark ";
 			$joinaa = "avainsana";
 		}
 
@@ -757,15 +764,15 @@ if (!function_exists("avain")) {
 		elseif ($laji == 'join' or $laji == 'join2') {
 			$returni = '';
 		}
-						
+
 		return $returni;
 	}
-	
+
 	/*esimerkki
 	".avain('select')."
 	".avain('join','TRY_')."
 	*/
-	
+
 }
 
 // Tehd‰‰n l‰hetteen ja laskun sorttauskent‰t

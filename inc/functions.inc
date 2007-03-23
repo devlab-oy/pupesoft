@@ -291,11 +291,15 @@ if (!function_exists("saldo_myytavissa")) {
 		$result = mysql_query($query) or die($query.mysql_error());
 		$tuote  = mysql_fetch_array($result);
 
-		if (mysql_num_rows($result) == 0) {
-			$myytavissa = FALSE;
+		if (mysql_num_rows($result) == 0) {			
+			$saldo			= FALSE;
+			$hyllyssa		= FALSE;
+			$myytavissa		= FALSE;
 		}
 		elseif ($tuote["ei_saldoa"] != "") {
-			$myytavissa = 0;
+			$saldo			= 0;
+			$hyllyssa		= 0;
+			$myytavissa		= 0;
 		}
 		else {
 			//Jos yhtiö tulee parametrinä niin katsotaan, ettei se ole ihan mitä sattuu ja lasketaan sen yhtiön saldo
@@ -332,14 +336,14 @@ if (!function_exists("saldo_myytavissa")) {
 						$tuoteno 	= $superrow["toim_tuoteno"];
 					}
 					else {
-						return 0;
+						return array(0, 0, 0);
 					}
 				}
 				elseif($yhtio == $kukarow["yhtio"]) {
 					$yhtiolisa = $kukarow["yhtio"];
 				}
 				else {
-					return 0;
+					return array(FALSE, FALSE, FALSE);
 				}
 			}
 			else {
@@ -407,98 +411,104 @@ if (!function_exists("saldo_myytavissa")) {
 						$valinta3";
 			$result = mysql_query($query) or die($query);
 
-			$saldo			= 0;
-			$hyllyssa		= 0;
-			$myytavissa		= 0;
-			$ennakkopois 	= 0;
+			
+			if (mysql_num_rows($result) == 0) {
+				return array(FALSE, FALSE, FALSE);
+			}
+			else {
+				$saldo			= 0;
+				$hyllyssa		= 0;
+				$myytavissa		= 0;
+				$ennakkopois 	= 0;
 
-			while ($row = mysql_fetch_array($result)) {
+				while ($row = mysql_fetch_array($result)) {
 
-				// Saldot
-				$saldo += $row["saldo"];
+					// Saldot
+					$saldo += $row["saldo"];
 
-				// Myyntirivien, varastosiirtojen ja valmistusten ennakkopoistot ja kerätyt rivit
-				$query = "	SELECT
-							ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,
-							ifnull(sum(tilausrivi.varattu),0) varattu
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-							WHERE tilausrivi.yhtio = '$yhtiolisa'
-							and tilausrivi.tyyppi in ('L','G','V')
-							and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
-							and tilausrivi.tuoteno = '$tuoteno'
-							and tilausrivi.varattu > 0
-							and tilausrivi.hyllyalue = '$row[hyllyalue]'
-							and tilausrivi.hyllynro  = '$row[hyllynro]'
-							and tilausrivi.hyllyvali = '$row[hyllyvali]'
-							and tilausrivi.hyllytaso = '$row[hyllytaso]'";
+					// Myyntirivien, varastosiirtojen ja valmistusten ennakkopoistot ja kerätyt rivit
+					$query = "	SELECT
+								ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,
+								ifnull(sum(tilausrivi.varattu),0) varattu
+								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+								WHERE tilausrivi.yhtio = '$yhtiolisa'
+								and tilausrivi.tyyppi in ('L','G','V')
+								and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+								and tilausrivi.tuoteno = '$tuoteno'
+								and tilausrivi.varattu > 0
+								and tilausrivi.hyllyalue = '$row[hyllyalue]'
+								and tilausrivi.hyllynro  = '$row[hyllynro]'
+								and tilausrivi.hyllyvali = '$row[hyllyvali]'
+								and tilausrivi.hyllytaso = '$row[hyllytaso]'";
+					$ennresult = mysql_query($query) or die($query);
+					$ennrow = mysql_fetch_array($ennresult);
+
+					$myytavissa += $row["saldo"] - $ennrow["varattu"] - $row["saldo_varattu"];
+					$hyllyssa   += $row["saldo"] - $ennrow["keratty"];
+				}
+
+				// katsotaan löytyykö tuotetta varattuna joltain muulta paikalta, jota ei ole enää olemassa tuotepaikoissa
+				// ekaks haetaan ihan kaikki nykyiset paikat suoraan mysql muotoon
+				$query = "	SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
+							FROM tuotepaikat
+							WHERE yhtio='$yhtiolisa' and tuoteno='$tuoteno'";
 				$ennresult = mysql_query($query) or die($query);
 				$ennrow = mysql_fetch_array($ennresult);
 
-				$myytavissa += $row["saldo"] - $ennrow["varattu"] - $row["saldo_varattu"];
-				$hyllyssa   += $row["saldo"] - $ennrow["keratty"];
-			}
+				if ($varasto == 0 and $hyllyalue == "" and $hyllynro == "") {
 
-			// katsotaan löytyykö tuotetta varattuna joltain muulta paikalta, jota ei ole enää olemassa tuotepaikoissa
-			// ekaks haetaan ihan kaikki nykyiset paikat suoraan mysql muotoon
-			$query = "	SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
-						FROM tuotepaikat
-						WHERE yhtio='$yhtiolisa' and tuoteno='$tuoteno'";
-			$ennresult = mysql_query($query) or die($query);
-			$ennrow = mysql_fetch_array($ennresult);
+					$orposaldomyytavissa = 0;
 
-			if ($varasto == 0 and $hyllyalue == "" and $hyllynro == "") {
+					// jos paikkoja löytyi
+					if ($ennrow["paikat"] != "") {
 
-				$orposaldomyytavissa = 0;
+						if ($tyyppi != "KAIKKI" and $tyyppi != "ORVOT") {
+							$query = "	SELECT sum(saldo) saldo, varastopaikat.tyyppi
+										FROM tuotepaikat
+										LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio and
+										concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+										concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+										WHERE tuotepaikat.yhtio = '$yhtiolisa'
+										and tuotepaikat.tuoteno = '$tuoteno'
+										GROUP BY varastopaikat.tyyppi
+										HAVING varastopaikat.tyyppi is null";
+							$ennsaldoresult = mysql_query($query) or die($query);
 
-				// jos paikkoja löytyi
-				if ($ennrow["paikat"] != "") {
+							$ennsaldorow = mysql_fetch_array($ennsaldoresult);
+							$orposaldomyytavissa = $ennsaldorow["saldo"];
+						}
 
-					if ($tyyppi != "KAIKKI" and $tyyppi != "ORVOT") {
-						$query = "	SELECT sum(saldo) saldo, varastopaikat.tyyppi
-									FROM tuotepaikat
-									LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio and
-									concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-									concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-									WHERE tuotepaikat.yhtio = '$yhtiolisa'
-									and tuotepaikat.tuoteno = '$tuoteno'
-									GROUP BY varastopaikat.tyyppi
-									HAVING varastopaikat.tyyppi is null";
-						$ennsaldoresult = mysql_query($query) or die($query);
+						// etsitään varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
+						$query = "	SELECT sum(varattu) varattu
+									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+									WHERE tilausrivi.yhtio = '$yhtiolisa' and
+									tilausrivi.tyyppi in ('L','G','V') and
+									tilausrivi.tuoteno = '$tuoteno' and
+									tilausrivi.varattu > 0 and
+									concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($ennrow[paikat])";
+						$ennresult = mysql_query($query) or die($query);
+						$ennrow = mysql_fetch_array($ennresult);
 
-						$ennsaldorow = mysql_fetch_array($ennsaldoresult);
-						$orposaldomyytavissa = $ennsaldorow["saldo"];
+						$orposaldomyytavissa -= $ennrow["varattu"];
+					}
+					else {
+						// tuotteella ei ole yhtään paikkaa.. katotaan silti varatut
+						// etsitään varatut kaikilta paikoilta joilla on joku muu varastopaikka (NOT IN)
+						$query = "	SELECT sum(varattu) varattu
+									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+									WHERE tilausrivi.yhtio = '$yhtiolisa' and
+									tilausrivi.tyyppi in ('L','G','V') and
+									tilausrivi.tuoteno = '$tuoteno' and
+									tilausrivi.varattu > 0";
+						$ennresult = mysql_query($query) or die($query);
+						$ennrow = mysql_fetch_array($ennresult);
+
+						$orposaldomyytavissa -= $ennrow["varattu"];
 					}
 
-					// etsitään varatut kaikilta paikoilla jolla on joku muu varastopaikka (NOT IN)
-					$query = "	SELECT sum(varattu) varattu
-								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-								WHERE tilausrivi.yhtio = '$yhtiolisa' and
-								tilausrivi.tyyppi in ('L','G','V') and
-								tilausrivi.tuoteno = '$tuoteno' and
-								tilausrivi.varattu > 0 and
-								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) NOT IN ($ennrow[paikat])";
-					$ennresult = mysql_query($query) or die($query);
-					$ennrow = mysql_fetch_array($ennresult);
+					$myytavissa += $orposaldomyytavissa;
 
-					$orposaldomyytavissa -= $ennrow["varattu"];
 				}
-				else {
-					// tuotteella ei ole yhtään paikkaa.. katotaan silti varatut
-					// etsitään varatut kaikilta paikoilta joilla on joku muu varastopaikka (NOT IN)
-					$query = "	SELECT sum(varattu) varattu
-								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-								WHERE tilausrivi.yhtio = '$yhtiolisa' and
-								tilausrivi.tyyppi in ('L','G','V') and
-								tilausrivi.tuoteno = '$tuoteno' and
-								tilausrivi.varattu > 0";
-					$ennresult = mysql_query($query) or die($query);
-					$ennrow = mysql_fetch_array($ennresult);
-
-					$orposaldomyytavissa -= $ennrow["varattu"];
-				}
-
-				$myytavissa += $orposaldomyytavissa;
-
 			}
 		}
 		return array($saldo, $hyllyssa, $myytavissa);

@@ -159,7 +159,11 @@
 	// +maa tarkoittaa ett‰ myynti on kielletty t‰h‰n maahan
 	// -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
 	// eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
-	$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$laskurow[toim_maa]%') and tuote.vienti not like '%+$laskurow[toim_maa]%' ";
+	$kieltolisa = "";
+
+	if ($laskurow["toim_maa"] != "") {
+		$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$laskurow[toim_maa]%') and tuote.vienti not like '%+$laskurow[toim_maa]%' ";
+	}
 
 	//Tutkitaan onko t‰m‰ hyvitysrivi
 	if ((float) $kpl < 0 and trim($var) == "") {
@@ -196,7 +200,6 @@
 								from korvaavat, tuote
 								where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
 								and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]'
-								$kieltolisa
 								order by jarjestys,
 								korvaavat.tuoteno";
 					$kres2  = mysql_query($query) or die($query);
@@ -394,7 +397,7 @@
 		if ((mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta or $varataan_saldoa == "EI") {
 
 			if ($debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
-			
+
 			// nyt meill‰ on $myy_ arrayperheess‰ kaikki tuotteet ja varastopaikat jolta voidaan myyd‰ jotain..
 			// loopataan kaikki tuotteet l‰pi
 
@@ -457,9 +460,9 @@
 
 			foreach ($myy_tuoteno as $i => $tuoteno) {
 				//T‰ss‰ loopataan vain is‰/normaleja tuotteita
-				
+
 				if ($debug==1) echo "Loopataan $tuoteno<br>";
-				
+
 				if ($myy_tyyppi[$i] == "NORMAALI") {
 					// jos ei olla viel‰ toimitettu kaikkea, niin lis‰t‰‰n tilausrivi
 					if ($toimittamatta > 0) {
@@ -489,6 +492,7 @@
 										and tuoteperhe.yhtio = '$kukarow[yhtio]'
 										$perhelisa
 										$perhelisa2
+										$kieltolisa
 										ORDER by tuoteno";
 							$perheresult = mysql_query($query) or pupe_error($query);
 
@@ -835,6 +839,7 @@
 						and tuoteperhe.yhtio = '$kukarow[yhtio]'
 						$perhelisa
 						$perhelisa2
+						$kieltolisa
 						ORDER by tuoteno";
 			$perheresult = mysql_query($query) or pupe_error($query);
 

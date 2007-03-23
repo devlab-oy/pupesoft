@@ -9,6 +9,10 @@
 		$tila = 'L';
 	}
 	
+	if ($toimtila != '') {
+		$tila = $toimtila;
+	}
+	
 	if ((int) $otsikkonro > 0 or (int) $id > 0) {
 		if ((int) $otsikkonro > 0) {
 			$hakutunnus	= $otsikkonro;
@@ -286,6 +290,7 @@
 		// tehd‰‰n etsi valinta
 		echo "<br><form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").":
 				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='toimtila' value='$tila'>
 				<input type='text' name='etsi'>
 				<input type='Submit' value='".t("Etsi")."'></form>";
 
@@ -331,7 +336,7 @@
 					HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
-
+		
 		//piirret‰‰n taulukko...
 		if (mysql_num_rows($tilre) != 0) {
 

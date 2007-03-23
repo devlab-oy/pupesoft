@@ -270,11 +270,6 @@
 
 			if ($debug==1) echo t("Löydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
 
-			if ($posrow["summa"] <= 0 or $posrow["maksuehto"] == 0 or (int) $posrow["tunnus"] == 0) {
-				echo "<font class='error'>".t("VIRHE: laskutusposition summa on nolla tai sen alle. Korjaa tämä!")."</font><br><br>";
-				return 0;
-			}
-
 			// Tilausrivin kommentti-kenttään menevä kommentti
 			$query = "	SELECT
 						sum(if(uusiotunnus > 0, 1, 0)) laskutettu,

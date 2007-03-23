@@ -8,7 +8,11 @@
 		}
 
 	}
-
+	if (mysql_field_name($result, $i) == "lasku_polku_http") {
+		//Tämä turvaan
+		$tmp_lasku_polku_http = $t[$i];
+	}
+	
 	//	TODO ale ja ennakkomaksutuotteet voisi tarkastaa vain jos tarpeellista
 	if (mysql_field_name($result, $i) == "maksuehto_tuotenumero" or
 	    mysql_field_name($result, $i) == "rahti_tuotenumero" or
@@ -60,6 +64,10 @@
 				$virhe[$i] = t("Virheellinen polku tai kirjoitusoikeus puuttuu!");
 				$errori = 1;
 			}
+		}
+		if (trim($t[$i]) != ''  and $tmp_lasku_polku_http == '') {
+			$virhe[$i] .= t("Jos täytät tämän kentän, niin täytä myös lasku_polku_http-kenttä");
+			$errori = 1;
 		}
 	}
 

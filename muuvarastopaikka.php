@@ -681,12 +681,12 @@
 			$query	= "	SELECT tilausrivi_osto.nimitys nimitys, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, 
 						concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
 						FROM sarjanumeroseuranta
-						LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+						LEFT JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
 						LEFT JOIN lasku lasku_osto use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
 						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 						and sarjanumeroseuranta.tuoteno = '$trow[tuoteno]'
 						and sarjanumeroseuranta.myyntirivitunnus = 0
-						and (lasku_osto.tila='U' or (lasku_osto.tila='K' and lasku_osto.alatila='X'))";
+						and (lasku_osto.tila='U' or (lasku_osto.tila='K' and tilausrivi_osto.laskutettuaika != '0000-00-00'))";
 			$sarjares = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sarjares) > 0) {			

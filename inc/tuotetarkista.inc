@@ -74,6 +74,13 @@
 		}
 	}
 
+	if (mysql_field_name($result, $i) == "vienti") {
+		if ($t[$i] != '' and strpos($t[$i], "+") !== FALSE and strpos($t[$i], "-") !== FALSE) {
+			$virhe[$i] = t("Laita samanaikaisesti vain + tai - maakoodeja!");
+			$errori = 1;
+		}
+	}
+
 /*
 	if (mysql_field_name($result, $i) == "tuotekuva" and $t[$i] != '') {
 		if (!file_exists($t[$i])) {

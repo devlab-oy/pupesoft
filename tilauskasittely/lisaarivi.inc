@@ -375,6 +375,17 @@
 				$myy_varasto[$i]   = "";
 				$myy_tyyppi[$i]    = "NORMAALI";
 
+				if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
+					$myy_tyyppi[$i] = "NORMAALI";
+					$saldoyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien isien saldoa yhteensä.
+					if ($debug==1) echo "$tuoteno on isätuote/normituote<br>";
+				}
+				else {
+					$myy_tyyppi[$i] = "LAPSITUOTE";
+					$lapsiyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien lapsien saldoa yhteensä.
+					if ($debug==1) echo "$tuoteno on lapsituote<br>";
+				}
+
 				//Kasvatetaan äiti-indeksiä
 				$i++;
 			}

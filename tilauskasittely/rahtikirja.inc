@@ -49,7 +49,7 @@ $sivu = "                              ".sprintf("%-11.s",$toitarow["sopimusnro"
       
                                                                 $viite
                                        
-                                                                $yhtiorow[pankkitili1_eitulosteta]
+                                                                $yhtiorow[pankkitili1]
                                        
                                                                 $yhteensa
                                                                 $summa_eitulosteta

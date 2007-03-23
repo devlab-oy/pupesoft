@@ -164,8 +164,13 @@
 
 		//käydään kaikki rivit läpi ja tarkastetaan varastopaika ja perustetaan uusia jos on tarvis
 		foreach($tunnus as $tun) {
-
-			$t1[$tun]=strtoupper($t1[$tun]);
+			
+			$t1[$tun] = trim($t1[$tun]);
+			$t2[$tun] = trim($t2[$tun]);
+			$t3[$tun] = trim($t3[$tun]);
+			$t4[$tun] = trim($t4[$tun]);
+				
+			$t1[$tun] = strtoupper($t1[$tun]);
 
 			$query = "	SELECT tilausrivi.tuoteno, tuote.ei_saldoa
 						FROM tilausrivi
@@ -181,7 +186,7 @@
 				echo "<font style='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
 			}
 			elseif ($tilausrivirow["ei_saldoa"] == "") {
-
+				
 				// Jaaha mitäs tuotepaikalle pitäisi tehdä
 				if (($rivivarasto[$tun] != 'x') and ($rivivarasto[$tun] != '')) {  //Varastopaikka vaihdettiin pop-upista, siellä on paikan tunnus
 					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
@@ -232,7 +237,7 @@
 						else {
 							$oletus='';
 						}
-
+						
 						if ($t1[$tun] != '' and $t2[$tun] != '' and $t3[$tun] != '' and $t4[$tun] != '') {
 							$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio)
 										values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]')";

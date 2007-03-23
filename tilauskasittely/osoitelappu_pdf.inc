@@ -64,13 +64,13 @@ if (!function_exists('tarkiste')) {
 $apu_kollityht = $kollityht;
 if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkki‰
 
-$prefix = "(00)";
+//$prefix = "(00)"; // t‰‰ on turha
 $sscc = 1;
 $sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
 $sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
 $sscc .= sprintf('%02.02d', $apu_kollityht);
 $loppu = tarkiste($sscc);
-$sscc = $prefix.$sscc.$loppu;
+$sscc = $sscc.$loppu;
 
 //PDF:n luonti ja defaultit
 define (__TRACE_ENABLED__, false);

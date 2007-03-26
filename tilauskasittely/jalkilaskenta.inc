@@ -89,7 +89,7 @@ if (!function_exists("korjaalaskut")) {
 			}
 
 			//etstään tuotteen kaikki myyntitilausrivit
-			$query= "	SELECT uusiotunnus ltunnus, tunnus ttunnus, kpl, kate, rivihinta, laskutettuaika
+			$query= "	SELECT otunnus oltunnus, uusiotunnus ltunnus, tunnus ttunnus, kpl, kate, rivihinta, laskutettuaika
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = 'L'
@@ -210,6 +210,21 @@ if (!function_exists("korjaalaskut")) {
 										laatija 	= '$kukarow[kuka]',
 										laadittu 	= now()";
 							$laskutusres = mysql_query($query) or pupe_error($query);
+							
+							// korjataan laskun kate
+							$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[ltunnus]'";
+							if ($jalkilaskenta_debug > 1) echo "$query<br>";
+							$result = mysql_query($query) or pupe_error($query);
+							
+							// korjataan tilauksen kate
+							$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[oltunnus]'";
+							if ($jalkilaskenta_debug > 1) echo "$query<br>";
+							$result = mysql_query($query) or pupe_error($query);
+
+							// ja lopuksi korjataan tilausrivin kate
+							$query = "UPDATE tilausrivi SET kate = $uusikate WHERE tunnus='$tilausrivi[ttunnus]'";
+							if ($jalkilaskenta_debug > 1) echo "$query<br>";
+							$result = mysql_query($query) or pupe_error($query);
 
 						}
 
@@ -263,6 +278,11 @@ if (!function_exists("korjaalaskut")) {
 
 							// korjataan laskun kate
 							$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[ltunnus]'";
+							if ($jalkilaskenta_debug > 1) echo "$query<br>";
+							$result = mysql_query($query) or pupe_error($query);
+							
+							// korjataan tilauksen kate
+							$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[oltunnus]'";
 							if ($jalkilaskenta_debug > 1) echo "$query<br>";
 							$result = mysql_query($query) or pupe_error($query);
 

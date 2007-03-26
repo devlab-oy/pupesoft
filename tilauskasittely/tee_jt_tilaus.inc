@@ -348,7 +348,13 @@
 				list($paikka, $toimitetaan) = split("&&&", $suoratoimpaikka[$tunnukset]);
 				
 				$kpl[$tunnukset] = $toimitetaan;
-				$isa_kerroin 	= $kpl[$tunnukset] / $isarivirow["jt"];
+
+				if ($toim == "ENNAKKO") {
+					$isa_kerroin 	= $kpl[$tunnukset] / $isarivirow["varattu"];
+				}
+				else {
+					$isa_kerroin 	= $kpl[$tunnukset] / $isarivirow["jt"];
+				}
 				
 				if ($isa_kpl > $toimitetaan) {
 					$loput[$tunnukset] = "JATA";

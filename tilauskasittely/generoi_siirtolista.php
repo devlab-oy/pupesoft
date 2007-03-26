@@ -99,7 +99,8 @@
 					$viesti 	= $kukarow["nimi"]." Generoi h‰lytysrajojen perusteella";
 					$varasto 	= $lahdevarasto;
 					$toim = "SIIRTOLISTA";
-
+					
+					//kato et t‰‰ toimii!!! siis osoitteet!!!!
 					require ("otsik_siirtolista.inc");
 
 					$query = "	SELECT *
@@ -143,7 +144,9 @@
 				}
 
 				//katotaan myyt‰viss‰ m‰‰r‰
-				list(, , $saldo_myytavissa) = (float) saldo_myytavissa($pairow["tuoteno"], "KAIKKI", "$lahdevarasto");
+				list(, , $saldo_myytavissa) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", "$lahdevarasto");
+				
+				$saldo_myytavissa = (float) $saldo_myytavissa;
 				
 				if ($saldo_myytavissa > 0 and $pairow['tarve'] > 0) {
 			
@@ -284,10 +287,11 @@
 
 		echo "<tr><th>".t("Osasto")."</th><td>";
 
-		$query = "	SELECT distinct selite, selitetark
+		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='OSASTO'
-					ORDER BY selite+0";
+					".avain('join','OSASTO_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
+					ORDER BY avainsana.selite+0";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 		echo "<select name='osasto'>";
@@ -306,10 +310,11 @@
 		echo "</td></tr><tr><th>".t("Tuoteryhm‰")."</th><td>";
 
 		//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-		$query = "	SELECT distinct selite, selitetark
+		$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 					FROM avainsana
-					WHERE yhtio='$kukarow[yhtio]' and laji='TRY'
-					ORDER BY selite+0";
+					".avain('join','TRY_')."
+					WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'
+					ORDER BY avainsana.selite+0";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 		echo "<select name='tuoteryhma'>";
@@ -350,7 +355,6 @@
 		echo "</td></tr>
 			<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='toimittaja' value='$toimittaja'></td></tr>";
 
-		// katotaan onko abc aputaulu rakennettu
 		$query  = "select count(*) from abc_aputaulu where yhtio='$kukarow[yhtio]' and tyyppi in ('TK','TR','TP')";
 		$abcres = mysql_query($query) or pupe_error($query);
 		$abcrow = mysql_fetch_array($abcres);

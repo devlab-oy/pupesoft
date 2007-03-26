@@ -62,7 +62,9 @@ if ($tee == "CHECK") {
 
 
 if ($tee == "SYOTTO") {
-	$myyntisaamiset=0;
+
+	$myyntisaamiset = 0;
+
 	switch ($vastatili) {
 		case 'myynti' :
 			$myyntisaamiset=$yhtiorow['myyntisaamiset'];
@@ -77,21 +79,29 @@ if ($tee == "SYOTTO") {
 			echo "".t("Virheellinen vastatilitieto")."!";
 			exit;
 	}
+
 	if ($myyntisaamiset == 0) {
 		echo "".t("Myyntisaamiset-tilin selvittely epäonnistui")."";
 		exit;
 	}
-	$query = "SELECT tilino, oletus_rahatili FROM yriti WHERE yriti.tunnus = '$tilino' AND yriti.yhtio='$kukarow[yhtio]'";
+
+	$query = "	SELECT yriti.*, valuu.kurssi FROM yriti
+				JOIN valuu ON valuu.yhtio = yriti.yhtio and yriti.valkoodi = valuu.nimi
+				WHERE yriti.tunnus = '$tilino' AND yriti.yhtio='$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if ($row = mysql_fetch_array($result)) {
-		$tilistr        = $row[0];
-		$kassatili      = $row[1];
+		$tilistr        = $row["tilino"];
+		$kassatili      = $row["oletus_rahatili"];
+		$tilivaluutta	= $row["valkoodi"];
+		$tilikurssi		= $row["kurssi"];
+		$omasumma		= round($pistesumma * $tilikurssi, 2);
 	}
 	else {
-		echo "Yriti tietoja on kateissa!";
+		echo "<font class='error'>".t("Valitun pankkitilin tiedot ovat puutteelliset!")."</font>";
 		exit;
 	}
+
 	if ($ytunnus{0} == "£") {
 		$query = "SELECT nimi FROM lasku WHERE ytunnus='".substr($ytunnus, 1)."' and yhtio = '$kukarow[yhtio]'";
 		$asiakasid = 0;
@@ -117,8 +127,9 @@ if ($tee == "SYOTTO") {
 	}
 	$ltunnus = mysql_insert_id($link);
 
-	#Myyntisaamiset
-	$query="INSERT INTO tiliointi(yhtio,laatija,laadittu,tapvm,ltunnus,tilino,summa,selite,lukko) values ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$myyntisaamiset',-$pistesumma,'Käsin syötetty suoritus','1')";
+	// Myyntisaamiset
+	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, lukko)
+				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$myyntisaamiset','-$omasumma','Käsin syötetty suoritus','1')";
 
 	if (!($result = mysql_query($query))) {
 		$result = mysql_query($unlockquery);
@@ -126,15 +137,14 @@ if ($tee == "SYOTTO") {
 	}
 	$ttunnus = mysql_insert_id($link);
 
-	#Kassatili
-	$query="INSERT INTO tiliointi(yhtio,laatija,laadittu,tapvm,ltunnus,tilino,summa,selite,aputunnus, lukko, kustp) values ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$kassatili',$pistesumma,'Käsin syötetty suoritus',$ttunnus, '1','$kustannuspaikka')";
+	// Kassatili
+	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, aputunnus, lukko, kustp)
+				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$kassatili','$omasumma','Käsin syötetty suoritus','$ttunnus', '1','$kustannuspaikka')";
 	mysql_query($query) or pupe_error($query);
 
 	// Näin kaikki tiliöinnit ovat kauniisti linkitetty toisiinsa. (Kuten alv-vienti)
-	$query = "INSERT INTO suoritus (yhtio, tilino, nimi_maksaja, summa,";
-	$query .= " maksupvm, kirjpvm, asiakas_tunnus, ltunnus, viesti, valkoodi)";
-	$query .= " VALUES ( '$kukarow[yhtio]', '$tilistr', '$asiakasstr',";
-	$query .= "$pistesumma, '$tapvm', '$tapvm', $asiakasid, $ttunnus, '$selite', '$yhtiorow[valkoodi]')";
+	$query = "	INSERT INTO suoritus (yhtio, tilino, nimi_maksaja, summa, maksupvm, kirjpvm, asiakas_tunnus, ltunnus, viesti, valkoodi, kurssi)
+				VALUES ('$kukarow[yhtio]', '$tilistr', '$asiakasstr', '$pistesumma', '$tapvm', '$tapvm', '$asiakasid', '$ttunnus', '$selite', '$tilivaluutta', '$tilikurssi')";
 
 	if (!($result = mysql_query($query))) {
 		$result = mysql_query($unlockquery);
@@ -171,7 +181,7 @@ if ($tee == "SYOTTO") {
 		// itse print komento...
 		$line = exec("$tulostakuitti $pdffilenimi");
 		$line = exec("$tulostakuitti $pdffilenimi");
-	
+
 		//poistetaan tmp file samantien kuleksimasta...
 		$line = exec("rm -f $pdffilenimi");
 
@@ -188,6 +198,7 @@ if ($tee == "SYOTTO") {
 		require("manuaalinen_suoritusten_kohdistus_suorituksen_kohdistus.php");
 		exit;
 	}
+
 	if ($tiliote == 'Z') {
 		$tee = 'Z';
 		require('../tilioteselailu.php');
@@ -197,6 +208,7 @@ if ($tee == "SYOTTO") {
 		$ytunnus = "";
 		$tee = "";
 	}
+
 }
 
 
@@ -316,7 +328,7 @@ if ($ytunnus != '' and $tee == "") {
 		<th>".t("Saajan tilinumero")."</th>
 		<td>";
 
-	$query  = "SELECT tunnus, nimi, tilino, oletus_rahatili FROM yriti WHERE yhtio = '$kukarow[yhtio]'";
+	$query  = "SELECT * FROM yriti WHERE yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$sel='';
 	echo "<select name='tilino'>";
@@ -325,7 +337,7 @@ if ($ytunnus != '' and $tee == "") {
 	while ($row = mysql_fetch_array($result)) {
 		if (($tilino == 0) and ($row['oletus_rahatili'] == $yhtiorow['selvittelytili'])) $sel='selected';
 		if ($tilino == $row['tilino']) $sel='selected';
-		echo "<option value='$row[tunnus]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])."</option>\n";
+		echo "<option value='$row[tunnus]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])." $row[valkoodi]</option>\n";
 		$sel='';
 	}
 	echo "</select>";

@@ -5,7 +5,7 @@ $query  = "	select *
 			where tunnus	= '$otunnus'
 			and yhtio		= '$kukarow[yhtio]'
 			and tila		= 'K'
-			and alatila		= ''";
+			and alatila		in ('','S')";
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) == 1) {
@@ -19,15 +19,18 @@ else {
 		$row    = mysql_fetch_array($result);
 		$id		= $row[0];
 		
-		$query  = "	INSERT into lasku
-					SET	yhtio	= '$kukarow[yhtio]',
-					laskunro	= '$id',
-					tila		= 'K',
-					alatila		= '',
-					liitostunnus= '$liitostunnus',
-					ytunnus 	= '$liitostunnus'";
+		$query = "	insert into lasku set
+					yhtio        = '$kukarow[yhtio]',
+					laskunro     = '$id',
+					ytunnus	     = '$liitostunnus',
+					nimi         = 'Sarjanumeroseuranta',
+					liitostunnus = '$liitostunnus',
+					tila         = 'K',
+					alatila      = 'S',
+					luontiaika	 = now(),
+					laatija		 = '$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
-			
+		
 		$otunnus = mysql_insert_id();
 				
 		$query  = "	select *
@@ -35,7 +38,7 @@ else {
 					where tunnus	= '$otunnus'
 					and yhtio		= '$kukarow[yhtio]'
 					and tila		= 'K'
-					and alatila		= ''";
+					and alatila     = 'S'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);	
 	}
@@ -189,7 +192,7 @@ if ($tee == "poista") {
 			//katotaan jäikö keikalle enää yhtään vaihto-omaisuuslaskua
 			$query  = "	select tunnus
 						from lasku
-						where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
+						where yhtio='$kukarow[yhtio]' and tila='K' and alatila in ('','S') and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//vaihto-omaisuuslasku/laskuja ei löytynyt
@@ -224,7 +227,7 @@ if ($toiminto == "kululaskut") {
 	// katotaan onko liitettyjä laskuja
 	$query  = "	select *
 				from lasku
-				where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus<>0 and laskunro='$laskurow[laskunro]'
+				where yhtio='$kukarow[yhtio]' and tila='K' and alatila in ('','S') and vanhatunnus<>0 and laskunro='$laskurow[laskunro]'
 				order by tapvm desc";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -300,7 +303,7 @@ if ($tee == "haku") {
 	// katsotaan aluksi, ollaanko tähän keikkaan liitetty jo vaihto-omaisuuslasku
 	$query  = "	select *
 				from lasku
-				where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
+				where yhtio='$kukarow[yhtio]' and tila='K' and alatila in ('','S') and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
 	$result = mysql_query($query) or pupe_error($query);
 
 	$vienti = "";
@@ -363,7 +366,7 @@ if ($tee == "haku") {
 			//Verojen määrä
 			$vero = $alvirow["summa"];
 
-			//Jalopuksi vielä verorton summa
+			//Ja lopuksi vielä veroton summa
 			$verotonsumma = $verosumma - $vero;
 
 

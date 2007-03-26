@@ -486,13 +486,19 @@
 						$nimitys .= "<tr><td>$row[nimitys]</td></tr>";
 					}
 				}
-				
+
 				$nimitys .= "</table>";
-				
+
 				$row["nimitys"] = $nimitys;
 			}
 
-			echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a></td>";
+
+			if ($kukarow["extranet"] != "") {
+				echo "<td valign='top' class='$vari'>$lisakala $row[tuoteno]</td>";
+			}
+			else {
+				echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a></td>";
+			}
 			echo "<td valign='top' class='$vari'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 
 			if ($lisatiedot != "") {
@@ -598,7 +604,7 @@
 				if (is_resource($sarjares) and mysql_num_rows($sarjares)) {
 					mysql_data_seek($sarjares, 0);
 				}
-				
+
 				echo "<td valign='top' $csp><table width='100%'>";
 
 				while ($sarjarow = mysql_fetch_array($sarjares)) {
@@ -637,7 +643,7 @@
 			}
 			else {
 				// K‰yd‰‰n l‰pi tuotepaikat
-				$query = "	SELECT tuotepaikat.*, 
+				$query = "	SELECT tuotepaikat.*,
 							varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
 							concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 				 			FROM tuotepaikat
@@ -648,19 +654,19 @@
 							and tuotepaikat.tuoteno = '$row[tuoteno]'
 							ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				$varresult = mysql_query($query) or pupe_error($query);
-				
+
 				echo "<td valign='top'>";
-				
+
 				if (mysql_num_rows($varresult) > 0) {
-					
+
 					echo "<table width='100%'>";
-					
+
 					// katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
 					list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($row["tuoteno"], "ORVOT");
 					$orvot *= -1;
-					
+
 					while ($saldorow = mysql_fetch_array ($varresult)) {
-						
+
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
 
 						// hoidetaan pois problematiikka jos meill‰ on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
@@ -676,7 +682,7 @@
 						    	$myytavissa = 0;
 							}
 						}
-						
+
 						echo "<tr>
 								<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
 								<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." $row[yksikko]</td>

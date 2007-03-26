@@ -305,6 +305,61 @@
 			}
 		}
 	}
+	
+	$lisa  = "";
+	$lisa2 = "";
+
+	if ($ostotilaus_haku != "") {
+		if (is_numeric($ostotilaus_haku)) {
+			if ($ostotilaus_haku == 0) {
+				$lisa .= " and lasku_osto.tunnus is null ";
+			}
+			else {
+				$lisa .= " and lasku_osto.tunnus='$ostotilaus_haku' ";
+			}
+		}
+		else {
+			$lisa .= " and match (lasku_osto.nimi) against ('$ostotilaus_haku*' IN BOOLEAN MODE) ";
+		}
+	}
+
+	if ($myyntitilaus_haku != "") {
+		if (is_numeric($myyntitilaus_haku)) {				
+			if ($myyntitilaus_haku == 0) {
+				$lisa .= " and (lasku_myynti.tunnus is null or lasku_myynti.tila = 'T') ";
+			}
+			else {
+				$lisa .= " and lasku_myynti.tunnus='$myyntitilaus_haku' ";
+			}
+		}
+		else {
+			$lisa .= " and match (lasku_myynti.nimi) against ('$myyntitilaus_haku*' IN BOOLEAN MODE) ";
+		}
+	}
+
+	if ($lisatieto_haku != "") {
+		$lisa .= " and sarjanumeroseuranta.lisatieto like '%$lisatieto_haku%' ";
+	}
+
+	if ($tuoteno_haku != "") {
+		$lisa .= " and sarjanumeroseuranta.tuoteno like '%$tuoteno_haku%' ";
+	}
+
+	if ($sarjanumero_haku != "") {
+		$lisa .= " and sarjanumeroseuranta.sarjanumero like '%$sarjanumero_haku%' ";
+	}
+	
+	if ($varasto_haku != "") {
+		$lisa .= " and varastopaikat.nimitys like '%$varasto_haku%' ";
+	}
+	
+	if ($nimitys_haku != "") {
+		$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
+	}		
+	
+	if ($lisa == "" and $lisa2 == "") {
+		$lisa2 = " HAVING osto_tunnus is null or myynti_tunnus is null";
+	}
 
 	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi != "ON")) {
 		//Jos tuote on marginaaliverotuksen alainen niin sen pitää olla onnistuneesti ostettu jotta sen voi myydä
@@ -314,6 +369,7 @@
 					lasku_osto.nimi										osto_nimi,
 					lasku_myynti.tunnus									myynti_tunnus,
 					lasku_myynti.nimi									myynti_nimi,
+					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
@@ -331,11 +387,10 @@
 					WHERE
 					sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
-					and sarjanumeroseuranta.myyntirivitunnus in (0,$rivitunnus)
-					and (sarjanumeroseuranta.kaytetty = ''
-					or  (sarjanumeroseuranta.kaytetty != ''
-					and sarjanumeroseuranta.ostorivitunnus > 0
-					and tilausrivi_osto.laskutettuaika > '0000-00-00'))
+					and (sarjanumeroseuranta.myyntirivitunnus in (0, $rivitunnus) or lasku_myynti.tila='T')
+					and (sarjanumeroseuranta.kaytetty = '' or (sarjanumeroseuranta.kaytetty != '' and sarjanumeroseuranta.ostorivitunnus > 0 and tilausrivi_osto.laskutettuaika > '0000-00-00'))
+					$lisa
+					$lisa2
 					ORDER BY sarjanumeroseuranta.sarjanumero";
 	}
 	elseif((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi == "ON")) {
@@ -346,6 +401,7 @@
 					lasku_osto.nimi										osto_nimi,
 					lasku_myynti.tunnus									myynti_tunnus,
 					lasku_myynti.nimi									myynti_nimi,
+					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
@@ -362,65 +418,12 @@
 					and concat(rpad(upper(varastopaikat.loppuhyllyalue) ,5,'0'),lpad(upper(varastopaikat.loppuhyllynro) ,5,'0')) >= concat(rpad(upper(sarjanumeroseuranta.hyllyalue) ,5,'0'),lpad(upper(sarjanumeroseuranta.hyllynro) ,5,'0'))
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
-					and sarjanumeroseuranta.ostorivitunnus in (0,$rivitunnus)
-					order by sarjanumero";
+					and sarjanumeroseuranta.ostorivitunnus in (0, $rivitunnus)
+					$lisa
+					$lisa2
+					ORDER BY sarjanumeroseuranta.sarjanumero";
 	}
 	else {
-		$lisa  = "";
-		$lisa2 = "";
-
-		if ($ostotilaus_haku != "") {
-			if (is_numeric($ostotilaus_haku)) {
-				if ($ostotilaus_haku == 0) {
-					$lisa .= " and lasku_osto.tunnus is null ";
-				}
-				else {
-					$lisa .= " and lasku_osto.tunnus='$ostotilaus_haku' ";
-				}
-			}
-			else {
-				$lisa .= " and match (lasku_osto.nimi) against ('$ostotilaus_haku*' IN BOOLEAN MODE) ";
-			}
-		}
-
-		if ($myyntitilaus_haku != "") {
-			if (is_numeric($myyntitilaus_haku)) {				
-				if ($myyntitilaus_haku == 0) {
-					$lisa .= " and lasku_myynti.tunnus is null ";
-				}
-				else {
-					$lisa .= " and lasku_myynti.tunnus='$myyntitilaus_haku' ";
-				}
-			}
-			else {
-				$lisa .= " and match (lasku_myynti.nimi) against ('$myyntitilaus_haku*' IN BOOLEAN MODE) ";
-			}
-		}
-
-		if ($lisatieto_haku != "") {
-			$lisa .= " and sarjanumeroseuranta.lisatieto like '%$lisatieto_haku%' ";
-		}
-
-		if ($tuoteno_haku != "") {
-			$lisa .= " and sarjanumeroseuranta.tuoteno like '%$tuoteno_haku%' ";
-		}
-
-		if ($sarjanumero_haku != "") {
-			$lisa .= " and sarjanumeroseuranta.sarjanumero like '%$sarjanumero_haku%' ";
-		}
-		
-		if ($varasto_haku != "") {
-			$lisa .= " and varastopaikat.nimitys like '%$varasto_haku%' ";
-		}
-		
-		if ($nimitys_haku != "") {
-			$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
-		}		
-		
-		if ($lisa == "" and $lisa2 == "") {
-			$lisa2 = " HAVING osto_tunnus is null or myynti_tunnus is null";
-		}
-
 		// Näytetään kaikki
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
@@ -428,6 +431,7 @@
 					lasku_osto.nimi										osto_nimi,
 					lasku_myynti.tunnus									myynti_tunnus,
 					lasku_myynti.nimi									myynti_nimi,
+					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
@@ -445,7 +449,7 @@
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					$lisa
 					$lisa2
-					ORDER BY tuoteno, myyntirivitunnus
+					ORDER BY sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.sarjanumero
 					LIMIT 50";
 	}
 	$sarjares = mysql_query($query) or pupe_error($query);
@@ -590,10 +594,21 @@
 			$sarjarow["myyntirivitunnus"] = "";
 		} 
 		
-		echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$sarjarow[osto_tunnus]'>$sarjarow[osto_tunnus] $sarjarow[osto_nimi]</a><br><a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$sarjarow[myynti_tunnus]'>$sarjarow[myynti_tunnus] $sarjarow[myynti_nimi]</a></td>";
+		echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$sarjarow[osto_tunnus]'>$sarjarow[osto_tunnus] $sarjarow[osto_nimi]</a><br>";
+		
+		if ($sarjarow["myynti_tila"] == 'T') {
+			$fnlina1 = "<font class='message'>(Tarjous: ";
+			$fnlina2 = ")</font>";
+		}
+		else {
+			$fnlina1 = "";
+			$fnlina2 = "";
+		}
+		
+		echo "<a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$sarjarow[myynti_tunnus]'>$fnlina1 $sarjarow[myynti_tunnus] $sarjarow[myynti_nimi] $fnlina2</a></td>";
 		
 		/*
-		//Haetaan myös ns. lisävarusteiden hinnat
+		// Haetaan myös ns. lisävarusteiden hinnat
 		if ($sarjarow["osto_perheid2"] != 0) {
 			$query = "	select sum(rivihinta) rivihinta
 						from tilausrivi
@@ -608,24 +623,24 @@
 		else {
 			$tilrivirow = "";
 		}
-		
+
 		$sarjarow["ostohinta"] 		= sprintf('%.2f', $sarjarow["ostohinta"]);
 		$sarjarow["myyntihinta"] 	= sprintf('%.2f', $sarjarow["myyntihinta"]);
 		$kulurow["summa"] 			= sprintf('%.2f', $kulurow["summa"]);
 		$yhteensa = $sarjarow["myyntihinta"] - $sarjarow["ostohinta"] - $kulurow["summa"] - $tilrivirow["rivihinta"];
-		
+
 		echo "<td valign='top' align='right' nowrap>";
 		if ($sarjarow["ostohinta"] != 0) 	echo "-$sarjarow[ostohinta]<br>";
 		if ($tilrivirow["rivihinta"] != 0) 	echo "-$tilrivirow[rivihinta]<br>";
 		if ($kulurow["summa"] != 0) 		echo "-$kulurow[summa]<br>";
 		if ($sarjarow["myyntihinta"] != 0) 	echo "+$sarjarow[myyntihinta]<br>";
 		if ($sarjarow["ostohinta"] != 0 or $kulurow["summa"] != 0 or $sarjarow["myyntihinta"] != 0) echo "=$yhteensa";
-		
+
 		echo "</td>";
 		*/
 		
 		
-		if (($sarjarow[$tunnuskentta] == 0 or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
+		if (($sarjarow[$tunnuskentta] == 0 or $sarjarow["myynti_tila"] == 'T' or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
 			$chk = "";
 			if ($sarjarow[$tunnuskentta] == $rivitunnus) {
 				$chk="CHECKED";
@@ -636,7 +651,7 @@
 			}
 			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") or ($from == "riviosto" or $from == "kohdista")) {
 				echo "<input type='hidden' name='sarjat[]' value='$sarjarow[tunnus]'>";
-				echo "<td valign='top'><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit()'></td>";
+				echo "<td valign='top'><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit();'></td>";
 			}
 		}
 		

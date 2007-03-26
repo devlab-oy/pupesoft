@@ -178,7 +178,7 @@
 	echo "<br>";
 	echo "<b>".t("Tilausrivit").":</b><hr>";
 
-	if ($laskurow["tila"] == 'U') {
+	if ($laskurow["tila"] == 'U' or $laskurow["tila"] == 'K') {
 		$where = " uusiotunnus = '$tunnus' ";
 	}
 	else {
@@ -198,19 +198,11 @@
 	$sorttauskentta = ", ".generoi_sorttauskentta();
 
 	//Listataan tilauksessa olevat tuotteet
-	if ($laskurow["tila"] != 'O') {
-		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl, varattu+kpl kpl, jt,
-					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti $sorttauskentta , tilausrivi.tunnus
-					FROM tilausrivi
-					".nimitys('join','tilausrivi')."
-					WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]'
-					and tilausrivi.tyyppi in ('E','L','G','V','W','T')
-					ORDER BY $jarjestys";
-	}
-	else {
+	
+	if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
 		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 					tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
-					concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', jt,
+					concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', kpl,
 					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),2) rivihinta, 
 					tilausrivi.alv, tilausrivi.kommentti $sorttauskentta, tilausrivi.tunnus
 					FROM tilausrivi
@@ -220,6 +212,15 @@
 					WHERE $where
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					and tyyppi='O'
+					ORDER BY $jarjestys";
+	}
+	else {
+		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl, varattu+kpl kpl, jt,
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti $sorttauskentta , tilausrivi.tunnus
+					FROM tilausrivi
+					".nimitys('join','tilausrivi')."
+					WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]'
+					and tilausrivi.tyyppi in ('E','L','G','V','W','T')
 					ORDER BY $jarjestys";
 	}
 	$presult = mysql_query($query) or pupe_error($query);
@@ -246,13 +247,22 @@
 
 		
 		//Haetaan sarjanumeron tiedot
-		if ($prow["kpl"]+$prow["varattu"] > 0){
-			$sarjanutunnus = "myyntirivitunnus";
+		if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
+				if ($prow["kpl"]+$prow["varattu"] > 0){
+					$sarjanutunnus = "ostorivitunnus";
+				}
+				else {
+					$sarjanutunnus = "myyntirivitunnus";
+				}
 		}
 		else {
-			$sarjanutunnus = "ostorivitunnus";
+			if ($prow["kpl"]+$prow["varattu"] > 0){
+				$sarjanutunnus = "myyntirivitunnus";
+			}
+			else {
+				$sarjanutunnus = "ostorivitunnus";
+			}
 		}
-
 		$query = "	select *
 					from sarjanumeroseuranta
 					where yhtio = '$kukarow[yhtio]'

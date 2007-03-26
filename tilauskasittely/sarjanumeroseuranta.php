@@ -297,7 +297,18 @@
 						if ($sarjatun > 0 and $rivitunnus > 0) {
 							require("sarjanumeron_lisavarlisays.inc");
 							
-							lisavarlisays($sarjatun, $rivitunnus);							
+							$palautus = lisavarlisays($sarjatun, $rivitunnus);
+								
+							if ($palautus != "OK") {	
+								echo "<font class='error'>$palautus</font><br><br>";
+								
+								$query = "	UPDATE sarjanumeroseuranta
+											SET $tunnuskentta=''
+											$paikkalisa
+											WHERE yhtio='$kukarow[yhtio]'
+											and tunnus='$sarjatun'";
+								$sarjares = mysql_query($query) or pupe_error($query);
+							}					
 						}
 					}
 				}

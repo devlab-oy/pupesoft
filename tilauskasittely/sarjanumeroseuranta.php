@@ -298,7 +298,6 @@
 							require("sarjanumeron_lisavarlisays.inc");
 							
 							lisavarlisays($sarjatun, $rivitunnus);							
-							echo "<br><br>";
 						}
 					}
 				}
@@ -357,7 +356,7 @@
 		$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
 	}		
 	
-	if ($lisa == "" and $lisa2 == "") {
+	if ($lisa == "" and $lisa2 == "" and $from == "") {
 		$lisa2 = " HAVING osto_tunnus is null or myynti_tunnus is null";
 	}
 
@@ -511,7 +510,6 @@
 	echo "<td><input type='text' size='10' name='varasto_haku' 			value='$varasto_haku'></td>";
 	echo "<td><input type='text' size='10' name='ostotilaus_haku' 		value='$ostotilaus_haku'></td>";
 	echo "<td><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
-	//echo "<td></td>";
 	
 	if (($sarjarow[$tunnuskentta] == 0 or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
 		echo "<td></td>";
@@ -553,33 +551,16 @@
 					from lasku
 					where yhtio		 = '$kukarow[yhtio]'
 					and tila		 = 'K'
-					and alatila		 = ''
+					and alatila		 = 'S'
 					and liitostunnus = '$sarjarow[tunnus]'
 					and ytunnus 	 = '$sarjarow[tunnus]'";
 		$keikkares = mysql_query($query) or pupe_error($query);
-		
+
 		unset($kulurow);
 		unset($keikkarow);
 		
 		if (mysql_num_rows($keikkares) == 1) {
 			$keikkarow = mysql_fetch_array($keikkares);
-
-			//Haetaan kaikki keittaan liitettyjen laskujen summa
-			// katsotaan onko tälle keikalle jo liitetty kululaskuja
-			$query = "	SELECT sum(summa) summa, valkoodi, vienti
-						FROM lasku
-						WHERE yhtio		= '$kukarow[yhtio]'
-						and tila 		= 'K'
-						and laskunro 	= '$keikkarow[laskunro]'
-						and vanhatunnus <> 0
-						and vienti in ('B','E','H')
-						GROUP BY valkoodi, vienti";
-			$result = mysql_query($query) or pupe_error($query);
-
-			// jos on, haetaan liitettyjen laskujen
-			if (mysql_num_rows($result) == 1) {
-				$kulurow = mysql_fetch_array($result);
-			}
 		}
 		
 		echo "<tr>";
@@ -606,39 +587,6 @@
 		}
 		
 		echo "<a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$sarjarow[myynti_tunnus]'>$fnlina1 $sarjarow[myynti_tunnus] $sarjarow[myynti_nimi] $fnlina2</a></td>";
-		
-		/*
-		// Haetaan myös ns. lisävarusteiden hinnat
-		if ($sarjarow["osto_perheid2"] != 0) {
-			$query = "	select sum(rivihinta) rivihinta
-						from tilausrivi
-						where yhtio 	= '$yhtiorow[yhtio]'
-						and perheid2 	= '$sarjarow[osto_perheid2]'
-						and tyyppi 	   != 'D'
-						and tunnus     != perheid2
-						order by tunnus";
-			$tilrivires = mysql_query($query) or pupe_error($query);
-			$tilrivirow = mysql_fetch_array($tilrivires);
-		}
-		else {
-			$tilrivirow = "";
-		}
-
-		$sarjarow["ostohinta"] 		= sprintf('%.2f', $sarjarow["ostohinta"]);
-		$sarjarow["myyntihinta"] 	= sprintf('%.2f', $sarjarow["myyntihinta"]);
-		$kulurow["summa"] 			= sprintf('%.2f', $kulurow["summa"]);
-		$yhteensa = $sarjarow["myyntihinta"] - $sarjarow["ostohinta"] - $kulurow["summa"] - $tilrivirow["rivihinta"];
-
-		echo "<td valign='top' align='right' nowrap>";
-		if ($sarjarow["ostohinta"] != 0) 	echo "-$sarjarow[ostohinta]<br>";
-		if ($tilrivirow["rivihinta"] != 0) 	echo "-$tilrivirow[rivihinta]<br>";
-		if ($kulurow["summa"] != 0) 		echo "-$kulurow[summa]<br>";
-		if ($sarjarow["myyntihinta"] != 0) 	echo "+$sarjarow[myyntihinta]<br>";
-		if ($sarjarow["ostohinta"] != 0 or $kulurow["summa"] != 0 or $sarjarow["myyntihinta"] != 0) echo "=$yhteensa";
-
-		echo "</td>";
-		*/
-		
 		
 		if (($sarjarow[$tunnuskentta] == 0 or $sarjarow["myynti_tila"] == 'T' or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
 			$chk = "";
@@ -692,7 +640,7 @@
 			
 		}
 		
-		if ($sarjarow['ostorivitunnus'] == 0 and $sarjarow['myyntirivitunnus'] == 0) {
+		if ($sarjarow['ostorivitunnus'] == 0 and $sarjarow['myyntirivitunnus'] == 0 and $keikkarow["tunnus"] == 0) {
 			echo "<br><a href='$PHP_SELF?toiminto=POISTA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku' onclick=\"return verify()\">".t("Poista")."</a>";
 		}
 

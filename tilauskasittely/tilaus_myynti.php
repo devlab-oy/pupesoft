@@ -1181,10 +1181,10 @@ if ($tee == '') {
 		if ($toim != "VALMISTAVARASTOON") {
 			$extralisa = "";
 			if ($kukarow["extranet"] != "") {
-				$extralisa = "  and selite not like '%E%' and selite not like '%O%' ";
+				$extralisa = "  and avainsana.selite not like '%E%' and avainsana.selite not like '%O%' ";
 
 				if ($kukarow['hinnat'] == 1) {
-					$hinnatlisa = " and selite not like '1%' ";
+					$hinnatlisa = " and avainsana.selite not like '1%' ";
 				}
 			}
 

@@ -215,7 +215,7 @@
 	}
 
 	if ($kukarow["extranet"] != "") {
-		$avainlisa = " and jarjestys < 10000";
+		$avainlisa = " and avainsana.jarjestys < 10000";
 	}
 	else {
 		$avainlisa = "";

@@ -61,22 +61,22 @@ else {
 					
 		// Marginaaliverotus
 		if ($trow["alv"] >= 500) {
-			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);													//Kappalehinta alennuksineen
+			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);												//Kappalehinta alennuksineen
 			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"];								//Rivihinta valuutassa 
-			$loppusumma 		   += $hinta * $trow["varattu"];																	//Rivihinta
+			$loppusumma 		   += $hinta * $trow["varattu"];																//Rivihinta
 		}
 		// Myyntihinnat sisältävät arvonlisäveron
 		elseif ($yhtiorow["alv_kasittely"] == '') {
-			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);													//Verollinen kappalehinta alennuksineen
+			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);												//Verollinen kappalehinta alennuksineen
 			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"];								//Verollinen rivihinta valuutassa 
-			$loppusumma 		   += $hinta * $trow["varattu"];																	//Verollinen rivihinta
-			$hinta 					= $hinta / (1 + ($trow["alv"] / 100));															//Veroton kappalehinta alennuksineen
+			$loppusumma 		   += $hinta * $trow["varattu"];																//Verollinen rivihinta
+			$hinta 					= $hinta / (1 + ($trow["alv"] / 100));														//Veroton kappalehinta alennuksineen
 		}
 		// Myyntihinnat ovat verottomia
 		else {
-			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);													//Veroton kappalehinta alennuksineen
+			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);												//Veroton kappalehinta alennuksineen
 			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"] * (1 + ($trow["alv"] / 100));	//Verollinen rivihinta valuutassa 
-			$loppusumma 		   += $hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100));										//Verollinen rivihinta
+			$loppusumma 		   += $hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100));									//Verollinen rivihinta
 		}
 		
 		// Etsitään tuote
@@ -154,34 +154,43 @@ else {
 			
 			if ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] > 0) {
 				//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
-				$query = "	SELECT GROUP_CONCAT(ostorivitunnus SEPARATOR ',') ostotunnukset
-							FROM sarjanumeroseuranta 
-							WHERE yhtio = '$kukarow[yhtio]' 
-							and myyntirivitunnus = '$trow[tunnus]'";
-				$sarjares1 = mysql_query($query) or pupe_error($query);
 				
-				$ostohinta = 0;
-												
-				if(mysql_num_rows($sarjares1) > 0) {
-					$sarjarow1 = mysql_fetch_array($sarjares1);
+				// Tuotteen ostohinta
+				$query = "	SELECT round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0)), 2) ostosumma
+							FROM sarjanumeroseuranta
+							JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus 
+							WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
+							and sarjanumeroseuranta.myyntirivitunnus = '$trow[tunnus]'
+							HAVING ostosumma!=0";
+				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjarow = mysql_fetch_array($sarjares);
+								
+				$ostohinta = $sarjarow["ostosumma"];
+				
+				// Katsotaan onko sarjanumerolle liitetty kulukeikka
+				$query  = "	select lasku.laskunro
+							FROM sarjanumeroseuranta
+							JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
+							WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
+							and sarjanumeroseuranta.myyntirivitunnus = '$trow[tunnus]'";
+				$keikkares = mysql_query($query) or pupe_error($query);
+								
+				while($kulukeikkarow = mysql_fetch_array($keikkares)) {
+					// Haetaan kaikki keikkaan liitettyjen laskujen summa
+					$query = "	SELECT round(sum(summa*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
+								FROM lasku
+								WHERE yhtio		= '$kukarow[yhtio]'
+								and tila 		= 'K'
+								and laskunro 	= '$kulukeikkarow[laskunro]'
+								and vanhatunnus <> 0
+								and vienti in ('B','E','H')";
+					$result = mysql_query($query) or pupe_error($query);
+										
+					$kulukulurow = mysql_fetch_array($result);
 					
-					//Tätä pitää fiilata koska jos ostorivi onkin myyntitilauksella niin hintaan voi kuulua esim erikoisalennus
-					if ($sarjarow1["ostotunnukset"]  != '') {
-						$query = "	SELECT round(sum(hinta*(1-ale/100)),2) ostosumma					
-									FROM tilausrivi 
-									WHERE yhtio='$kukarow[yhtio]' 
-									and tunnus in ($sarjarow1[ostotunnukset])";
-						$sarjares2 = mysql_query($query) or pupe_error($query);
-						$sarjarow2 = mysql_fetch_array($sarjares2);
-									
-						$ostohinta += $sarjarow2["ostosumma"];	
-					}
-					else {
-						// Ei löydetty ostohintaa
-						$ostohinta += 0;	
-					}			
+					$ostohinta	+= $kulukulurow["kulusumma"];
 				}
-																			
+					
 				// Kate = Hinta - Ostohinta
 				$kate = round($hinta - round($ostohinta/$trow["varattu"], 4), 2);				
 				

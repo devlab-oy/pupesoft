@@ -4,33 +4,33 @@
 	// $tunnusarray array jossa on k‰sitelt‰vien tilausrivien tunnukset arrayssa
 	// $kpl[$tunnukset]   = monta toimitetaan
 	// $loput[$tunnukset] = KAIKKI/POISTA/JATA/MITA/SUORA mit‰ tehd‰‰n lopuille
-		
+
 	if ($loput[$tunnukset] == 'MITA') {
 		if ($toim == "ENNAKKO") {
 			$query = "	DELETE FROM tilausrivi
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset) and kpl=0 and tyyppi='E'";																					
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset) and kpl=0 and tyyppi='E'";
 		}
 		else {
 			$query = "	DELETE FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset) and varattu=0 and kpl=0 and var='J' and tyyppi in ('L','G')";
-			
+
 		}
 		$tresult = mysql_query($query) or pupe_error($query);
-		
+
 		$query = "update sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and myyntirivitunnus in ($tunnukset)";
 		$sarjares = mysql_query($query) or pupe_error($query);
-		
+
 	}
 	else {
 		if ($toim == "ENNAKKO") {
 			$query = "	SELECT tilausrivi.*, tuote.ei_saldoa
 						FROM tilausrivi use index (PRIMARY), tuote
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tunnus  = '$tunnusarray[0]'
-						and tilausrivi.varattu > 0 
+						and tilausrivi.varattu > 0
 						and tilausrivi.tyyppi  = 'E'
 						and tilausrivi.yhtio = tuote.yhtio
-						and tilausrivi.tuoteno = tuote.tuoteno";						
+						and tilausrivi.tuoteno = tuote.tuoteno";
 		}
 		else {
 			$query = "	SELECT tilausrivi.*, tuote.ei_saldoa
@@ -87,7 +87,7 @@
 
 				list($erpcmvv, $erpcmkk, $erpcmpp) = split('-', $otsikkorivi["erpcm"]);
 
-				$nyt = (int) date("Ymd"); 
+				$nyt = (int) date("Ymd");
 				$erp = (int) $erpcmvv.$erpcmkk.$erpcmpp;
 
 				//Jos alkuper‰isell‰ tilauksella on er‰p‰iv‰m‰‰r‰ syˆtetty k‰sin niin huomioidaan se nyt rivien poiminnassa
@@ -95,7 +95,7 @@
 					$erpcmlisa1 = " and erpcm = '$otsikkorivi[erpcm]' ";
 					$erpcmlisa2 = " erpcm = '$otsikkorivi[erpcm]', ";
 				}
-				
+
 				$tila		= 'N';
 				$alatila	= 'E';
 			}
@@ -107,7 +107,7 @@
 				$tila		= 'N';
 				$alatila	= 'J';
 			}
-			
+
 			// Tarvitsemmeko uuden otsikon?
 			$query = "	SELECT *
 						FROM lasku
@@ -276,7 +276,7 @@
 
 			$stresult = mysql_query($query) or pupe_error($query);
 			$id = mysql_insert_id();
-			
+
 			if ($debug==1) echo t("Perustin laskun")." $otsikkorivi[nimi] $id<br>";
 		}
 
@@ -316,37 +316,37 @@
 
 				$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  ('$hinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 				$addtil = mysql_query($query) or pupe_error($query);
-			
+
 				if ($debug==1) echo t("Lis‰ttiin rahtikulu")." $otsikkorivi[nimi] $id<br>";
 			}
 		}
 
 		// T‰ss‰ haarassa k‰ytt‰j‰ on syˆtt‰nyt jonkun kappalem‰‰r‰n
 		if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] == 'KAIKKI' or $suoratoimpaikka[$tunnukset] != '') {
-									
+
 			if ($loput[$tunnukset] == 'KAIKKI') {
 				if ($toim == "ENNAKKO") {
 					$kpl[$tunnukset] = $isarivirow["varattu"];
 				}
 				else {
-					$kpl[$tunnukset] = $isarivirow["jt"];	
+					$kpl[$tunnukset] = $isarivirow["jt"];
 				}
-			
+
 				$loput[$tunnukset] = 'POISTA';
 			}
-			
+
 			if ($toim == "ENNAKKO") {
 				$isa_kerroin	= $kpl[$tunnukset] / $isarivirow["varattu"];
 				$isa_kpl		= $isarivirow["varattu"];
 			}
 			else {
 				$isa_kerroin 	= $kpl[$tunnukset] / $isarivirow["jt"];
-				$isa_kpl		= $isarivirow["jt"];	
+				$isa_kpl		= $isarivirow["jt"];
 			}
-			
-			if ($suoratoimpaikka[$tunnukset] != '') {				
+
+			if ($suoratoimpaikka[$tunnukset] != '') {
 				list($paikka, $toimitetaan) = split("&&&", $suoratoimpaikka[$tunnukset]);
-				
+
 				$kpl[$tunnukset] = $toimitetaan;
 
 				if ($toim == "ENNAKKO") {
@@ -355,7 +355,7 @@
 				else {
 					$isa_kerroin 	= $kpl[$tunnukset] / $isarivirow["jt"];
 				}
-				
+
 				if ($isa_kpl > $toimitetaan) {
 					$loput[$tunnukset] = "JATA";
 				}
@@ -366,22 +366,22 @@
 			else {
 				$paikka = "";
 			}
-			
+
 			if ($kpl[$tunnukset] <= $isa_kpl and $kpl[$tunnukset] > 0) {
-				
+
 				$luodut_rivit 		= array();
 				$luodut_kpl			= array();
-				
+
 				foreach($tunnusarray as $tunnus_nyt) {
 					if ($toim == "ENNAKKO") {
 						$query = "	SELECT tilausrivi.*, tuote.ei_saldoa
 									FROM tilausrivi use index (PRIMARY), tuote
-									WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.tunnus  = '$tunnus_nyt'
-									and tilausrivi.varattu > 0 
+									and tilausrivi.varattu > 0
 									and tilausrivi.tyyppi  = 'E'
 									and tilausrivi.yhtio = tuote.yhtio
-									and tilausrivi.tuoteno = tuote.tuoteno";						
+									and tilausrivi.tuoteno = tuote.tuoteno";
 					}
 					else {
 						$query = "	SELECT tilausrivi.*, tuote.ei_saldoa
@@ -397,30 +397,31 @@
 									and tilausrivi.tuoteno=tuote.tuoteno";
 					}
 					$rivitres = mysql_query($query) or pupe_error($query);
-					$lisataanrow = mysql_fetch_array ($rivitres);											
-					
+					$lisataanrow = mysql_fetch_array ($rivitres);
+
 					if ($toim == "ENNAKKO") {
 						$lisataanrow_kpl = round($lisataanrow["varattu"] * $isa_kerroin,2);
 					}
 					else {
 						$lisataanrow_kpl = round($lisataanrow["jt"] * $isa_kerroin,2);
 					}
-					
+
 					if ($debug==1) echo t("Yritet‰‰n myyd‰ tuotetta").": $lisataanrow[tuoteno] $lisataanrow_kpl kappaletta.<br>";
-									
+
 					$query = "	SELECT *
 								FROM tuote
 								WHERE yhtio  = '$kukarow[yhtio]'
 								and  tuoteno = '$lisataanrow[tuoteno]'";
 					$aresult = mysql_query($query) or pupe_error($query);
 					$trow = mysql_fetch_array($aresult);
-				
+
 					$query = "	SELECT *
 								FROM lasku
 								WHERE tunnus = '$id'";
 					$aresult = mysql_query($query) or pupe_error($query);
 					$laskurow = mysql_fetch_array($aresult);
-				
+
+					$talteen_kpl		= $kpl; // lis‰‰rivi rikkoo t‰n, otetaan talteen
 					$kukarow["kesken"]	= $id;
 					$tuoteno 		 	= $lisataanrow["tuoteno"];
 					$hinta 			 	= $lisataanrow["hinta"];
@@ -435,34 +436,36 @@
 					$perheid		 	= $lisataanrow["perheid"];
 					$perheid2		 	= $lisataanrow["perheid2"];
 					$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);
-										
+
 					require("lisaarivi.inc");
-					
-					if ($debug==1) echo t("Lis‰ttiin tuote").": $tuoteno<br>";
-					
+
+					$kpl = $talteen_kpl; // lis‰‰rivi rikko t‰n, otetaan haltuun
+
+					if ($debug==1) echo t("Lis‰ttiin tuote").": $tuoteno kpl: $lisataanrow_kpl<br>";
+
 					// Suoratoimitukset saliitaan jos ne ovat toivottuja
 					if ($var == "S" and $suoratoimpaikka[$tunnukset] != '') {
 						$lisatyt_rivit1 = $lisatyt_rivit2;
 						unset($lisatyt_rivit2);
 					}
-					
+
 					// Pidet‰‰n muistissa kaikki lis‰tyt rivit
 					if (count($lisatyt_rivit1) > 0) {
 						// Myyntihaara
 						foreach($lisatyt_rivit1 as $lisatty_tun) {
-							$luodut_rivit[$lisatty_tun] = $lisatty_tun;	
-							
+							$luodut_rivit[$lisatty_tun] = $lisatty_tun;
+
 							//Pidet‰‰n muistissa lis‰tyt kappaleet
-							$luodut_kpl[$tunnus_nyt]   += $lisataanrow_kpl;
+							$luodut_kpl[$tunnus_nyt] += $lisataanrow_kpl;
 						}
 					}
 					if (count($lisatyt_rivit2) > 0) {
 						// Puute - JT - Ostohaara
 						foreach($lisatyt_rivit2 as $lisatty_tun) {
-							$luodut_rivit[] = $lisatty_tun;	
+							$luodut_rivit[] = $lisatty_tun;
 						}
 					}
-					
+
 					//Jos saldo ei riitt‰nyt
 					if (count($lisatyt_rivit2) > 0) {
 						foreach($luodut_rivit as $poistetaan) {
@@ -472,16 +475,16 @@
 
 							$query = "update sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and myyntirivitunnus=$poistetaan";
 							$sarjares = mysql_query($query) or pupe_error($query);
-							
-							if ($debug==1) echo t("Saldo ei riitt‰nyt. Tehd‰‰n rollback")."<br>";					
+
+							if ($debug==1) echo t("Saldo ei riitt‰nyt. Tehd‰‰n rollback")."<br>";
 						}
-						
+
 						unset($luodut_rivit);
 						unset($luodut_kpl);
-						break;	
+						break;
 					}
-					
-					if (count($lisatyt_rivit1) > 0) {					
+
+					if (count($lisatyt_rivit1) > 0) {
 						// Korjataan sarjanumero-oliot, eli siirret‰‰n ne jtrivilt‰/ennakkorivilt‰ tilausriville
 						$query = "	SELECT myyntirivitunnus, count(*) kpl
 									FROM sarjanumeroseuranta
@@ -512,13 +515,13 @@
 											LIMIT $lisrow[varattu]";
 								$cores = mysql_query($query) or pupe_error($query);
 							}
-						
+
 							//Kopioidaan tilausrivin lisatiedot
-							$query = "	SELECT * 
-										FROM tilausrivin_lisatiedot 
+							$query = "	SELECT *
+										FROM tilausrivin_lisatiedot
 										WHERE tilausrivitunnus='$lisataanrow[tunnus]' and yhtio ='$kukarow[yhtio]'";
 							$monistares2 = mysql_query($query) or pupe_error($query);
-						
+
 							if (mysql_num_rows($monistares2) > 0) {
 								$monistarow2 = mysql_fetch_array($monistares2);
 
@@ -552,69 +555,69 @@
 						$cores = mysql_query($query) or pupe_error($query);
 					}
 				}
-			
+
 				if (count($luodut_rivit) > 0) {
 					// Katotaan mit‰ tehd‰‰n lopuille
 					// Poistetaan loput
 					if ($loput[$tunnukset] == 'POISTA') {
-						foreach($tunnusarray as $tunnus_nyt) {	
+						foreach($tunnusarray as $tunnus_nyt) {
 							$query = "	DELETE FROM tilausrivi
-										WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus_nyt' and kpl=0";						
+										WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus_nyt' and kpl=0";
 							$tresult = mysql_query($query) or pupe_error($query);
-							
-							if ($debug==1) echo t("Poistetaan loput rivilt‰").": $tunnus_nyt<br>";							
+
+							if ($debug==1) echo t("Poistetaan loput rivilt‰").": $tunnus_nyt<br>";
 						}
 					}
 					// J‰tet‰‰n loput
 					else {
-						foreach($tunnusarray as $tunnus_nyt) {	
+						foreach($tunnusarray as $tunnus_nyt) {
 							if ($toim == "ENNAKKO") {
 								$query = "	SELECT varattu jt
 											FROM tilausrivi
-											WHERE yhtio = '$kukarow[yhtio]' 
-											and tunnus  = '$tunnus_nyt'";						
+											WHERE yhtio = '$kukarow[yhtio]'
+											and tunnus  = '$tunnus_nyt'";
 							}
 							else {
 								$query = "	SELECT jt
 											FROM tilausrivi
-											WHERE yhtio = '$kukarow[yhtio]' 
+											WHERE yhtio = '$kukarow[yhtio]'
 											and tunnus  = '$tunnus_nyt'";
 							}
 							$rivitres = mysql_query($query) or pupe_error($query);
-							
+
 							if (mysql_num_rows($rivitres) == 1) {
 								$row = mysql_fetch_array ($rivitres);
-							
+
 								if ($row["jt"] > $luodut_kpl[$tunnus_nyt]) {
-									
+
 									$jaljella = $row["jt"] - $luodut_kpl[$tunnus_nyt];
-									
+
 									if ($toim == "ENNAKKO") {
 										$query = "	UPDATE tilausrivi
 													SET varattu = '$jaljella'
-													WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus_nyt' and kpl=0";										
+													WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus_nyt' and kpl=0";
 									}
 									else {
 										$query = "	UPDATE tilausrivi
 													SET jt = '$jaljella'
-													WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus_nyt' and kpl=0";						
+													WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus_nyt' and kpl=0";
 									}
 									$tresult = mysql_query($query) or pupe_error($query);
-									
+
 									if ($debug==1) echo t("J‰tet‰‰n loput rivilt‰").": $tunnus_nyt<br>";
-									
+
 								}
 								else {
 									$query = "	DELETE FROM tilausrivi
-												WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus_nyt' and kpl=0";						
+												WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus_nyt' and kpl=0";
 									$tresult = mysql_query($query) or pupe_error($query);
-								
+
 									if ($debug==1) echo t("J‰tet‰‰n loput, mutta j‰tett‰v‰‰ ei ollut, joten dellataan rivi").": $tunnus_nyt<br>";
 								}
 							}
 						}
 					}
-										
+
 					//Korjataan perheid:t uusilla riveill‰
 					$query = "	SELECT perheid, min(tunnus) uusiperheid
 								FROM tilausrivi
@@ -632,7 +635,7 @@
 									and perheid = '$coprivirow[perheid]'";
 						$cores = mysql_query($query) or pupe_error($query);
 					}
-			
+
 					//Korjataan perheid2:t uusilla riveill‰
 					$query = "	SELECT perheid2, min(tunnus) uusiperheid2
 								FROM tilausrivi

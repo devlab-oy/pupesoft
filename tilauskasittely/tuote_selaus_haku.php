@@ -207,6 +207,15 @@
 		$poischeck = "";
 	}
 
+	if ($kohtapoistetut != "") {
+		$kohtapoislisa  = "";
+		$kohtapoischeck = "CHECKED";
+	}
+	else {
+		$kohtapoislisa  = " and status != 'X' ";
+		$kohtapoischeck = "";
+	}
+
 	if ($lisatiedot != "") {
 		$lisacheck = "CHECKED";
 	}
@@ -321,6 +330,7 @@
 				FROM tuote use index (yhtio_tuotemerkki)
 				WHERE yhtio='$kukarow[yhtio]'
 				$poislisa
+				$kohtapoislisa				
 				and tuotemerkki != ''
 				ORDER BY tuotemerkki";
 	$sresult = mysql_query($query) or pupe_error($query);
@@ -342,8 +352,9 @@
 	echo "</select><br>";
 
 	if ($kukarow["extranet"] == "") {
-		echo t("Poistuvat")."<input type='checkbox' name='poistetut' $poischeck>";
-		echo t("Lisätiedot")."<input type='checkbox' name='lisatiedot' $lisacheck>";
+		echo t("Poistuvat")."<input type='checkbox' name='poistuvat' $kohtapoischeck>";
+		echo t("Lisätiedot")."<input type='checkbox' name='lisatiedot' $lisacheck><br>";
+		echo t("Poistetut")."<input type='checkbox' name='poistetut' $poischeck>";		
 	}
 
 	echo "</td>";
@@ -380,6 +391,7 @@
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					$lisa
 					$poislisa
+					$kohtapoislisa
 					GROUP BY 1,2
 					ORDER BY $jarjestys
 				) valitut

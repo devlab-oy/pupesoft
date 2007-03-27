@@ -143,6 +143,9 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	if ($poistetut != '') {
 		$lisaa .= " and tuote.status != 'P' ";
 	}
+	if ($poistuva != '') {
+		$lisaa .= " and tuote.status != 'X' ";
+	}
 	if ($tuoteno != '') {
 		echo "<tr><th>".t("Tuoteno")."</th><td>$tuoteno</td></tr>";
 		$lisaa .= " and tuote.tuoteno = '$tuoteno' ";
@@ -516,14 +519,22 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	echo "<tr><th>".t("Tuotenumero")."</th><td><input type='text' size='20' name='tuoteno' value='$tuoteno'></td></tr>";
 
-/*
+
 	echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'> $toimittajarow[nimi]</td></tr>";
 	echo "<input type='hidden' name='edytunnus' value='$ytunnus'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 
+	//	Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
+	if(!isset($poistetut)) $poistetut = "checked";
+	if(!isset($poistuva)) $poistuva = "checked";
+
 	$chk = "";
 	if ($poistetut != "") $chk = "checked";
 	echo "<tr><th>".t("Älä näytä poistettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistetut' $chk></td></tr>";
+
+	$chk = "";
+	if ($poistuva != "") $chk = "checked";
+	echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistuva' $chk></td></tr>";
 
 	$chk = "";
 	if ($eihinnastoon != "") $chk = "checked";
@@ -532,7 +543,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	$chk = "";
 	if ($ehdotettavat != "") $chk = "checked";
 	echo "<tr><th>".t("Näytä vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='ehdotettavat' $chk></td></tr>";
-*/
+
 
 	echo "</table>";
 

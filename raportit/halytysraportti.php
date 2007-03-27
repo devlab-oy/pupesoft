@@ -371,6 +371,9 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	if ($valitut["poistetut"] != '') {
 		$lisaa .= " and tuote.status != 'P' ";
 	}
+	if ($valitut["poistuvat"] != '') {
+		$lisaa .= " and tuote.status != 'X' ";
+	}
 	if ($valitut["EIHINNASTOON"] != '') {
 		$lisaa .= " and tuote.hinnastoon != 'E' ";
 	}
@@ -555,10 +558,20 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 					order by id, tuote.tuoteno, varastopaikka";
 	}
 	$res = mysql_query($query) or pupe_error($query);
+	//	Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
+	if(!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";
+	if(!isset($valitut["poistuvat"])) $valitut["poistuvat"] = "checked";
 
-	if ($valitut["poistetut"] != '') {
+	if ($valitut["poistetut"] != '' and $valitut["poistuvat"] == '') {
+		echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistuvat näytetään").".<br>";
+	}
+	if ($valitut["poistetut"] != '' and $valitut["poistuvat"] != '') {
 		echo "<font class='message'>".t("Vain aktiiviset tuotteet").".<br>";
 	}
+	if ($valitut["poistetut"] == '' and $valitut["poistuvat"] != '') {
+		echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistetut näytetään").".<br>";
+	}
+	
 	if ($valitut["VAINUUDETTUOTTEET"] != '') {
 		echo "<font class='message'>".t("Listaa vain 12kk sisällä perustetut tuotteet").".<br>";
 	}
@@ -1699,6 +1712,23 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
 	echo "<tr><th>".t("Älä näytä poistettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[poistetut]' value='POISTETUT' $chk></td></tr>";
 
+	//Näytetäänkö poistetut tuotteet
+	$query = "	SELECT selitetark
+				FROM avainsana
+				WHERE yhtio = '$kukarow[yhtio]'
+				and laji = 'HALYRAP'
+				and selite	= '$rappari'
+				and selitetark = 'POISTUVAT'";
+	$sresult = mysql_query($query) or pupe_error($query);
+	$srow = mysql_fetch_array($sresult);
+
+	$chk = "";
+	if (($srow["selitetark"] == "POISTUVAT" and $tee == "JATKA") or $valitut["poistuvat"] != '' or $defaultit == "PÄÄLLE") {
+		$chk = "CHECKED";
+	}
+
+	echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[poistuvat]' value='POISTUVAT' $chk></td></tr>";
+
 
 	//Näytetäänkö poistetut tuotteet
 	$query = "	SELECT selitetark
@@ -1718,7 +1748,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 	echo "<tr><th>".t("Älä näytä tuotteita joita ei näytetä hinnastossa")."</th><td colspan='3'><input type='checkbox' name='valitut[EIHINNASTOON]' value='EIHINNASTOON' $chk></td></tr>";
 
 
-	//Näytetäänkö poistetut tuotteet
+	//Näytetäänkö poistuvat tuotteet
 	$query = "	SELECT selitetark
 				FROM avainsana
 				WHERE yhtio = '$kukarow[yhtio]'

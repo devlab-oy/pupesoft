@@ -50,11 +50,11 @@ if (!function_exists('alku')) {
 		$tid = $pdf->template->create();
 		$pdf->template->size($tid, 600, 830);
 
-		$pdf->draw_rectangle(825, 20,  780, 580, 		$firstpage, $rectparam);
-		$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$firstpage, $p);
-		$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$firstpage, $p);
-		$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
-		$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
+		$pdf->draw_rectangle(825, 20,  780, 580, 				$firstpage, $rectparam);
+		$pdf->draw_text(30, 815, $yhtiorow["nimi"], 			$firstpage, $p);
+		$pdf->draw_text(30, 805, $yhtiorow["osoite"], 			$firstpage, $p);
+		$pdf->draw_text(30, 795, $yhtiorow["postino"], 			$firstpage, $p);
+		$pdf->draw_text(70, 795, $yhtiorow["postitp"], 			$firstpage, $p);
 		$pdf->draw_text(250,810, t("Keräilylista", $kieli), 	$firstpage);
 		$pdf->draw_text(320,810, t("Sivu", $kieli)." $sivu", 	$firstpage,$p);
 
@@ -75,7 +75,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(30, 730, $laskurow["toim_nimitark"], $firstpage, $p);
 		$pdf->draw_text(30, 720, $laskurow["toim_osoite"], 	$firstpage, $p);
 		$pdf->draw_text(30, 710, $laskurow["toim_postino"], 	$firstpage, $p);
-		$pdf->draw_text(60, 710, $laskurow["toim_postitp"], 	$firstpage, $p);
+		$pdf->draw_text(70, 710, $laskurow["toim_postitp"], 	$firstpage, $p);
 		$pdf->draw_text(30, 700, $laskurow["toim_maa"], 		$firstpage, $p);
 
 		$pdf->draw_rectangle(780, 200, 680, 380, $firstpage, $rectparam);

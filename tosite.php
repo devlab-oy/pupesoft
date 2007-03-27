@@ -207,6 +207,7 @@
 		<option value ='5'>4
 		<option value ='9'>8
 		<option value ='17'>16
+		<option value ='33'>32
 		</select>
 		</td><td><input type = 'submit' value = '".t("Perusta")."'></td>
 		</tr></table></form>";

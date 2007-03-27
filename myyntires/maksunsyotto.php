@@ -98,7 +98,7 @@ if ($tee == "SYOTTO") {
 		$omasumma		= round($pistesumma * $tilikurssi, 2);
 	}
 	else {
-		echo "<font class='error'>".t("Valitun pankkitilin tiedot ovat puutteelliset!")."</font>";
+		echo "<font class='error'>".t("Valitun pankkitilin tiedot ovat puutteelliset, tarkista pankkitilin tiedot!")."</font>";
 		exit;
 	}
 

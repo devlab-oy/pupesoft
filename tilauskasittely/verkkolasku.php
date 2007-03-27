@@ -165,7 +165,7 @@
 		if (!function_exists("xml_add")) {
 			function xml_add ($joukko, $tieto, $handle) {
 				global $yhtiorow, $lasrow;
-				
+
 				$ulos = "<$joukko>";
 
 				if (strlen($tieto) > 0) {
@@ -187,7 +187,7 @@
 					else {
 						$ulos .= "</$joukko>\n";
 					}
-	                
+
 	            }
 	            else {
 					if($yhtiorow["verkkolasku_lah"] != "" and $lasrow["chn"] != "111") {
@@ -227,7 +227,7 @@
 			function ymuuta ($ytunnus) {
 				// stripataan kaikki - merkit
 				$ytunnus = str_replace("-","", $ytunnus);
-				
+
 				$ytunnus = sprintf("%08.8s",$ytunnus);
 				return substr($ytunnus,0,7)."-".substr($ytunnus,-1);
 			}
@@ -831,6 +831,26 @@
 						$tyyppi='381';
 					}
 
+					$asiakas_apu_query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
+					$asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+
+					if (mysql_num_rows($asiakas_apu_res) == 1) {
+						$asiakas_apu_row = mysql_fetch_array($asiakas_apu_res);
+					}
+					else {
+						$asiakas_apu_row = array();
+					}
+
+					if ($asiakas_apu_row["kieli"] == "SE") {
+						$laskun_kieli = "SE";
+					}
+					elseif ($kieli != "") {
+						$laskun_kieli = $kieli;
+					}
+					else {
+						$laskun_kieli = "";
+					}
+
 					// Laskukohtaiset kommentit kuntoon
 					// Tämä merkki | eli pystyviiva on rivinvaihdon merkki elmalla
 					// Laskun kommentti on stripattu erikoismerkeistä jo aikaisemmin joten se on nyt puhdas tässä
@@ -846,7 +866,7 @@
 						finvoice_otsik($tootfinvoice, $lasrow, $silent, $tulos_ulos);
 					}
 					else {
-						pupevoice_otsik($tootxml, $lasrow, $kieli, $frow, $masrow, $myyrow, $tyyppi);
+						pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $frow, $masrow, $myyrow, $tyyppi);
 					}
 
 

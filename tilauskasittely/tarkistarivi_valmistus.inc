@@ -21,7 +21,7 @@
 		$query = "	SELECT tuoteno, nimitys
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' 
-					and status != 'P'
+					and status NOT IN ('P','X')
 					and $lisa1
 					ORDER BY tuoteno";
 		$tresult = mysql_query($query) or pupe_error($query);
@@ -55,7 +55,7 @@
 		$query = "	SELECT tuoteno, nimitys, ostohinta
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' 
-					and status != 'P'
+					and status NOT IN ('P','X')
 					and tuoteno like '" . substr($tuoteno,0,-1) . "%'
 					ORDER BY tuoteno";
 		$tresult = mysql_query($query) or pupe_error($query);
@@ -180,7 +180,7 @@
 		}
 
 		//poistotuotekäsittely
-		if ($trow["status"] == 'P') {
+		if (in_array($trow["status"], array('P','X'))) {
 			$varaosavirhe .= t("VIRHE: Tämä on poistotuote, sitä ei voi valmistaa")."!<br>";
 			$tee = "Y";
 		}

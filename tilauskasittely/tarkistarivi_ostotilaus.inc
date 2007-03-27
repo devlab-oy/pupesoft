@@ -32,7 +32,7 @@
 	}
 
 	//poistotuotekäsittely
-	if ($trow["status"] == 'P' and $riviok == 0) {
+	if (in_array($trow["status"], array('P','X')) and $riviok == 0) {
 		$varaosavirhe .= t("VIRHE: Tämä on poistotuote, sitä ei voi tilata")."!<br>";
 		$riviok++;
 		$tilausok++;

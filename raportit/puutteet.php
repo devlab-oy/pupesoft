@@ -23,7 +23,7 @@
 						and tilausrivi.osasto 	= '$osasto'
 						and tilausrivi.try		= '$try'
 						and tilausrivi.tyyppi	='L'
-						and tuote.status != 'P'
+						and tuote.status NOT IN ('P','X')
 						GROUP BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus
 						HAVING puuteeur <> 0
 						ORDER BY tilausrivi.osasto, tilausrivi.try, tilausrivi.tuoteno, tilausrivi.nimitys, lasku.ytunnus";
@@ -40,7 +40,7 @@
 						and tilausrivi.laadittu >='$vva-$kka-$ppa 00:00:00'
 						and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
 						and tilausrivi.var in ('P','H','')
-						and tuote.status != 'P'
+						and tuote.status NOT IN ('P','X')
 						GROUP BY tilausrivi.osasto, tilausrivi.try
 						ORDER BY tilausrivi.osasto, tilausrivi.try";
 		}

@@ -30,7 +30,7 @@
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.tuoteno " . $oper . " '$tuoteno'
 					GROUP BY tuote.tuoteno
-					HAVING status != 'P' or saldo > 0
+					HAVING status NOT IN ('P','X') or saldo > 0
 					ORDER BY tuote.tuoteno " . $suun . "
 					LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);

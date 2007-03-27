@@ -95,7 +95,7 @@
 		if ((strlen($where) > 0 or $checkall != "") and $ytunnus != '') {
 			$query = "	SELECT *
 						FROM tuote
-						WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status!='P'
+						WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status NOT IN ('P','X')
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$rresult = mysql_query($query) or pupe_error($query);
 

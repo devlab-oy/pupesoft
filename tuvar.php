@@ -22,7 +22,7 @@
 			$query = "	SELECT tuoteno, nimitys
 						FROM tuote
 						WHERE yhtio = '$kukarow[yhtio]' 
-						and status != 'P'
+						and status NOT IN ('P','X')
 						and nimitys like '%" . substr($tuoteno,1) . "%'
 						ORDER BY tuoteno";
 		}
@@ -31,7 +31,7 @@
 			$query = "	SELECT tuoteno, nimitys
 						FROM tuote
 						WHERE yhtio = '$kukarow[yhtio]' 
-						and status != 'P'
+						and status NOT IN ('P','X')
 						and tuoteno like '" . substr($tuoteno,0,-1) . "%'
 						ORDER BY tuoteno";
 		}
@@ -73,7 +73,7 @@
 					FROM tuote 
 					LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
 					WHERE tuote.yhtio = '$kukarow[yhtio]' 
-					and tuote.status != 'P'
+					and tuote.status NOT IN ('P','X')
 					and tuote.tuoteno = '$tuoteno'
 					GROUP BY tuote.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);

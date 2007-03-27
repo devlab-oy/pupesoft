@@ -15,7 +15,7 @@
 					from tuote 
 					where yhtio='$kukarow[yhtio]' 
 					and tullinimike1 > 0
-					and status!='P'
+					and status NOT IN ('P','X')
 					group by tullinimike1, alkuperamaa
 					order by tullinimike1, alkuperamaa";
 		$result = mysql_query($query) or pupe_error($query);

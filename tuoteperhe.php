@@ -68,7 +68,7 @@
 						LEFT JOIN tuoteperhe ON tuote.yhtio=tuoteperhe.yhtio and tuote.tuoteno=tuoteperhe.isatuoteno and tuoteperhe.tyyppi='$hakutyyppi'
 						where tuote.tuoteno 	= '$kop_isatuo' 
 						and tuote.yhtio 		= '$kukarow[yhtio]'
-						and tuote.status 	   != 'P'
+						and tuote.status 	   NOT IN ('P','X')
 						HAVING isa is null";
 			$result = mysql_query($query) or pupe_error($query);
 			

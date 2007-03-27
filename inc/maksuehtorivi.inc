@@ -128,4 +128,25 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "pankkiyhteystiedot") {
+		$query = "	SELECT *
+					FROM pankkiyhteystiedot
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY nimitys";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value='0'>".t("Käytä yrityksen oletuksia");
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel = "";
+			if ($trow[$i] == $vrow["tunnus"]) {
+				$sel = "selected";
+			}
+			$ulos .= "<option value='$vrow[tunnus]' $sel>$vrow[nimitys]</option>";
+		}
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
 ?>

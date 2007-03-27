@@ -5,21 +5,21 @@
 	echo "<font class='head'>".t("Kohdistamattomien suorituksien selaus")."</font><hr>";
 
 	$lisa = "";
-	
+
 	if ($tila == 'suoritus_asiakaskohdistus_kaikki') {
 		//kohdistetaan tästä kaikki helpot
 		require ("suoritus_asiakaskohdistus_kaikki.php");
-		
+
 		$tila = "";
-	
+
 	}
-	
+
 	if ($tila == 'komm') {
 		$query = "UPDATE suoritus set viesti = '$komm' WHERE tunnus='$tunnus' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tila = 'tarkenna';
 	}
-	
+
 	if ($tila == 'tulostakuitti') {
 
 		//Haetaan kirjoitin
@@ -29,7 +29,7 @@
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sinulla ei ole oletuskirjoitinta").".</font><br>";
 		}
-		else {		
+		else {
 			$kirjoitinrow = mysql_fetch_array($result);
 			$tulostakuitti = $kirjoitinrow["komento"];
 
@@ -43,21 +43,21 @@
 			$firstpage = alku();
 			rivi($firstpage);
 			loppu($firstpage);
-    		
+
 			$pdffilenimi = "/tmp/kuitti-".md5(uniqid(mt_rand(), true)).".pdf";
-    		
+
 			//kirjoitetaan pdf faili levylle..
 			$fh = fopen($pdffilenimi, "w");
 			if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 			fclose($fh);
-    		
+
 			// itse print komento...Koska ei ole luotettavaa tapaa tehdä kahta kopiota, niin printataan kahdesti
 			$line = exec("$tulostakuitti $pdffilenimi");
     			$line = exec("$tulostakuitti $pdffilenimi");
 
 			//poistetaan tmp file samantien kuleksimasta...
 			$line = exec("rm -f $pdffilenimi");
-    		
+
 			echo "<font class='message'>".t("Kuittikopio (2 kpl) tulostettu").".</font><br>";
 		}
 
@@ -67,7 +67,7 @@
 		$selite			= "";
 		$asiakas_tunnus	= "";
 	}
-	
+
 	if ($tila == "kohdista") {
 			$myyntisaamiset=0;
 			switch ($vastatili) {
@@ -84,27 +84,27 @@
 					echo t("Virheellinen vastatilitieto")."!";
 					exit;
 			}
-			$query = "	SELECT * 
+			$query = "	SELECT *
 						FROM suoritus
 						WHERE tunnus='$tunnus' and yhtio ='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($result)==1) {
-				
-				$suoritus = mysql_fetch_array($result);		
-				
+
+				$suoritus = mysql_fetch_array($result);
+
 				// Suoritus kuntoon
-				$query = "	UPDATE suoritus 
-							SET asiakas_tunnus='$atunnus' 
+				$query = "	UPDATE suoritus
+							SET asiakas_tunnus='$atunnus'
 							WHERE tunnus='$tunnus' AND yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
-				
-				// Tiliöinti on voinut muuttua				
-				$query = "	UPDATE tiliointi 
-							set tilino='$myyntisaamiset' 
+
+				// Tiliöinti on voinut muuttua
+				$query = "	UPDATE tiliointi
+							set tilino='$myyntisaamiset'
 							where yhtio='$kukarow[yhtio]' AND tunnus='$suoritus[ltunnus]' AND korjattu=''";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				echo "<font class='message'>".t("Suoritus kohdistettu")."</font><br>";
 			}
 			else {
@@ -151,7 +151,7 @@
 		echo "</table><br>";
 
 		// Mahdollisuus muuttaa viestiä
-		
+
 		echo "<form action = '$PHP_SELF' method='post'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
 				<input type = 'hidden' name='tila' value='komm'>
@@ -159,7 +159,7 @@
 				<td><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
 				<td><input type = 'submit' value = '".t("Lisää")."'></td></tr></table></form>";
 		// Nyt selataan
-		
+
 		$kentat = 'tunnus, ytunnus, nimi, postitp';
 		$array = split(",", $kentat);
 		$count = count($array);
@@ -229,7 +229,7 @@
 				$sel2 = '';
 				echo "<input type='radio' name='vastatili' value='konserni' checked>".t("Konsernisaamiset")."<br>";
 			}
-			
+
 			echo "<input type='radio' name='vastatili' value='myynti' $sel1> ".t("Myyntisaamiset")."<br>
 				<input type='radio' name='vastatili' value='factoring' $sel2> ".t("Factoringsaamiset")."<br>";
 
@@ -243,7 +243,14 @@
 
 		echo "<form action = '$PHP_SELF?tila=$tila' method = 'post'>";
 
-		$query  = "SELECT * FROM yriti WHERE yhtio = '$kukarow[yhtio]' order by nimi";
+		$query = "	SELECT distinct suoritus.tilino, nimi, yriti.valkoodi
+					FROM suoritus, yriti
+					WHERE suoritus.yhtio = '$kukarow[yhtio]'
+					AND kohdpvm = '0000-00-00'
+					and yriti.yhtio=suoritus.yhtio
+					and yriti.tilino=suoritus.tilino
+					$lisa
+					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";
@@ -258,10 +265,12 @@
 		}
 		echo "</select></td></tr>";
 
-		$query = "	SELECT *
-					FROM valuu
+		$query = "	SELECT distinct valkoodi
+					FROM suoritus
 					WHERE yhtio = '$kukarow[yhtio]'
-					ORDER BY jarjestys";
+					AND kohdpvm = '0000-00-00'
+					$lisa
+					ORDER BY valkoodi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		echo "<tr><th>".t("Näytä vain tapahtumat valuutassa")."</th>";
@@ -270,13 +279,13 @@
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel = "";
-			if ($valuutta == $vrow['nimi']) $sel = "selected";
-			echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
+			if ($valuutta == $vrow[0]) $sel = "selected";
+			echo "<option value = '$vrow[0]' $sel>$vrow[0]</option>";
 		}
 
 		echo "</select></td></tr>";
 		echo "</table>";
-		
+
 		echo "<br><font class='message'>".t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("tästä")."</a> ".t("kaikki helpot").".</font><br><br>";
 
 		$tila = '';
@@ -301,13 +310,13 @@
 		}
 
 		if ($tilino != "") {
-			$lisa .= " and tilino = '$tilino' ";
+			$lisa .= " and suoritus.tilino = '$tilino' ";
 		}
 
 		if ($valuutta != "") {
-			$lisa .= " and valkoodi = '$valuutta' ";
+			$lisa .= " and suoritus.valkoodi = '$valuutta' ";
 		}
-		
+
 		$maxrows = 200;
 		$query = "	SELECT ".$kentat."
 					FROM suoritus
@@ -363,7 +372,7 @@
 		    		break;
 		    	}
 			}
-			
+
 			// tehdään nappi kuitin tulostukseen
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='tila' value='tulostakuitti'>";

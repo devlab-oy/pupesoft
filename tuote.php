@@ -25,10 +25,11 @@
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.tuoteno " . $oper . " '$tuoteno'
 					GROUP BY tuote.tuoteno
-					HAVING status IN ('P','X') or saldo > 0
+					HAVING status NOT IN ('P','X') or saldo > 0
 					ORDER BY tuote.tuoteno " . $suun . "
 					LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
+		echo $query;
 		if (mysql_num_rows($result) > 0) {
 			$trow = mysql_fetch_array ($result);
 			$tuoteno = $trow['tuoteno'];
@@ -57,7 +58,7 @@
 						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 						and tuotteen_toimittajat.toim_tuoteno = '$tuoteno'
 						GROUP BY tuotteen_toimittajat.tuoteno
-						HAVING saldo > 0 or status IN ('P','X')
+						HAVING status NOT IN ('P','X') or saldo > 0
 						ORDER BY tuote.tuoteno";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -171,7 +172,7 @@
 			$tuoterow = array();
 		}
 
-		if ($tuoterow["tuoteno"] != "" and (in_array($tuoterow["status"], array('P', 'X')) or $salro["saldo"] != 0)) {
+		if ($tuoterow["tuoteno"] != "" and (!in_array($tuoterow["status"], array('P', 'X')) or $salro["saldo"] != 0)) {
 
 			// Laitetaan kehahin oikein...
 			if ($tuoterow['sarjanumeroseuranta'] != "") {

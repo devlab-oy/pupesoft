@@ -537,7 +537,9 @@
 
 				echo "<$ero>$tilrow[kerayspvm]</$ero>";
 				echo "<$ero>$tilrow[toimitustapa]</$ero>";
-				echo "<$ero>$tilrow[tilauksia]</$ero>";
+				
+				echo "<$ero>".str_replace(',','<br>',$tilrow["otunnus"])."</$ero>";
+				
 				echo "<$ero>$tilrow[riveja]</$ero>";
 
 				if ($tilrow["tilauksia"] > 1) {

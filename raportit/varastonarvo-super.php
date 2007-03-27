@@ -56,12 +56,15 @@ if ($valitaan_useita == "") {
 	$res2  = mysql_query($query) or die($query);
 
 	$sel = "";
+	$seltyhjat = "";
 	if ($osasto == "kaikki") $sel = "selected";
+	if ($osasto == "tyhjat") $seltyhjat = "selected";
 	
 	echo "<tr><th>Osasto:</th><td>";
 	echo "<select name='osasto'>";
 	echo "<option value=''>Valitse osasto</option>";
 	echo "<option value='kaikki' $sel>Näytä kaikki</option>";
+	echo "<option value='tyhjat' $seltyhjat>Osasto puuttuu</option>";
 
 	while ($rivi = mysql_fetch_array($res2)) {
 		$sel = "";
@@ -90,8 +93,11 @@ if ($valitaan_useita == "") {
 	echo "<option value=''>Valitse tuoteryhmä</option>";
 
 	$sel = "";
+	$seltyhjat = "";
 	if ($tuoteryhma == "kaikki") $sel = "selected";
+	if ($tuoteryhma == "tyhjat") $seltyhjat = "selected";
 	echo "<option value='kaikki' $sel>Näytä kaikki</option>";
+	echo "<option value='tyhjat' $seltyhjat>Tuoteryhmä puuttuu</option>";
 
 	while ($rivi = mysql_fetch_array($res2)) {
 		$sel = "";
@@ -350,7 +356,7 @@ else {
 echo "</form>";
 
 
-if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoteryhma == "kaikki") {
+if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoteryhma == "kaikki" or $osasto == "tyhjat" or $tuoteryhma == "tyhjat") {
 
 	$trylisa = "";
 
@@ -360,7 +366,13 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	if ($osasto != "kaikki" and $sel_osasto != "" and $sel_osasto != t("Ei valintaa")) {
 		$trylisa .= " and tuote.osasto in ('$sel_osasto') ";
 	}
-
+	if ($tuoteryhma == "tyhjat") {
+		$trylisa .= " and tuote.try = 0 ";
+	}
+	if ($osasto == "tyhjat") {
+		$trylisa .= " and tuote.osasto = 0 ";
+	}
+		
 	// haetaan halutut tuotteet
 	$query  = "	SELECT tuoteno, osasto, try, nimitys, kehahin, epakurantti1pvm, epakurantti2pvm, sarjanumeroseuranta
 				FROM tuote

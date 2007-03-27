@@ -25,7 +25,7 @@
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.tuoteno " . $oper . " '$tuoteno'
 					GROUP BY tuote.tuoteno
-					HAVING status != 'P' or saldo > 0
+					HAVING status NOT IN ('P','X') or saldo > 0
 					ORDER BY tuote.tuoteno " . $suun . "
 					LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
@@ -52,12 +52,12 @@
 
 			$query = "	SELECT tuotteen_toimittajat.tuoteno, sum(saldo) saldo, status
 						FROM tuotteen_toimittajat
-						JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.status != 'P'
+						JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.status NOT IN ('P','X')
 						LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno
 						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 						and tuotteen_toimittajat.toim_tuoteno = '$tuoteno'
 						GROUP BY tuotteen_toimittajat.tuoteno
-						HAVING saldo > 0 or status != 'P'
+						HAVING saldo > 0 or status NOT IN ('P','X')
 						ORDER BY tuote.tuoteno";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -171,7 +171,7 @@
 			$tuoterow = array();
 		}
 
-		if ($tuoterow["tuoteno"] != "" and ($tuoterow["status"] != "P" or $salro["saldo"] != 0)) {
+		if ($tuoterow["tuoteno"] != "" and (in_array($tuoterow["status"], array('P', 'X')) or $salro["saldo"] != 0)) {
 
 			// Laitetaan kehahin oikein...
 			if ($tuoterow['sarjanumeroseuranta'] != "") {
@@ -462,9 +462,10 @@
 			echo "</tr><tr><td class='back' valign='top' align='left' colspan='2'>";
 
 
-			$query = "	SELECT tilausrivi.*, lasku.ytunnus, tilausrivi.varattu+tilausrivi.jt kpl, lasku.nimi, tilausrivi.toimaika, round((tilausrivi.varattu+tilausrivi.jt)*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta
+			$query = "	SELECT tilausrivi.*, lasku.ytunnus, tilausrivi.varattu+tilausrivi.jt kpl, lasku.nimi, tilausrivi.toimaika, round((tilausrivi.varattu+tilausrivi.jt)*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta, varastopaikat.nimitys varasto
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto 
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi in ('L','E','O','G','V')
 						and tilausrivi.tuoteno = '$tuoteno'
@@ -534,6 +535,11 @@
 						$tyyppi = t("Hyvitys");
 						$merkki = "+";
 					}
+					
+					if($jtrow["varasto"] != "") {
+						$tyyppi = $tyyppi." - ".$jtrow["varasto"];
+					}
+					
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
 							<td><a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$jtrow[otunnus]'>$jtrow[otunnus]</a>$keikka</td>";

@@ -6,6 +6,17 @@ if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 
 echo "<font class='head'>".t("Saapuva ostotilaus")."</font><hr>";
 
+// scripti balloonien tekemiseen
+echo "
+	<script>
+	var DH = 0;var an = 0;var al = 0;var ai = 0;if (document.getElementById) {ai = 1; DH = 1;}else {if (document.all) {al = 1; DH = 1;} else { browserVersion = parseInt(navigator.appVersion); if ((navigator.appName.indexOf('Netscape') != -1) && (browserVersion == 4)) {an = 1; DH = 1;}}} function fd(oi, wS) {if (ai) return wS ? document.getElementById(oi).style:document.getElementById(oi); if (al) return wS ? document.all[oi].style: document.all[oi]; if (an) return document.layers[oi];}
+	function pw() {return window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;}
+	function mouseX(evt) {if (evt.pageX) return evt.pageX; else if (evt.clientX)return evt.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft); else return null;}
+	function mouseY(evt) {if (evt.pageY) return evt.pageY; else if (evt.clientY)return evt.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop); else return null;}
+	function popUp(evt,oi) {if (DH) {var wp = pw(); ds = fd(oi,1); dm = fd(oi,0); st = ds.visibility; if (dm.offsetWidth) ew = dm.offsetWidth; else if (dm.clip.width) ew = dm.clip.width; if (st == \"visible\" || st == \"show\") { ds.visibility = \"hidden\"; } else {tv = mouseY(evt) + 20; lv = mouseX(evt) - (ew/4); if (lv < 2) lv = 2; else if (lv + ew > wp) lv -= ew/2; if (!an) {lv += 'px';tv += 'px';} ds.left = lv; ds.top = tv; ds.visibility = \"visible\";}}}
+	</script>
+";
+
 // kohdisteaan keikkaa laskun tunnuksella $otunnus
 if ($toiminto == "kohdista") {
 	require('ostotilausten_rivien_kohdistus.inc');
@@ -180,7 +191,7 @@ if ($toiminto == "" and $ytunnus == "") {
 	$toiminto = "";
 
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
-	$query = "	select ytunnus, nimi, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br>') comments, liitostunnus, count(*) kpl
+	$query = "	select ytunnus, nimi, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(*) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0
 				group by liitostunnus, ytunnus, nimi, osoite, postitp, swift
@@ -192,10 +203,24 @@ if ($toiminto == "" and $ytunnus == "") {
 		echo "<br><font class='head'>".t("Keskener‰iset keikat")."</font><hr>";
 
 		echo "<table>";
-		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("kommentti")."</th><th>".t("kpl")."</th><th></th></tr>";
+		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("keikkanumerot")."</th><th>".t("kpl")."</th><th></th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
-			echo "<tr><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[comments]</td><td>$row[kpl]</td>";
+
+			echo "<tr>";
+
+			// tehd‰‰n pop-up divi jos keikalla on kommentti...
+			if ($row["comments"] != "") {
+				echo "<div id='$row[liitostunnus]' style='position:absolute; z-index:100; visibility:hidden; width:500px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>";
+				echo $row["comments"];
+				echo "</div>";
+				echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'$row[liitostunnus]')\" onmouseover=\"popUp(event,'$row[liitostunnus]')\">$row[ytunnus]</a></td>";
+			}
+			else {
+				echo "<td valign='top'>$row[ytunnus]</td>";
+			}
+
+			echo "<td>$row[nimi]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[keikat]</td><td>$row[kpl]</td>";
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
 			echo "<td><input type='submit' value='".t("Valitse")."'></td>";
@@ -248,17 +273,6 @@ if ($toiminto == "uusi" and $toimittajaid > 0) {
 
 // selataan toimittajan keikkoja
 if ($toiminto == "" and $ytunnus != "") {
-
-	// scripti balloonien tekemiseen
-	echo "
-		<script>
-		var DH = 0;var an = 0;var al = 0;var ai = 0;if (document.getElementById) {ai = 1; DH = 1;}else {if (document.all) {al = 1; DH = 1;} else { browserVersion = parseInt(navigator.appVersion); if ((navigator.appName.indexOf('Netscape') != -1) && (browserVersion == 4)) {an = 1; DH = 1;}}} function fd(oi, wS) {if (ai) return wS ? document.getElementById(oi).style:document.getElementById(oi); if (al) return wS ? document.all[oi].style: document.all[oi]; if (an) return document.layers[oi];}
-		function pw() {return window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;}
-		function mouseX(evt) {if (evt.pageX) return evt.pageX; else if (evt.clientX)return evt.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft); else return null;}
-		function mouseY(evt) {if (evt.pageY) return evt.pageY; else if (evt.clientY)return evt.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop); else return null;}
-		function popUp(evt,oi) {if (DH) {var wp = pw(); ds = fd(oi,1); dm = fd(oi,0); st = ds.visibility; if (dm.offsetWidth) ew = dm.offsetWidth; else if (dm.clip.width) ew = dm.clip.width; if (st == \"visible\" || st == \"show\") { ds.visibility = \"hidden\"; } else {tv = mouseY(evt) + 20; lv = mouseX(evt) - (ew/4); if (lv < 2) lv = 2; else if (lv + ew > wp) lv -= ew/2; if (!an) {lv += 'px';tv += 'px';} ds.left = lv; ds.top = tv; ds.visibility = \"visible\";}}}
-		</script>
-	";
 
 	// n‰ytet‰‰n v‰h‰ toimittajan tietoja
 	echo "<table>";
@@ -425,14 +439,14 @@ if ($toiminto == "" and $ytunnus != "") {
 			$sarjanrot = "<font color='#00FF00'>".t("ok")."</font>";
 
 			while ($toimrow = mysql_fetch_array($toimresult)) {
-				
+
 				if ($toimrow["kpl"] < 0) {
 					$tunken = "myyntirivitunnus";
 				}
 				else {
 					$tunken = "ostorivitunnus";
 				}
-				
+
 				// tilausrivin tunnus pit‰‰ lˆyty‰ sarjanumeroseurannasta
 				$query = "select * from sarjanumeroseuranta use index (yhtio_ostorivi) where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and $tunken='$toimrow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);

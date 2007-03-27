@@ -3,6 +3,8 @@
     require_once "../inc/tilinumero.inc";
 
 	echo "<font class='head'>".t("Kohdistamattomien suorituksien selaus")."</font><hr>";
+
+	$lisa = "";
 	
 	if ($tila == 'suoritus_asiakaskohdistus_kaikki') {
 		//kohdistetaan tästä kaikki helpot
@@ -66,7 +68,7 @@
 		$asiakas_tunnus	= "";
 	}
 	
-	if ($tila=="kohdista") {
+	if ($tila == "kohdista") {
 			$myyntisaamiset=0;
 			switch ($vastatili) {
 				case 'myynti' :
@@ -112,8 +114,7 @@
 			$tila = '';
 	}
 
-
-	if ($tila=='tarkenna') {
+	if ($tila == 'tarkenna') {
 		echo"<font class='head'>".t("Suorituksen kohdistaminen asiakkaaseen")."<hr></font>";
 
 		$query = "	SELECT suoritus.yhtio, concat_ws('/',yriti.oletus_rahatili, yriti.nimi) tilino,tilino_maksaja,nimi_maksaja,viite,viesti,suoritus.summa,maksupvm,kirjpvm, concat_ws('/',tili.tilino, tili.nimi) vastatili, asiakas_tunnus, tili.tilino ttilino
@@ -158,7 +159,7 @@
 				<td><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
 				<td><input type = 'submit' value = '".t("Lisää")."'></td></tr></table></form>";
 		// Nyt selataan
-
+		
 		$kentat = 'tunnus, ytunnus, nimi, postitp';
 		$array = split(",", $kentat);
 		$count = count($array);
@@ -240,6 +241,42 @@
 
 	if ($tila == '') {
 
+		echo "<form action = '$PHP_SELF?tila=$tila' method = 'post'>";
+
+		$query  = "SELECT * FROM yriti WHERE yhtio = '$kukarow[yhtio]' order by nimi";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<table>";
+		echo "<tr><th>".t("Näytä vain tapahtumat tililtä")."</th>";
+		echo "<td><select name='tilino' onchange='submit()'>";
+		echo "<option value=''>".t("Kaikki")."</option>\n";
+
+		while ($row = mysql_fetch_array($result)) {
+			$sel = '';
+			if ($tilino == $row['tilino']) $sel = 'selected';
+			echo "<option value='$row[tilino]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])." $row[valkoodi]</option>\n";
+		}
+		echo "</select></td></tr>";
+
+		$query = "	SELECT *
+					FROM valuu
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY jarjestys";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		echo "<tr><th>".t("Näytä vain tapahtumat valuutassa")."</th>";
+		echo "<td><select name='valuutta' onchange='submit()'>";
+		echo "<option value=''>".t("Kaikki")."</option>\n";
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel = "";
+			if ($valuutta == $vrow['nimi']) $sel = "selected";
+			echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
+		}
+
+		echo "</select></td></tr>";
+		echo "</table>";
+		
 		echo "<br><font class='message'>".t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("tästä")."</a> ".t("kaikki helpot").".</font><br><br>";
 
 		$tila = '';
@@ -247,6 +284,7 @@
 	    $kentankoko = array(15,10,8,5,15,15,20,10,10);
 		$array = split(",", $kentat);
 		$count = count($array);
+
 		for ($i=0; $i<=$count; $i++) {
 				// tarkastetaan onko hakukentässä jotakin
 				if (strlen($haku[$i]) > 0) {
@@ -254,6 +292,7 @@
 					$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
 				}
 		}
+
 		if (strlen($ojarj) > 0) {
 			$jarjestys = $array[$ojarj];
 		}
@@ -261,6 +300,14 @@
 			$jarjestys = 'kirjpvm';
 		}
 
+		if ($tilino != "") {
+			$lisa .= " and tilino = '$tilino' ";
+		}
+
+		if ($valuutta != "") {
+			$lisa .= " and valkoodi = '$valuutta' ";
+		}
+		
 		$maxrows = 200;
 		$query = "	SELECT ".$kentat."
 					FROM suoritus
@@ -268,13 +315,11 @@
 				 	ORDER BY $jarjestys";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<form action = '$PHP_SELF?tila=$tila' method = 'post'>";
+        echo "<table><tr><th>x</th>";
 
-	        echo "<table><tr><th>x</th>";
-
-	        for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-	        	echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=".$i.$ulisa."'>" . t(mysql_field_name($result,$i))."</a></th>";
-	        }
+        for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
+        	echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=".$i.$ulisa."'>" . t(mysql_field_name($result,$i))."</a></th>";
+        }
 
 		echo "<th></th></tr>";
 		echo "<tr><td></td>";
@@ -282,10 +327,12 @@
 		for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
 			echo "<td><input type='text' size='$kentankoko[$i]' name = 'haku[$i]' value = '$haku[$i]'></td>";
 		}
+
 		echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
 		echo "</form>";
 
 		$row = 0;
+
 	    while ($maksurow=mysql_fetch_array ($result)) {
 
 			for ($i=0; $i<mysql_num_fields($result)-1; $i++) {

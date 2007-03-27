@@ -537,7 +537,22 @@ else {
 					$ohno  = mysql_query($query) or pupe_error($query);
 				}
 			}
-
+			
+			$query = "select tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$laskurow[tunnus]'";
+			$result = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($result) > 1) {
+				
+				$montakotilausta = mysql_num_rows($result);
+				
+				while ($row = mysql_fetch_array($result)) {
+					
+					$upviesti = $row["sisviesti2"]." ".t("tilaus jakaantunut")." $montakotilausta ".t("tilaukseksi")."!";
+					
+					$query = "update lasku set sisviesti2 = '$upviesti' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]'";
+					$upresult = mysql_query($query) or pupe_error($query);
+				}
+			}
+			
 			//tyhjennet‰‰n muuttujat
 			$varasto 	= '';
 			$edvarasto 	= '';

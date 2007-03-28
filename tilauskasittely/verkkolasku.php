@@ -310,7 +310,7 @@
 							WHERE tunnus = '$laskurow[tunnus]'";
 				$updres = mysql_query($query) or pupe_error($query);
 
-				if ($silent == "") {
+				if ($silent == "" or $silent == "VIENTI") {
 					$tulos_ulos_maksusoppari .= t("Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $laskurow[tunnus] $laskurow[nimi]<br>\n<table>";
 				}
 			}
@@ -319,7 +319,7 @@
 			}
 		}
 
-		if (isset($tulos_ulos_maksusoppari) and $tulos_ulos_maksusoppari != '' and $silent == "") {
+		if (isset($tulos_ulos_maksusoppari) and $tulos_ulos_maksusoppari != '' and ($silent == "" or $silent == "VIENTI")) {
 			$tulos_ulos .= "<br>\n".t("Maksusopimustilausket").":<br>\n";
 			$tulos_ulos .= $tulos_ulos_maksusoppari;
 		}

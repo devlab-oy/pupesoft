@@ -84,7 +84,7 @@
 
 			require("verkkolasku.php");
 
-			//käydään kaikki ruksatut maksusopimukset läpi
+			// Käydään kaikki ruksatut maksusopimukset läpi
 			if (sizeof($positiotunnus) != 0) {
 
 				require("../maksusopimus_laskutukseen.php");
@@ -93,9 +93,9 @@
 					$query = "	SELECT count(*)-1 as ennakko_kpl
 								FROM maksupositio
 								JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
-								WHERE maksupositio.yhtio ='$kukarow[yhtio]'
-								and otunnus = '$postun'
-								and uusiotunnus = 0
+								WHERE maksupositio.yhtio 	 = '$kukarow[yhtio]'
+								and maksupositio.otunnus 	 = '$postun'
+								and maksupositio.uusiotunnus = 0
 								ORDER BY maksupositio.tunnus";
 					$rahres = mysql_query($query) or pupe_error($query);
 					$posrow = mysql_fetch_array($rahres);
@@ -116,19 +116,37 @@
 						}
 					}
 
+					// Katsotaan ennakkolaskujen tiloja ja tutkitaan voidaanko tehdä loppulaskutus
+					$query = "	SELECT
+								sum(if(maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0)) laskutettu_kpl,
+								count(*) yhteensa_kpl,
+								sum(if(maksupositio.uusiotunnus = 0 or (maksupositio.uusiotunnus > 0 and uusiolasku.alatila!='X'), 1, 0)) laskuttamatta
+								FROM lasku
+								JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
+								JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.jaksotettu != ''
+								LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus=uusiolasku.tunnus
+								WHERE lasku.yhtio 	 = '$kukarow[yhtio]'
+								and lasku.jaksotettu = '$postun'";
+					$postarkresult = mysql_query($query) or pupe_error($query);
+					$postarkrow = mysql_fetch_array($postarkresult);
+					
+					if($postarkrow["yhteensa_kpl"] - $postarkrow["laskutettu_kpl"] == 1) {
+						$laskutettavat = 0;
+						echo "<br>";
 
-					$laskutettavat = 0;
-					echo "<br>";
+						// Ja loppulaskutus samaan syssyyn
+						$laskutettavat = loppulaskuta($postun);
 
-					// Ja loppulaskutus samaan syssyyn
-					$laskutettavat = loppulaskuta($postun);
+						if ($laskutettavat != "" and $laskutettavat != 0) {
+							$tee 			= "TARKISTA";
+							$laskutakaikki 	= "KYLLA";
+							$silent		 	= "VIENTI";
 
-					if ($laskutettavat != "" and $laskutettavat != 0) {
-						$tee 			= "TARKISTA";
-						$laskutakaikki 	= "KYLLA";
-						$silent		 	= "VIENTI";
-
-						require("verkkolasku.php");
+							require("verkkolasku.php");
+						}
+					}
+					elseif($postarkrow["laskuttamatta"] > 0) {
+						echo t("Jokin ennakkolaskuista on laskuttamatta! Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $postun<br>";	
 					}
 				}
 			}

@@ -320,10 +320,9 @@ if (!function_exists('rivi')) {
 			$pdf->draw_text(470, $kala, sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100))),	$firstpage, $pieni);
 		}
 		
-		
 		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
-		if (strlen($row["kommentti"]) >= 40) {
-			
+		if (strlen($row["kommentti"]) >= 140) {
+
 			$row["kommentti"] = str_replace(' ' ,' ##', $row["kommentti"]);
 			$row["kommentti"] = str_replace('.' ,'.##', $row["kommentti"]);
 			$row["kommentti"] = str_replace(',' ,',##', $row["kommentti"]);
@@ -333,10 +332,9 @@ if (!function_exists('rivi')) {
 			$lauseet = array();
 			$ind = 0;
 			foreach($sanat as $sana) {
-				if (strlen($lauseet[$ind]) >= 40) {
+				if (strlen($lauseet[$ind]) >= 100) {
 					$lauseet[$ind] .= "\n";
-					$ind++;
-					
+					$ind++;	
 				}
 				$lauseet[$ind] .= $sana;
 			}

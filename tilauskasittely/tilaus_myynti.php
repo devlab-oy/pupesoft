@@ -2620,8 +2620,12 @@ if ($tee == '') {
 				if ($varaosavirhe != '') {
 					echo "<td class='back' valign='top'><font class='error'>$varaosavirhe</font></td>";
 				}
+				if ($varaosakommentti != '') {
+					echo "<td class='back' valign='top'><font class='message'>$varaosakommentti</font></td>";
+				}
 
 				$varaosavirhe = "";
+				$varaosakommentti = "";
 
 				if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "SIIRTOTYOMAARAYS") and $riviok == 0) {
 					//Tutkitaan tuotteiden lisävarusteita

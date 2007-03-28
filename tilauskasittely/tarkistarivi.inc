@@ -208,14 +208,13 @@
 		$omapaikatraja 	= 2;
 
 		//Katotaan voidaanko tämä myydä joltain toiselta paikalta
-		$query = "  select tuotepaikat.*, varastopaikat.tyyppi varastotyyppi, varastopaikat.tunnus varastotunnus, varastopaikat.maa varastomaa
+		$query = "  select tuotepaikat.*, varastopaikat.tyyppi varastotyyppi, varastopaikat.tunnus varastotunnus, varastopaikat.maa varastomaa, varastopaikat.nimitys varasto
 					FROM tuotepaikat
 					LEFT JOIN varastopaikat ON tuotepaikat.yhtio = varastopaikat.yhtio
 					and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					WHERE tuotepaikat.tuoteno	= '$row[tuoteno]'
-					and tuotepaikat.yhtio		= '$kukarow[yhtio]'
-					and tuotepaikat.hyllyalue  != '!!M'";
+					and tuotepaikat.yhtio		= '$kukarow[yhtio]'";
 		$omavarastores = mysql_query($query) or pupe_error($query);
 
 		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V') {
@@ -243,7 +242,7 @@
 		if ((in_array($row["var"], array('','H','S','T','U','J')) and mysql_num_rows($omavarastores) >= $omapaikatraja) or (in_array($row["var"], array('S','T','U','J')) and mysql_num_rows($omavarastores) > 0)) {
 
 			while($alkurow = mysql_fetch_array($omavarastores)) {
-				if ($alkurow["varastotyyppi"] != "E" or $laskurow["varasto"] == $alkurow["varastotunnus"] or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])) {
+				if ($alkurow["hyllyalue"] != "!!M" and ($alkurow["varastotyyppi"] != "E" or $laskurow["varasto"] == $alkurow["varastotunnus"] or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
 
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"]);
 
@@ -264,6 +263,21 @@
 						$paikatlask++;
 						$kotipaikatlask++;
 					}
+				}
+			}
+		}
+		//	Jos ollaan livahdettu puutteeksi koitetaan josko tätä voitasiin myydä erikokisvarastosta
+		elseif($row["var"] == "P" and mysql_num_rows($omavarastores) > 0) {
+			while($alkurow = mysql_fetch_array($omavarastores)) {
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"]);
+				if($myytavissa > 0 and ($alkurow["varastotyyppi"] == "E" or $alkurow["hyllyalue"] == "!!M")) {
+					if($kukarow["extranet"] != "") {
+						$varaosakommentti .= t("Tuote saatavissa asiakaspalvelun kautta")."!<br>";
+					}
+					else {
+						$varaosakommentti .= t("Tuote saatavilla erikoisvarastossa")."!<br>";
+					}
+					break;
 				}
 			}
 		}

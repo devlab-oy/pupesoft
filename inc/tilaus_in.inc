@@ -526,7 +526,7 @@ if (($tyyppi == 'yct') and ($id != '')) {
 			
 			$content .= "--$bound\r\n";
 			
-			$boob = mail($mailiosoite, "".t("tarveraportti")."".date("d.m.Y"), $content, $header);
+			$boob = mail($mailiosoite, "".t("tarveraportti")."".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
 		}
 	}
 }

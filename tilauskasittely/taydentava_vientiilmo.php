@@ -624,7 +624,7 @@
 
 		$content .= "--$bound--\r\n";
 
-		mail($kukarow["eposti"],  t("Täydentävä vienti-ilmoitus")."", $content, $header);
+		mail($kukarow["eposti"],  t("Täydentävä vienti-ilmoitus")."", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 
 		///* Tässä tehään täydentävä ilmoitus sähköiseen muotoon *///
@@ -686,7 +686,7 @@
 		mail($to, "", $content, $header, "-f juppe@arwidson.fi");
 
 		$to = 'juppe@arwidson.fi';
-		mail($to, "", $content, $header);
+		mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		echo "<br><br>".t("Sähköpostit lähetetty! Kaikki on valmista")."!";
 

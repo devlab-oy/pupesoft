@@ -177,7 +177,7 @@ while ($asiakasrow = mysql_fetch_array($result)) {
 	$content .= "--$bound\r\n";
 	
 	if ($asiakasrow['fakta'] == 'monroe' and $email!='tony.selkamo@arwidson.fi') {
-		$boob = mail("tony.selkamo@arwidson.fi", $otsikko, $content, $header);
+		$boob = mail("tony.selkamo@arwidson.fi", $otsikko, $content, $header, "-f $yhtiorow[postittaja_email]");
 		if ($boob===FALSE) {
 			echo "Meilin lähetys epäonnistui tony.selkamo@arwidson.fi! Asiakas $asiakasrow[nimi].<br>";
 		}
@@ -186,7 +186,7 @@ while ($asiakasrow = mysql_fetch_array($result)) {
 		}
 	}
 
-	$boob = mail($email, $otsikko, $content, $header);
+	$boob = mail($email, $otsikko, $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob===FALSE) {
 		echo "Meilin lähetys epäonnistui $email! Asiakas $asiakasrow[nimi].<br>";

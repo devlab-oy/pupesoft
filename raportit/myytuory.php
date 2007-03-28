@@ -318,7 +318,7 @@
 
 		$content .= "--$bound\n";
 
-		$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Myynnit tuoteryhmittäin raportti")."", $content, $header);
+		$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Myynnit tuoteryhmittäin raportti")."", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 		else echo "<font class='message'>".t("Lähetettiin osoitteeseen").": $kukarow[eposti].</font><br>";

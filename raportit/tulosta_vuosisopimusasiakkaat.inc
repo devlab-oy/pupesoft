@@ -174,8 +174,8 @@ function loppu ($firstpage) {
 
 		$content .= "--$bound\r\n";
 
-		$boob     = mail($edemail,  $yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), $content, $header);
-		//$boob     = mail($kukarow["eposti"],  $yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), $content, $header);
+		$boob     = mail($edemail,  $yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		//$boob     = mail($kukarow["eposti"],  $yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) {
 			echo "Meilin lähetys epäonnistui!<br>";

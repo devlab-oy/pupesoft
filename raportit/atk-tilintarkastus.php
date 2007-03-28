@@ -157,7 +157,7 @@ if ($alku != '' and $loppu != '') {
 
 	$content .= "--$bound\r\n";
 
-	$boob     = mail($kukarow['eposti'],  $yhtiorow['nimi']." / Tilintarkistus $alku - $loppu / Ajopvm ".date("d.m.Y"), $content, $header);
+	$boob     = mail($kukarow['eposti'],  $yhtiorow['nimi']." / Tilintarkistus $alku - $loppu / Ajopvm ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob===FALSE) {
 		echo "Sähköpostin lähetys osoitteeseen $kukarow[eposti] epäonnistui!<br><br>";

@@ -142,12 +142,12 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
 
 	        $content .= "--$bound\r\n";
 
-	        $boob = mail($kukro["eposti"],  "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content, $header);
+	        $boob = mail($kukro["eposti"],  "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
 			if ($pomomail != '') {
-				$boob = mail($pomomail,  "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content, $header);
+				$boob = mail($pomomail,  "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
 			}
 			if ($pomomail2 != '') {
-				$boob = mail($pomomail2,  "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content, $header);
+				$boob = mail($pomomail2,  "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
 			}
 	}
 	

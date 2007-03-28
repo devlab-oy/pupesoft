@@ -119,7 +119,7 @@
 
 		$content .= "--$bound\n" ;
 
-		$boob = mail($kukarow["eposti"],  "".t("hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His')."", $content, $header);
+		$boob = mail($kukarow["eposti"],  "".t("hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His')."", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) echo " - ".t("Sähköpostin lähetys epäonnistui")."!<br>";
 		else echo " $kukarow[eposti].<br>".t("Sähköposti lähetetty").".<br>";

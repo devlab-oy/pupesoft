@@ -275,6 +275,6 @@
 		}
 					
 		$to = $kukarow['eposti'];
-		mail($to, "Asiakkaan tietopaketti $row[ytunnus] $row[nimi]", $content, $header);
+		mail($to, "Asiakkaan tietopaketti $row[ytunnus] $row[nimi]", $content, $header, "-f $yhtiorow[postittaja_email]");
 	}
 ?>

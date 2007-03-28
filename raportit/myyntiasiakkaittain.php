@@ -192,7 +192,7 @@
 
 		$content .= "--$bound--\n";
 
-		$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Myynnit asiakkaittain raportti")." $ppa-$kka-$vva $ppl-$kkl-$vvl ".t("osasto").":$osasto ".t("try").":$try", $content, $header);
+		$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Myynnit asiakkaittain raportti")." $ppa-$kka-$vva $ppl-$kkl-$vvl ".t("osasto").":$osasto ".t("try").":$try", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 		if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 		else echo "".t("Lähetettiin osoitteeseen").": $kukarow[eposti].<br>";

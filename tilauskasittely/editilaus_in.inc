@@ -893,7 +893,7 @@ if ($yhtiorow["alert_email"] != "") {
 	$content .= chunk_split(base64_encode($sisalto));
 	$content .= "\n";
 
-	$boob = mail($yhtiorow["alert_email"],  "$edi_subj - $yhtiorow[nimi]", $content, $header);
+	$boob = mail($yhtiorow["alert_email"],  "$edi_subj - $yhtiorow[nimi]", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 }
 

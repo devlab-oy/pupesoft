@@ -1361,7 +1361,7 @@
 			$content .= "\n";
 			$content .= "--$bound--\n";
 
-			mail($yhtiorow["admin_email"],  "$yhtiorow[nimi] - Laskutusajo", $content, $header);
+			mail($yhtiorow["admin_email"],  "$yhtiorow[nimi] - Laskutusajo", $content, $header, "-f $yhtiorow[postittaja_email]");
 		}
 	}
 

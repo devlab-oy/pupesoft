@@ -29,7 +29,7 @@
 	
 		if($row[1] == "Sauna") {
 			$meili = "$kukarow[nimi] on PERUNUT  saunavarauksen ajalta:\n\n##################################################\n$row[4].$row[3].$row[2] Klo: $row[5] --> Klo: $row[6]\n##################################################\n";
-			$tulos = mail("$yhtiorow[varauskalenteri_email]", "Saunavarauksen peruutus", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n");		
+			$tulos = mail("$yhtiorow[varauskalenteri_email]", "Saunavarauksen peruutus", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
 		}
 	
 	}

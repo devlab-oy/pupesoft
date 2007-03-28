@@ -124,11 +124,11 @@
 		$to = $kukarow['eposti'];
 		
 		if ($tee == "lahetalista") {
-			mail($to, "Asiakkaiden tiedot", $content, $header);
+			mail($to, "Asiakkaiden tiedot", $content, $header, "-f $yhtiorow[postittaja_email]");
 			echo "<br><br><font class='message'>".t("Asiakkaiden tiedot sähköpostiisi")."!</font><br><br><br>";
 		}
 		else {
-			mail($to, "Viikkosunnitelmapohja", $content, $header);
+			mail($to, "Viikkosunnitelmapohja", $content, $header, "-f $yhtiorow[postittaja_email]");
 			echo "<br><br><font class='message'>".t("Suunnitelmapohja lähetetty sähköpostiisi")."!</font><br><br><br>";
 		}
 		

@@ -20,7 +20,7 @@
 		if ($trow['eposti'] != $veposti) {
 			if ($veposti != '') {
 				$meili = t("Sinulla on hyväksyttävänä seuraavat laskut").":\n\n" . $meili;
-				$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["admin_email"] . ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["admin_email"] . ">\n");
+				$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["admin_email"] . ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["admin_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
 				$maara++;
 			}
 			$meili = '';
@@ -34,7 +34,7 @@
 	}
 	if ($meili != '') {
 		$meili = t("Sinulla on hyväksyttävänä seuraavat laskut").":\n\n" . $meili;
-		$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["admin_email"]. ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["admin_email"] . ">\n");
+		$tulos = mail($veposti, t("Muistutus laskujen hyväksynnästä")."", $meili, "From: " . $yhtiorow["nimi"] . "<" . $yhtiorow["admin_email"]. ">\nReply-To: " . $yhtiorow["nimi"] . "<" . $yhtiorow["admin_email"] . ">\n", "-f $yhtiorow[postittaja_email]");
 		$maara++;
 	}
 	echo "<font class='message'>".t("Lähetettiin")." $maara ".t("muistutusta. Muistutettuja laskuja")." $laskuja</font><hr>";

@@ -47,7 +47,7 @@
 			$meili .= "P‰v‰m‰‰r‰:  $row[pvmalku]\n\n\n";
 			$meili .= "Viesti:     $row[kentta01]\n\n";
 			
-			$tulos = mail($email, "Asiakasmemo", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n");
+			$tulos = mail($email, "Asiakasmemo", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
 			
 			$kysely = "	INSERT INTO kalenteri
 						SET tapa 	= '$row[tapa]',

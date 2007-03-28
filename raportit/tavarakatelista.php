@@ -55,7 +55,7 @@
 			$content .= "\r\n" ;
 			$content .= "--$bound\r\n";
 
-			$boob     = mail($kukarow[eposti], $otsikko, $content, $headeri);
+			$boob     = mail($kukarow[eposti], $otsikko, $content, $headeri, "-f $yhtiorow[postittaja_email]");
 
 			echo t("Lähetettiin meili"). " $kukarow[eposti].";
 		}

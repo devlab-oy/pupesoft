@@ -203,7 +203,7 @@
 			$content .= "\r\n" ;
 
 			$content .= "--$bound\r\n";
-			$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - Pricelist", $content, $header);
+			$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - Pricelist", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 			exec("rm -f /tmp/".$filenimi);
 			exec("rm -f $liite");

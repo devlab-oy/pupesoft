@@ -611,7 +611,7 @@
 
 
 						if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
-							$boob = mail($laskurow["email"],  "$yhtiorow[nimi] - ".t("Keräyspoikkeamat")."", $ulos, $header);
+							$boob = mail($laskurow["email"],  "$yhtiorow[nimi] - ".t("Keräyspoikkeamat")."", $ulos, $header, "-f $yhtiorow[postittaja_email]");
 							if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 						}
 
@@ -628,7 +628,7 @@
 
 							$ulos = t("Tilauksen keräsi").": $keraaja[nimi]\r\n\r\n".$ulos;
 
-							$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Keräyspoikkeamat")."", $ulos, $header);
+							$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Keräyspoikkeamat")."", $ulos, $header, "-f $yhtiorow[postittaja_email]");
 							if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 						}
 					}

@@ -228,14 +228,23 @@
 
 		if ($tee == "update") {
 
-			// kokeillaan arpoa intrastat k‰sittely‰
+			$ultilno = "";
+
+			// kokeillaan arpoa intrastat k‰sittely‰, molemmat maat pit‰‰ olla EU maita
 			if ($maa_lahetys != "" and $maa_maara != "") {
-				if ($maa_lahetys == $yhtiorow["maakoodi"] and $maa_maara != $yhtiorow["maakoodi"]) {
-					$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+
+				$query = "select distinct koodi from maat where koodi in ('$maa_lahetys','$maa_maara') and eu = 'ON'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) == 2) {
+					if ($maa_lahetys == $yhtiorow["maakoodi"] and $maa_maara != $yhtiorow["maakoodi"]) {
+						$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+					}
+					elseif ($maa_maara == $yhtiorow["maakoodi"] and $maa_lahetys != $yhtiorow["maakoodi"]) {
+						$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+					}
 				}
-				elseif ($maa_maara == $yhtiorow["maakoodi"] and $maa_lahetys != $yhtiorow["maakoodi"]) {
-					$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
-				}
+
 			}
 
 			$query = "	UPDATE lasku

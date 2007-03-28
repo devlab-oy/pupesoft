@@ -207,7 +207,7 @@
 		$poischeck = "";
 	}
 
-	if ($kohtapoistetut != "") {
+	if ($poistuvat != "") {
 		$kohtapoislisa  = "";
 		$kohtapoischeck = "CHECKED";
 	}

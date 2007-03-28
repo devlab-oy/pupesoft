@@ -7,7 +7,7 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
-
+	
 	if (mysql_field_name($result, $i) == "chn") {
 
 		$sel = array();
@@ -142,6 +142,7 @@
 		}
 
 		$ulos .= "</td>";
+		$ulos.= "<td class='back'>".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/$kukarow[kieli]/vieshome.htm'>".t("täältä")."</td>";
 		$jatko = 0;
 	}
 

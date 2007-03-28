@@ -372,7 +372,7 @@
 	}
 
 	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi != "ON")) {
-		//Jos tuote on marginaaliverotuksen alainen niin sen pitää olla onnistuneesti ostettu jotta sen voi myydä
+		//Jos tuote on marginaaliverotuksen alainen niin sen pitää olla onnistuneesti ostettu jotta sen voi myydä and (sarjanumeroseuranta.kaytetty = '' or (sarjanumeroseuranta.kaytetty != '' and sarjanumeroseuranta.ostorivitunnus > 0 and tilausrivi_osto.laskutettuaika > '0000-00-00'))
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
 					lasku_osto.tunnus									osto_tunnus,
@@ -398,7 +398,6 @@
 					sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
 					and (sarjanumeroseuranta.myyntirivitunnus in (0, $rivitunnus) or lasku_myynti.tila='T')
-					and (sarjanumeroseuranta.kaytetty = '' or (sarjanumeroseuranta.kaytetty != '' and sarjanumeroseuranta.ostorivitunnus > 0 and tilausrivi_osto.laskutettuaika > '0000-00-00'))
 					$lisa
 					$lisa2
 					ORDER BY sarjanumeroseuranta.sarjanumero";

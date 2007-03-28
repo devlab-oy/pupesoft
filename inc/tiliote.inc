@@ -20,6 +20,10 @@
 		}
 			
 		if ($toim == 'K' and $kuittikoodi == ' ' and $tiliotedataka == '0000-00-00') {
+			//Muutetaan maara kotivaluuttaan
+			if ($valuuttarow['kurssi'] != 0 and $valuuttarow['kurssi'] != 1)
+				$maara = round($maara * $valuuttarow['kurssi'],2);
+				
 			if ($sisviite != 0) { //Tämän pitiäisi toimia nyt aina!
 				echo "<font class='message'> ".t("maksukanditaatti sisäinen viite & määrä")."</font><br>";
 				
@@ -227,9 +231,10 @@
 			echo "<td>".t("Kausi")."<br> $alkupvm - $loppupvm</td>";
 			echo "</tr>";
 
+			$tilinvaluutta = substr($tietue,96,3);
 			echo "<tr>";
 			echo "<td>" . substr($tietue,147,18) . "</td>";
-			echo "<td>" . substr($tietue,99,30) . "<br>" . substr($tietue,96,3) . " $pankkitilino</td>";
+			echo "<td>" . substr($tietue,99,30) . "<br>$tilinvaluutta $pankkitilino</td>";
 			echo "<td>".t("Myönnetty määrä")."<br>". substr($tietue, 117, 30) * 1 . "</td>";
 			echo "</tr>";
 
@@ -241,7 +246,7 @@
 			echo "<tr><td colspan='3'>";
 
 			if (mysql_num_rows($result) != 1) {
-				echo "<font class='message'> ".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>";
+				echo "<font class='error'> ".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>";
 				$toim='E';
 			}
 			else {
@@ -249,7 +254,7 @@
 				echo "<font class='message'> ".t("tili löytyi yrityksestä")." '$yritirow[yhtio]' ".t("vastuussa")." '$yritirow[hyvak]'</font><br>";
 
 				if ((strlen($yritirow['oletus_rahatili']) == 0) or (strlen($yritirow['oletus_kulutili']) == 0)) { // Tarkistetaan tilit
-					echo "<font class='message'> ".t("Tililtä puuttuu kulu tai rahatili")."</font>";
+					echo "<font class='error'> ".t("Tililtä puuttuu kulu tai rahatili")."</font>";
 					$toim='E';
 				}
 				else {
@@ -262,13 +267,30 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) != 1) {
-					echo "<font class='message'> ".t("Yritystä")." '$yritirow[yhtio]' ".t("ei löytynyt")."!</font><br>";
+					echo "<font class='error'> ".t("Yritystä")." '$yritirow[yhtio]' ".t("ei löytynyt")."!</font><br>";
 					$toim='E';
 				}
 				else {
 					$yhtiorow = mysql_fetch_array($result);
-					echo "<font class='message'> ".t("Yritys löytyi")." '$yhtiorow[nimi]'<br>".t("ostovelat")." '$yhtiorow[ostovelat]'<br>".t("konserniostovelat")." '$yhtiorow[konserniostovelat]'</font><br>";
+					echo "<font class='message'> ".t("Yritys löytyi")." '$yhtiorow[nimi]'<br>".t("ostovelat")." '$yhtiorow[ostovelat]' ".t("konserniostovelat")." '$yhtiorow[konserniostovelat]'</font><br>";
 					
+					$toim="K";
+				}
+
+				$query = "	SELECT *
+							FROM valuu
+							WHERE yhtio = '$yritirow[yhtio]' and nimi = '$tilinvaluutta'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) != 1) {
+					echo "<font class='error'> ".t("Valuuttaa")." '$tilinvaluutta' ".t("ei löytynyt")."!</font><br>";
+					$toim='E';
+				}
+				else {
+					$valuuttarow = mysql_fetch_array($result);
+					if ($valuuttarow['kurssi'] != 1) {
+						echo "<font class='message'> ".t("Tiliote kirjataan kurssiin")." ".(round(1/$valuuttarow['kurssi'],6))." ($valuuttarow[kurssi])!</font><br>";
+					}
 					$toim="K";
 				}
 			}
@@ -288,7 +310,7 @@
 
 			echo "<tr><td></td><td></td><td></td><td></td>";
 			echo "<td>".t("Saldo")." " . substr($tietue,65,6) . "</td>";
-			echo "<td>" . substr($tietue,71,19) / 100 . "</td>";
+			echo "<td align='right'>" . substr($tietue,71,19) / 100 . "</td>";
 			echo "</tr>";
 
 			break;
@@ -340,7 +362,7 @@
 			echo "<td>$maksaa</td>";
 			echo "<td>" . substr($tietue, 6, 6) * 1 . "$kuittikoodi $omataso</td>";
 			echo "<td></td>";
-			echo "<td>$maara</td>";
+			echo "<td align='right'>".sprintf('%.2f',$maara) ."</td>";
 			echo "</tr><tr>";
 			echo "<td>$tilino</td>";
 			echo "<td>$pvm</td>";
@@ -403,7 +425,7 @@
 					$selite = "".t("nimen tarkenne").": " .  trim(substr($arvo, 0, 35));
 					break;
 			default :
-				$selite = "<font color='red'><b>*** ".t("OHITETTU LISÄTIETO")." ***</b></font>";
+				$selite = "<font class='error'>*** ".t("OHITETTU LISÄTIETO")." ***</font>";
 				$eiselitetta = 1;
 			}
 			echo "<td>$selite</td><td></td><td></td><td></td></tr>";
@@ -415,7 +437,13 @@
 			
 			// Päivitetään saldo yriti-tauluun, jos sellainen löytyi
 			if ($toim == 'K' and $tiliotedatarow['kasitelty'] == '0000-00-00') {
-				$query = "UPDATE yriti SET maksulimitti = '".  substr($tietue,31,19) / 100 . "' WHERE tunnus = '$yritirow[tunnus]'";
+
+				if ($valuuttarow['kurssi'] != 0 and $valuuttarow['kurssi'] != 1) {
+					$tilisaldo = substr($tietue,31,19);
+					$tilisaldo = round($tilisaldo * $valuuttarow['kurssi'],2);
+				}
+
+				$query = "UPDATE yriti SET maksulimitti = '" . round($tilisaldo / 100, 2) . "' WHERE tunnus = '$yritirow[tunnus]'";
 				$result = mysql_query($query) or pupe_error($query);
 				
 				$query = "UPDATE tiliotedata SET kasitelty = now() WHERE tunnus='$tiliotedatarow[tunnus]'";
@@ -433,15 +461,15 @@
 			if (substr($tietue,6,1) == 4) $jakso = "vuoden";
 			echo "<tr><td colspan='3'>";
 			echo "".t("Panot")." $jakso ".t("alusta")." ".t("kpl")." " . substr($tietue,13,8) * 1 . "</td>";
-			echo "<td></td><td></td><td>" . substr($tietue,21,19) / 100 . "</td></tr>";
+			echo "<td></td><td></td><td align='right'>" . substr($tietue,21,19) / 100 . "</td></tr>";
 			echo "<tr><td colspan='3'>";
 			echo "".t("Otot")." $jakso ".t("alusta")." kpl " . substr($tietue,40,8) * 1 . "</td>";
-			echo "<td></td><td></td><td>" . substr($tietue,48,19) / 100 . "</td></tr>";
+			echo "<td></td><td></td><td align='right'>" . substr($tietue,48,19) / 100 . "</td></tr>";
 			break;
 		default:
 			if (trim($tunnus) != '') {
 				echo "<tr><td colspan='6'>";
-				echo "".t("Tunnistamaton tietue").": $tunnus</td></tr>";
+				echo t("Tunnistamaton tietue").": $tunnus</td></tr>";
 			}
 	}
 ?>

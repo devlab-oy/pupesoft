@@ -68,7 +68,9 @@ else {
 			default:
 				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
 		}
-
+		
+		$cmd = "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
+		
 		$rivi  = "$PHP_SELF\n";
 		$rivi .= "\n";
 		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("lähetys epäonnistui")."!\n";

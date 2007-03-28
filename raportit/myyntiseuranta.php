@@ -9,25 +9,39 @@
 	}
 
 	require("../inc/parametrit.inc");
+	
+	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+		<!--
+
+		function toggleAll(toggleBox) {
+
+			var currForm = toggleBox.form;
+			var isChecked = toggleBox.checked;
+			var nimi = toggleBox.name;
+
+			for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
+					currForm.elements[elementIdx].checked = isChecked;
+				}
+			}
+		}
+
+		//-->
+		</script>";
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);	
 		exit;
 	}
 	else {
-		
 		echo "<font class='head'>".t("Myyntiseuranta")."</font><hr>";
-		
+
 		// tutkaillaan saadut muuttujat
-		$tuoteosasto     = trim($tuoteosasto);
-		$tuoteryhma      = trim($tuoteryhma);
 		$asiakasosasto   = trim($asiakasosasto);
 		$asiakasryhma    = trim($asiakasryhma);
 		$asiakas         = trim($asiakas);
 		$toimittaja    	 = trim($toimittaja);
 
-		if ($tuoteosasto   == "") $tuoteosasto   = trim($tuoteosasto2);
-		if ($tuoteryhma    == "") $tuoteryhma    = trim($tuoteryhma2);
 		if ($asiakasosasto == "") $asiakasosasto = trim($asiakasosasto2);
 		if ($asiakasryhma  == "") $asiakasryhma  = trim($asiakasryhma2);
 
@@ -76,7 +90,7 @@
 		}
 
 		// jos ei olla valittu mitään ei tehdä mitään
-		if ($tuoteryhma == "" and $tuoteosasto == "" and $asiakasosasto == "" and $asiakasryhma == "" and count($ruksit) == 0) {
+		if ($mul_try == "" and $mul_osasto == "" and $asiakasosasto == "" and $asiakasryhma == "" and count($ruksit) == 0) {
 			$tee = "";
 		}
 
@@ -86,7 +100,7 @@
 		}
 
 		if ($tee == 'go') {
-
+	
 			// no hacking, please.
 			$lisa   = "";
 			$query  = "";
@@ -94,7 +108,12 @@
 			$order  = "";
 			$select = "";
 			$gluku  = 0;
-
+			
+			// näitä käytetään queryssä
+			$sel_osasto = "";
+			$sel_tuoteryhma = "";
+			
+	
 			$apu = array();
 
 			foreach ($jarjestys as $arvo) {
@@ -230,7 +249,7 @@
 				$gluku++;
 			}
 
-			if ($tuoteosasto  != "") {
+			if ($mul_osasto  != "") {
 				if ($group!="") $group .= ",tuote.osasto";
 				else $group .= "tuote.osasto";
 				$select .= "tuote.osasto tuos, ";
@@ -238,7 +257,7 @@
 				$gluku++;
 			}
 
-			if ($tuoteryhma != "") {
+			if ($mul_try != "") {
 				if ($group!="") $group .= ",tuote.try";
 				else $group .= "tuote.try";
 				$select .= "tuote.try tury, ";
@@ -256,28 +275,18 @@
 				$asiakasosastosel = "selected";
 			}
 
-			if ($tuoteryhma    == "kaikki") {
-				$tuoteryhma = "";
-				$tuoteryhmasel = "selected";
-			}
-
-			if ($tuoteosasto   == "kaikki") {
-				$tuoteosasto = "";
-				$tuoteosastosel = "selected";
-			}
-
 			if ($asiakasryhma  != "") $lisa .= " and asiakas.ryhma     = '$asiakasryhma' ";
 
 			if ($asiakasosasto != "") $lisa .= " and asiakas.osasto    = '$asiakasosasto' ";
-
-			if ($tuoteryhma != "" and strpos($tuoteryhma, "*") !== FALSE) {
-				$lisa .= " and tuote.try like '".substr($tuoteryhma,0,-1)."%' ";
+	
+			if ($mul_osasto != '') {
+				$sel_osasto = "('".str_replace(',','\',\'',implode(",", $mul_osasto))."')";
+				$lisa .= " and tuote.osasto in $sel_osasto ";	
 			}
-			elseif ($tuoteryhma != "") {
-				$lisa .= " and tuote.try = '$tuoteryhma' ";
+			if ($mul_try != '') {
+				$sel_tuoteryhma = "('".str_replace(',','\',\'',implode(",", $mul_try))."')";
+				$lisa .= " and tuote.try in $sel_tuoteryhma ";
 			}
-
-			if ($tuoteosasto   != "") $lisa .= " and tuote.osasto      = '$tuoteosasto' ";
 
 			if ($toimittaja != "") {
 				$query = "select tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and toimittaja='$toimittaja'";
@@ -309,7 +318,7 @@
 					$asiakas = "";
 				}
 			}
-	
+
 			if ($kateprossat != "") {
 				$katelisa = " 0 kateprosnyt, 0 kateprosed, ";
 			}
@@ -371,23 +380,23 @@
 			}
 
 			if ($query != "") {
-		
+
 				if(include('Spreadsheet/Excel/Writer.php')) {
-					
+		
 					//keksitään failille joku varmasti uniikki nimi:
 					list($usec, $sec) = explode(' ', microtime());
 					mt_srand((float) $sec + ((float) $usec * 100000));
 					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-					
+		
 					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
 					$worksheet =& $workbook->addWorksheet('Sheet 1');
-				
+	
 					$format_bold =& $workbook->addFormat();
 					$format_bold->setBold();
-				
+	
 					$excelrivi = 0;
 				}
-				
+	
 				echo "<table>";
 				echo "<tr>
 					<th>".t("Kausi nyt")."</th>
@@ -415,7 +424,7 @@
 
 				// echotaan kenttien nimet
 				for ($i=0; $i < mysql_num_fields($result); $i++) echo "<th>".t(mysql_field_name($result,$i))."</th>";
-				
+	
 				if(isset($workbook)) {
 					for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 					$excelrivi++;
@@ -431,15 +440,15 @@
 				$tarra_aineisto = "";
 
 				while ($row = mysql_fetch_array($result)) {
-			
+
 					if ($osoitetarrat != "" and $row[0] > 0) {
 						$tarra_aineisto .= $row[0].",";
 					}
-			
+
 					echo "<tr>";
 					// echotaan kenttien sisältö
 					for ($i=0; $i < mysql_num_fields($result); $i++) {
-				
+	
 						// jos kyseessa on asiakasosasto, haetaan sen nimi
 						if (mysql_field_name($result, $i) == "asos") {
 							$query = "	SELECT distinct avainsana.selite, ".avain('select')."
@@ -542,8 +551,8 @@
 								$row[$i] = $osrow['nimi'];
 							}
 						}
-				
-				
+	
+	
 						// kateprossa
 						if (mysql_field_name($result, $i) == "kateprosnyt") {
 							if ($row["myyntinyt"] != 0) {
@@ -564,7 +573,7 @@
 								$row[$i] = 0;
 							}
 						}
-				
+	
 						// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 						if ($gluku > 1) {
 
@@ -581,7 +590,7 @@
 								else {
 									$apu = mysql_num_fields($result)-11;
 								}
-						
+			
 								echo "<td class='tumma' colspan='$apu'>$edluku ".t("yhteensä")."</th>";
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntikplnyt))."</td>";
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntikpled))."</td>";
@@ -591,25 +600,25 @@
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$katenyt))."</td>";
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateed))."</td>";
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateind))."</td>";
-						
+			
 								if ($kateprossat != "") {
 									echo "<td class='tumma' align='right'></td>";
 									echo "<td class='tumma' align='right'></td>";
 								}
-						
+			
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokatenyt))."</td>";
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateed))."</td>";
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td></tr>\n";
-						
+			
 								if(isset($workbook)) {
 									$excelsarake=0;
-								
+					
 									$worksheet->write($excelrivi, $excelsarake, $edluku." ".t("yhteensä"), $format_bold);
-						
+			
 									for($iii = 0; $iii < $apu; $iii++) {
 										$excelsarake++;
 									}
-						
+			
 									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntikplnyt), $format_bold);
 									$excelsarake++;
 									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntikpled), $format_bold);
@@ -626,12 +635,12 @@
 									$excelsarake++;
 									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kateind), $format_bold);
 									$excelsarake++;
-						
+			
 									if ($kateprossat != "") {
 										$excelsarake++;
 										$excelsarake++;
 									}
-												
+									
 									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokatenyt), $format_bold);
 									$excelsarake++;
 									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateed), $format_bold);
@@ -639,7 +648,7 @@
 									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateind), $format_bold);
 									$excelrivi++;
 								}
-								
+					
 								echo "<tr>";
 
 								$myyntikplnyt = "0";
@@ -657,14 +666,14 @@
 						// hoidetaan pisteet piluiksi!!
 						if (mysql_field_type($result,$i) == 'real' or substr(mysql_field_name($result, $i),0 ,4) == 'kate') {
 							echo "<td align='right'>".sprintf("%.02f",$row[$i])."</td>";
-					
+		
 							if(isset($workbook)) {
 								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
 							}
 						}
 						else {
 							echo "<td>$row[$i]</td>";
-							
+				
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, $row[$i]);
 							}
@@ -699,7 +708,7 @@
 				else {
 					$apu = mysql_num_fields($result)-11;
 				}
-		
+
 
 				// jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 				if ($gluku > 1 and $mukaan != 'tuote' and $piiyhteensa == '') {
@@ -718,7 +727,7 @@
 		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$katenyt))."</td>";
 		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateed))."</td>";
 		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateind))."</td>";
-			
+
 					if ($kateprossat != "") {
 						echo "<td class='tumma' align='right'></td>";
 						echo "<td class='tumma' align='right'></td>";
@@ -727,16 +736,16 @@
 					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokatenyt))."</td>";
 					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateed))."</td>";
 					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td></tr>\n";
-			
+
 					if(isset($workbook)) {
 						$excelsarake=0;
-					
+		
 						$worksheet->write($excelrivi, $excelsarake, $edluku." ".t("yhteensä"), $format_bold);
-			
+
 						for($iii = 0; $iii < $apu; $iii++) {
 							$excelsarake++;
 						}
-			
+
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntikplnyt), $format_bold);
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntikpled), $format_bold);
@@ -753,12 +762,12 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kateind), $format_bold);
 						$excelsarake++;
-			
+
 						if ($kateprossat != "") {
 							$excelsarake++;
 							$excelsarake++;
 						}
-									
+						
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokatenyt), $format_bold);
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateed), $format_bold);
@@ -782,27 +791,27 @@
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totkatenyt))."</td>";
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totkateed))."</td>";
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateind))."</td>";
-		
+
 				if ($kateprossat != "") {
 					echo "<td class='tumma' align='right'></td>";
 					echo "<td class='tumma' align='right'></td>";
 				}
-		
+
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totnettokatenyt))."</td>";
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totnettokateed))."</td>";
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td></tr>\n";
 
 				echo "</table>";
-		
+
 				if(isset($workbook)) {
 					$excelsarake=0;
-				
+	
 					$worksheet->write($excelrivi, $excelsarake, t("Kaikki yhteensä"), $format_bold);
-		
+
 					for($iii = 0; $iii < $apu; $iii++) {
 						$excelsarake++;
 					}
-		
+
 					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totmyyntikplnyt), $format_bold);
 					$excelsarake++;
 					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totmyyntikpled), $format_bold);
@@ -819,22 +828,22 @@
 					$excelsarake++;
 					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totkateind), $format_bold);
 					$excelsarake++;
-		
+
 					if ($kateprossat != "") {
 						$excelsarake++;
 						$excelsarake++;
 					}
-								
+					
 					$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$totnettokatenyt), $format_bold);
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$totnettokateed), $format_bold);
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$totnettokateind), $format_bold);
 					$excelrivi++;
-				
+	
 					// We need to explicitly close the workbook
 					$workbook->close();
-					
+		
 					echo "<table>";
 					echo "<tr><th>".t("Tallenna tulos").":</th>";
 					echo "<form method='post' action='$PHP_SELF'>";
@@ -844,7 +853,7 @@
 					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 					echo "</table><br>";		
 				}
-		
+
 				if ($osoitetarrat != "" and $tarra_aineisto != '')  {
 					$tarra_aineisto = substr($tarra_aineisto, 0, -1);
 					echo "<br>";
@@ -854,7 +863,6 @@
 				}
 			}
 		}
-
 
 		if ($lopetus == "") {
 			//Käyttöliittymä
@@ -957,48 +965,74 @@
 			echo "</tr>\n";
 
 			echo "<tr>";
-			echo "<th>".t("Syötä tuoteosasto")."</th>";
-			echo "<td><input type='text' name='tuoteosasto' size='10'></td>";
+			echo "<td colspan='3'><table><tr><td valign='top' class='back'>";
 
-			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-						FROM avainsana
-						".avain('join','OSASTO_')."
-						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='OSASTO'
-						ORDER BY avainsana.selite+0";
-			$result = mysql_query($query) or pupe_error($query);
+			// näytetään soveltuvat osastot
+			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
+			$res2  = mysql_query($query) or die($query);
 
-			echo "<td><select name='tuoteosasto2'>";
-			echo "<option value=''>".t("Tuoteosasto")."</option>";
-			echo "<option value='kaikki' $tuoteosastosel>".t("Kaikki")."</option>";
-
-			while ($row = mysql_fetch_array($result)) {
-				if ($tuoteosasto == $row["selite"]) $sel = "selected";
-				else $sel = "";
-				echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
+			if (mysql_num_rows($res2) > 11) {
+				echo "<div style='height:265;overflow:auto;'>";
 			}
 
-			echo "</select></td>";
-			echo "<th>".t("ja/tai tuoteryhmä")."</th>";
-			echo "<td><input type='text' name='tuoteryhma' size='10'></td>";
+			echo "<table>";
+			echo "<tr><th colspan='2'>".t("Valitse tuoteosasto(t)").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
+			
+			while ($rivi = mysql_fetch_array($res2)) {
+				$mul_check = '';
+				if ($mul_osasto!="") {
+					if (in_array($rivi['selite'],$mul_osasto)) {
+						$mul_check = 'CHECKED';
+					}
+				}
 
-			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
-						FROM avainsana
-						".avain('join','TRY_')."
-						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='TRY'
-						ORDER BY avainsana.selite+0";
-			$result = mysql_query($query) or pupe_error($query);
-
-			echo "<td><select name='tuoteryhma2'>";
-			echo "<option value=''>".t("Tuoteryhmä")."</option>";
-			echo "<option value='kaikki' $tuoteryhmasel>".t("Kaikki")."</option>";
-
-			while ($row = mysql_fetch_array($result)) {
-				if ($tuoteryhma == $row["selite"]) $sel = "selected";
-				else $sel = "";
-				echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
+				echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
 			}
 
-			echo "</select></td>";
+			echo "</table>";
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "</div>";
+			}
+			
+			echo "</table>";
+			echo "</td>";
+			
+			echo "<td colspan='3'><table><tr><td valign='top' class='back'>";
+
+			// näytetään soveltuvat tryt
+			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
+			$res2  = mysql_query($query) or die($query);
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "<div style='height:265;overflow:auto;'>";
+			}
+
+			echo "<table>";
+			echo "<tr><th colspan='2'>".t("Valitse tuoterymät(t)").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
+			
+			while ($rivi = mysql_fetch_array($res2)) {
+				$mul_check = '';
+				if ($mul_try!="") {
+					if (in_array($rivi['selite'],$mul_try)) {
+						$mul_check = 'CHECKED';
+					}
+				}
+
+				echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+			}
+
+			echo "</table>";
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "</div>";
+			}
+			
+			echo "</table>";
+			echo "</td>";
+			
 			echo "</tr>\n";
 			echo "</table><br>";
 

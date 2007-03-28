@@ -289,7 +289,7 @@ if (!function_exists('rivi')) {
 		}
 		
 		//hatetaan tuotteen myyntihinta
-		$query = "	SELECT round(if(isnull(hinnasto.hinta) or hinnasto.hinta='', round(tuote.myyntihinta/'$laskurow[vienti_kurssi]',2), hinnasto.hinta) / (1+(if('$yhtiorow[alv_kasittely]'!='',0,if(isnull(avainsana.selitetark_3) or avainsana.selitetark_3='', tuote.alv, avainsana.selitetark_3))/100)),2) myyntihinta, tuote.aleryhma
+		$query = "	SELECT round(if(isnull(hinnasto.hinta) or hinnasto.hinta='', round(tuote.myyntihinta/if('$laskurow[vienti_kurssi]'=0,1,'$laskurow[vienti_kurssi]'),2), hinnasto.hinta) / (1+(if('$yhtiorow[alv_kasittely]'='',0,if(isnull(avainsana.selitetark_3) or avainsana.selitetark_3='', tuote.alv, avainsana.selitetark_3))/100)),2) myyntihinta, tuote.aleryhma
 					FROM tuote
 					LEFT JOIN hinnasto on tuote.yhtio = hinnasto.yhtio and tuote.tuoteno = hinnasto.tuoteno and hinnasto.valkoodi = '$laskurow[valkoodi]'
 					LEFT JOIN avainsana on tuote.yhtio = avainsana.yhtio and avainsana.laji = 'alvulk' and avainsana.selite = tuote.alv and avainsana.selitetark = '$laskurow[maa]' and avainsana.selitetark_2 = '$laskurow[valkoodi]'

@@ -50,7 +50,7 @@
 			if ($debug==1) echo t("Löydettiin maksupositio")." $posrow[tunnus], $posrow[osuus] %, $posrow[maksuehto]<br>";
 
 			if ($posrow["summa"] <= 0 or $posrow["maksuehto"] == 0 or (int) $posrow["tunnus"] == 0) {
-				echo $query." ".t("VIRHE: laskutusposition summa on nolla tai sen alle. Korjaa tämä!")."<br>";
+				echo t("VIRHE: laskutusposition summa on nolla tai sen alle. Korjaa tämä!")."<br>";
 				return 0;
 			}
 
@@ -163,13 +163,6 @@
 
 			if ($debug==1) echo t("Perustin laskun")." $laskurow[nimi] $id<br>";
 
-			$query = "	SELECT nimitys
-						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
-			$tresult = mysql_query($query) or pupe_error($query);
-			$trow = mysql_fetch_array($tresult);
-			$nimitys = $trow["nimitys"];
-
 			//Lasketaan maksusopimuksen arvo verokannoittain jotta voidaan laskuttaa ennakot oikeissa alveissa
 			// ja lisätään ennakkolaskutusrivi laskulle, vain jaksotetut rivit!
 			$query = "	SELECT
@@ -192,15 +185,21 @@
 						GROUP BY lasku.jaksotettu, alv";
 			$sresult = mysql_query($query) or pupe_error($query);
 			$tot = 0;
+			
+			$nimitys 		= $posrow["kuvaus"];
+			$rivikommentti 	= t("Ennakkolasku")." $lahteva_lasku ".t("tilaukselle")." $tunnus ".t("Osuus")." $posrow[osuus]% ";
 
+			if ($posrow["lisatiedot"] != "") {
+				$rivikommentti .= "\n ".$posrow["lisatiedot"];
+			}
+			
 			if(mysql_num_rows($sresult) == 0) {
 				echo "<font class = 'error'>".t("VIRHE: Ennakkolaskulla ei ole yhtään jaksotettua tilausriviä!")." $tunnus</font><br>";
 				echo "<font class = 'message'>".t("Käy tekemässä ennakkolasku manuaalisesti. Ennakkolaskulle perustetun laskun tunnus on")." $id</font><br>";
 				echo "<font class = 'message'>".t("Ennakkolaskutuksen tuotenumero on")." $yhtiorow[ennakkomaksu_tuotenumero]</font><br><br>";
 
-				$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  ('0', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '".t("Ennakkolasku")." $lahteva_lasku ".t("tilaukselle")." $tunnus ".t("Osuus")." $posrow[osuus]%')";
+				$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  ('0', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti')";
 				$addtil = mysql_query($query) or pupe_error($query);
-
 			}
 			else {
 				while($row = mysql_fetch_array($sresult)) {
@@ -208,7 +207,7 @@
 					// $summa on verollinen tai veroton riippuen yhtiön myyntihinnoista
 					$summa = $row["summa"]/$sumrow["jaksotettavaa"] * $posrow["summa"];
 
-					$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values ('$summa', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '".t("Ennakkolasku")." $lahteva_lasku ".t("tilaukselle")." $tunnus ".t("Osuus")." $posrow[osuus]%')";
+					$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values ('$summa', 'N', '1', '1', '$id', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti')";
 					$addtil = mysql_query($query) or pupe_error($query);
 
 					if ($debug==1) echo t("Lisättiin ennakkolaskuun rivi")." $summa $row[alv] otunnus $id<br>";
@@ -290,14 +289,6 @@
 
 			echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." $tunnus<br></font><br>";
 
-			$query = "	SELECT nimitys
-						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
-			$tresult = mysql_query($query) or pupe_error($query);
-			$trow = mysql_fetch_array($tresult);
-			$nimitys = $trow["nimitys"];
-
 			//Lasketaan paljonko ollaan jo laskutettu ja millä verokannoilla
 			$query = "	SELECT round(sum(rivihinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) laskutettu, tilausrivi.alv
 						FROM lasku
@@ -307,9 +298,17 @@
 						GROUP BY alv";
 			$sresult = mysql_query($query) or pupe_error($query);
 
+			$nimitys 		= $posrow["kuvaus"];
+			$rivikommentti 	= t("Ennakkolaskutuksen hyvitys")." $lahteva_lasku. ";
+
+			if ($posrow["lisatiedot"] != "") {
+				$rivikommentti .= "\n ".$posrow["lisatiedot"];
+			}
+
 			while($row = mysql_fetch_array($sresult)) {
+				
 				$query  = "	insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika)
-							values  ('$row[laskutettu]', 'N', '-1', '-1', '$tunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '".t("Ennakkolaskutuksen hyvitys")." $lahteva_lasku', '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
+							values  ('$row[laskutettu]', 'N', '-1', '-1', '$tunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
 				$addtil = mysql_query($query) or pupe_error($query);
 
 				if ($debug==1) echo t("Loppulaskuun lisättiin ennakkolaskun hyvitys")." -$row[laskutettu] alv $row[alv]% otunnus $vimppa<br>";
@@ -369,9 +368,9 @@
 			$query = "	SELECT count(*)-1 as ennakko_kpl
 						FROM maksupositio
 						JOIN maksuehto on maksupositio.yhtio = maksupositio.yhtio and maksupositio.maksuehto = maksuehto.tunnus
-						WHERE maksupositio.yhtio ='$kukarow[yhtio]'
-						and otunnus = '$tunnus'
-						and uusiotunnus = 0
+						WHERE maksupositio.yhtio 	 = '$kukarow[yhtio]'
+						and maksupositio.otunnus 	 = '$tunnus'
+						and maksupositio.uusiotunnus = 0
 						ORDER BY maksupositio.tunnus";
 			$rahres = mysql_query($query) or pupe_error($query);
 			$posrow = mysql_fetch_array($rahres);
@@ -406,14 +405,16 @@
 			$query = "	SELECT
 						lasku.jaksotettu jaksotettu,
 						concat_ws(' ',lasku.nimi, lasku.nimitark) nimi,
-						sum(if(maksupositio.uusiotunnus > 0, 1,0)) laskutettu_kpl,
+						sum(if(maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', 1, 0)) laskutettu_kpl,
+						sum(if(maksupositio.uusiotunnus = 0, 1, 0)) tekematta_kpl,
 						count(*) yhteensa_kpl,
-						sum(if(maksupositio.uusiotunnus = 0, maksupositio.summa,0)) laskuttamatta,
-						sum(if(maksupositio.uusiotunnus > 0, maksupositio.summa,0)) laskutettu,
+						sum(if(maksupositio.uusiotunnus = 0 or (maksupositio.uusiotunnus > 0 and uusiolasku.alatila!='X'), maksupositio.summa,0)) laskuttamatta,
+						sum(if(maksupositio.uusiotunnus > 0 and uusiolasku.tila='L' and uusiolasku.alatila='X', maksupositio.summa, 0)) laskutettu,
 						sum(maksupositio.summa) yhteensa
 						FROM lasku
 						JOIN maksupositio ON maksupositio.yhtio = lasku.yhtio and maksupositio.otunnus = lasku.tunnus
 						JOIN maksuehto ON maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto and maksuehto.jaksotettu != ''
+						LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus=uusiolasku.tunnus
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu > 0
 						GROUP BY jaksotettu, nimi
@@ -492,7 +493,7 @@
 					$tarkrow = mysql_fetch_array($tarkres);
 
 					if($tarkrow["tilaok"] <> $tarkrow["toimituksia"] or $tarkrow["toimittamatta"] > 0) {
-						echo "<td class='back'>Ei valmis</td>";
+						echo "<td class='back'><font class=message'>Ei valmis</font></td>";
 					}
 					else {
 						$msg = t("Oletko varma, että haluat LOPPULASKUTTAA tilauksen")." $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: $posrow[teksti]";
@@ -505,7 +506,6 @@
 								</form>";
 					}
 					echo "</tr>";
-
 				}
 				elseif($row["yhteensa_kpl"] - $row["laskutettu_kpl"] == 0) {
 					// suljetaan projektia
@@ -522,7 +522,7 @@
 					echo "</tr>";
 
 				}
-				else {
+				elseif($row["tekematta_kpl"] > 1) {
 					// muuten tämä on vain ennakkolaskutusta
 					$msg = t("Oletko varma, että haluat tehdä ennakkolaskun tilaukselle").": $row[jaksotettu]\\n\\nOsuus: $posrow[osuus]%\\nSumma: $posrow[summa] $laskurow[valkoodi]\\nMaksuehto: $posrow[teksti]";
 
@@ -545,6 +545,9 @@
 
 
 					echo "</tr>";
+				}
+				else {
+					echo "<td class='back'><font class=message'>Ei valmis</font></td>";
 				}
 			}
 			echo "</table>";

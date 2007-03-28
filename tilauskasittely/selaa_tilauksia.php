@@ -79,7 +79,7 @@
 					ORDER BY luontiaika";
 
 		// tilausnäkymä
-		$query3 = "	SELECT otunnus tunnus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta, ale, erikoisale, tilausrivi.alv,
+		$query3 = "	SELECT otunnus tunnus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, concat(nimitys, if(kommentti!='', concat('<br>* ',kommentti),'')) nimitys, kpl+varattu kpl, tilausrivi.hinta, ale, erikoisale, tilausrivi.alv,
 					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl),2) summa,
 					round(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1),2) arvo
 					FROM tilausrivi use index (yhtio_otunnus)

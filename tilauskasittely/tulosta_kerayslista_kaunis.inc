@@ -364,7 +364,7 @@ if (!function_exists('rivi')) {
 				$pdf->draw_text(430, $kala, $rivipaikkahyllyssa,		 					$firstpage, $p);
 			}
 
-			$pdf->draw_text(480, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$firstpage, $boldi);
+			$pdf->draw_text(480, $kala, ($row["tilkpl"]*1)." ".strtolower($row["yksikko"]), 	$firstpage, $boldi);
 
 			if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
 				$pdf->draw_text(530, $kala, $row['varattu'], 	$firstpage, $p);

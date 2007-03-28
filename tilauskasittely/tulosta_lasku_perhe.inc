@@ -514,6 +514,22 @@ if (!function_exists('loppu')) {
 		}
 		else {
 			// ei factoroida niin normitiedot
+			
+			if ($masrow["pankkinimi1"] != "") {
+				$yhtiorow["pankkinimi1"]	= $masrow["pankkinimi1"];
+				$yhtiorow["pankkitili1"]	= $masrow["pankkitili1"];
+				$yhtiorow["pankkiiban1"]	= $masrow["pankkiiban1"];
+				$yhtiorow["pankkiswift1"]	= $masrow["pankkiswift1"];
+				$yhtiorow["pankkinimi2"]	= $masrow["pankkinimi2"];
+				$yhtiorow["pankkitili2"]	= $masrow["pankkitili2"];
+				$yhtiorow["pankkiiban2"]	= $masrow["pankkiiban2"];
+				$yhtiorow["pankkiswift2"]	= $masrow["pankkiswift2"];
+				$yhtiorow["pankkinimi3"]	= $masrow["pankkinimi3"];
+				$yhtiorow["pankkitili3"]	= $masrow["pankkitili3"];
+				$yhtiorow["pankkiiban3"]	= $masrow["pankkiiban3"];
+				$yhtiorow["pankkiswift3"]	= $masrow["pankkiswift3"];
+			}
+			
 			if ($laskurow["vienti"] != "") {
 				// viennissä tällästä
 				$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),													$firstpage, $pieni);

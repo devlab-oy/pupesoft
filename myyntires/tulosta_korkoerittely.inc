@@ -7,10 +7,10 @@
 		$pdf->enable('template');
 		$tid = $pdf->template->create();
 		$pdf->template->size($tid, 600, 830);
-		
+
 		//Haetaan yhteyshenkilon tiedot
 		$apuqu = "	select *
-					from kuka 
+					from kuka
 					where yhtio='$kukarow[yhtio]' and tunnus='$yhteyshenkilo'";
 		$yres = mysql_query($apuqu) or pupe_error($apuqu);
 		$yrow = mysql_fetch_array($yres);
@@ -42,7 +42,7 @@
 		$pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 771, t("Eräpäivä", $kieli), $firstpage, $pieni);
 
-		
+
 		// Etsitään maksuehto
 		$query = "	SELECT *
 					FROM maksuehto
@@ -51,17 +51,17 @@
 		$xrow = mysql_fetch_array($presult);
 
 		if ($xrow['abs_pvm'] == '0000-00-00') {
-		
+
 			$seurday   = sprintf('%02d', date("j", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
 			$seurmonth = sprintf('%02d', date("n", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
 			$seuryear  = sprintf('%02d', date("Y", mktime(0, 0, 0, date("n"), date("j")+$xrow["rel_pvm"],  date("Y"))));
-			
+
 			$erapvm = $seuryear."-".$seurmonth."-".$seurday;
 		}
 		else {
 			$erapvm = "'$xrow[abs_pvm]'";
 		}
-										
+
 		$pdf->draw_text(310, 761, $erapvm, $firstpage, $norm);
 
 		$pdf->draw_text(430, 771, t("Puhelin", $kieli),	$firstpage, $pieni);
@@ -120,7 +120,7 @@
 	}
 
 
-	function paperi_loppu ($firstpage, $summa) {
+	function paperi_loppu ($firstpage, $summa, $masrow = "") {
 
 		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli;
 
@@ -133,6 +133,21 @@
 		$pdf->draw_text(404, 92,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
 		$pdf->draw_text(464, 92,  $summa,						$firstpage, $norm);
 		$pdf->draw_text(550, 92,  $yhtiorow["valkoodi"],		$firstpage, $norm);
+
+		if ($masrow["pankkinimi1"] != "") {
+			$yhtiorow["pankkinimi1"]	= $masrow["pankkinimi1"];
+			$yhtiorow["pankkitili1"]	= $masrow["pankkitili1"];
+			$yhtiorow["pankkiiban1"]	= $masrow["pankkiiban1"];
+			$yhtiorow["pankkiswift1"]	= $masrow["pankkiswift1"];
+			$yhtiorow["pankkinimi2"]	= $masrow["pankkinimi2"];
+			$yhtiorow["pankkitili2"]	= $masrow["pankkitili2"];
+			$yhtiorow["pankkiiban2"]	= $masrow["pankkiiban2"];
+			$yhtiorow["pankkiswift2"]	= $masrow["pankkiswift2"];
+			$yhtiorow["pankkinimi3"]	= $masrow["pankkinimi3"];
+			$yhtiorow["pankkitili3"]	= $masrow["pankkitili3"];
+			$yhtiorow["pankkiiban3"]	= $masrow["pankkiiban3"];
+			$yhtiorow["pankkiswift3"]	= $masrow["pankkiswift3"];
+		}
 
 		//Pankkiyhteystiedot
 		$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
@@ -198,16 +213,16 @@
 	// aloitellaan laskun teko
 	$xquery='';
 	for ($i=0; $i<sizeof($lasku_tunnus); $i++) {
-		if($i != 0) { 
+		if($i != 0) {
 			$xquery=$xquery . ",";
 		}
-				
+
 		$xquery=$xquery . "$lasku_tunnus[$i]";
 	}
 
 	$query = "	SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm,
 				l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
-				round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma
+				round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto
 				FROM lasku l use index (PRIMARY)
 				join tiliointi t use index (tositerivit_index) on (t.yhtio = l.yhtio and t.tilino = '$yhtiorow[myyntisaamiset]' and t.tapvm > l.erpcm and l.tunnus = t.ltunnus)
 				LEFT JOIN maksuehto me on (me.yhtio=l.yhtio and me.tunnus=l.maksuehto)
@@ -220,19 +235,25 @@
 
 	//otetaan asiakastiedot ekalta laskulta
 	$asiakastiedot = mysql_fetch_array($result);
-	
+
 	$query = "	SELECT *
 				FROM asiakas
 				WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$asiakastiedot[liitostunnus]'";
 	$asiakasresult = mysql_query($query) or pupe_error($query);
 	$asiakastiedot = mysql_fetch_array($asiakasresult);
-	
+
+	$query = "	SELECT *
+				FROM maksuehto
+				WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$asiakastiedot[maksuehto]'";
+	$mehtores = mysql_query($query) or pupe_error($query);
+	$mehtorow = mysql_fetch_array($mehtores);
+
 	//Otetaan tässä asiakkaan kieli talteen
 	$kieli = $asiakastiedot["kieli"];
-	
+
 	//Liitostunnusta tarvitaan tee_korkolasku.inc failissa
 	$liitostunnus  = $asiakastiedot["tunnus"];
-	
+
 	//ja kelataan akuun
 	mysql_data_seek($result,0);
 
@@ -253,7 +274,7 @@
 
 	$loppusumma = sprintf('%.2f', $summa);
 
-	paperi_loppu($firstpage,$loppusumma);
+	paperi_loppu($firstpage,$loppusumma, $mehtorow);
 
 	//keksitään uudelle failille joku varmasti uniikki nimi:
 	list($usec, $sec) = explode(' ', microtime());
@@ -270,15 +291,15 @@
 				from kirjoittimet
 				where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
 	$kires = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($kires) == 1) {
 		$kirow = mysql_fetch_array($kires);
 		$line  = exec("$kirow[komento] $pdffilenimi");
-		
+
 		//system("rm -f $pdffilenimi");
 		unset($pdffilenimi);
 	}
-	
+
 	unset($pdf);
 	unset($firstpage);
 ?>

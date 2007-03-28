@@ -7,7 +7,7 @@ if (!function_exists('pupevoice_otsik')) {
 		$fstat = fstat($tootxml);
 
 		if ($fstat["size"] == 0) {
-			//tehd√§√§n verkkolasku oliot
+			//tehd‰‰n verkkolasku oliot
 			fputs($tootxml, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
 			fputs($tootxml, "<Pupevoice Version=\"0.99\">\n");
 		}
@@ -38,21 +38,29 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("SellerPhoneNumber", 					$yhtiorow['puhelin'], 		$tootxml);
 		xml_add("SellerFaxNumber", 						$yhtiorow['fax'], 			$tootxml);
 
-		if ($masrow["factoring"] == "") {
-			xml_add("SellerAccountName1", 				$yhtiorow['pankkinimi1'],	$tootxml);
-			xml_add("SellerAccountID1", 				$yhtiorow['pankkitili1'],	$tootxml);
-			xml_add("SellerAccountName2", 				$yhtiorow['pankkinimi2'],	$tootxml);
-			xml_add("SellerAccountID2", 				$yhtiorow['pankkitili2'],	$tootxml);
-			xml_add("SellerAccountName3", 				$yhtiorow['pankkinimi3'],	$tootxml);
-			xml_add("SellerAccountID3", 				$yhtiorow['pankkitili3'],	$tootxml);
-		}
-		else {
+		if ($masrow["factoring"] != "") {
 			xml_add("SellerAccountName1", 				$frow['pankkinimi1'],		$tootxml);
 			xml_add("SellerAccountID1", 				$frow['pankkitili1'],		$tootxml);
 			xml_add("SellerAccountName2", 				$frow['pankkinimi2'],		$tootxml);
 			xml_add("SellerAccountID2", 				$frow['pankkitili2'],		$tootxml);
 			xml_add("SellerAccountName3", 				"",							$tootxml);
 			xml_add("SellerAccountID3", 				"",							$tootxml);
+		}
+		elseif ($masrow["pankkinimi1"] != "") {
+			xml_add("SellerAccountName1", 				$masrow['pankkinimi1'],		$tootxml);
+			xml_add("SellerAccountID1", 				$masrow['pankkitili1'],		$tootxml);
+			xml_add("SellerAccountName2", 				$masrow['pankkinimi2'],		$tootxml);
+			xml_add("SellerAccountID2", 				$masrow['pankkitili2'],		$tootxml);
+			xml_add("SellerAccountName3", 				$masrow['pankkinimi3'],		$tootxml);
+			xml_add("SellerAccountID3", 				$masrow['pankkitili3'],		$tootxml);
+		}
+		else {
+			xml_add("SellerAccountName1", 				$yhtiorow['pankkinimi1'],	$tootxml);
+			xml_add("SellerAccountID1", 				$yhtiorow['pankkitili1'],	$tootxml);
+			xml_add("SellerAccountName2", 				$yhtiorow['pankkinimi2'],	$tootxml);
+			xml_add("SellerAccountID2", 				$yhtiorow['pankkitili2'],	$tootxml);
+			xml_add("SellerAccountName3", 				$yhtiorow['pankkinimi3'],	$tootxml);
+			xml_add("SellerAccountID3", 				$yhtiorow['pankkitili3'],	$tootxml);
 		}
 
 		xml_add("SellerVatRegistrationText", 			t("Alv.Rek"), 		$tootxml);
@@ -74,7 +82,7 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("InvoiceCurrency",						$yhtiorow['valkoodi'],							$tootxml);
 		xml_add("InvoicePaymentReference",				$lasrow['viite'], 								$tootxml);
 		xml_add("InvoiceDate",							vlas_dateconv($lasrow['tapvm']), 				$tootxml);
-		xml_add("OrderIdentifier",						'', 											$tootxml); //Ostajan tilausnumero, eii oo viel√§ olemassa
+		xml_add("OrderIdentifier",						'', 											$tootxml); //Ostajan tilausnumero, eii oo viel‰ olemassa
 		xml_add("DeliveredPartyName",					"$lasrow[toim_nimi] $lasrow[toim_nimitark]",	$tootxml);
 		xml_add("DeliveredPartyStreetName",				$lasrow['toim_osoite'], 						$tootxml);
 		xml_add("DeliveredPartyPostCode",				$lasrow['toim_postino'], 						$tootxml);
@@ -115,17 +123,17 @@ if (!function_exists('pupevoice_rivi')) {
 	function pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat) {
 	
 		fputs($tootxml, "<Row>\n");
-		xml_add("OrderIdentifier",					$tilrow['otunnus'], 				$tootxml); // t√§m√§ on tilauksen numero meill√§, ei kuulu standardiin mutta se on pakko lis√§t√§
+		xml_add("OrderIdentifier",					$tilrow['otunnus'], 				$tootxml); // t‰m‰ on tilauksen numero meill‰, ei kuulu standardiin mutta se on pakko lis‰t‰
 		xml_add("ArticleIdentifier",				$tilrow['tuoteno'], 				$tootxml);
 		xml_add("ArticleName",						$tilrow['nimitys'], 				$tootxml);
 		xml_add("DeliveredQuantity",				$tilrow['kpl'], 					$tootxml);
 		xml_add("DeliveredQuantityUnitCode",		$tilrow['yksikko'],					$tootxml);
 		xml_add("DeliveryDate",						vlas_dateconv($tilrow['toimaika']),	$tootxml);
 		xml_add("UnitPrice",						$tilrow['hinta'], 					$tootxml);
-		xml_add("RowIdentifier",					$tilrow['tilaajanrivinro'], 		$tootxml); // t√§nne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
+		xml_add("RowIdentifier",					$tilrow['tilaajanrivinro'], 		$tootxml); // t‰nne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
 		xml_add("RowDiscountPercent",				$tilrow['ale'], 					$tootxml);
 		xml_add("RowVatRatePercent",				$tilrow['alv'], 					$tootxml);
-		xml_add("RowVatAmount",						$vatamount, 						$tootxml); // veron m√§√§r√§
+		xml_add("RowVatAmount",						$vatamount, 						$tootxml); // veron m‰‰r‰
 		xml_add("RowTotalVatExcludedAmount",		$tilrow['rivihinta'],		 		$tootxml); // veroton rivihinta
 		xml_add("RowTotalVatIncludedAmount",		$totalvat, 							$tootxml); // verollinen rivihinta
 		xml_add("RowFreeText",						$tilrow['kommentti'],		 		$tootxml);

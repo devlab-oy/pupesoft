@@ -257,7 +257,7 @@
 
 
 		// lock tables
-		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ";
+		$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ, pankkiyhteystiedot READ";
 		$locre = mysql_query($query) or pupe_error($query);
 
 		//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -774,7 +774,9 @@
 				}
 
 				// haetaan maksuehdon tiedot
-				$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$lasrow[maksuehto]'";
+				$query  = "	select * from maksuehto
+							left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+							where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) == 0) {
@@ -863,7 +865,7 @@
 						elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi);
 					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
-						finvoice_otsik($tootfinvoice, $lasrow, $silent, $tulos_ulos);
+						finvoice_otsik($tootfinvoice, $lasrow, $masrow, $silent, $tulos_ulos);
 					}
 					else {
 						pupevoice_otsik($tootxml, $lasrow, $laskun_kieli, $frow, $masrow, $myyrow, $tyyppi);
@@ -935,7 +937,7 @@
 						$edilask++;
 					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
-						finvoice_lasku_loppu($tootfinvoice, $lasrow);
+						finvoice_lasku_loppu($tootfinvoice, $lasrow, $masrow);
 					}
 					else {
 						pupevoice_lasku_loppu($tootxml);
@@ -1089,7 +1091,9 @@
 					$otunnus = $laskurow["tunnus"];
 
 					// haetaan maksuehdon tiedot
-					$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+					$query  = "	select * from maksuehto
+								left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+								where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) == 0) {

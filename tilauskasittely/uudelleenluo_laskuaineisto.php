@@ -4,22 +4,22 @@
 		$lataa_tiedosto = 1;
 		$file = file_get_contents($_POST["file"]);
 		unset($_POST["file"]);
-			
-		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') { 
+
+		if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
 			$_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 		}
 	}
-		
+
 	require("inc/parametrit.inc");
-	
+
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		echo "$file";
 	}
 	else {
-		
-		
+
+
 		echo "<font class='head'>".t("Luo laskutusaineisto")."</font><hr>\n";
-		
+
 		if (isset($tee) and $tee == "GENEROI" and $laskunumerot!='') {
 			if (!function_exists("xml_add")) {
 				function xml_add ($joukko, $tieto, $handle) {
@@ -116,15 +116,15 @@
 			require("verkkolasku_elmaedi.inc");
 			require("verkkolasku_finvoice.inc");
 			require("verkkolasku_pupevoice.inc");
-	
+
 			if (!isset($kieli)) {
 				$kieli = "";
 			}
-	
+
 			//Timestamppi EDI-failiin alkuu ja loppuun
 			$timestamppi=gmdate("YmdHis");
-	
-			
+
+
 			//Hetaan laskut jotka laitetaan aineistoon
 			$query = "	select *
 						from lasku
@@ -135,14 +135,16 @@
 			$res   = mysql_query($query) or pupe_error($query);
 
 			$lkm = count(explode(',', $laskunumerot));
-			
+
 			echo "<br><font class='message'>".t("Syˆtit")." $lkm ".t("laskua").".</font><br>";
 			echo "<font class='message'>".t("Aineistoon lis‰t‰‰n")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
-			
+
 			while ($lasrow = mysql_fetch_array($res)) {
-		
+
 				// haetaan maksuehdon tiedot
-				$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$lasrow[maksuehto]'";
+				$query  = "	select * from maksuehto
+							left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+							where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$masrow = mysql_fetch_array($result);
 
@@ -193,13 +195,13 @@
 					if (trim($lasrow['sisviesti1']) != '') {
 						$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $lasrow['sisviesti1']);
 					}
-		
+
 					//Kirjoitetaan failiin laskun otsikkotiedot
 					if ($lasrow["chn"] == "111") {
 						elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi);
-					}					
+					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
-						finvoice_otsik($tootfinvoice, $lasrow);
+						finvoice_otsik($tootfinvoice, $lasrow, $masrow);
 					}
 					else {
 						pupevoice_otsik($tootxml, $lasrow, $kieli, $frow, $masrow, $myyrow, $tyyppi);
@@ -209,7 +211,7 @@
 					// Tarvitaan rivien eri verokannat
 					$query = "	select alv, round(sum(rivihinta),2), round(sum(alv/100*rivihinta),2)
 								from tilausrivi
-								where yhtio='$kukarow[yhtio]' and uusiotunnus='$lasrow[tunnus]' 
+								where yhtio='$kukarow[yhtio]' and uusiotunnus='$lasrow[tunnus]'
 								group by alv";
 					$alvres = mysql_query($query) or pupe_error($query);
 
@@ -247,10 +249,10 @@
 					while ($tilrow = mysql_fetch_array($tilres)) {
 						$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);
 						$totalvat  = round($tilrow['rivihinta']+$vatamount, 2);
-			
+
 						$tilrow['kommentti']	= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+():%]", " ", $tilrow['kommentti']);
 						$tilrow['nimitys']		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+():%]", " ", $tilrow['nimitys']);
-			
+
 						if ($lasrow["chn"] == "111") {
 							elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 						}
@@ -266,18 +268,18 @@
 					//Lopetetaan lasku
 					if ($lasrow["chn"] == "111") {
 						elmaedi_lasku_loppu($tootedi, $lasrow);
-			
+
 						$edilask++;
 					}
 					elseif($yhtiorow["verkkolasku_lah"] != "") {
-						finvoice_lasku_loppu($tootfinvoice, $lasrow);
+						finvoice_lasku_loppu($tootfinvoice, $lasrow, $masrow);
 					}
 					else {
 						pupevoice_lasku_loppu($tootxml);
 					}
 				}
 			}
-	
+
 			//Aineistojen lopput‰git
 			elmaedi_aineisto_loppu($tootedi, $timestamppi);
 			pupevoice_aineisto_loppu($tootxml);
@@ -301,7 +303,7 @@
 
 				// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
 				echo "<pre>ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile</pre>";
-			
+
 				echo "<table>";
 				echo "<tr><th>".t("Tallenna pupevoice-aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
@@ -311,8 +313,8 @@
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";
 			}
-	
-	
+
+
 			if(filesize($nimifinvoice) == 0) {
 				unlink($nimifinvoice);
 			}
@@ -323,10 +325,10 @@
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='".str_replace('../dataout/', '', $nimifinvoice)."'>";
 				echo "<input type='hidden' name='file' value='$nimifinvoice'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";	
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";
 			}
-	
+
 			if(filesize($nimiedi) == 0) {
 				unlink($nimiedi);
 			}
@@ -349,7 +351,7 @@
 			echo "<input type='submit' value='Luo aineisto'>";
 			echo "</form>";
 		}
-	
-		require("../inc/footer.inc");	
+
+		require("../inc/footer.inc");
 	}
 ?>

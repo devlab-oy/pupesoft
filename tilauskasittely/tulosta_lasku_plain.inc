@@ -236,12 +236,12 @@ if (!function_exists('rivi')) {
 			$kala = 540;
 			$lask = 1;
 		}
-		
+
 		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
 			$laji = 'nimitys_'.strtolower($kieli);
 			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
 			$nimresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($nimresult)>0) {
 				$nimrow=mysql_fetch_array($nimresult);
 				$row['nimitys']=$nimrow['selite'];
@@ -312,6 +312,22 @@ if (!function_exists('loppu')) {
         	$pdf->draw_text(404, 72, $yhtiorow["factoring_pankkinimi3"]." ".$yhtiorow["factoring_pankkitili3"],	$firstpage, $norm);
 		}
 		else {
+
+			if ($masrow["pankkinimi1"] != "") {
+				$yhtiorow["pankkinimi1"]	= $masrow["pankkinimi1"];
+				$yhtiorow["pankkitili1"]	= $masrow["pankkitili1"];
+				$yhtiorow["pankkiiban1"]	= $masrow["pankkiiban1"];
+				$yhtiorow["pankkiswift1"]	= $masrow["pankkiswift1"];
+				$yhtiorow["pankkinimi2"]	= $masrow["pankkinimi2"];
+				$yhtiorow["pankkitili2"]	= $masrow["pankkitili2"];
+				$yhtiorow["pankkiiban2"]	= $masrow["pankkiiban2"];
+				$yhtiorow["pankkiswift2"]	= $masrow["pankkiswift2"];
+				$yhtiorow["pankkinimi3"]	= $masrow["pankkinimi3"];
+				$yhtiorow["pankkitili3"]	= $masrow["pankkitili3"];
+				$yhtiorow["pankkiiban3"]	= $masrow["pankkiiban3"];
+				$yhtiorow["pankkiswift3"]	= $masrow["pankkiswift3"];
+			}
+
 		    $pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
         	$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$firstpage, $norm);
         	$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"],	$firstpage, $norm);

@@ -124,7 +124,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 750, t("Maksuehto", $kieli), $firstpage, $pieni);
 		$pdf->draw_text(310, 740, $maksuehto, $firstpage, $norm);
 		$pdf->draw_text(430, 750, t("Kassa-alennus", $kieli)." ".$laskurow["valkoodi"], $firstpage, $pieni);
-		
+
 		if ($laskurow["kasumma"] != 0.00) {
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 				$pdf->draw_text(430, 740, $laskurow["kasumma_valuutassa"], $firstpage, $norm);
@@ -256,7 +256,7 @@ if (!function_exists('rivi')) {
 			$laji = 'nimitys_'.strtolower($kieli);
 			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
 			$nimresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($nimresult)>0) {
 				$nimrow=mysql_fetch_array($nimresult);
 				$row['nimitys']=$nimrow['selite'];
@@ -279,7 +279,7 @@ if (!function_exists('rivi')) {
 		else {
 			$pdf->draw_text(350, $kala, $row["hinta"], 								$firstpage, $norm);
 		}
-		
+
 		//Alennus
 		$pdf->draw_text(410, $kala, sprintf('%.2f', $row["ale"]),					$firstpage, $norm);
 
@@ -290,12 +290,12 @@ if (!function_exists('rivi')) {
 
 			if ($yhtiorow["alv_kasittely"] == '') {
 				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
-			}			
+			}
 		}
-		
+
 		//Rivihinta
 		$pdf->draw_text(470, $kala, sprintf('%.2f', $row["rivihinta"]), 			$firstpage, $norm);
-		
+
 		//Arvonlisävero
 		if ($row["alv"] >= 500) {
 			$pdf->draw_text(530, $kala, t("M.V."),	 								$firstpage, $norm);
@@ -319,28 +319,28 @@ if (!function_exists('rivi')) {
 		if ($row["alv"] < 500) {
 			$pdf->draw_text(470, $kala, sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100))),	$firstpage, $pieni);
 		}
-		
+
 		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
 		if (strlen($row["kommentti"]) >= 140) {
 
 			$row["kommentti"] = str_replace(' ' ,' ##', $row["kommentti"]);
 			$row["kommentti"] = str_replace('.' ,'.##', $row["kommentti"]);
 			$row["kommentti"] = str_replace(',' ,',##', $row["kommentti"]);
-			
+
 			$sanat = explode('##', $row["kommentti"]);
-			
+
 			$lauseet = array();
 			$ind = 0;
 			foreach($sanat as $sana) {
 				if (strlen($lauseet[$ind]) >= 100) {
 					$lauseet[$ind] .= "\n";
-					$ind++;	
+					$ind++;
 				}
 				$lauseet[$ind] .= $sana;
 			}
-			
+
 			$row["kommentti"] = "";
-			
+
 			foreach($lauseet as $lause) {
 				$row["kommentti"] .= $lause;
 			}
@@ -393,9 +393,9 @@ if (!function_exists('rivi')) {
 		if ($pohja < $kala) {
 			$kala = $pohja;
 		}
-		
+
 		$kala = $kala - 15;
-	
+
 		$arvo	+= $row["rivihinta"];
 		$summa 	+= sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100)));
 	}
@@ -435,7 +435,7 @@ if (!function_exists('loppu')) {
 			if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
 		        $summa = round($summa,0);
 			}
-			
+
 			$pdf->draw_text(464, 92+$vientikala,  sprintf('%.2f', $summa),			$firstpage, $boldi);
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -464,16 +464,16 @@ if (!function_exists('loppu')) {
 				// jos on vienti
 				$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),						$firstpage, $pieni);
 				$pdf->draw_text(30,  92, $frow["pankkinimi1"]."  ".$frow["pankkitili1"],	$firstpage, $norm);
-				
+
 				if($frow["pankkiiban1"]) {
 					$pdf->draw_text(217, 92, "IBAN: " .$frow["pankkiiban1"],				$firstpage, $norm);
 				}
 				if($frow["pankkiswift1"]) {
 					$pdf->draw_text(404, 92, "SWIFT: ".$frow["pankkiswift1"],				$firstpage, $norm);
 				}
-			
+
 				$pdf->draw_text(30,  82, $frow["pankkinimi2"]."  ".$frow["pankkitili2"],	$firstpage, $norm);
-				
+
 				if($frow["pankkiiban2"]) {
 					$pdf->draw_text(217, 82, "IBAN: " .$frow["pankkiiban2"],					$firstpage, $norm);
 				}
@@ -489,22 +489,38 @@ if (!function_exists('loppu')) {
 			}
 		}
 		else {
+
+			if ($masrow["pankkinimi1"] != "") {
+				$yhtiorow["pankkinimi1"]	= $masrow["pankkinimi1"];
+				$yhtiorow["pankkitili1"]	= $masrow["pankkitili1"];
+				$yhtiorow["pankkiiban1"]	= $masrow["pankkiiban1"];
+				$yhtiorow["pankkiswift1"]	= $masrow["pankkiswift1"];
+				$yhtiorow["pankkinimi2"]	= $masrow["pankkinimi2"];
+				$yhtiorow["pankkitili2"]	= $masrow["pankkitili2"];
+				$yhtiorow["pankkiiban2"]	= $masrow["pankkiiban2"];
+				$yhtiorow["pankkiswift2"]	= $masrow["pankkiswift2"];
+				$yhtiorow["pankkinimi3"]	= $masrow["pankkinimi3"];
+				$yhtiorow["pankkitili3"]	= $masrow["pankkitili3"];
+				$yhtiorow["pankkiiban3"]	= $masrow["pankkiiban3"];
+				$yhtiorow["pankkiswift3"]	= $masrow["pankkiswift3"];
+			}
+
 			// ei factoroida niin normitiedot
 			if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maakoodi"])) {
 				// viennissä tällästä
 				$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),													$firstpage, $pieni);
-				
+
 				$pdf->draw_text(30,  92, $yhtiorow["pankkinimi1"]."  ".$yhtiorow["pankkitili1"],						$firstpage, $norm);
-				
+
 				if($yhtiorow["pankkiiban1"]) {
 					$pdf->draw_text(217, 92, "IBAN: ".$yhtiorow["pankkiiban1"],											$firstpage, $norm);
 				}
 				if($yhtiorow["pankkiswift1"]) {
 					$pdf->draw_text(404, 92, "SWIFT: ".$yhtiorow["pankkiswift1"],										$firstpage, $norm);
 				}
-				
+
 				$pdf->draw_text(30,  82, $yhtiorow["pankkinimi2"]."  ".$yhtiorow["pankkitili2"],						$firstpage, $norm);
-				
+
 				if($yhtiorow["pankkiiban2"]) {
 					$pdf->draw_text(217, 82, "IBAN: ".$yhtiorow["pankkiiban2"],											$firstpage, $norm);
 				}
@@ -513,7 +529,7 @@ if (!function_exists('loppu')) {
 				}
 
 				$pdf->draw_text(30,  72, $yhtiorow["pankkinimi3"]."  ".$yhtiorow["pankkitili3"],						$firstpage, $norm);
-				
+
 				if($yhtiorow["pankkiiban3"]) {
 					$pdf->draw_text(217, 72, "IBAN: ".$yhtiorow["pankkiiban3"],											$firstpage, $norm);
 				}
@@ -672,10 +688,10 @@ if (!function_exists('alvierittely')) {
 
 		$pdf->draw_text(360, $kala, t("Lasku Yhteensä", $kieli).":",		$firstpage, $norm);
 
-		if ($toim == 'PROFORMA') {		
+		if ($toim == 'PROFORMA') {
 			$pdf->draw_text(470, $kala, sprintf('%.2f', $summa),			$firstpage, $boldi);
 		}
-		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {		
+		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$pdf->draw_text(470, $kala, $laskurow["summa_valuutassa"],		$firstpage, $boldi);
 		}
 		else {

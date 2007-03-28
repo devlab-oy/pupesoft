@@ -920,7 +920,9 @@
 				$otunnus = $laskurow["tunnus"];
 
 				// haetaan maksuehdon tiedot
-				$query  = "select * from maksuehto where tunnus='$laskurow[maksuehto]'";
+				$query  = "	select * from maksuehto 
+							left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+							where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) == 0) {

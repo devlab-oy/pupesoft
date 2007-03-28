@@ -267,6 +267,40 @@ if (mysql_error() == "") {
 	}
 }
 
+//	Haetaan kaikki varastot ja luodaan kysely paljonko ko. varastoon on tilattu tavaraa..
+$varastolisa = "";
+if($valitut["OSTOTVARASTOITTAIN"] != "") {
+		
+	$query = "	SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]'";
+	$vres = mysql_query($query) or pupe_error($query);
+	$abuArray=array();
+	while($vrow = mysql_fetch_array($vres)) {
+		$varastolisa .= ", sum(if(tyyppi='O' and 
+							concat(rpad(upper('$vrow[alkuhyllyalue]'),  5, '0'),lpad(upper('$vrow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) and
+							concat(rpad(upper('$vrow[loppuhyllyalue]'), 5, '0'),lpad(upper('$vrow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+						, varattu, 0)) tilattu_$vrow[tunnus] ";
+		$sarakkeet["SARAKE65#".$vrow["tunnus"]] = t("tilattu kpl - $vrow[nimitys]")."\t";
+		$abuArray["SARAKE65#".$vrow["tunnus"]] = "SARAKE65#".$vrow["tunnus"];
+	}
+
+	// Liitetään oletus jotta summat voisi täsmätä..
+	$varastolisa .= ", sum(if(tyyppi='O' and hyllyalue = '' , varattu, 0)) tilattu_oletus ";
+	$sarakkeet["SARAKE65#oletus"] = t("tilattu kpl - varastoa ei annettu")."\t";	
+	$abuArray["SARAKE65#oletus"] = "SARAKE65#oletus";	
+	
+	//	karseeta haetaan offset valitut arrayksi jotta osataan siirtää nämä tiedot oikeaan paikkaan..
+	$i = 0;
+	foreach($valitut as $key => $value) {
+		if(in_array($key, array("SARAKE56","SARAKE57","SARAKE58","SARAKE59","SARAKE60","SARAKE61","SARAKE62","SARAKE63"))) {
+			$offset = $i;
+			echo "löydettiin offset ($offset)<br>";
+			break;
+		}
+		$i++;
+	}
+	array_splice($valitut,$offset,0,$abuArray);
+}
+
 $sarakkeet["SARAKE56"] = t("Korvaavat Tuoteno")."\t";
 $sarakkeet["SARAKE57"] = t("Korvaavat Saldo")."\t";
 $sarakkeet["SARAKE58"] = t("Korvaavat Ennpois")."\t";
@@ -571,6 +605,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 	if ($valitut["poistetut"] == '' and $valitut["poistuvat"] != '') {
 		echo "<font class='message'>".t("Vain aktiiviset tuotteet, poistetut näytetään").".<br>";
 	}
+
+	if ($valitut["OSTOTVARASTOITTAIN"] != '') {
+		echo "<font class='message'>".t("Tilatut eritellään varastoittain").".<br>";
+	}
 	
 	if ($valitut["VAINUUDETTUOTTEET"] != '') {
 		echo "<font class='message'>".t("Listaa vain 12kk sisällä perustetut tuotteet").".<br>";
@@ -735,11 +773,12 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 		$result   = mysql_query($query) or pupe_error($query);
 		$kulutrow = mysql_fetch_array($result);
 
-		//tilauksessa, ennakkopoistot ja jt
+		//tilauksessa, ennakkopoistot ja jt	Huom! varastolisa määritelty jo aiemmin! 
 		$query = "	SELECT
 					sum(if(tyyppi='O', varattu, 0)) tilattu,
 					sum(if(tyyppi='L' or tyyppi='V', varattu, 0)) ennpois,
 					sum(if(tyyppi='L' or tyyppi='G', jt, 0)) jt
+					$varastolisa
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 					WHERE yhtio = '$row[yhtio]'
  					and tyyppi in ('L','V','O','G')
@@ -1055,6 +1094,15 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 			$apurivi .= $kasrow['kpl']."\t";
 		}
 
+		//	Liitetäänkö myös tilauttu by varasto
+		if(is_resource($vres)) {
+			mysql_data_seek($vres, 0); 
+			while($vrow = mysql_fetch_array($vres)) {
+				$apurivi .= str_replace(".",",",$ennp["tilattu_".$vrow["tunnus"]])."\t";
+			}
+			$apurivi .= str_replace(".",",",$ennp["tilattu_oletus"])."\t";
+		}
+
 		//korvaavat tuotteet
 		$query  = "	SELECT id
 					FROM korvaavat
@@ -1208,7 +1256,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
 	$content .= "--$bound\n";
 
-	$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Halytysraportti osasto").": $osasto ".t("tuoteryhma").": $tuoryh", $content, $header);
+	$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Halytysraportti osasto").": $osasto ".t("tuoteryhma").": $tuoryh", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui!")." $yhtiorow[postittaja_email] --> $kukarow[eposti]<br>";
 	else echo " $kukarow[eposti].<br>";
@@ -1764,6 +1812,23 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 	}
 
 	echo "<tr><th>".t("Näytä vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='valitut[EHDOTETTAVAT]' value='EHDOTETTAVAT' $chk></td></tr>";
+
+
+	//Näytetäänkö ostot varastoittain
+	$query = "	SELECT selitetark
+				FROM avainsana
+				WHERE yhtio = '$kukarow[yhtio]'
+				and laji = 'HALYRAP'
+				and selite	= '$rappari'
+				and selitetark = 'OSTOTVARASTOITTAIN'";
+	$sresult = mysql_query($query) or pupe_error($query);
+	$srow = mysql_fetch_array($sresult);
+
+	$chk = "";
+	if (($srow["selitetark"] == "OSTOTVARASTOITTAIN" and $tee == "JATKA") or $valitut["OSTOTVARASTOITTAIN"] != '') {
+		$chk = "CHECKED";
+	}
+	echo "<tr><th>".t("Näytä tilatut varastoittain")."</th><td colspan='3'><input type='checkbox' name='valitut[OSTOTVARASTOITTAIN]' $chk></td></tr>";
 
 	if ($abcrajaus != "") {
 

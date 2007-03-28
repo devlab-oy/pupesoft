@@ -550,11 +550,29 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$headerivi .= "$valittuyhtio kulu edkpl4\t";
 			$tuoterivi .= str_replace(".",",",$kulutrow['EDkpl4'])."\t";
 */
+
+			//	Haetaan kaikki varastot ja luodaan kysely paljonko ko. varastoon on tilattu tavaraa..
+			$varastolisa = "";
+			if($ostotVarastoittain != "") {
+				$query = "	SELECT * from varastopaikat where yhtio = '$kukarow[yhtio]'";
+				$vres = mysql_query($query) or pupe_error($query);
+
+				while($vrow = mysql_fetch_array($vres)) {
+					$varastolisa .= ", sum(if(tyyppi='O' and 
+										concat(rpad(upper('$vrow[alkuhyllyalue]'),  5, '0'),lpad(upper('$vrow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) and
+										concat(rpad(upper('$vrow[loppuhyllyalue]'), 5, '0'),lpad(upper('$vrow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+									, varattu, 0)) tilattu_$vrow[tunnus] ";
+				}
+				// Liitetään oletus jotta summat voisi täsmätä..
+				$varastolisa .= ", sum(if(tyyppi='O' and hyllyalue = '' , varattu, 0)) tilattu_oletus ";
+			}
+			
 			//tilauksessa, ennakkopoistot ja jt
 			$query = "	SELECT tilausrivi.yhtio,
 						sum(if(tyyppi='O', varattu, 0)) tilattu,
 						sum(if(tyyppi='L' or tyyppi='V', varattu, 0)) ennpois,
 						sum(if(tyyppi='L' or tyyppi='G', jt, 0)) jt
+						$varastolisa
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
 						JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and konserniyhtio = '')
@@ -575,7 +593,19 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$tuoterivi .= str_replace(".",",",$ennp['ennpois'])."\t";
 			$headerivi .= "$valittuyhtio jt kpl\t";
 			$tuoterivi .= str_replace(".",",",$ennp['jt'])."\t";
-
+			
+			//	Liitetäänkö myös tilauttu by varasto
+			if(is_resource($vres)) {
+				mysql_data_seek($vres, 0); 
+				while($vrow = mysql_fetch_array($vres)) {
+					$headerivi .= "$valittuyhtio tilattu kpl - $vrow[nimitys]\t";
+					$tuoterivi .= str_replace(".",",",$ennp["tilattu_".$vrow["tunnus"]])."\t";
+				}
+				
+				$headerivi .= "$valittuyhtio tilattu kpl - varastoa ei määritetty\t";
+				$tuoterivi .= str_replace(".",",",$ennp['tilattu_oletus'])."\t";				
+			}
+			
 			if ($varastot_maittain == "KYLLA") {
 
 				foreach ($valitutmaat as $maarivi) {
@@ -909,6 +939,10 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	$chk = "";
 	if ($ehdotettavat != "") $chk = "checked";
 	echo "<tr><th>".t("Näytä vain ostettavaksi ehdotettavat rivit")."</th><td colspan='3'><input type='checkbox' name='ehdotettavat' $chk></td></tr>";
+
+	$chk = "";
+	if ($ostotVarastoittain != "") $chk = "checked";
+	echo "<tr><th>".t("Näytä tilatut varastoittain")."</th><td colspan='3'><input type='checkbox' name='ostotVarastoittain' $chk></td></tr>";
 
 	if ($abcrajaus != "") {
 		echo "<tr><td class='back'><br></td></tr>";

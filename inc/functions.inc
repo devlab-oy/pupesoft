@@ -389,7 +389,7 @@ if (!function_exists("saldo_myytavissa")) {
 			}
 
 			// Katotaan halutaanko saldo vaan joltain tietyltä varasopaikalta, silloinkin unohdetaan edellä annettu tyyppi kokonaan
-			if ($hyllyalue != "" and $hyllynro != "") {
+			if ($hyllyalue != "") {
 				$valinta1 = "";
 				$valinta2 = " 	and tuotepaikat.hyllyalue = '$hyllyalue'
 								and tuotepaikat.hyllynro  = '$hyllynro'

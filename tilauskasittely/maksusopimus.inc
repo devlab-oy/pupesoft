@@ -77,6 +77,18 @@
 		$summa = str_replace(",", ".", $summa);
 		$osuus = str_replace(",", ".", $osuus);
 		
+		
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$tuoterow = mysql_fetch_array($result);
+		
+		if ($summa != 0 and $yhtiorow["alv_kasittely"] != "" and $kukarow["alv_kasittely"] == "A" and $tuoterow["alv"] != 0) {
+			$summa = sprintf('%.2f', $summa / (1+$tuoterow["alv"]/100));
+		}
+		
 		if($yhtiorow["alv_kasittely"] == '') {
 			$laskunsumma = $rivrow["jaksotettavaa_verolli"];
 		}
@@ -204,14 +216,12 @@
 		$rivrow = mysql_fetch_array($result);
 
 		
-		if($yhtiorow["alv_kasittely"] == '') {
-			$jaksotettavaa 	= $rivrow["jaksotettavaa_verolli"];
-			$loput 			= $rivrow["loput_verolli"];
-		}
-		else {
-			$jaksotettavaa 	= $rivrow["jaksotettavaa_veroton"];
-			$loput 			= $rivrow["loput_veroton"];
-		}
+		$jaksotettavaa_verolli 	= $rivrow["jaksotettavaa_verolli"];
+		$loput_verolli 			= $rivrow["loput_verolli"];
+		
+		$jaksotettavaa_veroton 	= $rivrow["jaksotettavaa_veroton"];
+		$loput_veroton 			= $rivrow["loput_veroton"];
+		
 		
 		
 		// Haetaan kaikki tämän tilauksen laskutuspositiot (HUOM! Positioiden summ on veroton tai verollinen riippuen yhtiön myyntihinnoista)
@@ -299,9 +309,15 @@
 
 					echo "<td><input type='text' size='30' name='lisatiedot' value='$row[lisatiedot]'></td>";
 					
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$yhtiorow[ennakkomaksu_tuotenumero]'";
+					$tuoteresult = mysql_query($query) or pupe_error($query);
+					$tuoterow = mysql_fetch_array($tuoteresult);
 					
-					if($yhtiorow["alv_kasittely"] == '') {
-						$row["summa"] = round($row["summa"] * (1+($row["alv"]/100)),2);	
+					if($yhtiorow["alv_kasittely"] != "" and $kukarow["alv_kasittely"] == "A") {
+						$row["summa"] = round($row["summa"] * (1+($tuoterow["alv"]/100)),2);	
 					}
 					else {
 						$row["summa"] = round($row["summa"],2);
@@ -368,17 +384,25 @@
 				mysql_data_seek($mresult,0);
 			}
 			
-			$ihakaikki = $loput + $jaksotettavaa;
+			$ihakaikki_verolli  = $loput_verolli + $jaksotettavaa_verolli;
+			$ihakaikki_veroton  = $loput_veroton + $jaksotettavaa_veroton; 		
 			
 			//Käsin syötetty summa johon lasku pyöristetään
-			if (abs($laskurow["hinta"]-$ihakaikki) <= 0.5) {
-				$ihakaikki = sprintf("%.2f",$laskurow["hinta"]);
+			if (abs($laskurow["hinta"]-$ihakaikki_verolli) <= 0.5) {
+				$ihakaikki_verolli = sprintf("%.2f",$laskurow["hinta"]);
 			}
 			//Käsin syötetty summa johon lasku pyöristetään
-			if (abs($laskurow["hinta"]-$loput-$jaksotettavaa) <= 0.5) {
-				$jaksotettavaa = $laskurow["hinta"]-$loput;
+			if (abs($laskurow["hinta"]-$loput_verolli-$jaksotettavaa_verolli) <= 0.5) {
+				$jaksotettavaa_verolli = $laskurow["hinta"]-$loput_verolli;
 			}
-						
+			
+			if ($yhtiorow["alv_kasittely"] != "") {
+				$jaksotettavaa = $jaksotettavaa_veroton;
+			}
+			else {
+				$jaksotettavaa = $jaksotettavaa_verolli;
+			}
+					
 			if(round($tot,2) != $jaksotettavaa) {
 				$osuusvippaus 	= round(($osuus - 100) * -1,2);
 				$summavippaus 	= round($jaksotettavaa-$tot,2);
@@ -392,8 +416,13 @@
 				echo "</tr>";
 			}
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $tot)."</td></tr>";
-			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput)."</td></tr>";
-			echo "<tr><td class='back' colspan = '3'></td><th>".t("Tilaus yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $ihakaikki)."</td></tr>";
+			
+			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput_veroton)."</td></tr>";
+			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput_verolli)."</td></tr>";
+			
+			echo "<tr><td class='back' colspan = '3'></td><th>".t("Tilaus yhteensä")." ".t("veroton").":</th><td class='spec' align='right'>".sprintf('%.2f', $ihakaikki_veroton)."</td></tr>";
+			echo "<tr><td class='back' colspan = '3'></td><th>".t("Tilaus yhteensä")." ".t("verollinen").":</th><td class='spec' align='right'>".sprintf('%.2f', $ihakaikki_verolli)."</td></tr>";
+			
 			echo "</table>";
 		}
 		else {

@@ -287,16 +287,139 @@
 		$formi  = "find";
 		$kentta = "etsi";
 
-		// tehd‰‰n etsi valinta
-		echo "<br><form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").":
-				<input type='hidden' name='toim' value='$toim'>
-				<input type='hidden' name='toimtila' value='$tila'>
-				<input type='text' name='etsi'>
-				<input type='Submit' value='".t("Etsi")."'></form>";
+
+		echo "<table>";
+		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='toimtila' value='$tila'>";
+		echo "<input type='hidden' name='text' value='etsi'>";						
+		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
+
+		$query = "	SELECT tunnus, nimitys
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY nimitys";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
+
+		while ($row = mysql_fetch_array($result)){
+			$sel = '';
+			if (($row[0] == $tuvarasto) or ($kukarow['varasto'] == $row[0] and $tuvarasto=='')) {
+				$sel = 'selected';
+				$tuvarasto = $row[0];
+			}
+			echo "<option value='$row[0]' $sel>$row[1]</option>";
+		}
+		echo "</select>";
+
+		$query = "	SELECT distinct maa
+					FROM varastopaikat
+					WHERE maa != '' and yhtio = '$kukarow[yhtio]'
+					ORDER BY maa";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 1) {
+			echo "<select name='tumaa' onchange='submit()'>";
+			echo "<option value=''>".t("Kaikki")."</option>";
+
+			while ($row = mysql_fetch_array($result)){
+				$sel = '';
+				if ($row[0] == $tumaa) {
+					$sel = 'selected';
+					$tumaa = $row[0];
+				}
+				echo "<option value='$row[0]' $sel>$row[0]</option>";
+			}
+			echo "</select>";
+		}
+
+		echo "</td>";
+
+		echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
+
+		$sela = $selb = $selc = "";
+
+		if ($tutyyppi == "NORMAA") {
+			$sela = "SELECTED";
+		}
+		if ($tutyyppi == "ENNAKK") {
+			$selb = "SELECTED";
+		}
+		if ($tutyyppi == "JTTILA") {
+			$selc = "SELECTED";
+		}
+		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
+		echo "<option value='NORMAA' $sela>".t("N‰yt‰ normaalitilaukset")."</option>";
+		echo "<option value='ENNAKK' $selb>".t("N‰yt‰ ennakkotilausket")."</option>";
+		echo "<option value='JTTILA' $selc>".t("N‰yt‰ jt-tilausket")."</option>";
+
+		echo "</select></td></tr>";
+
+		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
+
+		$query = "	SELECT selite
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY selite";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
+
+		while($row = mysql_fetch_array($result)){
+			$sel = '';
+			if($row[0] == $tutoimtapa) {
+				$sel = 'selected';
+				$tutoimtapa = $row[0];
+			}
+			echo "<option value='$row[0]' $sel>".asana('TOIMITUSTAPA_',$row[0])."</option>";
+		}
+
+		echo "</select></td>";
+
+		echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
+		echo "<input type='Submit' value='".t("Etsi")."'></form></td></tr>";
+
+		echo "</table>";
 
 		$haku = '';
-		if (is_string($etsi))  $haku = "and lasku.nimi LIKE '%$etsi%'";
-		if (is_numeric($etsi)) $haku = "and lasku.tunnus='$etsi'";
+
+		if (!is_numeric($etsi) and $etsi != '') {
+			$haku .= "and lasku.nimi LIKE '%$etsi%'";
+		}
+
+		if (is_numeric($etsi) and $etsi != '') {
+			$haku .= "and lasku.tunnus='$etsi'";
+		}
+
+		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
+			$haku .= " and lasku.varasto='$tuvarasto' ";
+		}
+
+		if ($tumaa != '') {
+			$query = "	SELECT group_concat(tunnus) tunnukset
+						FROM varastopaikat
+						WHERE maa != '' and yhtio = '$kukarow[yhtio]' and maa = '$tumaa'";
+			$maare = mysql_query($query) or pupe_error($query);
+			$maarow = mysql_fetch_array($maare);
+			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
+		}
+
+		if ($tutoimtapa != '' and $tutoimtapa != 'KAIKKI') {
+			$haku .= " and lasku.toimitustapa='$tutoimtapa' ";
+		}
+
+		if ($tutyyppi != '' and $tutyyppi != 'KAIKKI') {
+			if ($tutyyppi == "NORMAA") {
+				$haku .= " and lasku.clearing='' ";
+			}
+			elseif($tutyyppi == "ENNAKK") {
+				$haku .= " and lasku.clearing='ENNAKKOTILAUS' ";
+			}
+			elseif($tutyyppi == "JTTILA") {
+				$haku .= " and lasku.clearing='JT-TILAUS' ";
+			}
+		}
 		
 		//jos myyntitilaus niin halutaan maksuehto mukaan
 		if ($tila == 'L') {
@@ -332,6 +455,7 @@
 					and lasku.alatila = 'C'
 					$wherelasku
 					$haku
+					$tilaustyyppi
 					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, rahtikirjat.otsikkonro
 					HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
@@ -340,7 +464,7 @@
 		//piirret‰‰n taulukko...
 		if (mysql_num_rows($tilre) != 0) {
 
-			echo "<table>";
+			echo "<br><table>";
 
 			echo "<tr>";
 			echo "<th>".t("Tilaus")."</th>";
@@ -379,19 +503,138 @@
 
 		echo "<font class='head'>".t("Muokkaa rahtikirjatietoja")."</font><hr>";
 
-		$formi  = "find";
-		$kentta = "etsi";
+		echo "<table>";
+		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='toimtila' value='$tila'>";
+		echo "<input type='hidden' name='text' value='etsi'>";						
+		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
 
-		// tehd‰‰n etsi valinta
-		echo "<br><form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").":
-				<input type='hidden' name='toim' value='$toim'>
-				<input type='text' name='etsi'>
-				<input type='Submit' value='".t("Etsi")."'></form>";
+		$query = "	SELECT tunnus, nimitys
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY nimitys";
+		$result = mysql_query($query) or pupe_error($query);
 
-		$haku='';
-		if (is_string($etsi))  $haku = "and lasku.nimi LIKE '%$etsi%'";
-		if (is_numeric($etsi)) $haku = "and lasku.tunnus='$etsi'";
+		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
 
+		while ($row = mysql_fetch_array($result)){
+			$sel = '';
+			if (($row[0] == $tuvarasto) or ($kukarow['varasto'] == $row[0] and $tuvarasto=='')) {
+				$sel = 'selected';
+				$tuvarasto = $row[0];
+			}
+			echo "<option value='$row[0]' $sel>$row[1]</option>";
+		}
+		echo "</select>";
+
+		$query = "	SELECT distinct maa
+					FROM varastopaikat
+					WHERE maa != '' and yhtio = '$kukarow[yhtio]'
+					ORDER BY maa";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 1) {
+			echo "<select name='tumaa' onchange='submit()'>";
+			echo "<option value=''>".t("Kaikki")."</option>";
+
+			while ($row = mysql_fetch_array($result)){
+				$sel = '';
+				if ($row[0] == $tumaa) {
+					$sel = 'selected';
+					$tumaa = $row[0];
+				}
+				echo "<option value='$row[0]' $sel>$row[0]</option>";
+			}
+			echo "</select>";
+		}
+
+		echo "</td>";
+
+		echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
+
+		$sela = $selb = $selc = "";
+
+		if ($tutyyppi == "NORMAA") {
+			$sela = "SELECTED";
+		}
+		if ($tutyyppi == "ENNAKK") {
+			$selb = "SELECTED";
+		}
+		if ($tutyyppi == "JTTILA") {
+			$selc = "SELECTED";
+		}
+		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
+		echo "<option value='NORMAA' $sela>".t("N‰yt‰ normaalitilaukset")."</option>";
+		echo "<option value='ENNAKK' $selb>".t("N‰yt‰ ennakkotilausket")."</option>";
+		echo "<option value='JTTILA' $selc>".t("N‰yt‰ jt-tilausket")."</option>";
+
+		echo "</select></td></tr>";
+
+		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
+
+		$query = "	SELECT selite
+					FROM toimitustapa
+					WHERE yhtio = '$kukarow[yhtio]'
+					ORDER BY selite";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
+
+		while($row = mysql_fetch_array($result)){
+			$sel = '';
+			if($row[0] == $tutoimtapa) {
+				$sel = 'selected';
+				$tutoimtapa = $row[0];
+			}
+			echo "<option value='$row[0]' $sel>".asana('TOIMITUSTAPA_',$row[0])."</option>";
+		}
+
+		echo "</select></td>";
+
+		echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
+		echo "<input type='Submit' value='".t("Etsi")."'></form></td></tr>";
+
+		echo "</table>";
+
+		$haku = '';
+
+		if (!is_numeric($etsi) and $etsi != '') {
+			$haku .= "and lasku.nimi LIKE '%$etsi%'";
+		}
+
+		if (is_numeric($etsi) and $etsi != '') {
+			$haku .= "and lasku.tunnus='$etsi'";
+		}
+
+		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
+			$haku .= " and lasku.varasto='$tuvarasto' ";
+		}
+
+		if ($tumaa != '') {
+			$query = "	SELECT group_concat(tunnus) tunnukset
+						FROM varastopaikat
+						WHERE maa != '' and yhtio = '$kukarow[yhtio]' and maa = '$tumaa'";
+			$maare = mysql_query($query) or pupe_error($query);
+			$maarow = mysql_fetch_array($maare);
+			$haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
+		}
+
+		if ($tutoimtapa != '' and $tutoimtapa != 'KAIKKI') {
+			$haku .= " and lasku.toimitustapa='$tutoimtapa' ";
+		}
+
+		if ($tutyyppi != '' and $tutyyppi != 'KAIKKI') {
+			if ($tutyyppi == "NORMAA") {
+				$haku .= " and lasku.clearing='' ";
+			}
+			elseif($tutyyppi == "ENNAKK") {
+				$haku .= " and lasku.clearing='ENNAKKOTILAUS' ";
+			}
+			elseif($tutyyppi == "JTTILA") {
+				$haku .= " and lasku.clearing='JT-TILAUS' ";
+			}
+		}
 		// pvm 30 pv taaksep‰in
 		$dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 		$mm = date("m",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
@@ -413,12 +656,13 @@
 					and varastopaikat.yhtio=lasku.yhtio
 					and	varastopaikat.tunnus=rahtikirjat.tulostuspaikka
 					$haku
+					$tilaustyyppi
 					group by 1,2,3,4,5,6
 					order by toimitustapa, luontiaika desc";
 		$tilre = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($tilre) != 0) {
-			echo "<table>";
+			echo "<br><table>";
 
 			echo "<tr>";
 			for ($i=0; $i<mysql_num_fields($tilre)-5; $i++)

@@ -15,8 +15,9 @@ else {
 	require_once("pdflib/phppdflib.class.php");
 }
 
-$p["height"] = 10;
-$p["font"] = "Times-Roman";
+$p["height"] 	= 10;
+$p["font"] 		= "Times-Roman";
+
 $rectparam["width"] = 0.3;
 $sivu = 0;
 
@@ -203,10 +204,12 @@ if (!function_exists('rivi')) {
 	function rivi($firstpage) {
 		global $pdf, $row, $kala, $rivinkorkeus, $lask, $total, $rectparam, $kukarow, $yhtiorow, $rivinumerot, $kieli, $laskurow, $perheid;
 
-		$p["height"]	= 10;
-		$p["font"]		= "Times-Roman";
-		$pp["height"]	= 8;
-		$pp["font"]		= "Times-Roman";
+		$p["height"]		= 10;
+		$p["font"]			= "Times-Roman";
+		$pp["height"]		= 8;
+		$pp["font"]			= "Times-Roman";
+		$boldi["height"] 	= 10;
+		$boldi["font"] 		= "Times-Bold";
 
 		$rivinkorkeus	= 15;
 
@@ -347,14 +350,14 @@ if (!function_exists('rivi')) {
 				$pdf->draw_text(430, $kala, $rivipaikkahyllyssa." (".$rivivarastohyllyssa.")",	$firstpage, $p);
 			}
 			else {
-				$pdf->draw_text(430, $kala, $rivipaikkahyllyssa,		 		$firstpage, $p);
+				$pdf->draw_text(430, $kala, $rivipaikkahyllyssa,		 						$firstpage, $p);
 			}
 
 
-			$pdf->draw_text(480, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$firstpage, $p);
+			$pdf->draw_text(480, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 		$firstpage, $p);
 
 			if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-				$pdf->draw_text(530, $kala, $row['varattu'], 	$firstpage, $p);
+				$pdf->draw_text(530, $kala, $row['varattu'], 	$firstpage, $boldi);
 			}
 			else {
 				if ($row["jt"] != 0) { // jälkitoimitus

@@ -153,13 +153,13 @@ if (!function_exists('alku')) {
 
 		$kala = 650;
 
-		$pdf->draw_rectangle(670, 20,  $kala, 40,  $firstpage, $rectparam);
+		$pdf->draw_rectangle(670, 20,  $kala, 40,  $firstpage, 	$rectparam);
 		$pdf->draw_rectangle(670, 40,  $kala, 120,  $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 120, $kala, 320, $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 320, $kala, 420, $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 420, $kala, 470, $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 470, $kala, 520, $firstpage, $rectparam);
-		$pdf->draw_rectangle(670, 520, $kala, 580, $firstpage, $rectparam);
+		$pdf->draw_rectangle(670, 120, $kala, 320, $firstpage, 	$rectparam);
+		$pdf->draw_rectangle(670, 320, $kala, 420, $firstpage, 	$rectparam);
+		$pdf->draw_rectangle(670, 420, $kala, 470, $firstpage, 	$rectparam);
+		$pdf->draw_rectangle(670, 470, $kala, 520, $firstpage, 	$rectparam);
+		$pdf->draw_rectangle(670, 520, $kala, 580, $firstpage, 	$rectparam);
 
 		$pdf->draw_rectangle($kala, 20, 60, 580, $firstpage, $rectparam);
 
@@ -207,10 +207,12 @@ if (!function_exists('rivi')) {
 	function rivi($firstpage) {
 		global $pdf, $row, $kala, $rivinkorkeus, $lask, $total, $rectparam, $kukarow, $yhtiorow, $rivinumerot, $kieli, $laskurow, $perheid, $paino;
 
-		$p["height"]	= 10;
-		$p["font"]		= "Times-Roman";
-		$pp["height"]	= 8;
-		$pp["font"]		= "Times-Roman";
+		$p["height"]		= 10;
+		$p["font"]			= "Times-Roman";
+		$pp["height"]		= 8;
+		$pp["font"]			= "Times-Roman";
+		$boldi["height"] 	= 10;
+		$boldi["font"] 		= "Times-Bold";
 
 		$rivinkorkeus	= 18;
 
@@ -365,7 +367,7 @@ if (!function_exists('rivi')) {
 			$pdf->draw_text(480, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$firstpage, $p);
 
 			if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-				$pdf->draw_text(530, $kala, $row['varattu'], 	$firstpage, $p);
+				$pdf->draw_text(530, $kala, $row['varattu'], 	$firstpage, $boldi);
 			}
 			else {
 				if ($row["jt"] != 0) { // jälkitoimitus

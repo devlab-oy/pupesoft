@@ -290,7 +290,6 @@ if ($tee == "") {
 				ORDER BY tuotteen_toimittajat.toim_tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
 
-
 	//kahtsotaan löytyikö yhtään tilausriviä
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Yhtään tilausriviä ei löydytynyt!")."</font>";
@@ -395,8 +394,9 @@ if ($tee == "") {
 
 					echo "<option value='$paikkarow[tunnus]' $sel>$paikkarow[hyllyalue] $paikkarow[hyllynro] $paikkarow[hyllyvali] $paikkarow[hyllytaso] $ole $riv</option>";
 				}
-
+				
 				echo "</select></td>";
+				
 				echo "<td>".t("Oletus").":<input type='checkbox' name='oletusbox[$rivirow[tunnus]]'></td>";
 			}
 			else {
@@ -404,14 +404,21 @@ if ($tee == "") {
 				if ($rivirow["r1"] != "") {
 					echo " (".t("rivillä")." $rivirow[r1]-$rivirow[r2]-$rivirow[r3]-$rivirow[r4])";
 				}
-				echo "</font></td>";
+				
 				echo "<td></td>";
 			}
+			
+			if ($varasto == 'y') {
+				$rivlla1 = $rivirow["r1"];
+				$rivlla2 = $rivirow["r2"];
+				$rivlla3 = $rivirow["r3"];
+				$rivlla4 = $rivirow["r4"];
+			}
 
-			echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='' maxzise='3' size='5'></td>";
-			echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='' maxzise='3' size='5'></td>";
-			echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='' maxzise='3' size='5'></td>";
-			echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='' maxzise='3' size='5'></td>";
+			echo "<td><input type='text' name='t1[$rivirow[tunnus]]' value='$rivlla1' maxzise='3' size='5'></td>";
+			echo "<td><input type='text' name='t2[$rivirow[tunnus]]' value='$rivlla2' maxzise='3' size='5'></td>";
+			echo "<td><input type='text' name='t3[$rivirow[tunnus]]' value='$rivlla3' maxzise='3' size='5'></td>";
+			echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$rivlla4' maxzise='3' size='5'></td>";
 
 		}
 

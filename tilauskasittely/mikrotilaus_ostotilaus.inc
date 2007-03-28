@@ -43,7 +43,8 @@ if ($tee == "file") {
 
 			$hinta 	  = (float) str_replace(",", ".", $rivi[3]);
 			$ale	  = (float) str_replace(",", ".", $rivi[4]);
-			$netto 	  = $rivi[5];
+			//$netto 	  = $rivi[5];
+			$paikka	  = $rivi[5];
 
 			if ($tuoteno != '' and $kpl != 0) {
 
@@ -110,7 +111,7 @@ if ($tee == 'mikrotila') {
 
 			<table border='0' cellpadding='3' cellspacing='2'>
 			<tr><th colspan='7'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
-			<tr><td>".t("Tuoteno")."</td><td>".t("Kpl")."</td><td>".t("Arvioitu toimituspäivä vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td></tr>
+			<tr><td>".t("Tuoteno")."</td><td>".t("Kpl")."</td><td>".t("Arvioitu toimituspäivä vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Paikka (#-eroteltu)")."</td></tr>
 			</table>
 
 			<br>

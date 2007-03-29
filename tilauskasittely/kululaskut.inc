@@ -71,40 +71,29 @@ if ($tee == "liita") {
 	// pilkut pisteiksi
 	$liitasumma = (float) str_replace(",",".",$liitasumma);
 
-	//jos k‰ytt‰j‰ on syˆtt‰nyt osasumman kululakulta
+	$query = "	select sum(arvo) arvo
+				from lasku
+				where yhtio		= '$kukarow[yhtio]'
+				and tila		= 'K'
+				and vanhatunnus	= '$laskutunnus'";
+	$apure = mysql_query($query) or pupe_error($query);
+	$apurow = mysql_fetch_array($apure);
+
+	//t‰m‰n kululaskun k‰ytett‰viss‰ oleva summa
+	$summa_kaytettavissa = round($oslasrow["arvo"] - $apurow["arvo"],2);
+	
+	//jos k‰ytt‰j‰ on syˆtt‰nyt osasumman kululaskulta
 	if ($liitasumma != 0) {
-
-		$query = "	select sum(arvo) arvo
-					from lasku
-					where yhtio		= '$kukarow[yhtio]'
-					and tila		= 'K'
-					and vanhatunnus	= '$laskutunnus'";
-		$apure = mysql_query($query) or pupe_error($query);
-		$apurow = mysql_fetch_array($apure);
-
-		//t‰m‰n kululaskun k‰ytett‰viss‰ oleva summa
-		$summa_kaytettavissa = round($oslasrow["arvo"] - $apurow["arvo"],2);
-
-		if (abs($summa_kaytettavissa) >= abs($liitasumma)) {
-			//jos t‰m‰ on hyvityslasku k‰‰nnet‰‰n k‰ytt‰j‰n syˆtt‰m‰ summa aina negatiiviseksi
-			if ($oslasrow["arvo"] < 0) {
-				$liitasumma = -1 * abs($liitasumma);
-			}
-			else {
-				$liitasumma = abs($liitasumma);
-			}
-
-			$verosumma = $liitasumma;
-			$verotonsumma = $liitasumma;
+		//jos t‰m‰ on hyvityslasku k‰‰nnet‰‰n k‰ytt‰j‰n syˆtt‰m‰ summa aina negatiiviseksi
+		if ($oslasrow["arvo"] < 0) {
+			$liitasumma = -1 * abs($liitasumma);
 		}
-
 		else {
-			echo "<font class='error'>".t("VIRHE: Yritit liitt‰‰ liian suuren summan. Laskun saldo ei riitt‰nyt")."!</font><br>";
-			$tee = "haku";
-			$verosumma = 0;
-			$verotonsumma = 0;
+			$liitasumma = abs($liitasumma);
 		}
 
+		$verosumma = $liitasumma;
+		$verotonsumma = $liitasumma;
 	}
 	else {
 		//T‰ss‰ on ostolasku verollinen summa
@@ -113,10 +102,18 @@ if ($tee == "liita") {
 		//Verojen m‰‰r‰
 		$vero = $alvirow["summa"];
 
-		//Jalopuksi viel‰ veroton summa
+		//Ja lopuksi viel‰ veroton summa
 		$verotonsumma = $verosumma - $vero;
 	}
-
+		
+	if (abs($summa_kaytettavissa) < abs($verotonsumma)) {
+		echo "<font class='error'>".t("VIRHE: Yritit liitt‰‰ liian suuren summan. Laskun saldo ei riitt‰nyt")."!</font><br>";
+		$tee 			= "haku";
+		$verosumma 		= 0;
+		$verotonsumma 	= 0;
+	}
+	
+	
 	//lis‰t‰‰n lasku
 	if ($verotonsumma != 0 and $verosumma != 0) {
 		// meill‰ on laskurow haettuna ylh‰‰ll‰, tehd‰‰n liitosotsikko
@@ -293,10 +290,12 @@ if ($toiminto == "kululaskut") {
 if ($tee == "haku") {
 
 	$lisa = ""; // no hacking
+	
 	if ($hakutapa == "S") {
 		$haku = (float) str_replace(",",".",$haku); // pilkut pisteiksi
 		$lisa = "and summa='$haku'";
 	}
+	
 	if ($hakutapa == "N") $lisa = "and nimi like '%$haku%'";
 	if ($hakutapa == "V") $lisa = "and viite='$haku'";
 
@@ -306,8 +305,8 @@ if ($tee == "haku") {
 				where yhtio='$kukarow[yhtio]' and tila='K' and alatila in ('','S') and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
 	$result = mysql_query($query) or pupe_error($query);
 
-	$vienti = "";
-	$valuutta = "";
+	$vienti 	= "";
+	$valuutta 	= "";
 
 	//vaihto-omaisuuslasku/laskuja lˆytyi
 	if (mysql_num_rows($result) != 0) {
@@ -317,8 +316,6 @@ if ($tee == "haku") {
 		$valuutta 	= $vaihtrow["valkoodi"];
 		$vienti		= $vaihtrow["vienti"];
 	}
-
-
 
 	// haetaan vaihto-omaisuus, rahti ja raaka-aine laskuja (kotimaa, ei-eu, eu) HUOMAA LIMIT!
 	$query = "	SELECT *
@@ -416,22 +413,22 @@ if ($tee == "haku") {
 					$voikolisata = "OK";
 				}
 				//jos t‰m‰ on vahto-omaisuuslasku pit‰‰ viel‰ tarkistaa vienti ja valuutta
-				elseif ($llrow["valkoodi"] == $valuutta and $llrow["vienti"] == $vienti and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
+				elseif ($laskurow["alatila"] != "S" and $llrow["valkoodi"] == $valuutta and $llrow["vienti"] == $vienti and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
 					$voikolisata = "OK";
 				}
-				elseif ($vienti == '' and $valuutta == '' and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
+				elseif ($laskurow["alatila"] != "S" and $vienti == '' and $valuutta == '' and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
 					$voikolisata = "OK";
 				}
 
 				if ($voikolisata == "OK") {
-
+					
+					echo "<form name='haku' action='$PHP_SELF' method='post'>";
+					
 					if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
-						echo "<td valign='top'><form name='haku' action='$PHP_SELF' method='post'>
-								<input type='text' name='liitasumma' size='8'>
-								</td>";
+						echo "<td valign='top'><input type='text' name='liitasumma' size='8'></td>";
 					}
 					else {
-						echo "<td valign='top'><form name='haku' action='$PHP_SELF' method='post'> </td>";
+						echo "<td valign='top'></td>";
 					}
 
 
@@ -448,13 +445,13 @@ if ($tee == "haku") {
 					echo "</form>";
 				}
 				else {
-					echo "<td class='spec' colspan='2' valign='top'>";
+					echo "<td class='spec' valign='top'>";
 					echo t("T‰t‰ vaihto-omaisuuslaskua ei voida lis‰t‰ t‰lle keikalle")."!";
 					echo "</td></tr>";
 				}
 			}
 			else {
-				echo "<td colspan='2' valign='top'>";
+				echo "<td valign='top' colspan='2'>";
 				echo t("Laskun summa on jo k‰ytetty keikalla/keikoilla")." $apurow[laskunrot]!";
 				echo "</td></tr>";
 			}

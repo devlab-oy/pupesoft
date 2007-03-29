@@ -204,7 +204,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$kielletyt = array("");
 			break;
 		case "hinnasto" :
-			$pakolliset = array("TUOTENO","HINTA");
+			$pakolliset = array("TUOTENO","HINTA","ALV");
 			$kielletyt = array("");
 			break;
 		case "rahtisopimukset" :

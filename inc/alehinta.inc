@@ -217,11 +217,11 @@
 			$hresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow       = mysql_fetch_array ($hresult);
-				$hinta 		= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
-				$netto		= $hrow["laji"];
-				if ($hrow["alv"] != 0) $alehinta_alv = $hrow["alv"];
-				$aperuste  .= "Tuotteen hinnastohinta laskun valuutassa";
+				$hrow       	= mysql_fetch_array ($hresult);
+				$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
+				$netto			= $hrow["laji"];
+				$alehinta_alv	= $hrow["alv"];
+				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 			}
 		}
 
@@ -243,11 +243,11 @@
 			$hresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow       = mysql_fetch_array ($hresult);
-				$hinta 		= $hrow["hinta"];
-				$netto		= $hrow["laji"];
-				if ($hrow["alv"] != 0) $alehinta_alv = $hrow["alv"];
-				$aperuste  .= "Tuotteen hinnastohinta yhtiön valuutassa";
+				$hrow       	= mysql_fetch_array ($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$alehinta_alv	= $hrow["alv"];
+				$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
 			}
 		}
 
@@ -601,11 +601,11 @@
 			$hresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow       = mysql_fetch_array ($hresult);
-				$hinta 		= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
-				$netto		= $hrow["laji"];
-				if ($hrow["alv"] != 0) $alehinta_alv = $hrow["alv"];
-				$aperuste  .= "Tuotteen hinnastohinta laskun valuutassa";
+				$hrow			= mysql_fetch_array ($hresult);
+				$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
+				$netto			= $hrow["laji"];
+				$alehinta_alv	= $hrow["alv"];
+				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 			}
 		}
 
@@ -627,11 +627,11 @@
 			$hresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($hresult) > 0) {
-				$hrow       = mysql_fetch_array ($hresult);
-				$hinta 		= $hrow["hinta"];
-				$netto		= $hrow["laji"];
-				if ($hrow["alv"] != 0) $alehinta_alv = $hrow["alv"];
-				$aperuste  .= "Tuotteen hinnastohinta yhtiön valuutassa";
+				$hrow			= mysql_fetch_array ($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$alehinta_alv	= $hrow["alv"];
+				$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
 			}
 		}
 

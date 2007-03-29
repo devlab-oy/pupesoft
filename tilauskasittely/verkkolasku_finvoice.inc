@@ -44,19 +44,32 @@ if (!function_exists('finvoice_otsik')) {
 			$senderpartyid 			= str_replace(" ", "", $yhtiorow['ovttunnus']);
 			$senderintermediator	= $yhtiorow['pankkiswift1'];
 		}
+		
+		//	Osataanko t‰m‰n k‰sitell‰ t‰m‰n pankin finvoiceaineistoa?
+		switch ($yhtiorow['pankkiswift1']) {
+			case 'NDEAFIHH':
+	        	$tulostuspalvelu	= "tulostukseen";
+				break;
+			case 'PSPBFIHH':
+	        	$tulostuspalvelu	= "003718062728810P";			
+				break;
+			default:
+	        	$tulostuspalvelu	= "";			
+				break;
+		}
 
 		//	Aloitellaan aineiston luontia
-		if ($senderpartyid != "" and $senderintermediator != "") {
+		if ($senderpartyid != "" and $senderintermediator != "" and $tulostuspalvelu != "") {
 
 			list($receiverpartyid, $receiverintermediator) = explode("@",$lasrow["verkkotunnus"]);
 
 			// jos t‰nne ei saada mit‰‰n arvoja laitetaan se edelleen pankkiin, mutta annetaan lipuksi tulostukseen
 			if ($receiverpartyid == "" or $receiverintermediator == "" or $lasrow["chn"] == 100) {
-				$receiverpartyid 		= "tulostukseen";
+				$receiverpartyid 		= $tulostuspalvelu;
 				$receiverintermediator 	= $yhtiorow['pankkiswift1'];
 
 				if ($lasrow["chn"] != 100 and $silent == "") {
-					$tulos_ulos .= "<font class='error'>".t("Asiakkaalta puuttuu verkkotunnus, lasku menee tulostukseen.")." $lasrow[nimi] $lasrow[laskunro]</font><br>\r\n<br>\r\n";
+					$tulos_ulos .= "<font class='error'>".t("Asiakkaalta puuttuu verkkotunnus, lasku menee tulostuspalveluun.")." $lasrow[nimi] $lasrow[laskunro]</font><br>\r\n<br>\r\n";
 				}
 			}
 
@@ -241,7 +254,12 @@ if (!function_exists('finvoice_otsik')) {
 
 		}
 		elseif($silent == "") {
-			$tulos_ulos .= t("Finvoiceaineistoa ei voitu luoda. Yhtiolta puuttuu ovttunnus, SWIFT tai IBAN tunnus. Tulosta lasku manuaalisesti!")." ".$lasrow["laskunro"]."<br>\r\n<br>\r\n";
+			if($tulostuspalvelu == "") {
+				$tulos_ulos .= t("Finvoiceaineiston l‰hetyst‰ pankkiin '$yhtiorow[pankkiswift1]' ei viel‰ tueta. Tulosta lasku manuaalisesti!")." ".$lasrow["laskunro"]."<br>\r\n<br>\r\n";				
+			}
+			else {
+				$tulos_ulos .= t("Finvoiceaineistoa ei voitu luoda. Yhtiolta puuttuu ovttunnus, SWIFT tai IBAN tunnus. Tulosta lasku manuaalisesti!")." ".$lasrow["laskunro"]."<br>\r\n<br>\r\n";				
+			}
 			$err_finvoice++;
 		}
 		else {

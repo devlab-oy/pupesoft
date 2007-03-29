@@ -616,7 +616,7 @@
 		//jos saa muuttaa niin n‰ytet‰‰n muokkaa linkki
 		echo "<td valign='top' nowrap><a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku'>".t("Muokkaa")."</a>";
 		
-		if ($sarjarow['ostorivitunnus'] > 0 and $sarjarow['myyntirivitunnus'] == 0 and $from == "") {
+		if ($sarjarow['ostorivitunnus'] > 0 and $from == "") {
 			if ($keikkarow["tunnus"] > 0) {
 				$keikkalisa = "&otunnus=$keikkarow[tunnus]";
 			}

@@ -438,8 +438,8 @@
 			// Päivitetään saldo yriti-tauluun, jos sellainen löytyi
 			if ($toim == 'K' and $tiliotedatarow['kasitelty'] == '0000-00-00') {
 
+				$tilisaldo = substr($tietue,31,19);
 				if ($valuuttarow['kurssi'] != 0 and $valuuttarow['kurssi'] != 1) {
-					$tilisaldo = substr($tietue,31,19);
 					$tilisaldo = round($tilisaldo * $valuuttarow['kurssi'],2);
 				}
 

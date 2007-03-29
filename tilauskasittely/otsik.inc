@@ -297,6 +297,7 @@
 				<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
 				<input type='hidden' name='kolm_maa' 						 value = '$srow[kolm_maa]'>
 				<input type='hidden' name='tunnusnippu' 					 value = '$srow[tunnusnippu]'>
+				<input type='hidden' name='jaksotettu'	 					 value = '$srow[jaksotettu]'>				
 				<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
 
 
@@ -449,13 +450,13 @@
 			$query = "	SELECT *
 						FROM maksupositio
 						WHERE maksupositio.yhtio ='$kukarow[yhtio]'
-						and maksupositio.otunnus ='$kukarow[kesken]'";
+						and maksupositio.otunnus ='$srow[jaksotettu]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<tr><td>".t("Maksuehto").":</td>";
 
 			if(mysql_num_rows($result) > 0) {
-				echo "<td>$srow[maksuehto]</td>";
+				echo "<td>".t("Maksusopimus")."</td>";
 				echo "<input type='hidden' name='maksuehto' value = '$srow[maksuehto]'>";
 			}
 			else {
@@ -682,7 +683,7 @@
 			//	Jos halutaan niin voidaan liittää hieman yhteyshenkilöitä
 			if($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
 				echo "<tr><td>".t("Yhteyshenkilö").":</td>
-				<td><select name='yhteyshenkilo_tekninen'>";
+				<td><select id='yhteyshenkilo_tekninen' name='yhteyshenkilo_tekninen' onchange=\"yllapito('yhteyshenkilo&liitostunnus=$srow[liitostunnus]&yhtyyppi=asiakas',this.id)\">";
 
 				$query = "	SELECT tunnus, if(titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
 							FROM yhteyshenkilo
@@ -702,7 +703,7 @@
 				}
 
 				echo "	<optgroup label='Toiminto'>
-							<option value=''>Luo uusi yhteyshenkilö</option>
+							<option value='uusi'>Luo uusi yhteyshenkilö</option>
 						</optgroup>";
 
 				echo "</select>";
@@ -734,7 +735,7 @@
 				echo "</td></tr>";
 
 				echo "<tr><td>".t("Asiakkaan kaupallinen käsittelijä").":</td>
-				<td><select name='yhteyshenkilo_kaupallinen'>";
+				<td><select id='yhteyshenkilo_kaupallinen' name='yhteyshenkilo_kaupallinen' onchange=\"yllapito('yhteyshenkilo&liitostunnus=$srow[liitostunnus]&yhtyyppi=asiakas',this.id)\">";
 
 				echo "	<option value=''>Ei kaupallista käsittelijää</option>";
 				mysql_data_seek($yhresult,0);
@@ -748,7 +749,7 @@
 
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<optgroup label='Toiminto'>
-							<option value=''>Luo uusi yhteyshenkilö</option>
+							<option value='uusi'>Luo uusi yhteyshenkilö</option>
 						</optgroup>";
 
 				echo "</select>";
@@ -759,12 +760,12 @@
 			if($yhtiorow["tilauksen_kohteet"] == "K") {
 				$query = "	SELECT tunnus, kohde
 							FROM asiakkaan_kohde
-							WHERE yhtio = '$kukarow[yhtio]' and asiakas = '$srow[liitostunnus]'
-							ORDER BY kohde";
+							WHERE yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]'
+							ORDER BY tunnus desc";
 				$kohderesult = mysql_query($query) or pupe_error($query);
-
+				
 				echo "<td>".t("Kohde").":</td>
-					<td><select name='asiakkaan_kohde'>";
+					<td><select id='asiakkaan_kohde' name='asiakkaan_kohde' onchange=\"yllapito('asiakkaan_kohde&liitostunnus=$srow[liitostunnus]',this.id)\">";
 
 				echo "<option value=''>Asiakkaalla ei ole kohdetta</option>";
 
@@ -778,7 +779,7 @@
 
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<optgroup label='Toiminto'>
-							<option value=''>Luo uusi asiakkaan kohde</option>
+							<option value='uusi'>Luo uusi asiakkaan kohde</option>
 						</optgroup>";
 
 				echo "</select>";
@@ -962,17 +963,23 @@
 
 			echo "<td>".t("Toimitusehto")."</td><td>";
 
-			$query = "	SELECT selite, selitetark
+			$query = "	SELECT selite, if(selitetark_2 != '', concat(concat(' (',selitetark_2,') -'), selitetark), if(selitetark!='',concat('- ',selitetark), ''))
 						FROM avainsana
 						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
 						ORDER BY jarjestys, selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 			
-			echo "<select name='toimitusehto'><option value=''>".t("Tyhjä")."</option>";
-
+			echo "<select id='toimitusehto' name='toimitusehto' Style='width: 55px; font-size: 8pt; padding: 0' onchange=toimehtoTarkenne('toimitusehto')><option value=''></option>";
+			
 			while($row = mysql_fetch_array($tresult)) {
 				$sel = "";
-				if ($row["selite"] == $srow["toimitusehto"] or ($srow["toimitusehto"] == '' and $yhtiorow['oletus_toimitusehto'] == $row["selite"])) $sel = 'selected';
+				
+				if(stripos(substr($srow["toimitusehto"],0,4), $row["selite"]." ") !== false) {
+					$sel = 'selected';
+					$kasitoimehto = substr($srow["toimitusehto"],4);
+					
+				}
+				elseif ($row["selite"] == $srow["toimitusehto"] or ($srow["toimitusehto"] == '' and $yhtiorow['oletus_toimitusehto'] == $row["selite"])) $sel = 'selected';
 
 				echo "<option value='$row[selite]' $sel>$row[0] $row[1]</option>";
 			}
@@ -983,12 +990,15 @@
 						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO' and selite = '$srow[toimitusehto]'
 						ORDER BY jarjestys, selite";
 			$tresult = mysql_query($query) or pupe_error($query);
-			
-			if (mysql_num_rows($tresult) == 0) {
+			if (mysql_num_rows($tresult) == 0 and $kasitoimehto == "") {
 				$kasitoimehto = $srow["toimitusehto"];
 			}
+			if (mysql_num_rows($tresult) == 1 and $kasitoimehto == "") {
+				$row = mysql_fetch_array($tresult);
+				$kasitoimehto = $row["selitetark"];
+			}
 			
-			echo "<input type='text' name='kasitoimehto' value='$kasitoimehto' size='20'>";
+			echo "<input type='text' id='toimitusehtoLisa' name='kasitoimehto' value='$kasitoimehto' size='20'>";
 			
 			echo "</td>";
 
@@ -1000,19 +1010,25 @@
 			if ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
 				echo "<td>".t("Vaihtokohteen toimitusehto")."</td><td>";
 
-				$query = "	SELECT selite, selitetark
+				$query = "	SELECT selite, if(selitetark_2 != '', concat(concat(' (',selitetark_2,') -'), selitetark), if(selitetark!='',concat('- ',selitetark), ''))
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
 							ORDER BY jarjestys, selite";
 				$tresult = mysql_query($query) or pupe_error($query);
 
-				echo "<select name='toimitusehto2'><option value=''>".t("Tyhjä")."</option>";
+				echo "<select id='toimitusehto2' name='toimitusehto2' Style='width: 55px; font-size: 8pt; padding: 0' onchange=toimehtoTarkenne('toimitusehto2')><option value=''></option>";
 
 				while($row = mysql_fetch_array($tresult)) {
 					$sel = "";
-					if ($row["selite"] == $srow["toimitusehto2"] or ($srow["toimitusehto2"] == '' and $yhtiorow['oletus_toimitusehto2'] == $row["selite"])) $sel = 'selected';
 
-					echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
+					if(stripos(substr($srow["toimitusehto2"],0,4), $row["selite"]." ") !== false) {
+						$sel = 'selected';
+						$kasitoimehto = substr($srow["toimitusehto2"],4);
+
+					}
+					elseif ($row["selite"] == $srow["toimitusehto2"] or ($srow["toimitusehto2"] == '' and $yhtiorow['oletus_toimitusehto2'] == $row["selite"])) $sel = 'selected';
+
+					echo "<option value='$row[selite]' $sel>$row[0] $row[1]</option>";
 				}
 				echo "</select>";
 				
@@ -1021,12 +1037,15 @@
 							WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO' and selite = '$srow[toimitusehto2]'
 							ORDER BY jarjestys, selite";
 				$tresult = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($tresult) == 0) {
-					$kasitoimehto2 = $srow["toimitusehto2"];
+				if (mysql_num_rows($tresult) == 0 and $kasitoimehto == "") {
+					$kasitoimehto = $srow["toimitusehto2"];
+				}
+				if (mysql_num_rows($tresult) == 1 and $kasitoimehto == "") {
+					$row = mysql_fetch_array($tresult);
+					$kasitoimehto = $row["selitetark"];
 				}
 
-				echo "<input type='text' name='kasitoimehto2' value='$kasitoimehto2' size='20'>";
+				echo "<input type='text' id='toimitusehto2Lisa' name='kasitoimehto2' value='$kasitoimehto2' size='20'>";
 				
 				echo "</td>";
 			}
@@ -1493,11 +1512,11 @@
 		}
 		
 		if ($kasitoimehto != '') {
-			$toimitusehto = $kasitoimehto;
+			$toimitusehto = trim($toimitusehto." ".$kasitoimehto);
 		}
 		
 		if ($kasitoimehto2 != '') {
-			$toimitusehto2 = $kasitoimehto2;
+			$toimitusehto2 = trim($toimitusehto2." ".$kasitoimehto2);
 		}
 
 		//Otetaan valuutan kurssi
@@ -1566,6 +1585,7 @@
 					sisamaan_kuljetus_kansallisuus		= '$sisamaan_kuljetus_kansallisuus',
 					sisamaan_kuljetus					= '$sisamaan_kuljetus',
 					tunnusnippu							= '$tunnusnippu',
+					jaksotettu							= '$jaksotettu',					
 					splittauskielto						= '$splittauskielto',
 					maa_maara							= '$maa_maara'";
 

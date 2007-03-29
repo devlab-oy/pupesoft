@@ -953,8 +953,7 @@
 				echo "<option value='$row[0]' $sel>$row[1]</option>";
 			}
 			echo "</select>";
-
-
+			
 			echo "</td>";
 			echo "<td>".t("Suoraan laskutukseen")."</td><td><input type='checkbox' name='eilahe' $eilah></td>";
 			echo "</tr>";
@@ -968,7 +967,7 @@
 						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
 						ORDER BY jarjestys, selite";
 			$tresult = mysql_query($query) or pupe_error($query);
-
+			
 			echo "<select name='toimitusehto'><option value=''>".t("Tyhjä")."</option>";
 
 			while($row = mysql_fetch_array($tresult)) {
@@ -978,6 +977,19 @@
 				echo "<option value='$row[selite]' $sel>$row[0] $row[1]</option>";
 			}
 			echo "</select>";
+			
+			$query = "	SELECT selite, selitetark
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO' and selite = '$srow[toimitusehto]'
+						ORDER BY jarjestys, selite";
+			$tresult = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($tresult) == 0) {
+				$kasitoimehto = $srow["toimitusehto"];
+			}
+			
+			echo "<input type='text' name='kasitoimehto' value='$kasitoimehto' size='20'>";
+			
 			echo "</td>";
 
 			echo "<td>".t("Laskua ei ketjuteta")."</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
@@ -1003,6 +1015,19 @@
 					echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
 				}
 				echo "</select>";
+				
+				$query = "	SELECT selite, selitetark
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO' and selite = '$srow[toimitusehto2]'
+							ORDER BY jarjestys, selite";
+				$tresult = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($tresult) == 0) {
+					$kasitoimehto2 = $srow["toimitusehto2"];
+				}
+
+				echo "<input type='text' name='kasitoimehto2' value='$kasitoimehto2' size='20'>";
+				
 				echo "</td>";
 			}
 			else {
@@ -1465,6 +1490,14 @@
 			if ($chn == '') {
 				$chn = '100';
 			}
+		}
+		
+		if ($kasitoimehto != '') {
+			$toimitusehto = $kasitoimehto;
+		}
+		
+		if ($kasitoimehto2 != '') {
+			$toimitusehto2 = $kasitoimehto2;
 		}
 
 		//Otetaan valuutan kurssi

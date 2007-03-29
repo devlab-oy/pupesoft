@@ -47,4 +47,31 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "maakoodi") {
+
+		$query = "	SELECT distinct koodi, nimi
+					FROM maat
+					where nimi != ''
+					ORDER BY koodi";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		$ulos =	"<td><select name='$nimi'>";
+	
+		if ($trow[$i] == "" and $t[$i] == "") {
+			$trow[$i] = $yhtiorow["maakoodi"];
+		}
+		
+		while ($row = mysql_fetch_array($vresult)) {
+			$sel = '';
+			if ($row[0] == $trow[$i]) {
+				$sel = 'selected';
+			}
+			$ulos .= "<option value='$row[0]' $sel>$row[1]</option>";
+		}
+
+		$ulos .= "</select></td>";
+		$jatko = 0;
+
+	}
+
 ?>

@@ -12,7 +12,7 @@
 			$query = "	SELECT *
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnus = '$tunnus' and tila in ('L','N') and alatila != 'X'";
+						and tunnus = '$tunnus' and tila in ('L','N','R') and alatila != 'X'";
 			$stresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($stresult) == 0) {
@@ -244,18 +244,27 @@
 		function loppulaskuta($tunnus) {
 			global $kukarow, $yhtiorow;
 
-			///* Tutkitaan alkuperäisen tilauksen tilaa *///
-			$query = "	SELECT *
+			///* Tutkitaan alkuperäisten tilausten tiloja *///
+			$query = "	SELECT sum(if(tila='L' and alatila = 'J',1,0)) toimitus_valmis, sum(if(tila='R',1,0)) rojekti, count(*) kaikki, max(tunnus) vikatunnus
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnus = '$tunnus' and tila = 'L' and alatila = 'J'";
+						and jaksotettu = '$tunnus' and tila != 'D'";
 			$stresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($stresult) == 0) {
 				echo "<font class='error'>Otsikkoa '$tunnus' ei löytynyt, tai se on väärässä tilassa.</font><br><br>";
 				return 0;
 			}
-
+			else {
+				$row = mysql_fetch_array($stresult);
+				if($row["kaikki"] - ($row["toimitus_valmis"] + $row["rojekti"]) <> 0) {
+					echo "<font class='error'>Laskutussopimuksella on kaikki tilaukset oltava toimitettuna ennen loppulaskutusta.</font><br><br>";
+					echo $query;
+					return 0;					
+				}
+				$vikatunnus = $row["vikatunnus"];
+			}
+			
 			// tarkistetaan että meillä on jotain järkevää laskutettavaa
 			$query = "	SELECT *
 						FROM maksupositio
@@ -308,14 +317,14 @@
 			while($row = mysql_fetch_array($sresult)) {
 				
 				$query  = "	insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika)
-							values  ('$row[laskutettu]', 'N', '-1', '-1', '$tunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
+							values  ('$row[laskutettu]', 'N', '-1', '-1', '$vikatunnus', '$yhtiorow[ennakkomaksu_tuotenumero]', '$nimitys', '$kukarow[yhtio]', 'L', '$row[alv]', '$rivikommentti', '$kukarow[kuka]', now(), '$kukarow[kuka]', now())";
 				$addtil = mysql_query($query) or pupe_error($query);
 
 				if ($debug==1) echo t("Loppulaskuun lisättiin ennakkolaskun hyvitys")." -$row[laskutettu] alv $row[alv]% otunnus $vimppa<br>";
 			}
 
 			// Päivitetään positiolle laskutustunnus
-			$query = "update maksupositio set uusiotunnus='$tunnus' where tunnus = '$posrow[tunnus]'";
+			$query = "update maksupositio set uusiotunnus='$vikatunnus' where tunnus = '$posrow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if ($posrow["erpcm"] != "0000-00-00") {
@@ -333,7 +342,8 @@
 						$erlisa
 						alatila 		= 'D'
 						WHERE yhtio 	= '$kukarow[yhtio]'
-						and jaksotettu 	= '$tunnus'";
+						and jaksotettu 	= '$tunnus'
+						and tila		!= 'R'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "	SELECT group_concat(distinct tunnus) tunnukset
@@ -417,6 +427,7 @@
 						LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus=uusiolasku.tunnus
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu > 0
+						and lasku.tila in ('L','N','R')
 						GROUP BY jaksotettu, nimi
 						ORDER BY jaksotettu desc";
 			$result = mysql_query($query) or pupe_error($query);
@@ -458,7 +469,8 @@
 				$query = "	SELECT group_concat(tunnus SEPARATOR '<br>') tunnukset
 							FROM lasku
 							WHERE yhtio 	= '$kukarow[yhtio]'
-							and jaksotettu  = '$row[jaksotettu]'";
+							and jaksotettu  = '$row[jaksotettu]'
+							and tila in ('L','N','R')";
 				$rahres = mysql_query($query) or pupe_error($query);
 				$laskurow2 = mysql_fetch_array($rahres);
 
@@ -502,7 +514,7 @@
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='tunnus' value='$row[jaksotettu]'>
 								<input type='hidden' name='tee' value='loppulaskuta'>
-								<td class='back'><input type='submit' name = 'submit' value='".t("Laskuta")."'></td>
+								<td class='back'><input type='submit' name = 'submit' value='".t("Loppulaskuta")."'></td>
 								</form>";
 					}
 					echo "</tr>";

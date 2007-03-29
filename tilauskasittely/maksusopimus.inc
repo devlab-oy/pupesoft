@@ -5,15 +5,21 @@
 	if($tila == "uusi") {
 		if ($laskurow["jaksotettu"] == 0) {
 			$query = "	UPDATE lasku
-						SET jaksotettu = tunnus
+						SET jaksotettu=(if(tunnusnippu=0,tunnus,tunnusnippu))
 						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnus  = $laskurow[tunnus]
-						and tila in ('N','L','T')
+						and if(tunnusnippu = 0,tunnus=$laskurow[tunnus],tunnusnippu=$laskurow[tunnusnippu])
+						and tila in ('N','L','T','R')
 						and alatila != 'X'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// Tässä meidän on hieman fiilattava tätä muuttujaa
-			$laskurow["jaksotettu"] = $laskurow["tunnus"];
+			if($laskurow["tunnusnippu"] > 0) {
+				$laskurow["jaksotettu"] = $laskurow["tunnusnippu"];
+			}
+			else {
+				$laskurow["jaksotettu"] = $laskurow["tunnus"];
+			}
+			
 
 			// Jos tilaus on slittaantunut useaksi osaksi laitetaan maksusoppari koskemaan kaikkia splittejä jotka periytyvät samalta tilaukselta
 			if ($laskurow["vanhatunnus"] > 0) {
@@ -21,7 +27,7 @@
 							SET jaksotettu = '$laskurow[jaksotettu]'
 							WHERE yhtio 	= '$kukarow[yhtio]'
 							and vanhatunnus = '$laskurow[vanhatunnus]'
-							and tila in ('N','L','T')
+							and tila in ('N','L','T','R')
 							and alatila != 'X'";
 				$result = mysql_query($query) or pupe_error($query);
 
@@ -29,7 +35,7 @@
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							and jaksotettu  = '$laskurow[jaksotettu]'
-							and tila in ('N','L','T')
+							and tila in ('N','L','T','R')
 							and alatila != 'X'";
 				$result = mysql_query($query) or pupe_error($query);
 				$posrow = mysql_fetch_array($result);
@@ -417,8 +423,8 @@
 			}
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $tot)."</td></tr>";
 			
-			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput_veroton)."</td></tr>";
-			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput_verolli)."</td></tr>";
+			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä")." ".t("veroton").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput_veroton)."</td></tr>";
+			echo "<tr><td class='back' colspan = '3'></td><th>".t("Ei jaksotettavaa yhteensä")." ".t("verollinen").":</th><td class='spec' align='right'>".sprintf('%.2f', $loput_verolli)."</td></tr>";
 			
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Tilaus yhteensä")." ".t("veroton").":</th><td class='spec' align='right'>".sprintf('%.2f', $ihakaikki_veroton)."</td></tr>";
 			echo "<tr><td class='back' colspan = '3'></td><th>".t("Tilaus yhteensä")." ".t("verollinen").":</th><td class='spec' align='right'>".sprintf('%.2f', $ihakaikki_verolli)."</td></tr>";

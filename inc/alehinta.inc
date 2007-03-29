@@ -14,11 +14,15 @@
 	// $ale (aleprosentti)
 	// if ($yhtiorow["asiakashinta_netto"] == "") jos kenttä on tyhjä niin asiakashinnat ovat nettohintoja, muuten ovat ei-nettohintoja
 	// $aperuste (selkokielinen teksti mihin päädyttiin)
+	// alehinta_alv jos on joku erikoialv tälle hinnaston tuotteelle
 
 	$aperuste = "";
 
 	// oletetaan yhtiön valuutta jos sitä ei tiedetä
 	if ($laskurow["valkoodi"] == "") $laskurow["valkoodi"] = $yhtiorow["valkoodi"];
+
+	// oletetaan tuotteen alvi
+	$alehinta_alv = "";
 
 	// haetaan asiakkaan tiedot
 	$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
@@ -198,13 +202,14 @@
 		// 5. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-			$query = "	SELECT hinta, laji
+			$query = "	SELECT hinta, laji, alv
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
 						and tuoteno != ''
 						and laji in ('N', 'E')
 						and valkoodi = '$laskurow[valkoodi]'
+						and maakoodi = '$laskurow[maa]'
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
@@ -215,6 +220,7 @@
 				$hrow       = mysql_fetch_array ($hresult);
 				$hinta 		= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
 				$netto		= $hrow["laji"];
+				if ($hrow["alv"] != 0) $alehinta_alv = $hrow["alv"];
 				$aperuste  .= "Tuotteen hinnastohinta laskun valuutassa";
 			}
 		}
@@ -222,13 +228,14 @@
 		// 6. hinnasto.hinta tuotteen nettohinta hinnastosta yhtiön valuutassa
 		if ($hinta == 0) {
 
-			$query = "	SELECT hinta, laji
+			$query = "	SELECT hinta, laji, alv
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
 						and tuoteno != ''
 						and laji in ('N', 'E')
 						and valkoodi in ('$yhtiorow[valkoodi]','')
+						and maakoodi in ('$laskurow[maa]','')
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
@@ -239,6 +246,7 @@
 				$hrow       = mysql_fetch_array ($hresult);
 				$hinta 		= $hrow["hinta"];
 				$netto		= $hrow["laji"];
+				if ($hrow["alv"] != 0) $alehinta_alv = $hrow["alv"];
 				$aperuste  .= "Tuotteen hinnastohinta yhtiön valuutassa";
 			}
 		}
@@ -578,13 +586,14 @@
 		// 12. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-			$query = "	SELECT hinta, laji
+			$query = "	SELECT hinta, laji, alv
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
 						and tuoteno != ''
 						and laji     = ''
 						and valkoodi = '$laskurow[valkoodi]'
+						and maakoodi = '$laskurow[maa]'
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
@@ -595,6 +604,7 @@
 				$hrow       = mysql_fetch_array ($hresult);
 				$hinta 		= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
 				$netto		= $hrow["laji"];
+				if ($hrow["alv"] != 0) $alehinta_alv = $hrow["alv"];
 				$aperuste  .= "Tuotteen hinnastohinta laskun valuutassa";
 			}
 		}
@@ -602,13 +612,14 @@
 		// 13. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtion valuutassa
 		if ($hinta == 0) {
 
-			$query = "	SELECT hinta, laji
+			$query = "	SELECT hinta, laji, alv
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
 						and tuoteno != ''
 						and laji     = ''
 						and valkoodi in ('$yhtiorow[valkoodi]','')
+						and maakoodi in ('$laskurow[maa]','')
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
@@ -619,6 +630,7 @@
 				$hrow       = mysql_fetch_array ($hresult);
 				$hinta 		= $hrow["hinta"];
 				$netto		= $hrow["laji"];
+				if ($hrow["alv"] != 0) $alehinta_alv = $hrow["alv"];
 				$aperuste  .= "Tuotteen hinnastohinta yhtiön valuutassa";
 			}
 		}

@@ -252,7 +252,7 @@
 				}
 				else {
 					// katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
-					list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($tuoteno, "ORVOT");
+					list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($tuoteno, "ORVOT", "", "", "", "", "", "", $laskurow["toim_maa"]);
 					$orvot *= -1;
 				}
 
@@ -276,7 +276,7 @@
 				while ($zrow = mysql_fetch_array($zres)) {
 
 					// Saldolliset tuotteet
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"]);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"]);
 
 					if ($debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta<br>";
 

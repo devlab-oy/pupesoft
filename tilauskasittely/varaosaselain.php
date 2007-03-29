@@ -32,6 +32,16 @@
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</form>";
+		
+		$query = "select toim_maa from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
+		$maaresult = mysql_query($query) or pupe_error($query);
+		$maarow = mysql_fetch_array($result);
+		
+	}
+	elseif ($kukarow["extranet"] != "") {
+		$query = "select if(toim_nimi='',maa,toim_maa) toim_maa from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
+		$maaresult = mysql_query($query) or pupe_error($query);
+		$maarow = mysql_fetch_array($result);
 	}
 
 	if ($toiminto == "LISAARIVI" and $kukarow["kesken"] != 0) {
@@ -272,7 +282,7 @@
 			mysql_select_db ($dbkanta, $link) or die ("Tietokanta ei löydy palvelimelta..");
 
 			foreach($konsyhtiot as $yhtio) {
-				list(, , $myytavissa) = saldo_myytavissa($tuote["tuoteno"], "", 0, $yhtio);
+				list(, , $myytavissa) = saldo_myytavissa($tuote["tuoteno"], "", 0, $yhtio, "", "", "", "", "$maarow[toim_maa]");
 				$saldo += $myytavissa;
 			}
 

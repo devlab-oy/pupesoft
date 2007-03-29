@@ -73,7 +73,8 @@ if ($tee=='update') {
 				osoite			= '$osoite',
 				postino			= '$postino',
 				postitp			= '$postitp',
-				maa				= '$maa'
+				maa				= '$maa',
+				sallitut_maat	= '$sallitut_maat'
 				where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 

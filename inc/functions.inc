@@ -278,7 +278,7 @@ if (!function_exists("mm_pt")) {
 }
 
 if (!function_exists("saldo_myytavissa")) {
-	function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '') {
+	function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '') {
 
 		// Tämä funktio palauttaa myytävissä olevan saldon sallituista varastoista (tyyppi='')
 		// Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
@@ -397,6 +397,10 @@ if (!function_exists("saldo_myytavissa")) {
 								and tuotepaikat.hyllytaso = '$hyllytaso' ";
 				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 			}
+			
+			if ($maa != "") {
+				$valinta1 .= " (varastopaikat.sallitut_maat like '%$maa%' or varastopaikat.sallitut_maat = '') and ";
+			}
 
 			// Saldo varastoista
 			$query = "	SELECT tuotepaikat.*, varastopaikat.tyyppi
@@ -410,7 +414,6 @@ if (!function_exists("saldo_myytavissa")) {
 						$valinta2
 						$valinta3";
 			$result = mysql_query($query) or die($query);
-
 			
 			if (mysql_num_rows($result) == 0) {
 				return array(FALSE, FALSE, FALSE);

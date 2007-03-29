@@ -600,7 +600,7 @@
 				$kokonaismyytavissa = 0;
 
 				foreach($konsyhtiot as $yhtio) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $yhtio);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"]);
 					$kokonaismyytavissa += $myytavissa;
 				}
 
@@ -654,6 +654,11 @@
 				echo "</td>";
 			}
 			else {
+				
+				if ($laskurow["toim_maa"] != '') {
+					$sallitut_maat_lisa = " and (varastopaikat.sallitut_maat like '%$laskurow[toim_maa]%' or varastopaikat.sallitut_maat = '') ";
+				}
+				
 				// K‰yd‰‰n l‰pi tuotepaikat
 				$query = "	SELECT tuotepaikat.*,
 							varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
@@ -662,6 +667,7 @@
 							JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+							$sallitut_maat_lisa
 							WHERE tuotepaikat.$yhtiot
 							and tuotepaikat.tuoteno = '$row[tuoteno]'
 							ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
@@ -679,7 +685,7 @@
 
 					while ($saldorow = mysql_fetch_array ($varresult)) {
 
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], $laskurow["toim_maa"]);
 
 						// hoidetaan pois problematiikka jos meill‰ on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
 						if ($orvot > 0) {

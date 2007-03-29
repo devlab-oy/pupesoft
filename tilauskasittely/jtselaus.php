@@ -16,12 +16,15 @@
 		else {
 			echo "<font class='head'>".t("JT rivit")."</font><hr>";	
 		}
-		
-		if (!is_array($varastosta) and $vainvarastosta != "") {
+
+		if ($vainvarastosta != "") {
+			$varastosta = array();
 			$varastosta[$vainvarastosta] = $vainvarastosta;
 		}
 	}
-
+	
+	$asiakasmaa = "";
+	
 	//Extranet käyttäjille pakotetaan aina tiettyjä arvoja
 	if ($kukarow["extranet"] != "") {
 		$query  = "	SELECT *
@@ -37,6 +40,12 @@
 
 			$asiakasno 		= $asiakas["ytunnus"];
 			$asiakasid		= $asiakas["tunnus"];
+			if ($asiakas["toim_nimi"] == "") {
+				$asiakasmaa = $asiakas["maa"];
+			}
+			else {
+				$asiakasmaa = $asiakas["toim_maa"];				
+			}
 
 			$tyyppi 		= "T";
 			$tuotenumero	= "";
@@ -47,6 +56,17 @@
 			if ($tee == "") {
 				$tee = "JATKA";
 			}
+		}
+	}
+	elseif ($tilaus_on_jo != '') {
+		$query  = "	SELECT *
+					FROM lasku
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 1) {
+			$asiakas = mysql_fetch_array($result);
+			$asiakasmaa = $asiakas["toim_maa"];
 		}
 	}
 
@@ -571,7 +591,7 @@
 
 								if ($perherow["ei_saldoa"] == "") {
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "", $vara);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "", $vara, "", "", "", "", "", $asiakasmaa);
 
 										$lapsitoimittamatta -= $myytavissa;
 									}
@@ -594,8 +614,7 @@
 						
 						if ($jtrow["ei_saldoa"] == "") {
 							foreach ($varastosta as $vara) {
-								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "", $vara);
-
+								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "", $vara, "", "", "", "", "", $asiakasmaa);
 								$kokonaismyytavissa += $myytavissa;
 							}
 
@@ -690,9 +709,13 @@
 								}
 								else {
 									if ($kukarow["extranet"] == "") {
+										if ($asiakasmaa != '') {
+											$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
+										}
+										
 										$query = "	SELECT *
 													FROM varastopaikat
-													WHERE yhtio = '$kukarow[yhtio]'";
+													WHERE yhtio = '$kukarow[yhtio]' $asiakasmaalisa";
 										$vtresult = mysql_query($query) or pupe_error($query);
 
 										if (mysql_num_rows($vtresult) > 1) {
@@ -990,7 +1013,7 @@
 									$kokonaismyytavissa = 0;
 
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "", $vara);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "", $vara, "", "", "", "", "", $asiakasmaa);
 
 										$kokonaismyytavissa += $myytavissa;
 									}

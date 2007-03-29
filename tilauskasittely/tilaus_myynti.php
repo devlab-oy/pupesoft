@@ -2578,7 +2578,7 @@ if ($tee == '') {
 					}
 
 					if ($row["var"] == "J" and ($laskurow["alatila"] == "T" or $laskurow["alatila"] == "U")) {
-						list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "", 0, "");
+						list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"]);
 
 						if($jtapu_myytavissa >= $kpl_ruudulle) {
 							echo "	<form action='$PHP_SELF' method='post'>

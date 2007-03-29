@@ -18,8 +18,8 @@
 	//Jotta m‰‰ritelty rajattu n‰kym‰ olisi myˆs k‰yttˆoikeudellisesti tiukka
 	$aputoim = $toim;
 	list($toim, $alias_set, $rajattu_nakyma) = explode('!!!', $toim);
-	
-	
+
+
 	// Tutkitaan v‰h‰n alias_settej‰ ja rajattua n‰kym‰‰
 	$al_lisa = " and selitetark_2 = '' ";
 
@@ -31,7 +31,7 @@
 			$al_lisa = " and (selitetark_2 = '$alias_set' or selitetark_2 = '') ";
 		}
 	}
-	
+
 	// pikkuh‰kki, ettei rikota css kentt‰‰
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucss)) {
 		$t[$cssi] = $apucss;
@@ -105,20 +105,20 @@
 
 		// Tarkistetaan
 		$errori = '';
-		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
-			
+		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
+
 			//P‰iv‰m‰‰r‰ spesiaali
 			if (isset($tpp[$i])) {
 				if ($tvv[$i] < 1000 and $tvv[$i] > 0) $tvv[$i] += 2000;
-				
+
 				$t[$i] = sprintf('%04d', $tvv[$i])."-".sprintf('%02d', $tkk[$i])."-".sprintf('%02d', $tpp[$i]);
-			
+
 				if(!checkdate($tkk[$i],$tpp[$i],$tvv[$i]) and ($tkk[$i]!= 0 or $tpp[$i] != 0)) {
 					$virhe[$i] = t("Virheellinen p‰iv‰m‰‰r‰");
 					$errori = 1;
 				}
 			}
-			
+
 			// Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
 			$al_nimi   = mysql_field_name($result, $i);
 
@@ -134,7 +134,7 @@
 				$virhe[$i] = t("Sinulla ei ole oikeutta p‰ivitt‰‰ t‰t‰ kentt‰‰");
 				$errori = 1;
 			}
-			
+
 			require "inc/".$toim."tarkista.inc";
 		}
 
@@ -187,17 +187,17 @@
 					$lopetus .= "?";
 				}
 				else {
-					$lopetus .= "&";	
+					$lopetus .= "&";
 				}
-				
-				$lopetus .= "yllapidossa=$toim&yllapidontunnus=$tunnus";	
-				
+
+				$lopetus .= "yllapidossa=$toim&yllapidontunnus=$tunnus";
+
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;
 			}
 
 			$uusi 	 = 0;
-			
+
 			if (isset($yllapitonappi)) {
 				$tunnus  = 0;
 				$kikkeli = 0;
@@ -207,11 +207,11 @@
 			}
 		}
 	}
-	
+
 	// Rakennetaan hakumuuttujat kuntoon
 	$array = split(",", $kentat);
     $count = count($array);
-    
+
 	for ($i=0; $i<=$count; $i++) {
     	if (strlen($haku[$i]) > 0) {
         	$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
@@ -224,7 +224,7 @@
 
 	// Nyt selataan
 	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
-		
+
         $query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa ";
         $query .= "$ryhma ORDER BY $jarjestys LIMIT 350";
 
@@ -233,11 +233,11 @@
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type='hidden' name='uusi' value='1'>
-					<input type='hidden' name='toim' value='$aputoim'>					
+					<input type='hidden' name='toim' value='$aputoim'>
 					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form><br>";
 		}
-		
-		echo "	<table><tr>
+
+		echo "	<table><tr class='aktiivi'>
 				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 				<input type='hidden' name='toim' value='$aputoim'>";
 
@@ -256,7 +256,7 @@
 		echo "</tr>";
 
 		while ($trow=mysql_fetch_array ($result)) {
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			for ($i=1; $i<mysql_num_fields($result); $i++) {
 				if ($i == 1) {
 					if (trim($trow[1]) == '') $trow[1] = "".t("*tyhj‰*")."";
@@ -276,7 +276,7 @@
 		if ($oikeurow['paivitys'] != 1) {
 			echo "<b>".t("Sinulla ei ole oikeuksia p‰ivitt‰‰ t‰t‰ tietoa")."</b><br>";
 		}
-		
+
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa' name='mainform' method = 'post'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
@@ -290,9 +290,9 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
 
-		echo "<table width='100%'><tr><td class='back' valign='top'>";
+		echo "<table width='100%'><tr class='aktiivi'><td class='back' valign='top'>";
 		echo "<table>";
-		
+
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
 
 			$nimi = "t[$i]";
@@ -342,7 +342,7 @@
 			// $tyyppi --> 4 rivi‰ ei n‰ytet‰ ollenkaan, mutta sen arvo p‰ivitet‰‰n
 
 			if ($tyyppi > 0 and $tyyppi < 4) {
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				echo "<th align='left'>$otsikko</th>";
 			}
 
@@ -353,10 +353,10 @@
 				echo "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
 			}
 			elseif ($tyyppi == 1.5) {
-				$vva = substr($trow[$i],0,4);		
+				$vva = substr($trow[$i],0,4);
 				$kka = substr($trow[$i],5,2);
 				$ppa = substr($trow[$i],8,2);
-				
+
 				echo "<td>
 						<input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
 						<input type = 'text' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>

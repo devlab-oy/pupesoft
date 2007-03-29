@@ -26,11 +26,15 @@
 		if (strtoupper($trow[$i]) == 'SEB') {
 			$sel4 = "SELECTED";
 		}
+		if (strtoupper($trow[$i]) == 'OKO') {
+			$sel5 = "SELECTED";
+		}
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value='NORDEA' $sel2> ".t("Nordea Factoring")."</option>";
 		$ulos .= "<option value='SAMPO' $sel3> ".t("Sampo Factoring")."</option>";
 		$ulos .= "<option value='SEB' $sel4> ".t("SEB Factoring")."</option>";
+		$ulos .= "<option value='OKO' $sel5> ".t("OKO Factoring")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

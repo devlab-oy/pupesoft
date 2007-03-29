@@ -49,25 +49,46 @@ else {
 			$tilino_eu 		= (int) $yhtiorow['myynti_marginaali'];
 			$tilino_ei_eu	= (int) $yhtiorow['myynti_marginaali'];
 			
-			$query = "	SELECT GROUP_CONCAT(ostorivitunnus SEPARATOR ',') ostotunnukset, GROUP_CONCAT(sarjanumero SEPARATOR ', ') sarjanumerot 
-						from sarjanumeroseuranta 
-						where yhtio = '$kukarow[yhtio]' 
-						and myyntirivitunnus in ($xrow[tunnukset])";
-			$sarjares1 = mysql_query($query) or pupe_error($query);
-			$sarjarow1 = mysql_fetch_array($sarjares1);
-						
-			$query = "	SELECT round(sum(hinta*(1-ale/100)),2) ostosumma
-						FROM tilausrivi
-						WHERE yhtio='$kukarow[yhtio]'
-						and tunnus in ($sarjarow1[ostotunnukset])";
-			$sarjares2 = mysql_query($query) or pupe_error($query);
-			$sarjarow2 = mysql_fetch_array($sarjares2);
-									
+			// Tuotteiden ostohinnat
+			$query = "	SELECT round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0)), 2) ostosumma
+						FROM sarjanumeroseuranta
+						JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus 
+						WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
+						and sarjanumeroseuranta.myyntirivitunnus in ($xrow[tunnukset])
+						HAVING ostosumma!=0";
+			$xsarjares = mysql_query($query) or pupe_error($query);
+			$sarjarow = mysql_fetch_array($xsarjares);
+							
+			$ostohinta = $sarjarow["ostosumma"];
+			
+			// Katsotaan onko sarjanumerolle liitetty kulukeikka
+			$query  = "	select lasku.laskunro
+						FROM sarjanumeroseuranta
+						JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
+						WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
+						and sarjanumeroseuranta.myyntirivitunnus in ($xrow[tunnukset])";
+			$keikkares = mysql_query($query) or pupe_error($query);
+							
+			while($kulukeikkarow = mysql_fetch_array($keikkares)) {
+				// Haetaan kaikki keikkaan liitettyjen laskujen summa
+				$query = "	SELECT round(sum(summa*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
+							FROM lasku
+							WHERE yhtio		= '$kukarow[yhtio]'
+							and tila 		= 'K'
+							and laskunro 	= '$kulukeikkarow[laskunro]'
+							and vanhatunnus <> 0
+							and vienti in ('B','E','H')";
+				$kukeikkares = mysql_query($query) or pupe_error($query);
+				$kulukulurow = mysql_fetch_array($kukeikkares);
+				
+				$ostohinta	+= $kulukulurow["kulusumma"];
+			}
+					
 			//Myyntimarginaali
-			$marginaali = $xrow['summa'] - $sarjarow2["ostosumma"];
+			$marginaali = $xrow['summa'] - $ostohinta;
 			
 			//Tilioidaan veroton osuus marginaalimyynnistä
-			$tiliointisumma = $ostosumma = $sarjarow2["ostosumma"];
+			$tiliointisumma = $ostosumma = $ostohinta;
 									
 			//Tiliöidään margiinaalimyyntitapahtuma 
 			$query = "	INSERT into tiliointi set

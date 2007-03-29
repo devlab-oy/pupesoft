@@ -168,7 +168,7 @@ if ($tee == "") {
 				$rivi["deadline"] = "";
 			}
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			echo "<form method='post' name='todo' action='todo.php$sortlisa' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='valmis'>";
@@ -228,7 +228,7 @@ if ($tee == "") {
 
 			$numero ++;
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa'>$numero</a></th>";
 			echo "<td width='550'>$rivi[kuvaus]</td>";
 			echo "<td>$rivi[pyytaja]</td>";

@@ -16,7 +16,7 @@
 
 	if ($tee != '' and $ytunnus != '') {	// Valitaan asiakas, jos sitä ei tiedetä
 
-		$muutparametrit = $laji . "/" . $vv . "/" . $kk . "/" . $pp . "/" . $tee;
+		$muutparametrit = $laji . "/" . $vv . "/" . $kk . "/" . $pp . "/" . $tee . "/" . $maksuehto;
 
 		if (substr($laji,0,1) == 'M') {
 			include "asiakashaku.inc";
@@ -55,8 +55,31 @@
 				<option value='MK' $sel[MK]>".t("myyntilaskut konserni")."
 				<option value='O'  $sel[O]>".t("ostolaskut")."
 				<option value='OK' $sel[OK]>".t("ostolaskut konserni")."
-				</select></td>
-				<tr><th>".t("Näytä laskut, joilta puuttuu kaikki tiliöinnit")."	</th>
+				</select></td>";
+		
+		echo "<tr><th>".t("Maksuehto").":</th>";
+		echo "<td colspan='3'><select name='maksuehto'>";
+		echo "<option value=''>".t("Ei valintaa")."";
+
+		$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').") mehto
+					FROM maksuehto
+					".avain('join','MEHTOKATXT_')."
+					".avain('join2','MEHTOTXT_')."
+					WHERE maksuehto.yhtio = '$kukarow[yhtio]' 
+					and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$srow[maa]%')
+					order by maksuehto.jarjestys, mehto, maksuehto.tunnus";
+		$mresult = mysql_query($query) or pupe_error($query);
+
+		while($row=mysql_fetch_array($mresult)) {
+			$sel = "";
+			if ($row[0] == $maksuehto) {
+				$sel = 'selected';
+			}
+			echo "<option value='$row[0]' $sel>$row[1]";
+		}
+		echo "</select></td>";
+		
+		echo "<tr><th>".t("Näytä laskut, joilta puuttuu kaikki tiliöinnit")."	</th>
 				<td colspan='3'><input type = 'checkbox' name = 'rikki'></td></tr>
 				<tr><th>".t("Vain toimittaja/asiakas")."	</th>
 				<td colspan='3'><input type = 'text' name = 'ytunnus' value='$ytunnus'></td></tr>
@@ -167,6 +190,7 @@
 		else {
 			$lisa =  "";
 			$lisa2 = "";
+			$lisa3 = "";
 
 			if ($asiakasid != '')  {
 				$lisa = "and liitostunnus='$asiakasid'";
@@ -175,6 +199,10 @@
 			}
 			else {
 				$indeksi = " use index (yhtio_tila_mapvm)";
+			}
+			
+			if ($maksuehto != '') {
+				$lisa3 = " and lasku.maksuehto = '$maksuehto' ";
 			}
 
 			$tili=0;
@@ -197,6 +225,7 @@
 						and tila 	= 'U'
 						and alatila	= 'X'
 						$lisa
+						$lisa3
 						GROUP BY 1,3
 						ORDER BY 1,3";
 

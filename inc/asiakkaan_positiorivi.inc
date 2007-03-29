@@ -10,10 +10,9 @@
 	
 	if (mysql_field_name($result, $i) == "asiakkaan_kohde") {
 
-		if ($kohde != ''){
-			echo "kohde $kohde";
-			echo "<input type='hidden' name='$nimi' value='$kohde'>";
-			$trow[$i] = $kohde;
+		if ($asiakkaan_kohde != ''){
+			$trow[$i] = $asiakkaan_kohde;
+			$tyyppi = 3;
 		}
 		elseif($trow[$i] != "") {
 			$query = "	SELECT concat_ws(' - ', asiakkaan_kohde.kohde, left(asiakas.nimi, 30)) kohde
@@ -24,13 +23,11 @@
 			$arow = mysql_fetch_array($aresult);		
 			$ulos = "<td><input type='hidden' name='$nimi' value ='$trow[$i]'>$trow[$i] - $arow[kohde]</td>";
 
-
 	 		$tyyppi = 2;
 			$jatko = 0;
 		}
 	}
 
-	
 	if (mysql_field_name($result, $i) == "lisannyt" or
 		mysql_field_name($result, $i) == "lisatty" or
 		mysql_field_name($result, $i) == "muokannut" or

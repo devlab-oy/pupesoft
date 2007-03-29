@@ -195,6 +195,29 @@
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;
 			}
+			
+			if($suljeYllapito == "asiakkaan_kohde") {
+				$query = "SELECT kohde from asiakkaan_kohde where tunnus = $tunnus";
+				$result = mysql_query($query) or pupe_error($query);
+				$aburow = mysql_fetch_array($result);
+				echo "<a href='#' onclick=\"suljeYllapito('$suljeYllapito','$tunnus','$tunnus - $aburow[kohde]');\">Sulje ikkuna</a>";
+				exit;
+			}
+			if($suljeYllapito == "asiakkaan_positio") {
+				$query = "SELECT positio from asiakkaan_positio where tunnus = $tunnus";
+				$result = mysql_query($query) or pupe_error($query);
+				$aburow = mysql_fetch_array($result);
+				echo "<a href='#' onclick=\"suljeYllapito('$suljeYllapito','$tunnus','$tunnus - $aburow[positio]');\">Sulje ikkuna</a>";
+				exit;
+			}
+			if($suljeYllapito == "yhteyshenkilo_tekninen" or $suljeYllapito == "yhteyshenkilo_kaupallinen") {
+				$query = "SELECT nimi from yhteyshenkilo where tunnus = $tunnus";
+				$result = mysql_query($query) or pupe_error($query);
+				$aburow = mysql_fetch_array($result);
+				echo "<a href='#' onclick=\"suljeYllapito('$suljeYllapito','$tunnus','$aburow[nimi]');\">Sulje ikkuna</a>";
+				exit;
+			}
+			
 
 			$uusi 	 = 0;
 
@@ -281,6 +304,7 @@
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
+		echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";		
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
 
 		// Kokeillaan geneeristä
@@ -408,6 +432,7 @@
 						<input type = 'hidden' name = 'toim' value='$aputoim'>
 						<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+						<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>						
 						<input type = 'hidden' name = 'del' value ='1'>
 						<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'></form>";
 				}

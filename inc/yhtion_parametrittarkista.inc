@@ -12,15 +12,15 @@
 		//Tämä turvaan
 		$tmp_lasku_polku_http = $t[$i];
 	}
-	
+
 	//	TODO ale ja ennakkomaksutuotteet voisi tarkastaa vain jos tarpeellista
 	if (mysql_field_name($result, $i) == "maksuehto_tuotenumero" or
 	    mysql_field_name($result, $i) == "rahti_tuotenumero" or
 	    mysql_field_name($result, $i) == "alennus_tuotenumero" or
 		mysql_field_name($result, $i) == "ennakkomaksu_tuotenumero") {
-		
+
 		$tuote = trim($t[$i]);
-		
+
 		// katotaan löytyykö tällänen saldoton tuote
 		if ($tuote != "") {
 
@@ -65,7 +65,7 @@
 				$errori = 1;
 			}
 		}
-		if (trim($t[$i]) != ''  and $tmp_lasku_polku_http == '') {
+		if (trim($t[$i]) != ''  and $tmp_lasku_polku_http == '' and mysql_field_name($result, $i) == "lasku_polku_abs") {
 			$virhe[$i] .= t("Jos täytät tämän kentän, niin täytä myös lasku_polku_http-kenttä");
 			$errori = 1;
 		}

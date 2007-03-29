@@ -290,7 +290,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
 
-		echo "<table width='100%'><tr class='aktiivi'><td class='back' valign='top'>";
+		echo "<table width='100%'><tr><td class='back' valign='top'>";
 		echo "<table>";
 
 		for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
@@ -342,7 +342,7 @@
 			// $tyyppi --> 4 riviä ei näytetä ollenkaan, mutta sen arvo päivitetään
 
 			if ($tyyppi > 0 and $tyyppi < 4) {
-				echo "<tr class='aktiivi'>";
+				echo "<tr>";
 				echo "<th align='left'>$otsikko</th>";
 			}
 

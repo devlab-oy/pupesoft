@@ -587,24 +587,51 @@
 			}
 
 			$edtuoteno = $row["sorttauskentta"];
-
+			
 			if ($row['ei_saldoa'] != '' and $kukarow["extranet"] == "") {
 				echo "<td valign='top' class='green'>".t("Saldoton")."</td>";
 			}
-			elseif ($row['ei_saldoa'] != '' and $kukarow["extranet"] != "") {
-				echo "<td valign='top' class='green'>".t("On")."</td>";
-			}
 			elseif ($kukarow["extranet"] != "") {
-
+				
+				$query =	"select * 
+							from tuoteperhe
+							join tuote on tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno and ei_saldoa = ''
+							where tuoteperhe.yhtio = '$kukarow[yhtio]' and isatuoteno = '$row[tuoteno]' and tyyppi in ('','P')";
+				$isiresult = mysql_query($query) or pupe_error($query);
+				
 				// katotaan paljonko on myytävissä
 				$kokonaismyytavissa = 0;
-
-				foreach($konsyhtiot as $yhtio) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"]);
-					$kokonaismyytavissa += $myytavissa;
+				
+				if ($row['ei_saldoa'] == '') {
+					foreach($konsyhtiot as $yhtio) {
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"]);
+						$kokonaismyytavissa += $myytavissa;
+					}
 				}
-
-				if ($kokonaismyytavissa > 0) {
+				
+				$lapset=mysql_num_rows($isiresult);
+				$oklapset=0;
+				
+				if ($lapset > 0) {
+					while ($isirow = mysql_fetch_array($isiresult)) {
+						$lapsikokonaismyytavissa = 0;
+						foreach($konsyhtiot as $yhtio) {
+							list($lapsisaldo, $lapsihyllyssa, $lapsimyytavissa) = saldo_myytavissa($isirow["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"]);
+							$lapsikokonaismyytavissa += $lapsimyytavissa;
+						}
+						if ($lapsikokonaismyytavissa > 0) {
+							$oklapset++;
+						}
+					}
+				}
+				
+				if ($lapset > 0 and $lapset == $oklapset and ($row['ei_saldoa'] != '' or $kokonaismyytavissa > 0)) {
+					echo "<td valign='top' class='green'>".t("On")."</td>";
+				}
+				elseif ($lapset > 0 and $lapset <> $oklapset) {
+					echo "<td valign='top' class='red'>".t("Ei")."</td>";
+				}
+				elseif ($kokonaismyytavissa > 0 or $row['ei_saldoa'] != '') {
 					echo "<td valign='top' class='green'>".t("On")."</td>";
 				}
 				else {

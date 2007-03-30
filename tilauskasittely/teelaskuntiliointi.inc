@@ -35,20 +35,13 @@ else {
 	// Tehdaan myynnin kirjaukset
 	while ($xrow = mysql_fetch_array ($xresult)) {
 				
+		$lukko 		= "";
 		$tunnus 	= $lasku['tunnus'];
 		$tapvm		= $lasku['tapvm'];
 		$loppusumma	= $lasku['summa'];
 				
 		// Valitaan myyntitili, jos rivillä on alv yli 500 niin kyseessä on marginaalimyyntiä
 		if ($xrow["alv"] >= 500 and $xrow["marginaaliostot"] == "EI") {
-			// Valitaan myyntitili, tässä on marginaalimyyntiä
-			
-			$selite 	= "Marginaaliverolasku/Myynti ". $lasku['nimi']." ".$lasku['nimitark'];
-			
-			$tilino 		= (int) $yhtiorow['myynti_marginaali'];
-			$tilino_eu 		= (int) $yhtiorow['myynti_marginaali'];
-			$tilino_ei_eu	= (int) $yhtiorow['myynti_marginaali'];
-			
 			// Tuotteiden ostohinnat
 			$query = "	SELECT round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0)), 2) ostosumma
 						FROM sarjanumeroseuranta
@@ -59,7 +52,7 @@ else {
 			$xsarjares = mysql_query($query) or pupe_error($query);
 			$sarjarow = mysql_fetch_array($xsarjares);
 							
-			$ostohinta = $sarjarow["ostosumma"];
+			$ostohinta = (float) $sarjarow["ostosumma"];
 			
 			// Katsotaan onko sarjanumerolle liitetty kulukeikka
 			$query  = "	select lasku.laskunro
@@ -83,6 +76,13 @@ else {
 				
 				$ostohinta	+= $kulukulurow["kulusumma"];
 			}
+			
+			// Valitaan myyntitili, tässä on marginaalimyyntiä
+			$selite 	= "Marginaaliverolasku/Myynti ". $lasku['nimi']." ".$lasku['nimitark'];
+			
+			$tilino 		= (int) $yhtiorow['myynti_marginaali'];
+			$tilino_eu 		= (int) $yhtiorow['myynti_marginaali'];
+			$tilino_ei_eu	= (int) $yhtiorow['myynti_marginaali'];
 					
 			//Myyntimarginaali
 			$marginaali = $xrow['summa'] - $ostohinta;
@@ -102,19 +102,20 @@ else {
 						summa		= $tiliointisumma*-1,
 						vero 		= 0,
 						selite 		= '$selite',
-						lukko 		= '',
+						lukko 		= '1',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$laskutusres = mysql_query($query) or pupe_error($query);
 						
 			//Sitten pitää vielä tilioidä itse marginaali joka on normaalia verollista myyntiä
-			$selite 	= "Marginaaliverolasku/Marginaali ". $lasku['nimi']." ".$lasku['nimitark'];
+			$selite 		= "Marginaaliverolasku/Marginaali ". $lasku['nimi']." ".$lasku['nimitark'];
 			$tiliointisumma = $marginaali;
+			$lukko			= "1";
 			
 			//Poistetaan 500 yksikköä alvista
 			$xrow['alv'] = $xrow['alv'] - 500;
 			
-			$alv = round($xrow['alv'] / 100 * $tiliointisumma,2);
+			$alv = round($tiliointisumma - ($tiliointisumma / (1+ $xrow['alv'] / 100)), 2);
 			$tiliointisumma -= $alv;
 		}
 		elseif ($xrow["alv"] >= 500 and $xrow["marginaaliostot"] == "KYLLA") {
@@ -160,7 +161,7 @@ else {
 
 		//Tiliöidään myynti
 		$query = "	INSERT into tiliointi set
-					yhtio 		='$kukarow[yhtio]',
+					yhtio 		= '$kukarow[yhtio]',
 					ltunnus		= '$tunnus',
 					tilino		= '$tilino',
 					kustp 		= '$xrow[kustp]',
@@ -170,10 +171,12 @@ else {
 					summa 		= $tiliointisumma * -1,
 					vero 		= '$xrow[alv]',
 					selite 		= '$selite',
-					lukko 		= '',
+					lukko 		= '$lukko',
 					laatija 	= '$kukarow[kuka]',
 					laadittu 	= now()";
 		$laskutusres = mysql_query($query) or pupe_error($query);
+
+		$lukko = "";
 
 		//Tiliöidaan ALV, jos sitä on
 		if ($xrow['alv'] > 0) {

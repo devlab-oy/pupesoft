@@ -299,9 +299,43 @@
 
 		//ja katotaan vaatiiko joku maksuehto uusia tilauksia
 		while ($laskurow = mysql_fetch_array($res)) {
+
+			$query    = "	SELECT tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno
+							FROM tilausrivi use index (yhtio_otunnus)
+							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.otunnus = '$laskurow[tunnus]'";
+			$sarjares1 = mysql_query($query) or pupe_error($query);
+
+			while($srow1 = mysql_fetch_array($sarjares1)) {
+				if ($srow1["varattu"] < 0) {
+					$tunken = "ostorivitunnus";
+				}
+				else {
+					$tunken = "myyntirivitunnus";
+				}
+
+				$query = "	SELECT count(*) kpl 
+							FROM sarjanumeroseuranta
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$srow1[tuoteno]' 
+							and $tunken = '$srow1[tunnus]'";
+				$sarjares2 = mysql_query($query) or pupe_error($query);
+				$srow2 = mysql_fetch_array($sarjares2);
+				
+				if ($srow2["kpl"] != abs($srow1["varattu"])) {
+					$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+					
+					if ($silent == "" or $silent == "VIENTI") {
+						$tulos_ulos_maksusoppari .= t("Tilaukselta puuttuu sarjanumeroita, ei voida laskuttaa").": $laskurow[tunnus] $laskurow[nimi]<br>\n";
+					}
+				}
+			}
+			
 			$query = " 	select *
 						from maksuehto
-						where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+						where yhtio='$kukarow[yhtio]' 
+						and tunnus='$laskurow[maksuehto]'";
 			$maresult = mysql_query($query) or pupe_error($query);
 			$maksuehtorow = mysql_fetch_array($maresult);
 
@@ -311,7 +345,7 @@
 				$updres = mysql_query($query) or pupe_error($query);
 
 				if ($silent == "" or $silent == "VIENTI") {
-					$tulos_ulos_maksusoppari .= t("Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $laskurow[tunnus] $laskurow[nimi]<br>\n<table>";
+					$tulos_ulos_maksusoppari .= t("Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $laskurow[tunnus] $laskurow[nimi]<br>\n";
 				}
 			}
 			else {

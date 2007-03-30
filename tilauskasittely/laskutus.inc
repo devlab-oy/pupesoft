@@ -165,7 +165,7 @@ else {
 				$sarjares = mysql_query($query) or pupe_error($query);
 				$sarjarow = mysql_fetch_array($sarjares);
 								
-				$ostohinta = $sarjarow["ostosumma"];
+				$ostohinta = (float) $sarjarow["ostosumma"];
 				
 				// Katsotaan onko sarjanumerolle liitetty kulukeikka
 				$query  = "	select lasku.laskunro

@@ -535,7 +535,7 @@ if ($tee == 'POISTA') {
 	$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] != "") {
+	if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] > 0) {
 		
 		echo "<font class='message'>".t("Osatoimitus")." $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
 		
@@ -743,7 +743,9 @@ if ($tee == "VALMIS") {
 	}
 
 	// ollaan käsitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..
-	if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] != "") {
+	if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] > 0) {
+
+		echo "<font class='message'>Projektin osatoimitus $otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";		
 
 		$tee				= '';
 		$tilausnumero		= $laskurow["tunnusnippu"];
@@ -1145,7 +1147,7 @@ if ($tee == '') {
 		echo "<tr>";
 		echo "<th align='left'>".t("Tilausnumero").":</th>";
 
-		if ($toim == "PROJEKTI" or $laskurow["tunnusnippu"] != 0) {
+		if ($toim == "PROJEKTI" or $laskurow["tunnusnippu"] > 0) {
 			
 			echo "<td><select Style=\"width: 230px; font-size: 8pt; padding: 0\" name='valitsetoimitus' onchange='submit();'>";
 					

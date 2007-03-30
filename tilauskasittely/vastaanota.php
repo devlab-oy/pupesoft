@@ -518,7 +518,7 @@
 						$haku
 						$myytili
 						and yhtio = '$kukarow[yhtio]'
-						and alatila in ('C','D')
+						and alatila in ('B','C','D')
 						ORDER by laadittu desc";
 			$result = mysql_query($query) or pupe_error($query);
 

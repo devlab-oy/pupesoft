@@ -2,9 +2,9 @@
 
 /* Tälle on anenttava
 
-$tuotoeno =	korjattava tuote
-$pvm = mihin päivään asti korjataan
-$uusihinta = mikä on tuon pvm:n oikea ostohinta (vai uusi keskihankintahinta!!?!)
+$tuoteno 	= korjattava tuote
+$pvm 		= mihin päivään asti korjataan
+$uusihinta 	= mikä on tuon pvm:n oikea ostohinta (vai uusi keskihankintahinta!!?!)
 $rivitunnus = mikä on tapahtuman tehneen rivin tunnus
 
 Palautetaan $jlerror, joka on 1, jos jotain epätavallista sattui
@@ -73,13 +73,13 @@ if (!function_exists("korjaalaskut")) {
 		$query = "	SELECT tuoteno, tilino, kustp, kohde, projekti, osasto, try
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]'
-					and tuoteno='$tuoteno'";
+					and tuoteno = '$tuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
 
  		// So far so good
 		if (mysql_num_rows($result) == 1) {
 
-			$tuote=mysql_fetch_array ($result);
+			$tuote = mysql_fetch_array ($result);
 
 			if ($korjuusiotunnus != 0) {
 				$lisa = " and uusiotunnus = '$korjuusiotunnus' ";
@@ -87,9 +87,9 @@ if (!function_exists("korjaalaskut")) {
 			else {
 				$lisa = "";
 			}
-
+			
 			//etstään tuotteen kaikki myyntitilausrivit
-			$query= "	SELECT otunnus oltunnus, uusiotunnus ltunnus, tunnus ttunnus, kpl, kate, rivihinta, laskutettuaika
+			$query= "	SELECT otunnus oltunnus, uusiotunnus ltunnus, tunnus ttunnus, kpl, kate, rivihinta, laskutettuaika, alv
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tyyppi = 'L'
@@ -97,14 +97,18 @@ if (!function_exists("korjaalaskut")) {
 						and laskutettuaika >= left('$alku',10)
 						and laskutettuaika <= left('$loppu',10)
 						$lisa";
-
-			if ($jalkilaskenta_debug > 1) echo "$query<br>";
 			$tilausriviresult = mysql_query($query) or pupe_error($query);
-
+			
+			if ($jalkilaskenta_debug > 1) echo "$query<br>";
 			if ($jalkilaskenta_debug >= 1) echo "<font class='message'>".t("Löydettiin tuotteelle")." $tuoteno ".mysql_num_rows($tilausriviresult)." ".t("tilausriviä").".</font><br>";
 
 			while ($tilausrivi = mysql_fetch_array ($tilausriviresult)) {
-
+				
+				// haetaan laskun tiedot
+				$query  = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausrivi[ltunnus]'";
+				$result = mysql_query($query) or pupe_error($query);
+				$lasku  = mysql_fetch_array($result);
+				
 				// katotaan saadaanko tehdä tiliöintejä
 				// tehdään tilikausi_alku ja korjauksen_alku muuttujista PHP:ssä vertailukelpoisia
 				list($tkvv,$tkkk,$tkpp) = split("-",$yhtiorow["tilikausi_alku"]);
@@ -122,12 +126,13 @@ if (!function_exists("korjaalaskut")) {
 					//Ok, löydämmekö vastaavan tiliöinnin laskulta
 					$query = "	SELECT *
 								FROM tiliointi
-				 				WHERE yhtio = '$kukarow[yhtio]'
-				 				and ltunnus='$tilausrivi[ltunnus]'
-				 				and tilino = '$yhtiorow[varastonmuutos]'
-				 				and kustp = '$tuote[kustp]'
-				 				and kohde = '$tuote[kohde]'
-				 				and projekti = '$tuote[projekti]'
+				 				WHERE yhtio 	= '$kukarow[yhtio]'
+				 				and ltunnus		= '$tilausrivi[ltunnus]'
+				 				and tilino 		= '$yhtiorow[varastonmuutos]'
+				 				and kustp 		= '$tuote[kustp]'
+				 				and kohde 		= '$tuote[kohde]'
+				 				and projekti 	= '$tuote[projekti]'
+								and korjattu 	= ''
 								ORDER BY summa desc
 								LIMIT 1";
 					$result = mysql_query($query) or pupe_error($query);
@@ -143,16 +148,17 @@ if (!function_exists("korjaalaskut")) {
 
 					// debug
 					if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Uusikate = $tilausrivi[rivihinta] - $tilausrivi[kpl] * $kehahin</font><br>";
-
+																				
 					// jos ei löydetä varastonmuutostiliöintiä ja kate on muuttunut...
 					if ($tilikpl == 0 and $muutos <> 0) {
 
 						// tutkaillaan ensiks josko kustannuspaikat, kohteet tai projektit on muuttunut...
 						$query = "	SELECT *
 									FROM tiliointi
-					 				WHERE yhtio = '$kukarow[yhtio]'
-					 				and ltunnus='$tilausrivi[ltunnus]'
-					 				and tilino = '$yhtiorow[varastonmuutos]'
+					 				WHERE yhtio  = '$kukarow[yhtio]'
+					 				and ltunnus  = '$tilausrivi[ltunnus]'
+					 				and tilino   = '$yhtiorow[varastonmuutos]'
+									and korjattu = ''
 									ORDER BY summa desc
 									LIMIT 1";
 						$result = mysql_query($query) or pupe_error($query);
@@ -162,14 +168,8 @@ if (!function_exists("korjaalaskut")) {
 							$tilikpl = mysql_num_rows($result);
 						}
 						else {
-							// ei löydetty yhtään varastonmuutos tiliöintiä.. lisätään se nyt.
-
-							// haetaan laskun tiedot
-							$query  = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausrivi[ltunnus]'";
-							$result = mysql_query($query) or pupe_error($query);
-							$lasku  = mysql_fetch_array($result);
-
-							$tiliointisumma = $muutos * -1;
+							// ei löydetty yhtään varastonmuutos tiliöintiä.. lisätään se nyt.						
+							$tiliointisumma = $muutos;
 
 							// echotaan tää toistaiseksi aina.. että joku zekkaa, että menee oikein.
 							if ($jalkilaskenta_debug >= 1)
@@ -191,8 +191,9 @@ if (!function_exists("korjaalaskut")) {
 										laatija 	= '$kukarow[kuka]',
 										laadittu 	= now()";
 							$laskutusres = mysql_query($query) or pupe_error($query);
+							if ($jalkilaskenta_debug > 1) echo "$query<br>";
 
-							$tiliointisumma = $muutos;
+							$tiliointisumma = $muutos * -1;
 
 							// Kirjataan 'varastonmuutos'-tilille
 							$query = "INSERT into tiliointi set
@@ -210,6 +211,8 @@ if (!function_exists("korjaalaskut")) {
 										laatija 	= '$kukarow[kuka]',
 										laadittu 	= now()";
 							$laskutusres = mysql_query($query) or pupe_error($query);
+							if ($jalkilaskenta_debug > 1) echo "$query<br>";
+							
 							
 							// korjataan laskun kate
 							$query = "UPDATE lasku SET kate = kate - $tilausrivi[kate] + $uusikate WHERE tunnus='$tilausrivi[ltunnus]'";
@@ -227,7 +230,6 @@ if (!function_exists("korjaalaskut")) {
 							$result = mysql_query($query) or pupe_error($query);
 
 						}
-
 					} // end jos ei löydetty yhtään
 
 					// jos löydetään varastonmuutostiliöinti ja kate on muuttunut.. tehdään tarvittavat muutokset
@@ -239,9 +241,13 @@ if (!function_exists("korjaalaskut")) {
 
 						$query = "	SELECT *
 									FROM tiliointi
-				 					WHERE yhtio = '$kukarow[yhtio]' and ltunnus='$tilausrivi[ltunnus]' and
-			 						tilino = '$yhtiorow[varasto]' and kustp = '$tuote[kustp]' and
-			 						kohde = '$tuote[kohde]' and projekti = '$tuote[projekti]'
+				 					WHERE yhtio 	= '$kukarow[yhtio]' 
+									and ltunnus		= '$tilausrivi[ltunnus]' 
+									and tilino 		= '$yhtiorow[varasto]' 
+									and kustp 		= '$tuote[kustp]' 
+									and kohde 		= '$tuote[kohde]' 
+									and projekti 	= '$tuote[projekti]'
+									and korjattu 	= ''
 									ORDER BY summa asc
 									LIMIT 1";
 						$result = mysql_query($query) or pupe_error($query);
@@ -250,8 +256,10 @@ if (!function_exists("korjaalaskut")) {
 						if (mysql_num_rows($result) == 0) {
 							$query = "	SELECT *
 										FROM tiliointi
-					 					WHERE yhtio = '$kukarow[yhtio]' and ltunnus='$tilausrivi[ltunnus]' and
-				 						tilino = '$yhtiorow[varasto]'
+					 					WHERE yhtio 	= '$kukarow[yhtio]' 
+										and ltunnus		= '$tilausrivi[ltunnus]' 
+										and tilino 		= '$yhtiorow[varasto]'
+										and korjattu 	= ''
 										ORDER BY summa asc
 										LIMIT 1";
 							$result = mysql_query($query) or pupe_error($query);
@@ -307,9 +315,7 @@ if (!function_exists("korjaalaskut")) {
 
 							if ($jalkilaskenta_debug > 1) echo "$query<br>";
 							$jlerror = 1;
-
 						}
-
 					} // end jos löydettiin yks
 
 					// jos löydetään monta varastonmuutostiliöintiä ja kate on muuttunut...ei osata vielä tehä mitään :(
@@ -331,8 +337,162 @@ if (!function_exists("korjaalaskut")) {
 
 					} // end jos löydettiin enemmän ku yks
 
-				} // end else ollaan oikeella tilikaudella
+					// Jos tuote on käytetty niin joudumme korjaamaan marginaaleja 
+					if ($muutos <> 0) {
+						$query = "	SELECT kaytetty, sarjanumero
+									FROM sarjanumeroseuranta
+									WHERE yhtio 		 = '$kukarow[yhtio]'
+									and tuoteno 		 = '$tuoteno'
+									and myyntirivitunnus = '$tilausrivi[ttunnus]'
+									and kaytetty   	    != ''";
+						$margres = mysql_query($query) or pupe_error($query);
 
+						if (mysql_num_rows($margres) == 1) {
+							if ($jalkilaskenta_debug > 1) echo "$tuoteno on käytetty ja marginaaliverotuksen alainen! Korjataan tiliöintejä.<br>";
+							
+							$query = "	SELECT tiliointi.tunnus, tiliointi.summa, tiliointi.vero, alvitiliointi.tunnus alvitunnus, alvitiliointi.summa alvisumma
+										FROM tiliointi
+										LEFT JOIN tiliointi alvitiliointi ON tiliointi.tunnus=alvitiliointi.aputunnus and alvitiliointi.korjattu=''
+					 					WHERE tiliointi.yhtio  = '$kukarow[yhtio]' 
+										and tiliointi.ltunnus  = '$tilausrivi[ltunnus]' 
+										and tiliointi.tilino   = '$yhtiorow[myynti_marginaali]' 
+										and tiliointi.kustp    = '$tuote[kustp]' 
+										and tiliointi.kohde    = '$tuote[kohde]' 
+										and tiliointi.projekti = '$tuote[projekti]'
+										and tiliointi.selite like 'Marginaaliverolasku/Marginaali%'
+										and tiliointi.korjattu = ''
+										ORDER BY tiliointi.summa asc
+										LIMIT 1";
+							$result = mysql_query($query) or pupe_error($query);
+							
+							// otetaan löydettyjen rivien määrä talteen
+							$tilikpl = mysql_num_rows($result);
+							
+							if ($tilikpl == 1) {
+								$tilirivi = mysql_fetch_array($result);
+								
+								$edmarg    = $tilirivi["summa"] + $tilirivi["alvisumma"];
+								$uusimarg  = $tilirivi["summa"] + $tilirivi["alvisumma"] + $tilausrivi["kate"] - $uusikate;
+								
+								$uusialv   = round($uusimarg - ($uusimarg / (1+ $tilirivi["vero"] / 100)), 2);
+								$uusimarg -= $uusialv;								
+																
+								// korjataan marginaalitiliöinti
+								kopioitiliointi($tilirivi['tunnus'], $kukarow['kuka']); // kopioidaan vanha tiliöintirivi ja yliviivataan se
+								$query = "UPDATE tiliointi SET summa = '$uusimarg', laadittu=now(), laatija='$kukarow[kuka]' WHERE tunnus='$tilirivi[tunnus]'";
+								if ($jalkilaskenta_debug > 1) echo "$query<br>";
+								$result = mysql_query($query) or pupe_error($query);
+								
+								if ($tilirivi["alvitunnus"] > 0) {
+									// korjataan marginaalin alvi tiliöinti
+									kopioitiliointi($tilirivi['alvitunnus'], $kukarow['kuka']); // kopioidaan vanha tiliöintirivi ja yliviivataan se
+									$query = "UPDATE tiliointi SET summa = '$uusialv', laadittu=now(), laatija='$kukarow[kuka]' WHERE tunnus='$tilirivi[alvitunnus]'";
+									if ($jalkilaskenta_debug > 1) echo "$query<br>";
+									$result = mysql_query($query) or pupe_error($query);
+								}
+							}
+							else {
+								if($tilausrivi["alv"] != 0) {
+									if ($tilausrivi["alv"] >= 500) {
+										$tilausrivi['alv'] = $tilausrivi['alv'] - 500;
+									}
+									
+									$uusimarg  = $tilausrivi["kate"] - $uusikate;
+									$uusialv   = round($uusimarg - ($uusimarg / (1+ $tilausrivi["alv"] / 100)), 2);
+									$uusimarg -= $uusialv;
+								}
+								else {
+									$uusimarg  = $tilausrivi["kate"] - $uusikate;
+									$uusialv   = 0;
+								}
+								
+								$query = "INSERT into tiliointi set
+											yhtio 		= '$kukarow[yhtio]',
+											ltunnus		= '$lasku[tunnus]',
+											tilino 		= '$yhtiorow[myynti_marginaali]',
+											kustp 		= '$tuote[kustp]',
+											kohde 		= '$tuote[kohde]',
+											projekti 	= '$tuote[projekti]',
+											tapvm 		= '$lasku[tapvm]',
+											summa 		= '$uusimarg',
+											vero 		= '$tilausrivi[alv]',
+											selite 		= 'Marginaaliverolasku/Marginaali $lasku[nimi] $lasku[nimitark]',
+											lukko 		= '1',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+								$laskutusres = mysql_query($query) or pupe_error($query);
+								$isa = mysql_insert_id();
+								
+								if ($jalkilaskenta_debug > 1) echo "$query<br>";
+							
+								if ($uusialv != 0) {																											
+									$query = "INSERT into tiliointi set
+												yhtio 		= '$kukarow[yhtio]',
+												ltunnus		= '$lasku[tunnus]',
+												tilino 		= '$yhtiorow[alv]',
+												kustp 		= '$tuote[kustp]',
+												kohde 		= '$tuote[kohde]',
+												projekti 	= '$tuote[projekti]',
+												tapvm 		= '$lasku[tapvm]',
+												summa 		= '$uusialv',
+												vero 		= '0',
+												selite 		= 'Marginaaliverolasku/Marginaali $lasku[nimi] $lasku[nimitark]',
+												lukko 		= '1',
+												laatija 	= '$kukarow[kuka]',
+												laadittu 	= now(),
+												aputunnus	= $isa";
+									$laskutusres = mysql_query($query) or pupe_error($query);
+									if ($jalkilaskenta_debug > 1) echo "$query<br>";
+								}
+							}
+							
+							$query = "	SELECT tiliointi.tunnus
+										FROM tiliointi
+					 					WHERE tiliointi.yhtio  = '$kukarow[yhtio]' 
+										and tiliointi.ltunnus  = '$tilausrivi[ltunnus]' 
+										and tiliointi.tilino   = '$yhtiorow[myynti_marginaali]' 
+										and tiliointi.kustp    = '$tuote[kustp]' 
+										and tiliointi.kohde    = '$tuote[kohde]' 
+										and tiliointi.projekti = '$tuote[projekti]'
+										and tiliointi.selite like 'Marginaaliverolasku/Myynti %'
+										and tiliointi.korjattu = ''
+										ORDER BY tiliointi.summa asc
+										LIMIT 1";
+							$result = mysql_query($query) or pupe_error($query);
+							
+							// otetaan löydettyjen rivien määrä talteen
+							$tilikpl = mysql_num_rows($result);
+							
+							if ($tilikpl == 1) {
+								$tilirivi = mysql_fetch_array($result);
+										
+								// korjataan marginaamyyntilitiliöinti
+								kopioitiliointi($tilirivi['tunnus'], $kukarow['kuka']); // kopioidaan vanha tiliöintirivi ja yliviivataan se
+								$query = "UPDATE tiliointi SET summa = summa - $tilausrivi[kate] + $uusikate, laadittu=now(), laatija='$kukarow[kuka]' WHERE tunnus='$tilirivi[tunnus]'";
+								if ($jalkilaskenta_debug > 1) echo "$query<br>";
+								$result = mysql_query($query) or pupe_error($query);								
+							}
+							else {
+								$query = "INSERT into tiliointi set
+											yhtio 		= '$kukarow[yhtio]',
+											ltunnus		= '$lasku[tunnus]',
+											tilino 		= '$yhtiorow[myynti_marginaali]',
+											kustp 		= '$tuote[kustp]',
+											kohde 		= '$tuote[kohde]',
+											projekti 	= '$tuote[projekti]',
+											tapvm 		= '$lasku[tapvm]',
+											summa 		= '".(0 - $tilausrivi["kate"] + $uusikate)."',
+											vero 		= '0',
+											selite 		= 'Marginaaliverolasku/Myynti $lasku[nimi] $lasku[nimitark]',
+											lukko 		= '1',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+								$laskutusres = mysql_query($query) or pupe_error($query);
+								if ($jalkilaskenta_debug > 1) echo "$query<br>";
+							}														
+						}
+					}
+				}
 			}
 		}
 		else {
@@ -668,8 +828,9 @@ if ($tuoteno != '') {
 		//Hetaan kaikki tiedot sarjanumerosta
 		$query = "	select distinct myyntirivitunnus
 					from sarjanumeroseuranta
-					where yhtio = '$kukarow[yhtio]'
-					and ostorivitunnus = '$rivitunnus'";
+					where yhtio 		= '$kukarow[yhtio]'
+					and ostorivitunnus  = '$rivitunnus'
+					and ostorivitunnus != 0";
 		$sarjares = mysql_query($query) or pupe_error($query);
 		if ($jalkilaskenta_debug > 1) echo "$query<br>";
 

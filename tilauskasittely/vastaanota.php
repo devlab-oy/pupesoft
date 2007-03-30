@@ -490,7 +490,7 @@
 
 		$query = "	select distinct otunnus, count(rahtikirjat.tunnus) rtunnuksia, ultilno
 					from tilausrivi
-					JOIN lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='G' and lasku.alatila in ('C','D')
+					JOIN lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='G' and lasku.alatila in ('B','C','D')
 					LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
 					where tilausrivi.yhtio='$kukarow[yhtio]'
 					and toimitettu=''

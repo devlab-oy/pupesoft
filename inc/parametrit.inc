@@ -309,17 +309,17 @@ if ($session != '') {
 		echo "<style type='text/css'>";
 		echo $css;
 		echo "</style>";
-		echo "<script type='text/javascript' language='javascript' src='$palvelin/inc/pupe.js'></script>";
+		//echo "<script type='text/javascript' language='javascript' src='$palvelin/inc/pupe.js'></script>";
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
 		echo "</head>";
 
-		if($suljeYllapito!="") {
+		/*if($suljeYllapito!="") {
 			$body_js="onblur='window.close();'";
 		}
 		else {
 			$body_js="";
 		}
-		echo "<body $body_js>";
+		echo "<body $body_js>";*/
 		
 		if (basename($phpnimi) != 'indexvas.php') {
 			if (isset($toim) and $toim != '') {

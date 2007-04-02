@@ -50,12 +50,15 @@ else {
 
 if ($tee == "liita") {
 
-	// haetaan ostolaskun tiedot
-	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$laskutunnus'";
+	// Haetaan ostolaskun tiedot
+	$query = "	select * 
+				from lasku 
+				where yhtio	= '$kukarow[yhtio]' 
+				and tunnus	= '$laskutunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	$oslasrow = mysql_fetch_array($result);
 
-	//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
+	// Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
 	$query = "	select sum(summa) summa
 				from tiliointi
 				where yhtio	= '$kukarow[yhtio]'
@@ -65,10 +68,10 @@ if ($tee == "liita") {
 	$alvires = mysql_query($query) or pupe_error($query);
 	$alvirow = mysql_fetch_array($alvires);
 
-	//Ostoreskontralaskun veroton arvo
+	// Ostoreskontralaskun veroton arvo
 	$oslasrow["arvo"] = $oslasrow["summa"] - $alvirow["summa"];
 
-	// pilkut pisteiksi
+	// Pilkut pisteiksi
 	$liitasumma = (float) str_replace(",",".",$liitasumma);
 
 	$query = "	select sum(arvo) arvo
@@ -79,10 +82,10 @@ if ($tee == "liita") {
 	$apure = mysql_query($query) or pupe_error($query);
 	$apurow = mysql_fetch_array($apure);
 
-	//tämän kululaskun käytettävissä oleva summa
+	// Tämän kululaskun käytettävissä oleva summa
 	$summa_kaytettavissa = round($oslasrow["arvo"] - $apurow["arvo"],2);
 	
-	//jos käyttäjä on syöttänyt osasumman kululaskulta
+	// Jos käyttäjä on syöttänyt osasumman kululaskulta
 	if ($liitasumma != 0) {
 		//jos tämä on hyvityslasku käännetään käyttäjän syöttämä summa aina negatiiviseksi
 		if ($oslasrow["arvo"] < 0) {
@@ -92,18 +95,22 @@ if ($tee == "liita") {
 			$liitasumma = abs($liitasumma);
 		}
 
-		$verosumma = $liitasumma;
-		$verotonsumma = $liitasumma;
+		$verosumma 		= $liitasumma;
+		$verotonsumma 	= $liitasumma;
+	}
+	elseif ($summa_kaytettavissa != $oslasrow["summa"]) {
+		$verosumma 		= $summa_kaytettavissa;
+		$verotonsumma 	= $summa_kaytettavissa;
 	}
 	else {
-		//Tässä on ostolasku verollinen summa
-		$verosumma = $oslasrow["summa"];
+		//Tässä on ostolaskun verollinen summa
+		$verosumma 		= $oslasrow["summa"];
 
 		//Verojen määrä
 		$vero = $alvirow["summa"];
 
 		//Ja lopuksi vielä veroton summa
-		$verotonsumma = $verosumma - $vero;
+		$verotonsumma 	= $verosumma - $vero;
 	}
 		
 	if (abs($summa_kaytettavissa) < abs($verotonsumma)) {
@@ -111,8 +118,7 @@ if ($tee == "liita") {
 		$tee 			= "haku";
 		$verosumma 		= 0;
 		$verotonsumma 	= 0;
-	}
-	
+	}	
 	
 	//lisätään lasku
 	if ($verotonsumma != 0 and $verosumma != 0) {

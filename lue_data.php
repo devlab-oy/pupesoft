@@ -95,125 +95,124 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 		case "tuote" :
 			$pakolliset = array("TUOTENO");
-			//$kielletyt = array("KEHAHIN","VIHAHIN","VIHAPVM","EPAKURANTTI1PVM","EPAKURANTTI2PVM");
-			$kielletyt = array("KEHAHIN","VIHAHIN","VIHAPVM");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM","KEHAHIN","VIHAHIN","VIHAPVM");
 			break;
 		case "tuotepaikat" :
 			$pakolliset = array("TUOTENO","HYLLYALUE","HYLLYNRO","HYLLYVALI","HYLLYTASO","OLETUS");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "asiakas" :
 			if (strtoupper($yhtiorow['maakoodi']) == 'FI') {
-				$pakolliset = array("YTUNNUS", "OVTTUNNUS");
+				$pakolliset = array("YTUNNUS");
 				$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
 			}
 			else {
 				$pakolliset = array("YTUNNUS");
 			}
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "toimi" :
 			$pakolliset = array("YTUNNUS");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "tullinimike" :
 			$pakolliset = array("CN","KIELI");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "tili" :
 			$pakolliset = array("TILINO");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "maksuehto" :
 			$pakolliset = array("TEKSTI");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "asiakashinta" :
 			$pakolliset = array("HINTA");
-			$kielletyt = array("MUUTOSPVM");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "asiakaskommentti" :
 			$pakolliset = array("YTUNNUS","TUOTENO");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "asiakasalennus" :
 			$pakolliset = array("ALENNUS");
-			$kielletyt = array("MUUTOSPVM");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "perusalennus" :
 			$pakolliset = array("ALENNUS","RYHMA");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "yhteyshenkilo" :
 			$pakolliset = array("LIITOSTUNNUS","TYYPPI","NIMI");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "avainsana" :
 			$pakolliset = array("LAJI","SELITE");
 			$wherelliset = array("LAJI","SELITE","SELITETARK","SELITETARK_2");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "tuoteperhe" :
 			$pakolliset = array("ISATUOTENO","TUOTENO","TYYPPI");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "rahtimaksut" :
 			$pakolliset = array("TOIMITUSTAPA","KILOTALKU","KILOTLOPPU");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "tuotteen_avainsanat" :
 			$pakolliset = array("TUOTENO","LAJI","SELITE");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "kalenteri" :
 			$pakolliset = array("KUKA","ASIAKAS","PVMALKU");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "yhteensopivuus_auto" :
 			$pakolliset = array("MERKKI","MALLI","MALLITARKENNE","KORITYYPPI","CC","MOOTTORITYYPPI","POLTTOAINE","SYLINTERIMAARA","SYLINTERINHALKAISIJA","TEHO_KW","TEHO_HV","ALKUKK","ALKUVUOSI","LOPPUKK","LOPPUVUOSI","LISATIEDOT","AUTODATA");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			$wherelliset = array("MERKKI","MALLI","MALLITARKENNE","KORITYYPPI","CC","MOOTTORITYYPPI","POLTTOAINE","SYLINTERIMAARA","SYLINTERINHALKAISIJA","TEHO_KW","TEHO_HV","ALKUKK","ALKUVUOSI","LOPPUKK","LOPPUVUOSI","LISATIEDOT","AUTODATA");
 			break;
 		case "yhteensopivuus_tuote" :
 			$pakolliset = array("ATUNNUS","TUOTENO");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "autodata" :
 			$pakolliset = array("AUTODATAID");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "rekisteritiedot" :
 			$pakolliset = array("REKNO");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "sanakirja" :
 			$pakolliset = array("FI");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			$eiyhtiota = "TRIP";
 				break;
 		case "tuotteen_toimittajat" :
 			$pakolliset = array("TUOTENO","TOIMITTAJA");
-			$kielletyt = array("LIITOSTUNNUS");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM","LIITOSTUNNUS");
 			break;
 		case "kuka" :
 			$pakolliset = array("KUKA");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "todo" :
 			$pakolliset = array("KUVAUS","PRIORITEETTI","PYYTAJA");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "hinnasto" :
 			$pakolliset = array("TUOTENO","HINTA","ALV");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		case "rahtisopimukset" :
 			$pakolliset = array("YTUNNUS","RAHTISOPIMUS","TOIMITUSTAPA");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 		case "toimitustapa" :
 			$pakolliset = array("SELITE","HETIERA");
-			$kielletyt = array("");
+			$kielletyt = array("LAATIJA, LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
 		default :
 			echo t("Miten t‰nne p‰‰sit!");
@@ -478,18 +477,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		if($tila != 'ohita') {
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 				if ($eiyhtiota == "") {
-					$query = "INSERT into $table SET YHTIO='$kukarow[yhtio]' ";
+					$query = "INSERT into $table SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now() ";
 				}
 				elseif ($eiyhtiota == "TRIP") {
-					$query = "INSERT into $table SET tunnus=0 ";
+					$query = "INSERT into $table SET laatija='$kukarow[kuka]', luontiaika=now() ";
 				}
 			}
 			if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
 				if ($eiyhtiota == "") {
-					$query = "UPDATE $table SET YHTIO='$kukarow[yhtio]' ";
+					$query = "UPDATE $table SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
       			}
 				elseif ($eiyhtiota == "TRIP") {
-					$query = "UPDATE $table SET tunnus=tunnus ";
+					$query = "UPDATE $table SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
       			}
 			}
 

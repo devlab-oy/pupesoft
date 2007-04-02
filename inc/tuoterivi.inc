@@ -47,11 +47,8 @@
 		mysql_field_name($result, $i) == "vihapvm" or
 		mysql_field_name($result, $i) == "saldo" or
 		mysql_field_name($result, $i) == "saldoaika" or
-		mysql_field_name($result, $i) == "laatija" or
-		mysql_field_name($result, $i) == "muutospvm" or
 		mysql_field_name($result, $i) == "epakurantti1pvm" or
-		mysql_field_name($result, $i) == "epakurantti2pvm" or
-		mysql_field_name($result, $i) == "luontiaika") {
+		mysql_field_name($result, $i) == "epakurantti2pvm") {
 		$tyyppi = 2;
 	}
 

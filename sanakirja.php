@@ -102,7 +102,7 @@ if ($maxtunnus > 0) {
 				// eli etsit‰‰n kielen nimisesta arraysta indexill‰ $i
 				if (${$apurow[0]}[$i] != "") {
 					$value = addslashes(trim(${$apurow[0]}[$i])); // spacella pystyy tyhjent‰m‰‰n kent‰n, mutta ei tallenneta sit‰
-					$query = "update sanakirja set $apurow[0]='$value' where tunnus='$i'";
+					$query = "update sanakirja set $apurow[0]='$value', muuttaja='$kukarow[kuka]', muutospvm=now() where tunnus='$i'";
 					$result = mysql_query($query) or pupe_error($query);
 				}
 			}

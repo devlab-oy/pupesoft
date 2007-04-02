@@ -84,6 +84,8 @@
 									alekerroin 	= '$kop_alekerr[$tuoteno]',
 									fakta	 	= '$kop_fakta[$tuoteno]',
 									yhtio 		= '$kukarow[yhtio]',
+									laatija		= '$kukarow[kuka]',
+									luontiaika	= now(),
 									tyyppi 		= '$hakutyyppi'";
 						$result = mysql_query($query) or pupe_error($query);
 					}
@@ -184,11 +186,14 @@
 	
 					if ($tunnus == "") {
 						$query = "	INSERT INTO ";
-						$postq = "";
+						$postq = " , laatija	= '$kukarow[kuka]',
+								 	 luontiaika	= now()";
 					}
 					else { 
 						$query = " 	UPDATE ";
-						$postq = " 	WHERE tunnus='$tunnus' ";
+						$postq = " 	, muuttaja='$kukarow[kuka]', 
+									muutospvm=now()
+									WHERE tunnus='$tunnus' ";
 					}
 					
 					$query  .= "	tuoteperhe set 

@@ -97,7 +97,9 @@
 			$query = "	UPDATE sarjanumeroseuranta
 						SET lisatieto = '$lisatieto',
 						sarjanumero = '$sarjanumero',
-						kaytetty	= '$kaytetty'
+						kaytetty	= '$kaytetty',
+						muuttaja	= '$kukarow[kuka]', 
+						muutospvm	= now()
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$sarjatunnus'";
 			$sarjares = mysql_query($query) or pupe_error($query);
@@ -204,7 +206,8 @@
 
 		if (mysql_num_rows($sarjares) == 0) {
 			//jos ollaan syötetty kokonaan uusi sarjanuero
-			$query = "insert into sarjanumeroseuranta (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty) VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty')";
+			$query = "	insert into sarjanumeroseuranta (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, laatija, luontiaika) 
+						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$kukarow[kuka]',now())";
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$tun = mysql_insert_id();
 			
@@ -232,7 +235,9 @@
 				$sarrow = mysql_fetch_array($sarres);
 
 				$query = "	update sarjanumeroseuranta
-							set $tunnuskentta=''
+							set $tunnuskentta='',
+							muuttaja	= '$kukarow[kuka]', 
+							muutospvm	= now()
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus	= '$sarrow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
@@ -269,7 +274,9 @@
 					}
 
 					$query = "	UPDATE sarjanumeroseuranta
-								SET $tunnuskentta='$rivitunnus'
+								SET $tunnuskentta='$rivitunnus',
+								muuttaja	= '$kukarow[kuka]', 
+								muutospvm	= now()
 								$paikkalisa
 								WHERE yhtio='$kukarow[yhtio]'
 								and tunnus='$sarjatun'";
@@ -303,7 +310,9 @@
 								echo "<font class='error'>$palautus</font><br><br>";
 								
 								$query = "	UPDATE sarjanumeroseuranta
-											SET $tunnuskentta=''
+											SET $tunnuskentta='',
+											muuttaja	= '$kukarow[kuka]', 
+											muutospvm	= now()
 											$paikkalisa
 											WHERE yhtio='$kukarow[yhtio]'
 											and tunnus='$sarjatun'";

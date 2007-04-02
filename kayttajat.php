@@ -56,7 +56,9 @@
 	// Poistetaan käyttäjän salasana
 	if ($tee == 'delpsw') {
 		$query = "	UPDATE kuka
-					SET salasana=''
+					SET salasana = '',
+					muuttaja	 = '$kukarow[kuka]', 
+					muutospvm	 = now()
 					WHERE kuka='$selkuka'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -99,16 +101,10 @@
 			$taso 							= $monta['taso'];
 			$hinta 							= $monta['hinnat'];
 			$saatavat 						= $monta['saatavat'];
-			//$osasto 						= $monta['osasto'];
 			$salasana 						= $monta['salasana'];
-			//$keraajanro 					= $monta['keraajanro'];
-			//$myyja 						= $monta['myyja'];
-			//$varasto 						= $monta['varasto'];
-			//$kirjoitin					= $monta['kirjoitin'];
 			$kassamyyja 					= $monta['kassamyyja'];
 			$dynaaminen_kassamyynti			= $monta['dynaaminen_kassamyynti'];
 			$jyvitys 						= $monta['jyvitys'];			
-			//$oletus_asiakas				= $monta['oletus_asiakas'];
 			$oletus_ohjelma 				= $monta['oletus_ohjelma'];
 			$resoluutio 					= $monta['resoluutio'];
 			$extranet 						= $monta['extranet'];
@@ -160,6 +156,8 @@
 						toimipaikka		= '$toimipaikka',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
 						profiilit 		= '$profile',
+						laatija			= '$kukarow[kuka]',
+						luontiaika		= now(),
 						yhtio 			= '$yhtio'";
 			$result = mysql_query($query) or pupe_error($query);
 			$selkuka = mysql_insert_id();
@@ -275,7 +273,9 @@
 				$password = md5(trim($password));
 
 				$query = "	UPDATE kuka
-							SET salasana = '$password'
+							SET salasana = '$password',
+							muuttaja	 = '$kukarow[kuka]', 
+							muutospvm	 = now()
 							WHERE kuka='$kuka'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
@@ -305,7 +305,9 @@
 						jyvitys			= '$jyvitys',
 						oletus_ohjelma 	= '$oletus_ohjelma',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
-						profiilit 		= '$profile'
+						profiilit 		= '$profile',
+						muuttaja		= '$kukarow[kuka]', 
+						muutospvm		= now()
 						WHERE kuka='$kuka' and yhtio='$yhtio'";
 			$result = mysql_query($query) or pupe_error($query);
 

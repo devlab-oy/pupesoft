@@ -88,13 +88,15 @@ if ($tee == "paivita") {
 		$lisa = ", kuittaus = '$kuittaus'";
 	}
 
-	$query  = "update todo set
+	$query  = "	update todo set
 				kuvaus           = '$kuvaus',
 				prioriteetti     = '$prioriteetti',
 				projekti         = '$projekti',
 				pyytaja          = '$pyytaja',
 				kesto_arvio      = '$kesto_arvio',
 				kesto_toteutunut = '$kesto_toteutunut',
+				muuttaja		 = '$kukarow[kuka]', 
+				muutospvm		 = now(),
 				deadline         = '$deadline'
 				$lisa
 				where yhtio = '$kukarow[yhtio]' and
@@ -104,7 +106,7 @@ if ($tee == "paivita") {
 }
 
 if ($tee == "uusi" and $kuvaus != "") {
-	$query  = "insert into todo (yhtio, kuvaus, aika, prioriteetti, projekti, pyytaja, kesto_arvio) values ('$kukarow[yhtio]', '$kuvaus', now(), '$prioriteetti', '$projekti', '$pyytaja', '$kesto_arvio')";
+	$query  = "insert into todo (yhtio, kuvaus, aika, prioriteetti, projekti, pyytaja, kesto_arvio, laatija, luontiaika) values ('$kukarow[yhtio]', '$kuvaus', now(), '$prioriteetti', '$projekti', '$pyytaja', '$kesto_arvio','$kukarow[kuka]',now())";
 	$result = mysql_query($query) or pupe_error($query);
 	$tee = "";
 }
@@ -114,7 +116,7 @@ if ($tee == "uusi" and $kuvaus == "") {
 }
 
 if ($tee == "valmis") {
-	$query  = "update todo set kuittaus='$kuittaus', aika=now() where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$query  = "update todo set kuittaus='$kuittaus', aika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	$tee = "";
 }

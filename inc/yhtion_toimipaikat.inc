@@ -21,7 +21,9 @@
 					fax 			= '$toim_fax',
 					puhelin 		= '$toim_puhelin',
 					email 			= '$toim_email',
-					lasku_logo		= '$lasku_logo'
+					lasku_logo		= '$lasku_logo',
+					muuttaja		= '$kukarow[kuka]', 
+					muutospvm		= now()
 					where yhtio = '$kukarow[yhtio]' and tunnus = '$toim_tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$tee = "";
@@ -48,7 +50,9 @@
 					fax 			= '$toim_fax',
 					puhelin 		= '$toim_puhelin',
 					email 			= '$toim_email',
-					lasku_logo		= '$lasku_logo'";
+					lasku_logo		= '$lasku_logo',
+					laatija			= '$kukarow[kuka]',
+					luontiaika		= now()";
 		$result = mysql_query($query) or pupe_error($query);
 		$tee = "";
 	}

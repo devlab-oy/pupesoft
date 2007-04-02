@@ -37,7 +37,9 @@
 						gsm 			= '$gsm',
 						fax 			= '$fax',
 						www 			= '$www',
-						fakta 			= '$fakta'
+						fakta 			= '$fakta',
+						muuttaja		= '$kukarow[kuka]', 
+						muutospvm		= now()
 						where yhtio = '$kukarow[yhtio]' 
 						and tunnus  = '$henkilotunnus' 
 						and liitostunnus='$tunnus'";
@@ -68,7 +70,9 @@
 						gsm 			= '$gsm',
 						fax 			= '$fax',
 						www 			= '$www',
-						fakta 			= '$fakta'";
+						fakta 			= '$fakta',
+						laatija			= '$kukarow[kuka]',
+						luontiaika		= now()";
 			$result = mysql_query($query) or pupe_error($query);
 			$tee = "";
 		}

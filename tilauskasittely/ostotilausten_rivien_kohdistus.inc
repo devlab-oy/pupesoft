@@ -5,6 +5,13 @@ $query    = "SELECT * FROM lasku WHERE tunnus='$otunnus' AND yhtio ='$kukarow[yh
 $result   = mysql_query($query) or pupe_error($query);
 $laskurow = mysql_fetch_array($result);
 
+
+//Kukarow kesken p‰ivitet‰‰n kohdistuksessa jotta kukaan ei voi samalla vied‰ varaston ja tehd‰ kohdistuksia
+if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $laskurow["tunnus"]) {
+	$query = "update kuka set kesken='$laskurow[tunnus]' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+	$result = mysql_query($query) or pupe_error($query); 
+}
+
 // katsotaan onko t‰lle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
 $query = "	SELECT sum(summa) summa, valkoodi, vienti
 			FROM lasku
@@ -39,6 +46,10 @@ if ($tila == 'valmis') {
 	$query = "	UPDATE tilausrivi set toimaika='$laskurow[toimaika]' WHERE otunnus='$otunnus' and tyyppi='O' and yhtio='$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 
+	//Vapautetaan 'tilaus'
+	$query = "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+	$result = mysql_query($query) or pupe_error($query);
+	
 	$otunnus  = "";
 	$toiminto = "";
 	$tee 	  = "";

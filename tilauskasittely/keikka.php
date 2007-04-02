@@ -139,12 +139,40 @@ if ($toiminto == "kululaskut") {
 
 // lasketaan lopullinen varastonarvo
 if ($toiminto == "kaikkiok") {
-	require('varastonarvo_historia.inc');
+	
+	$query = "	SELECT nimi
+				FROM kuka
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kesken  = '$otunnus'";
+	$result = mysql_query($query) or pupe_error($query);
+	
+	if (mysql_num_rows($result) == "") {
+		require('varastonarvo_historia.inc');
+	}
+	else {
+		while ($rivi = mysql_fetch_array($result)) {
+			echo "<font class='error'>".t("VIRHE: Keikkaa ei voi vied‰ varastoon.").sprintf(t("K‰ytt‰j‰ll‰ %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
+		}
+	}
 }
 
 // vied‰‰n keikka varastoon
 if ($toiminto == "kalkyyli") {
-	require ("kalkyyli.inc");
+	
+	$query = "	SELECT nimi
+				FROM kuka
+				WHERE yhtio = '$kukarow[yhtio]'
+				and kesken  = '$otunnus'";
+	$result = mysql_query($query) or pupe_error($query);
+	
+	if (mysql_num_rows($result) == "") {
+		require ("kalkyyli.inc");
+	}
+	else {
+		while ($rivi = mysql_fetch_array($result)) {
+			echo "<font class='error'>".t("VIRHE: Keikkaa ei voi vied‰ varastoon.").sprintf(t("K‰ytt‰j‰ll‰ %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
+		}
+	}
 }
 
 // jos ollaan annettu $ytunnus haetaan toimittajan tiedot arrayseen $toimittajarow

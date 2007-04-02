@@ -6,9 +6,9 @@
 	if($tee == 'etsi') {
 		echo "<table>";	
 		
-		if($paivam1 != ''){
-			$muu1 = "lasku.luontiaika >= '$paivam1' and lasku.luontiaika <= ";
-			$muu2 = $paivam2;
+		if($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != ''){
+			$muu1 = "lasku.luontiaika >= '$vva-$kka-$ppa' and lasku.luontiaika <= ";
+			$muu2 = "$vvl-$kkl-$ppl";
 		}
 		if($nimi != ''){
 			$muu1 = "lasku.nimi LIKE ";  
@@ -40,7 +40,7 @@
 					and lasku.tilaustyyppi='A'
 					and $muu1 '$muu2'";
 		$sresult = mysql_query($squery) or pupe_error($query);
-		
+			
 		if(mysql_num_rows($sresult) > 0){
 			echo "<tr>
 					<th>Työmääräysno:</th>
@@ -58,7 +58,7 @@
 						<td valign='top'>$row[laskutunnus]</td>
 						<td valign='top'>$row[nimi]</td>
 						<td valign='top'>$row[rekno]</td>
-						<td valign='top'>".substr($row["luontiaika"],0,10)."</td>
+						<td valign='top'>".tv1dateconv(substr($row["luontiaika"],0,10))."</td>
 						<td><pre>$row[komm2]</pre></td>";
 				
 				if ($row["alatila"] == '' or $row["alatila"] == 'A' or $row["alatila"] == 'B' or$row["alatila"] == 'C' or $row["alatila"] == 'J') {
@@ -91,32 +91,42 @@
 	
 
 	echo "<table><tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>";
-	echo "<th>Hae työmääräykset väliltä: </th>";
+	echo "<th colspan='4'>Hae työmääräykset väliltä: </th>";
 		
-	$d1 = date(j);
-	$m1 = date(n);
-	$m11 = date(n)-1;		
-	$y1 = date(Y);
-
-	$paiva1 = $y1."-".$m1."-".$d1;
-	$paiva2 = $y1."-".$m11."-".$d1;
-
-	echo "<td><input type='text' name='paivam1' size='10' value='$paiva2'> - <input type='text' name='paivam2' size='10' value='$paiva1'></td>";
+	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if (!isset($kkl)) $kkl = date("m");
+	if (!isset($vvl)) $vvl = date("Y");
+	if (!isset($ppl)) $ppl = date("d");
+	
+	echo "<tr>
+		<th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
+		<td><input type='text' name='ppa' value='$ppa' size='3'></td>
+		<td><input type='text' name='kka' value='$kka' size='3'></td>
+		<td><input type='text' name='vva' value='$vva' size='5'></td>
+		</tr>\n
+		<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
+		<td><input type='text' name='ppl' value='$ppl' size='3'></td>
+		<td><input type='text' name='kkl' value='$kkl' size='3'></td>
+		<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
 	echo "<td class='back'><input type='submit' value='Hae'></td></form></tr>";
+	
+	
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Asiakkaan nimi:</th><td><input type='text' name='nimi' size='35'></td>
+		<th>Asiakkaan nimi:</th><td colspan='3'><input type='text' name='nimi' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Rekno:</th><td><input type='text' name='rekno' size='35'></td>
+		<th>Rekno:</th><td colspan='3'><input type='text' name='rekno' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Työmääräysno:</th><td><input type='text' name='eid' size='35'></td>
+		<th>Työmääräysno:</th><td colspan='3'><input type='text' name='eid' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Asiakasnumero:</th><td><input type='text' name='asno' size='35'></td>
+		<th>Asiakasnumero:</th><td colspan='3'><input type='text' name='asno' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Valm.numero:</th><td><input type='text' name='valmno' size='35'></td>
+		<th>Valm.numero:</th><td colspan='3'><input type='text' name='valmno' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "</table>";
 	

@@ -641,7 +641,7 @@
 		$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 
 		// n‰ytet‰‰n tilauksia jota voisi muokata, tila L alatila B tai E tai sitetn alatila D jos toimitustapa on HETI
-		$query = "	select lasku.tunnus 'tilaus', lasku.nimi asiakas, concat_ws(' ', lasku.toimitustapa, vienti, ' ', varastopaikat.nimitys) toimitustapa, date_format(luontiaika, '%Y-%m-%d') laadittu, laatija, rahtikirjat.rahtikirjanro rakirno, sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
+		$query = "	select lasku.tunnus 'tilaus', lasku.nimi asiakas, concat_ws(' ', lasku.toimitustapa, vienti, ' ', varastopaikat.nimitys) toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, laatija, rahtikirjat.rahtikirjanro rakirno, sum(kilot) kilot, sum(kollit) kollit, sum(kuutiot) kuutiot, sum(lavametri) lavametri
 					from lasku use index (tila_index),
 					toimitustapa use index (selite_index),
 					rahtikirjat use index (otsikko_index),
@@ -658,7 +658,7 @@
 					$haku
 					$tilaustyyppi
 					group by 1,2,3,4,5,6
-					order by toimitustapa, luontiaika desc";
+					order by toimitustapa, lasku.luontiaika desc";
 		$tilre = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($tilre) != 0) {

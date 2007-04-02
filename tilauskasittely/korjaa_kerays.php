@@ -61,7 +61,7 @@
 		while ($tilrow = mysql_fetch_array($tilre))
 		{
 			// etsit‰‰n sopivia tilauksia
-			$query = "	SELECT tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, date_format(luontiaika, '%Y-%m-%d') laadittu, laatija
+			$query = "	SELECT tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, laatija
 						FROM lasku
 						WHERE tunnus='$tilrow[0]' 
 						and tila='L' $haku 

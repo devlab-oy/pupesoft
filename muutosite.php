@@ -364,7 +364,7 @@
 	if (($tee == 'E') or ($tee=='F')) { // Tositeen näyttö muokkausta varten
 // Näytetään laskun tai tositteen tiedot....
 
-		$query = "SELECT tila, concat_ws('@',laatija, luontiaika) Laatija,
+		$query = "SELECT tila, concat_ws('@',laatija, lasku.luontiaika) Laatija,
 						ytunnus, nimi, nimitark, osoite, osoitetark, postino, postitp, maakoodi,
 						valkoodi,
 						concat_ws(' ',tapvm, mapvm) 'tapvm mapvm',

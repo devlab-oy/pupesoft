@@ -406,7 +406,7 @@
 		//listataan tuoreet tilausket
 		if (trim($etsi) != "") {
 
-			$query = "	select laskunro, nimi asiakas, luontiaika laadittu, laatija, vienti, tapvm, tunnus
+			$query = "	select laskunro, nimi asiakas, lasku.luontiaika laadittu, laatija, vienti, tapvm, tunnus
 						from lasku where yhtio='$kukarow[yhtio]' and vienti!='' $tila
 						$haku
 						ORDER by tapvm

@@ -349,12 +349,12 @@
 						FROM oikeu
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and kuka	= '$kukarow[kuka]'
-						and nimi	= 'raportit/aletaulukko.php'
+						and nimi	= 'raportit/asiakasinfo.php'
 						and alanimi = ''";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../raportit/aletaulukko.php?ytunnus=$ytunnus&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
+				echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
 			}
 			else {
 				echo "<td><u>".t("(Näytä alennustaulukko)")."</u></td>";

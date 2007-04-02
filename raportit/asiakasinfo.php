@@ -4,9 +4,111 @@ $useslave = 1;
 
 require ("../inc/parametrit.inc");
 
-echo "<font class='head'>".t("Asiakkaan perustiedot")."</font><hr>";
+if ($tee == 'eposti') {
 
+	if ($komento == '') {
+		$tulostimet[] = "Alennustaulukko";
+		$toimas = $ytunnus;
+		require("../inc/valitse_tulostin.inc");
+	}
+	
+	$ytunnus = $toimas;
+
+	require('../pdflib/phppdflib.class.php');
+
+	//PDF parametrit
+	$pdf = new pdffile;
+	$pdf->set_default('margin-top', 	0);
+	$pdf->set_default('margin-bottom', 	0);
+	$pdf->set_default('margin-left', 	0);
+	$pdf->set_default('margin-right', 	0);
+	$rectparam["width"] = 0.3;
+
+	$norm["height"] = 12;
+	$norm["font"] = "Courier";
+
+	$pieni["height"] = 8;
+	$pieni["font"] = "Courier";
+
+	// defaultteja
+	$lask = 1;
+	$sivu = 1;
+
+	function alku () {
+		global $yhtiorow, $firstpage, $pdf, $sivu, $rectparam, $norm, $pieni, $ytunnus, $kukarow, $kala;
+
+		$firstpage = $pdf->new_page("a4");
+		$pdf->enable('template');
+		$tid = $pdf->template->create();
+		$pdf->template->size($tid, 600, 830);
+
+
+		$query =  "	SELECT *
+					FROM asiakas
+					WHERE yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus'";
+		$assresult = mysql_query($query) or pupe_error($query);
+		$assrow = mysql_fetch_array($assresult);
+
+
+
+		//Otsikko
+		$pdf->draw_rectangle(830, 20,  810, 580, $firstpage, $rectparam);
+		$pdf->draw_text(30,  815, $yhtiorow["nimi"], $firstpage, $pieni);
+		$pdf->draw_text(120, 815, t("Asiakkaan")." ($ytunnus) $assrow[nimi] $assrow[nimitark] ".t("alennustaulukko")."", $firstpage);
+		$pdf->draw_text(500, 815, t("Sivu").": $sivu", $firstpage, $pieni);
+
+		if ($sivu == 1) {
+			//Vasen sarake
+			//$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
+			$pdf->draw_text(50, 729, t("Osoite", $kieli), 	$firstpage, $pieni);
+			$pdf->draw_text(50, 717, $assrow["nimi"], 		$firstpage, $norm);
+			$pdf->draw_text(50, 707, $assrow["nimitark"],	$firstpage, $norm);
+			$pdf->draw_text(50, 697, $assrow["osoite"], 	$firstpage, $norm);
+			$pdf->draw_text(50, 687, $assrow["postino"]." ".$assrow["postitp"], $firstpage, $norm);
+			$pdf->draw_text(50, 677, $assrow["maa"], 		$firstpage, $norm);
+
+			$kala = 630;
+		}
+
+		$pdf->draw_text(30,  $kala, t("Osasto"), 			$firstpage);
+		$pdf->draw_text(90,  $kala, t("Tuoteryh"), 			$firstpage);
+		$pdf->draw_text(150, $kala, t("Selite"), 			$firstpage);
+		$pdf->draw_text(370, $kala, t("Aleryhm‰"), 			$firstpage);
+		$pdf->draw_text(450, $kala, t("Alennusprosentti"),	$firstpage);
+
+		$kala-=20;
+
+	}
+
+	function rivi ($firstpage, $osasto, $try, $nimi, $ryhma, $ale) {
+		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni;
+
+		if (($sivu == 1 and $lask == 40) or ($sivu > 1 and $lask == 50)) {
+			$sivu++;
+			$firstpage = alku();
+			$kala = 770;
+			$lask = 1;
+		}
+
+		$pdf->draw_text(30,  $kala, $osasto, 									$firstpage, $norm);
+		$pdf->draw_text(90,  $kala, $try, 										$firstpage, $norm);
+		$pdf->draw_text(150, $kala, $nimi, 										$firstpage, $norm);
+		$pdf->draw_text(350, $kala, sprintf('%10s',sprintf('%.2d',$ryhma)), 	$firstpage, $norm);
+		$pdf->draw_text(450, $kala, sprintf('%10s',sprintf('%.2d',$ale))."%", 	$firstpage, $norm);
+
+
+		$kala = $kala - 15;
+		$lask++;
+	}
+
+	//tehd‰‰n eka sivu
+	alku();
+}
+
+
+echo "<font class='head'>".t("Asiakkaan perustiedot")."</font><hr>";
 echo "<form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 echo "<table><tr>";
 echo "<th>".t("Anna asiakasnumero tai osa nimest‰")."</th>";
 echo "<td><input type='text' name='ytunnus'></td>";
@@ -20,6 +122,15 @@ if ($ytunnus!='') {
 
 // jos meill‰ on onnistuneesti valittu asiakas
 if ($ytunnus!='') {
+	if ($lopetus != '') {
+		// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+		$lopetus = str_replace('////','?', $lopetus);
+		$lopetus = str_replace('//','&',  $lopetus);
+		echo "<br><br>";
+		echo "<a href='$lopetus'>".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";	
+	}
+
+	echo "<a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&lopetus=$lopetus'>".t("Tulosta alennustaulukko")."</a><br><br>";
 
 	echo "<table><tr>";
 	echo "<th>".t("ytunnus")."</th>";
@@ -132,6 +243,7 @@ if ($ytunnus!='') {
 	echo "<hr>";
 
 	echo "<form method='post' action='$PHP_SELF'>";
+	echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 	echo "<br>".t("N‰yt‰/piilota osastojen ja tuoteryhmien nimet.");
 	echo "<input type ='hidden' name='ytunnus' value='$ytunnus'>";
 
@@ -294,12 +406,16 @@ if ($ytunnus!='') {
 				<td><font class='info'>$asrow[loppupvm]<font></td>
 				<td><font class='info'>$mita	<font></td>
 				</tr>";
+			
+			if ($tee == 'eposti') {
+				rivi($firstpage);
+			}
 		}
 		
 		$asale .= "</table>";
 	}
 	else {
-		$asale = "<a href='$PHP_SELF?ytunnus=$ytunnus&asale=kylla'>".t("N‰yt‰ aletaulukko")."</a>";
+		$asale = "<a href='$PHP_SELF?ytunnus=$ytunnus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ aletaulukko")."</a>";
 	}
 
 	if ($ashin!='') {
@@ -341,10 +457,10 @@ if ($ytunnus!='') {
 		$ashin .= "</table>";
 	}
 	else {
-		$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&ashin=kylla'>".t("N‰yt‰ asiakashinnat")."</a>";
+		$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&ashin=kylla&lopetus=$lopetus'>".t("N‰yt‰ asiakashinnat")."</a>";
 	}
 
-	if ($aletaulu!='') {
+	if ($aletaulu!='' or $tee == 'eposti') {
 		// tehd‰‰n asiakkaan alennustaulukko...
 		$aletaulu  = "<table>";
 		$aletaulu .= "<tr><th>".t("Os")."</th><th>".t("Osasto")."</th><th>".t("Tryno")."</th><th>".t("Tuoteryhm‰")."</th><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Prosentti")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th><th>".t("Tyyppi")."</th></tr>";
@@ -440,13 +556,17 @@ if ($ytunnus!='') {
 					<td><font class='info'>$alerow[loppupvm]</td>
 					<td><font class='info'>$mita<font></td>
 					</tr>";
+					
+				if ($tee == 'eposti') {
+					rivi ($firstpage, $osaro["selitetark"], $tryro["selitetark"], $alerow["ytunnus"], $alerow["aleryhma"], $ale);
+				}
 			}
 		}
 
 		$aletaulu .= "</table>";
 	}
 	else {
-		$aletaulu = "<a href='$PHP_SELF?ytunnus=$ytunnus&aletaulu=kylla'>".t("N‰yt‰ alennustaulukot")."</a>";
+		$aletaulu = "<a href='$PHP_SELF?ytunnus=$ytunnus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
 	}
 
 	// piirret‰‰n ryhmist‰ ja hinnoista taulukko..
@@ -457,6 +577,32 @@ if ($ytunnus!='') {
 			<td class='back'></td>
 			<td valign='top' class='back'>$ashin</td>
 		</tr></table>";
+		
+	if ($tee == 'eposti') {
+		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$pdffilenimi = "/tmp/Aletaulukko-".md5(uniqid(mt_rand(), true)).".pdf";
+
+		//kirjoitetaan pdf faili levylle..
+		$fh = fopen($pdffilenimi, "w");
+		if (fwrite($fh, $pdf->generate()) === FALSE) die("".t("PDF kirjoitus ep‰onnistui")." $pdffilenimi");
+		fclose($fh);
+
+		// itse print komento...
+		if ($komento["Alennustaulukko"] == 'email') {
+			$liite = $pdffilenimi;
+			$kutsu = "Alennustaulukko";
+
+			require("../inc/sahkoposti.inc");
+		}
+		elseif ($komento["Alennustaulukko"] != '' and $komento["Alennustaulukko"] != 'edi') {
+			$line = exec("$komento[Alennustaulukko] $pdffilenimi");
+		}
+
+		//poistetaan tmp file samantien kuleksimasta...
+		system("rm -f $pdffilenimi");
+	}
 
 }
 

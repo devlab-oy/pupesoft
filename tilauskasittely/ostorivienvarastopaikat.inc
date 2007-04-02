@@ -90,8 +90,8 @@ if ($tee == "valmis") {
 						if (mysql_num_rows($checkres) == 0) {
 							$virheita = 0;
 							if (kuuluukovarastoon($t1[$tunnus],$t2[$tunnus],'') != 0) {
-								$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio)
-											values ('$t1[$tunnus]','$t2[$tunnus]','$t3[$tunnus]','$t4[$tunnus]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]')";
+								$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio,laatija,luontiaika)
+											values ('$t1[$tunnus]','$t2[$tunnus]','$t3[$tunnus]','$t4[$tunnus]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 								$insre = mysql_query($query) or pupe_error($query);
 
 								$uusipaikka = mysql_insert_id();
@@ -152,7 +152,12 @@ if ($tee == "valmis") {
 
 				if ($trow["sarjanumeroseuranta"] != '') {
 					$query = "	UPDATE sarjanumeroseuranta
-								SET hyllyalue='$paikkarow[hyllyalue]', hyllynro='$paikkarow[hyllynro]', hyllyvali='$paikkarow[hyllyvali]', hyllytaso='$paikkarow[hyllytaso]'
+								SET hyllyalue	= '$paikkarow[hyllyalue]', 
+								hyllynro		= '$paikkarow[hyllynro]', 
+								hyllyvali		= '$paikkarow[hyllyvali]', 
+								hyllytaso		= '$paikkarow[hyllytaso]',
+								muuttaja		= '$kukarow[kuka]', 
+								muutospvm		= now()
 								WHERE yhtio			= '$kukarow[yhtio]'
 								and ostorivitunnus	= '$tilausrivirow[tunnus]'";
 					$result = mysql_query($query) or pupe_error($query);
@@ -161,13 +166,17 @@ if ($tee == "valmis") {
 				//jos halutaan tehd‰ t‰st‰ paikasta jolle nyt vied‰‰n saldoa, oli se uusi tai vanha niin poistetaan kaikilta paikoilta oletustieto ja tehd‰‰n t‰st‰ oletuspaikka
 				if ($oletusbox[$tunnus]!= '' and $virheita == 0) {
 					$query = "	UPDATE tuotepaikat
-								SET oletus = ''
+								SET oletus 		= '',
+								muuttaja		= '$kukarow[kuka]', 
+								muutospvm		= now()
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$paikkarow[tuoteno]'";
 					$upresult = mysql_query($query) or pupe_error($query);
 
 					$query = "	UPDATE tuotepaikat
-								SET oletus = 'X'
+								SET oletus 	= 'X',
+								muuttaja	= '$kukarow[kuka]', 
+								muutospvm	= now()
 								WHERE yhtio 	= '$kukarow[yhtio]'
 								and tuoteno 	= '$paikkarow[tuoteno]'
 								and hyllyalue	= '$paikkarow[hyllyalue]'
@@ -186,7 +195,9 @@ if ($tee == "valmis") {
 
 					if (mysql_num_rows($upresult) == 0) {
 						$query = "	UPDATE tuotepaikat
-									SET oletus = 'X'
+									SET oletus 	= 'X',
+									muuttaja	= '$kukarow[kuka]', 
+									muutospvm	= now()
 									WHERE yhtio = '$kukarow[yhtio]'
 									and tuoteno = '$paikkarow[tuoteno]'
 									ORDER BY hyllyalue,hyllynro,hyllyvali,hyllytaso LIMIT 1";

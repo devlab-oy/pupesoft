@@ -129,11 +129,17 @@
 				// Tehd‰‰n p‰ivitykset
 				echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
 
-				$query = "	UPDATE tuotepaikat SET oletus = ''
+				$query = "	UPDATE tuotepaikat 
+							SET oletus = '',
+							muuttaja	= '$kukarow[kuka]', 
+							muutospvm	= now()
 							WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query = "	UPDATE tuotepaikat SET oletus = 'X'
+				$query = "	UPDATE tuotepaikat 
+							SET oletus = 'X',
+							muuttaja	= '$kukarow[kuka]', 
+							muutospvm	= now()
 							WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$oletus'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
@@ -144,7 +150,10 @@
 
 		if (count($halyraja2) > 0) {
 			foreach ($halyraja2 as $tunnus => $halyraja) {
-				$query = "	UPDATE tuotepaikat SET halytysraja = '$halyraja'
+				$query = "	UPDATE tuotepaikat 
+							SET halytysraja = '$halyraja',
+							muuttaja	= '$kukarow[kuka]', 
+							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
@@ -152,7 +161,10 @@
 
 		if (count($tilausmaara2) > 0) {
 			foreach ($tilausmaara2 as $tunnus => $tilausmaara) {
-				$query = "	UPDATE tuotepaikat SET tilausmaara = '$tilausmaara'
+				$query = "	UPDATE tuotepaikat 
+							SET tilausmaara = '$tilausmaara',
+							muuttaja	= '$kukarow[kuka]', 
+							muutospvm	= now()
 							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
@@ -343,14 +355,16 @@
 			
 					// Vastaanottavaa paikkaa ei lˆydy, perustetaan se
 					if (mysql_num_rows($result) == 0) {
-						$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno)
+						$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, laatija, luontiaika)
 								  VALUES (
 									'$kukarow[yhtio]',
 									'$minnerow[hyllyalue]',
 									'$minnerow[hyllynro]',
 									'$minnerow[hyllyvali]',
 									'$minnerow[hyllytaso]',
-									'$tuotteet[$iii]')";
+									'$tuotteet[$iii]',
+									'$kukarow[kuka]',
+									now())";
 						$result = mysql_query($query) or die($query);
 
 						$query = "	INSERT into tapahtuma set
@@ -399,9 +413,11 @@
 			
 			// Mist‰ varastosta otetaan?
 			$query = "	UPDATE tuotepaikat 
-						set saldo = saldo - $kappaleet[$iii], 
+						set saldo 	= saldo - $kappaleet[$iii], 
 						$lisavarlisa1
-						saldoaika=now()
+						saldoaika	= now(),
+						muuttaja	= '$kukarow[kuka]', 
+						muutospvm	= now()
 	                  	WHERE tuoteno 	= '$tuotteet[$iii]' 
 						and yhtio 		= '$kukarow[yhtio]' 
 						and tunnus		= '$mista'";
@@ -409,9 +425,11 @@
 			
 			// Minne varastoon vied‰‰n?
 			$query = "	UPDATE tuotepaikat 
-						set saldo = saldo + $kappaleet[$iii], 
+						set saldo 	= saldo + $kappaleet[$iii], 
 						$lisavarlisa2
-						saldoaika=now()
+						saldoaika	= now(),
+						muuttaja	= '$kukarow[kuka]', 
+						muutospvm	= now()
 						WHERE tuoteno 	= '$tuotteet[$iii]' 
 						and yhtio 		= '$kukarow[yhtio]' 
 						and tunnus		= '$minne'";
@@ -451,7 +469,9 @@
 								set hyllyalue	= '$minnerow[hyllyalue]',
 								hyllynro 		= '$minnerow[hyllynro]',
 								hyllyvali 		= '$minnerow[hyllyvali]',
-								hyllytaso		= '$minnerow[hyllytaso]'
+								hyllytaso		= '$minnerow[hyllytaso]',
+								muuttaja		= '$kukarow[kuka]', 
+								muutospvm		= now()
 								WHERE tuoteno 	= '$tuotteet[$iii]' 
 								and yhtio 		= '$kukarow[yhtio]' 
 								and tunnus		= '$sarjano'";
@@ -467,7 +487,9 @@
 							set hyllyalue	= '$minnerow[hyllyalue]',
 							hyllynro 		= '$minnerow[hyllynro]',
 							hyllyvali 		= '$minnerow[hyllyvali]',
-							hyllytaso		= '$minnerow[hyllytaso]'
+							hyllytaso		= '$minnerow[hyllytaso]',
+							muuttaja		= '$kukarow[kuka]', 
+							muutospvm		= now()
 							WHERE tuoteno = '$tuotteet[$iii]' 
 							and yhtio = '$kukarow[yhtio]' 
 							and tunnus='$sarjano'";
@@ -513,7 +535,7 @@
 				}
 				
 				
-				$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno)
+				$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, laatija, luontiaika)
 						  VALUES (
 							'$kukarow[yhtio]',
 							'$ahyllyalue',
@@ -521,7 +543,9 @@
 							'$ahyllyvali',
 							'$ahyllytaso',
 							'$oletus',
-							'$tuoteno')";
+							'$tuoteno',
+							'$kukarow[kuka]',
+							now())";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$query = "	INSERT into tapahtuma set

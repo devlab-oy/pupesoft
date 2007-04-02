@@ -239,8 +239,8 @@
 						}
 						
 						if ($t1[$tun] != '' and $t2[$tun] != '' and $t3[$tun] != '' and $t4[$tun] != '') {
-							$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio)
-										values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]')";
+							$query = "	insert into tuotepaikat (hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, saldo, saldoaika, tuoteno, yhtio, laatija, luontiaika)
+										values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 							$ynsre = mysql_query($query) or pupe_error($query);
 
 							$uusipaikka = mysql_insert_id();
@@ -282,7 +282,12 @@
 				}
 			}
 			if ($eankoodi[$tun]!= '') {
-				$query = "UPDATE tuote SET eankoodi = '$eankoodi[$tun]' WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tilausrivirow[tuoteno]'";
+				$query = "	UPDATE tuote 
+							SET eankoodi = '$eankoodi[$tun]', 
+							muuttaja	= '$kukarow[kuka]', 
+							muutospvm	= now()
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$tilausrivirow[tuoteno]'";
 				$resulteankoodi = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -414,11 +419,17 @@
 						if ($oletuspaiv != '') {
 							echo "<font class='message'>".t("Siirret‰‰n oletuspaikka")."</font><br><br>";
 
-							$query = "	UPDATE tuotepaikat SET oletus = ''
+							$query = "	UPDATE tuotepaikat 
+										SET oletus 	= '',
+										muuttaja	= '$kukarow[kuka]', 
+										muutospvm	= now()
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
 							$rresult = mysql_query($query) or pupe_error($query);
 
-							$query = "	UPDATE tuotepaikat SET oletus = 'X'
+							$query = "	UPDATE tuotepaikat 
+										SET oletus = 'X',
+										muuttaja	= '$kukarow[kuka]', 
+										muutospvm	= now()
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$uusiol'";
 							$rresult = mysql_query($query) or pupe_error($query);
 						}

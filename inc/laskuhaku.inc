@@ -1,5 +1,12 @@
 <?php
 
+if (isset($tee) and $summa1 == '') {
+	echo "<font class='error'>".t("Anna jokin hakukriteeri")."</font><br>";
+	unset($tee);
+}
+
+if (!isset($tee)) $tee='';
+
 if ($tee == 'Q') { // Q = laskuja tilansa mukaan
 	$ehto = "tila = '$itila' and alatila = '$ialatila'";
 	$jarj = "tapvm";
@@ -41,6 +48,11 @@ if ($tee == 'N') { // N = Etsit‰‰n nime‰ laskulta
 
 if ($tee == 'V') { // V = Etsit‰‰n viitett‰ laskulta
 	$ehto = "tila in ('H','Y','M','P','Q') and viite like '%$summa1%'";
+	$jarj = "nimi, summa";
+}
+
+if ($tee == 'K') { // K = Etsit‰‰n kommenttia laskulta
+	$ehto = "tila in ('H','Y','M','P','Q') and comments like '%$summa1%'";
 	$jarj = "nimi, summa";
 }
 
@@ -113,11 +125,12 @@ if ($tee != '') {
 		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila'>".t("Edelliset")."</a> ";
 	}
 	else {
-		echo "".t("Edelliset")." ";
+		echo t("Edelliset")." ";
 	}
 	$siirry = $alku + 20;
 	echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila'>".t("Seuraavat")."</a> ";
 	echo "<br><br>";
+	
 	$toim="";
 }
 
@@ -131,6 +144,7 @@ if ($tee == '') {
 			<option value = 'S'>".t("summalla")."
 			<option value = 'N'>".t("nimell‰")."
 			<option value = 'V'>".t("viitteell‰")."
+			<option value = 'K'>".t("kommentilla")."
 			</select></td>
 			<td><input type = 'text' name = 'summa1' size=8> - <input type = 'text' name = 'summa2' size=8></td>
 			<td><input type = 'submit' value = '".t("Valitse")."'></td>

@@ -209,10 +209,10 @@
 						and tuoteno != ''
 						and laji in ('N', 'E')
 						and valkoodi = '$laskurow[valkoodi]'
-						and maakoodi = '$laskurow[maa]'
+						and maakoodi in ('$laskurow[maa]','')
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
-						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maakoodi desc
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
 
@@ -593,10 +593,10 @@
 						and tuoteno != ''
 						and laji     = ''
 						and valkoodi = '$laskurow[valkoodi]'
-						and maakoodi = '$laskurow[maa]'
+						and maakoodi in ('$laskurow[maa]','')
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
-						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999)
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maakoodi desc
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
 

@@ -146,7 +146,7 @@
 		if ($errori == "") {
 			if ($tunnus == "") {
 				// Taulun ensimmäinen kenttä on aina yhtiö
-				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]' ";
+				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i])) {
@@ -159,7 +159,7 @@
 			// Päivitetään
 			else {
 				// Taulun ensimmäinen kenttä on aina yhtiö
-				$query = "UPDATE $toim SET yhtio='$kukarow[yhtio]' ";
+				$query = "UPDATE $toim SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i])) {
@@ -333,6 +333,14 @@
 
 			require ("inc/$toim"."rivi.inc");
 
+			// Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
+			if (mysql_field_name($result, $i) == "laatija" or
+				mysql_field_name($result, $i) == "muutospvm" or
+				mysql_field_name($result, $i) == "muuttaja" or
+				mysql_field_name($result, $i) == "luontiaika") {
+				$tyyppi = 2;
+			}
+			
 			//Haetaan tietokantasarakkeen nimialias
 			$al_nimi   = mysql_field_name($result, $i);
 

@@ -2951,6 +2951,9 @@ if ($tee == '') {
 				if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 					echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_kotimaa_eieri/$kotiarvo_kotimaa_eieri)."%</td>";
 				}
+				else {
+					echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
+				}
 
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
@@ -2962,7 +2965,10 @@ if ($tee == '') {
 				if ($kukarow['extranet'] == '' and $kotiarvo_ulkomaa_eieri != 0  and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 					echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_ulkomaa_eieri/$kotiarvo_ulkomaa_eieri)."%</td>";
 				}
-
+				else {
+					echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
+				}
+				
 				echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 			}
 			else {

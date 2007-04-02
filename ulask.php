@@ -251,7 +251,33 @@ if ($tee == 'I') {
 	if ($maara == 2 and strlen($isumma[1]) == 0) {
 		$isumma[1] = $summa;
 	}
-
+	
+	if ($maara > 1) {
+		if ($syottotyyppi=='prosentti') {
+			$viimeinensumma=0;
+			for ($i=1; $i<$maara; $i++) {
+				$viimeinensumma += $isumma[$i];
+			}
+			if ($viimeinensumma != 100) {
+				$errormsg .= "<font class='error'>".t("Prosenttien yhteisumma ei ole 100")." $viimeinensumma</font><br>";
+				$tee = 'E';
+			}
+			else {
+				for ($i=1; $i<$maara; $i++) {
+					if ($isumma[$i] != 0) {
+						$isumma[$i] = round((float) $summa * (float) $isumma[$i] / 100,2);
+						$summatotaali += $isumma[$i];
+						$viimeinensumma = $i;
+					}
+				}
+				if (abs($summatotaali - $summa) >= 0.01) {
+					$isumma[$viimeinensumma] += $summatotaali - $summa;
+				}
+				$syottotyyppi='saldo';
+			}
+		}
+	}
+	
  	// Käydään tiliöinnit läpi
 	for ($i=1; $i<$maara; $i++) {
 
@@ -857,9 +883,15 @@ if ($tee == 'P' or $tee == 'E') {
 	else {
 
 		// Tehdään haluttu määrä tiliöintirivejä
+		$syottotyyppisaldo='checked';
+		$syottotyyppiprosentti='';
+		if (isset($syottotyyppi)) {
+			if ($syottotyyppi=='prosentti') $syottotyyppiprosentti = 'checked';
+		}
+		
 		echo "<hr><table>
 			<tr><th>".t("Tili")."</th><th>".t("Kustannuspaikka")."</th>
-			<th>".t("Summa")."</th><th>".t("Vero")."</th></tr>";
+			<th><input type='radio' name='syottotyyppi' value =  'summa' $syottotyyppisaldo>".t("Summa")."<input type='radio' name='syottotyyppi' value =  'prosentti' $syottotyyppiprosentti>".t("Prosentti")."</th><th>".t("Vero")."</th></tr>";
 
 		for ($i=1; $i<$maara; $i++) {
 
@@ -1120,25 +1152,30 @@ if ($tee == 'I') {
 
 	// Oletuskulutiliöinti
 	// Nyt on saatava pyöristykset ok
-	$veroton=0;
-
+	$veroton = 0;
+	$muusumma = 0;
+	
 	for ($i=1; $i<$maara; $i++) {
 		$isumma[$i] = round($isumma[$i] * $vrow['kurssi'],2);
 
  		// Netotetaan alvi
-		if ($ivero != 0) {
+		if ($ivero[$i] != 0) {
 			$ialv[$i] = round($isumma[$i] - $isumma[$i] / (1 + ($ivero[$i] / 100)),2);
 			$isumma[$i] -= $ialv[$i];
+			$muusumma += $isumma[$i] + $ialv[$i];
 		}
-		$muusumma += $isumma[$i] + $ialv[$i];
+		else {
+			$muusumma += $isumma[$i];	
+		}
 		$veroton  += $isumma[$i];
 	}
 
 	if ($muusumma != $omasumma) {
-		echo t("Valuuttapyöristystä")." " . $muusumma-$omasumma . "<br>";
+		echo "<font class='message'>".t("Valuuttapyöristystä")." " . round($muusumma-$omasumma,2) . "</font><br>";
 		for ($i=1; $i<$maara; $i++) {
 			if ($isumma[$i] != 0) {
 				$isumma[$i] += $omasumma-$muusumma;
+				$i=$maara; 
 			}
 		}
 	}

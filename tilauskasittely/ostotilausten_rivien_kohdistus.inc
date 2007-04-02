@@ -789,7 +789,7 @@ if ($tila == '') {
 			}
 		}
 
-		echo "<tr>";
+		echo "<tr class='aktiivi'>";
 
 		// n‰ytet‰‰n vaan tsekpoksi jos rivi‰ saa viel‰ ru(n)kata...
 		if ($rivirow["varastossa_kpl"] == 0) {

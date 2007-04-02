@@ -235,7 +235,7 @@ if ($toiminto == "" and $ytunnus == "") {
 
 		while ($row = mysql_fetch_array($result)) {
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
 			if ($row["comments"] != "") {
@@ -509,7 +509,7 @@ if ($toiminto == "" and $ytunnus != "") {
 			if ($llrow["volasku"] == "") $llrow["volasku"] = 0; // kaunistellaan tyhj‰t nollaks
 			if ($llrow["kulasku"] == "") $llrow["kulasku"] = 0; // kaunistellaan tyhj‰t nollaks
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			// tehd‰‰n pop-up divi jos keikalla on kommentti...
 			if ($row["comments"] != "") {

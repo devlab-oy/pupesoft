@@ -1,4 +1,3 @@
-
 <?php
 	require "inc/parametrit.inc";
 
@@ -369,8 +368,13 @@
 						ytunnus, nimi, nimitark, osoite, osoitetark, postino, postitp, maakoodi,
 						valkoodi,
 						concat_ws(' ',tapvm, mapvm) 'tapvm mapvm',
-						if(valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', kapvm)) kassa_ale,
-						if(valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', erpcm)) summa,
+						if(kasumma = 0,'',
+						if (tila = 'U',
+						if(valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),valkoodi,')', '@', kapvm)),
+						if(valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', kapvm)))) kassa_ale,
+						if (tila = 'U',
+						if(valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', erpcm)),
+						if(valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', erpcm))) summa,
 						concat_ws('@',hyvak1,h1time) Hyväksyjä1,
 						concat_ws('@',hyvak2,h2time) Hyväksyjä2,
 						concat_ws('@',hyvak3,h3time) Hyväksyjä3,

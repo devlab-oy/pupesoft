@@ -71,7 +71,7 @@
 				$pdf->draw_text(30,  800, t("Asiaa hoitaa", $kieli), 		$firstpage, $pieni);
 				$pdf->draw_text(30,  790, $kukarow["nimi"], 				$firstpage, $p);
 				$pdf->draw_text(250, 800, t("Päivämäärä", $kieli), 			$firstpage, $pieni);
-				$pdf->draw_text(250, 790, date(d)."-".date(m)."-".date(Y), 	$firstpage, $p);
+				$pdf->draw_text(250, 790, date("j").".".date("n").".".date("Y"), 	$firstpage, $p);
 				$pdf->draw_text(400, 800, t("Sivu", $kieli), 				$firstpage, $pieni);
 				$pdf->draw_text(400, 790, $sivu, 							$firstpage, $p);
 
@@ -128,8 +128,9 @@
 
 
 				$pdf->draw_text(45,  553, t("Tuotenumero", $kieli),		$firstpage, $pieni);
-				$pdf->draw_text(413, 553, t("Määrä", $kieli),			$firstpage, $pieni);
-				$pdf->draw_text(463, 553, t("Hinta", $kieli),			$firstpage, $pieni);
+				$pdf->draw_text(363, 553, t("Määrä", $kieli),			$firstpage, $pieni);
+				$pdf->draw_text(413, 553, t("Hinta", $kieli),			$firstpage, $pieni);
+				$pdf->draw_text(463, 553, t("Ale", $kieli),			$firstpage, $pieni);
 				$pdf->draw_text(512, 553, t("Yhteensä", $kieli),		$firstpage, $pieni);
 
 				$pdf->draw_rectangle(570, 20, 70, 580, 					$firstpage, $rectparam);
@@ -229,7 +230,7 @@
 		}
 
 		$query = "	SELECT toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-					tilausrivi.hinta, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta,2) rivihinta, 
+					tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),2) rivihinta, 
 					substring(tuote.nimitys,1,80) nimitys, kommentti
 					FROM tilausrivi
 					join tuote USING (yhtio, tuoteno)
@@ -264,8 +265,9 @@
 
 			$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],				$firstpage, $p);
 			$pdf->draw_text(190, $kala, "(".$row["tuoteno"].")",			$firstpage, $p);
-			$pdf->draw_text(413, $kala, sprintf('%.2f',$row["varattu"]), 	$firstpage, $p);
-			$pdf->draw_text(463, $kala, sprintf('%.2f',$row["hinta"]),		$firstpage, $p);
+			$pdf->draw_text(363, $kala, sprintf('%.2f',$row["varattu"]), 	$firstpage, $p);
+			$pdf->draw_text(413, $kala, sprintf('%.2f',$row["hinta"]),		$firstpage, $p);
+			$pdf->draw_text(463, $kala, sprintf('%.2f',$row["ale"])."%",		$firstpage, $p);
 			$pdf->draw_text(512, $kala, sprintf('%.2f',$row["rivihinta"]), 	$firstpage, $p);
 			
             if ($nimitykset != "") {

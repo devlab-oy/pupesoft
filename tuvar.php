@@ -65,7 +65,7 @@
 	}
 	//tuotteen varastostatus
 	if ($tee == 'Z') {
-		$query = "	SELECT tuote.*, date_format(muutospvm, '%Y-%m-%d') muutos, date_format(luontiaika, '%Y-%m-%d') luonti,
+		$query = "	SELECT tuote.*, date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(luontiaika, '%Y-%m-%d') luonti,
 					group_concat(distinct tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
 					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,

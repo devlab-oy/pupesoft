@@ -56,11 +56,12 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos =	"<td><select name='$nimi'>";
-	
+		$ulos .= "<option value=''>".t("Kaikki maat")."</option>";
+
 		if ($trow[$i] == "" and $t[$i] == "") {
 			$trow[$i] = $yhtiorow["maakoodi"];
 		}
-		
+
 		while ($row = mysql_fetch_array($vresult)) {
 			$sel = '';
 			if ($row[0] == $trow[$i]) {

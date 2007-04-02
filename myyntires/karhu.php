@@ -1,27 +1,28 @@
 <?php
 
-require "../inc/parametrit.inc";
-
-//HUOMHUOM!!
-$query = "SET SESSION group_concat_max_len = 100000";
-$result = mysql_query($query) or pupe_error($query);
+require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Karhu")."</font><hr>";
 
 //vain n‰in monta p‰iv‰‰ sitten karhutut
 //laskut huomioidaan n‰kym‰sss‰
-$kpvm_aikaa=7;
+$kpvm_aikaa = 7;
 
 //vain n‰in monta p‰iv‰‰ sitten er‰‰ntyneet
 //laskut huomioidaan n‰kym‰sss‰
-$lpvm_aikaa=10;
+$lpvm_aikaa = 10;
 
 if ($kukarow["kirjoitin"] == 0) {
 	echo "<font class='error'>".t("Sinulla pit‰‰ olla henkilˆkohtainen tulostin valittuna, ett‰ voit tulostaa karhuja").".</font><br>";
 	$tee = "";
 }
 
-if (isset($ktunnus)) {
+if ($tee == 'LAHETA') {
+	require ('paperikarhu.php');
+	$tee = "KARHUA";
+}
+
+if ($tee == "ALOITAKARHUAMINEN") {
 
 	$maksuehtolista = "";
 	$ktunnus = (int) $ktunnus;
@@ -65,14 +66,6 @@ if (isset($ktunnus)) {
 			$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat])";
 		}
 	}
-}
-
-if ($tee == 'LAHETA') {
-	require('paperikarhu.php');
-	$tee = "KARHUA";
-}
-
-if ($tee == "ALOITAKARHUAMINEN") {
 
 	$query = "	SELECT GROUP_CONCAT(distinct ovttunnus) konsrernyhtiot
 				FROM yhtio
@@ -396,6 +389,6 @@ if ($tee == "") {
 	echo "</table>";
 }
 
-require "../inc/footer.inc";
+require ("../inc/footer.inc");
 
 ?>

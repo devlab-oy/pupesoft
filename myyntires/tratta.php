@@ -1,22 +1,16 @@
 <?php
 
-require "../inc/parametrit.inc";
-
-//HUOMHUOM!!
-$query = "SET SESSION group_concat_max_len = 100000";
-$result = mysql_query($query) or pupe_error($query);
+require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Tratta")."</font><hr>";
 
 //vain näin monta päivää sitten karhutut
 //laskut huomioidaan trattauksessa
-$kpvm_aikaa  = 0;
-
+$kpvm_aikaa = 0;
 
 //vain näin monta päivää sitten erääntyneet
 //laskut huomioidaan näkymässsä
-$lpvm_aikaa  = 10;
-
+$lpvm_aikaa = 10;
 
 //lasku pitää olla karhuttu väh näin
 //monta kertaa jotta sitä haluutaan tratata
@@ -28,58 +22,53 @@ if ($kukarow["kirjoitin"] == 0) {
 }
 
 if ($tee == 'LAHETA') {
-	require('paperitratta.php');
-
+	require ('paperitratta.php');
 	$tee = "TRATTAA";
 }
 
 if ($tee == "ALOITATRATTAAMINEN") {
 
-	if (isset($ktunnus)) {
+	$maksuehtolista = "";
+	$ktunnus = (int) $ktunnus;
 
-		$maksuehtolista = "";
-		$ktunnus = (int) $ktunnus;
+	$maa_lisa = "";
+	if ($mehto_maa != "") {
+		$maa_lisa = "and (sallitut_maat like '%$mehto_maa%' or sallitut_maat = '') ";
+	}
 
-		$maa_lisa = "";
-		if ($mehto_maa != "") {
-			$maa_lisa = "and (sallitut_maat like '%$mehto_maa%' or sallitut_maat = '') ";
-		}
+	if ($ktunnus != 0) {
+		$query = "	SELECT *
+					FROM factoring
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus=$ktunnus";
+		$result = mysql_query($query) or pupe_error($query);
 
-		if ($ktunnus != 0) {
-			$query = "	SELECT *
-						FROM factoring
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus=$ktunnus";
-			$result = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($result) == 1) {
-				$factoringrow = mysql_fetch_array($result);
-				$query = "SELECT GROUP_CONCAT(tunnus) karhuttavat
-							FROM maksuehto
-							WHERE yhtio = '$kukarow[yhtio]' and factoring = '$factoringrow[factoringyhtio]' $maa_lisa";
-				$result = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($result) == 1) {
-					$maksuehdotrow = mysql_fetch_array($result);
-					$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
-				}
-			}
-			else {
-				echo "Valittu factoringsopimus ei löydy";
-				exit;
-			}
-		}
-		else {
+		if (mysql_num_rows($result) == 1) {
+			$factoringrow = mysql_fetch_array($result);
 			$query = "SELECT GROUP_CONCAT(tunnus) karhuttavat
-							FROM maksuehto
-							WHERE yhtio = '$kukarow[yhtio]' and factoring = '' $maa_lisa";
+						FROM maksuehto
+						WHERE yhtio = '$kukarow[yhtio]' and factoring = '$factoringrow[factoringyhtio]' $maa_lisa";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 1) {
 				$maksuehdotrow = mysql_fetch_array($result);
-				$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat])";
+				$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
 			}
 		}
+		else {
+			echo "Valittu factoringsopimus ei löydy";
+			exit;
+		}
+	}
+	else {
+		$query = "SELECT GROUP_CONCAT(tunnus) karhuttavat
+						FROM maksuehto
+						WHERE yhtio = '$kukarow[yhtio]' and factoring = '' $maa_lisa";
+		$result = mysql_query($query) or pupe_error($query);
 
+		if (mysql_num_rows($result) == 1) {
+			$maksuehdotrow = mysql_fetch_array($result);
+			$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat])";
+		}
 	}
 
 	$query = "	SELECT GROUP_CONCAT(distinct ovttunnus) konsrernyhtiot
@@ -402,6 +391,6 @@ if ($tee == "") {
 	echo "</table>";
 }
 
-require "../inc/footer.inc";
+require ("../inc/footer.inc");
 
 ?>

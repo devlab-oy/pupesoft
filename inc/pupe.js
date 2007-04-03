@@ -39,22 +39,63 @@ function yllapito(url, tag, submitOnSelect) {
 }
 
 function suljeYllapito(sID,value,text) {
-	
-	var newOpt=document.createElement('option');
-	newOpt.text=text;
-	newOpt.value=value;
-	
-	sel=window.opener.document.getElementById(sID);
-	
-	try {
-		sel.add(newOpt, sel.options[1]);
-	}
-	catch(ex) {
-		sel.add(newOpt, 1);
-	}
 
-	//	Valitaan uusi arvo
-	sel.selectedIndex=1;
+	if(sID=='yhteyshenkilo_kaupallinen' || sID=='yhteyshenkilo_tekninen') {
+		
+		//	Päivitetään tekninen yhteyshenkilo
+		var newOptt=document.createElement('option');
+		newOptt.text=text;
+		newOptt.value=value;
+		
+		selt=window.opener.document.getElementById('yhteyshenkilo_tekninen');
+		try {
+			selt.add(newOptt, selt.options[1]);
+		}
+		catch(ex) {
+			selt.add(newOptt, 1);
+		}
+
+		//	Päivitetään kaupallinen yhteyshenkilo		
+		var newOptk=document.createElement('option');
+		newOptk.text=text;
+		newOptk.value=value;
+		
+		selk=window.opener.document.getElementById('yhteyshenkilo_kaupallinen');
+		try {
+			selk.add(newOptk, selk.options[1]);
+		}
+		catch(ex) {
+			selk.add(newOptk, 1);
+		}
+		
+		//	merkataan oikea valituksi
+		if(sID=='yhteyshenkilo_kaupallinen') {
+			selk.selectedIndex=1;
+		}
+		else {
+			selt.selectedIndex=1;			
+		}
+	}
+	else {
+		
+		//	Paivitetaan ja valitaan select option
+		var newOpt=document.createElement('option');
+		newOpt.text=text;
+		newOpt.value=value;
+
+		sel=window.opener.document.getElementById(sID);
+
+		try {
+			sel.add(newOpt, sel.options[1]);
+		}
+		catch(ex) {
+			sel.add(newOpt, 1);
+		}
+
+		//	Valitaan uusi arvo
+		sel.selectedIndex=1;
+	}
+			
 	window.close();
 	
 }

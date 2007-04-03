@@ -32,7 +32,7 @@ echo "<html>
 		<frame noresize src='indexvas.php?go=$go2' name='menu'>
 		<frame src='$go' name='main'>
 		<noframes>Your browser does not support frames!</noframes>
-	</frameset>
+	</frameset> 
 	</html>"; 
 
 ?>

@@ -603,8 +603,21 @@
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateind))."</td>";
 			
 								if ($kateprossat != "") {
-									echo "<td class='tumma' align='right'></td>";
-									echo "<td class='tumma' align='right'></td>";
+									if ($myyntinyt != 0) {
+										$kprny = round($katenyt / $myyntinyt * 100, 2);
+									}
+									else {
+										$kprny = 0;
+									}
+									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kprny))."</td>";
+									
+									if ($myyntied != 0) {
+										$kpred = round($kateed / $myyntied * 100, 2);
+									}
+									else {
+										$kpred = 0;
+									}
+									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kpred))."</td>";
 								}
 			
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokatenyt))."</td>";
@@ -638,7 +651,22 @@
 									$excelsarake++;
 			
 									if ($kateprossat != "") {
+										if ($myyntinyt != 0) {
+											$kprny = round($katenyt / $myyntinyt * 100, 2);
+										}
+										else {
+											$kprny = 0;
+										}
+										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kprny), $format_bold);
 										$excelsarake++;
+
+										if ($myyntied != 0) {
+											$kpred = round($kateed / $myyntied * 100, 2);
+										}
+										else {
+											$kpred = 0;
+										}
+										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kpred), $format_bold);
 										$excelsarake++;
 									}
 									
@@ -730,8 +758,21 @@
 		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateind))."</td>";
 
 					if ($kateprossat != "") {
-						echo "<td class='tumma' align='right'></td>";
-						echo "<td class='tumma' align='right'></td>";
+						if ($myyntinyt != 0) {
+							$kprny = round($katenyt / $myyntinyt * 100, 2);
+						}
+						else {
+							$kprny = 0;
+						}
+						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kprny))."</td>";
+						
+						if ($myyntied != 0) {
+							$kpred = round($kateed / $myyntied * 100, 2);
+						}
+						else {
+							$kpred = 0;
+						}
+						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kpred))."</td>";
 					}
 
 					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokatenyt))."</td>";
@@ -765,7 +806,22 @@
 						$excelsarake++;
 
 						if ($kateprossat != "") {
+							if ($myyntinyt != 0) {
+								$kprny = round($katenyt / $myyntinyt * 100, 2);
+							}
+							else {
+								$kprny = 0;
+							}
+							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kprny), $format_bold);
 							$excelsarake++;
+							
+							if ($myyntied != 0) {
+								$kpred = round($kateed / $myyntied * 100, 2);
+							}
+							else {
+								$kpred = 0;
+							}
+							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kpred), $format_bold);
 							$excelsarake++;
 						}
 						
@@ -794,8 +850,21 @@
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateind))."</td>";
 
 				if ($kateprossat != "") {
-					echo "<td class='tumma' align='right'></td>";
-					echo "<td class='tumma' align='right'></td>";
+					if ($totmyyntinyt != 0) {
+						$kprny = round($totkatenyt / $totmyyntinyt * 100, 2);
+					}
+					else {
+						$kprny = 0;
+					}
+					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kprny))."</td>";
+					
+					if ($totmyyntied != 0) {
+						$kpred = round($totkateed / $totmyyntied * 100, 2);
+					}
+					else {
+						$kpred = 0;
+					}
+					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kpred))."</td>";
 				}
 
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totnettokatenyt))."</td>";
@@ -831,7 +900,22 @@
 					$excelsarake++;
 
 					if ($kateprossat != "") {
+						if ($totmyyntinyt != 0) {
+							$kprny = round($totkatenyt / $totmyyntinyt * 100, 2);
+						}
+						else {
+							$kprny = 0;
+						}
+						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kprny), $format_bold);
 						$excelsarake++;
+						
+						if ($totmyyntied != 0) {
+							$kpred = round($totkateed / $totmyyntied * 100, 2);
+						}
+						else {
+							$kpred = 0;
+						}
+						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kpred), $format_bold);
 						$excelsarake++;
 					}
 					

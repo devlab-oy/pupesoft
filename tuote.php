@@ -273,11 +273,12 @@
 			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>$tuoterow[lyhytkuvaus]</td></tr>";
 
 
-			echo "</table><br>";
-
+			echo "</table>";
+			
+			echo "<table><tr>";
 			echo "<td class='back' valign='top' align='left'>";
 			echo "<table>";
-			echo "<th>".t("Korvaavat")."</th><th>".t("Kpl")."</th>";
+			echo "<tr><th>".t("Korvaavat")."</th><th>".t("Kpl")."</th></tr>";
 
 			//korvaavat tuotteet
 			$query  = "select * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
@@ -302,8 +303,32 @@
 			}
 
 			echo "</table>";
-			echo "</td><br>";
+			echo "</td>";
+			
+			// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
+			$query = "describe yhteensopivuus_tuote";
+			$res = mysql_query($query);
 
+			if (mysql_error() == "" and file_exists("yhteensopivuus_tuote.php")) {
+
+				$query = "select count(*) countti from yhteensopivuus_tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+				$yhtresult = mysql_query($query) or pupe_error($query);
+				$yhtrow = mysql_fetch_array($yhtresult);
+				
+				if ($yhtrow['countti'] > 0) {
+					echo "<td class='back' valign='top' align='left'>";
+					echo "<table>";
+					echo "<tr><th>".t("Yhteensopivuudet")."</th></tr>";
+					
+					echo "<tr><td><a href='yhteensopivuus_tuote.php?tee=etsi&tuoteno=$tuoteno'>Siirry tuotteen yhteensopivuuksiin</a></td></tr>";
+					
+					echo "</table>";
+					echo "</td>";
+				}
+			}
+			
+			echo "<tr></table>";
+			
 			// Varastosaldot ja paikat
 			echo "<table>";
 			echo "<tr>";

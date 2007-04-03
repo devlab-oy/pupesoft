@@ -94,6 +94,12 @@
 	// Halutaan muuttaa sarjanumeron tietoja
 	if ($toiminto == 'MUOKKAA') {
 		if (isset($PAIVITA)) {
+			$query = "	SELECT tunnus, kaytetty, ostorivitunnus, myyntirivitunnus, tuoteno
+						FROM sarjanumeroseuranta
+						WHERE tunnus = '$sarjatunnus'";
+			$sarres = mysql_query($query) or pupe_error($query);
+			$sarrow = mysql_fetch_array($sarres);
+			
 			$query = "	UPDATE sarjanumeroseuranta
 						SET lisatieto = '$lisatieto',
 						sarjanumero = '$sarjanumero',
@@ -105,12 +111,6 @@
 			$sarjares = mysql_query($query) or pupe_error($query);
 			
 			if ($kaytetty != '') {
-				$query = "	SELECT tunnus, kaytetty, ostorivitunnus, myyntirivitunnus
-							FROM sarjanumeroseuranta
-							WHERE tunnus = '$sarjatunnus'";
-				$sarres = mysql_query($query) or pupe_error($query);
-				$sarrow = mysql_fetch_array($sarres);
-
 				$query = "	UPDATE tilausrivi
 							SET alv=alv+500
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -120,12 +120,6 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 			else {
-				$query = "	SELECT tunnus, kaytetty, ostorivitunnus, myyntirivitunnus
-							FROM sarjanumeroseuranta
-							WHERE tunnus = '$sarjatunnus'";
-				$sarres = mysql_query($query) or pupe_error($query);
-				$sarrow = mysql_fetch_array($sarres);
-
 				$query = "	UPDATE tilausrivi
 							SET alv=alv-500
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -134,7 +128,62 @@
 							and alv >= 500";
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
-
+			
+			$query = "	SELECT *
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$sarrow[tuoteno]'";
+			$tuoteres = mysql_query($query) or pupe_error($query);
+			$tuoterow = mysql_fetch_array($tuoteres);
+			
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio 	 = '$kukarow[yhtio]' 
+						and laji 		 = 'SARJANUMERON_LI' 
+						and selite  	 = 'MERKKI' 
+						and selitetark_2 = '$tuoterow[tuotemerkki]'
+						ORDER BY jarjestys, selitetark_2";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_array($vresult);
+			
+			$query = "	SELECT yhtio
+						FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
+						WHERE sarjanumeron_lisatiedot.yhtio		 = '$kukarow[yhtio]'
+						and sarjanumeron_lisatiedot.liitostunnus = '$sarjatunnus'";
+			$lisatietores_apu = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($lisatietores_apu) == 0) {
+				$query = "	INSERT INTO sarjanumeron_lisatiedot
+							SET yhtio			= '$kukarow[yhtio]',
+							liitostunnus		= '$sarjatunnus',
+							laatija 			= '$kukarow[kuka]',
+							luontiaika 			= now(),";
+							
+				$pquery = ""; 	
+			}
+			else {
+				$query = "	UPDATE sarjanumeron_lisatiedot
+							SET muuttaja		= '$kukarow[kuka]',
+							muutospvm 			= now(),";
+							
+				$pquery = "	WHERE yhtio			= '$kukarow[yhtio]'
+							and liitostunnus	= '$sarjatunnus'"; 	
+			}
+			
+			$query .= "	Varirunko			= '$tuoterow[vari]',
+						Suurin_henkiloluku	= '$tuoterow[suurin_henkiloluku]',
+						Runkotyyppi			= '$tuoterow[runkotyyppi]',
+						Materiaali			= '$tuoterow[materiaali]',	
+						Koneistus			= '$tuoterow[koneistus]',
+						Tyyppi				= '$tuoterow[laitetyyppi]',
+						Kilpi				= '$tuoterow[kilpi]',
+						Sprinkleri 			= '$tuoterow[sprinkleri]',
+						Teho_kw				= '$tuoterow[teho_kw]',
+						Malli				= '$tuoterow[nimitys]',
+						Merkki				= '$vrow[selitetark]'
+						$postq";
+			$lisatietores_apu = mysql_query($query) or pupe_error($query);
+			
 			echo "<font class='message'>".t("Pävitettiin sarjanumeron tiedot")."!</font><br><br>";
 
 			$sarjanumero	= "";
@@ -210,6 +259,42 @@
 						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$kukarow[kuka]',now())";
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$tun = mysql_insert_id();
+			
+			
+			$query = "	SELECT *
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tuoteno = '$rivirow[tuoteno]'";
+			$tuoteres = mysql_query($query) or pupe_error($query);
+			$tuoterow = mysql_fetch_array($tuoteres);
+			
+			$query = "	SELECT selitetark
+						FROM avainsana
+						WHERE yhtio 	 = '$kukarow[yhtio]' 
+						and laji 		 = 'SARJANUMERON_LI' 
+						and selite  	 = 'MERKKI' 
+						and selitetark_2 = '$tuoterow[tuotemerkki]'
+						ORDER BY jarjestys, selitetark_2";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_array($vresult);
+			
+			$query = "	INSERT INTO sarjanumeron_lisatiedot
+						SET yhtio			= '$kukarow[yhtio]',
+						liitostunnus		= '$tun',
+						laatija 			= '$kukarow[kuka]',
+						luontiaika 			= now(),
+						Varirunko			= '$tuoterow[vari]',
+						Suurin_henkiloluku	= '$tuoterow[suurin_henkiloluku]',
+						Runkotyyppi			= '$tuoterow[runkotyyppi]',
+						Materiaali			= '$tuoterow[materiaali]',	
+						Koneistus			= '$tuoterow[koneistus]',
+						Tyyppi				= '$tuoterow[laitetyyppi]',
+						Kilpi				= '$tuoterow[kilpi]',
+						Sprinkleri 			= '$tuoterow[sprinkleri]',
+						Teho_kw				= '$tuoterow[teho_kw]',
+						Malli				= '$tuoterow[nimitys]',
+						Merkki				= '$vrow[selitetark]'";
+			$lisatietores_apu = mysql_query($query) or pupe_error($query);
 			
 			echo "<font class='message'>".t("Lisättiin sarjanumero")." $sarjanumero.</font><br><br>";
 

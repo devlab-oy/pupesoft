@@ -118,7 +118,7 @@
 	elseif($otunnus > 0) {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus
 					FROM lasku
-					WHERE tunnus='$otunnus'
+					WHERE tunnus='$otunnus' or tunnusnippu = '$otunnus'
 					and yhtio = '$kukarow[yhtio]' ";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
@@ -199,7 +199,7 @@
 				$query .= "and lasku.laskunro='$laskunro'";
 			}
 			else {
-				$query .= "and lasku.tunnus='$otunnus'";
+				$query .= "and lasku.tunnus='$otunnus' or lasku.tunnusnippu='$otunnus'";
 			}
 
 			$query .=	"$jarj";

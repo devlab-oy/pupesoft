@@ -181,6 +181,17 @@
 	if ($laskurow["tila"] == 'U' or $laskurow["tila"] == 'K') {
 		$where = " uusiotunnus = '$tunnus' ";
 	}
+	elseif ($laskurow["tila"] == 'R') {
+		$query = "	SELECT group_concat(tunnus) tunnukset
+		 			FROM lasku 
+					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = '$tunnus'
+					GROUP BY tunnusnippu";
+		$result = mysql_query($query) or pupe_error($query);
+		$row = mysql_fetch_array($result);
+
+		
+		$where = " otunnus IN ($row[tunnukset]) ";
+	}
 	else {
 		$where = " otunnus = '$tunnus' ";
 	}

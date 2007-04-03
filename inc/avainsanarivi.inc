@@ -151,7 +151,10 @@
 		if ($trow[$i] == 'PAKKAUS_SE') {
 			$sel48 = "selected";
 		}
-		
+		if ($trow[$i] == 'SARJANUMERON_LI') {
+			$sel49 = "selected";
+		}
+
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
 		$ulos .= "<option value='T'"			  .$sel01.">".t("Toimitustapa")."</option>";
@@ -202,6 +205,7 @@
 		$ulos .= "<option value='Y_SE'" 		  .$sel46.">".t("Ruotsinkielinen yksikkö")."</option>";
 		$ulos .= "<option value='S_SE'" 		  .$sel47.">".t("Ruotsinkielinen tuotteen status")."</option>";
 		$ulos .= "<option value='PAKKAUS_SE'" 	  .$sel48.">".t("Ruotsinkielinen pakkaus")."</option>";
+		$ulos .= "<option value='SARJANUMERON_LI'".$sel49.">".t("Sarjanumeron lisätieto")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -250,6 +254,30 @@
 		}
 		closedir($handle);
 
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "selite" and $sel49 == "selected") {
+
+		$selitteet = array(	'ANKKURIVINSSI','JAAKAAPPI','KONEISTUS','KUVATYYPPI','LAATU','MATERIAALI','MERKKI','MOOTTORINMERKKI','MOOTTORINOHJAUS',
+							'PILSSIPUMPPU','SIJAINTI','TIIKKISARJA','TOIMITUSKULUT','TYYNYSARJA','TYYPPI','UUNI','VALONHEITIN','VARIRUNKO','VESSA',
+							'RUNKOTYYPPI', 'SPRINKLERI','KILPI');
+
+		$ulos  = "<td><select name='$nimi'>";
+		
+		foreach ($selitteet as $selite) {
+			if ($selite == $trow[$i]) {
+				$sel = "SELECTED";
+			}
+			else {
+				$sel = "";
+			}
+			
+			$ulos .= "<option value='$selite' $sel>$selite</option>";
+			
+		}
+		
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

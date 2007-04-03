@@ -348,16 +348,16 @@
 			$miinus = 2;
 	}
 	elseif ($toim == "TARJOUS") {
-		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika,
-					if(date_add(lasku.luontiaika, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
-					DATEDIFF(lasku.luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
-					laatija, alatila, tila
+		$query = "	SELECT if(tunnusnippu>0,tunnusnippu,tunnus) tarjous, nimi asiakas, ytunnus, luontiaika,
+					if(date_add(luontiaika, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
+					DATEDIFF(luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
+					laatija, alatila, tila, lasku.tunnus tilaus
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
 					$haku
 					ORDER BY tunnus desc
 					LIMIT 50";
-		$miinus = 2;
+		$miinus = 3;
 	}
 	elseif ($toim == "TARJOUSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija, alatila, tila
@@ -463,7 +463,18 @@
 					$piilotarivi = "kylla";
 				}
 			}
+			
+			//	tarjousnipuista halutaan vain se viimeisin..
+			if($row["tila"] == "T") {
+				$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tila='T' and tunnusnippu='$row[tarjous]' and tunnus > $row[tilaus]";
+				$countres = mysql_query($query) or pupe_error($query);
 
+				// ja sill‰ ei ole yht‰‰n rivi‰
+				if (mysql_num_rows($countres) > 0) {
+					$piilotarivi = "kylla";
+				}
+			}
+			
 			if ($piilotarivi == "") {
 
 				// jos kyseess‰ on "odottaa JT tuotteita rivi ja kyseessa on toim=JTTOIMITA"

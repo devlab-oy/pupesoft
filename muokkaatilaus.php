@@ -101,7 +101,7 @@
 		$query = "	SELECT lasku.*
 					FROM lasku use index (tila_index)
 					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila in ('N','L') and alatila != 'X'";
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila in ('N','L') and alatila != 'X'";
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
 

@@ -785,7 +785,7 @@
 
 
 		//Tehd‰‰n suoratoimitusautomaatio jos kyseess‰ on extranet tai ediasiakas
-		if (($yhtiorow["suoratoim_automaatio"] != '' or $kukarow["extranet"] != '' or $kutsuja == "EDITILAUS") and $var == "" and $toimittamatta > 0 and $suoratoimeikiitos == "") {
+		if (($yhtiorow["suoratoim_automaatio"] != '' or $kukarow["extranet"] != '' or $kutsuja == "EDITILAUS") and $var == "" and $toimittamatta > 0 and $suoratoimeikiitos == "" and $rivityyppi != 'E') {
 			$suora_tuoteno 	= $alkupera_trow["tuoteno"];
 			$suora_kpl		= $toimittamatta;
 
@@ -966,7 +966,7 @@
 							$var	= "J";
 						}
 						// Terminaalitoimitukset tai ostoskorit; var tyhj‰‰ ja varattu normisti
-						elseif ($rivityyppi == 'Z' or $rivityyppi == 'B') {
+						elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E') {
 							$var 	= "";
 							$varattu = $kpl;
 						}

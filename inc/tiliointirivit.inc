@@ -139,7 +139,7 @@
 			$lisa = " and tiliointi.korjattu=''";
 		}
 		else {
-			$slisa = ", if(korjattu='',concat_ws('@', laatija, laadittu),concat_ws('@', korjattu, korjausaika)) korjaus, korjattu poistettu";
+			$slisa = ", if(tiliointi.korjattu='',concat_ws('@', tiliointi.laatija, tiliointi.laadittu),concat_ws('@', tiliointi.korjattu, tiliointi.korjausaika)) korjaus, tiliointi.korjattu poistettu";
 		}
 
 		$slAsa = "concat_ws('/',tiliointi.tilino,tili.nimi)";

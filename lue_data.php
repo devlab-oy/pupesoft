@@ -177,6 +177,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$pakolliset = array("ATUNNUS","TUOTENO");
 			$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 			break;
+		case "tuotteen_orginaalit" :
+			$pakolliset = array("TUOTENO","ORIG_TUOTENO");
+			$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+			break;
 		case "autodata" :
 			$pakolliset = array("AUTODATAID");
 			$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
@@ -912,6 +916,7 @@ else
 					<option value='kalenteri'>".t("Kalenteritietoja")."</option>
 					<option value='yhteensopivuus_auto'>".t("Yhteensopivuus automallit")."</option>
 					<option value='yhteensopivuus_tuote'>".t("Yhteensopivuus tuotteet")."</option>
+					<option value='tuotteen_orginaalit'>".t("Tuotteiden originaalit")."</option>
 					<option value='autodata'>".t("Autodatatiedot")."</option>
 					<option value='rekisteritiedot'>".t("Rekisteritiedot")."</option>
 					<option value='sanakirja'>".t("Sanakirja")."</option>

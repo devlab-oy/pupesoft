@@ -96,21 +96,17 @@ if ($tee == "liita") {
 		}
 
 		$verosumma 		= $liitasumma;
-		$verotonsumma 	= $liitasumma;
+		$verotonsumma 	= $liitasumma;		
 	}
-	elseif ($summa_kaytettavissa != $oslasrow["summa"]) {
+	elseif (abs($summa_kaytettavissa-$oslasrow["arvo"]) >= 0.01) {
 		$verosumma 		= $summa_kaytettavissa;
 		$verotonsumma 	= $summa_kaytettavissa;
 	}
 	else {
-		//T‰ss‰ on ostolaskun verollinen summa
+		//T‰ss‰ on ostolaskun verollinen summa (Tarvitaan alvillisissa vaihto-omaisuuslaskuissa)
 		$verosumma 		= $oslasrow["summa"];
-
-		//Verojen m‰‰r‰
-		$vero = $alvirow["summa"];
-
-		//Ja lopuksi viel‰ veroton summa
-		$verotonsumma 	= $verosumma - $vero;
+		//Ja veroton summa
+		$verotonsumma 	= $oslasrow["arvo"];
 	}
 		
 	if (abs($summa_kaytettavissa) < abs($verotonsumma)) {
@@ -118,7 +114,7 @@ if ($tee == "liita") {
 		$tee 			= "haku";
 		$verosumma 		= 0;
 		$verotonsumma 	= 0;
-	}	
+	}
 	
 	//lis‰t‰‰n lasku
 	if ($verotonsumma != 0 and $verosumma != 0) {
@@ -144,7 +140,6 @@ if ($tee == "liita") {
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<font class='message'>".t("Lasku")." ($oslasrow[nimi] $oslasrow[summa] $oslasrow[valkoodi]) ".t("liitettiin keikkaan")." $laskurow[laskunro].</font><br><br>";
-
 
 		// jos kyseess‰ on vaihto-omaisuuslasku, niin p‰ivitet‰‰n laskun tapvm keikalla ja vientikent‰n info keikan otsikolle (jos jostain syyst‰ toimittajan oletus onkin v‰‰rin)
 		if ($oslasrow["vienti"] == "C" or $oslasrow["vienti"] == "F" or $oslasrow["vienti"] == "I" or $oslasrow["vienti"] == "J" or $oslasrow["vienti"] == "K" or $oslasrow["vienti"] == "L") {

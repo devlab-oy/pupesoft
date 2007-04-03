@@ -1073,9 +1073,11 @@
 					echo "<option value='$row[0]' $sel>$row[1]</option>";
 				}
 				echo "</select></td>";
-
-				echo "</tr>";
-
+				
+				$rchk = "";
+				if($srow["rivihintoja_ei_nayteta"] != '') $rchk = 'CHECKED';				
+				echo "<td>".t("Rivihintoja ei näytetä")."</td><td><input type='checkbox' value='X' name='rivihintoja_ei_nayteta' $rchk></td>";
+								
 			}
 
 			echo "<tr>";
@@ -1642,7 +1644,7 @@
 			$tilausnumero = $id;
 		}
 		
-		if ($toim == "PROJEKTI") {
+		if ($toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"]!="")) {
 			$query = "	UPDATE lasku
 						SET tunnusnippu = '$tilausnumero'
 						WHERE tunnus = '$tilausnumero'";
@@ -1692,6 +1694,7 @@
 						yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
 						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
 						seuranta					= '$seuranta',
+						rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',				
 						asiakkaan_kohde				= '$asiakkaan_kohde',
 						otunnus 					= '$kukarow[kesken]'";
 			$query3 .= $postquery3;

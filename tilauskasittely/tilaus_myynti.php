@@ -1,5 +1,8 @@
 <?php
 
+//	Ladataan javahelpperit
+$pupejs=1;
+
 if (file_exists("../inc/parametrit.inc")) {
 	require ("../inc/parametrit.inc");
 }
@@ -414,6 +417,15 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS") {
 	$query = "UPDATE lasku SET alatila='B' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 	$result = mysql_query($query) or pupe_error($query);
 
+	//	Päivitetään myös muut tunnusnipun jäsenet sympatian vuoksi hyväksytyiksi 
+	$query = "select tunnusnippu from lasku where yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = $laskurow[tunnusnippu]";
+	$result = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($result) > 0) {
+		$row=mysql_fetch_array($result);
+		$query = "UPDATE lasku SET alatila='T' where yhtio='$kukarow[yhtio]' and tunnusnippu = $row[tunnusnippu] and tunnus!='$kukarow[kesken]'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -459,6 +471,39 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS") {
 
 		$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and $tunken='$srow[tunnus]'";
 		$sarjares = mysql_query($query) or pupe_error($query);
+	}
+
+	//	Päivitetään myös muut tunnusnipun jäsenet sympatian vuoksi hylätyiksi *** tämän voisi varmaan tehdä myös kaikki kerralla? ***
+	$query = "select tunnus from lasku where yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = $laskurow[tunnusnippu] and tunnus != '$kukarow[kesken]'";
+	$abures = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($abures) > 0) {
+		while($row=mysql_fetch_array($abures)) {
+			$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus=$row[tunnus]";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus=$row[tunnus]";
+			$result = mysql_query($query) or pupe_error($query);
+
+			//Nollataan sarjanumerolinkit
+			$query    = "	SELECT tilausrivi.tunnus, (tilausrivi.varattu+tilausrivi.jt) varattu, tilausrivi.tuoteno
+							FROM tilausrivi use index (yhtio_otunnus)
+							JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+							WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+							and tilausrivi.otunnus='$row[tunnus]'";
+			$sres = mysql_query($query) or pupe_error($query);
+
+			while($srow = mysql_fetch_array($sres)) {
+				if ($srow["varattu"] < 0) {
+					$tunken = "ostorivitunnus";
+				}
+				else {
+					$tunken = "myyntirivitunnus";
+				}
+
+				$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and $tunken='$srow[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}
+		}		
 	}
 
 	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
@@ -1147,12 +1192,13 @@ if ($tee == '') {
 		echo "<tr>";
 		echo "<th align='left'>".t("Tilausnumero").":</th>";
 
-		if ($toim == "PROJEKTI" or $laskurow["tunnusnippu"] > 0) {
+		if ($laskurow["tunnusnippu"] > 0) {
 			
 			echo "<td><select Style=\"width: 230px; font-size: 8pt; padding: 0\" name='valitsetoimitus' onchange='submit();'>";
 					
 			// Listataan kaikki toimitukset
-			$query = " 	SELECT tila, alatila, varastopaikat.nimitys varasto, lasku.toimaika, lasku.tunnus tunnus
+			$vquery="select count(*) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tunnus<=lasku.tunnus and l.tila='T'";
+			$query = " 	SELECT tila, alatila, varastopaikat.nimitys varasto, lasku.toimaika, if(tila='T',if(tunnusnippu>0,concat(lasku.tunnusnippu,'/',($vquery)), concat(lasku.tunnusnippu,'/1')),lasku.tunnus) tilaus, lasku.tunnus tunnus
 						FROM lasku
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						WHERE lasku.yhtio = '$kukarow[yhtio]' 
@@ -1177,17 +1223,19 @@ if ($tee == '') {
 
 					if($row["varasto"] == "") $row["varasto"] = "oletus";
 
-					echo "<option value ='$row[tunnus]' $sel>".t("$laskutyyppi")." ".t("$alatila")." $row[tunnus] - $row[varasto]</option>";
+					echo "<option value ='$row[tunnus]' $sel>".t("$laskutyyppi")." ".t("$alatila")." $row[tilaus] - $row[varasto]</option>";
 				}
 			}
-			
-			echo "<optgroup label='".t("Perusta uusi")."'>
-					<option value='PIKATILAUS'>".T("Toimitus")."</option>
-					<option value='TARJOUS'>".T("Tarjous")."</option>
-					<option value='TYOMAARAYS'>".T("Työmääräys")."</option>
-					<option value='VALMISTAASIAKKAALLE'>".T("Valmistus")."</option>					
-					<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>										
-			</optgroup></select></td>";
+			echo "<optgroup label='".t("Perusta uusi")."'>";
+			if($toim == "TARJOUS") {
+				echo "<option value='TARJOUS'>".T("Tarjouksen versio")."</option>";
+			}
+			else {
+				echo "<option value='PIKATILAUS'>".T("Toimitus")."</option>";
+				echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
+				echo "<option value='VALMISTAASIAKKAALLE'>".T("Valmistus")."</option>";				
+				echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";				
+			}
 			
 		}
 		else {

@@ -782,5 +782,25 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tarjouksen_voi_versioida") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "Y") {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Tarjoksesta ei voi tehdä versioita")."</option>";
+		$ulos .= "<option value='Y' $sel2>".t("Tarjouksesta voi tehdä versioita")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

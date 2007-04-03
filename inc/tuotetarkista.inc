@@ -49,18 +49,6 @@
 		$tem_tuoteno = $t[$i];
 	}
 
-	if (mysql_field_name($result, $i) == "laatija") {
-		if ($tunnus == "") {
-			$t[$i] = $kukarow['kuka'];
-		}
-	}
-
-	if (mysql_field_name($result, $i) == "luontiaika") {
-		if ($tunnus == "") {
-			$t[$i] = date('Y-m-d H:i:s');
-		}
-	}
-
 	if (mysql_field_name($result, $i) == "ei_saldoa") {
 		if ($t[$i] != '') {
 			$query = "SELECT *

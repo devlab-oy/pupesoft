@@ -18,24 +18,11 @@
 
 	}
 
-	if (mysql_field_name($result, $i) == "laatija") {
-		if ($tunnus == "") {
-			$t[$i] = $kukarow['kuka'];
-		}
-	}
-
-	if (mysql_field_name($result, $i) == "luontiaika") {
-		if ($tunnus == "") {
-			$t[$i] = date('Y-m-d H:i:s');
-		}
-	}
-
 	if (mysql_field_name($result, $i) == "asiakasnro") {
 		if ($asiakasnro_select != '') {
 			$t[$i] = $asiakasnro_select;
 		}
 	}
-
 
 	if (mysql_field_name($result, $i) == "toim_ovttunnus" and trim($t[$i]) != '') {
 

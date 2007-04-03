@@ -10,25 +10,6 @@
 
 	require("../inc/parametrit.inc");
 	
-	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-		<!--
-
-		function toggleAll(toggleBox) {
-
-			var currForm = toggleBox.form;
-			var isChecked = toggleBox.checked;
-			var nimi = toggleBox.name;
-
-			for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
-				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
-					currForm.elements[elementIdx].checked = isChecked;
-				}
-			}
-		}
-
-		//-->
-		</script>";
-
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);	
 		exit;
@@ -36,6 +17,26 @@
 	else {
 		echo "<font class='head'>".t("Myyntiseuranta")."</font><hr>";
 
+		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+			<!--
+
+			function toggleAll(toggleBox) {
+
+				var currForm = toggleBox.form;
+				var isChecked = toggleBox.checked;
+				var nimi = toggleBox.name;
+
+				for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+					if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
+						currForm.elements[elementIdx].checked = isChecked;
+					}
+				}
+			}
+
+			//-->
+			</script>";
+		
+		
 		// tutkaillaan saadut muuttujat
 		$asiakasosasto   = trim($asiakasosasto);
 		$asiakasryhma    = trim($asiakasryhma);

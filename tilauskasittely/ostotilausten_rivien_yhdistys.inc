@@ -7,7 +7,7 @@ $laskurow = mysql_fetch_array($result);
 
 // yhdistet‰‰n ruksatut keikat "is‰keikkaan" $otunnus
 if ($tee == "teeyhdistys") {
-	
+
 	if (count($yhdistakeikka) > 0) {
 
 		foreach ($yhdistakeikka as $keikkatunnus) {
@@ -15,15 +15,15 @@ if ($tee == "teeyhdistys") {
 			$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and tunnus='$keikkatunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($result) == 1) {	
+			if (mysql_num_rows($result) == 1) {
 				$keikkarow = mysql_fetch_array($result);
-				
+
 				$query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' and otunnus=uusiotunnus order by yhtio";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				$query = "update tilausrivi set uusiotunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' order by yhtio";
 				$result = mysql_query($query) or pupe_error($query);
-												
+
 				$query = "delete from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
@@ -42,7 +42,7 @@ if ($tee == "teeyhdistys") {
 }
 
 if ($tee == "") {
-	
+
 	// n‰ytet‰‰n v‰h‰ toimittajan tietoja
 	echo "<table>";
 	echo "<tr>";
@@ -73,9 +73,9 @@ if ($tee == "") {
 		echo "<input type='hidden' name='toiminto' value='yhdista'>";
 		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 		echo "<input type='hidden' name='tee' value='teeyhdistys'>";
-		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";	
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-	
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("keikka")."</th>";
@@ -84,12 +84,17 @@ if ($tee == "") {
 		echo "<th>".t("kohdistettu")."</th>";
 		echo "<th>".t("varastossa")."</th>";
 		echo "<th>".t("kululaskuja")."</th>";
-		echo "<th>".t("ostolaskuja")."</th>";		
+		echo "<th>".t("ostolaskuja")."</th>";
 		echo "<th>".t("yhdist‰")."</th>";
 		echo "</tr>";
-	
+
+		$keikkakesken = 0;
+		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
+		}
+
 		while ($row = mysql_fetch_array($result)) {
-		
+
 			// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
 			$query  = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$row[tunnus]' and tyyppi='O'";
 			$tilres = mysql_query($query) or pupe_error($query);
@@ -108,17 +113,17 @@ if ($tee == "") {
 					$kplvarasto++; // lasketaan montako tilausrivi‰ on viety varastoon
 				}
 			}
-		
+
 			// katotaan onko liitettyj‰ laskuja
 			// ('C','F','I','J','K','L') // vaihto-omaisuus ja raaka-aine
 			// ('B','C','J','E','F','K','H','I','L') // kaikki
 
-			$query = "	select count(*) num, 
-						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',1,0)) volasku, 
-						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',1,0)) kulasku,			
-						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',summa,0)) vosumma, 
-						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',arvo,0)) kusumma 			
-						from lasku 
+			$query = "	select count(*) num,
+						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',1,0)) volasku,
+						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',1,0)) kulasku,
+						sum(if(vienti='C' or vienti='F' or vienti='I' or vienti='J' or vienti='K' or vienti='L',summa,0)) vosumma,
+						sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',arvo,0)) kusumma
+						from lasku
 						where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus<>0 and laskunro='$row[laskunro]'";
 			$llres = mysql_query($query) or pupe_error($query);
 			$llrow = mysql_fetch_array($llres);
@@ -149,31 +154,38 @@ if ($tee == "") {
 				echo "<td>$kplvarasto</td>";
 				echo "<td>$llrow[kulasku] $llrow[kusumma]</td>";
 				echo "<td>$llrow[volasku] $llrow[vosumma]</td>";
-				echo "<td><input type='checkbox' name='yhdistakeikka[]' value='$row[tunnus]'></td>";
+
+				// keikkaa ollaan viem‰ss‰ varastoon
+				if ($keikkakesken == $row["tunnus"]) {
+					echo "<td>".t("Varastoonvienti kesken")."</td>";
+				}
+				else {
+					echo "<td><input type='checkbox' name='yhdistakeikka[]' value='$row[tunnus]'></td>";
+				}
 				echo "</tr>";
 			}
 		}
 
 		echo "</table>";
-	
+
 		echo "<br><input type='submit' value='".t("Liit‰ valitut keikat")."'>";
 		echo "</form>";
-	
+
 		if ($toiminto != "") {
 			echo "<hr>";
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toiminto' value=''>";
-			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";	
+			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
 			echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
-			echo "</form>";	
+			echo "</form>";
 		}
-	
+
 	}
 	else {
 		echo "<font class='message'>".t("Ei yht‰‰n liitett‰v‰ksi sopivaa tilausta").".</font>";
 	}
-	
+
 }
 
 ?>

@@ -1,10 +1,7 @@
 <?php
 
-//Kukarow kesken päivitetään tässä, jotta kukaan ei voi samalla viedä varaston ja tehdä kohdistuksia
-if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $otunnus) {
-	$query = "update kuka set kesken='$otunnus' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-	$result = mysql_query($query) or pupe_error($query);
-}
+// tehdään lock file, ettei voi kerralla ajaa kuin yks per firma
+file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus");
 
 $query  = "select * from lasku where tunnus='$otunnus' and yhtio='$kukarow[yhtio]' and tila='K' and alatila=''";
 $result = mysql_query($query) or pupe_error($query);
@@ -149,8 +146,7 @@ else {
 	echo "</form>";
 }
 
-//Kukarow kesken päivitetään tässä takas
-$query = "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-$result = mysql_query($query) or pupe_error($query);
+// poistetaan lock file
+unlink("/tmp/$kukarow[yhtio]-keikka.lock");
 
 ?>

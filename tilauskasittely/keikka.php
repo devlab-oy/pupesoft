@@ -137,42 +137,48 @@ if ($toiminto == "kululaskut") {
 	require('kululaskut.inc');
 }
 
-// lasketaan lopullinen varastonarvo
-if ($toiminto == "kaikkiok") {
-	
+// tehd‰‰n errorichekkej‰ jos on varastoonvienti kyseess‰
+if ($toiminto == "kaikkiok" or $toiminto == "kalkyyli") {
 	$query = "	SELECT nimi
 				FROM kuka
 				WHERE yhtio = '$kukarow[yhtio]'
 				and kesken  = '$otunnus'";
 	$result = mysql_query($query) or pupe_error($query);
-	
-	if (mysql_num_rows($result) == "") {
-		require('varastonarvo_historia.inc');
+
+	$varastoerror = 0;
+
+	if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+		echo "<font class='error'>".t("VIRHE: Keikkaa ei voi vied‰ varastoon.")." ".t("Varastoonvienti on kesken!")."</font><br>";
+		$varastoerror = 1;
 	}
-	else {
+	elseif (mysql_num_rows($result) != 0){
 		while ($rivi = mysql_fetch_array($result)) {
-			echo "<font class='error'>".t("VIRHE: Keikkaa ei voi vied‰ varastoon.").sprintf(t("K‰ytt‰j‰ll‰ %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
+			echo "<font class='error'>".t("VIRHE: Keikkaa ei voi vied‰ varastoon.")." ".sprintf(t("K‰ytt‰j‰ll‰ %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
 		}
+		$varastoerror = 1;
 	}
+
+	if ($varastoerror != 0) {
+		echo "<br><form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+		echo "<input type='hidden' name='toiminto' value=''>";
+		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+		echo "<input type='submit' value='".t("Takaisin")."'>";
+		echo "</form>";
+
+		$ytunnus = "";
+		$toiminto = "dummieimit‰‰n";
+	}
+}
+
+// lasketaan lopullinen varastonarvo
+if ($toiminto == "kaikkiok") {
+	require ("varastonarvo_historia.inc");
 }
 
 // vied‰‰n keikka varastoon
 if ($toiminto == "kalkyyli") {
-	
-	$query = "	SELECT nimi
-				FROM kuka
-				WHERE yhtio = '$kukarow[yhtio]'
-				and kesken  = '$otunnus'";
-	$result = mysql_query($query) or pupe_error($query);
-	
-	if (mysql_num_rows($result) == "") {
-		require ("kalkyyli.inc");
-	}
-	else {
-		while ($rivi = mysql_fetch_array($result)) {
-			echo "<font class='error'>".t("VIRHE: Keikkaa ei voi vied‰ varastoon.").sprintf(t("K‰ytt‰j‰ll‰ %s on kohdistus kesken!"), $rivi["nimi"])."</font><br>";
-		}
-	}
+	require ("kalkyyli.inc");
 }
 
 // jos ollaan annettu $ytunnus haetaan toimittajan tiedot arrayseen $toimittajarow
@@ -377,6 +383,11 @@ if ($toiminto == "" and $ytunnus != "") {
 		echo "<th valign='top'>".t("toiminto")."</th>";
 		echo "</tr>";
 
+		$keikkakesken = 0;
+		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
+			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
+		}
+		
 		while ($row = mysql_fetch_array($result)) {
 
 			// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
@@ -529,47 +540,53 @@ if ($toiminto == "" and $ytunnus != "") {
 			echo "<td valign='top'>$kplyhteensa<br>$kplvarasto</td>";
 			echo "<td valign='top'>$llrow[volasku] $llrow[vosumma]<br>$llrow[kulasku] $llrow[kusumma]</td>";
 
-			echo "<form action='$PHP_SELF' method='post'>";
-			echo "<td align='right'>";
-			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-			echo "<input type='hidden' name='otunnus' value='$row[tunnus]'>";
-			echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
-			echo "<input type='hidden' name='keikkaid' value='$row[laskunro]'>";
-			echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
-			echo "<input type='hidden' name='laskunro' value='$row[laskunro]'>";
-			echo "<select name='toiminto'>";
-
-			// n‰it‰ saa tehd‰ aina keikalle
-			echo "<option value='kohdista'>"         .t("Kohdista rivej‰")."</option>";
-			echo "<option value='kululaskut'>"       .t("Keikan laskut")."</option>";
-			echo "<option value='lisatiedot'>"       .t("Lis‰tiedot")."</option>";
-			echo "<option value='yhdista'>"          .t("Yhdist‰ keikkoja")."</option>";
-
-			// poista keikka vaan jos ei ole yht‰‰n rivi‰ kohdistettu ja ei ole yht‰‰n kululaskua liitetty
-			if ($kplyhteensa == 0 and $llrow["num"] == 0) {
-				echo "<option value='poista'>"       .t("Poista keikka")."</option>";
+			// jos t‰t‰ keikkaa ollaan just viem‰ss‰ varastoon ei tehd‰ dropdownia
+			if ($keikkakesken == $row["tunnus"]) {
+				echo "<td>".t("Varastoonvienti kesken")."</td>";
 			}
+			else {
+				echo "<form action='$PHP_SELF' method='post'>";
+				echo "<td align='right'>";
+				echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+				echo "<input type='hidden' name='otunnus' value='$row[tunnus]'>";
+				echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+				echo "<input type='hidden' name='keikkaid' value='$row[laskunro]'>";
+				echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
+				echo "<input type='hidden' name='laskunro' value='$row[laskunro]'>";
+				echo "<select name='toiminto'>";
 
-			// jos on kohdistettuja rivej‰ niin saa tehd‰ n‰it‰
-			if ($kplyhteensa > 0) {
-				echo "<option value='varastopaikat'>".t("Varastopaikat")."</option>";
-				echo "<option value='tulosta'>"      .t("Tulosta paperit")."</option>";
+				// n‰it‰ saa tehd‰ aina keikalle
+				echo "<option value='kohdista'>"         .t("Kohdista rivej‰")."</option>";
+				echo "<option value='kululaskut'>"       .t("Keikan laskut")."</option>";
+				echo "<option value='lisatiedot'>"       .t("Lis‰tiedot")."</option>";
+				echo "<option value='yhdista'>"          .t("Yhdist‰ keikkoja")."</option>";
+
+				// poista keikka vaan jos ei ole yht‰‰n rivi‰ kohdistettu ja ei ole yht‰‰n kululaskua liitetty
+				if ($kplyhteensa == 0 and $llrow["num"] == 0) {
+					echo "<option value='poista'>"       .t("Poista keikka")."</option>";
+				}
+
+				// jos on kohdistettuja rivej‰ niin saa tehd‰ n‰it‰
+				if ($kplyhteensa > 0) {
+					echo "<option value='varastopaikat'>".t("Varastopaikat")."</option>";
+					echo "<option value='tulosta'>"      .t("Tulosta paperit")."</option>";
+				}
+
+				// jos on kohdistettuja rivej‰ ja lis‰tiedot on syˆtetty ja varastopaikat on ok ja on viel‰ jotain viet‰v‰‰ varastoon
+				if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 0) {
+					echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
+				}
+
+				// jos lis‰tiedot, kohdistus ja paikat on ok sek‰ kaikki rivit on viety varastoon, niin saadaan laskea virallinen varastonarvo
+				if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto and $sarjanrook == 0) {
+					echo "<option value='kaikkiok'>"     .t("Laske virallinen varastonarvo")."</option>";
+				}
+
+				echo "</select>";
+				echo "<input type='submit' value='".t("Tee")."'>";
+				echo "</td>";
+				echo "</form>";
 			}
-
-			// jos on kohdistettuja rivej‰ ja lis‰tiedot on syˆtetty ja varastopaikat on ok ja on viel‰ jotain viet‰v‰‰ varastoon
-			if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 0) {
-				echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
-			}
-
-			// jos lis‰tiedot, kohdistus ja paikat on ok sek‰ kaikki rivit on viety varastoon, niin saadaan laskea virallinen varastonarvo
-			if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto and $sarjanrook == 0) {
-				echo "<option value='kaikkiok'>"     .t("Laske virallinen varastonarvo")."</option>";
-			}
-
-			echo "</select>";
-			echo "<input type='submit' value='".t("Tee")."'>";
-			echo "</td>";
-			echo "</form>";
 			echo "</tr>";
 		}
 

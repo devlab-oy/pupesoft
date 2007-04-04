@@ -1,10 +1,7 @@
 <?php
 
-//Kukarow kesken päivitetään tässä, jotta kukaan ei voi samalla viedä varaston ja tehdä kohdistuksia
-if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $otunnus) {
-	$query = "update kuka set kesken='$otunnus' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-	$result = mysql_query($query) or pupe_error($query);
-}
+// tehdään lock file, ettei voi kerralla ajaa kuin yks per firma
+file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus");
 
 // katsotaan, että kaikilla tuotteilla on joku varastopaikka
 $query  = "select * from tilausrivi where uusiotunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
@@ -105,8 +102,7 @@ else {
 	echo "<font class='error'>".t("Laskulla olevista tuotteista")." $eipaikkoja".t(":lta puuttuu varastopaikka tai oletuspaikka! Korjaa asia").".<br>".t("Tuotteet").": $eituotteet</font><br>";
 }
 
-//Kukarow kesken päivitetään tässä takas
-$query = "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-$result = mysql_query($query) or pupe_error($query);
+// poistetaan lock file
+unlink("/tmp/$kukarow[yhtio]-keikka.lock");
 
 ?>

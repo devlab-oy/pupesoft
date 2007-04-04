@@ -70,10 +70,10 @@ if ($tee == "liita") {
 
 	// Ostoreskontralaskun veroton arvo
 	$oslasrow["arvo"] = $oslasrow["summa"] - $alvirow["summa"];
-
+	
 	// Pilkut pisteiksi
 	$liitasumma = (float) str_replace(",",".",$liitasumma);
-
+	
 	$query = "	select sum(arvo) arvo
 				from lasku
 				where yhtio		= '$kukarow[yhtio]'
@@ -109,7 +109,7 @@ if ($tee == "liita") {
 		$verotonsumma 	= $oslasrow["arvo"];
 	}
 		
-	if (abs($summa_kaytettavissa) < abs($verotonsumma)) {
+	if ($summa_kaytettavissa-$verotonsumma >= 0) {
 		echo "<font class='error'>".t("VIRHE: Yritit liitt‰‰ liian suuren summan. Laskun saldo ei riitt‰nyt")."!</font><br>";
 		$tee 			= "haku";
 		$verosumma 		= 0;

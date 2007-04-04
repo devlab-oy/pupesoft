@@ -109,7 +109,7 @@ if ($tee == "liita") {
 		$verotonsumma 	= $oslasrow["arvo"];
 	}
 		
-	if ($summa_kaytettavissa-$verotonsumma >= 0) {
+	if ($summa_kaytettavissa-$verotonsumma > 0) {
 		echo "<font class='error'>".t("VIRHE: Yritit liitt‰‰ liian suuren summan. Laskun saldo ei riitt‰nyt")."!</font><br>";
 		$tee 			= "haku";
 		$verosumma 		= 0;

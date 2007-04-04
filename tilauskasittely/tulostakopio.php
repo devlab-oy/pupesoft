@@ -65,6 +65,9 @@
 	if ($toim == "PROFORMA") {
 		$fuse = t("Proforma");
 	}
+	if ($toim == "TILAUSVAHVISTUS") {
+		$fuse = t("Tilausvahvistus");
+	}
 	if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL") {
 		$fuse = t("Tarjous");
 	}
@@ -407,6 +410,27 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = "";
 		}
+		if ($toim == "TILAUSVAHVISTUS") {
+			//myyntitilaus. Tulostetaan proforma.
+			$where1 = " lasku.tila in ('L','U')";
+
+			if ($ytunnus{0} == '£') {
+				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
+							and lasku.nimitark  = '$asiakasrow[nimitark]'
+							and lasku.osoite    = '$asiakasrow[osoite]'
+							and lasku.postino   = '$asiakasrow[postino]'
+							and lasku.postitp   = '$asiakasrow[postitp]' ";
+			}
+			else {
+				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			}
+
+			$where2 .= " and lasku.lahetepvm >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.lahetepvm <='$vvl-$kkl-$ppl 23:59:59'";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = "";
+		}
 		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 			// Tulostellaan venemyyntiin liittyviä osia
 			$where1 = " lasku.tila in ('L','T','N') ";
@@ -705,6 +729,12 @@
 			$tulostimet[0] = 'Lasku';
 			if ($kappaleet > 0) {
 				$komento["Lasku"] .= " -# $kappaleet ";
+			}
+		}
+		if ($toim == "TILAUSVAHVISTUS" and $komento["Lasku"] != 'email') {
+			$tulostimet[0] = 'Tilausvahvistus';
+			if ($kappaleet > 0) {
+				$komento["Tilausvahvistus"] .= " -# $kappaleet ";
 			}
 		}
 		if (($toim == "TARJOUS"  or $toim == "TARJOUS!!!VL") and $komento["Tarjous"] != 'email' and substr($komento["Tarjous"],0,12) != 'asiakasemail') {
@@ -1037,6 +1067,16 @@
 					echo t("Lasku tulostuu")."...<br>";
 					$tee = '';
 				}
+			}
+
+			if ($toim == "TILAUSVAHVISTUS") {
+				$otunnus = $laskurow["tunnus"];
+				
+				require_once ("tulosta_tilausvahvistus.inc");
+				
+				tulosta_tilausvahvistus($otunnus, $komento["Tilausvahvistus"], $kieli, $tee);
+
+				$tee = '';
 			}
 
 			if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL") {

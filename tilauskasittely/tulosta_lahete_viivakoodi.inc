@@ -332,8 +332,8 @@ if (!function_exists('rivi')) {
 			$width    = "220";
 			$height   = "20";
 			$xres     = "1";
-			$font     = "2";
-			$drawtext = "off";
+			$font     = "1";
+			$drawtext = "on";
 			
 			$style  = BCS_ALIGN_CENTER;
 			$style |= ($output  == "png") 	? BCS_IMAGE_PNG  	: 0;

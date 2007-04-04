@@ -490,16 +490,21 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				$nimitys = "<table width='100%'>";
-
-				while ($sarjarow = mysql_fetch_array($sarjares)) {
-					if($sarjarow["nimitys"] != "") {
-						$nimitys .= "<tr><td>$sarjarow[nimitys]</td></tr>";
-					}
-					else {
-						$nimitys .= "<tr><td>$row[nimitys]</td></tr>";
-					}
+				
+				if(mysql_num_rows($sarjares)>0) {
+					while ($sarjarow = mysql_fetch_array($sarjares)) {
+						if($sarjarow["nimitys"] != "") {
+							$nimitys .= "<tr><td>$sarjarow[nimitys]</td></tr>";
+						}
+						else {
+							$nimitys .= "<tr><td>$row[nimitys]</td></tr>";
+						}
+					}					
 				}
-
+				else {
+					$nimitys .= "<tr><td>$row[nimitys]</td></tr>";					
+				}
+				
 				$nimitys .= "</table>";
 
 				$row["nimitys"] = $nimitys;

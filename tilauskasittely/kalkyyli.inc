@@ -1,5 +1,11 @@
 <?php
 
+//Kukarow kesken p‰ivitet‰‰n t‰ss‰, jotta kukaan ei voi samalla vied‰ varaston ja tehd‰ kohdistuksia
+if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $otunnus) {
+	$query = "update kuka set kesken='$otunnus' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+	$result = mysql_query($query) or pupe_error($query);
+}
+
 // katsotaan, ett‰ kaikilla tuotteilla on joku varastopaikka
 $query  = "select * from tilausrivi where uusiotunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 $result = mysql_query($query) or pupe_error($query);
@@ -23,7 +29,7 @@ while ($rivirow = mysql_fetch_array($result)) {
 			$eituotteet .= $rivirow["tuoteno"]." ";
 		}
 	}
-}	
+}
 
 // takaisin selaukseen
 $toiminto = "";
@@ -35,43 +41,43 @@ if ($eipaikkoja == 0) {
 
 	if (mysql_num_rows($result) == 1) {
 		$laskurow = mysql_fetch_array($result);
-		
-		// vied‰‰n oikeasti varastoon tai sitten n‰ytet‰‰n vaan ruudulla.. 
+
+		// vied‰‰n oikeasti varastoon tai sitten n‰ytet‰‰n vaan ruudulla..
 		if ($tee == "varastoon") {
 			require ("varastoon.inc");
 		}
 		else {
-			
+
 			if ($tee == "eitullia") {
 				//merkataan ne rivit joille ei pid‰ laskea tullia
-				$query = "	UPDATE tilausrivi 
+				$query = "	UPDATE tilausrivi
 							SET var='', netto='X'
 							WHERE uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'";
 				$varresult = mysql_query($query) or pupe_error($query);
-				
+
 				if (count($eitullia) > 0) {
-					foreach($eitullia as $eitul) { 
-						$query = "	UPDATE tilausrivi 
+					foreach($eitullia as $eitul) {
+						$query = "	UPDATE tilausrivi
 									SET var='T'
 									WHERE tunnus='$eitul' and uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'";
 						$varresult = mysql_query($query) or pupe_error($query);
 					}
 				}
-				
+
 				if (count($varastoonko) > 0) {
-					foreach($varastoonko as $varas) { 
-						$query = "	UPDATE tilausrivi 
+					foreach($varastoonko as $varas) {
+						$query = "	UPDATE tilausrivi
 									SET netto=''
 									WHERE tunnus='$varas' and uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'";
 						$varresult = mysql_query($query) or pupe_error($query);
 					}
 				}
 
-				$tee = "";	
+				$tee = "";
 			}
-			
+
 			require("varastoon_ruudulle.inc");
-			
+
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 			echo "<input type='hidden' name='toiminto' value='kalkyyli'>";
@@ -85,7 +91,7 @@ if ($eipaikkoja == 0) {
 			echo "<input type='hidden' name='toiminto' value=''>";
 			echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
 			echo "<input type='submit' value='".t("Peruuta")."'>";
-			echo "</form>";			
+			echo "</form>";
 		}
 
 		// ei n‰ytet‰ en‰‰ muuta
@@ -98,5 +104,9 @@ if ($eipaikkoja == 0) {
 else {
 	echo "<font class='error'>".t("Laskulla olevista tuotteista")." $eipaikkoja".t(":lta puuttuu varastopaikka tai oletuspaikka! Korjaa asia").".<br>".t("Tuotteet").": $eituotteet</font><br>";
 }
+
+//Kukarow kesken p‰ivitet‰‰n t‰ss‰ takas
+$query = "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+$result = mysql_query($query) or pupe_error($query);
 
 ?>

@@ -164,7 +164,7 @@ if (sizeof($kieli) > 0) {
 		$laskkaannos = 0;
 		
 		while ($row = mysql_fetch_array($result)) {
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			echo "<td>$row[fi]</td>";
 
 			if ($row['tunnus'] > $maxtunnus) $maxtunnus = $row['tunnus'];

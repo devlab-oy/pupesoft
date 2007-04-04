@@ -215,6 +215,14 @@
 	if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%')";
 	if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%')";
 
+	$seuranta = "";
+	$seurantalisa = "";
+	
+	if($yhtiorow["tilauksen_seuranta"] !="") {
+		$seuranta = " seuranta, ";
+		$seurantalisa = "LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus";
+	}
+	
 	// Etsit‰‰n muutettavaa tilausta
 	if ($toim == 'SUPER') {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija, alatila, tila
@@ -301,7 +309,7 @@
 					order by lasku.luontiaika desc";
 		$miinus = 2;
 	}
-	elseif ($toim=='VALMISTUS') {
+	elseif ($toim == 'VALMISTUS') {
 		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, lasku.luontiaika, laatija, viesti tilausviite, alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='V' and alatila in ('','A','B','J')
@@ -348,14 +356,15 @@
 			$miinus = 2;
 	}
 	elseif ($toim == "TARJOUS") {
-		$query = "	SELECT if(tunnusnippu>0,tunnusnippu,tunnus) tarjous, nimi asiakas, ytunnus, luontiaika,
-					if(date_add(luontiaika, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
-					DATEDIFF(luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
-					laatija, alatila, tila, lasku.tunnus tilaus
+		$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta nimi asiakas, ytunnus, lasku.luontiaika,
+					if(date_add(lasku.luontiaika, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
+					DATEDIFF(lasku.luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
+					lasku.laatija, alatila, tila, lasku.tunnus tilaus
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
+					$seurantalisa
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
 					$haku
-					ORDER BY tunnus desc
+					ORDER BY lasku.tunnus desc
 					LIMIT 50";
 		$miinus = 3;
 	}
@@ -379,7 +388,7 @@
 		$miinus = 2;
 	}
 	elseif ($toim == "LASKUTUSKIELTO") {
-		$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija, alatila, tila
+		$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, lasku.laatija, alatila, tila
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila in ('N','L') and alatila != 'X'
@@ -413,20 +422,20 @@
 		$miinus = 2;
 	}
 	elseif ($toim == 'PROJEKTI') {
-		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila
+		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila
 					FROM lasku use index (tila_index)
+					$seurantalisa
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='R'
 					$haku
 					ORDER by lasku.luontiaika desc
 					LIMIT 50";
 		$miinus = 2;
 	}
-
-
 	else {
-		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila, kuka.extranet extra
+		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila, kuka.extranet extra
 					FROM lasku use index (tila_index)
 					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
+					$seurantalisa
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in('L','N') and lasku.alatila in('A','')
 					$haku
 					HAVING extra = '' or extra is null

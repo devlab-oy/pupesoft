@@ -194,28 +194,17 @@
 		}
 
 		if ($otunnus > 0 or $laskunro > 0) {
+			$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+						FROM lasku
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.liitostunnus = '$asiakasid'
+						and $til";
+
 			if ($laskunro > 0) {
-				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
-							FROM lasku
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.liitostunnus = '$asiakasid'
-							and $til
-							and lasku.laskunro='$laskunro'";
+				$query .= "and lasku.laskunro='$laskunro'";
 			}
 			else {
-				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
-							FROM lasku
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.liitostunnus = '$asiakasid'
-							and $til
-							and lasku.tunnus='$otunnus')
-							UNION
-							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
-							FROM lasku
-							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.liitostunnus = '$asiakasid'
-							and $til
-							and lasku.tunnusnippu='$otunnus')";
+				$query .= "and lasku.tunnus='$otunnus' or lasku.tunnusnippu='$otunnus'";
 			}
 
 			$query .=	"$jarj";

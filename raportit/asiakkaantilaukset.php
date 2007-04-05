@@ -116,10 +116,15 @@
 		}
 	}
 	elseif($otunnus > 0) {
-		$query = "	SELECT laskunro, ytunnus, liitostunnus
-					FROM lasku
-					WHERE tunnus='$otunnus' or tunnusnippu = '$otunnus'
-					and yhtio = '$kukarow[yhtio]' ";
+		$query = "	(SELECT laskunro, ytunnus, liitostunnus
+					FROM lasku use index (PRIMARY)
+					WHERE tunnus='$otunnus'
+					and yhtio = '$kukarow[yhtio]')
+					UNION
+					(SELECT laskunro, ytunnus, liitostunnus
+					FROM lasku use index (yhtio_tunnusnippu)
+					WHERE tunnusnippu = '$otunnus'
+					and yhtio = '$kukarow[yhtio]')";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
 
@@ -189,17 +194,28 @@
 		}
 
 		if ($otunnus > 0 or $laskunro > 0) {
-			$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
-						FROM lasku
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.liitostunnus = '$asiakasid'
-						and $til";
-
 			if ($laskunro > 0) {
-				$query .= "and lasku.laskunro='$laskunro'";
+				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+							FROM lasku
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.liitostunnus = '$asiakasid'
+							and $til
+							and lasku.laskunro='$laskunro'";
 			}
 			else {
-				$query .= "and lasku.tunnus='$otunnus' or lasku.tunnusnippu='$otunnus'";
+				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+							FROM lasku
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.liitostunnus = '$asiakasid'
+							and $til
+							and lasku.tunnus='$otunnus')
+							UNION
+							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+							FROM lasku
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.liitostunnus = '$asiakasid'
+							and $til
+							and lasku.tunnusnippu='$otunnus')";
 			}
 
 			$query .=	"$jarj";

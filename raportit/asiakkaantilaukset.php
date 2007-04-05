@@ -127,7 +127,7 @@
 					and yhtio = '$kukarow[yhtio]')";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
-
+		
 		if ($row["laskunro"] > 0) {
 			$laskunro = $row["laskunro"];
 		}
@@ -186,7 +186,7 @@
 			$jarj = "ORDER BY $jarj";
 		}
 		else {
-			$jarj = "ORDER BY lasku.laskunro desc";
+			$jarj = "ORDER BY 2 desc";
 		}
 		
 		if ($toim == 'OSTO') {
@@ -194,17 +194,28 @@
 		}
 
 		if ($otunnus > 0 or $laskunro > 0) {
-			$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
-						FROM lasku
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.liitostunnus = '$asiakasid'
-						and $til";
-
 			if ($laskunro > 0) {
-				$query .= "and lasku.laskunro='$laskunro'";
+				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+							FROM lasku
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.liitostunnus = '$asiakasid'
+							and $til
+							and lasku.laskunro='$laskunro'";
 			}
 			else {
-				$query .= "and lasku.tunnus='$otunnus' or lasku.tunnusnippu='$otunnus'";
+				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+							FROM lasku
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.liitostunnus = '$asiakasid'
+							and $til
+							and lasku.tunnus='$otunnus')
+							UNION
+							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+							FROM lasku
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							and lasku.liitostunnus = '$asiakasid'
+							and $til
+							and lasku.tunnusnippu='$otunnus')";
 			}
 
 			$query .=	"$jarj";
@@ -238,7 +249,7 @@
 						and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
 						$jarj";
 		}
-
+		
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result)!=0) {

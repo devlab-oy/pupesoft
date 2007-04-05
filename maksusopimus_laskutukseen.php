@@ -187,7 +187,7 @@
 			$tot = 0;
 			
 			$nimitys 		= $posrow["kuvaus"];
-			$rivikommentti 	= t("Ennakkolasku")." $lahteva_lasku ".t("tilaukselle")." $tunnus ".t("Osuus")." $posrow[osuus]% ";
+			$rivikommentti 	= t("Ennakkolasku")." $lahteva_lasku ".t("tilaukselle")." $tunnus ".t("Osuus")." ".round($posrow["osuus"],2)."% ";
 
 			if ($posrow["lisatiedot"] != "") {
 				$rivikommentti .= "\n ".$posrow["lisatiedot"];

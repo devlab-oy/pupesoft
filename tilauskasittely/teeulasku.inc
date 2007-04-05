@@ -272,23 +272,26 @@ $laskurow = mysql_fetch_array($uusiuresult);
 $query = "UPDATE tilausrivi SET uusiotunnus='$laskurow[tunnus]' WHERE otunnus in ($tunnukset) and yhtio='$kukarow[yhtio]' and var not in ('P','J')";
 $ulasr = mysql_query($query) or pupe_error($query);
 
-$sorttauskentta = generoi_sorttauskentta();
+// katotaan montako tilausta ollaan käsittelemässä
+$montakotilausta = split(",", $tunnukset);
 
-//laitetaan välisummat rivin kommenttiin aina kun otunnus vaihtuu
-$query = "	select otunnus, $sorttauskentta
-			from tilausrivi
-			where yhtio='$kukarow[yhtio]'
-			and otunnus in ($tunnukset)
-			and kpl != 0
-			group by otunnus
-			order by otunnus, sorttauskentta";
-$valsures = mysql_query($query) or pupe_error($query);
+// jos meillä on enemmän kuin yksi tilaus ja kyseessä ei ole laskutyyppi PLAIN, lasketaan välisummat tilausriveillä
+if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 
-$edotunnus = '';
-$edtunnus  = '';
+	$sorttauskentta = generoi_sorttauskentta();
 
-//	Ei duusata välisummia jos laskutetaan vain 1 tilaus..
-if(mysql_num_rows($valsures)>1 and $yhtiorow['laskutyyppi']!= 1) {
+	//laitetaan välisummat rivin kommenttiin aina kun otunnus vaihtuu
+	$query = "	select otunnus, tunnus, $sorttauskentta
+				from tilausrivi
+				where yhtio='$kukarow[yhtio]'
+				and otunnus in ($tunnukset)
+				and kpl != 0
+				order by otunnus, sorttauskentta, tuoteno, tunnus";
+	$valsures = mysql_query($query) or pupe_error($query);
+
+	$edotunnus = '';
+	$edtunnus  = '';
+
 	while ($valsurow = mysql_fetch_array($valsures)) {
 
 		if ($valsurow["otunnus"] != $edotunnus and $edotunnus != '') {
@@ -321,8 +324,9 @@ if(mysql_num_rows($valsures)>1 and $yhtiorow['laskutyyppi']!= 1) {
 		$edtunnus  = $valsurow["tunnus"];
 	}
 
+	//laitetaan välisumma vikallekin tilaukselle
 	if ($edtunnus != "") {
-		//laitetaan välisumma vikallekin tilaukselle
+
 		$query 		= "SELECT summa, valkoodi, nimi, toim_nimi, toim_osoite, vienti_kurssi FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$edotunnus'";
 		$sumsresult = mysql_query($query) or pupe_error($query);
 		$sumsrow	= mysql_fetch_array($sumsresult);
@@ -343,12 +347,10 @@ if(mysql_num_rows($valsures)>1 and $yhtiorow['laskutyyppi']!= 1) {
 			$sumskommentti = t("Tilaus")." $edotunnus ".t("yhteensä").": $sumsrow[summa] $sumsrow[valkoodi].";
 		}
 
-		//jos käytetään pelkistettyä lasku niin ei haluta näitä kommentteja
-		if ($yhtiorow['laskutyyppi']!= 1) {
-			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
-			$paivres = mysql_query($query) or pupe_error($query);
-		}
-	}	
+		$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
+		$paivres = mysql_query($query) or pupe_error($query);
+	}
+
 }
 
 // tehdään laskun tiliöinnit.. tarvitaan $lasku array

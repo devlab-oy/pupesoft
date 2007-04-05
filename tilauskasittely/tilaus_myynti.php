@@ -1907,7 +1907,7 @@ if ($tee == '') {
 			//	Jos menutilaa ei ole laitetaan oletus
 			if(!isset($menutila)) $menutila = "oletus";
 			require("myyntimenu.inc");
-
+			if($tuoteno != "") $menutila = "haku";
 			//suoritetaan kysely ja tehdään menut jos aihetta
 			if(is_array($myyntimenu)){
 

@@ -310,7 +310,7 @@ if ($session != '') {
 		echo $css;
 		echo "</style>";
 		if($pupejs==1 or $suljeYllapito!="") {
-			echo "<script type='text/javascript' language='javascript' src='$palvelin/inc/pupe.js'></script>";    
+			echo "<script type='text/javascript' language='javascript' src='$palvelin2/inc/pupe.js'></script>";    
 		}
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
 		echo "</head>";

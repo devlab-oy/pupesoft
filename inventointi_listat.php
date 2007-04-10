@@ -37,9 +37,7 @@
 		
 		if(($try != '' and $osasto != '') or ($ahyllyalue != '' and $lhyllyalue != '') or ($toimittaja != '') or ($tuotemerkki != '')) {
 			///* Inventoidaan *///
-			
-			
-			
+
 			//näytetään vain $top myydyintä tuotetta
 			if ($top > 0) {
 				$kutsu .= " ".t("Top:").$top." ";
@@ -236,7 +234,7 @@
 		}
 		elseif ($tila == "SIIVOUS") {
 				$query = "	SELECT $select
-							FROM tuotepaikat
+							FROM tuotepaikat use index (primary)
 							JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = ''
 							LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
 							WHERE tuotepaikat.yhtio	= '$kukarow[yhtio]'

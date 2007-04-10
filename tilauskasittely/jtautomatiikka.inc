@@ -112,7 +112,7 @@
 									list( , , $myytavissa) = saldo_myytavissa($tuoteno);
 
 									$query = "	SELECT sum(jt) jt, count(*) kpl
-												FROM tilausrivi use index(yhtio_tyyppi_tuoteno_varattu)
+												FROM tilausrivi use index(yhtio_tyyppi_var)
 												WHERE yhtio='$kukarow[yhtio]'
 												and tyyppi in ('L','G')
 												and tuoteno='$tuoteno'
@@ -171,7 +171,7 @@
 								if ($myytavissa > 0  or $jtrow["ei_saldoa"] != "") {
 									if ($jtrow["ei_saldoa"] == "") {
 										$query = "	SELECT sum(jt) jt, count(*) kpl
-													FROM tilausrivi use index(yhtio_tyyppi_tuoteno_varattu)
+													FROM tilausrivi use index(yhtio_tyyppi_var)
 													WHERE yhtio='$kukarow[yhtio]'
 													and tyyppi in ('L','G')
 													and tuoteno='$tuoteno'

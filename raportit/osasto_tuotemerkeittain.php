@@ -95,7 +95,7 @@ if ($tee == 'go') {
 
 
 		if ($maa != '') {
-			$lisa1 = " ,lasku, asiakas";
+			$lisa1 = " , lasku use index (primary), asiakas use index (primary)";
 			$lisa2 .= " and lasku.yhtio     = tilausrivi.yhtio
 						and lasku.tunnus    = tilausrivi.uusiotunnus
 						and asiakas.yhtio   = tilausrivi.yhtio
@@ -104,7 +104,7 @@ if ($tee == 'go') {
 		}
 
 		if ($asiakas != '') {
-			$lisa1 = " ,lasku, asiakas";
+			$lisa1 = " , lasku use index (primary), asiakas use index (primary)";
 			$lisa2 .= " and lasku.yhtio     = tilausrivi.yhtio
 						and lasku.tunnus    = tilausrivi.uusiotunnus
 						and asiakas.yhtio   = tilausrivi.yhtio
@@ -113,7 +113,7 @@ if ($tee == 'go') {
 		}
 
 		if ($asos != '') {
-			$lisa1 = " ,lasku, asiakas";
+			$lisa1 = " , lasku use index (primary), asiakas use index (primary)";
 			$lisa2 .= " and lasku.yhtio     = tilausrivi.yhtio
 						and lasku.tunnus    = tilausrivi.uusiotunnus
 						and asiakas.yhtio   = tilausrivi.yhtio

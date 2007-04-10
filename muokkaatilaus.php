@@ -85,7 +85,7 @@
 	}
 	elseif ($toim == "ENNAKKO") {
 		$query = "	SELECT lasku.*
-					FROM lasku, tilausrivi
+					FROM lasku use index (tila_index), tilausrivi use index (yhtio_otunnus)
 					WHERE lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 					and lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')  and lasku.tila='E' and lasku.alatila in ('','A','J') and lasku.tilaustyyppi = 'E' and tilausrivi.tyyppi = 'E'
 					GROUP BY lasku.tunnus";
@@ -235,7 +235,7 @@
 		// haetaan kaikkien avoimien tilausten arvo
 		$sumquery = "	SELECT round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo, count(distinct lasku.tunnus) kpl
 						FROM lasku use index (yhtio_tila_tapvm)
-						JOIN tilausrivi on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
+						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and tila in ('L', 'N')
 						and tapvm = '0000-00-00'
@@ -247,7 +247,7 @@
 	}
 	elseif ($toim == 'ENNAKKO') {
 		$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, lasku.laatija, viesti tilausviite, alatila, tila
-					FROM lasku use index (tila_index), tilausrivi
+					FROM lasku use index (tila_index), tilausrivi use index (yhtio_otunnus)
 					WHERE lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 					and lasku.yhtio = '$kukarow[yhtio]' and tila='E' and tilausrivi.tyyppi = 'E'
 					$haku
@@ -329,7 +329,7 @@
 	}
 	elseif ($toim == "TYOMAARAYS") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija, alatila, tila
-					FROM lasku
+					FROM lasku use index (tila_index)
 					WHERE yhtio = '$kukarow[yhtio]' and tila in ('A','L','N') and tilaustyyppi='A' and alatila in ('','A','B','C','J')
 					$haku
 					order by lasku.luontiaika desc
@@ -339,7 +339,7 @@
 	}
 	elseif ($toim == "TYOMAARAYSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija, alatila, tila
-					FROM lasku
+					FROM lasku use index (tila_index)
 					WHERE yhtio = '$kukarow[yhtio]' and tila in ('A','L','N') and alatila in ('','A','B','C','J') and tilaustyyppi='A'
 					$haku
 					order by lasku.luontiaika desc
@@ -360,7 +360,7 @@
 					if(date_add(lasku.luontiaika, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
 					DATEDIFF(lasku.luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
 					lasku.laatija, alatila, tila, lasku.tunnus tilaus
-					FROM lasku
+					FROM lasku use index (tila_index)
 					$seurantalisa
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
 					$haku
@@ -370,7 +370,7 @@
 	}
 	elseif ($toim == "TARJOUSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija, alatila, tila
-					FROM lasku
+					FROM lasku use index (tila_index)
 					WHERE yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('A','','X')
 					$haku
 					order by lasku.luontiaika desc
@@ -389,7 +389,7 @@
 	}
 	elseif ($toim == "LASKUTUSKIELTO") {
 		$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, lasku.laatija, alatila, tila
-					FROM lasku
+					FROM lasku use index (tila_index)
 					JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila in ('N','L') and alatila != 'X'
 					$haku

@@ -849,7 +849,7 @@
 							}
 							else {
 								$query = "	SELECT sum(jt) jt, count(*) kpl
-											FROM tilausrivi use index(yhtio_tyyppi_tuoteno_varattu)
+											FROM tilausrivi use index(yhtio_tyyppi_var)
 											WHERE yhtio='$kukarow[yhtio]'
 											and tyyppi in ('L','G')
 											and tuoteno='$jtrow[tuoteno]'

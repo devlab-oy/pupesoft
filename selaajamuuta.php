@@ -78,10 +78,10 @@
 
 // Vasemmalle laskuluettelo
 	
-	$query = "SELECT tunnus, nimi, $pvm, summa
-					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and left($pvm,7) = '$vv-$kk' and $lajiv
-					ORDER BY tapvm desc, summa desc";
+	$query = "	SELECT tunnus, nimi, $pvm, summa
+				FROM lasku use index (yhtio_tila_tapvm)
+				WHERE yhtio = '$kukarow[yhtio]' and left($pvm,7) = '$vv-$kk' and $lajiv
+				ORDER BY tapvm desc, summa desc";
 
 	$result = mysql_query($query) or pupe_error($query);
 

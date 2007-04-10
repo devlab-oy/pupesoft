@@ -992,8 +992,8 @@ if ($tee == '') {
 					</form>";
 		}
 
-		$query  = "	SELECT count(*) kpl from tilausrivi
-					JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]')
+		$query  = "	SELECT count(*) kpl from tilausrivi USE INDEX (yhtio_tyyppi_var)
+					JOIN lasku USE INDEX (primary) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.liitostunnus='$laskurow[liitostunnus]')
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.tyyppi in ('L','G')
 					and tilausrivi.var = 'J'

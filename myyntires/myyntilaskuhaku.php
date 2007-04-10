@@ -1,7 +1,11 @@
 <?php
 
+$useslave = 1; // k‰ytet‰‰n slavea
+
 require ("../inc/parametrit.inc");
 echo "<font class='head'>".t("Myyntilaskuhaku")."</font><hr>";
+
+$index = "";
 
 if ($tee == 'S') { // S = Etsit‰‰n summaa laskulta
 	$summa1 = str_replace( ",", ".", $summa1);
@@ -14,6 +18,8 @@ if ($tee == 'S') { // S = Etsit‰‰n summaa laskulta
 
 	$ehto = "tila = 'U' and ";
 
+	$index = " use index (yhtio_tila_summa) ";
+	
 	if ($summa1 == $summa2) {
 		$ehto .= "summa = " . $summa1;
 		$jarj = "tapvm desc";
@@ -24,6 +30,7 @@ if ($tee == 'S') { // S = Etsit‰‰n summaa laskulta
 	}
 }
 if ($tee == 'N') { // S = Etsit‰‰n nime‰ laskulta
+	$index = " use index (asiakasnimi) ";
 	$ehto = "tila = 'U' and nimi like '%".$summa1."%'";
 	$jarj = "nimi, tapvm desc";
 }
@@ -34,6 +41,7 @@ if ($tee == 'V') { // V = viitteell‰
 }
 
 if ($tee == 'L') { // L = viitteell‰
+	$index = " use index (yhtio_tila_laskunro) ";
 	$ehto = "tila = 'U' and  laskunro = '$summa1'";
 	$jarj = "nimi, summa";
 }
@@ -42,7 +50,7 @@ if ($tee != '') {
 	$alku += 0;
 	$query = "SELECT tapvm, erpcm, laskunro, concat_ws(' ', nimi, nimitark) nimi,
 			  summa, valkoodi, ebid, tila, alatila, tunnus
-			  FROM lasku
+			  FROM lasku $index
 			  WHERE $ehto and yhtio='$kukarow[yhtio]'
 			  ORDER BY $jarj
 			  LIMIT $alku, 20";

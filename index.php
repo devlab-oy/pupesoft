@@ -10,7 +10,6 @@ if ($go == '') {
 	else 						$go		= "";	
 }
 
-
 $go2 = $go; // ei laiteta tervetuloa.phptä oletukseksi indexvassiin
 if ($go == '') $go = 'tervetuloa.php';
 

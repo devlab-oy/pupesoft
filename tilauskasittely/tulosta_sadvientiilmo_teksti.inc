@@ -88,7 +88,7 @@
 					FROM avainsana
 					WHERE yhtio	= '$yhtiorow[yhtio]'
 					and laji	= 'TOIMEHTO'
-					and selite	= '$laskurow[toimitusehto]'";
+					and selite	= '".substr($laskurow["toimitusehto"],0,3)."'";
 		$toimres = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($toimres) > 0) {
@@ -163,7 +163,7 @@
 		//Kenttä 30 Tavaran sijaintipaikka
 		$tulosulos .= sprintf('%-8.8s', "");
 		$tulosulos .= sprintf('%-18.18s', $laskurow["poistumistoimipaikka_koodi"]);
-		$tulosulos .= sprintf('%-24.24s', "O ".$sijaintipaikka);
+		$tulosulos .= sprintf('%-24.24s', "O ".sprintf($sijaintipaikka,0,15));
 		
 		if ($laskurow["lisattava_era"] != 0) {
 			$tulosulos .= sprintf('%-15.15s', $laskurow["lisattava_era"]);

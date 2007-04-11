@@ -570,7 +570,7 @@
 			$sijaintipaikka = $yhtiorow["osoite"];
 		}
 
-		$pdf2->draw_text(195,  520, "O ".$sijaintipaikka, 							$pages[0], $kymppi);
+		$pdf2->draw_text(195,  520, "O ".substr($sijaintipaikka,0,15), 							$pages[0], $kymppi);
 
 		//Kenttä 35 Bruttopaino
 		$pdf2->draw_text(480,  472, $kilot, 										$pages[0], $kymppi);

@@ -25,7 +25,8 @@ if ($tee == "valmis") {
 					FROM tilausrivi
 					WHERE (tunnus='$tunnus' or perheid2='$tunnus') 
 					and yhtio='$kukarow[yhtio]' 
-					and tyyppi='O' and uusiotunnus='$otunnus'";
+					and tyyppi='O' and uusiotunnus='$otunnus'
+					ORDER BY tunnus";
 		$perheresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($perheresult) == 0) {
@@ -36,12 +37,32 @@ if ($tee == "valmis") {
 			while($tilausrivirow = mysql_fetch_array($perheresult)) {
 
 				// Jaaha mit‰s tuotepaikalle pit‰isi tehd‰
-				if (($rivivarasto[$tunnus] != 'x') and ($rivivarasto[$tunnus] != '')) {  //Varastopaikka vaihdettiin pop-upista, siell‰ on paikan tunnus
+				if($tilausrivirow["perheid2"] != $tilausrivirow["tunnus"] and $tilausrivirow["perheid2"] > 0) {
+					
+					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
+								from tuotepaikat
+								WHERE yhtio		= '$kukarow[yhtio]'
+								and hyllyalue	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t1"]."'
+								and hyllynro	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t2"]."'
+								and hyllyvali	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t3"]."'
+								and hyllytaso	= '".$faijanmesta[$tilausrivirow["perheid2"]]["t4"]."'
+								and tuoteno		= '$tilausrivirow[tuoteno]'";
+					//echo "FAIJALTA: $tilausrivirow[tuoteno] $query<br><br>";
+					
+					//	Lis‰t‰‰n n‰m‰ paikka arrayhin
+					$t1[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t1"];
+					$t2[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t2"];
+					$t3[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t3"];
+					$t4[$tilausrivirow["tunnus"]] = $faijanmesta[$tilausrivirow["perheid2"]]["t4"];
+					
+				}
+				elseif (($rivivarasto[$tunnus] != 'x') and ($rivivarasto[$tunnus] != '')) {  //Varastopaikka vaihdettiin pop-upista, siell‰ on paikan tunnus
 					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
 								from tuotepaikat
 								WHERE yhtio	= '$kukarow[yhtio]'
-								and tunnus 	= '$rivivarasto[$tunnus]'";
-					//echo "VALIKKOON: $tilausrivirow[tuoteno] $query<br><br>";
+								and tunnus 	= '$rivivarasto[$tunnus]'
+								and tuoteno	= '$tilausrivirow[tuoteno]'";
+					//echo "VALIKKOON: $tilausrivirow[tuoteno] $query<br><br>";					
 				}
 				else {
 					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
@@ -74,26 +95,26 @@ if ($tee == "valmis") {
 						$oletus='';
 					}
 
-					if ($t1[$tunnus] != '' and $t2[$tunnus] != '') {
+					if ($t1[$tilausrivirow["tunnus"]] != '' and $t2[$tilausrivirow["tunnus"]] != '' and $t3[$tilausrivirow["tunnus"]] != '' and $t4[$tilausrivirow["tunnus"]] != '') {
 						//dubbelchekataan, ettei nyt varmasti mene duplikaattina mit‰‰n paikkaa
 						$query = "	SELECT tuoteno
 									FROM tuotepaikat
 									WHERE yhtio		= '$kukarow[yhtio]'
-									and hyllyalue	= '$t1[$tunnus]'
-									and hyllynro	= '$t2[$tunnus]'
-									and hyllyvali	= '$t3[$tunnus]'
-									and hyllytaso	= '$t4[$tunnus]'
+									and hyllyalue	= '".$t1[$tilausrivirow["tunnus"]]."'
+									and hyllynro	= '".$t2[$tilausrivirow["tunnus"]]."'
+									and hyllyvali	= '".$t3[$tilausrivirow["tunnus"]]."'
+									and hyllytaso	= '".$t4[$tilausrivirow["tunnus"]]."'
 									and tuoteno		= '$tilausrivirow[tuoteno]'";
 						$checkres = mysql_query($query) or pupe_error($query);
 
 						//jos duplikaattia ei lˆydy
 						if (mysql_num_rows($checkres) == 0) {
 							$virheita = 0;
-							if (kuuluukovarastoon($t1[$tunnus],$t2[$tunnus],'') != 0) {
+							if (kuuluukovarastoon($t1[$tilausrivirow["tunnus"]],$t2[$tilausrivirow["tunnus"]],'') != 0) {
 								$query = "	insert into tuotepaikat (hyllyalue,hyllynro,hyllyvali,hyllytaso,oletus,saldo,saldoaika,tuoteno,yhtio,laatija,luontiaika)
-											values ('$t1[$tunnus]','$t2[$tunnus]','$t3[$tunnus]','$t4[$tunnus]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
+											values ('".$t1[$tilausrivirow["tunnus"]]."','".$t2[$tilausrivirow["tunnus"]]."','".$t3[$tilausrivirow["tunnus"]]."','".$t4[$tilausrivirow["tunnus"]]."','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
 								$insre = mysql_query($query) or pupe_error($query);
-
+								
 								$uusipaikka = mysql_insert_id();
 
 								$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
@@ -112,19 +133,22 @@ if ($tee == "valmis") {
 											hinta		= '0',
 											kplhinta	= '0',
 											laji 		= 'uusipaikka',
-											selite		= '".t("Saavutettaessa lis‰ttiin tuotepaikka")." $t1[$tunnus] $t2[$tunnus] $t3[$tunnus] $t4[$tunnus]',
+											selite		= '".t("Saavutettaessa lis‰ttiin tuotepaikka")." ".$t1[$tilausrivirow["tunnus"]]." ".$t2[$tilausrivirow["tunnus"]]." ".$t3[$tilausrivirow["tunnus"]]." ".$t4[$tilausrivirow["tunnus"]]."',
 											laatija 	= '$kukarow[kuka]',
 											laadittu	= now()";
 								$result2 = mysql_query($query2) or pupe_error($query2);
 
-								echo "<font class='message'>".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." $t1[$tunnus]-$t2[$tunnus]-$t3[$tunnus]-$t4[$tunnus]</font><br>";
+								echo "<font class='message'>".t("Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("perustetaan uusi paikka")." ".$t1[$tilausrivirow["tunnus"]]."-".$t2[$tilausrivirow["tunnus"]]."-".$t3[$tilausrivirow["tunnus"]]."-".$t4[$tilausrivirow["tunnus"]]."</font><br>";
 							}
 							else {
-								echo "<font class='message'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("annettu paikka")." $t1[$tunnus]-$t2[$tunnus]-$t3[$tunnus]-$t4[$tunnus] ".t("ei kuulu mihink‰‰n varastoon, ei voitu perustaa!!!")."</font><br>";
+								echo "<font class='message'>".t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno] ".t("annettu paikka")." ".$t1[$tilausrivirow["tunnus"]]."-".$t2[$tilausrivirow["tunnus"]]."-".$t3[$tilausrivirow["tunnus"]]."-".$t4[$tunnus]." ".t("ei kuulu mihink‰‰n varastoon, ei voitu perustaa!!!")."</font><br>";
 								$virheita++;
 							}
 						}
 					}
+					elseif($t3[$tilausrivirow["tunnus"]] == '' or $t4[$tilausrivirow["tunnus"]] == '') {
+						echo t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("on annettava t‰ydellinen varastopaikka")."!<br>";						
+					}					
 					else {
 						echo t("VIRHE: Tuotenumerolle")." $tilausrivirow[tuoteno]. ".t("ei voitu perustaa tyhj‰‰ varastopaikkaa")."!<br>";
 					}
@@ -133,6 +157,13 @@ if ($tee == "valmis") {
 					$paikkarow = mysql_fetch_array($result);
 				}
 
+				//	Jos meill‰ on is‰tuotenumero niin laitetaan tuotepaikka talteen!!
+				if(!isset($faijanmesta[$tilausrivirow["perheid2"]]) and $tilausrivirow["perheid2"] == $tilausrivirow["tunnus"]) {
+					$faijanmesta[$tilausrivirow["perheid2"]]["t1"] = $paikkarow["hyllyalue"];
+					$faijanmesta[$tilausrivirow["perheid2"]]["t2"] = $paikkarow["hyllynro"];
+					$faijanmesta[$tilausrivirow["perheid2"]]["t3"] = $paikkarow["hyllyvali"];
+					$faijanmesta[$tilausrivirow["perheid2"]]["t4"] = $paikkarow["hyllytaso"];															
+				}
 
 				// P‰ivitet‰‰‰n tilausrivi
 				$query = "	UPDATE tilausrivi

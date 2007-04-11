@@ -422,14 +422,14 @@
 		$miinus = 2;
 	}
 	elseif ($toim == 'PROJEKTI') {
-		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila
+		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila, tunnusnippu
 					FROM lasku use index (tila_index)
 					$seurantalisa
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='R'
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N') and alatila NOT IN ('X') 
 					$haku
 					ORDER by lasku.luontiaika desc
-					LIMIT 50";
-		$miinus = 2;
+					LIMIT 100";
+		$miinus = 3;
 	}
 	else {
 		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila, kuka.extranet extra
@@ -476,6 +476,17 @@
 			//	tarjousnipuista halutaan vain se viimeisin..
 			if($row["tila"] == "T") {
 				$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tila='T' and tunnusnippu='$row[tarjous]' and tunnus > $row[tilaus]";
+				$countres = mysql_query($query) or pupe_error($query);
+
+				// ja sillä ei ole yhtään riviä
+				if (mysql_num_rows($countres) > 0) {
+					$piilotarivi = "kylla";
+				}
+			}
+			elseif($row["tunnusnippu"] > 0 and $row["tila"] != "R" and $toim == "PROJEKTI") {
+				
+				//	Jos meillä on tunnusnippu joka kuuluu projektiin se piilotetaan
+				$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tila='R' and tunnusnippu='$row[tunnusnippu]'";
 				$countres = mysql_query($query) or pupe_error($query);
 
 				// ja sillä ei ole yhtään riviä
@@ -569,12 +580,10 @@
 					$aputoim2 = "";
 					$lisa2 = "";
 				}
-				else {
-					$aputoim1 = $toim;
-					$aputoim2 = "";
+				elseif($toim=="PROJEKTI" and $row["tila"] != "R") {
+					$aputoim1 = "RIVISYOTTO";
 
-					$lisa1 = t("Muokkaa");
-					$lisa2 = "";
+					$lisa1 = t("Rivisyöttöön");
 				}
 
 				// tehdään alertteja

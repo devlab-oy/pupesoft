@@ -413,7 +413,7 @@
 				echo "<td></td>";
 			}
 
-			echo  "<td>$ivirhe[$i]</td>";
+			echo  "<td><font class='error'>$ivirhe[$i]</font></td>";
 
 			echo "</tr>";
 
@@ -426,6 +426,7 @@
 			if ($heittook != '') $heittotila = 'checked';
 			if (abs($totsumma) >= 0.01) echo t("Hyväksy heitto")."<input type='checkbox' name='heittook' $heittotila>";
 			echo "</td><td>";
+			$totsumma = round($totsumma,2);
 			if (abs($totsumma) >= 0.01) echo "<font class='error'>$totsumma</font>";
 			else echo "$totsumma";
 			echo "</td><td></td><td></td></tr>";

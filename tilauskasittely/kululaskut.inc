@@ -69,7 +69,7 @@ if ($tee == "liita") {
 	$alvirow = mysql_fetch_array($alvires);
 
 	// Ostoreskontralaskun veroton arvo
-	$oslasrow["arvo"] = $oslasrow["summa"] - $alvirow["summa"];
+	$oslasrow["arvo"] = round((float) $oslasrow["summa"] - (float) $alvirow["summa"], 2);
 	
 	// Pilkut pisteiksi
 	$liitasumma = (float) str_replace(",",".",$liitasumma);
@@ -83,7 +83,7 @@ if ($tee == "liita") {
 	$apurow = mysql_fetch_array($apure);
 
 	// T‰m‰n kululaskun k‰ytett‰viss‰ oleva summa
-	$summa_kaytettavissa = round($oslasrow["arvo"] - $apurow["arvo"],2);
+	$summa_kaytettavissa = round((float) $oslasrow["arvo"] - (float) $apurow["arvo"], 2);
 	
 	// Jos k‰ytt‰j‰ on syˆtt‰nyt osasumman kululaskulta
 	if ($liitasumma != 0) {
@@ -95,21 +95,21 @@ if ($tee == "liita") {
 			$liitasumma = abs($liitasumma);
 		}
 
-		$verosumma 		= $liitasumma;
-		$verotonsumma 	= $liitasumma;		
+		$verosumma 		= (float) $liitasumma;
+		$verotonsumma 	= (float) $liitasumma;		
 	}
 	elseif (abs($summa_kaytettavissa-$oslasrow["arvo"]) >= 0.01) {
-		$verosumma 		= $summa_kaytettavissa;
-		$verotonsumma 	= $summa_kaytettavissa;
+		$verosumma 		= (float) $summa_kaytettavissa;
+		$verotonsumma 	= (float) $summa_kaytettavissa;
 	}
 	else {
 		//T‰ss‰ on ostolaskun verollinen summa (Tarvitaan alvillisissa vaihto-omaisuuslaskuissa)
-		$verosumma 		= $oslasrow["summa"];
+		$verosumma 		= (float) $oslasrow["summa"];
 		//Ja veroton summa
-		$verotonsumma 	= $oslasrow["arvo"];
+		$verotonsumma 	= (float) $oslasrow["arvo"];
 	}
-		
-	if ($summa_kaytettavissa-$verotonsumma < 0) {
+			
+	if ($summa_kaytettavissa < $verotonsumma) {
 		echo "<font class='error'>".t("VIRHE: Yritit liitt‰‰ liian suuren summan. Laskun saldo ei riitt‰nyt")."!</font><br>";
 		$tee 			= "haku";
 		$verosumma 		= 0;

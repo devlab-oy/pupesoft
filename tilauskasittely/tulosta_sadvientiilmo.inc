@@ -515,8 +515,8 @@
 		$pdf2->draw_text(300,  592, $laskurow["kontti"], 							$pages[0], $kymppi);
 
 		//Kenttä 20 Toimitusehto
-		$pdf2->draw_text(320,  592, "EXW", 											$pages[0], $kymppi);
-		$pdf2->draw_text(360,  592, $laskurow["toimitusehto"], 						$pages[0], $kymppi);
+		$pdf2->draw_text(320,  592, substr($laskurow["toimitusehto"],0,3),			$pages[0], $kymppi);
+		$pdf2->draw_text(360,  592, substr($laskurow["toimitusehto"],4), 						$pages[0], $kymppi);
 
 		//Kenttä 21 Akt kuljetusväline
 		$pdf2->draw_text(61,  568, $laskurow["aktiivinen_kuljetus"],				$pages[0], $kymppi);

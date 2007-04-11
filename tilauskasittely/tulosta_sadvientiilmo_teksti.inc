@@ -82,22 +82,7 @@
 		$tulosulos .= sprintf('%-36.36s', "")."\r\n";
 
 		$tulosulos .= "\r\n";
-		
-		//hetaan toimitusehto
-		$query = "	SELECT selite, selitetark
-					FROM avainsana
-					WHERE yhtio	= '$yhtiorow[yhtio]'
-					and laji	= 'TOIMEHTO'
-					and selite	= '".substr($laskurow["toimitusehto"],0,3)."'";
-		$toimres = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($toimres) > 0) {
-			$toimrow = mysql_fetch_array($toimres);
-		}
-		else {
-			$toimrow["selite"] = "EXW";
-		}
-		
+				
 		//Kenttä 18 Sisämaan kuljetus
 		//Kenttä 19 Kontti
 		//Kenttä 20 Toimitusehto
@@ -105,8 +90,8 @@
 		$tulosulos .= sprintf('%-28.28s', $laskurow["sisamaan_kuljetus"]);
 		$tulosulos .= sprintf('%-5.5s', "");
 		$tulosulos .= sprintf('%-3.3s', $laskurow["kontti"]);
-		$tulosulos .= sprintf('%-6.6s', $toimrow["selite"]);
-		$tulosulos .= sprintf('%-20.20s', $toimrow["selitetark"])."\r\n";
+		$tulosulos .= sprintf('%-6.6s', substr($laskurow["toimitusehto"],0,3));
+		$tulosulos .= sprintf('%-20.20s', substr($laskurow["toimitusehto"],4))."\r\n";
 		
 		$tulosulos .= "\r\n";
 		

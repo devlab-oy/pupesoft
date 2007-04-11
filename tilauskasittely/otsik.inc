@@ -643,24 +643,19 @@
 
 
 			//jos käyttäjällä on myyjänro
-			if ($kukarow["myyja"] != 0) {
+			if ($kukarow["myyja"] != 0 and  (int) $srow["myyja"] == 0) {
 				$myyjanro = $kukarow["myyja"];
+			}
+			else {
+				$myyjanro = "";
 			}
 
 			echo "<td>".t("Myyjänro").": <input type='text' size='8' name='myyjanro' value='$myyjanro'> ".t("tai")."</td>";
 			echo "<td><select name='myyja'>";
-
-			if ($kukarow["extranet"] == "") {
-				$extralisa = " and extranet='' ";
-			}
-			else {
-				$extralisa = "";
-			}
 			
 			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
 						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]'
-						$extralisa
+						WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or tunnus='$srow[myyja]')
 						ORDER BY nimi";
 			$yresult = mysql_query($query) or pupe_error($query);
 

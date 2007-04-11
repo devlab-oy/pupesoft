@@ -248,6 +248,7 @@
 			foreach ($varastosta as $vara) {
 				$tilausnumero .= $vara."##";
 			}
+			$tilausnumero = substr($tilausnumero,0,-2);
 		}
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 
@@ -312,6 +313,7 @@
 			foreach ($varastosta as $vara) {
 				$tilausnumero .= $vara."##";
 			}
+			$tilausnumero = substr($tilausnumero,0,-2);
 		}
 
 		if ($ytunnus != '' or is_array($varastosta)) {
@@ -339,6 +341,7 @@
 			foreach ($varastosta as $vara) {
 				$tilausnumero .= $vara."##";
 			}
+			$tilausnumero = substr($tilausnumero,0,-2);
 		}
 
 		if ($asiakasno != '' and $tee == "JATKA") {
@@ -705,6 +708,7 @@
 										foreach ($varastosta as $vara) {
 											$tilausnumero .= $vara."##";
 										}
+										$tilausnumero = substr($tilausnumero,0,-2);
 									}
 								}
 								else {

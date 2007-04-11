@@ -244,7 +244,7 @@ if (!function_exists('rivi')) {
 			if (mysql_num_rows($perheresult) > 0) {
 				$perherow = mysql_fetch_array($perheresult);
 				
-				$query = "	SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys
+				$query = "	SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys, varattu
 							FROM tilausrivi
 							JOIN tuote tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -259,10 +259,11 @@ if (!function_exists('rivi')) {
 				if (mysql_num_rows($perheresult) > 1) {
 					while ($perherow = mysql_fetch_array($perheresult)) {
 						if ($litania == "") {
-							$litania .= $perherow["nimitys"].":  ";						
+								$litania .= $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"].":  ";
 						}
-						
-						$litania .= strtoupper($perherow["tuoteno"]).", ";	
+						else {
+							$litania .= strtoupper($perherow["tuoteno"]).", ";
+						}
 					}
 					$litania = substr($litania,0,-2);
 				

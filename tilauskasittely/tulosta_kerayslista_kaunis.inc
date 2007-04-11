@@ -58,7 +58,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(250,810, t("Keräilylista", $kieli), 	$firstpage);
 		$pdf->draw_text(320,810, t("Sivu", $kieli)." $sivu", 	$firstpage,$p);
 
-		$pdf->draw_text(150,795, t("Tilausnumero/-numerot", $kieli).": ".$tilausnumeroita, $firstpage, $p);
+		$pdf->draw_text(150,795, t("Tilausnumero(t)", $kieli).": ".$tilausnumeroita, $firstpage, $p);
 
 		$i["height"] = 28;
 		$i["font"] = "Times-Roman";
@@ -278,10 +278,11 @@ if (!function_exists('rivi')) {
 					$litania = '';
 					while ($perherow = mysql_fetch_array($perheresult)) {
 						if ($litania == "") {
-							$litania .= $perherow["nimitys"].":  ";
+								$litania .= $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"].":  ";
 						}
-
-						$litania .= strtoupper($perherow["tuoteno"]).", ";
+						else {
+							$litania .= strtoupper($perherow["tuoteno"]).", ";
+						}
 					}
 					$litania = substr($litania,0,-2);
 				}

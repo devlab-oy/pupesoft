@@ -247,10 +247,11 @@ if (!function_exists('rivi')) {
 				if (mysql_num_rows($perheresult) > 1) {
 					while ($perherow = mysql_fetch_array($perheresult)) {
 						if ($litania == "") {
-							$litania .= $perherow["nimitys"].":  ";						
+								$litania .= $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"].":  ";
 						}
-						
-						$litania .= strtoupper($perherow["tuoteno"]).", ";	
+						else {
+							$litania .= strtoupper($perherow["tuoteno"]).", ";
+						}
 					}
 					$litania = substr($litania,0,-2);
 				

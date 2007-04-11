@@ -226,7 +226,7 @@
 							$kieltolisa
 							ORDER by tuoteno";
 				$perheresult = mysql_query($query) or pupe_error($query);
-
+				
 				while ($perherow = mysql_fetch_array($perheresult)) {
 					//T‰t‰ tuoteperhett‰ halutaan myyd‰
 					if (!in_array(strtoupper($perherow["tuoteno"]), $tuoteperhe)) $tuoteperhe[]=strtoupper($perherow["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
@@ -377,19 +377,18 @@
 
 				if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
 					$myy_tyyppi[$i] = "NORMAALI";
-					$saldoyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien isien saldoa yhteens‰.
+					$saldoyhteensa += $toimittamatta; // summaillaan kaikkien isien saldoa yhteens‰.
 					if ($debug==1) echo "$tuoteno on is‰tuote/normituote<br>";
 				}
 				else {
 					$myy_tyyppi[$i] = "LAPSITUOTE";
-					$lapsiyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien lapsien saldoa yhteens‰.
+					$lapsiyhteensa += $toimittamatta; // summaillaan kaikkien lapsien saldoa yhteens‰.
 					if ($debug==1) echo "$tuoteno on lapsituote<br>";
 				}
 
 				//Kasvatetaan ‰iti-indeksi‰
 				$i++;
 			}
-
 		} // end foreach myyt‰v‰t tuotteet
 
 		if ($debug==1) echo "Kaikkiaan myyt‰viss‰: $saldoyhteensa kappaletta<br>";
@@ -403,7 +402,7 @@
 					and try     in ('$trow[try]','*')
 					and laji    = 'O'";
 		$kkres  = mysql_query($query) or die($query);
-
+		
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
 		if ((mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta or $varataan_saldoa == "EI") {
 

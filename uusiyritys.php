@@ -8,12 +8,12 @@
 	if ($tila == 'ulkonako') {	
 	// Tee yritys täällä
 		if ($yhtio == '') {
-			echo "<font class='error'>Yritykselle on annettava tunnus</font><br>";
+			echo "<font class='error'>".t("Yritykselle on annettava tunnus")."</font><br>";
 			$error = 1;
 		}
 		
 		if ($nimi == '') {
-			echo "<font class='error'>Yritykselle on annettava nimi</font><br>";
+			echo "<font class='error'>".t("Yritykselle on annettava nimi")."</font><br>";
 			$error = 1;
 		}
 		
@@ -22,11 +22,11 @@
 		
 		if (mysql_num_rows($result) > 0) {
 			$uusiyhtiorow=mysql_fetch_array($result);
-			echo "<font class='error'>Tunnus $yhtio on jo käytössä ($uusiyhtiorow[nimi])</font><br>";
+			echo "<font class='error'>".t("Tunnus $yhtio on jo käytössä (".$uusiyhtiorow['nimi'].")")."</font><br>";
 			$error = 1;
 		}
 		
-		if ($error == 0) {	
+		if ($error == 0) {
 			$query = "INSERT into yhtio SET yhtio='$yhtio', nimi='$nimi'";
 			$result = mysql_query($query) or pupe_error($query); 
 		}
@@ -37,7 +37,7 @@
 	
 	if ($tila == 'perusta') {
 		if ($fromyhtio == '') {
-			echo "<font class='error'>Valitse jokin yritys</font><br>";
+			echo "<font class='error'>".t("Valitse jokin yritys")."</font><br>";
 			$error = 1;
 		}
 		
@@ -45,7 +45,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='error'>Kopioitava yritys ei löydy</font><br>";
+			echo "<font class='error'>".t("Kopioitava yritys ei löydy")."</font><br>";
 			$error = 1;
 		}
 		
@@ -61,7 +61,7 @@
 
 	if ($tila == 'menut') {
 		if ($fromyhtio == '') {
-			echo "<font class='error'>Valitse jokin yritys</font><br>";
+			echo "<font class='error'>".t("Valitse jokin yritys")."</font><br>";
 			$error = 1;
 		}
 		
@@ -156,16 +156,45 @@
 					}
 				}
 			}
-			unset($tila);
-			unset($yhtio);
-			unset($nimi);
 		}
 		else {
 			$tila = 'profiilit';
 		}
 	}
+	
+	if ($tila == 'tili') {
+		if ($fromyhtio == '') {
+			echo "<font class='error'>".t("Valitse jokin yritys")."</font><br>";
+			$error = 1;
+		}
+		
+		if ($error == 0) {
+			$query = "SELECT * FROM tili where yhtio='$fromyhtio'";
+			$kukar = mysql_query($query) or pupe_error($query);
 
+			while ($row = mysql_fetch_array($kukar))
+			{
+				$query = "insert into tili (nimi, sisainen_taso, tilino, ulkoinen_taso, yhtio, oletusalv) values ('$row[nimi]','$row[sisainen_taso]','$row[tilino]','$row[ulkoinen_taso]','$fromyhtio', '$row[oletusalv]')";
+				$upres = mysql_query($query) or pupe_error($query);
+			}
+			
+			$query = "SELECT * FROM taso where yhtio='$fromyhtio'";
+			$kukar = mysql_query($query) or pupe_error($query);
 
+			while ($row = mysql_fetch_array($kukar))
+			{
+				$query = "insert into taso (tyyppi, laji, taso, nimi, yhtio) values ('$row[tyyppi]','$row[laji]','$row[taso]','$row[nimi]','$fromyhtio')";
+				$upres = mysql_query($query) or pupe_error($query);
+			}
+			unset($tila);
+			unset($yhtio);
+			unset($nimi);
+		}
+		else {
+			$tila = 'kayttaja';
+		}
+	}
+	
 //// Käyttöliittymä
 
 	if (isset($tila)) {
@@ -257,7 +286,26 @@
 
 		echo "<tr><th></th><td><input type='submit' value='".t('Perusta')."'></td></tr></table></form>";
 	}
-		
+
+	if ($tila == 'kayttaja') {
+		// tilit ja tasot
+		$query = "SELECT distinct tili.yhtio, yhtio.nimi FROM tili, yhtio WHERE tili.yhtio=yhtio.yhtio";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<form action = '$PHP_SELF' method='post'><input type='hidden' name = 'tila' value='tili'>
+		<input type='hidden' name = 'yhtio' value='$yhtio'>
+		<table>
+		<tr><th>".t("Miltä yritykseltä kopioidaan tilikartta?").":</th><td><select name='fromyhtio'>
+		<option value=''>".t("Valitse yhtiö")."</option>";
+
+		while ($uusiyhtiorow=mysql_fetch_array($result)) {
+			echo "<option value='$uusiyhtiorow[yhtio]'>$uusiyhtiorow[nimi]</option>";
+		}
+
+		echo "</select></td></tr>";
+		echo "<tr><th></th><td><input type='submit' value='".t('Kopioi')."'></td></tr></table></form>";
+	}
+	
 	
 	if (!isset($tila)) {
 		echo "<form action = '$PHP_SELF' method='post'><input type='hidden' name = 'tila' value='ulkonako'><table>

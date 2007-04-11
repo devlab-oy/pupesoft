@@ -127,7 +127,7 @@ if ($tee == 'YHTEENVETO') {
 	if ($kustannuksetyht == "") {
 		// etsitään kirjanpidosta mitkä on meidän kulut samalta ajanjaksolta
 		$query  = "	SELECT sum(summa) summa
-					FROM tiliointi use index (tapvm_index)
+					FROM tiliointi use index (yhtio_tapvm_tilino)
 					join tili use index (tili_index) on (tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino and sisainen_taso like '$sisainen_taso%')
 					where tiliointi.yhtio = '$kukarow[yhtio]' and
 					tiliointi.tapvm >= '$vva-$kka-$ppa' and

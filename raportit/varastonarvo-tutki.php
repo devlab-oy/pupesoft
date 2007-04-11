@@ -72,7 +72,7 @@ if ($tee == "tee") {
 		if ($trow['laji']=='tulo') $lvalinta = "tila in ('H', 'M', 'P', 'Q', 'Y') and vienti not in ('A', 'D', 'G', '')";
 		
 		if ($lvalinta != '') {
-			$query  = "SELECT sum(tiliointi.summa) FROM tiliointi use index (tapvm_index), lasku
+			$query  = "SELECT sum(tiliointi.summa) FROM tiliointi use index (yhtio_tilino_tapvm), lasku
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tiliointi.tapvm >= '$vv-$kk-$pp' and
 						tiliointi.tapvm <= '$vv1-$kk1-$pp1' and
 						tiliointi.yhtio = lasku. yhtio and

@@ -93,7 +93,7 @@ for ($i=1; $i<8; $i++) {
 		}
 		
 		$query = "SELECT taso.nimi $lisa
-					FROM tili, tiliointi USE INDEX (tiliointi_index), taso
+					FROM tili, tiliointi USE INDEX (yhtio_tilino_tapvm), taso
 					WHERE tili.yhtio = '$kukarow[yhtio]'
 						and tapvm >= '$yhtiorow[tilikausi_alku]'
 						and tapvm <= '$yhtiorow[tilikausi_loppu]'

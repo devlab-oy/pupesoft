@@ -585,6 +585,13 @@
 
 					$lisa1 = t("Rivisyöttöön");
 				}
+				else {
+					$aputoim1 = $toim;
+					$aputoim2 = "";
+
+					$lisa1 = t("Muokkaa");
+					$lisa2 = "";
+				}
 
 				// tehdään alertteja
 				if ($row["tila"] == "L" and $row["alatila"] == "A" and $toim == "") {

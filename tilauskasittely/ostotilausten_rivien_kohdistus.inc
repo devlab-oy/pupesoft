@@ -269,7 +269,7 @@ if ($tila == 'tee_kohdistus') {
 		}
 		$tunnukset2 = substr($tunnukset2,0,-1);
 
-		$query = "UPDATE tilausrivi use index (PRIMARY) SET uusiotunnus='0', kerattyaika='0' WHERE tunnus in ($tunnukset2) AND yhtio='$kukarow[yhtio]'";
+		$query = "UPDATE tilausrivi use index (PRIMARY) SET uusiotunnus='0', kerattyaika='0', keratty='' WHERE tunnus in ($tunnukset2) AND yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
@@ -279,7 +279,7 @@ if ($tila == 'tee_kohdistus') {
 
 			list($valittutunnus, $valittuotunnus) = explode("###", $valittu);
 
-			$query = "UPDATE tilausrivi use index (yhtio_otunnus) SET uusiotunnus='$otunnus', kerattyaika=now() WHERE yhtio='$kukarow[yhtio]' and otunnus in ('$valittuotunnus','$otunnus') and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
+			$query = "UPDATE tilausrivi use index (yhtio_otunnus) SET uusiotunnus='$otunnus', kerattyaika=now(), keratty='$kukarow[kuka]' WHERE yhtio='$kukarow[yhtio]' and otunnus in ('$valittuotunnus','$otunnus') and (tunnus = '$valittutunnus' or perheid2 = '$valittutunnus')";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 	}

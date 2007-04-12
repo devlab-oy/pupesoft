@@ -276,6 +276,12 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 		$ketjutus 			= $asiakasrow["ketjutus"];
 		$valkoodi 			= $asiakasrow["valkoodi"];
 		$sisviesti1			= $asiakasrow["sisviesti1"];
+		
+		$toimitusehto		= substr($yhtiorow['oletus_toimitusehto'], 0, 3);
+		$kasitoimehto 		= substr($yhtiorow['oletus_toimitusehto'], 4);
+
+		$toimitusehto2		= substr($yhtiorow['oletus_toimitusehto2'], 0, 3);
+		$kasitoimehto2 		= substr($yhtiorow['oletus_toimitusehto2'], 4);
 
 		//annetaan extranet-tilaukselle aina paras prioriteetti, tämä on hyvä porkkana.
 		if ($kukarow["extranet"] != '') {

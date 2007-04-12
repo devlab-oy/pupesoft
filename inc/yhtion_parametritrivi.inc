@@ -107,6 +107,23 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "ostotilaustyyppi") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$apu = (int)$trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '0' $sel[0]>".t("Normaali ostotilauspohja");
+		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty ostotilauspohja");		
+
+		
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "rahti_hinnoittelu") {
 
 		$ulos = "<td><select name='$nimi'>";

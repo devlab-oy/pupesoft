@@ -126,7 +126,18 @@ if (strtoupper($mehtorow["factoring"]) != "") {
 }
 
 if ($lasrow["vienti"] == 'E') {
-	$lisa_comments .= "VAT 0% Intra community supply. \n";
+	//	Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..
+	$query = "	SELECT tilausrivi.tunnus
+				FROM tilausrivi
+				JOIN tuote ON tilausrivi.tuoteno=tuoteno
+				WHERE yhtio='$kukarow[yhtio]' and tuote.ei_saldoa=''";
+	$abulisares=mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($abulisares) == 0) {
+		$lisa_comments .= "Reverse charge, intangible sevice. \n";	
+	}
+	else {
+		$lisa_comments .= "VAT 0% Intra community supply. \n";
+	}
 }
 if ($lasrow["vienti"] == 'K') {
 	$lisa_comments .= "VAT 0% Export of goods outside the European Union. \n";

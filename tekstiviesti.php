@@ -14,8 +14,10 @@
 		$ok = 1;
 
 		if (is_numeric($kotinum) and strlen($teksti) > 0 and strlen($teksti) <= 160 and $sms_palvelin != "" and $sms_user != "" and $sms_pass != "") {
+			$teksti = urlencode($teksti);
 			$retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$kotinum&viesti=$teksti");
 			if (trim($retval) == "0") $ok = 0;
+			$teksti = urldecode($teksti);
 		}
 
 		if ($ok == 1) {

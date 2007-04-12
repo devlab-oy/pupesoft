@@ -399,13 +399,16 @@
 	}
 	elseif ($toim == 'OSTOSUPER') {
 		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila
-					FROM lasku use index (tila_index), tilausrivi use index (yhtio_otunnus)
-					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					FROM tilausrivi use index (yhtio_tyyppi_kerattyaika),
+					lasku use index (primary)
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.tyyppi = 'O'
+					and tilausrivi.uusiotunnus = 0
+					and tilausrivi.kerattyaika = '0000-00-00 00:00:00'
+					and lasku.yhtio = tilausrivi.yhtio
+					and lasku.tunnus = tilausrivi.otunnus
 					and lasku.tila = 'O'
 					and lasku.alatila != ''
-					and tilausrivi.yhtio = lasku.yhtio
-					and tilausrivi.otunnus = lasku.tunnus
-					and tilausrivi.uusiotunnus = 0
 					$haku
 					GROUP by 1
 					ORDER by lasku.luontiaika desc

@@ -274,7 +274,7 @@
 
 
 			echo "</table>";
-			
+
 			echo "<table><tr>";
 			echo "<td class='back' valign='top' align='left'>";
 			echo "<table>";
@@ -304,7 +304,7 @@
 
 			echo "</table>";
 			echo "</td>";
-			
+
 			// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
 			$query = "describe yhteensopivuus_tuote";
 			$res = mysql_query($query);
@@ -314,21 +314,21 @@
 				$query = "select count(*) countti from yhteensopivuus_tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 				$yhtresult = mysql_query($query) or pupe_error($query);
 				$yhtrow = mysql_fetch_array($yhtresult);
-				
+
 				if ($yhtrow['countti'] > 0) {
 					echo "<td class='back' valign='top' align='left'>";
 					echo "<table>";
 					echo "<tr><th>".t("Yhteensopivuudet")."</th></tr>";
-					
+
 					echo "<tr><td><a href='yhteensopivuus_tuote.php?tee=etsi&tuoteno=$tuoteno'>Siirry tuotteen yhteensopivuuksiin</a></td></tr>";
-					
+
 					echo "</table>";
 					echo "</td>";
 				}
 			}
-			
+
 			echo "<tr></table>";
-			
+
 			// Varastosaldot ja paikat
 			echo "<table>";
 			echo "<tr>";
@@ -344,23 +344,23 @@
 				$kokonaismyytavissa = 0;
 
 				//saldot per varastopaikka
-				$query = "	SELECT tuotepaikat.*, 
+				$query = "	SELECT tuotepaikat.*,
 							varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
 							concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 				 			FROM tuotepaikat
 							JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]' 
+							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 							and tuotepaikat.tuoteno = '$tuoteno'
 							ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
-						
+
 						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
-						
+
 						//summataan kokonaissaldoa
 						$kokonaissaldo += $saldo;
 						$kokonaishyllyssa += $hyllyssa;
@@ -377,14 +377,14 @@
 				}
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, "ORVOT");
-				
+
 				if ($saldo != 0) {
 					echo "<tr><td>".t("Tuntematon")."</td><td>?</td>";
 					echo "<td align='right'>".sprintf("%.2f", $saldo)."</td>
 							<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
 							<td align='right'>".sprintf("%.2f", $myytavissa)."</td>
 							</tr>";
-					
+
 					//summataan kokonaissaldoa
 					$kokonaissaldo += $saldo;
 					$kokonaishyllyssa += $hyllyssa;
@@ -491,7 +491,7 @@
 			$query = "	SELECT tilausrivi.*, lasku.ytunnus, tilausrivi.varattu+tilausrivi.jt kpl, lasku.nimi, tilausrivi.toimaika, round((tilausrivi.varattu+tilausrivi.jt)*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta, varastopaikat.nimitys varasto
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto 
+						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi in ('L','E','O','G','V')
 						and tilausrivi.tuoteno = '$tuoteno'
@@ -561,11 +561,11 @@
 						$tyyppi = t("Hyvitys");
 						$merkki = "+";
 					}
-					
+
 					if($jtrow["varasto"] != "") {
 						$tyyppi = $tyyppi." - ".$jtrow["varasto"];
 					}
-					
+
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
 							<td><a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$jtrow[otunnus]'>$jtrow[otunnus]</a>$keikka</td>";
@@ -667,9 +667,9 @@
 							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 							and sarjanumeroseuranta.tuoteno = '$tuoterow[tuoteno]'
 							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-							and (lasku_osto.tila = 'U' or (lasku_osto.tila='K' and tilausrivi_osto.laskutettuaika != '0000-00-00'))";			
+							and (lasku_osto.tila = 'U' or (lasku_osto.tila='K' and tilausrivi_osto.laskutettuaika != '0000-00-00'))";
 				$sarjares = mysql_query($query) or pupe_error($query);
-			
+
 				if (mysql_num_rows($sarjares) > 0) {
 					echo "<table>";
 					echo "<tr><th colspan='3'>".t("Varasto").":</th></tr>";
@@ -703,7 +703,7 @@
 			echo "<select name='historia' onchange='submit();'>'";
 			echo "<option value='1' $chk[1]> ".t("20 viimeisintä")."</option>";
 			echo "<option value='2' $chk[2]> ".t("Tilivuoden alusta")."</option>";
-			echo "<option value='3' $chk[3]> ".t("Lähes kaikki")."</option>";
+			echo "<option value='3' $chk[3]> ".t("Edellinen tilivuosi")."</option>";
 			echo "</select>";
 			echo "</th>";
 
@@ -749,17 +749,17 @@
 
 
 			//tapahtumat
-			if ($historia == '1' or $historia == '') {
-				$maara = "LIMIT 20";
-				$ehto = ' and tapahtuma.laadittu >= date_sub(now(), interval 6 month)';
-			}
 			if ($historia == '2') {
 				$maara = "";
-				$ehto = " and tapahtuma.laadittu > '$yhtiorow[tilikausi_alku]'";
+				$ehto  = " and tapahtuma.laadittu > '$yhtiorow[tilikausi_alku]' ";
 			}
-			if ($historia == '3') {
-				$maara = "LIMIT 2500";
-				$ehto = "";
+			elseif ($historia == '3') {
+				$maara = "";
+				$ehto  = " and tapahtuma.laadittu >= date_sub('$yhtiorow[tilikausi_alku]', interval 12 month) and tapahtuma.laadittu <= '$yhtiorow[tilikausi_alku]' ";
+			}
+			else {
+				$maara = "LIMIT 20";
+				$ehto  = " and tapahtuma.laadittu >= date_sub(now(), interval 6 month) ";
 			}
 
 			$query = "	SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
@@ -769,7 +769,6 @@
 						LEFT JOIN lasku use index (primary) ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 						WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 						and tapahtuma.tuoteno = '$tuoteno'
-						and tapahtuma.laadittu > '0000-00-00 00:00:00'
 						$ehto
 						ORDER BY tapahtuma.laadittu desc $maara";
 			$qresult = mysql_query($query) or pupe_error($query);

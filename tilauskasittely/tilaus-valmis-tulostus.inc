@@ -45,6 +45,12 @@
 			else {
 				require_once ("tulosta_lahete_kerayslista.inc");
 			}
+
+			// ker‰yslistat sortataan aina n‰in
+			$sorttauskentta = "if(perheid = 0,
+								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+								) as sorttauskentta";
 		}
 		else {
 			//hatetaan asiakkaan l‰hetetyyppi
@@ -74,6 +80,9 @@
 					echo "<font class='error'>".t("Emme lˆyt‰neet yht‰‰n l‰hetetyyppi‰. L‰hetett‰ ei voida tulostaa.")."</font><br>";
 				}
 			}
+
+			// katotaan miten halutaan l‰hete sortattavan
+			$sorttauskentta = generoi_sorttauskentta();
 		}
 
 		//korjataan t‰‰ p‰iv‰m‰‰r‰ kuntoon jota ei viel‰ ole
@@ -98,9 +107,6 @@
 		else {
 			$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
 		}
-
-		// katotaan miten halutaan sortattavan
-		$sorttauskentta = generoi_sorttauskentta();
 
 		//generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
 		$query = "	SELECT tilausrivi.*,

@@ -596,9 +596,9 @@
 					WHERE tunnus = '$id'
 					and tila = 'G'
 					and yhtio = '$kukarow[yhtio]'
-					and alatila in ('C','D')";
+					and alatila in ('B','C','D')";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		$row = mysql_fetch_array($result);
 
 		echo "<table>";
@@ -682,8 +682,8 @@
 		$vares = mysql_query($query) or pupe_error($query);
 		$varow = mysql_fetch_array($vares);
 
-		$lisa = " and tuotepaikat.hyllyalue <= '$varow[loppuhyllyalue]'";
-		$lisa .= " and tuotepaikat.hyllyalue >= '$varow[alkuhyllyalue]'";
+		$lisa = " and concat(rpad(upper('$varow[alkuhyllyalue]'),  5, '0'),lpad(upper('$varow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) ";
+		$lisa .= " and concat(rpad(upper('$varow[loppuhyllyalue]'), 5, '0'),lpad(upper('$varow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) ";
 
 		//siirtolistan rivit
 		$query = "	SELECT tilausrivi.nimitys, tilausrivi.tuoteno, tilausrivi.tunnus,  tilausrivi.varattu,

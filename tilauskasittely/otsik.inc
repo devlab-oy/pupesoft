@@ -1018,7 +1018,7 @@
 
 					if(stripos(substr($srow["toimitusehto2"],0,4), $row["selite"]." ") !== false) {
 						$sel = 'selected';
-						$kasitoimehto = substr($srow["toimitusehto2"],4);
+						$kasitoimehto2 = substr($srow["toimitusehto2"],4);
 
 					}
 					elseif ($row["selite"] == $srow["toimitusehto2"] or ($srow["toimitusehto2"] == '' and $yhtiorow['oletus_toimitusehto2'] == $row["selite"])) $sel = 'selected';
@@ -1032,12 +1032,12 @@
 							WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO' and selite = '$srow[toimitusehto2]'
 							ORDER BY jarjestys, selite";
 				$tresult = mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($tresult) == 0 and $kasitoimehto == "") {
-					$kasitoimehto = $srow["toimitusehto2"];
+				if (mysql_num_rows($tresult) == 0 and $kasitoimehto2 == "") {
+					$kasitoimehto2 = $srow["toimitusehto2"];
 				}
-				if (mysql_num_rows($tresult) == 1 and $kasitoimehto == "") {
+				if (mysql_num_rows($tresult) == 1 and $kasitoimehto2 == "") {
 					$row = mysql_fetch_array($tresult);
-					$kasitoimehto = $row["selitetark"];
+					$kasitoimehto2 = $row["selitetark"];
 				}
 
 				echo "<input type='text' id='toimitusehto2Lisa' name='kasitoimehto2' value='$kasitoimehto2' size='20'>";

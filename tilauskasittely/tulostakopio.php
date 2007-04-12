@@ -948,124 +948,131 @@
 
 			if ($toim == "LASKU" or $toim == 'PROFORMA') {
 				$otunnus = $laskurow["tunnus"];
-
-				// haetaan maksuehdon tiedot
-				$query  = "	select * from maksuehto 
-							left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
-							where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
-				$result = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($result) == 0) {
-					$masrow = array();
-					if ($laskurow["erpcm"] == "0000-00-00") {
-						echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy")."! $laskurow[maksuehto]!</font>";
-					}
+				
+				if ($yhtiorow['laskutyyppi'] == 3) {
+					require_once ("tulosta_lasku_simppeli.inc");
+					tulosta_lasku($otunnus, $komento[ucfirst(strtolower($toim))], $kieli, $toim, $tee);
+					$tee = '';
 				}
 				else {
-					$masrow = mysql_fetch_array($result);
-				}
+					// haetaan maksuehdon tiedot
+					$query  = "	select * from maksuehto 
+								left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+								where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
+					$result = mysql_query($query) or pupe_error($query);
 
-				//maksuehto tekstinä
-				$maksuehto      = $masrow["teksti"]." ".$masrow["kassa_teksti"];
-				$kateistyyppi   = $masrow["kateinen"];
-
-				if ($yhtiorow['laskutyyppi'] == 0) {
-					require_once("tulosta_lasku.inc");
-				}
-				elseif ($yhtiorow['laskutyyppi'] == 2) {
-					require_once("tulosta_lasku_perhe.inc");
-				}
-				else {
-					require_once("tulosta_lasku_plain.inc");
-				}
-
-				if ($laskurow["tila"] == 'U') {
-					$where = " uusiotunnus='$otunnus' ";
-				}
-				else {
-					$where = " otunnus='$otunnus' ";
-				}
-
-				// katotaan miten halutaan sortattavan
-				$sorttauskentta = generoi_sorttauskentta();
-
-				if ($toim == 'PROFORMA') {
-					if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-						$hinta_riv = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
+					if (mysql_num_rows($result) == 0) {
+						$masrow = array();
+						if ($laskurow["erpcm"] == "0000-00-00") {
+							echo "<font class='error'>".t("VIRHE: Maksuehtoa ei löydy")."! $laskurow[maksuehto]!</font>";
+						}
 					}
 					else {
-						$hinta_riv = "tilausrivi.hinta";
+						$masrow = mysql_fetch_array($result);
 					}
 
-					$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
-								varattu kpl, ";
-				}
-				else {
-					$lisa = "";
-				}
+					//maksuehto tekstinä
+					$maksuehto      = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+					$kateistyyppi   = $masrow["kateinen"];
 
-				// haetaan tilauksen kaikki rivit
-				$query = "  SELECT *, $lisa $sorttauskentta
-							FROM tilausrivi
-							WHERE $where
-							and yhtio='$kukarow[yhtio]'
-							ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
-				$result = mysql_query($query) or pupe_error($query);
+					if ($yhtiorow['laskutyyppi'] == 0) {
+						require_once("tulosta_lasku.inc");
+					}
+					elseif ($yhtiorow['laskutyyppi'] == 2) {
+						require_once("tulosta_lasku_perhe.inc");
+					}
+					else {
+						require_once("tulosta_lasku_plain.inc");
+					}
 
-				//kuollaan jos yhtään riviä ei löydy
-				if (mysql_num_rows($result) == 0) {
-					echo t("Laskurivejä ei löytynyt");
-					exit;
-				}
+					if ($laskurow["tila"] == 'U') {
+						$where = " uusiotunnus='$otunnus' ";
+					}
+					else {
+						$where = " otunnus='$otunnus' ";
+					}
 
-				$sivu 	= 1;
-				$summa 	= 0;
-				$arvo 	= 0;
+					// katotaan miten halutaan sortattavan
+					$sorttauskentta = generoi_sorttauskentta();
 
-				// aloitellaan laskun teko
-				$firstpage = alku();
+					if ($toim == 'PROFORMA') {
+						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
+							$hinta_riv = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
+						}
+						else {
+							$hinta_riv = "tilausrivi.hinta";
+						}
 
-				while ($row = mysql_fetch_array($result)) {
-					rivi($firstpage);
-				}
+						$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
+									varattu kpl, ";
+					}
+					else {
+						$lisa = "";
+					}
 
-				loppu($firstpage);
-				alvierittely ($firstpage);
+					// haetaan tilauksen kaikki rivit
+					$query = "  SELECT *, $lisa $sorttauskentta
+								FROM tilausrivi
+								WHERE $where
+								and yhtio='$kukarow[yhtio]'
+								ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
+					$result = mysql_query($query) or pupe_error($query);
 
-				//keksitään uudelle failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$pdffilenimi = "/tmp/Lasku_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
+					//kuollaan jos yhtään riviä ei löydy
+					if (mysql_num_rows($result) == 0) {
+						echo t("Laskurivejä ei löytynyt");
+						exit;
+					}
 
-				//kirjoitetaan pdf faili levylle..
-				$fh = fopen($pdffilenimi, "w");
-				if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-				fclose($fh);
+					$sivu 	= 1;
+					$summa 	= 0;
+					$arvo 	= 0;
 
-				// itse print komento...
-				if ($komento["Lasku"] == 'email') {
-					$liite = $pdffilenimi;
-					$kutsu = "Lasku";
+					// aloitellaan laskun teko
+					$firstpage = alku();
 
-					require("../inc/sahkoposti.inc");
-				}
-				elseif ($tee == 'NAYTATILAUS') {
-					//Työnnetään tuo pdf vaan putkeen!
-					echo file_get_contents($pdffilenimi);
-				}
-				elseif ($komento["Lasku"] != '' and $komento["Lasku"] != 'edi') {
-					$line = exec("$komento[Lasku] $pdffilenimi");
-				}
+					while ($row = mysql_fetch_array($result)) {
+						rivi($firstpage);
+					}
 
-				//poistetaan tmp file samantien kuleksimasta...
-				system("rm -f $pdffilenimi");
+					loppu($firstpage);
+					alvierittely ($firstpage);
 
-				unset($pdf);
-				unset($firstpage);
+					//keksitään uudelle failille joku varmasti uniikki nimi:
+					list($usec, $sec) = explode(' ', microtime());
+					mt_srand((float) $sec + ((float) $usec * 100000));
+					$pdffilenimi = "/tmp/Lasku_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
 
-				if ($tee != 'NAYTATILAUS') {
-					echo t("Lasku tulostuu")."...<br>";
-					$tee = '';
+					//kirjoitetaan pdf faili levylle..
+					$fh = fopen($pdffilenimi, "w");
+					if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+					fclose($fh);
+
+					// itse print komento...
+					if ($komento["Lasku"] == 'email') {
+						$liite = $pdffilenimi;
+						$kutsu = "Lasku";
+
+						require("../inc/sahkoposti.inc");
+					}
+					elseif ($tee == 'NAYTATILAUS') {
+						//Työnnetään tuo pdf vaan putkeen!
+						echo file_get_contents($pdffilenimi);
+					}
+					elseif ($komento["Lasku"] != '' and $komento["Lasku"] != 'edi') {
+						$line = exec("$komento[Lasku] $pdffilenimi");
+					}
+
+					//poistetaan tmp file samantien kuleksimasta...
+					system("rm -f $pdffilenimi");
+
+					unset($pdf);
+					unset($firstpage);					
+					
+					if ($tee != 'NAYTATILAUS') {
+						echo t("Lasku tulostuu")."...<br>";
+						$tee = '';
+					}
 				}
 			}
 

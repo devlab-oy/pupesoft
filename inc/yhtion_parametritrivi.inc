@@ -96,9 +96,12 @@
 		$sel = array();
 		$sel[$apu] = "selected";
 
-		$ulos .= "<option value = '0' $sel[0]>".t("Normaali lasku");
-		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty lasku");
-		$ulos .= "<option value = '2' $sel[2]>".t("Normaali lasku (Tuoteperheet yhdistetty)");
+		$ulos .= "<option value = '0' $sel[0]>".t("Normaali laskupohja");
+		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");		
+		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
+		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2");		
+
+		
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

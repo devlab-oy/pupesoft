@@ -12,7 +12,7 @@
 			$query = "SELECT lasku.tapvm, lasku.nimi, round(lasku.summa * vienti_kurssi,2) lsumma, tiliointi.summa * -1 tsumma, lasku.tunnus, lasku.mapvm 
 				FROM lasku use index (yhtio_tila_tapvm)
 				LEFT JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and
-						lasku.tapvm=tiliointi.tapvm and tiliointi.tilino = '$yhtiorow[ostovelat]' and korjattu=''
+						lasku.tapvm=tiliointi.tapvm and tiliointi.tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]') and korjattu=''
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tapvm >='$vv-$kk-01' and
 						lasku.tapvm < '$loppu' and lasku.tila in ('H', 'M', 'P','Q', 'Y')";
 			$result = mysql_query($query) or pupe_error($query);
@@ -36,7 +36,7 @@
 			$query = "SELECT lasku.tapvm, lasku.nimi, round(lasku.summa * vienti_kurssi,2) lsumma, tiliointi.summa tsumma, lasku.tunnus, lasku.mapvm
 				FROM lasku use index (yhtio_tila_tapvm)
 				LEFT JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and
-						lasku.mapvm=tiliointi.tapvm and tiliointi.tilino = '$yhtiorow[ostovelat]' and korjattu=''
+						lasku.mapvm=tiliointi.tapvm and tiliointi.tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]') and korjattu=''
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tapvm >='$vv-$kk-01' and
 						lasku.tapvm < '$loppu' and lasku.tila = 'Y'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -81,7 +81,7 @@
 			$query = "SELECT lasku.tapvm, lasku.nimi, lasku.summa lsumma, sum(tiliointi.summa) tsumma, saldo_maksettu, lasku.tunnus, lasku.mapvm
 				FROM lasku use index (yhtio_tila_tapvm)
 				LEFT JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and
-						lasku.tapvm=tiliointi.tapvm and tiliointi.tilino = '$yhtiorow[myyntisaamiset]' and korjattu='' and lasku.summa = tiliointi.summa
+						lasku.tapvm=tiliointi.tapvm and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]','$yhtiorow[factoringsaamiset]','$yhtiorow[konsernimyyntisaamiset]') and korjattu='' and lasku.summa = tiliointi.summa
 				LEFT JOIN maksuehto ON maksuehto.tunnus=lasku.maksuehto and maksuehto.kateinen=''
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tapvm >='$vv-$kk-01' and
 						lasku.tapvm < '$loppu' and lasku.tila = 'U' and lasku.alatila='X'
@@ -108,7 +108,7 @@
 			$query = "SELECT lasku.tapvm, lasku.nimi, lasku.summa lsumma, sum(tiliointi.summa) * -1 tsumma, lasku.tunnus, lasku.mapvm
 				FROM lasku use index (yhtio_tila_tapvm)
 				LEFT JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and
-						lasku.tapvm!=tiliointi.tapvm and tiliointi.tilino = '$yhtiorow[myyntisaamiset]' and korjattu=''
+						lasku.tapvm!=tiliointi.tapvm and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]','$yhtiorow[factoringsaamiset]','$yhtiorow[konsernimyyntisaamiset]') and korjattu=''
 				LEFT JOIN maksuehto ON maksuehto.tunnus=lasku.maksuehto and maksuehto.kateinen=''
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tapvm >='$vv-$kk-01' and
 						lasku.tapvm < '$loppu' and lasku.tila = 'U' and lasku.alatila='X' and mapvm != '0000-00-00'
@@ -149,7 +149,7 @@
 			echo "</table>";
 			echo "<font class='message'>Done!</font><br><br>";
 			flush();
-			
+/*		
 			echo "<font class='message'>Tarkistetaan tositteilta syyt tapahtumiin</font><br>";
 			flush();
 			$query = "select tiliointi.laatija,tiliointi.tapvm ttapvm, korjattu, korjausaika, tiliointi.summa tsumma, lasku.summa lsumma, lasku.tila, lasku.alatila, lasku.tapvm ltapvm, lasku.mapvm, tiliointi.selite
@@ -190,7 +190,7 @@
 			echo "</table>";
 			echo "<font class='message'>Done!</font><br><br>";
 			flush();
-			
+*/			
 		} 
 	}
 	if ($tee == '') {

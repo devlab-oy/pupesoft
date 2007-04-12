@@ -480,7 +480,7 @@ if (!function_exists('tulosta_lasku')) {
 		
 		//	Loppuun duusataan yrityksen perustiedot
 		$h = 15;
-		$s=$pdf->teeSarakkeet(array(60,15,55,15));
+		$s=$pdf->teeSarakkeet(array(70,15,60,15));
 		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Puh", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["puhelin"], "norm", "L", "");		
@@ -596,7 +596,7 @@ if (!function_exists('tulosta_lasku')) {
 				$liite = $pdf_laskufilenimi;
 				$kutsu = ucfirst(strtolower($otsikko))." $laskurow[laskunro]";
 				
-				echo t(ucfirst(strtolower($otsikko))." tulostuu")."...<br>";
+				echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen '$kukarow[eposti]'")."...<br>";
 
 				if ($kukarow["extranet"] == '') {
 					require("../inc/sahkoposti.inc");
@@ -610,8 +610,22 @@ if (!function_exists('tulosta_lasku')) {
 				echo file_get_contents($pdf_laskufilenimi);
 			}
 			elseif ($komento != '' and $komento != 'edi') {
-				echo t(ucfirst(strtolower($otsikko))." tulostuu")."...<br>";
-				$line = exec("$komento $pdf_laskufilenimi", $output, $returnvalue);
+				//	Haetaan kirjoittimen nimi..
+				$querykieli = "	select *
+								from kirjoittimet
+								where yhtio='$kukarow[yhtio]' and komento='$komento'";
+				$kires = mysql_query($querykieli) or pupe_error($querykieli);
+				if(mysql_num_rows($kires) > 0) {
+					$kirow = mysql_fetch_array($kires);
+					echo t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";						
+					
+					echo t("Lasku tulostuu")."...<br>";
+					unset($returnvalue);
+					$line = exec("$komento $pdf_laskufilenimi", $output, $returnvalue);
+				}
+				if(mysql_num_rows($result) == 0 or $returnvalue!=0) {
+					echo "<font class='error'>".t("Laskun tulostus ep‰onnistui")."!!!</font><br>\n";	
+				}
 			}			
 		}
 

@@ -327,6 +327,7 @@ class pdffile
 	        $this->objects[$o][$margin] = $this->default[$margin];
         }
         $this->_debug_var(10, 'New page', $this->objects[$o]);
+		$this->currentPage = $this->objects[$o];
         return $o;
     }
 
@@ -1602,7 +1603,7 @@ class pdffile
      */
     function _addnewoid()
     {
-        $o = $this->nextoid;
+        $o = $this->oid = $this->nextoid;	
         $this->nextoid++;
         return $o;
     }

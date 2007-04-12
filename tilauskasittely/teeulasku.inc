@@ -129,11 +129,13 @@ if ($lasrow["vienti"] == 'E') {
 	//	Tarkastetaan onko laskulla vain saldotonta kamaa, se muuttaa kommenttia..
 	$query = "	SELECT tilausrivi.tunnus
 				FROM tilausrivi
-				JOIN tuote ON tilausrivi.tuoteno=tuoteno
-				WHERE yhtio='$kukarow[yhtio]' and tuote.ei_saldoa=''";
-	$abulisares=mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($abulisares) == 0) {
-		$lisa_comments .= "Reverse charge, intangible sevice. \n";	
+				JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa='')
+				WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+				and tilausrivi.otunnus in ($tunnukset)";
+	$abulisares = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($abulisares) == 0) {
+		$lisa_comments .= "Reverse charge, intangible service. \n";	
 	}
 	else {
 		$lisa_comments .= "VAT 0% Intra community supply. \n";

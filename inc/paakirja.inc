@@ -143,6 +143,7 @@
 		echo "</select></td>";
 		echo "</tr>";
 		echo "<tr><th>".t("Excel muoto")."</th><td><input type='checkbox' name='excel'></td></tr>";
+		echo "<tr><th>".t("Vain käsin viedyt")."</th><td><input type='checkbox' name='kasin'></td></tr>";
 		echo "</table><br>
 		      <input type = 'submit' value = '".t("Näytä")."'></form>";
 		$formi = 'valinta';
@@ -237,7 +238,10 @@
 		$lisa .= " and tiliointi.tilino >= '" . $tili . "' and  tiliointi.tilino <= '" . $tili2 . "'";
 		$lisa2 .= " and tiliointi.tilino >= '" . $tili . "' and  tiliointi.tilino <= '" . $tili2 . "'";
 	}
-
+	
+	if ($kasin != '') {
+		$lisa .= "and lasku.tila='X'";
+	}
 	//jos tili on valittu lasketaan sen alkusaldo	
 	if (strlen(trim($tili)) > 0) {
 		$query = "	SELECT sum(summa) saldo

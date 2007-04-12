@@ -412,7 +412,7 @@
 		}
 		if ($toim == "TILAUSVAHVISTUS") {
 			//myyntitilaus. Tulostetaan proforma.
-			$where1 = " lasku.tila in ('L','U')";
+			$where1 = " lasku.tila in ('N','L','U')";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -425,8 +425,8 @@
 				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where2 .= " and lasku.lahetepvm >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.lahetepvm <='$vvl-$kkl-$ppl 23:59:59'";
+			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = "";

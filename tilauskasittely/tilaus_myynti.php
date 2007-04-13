@@ -2073,7 +2073,7 @@ if ($tee == '') {
 		}
 		elseif ($toim == "PROJEKTI") {
 			$order = "ORDER BY tilausrivi.perheid desc, tunnus";
-			$tilrivity	= "'L','T','G','E','V','W'";
+			$tilrivity	= "'L','G','E','V','W'";
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM lasku

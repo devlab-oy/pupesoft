@@ -176,7 +176,21 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 666, t("Toimitustapa", $kieli), 	$firstpage, $pieni);
 		$pdf->draw_text(310, 656, $laskurow["toimitustapa"], 	$firstpage, $norm);
 		$pdf->draw_text(430, 666, t("Toimituspvm", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(430, 656, tv1dateconv($laskurow["toimaika"]), 		$firstpage, $norm);
+		//	Onko meillä monta toimituspäivää vai ei?
+		if ($laskurow["tila"] == 'U') {
+			$where = " uusiotunnus='$laskurow[tunnus]' ";
+		}
+		else {
+			$where = " otunnus='$laskurow[tunnus]' ";
+		}
+		$query = "SELECT date_format(toimitettuaika, '%Y%m%d') toimitettupaiva FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and $where and toimitettuaika!='0000-00-00' GROUP BY toimitettupaiva";
+		$toimaikares=mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($toimaikares) > 1) {
+			$pdf->draw_text(430, 656, t("useita"), 		$firstpage, $norm);
+		}
+		else {
+			$pdf->draw_text(430, 656, tv1dateconv($laskurow["toimaika"]), 		$firstpage, $norm);	
+		}
 
 		$pdf->draw_rectangle(653, 300, 632, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 645, t("Toimitusehto", $kieli), $firstpage, $pieni);

@@ -129,9 +129,21 @@ if (!function_exists('text_alku')) {
 		$sisalto .= "\r\n";	
 		$sisalto .= sprintf('%-35.35s', '');
 		$sisalto .= sprintf('%-25.25s', $laskurow["toimitustapa"]);
-		$sisalto .= sprintf('%-20.20s', $laskurow["toimaika"]);
-		
-		
+		//	Onko meillä monta toimituspäivää vai ei?
+		if ($laskurow["tila"] == 'U') {
+			$where = " uusiotunnus='$laskurow[tunnus]' ";
+		}
+		else {
+			$where = " otunnus='$laskurow[tunnus]' ";
+		}
+		$query = "SELECT date_format(toimitettuaika, '%Y%m%d') toimitettupaiva FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and $where and toimitettuaika!='0000-00-00' GROUP BY toimitettupaiva";
+		$toimaikares=mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($toimaikares) > 1) {
+			$sisalto .= t("useita");
+		}
+		else {
+			$sisalto .= sprintf('%-20.20s', $laskurow["toimaika"]);
+		}
 		
 		$sisalto .= "\r\n";	
 		$sisalto .= sprintf('%-35.35s', '');

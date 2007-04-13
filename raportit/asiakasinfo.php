@@ -16,74 +16,82 @@ if ($tee == 'eposti') {
 
 	require('../pdflib/phppdflib.class.php');
 
-	//PDF parametrit
-	$pdf = new pdffile;
-	$pdf->set_default('margin-top', 	0);
-	$pdf->set_default('margin-bottom', 	0);
-	$pdf->set_default('margin-left', 	0);
-	$pdf->set_default('margin-right', 	0);
-	$rectparam["width"] = 0.3;
-
-	$norm["height"] = 12;
-	$norm["font"] = "Courier";
-
-	$pieni["height"] = 8;
-	$pieni["font"] = "Courier";
-
 	// defaultteja
 	$lask = 1;
 	$sivu = 1;
 
 	function alku () {
-		global $yhtiorow, $firstpage, $pdf, $sivu, $rectparam, $norm, $pieni, $ytunnus, $kukarow, $kala;
+		global $yhtiorow, $firstpage, $pdf, $sivu, $rectparam, $norm, $pieni, $ytunnus, $kukarow, $kala, $tid, $otsikkotid;
+		
+		if(!isset($pdf)) {
+			//PDF parametrit
+			$pdf = new pdffile;
+			$pdf->enable('template');	
+			
+			$pdf->set_default('margin-top', 	0);
+			$pdf->set_default('margin-bottom', 	0);
+			$pdf->set_default('margin-left', 	0);
+			$pdf->set_default('margin-right', 	0);
+			$rectparam["width"] = 0.3;
+			
+			$norm["height"] = 12;
+			$norm["font"] = "Courier";
 
-		$firstpage = $pdf->new_page("a4");
-		$pdf->enable('template');
-		$tid = $pdf->template->create();
-		$pdf->template->size($tid, 600, 830);
+			$norm_bold["height"] = 12;
+			$norm_bold["font"] = "Courier-Bold";
 
-
-		$query =  "	SELECT *
-					FROM asiakas
-					WHERE yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus'";
-		$assresult = mysql_query($query) or pupe_error($query);
-		$assrow = mysql_fetch_array($assresult);
-
-
-
-		//Otsikko
-		$pdf->draw_rectangle(830, 20,  810, 580, $firstpage, $rectparam);
-		$pdf->draw_text(30,  815, $yhtiorow["nimi"], $firstpage, $pieni);
-		$pdf->draw_text(120, 815, t("Asiakkaan")." ($ytunnus) $assrow[nimi] $assrow[nimitark] ".t("alennustaulukko")."", $firstpage);
-		$pdf->draw_text(500, 815, t("Sivu").": $sivu", $firstpage, $pieni);
-
-		if ($sivu == 1) {
-			//Vasen sarake
+			$pieni["height"] = 8;
+			$pieni["font"] = "Courier";
+			
+			$query =  "	SELECT *
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus'";
+			$assresult = mysql_query($query) or pupe_error($query);
+			$assrow = mysql_fetch_array($assresult);
+			
+			// Tehdään firstpage
+			$firstpage = $pdf->new_page("a4");
+			
+			//	Tehdään headertemplate
+			$tid=$pdf->template->create();
+			$pdf->template->rectangle($tid, 20, 20,  0, 580, $rectparam);
+			$pdf->template->text($tid, 30,  5, $yhtiorow["nimi"], $pieni);
+			$pdf->template->text($tid, 120, 5, t("Asiakkaan")." ($ytunnus) $assrow[nimi] $assrow[nimitark] ".t("alennustaulukko"));
+			$pdf->template->text($tid, 500, 5, t("Sivu").": $sivu", $pieni);
+			$pdf->template->place($tid, $firstpage, 0, 800);
+			
+			//	Tehdään otsikkoheader
+			$otsikkotid=$pdf->template->create();			
+			$pdf->template->text($otsikkotid, 30,  0, t("Osasto"), $norm_bold);
+			$pdf->template->text($otsikkotid, 130, 0, t("Tuoteryh"), $norm_bold);
+			$pdf->template->text($otsikkotid, 250, 0, t("Selite"), $norm_bold);
+			$pdf->template->text($otsikkotid, 420, 0, t("Aleryhmä"), $norm_bold);
+			$pdf->template->text($otsikkotid, 520, 0, t("Alennus"), $norm_bold);
+			$pdf->template->place($otsikkotid, $firstpage, 0, 675, $norm_bold);
+			$kala = 660;			
+			
+			//	Asiakastiedot
 			//$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
-			$pdf->draw_text(50, 729, t("Osoite", $kieli), 	$firstpage, $pieni);
-			$pdf->draw_text(50, 717, $assrow["nimi"], 		$firstpage, $norm);
-			$pdf->draw_text(50, 707, $assrow["nimitark"],	$firstpage, $norm);
-			$pdf->draw_text(50, 697, $assrow["osoite"], 	$firstpage, $norm);
-			$pdf->draw_text(50, 687, $assrow["postino"]." ".$assrow["postitp"], $firstpage, $norm);
-			$pdf->draw_text(50, 677, $assrow["maa"], 		$firstpage, $norm);
-
-			$kala = 630;
+			$pdf->draw_text(50, 759, t("Osoite", $kieli), 	$firstpage, $pieni);
+			$pdf->draw_text(50, 747, $assrow["nimi"], 		$firstpage, $norm);
+			$pdf->draw_text(50, 737, $assrow["nimitark"],	$firstpage, $norm);
+			$pdf->draw_text(50, 727, $assrow["osoite"], 	$firstpage, $norm);
+			$pdf->draw_text(50, 717, $assrow["postino"]." ".$assrow["postitp"], $firstpage, $norm);
+			$pdf->draw_text(50, 707, $assrow["maa"], 		$firstpage, $norm);
 		}
-
-		$pdf->draw_text(30,  $kala, t("Osasto"), 			$firstpage);
-		$pdf->draw_text(90,  $kala, t("Tuoteryh"), 			$firstpage);
-		$pdf->draw_text(150, $kala, t("Selite"), 			$firstpage);
-		$pdf->draw_text(370, $kala, t("Aleryhmä"), 			$firstpage);
-		$pdf->draw_text(450, $kala, t("Alennusprosentti"),	$firstpage);
-
-		$kala-=20;
-
+		else {
+			
+			//	Liitetään vaan valmiit templatet uudelle sivulle
+			$firstpage = $pdf->new_page("a4");
+			$pdf->template->place($tid, $firstpage, 0, 800);
+			$pdf->template->place($otsikkotid, $firstpage, 0, 770);
+		}
 	}
 
 	function rivi ($firstpage, $osasto, $try, $nimi, $ryhma, $ale) {
 		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni;
 
-		if (($sivu == 1 and $lask == 40) or ($sivu > 1 and $lask == 50)) {
+		if (($sivu == 1 and $lask == 43) or ($sivu > 1 and $lask == 50)) {
 			$sivu++;
 			$firstpage = alku();
 			$kala = 770;
@@ -91,10 +99,10 @@ if ($tee == 'eposti') {
 		}
 
 		$pdf->draw_text(30,  $kala, $osasto, 									$firstpage, $norm);
-		$pdf->draw_text(90,  $kala, $try, 										$firstpage, $norm);
-		$pdf->draw_text(150, $kala, $nimi, 										$firstpage, $norm);
-		$pdf->draw_text(350, $kala, sprintf('%10s',sprintf('%.2d',$ryhma)), 	$firstpage, $norm);
-		$pdf->draw_text(450, $kala, sprintf('%10s',sprintf('%.2d',$ale))."%", 	$firstpage, $norm);
+		$pdf->draw_text(130, $kala, substr($try,0,16), 										$firstpage, $norm);
+		$pdf->draw_text(250, $kala, $nimi, 										$firstpage, $norm);
+		$pdf->draw_text(410, $kala, sprintf('%10s',sprintf('%.2d',$ryhma)), 	$firstpage, $norm);
+		$pdf->draw_text(490, $kala, sprintf('%10s',sprintf('%.2d',$ale))."%", 	$firstpage, $norm);
 
 
 		$kala = $kala - 15;
@@ -107,7 +115,7 @@ if ($tee == 'eposti') {
 
 
 echo "<font class='head'>".t("Asiakkaan perustiedot")."</font><hr>";
-echo "<form name=asiakas action='$PHP_SELF' method='post' autocomplete='off'>";
+echo "<form name=asiakas action='asiakasinfo.php' method='post' autocomplete='off'>";
 echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 echo "<table><tr>";
 echo "<th>".t("Anna asiakasnumero tai osa nimestä")."</th>";

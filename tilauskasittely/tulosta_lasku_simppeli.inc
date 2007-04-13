@@ -347,7 +347,7 @@ if (!function_exists('tulosta_lasku')) {
 		}
 		
 		// Alv erittely!
-		$s=$pdf->teeSarakkeet(array(130,25,25));
+		$s=$pdf->teeSarakkeet(array(140,25,25));
 		$pdf->write($h, 1, 0, $s[0], t("Veroton arvo yhteensä", $kieli).":", "norm", "R", "B");
 		if ($toim == 'PROFORMA' or ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])))) {
 			$pdf->write($h, 1, $s[0], 0, money_format('%i',$summa), "norm", "R", "B");
@@ -480,7 +480,7 @@ if (!function_exists('tulosta_lasku')) {
 		
 		//	Loppuun duusataan yrityksen perustiedot
 		$h = 15;
-		$s=$pdf->teeSarakkeet(array(70,15,60,15));
+		$s=$pdf->teeSarakkeet(array(70,15,58,15));
 		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Puh", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["puhelin"], "norm", "L", "");		

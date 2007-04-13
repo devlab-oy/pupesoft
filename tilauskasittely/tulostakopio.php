@@ -1079,7 +1079,7 @@
 			if ($toim == "TILAUSVAHVISTUS") {
 				$otunnus = $laskurow["tunnus"];
 				
-				require_once ("tulosta_tilausvahvistus.inc");
+				require_once ("tulosta_tilausvahvistus_pdf.inc");
 				
 				tulosta_tilausvahvistus($otunnus, $komento["Tilausvahvistus"], $kieli, $tee);
 

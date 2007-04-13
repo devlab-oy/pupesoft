@@ -349,7 +349,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 		
 		//	Loppuun duusataan yrityksen perustiedot
 		$h = 15;
-		$s=$pdf->teeSarakkeet(array(70,15,60,15));
+		$s=$pdf->teeSarakkeet(array(70,15,58,15));
 		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Puh", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["puhelin"], "norm", "L", "");		

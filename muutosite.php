@@ -364,17 +364,17 @@
 	if (($tee == 'E') or ($tee=='F')) { // Tositeen näyttö muokkausta varten
 // Näytetään laskun tai tositteen tiedot....
 
-		$query = "SELECT tila, concat_ws('@',laatija, lasku.luontiaika) Laatija,
-						ytunnus, nimi, nimitark, osoite, osoitetark, postino, postitp, maakoodi,
-						valkoodi,
+		$query = "SELECT tila, concat_ws('@',lasku.laatija, lasku.luontiaika) Laatija,
+						ytunnus, lasku.nimi, nimitark, osoite, osoitetark, postino, postitp, maakoodi,
+						lasku.valkoodi,
 						concat_ws(' ',tapvm, mapvm) 'tapvm mapvm',
 						if(kasumma = 0,'',
 						if (tila = 'U',
-						if(valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),valkoodi,')', '@', kapvm)),
-						if(valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', kapvm)))) kassa_ale,
+						if(lasku.valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),lasku.valkoodi,')', '@', kapvm)),
+						if(lasku.valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', kapvm)))) kassa_ale,
 						if (tila = 'U',
-						if(valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),valkoodi,')', '@', erpcm)),
-						if(valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', erpcm))) summa,
+						if(lasku.valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),lasku.valkoodi,')', '@', erpcm)),
+						if(lasku.valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', erpcm))) summa,
 						concat_ws('@',hyvak1,h1time) Hyväksyjä1,
 						concat_ws('@',hyvak2,h2time) Hyväksyjä2,
 						concat_ws('@',hyvak3,h3time) Hyväksyjä3,
@@ -384,9 +384,10 @@
 						tilinumero, concat_ws(' ', viite, viesti) Maksutieto,
 						maa, ultilno, pankki1, pankki2, pankki3, pankki4, swift, clearing, maksutyyppi,
 						ebid,
-						toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments
+						toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili
 						FROM lasku
-						WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+						LEFT JOIN yriti ON lasku.yhtio=yriti.yhtio and maksu_tili=yriti.tunnus
+						WHERE lasku.tunnus = '$tunnus' and lasku.yhtio = '$kukarow[yhtio]'";
 
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -534,9 +535,7 @@
 				for ($i = 21; $i < 22; $i++) {
 						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
 								<td>$trow[$i]</td></tr>";
-				}
-				// en jaksa miettiä indeksilukuja perkele!					
-				echo "<tr><th>comments</th><td>$trow[comments]</td></tr>";				
+				}		
 			}
 			else {
 				//Ulkomaan ostolaskuille
@@ -545,8 +544,6 @@
 						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
 								<td>$trow[$i]</td></tr>";
 					}
-					// en jaksa miettiä indeksilukuja perkele!					
-					echo "<tr><th>comments</th><td>$trow[comments]</td></tr>";
 				}
 				else {
 					//Kotimaan ostolaskuille
@@ -554,10 +551,12 @@
 						echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
 								<td>$trow[$i]</td></tr>";
 					}
-					// en jaksa miettiä indeksilukuja perkele!
-					echo "<tr><th>comments</th><td>$trow[comments]</td></tr>";
 				}
+				if ($trow['maksajanpankkitili'] != '') 
+					echo "<tr><th>Oma pankkitili</th><td>$trow[maksajanpankkitili]</td></tr>";
 			}
+			// en jaksa miettiä indeksilukuja perkele!					
+			echo "<tr><th>comments</th><td>$trow[comments]</td></tr>";
 			if (strlen($trow['ebid']) > 0) {
 				$ebid = $trow['ebid'];
 				require "inc/ebid.inc";

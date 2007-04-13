@@ -52,7 +52,7 @@ if (!function_exists('alku')) {
 			else {
 				$logoparam = array();
 				$logoparam['scale'] = 0.15;
-				$placement = $pdf->image_place($image, mm_pt(280), mm_pt(10), $firstpage, $logoparam);
+				$placement = $pdf->image_place($image, mm_pt(275), mm_pt(10), $firstpage, $logoparam);
 			}
 		}
 		else {

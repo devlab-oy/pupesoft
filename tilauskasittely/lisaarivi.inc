@@ -240,6 +240,10 @@
 						if (!in_array(strtoupper($perherow["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($perherow["tuoteno"]); // lisätään tuoteno arrayseen
 					}
 				}
+				elseif($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V' and $rivityyppi == "V") {
+					// Asiakkaallevalmistuskeissi, resepitä ei löydu joten teemme tästä myyntirivin
+					$rivityyppi = 'L'; // Myyntitilausrivi
+				}
 			}
 		}
 

@@ -1717,6 +1717,41 @@ if ($tee == '') {
 		$kayttajan_alv		= $alv;
 		$kayttajan_paikka	= $paikka;
 		$lisatty 			= 0;
+		
+		
+		// Valmistuksissa haetaan perheiden perheit‰ mikaan valmistukseen!!!!!!
+		// T‰‰ pit‰is tehd‰ rekusrsiiviseksi funktioksi tai joitain!!!!
+		if ($laskurow['tila'] == 'V' and $var != "W" and $yhtiorow["rekursiiviset_reseptit"] == "Y") {		
+			foreach($tuoteno_array as $tuoteno) {
+				$query = "	SELECT tuoteno
+							FROM tuoteperhe
+							WHERE isatuoteno = '$tuoteno'
+							and yhtio 		 = '$kukarow[yhtio]'
+							and tyyppi		 = 'R'
+							ORDER by tuoteno";
+				$perheresult = mysql_query($query) or pupe_error($query);
+				
+				while ($perherow = mysql_fetch_array($perheresult)) {
+					$query = "	SELECT distinct isatuoteno
+								FROM tuoteperhe
+								WHERE isatuoteno = '$perherow[tuoteno]'
+								and yhtio  		 = '$kukarow[yhtio]'
+								and tyyppi 		 = 'R'
+								ORDER by tuoteno";
+					$perheresult2 = mysql_query($query) or pupe_error($query);
+										
+					if (mysql_num_rows($perheresult2) > 0) {
+						
+						$perherow2 = mysql_fetch_array($perheresult2);
+						
+						//T‰t‰ tuoteperhett‰ halutaan myyd‰
+						if (!in_array(strtoupper($perherow2["isatuoteno"]), $tuoteno_array)) { 
+							$tuoteno_array[]=strtoupper($perherow2["isatuoteno"]); // lis‰t‰‰n tuoteno arrayseen								
+						}
+					}
+				}
+			}
+		}
 
 		foreach($tuoteno_array as $tuoteno) {
 			$query	= "	select *

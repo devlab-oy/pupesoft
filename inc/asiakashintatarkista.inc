@@ -12,9 +12,9 @@
 	}
 
 	if (mysql_field_name($result, $i) == "ytunnus") {
-		$ytunnus = $t[$i];
+		$chytunnus = $t[$i];
 		
-		if ($ytunnus != '') {
+		if ($chytunnus != '') {
 			$query = "	SELECT ytunnus
 						FROM asiakas
 						WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
@@ -22,6 +22,7 @@
 			
 			if (mysql_num_rows($sresult) == 0) {
 				
+				$ytunnus 		= $chytunnus;
 				$kutsuja 		= "yllapito.php";
 				$ulos 			= "";				
 				require("asiakashaku.inc");
@@ -38,6 +39,7 @@
 	
 	if (mysql_field_name($result, $i) == "asiakas_ryhma") {
 		$chasiakas_ryhma = $t[$i];
+		
 		if ($chasiakas_ryhma != '') {
 			$query = "	SELECT tunnus
 						FROM avainsana

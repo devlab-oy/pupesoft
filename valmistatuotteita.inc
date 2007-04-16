@@ -321,12 +321,14 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 		if ($isavarattu <= $tilrivirow["varattu"]) {
 
 			if ($laskurow["tilaustyyppi"] == "V") {
-				$tyx = "L";
-				$kpllisa = " kpl = '', ";
+				$tyx 		= "L";
+				$kpllisa 	= " kpl = '', ";
+				$perheidx 	= 0;
 			}
 			else {
-				$tyx = "D";
-				$kpllisa = " kpl = '$isavarattu', ";
+				$tyx 		= "D";
+				$kpllisa 	= " kpl = '$isavarattu', ";
+				$perheidx 	= $tilrivirow["perheid"];
 			}
 
 			//luodaan toimitettu valmisterivi
@@ -355,7 +357,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						kerattyaika		= now(),
 						toimaika 		= '$tilrivirow[toimaika]',
 						var 			= '$tilrivirow[var]',
-						perheid 		= '$tilrivirow[perheid]',
+						perheid 		= '$perheidx',
 						kommentti 		= '$tilrivirow[kommentti]',
 						hyllyalue 		= '$tilrivirow[hyllyalue]',
 						hyllynro 		= '$tilrivirow[hyllynro]',

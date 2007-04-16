@@ -37,6 +37,13 @@
 	elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
 		$otsikko = t("osto-tilausta");
 	}
+	elseif ($toim == "YLLAPITO") {
+		$otsikko = t("ylläpitosopimusta");
+	}
+	else {
+		$otsikko = t("myyntitilausta");
+		$toim = "";
+	}
 
 	echo "<font class='head'>".t("Muokkaa")." $otsikko:<hr></font>";
 
@@ -104,6 +111,13 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila in ('N','L') and alatila != 'X'";
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
+	elseif ($toim == "YLLAPITO") {
+		$query = "	SELECT lasku.*
+					FROM lasku use index (tila_index)
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila = '0' and alatila not in ('V','D')";
+		$eresult = mysql_query($query) or pupe_error($query);
+	}
+
 
 	if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET") {
 		if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
@@ -429,6 +443,15 @@
 					FROM lasku use index (tila_index)
 					$seurantalisa
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N') and alatila NOT IN ('X') 
+					$haku
+					ORDER by lasku.luontiaika desc
+					LIMIT 100";
+		$miinus = 3;
+	}
+	elseif ($toim == 'YLLAPITO') {
+		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila, lasku.tila, tunnusnippu
+					FROM lasku use index (tila_index)
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = '0' and alatila NOT IN ('D') 
 					$haku
 					ORDER by lasku.luontiaika desc
 					LIMIT 100";

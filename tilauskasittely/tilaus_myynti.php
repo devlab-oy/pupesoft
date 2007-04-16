@@ -157,6 +157,9 @@ elseif ($toim == "TARJOUS") {
 elseif ($toim == "PROJEKTI") {
 	$otsikko = t("Projekti");
 }
+elseif ($toim == "YLLAPITO") {
+	$otsikko = t("Ylläpitosopimus");
+}
 else {
 	$otsikko = t("Myyntitilaus");
 }
@@ -1819,8 +1822,8 @@ if ($tee == '') {
 				$varasto = (int) $laskurow["varasto"];
 			}
 
-			//Ennakkotilauksen ja Tarjoukset eivät varaa saldoa
-			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tila"] == "V") {
+			//Ennakkotilauksen, Tarjoukset ja Ylläpitosopimukset eivät varaa saldoa
+			if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tilaustyyppi"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
 				$varataan_saldoa = "EI";
 			}
 			else {
@@ -2117,6 +2120,11 @@ if ($tee == '') {
 			$toimrow = mysql_fetch_array($result);
 
 			$tunnuslisa = " and tilausrivi.otunnus in ($toimrow[tunnukset]) ";
+		}
+		elseif ($toim == "YLLAPITO") {
+			$order = "ORDER by sorttauskentta desc, tunnus";
+			$tilrivity	= "'L','0'";
+			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		else {
 			$order = "ORDER by sorttauskentta desc, tunnus";

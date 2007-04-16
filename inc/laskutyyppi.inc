@@ -278,6 +278,17 @@
 		case "B":
 			$laskutyyppi = "Ostoskori";
 			break;
+		case "0":
+			$laskutyyppi = "Ylläpitosopimus";
+			switch($alatila) {
+				case "D":
+					$alatila = "poistettu";
+					break;
+				case "V":
+					$alatila = "voimassa";
+					break;
+			}
+			break;
 	}
 
 ?>

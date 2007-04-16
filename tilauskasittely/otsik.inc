@@ -166,6 +166,9 @@
 		elseif ($toim == "PROJEKTI") {
 			echo "<font class='head'>".t("Projektin otsikko")."</font><hr>";
 		}
+		elseif ($toim == "YLLAPITO") {
+			echo "<font class='head'>".t("Ylläpitosopimuksen otsikko")."</font><hr>";
+		}
 		else {
 			echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
 		}
@@ -824,6 +827,14 @@
 
 				echo "<td>".t("Projekti")."</td>";
 			}
+			elseif ($toim == "YLLAPITO") {
+				echo "<tr><td>".t("Tilaustyyppi").":</td>";
+
+				//Jos kyseessä on ylläpitosopimus
+				echo "<input type='hidden' name='tilaustyyppi' value='0'>";
+
+				echo "<td>".t("Ylläpitosopimus")."</td>";
+			}
 			elseif ($toim == "MYYNTITILI") {
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 
@@ -856,29 +867,19 @@
 			elseif ($srow["tilaustyyppi"] != 'E' or $templ == 0) {
 
 				//Tarvitaan ainakin tarjoustilauksilla
-				if($srow["clearing"] != '') {
+				if ($srow["clearing"] != '') {
 					echo "<input type='hidden' name='clearing' value='$srow[clearing]'>";
 				}
 
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
 				echo "<td><select name='tilaustyyppi'>";
 
-				$selenna = "";
-				$selnorm = "";
+				$sel = array();
+				$sel[$srow["tilaustyyppi"]] = "selected";
 
-				if ($srow["tilaustyyppi"] == 'E') {
-					$selenna = 'selected';
-				}
-				elseif ($srow["tilaustyyppi"] == 'T') {
-					$seltarj = 'selected';
-				}
-				else {
-					$selnorm = 'selected';
-				}
-
-				echo "<option value='N' $selnorm>".t("Normaalitilaus")."</option>";
-				echo "<option value='E' $selenna>".t("Ennakkotilaus")."</option>";
-				echo "<option value='T' $seltarj>".t("Tarjoustilaus")."</option>";
+				echo "<option value='N' $sel[N]>".t("Normaalitilaus")."</option>";
+				echo "<option value='E' $sel[E]>".t("Ennakkotilaus")."</option>";
+				echo "<option value='T' $sel[T]>".t("Tarjoustilaus")."</option>";
 
 				echo "</select></td>";
 			}

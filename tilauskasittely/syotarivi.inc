@@ -75,7 +75,7 @@
 		echo "</form>";
 		echo "</table>";
 	}
-	elseif ($kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO")) {
+	elseif ($kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO" or $toim == "YLLAPITO")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>
@@ -196,7 +196,7 @@
 		echo "</form>";
 		echo "</table>";
 	}
-	elseif($kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON")) {
+	elseif ($kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>";
@@ -258,7 +258,7 @@
 		echo "</form>";
 		echo "</table>";
 	}
-	elseif($miniliittyma == "JOO") {
+	elseif ($miniliittyma == "JOO") {
 
 		echo "	<form name='rivi' action = '$PHP_SELF?ojarj=$array[0]$ulisa$ankka' method='post' autocomplete='off'>
 				<input type='hidden' name='tee' value = 'TI'>

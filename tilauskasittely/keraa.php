@@ -1248,13 +1248,13 @@
 				$i++;
 			}
 
-			//jos yhtiöllä on tulostusjono niin tässä vaiheessa tulostetaan sit se virallinen lähete
-			$sel = "";
-			$oslappkpl = "";
+			// Jos kyseessä ei ole valmistus tulostetaan virallinen lähete
+			$sel 		= "";
+			$oslappkpl 	= "";
 
-			if ($yhtiorow["lahetteen_tulostustapa"] == 'K' and $toim != 'VALMISTUS') {
-				$sel = 'SELECTED';
-				$oslappkpl = 1;
+			if ($toim != 'VALMISTUS') {
+				$sel 		= 'SELECTED';
+				$oslappkpl 	= 1;
 			}
 			
 			$spanni = 2;

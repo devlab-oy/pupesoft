@@ -495,12 +495,12 @@
 							// Tutkitaan onko t‰t‰ tuotetta jollain ostotilauksella auki t‰ll‰ toimittajalla
 							// jos on niin tiedet‰‰n, ett‰ t‰m‰ on suoratoimitusrivi
 							$query = "	SELECT *
-										FROM lasku use index (yhtio_liitostunnus), tilausrivi
+										FROM lasku use index (yhtio_liitostunnus), tilausrivi use index (yhtio_otunnus)
 										WHERE lasku.yhtio = '$kukarow[yhtio]'
 										and lasku.liitostunnus = '$sjtrow[tunnus]'
 										and lasku.tila='O'
-										and lasku.yhtio=tilausrivi.yhtio
-										and lasku.tunnus=tilausrivi.otunnus
+										and tilausrivi.yhtio=lasku.yhtio
+										and tilausrivi.otunnus=lasku.tunnus
 										and tilausrivi.tyyppi='O'
 										and tilausrivi.uusiotunnus=0
 										and tilausrivi.varattu!=0

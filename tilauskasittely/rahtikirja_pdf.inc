@@ -25,12 +25,8 @@
 	$tempr = mysql_query($query) or pupe_error($query);
 	$asiakasrow = mysql_fetch_array($tempr);
 	
-	
-	
 	//if ($rahsoprow['rahtisopimus']=='')	$rahsoprow['rahtisopimus']	= "000000";
 	//if ($toitarow['sopimusnro']=='')	$toitarow['sopimusnro']		= "000000";
-	
-	
 	
 	//tsekataan kuka maksaa rahdin ja laitetaan oikeat tiedot rahdinmaksajan ruutuun
 	if ($rahdinmaksaja == 'Vastaanottaja') {
@@ -186,14 +182,24 @@
 		$pdf->draw_text(302,  782,  "Lähettäjän viite Avsändarens referens",			$firstpage, $norm);
 		$pdf->draw_text(302,  767,  $lotsikot[0],										$firstpage, $kirj);
 		$pdf->draw_text(302,  761,  "Vastaanottajan viite Mottagarens referens",		$firstpage, $norm);
-	
+		
+		$query = "	select group_concat(viesti SEPARATOR ', ') viesti 
+					from lasku 
+					where yhtio = '$kukarow[yhtio]' 
+					and tunnus in ($otunnukset) 
+					order by tunnus ";
+		$viestires = mysql_query($query) or pupe_error($query);
+		$viestirow = mysql_fetch_array($viestires);
+		
+		$pdf->draw_text(302,  746,  $viestirow["viesti"],								$firstpage, $kirj);
+		
 		$pdf->draw_rectangle(733,60,733,545,											$firstpage, $rectparam);
 		
 		//vastaanottaja	
 		$pdf->draw_rectangle(733,60,711,300,											$firstpage, $rectparam);
 		$pdf->draw_text(62,  726,  "Vastaanottaja Mottagare",							$firstpage, $norm);
 		$pdf->draw_text(240, 726,  "Asiakasnro Kundnr",									$firstpage, $norm);
-		$pdf->draw_text(65,  714,  $rakir_row["nimi"],								$firstpage, $kirj);
+		$pdf->draw_text(65,  714,  $rakir_row["nimi"],									$firstpage, $kirj);
 		$pdf->draw_text(240, 714,  $rahsoprow['rahtisopimus'],							$firstpage, $kirj);
 		$pdf->draw_rectangle(711,60,689,300,											$firstpage, $rectparam);
 		$pdf->draw_text(65,  692,  $rakir_row["osoite"],								$firstpage, $kirj);

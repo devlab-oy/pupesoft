@@ -238,7 +238,9 @@
 
 		///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///
 		if ($yhtiorow["lahetteen_tulostustapa"] != "K") {
-			$tilausnumeroita = $laskurow["tunnus"];
+			$tilausnumeroita 	= $laskurow["tunnus"];
+			$kerayslista 		= "K";
+			
 			require("tilaus-valmis-tulostus.inc");
 		}
 		///* T‰h‰n menn‰‰n jos l‰hete vain siirret‰‰n tulostusjonoon *///

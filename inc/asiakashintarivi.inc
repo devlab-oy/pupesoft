@@ -50,9 +50,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "muutospvm") {
-		$tyyppi = 2;
-	}
 
 	if (mysql_field_name($result, $i) == "valkoodi") {
 		$query = "	SELECT nimi, tunnus
@@ -73,6 +70,11 @@
 
 		$ulos .= "</select></td>";
 		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "alkupvm" or 
+		mysql_field_name($result, $i) == "loppupvm") {
+		$tyyppi = 1.5;
 	}
 
 ?>

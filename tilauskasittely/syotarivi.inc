@@ -113,12 +113,20 @@
 		elseif ($var == "P") {
 			$selp = "SELECTED";
 		}
+		elseif ($var == "W") {
+			$selw = "SELECTED";
+		}
 
 		echo "<td><select name='var'>";
 		echo "<option value=''>".t("Oletus")."</option>";
 		echo "<option value='J' $selj>".t("JT")."</option>";
 		echo "<option value='H' $selh>".t("Hyväksy")."</option>";
 		echo "<option value='P' $selp>".t("Puute")."</option>";
+		
+		if($laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
+			echo "<option value='W' $selw>".t("Varastosta")."</option>";
+		}
+		
 		echo "</select></td>";
 
 		echo "<td><input type='text' size='5' name='hinta' value='$hinta'></td>

@@ -147,9 +147,15 @@
 
 	$perhelisa  = "";
 
-	//Haetaan myös tuoteperheet tai reseptit, tässä parametrit niille
-	if ($laskurow['tila'] == 'V') {
+	//Haetaan myös tuoteperheet tai reseptit, tässä parametrit niille.
+	if ($laskurow['tila'] == 'V' and $var != "W") {
 		$perhelisa = " and tuoteperhe.tyyppi='R' ";
+	}
+	elseif($var == "W" and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
+		// Asiaakkaallevalmistus ja halutaan myydä rivi varastosta
+		$perhelisa  = " and tuoteperhe.tyyppi in ('P','') ";
+		$var 		= "";
+		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 	else {
 		$perhelisa = " and tuoteperhe.tyyppi in ('P','') ";
@@ -227,10 +233,12 @@
 							ORDER by tuoteno";
 				$perheresult = mysql_query($query) or pupe_error($query);
 				
-				while ($perherow = mysql_fetch_array($perheresult)) {
-					//Tätä tuoteperhettä halutaan myydä
-					if (!in_array(strtoupper($perherow["tuoteno"]), $tuoteperhe)) $tuoteperhe[]=strtoupper($perherow["tuoteno"]); // lisätään tuoteno arrayseen
-					if (!in_array(strtoupper($perherow["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($perherow["tuoteno"]); // lisätään tuoteno arrayseen
+				if (mysql_num_rows($perheresult) > 0) {
+					while ($perherow = mysql_fetch_array($perheresult)) {
+						//Tätä tuoteperhettä halutaan myydä
+						if (!in_array(strtoupper($perherow["tuoteno"]), $tuoteperhe)) $tuoteperhe[]=strtoupper($perherow["tuoteno"]); // lisätään tuoteno arrayseen
+						if (!in_array(strtoupper($perherow["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($perherow["tuoteno"]); // lisätään tuoteno arrayseen
+					}
 				}
 			}
 		}

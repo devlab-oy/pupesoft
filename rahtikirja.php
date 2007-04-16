@@ -29,7 +29,7 @@
 	}
 	
 	if ($id == '') $id=0;
-
+		
 	// jos ollaan rahtikirjan esisyötössä niin tehdään lisäys vähän helpommin
 	if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_esisyotto"] == "M") {
 
@@ -51,6 +51,11 @@
 		// katotaan ollaanko syötetty jotain
 		for ($i = 0; $i < count($pakkaus); $i++) {
 			if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
+				$kilot[$i]		= str_replace(',', '.', $kilot[$i]);
+				$kollit[$i]	 	= str_replace(',', '.', $kollit[$i]);
+				$kuutiot[$i]	= str_replace(',', '.', $kuutiot[$i]);
+				$lavametri[$i]	= str_replace(',', '.', $lavametri[$i]);
+				
 				// lisätään rahtikirjatiedot (laitetaan poikkeava kenttään -9 niin tiedetään että esisyötetty)
 				$query  = "insert into rahtikirjat
 							(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,yhtio) values
@@ -141,7 +146,12 @@
 
 					// ja insertataan vaan jos se on erisuurta ku nolla (näin voidaan nollalla tai spacella tyhjentää kenttiä)
 					if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
-
+						
+						$kilot[$i]		= str_replace(',', '.', $kilot[$i]);
+						$kollit[$i]	 	= str_replace(',', '.', $kollit[$i]);
+						$kuutiot[$i]	= str_replace(',', '.', $kuutiot[$i]);
+						$lavametri[$i]	= str_replace(',', '.', $lavametri[$i]);
+						
 						if ($rakirno == '') {
 							$query = "select max(rahtikirjanro) rakirno from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro'";
 							$result = mysql_query($query) or pupe_error($query);

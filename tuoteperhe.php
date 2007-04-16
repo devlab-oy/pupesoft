@@ -240,7 +240,7 @@
 			$tchk = $isatuoteno;
 		}
 		else {
-			$lisa = " and (isatuoteno='$hakutuoteno' or tuoteno='$hakutuoteno')";
+			$lisa = " and isatuoteno='$hakutuoteno'";
 			$tchk = $hakutuoteno;
 		}
 		
@@ -261,9 +261,6 @@
 			$result = mysql_query($query) or pupe_error($query);
 	
 			if (mysql_num_rows($result)==0 and ($hakutuoteno != '' or $isatuoteno != '')) {
-				
-				
-				
 				if ($toim == "PERHE") {
 					echo "<br><font class='error'>".t("Tuotenumeroa")." $hakutuoteno ".t("ei löydy mistään tuoteperheestä")."!</font><br>";				
 					echo "<br><font class='message'>".t("Perusta uusi tuoteperhe tuotteelle").": $hakutuoteno</font><br>";

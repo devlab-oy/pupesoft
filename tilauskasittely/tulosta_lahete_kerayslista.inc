@@ -57,9 +57,13 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
 		$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
 		$pdf->draw_text(250,810, t("Keräilylista", $kieli), 	$firstpage);
+		$pdf->draw_text(260,795, t("Keräyspvm", $kieli).": ", 	$firstpage, $p);
+		$pdf->draw_text(325,795, tv1dateconv(substr($laskurow["kerayspvm"],0,10)), 	$firstpage, $p);
+		$pdf->draw_text(260,785, t("Toimituspvm", $kieli).": ", 	$firstpage, $p);
+		$pdf->draw_text(325,785, tv1dateconv($laskurow["toimaika"]), 	$firstpage, $p);
 		$pdf->draw_text(320,810, t("Sivu", $kieli)." $sivu", 	$firstpage,$p);
 
-		$pdf->draw_text(150,795, t("Tilausnumero(t)", $kieli).": ".$tilausnumeroita, $firstpage, $p);
+		$pdf->draw_text(135,795, t("Tilausnumero(t)", $kieli).": ".$tilausnumeroita, $firstpage, $p);
 
 		$i["height"] = 28;
 		$i["font"] = "Times-Roman";
@@ -98,7 +102,7 @@ if (!function_exists('alku')) {
 
 		$pdf->draw_rectangle(780, 380, 680, 580, $firstpage, $rectparam);
 		$pdf->draw_text(390, 760, t("Asiakasnumero", $kieli).": ".$laskurow["ytunnus"], $firstpage, $p);
-		$pdf->draw_text(390, 750, t("Päivämäärä", $kieli).": ".substr($laskurow["lahetepvm"],0,10) , $firstpage, $p);
+		$pdf->draw_text(390, 750, t("Päivämäärä", $kieli).": ".tv1dateconv(substr($laskurow["lahetepvm"],0,10)) , $firstpage, $p);
 		$pdf->draw_text(390, 740, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], $firstpage, $p);
 		$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage, $p);
 		$pdf->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage, $p);
@@ -124,22 +128,22 @@ if (!function_exists('alku')) {
 			$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
 
 			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
-
-			if(!$image) {
-				echo t("Viivakoodivirhe").": ".$image.$data;
-				exit;
-			}
-			$placement = $pdf->image_place($image, 783, 420, $firstpage);
-
-			unset($obj);
-
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
+			
+						$fh = fopen($nimi2, "r");
+						$data = fread($fh, filesize($nimi2));
+						fclose($fh);
+						$image = $pdf->png_embed($data);
+			
+						if(!$image) {
+							echo t("Viivakoodivirhe").": ".$image.$data;
+							exit;
+						}
+						$placement = $pdf->image_place($image, 783, 420, $firstpage);
+			
+						unset($obj);
+			
+						//dellataan tmp filet kuleksimasta
+						system("rm -f $nimi1 $nimi2");
 		}
 		else{
 			echo t("Oliota ei voitu luoda").".";

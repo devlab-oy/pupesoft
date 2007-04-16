@@ -52,6 +52,10 @@ if (!function_exists('alku_valm')) {
 		$pdf_valm->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage_valm, $p);
 		$pdf_valm->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage_valm, $p);
 		$pdf_valm->draw_text(250,810, t("Valmistuslista", $kieli), 	$firstpage_valm);
+		$pdf_valm->draw_text(260,795, t("Keräyspvm", $kieli).": ", 	$firstpage_valm, $p);
+		$pdf_valm->draw_text(325,795, tv1dateconv(substr($laskurow["kerayspvm"],0,10)), 	$firstpage_valm, $p);
+		$pdf_valm->draw_text(260,785, t("Toimituspvm", $kieli).": ", 	$firstpage_valm, $p);
+		$pdf_valm->draw_text(325,785, tv1dateconv($laskurow["toimaika"]), 	$firstpage_valm, $p);
 		$pdf_valm->draw_text(150,795, t("Tilausnumero", $kieli).": ".$tilausnumeroita, $firstpage_valm, $p);
 		
 		$i["height"] = 28;
@@ -91,7 +95,7 @@ if (!function_exists('alku_valm')) {
 		
 		$pdf_valm->draw_rectangle(780, 380, 680, 580, $firstpage_valm, $rectparam);
 		$pdf_valm->draw_text(390, 760, t("Asiakasnumero", $kieli).": ".$laskurow["ytunnus"], $firstpage_valm, $p);
-		$pdf_valm->draw_text(390, 750, t("Päivämäärä", $kieli).": ".substr($laskurow["lahetepvm"],0,10) , $firstpage_valm, $p);
+		$pdf_valm->draw_text(390, 750, t("Päivämäärä", $kieli).": ".tv1dateconv(substr($laskurow["lahetepvm"],0,10)) , $firstpage_valm, $p);
 		$pdf_valm->draw_text(390, 740, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], $firstpage_valm, $p);	
 		$pdf_valm->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage_valm, $p);
 		$pdf_valm->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage_valm, $p); 	

@@ -52,7 +52,11 @@ if (!function_exists('alku')) {
 			else {
 				$logoparam = array();
 				$logoparam['scale'] = 0.15;
-				$placement = $pdf->image_place($image, mm_pt(275), mm_pt(10), $firstpage, $logoparam);
+				
+				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+				$iy    = $isizelogo[1]*0.15*0.35714;	// kuvan y-korkeus millimetreissä
+				
+				$placement = $pdf->image_place($image, mm_pt(292-$iy), mm_pt(7), $firstpage, $logoparam);
 			}
 		}
 		else {

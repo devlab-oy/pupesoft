@@ -96,10 +96,10 @@
 		}
 		elseif (mysql_num_rows($thresult) != 1) {
 
-			if ($multi == "") {
+			if ($multi == "" and $kutsuja != "yllapito.php") {
 				$ulos = "<select name='tuoteno'>";
 			}
-			else {
+			elseif ($kutsuja != "yllapito.php") {
 				$ulos = "<select name='tuoteno_array[]' multiple='TRUE' size='6'>";
 			}
 
@@ -140,16 +140,17 @@
 				$edtuoteno = $trow["sorttauskentta"];
 			}
 
-			$ulos .= "</select>";
-			$tee = 'Y';
+			if ($kutsuja != "yllapito.php") {
+				$ulos .= "</select>";
+				$tee = 'Y';
+			}
 		}
-
 	}
 	elseif ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*') and trim(strlen($tuoteno)) < 3) {
-		$kentta='tuoteno';
-		$varaosavirhe = t("VIRHE: Hakusana pit‰‰ sis‰lt‰‰ t‰hden(*) lis‰ksi v‰hint‰‰n kaksi(2) merkki‰")."!<br>";
-		$tuoteno='';
-		$tee = 'Y';
+		$kentta			= 'tuoteno';
+		$varaosavirhe 	= t("VIRHE: Hakusana pit‰‰ sis‰lt‰‰ t‰hden(*) lis‰ksi v‰hint‰‰n kaksi(2) merkki‰")."!<br>";
+		$tuoteno		= '';
+		$tee 			= 'Y';
 	}
 
 	if ($ulos == '' and $tee != 'Y') {

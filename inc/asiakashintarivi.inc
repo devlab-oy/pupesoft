@@ -1,9 +1,9 @@
 <?php
 
 	$ulos = "";
-	$jatko = 1; // oletetaan normaali käsittely
-	$tyyppi = 1; // oletetaan rivin näkyvyys
-	if ($i == 0) { //yhtiötä ei näytetä
+	$jatko = 1; 	// oletetaan normaali käsittely
+	$tyyppi = 1; 	// oletetaan rivin näkyvyys
+	if ($i == 0) { 	//yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
 
@@ -69,6 +69,17 @@
 		}
 
 		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	
+	if (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
+		$ulos = "<td>".$alasveto[$i]."</td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "tuoteno" and isset($alasveto[$i])) {
+		$ulos = "<td>".$alasveto[$i]."</td>";
 		$jatko = 0;
 	}
 	

@@ -2068,7 +2068,7 @@ if ($tee == '') {
 		}
 		elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
 			$order = "ORDER BY tilausrivi.perheid desc, tunnus";
-			$tilrivity	= "'V','W'";
+			$tilrivity	= "'L','V','W'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		elseif ($toim == "PROJEKTI") {

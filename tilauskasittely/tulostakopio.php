@@ -1303,6 +1303,8 @@
 				$pdf_valm= new pdffile;
 				$pdf_valm->set_default('margin', 0);
 
+				$tilausnumeroita = $laskurow["tunnus"];
+				
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
 				$query = "  SELECT *
 							FROM tilausrivi

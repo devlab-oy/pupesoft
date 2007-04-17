@@ -85,12 +85,12 @@ if (!function_exists('alku_valm')) {
 		$pdf_valm->draw_text(240, 710, $laskurow["postitp"], 	$firstpage_valm, $p);
 		$pdf_valm->draw_text(210, 700, $laskurow["maa"], 		$firstpage_valm, $p);
 	
-		// haetaan maksuehdon tiedot
+		// Haetaan maksuehdon tiedot
 		$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$masresult = mysql_query($query) or pupe_error($query);
 		$masrow = mysql_fetch_array($masresult);
 	
-		//maksuehto tekstinä
+		// Maksuehto tekstinä
 		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 		
 		$pdf_valm->draw_rectangle(780, 380, 680, 580, $firstpage_valm, $rectparam);
@@ -100,6 +100,7 @@ if (!function_exists('alku_valm')) {
 		$pdf_valm->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage_valm, $p);
 		$pdf_valm->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage_valm, $p); 	
 		$pdf_valm->draw_text(390, 690, t("Tilausviite", $kieli).": ".substr($laskurow["viesti"],0,18), $firstpage_valm, $p);
+		
 		//viivakoodin arvo
 		$barcode  = $laskurow["tunnus"];
 	
@@ -144,15 +145,17 @@ if (!function_exists('alku_valm')) {
 	
 		$pdf_valm->draw_rectangle(670, 20,  650, 40,  $firstpage_valm, 	$rectparam);
 		$pdf_valm->draw_rectangle(670, 40,  650, 120, $firstpage_valm, 	$rectparam);
-		$pdf_valm->draw_rectangle(670, 120, 650, 220, $firstpage_valm,	$rectparam);
-		$pdf_valm->draw_rectangle(670, 220, 650, 460, $firstpage_valm, 	$rectparam);
+		$pdf_valm->draw_rectangle(670, 120, 650, 400, $firstpage_valm,	$rectparam);
+		
+		$pdf_valm->draw_rectangle(670, 400, 650, 460, $firstpage_valm, 	$rectparam);
 		$pdf_valm->draw_rectangle(670, 460, 650, 520, $firstpage_valm, 	$rectparam);
 		$pdf_valm->draw_rectangle(670, 520, 650, 580, $firstpage_valm, 	$rectparam);
 	
 		$pdf_valm->draw_text(25,  657, "#",							$firstpage_valm, $p);
 		$pdf_valm->draw_text(45,  657, t("Paikka", $kieli),			$firstpage_valm, $p);
-		$pdf_valm->draw_text(125, 657, t("Tuotenumero", $kieli),	$firstpage_valm, $p);
-		$pdf_valm->draw_text(225, 657, t("Tuotenimi", $kieli),		$firstpage_valm, $p);
+		$pdf_valm->draw_text(125, 657, t("Tuotenumero/Tuotenimi", $kieli),	$firstpage_valm, $p);
+		
+		$pdf_valm->draw_text(405, 657, t("Kerroin", $kieli),		$firstpage_valm, $p);
 		$pdf_valm->draw_text(465, 657, t("Valmistetaan", $kieli),	$firstpage_valm, $p);
 		$pdf_valm->draw_text(525, 657, t("Valmistettu", $kieli),	$firstpage_valm, $p);
 	
@@ -165,16 +168,17 @@ if (!function_exists('alku_valm')) {
 if (!function_exists('rivi_valm')) {
 	function rivi_valm($firstpage_valm) {
 		global $pdf_valm, $row, $kala_valm, $lask_valm, $total, $rectparam, $kukarow, $rivinumerot, $kieli, $perhe, $rivinkorkeus, $isakpl, $pohja;
-	
+		
 		$p["height"]	= 10;
 		$p["font"]		= "Times-Roman";
+		
 		$pp["height"]	= 8;
 		$pp["font"]		= "Times-Roman";
 		
 		$rivinkorkeus	= 15;
 	
 		//jos on paljon rivejä tehdään uusi otsikko...
-		if ($lask_valm > 39) {
+		if ($lask_valm > 37) {
 			loppu_valm($firstpage_valm, 0);
 			$firstpage_valm = alku_valm();
 		}
@@ -190,68 +194,79 @@ if (!function_exists('rivi_valm')) {
 				$pdf_valm->draw_line($x, $y, $firstpage_valm, $rectparam);
 			}
 			
-			
-			
 			if ($row["tunnus"] == $row["perheid"]) {
-				$pdf_valm->draw_text(35,  $kala_valm, "Valmiste:",	$firstpage_valm, $p);
-				
-				$kala_valm = $kala_valm - $rivinkorkeus;
-				$lask_valm++;
-				
-				$isakpl = $row["tilkpl"];
-				$lapskpl = '';
+				$isakpl  = $row["tilkpl"];
+				$lapskpl = ' ';
+			
+				$pb["height"]	= 10;
+				$pb["font"]		= "Times-Bold";
 			}
 			else {
-				$lapskpl = $row["tilkpl"]/$isakpl;
+				$pb["height"]	= 10;
+				$pb["font"]		= "Times-Roman";
+				
+				$lapskpl = round($row["tilkpl"]/$isakpl,8);
 			}
 			
-			$pdf_valm->draw_text(25,  $kala_valm, $rivinumerot[$row["tunnus"]],	$firstpage_valm, $pp);
-			$pdf_valm->draw_text(45,  $kala_valm, $varastopaikka,					$firstpage_valm, $p);
-			
-			
-			$pdf_valm->draw_text(125, $kala_valm, $row["tuoteno"],				$firstpage_valm, $p);
-			$pdf_valm->draw_text(465, $kala_valm, round($lapskpl,8)." (".$row["tilkpl"].") ".strtolower($row["yksikko"]), 	$firstpage_valm, $p);
+			$pdf_valm->draw_text(25,  $kala_valm, $rivinumerot[$row["tunnus"]],												$firstpage_valm, $pp);
+			$pdf_valm->draw_text(45,  $kala_valm, $varastopaikka,															$firstpage_valm, $pb);
+			                                                                            									
+			                                                                            									
+			$pdf_valm->draw_text(125, $kala_valm, $row["tuoteno"],															$firstpage_valm, $pb);
+			$pdf_valm->draw_text(405, $kala_valm, $lapskpl, 																			$firstpage_valm, $pb);
+			$pdf_valm->draw_text(465, $kala_valm, $row["tilkpl"]." ".$row["yksikko"],			 										$firstpage_valm, $pb);
 			
 			if ($row["keratty"] != '') {
-				$pdf_valm->draw_text(525, $kala_valm, $row['varattu'], 	$firstpage_valm, $p);
+				$pdf_valm->draw_text(525, $kala_valm, $row['varattu'], 														$firstpage_valm, $pb);
 			}
 			
-			if (strlen($row["nimitys"]) > 32) {
+			$kala_valm = $kala_valm - $rivinkorkeus+3;
+			$lask_valm++;
+			
+			$pdf_valm->draw_text(125, $kala_valm, asana('nimitys_', $row['tuoteno'], $row['nimitys']), 						$firstpage_valm, $pb);
+	
+		
+			if (trim($row["kommentti"]) != '') {
+				
 				$kala_valm = $kala_valm - $rivinkorkeus;
 				$lask_valm++;
+				
+				$pdf_valm->draw_text(125,  $kala_valm, "* ".$row["kommentti"],												$firstpage_valm, $p);
 			}
 			
-			$pdf_valm->draw_text(225, $kala_valm, asana('nimitys_',$row['tuoteno'],$row['nimitys']), 	$firstpage_valm, $p);
+			if ($row["tunnus"] == $row["perheid"]) {
+				$query = "	SELECT fakta 
+							FROM tuoteperhe 
+							WHERE yhtio 	= '$kukarow[yhtio]' 
+							and tyyppi 		= 'R' 
+							and isatuoteno 	= '$row[tuoteno]' 
+							and fakta is not null 
+							ORDER BY isatuoteno, tuoteno 
+							LIMIT 1";
+				$ressu = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($ressu) == 1) {
+					$faktarow = mysql_fetch_array($ressu);
+					
+					$kala_valm -= 5;
+					
+					$faktarow["fakta"] = t("Työohje:")."\n".$faktarow["fakta"];
+					
+					$pohja = $pdf_valm->draw_paragraph($kala_valm, 125, 60, 570, $faktarow["fakta"], $firstpage_valm, $p);
+					$lask_valm += ceil(($kala_valm - $pohja) / $rivinkorkeus);
+					$kala_valm = $pohja - $rivinkorkeus;
+				}
+				else {
+					$kala_valm = $kala_valm - $rivinkorkeus;
+					$lask_valm++;	
+				}
+				
+				$pdf_valm->draw_text(35,  $kala_valm, "Raaka-aineet:",	$firstpage_valm, $p);	
+			}
 	
 			$kala_valm = $kala_valm - $rivinkorkeus;
 			$lask_valm++;
-		
-			if (trim($row["kommentti"]) != '') {
-				$pdf_valm->draw_text(90,  $kala_valm, "* ".$row["kommentti"],	$firstpage_valm, $p);
 			
-				$kala_valm = $kala_valm - $rivinkorkeus;
-				$lask_valm++;
-			}
-			
-			if ($row["tunnus"] == $row["perheid"]) {
-				$query = "SELECT fakta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '$row[tuoteno]' and fakta is not null ORDER BY isatuoteno, tuoteno LIMIT 1";
-				$ressu = mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($ressu) == 1) {
-					$faktarow = mysql_fetch_array($ressu);
-					$kala_valm += 10;
-					$pohja = '';
-					$pohja = $pdf_valm->draw_paragraph($kala_valm, 35, 60, 570, $faktarow["fakta"], $firstpage_valm, $pp);
-					$lask_valm += ceil(($kala_valm - $pohja) / $rivinkorkeus);
-					$kala_valm = $pohja - $rivinkorkeus;
-					
-				}
-				
-				$pdf_valm->draw_text(35,  $kala_valm, "Raaka-aineet:",	$firstpage_valm, $p);
-				
-				$kala_valm = $kala_valm - $rivinkorkeus;
-				$lask_valm++;
-			}
-	
 			$perhe = $row["perheid"];
 		}
 		

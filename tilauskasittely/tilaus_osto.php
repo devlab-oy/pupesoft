@@ -333,7 +333,7 @@
 			require("../inc/tuotehaku.inc");
 		}
 		
-		if ($tee == 'TI' and (trim($tuoteno) != "" or is_array($tuoteno_array))) {
+		if ($tee == 'TI' and (trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array))) {
 
 			if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
 				$tuoteno_array[] = $tuoteno;
@@ -462,7 +462,7 @@
 			$perheid			= '';
 			$perheid2			= '';
 		}
-		elseif ($tee == 'TI' and trim($tuoteno) == "" and !is_array($tuoteno_array)) {
+		elseif ($tee == 'TI') {
 			$tee = "Y";
 		}
 		

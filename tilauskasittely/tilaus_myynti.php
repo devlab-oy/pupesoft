@@ -3139,7 +3139,7 @@ if ($tee == '') {
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 				}
 			}
-
+			
 			// Etsitään asiakas
 			$query = "	SELECT laskunsummapyoristys
 						FROM asiakas
@@ -3148,7 +3148,7 @@ if ($tee == '') {
 			$asrow = mysql_fetch_array($asres);
 
 			//Käsin syötetty summa johon lasku pyöristetään
-			if (abs($laskurow["hinta"]-$summa) <= 0.5) {
+			if (abs($laskurow["hinta"]-$summa) <= 0.5 and $summa >= 0.5) {
 				$summa = sprintf("%.2f",$laskurow["hinta"]);
 			}
 

@@ -594,6 +594,11 @@
 
 					echo "<input type='hidden' name='toim' value='$toim'>";
 					echo "<input type='hidden' name='jarj' value='$jarj'>";
+					echo "<input type='hidden' name='tuvarasto' value='$tuvarasto'>";				
+					echo "<input type='hidden' name='tumaa' 	value='$tumaa'>";
+					echo "<input type='hidden' name='tutyyppi' value='$tutyyppi'>";
+					echo "<input type='hidden' name='tutoimtapa' value='$tutoimtapa'>";										
+					echo "<input type='hidden' name='etsi' value='$etsi'>";										
 					echo "<input type='hidden' name='tee2' value='TULOSTA'>";
 					echo "<input type='hidden' name='tulostukseen[]' value='$tilrow[otunnus]'>";
 					echo "<$ero><input type='submit' value='".t("Tulosta")."'></form></$ero>";
@@ -601,6 +606,11 @@
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='toim' value='$toim'>";
 					echo "<input type='hidden' name='jarj' value='$jarj'>";
+					echo "<input type='hidden' name='tuvarasto' value='$tuvarasto'>";				
+					echo "<input type='hidden' name='tumaa' 	value='$tumaa'>";
+					echo "<input type='hidden' name='tutyyppi' value='$tutyyppi'>";
+					echo "<input type='hidden' name='tutoimtapa' value='$tutoimtapa'>";										
+					echo "<input type='hidden' name='etsi' value='$etsi'>";										
 					echo "<input type='hidden' name='tee2' value='NAYTATILAUS'>";
 					echo "<input type='hidden' name='vanha_tee2' value=''>";
 					echo "<input type='hidden' name='tunnus' value='$tilrow[otunnus]'>";

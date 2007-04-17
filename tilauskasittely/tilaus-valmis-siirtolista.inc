@@ -2,7 +2,7 @@
 
 	if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 		$tvs_tila 	= "V";
-		$tvs_tyyppi	= "'V','W'";
+		$tvs_tyyppi	= "'V'";
 	}
 	elseif ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") {
 		$tvs_tila 	= "G";
@@ -256,8 +256,7 @@
 						echo "<font class='message'>".t("Siirtolista siirrettiin j‰lkitoimitukseksi odottamaan tuotteita")." $laskurow[tunnus].<br><br>";
 					}
 					else {
-						//Mit‰‰n j‰rkevi‰ rivi‰ ei ollut, mit‰tˆid‰‰n lista
-						// poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
+						// Mit‰‰n j‰rkevi‰ rivi‰ ei ollut, mit‰tˆid‰‰n lista
 						$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
 						$result = mysql_query($query) or pupe_error($query);
 
@@ -276,9 +275,13 @@
 								and tila='$tvs_tila'";
 					$result = mysql_query($query) or pupe_error($query);
 
-					echo "<font class='message'>".t("Siirtolista siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
+					if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+						echo "<font class='message'>".t("Valmistus siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
+					}
+					else {
+						echo "<font class='message'>".t("Siirtolista siirretty tulostusjonoon")." $laskurow[tunnus].<br><br>";
+					}
 				}
-
 			}
 
 			// tilaus ei en‰‰ kesken...
@@ -305,7 +308,6 @@
 				//t‰llˆin halutaan siirt‰‰ kaikki mit‰ hyllyss‰ on t‰ll‰ hetkell‰
 
 				while($crow = mysql_fetch_array($cresult)) {
-
 					if ($crow['varattu'] == 0 and $crow['tilkpl'] == 9999.99) {
 						//siirret‰‰n kaikki mit‰ paikalla on
 
@@ -350,15 +352,18 @@
 					}
 				}
 
-				//generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
+				// Generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-					$query = " SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko,
-								tilausrivi.var, tilausrivi.nimitys, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt,
+					$query = " 	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, 
+								tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys, 
+								sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt,
 								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";
-					$lisa = " 	and tilausrivi.tyyppi='V' GROUP BY 1,2,3,4,5,6,7,8 ";
+					$lisa = " 	and tilausrivi.tyyppi = '$tvs_tyyppi' 
+								GROUP BY 1,2,3,4,5,6,7,8 ";
 				}
 				else {
-					$query = " SELECT tilausrivi.*, concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";
+					$query = " 	SELECT tilausrivi.*, 
+								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";
 					$lisa = " ";
 				}
 
@@ -499,8 +504,13 @@
 				}
 				else {
 
-					echo t("Siirtolista tulostuu")."!<br><br>";
-
+					if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+						echo t("Valmistus tulostuu")."!<br><br>";
+					}
+					else {
+						echo t("Siirtolista tulostuu")."!<br><br>";	
+					}
+					
 					$query = "	UPDATE lasku
 								SET alatila='A', lahetepvm=now()
 								where yhtio='$kukarow[yhtio]'
@@ -511,16 +521,22 @@
 				}
 			}
 			else {
-
-				echo t("Siirtolistalla ei ollut mit‰‰n ker‰tt‰v‰‰")."!<br><br>";
-
+				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+					echo t("Valmistuksella ei ollut mit‰‰n ker‰tt‰v‰‰")."!<br><br>";
+					$eikeralatila = "C";
+				}
+				else {
+					echo t("Siirtolistalla ei ollut mit‰‰n ker‰tt‰v‰‰")."!<br><br>";
+					$eikeralatila = "E";
+				}
+				
 				$query = "	UPDATE lasku
-							SET alatila='E', lahetepvm=now()
-							where yhtio='$kukarow[yhtio]'
-							and tunnus = '$laskurow[tunnus]'
-							and tila='$tvs_tila'
-							and alatila=''";
-				$result = mysql_query($query) or pupe_error($query);
+							SET alatila = '$eikeralatila', lahetepvm = now()
+							where yhtio	= '$kukarow[yhtio]'
+							and tunnus 	= '$laskurow[tunnus]'
+							and tila	= '$tvs_tila'
+							and alatila	in ('','J')";
+				$result = mysql_query($query) or pupe_error($query);				
 			}
 		}
 	}

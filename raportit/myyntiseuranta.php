@@ -366,7 +366,7 @@
 						lasku.tila in ($tila)"; 
 										
 			if ($ajotapa == 'tilausjaauki') {										
-				$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U')
+				$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
 							and ((lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'  and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))";
 			}
 			else {

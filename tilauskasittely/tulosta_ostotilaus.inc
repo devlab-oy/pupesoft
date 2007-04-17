@@ -507,6 +507,8 @@
 					$pdf->draw_rectangle(670, 300, 570, 580, 				$firstpage, $rectparam);
 					$pdf->draw_text(310, 660, t("Toimitusehto", $kieli), 	$firstpage, $pieni);
 					$pdf->draw_text(310, 645, $laskurow["toimitusehto"], 	$firstpage, $p);
+					$pdf->draw_text(500, 660, t("Toimitusaika", $kieli), 	$firstpage, $pieni);
+					$pdf->draw_text(500, 645, tv1dateconv($laskurow["toimaika"]), 		$firstpage, $p);
 					$pdf->draw_rectangle(640, 300, 570, 580,			 	$firstpage, $rectparam);
 					$pdf->draw_text(310, 630, t("Maksuehto", $kieli), 		$firstpage, $pieni);
 					$pdf->draw_text(310, 615, $laskurow["maksuteksti"], 	$firstpage, $p);

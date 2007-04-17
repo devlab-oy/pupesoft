@@ -19,7 +19,9 @@
 	}
 	else {
 
-		$ostohinta = str_replace(',','.', $ostohinta);
+		$ostohinta 		= str_replace(',','.', $ostohinta);
+		$tuotekerroin 	= str_replace(',','.', $tuotekerroin);
+		$osto_era 		= str_replace(',','.', $osto_era);
 
 		if ($kikkeli == 1) {			
 			$tee = "uusi";

@@ -247,10 +247,7 @@
 
 		// jos meillä oli lähetteen tulostusongelmia
 		if ($virheellinen != 'X') {
-			//päivitetään rivit tulostetuksi EI JÄRJEN HÄIVÄÄ!
-			$query = "UPDATE tilausrivi SET tyyppi ='L' where yhtio='$kukarow[yhtio]' and otunnus in ($tilausnumeroita)";
-			$result = mysql_query($query) or pupe_error($query);
-
+			
 			//jos tilauksia on useita niin laitetaan niille yhteinen kerayslista-tunnus
 			if ($laskuja > 1) {
 				$tunnukset = explode(',', $tilausnumeroita);

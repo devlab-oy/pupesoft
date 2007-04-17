@@ -1,6 +1,16 @@
 <?php
 	require ("../inc/parametrit.inc");
 
+	echo "
+		<script>
+		var DH = 0;var an = 0;var al = 0;var ai = 0;if (document.getElementById) {ai = 1; DH = 1;}else {if (document.all) {al = 1; DH = 1;} else { browserVersion = parseInt(navigator.appVersion); if ((navigator.appName.indexOf('Netscape') != -1) && (browserVersion == 4)) {an = 1; DH = 1;}}} function fd(oi, wS) {if (ai) return wS ? document.getElementById(oi).style:document.getElementById(oi); if (al) return wS ? document.all[oi].style: document.all[oi]; if (an) return document.layers[oi];}
+		function pw() {return window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;}
+		function mouseX(evt) {if (evt.pageX) return evt.pageX; else if (evt.clientX)return evt.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft); else return null;}
+		function mouseY(evt) {if (evt.pageY) return evt.pageY; else if (evt.clientY)return evt.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop); else return null;}
+		function popUp(evt,oi) {if (DH) {var wp = pw(); ds = fd(oi,1); dm = fd(oi,0); st = ds.visibility; if (dm.offsetWidth) ew = dm.offsetWidth; else if (dm.clip.width) ew = dm.clip.width; if (st == \"visible\" || st == \"show\") { ds.visibility = \"hidden\"; } else {tv = mouseY(evt) + 20; lv = mouseX(evt) - (ew/4); if (lv < 2) lv = 2; else if (lv + ew > wp) lv -= ew/2; if (!an) {lv += 'px';tv += 'px';} ds.left = lv; ds.top = tv; ds.visibility = \"visible\";}}}
+		</script>
+	";
+
 	if ($toim == 'SIIRTOLISTA') {
 		$tila 		= "G";
 		$lalatila	= "J";
@@ -147,6 +157,7 @@
 					varastopaikat.tunnus varastotunnus,
 					lasku.tunnus otunnus,
 					lasku.viesti,
+					lasku.sisviesti2,
 					count(*) riveja
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
@@ -217,31 +228,41 @@
 					//otetaan tämä muutuja talteen
 					$tul_varastoon = $tilrow["varasto"];
 
-					echo "<tr>";
+					echo "<tr class='aktiivi'>";
 
 					$ero="td";
 					if ($tunnus==$tilrow['otunnus']) $ero="th";
 
 					echo "<tr>";
-					echo "<$ero>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";
-					echo "<$ero>$tilrow[varastonimi]</$ero>";
-					echo "<$ero>$tilrow[tunnus]</$ero>";
-					echo "<$ero>$tilrow[ytunnus]</$ero>";
-
-					if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
-						echo "<$ero>$tilrow[nimi]</$ero>";
+					if(trim($tilrow["sisviesti2"]) != "") {
+						echo "<div id='$tilrow[tunnus]' style='position:absolute; z-index:100; visibility:hidden; width:500px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>";
+						echo t("Lisätiedot").":<br>";
+						echo $tilrow["sisviesti2"];
+						echo "</div>";
+						echo "<$ero valign='top'><a class='menu' onmouseout=\"popUp(event,'$tilrow[tunnus]')\" onmouseover=\"popUp(event,'$tilrow[otunnus]')\">$tilrow[t_tyyppi] $tilrow[prioriteetti]</a></$ero>";
 					}
 					else {
-						echo "<$ero>$tilrow[toim_nimi]</$ero>";
+						echo "<$ero valign='top'>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";
+					}
+					
+					echo "<$ero valign='top'>$tilrow[varastonimi]</$ero>";
+					echo "<$ero valign='top'>$tilrow[tunnus]</$ero>";
+					echo "<$ero valign='top'>$tilrow[ytunnus]</$ero>";
+
+					if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
+						echo "<$ero valign='top'>$tilrow[nimi]</$ero>";
+					}
+					else {
+						echo "<$ero valign='top'>$tilrow[toim_nimi]</$ero>";
 					}
 
-					echo "<$ero>$tilrow[viesti]</$ero>";
-					echo "<$ero>$tilrow[kerayspvm]</$ero>";
-					echo "<$ero>$tilrow[riveja]</$ero>";
+					echo "<$ero valign='top'>$tilrow[viesti]</$ero>";
+					echo "<$ero valign='top'>$tilrow[kerayspvm]</$ero>";
+					echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
 
-					echo "<$ero><input type='checkbox' name='tulostukseen[]' value='$tilrow[otunnus]' CHECKED></$ero>";
+					echo "<$ero valign='top'><input type='checkbox' name='tulostukseen[]' value='$tilrow[otunnus]' CHECKED></$ero>";
 
-					echo "<$ero><a href='$PHP_SELF?toim=$toim&tilaukset=$tilaukset&vanha_tee2=VALITSE&tee2=NAYTATILAUS&tunnus=$tilrow[otunnus]'>".t("Näytä")."</a></$ero>";
+					echo "<$ero valign='top'><a href='$PHP_SELF?toim=$toim&tilaukset=$tilaukset&vanha_tee2=VALITSE&tee2=NAYTATILAUS&tunnus=$tilrow[otunnus]'>".t("Näytä")."</a></$ero>";
 
 					echo "</tr>";
 				}
@@ -474,7 +495,8 @@
 					varastopaikat.nimitys varastonimi,
 					varastopaikat.tunnus varastotunnus,
 					GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ',') otunnus,
-					count(distinct otunnus) tilauksia, count(*) riveja
+					count(distinct otunnus) tilauksia, count(*) riveja,
+					GROUP_CONCAT(distinct(if(sisviesti2 != '', concat(lasku.tunnus,' - ', sisviesti2,'<br>'), NULL)) SEPARATOR '') ohjeet
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
@@ -523,35 +545,45 @@
 				$ero="td";
 				if ($tunnus==$tilrow['otunnus']) $ero="th";
 
-				echo "<tr>";
-				echo "<$ero>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";
-				echo "<$ero>$tilrow[varastonimi]</$ero>";
-				echo "<$ero>$tilrow[ytunnus]</$ero>";
-
-				if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
-					echo "<$ero>$tilrow[nimi]</$ero>";
+				echo "<tr class='aktiivi'>";
+				if(trim($tilrow["ohjeet"]) != "") {
+					echo "<div id='$tilrow[otunnus]' style='position:absolute; z-index:100; visibility:hidden; width:500px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>";
+					echo t("Lisätiedot").":<br>";
+					echo $tilrow["ohjeet"];
+					echo "</div>";
+					echo "<$ero valign='top'><a class='menu' onmouseout=\"popUp(event,'$tilrow[otunnus]')\" onmouseover=\"popUp(event,'$tilrow[otunnus]')\">$tilrow[t_tyyppi] $tilrow[prioriteetti]</a></$ero>";
 				}
 				else {
-					echo "<$ero>$tilrow[toim_nimi]</$ero>";
+					echo "<$ero valign='top'>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";
+				}
+				
+				echo "<$ero valign='top'>$tilrow[varastonimi]</$ero>";
+				echo "<$ero valign='top'>$tilrow[ytunnus]</$ero>";
+
+				if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
+					echo "<$ero valign='top'>$tilrow[nimi]</$ero>";
+				}
+				else {
+					echo "<$ero valign='top'>$tilrow[toim_nimi]</$ero>";
 				}
 
-				echo "<$ero>$tilrow[kerayspvm]</$ero>";
-				echo "<$ero>$tilrow[toimitustapa]</$ero>";
+				echo "<$ero valign='top'>$tilrow[kerayspvm]</$ero>";
+				echo "<$ero valign='top'>$tilrow[toimitustapa]</$ero>";
 				
-				echo "<$ero>".str_replace(',','<br>',$tilrow["otunnus"])."</$ero>";
+				echo "<$ero valign='top'>".str_replace(',','<br>',$tilrow["otunnus"])."</$ero>";
 				
-				echo "<$ero>$tilrow[riveja]</$ero>";
+				echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
 
 				if ($tilrow["tilauksia"] > 1) {
-					echo "<$ero></$ero>";
+					echo "<$ero valign='top'></$ero>";
 
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='toim' 			value='$toim'>";
 					echo "<input type='hidden' name='tee2' 			value='VALITSE'>
 							<input type='hidden' name='tilaukset'	value='$tilrow[otunnus]'>
-							<$ero><input type='submit' name='tila' 	value='".t("Valitse")."'></form></$ero>";
+							<$ero valign='top'><input type='submit' name='tila' 	value='".t("Valitse")."'></form></$ero>";
 
-					echo "<$ero></$ero>";
+					echo "<$ero valign='top'></$ero>";
 					echo "</tr>";
 				}
 				else {
@@ -577,7 +609,7 @@
 								ORDER by kirjoitin";
 					$kirre = mysql_query($query) or pupe_error($query);
 
-					echo "<$ero><select name='valittu_tulostin'>";
+					echo "<$ero valign='top'><select name='valittu_tulostin'>";
 
 					while ($kirrow = mysql_fetch_array($kirre)) {
 						$sel = '';
@@ -601,7 +633,7 @@
 					echo "<input type='hidden' name='etsi' value='$etsi'>";										
 					echo "<input type='hidden' name='tee2' value='TULOSTA'>";
 					echo "<input type='hidden' name='tulostukseen[]' value='$tilrow[otunnus]'>";
-					echo "<$ero><input type='submit' value='".t("Tulosta")."'></form></$ero>";
+					echo "<$ero valign='top'><input type='submit' value='".t("Tulosta")."'></form></$ero>";
 
 					echo "<form method='post' action='$PHP_SELF'>";
 					echo "<input type='hidden' name='toim' value='$toim'>";
@@ -614,7 +646,7 @@
 					echo "<input type='hidden' name='tee2' value='NAYTATILAUS'>";
 					echo "<input type='hidden' name='vanha_tee2' value=''>";
 					echo "<input type='hidden' name='tunnus' value='$tilrow[otunnus]'>";
-					echo "<$ero><input type='submit' value='".t("Näytä")."'></form></$ero>";
+					echo "<$ero valign='top'><input type='submit' value='".t("Näytä")."'></form></$ero>";
 
 					echo "</tr>";
 				}

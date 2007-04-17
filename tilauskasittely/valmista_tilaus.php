@@ -358,6 +358,7 @@
 					if(tyyppi='L' or tyyppi='D', varattu, 0) valmistettu,
 					if(toimitettu!='', if(varattu!=0, varattu, kpl), 0) korjataan,
 					if(toimitettu!='', kpl, 0) valmistettu_valmiiksi,
+					if(tyyppi!='L', kpl, 0) kaytetty,
 					toimaika,
 					kerayspvm,
 					tilausrivi.tunnus tunnus,
@@ -453,13 +454,17 @@
 						</td>";
 				echo "<td class='$class'></td>";
 			}
+			elseif ($prow["tyyppi"] == 'V') {
+				echo "<td class='$class'></td>";
+				echo "<td class='$class' align='right'>$prow[kaytetty]</td>";
+			}
 			else {
 				echo "<td class='$class'></td>";
 				echo "<td class='$class'></td>";
 			}
 
-			echo "<td class='$class' align='right'>$prow[toimaika]</td>";
-			echo "<td class='$class' align='right'>$prow[kerayspvm]</td>";
+			echo "<td class='$class' align='right'>".tv1dateconv($prow["toimaika"])."</td>";
+			echo "<td class='$class' align='right'>".tv1dateconv($prow["kerayspvm"])."</td>";
 
 			if ($prow["tyyppi"] == "V") {
 				echo "<td class='back'>".$virhe[$prow["tunnus"]]."</td>";

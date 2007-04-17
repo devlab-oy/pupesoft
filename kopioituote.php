@@ -111,7 +111,11 @@
 				$tee 	= '';
 
 				require ("yllapito.php");
-
+				
+				//	L‰hetet‰‰n mailia t‰st‰ eteenp‰in jos meill‰ on vastaanottajia
+				if($yhtiorow["tuotekopio_email"] != "") {
+					mail($yhtiorow["tuotekopio_email"], "Tuotteita kopioitu", "$kukarow[nimi] kopioi tuotteen '$tuoteno' tuotteeksi '$uustuoteno'\n\n", $header, "-f $yhtiorow[postittaja_email]");
+				}
 				exit;
 			}
 		}

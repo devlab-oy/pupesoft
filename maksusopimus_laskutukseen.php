@@ -259,7 +259,6 @@
 				$row = mysql_fetch_array($stresult);
 				if($row["kaikki"] - ($row["toimitus_valmis"] + $row["rojekti"]) <> 0) {
 					echo "<font class='error'>Laskutussopimuksella on kaikki tilaukset oltava toimitettuna ennen loppulaskutusta.</font><br><br>";
-					echo $query;
 					return 0;					
 				}
 				$vikatunnus = $row["vikatunnus"];
@@ -295,6 +294,23 @@
 				echo "<font class='error'>".t("VIRHE: Koitetaan loppulaskuttaa mutta positioita on jäljellä enemmän kuin yksi!")."</font><br><br>";
 				return 0;
 			}
+			
+			//	Tarkastetaan että meillä on ok maksuehto loppulaskutukseen!!!
+			$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$posrow[maksuehto]' and jaksotettu=''";
+			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+			
+			if(mysql_num_rows($meapu)>0) {
+				$meapurow = mysql_fetch_array($meapu);
+				if($meapurow["erapvmkasin"] != "" and $posrow["erpcm"] == "0000-00-00") {
+					echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehdon eräpäivä puuttuu")."!!!</font><br><br>";
+					return 0;
+				}
+			}
+			else {
+				echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehto ei voi olla tyyppi jaksotettu")."!!!</font><br><br>";
+				return 0;
+			}
+
 
 			echo "<font class = 'message'>".t("Loppulaskutetaan tilaus")." $tunnus<br></font><br>";
 

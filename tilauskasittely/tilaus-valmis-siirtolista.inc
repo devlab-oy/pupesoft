@@ -358,7 +358,7 @@
 								tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys, 
 								sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt,
 								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";
-					$lisa = " 	and tilausrivi.tyyppi = '$tvs_tyyppi' 
+					$lisa = " 	and tilausrivi.tyyppi in ($tvs_tyyppi) 
 								GROUP BY 1,2,3,4,5,6,7,8 ";
 				}
 				else {

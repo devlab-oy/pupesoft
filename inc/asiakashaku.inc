@@ -233,8 +233,9 @@ if ($monta > 1 and $monta <= $limit) {
 	
 	if ($kutsuja != "yllapito.php") {
 		echo "</table><br>";
-		$ytunnus = "";
 	}
+	
+	$ytunnus = "";
 }
 
 if ($monta > $limit) {

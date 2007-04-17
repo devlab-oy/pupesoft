@@ -27,11 +27,18 @@
 				$ulos 			= "";				
 				require("asiakashaku.inc");
 				
-				if ($ulos != "") {
+				if ($ulos != "" and $ytunnus == "") {
 					$alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
+					$virhe[$i]    = t("Valitse asiakas!");
 				}
-					
-				$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
+				elseif ($ytunnus != "") {
+					$t[$i]  = $ytunnus;
+					$virhe[$i] = t("Asiakas löytyi!");
+				}	
+				else {
+					$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");	
+				}	
+				
 				$errori = 1;
 			}
 		}	

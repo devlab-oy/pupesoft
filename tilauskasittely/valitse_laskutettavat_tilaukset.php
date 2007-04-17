@@ -56,8 +56,9 @@
 		$query = "	SELECT yhtio
 		            FROM tilausrivi
 					WHERE otunnus in ($laskutettavat)
-					and yhtio = '$kukarow[yhtio]'
-					and laskutettu != ''";
+					and yhtio 		= '$kukarow[yhtio]'
+					and laskutettu != ''
+					and tyyppi		= 'L'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -68,7 +69,8 @@
 						and var not in ('P','J')
 						and yhtio = '$kukarow[yhtio]'
 						and keratty != ''
-						and toimitettu = ''";
+						and toimitettu = ''
+						and tyyppi='L'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//ja päivitetään laskujen otsikot laskutusjonoon
@@ -170,7 +172,7 @@
 					maksuehto.itsetulostus,
 					maksuehto.kateinen
 					FROM lasku use index (tila_index)
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -224,7 +226,9 @@
 
 				$query = "	select sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*(1-ale/100)=0 and var!='P' and var!='J',1,0)) nollarivi
 							from tilausrivi
-							where yhtio='$kukarow[yhtio]' and otunnus='$row[tunnus]'";
+							where yhtio = '$kukarow[yhtio]' 
+							and otunnus = '$row[tunnus]'
+							and tyyppi  = 'L'";
 				$hyvre = mysql_query($query) or pupe_error($query);
 				$hyvrow = mysql_fetch_array($hyvre);
 
@@ -255,7 +259,7 @@
 								sum(if(tilausrivi.toimitettu='',1,0)) toimittamatta,
 								count(*) toimituksia
 								FROM lasku
-								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P'
+								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi = 'L' and tilausrivi.var != 'P'
 								WHERE lasku.yhtio 		= '$kukarow[yhtio]'
 								and lasku.jaksotettu 	= '$row[jaksotettu]'
 								GROUP BY lasku.jaksotettu";
@@ -414,7 +418,7 @@
 					count(tilausrivi.tunnus) riveja,
 					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)/if('$yhtiorow[alv_kasittely]'='',1+(tilausrivi.alv/100),1)),2) arvo
 					FROM lasku use index (tila_index)
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
 					LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'

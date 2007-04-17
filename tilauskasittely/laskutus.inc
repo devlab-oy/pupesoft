@@ -33,7 +33,10 @@ else {
 
 		// jos laskulla on erikoisalennus, siirret‰‰n se riveille, mutta EI riveille joilla on NETTOHINTA...
 		$query = "	update tilausrivi set ale = round(ale + $orow[erikoisale] - (ale * $orow[erikoisale] / 100),2)
-					where otunnus='$orow[tunnus]' and yhtio='$kukarow[yhtio]' and netto in ('','E')";
+					where otunnus='$orow[tunnus]' 
+					and yhtio='$kukarow[yhtio]' 
+					and netto in ('','E')
+					and tyyppi='L'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// nollataan erikoisalennus, ettei lasketa sit‰ en‰‰ uudelleen...
@@ -44,7 +47,10 @@ else {
 	// Etsit‰‰n tilausrivit
 	$query = "	SELECT *
 				FROM tilausrivi
-				WHERE otunnus = '$kukarow[kesken]' and yhtio='$kukarow[yhtio]' and var not in ('P','J')
+				WHERE otunnus = '$kukarow[kesken]' 
+				and yhtio='$kukarow[yhtio]' 
+				and var not in ('P','J')
+				and tyyppi='L'
 				ORDER BY tunnus";
 	$presult = mysql_query($query) or pupe_error($query);
 
@@ -158,7 +164,7 @@ else {
 				// Tuotteen ostohinta
 				$query = "	SELECT round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0)), 2) ostosumma
 							FROM sarjanumeroseuranta
-							JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus 
+							JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 							WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
 							and sarjanumeroseuranta.myyntirivitunnus = '$trow[tunnus]'
 							HAVING ostosumma!=0";
@@ -251,7 +257,8 @@ else {
 					varattu 		= 0,
 					laskutettu		= '$kukarow[kuka]',
 					laskutettuaika	= '$laskutuspvm'
-					WHERE tunnus = $trow[tunnus] and yhtio='$kukarow[yhtio]'";
+					WHERE tunnus = $trow[tunnus] 
+					and yhtio	 = '$kukarow[yhtio]'";
 		$laskutusres = mysql_query($query) or pupe_error($query);
 	}
 

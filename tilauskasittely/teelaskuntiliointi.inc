@@ -15,8 +15,9 @@ $query = "	SELECT tilausrivi.alv,
 			if(tilausrivi.alv >= 500 and tilausrivi.kpl < 0, 'KYLLA', 'EI') marginaaliostot
 			FROM tilausrivi
 			LEFT JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
-			WHERE tilausrivi.uusiotunnus='$lasku[tunnus]' 
-			and tilausrivi.yhtio='$kukarow[yhtio]'
+			WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]' 
+			and tilausrivi.tyyppi		 = 'L'
+			and tilausrivi.yhtio		 = '$kukarow[yhtio]'
 			GROUP BY tilausrivi.alv, marginaaliostot, tuote.tilino, tuote.tilino_eu, tuote.tilino_ei_eu, tuote.kustp, tuote.kohde, tuote.projekti";
 $xresult = mysql_query($query) or pupe_error($query);
 
@@ -45,7 +46,7 @@ else {
 			// Tuotteiden ostohinnat
 			$query = "	SELECT round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0)), 2) ostosumma
 						FROM sarjanumeroseuranta
-						JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus 
+						JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 						WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
 						and sarjanumeroseuranta.myyntirivitunnus in ($xrow[tunnukset])
 						HAVING ostosumma!=0";

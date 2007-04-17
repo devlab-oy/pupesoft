@@ -956,7 +956,8 @@
 				}
 				else {
 					// haetaan maksuehdon tiedot
-					$query  = "	select * from maksuehto 
+					$query  = "	select * 
+								from maksuehto 
 								left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 								where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
 					$result = mysql_query($query) or pupe_error($query);
@@ -1014,7 +1015,8 @@
 					$query = "  SELECT *, $lisa $sorttauskentta
 								FROM tilausrivi
 								WHERE $where
-								and yhtio='$kukarow[yhtio]'
+								and yhtio  = '$kukarow[yhtio]'
+								and tyyppi = 'L'
 								ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 

@@ -320,7 +320,8 @@
 								FROM tilausrivi use index (yhtio_otunnus)
 								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-								and tilausrivi.otunnus = '$laskurow[tunnus]'";
+								and tilausrivi.otunnus = '$laskurow[tunnus]'
+								and tilausrivi.tyyppi  = 'L'";
 				$sarjares1 = mysql_query($query) or pupe_error($query);
 
 				while($srow1 = mysql_fetch_array($sarjares1)) {
@@ -780,7 +781,10 @@
 					if ($lasrow["vienti"] == 'K' and $lasrow["sisainen"] == "") {
 						$query = "	SELECT yhtio
 									FROM tilausrivi
-									WHERE uusiotunnus = '$lasrow[tunnus]' and kpl > 0 and yhtio='$kukarow[yhtio]'";
+									WHERE uusiotunnus = '$lasrow[tunnus]' 
+									and kpl > 0 
+									and yhtio='$kukarow[yhtio]'
+									and tyyppi='L'";
 						$cresult = mysql_query($query) or pupe_error($query);
 
 						$hyvitys = "";
@@ -925,7 +929,10 @@
 						// Tarvitaan rivien eri verokannat
 						$query = "	select alv, round(sum(rivihinta),2), round(sum(alv/100*rivihinta),2)
 									from tilausrivi
-									where yhtio='$kukarow[yhtio]' and otunnus in ($tunnukset) group by alv";
+									where yhtio='$kukarow[yhtio]' 
+									and otunnus in ($tunnukset) 
+									and tyyppi='L'
+									group by alv";
 						$alvres = mysql_query($query) or pupe_error($query);
 
 						while ($alvrow = mysql_fetch_array($alvres)) {
@@ -955,7 +962,10 @@
 						// Kirjoitetaan rivitietoja tilausriveiltä
 						$query = "	SELECT *, $sorttauskentta
 									FROM tilausrivi
-									WHERE yhtio='$kukarow[yhtio]' and otunnus in ($tunnukset) and kpl<>0
+									WHERE yhtio = '$kukarow[yhtio]' 
+									and otunnus in ($tunnukset) 
+									and kpl<>0
+									and tilausrivi.tyyppi = 'L'
 									ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
 						$tilres = mysql_query($query) or pupe_error($query);
 
@@ -1178,7 +1188,9 @@
 							// haetaan tilauksen kaikki rivit
 							$query = "	SELECT *, $sorttauskentta
 										FROM tilausrivi
-										WHERE uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
+										WHERE uusiotunnus='$laskurow[tunnus]' 
+										and yhtio='$kukarow[yhtio]'
+										and tyyppi='L'
 										ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
 							$result = mysql_query($query) or pupe_error($query);
 

@@ -3,6 +3,7 @@
 	if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 		$tvs_tila 	= "V";
 		$tvs_tyyppi	= "'V'";
+		$tvs_tyyppi_2	= ",'W'";
 	}
 	elseif ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") {
 		$tvs_tila 	= "G";
@@ -234,7 +235,7 @@
 							and tuote.ei_saldoa = ''
 							and tuote.yhtio = '$kukarow[yhtio]'
 							and tuote.ei_saldoa = ''
-							and tilausrivi.tyyppi in ($tvs_tyyppi)
+							and tilausrivi.tyyppi in ($tvs_tyyppi$tvs_tyyppi_2)
 							and tuote.tuoteno = tilausrivi.tuoteno
 							and tilausrivi.yhtio = tuote.yhtio";
 				$cresult = mysql_query($query) or pupe_error($query);

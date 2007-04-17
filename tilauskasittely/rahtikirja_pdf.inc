@@ -82,10 +82,14 @@
 	$huge["height"] = 22;
 	$huge["font"] = "Helvetica-Bold";
 				
-	//tulostetaan 3 sivua
-	$tulostakolli = 3;
-	//$tulostakolli = 1; 
-	
+				
+	// Tulostetaan oikea sivum‰‰r‰
+	if ($yhtiorow["rahtikirjan_kopiomaara"] == 4) {
+		$tulostakolli = 4;
+	}
+	else {
+		$tulostakolli = 3;
+	}
 	
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			
@@ -392,6 +396,7 @@
 		if	($tulostuskpl == 1) $pdf->draw_text(25, 30 , "Kuljetusliike",				$firstpage, $kirj);
 		if	($tulostuskpl == 2) $pdf->draw_text(25, 30 , "Kuljetusliike",				$firstpage, $kirj);
 		if	($tulostuskpl == 3) $pdf->draw_text(25, 30 , "Vastaanottaja",				$firstpage, $kirj);
+		if	($tulostuskpl == 4) $pdf->draw_text(25, 30 , "L‰hett‰j‰",					$firstpage, $kirj);
 	
 	}
 	

@@ -844,4 +844,25 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "rahtikirjan_kopiomaara") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 3) {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == 4) {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value='3' $sel1>".t("Rahtikirjasta tulostetaan 3 kopiota.")."</option>";
+		$ulos .= "<option value='4' $sel2>".t("Rahtikirjasta tulostetaan 4 kopiota.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

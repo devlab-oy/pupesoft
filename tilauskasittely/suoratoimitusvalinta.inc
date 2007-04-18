@@ -4,9 +4,14 @@
 	//$suora_tuoteno jossa on k‰sitelt‰v‰ tuotenumero
 	//$suora_kpl jossa on tilattava m‰‰r‰
 	//$row jossa on tilausrivin kaikki tiedot
-
+	//$varastoista jossa vain sallitut suoratoimitusvarastot
+	
 	$suoratoim_array 	= array();
 	$suoratoim_totaali 	= 0;
+	
+	if($varastoista!="") {
+		$suortoimvarastolisa = " and varastopaikat.tunnus IN ($varastoista)";
+	}
 	
 	// Katsotaan onko t‰lle tuotteelle yht‰‰n sis‰ist‰ toimittajaa
 	// ja ett‰ toimittajan tiedoissa on varmasti kaikki EDI mokkulat p‰‰ll‰
@@ -39,6 +44,7 @@
 					join varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
 					and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
+					$suortoimvarastolisa
 					where tuotepaikat.yhtio 	= '$superrow[tyyppi_tieto]'
 					and tuoteno 				= '$superrow[toim_tuoteno]'
 					and varastopaikat.tyyppi 	= ''
@@ -95,7 +101,7 @@
 						$montako = $suora_kpl;
 					}
 					
-					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]&&&$montako'>".t("Toimita")." $montako ($varastomaa $krow[nimi] - $krow[nimitys])</option>";
+					$paikat .= "<option value='@@@$superrow[liitostunnus]#$krow[hyllyalue]#$krow[hyllynro]#$krow[hyllyvali]#$krow[hyllytaso]'>$varastomaa $krow[nimi] - $krow[nimitys] ($myytavissa)</option>";
 					$paikatlask=$paikatlask+1;
 					$suoratoim_totaali+=$myytavissa;
 				}

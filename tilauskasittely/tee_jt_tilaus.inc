@@ -322,7 +322,7 @@
 		}
 
 		// Tässä haarassa käyttäjä on syöttänyt jonkun kappalemäärän
-		if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] == 'KAIKKI' or $suoratoimpaikka[$tunnukset] != '') {
+		if ($kpl[$tunnukset] > 0 or $loput[$tunnukset] == 'KAIKKI') {
 
 			if ($loput[$tunnukset] == 'KAIKKI') {
 				if ($toim == "ENNAKKO") {
@@ -345,23 +345,7 @@
 			}
 
 			if ($suoratoimpaikka[$tunnukset] != '') {
-				list($paikka, $toimitetaan) = split("&&&", $suoratoimpaikka[$tunnukset]);
-
-				$kpl[$tunnukset] = $toimitetaan;
-
-				if ($toim == "ENNAKKO") {
-					$isa_kerroin 	= $kpl[$tunnukset] / $isarivirow["varattu"];
-				}
-				else {
-					$isa_kerroin 	= $kpl[$tunnukset] / $isarivirow["jt"];
-				}
-
-				if ($isa_kpl > $toimitetaan) {
-					$loput[$tunnukset] = "JATA";
-				}
-				else {
-					$loput[$tunnukset] = "KAIKKI";
-				}
+				$paikka = $suoratoimpaikka;
 			}
 			else {
 				$paikka = "";

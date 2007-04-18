@@ -18,8 +18,7 @@ if($tee == "VSRALVYV") {
 	}
 	
 	echo "</font><br><hr>";
-	$yhtiorow["maakoodi"] = "FI";
-	$yhtiorow["ytunnus"] = 6270618;
+
 	if (strtoupper($yhtiorow["maakoodi"])== 'FI') {
 		//muutetaan ytunnus takas oikean näköseks
 		$ytunpit = 8-strlen($yhtiorow["ytunnus"]);

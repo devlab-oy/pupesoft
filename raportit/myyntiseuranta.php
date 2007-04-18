@@ -95,11 +95,6 @@
 			$yhtio = substr($yhtio,0,-1);
 		}
 
-		// jos ei olla valittu mitään ei tehdä mitään
-		if ($mul_try == "" and $mul_osasto == "" and $asiakasosasto == "" and $asiakasryhma == "" and count($ruksit) == 0) {
-			$tee = "";
-		}
-
 		// jos joku päiväkenttä on tyhjää ei tehdä mitään
 		if ($ppa == "" or $kka == "" or $vva == "" or $ppl == "" or $kkl == "" or $vvl == "") {
 			$tee = "";
@@ -331,15 +326,31 @@
 			else {
 				$katelisa = "";
 			}
+			
+			// Jos ei olla valittu mitään
+			if ($group == "") {
+				$select = "tuote.yhtio, ";
+				$group = "lasku.yhtio";
+			}
 
 			$vvaa = $vva - '1';
 			$vvll = $vvl - '1';
 
+			if ($ajotapa == 'tilausjaauki') {
+				$tilauslisa1 = " sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.varattu+tilausrivi.jt,0)) myykpllaskuttamattanyt, ";
+				$tilauslisa2 = " sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) myyntilaskuttamattanyt, ";
+			}
+			else {
+				$tilauslisa1 = "";
+				$tilauslisa2 = "";
+			}
+			
+			
 			$query = "	SELECT $select
-						sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.varattu+tilausrivi.jt,0)) myykpllaskuttamattanyt,
+						$tilauslisa1
 						sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0)) myykplnyt,
-						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)) myykpled,
-						sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) myyntilaskuttamattanyt,						
+						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)) myykpled,						
+						$tilauslisa2												
 						sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) myyntinyt,
 						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)) myyntied,
 						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) /
@@ -592,13 +603,16 @@
 								if ($kateed      <> 0) $kateind      = round($katenyt/$kateed,2);
 								if ($nettokateed <> 0) $nettokateind = round($nettokatenyt/$nettokateed,2);
 
+								$apu = mysql_num_fields($result)-11;
+								
+								if ($ajotapa == 'tilausjaauki') {
+									$apu -= 2;
+								}
+								
 								if ($kateprossat != "") {
-									$apu = mysql_num_fields($result)-15;
+									$apu -= 2;
 								}
-								else {
-									$apu = mysql_num_fields($result)-13;
-								}
-			
+							
 								echo "<td class='tumma' colspan='$apu'>$edluku ".t("yhteensä")."</th>";
 							
 								if ($ajotapa == 'tilausjaauki') {
@@ -767,13 +781,15 @@
 
 				}
 
+				$apu = mysql_num_fields($result)-11;
+				
+				if ($ajotapa == 'tilausjaauki') {
+					$apu -= 2;
+				}
+				
 				if ($kateprossat != "") {
-					$apu = mysql_num_fields($result)-15;
+					$apu -= 2;
 				}
-				else {
-					$apu = mysql_num_fields($result)-13;
-				}
-
 
 				// jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 				if ($gluku > 1 and $mukaan != 'tuote' and $piiyhteensa == '') {
@@ -1044,27 +1060,28 @@
 			// tässä on tämä "perusnäkymä" mikä tulisi olla kaikissa myynnin raportoinneissa..
 			
 			if ($ajotapa == "lasku") {
-				$chk1 = "CHECKED";		
+				$chk1 = "SELECTED";		
 			}
 			elseif ($ajotapa == "tilaus") {
-				$chk2 = "CHECKED";		
+				$chk2 = "SELECTED";		
 			}
 			elseif ($ajotapa == "tilausjaauki") {
-				$chk3 = "CHECKED";		
+				$chk3 = "SELECTED";		
 			}
 			else {
-				$chk1 = "CHECKED";	
+				$chk1 = "SELECTED";	
 			}
 			
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>".t("Valitse ajotapa:")."</th>";
-			echo "<td><input type='radio' name='ajotapa' value='lasku'  		$chk1>".t("Laskuista")."</td>";
-			echo "<td><input type='radio' name='ajotapa' value='tilaus' 		$chk2>".t("Tilauksista")."</td>";
-			echo "<td><input type='radio' name='ajotapa' value='tilausjaauki'	$chk3>".t("Tilauksista avonaiset huomioiden")."</td>";
 			
-			echo "<td class='back'>".t("(HUOM! Raportin tulos todennäköisesti eroaa ajotavasta riippuen)")."</td>";
-
+			echo "<td><select name='ajotapa'>";
+			echo "<option value='lasku'  		$chk1>".t("Laskuista")."</option>";
+			echo "<option value='tilaus' 		$chk2>".t("Tilauksista")."</option>";
+			echo "<option value='tilausjaauki'	$chk3>".t("Tilauksista, avoimet huomioiden")."</option>";
+			echo "</select></td>";
+			
 			echo "</tr>";
 			echo "</table><br>";
 

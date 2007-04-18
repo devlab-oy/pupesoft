@@ -86,10 +86,11 @@ if($tee == "VSRALVYV") {
 					asiakas.nimi, sum(rivihinta) summa, sum(round(rivihinta*100,0)) arvo, count(distinct(lasku.tunnus)) laskuja, lasku.ytunnus, lasku.liitostunnus, if(lasku.maa='','X','') asiakkaan_maa
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
 					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus
-					JOIN tuote USE INDEX (tuoteno_index) ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and ei_saldoa='' and lasku.vienti='E'
+					JOIN tuote USE INDEX (tuoteno_index) ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuotetyyppi='' 
 					LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and lasku.liitostunnus = asiakas.tunnus 
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'U'
 					and lasku.tapvm >= '$vuosi-$alkupvm' and lasku.tapvm <= '$vuosi-$loppupvm'
+					and lasku.vienti='E'
 					GROUP BY lasku.ytunnus
 					HAVING maa IN ('','$eumaat')";
 		$result = mysql_query($query) or pupe_error($query);

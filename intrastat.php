@@ -82,7 +82,10 @@
 					round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi *
 					(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
 					/ lasku.summa) * lasku.bruttopaino), 0), 1) as paino,
-					if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta
+					if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+					group_concat(lasku.tunnus) as kaikkitunnukset,
+					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
+					'Keikka' as tapa
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
@@ -111,7 +114,10 @@
 					round(sum(tilausrivi.kpl),0) kpl,
 					tullinimike.su_vientiilmo su,
 					if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
-					if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta
+					if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
+					group_concat(lasku.tunnus) as kaikkitunnukset,
+					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
+					'Lasku' as tapa					
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
@@ -139,7 +145,10 @@
 					round(sum(tilausrivi.kpl),0) kpl,
 					tullinimike.su_vientiilmo su,
 					if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
-					round(sum(tilausrivi.rivihinta), 0) rivihinta
+					round(sum(tilausrivi.rivihinta), 0) rivihinta,
+					group_concat(lasku.tunnus) as kaikkitunnukset,
+					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
+					'Siirtolista' as tapa
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''

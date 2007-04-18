@@ -55,7 +55,6 @@
 						lisattava_era = '$lisattava_era',
 						vahennettava_era = '$vahennettava_era'
 						WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
-
 			$result = mysql_query($query) or pupe_error($query);
 
 			$tee = '';
@@ -126,7 +125,7 @@
 			}
 
 			echo "	<tr><td>24. ".t("Kauppatapahtuman luonne").":</td>
-					<td colspan='2'><select NAME='kauppatapahtuman_luonne'>";
+					<td colspan='2'><select name='kauppatapahtuman_luonne'>";
 
 			$query = "	SELECT avainsana.selite, ".avain('select')."
 						FROM avainsana
@@ -248,11 +247,21 @@
 			}
 
 			$query = "	UPDATE lasku
-						SET maa_lahetys = '$maa_lahetys',
-						kauppatapahtuman_luonne = '$ktapahtuman_luonne',
+						SET maa_maara = '$maa_maara',
+						maa_lahetys = '$maa_lahetys',
+						kauppatapahtuman_luonne = '$kauppatapahtuman_luonne',
 						kuljetusmuoto = '$kuljetusmuoto',
+						sisamaan_kuljetus = '$sisamaan_kuljetus',
+						sisamaan_kuljetusmuoto  = '$sisamaan_kuljetusmuoto',
+						sisamaan_kuljetus_kansallisuus = '$sisamaan_kuljetus_kansallisuus',
+						kontti  = '$kontti',
+						aktiivinen_kuljetus = '$aktiivinen_kuljetus',
+						aktiivinen_kuljetus_kansallisuus = '$aktiivinen_kuljetus_kansallisuus',
+						poistumistoimipaikka = '$poistumistoimipaikka',
+						poistumistoimipaikka_koodi = '$poistumistoimipaikka_koodi',
 						bruttopaino = '$bruttopaino',
-						maa_maara = '$maa_maara',
+						lisattava_era = '$lisattava_era',
+						vahennettava_era = '$vahennettava_era'
 						ultilno = '$ultilno'
 						WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 

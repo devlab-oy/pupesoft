@@ -523,13 +523,8 @@
 			}
 			
 			
-			
-			/*
-			
-			EI TOIMI!!!!!! NORMAALIT TARJOUKSET PIILOTETAAN AINA!
-			
 			//	tarjousnipuista halutaan vain se viimeisin..
-			if($row["tila"] == "T") {
+			if($row["tila"] == "T" and $row["tunnusnippu"] > 0) {
 				$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tila='T' and tunnusnippu='$row[tarjous]' and tunnus > $row[tilaus]";
 				$countres = mysql_query($query) or pupe_error($query);
 
@@ -548,11 +543,7 @@
 				if (mysql_num_rows($countres) > 0) {
 					$piilotarivi = "kylla";
 				}
-			}
-			*/
-			
-			
-			
+			}			
 			
 			if ($piilotarivi == "") {
 

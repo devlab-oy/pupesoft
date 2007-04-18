@@ -14,7 +14,7 @@
 		}
 		echo "</tr>";
 
-		if ($oikeurow['paivitys'] == 1) {
+		if ($oikeurow['paivitys'] == 1 and $kukarow['taso'] == 2) {
 			if ($ok != 1) {
 	// Annetaan tyhjät tiedot, jos rivi oli virheetön
 				$tili = '';
@@ -221,7 +221,7 @@
 				}
 
 			}
-			if (($trow['lukko']=='') && ($trow['poistettu'] == '') && ($maara > 1) && ($oikeurow['paivitys'] == 1)) {
+			if (($trow['lukko']=='') && ($trow['poistettu'] == '') && ($maara > 1) && ($oikeurow['paivitys'] == 1) && ($kukarow['taso'] == 2)) {
 				// Eli ei näytetä muuta-nappia, jos ei oikeuksia, 
 				//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu, 
 				//jos sen saa poistaa niin on hankalaa löytää heittävät tositteet...
@@ -240,7 +240,7 @@
 			}
 			else {
 				if ($maara > 1) {
-					if (($trow['lukko']=='1') or ($oikeurow['paivitys'] != 1)) {
+					if (($trow['lukko']=='1') or ($oikeurow['paivitys'] != 1) and ($kukarow['taso'] != 2)) {
 						echo "<td>".t("Lukittu")."";
 						if ($trow['poistettu'] != '') { //Rivi on poistettu
 							echo " ".t("ja poistettu")."";

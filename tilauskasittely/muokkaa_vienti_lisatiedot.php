@@ -1,4 +1,5 @@
 <?php
+
 	require ('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Lis‰tietojen korjaukset")."</font><hr>";
@@ -459,9 +460,18 @@
 			echo "</table>";
 		}
 	}
-
+	
 	// meill‰ ei ole valittua tilausta
 	if ($tee == '') {
+
+		// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
+		if ($lopetus != "") {
+			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+			$lopetus = str_replace('////','?', $lopetus);
+			$lopetus = str_replace('//','&',  $lopetus);
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2$lopetus'>";
+			exit;
+		}
 
 		$formi  = "find";
 		$kentta = "etsi";

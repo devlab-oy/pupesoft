@@ -39,7 +39,7 @@
 			$sisamaan_kuljetus_kansallisuus = strtoupper($sisamaan_kuljetus_kansallisuus);
 			$maa_maara = strtoupper($maa_maara);
 
-			$ultilno = "";
+			$ultilno = $laskurow["ultilno"];
 
 			// kokeillaan arpoa intrastat k‰sittely‰, molemmat maat pit‰‰ olla EU maita
 			if ($maa_lahetys != "" and $maa_maara != "") {
@@ -49,10 +49,13 @@
 
 				if (mysql_num_rows($result) == 2) {
 					if ($maa_lahetys == $yhtiorow["maakoodi"] and $maa_maara != $yhtiorow["maakoodi"]) {
-						$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+						$ultilno = "-1"; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
 					}
 					elseif ($maa_maara == $yhtiorow["maakoodi"] and $maa_lahetys != $yhtiorow["maakoodi"]) {
-						$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+						$ultilno = "-2"; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+					}
+					else {
+						$ultilno = "";
 					}
 				}
 
@@ -83,6 +86,31 @@
 
 		if ($tee == 'K') {
 			//toimittaja ja lasku on valittu. Nyt jumpataan.
+
+			if ($laskurow["tila"] == "K") {
+				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus = '$otunnus'";
+			}
+			else {
+				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otunnus'";
+			}
+			$painoresult = mysql_query($query) or pupe_error($query);
+			$painorow = mysql_fetch_array($painoresult);
+
+			if ($painorow["kpl"] > 0) {
+				$osumapros = round($painorow["kplok"] / $painorow["kpl"] * 100, 2);
+			}
+			else {
+				$osumapros = "N/A";
+			}
+
+			echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br><br>";
+
 			echo "<table>";
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='otunnus' value='$otunnus'>
@@ -228,6 +256,11 @@
 			echo "<br><input type='submit' value='".t("P‰ivit‰ tiedot")."'>";
 			echo "<input type='hidden' name='tapa' value='$tapa'>";
 			echo "</form>";
+
+			echo "<br><br>";
+			$tunnus = $otunnus;
+			require ("raportit/naytatilaus.inc");
+
 		}
 
 	}
@@ -249,7 +282,7 @@
 
 		if ($tee == "update") {
 
-			$ultilno = "";
+			$ultilno = $laskurow["ultilno"];
 
 			// kokeillaan arpoa intrastat k‰sittely‰, molemmat maat pit‰‰ olla EU maita
 			if ($maa_lahetys != "" and $maa_maara != "") {
@@ -259,10 +292,13 @@
 
 				if (mysql_num_rows($result) == 2) {
 					if ($maa_lahetys == $yhtiorow["maakoodi"] and $maa_maara != $yhtiorow["maakoodi"]) {
-						$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+						$ultilno = "-1"; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
 					}
 					elseif ($maa_maara == $yhtiorow["maakoodi"] and $maa_lahetys != $yhtiorow["maakoodi"]) {
-						$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+						$ultilno = "-2"; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+					}
+					else {
+						$ultilno = "";
 					}
 				}
 
@@ -286,7 +322,6 @@
 						vahennettava_era = '$vahennettava_era',
 						ultilno = '$ultilno'
 						WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
-
 			$result = mysql_query($query) or pupe_error($query);
 
 			$tee = "";
@@ -305,6 +340,30 @@
 			echo "</tr>";
 			echo "<tr><td>$laskurow[ytunnus]</td><td>$laskurow[nimi]</td><td>$laskurow[tapvm]</td><td>$laskurow[summa] $laskurow[valkoodi]</td><td>$laskurow[toimitusehto]</td></tr>";
 			echo "</table><br>";
+
+			if ($laskurow["tila"] == "K") {
+				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus = '$otunnus'";
+			}
+			else {
+				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+							FROM tilausrivi
+							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otunnus'";
+			}
+			$painoresult = mysql_query($query) or pupe_error($query);
+			$painorow = mysql_fetch_array($painoresult);
+
+			if ($painorow["kpl"] > 0) {
+				$osumapros = round($painorow["kplok"] / $painorow["kpl"] * 100, 2);
+			}
+			else {
+				$osumapros = "N/A";
+			}
+
+			echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br><br>";
 
 			echo "<table>";
 			echo "<form action = '$PHP_SELF' method='post'>";
@@ -376,7 +435,7 @@
 			}
 
 			echo "<tr><td>".t("Kauppatapahtuman luonne").":</td><td colspan='3'>
-				<select NAME='ktapahtuman_luonne'>";
+				<select name='kauppatapahtuman_luonne'>";
 
 			$query = "	SELECT avainsana.selite, ".avain('select')."
 						FROM avainsana
@@ -420,6 +479,10 @@
 			echo "<input type='hidden' name='tapa' value='$tapa'";
 			echo "<br><input type='submit' value='".t("P‰ivit‰ tiedot")."'>";
 			echo "</form>";
+
+			echo "<br><br>";
+			$tunnus = $otunnus;
+			require ("raportit/naytatilaus.inc");
 		}
 
 	}

@@ -1,6 +1,6 @@
 <?php
 	require ("inc/parametrit.inc");
-	
+
 	if (strpos($toim,'_') !== false) {
 		$toim = substr($toim,0,strpos($toim,'_'));
 		$tila = 'G';
@@ -8,11 +8,11 @@
 	else {
 		$tila = 'L';
 	}
-	
+
 	if ($toimtila != '') {
 		$tila = $toimtila;
 	}
-	
+
 	if ((int) $otsikkonro > 0 or (int) $id > 0) {
 		if ((int) $otsikkonro > 0) {
 			$hakutunnus	= $otsikkonro;
@@ -24,12 +24,12 @@
 		$query = "SELECT tila FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus='$hakutunnus' LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
-		
+
 		$tila = $row["tila"];
 	}
-	
+
 	if ($id == '') $id=0;
-		
+
 	// jos ollaan rahtikirjan esisyötössä niin tehdään lisäys vähän helpommin
 	if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_esisyotto"] == "M") {
 
@@ -55,7 +55,7 @@
 				$kollit[$i]	 	= str_replace(',', '.', $kollit[$i]);
 				$kuutiot[$i]	= str_replace(',', '.', $kuutiot[$i]);
 				$lavametri[$i]	= str_replace(',', '.', $lavametri[$i]);
-				
+
 				// lisätään rahtikirjatiedot (laitetaan poikkeava kenttään -9 niin tiedetään että esisyötetty)
 				$query  = "insert into rahtikirjat
 							(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,yhtio) values
@@ -103,7 +103,7 @@
 							where otunnus = '$otsikkonro' and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
 				$result  = mysql_query($query) or pupe_error($query);
 			}
-			
+
 			if ($tila == 'L') {
 				$alatilassa = " and lasku.alatila in ('C','E') ";
 				$joinmaksuehto = " JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus ";
@@ -111,7 +111,7 @@
 			else {
 				$alatilassa = " and lasku.alatila = 'C' ";
 			}
-			
+
 			// saadaanko näille tilauksille syöttää rahtikirjoja
 			$query = "	SELECT
 						lasku.yhtio,
@@ -146,12 +146,12 @@
 
 					// ja insertataan vaan jos se on erisuurta ku nolla (näin voidaan nollalla tai spacella tyhjentää kenttiä)
 					if (($kilot[$i] != '' or $kollit[$i] != '' or $kuutiot[$i] != '' or $lavametri[$i] != '') and $subnappi != '') {
-						
+
 						$kilot[$i]		= str_replace(',', '.', $kilot[$i]);
 						$kollit[$i]	 	= str_replace(',', '.', $kollit[$i]);
 						$kuutiot[$i]	= str_replace(',', '.', $kuutiot[$i]);
 						$lavametri[$i]	= str_replace(',', '.', $lavametri[$i]);
-						
+
 						if ($rakirno == '') {
 							$query = "select max(rahtikirjanro) rakirno from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro'";
 							$result = mysql_query($query) or pupe_error($query);
@@ -302,7 +302,7 @@
 		echo "<form action='$PHP_SELF' name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='toimtila' value='$tila'>";
-		echo "<input type='hidden' name='text' value='etsi'>";						
+		echo "<input type='hidden' name='text' value='etsi'>";
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
 
 		$query = "	SELECT tunnus, nimitys
@@ -430,7 +430,7 @@
 				$haku .= " and lasku.clearing='JT-TILAUS' ";
 			}
 		}
-		
+
 		//jos myyntitilaus niin halutaan maksuehto mukaan
 		if ($tila == 'L') {
 			$joinmaksuehto = "JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus";
@@ -440,7 +440,7 @@
 		else {
 			$wherelasku = " and lasku.toim_nimi != '' ";
 		}
-		
+
 		// Haetaan sopivia tilauksia
 		$query = "	SELECT
 					min(lasku.tunnus) tunnus,
@@ -470,7 +470,7 @@
 					HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
-		
+
 		//piirretään taulukko...
 		if (mysql_num_rows($tilre) != 0) {
 
@@ -517,7 +517,7 @@
 		echo "<form action='$PHP_SELF' name='find' method='post'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='toimtila' value='$tila'>";
-		echo "<input type='hidden' name='text' value='etsi'>";						
+		echo "<input type='hidden' name='text' value='etsi'>";
 		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
 
 		$query = "	SELECT tunnus, nimitys
@@ -733,7 +733,7 @@
 		}
 
 		$otsik = mysql_fetch_array($resul);
-		
+
 		if ($tila == 'L') {
 			$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$otsik[maksuehto]'";
 			$resul = mysql_query($query) or pupe_error($query);
@@ -956,41 +956,21 @@
 					order by avainsana.jarjestys";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$query  = "	SELECT tuotemassa, varattu
-					FROM tilausrivi, tuote
-					WHERE tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-					and tilausrivi.yhtio = '$kukarow[yhtio]' and otunnus = '$otsik[tunnus]' and ei_saldoa = ''";
+		$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+					FROM tilausrivi
+					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otsik[tunnus]'";
 		$painoresult = mysql_query($query) or pupe_error($query);
+		$painorow = mysql_fetch_array($painoresult);
 
-		$puntari	= 0;
-		$ylikpl		= 0;
-		$nollakpl	= 0;
-
-		if (mysql_num_rows($painoresult) > 0) {
-			while ($painorow = mysql_fetch_array($painoresult)) {
-				if ($painorow['tuotemassa'] > 0) {
-					$massa = $painorow['tuotemassa'] * $painorow['varattu'];
-					$puntari += $massa;
-					$ylikpl += $painorow['varattu'];
-				}
-				else {
-					$nollakpl += $painorow['varattu'];
-				}
-			}
-
-			$yhtpaikpl = $ylikpl + $nollakpl;
-
-			if ($ylikpl > 0 and $yhtpaikpl > 0) {
-				$osumapros = round(($ylikpl / $yhtpaikpl) * 100,0);
-			}
-			else {
-				$osumapros = 'N/A';
-			}
-
-			$puntari = round($puntari,2);
-
-			echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$puntari,$osumapros)."</font><br>";
+		if ($painorow["kpl"] > 0) {
+			$osumapros = round($painorow["kplok"] / $painorow["kpl"] * 100, 2);
 		}
+		else {
+			$osumapros = "N/A";
+		}
+
+		echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 
 		echo "<table>";
 

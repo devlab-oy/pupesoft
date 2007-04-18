@@ -8,7 +8,7 @@
 
 if ($tee == "update") {
 
-	$query = "select kohdistettu, erikoisale, rahti_etu from lasku WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+	$query = "select * from lasku WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array ($result);
 
@@ -32,7 +32,7 @@ if ($tee == "update") {
 		$rahti_etu = round($rahti_etu/(1+($alv/100)),2);
 	}
 
-	$ultilno = "";
+	$ultilno = $laskurow["ultilno"];
 
 	// kokeillaan arpoa intrastat k‰sittely‰, molemmat maat pit‰‰ olla EU maita
 	if ($maa_lahetys != "" and $maa_maara != "") {
@@ -42,10 +42,13 @@ if ($tee == "update") {
 
 		if (mysql_num_rows($result) == 2) {
 			if ($maa_lahetys == $yhtiorow["maakoodi"] and $maa_maara != $yhtiorow["maakoodi"]) {
-				$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+				$ultilno = "-1"; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
 			}
 			elseif ($maa_maara == $yhtiorow["maakoodi"] and $maa_lahetys != $yhtiorow["maakoodi"]) {
-				$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+				$ultilno = "-2"; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+			}
+			else {
+				$ultilno = "";
 			}
 		}
 

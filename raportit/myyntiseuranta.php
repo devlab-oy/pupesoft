@@ -345,6 +345,13 @@
 				$tilauslisa2 = "";
 			}
 			
+			if ($ajotapanlisa == "erikseen") {
+				$tilauslisa3 = ", if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt>0, 'Veloitus', 'Hyvitys') rivityyppi";
+				$group .= ", rivityyppi";
+			}
+			else {
+				$tilauslisa3 = "";
+			}
 			
 			$query = "	SELECT $select
 						$tilauslisa1
@@ -368,6 +375,7 @@
 						tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) /
 						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',
 						tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)),2) nettokateind
+						$tilauslisa3
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tilausrivi use index ($index) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.$ouusio=lasku.tunnus and tilausrivi.tyyppi='L'
 						LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
@@ -378,7 +386,7 @@
 										
 			if ($ajotapa == 'tilausjaauki') {										
 				$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-							and ((lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'  and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))";
+							and ((lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'  and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))";
 			}
 			else {
 				$query .= "	and lasku.alatila='X'
@@ -605,6 +613,10 @@
 
 								$apu = mysql_num_fields($result)-11;
 								
+								if ($ajotapanlisa == "erikseen") {
+									$apu -= 1;
+								}
+								
 								if ($ajotapa == 'tilausjaauki') {
 									$apu -= 2;
 								}
@@ -782,6 +794,10 @@
 				}
 
 				$apu = mysql_num_fields($result)-11;
+				
+				if ($ajotapanlisa == "erikseen") {
+					$apu -= 1;
+				}
 				
 				if ($ajotapa == 'tilausjaauki') {
 					$apu -= 2;
@@ -1083,6 +1099,25 @@
 			echo "</select></td>";
 			
 			echo "</tr>";
+			
+			if ($ajotapanlisa == "summattuna") {
+				$chk1 = "SELECTED";		
+			}
+			elseif ($ajotapanlisa == "erikseen") {
+				$chk2 = "SELECTED";		
+			}
+			else {
+				$chk1 = "SELECTED";	
+			}
+			
+			echo "<tr>";
+			echo "<th>".t("Ajotavan lisäparametrit:")."</th>";
+			
+			echo "<td><select name='ajotapanlisa'>";
+			echo "<option value='summattuna'  $chk1>".t("Veloitukset ja hyvitykset summattuina")."</option>";
+			echo "<option value='erikseen' 	  $chk2>".t("Veloitukset ja hyvitykset allekkain")."</option>";
+			echo "</select></td>";
+			echo "</tr>";			
 			echo "</table><br>";
 
 			$query = "	SELECT *

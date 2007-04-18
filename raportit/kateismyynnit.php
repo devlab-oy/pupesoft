@@ -116,7 +116,7 @@
 			$ots .= sprintf ('%-12.12s', t("Pvm"));
 			$ots .= sprintf ('%-13.13s', "$yhtiorow[valkoodi]");
 			$ots .= "\n";
-			$ots .= "---------------------------------------------------------------------------\n";
+			$ots .= "---------------------------------------------------------------------------------------\n";
 			fwrite($fh, $ots);
 			$ots = chr(12).$ots;
 		}
@@ -134,7 +134,7 @@
 
 				if ($vaiht == 1) {
 					$prn  = sprintf ('%-35.35s', 	$edkassanimi." ".t("yhteensä").":");
-					$prn .= "................................";
+					$prn .= "............................................";
 					$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$kassayhteensa)));
 					$prn .= "\n\n";
 
@@ -182,7 +182,7 @@
 
 			if ($vaiht == 1) {
 				$prn  = sprintf ('%-35.35s', 	$edkassanimi." ".t("yhteensä").":");
-				$prn .= "................................";
+				$prn .= "............................................";
 				$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$kassayhteensa)));
 				$prn .= "\n\n";
 				fwrite($fh, $prn);
@@ -243,7 +243,7 @@
 
 				if ($vaiht == 1) {
 					$prn  = sprintf ('%-35.35s', 	t("Käteissuoritukset yhteensä").":");
-					$prn .= "................................";
+					$prn .= "............................................";
 					$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$kassayhteensa)));
 					$prn .= "\n\n";
 					fwrite($fh, $prn);
@@ -257,7 +257,7 @@
 
 		if ($vaiht == 1) {
 			$prn  = sprintf ('%-35.35s', 	t("Yhteensä").":");
-			$prn .= "................................";
+			$prn .= "............................................";
 			$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$yhteensa)));
 			$prn .= "\n";
 			fwrite($fh, $prn);
@@ -265,12 +265,12 @@
 			fclose($fh);
 
 			//haetaan tilausken tulostuskomento
-			$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$printteri'";
-			$kirres= mysql_query($query) or pupe_error($query);
-			$kirrow= mysql_fetch_array($kirres);
-			$komento=$kirrow['komento'];
+			$query   = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$printteri'";
+			$kirres  = mysql_query($query) or pupe_error($query);
+			$kirrow  = mysql_fetch_array($kirres);
+			$komento = $kirrow['komento'];
 
-			$line = exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=82 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
+			$line = exec("a2ps -o $filenimi.ps -R --medium=A4 --chars-per-line=94 --no-header --columns=1 --margin=0 --borders=0 $filenimi");
 
 			// itse print komento...
 			$line = exec("$komento $filenimi.ps");

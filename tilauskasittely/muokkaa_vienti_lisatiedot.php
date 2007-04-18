@@ -86,6 +86,7 @@
 			echo "<table>";
 			echo "<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='otunnus' value='$otunnus'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tee' value='L'>";
 
 			$query = "SELECT sum(kollit) kollit, sum(kilot) kilot
@@ -311,6 +312,7 @@
 			echo "	<input type='hidden' name='toiminto' value='lisatiedot'>
 					<input type='hidden' name='otunnus' value='$otunnus'>
 					<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tee' value='update'>";
 
 			$query = "SELECT sum(kollit) kollit, sum(kilot) kilot
@@ -466,6 +468,7 @@
 					echo "<form method='post' action='$PHP_SELF'><td class='back'>
 							<input type='hidden' name='otunnus' value='$tilrow[tunnus]'>
 							<input type='hidden' name='tee' value='K'>
+							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tapa' value='$tapa'>
 							<input type='submit' value='".t("Valitse")."'></td></form>";
 

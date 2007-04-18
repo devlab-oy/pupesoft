@@ -130,6 +130,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		case "asiakashinta" :
 			$pakolliset = array("HINTA");
 			$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+			$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA");
 			break;
 		case "asiakaskommentti" :
 			$pakolliset = array("YTUNNUS","TUOTENO");
@@ -138,6 +139,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		case "asiakasalennus" :
 			$pakolliset = array("ALENNUS");
 			$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+			$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA");
 			break;
 		case "perusalennus" :
 			$pakolliset = array("ALENNUS","RYHMA");

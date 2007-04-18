@@ -106,16 +106,26 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$rivi = mysql_fetch_array($result);
 
+				//	Lähetetään mailia tästä eteenpäin jos meillä on vastaanottajia
+				if($yhtiorow["tuotekopio_email"] != "") {
+					$header  = "From: <$yhtiorow[postittaja_email]>\n";
+					$header .= "MIME-Version: 1.0\n" ;
+					
+					$query = "select * from yhtio where yhtio='$hakyhtio'";
+					$yres = mysql_query($query) or pupe_error($query);
+					$yrow = mysql_fetch_array($yres);
+					
+					$content = $kukarow["nimi"]." ".t("kopioi yhtiön")." $yrow[nimi] ".t("tuotteen")." '$tuoteno' ".t("yhtiön")." $yhtiorow[nimi] ".t("tuotteeksi")." '$uustuoteno'\n\n";
+										
+					mail($yhtiorow["tuotekopio_email"], t("Tuotteita kopioitu"), $content, $header, "-f $yhtiorow[postittaja_email]");
+				}
+				
 				$toim 	= 'tuote';
 				$tunnus = $rivi['tunnus'];
 				$tee 	= '';
 
 				require ("yllapito.php");
 				
-				//	Lähetetään mailia tästä eteenpäin jos meillä on vastaanottajia
-				if($yhtiorow["tuotekopio_email"] != "") {
-					mail($yhtiorow["tuotekopio_email"], "Tuotteita kopioitu", "$kukarow[nimi] kopioi tuotteen '$tuoteno' tuotteeksi '$uustuoteno'\n\n", $header, "-f $yhtiorow[postittaja_email]");
-				}
 				exit;
 			}
 		}

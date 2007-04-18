@@ -115,7 +115,7 @@ if ($tee != '') {
 				}
 				else {
 					if ($i == 0) { // Linkki tositteelle, jos kayttaja saa sita tehda
-						if ($kukarow['taso'] < 2) {
+						if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2) {
 							echo "<td>$trow[tapvm]</td>";
 						}
 						else {

@@ -109,8 +109,8 @@
 
 						// lis‰t‰‰n ostotilausrivi
 						$query = "	insert into tilausrivi
-									(tuoteno, hinta, tilkpl, varattu, otunnus, yhtio, tyyppi, kommentti, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
-									('$rivi[tuoteno]', '$rivi[hinta]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O', '".trim("$rivi[kommentti] $sarjacomment")."', '$varastorotunnus','0','0','0','$rivi[tunnus]')";
+									(tuoteno, hinta, tilkpl, varattu, otunnus, yhtio, tyyppi, kommentti, toimaika, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
+									('$rivi[tuoteno]', '$rivi[hinta]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O', '".trim("$rivi[kommentti] $sarjacomment")."', '$rivi[toimaika]', '$varastorotunnus','0','0','0','$rivi[tunnus]')";
 						$updre = mysql_query($query) or pupe_error($query);
 						$rivitunnus = (string) mysql_insert_id();
 

@@ -143,25 +143,16 @@ if ($tee == "liita") {
 
 		// jos kyseess‰ on vaihto-omaisuuslasku, niin p‰ivitet‰‰n laskun tapvm keikalla ja vientikent‰n info keikan otsikolle (jos jostain syyst‰ toimittajan oletus onkin v‰‰rin)
 		if ($oslasrow["vienti"] == "C" or $oslasrow["vienti"] == "F" or $oslasrow["vienti"] == "I" or $oslasrow["vienti"] == "J" or $oslasrow["vienti"] == "K" or $oslasrow["vienti"] == "L") {
-
-			// haetaan kurssi uusiksi, jos valuutta on vaihtunut
-			$query  = "	select kurssi
-						from valuu
-						where nimi	= '$oslasrow[valkoodi]'
-						and yhtio	= '$kukarow[yhtio]'";
-			$kurres = mysql_query($query) or pupe_error($query);
-			$kurrow = mysql_fetch_array($kurres);
-			$kurssi = $kurrow["kurssi"];
-
 			$query = "	update lasku set
 						vienti			= '$oslasrow[vienti]',
 						tapvm			= '$oslasrow[tapvm]',
 						valkoodi		= '$oslasrow[valkoodi]',
-						vienti_kurssi	= '$kurssi',
+						maksu_kurssi 	= '$oslasrow[maksu_kurssi]',
+						vienti_kurssi	= '$oslasrow[vienti_kurssi]',
 						kohdistettu		= ''
 						where yhtio		= '$kukarow[yhtio]'
 						and tunnus		= '$laskurow[tunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
+			$result = mysql_query($query) or pupe_error($query);			
 		}
 
 		// takasin selaukseen

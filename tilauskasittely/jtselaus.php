@@ -88,7 +88,7 @@
 
 				$suoratoimpaikka[$tunnukset] = $suoravarastopaikka[$tunnukset]."&&&".$montako;
 			}
-			elseif(isset($suoratoimpaikka[$tunnukset]) and $kpl[$tunnukset] > 0 or $loput[$tunnukset] != '') {
+			elseif(isset($suoratoimpaikka[$tunnukset]) and ($kpl[$tunnukset] > 0 or $loput[$tunnukset] != '')) {
 				echo "<font class='message'>".t("Jos suoratoimitat tuotteita, muista valita myös toimittaja")."!!!</font><br>";
 				
 				unset($suoratoimpaikka[$tunnukset]);
@@ -960,7 +960,7 @@
 							elseif ($paikatlask > 0 and $automaaginen == ''and $kukarow['extranet'] == '') {
 								echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
-								$varalisa = "<br><select name='suoratoimpaikka[$tunnukset]'><option value=''>".t("Ei toimiteta")."</option>".$paikat."</select>";
+								$varalisa = "<br><select name='suoratoimpaikka[$tunnukset]'><option value='EITOIMITETA'>".t("Ei toimiteta")."</option>".$paikat."</select>";
 
 								if ($suoratoim_totaali >= $jurow["jt"]) {
 									echo "<td valign='top' $class><font color='#00FF00'>".t("Riittää kaikille")."!$varalisa</font></td>";

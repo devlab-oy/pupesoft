@@ -960,7 +960,7 @@
 							elseif ($paikatlask > 0 and $automaaginen == ''and $kukarow['extranet'] == '') {
 								echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
-								$varalisa = "<br><select name='suoratoimpaikka[$tunnukset]'><option value='EITOIMITETA'>".t("Ei toimiteta")."</option>".$paikat."</select>";
+								$varalisa = "<br><select name='suoratoimpaikka[$tunnukset]'><option value=''>".t("Ei toimiteta")."</option>".$paikat."</select>";
 
 								if ($suoratoim_totaali >= $jurow["jt"]) {
 									echo "<td valign='top' $class><font color='#00FF00'>".t("Riittää kaikille")."!$varalisa</font></td>";

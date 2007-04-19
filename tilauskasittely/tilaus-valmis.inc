@@ -446,22 +446,30 @@ else {
 				$varaston_res = mysql_query($query) or pupe_error($query);
 				$varaston_row = mysql_fetch_array($varaston_res);
 
+				$laskurow["kauppatapahtuman_luonne"] = '0';
+
 				// katotaan pit‰‰kˆ tilaukselle tehd‰ intrastat
 				// varasto pit‰‰ lˆyty‰, toimitusosoitteen maa ja varastonmaa pit‰‰ lˆyty‰ ja kauppatapahtuman_luonnetta ei saa olla annettu viel‰
 				if (mysql_num_rows($varaston_res) == 1 and $laskurow["toim_maa"] != "" and $varaston_row["maa"] != "") {
 
-					#TODO mit‰ jos kyseess‰ on ei-EU maa!? tai joku muu kummallinen keisi
-					if ($laskurow["toim_maa"] == $varaston_row["maa"]) {
-						$laskurow["kauppatapahtuman_luonne"] = '999'; // intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
-					}
-					elseif ($laskurow["kauppatapahtuman_luonne"] == 0 or $laskurow["kauppatapahtuman_luonne"] == 999) {
+					$query = "select distinct koodi from maat where koodi in ('$laskurow[toim_maa]','$varaston_row[maa]') and eu = 'ON'";
+					$euapuresult = mysql_query($query) or pupe_error($query);
 
-						if ($varaston_row["maa"] == $yhtiorow["maakoodi"]) {
-							$laskurow["kauppatapahtuman_luonne"] = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+					// kummatkin maat pit‰‰ olla EU:ssa
+					if (mysql_num_rows($euapuresult) == 2) {
+
+						if ($laskurow["toim_maa"] == $varaston_row["maa"]) {
+							$laskurow["kauppatapahtuman_luonne"] = '999'; // intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
 						}
-						elseif ($laskurow["toim_maa"] == $yhtiorow["maakoodi"]) {
-							$laskurow["kauppatapahtuman_luonne"] = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+						elseif ($laskurow["kauppatapahtuman_luonne"] == 0 or $laskurow["kauppatapahtuman_luonne"] == 999) {
+							if ($varaston_row["maa"] == $yhtiorow["maakoodi"]) {
+								$laskurow["kauppatapahtuman_luonne"] = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+							}
+							elseif ($laskurow["toim_maa"] == $yhtiorow["maakoodi"]) {
+								$laskurow["kauppatapahtuman_luonne"] = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+							}
 						}
+
 					}
 
 				}
@@ -556,22 +564,22 @@ else {
 					$ohno  = mysql_query($query) or pupe_error($query);
 				}
 			}
-			
+
 			$query = "select tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$laskurow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($result) > 1) {
-				
+
 				$montakotilausta = mysql_num_rows($result);
-				
+
 				while ($row = mysql_fetch_array($result)) {
-					
+
 					$upviesti = $row["sisviesti2"]." ".t("tilaus jakaantunut")." $montakotilausta ".t("tilaukseksi")."!";
-					
+
 					$query = "update lasku set sisviesti2 = '$upviesti' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]'";
 					$upresult = mysql_query($query) or pupe_error($query);
 				}
 			}
-			
+
 			//tyhjennet‰‰n muuttujat
 			$varasto 	= '';
 			$edvarasto 	= '';

@@ -164,12 +164,12 @@
 
 		//käydään kaikki rivit läpi ja tarkastetaan varastopaika ja perustetaan uusia jos on tarvis
 		foreach($tunnus as $tun) {
-			
+
 			$t1[$tun] = trim($t1[$tun]);
 			$t2[$tun] = trim($t2[$tun]);
 			$t3[$tun] = trim($t3[$tun]);
 			$t4[$tun] = trim($t4[$tun]);
-				
+
 			$t1[$tun] = strtoupper($t1[$tun]);
 
 			$query = "	SELECT tilausrivi.tuoteno, tuote.ei_saldoa
@@ -186,7 +186,7 @@
 				echo "<font style='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
 			}
 			elseif ($tilausrivirow["ei_saldoa"] == "") {
-				
+
 				// Jaaha mitäs tuotepaikalle pitäisi tehdä
 				if (($rivivarasto[$tun] != 'x') and ($rivivarasto[$tun] != '')) {  //Varastopaikka vaihdettiin pop-upista, siellä on paikan tunnus
 					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
@@ -237,7 +237,7 @@
 						else {
 							$oletus='';
 						}
-						
+
 						if ($t1[$tun] != '' and $t2[$tun] != '' and $t3[$tun] != '' and $t4[$tun] != '') {
 							$query = "	insert into tuotepaikat (hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, saldo, saldoaika, tuoteno, yhtio, laatija, luontiaika)
 										values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
@@ -282,11 +282,11 @@
 				}
 			}
 			if ($eankoodi[$tun]!= '') {
-				$query = "	UPDATE tuote 
-							SET eankoodi = '$eankoodi[$tun]', 
-							muuttaja	= '$kukarow[kuka]', 
+				$query = "	UPDATE tuote
+							SET eankoodi = '$eankoodi[$tun]',
+							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
-							WHERE yhtio = '$kukarow[yhtio]' 
+							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$tilausrivirow[tuoteno]'";
 				$resulteankoodi = mysql_query($query) or pupe_error($query);
 			}
@@ -419,16 +419,16 @@
 						if ($oletuspaiv != '') {
 							echo "<font class='message'>".t("Siirretään oletuspaikka")."</font><br><br>";
 
-							$query = "	UPDATE tuotepaikat 
+							$query = "	UPDATE tuotepaikat
 										SET oletus 	= '',
-										muuttaja	= '$kukarow[kuka]', 
+										muuttaja	= '$kukarow[kuka]',
 										muutospvm	= now()
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
 							$rresult = mysql_query($query) or pupe_error($query);
 
-							$query = "	UPDATE tuotepaikat 
+							$query = "	UPDATE tuotepaikat
 										SET oletus = 'X',
-										muuttaja	= '$kukarow[kuka]', 
+										muuttaja	= '$kukarow[kuka]',
 										muutospvm	= now()
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$uusiol'";
 							$rresult = mysql_query($query) or pupe_error($query);
@@ -467,13 +467,50 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$apusummarow = mysql_fetch_array($result);
 
-			$query = "	UPDATE lasku, tilausrivi
-						SET alatila				= 'V',
-						tapvm					= now(),
-						summa					= '$apusummarow[rivihinta]'
-						WHERE lasku.tunnus		= '$id'
-						and lasku.yhtio			= '$kukarow[yhtio]'
-						and lasku.tila			= 'G'";
+			// katotaan onko toimitustavalle jotain intrastat oletuksia
+			$query  = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$id'";
+			$result = mysql_query($query) or pupe_error($query);
+			$apulaskurow = mysql_fetch_array($result);
+
+			// katotaan onko toimitustavalle jotain intrastat oletuksia
+			$query  = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$apulaskurow[toimitustapa]'";
+			$result = mysql_query($query) or pupe_error($query);
+			$aputoimirow = mysql_fetch_array($result);
+
+			// clearing on kohdevarasto
+			$query  = "select maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$apulaskurow[clearing]'";
+			$result = mysql_query($query) or pupe_error($query);
+			$apuvararow = mysql_fetch_array($result);
+			$maa_maara = $apuvararow["maa"];
+
+			// varasto on lähdevarasto
+			$query  = "select maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$apulaskurow[varasto]'";
+			$result = mysql_query($query) or pupe_error($query);
+			$apuvararow = mysql_fetch_array($result);
+			$maa_lahetys = $apuvararow["maa"];
+
+			$query = "	UPDATE lasku
+						SET alatila							= 'V',
+						tapvm								= now(),
+						summa								= '$apusummarow[rivihinta]',
+						maa_maara							= '$maa_maara',
+						maa_lahetys							= '$maa_lahetys',
+						kauppatapahtuman_luonne 			= '$aputoimirow[kauppatapahtuman_luonne]',
+						kuljetusmuoto						= '$aputoimirow[kuljetusmuoto]',
+						sisamaan_kuljetus					= '$aputoimirow[sisamaan_kuljetus]',
+						sisamaan_kuljetusmuoto  			= '$aputoimirow[sisamaan_kuljetusmuoto]',
+						sisamaan_kuljetus_kansallisuus		= '$aputoimirow[sisamaan_kuljetus_kansallisuus]',
+						kontti								= '$aputoimirow[kontti]',
+						aktiivinen_kuljetus 				= '$aputoimirow[aktiivinen_kuljetus]',
+						aktiivinen_kuljetus_kansallisuus	= '$aputoimirow[aktiivinen_kuljetus_kansallisuus]',
+						poistumistoimipaikka 				= '$aputoimirow[poistumistoimipaikka]',
+						poistumistoimipaikka_koodi 			= '$aputoimirow[poistumistoimipaikka_koodi]',
+						bruttopaino 						= '$aputoimirow[bruttopaino]',
+						lisattava_era 						= '$aputoimirow[lisattava_era]',
+						vahennettava_era 					= '$aputoimirow[vahennettava_era]'
+						WHERE lasku.tunnus					= '$id'
+						and lasku.yhtio						= '$kukarow[yhtio]'
+						and lasku.tila						= 'G'";
 			$result = mysql_query($query) or pupe_error($query);
 			$id = 0;
 		}
@@ -483,7 +520,7 @@
 
 	// meillä ei ole valittua tilausta
 	if ($id == '0') {
-		
+
 		$formi  = "find";
 		$kentta = "etsi";
 
@@ -509,7 +546,7 @@
 					GROUP BY 1
 					HAVING ultilno not in ('-1','-2') or rtunnuksia > 0";
 		$tilre = mysql_query($query) or pupe_error($query);
-		
+
 		while ($tilrow = mysql_fetch_array($tilre)) {
 
 			if ($toim == "MYYNTITILI") {
@@ -598,7 +635,7 @@
 					and yhtio = '$kukarow[yhtio]'
 					and alatila in ('B','C','D')";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		$row = mysql_fetch_array($result);
 
 		echo "<table>";
@@ -835,7 +872,7 @@
 			}
 
 			if ($toim != "MYYNTITILI") {
-				
+
 				//haetaan eankoodi tuotteelta
 				$query  = "	SELECT eankoodi
 							FROM tuote

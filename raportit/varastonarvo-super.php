@@ -361,27 +361,32 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	$trylisa = "";
 
 	if ($tuoteryhma != "kaikki" and $sel_tuoteryhma != "" and $sel_tuoteryhma != t("Ei valintaa")) {
-		$trylisa .= " and tuote.try in ('$sel_tuoteryhma') ";
+		$trylisa .= " and try in ('$sel_tuoteryhma') ";
 	}
 	if ($osasto != "kaikki" and $sel_osasto != "" and $sel_osasto != t("Ei valintaa")) {
-		$trylisa .= " and tuote.osasto in ('$sel_osasto') ";
+		$trylisa .= " and osasto in ('$sel_osasto') ";
 	}
 	if ($tuoteryhma == "tyhjat") {
-		$trylisa .= " and tuote.try = 0 ";
+		$trylisa .= " and (try = 0 or try is null) ";
 	}
 	if ($osasto == "tyhjat") {
-		$trylisa .= " and tuote.osasto = 0 ";
+		$trylisa .= " and (osasto = 0 or osasto is null) ";
 	}
 		
 	// haetaan halutut tuotteet
-	$query  = "	SELECT tuoteno, osasto, try, nimitys, kehahin, epakurantti1pvm, epakurantti2pvm, sarjanumeroseuranta
+	$query  = "	SELECT tuote.tuoteno, 
+				atry.selite try, 
+				aosa.selite osasto, 
+				tuote.nimitys, tuote.kehahin, tuote.epakurantti1pvm, tuote.epakurantti2pvm, tuote.sarjanumeroseuranta
 				FROM tuote
-				WHERE yhtio = '$kukarow[yhtio]'
-				and ei_saldoa = ''
+				LEFT JOIN avainsana atry on atry.yhtio=tuote.yhtio and atry.selite=tuote.try and atry.laji='TRY'
+				LEFT JOIN avainsana aosa on aosa.yhtio=tuote.yhtio and aosa.selite=tuote.try and aosa.laji='OSASTO'
+				WHERE tuote.yhtio = '$kukarow[yhtio]'
+				and tuote.ei_saldoa = ''
 				$trylisa
-				ORDER BY osasto, try, tuoteno";
+				ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
-		
+			
 	$lask  = 0;
 	$varvo = 0; // tähän summaillaan
 

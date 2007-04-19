@@ -1729,10 +1729,6 @@ if ($tee == '') {
 		// Valmistuksissa haetaan perheiden perheitä mukaan valmistukseen!!!!!!
 		if ($laskurow['tila'] == 'V' and $var != "W" and $yhtiorow["rekursiiviset_reseptit"] == "Y") {
 			
-			if (!is_array($kpl_array) and trim($kpl) != "") {
-				$kpl_array[$tuoteno] = $kpl;
-			}
-			
 			$kommentti_array = array();
 			
 			function rekursiivinen_resepti($pertuoteno) {
@@ -1777,7 +1773,12 @@ if ($tee == '') {
 			$riikoko = count($tuoteno_array);
 			$perkpl = $kayttajan_kpl;
 			
-			for($rii=0; $rii < $riikoko; $rii++) {			
+			for($rii=0; $rii < $riikoko; $rii++) {
+				
+				if ($kpl != '' and !is_array($kpl_array) and $rii == 0) {
+					$kpl_array[$tuoteno_array[$rii]] = $kayttajan_kpl;
+				}
+				
 				rekursiivinen_resepti($tuoteno_array[$rii]);	
 			}
 		}
@@ -1787,7 +1788,7 @@ if ($tee == '') {
 						from tuote
 						where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+						
 			if (mysql_num_rows($result) > 0) {
 				//Tuote löytyi
 				$trow = mysql_fetch_array($result);

@@ -124,6 +124,7 @@
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
 					WHERE lasku.tila = 'L'
 					and lasku.alatila = 'X'
+					and lasku.vienti != 'K'
 					$where2
 					and lasku.kauppatapahtuman_luonne != '999'
 					and lasku.yhtio = '$kukarow[yhtio]'

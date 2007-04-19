@@ -71,4 +71,59 @@
 		}
 	}
 
+	if (mysql_field_name($result, $i) == "syncronoi") {
+		
+		if($t[$i]!="") {
+			$t[$i]=str_replace("'","",$t[$i]);
+			if(strpos($t[$i],",")) {
+				$taulut=explode(",",$t[$i]);
+			}
+			else {
+				$taulut=array($t[$i]);
+			}
+
+			$sallitut=array("asiakas","toimi","avainsana","tuote","tuotteen_toimittajat");
+			$sallitut_avainsana=array("TRY","OSASTO");
+
+			if(count($taulut)>0) {			
+				foreach($taulut as $taulu) {				
+
+					if(strpos($taulu,"avainsana")!==false) {
+						$taululisat = explode("|",substr($taulu,10));
+						$taulu = substr($taulu,0,9);
+						if(count($taululisat)>0) {
+							foreach($taululisat as $taululisa) {
+								if(!in_array($taululisa, $sallitut_avainsana)) {
+									if($virhe[$i]!="") {
+										$virhe[$i] .= "<br>";
+									}
+									$virhe[$i] .= t("Lisätieto ei kelpaa")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
+									$errori = 1;							
+								}
+							}						
+						}
+						else {
+							if($virhe[$i]!="") {
+								$virhe[$i] .= "<br>";
+							}
+							$virhe[$i] .= t("Lisätiedot vaaditaan")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
+							$errori = 1;													
+						}
+					}
+
+					$query="show tables like '$taulu'";
+					$taulures=mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($taulures)==0 or !in_array($taulu, $sallitut)) {
+						if($virhe[$i]!="") {
+							$virhe[$i] .= "<br>";
+						}
+						$virhe[$i] .= t("Taulu ei kelpaa")." '$taulu' ".t("sallitut kentät ovat")." ".implode(",", $sallitut);
+						$errori = 1;
+					}
+				}
+			}					
+		}
+	}
+
+
 ?>

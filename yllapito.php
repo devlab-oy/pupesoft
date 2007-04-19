@@ -176,7 +176,10 @@
 			if ($tunnus == '') {
 				$tunnus = mysql_insert_id();
 			}
-
+			
+			//	Tämä funktio tekee myös oikeustarkistukset!
+			synkronoi($toim, $tunnus, $trow);
+			
 			// Siirrytään takaisin sieltä mistä tultiin
 			if ($lopetus != '') {
 				// Jotta urlin parametrissa voisi päässätä toisen urlin parametreineen

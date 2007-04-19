@@ -113,6 +113,12 @@
 
 		// p‰ivitet‰‰n toimittaja
 		if ($tee == "update") {
+
+			//	synkkausta varten!			
+			$query = "select * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tunnus='$toimtunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			$orgirow=mysql_fetch_array($result) or pupe_error($query);
+			
 			$query = "	update tuotteen_toimittajat set
 						yhtio			= '$kukarow[yhtio]',
 						tuoteno			= '$tuoteno',
@@ -127,6 +133,8 @@
 						liitostunnus	= '$tuotoimirow[tunnus]'
 						where yhtio = '$kukarow[yhtio]' and tunnus = '$toimtunnus'";
 			$result = mysql_query($query) or pupe_error($query);
+			
+			synkronoi("tuotteen_toimittajat", $toimtunnus, $orgirow);
 			$tee = "";
 		}
 
@@ -152,6 +160,7 @@
 						alkuperamaa		= '$alkuperamaa',
 						liitostunnus	= '$tuotoimirow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
+			synkronoi("tuotteen_toimittajat", mysql_insert_id(), $origrow);			
 			$tee = "";
 		}
 

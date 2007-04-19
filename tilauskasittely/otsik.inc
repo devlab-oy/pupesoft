@@ -978,7 +978,7 @@
 						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
 						ORDER BY jarjestys, selite";
 			$tresult = mysql_query($query) or pupe_error($query);
-			
+
 			echo "<select id='toimitusehto' name='toimitusehto' Style='width: 55px; font-size: 8pt; padding: 0' onchange=toimehtoTarkenne('toimitusehto')>";
 
 			while($row = mysql_fetch_array($tresult)) {
@@ -988,10 +988,10 @@
 					$sel = 'selected';
 					$kasitoimehto = substr($srow["toimitusehto"],4);
 				}
-				elseif ($row["selite"] == $srow["toimitusehto"] or ($srow["toimitusehto"] == '' and $yhtiorow['oletus_toimitusehto'] == $row["selite"])) { 
+				elseif ($row["selite"] == $srow["toimitusehto"] or ($srow["toimitusehto"] == '' and $yhtiorow['oletus_toimitusehto'] == $row["selite"])) {
 					$sel = 'selected';
 				}
-				
+
 				echo "<option value='$row[selite]' $sel>$row[0] $row[1]</option>";
 			}
 			echo "<option value=''></option></select>";
@@ -1040,7 +1040,7 @@
 					elseif ($row["selite"] == $srow["toimitusehto2"] or ($srow["toimitusehto2"] == '' and $yhtiorow['oletus_toimitusehto2'] == $row["selite"])) {
 						$sel = 'selected';
 					}
-					
+
 					echo "<option value='$row[selite]' $sel>$row[0] $row[1]</option>";
 				}
 				echo "<option value=''></option></select>";
@@ -1227,6 +1227,89 @@
 						<td>Työn suorittaja:</td><td><input type='text' name='suorittaja' size='20' maxlengtd='15' value='$srow[suorittaja]'></td></tr>";
 				echo "<tr><td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td></tr>";
 				echo "<tr><td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td></tr>";
+				echo "</table><br>";
+			}
+
+			// tehdään ylläpitosopimista varten laskutusaikataulu taulu
+			if ($toim == "YLLAPITO") {
+				echo "<table>";
+				echo "<tr><th colspan='2'>".t("Valitse ylläpitosopimuksen laskutusaikataulu").":</th></tr>";
+				echo "<tr>";
+				echo "<td>";
+					echo "<table><tr>";
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[1] value='1'> Tammi </td>";
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[2] value='2'> Helmi </td>";
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[3] value='3'> Maalis </td>";
+					echo "</tr><tr>";                                     
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[4] value='4'> Huhti </td>";
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[5] value='5'> Touko </td>";
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[6] value='6'> Kesä </td>";
+					echo "</tr><tr>";                                     
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[7] value='7'> Heinä </td>";
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[8] value='8'> Elo </td>";
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[9] value='9'> Syys </td>";
+					echo "</tr><tr>";                                     
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[10] value='10'> Loka </td>";
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[11] value='11'> Marras </td>";
+					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[12] value='12'> Joulu </td>";
+					echo "</tr></table>";
+				echo "</td>";
+				echo "<td>";
+					echo "<table><tr>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[1] value='1'> 1 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[2] value='2'> 2 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[3] value='3'> 3 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[4] value='4'> 4 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[5] value='5'> 5 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[6] value='6'> 6 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[7] value='7'> 7 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[8] value='8'> 8 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[9] value='9'> 9 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[10] value='10'> 10 </td>";
+					echo "</tr><tr>";                                          
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[11] value='11'> 11 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[12] value='12'> 12 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[13] value='13'> 13 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[14] value='14'> 14 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[15] value='15'> 15 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[16] value='16'> 16 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[17] value='17'> 17 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[18] value='18'> 18 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[19] value='19'> 19 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[20] value='20'> 20 </td>";
+					echo "</tr><tr>";                                          
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[21] value='21'> 21 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[22] value='22'> 22 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[23] value='23'> 23 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[24] value='24'> 24 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[25] value='25'> 25 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[26] value='26'> 26 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[27] value='27'> 27 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[28] value='28'> 28 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[29] value='29'> 29 </td>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[30] value='30'> 30 </td>";
+					echo "</tr><tr>";
+					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[31] value='31'> 31 </td>";
+					echo "<td colspan='9'><input name='yllapito_pp[]' type='checkbox' $chk[99] value='99'> Kuun viimeinen </td>";
+					echo "</tr></table>";
+				echo "</td>";
+				echo "</tr>";
+				echo "<tr><th colspan='4'>".t("Sopimuksen voimassaoloaika").":</th></tr>";			
+				echo "<tr>";
+				echo "<td>Alkupäivä:</td>";
+				echo "<td>";
+				echo "<input type='text' name='yllapito_alkupp' value='$yllapito_alkupp' size='3'>";
+				echo "<input type='text' name='yllapito_alkukk' value='$yllapito_alkukk' size='3'>";
+				echo "<input type='text' name='yllapito_alkuvv' value='$yllapito_alkuvv' size='6'>";
+				echo "</td>";
+				echo "</tr><tr>";
+				echo "<td>Loppupäivä:</td>";
+				echo "<td>";
+				echo "<input type='text' name='yllapito_loppupp' value='$yllapito_loppupp' size='3'>";
+				echo "<input type='text' name='yllapito_loppukk' value='$yllapito_loppukk' size='3'>";
+				echo "<input type='text' name='yllapito_loppuvv' value='$yllapito_loppuvv' size='6'>";
+				echo "</td>";
+				echo "</tr>";
 				echo "</table><br>";
 			}
 

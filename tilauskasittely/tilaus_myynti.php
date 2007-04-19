@@ -280,6 +280,11 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 		$valkoodi 			= $asiakasrow["valkoodi"];
 		$sisviesti1			= $asiakasrow["sisviesti1"];
 		
+		
+		if (trim($asiakasrow["toimitusehto"]) != "") {
+			$yhtiorow['oletus_toimitusehto'] = $asiakasrow["toimitusehto"];
+		}
+		
 		$toimitusehto		= substr($yhtiorow['oletus_toimitusehto'], 0, 3);
 		$kasitoimehto 		= substr($yhtiorow['oletus_toimitusehto'], 4);
 

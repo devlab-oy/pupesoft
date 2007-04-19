@@ -978,8 +978,8 @@
 						WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
 						ORDER BY jarjestys, selite";
 			$tresult = mysql_query($query) or pupe_error($query);
-
-			echo "<select id='toimitusehto' name='toimitusehto' Style='width: 55px; font-size: 8pt; padding: 0' onchange=toimehtoTarkenne('toimitusehto')><option value=''></option>";
+			
+			echo "<select id='toimitusehto' name='toimitusehto' Style='width: 55px; font-size: 8pt; padding: 0' onchange=toimehtoTarkenne('toimitusehto')>";
 
 			while($row = mysql_fetch_array($tresult)) {
 				$sel = "";
@@ -987,13 +987,14 @@
 				if(stripos(substr($srow["toimitusehto"],0,4), $row["selite"]." ") !== false) {
 					$sel = 'selected';
 					$kasitoimehto = substr($srow["toimitusehto"],4);
-
 				}
-				elseif ($row["selite"] == $srow["toimitusehto"] or ($srow["toimitusehto"] == '' and $yhtiorow['oletus_toimitusehto'] == $row["selite"])) $sel = 'selected';
-
+				elseif ($row["selite"] == $srow["toimitusehto"] or ($srow["toimitusehto"] == '' and $yhtiorow['oletus_toimitusehto'] == $row["selite"])) { 
+					$sel = 'selected';
+				}
+				
 				echo "<option value='$row[selite]' $sel>$row[0] $row[1]</option>";
 			}
-			echo "</select>";
+			echo "<option value=''></option></select>";
 
 			$query = "	SELECT selite, selitetark
 						FROM avainsana
@@ -1026,7 +1027,7 @@
 							ORDER BY jarjestys, selite";
 				$tresult = mysql_query($query) or pupe_error($query);
 
-				echo "<select id='toimitusehto2' name='toimitusehto2' Style='width: 55px; font-size: 8pt; padding: 0' onchange=toimehtoTarkenne('toimitusehto2')><option value=''></option>";
+				echo "<select id='toimitusehto2' name='toimitusehto2' Style='width: 55px; font-size: 8pt; padding: 0' onchange=toimehtoTarkenne('toimitusehto2')>";
 
 				while($row = mysql_fetch_array($tresult)) {
 					$sel = "";
@@ -1036,11 +1037,13 @@
 						$kasitoimehto2 = substr($srow["toimitusehto2"],4);
 
 					}
-					elseif ($row["selite"] == $srow["toimitusehto2"] or ($srow["toimitusehto2"] == '' and $yhtiorow['oletus_toimitusehto2'] == $row["selite"])) $sel = 'selected';
-
+					elseif ($row["selite"] == $srow["toimitusehto2"] or ($srow["toimitusehto2"] == '' and $yhtiorow['oletus_toimitusehto2'] == $row["selite"])) {
+						$sel = 'selected';
+					}
+					
 					echo "<option value='$row[selite]' $sel>$row[0] $row[1]</option>";
 				}
-				echo "</select>";
+				echo "<option value=''></option></select>";
 
 				$query = "	SELECT selite, selitetark
 							FROM avainsana

@@ -370,26 +370,24 @@
 
 	if (mysql_field_name($result, $i) == "toimitusehto") {
 
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT concat(selite, ' ', selitetark) toimehto
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]'
-					and laji = 'TOIMEHTO'
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
 					ORDER BY jarjestys, selite";
-		$tresult = mysql_query($query) or pupe_error($query);
+		$kires = mysql_query($query) or pupe_error($query);
 
-		$ulos = "<td><select name='$nimi'><option value=''>".t("Tyhjä")."</option>";
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
 
-		while($row = mysql_fetch_array($tresult)) {
+		while ($kirow=mysql_fetch_array($kires)) {
+			if ($kirow["toimehto"]==$trow[$i]) $select='SELECTED';
+			else $select = '';
 
-			$sel = "";
-			if ($row["selite"] == $trow[$i]) {
-				$sel = 'selected';
-			}
-
-			$ulos .= "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
+			$ulos .= "<option value='$kirow[toimehto]' $select>$kirow[toimehto]</option>";
 		}
 
 		$ulos .= "</select></td>";
+
 		$jatko = 0;
 	}
 

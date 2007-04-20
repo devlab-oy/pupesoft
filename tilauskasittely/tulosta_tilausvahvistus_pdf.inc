@@ -86,7 +86,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 			
 			//	Laitetaan perustiedot oikealle		
 			$h=250;
-			$s=$pdf->teeSarakkeet(array(105,30));
+			$s=$pdf->teeSarakkeet(array(100,35));
 			if($laskurow["projekti"] != "" and $laskurow["projekti"] == $laskurow["tunnus"]) {
 				$kentat = array("projekti", "päiväys", "valuutta", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
 			}

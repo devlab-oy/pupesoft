@@ -123,7 +123,7 @@
 						}
 						$h-=$pdf->ln(0.5);
 						//	Sitten yhteyshenkilöitä
-						foreach(array("tilausviite", "lisätiedot") as $key) {
+						foreach(array("viite", "lisätiedot") as $key) {
 							if($laskurow[$key] != "") {
 								$pdf->write($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B");
 								$h-=$pdf->ln();					

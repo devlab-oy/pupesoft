@@ -69,7 +69,7 @@
 										laatija 			= '$kukarow[kuka]',
 										alv 				= '$tiltoi[alv]',
 										comments 			= '$tiltoi[comments]',
-										viesti 				= '$tiltoi[viesti]',
+										viesti 				= '$myytilrow[viesti]',
 										kuljetus 			= '$tiltoi[kuljetus]',
 										huolitsija 			= '$tiltoi[huolitsija]',
 										maksuteksti 		= '$tiltoi[maksuteksti]',

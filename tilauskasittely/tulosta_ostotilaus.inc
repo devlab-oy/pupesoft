@@ -44,7 +44,7 @@
 					global $yhtiorow, $kukarow, $fonts, $tulosta_ostotilaus_ulos;
 
 					// Haetaan laskun tiedot
-					$query = "	SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti tilausviite, sisviesti1 lisätiedot,
+					$query = "	SELECT lasku.*, lasku.tunnus tunnus, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, lasku.tunnus tilaus, lasku.tunnus toimitus, viesti viite, comments lisätiedot,
 								concat_ws(' ', postino, postitp) postiosoite,
 								concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,					
 								SUBSTRING(lasku_maa.nimi FROM 5) maa,
@@ -112,7 +112,7 @@
 
 						//	Laitetaan perustiedot oikealle		
 						$h=250;
-						$s=$pdf->teeSarakkeet(array(105,30));
+						$s=$pdf->teeSarakkeet(array(100,35));
 						foreach(array("tilaus", "päiväys", "toimitustapa", "toimitusehto") as $key) {
 							if($key == "päiväys") {
 								$laskurow[$key] = strftime("%x",strtotime($laskurow[$key]));

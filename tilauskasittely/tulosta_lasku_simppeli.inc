@@ -93,7 +93,7 @@ if (!function_exists('tulosta_lasku')) {
 			
 			//	Laitetaan perustiedot oikealle		
 			$h=250;
-			$s=$pdf->teeSarakkeet(array(105,30));
+			$s=$pdf->teeSarakkeet(array(100,35));
 			if($laskurow["projekti"] != "" and $laskurow["projekti"] == $laskurow["tunnus"]) {
 				$kentat = array("laskunro", "päiväys", "projekti", "valuutta", "viivästyskorko", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
 			}

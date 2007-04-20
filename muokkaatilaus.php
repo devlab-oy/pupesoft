@@ -40,6 +40,9 @@
 	elseif ($toim == "YLLAPITO") {
 		$otsikko = t("ylläpitosopimusta");
 	}
+	elseif ($toim == "PROJEKTI") {
+		$otsikko = t("tilauksia");
+	}
 	else {
 		$otsikko = t("myyntitilausta");
 		$toim = "";

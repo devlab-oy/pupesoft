@@ -133,7 +133,7 @@
 						}
 
 						//	Laitetaan toimittajatiedot vasemmalle
-						$h=250;
+						$h=240;
 						$pdf->write($h, 1, 0, $s[1], t("Toimittaja", $kieli).":", "norm", "L", "B");
 						$h-=$pdf->ln();
 						foreach(array("nimi", "nimitark", "osoite", "postiosoite", "maa") as $key) {

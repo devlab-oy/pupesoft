@@ -122,7 +122,7 @@
 		$meapurow = mysql_fetch_array($meapu);
 	}
 
-	if (($erpcmvv != "" and $erpcmkk != "" and $erpcmpp != "") or $meapurow["erapvmkasin"] != '') {
+	if ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
 
 		$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' order by tunnus limit 1";
 		$erpres = mysql_query($erpquery) or pupe_error($erpquery);
@@ -145,6 +145,39 @@
 		else {
 			$erpcm_kasin = "KYLLA";
 		}
+	}
+
+	// tehdään päivämäärächeckit
+	if ($toim == "YLLAPITO") {
+
+		if ($yllapito_alkupp != "" or $yllapito_alkukk != "" or $yllapito_alkuvv != "") {
+
+			$yllapito_alkupp = (int) $yllapito_alkupp;
+			$yllapito_alkukk = (int) $yllapito_alkukk;
+			$yllapito_alkuvv = (int) $yllapito_alkuvv;
+
+			if (!checkdate($yllapito_alkukk, $yllapito_alkupp, $yllapito_alkuvv)) {
+				echo "<font class='error'>".t("VIRHE: Syötetty alkupvm on virheellinen")."!</font><br>";
+				$tee = "OTSIK";
+				unset($jatka);
+				$erpcm_virhe = "X";
+			}
+		}
+
+		if ($yllapito_loppupp != "" or $yllapito_loppukk != "" or $yllapito_loppuvv != "") {
+
+			$yllapito_loppupp = (int) $yllapito_loppupp;
+			$yllapito_loppukk = (int) $yllapito_loppukk;
+			$yllapito_loppuvv = (int) $yllapito_loppuvv;
+
+			if (!checkdate($yllapito_loppukk, $yllapito_loppupp, $yllapito_loppuvv)) {
+				echo "<font class='error'>".t("VIRHE: Syötetty loppupvm on virheellinen")."!</font><br>";
+				$tee = "OTSIK";
+				unset($jatka);
+				$erpcm_virhe = "X";
+			}
+		}
+
 	}
 
 	if ($tila == "" and !isset($jatka)) {
@@ -941,10 +974,10 @@
 
 			if ($srow['chn'] == '999') $laskkielto = 'CHECKED';
 
-			echo "<td>".t("Sisäinen lasku")."</td><td><input type='checkbox' name='sisainen' $sisah></td>";
+			echo "<td>".t("Sisäinen lasku").":</td><td><input type='checkbox' name='sisainen' $sisah></td>";
 			echo "</tr>";
 
-			echo "<td>".t("Keräysprioriteetti")."</td><td>";
+			echo "<td>".t("Keräysprioriteetti").":</td><td>";
 
 			$query = "	SELECT avainsana.selite, ".avain('select')."
 						FROM avainsana
@@ -966,12 +999,12 @@
 			echo "</select>";
 
 			echo "</td>";
-			echo "<td>".t("Suoraan laskutukseen")."</td><td><input type='checkbox' name='eilahe' $eilah></td>";
+			echo "<td>".t("Suoraan laskutukseen").":</td><td><input type='checkbox' name='eilahe' $eilah></td>";
 			echo "</tr>";
 			echo "<tr>";
 
 
-			echo "<td>".t("Toimitusehto")."</td><td>";
+			echo "<td>".t("Toimitusehto").":</td><td>";
 
 			$query = "	SELECT selite, if(selitetark_2 != '', concat(concat(' (',selitetark_2,') -'), selitetark), if(selitetark!='',concat('- ',selitetark), ''))
 						FROM avainsana
@@ -1013,7 +1046,7 @@
 
 			echo "</td>";
 
-			echo "<td>".t("Laskua ei ketjuteta")."</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
+			echo "<td>".t("Laskua ei ketjuteta").":</td><td><input type='checkbox' name='ketjutus' $eiket></td>";
 			echo "</tr>";
 
 			echo "<tr>";
@@ -1066,7 +1099,7 @@
 				echo "<td></td><td></td>";
 			}
 
-			echo "<td>".t("Tilausta ei osatoimiteta")."</td><td><input type='checkbox' name='osatoimitus' $osath></td></tr>";
+			echo "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td></tr>";
 
 			if($yhtiorow["tilauksen_seuranta"] == "K") {
 				//seuranta
@@ -1106,7 +1139,7 @@
 						ORDER BY jarjestys";
 			$vresult = mysql_query($query) or pupe_error($query);
 
-			echo "<td>".t("Valuutta")."</td><td><select name='valkoodi'>";
+			echo "<td>".t("Valuutta").":</td><td><select name='valkoodi'>";
 
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";
@@ -1120,7 +1153,7 @@
 			echo "</select></td>";
 
 			if ($yhtiorow['laskutuskielto'] != 0) {
-				echo "<td>".t("Laskutuskieltoon")."</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
+				echo "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
 			}
 			else{
 				echo "<td></td><td></td>";
@@ -1134,7 +1167,7 @@
 
 				echo "<tr>";
 				echo "<td></td><td></td>";
-				echo "<td>".t("Splittauskielto")."</td><td><input type='checkbox' value='E' name='splittauskielto' $laskkielto></td>";
+				echo "<td>".t("Splittauskielto").":</td><td><input type='checkbox' value='E' name='splittauskielto' $laskkielto></td>";
 				echo "</tr>";
 			}
 
@@ -1232,70 +1265,111 @@
 
 			// tehdään ylläpitosopimista varten laskutusaikataulu taulu
 			if ($toim == "YLLAPITO") {
+
+				$query = "select * from laskun_lisatiedot where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+				$sopapures = mysql_query($query) or pupe_error($query);
+				$sopapurow = mysql_fetch_array($sopapures);
+
+				$disable = "";
+
+				// jos alatila on X niin pitää tehdä hidden muuttujat ettei nollaannu
+				if ($srow["alatila"] == "X") {
+					$disable = "disabled";
+					
+					foreach (explode(',', $sopapurow["sopimus_kk"]) as $numi) {
+						echo "<input type='hidden' name='yllapito_kk[]' value='$numi'>";
+					}
+					foreach (explode(',', $sopapurow["sopimus_pp"]) as $numi) {
+						echo "<input type='hidden' name='yllapito_pp[]' value='$numi'>";
+					}
+				
+				}
+
+				$chk = array();
+				foreach (explode(',', $sopapurow["sopimus_kk"]) as $numi) {
+					$chk[$numi] = "checked";
+				}
+
 				echo "<table>";
 				echo "<tr><th colspan='2'>".t("Valitse ylläpitosopimuksen laskutusaikataulu").":</th></tr>";
 				echo "<tr>";
 				echo "<td>";
-					echo "<table><tr>";
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[1] value='1'> Tammi </td>";
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[2] value='2'> Helmi </td>";
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[3] value='3'> Maalis </td>";
-					echo "</tr><tr>";                                     
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[4] value='4'> Huhti </td>";
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[5] value='5'> Touko </td>";
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[6] value='6'> Kesä </td>";
-					echo "</tr><tr>";                                     
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[7] value='7'> Heinä </td>";
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[8] value='8'> Elo </td>";
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[9] value='9'> Syys </td>";
-					echo "</tr><tr>";                                     
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[10] value='10'> Loka </td>";
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[11] value='11'> Marras </td>";
-					echo "<td><input name='yllapito_kk[]' type='checkbox' $chk[12] value='12'> Joulu </td>";
-					echo "</tr></table>";
+				echo "<table><tr>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[1] value='1'> Tammi </td>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[2] value='2'> Helmi </td>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[3] value='3'> Maalis </td>";
+				echo "</tr><tr>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[4] value='4'> Huhti </td>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[5] value='5'> Touko </td>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[6] value='6'> Kesä </td>";
+				echo "</tr><tr>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[7] value='7'> Heinä </td>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[8] value='8'> Elo </td>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[9] value='9'> Syys </td>";
+				echo "</tr><tr>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[10] value='10'> Loka </td>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[11] value='11'> Marras </td>";
+				echo "<td><input name='yllapito_kk[]' $disable type='checkbox' $chk[12] value='12'> Joulu </td>";
+				echo "</tr></table>";
 				echo "</td>";
 				echo "<td>";
-					echo "<table><tr>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[1] value='1'> 1 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[2] value='2'> 2 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[3] value='3'> 3 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[4] value='4'> 4 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[5] value='5'> 5 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[6] value='6'> 6 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[7] value='7'> 7 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[8] value='8'> 8 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[9] value='9'> 9 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[10] value='10'> 10 </td>";
-					echo "</tr><tr>";                                          
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[11] value='11'> 11 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[12] value='12'> 12 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[13] value='13'> 13 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[14] value='14'> 14 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[15] value='15'> 15 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[16] value='16'> 16 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[17] value='17'> 17 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[18] value='18'> 18 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[19] value='19'> 19 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[20] value='20'> 20 </td>";
-					echo "</tr><tr>";                                          
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[21] value='21'> 21 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[22] value='22'> 22 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[23] value='23'> 23 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[24] value='24'> 24 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[25] value='25'> 25 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[26] value='26'> 26 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[27] value='27'> 27 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[28] value='28'> 28 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[29] value='29'> 29 </td>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[30] value='30'> 30 </td>";
-					echo "</tr><tr>";
-					echo "<td><input name='yllapito_pp[]' type='checkbox' $chk[31] value='31'> 31 </td>";
-					echo "<td colspan='9'><input name='yllapito_pp[]' type='checkbox' $chk[99] value='99'> Kuun viimeinen </td>";
-					echo "</tr></table>";
+
+				$chk = array();
+				foreach (explode(',', $sopapurow["sopimus_pp"]) as $numi) {
+					$chk[$numi] = "checked";
+				}
+
+				echo "<table><tr>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[1] value='1'> 1 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[2] value='2'> 2 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[3] value='3'> 3 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[4] value='4'> 4 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[5] value='5'> 5 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[6] value='6'> 6 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[7] value='7'> 7 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[8] value='8'> 8 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[9] value='9'> 9 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[10] value='10'> 10 </td>";
+				echo "</tr><tr>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[11] value='11'> 11 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[12] value='12'> 12 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[13] value='13'> 13 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[14] value='14'> 14 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[15] value='15'> 15 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[16] value='16'> 16 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[17] value='17'> 17 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[18] value='18'> 18 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[19] value='19'> 19 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[20] value='20'> 20 </td>";
+				echo "</tr><tr>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[21] value='21'> 21 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[22] value='22'> 22 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[23] value='23'> 23 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[24] value='24'> 24 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[25] value='25'> 25 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[26] value='26'> 26 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[27] value='27'> 27 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[28] value='28'> 28 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[29] value='29'> 29 </td>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[30] value='30'> 30 </td>";
+				echo "</tr><tr>";
+				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[31] value='31'> 31 </td>";
+				echo "<td colspan='9'><input name='yllapito_pp[]' $disable type='checkbox' $chk[99] value='99'> Kuun viimeinen </td>";
+				echo "</tr></table>";
 				echo "</td>";
 				echo "</tr>";
-				echo "<tr><th colspan='4'>".t("Sopimuksen voimassaoloaika").":</th></tr>";			
+				echo "<tr><th colspan='4'>".t("Sopimuksen voimassaoloaika").":</th></tr>";
 				echo "<tr>";
+
+				if ($sopapurow["sopimus_alkupvm"] == "0000-00-00") $sopapurow["sopimus_alkupvm"] = "";
+				if ($sopapurow["sopimus_loppupvm"] == "0000-00-00") $sopapurow["sopimus_loppupvm"] = "";
+
+				if (!isset($yllapito_alkuvv) or !isset($yllapito_alkukk) or !isset($yllapito_alkupp))
+					list($yllapito_alkuvv, $yllapito_alkukk, $yllapito_alkupp) = explode('-', $sopapurow["sopimus_alkupvm"]);
+
+				if (!isset($yllapito_loppuvv) or !isset($yllapito_loppukk) or !isset($yllapito_loppupp))
+					list($yllapito_loppuvv, $yllapito_loppukk, $yllapito_loppupp) = explode('-', $sopapurow["sopimus_loppupvm"]);
+
 				echo "<td>Alkupäivä:</td>";
 				echo "<td>";
 				echo "<input type='text' name='yllapito_alkupp' value='$yllapito_alkupp' size='3'>";
@@ -1311,6 +1385,7 @@
 				echo "</td>";
 				echo "</tr>";
 				echo "</table><br>";
+
 			}
 
 			echo "<table>";
@@ -1796,6 +1871,23 @@
 			$query3 .= $postquery3;
 			$result = mysql_query($query3) or pupe_error($query3);
 		}
+
+		if ($toim == "YLLAPITO") {
+
+			$sopimus_kk = implode(",", $yllapito_kk);
+			$sopimus_pp = implode(",", $yllapito_pp);
+
+			$query3 .= "laskun_lisatiedot SET
+						yhtio						= '$kukarow[yhtio]',
+						sopimus_kk					= '$sopimus_kk',
+						sopimus_pp					= '$sopimus_pp',
+						sopimus_alkupvm				= '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
+						sopimus_loppupvm			= '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
+						otunnus 					= '$kukarow[kesken]'";
+			$query3 .= $postquery3;
+			$result = mysql_query($query3) or pupe_error($query3);
+		}
+
 	}
 	unset($alv);
 ?>

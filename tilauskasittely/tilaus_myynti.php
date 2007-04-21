@@ -2893,7 +2893,7 @@ if ($tee == '') {
 					if($kukarow["resoluutio"] == "I") {
 						$cspan++;
 					}
-					if($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
+					if($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
 						$cspan++;
 					}
 					

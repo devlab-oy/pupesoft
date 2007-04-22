@@ -256,11 +256,10 @@
 	}
 
 	$query = "	SELECT $alku , kustp, kohde, tiliointi.projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus
-				FROM tiliointi, tili, lasku
+				FROM tiliointi
+				LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
+				LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
-					tili.yhtio = '$kukarow[yhtio]' and
-					tiliointi.ltunnus = lasku.tunnus and
-					tiliointi.tilino = tili.tilino and
 					tiliointi.korjattu='' and
 					$lisa
 				ORDER BY $jarj";

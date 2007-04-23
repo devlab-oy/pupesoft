@@ -4,7 +4,7 @@
 
 	echo "<font class='head'>".t("Menujen yll‰pito")."</font><hr>";
 
-	//synkronoidaan kahden firman menut
+	// Synkronoidaan kahden firman menut
 	if (isset($synkronoi)) {
 
 		if (count($yhtiot) > 0) {
@@ -19,7 +19,7 @@
 			$lisa = " and sovellus	= '$sovellus' ";
 		}
 
-		$query = "	SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2
+		$query = "	SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
 					FROM oikeu
 					WHERE oikeu.yhtio in ($yht)
 					and kuka = ''
@@ -70,6 +70,7 @@
 							nimitys		= '$row[nimitys]',
 							jarjestys 	= '$jarj',
 							jarjestys2	= '$jarj2',
+							hidden		= '$row[hidden]',
 							yhtio		= '$uusiyhtio'";
 				$insresult = mysql_query($query) or pupe_error($query);
 
@@ -112,7 +113,7 @@
 
 				//p‰ivitet‰‰n uudet menun tiedot kaikille k‰ytt‰jille
 				$query = "	UPDATE oikeu
-							SET sovellus='$sove', nimi='$nimi', alanimi='$alanimi', nimitys='$nimitys', jarjestys='$jarjestys', jarjestys2='$jarjestys2'
+							SET sovellus='$sove', nimi='$nimi', alanimi='$alanimi', nimitys='$nimitys', jarjestys='$jarjestys', jarjestys2='$jarjestys2', hidden='$hidden'
 							WHERE
 							sovellus		= '$row[sovellus]'
 							and nimi		= '$row[nimi]'
@@ -120,6 +121,7 @@
 							and nimitys		= '$row[nimitys]'
 							and jarjestys	= '$row[jarjestys]'
 							and jarjestys2	= '$row[jarjestys2]'
+							and hidden		= '$row[hidden]'
 							and yhtio in ($yht)";
 				$result = mysql_query($query) or pupe_error($query);
 				$num1 = mysql_affected_rows();
@@ -143,8 +145,8 @@
 			foreach($yht as $yhtio) {
 				$yhtiot[] = $yhtio;
 
-				$query = "INSERT into oikeu (kuka, sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, yhtio)
-							values ('', '$sove', '$nimi', '$alanimi', '$nimitys', '$jarjestys', '$jarjestys2', '$yhtio')";
+				$query = "INSERT into oikeu (kuka, sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, yhtio, hidden)
+							values ('', '$sove', '$nimi', '$alanimi', '$nimitys', '$jarjestys', '$jarjestys2', '$yhtio', '$hidden')";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$num=mysql_affected_rows();
@@ -175,6 +177,16 @@
 			$nimitys	= $row['nimitys'];
 			$jarjestys	= $row['jarjestys'];
 			$jarjestys2	= $row['jarjestys2'];
+			$hidden		= $row['hidden'];
+		}
+		else {
+			$sove		= "";
+			$nimi		= "";
+			$alanimi	= "";
+		    $nimitys	= "";
+		    $jarjestys	= "";
+		    $jarjestys2	= "";
+		    $hidden		= "";
 		}
 
 		echo "<table>
@@ -184,7 +196,17 @@
 				<tr><th>".t("Alanimi")."</th><td><input type='text' name='alanimi' value='$alanimi'></td></tr>
 				<tr><th>".t("Nimitys")."</th><td><input type='text' name='nimitys' value='$nimitys'></td></tr>
 				<tr><th>".t("J‰rjestys")."</th><td><input type='text' name='jarjestys' value='$jarjestys'></td></tr>
-				<tr><th>".t("J‰rjestys2")."</th><td><input type='text' name='jarjestys2' value='$jarjestys2'></td></tr>
+				<tr><th>".t("J‰rjestys2")."</th><td><input type='text' name='jarjestys2' value='$jarjestys2'></td></tr>";
+				
+		if ($hidden != '') {
+			$chk = "CHECKED";
+		}
+		else {
+			$chk = "";
+		}
+				
+		echo "	<tr><th>".t("Piilossa")."</th><td><input type='checkbox' name='hidden' value='H' $chk></td></tr>
+				
 				<tr><th>".t("Kopioi")."</th><td><input type='checkbox' name='kopioi'></td></tr>
 				</table>
 				<br>
@@ -318,7 +340,7 @@
 			foreach($yhtiot as $yhtio) {
 				echo "<td class='back' valign='top'>";
 
-				$query	= "	SELECT sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, tunnus
+				$query	= "	SELECT sovellus, nimi, alanimi, nimitys, jarjestys, jarjestys2, hidden, tunnus
 							from oikeu
 							where kuka='' and yhtio='$yhtio'";
 
@@ -341,6 +363,7 @@
 					$nimitys	= $row['nimitys'];
 					$jarjestys	= $row['jarjestys'];
 					$jarjestys2	= $row['jarjestys2'];
+					$hidden		= $row['hidden'];
 
 					if ($vsove != $sove) {
 						echo "<tr><td class='back' colspan='4'><br></td></tr>\n";
@@ -350,6 +373,7 @@
 								<th nowrap>".t("Nimitys")."</th>
 								<th nowrap>".t("J1")."</th>
 								<th nowrap>".t("J2")."</th>
+								<th nowrap>".t("Piilossa")."</th>
 							</tr>\n";
 					}
 
@@ -366,7 +390,8 @@
 					echo "<td nowrap>$alanimi</td>";
 					echo "<td nowrap>".t($nimitys)."</td>";
 					echo "<td nowrap>$jarjestys</td>";
-					echo "<td nowrap>$jarjestys2</td></tr>\n";
+					echo "<td nowrap>$jarjestys2</td>";
+					echo "<td nowrap>$hidden</td></tr>\n";
 
 					$vsove = $sove;
 				}

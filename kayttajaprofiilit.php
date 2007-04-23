@@ -55,7 +55,7 @@
 				list ($nimi, $alanimi, $sov) = split("#", $rastit);
 
 				//haetaan menu itemi
-				$query = "	SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2
+				$query = "	SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
 							FROM oikeu use index (sovellus_index)
 							WHERE kuka='' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -73,8 +73,8 @@
 							nimitys		= '$trow[nimitys]',
 							jarjestys 	= '$trow[jarjestys]',
 							jarjestys2	= '$trow[jarjestys2]',
+							hidden		= '$trow[hidden]',
 							yhtio		= '$kukarow[yhtio]'";
-
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			echo "<font class='message'>".t("Käyttöoikeudet päivitetty")."!</font><br>";
@@ -154,6 +154,7 @@
 										and nimitys		= '$trow[nimitys]'
 										and jarjestys 	= '$trow[jarjestys]'
 										and jarjestys2	= '$trow[jarjestys2]'
+										and hidden		= '$trow[hidden]'
 										and yhtio		= '$kukarow[yhtio]'";
 							$tarkesult = mysql_query($query) or pupe_error($query);
 
@@ -169,6 +170,7 @@
 											nimitys		= '$trow[nimitys]',
 											jarjestys 	= '$trow[jarjestys]',
 											jarjestys2	= '$trow[jarjestys2]',
+											hidden		= '$trow[hidden]',
 											yhtio		= '$kukarow[yhtio]'";
 								$rresult = mysql_query($query) or pupe_error($query);
 							}

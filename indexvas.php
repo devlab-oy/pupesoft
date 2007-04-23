@@ -100,10 +100,14 @@ echo "<tr><td class='back'><a class='menu' href='logout.php' target='main'>".t("
 
 // Mitä käyttäjä saa tehdä?
 // Valitaan ensin vain ylätaso jarjestys2='0'
-$query = "SELECT nimi, jarjestys
-		FROM oikeu
-		WHERE yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and sovellus='$sovellus' and jarjestys2='0'
-		ORDER BY jarjestys";
+$query = "	SELECT nimi, jarjestys
+			FROM oikeu
+			WHERE yhtio		= '$kukarow[yhtio]' 
+			and kuka		= '$kukarow[kuka]' 
+			and sovellus	= '$sovellus' 
+			and jarjestys2	= '0' 
+			and hidden		= ''
+			ORDER BY jarjestys";
 $result = mysql_query($query) or pupe_error($query);
 
 while ($orow = mysql_fetch_array($result)) {
@@ -111,7 +115,11 @@ while ($orow = mysql_fetch_array($result)) {
 	// tutkitaan onko meillä alamenuja
 	$query = "SELECT nimi, nimitys, alanimi
 			FROM oikeu
-			WHERE yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and sovellus='$sovellus' and jarjestys='$orow[jarjestys]'
+			WHERE yhtio		= '$kukarow[yhtio]' 
+			and kuka		= '$kukarow[kuka]' 
+			and sovellus	= '$sovellus' 
+			and jarjestys	= '$orow[jarjestys]'
+			and hidden		= ''
 			ORDER BY jarjestys, jarjestys2";
 	$xresult = mysql_query($query) or pupe_error($query);
 	$mrow = mysql_fetch_array($xresult);

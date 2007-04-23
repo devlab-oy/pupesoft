@@ -201,6 +201,7 @@
 									and nimitys		= '$trow[nimitys]'
 									and jarjestys 	= '$trow[jarjestys]'
 									and jarjestys2	= '$trow[jarjestys2]'
+									and hidden		= '$trow[hidden]'
 									and yhtio		= '$yhtio'";
 						$tarkesult = mysql_query($query) or pupe_error($query);
 
@@ -215,6 +216,7 @@
 										nimitys		= '$trow[nimitys]',
 										jarjestys 	= '$trow[jarjestys]',
 										jarjestys2	= '$trow[jarjestys2]',
+										hidden		= '$trow[hidden]',
 										yhtio		= '$yhtio'";
 							$rresult = mysql_query($query) or pupe_error($query);
 						}
@@ -346,6 +348,7 @@
 									and nimitys		= '$trow[nimitys]'
 									and jarjestys 	= '$trow[jarjestys]'
 									and jarjestys2	= '$trow[jarjestys2]'
+									and hidden		= '$trow[hidden]'
 									and yhtio		= '$kukarow[yhtio]'";
 						$tarkesult = mysql_query($query) or pupe_error($query);
 
@@ -360,6 +363,7 @@
 										nimitys		= '$trow[nimitys]',
 										jarjestys 	= '$trow[jarjestys]',
 										jarjestys2	= '$trow[jarjestys2]',
+										hidden		= '$trow[hidden]',
 										yhtio		= '$kukarow[yhtio]'";
 							$rresult = mysql_query($query) or pupe_error($query);
 						}

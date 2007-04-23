@@ -105,6 +105,10 @@
 				$toimerrorit[$toimtunnus]["alkuperamaa"] = "<font class='error'>".t("Tieto puuttuu")."!</font>";
 			}
 
+			if ($toim_tuoteno == "" and $tuotoimirow["tyyppi"] != "") {
+				$toimerrorit[$toimtunnus]["toim_tuoteno"] = "<font class='error'>".t("Online/sisäinen toimittaja vaatii aina toimittajan tuotenumeron")."!</font>";
+			}
+
 			if (count($toimerrorit) > 0) {
 				if ($tee == "insert") $tee = "uusi";
 				else $tee = "";
@@ -209,6 +213,9 @@
 
 			if ($toim_valinta[0] != "") {
 				echo "$toim_valinta[0]";
+			}
+			elseif($tuotoimirow["tunnus"] > 0) {
+				echo "<input type='hidden' name='toimittajatunnus' 	value='$tuotoimirow[tunnus]'>$tuotoimirow[nimi] - $tuotoimirow[ovttunnus]";
 			}
 			else {
 				echo "<input type='text' name='toimittaja' 	value='$toimittaja'>";

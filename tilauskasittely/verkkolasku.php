@@ -430,11 +430,11 @@
 				$yhdista[] = $row["tunnukset"];
 			}
 
-			if (count($yhdista) == 0) {
+			if (count($yhdista) == 0 and $silent == "") {
 				$tulos_ulos .= t("Ei jälkivaatimuksia")."!<br>\n";
 			}
 
-			$tulos_ulos .= "<table>";
+			if ($silent == "") $tulos_ulos .= "<table>";
 
 			foreach ($yhdista as $otsikot) {
 
@@ -1008,7 +1008,7 @@
 						$lask++;
 					}
 					elseif ($lasrow["sisainen"] != '') {
-						$tulos_ulos .= "<br>\n".t("Tehtiin sisäinen lasku")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
+						if ($silent == "") $tulos_ulos .= "<br>\n".t("Tehtiin sisäinen lasku")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
 
 						// Sisäisiä laskuja ei normaaalisti tuloseta paitski jos meillä on valittu_tulostin
 						if ($valittu_tulostin != '') {
@@ -1136,11 +1136,11 @@
 						$yhtiorow['lasku_tulostin'] = $valittu_tulostin;
 					}
 
-					$tulos_ulos .= "<br>\n".t("Tulostetaan paperilaskuja").":<br>\n";
+					if ($silent == "") $tulos_ulos .= "<br>\n".t("Tulostetaan paperilaskuja").":<br>\n";
 
 					foreach($tulostettavat as $lasku) {
 
-						$tulos_ulos .= t("Tulostetaan lasku").": $lasku<br>\n";
+						if ($silent == "") $tulos_ulos .= t("Tulostetaan lasku").": $lasku<br>\n";
 
 						$query = "	SELECT *
 									FROM lasku
@@ -1246,7 +1246,7 @@
 								$prirow= mysql_fetch_array($prires);
 								$yhtiorow['lasku_tulostin'] = $prirow["printteri5"];
 
-								$tulos_ulos .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
+								if ($silent == "") $tulos_ulos .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
 							}
 
 							$querykieli = "	select *
@@ -1255,7 +1255,7 @@
 							$kires = mysql_query($querykieli) or pupe_error($querykieli);
 							$kirow = mysql_fetch_array($kires);
 
-							$tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
+							if ($silent == "") $tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
 
 							if ($kirow["komento"] != "email") {
 								// itse print komento...
@@ -1275,7 +1275,7 @@
 								$kires = mysql_query($querykieli) or pupe_error($querykieli);
 								$kirow = mysql_fetch_array($kires);
 
-								$tulos_ulos .= t("Laskukopio tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
+								if ($silent == "") $tulos_ulos .= t("Laskukopio tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
 
 								if ($kirow["komento"] != "email") {
 									// itse print komento...
@@ -1306,12 +1306,12 @@
 								if ($paalomake != '') {
 									lpr($paalomake, $valittu_sadtulostin);
 
-									$tulos_ulos .=  t("SAD-lomake tulostuu")."...<br>\n";
+									if ($silent == "") $tulos_ulos .=  t("SAD-lomake tulostuu")."...<br>\n";
 
 									if ($lisalomake != "") {
 										lpr($lisalomake, $valittu_sadlitulostin);
 
-										$tulos_ulos .=  t("SAD-lomakkeen lisäsivu tulostuu")."...<br>\n";
+										if ($silent == "") $tulos_ulos .=  t("SAD-lomakkeen lisäsivu tulostuu")."...<br>\n";
 									}
 								}
 							}
@@ -1346,7 +1346,7 @@
 								unset($pdf2);
 								unset($sadilmo);
 
-								$tulos_ulos .= t("SAD-lomake tulostuu")."...<br>\n";
+								if ($silent == "") $tulos_ulos .= t("SAD-lomake tulostuu")."...<br>\n";
 							}
 						}
 
@@ -1379,7 +1379,7 @@
 							//poistetaan tmp file samantien kuleksimasta...
 							system("rm -f $pdffilenimi");
 
-							$tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
+							if ($silent == "") $tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
 
 							unset($Xpdf);
 						}

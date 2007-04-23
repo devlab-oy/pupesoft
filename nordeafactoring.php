@@ -39,6 +39,7 @@
 		echo "<br>";
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<table>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='TARKISTA'>";
 
 		if ($valkoodi == '') {
@@ -108,8 +109,7 @@
 		echo "<tr><th>Siirtoluettelon numero:</th>
 				<td><input type='text' name='factoringsiirtonumero' value='$arow[seuraava]' size='6'></td>";
 
-
-		echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></table><br><br>";
+		echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></form></table><br><br>";
 	}
 
 	if ($tee == 'TULOSTA') {
@@ -565,6 +565,7 @@
 				}
 				
 				echo "<input type='hidden' name='filenimi' value='$filenimi'>";
+				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<td><input type='submit' value='Tallenna'></td></form>";
 				echo "</tr></table>";
 			}

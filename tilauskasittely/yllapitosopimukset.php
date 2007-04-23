@@ -46,30 +46,28 @@
 							SET alatila = 'X'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$tilausnumero'
-							and tila in ('0')";
+							and tila    = '0'";
 				$result = mysql_query($query) or pupe_error($query);
 				
 				// p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
 				$query  = "	UPDATE lasku
 							SET tila = 'N',
-							alatila = 'D',
+							alatila = '',
 							eilahetetta = 'o',
 							clearing = 'sopimus',
 							swift = '$tilausnumero',
 							tilaustyyppi = ''
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$ok'
-							and tila in ('0')";
+							and tila    = '0'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				// tyyppi takasin L, merkataan rivit ker‰tyks ja toimitetuks
 				$query = "	UPDATE tilausrivi
-							SET tyyppi	   = 'L',
-							toimitettu     = '$kukarow[kuka]',
-							toimitettuaika = now()
+							SET tyyppi	   = 'L'
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and otunnus	= '$ok'
-							and tyyppi in ('0')";
+							and tyyppi  = '0'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				// haetaan laskun tiedot
@@ -84,6 +82,25 @@
 
 				// tilaus valmis
 				require("tilaus-valmis.inc");
+
+				// p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
+				$query  = "	UPDATE lasku
+							SET tila = 'L',
+							alatila = 'D'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$ok'
+							and tila = 'L'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				// tyyppi takasin L, merkataan rivit ker‰tyks ja toimitetuks
+				$query = "	UPDATE tilausrivi
+							SET tyyppi	   = 'L',
+							toimitettu     = '$kukarow[kuka]', 
+							toimitettuaika = now()
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and otunnus	= '$ok'
+							and tyyppi = 'L'";
+				$result = mysql_query($query) or pupe_error($query);
 
 				// laskutetaan tilaus
 				$laskutettavat  = $ok;

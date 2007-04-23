@@ -312,7 +312,7 @@
 			echo "<b>".t("Sinulla ei ole oikeuksia p‰ivitt‰‰ t‰t‰ tietoa")."</b><br>";
 		}
 
-		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa' name='mainform' method = 'post'>";
+		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa' name='mainform' method = 'post' autocomplete='off'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
@@ -367,7 +367,12 @@
 			if(mysql_num_rows($al_res) > 0) {
 				$al_row = mysql_fetch_array($al_res);
 
-				$otsikko = $al_row["selitetark"];
+				if ($al_row["selitetark"] != '') {
+					$otsikko = $al_row["selitetark"];
+				}
+				else {
+					$otsikko = t(mysql_field_name($result, $i));
+				}
 			}
 			else {
 				$otsikko = t(mysql_field_name($result, $i));

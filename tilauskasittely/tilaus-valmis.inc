@@ -67,7 +67,8 @@ elseif ($laskurow["tilaustyyppi"] == '0') {
 					alatila  = 'V'
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus  = '$laskurow[tunnus]'
-					and tila in ('N','L','0')";
+					and tila in ('N','L','0')
+					and alatila != 'X'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// tyyppi on 0 ja rivit ei ole ennakkopoistossa

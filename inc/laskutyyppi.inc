@@ -285,7 +285,10 @@
 					$alatila = "poistettu";
 					break;
 				case "V":
-					$alatila = "voimassa";
+					$alatila = "voimassa ei laskutettu";
+					break;
+				case "X":
+					$alatila = "voimassa laskutettu";
 					break;
 			}
 			break;

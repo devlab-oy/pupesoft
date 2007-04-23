@@ -147,8 +147,15 @@
 		}
 	}
 
-	// tehdään päivämäärächeckit
+	// tehdään oikeellisuus
 	if ($toim == "YLLAPITO") {
+		
+		if ((count($yllapito_kk) == 0 or count($yllapito_pp) == 0) and isset($jatka)) {
+			echo "<font class='error'>".t("VIRHE: Laskutusaikataulu on syötettävä")."!</font><br>";
+			$tee = "OTSIK";
+			unset($jatka);
+			$erpcm_virhe = "X";			
+		}
 
 		if ($yllapito_alkupp != "" or $yllapito_alkukk != "" or $yllapito_alkuvv != "") {
 
@@ -163,6 +170,12 @@
 				$erpcm_virhe = "X";
 			}
 		}
+		elseif (isset($yllapito_alkupp) and isset($yllapito_alkukk) and isset($yllapito_alkuvv) and $yllapito_alkupp == "" and $yllapito_alkukk == "" and $yllapito_alkuvv == "") {
+			echo "<font class='error'>".t("VIRHE: Alkupvm on pakollinen tieto")."!</font><br>";
+			$tee = "OTSIK";
+			unset($jatka);
+			$erpcm_virhe = "X";			
+		}
 
 		if ($yllapito_loppupp != "" or $yllapito_loppukk != "" or $yllapito_loppuvv != "") {
 
@@ -170,7 +183,11 @@
 			$yllapito_loppukk = (int) $yllapito_loppukk;
 			$yllapito_loppuvv = (int) $yllapito_loppuvv;
 
-			if (!checkdate($yllapito_loppukk, $yllapito_loppupp, $yllapito_loppuvv)) {
+			// vertaillaan päiviä
+			$pvmsyote = (int) date('Ymd',mktime(0,0,0,$yllapito_loppukk,$yllapito_loppupp,$yllapito_loppuvv));
+			$pvmtoday = (int) date('Ymd'); // now
+
+			if (!checkdate($yllapito_loppukk, $yllapito_loppupp, $yllapito_loppuvv) ) { //or $pvmsyote < $pvmtoday) {
 				echo "<font class='error'>".t("VIRHE: Syötetty loppupvm on virheellinen")."!</font><br>";
 				$tee = "OTSIK";
 				unset($jatka);
@@ -539,11 +556,17 @@
 			}
 
 			echo "<tr><td>".t("Eräpäivä").":</td>
-				<td>
-				<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
-				<input type='text' name='erpcmkk' value='$erpcmkk' size='3'>
-				<input type='text' name='erpcmvv' value='$erpcmvv' size='6'>
-				</td>";
+				<td>"; 
+
+			if ($toim == "YLLAPITO") {
+				echo t("Ei käytössä");
+			}
+			else {
+				echo "<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
+					<input type='text' name='erpcmkk' value='$erpcmkk' size='3'>
+					<input type='text' name='erpcmvv' value='$erpcmvv' size='6'>";
+			}
+			echo "</td>";
 
 			// haetaan oletus rahdinmaksaja
 			$apu_rahdinmaksaja = $srow["kohdistettu"];
@@ -644,12 +667,18 @@
 			}
 
 
-			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>
+			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
+			if ($toim == "YLLAPITO") {
+				echo t("Ei käytössä");
+			}
+			else {
+				echo "				
 					<input type='text' name='toimpp' value='$toimpp' size='3'>
 					<input type='text' name='toimkk' value='$toimkk' size='3'>
 					<input type='text' name='toimvv' value='$toimvv' size='6'>
-					<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'></td>";
-
+					<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'>";
+			}
+			echo "</td>";
 
 			if ($srow['vienti'] == '') {
 				$sel1 = 'SELECTED';
@@ -675,6 +704,9 @@
 			if ($srow["alv"] == 99.99) {
 				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaan marginaalimyyntiä")."</td>";
 			}
+			elseif ($toim == "YLLAPITO") {
+				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")."</td>";
+			}
 			else {
 				echo "<td>
 					<select name='vienti'>
@@ -685,11 +717,17 @@
 			}
 
 			echo "</tr>";
-			echo "<tr><td>".t("Keräysajankohta").": </td><td valign='middle'>
-					<input type='text' name='kerpp' value='$kerpp' size='3'>
-					<input type='text' name='kerkk' value='$kerkk' size='3'>
-					<input type='text' name='kervv' value='$kervv' size='6'>
-					<input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'></td>";
+			echo "<tr><td>".t("Keräysajankohta").": </td><td valign='middle'>";
+			if ($toim == "YLLAPITO") {
+				echo t("Ei käytössä");
+			}
+			else {
+				echo "<input type='text' name='kerpp' value='$kerpp' size='3'>
+						<input type='text' name='kerkk' value='$kerkk' size='3'>
+						<input type='text' name='kervv' value='$kervv' size='6'>
+						<input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'>"; 
+			}
+			echo "</td>";
 
 
 			//jos käyttäjällä on myyjänro
@@ -1354,7 +1392,8 @@
 				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[30] value='30'> 30 </td>";
 				echo "</tr><tr>";
 				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[31] value='31'> 31 </td>";
-				echo "<td colspan='9'><input name='yllapito_pp[]' $disable type='checkbox' $chk[99] value='99'> Kuun viimeinen </td>";
+// tää ei oo vielä implmentoitu
+//				echo "<td colspan='9'><input name='yllapito_pp[]' $disable type='checkbox' $chk[99] value='99'> Kuun viimeinen </td>";
 				echo "</tr></table>";
 				echo "</td>";
 				echo "</tr>";

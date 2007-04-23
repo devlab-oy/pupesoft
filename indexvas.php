@@ -9,6 +9,7 @@ else {
 	require ("functions.inc");
 }
 
+
 if ($yhtiorow["logo"] != '' and file_exists($yhtiorow["logo"])) {
 
 	$image = getimagesize($yhtiorow["logo"]);

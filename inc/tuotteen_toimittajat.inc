@@ -111,14 +111,15 @@
 			}
 		}
 
-		// p‰ivitet‰‰n toimittaja
-		if ($tee == "update") {
-
-			//	synkkausta varten!			
+		//	synkkausta varten!
+		if($toimtunnus>0) {
 			$query = "select * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tunnus='$toimtunnus'";
 			$result = mysql_query($query) or pupe_error($query);
-			$orgirow=mysql_fetch_array($result) or pupe_error($query);
-			
+			$orgirow=mysql_fetch_array($result) or pupe_error($query);			
+		}		
+
+		// p‰ivitet‰‰n toimittaja
+		if ($tee == "update") {			
 			$query = "	update tuotteen_toimittajat set
 						yhtio			= '$kukarow[yhtio]',
 						tuoteno			= '$tuoteno',
@@ -143,6 +144,8 @@
 			$query = "delete from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tunnus='$toimtunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$tee = "";
+			
+			synkronoi("tuotteen_toimittajat", $toimtunnus, $orgirow);			
 		}
 
 		// lis‰t‰‰n toimittaja

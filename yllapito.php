@@ -78,9 +78,18 @@
 
 	// Tietue poistetaan
 	if ($del == 1 and $saakopoistaa == "") {
+
+		$query = "	SELECT *
+					FROM $toim
+					WHERE tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		$trow = mysql_fetch_array($result);
+				
 		$query = "	DELETE from $toim
 					WHERE tunnus='$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
+
+		synkronoi($toim, $tunnus, $trow);
 		$tunnus = 0;
 
 		// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin

@@ -1056,11 +1056,11 @@
 		if ($nayta != '') $nayta = '';
 		else $nayta = "and alatila != 'H'";
 
-		$query = "	SELECT *, if(kapvm!='0000-00-00',concat_ws('<br>',kapvm,erpcm),erpcm) erpcmkapcm
+		$query = "	SELECT *, if(kapvm!='0000-00-00',concat_ws('<br>',kapvm,erpcm),erpcm) erpcmkapcm, round(summa * vienti_kurssi, 2) kotisumma
 				 	FROM lasku
-				  	WHERE hyvaksyja_nyt = '$kukarow[kuka]' and
-					yhtio = '$kukarow[yhtio]' and
-					tila != 'D'
+				  	WHERE hyvaksyja_nyt = '$kukarow[kuka]' 
+					and yhtio = '$kukarow[yhtio]' 
+					and tila != 'D'
 					$nayta
 				  	ORDER BY if(kapvm!='0000-00-00',kapvm,erpcm)";
 		$result = mysql_query($query) or pupe_error($query);
@@ -1088,13 +1088,13 @@
 
 			 // Eli vain tasolla 1/2 ja ensimmäiselle hyväksyjälle.
 			if (($kukarow['taso'] == '1' or $kukarow["taso"] == '2') and $trow['hyvak1'] == $kukarow['kuka']) {
-				echo "<td valign='top'><a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>$trow[tapvm]</a></td>";
+				echo "<td valign='top'><a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a></td>";
 			}
 			else {
-				echo "<td valign='top'>$trow[tapvm]</td>";
+				echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
 			}
 
-			echo "<td valign='top'>$trow[erpcmkapcm]</td>";
+			echo "<td valign='top'>".tv1dateconv($trow["erpcmkapcm"])."</td>";
 			echo "<td valign='top'>$trow[ytunnus]</td>";
 
 			if ($trow['comments'] != '') {
@@ -1105,8 +1105,8 @@
 			}
 
 			echo "<td valign='top'>$trow[postitp]</td>";
-			echo "<td valign='top'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
-			echo "<td valign='top'>$trow[summa] $trow[valkoodi]</td>";
+			echo "<td valign='top' style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
+			echo "<td valign='top' style='text-align: right;'>$trow[summa] $trow[valkoodi]</td>";
 
 			if ($trow["ebid"] != "") {
 				$ebid = $trow["ebid"];

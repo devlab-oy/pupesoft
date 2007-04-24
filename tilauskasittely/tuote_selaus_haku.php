@@ -717,26 +717,29 @@
 
 					while ($saldorow = mysql_fetch_array ($varresult)) {
 
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], $laskurow["toim_maa"]);
+						list($saldo, $hyllyssa, $myytavissa, $sallittu) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], $laskurow["toim_maa"]);
+						
+						//	Listataan vain varasto jo se ei ole kielletty
+						if($sallittu === TRUE) {
+							// hoidetaan pois problematiikka jos meillä on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
+							if ($orvot > 0) {
+								if ($myytavissa >= $orvot and $saldorow["yhtio"] == $kukarow["yhtio"]) {
+							    	// poistaan orpojen varaamat tuotteet tältä paikalta
+							    	$myytavissa = $myytavissa - $orvot;
+							    	$orvot = 0;
+								}
+								elseif ($orvot > $myytavissa and $saldorow["yhtio"] == $kukarow["yhtio"]) {
+							    	// poistetaan niin paljon orpojen saldoa ku voidaan
+							    	$orvot = $orvot - $myytavissa;
+							    	$myytavissa = 0;
+								}
+							}
 
-						// hoidetaan pois problematiikka jos meillä on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
-						if ($orvot > 0) {
-							if ($myytavissa >= $orvot and $saldorow["yhtio"] == $kukarow["yhtio"]) {
-						    	// poistaan orpojen varaamat tuotteet tältä paikalta
-						    	$myytavissa = $myytavissa - $orvot;
-						    	$orvot = 0;
-							}
-							elseif ($orvot > $myytavissa and $saldorow["yhtio"] == $kukarow["yhtio"]) {
-						    	// poistetaan niin paljon orpojen saldoa ku voidaan
-						    	$orvot = $orvot - $myytavissa;
-						    	$myytavissa = 0;
-							}
+							echo "<tr>
+									<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
+									<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." $row[yksikko]</td>
+									</tr>";							
 						}
-
-						echo "<tr>
-								<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
-								<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." $row[yksikko]</td>
-								</tr>";
 					}
 					echo "</table></td>";
 				}

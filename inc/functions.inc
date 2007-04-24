@@ -336,14 +336,14 @@ if (!function_exists("saldo_myytavissa")) {
 						$tuoteno 	= $superrow["toim_tuoteno"];
 					}
 					else {
-						return array(0, 0, 0);
+						return array(0, 0, 0, FALSE);
 					}
 				}
 				elseif($yhtio == $kukarow["yhtio"]) {
 					$yhtiolisa = $kukarow["yhtio"];
 				}
 				else {
-					return array(FALSE, FALSE, FALSE);
+					return array(FALSE, FALSE, FALSE, FALSE);
 				}
 			}
 			else {
@@ -416,7 +416,7 @@ if (!function_exists("saldo_myytavissa")) {
 			$result = mysql_query($query) or die($query);
 			
 			if (mysql_num_rows($result) == 0) {
-				return array(FALSE, FALSE, FALSE);
+				return array(FALSE, FALSE, FALSE, FALSE);
 			}
 			else {
 				$saldo			= 0;
@@ -514,7 +514,7 @@ if (!function_exists("saldo_myytavissa")) {
 				}
 			}
 		}
-		return array($saldo, $hyllyssa, $myytavissa);
+		return array($saldo, $hyllyssa, $myytavissa, TRUE);
 	}
 }
 

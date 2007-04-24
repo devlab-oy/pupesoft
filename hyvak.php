@@ -581,12 +581,34 @@
 		echo "</tr>";
 		echo "</table>";
 
+		echo "<br><table><tr valign='top'><td class='back'>";
+		echo "<table>";
+		echo "<tr><th colspan='2'>".t("Hyväksyjät")."</th></tr>";
+		if($laskurow["h1time"] != "0000-00-00 00:00:00") {
+			echo "<tr><td>$laskurow[hyvak1]@$laskurow[h1time]</td><tr>";
+		}
+		if($laskurow["h2time"] != "0000-00-00 00:00:00") {
+			echo "<tr><td>$laskurow[hyvak2]@$laskurow[h2time]</td><tr>";
+		}
+		if($laskurow["h3time"] != "0000-00-00 00:00:00") {
+			echo "<tr><td>$laskurow[hyvak3]@$laskurow[h3time]</td><tr>";
+		}
+		if($laskurow["h4time"] != "0000-00-00 00:00:00") {
+			echo "<tr><td>$laskurow[hyvak4]@$laskurow[h4time]</td><tr>";
+		}
+		if($laskurow["h5time"] != "0000-00-00 00:00:00") {
+			echo "<tr><td>$laskurow[hyvak5]@$laskurow[h5time]</td><tr>";
+		}
+
+		echo "</table>";
 		if ($laskurow["comments"] != "") {
-			echo "<br><table>";
+			echo "</td><td class='back' width='20'></td><td valign='top' class='back'><table>";
 			echo "<tr><th colspan='2'>".t("Kommentit")."</th></tr>";
 			echo "<tr><td colspan='2'>$laskurow[comments]</td></tr>";
 			echo "</table>";
 		}
+
+		echo "</td></tr></table>";
 
 		// ykkös ja kakkostasolla voidaan antaa kommentti
 		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) {

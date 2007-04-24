@@ -1,6 +1,12 @@
 <?php
 
-	require("../inc/parametrit.inc");
+	// jos tullaan t‰‰lt‰ itsest‰ niin tarvitaan paramertit
+	if (strpos($_SERVER['SCRIPT_NAME'], "yllapitosopimukset.php") !== FALSE) {
+		require("../inc/parametrit.inc");
+	}
+	else {
+		ob_start(); // ei echota mit‰‰‰n jos kutsutaan muualta!
+	}
 
 	echo "<font class='head'>".t("Yll‰pitosopimukset")."</font><hr>";
 
@@ -13,7 +19,7 @@
 			var isChecked = toggleBox.checked;
 			var nimi = toggleBox.name;
 
-			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
+			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
 				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,5) == nimi) {
 					currForm.elements[elementIdx].checked = isChecked;
 				}
@@ -23,23 +29,24 @@
 		//-->
 		</script>";
 
-	flush();
-
 	if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
 		// haetaan funktio
 		require ("kopioi_tilaus.inc");
 
+		$laskuta_message = "";
+
 		foreach ($laskutapvm as $pointteri => $tapahtumapvm) {
 
 			$tilausnumero = $laskutatun[$pointteri];
+			list($tapvmvv,$tapvmkk,$tapvmpp) = split("-", $tapahtumapvm);
 
 			// monistetaan soppari
 			$ok = kopioi_tilaus($tilausnumero);
 
 			if ($ok !== FALSE) {
 
-				echo "<font class='message'>Monistetaan sopimus $tilausnumero";
+				$laskuta_message .= "<font class='message'>Monistetaan sopimus $tilausnumero ($tapvmpp.$tapvmkk.$tapvmvv)";
 
 				// p‰ivitet‰‰n sopparipohjalle, ett‰ sit‰ on jo k‰yettty
 				$query  = "	UPDATE lasku
@@ -48,7 +55,7 @@
 							and tunnus  = '$tilausnumero'
 							and tila    = '0'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				// p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
 				$query  = "	UPDATE lasku
 							SET tila = 'N',
@@ -86,7 +93,8 @@
 				// p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
 				$query  = "	UPDATE lasku
 							SET tila = 'L',
-							alatila = 'D'
+							alatila = 'D',
+							luontiaika = '$tapahtumapvm'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$ok'
 							and tila = 'L'";
@@ -95,7 +103,7 @@
 				// tyyppi takasin L, merkataan rivit ker‰tyks ja toimitetuks
 				$query = "	UPDATE tilausrivi
 							SET tyyppi	   = 'L',
-							toimitettu     = '$kukarow[kuka]', 
+							toimitettu     = '$kukarow[kuka]',
 							toimitettuaika = now()
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and otunnus	= '$ok'
@@ -108,17 +116,15 @@
 				$laskutakaikki 	= "KYLLA";
 				$silent		 	= "KYLLA";
 
-				// poikkeava lasskutusp‰iv‰
-				list($laskvv,$laskkk,$laskpp) = split("-", $tapahtumapvm);
-
-				echo ", laskutetaan tilaus $ok p‰iv‰lle $laskpp.$laskkk.$laskvv.</font><br>";
+				$laskuta_message .= ", laskutetaan tilaus $ok p‰iv‰lle ".date("d.m.Y").".</font><br>";
 				require("verkkolasku.php");
 
 			}
 
 		}
 
-		echo "<br>";
+		echo "$laskuta_message<br>";
+
 	}
 
 	// n‰ytet‰‰n sopparit
@@ -186,7 +192,9 @@
 		echo "</tr>";
 
 		$pointteri = 0; // pointteri
-		
+		$cron_pvm = array(); // cronijobia varten
+		$cron_tun = array(); // cronijobia varten
+
 		while ($row = mysql_fetch_array($result)) {
 
 			echo "<tr>";
@@ -239,11 +247,26 @@
 				if (in_array($pvmloop_kk, explode(',', $row["sopimus_kk"])) and in_array($pvmloop_pp, explode(',', $row["sopimus_pp"]))) {
 
 					// katotaan ollaanko t‰m‰ lasku laskutettu
-					$query = "select * from lasku where yhtio='$kukarow[yhtio]' and liitostunnus='$row[liitostunnus]' and tila='L' and alatila='X' and tapvm='$pvmloop_vv-$pvmloop_kk-$pvmloop_pp' and clearing='sopimus' and swift = '$row[laskutunnus]'";
+					$query = "	SELECT *
+								FROM lasku
+								WHERE yhtio  = '$kukarow[yhtio]' and
+								liitostunnus = '$row[liitostunnus]' and
+								tila         = 'L' and
+								alatila      = 'X' and
+								luontiaika   = '$pvmloop_vv-$pvmloop_kk-$pvmloop_pp' and
+								clearing     = 'sopimus' and
+								swift        = '$row[laskutunnus]'";
 					$chkres = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($chkres) == 0) {
-						$laskuttamatta .= "<input type='checkbox' name='laskutapvm[$pointteri]' value='$pvmloop_vv-$pvmloop_kk-$pvmloop_pp'><input type='hidden' name='laskutatun[$pointteri]' value='$row[laskutunnus]'> $pvmloop_pp.$pvmloop_kk.$pvmloop_vv<br>";
+						$laskuttamatta .= "	<input type='checkbox' name='laskutapvm[$pointteri]' value='$pvmloop_vv-$pvmloop_kk-$pvmloop_pp'>
+											<input type='hidden' name='laskutatun[$pointteri]' value='$row[laskutunnus]'>
+											$pvmloop_pp.$pvmloop_kk.$pvmloop_vv<br>";
+
+						// tehd‰‰n arrayt‰ cronijobia varten
+						$cron_pvm[$pointteri] = "$pvmloop_vv-$pvmloop_kk-$pvmloop_pp";
+						$cron_tun[$pointteri] = "$row[laskutunnus]";
+
 						$pointteri++;
 					}
 					else {
@@ -264,13 +287,18 @@
 
 		echo "<br><input type='submit' value='Laskuta'>";
 		echo "</form>";
-		
+
 	}
 	else {
 		echo "Ei yll‰pitosopimuksia.";
 	}
 
-
-	require ("../inc/footer.inc");
+	// jos tullaan t‰‰lt‰ itsest‰ niin n‰ytet‰‰n footer
+	if (strpos($_SERVER['SCRIPT_NAME'], "yllapitosopimukset.php") !== FALSE) {
+		require ("../inc/footer.inc");
+	}
+	else {
+		ob_end_clean(); // ei echota mit‰‰‰n jos kutsutaan muualta!
+	}
 
 ?>

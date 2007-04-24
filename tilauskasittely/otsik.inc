@@ -384,9 +384,20 @@
 		echo "<tr>
 				<td valign='top'>".t("Osoite").": </td>
 				<td><input type='text' name='osoite' size='35' maxlength='31' value='$srow[osoite]'></td></tr>";
+		
+		//	Jos ollaan kaukomailla, voi postinumero olla paljonkin pitempi!
+		$query	= "	SELECT * FROM maat WHERE eu='' and koodi='$srow[maa]'";
+		$maatarkres=mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($maatarkres)>0) {
+			$pno_maxlen=10;
+		}
+		else {
+			$pno_maxlen=6;
+		}
+		
 		echo "<tr>
 				<td valign='top'>".t("Postitp").": </td>
-				<td><input type='text' name='postino' size='6' maxlength='6' value='$srow[postino]'> <input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'></td></tr>";
+				<td><input type='text' name='postino' size='".($pno_maxlen+1)."' maxlength='$pno_maxlen' value='$srow[postino]'> <input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'></td></tr>";
 
 		if ($templ > 0 and $asiakasid == '') {
 			echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM! Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
@@ -421,7 +432,7 @@
 					<td><input type='text' name='tosoite' size='35' maxlength='31' value='$srow[toim_osoite]'></td></tr>";
 			echo "<tr>
 					<td valign='top'>".t("Postitp").": </td>
-					<td><input type='text' name='tpostino' size='6' maxlength='6' value='$srow[toim_postino]'> <input type='text' name='tpostitp' size='21' maxlength='20' value='$srow[toim_postitp]'></td></tr>";
+					<td><input type='text' name='tpostino' size='".($pno_maxlen+1)."' maxlength='$pno_maxlen' value='$srow[toim_postino]'> <input type='text' name='tpostitp' size='21' maxlength='20' value='$srow[toim_postitp]'></td></tr>";
 			echo "</table>";
 			echo "</td>";
 			echo "</tr>";

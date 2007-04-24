@@ -10,7 +10,7 @@ else {
 }
 
 
-if ($yhtiorow["logo"] != '' and file_exists($yhtiorow["logo"])) {
+if ($yhtiorow["logo"] != '' and file($yhtiorow["logo"]) !== FALSE) {
 
 	$image = getimagesize($yhtiorow["logo"]);
 	$ix    = $image[0];			// kuvan x

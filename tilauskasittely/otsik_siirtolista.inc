@@ -23,6 +23,25 @@
 		$tila = 'Muuta';
 	}
 	
+	//	Tehd‰‰n hieman oikeellisuustarkistuksia..
+	if(isset($jatka)) {
+		//	Valmistuksia voi tehd‰ vain saman maan sis‰ll‰!
+		$query = "select maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus=$clearing";
+		$abures = mysql_query($query) or pupe_error($query);
+		$kohdev=mysql_fetch_array($abures);
+
+		$query = "select maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus=$varasto";
+		$abures = mysql_query($query) or pupe_error($query);
+		$lahdev=mysql_fetch_array($abures);
+		
+		if($lahdev["maa"] != $kohdev["maa"]) {
+			echo "<font class='error'>".t("Valmistus on mahdollista vain saman maan sis‰ll‰")."!!!</font><br><br>";
+			$tila == "Muuta";
+			unset($jatka);
+		}
+	}
+		
+	
 	if ($tila == 'Muuta' and !isset($jatka)) {
 		
 		if ($toim == "SIIRTOLISTA") {

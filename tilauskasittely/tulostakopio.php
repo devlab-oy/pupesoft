@@ -158,6 +158,15 @@
 			if (!isset($ppa))
 				$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 		}
+		elseif ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
+			//N‰iss‰ kaupoissa voi kest‰‰ v‰h‰n kauemmin
+			if (!isset($kka))
+				$kka = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+			if (!isset($vva))
+				$vva = date("Y",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+			if (!isset($ppa))
+				$ppa = date("d",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+		}
 		else {
 			if (!isset($kka))
 				$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));

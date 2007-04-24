@@ -518,7 +518,7 @@
 
 
 					$pdf->draw_text(45,  553, t("Tuotenumero", $kieli),		$firstpage, $pieni);
-					$pdf->draw_text(363, 553, t("Määrä", $kieli),			$firstpage, $pieni);
+					$pdf->draw_text(360, 553, t("Määrä", $kieli),			$firstpage, $pieni);
 					$pdf->draw_text(413, 553, t("Hinta", $kieli),			$firstpage, $pieni);
 					$pdf->draw_text(463, 553, t("Ale", $kieli),			$firstpage, $pieni);
 					$pdf->draw_text(512, 553, t("Yhteensä", $kieli),		$firstpage, $pieni);
@@ -621,7 +621,7 @@
 
 			$query = "	SELECT toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
 						tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),2) rivihinta, 
-						substring(tuote.nimitys,1,80) nimitys, kommentti
+						substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko
 						FROM tilausrivi
 						join tuote USING (yhtio, tuoteno)
 						join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
@@ -655,7 +655,7 @@
 
 				$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],				$firstpage, $p);
 				$pdf->draw_text(190, $kala, "(".$row["tuoteno"].")",			$firstpage, $p);
-				$pdf->draw_text(363, $kala, sprintf('%.2f',$row["varattu"]), 	$firstpage, $p);
+				$pdf->draw_text(360, $kala, sprintf('%.2f',$row["varattu"])." ".$row["yksikko"], 	$firstpage, $p);
 				$pdf->draw_text(413, $kala, sprintf('%.2f',$row["hinta"]),		$firstpage, $p);
 				$pdf->draw_text(463, $kala, sprintf('%.2f',$row["ale"])."%",		$firstpage, $p);
 				$pdf->draw_text(512, $kala, sprintf('%.2f',$row["rivihinta"]), 	$firstpage, $p);

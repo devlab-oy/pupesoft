@@ -133,6 +133,7 @@
 						valuutta		= '$valuutta',
 						toim_tuoteno	= '$toim_tuoteno',
 						toim_nimitys	= '$toim_nimitys',
+						toim_yksikko	= '$toim_yksikko',						
 						tuotekerroin	= '$tuotekerroin',
 						alkuperamaa		= '$alkuperamaa',
 						liitostunnus	= '$tuotoimirow[tunnus]'
@@ -163,6 +164,7 @@
 						valuutta		= '$valuutta',
 						toim_tuoteno	= '$toim_tuoteno',
 						toim_nimitys	= '$toim_nimitys',
+						toim_yksikko	= '$toim_yksikko',						
 						tuotekerroin	= '$tuotekerroin',
 						alkuperamaa		= '$alkuperamaa',
 						liitostunnus	= '$tuotoimirow[tunnus]'";
@@ -229,6 +231,7 @@
 			echo "<tr><th>".t("valuutta")."</th>			<td>$valuu																</td><td class='back'>".$toimerrorit[0]["valuutta"]."</td></tr>";
 			echo "<tr><th>".t("toim_tuoteno")."</th>		<td><input type='text' name='toim_tuoteno' 	value='$toim_tuoteno'>		</td><td class='back'>".$toimerrorit[0]["toim_tuoteno"]."</td></tr>";
 			echo "<tr><th>".t("toim_nimitys")."</th>		<td><input type='text' name='toim_nimitys'	value='$trow[toim_nimitys]'></td><td class='back'>".$toimerrorit[0]["toim_nimitys"]."</td></tr>";
+			echo "<tr><th>".t("toim_yksikko")."</th>		<td><input type='text' name='toim_yksikko' maxlength='3' size='4' 	value='$toim_yksikko'>		</td><td class='back'>".$toimerrorit[0]["toim_yksikko"]."</td></tr>";			
 			echo "<tr><th>".t("tuotekerroin")."</th>		<td><input type='text' name='tuotekerroin'	value='$tuotekerroin'>		</td><td class='back'>".$toimerrorit[0]["tuotekerroin"]."</td></tr>";
 			echo "<tr><th>".t("alkuperamaa")."</th>			<td>$maat																</td><td class='back'>".$toimerrorit[0]["alkuperamaa"]."</td></tr>";
 			echo "</table><hr>";
@@ -412,6 +415,26 @@
 				}
 				else {
 					echo "<input type='hidden' name='toim_nimitys' value='$trow[toim_nimitys]'>";
+				}
+
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.toim_yksikko'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td><input type='text' name='toim_yksikko' maxlength='3' size='4' value='$trow[toim_yksikko]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toim_yksikko"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("toim_yksikko")."</th><td><input type='text' name='toim_yksikko' maxlength='3' size='4' value='$trow[toim_yksikko]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toim_yksikko"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='toim_yksikko' maxlength='3' size='4' value='$trow[toim_yksikko]'>";
 				}
 				
 				$query = "	SELECT *

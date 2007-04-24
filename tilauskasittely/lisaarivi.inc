@@ -1096,7 +1096,24 @@
 				// lisätään saatu nimitys kaikille tuotteille
 				$trow["nimitys"] = addslashes($tuotenimitys);
 			}
-
+			
+			if($laskurow["tila"] == "O") {
+				//	Tarkastetaan olisiko toimittajalla yksikkö!
+				$query = "	SELECT toim_yksikko
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$trow[tuoteno]'
+							and liitostunnus = '$laskurow[liitostunnus]'
+							LIMIT 1";
+				$rarres = mysql_query($query) or pupe_error($query);
+				$rarrow	 = mysql_fetch_array($rarres);
+				
+				//	Jos toimittajalla on yksikkö ohitetaan tuotteen yksikkö
+				if($rarrow["toim_yksikko"]!= "") {
+					$trow["yksikko"] = $rarrow["toim_yksikko"];
+				}
+			}
+			
 			// lisätään puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue   = '$p_hyllyalue',

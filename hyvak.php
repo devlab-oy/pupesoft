@@ -579,30 +579,26 @@
 		}
 
 		echo "</tr>";
-		echo "</table>";
 
-		echo "<br><table><tr valign='top'><td class='back'>";
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Hyväksyjät")."</th></tr>";
-		if($laskurow["h1time"] != "0000-00-00 00:00:00") {
-			echo "<tr><td>$laskurow[hyvak1]@$laskurow[h1time]</td><tr>";
+		if ($laskurow["h1time"] == "0000-00-00 00:00:00") $laskurow["h1time"] = "";
+		if ($laskurow["h2time"] == "0000-00-00 00:00:00") $laskurow["h2time"] = "";
+		if ($laskurow["h3time"] == "0000-00-00 00:00:00") $laskurow["h3time"] = "";
+		if ($laskurow["h4time"] == "0000-00-00 00:00:00") $laskurow["h4time"] = "";
+		if ($laskurow["h5time"] == "0000-00-00 00:00:00") $laskurow["h5time"] = "";
+
+		if ($laskurow["hyvak1"] != "") {
+			echo "<tr><th>".t("Hyväksyjät")."</th><th colspan='2'>".t("Hyväksytty")."</th></tr>";
+			echo "<tr><td>1. $laskurow[hyvak1]</td><td colspan='2'>$laskurow[h1time]</td></tr>";
 		}
-		if($laskurow["h2time"] != "0000-00-00 00:00:00") {
-			echo "<tr><td>$laskurow[hyvak2]@$laskurow[h2time]</td><tr>";
-		}
-		if($laskurow["h3time"] != "0000-00-00 00:00:00") {
-			echo "<tr><td>$laskurow[hyvak3]@$laskurow[h3time]</td><tr>";
-		}
-		if($laskurow["h4time"] != "0000-00-00 00:00:00") {
-			echo "<tr><td>$laskurow[hyvak4]@$laskurow[h4time]</td><tr>";
-		}
-		if($laskurow["h5time"] != "0000-00-00 00:00:00") {
-			echo "<tr><td>$laskurow[hyvak5]@$laskurow[h5time]</td><tr>";
-		}
+		if ($laskurow["hyvak2"] != "") echo "<tr><td>2. $laskurow[hyvak2]</td><td colspan='2'>$laskurow[h2time]</td></tr>";
+		if ($laskurow["hyvak3"] != "")echo "<tr><td>3. $laskurow[hyvak3]</td><td colspan='2'>$laskurow[h3time]</td></tr>";
+		if ($laskurow["hyvak4"] != "")echo "<tr><td>4. $laskurow[hyvak4]</td><td colspan='2'>$laskurow[h4time]</td></tr>";
+		if ($laskurow["hyvak5"] != "")echo "<tr><td>5. $laskurow[hyvak5]</td><td colspan='2'>$laskurow[h5time]</td></tr>";
 
 		echo "</table>";
+
 		if ($laskurow["comments"] != "") {
-			echo "</td><td class='back' width='20'></td><td valign='top' class='back'><table>";
+			echo "<br><table>";
 			echo "<tr><th colspan='2'>".t("Kommentit")."</th></tr>";
 			echo "<tr><td colspan='2'>$laskurow[comments]</td></tr>";
 			echo "</table>";
@@ -1080,8 +1076,8 @@
 
 		$query = "	SELECT *, if(kapvm!='0000-00-00',concat_ws('<br>',kapvm,erpcm),erpcm) erpcmkapcm, round(summa * vienti_kurssi, 2) kotisumma
 				 	FROM lasku
-				  	WHERE hyvaksyja_nyt = '$kukarow[kuka]' 
-					and yhtio = '$kukarow[yhtio]' 
+				  	WHERE hyvaksyja_nyt = '$kukarow[kuka]'
+					and yhtio = '$kukarow[yhtio]'
 					and tila != 'D'
 					$nayta
 				  	ORDER BY if(kapvm!='0000-00-00',kapvm,erpcm)";

@@ -75,8 +75,8 @@ if ($virexx == 0) {
 
 		$ulos .= "\r\n";
 
-		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("Kpl", $kieli)."   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli)."\r\n";
-		$ulos .= "---------------------------------------------------------------------------------\r\n";
+		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("EAN", $kieli)."          ".t("Kpl", $kieli)."   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli)."\r\n";
+		$ulos .= "----------------------------------------------------------------------------------------------\r\n";
 
 		$rivino = 0;
 		$liite  = t("Rivino", $kieli)."\t".t("Nimitys", $kieli)."\t".t("Tuoteno", $kieli)."\t".t("Varattu", $kieli)."\t".t("Hinta", $kieli)."\t".t("Ale", $kieli)."\r\n";
@@ -91,6 +91,7 @@ if ($virexx == 0) {
 			$ulos .= sprintf("%03.0f",$rivino)." ";
 			$ulos .= sprintf("%-30.s",$tvtilausrivirow['nimitys']);
 			$ulos .= sprintf("%-20.s",$tvtilausrivirow['tuoteno']);
+			$ulos .= sprintf("%-13.s",$tvtilausrivirow['eankoodi']);
 
 			if ($laskurow["tilaustyyppi"] == 'E') {
 				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['tilkpl']);

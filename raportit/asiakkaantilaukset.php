@@ -285,10 +285,24 @@
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='asiakasid' value='$asiakasid'>
-						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-						<input type='hidden' name='tunnus' value='$row[tilaus]'>
-						<input type='hidden' name='ytunnus' value='$ytunnus'>
-						<input type='hidden' name='nimi' value='$nimi'>
+						<input type='hidden' name='toimittajaid' value='$toimittajaid'>		
+						<input type='hidden' name='tunnus' value='$row[tilaus]'>";
+				
+				//	Pysytään projektilla jos valitaan vain projekti
+				if($row["tila"] == "R" or $nippu > 0) {
+					if($nippu>0) {
+						echo "<input type='hidden' name='otunnus' value='$nippu'>";
+						echo "<input type='hidden' name='nippu' value='$nippu'>";
+					}
+					else {
+						echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+						echo "<input type='hidden' name='nippu' value='$otunnus'>";						
+					}
+				}
+				else {
+					echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+				}
+				echo "	<input type='hidden' name='nimi' value='$nimi'>
 						<input type='hidden' name='ppa' value='$ppa'>
 						<input type='hidden' name='kka' value='$kka'>
 						<input type='hidden' name='vva' value='$vva'>

@@ -184,7 +184,7 @@
 	elseif ($laskurow["tila"] == 'R') {
 		$query = "	SELECT group_concat(tunnus) tunnukset
 		 			FROM lasku 
-					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = '$tunnus'
+					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = '$tunnus' and tila IN ('L','G','E','V','W','N')
 					GROUP BY tunnusnippu";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
@@ -241,13 +241,18 @@
 
 	for ($i = 0; $i < mysql_num_fields($presult)-3; $i++) {
 		$ojarj=$i+1; // sortti numeron mukaan niin ei tuu onglemia
-		echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&ytunnus=$ytunnus&nimi=$nimi&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";
+		if($nippu>0) {
+			echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&nippu=$nippu&otunnus=$nippu&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";			
+		}
+		else {
+			echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&ytunnus=$ytunnus&nimi=$nimi&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";			
+		}
 	}
 
 	echo "</tr>";
 
 
-	$summa = 0;
+	$summa = $ennakkosumma = 0;
 	while ($prow = mysql_fetch_array ($presult)) {
 
 		echo "<tr>";
@@ -298,16 +303,21 @@
 			echo "<td colspan='13'>$prow[kommentti]</td>";
 			echo "</tr>";
 		}
-
-
-		$summa += $prow["rivihinta"];
+		
+		//	Jos ollaan laskulla joka ei ole ennakkolasku
+		if($prow["tuoteno"] == $yhtiorow["ennakkomaksu_tuotenumero"] and $laskurow["jaksotettu"]>=0) {
+			$ennakkosumma += $prow["rivihinta"];
+		}
+		else {
+			$summa += $prow["rivihinta"];
+		}
 	}
 
 	echo "<tr><td class='back' colspan='11' align='right'>".t("Arvo").":</td><td class='back' colspan='2'>".str_replace(".",",",sprintf('%.2f',$summa))."</td></tr>";
 
 	$aquery = "	SELECT alv, round(sum(rivihinta*(alv/100)),2) alvrivihinta, sum(rivihinta) rivihinta
 				FROM tilausrivi
-				WHERE $where and yhtio='$kukarow[yhtio]'
+				WHERE $where and yhtio='$kukarow[yhtio]' and tuoteno!='$yhtiorow[ennakkomaksu_tuotenumero]'
 				GROUP BY alv
 				ORDER BY alv";
 	$aresult = mysql_query($aquery) or pupe_error($aquery);
@@ -322,6 +332,30 @@
 
 	if ($summa!=0) {
 		echo "<tr><td class='back' colspan='11' align='right'>".t("Yhteensä").":</td><td class='back' colspan='2'>".str_replace(".",",",sprintf('%.2f',$summa))."</td></tr>";
+	}
+
+	if($ennakkosumma>0) {
+		echo "<tr><td class='back'><br></td></tr><tr><td class='back' colspan='12' align='right'>".t("Ennakkolaskutus").":</td><td class='back' colspan='2'></td></tr>";
+		echo "<tr><td class='back' colspan='11' align='right'>".t("Laskutettu").":</td><td class='back' colspan='2'>".str_replace(".",",",sprintf('%.2f',$ennakkosumma))."</td></tr>";
+		
+		$aquery = "	SELECT alv, round(sum(rivihinta*(alv/100)),2) alvrivihinta, sum(rivihinta) rivihinta
+					FROM tilausrivi
+					WHERE $where and yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[ennakkomaksu_tuotenumero]'
+					GROUP BY alv
+					ORDER BY alv";
+		$aresult = mysql_query($aquery) or pupe_error($aquery);
+		$summa = 0;
+		while ($arow = mysql_fetch_array($aresult)) {
+
+			if ($arow['alvrivihinta']!=0) {
+				echo "<tr><td class='back' colspan='11' align='right'>".t("Alv").": ".str_replace(".",",",$arow['alv'])."%</td><td class='back' colspan='2'>".str_replace(".",",",$arow['alvrivihinta'])."</td></tr>";
+			}
+			$summa += $arow["alvrivihinta"] + $arow["rivihinta"];
+		}
+
+		if ($summa!=0) {
+			echo "<tr><td class='back' colspan='11' align='right'>".t("Yhteensä").":</td><td class='back' colspan='2'>".str_replace(".",",",sprintf('%.2f',$summa))."</td></tr>";
+		}
 	}
 
 	echo "</table>";

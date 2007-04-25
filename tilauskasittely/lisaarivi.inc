@@ -167,7 +167,7 @@
 	// eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
 	$kieltolisa = "";
 
-	if ($laskurow["toim_maa"] != "") {
+	if ($laskurow["toim_maa"] != "" and $laskurow["tila"] != 'V') {
 		$kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$laskurow[toim_maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$laskurow[toim_maa]%' ";
 	}
 

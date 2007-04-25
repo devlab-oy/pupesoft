@@ -129,7 +129,7 @@ if ($tee == "SYOTTO") {
 
 	// Myyntisaamiset
 	$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, lukko)
-				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$myyntisaamiset','-$omasumma','Käsin syötetty suoritus','1')";
+				VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(),'$tapvm','$ltunnus','$myyntisaamiset', $omasumma * -1,'Käsin syötetty suoritus','1')";
 
 	if (!($result = mysql_query($query))) {
 		$result = mysql_query($unlockquery);

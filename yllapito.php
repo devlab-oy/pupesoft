@@ -368,7 +368,7 @@
 				$al_row = mysql_fetch_array($al_res);
 
 				if ($al_row["selitetark"] != '') {
-					$otsikko = $al_row["selitetark"];
+					$otsikko = t($al_row["selitetark"]);
 				}
 				else {
 					$otsikko = t(mysql_field_name($result, $i));

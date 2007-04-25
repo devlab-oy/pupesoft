@@ -57,13 +57,11 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
 		$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
 		$pdf->draw_text(250,810, t("Keräilylista", $kieli), 	$firstpage);
-		$pdf->draw_text(260,795, t("Keräyspvm", $kieli).": ", 	$firstpage, $p);
-		$pdf->draw_text(325,795, tv1dateconv(substr($laskurow["kerayspvm"],0,10)), 	$firstpage, $p);
-		$pdf->draw_text(260,785, t("Toimituspvm", $kieli).": ", 	$firstpage, $p);
-		$pdf->draw_text(325,785, tv1dateconv($laskurow["toimaika"]), 	$firstpage, $p);
+		$pdf->draw_text(260,785, t("Toimituspvm", $kieli).": ".tv1dateconv($laskurow["toimaika"]), 	$firstpage, $p);
 		$pdf->draw_text(320,810, t("Sivu", $kieli)." $sivu", 	$firstpage,$p);
-
 		$pdf->draw_text(135,795, t("Tilausnumero(t)", $kieli).": ".$tilausnumeroita, $firstpage, $p);
+		$pdf->draw_text(135,785, t("Keräyspvm", $kieli).": ".tv1dateconv(substr($laskurow["kerayspvm"],0,10)), 	$firstpage, $p);
+
 
 		$i["height"] = 28;
 		$i["font"] = "Times-Roman";

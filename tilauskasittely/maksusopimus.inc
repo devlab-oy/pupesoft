@@ -1,7 +1,16 @@
 <?php
 
 	echo "<font class='head'>".t("Tilauksen maksusopimus")."</font><hr><br>";
-
+	
+	/*
+		Jotta osataan hakea oikeat tilaukset laitetaan tilat talteen
+	*/
+	if($toim == "TARJOUS") {
+		$sallitut_tilat = "'T'";
+	}
+	else {
+		$sallitut_tilat = "'L','G','E','V','W','N'";
+	}
 	if($tila == "uusi") {
 		if ($laskurow["jaksotettu"] == 0) {
 			$query = "	UPDATE lasku
@@ -27,7 +36,7 @@
 							SET jaksotettu = '$laskurow[jaksotettu]'
 							WHERE yhtio 	= '$kukarow[yhtio]'
 							and vanhatunnus = '$laskurow[vanhatunnus]'
-							and tila in ('N','L','T','R')
+							and tila IN ($sallitut_tilat)
 							and alatila != 'X'";
 				$result = mysql_query($query) or pupe_error($query);
 
@@ -35,7 +44,7 @@
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]'
 							and jaksotettu  = '$laskurow[jaksotettu]'
-							and tila in ('N','L','T','R')
+							and tila IN ($sallitut_tilat)
 							and alatila != 'X'";
 				$result = mysql_query($query) or pupe_error($query);
 				$posrow = mysql_fetch_array($result);
@@ -69,6 +78,7 @@
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tilausrivi.jaksotettu='$laskurow[jaksotettu]'
 					WHERE lasku.yhtio 		= '$kukarow[yhtio]'
+					and lasku.tila 			IN ($sallitut_tilat)					
 					and lasku.jaksotettu 	= '$laskurow[jaksotettu]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$rivrow = mysql_fetch_array($result);
@@ -213,9 +223,10 @@
 					round(sum(if(tilausrivi.jaksotettu=0 , tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_veroton,
 					round(sum(if(tilausrivi.jaksotettu=0 , tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)), 0)),2) loput_verolli
 					FROM lasku
-					JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D'
+					JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tuoteno!='$yhtiorow[ennakkomaksu_tuotenumero]'
 					WHERE lasku.yhtio		= '$kukarow[yhtio]'
 					and lasku.jaksotettu	= '$laskurow[jaksotettu]'
+					and lasku.tila 			IN ($sallitut_tilat)
 					and lasku.jaksotettu 	> 0
 					GROUP by lasku.jaksotettu";
 		$result = mysql_query($query) or pupe_error($query);

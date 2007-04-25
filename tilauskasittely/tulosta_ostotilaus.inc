@@ -235,6 +235,21 @@
 								$pdf = alku($pdf, $laskurow,$kieli);
 								$h = 190;
 							}
+							
+							//	Tarkastetaan olisiko toimittajalla yksikkö!
+							$query = "	SELECT toim_yksikko
+										FROM tuotteen_toimittajat
+										WHERE yhtio = '$kukarow[yhtio]'
+										and tuoteno = '$trow[tuoteno]'
+										and liitostunnus = '$laskurow[liitostunnus]'
+										LIMIT 1";
+							$rarres = mysql_query($query) or pupe_error($query);
+							$rarrow	 = mysql_fetch_array($rarres);
+
+							//	Jos toimittajalla on yksikkö ohitetaan tuotteen yksikkö
+							if($rarrow["toim_yksikko"]!= "") {
+								$row["yksikko"] = $rarrow["toim_yksikko"];
+							}
 
 							$pdf->write($h, 1, 0, $s[0], $row["toim_tuoteno"]." ".$row["toim_nimitys"], "norm", "L", "");
 							$pdf->write($h, 1, $s[0], $s[1], $row["varattu"]." ".strtolower($row["yksikko"]), "norm", "R", "");

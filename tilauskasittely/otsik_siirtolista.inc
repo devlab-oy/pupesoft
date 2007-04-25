@@ -23,8 +23,8 @@
 		$tila = 'Muuta';
 	}
 
-	//	Tehd‰‰n hieman oikeellisuustarkistuksia..
-	if (isset($jatka) and $clearing != "" and $varasto != "") {
+	//	Tehd‰‰n hieman oikeellisuustarkistuksia valmistuksesta.. "ei viel‰ hanskaa k‰yt‰ kaikista valintaa"
+	if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $varasto != "") {
 		//	Valmistuksia voi tehd‰ vain saman maan sis‰ll‰!
 		$query  = "select maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$clearing'";
 		$abures = mysql_query($query) or pupe_error($query);

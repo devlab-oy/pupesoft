@@ -27,6 +27,7 @@
 
 	if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
+
 		$lisa = '';
 
 		if ($nimi != '') {
@@ -63,7 +64,7 @@
 					$having
 					order by 1,2,3";
 		$result = mysql_query($query) or pupe_error($query);
-	
+
 		$aay = 0;
 		$aabby = 0;
 		$bby = 0;
@@ -77,6 +78,7 @@
 		$rivilask = 0;
 
 		if (mysql_num_rows($result) > 0) {
+
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>".t("Ytunnus")."</th>";
@@ -92,8 +94,7 @@
 			echo "<th align='right'>".t("Yhteensä")."</th>";
 			echo "<th align='right'>".t("Luottoraja")."</th>";
 			echo "</tr>";
-	
-	
+
 			while ($row = mysql_fetch_array($result)) {
 
 				$query = "	SELECT luottoraja
@@ -140,38 +141,40 @@
 					$ffy += $row["ff"];
 					$kky += $surow["summa"];
 					$lly += $row["ll"];
-			
+
 					$ylikolkyt += $row["cc"];
 					$ylikolkyt += $row["dd"];
 					$ylikolkyt += $row["ee"];
-					$ylikolkyt += $row["ff"];			
+					$ylikolkyt += $row["ff"];
 					$rivilask++;
 				}
-		
-
-				if ($eiliittymaa != 'ON' or $rivilask > 1) {
-					echo "<tr>";
-					echo "<td class='tumma' align='right' colspan='2'>".t("Yhteensä").":</th>";
-					echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aay))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aabby))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$bby))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ccy))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ddy))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$eey))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ffy))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$kky))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$lly))."</td>";
-					echo "<td class='tumma'></td>";
-					echo "</tr>";
-				}
 			}
-			
-			echo "</table>";		
+
+			if ($eiliittymaa != 'ON' or $rivilask > 1) {
+				echo "<tr>";
+				echo "<td class='tumma' align='right' colspan='2'>".t("Yhteensä").":</th>";
+				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aay))."</td>";
+				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aabby))."</td>";
+				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$bby))."</td>";
+				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ccy))."</td>";
+				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ddy))."</td>";
+				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$eey))."</td>";
+				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ffy))."</td>";
+				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$kky))."</td>";
+				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$lly))."</td>";
+				echo "<td class='tumma'></td>";
+				echo "</tr>";
+			}
+
+			echo "</table>";
+
 		}
-		elseif($eiliittymaa != 'ON') {
+		elseif ($eiliittymaa != 'ON') {
 			echo "<br><br>".t("Ei saatavia!")."<br>";
 		}
+
 	}
+
 
 	if ($eiliittymaa != 'ON') {
 		require ("../inc/footer.inc");

@@ -318,7 +318,7 @@
 	if ($kukarow["extranet"] == "" and $tilaus_on_jo == "" and ($tee == "" or $tee == "JATKA")) {
 
 		if (isset($muutparametrit)) {
-			list($tuotenumero,$tyyppi,$toimi,$superit,$automaaginen,$ytunnus,$asiakasno,$toimittaja,$suorana,$tuoteosasto,$tuoteryhma,$tuotemerkki) = explode('#', $muutparametrit);
+			list($tuotenumero,$tyyppi,$toimi,$superit,$automaaginen,$ytunnus,$asiakasno,$toimittaja,$suorana,$tuoteosasto,$tuoteryhma,$tuotemerkki,$maa) = explode('#', $muutparametrit);
 
 			$varastot = explode('##', $tilausnumero);
 
@@ -327,7 +327,7 @@
 			}
 		}
 
-		$muutparametrit = "$tuotenumero#$tyyppi#$toimi#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#";
+		$muutparametrit = "$tuotenumero#$tyyppi#$toimi#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#";
 
 		if(is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -355,7 +355,7 @@
 				$tee = "";
 			}
 		}
-		$muutparametrit = "$tuotenumero#$tyyppi#$toimi#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#";
+		$muutparametrit = "$tuotenumero#$tyyppi#$toimi#$superit#$automaaginen#$ytunnus#$asiakasno#$toimittaja#$suorana#$tuoteosasto#$tuoteryhma#$tuotemerkki#$maa#";
 
 		if(is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -426,6 +426,10 @@
 
 		if ($tuotemerkki != '') {
 			$tuotelisa .= " and tuote.tuotemerkki = '$tuotemerkki' ";
+		}
+		
+		if ($maa != '') {
+			$tuotelisa .= " and lasku.maa = '$maa' ";
 		}
 
 		$query = "";
@@ -1329,6 +1333,27 @@
 
 		echo "</select></td>";
 		echo "</tr>\n";
+		
+		echo "<tr>";
+		echo "<th>".t("Maa")."</th>";
+
+		$query = "	SELECT distinct koodi, nimi
+					FROM maat
+					WHERE nimi != ''
+					ORDER BY koodi";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<td><select name='maa'>";
+		echo "<option value=''>".t("Maa")."</option>";
+
+		while ($row = mysql_fetch_array($result)) {
+			if ($maa == $row["koodi"]) $sel = "selected";
+			else $sel = "";
+			echo "<option value = '".strtoupper($row[0])."' $sel>".t($row[1])."</option>";
+		}
+
+		echo "</select></td>";
+		echo "</tr>\n";	
 
 		echo "<tr>
 				<th>".t("Tuotenumero")."</th>

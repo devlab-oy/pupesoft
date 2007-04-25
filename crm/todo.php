@@ -45,18 +45,7 @@ if ($tee == "muokkaa") {
 			<td><input name='projekti' type='text' size='15' value='$rivi[projekti]'></td>
 
 			<td>
-				<select name='prioriteetti'>
-				<option $prio_sel[0] value='0'>bug</option>
-				<option $prio_sel[1] value='1'>1</option>
-				<option $prio_sel[2] value='2'>2</option>
-				<option $prio_sel[3] value='3'>3</option>
-				<option $prio_sel[4] value='4'>4</option>
-				<option $prio_sel[5] value='5'>5</option>
-				<option $prio_sel[6] value='6'>6</option>
-				<option $prio_sel[7] value='7'>7</option>
-				<option $prio_sel[8] value='8'>8</option>
-				<option $prio_sel[9] value='9'>9</option>
-				</select>
+				<input name='prioriteetti' type='text' size='5' value='$prioriteetti'></td>
 			</td>
 
 			<td><input name='kuittaus' type='text' size='15' value='$rivi[kuittaus]'></td>
@@ -106,7 +95,7 @@ if ($tee == "paivita") {
 }
 
 if ($tee == "uusi" and $kuvaus != "") {
-	$query  = "insert into todo (yhtio, kuvaus, aika, prioriteetti, projekti, pyytaja, kesto_arvio, laatija, luontiaika) values ('$kukarow[yhtio]', '$kuvaus', now(), '$prioriteetti', '$projekti', '$pyytaja', '$kesto_arvio','$kukarow[kuka]',now())";
+	$query  = "insert into todo (yhtio, kuvaus, aika, prioriteetti, projekti, pyytaja, kesto_arvio, laatija, luontiaika, deadline) values ('$kukarow[yhtio]', '$kuvaus', now(), '$prioriteetti', '$projekti', '$pyytaja', '$kesto_arvio', '$kukarow[kuka]', now(), '$deadline')";
 	$result = mysql_query($query) or pupe_error($query);
 	$tee = "";
 }
@@ -256,6 +245,7 @@ if ($tee == "") {
 			<th>kuvaus</th>
 			<th>pyytäjä</th>
 			<th>aika-arvio</th>
+			<th>deadline</th>
 			<th>projekti</th>
 			<th>prio</th>
 			<th></th>
@@ -264,6 +254,7 @@ if ($tee == "") {
 			<td><textarea name='kuvaus' cols='80' rows='2'></textarea></td>
 			<td><input name='pyytaja' type='text' size='15'></td>
 			<td><input name='kesto_arvio' type='text' size='6'></td>
+			<td><input name='deadline' type='text' size='10'</td>
 			<td><input name='projekti' type='text' size='15'></td>
 
 			<td>

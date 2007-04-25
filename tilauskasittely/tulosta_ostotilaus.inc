@@ -489,7 +489,7 @@
 					}
 
 					if (trim($laskurow["comments"]) != "") {
-						$pdf->draw_text(310, 767,  trim($laskurow["comments"]), 			$firstpage, $pieni);
+						$pdf->draw_text(310, 767,  trim($laskurow["comments"]), 			$firstpage, $p);
 					}
 
 					$pdf->draw_text(310, 755, t("Olkaa hyvä ja kirjoittakaa tilausnumero lähetteeseen, laskuun ja kirjeisiin", $kieli).".", $firstpage, $pieni);

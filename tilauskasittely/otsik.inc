@@ -226,6 +226,7 @@
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='paaformi'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 		echo "<input type='hidden' name='from' value='$from'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 
@@ -1481,6 +1482,7 @@
 			echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='OTSIK'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
+			echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 			echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
 			echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'></td></form>";

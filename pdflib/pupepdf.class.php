@@ -1,4 +1,3 @@
-
 <?php
 
 require_once('../pdflib/phppdflib.class.php');
@@ -73,14 +72,14 @@ class PDF extends pdffile {
 		return $s;
 	}
 
-	function write($bottom, $ln, $left, $right, $txt, $font, $align="", $style="", $page="") {
+	function write($top, $ln, $left, $right, $txt, $font, $align="", $style="", $page="") {
 		global $fonts;
  		
 		$p = $fonts[$font];
 
 		$right = mm_pt($right);
 		$left = mm_pt($left);
-		$bottom = mm_pt($bottom);
+		$top = mm_pt($top);
 										
 		if(strtoupper($style) == "B") {
 			$p["font"] = $p["font"]."-Bold";
@@ -106,15 +105,54 @@ class PDF extends pdffile {
 			$right = $this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"];
 		}
 		
-		$top = $bottom + ($ln * ($p["height"]+2));
+		$bottom = $top - ($ln * ($p["height"]+2));
 		
-		if($page == "") {
+		if(!is_int($page)) {
 			$page = $this->currentPage["oid"];
 		}
 
 		$this->draw_paragraph($top,	$left, $bottom, $right,	$txt, $page, $p);
 		
 		$this->lasth = $p["height"];
+	}
+
+	function writeToTemplate($top, $ln, $left, $right, $txt, $font, $align="", $style="", $template="") {
+		global $fonts;
+ 		
+		$p = $fonts[$font];
+
+		$right = mm_pt($right);
+		$left = mm_pt($left);
+		$top = mm_pt($top);
+										
+		if(strtoupper($style) == "B") {
+			$p["font"] = $p["font"]."-Bold";
+		}
+		if(strtoupper($style) == "I") {
+			$p["font"] = $p["font"]."-Oblique";
+		}
+		if(strtoupper($style) == "BI" or strtoupper($style) == "IB") {
+			$p["font"] = $p["font"]."-BoldOblique";
+		}
+
+		if(strtoupper($align) == "C") {
+			$p["align"] = "center";
+		}		
+		if(strtoupper($align) == "R") {
+			$p["align"] = "right";
+		}		
+		if(strtoupper($align) == "L") {
+			$p["align"] = "left";
+		}		
+		
+		if($right == 0) {
+			$right = $this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"];
+		}
+		
+		$bottom = $top - ($ln * ($p["height"]+10));
+		$this->template->paragraph($template,  $bottom,	$left, $top, $right,	$txt, $p);
+		$this->lasth = $p["height"];			
+
 	}
 
 	function writeStrlen($txt, $font) {
@@ -124,7 +162,7 @@ class PDF extends pdffile {
 		return $this->strlen($txt,$p);
 	}
 
-	function placeImage($top, $width, $imageFile) {
+	function placeImage($top, $width, $imageFile, $page="") {
 						
 		$filedata = file_get_contents($imageFile);
 		if($filedata != "") {
@@ -140,6 +178,10 @@ class PDF extends pdffile {
 				$top = mm_pt($top);
 				$width = mm_pt($width);
 				
+				if(!is_int($page)) {
+					$page = $this->currentPage["oid"];
+				}
+				
 				$this->image_place($image,$top,$width,$this->currentPage["oid"]);
 			}
 			else {
@@ -151,6 +193,51 @@ class PDF extends pdffile {
 			echo "Kuvavirhe!";
 			return false;
 		}
+	}
+
+	function placeImageToTemplate($top, $width, $imageFile, $template="") {
+						
+		$filedata = file_get_contents($imageFile);
+		if($filedata != "") {
+			if(strpos($imageFile, ".png")) {
+				$image = $this->png_embed($filedata);
+			}
+			elseif(strpos($imageFile, ".jpg")) {
+				$image = $this->jfif_embed($filedata);
+			}
+			
+			if($image!="") {
+				
+				$top = mm_pt($top);
+				$left = mm_pt($width);
+				$size  = getimagesize($imageFile);
+				$height=$size[1];
+				$width=$size[0];
+				$bottom = $top - $height;
+				
+				$this->template->image($template, $left, $bottom, $width, $height, $image);
+			}
+			else {
+				echo "Kuvavirhe!";
+				return false;
+			}			
+		}
+		else {
+			echo "Kuvavirhe!";
+			return false;
+		}
+	}
+
+	function placeTemplate($template, $page="", $left=0, $height=0) {
+		
+		$left = mm_pt($left);
+		$height = mm_pt($height);
+		
+		if(!is_int($page)) {
+			$page = $this->currentPage["oid"];
+		}
+
+		$this->template->place($template, $page, $left, $height);
 	}
 }
 

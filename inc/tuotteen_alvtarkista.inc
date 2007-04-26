@@ -3,9 +3,15 @@
 	if (mysql_field_name($result, $i) == "tuoteno") {
 		$query = "SELECT yhtio FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '".trim($t[$i])."'";
 		$chkressiresult = mysql_query($query) or pupe_error($query);
-
 		if (mysql_num_rows($chkressiresult) == 0) {
 			$virhe[$i] = t("Tuotenumero ei löydy");
+			$errori = 1;
+		}
+	}
+
+	if (mysql_field_name($result, $i) == "maakoodi") {
+		if ($t[$i] == $yhtiorow["maakoodi"]) {
+			$virhe[$i] = t("Tämä on turhaa, syötä tämä alv tuotetietojen taakse.");
 			$errori = 1;
 		}
 	}

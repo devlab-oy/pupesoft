@@ -104,8 +104,17 @@
 			$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 			$insres  = mysql_query($kysely) or pupe_error($kysely);
 			$utunnus = mysql_insert_id();
-
-
+			
+			/*
+				Tää voi olla hassua, mutta näin tämä haluttiin!
+				Eli liitetään hyväksytty tarjous uuteen tunnusnippuun eikä jatketa vanhaa.
+				Tämä siksi, että tarjous on laitettu vetämään ehkä puoli vuotta aiemmin ja silloin tämä uusi tilaus ei mene raporteissa "loogisessa" järjestyksessä..
+			*/
+			if($monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
+				$query = "update lasku set tunnusnippu = '$utunnus' WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu='$monistarow[tunnusnippu]'";
+				$updres = mysql_query($query) or pupe_error($query);
+			}
+			
 			//Kopioidaan otsikon lisatiedot
 			$query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
 			$monistares2 = mysql_query($query) or pupe_error($query);

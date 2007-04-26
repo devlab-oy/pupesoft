@@ -68,19 +68,10 @@ if (!function_exists('tulosta_lasku')) {
 				$otsikko = "VIENNIN HYVITYSLASKU";					
 			}
 		}
-
-		$fonts["snadi"]['height']	= 9;
-		$fonts["snadi"]['font']		= "Helvetica";
-		
-		$fonts["norm"]['height']	= 10;
-		$fonts["norm"]['font']		= "Helvetica";
-
-		$fonts["BIG"]['height']		= 14;
-		$fonts["BIG"]['font']		= "Helvetica";				
 		
 		if (!function_exists('alku')) {
 			function alku ($pdf, $laskurow, $toim, $otsikko, $kieli) {
-				global $yhtiorow;
+				global $yhtiorow, $kukarow, $fonts;
 
 				if(!is_object($pdf)) {
 
@@ -93,6 +84,15 @@ if (!function_exists('tulosta_lasku')) {
 					$pdf->set_default('margin-left', 	mm_pt(15));
 					$pdf->set_default('margin-right',	mm_pt(15));
 
+					$fonts["snadi"]['height']	= 9;
+					$fonts["snadi"]['font']		= "Helvetica";
+
+					$fonts["norm"]['height']	= 10;
+					$fonts["norm"]['font']		= "Helvetica";
+
+					$fonts["BIG"]['height']		= 14;
+					$fonts["BIG"]['font']		= "Helvetica";				
+
 					//	Asetetaan localet
 					$pdf->setLocales($laskurow["maa"], $laskurow["valkoodi"]);
 
@@ -100,11 +100,11 @@ if (!function_exists('tulosta_lasku')) {
 					$pdf->addPage("a4");	
 
 					//	Tehdään template
+					static $tid;
 					$tid=$pdf->template->create();
-															
+													
 					$h=280;
 					//	Liitetään kuva
-					$yhtiorow["lasku_logo"] = "../pics/RTEC_logo.png";
 					if($yhtiorow["lasku_logo"] != "" and file_exists($yhtiorow["lasku_logo"])) {
 						$pdf->placeImageToTemplate($h,0,$yhtiorow["lasku_logo"], $tid);
 					}
@@ -114,7 +114,7 @@ if (!function_exists('tulosta_lasku')) {
 					//	Laitetaan perustiedot oikealle		
 					$h=260;
 					$s=$pdf->teeSarakkeet(array(105,30));
-					if($laskurow["projekti"] != "") {
+					if($laskurow["projekti"] > 0) {
 						//	Onko nippulla projektia?
 						$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
 						$abures = mysql_query($query) or pupe_error($query);
@@ -271,10 +271,14 @@ if (!function_exists('tulosta_lasku')) {
 		$riresult = mysql_query($query) or pupe_error($query);
 
 		// HUOM sama kuin alku funktiossa!
-		$s=$pdf->teeSarakkeet(array(95,15,20,15));
+		
 		if(mysql_num_rows($riresult)>0) {
+		
+			$s=$pdf->teeSarakkeet(array(95,15,20,15));	
+			$summa=$summa_verolla=0;
+			
 			while ($row = mysql_fetch_array($riresult)) {
-				$summa=$summa_verolla=0;
+
 				if($h < 20) {
 					$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
 					$h = 190;
@@ -332,9 +336,8 @@ if (!function_exists('tulosta_lasku')) {
 				}
 				if($row["kommentti"] != "") {
 					if($pdf->pt_mm($pdf->writeStrlen($row["otunnus"]."/".$row["kommentti"], "snadi")) > $s[0]) {
-						$h-=$pdf->ln();						
 						$pdf->write($h, 2, 0, $s[0], $row["otunnus"]."/* ".$row["kommentti"], "snadi", "L", "I");	
-						$h-=$pdf->ln();
+						$h-=$pdf->ln(2);
 					} 
 					else {
 						$pdf->write($h, 1, 0, $s[0], $row["otunnus"]."/* ".$row["kommentti"], "snadi", "L", "I");	

@@ -240,7 +240,7 @@
 							$query = "	SELECT toim_yksikko
 										FROM tuotteen_toimittajat
 										WHERE yhtio = '$kukarow[yhtio]'
-										and tuoteno = '$trow[tuoteno]'
+										and tuoteno = '$row[tuoteno]'
 										and liitostunnus = '$laskurow[liitostunnus]'
 										LIMIT 1";
 							$rarres = mysql_query($query) or pupe_error($query);
@@ -667,6 +667,21 @@
 
 				$pieni["height"] = 8;
 				$pieni["font"] = "Times-Roman";
+				
+				//	Tarkastetaan olisiko toimittajalla yksikkö!
+				$query = "	SELECT toim_yksikko
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+							and liitostunnus = '$laskurow[liitostunnus]'
+							LIMIT 1";
+				$rarres = mysql_query($query) or pupe_error($query);
+				$rarrow	 = mysql_fetch_array($rarres);
+
+				//	Jos toimittajalla on yksikkö ohitetaan tuotteen yksikkö
+				if($rarrow["toim_yksikko"]!= "") {
+					$row["yksikko"] = $rarrow["toim_yksikko"];
+				}
 
 				$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],				$firstpage, $p);
 				$pdf->draw_text(190, $kala, "(".$row["tuoteno"].")",			$firstpage, $p);

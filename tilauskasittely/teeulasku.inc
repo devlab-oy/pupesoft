@@ -269,6 +269,7 @@ $query = "	INSERT into lasku SET
 			viitetxt							= '$viitetxt',
 			sisviesti1							= '$sisviestit1',
 			alatila								= '',
+			tunnusnippu							= '$lasrow[tunnusnippu]',
 			tila								= 'U'";
 $uusiotsikko = mysql_query($query) or pupe_error($query);
 

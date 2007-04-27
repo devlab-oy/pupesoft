@@ -735,6 +735,13 @@ if ($tee == "VALMIS") {
 	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI")) {
 		require ("tilaus-valmis-siirtolista.inc");
 	}
+	// Projekti, t‰ll‰ ei ole mit‰‰n rivej‰ joten nollataan vaan muuttujat
+	elseif ($toim == "PROJEKTI") {
+		$tee				= '';
+		$tilausnumero		= '';
+		$laskurow			= '';
+		$kukarow['kesken']	= '';			
+	}
 	// Myyntitilaus valmis
 	else {
 		//Jos k‰ytt‰j‰ on extranettaaja ja h‰n ostellut tuotteita useista eri maista niin laitetaan tilaus holdiin
@@ -3452,7 +3459,7 @@ if ($tee == '') {
 		echo "<td class='back' valign='top'>";
 
 		//N‰ytet‰‰n tilaus valmis nappi
-		if ($muokkauslukko == "" and $laskurow["liitostunnus"] > 0 and $tilausok == 0 and $rivilaskuri > 0) {
+		if (($muokkauslukko == "" or $toim=="PROJEKTI") and $laskurow["liitostunnus"] > 0 and $tilausok == 0 and $rivilaskuri > 0) {
 
 			// Jos myyj‰ myy todella pienell‰ summalta varastosta joka sijaitsee ulkmailla niin herjataan heiman
 			$javalisa = "";

@@ -131,7 +131,7 @@
 								and lasku.jaksotettu = '$postun'";
 					$postarkresult = mysql_query($query) or pupe_error($query);
 					$postarkrow = mysql_fetch_array($postarkresult);
-					
+
 					if($postarkrow["yhteensa_kpl"] - $postarkrow["laskutettu_kpl"] == 1) {
 						$laskutettavat = 0;
 						echo "<br>";
@@ -148,7 +148,7 @@
 						}
 					}
 					elseif($postarkrow["laskuttamatta"] > 0) {
-						echo t("Jokin ennakkolaskuista on laskuttamatta! Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $postun<br>";	
+						echo t("Jokin ennakkolaskuista on laskuttamatta! Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $postun<br>";
 					}
 				}
 			}
@@ -210,7 +210,7 @@
 							pp = Number(pp.value);
 							kk = Number(kk.value)-1;
 							vv = Number(vv.value);
-						
+
 							if (vv == 0 && pp == 0 && kk == -1) {
 								var dateSyotetty = new Date();
 							}
@@ -218,10 +218,10 @@
 								if (vv > 0 && vv < 1000) {
 									vv = vv+2000;
 								}
-								
+
 								var dateSyotetty = new Date(vv,kk,pp);
 							}
-							
+
 							var dateTallaHet = new Date();
 							var ero = (dateTallaHet.getTime() - dateSyotetty.getTime()) / 86400000;
 
@@ -256,7 +256,7 @@
 							}
 							if (ero < 0) {
 								var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
-								
+
 								if (alert(msg)) {
 									return false;
 								}
@@ -266,7 +266,7 @@
 							}
 						}
 					</SCRIPT>";
-			
+
 			echo "<table>";
 			echo "<form method='post' action='$PHP_SELF' name='lasku' onSubmit = 'return verify()'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
@@ -296,6 +296,7 @@
 			echo "<th>".t("Laadittu")."</th>";
 			echo "<th>".t("Tyyppi")."</th>";
 			echo "<th>".t("Maksuehto")."</th>";
+			echo "<th>".t("Toimitustapa")."</th>";
 			echo "<th>".t("Muokkaa tilausta")."</th>";
 			echo "<th>".t("Laskuta kaikki positiot")."</th>";
 
@@ -305,7 +306,7 @@
 
 				$query = "	select sum(if(varattu>0,1,0)) veloitus, sum(if(varattu<0,1,0)) hyvitys, sum(if(hinta*varattu*(1-ale/100)=0 and var!='P' and var!='J',1,0)) nollarivi
 							from tilausrivi
-							where yhtio = '$kukarow[yhtio]' 
+							where yhtio = '$kukarow[yhtio]'
 							and otunnus = '$row[tunnus]'
 							and tyyppi  = 'L'";
 				$hyvre = mysql_query($query) or pupe_error($query);
@@ -328,6 +329,40 @@
 				}
 				echo "<td>".t("$teksti")."</td>";
 				echo "<td>$row[mehka] $row[meh]</td>";
+
+				$rahti_hinta = "";
+
+				if ($yhtiorow["rahti_hinnoittelu"] == "") {
+
+					$query = "SELECT sum(kilot) kilot FROM rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$row[tunnus]'";
+					$pakre = mysql_query($query) or pupe_error($query);
+					$pakka = mysql_fetch_array($pakre);
+
+					//haetaan tällä rahtikirjalle rahtimaksu
+					$query = "	select *
+								from rahtimaksut
+								where toimitustapa = '$row[toimitustapa]'
+								and kilotalku <= '$pakka[kilot]'
+								and kilotloppu >= '$pakka[kilot]'
+								and yhtio = '$kukarow[yhtio]'";
+					$rares = mysql_query($query) or pupe_error($query);
+					$rahti = mysql_fetch_array($rares);
+
+					$otunnus	= $row['tunnus'];
+					$hinta		= $rahti["rahtihinta"]; // rahtihinta
+					$alv 		= '';
+
+					require("alv.inc");
+
+					if ($row["kohdistettu"] == "K") {
+						$rahti_hinta = "(" . (float) $hinta ." $row[valkoodi])";
+					}
+					else {
+						$rahti_hinta = "(vastaanottaja)";
+					}
+				}
+
+				echo "<td>$row[toimitustapa] $rahti_hinta</td>";
 
 				echo "<td><a href='tilaus_myynti.php?toim=PIKATILAUS&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$row[tunnus]'>".t("Pikatilaukseen")."</a></td>";
 
@@ -464,7 +499,7 @@
 				}
 				echo "</select></td></tr>";
 			}
-			
+
 			echo "<tr><th>".t("Syötä poikkeava laskutuspäivämäärä (pp-kk-vvvv)")."</th>
 					<td><input type='text' name='laskpp' value='' size='3'></td>
 					<td><input type='text' name='laskkk' value='' size='3'></td>
@@ -501,8 +536,8 @@
 					group_concat(distinct lasku.tunnus separator '<br>') tunnukset_ruudulle,
 					count(distinct lasku.tunnus) tilauksia,
 					count(tilausrivi.tunnus) riveja,
-					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, 
-					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa					
+					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
+					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
 					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno

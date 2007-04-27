@@ -1415,8 +1415,8 @@
 				$tulos_ulos .= t("Yht‰‰n laskua ei siirretty/tulostettu!")."<br>\n";
 			}
 
-			// l‰hetet‰‰n meili vaan jos on jotain laskutettavaa
-			if ($lask > 0) {
+			// l‰hetet‰‰n meili vaan jos on jotain laskutettavaa ja ollaan tultu komentorivilt‰
+			if ($lask > 0 and $komentorivilta != "") {
 
 				//echotaan ruudulle ja l‰hetet‰‰n meili yhtiorow[admin]:lle
 				$bound = uniqid(time()."_") ;

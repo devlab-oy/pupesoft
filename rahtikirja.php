@@ -956,7 +956,7 @@
 					order by avainsana.jarjestys";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+		$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otsik[tunnus]'";
@@ -971,7 +971,25 @@
 		}
 
 		echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
+		
+		$query  = "	SELECT round(sum(tuotekorkeus*tuoteleveys*tuotesyvyys*(varattu+kpl)),10) tilavuus, sum(varattu+kpl) kpl, sum(if(tuotekorkeus!=0 and tuoteleveys!=0 and tuotesyvyys!=0, varattu+kpl, 0)) kplok
+					FROM tilausrivi
+					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otsik[tunnus]'";
+		$tilaresult = mysql_query($query) or pupe_error($query);
+		$tilarow = mysql_fetch_array($tilaresult);
 
+		if ($tilarow["kpl"] > 0) {
+			$osumapros = round($tilarow["kplok"] / $tilarow["kpl"] * 100, 2);
+		}
+		else {
+			$osumapros = "N/A";
+		}
+		
+		$tilarow["tilavuus"] = round($tilarow["tilavuus"],6);
+
+		echo "<font class='message'>".t("Tilauksen tilavuus tuoterekisterin tietojen mukaan on").": $tilarow[tilavuus] , $osumapros ".t("%:lle kappaleista on annettu koko.")."</font><br>";
+		
 		echo "<table>";
 
 		echo "<tr><th>".t("Kollia")."</th><th>".t("Kg")."</th><th>m&sup3;</th><th>m</th><th align='left' colspan='3'>".t("Pakkaus")."</th></tr>";

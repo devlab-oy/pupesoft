@@ -88,13 +88,13 @@
 			//toimittaja ja lasku on valittu. Nyt jumpataan.
 
 			if ($laskurow["tila"] == "K") {
-				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+				$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus = '$otunnus'";
 			}
 			else {
-				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+				$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otunnus'";

@@ -126,8 +126,8 @@ else {
 
 		// viidenteen segmenttiin menee sarjanumeron tunnus jos se tiedetään, lisätään myös tässä keisissä riville mukaan tuotteen hinta koska vastaanottaja luottaa meihin
 		if ($tilausrivirow['kommentti'] != '') {
-			$ulos .= "OLIN8__IF:@@@@@$tilausrivirow[kommentti]\n";
-			$ulos .= "OLINCONIV:" . sprintf("%015.2f", (float) $tilausrivirow['hinta'])."\n";
+//			$ulos .= "OLIN8__IF:@@@@@$tilausrivirow[kommentti]\n";
+//			$ulos .= "OLINCONIV:" . sprintf("%015.2f", (float) $tilausrivirow['hinta'])."\n";
 		}
 
 		$ulos .= "OLIN__END:$tilausrivirow[tunnus]\n";				// Tilausrivi loppuu

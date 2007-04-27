@@ -644,13 +644,13 @@ while (!feof ($fd)) {
 			// asiakkaan antama nimitys tuotteelle
 			$type = split("@", $tieto);
 			$edi_nimitys = $type[4]; // rivin neljännessä segmentissä tulee oikee info
-			$edi_sarjanumero = $type[5]; // rivin viidennessä segmentissä tulee tuotteen sarjanumeron tunnus jos asiakas sen tiesi???
+//			$edi_sarjanumero = $type[5]; // rivin viidennessä segmentissä tulee tuotteen sarjanumeron tunnus jos asiakas sen tiesi???
 			break;
 
 		case 'OLINCONIV' :
 			// asiakkaan antama hinta tuotteelle
 			$type = split(" ", $tieto);
-			$edi_hinta = abs($type[0]);
+//			$edi_hinta = abs($type[0]);
 			break;
 
 		case 'OLIN21_QT' :

@@ -1259,7 +1259,7 @@
 					if($valitut["SARAKE22"] != '') {
 						if ($row['epakurantti2pvm'] == '0000-00-00') $row['epakurantti2pvm'] = "";
 				
-						$rivi .= "$row[epakurantti1pvm]\t";
+						$rivi .= "$row[epakurantti2pvm]\t";
 				
 						if(isset($workbook)) {
 							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti2pvm"]);

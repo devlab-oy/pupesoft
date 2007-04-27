@@ -8,6 +8,25 @@
 		$tyyppi = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "tilino") {
+		if ($ulosarray[$i] != '') {
+			$ulos=$ulosarray[$i];
+			$jatko = 0;
+		}
+		else {
+			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+			$query = "	SELECT nimi
+						FROM tili
+						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
+			$vresult = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($vresult) == 1) {
+				$vrow=mysql_fetch_array($vresult);
+				$ulos .= " " . $vrow[nimi] . "</td>";
+				$jatko = 0;
+			}
+		}
+	}
+	
 	if (mysql_field_name($result, $i) == "tilinumero") { //suoraveloitus suoritetaan automaattisesti 
 		$maxsize++; //Tilaa mahdolliselle viivalle
 	}

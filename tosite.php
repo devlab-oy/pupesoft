@@ -36,7 +36,7 @@
 			$lopnimi = $polku.$fnimi;
 
 			// extensio pit‰‰ olla oikein
-			if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
+			if (strtoupper($ext) != "JPEG" and strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
 				echo "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
 				$tee = "N";
 				$fnimi = "";

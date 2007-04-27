@@ -311,7 +311,7 @@
 				$hyvre = mysql_query($query) or pupe_error($query);
 				$hyvrow = mysql_fetch_array($hyvre);
 
-				echo "<tr><td><input type='checkbox' name='tunnus[$row[tunnus]]' value='$row[tunnus]' checked></td>";
+				echo "<tr class='aktiivi'><td><input type='checkbox' name='tunnus[$row[tunnus]]' value='$row[tunnus]' checked></td>";
 
 				echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&toim=$toim&tunnukset=$tunnukset&tunnus=$row[tunnus]'>$row[tunnus]</a></td>";
 				echo "<td>$row[laatija]</td>";

@@ -128,16 +128,20 @@
 	}
 
 	// n‰ytet‰‰n sopparit
-	$query = "	SELECT *, lasku.tunnus laskutunnus
+	$query = "	SELECT *, lasku.tunnus laskutunnus,
+				round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
+				round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
 				FROM lasku
 				JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and
 										laskun_lisatiedot.otunnus = lasku.tunnus and
 										laskun_lisatiedot.sopimus_alkupvm <= now() and
 										(laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
+				JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
 				lasku.tila = '0' and
 				lasku.alatila in ('V','X')
-				order by liitostunnus, sopimus_loppupvm, sopimus_alkupvm";
+				GROUP BY laskutunnus
+				ORDER BY liitostunnus, sopimus_loppupvm, sopimus_alkupvm";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
@@ -187,6 +191,7 @@
 		echo "<th>sopimus loppupvm</th>";
 		echo "<th>laskutus kk</th>";
 		echo "<th>laskutus pp</th>";
+		echo "<th>arvo</th>";
 		echo "<th>laskutettu</th>";
 		echo "<th>laskuttamatta</th>";
 		echo "</tr>";
@@ -194,6 +199,8 @@
 		$pointteri = 0; // pointteri
 		$cron_pvm = array(); // cronijobia varten
 		$cron_tun = array(); // cronijobia varten
+		$arvoyhteensa  = 0;
+        $summayhteensa = 0;
 
 		while ($row = mysql_fetch_array($result)) {
 
@@ -218,6 +225,7 @@
 			echo "<td>";
 			foreach (explode(',', $row["sopimus_pp"]) as $numi) echo "$numi. ";
 			echo "</td>";
+			echo "<td>$row[arvo]</td>";
 
 			// katotaan montakertaa t‰‰ on laskutettu tai laskuttamatta
 			$laskutettu = "";
@@ -268,6 +276,9 @@
 						$cron_tun[$pointteri] = "$row[laskutunnus]";
 
 						$pointteri++;
+						
+						$arvoyhteensa 	+= $row["arvo"];
+						$summayhteensa 	+= $row["summa"];
 					}
 					else {
 						$laskutettu .= "$pvmloop_pp.$pvmloop_kk.$pvmloop_vv<br>";
@@ -281,9 +292,16 @@
 			echo "</tr>";
 		}
 
-		echo "<tr><th colspan='8'>Valitse kaikki</th><th><input type='checkbox' name='lasku' onclick='toggleAll(this);'></th></tr>";
+		echo "<tr><th colspan='9'>Valitse kaikki</th><th><input type='checkbox' name='lasku' onclick='toggleAll(this);'></th></tr>";
 
 		echo "</table>";
+
+		if ($arvoyhteensa != 0) {
+			echo "<br><table>";
+			echo "<tr><th>".t("Laskuttamatta arvo yhteens‰").": </th><td align='right'>$arvoyhteensa $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr><th>".t("Laskuttamatta summa yhteens‰").": </th><td align='right'>$summayhteensa $yhtiorow[valkoodi]</td></tr>";
+			echo "</table>";
+		}
 
 		echo "<br><input type='submit' value='Laskuta'>";
 		echo "</form>";

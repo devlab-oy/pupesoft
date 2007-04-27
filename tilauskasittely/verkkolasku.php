@@ -131,7 +131,10 @@
 			//syötetty päivämäärä
 			if ($laskkk != '' or $laskpp != '' or $laskvv != '') {
 
-				//katotaan ensin, että se on ollenkaan validi
+				// Korjataan vuosilukua
+				if ($laskvv < 1000) $laskvv += 2000;
+				
+				// Katotaan ensin, että se on ollenkaan validi
 				if (checkdate($laskkk, $laskpp, $laskvv)) {
 
 					//vertaillaan tilikauteen
@@ -1456,36 +1459,84 @@
 
 		if ($tee == '' and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
 
+			//päivämäärän tarkistus
+			$tilalk = split("-", $yhtiorow["tilikausi_alku"]);
+			$tillop = split("-", $yhtiorow["tilikausi_loppu"]);
+
+			$tilalkpp = $tilalk[2];
+			$tilalkkk = $tilalk[1]-1;
+			$tilalkvv = $tilalk[0];
+
+			$tilloppp = $tillop[2];
+			$tillopkk = $tillop[1]-1;
+			$tillopvv = $tillop[0];
+
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 
-					function verify(){
-						var pp = document.lasku.laskpp;
-						var kk = document.lasku.laskkk;
-						var vv = document.lasku.laskvv;
-
-						if (vv > 0) {
+						function verify(){
+							var pp = document.lasku.laskpp;
+							var kk = document.lasku.laskkk;
+							var vv = document.lasku.laskvv;
 
 							pp = Number(pp.value);
 							kk = Number(kk.value)-1;
 							vv = Number(vv.value);
 
-							if (vv < 1000) {
-								vv = vv+2000;
+							if (vv == 0 && pp == 0 && kk == -1) {
+								var dateSyotetty = new Date();
 							}
-
-							var dateSyotetty = new Date(vv,kk,pp);
+							else {
+								if (vv > 0 && vv < 1000) {
+									vv = vv+2000;
+								}
+								
+								var dateSyotetty = new Date(vv,kk,pp);
+							}
+							
 							var dateTallaHet = new Date();
 							var ero = (dateTallaHet.getTime() - dateSyotetty.getTime()) / 86400000;
 
+							var tilalkpp = $tilalkpp;
+							var tilalkkk = $tilalkkk;
+							var tilalkvv = $tilalkvv;
+							var dateTiliAlku = new Date(tilalkvv,tilalkkk,tilalkpp);
+							dateTiliAlku = dateTiliAlku.getTime();
+
+
+							var tilloppp = $tilloppp;
+							var tillopkk = $tillopkk;
+							var tillopvv = $tillopvv;
+							var dateTiliLoppu = new Date(tillopvv,tillopkk,tilloppp);
+							dateTiliLoppu = dateTiliLoppu.getTime();
+
 							dateSyotetty = dateSyotetty.getTime();
 
-							if(ero > 2) {
+							if (dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
+								var msg = '".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen!")."';
+
+								if (alert(msg)) {
+									return false;
+								}
+								else {
+									return false;
+								}
+							}
+							if (ero >= 2) {
 								var msg = '".t("Oletko varma, että haluat päivätä laskun yli 2pv menneisyyteen?")."';
 								return confirm(msg);
 							}
+							if (ero < 0) {
+								var msg = '".t("VIRHE: Laskua ei voi päivätä tulevaisuuteen!")."';
+								
+								if (alert(msg)) {
+									return false;
+								}
+								else {
+									return false;
+								}
+							}
 						}
-					}
-				</SCRIPT>";
+					</SCRIPT>";
 
 
 			echo "<br>\n<table>";

@@ -55,7 +55,7 @@
 							ORDER BY tilino";
 				$sresult = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($sresult) > 0) {
-					$ulosarray[$i] = "<td><select name='$nimi'><option value = '' $sel>".t("Ei valintaa")."</option>";
+					$ulosarray[$i] = "<td><select name='t[$i]'><option value = '' $sel>".t("Ei valintaa")."</option>";
 					while ($vrow=mysql_fetch_array($sresult)) {
 						$sel="";
 						if ($trow[$i] == $vrow[0]) {

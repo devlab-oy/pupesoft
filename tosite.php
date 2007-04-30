@@ -26,7 +26,8 @@
 			// otetaan file extensio
 			$path_parts = pathinfo($_FILES['userfile']['name']);
 			$ext = $path_parts['extension'];
-
+			if (strtoupper($ext) == "JPEG") $ext = "jpg";
+			
 			// laskun polku
 			$polku = $yhtiorow['lasku_polku_abs'];
 			// uniikki filenimi (t‰m‰ tallennetaan kantaan, huom eka / on pakollinen, sill‰ erotetaan scannatut ja verkkolaskut!!)
@@ -36,7 +37,7 @@
 			$lopnimi = $polku.$fnimi;
 
 			// extensio pit‰‰ olla oikein
-			if (strtoupper($ext) != "JPEG" and strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
+			if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
 				echo "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
 				$tee = "N";
 				$fnimi = "";

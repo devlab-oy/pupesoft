@@ -81,18 +81,14 @@
 
 			while ($row = mysql_fetch_array($result)) {
 
-				$apuvarasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllyvali"]);
-
-				if ($apuvarasto != 0) {
-					$varasto = $apuvarasto;
-				}
+				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 
 				$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
 				$varaston_res = mysql_query($query) or pupe_error($query);
 				$varaston_row = mysql_fetch_array($varaston_res);
 
-				$laskurow["kauppatapahtuman_luonne"] = '0';
-
+				$ultilno = '';
+				
 				// katotaan pit‰‰kˆ tilaukselle tehd‰ intrastat
 				// varasto pit‰‰ lˆyty‰, toimitusosoitteen maa ja varastonmaa pit‰‰ lˆyty‰ ja kauppatapahtuman_luonnetta ei saa olla annettu viel‰
 				if (mysql_num_rows($varaston_res) == 1 and $laskurow["toim_maa"] != "" and $varaston_row["maa"] != "") {
@@ -105,16 +101,36 @@
 
 						if ($laskurow["toim_maa"] == $varaston_row["maa"]) {
 							$laskurow["kauppatapahtuman_luonne"] = '999'; // intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
+							$ultilno = '';
 						}
-						elseif ($laskurow["kauppatapahtuman_luonne"] == 0 or $laskurow["kauppatapahtuman_luonne"] == 999) {
-							if ($varaston_row["maa"] == $yhtiorow["maakoodi"]) {
-								$laskurow["kauppatapahtuman_luonne"] = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
-							}
-							elseif ($laskurow["toim_maa"] == $yhtiorow["maakoodi"]) {
-								$laskurow["kauppatapahtuman_luonne"] = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
-							}
+						elseif ($varaston_row["maa"] == $yhtiorow["maakoodi"]) {
+							$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
 						}
-					
+						elseif ($laskurow["toim_maa"] == $yhtiorow["maakoodi"]) {
+							$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+
+							// katotaan onko toimitustavalle jotain intrastat oletuksia
+							$query  = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
+							$toiresult = mysql_query($query) or pupe_error($query);
+							$aputoimirow = mysql_fetch_array($toiresult);
+
+							$laskurow["kauppatapahtuman_luonne"] 			= $aputoimirow["kauppatapahtuman_luonne"];
+							$laskurow["kuljetusmuoto"]						= $aputoimirow["kuljetusmuoto"];
+							$laskurow["sisamaan_kuljetus"]					= $aputoimirow["sisamaan_kuljetus"];
+							$laskurow["sisamaan_kuljetusmuoto"]  			= $aputoimirow["sisamaan_kuljetusmuoto"];
+							$laskurow["sisamaan_kuljetus_kansallisuus"]		= $aputoimirow["sisamaan_kuljetus_kansallisuus"];
+							$laskurow["kontti"]								= $aputoimirow["kontti"];
+							$laskurow["aktiivinen_kuljetus"] 				= $aputoimirow["aktiivinen_kuljetus"];
+							$laskurow["aktiivinen_kuljetus_kansallisuus"]	= $aputoimirow["aktiivinen_kuljetus_kansallisuus"];
+							$laskurow["poistumistoimipaikka"] 				= $aputoimirow["poistumistoimipaikka"];
+							$laskurow["poistumistoimipaikka_koodi"] 		= $aputoimirow["poistumistoimipaikka_koodi"];
+							$laskurow["bruttopaino"] 						= $aputoimirow["bruttopaino"];
+							$laskurow["lisattava_era"] 						= $aputoimirow["lisattava_era"];
+							$laskurow["vahennettava_era"] 					= $aputoimirow["vahennettava_era"];
+							$laskurow["maa_maara"] 							= $aputoimirow["maa_maara"];
+							$laskurow["maa_lahetys"] 						= $varaston_row["maa"];
+						}
+
 					}
 
 				}
@@ -179,7 +195,7 @@
 							jaksotettu				= '$laskurow[jaksotettu]',
 							kuljetusmuoto			= '$laskurow[kuljetusmuoto]',
 							kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
-							ultilno					= '$laskurow[kauppatapahtuman_luonne]', 
+							ultilno					= '$ultilno', 
 							maa_maara				= '$laskurow[maa_maara]'";
 
 					$uusires = mysql_query($query) or pupe_error($query);
@@ -189,11 +205,25 @@
 				elseif ($laskurow["varasto"] == 0) {
 					//p‰ivitet‰‰n laskulle tieto mihin varastoon se kuuluu
 					$query  ="	update lasku set
-								varasto = '$varasto',
-								kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
-								ultilno	= '$laskurow[kauppatapahtuman_luonne]'
-								where yhtio='$kukarow[yhtio]'
-								and tunnus = '$laskurow[tunnus]'";
+								varasto 							= '$varasto',
+								ultilno 							= '$ultilno',
+								maa_maara							= '$laskurow[maa_maara]',
+								maa_lahetys							= '$laskurow[maa_lahetys]',
+								kauppatapahtuman_luonne 			= '$laskurow[kauppatapahtuman_luonne]',
+								kuljetusmuoto						= '$laskurow[kuljetusmuoto]',
+								sisamaan_kuljetus					= '$laskurow[sisamaan_kuljetus]',
+								sisamaan_kuljetusmuoto  			= '$laskurow[sisamaan_kuljetusmuoto]',
+								sisamaan_kuljetus_kansallisuus		= '$laskurow[sisamaan_kuljetus_kansallisuus]',
+								kontti								= '$laskurow[kontti]',
+								aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
+								aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',
+								poistumistoimipaikka 				= '$laskurow[poistumistoimipaikka]',
+								poistumistoimipaikka_koodi 			= '$laskurow[poistumistoimipaikka_koodi]',
+								bruttopaino 						= '$laskurow[bruttopaino]',
+								lisattava_era 						= '$laskurow[lisattava_era]',
+								vahennettava_era 					= '$laskurow[vahennettava_era]'								
+								where yhtio = '$kukarow[yhtio]' and
+								tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);
 
 					$laskurow["varasto"] = $varasto;

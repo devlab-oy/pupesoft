@@ -16,6 +16,8 @@
 
 	require('../inc/parametrit.inc');
 
+	if ($toim == "") $toim = "LASKU";
+
 	if ($tee == 'NAYTAHTML') {
 		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 		require ("../raportit/naytatilaus.inc");
@@ -503,8 +505,7 @@
 				$use = " use index (lasno_index) ";
 			}
 			else {
-				$where1 = " lasku.tunnus = '$otunnus' ";
-				$where2 = "";
+				$where2 = " and lasku.tunnus = '$otunnus' ";
 				if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 				$use = " use index (PRIMARY) ";
 			}
@@ -1593,7 +1594,7 @@
 
 	if ($tee == '') {
 		//syötetään tilausnumero
-		echo "<br><table>";
+		echo "<table>";
 		echo "<form action = '$PHP_SELF' method = 'post' name='hakuformi'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim' value='$toim'>";

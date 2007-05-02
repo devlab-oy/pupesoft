@@ -205,9 +205,13 @@
 		elseif ($trow[$i] == "J") {
 			$sel2 = "selected";
 		}
+		elseif ($trow[$i] == "H") {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value=''  $sel1>".t("Jos varastosaldo ei riit‰, tilausrivi merkataan puuteriviksi")."</option>";
 		$ulos .= "<option value='J' $sel2>".t("Jos varastosaldo ei riit‰, tilausrivi merkataan j‰lkitoimitukseksi")."</option>";
+		$ulos .= "<option value='H' $sel3>".t("Jos varastosaldo ei riit‰, tilausrivi myyd‰‰n normaalisti")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

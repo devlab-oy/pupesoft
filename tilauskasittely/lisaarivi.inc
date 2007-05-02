@@ -981,6 +981,15 @@
 							$var 	= "";
 							$varattu = $kpl;
 						}
+						// Halutaan myyd‰ saldoista juurikaan mit‰‰n v‰litt‰m‰tt‰!
+						elseif ($yhtiorow["puute_jt_oletus"] == "H") {
+							$var 	= "";
+							$varattu = $kpl;
+						}
+						elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E') {
+							$var 	= "";
+							$varattu = $kpl;
+						}
 						// Hyvitysrivit menee normaaleina
 						elseif($kpl < 0) {
 							$var 	= "";

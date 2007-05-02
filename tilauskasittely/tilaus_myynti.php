@@ -1343,11 +1343,10 @@ if ($tee == '') {
 			echo "<td><input type='text' name='myyjanro' size='8'> tai ";
 			echo "<select name='myyja' onchange='submit()'>";
 
-			$query = "	SELECT tunnus, kuka, nimi, myyja
-						FROM kuka use index (yhtio_myyja)
-						WHERE yhtio = '$kukarow[yhtio]'
+			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
+						FROM kuka
+						WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or tunnus='$laskurow[myyja]')
 						ORDER BY nimi";
-
 			$yresult = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($yresult)) {
@@ -3276,11 +3275,13 @@ if ($tee == '') {
 					if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
 						echo "<form name='valmis' action='tulostakopio.php' method='post'>
 								<input type='hidden' name='otunnus' value='$tilausnumero'>
+								<input type='hidden' name='projektilla' value='$projektilla'>
 								<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//tee='>
 								<th colspan='".(floor($ycspan/2))."' nowrap>".t("Näytä lomake").":</th>
 								<td colspan='".(ceil($ycspan/2)-1)."' nowrap>";
+						
+						
 						echo "<select name='toim' Style='font-size: 8pt; padding:0;'>";
-						echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 						echo "<option value='TARJOUS'>Tarjous</value>";
 						echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</value>";
 						echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";

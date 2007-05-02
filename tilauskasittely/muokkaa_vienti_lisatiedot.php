@@ -16,7 +16,7 @@
 
 		$query = "SELECT *
 				  FROM lasku
-				  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
+				  WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -78,7 +78,7 @@
 						lisattava_era = '$lisattava_era',
 						vahennettava_era = '$vahennettava_era',
 						ultilno = '$ultilno'
-						WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+						WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$tee = '';
@@ -91,13 +91,13 @@
 				$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus = '$otunnus'";
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus in ($otunnus)";
 			}
 			else {
 				$query  = "	SELECT sum(tuotemassa*(varattu+kpl)) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otunnus'";
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus in ($otunnus)";
 			}
 			$painoresult = mysql_query($query) or pupe_error($query);
 			$painorow = mysql_fetch_array($painoresult);
@@ -119,7 +119,7 @@
 
 			$query = "SELECT sum(kollit) kollit, sum(kilot) kilot
 					  FROM rahtikirjat
-					  WHERE otsikkonro ='$otunnus' and yhtio='$kukarow[yhtio]'";
+					  WHERE otsikkonro in ($otunnus) and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$rahtirow = mysql_fetch_array ($result);
 
@@ -269,7 +269,7 @@
 
 		$query = "SELECT *
 				  FROM lasku
-				  WHERE tunnus ='$otunnus' and yhtio='$kukarow[yhtio]'";
+				  WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
@@ -321,7 +321,7 @@
 						lisattava_era = '$lisattava_era',
 						vahennettava_era = '$vahennettava_era',
 						ultilno = '$ultilno'
-						WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+						WHERE tunnus in ($otunnus) and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$tee = "";
@@ -345,13 +345,13 @@
 				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus = '$otunnus'";
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus  in ($otunnus)";
 			}
 			else {
 				$query  = "	SELECT sum(tuotemassa) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
 							FROM tilausrivi
 							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otunnus'";
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus in ($otunnus)";
 			}
 			$painoresult = mysql_query($query) or pupe_error($query);
 			$painorow = mysql_fetch_array($painoresult);
@@ -376,7 +376,7 @@
 
 			$query = "SELECT sum(kollit) kollit, sum(kilot) kilot
 					  FROM rahtikirjat
-					  WHERE otsikkonro ='$otunnus' and yhtio='$kukarow[yhtio]'";
+					  WHERE otsikkonro in ($otunnus) and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$rahtirow = mysql_fetch_array ($result);
 
@@ -494,17 +494,18 @@
 		if (is_numeric($etsi)) $haku = "and laskunro='$etsi'";
 
 		if ($tapa == "tuonti") $tila = " and tila='K' and vanhatunnus=0 ";
-		else $tila = " and tila='L' and alatila='X' ";
+		else $tila = " and tila in ('L','U') and alatila='X' ";
 
 		if (trim($etsi) == "") $tee = "";
 
 		//listataan tuoreet tilausket
 		if (trim($etsi) != "") {
 
-			$query = "	select laskunro, nimi asiakas, lasku.luontiaika laadittu, laatija, vienti, tapvm, tunnus
+			$query = "	select laskunro, nimi asiakas, lasku.luontiaika laadittu, laatija, vienti, tapvm, group_concat(tunnus) tunnus
 						from lasku where yhtio='$kukarow[yhtio]' and vienti!='' $tila
 						$haku
-						ORDER by tapvm
+						GROUP BY laskunro
+						ORDER BY tapvm
 						LIMIT 50";
 			$tilre = mysql_query($query) or pupe_error($query);
 

@@ -118,8 +118,27 @@
 		else{
 			echo "<th>".t("Etsi tuotereseptiä").": </th>";
 		}		  		  
-			
-		echo "<td class='back'><input type='text' name='hakutuoteno' value='$hakutuoteno' size='20'></td>
+		
+		//	Haetaan tuotetta jos sellainen on annettu
+		if($hakutuoteno!="") {
+			$tuoteno=$hakutuoteno;
+			$kutsuja="tuoteperhe.php";
+			require_once "inc/tuotehaku.inc";
+
+			//on vaan löytynyt 1 muuten tulis virhettä ja ulosta
+			if ($ulos == '' and $varaosavirhe == '' and $tuoteno != '') {
+				$tee = '';
+				$ulos="<input type='text' name='hakutuoteno' value='$hakutuoteno' size='20'>";
+			}
+			else {
+				$tee="SKIPPAA";
+			}
+		}
+		else {
+			$ulos="<input type='text' name='hakutuoteno' value='$hakutuoteno' size='20'>";
+		}
+		
+		echo "<td class='back'>$ulos</td>
 			<td class='back'><input type='submit' value='".t("Etsi")."'></td>
 			</tr>
 			</form>";
@@ -303,9 +322,13 @@
 				$query = "select * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
 				$res   = mysql_query($query) or pupe_error($query);
 	
-				if (mysql_num_rows($res)==0)
-					$error="<font class='error'>(".t("Tuote ei enää rekisterissä")."!)</font>";
-	
+				if (mysql_num_rows($res)==0) {
+					echo "<font class='error'>".t("Tuote ei enää rekisterissä")."!)</font><br>";
+				}
+				else {
+					$isarow=mysql_fetch_array($res);
+				}
+				
 				echo "<br><table>";
 				echo "<tr>";
 				
@@ -322,7 +345,7 @@
 				echo "<th>".t("Esitysmuoto").": </th>";
 				
 				echo "</td><td class='back'></td></tr>";
-				echo "<tr><td>$isatuoteno $error</td><td>";
+				echo "<tr><td>$isatuoteno - $isarow[nimitys]</td><td>";
 				
 				
 				$query = "SELECT fakta, ei_nayteta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";

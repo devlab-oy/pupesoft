@@ -96,7 +96,10 @@
 		}
 		elseif (mysql_num_rows($thresult) != 1) {
 
-			if ($multi == "" and $kutsuja != "yllapito.php") {
+			if ($multi == "" and $kutsuja == "tuoteperhe.php") {
+				$ulos = "<select name='hakutuoteno'>";
+			}
+			elseif ($multi == "" and $kutsuja != "yllapito.php") {
 				$ulos = "<select name='tuoteno'>";
 			}
 			elseif ($kutsuja != "yllapito.php") {

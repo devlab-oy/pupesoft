@@ -190,15 +190,18 @@
 
 							if ($tee != "UV") {
 								$virheitaoli = "JOO";
+								$valmkpllat2[$rivitunnus] = $valmkpl;								
 							}
 						}
 						elseif ($valmkpl == 0 or $valmkpl == "") {
 							$virhe[$rivitunnus] = "<font class='message'>Kappalemäärä ei syötetty!</font>";
 							$tee = "VALMISTA";
+							$valmkpllat2[$rivitunnus] = $valmkpl;							
 						}
 						else {
 							$virhe[$rivitunnus] = "<font class='error'>VIRHE: Syötit liian ison kappalemäärän!</font>";
 							$tee = "VALMISTA";
+							$valmkpllat2[$rivitunnus] = $valmkpl;
 						}
 					}
 				}
@@ -471,7 +474,7 @@
 			}
 
 			if ($prow["tunnus"] == $prow["perheid"] and $prow["tyyppi"] == "W" and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
-				echo "<td align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]]."</td>";
+				echo "<td align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]]."</td>";
 			}
 			elseif($prow["tunnus"] == $prow["perheid"] and $prow["tyyppi"] == "W" and $prow["toimitettuaika"] != "0000-00-00 00:00:00" and $toim == "KORJAA") {
 				//tutkitaan kuinka paljon tätä nyt oli valmistettu

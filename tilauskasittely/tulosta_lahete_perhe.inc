@@ -61,6 +61,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$firstpage, $p);
 		$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
 		$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
+		$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$firstpage, $p);
 		$pdf->draw_text(250,810, t("Lähete", $kieli), $firstpage);
 		$pdf->draw_text(250,795, t("Tilausnumero", $kieli).": ".$laskurow["tunnus"], $firstpage, $p);
 

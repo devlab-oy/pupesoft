@@ -56,6 +56,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$firstpage, $p);
 		$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
 		$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
+		$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$firstpage, $p);
 		$pdf->draw_text(250,810, t("Keräilylista", $kieli), 	$firstpage);
 		$pdf->draw_text(260,785, t("Toimituspvm", $kieli).": ".tv1dateconv($laskurow["toimaika"]), 	$firstpage, $p);
 		$pdf->draw_text(320,810, t("Sivu", $kieli)." $sivu", 	$firstpage,$p);

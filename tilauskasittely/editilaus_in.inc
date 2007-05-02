@@ -13,18 +13,11 @@ if (trim($argv[1])!='') {
 	require ("../inc/functions.inc");
 
 	// ja parametri komentorivilt‰
-	$filename=$argv[1];
+	$filename	= $argv[1];
+	
 	// ja toinen parametri komentorivilt‰
-	$edi_tyyppi=$argv[2];
-
-	$edimyyja = 195; // en nyt jaksa tehd‰ t‰t‰ hienommin.. kenelle myyj‰lle annetaan editilauksen myynnit (kukarow tunnus)
-
-	$query   = "select * from kuka where tunnus='$edimyyja'";
-	$result  = mysql_query($query) or die($query);
-	$kukarow = mysql_fetch_array($result);
+	$edi_tyyppi	= $argv[2];
 }
-
-$edimyyja = $kukarow['tunnus'];
 
 // nollataan kaikki laskun muuttujat (n‰m‰ samat pit‰‰ tehd‰ whilen lopussa)
 unset($arow);
@@ -513,8 +506,19 @@ while (!feof ($fd)) {
 				if ($ketjutus != "") {
 					$arow["ketjutus"] = $ketjutus;
 				}
-
-				$query = "INSERT into lasku SET
+				
+				// Haetaan viel‰ myyyj‰numero
+				$query = "	SELECT tunnus
+							FROM kuka
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and kuka 	= 'EDI'";
+				$meapu = mysql_query($query) or pupe_error($query);
+				$apuro = mysql_fetch_array($meapu);
+				$edimyyja = $apuro['tunnus'];
+				
+				
+				// Lis‰t‰‰n otsikko
+				$query = "	INSERT into lasku SET
 							alatila 		   					= '',
 							alv 			   					= '$arow[alv]',
 							chn				   					= '$arow[chn]',

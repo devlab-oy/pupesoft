@@ -793,10 +793,16 @@ if ($tee == "VALMIS") {
 			//Luodaan valituista riveist‰ suoraan normaali ostotilaus
 			if($kukarow["extranet"] == "" and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
 				require("tilauksesta_ostotilaus.inc");
-
-				$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');
-				$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"],'U');
-
+				
+				//	Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
+				if($tee_osto!="") {
+					$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'KAIKKI');
+				}
+				else {
+					$tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"],'T');
+					$tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"],'U');					
+				}
+				
 				if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
 			}
 
@@ -3549,6 +3555,10 @@ if ($tee == '') {
 					}
 
 					echo "</select><br><br></td></tr><tr><td class='back'>";
+				}
+				
+				if($yhtiorow["tee_osto_myyntitilaukselta"] != "") {
+					echo "Tee riveist‰ ostotilaus:<input type='checkbox' name='tee_osto'><br>";					
 				}
 
 				echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."'>";

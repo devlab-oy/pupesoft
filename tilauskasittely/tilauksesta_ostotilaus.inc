@@ -9,9 +9,18 @@
 
 			$tilauksesta_ostotilaus = "";
 
-			if ($tyyppi!='T' and $tyyppi!='U') {
+			if($tyyppi == "T") {
+				$vars = "'T'";
+			}
+			elseif($tyyppi == "U") {
+				$vars = "'U'";
+			}
+			elseif($tyyppi == "KAIKKI") {
+				$vars = "'L','J','H',''";
+			}
+			else {
 				echo "VIRHE: Funktiota kutsuttiin v‰‰r‰ll‰ parametrilla!<br><br>";
-				return;
+				return false;				
 			}
 
 			$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
@@ -24,7 +33,7 @@
 						where yhtio = '$kukarow[yhtio]'
 						and otunnus	='$otunnus'
 						and tyyppi != 'D'
-						and var 	= '$tyyppi'
+						and var 	IN ($vars)
 						and (perheid2 = tunnus or perheid2 = 0)
 						order by perheid2, tunnus";
 			$result = mysql_query($query) or pupe_error($query);
@@ -32,7 +41,24 @@
 			if (mysql_num_rows($result) > 0) {
 
 				while ($rivi = mysql_fetch_array($result)) {
+					
+					//	Jos tehd‰‰n vaan t‰m‰ tilaus niin haetaan t‰m‰n oletustoimittaja, by default
+					if($tyyppi == "KAIKKI") {
+						$query = "select liitostunnus from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$rivi[tuoteno]' limit 1";
+						$abures = mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($abures) == 1) {
+							$aburow = mysql_fetch_array($abures);
 
+							$query = "update tilausrivi set tilaajanrivinro='$aburow[liitostunnus]' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
+							$updres = mysql_query($query) or pupe_error($query);
+
+							$rivi["tilaajanrivinro"] = $aburow["liitostunnus"];							
+						}
+						else {
+							$tilauksesta_ostotilaus .= "<font class='error'>Koitettiin p‰ivitt‰‰ riville toimittaja, mutta toimittajaa ei lˆydy! '$rivi[tunnus]'<br>";
+						}
+					}
+					
 					// tehd‰‰n aluksi v‰h‰n oikeellisuustarkastuksia
 					$query = "select * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and tuoteno='$rivi[tuoteno]' and liitostunnus='$rivi[tilaajanrivinro]'";
 					$erres = mysql_query($query) or pupe_error($query);
@@ -177,10 +203,12 @@
 							}
 						}
 					}
-
-					// tehd‰‰n rivist‰ tavallinen JT
-					$query = "update tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
-					$updre = mysql_query($query) or pupe_error($query);
+					
+					// tehd‰‰n rivist‰ tavallinen JT jos meill‰ oli joku tilattava rivi
+					if($rivi["var"]=="T" or $rivi["var"]=="U") {
+						$query = "update tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
+						$updre = mysql_query($query) or pupe_error($query);						
+					}
 				}
 			}
 			return $tilauksesta_ostotilaus;

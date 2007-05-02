@@ -190,9 +190,9 @@
 		echo "<th>sopimus alkupvm</th>";
 		echo "<th>sopimus loppupvm</th>";
 		echo "<th>laskutus kk</th>";
-		echo "<th>laskutus pp</th>";
+		echo "<th>laskutus pv</th>";
 		echo "<th>arvo</th>";
-		echo "<th>laskutettu</th>";
+		echo "<th>laskutettu (laskunro)</th>";
 		echo "<th>laskuttamatta</th>";
 		echo "</tr>";
 
@@ -204,12 +204,12 @@
 
 		while ($row = mysql_fetch_array($result)) {
 
-			echo "<tr>";
-			echo "<td>$row[laskutunnus]</td>";
-			echo "<td>$row[ytunnus]</td>";
-			echo "<td>$row[nimi] $row[toim_nimi]</td>";
-			echo "<td>".tv1dateconv($row["sopimus_alkupvm"])."</td>";
-			echo "<td>";
+			echo "<tr class='aktiivi'>";
+			echo "<td valign='top'>$row[laskutunnus]</td>";
+			echo "<td valign='top'>$row[ytunnus]</td>";
+			echo "<td valign='top'>$row[nimi] $row[toim_nimi]</td>";
+			echo "<td valign='top'>".tv1dateconv($row["sopimus_alkupvm"])."</td>";
+			echo "<td valign='top'>";
 			// kaunistelua
 			if ($row["sopimus_loppupvm"] == '0000-00-00') {
 				echo "Toistaiseksi";
@@ -218,14 +218,14 @@
 				echo tv1dateconv($row["sopimus_loppupvm"]);
 			}
 			echo "</td>";
-			echo "<td>";
+			echo "<td valign='top'>";
 			if (count(explode(',', $row["sopimus_kk"])) == 12) echo "Kaikki";
 			else foreach (explode(',', $row["sopimus_kk"]) as $numi) echo "$numi. ";
 			echo "</td>";
-			echo "<td>";
+			echo "<td valign='top'>";
 			foreach (explode(',', $row["sopimus_pp"]) as $numi) echo "$numi. ";
 			echo "</td>";
-			echo "<td>$row[arvo]</td>";
+			echo "<td valign='top'>$row[arvo] $row[valkoodi]</td>";
 
 			// katotaan montakertaa t‰‰ on laskutettu tai laskuttamatta
 			$laskutettu = "";
@@ -276,19 +276,20 @@
 						$cron_tun[$pointteri] = "$row[laskutunnus]";
 
 						$pointteri++;
-						
+
 						$arvoyhteensa 	+= $row["arvo"];
 						$summayhteensa 	+= $row["summa"];
 					}
 					else {
-						$laskutettu .= "$pvmloop_pp.$pvmloop_kk.$pvmloop_vv<br>";
+						$chkrow = mysql_fetch_array($chkres);
+						$laskutettu .= "$pvmloop_pp.$pvmloop_kk.$pvmloop_vv ($chkrow[laskunro])<br>";
 					}
 				}
 
 			}
 
-			echo "<td>$laskutettu</td>";
-			echo "<td>$laskuttamatta</td>";
+			echo "<td valign='top' nowrap>$laskutettu</td>";
+			echo "<td valign='top' nowrap>$laskuttamatta</td>";
 			echo "</tr>";
 		}
 

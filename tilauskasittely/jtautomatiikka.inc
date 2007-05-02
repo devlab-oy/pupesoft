@@ -159,7 +159,7 @@
 								$atil        = $jtrow["jt"];
 
 								if ($jtrow["ei_saldoa"] == "") {
-									$myytavissa = saldo_myytavissa($tuoteno);
+									list( , ,$myytavissa) = saldo_myytavissa($tuoteno);
 								}
 								else {
 									//saldottomat tuotteet

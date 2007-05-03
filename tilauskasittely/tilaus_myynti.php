@@ -3557,7 +3557,7 @@ if ($tee == '') {
 					echo "</select><br><br></td></tr><tr><td class='back'>";
 				}
 				
-				if($yhtiorow["tee_osto_myyntitilaukselta"] != "") {
+				if($yhtiorow["tee_osto_myyntitilaukselta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
 					echo "Tee riveistä ostotilaus:<input type='checkbox' name='tee_osto'><br>";					
 				}
 

@@ -7,11 +7,42 @@
 		exit;
 	}
 
+	// tehd‰‰n tarkastuksia ja muuta kivaa
+	if ($tee != "uusi" and $tee != "poista" and $tee != "") {
+
+		$toimerrorit = 0;
+
+		if ($toim_maakoodi != "") {
+			$query = "select * from maat where koodi='$toim_maakoodi'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 0) {
+				$toimerrorit++;
+				echo "<font class='error'>Virheellinen maakoodi!</font><br>";
+			}
+		}
+		else {
+			$toimerrorit++;
+			echo "<font class='error'>Virheellinen maakoodi!</font><br>";
+		}
+
+		if ($vat_numero != "" and substr($vat_numero, 0, 2) != $toim_maakoodi) {
+			$toimerrorit++;
+			echo "<font class='error'>Virheellinen vat-numero!</font><br>";
+		}
+
+		if ($toimerrorit > 0) {
+			if ($tee == "insert") $tee = "uusi";
+			else $tee = "";
+		}
+	}
+
 	// p‰ivitet‰‰n toimipaikka
 	if ($tee == "update") {
 		$query = "	update yhtion_toimipaikat set
 					yhtio			= '$kukarow[yhtio]',
 					ovtlisa 		= '$toim_ovtlisa',
+					vat_numero		= '$vat_numero',
 					nimi 			= '$toim_nimi',
 					osoite 			= '$toim_osoite',
 					postino 		= '$toim_postino',
@@ -22,7 +53,7 @@
 					puhelin 		= '$toim_puhelin',
 					email 			= '$toim_email',
 					lasku_logo		= '$lasku_logo',
-					muuttaja		= '$kukarow[kuka]', 
+					muuttaja		= '$kukarow[kuka]',
 					muutospvm		= now()
 					where yhtio = '$kukarow[yhtio]' and tunnus = '$toim_tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -41,6 +72,7 @@
 		$query = "	insert into yhtion_toimipaikat set
 					yhtio			= '$kukarow[yhtio]',
 					ovtlisa 		= '$toim_ovtlisa',
+					vat_numero		= '$vat_numero',
 					nimi 			= '$toim_nimi',
 					osoite 			= '$toim_osoite',
 					postino 		= '$toim_postino',
@@ -63,17 +95,18 @@
 		echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 
 		echo "<table>";
-		echo "<tr><th>".t("Ovtlisa")."</th>	<td><input type='text' 		name='toim_ovtlisa'  value='$toim_ovtlisa'></td></tr>";
-		echo "<tr><th>".t("Nimi")."</th>	<td><input type='text' 		name='toim_nimi'     value='$toim_nimi'></td></tr>";
-		echo "<tr><th>".t("Osoite")."</th>	<td><input type='text' 		name='toim_osoite'   value='$toim_osoite'></td></tr>";
-		echo "<tr><th>".t("Postino")."</th>	<td><input type='text' 		name='toim_postino'  value='$toim_postino'></td></tr>";
-		echo "<tr><th>".t("Postitp")."</th>	<td><input type='text' 		name='toim_postitp'  value='$toim_postitp'></td></tr>";
-		echo "<tr><th>".t("Maa")."</th>		<td><input type='text' 		name='toim_maa'      value='$toim_maa'></td></tr>";
-		echo "<tr><th>".t("Maakoodi")."</th><td><input type='text' 		name='toim_maakoodi' value='$toim_maakoodi'></td></tr>";
-		echo "<tr><th>".t("Fax")."</th>		<td><input type='text' 		name='toim_fax'      value='$toim_fax'></td></tr>";
-		echo "<tr><th>".t("Puhelin")."</th>	<td><input type='text' 		name='toim_puhelin'  value='$toim_puhelin'></td></tr>";
-		echo "<tr><th>".t("Email")."</th>	<td><input type='text' 		name='toim_email'    value='$toim_email'></td></tr>";
-		echo "<tr><th>".t("Lasku logo")."</th><td><input type='text' 	name='lasku_logo'    value='$lasku_logo'></td></tr>";
+		echo "<tr><th>".t("Ovtlisa")."</th>		<td><input type='text' name='toim_ovtlisa'  value='$toim_ovtlisa'></td></tr>";
+		echo "<tr><th>".t("VAT-numero")."</th>	<td><input type='text' name='vat_numero'    value='$vat_numero'><td class='back'><a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/$kukarow[kieli]/vieshome.htm'>Tarkista numero t‰‰lt‰!</a></td></td></tr>";
+		echo "<tr><th>".t("Nimi")."</th>		<td><input type='text' name='toim_nimi'     value='$toim_nimi'></td></tr>";
+		echo "<tr><th>".t("Osoite")."</th>		<td><input type='text' name='toim_osoite'   value='$toim_osoite'></td></tr>";
+		echo "<tr><th>".t("Postino")."</th>		<td><input type='text' name='toim_postino'  value='$toim_postino'></td></tr>";
+		echo "<tr><th>".t("Postitp")."</th>		<td><input type='text' name='toim_postitp'  value='$toim_postitp'></td></tr>";
+		echo "<tr><th>".t("Maa")."</th>			<td><input type='text' name='toim_maa'      value='$toim_maa'></td></tr>";
+		echo "<tr><th>".t("Maakoodi")."</th>	<td><input type='text' name='toim_maakoodi' value='$toim_maakoodi'></td></tr>";
+		echo "<tr><th>".t("Fax")."</th>			<td><input type='text' name='toim_fax'      value='$toim_fax'></td></tr>";
+		echo "<tr><th>".t("Puhelin")."</th>		<td><input type='text' name='toim_puhelin'  value='$toim_puhelin'></td></tr>";
+		echo "<tr><th>".t("Email")."</th>		<td><input type='text' name='toim_email'    value='$toim_email'></td></tr>";
+		echo "<tr><th>".t("Lasku logo")."</th>	<td><input type='text' name='lasku_logo'    value='$lasku_logo'></td></tr>";
 		echo "</table><hr>";
 
 		echo "<input type='hidden' name='tee' value='insert'>";
@@ -96,6 +129,7 @@
 
 			echo "<table>";
 			echo "<tr><th>".t("Ovtlisa")."</th>	<td><input type='text' name='toim_ovtlisa'  value='$trow[ovtlisa]'></td></tr>";
+			echo "<tr><th>".t("VAT-numero")."</th><td><input type='text' name='vat_numero'  value='$trow[vat_numero]'></td><td class='back'><a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/$kukarow[kieli]/vieshome.htm'>Tarkista numero t‰‰lt‰!</a></td></tr>";
 			echo "<tr><th>".t("Nimi")."</th>	<td><input type='text' name='toim_nimi'     value='$trow[nimi]'></td></tr>";
 			echo "<tr><th>".t("Osoite")."</th>	<td><input type='text' name='toim_osoite'   value='$trow[osoite]'></td></tr>";
 			echo "<tr><th>".t("Postino")."</th>	<td><input type='text' name='toim_postino'  value='$trow[postino]'></td></tr>";

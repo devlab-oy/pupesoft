@@ -29,7 +29,7 @@ $rectparam["width"] = 0.3;
 //muutamat funktiot...
 if (!function_exists('alku')) {
 	function alku () {
-		global $pdf, $image, $laskurow, $yhtiorow, $tid, $viite, $p, $kala, $lask, $rectparam, $kukarow, $kieli, $asrow;
+		global $pdf, $image, $laskurow, $yhtiorow, $viite, $p, $kala, $lask, $rectparam, $kukarow, $kieli, $asrow;
 
 		//oletukasia
 		$kala = 638;
@@ -52,16 +52,38 @@ if (!function_exists('alku')) {
 		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
 		$firstpage = $pdf->new_page("a4");
-		$pdf->enable('template');
-		$tid = $pdf->template->create();
-		$pdf->template->size($tid, 600, 830);
+		
+		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
+			
+			$filename = $yhtiorow["lasku_logo"];
 
-		$pdf->draw_rectangle(825, 20,  780, 580, 		$firstpage, $rectparam);
-		$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$firstpage, $p);
-		$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$firstpage, $p);
-		$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
-		$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
-		$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$firstpage, $p);
+			$fh = fopen($filename, "r");
+			$data = fread($fh, filesize($filename));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+
+			if(!$image) {
+				echo t("Logokuvavirhe").": ".$image.$data;
+			}
+			else {
+				$logoparam = array();
+				$logoparam['scale'] = 0.15;
+				
+				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+				$logoparam['scale'] = 1/($isizelogo[1]*0.35714/15);
+								
+				$placement = $pdf->image_place($image, mm_pt(277), mm_pt(7), $firstpage, $logoparam);
+			}
+		}
+		else {
+			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$firstpage, $p);
+			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$firstpage, $p);
+			$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
+			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
+			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$firstpage, $p);
+		}
+		
 		$pdf->draw_text(250,810, t("Lähete", $kieli), $firstpage);
 		$pdf->draw_text(250,795, t("Tilausnumero", $kieli).": ".$laskurow["tunnus"], $firstpage, $p);
 
@@ -348,33 +370,39 @@ if (!function_exists('rivi')) {
 
 if (!function_exists('loppu')) {
 	function loppu ($firstpage, $tots) {
-		global $pdf, $laskurow, $viite, $p, $total, $total_netto, $rectparam, $kieli;
-
-		$pdf->draw_rectangle(50, 20, 20, 580, $firstpage, $rectparam);
-		$pdf->draw_text(30, 37,  t("Tilausviite", $kieli).": ".$laskurow["viesti"], $firstpage, $p);
-		$pdf->draw_text(30, 25,  t("Kommentti", $kieli).":   ".$laskurow["comments"], $firstpage, $p);
-
+		global $pdf, $laskurow, $viite, $p, $total, $total_netto, $rectparam, $kieli, $yhtiorow;
+		
+		$pdf->draw_text(30, 50, $yhtiorow["nimi"], 		$firstpage, $p);
+		$pdf->draw_text(30, 40, $yhtiorow["osoite"], 	$firstpage, $p);
+		$pdf->draw_text(30, 30, $yhtiorow["postino"], 	$firstpage, $p);
+		$pdf->draw_text(60, 30, $yhtiorow["postitp"], 	$firstpage, $p);
+		$pdf->draw_text(30, 20, $yhtiorow["maa"], 		$firstpage, $p);
+	
+	
+		$pdf->draw_paragraph(60,150,40,440, t("Tilausviite", $kieli).": ".$laskurow["viesti"], $firstpage, $p);
+		$pdf->draw_paragraph(40,150,10,440, t("Kommentti", $kieli).":   ".$laskurow["comments"], $firstpage, $p);
+		
 		if ($tots == 1) {
-			$arvo = $total + $total_netto;
+			$arvo = $total + $total_netto;			
 
 			//erikoisalennus annetaan vain riveille joilla EI ole NETTOHINTAA
 			if ($laskurow['erikoisale'] != 0) {
 				$apu1 = round($laskurow['erikoisale']/100,2);	// erikoisale prosentti
 				$apu2 = round($total*$apu1,2); 					// erikoisalen määrä
-				$apu3 = round((1-$apu1)*$total,2);				// loppusumma
-
-				$pdf->draw_text(450, 37, t("Erikoisale", $kieli).":", $firstpage, $p);
-				$pdf->draw_text(500, 37, sprintf("%01.2f", $apu2)." ".$laskurow["valkoodi"], $firstpage, $p);
-
+				$apu3 = round((1-$apu1)*$total,2);				// loppusumma								
+				
+				$pdf->draw_text(450, 50, t("Erikoisale", $kieli).":", $firstpage, $p);
+				$pdf->draw_text(500, 50, sprintf("%01.2f", $apu2)." ".$laskurow["valkoodi"], $firstpage, $p);
+			
 				$kaikkiyhteensa = $apu3 + $total_netto;
 			}
 			else {
-				$kaikkiyhteensa = $arvo;
+				$kaikkiyhteensa = $arvo;											
 			}
-
-			$pdf->draw_text(450, 25, t("Yhteensä", $kieli).":", $firstpage, $p);
-			$pdf->draw_text(500, 25, sprintf("%01.2f", $kaikkiyhteensa)." ".$laskurow["valkoodi"], $firstpage, $p);
-
+			
+			$pdf->draw_text(450, 40, t("Yhteensä", $kieli).":", $firstpage, $p);
+			$pdf->draw_text(500, 40, sprintf("%01.2f", $kaikkiyhteensa)." ".$laskurow["valkoodi"], $firstpage, $p);
+										
 			$total			= 0;
 			$total_netto 	= 0;
 		}

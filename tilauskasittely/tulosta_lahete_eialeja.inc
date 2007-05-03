@@ -60,9 +60,13 @@ if (!function_exists('alku')) {
 				echo t("Logokuvavirhe").": ".$image.$data;
 			}
 			else {
-				$kalakuvakala = array();
-				$kalakuvakala['scale'] = 0.15;
-				$placement = $pdf->image_place($image, mm_pt(280), mm_pt(10), $firstpage, $kalakuvakala);
+				$logoparam = array();
+				$logoparam['scale'] = 0.15;
+				
+				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+				$logoparam['scale'] = 1/($isizelogo[1]*0.35714/15);
+								
+				$placement = $pdf->image_place($image, mm_pt(277), mm_pt(7), $firstpage, $logoparam);
 			}
 		}
 		else {

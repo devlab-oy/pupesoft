@@ -124,7 +124,7 @@
 
 	if ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
 
-		$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' order by tunnus limit 1";
+		$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
 		$erpres = mysql_query($erpquery) or pupe_error($erpquery);
 
 		$erpcmvv = (int) $erpcmvv;
@@ -524,7 +524,8 @@
 							FROM maksuehto
 							".avain('join','MEHTOKATXT_')."
 							".avain('join2','MEHTOTXT_')."
-							WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+							WHERE maksuehto.yhtio 	= '$kukarow[yhtio]'
+							and maksuehto.kaytossa 	= ''
 							and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$srow[maa]%')
 							order by maksuehto.jarjestys, mehto, maksuehto.tunnus";
 				$mresult = mysql_query($query) or pupe_error($query);
@@ -1688,7 +1689,7 @@
 
 		// jos kyseessä oli käsin syötetty eräpäivä ja maksuehto on väärin laitetaan oikea maksuehto... hakee järjestyksessä ekan
 		if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "") {
-			$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' order by tunnus limit 1";
+			$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
 			$erpres = mysql_query($erpquery) or pupe_error($erpquery);
 			$erprow = mysql_fetch_array($erpres);
 			$maksuehto = $erprow["tunnus"]; // valitaan tää maksuehdoks

@@ -63,7 +63,8 @@
 					FROM maksuehto
 					".avain('join','MEHTOKATXT_')."
 					".avain('join2','MEHTOTXT_')."
-					WHERE maksuehto.yhtio = '$kukarow[yhtio]'
+					WHERE maksuehto.yhtio  = '$kukarow[yhtio]'
+					and maksuehto.kaytossa = ''
 					ORDER BY maksuehto.jarjestys, maksuehto.teksti";
 		$vresult = mysql_query($query) or pupe_error($query);
 

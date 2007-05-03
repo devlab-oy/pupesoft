@@ -37,6 +37,27 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "kaytossa") {
+
+		$ulos  = "<td><select name='$nimi'>";
+		
+		$chk1 = '';
+		$chk2 = '';
+
+		if ($trow[$i] == "") {
+			$chk1 = 'selected';
+		}
+		else {
+			$chk2 = 'selected';
+		}
+
+		$ulos .= "<option value=''  $chk1>".t("Käytössä")."</option>";
+		$ulos .= "<option value='E' $chk2>".t("Ei käytössä")."</option>";
+		
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "kateinen") {
 

@@ -121,13 +121,15 @@
 		
 		//	Haetaan tuotetta jos sellainen on annettu
 		if($hakutuoteno!="") {
-			$tuoteno=$hakutuoteno;
+			if ($tee != 'LISAA') {
+				$tuoteno=$hakutuoteno;
+			}
+			
 			$kutsuja="tuoteperhe.php";
 			require_once "inc/tuotehaku.inc";
 
 			//on vaan löytynyt 1 muuten tulis virhettä ja ulosta
 			if ($ulos == '' and $varaosavirhe == '' and $tuoteno != '') {
-				$tee = '';
 				$ulos="<input type='text' name='hakutuoteno' value='$hakutuoteno' size='20'>";
 			}
 			else {
@@ -175,6 +177,7 @@
 					$ok = 0;
 				}				
 			}
+			
 			if ($ok == 1) {
 				//tarkistetaan tuotteiden olemassaolo
 				$error = '';

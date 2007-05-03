@@ -18,8 +18,11 @@ $wquery = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='
 $wtres  = mysql_query($wquery) or pupe_error($wquery);
 $wtrow  = mysql_fetch_array($wtres);
 
-// jos meillä on hinnastosta tuleva poikkeava tuotteen alv, käytetään sitä
-if ($alehinta_alv != 0) $trow["alv"] = $alehinta_alv;
+// jos meillä on tuotteelta tuleva poikkeava tuotteen alv, käytetään sitä
+if ($alehinta_alv != 0) {
+	$trow["alv"]     = $alehinta_alv;
+	$wtrow["selite"] = $laskurow["alv"]; // otetaan "yhtiön oletus" laskulta, koska tässä keisissä siellä pitäs olla yhtiön oletus aina
+}
 
 if ($laskurow["tila"] == "O") {
 	//Jos käyttäjä on valinnut drop-downista jonkun nollasta poikkeavan alvin, niin lasketaan sen verran alvia pois hinnasta
@@ -60,31 +63,7 @@ else {
 
 	// Jos alvit täsmäävät, ei tarvitse tehdä mitään. Muuten lasketaan uuden alvin sisältävä myyntihinta.
 	if ($alv != $trow['alv']) {
-		// Huomioidaan hinnaston alviprossa
-		if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$vquery = "	select selitetark_3
-						from avainsana
-						where yhtio			= '$kukarow[yhtio]'
-						and laji			= 'alvulk'
-						and selite 			= '$trow[alv]'
-						and selitetark		= '$laskurow[maa]'
-						and selitetark_2	= '$laskurow[valkoodi]'";
-			$vtres  = mysql_query($vquery) or pupe_error($vquery);
-
-			if (mysql_num_rows($vtres) == 1) {
-				$vtrow  = mysql_fetch_array($vtres);
-
-				$tuotealvi = $vtrow['selitetark_3'];
-			}
-			else {
-				$tuotealvi = $trow['alv'];
-			}
-		}
-		else {
-			$tuotealvi = $trow['alv'];
-		}
-
-		$hinta = round($hinta / (1+$tuotealvi/100) * (1+$alv/100),2);
+		$hinta = round($hinta / (1+$trow['alv']/100) * (1+$alv/100),2);
 	}
 }
 

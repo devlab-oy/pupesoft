@@ -24,6 +24,32 @@
 	// oletetaan tuotteen alvi
 	$alehinta_alv = "";
 
+	// jos meillä on lasku menossa ulkomaille
+	if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maakoodi"]) {
+
+		// tutkitaan ollaanko siellä alv-rekisteröity
+		$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maakoodi='$laskurow[maa]' and vat_numero != ''";
+		$alhire = mysql_query($query) or pupe_error($query);
+
+		// ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
+		if (mysql_num_rows($alhire) == 1) {
+			$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maakoodi='$laskurow[maa]' and tuoteno='$trow[tuoteno]' limit 1";
+			$alhire = mysql_query($query) or pupe_error($query);
+
+			// ei löytynyt alvia, se on pakko löytyä
+			if (mysql_num_rows($alhire) == 0) {
+				$alehinta_alv = -999.99; // tää on näin että tiedetään että kävi huonosti ja ei anneta lisätä tuotetta
+				$alv          = -999.99;
+				$netto        = "";
+				$hinta        = "0";
+			}
+			else {
+				$alehi_alrow = mysql_fetch_array($alhire);
+				$alehinta_alv = $alehi_alrow["alv"];
+			}
+		}
+	}
+
 	// haetaan asiakkaan tiedot
 	$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 	$alhire = mysql_query($query) or pupe_error($query);
@@ -185,6 +211,8 @@
 				$myymresult = mysql_query($query) or pupe_error($query);
 				$myymrow = mysql_fetch_array ($myymresult);
 
+				if ($alehinta_alv != "") $myymrow["alv"] = $alehinta_alv;
+
 				if ($myymrow["myymalahinta"] > 0) {
 					if ($yhtiorow["alv_kasittely"] != '') {
 						$hinta = $myymrow["myymalahinta"]/($myymrow["alv"]/100+1);
@@ -202,7 +230,7 @@
 		// 5. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-			$query = "	SELECT hinta, laji, alv
+			$query = "	SELECT hinta, laji
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
@@ -220,7 +248,6 @@
 				$hrow       	= mysql_fetch_array ($hresult);
 				$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
 				$netto			= $hrow["laji"];
-				$alehinta_alv	= $hrow["alv"];
 				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 			}
 		}
@@ -228,7 +255,7 @@
 		// 6. hinnasto.hinta tuotteen nettohinta hinnastosta yhtiön valuutassa
 		if ($hinta == 0) {
 
-			$query = "	SELECT hinta, laji, alv
+			$query = "	SELECT hinta, laji
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
@@ -246,7 +273,6 @@
 				$hrow       	= mysql_fetch_array ($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
-				$alehinta_alv	= $hrow["alv"];
 				$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
 			}
 		}
@@ -586,7 +612,7 @@
 		// 12. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-			$query = "	SELECT hinta, laji, alv
+			$query = "	SELECT hinta, laji
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
@@ -604,7 +630,6 @@
 				$hrow			= mysql_fetch_array ($hresult);
 				$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
 				$netto			= $hrow["laji"];
-				$alehinta_alv	= $hrow["alv"];
 				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 			}
 		}
@@ -612,7 +637,7 @@
 		// 13. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtion valuutassa
 		if ($hinta == 0) {
 
-			$query = "	SELECT hinta, laji, alv
+			$query = "	SELECT hinta, laji
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
@@ -630,7 +655,6 @@
 				$hrow			= mysql_fetch_array ($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
-				$alehinta_alv	= $hrow["alv"];
 				$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
 			}
 		}
@@ -792,6 +816,7 @@
 			}
 		}
 	}
+
 	if ($ale > 100) {
 		$ale = 100;
 	}

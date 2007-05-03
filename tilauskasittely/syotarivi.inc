@@ -152,7 +152,7 @@
 			echo "<input type='hidden' name='alv' value='$alv'>";
 		}
 		else {
-			echo "<td>".alv_popup_oletus('alv',$alv)."</td>";
+			echo "<td>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
 
 		echo "<td class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";

@@ -1373,7 +1373,7 @@ if ($tee == '') {
 
 			$query = "	SELECT a.fakta, l.ytunnus, round(a.luottoraja,0) luottoraja, a.luokka
 						FROM asiakas a, lasku l
-						WHERE l.tunnus='$kukarow[kesken]' and l.yhtio='$kukarow[yhtio]' and a.yhtio = l.yhtio and a.ytunnus = l.ytunnus";
+						WHERE l.tunnus='$kukarow[kesken]' and l.yhtio='$kukarow[yhtio]' and a.yhtio = l.yhtio and a.tunnus = l.liitostunnus";
 			$faktaresult = mysql_query($query) or pupe_error($query);
 			$faktarow = mysql_fetch_array($faktaresult);
 
@@ -1605,31 +1605,7 @@ if ($tee == '') {
 			$tuoterow = mysql_fetch_array($tuoteresult);
 
 			if ($tuoterow["alv"] != $tilausrivi["alv"] and $yhtiorow["alv_kasittely"] == "" and $tilausrivi["alv"] < 500) {
-				// Huomioidaan hinnaston alviprossa
-				if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-					$vquery = "	select selitetark_3
-								from avainsana
-								where yhtio			= '$kukarow[yhtio]'
-								and laji			= 'alvulk'
-								and selite 			= '".($tuoterow["alv"]+0)."'
-								and selitetark		= '$laskurow[maa]'
-								and selitetark_2	= '$laskurow[valkoodi]'";
-					$vtres  = mysql_query($vquery) or pupe_error($vquery);
-
-					if (mysql_num_rows($vtres) == 1) {
-						$vtrow  = mysql_fetch_array($vtres);
-
-						$tuotealvi = $vtrow['selitetark_3'];
-					}
-					else {
-						$tuotealvi = $tuoterow['alv'];
-					}
-				}
-				else {
-					$tuotealvi = $tuoterow['alv'];
-				}
-
-				$hinta = sprintf('%.2f',round($tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuotealvi/100),2));
+				$hinta = sprintf('%.2f',round($tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuoterow['alv']/100),2));
 			}
 			else {
 				$hinta	= $tilausrivi["hinta"];
@@ -2765,7 +2741,7 @@ if ($tee == '') {
 						$classx = $class;
 					}
 
-					echo "<td $classx align='right' valign='top'>$row[alv]</td>";
+					echo "<td $classx align='right' valign='top' nowrap>$row[alv]</td>";
 				}
 
 				if ($muokkauslukko == "") {
@@ -3185,7 +3161,7 @@ if ($tee == '') {
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
 					echo "<tr>
-						<td class='back' colspan='$ycspan' align='right'>$ulkom_huom</td>
+						<td nowrap class='back' colspan='$ycspan' align='right'>$ulkom_huom</td>
 						<th colspan='5' align='right'>".t("Ulkomaan myynti").":</th>
 						<td class='spec' align='right'>".sprintf("%.2f",$arvo_ulkomaa_eieri)."</td>";
 

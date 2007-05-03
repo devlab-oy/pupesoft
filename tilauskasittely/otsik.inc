@@ -149,12 +149,12 @@
 
 	// tehdään oikeellisuus
 	if ($toim == "YLLAPITO") {
-		
+
 		if ((count($yllapito_kk) == 0 or count($yllapito_pp) == 0) and isset($jatka)) {
 			echo "<font class='error'>".t("VIRHE: Laskutusaikataulu on syötettävä")."!</font><br>";
 			$tee = "OTSIK";
 			unset($jatka);
-			$erpcm_virhe = "X";			
+			$erpcm_virhe = "X";
 		}
 
 		if ($yllapito_alkupp != "" or $yllapito_alkukk != "" or $yllapito_alkuvv != "") {
@@ -174,7 +174,7 @@
 			echo "<font class='error'>".t("VIRHE: Alkupvm on pakollinen tieto")."!</font><br>";
 			$tee = "OTSIK";
 			unset($jatka);
-			$erpcm_virhe = "X";			
+			$erpcm_virhe = "X";
 		}
 
 		if ($yllapito_loppupp != "" or $yllapito_loppukk != "" or $yllapito_loppuvv != "") {
@@ -196,7 +196,7 @@
 		}
 
 	}
-
+	
 	if ($tila == "" and !isset($jatka)) {
 		if ($toim == "TYOMAARAYS") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
@@ -330,6 +330,38 @@
 			if ($srow['tila'] != '')    $ylatila=$srow['tila'];
 		}
 
+		// katsotaan miten vienti ja ALV käsitellään
+		$alv_velvollisuus = "";
+
+		// jos meillä on lasku menossa ulkomaille
+		if ($srow["maa"] != "" and $srow["maa"] != $yhtiorow["maakoodi"]) {
+			// tutkitaan ollaanko siellä alv-rekisteröity
+			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maakoodi='$srow[maa]' and vat_numero != ''";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
+			if (mysql_num_rows($alhire) == 1) {	
+						
+				// haetaan maan oletusalvi
+				$query = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$srow[maa]'";
+				$alhire = mysql_query($query) or pupe_error($query);
+			
+				// jos ei löydy niin mennään erroriin
+				if (mysql_num_rows($alhire) == 0) {
+					echo "<font class='error'>Oletus ALV-kantaa ei löydy asiakkaan maahan $srow[maa]! Ei voida jatkaa!</font><br>";
+					exit;
+				}
+				else {			
+					$apuro  = mysql_fetch_array($alhire);
+					// nämä tässä keisissä aina näin
+					$alv    = $apuro["selite"];
+					$vienti = "";
+					$alv_velvollisuus = "KYLLA";
+				}
+			}
+
+		}
+		
 		echo "	<input type='hidden' name='ylatila' 						 value = '$ylatila'>
 				<input type='hidden' name='alatila' 						 value = '$alatila'>
 				<input type='hidden' name='poistumistoimipaikka_koodi'       value = '$srow[poistumistoimipaikka_koodi]'>
@@ -385,7 +417,7 @@
 		echo "<tr>
 				<td valign='top'>".t("Osoite").": </td>
 				<td><input type='text' name='osoite' size='35' maxlength='31' value='$srow[osoite]'></td></tr>";
-				
+
 		echo "<tr>
 				<td valign='top'>".t("Postitp").": </td>
 				<td><input type='text' name='postino' size='10' maxlength='15' value='$srow[postino]'> <input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'></td></tr>";
@@ -559,7 +591,7 @@
 			}
 
 			echo "<tr><td>".t("Eräpäivä").":</td>
-				<td>"; 
+				<td>";
 
 			if ($toim == "YLLAPITO") {
 				echo t("Ei käytössä");
@@ -619,7 +651,12 @@
 
 			echo "<td>".t("Alv").":</td>";
 
-			if ($srow["vienti"] == '') {
+			if ($alv_velvollisuus == "KYLLA") {
+				echo " <td>".t("Verollinen myynti")."
+						<input type='hidden' name='alv' value='$alv'>
+						</td></tr>";				
+			}
+			elseif ($srow["vienti"] == '') {
 				if (isset($srow)) {
 					if ($srow['alv'] == 0) {
 						$sel00 = 'selected';
@@ -675,7 +712,7 @@
 				echo t("Ei käytössä");
 			}
 			else {
-				echo "				
+				echo "
 					<input type='text' name='toimpp' value='$toimpp' size='3'>
 					<input type='text' name='toimkk' value='$toimkk' size='3'>
 					<input type='text' name='toimvv' value='$toimvv' size='6'>
@@ -707,7 +744,8 @@
 			if ($srow["alv"] == 99.99) {
 				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaan marginaalimyyntiä")."</td>";
 			}
-			elseif ($toim == "YLLAPITO") {
+			elseif ($toim == "YLLAPITO" or $alv_velvollisuus == "KYLLA") {
+				// aina kotimaa
 				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")."</td>";
 			}
 			else {
@@ -728,7 +766,7 @@
 				echo "<input type='text' name='kerpp' value='$kerpp' size='3'>
 						<input type='text' name='kerkk' value='$kerkk' size='3'>
 						<input type='text' name='kervv' value='$kervv' size='6'>
-						<input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'>"; 
+						<input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'>";
 			}
 			echo "</td>";
 
@@ -1316,14 +1354,14 @@
 				// jos alatila on X niin pitää tehdä hidden muuttujat ettei nollaannu
 				if ($srow["alatila"] == "X") {
 					$disable = "disabled";
-					
+
 					foreach (explode(',', $sopapurow["sopimus_kk"]) as $numi) {
 						echo "<input type='hidden' name='yllapito_kk[]' value='$numi'>";
 					}
 					foreach (explode(',', $sopapurow["sopimus_pp"]) as $numi) {
 						echo "<input type='hidden' name='yllapito_pp[]' value='$numi'>";
 					}
-				
+
 				}
 
 				$chk = array();
@@ -1571,7 +1609,7 @@
 				//lasketaan alvit
 				$hinta 	= $uusihinta;
 
-				if($row["alv"] < 500) {
+				if ($row["alv"] < 500) {
 					$alv = "";
 				}
 				else {
@@ -1598,7 +1636,7 @@
 		$alv = $laskunalv;
 
 		//Erikoisalennuksen desimaalipilkku
-		$erikoisale = str_replace ( ",", ".", $erikoisale);
+		$erikoisale = str_replace (",", ".", $erikoisale);
 
 		if ($kukarow["kesken"] == 0) {
 			$query = "INSERT into ";
@@ -1932,5 +1970,7 @@
 		}
 
 	}
+
 	unset($alv);
+
 ?>

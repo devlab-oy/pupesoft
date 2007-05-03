@@ -46,6 +46,12 @@
 		$tilausok++;
 	}
 
+	if ($row["alv"] == -999.99) {
+		$varaosavirhe .= t("VIRHE: Tuotteelle ei löytynyt ALV-prosenttia asiakkaan maahan!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
+
 	//	Pakkokommentoitava tuote
 	if ($trow["kommentoitava"] != "" and $row["kommentti"] == "") {
 		$varaosavirhe .= t("VIRHE: Tuotetta on kommentoitava!")."<br>";

@@ -31,6 +31,18 @@
 			echo "<font class='error'>Virheellinen vat-numero!</font><br>";
 		}
 
+		if ($vat_numero != "") {
+			$query = "	SELECT selite
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]' and laji = 'alvulk' and selitetark_2 = '$toim_maakoodi'";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($vresult) == 0) {
+				echo "<font class='error'>Yrityksen ALV-prosentit puuttuvat tälle maalle ($toim_maakoodi)! Käy perustamassa ensin ne avainsanoihin.</font>";
+				$toimerrorit++;
+			}
+		}
+
 		if ($toimerrorit > 0) {
 			if ($tee == "insert") $tee = "uusi";
 			else $tee = "";
@@ -48,7 +60,7 @@
 					postino 		= '$toim_postino',
 					postitp 		= '$toim_postitp',
 					maa 			= '$toim_maa',
-					maakoodi 		= '$toim_maakoodi',
+					maakoodi 		= '".strtoupper($toim_maakoodi)."',
 					fax 			= '$toim_fax',
 					puhelin 		= '$toim_puhelin',
 					email 			= '$toim_email',
@@ -78,7 +90,7 @@
 					postino 		= '$toim_postino',
 					postitp 		= '$toim_postitp',
 					maa 			= '$toim_maa',
-					maakoodi 		= '$toim_maakoodi',
+					maakoodi 		= '".strtoupper($toim_maakoodi)."',
 					fax 			= '$toim_fax',
 					puhelin 		= '$toim_puhelin',
 					email 			= '$toim_email',

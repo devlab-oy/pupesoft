@@ -25,7 +25,7 @@
 			$delre = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($kukar)) {
-				$query = "insert into oikeu values ('$fromkuka','$row[sovellus]','$row[nimi]','$row[alanimi]','$row[paivitys]','','$row[nimitys]','$row[jarjestys]','$row[jarjestys2]','$fromkuka','$tokuka',0)";
+				$query = "insert into oikeu values ('$fromkuka','$row[sovellus]','$row[nimi]','$row[alanimi]','$row[paivitys]','','$row[nimitys]','$row[jarjestys]','$row[jarjestys2]','$fromkuka','$tokuka','$row[hidden]',0)";
 				$upres = mysql_query($query) or pupe_error($query);						
 			}
 

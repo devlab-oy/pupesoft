@@ -318,4 +318,56 @@
 			$paikat = "";
 		}
 	}
+	elseif ($trow["ei_saldoa"] != "" and $row["tyyppi"] != "E" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('S','P','J'))) {
+		
+		// Suoratoimitushäkki
+		$query = "	select sum(if(var='S', 1, 0)) suoria, count(*) lapsia, count(distinct tilaajanrivinro) toimittajia, group_concat(distinct tilaajanrivinro) toimittaja
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]' 
+					and otunnus = '$row[otunnus]'
+					and perheid = '$row[tunnus]'
+					and tunnus != '$row[tunnus]'";
+		$maksuehtoresult = mysql_query($query) or pupe_error($query);
+		$maksuehtorow = mysql_fetch_array($maksuehtoresult);
+						
+		if ($maksuehtorow["suoria"] == $maksuehtorow["lapsia"] and $maksuehtorow["toimittajia"] == 1) {
+			$query = "	update tilausrivi set
+						var			= '',
+						varattu 	= '$kpl_st',
+						jt 			= 0
+						where yhtio = '$kukarow[yhtio]'
+						and tunnus 	= '$row[tunnus]'";
+			$updres = mysql_query($query) or pupe_error($query);
+			
+			/*
+			$query = "	update tilausrivi set
+						kommentti = concat_ws(' ', kommentti, '".t("Tuoteperhe").": $row[nimitys]')
+						where yhtio = '$kukarow[yhtio]'
+						and otunnus = '$row[otunnus]'
+						and perheid = '$row[tunnus]'
+						and tunnus != '$row[tunnus]'";
+			$updres = mysql_query($query) or pupe_error($query);
+			*/
+			
+			$row["var"] = "";
+		}
+		
+		$sel1 = $sel2 = "";
+
+		if ($row["var"] == "P") {
+			$sel1 = "SELECTED";
+		}
+		elseif ($row["var"] == "J") {
+			$sel2 = "SELECTED";
+		}
+		else {
+			$sel3 = "SELECTED";
+		}
+
+		$paikat  = "<option value=''  $sel1>".t("Oletus")."</option>";
+		$paikat .= "<option value='P'  $sel1>".t("Jätä puutteeksi")."</option>";
+		$paikat .= "<option value='J' $sel2>".t("Jälkitoimitus")."</option>";
+		$paikat .= "<option value='X' $sel3>".t("Suoratoimita")."</option>";
+		$paikat = "<select Style='font-size: 8pt; padding:0;' name='var' onchange='submit();'>".$paikat."</select>";
+	}
 ?>

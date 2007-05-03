@@ -24,6 +24,9 @@
 
 				while ($rivi = mysql_fetch_array($result)) {
 
+					$sarjacomment 	= "";
+					$perhecomm 		= "";
+					
 					// tehd‰‰n aluksi v‰h‰n oikeellisuustarkastuksia
 					$query = "select * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tilaajanrivinro]'";
 					$erres = mysql_query($query) or pupe_error($query);
@@ -103,14 +106,19 @@
 							$sarjarow = mysql_fetch_array($sarjaresult);
 							$sarjacomment = "$sarjarow[tunnus]";
 						}
-						else {
-							$sarjacomment = "";
+						
+						if($rivi["perheid"] != 0) {
+							$query = "select nimitys from tilausrivi where tunnus='$rivi[perheid]'";
+							$vrnimire = mysql_query($query) or pupe_error($query);
+							$vrnimiro = mysql_fetch_array($vrnimire);
+
+							$perhecomm = t("Tuoteperhe:")." ".$vrnimiro["nimitys"];	
 						}
 
 						// lis‰t‰‰n ostotilausrivi
 						$query = "	insert into tilausrivi
 									(tuoteno, hinta, tilkpl, varattu, otunnus, yhtio, tyyppi, kommentti, toimaika, hyllyalue, hyllynro, hyllyvali, hyllytaso, tilaajanrivinro) values
-									('$rivi[tuoteno]', '$rivi[hinta]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O', '".trim("$rivi[kommentti] $sarjacomment")."', '$rivi[toimaika]', '$varastorotunnus','0','0','0','$rivi[tunnus]')";
+									('$rivi[tuoteno]', '$rivi[hinta]', '$rivi[jt]', '$rivi[jt]', '$tunnus', '$kukarow[yhtio]', 'O', '".trim("$rivi[kommentti] $sarjacomment $perhecomm")."', '$rivi[toimaika]', '$varastorotunnus','0','0','0','$rivi[tunnus]')";
 						$updre = mysql_query($query) or pupe_error($query);
 						$rivitunnus = (string) mysql_insert_id();
 
@@ -131,8 +139,9 @@
 
 					}
 
-					// tehd‰‰n rivist‰ tavallinen JT
-					$query = "update tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
+					
+					// tehd‰‰n rivist‰ tavallinen JT, perheidkin nollataan
+					$query = "update tilausrivi set var='J', perheid=0, kommentti=concat_ws(' ', kommentti, '$perhecomm') where yhtio='$kukarow[yhtio]' and tunnus='$rivi[tunnus]'";
 					$updre = mysql_query($query) or pupe_error($query);
 
 				}

@@ -99,7 +99,6 @@
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}
 
-
 	// Jos kyseessä on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
 	if (substr($paikka,0,3) == "###") {
 		$var 		 = "T";
@@ -890,6 +889,34 @@
 			else {
 				$trow = mysql_fetch_array($tuoteresult);
 			}
+				
+			if ($rivityyppi != 'E' and $var == "X") {
+				
+				$var 			= "";
+				$suora_tuoteno 	= $trow["tuoteno"];
+				$suora_kpl		= $kpl;
+
+				require("suoratoimitusvalinta.inc");
+
+				if (count($suoratoim_array) > 0) {
+					if (strpos($suoratoim_array[0], "&&&") !== FALSE) {
+						$superpaikka = substr($suoratoim_array[0], 0, strpos($suoratoim_array[0], "&&&"));
+						$loppupaikka = substr($suoratoim_array[0], strpos($suoratoim_array[0], "&&&")+3);
+
+						$lop = "LOP#".$toimittamatta;
+						$toimittamatta = $loppupaikka;
+					}
+					else {
+						$superpaikka = $suoratoim_array[0];
+					}
+
+					$var 		 = "S";
+					$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
+					$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);					
+				}
+			}
+			
+			
 
 			//Käsinsyöteyt hinnat nollataan kun lisätään tuoteperheiden lapsia
 			//Ostossa splittaukset menee aina samalla hinnalla
@@ -898,7 +925,10 @@
 				$ale		= "";
 				$netto		= "";
 				$alv 		= "";
-				$rivinumero = "";
+				
+				if ($var != "S") {
+					$rivinumero = "";
+				}
 			}
 
 			if ($laskurow['tila'] == 'O' and ($hinta == "" or $hinta == 0)) {
@@ -1145,7 +1175,7 @@
 			}
 			$result = mysql_query($query) or die($query);
 			$lisatty_tun = mysql_insert_id();
-
+			
 			$lisatyt_rivit2[] = $lisatty_tun;
 
 			if ($i == 0) {

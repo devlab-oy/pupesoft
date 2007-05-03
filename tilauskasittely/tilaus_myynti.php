@@ -1705,6 +1705,11 @@ if ($tee == '') {
 				$tila		= "";
 				$var		= $tilausrivi["var"];
 			}
+			elseif ($tapa == "VAIHDAJAPOISTA") {
+				$perheid	= "";
+				$tila		= "";
+				$paikka		= "";
+			}
 			elseif ($tapa == "POISTA") {
 				$tuoteno	= '';
 				$kpl		= '';
@@ -2280,6 +2285,11 @@ if ($tee == '') {
 
 			while ($row = mysql_fetch_array($result)) {
 
+				// Rivin tarkistukset
+				if ($muokkauslukko == "") {
+					require('tarkistarivi.inc');
+				}
+				
 				//Hetaaan tilausrivin_lisatiedot
 				$query  = "	SELECT *
 							FROM tilausrivin_lisatiedot
@@ -2440,11 +2450,6 @@ if ($tee == '') {
 
 				$vanhaid = $row["perheid"];
 
-				// Rivin tarkistukset
-				if ($muokkauslukko == "") {
-					require('tarkistarivi.inc');
-				}
-
 				if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $yhtiorow['tilauksen_kohteet'] == 'K') {
 
 					if($lisatied_row["ei_nayteta"] == "") {
@@ -2556,13 +2561,13 @@ if ($tee == '') {
 				elseif ($kukarow['extranet'] == '' and $trow["ei_saldoa"] == "") {
 					if ($paikat != '') {
 						echo "	<form action='$PHP_SELF' method='post'>
-								<input type='hidden' name='toim' value='$toim'>
-								<input type='hidden' name='projektilla' value='$projektilla'>
-								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
-								<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
-								<input type='hidden' name='menutila' value='$menutila'>
-								<input type='hidden' name='tila' value = 'MUUTA'>
-								<input type='hidden' name='tapa' value = 'VAIHDA'>";
+								<input type='hidden' name='toim' 			value = '$toim'>
+								<input type='hidden' name='projektilla' 	value = '$projektilla'>
+								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								<input type='hidden' name='menutila' 		value = '$menutila'>
+								<input type='hidden' name='tila' 			value = 'MUUTA'>
+								<input type='hidden' name='tapa' 			value = 'VAIHDA'>";
 						echo "<td $class align='left' valign='top'>$paikat</td>";
 						echo "</form>";
 					}
@@ -2585,7 +2590,21 @@ if ($tee == '') {
 					}
 				}
 				elseif($kukarow['extranet'] == '') {
-					echo "<td $class align='left' valign='top'>&nbsp;</td>";
+					if ($paikat != '') {
+						echo "	<form action='$PHP_SELF' method='post'>
+								<input type='hidden' name='toim' 			value = '$toim'>
+								<input type='hidden' name='projektilla' 	value = '$projektilla'>
+								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
+								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								<input type='hidden' name='menutila' 		value = '$menutila'>
+								<input type='hidden' name='tila' 			value = 'MUUTA'>
+								<input type='hidden' name='tapa' 			value = 'VAIHDAJAPOISTA'>";
+						echo "<td $class align='left' valign='top'>$paikat</td>";
+						echo "</form>";
+					}
+					else {
+						echo "<td $class align='left' valign='top'>&nbsp;</td>";
+					}	
 				}
 
 				if($kukarow['extranet'] == '') {
@@ -3150,7 +3169,7 @@ if ($tee == '') {
 					if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_kotimaa_eieri/$kotiarvo_kotimaa_eieri)."%</td>";
 					}
-					else {
+					elseif ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) {
 						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 					}
 
@@ -3164,7 +3183,7 @@ if ($tee == '') {
 					if ($kukarow['extranet'] == '' and $kotiarvo_ulkomaa_eieri != 0  and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_ulkomaa_eieri/$kotiarvo_ulkomaa_eieri)."%</td>";
 					}
-					else {
+					elseif ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) {
 						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 					}
 				
@@ -3176,13 +3195,11 @@ if ($tee == '') {
 							<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$arvo_eieri)."</td>";
 
-					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						if ($kotiarvo_eieri != 0) {
-							echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_eieri/$kotiarvo_eieri)."%</td>";
-						}
-						else {
-							echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
-						}
+					if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_eieri/$kotiarvo_eieri)."%</td>";
+					}
+					elseif ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) {
+						echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 					}
 
 					echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
@@ -3209,6 +3226,9 @@ if ($tee == '') {
 						if ($kukarow['extranet'] == '' and $kotiarvo_kotimaa != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 							echo "<td class='spec' align='right'>".sprintf("%.2f",100*$kate_kotimaa/$kotiarvo_kotimaa)."%</td>";
 						}
+						elseif ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) {
+							echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
+						}
 
 						echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
 
@@ -3229,13 +3249,11 @@ if ($tee == '') {
 								<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
 								<td class='spec' align='right'>".sprintf("%.2f",$arvo)."</td>";
 
-						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-							if($kotiarvo != 0) {
-								echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate/$kotiarvo)."%</td>";
-							}
-							else {
-								echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
-							}
+						if ($kukarow['extranet'] == '' and $kotiarvo != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+							echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate/$kotiarvo)."%</td>";
+						}
+						elseif ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) {
+							echo "<td class='spec' align='right' nowrap>&nbsp;</td>";
 						}
 
 						echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";

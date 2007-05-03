@@ -3,7 +3,7 @@
 	if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 		$tvs_tila 	= "V";
 		$tvs_tyyppi	= "'V'";
-		$tvs_tyyppi_2	= ",'W'";
+		$tvs_tyyppi_2	= ",'W','M'";
 	}
 	elseif ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") {
 		$tvs_tila 	= "G";

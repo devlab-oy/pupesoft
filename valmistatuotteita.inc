@@ -320,7 +320,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 		//osavalmistus tai kokovalmistus
 		if ($isavarattu <= $tilrivirow["varattu"]) {
 
-			if ($laskurow["tilaustyyppi"] == "V") {
+			if ($laskurow["tilaustyyppi"] == "V" and $tilrivirow["tyyppi"] == "W") {
 				$tyx 		= "L";
 				$kpllisa 	= " kpl = '', ";
 				$perheidx 	= 0;
@@ -376,7 +376,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						WHERE yhtio = '$kukarow[yhtio]'
 						and otunnus = '$tilrivirow[otunnus]'
 						and tunnus  = '$tilrivirow[tunnus]'
-						and tyyppi  = 'W'";
+						and tyyppi in ('W','M')";
 			$upparesult = mysql_query($query) or pupe_error($query);
 
 		}

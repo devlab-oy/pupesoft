@@ -318,7 +318,7 @@
 		}
 		if ($toim == "LAHETE") {
 			//myyntitilaus. Tulostetaan lähete.
-			$where1 = " lasku.tila in ('L','N') ";
+			$where1 = " lasku.tila in ('L','N','V') ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -360,7 +360,7 @@
 		}
 		if ($toim == "OSOITELAPPU") {
 			//myyntitilaus. Tulostetaan osoitelappuja.
-			$where1 = " lasku.tila = 'L' ";
+			$where1 = " lasku.tila in ('L','G') ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -1424,7 +1424,7 @@
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.yhtio = tuote.yhtio
 							and tilausrivi.tuoteno = tuote.tuoteno
-							and tilausrivi.tyyppi = 'L'
+							and tilausrivi.tyyppi in ('L','G','W')
 							ORDER BY sorttauskentta";
 				$riresult = mysql_query($query) or pupe_error($query);
 

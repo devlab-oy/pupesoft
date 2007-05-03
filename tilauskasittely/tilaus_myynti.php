@@ -1773,9 +1773,10 @@ if ($tee == '') {
 		if ($laskurow['tila'] == 'V' and $var != "W" and $yhtiorow["rekursiiviset_reseptit"] == "Y") {
 			
 			$kommentti_array = array();
+			$lapsenlap_array = array();
 			
 			function rekursiivinen_resepti($pertuoteno) {
-				global $kukarow, $tuoteno_array, $riikoko, $perkpl, $kpl_array, $kommentti_array;
+				global $kukarow, $tuoteno_array, $riikoko, $perkpl, $kpl_array, $kommentti_array, $lapsenlap_array;
 				
 				$query = "	SELECT tuoteno, kerroin
 							FROM tuoteperhe
@@ -1806,7 +1807,15 @@ if ($tee == '') {
 								$kpl_array[$lt]			= round($perkpl * $perherow["kerroin"],2);
 								$perkpl					= $kpl_array[$lt];
 								$kommentti_array[$lt] 	= "Valmista $pertuoteno:n raaka-aineeksi $kpl_array[$lt] kappaletta.";
+								$lapsenlap_array[$lt] 	= $lt;
 								$riikoko++;
+							}
+							else {
+								$lt = strtoupper($perherow["tuoteno"]);
+								
+								$kpl_array[$lt]		   += round($perkpl * $perherow["kerroin"],2);
+								$perkpl					= $kpl_array[$lt];
+								$kommentti_array[$lt]  .= " Valmista $pertuoteno:n raaka-aineeksi ".round($perkpl * $perherow["kerroin"],2)." kappaletta.";
 							}
 						}
 					}
@@ -2180,7 +2189,7 @@ if ($tee == '') {
 		}
 		elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
 			$order = "ORDER BY tilausrivi.perheid desc, tunnus";
-			$tilrivity	= "'L','V','W'";
+			$tilrivity	= "'L','V','W','M'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		elseif ($toim == "PROJEKTI") {

@@ -93,7 +93,7 @@
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$rivitunnus'
-								and tyyppi = 'W'";
+								and tyyppi in ('W','M')";
 					$roxresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($roxresult) == 1) {
@@ -127,7 +127,7 @@
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = '$rivitunnus'
-								and tyyppi = 'W'
+								and tyyppi in ('W','M')
 								and toimitettuaika = '0000-00-00 00:00:00'";
 					$roxresult = mysql_query($query) or pupe_error($query);
 
@@ -183,7 +183,7 @@
 											varattu = 0
 											WHERE yhtio = '$kukarow[yhtio]'
 											and otunnus = '$tilrivirow[otunnus]'
-											and tyyppi in ('W','V')
+											and tyyppi in ('W','V','M')
 											and perheid = '$tilrivirow[perheid]'";
 								$updresult = mysql_query($query) or pupe_error($query);
 							}
@@ -214,7 +214,7 @@
 								FROM tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus = $rivitunnus
-								and tyyppi = 'W'";
+								and tyyppi in ('W','M')";
 					$roxresult = mysql_query($query) or pupe_error($query);
 					$tilrivirow = mysql_fetch_array($roxresult);
 
@@ -223,7 +223,7 @@
 								FROM tilausrivi
 								WHERE yhtio	= '$kukarow[yhtio]'
 								and otunnus = $tilrivirow[otunnus]
-								and tyyppi	= 'W'
+								and tyyppi	in ('W','M')
 								and tunnus	= perheid
 								and toimitettuaika = '0000-00-00 00:00:00'";
 					$chkresult1 = mysql_query($query) or pupe_error($query);
@@ -274,7 +274,7 @@
 									FROM tilausrivi
 									WHERE yhtio	= '$kukarow[yhtio]'
 									and (otunnus = $tilrivirow[uusiotunnus] or uusiotunnus = $tilrivirow[uusiotunnus])
-									and tyyppi	= 'W'
+									and tyyppi	in ('W','M')
 									and tunnus	= perheid
 									and toimitettuaika = '0000-00-00 00:00:00'";
 						$selres = mysql_query($query) or pupe_error($query);
@@ -376,8 +376,8 @@
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					and tuote.yhtio=tilausrivi.yhtio
 					and tuote.tuoteno=tilausrivi.tuoteno
-					and tyyppi in ('V','W','L','D')
-					ORDER BY perheid desc, tyyppi in ('W','L','D','V'), tunnus";
+					and tyyppi in ('V','W','M','L','D')
+					ORDER BY perheid desc, tyyppi in ('W','M','L','D','V'), tunnus";
 		$presult = mysql_query($query) or pupe_error($query);
 		$riveja = mysql_num_rows($presult);
 
@@ -473,10 +473,10 @@
 				echo "<td class='back'>".$virhe[$prow["tunnus"]]."</td>";
 			}
 
-			if ($prow["tunnus"] == $prow["perheid"] and $prow["tyyppi"] == "W" and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
+			if ($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00") {
 				echo "<td align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]]."</td>";
 			}
-			elseif($prow["tunnus"] == $prow["perheid"] and $prow["tyyppi"] == "W" and $prow["toimitettuaika"] != "0000-00-00 00:00:00" and $toim == "KORJAA") {
+			elseif($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] != "0000-00-00 00:00:00" and $toim == "KORJAA") {
 				//tutkitaan kuinka paljon tätä nyt oli valmistettu
 				$query = "	SELECT sum(kpl) valmistetut
 							FROM tilausrivi
@@ -576,7 +576,7 @@
 			$grouppi	= " GROUP BY tilausrivi.tuoteno";
 			$orderby 	= " tuoteno, lasku.tunnus, varattu";
 			$alatilat 	= " 'C','B' ";
-			$lisa 		= " and tilausrivi.tyyppi = 'W'
+			$lisa 		= " and tilausrivi.tyyppi in ('W','M')
 							and tilausrivi.toimitettu = ''
 							and tilausrivi.varattu != 0";
 		}

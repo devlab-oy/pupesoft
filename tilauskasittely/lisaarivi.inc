@@ -715,8 +715,24 @@
 								if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {
 									//P‰ivitet‰‰n is‰n perhetunnus
 									if ($rivityyppi == 'V') {
-										//jos on valmistusprosessi kyseess‰ niin is‰n tyyppi vaihdetaan W:ksi koska sen ei pid‰ varata saldoa!
-										$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='W' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi";
+										
+										$query  = "	SELECT tuoteno
+													FROM tilausrivi
+													WHERE yhtio	= '$kukarow[yhtio]'
+													and tunnus	= $perheid_lisaarivi 
+													and tyyppi	= 'V'";
+										$lisa_res = mysql_query($query) or pupe_error($query);
+										$lisa_row = mysql_fetch_array($lisa_res);
+																				
+										if (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"])) {											
+											$valmistetyyppi = "M";											
+										}
+										else {
+											$valmistetyyppi = "W";
+										}
+										
+										//jos on valmistusprosessi kyseess‰ niin is‰n tyyppi vaihdetaan W:ksi koska sen ei pid‰ varata saldoa!										
+										$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='$valmistetyyppi' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi and tyyppi='V'";
 										$result = mysql_query($query) or pupe_error($query);
 
 										$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi' where yhtio='$kukarow[yhtio]' and tunnus=$lisatty_tun";
@@ -1231,6 +1247,21 @@
 			if (count($puu_tuoteno) > 1 and $laskurow['tila'] != 'O' and $lop == "") {
 				//P‰ivitet‰‰n is‰n perhetunnus
 				if ($rivityyppi == 'V') {
+					$query  = "	SELECT tuoteno
+								FROM tilausrivi
+								WHERE yhtio	= '$kukarow[yhtio]'
+								and tunnus	= $perheid_lisaarivi 
+								and tyyppi	= 'V'";
+					$lisa_res = mysql_query($query) or pupe_error($query);
+					$lisa_row = mysql_fetch_array($lisa_res);
+															
+					if (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"])) {											
+						$valmistetyyppi = "M";											
+					}
+					else {
+						$valmistetyyppi = "W";
+					}
+					
 					//jos on valmistusprosessi kyseess‰ niin is‰n tyyppi vaihdetaan W:ksi koska sen ei pid‰ varata saldoa!
 					$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='W' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi";
 					$result = mysql_query($query) or pupe_error($query);

@@ -22,14 +22,14 @@ if ($kieli== '') {
 	$kieli = strtolower($kielrow['kieli']);
 }
 
-$p["height"] = 10;
-$p["font"] = "Times-Roman";
+$p["height"] 		= 10;
+$p["font"] 			= "Times-Roman";
 $rectparam["width"] = 0.3;
 
 //muutamat funktiot...
 if (!function_exists('alku')) {
 	function alku () {
-		global $pdf, $image, $laskurow, $yhtiorow, $tid, $viite, $p, $kala, $lask, $rectparam, $kukarow, $kieli, $asrow;
+		global $pdf, $image, $laskurow, $yhtiorow, $viite, $p, $kala, $lask, $rectparam, $kukarow, $kieli, $asrow;
 	
 		//oletukasia
 		$kala = 638;
@@ -53,16 +53,38 @@ if (!function_exists('alku')) {
 	
 		$firstpage = $pdf->new_page("a4");
 		$pdf->enable('template');
-		$tid = $pdf->template->create();
-		$pdf->template->size($tid, 600, 830);
-	
-		$pdf->draw_rectangle(825, 20,  780, 580, 		$firstpage, $rectparam);
-		$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$firstpage, $p);
-		$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$firstpage, $p);
-		$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
-		$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
-		$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$firstpage, $p);
-		$pdf->draw_text(250,810, t("Lähete", $kieli), $firstpage);
+		
+		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
+			
+			$filename = $yhtiorow["lasku_logo"];
+
+			$fh = fopen($filename, "r");
+			$data = fread($fh, filesize($filename));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+
+			if(!$image) {
+				echo t("Logokuvavirhe").": ".$image.$data;
+			}
+			else {
+				$kalakuvakala = array();
+				$kalakuvakala['scale'] = 0.15;
+				$placement = $pdf->image_place($image, mm_pt(280), mm_pt(10), $firstpage, $kalakuvakala);
+			}
+		}
+		else {
+			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$firstpage, $p);
+			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$firstpage, $p);
+			$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
+			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
+			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$firstpage, $p);
+		}
+		
+		
+		
+		
+		$pdf->draw_text(250,810, t("Lähete", $kieli), 	$firstpage);
 		$pdf->draw_text(250,795, t("Tilausnumero", $kieli).": ".$laskurow["tunnus"], $firstpage, $p);
 		
 		$i["height"] = 28;
@@ -161,7 +183,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(670, 470, 650, 520, $firstpage, $rectparam);
 		$pdf->draw_rectangle(670, 520, 650, 580, $firstpage, $rectparam);
 	
-		$pdf->draw_text(25,  657, "#",					$firstpage, $p);
+		$pdf->draw_text(25,  657, "#",							$firstpage, $p);
 		$pdf->draw_text(45,  657, t("Paikka", $kieli),			$firstpage, $p);
 		$pdf->draw_text(90,  657, t("Tuotenumero", $kieli),		$firstpage, $p);
 		$pdf->draw_text(190, 657, t("Tuotenimi", $kieli),		$firstpage, $p);
@@ -207,9 +229,10 @@ if (!function_exists('rivi')) {
 			$laji = 'nimitys_'.strtolower($kieli);
 			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
 			$nimresult = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($nimresult)>0) {
-				$nimrow=mysql_fetch_array($nimresult);
-				$row['nimitys']=$nimrow['selite'];
+				$nimrow	= mysql_fetch_array($nimresult);
+				$row['nimitys'] = $nimrow['selite'];
 			}
 		}
 		
@@ -226,10 +249,10 @@ if (!function_exists('rivi')) {
 			$vtunrow = mysql_fetch_array($vtunres);
 			
 			if ($vtunrow["vanhatunnus"] != 0) {
-				$query = " SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-						FROM lasku use index (yhtio_vanhatunnus)
-						WHERE yhtio         = '$kukarow[yhtio]'
-						and vanhatunnus     = '$vtunrow[vanhatunnus]'";
+				$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+							FROM lasku use index (yhtio_vanhatunnus)
+							WHERE yhtio		= '$kukarow[yhtio]'
+							and vanhatunnus = '$vtunrow[vanhatunnus]'";
 				$perheresult = mysql_query($query) or pupe_error($query);
 				$numrows = mysql_num_rows($perheresult);
 			}
@@ -237,8 +260,8 @@ if (!function_exists('rivi')) {
 			if ($numrows == 0 or $vtunrow["vanhatunnus"] == 0) {
 				$query = "  SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
 							FROM lasku use index (PRIMARY)
-							WHERE yhtio    = '$kukarow[yhtio]'
-							and tunnus    = '$row[otunnus]'";
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$row[otunnus]'";
 				$perheresult = mysql_query($query) or pupe_error($query);
 			}                        
 			
@@ -251,7 +274,8 @@ if (!function_exists('rivi')) {
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.otunnus in ($perherow[tunnukset]) 
 							and tilausrivi.perheid = '$row[perheid]'
-							and tuote.tuotetyyppi != 'R' 
+							and tuote.tuotetyyppi != 'R'
+							and tilausrivi.tyyppi != 'V' 
 							ORDER by tilausrivi.tunnus";
 				$perheresult = mysql_query($query) or pupe_error($query);
 				
@@ -354,11 +378,17 @@ if (!function_exists('rivi')) {
 if (!function_exists('loppu')) {
 	function loppu ($firstpage, $tots) {
 		global $pdf, $laskurow, $viite, $p, $total, $total_netto, $rectparam, $kieli, $yhtiorow;
+		
+		$pdf->draw_text(30, 50, $yhtiorow["nimi"], 		$firstpage, $p);
+		$pdf->draw_text(30, 40, $yhtiorow["osoite"], 	$firstpage, $p);
+		$pdf->draw_text(30, 30, $yhtiorow["postino"], 	$firstpage, $p);
+		$pdf->draw_text(60, 30, $yhtiorow["postitp"], 	$firstpage, $p);
+		$pdf->draw_text(30, 20, $yhtiorow["maa"], 		$firstpage, $p);
 	
-		$pdf->draw_rectangle(50, 20, 20, 580, $firstpage, $rectparam);
-		$pdf->draw_text(30, 37,  t("Tilausviite", $kieli).": ".$laskurow["viesti"], $firstpage, $p);
-		$pdf->draw_text(30, 25,  t("Kommentti", $kieli).":   ".$laskurow["comments"], $firstpage, $p);
-			
+	
+		$pdf->draw_paragraph(60,150,40,440, t("Tilausviite", $kieli).": ".$laskurow["viesti"], $firstpage, $p);
+		$pdf->draw_paragraph(40,150,10,440, t("Kommentti", $kieli).":   ".$laskurow["comments"], $firstpage, $p);
+		
 		if ($tots == 1) {
 			$arvo = $total + $total_netto;			
 
@@ -368,8 +398,8 @@ if (!function_exists('loppu')) {
 				$apu2 = round($total*$apu1,2); 					// erikoisalen määrä
 				$apu3 = round((1-$apu1)*$total,2);				// loppusumma								
 				
-				$pdf->draw_text(450, 37, t("Erikoisale", $kieli).":", $firstpage, $p);
-				$pdf->draw_text(500, 37, sprintf("%01.2f", $apu2)." ".$laskurow["valkoodi"], $firstpage, $p);
+				$pdf->draw_text(450, 50, t("Erikoisale", $kieli).":", $firstpage, $p);
+				$pdf->draw_text(500, 50, sprintf("%01.2f", $apu2)." ".$laskurow["valkoodi"], $firstpage, $p);
 			
 				$kaikkiyhteensa = $apu3 + $total_netto;
 			}
@@ -377,8 +407,8 @@ if (!function_exists('loppu')) {
 				$kaikkiyhteensa = $arvo;											
 			}
 			
-			$pdf->draw_text(450, 25, t("Yhteensä", $kieli).":", $firstpage, $p);
-			$pdf->draw_text(500, 25, sprintf("%01.2f", $kaikkiyhteensa)." ".$laskurow["valkoodi"], $firstpage, $p);
+			$pdf->draw_text(450, 40, t("Yhteensä", $kieli).":", $firstpage, $p);
+			$pdf->draw_text(500, 40, sprintf("%01.2f", $kaikkiyhteensa)." ".$laskurow["valkoodi"], $firstpage, $p);
 										
 			$total			= 0;
 			$total_netto 	= 0;

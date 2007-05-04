@@ -2994,6 +2994,7 @@ if ($tee == '') {
 			                    and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 			                    and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.tyyppi in ('L','T','G','E','W')
 								$tunnuslisa
 								GROUP BY 1
 								ORDER BY 1";

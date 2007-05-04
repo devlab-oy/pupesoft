@@ -79,7 +79,7 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("InvoicedTownName",						$lasrow['postitp'],								$tootxml);
 		xml_add("InvoicedCountryName",					$lasrow['maa'], 								$tootxml);
 		xml_add("InvoiceNumber",						$lasrow['laskunro'],							$tootxml);
-		xml_add("InvoiceCurrency",						$yhtiorow['valkoodi'],							$tootxml);
+		xml_add("InvoiceCurrency",						$lasrow['valkoodi'],							$tootxml);
 		xml_add("InvoicePaymentReference",				$lasrow['viite'], 								$tootxml);
 		xml_add("InvoiceDate",							vlas_dateconv($lasrow['tapvm']), 				$tootxml);
 		xml_add("OrderIdentifier",						'', 											$tootxml); //Ostajan tilausnumero, eii oo vielä olemassa

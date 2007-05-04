@@ -1530,7 +1530,7 @@
 		$apuqu = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 		$apuro = mysql_fetch_array($meapu);
-		
+
 		//otetaan käyttöliittymästä tullut alv talteen
 		$laskunalv = $alv;
 
@@ -1552,6 +1552,7 @@
 				$laskurow['vienti']       = $vienti;
 				$laskurow['alv']          = $laskunalv;
 				$laskurow['liitostunnus'] = $asiakasid;
+				$laskurow['maa']          = $maa;
 
 				$kpl	= $row['tilkpl'];
 				$debug	= 0;

@@ -369,10 +369,9 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 			else {
 				$apuro  = mysql_fetch_array($alhire);
 				// nämä tässä keisissä aina näin
-				$alv    = $apuro["selite"];
+				$alv = $apuro["selite"];
 				$vienti = "";
 				$alv_velvollisuus = "KYLLA";
-				echo "LKSdjlkasj";
 			}
 		}
 	}

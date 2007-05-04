@@ -52,6 +52,22 @@
 				$toimerrorit++;
 			}
 
+			if ($toim_ovtlisa == "" or
+				$toim_kotipaikka == "" or
+				$vat_numero == "" or
+				$toim_nimi == "" or
+				$toim_osoite == "" or
+				$toim_postino == "" or
+				$toim_postitp == "" or
+				$toim_maa == "" or
+				$toim_maakoodi == "" or
+				$toim_fax == "" or
+				$toim_puhelin == "" or
+				$toim_email == "") {
+				echo "<font class='error'>Kaikki tiedot on syötettävä alv-velvolliselle toimipaikalle!</font>";
+				$toimerrorit++;
+			}
+
 		}
 
 		if ($toimerrorit > 0) {

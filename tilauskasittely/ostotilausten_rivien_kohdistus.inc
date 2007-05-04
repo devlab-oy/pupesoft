@@ -107,7 +107,7 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TY' and $tee != 'TI') {
 	echo t("Muuta rivi‰").":<br>";
 
 	//pidet‰‰n kaikki muuttujat tallessa
-	$muut_siirrettavat = $alku."/".$nayta_kohdistetut."/".$ojarj."/".$nimitykset."/".$nayta_kaikki."/".$suoratoimitukset."/".$toimittajaid;
+	$muut_siirrettavat = $alku."/".$nayta_kohdistetut."/".$ojarj."/".$nayta_kaikki."/".$suoratoimitukset."/".$toimittajaid;
 
 	for($i = 0; $i < 10; $i++) {
 		if ($haku[$i] != '') {
@@ -126,7 +126,7 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TY' and $tee != 'TI') {
 //Lis‰t‰‰n sarjanumeroita
 if ($tila == "sarjanumerot") {
 	//pidet‰‰n kaikki muuttujat tallessa
-	$muut_siirrettavat = $alku."/".$nayta_kohdistetut."/".$ojarj."/".$nimitykset."/".$nayta_kaikki."/".$suoratoimitukset."/".$toimittajaid;
+	$muut_siirrettavat = $alku."/".$nayta_kohdistetut."/".$ojarj."/".$nayta_kaikki."/".$suoratoimitukset."/".$toimittajaid;
 
 	for($i = 0; $i < 10; $i++) {
 		if ($haku[$i] != '') {
@@ -152,7 +152,7 @@ if ($tila == 'uusirivi') {
 	echo t("Tee uusi rivi").":<br>";
 
 	//pidet‰‰n kaikki muuttujat tallessa
-	$muut_siirrettavat = $alku."/".$nayta_kohdistetut."/".$ojarj."/".$nimitykset."/".$nayta_kaikki."/".$suoratoimitukset."/".$toimittajaid;
+	$muut_siirrettavat = $alku."/".$nayta_kohdistetut."/".$ojarj."/".$nayta_kaikki."/".$suoratoimitukset."/".$toimittajaid;
 
 	if(is_array($haku)) {
 		foreach($haku as $i => $hakusana) {
@@ -240,12 +240,11 @@ if (isset($muut_siirrettavat)) {
 	$alku 				= $muut[0];
 	$nayta_kohdistetut 	= $muut[1];
 	$ojarj 				= $muut[2];
-	$nimitykset 		= $muut[3];
-	$nayta_kaikki 		= $muut[4];
-	$suoratoimitukset	= $muut[5];
-	$toimittajaid 		= $muut[6];
+	$nayta_kaikki 		= $muut[3];
+	$suoratoimitukset	= $muut[4];
+	$toimittajaid 		= $muut[5];
 
-	for($i = 5; $i < count($muut); $i++) {
+	for($i = 4; $i < count($muut); $i++) {
 		list($h,$s) = split('#', $muut[$i]);
 		$haku[$h] = $s;
 	}
@@ -383,7 +382,7 @@ if ($tila == 'tee_kohdistus') {
 
 //n‰ytet‰‰n rivilista ja ruksataan kohdistettavia rivej‰
 if ($tila == '') {
-
+	
 	// jos erikoislale niin otetaan sit‰ kanssa huomioon
 	if ($laskurow['erikoisale']<>0) {
 		$erikoisale = 1-($laskurow['erikoisale']/100);
@@ -430,7 +429,7 @@ if ($tila == '') {
 		$laskunsumma = '0.00';
 	}
 
-	//Tietokannan kent‰t‰ obn m‰‰ritelt‰v‰ n‰in jotta meid‰n dynaamiset haut toimisivat
+	//Tietokannan kent‰t‰ on m‰‰ritelt‰v‰ n‰in jotta meid‰n dynaamiset haut toimisivat
 	$kentat_array = array(	"tilausrivi.otunnus otunnus",
 							"tilausrivi.tuoteno tuoteno",
 							"GROUP_CONCAT(DISTINCT tuotteen_toimittajat.toim_tuoteno ORDER BY toim_tuoteno SEPARATOR ',') toim_tuoteno",
@@ -450,7 +449,7 @@ if ($tila == '') {
 	$kenhak_array = array('otunnus','tuoteno','toim_tuoteno','nimitys','siskpl', 'ulkkpl' ,'hinta','ale','alv','rivihinta','alerivihinta','kuluhinta','toimaika', 'toimaika');
 	$kenkok_array = array(6,15,15,17,7,7,7,4,4,8,8,4,12,12);
 
-	if ($nimitykset == "") {
+	if ($kukarow["resoluutio"] != 'I') {
 		unset($kentat_array[3]);
 		unset($kennim_array[3]);
 		unset($kenhak_array[3]);
@@ -564,10 +563,6 @@ if ($tila == '') {
 	if ($nayta_kohdistetut == "") {
 		$chk4 = "checked";
 	}
-
-	if ($nimitykset != "") {
-		$chk5 = "checked";
-	}
 	
 	if ($suoratoimitukset != "") {
 		$chk6 = "checked";
@@ -601,7 +596,7 @@ if ($tila == '') {
 
 	echo "<table cellpadding='2'>
 	<tr>
-		<th>".t("Laskunumero")."</th><td>$laskurow[tunnus] / $laskurow[laskunro]</td>
+		<th>".t("Keikka")."</th><td>$laskurow[laskunro]</td>
 		<th>".t("Laskun summa")."</th><td style='text-align:right'>$kulurow[summa] $kulurow[valkoodi]</td>
 		<th>".t("Perusn‰kym‰").":</th><td><INPUT type='radio' $chk4 name='nayta_kohdistetut' value='' onclick='submit()'></td>
 	</tr>
@@ -611,7 +606,42 @@ if ($tila == '') {
 		<th>".t("N‰yt‰ kaikki kohdistetut").":</th><td><INPUT type='radio' $chk1 name='nayta_kohdistetut' value='jees' onclick='submit()'></td>
 	</tr>
 	<tr>
-		<th>".t("N‰yt‰ nimitykset").":</th><td><INPUT type='checkbox' $chk5 name='nimitykset' onclick='submit()'></td>
+		<th>".t("N‰yt‰ lasku").":</th><td>";
+	
+	
+	echo "
+		<script>
+		var DH = 0;var an = 0;var al = 0;var ai = 0;if (document.getElementById) {ai = 1; DH = 1;}else {if (document.all) {al = 1; DH = 1;} else { browserVersion = parseInt(navigator.appVersion); if ((navigator.appName.indexOf('Netscape') != -1) && (browserVersion == 4)) {an = 1; DH = 1;}}} function fd(oi, wS) {if (ai) return wS ? document.getElementById(oi).style:document.getElementById(oi); if (al) return wS ? document.all[oi].style: document.all[oi]; if (an) return document.layers[oi];}
+		function pw() {return window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;}
+		function mouseX(evt) {if (evt.pageX) return evt.pageX; else if (evt.clientX)return evt.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft); else return null;}
+		function mouseY(evt) {if (evt.pageY) return evt.pageY; else if (evt.clientY)return evt.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop); else return null;}
+		function popUp(evt,oi) {if (DH) {var wp = pw(); ds = fd(oi,1); dm = fd(oi,0); st = ds.visibility; if (dm.offsetWidth) ew = dm.offsetWidth; else if (dm.clip.width) ew = dm.clip.width; if (st == \"visible\" || st == \"show\") { ds.visibility = \"hidden\"; } else {tv = mouseY(evt) + 20; lv = mouseX(evt) - (ew/4); if (lv < 2) lv = 2; else if (lv + ew > wp) lv -= ew/2; if (!an) {lv += 'px';tv += 'px';} ds.left = lv; ds.top = tv; ds.visibility = \"visible\";}}}
+		</script>
+	";
+	
+	$query = "	select l2.ebid, l2.nimi, l2.summa, l2.tunnus
+				FROM lasku l1
+				JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.vanhatunnus=l2.tunnus and l2.ebid!=''
+				WHERE l1.yhtio		= '$kukarow[yhtio]' 
+				and l1.tila			= 'K' 
+				and l1.laskunro		= '$laskurow[laskunro]' 
+				and l1.vanhatunnus  > 0";
+	$muutkeikres = mysql_query($query) or pupe_error($query);
+	
+	$laskakak = 1;
+	
+	while ($muutkeikrow = mysql_fetch_array($muutkeikres)) {
+		$ebid = $muutkeikrow['ebid'];
+		require "../inc/ebid.inc";
+		
+		echo "<div id='$muutkeikrow[tunnus]' style='position:absolute; z-index:100; visibility:hidden; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>$muutkeikrow[nimi] $muutkeikrow[summa]</div>";
+		
+		echo "<a href='$url' onmouseout=\"popUp(event,'$muutkeikrow[tunnus]')\" onmouseover=\"popUp(event,'$muutkeikrow[tunnus]')\">$laskakak</a> ";
+		
+		$laskakak++;
+	}
+	
+	echo "</td>
 		<th>".t("Kohdistettava summa")."</th><td style='text-align:right'>$kohdistettava_summa $kulurow[valkoodi]</td>
 		<th>".t("N‰yt‰ vain kohdistamattomat").":</th><td><INPUT type='radio' $chk2 name='nayta_kohdistetut' value='eitod' onclick='submit()'></td>
 	</tr>
@@ -654,12 +684,12 @@ if ($tila == '') {
 	$viimenen_sivu = mysql_num_rows($result)+$alku-50;
 	
 	echo "<td class='back' colspan='4' align='center'>
-	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=0&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&nimitykset=$nimitykset&suoratoimitukset=$suoratoimitukset'><<<</a>
+	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=0&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&suoratoimitukset=$suoratoimitukset'><<<</a>
 	&nbsp;&nbsp;
-	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&nimitykset=$nimitykset'><< ".t("Edellinen sivu")."</a>
-	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&nimitykset=$nimitykset'>".t("Seuraava sivu")." >></a>
+	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a>
+	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>
 	&nbsp;&nbsp;
-	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$viimenen_sivu&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&nimitykset=$nimitykset'>>>></a>
+	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$viimenen_sivu&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'>>>></a>
 	</td>";
 	
 	
@@ -697,23 +727,22 @@ if ($tila == '') {
 	echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
 	echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
 	echo "<input type='hidden' name='ojarj' value='$ojarj'>";
-	echo "<input type='hidden' name='nimitykset' value='$nimitykset'>";
 
 	$href = "$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj";
 	
-	echo "<th nowrap valign='top'><a href='$href=0".$ulisa."&nimitykset=$nimitykset'>$kennim_array[0]</a></th>";
-	echo "<th nowrap valign='top'><a href='$href=1".$ulisa."&nimitykset=$nimitykset'>$kennim_array[1]</a><br><a href='$href=2".$ulisa."&nimitykset=$nimitykset'>$kennim_array[2]</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=0".$ulisa."'>$kennim_array[0]</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=1".$ulisa."'>$kennim_array[1]</a><br><a href='$href=2".$ulisa."'>$kennim_array[2]</a></th>";
 	
-	if ($nimitykset != '') {
-		echo "<th nowrap valign='top'><a href='$href=3".$ulisa."&nimitykset=$nimitykset'>$kennim_array[3]</a></th>";
+	if ($kukarow["resoluutio"] == 'I') {
+		echo "<th nowrap valign='top'><a href='$href=3".$ulisa."'>$kennim_array[3]</a></th>";
 	}
 	
-	echo "<th nowrap valign='top'><a href='$href=4".$ulisa."&nimitykset=$nimitykset'>$kennim_array[4]</a><br><a href='$href=5".$ulisa."&nimitykset=$nimitykset'>$kennim_array[5]</a></th>";
-	echo "<th nowrap valign='top'><a href='$href=6".$ulisa."&nimitykset=$nimitykset'>$kennim_array[6]</a><br><a href='$href=6".$ulisa."&nimitykset=$nimitykset'>".t("Valuutta")."</a></th>";
-	echo "<th nowrap valign='top'><a href='$href=7".$ulisa."&nimitykset=$nimitykset'>$kennim_array[7]</a><br><a href='$href=8".$ulisa."&nimitykset=$nimitykset'>$kennim_array[8]</a></th>";
-	echo "<th nowrap valign='top'><a href='$href=9".$ulisa."&nimitykset=$nimitykset'>$kennim_array[9]</a><br><a href='$href=10".$ulisa."&nimitykset=$nimitykset'>$kennim_array[10]</a></th>";
-	echo "<th nowrap valign='top'><a href='$href=11".$ulisa."&nimitykset=$nimitykset'>$kennim_array[11]</a><br><a href='$href=11".$ulisa."&nimitykset=$nimitykset'>".t("Valuutta")."</a></th>";
-	echo "<th nowrap valign='top'><a href='$href=12".$ulisa."&nimitykset=$nimitykset'>$kennim_array[12]</a><br><a href='$href=13".$ulisa."&nimitykset=$nimitykset'>$kennim_array[13]</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=4".$ulisa."'>$kennim_array[4]</a><br><a href='$href=5".$ulisa."'>$kennim_array[5]</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=6".$ulisa."'>$kennim_array[6]</a><br><a href='$href=6".$ulisa."'>".t("Valuutta")."</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=7".$ulisa."'>$kennim_array[7]</a><br><a href='$href=8".$ulisa."'>$kennim_array[8]</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=9".$ulisa."'>$kennim_array[9]</a><br><a href='$href=10".$ulisa."'>$kennim_array[10]</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=11".$ulisa."'>$kennim_array[11]</a><br><a href='$href=11".$ulisa."'>".t("Valuutta")."</a></th>";
+	echo "<th nowrap valign='top'><a href='$href=12".$ulisa."'>$kennim_array[12]</a><br><a href='$href=13".$ulisa."'>$kennim_array[13]</a></th>";
 
 	echo "</tr>";
 	echo "<tr><td></td>";
@@ -721,7 +750,7 @@ if ($tila == '') {
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[0]' name='haku[0]' value='$haku[0]'></td>";
 	echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[1]' name='haku[1]' value='$haku[1]'><br><input type='text' size='$kenkok_array[2]' name='haku[2]' value='$haku[2]'></td>";
 	
-	if ($nimitykset != '') {
+	if ($kukarow["resoluutio"] == 'I') {
 		echo "<td nowrap valign='top'><input type='text' size='$kenkok_array[3]' name='haku[3]' value='$haku[3]'></td>";
 	}
 	
@@ -756,7 +785,6 @@ if ($tila == '') {
 	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 	echo "<input type='hidden' name='alku' value='$alku'>";
 	echo "<input type='hidden' name='tee' value='K'>";
-	echo "<input type='hidden' name='nimitykset' value='$nimitykset'>";
 	echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
 	echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
 	echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
@@ -817,7 +845,7 @@ if ($tila == '') {
 
 		// jos rivi‰ ei ole viel‰ viety varastoon niin rivi‰ voi muokata
 		if ($rivirow["varastossa_kpl"] == 0) {
-			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi&nimitykset=$nimitykset'>$rivirow[tuoteno]</a>";
+			echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=muokkaa_rivi'>$rivirow[tuoteno]</a>";
 		}
 		else {
 			echo "$rivirow[tuoteno]";
@@ -841,16 +869,16 @@ if ($tila == '') {
 			$sarjares = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($sarjares) == abs($rivirow["siskpl"])) {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa&nimitykset=$nimitykset' style='color:00FF00'>Sarjanro OK</font></a>)";
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa' style='color:00FF00'>Sarjanro OK</font></a>)";
 			}
 			else {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa&nimitykset=$nimitykset' style='color:DD0000'>Sarjanro</a>)";
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa' style='color:DD0000'>Sarjanro</a>)";
 			}
 		}
 		echo "</$td>";
 
 
-		if ($nimitykset != '') {
+		if ($kukarow["resoluutio"] == 'I') {
 			echo "<$td valign='top'>".asana('nimitys_',$rivirow['tuoteno'],$rivirow['nimitys'])."</$td>";
 		}
 
@@ -904,7 +932,7 @@ if ($tila == '') {
 						<td valign='top' colspan='2' class='back'></td>
 						<$td valign='top'>$lisavar_row[tuoteno]<br>$lisavar_row[toim_tuoteno]</$td>";
 
-				if ($nimitykset != '') {
+				if ($kukarow["resoluutio"] == 'I') {
 					echo "<$td valign='top'>".asana('nimitys_',$lisavar_row['tuoteno'],$lisavar_row['nimitys'])."</$td>";
 				}
 
@@ -918,14 +946,14 @@ if ($tila == '') {
 		}
 		
 		if ($rivirow["rivitunnus"] == $rivirow["perheid2"] or $rivirow["perheid2"] == 0) {
-			echo "<$td valign='top'><a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=uusirivi&perheid2=$rivirow[rivitunnus]&nimitykset=$nimitykset'>Liit‰ rivi</a></$td>";
+			echo "<$td valign='top'><a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&riviid=$rivirow[rivitunnus]&tila=uusirivi&perheid2=$rivirow[rivitunnus]'>Liit‰ rivi</a></$td>";
 		}
 	}
 
  	echo "<tr><td class='back' colspan='12' align='center'>";
-	echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&nimitykset=$nimitykset'><< ".t("Edellinen sivu")."</a> ";
+	echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a> ";
 	echo "&nbsp;&nbsp;";
- 	echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa&nimitykset=$nimitykset'>".t("Seuraava sivu")." >></a>";
+ 	echo "<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>";
 	echo "</th></tr>";
 	echo "</table>";
 
@@ -947,7 +975,6 @@ if ($tila == '') {
 	echo "<input type='hidden' name='tila' value='uusirivi'>";
 	echo "<input type='hidden' name='tee' value='K'>";
 	echo "<input type='hidden' name='alku' value='$alku'>";
-	echo "<input type='hidden' name='nimitykset' value='$nimitykset'>";
 	echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
 	echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
 	echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";

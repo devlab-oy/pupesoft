@@ -231,12 +231,38 @@ if ($toiminto == "kululaskut") {
 				<th>".t("Veroton")."</th>
 				<th>".t("Valuutta")."</th>
 				<th>".t("Viite")."</th>
+				<th>".t("Kuva")."</th>
 				<th>".t("Vienti")."</th>
 				</tr>";
 
 		while($llrow = mysql_fetch_array($result)) {
 
-			echo "<tr><td>$llrow[nimi]</td><td>$llrow[tapvm]</td><td align='right'>$llrow[summa]</td><td align='right'>$llrow[arvo]</td><td>$llrow[valkoodi]</td><td>$llrow[viite]</td><td>$llrow[vienti]</td>";
+			echo "<tr>
+					<td>$llrow[nimi]</td>
+					<td>$llrow[tapvm]</td>
+					<td align='right'>$llrow[summa]</td>
+					<td align='right'>$llrow[arvo]</td>
+					<td>$llrow[valkoodi]</td>
+					<td>$llrow[viite]</td>";
+			
+			$query  = "	select ebid
+						from lasku
+						where yhtio	= '$kukarow[yhtio]' 
+						and tunnus	= '$llrow[vanhatunnus]'";
+			$osresres = mysql_query($query) or pupe_error($query);
+			$osresrow = mysql_fetch_array($osresres);
+			
+			if (strlen($osresrow['ebid']) > 0) {
+				$ebid = $osresrow['ebid'];
+				require "../inc/ebid.inc";
+				echo "<td><a href='$url'>".t("Näytä lasku")."</a></td>";
+			}
+			else {
+				echo "<td></td>";	
+			}
+			
+			echo "<td>$llrow[vienti]</td>";
+			
 			echo "<td class='back'>
 					<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>
 					<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -332,6 +358,7 @@ if ($tee == "haku") {
 				<th>".t("Veroton")."</th>
 				<th>".t("Valuutta")."</th>
 				<th>".t("Viite")."</th>
+				<th>".t("Kuva")."</th>
 				<th>".t("Vienti")."</th>
 				<th>".t("Liitettävissä")."</th>
 				<th>".t("Summa")."</th>
@@ -339,7 +366,7 @@ if ($tee == "haku") {
 
 		while($llrow = mysql_fetch_array($result)) {
 
-			//Haetann kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
+			//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
 			$query = "	select sum(summa) summa
 						from tiliointi
 						where yhtio	= '$kukarow[yhtio]'
@@ -359,7 +386,7 @@ if ($tee == "haku") {
 			$verotonsumma = $verosumma - $vero;
 
 
-			echo "<tr><td>$llrow[nimi]";
+			echo "<tr><td valign='top'>$llrow[nimi]";
 			
 			if ($llrow["comments"] != '') {
 				echo "<br>$llrow[comments]";
@@ -372,8 +399,18 @@ if ($tee == "haku") {
 					<td align='right' valign='top'>".sprintf('%.2f',$verosumma)."</td>
 					<td align='right' valign='top'>".sprintf('%.2f',$verotonsumma)."</td>
 					<td valign='top'>$llrow[valkoodi]</td>
-					<td valign='top'>$llrow[viite]</td>
-					<td valign='top'>$llrow[vienti]</td>";
+					<td valign='top'>$llrow[viite]</td>";
+					
+			if (strlen($llrow['ebid']) > 0) {
+				$ebid = $llrow['ebid'];
+				require "../inc/ebid.inc";
+				echo "<td valign='top'><a href='$url'>".t("Näytä lasku")."</a></td>";
+			}
+			else {
+				echo "<td></td>";	
+			}
+					
+			echo "<td valign='top'>$llrow[vienti]</td>";
 
 			$query = "	select sum(arvo) arvo, GROUP_CONCAT(DISTINCT laskunro ORDER BY laskunro SEPARATOR ', ') laskunrot
 						from lasku

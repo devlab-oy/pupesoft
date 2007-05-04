@@ -54,6 +54,7 @@
 		$query = "	update yhtion_toimipaikat set
 					yhtio			= '$kukarow[yhtio]',
 					ovtlisa 		= '$toim_ovtlisa',
+					kotipaikka		= '$toim_kotipaikka',
 					vat_numero		= '$vat_numero',
 					nimi 			= '$toim_nimi',
 					osoite 			= '$toim_osoite',
@@ -85,6 +86,7 @@
 					yhtio			= '$kukarow[yhtio]',
 					ovtlisa 		= '$toim_ovtlisa',
 					vat_numero		= '$vat_numero',
+					kotipaikka		= '$toim_kotipaikka',					
 					nimi 			= '$toim_nimi',
 					osoite 			= '$toim_osoite',
 					postino 		= '$toim_postino',
@@ -109,6 +111,7 @@
 		echo "<table>";
 		echo "<tr><th>".t("Ovtlisa")."</th>		<td><input type='text' name='toim_ovtlisa'  value='$toim_ovtlisa'></td></tr>";
 		echo "<tr><th>".t("VAT-numero")."</th>	<td><input type='text' name='vat_numero'    value='$vat_numero'><td class='back'><a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/$kukarow[kieli]/vieshome.htm'>Tarkista numero t‰‰lt‰!</a></td></td></tr>";
+		echo "<tr><th>".t("Kotipaikka")."</th>	<td><input type='text' name='toim_kotipaikka'value='$toim_kotipaikka'></td></tr>";
 		echo "<tr><th>".t("Nimi")."</th>		<td><input type='text' name='toim_nimi'     value='$toim_nimi'></td></tr>";
 		echo "<tr><th>".t("Osoite")."</th>		<td><input type='text' name='toim_osoite'   value='$toim_osoite'></td></tr>";
 		echo "<tr><th>".t("Postino")."</th>		<td><input type='text' name='toim_postino'  value='$toim_postino'></td></tr>";
@@ -142,6 +145,7 @@
 			echo "<table>";
 			echo "<tr><th>".t("Ovtlisa")."</th>	<td><input type='text' name='toim_ovtlisa'  value='$trow[ovtlisa]'></td></tr>";
 			echo "<tr><th>".t("VAT-numero")."</th><td><input type='text' name='vat_numero'  value='$trow[vat_numero]'></td><td class='back'><a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/$kukarow[kieli]/vieshome.htm'>Tarkista numero t‰‰lt‰!</a></td></tr>";
+			echo "<tr><th>".t("Kotipaikka")."</th>	<td><input type='text' name='toim_kotipaikka'value='$toim_kotipaikka'></td></tr>";
 			echo "<tr><th>".t("Nimi")."</th>	<td><input type='text' name='toim_nimi'     value='$trow[nimi]'></td></tr>";
 			echo "<tr><th>".t("Osoite")."</th>	<td><input type='text' name='toim_osoite'   value='$trow[osoite]'></td></tr>";
 			echo "<tr><th>".t("Postino")."</th>	<td><input type='text' name='toim_postino'  value='$trow[postino]'></td></tr>";

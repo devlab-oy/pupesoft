@@ -105,29 +105,46 @@
 			$query = "INSERT INTO tiliointi(yhtio, laatija,laadittu,tapvm,ltunnus,tilino,summa,selite) values ('$row[suoriyhtio]','automaattikohdistus',now(),'$row[kirjpvm]','$row[laskutunnus]','$row[kassatili]',$suoritettu_kassaan,'Automaattikohdistettu asiakkaan suoritus')";
 			$insres = mysql_query($query) or pupe_error($query);
 
-			#Mahdollinen kassa-alennus
+			// Mahdollinen kassa-alennus
 			if($alennus != 0) {
-				#$alennus muuttujassa on kassa-alennus mahdollisine arvonlisäveroineen
+				// Kassa-alessa on huomioitava alv, joka voi olla useita vientejä
+				$totkasumma = 0;
 
 				#Etsitään myynti-tiliöinnit
-				$query = "	SELECT summa, vero
+				$query = "	SELECT summa, vero, kustp, kohde, projekti
 							FROM tiliointi use index (tositerivit_index)
 							WHERE ltunnus 	 = '$row[laskutunnus]'
 							and yhtio   	 = '$row[suoriyhtio]'
 							and tapvm   	 = '$row[tapvm]'
 							and abs(summa)  <> 0
 							and tilino 		<> '$row[myyntisaamiset]'
+							and tilino	    <> '$row[konsernimyyntisaamiset]' 
 							and tilino 		<> '$row[alvtili]'
 							and tilino 		<> '$row[varasto]'
 							and tilino 		<> '$row[varastomuu]'
 							and tilino 		<> '$row[pyoristys]'
 							and tilino 		<> '$row[alennustili]'
-							and tilino		<> '$yhtiorow[factoringsaamiset]' 
-							and korjattu = ''";
+							and tilino		<> '$row[factoringsaamiset]' 
+							and korjattu	 = ''";
 				$tilres = mysql_query($query) or pupe_error($query);
 
-				# jos löytyy vaan yksi myynti-tiliöinti tehdään kassa-ale kirjaus.. mitä jos löytyy useampi!?!?!?
-				if (mysql_num_rows($tilres) == 1) {
+				if (mysql_num_rows($tilres) == 0) {					
+					$query = "	INSERT INTO tiliointi
+								SET yhtio	= '$row[suoriyhtio]',
+								laatija 	= 'automaattikohdistus',
+								laadittu 	= now(),
+								tapvm 		= '$row[kirjpvm]',
+								ltunnus 	= '$row[laskutunnus]',
+								tilino 		= '$row[alennustili]',
+								summa 		= '$alennus',
+								vero		= '0',
+								selite 		= 'Automaattikohdistettu asiakkaan suoritus (alv ongelma)'";
+					$insres = mysql_query($query) or pupe_error($query);						
+				}
+				else {
+					
+					$aputunnus = 0;
+					
 					while ($tiliointirow = mysql_fetch_array($tilres)) {
 						$alv 	= 0;
 						$summa 	= sprintf('%.2f', $tiliointirow["summa"] * -1 * (1+$tiliointirow["vero"]/100) / $row["laskusumma"] * $alennus);
@@ -140,7 +157,10 @@
 							#$summa on alviton alennus
 							$summa -= $alv;
 						}
-
+						
+						// Kuinka paljon olemme kumulatiivisesti tiliöineet
+						$totkasumma += $summa + $alv;
+						
 						# Etsitään korjattava vienti
 						if ($alv != 0) {
 							#Lisätään myynnin kassa-alennuskirjaus ilman veroa
@@ -148,6 +168,9 @@
 										SET yhtio	= '$row[suoriyhtio]',
 										laatija 	= 'automaattikohdistus',
 										laadittu 	= now(),
+										kustp		= '$tiliointirow[kustp]', 
+										kohde		= '$tiliointirow[kohde]', 
+										projekti	= '$tiliointirow[projekti]',
 										tapvm 		= '$row[kirjpvm]',
 										ltunnus 	= '$row[laskutunnus]',
 										tilino 		= '$row[alennustili]',
@@ -178,13 +201,28 @@
 										SET yhtio	= '$row[suoriyhtio]',
 										laatija 	= 'automaattikohdistus',
 										laadittu 	= now(),
+										kustp		= '$tiliointirow[kustp]', 
+										kohde		= '$tiliointirow[kohde]', 
+										projekti	= '$tiliointirow[projekti]',
 										tapvm 		= '$row[kirjpvm]',
 										ltunnus 	= '$row[laskutunnus]',
 										tilino 		= '$row[alennustili]',
 										summa 		= '$alennus',
 										selite 		= 'Automaattikohdistettu asiakkaan suoritus (Kassa-Alennus)'";
 							$insres = mysql_query($query) or pupe_error($query);
+							$aputunnus = mysql_insert_id();
 						}
+					}
+				
+					//Hoidetaan mahdolliset pyöristykset
+					$heitto = $totkasumma - $alennus;
+					
+					if (abs($heitto) >= 0.01) {						
+						$query = "	UPDATE tiliointi SET summa = summa - $totkasumma + $alennus
+									WHERE tunnus = '$aputunnus' and yhtio='$row[suoriyhtio]'";
+						$xresult = mysql_query($query) or pupe_error($query);
+						
+						$aputunnus = 0;
 					}
 				}
 			}

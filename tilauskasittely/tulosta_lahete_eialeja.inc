@@ -14,6 +14,13 @@ else {
 	require_once("barcode/c39object.php");
 	require_once("pdflib/phppdflib.class.php");
 }
+if ($kieli== '') {
+	$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
+	$kielresult = mysql_query($querykiel) or pupe_error($querykiel);
+	$kielnum = mysql_num_rows($kielresult);
+	$kielrow = mysql_fetch_array($kielresult);
+	$kieli = strtolower($kielrow['kieli']);
+}
 
 $p["height"] = 10;
 $p["font"] = "Times-Roman";
@@ -296,10 +303,10 @@ if (!function_exists('rivi')) {
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$firstpage, $pp);
 		$pdf->draw_text(42,  $kala, $varastopaikka,	$firstpage, $p);
 		$pdf->draw_text(99,  $kala, $row["tuoteno"],	$firstpage, $p);	
-		$pdf->draw_text(330, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$firstpage, $p);
+		$pdf->draw_text(330, $kala, ($row["tilkpl"]*1)." ".strtolower($row["yksikko"]), 	$firstpage, $p);
 		
 		if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-			$pdf->draw_text(380, $kala, $row["varattu"]+$row["kpl"], 	$firstpage, $p);
+			$pdf->draw_text(380, $kala, (($row['varattu']+$row['kpl'])*1)." ".strtolower($row["yksikko"]), 	$firstpage, $p);
 		}
 		else {	
 			if ($row["jt"] != 0) { // jälkitoimitus

@@ -1414,6 +1414,13 @@
 				// katotaan miten halutaan sortattavan
 				$sorttauskentta = generoi_sorttauskentta();
 
+				if($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+					$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
+				}
+				else {
+					$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
+				} 
+				
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
 				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
@@ -1424,7 +1431,7 @@
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.yhtio = tuote.yhtio
 							and tilausrivi.tuoteno = tuote.tuoteno
-							and tilausrivi.tyyppi in ('L','G','W')
+							$tyyppilisa
 							ORDER BY sorttauskentta";
 				$riresult = mysql_query($query) or pupe_error($query);
 

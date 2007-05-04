@@ -303,10 +303,10 @@ if (!function_exists('rivi')) {
 		$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$firstpage, $pp);
 		//$pdf->draw_text(42,  $kala, $varastopaikka,	$firstpage, $p);
 		$pdf->draw_text(45,  $kala, $row["tuoteno"],	$firstpage, $p);
-		$pdf->draw_text(490, $kala, $row["tilkpl"]." ".strtolower($row["yksikko"]), 	$firstpage, $p);
+		$pdf->draw_text(490, $kala, ($row["tilkpl"]*1)." ".strtolower($row["yksikko"]), 	$firstpage, $p);
 		
 		if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-			$pdf->draw_text(540, $kala, $row['varattu'], 	$firstpage, $p);
+			$pdf->draw_text(540, $kala, (($row['varattu']+$row['kpl'])*1)." ".strtolower($row["yksikko"]), 	$firstpage, $p);
 		}
 		else {	
 			if ($row["jt"] != 0) { // jälkitoimitus

@@ -19,6 +19,7 @@
 					b.kohdpvm = '0000-00-00' and
 					a.asiakas_tunnus = b.asiakas_tunnus and
 					a.summa < 0 and
+					a.valkoodi = b.valkoodi and
 					a.summa = -1 * b.summa";
 		$paaresult = mysql_query($query) or pupe_error($query);
 
@@ -115,6 +116,7 @@
 					b.kohdpvm = '0000-00-00' and
 					a.asiakas_tunnus = b.asiakas_tunnus and
 					a.summa < 0 and
+					a.valkoodi = b.valkoodi and
 					a.summa = -1 * b.summa";
 		$result = mysql_query($query) or pupe_error($query);
 

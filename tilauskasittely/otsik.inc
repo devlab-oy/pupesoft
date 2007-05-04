@@ -196,7 +196,7 @@
 		}
 
 	}
-	
+
 	if ($tila == "" and !isset($jatka)) {
 		if ($toim == "TYOMAARAYS") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
@@ -340,18 +340,18 @@
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
-			if (mysql_num_rows($alhire) == 1) {	
-						
+			if (mysql_num_rows($alhire) == 1) {
+
 				// haetaan maan oletusalvi
 				$query = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$srow[maa]'";
 				$alhire = mysql_query($query) or pupe_error($query);
-			
+
 				// jos ei löydy niin mennään erroriin
 				if (mysql_num_rows($alhire) == 0) {
 					echo "<font class='error'>Oletus ALV-kantaa ei löydy asiakkaan maahan $srow[maa]! Ei voida jatkaa!</font><br>";
 					exit;
 				}
-				else {			
+				else {
 					$apuro  = mysql_fetch_array($alhire);
 					// nämä tässä keisissä aina näin
 					$alv    = $apuro["selite"];
@@ -361,7 +361,7 @@
 			}
 
 		}
-		
+
 		echo "	<input type='hidden' name='ylatila' 						 value = '$ylatila'>
 				<input type='hidden' name='alatila' 						 value = '$alatila'>
 				<input type='hidden' name='poistumistoimipaikka_koodi'       value = '$srow[poistumistoimipaikka_koodi]'>
@@ -654,7 +654,7 @@
 			if ($alv_velvollisuus == "KYLLA") {
 				echo " <td>".t("Verollinen myynti")."
 						<input type='hidden' name='alv' value='$alv'>
-						</td></tr>";				
+						</td></tr>";
 			}
 			elseif ($srow["vienti"] == '') {
 				if (isset($srow)) {
@@ -1530,7 +1530,7 @@
 		$apuqu = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 		$apuro = mysql_fetch_array($meapu);
-
+		
 		//otetaan käyttöliittymästä tullut alv talteen
 		$laskunalv = $alv;
 

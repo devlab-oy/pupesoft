@@ -41,6 +41,17 @@
 				echo "<font class='error'>Yrityksen ALV-prosentit puuttuvat tälle maalle ($toim_maakoodi)! Käy perustamassa ensin ne avainsanoihin.</font>";
 				$toimerrorit++;
 			}
+
+			$query = "	SELECT *
+						FROM yhtion_toimipaikat
+						WHERE yhtio = '$kukarow[yhtio]' and maakoodi = '$toim_maakoodi' and tunnus != '$toim_tunnus' and vat_numero != ''";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($vresult) != 0) {
+				echo "<font class='error'>Yksi vat tunnus per maa sallittu!</font>";
+				$toimerrorit++;
+			}
+
 		}
 
 		if ($toimerrorit > 0) {
@@ -86,7 +97,7 @@
 					yhtio			= '$kukarow[yhtio]',
 					ovtlisa 		= '$toim_ovtlisa',
 					vat_numero		= '$vat_numero',
-					kotipaikka		= '$toim_kotipaikka',					
+					kotipaikka		= '$toim_kotipaikka',
 					nimi 			= '$toim_nimi',
 					osoite 			= '$toim_osoite',
 					postino 		= '$toim_postino',

@@ -3,7 +3,7 @@
 if (!function_exists('pupevoice_otsik')) {
 	function pupevoice_otsik($tootxml, $lasrow, $kieli, $frow, $masrow, $myyrow, $tyyppi) {
 		global $yhtiorow;
-	
+
 		$fstat = fstat($tootxml);
 
 		if ($fstat["size"] == 0) {
@@ -27,6 +27,27 @@ if (!function_exists('pupevoice_otsik')) {
 
 		fputs($tootxml, "</CHN>\n");
 		fputs($tootxml, "<SellerPartyInformation>\n");
+
+		// jos meillä on lasku menossa ulkomaille
+		if ($lasrow["maa"] != "" and $lasrow["maa"] != $yhtiorow["maakoodi"]) {
+			// tutkitaan ollaanko siellä alv-rekisteröity
+			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maakoodi='$lasrow[maa]' and vat_numero != ''";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			// jos ollaan alv-rekisteröity, käytetään sen toimipaikan yhtiötietoja
+			if (mysql_num_rows($alhire) == 1) {
+				$alhiro = mysql_fetch_array($alhire);
+				$yhtiorow['ovttunnus']	= $alhiro['vat_numero'];
+				$yhtiorow['kotipaikka']	= $alhiro['kotipaikka'];
+				$yhtiorow['nimi']		= $alhiro['nimi'];
+				$yhtiorow['osoite']		= $alhiro['osoite'];
+				$yhtiorow['postino']	= $alhiro['postino'];
+				$yhtiorow['postitp']	= $alhiro['postitp'];
+				$yhtiorow['maakoodi']	= $alhiro['maakoodi'];
+				$yhtiorow['puhelin']	= $alhiro['puhelin'];
+				$yhtiorow['fax']		= $alhiro['fax'];
+			}
+		}
 
 		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],		$tootxml);
 		xml_add("SellerPartyDomicile", 					$yhtiorow['kotipaikka'], 	$tootxml);
@@ -110,7 +131,7 @@ if (!function_exists('pupevoice_otsik')) {
 
 if (!function_exists('pupevoice_alvierittely')) {
 	function pupevoice_alvierittely($tootxml, $alvrow) {
-	
+
 		fputs($tootxml, "<VatSpecificationDetails>\n");
 		xml_add("VatRatePercent",					$alvrow[0], $tootxml);
 		xml_add("VatBaseAmount",					$alvrow[1], $tootxml);
@@ -121,7 +142,7 @@ if (!function_exists('pupevoice_alvierittely')) {
 
 if (!function_exists('pupevoice_rivi')) {
 	function pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat) {
-	
+
 		fputs($tootxml, "<Row>\n");
 		xml_add("OrderIdentifier",					$tilrow['otunnus'], 				$tootxml); // tämä on tilauksen numero meillä, ei kuulu standardiin mutta se on pakko lisätä
 		xml_add("ArticleIdentifier",				$tilrow['tuoteno'], 				$tootxml);
@@ -143,7 +164,7 @@ if (!function_exists('pupevoice_rivi')) {
 
 if (!function_exists('pupevoice_lasku_loppu')) {
 	function pupevoice_lasku_loppu($tootxml) {
-	
+
 		fputs($tootxml, "</InvoiceDetails>\n");
 		fputs($tootxml, "</Invoice>\n");
 	}
@@ -151,7 +172,7 @@ if (!function_exists('pupevoice_lasku_loppu')) {
 
 if (!function_exists('pupevoice_aineisto_loppu')) {
 	function pupevoice_aineisto_loppu($tootxml) {
-	
+
 		$fstat = fstat($tootxml);
 
 		if ($fstat["size"] > 0) {

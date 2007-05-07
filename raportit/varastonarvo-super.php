@@ -326,11 +326,15 @@
 		elseif($tyyppi == "B") {
 			$sel2 = "SELECTED";
 		}
+		elseif($tyyppi == "C") {
+			$sel3 = "SELECTED";
+		}
 
 		echo "<td>
 				<select name='tyyppi'>
 				<option value='A' $sel1>".t("N‰ytet‰‰n tuotteet joilla on saldoa")."</option>
 				<option value='B' $sel2>".t("N‰ytet‰‰n tuotteet joilla ei ole saldoa")."</option>
+				<option value='C' $sel3>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
 				</select>
 				</td>";
 		echo "</tr>";
@@ -362,6 +366,8 @@
 		echo "</tr>";
 		
 		
+		echo "<tr><th valign='top'>".t("Tuotelista")."</th><td><textarea name='tuotteet' rows='5' cols='15'>$tuotteet</textarea></td></tr>";
+		
 		echo "</table>";
 		echo "<br>";
 
@@ -375,7 +381,7 @@
 		echo "</form>";
 
 
-		if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoteryhma == "kaikki" or $osasto == "tyhjat" or $tuoteryhma == "tyhjat") {
+		if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoteryhma == "kaikki" or $osasto == "tyhjat" or $tuoteryhma == "tyhjat" or $tuotteet != '') {
 
 			$trylisa1 = "";
 			$trylisa2 = "";
@@ -383,6 +389,7 @@
 			if ($tuoteryhma != "kaikki" and $sel_tuoteryhma != "" and $sel_tuoteryhma != t("Ei valintaa")) {
 				$trylisa1 .= " and try in ('$sel_tuoteryhma') ";
 			}
+			
 			if ($osasto != "kaikki" and $sel_osasto != "" and $sel_osasto != t("Ei valintaa")) {
 				$trylisa1 .= " and osasto in ('$sel_osasto') ";
 			}
@@ -390,6 +397,7 @@
 			if ($tuoteryhma == "tyhjat") {
 				$trylisa2 .= " HAVING try='0' ";
 			}
+			
 			if ($osasto == "tyhjat") {
 				if ($tuoteryhma == "tyhjat") {
 					$trylisa2 .= " or osasto='0' ";
@@ -397,6 +405,18 @@
 				else {
 					$trylisa2 .= " HAVING osasto='0' ";
 				}
+			}
+			
+			if ($tuotteet != '') {				
+				$tuotteet = explode("\n", $tuotteet);
+				$tuoterajaus = "";
+				
+				foreach($tuotteet as $tuote) {
+					if (trim($tuote) != '') {
+						$tuoterajaus .= "'".trim($tuote)."',";
+					}
+				}
+				$tuoterajaus = "and tuoteno in (".substr($tuoterajaus, 0, -1).") ";
 			}
 		
 			// haetaan halutut tuotteet
@@ -411,9 +431,10 @@
 						and tuote.ei_saldoa = ''
 						$trylisa1
 						$trylisa2
+						$tuoterajaus
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$result = mysql_query($query) or pupe_error($query);
-									
+								
 			$lask  = 0;
 			$varvo = 0; // t‰h‰n summaillaan
 	
@@ -462,6 +483,8 @@
 				$worksheet->write($excelrivi, $excelsarake, t("Kehahin"), 		$format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Varastonarvo"), 	$format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Kiertonopeus 12kk"), $format_bold);
 				
 				$excelrivi++;
 				$excelsarake = 0;
@@ -543,8 +566,10 @@
 					// saldo historiassa: lasketaan nykyiset kpl - muutoskpl
 					$muutoskpl = $vrow["varasto"] - $mrow["muutoskpl"];
 
-		
-					if ($tyyppi == "A" and $muutoskpl != 0) {
+					if($tyyppi == "C") {
+						$ok = "GO";
+					}
+					elseif ($tyyppi == "A" and $muutoskpl != 0) {
 						$ok = "GO";
 					}		
 					elseif ($tyyppi == "B" and $muutoskpl == 0) {
@@ -614,6 +639,25 @@
 								}
 							}
 						}
+						else {
+							// haetaan tuotteen myydyt kappaleet
+							$query  = "SELECT ifnull(sum(kpl),0) kpl FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and tuoteno='$row[tuoteno]' and laskutettuaika <= '$vv-$kk-$pp' and laskutettuaika >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)";
+							$xmyyres = mysql_query($query) or pupe_error($query);
+							$xmyyrow = mysql_fetch_array($xmyyres);
+
+							// haetaan tuotteen kulutetut kappaleet
+							$query  = "SELECT ifnull(sum(kpl),0) kpl FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) WHERE yhtio='$kukarow[yhtio]' and tyyppi='V' and tuoteno='$row[tuoteno]' and toimitettuaika <= '$vv-$kk-$pp' and toimitettuaika >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)";
+							$xkulres = mysql_query($query) or pupe_error($query);
+							$xkulrow = mysql_fetch_array($xkulres);
+
+							// lasketaan varaston kiertonopeus
+							if ($muutoskpl > 0) {
+								$kierto = round(($xmyyrow["kpl"] + $xkulrow["kpl"]) / $muutoskpl, 2);
+							}
+							else {
+								$kierto = 0;
+							}
+						}
 
 						if(isset($workbook)) {						
 							if ($summaustaso == "P") {
@@ -653,6 +697,8 @@
 							$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$kehasilloin));
 							$excelsarake++;
 							$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$muutoshinta));
+							$excelsarake++;
+							$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
 							$excelsarake++;
 							$worksheet->write($excelrivi, $excelsarake, $kehalisa);
 				

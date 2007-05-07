@@ -35,7 +35,71 @@
 
 			//-->
 			</script>";
-		
+			
+			
+		if (isset($muutparametrit)) {
+						
+			list($tee,$ajotapa,$ajotapanlisa,$yhtiot, $asiakasosasto, $asiakasosasto2, $asiakasryhma, $asiakasryhma2, 
+			$mul_osasto, $mul_try, $asiakas, $toimittaja, $jarjestys, $ruksit, $nimitykset, $kateprossat, $piiyhteensa,
+			$osoitetarrat, $ppa, $kka, $vva, $ppl, $kkl, $vvl) = explode("//", $muutparametrit);
+			
+			if ($yhtiot != "") $yhtiot_x 			= explode("!!", $yhtiot);
+			else unset($yhtiot);
+			if ($mul_osasto != "") $mul_osasto_x 	= explode("!!", $mul_osasto);
+			else unset($mul_osasto);
+			if ($mul_try != "") $mul_try_x 			= explode("!!", $mul_try);
+			else unset($mul_try);
+			if ($jarjestys != "") $jarjestys_x 		= explode("!!", $jarjestys);
+			else unset($jarjestys);
+			if ($ruksit != "") $ruksit_x 			= explode("!!", $ruksit);
+			else unset($ruksit);
+			
+			if (count($yhtiot_x) > 0) {							
+				$yhtiot = array();
+				
+				foreach($yhtiot_x as $a) {
+					list ($b, $c) = explode("#", $a);
+					
+					$yhtiot[$b] = $c;
+				}
+			}
+			if (count($mul_osasto_x) > 0) {							
+				$mul_osasto = array();
+				
+				foreach($mul_osasto_x as $a) {
+					list ($b, $c) = explode("#", $a);
+					
+					$mul_osasto[$b] = $c;
+				}
+			}
+			if (count($mul_try_x) > 0) {							
+				$mul_try = array();
+				
+				foreach($mul_try_x as $a) {
+					list ($b, $c) = explode("#", $a);
+					
+					$mul_try[$b] = $c;
+				}
+			}
+			if (count($jarjestys_x) > 0) {							
+				$jarjestys = array();
+				
+				foreach($jarjestys_x as $a) {
+					list ($b, $c) = explode("#", $a);
+					
+					$jarjestys[$b] = $c;
+				}
+			}
+			if (count($ruksit_x) > 0) {							
+				$ruksit = array();
+				
+				foreach($ruksit_x as $a) {
+					list ($b, $c) = explode("#", $a);
+					
+					$ruksit[$b] = $c;
+				}
+			}
+		}
 		
 		// tutkaillaan saadut muuttujat
 		$asiakasosasto   = trim($asiakasosasto);
@@ -56,7 +120,7 @@
 			$tee = "";
 		}
 
-		//haetaan tilauksista
+		// haetaan tilauksista
 		if ($ajotapa == 'tilaus') {
 			$tila		= "'L'";
 			$ouusio		= 'otunnus';
@@ -67,7 +131,7 @@
 			$ouusio		= 'otunnus';
 			$index		= 'yhtio_otunnus';
 		}
-		//haetaan laskuista
+		// haetaan laskuista
 		else {
 			$tila		= "'U'";
 			$ouusio		= 'uusiotunnus';
@@ -80,7 +144,6 @@
 				echo "<font class='error'>".t("Toimittajahauissa voi valita vain yhden yrityksen")."!</font><br>";
 				$tee = "";
 			}
-		//	$toimittaja = ""; // ei toimikkaan mysql 4.0ssa niin nollataan ettei kukaan saa tehtyä
 		}
 
 		// jos ei ole mitään yritystä valittuna ei tehdä mitään
@@ -99,9 +162,103 @@
 		if ($ppa == "" or $kka == "" or $vva == "" or $ppl == "" or $kkl == "" or $vvl == "") {
 			$tee = "";
 		}
+		
+		if ($tee == 'go' and $asiakas != '' or $toimittaja != '') {
+			$muutparametrit = $tee."//".$ajotapa."//".$ajotapanlisa."//";
+			
+			if (count($yhtiot) > 0) {
+				foreach($yhtiot as $a => $b) {
+					$muutparametrit .= "$a#".$b."!!";
+				}
+				
+				$muutparametrit = substr($muutparametrit, 0, -2)."//";
+			}
+			else {
+				$muutparametrit .= "//";
+			}
+			
+			$muutparametrit .= $asiakasosasto."//".$asiakasosasto2."//".$asiakasryhma."//".$asiakasryhma2."//";
+									
+			if (count($mul_osasto) > 0) {
+				foreach($mul_osasto as $a => $b) {
+					$muutparametrit .= "$a#".$b."!!";
+				}
+				
+				$muutparametrit = substr($muutparametrit, 0, -2)."//";
+			}
+			else {
+				$muutparametrit .= "//";
+			}						
+																							
+			if (count($mul_try) > 0) {
+				foreach($mul_try as $a => $b) {
+					$muutparametrit .= "$a#".$b."!!";
+				}
+				
+				$muutparametrit = substr($muutparametrit, 0, -2)."//";
+			}
+			else {
+				$muutparametrit .= "//";
+			}
+			
+			$muutparametrit .= $asiakas."//".$toimittaja."//";
+			
+			if (count($jarjestys) > 0) {
+				foreach($jarjestys as $a => $b) {
+					$muutparametrit .= "$a#".$b."!!";
+				}
+				
+				$muutparametrit = substr($muutparametrit, 0, -2)."//";
+			}
+			else {
+				$muutparametrit .= "//";
+			}
+			
+			if (count($ruksit) > 0) {							
+				foreach($ruksit as $a => $b) {
+					$muutparametrit .= "$a#".$b."!!";
+				}
+				
+				$muutparametrit = substr($muutparametrit, 0, -2)."//";
+			}
+			else {
+				$muutparametrit .= "//";
+			}
 
+			$muutparametrit .= $nimitykset."//".$kateprossat."//".$piiyhteensa."//".$osoitetarrat."//".$ppa."//".$kka."//".$vva."//".$ppl."//".$kkl."//".$vvl;
+		}
+
+		if ($tee == 'go' and $asiakas != '') {
+			$ytunnus = $asiakas;
+
+			require("../inc/asiakashaku.inc");
+			
+			if ($ytunnus != '') {
+				$asiakas = $ytunnus;
+				$ytunnus = "";
+			}
+			else {
+				$tee 		= "";
+				$asiakasid 	= "";
+			}
+		}
+				
+		if ($tee == 'go' and $toimittaja != '') {			
+			$ytunnus = $toimittaja;
+							
+			require("../inc/kevyt_toimittajahaku.inc");
+			
+			if ($ytunnus != '') {
+				$toimittaja = $ytunnus;
+			}
+			else {
+				$tee 			= "";
+				$toimittajaid 	= "";
+			}
+		}
+		
 		if ($tee == 'go') {
-	
+										
 			// no hacking, please.
 			$lisa   = "";
 			$query  = "";
@@ -114,7 +271,6 @@
 			$sel_osasto = "";
 			$sel_tuoteryhma = "";
 			
-	
 			$apu = array();
 
 			foreach ($jarjestys as $arvo) {
@@ -280,11 +436,14 @@
 
 			if ($asiakasosasto != "") $lisa .= " and asiakas.osasto    = '$asiakasosasto' ";
 	
-			if ($mul_osasto != '') {
+			if (count($mul_osasto) > 0) {
 				$sel_osasto = "('".str_replace(',','\',\'',implode(",", $mul_osasto))."')";
 				$lisa .= " and tuote.osasto in $sel_osasto ";	
 			}
-			if ($mul_try != '') {
+			if (is_array($mul_try) and count($mul_try) > 0) {
+				
+				echo "kala ".$mul_try[0]."<br>";
+				
 				$sel_tuoteryhma = "('".str_replace(',','\',\'',implode(",", $mul_try))."')";
 				$lisa .= " and tuote.try in $sel_tuoteryhma ";
 			}
@@ -298,7 +457,7 @@
 					while ($toimirow = mysql_fetch_array($result)) {
 						$lisa .= "'$toimirow[tuoteno]',";
 					}
-					$lisa = substr($lisa,0,-1).")";
+					$lisa = substr($lisa,0,-1).")";					
 				}
 				else {
 					echo "<font class='error'>Toimittajan $toimittaja tuotteita ei löytynyt! Ajetaan ajo ilman rajausta!</font><br><br>";
@@ -1194,6 +1353,9 @@
 
 			echo "</select></td>";
 			echo "</tr>\n";
+			
+			echo "<tr>";
+			echo "<td colspan='3' class='back'><br></td></tr>";
 
 			echo "<tr>";
 			echo "<td colspan='3'><table><tr><td valign='top' class='back'>";
@@ -1281,8 +1443,6 @@
 			</tr>";
 
 			echo "</table><br>";
-
-	
 
 			// lisärajaukset näkymä..
 			if ($ruksit[1]  != '') $ruk1chk  = "CHECKED";

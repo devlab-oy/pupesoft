@@ -42,7 +42,7 @@
 		$olquery = "	select concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
 					from tuotepaikat
 					yhtio = '$kukarow[yhtio]'
-					and tuoteno = '$jtrivit'
+					and tuoteno = '$trow[tuoteno]'
 					and oletus != ''
 					limit 1";
 		$olpares = mysql_query($olquery) or pupe_error($olquery);

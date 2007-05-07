@@ -39,9 +39,9 @@
 	
 	//katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
 	if ($olpaikalta != '') {
-		$olquery = "	select concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
+		$olquery = "select concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
 					from tuotepaikat
-					yhtio = '$kukarow[yhtio]'
+					where yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$trow[tuoteno]'
 					and oletus != ''
 					limit 1";

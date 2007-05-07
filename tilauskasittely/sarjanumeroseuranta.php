@@ -705,7 +705,7 @@
 		echo "<td valign='top'>$sarjarow[sarjanumero]</td>";
 		echo "<td colspan='2' valign='top'>$sarjarow[tuoteno]<br>$sarjarow[nimitys]";
 		
-		if ($sarjarow["takuu_alku"] != '0000-00-00') {
+		if ($sarjarow["takuu_alku"] != '') {
 			echo "<br>".t("Takuu").": ".tv1dateconv($sarjarow["takuu_alku"])." - ".tv1dateconv($sarjarow["takuu_loppu"]);
 		}
 		

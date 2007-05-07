@@ -4,14 +4,14 @@
 	// eli t‰pp‰ "suoraan laskutukseen" p‰‰lle tilaukselle...
 	// tarvitaan keikan tunnus muuttujassa $otunnus
 	// jos $mista ei ole tyhj‰ tullaan k‰yttˆliittym‰st‰, jolloin aina kutsutaan t‰t‰ failia eik‰ haluta pilata k‰ytt‰j‰n p‰iv‰‰ echoamalla ett‰ ep‰onnistui
-	
+
 	if ($mista == 'varastoon.inc' and $superirivit != '') {
 		$alkulisa = " tilausrivi.tunnus in ($superirivit) and ";
 	}
 	else {
 		$alkulisa = " tilausrivi.uusiotunnus='$otunnus' and ";
 	}
-	
+
 	// haetaan eka keikan kaikki rivit (ostotilauksen verkkotunnus kent‰ss‰ on alkuper‰isen myyntitilauksen lasku.liitostunnus)
 	$query = "	select tilausrivi.*, verkkotunnus from
 				tilausrivi use index (uusiotunnus_index)
@@ -54,12 +54,13 @@
 
 			$jtrivit = mysql_fetch_array($jtres);
 			$laskuvirhe .= "$jtrivit[nimi] ($jtrivit[ytunnus]): ".t("T‰ysin oikea rivi lˆytyi").". $jtrivit[tuoteno] ".t("toimitetaan")." $jtrivit[jt] ".t("kpl")." ($jtrivit[tunnus])\n";
-			
+
 			$tunnukset 			= $jtrivit["tunnus"];
 			$tunnusarray		= array(0 => $jtrivit["tunnus"]);
 			$kpl	 			= array($tunnukset => $jtrivit["jt"]);
 			$loput 				= array($tunnukset => "JATA");
 			$varataan_saldoa 	= "EI"; // pakotetaan myynti saldosta v‰litt‰m‰tt‰ kaikista varastoista
+			$alv				= $jtrivit["alv"];
 
 			require ("tee_jt_tilaus.inc");
 
@@ -87,12 +88,13 @@
 			}
 
 			while ($jtrivit = mysql_fetch_array($jtres)) {
-				
+
 				$tunnukset 			= $jtrivit["tunnus"];
 				$tunnusarray		= array(0 => $jtrivit["tunnus"]);
 				$loput 				= array($tunnukset => "JATA");
 				$varataan_saldoa 	= "EI"; // pakotetaan myynti saldosta v‰litt‰m‰tt‰ kaikista varastoista
-				
+				$alv				= $jtrivit["alv"];
+
 				// yritet‰‰n myyd‰ niin paljon kun ollaan viem‰ss‰ varastoon tai sitten koko JT rivi kerralla
 				if ($rivi["kpl"] > $jtrivit["jt"]) {
 					$kpl = array($tunnukset => $jtrivit["jt"]);
@@ -138,7 +140,7 @@
 	else {
 		$laskuvirhe .= t("Suoratoimituksen laskutus ep‰onnistui! Yht‰‰n rivi‰ ei voitu toimittaa keikalta!")." ($otunnus)\n";
 	}
-	
+
 	if ($mista == 'varastoon.inc') {
 		$laskuvirhe = str_replace("\n","<br>",$laskuvirhe);
 	}

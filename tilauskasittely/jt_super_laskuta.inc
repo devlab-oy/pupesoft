@@ -51,8 +51,9 @@
 
 		// jos lˆyty oikea rivi
 		if (mysql_num_rows($jtres) == 1) {
-
+			
 			$jtrivit = mysql_fetch_array($jtres);
+			
 			$laskuvirhe .= "$jtrivit[nimi] ($jtrivit[ytunnus]): ".t("T‰ysin oikea rivi lˆytyi").". $jtrivit[tuoteno] ".t("toimitetaan")." $jtrivit[jt] ".t("kpl")." ($jtrivit[tunnus])\n";
 
 			$tunnukset 			= $jtrivit["tunnus"];
@@ -61,9 +62,14 @@
 			$loput 				= array($tunnukset => "JATA");
 			$varataan_saldoa 	= "EI"; // pakotetaan myynti saldosta v‰litt‰m‰tt‰ kaikista varastoista
 			$alv				= $jtrivit["alv"];
+			$olpaikalta 		= "TIETENKII";
 
 			require ("tee_jt_tilaus.inc");
-
+			
+			if ($paikka != '') {
+				$laskuvirhe .= "Toimitetaan paikalta $paikka\n";
+			}
+			
 			//jt-tilausten laskutunnukset talteen, n‰m‰ pit‰‰ sitten merkata valmiiksi lopussa
 			if (!in_array($id, $jt_otsikot)) $jt_otsikot[] = $id;
 		}

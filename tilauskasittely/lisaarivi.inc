@@ -27,13 +27,28 @@
 	// $perheid2		 --> Lis‰varusteryhm‰n perheid2
 	// $orvoteikiinnosta --> Meit‰ ei kiinnosta orvot jos t‰m‰ ei ole tyhj‰.
 	// $osatoimkielto	 --> Jos saldo ei riit‰ koko riville niin ei lis‰t‰ rivi‰ ollenkaan
-
+	// $olpaikalta		 --> pakotetaan myym‰‰n oletuspaikalta
+	
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 
 	//Jos saamme vain yksi valittu varasto, niin tehd‰‰n siit‰ yhteensopiva array
 	if (!is_array($varasto) and (int) $varasto > 0) {
 		$varasto = array($varasto);
+	}
+	
+	//katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
+	if ($olpaikalta != '') {
+		$olquery = "	select concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
+					from tuotepaikat
+					yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$jtrivit'
+					and oletus != ''
+					limit 1";
+		$olpares = mysql_query($olquery) or pupe_error($olquery);
+		$olparow = mysql_fetch_array($olpares);
+		
+		$paikka	= $olparow["olpaikka"];
 	}
 
 	//muutetaan pilkkuja pisteiksi

@@ -3,8 +3,6 @@
 // tarvitaan $ytunnus (jolla haetaan) tai $asiakasid (joka on asiakas.tunnus) ja $kukarow
 // palautetaan $asiakasrow
 
-
-
 if (trim($konserni) != '') {
 	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 	$result = mysql_query($query) or pupe_error($query);
@@ -23,9 +21,7 @@ $ytunnus = addslashes(trim($ytunnus));
 $limit   = 300; // montako riviä on maksimi
 $monta   = 0;
 
-
-
-if ($asiakasid != '' and substr($asiakasid,0,1) != '£') {
+if (is_numeric($asiakasid) and $asiakasid > 0) {
 	$query	= "	SELECT *
 				FROM asiakas
 				WHERE $konsyhtiot and tunnus='$asiakasid'";

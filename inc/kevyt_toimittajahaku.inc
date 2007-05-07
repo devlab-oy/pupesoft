@@ -3,10 +3,11 @@
 // tarvitaan $ytunnus ja $kukarow
 // palautetaan $toimittajarow
 
-$ytunnus = trim($ytunnus);
-$limit   = 100; // montako riviä on maksimi
+$ytunnus = addslashes(trim($ytunnus));
+$limit   = 300; // montako riviä on maksimi
+$monta   = 0;
 
-if ($toimittajaid != '') {
+if (is_numeric($toimittajaid) and $toimittajaid > 0) {
 	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
@@ -64,6 +65,7 @@ if ($monta > 1 and $monta <= $limit) {
 
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittaja[tunnus]'>";
+		echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
 		echo "<input type='hidden' name='tee' value='$tee'>";
 		echo "<input type='hidden' name='tila' value='$tila'>";
 		echo "<input type='hidden' name='maara' value='$maara'>";	

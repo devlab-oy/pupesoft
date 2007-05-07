@@ -116,7 +116,9 @@
 						sarjanumero = '$sarjanumero',
 						kaytetty	= '$kaytetty',
 						muuttaja	= '$kukarow[kuka]',
-						muutospvm	= now()
+						muutospvm	= now(), 
+						takuu_alku	= '$tvva-$tkka-$tppa',
+						takuu_loppu	= '$tvvl-$tkkl-$tppl'
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  = '$sarjatunnus'";
 			$sarjares = mysql_query($query) or pupe_error($query);
@@ -245,7 +247,24 @@
 					$chk = "CHECKED";
 				}
 
-				echo "<tr><th>".t("Käytetty")."</th><td><input type='checkbox' name='kaytetty' value='K' $chk></td>";
+				echo "<tr><th>".t("Käytetty")."</th><td><input type='checkbox' name='kaytetty' value='K' $chk></td></tr>";
+				
+				$tvva = substr($muutarow["takuu_alku"],0,4);
+				$tkka = substr($muutarow["takuu_alku"],5,2);
+				$tppa = substr($muutarow["takuu_alku"],8,2);
+				
+				$tvvl = substr($muutarow["takuu_loppu"],0,4);
+				$tkkl = substr($muutarow["takuu_loppu"],5,2);
+				$tppl = substr($muutarow["takuu_loppu"],8,2);
+				
+				echo "<tr><th>".t("Takuu")."</th><td>
+				<input type='text' name='tppa' value='$tppa' size='3'>
+				<input type='text' name='tkka' value='$tkka' size='3'>
+				<input type='text' name='tvva' value='$tvva' size='5'>
+				- <input type='text' name='tppl' value='$tppl' size='3'>
+				<input type='text' name='tkkl' value='$tkkl' size='3'>
+				<input type='text' name='tvvl' value='$tvvl' size='5'></td>";
+				
 				echo "<td class='back'><input type='submit' name='PAIVITA' value='".t("Päivitä")."'></td>";
 				echo "</tr></form></table><br><br>";
 			}
@@ -268,8 +287,8 @@
 
 		if (mysql_num_rows($sarjares) == 0) {
 			//jos ollaan syötetty kokonaan uusi sarjanuero
-			$query = "	insert into sarjanumeroseuranta (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, laatija, luontiaika)
-						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$kukarow[kuka]',now())";
+			$query = "	INSERT into sarjanumeroseuranta (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu)
+						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl')";
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$tun = mysql_insert_id();
 
@@ -684,7 +703,13 @@
 
 		echo "<tr>";
 		echo "<td valign='top'>$sarjarow[sarjanumero]</td>";
-		echo "<td colspan='2' valign='top'>$sarjarow[tuoteno]<br>$sarjarow[nimitys]</td>";
+		echo "<td colspan='2' valign='top'>$sarjarow[tuoteno]<br>$sarjarow[nimitys]";
+		
+		if ($sarjarow["takuu_alku"] != '0000-00-00') {
+			echo "<br>".t("Takuu").": ".tv1dateconv($sarjarow["takuu_alku"])." - ".tv1dateconv($sarjarow["takuu_loppu"]);
+		}
+		
+		echo "</td>";
 		echo "<td valign='top'>$sarjarow[varastonimi]<br>$sarjarow[tuotepaikka]</td>";
 
 		if ($sarjarow["ostorivitunnus"] == 0) {
@@ -803,7 +828,16 @@
 			$chk = "CHECKED";
 		}
 
-		echo "<tr><th>".t("Käytetty")."</th><td><input type='checkbox' name='kaytetty' value='K'></td>";
+		echo "<tr><th>".t("Käytetty")."</th><td><input type='checkbox' name='kaytetty' value='K'></td></tr>";
+		
+		echo "<tr><th>".t("Takuu")."</th><td>
+		<input type='text' name='tppa' value='' size='3'>
+		<input type='text' name='tkka' value='' size='3'>
+		<input type='text' name='tvva' value='' size='5'>
+		- <input type='text' name='tppl' value='' size='3'>
+		<input type='text' name='tkkl' value='' size='3'>
+		<input type='text' name='tvvl' value='' size='5'></td>";
+		
 		echo "<td class='back'><input type='submit' value='".t("Lisää")."'></td>";
 		echo "</form>";
 		echo "</tr></table>";

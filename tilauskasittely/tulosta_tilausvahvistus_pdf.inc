@@ -18,7 +18,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus					
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_kaupallinen ON laskun_lisatiedot.yhtio=yhteyshenkilo_kaupallinen.yhtio and laskun_lisatiedot.yhteyshenkilo_kaupallinen=yhteyshenkilo_kaupallinen.tunnus
-					LEFT JOIN kuka AS laatija ON lasku.laatija=laatija.kuka
+					LEFT JOIN kuka AS laatija ON laatija.yhtio='$kukarow[yhtio]' and lasku.laatija=laatija.kuka
 					LEFT JOIN maat lasku_maa ON lasku_maa.koodi=lasku.maa 
 					LEFT JOIN maat toim_maa ON toim_maa.koodi=lasku.toim_maa
 					WHERE lasku.yhtio = '$kukarow[yhtio]'

@@ -66,7 +66,12 @@ if (!function_exists('alku')) {
 		//Otsikko
 		if ($laskurow["vienti"] == "") {
 			if ($laskurow["summa"] >= 0) {
-				$pdf->draw_text(310, 815, t("Lasku", $kieli), $firstpage);
+				if ($toim == 'PROFORMA') {
+					$pdf->draw_text(310, 815, t("Proformalasku", $kieli), $firstpage);
+				}
+				else {
+					$pdf->draw_text(310, 815, t("Lasku", $kieli), $firstpage);					
+				}
 			}
 			else {
 				$pdf->draw_text(310, 815, t("Hyvityslasku", $kieli), $firstpage);

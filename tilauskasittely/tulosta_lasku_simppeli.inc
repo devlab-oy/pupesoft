@@ -48,7 +48,12 @@ if (!function_exists('tulosta_lasku')) {
 		
 		if ($laskurow["vienti"] == "") {
 			if ($laskurow["summa"] >= 0) {
-				$otsikko = "LASKU";
+				if ($toim == 'PROFORMA') {
+					$otsikko = "PROFORMALASKU";
+				}
+				else {
+					$otsikko = "LASKU";
+				}
 			}
 			else {
 				$otsikko = "HYVITYSLASKU";

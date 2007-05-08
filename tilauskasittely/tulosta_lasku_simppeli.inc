@@ -553,7 +553,7 @@ if (!function_exists('tulosta_lasku')) {
 		//keksitään uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
-		$pdf_laskufilenimi = "/tmp/test_pdf.pdf";
+		$pdf_laskufilenimi = "/tmp/Lasku-".md5(uniqid(mt_rand(), true)).".pdf";
 
 		//duusataan sivunumerot!
 		foreach($pdf->objects as $key => $value) {

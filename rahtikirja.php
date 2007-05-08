@@ -976,19 +976,19 @@
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otsik[tunnus]'";
-		$tilaresult = mysql_query($query) or pupe_error($query);
-		$tilarow = mysql_fetch_array($tilaresult);
+		$tilavuusresult = mysql_query($query) or pupe_error($query);
+		$tilavuusrow = mysql_fetch_array($tilavuusresult);
 
-		if ($tilarow["kpl"] > 0) {
-			$osumapros = round($tilarow["kplok"] / $tilarow["kpl"] * 100, 2);
+		if ($tilavuusrow["kpl"] > 0) {
+			$osumapros = round($tilavuusrow["kplok"] / $tilavuusrow["kpl"] * 100, 2);
 		}
 		else {
 			$osumapros = "N/A";
 		}
 		
-		$tilarow["tilavuus"] = round($tilarow["tilavuus"],6);
+		$tilavuusrow["tilavuus"] = round($tilavuusrow["tilavuus"],6);
 
-		echo "<font class='message'>".t("Tilauksen tilavuus tuoterekisterin tietojen mukaan on").": $tilarow[tilavuus] , $osumapros ".t("%:lle kappaleista on annettu koko.")."</font><br>";
+		echo "<font class='message'>".t("Tilauksen tilavuus tuoterekisterin tietojen mukaan on").": $tilavuusrow[tilavuus] , $osumapros ".t("%:lle kappaleista on annettu koko.")."</font><br>";
 		
 		echo "<table>";
 

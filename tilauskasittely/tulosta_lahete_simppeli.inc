@@ -216,6 +216,7 @@ if (!function_exists('tulosta_lahete')) {
 		
 		// haetaan tilauksen kaikki rivit
 		$query = "  SELECT tilausrivi.*, maat.nimi alkuperamaa, tuote.ei_saldoa ei_saldoa, tuote.tullinimike1, tuote.tullikohtelu,
+					round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
 					$sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno and tuote.ei_saldoa=''
@@ -247,6 +248,11 @@ if (!function_exists('tulosta_lahete')) {
 				if($h < 20) {
 					$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
 					$h = 190;
+				}
+				
+				if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
+					$row["hinta"] 	  = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]),2);
+					$row["rivihinta"] = round(laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]),2);
 				}
 				
 				//	Etsitään käännöksiä
@@ -302,8 +308,6 @@ if (!function_exists('tulosta_lahete')) {
 					if ($row["alv"] < 500) {
 						$pdf->write($h, 1, $s[3], 0, money_format('%!i',$row["rivihinta"]*(1+($row["alv"]/100))), "snadi", "R", "I");
 					}
-					
-					
 				}
 				if($row["kommentti"] != "") {
 					if($pdf->pt_mm($pdf->writeStrlen($row["otunnus"]."/".$row["kommentti"], "snadi")) > $s[0]) {

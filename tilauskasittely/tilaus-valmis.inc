@@ -120,29 +120,148 @@ else {
 		}
 	}
 
+	// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
+	$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+	$result = mysql_query($query) or pupe_error($query);
+
+	$kateinen = "";
+	$jaksotettu = "";
+	$itsetulostus = "";
+
+	if (mysql_num_rows($result)==1) {
+		$maksuehtorow = mysql_fetch_array($result);
+
+		// jos kyseessä on käteiskauppaa
+		if ($maksuehtorow['kateinen']!='') {
+			$kateinen = "X";
+		}
+		// jos kyseessä on jaksotusta
+		if ($maksuehtorow['jaksotettu']!='') {
+			$jaksotettu = "X";
+		}
+		//jos kyseessä on itsetulostusmaksuehto
+		if ($maksuehtorow['itsetulostus']!='') {
+			$itsetulostus = "X";
+		}
+	}
+
 	// Katotaan, onko tämä jo kerätty...
-	$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and keratty!=''";
+	$query = "	select * 
+				from tilausrivi 
+				where yhtio  = '$kukarow[yhtio]' 
+				and otunnus	 = '$laskurow[tunnus]' 
+				and keratty	!= ''";
 	$keres = mysql_query($query) or pupe_error($query);
 
-	//tila L ja alatila C, B, D, E niin tilaus on kerätty otsikko
-	//jos otsikko sanoo, että tilaus on kerätty mutta rivit kuitenkaan ei ole kerätty niin merkataan ne kumminkin kerätyiksi
-	//tai jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan)...
 	if (mysql_num_rows($keres) > 0 or ($laskurow["tila"] == 'L' and ($laskurow["alatila"] == 'C' or $laskurow["alatila"] == 'B' or $laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E'))) {
-
-		//...niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
+		//tila L ja alatila C, B, D, E niin tilaus on kerätty otsikko
+		//jos otsikko sanoo, että tilaus on kerätty mutta rivit kuitenkaan ei ole kerätty niin merkataan ne kumminkin kerätyiksi
+		//tai jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan) niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
+		
 		$query = "UPDATE tilausrivi SET keratty='$kukarow[kuka]', kerattyaika=now() where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and keratty='' and var != 'J'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Laitetaan rivit toimitetuiksi jos otsikko sanoo toimitettu
 		if ($laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E') {
-			$query = "UPDATE tilausrivi SET toimitettu='$kukarow[kuka]', toimitettuaika=now() where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and keratty!='' and toimitettu='' and var != 'J'";
+			$query = "	UPDATE tilausrivi 
+						SET toimitettu='$kukarow[kuka]', toimitettuaika=now() 
+						WHERE yhtio		 = '$kukarow[yhtio]' 
+						and otunnus		 = '$laskurow[tunnus]' 
+						and keratty		!= '' 
+						and toimitettu	 = '' 
+						and var 		!= 'J'
+						and tyyppi 		!= 'D'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
 		$tilaus_valmis_ulos .= "<font class='message'>".t("Tilauksella oli jo kerättyjä rivejä, joten lähetettä ei tulosteta").".<br>".t("Jos haluat lähetteen tulosta lähetteen kopio. Tilausnumero on")." $laskurow[tunnus].</font><br><br>";
+		
+		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
+		if ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
+			if ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '') {
+				// jos kyseessä on käteismyyntiä tai vientiä, merkataan tilaukset kerätyksi mutta ei toimitetuksi ja alatila C/B
+				// myös jos maksuehtolla on itsetulostustäppä trigattuna niin laitetaan se tähän haaraan
+				// Merkataan rivit kerätyiksi. JT-rivejä ei merkata kerätyiksi.
+
+				$query  = "	UPDATE tilausrivi
+							SET kerattyaika = now(),
+							keratty = '$kukarow[kuka]'
+							WHERE otunnus 	= '$laskurow[tunnus]'
+							and yhtio 		= '$kukarow[yhtio]'
+							and var not in ('P','J')
+							and keratty 	= ''
+							and toimitettu 	= ''";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if ($laskurow['sisainen'] != '') {
+					$alat = "D";
+				}
+				elseif($laskurow["vienti"] != '') {
+					$alat = "B";
+				}
+				else {
+					$alat = "C";
+				}
+
+				$query  = "	UPDATE lasku set tila='L', alatila='$alat', lahetepvm=now()
+							WHERE tunnus='$laskurow[tunnus]'
+							and yhtio='$kukarow[yhtio]'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+			else {
+				// jos kyseessä  EI ole käteismyyntiä eikä itsetulostusta niin merkataan tilaus toimitetuksi
+				// tämä on kotimaan myyntia, mutta ei käteismyyntiä
+				//tässä toimitetaan ja kerätään tilaus samantien jos ei_lähetettä nappi oli ruksattuna
+				// Merkataan rivit kerätyiksi ja toimitetuiksi. JT-rivejä ei merkata kerätyiksi.
+
+				$query  = "	UPDATE tilausrivi
+							SET kerattyaika = now(),
+							keratty = '$kukarow[kuka]',
+							toimitettuaika = now(),
+							toimitettu = '$kukarow[kuka]'
+							WHERE otunnus 	= '$laskurow[tunnus]'
+							and yhtio		= '$kukarow[yhtio]'
+							and var not in ('P','J')
+							and keratty		= ''
+							and toimitettu	= ''
+							and tyyppi 	   != 'D'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if ($jaksotettu == 'X') {
+					$query = "	UPDATE lasku SET tila='L', alatila='J', lahetepvm=now()
+								WHERE tunnus = '$laskurow[tunnus]'
+								and yhtio = '$kukarow[yhtio]'";
+					$result = mysql_query($query) or pupe_error($query);
+
+					$tilaus_valmis_ulos .= t("Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $laskurow[tunnus] $laskurow[nimi]<br>\n";
+				}
+				else {
+					$query  = "	UPDATE lasku set tila='L', alatila='D', lahetepvm=now()
+								WHERE tunnus = '$laskurow[tunnus]'
+								and yhtio = '$kukarow[yhtio]'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
+			}
+
+			if ($laskurow["sisainen"] != '') {
+				//laskutetaan koko tilaus heti jos se on sisainen lasku
+				$laskutettavat	= $laskurow["tunnus"];
+				$tee 			= "TARKISTA";
+				$laskutakaikki 	= "KYLLA";
+				$silent		 	= "KYLLA";
+
+				if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
+					$valittu_tulostin = $kukarow["kirjoitin"];
+				}
+				elseif($valittu_tulostin == 0) {
+					$valittu_tulostin = "AUTOMAAGINEN_VALINTA";
+				}
+
+				require ("tilauskasittely/verkkolasku.php");
+			}
+		}
 	}
 	else {
-
 		//tässä käydään läpi vähän näitä rahtijuttuja
 		//jos rahtihinnoittelu tapahtuu tilauksen hinnan (alviton) perusteella niin tehdään se tässä
 		//tämä olkoon hyvä arvaus rahtihinnasta, sitä voidaan sitten myöhemmin tarkentaa
@@ -262,33 +381,6 @@ else {
 			}
 		}
 
-
-
-		// otetaan maksuehto tässä heti alussa selville.. käteinen ja itsetulostus muuttaa asioita
-		$query = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		$kateinen = "";
-		$jaksotettu = "";
-		$itsetulostus = "";
-
-		if (mysql_num_rows($result)==1) {
-			$maksuehtorow = mysql_fetch_array($result);
-
-			// jos kyseessä on käteiskauppaa
-			if ($maksuehtorow['kateinen']!='') {
-				$kateinen = "X";
-			}
-			// jos kyseessä on jaksotusta
-			if ($maksuehtorow['jaksotettu']!='') {
-				$jaksotettu = "X";
-			}
-			//jos kyseessä on itsetulostusmaksuehto
-			if ($maksuehtorow['itsetulostus']!='') {
-				$itsetulostus = "X";
-			}
-		}
-
 		//jos on kassamyyntiä ja se on käteistä niin tulostetaan lasku heti ilman lähetettä
 		if (($kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kertakassa != "") and $laskurow["vienti"] == '') or ($korkolasku == 'kylla')) {
 			$query = "	UPDATE tilausrivi
@@ -297,7 +389,8 @@ else {
 						WHERE otunnus = '$laskurow[tunnus]'
 						and var not in ('P','J')
 						and yhtio = '$kukarow[yhtio]'
-						and keratty != ''";
+						and keratty != ''
+						and tyyppi  != 'D'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "	UPDATE lasku
@@ -368,7 +461,8 @@ else {
 							and yhtio		= '$kukarow[yhtio]'
 							and var not in ('P','J')
 							and keratty		= ''
-							and toimitettu	= ''";
+							and toimitettu	= ''
+							and tyyppi 	   != 'D'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if ($jaksotettu == 'X') {

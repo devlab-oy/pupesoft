@@ -18,7 +18,7 @@ if (!function_exists('tulosta_lahete')) {
 		}
 
 		// Haetaan laskun tiedot
-		$query = "	SELECT lasku.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.tapvm päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, viesti asiakkaan_viite, comments lisätiedot, lasku.ytunnus asiakkaan_VAT, toimaika toimitusaika, kerayspvm keräysaika,
+		$query = "	SELECT lasku.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.tapvm päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, lasku.tunnus toimitus, viesti asiakkaan_viite, comments lisätiedot, lasku.ytunnus asiakkaan_VAT, toimaika toimitusaika, kerayspvm keräysaika,
 					(select if(count(distinct(keratty))>1,'".t("useita")."', keratty) from tilausrivi,tuote where tilausrivi.yhtio=lasku.yhtio and tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa='' and $mika=lasku.tunnus) käsittelijä,
 					(select if(count(distinct(left(kerattyaika,10)))>1,'".t("useita")."', max(kerattyaika)) from tilausrivi,tuote where tilausrivi.yhtio=lasku.yhtio and tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa='' and $mika=lasku.tunnus) käsitelty,
 					concat_ws(' ', postino, postitp) postiosoite,
@@ -97,7 +97,7 @@ if (!function_exists('tulosta_lahete')) {
 						$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
 						$abures = mysql_query($query) or pupe_error($query);
 						if(mysql_num_rows($abures)>0) {
-							$kentat = array("projekti", "toimitusaika", "käsittelijä", "käsitelty", "toimitustapa", "toimitusehto", "asiakkaan_VAT");							
+							$kentat = array("toimitus", "projekti", "toimitusaika", "käsittelijä", "käsitelty", "toimitustapa", "toimitusehto", "asiakkaan_VAT");							
 						}
 						else {
 							$kentat = array("tilaus", "toimitusaika", "käsittelijä", "käsitelty", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
@@ -113,7 +113,9 @@ if (!function_exists('tulosta_lahete')) {
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, strftime("%x",strtotime($laskurow[$key])), "norm", "L", "", $tid);
 						}
 						elseif($key == "käsitelty") {
-							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, strftime("%x %T",strtotime($laskurow[$key])), "norm", "L", "", $tid);
+							if($laskurow[$key]!='0000-00-00 00:00:00') {
+								$pdf->writeToTemplate($h, 1, $s[1]+2, 0, strftime("%x %T",strtotime($laskurow[$key])), "norm", "L", "", $tid);
+							}
 						}
 						else {
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "", $tid);

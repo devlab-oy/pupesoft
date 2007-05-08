@@ -255,10 +255,13 @@
 		$kumsumma = $alkurow["saldo"];
 	}
 
-	$query = "	SELECT $alku , kustp, kohde, tiliointi.projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus
+	$query = "	SELECT $alku , kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus
 				FROM tiliointi
 				LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
 				LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
+				LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio = kustp.yhtio and tiliointi.kustp = kustp.tunnus
+				LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio = kohde.yhtio and tiliointi.kohde = kohde.tunnus
+				LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio = projekti.yhtio and tiliointi.projekti = projekti.tunnus
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
 					tiliointi.korjattu='' and
 					$lisa
@@ -355,14 +358,7 @@
 
 			}
 			else {
-				// Selväkieliset tarkenteet
-				if (($i > 1) and ($i < 5) and ($trow[$i] > 0)) {
-					$query = "SELECT nimi
-								FROM kustannuspaikka WHERE tunnus = '$trow[$i]'";
-					$vresult = mysql_query($query) or pupe_error($query);
-					$vrow=mysql_fetch_array($vresult);
-					$trow[$i] = $vrow[0];
-				}
+
 				if (($i == 5) and ($excel!=''))$trow[$i]=str_replace("<br>"," ",$trow[$i]);
 				
 				echo "<td>$trow[$i]</td>";

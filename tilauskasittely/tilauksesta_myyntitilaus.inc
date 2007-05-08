@@ -7,7 +7,7 @@
 	// $syot_var voidaan ohjata var-kenttää
 
 	if (!function_exists("tilauksesta_myyntitilaus")) {
-		function tilauksesta_myyntitilaus($otunnus, $tilrivilisa, $syot_varasto, $syot_var) {
+		function tilauksesta_myyntitilaus($otunnus, $tilrivilisa, $syot_varasto, $syot_var, $varataan_saldoa = "", $kopioi_paikat = "") {
 			global $yhtiorow, $kukarow;
 
 			$tilauksesta_myyntitilaus = "";
@@ -110,6 +110,7 @@
 				Eli liitetään hyväksytty tarjous uuteen tunnusnippuun eikä jatketa vanhaa.
 				Tämä siksi, että tarjous on laitettu vetämään ehkä puoli vuotta aiemmin ja silloin tämä uusi tilaus ei mene raporteissa "loogisessa" järjestyksessä..
 			*/
+			
 			if($monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
 				$query = "update lasku set tunnusnippu = '$utunnus' WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu='$monistarow[tunnusnippu]'";
 				$updres = mysql_query($query) or pupe_error($query);
@@ -220,7 +221,6 @@
 				
 				$tuotenimitys = $coprivirow['nimitys'];
 
-				$paikka		= "";
 				$paikat		= "";
 				$rivitunnus = "";
 
@@ -237,9 +237,16 @@
 				else {
 					$varasto = "";
 				}
-
+				
+				
+				if($kopioi_paikat != "") {
+					$paikka	= $coprivirow['hyllyalue']."#".$coprivirow['hyllynro']."#".$coprivirow['hyllyvali']."#".$coprivirow['hyllytaso'];
+				}
+				else {
+					$paikka	= "";	
+				}
+				
 				$korvaavakielto		= "";
-				$varataan_saldoa	= "";
 
 				$query = "SELECT * FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$coprivirow[tuoteno]'";
 				$tuote_result = mysql_query($query) or pupe_error($query);

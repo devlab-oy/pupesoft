@@ -214,6 +214,7 @@
 		if ($toitarow['rahdinkuljettaja'] == '') {
 			$toitarow['rahdinkuljettaja'] = $toitarow['selite'];
 		}
+		
 		$pdf->draw_text(302,  726,  "Rahdinkuljettaja ja / tai huolitsijaTransportföretag och / eller Speditör", $firstpage, $norm);
 		$pdf->draw_text(302, 670,  $toitarow['rahdinkuljettaja'],						$firstpage, $kirj);
 	
@@ -239,6 +240,7 @@
 	
 		//oikeeta laitaa
 		$pdf->draw_text(302,  617, "Toimituslauseke Leveransklausul",					$firstpage, $norm);
+		$pdf->draw_text(302,  582, $rakir_row["toimitusehto"],							$firstpage, $kirj);
 		$pdf->draw_rectangle(579,300,579,545,											$firstpage, $rectparam);
 		$pdf->draw_text(302,  573, "Rahdinmaksaja Fraktbetalare",						$firstpage, $norm);
 		$pdf->draw_text(302,  559, $rahdinmaksaja,										$firstpage, $kirj);

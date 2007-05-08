@@ -3316,13 +3316,27 @@ if ($tee == '') {
 
 
 						echo "<select name='toim' Style='font-size: 8pt; padding:0;'>";
-						echo "<option value='TARJOUS'>Tarjous</value>";
-						echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</value>";
-						echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";
-						echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</value>";
-						echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
-						echo "<option value='TYOMAARAYS'>Työmäärys</value>";
-						echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
+						if (file_exists("tulosta_tarjous.inc")) {
+							echo "<option value='TARJOUS'>Tarjous</value>";
+						}
+						if (file_exists("tulosta_myyntisopimus.inc")) {
+							echo "<option value='MYYNTISOPIMUS'>Myyntisopimus</value>";
+						}
+						if (file_exists("tulosta_osamaksusoppari.inc")) {
+							echo "<option value='OSAMAKSUSOPIMUS'>Osamaksusopimus</value>";
+						}
+						if (file_exists("tulosta_luovutustodistus.inc")) {
+							echo "<option value='LUOVUTUSTODISTUS'>Luovutustodistus</value>";
+						}
+						if (file_exists("tulosta_vakuutushakemus.inc")) {
+							echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</value>";
+						}
+						if (file_exists("tulosta_vakuutushakemus.inc")) {
+							echo "<option value='TYOMAARAYS'>Työmäärys</value>";
+						}
+						if (file_exists("tulosta_rekisteriilmoitus.inc")) {
+							echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</value>";
+						}
 						echo "</select></td>";
 						echo "<td class='back'><input type='submit' name='NAYTATILAUS' value='".t("Näytä")."' Style='font-size: 8pt; padding:0;'>
 						<input type='submit' name='TULOSTA' value='".t("Tulosta")."' Style='font-size: 8pt; padding:0;'>";

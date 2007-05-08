@@ -98,7 +98,8 @@ if (!function_exists('alku_valm')) {
 		$pdf_valm->draw_text(390, 750, t("Päivämäärä", $kieli).": ".tv1dateconv(substr($laskurow["lahetepvm"],0,10)) , $firstpage_valm, $p);
 		$pdf_valm->draw_text(390, 740, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], $firstpage_valm, $p);	
 		$pdf_valm->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage_valm, $p);
-		$pdf_valm->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage_valm, $p); 	
+		$pdf_valm->draw_text(390, 710, t("Toimitusehto", $kieli).": ".$laskurow["toimitusehto"], $firstpage_valm, $p);
+		$pdf_valm->draw_text(390, 700, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage_valm, $p); 	
 		$pdf_valm->draw_text(390, 690, t("Tilausviite", $kieli).": ".substr($laskurow["viesti"],0,18), $firstpage_valm, $p);
 		
 		//viivakoodin arvo

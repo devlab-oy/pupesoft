@@ -1331,4 +1331,19 @@ if (!function_exists("synkronoi")) {
 		return true;
 	}
 }
+
+if (!function_exists("jalkilaskentafunktio")) {
+	function jalkilaskentafunktio ($tuoteno, $pvm, $uusihinta, $rivitunnus) {
+		global $yhtiorow, $kukarow;
+
+		/*
+		$tuoteno 	= korjattava tuote
+		$pvm 		= mihin päivään asti korjataan
+		$uusihinta 	= mikä on tuon pvm:n oikea ostohinta
+		$rivitunnus = mikä on tapahtuman tehneen rivin tunnus (ostorivitunnus)
+		*/
+
+		require("tilauskasittely/jalkilaskenta.inc");
+	}
+}
 ?>

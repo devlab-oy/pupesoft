@@ -110,7 +110,8 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(390, 740, t("Päivämäärä", $kieli).": ".substr($laskurow["lahetepvm"],0,10) , $firstpage, $p);
 		$pdf->draw_text(390, 730, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], $firstpage, $p);
 		$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], $firstpage, $p);
-		$pdf->draw_text(390, 710, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage, $p);
+		$pdf->draw_text(390, 710, t("Toimitusehto", $kieli).": ".$laskurow["toimitusehto"], $firstpage, $p);
+		$pdf->draw_text(390, 700, t("Maksuehto", $kieli).": ".$maksuehto, $firstpage, $p);
 		$pdf->draw_text(390, 690, t("Tilausviite", $kieli).": ".substr($laskurow["viesti"],0,18), $firstpage, $p);
 
 		//viivakoodin arvo

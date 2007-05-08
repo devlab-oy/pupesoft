@@ -355,7 +355,7 @@ if (!function_exists('tulosta_lasku')) {
 				}
 				
 				if ($row["alv"] >= 500) {
-					$pdf->write($h, 1, 0, $s[0], t("Ei sisälä vähennettävää veroa", $kieli), "snadi", "L", "I");	
+					$pdf->write($h, 1, 0, $s[0], t("Ei sisällä vähennettävää veroa", $kieli), "snadi", "L", "I");	
 					$h-=$pdf->ln();
 				}
 				

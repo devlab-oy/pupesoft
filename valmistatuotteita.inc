@@ -89,7 +89,22 @@ if ($tee =='UV') {
 			if ($perherow["ei_saldoa"] == "") {
 
 				unset($tuoteresult);
-
+				
+				$varataankpl = 0;
+				
+				//N‰in paljon haluamme k‰ytt‰‰ raaka-ainetta
+				if ($valmistetaan == "TILAUKSELTA") {
+					if ($kulukpllat[$perherow["tunnus"]] != 0) {
+						$varataankpl = $kulukpllat[$perherow["tunnus"]];
+					}
+					else {
+						$varataankpl = $perherow['varattu'] * $akerroin;
+					}					
+				}
+				else {
+					$varataankpl = $perherow['kerroin'] * $isavarattu;
+				}
+								
 				if ($perherow["paikka"] != '') {
 					//k‰ytet‰‰n tilausrivill‰ olevaa paikkaa
 					$query = "	SELECT  saldo, ei_saldoa, tuote.tuoteno
@@ -130,16 +145,16 @@ if ($tee =='UV') {
 					$trow = mysql_fetch_array($tuoteresult);
 
 					if ($valmistetaan == "TILAUKSELTA") {
-						if ($trow['saldo'] < $perherow["varattu"] and $vakisinhyvaksy == "") { //nyt varasto ei riit‰
+						if ($trow['saldo'] < $varataankpl and $vakisinhyvaksy == "") {
 							$tee=''; //Raaka-aineet eiv‰t riit‰!
-							echo "<font class='error'>$perherow[tuoteno] ".t("saldo")." $trow[saldo] ".t("ei riit‰ valmistukseen")." ($perherow[varattu])</font><br>";
+							echo "<font class='error'>$perherow[tuoteno] ".t("saldo")." $trow[saldo] ".t("ei riit‰ valmistukseen")." ($varataankpl)</font><br>";
 						}
 
 					}
 					else {
-						if ($trow['saldo'] < ($perherow['kerroin'] * $isavarattu)) { //nyt varasto ei riit‰
+						if ($trow['saldo'] < $varataankpl) {
 							$tee=''; //Raaka-aineet eiv‰t riit‰!
-							echo "<font class='error'>$perherow[tuoteno] ".t("saldo")." $trow[saldo] ".t("ei riit‰ valmistukseen")." (" . $perherow['kerroin'] * $isavarattu . ")</font><br>";
+							echo "<font class='error'>$perherow[tuoteno] ".t("saldo")." $trow[saldo] ".t("ei riit‰ valmistukseen")." ($varataankpl)</font><br>";
 						}
 					}
 				}
@@ -163,7 +178,6 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 	mysql_data_seek($perheresult,0);
 
 	$uusiarvo 	= 0;
-	$kplr 		= 0;
 	$kpl 		= 0;
 
 	while ($perherow = mysql_fetch_array($perheresult)) {
@@ -217,21 +231,18 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 		//Poistetaan raaka-aineet varastosta
 		if ($valmistetaan == "TILAUKSELTA") {
-			$kpl = $perherow['varattu'] * $akerroin * -1;
+			if ($kulukpllat[$perherow["tunnus"]] != 0) {
+				$kpl = $kulukpllat[$perherow["tunnus"]];
+			}
+			else {
+				$kpl = $perherow['varattu'] * $akerroin;
+			}					
 		}
 		else {
-			$kpl = $perherow['kerroin'] * $isavarattu * -1;
+			$kpl = $perherow['kerroin'] * $isavarattu;
 		}
-
-		$kplr = $kpl * -1;
-
-		if ($valmistetaan == "TILAUKSELTA") {
-			$arvo = $tuoterow['kehahin'] * round($perherow['varattu'] * $akerroin / $isavarattu,8);
-		}
-		else {
-			$arvo = $tuoterow['kehahin'] * $perherow['kerroin'];
-		}
-
+		
+		$arvo = $tuoterow['kehahin'] * $kpl;
 		$uusiarvo += $arvo;
 
 		///* Tehd‰‰n tapahtuma *///
@@ -239,7 +250,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 					yhtio    	= '$kukarow[yhtio]',
 					tuoteno  	= '$perherow[tuoteno]',
 					laji     	= 'kulutus',
-					kpl      	= '$kpl',
+					kpl      	=  round($kpl*-1 ,2),
 					kplhinta 	= '$tuoterow[kehahin]',
 					hinta    	= '$tuoterow[kehahin]',
 					rivitunnus	= '$perherow[tunnus]',
@@ -250,24 +261,24 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 		if ($tuoterow['ei_saldoa'] == "") {
 			$query = "	UPDATE tuotepaikat
-						SET saldo	= saldo+$kpl
+						SET saldo	= round(saldo-$kpl,2)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$perherow[tuoteno]'
 						and tunnus  = '$tuoterow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			echo "<font class='message'>".t("Varastosta k‰ytettiin tuotetta")." $perherow[tuoteno] $kplr $tuoterow[yksikko]</font><br>";
+			echo "<font class='message'>".t("Varastosta k‰ytettiin tuotetta")." $perherow[tuoteno] $kpl $tuoterow[yksikko]</font><br>";
 
 		}
 		else {
-			echo "<font class='message'>".t("K‰ytettiin tuotetta")." $perherow[tuoteno] $kplr $tuoterow[yksikko]</font><br>";
+			echo "<font class='message'>".t("K‰ytettiin tuotetta")." $perherow[tuoteno] $kpl $tuoterow[yksikko]</font><br>";
 		}
 
 		//p‰ivitet‰‰n tilausrivi k‰ytetyksi
 		if ($valmistetaan == "TILAUKSELTA") {
 			$query = "	UPDATE tilausrivi
-						SET varattu = varattu+$kpl,
-						kpl=kpl-$kpl
+						SET varattu = round(varattu-$kpl,2),
+						kpl			= round(kpl+$kpl,2)
 						WHERE yhtio = '$kukarow[yhtio]'
 						and otunnus = '$tilrivirow[otunnus]'
 						and tunnus  = '$perherow[tunnus]'
@@ -280,10 +291,10 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 	// Tehd‰‰n uusi tuote
 	// kehahin matikka (tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen, ett‰ kehahin lasketaan)
 	if ($isarow['saldo'] + $isavarattu > 0 and $isarow['saldo'] > 0) {
-		$kehahin = round(($isarow['saldo'] * $isarow['kehahin'] + $uusiarvo * $isavarattu) / ($isarow['saldo'] + $isavarattu),4);
+		$kehahin = sprintf('%.4f', ($isarow['saldo'] * $isarow['kehahin'] + $uusiarvo) / ($isarow['saldo'] + $isavarattu));
 	}
 	else {
-		$kehahin = round($uusiarvo,4); // jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n valmistuksen hinnasta
+		$kehahin = sprintf('%.4f', $uusiarvo/$isavarattu); // jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n valmistuksen hinnasta
 	}
 
 
@@ -294,7 +305,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 				rivitunnus 	= '$tilrivirow[tunnus]',
 				laji    	= 'valmistus',
 				kpl     	= '$isavarattu',
-				kplhinta	= '$uusiarvo',
+				kplhinta	=  round($uusiarvo/$isavarattu, 4),
 				hinta   	= '$kehahin',
 				selite  	= '".t("Valmistettiin tuotetta tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus] ($isarow[kehahin] --> $kehahin)',
 				laatija 	= '$kukarow[kuka]',
@@ -302,7 +313,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 	$result = mysql_query($query) or pupe_error($query);
 
 	$query = "	UPDATE tuote
-				SET kehahin=$kehahin, vihahin=$uusiarvo, vihapvm=now()
+				SET kehahin=$kehahin, vihahin=round($uusiarvo/$isavarattu, 2), vihapvm=now()
 				WHERE yhtio='$kukarow[yhtio]'
 				and tuoteno='$isatuoteno'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -316,21 +327,45 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 	//p‰ivitet‰‰n tilausrivi k‰ytetyksi ja splitataan se
 	if ($valmistetaan == "TILAUKSELTA") {
-
 		//osavalmistus tai kokovalmistus
 		if ($isavarattu <= $tilrivirow["varattu"]) {
-
 			if ($laskurow["tilaustyyppi"] == "V" and $tilrivirow["tyyppi"] == "W") {
-				$tyx 		= "L";
-				$kpllisa 	= " kpl = '', ";
-				$perheidx 	= 0;
+				//luodaan toimitettu valmisterivi
+				$query = "	INSERT into tilausrivi set
+							laatija			= '$kukarow[kuka]',
+							laadittu 		= now(),
+							yhtio 			= '$kukarow[yhtio]',
+							tuoteno 		= '$tilrivirow[tuoteno]',
+							varattu 		= '$isavarattu',
+							tilkpl 			= '$isavarattu',
+							kpl 			= '',
+							ale 			= '$tilrivirow[ale]',
+							netto 			= '$tilrivirow[netto]',
+							jt 				= '',
+							yksikko 		= '$tilrivirow[yksikko]',
+							try 			= '$tilrivirow[try]',
+							osasto 			= '$tilrivirow[osasto]',
+							alv 			= '$tilrivirow[alv]',
+							hinta 			= '$tilrivirow[hinta]',
+							kerayspvm 		= '$tilrivirow[kerayspvm]',
+							nimitys 		= '$tilrivirow[nimitys]',
+							otunnus 		= '$tilrivirow[otunnus]',
+							uusiotunnus		= '$tilrivirow[uusiotunnus]',
+							tyyppi 			= 'L',
+							keratty	 		= '$kukarow[kuka]',
+							kerattyaika		= now(),
+							toimaika 		= '$tilrivirow[toimaika]',
+							var 			= '$tilrivirow[var]',
+							perheid 		= 0,
+							kommentti 		= '$tilrivirow[kommentti]',
+							hyllyalue 		= '$tilrivirow[hyllyalue]',
+							hyllynro 		= '$tilrivirow[hyllynro]',
+							hyllytaso 		= '$tilrivirow[hyllytaso]',
+							hyllyvali 		= '$tilrivirow[hyllyvali]'";
+				$insresult = mysql_query($query) or pupe_error($query);
+				$valmistettavat .= ",".mysql_insert_id();
 			}
-			else {
-				$tyx 		= "D";
-				$kpllisa 	= " kpl = '$isavarattu', ";
-				$perheidx 	= $tilrivirow["perheid"];
-			}
-
+			
 			//luodaan toimitettu valmisterivi
 			$query = "	INSERT into tilausrivi set
 						laatija			= '$kukarow[kuka]',
@@ -339,7 +374,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						tuoteno 		= '$tilrivirow[tuoteno]',
 						varattu 		= '$isavarattu',
 						tilkpl 			= '$isavarattu',
-						$kpllisa
+						kpl 			= '$isavarattu',
 						ale 			= '$tilrivirow[ale]',
 						netto 			= '$tilrivirow[netto]',
 						jt 				= '',
@@ -352,21 +387,19 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						nimitys 		= '$tilrivirow[nimitys]',
 						otunnus 		= '$tilrivirow[otunnus]',
 						uusiotunnus		= '$tilrivirow[uusiotunnus]',
-						tyyppi 			= '$tyx',
+						tyyppi 			= 'D',
 						keratty	 		= '$kukarow[kuka]',
 						kerattyaika		= now(),
 						toimaika 		= '$tilrivirow[toimaika]',
 						var 			= '$tilrivirow[var]',
-						perheid 		= '$perheidx',
+						perheid 		= '$tilrivirow[perheid]',
 						kommentti 		= '$tilrivirow[kommentti]',
 						hyllyalue 		= '$tilrivirow[hyllyalue]',
 						hyllynro 		= '$tilrivirow[hyllynro]',
 						hyllytaso 		= '$tilrivirow[hyllytaso]',
 						hyllyvali 		= '$tilrivirow[hyllyvali]'";
-			$insresult = mysql_query($query) or pupe_error($query);
-			$insid = mysql_insert_id();
-
-			$valmistettavat .= ",$insid";
+			$insresult = mysql_query($query) or pupe_error($query);			
+			$valmistettavat .= ",".mysql_insert_id();
 
 			$jaljella = round($tilrivirow["varattu"] - $isavarattu,2);
 
@@ -378,7 +411,6 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 						and tunnus  = '$tilrivirow[tunnus]'
 						and tyyppi in ('W','M')";
 			$upparesult = mysql_query($query) or pupe_error($query);
-
 		}
 	}
 

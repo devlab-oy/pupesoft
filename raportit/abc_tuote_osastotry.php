@@ -205,14 +205,14 @@
 				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 							FROM avainsana
 							".avain('join','TRY_')."
-							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' and selite='$row[try]'";
+							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' and avainsana.selite='$row[try]'";
 				$keyres = mysql_query($query) or pupe_error($query);
 				$keytry = mysql_fetch_array($keyres);
 
 				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 							FROM avainsana
 							".avain('join','OSASTO_')."
-							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' and selite='$row[osasto]'";
+							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' and avainsana.selite='$row[osasto]'";
 				$keyres = mysql_query($query) or pupe_error($query);
 				$keyosa = mysql_fetch_array($keyres);
 

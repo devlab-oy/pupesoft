@@ -703,7 +703,6 @@ if ($tuoteno != '') {
 								$kpl += $trow['kpl'];
 							}
 
-
 							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo
 							if ($trow['laji'] == 'Inventointi' and $eka == 0) {
 								// etsitään tuotteen tiliöinti
@@ -787,7 +786,15 @@ if ($tuoteno != '') {
 
 							// jos ollaa löydetty eka tulo voidaan aina päivitetään tapahtuma jos se on tulo, laskutus tai inventointi
 							if ($eka == 0) {
-								$query = "UPDATE tapahtuma SET hinta='$uusikehahin' WHERE tunnus='$trow[tunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi')";
+								
+								if ($trow["laji"] == "kulutus") {
+									$kulutuslisa = ", kplhinta='$uusikehahin' ";
+								}
+								else {
+									$kulutuslisa = "";
+								}
+								
+								$query = "UPDATE tapahtuma SET hinta='$uusikehahin' $kulutuslisa WHERE tunnus='$trow[tunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'kulutus')";
 								if ($jalkilaskenta_debug > 1) echo "$query<br>";
 								$upresu = mysql_query($query) or pupe_error($query);
 							}

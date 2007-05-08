@@ -187,20 +187,22 @@
 		
 	$lisat = '';
 	if ($tee == 'S') { // S = selaussanahaku
-		$lisat = "and selaus like '%" . $nimi . "%'";
+		$lisat = "and toimi.selaus like '%" . $nimi . "%'";
 	}
 
 	if ($tee == 'N') { // N = nimihaku
-		$lisat = "and nimi like '%" . $nimi . "%'";
+		$lisat = "and toimi.nimi like '%" . $nimi . "%'";
 	}
 
 	if ($tee == 'Y') { // Y = yritystunnushaku
-		$lisat = "and ytunnus = '$nimi'";
+		$lisat = "and toimi.ytunnus = '$nimi'";
 	}
 	if ($lisat != '') {
-		$query = "SELECT tunnus, ytunnus, nimi, postitp
+		$query = "SELECT toimi.tunnus, toimi.ytunnus, toimi.nimi, toimi.postitp, round(sum(summa*vienti_kurssi),2) avoimet
 					FROM toimi
-					WHERE yhtio='$kukarow[yhtio]' $lisat
+					LEFT JOIN lasku ON toimi.yhtio=lasku.yhtio and toimi.tunnus=lasku.liitostunnus and tila in ('H','M')
+					WHERE toimi.yhtio='$kukarow[yhtio]' $lisat
+					GROUP BY toimi.tunnus
 					ORDER BY selaus";
 
 		$result = mysql_query($query) or pupe_error($query);
@@ -216,7 +218,7 @@
 			for ($i = 1; $i < mysql_num_fields($result); $i++) {
 				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
 			}
-			echo "<th></th><th></th></tr>";
+			echo "<th>".t("valitse")."</th><th></th></tr>";
 
 			while ($trow=mysql_fetch_array ($result)) {
 				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>

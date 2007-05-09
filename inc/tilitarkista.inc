@@ -12,4 +12,9 @@ if (mysql_field_name($result, $i) == "tilino" and trim($t[$i]) != '') {
 
 }
 
+if (mysql_field_name($result, $i) == "ulkoinen_taso" and trim($t[$i]) == "") {
+	$virhe[$i] = t("Ulkoinen taso on syötettävä")."!";
+	$errori = 1;
+}
+
 ?>

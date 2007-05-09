@@ -276,6 +276,12 @@ if (!function_exists("mm_pt")) {
 		return $pointseja;
 	}
 }
+if (!function_exists("pt_mm")) {
+	function pt_mm($pointseja) {
+		$millimetreja = round($pointseja * 0.3527777778,2);
+		return $millimetreja;
+	}
+}
 
 if (!function_exists("saldo_myytavissa")) {
 	function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '') {

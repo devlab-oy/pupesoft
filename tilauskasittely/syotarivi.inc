@@ -13,7 +13,7 @@
 		require ("alvpopup.inc");
 	}
 
-	if ($kukarow["extranet"] == '' and ($toim == "PIKATILAUS" or  $toim == "TARJOUS")) {
+	if ($kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
 		// Pikatilauksen syöttörivi
 		echo "<table>
 				<tr>
@@ -75,7 +75,7 @@
 		echo "</form>";
 		echo "</table>";
 	}
-	elseif ($kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO" or $toim == "YLLAPITO")) {
+	elseif ($kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO" or $toim == "YLLAPITO" or $toim == "TARJOUS")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>

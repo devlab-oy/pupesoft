@@ -690,7 +690,7 @@
 											nimitys 	= '$trow[nimitys]',
 											jaksotettu	= '$jaksotettu'";
 
-								if ($trow['ei_saldoa']!='') {
+								if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
 									$query .= ", kerattyaika = now()";
 								}
 
@@ -1201,7 +1201,7 @@
 						nimitys 	= '$trow[nimitys]',
 						jaksotettu	= '$jaksotettu'";
 
-			if ($trow['ei_saldoa']!='') {
+			if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
 				$query .= ", kerattyaika = now()";
 			}
 			$result = mysql_query($query) or die($query);

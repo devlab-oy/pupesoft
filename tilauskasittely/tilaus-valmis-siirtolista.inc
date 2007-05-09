@@ -13,6 +13,13 @@
 		$tvs_tila 	= "S";
 		$tvs_tyyppi	= "'G'";
 	}
+	
+	if ($yhtiorow["kerataanko_saldottomat"] == '') {
+		$lisasalker = " and tuote.ei_saldoa = '' ";
+	}
+	else {
+		$lisasalker = " ";
+	}
 
 	// katotaan ihan aluksi, onko tämä jo kerätty...
 	$query = "	select *
@@ -254,9 +261,9 @@
 			}
 			
 			//tyhjennetään muuttujat
-			$varasto = '';
-			$edvarasto = '';
-
+			$varasto 	= '';
+			$edvarasto 	= '';									
+			
 			//loopataan kaikki yhdestä tilausesta syntyneet lähetteet
 			foreach ($tvs_tilausnumerot as $tvs_tilausnumero) {
 				//luetaan laskun tiedot uudestaan tässä, per splitti
@@ -270,9 +277,8 @@
 							WHERE otunnus = '$laskurow[tunnus]'
 							and var in ('','H')
 							and (varattu > 0 or tilkpl = 9999.99)
-							and tuote.ei_saldoa = ''
+							$lisasalker
 							and tuote.yhtio = '$kukarow[yhtio]'
-							and tuote.ei_saldoa = ''
 							and tilausrivi.tyyppi in ($tvs_tyyppi$tvs_tyyppi_2)
 							and tuote.tuoteno = tilausrivi.tuoteno
 							and tilausrivi.yhtio = tuote.yhtio";
@@ -332,7 +338,7 @@
 			$query = "	SELECT tuote.tuoteno, tilausrivi.*
 						FROM tilausrivi use index (yhtio_otunnus), tuote use index (tuoteno_index)
 						WHERE otunnus = '$laskurow[tunnus]'
-						and tuote.ei_saldoa = ''
+						$lisasalker
 						and tuote.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi in ($tvs_tyyppi)
 						and tilausrivi.var in ('','H')
@@ -412,7 +418,7 @@
 							and tilausrivi.var in ('','H')
 							and tuote.yhtio=tilausrivi.yhtio
 							and tuote.tuoteno=tilausrivi.tuoteno
-							and tuote.ei_saldoa = ''
+							$lisasalker
 							$lisa
 							ORDER BY tilausrivi.perheid, sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);

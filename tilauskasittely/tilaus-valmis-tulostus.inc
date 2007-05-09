@@ -93,7 +93,7 @@
 		$pdf->set_default('margin', 0);
 
 		//keräyslistalle ei tulosteta saldottomia tuotteita
-		if ($kerayslista == 'K') {
+		if ($kerayslista == 'K' and $yhtiorow["kerataanko_saldottomat"] == '') {
 			$lisa1 = " and tuote.ei_saldoa = '' ";
 		}
 		else {

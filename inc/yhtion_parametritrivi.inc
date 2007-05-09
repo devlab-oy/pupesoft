@@ -248,6 +248,28 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "kerataanko_saldottomat") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "S") {
+			$sel2 = "selected";
+		}
+		
+
+		$ulos .= "<option value = ''  $sel1>".t("Saldottomia tuotteita ei ker‰t‰")."</option>";
+		$ulos .= "<option value = 'S' $sel2>".t("Saldottomat tuotteet ker‰t‰‰n")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "kerayslistojen_yhdistaminen") {
 
 		$ulos = "<td><select name='$nimi'>";

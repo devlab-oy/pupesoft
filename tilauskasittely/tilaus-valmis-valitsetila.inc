@@ -12,8 +12,8 @@
 				sum(if(var = 'P' and tilkpl > 0, 1, 0)) puutteet,
 				sum(if(var in ('J','S') and jt > 0, 1, 0)) jteet,
 				sum(if(varattu < 0, 1, 0)) hyvitykset,
-				sum(if(ei_saldoa = '' and varattu > 0, 1, 0)) normaalit_kerataan,
-				sum(if(ei_saldoa != '' and varattu > 0, 1, 0)) saldottomat
+				sum(if((('$yhtiorow[kerataanko_saldottomat]' = '' and ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and varattu > 0, 1, 0)) normaalit_kerataan,
+				sum(if('$yhtiorow[kerataanko_saldottomat]' = '' and ei_saldoa != '' and varattu > 0, 1, 0)) saldottomat
 				FROM tilausrivi
 				LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'

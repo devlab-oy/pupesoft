@@ -76,7 +76,7 @@
 			
 			$footerpala = $pdf_tarjous->strlen("T  ".$yhtiorow["puhelin"]."    W  ".$yhtiorow["www"], $footer_helvetica);
 			
-			$pdf_tarjous->draw_text(mm_pt(8),	mm_pt(15), $yhtiorow["nimi"]."    ".$yhtiorow["osoite"].",  ".$yhtiorow["postino"]." ".$yhtiorow["postitp"].",  ".$yhtiorow["maa"].$footerpala,		$firstpage, $footer_helvetica);
+			$pdf_tarjous->draw_text(mm_pt(8),	mm_pt(15), $yhtiorow["nimi"]."    ".$yhtiorow["osoite"].",  ".$yhtiorow["postino"]." ".$yhtiorow["postitp"].",  ".$yhtiorow["maa"],		$firstpage, $footer_helvetica);
 			$pdf_tarjous->draw_text(570-$footerpala,		mm_pt(15), "T  ".$yhtiorow["puhelin"]."    W  ".$yhtiorow["www"],		$firstpage, $footer_helvetica);
 			
 			//Palautetan luotu sivu
@@ -378,7 +378,6 @@
 							}
 							
 							//jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-							//if ($kala <= 100) {
 							if ($tarvitaanuus == 'NYT') {
 								loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous2[$sivu], 0);
 
@@ -399,6 +398,7 @@
 							$tarvitaanuus = "";
 
 							$page_tarjous2[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
+							loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous2[$sivu], 0);
 						}
 					}
 				}

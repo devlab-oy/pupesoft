@@ -148,7 +148,13 @@
 			$ulos .= sprintf ('%-2.2s', "MR");										//rahoitusyhtiön tunnus
 		}
 		
-		$ulos .= sprintf ('%-30.30s', 	$kukarow["nimi"]);							//siirtäjän nimi
+		if($toim == "OKO") {
+			$ulos .= sprintf ('%-30.30s', 	$yhtiorow["nimi"]);						//siirtäjän nimi
+		}
+		else {
+			$ulos .= sprintf ('%-30.30s', 	$kukarow["nimi"]);						//siirtäjän nimi
+		}
+		
 		$ulos .= sprintf ('%06.6s', 	$factoringsiirtonumero);					//siirtoluettelon numero
 		$ulos .= sprintf ('%-37.37s', 	"");										//
 		$ulos .= sprintf ('%-63.63s', 	"");										//
@@ -334,7 +340,7 @@
 				$ulos .= sprintf ('%06.6s',   		0);
 
 				if($toim == "OKO") {
-					$ulos .= sprintf ('%03.3s',   	0);															//myyjän sopimustunnus
+					$ulos .= sprintf ('%03.3s',   	1);															//myyjän sopimustunnus
 					$ulos .= sprintf ('%-179.179s',	0);                                                         
 				}                                                                                               
 				else {                                                                                          
@@ -429,7 +435,7 @@
 					$ulos .= sprintf ('%-13.13s', 	"");
 					$ulos .= sprintf ('%-30.30s', 	"");
 					$ulos .= sprintf ('%06.6s', 	0);
-					$ulos .= sprintf ('%03.3s', 	0);
+					$ulos .= sprintf ('%03.3s', 	1);															//myyjän sopimustunnus
 					$ulos .= sprintf ('%-38.38s', 	"");
 				}
 				else {

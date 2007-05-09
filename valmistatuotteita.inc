@@ -254,7 +254,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 					kplhinta 	= '$tuoterow[kehahin]',
 					hinta    	= '$tuoterow[kehahin]',
 					rivitunnus	= '$perherow[tunnus]',
-					selite   	= '".t("Käytettiin tuotteen")." $isatuoteno ".t("valmistamiseen").".',
+					selite   	= '".t("Käytettiin tuotteen")." $isatuoteno ".t("valmistamiseen")." ".t("työmääräyksellä")." $tilrivirow[otunnus]',
 					laatija  	= '$kukarow[kuka]',
 					laadittu 	= now()";
 		$result = mysql_query($query) or pupe_error($query);

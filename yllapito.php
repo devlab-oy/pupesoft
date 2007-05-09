@@ -283,7 +283,10 @@
 			elseif	(mysql_field_len($result,$i)<5)  $size='5';
 			else	$size='10';
 
-			echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+			// jos meid‰n kentt‰ ei ole subselect niin tehd‰‰n hakukentt‰
+			if (strpos(strtoupper($array[$i]), "SELECT") === FALSE) {
+				echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+			}
 			echo "</th>";
 		}
 

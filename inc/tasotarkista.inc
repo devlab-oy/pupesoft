@@ -11,7 +11,7 @@ if (mysql_field_name($result, $i) == "taso") {
 		$errori = 1;
 	}
 	else {
-		$query   = "select tunnus from taso where yhtio='$kukarow[yhtio]' and taso='$t[$i]' and tyyppi='$tyyppitalteen' and tunnus != '$tunnus'";
+		$query   = "select tunnus from taso where yhtio='$kukarow[yhtio]' and taso = BINARY '$t[$i]' and tyyppi='$tyyppitalteen' and tunnus != '$tunnus'";
 		$sresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($sresult) > 0) {

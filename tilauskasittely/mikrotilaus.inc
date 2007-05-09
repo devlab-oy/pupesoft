@@ -31,7 +31,7 @@ if ($tee == "file") {
 			$valinta='';
 
 			// luetaan rivi tiedostosta..
-			$poista	  	= array("\"", "'", "\\", " ");
+			$poista	  	= array("\"", "'", "\\");
 			$rivi	  	= str_replace($poista,"",$rivi);
 			$rivi	  	= explode("\t", trim($rivi));
 
@@ -45,6 +45,7 @@ if ($tee == "file") {
 				$ale	  	= str_replace(",", ".", $rivi[4]);
 				$netto 	  	= strtoupper(trim($rivi[5]));
 				$var  		= strtoupper(trim($rivi[6]));
+				$kommentti	= trim($rivi[7]);
 
 				if (($var!='') and ($var!='P') and ($var!='H') and ($var!='J')) {
 					echo t("V‰‰r‰ arvo kent‰ss‰ var! Sallitut arvot ovat: P, J ja H").".<br>";
@@ -144,13 +145,13 @@ if ($tee == 'mikrotila') {
 			<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 
 			<table border='0' cellpadding='3' cellspacing='2'>
-			<tr><th colspan='7'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>
+			<tr><th colspan='8'>".t("Sarkaineroteltu tekstitiedosto").".</th></tr>
 			<tr>";
 
 	echo "	<td>".t("Tuoteno")."</td><td>".t("Kpl")."</td>";
 
 	if ($kukarow["extranet"] == "") {
-		echo "<td>".t("Arvioitu toimitusp‰iv‰ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Netto")."</td><td>".t("Var")."</td>";
+		echo "<td>".t("Arvioitu toimitusp‰iv‰ vvvv-kk-pp")."</td><td>".t("Hinta")."</td><td>".t("Ale")."</td><td>".t("Netto")."</td><td>".t("Var")."</td><td>".t("Kommentti")."</td>";
 	}
 
 	echo "	</tr>

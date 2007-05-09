@@ -64,7 +64,7 @@ if (!function_exists("kopioitiliointi")) {
 
 if (!function_exists("korjaalaskut")) {
 
-	function korjaalaskut($tuoteno, $kehahin, $alku, $loppu, $korjuusiotunnus) {
+	function korjaalaskut($tuoteno, $kehahin, $alku, $loppu, $korjtunnus) {
 
 		global $kukarow, $yhtiorow, $jalkilaskenta_debug;
 		$jlerror=0;
@@ -81,8 +81,8 @@ if (!function_exists("korjaalaskut")) {
 
 			$tuote = mysql_fetch_array ($result);
 
-			if ($korjuusiotunnus != 0) {
-				$lisa = " and uusiotunnus = '$korjuusiotunnus' ";
+			if ($korjtunnus != 0) {
+				$lisa = " and tunnus = '$korjtunnus' ";
 			}
 			else {
 				$lisa = "";
@@ -511,7 +511,10 @@ if ($tuoteno != '') {
 	if ($jalkilaskenta_debug >= 1) echo "<hr><font class='message'>".t("Aloitellaan käsittely tuotteelle")." $tuoteno.</font><br>";
 
 	//Tuote
-	$query = "SELECT * FROM tuote WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+	$query = "	SELECT * 
+				FROM tuote 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and tuoteno = '$tuoteno'";
 	$result = mysql_query($query) or pupe_error($query);
 	$tuote = mysql_fetch_array($result);
 
@@ -832,22 +835,34 @@ if ($tuoteno != '') {
 		//Tähän haaraan mennään jos tuotteella on sarjanumeroseurantaa ja varastonarvo lasketaan suoraan osto ja myyntiriveiltä
 		if ($jalkilaskenta_debug >= 1) echo "Tuotenumero $tuoteno on sarjanumeroseurannassa<br>";
 
-		$query  = "SELECT yhtio FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and tyyppi='O' and laskutettuaika != '0000-00-00' and tunnus='$rivitunnus'";
+		$query  = "	SELECT yhtio 
+					FROM tilausrivi 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tyyppi = 'O' 
+					and laskutettuaika != '0000-00-00' 
+					and tunnus = '$rivitunnus'";
 		$rxiviresult = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($rxiviresult) == 1 and is_numeric($uusihinta)) {
 			// Päivitetään ostotilausrivin rivihinta
-			$query  = "UPDATE tilausrivi SET rivihinta = round($uusihinta*kpl,2) WHERE yhtio='$kukarow[yhtio]' and tunnus='$rivitunnus'";
+			$query  = "	UPDATE tilausrivi 
+						SET rivihinta = round($uusihinta*kpl,2) 
+						WHERE yhtio='$kukarow[yhtio]' 
+						and tunnus='$rivitunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			
 			// Päivitetään korjattava tapahtuma
-			$query = "UPDATE tapahtuma SET kplhinta='$uusihinta', selite = concat(selite,', jälkilaskentahinta = ', $uusihinta) WHERE yhtio = '$kukarow[yhtio]' and laji in ('tulo','valmistus') and rivitunnus='$rivitunnus'";
+			$query = "	UPDATE tapahtuma 
+						SET kplhinta='$uusihinta', selite = concat(selite,', jälkilaskentahinta = ', $uusihinta) 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and laji in ('tulo','valmistus') 
+						and rivitunnus='$rivitunnus'";
 			$paivresult = mysql_query($query) or pupe_error($query);
 						
 			// Haetaan kaikki tiedot sarjanumerosta
-			$query = "	select distinct myyntirivitunnus
-						from sarjanumeroseuranta
-						where yhtio 		= '$kukarow[yhtio]'
+			$query = "	SELECT distinct myyntirivitunnus
+						FROM sarjanumeroseuranta
+						WHERE yhtio 		= '$kukarow[yhtio]'
 						and ostorivitunnus  = '$rivitunnus'
 						and ostorivitunnus != 0";
 			$sarjares = mysql_query($query) or pupe_error($query);
@@ -855,9 +870,9 @@ if ($tuoteno != '') {
 
 			while ($sarjarow = mysql_fetch_array($sarjares)) {
 				//Hetaaan laskutetut myntirivit
-				$query = "	select uusiotunnus, laskutettuaika
-							from tilausrivi
-							where yhtio = '$kukarow[yhtio]'
+				$query = "	SELECT *
+							FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$sarjarow[myyntirivitunnus]'
 							and tyyppi = 'L'
 							and uusiotunnus != 0
@@ -869,12 +884,46 @@ if ($tuoteno != '') {
 				if (mysql_num_rows($rivires) == 1) {
 					$rivirow = mysql_fetch_array($rivires);
 					
-					// korjaus
+					//Haetaan nyt tämän myyntirivin kaikki ostorivit
+					$query = "	SELECT ostorivitunnus
+								FROM sarjanumeroseuranta
+								WHERE yhtio 			= '$kukarow[yhtio]'
+								and tuoteno				= '$tuoteno'
+								and myyntirivitunnus	= '$rivirow[tunnus]'
+								and ostorivitunnus		> 0";
+					$ostosarjares = mysql_query($query) or pupe_error($query);
+					
+					$uusisarjahin = 0;
+					
+					while($ostosarjarow = mysql_fetch_array($ostosarjares)) {
+						$query = "	SELECT tilausrivi.rivihinta/tilausrivi.kpl hinta
+									FROM tilausrivi
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus = '$ostosarjarow[ostorivitunnus]'
+									and laskutettuaika != '0000-00-00'
+									and kpl > 0";
+						$hinrivires = mysql_query($query) or pupe_error($query);
+												
+						$hinrivirow = mysql_fetch_array($hinrivires);
+						$uusisarjahin += $hinrivirow["hinta"];
+						
+					}
+					$uusisarjahin = round($uusisarjahin/$rivirow["kpl"],2);
+																
+					if ($uusisarjahin != 0) {															
+						$uusihinta = $uusisarjahin;
+					}
+					
+					// Korjaus
 					if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Korjataan in-out hintoja! Laskuja (1) Uusi hinta: $uusihinta $rivirow[uusiotunnus]</font><br>";
 
-					$mitenkavi = korjaalaskut($tuoteno, $uusihinta, $rivirow["laskutettuaika"], $rivirow["laskutettuaika"], $rivirow["uusiotunnus"]);
+					$mitenkavi = korjaalaskut($tuoteno, $uusihinta, $rivirow["laskutettuaika"], $rivirow["laskutettuaika"], $rivirow["tunnus"]);
 					
-					$query = "UPDATE tapahtuma SET hinta='$uusihinta' WHERE yhtio = '$kukarow[yhtio]' and rivitunnus='$sarjarow[myyntirivitunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi')";
+					$query = "	UPDATE tapahtuma 
+								SET hinta = '$uusihinta' 
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and rivitunnus = '$sarjarow[myyntirivitunnus]' 
+								and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi')";					
 					if ($jalkilaskenta_debug > 1) echo "$query<br>";
 					$upresu = mysql_query($query) or pupe_error($query);
 				}

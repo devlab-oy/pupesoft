@@ -37,8 +37,8 @@
 		echo "<select name='filenimi' multiple='FALSE' size='20'>";
 
 		while ($file = readdir($handle)) {
-			if (substr($file,0, 12) == $factoringyhtio) {
-				echo "<option value='$file' $sel>".t($file)."</option>";
+			if (substr($file,0, 9) == $factoringyhtio) {
+				echo "<option value='$file' $sel>$file</option>";
 			}
 		}
 		closedir($handle);

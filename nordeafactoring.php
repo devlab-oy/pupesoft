@@ -4,7 +4,7 @@
 	else $tee = "";	
 	if(isset($_POST["kaunisnimi"])) $kaunisnimi = $_POST["kaunisnimi"];
 	else $kaunisnimi = "";
-	if(isset($_POST["valkoodi"])) $kaunisnimi = $_POST["valkoodi"];
+	if(isset($_POST["valkoodi"])) $valkoodi = $_POST["valkoodi"];
 	else $valkoodi = "";
 
 

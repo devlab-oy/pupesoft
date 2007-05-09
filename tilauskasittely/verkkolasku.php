@@ -746,20 +746,23 @@
 
 					$lasno = $lrow[0] + 1;
 
-					// Tutkitaan onko ketju Nordean factorinkia
-					$query  = "	SELECT factoring.sopimusnumero
+					// Tutkitaan onko ketju Nordean tai OKO:n factorinkia
+					$query  = "	SELECT factoring.sopimusnumero, maksuehto.factoring
 								FROM lasku
-								JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='NORDEA'
+								JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring!=''
 								JOIN factoring ON maksuehto.yhtio=factoring.yhtio and maksuehto.factoring=factoring.factoringyhtio and lasku.valkoodi=factoring.valkoodi
 								WHERE lasku.yhtio = '$kukarow[yhtio]'
 								and lasku.tunnus in ($tunnukset)
-								GROUP BY factoring.sopimusnumero";
+								GROUP BY factoring.sopimusnumero, maksuehto.factoring";
 					$fres = mysql_query($query) or pupe_error($query);
 					$frow = mysql_fetch_array($fres);
 
 					//Nordean viitenumero rakentuu hieman eri lailla ku normaalisti
-					if ($frow["sopimusnumero"] > 0) {
+					if ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'NORDEA') {
 						$viite = $frow["sopimusnumero"]."0".sprintf('%08d', $lasno);
+					}
+					elseif ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'OKO') {
+						$viite = $frow["sopimusnumero"]."001".sprintf('%09d', $lasno);
 					}
 					else {
 						$viite = $lasno;

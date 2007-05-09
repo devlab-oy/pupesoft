@@ -644,7 +644,7 @@
 							and tilausrivi.varattu != 0";
 		}
 		elseif ($toim == "KORJAA") {
-			$query	 	= "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
+			$query	 	= "	SELECT lasku.ytunnus, lasku.tila, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 							lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 							lasku.maksuehto, lasku.tunnus, lasku.viesti, count(tilausrivi.tunnus) riveja,
 							GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat";
@@ -683,8 +683,11 @@
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
-
-			if ($toim == "TUOTE") {
+			
+			if ($toim == "KORJAA") {
+				echo "<tr><th>".t("Valmistus")."</th><th>".t("Tyyppi")."</th><th>".t("Asiakas/Varasto")."</th><th>".t("Ytunnus")."</th><th>".t("Valmiste")."</th><th>".t("Kpl")."</th><tr>";
+			}
+			elseif ($toim == "TUOTE") {
 				echo "<tr><th>".t("Valmistus")."</th><th>".t("Asiakas/Varasto")."</th><th>".t("Ytunnus")."</th><th>".t("Valmiste")."</th><th>".t("Kpl")."</th><tr>";
 			}
 			else {
@@ -693,7 +696,16 @@
 
 			while ($tilrow = mysql_fetch_array($tilre)) {
 
-				echo "<tr><td valign='top'>$tilrow[tunnus]</td><td valign='top'>$tilrow[nimi] $tilrow[nimitark]</td><td valign='top'>$tilrow[ytunnus]</td>";
+				echo "<tr><td valign='top'>$tilrow[tunnus]</td>";
+				
+				if ($toim == "KORJAA" and $tilrow["tila"] == "L") {
+					echo "<td valign='top'>".t("Asiakkaallevalmistus")."</td>";
+				}
+				elseif ($toim == "KORJAA" and $tilrow["tila"] == "V") {
+					echo "<td valign='top'>".t("Varastoonvalmistus")."</td>";
+				}
+				
+				echo "<td valign='top'>$tilrow[nimi] $tilrow[nimitark]</td><td valign='top'>$tilrow[ytunnus]</td>";
 
 
 				if ($toim == "TUOTE") {

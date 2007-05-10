@@ -181,7 +181,7 @@
 		$taso41 = 0;
 		$taso42 = 0;
 
-		while ($tilirow=mysql_fetch_array ($result)) {
+		while ($tilirow = mysql_fetch_array ($result)) {
 
 		// Ensin lasketaan kaikki kaudet ja sitten yhdistell‰‰n ne
 		// Huomaa tuo tapvm<'$yhtiorow[1]' and tapvm>='$yhtiorow[0]' eli otetaan mukaan ensimm‰inen p‰iv‰, mutta
@@ -687,20 +687,20 @@
 		}
 
 		$sel = array();
-		if ($alvk == "") $alvk = sprintf("%02s",date("m"));
+		if ($alvk == "") $alvk = date("m");
 		$sel[$alvk] = "SELECTED";
 
 		echo "</select>
 				<select name='alvk'>
-				<option $sel[01] value = '01'>01</option>
-				<option $sel[02] value = '02'>02</option>
-				<option $sel[03] value = '03'>03</option>
-				<option $sel[04] value = '04'>04</option>
-				<option $sel[05] value = '05'>05</option>
-				<option $sel[06] value = '06'>06</option>
-				<option $sel[07] value = '07'>07</option>
-				<option $sel[08] value = '08'>08</option>
-				<option $sel[09] value = '09'>09</option>
+				<option $sel[1] value = '1'>01</option>
+				<option $sel[2] value = '2'>02</option>
+				<option $sel[3] value = '3'>03</option>
+				<option $sel[4] value = '4'>04</option>
+				<option $sel[5] value = '5'>05</option>
+				<option $sel[6] value = '6'>06</option>
+				<option $sel[7] value = '7'>07</option>
+				<option $sel[8] value = '8'>08</option>
+				<option $sel[9] value = '9'>09</option>
 				<option $sel[10] value = '10'>10</option>
 				<option $sel[11] value = '11'>11</option>
 				<option $sel[12] value = '12'>12</option>

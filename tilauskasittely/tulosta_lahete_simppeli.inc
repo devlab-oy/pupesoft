@@ -3,8 +3,8 @@
 require_once('../pdflib/pupepdf.class.php');
 
 if (!function_exists('tulosta_lahete')) {
-	function tulosta_lahete ($otunnus, $komento, $kieli = "", $tee) {
-		global $yhtiorow, $kukarow, $fonts, $_SERVER;
+	function tulosta_lahete ($otunnus, $komento, $kieli = "", $tee, $tulostusversio) {
+		global $yhtiorow, $kukarow, $fonts, $_SERVER, $lahete_param;
 		
 		//	Tarkastetaan tila...
 		$query = "select tila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
@@ -15,6 +15,23 @@ if (!function_exists('tulosta_lahete')) {
 		}
 		else {
 			$mika = "otunnus";
+		}
+		
+		//	Suorastaan hämmentävää kikkailua..
+		$lahete_param=array();
+		switch ($tulostusversio) {
+			case "tulosta_lahete_simppeli_ei_hintoja_ei_aleja.inc":
+				$lahete_param["ale"]= "ei";
+				$lahete_param["hinnat"]= "ei";				
+				break;
+			case "tulosta_lahete_simppeli_ei_aleja.inc":
+				$lahete_param["ale"]= "ei";
+				$lahete_param["hinnat"]= "on";				
+				break;				
+			default:
+				$lahete_param["ale"]= "on";
+				$lahete_param["hinnat"]= "on";				
+				break;
 		}
 
 		// Haetaan laskun tiedot
@@ -45,10 +62,15 @@ if (!function_exists('tulosta_lahete')) {
 			$kieli = strtolower($kielrow['kieli']);
 		}				
 		
+		if($laskurow["rivihintoja_ei_nayteta"]) {
+			$lahete_param["ale"]= "ei";
+			$lahete_param["hinnat"]= "ei";				
+		}
+		
 		$otsikko = "LÄHETE";
 		
 		if (!function_exists('alku')) {
-			function alku ($pdf, $laskurow, $toim, $otsikko, $kieli) {
+			function alku ($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param) {
 				global $yhtiorow, $kukarow, $fonts;
 
 				if(!is_object($pdf)) {
@@ -165,7 +187,7 @@ if (!function_exists('tulosta_lahete')) {
 					$s=$pdf->teeSarakkeet(array(95,15,20,15));
 					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tuote", $kieli), "norm", "L", "B", $tid);
 					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimitettu", $kieli), "norm", "R", "B", $tid);
-					if($laskurow["rivihintoja_ei_nayteta"] == "") {
+					if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
 						$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Hinta/yks", $kieli), "norm", "R", "B", $tid);
 						$pdf->writeToTemplate($h, 1, $s[2], $s[3], t("Alv", $kieli), "norm", "R", "B", $tid);
 						$pdf->writeToTemplate($h, 1, $s[3], 0, t("Veroton arvo", $kieli), "norm", "R", "B", $tid);					
@@ -173,7 +195,7 @@ if (!function_exists('tulosta_lahete')) {
 					$h-=$pdf->ln();
 					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus")."/".t("Kommentti", $kieli), "norm", "L", "B", $tid);
 					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Tilattu", $kieli), "norm", "R", "B", $tid);
-					if($laskurow["rivihintoja_ei_nayteta"] == "") {
+					if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
 						if($alenaytetaan=="OK") {
 							$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Ale", $kieli), "norm", "R", "B", $tid);				
 						}
@@ -195,7 +217,7 @@ if (!function_exists('tulosta_lahete')) {
 			}			
 		}
 		
-		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
+		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param);
 		$h = 180;
 		
 		$sorttauskentta = generoi_sorttauskentta();
@@ -248,7 +270,7 @@ if (!function_exists('tulosta_lahete')) {
 			while ($row = mysql_fetch_array($riresult)) {
 
 				if($h < 20) {
-					$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
+					$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param);
 					$h = 190;
 				}
 				
@@ -287,7 +309,7 @@ if (!function_exists('tulosta_lahete')) {
 				}
 				
 				
-				if($laskurow["rivihintoja_ei_nayteta"] == "") {
+				if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
 					$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), "norm", "R", "");
 					if ($row["alv"] >= 500) {
 						$pdf->write($h, 1, $s[2], $s[3], t("M.V.", $kieli), "norm", "R", "");					
@@ -302,7 +324,7 @@ if (!function_exists('tulosta_lahete')) {
 				
 				$pdf->write($h, 1, $s[0], $s[1], ($row['tilkpl']*1)." ".strtolower($row["yksikko"]), "snadi", "R", "I");
 				
-				if($laskurow["rivihintoja_ei_nayteta"] == "") {
+				if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
 					if($alenaytetaan=="OK") {
 						$pdf->write($h, 1, $s[1], $s[2], $row["ale"]."%", "snadi", "R", "I");				
 					}
@@ -355,23 +377,23 @@ if (!function_exists('tulosta_lahete')) {
 		}
 
 		//erikoisalennus annetaan vain riveille joilla EI ole NETTOHINTAA
-		if ($laskurow['erikoisale'] != 0) {
-			$erikoisale=(1-round($laskurow['erikoisale']/100,2))*$summa;
-			
-			$kaikkiyhteensa = $summa + $summa_netto - $erikoisale;
+		if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on")  {
+			if ($laskurow['erikoisale'] != 0) {
+				$erikoisale=(1-round($laskurow['erikoisale']/100,2))*$summa;
 
-			$pdf->write($h, 1, 0, $s[2], t("Erikoisale", $kieli).":", "norm", "R", "B");
-			$pdf->write($h, 1, $s[2], 0, money_format('%i',$erikoisale), "norm", "R", "B");
-			$h-=$pdf->ln(1);
-		}
-		else {
-			$kaikkiyhteensa = $summa + $summa_netto;
-		}
-		
-		$pdf->write($h, 1, 0, $s[2], t("Lähetys yhteensä", $kieli).":", "norm", "R", "B");
-		$pdf->write($h, 1, $s[2], 0, money_format('%i',$kaikkiyhteensa), "norm", "R", "B");
+				$kaikkiyhteensa = $summa + $summa_netto - $erikoisale;
 
-		$h-=$pdf->ln(3);						
+				$pdf->write($h, 1, 0, $s[2], t("Erikoisale", $kieli).":", "norm", "R", "B");
+				$pdf->write($h, 1, $s[2], 0, money_format('%i',$erikoisale), "norm", "R", "B");
+				$h-=$pdf->ln(1);
+			}
+			else {
+				$kaikkiyhteensa = $summa + $summa_netto;
+			}
+
+			$pdf->write($h, 1, 0, $s[2], t("Lähetys yhteensä", $kieli).":", "norm", "R", "B");
+			$pdf->write($h, 1, $s[2], 0, money_format('%i',$kaikkiyhteensa), "norm", "R", "B");
+		}		
 		
 				
 		//	Loppuun duusataan yrityksen perustiedot

@@ -1401,7 +1401,14 @@
 
 				//	Jos meill‰ on funktio tulosta_lahete meill‰ on suora funktio joka hoitaa koko tulostuksen
 				if(function_exists("tulosta_lahete")) {
-					tulosta_lahete($otunnus, $komento["L‰hete"], $kieli = "", $tee);
+					if($vrow["selite"] != '') {
+						$tulostusversio = $vrow["selite"];
+					}
+					else {
+						$tulostusversio = $asrow["lahetetyyppi"];						
+					}
+					
+					tulosta_lahete($otunnus, $komento["L‰hete"], $kieli = "", $tee, $tulostusversio);
 				}
 				else {
 					//tehd‰‰n uusi PDF failin olio

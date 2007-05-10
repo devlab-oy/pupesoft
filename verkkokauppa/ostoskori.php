@@ -258,4 +258,11 @@ if ($tee == "") {
 	}
 }
 
+if (file_exists("inc/footer.inc")) {
+	require("inc/footer.inc");
+}
+else {
+	require("footer.inc");
+}
+
 ?>

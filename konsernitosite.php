@@ -164,6 +164,8 @@
 				$result = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($result) != 1) {
 					echo "".t("Yritystä")." $kukarow[yhtio] ".t("ei löytynytkään")."!";
+					
+					require "inc/footer.inc";
 					exit;
 				}
 				$yhtiorow=mysql_fetch_array ($result);
@@ -211,6 +213,8 @@
 		$result = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($result) != 1) {
 			echo "Yritystä $kukarow[yhtio] ei löytynytkään!";
+			
+			require "inc/footer.inc";
 			exit;
 		}
 		$yhtiorow=mysql_fetch_array ($result);
@@ -228,6 +232,8 @@
 			$yresult = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($yresult) < 2) {
 				echo "<font class='error'>".t("Konsernissasi ei ole yhtään yritystä. Näin ollen et voi käyttää tätä toimintoa")."</font>";
+				
+				require "inc/footer.inc";
 				exit;
 			}
 			echo "<form name = 'tosite' action = '$PHP_SELF' method='post'>
@@ -314,6 +320,8 @@
 					$result = mysql_query($query) or pupe_error($query);
 					if (mysql_num_rows($result) != 1) {
 						echo "".t("Yritystä")." $kukarow[yhtio] ".t("ei löytynytkään")."!";
+						
+						require "inc/footer.inc";
 						exit;
 					}
 					$yhtiorow=mysql_fetch_array ($result);

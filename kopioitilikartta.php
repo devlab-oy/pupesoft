@@ -1,8 +1,10 @@
 <?php
 	require "inc/parametrit.inc";
+	
 	echo "<font class='head'>Kopioi tilikartta:</font><hr>";
-	if ($tila == 'x')
-	{
+	
+	if ($tila == 'x') {
+		
 		$query = "SELECT tunnus FROM tili where yhtio='$kukarow[yhtio]' limit 1";
 		$kukar = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($kukar) > 0) echo "<font class='error'>Yhtiöllä '$kukarow[yhtio]' on jo tilikartta</font><br>";
@@ -53,5 +55,10 @@
 		}
 		echo "</select></td>";
 		echo "<td><input type='submit' value='Kopioi'></td></tr>";
+		echo "</table>";
 	}
+	
+
+	require "inc/footer.inc";
+	
 ?>

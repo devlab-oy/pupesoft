@@ -4,23 +4,25 @@
 	echo "<font class='head'>".t("Manuaaliset menot")."</font><hr>";
 
 	if ($tee == 'P') {
-// Olemassaolevaa maksua muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
-                $query = "SELECT tapvm, summa, selite
-                          FROM maksu
-                          WHERE tunnus = '$tunnus'";
-                $result = mysql_query($query) or pupe_error($query);
+		// Olemassaolevaa maksua muutetaan, joten poistetaan rivi ja annetaan perustettavaksi
+        $query = "	SELECT tapvm, summa, selite
+                   	FROM maksu
+                    WHERE tunnus = '$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		
 		if (mysql_num_rows($result) == 0) {
 			echo "".t("Maksua ei löydy")."!";
 			exit;
 		}
+		
 		$maksurow=mysql_fetch_array($result);
 		$tapvm = $maksurow[0];
 		$summa = $maksurow[1];
 		$selite = $maksurow[2];
 		$ok = 1;
 
-		$query = "DELETE from maksu
-			  WHERE tunnus = '$tunnus'";
+		$query = "	DELETE from maksu
+			  		WHERE tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
@@ -32,7 +34,7 @@
 	}
 
 	if ($tee == 'U') {
-// Lisätään maksurivi
+		// Lisätään maksurivi
 		if ($ok != 1) {
 			$query = "SELECT konserni
 						FROM yhtio
@@ -91,9 +93,9 @@
 				</td></tr></form>";
 	}
 
-// Annetaan mahdollisuus tehdä uusi maksu
+	// Annetaan mahdollisuus tehdä uusi maksu
 	if ($ok != 1) {
-// Annetaan tyhjät tiedot, jos rivi oli virheetön
+		// Annetaan tyhjät tiedot, jos rivi oli virheetön
 		$tapvm = '';
 		$summa = '';
 		$selite = '';
@@ -109,5 +111,6 @@
 		<td><input type='Submit' value = '".t("Lisää")."'></td>
 		</tr></form>";
 	echo "</table>";
-	echo "</body></html>";
+	
+	require "inc/footer.inc";
 ?>

@@ -121,5 +121,7 @@
 		}
 		echo "</table>";
 	}
+	
+	require "inc/footer.inc";
 
 ?>

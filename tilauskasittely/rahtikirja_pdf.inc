@@ -421,4 +421,6 @@
 	//itse print komento...
 	$line = exec("$kirjoitin $pdffilenimi");
 
+	system("rm -f $pdffilenimi");
+
 ?>

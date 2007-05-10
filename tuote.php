@@ -474,14 +474,48 @@
 						}
 					}
 					echo "<tr><th>".t("Suoratoimitettavissa Yhteens‰")."</th><td align='right'>".sprintf("%.02f",$kokonaissaldo)."</td></tr>";
-
-					echo "</table>";
+					
+					echo "</table></td></tr>";
 				}
+				
+				echo "<tr><td class='back' valign='top' align='left' colspan='2'><br><table>";
+				echo "<tr><th>".t("P‰iv‰m‰‰r‰")."</th><th>".t("Myyt‰viss‰")."</th></tr>";
+				
+				$query = "	select distinct(if(tyyppi!='O',kerayspvm,toimaika)) as kerayspvm
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.tyyppi in ('L','G','V','W','O')
+							and tilausrivi.tuoteno = '$tuoteno'
+							and tilausrivi.varattu > 0
+							and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+							and ((tilausrivi.tyyppi in ('L','G','V','W') and kerayspvm >= now()) or (tilausrivi.tyyppi = 'O' and toimaika >= now()))
+							order by 1";
+				$kerresult = mysql_query($query) or pupe_error($query);
+				
+				$oldie = 0;
+				
+				while ($kerrow = mysql_fetch_array($kerresult)) {
+					
+					list( , , $nymyytavissa, $staattus) = saldo_myytavissa($tuoteno, 'KAIKKI', '', '', '', '', '', '', '', $kerrow['kerayspvm']);
+					
+					if ($oldie != $nymyytavissa) {
+						echo "<tr><td>".tv1dateconv($kerrow["kerayspvm"])."</td><td>".sprintf("%.2f", $nymyytavissa)."</td></tr>";
+						$oldie = $nymyytavissa;
+					}
+				}
+				
+				$oldie = 0;
+				
+				
+				
+				echo "</tr></td>";
+				echo "</table></td></tr>";
+				
 			}
 
 			echo "</td>";
 
-
+			
 
 			echo "</tr><tr><td class='back' valign='top' align='left' colspan='2'>";
 

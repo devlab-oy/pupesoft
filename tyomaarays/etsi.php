@@ -130,4 +130,6 @@
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "</table>";
 	
+	require ("../inc/footer.inc");
+	
 ?>

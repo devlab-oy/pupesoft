@@ -9,6 +9,8 @@
 		$result = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($result) != 1) {
 			echo "<font class='error'>".t("Tili katosi")."</font><br>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 		else {
@@ -96,6 +98,8 @@
 		$result = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sinulla ei ole yht‰‰n pankkitili‰")."</font><hr>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -135,6 +139,8 @@
 		$result = mysql_query($query) or pupe_error($query);
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sinulla ei ole pankkiainestoja")."</font><hr>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 		echo "<table>";

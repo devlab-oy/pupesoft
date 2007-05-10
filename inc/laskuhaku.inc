@@ -88,6 +88,8 @@ if ($tee != '') {
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<b>".t("Haulla ei löytynyt yhtään laskua")."</b>";
+		
+		require ("inc/footer.inc");
 		exit;
 	}
 

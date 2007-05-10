@@ -312,4 +312,6 @@ if ($tee=='') {
 	</form>";
 }
 
+require ("inc/footer.inc");
+
 ?>

@@ -334,8 +334,7 @@ echo "<table width='250'>
 	
 	echo "<tr><td class='back' align='center' colspan='8'><a href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&toim=$toim'>".t("Edellinen")."</a>  - <a href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&toim=$toim'>".t("Seuraava")."</a></td></tr>\n";
 
-	echo "</table></th></tr>
-			</table>
-			</body></html>";
+	echo "</table></th></tr></table>";
 
+	require ("../inc/footer.inc");
 ?>

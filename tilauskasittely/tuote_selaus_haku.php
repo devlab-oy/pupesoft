@@ -366,6 +366,13 @@
 
 	// Ei listata mit‰‰n jos k‰ytt‰j‰ ei ole tehnyt mit‰‰n rajauksia
 	if($lisa == "") {
+		if (file_exists("../inc/footer.inc")) {
+			require ("../inc/footer.inc");
+		}
+		else {
+			require ("footer.inc");
+		}
+		
 		exit;
 	}
 

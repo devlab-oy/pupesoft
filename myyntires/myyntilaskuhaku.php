@@ -152,4 +152,6 @@ if ($tee == '') {
 	$kentta = 'summa1';
 }
 
+require ("../inc/footer.inc");
+
 ?>

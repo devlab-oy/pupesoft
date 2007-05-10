@@ -67,6 +67,8 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo "<b>".t("Haulla ei löytynyt yhtä laskua")."</b>$query";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 		$trow=mysql_fetch_array ($result);
@@ -79,6 +81,8 @@
 		// Se oli jo maksettu
 		if (strlen($trow["maksuaika"]) > 0) { 
 			echo "<font class='error'>".t("Laskun ehti jo joku muu maksaa! Ohitetaan")."! $trow[maksuaika]</font><br>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 		
@@ -116,6 +120,8 @@
 
 			if (mysql_num_rows($result) != 1) {
 				echo "<b>".t("Hyvityshaulla ei löytynyt mitään")."</b>$query";
+				
+				require ("inc/footer.inc");
 				exit;
 			}
 			
@@ -143,6 +149,8 @@
 						<input type='radio' name = 'valinta' value='K' checked> ".t("Kyllä")."
 						<input type='radio' name = 'valinta' value='E'> ".t("Ei")."
 						<input type='submit' name = 'valitse' value='".t("valitse")."'>";
+						
+						require ("inc/footer.inc");
 						exit;
 					}
 					if ($valinta == 'E') {
@@ -202,6 +210,8 @@
 		
 		if (mysql_num_rows($result) < 2) {
 			echo "<font class='error'>".t("Laskuja katosi")."</font><br>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 		
@@ -358,6 +368,8 @@
 		
 		if (mysql_affected_rows() != 1) { // Jotain meni pieleen
 			echo "System error Debug --> $query<br>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 		$query = "	UPDATE yriti set
@@ -415,6 +427,8 @@
 				$result = mysql_query($query) or pupe_error($query);
 				if (mysql_num_rows($result) != 1) {
 					echo "<b>".t("Hyvityshaulla ei löytynyt mitään")."</b>$query";
+					
+					require ("inc/footer.inc");
 					exit;
 				}
 
@@ -439,6 +453,8 @@
 				
 				if (mysql_affected_rows() != 1) { // Jotain meni pieleen
 					echo "System error Debug --> $query<br>";
+					
+					require ("inc/footer.inc");
 					exit;
 				}
 				
@@ -456,6 +472,8 @@
 	if ($tee == "NK" or $tee == "NT" or $tee == "NV") {
 		if ($oltilrow['tunnus'] == 0) {
 			echo "Maksutili on kateissa! Systeemivirhe!";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 		if ($tee != "NV") {
@@ -499,6 +517,8 @@
 			
 			if (mysql_num_rows($yrires) != 1) {
 				echo "Maksutili katosi! Systeemivirhe!";
+				
+				require ("inc/footer.inc");
 				exit;
 			}
 			
@@ -522,6 +542,8 @@
 			
 			if (mysql_affected_rows() != 1) { // Jotain meni pieleen
 				echo "System error Debug --> $query<br>";
+				
+				require ("inc/footer.inc");
 				exit;
 			}
 			
@@ -551,6 +573,8 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -594,6 +618,8 @@
 		
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='head'>".t("Sinulla ei ole yhtään tiliä, jolla olisi limiittiä")."!<p>".t("Käy päivittämässä limiitit yrityksen pankkitileille")."!</font><hr>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 		echo "<form action='maksa.php' method='post'>
@@ -627,6 +653,8 @@
 		
 		if (mysql_num_rows($result) != 1) {
 			echo t("Etsin tiliä")." '$oltilrow[0]', ".t("mutta sitä ei löytynyt")."!";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 		echo "<table><tr>";
@@ -1014,5 +1042,7 @@
 		echo "<td><input type='Submit' value='".t("valitse")."'></td></form><td></td></tr>";
 		echo "</table>";
 	}
+	
+	require ("inc/footer.inc");
 
 ?>

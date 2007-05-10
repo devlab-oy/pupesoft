@@ -67,6 +67,8 @@
 					</td>
 					<td><input type = 'submit' value = '".t("Näytä")."'></td>
 					</tr></table></form>";
+			
+			require ("inc/footer.inc");
 			exit;
 	}
 	if ($tee == 1) {

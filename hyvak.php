@@ -15,6 +15,8 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -25,6 +27,9 @@
 		}
 		else {
 			echo "Tietosuojaongelma! Et ole oikea käyttäjä";
+			
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 	}
@@ -41,6 +46,8 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -93,6 +100,8 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -145,6 +154,8 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -170,6 +181,8 @@
 
 		if (mysql_num_rows($result) !=1 ) {
 			echo t('lasku kateissa') . "$tunnus</font>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -194,6 +207,8 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -201,6 +216,8 @@
 
 		if ($laskurow['hyvak1'] != $laskurow['hyvaksyja_nyt'] or $laskurow['hyvaksynnanmuutos'] == '') {
 			echo pupe_eror('lasku on väärässä tilassa');
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -233,6 +250,8 @@
 
 		if (mysql_num_rows($result) !=1 ) {
 			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -348,6 +367,8 @@
 
 		if (mysql_num_rows($result) == 0) {
 			echo t("Tiliöintiä ei löydy")."! $query";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -413,6 +434,8 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t("Laskua ei enää löydy! Systeemivirhe!");
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -431,6 +454,8 @@
 
 				if (mysql_num_rows($result) == 0) {
 					echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
+					
+					require ("inc/footer.inc");
 					exit;
 				}
 			}
@@ -450,6 +475,8 @@
 
 					if (mysql_num_rows($result) == 0) {
 						echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
+						
+						require ("inc/footer.inc");
 						exit;
 					}
 
@@ -470,6 +497,8 @@
 
 					if (mysql_num_rows($result) == 0) {
 						echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
+						
+						require ("inc/footer.inc");
 						exit;
 					}
 
@@ -497,6 +526,8 @@
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Lasku katosi")."</b><br>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 
@@ -673,6 +704,8 @@
 				// Käydään sama data läpi uudestaan
 				if (!mysql_data_seek ($vresult, 0)) {
 					echo "mysql_data_seek failed!";
+					
+					require ("inc/footer.inc");
 					exit;
 				}
 
@@ -1085,6 +1118,8 @@
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Sinulla ei ole hyväksymättömiä laskuja")."</b><br>";
+			
+			require ("inc/footer.inc");
 			exit;
 		}
 

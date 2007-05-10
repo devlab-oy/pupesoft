@@ -181,9 +181,6 @@
 		}
 	}
 
-	// end if paivita
-
-	require ("inc/footer.inc");
 	echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 				function verify(){
 						msg = '".t("Haluatko todella poistaa tämän profiilin ja käyttäjiltä oikeudet tähän profiiliin?")."';

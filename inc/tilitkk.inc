@@ -71,6 +71,8 @@
 		echo "</tr>";
 		echo "<tr><td></td>
 		      <td><input type = 'submit' value = '".t("Näytä")."'></form></td><tr></table>";
+		
+		require ("inc/footer.inc");
 		exit;
 	}
 

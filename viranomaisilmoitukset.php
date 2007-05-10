@@ -19,7 +19,7 @@ if($tee == "VSRALVYV") {
 	
 	echo "</font><br><hr>";
 
-	if (strtoupper($yhtiorow["maakoodi"])== 'FI') {
+	if (strtoupper($yhtiorow["maa"])== 'FI') {
 		//muutetaan ytunnus takas oikean näköseks
 		$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
 
@@ -70,10 +70,10 @@ if($tee == "VSRALVYV") {
 				$query = "	UPDATE asiakas SET maa = '$maa'
 							WHERE yhtio = '$kukarow[yhtio]'and ytunnus='$ytunnus'";
 				$result = mysql_query($query) or pupe_error($query);
-				echo "<font class='message'>".t("Korjattiin asiakkaan")." '$ytunnus' ".t("maakoodiksi")." '$maa'</font><br>";
+				echo "<font class='message'>".t("Korjattiin asiakkaan")." '$ytunnus' ".t("maaksi")." '$maa'</font><br>";
 			}
 			else {
-				echo "<font class='error'>".t("Syötetty maakoodi on väärin")."</font><br>";
+				echo "<font class='error'>".t("Syötetty maa on väärin")."</font><br>";
 			}
 		}
 		
@@ -129,14 +129,14 @@ if($tee == "VSRALVYV") {
 								<td>$ulos</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[summa]</td><td>$row[laskuja]</td>
 								<td class='back'>
 								<font class='error'>".t("VIRHE!!! asiakkaan maa puuttuu!!")."</font><br>
-								<input type='submit' name='tallenna' value='".t("Korjaa asiakkaan maakoodi")."'>
+								<input type='submit' name='tallenna' value='".t("Korjaa asiakkaan maa")."'>
 								</td></form></tr>";
 					
 					$ok = 1;
 					
 				}
 				elseif($row["maa"] != "" and $row["asiakkaan_maa"] == "X") {
-					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[summa]</td><td>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maakoodi haettu asiakkaan tiedoista")."</font></td></tr>";
+					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[summa]</td><td>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
 				} 
 				else {
 					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[summa]</td><td>$row[laskuja]</td></tr>";					
@@ -183,7 +183,7 @@ if($tee == "VSRALVYV") {
 						</td></tr>";
 			}
 			else {
-				echo "<tr><td colspan='4' class='back'><font class='error'>".t("Korjaa virheet maakoodit ennen ilmoituksen lähettämistä")."</font></td></tr>";
+				echo "<tr><td colspan='4' class='back'><font class='error'>".t("Korjaa virheet maat ennen ilmoituksen lähettämistä")."</font></td></tr>";
 			}
 			echo "</table>";												
 			

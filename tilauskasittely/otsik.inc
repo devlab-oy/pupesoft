@@ -334,13 +334,15 @@
 		$alv_velvollisuus = "";
 
 		// jos meillä on lasku menossa ulkomaille
-		if ($srow["maa"] != "" and $srow["maa"] != $yhtiorow["maakoodi"]) {
+		if ($srow["maa"] != "" and $srow["maa"] != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
-			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maakoodi='$srow[maa]' and vat_numero != ''";
+			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$srow[maa]' and vat_numero != ''";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
 			if (mysql_num_rows($alhire) == 1) {
+
+				$alhiro  = mysql_fetch_array($alhire);
 
 				// haetaan maan oletusalvi
 				$query = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$srow[maa]'";
@@ -356,7 +358,8 @@
 					// nämä tässä keisissä aina näin
 					$alv    = $apuro["selite"];
 					$vienti = "";
-					$alv_velvollisuus = "KYLLA";
+					$alv_velvollisuus = $alhiro["vat_numero"];
+					echo "<input type='hidden' name='alv_velvollisuus' value='$alhiro[vat_numero]'>";
 				}
 			}
 
@@ -651,8 +654,8 @@
 
 			echo "<td>".t("Alv").":</td>";
 
-			if ($alv_velvollisuus == "KYLLA") {
-				echo " <td>".t("Verollinen myynti")."
+			if ($alv_velvollisuus != "") {
+				echo " <td>".t("Verollinen myynti (ulkomaan VAT)")."
 						<input type='hidden' name='alv' value='$alv'>
 						</td></tr>";
 			}
@@ -744,9 +747,12 @@
 			if ($srow["alv"] == 99.99) {
 				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaan marginaalimyyntiä")."</td>";
 			}
-			elseif ($toim == "YLLAPITO" or $alv_velvollisuus == "KYLLA") {
+			elseif ($toim == "YLLAPITO") {
 				// aina kotimaa
 				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")."</td>";
+			}
+			elseif ($alv_velvollisuus != "") {
+				echo "<td><input type='hidden' name='vienti' value=''>".t("Kotimaa")." ($srow[maa])</td>";
 			}
 			else {
 				echo "<td>
@@ -1774,10 +1780,37 @@
 			$toimitusehto2 = trim($toimitusehto2." ".$kasitoimehto2);
 		}
 
+		// poikkeava laskutusosoite
+		if ($alv_velvollisuus != "") {
+
+			// haetaan sen yhteystiedot
+			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero = '$alv_velvollisuus'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
+				$apualvrow  = mysql_fetch_array($alhire);
+				$yhtiorow["nimi"] 		= $apualvrow["nimi"];
+				$yhtiorow["osoite"] 	= $apualvrow["osoite"];
+				$yhtiorow["postino"]	= $apualvrow["postino"];
+				$yhtiorow["postitp"]	= $apualvrow["postitp"];
+				$yhtiorow["maa"] 		= $apualvrow["maa"];
+				$yhtiorow["ovttunnus"] 	= $apualvrow["vat_numero"];
+				$yhtiorow["kotipaikka"]	= $apualvrow["kotipaikka"];
+			}
+
+		}
+
 		//Otetaan valuutan kurssi
 		list($valkoodi, $kurssi) = explode('##', $valkoodi);
 
 		$query .= "	lasku SET
+					yhtio_nimi							= '$yhtiorow[nimi]',
+					yhtio_osoite						= '$yhtiorow[osoite]',
+					yhtio_postino						= '$yhtiorow[postino]',
+					yhtio_postitp						= '$yhtiorow[postitp]',
+					yhtio_maa							= '$yhtiorow[maa]',
+					yhtio_ovttunnus						= '$yhtiorow[ovttunnus]',
+					yhtio_kotipaikka					= '$yhtiorow[kotipaikka]',
 					ytunnus								= '$ytunnus',
 					nimi 								= '$nimi',
 					nimitark 							= '$nimitark',

@@ -60,7 +60,7 @@
 					$haku1 = " and nimi like '%$toimittaja%' ";
 				}
 
-				$query = "select tunnus, ytunnus, nimi, postino, postitp, if(maakoodi='$yhtiorow[maakoodi]', tilinumero, ultilno) tilinumero from toimi where yhtio='$kukarow[yhtio]' $haku1";
+				$query = "select tunnus, ytunnus, nimi, postino, postitp, if(maa='$yhtiorow[maa]', tilinumero, ultilno) tilinumero from toimi where yhtio='$kukarow[yhtio]' $haku1";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {

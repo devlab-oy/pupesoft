@@ -172,7 +172,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(695, 420, 674, 580, $firstpage, $rectparam);
 		$pdf->draw_text(310, 687, t("Asiakkaan Y-tunnus", $kieli), 	$firstpage, $pieni);
 
-		if (substr(trim(strtoupper($laskurow["ytunnus"])),0,2) != strtoupper($laskurow["maa"]) and trim(strtoupper($laskurow["maa"])) != trim(strtoupper($yhtiorow["maakoodi"]))) {
+		if (substr(trim(strtoupper($laskurow["ytunnus"])),0,2) != strtoupper($laskurow["maa"]) and trim(strtoupper($laskurow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
 			$laskurow["ytunnus"] = strtoupper($laskurow["maa"])."-".$laskurow["ytunnus"];
 		}
 
@@ -433,7 +433,7 @@ if (!function_exists('loppu')) {
 
 		$vientikala = 0;
 
-		if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maakoodi"])) {
+		if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maa"])) {
 			$vientikala = 20;
 		}
 
@@ -485,7 +485,7 @@ if (!function_exists('loppu')) {
 			$fres = mysql_query($query) or pupe_error($query);
 			$frow = mysql_fetch_array($fres);
 
-			if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maakoodi"])) {
+			if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maa"])) {
 				// jos on vienti
 				$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),						$firstpage, $pieni);
 				$pdf->draw_text(30,  92, $frow["pankkinimi1"]."  ".$frow["pankkitili1"],	$firstpage, $norm);
@@ -531,7 +531,7 @@ if (!function_exists('loppu')) {
 			}
 
 			// ei factoroida niin normitiedot
-			if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maakoodi"])) {
+			if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maa"])) {
 				// viennissä tällästä
 				$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),													$firstpage, $pieni);
 
@@ -589,7 +589,7 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(257, 35, $yhtiorow["email"],				$firstpage, $pieni);
 
 		//jos on suomalainen yritys tehdään ytunnus nätiks
-		if (strtoupper($yhtiorow["maakoodi"])== 'FI') {
+		if (strtoupper($yhtiorow["maa"])== 'FI') {
 			//muutetaan ytunnus takas oikean näköseks
 			$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
 
@@ -609,7 +609,7 @@ if (!function_exists('loppu')) {
 			$uytunnus = $yhtiorow["ytunnus"];
 		}
 
-		$uytunnus = $yhtiorow["maakoodi"]."-".$uytunnus;
+		$uytunnus = $yhtiorow["maa"]."-".$uytunnus;
 
 		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$firstpage, $pieni);
 		$pdf->draw_text(444, 55, $uytunnus,							$firstpage, $pieni);

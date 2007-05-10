@@ -110,10 +110,10 @@
 							$laskurow["kauppatapahtuman_luonne"] = '999'; // intrastattia ei l‰hetet‰ tulliin kun varasto ja toimitusosoite on samassa maassa
 							$ultilno = '';
 						}
-						elseif ($varaston_row["maa"] == $yhtiorow["maakoodi"]) {
+						elseif ($varaston_row["maa"] == $yhtiorow["maa"]) {
 							$ultilno = '-1'; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
 						}
-						elseif ($laskurow["toim_maa"] == $yhtiorow["maakoodi"]) {
+						elseif ($laskurow["toim_maa"] == $yhtiorow["maa"]) {
 							$ultilno = '-2'; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
 
 							// katotaan onko toimitustavalle jotain intrastat oletuksia

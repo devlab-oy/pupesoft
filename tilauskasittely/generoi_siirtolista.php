@@ -253,7 +253,7 @@
 			if ($varow['tunnus']==$lahdevarasto) $sel = 'selected';
 
 			$varastomaa = '';
-			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maakoodi'])) {
+			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
 				$varastomaa = strtoupper($varow['maa']);
 			}
 
@@ -274,7 +274,7 @@
 			if ($varow['tunnus']==$kohdevarasto) $sel = 'selected';
 
 			$varastomaa = '';
-			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maakoodi'])) {
+			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
 				$varastomaa = strtoupper($varow['maa']);
 			}
 

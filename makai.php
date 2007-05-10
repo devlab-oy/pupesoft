@@ -1,12 +1,12 @@
 <?php
 	require "inc/parametrit.inc";
 	
-	if (strtoupper($yhtiorow['maakoodi']) == 'SE') {
+	if (strtoupper($yhtiorow['maa']) == 'SE') {
 		require "makaise.php";
 		exit;
 	}
-	if (strtoupper($yhtiorow['maakoodi']) != 'FI') {
-		echo "<font class='error'>".t("Yrityksen maakoodi ei ole sallittu")." (FI, SE) '$yhtiorow[maakoodi]'</font><br>";
+	if (strtoupper($yhtiorow['maa']) != 'FI') {
+		echo "<font class='error'>".t("Yrityksen maakoodi ei ole sallittu")." (FI, SE) '$yhtiorow[maa]'</font><br>";
 		exit;
 	}
 	echo "<font class='head'>LM03-maksuaineisto</font><hr>";
@@ -42,7 +42,7 @@
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]' 
 				and tila = 'P' 
-				and maakoodi = 'fi' 
+				and maa = 'fi' 
 				and maksaja = '$kukarow[kuka]'
 				ORDER BY 1";
 	$pvmresult = mysql_query($query) or pupe_error($query);
@@ -78,7 +78,7 @@
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]' 
 					and tila = 'P' 
-					and maakoodi = 'fi' 
+					and maa = 'fi' 
 					and summa < 0 
 					and maksaja = '$kukarow[kuka]' 
 					and olmapvm = '$pvmrow[olmapvm]'
@@ -94,7 +94,7 @@
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' 
 							and tila = 'P' 
-							and maakoodi = 'fi' 
+							and maa = 'fi' 
 							and maksaja = '$kukarow[kuka]' 
 							and tilinumero='$laskurow[tilinumero]' 
 							and maksu_tili='$laskurow[maksu_tili]' 
@@ -126,7 +126,7 @@
 		$query = "	SELECT yriti.tunnus, yriti.tilino, yriti.nimi nimi
 					FROM lasku, yriti
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'P' 
-					and maakoodi = 'fi' 
+					and maa = 'fi' 
 					and yriti.tunnus = maksu_tili 
 					and yriti.yhtio = lasku.yhtio 
 					and maksaja = '$kukarow[kuka]' 
@@ -156,7 +156,7 @@
 							FROM lasku, yriti
 							WHERE lasku.yhtio = '$kukarow[yhtio]' 
 							and tila = 'P' 
-							and maakoodi = 'fi' 
+							and maa = 'fi' 
 							and yriti.tunnus = maksu_tili 
 							and yriti.yhtio = lasku.yhtio 
 							and maksaja = '$kukarow[kuka]' 
@@ -196,7 +196,7 @@
 				
 				$query = "UPDATE lasku SET tila = 'Q'
 				          WHERE lasku.yhtio = '$kukarow[yhtio]' 
-				          and tila = 'P' and maakoodi = 'fi' 
+				          and tila = 'P' and maa = 'fi' 
 				          and maksaja = '$kukarow[kuka]' 
 				          and maksu_tili='$yritirow[tunnus]' 
 				          and olmapvm = '$pvmrow[olmapvm]'
@@ -250,12 +250,12 @@
 				viesti,
 				ultilno,
 				lasku.tunnus, sisviesti2, yriti.tilino,
-				maa, maakoodi,
+				maa,
 				pankki1, pankki2, pankki3, pankki4,
 				swift, alatila, kasumma, kurssi
 				FROM lasku, yriti, valuu
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'P' and
-				maakoodi <> 'fi' and
+				maa <> 'fi' and
 				yriti.tunnus = maksu_tili and
 				yriti.yhtio = lasku.yhtio and
 				valuu.nimi = lasku.valkoodi and
@@ -355,7 +355,7 @@
 		$query = "	UPDATE lasku SET tila = 'Q'
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
 					and tila = 'P' 
-					and maakoodi <> 'fi' 
+					and maa <> 'fi' 
 					and maksaja = '$kukarow[kuka]'
 				    ORDER BY yhtio, tila";
 		$result = mysql_query($query) or pupe_error($query);

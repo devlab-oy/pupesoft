@@ -85,7 +85,7 @@
 
 	//Kenttä 2 Viejä
 	$pdf2->draw_text(61,  783, $yhtiorow["nimi"], 								$pages[0], $kymppi);
-	$pdf2->draw_text(180, 794, $yhtiorow["maakoodi"].print_ytunnus($yhtiorow["ytunnus"]),  $pages[0], $kymppi);
+	$pdf2->draw_text(180, 794, $yhtiorow["maa"].print_ytunnus($yhtiorow["ytunnus"]),  $pages[0], $kymppi);
 	$pdf2->draw_text(61,  771, $yhtiorow["osoite"], 							$pages[0], $kymppi);
 	$pdf2->draw_text(61,  759, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$pages[0], $kymppi);
 
@@ -251,7 +251,7 @@
 						$pdf2->draw_text(25,  776, "2. Lähetäjä/Viejä",						$lisalehti, $kutonen);
 						$pdf2->draw_text(190, 776, "Asiakasnumero",							$lisalehti, $kutonen);
 						$pdf2->draw_text(25,  765, $yhtiorow["nimi"], 						$lisalehti, $kymppi);
-						$pdf2->draw_text(190, 765, $yhtiorow["maakoodi"].print_ytunnus($yhtiorow["ytunnus"]), $lisalehti, $kymppi);
+						$pdf2->draw_text(190, 765, $yhtiorow["maa"].print_ytunnus($yhtiorow["ytunnus"]), $lisalehti, $kymppi);
 						$pdf2->draw_text(25,  753, $yhtiorow["osoite"], 					$lisalehti, $kymppi);
 						$pdf2->draw_text(25,  741, $yhtiorow["postino"]." ".$yhtiorow["postitp"], $lisalehti, $kymppi);
 
@@ -309,7 +309,7 @@
 
 						//Kenttä 2 Viejä
 						$pdf2->draw_text(62,  791, $yhtiorow["nimi"], 						$lisalehti[0], $kymppi);
-						$pdf2->draw_text(190, 802, $yhtiorow["maakoodi"].print_ytunnus($yhtiorow["ytunnus"]), $lisalehti[0], $kymppi);
+						$pdf2->draw_text(190, 802, $yhtiorow["maa"].print_ytunnus($yhtiorow["ytunnus"]), $lisalehti[0], $kymppi);
 						$pdf2->draw_text(62,  778, $yhtiorow["osoite"], 					$lisalehti[0], $kymppi);
 						$pdf2->draw_text(62,  766, $yhtiorow["postino"]." ".$yhtiorow["postitp"], $lisalehti[0], $kymppi);
 
@@ -494,7 +494,7 @@
 
 		//Kenttä 14
 		$pdf2->draw_text(61,  640, $yhtiorow["nimi"], 								$pages[0], $kymppi);
-		$pdf2->draw_text(180, 649, $yhtiorow["maakoodi"].print_ytunnus($yhtiorow["ytunnus"]),$pages[0], $kymppi);
+		$pdf2->draw_text(180, 649, $yhtiorow["maa"].print_ytunnus($yhtiorow["ytunnus"]),$pages[0], $kymppi);
 		$pdf2->draw_text(61,  628, $yhtiorow["osoite"], 							$pages[0], $kymppi);
 		$pdf2->draw_text(61,  616, $yhtiorow["postino"]."  ".$yhtiorow["postitp"], 	$pages[0], $kymppi);
 

@@ -527,7 +527,7 @@ if (!function_exists('tulosta_lasku')) {
 		}
 		else {
 			$pdf->write($h, 1, $s[2], $s[3], 	t("VAT", $kieli).":", "norm", "L", "");					
-			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maakoodi"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
+			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
 		}
 		$h-=$pdf->ln();
 
@@ -536,11 +536,11 @@ if (!function_exists('tulosta_lasku')) {
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["fax"], "norm", "L", "");		
 		if($laskurow["maa"] == "FI" or trim($laskurow["maa"]) == "SUOMI") {
 			$pdf->write($h, 1, $s[2], $s[3], 	t("VAT", $kieli).":", "norm", "L", "");					
-			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maakoodi"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");		
+			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");		
 		}		
 		$h-=$pdf->ln();
 
-		$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["maakoodi"].$yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
+		$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["maa"].$yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Web", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["www"], "norm", "L", "");		
 		$h-=$pdf->ln();

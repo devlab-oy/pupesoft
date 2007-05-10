@@ -204,7 +204,7 @@ if ($tee=='edit') {
 				if (strtoupper($row['maa']) == strtoupper($vrow[0])) {
 					$sel = "selected";
 				}
-				elseif($row['maa'] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maakoodi"])) {
+				elseif($row['maa'] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
 					$sel = "selected";
 				}
 				echo "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";

@@ -197,7 +197,7 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_text(247, 25, $yhtiorow["email"],					$Xfirstpage, $Xpieni);
 	
 			$Xpdf->draw_text(404, 45, t("Y-tunnus", $kieli).":",			$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(444, 45, $yhtiorow["maakoodi"]."-".$yhtiorow["ytunnus"],	$Xfirstpage, $Xpieni);
+			$Xpdf->draw_text(444, 45, $yhtiorow["maa"]."-".$yhtiorow["ytunnus"],	$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(404, 35, t("Kotipaikka", $kieli).":",			$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(444, 35, $yhtiorow["kotipaikka"],				$Xfirstpage, $Xpieni);
 		}

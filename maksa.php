@@ -56,7 +56,7 @@
 			$alatila = '';
 		}
 
-		$query = "	SELECT valuu.kurssi, round($maksettava * valuu.kurssi,2) summa, maksuaika, olmapvm, tilinumero, maakoodi, kapvm, erpcm,
+		$query = "	SELECT valuu.kurssi, round($maksettava * valuu.kurssi,2) summa, maksuaika, olmapvm, tilinumero, maa, kapvm, erpcm,
 							ultilno, swift, pankki1, pankki2, pankki3, pankki4, valkoodi
 					FROM lasku, valuu
 					WHERE lasku.tunnus = '$tunnus' and
@@ -93,11 +93,11 @@
 		
 		//Kotimainen hyvityslasku --> vastaava m‰‰r‰ rahaa on oltava veloituspuolella
 		if ($trow['summa'] < 0 and $eipankkiin == '')  {
-			if (strtoupper($trow['maakoodi']) == 'FI') {
+			if (strtoupper($trow['maa']) == 'FI') {
 				$query = "	SELECT sum(if(alatila='K', summa - kasumma, summa)) summa 
 							FROM lasku
 							WHERE yhtio='$kukarow[yhtio]' and tila='P' and olmapvm = '$trow[olmapvm]' and
-							maksu_tili = '$tili' and maakoodi = 'FI' and tilinumero='$trow[tilinumero]'";
+							maksu_tili = '$tili' and maa = 'FI' and tilinumero='$trow[tilinumero]'";
 			}
 			else {
 				$query = " SELECT sum(if(alatila='K', summa - kasumma, summa)) summa 
@@ -106,7 +106,7 @@
 									and tila='P' 
 									and olmapvm = '$trow[olmapvm]' 
 									and maksu_tili = '$tili' 
-									and maakoodi <> 'FI'
+									and maa <> 'FI'
 									and valkoodi = '$trow[valkoodi]'
 									and ultilno = '$trow[ultilno]'
 									and swift = '$trow[swift]'
@@ -127,7 +127,7 @@
 			
 			$veloitusrow=mysql_fetch_array ($result);
 
-			if (strtoupper($trow['maakoodi']) == 'FI') {
+			if (strtoupper($trow['maa']) == 'FI') {
 				if ($veloitusrow['summa'] + $trow['summa'] < 0) {
 					echo "<font class='error'>".t("Hyvityslaskua vastaavaa m‰‰r‰‰ veloituksia ei ole valittuna.")."<br>".t("Valitse samalle asiakkaalle lis‰‰ veloituksia, jos haluat valita t‰m‰n hyvityslaskun maksatukseen")." ($veloitusrow[summa])</font><br>";
 						$tee = 'S';
@@ -202,7 +202,7 @@
 					and tila		= 'P' 
 					and olmapvm 	= '$maksupvm' 
 					and maksu_tili 	= '$tili' 
-					and maakoodi 	= 'fi' 
+					and maa 	= 'fi' 
 					and tilinumero	= '$trow[tilinumero]'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -393,14 +393,14 @@
 
 			//Hyvityslasku --> vastaava m‰‰r‰ rahaa on oltava veloituspuolella
 			if ($trow['usumma'] > 0) { 
-				if (strtoupper($trow['maakoodi']) == 'FI') {
+				if (strtoupper($trow['maa']) == 'FI') {
 					$query = "	SELECT sum(if(alatila='K', summa - kasumma, summa)) summa 
 								FROM lasku
 								WHERE yhtio='$kukarow[yhtio]' 
 								and tila='P' 
 								and olmapvm = '$trow[olmapvm]' 
 								and maksu_tili = '$trow[maksu_tili]' 
-								and maakoodi = 'fi' 
+								and maa = 'fi' 
 								and tilinumero='$trow[tilinumero]'
 								and maksaja = '$kukarow[kuka]' 
 								and tunnus != '$lasku'";
@@ -412,7 +412,7 @@
 								and tila='P' 
 								and olmapvm = '$trow[olmapvm]' 
 								and maksu_tili = '$trow[maksu_tili]' 
-								and maakoodi <> 'fi'
+								and maa <> 'fi'
 								and valkoodi = '$trow[valkoodi]'
 								and ultilno = '$trow[ultilno]'
 								and swift = '$trow[swift]'
@@ -811,7 +811,7 @@
 					round((lasku.summa - lasku.kasumma) * valuu.kurssi,2) 'kotivaluutassa',
 					lasku.summa, round(lasku.summa * valuu.kurssi,2) 'kotivaluutassa',
 					lasku.ebid, lasku.tunnus, lasku.olmapvm, 
-					if(lasku.maakoodi='$yhtiorow[maakoodi]',lasku.tilinumero, lasku.ultilno) tilinumero,
+					if(lasku.maa='$yhtiorow[maa]',lasku.tilinumero, lasku.ultilno) tilinumero,
 					h1time,
 					h2time,
 					h3time,
@@ -865,7 +865,7 @@
 									WHERE yhtio = '$kukarow[yhtio]' 
 									and tila = 'M' 
 									and summa < 0 
-									and if(lasku.maakoodi='$yhtiorow[maakoodi]',lasku.tilinumero, lasku.ultilno) = '$trow[tilinumero]'";
+									and if(lasku.maa='$yhtiorow[maa]',lasku.tilinumero, lasku.ultilno) = '$trow[tilinumero]'";
 						$hyvitysresult = mysql_query($query) or pupe_error($query);
 						$hyvitysrow=mysql_fetch_array ($hyvitysresult);
 						

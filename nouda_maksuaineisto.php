@@ -11,14 +11,14 @@
 	}
 	else {
 	
-		if (strtoupper($yhtiorow['maakoodi']) == 'FI') {
+		if (strtoupper($yhtiorow['maa']) == 'FI') {
 			$kotimaa = "FI";
 		}
-		elseif (strtoupper($yhtiorow['maakoodi']) == 'SE') {
+		elseif (strtoupper($yhtiorow['maa']) == 'SE') {
 			$kotimaa = "SE";
 		}
-		if (strtoupper($yhtiorow['maakoodi']) != 'FI' and strtoupper($yhtiorow['maakoodi']) != 'SE') {
-			echo "<font class='error'>".t("Yrityksen maakoodi ei ole sallittu")." (FI, SE) '$yhtiorow[maakoodi]'</font><br>";
+		if (strtoupper($yhtiorow['maa']) != 'FI' and strtoupper($yhtiorow['maa']) != 'SE') {
+			echo "<font class='error'>".t("Yrityksen maa ei ole sallittu")." (FI, SE) '$yhtiorow[maa]'</font><br>";
 			exit;
 		}
 

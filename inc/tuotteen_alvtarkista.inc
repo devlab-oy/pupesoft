@@ -9,8 +9,8 @@
 		}
 	}
 
-	if (mysql_field_name($result, $i) == "maakoodi") {
-		if ($t[$i] == $yhtiorow["maakoodi"]) {
+	if (mysql_field_name($result, $i) == "maa") {
+		if ($t[$i] == $yhtiorow["maa"]) {
 			$virhe[$i] = t("Tämä on turhaa, syötä tämä alv tuotetietojen taakse.");
 			$errori = 1;
 		}

@@ -7,7 +7,7 @@
 
 	if ($tee != '') {
 
-		$rivi = "Tullinimike\tMaakoodi\tTuotenumero\tNimitys\r\n";
+		$rivi = "Tullinimike\tMaa\tTuotenumero\tNimitys\r\n";
 		$virtu= "";
 
 		// tehd‰‰n tullin aineisto

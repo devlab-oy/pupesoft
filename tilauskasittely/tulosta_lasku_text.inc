@@ -259,7 +259,7 @@ if (!function_exists('text_loppu')) {
 		$sisalto .= "\r\n";		
 				
 		$sisalto .= sprintf('%-25.25s', $yhtiorow["maa"]);
-		$sisalto .= sprintf('%-50.50s', t("Y-tunnus", $kieli).": ".$yhtiorow["maakoodi"].$yhtiorow["ytunnus"]."   ".t("Alv.Rek"));
+		$sisalto .= sprintf('%-50.50s', t("Y-tunnus", $kieli).": ".$yhtiorow["maa"].$yhtiorow["ytunnus"]."   ".t("Alv.Rek"));
 		$sisalto .= "\r\n";	
 	}
 }

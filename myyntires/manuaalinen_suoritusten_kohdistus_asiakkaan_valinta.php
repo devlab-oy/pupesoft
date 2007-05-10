@@ -69,12 +69,12 @@ $query = "	SELECT distinct a.maa
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<tr><th>".t("Näytä vain suoritukset maasta")."</th>";
-echo "<td><select name='maakoodi' onchange='submit()'>";
+echo "<td><select name='maa' onchange='submit()'>";
 echo "<option value='' >".t("Kaikki")."</option>";
 
 while ($vrow = mysql_fetch_array($vresult)) {
 	$sel = "";
-	if ($maakoodi == $vrow[0]) $sel = "selected";
+	if ($maa == $vrow[0]) $sel = "selected";
 	echo "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[0])."</option>";
 }
 
@@ -92,8 +92,8 @@ if ($valuutta != "") {
 	$lisa .= " and s.valkoodi = '$valuutta' ";
 }
 
-if ($maakoodi != "") {
-	$lisa .= " and a.maa = '$maakoodi' ";
+if ($maa != "") {
+	$lisa .= " and a.maa = '$maa' ";
 }
 
 $query = "	SELECT a.nimi nimi, a.ytunnus ytunnus, s.asiakas_tunnus tunnus, COUNT(s.asiakas_tunnus) maara, sum(if(s.viite>0, 1,0)) viitteita

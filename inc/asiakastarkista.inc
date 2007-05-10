@@ -106,7 +106,7 @@
 				$t[$ytunnus_tunnus] = $ytunnus;
 			}
 		}
-		elseif ($yhtiorow["maakoodi"] == 'FI' and strtoupper($t[$i]) == 'SE' and strtoupper(substr($t[$ytunnus_tunnus], 0, 2)) != "SE") {
+		elseif ($yhtiorow["maa"] == 'FI' and strtoupper($t[$i]) == 'SE' and strtoupper(substr($t[$ytunnus_tunnus], 0, 2)) != "SE") {
 			$virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! Laskutusosoite ruotsissa. Ytunnus pitää alkaa SE!";
 			$errori = 1;
 		}

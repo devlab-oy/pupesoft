@@ -115,7 +115,7 @@
 				$lisa .= " and tiliointi.laatija = '" . $laatija . "'";
 			}
 			
-			if ($kpexport == 1 or strtoupper($yhtiorow['maakoodi']) != 'FI') {
+			if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 				if (strlen($tositenro) > 0) {
 					list($tositenro1, $tositenro2) = split("-",$tositenro);
 					$tositenro1 = (int) $tositenro1;
@@ -249,7 +249,7 @@
 		}
 		else $laskurow=mysql_fetch_array($result);
 		
-		if (($kpexport==1) or (strtoupper($yhtiorow['maakoodi']) != 'FI')) { //Tarvitaan kenties tositenro
+		if (($kpexport==1) or (strtoupper($yhtiorow['maa']) != 'FI')) { //Tarvitaan kenties tositenro
 			if ($tositenro != 0) {
 				$query = "SELECT tosite FROM tiliointi
 								WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and tosite='$tositenro'";
@@ -365,7 +365,7 @@
 // N‰ytet‰‰n laskun tai tositteen tiedot....
 
 		$query = "SELECT tila, concat_ws('@',lasku.laatija, lasku.luontiaika) Laatija,
-						ytunnus, lasku.nimi, nimitark, osoite, osoitetark, postino, postitp, maakoodi,
+						ytunnus, lasku.nimi, nimitark, osoite, osoitetark, postino, postitp, maa,
 						lasku.valkoodi,
 						concat_ws(' ',tapvm, mapvm) 'tapvm mapvm',
 						if(kasumma = 0,'',
@@ -665,7 +665,7 @@
 			  <td><input type='text' name='laatija' size=10></td>
 			  <td></td>
 			  </tr>";
-		if (($kpexport==1) or (strtoupper($yhtiorow['maakoodi']) != 'FI')) { //$kpexport tulee salanasat.php:st‰
+		if (($kpexport==1) or (strtoupper($yhtiorow['maa']) != 'FI')) { //$kpexport tulee salanasat.php:st‰
 			echo "
 			  <tr>
 			  <td></td>

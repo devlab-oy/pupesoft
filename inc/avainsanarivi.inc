@@ -323,7 +323,7 @@
 			if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
 				$sel = "selected";
 			}
-			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maakoodi"])) {
+			elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
 				$sel = "selected";
 			}
 			$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";

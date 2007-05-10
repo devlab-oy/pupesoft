@@ -442,7 +442,7 @@
 		$laskurow = mysql_fetch_array($result);
 
  		// Tarvitaan kenties tositenro
-		if ($kpexport == 1 or strtoupper($yhtiorow['maakoodi']) != 'FI') {
+		if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 
 			if ($tositenro != 0) {
 				$query = "	SELECT tosite

@@ -23,7 +23,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "asiakas" :
 				//	Tämä estää syncronoinnin muilla kuin suomalaisilla toimittajilla..
-				if (strtoupper($yhtiorow['maakoodi']) == 'FI') {
+				if (strtoupper($yhtiorow['maa']) == 'FI') {
 					$pakolliset = array("YTUNNUS");
 					$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
 				}

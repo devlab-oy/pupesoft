@@ -115,7 +115,7 @@
 			if ($vrow['tunnus']==$srow["varasto"]) $sel = 'selected';
 
 			$varastomaa = '';
-			if (strtoupper($vrow['maa']) != strtoupper($yhtiorow['maakoodi'])) {
+			if (strtoupper($vrow['maa']) != strtoupper($yhtiorow['maa'])) {
 				$varastomaa = strtoupper($vrow['maa']);
 			}
 
@@ -145,7 +145,7 @@
 				if ($varow['tunnus']==$srow["clearing"]) $sel = 'selected';
 
 				$varastomaa = '';
-				if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maakoodi'])) {
+				if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
 					$varastomaa = strtoupper($varow['maa']);
 				}
 
@@ -415,29 +415,36 @@
 		}
 
 		$query .= "	lasku SET
-					clearing		= '$clearing',
-					maa				= '$vtrow[maa]',
-					nimi 			= '$vtrow[nimitys]',
-					nimitark		= '$vtrow[nimi]',
-					osoite			= '$vtrow[osoite]',
-					postino			= '$vtrow[postino]',
-					postitp			= '$vtrow[postitp]',
-					toim_maa		= '$toim_maa',
-					toim_nimi		= '$toim_nimi',
-					toim_nimitark	= '$toim_nimitark',
-					toim_osoite		= '$toim_osoite',
-					toim_postino	= '$toim_postino',
-					toim_postitp	= '$toim_postitp',
-					toimaika 		= '".$toimvv."-".$toimkk."-".$toimpp."',
-					kerayspvm 		= '".$kervv."-".$kerkk."-".$kerpp."',
-					comments 		= '$comments',
-					eilahetetta 	= '$eilahe',
-					viesti 			= '$viesti',
-					yhtio 			= '$kukarow[yhtio]',
-					alatila 		= '$alatila',
-					varasto 		= '$varasto',
-					hyvaksynnanmuutos = '$luokka',
-					toimitustapa	= '$toimitustapa'";
+					yhtio_nimi			= '$yhtiorow[nimi]',
+					yhtio_osoite		= '$yhtiorow[osoite]',
+					yhtio_postino		= '$yhtiorow[postino]',
+					yhtio_postitp		= '$yhtiorow[postitp]',
+					yhtio_maa			= '$yhtiorow[maa]',
+					yhtio_ovttunnus		= '$yhtiorow[ovttunnus]',
+					yhtio_kotipaikka	= '$yhtiorow[kotipaikka]',		
+					clearing			= '$clearing',
+					maa					= '$vtrow[maa]',
+					nimi 				= '$vtrow[nimitys]',
+					nimitark			= '$vtrow[nimi]',
+					osoite				= '$vtrow[osoite]',
+					postino				= '$vtrow[postino]',
+					postitp				= '$vtrow[postitp]',
+					toim_maa			= '$toim_maa',
+					toim_nimi			= '$toim_nimi',
+					toim_nimitark		= '$toim_nimitark',
+					toim_osoite			= '$toim_osoite',
+					toim_postino		= '$toim_postino',
+					toim_postitp		= '$toim_postitp',
+					toimaika 			= '".$toimvv."-".$toimkk."-".$toimpp."',
+					kerayspvm 			= '".$kervv."-".$kerkk."-".$kerpp."',
+					comments 			= '$comments',
+					eilahetetta 		= '$eilahe',
+					viesti 				= '$viesti',
+					yhtio 				= '$kukarow[yhtio]',
+					alatila 			= '$alatila',
+					varasto 			= '$varasto',
+					hyvaksynnanmuutos 	= '$luokka',
+					toimitustapa		= '$toimitustapa'";
 
 		if ($toim == "VALMISTAVARASTOON") {
 			$query .= ",tilaustyyppi = 'W', tila='V', ytunnus='$vtrow[nimitys]', liitostunnus='99999999999'";

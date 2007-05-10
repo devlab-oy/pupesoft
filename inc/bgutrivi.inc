@@ -63,9 +63,9 @@
 	$ulos = "3";
 	$ulos .= sprintf ('%-7.7s', $laskurow['ytunnus']);
 	$ulos .= sprintf ('%-30.30s', strtoupper($laskurow['osoite']));
-	$ulos .= sprintf ('%-35.35s', strtoupper($laskurow['maakoodi']. "-" . $laskurow['postino'] . " " . $laskurow['postitp']));
+	$ulos .= sprintf ('%-35.35s', strtoupper($laskurow['maa']. "-" . $laskurow['postino'] . " " . $laskurow['postitp']));
 	$ulos .= '0';
-	$ulos .= sprintf ('%-2.2s', $laskurow['maakoodi']);
+	$ulos .= sprintf ('%-2.2s', $laskurow['maa']);
 	$ulos .= " 010"; // Ei aavistustakaan, mutta näin oli esimerkissä
 	//print strlen($ulos) . "/" . $ulos;
 	//print "</pre>";

@@ -348,17 +348,21 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 		}
 	}
 
+	$alv_velvollisuus = "";
+	
 	// jos meillä on lasku menossa ulkomaille
-	if ($maa != "" and $maa != $yhtiorow["maakoodi"]) {
+	if ($maa != "" and $maa != $yhtiorow["maa"]) {
 		// tutkitaan ollaanko siellä alv-rekisteröity
-		$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maakoodi='$maa' and vat_numero != ''";
+		$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$maa' and vat_numero != ''";
 		$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 		// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
 		if (mysql_num_rows($alhire) == 1) {
 
+			$alhiro  = mysql_fetch_array($alhire);
+
 			// haetaan maan oletusalvi
-			$query = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$maa'";
+			$query = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark!='' and selitetark_2='$maa' limit 1";
 			$alhire = mysql_query($query) or pupe_error($query);
 
 			// jos ei löydy niin mennään erroriin
@@ -371,7 +375,7 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 				// nämä tässä keisissä aina näin
 				$alv = $apuro["selite"];
 				$vienti = "";
-				$alv_velvollisuus = "KYLLA";
+				$alv_velvollisuus = $alhiro["vat_numero"];
 			}
 		}
 	}
@@ -414,7 +418,7 @@ if ((int) $kukarow["kesken"] != 0) {
 		$yhtiorow["suoratoim_ulkomaan_alarajasumma"] = round(laskuval($yhtiorow["suoratoim_ulkomaan_alarajasumma"], $laskurow["vienti_kurssi"]),0);
 	}
 
-	if ($laskurow["toim_maa"] == "") $laskurow["toim_maa"] = $yhtiorow['maakoodi'];
+	if ($laskurow["toim_maa"] == "") $laskurow["toim_maa"] = $yhtiorow['maa'];
 
 }
 
@@ -2158,7 +2162,7 @@ if ($tee == '') {
 				}
 
 				$varastomaa = '';
-				if (strtoupper($nimro['maa']) != strtoupper($yhtiorow['maakoodi'])) {
+				if (strtoupper($nimro['maa']) != strtoupper($yhtiorow['maa'])) {
 					$varastomaa = "<br>".strtoupper($nimro['maa']);
 				}
 
@@ -2590,7 +2594,7 @@ if ($tee == '') {
 						$varastore = mysql_query($query) or pupe_error($query);
 						$varastoro = mysql_fetch_array($varastore);
 
-						if (strtoupper($varastoro['maa']) != strtoupper($yhtiorow['maakoodi'])) {
+						if (strtoupper($varastoro['maa']) != strtoupper($yhtiorow['maa'])) {
 							echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varastoro['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
 						}
 						else {
@@ -2988,7 +2992,7 @@ if ($tee == '') {
 
 			if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
 				//Laskeskellaan tilauksen loppusummaa
-				$alvquery = "	SELECT if(isnull(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maakoodi]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
+				$alvquery = "	SELECT if(isnull(varastopaikat.maa) or varastopaikat.maa='', '$yhtiorow[maa]', varastopaikat.maa) maa, group_concat(tilausrivi.tunnus) rivit
 								FROM tilausrivi
 								LEFT JOIN varastopaikat ON varastopaikat.yhtio = if(tilausrivi.var='S', if((SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro)!='', (SELECT tyyppi_tieto FROM toimi WHERE yhtio = tilausrivi.yhtio and tunnus = tilausrivi.tilaajanrivinro), tilausrivi.yhtio), tilausrivi.yhtio)
 			                    and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))

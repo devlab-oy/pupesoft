@@ -38,15 +38,15 @@ else {
 	$ulos .= "ONADSE_SA:" . $laskurow['osoite'] . "\n";
 	$ulos .= "ONADSE_PO:" . $laskurow['postino'] . "\n";
 	$ulos .= "ONADSE_CI:" . $laskurow['postitp'] . "\n";
-	$ulos .= "ONADSE_CN:" . $laskurow['maakoodi'] . "\n";
+	$ulos .= "ONADSE_CN:" . $laskurow['maa'] . "\n";
 	$ulos .= "ONADBY_PC:" . sprintf ('%-18.18s', $yhtiorow['ovttunnus']) . "167 91". "\n";
 	$ulos .= "ONADBY_NA:" . $yhtiorow['nimi'] . "\n";
 	$ulos .= "ONADBY_SA:" . $yhtiorow['osoite'] . "\n";
 	$ulos .= "ONADBY_PO:" . $yhtiorow['postino'] . "\n";
 	$ulos .= "ONADBY_CI:" . $yhtiorow['postitp'] . "\n";
-	$ulos .= "ONADBY_CN:" . $yhtiorow['maakoodi'] . "\n";
+	$ulos .= "ONADBY_CN:" . $yhtiorow['maa'] . "\n";
 	$ulos .= "ONADBY_CC:" . $laskurow['myyja'] . "\n";
-	$ulos .= "ONADBY_RF:" . "VA  " . $yhtiorow['maakoodi'] . "-" . $yhtiorow['ytunnus'] . "\n";
+	$ulos .= "ONADBY_RF:" . "VA  " . $yhtiorow['maa'] . "-" . $yhtiorow['ytunnus'] . "\n";
 	$ulos .= "ONADBY_DO:" . "320 EI  1" . "\n";
 	$ulos .= "OHDR__END:" . $yhtiorow['yhtio'] . $laskurow['tunnus'] . "\n";
 	fputs($toot,$ulos);

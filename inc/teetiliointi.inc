@@ -15,7 +15,7 @@
 		$alv = round($summa - $summa / (1 + ($vero / 100)),2);
 		$summa -= $alv;
 	}
-	if (($kpexport!=1) and (strtoupper($yhtiorow['maakoodi']) == 'FI')) $tositenro=0; // Jos tätä ei tarvita
+	if (($kpexport!=1) and (strtoupper($yhtiorow['maa']) == 'FI')) $tositenro=0; // Jos tätä ei tarvita
 
 	// jos on valittu tiliointipvm popupista
 	if ($tiliointipvm != ''){

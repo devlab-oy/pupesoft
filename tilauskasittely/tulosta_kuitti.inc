@@ -115,7 +115,7 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(247, 25, $yhtiorow["email"],					$firstpage, $pieni);
 
 		$pdf->draw_text(404, 45, t("Y-tunnus", $kieli).":",				$firstpage, $pieni);
-		$pdf->draw_text(444, 45, $yhtiorow["maakoodi"]."-".$yhtiorow["ytunnus"],	$firstpage, $pieni);
+		$pdf->draw_text(444, 45, $yhtiorow["maa"]."-".$yhtiorow["ytunnus"],	$firstpage, $pieni);
 		$pdf->draw_text(404, 35, t("Kotipaikka", $kieli).":",			$firstpage, $pieni);
 		$pdf->draw_text(444, 35, $yhtiorow["kotipaikka"],				$firstpage, $pieni);
 	}

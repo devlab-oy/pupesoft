@@ -140,7 +140,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	$tulliprossa = "";
 	$tv_nimrow	 = "";
 
-	if ($tilrivirow["var"] == "" and $laskurow["maakoodi"] != $yhtiorow["maakoodi"]) {
+	if ($tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 		// lis‰t‰‰n tulli
 		require ("taric_veroperusteet.inc");
 		$ohinta = $ohinta * (1+($tulliprossa/100));

@@ -261,7 +261,7 @@
 						}
 
 						$varastomaa = '';
-						if (strtoupper($alkurow['varastomaa']) != strtoupper($yhtiorow['maakoodi'])) {
+						if (strtoupper($alkurow['varastomaa']) != strtoupper($yhtiorow['maa'])) {
 							$varastomaa = strtoupper($alkurow['varastomaa']);
 						}
 

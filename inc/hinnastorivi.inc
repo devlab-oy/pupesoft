@@ -47,7 +47,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "maakoodi") {
+	if (mysql_field_name($result, $i) == "maa") {
 
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
@@ -59,7 +59,7 @@
 		$ulos .= "<option value=''>".t("Kaikki maat")."</option>";
 
 		if ($trow[$i] == "" and $t[$i] == "") {
-			$trow[$i] = $yhtiorow["maakoodi"];
+			$trow[$i] = $yhtiorow["maa"];
 		}
 
 		while ($row = mysql_fetch_array($vresult)) {

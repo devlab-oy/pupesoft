@@ -4,7 +4,7 @@ if (mysql_field_name($result, $i) == "pankkitili1" or
 	mysql_field_name($result, $i) == "pankkitili2" or
 	mysql_field_name($result, $i) == "pankkitili3") {
 
-	if (strtoupper($yhtiorow['maakoodi']) == "FI" and trim($t[$i]) != "") {
+	if (strtoupper($yhtiorow['maa']) == "FI" and trim($t[$i]) != "") {
 
 		$pankkitili = $t[$i];
 

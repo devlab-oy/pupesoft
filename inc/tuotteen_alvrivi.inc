@@ -8,7 +8,7 @@
 		$tyyppi = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "maakoodi") {
+	if (mysql_field_name($result, $i) == "maa") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''

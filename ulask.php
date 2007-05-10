@@ -32,7 +32,7 @@ if ($tee == 'VIIVA') {
 		$erp    = substr($nimi,47,2);
 
 		//Toistaiseksi osataan vaan tarkistaa suomalaisten pankkitilien oikeellisuutta
-		if (strtoupper($yhtiorow['maakoodi']) == 'FI') {
+		if (strtoupper($yhtiorow['maa']) == 'FI') {
 			$pankkitili = $tilino;
 			require("inc/pankkitilinoikeellisuus.php");
 			$tilino = $pankkitili;
@@ -113,14 +113,14 @@ if ($tee == 'I') {
 
 		$trow = mysql_fetch_array ($result);
 
-		if (isset($toitilinumero) and (strtoupper($trow['maakoodi'])) == 'FI') {
+		if (isset($toitilinumero) and (strtoupper($trow['maa'])) == 'FI') {
 			$pankkitili = $toitilinumero;
 			require("inc/pankkitilinoikeellisuus.php");
 			$tilino = $pankkitili; //Jos tämä ei siis onnistu puuttuu tilinumero ja se huomataan myöhemmin
 			if ($tilino == '') unset($toitilinumero); //Ei päivitetä
 		}
 		
-		if (strtoupper($trow['maakoodi']) == strtoupper($yhtiorow['maakoodi'])) {
+		if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
 			$query = "update toimi set tilinumero='$toitilinumero' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
@@ -349,7 +349,7 @@ if ($tee == 'I') {
 	}
 
 	// Kotimainen toimittaja
-	if (strtoupper($tyyppi) == strtoupper($yhtiorow['maakoodi']) or strtoupper($trow['maakoodi']) == strtoupper($yhtiorow['maakoodi'])) {
+	if (strtoupper($tyyppi) == strtoupper($yhtiorow['maa']) or strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
 
 		if (strlen($trow['tilinumero']) < 6) {
 			$errormsg .= "<font class='error'>".t("Pankkitili puuttuu tai liian lyhyt")."</font><br>";
@@ -358,7 +358,7 @@ if ($tee == 'I') {
 		else {
 			$pankkitili = $trow['tilinumero'];
 
-			if (strtoupper($yhtiorow['maakoodi']) == 'FI') {
+			if (strtoupper($yhtiorow['maa']) == 'FI') {
 				require "inc/pankkitilinoikeellisuus.php";
 			}
 
@@ -507,7 +507,7 @@ if ($tee == 'P' or $tee == 'E') {
 		echo "<table>";
 		echo "<tr><th colspan='2'>".t("Toimittaja")."</th></tr>";
 		echo "<tr><td colspan='2'>$trow[nimi] $trow[nimitark] ($trow[ytunnus])</td></tr>";
-		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maakoodi]-$trow[postino] $trow[postitp], $trow[maa]</td></tr>";
+		echo "<tr><td colspan='2'>$trow[osoite] $trow[osoitetark], $trow[maa]-$trow[postino] $trow[postitp], $trow[maa]</td></tr>";
 		echo "<tr><td><form action='yllapito.php?toim=toimi&tunnus=$toimittajaid&lopetus=ulask.php////tee=$tee//toimittajaid=$toimittajaid//maara=$maara' method='post'>";
 		echo "<input type = 'submit' value = '".t("Muuta toimittajan tietoja")."'></form>";
 		echo "</td></tr></table>";
@@ -520,7 +520,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 		echo "<form name = 'lasku' action = '$PHP_SELF?tee=I&toimittajaid=$toimittajaid' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>";
 
-		if (strtoupper($trow['maakoodi']) != strtoupper($yhtiorow['maakoodi'])) {
+		if (strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) {
 
 			$pankki = $trow['pankki1'];
 
@@ -601,7 +601,7 @@ if ($tee == 'P' or $tee == 'E') {
 
 		if ($errormsg != '') echo "$errormsg<br>";
 
-		if ($tyyppi != strtoupper($yhtiorow['maakoodi'])) {
+		if ($tyyppi != strtoupper($yhtiorow['maa'])) {
 			echo "
 				<font class='message'>".t("Ulkomaalaisen toimittajan tiedot")."</font>
 				<table border='0'><tr><td class='back' valign='top'>
@@ -619,7 +619,7 @@ if ($tee == 'P' or $tee == 'E') {
 				</td><td class='back'>
 
 				<table>
-				<tr><th>".t("maakoodi")."</th>	<td><input type='text' name='trow[maakoodi]' maxlength='2'  size=4  value='$trow[maakoodi]'></td></tr>
+				<tr><th>".t("maa")."</th>	<td><input type='text' name='trow[maa]' maxlength='2'  size=4  value='$trow[maa]'></td></tr>
 				<tr><th>".t("Ultilino")."</th>	<td><input type='text' name='trow[ultilno]'  maxlength='35' size=45 value='$trow[ultilno]'></td></tr>
 				<tr><th>".t("SWIFT")."</th>		<td><input type='text' name='trow[swift]'    maxlength='11' size=45 value='$trow[swifth]'></td></tr>
 				<tr><th>".t("pankki1")."</th>	<td><input type='text' name='trow[pankki1]'  maxlength='35' size=45 value='$trow[pankki1]'></td></tr>
@@ -633,7 +633,7 @@ if ($tee == 'P' or $tee == 'E') {
 		else {
 			echo "
 				<font class='message'>".t("Kotimaisen toimittajan tiedot")."</font>
-				<input type='hidden' name = 'trow[maakoodi]' value = ".strtoupper($yhtiorow['maakoodi']).">
+				<input type='hidden' name = 'trow[maa]' value = ".strtoupper($yhtiorow['maa']).">
 
 				<table>
 				<tr><th>".t("ytunnus")."</th>	<td><input type='text' name='trow[ytunnus]'    maxlength='8'  size=10 value='$trow[ytunnus]'></td></tr>
@@ -676,7 +676,7 @@ if ($tee == 'P' or $tee == 'E') {
 	echo "<td><input type='text' name='summa' value='$summa'>";
 
 	//Tehdään valuuttapopup, jos ulkomainen toimittaja muuten kirjoitetaan vain $yhtiorow[valkoodi]
-	if (strtoupper($trow['maakoodi']) != strtoupper($yhtiorow['maakoodi'])) {
+	if (strtoupper($trow['maa']) != strtoupper($yhtiorow['maa'])) {
 
 		$query = "SELECT nimi
 					FROM valuu
@@ -859,7 +859,7 @@ if ($tee == 'P' or $tee == 'E') {
 			$ikustp[$i] = $olkustp;
 		}
 		if (strlen($ivero[$i]) == 0) {
-			if (strtoupper($trow['maakoodi']) == strtoupper($yhtiorow['maakoodi'])) {
+			if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
 				$ivero[$i] = alv_oletus();
 			}
 			else {
@@ -1052,7 +1052,7 @@ if ($tee == 'I') {
 	// Jotkut maat (kaikki paitsi Suomi) vaativat toistaiseksi toistenroita :( Taklataan sitä tässä
 	$tositenro=0;
 
-	if ($kpexport == 1 or strtoupper($yhtiorow['maakoodi']) != 'FI') {
+	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 		$query = "LOCK TABLE tiliointi WRITE, lasku WRITE, sanakirja WRITE";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -1095,7 +1095,6 @@ if ($tee == 'I') {
 			postino = '$trow[postino]',
 			postitp = '$trow[postitp]',
 			maa =  '$trow[maa]',
-			maakoodi =  '$trow[maakoodi]',
 			viite = '$viite',
 			viesti = '$viesti',
 			vienti = '$vienti',
@@ -1484,7 +1483,7 @@ if ($tee == 'I') {
 	$tee    = "";
 	$selite = "";
 
-	if ($kpexport == 1 or strtoupper($yhtiorow['maakoodi']) != 'FI') {
+	if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 		$query = "UNLOCK TABLES";
 		$result = mysql_query($query) or pupe_error($query);
 		echo "<font class='message'>".t("Lasku perustettiin asiakkalle")." $trow[nimi]<br>";
@@ -1570,7 +1569,7 @@ if (strlen($tee) == 0) {
 	echo "<td><form action = '$PHP_SELF?tee=P' method='post'>".t("Perusta lasku ilman toimittajatietoja")."</td>
 		<td>
 		<select name='tyyppi'>
-		<option value =".strtoupper($yhtiorow['maakoodi']).">".t("Kotimaa")."
+		<option value =".strtoupper($yhtiorow['maa']).">".t("Kotimaa")."
 		<option value ='nonfi'>".t("Ulkomaa")."
 		</select></td>
 		<td>".t("tiliöintirivejä").":</td>

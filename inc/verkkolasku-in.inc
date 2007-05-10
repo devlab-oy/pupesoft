@@ -215,12 +215,12 @@
 
 				// löydettiin mätchi ostoriveiltä, laitetaan vaihto-omaisuus täppi päälle
 				if ($chkriviok != 0 ) {
-					if (strtoupper($trow["maakoodi"]) == strtoupper($yhtiorow["maakoodi"])) {
+					if (strtoupper($trow["maa"]) == strtoupper($yhtiorow["maa"])) {
 						// kyseessä kotimaa
 						$trow['oletus_vienti'] = 'C';
 					}
 					else {
-						$chkquery = "select * from maat where koodi = '$trow[maakoodi]' and eu != ''";
+						$chkquery = "select * from maat where koodi = '$trow[maa]' and eu != ''";
 						$checkostot = mysql_query($chkquery) or die ("$chkquery<br><br>".mysql_error());
 
 						if (mysql_num_rows($checkostot) != 0) {
@@ -446,7 +446,6 @@
 						postino = '$trow[postino]',
 						postitp = '$trow[postitp]',
 						maa =  '$trow[maa]',
-						maakoodi =  '$trow[maakoodi]',
 						viite = '$viite',
 						viesti = '$viesti',
 						sisviesti1 = '$sis1',

@@ -9,7 +9,7 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
 			 lasku.tunnus, sisviesti2, yriti.tilino, alatila, kasumma
 		  FROM lasku, yriti
 		  WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'P' and
-			maakoodi = 'fi' and
+			maa = 'fi' and
 			yriti.tunnus = maksu_tili and
 			yriti.yhtio = lasku.yhtio and
 			maksaja = '$kukarow[kuka]' and

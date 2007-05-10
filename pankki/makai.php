@@ -15,14 +15,14 @@
 	}
 	else {
 		
-		if (strtoupper($yhtiorow['maakoodi']) == 'FI') {
+		if (strtoupper($yhtiorow['maa']) == 'FI') {
 			$kotimaa = "FI";
 		}
-		elseif (strtoupper($yhtiorow['maakoodi']) == 'SE') {
+		elseif (strtoupper($yhtiorow['maa']) == 'SE') {
 			$kotimaa = "SE";
 		}
-		if (strtoupper($yhtiorow['maakoodi']) != 'FI' and strtoupper($yhtiorow['maakoodi']) != 'SE') {
-			echo "<font class='error'>".t("Yrityksen maakoodi ei ole sallittu")." (FI, SE) '$yhtiorow[maakoodi]'</font><br>";
+		if (strtoupper($yhtiorow['maa']) != 'FI' and strtoupper($yhtiorow['maa']) != 'SE') {
+			echo "<font class='error'>".t("Yrityksen maa ei ole sallittu")." (FI, SE) '$yhtiorow[maa]'</font><br>";
 			exit;
 		}
 	
@@ -75,7 +75,7 @@
 					FROM lasku
 					WHERE yhtio 	= '$kukarow[yhtio]' 
 					and tila 		= 'P' 
-					and maakoodi	= '$kotimaa' 
+					and maa	= '$kotimaa' 
 					and maksaja		= '$kukarow[kuka]'
 					ORDER BY 1";
 		$pvmresult = mysql_query($query) or pupe_error($query);
@@ -121,7 +121,7 @@
 						FROM lasku
 						WHERE yhtio  = '$kukarow[yhtio]' 
 						and tila 	 = 'P' 
-						and maakoodi = '$kotimaa' 
+						and maa		 = '$kotimaa' 
 						and summa 	 < 0 
 						and maksaja  = '$kukarow[kuka]' 
 						and olmapvm  = '$pvmrow[olmapvm]'
@@ -137,7 +137,7 @@
 								FROM lasku
 								WHERE yhtio 	= '$kukarow[yhtio]' 
 								and tila 		= 'P' 
-								and maakoodi 	= '$kotimaa' 
+								and maa		 	= '$kotimaa' 
 								and maksaja 	= '$kukarow[kuka]' 
 								and tilinumero	= '$laskurow[tilinumero]' 
 								and maksu_tili	= '$laskurow[maksu_tili]' 
@@ -172,7 +172,7 @@
 						FROM lasku, yriti
 						WHERE lasku.yhtio 	= '$kukarow[yhtio]' 
 						and tila 			= 'P' 
-						and maakoodi 		= '$kotimaa' 
+						and maa		 		= '$kotimaa' 
 						and yriti.tunnus 	= maksu_tili 
 						and yriti.yhtio 	= lasku.yhtio 
 						and maksaja 		= '$kukarow[kuka]' 
@@ -237,7 +237,7 @@
 								FROM lasku, yriti
 								WHERE lasku.yhtio 	= '$kukarow[yhtio]' 
 								and tila 			= 'P' 
-								and maakoodi 		= '$kotimaa' 
+								and maa		 		= '$kotimaa' 
 								and yriti.tunnus 	= maksu_tili 
 								and yriti.yhtio 	= lasku.yhtio 
 								and maksaja 		= '$kukarow[kuka]' 
@@ -325,7 +325,7 @@
 								SET tila = 'Q'
 					          	WHERE yhtio 	= '$kukarow[yhtio]' 
 					          	and tila 		= 'P' 
-								and maakoodi 	= '$kotimaa' 
+								and maa		 	= '$kotimaa' 
 					          	and maksaja 	= '$kukarow[kuka]' 
 					          	and maksu_tili	= '$yritirow[tunnus]' 
 					          	and olmapvm 	= '$pvmrow[olmapvm]'
@@ -405,7 +405,7 @@
 					FROM lasku, yriti
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
 					and tila = 'P' 
-					and maakoodi <> '$kotimaa'
+					and maa <> '$kotimaa'
 					and maksaja = '$kukarow[kuka]'
 					and yriti.tunnus = maksu_tili 
 					and yriti.yhtio = lasku.yhtio
@@ -443,7 +443,7 @@
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]' 
 							and tila = 'P' 
-							and maakoodi <> '$kotimaa'
+							and maa <> '$kotimaa'
 							and maksaja = '$kukarow[kuka]'
 							and summa < 0
 							and maksu_tili = '$pvmrow[maksu_tili]'
@@ -462,12 +462,12 @@
 							group_concat(viite) viite, group_concat(viesti) viesti,
 							ultilno, group_concat(lasku.tunnus) tunnus,
 							yriti.tilino ytilino, yriti.nimi tilinimi,
-							maa, maakoodi, pankki1, pankki2, pankki3, pankki4,
+							maa, pankki1, pankki2, pankki3, pankki4,
 							swift, ytunnus, yriti.valkoodi yritivalkoodi
 							FROM lasku, yriti, valuu
 							WHERE lasku.yhtio = '$kukarow[yhtio]' 
 							and tila = 'P' 
-							and maakoodi <> '$kotimaa' 
+							and maa <> '$kotimaa' 
 							and yriti.tunnus = maksu_tili 
 							and yriti.yhtio = lasku.yhtio 
 							and valuu.nimi = lasku.valkoodi 
@@ -513,7 +513,7 @@
 								$laskuvaluutta 	= $laskurow["valkoodi"];
 								$laskutilino 	= $laskurow["ultilno"];
 								$laskuaihe 		= $laskurow["viesti"] . " " . $laskurow["tunnus"];
-								$laskumaakoodi 	= $laskurow["maakoodi"];
+								$laskumaakoodi 	= $laskurow["maa"];
 								$laskupankki1  	= $laskurow["pankki1"];
 								$laskupankki2  	= $laskurow["pankki2"];
 								$laskupankki3  	= $laskurow["pankki3"];
@@ -534,7 +534,7 @@
 							$query = "	UPDATE lasku SET tila = 'Q'
 										WHERE lasku.yhtio = '$kukarow[yhtio]' 
 										and tila = 'P' 
-										and maakoodi <> '$kotimaa' 
+										and maa <> '$kotimaa' 
 										and maksaja = '$kukarow[kuka]'
 										and olmapvm = '$hyvitysrow[olmapvm]'
 										and maksu_tili = '$hyvitysrow[maksu_tili]'
@@ -561,12 +561,12 @@
 							summa, lasku.valkoodi, viite, viesti,
 							ultilno, lasku.tunnus, sisviesti2, 
 							yriti.tilino ytilino, yriti.nimi tilinimi,
-							maa, maakoodi, pankki1, pankki2, pankki3, pankki4,
+							maa, pankki1, pankki2, pankki3, pankki4,
 							swift, alatila, kasumma, kurssi, ytunnus, yriti.valkoodi yritivalkoodi
 							FROM lasku, yriti, valuu
 							WHERE lasku.yhtio = '$kukarow[yhtio]' 
 							and tila = 'P' 
-							and maakoodi <> '$kotimaa' 
+							and maa <> '$kotimaa' 
 							and yriti.tunnus = maksu_tili 
 							and yriti.yhtio = lasku.yhtio 
 							and valuu.nimi = lasku.valkoodi 
@@ -597,7 +597,7 @@
 						$laskuvaluutta 	= $laskurow["valkoodi"];
 						$laskutilino 	= $laskurow["ultilno"];
 						$laskuaihe 		= $laskurow["viesti"] . " " . $laskurow["tunnus"];
-						$laskumaakoodi 	= $laskurow["maakoodi"];
+						$laskumaakoodi 	= $laskurow["maa"];
 						$laskupankki1  	= $laskurow["pankki1"];
 						$laskupankki2  	= $laskurow["pankki2"];
 						$laskupankki3  	= $laskurow["pankki3"];
@@ -734,7 +734,7 @@
 					$query = "	UPDATE lasku SET tila = 'Q'
 								WHERE lasku.yhtio = '$kukarow[yhtio]' 
 								and tila = 'P' 
-								and maakoodi <> '$kotimaa' 
+								and maa <> '$kotimaa' 
 								and maksaja = '$kukarow[kuka]'
 								and maksu_tili = '$pvmrow[maksu_tili]'
 								and valkoodi = '$pvmrow[valkoodi]'

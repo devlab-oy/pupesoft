@@ -352,7 +352,7 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(257, 35, $yhtiorow["fax"],					$firstpage, $pieni);
 
 		//jos on suomalainen yritys tehdään ytunnus nätiks
-		if (strtoupper($yhtiorow["maakoodi"])== 'FI') {
+		if (strtoupper($yhtiorow["maa"])== 'FI') {
 			//muutetaan ytunnus takas oikean näköseks
 			$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
 			if ($ytunpit > 0) {

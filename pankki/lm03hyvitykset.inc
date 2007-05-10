@@ -13,7 +13,7 @@
 			  			FROM lasku, yriti
 			  			WHERE lasku.yhtio 	= '$kukarow[yhtio]' 
 						and tila 			= 'P' 
-						and maakoodi 		= '$kotimaa' 
+						and maa		 		= '$kotimaa' 
 						and yriti.tunnus 	= maksu_tili 
 						and yriti.yhtio 	= lasku.yhtio 
 						and maksaja 		= '$kukarow[kuka]' 

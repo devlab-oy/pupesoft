@@ -38,7 +38,7 @@
 		}
 	}
 	if (mysql_field_name($result, $i) == "tilino") {
-		if (strtoupper($yhtiorow['maakoodi']) == 'FI') {
+		if (strtoupper($yhtiorow['maa']) == 'FI') {
 			if ((substr($t[$i], 0, 1) >= 0) and (substr($t[$i], 0, 1) <= '9')) {
 				$pankkitili = $t[$i];
 				require 'pankkitilinoikeellisuus.php';

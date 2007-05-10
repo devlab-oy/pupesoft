@@ -29,7 +29,7 @@ $ulos .= "SNADCZ_NX:\n";												// l‰hett‰j‰n nimitarkenne
 $ulos .= "SNADCZ_SA:$yhtiorow[osoite]\n";								// l‰hett‰j‰n osoite
 $ulos .= "SNADCZ_CI:$yhtiorow[postitp]\n";								// l‰hett‰j‰n postitp
 $ulos .= "SNADCZ_PO:$yhtiorow[postino]\n";								// l‰hett‰j‰n postino
-$ulos .= "SNADCZ_CN:$yhtiorow[maakoodi]\n";								// l‰hett‰j‰n maakoodi
+$ulos .= "SNADCZ_CN:$yhtiorow[maa]\n";									// l‰hett‰j‰n maa
 $ulos .= "SNADCN_PC:\n";
 $ulos .= "SNADCN_NA:$rakir_row[toim_nimi]\n";							// vastaanottajan nimi
 $ulos .= "SNADCN_NX:$rakir_row[toim_nimitark]\n";						// vastaanottan nimitarkenne
@@ -45,7 +45,7 @@ if ($rakir_row['merahti']=='K') // jos rahtirivit lis‰t‰‰n tilaukselle (eli arwi
 	$ulos .= "SNADFP_SA:$yhtiorow[osoite]\n";							// rahdinmaksajan osoite
 	$ulos .= "SNADFP_CI:$yhtiorow[postitp]\n";							// rahdinmaksajan postitp
 	$ulos .= "SNADFP_PO:$yhtiorow[postino]\n";							// rahdinmaksajan postino
-	$ulos .= "SNADFP_CN:$yhtiorow[maakoodi]\n";							// rahdinmaksajan maakoodi
+	$ulos .= "SNADFP_CN:$yhtiorow[maa]\n";								// rahdinmaksajan maa
 }
 else // jos vastaanottaja masksaa rahdin, k‰ytet‰‰n asiakkaan sopimusnumeroita
 {
@@ -55,7 +55,7 @@ else // jos vastaanottaja masksaa rahdin, k‰ytet‰‰n asiakkaan sopimusnumeroita
 	$ulos .= "SNADFP_SA:$postirow[osoite]\n";							// rahdinmaksajan osoite
 	$ulos .= "SNADFP_CI:$postirow[postitp]\n";							// rahdinmaksajan postitp
 	$ulos .= "SNADFP_PO:$postirow[postino]\n";							// rahdinmaksajan postino
-	$ulos .= "SNADFP_CN:$postirow[maakoodi]\n";							// rahdinmaksajan maakoodi
+	$ulos .= "SNADFP_CN:$postirow[maa]\n";								// rahdinmaksajan maa
 }
 
 $ulos .= "SCNISTART:1\n";

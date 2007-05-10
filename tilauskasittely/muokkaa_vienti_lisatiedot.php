@@ -48,10 +48,10 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) == 2) {
-					if ($maa_lahetys == $yhtiorow["maakoodi"] and $maa_maara != $yhtiorow["maakoodi"]) {
+					if ($maa_lahetys == $yhtiorow["maa"] and $maa_maara != $yhtiorow["maa"]) {
 						$ultilno = "-1"; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
 					}
-					elseif ($maa_maara == $yhtiorow["maakoodi"] and $maa_lahetys != $yhtiorow["maakoodi"]) {
+					elseif ($maa_maara == $yhtiorow["maa"] and $maa_lahetys != $yhtiorow["maa"]) {
 						$ultilno = "-2"; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
 					}
 					else {
@@ -291,10 +291,10 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) == 2) {
-					if ($maa_lahetys == $yhtiorow["maakoodi"] and $maa_maara != $yhtiorow["maakoodi"]) {
+					if ($maa_lahetys == $yhtiorow["maa"] and $maa_maara != $yhtiorow["maa"]) {
 						$ultilno = "-1"; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
 					}
-					elseif ($maa_maara == $yhtiorow["maakoodi"] and $maa_lahetys != $yhtiorow["maakoodi"]) {
+					elseif ($maa_maara == $yhtiorow["maa"] and $maa_lahetys != $yhtiorow["maa"]) {
 						$ultilno = "-2"; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
 					}
 					else {
@@ -415,7 +415,7 @@
 						ORDER BY koodi";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if ($laskurow["maa_maara"] == "") $laskurow["maa_maara"] = $yhtiorow["maakoodi"];
+			if ($laskurow["maa_maara"] == "") $laskurow["maa_maara"] = $yhtiorow["maa"];
 
 			while ($row = mysql_fetch_array($result)) {
 				$sel = '';

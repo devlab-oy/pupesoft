@@ -340,14 +340,14 @@ if (!isset($tunnus)) {
 	// Maksupäivät
 	
 	$query = "UPDATE lasku set olmapvm=now() where yhtio='$kukarow[yhtio]' and tila = 'P' 
-					and maakoodi = 'fi' and maksaja = '$kukarow[kuka]' and olmapvm < now()";
+					and maa = 'fi' and maksaja = '$kukarow[kuka]' and olmapvm < now()";
 	$result = mysql_query($query) or pupe_error($query);
 					
 	$query = "SELECT maksu_tili, yriti.tilino, olmapvm, sum(if(alatila='K', summa-kasumma, summa)), count(*)
 			FROM lasku, yriti
 			WHERE lasku.yhtio = '$kukarow[yhtio]' 
 			and tila = 'P' 
-			and maakoodi = 'fi' 
+			and maa = 'fi' 
 			and maksaja = '$kukarow[kuka]'
 			and lasku.yhtio=yriti.yhtio
 			and lasku.maksu_tili=yriti.tunnus

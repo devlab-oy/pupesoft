@@ -196,7 +196,7 @@
 					lasku.osoite,
 					lasku.postino,
 					lasku.postitp,
-					lasku.maakoodi,
+					lasku.maa,
 					lasku.laskunro,
 					round(lasku.viikorkopros*100,0) viikorkopros,
 					round(abs(lasku.summa*100),0) summa,
@@ -344,7 +344,7 @@
 					$ulos .= sprintf ('%-179.179s',	0);                                                         
 				}                                                                                               
 				else {                                                                                          
-					if ($laskurow["maa"] != $yhtiorow["maakoodi"] and $laskurow["maa"] != '') {                 
+					if ($laskurow["maa"] != $yhtiorow["maa"] and $laskurow["maa"] != '') {                 
 						$ulos .= sprintf ('%-10.10s', $laskurow["maa"]);                                        
 					}                                                                                           
 					else {                                                                                      
@@ -449,7 +449,7 @@
 					$ulos .= sprintf ('%-30.30s', 	"");
 					$ulos .= sprintf ('%06.6s', 	0);
 
-					if ($laskurow["toim_maa"] != $yhtiorow["maakoodi"] and $laskurow["toim_maa"] != '') {
+					if ($laskurow["toim_maa"] != $yhtiorow["maa"] and $laskurow["toim_maa"] != '') {
 						$ulos .= sprintf ('%-10.10s', $laskurow["toim_maa"]);
 					}
 					else {

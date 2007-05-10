@@ -12,21 +12,21 @@
 
 		$toimerrorit = 0;
 
-		if ($toim_maakoodi != "") {
-			$query = "select * from maat where koodi='$toim_maakoodi'";
+		if ($toim_maa != "") {
+			$query = "select * from maat where koodi='$toim_maa'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 0) {
 				$toimerrorit++;
-				echo "<font class='error'>Virheellinen maakoodi!</font><br>";
+				echo "<font class='error'>Virheellinen maa!</font><br>";
 			}
 		}
 		else {
 			$toimerrorit++;
-			echo "<font class='error'>Virheellinen maakoodi!</font><br>";
+			echo "<font class='error'>Virheellinen maa!</font><br>";
 		}
 
-		if ($vat_numero != "" and substr($vat_numero, 0, 2) != $toim_maakoodi) {
+		if ($vat_numero != "" and substr($vat_numero, 0, 2) != $toim_maa) {
 			$toimerrorit++;
 			echo "<font class='error'>Virheellinen vat-numero!</font><br>";
 		}
@@ -34,17 +34,17 @@
 		if ($vat_numero != "") {
 			$query = "	SELECT selite
 						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'alvulk' and selitetark_2 = '$toim_maakoodi'";
+						WHERE yhtio = '$kukarow[yhtio]' and laji = 'alvulk' and selitetark_2 = '$toim_maa'";
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vresult) == 0) {
-				echo "<font class='error'>Yrityksen ALV-prosentit puuttuvat tälle maalle ($toim_maakoodi)! Käy perustamassa ensin ne avainsanoihin.</font>";
+				echo "<font class='error'>Yrityksen ALV-prosentit puuttuvat tälle maalle ($toim_maa)! Käy perustamassa ensin ne avainsanoihin.</font>";
 				$toimerrorit++;
 			}
 
 			$query = "	SELECT *
 						FROM yhtion_toimipaikat
-						WHERE yhtio = '$kukarow[yhtio]' and maakoodi = '$toim_maakoodi' and tunnus != '$toim_tunnus' and vat_numero != ''";
+						WHERE yhtio = '$kukarow[yhtio]' and maa = '$toim_maa' and tunnus != '$toim_tunnus' and vat_numero != ''";
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vresult) != 0) {
@@ -60,7 +60,6 @@
 				$toim_postino == "" or
 				$toim_postitp == "" or
 				$toim_maa == "" or
-				$toim_maakoodi == "" or
 				$toim_fax == "" or
 				$toim_puhelin == "" or
 				$toim_email == "") {
@@ -87,8 +86,7 @@
 					osoite 			= '$toim_osoite',
 					postino 		= '$toim_postino',
 					postitp 		= '$toim_postitp',
-					maa 			= '$toim_maa',
-					maakoodi 		= '".strtoupper($toim_maakoodi)."',
+					maa		 		= '".strtoupper($toim_maa)."',
 					fax 			= '$toim_fax',
 					puhelin 		= '$toim_puhelin',
 					email 			= '$toim_email',
@@ -118,8 +116,7 @@
 					osoite 			= '$toim_osoite',
 					postino 		= '$toim_postino',
 					postitp 		= '$toim_postitp',
-					maa 			= '$toim_maa',
-					maakoodi 		= '".strtoupper($toim_maakoodi)."',
+					maa		 		= '".strtoupper($toim_maa)."',
 					fax 			= '$toim_fax',
 					puhelin 		= '$toim_puhelin',
 					email 			= '$toim_email',
@@ -144,7 +141,6 @@
 		echo "<tr><th>".t("Postino")."</th>		<td><input type='text' name='toim_postino'  value='$toim_postino'></td></tr>";
 		echo "<tr><th>".t("Postitp")."</th>		<td><input type='text' name='toim_postitp'  value='$toim_postitp'></td></tr>";
 		echo "<tr><th>".t("Maa")."</th>			<td><input type='text' name='toim_maa'      value='$toim_maa'></td></tr>";
-		echo "<tr><th>".t("Maakoodi")."</th>	<td><input type='text' name='toim_maakoodi' value='$toim_maakoodi'></td></tr>";
 		echo "<tr><th>".t("Fax")."</th>			<td><input type='text' name='toim_fax'      value='$toim_fax'></td></tr>";
 		echo "<tr><th>".t("Puhelin")."</th>		<td><input type='text' name='toim_puhelin'  value='$toim_puhelin'></td></tr>";
 		echo "<tr><th>".t("Email")."</th>		<td><input type='text' name='toim_email'    value='$toim_email'></td></tr>";
@@ -178,7 +174,6 @@
 			echo "<tr><th>".t("Postino")."</th>	<td><input type='text' name='toim_postino'  value='$trow[postino]'></td></tr>";
 			echo "<tr><th>".t("Postitp")."</th>	<td><input type='text' name='toim_postitp'  value='$trow[postitp]'></td></tr>";
 			echo "<tr><th>".t("Maa")."</th>		<td><input type='text' name='toim_maa'      value='$trow[maa]'></td></tr>";
-			echo "<tr><th>".t("Maakoodi")."</th><td><input type='text' name='toim_maakoodi' value='$trow[maakoodi]'></td></tr>";
 			echo "<tr><th>".t("Fax")."</th>		<td><input type='text' name='toim_fax'      value='$trow[fax]'></td></tr>";
 			echo "<tr><th>".t("Puhelin")."</th>	<td><input type='text' name='toim_puhelin'  value='$trow[puhelin]'></td></tr>";
 			echo "<tr><th>".t("Email")."</th>	<td><input type='text' name='toim_email'    value='$trow[email]'></td></tr>";

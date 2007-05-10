@@ -80,7 +80,7 @@ if ($monta > 1 and $monta <= $limit) {
 				<td>$toimittaja[postino]</td>
 				<td>$toimittaja[postitp]</td>";
 				
-		if (strtoupper($toimittaja['maakoodi']) != strtoupper($yhtiorow['maakoodi'])) {
+		if (strtoupper($toimittaja['maa']) != strtoupper($yhtiorow['maa'])) {
 			echo "<td>$toimittaja[ultilno]</td>";
 		}
 		else {

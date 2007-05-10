@@ -345,7 +345,7 @@
 					}
 					else {
 						$pdf->write($h, 1, $s[2], $s[3], 	t("VAT", $kieli).":", "norm", "L", "");					
-						$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maakoodi"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
+						$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
 					}
 					$h-=$pdf->ln();
 
@@ -354,11 +354,11 @@
 					$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["fax"], "norm", "L", "");		
 					if($laskurow["maa"] == "FI" or trim($laskurow["maa"]) == "SUOMI") {
 						$pdf->write($h, 1, $s[2], $s[3], 	t("VAT", $kieli).":", "norm", "L", "");					
-						$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maakoodi"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");		
+						$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");		
 					}		
 					$h-=$pdf->ln();
 
-					$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["maakoodi"].$yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
+					$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["maa"].$yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
 					$pdf->write($h, 1, $s[0], $s[1], 	t("Web", $kieli).":", "norm", "L", "");
 					$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["www"], "norm", "L", "");		
 					$h-=$pdf->ln();
@@ -446,7 +446,7 @@
 
 			if (!function_exists('alku')) {
 				function alku () {
-					global $pdf, $image, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli, $maakoodi;
+					global $pdf, $image, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli, $maa;
 
 					$firstpage = $pdf->new_page("a4");
 					$pdf->enable('template');
@@ -459,11 +459,11 @@
 					$pieni["height"] = 8;
 					$pieni["font"] = "Times-Roman";
 
-		            if (strtoupper($yhtiorow["maakoodi"]) == 'FI') {
-	                    $maakoodi = "FI ";
+		            if (strtoupper($yhtiorow["maa"]) == 'FI') {
+	                    $maa = "FI ";
 		            }
 		            else {
-	                    $maakoodi = "";
+	                    $maa = "";
 		            }
 
 					$pdf->draw_rectangle(827, 20,  780, 580, 				$firstpage, $rectparam);
@@ -507,7 +507,7 @@
 					$pdf->draw_text(310, 710, $laskurow["toim_osoite"], 								$firstpage, $p);
 					$pdf->draw_text(310, 700, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], 	$firstpage, $p);
 					$pdf->draw_text(310, 690, $laskurow["toim_maa"],			 						$firstpage, $p);
-					$pdf->draw_text(310, 680, t("Y-tunnus", $kieli).": ".$maakoodi.$yhtiorow["ytunnus"],$firstpage, $p);
+					$pdf->draw_text(310, 680, t("Y-tunnus", $kieli).": ".$maa.$yhtiorow["ytunnus"],$firstpage, $p);
 
 					$pdf->draw_rectangle(670, 20,  570, 300, 				$firstpage, $rectparam);
 					$pdf->draw_text(30, 660, t("Kuljetus", $kieli), 		$firstpage, $pieni);

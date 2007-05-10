@@ -1,14 +1,14 @@
 <?php
 
 	if ((mysql_field_name($result, $i) == "nimi") or
-		(mysql_field_name($result, $i) == "maakoodi") or
+		(mysql_field_name($result, $i) == "maa") or
 		(mysql_field_name($result, $i) == "ytunnus") or
 		(mysql_field_name($result, $i) == "oletus_hyvak1")) {
 		if (trim($t[$i]) == '') {
 			$virhe[$i] = t("Tieto puuttuu");
 			$errori = 1;
 		}
-		if (mysql_field_name($result, $i) == "maakoodi") {
+		if (mysql_field_name($result, $i) == "maa") {
 			$t[$i] = strtoupper($t[$i]);
 			$tmp_maakoodi = $t[$i];
 		}
@@ -50,7 +50,7 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "tilinumero") {
-		if ($tmp_maakoodi == strtoupper($yhtiorow['maakoodi'])) {
+		if ($tmp_maakoodi == strtoupper($yhtiorow['maa'])) {
 			if ((int)trim($t[$i]) != 0) {
 				$pankkitili = $t[$i];
 				if ($tmp_maakoodi == 'FI') {
@@ -72,7 +72,7 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "ultilno") {
-		if ($tmp_maakoodi != strtoupper($yhtiorow['maakoodi'])) {
+		if ($tmp_maakoodi != strtoupper($yhtiorow['maa'])) {
 			if ($t[$i] == '') {
 				$virhe[$i] = "".t("Tieto puuttuu")."";
 				$errori = 1;

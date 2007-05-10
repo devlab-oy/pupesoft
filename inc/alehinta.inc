@@ -25,15 +25,15 @@
 	$alehinta_alv = "";
 
 	// jos meillä on lasku menossa ulkomaille
-	if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maakoodi"]) {
+	if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 
 		// tutkitaan ollaanko siellä alv-rekisteröity
-		$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maakoodi='$laskurow[maa]' and vat_numero != ''";
+		$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
 		$alhire = mysql_query($query) or pupe_error($query);
 
 		// ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
 		if (mysql_num_rows($alhire) == 1) {
-			$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maakoodi='$laskurow[maa]' and tuoteno='$trow[tuoteno]' limit 1";
+			$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$trow[tuoteno]' limit 1";
 			$alhire = mysql_query($query) or pupe_error($query);
 
 			// ei löytynyt alvia, se on pakko löytyä
@@ -237,10 +237,10 @@
 						and tuoteno != ''
 						and laji in ('N', 'E')
 						and valkoodi = '$laskurow[valkoodi]'
-						and maakoodi in ('$laskurow[maa]','')
+						and maa in ('$laskurow[maa]','')
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
-						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maakoodi desc
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
 
@@ -262,7 +262,7 @@
 						and tuoteno != ''
 						and laji in ('N', 'E')
 						and valkoodi in ('$yhtiorow[valkoodi]','')
-						and maakoodi in ('$laskurow[maa]','')
+						and maa in ('$laskurow[maa]','')
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
@@ -619,10 +619,10 @@
 						and tuoteno != ''
 						and laji     = ''
 						and valkoodi = '$laskurow[valkoodi]'
-						and maakoodi in ('$laskurow[maa]','')
+						and maa in ('$laskurow[maa]','')
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
-						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maakoodi desc
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
 						LIMIT 1";
 			$hresult = mysql_query($query) or pupe_error($query);
 
@@ -644,7 +644,7 @@
 						and tuoteno != ''
 						and laji     = ''
 						and valkoodi in ('$yhtiorow[valkoodi]','')
-						and maakoodi in ('$laskurow[maa]','')
+						and maa in ('$laskurow[maa]','')
 						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
 						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC

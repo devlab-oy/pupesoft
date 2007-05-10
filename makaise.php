@@ -2,7 +2,7 @@
 	// Tätä kutsutaan makai.php:stä, jos kysessä on ruotsalainen yhtiö. Siksi ei parametrejä
 
 	echo "<font class='head'>".t("Pankkiaineistot")."</font><hr>";
-	if (strtoupper($yhtiorow['maakoodi']) != 'SE') {
+	if (strtoupper($yhtiorow['maa']) != 'SE') {
 		echo "<font class='error'>".t("Tämä on vain ruotsalaisille yrityksille!")."</font>";
 		exit;
 	}
@@ -13,7 +13,7 @@
 	$query = "	SELECT distinct(olmapvm)
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]' and tila = 'P' and
-				maakoodi = 'se' and
+				maa = 'se' and
 				maksaja = '$kukarow[kuka]'
 				ORDER BY 1";
 	$pvmresult = mysql_query($query) or pupe_error($query);
@@ -49,7 +49,7 @@
 		$query = "	SELECT maksu_tili, tilinumero, nimi
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]' and tila = 'P' and
-					maakoodi = 'se' and
+					maa = 'se' and
 					summa < 0 and
 					maksaja = '$kukarow[kuka]' 
 					and olmapvm = '$pvmrow[olmapvm]'
@@ -64,7 +64,7 @@
 				$query = "	SELECT *
 							FROM lasku
 							WHERE yhtio = '$kukarow[yhtio]' and tila = 'P' and
-							maakoodi = 'se' and
+							maa = 'se' and
 							maksaja = '$kukarow[kuka]' and
 							tilinumero='$laskurow[tilinumero]' and
 							maksu_tili='$laskurow[maksu_tili]' and
@@ -96,7 +96,7 @@
 		$query = "	SELECT yriti.tunnus, yriti.tilino, yriti.nimi nimi
 					FROM lasku, yriti
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'P' and
-					maakoodi = 'se' and
+					maa = 'se' and
 					yriti.tunnus = maksu_tili and
 					yriti.yhtio = lasku.yhtio and
 					maksaja = '$kukarow[kuka]' and
@@ -117,7 +117,7 @@
 					 		lasku.tunnus, sisviesti2, yriti.tilino, alatila, kasumma, summa
 							FROM lasku, yriti
 							WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'P' and
-							maakoodi = 'se' and
+							maa = 'se' and
 							yriti.tunnus = maksu_tili and
 							yriti.yhtio = lasku.yhtio and
 							maksaja = '$kukarow[kuka]' and
@@ -144,7 +144,7 @@
 				$query = "UPDATE lasku SET tila = 'Q'
 				          WHERE lasku.yhtio = '$kukarow[yhtio]' 
 				          and tila = 'P' 
-				          and maakoodi = 'se' 
+				          and maa = 'se' 
 				          and maksaja = '$kukarow[kuka]' 
 				          and maksu_tili='$yritirow[tunnus]' 
 				          and olmapvm = '$pvmrow[olmapvm]'
@@ -185,15 +185,15 @@
 	$query = "LOCK TABLES lasku write, yriti read, sanakirja write, valuu read";
 	$result = mysql_query($query) or pupe_error($query);
 		
-	$query = "	SELECT maksu_tili, lasku.nimi, nimitark, osoite, osoitetark, maakoodi, postino, postitp,
+	$query = "	SELECT maksu_tili, lasku.nimi, nimitark, osoite, osoitetark, maa, postino, postitp,
 				summa, lasku.valkoodi, viite, viesti, ultilno, lasku.tunnus, sisviesti2, yriti.tilino,
-				maa, maakoodi,
+				maa, maa,
 				pankki1, pankki2, pankki3, pankki4,
 				swift, alatila, kasumma,
 				lasku.nimi, nimitark, osoite, ytunnus, kurssi
 				FROM lasku, yriti, valuu
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'P' and
-				maakoodi <> 'se' and
+				maa <> 'se' and
 				yriti.tunnus = maksu_tili and
 				yriti.yhtio = lasku.yhtio and
 				valuu.yhtio = lasku.yhtio and
@@ -267,7 +267,7 @@
 					SET tila = 'Q'
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
 					and tila = 'P' 
-					and maakoodi <> 'se' 
+					and maa <> 'se' 
 					and maksaja = '$kukarow[kuka]'
 					ORDER BY yhtio,tila";
 		$result = mysql_query($query) or pupe_error($query);

@@ -60,7 +60,7 @@ if (mysql_num_rows($tilvahresult) > 0)
 	$ulos .= "RNADBY_SA:" . $laskurow['osoite'] . "\n";
 	$ulos .= "RNADBY_PO:" . $laskurow['postino'] . "\n";
 	$ulos .= "RNADBY_CI:" . $laskurow['postitp'] . "\n";
-	$ulos .= "RNADBY_CN:" . $laskurow['maakoodi'] . "\n";
+	$ulos .= "RNADBY_CN:" . $laskurow['maa'] . "\n";
 	#$ulos .= "RNADBY_DO:" . $laskurow['tilausvahvistus'] . "\n"; // mimmosen tilausvahvistuksen asiakas haluaa... F = fax, E = edi
 	$ulos .= "RNADBY_DO:E\n"; // mimmosen tilausvahvistuksen asiakas haluaa... aina edi ni ei tule ongelmia
 	$ulos .= "RNADDP_RF:" . "ZZ /" . $laskurow['ytunnus'] . "\n";
@@ -73,15 +73,15 @@ if (mysql_num_rows($tilvahresult) > 0)
 	$ulos .= "RNADDP_SA:" . $laskurow['toim_osoite'] . "\n";
 	$ulos .= "RNADDP_PO:" . $laskurow['toim_postino'] . "\n";
 	$ulos .= "RNADDP_CI:" . $laskurow['toim_postitp'] . "\n";
-	$ulos .= "RNADDP_CN:" . $laskurow['toim_maakoodi'] . "\n";
+	$ulos .= "RNADDP_CN:" . $laskurow['toim_maa'] . "\n";
 
-	$ulos .= "RNADSE_RF:" . "VA  " . $yhtiorow['maakoodi'] . "-" . $yhtiorow['ytunnus'] . "\n";
+	$ulos .= "RNADSE_RF:" . "VA  " . $yhtiorow['maa'] . "-" . $yhtiorow['ytunnus'] . "\n";
 	$ulos .= "RNADSE_PC:" . sprintf ("%-18.18s", $yhtiorow['ovttunnus']) . "100 91". "\n";
 	$ulos .= "RNADSE_NA:" . $yhtiorow['nimi'] . "\n";
 	$ulos .= "RNADSE_SA:" . $yhtiorow['osoite'] . "\n";
 	$ulos .= "RNADSE_PO:" . $yhtiorow['postino'] . "\n";
 	$ulos .= "RNADSE_CI:" . $yhtiorow['postitp'] . "\n";
-	$ulos .= "RNADSE_CN:" . $yhtiorow['maakoodi'] . "\n";
+	$ulos .= "RNADSE_CN:" . $yhtiorow['maa'] . "\n";
 	$ulos .= "RNADSE_CC:" . "EB @" . $myyjarow['kuka']. "\n";
 	$ulos .= "RNADSE_EM:" . "SR @" . $myyjarow['eposti'] . "\n";
 

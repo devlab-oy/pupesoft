@@ -38,7 +38,7 @@
 	// K‰‰yd‰‰n l‰pi suoratoimittajan paikat
 	while ($superrow = mysql_fetch_array($superjtres)) {
 		$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus vartunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso,
-					if(varastopaikat.maa = '$yhtiorow[maakoodi]', 1,2) as sorttaus, sum(saldo) saldo, varastopaikat.maa varastomaa
+					if(varastopaikat.maa = '$yhtiorow[maa]', 1,2) as sorttaus, sum(saldo) saldo, varastopaikat.maa varastomaa
 					from tuotepaikat
 					join yhtio on yhtio.yhtio=tuotepaikat.yhtio
 					join varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
@@ -89,7 +89,7 @@
 				}
 
 				$varastomaa = '';
-				if (strtoupper($krow['varastomaa']) != strtoupper($yhtiorow['maakoodi'])) {
+				if (strtoupper($krow['varastomaa']) != strtoupper($yhtiorow['maa'])) {
 					$varastomaa = strtoupper($krow['varastomaa']);
 				}
 				

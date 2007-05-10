@@ -5,7 +5,7 @@
 		if (is_array($lasku)) {
 			foreach ($lasku as $peruttava) {
 				$tee='DS';
-				$query = "SELECT round(if(kapvm=olmapvm,summa-kasumma,summa) * maksu_kurssi,2) summa, maksu_tili, maakoodi, olmapvm, maksu_tili, tilinumero, ultilno, yhtio
+				$query = "SELECT round(if(kapvm=olmapvm,summa-kasumma,summa) * maksu_kurssi,2) summa, maksu_tili, maa, olmapvm, maksu_tili, tilinumero, ultilno, yhtio
 							FROM lasku
 							WHERE tunnus = '$peruttava' and tila='P'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -26,7 +26,7 @@
 						$query = "SELECT sum(if(alatila='K', summa - kasumma, summa)) summa FROM lasku
 									WHERE yhtio='$trow[yhtio]' and tila='P' and olmapvm = '$trow[olmapvm]' and
 											maksu_tili = '$trow[maksu_tili]' and
-											if(maakoodi='$yhtiorow[maakoodi]', tilinumero, ultilno) =  if('$trow[maakoodi]'='$yhtiorow[maakoodi]', '$trow[tilinumero]', '$trow[ultilno]') and tunnus != '$peruttava'";
+											if(maa='$yhtiorow[maa]', tilinumero, ultilno) =  if('$trow[maa]'='$yhtiorow[maa]', '$trow[tilinumero]', '$trow[ultilno]') and tunnus != '$peruttava'";
 						$result = mysql_query($query) or pupe_error($query);
 						if (mysql_num_rows($result) != 1) {
 							echo "<b>".t("Hyvityshaulla ei löytynyt mitään")."</b>$query";
@@ -108,7 +108,7 @@
 											valuu.yhtio = '$yhtio' and
 											lasku.yhtio = valuu.yhtio and
 											summa > 0 and tila = 'M' and $valinta
-											and if(lasku.maakoodi='$yhtiorow[maakoodi]',lasku.tilinumero, lasku.ultilno) <>  ALL (SELECT distinct if(lasku.maakoodi='$apurow[maakoodi]',lasku.tilinumero, lasku.ultilno) tilinumero FROM lasku WHERE lasku.yhtio = '$yhtiorow[yhtio]' and tila = 'M' and summa < 0)
+											and if(lasku.maa='$yhtiorow[maa]',lasku.tilinumero, lasku.ultilno) <>  ALL (SELECT distinct if(lasku.maa='$apurow[maa]',lasku.tilinumero, lasku.ultilno) tilinumero FROM lasku WHERE lasku.yhtio = '$yhtiorow[yhtio]' and tila = 'M' and summa < 0)
 											ORDER BY olmapvm, summa  desc";
 						$result = mysql_query($query) or pupe_error($query);
 						$erapvm = 'olmapvm = if(now()<=kapvm,kapvm,if(now()<=erpcm,erpcm,now()))';
@@ -119,7 +119,7 @@
 									FROM lasku,
 									valuu
 									WHERE lasku.yhtio = '$yhtio' and tila = 'M'
-									and if(lasku.maakoodi='$apurow[maakoodi]',lasku.tilinumero, lasku.ultilno) = '$tee'
+									and if(lasku.maa='$apurow[maa]',lasku.tilinumero, lasku.ultilno) = '$tee'
 									and if(kasumma > 0,kapvm,erpcm) <= now()
 									and lasku.valkoodi = valuu.nimi and valuu.yhtio = '$yhtio'";
 						$result = mysql_query($query) or pupe_error($query);
@@ -196,9 +196,9 @@
 			// Onko hyvityksiä, jotka voisi käyttää
 			$query = "SELECT lasku.nimi, mahdolliset.tilinumero, sum(if(lasku.summa < 0, summa, 0)) hyvitykset,sum(if(lasku.summa < 0, 1, 0)) hyvityksetkpl, sum(if(lasku.kasumma=0,lasku.summa, if(lasku.kapvm<now(),lasku.summa-lasku.kasumma, lasku.summa))) summa, count(*) kpl
 					  FROM lasku,
-					  (SELECT distinct if(lasku.maakoodi='$konsernirow[maakoodi]',lasku.tilinumero, lasku.ultilno) tilinumero FROM lasku WHERE lasku.yhtio = '$konsernirow[yhtio]' and tila = 'M' and summa < 0) as mahdolliset
+					  (SELECT distinct if(lasku.maa='$konsernirow[maa]',lasku.tilinumero, lasku.ultilno) tilinumero FROM lasku WHERE lasku.yhtio = '$konsernirow[yhtio]' and tila = 'M' and summa < 0) as mahdolliset
 					  WHERE lasku.yhtio = '$konsernirow[yhtio]' and tila = 'M'
-					  		and if(lasku.maakoodi='$konsernirow[maakoodi]',lasku.tilinumero, lasku.ultilno) = mahdolliset.tilinumero and
+					  		and if(lasku.maa='$konsernirow[maa]',lasku.tilinumero, lasku.ultilno) = mahdolliset.tilinumero and
 					  		if(kasumma > 0,kapvm,erpcm) <= now()
 		  			  GROUP BY lasku.yhtio, mahdolliset.tilinumero";
 			$laskuresult = mysql_query($query) or pupe_error($query);
@@ -326,7 +326,7 @@
 							sum(if(olmapvm>now(),1,0)) uudetmaara
 				FROM lasku, valuu
 				WHERE lasku.yhtio='$yhtiorow[yhtio]' and summa > 0 and
-					   tila = 'M' and olmapvm <= date_add(now(), interval 7 day) and valuu.yhtio=lasku.yhtio and valuu.nimi=lasku.valkoodi and if(lasku.maakoodi='$yhtiorow[maakoodi]',lasku.tilinumero, lasku.ultilno) <>  ALL (SELECT distinct if(lasku.maakoodi='$konsernirow[maakoodi]',lasku.tilinumero, lasku.ultilno) tilinumero FROM lasku WHERE lasku.yhtio = '$yhtiorow[yhtio]' and tila = 'M' and summa < 0)";
+					   tila = 'M' and olmapvm <= date_add(now(), interval 7 day) and valuu.yhtio=lasku.yhtio and valuu.nimi=lasku.valkoodi and if(lasku.maa='$yhtiorow[maa]',lasku.tilinumero, lasku.ultilno) <>  ALL (SELECT distinct if(lasku.maa='$konsernirow[maa]',lasku.tilinumero, lasku.ultilno) tilinumero FROM lasku WHERE lasku.yhtio = '$yhtiorow[yhtio]' and tila = 'M' and summa < 0)";
 			$result = mysql_query($query) or pupe_error($query);
 			$sumrow=mysql_fetch_array ($result);
 			

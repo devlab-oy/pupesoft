@@ -144,7 +144,7 @@
 
 		$slAsa = "concat_ws('/',tiliointi.tilino,tili.nimi)";
 		
-		if ($kpexport == 1 or strtoupper($yhtiorow['maakoodi']) != 'FI') {
+		if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 			$slAsa = "concat_ws('/',if(tosite<>0,concat_ws('-',left(tosite,2), 1*right(tosite,6)), '".t('#NA')."'),tiliointi.tilino,tili.nimi)";
 		}
 		

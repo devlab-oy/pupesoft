@@ -2,6 +2,6 @@
 	$otsikko = 'Hinnastot';
 	$otsikko_nappi = 'hinnastohinta';
 
-	$kentat = 'tunnus, tuoteno, hinta, laji, valkoodi, alv, maakoodi, alkupvm, loppupvm';
+	$kentat = 'tunnus, tuoteno, hinta, laji, valkoodi, alv, maa, alkupvm, loppupvm';
 	$jarjestys = 'tuoteno, hinta, laji, valkoodi, alkupvm, loppupvm';
 ?>

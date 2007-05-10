@@ -136,7 +136,7 @@ if (!function_exists('finvoice_otsik')) {
 			xml_add("SellerStreetName", 												$yhtiorow['osoite'], 									$tootfinvoice);
 			xml_add("SellerTownName", 													$yhtiorow['postitp'], 									$tootfinvoice);
 			xml_add("SellerPostCodeIdentifier", 										$yhtiorow['postino'], 									$tootfinvoice);
-			xml_add("CountryCode",														$yhtiorow['maakoodi'],									$tootfinvoice);
+			xml_add("CountryCode",														$yhtiorow['maa'],										$tootfinvoice);
 			xml_add("CountryName",														$yhtiorow['maa'], 										$tootfinvoice);
 			fputs($tootfinvoice, "</SellerPostalAddressDetails>\r\n");
 

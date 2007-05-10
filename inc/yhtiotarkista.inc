@@ -73,7 +73,7 @@
 		}
 	}
 
-	if (mysql_field_name($result, $i) == "ytunnus" and strtoupper($yhtiorow["maakoodi"]) == "FI") {
+	if (mysql_field_name($result, $i) == "ytunnus" and strtoupper($yhtiorow["maa"]) == "FI") {
 		$ytunnus = trim($t[$i]);
 		require ("tarkistaytunnus.inc");
 
@@ -91,7 +91,7 @@
 		mysql_field_name($result, $i) == "pankkitili2" or
 		mysql_field_name($result, $i) == "pankkitili3") {
 
-		if (strtoupper($yhtiorow['maakoodi']) == "FI" and trim($t[$i]) != "") {
+		if (strtoupper($yhtiorow['maa']) == "FI" and trim($t[$i]) != "") {
 
 			$pankkitili = $t[$i];
 

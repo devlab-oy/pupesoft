@@ -20,7 +20,7 @@
 		//Kenttä 2 Viejä
 		//Kenttä 3 Lomakenro
 		$tulosulos .= sprintf('%-27.27s', "");
-		$tulosulos .= sprintf('%-15.15s', $yhtiorow["maakoodi"].print_ytunnus($yhtiorow["ytunnus"]))."\r\n";
+		$tulosulos .= sprintf('%-15.15s', $yhtiorow["maa"].print_ytunnus($yhtiorow["ytunnus"]))."\r\n";
 		
 		$tulosulos .= sprintf('%-8.8s', "");
 		$tulosulos .= sprintf('%-36.36s', $yhtiorow["nimi"]);
@@ -272,7 +272,7 @@
 		$tulosulos .= sprintf('%-8.8s', "");
 		$tulosulos .= sprintf('%-21.21s', $yhtiorow["nimi"]);
 		
-		$tulosulos .= sprintf('%-15.15s', $yhtiorow["maakoodi"].print_ytunnus($yhtiorow["ytunnus"]));
+		$tulosulos .= sprintf('%-15.15s', $yhtiorow["maa"].print_ytunnus($yhtiorow["ytunnus"]));
 		
 		$tulosulos .= sprintf('%-4.4s', "EX");
 		$tulosulos .= sprintf('%-1.1s', "A")."\r\n";

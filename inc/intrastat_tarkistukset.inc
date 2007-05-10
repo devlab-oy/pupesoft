@@ -37,7 +37,7 @@ while ($intrtuorow = mysql_fetch_array($intrtuores)) {
 	}
 
 	// #TODO tällänen häkki, että toimii :) vois korjata joskus
-	if ($intrtuorow["alkuperamaa"] == $yhtiorow["maakoodi"] and $intrtuorow["toim_maa"] == $yhtiorow["maakoodi"]) {
+	if ($intrtuorow["alkuperamaa"] == $yhtiorow["maa"] and $intrtuorow["toim_maa"] == $yhtiorow["maa"]) {
 		$intrtuorow["alkuperamaa"] = "SE";
 	}
 
@@ -45,7 +45,7 @@ while ($intrtuorow = mysql_fetch_array($intrtuores)) {
 		$virhetxt .= t("Alkuperämaa puuttuu tuotteelta")." <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus'>$intrtuorow[tuoteno]</a>!<br>";
 		$virhe++;
 	}
-	elseif ($intrtuorow["alkuperamaa"] == $yhtiorow["maakoodi"] and $tapa != "vienti") {
+	elseif ($intrtuorow["alkuperamaa"] == $yhtiorow["maa"] and $tapa != "vienti") {
 		$virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus'>$intrtuorow[tuoteno]</a>. ".t("Alkuperämaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
 		$virhe++;
 	}
@@ -104,7 +104,7 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
 			$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa puuttuu")."!<br>";
 			$virhe++;
 		}
-		elseif ($intrlasrow["maa_lahetys"] == $yhtiorow["maakoodi"]) {
+		elseif ($intrlasrow["maa_lahetys"] == $yhtiorow["maa"]) {
 			$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
 			$virhe++;
 		}
@@ -136,7 +136,7 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
 			$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Määrämaa puuttuu")."!<br>";
 			$virhe++;
 		}
-		elseif ($intrlasrow["maa_maara"] == $yhtiorow["maakoodi"]) {
+		elseif ($intrlasrow["maa_maara"] == $yhtiorow["maa"]) {
 			$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/muokkaa_vienti_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Määrämaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
 			$virhe++;
 		}

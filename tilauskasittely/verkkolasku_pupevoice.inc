@@ -43,13 +43,13 @@ if (!function_exists('pupevoice_otsik')) {
 			}
 		}
 
-		xml_add("SellerPartyIdentifier", 				$lasrow['ovttunnus'],		$tootxml);
-		xml_add("SellerPartyDomicile", 					$lasrow['kotipaikka'], 		$tootxml);
-		xml_add("SellerOrganisationName", 				$lasrow['nimi'], 			$tootxml);
-		xml_add("SellerStreetName", 					$lasrow['osoite'], 			$tootxml);
-		xml_add("SellerPostCode", 						$lasrow['postino'], 		$tootxml);
-		xml_add("SellerTownName", 						$lasrow['postitp'], 		$tootxml);
-		xml_add("SellerCountryName", 					$lasrow['maa'],				$tootxml);
+		xml_add("SellerPartyIdentifier", 				$lasrow['yhtio_ovttunnus'],	$tootxml);
+		xml_add("SellerPartyDomicile", 					$lasrow['yhtio_kotipaikka'],$tootxml);
+		xml_add("SellerOrganisationName", 				$lasrow['yhtio_nimi'], 		$tootxml);
+		xml_add("SellerStreetName", 					$lasrow['yhtio_osoite'], 	$tootxml);
+		xml_add("SellerPostCode", 						$lasrow['yhtio_postino'], 	$tootxml);
+		xml_add("SellerTownName", 						$lasrow['yhtio_postitp'], 	$tootxml);
+		xml_add("SellerCountryName", 					$lasrow['yhtio_maa'],		$tootxml);
 		xml_add("SellerPhoneNumber", 					$yhtiorow['puhelin'], 		$tootxml);
 		xml_add("SellerFaxNumber", 						$yhtiorow['fax'], 			$tootxml);
 

@@ -479,6 +479,7 @@
 				}
 				
 				echo "<tr><td class='back' valign='top' align='left' colspan='2'><br><table>";
+				echo "<tr><th colspan='2'>".t("Tulevaisuus")."</th></tr>";
 				echo "<tr><th>".t("P‰iv‰m‰‰r‰")."</th><th>".t("Myyt‰viss‰")."</th></tr>";
 				
 				$query = "	select distinct(if(tyyppi!='O',kerayspvm,toimaika)) as kerayspvm

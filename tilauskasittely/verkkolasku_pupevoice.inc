@@ -28,6 +28,7 @@ if (!function_exists('pupevoice_otsik')) {
 		fputs($tootxml, "</CHN>\n");
 		fputs($tootxml, "<SellerPartyInformation>\n");
 
+/*
 		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
 		if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
 
@@ -42,14 +43,15 @@ if (!function_exists('pupevoice_otsik')) {
 				$yhtiorow['fax']		= $alhiro['fax'];
 			}
 		}
+*/
 
-		xml_add("SellerPartyIdentifier", 				$lasrow['yhtio_ovttunnus'],	$tootxml);
-		xml_add("SellerPartyDomicile", 					$lasrow['yhtio_kotipaikka'],$tootxml);
-		xml_add("SellerOrganisationName", 				$lasrow['yhtio_nimi'], 		$tootxml);
-		xml_add("SellerStreetName", 					$lasrow['yhtio_osoite'], 	$tootxml);
-		xml_add("SellerPostCode", 						$lasrow['yhtio_postino'], 	$tootxml);
-		xml_add("SellerTownName", 						$lasrow['yhtio_postitp'], 	$tootxml);
-		xml_add("SellerCountryName", 					$lasrow['yhtio_maa'],		$tootxml);
+		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],		$tootxml);
+		xml_add("SellerPartyDomicile", 					$yhtiorow['kotipaikka'],	$tootxml);
+		xml_add("SellerOrganisationName", 				$yhtiorow['nimi'], 			$tootxml);
+		xml_add("SellerStreetName", 					$yhtiorow['osoite'], 		$tootxml);
+		xml_add("SellerPostCode", 						$yhtiorow['postino'], 		$tootxml);
+		xml_add("SellerTownName", 						$yhtiorow['postitp'], 		$tootxml);
+		xml_add("SellerCountryName", 					$yhtiorow['maa'],			$tootxml);
 		xml_add("SellerPhoneNumber", 					$yhtiorow['puhelin'], 		$tootxml);
 		xml_add("SellerFaxNumber", 						$yhtiorow['fax'], 			$tootxml);
 

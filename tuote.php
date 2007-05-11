@@ -331,9 +331,16 @@
 			echo "<table>";
 			echo "<tr>";
 			echo "<td class='back' valign='top' align='left'>";
-
+			
+			if ($yhtiorow["saldo_kasittely"] == "T") {
+				$aikalisa = date("Y-m-d");
+			}
+			else {
+				$aikalisa = "";
+			}
+			
 			if ($tuoterow["ei_saldoa"] == '') {
-				//saldot
+				// Saldot
 				echo "<table>";
 				echo "<tr><th>".t("Varasto")."</th><th>".t("Varastopaikka")."</th><th>".t("Saldo")."</th><th>".t("Hyllyss‰")."</th><th>".t("Myyt‰viss‰")."</th></tr>";
 
@@ -357,7 +364,7 @@
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
 
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"]);
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $aikalisa);
 
 						//summataan kokonaissaldoa
 						$kokonaissaldo += $saldo;
@@ -374,7 +381,7 @@
 					}
 				}
 
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, "ORVOT");
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, "ORVOT", '', '', '', '', '', '', '', $aikalisa);
 
 				if ($saldo != 0) {
 					echo "<tr><td>".t("Tuntematon")."</td><td>?</td>";
@@ -477,64 +484,29 @@
 					
 					echo "</table></td></tr>";
 				}
-				
-				echo "<tr><td class='back' valign='top' align='left' colspan='2'><br><table>";
-				echo "<tr><th colspan='2'>".t("Tulevaisuus")."</th></tr>";
-				echo "<tr><th>".t("P‰iv‰m‰‰r‰")."</th><th>".t("Myyt‰viss‰")."</th></tr>";
-				
-				$query = "	select distinct(if(tyyppi!='O',kerayspvm,toimaika)) as kerayspvm
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi in ('L','G','V','W','O')
-							and tilausrivi.tuoteno = '$tuoteno'
-							and tilausrivi.varattu > 0
-							and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
-							and ((tilausrivi.tyyppi in ('L','G','V','W') and kerayspvm >= now()) or (tilausrivi.tyyppi = 'O' and toimaika >= now()))
-							order by 1";
-				$kerresult = mysql_query($query) or pupe_error($query);
-				
-				$oldie = 0;
-				
-				while ($kerrow = mysql_fetch_array($kerresult)) {
-					
-					list( , , $nymyytavissa, $staattus) = saldo_myytavissa($tuoteno, 'KAIKKI', '', '', '', '', '', '', '', $kerrow['kerayspvm']);
-					
-					if ($oldie != $nymyytavissa) {
-						echo "<tr><td>".tv1dateconv($kerrow["kerayspvm"])."</td><td>".sprintf("%.2f", $nymyytavissa)."</td></tr>";
-						$oldie = $nymyytavissa;
-					}
-				}
-				
-				$oldie = 0;
-				
-				
-				
-				echo "</tr></td>";
-				echo "</table></td></tr>";
-				
 			}
 
 			echo "</td>";
-
-			
-
 			echo "</tr><tr><td class='back' valign='top' align='left' colspan='2'>";
 
-
-			$query = "	SELECT tilausrivi.*, lasku.ytunnus, tilausrivi.varattu+tilausrivi.jt kpl, lasku.nimi, tilausrivi.toimaika, round((tilausrivi.varattu+tilausrivi.jt)*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta, varastopaikat.nimitys varasto
+			
+			// Tilausrivit t‰lle tuotteelle
+			$query = "	SELECT lasku.nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
+						if(tilausrivi.tyyppi!='O', tilausrivi.kerayspvm, tilausrivi.toimaika) kerayspvm,
+						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi in ('L','E','O','G','V')
+						and tilausrivi.tyyppi in ('L','E','O','G','V','W')
 						and tilausrivi.tuoteno = '$tuoteno'
 						and tilausrivi.laadittu > '0000-00-00 00:00:00'
 						and tilausrivi.laskutettuaika = '0000-00-00'
 						and (tilausrivi.varattu != 0 or jt != 0)
 						and tilausrivi.var not in ('P')
-						ORDER BY tyyppi, var";
+						ORDER BY kerayspvm";
 			$jtresult = mysql_query($query) or pupe_error($query);
-
+			
 			if (mysql_num_rows($jtresult) != 0) {
 
 				// Avoimet rivit
@@ -546,9 +518,9 @@
 						<th>".t("Tyyppi")."</th>
 						<th>".t("Toimaika")."</th>
 						<th>".t("Kpl")."</th>
+						<th>".t("Myyt‰viss‰")."</th>
 						</tr>";
 
-				// jtrivej‰ lˆytyi
 				while ($jtrow = mysql_fetch_array($jtresult)) {
 
 					$tyyppi = "";
@@ -559,15 +531,8 @@
 						$tyyppi = t("Ostotilaus");
 						$merkki = "+";
 
-						$query = "	SELECT laskunro
-									FROM lasku
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus='$jtrow[uusiotunnus]'";
-						$keikkares = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($keikkares) > 0) {
-							$keikkarow = mysql_fetch_array($keikkares);
-							$keikka = " / ".$keikkarow["laskunro"];
+						if ($jtrow["laskunro"] > 0) {
+							$keikka = " / ".$jtrow["laskunro"];
 						}
 					}
 					elseif($jtrow["tyyppi"] == "E") {
@@ -579,32 +544,43 @@
 						$merkki = "-";
 					}
 					elseif($jtrow["tyyppi"] == "V") {
-						$tyyppi = t("Valmistus");
+						$tyyppi = t("Kulutus");
 						$merkki = "-";
 					}
 					elseif($jtrow["tyyppi"] == "L" and $jtrow["var"] == "J") {
 						$tyyppi = t("J‰lkitoimitus");
 						$merkki = "-";
 					}
-					elseif(($jtrow["tyyppi"] == "L" or $jtrow["tyyppi"] == "N") and $jtrow["varattu"] > 0) {
+					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] > 0) {
 						$tyyppi = t("Myynti");
 						$merkki = "-";
 					}
-					elseif(($jtrow["tyyppi"] == "L" or $jtrow["tyyppi"] == "N") and $jtrow["varattu"] < 0) {
+					elseif($jtrow["tyyppi"] == "L" and $jtrow["kpl"] < 0) {
 						$tyyppi = t("Hyvitys");
 						$merkki = "+";
 					}
-
+					elseif($jtrow["tyyppi"] == "W" and $jtrow["tilaustyyppi"] == "W") {
+						$tyyppi = t("Valmistus");
+						$merkki = "+";
+					}
+					elseif($jtrow["tyyppi"] == "W" and $jtrow["tilaustyyppi"] == "V") {
+						$tyyppi = t("Asiakkaallevalmistus");
+						$merkki = "+";
+					}
+					
 					if($jtrow["varasto"] != "") {
 						$tyyppi = $tyyppi." - ".$jtrow["varasto"];
 					}
-
+					
+					list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["kerayspvm"]);
+					
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
-							<td><a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$jtrow[otunnus]'>$jtrow[otunnus]</a>$keikka</td>";
-					echo "	<td>$tyyppi</td>
-							<td>".substr($jtrow["toimaika"],0,10)."</td>
-							<td>$merkki".abs($jtrow["kpl"])."</td>
+							<td><a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]'>$jtrow[tunnus]</a>$keikka</td>
+							<td>$tyyppi</td>
+							<td>".tv1dateconv($jtrow["kerayspvm"])."</td>
+							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
+							<td align='right'>".sprintf('%.2f', $myyta)."</td>
 							</tr>";
 				}
 
@@ -616,7 +592,7 @@
 			echo "</table><br>";
 
 			//myynnit
-			$edvuosi = date('Y')-1;
+			$edvuosi  = date('Y')-1;
 			$taavuosi = date('Y');
 
 			$query = "	SELECT

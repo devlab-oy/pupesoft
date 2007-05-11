@@ -247,7 +247,29 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "saldo_kasittely") {
 
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "T") {
+			$sel2 = "selected";
+		}
+		
+
+		$ulos .= "<option value = ''  $sel1>".t("Myytävissä-kpl ajasta riippumaton")."</option>";
+		$ulos .= "<option value = 'T' $sel2>".t("Myytävissä-kpl lasketaan keräyspvm:n mukaan")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "kerataanko_saldottomat") {
 
 		$ulos = "<td><select name='$nimi'>";

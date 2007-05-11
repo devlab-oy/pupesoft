@@ -46,8 +46,50 @@
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
+			echo "<tr>";
+
+			echo "	<th align='left' colspan='2'>".t("Ker‰ysaika")."</th>
+					<th align='left' colspan='4'>".t("Toimitusaika")."</th>
+					</tr>";
+			echo "<tr>";
+
+			if ($toimaika == "" or $toimaika == "0000-00-00") {
+				$toimaika = $laskurow["toimaika"];
+			}
+
+			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+				$kerayspvm = $laskurow["kerayspvm"];
+			}
+
+			if ($toimaika == "" or $toimaika == "0000-00-00") {
+				$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			}
+			else {
+				$toimkka = substr($toimaika, 5, 2);
+				$toimvva = substr($toimaika, 0, 4);
+				$toimppa = substr($toimaika, 8, 2);
+			}
+
+			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+				$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+				$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			}
+			else {
+				$kerayskka = substr($kerayspvm, 5, 2);
+				$keraysvva = substr($kerayspvm, 0, 4);
+				$keraysppa = substr($kerayspvm, 8, 2);
+			}
+
+			echo "<td colspan='2'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
+			echo "<td colspan='4'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";
+			echo "<tr>";
+			
+			
 			echo "<tr><th colspan='6' align='left'>".t("Rivikommentti").":</tg></tr>";
-			echo "<tr><td class='back' colspan='6'><input type='text' value='$kommentti' name='kommentti' size='75' maxlength='255'></td></tr>";
+			echo "<tr><td colspan='6'><input type='text' value='$kommentti' name='kommentti' size='75' maxlength='255'></td></tr>";
 
 			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T")) {
 				echo "<tr>
@@ -158,18 +200,48 @@
 		echo "<td class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>
-				<th align='left'>".t("Toimitusaika")."</th>
-				<th align='left' colspan='2'>".t("Ker‰ysaika")."</th>
+				<th align='left'>".t("Ker‰ysaika")."</th>
+				<th align='left' colspan='2'>".t("Toimitusaika")."</th>
 				<th colspan='4' align='left'>".t("Kommentti")."</th>
 				<td class='back'></td>
 				</tr>";
+		echo "<tr>";
+		
+		if ($toimaika == "" or $toimaika == "0000-00-00") {
+			$toimaika = $laskurow["toimaika"];
+		}
 
-		echo "<tr>
-				<td><input type='text' size='12' name='toimaika' value='$toimaika'></td>
-				<td colspan='2'><input type='text' size='12' name='kerayspvm' value = '$kerayspvm'></td>
-				<td colspan='4'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>";
+		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			$kerayspvm = $laskurow["kerayspvm"];
+		}
+		
+		if ($toimaika == "" or $toimaika == "0000-00-00") {
+			$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+		}
+		else {
+			$toimkka = substr($toimaika, 5, 2);
+			$toimvva = substr($toimaika, 0, 4);
+			$toimppa = substr($toimaika, 8, 2);
+		}
+		
+		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+		}
+		else {
+			$kerayskka = substr($kerayspvm, 5, 2);
+			$keraysvva = substr($kerayspvm, 0, 4);
+			$keraysppa = substr($kerayspvm, 8, 2);
+		}
+		
+		echo "<td><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
+		echo "<td colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";		
+		echo "<td colspan='4'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>";
 
-		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS")) {
+		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T"))) {
 			echo "</tr>
 				<tr>
 					<th colspan='7' align='left'>".t("Tuotteen nimitys")."</th>
@@ -214,12 +286,7 @@
 
 		if ($tila == "LISAARESEPTIIN") {
 			echo "<td>$perheid $perheid2</td>";
-			$csp = "3";
 		}
-		else {
-			$csp = "2";
-		}
-
 
 		if ($ulos == '') {
 			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
@@ -228,18 +295,75 @@
 			echo "<td>$ulos</td>";
 		}
 
-		echo "
-			<td><input type='text' size='5' name='kpl' value='$kpl'></td>";
+		echo "<td><input type='text' size='5' name='kpl' value='$kpl'></td>";
 
 		echo "<td class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
-		echo "<tr>
-				<th colspan='$csp' align='left'>".t("Kommentti")."</th>
-				<td class='back'></td>
+		
+		echo "<tr>";
+		
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<th></th>";
+		}
+		
+		echo "	<th align='left'>".t("Ker‰ysaika")."</th>
+				<th align='left'>".t("Toimitusaika")."</th>
+				</tr>";
+		echo "<tr>";
+		
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<td></td>";
+		}
+
+		if ($toimaika == "" or $toimaika == "0000-00-00") {
+			$toimaika = $laskurow["toimaika"];
+		}
+
+		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			$kerayspvm = $laskurow["kerayspvm"];
+		}
+		
+		if ($toimaika == "" or $toimaika == "0000-00-00") {
+			$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+		}
+		else {
+			$toimkka = substr($toimaika, 5, 2);
+			$toimvva = substr($toimaika, 0, 4);
+			$toimppa = substr($toimaika, 8, 2);
+		}
+
+		if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+			$kerayskka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$keraysvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+			$keraysppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+		}
+		else {
+			$kerayskka = substr($kerayspvm, 5, 2);
+			$keraysvva = substr($kerayspvm, 0, 4);
+			$keraysppa = substr($kerayspvm, 8, 2);
+		}
+
+		echo "<td><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
+		echo "<td><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";		
+		
+		echo "<tr>";
+		
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<th></th>";
+		}
+		
+		echo "<th colspan='2' align='left'>".t("Kommentti")."</th>
 				</tr>";
 
-		echo "<tr>
-				<td colspan='$csp'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>
+		echo "<tr>";
+		
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<td></td>";
+		}
+				
+		echo "<td colspan='2'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>
 				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td></tr>";
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..

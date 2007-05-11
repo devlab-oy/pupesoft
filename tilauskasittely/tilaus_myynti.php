@@ -1880,7 +1880,6 @@ if ($tee == '') {
 						$kpl	 = 0;
 						$kielletty++;
 					}
-
 				}
 			}
 			elseif ($kukarow["extranet"] != '') {
@@ -1893,13 +1892,20 @@ if ($tee == '') {
 				$trow["alv"] = $laskurow["alv"];
 			}
 
+
+			if (checkdate($toimkka,$toimppa,$toimvva)) {
+				$toimaika = $toimvva."-".$toimkka."-".$toimppa;
+			}
+			if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
+				$kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
+			}
 			if ($toimaika == "" or $toimaika == "0000-00-00") {
 				$toimaika = $laskurow["toimaika"];
 			}
-
 			if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
 				$kerayspvm = $laskurow["kerayspvm"];
 			}
+
 
 			if ($laskurow["varasto"] != 0) {
 				$varasto = (int) $laskurow["varasto"];
@@ -2927,11 +2933,14 @@ if ($tee == '') {
 							echo "<td valign='top'>&nbsp;</td>";
 							echo "<td valign='top'>$prow[tuoteno]</td>";
 							echo "<td valign='top'><input type='text' name='kpl_array[$prow[tuoteno]]'   size='2' maxlength='8'		Style='font-size: 8pt; padding:0;'></td>";
-							echo "<td valign='top'><input type='text' name='var_array[$prow[tuoteno]]'   size='2' maxlength='1' 	Style='font-size: 8pt; padding:0;'></td>
-								  <td valign='top'><input type='text' name='hinta_array[$prow[tuoteno]]' size='5' maxlength='12' 	Style='font-size: 8pt; padding:0;'></td>
-								  <td valign='top'><input type='text' name='ale_array[$prow[tuoteno]]'   size='5' maxlength='6' 	Style='font-size: 8pt; padding:0;'></td>
-								  <td valign='top'><input type='text' name='netto_array[$prow[tuoteno]]' size='2' maxlength='1' 	Style='font-size: 8pt; padding:0;'></td>";
-
+						
+							if ($toim != "SIIRTOTYOMAARAYS") {
+								echo "<td valign='top'><input type='text' name='var_array[$prow[tuoteno]]'   size='2' maxlength='1' 	Style='font-size: 8pt; padding:0;'></td>
+								  	<td valign='top'><input type='text' name='hinta_array[$prow[tuoteno]]' size='5' maxlength='12' 	Style='font-size: 8pt; padding:0;'></td>
+								  	<td valign='top'><input type='text' name='ale_array[$prow[tuoteno]]'   size='5' maxlength='6' 	Style='font-size: 8pt; padding:0;'></td>
+								  	<td valign='top'><input type='text' name='netto_array[$prow[tuoteno]]' size='2' maxlength='1' 	Style='font-size: 8pt; padding:0;'></td>";
+							}
+							
 							$lislask++;
 
 							if ($lislask == mysql_num_rows($lisaresult)) {

@@ -69,7 +69,8 @@ if ($Xtunnukset2 != "") {
 				LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
 				LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.uusiotunnus='$uusiotunnus' 
-				and tilausrivi.yhtio='$kukarow[yhtio]' 
+				and tilausrivi.yhtio = '$kukarow[yhtio]' 
+				and tilausrivi.tyyppi = 'L'
 				and tilausrivi.kpl<>0
 				GROUP BY 1,2,3,4,5";	
 	$Xriviresult = mysql_query($Xquery) or pupe_error($Xquery);

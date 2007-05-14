@@ -67,27 +67,7 @@
 	}
 
 	// Etsitään asiakasta
-	if ($toim == "TYOMAARAYS" and ($nimi != '' or $rekno!='' or $valmnro!='') and !isset($jatka)) {
-		//tehdään asiakashaku yhteensopivuus
-		$ytunnus 	= $nimi;
-		$asiakasid	= "";
-		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
-
-		require ("../inc/asiakashaku.inc");
-
-		if ($asiakasid == '' and $monta > 1) {
-			//Löytyi monta sopivaa, näytetään formi, mutta ei otsikkoa
-			$tila = 'EI_NAYTETA';
-		}
-
-		/*
-		$ytunnus	= $nimi;
-		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
-
-		require ("../inc/tyomaarayshaku.inc");
-		*/
-	}
-	elseif ($toim != "TYOMAARAYS" and $nimi != '' and !isset($jatka) and $asiakasid == 0) {
+	if ($nimi != '' and !isset($jatka) and $asiakasid == 0) {
 
 		//tehdään asiakashaku yhteensopivuus
 		$ytunnus 	= $nimi;
@@ -225,6 +205,7 @@
 
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='paaformi'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
+		echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 		echo "<input type='hidden' name='from' value='$from'>";
@@ -711,16 +692,15 @@
 
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
+
 			if ($toim == "YLLAPITO") {
 				echo t("Ei käytössä");
 			}
 			else {
-				echo "
-					<input type='text' name='toimpp' value='$toimpp' size='3'>
-					<input type='text' name='toimkk' value='$toimkk' size='3'>
-					<input type='text' name='toimvv' value='$toimvv' size='6'>
+				echo "<input type='text' name='toimpp' value='$toimpp' size='3'><input type='text' name='toimkk' value='$toimkk' size='3'><input type='text' name='toimvv' value='$toimvv' size='6'>
 					<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'>";
 			}
+
 			echo "</td>";
 
 			if ($srow['vienti'] == '') {
@@ -769,9 +749,7 @@
 				echo t("Ei käytössä");
 			}
 			else {
-				echo "<input type='text' name='kerpp' value='$kerpp' size='3'>
-						<input type='text' name='kerkk' value='$kerkk' size='3'>
-						<input type='text' name='kervv' value='$kervv' size='6'>
+				echo "<input type='text' name='kerpp' value='$kerpp' size='3'><input type='text' name='kerkk' value='$kerkk' size='3'><input type='text' name='kervv' value='$kervv' size='6'>
 						<input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'>";
 			}
 			echo "</td>";
@@ -1256,19 +1234,64 @@
 				echo "</tr>";
 			}
 
-			echo "</table><br>";
+			if ($toim == "TYOMAARAYS") {				
+				echo "<tr><td class='back'><br></td></tr>";
+				echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
+				
+				echo "	<tr>
+						<td>".t("Työjono").":</td><td>";
+						
+				echo "<select name='tyojono'>";
 
-			if ($toim == "TYOMAARAYS") {
-				echo "<table>";
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio='$kukarow[yhtio]' and laji = 'TYOM_TYOJONO'
+							ORDER BY jarjestys, selitetark_2";
+				$vresult = mysql_query($query) or pupe_error($query);
+
+				while ($vrow=mysql_fetch_array($vresult)) {
+					$sel="";
+					if ($srow["tyojono"] == $vrow['selite']) {
+						$sel = "selected";
+					}
+					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
+				}
+
+				echo "</select>";
+					
+
+				echo "	</td>						
+						<td>".t("Työstatus").":</td><td>";
+						
+				echo "<select name='tyostatus'>";
+
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio='$kukarow[yhtio]' and laji = 'TYOM_TYOSTATUS'
+							ORDER BY jarjestys, selitetark_2";
+				$vresult = mysql_query($query) or pupe_error($query);
+
+				while ($vrow=mysql_fetch_array($vresult)) {
+					$sel="";
+					if ($srow["tyostatus"] == $vrow['selite']) {
+						$sel = "selected";
+					}
+					echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
+				}
+
+				echo "</select>";
+				echo "	</td>
+						</tr>";
+				
 				echo "<tr>
-						<td>Rek. no:</td><td><input type='text' name='rekno' size='15' value='$srow[rekno]'> <input type='submit' value='Hae'></td>
-						<td>Kotipuh:</td><td><input type='text' name='kotipuh' size='20' value='$srow[kotipuh]'></td></tr>";
+						<td>".t("Rek. no").":</td><td><input type='text' name='rekno' size='15' value='$srow[rekno]'></td>
+						<td>".t("Kotipuh").":</td><td><input type='text' name='kotipuh' size='20' value='$srow[kotipuh]'></td></tr>";
 				echo "<tr>
-						<td>Valm. nro:</td><td><input type='text' name='valmnro' size='20' value='$srow[valmnro]'></td>
-						<td>Työpuh:</td><td><input type='text' name='tyopuh' size='20' value='$srow[tyopuh]'></td></tr>";
+						<td>".t("Valm. nro").":</td><td><input type='text' name='valmnro' size='20' value='$srow[valmnro]'></td>
+						<td>".t("Työpuh").":</td><td><input type='text' name='tyopuh' size='20' value='$srow[tyopuh]'></td></tr>";
 				echo "<tr>
-						<td>Mittarilukema:</td><td><input type='text' name='mittarilukema' size='20' value='$srow[mittarilukema]'></td>
-						<td>Myyjäliike:</td><td><input type='text' name='myyjaliike' size='20' value='$srow[myyjaliike]'></td></tr>";
+						<td>".t("Mittarilukema").":</td><td><input type='text' name='mittarilukema' size='20' value='$srow[mittarilukema]'></td>
+						<td>".t("Myyjäliike").":</td><td><input type='text' name='myyjaliike' size='20' value='$srow[myyjaliike]'></td></tr>";
 
 				if ($srow["ostopvm"] == "" or $srow["ostopvm"] == "0000-00-00") {
 					$luvattupp = date("d");
@@ -1296,23 +1319,19 @@
 					list($luvattuvv, $luvattukk, $luvattupp) = split('-', $srow["luvattu"]);
 				}
 
-				echo "<tr><td>".t("Ostopvm").":</td>
-						<td>
-						<input type='text' name='ostopvmpp' size='3' value='$ostopvmpp'>-
-						<input type='text' name='ostopvmkk' size='3' value='$ostopvmkk'>-
-						<input type='text' name='ostopvmvv' size='6' value='$ostopvmvv'>
-						</td>
-						<td>".t("Merkki ja malli").":</td><td>";
-				echo "<select name='merkki2'><option value='eimenu'>Valitse merkki";
-
-
+				echo "	<tr>
+						<td>".t("Ostopvm").":</td><td><input type='text' name='ostopvmpp' size='3' value='$ostopvmpp'><input type='text' name='ostopvmkk' size='3' value='$ostopvmkk'><input type='text' name='ostopvmvv' size='6' value='$ostopvmvv'></td>
+						<td>".t("Merkki").":</td><td>";
+				
+				echo "<select name='merkki2'>";
+				
 				$query = "	SELECT *
 							FROM avainsana
 							WHERE yhtio='$kukarow[yhtio]' and laji = 'sarjanumeron_li' and selite = 'MERKKI'
 							ORDER BY jarjestys, selitetark_2";
 				$vresult = mysql_query($query) or pupe_error($query);
 
-				echo "<option value = ''>".t("Valitse merkki")."</option>";
+				echo "<option value = 'eimenu'>".t("Valitse merkki")."</option>";
 
 				$zxk = "";
 
@@ -1329,25 +1348,27 @@
 					$srow["merkki"] = "";
 				}
 
-				echo "</select> ja <input type='text' name='merkki' size='11' value='$srow[merkki]'></td></tr>";
-				echo "<tr><td>Tuotu:</td>
-						<td>
-						<input type='text' name='tuotupp' size='3' value='$tuotupp'>-
-						<input type='text' name='tuotukk' size='3' value='$tuotukk'>-
-						<input type='text' name='tuotuvv' size='6' value='$tuotuvv'>
-						</td>
-						<td>Malli/Värikoodi:</td><td><input type='text' name='mallivari' size='20' value='$srow[mallivari]'></td></tr>";
-				echo "<tr><td>Luvattu:</td><td>
-						<input type='text' name='luvattupp' size='3' value='$luvattupp'>-
-						<input type='text' name='luvattukk' size='3' value='$luvattukk'>-
-						<input type='text' name='luvattuvv' size='6' value='$luvattuvv'>
-						</td>
-						<td>Työn suorittaja:</td><td><input type='text' name='suorittaja' size='20' maxlengtd='15' value='$srow[suorittaja]'></td></tr>";
-				echo "<tr><td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td></tr>";
-				echo "<tr><td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td></tr>";
-				echo "</table><br>";
+				echo "</select> ".t("tai")." <input type='text' name='merkki' size='11' value='$srow[merkki]'></td>
+						</tr>";
+				echo "	<tr>
+						<td>".t("Tuotu").":</td><td><input type='text' name='tuotupp' size='3' value='$tuotupp'><input type='text' name='tuotukk' size='3' value='$tuotukk'><input type='text' name='tuotuvv' size='6' value='$tuotuvv'></td>
+						<td>".t("Malli/Värikoodi").":</td><td><input type='text' name='mallivari' size='20' value='$srow[mallivari]'></td>
+						</tr>";
+				echo "	<tr>
+						<td>".t("Luvattu").":</td><td><input type='text' name='luvattupp' size='3' value='$luvattupp'><input type='text' name='luvattukk' size='3' value='$luvattukk'><input type='text' name='luvattuvv' size='6' value='$luvattuvv'></td>
+						<td>".t("Työn suorittaja").":</td><td><input type='text' name='suorittaja' size='20' maxlengtd='15' value='$srow[suorittaja]'></td>
+						</tr>";				
+				echo "	<tr>
+						<td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td>
+						</tr>";
+				echo "	<tr>
+						<td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td>
+						</tr>";
 			}
 
+			
+			echo "</table><br>";
+				
 			// tehdään ylläpitosopimista varten laskutusaikataulu taulu
 			if ($toim == "YLLAPITO") {
 
@@ -1439,8 +1460,10 @@
 				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[30] value='30'> 30 </td>";
 				echo "</tr><tr>";
 				echo "<td><input name='yllapito_pp[]' $disable type='checkbox' $chk[31] value='31'> 31 </td>";
-// tää ei oo vielä implmentoitu
-//				echo "<td colspan='9'><input name='yllapito_pp[]' $disable type='checkbox' $chk[99] value='99'> Kuun viimeinen </td>";
+				
+				// tää ei oo vielä implmentoitu
+				//echo "<td colspan='9'><input name='yllapito_pp[]' $disable type='checkbox' $chk[99] value='99'> Kuun viimeinen </td>";
+				
 				echo "</tr></table>";
 				echo "</td>";
 				echo "</tr>";
@@ -1516,6 +1539,7 @@
 
 			echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='OTSIK'>";
+			echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='projektilla' value='$projektilla'>";
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -1937,7 +1961,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
-		if ($toim == "TYOMAARAYS" or trim($komm1) != "") {
+		if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $tilaustyyppi == "T") {
 			//otetaan kantaa pyörän malliin
 			if($merkki2 != 'eimenu'){
 				$merkki = $merkki2;
@@ -1960,6 +1984,8 @@
 						komm2 			= '$komm2',
 						suorittaja 		= '$suorittaja',
 						viite	 		= '$viite',
+						tyojono			= '$tyojono',
+						tyostatus		= '$tyostatus',
 						otunnus 		= '$kukarow[kesken]'";
 			$query2 .= $postquery2;
 			$result = mysql_query($query2) or pupe_error($query2);

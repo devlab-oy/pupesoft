@@ -112,9 +112,17 @@ if (!function_exists("js_popup")) {
 }
 
 if (!function_exists("tv1dateconv")) {
-	function tv1dateconv($date) {
+	function tv1dateconv($date, $pitka="") {
 		//kääntää mysqln vvvv-kk-pp muodon muotoon pp.kk.vvvv
-		return substr($date,8,2).".".substr($date,5,2).".".substr($date,0,4);
+		//2007-05-09 12:18:18
+		if (strlen($date) > 10 and $pitka != "") {
+			$jatko = substr($date,10);
+		}
+		else {
+			$jatko = "";
+		}
+		
+		return substr($date,8,2).".".substr($date,5,2).".".substr($date,0,4).$jatko;
 	}
 }
 

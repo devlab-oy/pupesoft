@@ -22,7 +22,7 @@
 			exit;
 		}
 
-		echo "<font class='head'>".t("Nouda tallennettu maksuaineisto")."</font><hr><br><br>";
+		echo "<font class='head'>".t("Nouda tallennettu maksuaineisto")."</font><hr><br>";
 
 		if ($kotimaa == "FI") {
 			echo "<font class='message'>Kotimaan LM03-maksuaineisto:</font><br>";
@@ -36,8 +36,6 @@
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<select name='filenimi' multiple='FALSE' size='10'>";
-
-		echo "<option value=''></option>";
 
 		while ($file = readdir($handle)) {
 			if (($kotimaa == "FI" and substr($file,0, 5+strlen($kukarow["yhtio"])) == "lm03-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
@@ -62,8 +60,6 @@
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<select name='filenimi' multiple='FALSE' size='10'>";
-
-		echo "<option value=''></option>";
 
 		while ($file = readdir($handle)) {
 			if (($kotimaa == "FI" and substr($file, 0, 5+strlen($kukarow["yhtio"])) == "lum3-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {

@@ -262,24 +262,25 @@
 			echo "</tr>";
 
 			while ($row = mysql_fetch_array($result)) {
+				if ($row['rahtikirjanro'] != '') {
+					$query = "select otsikkonro, tulostettu from rahtikirjat where yhtio='$kukarow[yhtio]' and rahtikirjanro='$row[rahtikirjanro]' limit 1";
+					$ores  = mysql_query($query) or pupe_error($query);
+					$rrow  = mysql_fetch_array($ores);
 
-				$query = "select otsikkonro, tulostettu from rahtikirjat where yhtio='$kukarow[yhtio]' and rahtikirjanro='$row[rahtikirjanro]' limit 1";
-				$ores  = mysql_query($query) or pupe_error($query);
-				$rrow  = mysql_fetch_array($ores);
+					$query = "select ytunnus, nimi, nimitark, toim_osoite, toim_postino, toim_postitp, tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnus='$rrow[otsikkonro]'";
+					$ores  = mysql_query($query) or pupe_error($query);
+					$orow  = mysql_fetch_array($ores);
 
-				$query = "select ytunnus, nimi, nimitark, toim_osoite, toim_postino, toim_postitp, tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnus='$rrow[otsikkonro]'";
-				$ores  = mysql_query($query) or pupe_error($query);
-				$orow  = mysql_fetch_array($ores);
-
-				echo "<tr>";
-				echo "<td>$row[rahtikirjanro]</td>";
-				echo "<td>$orow[tunnus]</td>";
-				echo "<td>$rrow[tulostettu]</td>";
-				echo "<td>$orow[nimi] $orow[nimitark]</td>";
-				echo "<td>$orow[toim_osoite]</td>";
-				echo "<td>$orow[toim_postino] $orow[toim_postitp]</td>";
-				echo "<td><input type='checkbox' name='rtunnukset[]' value='$row[rahtikirjanro]' checked></td>";
-				echo "</tr>";
+					echo "<tr>";
+					echo "<td>$row[rahtikirjanro]</td>";
+					echo "<td>$orow[tunnus]</td>";
+					echo "<td>$rrow[tulostettu]</td>";
+					echo "<td>$orow[nimi] $orow[nimitark]</td>";
+					echo "<td>$orow[toim_osoite]</td>";
+					echo "<td>$orow[toim_postino] $orow[toim_postitp]</td>";
+					echo "<td><input type='checkbox' name='rtunnukset[]' value='$row[rahtikirjanro]' checked></td>";
+					echo "</tr>";
+				}
 			}
 
 			echo "</table><br>";

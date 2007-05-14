@@ -74,6 +74,33 @@ elseif ($ytunnus != '') {
 
 		if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
 	}
+	
+	
+	if ($toim == "TYOMAARAYS") {
+		$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, lasku.yhtio
+					FROM lasku
+					JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+					WHERE lasku.yhtio='$kukarow[yhtio]'						
+					and lasku.tila in ('A','L','N')
+					and tyomaarays.rekno = '$ytunnus'
+					group by 1,2,3,4,5 order by 1
+					LIMIT 50";
+		$result = mysql_query($query) or pupe_error($query);
+		$monta  = mysql_num_rows($result);
+				
+		if ($monta == 0) {
+			$query = "	SELECT lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, concat('£',max(lasku.tunnus)) ytunnus, concat('£',max(lasku.tunnus)) tunnus, lasku.yhtio
+						FROM lasku
+						JOIN tyomaarays ON lasku.yhtio=tyomaarays.yhtio and lasku.tunnus=tyomaarays.otunnus
+						WHERE lasku.yhtio='$kukarow[yhtio]'						
+						and lasku.tila in ('A','L','N')
+						and tyomaarays.valmnro = '$ytunnus'
+						group by 1,2,3,4,5 order by 1
+						LIMIT 50";
+			$result = mysql_query($query) or pupe_error($query);
+			$monta  = mysql_num_rows($result);
+		}
+	}
 
 	if ($monta == 0) {
 		// exactihaku
@@ -208,6 +235,7 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='asiakasyhtio'    value='$asiakas[yhtio]'>";
 			echo "<input type='hidden' name='alatila'		  value='$alatila'>";
 			echo "<input type='hidden' name='ylatila'  		  value='$ylatila'>";
+			echo "<input type='hidden' name='lopetus' 		  value='$lopetus'>";
 			echo "<input type='submit' value='".t("Valitse")."'>";
 			echo "</td>";
 			echo "</form>";

@@ -387,6 +387,7 @@
 		echo "	<form name='rivi' action = '$PHP_SELF?ojarj=$array[0]$ulisa$ankka' method='post' autocomplete='off'>
 				<input type='hidden' name='tee' value = 'TI'>
 				<input type='hidden' name='toim' value = '$toim'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim_kutsu' value = '$toim_kutsu'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='oldmerkki' value = '$merkki'>

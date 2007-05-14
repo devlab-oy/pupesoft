@@ -237,11 +237,18 @@
 						mysql_field_name($stresult,$i)=='sisamaan_kuljetusmuoto' or
 						mysql_field_name($stresult,$i)=='poistumistoimipaikka' or
 						mysql_field_name($stresult,$i)=='vanhatunnus' or
-						mysql_field_name($stresult,$i)=='viesti' or
 						mysql_field_name($stresult,$i)=='sisviesti1' or
 						mysql_field_name($stresult,$i)=='sisviesti2' or
 						mysql_field_name($stresult,$i)=='poistumistoimipaikka_koodi') {
 					$query .= mysql_field_name($stresult,$i)."='',";
+				}
+				elseif (mysql_field_name($stresult,$i) == 'viesti') {
+					if ($toim == "ENNAKKO") {
+						$query .= "viesti='".$otsikkorivi[$i]."',";
+					}
+					else {
+						$query .= "viesti='',";
+					}
 				}
 				// kommenttii speciaalia
 				elseif (mysql_field_name($stresult,$i) == 'comments') {

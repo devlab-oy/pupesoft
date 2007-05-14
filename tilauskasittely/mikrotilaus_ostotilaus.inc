@@ -105,6 +105,7 @@ if ($tee == 'mikrotila') {
 
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+			<input type='hidden' name='lopetus' value='$lopetus'>
 			<input type='hidden' name='tee' value='file'>
 
 			<font class='message'>".t("Tiedostomuoto").":</font><br><br>

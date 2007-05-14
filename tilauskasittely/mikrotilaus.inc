@@ -138,7 +138,9 @@ if ($tee == "file") {
 if ($tee == 'mikrotila') {
 	echo "<font class='head'>$otsikko</font><hr>";
 
-	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF?toim=$toim'>
+	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+			<input type='hidden' name='toim' value='$toim'>
+			<input type='hidden' name='lopetus' value='$lopetus'>
 			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 			<input type='hidden' name='tee' value='file'>
 

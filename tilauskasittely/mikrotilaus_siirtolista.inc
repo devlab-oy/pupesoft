@@ -102,6 +102,7 @@
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 				<input type='hidden' name='tee' value='file'>
 				<input type='hidden' name='toim' value='$toim'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='taalta' value='$laskurow[varasto]'>
 				<font class='message'>".t("Tiedostomuoto").":</font><br><br>
 

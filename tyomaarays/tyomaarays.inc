@@ -91,6 +91,15 @@
 		$tilausnumero		= '';
 		$laskurow			= '';
 		$kukarow['kesken']	= '';
+		
+		if ($lopetus != '') {
+			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
+			$lopetus = str_replace('////','?', $lopetus);
+			$lopetus = str_replace('//','&',  $lopetus);
+
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
+			exit;
+		}
 
 	}
 
@@ -202,6 +211,7 @@
 			echo "	<form action='$PHP_SELF' method='post' enctype='multipart/form-data'>
 					<input type='hidden' name='tee' value = 'VAHINKO'>
 					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='vahtunnus' value='$row[tunnus]'>
 					<input type='hidden' name='tila' value = 'LISAA'>				
@@ -308,6 +318,7 @@
 		echo "<table>";
 		echo "<form action = '$PHP_SELF' method='post'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='tee' value='HUOLTO'>";
 		

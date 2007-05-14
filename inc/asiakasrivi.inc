@@ -59,7 +59,7 @@
 	}
 
 	if (mysql_field_name($result, $i) == "maksuehto") {
-		$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').")
+		$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_')."), maksuehto.sallitut_maat smaat
 					FROM maksuehto
 					".avain('join','MEHTOKATXT_')."
 					".avain('join2','MEHTOTXT_')."
@@ -70,12 +70,19 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		while ($vrow=mysql_fetch_row($vresult)) {
+		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
+			$sallitut_maat = "";
+
 			if ($trow[$i] == $vrow[0]) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1]";
+
+			if ($vrow["smaat"] != "") {
+				$sallitut_maat = "($vrow[smaat])";
+			}
+
+			$ulos .= "<option value = '$vrow[0]' $sel>$vrow[1] $sallitut_maat</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;

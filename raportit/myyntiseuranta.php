@@ -561,7 +561,7 @@
 
 				$result = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($result) > 2000) {
+				if (mysql_num_rows($result) > 4000) {
 					echo "<font class='message'>".t("Hakutulos oli liian suuri. Tee tarkempi rajaus")."!<br></font>";
 					$query = "";
 				}

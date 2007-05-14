@@ -31,6 +31,18 @@
 			echo "<font class='error'>Virheellinen vat-numero!</font><br>";
 		}
 
+		if ($toim_tilino != "") {
+			$query = "	SELECT nimi
+						FROM tili
+						WHERE yhtio='$kukarow[yhtio]' and tilino = '$toim_tilino'";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sresult) != 1) {
+				echo "<font class='error'>Tili ei löydy!</font><br>";
+				$toimerrorit++;
+			}
+		}
+
 		if ($vat_numero != "") {
 			$query = "	SELECT selite
 						FROM avainsana
@@ -38,7 +50,7 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vresult) == 0) {
-				echo "<font class='error'>Yrityksen ALV-prosentit puuttuvat tälle maalle ($toim_maa)! Käy perustamassa ensin ne avainsanoihin.</font>";
+				echo "<font class='error'>Yrityksen ALV-prosentit puuttuvat tälle maalle ($toim_maa)! Käy perustamassa ensin ne avainsanoihin.</font><br>";
 				$toimerrorit++;
 			}
 
@@ -48,7 +60,7 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vresult) != 0) {
-				echo "<font class='error'>Yksi vat tunnus per maa sallittu!</font>";
+				echo "<font class='error'>Yksi vat tunnus per maa sallittu!</font><br>";
 				$toimerrorit++;
 			}
 
@@ -63,7 +75,7 @@
 				$toim_fax == "" or
 				$toim_puhelin == "" or
 				$toim_email == "") {
-				echo "<font class='error'>Kaikki tiedot on syötettävä alv-velvolliselle toimipaikalle!</font>";
+				echo "<font class='error'>Kaikki tiedot on syötettävä alv-velvolliselle toimipaikalle!</font><br>";
 				$toimerrorit++;
 			}
 
@@ -91,6 +103,10 @@
 					puhelin 		= '$toim_puhelin',
 					email 			= '$toim_email',
 					lasku_logo		= '$lasku_logo',
+					tilino			= '$toim_tilino',
+					kustp			= '$toim_kustp',
+					kohde			= '$toim_kohde',
+					projekti		= '$toim_projekti',
 					muuttaja		= '$kukarow[kuka]',
 					muutospvm		= now()
 					where yhtio = '$kukarow[yhtio]' and tunnus = '$toim_tunnus'";
@@ -121,6 +137,10 @@
 					puhelin 		= '$toim_puhelin',
 					email 			= '$toim_email',
 					lasku_logo		= '$lasku_logo',
+					tilino			= '$toim_tilino',
+					kustp			= '$toim_kustp',
+					kohde			= '$toim_kohde',
+					projekti		= '$toim_projekti',
 					laatija			= '$kukarow[kuka]',
 					luontiaika		= now()";
 		$result = mysql_query($query) or pupe_error($query);
@@ -145,6 +165,64 @@
 		echo "<tr><th>".t("Puhelin")."</th>		<td><input type='text' name='toim_puhelin'  value='$toim_puhelin'></td></tr>";
 		echo "<tr><th>".t("Email")."</th>		<td><input type='text' name='toim_email'    value='$toim_email'></td></tr>";
 		echo "<tr><th>".t("Lasku logo")."</th>	<td><input type='text' name='lasku_logo'    value='$lasku_logo'></td></tr>";
+
+		echo "<tr><th>".t("Tilino")."</th>			<td><input type='text' name='toim_tilino'   value='$toim_tilino'></td></tr>";
+
+		echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
+		echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";	
+		$query = "	SELECT tunnus, nimi
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+					ORDER BY nimi";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel = "";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+		}
+		echo "</select>";
+		echo "</td></tr>";	
+		echo "<tr><th>".t("Kohde")."</th><td>";
+
+		echo "<select name='toim_kohde'><option value=' '>".t("Ei kohdetta")."</option>";	
+		$query = "	SELECT tunnus, nimi
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+					ORDER BY nimi";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel = "";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+		}
+		echo "</select>";
+		echo "</td></tr>";
+		echo "<tr><th>".t("Projekti")."</th><td>";
+
+		echo "<select name='toim_projekti'><option value=' '>".t("Ei projektia")."</option>";	
+		$query = "	SELECT tunnus, nimi
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+					ORDER BY nimi";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel = "";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+		}
+		echo "</select>";	
+		echo "</td></tr>";
+
+
 		echo "</table><hr>";
 
 		echo "<input type='hidden' name='tee' value='insert'>";
@@ -179,6 +257,61 @@
 			echo "<tr><th>".t("Email")."</th>	<td><input type='text' name='toim_email'    value='$trow[email]'></td></tr>";
 			echo "<tr><th>".t("Lasku logo")."</th><td><input type='text' name='lasku_logo'  value='$trow[lasku_logo]'></td></tr>";
 
+			echo "<tr><th>".t("Tilino")."</th>			<td><input type='text' name='toim_tilino'   value='$trow[tilino]'></td></tr>";
+
+			echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
+			echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";	
+			$query = "	SELECT tunnus, nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
+						ORDER BY nimi";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			while ($vrow = mysql_fetch_array($vresult)) {
+				$sel = "";
+				if ($trow["kustp"] == $vrow[0]) {
+					$sel = "selected";
+				}
+				echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+			}
+			echo "</select>";
+			echo "</td></tr>";	
+			echo "<tr><th>".t("Kohde")."</th><td>";
+
+			echo "<select name='toim_kohde'><option value=' '>".t("Ei kohdetta")."</option>";	
+			$query = "	SELECT tunnus, nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
+						ORDER BY nimi";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			while ($vrow = mysql_fetch_array($vresult)) {
+				$sel = "";
+				if ($trow["kohde"] == $vrow[0]) {
+					$sel = "selected";
+				}
+				echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+			}
+			echo "</select>";
+			echo "</td></tr>";
+			echo "<tr><th>".t("Projekti")."</th><td>";
+
+			echo "<select name='toim_projekti'><option value=' '>".t("Ei projektia")."</option>";	
+			$query = "	SELECT tunnus, nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
+						ORDER BY nimi";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			while ($vrow = mysql_fetch_array($vresult)) {
+				$sel = "";
+				if ($trow["projekti"] == $vrow[0]) {
+					$sel = "selected";
+				}
+				echo "<option value = '$vrow[0]' $sel>$vrow[1]</option>";
+			}
+			echo "</select>";	
+			echo "</td></tr>";
 			echo "<tr><td class='back'>";
 			echo "<input type='hidden' name='tee' value='update'>";
 			echo "<input type='hidden' name='toim' value='yhtio'>";

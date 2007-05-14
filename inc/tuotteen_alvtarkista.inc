@@ -23,4 +23,15 @@
 		}
 	}
 
+	if (mysql_field_name($result, $i) == "tilino" and $t[$i] != 0) {
+		$query = "	SELECT nimi
+					FROM tili
+					WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
+		$sresult = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($sresult) != 1) {
+			$virhe[$i] = t("Tili puuttuu tai sitä ei löydy");
+			$errori = 1;
+		}
+	}
+
 ?>

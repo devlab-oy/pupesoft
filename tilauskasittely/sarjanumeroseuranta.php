@@ -171,32 +171,39 @@
 								SET yhtio			= '$kukarow[yhtio]',
 								liitostunnus		= '$sarjatunnus',
 								laatija 			= '$kukarow[kuka]',
-								luontiaika 			= now(),";
-
-					$pquery = "";
+								luontiaika 			= now(),
+								Varirunko			= '$tuoterow[vari]',
+								Suurin_henkiloluku	= '$tuoterow[suurin_henkiloluku]',
+								Runkotyyppi			= '$tuoterow[runkotyyppi]',
+								Materiaali			= '$tuoterow[materiaali]',
+								Koneistus			= '$tuoterow[koneistus]',
+								Tyyppi				= '$tuoterow[laitetyyppi]',
+								Kilpi				= '$tuoterow[kilpi]',
+								Sprinkleri 			= '$tuoterow[sprinkleri]',
+								Teho_kw				= '$tuoterow[teho_kw]',
+								Malli				= '$tuoterow[nimitys]',
+								Merkki				= '$vrow[selitetark]'";
+					$lisatietores_apu = mysql_query($query) or pupe_error($query);
 				}
 				else {
 					$query = "	UPDATE sarjanumeron_lisatiedot
 								SET muuttaja		= '$kukarow[kuka]',
-								muutospvm 			= now(),";
-
-					$pquery = "	WHERE yhtio			= '$kukarow[yhtio]'
+								muutospvm 			= now(),
+								Varirunko			= '$tuoterow[vari]',
+								Suurin_henkiloluku	= '$tuoterow[suurin_henkiloluku]',
+								Runkotyyppi			= '$tuoterow[runkotyyppi]',
+								Materiaali			= '$tuoterow[materiaali]',
+								Koneistus			= '$tuoterow[koneistus]',
+								Tyyppi				= '$tuoterow[laitetyyppi]',
+								Kilpi				= '$tuoterow[kilpi]',
+								Sprinkleri 			= '$tuoterow[sprinkleri]',
+								Teho_kw				= '$tuoterow[teho_kw]',
+								Malli				= '$tuoterow[nimitys]',
+								Merkki				= '$vrow[selitetark]'
+								WHERE yhtio			= '$kukarow[yhtio]'
 								and liitostunnus	= '$sarjatunnus'";
+					$lisatietores_apu = mysql_query($query) or pupe_error($query);
 				}
-
-				$query .= "	Varirunko			= '$tuoterow[vari]',
-							Suurin_henkiloluku	= '$tuoterow[suurin_henkiloluku]',
-							Runkotyyppi			= '$tuoterow[runkotyyppi]',
-							Materiaali			= '$tuoterow[materiaali]',
-							Koneistus			= '$tuoterow[koneistus]',
-							Tyyppi				= '$tuoterow[laitetyyppi]',
-							Kilpi				= '$tuoterow[kilpi]',
-							Sprinkleri 			= '$tuoterow[sprinkleri]',
-							Teho_kw				= '$tuoterow[teho_kw]',
-							Malli				= '$tuoterow[nimitys]',
-							Merkki				= '$vrow[selitetark]'
-							$postq";
-				$lisatietores_apu = mysql_query($query) or pupe_error($query);
 			}
 
 			echo "<font class='message'>".t("Pävitettiin sarjanumeron tiedot")."!</font><br><br>";

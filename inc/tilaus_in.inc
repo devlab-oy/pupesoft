@@ -29,6 +29,13 @@ if ($tyyppi == 'yct') {
 		$toim_maa 	= $asiakasrow['maa'];
 
 		$query = "	INSERT into lasku SET
+					yhtio_nimi		= '$yhtiorow[nimi]',
+					yhtio_osoite	= '$yhtiorow[osoite]',
+					yhtio_postino	= '$yhtiorow[postino]',
+					yhtio_postitp	= '$yhtiorow[postitp]',
+					yhtio_maa		= '$yhtiorow[maa]',
+					yhtio_ovttunnus	= '$yhtiorow[ovttunnus]',
+					yhtio_kotipaikka= '$yhtiorow[kotipaikka]',
 					laatija 		= '$kukarow[kuka]',
 					luontiaika		= NOW(),
 					ytunnus			= '$asiakasrow[ytunnus]',
@@ -282,6 +289,13 @@ while ((!feof ($fd)) and ($error!=1)) {
 				$toim_maa = $asiakasrow['maa'];
 	
 				$query = "INSERT into lasku SET
+					yhtio_nimi = '$yhtiorow[nimi]',
+					yhtio_osoite = '$yhtiorow[osoite]',
+					yhtio_postino = '$yhtiorow[postino]',
+					yhtio_postitp = '$yhtiorow[postitp]',
+					yhtio_maa = '$yhtiorow[maa]',
+					yhtio_ovttunnus	= '$yhtiorow[ovttunnus]',
+					yhtio_kotipaikka = '$yhtiorow[kotipaikka]',
 					laatija = '$kukarow[kuka]',
 					luontiaika=NOW(),
 					ytunnus= '$asiakasrow[ytunnus]',
@@ -398,6 +412,13 @@ while ((!feof ($fd)) and ($error!=1)) {
 				$toim_maa = $asiakasrow['maa'];
 	
 				$query = "INSERT into lasku SET
+					yhtio_nimi							= '$yhtiorow[nimi]',
+					yhtio_osoite						= '$yhtiorow[osoite]',
+					yhtio_postino						= '$yhtiorow[postino]',
+					yhtio_postitp						= '$yhtiorow[postitp]',
+					yhtio_maa							= '$yhtiorow[maa]',
+					yhtio_ovttunnus						= '$yhtiorow[ovttunnus]',
+					yhtio_kotipaikka					= '$yhtiorow[kotipaikka]',				
 					laatija = '$kukarow[kuka]',
 					luontiaika=NOW(),
 					ytunnus= '$asiakasrow[ytunnus]',

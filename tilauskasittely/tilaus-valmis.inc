@@ -594,6 +594,13 @@ else {
 
 					//tehd‰‰n uusi otsikko
 					$query = "INSERT into lasku SET
+							yhtio_nimi							= '$laskurow[yhtio_nimi]',
+							yhtio_osoite						= '$laskurow[yhtio_osoite]',
+							yhtio_postino						= '$laskurow[yhtio_postino]',
+							yhtio_postitp						= '$laskurow[yhtio_postitp]',
+							yhtio_maa							= '$laskurow[yhtio_maa]',
+							yhtio_ovttunnus						= '$laskurow[yhtio_ovttunnus]',
+							yhtio_kotipaikka					= '$laskurow[yhtio_kotipaikka]',
 							alatila								= 'A',
 							alv									= '$laskurow[alv]',
 							chn									= '$laskurow[chn]',

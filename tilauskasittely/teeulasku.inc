@@ -195,6 +195,13 @@ $viitetxt		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+():%\r\n]", "", $viitetxt);
 
 // kirjotetaan kokonaan uusi lasku-olio laskusta.. helpottaa myyntireskontraa! tilaksi: U alatila: tyhj‰
 $query = "	INSERT into lasku SET
+			yhtio_nimi							= '$lasrow[yhtio_nimi]',
+			yhtio_osoite						= '$lasrow[yhtio_osoite]',
+			yhtio_postino						= '$lasrow[yhtio_postino]',
+			yhtio_postitp						= '$lasrow[yhtio_postitp]',
+			yhtio_maa							= '$lasrow[yhtio_maa]',
+			yhtio_ovttunnus						= '$lasrow[yhtio_ovttunnus]',
+			yhtio_kotipaikka					= '$lasrow[yhtio_kotipaikka]',
 			aktiivinen_kuljetus 				= '$lasrow[aktiivinen_kuljetus]',
 			aktiivinen_kuljetus_kansallisuus	= '$lasrow[aktiivinen_kuljetus_kansallisuus]',
 			alv									= '$lasrow[alv]',

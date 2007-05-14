@@ -519,6 +519,13 @@ while (!feof ($fd)) {
 				
 				// Lis‰t‰‰n otsikko
 				$query = "	INSERT into lasku SET
+							yhtio_nimi							= '$yhtiorow[nimi]',
+							yhtio_osoite						= '$yhtiorow[osoite]',
+							yhtio_postino						= '$yhtiorow[postino]',
+							yhtio_postitp						= '$yhtiorow[postitp]',
+							yhtio_maa							= '$yhtiorow[maa]',
+							yhtio_ovttunnus						= '$yhtiorow[ovttunnus]',
+							yhtio_kotipaikka					= '$yhtiorow[kotipaikka]',
 							alatila 		   					= '',
 							alv 			   					= '$arow[alv]',
 							chn				   					= '$arow[chn]',

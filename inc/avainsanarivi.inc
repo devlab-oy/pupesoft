@@ -154,7 +154,13 @@
 		if ($trow[$i] == 'SARJANUMERON_LI') {
 			$sel49 = "selected";
 		}
-
+		if ($trow[$i] == 'TYOM_TYOJONO') {
+			$sel50 = "selected";
+		}
+		if ($trow[$i] == 'TYOM_TYOSTATUS') {
+			$sel51 = "selected";
+		}
+		
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
 		$ulos .= "<option value='T'"			  .$sel01.">".t("Toimitustapa")."</option>";
@@ -206,6 +212,8 @@
 		$ulos .= "<option value='S_SE'" 		  .$sel47.">".t("Ruotsinkielinen tuotteen status")."</option>";
 		$ulos .= "<option value='PAKKAUS_SE'" 	  .$sel48.">".t("Ruotsinkielinen pakkaus")."</option>";
 		$ulos .= "<option value='SARJANUMERON_LI'".$sel49.">".t("Sarjanumeron lisätieto")."</option>";
+		$ulos .= "<option value='TYOM_TYOJONO'"   .$sel50.">".t("Työmääräysten työjono")."</option>";
+		$ulos .= "<option value='TYOM_TYOSTATUS'" .$sel51.">".t("Työmääräysten työstatus")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

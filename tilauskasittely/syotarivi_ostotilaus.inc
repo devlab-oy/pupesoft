@@ -63,14 +63,31 @@
 	echo " $varaosavirhe</td>";
 	echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lisää")."'></td></tr>";
 
+	
 	echo "<tr>
 			<th align='left'>".t("Toimitusaika")."</th>
 			<th colspan='6' align='left'>".t("Kommentti")."</th>
 			<td class='back'></td>
 			</tr>";
 
+
+	if ($toimaika == "" or $toimaika == "0000-00-00") {
+		$toimaika = $laskurow["toimaika"];
+	}
+
+	if ($toimaika == "" or $toimaika == "0000-00-00") {
+		$toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+		$toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+		$toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+	}
+	else {
+		$toimkka = substr($toimaika, 5, 2);
+		$toimvva = substr($toimaika, 0, 4);
+		$toimppa = substr($toimaika, 8, 2);
+	}
+
 	echo "<tr>
-			<td><input type='text' size='12' name='toimaika' value='$toimaika'></td>
+			<td><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>
 			<td colspan='6'><input type='text' size='50' name='kommentti' value = '$kommentti'></td>
 			</form>";
 

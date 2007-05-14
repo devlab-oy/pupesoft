@@ -962,7 +962,7 @@
 				}
 			}
 
-			if ($laskurow['tila'] == 'O' and ($hinta == "" or $hinta == 0)) {
+			if ($laskurow['tila'] == 'O' and $hinta == "") {
 				$query = "	SELECT ostohinta
 							FROM tuotteen_toimittajat
 							WHERE yhtio = '$kukarow[yhtio]'

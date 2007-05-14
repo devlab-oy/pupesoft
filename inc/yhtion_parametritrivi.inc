@@ -361,6 +361,7 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == "") {
 			$sel1 = "selected";
@@ -368,9 +369,13 @@
 		elseif ($trow[$i] == "Y") {
 			$sel2 = "selected";
 		}
+		elseif ($trow[$i] == "Z") {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value=''  $sel1>".t("Myyntitilaukselta ei voi luoda ostorivejä")."</option>";
-		$ulos .= "<option value='Y' $sel2>".t("Myyntitilaukselta voi luoda ostorivejä ja ostotilaus")."</option>";
+		$ulos .= "<option value='Y' $sel2>".t("Myyntitilaukselta voi luoda ostorivejä")."</option>";
+		$ulos .= "<option value='Z' $sel3>".t("Myyntitilaukselta voi luoda ostorivejä tai ostotilaus")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

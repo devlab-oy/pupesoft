@@ -363,10 +363,15 @@
 					$trow["alv"] = $laskurow["alv"];
 				}
 
+				if (checkdate($toimkka,$toimppa,$toimvva)) {
+					$toimaika = $toimvva."-".$toimkka."-".$toimppa;
+				}
+				if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
+					$kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
+				}
 				if ($toimaika == "" or $toimaika == "0000-00-00") {
 					$toimaika = $laskurow["toimaika"];
 				}
-
 				if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
 					$kerayspvm = $laskurow["kerayspvm"];
 				}

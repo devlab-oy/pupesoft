@@ -139,9 +139,14 @@ if ($tee == "ETSILASKU") {
 
 			if ($tunnus==$row['tilaus']) $ero="th";
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-				echo "<$ero>$row[$i]</$ero>";
+				if(mysql_field_name($result,$i) == 'tapvm')
+					echo "<$ero>".tv1dateconv($row["$i"])."</$ero>";
+				else {
+					echo "<$ero>$row[$i]</$ero>";
+				}
+
 			}
 
 			$laskutyyppi = $row["tila"];

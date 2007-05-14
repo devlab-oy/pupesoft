@@ -258,7 +258,7 @@
 		echo "<tr class='aktiivi'>";
 		for ($i=0; $i < mysql_num_fields($presult)-3; $i++) {
 			if (mysql_field_name($presult,$i) == 'kerattyaika' or mysql_field_name($presult,$i) == 'toimaika') {
-				echo "<td>".tv1dateconv($prow[$i])."</td>";
+				echo "<td>".tv1dateconv($prow[$i],"pitka")."</td>";
 			}
 			else {
 				echo "<td>".str_replace(".",",",$prow[$i])."</td>";

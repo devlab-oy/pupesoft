@@ -460,7 +460,7 @@
 		$miinus = 2;
 	}
 	elseif ($toim == 'OSTO') {
-		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija, lasku.alatila,$toimaikalisa lasku.tila
+		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila
 					FROM lasku use index (tila_index)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='O' and alatila=''
 					$haku
@@ -595,7 +595,13 @@
 				echo "<tr class='aktiivi'>";
 
 				for ($i=0; $i<mysql_num_fields($result)-$miinus; $i++) {
-					echo "<td>$row[$i]</td>";
+					if (mysql_field_name($result,$i) == 'luontiaika' or mysql_field_name($result,$i) == 'toimaika') {
+						echo "<td>".tv1dateconv($row[$i],"pitka")."</td>";
+					}
+					else {
+						echo "<td>$row[$i]</td>";
+					}
+					
 				}
 
 				if ($row["tila"] == "N" and $row["alatila"] == "U") {

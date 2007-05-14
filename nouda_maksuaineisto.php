@@ -31,17 +31,27 @@
 			echo "<font class='message'>Betalningsuppdrang via Bankgirot - Inrikesbetalningar:</font><hr>";
 		}
 
-		$handle = opendir("dataout");
-
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<select name='filenimi' multiple='FALSE' size='10'>";
-
+		
+		$handle = opendir("dataout");
+		
+		$i=0;
+		
 		while ($file = readdir($handle)) {
+		  	$lista[$i] = $file;
+		 	$i++;
+		}
+
+		sort($lista);
+
+		for ($i=0; $i < count($lista); $i++) {
 			if (($kotimaa == "FI" and substr($file,0, 5+strlen($kukarow["yhtio"])) == "lm03-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
 				echo "<option value='$file' $sel>$file</option>";
 			}
 		}
+		
 		closedir($handle);
 
 		echo "</select>";

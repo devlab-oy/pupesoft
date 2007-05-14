@@ -28,19 +28,28 @@
 		echo "<input type='submit' value='Näytä'>";
 		echo "</form><br><br>";
 		
-		
-		$handle = opendir("dataout");
-
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<input type='hidden' name='factoringyhtio' value='$factoringyhtio'>";
 		echo "<select name='filenimi' multiple='FALSE' size='20'>";
 
+		$handle = opendir("dataout");
+		
+		$i=0;
+		
 		while ($file = readdir($handle)) {
-			if (substr($file,0, 9) == $factoringyhtio) {
-				echo "<option value='$file' $sel>$file</option>";
+		  	$lista[$i] = $file;
+		 	$i++;
+		}
+
+		sort($lista);
+
+		for ($i=0; $i < count($lista); $i++) {
+			if (substr($lista[$i],0, 9) == $factoringyhtio) {
+				echo "<option value='$lista[$i]'>$lista[$i]</option>";
 			}
 		}
+		
 		closedir($handle);
 
 		echo "</select>";

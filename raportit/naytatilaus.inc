@@ -227,7 +227,7 @@
 	}
 	else {
 		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl, varattu+kpl kpl, jt,
-					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, keratty keraaja, tilausrivi.kommentti $sorttauskentta , tilausrivi.tunnus
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, alv, kerattyaika, keratty keraaja, toimaika, tilausrivi.kommentti $sorttauskentta , tilausrivi.tunnus
 					FROM tilausrivi
 					".nimitys('join','tilausrivi')."
 					WHERE $where and tilausrivi.yhtio='$kukarow[yhtio]'
@@ -255,9 +255,14 @@
 	$summa = $ennakkosumma = 0;
 	while ($prow = mysql_fetch_array ($presult)) {
 
-		echo "<tr>";
+		echo "<tr class='aktiivi'>";
 		for ($i=0; $i < mysql_num_fields($presult)-3; $i++) {
-			echo "<td>".str_replace(".",",",$prow[$i])."</td>";
+			if (mysql_field_name($presult,$i) == 'kerattyaika' or mysql_field_name($presult,$i) == 'toimaika') {
+				echo "<td>".tv1dateconv($prow[$i])."</td>";
+			}
+			else {
+				echo "<td>".str_replace(".",",",$prow[$i])."</td>";
+			}
 		}
 		echo "</tr>";
 
@@ -300,7 +305,7 @@
 		if ($prow["kommentti"] != '') {
 			echo "<tr>";
 			echo "<td valign='top'>".t("Kommentti").":</td>";
-			echo "<td colspan='13'>$prow[kommentti]</td>";
+			echo "<td colspan='15'>$prow[kommentti]</td>";
 			echo "</tr>";
 		}
 		

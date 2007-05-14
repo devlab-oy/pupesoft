@@ -10,7 +10,7 @@
 		exit;
 	}
 	else {
-	
+
 		if (strtoupper($yhtiorow['maa']) == 'FI') {
 			$kotimaa = "FI";
 		}
@@ -30,7 +30,7 @@
 		else {
 			echo "<font class='message'>Betalningsuppdrang via Bankgirot - Inrikesbetalningar:</font><hr>";
 		}
-		
+
 		$handle = opendir("dataout");
 
 		echo "<form method='post' action='$PHP_SELF'>";
@@ -40,8 +40,7 @@
 		echo "<option value=''></option>";
 
 		while ($file = readdir($handle)) {
-			
-			if (($kotimaa == "FI" and substr($file,0, 4) == "lm03") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
+			if (($kotimaa == "FI" and substr($file,0, 5+strlen($kukarow["yhtio"])) == "lm03-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
 				echo "<option value='$file' $sel>$file</option>";
 			}
 		}
@@ -50,16 +49,14 @@
 		echo "</select>";
 		echo "<input type='submit' value='Tallenna'></form>";
 		echo "<br><br>";
-	
-	
-	
+
 		if ($kotimaa == "FI") {
 			echo "<font class='message'>Ulkomaan LUM3-maksuaineisto:</font><br>";
 		}
 		else {
 			echo "<font class='message'>Betalningsuppdrang via Bankgirot - Utlandsbetalningar:</font><hr>";
 		}
-		
+
 		$handle = opendir("dataout");
 
 		echo "<form method='post' action='$PHP_SELF'>";
@@ -69,8 +66,7 @@
 		echo "<option value=''></option>";
 
 		while ($file = readdir($handle)) {
-			
-			if (($kotimaa == "FI" and substr($file,0, 4) == "lum3") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
+			if (($kotimaa == "FI" and substr($file, 0, 5+strlen($kukarow["yhtio"])) == "lum3-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
 				echo "<option value='$file' $sel>$file</option>";
 			}
 		}
@@ -79,7 +75,7 @@
 		echo "</select>";
 		echo "<input type='submit' value='Tallenna'></form>";
 		echo "<br><br>";
-	
+
 		require ("inc/footer.inc");
 	}
 

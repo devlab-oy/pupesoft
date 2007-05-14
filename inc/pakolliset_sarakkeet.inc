@@ -143,6 +143,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("SELITE","HETIERA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
+			case "tuotteen_alv" :
+				$pakolliset = array("TUOTENO","MAA", "ALV");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				break;
 			default :
 				echo t("Miten tänne pääsit!");
 				exit;

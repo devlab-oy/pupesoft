@@ -796,6 +796,7 @@ else
 					<option value='hinnasto'>".t("Hinnasto")."</option>
 					<option value='rahtisopimukset'>".t("Rahtisopimukset")."</option>
 					<option value='toimitustapa'>".t("Toimitustapoja")."</option>
+					<option value='tuotteen_alv'>".t("Tuotteiden ulkomaan ALV")."</option>
 					</select></td>
 			</tr>
 

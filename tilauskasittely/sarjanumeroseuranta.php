@@ -142,24 +142,25 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 
-			$query = "	SELECT *
-						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tuoteno = '$sarrow[tuoteno]'";
-			$tuoteres = mysql_query($query) or pupe_error($query);
-			$tuoterow = mysql_fetch_array($tuoteres);
-
-			$query = "	SELECT selitetark
-						FROM avainsana
-						WHERE yhtio 	 = '$kukarow[yhtio]'
-						and laji 		 = 'SARJANUMERON_LI'
-						and selite  	 = 'MERKKI'
-						and selitetark_2 = '$tuoterow[tuotemerkki]'
-						ORDER BY jarjestys, selitetark_2";
-			$vresult = mysql_query($query) or pupe_error($query);
-			$vrow = mysql_fetch_array($vresult);
-
 			if($sarjanumeronLisatiedot=="OK") {
+
+				$query = "	SELECT *
+							FROM tuote
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$sarrow[tuoteno]'";
+				$tuoteres = mysql_query($query) or pupe_error($query);
+				$tuoterow = mysql_fetch_array($tuoteres);
+
+				$query = "	SELECT selitetark
+							FROM avainsana
+							WHERE yhtio 	 = '$kukarow[yhtio]'
+							and laji 		 = 'SARJANUMERON_LI'
+							and selite  	 = 'MERKKI'
+							and selitetark_2 = '$tuoterow[tuotemerkki]'
+							ORDER BY jarjestys, selitetark_2";
+				$vresult = mysql_query($query) or pupe_error($query);
+				$vrow = mysql_fetch_array($vresult);
+				
 				$query = "	SELECT yhtio
 							FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
 							WHERE sarjanumeron_lisatiedot.yhtio		 = '$kukarow[yhtio]'
@@ -183,25 +184,6 @@
 								Teho_kw				= '$tuoterow[teho_kw]',
 								Malli				= '$tuoterow[nimitys]',
 								Merkki				= '$vrow[selitetark]'";
-					$lisatietores_apu = mysql_query($query) or pupe_error($query);
-				}
-				else {
-					$query = "	UPDATE sarjanumeron_lisatiedot
-								SET muuttaja		= '$kukarow[kuka]',
-								muutospvm 			= now(),
-								Varirunko			= '$tuoterow[vari]',
-								Suurin_henkiloluku	= '$tuoterow[suurin_henkiloluku]',
-								Runkotyyppi			= '$tuoterow[runkotyyppi]',
-								Materiaali			= '$tuoterow[materiaali]',
-								Koneistus			= '$tuoterow[koneistus]',
-								Tyyppi				= '$tuoterow[laitetyyppi]',
-								Kilpi				= '$tuoterow[kilpi]',
-								Sprinkleri 			= '$tuoterow[sprinkleri]',
-								Teho_kw				= '$tuoterow[teho_kw]',
-								Malli				= '$tuoterow[nimitys]',
-								Merkki				= '$vrow[selitetark]'
-								WHERE yhtio			= '$kukarow[yhtio]'
-								and liitostunnus	= '$sarjatunnus'";
 					$lisatietores_apu = mysql_query($query) or pupe_error($query);
 				}
 			}

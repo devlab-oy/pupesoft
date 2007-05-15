@@ -183,13 +183,13 @@ if (!function_exists('tulosta_tarjous')) {
 				if(mysql_num_rows($ares)==1) {
 					$arow=mysql_fetch_array($ares);
 					$h-=$pdf->ln(1.25);
-					$pdf->write($h, 1, 0, 0, t($arow["selitetark_2"], $kieli), "snadi", "L", "I");
+					$pdf->write($h, 2, 0, 0, t($arow["selitetark_2"], $kieli), "snadi", "L", "I");
 				}
 				$h-=$pdf->ln(3);
 
 				$pdf->write($h, 1, 0, $s[1], t("Tuote", $kieli), "norm", "L", "B");
 				$pdf->write($h, 1, $s[1], $s[2], t("Määrä", $kieli), "norm", "R", "B");				
-				if($laskurow["rivihintoja_ei_nayteta"] == "") {
+				if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 					$pdf->write($h, 1, $s[2], $s[3], t("Hinta/yks", $kieli), "norm", "R", "B");
 					$pdf->write($h, 1, $s[3], $s[4], t("Yhteensä", $kieli), "norm", "R", "B");					
 				}
@@ -221,8 +221,8 @@ if (!function_exists('tulosta_tarjous')) {
 					}
 					
 					$pdf->write($h, 1, 0, $s[1], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
-					$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower($row["yksikko"]), "norm", "R", "");
-					if($laskurow["rivihintoja_ei_nayteta"] == "") {
+					$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"])), "norm", "R", "");
+					if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 						$pdf->write($h, 1, $s[2], $s[3], money_format('%!i',$row["hinta"]), "norm", "R", "");
 						$pdf->write($h, 1, $s[3], $s[4], money_format('%!i',$row["rivihinta"]), "norm", "R", "");						
 					}

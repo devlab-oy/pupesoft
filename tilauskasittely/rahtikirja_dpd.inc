@@ -46,24 +46,8 @@ if (!function_exists('tarkiste')) {
 	}
 }
 
-// tehd‰‰n SSCC :
-// (00) 
-// 1 
-// ytunnus (8)
-// l‰hetenro (6)
-// kollityht (2)
-// tarkiste (1)
-
 $apu_kollityht = $kollityht;
 if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkki‰
-
-//$prefix = "(00)"; // t‰‰ on turha
-// $sscc = 1;
-// $sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-// $sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
-// $sscc .= sprintf('%02.02d', $apu_kollityht);
-// $loppu = tarkiste($sscc);
-// $sscc = $sscc.$loppu;
 
 //PDF:n luonti ja defaultit
 define (__TRACE_ENABLED__, false);
@@ -103,6 +87,7 @@ $hugein["font"] = "Helvetica-Bold";
 $tulostakolli = $kollityht;
 
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
+	
 	// tehd‰‰n SSCC :
 	// (00) 
 	// 1 
@@ -121,6 +106,27 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	
 	// tehd‰‰n pdf:n uusi sivu
 	$firstpage = $pdf->new_page("420x590");
+	
+	//DPD-LOGOGO
+	if (file_exists("pics/dpd_logo.jpg")) {
+		
+		$filename = "pics/dpd_logo.jpg";
+
+		$fh = fopen($filename, "r");
+		$data = fread($fh, filesize($filename));
+		fclose($fh);
+
+		$image = $pdf->jfif_embed($data);
+
+		if(!$image) {
+			echo t("Logokuvavirhe").": ".$image.$data;
+		}
+		else {
+			$kala = array();
+			$kala['scale'] = 0.20;
+			$pdf->image_place($image, mm_pt(180), mm_pt(100), $firstpage,$kala);
+		}
+	}
 
 	//Duusataan viivakoodia
 	$output      = "png";
@@ -295,9 +301,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	//Kuljetusohjeet = viivakoodi tulee t‰h‰n
 	$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow["toimitustapa"],											$firstpage, $hugein);
-	$pdf->draw_text(mm_pt(20), mm_pt(45), "Kolleja - Kollis: ".$kollityht,										$firstpage, $kirj);
-	//$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow['viesti'],												$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(20), mm_pt(40), "VIESTIIIMNASMSVDMLKMDVFVMSKLVMLKVMDFV",								$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(20), mm_pt(45), "Paketteja - Paket - Packages: ".$kollityht,							$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(20), mm_pt(40), $laskurow['viesti'],													$firstpage, $kirj);
 
 	if ($rakir_row['hetiera'] == 'K') {
 		$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
@@ -309,7 +314,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 }
 
 //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
-$pdffilenimi = "/tmp/kolliosoitelappu-".md5(uniqid(rand(),true)).".pdf";
+$pdffilenimi = "/tmp/dpdosoitelappu-".md5(uniqid(rand(),true)).".pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");

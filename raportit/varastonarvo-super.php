@@ -306,7 +306,31 @@
 				echo "</td></tr></table>";
 			}
 		}
+		
+		echo "<br><table>";
+		echo "<tr>";
+		echo "<th>".t("Tuotemerkki")."</th>";
 
+		$query = "	SELECT distinct tuotemerkki
+					FROM tuote use index (yhtio_tuotemerkki)
+					WHERE yhtio='$kukarow[yhtio]'
+					and tuotemerkki != ''
+					ORDER BY tuotemerkki";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<td><select name='tuotemerkki'>";
+		echo "<option value=''>".t("Tuotemerkki")."</option>";
+
+		while ($row = mysql_fetch_array($result)) {
+			if ($tuotemerkki == $row["tuotemerkki"]) $sel = "selected";
+			else $sel = "";
+			echo "<option value='$row[tuotemerkki]' $sel>$row[tuotemerkki]</option>";
+		}
+
+		echo "</select></td>";
+		echo "</tr>\n";
+		echo "</table>";
+		
 		echo "<br><table>";
 		echo "<tr>";
 		echo "<th>Syötä vvvv-kk-pp:</th>";
@@ -381,7 +405,7 @@
 		echo "</form>";
 
 
-		if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoteryhma == "kaikki" or $osasto == "tyhjat" or $tuoteryhma == "tyhjat" or $tuotteet != '') {
+		if ($tuotemerkki != '' or $sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoteryhma == "kaikki" or $osasto == "tyhjat" or $tuoteryhma == "tyhjat" or $tuotteet != '') {
 
 			$trylisa1 = "";
 			$trylisa2 = "";
@@ -407,6 +431,13 @@
 				}
 			}
 			
+			if ($tuotemerkki != '') {
+				$tuotemerkkilisa .= " and tuote.tuotemerkki = '$tuotemerkki' ";
+			}
+			else {
+				$tuotemerkkilisa = "";
+			}
+			
 			if ($tuotteet != '') {				
 				$tuotteet = explode("\n", $tuotteet);
 				$tuoterajaus = "";
@@ -423,15 +454,17 @@
 			$query  = "	SELECT tuote.tuoteno, 
 						if(atry.selite is not null, atry.selite, 0) try, 
 						if(aosa.selite is not null, aosa.selite, 0) osasto,
+						tuote.tuotemerkki,
 						tuote.nimitys, tuote.kehahin, tuote.epakurantti1pvm, tuote.epakurantti2pvm, tuote.sarjanumeroseuranta
 						FROM tuote
 						LEFT JOIN avainsana atry use index (yhtio_laji_selite) on atry.yhtio=tuote.yhtio and atry.selite=tuote.try and atry.laji='TRY'
-						LEFT JOIN avainsana aosa use index (yhtio_laji_selite) on aosa.yhtio=tuote.yhtio and aosa.selite=tuote.try and aosa.laji='OSASTO'
+						LEFT JOIN avainsana aosa use index (yhtio_laji_selite) on aosa.yhtio=tuote.yhtio and aosa.selite=tuote.osasto and aosa.laji='OSASTO'
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.ei_saldoa = ''
 						$trylisa1
 						$trylisa2
 						$tuoterajaus
+						$tuotemerkkilisa
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$result = mysql_query($query) or pupe_error($query);
 								
@@ -467,6 +500,11 @@
 					$worksheet->write($excelrivi, $excelsarake, t("Hyllyvali"), $format_bold);
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, t("Hyllytaso"), $format_bold);
+					$excelsarake++;
+				}
+				
+				if ($tuotemerkki != '') {
+					$worksheet->write($excelrivi, $excelsarake, t("Tuotemerkki"), 		$format_bold);
 					$excelsarake++;
 				}
 				
@@ -681,6 +719,11 @@
 								$worksheet->write($excelrivi, $excelsarake, $vrow["hyllyvali"], $format_bold);
 								$excelsarake++;
 								$worksheet->write($excelrivi, $excelsarake, $vrow["hyllytaso"], $format_bold);
+								$excelsarake++;
+							}
+							
+							if ($tuotemerkki != '') {
+								$worksheet->write($excelrivi, $excelsarake, $row["tuotemerkki"]);
 								$excelsarake++;
 							}
 							

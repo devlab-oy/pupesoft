@@ -197,7 +197,7 @@
 
 			$yhteensa += $prow["rivihinta"];
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			for ($i=0; $i < mysql_num_fields($presult)-$miinus; $i++) {
 				if (mysql_field_name($presult,$i) == 'tuoteno') {															

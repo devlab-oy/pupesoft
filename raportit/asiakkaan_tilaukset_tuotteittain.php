@@ -81,7 +81,7 @@
 			$tyyppi =  "L";
 		}
 
-		$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, if(nimi!=toim_nimi,concat(toim_nimi,'<br>(',nimi,')'), nimi) nimi, if(postitp!=toim_postitp,concat(toim_postitp,'<br>(',postitp,')'), postitp) postitp, tuoteno, REPLACE(kpl+varattu,'.',',') kpl, REPLACE(tilausrivi.hinta,'.',',') hinta, REPLACE(rivihinta,'.',',') rivihinta, lasku.lahetepvm, lasku.tila, lasku.alatila
+		$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, if(nimi!=toim_nimi,concat(toim_nimi,'<br>(',nimi,')'), nimi) nimi, if(postitp!=toim_postitp,concat(toim_postitp,'<br>(',postitp,')'), postitp) postitp, tuoteno, REPLACE(kpl+varattu,'.',',') kpl, REPLACE(tilausrivi.hinta,'.',',') hinta, REPLACE(rivihinta,'.',',') rivihinta, lasku.toimaika, lasku.lahetepvm, lasku.tila, lasku.alatila
 					FROM tilausrivi, lasku
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and lasku.yhtio=tilausrivi.yhtio
@@ -125,10 +125,16 @@
 				$ero="td";
 				if ($tunnus==$row['tilaus']) $ero="th";
 
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				
 				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-					echo "<$ero>$row[$i]</$ero>";
+					if (mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'lahetepvm') {
+						echo "<$ero>".tv1dateconv($row[$i],"pitka")."</$ero>";
+					}
+					else {
+						echo "<$ero>$row[$i]</$ero>";
+					}
+					
 				}
 
 				$laskutyyppi=$row["tila"];

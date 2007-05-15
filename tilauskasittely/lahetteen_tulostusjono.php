@@ -153,6 +153,7 @@
 					if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos) prioriteetti,
 					if(min(lasku.clearing)='','N',if(min(lasku.clearing)='JT-TILAUS','J',if(min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
 					left(min(lasku.kerayspvm),10) kerayspvm,
+					left(min(lasku.toimaika),10) toimaika,
 					varastopaikat.nimitys varastonimi,
 					varastopaikat.tunnus varastotunnus,
 					lasku.tunnus otunnus,
@@ -215,6 +216,11 @@
 				echo "<th>".t("Nimi")."</th>";
 				echo "<th>".t("Viite")."</th>";
 				echo "<th>".t("Keräyspvm")."</th>";
+				
+				if ($kukarow['resoluutio'] == 'I') {
+					echo "<th>".t("Toimaika")."</th>";
+				}
+				
 				echo "<th>".t("Riv")."</th>";
 				echo "<th>".t("Tulosta")."</th>";
 				echo "<th>".t("Näytä")."</th>";
@@ -257,7 +263,12 @@
 					}
 
 					echo "<$ero valign='top'>$tilrow[viesti]</$ero>";
-					echo "<$ero valign='top'>$tilrow[kerayspvm]</$ero>";
+					echo "<$ero valign='top'>".tv1dateconv($tilrow["kerayspvm"])."</$ero>";
+					
+					if ($kukarow['resoluutio'] == 'I') {
+						echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";
+					}
+					
 					echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
 
 					echo "<$ero valign='top'><input type='checkbox' name='tulostukseen[]' value='$tilrow[otunnus]' CHECKED></$ero>";
@@ -492,6 +503,7 @@
 					if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos) prioriteetti,
 					if(min(lasku.clearing)='','N',if(min(lasku.clearing)='JT-TILAUS','J',if(min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
 					left(min(lasku.kerayspvm),10) kerayspvm,
+					left(min(lasku.toimaika),10) toimaika,
 					varastopaikat.nimitys varastonimi,
 					varastopaikat.tunnus varastotunnus,
 					GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ',') otunnus,
@@ -523,6 +535,11 @@
 			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=lasku.ytunnus'>".t("Asiakas")."</th>";
 			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=lasku.nimi'>".t("Nimi")."</th>";
 			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=kerayspvm'>".t("Keräyspvm")."</th>";
+			
+			if ($kukarow['resoluutio'] == 'I') {
+				echo "<th><a href='$PHP_SELF?toim=$toim&jarj=toimaika'>".t("Toimaika")."</th>";
+			}
+			
 			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=toimitustapa'>".t("Toimitustapa")."</th>";
 			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=tilauksia'>".t("Til.")."</th>";
 			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=riveja'>".t("Riv")."</th>";
@@ -567,7 +584,12 @@
 					echo "<$ero valign='top'>$tilrow[toim_nimi]</$ero>";
 				}
 
-				echo "<$ero valign='top'>$tilrow[kerayspvm]</$ero>";
+				echo "<$ero valign='top'>".tv1dateconv($tilrow["kerayspvm"])."</$ero>";
+				
+				if ($kukarow['resoluutio'] == 'I') {
+					echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";
+				}
+				
 				echo "<$ero valign='top'>$tilrow[toimitustapa]</$ero>";
 				
 				echo "<$ero valign='top'>".str_replace(',','<br>',$tilrow["otunnus"])."</$ero>";

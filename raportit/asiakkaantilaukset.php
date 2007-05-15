@@ -300,10 +300,15 @@
 				$ero="td";
 				if ($tunnus==$row['tilaus']) $ero="th";
 
-				echo "<tr>";
-				for ($i=0; $i<mysql_num_fields($result)-2; $i++)
-				{
-					echo "<$ero>$row[$i]</$ero>";
+				echo "<tr class='aktiivi'>";
+				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
+					if (mysql_field_name($result,$i) == 'toimaika') {
+						echo "<$ero>".tv1dateconv($row[$i])."</$ero>";
+					}
+					else {
+						echo "<$ero>$row[$i]</$ero>";						
+					}
+
 				}
 
 				$laskutyyppi	= $row["tila"];

@@ -42,7 +42,7 @@ if ($ytunnus!='') {
 		echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$tulrow[tunnus]&ytunnus=$ytunnus'>$tulrow[tunnus]</a></td>";
 		echo "<td>$toimittajarow[ytunnus]</td>";
 		echo "<td>$toimittajarow[nimi]</td>";
-		echo "<td>$tulrow[toimaika]</td>";
+		echo "<td>".tv1dateconv($tulrow[toimaika])."</td>";
 		echo "<td>$tulrow[maara]</td>";
 		echo "<td>$tulrow[tilattu]</td>";
 		echo "<td>$tulrow[arvo]</td>";

@@ -453,6 +453,7 @@
 					if(toimitustapa.hetiera='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti,
 					lasku.vienti,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
+					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,
 					rahtikirjat.otsikkonro,
 					rahtikirjat.poikkeava
 					FROM lasku use index (tila_index)
@@ -466,7 +467,7 @@
 					$wherelasku
 					$haku
 					$tilaustyyppi
-					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, rahtikirjat.otsikkonro
+					GROUP BY lasku.toimitustapa, toimitustapa.nouto, $groupmaksuehto kimppakyyti, lasku.vienti, laadittux, toimaika, rahtikirjat.otsikkonro
 					HAVING (rahtikirjat.otsikkonro is null or rahtikirjat.poikkeava = -9) and ((toimitustapa.nouto is null or toimitustapa.nouto = '') or lasku.vienti != '')
 					ORDER BY laadittu";
 		$tilre = mysql_query($query) or pupe_error($query);
@@ -482,15 +483,24 @@
 			echo "<th>".t("Toimitustapa")."</th>";
 			echo "<th>".t("Laatija")."</th>";
 			echo "<th>".t("Laadittu")."</th>";
+			
+			if ($kukarow['resoluutio'] == 'I') {
+				echo "<th>".t("Toimaika")."</th>";
+			}
+			
 			echo "</tr>";
 
 			while ($row = mysql_fetch_array($tilre)) {
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				echo "<td valign='top'>".str_replace(',', '<br>', $row["tunnukset"])."</td>";
 				echo "<td valign='top'>$row[nimi]</td>";
 				echo "<td valign='top'>$row[toimitustapa]</td>";
 				echo "<td valign='top'>$row[laatija]</td>";
-				echo "<td valign='top'>$row[laadittux]</td>";
+				echo "<td valign='top'>".tv1dateconv($row["laadittux"])."</td>";
+				
+				if ($kukarow['resoluutio'] == 'I') {
+					echo "<td valign='top'>".tv1dateconv($row["toimaika"])."</td>";
+				}
 
 				echo "	<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='id' value='$row[tunnus]'>
@@ -680,10 +690,15 @@
 			echo "<th>".t("Tiedot yhteensä")."</th></tr>";
 
 			while ($row = mysql_fetch_array($tilre)) {
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 
 				for ($i=0; $i<mysql_num_fields($tilre)-5; $i++)
-					echo "<td>$row[$i]</td>";
+					if (mysql_field_name($tilre,$i) == 'laadittu') {
+						echo "<td>".tv1dateconv($row[$i])."</td>";
+					}
+					else {
+						echo "<td>$row[$i]</td>";
+					}
 
 				$tiedot="";
 				if ($row['kollit']>0)		$tiedot .= "$row[kollit] kll ";

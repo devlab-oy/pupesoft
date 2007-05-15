@@ -87,7 +87,7 @@
 
 		while ($tilrow = mysql_fetch_array($tilre)) {
 			// etsit‰‰n sopivia tilauksia
-			$query = "	SELECT tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, toimitustapa, date_format(luontiaika, '%Y-%m-%d') laadittu, laatija
+			$query = "	SELECT tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, toimitustapa, date_format(luontiaika, '%Y-%m-%d') laadittu, laatija, toimaika
 						FROM lasku
 						WHERE tunnus='$tilrow[0]' and tila='L' $haku and yhtio='$kukarow[yhtio]' and (alatila='C' or alatila='B') ORDER by laadittu desc";
 			$result = mysql_query($query) or pupe_error($query);
@@ -105,10 +105,15 @@
 						echo "</tr>";
 					}
 
-					echo "<tr>";
+					echo "<tr class='aktiivi'>";
 
 					for ($i=0; $i<mysql_num_fields($result); $i++)
-						echo "<td>$row[$i]</td>";
+						if (mysql_field_name($result,$i) == 'laadittu' or mysql_field_name($result,$i) == 'toimaika') {
+							echo "<td>".tv1dateconv($row[$i])."</td>";
+						}
+						else {
+							echo "<td>$row[$i]</td>";
+						}
 
 					echo "<form method='post' action='$PHP_SELF'><td class='back'>
 						  <input type='hidden' name='id' value='$row[0]'>

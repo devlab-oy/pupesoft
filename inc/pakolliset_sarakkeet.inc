@@ -147,6 +147,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("TUOTENO","MAA", "ALV");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
+			case "sarjanumeron_lisatiedot" :
+				$pakolliset = array("LIITOSTUNNUS");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				break;
 			default :
 				echo t("Miten tänne pääsit!");
 				exit;

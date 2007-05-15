@@ -1021,6 +1021,8 @@
 					concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark) asiakas,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittu,
 					lasku.laatija,
+					lasku.kerayspvm,
+					lasku.toimaika,
 					concat_ws('<br><br>',if(comments!='',concat('".t("Lähetteen lisätiedot").":<br>',comments),NULL), if(sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":<br>',sisviesti2),NULL)) ohjeet
 					from lasku use index (tila_index),
 					tilausrivi use index (yhtio_otunnus)
@@ -1052,6 +1054,12 @@
 			echo "<th>".t("Asiakas")."</th>";
 			echo "<th>".t("Laatija")."</th>";
 			echo "<th>".t("Laadittu")."</th>";
+			
+			if ($kukarow['resoluutio'] == 'I') {
+				echo "<th>".t("Kerayspvm")."</th>";
+				echo "<th>".t("Toimaika")."</th>";
+			}
+			
 			echo "</tr>";
 
 			while ($row = mysql_fetch_array($result)) {
@@ -1069,7 +1077,12 @@
 				
 				echo "<td valign='top'>$row[asiakas]</td>";
 				echo "<td valign='top'>$row[laatija]</td>";
-				echo "<td valign='top'>$row[laadittu]</td>";
+				echo "<td valign='top'>".tv1dateconv($row["laadittu"])."</td>";
+				
+				if ($kukarow['resoluutio'] == 'I') {
+					echo "<td valign='top'>".tv1dateconv($row["kerayspvm"])."</td>";
+					echo "<td valign='top'>".tv1dateconv($row["toimaika"])."</td>";
+				}
 
 				echo "<form method='post' action='$PHP_SELF'><td class='back'>
 						<input type='hidden' name='id' value='$row[tunnus]'>

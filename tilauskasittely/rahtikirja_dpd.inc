@@ -58,12 +58,12 @@ $apu_kollityht = $kollityht;
 if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkki‰
 
 //$prefix = "(00)"; // t‰‰ on turha
-$sscc = 1;
-$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
-$sscc .= sprintf('%02.02d', $apu_kollityht);
-$loppu = tarkiste($sscc);
-$sscc = $sscc.$loppu;
+// $sscc = 1;
+// $sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
+// $sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
+// $sscc .= sprintf('%02.02d', $apu_kollityht);
+// $loppu = tarkiste($sscc);
+// $sscc = $sscc.$loppu;
 
 //PDF:n luonti ja defaultit
 define (__TRACE_ENABLED__, false);
@@ -95,10 +95,30 @@ $iso["font"] = "Helvetica-Bold";
 $huge["height"] = 20;
 $huge["font"] = "Helvetica-Bold";
 
-$tulostakolli = 1; // tulostetaan aina yksi kappale???
+$hugein["height"] = 28;
+$hugein["font"] = "Helvetica-Bold";
+
+//$tulostakolli = 1; // tulostetaan aina yksi kappale???miks???
+
+$tulostakolli = $kollityht;
 
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
-
+	// tehd‰‰n SSCC :
+	// (00) 
+	// 1 
+	// ytunnus (8)
+	// l‰hetenro (6)
+	// kollityht (2)
+	// tarkiste (1)
+	
+	//$prefix = "(00)"; // t‰‰ on turha
+	$sscc = 1;
+	$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
+	$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
+	$sscc .= sprintf('%02.02d', $tulostuskpl);
+	$loppu = tarkiste($sscc);
+	$sscc = $sscc.$loppu;
+	
 	// tehd‰‰n pdf:n uusi sivu
 	$firstpage = $pdf->new_page("420x590");
 
@@ -274,8 +294,10 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	//Kuljetusohjeet = viivakoodi tulee t‰h‰n
 	$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(20), mm_pt(55), $laskurow["toimitustapa"],											$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow['viesti'],													$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow["toimitustapa"],											$firstpage, $hugein);
+	$pdf->draw_text(mm_pt(20), mm_pt(45), "Kolleja - Kollis: ".$kollityht,										$firstpage, $kirj);
+	//$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow['viesti'],												$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(20), mm_pt(40), "VIESTIIIMNASMSVDMLKMDVFVMSKLVMLKVMDFV",								$firstpage, $kirj);
 
 	if ($rakir_row['hetiera'] == 'K') {
 		$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);

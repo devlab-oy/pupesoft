@@ -1234,7 +1234,7 @@
 				echo "</tr>";
 			}
 
-			if ($toim == "TYOMAARAYS") {				
+			if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
 				
@@ -1282,7 +1282,8 @@
 				echo "</select>";
 				echo "	</td>
 						</tr>";
-				
+			}
+			if ($toim == "TYOMAARAYS") {	
 				echo "<tr>
 						<td>".t("Rek. no").":</td><td><input type='text' name='rekno' size='15' value='$srow[rekno]'></td>
 						<td>".t("Kotipuh").":</td><td><input type='text' name='kotipuh' size='20' value='$srow[kotipuh]'></td></tr>";
@@ -1357,10 +1358,14 @@
 				echo "	<tr>
 						<td>".t("Luvattu").":</td><td><input type='text' name='luvattupp' size='3' value='$luvattupp'><input type='text' name='luvattukk' size='3' value='$luvattukk'><input type='text' name='luvattuvv' size='6' value='$luvattuvv'></td>
 						<td>".t("Työn suorittaja").":</td><td><input type='text' name='suorittaja' size='20' maxlengtd='15' value='$srow[suorittaja]'></td>
-						</tr>";				
+						</tr>";	
+			}
+			if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
 				echo "	<tr>
 						<td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td>
 						</tr>";
+			}
+			if ($toim == "TYOMAARAYS") {
 				echo "	<tr>
 						<td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td>
 						</tr>";
@@ -1521,17 +1526,10 @@
 				echo "<tr><th colspan='3'>".t("Tilauksen kommentit").":</th></tr>";
 			}
 
-
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>(".t("keräyslista + lähete + lasku").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>(".t("keräyslista + lähete").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>(".t("lasku").")</td></tr>";
-
-			if ($toim != "TYOMAARAYS" and ($toim == "TARJOUS" or $srow["tilaustyyppi"] == "T")) {
-				echo "<tr><td>".t("Työn kuvaus").":</td><td colspan='2'><textarea name='komm1' rows='6' cols='60'>$srow[komm1]</textarea></td></tr>";
-			}
-
-
 			echo "</table><br>";
 
 			echo "<table>";

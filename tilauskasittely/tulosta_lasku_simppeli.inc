@@ -516,12 +516,16 @@ if (!function_exists('tulosta_lasku')) {
 		$pdf->write($h, 1, $s[4], 0, t("SWIFT", $kieli), "norm", "L", "");		
 		
 		//	Loppuun duusataan yrityksen perustiedot
+		$query="select SUBSTRING(nimi FROM 6) nimi from maat where koodi='$yhtiorow[maa]'";
+		$maares=mysql_query($query) or pupe_error($query);
+		$maa=mysql_fetch_array($maares);
+		
 		$h = 15;
 		$s=$pdf->teeSarakkeet(array(70,15,58,15));
 		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Puh", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["puhelin"], "norm", "L", "");		
-		if($laskurow["maa"] == "FI" or trim($laskurow["maa"]) == "SUOMI") {
+		if($laskurow["maa"] == "FI") {
 			$pdf->write($h, 1, $s[2], $s[3], 	t("Y-tunnus", $kieli).":", "norm", "L", "");					
 			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["ytunnus"], "norm", "R", "");		
 		}
@@ -534,7 +538,7 @@ if (!function_exists('tulosta_lasku')) {
 		$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["osoite"], "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Fax", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["fax"], "norm", "L", "");		
-		if($laskurow["maa"] == "FI" or trim($laskurow["maa"]) == "SUOMI") {
+		if($laskurow["maa"] == "FI") {
 			$pdf->write($h, 1, $s[2], $s[3], 	t("VAT", $kieli).":", "norm", "L", "");					
 			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");		
 		}		
@@ -545,9 +549,9 @@ if (!function_exists('tulosta_lasku')) {
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["www"], "norm", "L", "");		
 		$h-=$pdf->ln();
 
-		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["maa"], "norm", "L", "");
+		$pdf->write($h, 1, 0, $s[0], 		$maa["nimi"], "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Email", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["email"], "norm", "L", "");		
+		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["email"], "norm", "L", "");
 		
 		// Tulostetaan sivu
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:

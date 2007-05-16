@@ -160,7 +160,7 @@ if (!function_exists('tulosta_tarjous')) {
 			
 			//	Optiota ei haluta mukaan grand totaliin
 			if($key == "Optio") {
-				$pdf->write($h, 1, $s[1], $s[3], t("Tarjous yhteensä",$kieli).": ", "norm", "R", "B");
+				$pdf->write($h, 1, $s[1], $s[3], t("Tarjous yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
 				$pdf->write($h, 1, $s[3], 0, money_format('%i',$grand_total), "norm", "R", "B");
 				$h-=$pdf->ln(3);
 			}
@@ -259,7 +259,7 @@ if (!function_exists('tulosta_tarjous')) {
 		
 		$h-=$pdf->ln(2);
 		
-		if($h < 50) {
+		if($h < 40) {
 			$pdf = alku($pdf, $laskurow,$kieli);
 			$h = 210;
 		}
@@ -270,6 +270,11 @@ if (!function_exists('tulosta_tarjous')) {
 			$h-=$pdf->ln(1.25);
 			$pdf->write($h, 4, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
 			$h-=$pdf->ln(4);					
+		}
+
+		if($h < 60) {
+			$pdf = alku($pdf, $laskurow,$kieli);
+			$h = 210;
 		}
 		
 		//	Maksusopimus
@@ -331,36 +336,40 @@ if (!function_exists('tulosta_tarjous')) {
 		$pdf->write($h, 1, 20, 0, $kukarow["eposti"], "norm", "L", "");
 		
 		//	Loppuun duusataan yrityksen perustiedot
+		$query="select SUBSTRING(nimi FROM 6) nimi from maat where koodi='$yhtiorow[maa]'";
+		$maares=mysql_query($query) or pupe_error($query);
+		$maa=mysql_fetch_array($maares);
+		
 		$h = 15;
 		$s=$pdf->teeSarakkeet(array(70,15,58,15));
 		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Puh", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["puhelin"], "norm", "L", "");		
-		if($laskurow["maa"] == "FI" or trim($laskurow["maa"]) == "SUOMI") {
+		if($laskurow["maa"] == "FI") {
 			$pdf->write($h, 1, $s[2], $s[3], 	t("Y-tunnus", $kieli).":", "norm", "L", "");					
 			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["ytunnus"], "norm", "R", "");		
 		}
 		else {
 			$pdf->write($h, 1, $s[2], $s[3], 	t("VAT", $kieli).":", "norm", "L", "");					
-			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maakoodi"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
+			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");
 		}
 		$h-=$pdf->ln();
 
 		$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["osoite"], "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Fax", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["fax"], "norm", "L", "");		
-		if($laskurow["maa"] == "FI" or trim($laskurow["maa"]) == "SUOMI") {
+		if($laskurow["maa"] == "FI") {
 			$pdf->write($h, 1, $s[2], $s[3], 	t("VAT", $kieli).":", "norm", "L", "");					
-			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maakoodi"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");		
+			$pdf->write($h, 1, $s[3], 0, 		$yhtiorow["maa"].sprintf("%08.8s",ereg_replace("[^0-9]","",$yhtiorow["ytunnus"])), "norm", "R", "");		
 		}		
 		$h-=$pdf->ln();
 
-		$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["maakoodi"].$yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
+		$pdf->write($h, 1, 0, $s[1], 		$yhtiorow["maa"].$yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Web", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["www"], "norm", "L", "");		
 		$h-=$pdf->ln();
 
-		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["maa"], "norm", "L", "");
+		$pdf->write($h, 1, 0, $s[0], 		$maa["nimi"], "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Email", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["email"], "norm", "L", "");
 				

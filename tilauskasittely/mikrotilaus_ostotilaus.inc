@@ -41,9 +41,14 @@ if ($tee == "file") {
 				$toimaika = $laskurow["toimaika"];
 			}
 
-			$hinta 	  = (float) str_replace(",", ".", $rivi[3]);
+			if (trim($rivi[3]) != '') {
+				$hinta = (float) str_replace(",", ".", $rivi[3]);
+			}
+			else {
+				$hinta = "";
+			}
+			
 			$ale	  = (float) str_replace(",", ".", $rivi[4]);
-			//$netto 	  = $rivi[5];
 			$paikka	  = $rivi[5];
 
 			if ($tuoteno != '' and $kpl != 0) {

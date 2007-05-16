@@ -68,6 +68,9 @@ if ($filename == "") die('Tiedostonimi puuttui!\n');
 
 if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui")."!\n");
 
+//jotta filenimi ei varmasti katoaisi matkalla
+$mailfile = $filename;
+
 $toimpvm = date(Y)."-".date(n)."-".date(j);
 $vastaustapa = "";
 
@@ -897,8 +900,8 @@ if ($yhtiorow["alert_email"] != "") {
 	$content .= "Content-Transfer-Encoding: base64\n" ;
 	$content .= "Content-Disposition: attachment; filename=\"".$kutsu."\"\n\n";
 
-	$handle  = fopen($filename, "r");
-	$sisalto = fread($handle, filesize($filename));
+	$handle  = fopen($mailfile, "r");
+	$sisalto = fread($handle, filesize($mailfile));
 	fclose($handle);
 
 	$content .= chunk_split(base64_encode($sisalto));

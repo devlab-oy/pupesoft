@@ -580,6 +580,10 @@ if($tee == "MAKSUSOPIMUS") {
 	require("maksusopimus.inc");
 }
 
+if($tee == "LISAAKULUT") {
+	require("lisaa_kulut.inc");
+}
+
 // Poistetaan tilaus
 if ($tee == 'POISTA') {
 
@@ -1134,7 +1138,20 @@ if ($tee == '') {
 				</form>";
 			}
 		}
-
+		
+		//	Tämä koko toiminto pitänee taklata paremmin esim. perheillä..
+		if(file_exists("lisaa_kulut.inc")) {
+			echo "<form action = '$PHP_SELF' method='post'>
+			<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+			<input type='hidden' name='tee' value='LISAAKULUT'>
+			<input type='hidden' name='toim' value='$toim'>
+			<input type='hidden' name='lopetus' value='$lopetus'>
+			<input type='hidden' name='projektilla' value='$projektilla'>
+			<td class='back'><input type='Submit' value='".t("Lisaa kulut")."' Style='font-size: 8pt; padding:0;'></td>
+			</form>";
+			
+		}
+		
 		echo "	<form action='tuote_selaus_haku.php' method='post'>
 				<input type='hidden' name='toim_kutsu' value='$toim'>
 				<td class='back'><input type='submit' value='".t("Selaa tuotteita")."' Style='font-size: 8pt; padding:0;'></td>
@@ -1346,6 +1363,7 @@ if ($tee == '') {
 				echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
 			}
 
+			echo "</optgroup></select>";
 		}
 		else {
 			echo "<td>$kukarow[kesken]</td>";

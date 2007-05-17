@@ -1950,9 +1950,66 @@
 
 			$kukarow["kesken"] = $id;
 			$tilausnumero = $id;
+			
+			//	jos tehtiin tarjouksesta uusi versio kopioidaan vanhat rivit uudeksi pohjaksi..
+			//	Koska meillä on jo tässävaiheessa tunnusnippu, on tämän oltava uusi versio, eikä uusi tarjous
+			if($tunnusnippu>0 and $toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"]!="") {
+
+				// Haetaan tämän nipun viimeisin tarjous
+				$query = "	SELECT tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$tunnusnippu' and tunnus<'$kukarow[kesken]' and tila = 'T' order by tunnus desc LIMIT 1";
+				$abures = mysql_query($query) or pupe_error($query);
+				$aburow = mysql_fetch_array($abures);
+
+				//	Haetaan rivit ja kopioidaan ne uuteen tarjoukseen.. as they are..
+				$query = "select * from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and otunnus='$aburow[tunnus]'";
+				$monistares = mysql_query($query) or pupe_error($query);
+				
+				if(mysql_num_rows($monistares)>0) {
+					$fields = mysql_field_name($monistares,0);
+					for($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
+						$fields .= ", ".mysql_field_name($monistares,$i);
+					}
+
+					$values ="";
+					while($monistarow = mysql_fetch_array($monistares)) {
+
+						if($values == "") {
+							$values = "('".$monistarow[0]."'";
+						}
+						else {
+							$values .= "), ('".$monistarow[0]."'";
+						}
+
+						for($i=1; $i < mysql_num_fields($monistares)-1; $i++) { // Ei monisteta tunnusta
+							switch (mysql_field_name($monistares,$i)) {
+								case "otunnus";
+									$values .= ", '$tilausnumero'";
+									break;
+								case "laatija";
+									$values .= ", '$kukarow[kuka]'";
+									break;
+								case "luontiaika";
+									$values .= ", now()";
+									break;
+								default;
+									$values .= ", '$monistarow[$i]'";
+									break;
+							}
+						}
+					}
+					
+					$values .= ")";
+					
+					// 	Ja insertoidaan rivit kantaan
+					$query = "	INSERT INTO tilausrivi ($fields) VALUES $values";
+					$insres=mysql_query($query) or pupe_error($query);
+					
+					//	Nämä kivatietää tarjoukset pitäisi varmaan vaihtaa toiseen tilaan jottei hämää tarjousraportointia?
+				}
+			}
 		}
 
-		if ($toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"]!="")) {
+		if (($toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"]!="")) and $tunnusnippu=="") {
 			$query = "	UPDATE lasku
 						SET tunnusnippu = '$tilausnumero'
 						WHERE tunnus = '$tilausnumero'";

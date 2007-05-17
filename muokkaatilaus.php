@@ -380,7 +380,7 @@
 		$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta nimi asiakas, ytunnus, lasku.luontiaika,
 					if(date_add(lasku.luontiaika, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
 					DATEDIFF(lasku.luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
-					lasku.laatija,$toimaikalisa alatila, tila, lasku.tunnus tilaus
+					lasku.laatija,$toimaikalisa alatila, tila, lasku.tunnus tilaus, tunnusnippu
 					FROM lasku use index (tila_index)
 					$seurantalisa
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
@@ -399,7 +399,7 @@
 		$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 		$sumrow = mysql_fetch_array($sumresult);
 				
-		$miinus = 3;
+		$miinus = 4;
 	}
 	elseif ($toim == "TARJOUSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila
@@ -555,7 +555,7 @@
 			
 			//	tarjousnipuista halutaan vain se viimeisin..
 			if($row["tila"] == "T" and $row["tunnusnippu"] > 0) {
-				$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tila='T' and tunnusnippu='$row[tarjous]' and tunnus > $row[tilaus]";
+				$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tila='T' and tunnusnippu='$row[tunnusnippu]' and tunnus > $row[tilaus]";
 				$countres = mysql_query($query) or pupe_error($query);
 
 				// ja sill‰ ei ole yht‰‰n rivi‰

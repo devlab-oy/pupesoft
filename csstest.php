@@ -13,6 +13,11 @@ Tässä näkee miten logon linkki käyttäytyy (Linkki A.puhdas):<br><br>
 
 Tässä näkee miten formit käyttäytyy:
 <form action='#'>
+<select>
+<option>1 - ensimmäinen</option>
+<option>2 - toinen</option>
+<option>3 - kolmas</option>
+</select>
 <input type='text'>
 <input type='checkbox'	name='1'>
 <input type='radio' 	name='2'>

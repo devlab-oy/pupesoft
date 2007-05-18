@@ -287,19 +287,42 @@ if (!function_exists('tulosta_tarjous')) {
 					WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = $laskurow[jaksotettu] order by tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($result)>0) {
+			
+			//	Koitetaan arpoa mahtuuko tämä samalle sivulle, vai ei..
+			if($h < (mysql_num_rows($result)*$pdf->ln(2.75) + 10)) {
+				$pdf = alku($pdf, $laskurow,$kieli);
+				$h = 190;
+			}
+
+			//	Maksusopimus
+			$pdf->write($h, 1, 0, 0, t("MAKSUEHTO", $kieli), "norm", "L", "B");
+			$h-=$pdf->ln(1.25);
+			
 			$i=0;
 			while($row = mysql_fetch_array($result)) {
 				$i++;
 				$pdf->write($h, 1, 0, 5, "$i.", "norm", "L", "");
-				$pdf->write($h, 1, 5, 0, "$row[osuus]%  ".t($row["teksti"], $kieli).", ".t($row["kuvaus"], $kieli)."", "norm", "L", "");
+				$pdf->write($h, 1, 5, 15, "$row[osuus]%", "norm", "L", "");
+				$pdf->write($h, 1, 15, 0, t($row["teksti"], $kieli).", ".t($row["kuvaus"], $kieli)."", "norm", "L");
+				
 				if($row["lisatiedot"] != "") {
 					$h-=$pdf->ln(1.25);
-					$pdf->write($h, 1, 5, 0, $row["lisatiedot"], "norm", "L", "I");
+					$pdf->write($h, 1, 15, 0, $row["lisatiedot"], "norm", "L", "I");
 				}
-				$h-=$pdf->ln(1.25);
+				$h-=$pdf->ln(1.5);
 			}
 		}
 		else {
+			//	Katosotaan, että tämä mahtuu samalle sivulle
+			if($h < 50) {
+				$pdf = alku($pdf, $laskurow,$kieli);
+				$h = 190;
+			}
+			
+			//	Maksusopimus
+			$pdf->write($h, 1, 0, 0, t("MAKSUEHTO", $kieli), "norm", "L", "B");
+			$h-=$pdf->ln(1.25);
+			
 			$query = "	SELECT teksti
 						FROM maksuehto
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = $laskurow[maksuehto]";

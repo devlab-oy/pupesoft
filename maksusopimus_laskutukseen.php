@@ -186,8 +186,16 @@
 			$sresult = mysql_query($query) or pupe_error($query);
 			$tot = 0;
 			
-			$nimitys 		= $posrow["kuvaus"];
-			$rivikommentti 	= t("Ennakkolasku")." $lahteva_lasku ".t("tilaukselle")." $tunnus ".t("Osuus")." ".round($posrow["osuus"],2)."% ";
+			//	Lasku voi mennä myös kaukomaille, joten haetaan tämän asiakkaan kieli..
+			$query = "select kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+			$kielires = mysql_query($query) or pupe_error($query);
+			$kielirow = mysql_fetch_array($kielires);
+			if($kielirow["kieli"] == "") {
+				$kielirow["kieli"]="fi";
+			}
+						
+			$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
+			$rivikommentti 	= t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
 
 			if ($posrow["lisatiedot"] != "") {
 				$rivikommentti .= "\n ".$posrow["lisatiedot"];
@@ -322,9 +330,17 @@
 						and lasku.jaksotettu = '".($tunnus*-1)."'
 						GROUP BY alv";
 			$sresult = mysql_query($query) or pupe_error($query);
-
-			$nimitys 		= $posrow["kuvaus"];
-			$rivikommentti 	= t("Ennakkolaskutuksen hyvitys")." $lahteva_lasku. ";
+			
+			//	Haetaan asiakkaan kieli niin hekin ymmärätävät..
+			$query = "select kieli from asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+			$kielires = mysql_query($query) or pupe_error($query);
+			$kielirow = mysql_fetch_array($kielires);
+			if($kielirow["kieli"] == "") {
+				$kielirow["kieli"]="fi";
+			}
+			
+			$nimitys 		= t($posrow["kuvaus"], $kielirow["kieli"]);
+			$rivikommentti 	= t("Ennakkolaskutuksen hyvitys", $kielirow["kieli"])." $lahteva_lasku. ";
 
 			if ($posrow["lisatiedot"] != "") {
 				$rivikommentti .= "\n ".$posrow["lisatiedot"];
@@ -515,7 +531,7 @@
 								FROM lasku
 								JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.jaksotettu=lasku.jaksotettu and tilausrivi.tyyppi != 'D' and tilausrivi.var != 'P'
 								WHERE lasku.yhtio 		= '$kukarow[yhtio]'
-								and lasku.jaksotettu 	= '$row[jaksotettu]'
+								and lasku.jaksotettu 	= '$row[jaksotettu]' and tila in ('L','N','R')
 								GROUP BY lasku.jaksotettu";
 					$tarkres = mysql_query($query) or pupe_error($query);
 					$tarkrow = mysql_fetch_array($tarkres);

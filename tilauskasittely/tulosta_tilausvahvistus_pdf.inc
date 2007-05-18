@@ -424,7 +424,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["www"], "norm", "L", "");		
 		$h-=$pdf->ln();
 
-		$pdf->write($h, 1, 0, $s[0], 		$maa["nimi"], "norm", "L", "");
+		$pdf->write($h, 1, 0, $s[0], 		t($maa["nimi"],$kieli), "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Email", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["email"], "norm", "L", "");
 

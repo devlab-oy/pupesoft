@@ -24,8 +24,8 @@ if (!function_exists('tulosta_lasku')) {
 					concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
 					yhteyshenkilo_kaupallinen.nimi asiakkaan_kaupallinen_käsittelijä,
 					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö,
-					SUBSTRING(lasku_maa.nimi FROM 5) maa,
-					SUBSTRING(toim_maa.nimi FROM 5) toim_maa
+					SUBSTRING(lasku_maa.nimi FROM 6) maa,
+					SUBSTRING(toim_maa.nimi FROM 6) toim_maa
 					FROM lasku
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus					

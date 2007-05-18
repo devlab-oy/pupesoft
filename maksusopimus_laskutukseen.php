@@ -256,7 +256,7 @@
 			$query = "	SELECT sum(if(tila='L' and alatila = 'J',1,0)) toimitus_valmis, sum(if(tila='R',1,0)) rojekti, count(*) kaikki, max(tunnus) vikatunnus
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'
-						and jaksotettu = '$tunnus' and tila != 'D'";
+						and jaksotettu = '$tunnus' and tila != 'D' and tila in ('L','N','R')";
 			$stresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($stresult) == 0) {

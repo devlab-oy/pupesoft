@@ -5,6 +5,12 @@ require("inc/parametrit.inc");
 echo "
 <font class='head'>CSS-testing:</font><hr><br>
 
+Tässä näkee miten logon linkki käyttäytyy (Linkki A.puhdas):<br><br>
+<a class='puhdas' href='#'><img border='0' src='http://www.pupesoft.com/pupesoft.gif' alt='logo' height='50'></a>
+
+<br>
+<br>
+
 Tässä näkee miten formit käyttäytyy:
 <form action='#'>
 <input type='text'>

@@ -467,11 +467,11 @@ if (!function_exists('tulosta_lasku')) {
 		}
 		$h-=$pdf->ln(4);
 				
-		if($h < 55) {
+		if($h < 35) {
 			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
 		}
 
-		$h=55;
+		$h=50;
 		$s=$pdf->teeSarakkeet(array(25,30,45,25,35));		
 		$pdf->write($h, 1, 0, $s[1], t("MAKSUTIEDOT", $kieli), "norm", "L", "B");
 		$h-=$pdf->ln(1.25);
@@ -485,7 +485,7 @@ if (!function_exists('tulosta_lasku')) {
 		$pdf->write($h, 1, $s[0], 	$s[1], strftime("%x",strtotime($laskurow["tapvm"])), "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Maksuehto", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], $row["teksti"], "norm", "L", "");
+		$pdf->write($h, 1, $s[0], 	$s[1], t($row["teksti"], $kieli), "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Eräpäivä", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[0], 	$s[1], strftime("%x",strtotime($laskurow["erpcm"])), "norm", "L", "");

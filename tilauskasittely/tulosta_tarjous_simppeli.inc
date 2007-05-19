@@ -277,10 +277,7 @@ if (!function_exists('tulosta_tarjous')) {
 			$h = 210;
 		}
 		
-		//	Maksusopimus
-		$pdf->write($h, 1, 0, 0, t("MAKSUEHTO", $kieli), "norm", "L", "B");
-		$h-=$pdf->ln(1.25);
-		
+		//	Maksusopimus		
 		$query = "	SELECT maksupositio.*, round(osuus,0) osuus, maksuehto.teksti
 					FROM maksupositio
 					LEFT JOIN maksuehto on maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto

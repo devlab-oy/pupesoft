@@ -142,24 +142,27 @@ if (!function_exists('tulosta_tarjous')) {
 					$ennakkolisa";
 		$grand_total=0;
 		$s=$pdf->teeSarakkeet(array(55,30,30,30));		
-		foreach(array("Tuotteet","Palvelut","Alennukset","Optio") as $key) {
+		foreach(array("Tuotteet","Palvelut","Alennukset","Ylläpito", "Optio") as $key) {
 			
 			$query = "";
 			if($key == "Tuotteet") {
-				$query = "$q $w and (tuote.ei_saldoa = '' and tilkpl > 0 and (tilausrivin_lisatiedot.positio != 'Optio' or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Tuotteet')";
+				$query = "$q $w and (tuote.ei_saldoa = '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Tuotteet')";
 			}
 			elseif($key == "Palvelut"){
-				$query = "$q $w and (tuote.ei_saldoa != '' and tilkpl > 0 and (tilausrivin_lisatiedot.positio != 'Optio' or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Palvelut')";
+				$query = "$q $w and (tuote.ei_saldoa != '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Palvelut')";
 			}
 			elseif($key == "Alennukset"){
-				$query = "$q $w and tilkpl < 0 and (tilausrivin_lisatiedot.positio != 'Optio' and (tilausrivin_lisatiedot.positio != 'Optio' or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Alennukset')";
+				$query = "$q $w and tilkpl < 0 and (tilausrivin_lisatiedot.positio != 'Optio' and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Alennukset')";
+			}
+			elseif($key == "Ylläpito"){
+				$query = "$q $w and tilausrivin_lisatiedot.positio = 'Ylläpito'";
 			}
 			elseif($key == "Optio"){
 				$query = "$q $w and tilausrivin_lisatiedot.positio = 'Optio'";
 			}
 			
-			//	Optiota ei haluta mukaan grand totaliin
-			if($key == "Optio") {
+			//	Ylläpitoa ei haluta mukaan grand totaliin
+			if($key == "Ylläpito") {
 				$pdf->write($h, 1, $s[1], $s[3], t("Tarjous yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
 				$pdf->write($h, 1, $s[3], 0, money_format('%i',$grand_total), "norm", "R", "B");
 				$h-=$pdf->ln(3);
@@ -269,7 +272,7 @@ if (!function_exists('tulosta_tarjous')) {
 			$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
 			$h-=$pdf->ln(1.25);
 			$pdf->write($h, 4, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
-			$h-=$pdf->ln(4);					
+			$h-=$pdf->ln(6);					
 		}
 
 		if($h < 60) {

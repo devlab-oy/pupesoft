@@ -178,7 +178,7 @@ if (!function_exists('tulosta_tarjous')) {
 				}
 				
 				$summa = 0;
-				$pdf->write($h, 1, 0, 0, t(strtoupper($key), $kieli), "norm", "L", "B");
+				$pdf->write($h, 1, 0, 0, t(mb_strtoupper($key), $kieli), "norm", "L", "B");
 				
 				//	Onko tällä selitettä?
 				$query = "select selitetark_2 from avainsana where laji='TRIVITYYPPI' and selite='$key' and selitetark_2!=''";

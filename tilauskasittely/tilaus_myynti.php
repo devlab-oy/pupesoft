@@ -44,7 +44,6 @@ if ((int)$valitsetoimitus > 0) {
 	}
 	elseif ($toimrow["tila"] == "R") {
 		$toim = "PROJEKTI";
-		$projektilla=$tilausnumero;
 	}
 }
 elseif(in_array($valitsetoimitus,array("TARJOUS","PIKATILAUS","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS"))) {
@@ -79,6 +78,10 @@ if ($tee == 'AKTIVOI') {
 		// Näin ostataan valita pikatilaus
 		if ($toim == "RIVISYOTTO" and isset($PIKATILAUS)) {
 			$toim = "PIKATILAUS";
+		}
+		// Jos tullaan projektille pitää myös aktioida $projektilla
+		elseif ($toim == "PROJEKTI") {
+			$projektilla = $tilausnumero;		
 		}
 		elseif ($toim == "VALMISTAASIAKKAALLE" and $tilausnumero != "") {
 			$tyyppiquery = "select tilaustyyppi from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
@@ -425,7 +428,7 @@ if ((int) $kukarow["kesken"] != 0) {
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
 $muokkauslukko = "";
 
-if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or $toim == "PROJEKTI") {
+if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or $toim == "PROJEKTI" or ($toim=="TARJOUS" and $laskurow["alatila"]=="B")) {
 	$muokkauslukko = "LUKOSSA";
 }
 
@@ -628,7 +631,7 @@ if ($tee == 'POISTA') {
 	$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $toim!="TARJOUS") {
+	if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $toim!="TARJOUS" and $toim!="PROJEKTI") {
 
 		echo "<font class='message'>".t("Osatoimitus")." $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
 
@@ -636,7 +639,13 @@ if ($tee == 'POISTA') {
 			$tee				= '';
 			$tilausnumero		= $laskurow["tunnusnippu"];
 			$kukarow["kesken"]	= $tilausnumero;
+			$projektilla		= $tilausnumero;
 			$aktivoinnista		= "";
+			$toim				= "PROJEKTI";
+
+			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$result = mysql_query($query) or pupe_error($query);
+			
 			$query 	= "	select *
 						from lasku
 						where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
@@ -873,7 +882,13 @@ if ($tee == "VALMIS") {
 			$tee				= '';
 			$tilausnumero		= $laskurow["tunnusnippu"];
 			$kukarow["kesken"]	= $tilasnumero;
-
+			$projektilla		= $tilausnumero;
+			$aktivoinnista		= "";			
+			$toim				= "PROJEKTI";
+			
+			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$result = mysql_query($query) or pupe_error($query);
+			
 			$query 	= "	select *
 						from lasku
 						where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
@@ -1353,7 +1368,7 @@ if ($tee == '') {
 				}
 			}
 			echo "<optgroup label='".t("Perusta uusi")."'>";
-			if($toim == "TARJOUS") {
+			if($toim == "TARJOUS" and $laskurow["alatila"] != "B") {
 				echo "<option value='TARJOUS'>".T("Tarjouksen versio")."</option>";
 			}
 			else {
@@ -2254,7 +2269,7 @@ if ($tee == '') {
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila IN ('L','G','E','V','W','N')";
+						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila IN ('L','G','E','V','W','N','R')";
 			$result = mysql_query($query) or pupe_error($query);
 			$toimrow = mysql_fetch_array($result);
 
@@ -3701,8 +3716,10 @@ if ($tee == '') {
 			
 			echo "</td>";
 		}
-
-		if ($muokkauslukko == "") {
+		//	Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
+		$query = "	select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
+		$abures=mysql_query($query) or pupe_error($query);
+		if ($muokkauslukko == "" or ($toim=="PROJEKTI" and mysql_num_rows($abures)==0)) {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
 								msg = '".t("Haluatko todella poistaa tämän tietueen?")."';

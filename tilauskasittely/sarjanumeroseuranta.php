@@ -63,7 +63,7 @@
 			$rivirow["varattu"] = $rivirow["kpl"];
 		}
 
-		if ($rivirow["varattu"] < 0 and ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA")) {
+		if ($rivirow["varattu"] < 0 and ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA")) {
 			// tässä muutetaan myyntirivitunnus ostorivitunnukseksi jos $rivirow["varattu"] eli kappalemäärä on negatiivinen
 			$tunnuskentta 		= "ostorivitunnus";
 			$rivirow["varattu"] = abs($rivirow["varattu"]);
@@ -216,6 +216,7 @@
 						<input type='hidden' name='muut_siirrettavat'	value='$muut_siirrettavat'>
 						<input type='hidden' name='$tunnuskentta' 		value='$rivitunnus'>
 						<input type='hidden' name='from' 				value='$from'>
+						<input type='hidden' name='lopetus' 			value='$lopetus'>
 						<input type='hidden' name='aputoim' 			value='$aputoim'>
 						<input type='hidden' name='otunnus' 			value='$otunnus'>
 						<input type='hidden' name='toiminto' 			value='MUOKKAA'>
@@ -488,7 +489,7 @@
 		$lisa2 = " HAVING osto_tunnus is null or myynti_tunnus is null";
 	}
 
-	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi != "ON")) {
+	if ((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi == "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi != "ON")) {
 		//Jos tuote on marginaaliverotuksen alainen niin sen pitää olla onnistuneesti ostettu jotta sen voi myydä and (sarjanumeroseuranta.kaytetty = '' or (sarjanumeroseuranta.kaytetty != '' and sarjanumeroseuranta.ostorivitunnus > 0 and tilausrivi_osto.laskutettuaika > '0000-00-00'))
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
@@ -519,7 +520,7 @@
 					$lisa2
 					ORDER BY sarjanumeroseuranta.sarjanumero";
 	}
-	elseif((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") and $hyvitysrivi == "ON")) {
+	elseif((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi == "ON")) {
 		// Haetaan vain sellaiset sarjanumerot jotka on vielä vapaita
 		$query	= "	SELECT sarjanumeroseuranta.*,
 					if(sarjanumeroseuranta.lisatieto = '', if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), concat(if(tilausrivi_osto.nimitys!='', tilausrivi_osto.nimitys, tuote.nimitys), '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,					if(sarjanumeroseuranta.lisatieto = '', tuote.nimitys, concat(tuote.nimitys, '<br><i>',left(sarjanumeroseuranta.lisatieto,50),'</i>')) nimitys,
@@ -625,6 +626,7 @@
 	echo "<form name='haku' action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='$tunnuskentta' 	value = '$rivitunnus'>";
 	echo "<input type='hidden' name='from' 				value = '$from'>";
+	echo "<input type='hidden' name='lopetus' 			value = '$lopetus'>";
 	echo "<input type='hidden' name='aputoim' 			value = '$aputoim'>";
 	echo "<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>";
 	echo "<input type='hidden' name='toiminto' 			value = '$toiminto'>";
@@ -650,6 +652,7 @@
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='$tunnuskentta' 	value='$rivitunnus'>";
 	echo "<input type='hidden' name='from' 				value='$from'>";
+	echo "<input type='hidden' name='lopetus' 			value='$lopetus'>";
 	echo "<input type='hidden' name='aputoim' 			value='$aputoim'>";
 	echo "<input type='hidden' name='muut_siirrettavat' value='$muut_siirrettavat'>";
 	echo "<input type='hidden' name='toiminto' 			value='$toiminto'>";
@@ -694,7 +697,7 @@
 		echo "<td valign='top'>$sarjarow[sarjanumero]</td>";
 		echo "<td colspan='2' valign='top'>$sarjarow[tuoteno]<br>$sarjarow[nimitys]";
 		
-		if ($sarjarow["takuu_alku"] != '') {
+		if ($sarjarow["takuu_alku"] != '' and $sarjarow["takuu_alku"] != '0000-00-00') {
 			echo "<br>".t("Takuu").": ".tv1dateconv($sarjarow["takuu_alku"])." - ".tv1dateconv($sarjarow["takuu_loppu"]);
 		}
 		
@@ -730,7 +733,7 @@
 			if ($tunnuskentta == "ostorivitunnus" and $sarjarow["kpl"] != 0) {
 				echo "<td valign='top'>".t("Lukittu")."</td>";
 			}
-			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA") or ($from == "riviosto" or $from == "kohdista")) {
+			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") or ($from == "riviosto" or $from == "kohdista")) {
 				echo "<input type='hidden' name='sarjat[]' value='$sarjarow[tunnus]'>";
 				echo "<td valign='top'><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit();'></td>";
 			}
@@ -792,6 +795,7 @@
 		echo "	<form name='sarjaformi' action='$PHP_SELF' method='post'>
 				<input type='hidden' name='$tunnuskentta' 		value='$rivitunnus'>
 				<input type='hidden' name='from' 				value='$from'>
+				<input type='hidden' name='lopetus' 			value='$lopetus'>
 				<input type='hidden' name='aputoim' 			value='$aputoim'>
 				<input type='hidden' name='otunnus' 			value='$otunnus'>
 				<input type='hidden' name='muut_siirrettavat'	value='$muut_siirrettavat'>
@@ -865,6 +869,17 @@
 			<input type='hidden' name='toim' value='$aputoim'>
 			<input type='hidden' name='id'   value='$otunnus'>
 			<input type='submit' value='".t("Takaisin keräykseen")."'>
+			</form>";
+	}
+	
+	if ($from == "KORJAA") {
+		
+		$lopetus = str_replace('//','&',  $lopetus);
+		
+		echo "<form method='post' action='../raportit/sarjanumerotarkistukset.php?$lopetus'>
+			<input type='hidden' name='toim' value='$aputoim'>
+			<input type='hidden' name='id'   value='$otunnus'>
+			<input type='submit' value='".t("Takaisin laitemyyntien tarkistukseen")."'>
 			</form>";
 	}
 

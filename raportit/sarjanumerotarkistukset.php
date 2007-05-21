@@ -13,12 +13,12 @@
 	}
 	
 	if ($tee == "") {
-		if ($jarjestys[1] != "") $chk1 = "CHECKED";
-		if ($jarjestys[2] != "") $chk2 = "CHECKED";
-		if ($jarjestys[3] != "") $chk3 = "CHECKED";
-		if ($jarjestys[4] != "") $chk4 = "CHECKED";
-		if ($jarjestys[5] != "") $chk5 = "CHECKED";
-		if ($jarjestys[6] != "") $chk6 = "CHECKED";
+		if ($jarjestys_1 != "") $chk1 = "CHECKED";
+		if ($jarjestys_2 != "") $chk2 = "CHECKED";
+		if ($jarjestys_3 != "") $chk3 = "CHECKED";
+		if ($jarjestys_4 != "") $chk4 = "CHECKED";
+		if ($jarjestys_5 != "") $chk5 = "CHECKED";
+		if ($jarjestys_6 != "") $chk6 = "CHECKED";
 		
 		if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 		if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -42,27 +42,27 @@
 			</tr>
 			<tr>
 			<th>".t("Myyydyt rivit joita ei olla ostettu")."</th>
-			<td colspan='3'><input type='checkbox' name='jarjestys[1]' $chk1></td>
+			<td colspan='3'><input type='checkbox' name='jarjestys_1' $chk1></td>
 			</tr>
 			<tr>
 			<th>".t("Myyydyt rivit")."</th>
-			<td colspan='3'><input type='checkbox' name='jarjestys[2]' $chk2></td>
+			<td colspan='3'><input type='checkbox' name='jarjestys_2' $chk2></td>
 			</tr>
 			<tr>
 			<th>".t("Myydyt rivit ilman sarjanumeroa")."</th>
-			<td colspan='3'><input type='checkbox' name='jarjestys[3]' $chk3></td>
+			<td colspan='3'><input type='checkbox' name='jarjestys_3' $chk3></td>
 			</tr>
 			<tr>
 			<th>".t("Myyntipuolelta ostetut ja hyvitetyt rivit")."</th>
-			<td colspan='3'><input type='checkbox' name='jarjestys[4]' $chk4></td>
+			<td colspan='3'><input type='checkbox' name='jarjestys_4' $chk4></td>
 			</tr>
 			<tr>
 			<th>".t("Myyntipuolelta ostetut ja hyvitetyt rivit ilman sarjanumeroa")."</th>
-			<td colspan='3'><input type='checkbox' name='jarjestys[5]' $chk5></td>
+			<td colspan='3'><input type='checkbox' name='jarjestys_5' $chk5></td>
 			</tr>
 			<tr>
 			<th>".t("Ostopuolelta ostetut sarjanumerot")."</th>
-			<td colspan='3'><input type='checkbox' name='jarjestys[6]' $chk6></td>
+			<td colspan='3'><input type='checkbox' name='jarjestys_6' $chk6></td>
 			</tr>";
 		echo "</table><br>";
 
@@ -85,7 +85,7 @@
 		echo "</form>";
 	}
 	
-	if (is_array($jarjestys) and $tee == "") {
+	if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjestys_4 != '' or $jarjestys_5 != '' or $jarjestys_6 != '')and $tee == "") {
 		
 		$lisa  = "";
 
@@ -109,7 +109,7 @@
 			$lisa .= " and tilausrivi.nimitys like '%$nimitys_haku%' ";
 		}	
 		
-		if ($jarjestys[1] != "") {
+		if ($jarjestys_1 != "") {
 			echo "<tr><th colspan='8'>Myyydyt sarjanumerot joita ei olla ollenkaan ostettu</th></tr>";
 			echo "<tr><th>Myyntitilaus</th><th>Tuoteno</th><th>Nimitys</th><th>Myyntihinta</th><th>Ostohinta</th><th>Kate</th><th>Ostotilaus</th><th>Sarjanumero</th></tr>";
 			
@@ -139,7 +139,7 @@
 				
 		
 				if (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
-					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
+					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
 				}
 				elseif (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
 					//Haetaan nyt tämän myyntirivin kaikki ostorivit
@@ -169,7 +169,7 @@
 					$uusisarjahin = round($uusisarjahin/$vrow["kpl"],2);
 				
 					if (round($vrow["rivihinta"]-$uusisarjahin,2) != $vrow["kate"]) {
-						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
+						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
 					}
 					else {
 						echo "<td align='right'>$vrow[kate]</td>";
@@ -190,12 +190,12 @@
 			echo "<tr><td class='back'><br><br></td></tr>";
 		}
 	
-		if ($jarjestys[2] != "") {
+		if ($jarjestys_2 != "") {
 			//Myyydyt sarjanumerot
 			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
 						round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta, round(tilausrivi.kate/tilausrivi.kpl,2) kate, round(ostorivi.rivihinta/ostorivi.kpl,2) ostohinta,
 						ostorivi.tunnus ostotunnus, if(ostorivi.tyyppi='O', ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus, sm.sarjanumero sarjanumero, sm.tunnus sarjatunnus,
-						tilausrivi.kpl
+						tilausrivi.kpl, (select count(*) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
 						FROM tilausrivi
 						JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 						LEFT JOIN sarjanumeroseuranta sm ON tilausrivi.yhtio=sm.yhtio and tilausrivi.tuoteno=sm.tuoteno and tilausrivi.tunnus=sm.myyntirivitunnus
@@ -206,7 +206,7 @@
 						and tilausrivi.kpl > 0
 						$lisa
 						and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-						having sarjanumero is not null and ostotunnus is not null
+						having sarjanumero is not null and ostotunnus is not null and kpl=css
 						order by sarjanumero";
 			$vresult = mysql_query($query) or pupe_error($query);
 
@@ -219,7 +219,7 @@
 						<td><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td><td>$vrow[nimitys]</td><td align='right'>$vrow[rivihinta]</td><td align='right'>$vrow[ostohinta]</td>";
 				
 				if (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
-					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
+					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
 				}
 				elseif (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
 					//Haetaan nyt tämän myyntirivin kaikki ostorivit
@@ -249,7 +249,7 @@
 					$uusisarjahin = round($uusisarjahin/$vrow["kpl"],2);
 
 					if (round($vrow["rivihinta"]-$uusisarjahin,2) != $vrow["kate"]) {
-						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
+						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
 					}
 					else {
 						echo "<td align='right'>$vrow[kate]</td>";
@@ -270,12 +270,12 @@
 			echo "<tr><td class='back'><br><br></td></tr>";
 		}
 		
-		if ($jarjestys[3] != "") {
+		if ($jarjestys_3 != "") {
 			//Myydyt sarjanumerot ilman sarjanumeroa
 			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys, 
 						round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta, round(tilausrivi.kate/tilausrivi.kpl,2) kate, round(ostorivi.rivihinta/ostorivi.kpl,2) ostohinta,
 						ostorivi.tunnus ostotunnus, if(ostorivi.tyyppi='O', ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus, sm.sarjanumero sarjanumero, sm.tunnus sarjatunnus,
-						tilausrivi.kpl
+						tilausrivi.kpl, (select count(*) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
 						FROM tilausrivi
 						JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 						LEFT JOIN sarjanumeroseuranta sm ON tilausrivi.yhtio=sm.yhtio and tilausrivi.tuoteno=sm.tuoteno and tilausrivi.tunnus=sm.myyntirivitunnus
@@ -286,7 +286,7 @@
 						and tilausrivi.kpl > 0
 						$lisa
 						and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-						having sarjanumero is null
+						having sarjanumero is null or kpl!=css
 						order by sarjanumero";
 			$vresult = mysql_query($query) or pupe_error($query);
 	
@@ -299,7 +299,7 @@
 						<td><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td><td>$vrow[nimitys]</td><td align='right'>$vrow[rivihinta]</td><td align='right'>$vrow[ostohinta]</td>";
 				
 				if (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
-					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
+					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
 				}
 				elseif (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
 					//Haetaan nyt tämän myyntirivin kaikki ostorivit
@@ -329,7 +329,7 @@
 					$uusisarjahin = round($uusisarjahin/$vrow["kpl"],2);
 
 					if (round($vrow["rivihinta"]-$uusisarjahin,2) != $vrow["kate"]) {
-						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
+						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
 					}
 					else {
 						echo "<td align='right'>$vrow[kate]</td>";
@@ -343,24 +343,24 @@
 				}
 		
 				echo "	<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]'>$vrow[ostotilaus]</a></td>
-						<td><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$vrow[tuoteno]&sarjanumero_haku=$vrow[sarjanumero]'>&nbsp;$vrow[sarjanumero]&nbsp;</a></td>
+						<td><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno=$vrow[tuoteno]&myyntirivitunnus=$vrow[myyntitunnus]&from=KORJAA&lopetus=ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//jarjestys_1=$jarjestys_1//jarjestys_2=$jarjestys_2//jarjestys_3=$jarjestys_3//jarjestys_4=$jarjestys_4//jarjestys_5=$jarjestys_5//jarjestys_6=$jarjestys_6'>sarjanro</a></td>
 						</tr>";
 			}
 	
 			echo "<tr><td class='back'><br><br></td></tr>";
 		}
 
-		if ($jarjestys[4] != "") {
-			//Ostetut ja hyvitetyt sarjanumerot
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
-						round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta, round(tilausrivi.kate/tilausrivi.kpl,2) kate, round(ostorivi.rivihinta/ostorivi.kpl,2) ostohinta,
-						ostorivi.tunnus ostotunnus, if(ostorivi.tyyppi='O', ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus, so.sarjanumero sarjanumero, so.tunnus sarjatunnus,
+		if ($jarjestys_4 != "") {
+			//Ostetut ja hyvitetyt sarjanumerot			
+			$query = "	SELECT myyntirivi.otunnus, myyntirivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
+						round(myyntirivi.rivihinta/myyntirivi.kpl,2) rivihinta, round(myyntirivi.kate/myyntirivi.kpl,2) kate, round(tilausrivi.rivihinta/tilausrivi.kpl,2) ostohinta,
+						tilausrivi.tunnus ostotunnus, if(tilausrivi.tyyppi='O', tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus, so.sarjanumero sarjanumero, so.tunnus sarjatunnus,
 						tilausrivi.kpl
 						FROM tilausrivi
 						JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 						LEFT JOIN sarjanumeroseuranta sm ON tilausrivi.yhtio=sm.yhtio and tilausrivi.tuoteno=sm.tuoteno and tilausrivi.tunnus=sm.myyntirivitunnus
 						LEFT JOIN sarjanumeroseuranta so ON tilausrivi.yhtio=so.yhtio and tilausrivi.tuoteno=so.tuoteno and tilausrivi.tunnus=so.ostorivitunnus
-						LEFT JOIN tilausrivi ostorivi ON ostorivi.yhtio=so.yhtio and ostorivi.tunnus=so.ostorivitunnus
+						LEFT JOIN tilausrivi myyntirivi ON myyntirivi.yhtio=so.yhtio and myyntirivi.tunnus=so.myyntirivitunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi = 'L'
 						and tilausrivi.kpl < 0
@@ -379,7 +379,7 @@
 						<td><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td><td>$vrow[nimitys]</td><td align='right'>$vrow[rivihinta]</td><td align='right'>$vrow[ostohinta]</td>";
 				
 				if (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
-					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
+					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
 				}
 				elseif (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
 					//Haetaan nyt tämän myyntirivin kaikki ostorivit
@@ -409,7 +409,7 @@
 					$uusisarjahin = round($uusisarjahin/$vrow["kpl"],2);
 
 					if (round($vrow["rivihinta"]-$uusisarjahin,2) != $vrow["kate"]) {
-						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
+						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
 					}
 					else {
 						echo "<td align='right'>$vrow[kate]</td>";
@@ -430,23 +430,23 @@
 			echo "<tr><td class='back'><br><br></td></tr>";
 		}
 
-		if ($jarjestys[5] != "") {
+		if ($jarjestys_5 != "") {
 			//Ostetut ja hyvitetyt sarjanumerot ilman sarjanumeroa
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys, 
-						round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta, round(tilausrivi.kate/tilausrivi.kpl,2) kate, round(ostorivi.rivihinta/ostorivi.kpl,2) ostohinta,
-						ostorivi.tunnus ostotunnus, if(ostorivi.tyyppi='O', ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus, so.sarjanumero sarjanumero, so.tunnus sarjatunnus,
-						tilausrivi.kpl
+			$query = "	SELECT myyntirivi.otunnus, myyntirivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
+						round(myyntirivi.rivihinta/myyntirivi.kpl,2) rivihinta, round(myyntirivi.kate/myyntirivi.kpl,2) kate, round(tilausrivi.rivihinta/tilausrivi.kpl,2) ostohinta,
+						tilausrivi.tunnus ostotunnus, if(tilausrivi.tyyppi='O', tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus, so.sarjanumero sarjanumero, so.tunnus sarjatunnus,
+						tilausrivi.kpl, (select count(*) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.ostorivitunnus=tilausrivi.tunnus) css
 						FROM tilausrivi
 						JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 						LEFT JOIN sarjanumeroseuranta sm ON tilausrivi.yhtio=sm.yhtio and tilausrivi.tuoteno=sm.tuoteno and tilausrivi.tunnus=sm.myyntirivitunnus
 						LEFT JOIN sarjanumeroseuranta so ON tilausrivi.yhtio=so.yhtio and tilausrivi.tuoteno=so.tuoteno and tilausrivi.tunnus=so.ostorivitunnus
-						LEFT JOIN tilausrivi ostorivi ON ostorivi.yhtio=so.yhtio and ostorivi.tunnus=so.ostorivitunnus
+						LEFT JOIN tilausrivi myyntirivi ON myyntirivi.yhtio=so.yhtio and myyntirivi.tunnus=so.myyntirivitunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi = 'L'
 						and tilausrivi.kpl < 0
 						$lisa
 						and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-						having sarjanumero is null
+						having sarjanumero is null or abs(kpl)!=css
 						order by sarjanumero";
 			$vresult = mysql_query($query) or pupe_error($query);
 	
@@ -459,7 +459,7 @@
 						<td><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td><td>$vrow[nimitys]</td><td align='right'>$vrow[rivihinta]</td><td align='right'>$vrow[ostohinta]</td>";
 				
 				if (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
-					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
+					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
 				}
 				elseif (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
 					//Haetaan nyt tämän myyntirivin kaikki ostorivit
@@ -489,7 +489,7 @@
 					$uusisarjahin = round($uusisarjahin/$vrow["kpl"],2);
 
 					if (round($vrow["rivihinta"]-$uusisarjahin,2) != $vrow["kate"]) {
-						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
+						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
 					}
 					else {
 						echo "<td align='right'>$vrow[kate]</td>";
@@ -503,27 +503,28 @@
 				}
 		
 				echo "	<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]'>$vrow[ostotilaus]</a></td>
-						<td><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$vrow[tuoteno]&sarjanumero_haku=$vrow[sarjanumero]'>&nbsp;$vrow[sarjanumero]&nbsp;</a></td>
+						<td><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno=$vrow[tuoteno]&ostorivitunnus=$vrow[ostotunnus]&from=KORJAA&lopetus=ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//jarjestys_1=$jarjestys_1//jarjestys_2=$jarjestys_2//jarjestys_3=$jarjestys_3//jarjestys_4=$jarjestys_4//jarjestys_5=$jarjestys_5//jarjestys_6=$jarjestys_6'>sarjanro</a></td>
 						</tr>";
 			}
 
 			echo "<tr><td class='back'><br><br></td></tr>";
 		}
 
-		if ($jarjestys[6] != "") {
-			//Ostopuolelta ostetut sarjanumrot
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus myyntitunnus, ostorivi.tuoteno, ostorivi.nimitys, 
-						if(tilausrivi.tyyppi='L', round(tilausrivi.rivihinta/tilausrivi.kpl,2), '') rivihinta, if(tilausrivi.tyyppi='L', round(tilausrivi.kate/tilausrivi.kpl,2), '') kate, round(ostorivi.rivihinta/ostorivi.kpl,2) ostohinta,
-						ostorivi.tunnus ostotunnus, ostorivi.uusiotunnus ostotilaus, so.sarjanumero sarjanumero, so.tunnus sarjatunnus,
+		if ($jarjestys_6 != "") {
+			//Ostopuolelta ostetut sarjanumerot
+			$query = "	SELECT myyntirivi.otunnus, myyntirivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
+						round(myyntirivi.rivihinta/myyntirivi.kpl,2) rivihinta, round(myyntirivi.kate/myyntirivi.kpl,2) kate, round(tilausrivi.rivihinta/tilausrivi.kpl,2) ostohinta,
+						tilausrivi.tunnus ostotunnus, if(tilausrivi.tyyppi='O', tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus, so.sarjanumero sarjanumero, so.tunnus sarjatunnus,
 						tilausrivi.kpl
-						FROM tilausrivi ostorivi
-						JOIN tuote on tuote.yhtio=ostorivi.yhtio and tuote.tuoteno=ostorivi.tuoteno and tuote.sarjanumeroseuranta!=''
-						LEFT JOIN sarjanumeroseuranta so ON ostorivi.yhtio=so.yhtio and ostorivi.tuoteno=so.tuoteno and ostorivi.tunnus=so.ostorivitunnus
-						LEFT JOIN tilausrivi ON tilausrivi.yhtio=so.yhtio and tilausrivi.tunnus=so.myyntirivitunnus
-						WHERE ostorivi.yhtio = '$kukarow[yhtio]'
-						and ostorivi.tyyppi = 'O'
+						FROM tilausrivi
+						JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+						LEFT JOIN sarjanumeroseuranta sm ON tilausrivi.yhtio=sm.yhtio and tilausrivi.tuoteno=sm.tuoteno and tilausrivi.tunnus=sm.myyntirivitunnus
+						LEFT JOIN sarjanumeroseuranta so ON tilausrivi.yhtio=so.yhtio and tilausrivi.tuoteno=so.tuoteno and tilausrivi.tunnus=so.ostorivitunnus
+						LEFT JOIN tilausrivi myyntirivi ON myyntirivi.yhtio=so.yhtio and myyntirivi.tunnus=so.myyntirivitunnus
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.tyyppi = 'O'
 						$lisa
-						and ostorivi.laskutettuaika >= '$vva-$kka-$ppa' and ostorivi.laskutettuaika <= '$vvl-$kkl-$ppl'
+						and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
 						order by sarjanumero";
 			$vresult = mysql_query($query) or pupe_error($query);
 
@@ -536,7 +537,7 @@
 						<td><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td><td>$vrow[nimitys]</td><td align='right'>$vrow[rivihinta]</td><td align='right'>$vrow[ostohinta]</td>";
 				
 				if ($vrow["rivihinta"] != "" and abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
-					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
+					echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
 				}
 				elseif ($vrow["rivihinta"] != "" and abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
 					//Haetaan nyt tämän myyntirivin kaikki ostorivit
@@ -566,7 +567,7 @@
 					$uusisarjahin = round($uusisarjahin/$vrow["kpl"],2);
 
 					if (round($vrow["rivihinta"]-$uusisarjahin,2) != $vrow["kate"]) {
-						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <>".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
+						echo "<td align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
 					}
 					else {
 						echo "<td align='right'>$vrow[kate]</td>";

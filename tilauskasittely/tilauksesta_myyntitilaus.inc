@@ -7,7 +7,7 @@
 	// $syot_var voidaan ohjata var-kenttää
 
 	if (!function_exists("tilauksesta_myyntitilaus")) {
-		function tilauksesta_myyntitilaus($otunnus, $tilrivilisa, $syot_varasto, $syot_var, $varataan_saldoa = "", $kopioi_paikat = "") {
+		function tilauksesta_myyntitilaus($otunnus, $tilrivilisa, $syot_varasto, $syot_var, $varataan_saldoa = "", $kopioi_paikat = "", $perusta_projekti="") {
 			global $yhtiorow, $kukarow;
 
 			$tilauksesta_myyntitilaus = "";
@@ -100,7 +100,25 @@
 						$values .= ", '".$monistarow[$i]."'";
 				}
 			}
-
+			
+			/*
+				Vähän glungea taas.. jos halutaan perustaa tarjous insertoidaan ensin pelkkä perusotsikko ja sitten tämä toimitusotsikko
+				
+				Korjataan projektiotsikon tiedot insertin jälkeen..
+			*/
+			
+			$tunnusnippu=0;
+			if($perusta_projekti != "" and $monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
+				$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
+				$insres  = mysql_query($kysely) or pupe_error($kysely);
+				$ptunnus = mysql_insert_id();
+				
+				$kysely = "UPDATE lasku SET tunnusnippu='$ptunnus', tila='R', alatila='' WHERE yhtio='$kukarow[yhtio]' and tunnus='$ptunnus'";
+				$updres=mysql_query($kysely) or pupe_error($kysely);
+				
+				$tilauksesta_myyntitilaus = "<font class='message'>".t("PERUSTETTIIN PROJEKTI").": $ptunnus</font><br><br>";
+			}
+			
 			$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 			$insres  = mysql_query($kysely) or pupe_error($kysely);
 			$utunnus = mysql_insert_id();
@@ -112,7 +130,14 @@
 			*/
 			
 			if($monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
-				$query = "update lasku set tunnusnippu = '$utunnus' WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu='$monistarow[tunnusnippu]'";
+				if($ptunnus > 0) {
+					$tunnusnippu=$ptunnus;
+				}
+				else {
+					$tunnusnippu=$utunnus;
+				}
+
+				$query = "update lasku set tunnusnippu = '$tunnusnippu' WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu='$monistarow[tunnusnippu]'";
 				$updres = mysql_query($query) or pupe_error($query);
 			}
 			

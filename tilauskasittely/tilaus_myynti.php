@@ -455,7 +455,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS") {
 	// Kopsataan valitut rivit uudelle myyntitilaukselle
 	require("tilauksesta_myyntitilaus.inc");
 
-	$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], '', '', '');
+	$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], '', '', '', '', '', $perusta_projekti);
 	if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
 
 	$query = "UPDATE lasku SET alatila='B' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
@@ -3558,12 +3558,24 @@ if ($tee == '') {
 			$optiotarkres = mysql_query($query) or pupe_error($query);
 			
 			if(mysql_num_rows($optiotarkres) == 0) {
+				
+				//	Käytetäänkö projekteja?
+				$query = "select tunnus from oikeu where yhtio='$kukarow[yhtio]' and nimi='tilauskasittely/tilaus_myynti.php' and alanimi='PROJEKTI' LIMIT 1";
+				$projektitarkres = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($projektitarkres)==1 and $laskurow["tunnusnippu"]>0) {
+					$tarjouslisa=t("Perusta tilaukselle projekti").":<input type='checkbox' name='perusta_projekti'><br>";
+				}
+				else {
+					$tarjouslisa="";
+				}
+
 				echo "	<form name='valmis' action='$PHP_SELF' method='post'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='projektilla' value='$projektilla'>
 						<input type='hidden' name='tee' value='HYVAKSYTARJOUS'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+						$tarjouslisa
 						<input type='submit' value='".t("Hyväksy tarjous")."'>
 						</form>";
 			}

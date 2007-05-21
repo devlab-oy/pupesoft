@@ -230,6 +230,39 @@
 
 				} // end käydään läpi korvaavat
 			} // end saako myydä korvaavia
+			elseif ($rivityyppi == 'L') {
+				//jos olisi voinut myydä korvaavaa, mutta se oli kielletty, laitetaan kommenttii
+				// Tehdään homma siten, että etsitään kaikki korvaavat jo tässä vaiheessa arrayseen
+				$query = "select * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+				$kres1	= mysql_query($query) or die($query);
+
+				while ($krow1 = mysql_fetch_array($kres1)) {
+					// Käydään läpi kaikki korvaavat...
+					$query = 	"select korvaavat.*
+								from korvaavat, tuote
+								where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
+								and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]'
+								order by jarjestys,
+								korvaavat.tuoteno";
+					$kres2  = mysql_query($query) or die($query);
+					
+					$korkieltokommi = t("Voit tilata korvaavaa tuotetta");
+					$korkieltokommi= array();
+					
+					
+					while ($krow2 = mysql_fetch_array($kres2)) {
+						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
+							$korkieltokommi[] = strtoupper($krow2["tuoteno"]); // lisätään tuoteno kommenttin
+						}
+					}
+					if (count($korkieltokommi) == 1) {
+						$korkieltokommi = t("Voit tilata korvaavaa tuotetta ").$korkieltokommi[0];
+					}
+					elseif (count($korkieltokommi) > 1) {
+						$korkieltokommi = t("Voit tilata korvaavia tuotteita ").implode(", ",$korkieltokommi);
+					}
+				} // end käydään läpi korvaavat
+			} // end kieltokommentit
 		} // end etsitäänkö korvaavia
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhjä niin vaihdetaan vain jonkun tuotteen paikkaa eikä päivitetä tuoteperheitä
@@ -1157,6 +1190,10 @@
 				else {
 					$ale = round($ale * $puu_alekerr[$i],2);
 				}
+			}
+			
+			if ($korkieltokommi != '') {
+				$kommentti .= $korkieltokommi;
 			}
 
 			$trow["tuoteno"] = strtoupper($trow["tuoteno"]);

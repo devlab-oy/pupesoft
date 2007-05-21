@@ -838,7 +838,7 @@ if ($tuoteno != '') {
 		$query  = "	SELECT yhtio 
 					FROM tilausrivi 
 					WHERE yhtio = '$kukarow[yhtio]' 
-					and tyyppi = 'O' 
+					and ((tyyppi = 'O' and kpl > 0) or (tyyppi = 'L' and kpl < 0))
 					and laskutettuaika != '0000-00-00' 
 					and tunnus = '$rivitunnus'";
 		$rxiviresult = mysql_query($query) or pupe_error($query);

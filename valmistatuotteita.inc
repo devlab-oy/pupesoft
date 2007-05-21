@@ -232,15 +232,17 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 		//Poistetaan raaka-aineet varastosta
 		if ($valmistetaan == "TILAUKSELTA") {
 			if ($kulukpllat[$perherow["tunnus"]] != 0) {
-				$kpl = $kulukpllat[$perherow["tunnus"]];
+				$kpl = str_replace(',','.',$kulukpllat[$perherow["tunnus"]]);
 			}
 			else {
-				$kpl = $perherow['varattu'] * $akerroin;
+				$kpl = $perherow['varattu'] * str_replace(',','.',$akerroin);
 			}					
 		}
 		else {
-			$kpl = $perherow['kerroin'] * $isavarattu;
+			$kpl = $perherow['kerroin'] * str_replace(',','.',$isavarattu);
 		}
+		
+		$kpl = str_replace(',','.',$kpl);
 		
 		$arvo = $tuoterow['kehahin'] * $kpl;
 		$uusiarvo += $arvo;

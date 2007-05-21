@@ -276,11 +276,20 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_rectangle(mm_pt(150),mm_pt(143),mm_pt(145),mm_pt(143),						$firstpage, $rectparam);
 
 	$pdf->draw_text(mm_pt(15),	mm_pt(145), "Minne - Till - To: " ,							$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(15),	mm_pt(140), $laskurow['toim_nimi'],							$firstpage, $iso);
-	$pdf->draw_text(mm_pt(15),	mm_pt(133), $laskurow['toim_nimitark'],						$firstpage, $iso);
-	$pdf->draw_text(mm_pt(15),	mm_pt(126), $laskurow['toim_osoite'],						$firstpage, $iso);
-	$pdf->draw_text(mm_pt(15),	mm_pt(119), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $huge);
-
+	$pdf->draw_text(mm_pt(15),	mm_pt(140), $laskurow['toim_nimi'],							$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(15),	mm_pt(135), $laskurow['toim_nimitark'],						$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(15),	mm_pt(130), $laskurow['toim_osoite'],						$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(15),	mm_pt(123), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $iso);
+	
+	$query = "	select *
+				from maat
+				where koodi = '$laskurow[toim_maa]'";
+	$tempr = mysql_query($query) or pupe_error($query);
+	$maarow = mysql_fetch_array($tempr);
+	
+	$pdf->draw_text(mm_pt(15),	mm_pt(116), substr($maarow['nimi'],5),								$firstpage, $iso);
+	
+	
 	$query = "	select *
 				from asiakas
 				where yhtio = '$kukarow[yhtio]'

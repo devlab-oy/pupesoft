@@ -642,6 +642,7 @@ if ($tee == 'POISTA') {
 			$projektilla		= $tilausnumero;
 			$aktivoinnista		= "";
 			$toim				= "PROJEKTI";
+			$muokkauslukko		= "LUKOSSA";
 
 			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -885,7 +886,8 @@ if ($tee == "VALMIS") {
 			$projektilla		= $tilausnumero;
 			$aktivoinnista		= "";			
 			$toim				= "PROJEKTI";
-			
+			$muokkauslukko		= "LUKOSSA";
+						
 			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
 			
@@ -3719,6 +3721,7 @@ if ($tee == '') {
 		//	Projekti voidaan poistaa vain jos meill‰ ei ole sill‰ mit‰‰n toimituksia
 		$query = "	select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
 		$abures=mysql_query($query) or pupe_error($query);
+
 		if ($muokkauslukko == "" or ($toim=="PROJEKTI" and mysql_num_rows($abures)==0)) {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){

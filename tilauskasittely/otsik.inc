@@ -275,8 +275,8 @@
 							FROM asiakas
 							WHERE tunnus = '$asiakasid'";
 			}
-			elseif ($kopioitava_otsikko != 0) {
-				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokka
+			elseif ($kopioitava_otsikko > 0) {
+				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
 							FROM lasku
 							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -2046,7 +2046,7 @@
 			$result = mysql_query($query2) or pupe_error($query2);
 		}
 
-		if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T") {
+		if ($toim == "RIVISYOTTO" or $toim == "TARJOUS" or $tilaustyyppi == "T" or ($yhtiorow["tilauksen_seuranta"] != "" and in_array($toim, array("PROJEKTI","RIVISYOTTO","PIKATILAUS")))) {
 			$query3 .= "laskun_lisatiedot SET
 						yhtio						= '$kukarow[yhtio]',
 						kolm_ovttunnus				= '$kolm_ovttunnus',

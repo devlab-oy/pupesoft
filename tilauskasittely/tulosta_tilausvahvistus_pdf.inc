@@ -216,27 +216,32 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 		else {
 			$alenaytetaan="";
 		}
+
+		$sorttauskentta = generoi_sorttauskentta(4);
+		$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)";
+		$perherivihinta = "	(select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi!='D')";
 		
 		//	Käsitellään tuoterivit
 		$query = "	SELECT tilausrivi.*, 
-					round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta, (jt+varattu) kpl,
-					tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, ei_saldoa
+					if(tilausrivi.perheid=0,$rivihinta,$perherivihinta) rivihinta, (jt+varattu) kpl,
+					tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, tilausrivin_lisatiedot.ei_nayteta, ei_saldoa, $sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-					WHERE tilausrivi.otunnus IN ($tunnukset)
+					WHERE tilausrivi.otunnus IN ($tunnukset) and (perheid=0 or perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta='' or tilausrivin_lisatiedot.ei_nayteta IS NULL)
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.tyyppi in  ('L','T','U')
-					$ennakkolisa";
+					and tilausrivi.tyyppi!='D'
+					$ennakkolisa
+					ORDER BY otunnus, sorttauskentta";
 		
 		$grand_total=0;
 		$riresult = mysql_query($query) or pupe_error($query);
-
 		if(mysql_num_rows($riresult)>0) {
 
 			$s=$pdf->teeSarakkeet(array(105,20,25));
 			$summa = 0;
-
+			unset($edperhe);
+			
 			while ($row = mysql_fetch_array($riresult)) {
 				
 				//	Etsitään käännöksiä
@@ -255,42 +260,75 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 					$h = 190;
 				}
 				
-				$pdf->write($h, 1, 0, $s[0], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
-				$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower($row["yksikko"]), "norm", "R", "");
-				if($laskurow["rivihintoja_ei_nayteta"] == "") {
-					$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), "norm", "R", "");
-					$pdf->write($h, 1, $s[2], 0, money_format('%!i',$row["rivihinta"]), "norm", "R", "");				
-				}
-				$h-=$pdf->ln();
-				$pdf->write($h, 1, $s[0], $s[1], strftime("%x",strtotime($row["toimaika"])), "snadi", "R", "I");
-				if($alenaytetaan=="OK" and $row["ale"] > 0) {
-					$pdf->write($h, 1, $s[1], $s[2], $row["ale"]."%", "snadi", "R", "I");
+				//	Perheiden väliin laitetaan yksi extraväli..
+				if(isset($edperhe) and $edperhe != $row["perheid"]) {
+					$h-=$pdf->ln(1);
+					unset($edperhe);
 				}
 				
-				$ei_valia = "";
-				if($row["kommentti"] != "") {
-					if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[0]) {
-						$pdf->write($h, 2, 0, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
-						$h-=$pdf->ln(2);
-					} 
-					else {
-						$pdf->write($h, 1, 0, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
-						$h-=$pdf->ln();
+				//	Jos meillä on "normaali tuote"
+				if($row["perheid"]==0 or $row["perheid"]==$row["tunnus"]) {
+					
+					//	Jos meillä on isätuote fiksataan yksikköhinta
+					if($row["perheid"]==$row["tunnus"]) {
+						$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),2);
 					}
-					$ei_valia = "OK";
-				}
-				if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
-					$pdf->write($h, 1, 0, $s[0], t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "norm", "L", "I");
+					
+					$pdf->write($h, 1, 0, $s[0], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
+					$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower($row["yksikko"]), "norm", "R", "");
+					if($laskurow["rivihintoja_ei_nayteta"] == "") {
+						$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), "norm", "R", "");
+						$pdf->write($h, 1, $s[2], 0, money_format('%!i',$row["rivihinta"]), "norm", "R", "");				
+					}
 					$h-=$pdf->ln();
-					$ei_valia = "OK";					
-				}
+					$pdf->write($h, 1, $s[0], $s[1], strftime("%x",strtotime($row["toimaika"])), "snadi", "R", "I");
+					if($alenaytetaan=="OK" and $row["ale"] > 0) {
+						$pdf->write($h, 1, $s[1], $s[2], $row["ale"]."%", "snadi", "R", "I");
+					}
 
-				$summa += $row["rivihinta"];
-				if($ei_valia == "OK") {
-					$h-=$pdf->ln(0.5);
+					$ei_valia = "";
+					if($row["kommentti"] != "") {
+						if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[0]) {
+							$pdf->write($h, 2, 0, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
+							$h-=$pdf->ln(2);
+						} 
+						else {
+							$pdf->write($h, 1, 0, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
+							$h-=$pdf->ln();
+						}
+						$ei_valia = "OK";
+					}
+					if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
+						$pdf->write($h, 1, 0, $s[0], t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "norm", "L", "I");
+						$h-=$pdf->ln();
+						$ei_valia = "OK";					
+					}
+
+					$summa += $row["rivihinta"];
+					if($ei_valia == "OK") {
+						$h-=$pdf->ln(0.5);
+					}
+					else {
+						$h-=$pdf->ln(1.5);
+					}					
 				}
+				//	Meillä on vaan näytettävä tuoteperhetuote
 				else {
+					$pdf->write($h, 1, 5, $s[0], $row["tuoteno"]." ".$row["nimitys"], "snadi", "L", "");
+					$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower($row["yksikko"]), "snadi", "R", "");					
 					$h-=$pdf->ln(1.5);
+
+					if($row["kommentti"] != "") {
+						if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[0]) {
+							$pdf->write($h, 2, 5, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
+							$h-=$pdf->ln(2);
+						} 
+						else {
+							$pdf->write($h, 1, 5, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
+							$h-=$pdf->ln();
+						}
+					}
+					$edperhe=$row["perheid"];					
 				}
 			}
 			$grand_total+=$summa;

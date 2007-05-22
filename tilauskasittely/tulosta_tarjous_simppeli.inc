@@ -127,18 +127,21 @@ if (!function_exists('tulosta_tarjous')) {
 		
 		$pdf=alku($pdf, $laskurow,$kieli);
 		$h = 220;
+		$sorttauskentta = generoi_sorttauskentta(4);
+		$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)";
+		$perherivihinta = "	(select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi in  ('T'))";
 		
 		//	Käsitellään tuoterivit
 		$q = "	SELECT tilausrivi.*, 
-					round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta, 
-					tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, ei_saldoa
+					if(tilausrivi.perheid=0,$rivihinta,$perherivihinta) rivihinta,
+					tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, ei_saldoa, $sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus";
 					
-		$w = "	WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+		$w = "	WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and (perheid=0 or perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta='' or tilausrivin_lisatiedot.ei_nayteta IS NULL)
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.tyyppi in  ('L','T','U')
+					and tilausrivi.tyyppi in  ('T')
 					$ennakkolisa";
 		$grand_total=0;
 		$s=$pdf->teeSarakkeet(array(55,30,30,30));		
@@ -168,6 +171,7 @@ if (!function_exists('tulosta_tarjous')) {
 				$h-=$pdf->ln(3);
 			}
 			
+			$query .= " ORDER BY otunnus, sorttauskentta";
 			$riresult = mysql_query($query) or pupe_error($query);
 
 			if(mysql_num_rows($riresult)>0) {
@@ -177,6 +181,7 @@ if (!function_exists('tulosta_tarjous')) {
 					$h = 210;
 				}
 				
+				unset($edperhe);				
 				$summa = 0;
 				$pdf->write($h, 1, 0, 0, t(mb_strtoupper($key), $kieli), "norm", "L", "B");
 				
@@ -223,31 +228,70 @@ if (!function_exists('tulosta_tarjous')) {
 						$h = 210;
 					}
 					
-					$pdf->write($h, 1, 0, $s[1], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
-					$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"])), "norm", "R", "");
-					if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
-						$pdf->write($h, 1, $s[2], $s[3], money_format('%!i',$row["hinta"]), "norm", "R", "");
-						$pdf->write($h, 1, $s[3], $s[4], money_format('%!i',$row["rivihinta"]), "norm", "R", "");						
+					//	Perheiden väliin laitetaan yksi extraväli..
+					if(isset($edperhe) and $edperhe != $row["perheid"]) {
+						$h-=$pdf->ln(1);
+						unset($edperhe);
 					}
-					$h-=$pdf->ln();
-					if($row["kommentti"] != "") {
-						if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[1]) {
-							$pdf->write($h, 2, 0, $s[1], "* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln(2);
-						} 
-						else {
-							$pdf->write($h, 1, 0, $s[1], "* ".$row["kommentti"], "snadi", "L", "I");	
+					
+					if($row["perheid"]==0 or $row["perheid"]==$row["tunnus"]) {
+						
+						//	Jos meillä on isätuote fiksataan yksikköhinta
+						if($row["perheid"]==$row["tunnus"]) {
+							$row["hinta"] = round(($row["rivihinta"]/$row["tilkpl"]),2);
+						}
+						
+						$pdf->write($h, 1, 0, $s[1], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
+						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"])), "norm", "R", "");
+						if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
+							$pdf->write($h, 1, $s[2], $s[3], money_format('%!i',$row["hinta"]), "norm", "R", "");
+							$pdf->write($h, 1, $s[3], $s[4], money_format('%!i',$row["rivihinta"]), "norm", "R", "");						
+						}
+						$h-=$pdf->ln();
+						if($row["kommentti"] != "") {
+							if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[1]) {
+								$pdf->write($h, 2, 0, $s[1], "* ".$row["kommentti"], "snadi", "L", "I");	
+								$h-=$pdf->ln(2);
+							} 
+							else {
+								$pdf->write($h, 1, 0, $s[1], "* ".$row["kommentti"], "snadi", "L", "I");	
+								$h-=$pdf->ln();
+							}
+						}
+
+						if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
+							$pdf->write($h, 1, 0, 0, t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "snadi", "L", "I");
 							$h-=$pdf->ln();
 						}
-					}
 
-					if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
-						$pdf->write($h, 1, 0, 0, t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "snadi", "L", "I");
+						$summa += $row["rivihinta"];
+						$h-=$pdf->ln(0.5);						
+					}
+					//	Meillä on vaan näytettävä tuoteperhetuote					
+					else {
+						$pdf->write($h, 1, 5, $s[1], $row["tuoteno"]." ".$row["nimitys"], "snadi", "L", "");
+						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"])), "snadi", "R", "");
 						$h-=$pdf->ln();
+						
+						if($row["kommentti"] != "") {
+							if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[1]) {
+								$pdf->write($h, 2, 5, $s[1], "* ".$row["kommentti"], "snadi", "L", "I");	
+								$h-=$pdf->ln(2);
+							} 
+							else {
+								$pdf->write($h, 1, 5, $s[1], "* ".$row["kommentti"], "snadi", "L", "I");	
+								$h-=$pdf->ln();
+							}
+						}
+						
+						$edperhe=$row["perheid"];
 					}
-
-					$summa += $row["rivihinta"];
-					$h-=$pdf->ln(0.5);
+				}
+				
+				//	Perheiden väliin laitetaan yksi extraväli..
+				if(isset($edperhe) and $edperhe != $row["perheid"]) {
+					$h-=$pdf->ln(1);
+					unset($edperhe);
 				}
 
 				if($laskurow["rivihintoja_ei_nayteta"] == "" and $key != "Optio") {

@@ -3718,11 +3718,20 @@ if ($tee == '') {
 			
 			echo "</td>";
 		}
+		
+		
 		//	Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
-		$query = "	select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
-		$abures=mysql_query($query) or pupe_error($query);
-
-		if ($muokkauslukko == "" or ($toim=="PROJEKTI" and mysql_num_rows($abures)==0)) {
+		if ($laskurow["tunnusnippu"] > 0) {
+			$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
+			$abures = mysql_query($query) or pupe_error($query);
+			
+			$projektilask = mysql_num_rows($abures);
+		}
+		else {
+			$projektilask = 0;
+		}
+	
+		if ($muokkauslukko == "" and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0))) {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
 								msg = '".t("Haluatko todella poistaa tämän tietueen?")."';

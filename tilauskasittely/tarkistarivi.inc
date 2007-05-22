@@ -33,6 +33,12 @@
 		$riviok++;
 		$tilausok++;
 	}
+	
+	if ($row["hinta"] < 0) {
+		$varaosavirhe .= t("VIRHE: Hinta ei voi olla negatiivinen!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
 
 	if (($row["jt"] < 0 and in_array($row["var"], array('J','S','U','T'))) or ($row["varattu"] < 0 and $row["tyyppi"] == "E")) {
 		$varaosavirhe .= t("VIRHE: Määrä ei saa olla negatiivinen!")."<br>";

@@ -247,16 +247,11 @@ if (!function_exists('tulosta_tarjous')) {
 							$pdf->write($h, 1, $s[2], $s[3], money_format('%!i',$row["hinta"]), "norm", "R", "");
 							$pdf->write($h, 1, $s[3], $s[4], money_format('%!i',$row["rivihinta"]), "norm", "R", "");						
 						}
-						$h-=$pdf->ln();
+						$h-=$pdf->ln(1.25);
 						if($row["kommentti"] != "") {
-							if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[1]) {
-								$pdf->write($h, 2, 0, $s[1], "* ".$row["kommentti"], "snadi", "L", "I");	
-								$h-=$pdf->ln(2);
-							} 
-							else {
-								$pdf->write($h, 1, 0, $s[1], "* ".$row["kommentti"], "snadi", "L", "I");	
-								$h-=$pdf->ln();
-							}
+							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", (5-$s[0]));
+							$pdf->write($h, $nb, 5, $s[1], $row["kommentti"], "snadi", "L", "I");	
+							$h-=$pdf->ln($nb);					
 						}
 
 						if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
@@ -315,8 +310,9 @@ if (!function_exists('tulosta_tarjous')) {
 			//	Maksusopimus
 			$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
 			$h-=$pdf->ln(1.25);
-			$pdf->write($h, 4, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
-			$h-=$pdf->ln(6);					
+			$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm")+2;
+			$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
+			$h-=$pdf->ln($nb);					
 		}
 
 		if($h < 60) {

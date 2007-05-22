@@ -130,9 +130,10 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 					foreach(array("asiakkaan_viite", "toimittajan_yhteyshenkilö", "asiakkaan_yhteyshenkilö", "asiakkaan_kaupallinen_käsittelijä") as $key) {
 						if($laskurow[$key] != "") {
 							$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
-							$h-=$pdf->ln();					
-							$pdf->writeToTemplate($h, 1, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
-							$h-=$pdf->ln(1.5);
+							$h-=$pdf->ln();		
+							$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0]-5)));										
+							$pdf->writeToTemplate($h, $nb, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
+							$h-=$pdf->ln($nb);					
 						}
 					}
 
@@ -319,14 +320,9 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 					$h-=$pdf->ln(1.5);
 
 					if($row["kommentti"] != "") {
-						if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[0]) {
-							$pdf->write($h, 2, 5, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln(2);
-						} 
-						else {
-							$pdf->write($h, 1, 5, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln();
-						}
+						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", (5-$s[0]));
+						$pdf->write($h, $nb, 5, $s[0], $row["kommentti"], "snadi", "L", "I");	
+						$h-=$pdf->ln($nb);					
 					}
 					$edperhe=$row["perheid"];					
 				}
@@ -336,7 +332,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 			
 		}			
 
-		$pdf->write($h, 1, $s[0], $s[2], t("Tilaus yhteensä",$kieli).": ", "norm", "R", "B");
+		$pdf->write($h, 1, $s[0], $s[2], t("Tilaus yhteensä alv 0%",$kieli).": ", "norm", "R", "B");
 		$pdf->write($h, 1, $s[2], 0, money_format('%i',$grand_total), "norm", "R", "B");
 		$h-=$pdf->ln(3);
 		
@@ -349,8 +345,9 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 			//	Maksusopimus
 			$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
 			$h-=$pdf->ln(1.25);
-			$pdf->write($h, 4, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
-			$h-=$pdf->ln(4);			
+			$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm")+2;
+			$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
+			$h-=$pdf->ln($nb);					
 		}
 				
 		$query = "	SELECT maksupositio.*, round(osuus,0) osuus, maksuehto.teksti

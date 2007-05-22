@@ -153,8 +153,9 @@ if (!function_exists('tulosta_lasku')) {
 						if($laskurow[$key] != "" or $key == "asiakkaan_viite") {
 							$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 							$h-=$pdf->ln();					
-							$pdf->writeToTemplate($h, 1, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
-							$h-=$pdf->ln(1.5);
+							$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0]-5)));										
+							$pdf->writeToTemplate($h, $nb, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
+							$h-=$pdf->ln($nb);					
 						}
 					}
 
@@ -346,14 +347,11 @@ if (!function_exists('tulosta_lasku')) {
 						}
 					}
 					if($row["kommentti"] != "") {
-						if($pdf->pt_mm($pdf->writeStrlen($row["otunnus"]."/".$row["kommentti"], "snadi")) > $s[0]) {
-							$pdf->write($h, 2, 0, $s[0], $row["otunnus"]."/* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln(2);
-						} 
-						else {
-							$pdf->write($h, 1, 0, $s[0], $row["otunnus"]."/* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln();
-						}
+						$abuw=$pdf->pt_mm($pdf->strlen($row["otunnus"]."/", $fonts["snadi"])+1);
+						$pdf->write($h, 1, 0, $abuw, $row["otunnus"]."/", "snadi", "L", "");
+						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-$abuw));
+						$pdf->write($h, $nb, $abuw, $s[0], $row["kommentti"], "snadi", "L", "I");	
+						$h-=$pdf->ln($nb);					
 					}
 					else {
 						$pdf->write($h, 1, 0, $s[0], $row["otunnus"], "snadi", "L", "I");	
@@ -409,13 +407,13 @@ if (!function_exists('tulosta_lasku')) {
 		$h-=$pdf->ln(3);			
 		
 		// Alv erittely!
-		$s=$pdf->teeSarakkeet(array(140,25,25));
+		$s=$pdf->teeSarakkeet(array(140,15,35));
 		$pdf->write($h, 1, 0, $s[0], t("Veroton arvo yhteensä", $kieli).":", "norm", "R", "B");
 		if ($toim == 'PROFORMA' or ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])))) {
-			$pdf->write($h, 1, $s[0], 0, money_format('%i',$summa), "norm", "R", "B");
+			$pdf->write($h, 1, $s[1], 0, money_format('%i',$summa), "norm", "R", "B");
 		}
 		else {
-			$pdf->write($h, 1, $s[0], $s[1], money_format('%i',$laskurow["arvo"]), "norm", "R", "B");
+			$pdf->write($h, 1, $s[1], 0, money_format('%i',$laskurow["arvo"]), "norm", "R", "B");
 		}
 		$h-=$pdf->ln();
 
@@ -470,24 +468,26 @@ if (!function_exists('tulosta_lasku')) {
 			$arow = mysql_fetch_array($aresult);
 
 			$pdf->write($h, 1, 0, $s[0], t("Arvonlisävero", $kieli)." ($arow[rivihinta])", "norm", "R", "");
-			$pdf->write($h, 1, $s[0], $s[1], money_format('%i', $arow["alvrivihinta"]), "norm", "R", "");			
 
 			if ($alvrow["alv"] >= 500) {
-				$pdf->write($h, 1, $s[1], $s[2], "M.V.", "norm", "R", "");							
+				$pdf->write($h, 1, $s[0], $s[1], "M.V.", "norm", "R", "");							
 			}
 			else {
-				$pdf->write($h, 1, $s[1], $s[2], $alvrow["alv"]."%", "norm", "R", "");
+				$pdf->write($h, 1, $s[0], $s[1], $alvrow["alv"]."%", "norm", "R", "");
 			}
+			
+			$pdf->write($h, 1, $s[1], 0, money_format('%i', $arow["alvrivihinta"]), "norm", "R", "");	
+			
 			$h-=$pdf->ln();
 		}
 
 		$pdf->write($h, 1, 0, $s[0], t("Lasku yhteensä", $kieli).":", "norm", "R", "B");
 		if ($toim == 'PROFORMA' or ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])))) {
-			$pdf->write($h, 1, $s[0], 0, money_format('%i',$summa_verolla), "norm", "R", "B");
+			$pdf->write($h, 1, $s[1], 0, money_format('%i',$summa_verolla), "norm", "R", "B");
 			$laskusumma=$summa_verolla;
 		}
 		else {
-			$pdf->write($h, 1, $s[0], $s[1], money_format('%i',$laskurow["summa"]), "norm", "R", "B");
+			$pdf->write($h, 1, $s[1], 0, money_format('%i',$laskurow["summa"]), "norm", "R", "B");
 			$laskusumma=$laskurow["summa"];			
 		}
 		$h-=$pdf->ln(4);

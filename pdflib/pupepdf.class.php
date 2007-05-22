@@ -14,6 +14,53 @@ class PDF extends pdffile {
 		$this->currentPage["oid"] = $oid;
 	}
 
+	function countParagraphHeight($txt, $font, $w=0) {
+		global $fonts;
+		
+		if($w>0) {
+			$w=mm_pt($w);
+		}
+		elseif($w<0) {
+			$w=$this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"]+mm_pt($w);
+		}
+		else {
+			$w=$this->currentPage["width"]-$this->currentPage["margin-left"]-$this->currentPage["margin-right"];
+		}
+		
+		// Poistetaan kaikki roskat
+		$txt = str_replace(array("\r","\t"), array("","    "), $txt); 
+		$riveja=1;
+
+		//	Ja lasketaan..
+		$i=0;
+		$stringw=0;
+		foreach(preg_split("/([\s\n])+/U",$txt, -1, PREG_SPLIT_DELIM_CAPTURE) as $osa) {
+			if($i=0) {
+				$stringw+=$this->strlen($osa,$fonts[$font]);
+				if($stringw>$w) {
+					$riveja++;
+					$stringw=0;
+				}
+				$i=1;
+			}
+			else {
+				if(preg_match("/\n/",$osa)) {
+					$riveja++;
+					$stringw=0;
+				}
+				else {
+					$stringw+=$this->strlen($osa,$fonts[$font]);
+					if($stringw>$w) {
+						$riveja++;
+						$stringw=0;
+					}
+				}
+			}
+		}
+
+		return $riveja;
+	}
+
 	function setLocales($maa, $valuutta) {
 		$maa = strtoupper($maa);
 		$valuutta = strtoupper($valuutta);		

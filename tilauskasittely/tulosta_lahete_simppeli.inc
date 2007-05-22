@@ -158,8 +158,9 @@ if (!function_exists('tulosta_lahete')) {
 						if($laskurow[$key] != "" or $key == "asiakkaan_viite") {
 							$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 							$h-=$pdf->ln();					
-							$pdf->writeToTemplate($h, 1, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
-							$h-=$pdf->ln(1.5);
+							$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0]-5)));										
+							$pdf->writeToTemplate($h, $nb, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
+							$h-=$pdf->ln($nb);					
 						}
 					}
 
@@ -414,14 +415,9 @@ if (!function_exists('tulosta_lahete')) {
 					$h-=$pdf->ln();
 					
 					if($row["kommentti"] != "") {
-						if($pdf->pt_mm($pdf->writeStrlen($row["otunnus"]."/".$row["kommentti"], "snadi")) > $s[0]) {
-							$pdf->write($h, 2, 5, $s[0], $row["otunnus"]."/* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln(2);
-						} 
-						else {
-							$pdf->write($h, 1, 5, $s[0], $row["otunnus"]."/* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln();
-						}
+						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", (5-$s[0]));
+						$pdf->write($h, $nb, 5, $s[0], $row["kommentti"], "snadi", "L", "I");	
+						$h-=$pdf->ln($nb);					
 					}
 				
 					$edperhe=$row["perheid"];						

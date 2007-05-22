@@ -308,7 +308,7 @@
 					//	Maksusopimus
 					$pdf->write($h, 1, 0, 0, t("MAKSUEHTO", $kieli), "norm", "L", "B");
 					$h-=$pdf->ln(1.25);
-					$pdf->write($h, 1, 5, 0, "100% $laskurow[maksuteksti]", "norm", "L", "");
+					$pdf->write($h, 1, 5, 0, "100% ".t("$laskurow[maksuteksti]"), "norm", "L", "");
 
 
 					//	Allekirjoituspohjat

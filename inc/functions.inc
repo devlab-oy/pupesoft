@@ -872,7 +872,7 @@ if (!function_exists("avain")) {
 // Tehd‰‰n l‰hetteen ja laskun sorttauskent‰t
 if (!function_exists("generoi_sorttauskentta")) {
 
-	function generoi_sorttauskentta($jarjestys = '') {
+	function generoi_sorttauskentta($jarjestys = "") {
 
 		global $kukarow, $yhtiorow;
 
@@ -894,7 +894,7 @@ if (!function_exists("generoi_sorttauskentta")) {
 		}
 
 		// varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰
-		if ($jarjestys == "1") {
+		elseif ($jarjestys == "1") {
 			$sorttauskentta = "if (perheid = 0,
 								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno),
 								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tilausrivi.tuoteno, perheid) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid)
@@ -902,7 +902,7 @@ if (!function_exists("generoi_sorttauskentta")) {
 		}
 
 		// varastopaikkaj‰rjestys, erikoistuotteet loppuun
-		if ($jarjestys == "2") {
+		elseif ($jarjestys == "2") {
 			$sorttauskentta = "if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '',
 								concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno),
 								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)
@@ -910,12 +910,12 @@ if (!function_exists("generoi_sorttauskentta")) {
 		}
 
 		// varastopaikkaj‰rjestys
-		if ($jarjestys == "3") {
+		elseif ($jarjestys == "3") {
 			$sorttauskentta = "concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) as sorttauskentta";
 		}
 
 		// tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun
-		if ($jarjestys == "4") {
+		elseif ($jarjestys == "4") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0,
 								if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '',
 									concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno),
@@ -926,7 +926,7 @@ if (!function_exists("generoi_sorttauskentta")) {
 		}
 
 		// tuotenumeroj‰rjestys, tuoteperheet pidet‰‰n yhdess‰
-		if ($jarjestys == "5") {
+		elseif ($jarjestys == "5") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0,
 								tilausrivi.tuoteno,
 								(select concat(tilausrivi.tuoteno, perheid) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid)
@@ -934,7 +934,7 @@ if (!function_exists("generoi_sorttauskentta")) {
 		}
 
 		// tuotenumeroj‰rjestys, erikoistuotteet loppuun
-		if ($jarjestys == "6") {
+		elseif ($jarjestys == "6") {
 			$sorttauskentta = "if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '',
 									concat('÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷÷', tilausrivi.tuoteno),
 									tilausrivi.tuoteno
@@ -942,12 +942,12 @@ if (!function_exists("generoi_sorttauskentta")) {
 		}
 
 		// tuotenumeroj‰rjestys
-		if ($jarjestys == "7") {
+		elseif ($jarjestys == "7") {
 			$sorttauskentta = "tilausrivi.tuoteno as sorttauskentta";
 		}
 
 		// tilausj‰rjestys, tuoteperheet pidet‰‰n yhdess‰
-		if ($jarjestys == "8") {
+		elseif ($jarjestys == "8") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0,
 								tilausrivi.tunnus,
 								(select concat(tilausrivi.tunnus, perheid) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid)
@@ -955,7 +955,12 @@ if (!function_exists("generoi_sorttauskentta")) {
 		}
 
 		// tilausj‰rjestys
-		if ($jarjestys == "9") {
+		elseif ($jarjestys == "9") {
+			$sorttauskentta = "tilausrivi.tunnus as sorttauskentta";
+		}
+
+		// joku default
+		else {
 			$sorttauskentta = "tilausrivi.tunnus as sorttauskentta";
 		}
 

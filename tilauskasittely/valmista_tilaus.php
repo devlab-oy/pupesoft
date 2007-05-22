@@ -22,7 +22,7 @@
 					and lasku.tunnus=tilausrivi.otunnus
 					and lasku.yhtio=tilausrivi.yhtio";
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		while ($row = mysql_fetch_array($result)) {
 			if ($row["tila"] == "L") {
 				$kalatila = "X";
@@ -30,7 +30,7 @@
 			else {
 				$kalatila = "V";
 			}
-			
+
 			$query = "	UPDATE lasku
 						SET alatila	= '$kalatila'
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -39,33 +39,33 @@
 						and alatila = 'K'";
 			$chkresult4 = mysql_query($query) or pupe_error($query);
 		}
-	
+
 		$valmistettavat = "";
 		$tee = "";
 	}
-	
+
 	if ($tee=='TEEVALMISTUS' and isset($osatoimitus)) {
 		// Osatoimitetaan valitut rivit
 		if (count($osatoimitetaan) > 0) {
 			$tilrivilisa = implode(',', $osatoimitetaan);
-			
-			require("tilauksesta_myyntitilaus.inc");			
-			
+
+			require("tilauksesta_myyntitilaus.inc");
+
 			$query = "	SELECT otunnus, group_concat(tunnus) tunnukset
 						FROM tilausrivi
 						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus  in ($tilrivilisa)
 						GROUP BY otunnus";
 			$copresult = mysql_query($query) or pupe_error($query);
-			
+
 			while ($coprow = mysql_fetch_array($copresult)) {
-				
+
 				$tillisa = " and tilausrivi.tunnus in ($coprow[tunnukset]) ";
-				
+
 				$tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($coprow["otunnus"], $tillisa, "", "", "", "JOO");
-				
+
 				echo "$tilauksesta_myyntitilaus<br>";
-				
+
 				$query = "	UPDATE tilausrivi
 							SET tyyppi = 'D'
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -74,11 +74,11 @@
 				$chkresult4 = mysql_query($query) or pupe_error($query);
 			}
 		}
-			
+
 		$tee = "VALMISTA";
 	}
-	
-	
+
+
 
 	if ($tee=='TEEVALMISTUS') {
 		//K‰yd‰‰n l‰pi rivien kappalem‰‰r‰t ja tehd‰‰n samalla pieni tsekki, ett‰ onko rivi jo valmistettu
@@ -234,13 +234,13 @@
 
 							if ($tee != "UV") {
 								$virheitaoli = "JOO";
-								$valmkpllat2[$rivitunnus] = $valmkpl;								
+								$valmkpllat2[$rivitunnus] = $valmkpl;
 							}
 						}
 						elseif ($valmkpl == 0 or $valmkpl == "") {
 							$virhe[$rivitunnus] = "<font class='message'>Kappalem‰‰r‰ ei syˆtetty!</font>";
 							$tee = "VALMISTA";
-							$valmkpllat2[$rivitunnus] = $valmkpl;							
+							$valmkpllat2[$rivitunnus] = $valmkpl;
 						}
 						else {
 							$virhe[$rivitunnus] = "<font class='error'>VIRHE: Syˆtit liian ison kappalem‰‰r‰n!</font>";
@@ -514,15 +514,15 @@
 			echo "<td class='$class' align='right'>".tv1dateconv($prow["kerayspvm"])."</td>";
 
 			if($prow["tunnus"] != $prow["perheid"] and $prow["perheid"] > 0 and $prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
-				
+
 				if ($valmkpllat2[$prow["perheid"]] != 0) {
 					$lapsivalue = $kulukpllat[$prow["tunnus"]];
 				}
 				else {
 					$lapsivalue = "";
 				}
-				
-				echo "<td align='center'><input type='text' name='kulukpllat[$prow[tunnus]]' value='$lapsivalue' size='5'></td>";	
+
+				echo "<td align='center'><input type='text' name='kulukpllat[$prow[tunnus]]' value='$lapsivalue' size='5'></td>";
 			}
 
 			if ($prow["tyyppi"] == "V") {
@@ -552,8 +552,8 @@
 					echo "<td class='back'><font class='error'>Rivi‰ ei voida korjata!</font></td>";
 				}
 			}
-			
-			
+
+
 			if ($prow["tyyppi"] == "L" and $toim != "KORJAA") {
 				echo "<td><input type='checkbox' name='osatoimitetaan[$prow[tunnus]]' value='$prow[tunnus]'></td>";
 			}
@@ -636,7 +636,7 @@
 							GROUP_CONCAT(DISTINCT tilausrivi.tunnus SEPARATOR ',') valmistettavat";
 
 			$grouppi	= " GROUP BY tilausrivi.tuoteno";
-			$orderby 	= " tuoteno, lasku.tunnus, varattu";
+			$orderby 	= " order by tuoteno, lasku.tunnus, varattu";
 			$ylatilat	= " 'V' ";
 			$alatilat 	= " 'C','B' ";
 			$lisa 		= " and tilausrivi.tyyppi in ('W','M')
@@ -652,8 +652,9 @@
 			$grouppi	= " GROUP BY lasku.tunnus";
 			$ylatilat	= " 'V','L' ";
 			$alatilat 	= " 'V','K','X' ";
-			$orderby 	= " lasku.tunnus";
+			$orderby 	= " order by lasku.tunnus desc";
 			$lisa 		= " ";
+			$limit 		= " LIMIT 100 ";
 		}
 		else {
 			$query	 	= "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
@@ -664,7 +665,7 @@
 			$grouppi	= " GROUP BY lasku.tunnus";
 			$ylatilat	= " 'V' ";
 			$alatilat 	= " 'C','B' ";
-			$orderby 	= " lasku.tunnus";
+			$orderby 	= " order by lasku.tunnus";
 			$lisa 		= " ";
 			$limit 		= " LIMIT 100 ";
 		}
@@ -678,12 +679,13 @@
 					$lisa
 					$haku
 					$grouppi
+					$orderby
 					$limit";
 		$tilre = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
-			
+
 			if ($toim == "KORJAA") {
 				echo "<tr><th>".t("Valmistus")."</th><th>".t("Tyyppi")."</th><th>".t("Asiakas/Varasto")."</th><th>".t("Ytunnus")."</th><th>".t("Valmiste")."</th><th>".t("Kpl")."</th><tr>";
 			}
@@ -697,14 +699,14 @@
 			while ($tilrow = mysql_fetch_array($tilre)) {
 
 				echo "<tr><td valign='top'>$tilrow[tunnus]</td>";
-				
+
 				if ($toim == "KORJAA" and $tilrow["tila"] == "L") {
 					echo "<td valign='top'>".t("Asiakkaallevalmistus")."</td>";
 				}
 				elseif ($toim == "KORJAA" and $tilrow["tila"] == "V") {
 					echo "<td valign='top'>".t("Varastoonvalmistus")."</td>";
 				}
-				
+
 				echo "<td valign='top'>$tilrow[nimi] $tilrow[nimitark]</td><td valign='top'>$tilrow[ytunnus]</td>";
 
 

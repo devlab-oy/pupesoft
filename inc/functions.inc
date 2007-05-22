@@ -121,7 +121,7 @@ if (!function_exists("tv1dateconv")) {
 		else {
 			$jatko = "";
 		}
-		
+
 		return substr($date,8,2).".".substr($date,5,2).".".substr($date,0,4).$jatko;
 	}
 }
@@ -305,7 +305,7 @@ if (!function_exists("saldo_myytavissa")) {
 		$result = mysql_query($query) or die($query.mysql_error());
 		$tuote  = mysql_fetch_array($result);
 
-		if (mysql_num_rows($result) == 0) {			
+		if (mysql_num_rows($result) == 0) {
 			$saldo			= FALSE;
 			$hyllyssa		= FALSE;
 			$myytavissa		= FALSE;
@@ -411,11 +411,11 @@ if (!function_exists("saldo_myytavissa")) {
 								and tuotepaikat.hyllytaso = '$hyllytaso' ";
 				$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 			}
-			
+
 			if ($maa != "") {
 				$valinta1 .= " (varastopaikat.sallitut_maat like '%$maa%' or varastopaikat.sallitut_maat = '') and ";
 			}
-			
+
 			if ($pvm != '') {
 				$kerayslisa = " and tilausrivi.kerayspvm <= '$pvm' ";
 			}
@@ -432,7 +432,7 @@ if (!function_exists("saldo_myytavissa")) {
 						$valinta2
 						$valinta3";
 			$result = mysql_query($query) or die($query);
-			
+
 			if (mysql_num_rows($result) == 0) {
 				return array(FALSE, FALSE, FALSE, FALSE);
 			}
@@ -464,10 +464,10 @@ if (!function_exists("saldo_myytavissa")) {
 								$kerayslisa ";
 					$ennresult = mysql_query($query) or die($query);
 					$ennrow = mysql_fetch_array($ennresult);
-					
+
 					$myytavissa += $row["saldo"] - $ennrow["varattu"] - $row["saldo_varattu"];
 					$hyllyssa   += $row["saldo"] - $ennrow["keratty"];
-					
+
 					// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon
 					if ($pvm != '') {
 						$query = "	SELECT
@@ -489,7 +489,7 @@ if (!function_exists("saldo_myytavissa")) {
 						$valmrow = mysql_fetch_array($valmresult);
 
 						$myytavissa -= $valmrow["varattu"];
-						
+
 						$query = "	SELECT
 									ifnull(sum(tilausrivi.varattu),0)*-1 varattu
 									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -509,10 +509,10 @@ if (!function_exists("saldo_myytavissa")) {
 						$myytavissa -= $ostrow["varattu"];
 					}
 				}
-				
+
 				// jos lasketaan tulevaisuuteen niin otetaan ostorivit huomioon
 				if ($pvm != '') {
-					
+
 					$query = "	SELECT
 								ifnull(sum(tilausrivi.varattu),0)*-1 varattu
 								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -524,11 +524,11 @@ if (!function_exists("saldo_myytavissa")) {
 								and tilausrivi.toimaika <= '$pvm'";
 					$ostresult = mysql_query($query) or die($query);
 					$ostrow = mysql_fetch_array($ostresult);
-					
+
 					$myytavissa -= $ostrow["varattu"];
 				}
-				
-				
+
+
 				// katsotaan löytyykö tuotetta varattuna joltain muulta paikalta, jota ei ole enää olemassa tuotepaikoissa
 				// ekaks haetaan ihan kaikki nykyiset paikat suoraan mysql muotoon
 				$query = "	SELECT group_concat(\"'\",rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'),\"'\") paikat
@@ -872,11 +872,14 @@ if (!function_exists("avain")) {
 // Tehdään lähetteen ja laskun sorttauskentät
 if (!function_exists("generoi_sorttauskentta")) {
 
-	function generoi_sorttauskentta() {
+	function generoi_sorttauskentta($jarjestys = '') {
 
 		global $kukarow, $yhtiorow;
 
-		$jarjestys = (int) $yhtiorow["lahetteen_jarjestys"];
+		if ($jarjestys == "") {
+			$jarjestys = (int) $yhtiorow["lahetteen_jarjestys"];
+		}
+
 		$sorttauskentta = "";
 
 		// varastopaikkajärjestys, tuoteperheet pidetään yhdessä, erikoistuotteet loppuun
@@ -964,7 +967,7 @@ if (!function_exists("generoi_sorttauskentta")) {
 if (!function_exists("synkronoi")) {
 	function synkronoi($table,$tunnus, $orig="") {
 		global $yhtiorow, $kukarow;
-		
+
 		if (!function_exists("synclog")) {
 		function synclog($kohde, $table, $viesti, $tunnus) {
 			global $yhtiorow, $kukarow;
@@ -974,52 +977,52 @@ if (!function_exists("synkronoi")) {
 				else {
 					$tapa = "TARGET";
 				}
-				
+
 				$query = "	INSERT INTO synclog SET
 								yhtio		= '$kohde',
 								taulu		= '$table',
 								tauluntunnus= '$tunnus',
-								tapa		= '$tapa',								
+								tapa		= '$tapa',
 								viesti		= '".addslashes($viesti)."',
 								laatija		= '$kukarow[kuka]',
 								luontiaika	= now()";
 				$insres=mysql_query($query) or pupe_error($query);
 			}
 		}
-		
+
 		/*
 			Hieman tarkastelua
 		*/
-		
+
 		//	Onko mahdollista synkronoida?
 		if(strpos($yhtiorow["syncronoi"],$table) === false) {
 			return false;
 		}
-		
+
 		$muutokset=array();
 
 		//	Näillä tarttetaan vähän lisätietoo
 		if($table=="avainsana") {
 			$abulisa=ereg(",(avainsana\|*([\|a-zA-Z]*)),*", $yhtiorow["syncronoi"], $regs);
 			$lajit = explode("|",$regs[2]);
-			
-			//	saadaanko juuri tätä lajia synkronoida?			
+
+			//	saadaanko juuri tätä lajia synkronoida?
 			if(is_array($orig) and count($orig)>0) {
 				if(!in_array($orig["laji"], $lajit)) {
-					return false;					
-				}				
+					return false;
+				}
 			}
 			else {
 				$query="select tunnus from avainsana where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and laji IN ($lajit)";
 				$tarkres=mysql_query($query);
 				if(mysql_num_rows($tarkres)==0) {
 					return false;
-				}				
+				}
 			}
 		}
-						
+
 		$synclog= "Aktivoidaan syncronointi konserniyrityksiin<br>";
-		
+
 		if(!is_numeric($tunnus)) {
 			$synclog.= "VIRHE: Syötetty tunnus ei kelpaa!<br>";
 			synclog($kukarow["yhtio"], $table, $synclog, $tunnus);
@@ -1032,10 +1035,10 @@ if (!function_exists("synkronoi")) {
 		if(mysql_num_rows($masterres)==1) {
 			$masterrow=mysql_fetch_array($masterres) or pupe_error($query);
 			$synclog.= "Masteri on tunnus ($tunnus)<br>";
-			
+
 			//	Tarkastetaan että originaali on varmasti samasta taulusta!
 			//echo "orig<pre>".print_r($orig,true)."<pre>";
-			//echo "masterrow<pre>".print_r($masterrow,true)."<pre>";			
+			//echo "masterrow<pre>".print_r($masterrow,true)."<pre>";
 			if(is_array($orig) and count($orig)>0) {
 				$diff = array_diff_key($orig,$masterrow);
 				if(count($diff)==0) {
@@ -1060,15 +1063,15 @@ if (!function_exists("synkronoi")) {
 						$synclog .= $muutos."<br>";
 					}
 					else {
-						return true;							
+						return true;
 					}
-					
+
 				}
 				else {
 					$synclog= "VIRHE: Originaali ei täsmää masteriin!!!<br>";
-					synclog($kukarow["yhtio"], $table, $synclog, $tunnus);					
+					synclog($kukarow["yhtio"], $table, $synclog, $tunnus);
 					return false;
-				}				
+				}
 			}
 		}
 		elseif(!is_array($orig)) {
@@ -1080,9 +1083,9 @@ if (!function_exists("synkronoi")) {
 			$synclog.= "Master tietue ($tunnus) on poistettu, koitetaan poistaa tietue myös konserniyrityksiltä..<br><br>";
 			unset($masterrow);
 		}
-		
+
 		require_once("inc/pakolliset_sarakkeet.inc");
-		
+
 		list($pakolliset, $kielletyt, $wherelliset)=pakolliset_sarakkeet($table);
 		if(count($wherelliset)==0) {
 			$synclog.= "VIRHE: Pyydettyä taulua $table ei voida synkronoida, sitä ei ole määritelty!<br>";
@@ -1102,22 +1105,22 @@ if (!function_exists("synkronoi")) {
 				}
 			}
 		}
-				
+
 		/*
 			Aloitetaan itse synkronointii
 		*/
-		
+
 		//	haetaan konserniyhtiöt joita voidaan synkronisoida
 		$query = "select yhtio from yhtio where konserni='$yhtiorow[konserni]' and yhtio!='$yhtiorow[yhtio]'";
 		$kohderes=mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($kohderes)>0) {
-			while($kohderow=mysql_fetch_array($kohderes)) {				
+			while($kohderow=mysql_fetch_array($kohderes)) {
 				$vanhatunnus=$utunnus="";
 				$override=array();
 
 				//	Poistetaan tietue jos masteria ei löydetty mutta originaali on tallessa.. olisiko tässä selvempi tapa?
 				if(!isset($masterrow) and is_array($orig) and count($orig)>0) {
-					
+
 					//	Tarkastetaan ettei tällä kriteerillä löydy useita poistettavia..
 					$query = "	SELECT tunnus
 								FROM $table
@@ -1152,7 +1155,7 @@ if (!function_exists("synkronoi")) {
 							$query = "select * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$masterrow[liitostunnus]'";
 							$abures=mysql_query($query) or pupe_error($query);
 							$aburow=mysql_fetch_array($abures);
-							
+
 							//	Etsitään oikea toimittaja jotta saadaan oikea liitostunnus
 							$tarkquery="select tunnus from toimi where yhtio='$kohderow[yhtio]' and ytunnus='$aburow[ytunnus]' and ovttunnus='$aburow[ovttunnus]'";
 							$tarkres=mysql_query($tarkquery) or pupe_error($tarkquery);
@@ -1163,13 +1166,13 @@ if (!function_exists("synkronoi")) {
 							}
 							else {
 								$synclog.= "Yhtiölle '$kohderow[yhtio]' ei löydy toimittajaa $masterrow[toimittaja] joten tuotteen toimittajaa ei voida sycronisoida<br>";
-								$ok=0;						
-							}						
+								$ok=0;
+							}
 						}
 						else {
 							$synclog.= "Yhtiölle '$kohderow[yhtio]' ei löydy tuotetta $masterrow[tuoteno] joten tuotteen toimittajaa ei voida sycronisoida<br>";
-							$ok=0;						
-						}											
+							$ok=0;
+						}
 					}
 
 					if($table=="toimi") {
@@ -1202,7 +1205,7 @@ if (!function_exists("synkronoi")) {
 								$tarkres=mysql_query($query) or pupe_error($query);
 								if(mysql_num_rows($tarkres)!=1) {
 									$override[$value]="";
-								}					
+								}
 							}
 						}
 					}
@@ -1226,7 +1229,7 @@ if (!function_exists("synkronoi")) {
 							$tarkres=mysql_query($query) or pupe_error($query);
 							if(mysql_num_rows($tarkres)!=1) {
 								$override[$value]="";
-							}											
+							}
 						}
 
 						// Onko kustannuspaikat olemassa?
@@ -1239,7 +1242,7 @@ if (!function_exists("synkronoi")) {
 								$tarkres=mysql_query($query) or pupe_error($query);
 								if(mysql_num_rows($tarkres)!=1) {
 									$override[$value]="";
-								}					
+								}
 							}
 						}
 
@@ -1265,24 +1268,24 @@ if (!function_exists("synkronoi")) {
 						$aburow=mysql_fetch_array($abures);
 
 						//	Melkein kaikki tiedot pitää stemmata!
-						$query = "select tunnus from maksuehto where yhtio='$kohderow[yhtio]' 
-									and abs_pvm				= '$aburow[abs_pvm]' 
-									and erapvmkasin			= '$aburow[erapvmkasin]' 
-									and factoring			= '$aburow[factoring]' 
-									and jaksotettu			= '$aburow[jaksotettu]' 
-									and jv					= '$aburow[jv]' 
-									and kassa_abspvm		= '$aburow[kassa_abspvm]' 
-									and kassa_alepros		= '$aburow[kassa_alepros]' 
-									and kassa_relpvm		= '$aburow[kassa_relpvm]' 
-									and kassa_teksti		= '$aburow[kassa_teksti]' 
-									and kateinen			= '$aburow[kateinen]' 
-									and osamaksuehto1		= '$aburow[osamaksuehto1]' 
-									and osamaksuehto2		= '$aburow[osamaksuehto2]' 
-									and rel_pvm				= '$aburow[rel_pvm]' 
-									and sallitut_maat		= '$aburow[sallitut_maat]' 
-									and summanjakoprososa2	= '$aburow[summanjakoprososa2]' 
+						$query = "select tunnus from maksuehto where yhtio='$kohderow[yhtio]'
+									and abs_pvm				= '$aburow[abs_pvm]'
+									and erapvmkasin			= '$aburow[erapvmkasin]'
+									and factoring			= '$aburow[factoring]'
+									and jaksotettu			= '$aburow[jaksotettu]'
+									and jv					= '$aburow[jv]'
+									and kassa_abspvm		= '$aburow[kassa_abspvm]'
+									and kassa_alepros		= '$aburow[kassa_alepros]'
+									and kassa_relpvm		= '$aburow[kassa_relpvm]'
+									and kassa_teksti		= '$aburow[kassa_teksti]'
+									and kateinen			= '$aburow[kateinen]'
+									and osamaksuehto1		= '$aburow[osamaksuehto1]'
+									and osamaksuehto2		= '$aburow[osamaksuehto2]'
+									and rel_pvm				= '$aburow[rel_pvm]'
+									and sallitut_maat		= '$aburow[sallitut_maat]'
+									and summanjakoprososa2	= '$aburow[summanjakoprososa2]'
 									and suoraveloitus		= '$aburow[suoraveloitus]'";
-						$tarkres=mysql_query($query) or pupe_error($query);					
+						$tarkres=mysql_query($query) or pupe_error($query);
 						if(mysql_num_rows($tarkres) == 1) {
 							$tarkrow=mysql_fetch_array($tarkres);
 							$override["maksuehto"] = $tarkrow["tunnus"];
@@ -1297,7 +1300,7 @@ if (!function_exists("synkronoi")) {
 						$aburow=mysql_fetch_array($abures);
 
 						//	Melkein kaikki tiedot pitää stemmata!
-						$query = "select tunnus from toimitustapa where yhtio='$kohderow[yhtio]' 
+						$query = "select tunnus from toimitustapa where yhtio='$kohderow[yhtio]'
 									and selite			= '$aburow[selite]'
 									and jvkulu			= '$aburow[jvkulu]'
 									and lauantai		= '$aburow[lauantai]'
@@ -1307,7 +1310,7 @@ if (!function_exists("synkronoi")) {
 									and nouto			= '$aburow[nouto]'
 									and sallitut_maat	= '$aburow[sallitut_maat]'
 									";
-						$tarkres=mysql_query($query) or pupe_error($query);					
+						$tarkres=mysql_query($query) or pupe_error($query);
 						if(mysql_num_rows($tarkres) == 1) {
 							$tarkrow=mysql_fetch_array($tarkres);
 							$override["toimitustapa"] = $tarkrow["tunnus"];
@@ -1326,7 +1329,7 @@ if (!function_exists("synkronoi")) {
 						if(mysql_num_rows($tarkres)!=1 and $masterrow["myyjanro"]!="") {
 							$override["myyjanro"]="";
 						}
-					}				
+					}
 
 					//	Päivitetään vai tehdään uutta?
 					$query = "	SELECT tunnus
@@ -1334,7 +1337,7 @@ if (!function_exists("synkronoi")) {
 								WHERE yhtio='$kohderow[yhtio]' $where";
 					$abures=mysql_query($query);
 
-					$ok=1;	
+					$ok=1;
 					if(mysql_num_rows($abures)==0) {
 						$query 	= "INSERT into $table SET yhtio='$kohderow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now() ";
 						$query2	="";
@@ -1343,14 +1346,14 @@ if (!function_exists("synkronoi")) {
 						$aburow=mysql_fetch_array($abures);
 						$vanhatunnus=$aburow["tunnus"];
 						$query = "UPDATE $table SET yhtio='$kohderow[yhtio]'";
-						$query2	=" WHERE yhtio='$kohderow[yhtio]' and tunnus=$vanhatunnus";					
+						$query2	=" WHERE yhtio='$kohderow[yhtio]' and tunnus=$vanhatunnus";
 					}
-					else {					
+					else {
 						$ok=0;
 					}
 
 					if($ok==1) {
-						//	Duunataan itse päivitys/insert kysely!!!		
+						//	Duunataan itse päivitys/insert kysely!!!
 						for ($i=1; $i < mysql_num_fields($masterres); $i++) {
 							//	Päivitetään vain muuttuneet kentät!
 							if (isset($masterrow[$i]) and !in_array(mysql_field_name($masterres, $i), array("yhtio","tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
@@ -1378,7 +1381,7 @@ if (!function_exists("synkronoi")) {
 							}
 
 							if(mysql_num_rows($abures)==0) {
-								$utunnus=mysql_insert_id();							
+								$utunnus=mysql_insert_id();
 								$synclog.= "Yhtiölle '$kohderow[yhtio]' lisättiin tietue ($utunnus)<br>";
 								synclog($kohderow["yhtio"], $table, "Uusi $table lisätty.$erot", $utunnus);
 							}
@@ -1387,7 +1390,7 @@ if (!function_exists("synkronoi")) {
 								$query = "UPDATE $table SET yhtio='$kohderow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() WHERE yhtio='$kohderow[yhtio]' and tunnus=$vanhatunnus";
 								$updres=mysql_query($query) or pupe_error($query);
 
-								synclog($kohderow["yhtio"], $table, "Tuote ($vanhatunnus) päivitetty.".$muutos.$erot, $utunnus);							
+								synclog($kohderow["yhtio"], $table, "Tuote ($vanhatunnus) päivitetty.".$muutos.$erot, $utunnus);
 								$synclog.= "Yhtiölle '$kohderow[yhtio]' päivitettiin tietue ($vanhatunnus)<br>";
 							}
 						}
@@ -1397,16 +1400,16 @@ if (!function_exists("synkronoi")) {
 					}
 					else {
 						$synclog.= "VIRHE: Yhtiön '$kohderow[yhtio]' tietoa ei voitu päivittää!!!<br>";
-					}					
-				}				
-			}	
+					}
+				}
+			}
 		}
 		else {
 			$synclog.= "Yhtään syncronoitavaa yhtiötä ei löytynyt!!!<br>";
 			synclog($kukarow["yhtio"], $table, $synclog, $tunnus);
 			return false;
 		}
-		
+
 		$synclog .="<br>Syncronointi valmis!!";
 		synclog($kukarow["yhtio"], $table, $synclog, $tunnus);
 		return true;

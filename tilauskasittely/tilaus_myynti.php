@@ -3721,7 +3721,7 @@ if ($tee == '') {
 		
 		
 		//	Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
-		if ($laskurow["tunnusnippu"] > 0) {
+		if ($laskurow["tunnusnippu"] > 0 and $toim=="PROJEKTI") {
 			$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
 			$abures = mysql_query($query) or pupe_error($query);
 			

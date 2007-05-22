@@ -4,13 +4,13 @@
 
 	// Annetaan mahdollisuus tehd‰ uusi tilausrivi tai n‰ytet‰‰n virhe
 	echo "<table border='0' cellspacing='1' cellpadding='2'>
-			<tr><th align='left'>".t("tuoteno")."</th>
-			<th align='left'>".t("kpl_rivill‰")."</th>
-			<th align='left'>".t("kpl")."</th>
-			<th align='left'>".t("hinta")."</th>
-			<th align='left'>".t("ale")."</th>
-			<th align='left'>".t("alv")."</th>
-			<th align='left'>".t("viestit")."</th>
+			<tr><th align='left'>".t("Tuoteno")."</th>
+			<th align='left'>".t("M‰‰r‰")."</th>
+			<th align='left'>".t("M‰‰r‰")."</th>
+			<th align='left'>".t("Hinta")."</th>
+			<th align='left'>".t("Ale")."</th>
+			<th align='left'>".t("Alv")."</th>
+			<th align='left'>".t("Viestit")."</th>
 			<td class='back'></td>
 			</tr>";
 

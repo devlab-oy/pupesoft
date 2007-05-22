@@ -18,7 +18,7 @@
 		echo "<table>
 				<tr>
 					<th align='left'>".t("Tuotenumero")."</th>
-					<th align='left'>".t("Kpl")."</th>
+					<th align='left'>".t("M‰‰r‰")."</th>
 					<th align='left'>".t("Var")."</th>
 					<th align='left'>".t("Hinta")."</th>
 					<th align='left'>".t("Ale")."</th>
@@ -122,7 +122,7 @@
 		echo "<table>
 				<tr>
 				<th align='left'>".t("Tuoteno")."</th>
-				<th align='left'>".t("Kpl")."</th>
+				<th align='left'>".t("M‰‰r‰")."</th>
 				<th align='left'>".t("Var")."</th>
 				<th align='left'>".t("Hinta")."</th>
 				<th align='left'>".t("Ale")."</th>
@@ -278,7 +278,7 @@
 		}
 
 		echo "	<th align='left'>".t("Tuoteno")."</th>
-				<th align='left'>".t("Kpl")."</th>
+				<th align='left'>".t("M‰‰r‰")."</th>
 				</tr>";
 
 
@@ -419,7 +419,7 @@
 		echo "<table>
 				<tr>
 					<th align='left'>".t("Tuotenumero")."</th>
-					<th align='left'>".t("Kpl")."</th>
+					<th align='left'>".t("M‰‰r‰")."</th>
 					<td class='back'></td>
 				</tr>
 			<tr>";

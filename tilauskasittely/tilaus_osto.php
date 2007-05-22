@@ -667,7 +667,7 @@
 			echo "<th align='left'>".t("Paikka")."</th>";
 			echo "<th align='left'>".t("Tuote")."</th>";
 			echo "<th align='left'>".t("Toim Tuote")."</th>";
-			echo "<th align='left'>".t("Tilattu")."</th>";
+			echo "<th align='left'>".t("M‰‰r‰")."</th>";
 			echo "<th align='left'>".t("Ostohinta")."</th>";
 			echo "<th align='left'>".t("Ale")."</th>";
 			echo "<th align='left'>".t("Alv")."</th>";

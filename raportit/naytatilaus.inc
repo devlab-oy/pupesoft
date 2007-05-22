@@ -152,6 +152,9 @@
 	}
 	
 	$comments = "";
+	
+	if ($laskurow["viesti"] != "")
+		$comments .= $laskurow["viesti"]."\n";
 
 	if ($laskurow["comments"] != "")
 		$comments .= $laskurow["comments"]."\n";

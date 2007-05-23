@@ -18,7 +18,7 @@ $error 			= 0;
 $failista		= "";
 $uusi_on_jo		= "";
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE and $tee == "file") {
+if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file") {
 	//Tuotenumerot tulevat tiedostosta
 	list($name,$ext) = split("\.", $_FILES['userfile']['name']);
 
@@ -256,12 +256,93 @@ if ($error == 0 and $tee == "file") {
 										ORDER BY yhtio";
 							$result2 = mysql_query($query) or pupe_error($query);
 						}
+						elseif ($tulos2 == 'tuotepaikat') {
+							// Tuotepaikat käsitellään hieman eri lailla
+							$query = "	SELECT * 
+										FROM tuotepaikat 
+										WHERE yhtio = '$kukarow[yhtio]'
+										and tuoteno	= '$vantuoteno'";
+							$paires = mysql_query($query) or pupe_error($query);
+							
+							while($pairow = mysql_fetch_array($paires)) {
+								
+								// Tutkitaan löytyykö vanhan tuotteen paikka uudella tuoteella
+								$query = "	SELECT * 
+											FROM tuotepaikat 
+											WHERE yhtio 	= '$kukarow[yhtio]'
+											and tuoteno		= '$uustuoteno'
+											and hyllyalue	= '$pairow[hyllyalue]'
+											and hyllynro	= '$pairow[hyllynro]'
+											and hyllyvali	= '$pairow[hyllyvali]'
+											and hyllytaso	= '$pairow[hyllytaso]'";
+								$paires2 = mysql_query($query) or pupe_error($query);
+								
+								if (mysql_num_rows($paires2) == 0) {
+									$query = "	UPDATE tuotepaikat
+												SET tuoteno = '$uustuoteno'
+												WHERE yhtio 	= '$kukarow[yhtio]'
+												and tuoteno		= '$vantuoteno'
+												and hyllyalue	= '$pairow[hyllyalue]'
+												and hyllynro	= '$pairow[hyllynro]'
+												and hyllyvali	= '$pairow[hyllyvali]'
+												and hyllytaso	= '$pairow[hyllytaso]'";
+									$result2 = mysql_query($query) or pupe_error($query);
+								}
+								else {
+									$query = "	UPDATE tuotepaikat
+												SET saldo = saldo+$pairow[saldo]
+												WHERE yhtio 	= '$kukarow[yhtio]'
+												and tuoteno		= '$uustuoteno'
+												and hyllyalue	= '$pairow[hyllyalue]'
+												and hyllynro	= '$pairow[hyllynro]'
+												and hyllyvali	= '$pairow[hyllyvali]'
+												and hyllytaso	= '$pairow[hyllytaso]'";
+									$result2 = mysql_query($query) or pupe_error($query);
+									
+									$query = "	DELETE from tuotepaikat
+												WHERE yhtio 	= '$kukarow[yhtio]'
+												and tuoteno		= '$vantuoteno'
+												and hyllyalue	= '$pairow[hyllyalue]'
+												and hyllynro	= '$pairow[hyllynro]'
+												and hyllyvali	= '$pairow[hyllyvali]'
+												and hyllytaso	= '$pairow[hyllytaso]'
+												and tunnus 		= '$pairow[tunnus]'";
+									$result2 = mysql_query($query) or pupe_error($query);
+								}								
+							}
+							
+							// Fixaataan jottei meille jäisi useita oletuspaikkoja
+							$query = "	SELECT *
+										FROM tuotepaikat 
+										WHERE yhtio 	= '$kukarow[yhtio]'
+										and tuoteno		= '$uustuoteno'
+										and oletus 	   != ''";
+							$paires = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($paires) == 0) {
+								$query = "	UPDATE tuotepaikat
+											SET oletus = 'X'
+											WHERE yhtio = '$kukarow[yhtio]'
+											and tuoteno	= '$uustuoteno'
+											ORDER BY tunnus
+											LIMIT 1";
+								$result2 = mysql_query($query) or pupe_error($query);
+							}
+							elseif (mysql_num_rows($paires) > 1) {
+								$query = "	UPDATE tuotepaikat
+											SET oletus = ''
+											WHERE yhtio = '$kukarow[yhtio]'
+											and tuoteno	= '$uustuoteno'
+											and oletus != ''
+											ORDER BY tunnus
+											LIMIT ".(mysql_num_rows($paires)-1);
+								$result2 = mysql_query($query) or pupe_error($query);
+							}
+						}
 						elseif($uusi_on_jo == "" or ($uusi_on_jo == "OK" and $tulos2 != 'tuote')) {
 							$query = "	UPDATE $tulos2
-										SET
-										tuoteno	= '$uustuoteno'
-										WHERE
-										yhtio = '$kukarow[yhtio]'
+										SET tuoteno	= '$uustuoteno'
+										WHERE yhtio = '$kukarow[yhtio]'
 										and tuoteno	= '$vantuoteno'
 										ORDER BY yhtio";
 							$result2 = mysql_query($query) or pupe_error($query);							

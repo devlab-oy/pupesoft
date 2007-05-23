@@ -118,7 +118,7 @@
 		echo "</form>";
 	}
 	
-	if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjestys_4 != '' or $jarjestys_5 != '' or $jarjestys_6 != '')and $tee == "") {
+	if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjestys_4 != '' or $jarjestys_5 != '' or $jarjestys_6 != '') and $tee == "") {
 		
 		function superlistaus ($tyyppi, $lisa1, $lisa2, $lisa3, $ostov) {
 			global $PHP_SELF, $kukarow, $yhtiorow, $myyntitilaus_haku, $tuoteno_haku, $nimitys_haku, $ostotilaus_haku, $sarjanumero_haku, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $jarjestys_1, $jarjestys_2, $jarjestys_3, $jarjestys_4, $jarjestys_5, $jarjestys_6;
@@ -204,8 +204,6 @@
 					$keikkahinta	+= $kulukulurow["kulusumma"];
 				}
 				
-				$vrow["ostohinta"] = sprintf('%.2f', $keikkahinta+$vrow["ostohinta"]);
-				
 				echo "<tr>
 						<td valign='top'><a name='$vrow[ostotunnus]'><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[otunnus]'>$vrow[otunnus]</a></td>
 						<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td>
@@ -215,10 +213,12 @@
 				if ($keikkahinta != 0) echo "<br>".sprintf('%.2f', $keikkahinta);
 				echo "</td>";
 																							
-				if (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
+				$vrow["ostohinta"] = sprintf('%.2f', $keikkahinta+$vrow["ostohinta"]);
+				
+				if ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
 					echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
 				}
-				elseif (abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
+				elseif ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
 					//Haetaan nyt tämän myyntirivin kaikki ostorivit
 					$query = "	SELECT ostorivitunnus
 								FROM sarjanumeroseuranta
@@ -252,12 +252,15 @@
 						echo "<td valign='top' align='right'>$vrow[kate]</td>";
 					}
 				}
-				elseif ($vrow["kate"] < 0) {
+				elseif ($vrow["myyntitunnus"] > 0 and $vrow["kate"] < 0) {
 					echo "<td valign='top' align='right'><font style='color: red;'>$vrow[kate]</font></td>";
 				}
-				else {
+				elseif($vrow["myyntitunnus"] > 0) {
 					echo "<td valign='top' align='right'>$vrow[kate]</td>";
 				}
+				else {
+					echo "<td valign='top' align='right'></td>";
+				} 
 		
 				echo "	<td valign='top'><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]'>$vrow[ostotilaus]</a></td>";
 			
@@ -287,11 +290,11 @@
 					echo "<td></td>";
 				}
 				
-				if ($vrow["sarjanumero"] != "") {
+				if ($vrow["sarjatunnus"] != "") {
 					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$vrow[tuoteno]&sarjanumero_haku=$vrow[sarjanumero]'>$vrow[sarjanumero]</a><br>$vrow[kaytetty]</td></tr>";
 				}
 				else {
-					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$vrow[tuoteno]'>Sarjanumero</a><br>&nbsp;</tr>";
+					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno=$vrow[tuoteno]&myyntirivitunnus=$vrow[myyntitunnus]&from=KORJAA&lopetus=ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//jarjestys_1=$jarjestys_1//jarjestys_2=$jarjestys_2//jarjestys_3=$jarjestys_3//jarjestys_4=$jarjestys_4//jarjestys_5=$jarjestys_5//jarjestys_6=$jarjestys_6'>Sarjanumero</a><br>&nbsp;</tr>";
 				}
 			}
 	

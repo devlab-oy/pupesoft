@@ -17,7 +17,7 @@
 		elseif($trow[$i] != "") {
 			$query = "	SELECT concat_ws(' - ', asiakkaan_kohde.kohde, left(asiakas.nimi, 30)) kohde
 						FROM asiakkaan_kohde
-						LEFT JOIN asiakas ON asiakas.yhtio = asiakkaan_kohde.yhtio and asiakas.tunnus = asiakkaan_kohde.asiakas
+						LEFT JOIN asiakas ON asiakas.yhtio = asiakkaan_kohde.yhtio and asiakas.tunnus = asiakkaan_kohde.liitostunnus
 						WHERE asiakkaan_kohde.yhtio = '$kukarow[yhtio]' and asiakkaan_kohde.tunnus='$trow[$i]'";
 			$aresult = mysql_query($query) or pupe_error($query);
 			$arow = mysql_fetch_array($aresult);		

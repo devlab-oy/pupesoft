@@ -238,7 +238,7 @@
 
 				while ($krow1 = mysql_fetch_array($kres1)) {
 					// K‰yd‰‰n l‰pi kaikki korvaavat...
-					$query = 	"select korvaavat.*
+					$query = 	"select korvaavat.*, tuote.myyntihinta
 								from korvaavat, tuote
 								where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
 								and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]'
@@ -251,10 +251,12 @@
 					
 					
 					while ($krow2 = mysql_fetch_array($kres2)) {
-						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
-							$korkieltokommi[] = strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno kommenttin
+						list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"]);
+						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet) and $krmyytavissa > 0) {
+							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lis‰t‰‰n tuoteno kommenttin
 						}
 					}
+					
 					if (count($korkieltokommi) == 1) {
 						$korkieltokommi = t("Voit tilata korvaavaa tuotetta ").$korkieltokommi[0];
 					}

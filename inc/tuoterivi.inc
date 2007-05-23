@@ -185,7 +185,7 @@
 
 			$ulos  = "<td><select name='$nimi'>";
 			$ulos .= "<option value = ''>".t("Normaalik‰sittely")."</option>";
-			$ulos .= "<option value = 'o' $sel>".t("Tuotteelle on annettava kpl2")."</option>";
+			$ulos .= "<option value = 'P' $sel>".t("M‰‰r‰ on perheen is‰n position pituus")."</option>";
 			$ulos .= "</select></td>";
 			$jatko = 0;
 		}

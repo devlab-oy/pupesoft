@@ -1625,7 +1625,33 @@ if ($tee == '') {
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
-
+		
+		//	Jos vaihdettiin asiakkaan positio korjataan niiden tuotteiden määrä jotka saavat määrätiedot asiakkaan_positiolta
+		if($asiakkaan_positio!='') {
+			$query = "	SELECT tilausrivi.tunnus, if(varattu>0,'varattu','jt') kentta, asiakkaan_positio.pituus kpl
+						FROM tilausrivi
+						JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+						JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = '$rivitunnus'
+						JOIN asiakkaan_positio ON asiakkaan_positio.yhtio=tilausrivin_lisatiedot.yhtio and asiakkaan_positio.tunnus=tilausrivin_lisatiedot.asiakkaan_positio
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.otunnus = '$kukarow[kesken]'
+						and tuote.vaaditaan_kpl2 = 'P'
+						and (tilausrivi.tunnus = '$rivitunnus' or (tilausrivi.perheid!=0 and tilausrivi.perheid = '$rivitunnus')
+						or (tilausrivi.perheid2!=0 and tilausrivi.perheid2 = '$rivitunnus'))";
+			$lapsires = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($lapsires)>0) {
+				while($lapsi = mysql_fetch_array($lapsires)) {
+					//	Tämä on nyt proof of consept toteutus. Oikea tapa olisi poistaa rivi ja lisätä se uudestaan.
+					$query = "	UPDATE tilausrivi
+								SET $lapsi[kentta] = '$lapsi[kpl]'
+								WHERE yhtio			 = '$kukarow[yhtio]'
+								and tunnus = '$lapsi[tunnus]'";
+								echo $query."<br>";
+					$updres = mysql_query($query) or pupe_error($query);
+				}
+			}
+		}
+		
 		$tila 		= "";
 		$rivitunnus = "";
 		$positio 	= "";

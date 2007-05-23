@@ -131,7 +131,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 						if($laskurow[$key] != "") {
 							$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 							$h-=$pdf->ln();		
-							$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0]-5)));										
+							$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0])));										
 							$pdf->writeToTemplate($h, $nb, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
 							$h-=$pdf->ln($nb);					
 						}

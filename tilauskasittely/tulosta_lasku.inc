@@ -185,6 +185,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 666, t("Toimitustapa", $kieli), 	$firstpage, $pieni);
 		$pdf->draw_text(310, 656, $laskurow["toimitustapa"], 	$firstpage, $norm);
 		$pdf->draw_text(430, 666, t("Toimituspvm", $kieli), 	$firstpage, $pieni);
+		
 		//	Onko meillä monta toimituspäivää vai ei?
 		if ($laskurow["tila"] == 'U') {
 			$where = " uusiotunnus='$laskurow[tunnus]' ";
@@ -192,13 +193,17 @@ if (!function_exists('alku')) {
 		else {
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
-		$query = "SELECT date_format(toimitettuaika, '%Y%m%d') toimitettupaiva FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and $where and toimitettuaika!='0000-00-00' GROUP BY toimitettupaiva";
-		$toimaikares=mysql_query($query) or pupe_error($query);
+		
+		$query = "SELECT date_format(toimitettuaika, '%Y-%m-%d') toimitettupaiva FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and $where and toimitettuaika!='0000-00-00' GROUP BY toimitettupaiva";
+		$toimaikares = mysql_query($query) or pupe_error($query);
+		
 		if(mysql_num_rows($toimaikares) > 1) {
-			$pdf->draw_text(430, 656, t("useita"), 		$firstpage, $norm);
+			$pdf->draw_text(430, 656, t("Useita"), 											$firstpage, $norm);
 		}
 		else {
-			$pdf->draw_text(430, 656, tv1dateconv($laskurow["toimaika"]), 		$firstpage, $norm);	
+			$toimaikarow = mysql_fetch_array($toimaikares);
+			
+			$pdf->draw_text(430, 656, tv1dateconv($toimaikarow["toimitettupaiva"]),			$firstpage, $norm);	
 		}
 
 		$pdf->draw_rectangle(653, 300, 632, 580, $firstpage, $rectparam);

@@ -428,7 +428,7 @@ if ((int) $kukarow["kesken"] != 0) {
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
 $muokkauslukko = "";
 
-if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or $toim == "PROJEKTI" or ($toim=="TARJOUS" and $laskurow["alatila"]=="B")) {
+if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or $toim == "PROJEKTI" or ($toim=="TARJOUS" and in_array($laskurow["alatila"], array("B","T","X","D")))) {
 	$muokkauslukko = "LUKOSSA";
 }
 
@@ -1346,7 +1346,7 @@ if ($tee == '') {
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tunnusnippu = '$laskurow[tunnusnippu]'
-						and lasku.tila IN ('L','N','A','T','G','S','V','O','R')
+						and lasku.tila IN ('L','N','A','T','G','S','V','O','R') and if(tila='T', alatila='B',lasku.tunnus=lasku.tunnus)
 						and if('$tila' = 'MUUTA', alatila != 'X', lasku.tunnus=lasku.tunnus)
 						GROUP BY lasku.tunnus";
 			$toimres = mysql_query($query) or pupe_error($query);
@@ -2336,7 +2336,7 @@ if ($tee == '') {
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila IN ('L','G','E','V','W','N','R')";
+						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila IN ('L','G','E','V','W','N','R','A')";
 			$result = mysql_query($query) or pupe_error($query);
 			$toimrow = mysql_fetch_array($result);
 

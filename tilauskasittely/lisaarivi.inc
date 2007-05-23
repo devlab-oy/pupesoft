@@ -28,7 +28,7 @@
 	// $orvoteikiinnosta --> Meit‰ ei kiinnosta orvot jos t‰m‰ ei ole tyhj‰.
 	// $osatoimkielto	 --> Jos saldo ei riit‰ koko riville niin ei lis‰t‰ rivi‰ ollenkaan
 	// $olpaikalta		 --> pakotetaan myym‰‰n oletuspaikalta
-	
+
 	// Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 	// Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 
@@ -36,7 +36,7 @@
 	if (!is_array($varasto) and (int) $varasto > 0) {
 		$varasto = array($varasto);
 	}
-	
+
 	//katotaan oletuspaikka ja myyd‰‰n tietenkin sielt‰ jos niin halutaan
 	if ($olpaikalta != '') {
 		$olquery = "select concat_ws('#',hyllyalue,hyllynro,hyllyvali,hyllytaso) olpaikka
@@ -47,7 +47,7 @@
 					limit 1";
 		$olpares = mysql_query($olquery) or pupe_error($olquery);
 		$olparow = mysql_fetch_array($olpares);
-		
+
 		$paikka	= $olparow["olpaikka"];
 	}
 
@@ -56,17 +56,18 @@
 	$hinta 	= str_replace(',','.',$hinta);
 	$ale 	= str_replace(',','.',$ale);
 
-	$alkupera_trow		= $trow; 				// alkuper‰inen tuoterow talteen..
-	$saldoyhteensa		= 0; 					// t‰h‰n summaillaan saldoa yhteens‰
-	$lapsiyhteensa		= 0;
-	$suoratoimeikiitos  = '';
-	$lop				= "";
-	$tuoteperhe			= array(); 				// Tuoteperheiden lapset menev‰t t‰nne
-	$kaikkituotteet		= array();  			// t‰h‰n arrayseen lis‰t‰‰n kaikki tuotteet ketjusta
-	$kaikkituotteet[]	= strtoupper($tuoteno); // ekaksi lis‰t‰‰n ketjuun kysytty tuote
-	$var				= strtoupper($var); 	// varri isoks
-	$netto				= strtoupper($netto); 	// netto isoks
-	$toimittamatta		= $kpl;					//N‰in paljon ollaan toimittamassa
+	$alkupera_trow			= $trow; 				// alkuper‰inen tuoterow talteen..
+	$saldoyhteensa			= 0; 					// t‰h‰n summaillaan saldoa yhteens‰
+	$lapsiyhteensa			= 0;
+	$korvaavan_isaa_myyty	= 0;
+	$suoratoimeikiitos  	= '';
+	$lop					= "";
+	$tuoteperhe				= array(); 				// Tuoteperheiden lapset menev‰t t‰nne
+	$kaikkituotteet			= array();  			// t‰h‰n arrayseen lis‰t‰‰n kaikki tuotteet ketjusta
+	$kaikkituotteet[]		= strtoupper($tuoteno); // ekaksi lis‰t‰‰n ketjuun kysytty tuote
+	$var					= strtoupper($var); 	// varri isoks
+	$netto					= strtoupper($netto); 	// netto isoks
+	$toimittamatta			= $kpl;					//N‰in paljon ollaan toimittamassa
 
 	// n‰ihin arraysiin tulee sitten myyt‰viss‰ olevat tuotteet, kappaleet ja varastopaikat
 	$myy_tuoteno    = array();
@@ -245,11 +246,11 @@
 								order by jarjestys,
 								korvaavat.tuoteno";
 					$kres2  = mysql_query($query) or die($query);
-					
+
 					$korkieltokommi = t("Voit tilata korvaavaa tuotetta");
 					$korkieltokommi= array();
-					
-					
+
+
 					while ($krow2 = mysql_fetch_array($kres2)) {
 						list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"]);
 						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet) and $krmyytavissa > 0) {
@@ -281,7 +282,7 @@
 							$kieltolisa
 							ORDER by tuoteno";
 				$perheresult = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($perheresult) > 0) {
 					while ($perherow = mysql_fetch_array($perheresult)) {
 						//T‰t‰ tuoteperhett‰ halutaan myyd‰
@@ -371,6 +372,11 @@
 					$zzrow[$zzrowlask]["hyllytaso"]		= $zrow["hyllytaso"];
 
 					if ($debug==1) echo "Myyt‰viss‰ paikalta $zrow[hyllyalue]: $myytavissa kappaletta<br>";
+
+					// tilatulla tuotteella oli saldoa.. laitetaan lippu p‰‰lle, ett‰ huomataan osatoimituskeisi oikein..
+					if ($tuoteno == $alkupera_trow["tuoteno"]) {
+						$korvaavan_isaa_myyty = 1; // laitetaan lippu p‰‰lle ett‰ tiedet‰‰n ett‰ meneekˆ tilattua tuotetta ja korvaavaa tuotetetta samalla tilauksella
+					}
 
 					$zzrowlask++;
 				}
@@ -463,7 +469,7 @@
 					and try     in ('$trow[try]','*')
 					and laji    = 'O'";
 		$kkres  = mysql_query($query) or die($query);
-		
+
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
 		if ((mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta or $varataan_saldoa == "EI") {
 
@@ -657,6 +663,12 @@
 								// jos ollaan laittamassa muuta tuotetta kun mit‰ tilattiin, lis‰t‰‰n rivikommentti
 								if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"]) and $myy_tyyppi[$indeksi] == "NORMAALI") {
 									$kommentti .= " ".t("Korvaa tuotteen")." $alkupera_trow[tuoteno]";
+
+									// oletetaan, ett‰ meill‰ on $edi_tyyppi muuttuja viritetty editilaus_in.inc failista
+									if ((int) $rivinumero != 0 and $edi_tyyppi != "" and $korvaavan_isaa_myyty == 1) {
+										$rivinumero = 0; // jos myyd‰‰n korvaava tuote ja ollaan myyty jo tilattuakin tuotetta, niin ei pistet‰ samaa rivinumeroa..
+									}
+
 								}
 
 								if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
@@ -765,23 +777,23 @@
 								if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {
 									//P‰ivitet‰‰n is‰n perhetunnus
 									if ($rivityyppi == 'V') {
-										
+
 										$query  = "	SELECT tuoteno
 													FROM tilausrivi
 													WHERE yhtio	= '$kukarow[yhtio]'
-													and tunnus	= $perheid_lisaarivi 
+													and tunnus	= $perheid_lisaarivi
 													and tyyppi	= 'V'";
 										$lisa_res = mysql_query($query) or pupe_error($query);
 										$lisa_row = mysql_fetch_array($lisa_res);
-																				
-										if (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"])) {											
-											$valmistetyyppi = "M";											
+
+										if (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"])) {
+											$valmistetyyppi = "M";
 										}
 										else {
 											$valmistetyyppi = "W";
 										}
-										
-										//jos on valmistusprosessi kyseess‰ niin is‰n tyyppi vaihdetaan W:ksi koska sen ei pid‰ varata saldoa!										
+
+										//jos on valmistusprosessi kyseess‰ niin is‰n tyyppi vaihdetaan W:ksi koska sen ei pid‰ varata saldoa!
 										$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='$valmistetyyppi' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi and tyyppi='V'";
 										$result = mysql_query($query) or pupe_error($query);
 
@@ -836,6 +848,7 @@
 
 							} // T‰ll‰ rundilla myydyt
 						} // Jos tuoteperhett‰ lˆytyi riitt‰v‰sti tai myytiin pelk‰‰ is‰‰
+
 					} // Jos vil‰ on toimittamatta kappaleita
 				} // end if toimittamatta > 0
 			} // end foreach myy_tuoteno
@@ -955,9 +968,9 @@
 			else {
 				$trow = mysql_fetch_array($tuoteresult);
 			}
-				
+
 			if ($rivityyppi != 'E' and $var == "X") {
-				
+
 				$var 			= "";
 				$suora_tuoteno 	= $trow["tuoteno"];
 				$suora_kpl		= $kpl;
@@ -978,11 +991,11 @@
 
 					$var 		 = "S";
 					$paikka 	 = substr($superpaikka, strpos($superpaikka,'#')+1);
-					$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);					
+					$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
 				}
 			}
-			
-			
+
+
 
 			//K‰sinsyˆteyt hinnat nollataan kun lis‰t‰‰n tuoteperheiden lapsia
 			//Ostossa splittaukset menee aina samalla hinnalla
@@ -991,7 +1004,7 @@
 				$ale		= "";
 				$netto		= "";
 				$alv 		= "";
-				
+
 				if ($var != "S") {
 					$rivinumero = "";
 				}
@@ -1193,7 +1206,7 @@
 					$ale = round($ale * $puu_alekerr[$i],2);
 				}
 			}
-			
+
 			if ($korkieltokommi != '') {
 				$kommentti .= $korkieltokommi;
 			}
@@ -1205,7 +1218,7 @@
 				// lis‰t‰‰n saatu nimitys kaikille tuotteille
 				$trow["nimitys"] = addslashes($tuotenimitys);
 			}
-			
+
 			// lis‰t‰‰n puuterivi
 			$query = "	INSERT into tilausrivi set
 						hyllyalue   = '$p_hyllyalue',
@@ -1245,7 +1258,7 @@
 			}
 			$result = mysql_query($query) or die($query);
 			$lisatty_tun = mysql_insert_id();
-			
+
 			$lisatyt_rivit2[] = $lisatty_tun;
 
 			if ($i == 0) {
@@ -1304,18 +1317,18 @@
 					$query  = "	SELECT tuoteno
 								FROM tilausrivi
 								WHERE yhtio	= '$kukarow[yhtio]'
-								and tunnus	= $perheid_lisaarivi 
+								and tunnus	= $perheid_lisaarivi
 								and tyyppi	= 'V'";
 					$lisa_res = mysql_query($query) or pupe_error($query);
 					$lisa_row = mysql_fetch_array($lisa_res);
-															
-					if (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"])) {											
-						$valmistetyyppi = "M";											
+
+					if (isset($lapsenlap_array[$lisa_row["tuoteno"]]) and strtoupper($lapsenlap_array[$lisa_row["tuoteno"]]) == strtoupper($lisa_row["tuoteno"])) {
+						$valmistetyyppi = "M";
 					}
 					else {
 						$valmistetyyppi = "W";
 					}
-					
+
 					//jos on valmistusprosessi kyseess‰ niin is‰n tyyppi vaihdetaan W:ksi koska sen ei pid‰ varata saldoa!
 					$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi', tyyppi='W' where yhtio='$kukarow[yhtio]' and tunnus=$perheid_lisaarivi";
 					$result = mysql_query($query) or pupe_error($query);

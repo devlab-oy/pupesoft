@@ -48,7 +48,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 
 		//	Aloituskorkeus		
 		if (!function_exists('alku')) {
-			function alku ($pdf, $laskurow, $kieli) {
+			function alku ($pdf, $laskurow, $kieli, $riviotsikot="") {
 				global $yhtiorow, $kukarow, $fonts, $tid;
 
 				if(!is_object($pdf)) {
@@ -164,42 +164,52 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 						$h-=$pdf->ln();	
 					}
 					
-					$h=190;					
+					$h=190;
+					//	Tehdään template
+					$tid2=$pdf->template->create();
+										
 					$s=$pdf->teeSarakkeet(array(105,20,25));
-					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tuote", $kieli), "norm", "L", "B", $tid);
-					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Määrä", $kieli), "norm", "R", "B", $tid);				
+					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tuote", $kieli), "norm", "L", "B", $tid2);
+					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Määrä", $kieli), "norm", "R", "B", $tid2);				
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
-						$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Hinta/yks", $kieli), "norm", "R", "B", $tid);
-						$pdf->writeToTemplate($h, 1, $s[2], 0, t("Yhteensä", $kieli), "norm", "R", "B", $tid);					
+						$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Hinta/yks", $kieli), "norm", "R", "B", $tid2);
+						$pdf->writeToTemplate($h, 1, $s[2], 0, t("Yhteensä", $kieli), "norm", "R", "B", $tid2);					
 					}
 					$h-=$pdf->ln();
-					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Kommentti", $kieli), "norm", "L", "B", $tid);
-					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimituspvm", $kieli), "norm", "R", "B", $tid);			
+					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Kommentti", $kieli), "norm", "L", "B", $tid2);
+					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimituspvm", $kieli), "norm", "R", "B", $tid2);			
 					if($alenaytetaan=="OK") {
-						$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Ale", $kieli), "norm", "R", "B", $tid);
+						$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Ale", $kieli), "norm", "R", "B", $tid2);
 					}
 
 					//	Liitetään pohjat				
 					$pdf->placeTemplate($tid);
+					$pdf->placeTemplate($tid2);					
 				}
 				else {
 					$pdf->addPage("a4");					
 
-					//	Liitetään pohjat				
-					$pdf->placeTemplate($tid);
+					//	Liitetään pohjat									
+					if($riviotsikot!="") {
+						$pdf->placeTemplate($tid);
+						$pdf->placeTemplate($tid2);						
+					}
+					else {
+						$pdf->placeTemplate($tid);
+					}
 				}
 
 				return $pdf;
 			}			
 		}
 	
-		$pdf=alku($pdf, $laskurow,$kieli);
+		$pdf=alku($pdf, $laskurow,$kieli, "OK");
 		$h = 180;
 		
 		if($laskurow["tila"] == "R") {
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnus]' and tila IN ('U','N')";
+						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnus]' and tila IN ('L','G','E','V','W','N','R','A')";
 			$result = mysql_query($query) or pupe_error($query);
 			$tunnusrow=mysql_fetch_array($result);
 			$tunnukset=$tunnusrow["tunnukset"];
@@ -257,7 +267,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 				}
 				
 				if($h < 20) {
-					$pdf = alku($pdf, $laskurow,$kieli);
+					$pdf = alku($pdf, $laskurow,$kieli, "OK");
 					$h = 190;
 				}
 				
@@ -336,7 +346,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 		$pdf->write($h, 1, $s[2], 0, money_format('%i',$grand_total), "norm", "R", "B");
 		$h-=$pdf->ln(3);
 		
-		if($h < 50) {
+		if($h < 60) {
 			$pdf = alku($pdf, $laskurow,$kieli);
 			$h = 190;
 		}

@@ -77,7 +77,7 @@ if (!function_exists('tulosta_lahete')) {
 		$otsikko = "LÄHETE";
 		
 		if (!function_exists('alku')) {
-			function alku ($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param) {
+			function alku ($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param, $riviotsikot="") {
 				global $yhtiorow, $kukarow, $fonts;
 
 				if(!is_object($pdf)) {
@@ -192,40 +192,49 @@ if (!function_exists('tulosta_lahete')) {
 					}
 
 					$h=195;
+					//	Tehdään template
+					$tid2=$pdf->template->create();
+					
 					$s=$pdf->teeSarakkeet(array(95,15,20,15));
-					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tuote", $kieli), "norm", "L", "B", $tid);
-					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimitettu", $kieli), "norm", "R", "B", $tid);
+					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tuote", $kieli), "norm", "L", "B", $tid2);
+					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimitettu", $kieli), "norm", "R", "B", $tid2);
 					if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
-						$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Hinta/yks", $kieli), "norm", "R", "B", $tid);
-						$pdf->writeToTemplate($h, 1, $s[2], $s[3], t("Alv", $kieli), "norm", "R", "B", $tid);
-						$pdf->writeToTemplate($h, 1, $s[3], 0, t("Veroton arvo", $kieli), "norm", "R", "B", $tid);					
+						$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Hinta/yks", $kieli), "norm", "R", "B", $tid2);
+						$pdf->writeToTemplate($h, 1, $s[2], $s[3], t("Alv", $kieli), "norm", "R", "B", $tid2);
+						$pdf->writeToTemplate($h, 1, $s[3], 0, t("Veroton arvo", $kieli), "norm", "R", "B", $tid2);
 					}
 					$h-=$pdf->ln();
-					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus")."/".t("Kommentti", $kieli), "norm", "L", "B", $tid);
-					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Tilattu", $kieli), "norm", "R", "B", $tid);
+					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus")."/".t("Kommentti", $kieli), "norm", "L", "B", $tid2);
+					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Tilattu", $kieli), "norm", "R", "B", $tid2);
 					if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
 						if($alenaytetaan=="OK") {
-							$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Ale", $kieli), "norm", "R", "B", $tid);				
+							$pdf->writeToTemplate($h, 1, $s[1], $s[2], t("Ale", $kieli), "norm", "R", "B", $tid2);				
 						}
-						$pdf->writeToTemplate($h, 1, $s[3], 0, t("Verollinen arvo", $kieli), "norm", "R", "B", $tid);					
+						$pdf->writeToTemplate($h, 1, $s[3], 0, t("Verollinen arvo", $kieli), "norm", "R", "B", $tid2);
 					}
 
 					//	Liitetään pohjat
 					$pdf->placeTemplate($tid);
+					$pdf->placeTemplate($tid2);
 				}
 				else {
 					$pdf->addPage("a4");					
 
-					//	Liitetään pohjat				
-					$pdf->placeTemplate($tid);
-					
+					//	Liitetään pohjat									
+					if($riviotsikot!="") {
+						$pdf->placeTemplate($tid);
+						$pdf->placeTemplate($tid2);						
+					}
+					else {
+						$pdf->placeTemplate($tid);
+					}
 				}
 
 				return $pdf;
 			}			
 		}
 		
-		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param);
+		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param, "JOO");
 		$h = 180;
 		
 		$sorttauskentta = generoi_sorttauskentta();
@@ -283,7 +292,7 @@ if (!function_exists('tulosta_lahete')) {
 			while ($row = mysql_fetch_array($riresult)) {
 
 				if($h < 20) {
-					$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param);
+					$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param, "JOO");
 					$h = 190;
 				}
 				

@@ -1626,9 +1626,10 @@ if ($tee == '') {
 			}
 		}
 		
+		/*
 		//	Jos vaihdettiin asiakkaan positio korjataan niiden tuotteiden määrä jotka saavat määrätiedot asiakkaan_positiolta
 		if($asiakkaan_positio!='') {
-			$query = "	SELECT tilausrivi.tunnus, if(varattu>0,'varattu','jt') kentta, asiakkaan_positio.pituus kpl
+			$query = "	SELECT tilausrivi.tunnus, if(tilausrivi.varattu>0,'varattu','jt') kentta, asiakkaan_positio.pituus kpl
 						FROM tilausrivi
 						JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 						JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = '$rivitunnus'
@@ -1641,16 +1642,25 @@ if ($tee == '') {
 			$lapsires = mysql_query($query) or pupe_error($query);
 			if(mysql_num_rows($lapsires)>0) {
 				while($lapsi = mysql_fetch_array($lapsires)) {
+					$ukpl = ($lapsi["isakpl"] * $lapsi["kpl"])/1000;
 					//	Tämä on nyt proof of consept toteutus. Oikea tapa olisi poistaa rivi ja lisätä se uudestaan.
 					$query = "	UPDATE tilausrivi
-								SET $lapsi[kentta] = '$lapsi[kpl]'
+								SET $lapsi[kentta] = '$ukpl'
 								WHERE yhtio			 = '$kukarow[yhtio]'
 								and tunnus = '$lapsi[tunnus]'";
-								echo $query."<br>";
 					$updres = mysql_query($query) or pupe_error($query);
+					
+					//	Talletetaan tämä oikea pituus lisätietoihin
+					$query = "	UPDATE tilausrivin_lisatiedot
+								SET pituus = '$lapsi[kpl]'
+								WHERE yhtio			 = '$kukarow[yhtio]'
+								and tilausrivitunnus = '$lapsi[tunnus]'";
+					$result = mysql_query($query) or pupe_error($query);
+					
 				}
 			}
 		}
+		*/
 		
 		$tila 		= "";
 		$rivitunnus = "";
@@ -2636,7 +2646,7 @@ if ($tee == '') {
 							}
 
 
-							echo "	<form name='positio' action='$PHP_SELF' method='post'>
+							echo "	<form name='asiakkaan_positio' action='$PHP_SELF' method='post'>
 									<input type='hidden' name='toim' value='$toim'>
 									<input type='hidden' name='lopetus' value='$lopetus'>
 									<input type='hidden' name='projektilla' value='$projektilla'>
@@ -2644,19 +2654,23 @@ if ($tee == '') {
 									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
 									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
-									<select id='asiakkaan_positio' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id,'positio');\" Style='font-size: 8pt; padding:0;'>
+									<select id='asiakkaan_positio' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id,'asiakkaan_positio');\" Style='font-size: 8pt; padding:0;'>
 									<option value=''>Asiakkaalla ei ole positiota</option>";
 
 							if(mysql_num_rows($posres) > 0) {
+								$optlisa="";
 								while($posrow = mysql_fetch_array($posres)) {
 									$sel = "";
-									if($posrow["tunnus"] == $lisatied_row["asiakkaan_positio"]) $sel = "SELECTED";
-
+									if($posrow["tunnus"] == $lisatied_row["asiakkaan_positio"]) {
+										$sel = "SELECTED";
+										$optlisa = "<option value='muokkaa#$lisatied_row[asiakkaan_positio]'>Muokkaa asiakaan positiota</option>";										
+									}
 									echo "<option value='$posrow[tunnus]' $sel>$posrow[tunnus] - $posrow[positio]</option>";
 								}
 							}
 							echo "	<optgroup label='Toiminto'>
 										<option value='uusi'>Luo uusi asiakkaan positio</option>
+										$optlisa
 									</optgroup>
 									</select></form>";
 						}

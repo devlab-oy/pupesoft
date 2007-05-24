@@ -184,6 +184,11 @@
 
 			if ($tunnus == '') {
 				$tunnus = mysql_insert_id();
+				$wanha="";
+			}
+			else {
+				//	Javalla tieto että tätä muokattiin..
+				$wanha="P_";
 			}
 			
 			//	Tämä funktio tekee myös oikeustarkistukset!
@@ -212,21 +217,21 @@
 				$query = "SELECT kohde from asiakkaan_kohde where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
-				echo "<a href='#' onclick=\"suljeYllapito('$suljeYllapito','$tunnus','$tunnus - $aburow[kohde]');\">Sulje ikkuna</a>";
+				echo "<a href='#' onclick=\"suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[kohde]');\">Sulje ikkuna</a>";
 				exit;
 			}
 			if($suljeYllapito == "asiakkaan_positio") {
 				$query = "SELECT positio from asiakkaan_positio where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
-				echo "<a href='#' onclick=\"suljeYllapito('$suljeYllapito','$tunnus','$tunnus - $aburow[positio]');\">Sulje ikkuna</a>";
+				echo "<a href='#' onclick=\"suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[positio]');\">Sulje ikkuna</a>";
 				exit;
 			}
 			if($suljeYllapito == "yhteyshenkilo_tekninen" or $suljeYllapito == "yhteyshenkilo_kaupallinen") {
 				$query = "SELECT nimi from yhteyshenkilo where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
-				echo "<a href='#' onclick=\"suljeYllapito('$suljeYllapito','$tunnus','$aburow[nimi]');\">Sulje ikkuna</a>";
+				echo "<a href='#' onclick=\"suljeYllapito('$wanha$suljeYllapito','$tunnus','$aburow[nimi]');\">Sulje ikkuna</a>";
 				exit;
 			}
 			

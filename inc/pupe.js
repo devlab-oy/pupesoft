@@ -3,8 +3,10 @@ function yllapito(url, tag, submitOnSelect) {
 	select=document.getElementById(tag);
 	
 	toim=url.substr(0,url.indexOf("&"));
+	valinta=select.options[select.selectedIndex].value;
+
 	//	Jos meillä on valintana uusi, siirrytään tekemään uusi tietue!
-	if(select.options[select.selectedIndex].value=='uusi') {
+	if(isNaN(valinta)) {
 		
 		var width=0;
 		var height=0;
@@ -30,58 +32,106 @@ function yllapito(url, tag, submitOnSelect) {
 			alert('Ylläpitotoimintoa '+toim+' ei tunneta!');
 		}
 		else {
-			newwindow=window.open('../yllapito.php?popparista=JOO&uusi=1&suljeYllapito='+tag+'&toim='+url, 'yllapito', 'width='+height+',height='+height+',top=100,left=100,scrollbars=no,resizable=yes');
+			//	Tehdään uutta
+			if(valinta=='uusi') {
+				newwindow=window.open('../yllapito.php?popparista=JOO&uusi=1&suljeYllapito='+tag+'&toim='+url, 'yllapito', 'width='+height+',height='+height+',top=100,left=100,scrollbars=no,resizable=yes');
+			}
+			//	Muokataan valittua
+			else if (valinta.indexOf('\muokkaa#[0-9]+\b')) {
+				tunnus=valinta.slice(valinta.indexOf("#")+1);
+				newwindow=window.open('../yllapito.php?popparista=JOO&tunnus='+tunnus+'&suljeYllapito='+tag+'&toim='+url, 'yllapito', 'width='+height+',height='+height+',top=100,left=100,scrollbars=no,resizable=yes');
+			}
+			else {
+				//alert('DONT FUCK THE SYSTEM \"'+valinta+'\"');
+			}
 		}		
 	}
-	else if (submitOnSelect) {
-		document.forms[submitOnSelect].submit();
+	else {
+		
+		// Onko meillä muokkaus?		
+		sain='en';
+		for(i=0;i<=select.options.length-1;i++) {
+			if(select.options[i].value.substring(0,7)=='muokkaa') {
+				if(valinta=='') {
+					select.options[i]=null;
+					sain='JOO';					
+				}
+				else {
+					select.options[i].value='muokkaa#'+valinta;
+					sain='JOO';					
+				}
+			}
+		}
+		
+		//	Joudutaan duusaamaan kokonaan uusi..
+		if(sain=='en') {
+			var newOpt=document.createElement('option');
+			newOpt.text='Muokkaa';
+			newOpt.value='muokkaa#'+valinta;
+
+			try {
+				select.add(newOpt, select.options[select.options.length-1]);
+			}
+			catch(ex) {
+				select.add(newOpt, select.options[select.options.length-1]);
+			}
+			
+		}
+		 if (submitOnSelect) {
+			document.forms[submitOnSelect].submit();
+		}
 	}
 }
 
 function suljeYllapito(sID,value,text) {
-
-	if(sID=='yhteyshenkilo_kaupallinen' || sID=='yhteyshenkilo_tekninen') {
-		
-		//	Päivitetään tekninen yhteyshenkilo
-		var newOptt=document.createElement('option');
-		newOptt.text=text;
-		newOptt.value=value;
-		
-		selt=window.opener.document.getElementById('yhteyshenkilo_tekninen');
-		try {
-			selt.add(newOptt, selt.options[1]);
-		}
-		catch(ex) {
-			selt.add(newOptt, 1);
-		}
-
-		//	Päivitetään kaupallinen yhteyshenkilo		
-		var newOptk=document.createElement('option');
-		newOptk.text=text;
-		newOptk.value=value;
-		
-		selk=window.opener.document.getElementById('yhteyshenkilo_kaupallinen');
-		try {
-			selk.add(newOptk, selk.options[1]);
-		}
-		catch(ex) {
-			selk.add(newOptk, 1);
-		}
+	
+	//	Wanhaa on muokattu, submittoidaan formi tarvittaessa..
+	if(sID.substring(0,2)=='P_') {
+		sID=sID.substr(2);
+	
+		sel=window.opener.document.getElementById(sID);
 		
 		//	merkataan oikea valituksi
-		if(sID=='yhteyshenkilo_kaupallinen') {
-			selk.selectedIndex=1;
+		for(i in sel.options) {
+			if(sel.options[i].value==value) {
+				sel.selectedIndex=i;
+				sel.options[i].text=text;
+			}
 		}
-		else {
-			selt.selectedIndex=1;			
+	
+		if(sID=='asiakkaan_positio') {
+			window.opener.document.forms[sID].submit();
 		}
+		window.close();
 	}
 	else {
-		
+
 		//	Paivitetaan ja valitaan select option
 		var newOpt=document.createElement('option');
 		newOpt.text=text;
 		newOpt.value=value;
+
+		//	Jos päivitettiin yhteyshenkilöitä meidän pitää listätä ne kaikkiin valikkoihin..			
+		sela='EI'
+		if(sID=='yhteyshenkilo_kaupallinen') {
+			sela=window.opener.document.getElementById('yhteyshenkilo_tekninen');
+		}
+		else if (sID=='yhteyshenkilo_tekninen') {
+			sela=window.opener.document.getElementById('yhteyshenkilo_kaupallinen');
+		}
+		
+		if(sela!='EI') {
+			var newOpt2=document.createElement('option');			
+			newOpt2.text=text;
+			newOpt2.value=value;
+			
+			try {
+				sela.add(newOpt2, sela.options[1]);
+			}
+			catch(ex) {
+				sela.add(newOpt2, 1);
+			}
+		}
 
 		sel=window.opener.document.getElementById(sID);
 
@@ -94,10 +144,12 @@ function suljeYllapito(sID,value,text) {
 
 		//	Valitaan uusi arvo
 		sel.selectedIndex=1;
-	}
-			
-	window.close();
-	
+
+		
+		
+		window.close();
+		
+	}	
 }
 
 

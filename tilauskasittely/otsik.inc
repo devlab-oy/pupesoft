@@ -802,16 +802,19 @@
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<option value=''>Ei teknistä yhteyshenkilöä</option>";
 
+				$optlisa="";
 				while($row = mysql_fetch_array($yhresult)) {
 					$sel = "";
 					if ($row[0] == $srow["yhteyshenkilo_tekninen"]) {
 						$sel = 'selected';
+						$optlisa = "<option value='muokkaa#$srow[yhteyshenkilo_tekninen]'>Muokkaa yhteyshenkilöä</option>";										
 					}
 					echo "<option value='$row[0]' $sel>$row[1]</option>";
 				}
 
 				echo "	<optgroup label='Toiminto'>
 							<option value='uusi'>Luo uusi yhteyshenkilö</option>
+							$optlisa
 						</optgroup>";
 
 				echo "</select>";
@@ -847,10 +850,13 @@
 
 				echo "	<option value=''>Ei kaupallista käsittelijää</option>";
 				mysql_data_seek($yhresult,0);
+				
+				$optlisa="";
 				while($row = mysql_fetch_array($yhresult)) {
 					$sel = "";
 					if ($row[0] == $srow["yhteyshenkilo_kaupallinen"]) {
 						$sel = 'selected';
+						$optlisa = "<option value='muokkaa#$srow[yhteyshenkilo_kaupallinen]'>Muokkaa yhteyshenkilöä</option>";										
 					}
 					echo "<option value='$row[0]' $sel>$row[1]</option>";
 				}
@@ -858,6 +864,7 @@
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<optgroup label='Toiminto'>
 							<option value='uusi'>Luo uusi yhteyshenkilö</option>
+							$optlisa
 						</optgroup>";
 
 				echo "</select>";
@@ -876,11 +883,13 @@
 					<td><select id='asiakkaan_kohde' name='asiakkaan_kohde' onchange=\"yllapito('asiakkaan_kohde&liitostunnus=$srow[liitostunnus]',this.id)\">";
 
 				echo "<option value=''>Asiakkaalla ei ole kohdetta</option>";
-
+				
+				$optlisa="";
 				while($row = mysql_fetch_array($kohderesult)) {
 					$sel = "";
 					if ($row[0] == $srow["asiakkaan_kohde"]) {
 						$sel = 'selected';
+						$optlisa = "<option value='muokkaa#$srow[asiakkaan_kohde]'>Muokkaa kohdetta</option>";										
 					}
 					echo "<option value='$row[0]' $sel>$row[0] - $row[1]</option>";
 				}
@@ -888,6 +897,7 @@
 				//duusaan näihin javascript handlerin myöhemmin
 				echo "	<optgroup label='Toiminto'>
 							<option value='uusi'>Luo uusi asiakkaan kohde</option>
+							$optlisa
 						</optgroup>";
 
 				echo "</select>";

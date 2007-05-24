@@ -290,7 +290,7 @@
 					echo "<td></td>";
 				}
 				
-				if ($vrow["sarjatunnus"] != "") {
+				if ($vrow["sarjatunnus"] != "" and $vrow["css"] == $vrow["kpl"]) {
 					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$vrow[tuoteno]&sarjanumero_haku=$vrow[sarjanumero]'>$vrow[sarjanumero]</a><br>$vrow[kaytetty]</td></tr>";
 				}
 				else {

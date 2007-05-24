@@ -493,7 +493,7 @@
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT lasku.nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
 						if(tilausrivi.tyyppi!='O', tilausrivi.kerayspvm, tilausrivi.toimaika) kerayspvm,
-						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi
+						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto

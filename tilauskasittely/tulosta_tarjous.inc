@@ -135,11 +135,11 @@
 	
 	if (!function_exists('loppu_tarjous')) {
 		function loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $tots, $total=0) {
-			global $yhtiorow, $kukarow, $kala, $kasi_helvetica, $kymppi_helvetica, $rectparam, $kymppi_helvetica_b;
+			global $yhtiorow, $kukarow, $kasi_helvetica, $kymppi_helvetica, $rectparam, $kymppi_helvetica_b;
 
 			if ($tots == 1) {
 				$arvo  = $total;
-
+				
 				$pp = substr($laskurow["luontiaika"],8,2);
 				$kk = substr($laskurow["luontiaika"],5,2);
 				$vv = substr($laskurow["luontiaika"],0,4);
@@ -314,7 +314,6 @@
 				
 			}
 			
-			
 			function printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous, $total) {
 				global $yhtiorow, $kukarow;
 
@@ -329,67 +328,26 @@
 				}
 				
 				//	K‰sitell‰‰n tuoterivit
-				$q = "	SELECT tilausrivi.*, 
+				$query = "	SELECT tilausrivi.*, 
 							round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta, 
 							tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, ei_saldoa
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus";
-
-				$w = "	WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus	
+							WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi in  ('L','T','U')
-							$ennakkolisa";
+							and tilausrivi.tyyppi in  ('L','T','U')";
+							
 				$grand_total=0;
+
+				$riresult = mysql_query($query) or pupe_error($query);
 				
-				foreach(array("Tuotteet","Palvelut","Alennukset","Optio") as $key) {
-
-					$query = "";
-					if($key == "Tuotteet") {
-						$query = "$q $w and (tuote.ei_saldoa = '' and tilkpl > 0 and (tilausrivin_lisatiedot.positio != 'Optio' or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Tuotteet')";
-					}
-					elseif($key == "Palvelut"){
-						$query = "$q $w and (tuote.ei_saldoa != '' and tilkpl > 0 and (tilausrivin_lisatiedot.positio != 'Optio' or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Palvelut')";
-					}
-					elseif($key == "Alennukset"){
-						$query = "$q $w and tilkpl < 0 and (tilausrivin_lisatiedot.positio != 'Optio' and (tilausrivin_lisatiedot.positio != 'Optio' or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Alennukset')";
-					}
-					elseif($key == "Optio"){
-						$query = "$q $w and tilausrivin_lisatiedot.positio = 'Optio'";
-					}
-
-					$riresult = mysql_query($query) or pupe_error($query);
-
-					if(mysql_num_rows($riresult)>0) {
-						$tarvitaanuus = "";
-						
-						while ($row = mysql_fetch_array($riresult)) {
-							list($page_tarjous2[$sivu], $kala) = rivi_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous2[$sivu], $row);
-
-							$lask++;
-
-							$total += $row["rivihinta"];						
-							
-							if ($tarvitaanuus == 'KOHTA') {
-								$tarvitaanuus = 'NYT';
-							}
-							elseif ($kala <= 100) {
-								$tarvitaanuus = 'KOHTA';
-							}
-							
-							//jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-							if ($tarvitaanuus == 'NYT') {
-								loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous2[$sivu], 0);
-
-								$sivu++;
-								$lask = 0;
-								$kala = 200;
-								$tarvitaanuus = "";
-
-								$page_tarjous2[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
-							}					
-						}
-						if ($tarvitaanuus == 'KOHTA') {
+				if(mysql_num_rows($riresult)>0) {
+					$tarvitaanuus = "";
+					
+					while ($row = mysql_fetch_array($riresult)) {
+						//jos on paljon rivej‰ tehd‰‰n uusi otsikko...
+						if ($tarvitaanuus != '') {
 							loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous2[$sivu], 0);
 
 							$sivu++;
@@ -398,8 +356,26 @@
 							$tarvitaanuus = "";
 
 							$page_tarjous2[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
-							loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous2[$sivu], 0);
 						}
+						
+						elseif ($kala <= 100) {
+							$tarvitaanuus = 'NYT';
+						}
+						
+						list($page_tarjous2[$sivu], $kala) = rivi_tarjous($pdf_tarjous, $laskurow, $kala, $kieli, $page_tarjous2[$sivu], $row);
+						$lask++;
+						$total += $row["rivihinta"];
+					}
+					
+					if ($tarvitaanuus != '') {
+						loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous2[$sivu], 0);
+
+						$sivu++;
+						$lask = 0;
+						$kala = 200;
+						$tarvitaanuus = "";
+
+						$page_tarjous2[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
 					}
 				}
 				return array ($page_tarjous2[$sivu], $lask, $kala, $sivu, $total);
@@ -420,14 +396,12 @@
  			$pdf_tarjous->set_default('margin-left', 0);
  			$pdf_tarjous->set_default('margin-right', 0);
  
- 			$pdf_tarjous->enable('import');
- 
  			$page_tarjous[$sivu] = alku_tarjous ($laskurow, $asiakasrow, $sivu, $kieli, $pdf_tarjous);
-
-			list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], $total);
 			
-			$lask--;
+			list ($page_tarjous[$sivu], $lask, $kala, $sivu, $total) = printtaa_rivit_tarjous($pdf_tarjous, $laskurow, $lask, $kala, $kieli, $sivu, $page_tarjous[$sivu], $total);
 
+			$lask--;
+			
 			// Lopputekstit
 			loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous[$sivu], 1, $total);
 

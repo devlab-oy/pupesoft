@@ -13,6 +13,15 @@
 		echo "<tr><th>".t("Näytä vain tämä nimi").":</th><td><input type='text' name='nimi' size ='15' value='$nimi'></td></tr>";
 		echo "<tr><th>".t("Näytä vain ne joilla saatavaa on yli").":</th><td><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
 
+		if (!isset($kkl)) $kkl = date("m");
+		if (!isset($vvl)) $vvl = date("Y");
+		if (!isset($ppl)) $ppl = date("d");
+
+		echo "<tr><th>".t("Näytä vain ne laskut joita on päivätty ennen").":</th>
+			<td><input type='text' name='ppl' value='$ppl' size='3'>
+			<input type='text' name='kkl' value='$kkl' size='3'>
+			<input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
+
 		$chk ='';
 
 		if ($ylilimiitin != '') {
@@ -58,6 +67,7 @@
 					AND alatila='X'
 					AND mapvm='0000-00-00'
 					AND erpcm != '0000-00-00'
+					and lasku.tapvm < '$vvl-$kkl-$ppl'
 					$lisa
 					AND lasku.yhtio='$kukarow[yhtio]'
 					GROUP BY 1,2,3

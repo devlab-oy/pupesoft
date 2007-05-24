@@ -428,7 +428,7 @@ if ((int) $kukarow["kesken"] != 0) {
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
 $muokkauslukko = "";
 
-if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or $toim == "PROJEKTI" or ($toim=="TARJOUS" and in_array($laskurow["alatila"], array("B","T","X","D")))) {
+if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or $toim == "PROJEKTI" or ($toim=="TARJOUS" and $projektilla>0)) {
 	$muokkauslukko = "LUKOSSA";
 }
 
@@ -1342,7 +1342,7 @@ if ($tee == '') {
 			// Listataan kaikki toimitukset ja liitetään tarjous mukaan jos se tiedetään
 			$hakulisa = "";
 			if($lasklisatied_row["tunnusnippu_tarjous"]>0) {
-				$hakulisa =" or lasku.tunnusnippu = '$lasklisatied_row[tunnusnippu_tarjous]'";
+				$hakulisa =" or (lasku.tunnusnippu = '$lasklisatied_row[tunnusnippu_tarjous]' and tila='T' and alatila='B')";
 			}			
 			elseif($projektilla>0 and $laskurow["tunnusnippu"]!=$projektilla) {
 				$hakulisa =" or lasku.tunnusnippu = '$projektilla'";

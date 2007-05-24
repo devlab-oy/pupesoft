@@ -32,19 +32,20 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		$sel = '';
+		$sel1 = '';
+		$sel2 = '';
 		
 		if ($trow[$i] == 'H') {
-			$sel = "SELECTED";
+			$sel1 = "SELECTED";
 		}
 		elseif ($trow[$i] == 'P') {
-			$sel = "SELECTED";
+			$sel2 = "SELECTED";
 		}
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Yritys")."</option>";
-		$ulos .= "<option value = 'H' $sel>".t("Yksityishenkilö")."</option>";
-		$ulos .= "<option value = 'P' $sel>".t("Poistettu")."</option>";
+		$ulos .= "<option value = 'H' $sel1>".t("Yksityishenkilö")."</option>";
+		$ulos .= "<option value = 'P' $sel2>".t("Poistettu")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

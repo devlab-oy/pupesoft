@@ -325,7 +325,7 @@
 			//Lasketaan paljonko ollaan jo laskutettu ja millä verokannoilla
 			$query = "	SELECT round(sum(rivihinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) laskutettu, tilausrivi.alv
 						FROM lasku
-						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and kpl <> 0 and uusiotunnus > 0
+						JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and kpl <> 0 and uusiotunnus > 0 and tilausrivi.tuoteno='$yhtiorow[ennakkomaksu_tuotenumero]'
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu = '".($tunnus*-1)."'
 						GROUP BY alv";

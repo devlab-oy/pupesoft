@@ -1339,14 +1339,22 @@ if ($tee == '') {
 
 			echo "<td><select Style=\"width: 230px; font-size: 8pt; padding: 0\" name='valitsetoimitus' onchange='submit();'>";
 
-			// Listataan kaikki toimitukset
+			// Listataan kaikki toimitukset ja liitetään tarjous mukaan jos se tiedetään
+			$hakulisa = "";
+			if($lasklisatied_row["tunnusnippu_tarjous"]>0) {
+				$hakulisa =" or lasku.tunnusnippu = '$lasklisatied_row[tunnusnippu_tarjous]'";
+			}			
+			elseif($projektilla>0 and $laskurow["tunnusnippu"]!=$projektilla) {
+				$hakulisa =" or lasku.tunnusnippu = '$projektilla'";
+			}
+			
 			$vquery="select count(*) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tunnus<=lasku.tunnus and l.tila='T'";
 			$query = " 	SELECT tila, alatila, varastopaikat.nimitys varasto, lasku.toimaika, if(tila='T',if(tunnusnippu>0,concat(lasku.tunnusnippu,'/',($vquery)), concat(lasku.tunnusnippu,'/1')),lasku.tunnus) tilaus, lasku.tunnus tunnus
 						FROM lasku
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
-						and lasku.tunnusnippu = '$laskurow[tunnusnippu]'
-						and lasku.tila IN ('L','N','A','T','G','S','V','O','R') and if(tila='T', alatila='B',lasku.tunnus=lasku.tunnus)
+						and (lasku.tunnusnippu = '$laskurow[tunnusnippu]' $hakulisa)
+						and lasku.tila IN ('L','N','A','T','G','S','V','O','R')
 						and if('$tila' = 'MUUTA', alatila != 'X', lasku.tunnus=lasku.tunnus)
 						GROUP BY lasku.tunnus";
 			$toimres = mysql_query($query) or pupe_error($query);

@@ -107,7 +107,7 @@
 				Korjataan projektiotsikon tiedot insertin jälkeen..
 			*/
 			
-			$tunnusnippu=0;
+			$tunnusnippu=$ptunnus=0;
 			if($perusta_projekti != "" and $monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
 				$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 				$insres  = mysql_query($kysely) or pupe_error($kysely);
@@ -137,8 +137,8 @@
 					$tunnusnippu=$utunnus;
 				}
 
-				$query = "update lasku set tunnusnippu = '$tunnusnippu' WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu='$monistarow[tunnusnippu]'";
-				$updres = mysql_query($query) or pupe_error($query);
+				$query = "update lasku set tunnusnippu = '$tunnusnippu' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$utunnus'";
+				$updres = mysql_query($query) or pupe_error($query);				
 			}
 			
 			//Kopioidaan otsikon lisatiedot
@@ -148,7 +148,10 @@
 
 			$fields = mysql_field_name($monistares2,0);
 			$values = "'".$monistarow2[0]."'";
-
+			
+			//	Samat tiedot tarvitaan myös projektill			
+			$pvalues = "'".$monistarow2[0]."'";
+			
 			for($i=1; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
 
 				$fields .= ", ".mysql_field_name($monistares2,$i);
@@ -156,15 +159,34 @@
 				switch (mysql_field_name($monistares2,$i)) {
 					case 'otunnus':
 						$values .= ", '$utunnus'";
+						$pvalues .= ", '$ptunnus'";
+						break;
+					case 'tunnusnippu_tarjous':
+						$values .= ", '$monistarow[tunnusnippu]'";
+						$pvalues .= ", '$monistarow[tunnusnippu]'";
 						break;
 					default:
 						$values .= ", '".$monistarow2[$i]."'";
+						$pvalues .= ", '".$monistarow2[$i]."'";	
 				}
 			}
 
 			$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
 			$insres2 = mysql_query($kysely) or pupe_error($kysely);
 
+			if($ptunnus>0) {
+				$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($pvalues)";
+				$insres2 = mysql_query($kysely) or pupe_error($kysely);
+			}
+			
+			//	Projektin maksusuunnitelma kuuluu projektiotsikolle, ei tilaukselle
+			if($ptunnus>0) {
+				$mtunnus = $ptunnus;
+			}
+			else {
+				$mtunnus = $utunnus;
+			}
+			
 			//Siirretään maksusuunnitelma
 			$query = "	SELECT *
 						FROM maksupositio
@@ -174,17 +196,26 @@
 						
 			if (mysql_num_rows($copresult) > 0) {					
 				$query = "	UPDATE maksupositio
-							SET otunnus = '$utunnus'
+							SET otunnus = '$mtunnus'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and otunnus = '$otunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 			
 				//Päivitetään lasku
 				$query = "	UPDATE lasku
-							SET jaksotettu 	= '$utunnus'
+							SET jaksotettu 	= '$mtunnus'
 							WHERE yhtio 	= '$kukarow[yhtio]'
 							and tunnus 		= '$utunnus'";
 				$result = mysql_query($query) or pupe_error($query);
+				
+				//	Päivitetään projekti
+				if($ptunnus>0) {
+					$query = "	UPDATE lasku
+								SET jaksotettu 	= '$mtunnus'
+								WHERE yhtio 	= '$kukarow[yhtio]'
+								and tunnus 		= '$ptunnus'";
+					$result = mysql_query($query) or pupe_error($query);
+				}				
 			}
 			
 			
@@ -238,7 +269,7 @@
 				$perheid2	= $coprivirow['perheid2'];
 
 				if($coprivirow['jaksotettu'] != 0) {
-					$jaksotettu = $utunnus;
+					$jaksotettu = $mtunnus;
 				}
 				else {
 					$jaksotettu	= 0;

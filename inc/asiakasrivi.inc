@@ -33,13 +33,18 @@
 	if (mysql_field_name($result, $i) == "laji") {
 
 		$sel = '';
-		if ($trow[$i] != '') {
+		
+		if ($trow[$i] == 'H') {
+			$sel = "SELECTED";
+		}
+		elseif ($trow[$i] == 'P') {
 			$sel = "SELECTED";
 		}
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Yritys")."</option>";
 		$ulos .= "<option value = 'H' $sel>".t("Yksityishenkilö")."</option>";
+		$ulos .= "<option value = 'P' $sel>".t("Poistettu")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

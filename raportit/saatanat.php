@@ -1,8 +1,23 @@
 <?php
+
 	if ($eiliittymaa != 'ON') {
+		
+		if (isset($_POST["supertee"])) {
+			if($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+			if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+		}
+		
 		///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 		$useslave = 1;
+		
 		require ("../inc/parametrit.inc");
+
+		if (isset($supertee)) {
+			if ($supertee == "lataa_tiedosto") {
+				readfile("/tmp/".$tmpfilenimi);	
+				exit;
+			}
+		}
 
 		echo "<font class='head'>".t("Saatavat")." - $yhtiorow[nimi]</font><hr>";
 
@@ -17,7 +32,7 @@
 		if (!isset($vvl)) $vvl = date("Y");
 		if (!isset($ppl)) $ppl = date("d");
 
-		echo "<tr><th>".t("Näytä vain ne laskut joita on päivätty ennen").":</th>
+		echo "<tr><th>".t("Näytä vain ne laskut jotka on päivätty ennen").":</th>
 			<td><input type='text' name='ppl' value='$ppl' size='3'>
 			<input type='text' name='kkl' value='$kkl' size='3'>
 			<input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
@@ -35,8 +50,7 @@
 	}
 
 	if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
-
-
+		
 		$lisa = '';
 
 		if ($nimi != '') {
@@ -70,7 +84,7 @@
 					and lasku.tapvm < '$vvl-$kkl-$ppl'
 					$lisa
 					AND lasku.yhtio='$kukarow[yhtio]'
-					GROUP BY 1,2,3
+					GROUP BY 3
 					$having
 					order by 1,2,3";
 		$result = mysql_query($query) or pupe_error($query);
@@ -88,6 +102,55 @@
 		$rivilask = 0;
 
 		if (mysql_num_rows($result) > 0) {
+		
+			if ($eiliittymaa != 'ON') {
+				if(include('Spreadsheet/Excel/Writer.php')) {
+			
+					//keksitään failille joku varmasti uniikki nimi:
+					list($usec, $sec) = explode(' ', microtime());
+					mt_srand((float) $sec + ((float) $usec * 100000));
+					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+			
+					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+					$worksheet =& $workbook->addWorksheet('Sheet 1');
+		
+					$format_bold =& $workbook->addFormat();
+					$format_bold->setBold();
+		
+					$excelrivi = 0;
+				}
+			}
+
+			if(isset($workbook)) {
+				$excelsarake = 0;
+			
+				$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Alle 0 pv"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("0-15 pv"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("16-30 pv"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("31-60 pv"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("61-90 pv"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("91-120 pv"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("yli 121 pv"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Kaatotili"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Yhteensä"), $format_bold);
+				$excelsarake++;
+				$worksheet->write($excelrivi, $excelsarake, t("Luottoraja"), $format_bold);
+			
+				$excelsarake = 0;
+				$excelrivi++;
+			}
 
 			echo "<table>";
 			echo "<tr>";
@@ -115,7 +178,7 @@
 				$asrow = mysql_fetch_array($asresult);
 
 				$query = "	SELECT
-							sum(summa) summa
+							sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa
 							FROM suoritus
 							WHERE yhtio='$kukarow[yhtio]'
 							and asiakas_tunnus='$row[liitostunnus]'
@@ -141,6 +204,37 @@
 					echo "<td align='right'>".str_replace(".",",",$row["ll"])."</td>";
 					echo "<td align='right'>".str_replace(".",",",$asrow["luottoraja"])."</td>";
 					echo "</tr>";
+				
+					if(isset($workbook)) {
+						$excelsarake = 0;
+					
+						$worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"]);
+						$excelsarake++;
+						$worksheet->writeString($excelrivi, $excelsarake, $row["nimi"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $row["aa"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $row["aabb"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $row["bb"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $row["cc"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $row["dd"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $row["ee"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $row["ff"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $surow["summa"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $row["ll"]);
+						$excelsarake++;
+						$worksheet->writeNumber($excelrivi, $excelsarake, $asrow["luottoraja"]);
+					
+						$excelsarake = 0;
+						$excelrivi++;
+					}
 
 					$aay += $row["aa"];
 					$aabby += $row["aabb"];
@@ -177,17 +271,31 @@
 			}
 
 			echo "</table>";
+			
+			if(isset($workbook)) {
+				
+				// We need to explicitly close the workbook
+				$workbook->close();
+				
+				echo "<br><table>";
+				echo "<tr><th>".t("Tallenna tulos").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
+				echo "<input type='hidden' name='kaunisnimi' value='Saatavat.xls'>";
+				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br>";
+			}
 
 		}
+		
 		elseif ($eiliittymaa != 'ON') {
 			echo "<br><br>".t("Ei saatavia!")."<br>";
 		}
 
 	}
 
-
 	if ($eiliittymaa != 'ON') {
 		require ("../inc/footer.inc");
 	}
-
 ?>

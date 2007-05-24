@@ -1,5 +1,9 @@
 <?php
 
+	if (!isset($sakkl)) $sakkl = date("m");
+	if (!isset($savvl)) $savvl = date("Y");
+	if (!isset($sappl)) $sappl = date("d");
+	
 	if ($eiliittymaa != 'ON') {
 		
 		if (isset($_POST["supertee"])) {
@@ -24,27 +28,94 @@
 		echo "<table>";
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='tee' value='NAYTA'>";
-		echo "<tr><th>".t("Näytä vain tämä ytunnus").":</th><td><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td></tr>";
-		echo "<tr><th>".t("Näytä vain tämä nimi").":</th><td><input type='text' name='nimi' size ='15' value='$nimi'></td></tr>";
-		echo "<tr><th>".t("Näytä vain ne joilla saatavaa on yli").":</th><td><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
+		echo "<tr><th>".t("Näytä vain tämä ytunnus").":</th><td valign='top'><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td></tr>";
+		echo "<tr><th>".t("Näytä vain tämä nimi").":</th><td valign='top'><input type='text' name='nimi' size ='15' value='$nimi'></td></tr>";
+		echo "<tr><th>".t("Näytä vain ne joilla saatavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
 
-		if (!isset($kkl)) $kkl = date("m");
-		if (!isset($vvl)) $vvl = date("Y");
-		if (!isset($ppl)) $ppl = date("d");
+		echo "<tr>
+				<th>".t("Näytä vain ne laskut jotka on päivätty ennen").":</th>
+				<td valign='top'><input type='text' name='sappl' value='$sappl' size='3'><input type='text' name='sakkl' value='$sakkl' size='3'><input type='text' name='savvl' value='$savvl' size='5'></td>
+				</tr>";
 
-		echo "<tr><th>".t("Näytä vain ne laskut jotka on päivätty ennen").":</th>
-			<td><input type='text' name='ppl' value='$ppl' size='3'>
-			<input type='text' name='kkl' value='$kkl' size='3'>
-			<input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
-
-		$chk ='';
+		$chk = '';
 
 		if ($ylilimiitin != '') {
 			$chk = "CHECKED";
 		}
+		
+		$sel1 = '';
+		$sel2 = '';
+		$sel3 = '';
+		$sel4 = '';
+		$sel5 = '';
+		$sel6 = '';
+		
+		if ($grouppaus == '1,2') {
+			$sel1 = "SELECTED";
+		}
+		elseif ($grouppaus == '2,3') {
+			$sel2 = "SELECTED";
+		}
+		elseif ($grouppaus == '1,3') {
+			$sel3 = "SELECTED";
+		}
+		elseif ($grouppaus == '1') {
+			$sel4 = "SELECTED";
+		}
+		elseif ($grouppaus == '2') {
+			$sel5 = "SELECTED";
+		}
+		elseif ($grouppaus == '3') {
+			$sel6 = "SELECTED";
+		}
 
-		echo "<tr><th>".t("Näytä vain ne joilla luottoraja on ylitetty").":</th><td><input type='checkbox' name='ylilimiitin' value='ON' $chk></td>";
-		echo "<td class='back'><input type='submit' value='".t("Näytä")."'></td><td class='back'>".t("Jätä kaikki kentät tyhjäksi jos haluat listata kaikki saatavat").".</td></tr>";
+		echo "<tr><th>".t("Summaustaso").":</th><td valign='top'><select name='grouppaus'>";
+		echo "<option value = '1,2,3'>".t("Ytunnus, Nimi, Asiakastunnus")."</option>";
+		echo "<option value = '1,2' $sel1>".t("Ytunnus, Nimi")."</option>";
+		echo "<option value = '2,3' $sel2>".t("Nimi, Asiakastunnus")."</option>";
+		echo "<option value = '1,3' $sel3>".t("Ytunnus, Asiakastunnus")."</option>";
+		echo "<option value = '1'   $sel4>".t("Ytunnus")."</option>";
+		echo "<option value = '2'   $sel5>".t("Nimi")."</option>";
+		echo "<option value = '3'   $sel6>".t("Asiakastunnus")."</option>";
+		echo "</select></td></tr>";
+
+
+		$query = "	SELECT nimi, tunnus
+	                FROM valuu
+	             	WHERE yhtio = '$kukarow[yhtio]'
+	               	ORDER BY jarjestys";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		echo "<tr><th>Valitse valuutta:</th><td><select name='savalkoodi'>";
+		echo "<option value = ''>".t("Kaikki")."</option>";
+		
+		
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel="";
+			if (strtoupper($vrow['nimi']) == strtoupper($savalkoodi)) {
+				$sel = "selected";
+			}
+			
+			echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
+		}
+
+		echo "</select></td></tr>";
+		
+		
+		$sel1 = '';
+		
+		if ($valuutassako == 'V') {
+			$sel1 = "SELECTED";
+		}
+		
+		echo "<tr><th>".t("Summat").":</th>";
+		echo "<td><select name='valuutassako'>";
+		echo "<option value = ''>".t("Yrityksen valuutassa")."</option>";
+		echo "<option value = 'V' $sel1>".t("Laskun valuutassa")."</option>";
+		echo "</select></td></tr>";
+
+		echo "<tr><th>".t("Näytä vain ne joilla luottoraja on ylitetty").":</th><td valign='top'><input type='checkbox' name='ylilimiitin' value='ON' $chk></td>";
+		echo "<td valign='top' class='back'><input type='submit' value='".t("Näytä")."'></td><td valign='top' class='back'>".t("Jätä kaikki kentät tyhjäksi jos haluat listata kaikki saatavat").".</td></tr>";
 		echo "</form>";
 		echo "</table><br>";
 	}
@@ -65,26 +136,68 @@
 		else {
 			$having = " HAVING ll > 0 ";
 		}
+		
+		if ($grouppaus == '1,2') {
+			$selecti = "lasku.ytunnus, lasku.nimi, group_concat(distinct lasku.liitostunnus) liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
+		}
+		elseif ($grouppaus == '2,3') {
+			$selecti = "group_concat(distinct lasku.ytunnus separator '<br>') ytunnus, lasku.nimi, lasku.liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
+		}
+		elseif ($grouppaus == '1,3') {
+			$selecti = "lasku.ytunnus, group_concat(distinct lasku.nimi separator '<br>') nimi, lasku.liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
+		}
+		elseif ($grouppaus == '1') {
+			$selecti = "lasku.ytunnus, group_concat(distinct lasku.nimi separator '<br>') nimi, group_concat(distinct lasku.liitostunnus) liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
+		}
+		elseif ($grouppaus == '2') {
+			$selecti = "group_concat(distinct lasku.ytunnus separator '<br>') ytunnus, lasku.nimi, group_concat(distinct lasku.liitostunnus) liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
+		}
+		elseif ($grouppaus == '3') {
+			$selecti = "group_concat(distinct lasku.ytunnus separator '<br>') ytunnus, group_concat(distinct lasku.nimi separator '<br>') nimi, lasku.liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
+		}
+		else {
+			$selecti = "lasku.ytunnus, lasku.nimi, lasku.liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
+		}
+		
+		
+		if ($savalkoodi != "") {
+			$salisa = " and lasku.valkoodi='$savalkoodi' ";
+		}
+		
+		if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
+			$summalisa = "	round(sum(summa_valuutassa-saldo_maksettu_valuutassa),2) ll,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) <= 0, summa_valuutassa-saldo_maksettu_valuutassa, 0)) aa,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) >  0 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 15,  summa_valuutassa-saldo_maksettu_valuutassa, 0)) aabb,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 15 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 30,  summa_valuutassa-saldo_maksettu_valuutassa, 0)) bb,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 30 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 60,  summa_valuutassa-saldo_maksettu_valuutassa, 0)) cc,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 60 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 90,  summa_valuutassa-saldo_maksettu_valuutassa, 0)) dd,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 90 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 120, summa_valuutassa-saldo_maksettu_valuutassa, 0)) ee,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 120,	summa_valuutassa-saldo_maksettu_valuutassa, 0)) ff ";
+		}
+		else {
+			$summalisa = "	round(sum(summa-saldo_maksettu),2) ll,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) <= 0, summa-saldo_maksettu, 0)) aa,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) >  0 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 15, summa-saldo_maksettu, 0)) aabb,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 15 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 30, summa-saldo_maksettu, 0)) bb,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 30 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 60, summa-saldo_maksettu, 0)) cc,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 60 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 90, summa-saldo_maksettu, 0)) dd,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 90 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 120, summa-saldo_maksettu, 0)) ee,
+							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 120, summa-saldo_maksettu, 0)) ff ";
+		}
 
 		$query = "	SELECT
-					lasku.ytunnus, lasku.nimi, lasku.liitostunnus, lasku.toim_nimi,
-					round(sum(summa-saldo_maksettu),2) ll,
-					sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) <= 0, summa-saldo_maksettu, 0)) aa,
-					sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) >  0 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 15, summa-saldo_maksettu, 0)) aabb,
-					sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 15 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 30, summa-saldo_maksettu, 0)) bb,
-					sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 30 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 60, summa-saldo_maksettu, 0)) cc,
-					sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 60 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 90, summa-saldo_maksettu, 0)) dd,
-					sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 90 and TO_DAYS(NOW())-TO_DAYS(erpcm) <= 120, summa-saldo_maksettu, 0)) ee,
-					sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) > 120, summa-saldo_maksettu, 0)) ff
+					$selecti,
+					$summalisa
 					FROM lasku use index (yhtio_tila_mapvm)
-					WHERE tila='U'
-					AND alatila='X'
-					AND mapvm='0000-00-00'
-					AND erpcm != '0000-00-00'
-					and lasku.tapvm < '$vvl-$kkl-$ppl'
+					WHERE tila	= 'U'
+					AND alatila	= 'X'
+					AND mapvm	= '0000-00-00'
+					AND erpcm  != '0000-00-00'
+					and lasku.tapvm < '$savvl-$sakkl-$sappl'
 					$lisa
-					AND lasku.yhtio='$kukarow[yhtio]'
-					GROUP BY 3
+					$salisa
+					AND lasku.yhtio = '$kukarow[yhtio]'
+					GROUP BY $grouppaus
 					$having
 					order by 1,2,3";
 		$result = mysql_query($query) or pupe_error($query);
@@ -177,12 +290,20 @@
 				$asresult = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($asresult);
 
+				
+				if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
+					$suorilisa = " sum(summa) summa ";
+				}
+				else {
+					$suorilisa = " sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa ";
+				}
+				
 				$query = "	SELECT
-							sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa
+							$suorilisa							
 							FROM suoritus
 							WHERE yhtio='$kukarow[yhtio]'
-							and asiakas_tunnus='$row[liitostunnus]'
-							and kohdpvm='0000-00-00'";
+							and asiakas_tunnus in ($row[liitostunnus])
+							and kohdpvm = '0000-00-00'";
 				$suresult = mysql_query($query) or pupe_error($query);
 				$surow = mysql_fetch_array($suresult);
 
@@ -191,26 +312,26 @@
 					if ($row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";
 
 					echo "<tr>";
-					echo "<td>$row[ytunnus]</td>";
-					echo "<td>$row[nimi]</td>";
-					echo "<td align='right'>".str_replace(".",",",$row["aa"])."</td>";
-					echo "<td align='right'>".str_replace(".",",",$row["aabb"])."</td>";
-					echo "<td align='right'>".str_replace(".",",",$row["bb"])."</td>";
-					echo "<td align='right'>".str_replace(".",",",$row["cc"])."</td>";
-					echo "<td align='right'>".str_replace(".",",",$row["dd"])."</td>";
-					echo "<td align='right'>".str_replace(".",",",$row["ee"])."</td>";
-					echo "<td align='right'>".str_replace(".",",",$row["ff"])."</td>";
-					echo "<td align='right'>".str_replace(".",",",$surow["summa"])."</td>";
-					echo "<td align='right'>".str_replace(".",",",$row["ll"])."</td>";
-					echo "<td align='right'>".str_replace(".",",",$asrow["luottoraja"])."</td>";
+					echo "<td valign='top'>$row[ytunnus]</td>";
+					echo "<td valign='top'>$row[nimi]</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$row["aa"])."</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$row["aabb"])."</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$row["bb"])."</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$row["cc"])."</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$row["dd"])."</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$row["ee"])."</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$row["ff"])."</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$surow["summa"])."</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$row["ll"])."</td>";
+					echo "<td valign='top' align='right'>".str_replace(".",",",$asrow["luottoraja"])."</td>";
 					echo "</tr>";
 				
 					if(isset($workbook)) {
 						$excelsarake = 0;
 					
-						$worksheet->writeString($excelrivi, $excelsarake, $row["ytunnus"]);
+						$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["ytunnus"]));
 						$excelsarake++;
-						$worksheet->writeString($excelrivi, $excelsarake, $row["nimi"]);
+						$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["nimi"]));
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, $row["aa"]);
 						$excelsarake++;
@@ -236,37 +357,36 @@
 						$excelrivi++;
 					}
 
-					$aay += $row["aa"];
-					$aabby += $row["aabb"];
-					$bby += $row["bb"];
-					$ccy += $row["cc"];
-					$ddy += $row["dd"];
-					$eey += $row["ee"];
-					$ffy += $row["ff"];
-					$kky += $surow["summa"];
-					$lly += $row["ll"];
-
-					$ylikolkyt += $row["cc"];
-					$ylikolkyt += $row["dd"];
-					$ylikolkyt += $row["ee"];
-					$ylikolkyt += $row["ff"];
+					$aay 		+= $row["aa"];
+					$aabby 		+= $row["aabb"];
+					$bby 		+= $row["bb"];
+					$ccy 		+= $row["cc"];
+					$ddy 		+= $row["dd"];
+					$eey 		+= $row["ee"];
+					$ffy 		+= $row["ff"];
+					$kky 		+= $surow["summa"];
+					$lly 		+= $row["ll"];
+					$ylikolkyt	+= $row["cc"];
+					$ylikolkyt 	+= $row["dd"];
+					$ylikolkyt 	+= $row["ee"];
+					$ylikolkyt 	+= $row["ff"];
 					$rivilask++;
 				}
 			}
 
 			if ($eiliittymaa != 'ON' or $rivilask > 1) {
 				echo "<tr>";
-				echo "<td class='tumma' align='right' colspan='2'>".t("Yhteensä").":</th>";
-				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aay))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aabby))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$bby))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ccy))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ddy))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$eey))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ffy))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$kky))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$lly))."</td>";
-				echo "<td class='tumma'></td>";
+				echo "<td valign='top' class='tumma' align='right' colspan='2'>".t("Yhteensä").":</th>";
+				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aay))."</td>";
+				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aabby))."</td>";
+				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$bby))."</td>";
+				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ccy))."</td>";
+				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ddy))."</td>";
+				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$eey))."</td>";
+				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$ffy))."</td>";
+				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$kky))."</td>";
+				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$lly))."</td>";
+				echo "<td valign='top' class='tumma'></td>";
 				echo "</tr>";
 			}
 
@@ -283,7 +403,7 @@
 				echo "<input type='hidden' name='supertee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='Saatavat.xls'>";
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "<td valign='top' class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table><br>";
 			}
 

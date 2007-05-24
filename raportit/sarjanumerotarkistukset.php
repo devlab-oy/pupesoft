@@ -317,7 +317,7 @@
 		}
 
 		if ($sarjanumero_haku != "") {
-			$lisa2 .= " and (sm.sarjanumero like '%$sarjanumero_haku%' or so.sarjanumero like '%$sarjanumero_haku%') ";
+			$lisa2 .= " and sarjanumeroseuranta.sarjanumero like '%$sarjanumero_haku%' ";
 		}
 
 		if ($nimitys_haku != "") {

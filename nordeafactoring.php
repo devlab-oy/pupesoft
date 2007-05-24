@@ -175,7 +175,7 @@
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='$factoringyhtio'
 					WHERE lasku.yhtio	  = '$kukarow[yhtio]'
-					and lasku.tila	  = 'U'
+					and lasku.tila	  	  = 'U'
 					and lasku.alatila	  = 'X'
 					and lasku.summa 	 != 0
 					and lasku.laskunro >= '$ppa'
@@ -225,7 +225,8 @@
 					and lasku.laskunro >= '$ppa'
 					and lasku.laskunro <= '$ppl'
 					and lasku.factoringsiirtonumero = 0
-					and lasku.valkoodi	= '$valkoodi'";
+					and lasku.valkoodi	= '$valkoodi'
+					ORDER BY laskunro";
 		$laskures = mysql_query ($query) or pupe_error($query);
 
 		if (mysql_num_rows($laskures) > 0) {
@@ -480,7 +481,7 @@
 				}
 
 				if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {
-					echo "<td><font class='error'>VIRHE: Asiakasnumero: $asirow[asiakasnro] ei kelpaa!</font></td>";
+					echo "<td><font class='error'>VIRHE: Asiakasnumero: $asirow[asiakasnro] ei kelpaa!</font> <a href='http://172.27.10.13/pupesoft/yllapito.php?ojarj=&toim=asiakas&tunnus=$laskurow[liitostunnus]'>Muuta asiakkaan tietoja</a></td>";
 				}
 			}
 

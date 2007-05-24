@@ -3108,7 +3108,7 @@ if ($tee == '') {
 
 							echo "<tr>";
 
-							if ($toim == 'TARJOUS') {
+							if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
 								echo "<td valign='top'>&nbsp;</td>";
 							}
 

@@ -671,8 +671,8 @@
 				<td><select name = 'tyyppi'>
 				<option $sel[4] value='4'>".t("Sisäinen tuloslaskelma")."</option>
 				<option $sel[3] value='3'>".t("Ulkoinen tuloslaskelma")."</option>
-				<option $sel[2] value='2'>".t("Vastattavaa")." (".t("Velat").")</option>
 				<option $sel[1] value='1'>".t("Vastaavaa")." (".t("Varat").")</option>
+				<option $sel[2] value='2'>".t("Vastattavaa")." (".t("Velat").")</option>
 				</select></td></tr>
 				<tr>
 				<th>".t("Ajalta")."</th>

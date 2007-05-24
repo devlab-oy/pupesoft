@@ -70,17 +70,21 @@ echo "
 
 */
 
-$query = "SELECT count(l.tunnus) as maara, sum(if(mapvm='0000-00-00',1,0)) avoinmaara, sum(if(erpcm < now() and mapvm = '0000-00-00',1,0)) eraantynytmaara,
-sum(l.summa-l.saldo_maksettu) as summa,  sum(if(mapvm='0000-00-00',l.summa-l.saldo_maksettu,0)) avoinsumma, sum(if(erpcm < now() and mapvm = '0000-00-00',l.summa-l.saldo_maksettu,0)) eraantynytsumma,
-sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) <= -3,1,0)) maara1,
-sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > -3 AND TO_DAYS(NOW())-TO_DAYS(erpcm) <= -1,1,0)) maara2,
-sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > -1 AND TO_DAYS(NOW())-TO_DAYS(erpcm) <= 15,1,0)) maara3,
-sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > 15 AND TO_DAYS(NOW())-TO_DAYS(erpcm) <= 30,1,0)) maara4,
-sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > 30 AND TO_DAYS(NOW())-TO_DAYS(erpcm) <= 60,1,0)) maara5,
-sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > 60,1,0)) maara6
-FROM lasku l use index (yhtio_liitostunnus),
-(select tunnus from asiakas where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus') as valitut
-WHERE l.tila = 'U' AND l.yhtio='$kukarow[yhtio]' AND liitostunnus=valitut.tunnus";
+$query = "	SELECT count(l.tunnus) as maara, 
+			sum(if(mapvm='0000-00-00',1,0)) avoinmaara, 
+			sum(if(erpcm < now() and mapvm = '0000-00-00',1,0)) eraantynytmaara,
+			sum(l.summa-l.saldo_maksettu) as summa,  
+			sum(if(mapvm='0000-00-00',l.summa-l.saldo_maksettu,0)) avoinsumma, 
+			sum(if(erpcm < now() and mapvm = '0000-00-00',l.summa-l.saldo_maksettu,0)) eraantynytsumma,
+			sum(if(mapvm = '0000-00-00' and TO_DAYS(NOW())-TO_DAYS(erpcm) <= -3,1,0)) maara1,
+			sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > -3 AND TO_DAYS(NOW())-TO_DAYS(erpcm) <= -1,1,0)) maara2,
+			sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > -1 AND TO_DAYS(NOW())-TO_DAYS(erpcm) <= 15,1,0)) maara3,
+			sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > 15 AND TO_DAYS(NOW())-TO_DAYS(erpcm) <= 30,1,0)) maara4,
+			sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > 30 AND TO_DAYS(NOW())-TO_DAYS(erpcm) <= 60,1,0)) maara5,
+			sum(if(mapvm = '0000-00-00' AND TO_DAYS(NOW())-TO_DAYS(erpcm) > 60,1,0)) maara6
+			FROM lasku l use index (yhtio_liitostunnus),
+			(select tunnus from asiakas where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus') as valitut
+			WHERE l.tila = 'U' AND l.yhtio='$kukarow[yhtio]' AND liitostunnus=valitut.tunnus";
 
 $result = mysql_query($query) or pupe_error($query);
 $kok = mysql_fetch_array($result);

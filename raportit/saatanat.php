@@ -187,13 +187,14 @@
 
 		$query = "	SELECT
 					$selecti,
-					$summalisa
+					$summalisa,
+					min(liitostunnus) litu
 					FROM lasku use index (yhtio_tila_mapvm)
 					WHERE tila	= 'U'
 					AND alatila	= 'X'
 					AND mapvm	= '0000-00-00'
 					AND erpcm  != '0000-00-00'
-					and lasku.tapvm < '$savvl-$sakkl-$sappl'
+					and lasku.tapvm <= '$savvl-$sakkl-$sappl'
 					$lisa
 					$salisa
 					AND lasku.yhtio = '$kukarow[yhtio]'
@@ -311,8 +312,8 @@
 
 					if ($row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";
 
-					echo "<tr>";
-					echo "<td valign='top'>$row[ytunnus]</td>";
+					echo "<tr class='aktiivi'>";
+					echo "<td valign='top'><a href='../myyntires/myyntilaskut_asiakasraportti.php?tunnus=$row[litu]&tila=tee_raportti'>$row[ytunnus]</a></td>";
 					echo "<td valign='top'>$row[nimi]</td>";
 					echo "<td valign='top' align='right'>".str_replace(".",",",$row["aa"])."</td>";
 					echo "<td valign='top' align='right'>".str_replace(".",",",$row["aabb"])."</td>";

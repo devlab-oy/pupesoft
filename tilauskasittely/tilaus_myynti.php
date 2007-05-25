@@ -388,6 +388,8 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 	$override_ytunnus_check = "YES";
 
 	require ("otsik.inc");
+	
+	$kaytiin_otsikolla = "NOJOO!";
 }
 
 //Haetaan otsikon kaikki tiedot
@@ -971,6 +973,8 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result  	= mysql_query($query) or pupe_error($query);
 	$laskurow   = mysql_fetch_array($result);
+	
+	$kaytiin_otsikolla = "NOJOO!";
 }
 
 //lis‰t‰‰n rivej‰ tiedostosta
@@ -1520,11 +1524,21 @@ if ($tee == '') {
 	}
 
 	echo "</table>";
+	
+	
+	//N‰ytet‰‰nko asiakkaan saatavat!
+	$query  = "	SELECT yhtio
+				FROM tilausrivi
+				WHERE yhtio	= '$kukarow[yhtio]'
+				and otunnus = '$kukarow[kesken]'";
+	$numres = mysql_query($query) or pupe_error($query);
 
-	if ($kukarow['extranet'] == '' and $kukarow['kassamyyja'] == '' and $laskurow['liitostunnus'] > 0 and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
-		$sytunnus = $laskurow['ytunnus'];
+	if ($kukarow['extranet'] == '' and $kukarow['kassamyyja'] == '' and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
+		
+		$sytunnus 	 = $laskurow['ytunnus'];
 		$eiliittymaa = 'ON';
-		//require ("../raportit/saatanat.php");
+		
+		require ("../raportit/saatanat.php");
 
 		if ($ylikolkyt > 0) {
 			echo "<font class='error'>".t("HUOM!!!!!! Asiakkaalla on yli 30 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!<br></font>";

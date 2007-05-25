@@ -16,7 +16,7 @@
 	}
 	
 	//	Nämä tuotteet ovat Kielletty viranomaistuotteilla
-	if(!in_array($tuotetyyppi, array("A","B","C","D"))
+	if(!in_array($tuotetyyppi, array("A","B","C","D","E"))
 				or mysql_field_name($result, $i) == "nimitys"
 	 			or mysql_field_name($result, $i) == "tilino"
 				or mysql_field_name($result, $i) == "tilino_eu"
@@ -28,7 +28,7 @@
 				or mysql_field_name($result, $i) == "kehahin") {
 		
 		//	Vähän speciaali featureita viranomaistuotteille
-		if (mysql_field_name($result, $i) == "nimitys" and in_array($tuotetyyppi, array("A","B","C","D"))) {
+		if (mysql_field_name($result, $i) == "nimitys" and in_array($tuotetyyppi, array("A","B","C","D","E"))) {
 			$tyyppi = 3;
 		}
 		
@@ -60,6 +60,7 @@
 				$ulos .= "<option value='B' $selb>".t("Viranomaistuote - Ulkomaan päiväraha")."</option>";
 				$ulos .= "<option value='C' $selc>".t("Viranomaistuote - Kilometrikorvaus")."</option>";
 				$ulos .= "<option value='D' $seld>".t("Viranomaistuote - Muu korvaus")."</option>";
+				$ulos .= "<option value='E' $selc>".t("Viranomaistuote - Puolipäiväraha")."</option>";				
 
 				$ulos .= "</select></td>";
 			}

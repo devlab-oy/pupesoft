@@ -3,22 +3,22 @@
 	if (!isset($sakkl)) $sakkl = date("m");
 	if (!isset($savvl)) $savvl = date("Y");
 	if (!isset($sappl)) $sappl = date("d");
-	
+
 	if ($eiliittymaa != 'ON') {
-		
+
 		if (isset($_POST["supertee"])) {
 			if($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
 			if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 		}
-		
+
 		///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 		$useslave = 1;
-		
+
 		require ("../inc/parametrit.inc");
 
 		if (isset($supertee)) {
 			if ($supertee == "lataa_tiedosto") {
-				readfile("/tmp/".$tmpfilenimi);	
+				readfile("/tmp/".$tmpfilenimi);
 				exit;
 			}
 		}
@@ -42,14 +42,14 @@
 		if ($ylilimiitin != '') {
 			$chk = "CHECKED";
 		}
-		
+
 		$sel1 = '';
 		$sel2 = '';
 		$sel3 = '';
 		$sel4 = '';
 		$sel5 = '';
 		$sel6 = '';
-		
+
 		if ($grouppaus == '1,2') {
 			$sel1 = "SELECTED";
 		}
@@ -88,25 +88,25 @@
 
 		echo "<tr><th>Valitse valuutta:</th><td><select name='savalkoodi'>";
 		echo "<option value = ''>".t("Kaikki")."</option>";
-		
-		
+
+
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
 			if (strtoupper($vrow['nimi']) == strtoupper($savalkoodi)) {
 				$sel = "selected";
 			}
-			
+
 			echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
 		}
 
 		echo "</select></td></tr>";
-		
+
 		$sel1 = '';
-		
+
 		if ($valuutassako == 'V') {
 			$sel1 = "SELECTED";
 		}
-		
+
 		echo "<tr><th>".t("Summat").":</th>";
 		echo "<td><select name='valuutassako'>";
 		echo "<option value = ''>".t("Yrityksen valuutassa")."</option>";
@@ -120,10 +120,10 @@
 	}
 
 	if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
-		
+
 		$lisa = '';
 		$useindex = " use index (yhtio_tila_mapvm) ";
-		
+
 		if ($sanimi != '') {
 			$lisa .= " and lasku.nimi like '%$sanimi%' ";
 		}
@@ -131,14 +131,14 @@
 			$lisa .= " and lasku.ytunnus='$sytunnus' ";
 			$useindex = " use index (yhtio_tila_ytunnus_tapvm) ";
 		}
-		
+
 		if ($yli != 0) {
 			$having = " HAVING ll >= $yli ";
 		}
 		else {
 			$having = " HAVING ll > 0 ";
 		}
-		
+
 		if ($grouppaus == '1,2') {
 			$selecti = "lasku.ytunnus, lasku.nimi, group_concat(distinct lasku.liitostunnus) liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
 		}
@@ -161,11 +161,11 @@
 			$selecti = "lasku.ytunnus, lasku.nimi, lasku.liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
 			$grouppaus = "1,2,3";
 		}
-		
+
 		if ($savalkoodi != "") {
 			$salisa = " and lasku.valkoodi='$savalkoodi' ";
 		}
-		
+
 		if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
 			$summalisa = "	round(sum(summa_valuutassa-saldo_maksettu_valuutassa),2) ll,
 							sum(if(TO_DAYS(NOW())-TO_DAYS(erpcm) <= 0, summa_valuutassa-saldo_maksettu_valuutassa, 0)) aa,
@@ -218,28 +218,28 @@
 		$rivilask 	= 0;
 
 		if (mysql_num_rows($result) > 0) {
-		
-			if ($eiliittymaa != 'ON') {
-				if(include('Spreadsheet/Excel/Writer.php')) {
-			
-					//keksit‰‰n failille joku varmasti uniikki nimi:
-					list($usec, $sec) = explode(' ', microtime());
-					mt_srand((float) $sec + ((float) $usec * 100000));
-					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-			
-					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-					$worksheet =& $workbook->addWorksheet('Sheet 1');
-		
-					$format_bold =& $workbook->addFormat();
-					$format_bold->setBold();
-		
-					$excelrivi = 0;
-				}
+
+			if ($eiliittymaa != 'ON' and file_exists("Spreadsheet/Excel/Writer.php")) {
+
+				include('Spreadsheet/Excel/Writer.php');
+
+				//keksit‰‰n failille joku varmasti uniikki nimi:
+				list($usec, $sec) = explode(' ', microtime());
+				mt_srand((float) $sec + ((float) $usec * 100000));
+				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+				$worksheet =& $workbook->addWorksheet('Sheet 1');
+
+				$format_bold =& $workbook->addFormat();
+				$format_bold->setBold();
+
+				$excelrivi = 0;
 			}
 
 			if(isset($workbook)) {
 				$excelsarake = 0;
-			
+
 				$worksheet->write($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Nimi"), $format_bold);
@@ -263,7 +263,7 @@
 				$worksheet->write($excelrivi, $excelsarake, t("Yhteens‰"), $format_bold);
 				$excelsarake++;
 				$worksheet->write($excelrivi, $excelsarake, t("Luottoraja"), $format_bold);
-			
+
 				$excelsarake = 0;
 				$excelrivi++;
 			}
@@ -293,16 +293,16 @@
 				$asresult = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($asresult);
 
-				
+
 				if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
 					$suorilisa = " sum(summa) summa ";
 				}
 				else {
 					$suorilisa = " sum(round(summa*if(kurssi=0, 1, kurssi),2)) summa ";
 				}
-				
+
 				$query = "	SELECT
-							$suorilisa							
+							$suorilisa
 							FROM suoritus
 							WHERE yhtio='$kukarow[yhtio]'
 							and asiakas_tunnus in ($row[liitostunnus])
@@ -328,10 +328,10 @@
 					echo "<td valign='top' align='right'>".str_replace(".",",",$row["ll"])."</td>";
 					echo "<td valign='top' align='right'>".str_replace(".",",",$asrow["luottoraja"])."</td>";
 					echo "</tr>";
-				
+
 					if(isset($workbook)) {
 						$excelsarake = 0;
-					
+
 						$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["ytunnus"]));
 						$excelsarake++;
 						$worksheet->writeString($excelrivi, $excelsarake, str_replace("<br>","\n", $row["nimi"]));
@@ -355,7 +355,7 @@
 						$worksheet->writeNumber($excelrivi, $excelsarake, $row["ll"]);
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, $asrow["luottoraja"]);
-					
+
 						$excelsarake = 0;
 						$excelrivi++;
 					}
@@ -394,12 +394,12 @@
 			}
 
 			echo "</table>";
-			
+
 			if(isset($workbook)) {
-				
+
 				// We need to explicitly close the workbook
 				$workbook->close();
-				
+
 				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";

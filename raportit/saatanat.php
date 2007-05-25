@@ -33,7 +33,7 @@
 		echo "<tr><th>".t("Näytä vain ne joilla saatavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
 
 		echo "<tr>
-				<th>".t("Näytä vain ne laskut jotka on päivätty ennen").":</th>
+				<th>".t("Näytä tilanne").":</th>
 				<td valign='top'><input type='text' name='sappl' value='$sappl' size='3'><input type='text' name='sakkl' value='$sakkl' size='3'><input type='text' name='savvl' value='$savvl' size='5'></td>
 				</tr>";
 
@@ -136,7 +136,7 @@
 			$having = " HAVING ll >= $yli ";
 		}
 		else {
-			$having = " HAVING ll > 0 ";
+			$having = " HAVING ll != 0 ";
 		}
 
 		if ($grouppaus == '1,2') {
@@ -164,6 +164,9 @@
 
 		if ($savalkoodi != "") {
 			$salisa = " and lasku.valkoodi='$savalkoodi' ";
+		}
+		else {
+			$salisa = "";
 		}
 
 		if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
@@ -193,13 +196,12 @@
 					min(liitostunnus) litu
 					FROM lasku $useindex
 					WHERE tila	= 'U'
-					AND alatila	= 'X'
-					AND mapvm	= '0000-00-00'
-					AND erpcm  != '0000-00-00'
+					and alatila	= 'X'
+					and (lasku.mapvm > '$savvl-$sakkl-$sappl' or lasku.mapvm='0000-00-00')
 					and lasku.tapvm <= '$savvl-$sakkl-$sappl'
 					$lisa
 					$salisa
-					AND lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.yhtio = '$kukarow[yhtio]'
 					GROUP BY $grouppaus
 					$having
 					order by 1,2,3";
@@ -306,7 +308,8 @@
 							FROM suoritus
 							WHERE yhtio='$kukarow[yhtio]'
 							and asiakas_tunnus in ($row[liitostunnus])
-							and kohdpvm = '0000-00-00'";
+							and kohdpvm = '0000-00-00'
+							$salisa";
 				$suresult = mysql_query($query) or pupe_error($query);
 				$surow = mysql_fetch_array($suresult);
 
@@ -376,7 +379,37 @@
 					$rivilask++;
 				}
 			}
+			
+			//Listataan vielä kohdistamattomat
+			$query = "	SELECT asiakas.tunnus, asiakas.ytunnus, nimi_maksaja, viite, kirjpvm, '', '',  tiliointi.summa avoinsaldo, round(suoritus.summa*if(suoritus.kurssi=0, 1, kurssi),2)*-1 avoinsaldo2
+				  		FROM suoritus
+						JOIN tiliointi on tiliointi.tunnus = suoritus.ltunnus and tiliointi.tilino='$tili' and tiliointi.korjattu = ''
+				  		LEFT JOIN asiakas on suoritus.yhtio=asiakas.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus 
+				  		WHERE suoritus.yhtio = '$kukarow[yhtio]' 
+						and kirjpvm <= '$savvl-$sakkl-$sappl' 
+						and kohdpvm  = '0000-00-00'
+						$lisa2
+				  		ORDER BY ytunnus";
+			$result = mysql_query($query) or pupe_error($query);
 
+			while ($trow = mysql_fetch_array ($result)) {
+				
+					$summa += $trow["avoinsaldo"];
+
+					echo "<tr>";
+					echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
+					echo "<td>$trow[nimi_maksaja]</td>";
+					echo "<td>$trow[viite]</td>";
+					echo "<td>".tv1dateconv($trow["kirjpvm"])."</td>";
+					echo "<td></td>";
+					echo "<td></td>";
+					echo "<td align='right'><font class='error'>$trow[avoinsaldo]</font></td>";	
+					if ($trow["avoinsaldo"] != $trow["avoinsaldo2"]) echo "<td><font class='error'>/$trow[avoinsaldo2]</font></td><td class='back'> VIRHE: Kirjanpito/Suoritus! Summat heittävät!</td>";										
+					echo "</tr>";
+				
+			}
+			
+			
 			if ($eiliittymaa != 'ON' or $rivilask >= 1) {
 				echo "<tr>";
 				echo "<td valign='top' class='tumma' align='right' colspan='2'>".t("Yhteensä").":</th>";

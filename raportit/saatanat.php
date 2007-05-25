@@ -377,7 +377,7 @@
 				}
 			}
 
-			if ($eiliittymaa != 'ON' or $rivilask > 1) {
+			if ($eiliittymaa != 'ON' or $rivilask >= 1) {
 				echo "<tr>";
 				echo "<td valign='top' class='tumma' align='right' colspan='2'>".t("Yhteensä").":</th>";
 				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aay))."</td>";

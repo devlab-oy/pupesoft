@@ -1524,7 +1524,7 @@ if ($tee == '') {
 	if ($kukarow['extranet'] == '' and $kukarow['kassamyyja'] == '' and $laskurow['liitostunnus'] > 0 and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
 		$sytunnus = $laskurow['ytunnus'];
 		$eiliittymaa = 'ON';
-		require ("../raportit/saatanat.php");
+		//require ("../raportit/saatanat.php");
 
 		if ($ylikolkyt > 0) {
 			echo "<font class='error'>".t("HUOM!!!!!! Asiakkaalla on yli 30 p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan")."!!!!!<br></font>";

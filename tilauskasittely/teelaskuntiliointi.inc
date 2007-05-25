@@ -18,7 +18,7 @@ $query = "	SELECT tilausrivi.alv,
 			FROM tilausrivi
 			LEFT JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 			LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio and tuotteen_alv.tuoteno = tilausrivi.tuoteno and tuotteen_alv.maa = '$lasku[maa]' and tuotteen_alv.maa != '')
-			LEFT JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = tilausrivi.yhtio and yhtion_toimipaikat.vat_numero = '$lasku[ovttunnus]' and yhtion_toimipaikat.vat_numero != '')
+			LEFT JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = tilausrivi.yhtio and yhtion_toimipaikat.vat_numero = '$lasku[yhtio_ovttunnus]' and yhtion_toimipaikat.vat_numero != '')
 			WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
 			and tilausrivi.tyyppi		 = 'L'
 			and tilausrivi.yhtio		 = '$kukarow[yhtio]'

@@ -7,9 +7,9 @@ echo "<font class='head'>$yhtiorow[nimi] Extranet</font><hr>";
 if ($tee == '') {
 
 	if ($kukarow['saatavat'] <= 1) {
-		echo "<font class='head'>".t("Laskutilanne")."</font><hr>";
+//		echo "<font class='head'>".t("Laskutilanne")."</font><hr>";
 
-		$query =	"SELECT asiakas.ytunnus
+		$query = "	SELECT ytunnus
 					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]' LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
@@ -17,8 +17,9 @@ if ($tee == '') {
 
 		$sytunnus = $sytunnusrow['ytunnus'];
 		$eiliittymaa = 'ON';
+
 		require ("saatanat.php");
-		echo "<hr><br>";
+//		echo "<hr><br>";
 	}
 
 	echo "<table width='100%'>";
@@ -35,14 +36,14 @@ if ($tee == '') {
 	else {
 		$ehto = "kalenteri.yhtio='$kukarow[yhtio]'";
 	}
-	
+
 	if ($kukarow['kieli'] == $yhtiorow['kieli']) {
 		$lisa = " and (kalenteri.kieli = '$kukarow[kieli]' or kalenteri.kieli = '') ";
 	}
 	else {
 		$lisa = " and kalenteri.kieli = '$kukarow[kieli]' ";
 	}
-	
+
 	$query = "	select *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka

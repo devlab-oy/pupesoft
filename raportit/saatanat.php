@@ -29,7 +29,7 @@
 		echo "<form action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='tee' value='NAYTA'>";
 		echo "<tr><th>".t("Näytä vain tämä ytunnus").":</th><td valign='top'><input type='text' name='sytunnus' size ='15' value='$sytunnus'></td></tr>";
-		echo "<tr><th>".t("Näytä vain tämä nimi").":</th><td valign='top'><input type='text' name='nimi' size ='15' value='$nimi'></td></tr>";
+		echo "<tr><th>".t("Näytä vain tämä nimi").":</th><td valign='top'><input type='text' name='sanimi' size ='15' value='$sanimi'></td></tr>";
 		echo "<tr><th>".t("Näytä vain ne joilla saatavaa on yli").":</th><td valign='top'><input type='text' name='yli' size ='15' value='$yli'></td></tr>";
 
 		echo "<tr>
@@ -101,7 +101,6 @@
 
 		echo "</select></td></tr>";
 		
-		
 		$sel1 = '';
 		
 		if ($valuutassako == 'V') {
@@ -123,13 +122,16 @@
 	if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 		
 		$lisa = '';
-
-		if ($nimi != '') {
-			$lisa .= " and lasku.nimi like '%$nimi%' ";
+		$useindex = " use index (yhtio_tila_mapvm) ";
+		
+		if ($sanimi != '') {
+			$lisa .= " and lasku.nimi like '%$sanimi%' ";
 		}
 		if ($sytunnus != '') {
 			$lisa .= " and lasku.ytunnus='$sytunnus' ";
+			$useindex = " use index (yhtio_tila_ytunnus_tapvm) ";
 		}
+		
 		if ($yli != 0) {
 			$having = " HAVING ll >= $yli ";
 		}
@@ -157,8 +159,8 @@
 		}
 		else {
 			$selecti = "lasku.ytunnus, lasku.nimi, lasku.liitostunnus, group_concat(distinct lasku.toim_nimi separator '<br>') toim_nimi";
+			$grouppaus = "1,2,3";
 		}
-		
 		
 		if ($savalkoodi != "") {
 			$salisa = " and lasku.valkoodi='$savalkoodi' ";
@@ -189,7 +191,7 @@
 					$selecti,
 					$summalisa,
 					min(liitostunnus) litu
-					FROM lasku use index (yhtio_tila_mapvm)
+					FROM lasku $useindex
 					WHERE tila	= 'U'
 					AND alatila	= 'X'
 					AND mapvm	= '0000-00-00'
@@ -203,17 +205,17 @@
 					order by 1,2,3";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$aay = 0;
-		$aabby = 0;
-		$bby = 0;
-		$ccy = 0;
-		$ddy = 0;
-		$eey = 0;
-		$ffy = 0;
-		$kky = 0;
-		$lly = 0;
-		$ylikolkyt = 0;
-		$rivilask = 0;
+		$aay 		= 0;
+		$aabby 		= 0;
+		$bby 		= 0;
+		$ccy 		= 0;
+		$ddy 		= 0;
+		$eey 		= 0;
+		$ffy 		= 0;
+		$kky 		= 0;
+		$lly 		= 0;
+		$ylikolkyt 	= 0;
+		$rivilask 	= 0;
 
 		if (mysql_num_rows($result) > 0) {
 		
@@ -409,11 +411,9 @@
 			}
 
 		}
-		
 		elseif ($eiliittymaa != 'ON') {
 			echo "<br><br>".t("Ei saatavia!")."<br>";
 		}
-
 	}
 
 	if ($eiliittymaa != 'ON') {

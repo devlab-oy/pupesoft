@@ -104,7 +104,13 @@
 			<td>$vteksti</td>
 			<td>".str_replace(".",",",$laskurow['erikoisale'])."</td>
 			<td>".tv1dateconv($laskurow["toimaika"])."</td>";
-
+	
+	$dpdtun = ${$kukarow['yhtio'].'_dpdtun'};		
+	$dpdss 	= ${$kukarow['yhtio'].'_dpdss'};
+	
+	$possi = strpos(strtoupper($laskurow['toimitustapa']),"DPD");
+	
+	
 	// postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
 	if (strpos($rakirrow['rahtikirjanro'],"JFI")) {
 		$linkurl = "";
@@ -115,6 +121,46 @@
 		}
 
 		$linkurl = substr($linkurl,0,-4); // vika br pois
+	}
+	//luodaan dpd seurantalinkki
+	elseif ($possi !== FALSE and $rakirrow['rahtikirjanro'] != '' and $dpdtun != '' and $dpdss != '') {
+		$linkurl = "";
+		
+		for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {
+			$sscc = "";
+			
+			if (!function_exists('tarkiste')) {
+
+				function tarkiste($sscc) {
+
+					$kerroin = 3; // kerroin aluks 3
+					$summa   = 0; // summa nolla tietty
+
+					// loopataan luvut oikeelta vasemmalle
+					for ($i = 16; $i >= 0; $i--) { 
+						$summa += $kerroin * (ord($sscc{$i})-48); // lis‰t‰‰n summaan ko. luku * kerroin (t‰‰ hanskaa kirjaimet )
+						$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
+					}
+
+					$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mik‰ pit‰‰ lis‰t‰, ett‰ p‰‰st‰‰n seuraavaan tasakymmeneen
+
+					return $sscc;
+				}
+			}
+
+			$sscc = 1;
+			$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
+			$sscc .= sprintf('%06.06d', substr($rakirrow['rahtikirjanro'], -6));
+			$sscc .= sprintf('%02.02d', $dpdi);
+			$loppu = tarkiste($sscc);
+			$sscc = $sscc.$loppu;
+			
+			$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?&typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>DPD $sscc</a><br>";
+			
+		}
+
+		$linkurl = substr($linkurl,0,-4); // vika br pois
+		
 	}
 	else {
 		$linkurl = $rakirrow['rahtikirjanro'];

@@ -345,21 +345,21 @@ if (mysql_num_rows($result) > 0) {
 		echo "<tr>";
 		echo "<td><a href='../muutosite.php?tee=E&tunnus=$maksurow[tunnus]'>$maksurow[laskunro]</a></td>";
 	
-		echo "<td>".tv1dateconv($maksurow["tapvm"])."</td>";
-		echo "<td>".tv1dateconv($maksurow["erpcm"])."</td>";
+		echo "<td align='right'>".tv1dateconv($maksurow["tapvm"])."</td>";
+		echo "<td align='right'>".tv1dateconv($maksurow["erpcm"])."</td>";
 	
 		if ($maksurow["saldo_maksettu"] != 0 and $maksurow["mapvm"] == "0000-00-00") {
 			$maksurow["summa"] .= "*";
 		}
 		echo "<td align='right'>$maksurow[summa]</td>";
 	
-		if ($maksurow["kapvm"] != '0000-00-00') echo "<td>".tv1dateconv($maksurow["kapvm"])."</td>";
+		if ($maksurow["kapvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["kapvm"])."</td>";
 		else echo "<td></td>";
 	
 		if ($maksurow["kasumma"] != 0) echo "<td align='right'>$maksurow[kasumma]</td>";
 		else echo "<td></td>";
 	
-		if ($maksurow["mapvm"] != '0000-00-00') echo "<td>".tv1dateconv($maksurow["mapvm"])."</td>";
+		if ($maksurow["mapvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["mapvm"])."</td>";
 		else echo "<td></td>";
 	
 		echo "<td align='right'>$maksurow[ika]</td>";
@@ -367,7 +367,7 @@ if (mysql_num_rows($result) > 0) {
 		if ($maksurow["korko"] != 0) echo "<td align='right'>$maksurow[korko]</td>";
 		else echo "<td></td>";
 	
-		if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td>".tv1dateconv($maksurow["korkolaspvm"])."</td>";
+		if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["korkolaspvm"])."</td>";
 		else echo "<td></td>";
 
 		$summa+=$maksurow["summa"];

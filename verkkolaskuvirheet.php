@@ -70,61 +70,104 @@
 
 			echo "<table>";
 
-			for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {
+			for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {			
 				$nimi = "t[$i]";
-				$trow[$i] = $t[$i];					
-		
-				require "inc/$toim"."rivi.inc";
+
+				if (isset($t[$i])) {
+					$trow[$i] = $t[$i];
+				}
+
+				if 	(mysql_field_len($result,$i)>10) 	$size='35';
+				elseif	(mysql_field_len($result,$i)<5)	$size='5';
+				else	$size='10';
+
+		 		$maxsize = mysql_field_len($result,$i); // Jotta tätä voidaan muuttaa
+
+				require ("inc/$toim"."rivi.inc");
 
 				// Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
 				if (mysql_field_name($result, $i) == "laatija" or
-				mysql_field_name($result, $i) == "muutospvm" or
-				mysql_field_name($result, $i) == "muuttaja" or
-				mysql_field_name($result, $i) == "luontiaika") {
+					mysql_field_name($result, $i) == "muutospvm" or
+					mysql_field_name($result, $i) == "muuttaja" or
+					mysql_field_name($result, $i) == "luontiaika") {
 					$tyyppi = 2;
 				}
 				
-				if 	(mysql_field_len($result,$i)>10) $size='35';
-				elseif	(mysql_field_len($result,$i)<5)  $size='5';
-				else	$size='10';
-			 	echo "<tr>";
+				//Haetaan tietokantasarakkeen nimialias
+				$al_nimi   = mysql_field_name($result, $i);
 
-				if ($tyyppi > 0) {
-			 		echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='$toim.$al_nimi'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					if ($al_row["selitetark"] != '') {
+						$otsikko = t($al_row["selitetark"]);
+					}
+					else {
+						$otsikko = t(mysql_field_name($result, $i));
+					}
 				}
 				else {
-					echo "<td class='back'></td>";
+					$otsikko = t(mysql_field_name($result, $i));
+
+					if ($rajattu_nakyma != '') {
+	 					$ulos = "";
+	 					$tyyppi = 0;
+	 				}
+				}
+
+				// $tyyppi --> 0 riviä ei näytetä ollenkaan
+				// $tyyppi --> 1 rivi näytetään normaalisti
+				// $tyyppi --> 1.5 rivi näytetään normaalisti ja se on päivämääräkenttä
+				// $tyyppi --> 2 rivi näytetään, mutta sitä ei voida muokata, eikä sen arvoa pävitetä
+				// $tyyppi --> 3 rivi näytetään, mutta sitä ei voida muokata, mutta sen arvo päivitetään
+				// $tyyppi --> 4 riviä ei näytetä ollenkaan, mutta sen arvo päivitetään
+
+				if ($tyyppi > 0 and $tyyppi < 4) {
+					echo "<tr>";
+					echo "<th align='left'>$otsikko</th>";
 				}
 
 				if ($jatko == 0) {
 					echo $ulos;
 				}
-				else {
-					$mita = 'text';
-					
-					if ($tyyppi == "2") {
-						$mita='hidden';
-						echo "<td>";
-					}
-					elseif ($tyyppi != 1) {
-						$mita='hidden';
-						echo "<td class = 'back'>";
-					}
-					else {
-						echo "<td>";
-					}
+				elseif ($tyyppi == 1) {
+					echo "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
+				}
+				elseif ($tyyppi == 1.5) {
+					$vva = substr($trow[$i],0,4);
+					$kka = substr($trow[$i],5,2);
+					$ppa = substr($trow[$i],8,2);
 
-					echo "<input type = '$mita' name = '$nimi'
-						value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
-
-					if($tyyppi == 2) {
-						echo "$trow[$i]";
-					}
-
-					echo "</td>";
+					echo "<td>
+							<input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
+							<input type = 'text' name = 'tkk[$i]' value = '$kka' size='3' maxlength='2'>
+							<input type = 'text' name = 'tvv[$i]' value = '$vva' size='5' maxlength='4'></td>";
+				}
+				elseif ($tyyppi == 2) {
+					echo "<td>$trow[$i]</td>";
+				}
+				elseif($tyyppi == 3) {
+					echo "<td>$trow[$i]<input type = 'hidden' name = '$nimi' value = '$trow[$i]'></td>";
+				}
+				elseif($tyyppi == 4) {
+					echo "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>";
 				}
 
-				echo "<td class='back'><font class='error'>$virhe[$i]</font></td></tr>\n";
+				if (isset($virhe[$i])) {
+					echo "<td class='back'><font class='error'>$virhe[$i]</font></td>\n";
+				}
+
+				if ($tyyppi > 0 and $tyyppi < 4) {
+					echo "</tr>";
+				}
 			}
 			echo "</table>";
 			echo "<br><input type = 'submit' value = '".t("Perusta $toim")."'>";

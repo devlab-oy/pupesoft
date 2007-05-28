@@ -5,6 +5,13 @@
 	$poistetut='/home/jarmo/einv/hylatyt';
 	$vaarat="/home/jarmo/einv/error";
 	$oikeat="/home/jarmo/einv";
+	
+	if (isset($tunnus)) {
+		$toim='toimi';
+		$lopetus='verkkolaskuvirheet.php';
+		require ("yllapito.php");
+	}
+	
 	if (isset($tiedosto)) {
 		if ($tapa=='') {
 			$xmlstr=file_get_contents($vaarat."/".$tiedosto);
@@ -69,6 +76,14 @@
 		
 				require "inc/$toim"."rivi.inc";
 
+				// N‰it‰ kentti‰ ei ikin‰ saa p‰ivitt‰‰ k‰yttˆliittym‰st‰
+				if (mysql_field_name($result, $i) == "laatija" or
+				mysql_field_name($result, $i) == "muutospvm" or
+				mysql_field_name($result, $i) == "muuttaja" or
+				mysql_field_name($result, $i) == "luontiaika") {
+					$tyyppi = 2;
+				}
+				
 				if 	(mysql_field_len($result,$i)>10) $size='35';
 				elseif	(mysql_field_len($result,$i)<5)  $size='5';
 				else	$size='10';
@@ -193,9 +208,29 @@
 						$result = mysql_query($query) or die ("$query<br><br>".mysql_error());	
 						if (mysql_num_rows($result) == 1) $ok = 1;
 					}
-					if ($ok==0) echo "<form action='$PHP_SELF' method='post'>
+
+					//Olisiko toimittaja sittenkin jossain (v‰‰rin perustettu)
+					if ($ok == 0) {
+						$siivottu = utf8_decode($xresult[0]['eC080.3036.1']);
+						$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($siivottu));
+						$siivottu = preg_replace('/^\s*/', '', $siivottu);
+						$siivottu = preg_replace('/\s*$/', '', $siivottu);
+						$query = "SELECT tunnus,nimi FROM toimi WHERE yhtio='$yhtiorow[yhtio]' and nimi like '%$siivottu%'";
+						$lahellaresult = mysql_query($query) or die ("$query<br><br>".mysql_error());
+					}
+										
+					if ($ok == 0) {
+						if (mysql_num_rows($lahellaresult) > 0) {
+							echo "<form action='$PHP_SELF' method='post'><select name='tunnus'>";
+							while ($lahellarow=mysql_fetch_array($lahellaresult)) {
+								echo "<option value='$lahellarow[tunnus]'>$lahellarow[nimi]";
+							}
+							echo "</select><input type='submit' value ='P‰ivit‰ toimittaja'></form>";
+						}
+						echo "<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name= 'tiedosto' value ='$file'>
-						<input type='submit' value ='Perusta'></form>";
+						<input type='submit' value ='Perusta toimittaja'></form>";
+					}
 					else echo "<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name= 'tiedosto' value ='$file'>
 						<input type='hidden' name= 'tapa' value ='U'>

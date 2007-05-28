@@ -45,7 +45,7 @@ if ($tee == "paivita") {
 }
 
 if ($tee == "paivita") {
-	$query = "update lasku set mapvm='$savvl-$sakkl-$sappl', saldo_maksettu='$samaksettu', comments=concat(comments, ' $kukarow[kuka] korjasi ', now(), ' (korjaa_avoimia_myyntilaskuja).') where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+	$query = "update lasku set mapvm='$savvl-$sakkl-$sappl', saldo_maksettu='$samaksettu', comments=concat(comments, ' $kukarow[kuka] korjasi ', now(), ' saldo_maksettu: ".($saldomaksettu*1)." -> $samaksettu mapvm: $savvl-$sakkl-$sappl (korjaa_avoimia_myyntilaskuja).') where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 	echo "<font class='message'>Lasku $laskunro päivitetty!</font><br>";
 }
@@ -103,6 +103,7 @@ if ($ytunnus != "") {
 		echo "<input type='hidden' name='tee' value='paivita'>";
 		echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 		echo "<input type='hidden' name='summa' value='$row[summa]'>";
+		echo "<input type='hidden' name='saldomaksettu' value='$row[saldo_maksettu]'>";
 		echo "<input type='hidden' name='laskunro' value='$row[laskunro]'>";
 		echo "<input type='hidden' name='tappl' value='$tappl'>";
 		echo "<input type='hidden' name='takkl' value='$takkl'>";

@@ -104,7 +104,7 @@
 			ORDER BY tilino";
 	$result = mysql_query($query) or pupe_error($query);
 
-	echo "<font class='head'>".t("Vuosi")." $alvv $teksti</font>";
+	echo "<font class='message'>".t("Vuosi")." $alvv $teksti</font>";
 	echo "<table>";
 
 	echo "<tr><th>".t("taso")."</th><th>".t("tili")."</th><th>".t("nimi")."</th><th>".t("tammi")."</th><th>".t("helmi")."</th><th>".t("maalis")."</th><th>".t("huhti")."</th><th>".t("touko")."</th><th>".t("kesä")."</th><th>".t("heinä")."</th><th>".t("elo")."</th><th>".t("syys")."</th><th>".t("loka")."</th><th>".t("marras")."</th><th>".t("joulu")."</th></tr>";

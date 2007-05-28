@@ -2,7 +2,7 @@
 
 	if ($tee == '') { // Summaus hyväksynnässä olevista laskuista
 
-		echo "<font class='message'>".t("Laskuja hyväksymättä")."</font><hr>";
+		echo "<font class='head'>".t("Laskuja hyväksymättä")."</font><hr>";
 
 		$query = "SELECT hyvaksyja_nyt, if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi, concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys, min(erpcm) erpcm
 					FROM lasku
@@ -82,7 +82,7 @@
 			$trow=mysql_fetch_array ($result);
 		}
 
-		echo "<font class='message'>$trow[nimi]".t(":n pöydällä olevat laskut")."</font><hr>";
+		echo "<font class='head'>$trow[nimi]".t(":n pöydällä olevat laskut")."</font><hr>";
 
 		// Tehdään popup, jolla voidaan hyväksyjä myöhemmin vaihtaa
 		$query = "SELECT kuka, nimi

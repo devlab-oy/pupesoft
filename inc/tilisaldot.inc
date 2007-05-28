@@ -26,7 +26,7 @@
 			if (mysql_num_rows($vresult) == 1) {
 				$tilikausirow=mysql_fetch_array($vresult);
 				$lisa = "tapvm >= '$tilikausirow[tilikausi_alku]' and tapvm <= '$tilikausirow[tilikausi_loppu]'";
-				echo "<b>".t("Tilien saldot tilikaudelta")."  $tilikausirow[tilikausi_alku] - $tilikausirow[tilikausi_loppu]</b><hr>";
+				echo "<font class='head'>".t("Tilien saldot tilikaudelta")."  $tilikausirow[tilikausi_alku] - $tilikausirow[tilikausi_loppu]</font><hr>";
 			}
 			else {
 				echo "<font class='error'>Tuntematon tilikausi</font>";
@@ -44,7 +44,7 @@
 				if ($loppupvm <= $alkupvm)  //Kausi on tilikauden "etupuoella"
 					$loppupvm = substr($loppupvm,0,4) + 1 . substr($loppupvm,4,6);
 				
-				echo "<b>".t("Tilien saldot tilikauden alusta")." $alkupvm - $loppupvm</b><hr>";
+				echo "<font class='head'>".t("Tilien saldot tilikauden alusta")." $alkupvm - $loppupvm</font><hr>";
 				
 				$lisa = "tapvm >= '$alkupvm' and tapvm < '$loppupvm'";
 			}
@@ -58,7 +58,7 @@
 					$alkupvm = substr($alkupvm,0,4) + 1 . substr($alkupvm,4,6);
 					$loppupvm = substr($loppupvm,0,4) + 1 . substr($loppupvm,4,6);
 				}
-				echo "<b>". t("Tilien saldot kaudelta") . " ". substr($alkupvm,0,7) ."</b><hr>";
+				echo "<font class='head'>". t("Tilien saldot kaudelta") . " ". substr($alkupvm,0,7) ."</font><hr>";
 				
 				$lisa = "tapvm >= '$alkupvm' and tapvm < '$loppupvm'";
 			}
@@ -122,6 +122,9 @@
 		echo "</table><br>";
 	}
 	if ($tee == '') { // N‰ytet‰‰n valikko
+		
+		echo "<font class='head'>". t("Tilien saldot")."</font><hr>";
+		
 		echo "<form action = 'raportit.php' method='post'>
 				<input type = 'hidden' name = 'toim' value = 'tilisaldot'>
 				<input type = 'hidden' name = 'tee' value = '1'>
@@ -136,7 +139,7 @@
 		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[tunnus]) {
+			if ($trow[$i] == $vrow["tunnus"]) {
 				$sel = "selected";
 			}
 			echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";

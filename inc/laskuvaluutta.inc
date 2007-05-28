@@ -1,5 +1,5 @@
 <?php
-	echo "<b>".t("Laskut per valuutta")."</b><hr>";
+	echo "<font class='head'>".t("Laskut per valuutta")."</font><hr>";
 	
 	$query = "	SELECT valkoodi, sum(summa) summa, sum(summa * valuu.kurssi) kotisumma, count(*) kpl
 		  		FROM lasku

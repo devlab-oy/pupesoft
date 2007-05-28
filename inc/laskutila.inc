@@ -1,5 +1,6 @@
 <?php
-	echo "<font class='message'>".t("Laskut per tila")."</font><hr>";
+	echo "<font class='head'>".t("Laskut per tila")."</font><hr>";
+	
 	flush();
 
 	$query = "	SELECT tila, alatila, round(sum(summa * valuu.kurssi),2) summa, count(*) kpl

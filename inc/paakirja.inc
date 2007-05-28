@@ -1,6 +1,6 @@
 <?php
 	if ($tee == '') {
-		echo "<b>".t("P‰‰- ja p‰iv‰kirja")."</b><hr>
+		echo "<font class='head'>".t("P‰‰- ja p‰iv‰kirja")."</font><hr>
 				<form name = 'valinta' action = 'raportit.php' method='post'>
 				<input type = 'hidden' name = 'toim' value = 'paakirja'>
 				<table><tr>
@@ -194,23 +194,23 @@
 	}
 
 	if ($tkausi != '0') {
-        echo "<font class='message'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><hr>";
+        echo "<font class='head'>$nimi ".t("tilikaudelta")." $tilikaudetrow[tilikausi_alku] - $tilikaudetrow[tilikausi_loppu]</font><hr>";
 		$lisa  = "tiliointi.tapvm <= '$tilikaudetrow[tilikausi_loppu]' and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'";
 		$lisa2 = "tiliointi.tapvm < '$tilikaudetrow[tilikausi_alku]'"; //hassua hassua
 	}
 	elseif ($alvk == '0') {
-		echo "<font class='message'>$nimi ".t("kalenterivuodelta")." $alvv</font><hr>";
+		echo "<font class='head'>$nimi ".t("kalenterivuodelta")." $alvv</font><hr>";
 		$lisa  = "YEAR(tiliointi.tapvm) = '$alvv'";
 		$apualvv = $alvv + 1;
 		$lisa2 = "tiliointi.tapvm < '$apualvv-01-01'";
 	}
 	elseif ($alvp == '0') {
-		echo "<font class='message'>$nimi ".t("kaudelta")." $alvv-$alvk</font><hr>";
+		echo "<font class='head'>$nimi ".t("kaudelta")." $alvv-$alvk</font><hr>";
 		$lisa  = "CONCAT_WS(' ',YEAR(tiliointi.tapvm),MONTH(tiliointi.tapvm)) = '$alvv $alvk'";
 		$lisa2 = "tiliointi.tapvm < '$alvv-$alvk-01'";
 	}
 	else {
-		echo "<font class='message'>$nimi ".t("p‰iv‰lt‰")." $alvv-$alvk-$alvp</font><hr>";
+		echo "<font class='head'>$nimi ".t("p‰iv‰lt‰")." $alvv-$alvk-$alvp</font><hr>";
 		$lisa  = "tiliointi.tapvm = '$alvv-$alvk-$alvp'";
 		$lisa2 = "tiliointi.tapvm < '$alvv-$alvk-$alvp'";
 	}

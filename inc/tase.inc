@@ -43,7 +43,7 @@
 		echo "</tr>";
 	}
 
-    echo "<font class='message'>".t("Tase/tuloslaskelma")."</font><hr>";
+    echo "<font class='head'>".t("Tase/tuloslaskelma")."</font><hr>";
 
     if ($tee == 'aja') {
     	if (($plvv == 0 and $plvk != 0) or ($plvv != 0 and $plvk == 0)) {

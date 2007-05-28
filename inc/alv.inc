@@ -1,7 +1,8 @@
 <?php
 	if ($tee == '') {
-			echo "<b>".t("Arvonlisäverolaskelma")."</b><hr>";
-	        echo "<form action = 'raportit.php' method='post'>
+			echo "<font class='head'>".t("Arvonlisäverolaskelma")."</font><hr>";
+	        
+			echo "<form action = 'raportit.php' method='post'>
 					<input type = 'hidden' name = 'toim' value = 'alv'>
 					<input type = 'hidden' name = 'tee' value = '1'>
 					<table><tr>
@@ -80,7 +81,7 @@
 		}
 		$alloppu = $lovv . "-" . $lokk . "-01";
 		
-		echo "<b>".t("Arvonlisäverolaskelma kaudelta")." $alvv-$alvk</b><hr>";
+		echo "<font class='head'>".t("Arvonlisäverolaskelma kaudelta")." $alvv-$alvk</font><hr>";
 		
 		if ($ruotsi != 'on') {
 			$query = "SELECT if(lasku.tila='U','".t("myyntireskontra")."', if(lasku.tila='X','".t("muu")."','".t("ostoreskontra")."')) tyyppi, vero,
@@ -234,7 +235,7 @@
 	}
 
 	if ($tee == '2') {
-		echo "<b>".t("Alv-tarkistus kaudelta")." $alvv-$alvk</b><hr>";
+		echo "<font class='head'>".t("Alv-tarkistus kaudelta")." $alvv-$alvk</font><hr>";
 		echo "".t("Tarkistetaan automaattiviennit")."<br>";
 		$query = "SELECT tunnus, ltunnus, tapvm, summa, selite, round(summa * vero / 100 ,2) Verot
 					FROM tiliointi
@@ -269,7 +270,7 @@
 			else {
 				$xrow=mysql_fetch_array ($xresult);
 
-				$heitto = $xrow[summa] - $trow[Verot];
+				$heitto = $xrow["summa"] - $trow["Verot"];
 				$heitto = abs($heitto);
 
 				if ($heitto > 0.02) {

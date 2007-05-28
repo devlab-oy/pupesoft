@@ -1,4 +1,6 @@
 <?php
+	
+	echo "<font class='head'>".t("Laskut per eräpvm")."</font><hr>";
 
 	$sel1 = $sel2 = $sel3 = "";
 	
@@ -26,8 +28,7 @@
 			</tr></table></form><br>";
 
 
-	if ($aika != '') {
-		echo "<b>".t("Laskut per eräpvm")."</b><hr>";
+	if ($aika != '') {		
 	
 		if ($aika == 'pv') {
 			$tapa = 'erpcm';

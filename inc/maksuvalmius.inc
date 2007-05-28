@@ -1,5 +1,5 @@
 <?php
-	echo "<b>".t("Maksuvalmius")."</b><hr>";
+	echo "<font class='head'>".t("Maksuvalmius")."</font><hr>";
 	
 	$sel1 = $sel2 = $sel3 = $sel4 = "";
 	

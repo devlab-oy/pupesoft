@@ -1,4 +1,7 @@
 <?php
+
+	echo "<font class='head'>".t("Toimittajan laskut")."</font><hr>";
+	
 	if ($tee == 'A') { // Näytetään toimittajan laskuja
 
 		//Jos käytetään $tunnusta niin käytetään liitostunnusta
@@ -283,7 +286,9 @@
 	if ($tee == '') {
 		echo "<form name = 'valinta' action = 'raportit.php' method='post'>
 				<input type='hidden' name='toim' value='toimittajahaku'>
-				<td>".t("Valitse toimittaja")."</td>
+				<table>
+				<tr>
+				<th>".t("Valitse toimittaja")."</th>
 				<td><input type = 'text' name = 'nimi'></td>
 				<td><select name='tee'>
 				<option value = 'N'>".t("Toimittajan nimi")."
@@ -291,7 +296,7 @@
 				<option value = 'Y'>".t("Y-tunnus")."
 				</select>
 				</td>
-				<td><input type = 'submit' value = '".t("Valitse")."'></td>
+				<td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>
 				</tr></table></form>";
 				
 		$formi = 'valinta';

@@ -1,5 +1,7 @@
 <?php
 
+echo "<font class='head'>".t("Laskuhaku")."</font><hr>";
+
 if (isset($tee) and $summa1 == "" and $pvm == "") {
 	echo "<font class='error'>".t("Anna jokin hakukriteeri")."</font><br>";
 	unset($tee);
@@ -151,8 +153,11 @@ if ($tee != '') {
 	else {
 		echo t("Edelliset")." ";
 	}
-	$siirry = $alku + 20;
-	echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila'>".t("Seuraavat")."</a> ";
+	
+	if (mysql_num_rows($result) > 20) {
+		$siirry = $alku + 20;
+		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila'>".t("Seuraavat")."</a> ";
+	}
 	echo "<br><br>";
 
 	$toim="";

@@ -16,7 +16,7 @@
 	}
 	
 	//	Nämä tuotteet ovat Kielletty viranomaistuotteilla
-	if(!in_array($tuotetyyppi, array("A","B","C","D","E"))
+	if(!in_array($tuotetyyppi, array("A","B"))
 				or mysql_field_name($result, $i) == "nimitys"
 	 			or mysql_field_name($result, $i) == "tilino"
 				or mysql_field_name($result, $i) == "tilino_eu"
@@ -28,7 +28,7 @@
 				or mysql_field_name($result, $i) == "kehahin") {
 		
 		//	Vähän speciaali featureita viranomaistuotteille
-		if (mysql_field_name($result, $i) == "nimitys" and in_array($tuotetyyppi, array("A","B","C","D","E"))) {
+		if (mysql_field_name($result, $i) == "nimitys" and in_array($tuotetyyppi, array("A","B"))) {
 			$tyyppi = 3;
 		}
 		
@@ -49,18 +49,13 @@
 				if($trow[$i]=='K') $selk="SELECTED";
 				if($trow[$i]=='A') $sela="SELECTED";
 				if($trow[$i]=='B') $selb="SELECTED";
-				if($trow[$i]=='C') $selc="SELECTED";
-				if($trow[$i]=='D') $seld="SELECTED";												
 
 				$ulos .= "<option value='' $selv>".t("Valmiste")."</option>";
 				//$ulos .= "<option value='P' $selp>".t("Puolivalmiste")."</option>";
 				$ulos .= "<option value='R' $selr>".t("Raaka-aine")."</option>";
 				$ulos .= "<option value='K' $selk>".t("Palvelu")."</option>";
-				$ulos .= "<option value='A' $sela>".t("Viranomaistuote - Kotimaan päiväraha")."</option>";
-				$ulos .= "<option value='B' $selb>".t("Viranomaistuote - Ulkomaan päiväraha")."</option>";
-				$ulos .= "<option value='C' $selc>".t("Viranomaistuote - Kilometrikorvaus")."</option>";
-				$ulos .= "<option value='D' $seld>".t("Viranomaistuote - Muu korvaus")."</option>";
-				$ulos .= "<option value='E' $selc>".t("Viranomaistuote - Puolipäiväraha")."</option>";				
+				$ulos .= "<option value='A' $sela>".t("Viranomaistuote - Päiväraha")."</option>";
+				$ulos .= "<option value='B' $selb>".t("Viranomaistuote - Muu kulu")."</option>";
 
 				$ulos .= "</select></td>";
 			}

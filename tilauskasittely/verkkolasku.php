@@ -984,6 +984,33 @@
 							$tilrow['kommentti'] 	= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+()%]", " ", $tilrow['kommentti']);
 							$tilrow['nimitys'] 		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+()%]", " ", $tilrow['nimitys']);
 
+							if ($tilrow["alv"] >= 500) { //K‰ytetyn tavaran myynti
+								$tilrow["alv"] = 0;
+								$tilrow["kommentti"] .= "|Ei sis‰ll‰ v‰hennett‰v‰‰ veroa.";
+							}
+							//Hetaan sarjanumeron tiedot
+							if ($tilrow["kpl"]+$tilrow["varattu"] > 0){
+								$sarjanutunnus = "myyntirivitunnus";
+							}
+							else {
+								$sarjanutunnus = "ostorivitunnus";
+							}
+
+							$query = "	select *
+										from sarjanumeroseuranta
+										where yhtio = '$kukarow[yhtio]'
+										and tuoteno = '$tilrow[tuoteno]'
+										and $sarjanutunnus='$tilrow[tunnus]'
+										and sarjanumero != ''";
+							$sarjares = mysql_query($query) or pupe_error($query);
+
+							if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
+								$tilrow["kommentti"] .= "|";
+							}
+							while($sarjarow = mysql_fetch_array($sarjares)) {
+								$tilrow["kommentti"] .= "# $sarjarow[sarjanumero]|";
+							}
+
 							if ($lasrow["chn"] == "111") {
 								elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 							}
@@ -991,6 +1018,7 @@
 								finvoice_rivi($tootfinvoice, $tilrow, $lasrow, $vatamount, $totalvat);
 							}
 							else {
+								$tilrow["kommentti"]= str_replace("|"," ",$tilrow["kommentti"]); //Poistetaan pipet. Itella ei niist‰ t‰‰ll‰ selvi‰
 								pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat);
 							}
 							$rivinumero++;

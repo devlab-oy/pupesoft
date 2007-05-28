@@ -323,8 +323,12 @@ if (!function_exists('finvoice_rivi')) {
 			if($tilrow["tilaajanrivinro"] != 0) {
 				xml_add("RowIdentifier",                                    			$tilrow['tilaajanrivinro'], 	$tootfinvoice); // tänne laitetaan asiakkaan rivinumero, niin saavat parseroida senkin laskuista
 			}
-			if ($tilrow['kommentti']!='') {
-				xml_add("RowFreeText",    												$tilrow['kommentti'],			$tootfinvoice);
+			
+			if (trim($row["kommentti"]) != '') {
+				$kommentit = explode("|", trim($row["kommentti"]));
+				foreach($kommentit as $kommentti) {
+					xml_add("RowFreeText",												$kommentti,		 				$tootfinvoice);
+				}
 			}
 
 			xml_add("RowVatRatePercent",                                    			pp($tilrow['alv']),           	$tootfinvoice);

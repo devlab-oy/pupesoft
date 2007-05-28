@@ -276,6 +276,10 @@ if (!function_exists('finvoice_alvierittely')) {
 			xml_add("VatBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow[1]), 				$tootfinvoice);
 			xml_add("VatRatePercent",												pp($alvrow[0]), 				$tootfinvoice);
 			xml_add("VatRateAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow[2]), 				$tootfinvoice);
+			if($lasrow["sisviesti1"]!="") {
+				xml_add("InvoiceFreeText",											trim(str_replace("|", " ", $lasrow["sisviesti1"])), 				$tootfinvoice);			
+			}
+			
 			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
 		}
 	}
@@ -353,6 +357,27 @@ if (!function_exists('finvoice_lasku_loppu')) {
 		}
 
 		if($err_finvoice == 0) {
+			
+			if ($masrow["factoring"] != '') {
+				// jos factoroidaan tulostaan eri kentät
+				$query = "	SELECT *
+							FROM factoring
+							WHERE yhtio 		= '$kukarow[yhtio]'
+							and factoringyhtio 	= '$masrow[factoring]'
+							and valkoodi 		= '$laskurow[valkoodi]'";
+				$fres = mysql_query($query) or pupe_error($query);
+				$frow = mysql_fetch_array($fres);
+
+				$EpiBfiIdentifier 		= $frow["pankkiswift1"];
+				$EpiNameAddressDetails	= $frow["pankkinimi1"];
+				$EpiAccountID			= $frow["pankkiiban1"];
+			}
+			else {
+				$EpiBfiIdentifier 		= $yhtiorow['pankkiswift1'];
+				$EpiNameAddressDetails	= $yhtiorow['nimi'];
+				$EpiAccountID			= $yhtiorow['pankkitili1'];
+			}
+		    
 			fputs($tootfinvoice, "<EpiDetails>\r\n");
 
 			fputs($tootfinvoice, "<EpiIdentificationDetails>\r\n");
@@ -363,20 +388,20 @@ if (!function_exists('finvoice_lasku_loppu')) {
 			fputs($tootfinvoice, "<EpiPartyDetails>\r\n");
 
 			fputs($tootfinvoice, "<EpiBfiPartyDetails>\r\n");
-			xml_add('EpiBfiIdentifier IdentificationSchemeName="BIC"',						$yhtiorow['pankkiswift1'],			$tootfinvoice);
+			xml_add('EpiBfiIdentifier IdentificationSchemeName="BIC"',						$EpiBfiIdentifier,					$tootfinvoice);
 			fputs($tootfinvoice, "</EpiBfiPartyDetails>\r\n");
 
 			fputs($tootfinvoice, "<EpiBeneficiaryPartyDetails>\r\n");
-			xml_add("EpiNameAddressDetails",    											$yhtiorow['nimi'],					$tootfinvoice);
-			xml_add("EpiBei",                         										ymuuta($yhtiorow['ytunnus']),  		$tootfinvoice);
-			xml_add("EpiAccountID IdentificationSchemeName=\"BBAN\"",						$yhtiorow['pankkitili1'],			$tootfinvoice);
+			xml_add("EpiNameAddressDetails",    											$EpiNameAddressDetails,				$tootfinvoice);
+			xml_add("EpiBei",                         										ymuuta($yhtiorow['ytunnus']),		$tootfinvoice);
+			xml_add("EpiAccountID IdentificationSchemeName=\"BBAN\"",						$EpiAccountID,						$tootfinvoice);
 			fputs($tootfinvoice, "</EpiBeneficiaryPartyDetails>\r\n");
 
 			fputs($tootfinvoice, "</EpiPartyDetails>\r\n");
 
 			fputs($tootfinvoice, "<EpiPaymentInstructionDetails>\r\n");
 			xml_add("EpiRemittanceInfoIdentifier IdentificationSchemeName=\"SPY\"",			spyconv($lasrow['viite']),    		$tootfinvoice);
-			xml_add("EpiInstructedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", pp($lasrow['summa']),         		$tootfinvoice);
+			xml_add("EpiInstructedAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"", 	pp($lasrow['summa']),         		$tootfinvoice);
 			xml_add("EpiCharge ChargeOption=\"SHA\"", 										"SHA",								$tootfinvoice);
 			xml_add('EpiDateOptionDate Format="CCYYMMDD"',                					vlas_dateconv($lasrow['erpcm']),	$tootfinvoice);
 			fputs($tootfinvoice, "</EpiPaymentInstructionDetails>\r\n");

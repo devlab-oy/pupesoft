@@ -147,6 +147,13 @@
 						$tuoteno 		= $tilrivirow["tuoteno"];
 						$tee			= "UV";
 						$varastopaikka  = $tilrivirow["paikka"];
+						
+						if ($perutamakorj[$rivitunnus] != "") {
+							$perutaan = "JOO";
+						}
+						else {
+							$perutaan = "";
+						}
 
 						require ("korjaa_valmistus.inc");
 					}
@@ -488,7 +495,7 @@
 					<input type='hidden' name='edtilkpllat[$prow[tunnus]]'  value='$prow[korjataan]'>
 					<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[korjataan]'>
 					</td>";
-				echo "<td class='$class'>$prow[valmistettu_valmiiksi]</td>";
+				echo "<td class='$class' align='right'>$prow[valmistettu_valmiiksi]</td>";
 			}
 			elseif ($prow["tyyppi"] == 'L' or $prow["tyyppi"] == 'D' or $prow["perheid"] == 0) {
 				echo "<td class='$class' align='right'></td>";
@@ -545,7 +552,11 @@
 				$sumrow = mysql_fetch_array($sumres);
 
 				if ($sumrow["valmistetut"] != 0) {
-					echo "<td class='back'><input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$sumrow[valmistetut]'></td><td class='back'>".$virhe[$prow["tunnus"]]."</td>";
+					echo "<td><input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$sumrow[valmistetut]'>";
+					
+					echo "<input type='checkbox' name='perutamakorj[$prow[tunnus]]' value='$prow[tunnus]'> Peru tämä valmistus.</td>";
+					echo "<td class='back'>".$virhe[$prow["tunnus"]]."</td>";					
+					
 					$voikokorjata++;
 				}
 				else {

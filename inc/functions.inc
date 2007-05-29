@@ -15,7 +15,7 @@ if (!function_exists("pupe_error")) {
 		$query = ereg_replace("  +", " ", $query);
 
 		// tehd‰‰n errorimessage
-		$puperror = "File: $_SERVER[PHP_SELF]\nUser: $kukarow[kuka]\n\n$query\n\n".mysql_error();
+		$puperror = "File: ".__FILE__."\nUser: $kukarow[kuka]\n\n$query\n\n".mysql_error();
 
 		// l‰hetet‰‰n se meilitse adminille
 		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: $yhtiorow[postittaja_email]\r\n", "-f $yhtiorow[postittaja_email]");

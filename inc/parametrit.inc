@@ -4,6 +4,9 @@
 $serc = array("\"","'","<",">","\\", ";");
 $repl = array("", "", "", "", "", "");
 
+// otetaan includepath aina rootista
+ini_set("include_path", dirname(dirname(__FILE__)));
+
 foreach ($_GET as $key => $value) {
 	//$_GET[$key] = addslashes(trim($_GET[$key]));
 	$_GET[$key] = str_replace($serc, $repl, $_GET[$key]);

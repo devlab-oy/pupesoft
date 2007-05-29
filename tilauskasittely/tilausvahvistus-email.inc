@@ -104,10 +104,10 @@ if ($virexx == 0) {
 			}
 
 			if ($naytatvale==2) {
-				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['myyntihinta'])." ";
+				$ulos .= sprintf("%8.s"  ,round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),2))." ";
 			}
 			else {
-				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['hinta'])." ";
+				$ulos .= sprintf("%8.s"  ,round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),2))." ";
 			}
 
 			$ulos .= sprintf("%3.s"  	,$laskurow['valkoodi'])." ";
@@ -133,10 +133,10 @@ if ($virexx == 0) {
 			$liite .= $rivino."\t".$tvtilausrivirow['nimitys']."\t".$tvtilausrivirow['tuoteno']."\t".$tvtilausrivirow['varattu']."\t";
 
 			if ($naytatvale==2) {
-				$liite .= $tvtilausrivirow['myyntihinta']."\t";
+				$liite .= round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),2)."\t";
 			}
 			else {
-				$liite .= $tvtilausrivirow['hinta']."\t";
+				$liite .= round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),2)."\t";
 			}
 
 			if ($naytatvale==2) {

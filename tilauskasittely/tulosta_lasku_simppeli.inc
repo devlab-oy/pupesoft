@@ -149,7 +149,7 @@ if (!function_exists('tulosta_lasku')) {
 					$h-=$pdf->ln(0.5);
 
 					//	Sitten yhteyshenkilöitä
-					foreach(array("asiakkaan_viite", "lisätiedot", "toimittajan_yhteyshenkilö", "asiakkaan_yhteyshenkilö", "asiakkaan_kaupallinen_käsittelijä") as $key) {
+					foreach(array("asiakkaan_viite", "toimittajan_yhteyshenkilö", "asiakkaan_yhteyshenkilö", "asiakkaan_kaupallinen_käsittelijä") as $key) {
 						if($laskurow[$key] != "" or $key == "asiakkaan_viite") {
 							$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 							$h-=$pdf->ln();					
@@ -500,7 +500,22 @@ if (!function_exists('tulosta_lasku')) {
 			$laskusumma=$laskurow["summa"];			
 		}
 		$h-=$pdf->ln(4);
-				
+		
+		
+		// dynamiikkaa
+		if($h < 35) {
+			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
+		}
+
+		if($laskurow["sisviesti1"] != "") {
+			//	Maksusopimus
+			$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
+			$h-=$pdf->ln(1.25);
+			$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm")+2;
+			$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
+			$h-=$pdf->ln($nb);					
+		}
+			
 		if($h < 35) {
 			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
 		}

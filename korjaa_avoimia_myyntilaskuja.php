@@ -38,8 +38,8 @@ if ($tee == "paivita") {
 
 	if ($error == 1) {
 		$tee = "";
-		$laskunro--;
-		$ytunnus--;
+		// otetaan sama lasku takasin käsitteyyn
+		array_unshift($tunnukset, $tunnus);
 	}
 
 }
@@ -47,7 +47,34 @@ if ($tee == "paivita") {
 if ($tee == "paivita") {
 	$query = "update lasku set mapvm='$savvl-$sakkl-$sappl', saldo_maksettu='$samaksettu', comments=concat(comments, ' $kukarow[kuka] korjasi ', now(), ' saldo_maksettu: ".($saldomaksettu*1)." -> $samaksettu mapvm: $savvl-$sakkl-$sappl (korjaa_avoimia_myyntilaskuja).') where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
-	echo "<font class='message'>Lasku $laskunro päivitetty!</font><br>";
+	
+	if (mysql_affected_rows() == 1) {
+		echo "<font class='message'>Lasku $laskunro päivitetty! Alla vielä uudestaan lasku päivitettynä!</font><br>";
+		// otetaan sama lasku takasin käsitteyyn
+		array_unshift($tunnukset, $tunnus);	
+	}
+}
+
+if ($tee == "aloita") {
+	// haetaan käsiteltävät laskut
+	$query = "	SELECT *, summa-saldo_maksettu maksamatta
+				FROM lasku use index (yhtio_tila_mapvm)
+				WHERE tila = 'u' and
+				alatila	= 'x' and
+				mapvm = '0000-00-00' and
+				erpcm != '0000-00-00' and
+				tapvm <= '$tavvl-$takkl-$tappl' and
+				yhtio = '$kukarow[yhtio]' and
+				ytunnus + 0 >= '$ytunnus'
+				HAVING maksamatta != 0
+				ORDER BY ytunnus + 0, laskunro";
+	$result = mysql_query($query) or pupe_error($query);
+
+	$tunnukset = array();
+
+	while ($row = mysql_fetch_array($result)) {
+		$tunnukset[] = $row["tunnus"];
+	}
 }
 
 if ($ytunnus != "") {
@@ -60,11 +87,9 @@ if ($ytunnus != "") {
 				erpcm != '0000-00-00' and
 				tapvm <= '$tavvl-$takkl-$tappl' and
 				yhtio = '$kukarow[yhtio]' and
-				ytunnus + 0 > '$ytunnus' and
-				laskunro > '$laskunro'
-				HAVING maksamatta > 0
-				ORDER BY ytunnus + 0, laskunro
-				LIMIT 1";
+				tunnus = '$tunnukset[0]'
+				HAVING maksamatta != 0
+				ORDER BY ytunnus + 0, laskunro";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
@@ -99,7 +124,8 @@ if ($ytunnus != "") {
 		echo "<br>";
 
 		echo "<form action='$PHP_SELF' method='post' name='kala'>";
-		echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
+		echo "<input type='hidden' name='edytunnus' value='$ytunnus'>";
+		echo "<input type='hidden' name='ytunnus' value='$row[ytunnus]'>";
 		echo "<input type='hidden' name='tee' value='paivita'>";
 		echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 		echo "<input type='hidden' name='summa' value='$row[summa]'>";
@@ -108,6 +134,12 @@ if ($ytunnus != "") {
 		echo "<input type='hidden' name='tappl' value='$tappl'>";
 		echo "<input type='hidden' name='takkl' value='$takkl'>";
 		echo "<input type='hidden' name='tavvl' value='$tavvl'>";
+
+		unset($tunnukset[0]);
+
+		foreach($tunnukset as $tunnus) {
+			echo "<input type='hidden' name='tunnukset[]' value='$tunnus'>";
+		}
 
 		if ($row["saldo_maksettu"] == 0) $row["saldo_maksettu"] = "";
 
@@ -118,6 +150,8 @@ if ($ytunnus != "") {
 
 		echo "</form>";
 
+		echo "<br><font class='message'>".count($tunnukset). " laskua to go...</font><br>";
+
 		$formi = "kala";
 		$kentta = "samaksettu";
 	}
@@ -126,10 +160,10 @@ if ($ytunnus != "") {
 else {
 
 	echo "<form action='$PHP_SELF' method='post' name='kala'>";
-	echo "<input type='hidden' name='tee' value=''>";
+	echo "<input type='hidden' name='tee' value='aloita'>";
 	echo "<table>";
 	echo "<tr><th>Aloita ytunnuksesta:</th><td valign='top'><input type='text' name='ytunnus' size ='15'></td></tr>";
-	echo "<tr><th>Tapvm takaraja ppkkvv</th><td valign='top'><input type='text' name='tappl' size='3' value='01'><input type='text' name='takkl' size='3' value='10'><input type='text' name='tavvl' size='5' value='2007'></td><td><input type='submit' value='go'></td></tr>";
+	echo "<tr><th>Tapvm takaraja ppkkvv</th><td valign='top'><input type='text' name='tappl' size='3' value='13'><input type='text' name='takkl' size='3' value='11'><input type='text' name='tavvl' size='5' value='2006'></td><td><input type='submit' value='go'></td></tr>";
 	echo "</table>";
 	echo "</form>";
 

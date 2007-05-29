@@ -27,7 +27,7 @@ if ($tee == "paivita") {
 
 	$samaksettu = (float) str_replace(",", ".", $samaksettu);
 
-	if ($samaksettu >= $summa and $sappl == "" and $sakkl == "" and $savvl == "") {
+	if (abs($samaksettu) >= abs($summa) and $sappl == "" and $sakkl == "" and $savvl == "") {
 		echo "<font class='error'>lasku kokonaan maksettu, merkkaa mapvm!</font><br>";
 		$error = 1;
 	}
@@ -80,16 +80,11 @@ if ($tee == "aloita") {
 if ($ytunnus != "") {
 
 	$query = "	SELECT *, summa-saldo_maksettu maksamatta
-				FROM lasku use index (yhtio_tila_mapvm)
+				FROM lasku use index (PRIMARY)
 				WHERE tila = 'u' and
 				alatila	= 'x' and
-				mapvm = '0000-00-00' and
-				erpcm != '0000-00-00' and
-				tapvm <= '$tavvl-$takkl-$tappl' and
 				yhtio = '$kukarow[yhtio]' and
-				tunnus = '$tunnukset[0]'
-				HAVING maksamatta != 0
-				ORDER BY ytunnus + 0, laskunro";
+				tunnus = '$tunnukset[0]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
@@ -145,13 +140,37 @@ if ($ytunnus != "") {
 
 		echo "<table>";
 		echo "<tr><th>Saldo maksettu</th><td valign='top'><input type='text' name='samaksettu' value='$row[saldo_maksettu]'></td></tr>";
-		echo "<tr><th>Mapvm ppkkvv</th><td valign='top'><input type='text' name='sappl' size='3'><input type='text' name='sakkl' size='3'><input type='text' name='savvl' size='5'></td><td><input type='submit' value='päivitä'></td></tr>";
+		echo "<tr><th>Mapvm ppkkvv</th><td valign='top'><input type='text' name='sappl' size='3'><input type='text' name='sakkl' size='3'><input type='text' name='savvl' size='5'></td><td class='back'><input type='submit' value='Päivitä'></td></tr>";
 		echo "</table>";
 
 		echo "</form>";
 
 		echo "<br><font class='message'>".count($tunnukset). " laskua to go...</font><br>";
 
+		$query = "select * from tiliointi where yhtio='$kukarow[yhtio]' and ltunnus='$row[tunnus]' and korjattu='' order by tapvm desc";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<br><table>";
+		echo "<tr>";
+		echo "<th>tilino</th>";
+		echo "<th>summa</th>";
+		echo "<th>vero</th>";
+		echo "<th>tapvm</th>";
+		echo "<th>selite</th>";
+		echo "</tr>";			
+		
+		while ($row = mysql_fetch_array($result)) {
+			echo "<tr>";
+			echo "<td>$row[tilino]</td>";
+			echo "<td>$row[summa]</td>";
+			echo "<td>$row[vero]</td>";
+			echo "<td>$row[tapvm]</td>";
+			echo "<td>$row[selite]</td>";			
+			echo "</tr>";			
+		}
+
+		echo "</table>";
+		
 		$formi = "kala";
 		$kentta = "samaksettu";
 	}

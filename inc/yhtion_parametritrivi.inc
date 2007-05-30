@@ -28,19 +28,15 @@
 		$sel1 = "";
 		$sel2 = "";
 
-		if ($trow[$i] == 'iban+soap') {
-			$sel1 = "selected";
-		}
-		if ($trow[$i] == 'ovt+soap') {
+		if ($trow[$i] == 'finvoice') {
 			$sel2 = "selected";
 		}
 		else {
-			$sel = "selected";
+			$sel1 = "selected";
 		}
 
-		$ulos .= "<option value = '' $sel>".t("eInvoice")."";
-		$ulos .= "<option value = 'iban+soap' $sel1>".t("Finvoice + soap IBAN-tunnuksella")."";
-		$ulos .= "<option value = 'ovt+soap' $sel2>".t("Finvoice + soap ovttunnuksella")."";
+		$ulos .= "<option value = '' $sel1>".t("Pupevoice")."";
+		$ulos .= "<option value = 'finvoice' $sel2>".t("Finvoice")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

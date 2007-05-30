@@ -913,5 +913,31 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "vienti_erittelyn_tulostus") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+		$sel3 = "";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == "I") {
+			$sel2 = "selected";
+		}
+		elseif ($trow[$i] == "E") {
+			$sel3 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Vientierittely tulostetaan")."</option>";
+		$ulos .= "<option value='I' $sel2>".t("Vientierittely tulostetaan ilman alkuperämaatietoja")."</option>";
+		$ulos .= "<option value='E' $sel3>".t("Vientierittelyä ei tulosteta")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

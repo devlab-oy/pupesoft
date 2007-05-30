@@ -147,14 +147,17 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_text(340, 572, t("Määrä", $kieli),			$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(390, 572, t("Hinta", $kieli),			$Xfirstpage, $Xpieni);
 			$Xpdf->draw_text(450, 572, t("Paino", $kieli),			$Xfirstpage, $Xpieni);
-			$Xpdf->draw_text(500, 572, t("Alkuperämaa", $kieli),	$Xfirstpage, $Xpieni);
-	
+			
+			if ($yhtiorow["vienti_erittelyn_tulostus"] != "I") {
+				$Xpdf->draw_text(500, 572, t("Alkuperämaa", $kieli),	$Xfirstpage, $Xpieni);
+			}
+			
 			return($Xfirstpage);
 		}
 	}
 	if (!function_exists('erittely_rivi')) {
 		function erittely_rivi ($Xfirstpage) {
-			global $Xfirstpage, $Xpdf, $Xrow, $Xkala, $Xsivu, $Xlask, $Xrectparam, $Xnorm, $Xpieni, $kieli;
+			global $Xfirstpage, $yhtiorow, $Xpdf, $Xrow, $Xkala, $Xsivu, $Xlask, $Xrectparam, $Xnorm, $Xpieni, $kieli;
 	
 			if ($Xlask == 36) {
 				$Xsivu++;
@@ -170,8 +173,11 @@ if ($Xtunnukset2 != "") {
 			$Xpdf->draw_text(340, $Xkala, $Xrow["kpl"], 			$Xfirstpage, $Xnorm);
 			$Xpdf->draw_text(390, $Xkala, $Xrow["summa"], 			$Xfirstpage, $Xnorm);
 			$Xpdf->draw_text(450, $Xkala, $Xrow["paino"],			$Xfirstpage, $Xnorm);
-			$Xpdf->draw_text(500, $Xkala, $Xrow["alkuperamaa"],	$Xfirstpage, $Xnorm);
-				
+			
+			if ($yhtiorow["vienti_erittelyn_tulostus"] != "I") {
+				$Xpdf->draw_text(500, $Xkala, $Xrow["alkuperamaa"],		$Xfirstpage, $Xnorm);
+			}
+			
 			$Xkala = $Xkala - 13;
 			$Xlask++;
 		}

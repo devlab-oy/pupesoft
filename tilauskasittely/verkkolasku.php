@@ -1516,9 +1516,9 @@
 							}
 						}
 
-						if ($laskurow["vienti"] == "E") {
+						if ($laskurow["vienti"] == "E" and $yhtiorow["vienti_erittelyn_tulostus"] != "E") {
 							$uusiotunnus = $laskurow["tunnus"];
-
+								
 							require('tulosta_vientierittely.inc');
 
 							//keksit‰‰n uudelle failille joku varmasti uniikki nimi:

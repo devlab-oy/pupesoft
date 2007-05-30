@@ -194,7 +194,12 @@ if (!function_exists('alku')) {
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
 		
-		$query = "SELECT date_format(toimitettuaika, '%Y-%m-%d') toimitettupaiva FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and $where and toimitettuaika!='0000-00-00' GROUP BY toimitettupaiva";
+		$query = "	SELECT date_format(toimitettuaika, '%Y-%m-%d') toimitettupaiva 
+					FROM tilausrivi 
+					WHERE yhtio='$kukarow[yhtio]' 
+					and $where 
+					and toimitettuaika!='0000-00-00' 
+					GROUP BY toimitettupaiva";
 		$toimaikares = mysql_query($query) or pupe_error($query);
 		
 		if(mysql_num_rows($toimaikares) > 1) {
@@ -280,17 +285,22 @@ if (!function_exists('rivi')) {
 		$rivihinta_veroton = 0;
 		$rivihinta_verolli = 0;
 
-		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
-			$laji = 'nimitys_'.strtolower($kieli);
-			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
+		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {								
+			$query = "	SELECT selite 
+						FROM tuotteen_avainsanat 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and laji 	= 'nimitys_".strtolower($kieli)."' 
+						and tuoteno = '$row[tuoteno]' 
+						and selite != ''
+						LIMIT 1";
 			$nimresult = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($nimresult)>0) {
-				$nimrow=mysql_fetch_array($nimresult);
-				$row['nimitys']=$nimrow['selite'];
+			if (mysql_num_rows($nimresult) > 0) {
+				$nimrow = mysql_fetch_array($nimresult);
+				$row['nimitys'] = $nimrow['selite'];
 			}
 		}
-
+		
 		//Tuoteno
 		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,22),					$firstpage, $norm);
 
@@ -662,13 +672,15 @@ if (!function_exists('alvierittely')) {
 		//Haetaan kaikki alvikannat riveiltä
 		$alvquery = "	SELECT distinct alv
 						FROM tilausrivi
-						WHERE $where and yhtio='$kukarow[yhtio]'
+						WHERE $where 
+						and yhtio='$kukarow[yhtio]'
+						and tyyppi='L'
 						ORDER BY alv";
 		$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 		$kala -= 10;
 
 		while ($alvrow = mysql_fetch_array($alvresult)) {
-			// Valuuttajutu kuntoon
+			// Valuuttajutut kuntoon
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 				$rivihinta_q 	= "(rivihinta/$laskurow[vienti_kurssi])";
 				$hinta_q 		= "(hinta/$laskurow[vienti_kurssi])";
@@ -681,24 +693,24 @@ if (!function_exists('alvierittely')) {
 			if ($alvrow["alv"] >= 500 and $toim != 'PROFORMA') {
 				$aquery = "	SELECT sum(0) alvrivihinta, sum($rivihinta_q) rivihinta
 							FROM tilausrivi
-							WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'";
+							WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
 			}
 			elseif ($alvrow["alv"] >= 500) {
 				$aquery = "	SELECT round(0) alvrivihinta, round(sum($hinta_q*varattu*(1-ale/100)),2) rivihinta
 							FROM tilausrivi
-							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'";
+							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
 			}
 			elseif ($alvrow["alv"] < 500 and $toim != 'PROFORMA') {
 				$aquery = "	SELECT round(sum($rivihinta_q*(alv/100)),2) alvrivihinta, sum($rivihinta_q) rivihinta
 							FROM tilausrivi
-							WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'";
+							WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
 			}
 			else {
 				$aquery = "	SELECT
 							round(sum($hinta_q / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * if(netto='N', (1-ale/100), (1-(ale+$laskurow[erikoisale]-(ale*$laskurow[erikoisale]/100))/100)) * (alv/100)),2) alvrivihinta,
 							round(sum($hinta_q / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * if(netto='N', (1-ale/100), (1-(ale+$laskurow[erikoisale]-(ale*$laskurow[erikoisale]/100))/100))),2) rivihinta
 							FROM tilausrivi
-							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'";
+							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
 			}
 			$aresult = mysql_query($aquery) or pupe_error($aquery);
 			$arow = mysql_fetch_array($aresult);

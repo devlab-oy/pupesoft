@@ -141,8 +141,9 @@
 							$lisa
 						  	and tila in ('H', 'M', 'P', 'Q', 'Y')  
 						  	ORDER BY tapvm desc 
-							LIMIT $alku, 200";			
+							LIMIT $alku, 50";			
 				$result = mysql_query($query) or pupe_error($query);
+				$seraavako = mysql_num_rows($result);
 
 				if (mysql_num_rows($result) == 0) {
 				 	echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
@@ -196,15 +197,15 @@
 				echo "</table><br>";
 			
 				if ($alku > 0) {
-					$siirry = $alku - 200;
+					$siirry = $alku - 50;
 					echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Edelliset")."</a> ";
 				}
 				else {
-					echo t("Edelliset");
+					echo t("Edelliset")." ";
 				}
 			
-				if (mysql_num_rows($result) > 200) {
-					$siirry = $alku + 200;
+				if ($seraavako >= 50) {
+					$siirry = $alku + 50;
 					echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Seuraavat")."</a> ";
 					echo "<br><br>";
 				}

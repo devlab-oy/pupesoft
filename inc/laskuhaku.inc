@@ -84,9 +84,9 @@ if ($tee != '') {
 			  FROM lasku $index
 			  WHERE $ehto and yhtio='$kukarow[yhtio]'
 			  ORDER BY $jarj
-			  LIMIT $alku, 20";
-
+			  LIMIT $alku, 50";
 	$result = mysql_query($query) or pupe_error($query);
+	$seraavako = mysql_num_rows($result);
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<b>".t("Haulla ei löytynyt yhtään laskua")."</b>";
@@ -101,7 +101,7 @@ if ($tee != '') {
 	}
 	echo "</tr>";
 
-	while ($trow = mysql_fetch_array ($result)) {
+	while ($trow = mysql_fetch_array($result)) {
 
 			echo "<tr>";
 
@@ -147,15 +147,15 @@ if ($tee != '') {
 	echo "</table><br>";
 
 	if ($alku > 0) {
-		$siirry = $alku - 20;
+		$siirry = $alku - 50;
 		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila'>".t("Edelliset")."</a> ";
 	}
 	else {
 		echo t("Edelliset")." ";
 	}
 	
-	if (mysql_num_rows($result) > 20) {
-		$siirry = $alku + 20;
+	if ($seraavako >= 50) {
+		$siirry = $alku + 50;
 		echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&itila=$itila&ialatila=$ialatila'>".t("Seuraavat")."</a> ";
 	}
 	echo "<br><br>";

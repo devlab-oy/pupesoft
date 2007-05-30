@@ -81,7 +81,7 @@
 
 			while ($yrow = mysql_fetch_array ($result)) {
 				//Myyntireskontra
-				$query = "SELECT if(kapvm > now(), kapvm,erpcm) olmapvm, sum(summa) summa, count(*)
+				$query = "	SELECT if(kapvm > now(), kapvm,erpcm) olmapvm, sum(summa) summa, count(*)
 							FROM lasku
 							WHERE yhtio = '$yrow[yhtio]' and lasku.tila = 'U' and mapvm='0000-00-00'
 							GROUP BY 1";
@@ -154,12 +154,13 @@
 			}
 
 			//Ostoreskontra
-			$query = "SELECT olmapvm, -1 * sum(summa * valuu.kurssi) summa, count(*)
+			$query = "	SELECT olmapvm, -1 * sum(summa * valuu.kurssi) summa, count(*)
 						FROM lasku, valuu
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and valuu.yhtio = '$kukarow[yhtio]' and
-					      lasku.valkoodi = valuu.nimi and lasku.tila in ('H', 'M', 'P', 'Q')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and valuu.yhtio = '$kukarow[yhtio]' 
+						and lasku.valkoodi = valuu.nimi 
+						and lasku.tila in ('H', 'M', 'P', 'Q')
 						GROUP BY olmapvm";
-
 			$result = mysql_query($query) or pupe_error($query);
 
 			//echo "Laskuja '". mysql_num_rows($result) . "'<br>";

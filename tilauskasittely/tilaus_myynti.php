@@ -747,35 +747,21 @@ if ($tee == "VALMIS") {
 		$query = "UPDATE lasku SET alatila='A' where yhtio='$kukarow[yhtio]' and alatila='' and tunnus='$kukarow[kesken]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		//Tehdään asiakasmemotapahtuma
-		$kysely = "	INSERT INTO kalenteri
-					SET tapa 		= 'Tarjous asiakkaalle',
-					asiakas  	 	= '$laskurow[ytunnus]',
-					liitostunnus	= '$laskurow[liitostunnus]',
-					henkilo  		= '',
-					kuka     		= '$kukarow[kuka]',
-					yhtio    		= '$kukarow[yhtio]',
-					tyyppi   		= 'Memo',
-					pvmalku  		= now(),
-					kentta01 		='Tarjous $laskurow[tunnus] tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]'";
- 		$result = mysql_query($kysely) or pupe_error($kysely);
+		// Meillä voi olla versio..
+		if($laskurow["tunnusnippu"]>0) {
+			$result = mysql_query($query) or pupe_error($query);			
+			$query="select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tunnus <= '$laskurow[tunnus]' and tila='T'";
+			$result = mysql_query($query) or pupe_error($query);			
+			$tarjous=$laskurow["tunnusnippu"]."/".mysql_num_rows($result);
+		}
+		else {
+			$tarjous=$laskurow["tunnus"];
+		}
 
-		 //Tehdään myyjälle muistutus
-		$kysely = "	INSERT INTO kalenteri
-					SET
-					asiakas  	 	= '$laskurow[ytunnus]',
-					liitostunnus	= '$laskurow[liitostunnus]',
-					kuka     		= '$kukarow[kuka]',
-					yhtio    		= '$kukarow[yhtio]',
-					tyyppi   		= 'Muistutus',
-					tapa     		= 'Tarjous asiakkaalle',
-					kentta01 		= 'Muista tarjous $laskurow[tunnus]!',
-					kuittaus 		= 'K',
-					pvmalku  		= date_add(now(), INTERVAL 7 day)";
-		$result = mysql_query($kysely) or pupe_error($kysely);
+		kalenteritapahtuma ("Memo", "Tarjous asiakkaalle", "Tarjous $tarjous tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]", $laskurow["liitostunnus"], "", $lasklisatied_row["yhteyshenkilo_tekninen"], $laskurow["tunnus"]);
 
-		$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-		$result = mysql_query($query) or pupe_error($query);
+		kalenteritapahtuma ("Muistutus", "Tarjous asiakkaalle", "Muista tarjous $tarjous", $laskurow["liitostunnus"], "K", $lasklisatied_row["yhteyshenkilo_tekninen"], $laskurow["tunnus"]);
+
 	}
 	// Sisäinen työmääräys valmis
 	elseif($kukarow["extranet"] == "" and $toim == "SIIRTOTYOMAARAYS") {

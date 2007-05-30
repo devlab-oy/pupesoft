@@ -18,6 +18,7 @@ $viitetxt			= "";
 
 $query  = "	select
 			sum(arvo) arvo,
+			sum(arvo_valuutassa) arvo_valuutassa,
 			sum(summa) summa,
 			sum(summa_valuutassa) summa_valuutassa,
 			sum(kate) kate,
@@ -35,6 +36,7 @@ if (mysql_num_rows($uusiuresult) > 0) {
 	$sumrow = mysql_fetch_array($uusiuresult);
 
 	$arvo				= round($sumrow["arvo"], 2);
+	$arvo_valuutassa	= round($sumrow["arvo_valuutassa"], 2);
 	$summa				= round($sumrow["summa"], 2);
 	$summa_valuutassa	= round($sumrow["summa_valuutassa"], 2);
 	$kate				= round($sumrow["kate"], 2);
@@ -206,6 +208,7 @@ $query = "	INSERT into lasku SET
 			aktiivinen_kuljetus_kansallisuus	= '$lasrow[aktiivinen_kuljetus_kansallisuus]',
 			alv									= '$lasrow[alv]',
 			arvo								= '$arvo',
+			arvo_valuutassa						= '$arvo_valuutassa',
 			bruttopaino							= '$bruttopaino',
 			chn									= '$lasrow[chn]',
 			comments							= '$comments',

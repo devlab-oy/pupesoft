@@ -4,8 +4,9 @@
 $serc = array("\"","'","<",">","\\", ";");
 $repl = array("", "", "", "", "", "");
 
-// otetaan includepath aina rootista
-ini_set("include_path", ".:".dirname(dirname(__FILE__)));
+// otetaan includepath aina rootist¨
+
+ini_set("include_path", ini_get("include_path").":".dirname(dirname(__FILE__)));
 
 foreach ($_GET as $key => $value) {
 	//$_GET[$key] = addslashes(trim($_GET[$key]));

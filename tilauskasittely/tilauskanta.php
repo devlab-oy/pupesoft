@@ -106,16 +106,19 @@
 		
 		for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
 			$kojarj=$i+1; // sortti numeron mukaan niin ei tuu onglemia
-				echo "<th align='left'><a href = '$PHP_SELF?tee=$tee&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try&kojarj=$kojarj'>".t(mysql_field_name($result,$i))."</a></th>";
+			echo "<th align='left'><a href = '$PHP_SELF?tee=$tee&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try&kojarj=$kojarj'>".t(mysql_field_name($result,$i))."</a></th>";
 		}
 		
 		$kojarj = $vanhaojarj;
 				
-		echo "<th align='left'><a href = '$PHP_SELF?tee=$tee&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try&kojarj=4,5'>".t("Tyyppi")."</a></th></tr>";
+		echo "<th align='left'><a href = '$PHP_SELF?tee=$tee&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuotealku=$tuotealku&tuoteloppu=$tuoteloppu&osasto=$osasto&try=$try&kojarj=4,5'>".t("Tyyppi")."</a></th>";
+		echo "<th align='left'>".t("Summa")."</th>";
+		echo "</tr>";
 		
+		$summat = 0;
+		$arvot  = 0;
 		
-		
-		while ($prow = mysql_fetch_array ($result)) {
+		while ($prow = mysql_fetch_array($result)) {
 			
 			$ero="td";
 			if ($tunnus==$prow['Tilausnro']) $ero="th";
@@ -144,9 +147,29 @@
 
 			echo "<$ero>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
 			
+			// haetaan kaikkien avoimien tilausten arvo
+			$sumquery = "	SELECT 
+							round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, 
+							round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, 
+							count(distinct lasku.tunnus) kpl
+							FROM lasku use index (tila_index)
+							JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+							WHERE lasku.yhtio = '$kukarow[yhtio]' 
+							and lasku.tunnus = '$prow[Tilausnro]'";
+			$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+			$sumrow = mysql_fetch_array($sumresult);
+			
+			echo "<$ero align='right'>$sumrow[arvo]</$ero>";
+			
+			$summat += $sumrow["summa"];
+			$arvot  += $sumrow["arvo"];
+			
 			echo "</tr>";
 			
 		}
+		
+		echo "<tr><td class='back' colspan='3'><th>".t("Veroton").":</th><th>".sprintf('%.2f', $arvot)."</th></tr>";
+		echo "<tr><td class='back' colspan='3'><th>".t("Verollinen").":</th><th>".sprintf('%.2f', $summat)."</th></tr>";
 
 		echo "</table><br><br><br><br>";
 	}
@@ -191,7 +214,7 @@
 				ORDER BY avainsana.selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 	
-	echo "<tr><th>".t("Osasto (Ei pakollinen)")."</th><td colspan='5' class='back'>";
+	echo "<tr><th>".t("Osasto (Ei pakollinen)")."</th><td colspan='3'>";
 	
 	echo "<select name='osasto'>";
 	echo "<option value=''>".t("Näytä kaikki")."</option>";
@@ -206,7 +229,6 @@
 	echo "</select>";
 	echo "</td></tr>";
 	
-	
 	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
 				".avain('join','TRY_')."
@@ -214,7 +236,7 @@
 				ORDER BY avainsana.selite+0";
 	$sresult = mysql_query($query) or pupe_error($query);
 	
-	echo "<tr><th>".t("Tuoteryhmä (Ei pakollinen)")."</th><td colspan='5' class='back'>";
+	echo "<tr><th>".t("Tuoteryhmä (Ei pakollinen)")."</th><td colspan='3'>";
 	
 	echo "<select name='try'>";
 	echo "<option value=''>".t("Näytä kaikki")."</option>";

@@ -45,42 +45,58 @@ else {
 	}
 
 	// Etsitään tilausrivit
-	$query = "	SELECT *
+	$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys
 				FROM tilausrivi
-				WHERE otunnus = '$kukarow[kesken]' 
-				and yhtio='$kukarow[yhtio]' 
-				and var not in ('P','J')
-				and tyyppi='L'
-				ORDER BY tunnus";
+				LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+				WHERE tilausrivi.otunnus 	= '$kukarow[kesken]' 
+				and tilausrivi.yhtio 		= '$kukarow[yhtio]' 
+				and tilausrivi.var 			not in ('P','J')
+				and tilausrivi.tyyppi 		= 'L'
+				ORDER BY tilausrivi.tunnus";
 	$presult = mysql_query($query) or pupe_error($query);
 
 	// Nollataan muuttujat
 	$loppusumma 					= 0;
 	$loppusumma_valuutassa 			= 0;
 	$tothinta   					= 0;
+	$tothinta_valuutassa			= 0;
 	$totkate    					= 0;
 	$kassa_loppusumma 				= 0;
 	$kassa_loppusumma_valuutassa 	= 0;
+	$ei_pyorist						= 0;
+	$pyorerotus						= 0;
+	$arvosumma						= 0;
+	$katesumma 						= 0;
+	$ei_pyorist_valuutassa			= 0;
+	$pyorerotus_valuutassa			= 0;
+	$arvosumma_valuutassa			= 0;
 	$kassa_erapvm 					= "";
 	
 	while ($trow = mysql_fetch_array ($presult)) {
 					
 		// Marginaaliverotus
 		if ($trow["alv"] >= 500) {
+			$hinta_valuutassa	    = laskuval($trow["hinta"], $orow["vienti_kurssi"]) / (1 - $trow["ale"] / 100);				//Kappalehinta alennuksineen valuutassa
 			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);												//Kappalehinta alennuksineen
+			
 			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"];								//Rivihinta valuutassa 
-			$loppusumma 		   += $hinta * $trow["varattu"];																//Rivihinta
+			$loppusumma 		   += $hinta * $trow["varattu"];																//Rivihinta			
 		}
 		// Myyntihinnat sisältävät arvonlisäveron
 		elseif ($yhtiorow["alv_kasittely"] == '') {
 			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);												//Verollinen kappalehinta alennuksineen
+			
 			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"];								//Verollinen rivihinta valuutassa 
 			$loppusumma 		   += $hinta * $trow["varattu"];																//Verollinen rivihinta
-			$hinta 					= $hinta / (1 + ($trow["alv"] / 100));														//Veroton kappalehinta alennuksineen
+			
+			$hinta_valuutassa	    = laskuval($hinta, $orow["vienti_kurssi"]) / (1 + ($trow["alv"] / 100));					//Veroton kappalehinta alennuksineen valuutassa
+			$hinta 					= $hinta / (1 + ($trow["alv"] / 100));														//Veroton kappalehinta alennuksineen			
 		}
 		// Myyntihinnat ovat verottomia
 		else {
+			$hinta_valuutassa	    = laskuval($trow["hinta"], $orow["vienti_kurssi"]) * (1 - $trow["ale"] / 100);				//Veroton kappalehinta alennuksineen valuutassa
 			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);												//Veroton kappalehinta alennuksineen
+			
 			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"] * (1 + ($trow["alv"] / 100));	//Verollinen rivihinta valuutassa 
 			$loppusumma 		   += $hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100));									//Verollinen rivihinta
 		}
@@ -206,8 +222,8 @@ else {
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";
 			}
-			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] < 0) {
-				//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on ostoa (aka. hyvitystä)
+			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
+				//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on OSTOA
 				
 				// Kate = 0
 				$kate 				= 0;
@@ -215,6 +231,16 @@ else {
 											
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "tulo";
+			}
+			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
+				//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on HYVITYSTÄ
+				
+				// Kate = -1 * ostohinta
+				$kate 				= -1 * round($hinta/$trow["varattu"],2);
+				$turow["kehahin"] 	= round($hinta/$trow["varattu"],4);	
+											
+				//tapahtuman otsikko
+				$tapahtumattyyppi = "laskutus";
 			}
 			else {
 				// Kate = Hinta - Kehahin (alviton)
@@ -246,10 +272,12 @@ else {
 		} // tuote ei löydy else haara
 
 		// Kumuloidaan
-		$totkate  += $kate;
-		$tothinta += $hinta;
+		$totkate  			 += $kate;
+		$tothinta 			 += $hinta;
+		$tothinta_valuutassa += $hinta_valuutassa;
 
 		// Päivitetään tilausrivi
+		////// FUTURE: rivihinta_valuutassa = round($hinta_valuutassa,2), //////
 		$query = "	UPDATE tilausrivi
 					SET kate 		= round($kate,2),
 					rivihinta 		= round($hinta,2),
@@ -308,25 +336,26 @@ else {
 		$kassa_loppusumma_valuutassa 	= "";
 	}
 
-	// Päivitetään lasku
-	$tothinta += 0;
-	$totkate  += 0;
-	
+	// Päivitetään lasku	
 	if (isset($kateistyyppi) and $kateistyyppi == 'p') {
-		//pöristetään käteismyynti lähimpään viiteen senttiin
-		
+		// Pyöristetään käteismyynti lähimpään viiteen senttiin
 		$ei_pyorist = round($loppusumma,2);
 		$loppusumma = round(round($loppusumma / 0.05) * 0.05, 2);
-		
 		$pyorerotus = $ei_pyorist - $loppusumma;
-		
 		$arvosumma	= round($tothinta - $pyorerotus, 2);
 		$katesumma  = round($totkate - $pyorerotus, 2);
+		
+		// Pyöristetään käteismyynti lähimpään viiteen senttiin myös laskun valuutassa
+		$ei_pyorist_valuutassa = round($loppusumma_valuutassa,2);
+		$loppusumma_valuutassa = round(round($loppusumma_valuutassa / 0.05) * 0.05, 2);
+		$pyorerotus_valuutassa = $ei_pyorist_valuutassa - $loppusumma_valuutassa;
+		$arvosumma_valuutassa  = round($tothinta_valuutassa - $pyorerotus_valuutassa, 2);		
 	}
 	else {
 		$loppusumma 			= round($loppusumma,2);
 		$loppusumma_valuutassa 	= round($loppusumma_valuutassa,2);
 		$arvosumma				= round($tothinta,2);
+		$arvosumma_valuutassa	= round($tothinta_valuutassa,2);
 		$katesumma  			= round($totkate,2);
 	}
 	
@@ -364,6 +393,7 @@ else {
 	$query = "	UPDATE lasku
 				SET alatila 		= 'V',
 				arvo 				= '$arvosumma',
+				arvo_valuutassa 	= '$arvosumma_valuutassa',
 				kate 				= '$katesumma',
 				summa 				= '$loppusumma',
 				summa_valuutassa 	= '$loppusumma_valuutassa',

@@ -528,10 +528,9 @@ if ($tila == '') {
 				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
 				JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
-				WHERE lasku.liitostunnus='$laskurow[liitostunnus]'
-				and lasku.yhtio = '$kukarow[yhtio]'
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				and lasku.liitostunnus = '$laskurow[liitostunnus]'
 				and lasku.tila in ('O','K')
-				and lasku.alatila not in ('X','B')
 				GROUP BY tilausrivi.tunnus
 				$lisa1
 				ORDER BY $jarjestys

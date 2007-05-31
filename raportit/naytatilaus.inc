@@ -413,4 +413,23 @@
 	}
 
 	echo "</table>";
+	
+	if($laskurow["jaksotettu"]>0) {
+		echo "<b>".t("Maksusopimus").":</b><hr><br>";
+		
+		echo "<table><tr><th>#</th><th>".t("Osuus-%")."</th><th>".t("Maksuehto/Kuvaus")."</th><th>".t("Lisätiedot/Ohje")."</th><th>".t("Summa")."</th><th>".t("Laskunro")."</th></tr>";
+		$query = "	SELECT maksupositio.*, round(osuus,0) osuus, concat_ws('<br>', maksuehto.teksti, kuvaus) maksuehto, concat(maksupositio.lisatiedot, '<br>', maksupositio.ohje) lisatiedot, if(lasku.laskunro>0,lasku.laskunro, '') laskunro
+					FROM maksupositio
+					LEFT JOIN lasku ON lasku.yhtio=maksupositio.yhtio and lasku.tunnus=maksupositio.uusiotunnus
+					LEFT JOIN maksuehto on maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto
+					WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = $laskurow[jaksotettu] order by tunnus";
+		$maksusopres = mysql_query($query) or pupe_error($query);
+		$i=0;
+		while($maksusoprow = mysql_fetch_array($maksusopres)) {
+			$i++;
+			echo "<tr class='aktiivi'><td>$i</td><td align='center'>{$maksusoprow[osuus]}</td><td>{$maksusoprow[maksuehto]}</td><td>{$maksusoprow[lisatiedot]}</td><td align='right'>{$maksusoprow[summa]}</td><td align='center'>{$maksusoprow[laskunro]}</td></tr>";
+		}
+		echo "</table>";
+	}
+	
 ?>

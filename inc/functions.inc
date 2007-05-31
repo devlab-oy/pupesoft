@@ -5,7 +5,7 @@ if (!function_exists("pupe_error")) {
 	// otetaan parametriksi query
 	function pupe_error($query) {
 		// tarvitaan yhtiörowta ja kukarowta
-		global $yhtiorow, $kukarow;
+		global $yhtiorow, $kukarow, $toim;
 
 		// trimmataan, tabit, rivinvaihdot ja tuplaspacet pois querystä..
 		$query = trim($query);
@@ -14,8 +14,16 @@ if (!function_exists("pupe_error")) {
 		$query = str_replace("\r", "", $query);
 		$query = ereg_replace("  +", " ", $query);
 
+		$debuggi = debug_backtrace();
+
 		// tehdään errorimessage
-		$puperror = "File: ".__FILE__."\nUser: $kukarow[kuka]\n\n$query\n\n".mysql_error();
+		$puperror  = "User:   {$kukarow["nimi"]} ({$kukarow["kuka"]}) @ {$yhtiorow["nimi"]} ({$yhtiorow["yhtio"]})\n\n";
+		$puperror .= "File:   {$debuggi[0]["file"]}\n";
+		$puperror .= "Line:   {$debuggi[0]["line"]}\n\n";
+		$puperror .= "Script: {$_SERVER["PHP_SELF"]}\n";
+		$puperror .= "Toim:   $toim\n\n";
+		$puperror .= "Error:  ".mysql_error()."\n\n";
+		$puperror .= "$query\n\n";
 
 		// lähetetään se meilitse adminille
 		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: $yhtiorow[postittaja_email]\r\n", "-f $yhtiorow[postittaja_email]");

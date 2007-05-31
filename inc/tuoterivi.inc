@@ -22,6 +22,7 @@
 				or mysql_field_name($result, $i) == "tilino_eu"
 				or mysql_field_name($result, $i) == "tilino_ei_eu"
 				or mysql_field_name($result, $i) == "kohde"
+				or mysql_field_name($result, $i) == "status"				
 				or mysql_field_name($result, $i) == "projekti"
 				or mysql_field_name($result, $i) == "kustp"
 				or mysql_field_name($result, $i) == "vihapvm"
@@ -412,7 +413,7 @@
 		
 	}
 	else {
-		$tyyppi = 0;
+		$tyyppi = 4;
 	}
 
 ?>

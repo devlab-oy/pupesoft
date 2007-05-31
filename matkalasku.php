@@ -151,7 +151,7 @@ if($tee=="MUOKKAA") {
 		//	Koitetaan lis‰t‰ uusi rivi!
 		if($tuoteno!="" and isset($lisaa)) {
 
-			$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+			$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tuotetyyppi='$tyyppi' and status !='P'";
 			$tres=mysql_query($query) or pupe_error($query);
 			if(mysql_num_rows($tres)<>1) {
 				echo "<font class='error'>".t("VIRHE!!! Viranomaistuote0 puuttuu")." $lisaa_tuoteno $query</font><br>";
@@ -197,7 +197,7 @@ if($tee=="MUOKKAA") {
 								and (	(kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika <= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm') or 
 										(kerattyaika <  '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika > '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm') or
 										(toimitettuaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika <= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm'))
-								and tuotetyyppi IN ('A','B','E')";
+								and tuotetyyppi IN ('A','B')";
 					$result = mysql_query($query) or pupe_error($query);
 
 					if(mysql_num_rows($result)>0) {
@@ -221,13 +221,17 @@ if($tee=="MUOKKAA") {
 					elseif($ylitunnit<=10 and $trow["vienti"]!="FI") {
 						$errori .= "<font class='error'>".t("VIRHE!!! Ulkomaanp‰iv‰rahalla on oltava v‰hint‰‰n 10 tuntia")."</font><br>";
 					}
-					
+										
 					if($paivat>0) {
 						$tuoteno_array[$tuoteno]				=$tuoteno;
 						$kpl_array[$tuoteno]					=$paivat;
 
 						$alkuaika_array[$tuoteno]				="$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm:00";
 						$loppuaika_array[$tuoteno]				="$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm:00";						
+						
+						$hinta=$trow["myyntihinta"];
+						$hinta_array[$trow["tuoteno"]]		= $hinta;
+						
 					}
 					
 					if($puolipaivat>0) {
@@ -247,6 +251,10 @@ if($tee=="MUOKKAA") {
 
 						$alkuaika_array[$trow2["tuoteno"]]		="$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm:00";
 						$loppuaika_array[$trow2["tuoteno"]]		="$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm:00";													
+						
+						$hinta=$trow2["myyntihinta"];
+						$hinta_array[$trow2["tuoteno"]]		= $hinta;
+						
 					}
 					
 					//echo "SAATIIN p‰ivarahoja: $paivat puolip‰iv‰rahoja: $puolipaivat<br>";
@@ -284,7 +292,7 @@ if($tee=="MUOKKAA") {
 				foreach($tuoteno_array as $lisaa_tuoteno) {
 
 					//	Haetaan tuotteen tiedot
-					$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuotetyyppi='$tyyppi' and tuoteno='$lisaa_tuoteno'";
+					$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuotetyyppi='$tyyppi' and tuoteno='$lisaa_tuoteno' and status !='P'";
 					$tres=mysql_query($query) or pupe_error($query);
 					if(mysql_num_rows($tres)<>1) {
 						echo "<font class='error'>".t("VIRHE!!! Viranomaistuote1 puuttuu")." $lisaa_tuoteno $query</font><br>";
@@ -423,10 +431,10 @@ if($tee=="MUOKKAA") {
 		echo "<table><tr>";
 		echo "<th colspan='4'>".t('Lis‰‰ kulu').":</th>";
 		
-		foreach(array("A","B") as $tyyppi) {
+		foreach(array("A","B") as $viranomaistyyppi) {
 			
 			$tyyppi_nimi="";
-			switch ($tyyppi) {
+			switch ($viranomaistyyppi) {
 				case "A":
 					$tyyppi_nimi="P‰iv‰raha";
 					break;
@@ -435,7 +443,7 @@ if($tee=="MUOKKAA") {
 					break;
 			}
 						
-			$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuotetyyppi='$tyyppi'";
+			$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuotetyyppi='$viranomaistyyppi' and status !='P'";
 			$tres=mysql_query($query) or pupe_error($query);
 			$valinta="";
 			if(mysql_num_rows($tres)>1){
@@ -461,30 +469,30 @@ if($tee=="MUOKKAA") {
 				echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='tee' value='$tee'>";
 				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-				echo "<input type='hidden' name='tyyppi' value='A'>";		
+				echo "<input type='hidden' name='tyyppi' value='$viranomaistyyppi'>";		
 				echo "<td class='back'>$valinta</td>";
 				echo "</form>";					
 			}
 		}
 		
 		echo "</table><br><br>";
-				
+
 		if($tyyppi!="" and $tuoteno != "") {
 			
-			$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+			$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tuotetyyppi='$tyyppi' and status !='P'";
 			$tres=mysql_query($query) or pupe_error($query);
 			if(mysql_num_rows($tres)==1){
 				$trow=mysql_fetch_array($tres);
-				$tyyppi=$trow["tuotetyyppi"];
 			}
 			else {
-				die("<font class='error'>".t("VIRHE!!! Viranomaistuote3 puuttuu")."</font><br>");
+				die("<font class='error'>".t("VIRHE!!! Viranomaistuote3 puuttuu")."<br>$query</font><br>");
 			}
 			
 			echo "<font class='message'>".t("Lis‰‰")." $trow[nimitys]</font><hr><br>$errori";
 			
 			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='$tee'>";
+			echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
 			echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";			
 			echo "<input type='hidden' name='rivitunnus' value='$rivitunnus'>";			
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";		
@@ -496,7 +504,7 @@ if($tee=="MUOKKAA") {
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
 						ORDER BY nimi";
 			$result = mysql_query($query) or pupe_error($query);
-			$kustannuspaikka = "<select name = 'kustp'><option value = ' '>".t("Ei kustannuspaikkaa");
+			$kustannuspaikka = "<select name = 'kustp' style=\"width: 100px\"><option value = ' '>".t("Ei kustannuspaikkaa");
 			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 				$valittu = "";
 				if ($kustannuspaikkarow[0] == $kustp) {
@@ -511,7 +519,7 @@ if($tee=="MUOKKAA") {
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 						ORDER BY nimi";
 			$result = mysql_query($query) or pupe_error($query);
-			$kustannuspaikka .= "<select name = 'kohde'><option value = ' '>".t("Ei kohdetta");
+			$kustannuspaikka .= " <select name = 'kohde' style=\"width: 100px\"><option value = ' '>".t("Ei kohdetta");
 			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 				$valittu = "";
 				if ($kustannuspaikkarow[0] == $kohde) {
@@ -526,7 +534,7 @@ if($tee=="MUOKKAA") {
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 						ORDER BY nimi";
 			$result = mysql_query($query) or pupe_error($query);
-			$kustannuspaikka .= "<select name = 'projekti'><option value = ' '>".t("Ei projektia");
+			$kustannuspaikka .= " <select name = 'projekti' style=\"width: 100px\"><option value = ' '>".t("Ei projektia");
 			while ($kustannuspaikkarow=mysql_fetch_array ($result)) {
 				$valittu = "";
 				if ($kustannuspaikkarow[0] == $projekti) {
@@ -544,10 +552,10 @@ if($tee=="MUOKKAA") {
 			if(!isset($loppuvv)) $loppuvv=date("Y");
 			
 			if($tyyppi=="A") {
-				echo "<th>".t("Kustannuspaikka")."</th><th>".t("Alku")."</th><th>".t("Loppu")."</th></tr>";
+				echo "<th>".t("Kustannuspaikka")."</th><th>".t("Alku")."</th><th>".t("Loppu")."</th><th>".t("Hinta")."</th></tr>";
 				echo "<tr><td>$kustannuspaikka</td><td><input type='text' name='alkupp' value='$alkupp' size='3' maxlength='2'> <input type='text' name='alkukk' value='$alkukk' size='3' maxlength='2'> <input type='text' name='alkuvv' value='$alkuvv' size='5' maxlength='4'> ".t("klo").":<input type='text' name='alkuhh' value='$alkuhh' size='3' maxlength='2'>:<input type='text' name='alkumm' value='$alkumm' size='3' maxlength='2'>&nbsp;</td>
-						<td>&nbsp;<input type='text' name='loppupp' value='$loppupp' size='3' maxlength='2'> <input type='text' name='loppukk' value='$loppukk' size='3' maxlength='2'> <input type='text' name='loppuvv' value='$loppuvv' size='5' maxlength='4'> ".t("klo").":<input type='text' name='loppuhh' value='$loppuhh' size='3' maxlength='2'>:<input type='text' name='loppumm' value='$loppumm' size='3' maxlength='2'></td>";
-				$cols=3;
+						<td>&nbsp;<input type='text' name='loppupp' value='$loppupp' size='3' maxlength='2'> <input type='text' name='loppukk' value='$loppukk' size='3' maxlength='2'> <input type='text' name='loppuvv' value='$loppuvv' size='5' maxlength='4'> ".t("klo").":<input type='text' name='loppuhh' value='$loppuhh' size='3' maxlength='2'>:<input type='text' name='loppumm' value='$loppumm' size='3' maxlength='2'></td><td align='center'>$trow[myyntihinta]</td>";
+				$cols=4;
 				$leveys=80;
 			}
 			elseif($tyyppi=="B") {
@@ -556,7 +564,7 @@ if($tee=="MUOKKAA") {
 				
 				//	Hinta saadaan antaa, jos meill‰ ei ole ennettu hintaa
 				if($trow["myyntihinta"] > 0) {
-					echo "<td><input type='hidden' name='hinta' value='$trow[myyntihinta]'>$trow[myyntihinta]</td>";
+					echo "<td align='center'><input type='hidden' name='hinta' value='$trow[myyntihinta]'>$trow[myyntihinta]</td>";
 				}
 				else {
 					echo "<td><input type='text' name='hinta' value='$hinta' size='4'></td>";
@@ -607,15 +615,14 @@ if($tee=="MUOKKAA") {
 				
 				if($row["perheid"]==$row["tunnus"] or $row["perheid"]==0) {
 					echo "<td class='back'><input type='submit' value='".t("Muokkaa")."'></td>";
+					if($row["tuotetyyppi"] == "A") {
+						echo "<tr><th>".t("Ajalla").":</th><td colspan='2'>$row[ajalla]</td></tr>";
+					}					
 				}
 				echo "</tr>";
 				
 				if($row["kommentti"]!="") {
 					echo "<tr><th>".t("Kommentti").":</th><td colspan='2'>$row[kommentti]</td></tr>";
-				}
-
-				if(in_array($row["tuotetyyppi"], array("A","B"))) {
-					echo "<tr><th>".t("Ajalla").":</th><td colspan='2'>$row[ajalla]</td></tr>";
 				}
 						
 				echo "</tr></form>";

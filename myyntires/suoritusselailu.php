@@ -219,7 +219,7 @@
 			$sel1='checked';
 			$sel2='';
 
-			if ($yhtiorow['factoringsaamiset'] == $trow['ttilino']) {
+			if ($yhtiorow['factoringsaamiset'] == $suoritus['ttilino']) {
 				$sel2 = $sel1;
 				$sel1 = '';
 			}

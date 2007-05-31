@@ -462,7 +462,7 @@
 					$resyht += $lapsiyht;
 					
 					if ($tunnus != $prow["tunnus"]) {												
-						echo "<tr><td>$prow[tuoteno] $error</td><td>".asana('nimitys_',$prow['tuoteno'],$tuoterow['nimitys'])."</td>";
+						echo "<tr class='aktiivi'><td>$prow[tuoteno] $error</td><td>".asana('nimitys_',$prow['tuoteno'],$tuoterow['nimitys'])."</td>";
 						
 						if ($toim != "LISAVARUSTE") {
 							echo "<td>$prow[kerroin]</td>";

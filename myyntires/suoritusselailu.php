@@ -344,6 +344,8 @@
 
 	    while ($maksurow=mysql_fetch_array ($result)) {
 
+			echo "<tr class='aktiivi'>";
+
 			for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
 				switch ($i) {
 				case 0:

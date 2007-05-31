@@ -377,7 +377,15 @@
 						and jaksotettu 	= '$tunnus'
 						and tila		!= 'R'";
 			$result = mysql_query($query) or pupe_error($query);
-
+			
+			//	Merkataan projekti valmiiksi
+			$query = "	UPDATE lasku
+						SET alatila 	= 'B' 
+						WHERE yhtio 	= '$kukarow[yhtio]'
+						and jaksotettu 	= '$tunnus'
+						and tila		= 'R'";
+			$result = mysql_query($query) or pupe_error($query);
+			
 			$query = "	SELECT group_concat(distinct tunnus) tunnukset
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]'

@@ -257,7 +257,7 @@
 							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lisätään tuoteno kommenttin
 						}
 					}
-					
+
 					if (count($korkieltokommi) == 1) {
 						$korkieltokommi = t("Voit tilata korvaavaa tuotetta ").$korkieltokommi[0];
 					}
@@ -319,7 +319,7 @@
 				}
 
 				// Käydään läpi tuotepaikat
-				$query = "	SELECT tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+				$query = "	SELECT tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 							concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
 				 			FROM tuote
 							JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
@@ -365,6 +365,7 @@
 					$zzrow[$zzrowlask]["ei_saldoa"]		= $zrow["ei_saldoa"];
 					$zzrow[$zzrowlask]["oletus"]		= $zrow["oletus"];
 					$zzrow[$zzrowlask]["varasto"]		= $zrow["varasto"];
+					$zzrow[$zzrowlask]["varastomaa"]	= $zrow["varastomaa"];
 					$zzrow[$zzrowlask]["varastotyyppi"]	= $zrow["varastotyyppi"];
 					$zzrow[$zzrowlask]["hyllyalue"]		= $zrow["hyllyalue"];
 					$zzrow[$zzrowlask]["hyllynro"]		= $zrow["hyllynro"];
@@ -401,7 +402,30 @@
 					}
 				}
 
-				usort($zzrow, "zzrowcmp");
+				// sortataan varastopaikkojen saldot by ostajan maa
+				$oma_maa = array();
+				$muu_maa = array();
+
+				foreach ($zzrow as $zzrow_rivi) {
+					// jos löydetään varasto toimitusoosoitteen maasta, käytetään sitä eka
+					if ($laskurow["toim_maa"] == $zzrow_rivi["varastomaa"] and $laskurow["toim_maa"] != "" and $zzrow_rivi["varastomaa"] != "") {
+						$oma_maa[] = $zzrow_rivi;
+					}
+					else {
+						$muu_maa[] = $zzrow_rivi;
+					}
+				}
+
+				// sortataan ostajan maan varastopaikat saldo järkkään
+				usort($oma_maa, "zzrowcmp");
+				// sortataan muiden maiden varastopaikat saldo järkkään
+				usort($muu_maa, "zzrowcmp");
+
+				// yhdistetään arrayt
+				$zzrow = array_merge($oma_maa, $muu_maa);
+
+				// näin tehtiin vaan ennen
+				// usort($zzrow, "zzrowcmp");
 
 				foreach($zzrow as $zrow) {
 					if ($varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or $laskurow["varasto"] == $zrow["varasto"]))) {

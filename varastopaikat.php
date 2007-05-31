@@ -197,8 +197,6 @@ if ($tee=='edit') {
 			$vresult = mysql_query($query) or pupe_error($query);
 			echo "<tr><th>".t("Maa")."</th><td><select name='maa'>";
 
-			echo "<option value = '' ></option>";
-
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";
 				if (strtoupper($row['maa']) == strtoupper($vrow[0])) {

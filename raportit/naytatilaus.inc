@@ -417,17 +417,35 @@
 	if($laskurow["jaksotettu"]>0) {
 		echo "<b>".t("Maksusopimus").":</b><hr><br>";
 		
-		echo "<table><tr><th>#</th><th>".t("Osuus-%")."</th><th>".t("Maksuehto/Kuvaus")."</th><th>".t("Lisätiedot/Ohje")."</th><th>".t("Summa")."</th><th>".t("Laskunro")."</th></tr>";
-		$query = "	SELECT maksupositio.*, round(osuus,0) osuus, concat_ws('<br>', maksuehto.teksti, kuvaus) maksuehto, concat(maksupositio.lisatiedot, '<br>', maksupositio.ohje) lisatiedot, if(lasku.laskunro>0,lasku.laskunro, '') laskunro
+		echo "<table><tr><th>#</th><th>".t("Osuus-%")."</th><th>".t("Maksuehto/Kuvaus")."</th><th>".t("Lisätiedot/Ohje")."</th><th>".t("Summa")."</th><th>".t("Laskunro")."</th><th>".t("Laskun pvm")."</th><th>".t("Eräpäivä")."</th><th>".t("Maksupäivä")."</th></tr>";
+		$query = "	SELECT maksupositio.*, round(osuus,0) osuus, 
+					concat_ws('<br>', maksuehto.teksti, kuvaus) maksuehto, 
+					concat(maksupositio.lisatiedot, '<br>', maksupositio.ohje) lisatiedot, 
+					if(lasku.laskunro>0,lasku.laskunro, '') laskunro, 
+					if(myre.tapvm!='0000-00-00', date_format(myre.tapvm, '%d.%m.%Y'), '') tapvm,
+					if(myre.erpcm!='0000-00-00', date_format(myre.erpcm, '%d.%m.%Y'), '') erpcm,
+					if(myre.mapvm!='0000-00-00', date_format(myre.mapvm, '%d.%m.%Y'), '') mapvm
 					FROM maksupositio
 					LEFT JOIN lasku ON lasku.yhtio=maksupositio.yhtio and lasku.tunnus=maksupositio.uusiotunnus
+					LEFT JOIN lasku myre ON myre.yhtio=lasku.yhtio and myre.laskunro=lasku.laskunro and myre.tila='U'
 					LEFT JOIN maksuehto on maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto
-					WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = $laskurow[jaksotettu] order by tunnus";
+					WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = $laskurow[jaksotettu]
+					ORDER BY tunnus";
 		$maksusopres = mysql_query($query) or pupe_error($query);
 		$i=0;
 		while($maksusoprow = mysql_fetch_array($maksusopres)) {
 			$i++;
-			echo "<tr class='aktiivi'><td>$i</td><td align='center'>{$maksusoprow[osuus]}</td><td>{$maksusoprow[maksuehto]}</td><td>{$maksusoprow[lisatiedot]}</td><td align='right'>{$maksusoprow[summa]}</td><td align='center'>{$maksusoprow[laskunro]}</td></tr>";
+			echo "<tr class='aktiivi'>
+					<td>$i</td>
+					<td align='center'>{$maksusoprow[osuus]}</td>
+					<td>{$maksusoprow[maksuehto]}</td>
+					<td>{$maksusoprow[lisatiedot]}</td>
+					<td align='right'>{$maksusoprow[summa]}</td>
+					<td align='center'>{$maksusoprow[laskunro]}</td>
+					<td align='center'>{$maksusoprow[tapvm]}</td>
+					<td align='center'>{$maksusoprow[erpcm]}</td>
+					<td align='center'>{$maksusoprow[mapvm]}</td>					
+				</tr>";
 		}
 		echo "</table><br>";
 	}

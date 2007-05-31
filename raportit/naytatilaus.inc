@@ -429,7 +429,7 @@
 			$i++;
 			echo "<tr class='aktiivi'><td>$i</td><td align='center'>{$maksusoprow[osuus]}</td><td>{$maksusoprow[maksuehto]}</td><td>{$maksusoprow[lisatiedot]}</td><td align='right'>{$maksusoprow[summa]}</td><td align='center'>{$maksusoprow[laskunro]}</td></tr>";
 		}
-		echo "</table>";
+		echo "</table><br>";
 	}
 	
 ?>

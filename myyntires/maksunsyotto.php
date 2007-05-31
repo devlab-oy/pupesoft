@@ -423,9 +423,9 @@ if ($ytunnus != '' and $tee == "") {
 	</tr>
 	</table>
 	<br>
-	<input type='submit' name='jatko' value='".t("Lähetä")."'>
-	<input type='submit' name='jatko' value='".t("Lähetä ja kohdista")."'>
-	<input type='submit' name='jatko' value='".t("Lähetä ja kohdista nimellä")."'>
+	<input type='submit' name='jatko' value='".t("Tallenna suoritus")."'>
+	<input type='submit' name='jatko' value='".t("Tallenna suoritus ja siirry kohdistukseen y-tunnuksella")."'>
+	<input type='submit' name='jatko' value='".t("Tallenna suoritus ja siirry kohdistukseen nimellä")."'>
 	</form>";
 }
 

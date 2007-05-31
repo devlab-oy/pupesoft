@@ -169,3 +169,25 @@ function toimehtoTarkenne(toimehto) {
 		tehtoLisa.value='';
 	}
 }
+
+function showhide(layer_ref) {
+
+	var state = document.getElementById(layer_ref).style.display;	
+	if (state == 'block') {
+		state = 'none';
+	}
+	else {
+		state = 'block';
+	}
+
+	if (document.all) { //IS IE 4 or 5 (or 6 beta)
+		eval( "document.all." + layer_ref + ".style.display = state");
+	}
+	if (document.layers) { //IS NETSCAPE 4 or below
+		document.layers[layer_ref].display = state;
+	}
+	if (document.getElementById &&!document.all) {
+		hza = document.getElementById(layer_ref);
+		hza.style.display = state;
+	}
+}

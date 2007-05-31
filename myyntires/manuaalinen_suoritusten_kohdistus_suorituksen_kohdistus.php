@@ -79,45 +79,35 @@ else{
   $jarjestys = 'erpcm';
 }
 
-if ($asiakas_nimi=='') { // Etsitään ytunnuksella
-	$query = "SELECT ytunnus FROM asiakas WHERE tunnus=$asiakas_tunnus AND ytunnus!='' AND yhtio ='$kukarow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
+// Etsitään ytunnuksella
+$query  = "SELECT ytunnus FROM asiakas WHERE tunnus = '$asiakas_tunnus' AND ytunnus != '' AND yhtio = '$kukarow[yhtio]'";
+$result = mysql_query($query) or pupe_error($query);
 
-	if ($ytunnusrow=mysql_fetch_array($result)) {
-  		$ytunnus = $ytunnusrow[0];
-	} 
-	else {
-  		echo "<font class='head'>".t("Asiakkaalta ei löydy y-tunnusta")."</font>";
-  		exit;
-	}
-	
-	if (strtoupper($suoritus['valkoodi']) != strtoupper($yhtiorow['valkoodi'])) {
-		$query = "	SELECT summa_valuutassa-saldo_maksettu_valuutassa summa, kasumma_valuutassa kasumma, laskunro, erpcm, kapvm, viite, lasku.tunnus
-					FROM lasku
-	            	WHERE lasku.yhtio ='$kukarow[yhtio]' and tila = 'U' AND ytunnus='$ytunnus' and mapvm='0000-00-00' and valkoodi='$valkoodi' $lisa
-					ORDER BY $jarjestys";
-	}
-	else {			
-		$query = "	SELECT summa-saldo_maksettu summa, kasumma, laskunro, erpcm, kapvm, viite, lasku.tunnus
-					FROM lasku
-	            	WHERE lasku.yhtio ='$kukarow[yhtio]' and tila = 'U' AND ytunnus='$ytunnus' and mapvm='0000-00-00' and valkoodi='$valkoodi' $lisa
-					ORDER BY $jarjestys";
-	}
+if ($ytunnusrow=mysql_fetch_array($result)) {
+	$ytunnus = $ytunnusrow[0];
 } 
 else {
-	if (strtoupper($suoritus['valkoodi']) != strtoupper($yhtiorow['valkoodi'])) {
-		$query = "	SELECT summa_valuutassa-saldo_maksettu_valuutassa summa, kasumma_valuutassa kasumma, laskunro, erpcm, kapvm, viite, lasku.tunnus
-					FROM lasku
-	            	WHERE lasku.yhtio ='$kukarow[yhtio]' and tila = 'U' AND nimi='$asiakas_nimi' and mapvm='0000-00-00' and valkoodi='$valkoodi' $lisa
-					ORDER BY $jarjestys";
-	}
-	else {			
-		$query = "	SELECT summa-saldo_maksettu summa, kasumma, laskunro, erpcm, kapvm, viite, lasku.tunnus
-					FROM lasku
-	            	WHERE lasku.yhtio ='$kukarow[yhtio]' and tila = 'U' AND nimi='$asiakas_nimi' and mapvm='0000-00-00' and valkoodi='$valkoodi' $lisa
-					ORDER BY $jarjestys";
-	}
+	echo "<font class='head'>".t("Asiakkaalta ei löydy y-tunnusta")."</font>";
+	exit;
 }
+
+if (strtoupper($suoritus['valkoodi']) != strtoupper($yhtiorow['valkoodi'])) {
+	$query = "SELECT summa_valuutassa-saldo_maksettu_valuutassa summa, kasumma_valuutassa kasumma, ";
+}
+else {
+	$query = "SELECT summa-saldo_maksettu summa, kasumma, ";
+	
+}
+
+$query .= " laskunro, erpcm, kapvm, viite, lasku.tunnus
+			FROM lasku USE INDEX (yhtio_tila_mapvm)
+           	WHERE yhtio  = '$kukarow[yhtio]' 
+			and tila     = 'U'
+			and mapvm    = '0000-00-00' 
+			and valkoodi = '$valkoodi' 
+			and (ytunnus = '$ytunnus' or nimi = '$asiakas_nimi' or liitostunnus = '$asiakas_tunnus')
+			$lisa
+			ORDER BY $jarjestys";
 $result = mysql_query($query) or pupe_error($query);
 
 echo "<form action = '$PHP_SELF?tila=$tila&suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi' method = 'post'>";

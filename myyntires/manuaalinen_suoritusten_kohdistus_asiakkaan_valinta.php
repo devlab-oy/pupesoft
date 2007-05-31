@@ -120,15 +120,15 @@ while ($asiakas = mysql_fetch_array($result)) {
 
 	// Onko asiakkaalla avoimia laskuja???
 	$query = "	SELECT COUNT(*) maara
-				FROM lasku
+				FROM lasku USE INDEX (yhtio_tila_mapvm)
 				WHERE yhtio ='$kukarow[yhtio]'
 				and mapvm='0000-00-00'
 				and tila = 'U'
-				and ytunnus = '$asiakas[ytunnus]'";
+				and (ytunnus = '$asiakas[ytunnus]' or nimi = '$asiakas[nimi]' or liitostunnus = '$asiakas[tunnus]')";
 	$lresult = mysql_query($query) or pupe_error($query);
 	$lasku = mysql_fetch_array ($lresult);
 
-	echo "<tr>
+	echo "<tr class='aktiivi'>
 			<td>$asiakas[nimi]</td>
 			<td>$asiakas[maara] / $asiakas[viitteita]</td>
 			<td>$lasku[maara]</td>";
@@ -136,15 +136,11 @@ while ($asiakas = mysql_fetch_array($result)) {
 	echo "<form action='$PHP_SELF' method='POST'>";
 	echo "<input type='hidden' name='tila' value='suorituksenvalinta'>";
 	echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas[tunnus]'>";
+	echo "<input type='hidden' name='asiakas_nimi' value='$asiakas[nimi]'>";
 	echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td>";
 	echo "</form>";
 
-	echo "<form action='$PHP_SELF' method='POST'>";
-	echo "<input type='hidden' name='tila' value='suorituksenvalinta'>";
-	echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas[tunnus]'>";
-	echo "<input type='hidden' name='asiakas_nimi' value='$asiakas[nimi]'>";
-	echo "<td class='back'><input type='submit' value='".t("Valitse nimellä")."'></td>";
-	echo "</form></tr>";
+	echo "</tr>";
 }
 
 echo "</table>";

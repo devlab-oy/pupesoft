@@ -189,12 +189,9 @@ if ($tee == "SYOTTO") {
 	}
 
 	// takasin jonnekin
-	if ($jatko == t("Lähetä ja kohdista") or $jatko == t("Lähetä ja kohdista nimellä")) {
+	if ($jatko != t("Tallenna suoritus")) {
 		$oikeus=1;
 		$PHP_SELF='manuaalinen_suoritusten_kohdistus.php';
-
-		if ($jatko != t("Lähetä ja kohdista nimellä")) unset($asiakas_nimi);
-
 		require("manuaalinen_suoritusten_kohdistus_suorituksen_kohdistus.php");
 		exit;
 	}
@@ -424,8 +421,7 @@ if ($ytunnus != '' and $tee == "") {
 	</table>
 	<br>
 	<input type='submit' name='jatko' value='".t("Tallenna suoritus")."'>
-	<input type='submit' name='jatko' value='".t("Tallenna suoritus ja siirry kohdistukseen y-tunnuksella")."'>
-	<input type='submit' name='jatko' value='".t("Tallenna suoritus ja siirry kohdistukseen nimellä")."'>
+	<input type='submit' name='jatko' value='".t("Tallenna suoritus ja siirry kohdistukseen")."'>
 	</form>";
 }
 

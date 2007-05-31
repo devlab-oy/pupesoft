@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require ("inc/parametrit.inc"); 
 
 if(isset($_POST['go'])) 		$go		= $_POST['go'];
 else 							$go		= "";

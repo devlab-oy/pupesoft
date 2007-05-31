@@ -83,7 +83,7 @@ if (isset($tapa) and $tapa == 'pois') {
 	if (isset($viite)) {
 		$query = "select suoritus.*, tiliointi.summa from suoritus, yriti, tiliointi where suoritus.yhtio='$kukarow[yhtio]' and suoritus.summa = 0 and kohdpvm != '0000-00-00' and viite like '$viite%' and suoritus.yhtio=yriti.yhtio and suoritus.tilino=yriti.tilino and yriti.factoring != '' and tiliointi.yhtio=suoritus.yhtio and selite = '".t("Kohdistettiin korkoihin")."' and tiliointi.tunnus=suoritus.ltunnus";
 		$result = mysql_query($query) or pupe_error($query);
-		echo $query."<br>";
+		//echo $query."<br>";
 		
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sopivia korkovientejä ei löydy")."!</font><br><br>";
@@ -109,7 +109,7 @@ if (isset($tapa) and $tapa == 'pois') {
 		foreach ($valitut as $valittu) {
 			$query = "select * from suoritus where yhtio='$kukarow[yhtio]' and tunnus='$valittu' and kohdpvm!='0000-00-00'";
 			$result = mysql_query($query) or pupe_error($query);
-			echo "$query<br>";
+			//echo "$query<br>";
 			if (mysql_num_rows($result) == 0) {
 				echo "<font class='error'>".t("Suoritus on kadonnut tai se ei ole enää käytetty")."!</font><br><br>";
 			}
@@ -118,23 +118,32 @@ if (isset($tapa) and $tapa == 'pois') {
 				// Etsitään kirjanpitotapahtuma
 				$query = "select summa from tiliointi where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[ltunnus]'";
 				$result = mysql_query($query) or pupe_error($query);
-				echo "$query<br>";
+				//echo "$query<br>";
 				if (mysql_num_rows($result) == 0) {
 					echo "<font class='error'>".t("Tiliöinti on kadonnut")."!</font><br><br>";
 				}
 				else {
 					$tiliointirow=mysql_fetch_array($result);
+					$query = "select pankki_tili from factoring where yhtio='$kukarow[yhtio]' and pankki_tili='$suoritusrow[tilino]'";
+					$result = mysql_query($query) or pupe_error($query);
+					//echo "$query<br>";
+					if (mysql_num_rows($result) == 0) {
+						$tilino = $yhtiorow['myyntisaamiset'];
+					}
+					else {
+						$tilino = $yhtiorow['factoringsaamiset'];
+					}
 					// päivitetään suoritus
 					$query = "update suoritus set kohdpvm = '0000-00-00', summa = -1 * $tiliointirow[summa] where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[tunnus]'";
 					$result = mysql_query($query) or pupe_error($query);
-					echo "$query<br>";
+					//echo "$query<br>";
 					if (mysql_affected_rows() == 0) {
 						echo "<font class='error'>".t("Suorituksen päivitys epäonnistui")."! $tunnus</font><br>";	
 					}
 					// tehdään kirjanpitomuutokset
-					$query = "update tiliointi set tilino='$yhtiorow[factoringsaamiset]', selite = '".t("Korjatttu suoritus")."' where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[ltunnus]'";
+					$query = "update tiliointi set tilino='$tilino', selite = '".t("Korjatttu suoritus")."' where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[ltunnus]'";
 					$result = mysql_query($query) or pupe_error($query);
-					echo "$query<br>";
+					//echo "$query<br>";
 					if (mysql_affected_rows() == 0) {
 						echo "<font class='error'>".t("Kirjanpitomuutoksia ei osattu tehdä! Korjaa kirjanpito käsin")."!</font><br>";
 					}
@@ -158,25 +167,27 @@ if (!isset($tapa)) {
 		echo "</form>";
 }
 else {
-	if (!isset($viite) and $tapa == 'paalle') {
-		echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
-		echo "<input type='hidden' name='tapa' value='$tapa'><table>";
-		echo "<tr><th>".t("Anna viitteen alku suorituuksista, jotka haluat käsiteltäviksi")."</th>";
-		echo "<td><input type='text' name='viite' value = '50009'></td></tr>";
-		echo "<tr><th>".t("Mille tilille nämä varat tiliöidään")."</th>";
-		echo "<td><input type='text' name='tilino'></td></tr>";
-		echo "<tr><td class='back'><input name='subnappi' type='submit' value='".t("Hae suoritukset")."'></td></tr>";
-		echo "</table>";
-		echo "</form>";
-	}
-	else {
-		echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
-		echo "<input type='hidden' name='tapa' value='$tapa'><table>";
-		echo "<tr><th>".t("Anna viitteen alku korkovienneistä, jotka haluat käsiteltäviksi")."</th>";
-		echo "<td><input type='text' name='viite'></td></tr>";
-		echo "<tr><td class='back'><input name='subnappi' type='submit' value='".t("Hae korkoviennit")."'></td></tr>";
-		echo "</table>";
-		echo "</form>";
+	if (!isset($viite)) { 
+		if ($tapa == 'paalle') {
+			echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='tapa' value='$tapa'><table>";
+			echo "<tr><th>".t("Anna viitteen alku suorituuksista, jotka haluat käsiteltäviksi")."</th>";
+			echo "<td><input type='text' name='viite' value = '50009'></td></tr>";
+			echo "<tr><th>".t("Mille tilille nämä varat tiliöidään")."</th>";
+			echo "<td><input type='text' name='tilino'></td></tr>";
+			echo "<tr><td class='back'><input name='subnappi' type='submit' value='".t("Hae suoritukset")."'></td></tr>";
+			echo "</table>";
+			echo "</form>";
+		}
+		else {
+			echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
+			echo "<input type='hidden' name='tapa' value='$tapa'><table>";
+			echo "<tr><th>".t("Anna viitteen alku korkovienneistä, jotka haluat käsiteltäviksi")."</th>";
+			echo "<td><input type='text' name='viite'></td></tr>";
+			echo "<tr><td class='back'><input name='subnappi' type='submit' value='".t("Hae korkoviennit")."'></td></tr>";
+			echo "</table>";
+			echo "</form>";
+		}
 	}
 }
 

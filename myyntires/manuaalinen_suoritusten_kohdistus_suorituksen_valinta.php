@@ -33,7 +33,7 @@ if (mysql_num_rows($result) > 1) {
 	$r=1;
 	while ($suoritus=mysql_fetch_array ($result)) {
 		
-		echo "<tr><td>
+		echo "<tr class='aktiivi'><td>
 		<input type='radio' name='suoritus_tunnus' value='$suoritus[tunnus]' ";
 		
 		if (mysql_num_rows($result)==$r) echo "checked";

@@ -114,7 +114,7 @@ echo "<form action = '$PHP_SELF?tila=$tila&suoritus_tunnus=$suoritus_tunnus&asia
 echo "<table><tr><th colspan='2'></th>";
 
 for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-  echo "<th><a href='$PHP_SELF?suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi&tila=$tila&ojarj=".$i.$ulisa."'>" . t(mysql_field_name($result,$i))."</a></th>";
+	echo "<th><a href='$PHP_SELF?suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi&tila=$tila&ojarj=".$i.$ulisa."'>" . t(mysql_field_name($result,$i))."</a></th>";
 }
 
 echo "<th></th></tr>";
@@ -142,7 +142,7 @@ while ($maksurow=mysql_fetch_array ($result)) {
 		$lasku_tunnus = $maksurow['tunnus'];
 		$bruttokale = $maksurow['summa']-$maksurow['kasumma'];
 		
-		echo "<tr><th>";
+		echo "<tr class='aktiivi'><th>";
 		echo "<input type='checkbox' name='lasku_tunnukset[]' value='$lasku_tunnus' onclick='javascript:paivita1(this)'>";
 		echo "<input type='hidden' name='lasku_summa' value='$maksurow[summa]'>";
 		echo "</th><th>";

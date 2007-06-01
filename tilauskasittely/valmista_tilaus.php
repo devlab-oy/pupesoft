@@ -445,7 +445,7 @@
 		echo "<th>".t("Toimaka")."</a></th>";
 		echo "<th>".t("Keräysaika")."</a></th>";
 
-		if ($toim != 'KORJAA') {
+		if ($toim != 'KORJAA' and $toim != 'TUTKAA') {
 			echo "<th>".t("Valmista")."</th>";
 		}
 
@@ -565,7 +565,7 @@
 			}
 
 
-			if ($prow["tyyppi"] == "L" and $toim != "KORJAA") {
+			if ($prow["tyyppi"] == "L" and $toim != "KORJAA" and $toim != 'TUTKAA') {
 				echo "<td><input type='checkbox' name='osatoimitetaan[$prow[tunnus]]' value='$prow[tunnus]'></td>";
 			}
 
@@ -577,7 +577,7 @@
 
 		echo "<tr><td colspan='9' class='back'><br></td></tr>";
 
-		if ($toim != 'KORJAA') {
+		if ($toim != 'KORJAA' and $toim != 'TUTKAA') {
 			echo "<tr><td colspan='8'>Valmista syötetyt kappaleet:</td><td><input type='submit' name='osavalmistus' value='".t("Valmista")."'></td></tr>";
 			echo "<tr><td colspan='4'>Valmista prosentti koko tilauksesta:</td><td colspan='4' align='right'><input type='text' name='kokopros' size='5'> % </td><td><input type='submit' name='osavalmistus' value='".t("Valmista")."'></td></tr>";
 			echo "<tr><td colspan='8'>Siirrä valitut valmisteet uudelle tilaukselle:</td><td><input type='submit' name='osatoimitus' value='".t("Osatoimita")."'></td></tr>";
@@ -654,7 +654,7 @@
 							and tilausrivi.toimitettu = ''
 							and tilausrivi.varattu != 0";
 		}
-		elseif ($toim == "KORJAA") {
+		elseif ($toim == "KORJAA" or $toim == "TUTKAA") {
 			$query	 	= "	SELECT lasku.ytunnus, lasku.tila, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 							lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 							lasku.maksuehto, lasku.tunnus, lasku.viesti, count(tilausrivi.tunnus) riveja,

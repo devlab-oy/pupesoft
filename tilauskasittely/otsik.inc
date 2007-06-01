@@ -369,6 +369,7 @@
 				<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
 				<input type='hidden' name='kolm_maa' 						 value = '$srow[kolm_maa]'>
 				<input type='hidden' name='tunnusnippu' 					 value = '$srow[tunnusnippu]'>
+				<input type='hidden' name='projekti'						 value = '$srow[projekti]'>				
 				<input type='hidden' name='jaksotettu'	 					 value = '$srow[jaksotettu]'>
 				<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
 
@@ -2024,6 +2025,13 @@
 						SET tunnusnippu = '$tilausnumero'
 						WHERE tunnus = '$tilausnumero'";
 			$result = mysql_query($query) or pupe_error($query);
+			
+			if($toim=="PROJEKTI") {
+				// avataan projekti kirjanpitoon
+				$query = " insert into kustannuspaikka set nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o'";
+				$result = mysql_query($query) or pupe_error($query);
+				$projekti = mysql_insert_id();				
+			}
 		}
 
 		if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $tilaustyyppi == "T") {
@@ -2071,6 +2079,7 @@
 						yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',
 						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
 						seuranta					= '$seuranta',
+						projekti					= '$projekti',						
 						rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',
 						asiakkaan_kohde				= '$asiakkaan_kohde',
 						otunnus 					= '$kukarow[kesken]'";

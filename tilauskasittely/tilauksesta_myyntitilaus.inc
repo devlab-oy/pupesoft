@@ -116,6 +116,11 @@
 				$kysely = "UPDATE lasku SET tunnusnippu='$ptunnus', tila='R', alatila='' WHERE yhtio='$kukarow[yhtio]' and tunnus='$ptunnus'";
 				$updres=mysql_query($kysely) or pupe_error($kysely);
 				
+				// avataan projekti kirjanpitoon
+				$query = " insert into kustannuspaikka set nimi = '$ptunnus - {$monistarow[nimi]}', tyyppi = 'P', kaytossa = 'o'";
+				$result = mysql_query($query) or pupe_error($query);
+				$projekti = mysql_insert_id();
+				
 				$tilauksesta_myyntitilaus = "<font class='message'>".t("PERUSTETTIIN PROJEKTI").": $ptunnus</font><br><br>";
 			}
 			
@@ -164,6 +169,10 @@
 					case 'tunnusnippu_tarjous':
 						$values .= ", '$monistarow[tunnusnippu]'";
 						$pvalues .= ", '$monistarow[tunnusnippu]'";
+						break;
+					case 'projekti':
+						$values .= ", '$projekti'";
+						$pvalues .= ", '$projekti'";
 						break;
 					default:
 						$values .= ", '".$monistarow2[$i]."'";

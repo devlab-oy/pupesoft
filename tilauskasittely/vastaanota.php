@@ -450,6 +450,16 @@
 								and tuote.yhtio				= tilausrivi.yhtio
 								and tuote.tuoteno			= tilausrivi.tuoteno";
 					$result = mysql_query($query) or pupe_error($query);
+				
+					//Irrotetaan sarjanumerot
+					if ($tilausrivirow["sarjanumeroseuranta"] != "") {
+						$query = "	UPDATE sarjanumeroseuranta
+									SET siirtorivitunnus = 0
+									WHERE siirtorivitunnus		= '$tun'
+									and yhtio					= '$kukarow[yhtio]'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+					}
+				
 				}
 				if ($tee == "X") {
 					// Summataan virhecountteria

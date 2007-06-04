@@ -166,7 +166,7 @@
 	if ($laskurow['tila'] == 'V' and $var != "W") {
 		$perhelisa = " and tuoteperhe.tyyppi='R' ";
 	}
-	elseif($var == "W" and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
+	elseif ($var == "W" and $laskurow["tila"] == 'V' and $laskurow["tilaustyyppi"] == 'V') {
 		// Asiaakkaallevalmistus ja halutaan myyd‰ rivi varastosta
 		$perhelisa  = " and tuoteperhe.tyyppi in ('P','') ";
 		$var 		= "";
@@ -194,7 +194,7 @@
 
 	if ($laskurow['tila'] != "O" and trim($var) == "") {
 
-		if ($debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
+		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 
 		// Etsit‰‰n korvaavia tuotteita
 		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "") {
@@ -340,7 +340,7 @@
 					// Saldolliset tuotteet
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"]);
 
-					if ($debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta<br>";
+					if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta<br>";
 
 					//Tutkitaan myyd‰‰nkˆ tietty‰ jo varattua lis‰varustetta
 					if ($perheid2 > 0 and $perheid2!=$rivitunnus and strtoupper($zrow["hyllyalue"]."#".$zrow["hyllynro"]."#".$zrow["hyllyvali"]."#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
@@ -372,7 +372,7 @@
 					$zzrow[$zzrowlask]["hyllyvali"]		= $zrow["hyllyvali"];
 					$zzrow[$zzrowlask]["hyllytaso"]		= $zrow["hyllytaso"];
 
-					if ($debug==1) echo "Myyt‰viss‰ paikalta $zrow[hyllyalue]: $myytavissa kappaletta<br>";
+					if ($lisaarivi_debug==1) echo "Myyt‰viss‰ paikalta $zrow[hyllyalue]: $myytavissa kappaletta<br>";
 
 					// tilatulla tuotteella oli saldoa.. laitetaan lippu p‰‰lle, ett‰ huomataan osatoimituskeisi oikein..
 					if ($tuoteno == $alkupera_trow["tuoteno"]) {
@@ -430,7 +430,7 @@
 				foreach($zzrow as $zrow) {
 					if ($varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or $laskurow["varasto"] == $zrow["varasto"]))) {
 
-						if ($debug==1) echo "Myyd‰‰n paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
+						if ($lisaarivi_debug==1) echo "Myyd‰‰n paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
 
 						// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
 						$myy_tuoteno[$i]   = strtoupper($tuoteno);
@@ -469,12 +469,12 @@
 				if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
 					$myy_tyyppi[$i] = "NORMAALI";
 					$saldoyhteensa += $toimittamatta; // summaillaan kaikkien isien saldoa yhteens‰.
-					if ($debug==1) echo "$tuoteno on is‰tuote/normituote<br>";
+					if ($lisaarivi_debug==1) echo "$tuoteno on is‰tuote/normituote<br>";
 				}
 				else {
 					$myy_tyyppi[$i] = "LAPSITUOTE";
 					$lapsiyhteensa += $toimittamatta; // summaillaan kaikkien lapsien saldoa yhteens‰.
-					if ($debug==1) echo "$tuoteno on lapsituote<br>";
+					if ($lisaarivi_debug==1) echo "$tuoteno on lapsituote<br>";
 				}
 
 				//Kasvatetaan ‰iti-indeksi‰
@@ -482,7 +482,7 @@
 			}
 		} // end foreach myyt‰v‰t tuotteet
 
-		if ($debug==1) echo "Kaikkiaan myyt‰viss‰: $saldoyhteensa kappaletta<br>";
+		if ($lisaarivi_debug==1) echo "Kaikkiaan myyt‰viss‰: $saldoyhteensa kappaletta<br>";
 
 		//tutkitaan ensin saako t‰lle asiakkaalle myyd‰ osatoimituksen t‰st‰ tuoteryhm‰st‰
 		$query = "  select yhtio
@@ -497,7 +497,7 @@
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
 		if ((mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta or $varataan_saldoa == "EI") {
 
-			if ($debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
+			if ($lisaarivi_debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
 
 			// nyt meill‰ on $myy_ arrayperheess‰ kaikki tuotteet ja varastopaikat jolta voidaan myyd‰ jotain..
 			// loopataan kaikki tuotteet l‰pi
@@ -506,7 +506,7 @@
 			if ($paikka != '') {
 				$paikat = split('#',$paikka);
 
-				if ($debug==1) echo "Halutaan myyd‰ paikalta $paikka<br>";
+				if ($lisaarivi_debug==1) echo "Halutaan myyd‰ paikalta $paikka<br>";
 
 				foreach ($myy_tuoteno as $i => $tuoteno) {
 					if ($myy_kpl[$i] >= $toimittamatta and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1]  == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i]) {
@@ -535,7 +535,7 @@
 			// Myyd‰‰n tietyst‰ varastosta
 			if (is_array($varasto) and $paikka == '') {
 
-				if ($debug==1) echo "Halutaan myyd‰ varastoista $varasto<br>";
+				if ($lisaarivi_debug==1) echo "Halutaan myyd‰ varastoista $varasto<br>";
 
 				foreach ($myy_tuoteno as $i => $tuoteno) {
 					if (!in_array($myy_varasto[$i], $varasto) and $myy_varasto[$i] != "") {
@@ -562,13 +562,13 @@
 			foreach ($myy_tuoteno as $i => $tuoteno) {
 				//T‰ss‰ loopataan vain is‰/normaleja tuotteita
 
-				if ($debug==1) echo "Loopataan $tuoteno<br>";
+				if ($lisaarivi_debug==1) echo "Loopataan $tuoteno<br>";
 
 				if ($myy_tyyppi[$i] == "NORMAALI") {
 					// jos ei olla viel‰ toimitettu kaikkea, niin lis‰t‰‰n tilausrivi
 					if ($toimittamatta > 0) {
 
-						if ($debug==1) echo "Normaalituote $tuoteno, toimittamatta $toimittamatta<br>";
+						if ($lisaarivi_debug==1) echo "Normaalituote $tuoteno, toimittamatta $toimittamatta<br>";
 
 						if ($myy_kpl[$i] >= $toimittamatta or $varataan_saldoa == "EI") {
 							$myy_kpl[$i] = $toimittamatta; // jos t‰ll‰ paikalla on saldoa enemm‰n kun tarvitaan, otetaan sitten vaan tarvittava m‰‰r‰
@@ -879,12 +879,12 @@
 		} // end saadaanko myyd‰ osatoimitus
 	}
 
-
-
 	// jos tultiin ulos loopista, ett‰ meill‰ on toimittamattomia rivej‰, tehd‰‰n niist‰ puuterivi
 	// tai jos tullaan niin, ett‰ var-kent‰ss‰ on J tai P tai jotain
 	if ($toimittamatta > 0 or trim($var) != '' or $laskurow['tila'] == 'O') {
 
+		if ($lisaarivi_debug==1) echo "Menn‰‰n puutehaaraan: $tuoteno hinta $hinta<br>";
+		
 		//Tyhjennet‰‰n apumuuttuja
 		if ($var == "Y")	{
 			$var = "";
@@ -896,9 +896,11 @@
 		$puu_alekerr	= array();
 		$puu_var		= array();
 
-
 		//Tehd‰‰n suoratoimitusautomaatio jos kyseess‰ on extranet tai ediasiakas
 		if (($yhtiorow["suoratoim_automaatio"] != '' or $kukarow["extranet"] != '' or $kutsuja == "EDITILAUS") and $var == "" and $toimittamatta > 0 and $suoratoimeikiitos == "" and $rivityyppi != 'E') {
+
+			if ($lisaarivi_debug==1) echo "Tehd‰‰n suoratoimitusautomaatio<br>";
+
 			$suora_tuoteno 	= $alkupera_trow["tuoteno"];
 			$suora_kpl		= $toimittamatta;
 
@@ -924,6 +926,9 @@
 
 
 		if (substr($var,0,4) == "LOJ#" or substr($var,0,4) == "LOP#" or substr($lop,0,4) == "LOP#") {
+
+			if ($lisaarivi_debug==1) echo "Laitetaan loput rivit jtksi tai puutteeksi (".substr($var,0,4).") (".substr($lop,0,4).")<br>";
+			
 			//Lis‰t‰‰n syˆtetyt ja laitetaan loput JT:seen tai puutteiksi
 			$puu_tuoteno[]	= $alkupera_trow["tuoteno"];
 			$puu_kpl[] 		= $toimittamatta;
@@ -947,6 +952,9 @@
 			}
 		}
 		else {
+			
+			if ($lisaarivi_debug==1) echo "Kaikki puutteeksi var $var<br>";
+			
 			$puu_tuoteno[]	= $alkupera_trow["tuoteno"];
 			$puu_kpl[]	 	= $toimittamatta;
 			$puu_hintake[]	= "X";
@@ -1053,6 +1061,9 @@
 					require ("alv.inc");
 				}
 				else {
+					
+					if ($lisaarivi_debug==1) echo "Eka haara hinta t‰‰ll‰ $hinta<br>";
+					
 					if (file_exists("../inc/alehinta.inc")) {
 						require ("../inc/alehinta.inc");
 						require ("alv.inc");

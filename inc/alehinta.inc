@@ -277,7 +277,7 @@
 			}
 		}
 
-		// 7.1 asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) laskun valuutassa
+		// 7 asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 			$query = "	SELECT hinta
@@ -317,7 +317,7 @@
 			}
 		}
 
-		// 7.2 asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa
+		// 8. asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa
 		if ($hinta == 0) {
 
 			$query = "	SELECT hinta
@@ -357,7 +357,7 @@
 			}
 		}
 
-		// 8.1 asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) laskun valuutassa
+		// 9. asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 			$query = "	SELECT hinta
@@ -397,7 +397,7 @@
 			}
 		}
 
-		// 8.2 asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa
+		// 10. asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa
 		if ($hinta == 0) {
 
 			$query = "	SELECT hinta
@@ -437,7 +437,7 @@
 			}
 		}
 
-		// 9.1 asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta) laskun valuutassa
+		// 11. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta) laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 			$query = "	SELECT hinta
@@ -478,7 +478,7 @@
 			}
 		}
 
-		// 9.2 asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta)
+		// 12. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta)
 		if ($hinta == 0) {
 
 			$query = "	SELECT hinta
@@ -519,7 +519,7 @@
 			}
 		}
 
-		// 10.1 asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta)
+		// 13. asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta)
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 			$query = "	SELECT hinta
@@ -560,7 +560,7 @@
 			}
 		}
 
-		// 10.2 asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta)
+		// 14. asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta)
 		if ($hinta == 0) {
 
 			$query = "	SELECT hinta
@@ -601,7 +601,7 @@
 			}
 		}
 
-		// 11. tuote.nettohinta (tuotteen nettohinta)
+		// 15. tuote.nettohinta (tuotteen nettohinta)
 		if ($hinta == 0 and $netto != 'E' and $trow['nettohinta'] > 0) {
 			$hinta 			= $trow['nettohinta'];
 			$aperuste 		.= "Tuotteen nettohinta. ";
@@ -609,7 +609,7 @@
 			$ale			= 0;
 		}
 
-		// 12. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
+		// 16. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
 			$query = "	SELECT hinta, laji
@@ -634,7 +634,7 @@
 			}
 		}
 
-		// 13. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtion valuutassa
+		// 17. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtion valuutassa
 		if ($hinta == 0) {
 
 			$query = "	SELECT hinta, laji
@@ -659,7 +659,7 @@
 			}
 		}
 
-		// 14. tuote.myyntihinta (tuotteen bruttohinta)
+		// 18. tuote.myyntihinta (tuotteen bruttohinta)
 		if ($hinta == 0) {
 			$hinta		= $trow['myyntihinta'];
 			$aperuste	.= "Tuotteen myyntihinta. ";

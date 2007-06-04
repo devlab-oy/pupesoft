@@ -1725,7 +1725,7 @@ if ($tee == '') {
 			$result = mysql_query($query) or pupe_error($query);
 
 			// Tehd‰‰n pari juttua jos tuote on sarjanuerosaurannassa
-			if($tilausrivi["sarjanumeroseuranta"] != '') {
+			if ($tilausrivi["sarjanumeroseuranta"] != '') {
 				//Nollataan sarjanumero
 				if ($tilausrivi["varattu"] < 0) {
 					$tunken = "ostorivitunnus";
@@ -1770,13 +1770,43 @@ if ($tee == '') {
 				$paikka = "!!!".$tilausrivi["tilaajanrivinro"];
 			}
 
-
 			//haetaan tuotteen alv matikkaa varten
 			$query = "	SELECT alv, myyntihinta, nettohinta
 						FROM tuote
 						WHERE tuoteno = '$tilausrivi[tuoteno]' and yhtio='$kukarow[yhtio]'";
 			$tuoteresult = mysql_query($query) or pupe_error($query);
 			$tuoterow = mysql_fetch_array($tuoteresult);
+
+			// jos meill‰ on lasku menossa ulkomaille
+			if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+
+				// tutkitaan ollaanko siell‰ alv-rekisterˆity
+				$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
+				$alhire = mysql_query($query) or pupe_error($query);
+
+				// ollaan alv-rekisterˆity, haetaan tuotteelle oikea ALV
+				if (mysql_num_rows($alhire) == 1) {
+					$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$tilausrivi[tuoteno]' limit 1";
+					$alhire = mysql_query($query) or pupe_error($query);
+
+					// ei lˆytynyt alvia, se on pakko lˆyty‰
+					if (mysql_num_rows($alhire) == 0) {
+						$alehinta_alv        = -999.99; // t‰‰ on n‰in ett‰ tiedet‰‰n ett‰ k‰vi huonosti ja ei anneta lis‰t‰ tuotetta
+						$alv                 = -999.99;
+						$tuoterow["alv"]     = -999.99;
+						$tilausrivi["alv"]   = -999.99;
+						$tilausrivi["hinta"] = "0";
+						$netto               = "";
+						$hinta               = "0";
+					}
+					else {
+						$alehi_alrow     = mysql_fetch_array($alhire);
+						$alehinta_alv    = $alehi_alrow["alv"];
+						$tuoterow["alv"] = $alehi_alrow["alv"];
+					}
+				}
+			}
+
 
 			if ($tuoterow["alv"] != $tilausrivi["alv"] and $yhtiorow["alv_kasittely"] == "" and $tilausrivi["alv"] < 500) {
 				$hinta = sprintf('%.2f',round($tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuoterow['alv']/100),2));
@@ -3041,7 +3071,7 @@ if ($tee == '') {
 						}
 					}
 
-					if ($row["var"] == "P") {
+					if ($row["var"] == "P" and $saako_jalkitoimittaa == 0) {
 						echo "	<form action='$PHP_SELF' method='post'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='lopetus' value='$lopetus'>

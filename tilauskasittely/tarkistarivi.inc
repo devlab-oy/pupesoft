@@ -3,6 +3,7 @@
 
 	$riviok = 0;
 	$saako_hyvaksya = 0;
+	$saako_jalkitoimittaa = 0;
 	$varaosavirhe = "";
 
 	$tquery	= "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
@@ -48,12 +49,6 @@
 
 	if ($row["jt"] != 0 and $row["tyyppi"] == "E") {
 		$varaosavirhe .= t("VIRHE: Et voi syöttää jt-riviä ennakkotilaukseen!")."<br>";
-		$riviok++;
-		$tilausok++;
-	}
-
-	if ($row["alv"] == -999.99) {
-		$varaosavirhe .= t("VIRHE: Tuotteelle ei löytynyt ALV-prosenttia asiakkaan maahan!")."<br>";
 		$riviok++;
 		$tilausok++;
 	}
@@ -382,4 +377,13 @@
 		$paikat .= "<option value='X' $sel3>".t("Suoratoimita")."</option>";
 		$paikat = "<select Style='font-size: 8pt; padding:0;' name='var' onchange='submit();'>".$paikat."</select>";
 	}
+	
+	if ($row["alv"] == -999.99) {
+		$varaosavirhe .= t("VIRHE: Tuotteelle ei löytynyt ALV-prosenttia asiakkaan maahan!")."<br>";
+		$riviok++;
+		$tilausok++;
+		$saako_jalkitoimittaa++;
+		$saako_hyvaksya = 0;
+	}
+	
 ?>

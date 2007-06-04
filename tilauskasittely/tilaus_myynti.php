@@ -510,23 +510,30 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS") {
 					and tilausrivi.otunnus='$kukarow[kesken]'";
 	$sres = mysql_query($query) or pupe_error($query);
 
-	while($srow = mysql_fetch_array($sres)) {
+	while ($srow = mysql_fetch_array($sres)) {
 		if ($srow["varattu"] < 0) {
-			$tunken = "ostorivitunnus";
+			// dellataan koko rivi jos sitä ei ole vielä myyty
+			$query = "delete from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
+			$sarjares = mysql_query($query) or pupe_error($query);
+			if (mysql_affected_rows() == 0) {
+				// merkataan osorivitunnus nollaksi
+				$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}
 		}
 		else {
-			$tunken = "myyntirivitunnus";
+			// merktaan myyntirivitunnus nollaks
+			$query = "update sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and myyntirivitunnus='$srow[tunnus]'";
+			$sarjares = mysql_query($query) or pupe_error($query);
 		}
-
-		$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and $tunken='$srow[tunnus]'";
-		$sarjares = mysql_query($query) or pupe_error($query);
 	}
 
 	//	Päivitetään myös muut tunnusnipun jäsenet sympatian vuoksi hylätyiksi *** tämän voisi varmaan tehdä myös kaikki kerralla? ***
 	$query = "select tunnus from lasku where yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = $laskurow[tunnusnippu] and tunnus != '$kukarow[kesken]'";
 	$abures = mysql_query($query) or pupe_error($query);
-	if(mysql_num_rows($abures) > 0) {
-		while($row=mysql_fetch_array($abures)) {
+
+	if (mysql_num_rows($abures) > 0) {
+		while ($row = mysql_fetch_array($abures)) {
 			$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus=$row[tunnus]";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -541,16 +548,22 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS") {
 							and tilausrivi.otunnus='$row[tunnus]'";
 			$sres = mysql_query($query) or pupe_error($query);
 
-			while($srow = mysql_fetch_array($sres)) {
+			while ($srow = mysql_fetch_array($sres)) {
 				if ($srow["varattu"] < 0) {
-					$tunken = "ostorivitunnus";
+					// dellataan koko rivi jos sitä ei ole vielä myyty
+					$query = "delete from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
+					$sarjares = mysql_query($query) or pupe_error($query);
+					if (mysql_affected_rows() == 0) {
+						// merkataan osorivitunnus nollaksi
+						$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+					}
 				}
 				else {
-					$tunken = "myyntirivitunnus";
+					// merktaan myyntirivitunnus nollaks
+					$query = "update sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and myyntirivitunnus='$srow[tunnus]'";
+					$sarjares = mysql_query($query) or pupe_error($query);
 				}
-
-				$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and $tunken='$srow[tunnus]'";
-				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 		}
 	}
@@ -604,19 +617,27 @@ if ($tee == 'POISTA') {
 					and tilausrivi.otunnus='$kukarow[kesken]'";
 	$sres = mysql_query($query) or pupe_error($query);
 
-	while($srow = mysql_fetch_array($sres)) {
+	while ($srow = mysql_fetch_array($sres)) {
 		if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
-			$tunken = "siirtorivitunnus";
+			// merktaan siirtolistatunnus nollaks
+			$query = "update sarjanumeroseuranta set siirtorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
+			$sarjares = mysql_query($query) or pupe_error($query);
 		}
 		elseif ($row["varattu"] < 0) {
-			$tunken = "ostorivitunnus";
+			// dellataan koko rivi jos sitä ei ole vielä myyty
+			$query = "delete from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
+			$sarjares = mysql_query($query) or pupe_error($query);
+			if (mysql_affected_rows() == 0) {
+				// merkataan osorivitunnus nollaksi
+				$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}
 		}
 		else {
-			$tunken = "myyntirivitunnus";
+			// merktaan myyntirivitunnus nollaks
+			$query = "update sarjanumeroseuranta set myyntirivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and myyntirivitunnus='$srow[tunnus]'";
+			$sarjares = mysql_query($query) or pupe_error($query);
 		}
-
-		$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and $tunken='$srow[tunnus]'";
-		$sarjares = mysql_query($query) or pupe_error($query);
 	}
 
 	//Poistetaan maksusuunnitelma
@@ -1743,6 +1764,7 @@ if ($tee == '') {
 					$myy_sarjatunnus = $sarjarow["tunnus"];
 				}
 
+				// pitäisikö tässä poistaa myös rivit ostokeiseissä niinkuin POISTA ja HYLKAATARJOUS keisseissä
 				$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivi[tuoteno]' and $tunken='$tilausrivi[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 

@@ -1,4 +1,5 @@
 <?php
+
 require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t('Matkalaskut')."</font><hr><br><br>";
@@ -79,6 +80,73 @@ if($tee=="UUSI") {
 		echo "<font class='error'>".t("VIRHE!!! Anna asiakkaan nimi")."</font><br>";
 		$tee="";
 	}	
+}
+
+//	Joitain asioita kai pit‰‰ muutella..
+if($tee == "TALLENNA") {
+	if((int)$tilausnumero==0) {
+		echo "<font class='error'>".t("Matkalaskun numero puuttuu")."</font>";
+		$tee="";
+	}
+	else {
+		//	Koitetaan tallennella kuva
+		if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+			if($kuvaselite == "") {
+				$errormsg = t("Anna kuvalle selite");
+			}
+			else {
+				//	chekataan erroit
+				switch ($_FILES['userfile']['error']) {
+					case 1:
+					case 2:
+						$errormsg .= t("Kuva on liian suuri, suurin sallittu koko on")." ".ini_get('post_max_size');
+						break;
+					case 3:
+						$errormsg .= t("Kuvan lataus keskeytyi")."!";
+						break;
+					case 6:
+					case 7:
+					case 8:
+						$errormsg .= t("Tallennus ep‰onnistui")."!";
+						break;
+					case 0:
+						//	OK tallennetaan
+
+						// otetaan file extensio
+						$path_parts = pathinfo($_FILES['userfile']['name']);
+						$ext = $path_parts['extension'];
+						if (strtoupper($ext) == "JPEG") $ext = "jpg";
+
+						// extensio pit‰‰ olla oikein
+						if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
+							$errormsg .= "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
+						}
+						else {
+							// lis‰t‰‰n kuva
+							$query = "	insert into liitetiedostot set
+											yhtio    = '$kukarow[yhtio]',
+											liitos   = 'lasku',
+											liitostunnus = '$tilausnumero',
+											data     = '".addslashes(file_get_contents($_FILES['userfile']['tmp_name']))."',
+											selite   = '$kuvaselite',
+											filename = '{$_FILES["userfile"]["name"]}',
+											filesize = '{$_FILES["userfile"]["size"]}',
+											filetype = '{$_FILES["userfile"]["type"]}'";
+							$insre = mysql_query($query) or pupe_error($query);							
+
+							$kuvaselite = "";
+						}
+						break;
+				}				
+			}
+			
+			if($errormsg != "") {
+				echo "<font class='error'>$errormsg</font><br>";
+			}			
+		}
+		
+		$tee="MUOKKAA";
+	}
 }
 
 if($tee=="MUOKKAA") {
@@ -416,9 +484,9 @@ if($tee=="MUOKKAA") {
 		echo "<table>";
 
 		// t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
-		echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
+		echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off' enctype='multipart/form-data'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-				<input type='hidden' name='tee' value='$tee'>";
+				<input type='hidden' name='tee' value='TALLENNA'>";
 
 		echo "<tr>";
 		echo "<th align='left'>".t("Asiakas").":</th>";
@@ -426,6 +494,25 @@ if($tee=="MUOKKAA") {
 		echo "<td>$laskurow[toim_nimi]<br>$laskurow[toim_nimitark]<br>$laskurow[toim_osoite]<br>$laskurow[toim_postino] $laskurow[toim_postitp]</td>";
 
 		echo "</tr>";
+		echo "<tr>";
+		echo "<th align='left'>".t("Kuittikopiot").":</th>";
+		
+		echo "<td>";
+
+		$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='$tilausnumero'";
+		$liiteres=mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($liiteres)>0) {
+			while($liiterow=mysql_fetch_array($liiteres)) {
+				echo "<a href='$PHP_SELF?tee=$tee&tilausnumero=$tilausnumero&id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+			}
+		}
+		
+		echo "</td>";
+		
+		echo "	<tr><td class='back' colspan='2'><br></td></tr>
+				<tr><td class='back' colspan='2'><font class='message'>".t("Liit‰ kuittikopio")."</font></td></tr>
+				<tr><th>".t("Kuvan selite")."</th><th>".t("Tiedosto")."</th></tr>				
+				<tr><td><input type='text' name='kuvaselite' value='$kuvaselite'></td><td><input name='userfile' type='file' onchange='submit();'></td></tr>";
 		echo "</form></table><br>";
 
 		echo "<table><tr>";
@@ -579,7 +666,8 @@ if($tee=="MUOKKAA") {
 			
 			echo "<tr><th colspan='$cols'>".t("Kommentti")."</th></tr>";
 			echo "<tr><td colspan='$cols'><input type='text' name='kommentti' value='$kommentti' size='$leveys'></td>";			
-			echo "<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td></tr></table></form>";
+			echo "<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td></tr></table>";
+			echo "</form>";
 						
 		}
 		
@@ -633,8 +721,11 @@ if($tee=="MUOKKAA") {
 	
 	echo "<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
 			<tr><td class='back'><br></td></tr>
-			<tr><td colspan='4' class='back' align='right'><input type='submit' value='".t("Palaa")."'></td></tr></table>";
+			<tr><td colspan='4' class='back' align='right'><input type='submit' value='".t("Palaa")."'></td></form></tr></table>";
 	
+	if($id>0) {
+		echo "<iframe src='view.php?id=$id' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
+	}
 }
 
 if($tee == "") {    

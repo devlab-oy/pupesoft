@@ -562,6 +562,19 @@
 				require "inc/ebid.inc";
 				echo "<td></td><td><a href='$url'>".t("Näytä lasku")."</a></td></tr>";
 			}
+			else {
+				//	Onko kuva tietokannassa?
+				echo "<td></td><td>";				
+				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+				$liiteres=mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($liiteres)>0) {
+					while($liiterow=mysql_fetch_array($liiteres)) {
+						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+					}
+				}
+
+				echo "</td></tr>";
+			}
 		}
 		else {
 // Muu tosite
@@ -572,7 +585,21 @@
 				echo "<td><a href='$url'>".t("Näytä tosite/liite")."</a></td></tr>";
 			}
 			else {
-				echo "<td></td></tr>";
+				//	Onko kuva tietokannassa?
+				echo "<td valign='top'>";
+				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+				$liiteres=mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($liiteres)>0) {
+					while($liiterow=mysql_fetch_array($liiteres)) {
+						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+					}
+				}
+				else {
+					echo t("Paperilasku");
+				}
+				echo "</td>";		
+				
+				echo "</tr>";
 			}
 
 		}

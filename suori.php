@@ -269,7 +269,20 @@
 					echo "<td><a href='$url'>".t("Näytä lasku")."</a></td>";
 				}
 				else {
-					echo "<td>".t("Paperilasku")."</td>";
+					//	Onko kuva tietokannassa?
+					echo "<td valign='top'>";
+					$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+					$liiteres=mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($liiteres)>0) {
+						while($liiterow=mysql_fetch_array($liiteres)) {
+							echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+						}
+					}
+					else {
+						echo t("Paperilasku");
+					}
+					echo "</td>";		
+
 				}
 			}
 			else {
@@ -373,7 +386,19 @@
 						echo "<td><a href='$url'>".t("Näytä lasku")."</a></td>";
 					}
 					else {
-						echo "<td>".t("Paperilasku")."</td>";
+						//	Onko kuva tietokannassa?
+						echo "<td valign='top'>";
+						$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+						$liiteres=mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($liiteres)>0) {
+							while($liiterow=mysql_fetch_array($liiteres)) {
+								echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+							}
+						}
+						else {
+							echo t("Paperilasku");
+						}
+						echo "</td>";		
 					}
 				}
 				else {

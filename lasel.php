@@ -53,7 +53,19 @@
 					      	".t("Näytä lasku")."</a></td>";
 					}
 					else {
-					        echo "<td>".t("Paperilasku")."</td>";
+						//	Onko kuva tietokannassa?
+						echo "<td valign='top'>";
+						$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+						$liiteres=mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($liiteres)>0) {
+							while($liiterow=mysql_fetch_array($liiteres)) {
+								echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+							}
+						}
+						else {
+							echo t("Paperilasku");
+						}
+						echo "</td>";		
 					}
 				}
 				else {
@@ -281,7 +293,19 @@
 						".t("Näytä lasku")."</a></td>";
 					}
 					else {
-						echo "<td>".t("Paperilasku")."</td>";
+						//	Onko kuva tietokannassa?
+						echo "<td valign='top'>";
+						$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+						$liiteres=mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($liiteres)>0) {
+							while($liiterow=mysql_fetch_array($liiteres)) {
+								echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+							}
+						}
+						else {
+							echo t("Paperilasku");
+						}
+						echo "</td>";		
 					}
 				}
 				else {
@@ -644,10 +668,10 @@
                       ".t("Päiväkirja")."</td>
                       <td>
                       <select name='alvv'>
-                      <option value = '".date("Y")-4."'>".date("Y")-4."
-                      <option value = '".date("Y")-3."'>".date("Y")-3."
-                      <option value = '".date("Y")-2."'>".date("Y")-2."
-                      <option value = '".date("Y")-1."'>".date("Y")-1."
+                      <option value = '".(date("Y")-4)."'>".(date("Y")-4)."
+                      <option value = '".(date("Y")-3)."'>".(date("Y")-3)."
+                      <option value = '".(date("Y")-2)."'>".(date("Y")-2)."
+                      <option value = '".(date("Y")-1)."'>".(date("Y")-1)."
                       <option value = '".date("Y")  ."' selected>".date("Y")."
                       <select name='alvk'>
                       <option value = '0'>".t("koko vuosi")."

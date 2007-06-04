@@ -588,7 +588,19 @@
 			echo "<td><a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
 		}
 		else {
-			echo "<td>".t("Paperilasku")."</td>";
+			//	Onko kuva tietokannassa?
+			echo "<td valign='top'>";
+			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+			$liiteres=mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($liiteres)>0) {
+				while($liiterow=mysql_fetch_array($liiteres)) {
+					echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+				}
+			}
+			else {
+				echo t("Paperilasku");
+			}
+			echo "</td>";		
 		}
 
 		// N‰ytet‰‰n poistonappi, jos se on sallittu
@@ -644,7 +656,9 @@
 			echo "	<form name='kommentti' action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='V'>
 					<input type='hidden' name = 'nayta' value='$nayta'>
-					<input type='hidden' name='tunnus' value = '$tunnus'>";
+					<input type='hidden' name='tunnus' value = '$tunnus'>
+					<input type='hidden' name='iframe' value = '$iframe'>
+					<input type='hidden' name='id' value = '$id'>";
 
 			echo "	<tr>
 					<th colspan='2'>Lis‰‰ kommentti</th>
@@ -676,7 +690,9 @@
 			echo "<form name='uusi' action = '$PHP_SELF' method='post'>
 					 <input type='hidden' name='tee' value='L'>
 					 <input type='hidden' name = 'nayta' value='$nayta'>
-					 <input type='hidden' name='tunnus' value='$tunnus'><tr>";
+					 <input type='hidden' name='tunnus' value='$tunnus'>
+					 <input type='hidden' name='iframe' value = '$iframe'>
+					 <input type='hidden' name='id' value = '$id'><tr>";
 
 			echo "<tr><th colspan='2'>".t("Hyv‰ksyj‰t")."</th></tr>";
 
@@ -813,7 +829,9 @@
 				echo "	<form name='uusi' action = '$PHP_SELF' method='post'>
 						<input type='hidden' name='tee' value = 'U'>
 						<input type='hidden' name = 'nayta' value='$nayta'>
-						<input type='hidden' name='tunnus' value = '$tunnus'>";
+						<input type='hidden' name='tunnus' value = '$tunnus'>
+						<input type='hidden' name='iframe' value = '$iframe'>
+						<input type='hidden' name='id' value = '$id'>";
 
 				echo "<tr><td colspan='2'>";
 
@@ -933,6 +951,8 @@
 					echo "	<form action = '$PHP_SELF' method='post'>
 							<input type='hidden' name = 'nayta' value='$nayta'>
 							<input type='hidden' name='tunnus' value = '$tunnus'>
+							<input type='hidden' name='iframe' value = '$iframe'>
+							<input type='hidden' name='id' value = '$id'>
 							<input type='hidden' name='rtunnus' value = '$tiliointirow[tunnus]'>
 							<input type='hidden' name='tee' value = 'P'>
 							<input type='hidden' name = 'nayta' value='$nayta'>
@@ -967,6 +987,8 @@
 					<td>N‰yt‰ kaikki</td>
 					<form action = '$PHP_SELF' method='post' onchange='submit()'>
 					<input type='hidden' name = 'tunnus' value='$tunnus'>
+					<input type='hidden' name='iframe' value = '$iframe'>
+					<input type='hidden' name='id' value = '$id'>
 					<input type='hidden' name='tee' value = ''>
 					<td><input type='checkbox' onclick='submit();' name = 'nayta' $tila></td>
 					</form>
@@ -1023,6 +1045,8 @@
 			if ($iframe == "" and $laskurow["ebid"] != "") {
 		  		echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+						<input type='hidden' name='iframe' value = '$iframe'>
+						<input type='hidden' name='id' value = '$id'>
 		  				<input type='hidden' name = 'iframe' value='yes'>
 		  				<input type='hidden' name = 'nayta' value='$nayta'>
 		  				<input type='hidden' name = 'tee' value = ''>
@@ -1032,11 +1056,40 @@
 			elseif ($iframe == 'yes' and $laskurow["ebid"] != "") {
 		  		echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+						<input type='hidden' name='iframe' value = '$iframe'>
+						<input type='hidden' name='id' value = '$id'>		
 		  				<input type='hidden' name = 'iframe' value=''>
 		  				<input type='hidden' name = 'nayta' value='$nayta'>
 		  				<input type='hidden' name = 'tee' value = ''>
 		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>
 						</form>";
+			}
+
+			//	Onko kuva tietokannassa?
+			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+			$liiteres=mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($liiteres)>0) {
+				echo "<form action = '$PHP_SELF' method='post'>
+		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+		  				<input type='hidden' name = 'iframe' value='yes'>
+		  				<input type='hidden' name = 'nayta' value='$nayta'>
+		  				<input type='hidden' name = 'tee' value = ''>
+						<th>".t("N‰yt‰ tilauksen lasku")."</th>
+		  				<td class='back'><select name='id' onchange='submit();'>
+							<option value=''>Valitse lasku</option>";
+		
+				while($liiterow=mysql_fetch_array($liiteres)) {
+					if($id==$liiterow["tunnus"]) $sel = "selected";
+					else $sel = "";
+					echo "<option value='{$liiterow["tunnus"]}' $sel>{$liiterow["selite"]}</option>";
+				}
+				echo "	</select>
+						</td>
+					</form>";
+				
+			}
+			else {
+				echo t("Paperilasku");
 			}
 
 			echo "</tr></table>";
@@ -1082,9 +1135,15 @@
 			echo "</tr></table><br>";
 		}
 
-		if ($iframe == 'yes' and $laskurow["ebid"] != "") {
-			$ebid = $laskurow["ebid"];
-			require ("inc/ebid.inc");
+		if ($iframe == 'yes' and ($laskurow["ebid"] != "" or $id>0)) {
+			if($id>0) {
+				$url="view.php?id=$id";
+			}
+			else {
+				$ebid = $laskurow["ebid"];
+				require ("inc/ebid.inc");				
+			}
+			
 			echo "<iframe src='$url' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
 		}
 
@@ -1167,7 +1226,20 @@
 				echo "<td valign='top'><a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
 			}
 			else {
-				echo "<td valign='top'>".t("Paperilasku")."</td>";
+				
+				//	Onko kuva tietokannassa?
+				echo "<td valign='top'>";
+				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$trow["tunnus"]}'";
+				$liiteres=mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($liiteres)>0) {
+					while($liiterow=mysql_fetch_array($liiteres)) {
+						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+					}
+				}
+				else {
+					echo t("Paperilasku");
+				}
+				echo "</td>";
 			}
 
 			echo "	<form action = '$PHP_SELF' method='post'>

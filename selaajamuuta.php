@@ -220,7 +220,17 @@
 			echo "<iframe src='$url' name='alaikkuna' width='100%' align='bottom' scrolling='auto'></iframe>";
 		}
 		else {
-			echo "<font class='message'>".t("Paperilasku! Kuvaa ei ole saatavilla")."</font>";
+			//	Onko kuva tietokannassa?
+			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+			$liiteres=mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($liiteres)>0) {
+				while($liiterow=mysql_fetch_array($liiteres)) {
+					echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+				}
+			}
+			else {
+				echo "<font class='message'>".t("Paperilasku! Kuvaa ei ole saatavilla")."</font>";
+			}
 		}
 	}
 	else {

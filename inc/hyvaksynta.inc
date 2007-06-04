@@ -153,7 +153,19 @@
 				echo "<$erotin><a href='$url'>".t("Näytä lasku")."</a></$erotin>";
 			}
 			else {
-				echo "<$erotin>".t("Paperilasku")."</$erotin>";
+				//	Onko kuva tietokannassa?
+				echo "<$erotin valign='top'>";
+				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+				$liiteres=mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($liiteres)>0) {
+					while($liiterow=mysql_fetch_array($liiteres)) {
+						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+					}
+				}
+				else {
+					echo t("Paperilasku");
+				}
+				echo "</$erotin>";		
 			}
 			
 			echo "	<form action = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$kuka' method = 'post'>

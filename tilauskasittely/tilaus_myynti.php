@@ -81,7 +81,7 @@ if ($tee == 'AKTIVOI') {
 		}
 		// Jos tullaan projektille pit‰‰ myˆs aktioida $projektilla
 		elseif ($toim == "PROJEKTI") {
-			$projektilla = $tilausnumero;		
+			$projektilla = $tilausnumero;
 		}
 		elseif ($toim == "VALMISTAASIAKKAALLE" and $tilausnumero != "") {
 			$tyyppiquery = "select tilaustyyppi from lasku where yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
@@ -352,7 +352,7 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 	}
 
 	$alv_velvollisuus = "";
-	
+
 	// jos meill‰ on lasku menossa ulkomaille
 	if ($maa != "" and $maa != $yhtiorow["maa"]) {
 		// tutkitaan ollaanko siell‰ alv-rekisterˆity
@@ -388,7 +388,7 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 	$override_ytunnus_check = "YES";
 
 	require ("otsik.inc");
-	
+
 	$kaytiin_otsikolla = "NOJOO!";
 }
 
@@ -669,7 +669,7 @@ if ($tee == 'POISTA') {
 
 			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			$query 	= "	select *
 						from lasku
 						where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
@@ -701,7 +701,7 @@ if ($tee == 'POISTA') {
 			$tee = "SKIPPAAKAIKKI";
 		}
 	}
-	
+
 	if ($kuakrow["extranet"] == "" and $lopetus != '') {
 		// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
 		$lopetus = str_replace('////','?', $lopetus);
@@ -770,9 +770,9 @@ if ($tee == "VALMIS") {
 
 		// Meill‰ voi olla versio..
 		if($laskurow["tunnusnippu"]>0) {
-			$result = mysql_query($query) or pupe_error($query);			
+			$result = mysql_query($query) or pupe_error($query);
 			$query="select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tunnus <= '$laskurow[tunnus]' and tila='T'";
-			$result = mysql_query($query) or pupe_error($query);			
+			$result = mysql_query($query) or pupe_error($query);
 			$tarjous=$laskurow["tunnusnippu"]."/".mysql_num_rows($result);
 		}
 		else {
@@ -893,13 +893,13 @@ if ($tee == "VALMIS") {
 			$tilausnumero		= $laskurow["tunnusnippu"];
 			$kukarow["kesken"]	= $tilasnumero;
 			$projektilla		= $tilausnumero;
-			$aktivoinnista		= "";			
+			$aktivoinnista		= "";
 			$toim				= "PROJEKTI";
 			$muokkauslukko		= "LUKOSSA";
-						
+
 			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			$query 	= "	select *
 						from lasku
 						where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
@@ -931,7 +931,7 @@ if ($tee == "VALMIS") {
 			$tee = "SKIPPAAKAIKKI";
 		}
 	}
-	
+
 	if ($kuakrow["extranet"] == "" and $lopetus != '') {
 		// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
 		$lopetus = str_replace('////','?', $lopetus);
@@ -980,7 +980,7 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result  	= mysql_query($query) or pupe_error($query);
 	$laskurow   = mysql_fetch_array($result);
-	
+
 	$kaytiin_otsikolla = "NOJOO!";
 }
 
@@ -1166,7 +1166,7 @@ if ($tee == '') {
 				</form>";
 			}
 		}
-		
+
 		//	T‰m‰ koko toiminto pit‰nee taklata paremmin esim. perheill‰..
 		if(file_exists("lisaa_kulut.inc")) {
 			echo "<form action = '$PHP_SELF' method='post'>
@@ -1177,9 +1177,9 @@ if ($tee == '') {
 			<input type='hidden' name='projektilla' value='$projektilla'>
 			<td class='back'><input type='Submit' value='".t("Lisaa kulut")."' Style='font-size: 8pt; padding:0;'></td>
 			</form>";
-			
+
 		}
-		
+
 		echo "	<form action='tuote_selaus_haku.php' method='post'>
 				<input type='hidden' name='toim_kutsu' value='$toim'>
 				<td class='back'><input type='submit' value='".t("Selaa tuotteita")."' Style='font-size: 8pt; padding:0;'></td>
@@ -1354,11 +1354,11 @@ if ($tee == '') {
 			$hakulisa = "";
 			if($lasklisatied_row["tunnusnippu_tarjous"]>0) {
 				$hakulisa =" or (lasku.tunnusnippu = '$lasklisatied_row[tunnusnippu_tarjous]' and tila='T' and alatila='B')";
-			}			
+			}
 			elseif($projektilla>0 and $laskurow["tunnusnippu"]!=$projektilla) {
 				$hakulisa =" or lasku.tunnusnippu = '$projektilla'";
 			}
-			
+
 			$vquery="select count(*) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tunnus<=lasku.tunnus and l.tila='T'";
 			$query = " 	SELECT tila, alatila, varastopaikat.nimitys varasto, lasku.toimaika, if(tila='T',if(tunnusnippu>0,concat(lasku.tunnusnippu,'/',($vquery)), concat(lasku.tunnusnippu,'/1')),lasku.tunnus) tilaus, lasku.tunnus tunnus
 						FROM lasku
@@ -1531,8 +1531,8 @@ if ($tee == '') {
 	}
 
 	echo "</table>";
-	
-	
+
+
 	//N‰ytet‰‰nko asiakkaan saatavat!
 	$query  = "	SELECT yhtio
 				FROM tilausrivi
@@ -1541,10 +1541,10 @@ if ($tee == '') {
 	$numres = mysql_query($query) or pupe_error($query);
 
 	if ($kukarow['extranet'] == '' and $kukarow['kassamyyja'] == '' and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or mysql_num_rows($numres) == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
-		
+
 		$sytunnus 	 = $laskurow['ytunnus'];
 		$eiliittymaa = 'ON';
-		
+
 		require ("../raportit/saatanat.php");
 
 		if ($ylikolkyt > 0) {
@@ -1603,9 +1603,9 @@ if ($tee == '') {
 		$rivitunnus = "";
 		$positio 	= "";
 		$lisaalisa 	= "";
-	
+
 	}
-	
+
 
 
 	//Muokataan tilausrivin lit‰tietoa
@@ -1654,7 +1654,7 @@ if ($tee == '') {
 				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
-		
+
 		/*
 		//	Jos vaihdettiin asiakkaan positio korjataan niiden tuotteiden m‰‰r‰ jotka saavat m‰‰r‰tiedot asiakkaan_positiolta
 		if($asiakkaan_positio!='') {
@@ -1678,19 +1678,19 @@ if ($tee == '') {
 								WHERE yhtio			 = '$kukarow[yhtio]'
 								and tunnus = '$lapsi[tunnus]'";
 					$updres = mysql_query($query) or pupe_error($query);
-					
+
 					//	Talletetaan t‰m‰ oikea pituus lis‰tietoihin
 					$query = "	UPDATE tilausrivin_lisatiedot
 								SET pituus = '$lapsi[kpl]'
 								WHERE yhtio			 = '$kukarow[yhtio]'
 								and tilausrivitunnus = '$lapsi[tunnus]'";
 					$result = mysql_query($query) or pupe_error($query);
-					
+
 				}
 			}
 		}
 		*/
-		
+
 		$tila 		= "";
 		$rivitunnus = "";
 		$positio 	= "";
@@ -1793,7 +1793,7 @@ if ($tee == '') {
 			}
 
 			//haetaan tuotteen alv matikkaa varten
-			$query = "	SELECT alv, myyntihinta, nettohinta
+			$query = "	SELECT *
 						FROM tuote
 						WHERE tuoteno = '$tilausrivi[tuoteno]' and yhtio='$kukarow[yhtio]'";
 			$tuoteresult = mysql_query($query) or pupe_error($query);
@@ -2225,7 +2225,7 @@ if ($tee == '') {
 
 	//Syˆttˆrivi
 	if ($muokkauslukko == "" and ($toim != 'PROJEKTI' or $rivitunnus != 0)) {
-		if(file_exists("myyntimenu.inc")){
+		if (file_exists("myyntimenu.inc")) {
 
 			/*
 				Customoidut menuratkaisut onnistuu nyt myyntimenu.inc tiedostolla
@@ -2240,11 +2240,11 @@ if ($tee == '') {
 
 			//	Haetaan myyntimenu Array ja kysely Array
 			//	Jos menutilaa ei ole laitetaan oletus
-			if(!isset($menutila)) $menutila = "oletus";
+			if (!isset($menutila)) $menutila = "oletus";
 			require("myyntimenu.inc");
-			if($tuoteno != "") $menutila = "haku";
+			if ($tuoteno != "") $menutila = "haku";
 			//suoritetaan kysely ja tehd‰‰n menut jos aihetta
-			if(is_array($myyntimenu)){
+			if (is_array($myyntimenu)) {
 
 				//	Tehd‰‰n menuset
 				$menuset = "<select name='menutila' onChange='submit()'>";
@@ -2270,13 +2270,13 @@ if ($tee == '') {
 				echo "
 							<table>
 								<tr>
-									<td class='back' align = 'left'><b>".t("Lis‰‰ rivi").": </b></td><td class='back' align = 'left'>$menuset</td>
+									<td class='back' align = 'left'><font class='message'>".t("Lis‰‰ rivi").": </font></td><td class='back' align = 'left'>$menuset</td>
 								</tr>
 							</table><hr>";
 
 
 				//	Tarkastetaan viel‰, ett‰ menutila on m‰‰ritelty ja luodaan lista
-				if($myyntimenu[$menutila]["query"] != "") {
+				if ($myyntimenu[$menutila]["query"] != "") {
 					unset($ulos);
 
 					// varsinainen kysely ja menu
@@ -2286,9 +2286,9 @@ if ($tee == '') {
 								WHERE tuote.yhtio ='$kukarow[yhtio]' and ".$myyntimenu[$menutila]["query"];
 								$tuoteresult = mysql_query($query) or pupe_error($query);
 
-					$ulos = "<select Style=\"width: 230px; font-size: 8pt; padding: 0\" name='tuoteno' multiple ='TRUE'><option value=''>Valitse tuote</option>";
+					$ulos = "<select style='width: 230px; font-size: 8pt; padding: 0' name='tuoteno' multiple ='TRUE'><option value=''>Valitse tuote</option>";
 
-					if(mysql_num_rows($tuoteresult) > 0) {
+					if (mysql_num_rows($tuoteresult) > 0) {
 						while($row=mysql_fetch_array($tuoteresult)) {
 							$sel='';
 							if($tuoteno==$row['tuoteno']) $sel='SELECTED';
@@ -2311,7 +2311,7 @@ if ($tee == '') {
 			}
 		}
 		else {
-			echo "<b>".t("Lis‰‰ rivi").": </b>";
+			echo "<font class='message'>".t("Lis‰‰ rivi").": </font>";
 		}
 
 		require ("syotarivi.inc");
@@ -2432,7 +2432,7 @@ if ($tee == '') {
 					tuote.kehahin,
 					tuote.sarjanumeroseuranta
 					FROM tilausrivi
-					LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+					LEFT JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					$tunnuslisa
 					and tilausrivi.tyyppi in ($tilrivity)
@@ -2446,11 +2446,49 @@ if ($tee == '') {
 
 			echo "<br><table>";
 
+
 			if ($toim == "VALMISTAVARASTOON") {
-				echo "<tr><td class='back' colspan='10'><b>".t("Valmistusrivit")."</b>:</td></tr>";
+				echo "<tr><td class='back' colspan='10'><font class='message'>";
+				echo t("Valmistusrivit").":";
+				echo "</font></td></tr>";
 			}
 			else {
-				echo "<tr><td class='back' colspan='10'><b>".t("Tilausrivit")."</b>:</td></tr>";
+				echo "<tr><td class='back' colspan='10'><font class='message'>";
+
+				echo t("Tilausrivit").":</font>";
+
+				// jos meill‰ on yhtiˆn myyntihinnoissa alvit mukana ja meill‰ on alvillinen tilaus, annetaan mahdollisuus switchata listaus alvittomaksi
+				if ($yhtiorow["alv_kasittely"] == "" and $laskurow["alv"] != 0 and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
+
+					$sele = array();
+
+					if ($tilausrivi_alvillisuus == "E") {
+						$sele["E"] = "checked";
+					}
+					else {
+						$sele["K"] = "checked";
+						$tilausrivi_alvillisuus = "";
+					}
+
+					echo "<form action='' method='post'>
+ 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+ 					<input type='hidden' name='tee' value='$tee'>
+ 					<input type='hidden' name='toim' value='$toim'>
+ 					<input type='hidden' name='lopetus' value='$lopetus'>
+ 					<input type='hidden' name='projektilla' value='$projektilla'>
+ 					<input type='hidden' name='tiedot_laskulta' value='$tiedot_laskulta'>
+ 					<input type='hidden' name='asiakasid' value='$asiakasid'>";
+
+					echo "<input type='radio' onclick='submit()' name='tilausrivi_alvillisuus' value='K' $sele[K]> Verolliset hinnat ";
+					echo "<input type='radio' onclick='submit()' name='tilausrivi_alvillisuus' value='E' $sele[E]> Verottomat hinnat ";
+
+					echo "</form>";
+				}
+				else {
+					$tilausrivi_alvillisuus = "";
+				}
+
+				echo "</td></tr>";
 			}
 
 			echo "<tr><th>".t("#")."</th>";
@@ -2471,23 +2509,24 @@ if ($tee == '') {
 					<th>".t("M‰‰r‰")."</th>
 					<th>".t("Var")."</th>";
 
-
 			if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
-				echo "<th>".t("Hinta")."</th>";
+
+				echo "<th>".t("Netto")."</th>";
+
+				echo "<th style='text-align:right;'>".t("Svh")."</th>";
 
 				if ($kukarow['hinnat'] == 0) {
-					echo "<th>".t("Ale%")."</th>";
+					echo "<th style='text-align:right;'>".t("Ale%")."</th>";
+					echo "<th style='text-align:right;'>".t("Hinta")."</th>";
 				}
 
-				echo "	<th>".t("Netto")."</th>
-						<th>".t("Summa")."</th>";
-
+				echo "	<th style='text-align:right;'>".t("Rivihinta")."</th>";
 
 				if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-					echo "<th>".t("Kate")."</th>";
+					echo "<th style='text-align:right;'>".t("Kate")."</th>";
 				}
 
-				echo "	<th>".t("Alv")."</th>
+				echo "	<th style='text-align:right;'>".t("Alv%")."</th>
 						<td class='back'>&nbsp;</td>
 						<td class='back'>&nbsp;</td>
 						</tr>";
@@ -2723,7 +2762,7 @@ if ($tee == '') {
 									$sel = "";
 									if($posrow["tunnus"] == $lisatied_row["asiakkaan_positio"]) {
 										$sel = "SELECTED";
-										$optlisa = "<option value='muokkaa#$lisatied_row[asiakkaan_positio]'>Muokkaa asiakaan positiota</option>";										
+										$optlisa = "<option value='muokkaa#$lisatied_row[asiakkaan_positio]'>Muokkaa asiakaan positiota</option>";
 									}
 									echo "<option value='$posrow[tunnus]' $sel>$posrow[tunnus] - $posrow[positio]</option>";
 								}
@@ -2816,7 +2855,7 @@ if ($tee == '') {
 					if ($paikat != '') {
 						echo "	<form action='$PHP_SELF' method='post'>
 								<input type='hidden' name='toim' 			value = '$toim'>
-								<input type='hidden' name='lopetus' 		value='$lopetus'>
+								<input type='hidden' name='lopetus' 		value = '$lopetus'>
 								<input type='hidden' name='projektilla' 	value = '$projektilla'>
 								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
@@ -2892,20 +2931,20 @@ if ($tee == '') {
 						$kpl_ruudulle = $row['varattu'] * 1;
 					}
 
-										
+
 					if ($kpl_ruudulle < 0 and $row["sarjanumeroseuranta"] != "") {
-						
+
 						echo "<td $class align='right' valign='top' nowrap>";
-							
+
 						$sel1 = $sel2 = "";
-						
+
 						if ($lisatied_row["osto_vai_hyvitys"] == "O") {
 							$sel2 = "SELECTED";
 						}
 						else {
 							$sel1 = "SELECTED";
 						}
-						
+
 						echo "	<form action='$PHP_SELF' method='post'>
 								<input type='hidden' name='toim' value='$toim'>
 								<input type='hidden' name='lopetus' value='$lopetus'>
@@ -2922,7 +2961,7 @@ if ($tee == '') {
 					}
 					else {
 						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
-					}	
+					}
 				}
 
 				if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
@@ -2939,24 +2978,51 @@ if ($tee == '') {
 
 				echo "<td $classvar align='center' valign='top'>$row[var]&nbsp;</td>";
 
+
 				if ($toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
-					if ($kukarow['hinnat'] == 1) {
-						echo "<td $class align='right' valign='top'>".sprintf('%.2f',$row["myyntihinta"])."</td>";
-					}
-					else {
-						echo "<td $class align='right' valign='top'>".sprintf('%.2f',$row["hinta"])."</td>";
-						echo "<td $class align='right' valign='top'>".($row["ale"] * 1)."</td>";
-					}
 
 					echo "<td $class align='center' valign='top'>$row[netto]&nbsp;</td>";
 
+					$hinta = $row["hinta"];
+					$netto = $row["netto"];
+					$kpl   = $row["varattu"]+$row["jt"];
+
+					if ($kukarow["extranet"] != "") {
+						require ("alehinta.inc");
+						require ("alv.inc");
+					}
+					else {
+						require ("inc/alehinta.inc");
+						require ("tilauskasittely/alv.inc");
+					}
+
+					// halutaan alvittomat hinnat
+					if ($tilausrivi_alvillisuus == "E") {
+						$alvillisuus_jako = 1 + $row["alv"] / 100;
+					}
+					else {
+						$alvillisuus_jako = 1;
+					}
+
+					$hinta    = round($hinta / $alvillisuus_jako, 2);
+					$summa    = round($summa / $alvillisuus_jako, 2);
+					$brutto   = $hinta * ($row["varattu"] + $row["jt"]);
+					$kplhinta = $hinta * (1 - $row["ale"] / 100);
+
+					$myyntihinta = round(tuotteen_myyntihinta($laskurow, $trow, $row["tuoteno"]) / $alvillisuus_jako, 2);
+
 					if ($kukarow['hinnat'] == 1) {
-						$hinta = $row["myyntihinta"];
+						echo "<td $class align='right' valign='top'>$myyntihinta</td>";
+					}
+					else {
+						if ($myyntihinta != $hinta) $myyntihinta = sprintf('%.2f', $myyntihinta, 2)." (".sprintf('%.2f',$hinta).")";
+						else $myyntihinta = sprintf('%.2f', $myyntihinta, 2);
+						echo "<td $class align='right' valign='top'>$myyntihinta</td>";
+						echo "<td $class align='right' valign='top'>".($row["ale"] * 1)."</td>";
+						echo "<td $class align='right' valign='top'>".sprintf('%.2f', $kplhinta, 2)."</td>";
+					}
 
-						require('alv.inc');
-
-						$brutto = $hinta*($row["varattu"]+$row["jt"]);
-
+					if ($kukarow['hinnat'] == 1) {
 						echo "<td $class align='right' valign='top'>".sprintf('%.2f',$brutto)."</td>";
 					}
 					else {
@@ -3180,14 +3246,14 @@ if ($tee == '') {
 							echo "<td valign='top'>&nbsp;</td>";
 							echo "<td valign='top'>$prow[tuoteno]</td>";
 							echo "<td valign='top'><input type='text' name='kpl_array[$prow[tuoteno]]'   size='2' maxlength='8'		Style='font-size: 8pt; padding:0;'></td>";
-						
+
 							if ($toim != "SIIRTOTYOMAARAYS") {
 								echo "<td valign='top'><input type='text' name='var_array[$prow[tuoteno]]'   size='2' maxlength='1' 	Style='font-size: 8pt; padding:0;'></td>
 								  	<td valign='top'><input type='text' name='hinta_array[$prow[tuoteno]]' size='5' maxlength='12' 	Style='font-size: 8pt; padding:0;'></td>
 								  	<td valign='top'><input type='text' name='ale_array[$prow[tuoteno]]'   size='5' maxlength='6' 	Style='font-size: 8pt; padding:0;'></td>
 								  	<td valign='top'><input type='text' name='netto_array[$prow[tuoteno]]' size='2' maxlength='1' 	Style='font-size: 8pt; padding:0;'></td>";
 							}
-							
+
 							$lislask++;
 
 							if ($lislask == mysql_num_rows($lisaresult)) {
@@ -3219,7 +3285,7 @@ if ($tee == '') {
 				echo "</tr>";
 
 				if ($row['kommentti'] != '') {
-					$cspan = 9;
+					$cspan = 10;
 
 					if ($toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 						$cspan -= 5;
@@ -3419,10 +3485,10 @@ if ($tee == '') {
 					$ulkom_huom = "";
 				}
 
-				$ycspan=3;
+				$ycspan=4;
 
 				if ($kukarow['hinnat'] == 1) {
-					$ycspan--;
+					$ycspan = $ycspan - 2;
 				}
 				if($kukarow["resoluutio"] == "I") {
 					$ycspan++;
@@ -3576,7 +3642,7 @@ if ($tee == '') {
 								<td colspan='".($ycspan-2)."' nowrap>";
 
 						echo "<select name='toim' Style='font-size: 8pt; padding:0;'>";
-						
+
 						if (file_exists("tulosta_tarjous.inc")) {
 							echo "<option value='TARJOUS'>Tarjous</value>";
 						}
@@ -3746,9 +3812,9 @@ if ($tee == '') {
 						JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.positio = 'Optio'
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$kukarow[kesken]'";
 			$optiotarkres = mysql_query($query) or pupe_error($query);
-			
+
 			if(mysql_num_rows($optiotarkres) == 0) {
-				
+
 				//	K‰ytet‰‰nkˆ projekteja?
 				$query = "select tunnus from oikeu where yhtio='$kukarow[yhtio]' and nimi='tilauskasittely/tilaus_myynti.php' and alanimi='PROJEKTI' LIMIT 1";
 				$projektitarkres = mysql_query($query) or pupe_error($query);
@@ -3791,7 +3857,7 @@ if ($tee == '') {
 
 			// Jos myyj‰ myy todella pienell‰ summalta varastosta joka sijaitsee ulkmailla niin herjataan heiman
 			$javalisa = "";
-			
+
 			if ($kukarow["extranet"] == "" and $arvo_ulkomaa != 0 and $arvo_ulkomaa <= $yhtiorow["suoratoim_ulkomaan_alarajasumma"]) {
 				echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 						function ulkomaa_verify(){
@@ -3831,7 +3897,7 @@ if ($tee == '') {
 			}
 			else {
 				echo "<td class='back' valign='top'>";
-				
+
 				echo "
 					<form action='$PHP_SELF' method='post' $javalisa>
 					<input type='hidden' name='toim' value='$toim'>
@@ -3888,22 +3954,22 @@ if ($tee == '') {
 				echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."'>";
 				echo "</form>";
 			}
-			
+
 			echo "</td>";
 		}
-		
-		
+
+
 		//	Projekti voidaan poistaa vain jos meill‰ ei ole sill‰ mit‰‰n toimituksia
 		if ($laskurow["tunnusnippu"] > 0 and $toim=="PROJEKTI") {
 			$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
 			$abures = mysql_query($query) or pupe_error($query);
-			
+
 			$projektilask = mysql_num_rows($abures);
 		}
 		else {
 			$projektilask = 0;
 		}
-	
+
 		if ($muokkauslukko == "" and ($toim != "PROJEKTI" or ($toim == "PROJEKTI" and $projektilask == 0))) {
 			echo "<SCRIPT LANGUAGE=JAVASCRIPT>
 						function verify(){
@@ -3922,22 +3988,22 @@ if ($tee == '') {
 					<input type='submit' value='* ".t("Mit‰tˆi koko")." $otsikko *'>
 					</form></td>";
 		}
-		
-		
+
+
 		echo "</tr>";
-		
+
 		if ($lopetus != "") {
-			
+
 			$lopetus = str_replace('////','?', $lopetus);
 			$lopetus = str_replace('//','&',  $lopetus);
-			
+
 			echo "<tr><td class='back'><form name='lopetusformi' action='$lopetus' method='post'>
 					<input type='submit' value='".t("Siirry sinne mist‰ tulit")."'>
 					</form></td></tr>";
 		}
-		
+
 		echo "</table>";
-		
+
 	}
 }
 

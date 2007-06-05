@@ -1444,4 +1444,132 @@ if (!function_exists("jalkilaskentafunktio")) {
 		require("tilauskasittely/jalkilaskenta.inc");
 	}
 }
+
+if (!function_exists("tuotteen_myyntihinta")) {
+	function tuotteen_myyntihinta ($laskurow, $trow, $kpl) {
+		global $yhtiorow, $kukarow;
+
+		// tämä funktion on kopsattu alehinta.incistä sopivilta osilta
+		$hinta = 0;
+
+		// 5. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
+		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT hinta, laji
+						FROM hinnasto
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tuoteno  = '$trow[tuoteno]'
+						and tuoteno != ''
+						and laji in ('N', 'E')
+						and valkoodi = '$laskurow[valkoodi]'
+						and maa in ('$laskurow[maa]','')
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow       	= mysql_fetch_array ($hresult);
+				$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
+				$netto			= $hrow["laji"];
+				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
+			}
+		}
+
+		// 6. hinnasto.hinta tuotteen nettohinta hinnastosta yhtiön valuutassa
+		if ($hinta == 0) {
+
+			$query = "	SELECT hinta, laji
+						FROM hinnasto
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tuoteno  = '$trow[tuoteno]'
+						and tuoteno != ''
+						and laji in ('N', 'E')
+						and valkoodi in ('$yhtiorow[valkoodi]','')
+						and maa in ('$laskurow[maa]','')
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow       	= mysql_fetch_array ($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
+			}
+		}
+
+		// 15. tuote.nettohinta (tuotteen nettohinta)
+		if ($hinta == 0 and $trow['nettohinta'] > 0) {
+			$hinta 			= $trow['nettohinta'];
+			$aperuste 		.= "Tuotteen nettohinta. ";
+			$netto 			= 'N';
+			$ale			= 0;
+		}
+
+		// 16. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
+		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+
+			$query = "	SELECT hinta, laji
+						FROM hinnasto
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tuoteno  = '$trow[tuoteno]'
+						and tuoteno != ''
+						and laji     = ''
+						and valkoodi = '$laskurow[valkoodi]'
+						and maa in ('$laskurow[maa]','')
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), maa desc
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow			= mysql_fetch_array ($hresult);
+				$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
+				$netto			= $hrow["laji"];
+				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
+			}
+		}
+
+		// 17. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtion valuutassa
+		if ($hinta == 0) {
+
+			$query = "	SELECT hinta, laji
+						FROM hinnasto
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and tuoteno  = '$trow[tuoteno]'
+						and tuoteno != ''
+						and laji     = ''
+						and valkoodi in ('$yhtiorow[valkoodi]','')
+						and maa in ('$laskurow[maa]','')
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						and ((minkpl <= '$kpl' and maxkpl >= '$kpl') or (minkpl = 0 and maxkpl = 0))
+						ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), valkoodi DESC
+						LIMIT 1";
+			$hresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($hresult) > 0) {
+				$hrow			= mysql_fetch_array ($hresult);
+				$hinta 			= $hrow["hinta"];
+				$netto			= $hrow["laji"];
+				$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
+			}
+		}
+
+		// 18. tuote.myyntihinta (tuotteen bruttohinta)
+		if ($hinta == 0) {
+			$hinta		= $trow['myyntihinta'];
+			$aperuste	.= "Tuotteen myyntihinta. ";
+		}
+
+		return $hinta;
+
+	}
+
+}
+
 ?>

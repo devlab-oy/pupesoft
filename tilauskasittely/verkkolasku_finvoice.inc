@@ -202,8 +202,8 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "<DeliveryDetails>\r\n");
 			fputs($tootfinvoice, "<DeliveryPeriodDetails>\r\n");
 			xml_add('StartDate Format="CCYYMMDD"',                   					vlas_dateconv($toimaikarow["mint"]),					$tootfinvoice);
-			xml_add('EndDate Format="CCYYMMDD"',                   						vlas_dateconv($toimaikarow["maxt"]),				
-			fputs($tootfinvoice, "</DeliveryPeriodDetails>\r\n");						$tootfinvoice);
+			xml_add('EndDate Format="CCYYMMDD"',                   						vlas_dateconv($toimaikarow["maxt"]),					$tootfinvoice);
+			fputs($tootfinvoice, "</DeliveryPeriodDetails>\r\n");
 			xml_add("DeliveryMethodText",                                     			$lasrow['toimitustapa'],          						$tootfinvoice);
 			if($lasrow['toimitusehto']!="") {
 				xml_add("DeliveryTermsText",                                     			$lasrow['toimitusehto'],          						$tootfinvoice);

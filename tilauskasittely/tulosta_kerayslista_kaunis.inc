@@ -390,10 +390,12 @@ if (!function_exists('rivi')) {
 			$kala = $kala - $rivinkorkeus + 5;
 
 			$pdf->draw_text(125, $kala, $row["nimitys"], 															$firstpage, $p);
-			$pdf->draw_text(480, $kala, $trow["tuotemassa"]." kg",								 					$firstpage, $p);
-			$pdf->draw_text(530, $kala, sprintf('%.2f',($row['varattu']+$row['kpl'])*$trow["tuotemassa"])." kg",	$firstpage, $p);
-			
-			$paino += sprintf('%.2f',($row['varattu']+$row['kpl'])*$trow["tuotemassa"]);
+			if($trow["tuotemassa"]>0) {
+				$pdf->draw_text(480, $kala, $trow["tuotemassa"]." kg",								 					$firstpage, $p);
+				$pdf->draw_text(530, $kala, sprintf('%.2f',($row['varattu']+$row['kpl'])*$trow["tuotemassa"])." kg",	$firstpage, $p);
+				$paino += sprintf('%.2f',($row['varattu']+$row['kpl'])*$trow["tuotemassa"]);
+			}
+
 			
 			$kala = $kala - $rivinkorkeus;
 

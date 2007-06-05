@@ -4,10 +4,10 @@
 	//
 	// arrayt:
 	// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-	// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
+	// $rakir_row:sta löytyy asiakkaan tiedot
 	//
 	// muuttujat:
-	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
+	// otunnukset, rahdinmaksaja, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
 	// mehto sisältää maksuehdon tiedot
 	// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
 	//
@@ -16,14 +16,27 @@
 	if ($tulostakopio == 'kylla') {
 		$lotsikot = $otsikot;
 	}
+	// onko tämä tyhjä rahtikirja (custom)?
+	if (! isset($GLOBALS['tyhja'])) {
+		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
+		$tempr = mysql_query($query) or pupe_error($query);
+		$postirow = mysql_fetch_array($tempr);
+		
+		// lähettäjän viite otetaan laskulta
+		$viitelah = $lotsikot[0];
+	} else {
+		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='{$GLOBALS['asiakasid']}'";
+		$tempr = mysql_query($query) or pupe_error($query);
+		$rakir_row = mysql_fetch_array($tempr);
+		
+		if (empty($rakir_row['toim_postitp'])) {
+			$rakir_row['toim_postitp'] = $rakir_row['postitp'];
+			$rakir_row['toim_postino'] = $rakir_row['postino'];
+			$rakir_row['toim_osoite']  = $rakir_row['osoite'];
+			$rakir_row['toim_nimi']    = $rakir_row['nimi'];
+		}
+	}
 	
-	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$postirow = mysql_fetch_array($tempr);
-	
-	$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and ytunnus='$postirow[liitostunnus]'";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$asiakasrow = mysql_fetch_array($tempr);
 	
 	//if ($rahsoprow['rahtisopimus']=='')	$rahsoprow['rahtisopimus']	= "000000";
 	//if ($toitarow['sopimusnro']=='')	$toitarow['sopimusnro']		= "000000";
@@ -137,12 +150,12 @@
 	
 			//flushataan barcode ja saadaam filenimi johon se tallennettiin
 			$nimi1 = $obj->FlushObject();
-	
+
 			//keksitään uudelle failille joku varmasti uniikki nimi:
 			$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
 	
 			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-	
+
 			$fh = fopen($nimi2, "r");
 			$data = fread($fh, filesize($nimi2));
 			fclose($fh);
@@ -184,16 +197,22 @@
 		$pdf->draw_text(302,  803,  "Lähetyspäivämäärä Avsändningsdatum",				$firstpage, $norm);
 		$pdf->draw_text(302,  788,  date("d.m.Y"),										$firstpage, $kirj);
 		$pdf->draw_text(302,  782,  "Lähettäjän viite Avsändarens referens",			$firstpage, $norm);
-		$pdf->draw_text(302,  767,  $lotsikot[0],										$firstpage, $kirj);
+		$pdf->draw_text(302,  767,  $viitelah,										$firstpage, $kirj);
 		$pdf->draw_text(302,  761,  "Vastaanottajan viite Mottagarens referens",		$firstpage, $norm);
 		
-		$query = "	select group_concat(viesti SEPARATOR ', ') viesti 
-					from lasku 
-					where yhtio = '$kukarow[yhtio]' 
-					and tunnus in ($otunnukset) 
-					order by tunnus ";
-		$viestires = mysql_query($query) or pupe_error($query);
-		$viestirow = mysql_fetch_array($viestires);
+		if (! isset($GLOBALS['tyhja'])) {
+			$query = "	select group_concat(viesti SEPARATOR ', ') viesti 
+						from lasku 
+						where yhtio = '$kukarow[yhtio]' 
+						and tunnus in ($otunnukset) 
+						order by tunnus ";
+			$viestires = mysql_query($query) or pupe_error($query);
+			$viestirow = mysql_fetch_array($viestires);
+		} else {
+			$viestirow = array(
+				'viesti' => $viitevas,
+			);
+		}
 		
 		$pdf->draw_text(302,  746,  $viestirow["viesti"],								$firstpage, $kirj);
 		
@@ -283,7 +302,7 @@
 		if ($kilot[4] != '') {
 			$kilot[4] = round($kilot[4],2);
 		}
-				
+		
 		//kollit
 		$pdf->draw_text(62, 510, $lotsikot[0],											$firstpage, $kirj);
 		$pdf->draw_text(183, 510, $kollit[0]."  ". $pakkaus[0],							$firstpage, $kirj); 
@@ -422,7 +441,7 @@
 	
 	//keksitään uudelle failille joku varmasti uniikki nimi:
 	$pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(),true)).".pdf";
-	
+
 	//kirjoitetaan pdf faili levylle..
 	$fh = fopen($pdffilenimi, "w");
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
@@ -437,7 +456,7 @@
 
 	//itse print komento...
 	$line = exec("$kirjoitin $pdffilenimi");
-
+    
 	system("rm -f $pdffilenimi");
 
 ?>

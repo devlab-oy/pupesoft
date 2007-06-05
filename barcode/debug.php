@@ -38,7 +38,7 @@ if (__TRACE_ENABLED__) {
 	$errno  = 0;
 	$errstr = "no error";
 	
-	$fp = @fsockopen(__TRACE_HOST__, __TRACE_PORT__, &$errno, &$errstr, __TIMEOUT__);
+	$fp = @fsockopen(__TRACE_HOST__, __TRACE_PORT__, $errno, $errstr, __TIMEOUT__);
 	
 	if ($fp)
 	{
@@ -53,7 +53,7 @@ if (__DEBUG_ENABLED__) {
 	$errno  = 0;
 	$errstr = "no error";
 	
-	$fp = @fsockopen(__DEBUG_HOST__, __DEGUB_PORT__, &$errno, &$errstr, __TIMEOUT__);
+	$fp = @fsockopen(__DEBUG_HOST__, __DEGUB_PORT__, $errno, $errstr, __TIMEOUT__);
 	
 	if ($fp)
 	{

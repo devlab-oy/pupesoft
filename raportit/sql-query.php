@@ -50,59 +50,63 @@
 		if ($sqlhaku != '') {
 
 			$result = mysql_query($sqlhaku) or die ("<font class='error'>".mysql_error()."</font>");
-
-			if(include('Spreadsheet/Excel/Writer.php')) {
-				
-				//keksitään failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-				
-				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-				$worksheet =& $workbook->addWorksheet('Sheet 1');
 			
-				$format_bold =& $workbook->addFormat();
-				$format_bold->setBold();
+			#TODO
+			//jos Juppe on joskus väärässä niin mennään tähän. Tämä kaatuu jos tulos on liian iso.
+			if ('JUPPE' == 'VAARASSA') {
+				
+				if(include('Spreadsheet/Excel/Writer.php')) {
+				
+					//keksitään failille joku varmasti uniikki nimi:
+					list($usec, $sec) = explode(' ', microtime());
+					mt_srand((float) $sec + ((float) $usec * 100000));
+					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+				
+					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+					$worksheet =& $workbook->addWorksheet('Sheet 1');
 			
-				$excelrivi = 0;
-			}
-
-			if(isset($workbook)) {
-				for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
-				$excelrivi++;
-			}
-
-			while ($row = mysql_fetch_array($result)) {
-				for ($i=0; $i<mysql_num_fields($result); $i++) {
-					if (mysql_field_type($result,$i) == 'real') {
-						if(isset($workbook)) {
-							$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
-						}
-					}
-					else {						
-						if(isset($workbook)) {
-							$worksheet->writeString($excelrivi, $i, $row[$i]);
-						}
-					}
+					$format_bold =& $workbook->addFormat();
+					$format_bold->setBold();
+			
+					$excelrivi = 0;
 				}
-				$excelrivi++;
-			}
-
-			if(isset($workbook)) {
+            
+				if(isset($workbook)) {
+					for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+					$excelrivi++;
+				}
+            
+				while ($row = mysql_fetch_array($result)) {
+					for ($i=0; $i<mysql_num_fields($result); $i++) {
+						if (mysql_field_type($result,$i) == 'real') {
+							if(isset($workbook)) {
+								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
+							}
+						}
+						else {						
+							if(isset($workbook)) {
+								$worksheet->writeString($excelrivi, $i, $row[$i]);
+							}
+						}
+					}
+					$excelrivi++;
+				}
+            
+				if(isset($workbook)) {
 				
-				// We need to explicitly close the workbook
-				$workbook->close();
+					// We need to explicitly close the workbook
+					$workbook->close();
 				
-				echo "<table>";
-				echo "<tr><th>".t("Tallenna tulos").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xls'>";
-				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table><br>";
+					echo "<table>";
+					echo "<tr><th>".t("Tallenna tulos").":</th>";
+					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+					echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xls'>";
+					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+					echo "</table><br>";
+				}
 			}
-			
 			
 			echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
 

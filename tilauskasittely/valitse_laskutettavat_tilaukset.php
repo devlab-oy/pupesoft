@@ -12,7 +12,7 @@
 	elseif ($toim == "VAINLASKUTA") {
 		echo "<font class='head'>".t("Laskuta tilaus").":</font><hr>";
 
-		$alatilat = " 	and lasku.alatila='D' ";
+		$alatilat = " 	and (lasku.alatila = 'D' or (lasku.alatila = 'C' and lasku.eilahetetta != ''))";
 		$vientilisa = " and lasku.vienti = '' ";
 		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
 						and tilausrivi.varattu  != 0";

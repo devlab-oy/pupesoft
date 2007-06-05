@@ -102,6 +102,18 @@
 				$query = "	update tilausrivi set toimitettu = '', toimitettuaika=''
 							where otunnus = '$otsikkonro' and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
 				$result  = mysql_query($query) or pupe_error($query);
+				
+				//	Poistetaan kaikki lavaeloitukset
+				$query = "	select group_concat(distinct(concat('\'', selitetark_2, '\''))) veloitukset
+							from avainsana
+							join tuote on tuote.yhtio=avainsana.yhtio and tuote.tuoteno=avainsana.selitetark_2
+							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='pakkaus'";
+				$pakres = mysql_query($query) or pupe_error($query);
+				$pakrow = mysql_fetch_array($pakres);
+				if($pakrow["veloitukset"]!="") {
+					$query = "delete from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus='$otsikkonro' and tuoteno IN ({$pakrow["veloitukset"]})";
+					$delres = mysql_query($query) or pupe_error($query);
+				}
 			}
 
 			if ($tila == 'L') {
@@ -172,7 +184,51 @@
 							if ($kilot[$i]=='') 	$kilot[$i]		= 0;
 							if ($lavametri[$i]=='') $lavametri[$i]	= 0;
 							if ($kuutiot[$i]=='')	$kuutiot[$i]	= 0;
+							
+							//	Lisätään myös pakkauksen veloitus, mikäli sellainen on annettu
+							$query = "	SELECT * 
+										FROM avainsana
+										JOIN tuote ON tuote.yhtio=avainsana.yhtio and tuote.tuoteno=avainsana.selitetark_2
+										WHERE avainsana.yhtio='$kukarow[yhtio]'
+											and avainsana.laji='pakkaus' 
+											and avainsana.selite='$pakkaus[$i]'
+											and selitetark='$pakkauskuvaus[$i]'";
+							$pakres = mysql_query($query) or pupe_error($query);
+							if(mysql_num_rows($pakres) == 1) {
+								$pakrow = mysql_fetch_array($pakres);
+								
+								//	Jostain vuotaa muuttuja ja joudutaan ikuiseen looppiin. Tämä näyttää toimivan
+								if(!function_exists(lisaarivi)) {
+									function lisaarivi ($otunnus, $tuoteno, $kpl) {
+										global $kukarow, $yhtiorow;
 
+										$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
+										$rhire = mysql_query($query) or pupe_error($query);
+										$laskurow = mysql_fetch_array($rhire);
+
+										$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+										$rhire = mysql_query($query) or pupe_error($query);
+										$trow  = mysql_fetch_array($rhire);
+
+										$varataan_saldoa 	= "EI";
+										$kukarow["kesken"]	= $otunnus;
+										$korvaavakielto 	= "ON";
+										$toimaika			= $laskurow["toimaika"];
+										$kerayspvm			= $laskurow["kerayspvm"];
+										
+										require("tilauskasittely/lisaarivi.inc");
+										
+										//	Merkataan tämä rivi kerätyksi ja toimitetuksi..
+										$query = "	update tilausrivi set 
+														kerattyaika	= now(),
+														keratty		= '{$kukarow["kuka"]}'
+													where yhtio = '$kukarow[yhtio]' and tunnus='{$lisatyt_rivit1[0]}'";
+										$updres = mysql_query($query) or pupe_error($query);										
+									}
+								}
+								lisaarivi($otsikkonro, $pakrow["selitetark_2"], $kollit[$i]);
+							}
+							
 							if ($kilot[$i]!=0 or $kollit[$i]!=0 or $kuutiot[$i]!=0 or $lavametri[$i]!=0) {
 								echo "<tr><td>$pakkauskuvaus[$i]</td><td>$pakkaus[$i]</td><td>$pakkauskuvaustark[$i]</td><td align='right'>$kollit[$i] kll</td><td align='right'>$kilot[$i] kg</td><td align='right'>$kuutiot[$i] m&sup3;</td><td align='right'>$lavametri[$i] m</td></tr>";
 							}

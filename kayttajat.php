@@ -111,6 +111,7 @@
 			$hyvaksyja 						= $monta['hyvaksyja'];
 			$naytetaan_katteet_tilauksella	= $monta['naytetaan_katteet_tilauksella'];
 			$profile 						= $monta['profiilit'];
+			$piirit	 						= $monta['piirit'];			
 
 			echo "<font class='message'>".t("Käyttäjä")." $monta[kuka] ($monta[nimi]) ".t("löytyi muista yrityksistä.")."<br>";
 			echo t("Hänelle lisätään nyt myös oikeudet yritykselle")." $yhtio.<br>".t("Käyttäjätiedot kopioidaan yhtiöstä")." $monta[yhtio].</font><br>";
@@ -124,7 +125,11 @@
 				}
 				$profile = substr($profile,0,-1);
 			}
-
+			
+			if (count($piiri)>0) {
+				$piirit = implode(",", $piiri);
+			}
+			
 			$password = md5(trim($password));
 			if ($salasana == "") $salasana = $password; // jos meillä ei ole kopioitua salasanaa toisesta yrityksestä, käytetään syötettyä
 
@@ -156,6 +161,7 @@
 						toimipaikka		= '$toimipaikka',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
 						profiilit 		= '$profile',
+						piirit			= '$piirit',
 						laatija			= '$kukarow[kuka]',
 						luontiaika		= now(),
 						yhtio 			= '$yhtio'";
@@ -177,7 +183,7 @@
 			$query = "	DELETE FROM oikeu
 						WHERE yhtio='$yhtio' and kuka='$ktunnus' and lukittu=''";
 			$pres = mysql_query($query) or pupe_error($query);
-
+			
 			if (count($profiilit) > 0 and $profiilit[0] !='') {
 
 				//käydään uudestaan profiili läpi
@@ -270,6 +276,10 @@
 				$profile = substr($profile,0,-1);
 			}
 
+			if (count($piiri)>0) {
+				$piirit = implode(",", $piiri);
+			}
+			
 			//päivitetään salasana
 			if (trim($password) != '') {
 				$password = md5(trim($password));
@@ -308,6 +318,7 @@
 						oletus_ohjelma 	= '$oletus_ohjelma',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
 						profiilit 		= '$profile',
+						piirit			= '$piirit',
 						muuttaja		= '$kukarow[kuka]', 
 						muutospvm		= now()
 						WHERE kuka='$kuka' and yhtio='$yhtio'";
@@ -321,12 +332,12 @@
 
 			//päivitetään oikeudet jos profiileja on olemassa
 			$profiilit = explode(',', trim($profile));
+			
 
 			//poistetaan käyttäjän vanhat profiilioikeudet
 			$query = "	DELETE FROM oikeu
 						WHERE yhtio='$kukarow[yhtio]' and kuka='$kuka' and lukittu=''";
 			$pres = mysql_query($query) or pupe_error($query);
-
 			if (count($profiilit) > 0 and $profiilit[0] != '') {
 				//käydään uudestaan profiili läpi
 				foreach($profiilit as $prof) {
@@ -370,6 +381,7 @@
 					}
 				}
 			}
+
 			$tee = "";
 		}
 		else {
@@ -785,6 +797,7 @@
 
 			$profiilit = explode(',', $krow["profiilit"]);
 
+			echo "<tr><th valign='top'>Piiirit:</th><td>";
 			while ($prow = mysql_fetch_array($pres)) {
 
 				$chk = "";
@@ -797,9 +810,32 @@
 					}
 				}
 
-				echo "<tr><th>Profiili:</th><td><input type='checkbox' name='profiili[]' value='$prow[profiili]' $chk> $prow[profiili]</td></tr>";
+				echo "<input type='checkbox' name='profiili[]' value='$prow[profiili]' $chk> $prow[profiili]<br>";
 			}
+			echo "</td></tr>";
 
+			$query = "	SELECT *
+						FROM avainsana
+						WHERE yhtio='$kukarow[yhtio]' and laji='PIIRI'
+						ORDER BY jarjestys";
+			$pres = mysql_query($query) or pupe_error($query);
+
+			$piirit = explode(',', $krow["piirit"]);
+
+			echo "<tr><th valign='top'>Piirit:</th><td>";
+			while ($prow = mysql_fetch_array($pres)) {
+
+				
+				$chk = "";
+
+				if(in_array($prow["selite"], $piirit)) {
+					$chk = "CHECKED";
+				}
+
+				echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
+				
+			}
+			echo "</td></tr>";
 
 			if ($selkuka == "UUSI" and $toim != "extranet") {
 				$query = "select yhtio, nimi from yhtio order by yhtio";

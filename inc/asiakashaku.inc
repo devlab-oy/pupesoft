@@ -21,10 +21,17 @@ $ytunnus = addslashes(trim($ytunnus));
 $limit   = 300; // montako riviä on maksimi
 $monta   = 0;
 
+//	Jos käyttäjällä on valittu piirejä niin sallitaan vain ko. piirin/piirien hakeminen
+if($kukarow["piirit"] != "")	 {
+	$asiakasrajaus = "and piiri IN ($kukarow[piirit])";
+}
+else {
+	$asiakasrajaus="";
+}
 if (is_numeric($asiakasid) and $asiakasid > 0) {
 	$query	= "	SELECT *
 				FROM asiakas
-				WHERE $konsyhtiot and tunnus='$asiakasid'";
+				WHERE $konsyhtiot and tunnus='$asiakasid' $asiakasrajaus";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }
@@ -104,13 +111,13 @@ elseif ($ytunnus != '') {
 
 	if ($monta == 0) {
 		// exactihaku
-		$query	= "	(SELECT * FROM asiakas use index (ytunnus_index) WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='' and laji != 'P')
+		$query	= "	(SELECT * FROM asiakas use index (ytunnus_index) WHERE $konsyhtiot and ytunnus = '$ytunnus' and ytunnus!='' and laji != 'P' $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asno_index) WHERE $konsyhtiot and asiakasnro = '$ytunnus' and asiakasnro!=0 and laji != 'P')
+					(SELECT * FROM asiakas use index (asno_index) WHERE $konsyhtiot and asiakasnro = '$ytunnus' and asiakasnro!=0 and laji != 'P' $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus = '$ytunnus' and ovttunnus!='' and laji != 'P')
+					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus = '$ytunnus' and ovttunnus!='' and laji != 'P' $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (toim_ovttunnus_index) WHERE $konsyhtiot and toim_ovttunnus = '$ytunnus' and toim_ovttunnus!='' and laji != 'P')
+					(SELECT * FROM asiakas use index (toim_ovttunnus_index) WHERE $konsyhtiot and toim_ovttunnus = '$ytunnus' and toim_ovttunnus!='' and laji != 'P' $asiakasrajaus)
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
@@ -124,6 +131,7 @@ elseif ($ytunnus != '') {
 					and ytunnus like '$ytunnus%' 
 					and ytunnus!=''
 					and laji != 'P'
+					$asiakasrajaus
 					ORDER BY asiakas.nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
@@ -131,17 +139,17 @@ elseif ($ytunnus != '') {
 
 	if ($monta == 0 and is_string($ytunnus)) {
 		// arvailuhaku
-		$query	= "	(SELECT * FROM asiakas use index (asiakasnimi) WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!='' and laji != 'P')
+		$query	= "	(SELECT * FROM asiakas use index (asiakasnimi) WHERE $konsyhtiot and nimi like '%$ytunnus%' and nimi!='' and laji != 'P' $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asiakasnimitark) WHERE $konsyhtiot and nimitark like '%$ytunnus%' and nimitark!='' and laji != 'P')
+					(SELECT * FROM asiakas use index (asiakasnimitark) WHERE $konsyhtiot and nimitark like '%$ytunnus%' and nimitark!='' and laji != 'P' $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asiakastoim_nimi) WHERE $konsyhtiot and toim_nimi like '%$ytunnus%' and toim_nimi!='' and laji != 'P')
+					(SELECT * FROM asiakas use index (asiakastoim_nimi) WHERE $konsyhtiot and toim_nimi like '%$ytunnus%' and toim_nimi!='' and laji != 'P' $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (asiakastoim_nimitark) WHERE $konsyhtiot and toim_nimitark like '%$ytunnus%' and toim_nimitark!='' and laji != 'P')
+					(SELECT * FROM asiakas use index (asiakastoim_nimitark) WHERE $konsyhtiot and toim_nimitark like '%$ytunnus%' and toim_nimitark!='' and laji != 'P' $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!='' and laji != 'P')
+					(SELECT * FROM asiakas use index (ovttunnus_index) WHERE $konsyhtiot and ovttunnus like '%$ytunnus%' and ovttunnus!='' and laji != 'P' $asiakasrajaus)
 					UNION
-					(SELECT * FROM asiakas WHERE $konsyhtiot and postitp like '%$ytunnus%' and postitp!='' and laji != 'P')
+					(SELECT * FROM asiakas WHERE $konsyhtiot and postitp like '%$ytunnus%' and postitp!='' and laji != 'P' $asiakasrajaus)
 					ORDER BY nimi";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);

@@ -1,5 +1,6 @@
 <?php
 
+
 	// k‰ytet‰‰n slavea
 	$useslave = 1;
 
@@ -15,6 +16,7 @@
 		exit;
 	}
 	else {
+		
 		echo "<font class='head'>".t("Myyntiseuranta")."</font><hr>";
 
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
@@ -36,6 +38,15 @@
 			//-->
 			</script>";
 			
+			//	Jos k‰ytt‰j‰ll‰ on valittu piirej‰ niin sallitaan vain ko. piirin/piirien hakeminen
+			if($kukarow["piirit"] != "")	 {
+				$asiakasrajaus = "and piiri IN ($kukarow[piirit])";
+				$asiakasrajaus_avainsana = "and selite IN ($kukarow[piirit])";
+			}
+			else {
+				$asiakasrajaus="";
+				$asiakasrajaus_avainsana = "";				
+			}
 			
 		if (isset($muutparametrit)) {
 						
@@ -466,7 +477,7 @@
 			}
 
 			if ($asiakas != "") {
-				$query = "select group_concat(tunnus) from asiakas where yhtio in ($yhtio) and ytunnus = '$asiakas'";
+				$query = "select group_concat(tunnus) from asiakas where yhtio in ($yhtio) and ytunnus = '$asiakas' $asiakasrajaus";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$asiakasrow = mysql_fetch_array($result);
@@ -540,7 +551,8 @@
 						LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 						LEFT JOIN asiakas use index (PRIMARY) ON asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 						LEFT JOIN toimitustapa ON lasku.yhtio=toimitustapa.yhtio and lasku.toimitustapa=toimitustapa.selite
-						WHERE lasku.yhtio in ($yhtio) and
+						WHERE lasku.yhtio in ($yhtio)
+						$asiakasrajaus and
 						lasku.tila in ($tila)"; 
 										
 			if ($ajotapa == 'tilausjaauki') {										
@@ -1352,13 +1364,9 @@
 			}
 
 			echo "</select></td>";
-			echo "</tr>\n";
+			echo "</tr></table><br>\n";
 			
-			echo "<tr>";
-			echo "<td colspan='3' class='back'><br></td></tr>";
-
-			echo "<tr>";
-			echo "<td colspan='3'><table><tr><td valign='top' class='back'>";
+			echo "<table width='100%'><tr valign='top'><td><table><tr><td class='back'>";
 
 			// n‰ytet‰‰n soveltuvat osastot
 			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
@@ -1424,6 +1432,48 @@
 			}
 			
 			echo "</table>";
+			echo "</td>";
+			/*
+
+			echo "<td colspan='3'><table><tr><td valign='top' class='back'>";
+			// n‰ytet‰‰n sallityt piirit
+			$query = "	SELECT * 
+						FROM avainsana
+						WHERE yhtio='$kukarow[yhtio]' and 
+						laji='piiri'
+						$asiakasrajaus_avainsana
+						order by jarjestys";
+			$res2  = mysql_query($query) or die($query);
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "<div style='height:265;overflow:auto;'>";
+			}
+			
+			echo "<table>";
+			echo "<tr><th colspan='2'>".t("Valitse piiri(t)").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
+			
+			while ($rivi = mysql_fetch_array($res2)) {
+				$mul_check = '';
+				if ($mul_piiri!="") {
+					if (in_array($rivi['selite'],$mul_piiri)) {
+						$mul_check = 'CHECKED';
+					}
+				}
+				
+				if(count($_POST)==0) $mul_check = 'CHECKED';
+				
+				echo "<tr><td><input type='checkbox' name='mul_piiri[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+			}
+
+			echo "</table>";
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "</div>";
+			}
+			
+			echo "</table>";
+			*/
 			echo "</td>";
 			
 			echo "</tr>\n";
@@ -1513,6 +1563,7 @@
 				<td><input type='text' name='jarjestys[9]' size='2' value='$jarjestys[9]'></td>
 				<td><input type='checkbox' name='ruksit[9]' value='toimittaja' $ruk9chk></td>
 				</tr>
+				<tr>
 				<th>".t("Listaa tilaustyypeitt‰in")."</th>
 				<td><input type='text' name='jarjestys[10]' size='2' value='$jarjestys[10]'></td>
 				<td><input type='checkbox' name='ruksit[10]' value='tilaustyyppi' $ruk10chk></td>

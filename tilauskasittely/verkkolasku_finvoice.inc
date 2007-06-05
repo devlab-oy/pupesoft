@@ -202,10 +202,13 @@ if (!function_exists('finvoice_otsik')) {
 			fputs($tootfinvoice, "<DeliveryDetails>\r\n");
 			fputs($tootfinvoice, "<DeliveryPeriodDetails>\r\n");
 			xml_add('StartDate Format="CCYYMMDD"',                   					vlas_dateconv($toimaikarow["mint"]),					$tootfinvoice);
-			xml_add('EndDate Format="CCYYMMDD"',                   						vlas_dateconv($toimaikarow["maxt"]),					$tootfinvoice);
+			xml_add('EndDate Format="CCYYMMDD"',                   						vlas_dateconv($toimaikarow["maxt"]),				
+			fputs($tootfinvoice, "</DeliveryPeriodDetails>\r\n");						$tootfinvoice);
 			xml_add("DeliveryMethodText",                                     			$lasrow['toimitustapa'],          						$tootfinvoice);
-			xml_add("DeliveryTermsText",                                     			$lasrow['toimitusehto'],          						$tootfinvoice);
-			fputs($tootfinvoice, "</DeliveryPeriodDetails>\r\n");
+			if($lasrow['toimitusehto']!="") {
+				xml_add("DeliveryTermsText",                                     			$lasrow['toimitusehto'],          						$tootfinvoice);
+			}
+
 			fputs($tootfinvoice, "</DeliveryDetails>\r\n");
 
 			fputs($tootfinvoice, "<InvoiceDetails>\r\n");
@@ -270,7 +273,7 @@ if (!function_exists('finvoice_otsikko_loput')) {
 			xml_add("PaymentTermsFreeText",       											pp($masrow['teksti']." ".$masrow['kassa_teksti']),			$tootfinvoice);
 			xml_add('InvoiceDueDate Format="CCYYMMDD"',               						pp(vlas_dateconv($lasrow['erpcm'])),   	       				$tootfinvoice);
 			xml_add('CashDiscountDate Format="CCYYMMDD"',               					pp(vlas_dateconv($lasrow['kapvm'])),   	       				$tootfinvoice);
-			xml_add("CashDiscountBaseAmount Format=\"$lasrow[valkoodi]\"",					pp($lasrow['kasumma']),				         				$tootfinvoice);
+			xml_add("CashDiscountBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",					pp($lasrow['kasumma']),				         				$tootfinvoice);
 			fputs($tootfinvoice, "<PaymentOverDueFineDetails>\r\n");
 			xml_add("PaymentOverDueFineFreeText",											"Viivästyskorko ".pp($lasrow['viikorkopros']),				$tootfinvoice);
 			xml_add("PaymentOverDueFinePercent",                 						 	pp($lasrow['viikorkopros']),   								$tootfinvoice);

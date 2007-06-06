@@ -591,7 +591,7 @@
 
 						$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, kuka.nimi kukanimi
 									FROM lasku
-									JOIN asiakas on asiakas.yhtio=lasku.yhtio and asiakas.ytunnus=lasku.ytunnus
+									JOIN asiakas on asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 									LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
 									WHERE lasku.tunnus='$otsrow[otunnus]' and lasku.yhtio='$kukarow[yhtio]'";
 						$result = mysql_query($query) or pupe_error($query);

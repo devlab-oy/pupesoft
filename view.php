@@ -7,6 +7,9 @@ else {
 	require ("connect.inc");
 }
 
+/*
+	Diasbloitu rikkoo extranetin
+	
 //	Tarkastetaan oikeudet
 if (isset($_COOKIE["pupesoft_session"])) {
 	$session = $_COOKIE["pupesoft_session"];
@@ -31,7 +34,7 @@ if($refererurl!="") {
 else {
 	die();
 }
-
+*/
 $id = (int) $_GET["id"];
 
 $query = "select * from liitetiedostot where tunnus='$id'";

@@ -187,6 +187,7 @@
 		if (mysql_num_rows($stresult) > 0) {
 			echo "	<form name='valinta' action='$PHP_SELF' method='post'>
 					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='maa' value='$maa'>
 					<input type='hidden' name='tee' value='TOIMITA'>";
 					
 			if ($toim == "ENNAKKO") {
@@ -263,6 +264,7 @@
 		echo "<input type='hidden' name='suorana' value='$suorana'>";
 		echo "<input type='hidden' name='tuotenumero' value='$tuotenumero'>";
 		echo "<input type='hidden' name='rivinotunnus' value='$rivinotunnus'>";
+		echo "<input type='hidden' name='maa' value='$maa'>";
 
 		if(is_array($varastosta)) {
 			foreach ($varastosta as $vara) {
@@ -718,7 +720,8 @@
 								echo "</tr>";
 
 								echo "<form action='$PHP_SELF' method='post'>";
-
+								echo "<input type='hidden' name='maa' value='$maa'>";
+								
 								if ($tilaus_on_jo == "") {
 									echo "<input type='hidden' name='tee' value='POIMI'>";
 									echo "<input type='hidden' name='toim' value='$toim'>";

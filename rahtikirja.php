@@ -186,13 +186,14 @@
 							if ($kuutiot[$i]=='')	$kuutiot[$i]	= 0;
 							
 							//	Lisätään myös pakkauksen veloitus, mikäli sellainen on annettu
-							$query = "	SELECT * 
+							$query = "	SELECT avainsana.* 
 										FROM avainsana
 										JOIN tuote ON tuote.yhtio=avainsana.yhtio and tuote.tuoteno=avainsana.selitetark_2
 										WHERE avainsana.yhtio='$kukarow[yhtio]'
 											and avainsana.laji='pakkaus' 
 											and avainsana.selite='$pakkaus[$i]'
-											and selitetark='$pakkauskuvaus[$i]'";
+											and selitetark='$pakkauskuvaus[$i]'
+											and tuoteno != ''";
 							$pakres = mysql_query($query) or pupe_error($query);
 							if(mysql_num_rows($pakres) == 1) {
 								$pakrow = mysql_fetch_array($pakres);

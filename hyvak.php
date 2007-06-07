@@ -78,12 +78,7 @@
 		echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'],$tunnus)."</font><br>";
 
 		$tunnus = '';
-		if($kutsuja=="MATKALASKU") {
-			$tee = "passaa";
-		}	
-		else {
-			$tee = '';			
-		}
+		$tee = '';
 	}
 
 	if ($tee == 'W' and $komm == '') {
@@ -361,13 +356,8 @@
 		echo "'$laskurow[hyvaksyja_nyt]' ".t("hyväksyi laskun")." $viesti<br><br>";
 
 		$tunnus = '';
+		$tee = '';
 
-		if($kutsuja=="MATKALASKU") {
-			$tee = "passaa";
-		}	
-		else {
-			$tee = '';			
-		}
 	}
 
 	if ($tee == 'P') {
@@ -1161,7 +1151,7 @@
 		}
 
 	}
-	else {
+	elseif($kutsuja=="") {
 
 		// Tällä ollaan, jos olemme vasta valitsemassa laskua
 		if ($nayta == '') {

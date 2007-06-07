@@ -1,9 +1,11 @@
 <?php
-	require ("inc/parametrit.inc");
+
+	if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php")  !== FALSE) {
+		require ("inc/parametrit.inc");
+		echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr>";		
+	}
 	require ("inc/alvpopup.inc");
 	require_once ("inc/tilinumero.inc");
-
-	echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr>";
 
 	if ($tee == 'M') {
 		$query = "	SELECT *
@@ -76,7 +78,12 @@
 		echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'],$tunnus)."</font><br>";
 
 		$tunnus = '';
-		$tee = '';
+		if($kutsuja=="MATKALASKU") {
+			$tee = "passaa";
+		}	
+		else {
+			$tee = '';			
+		}
 	}
 
 	if ($tee == 'W' and $komm == '') {
@@ -354,7 +361,13 @@
 		echo "'$laskurow[hyvaksyja_nyt]' ".t("hyväksyi laskun")." $viesti<br><br>";
 
 		$tunnus = '';
-		$tee = '';
+
+		if($kutsuja=="MATKALASKU") {
+			$tee = "passaa";
+		}	
+		else {
+			$tee = '';			
+		}
 	}
 
 	if ($tee == 'P') {
@@ -1288,6 +1301,8 @@
 
 	}
 
-	require ("inc/footer.inc");
+	if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php")  !== FALSE) {
+		require ("inc/footer.inc");
+	}
 
 ?>

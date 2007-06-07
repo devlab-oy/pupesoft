@@ -19,8 +19,7 @@
 	if(!in_array($tuotetyyppi, array("A","B"))
 				or mysql_field_name($result, $i) == "nimitys"
 	 			or mysql_field_name($result, $i) == "tilino"
-				or mysql_field_name($result, $i) == "tilino_eu"
-				or mysql_field_name($result, $i) == "tilino_ei_eu"
+	 			or mysql_field_name($result, $i) == "kommentoitava"	
 				or mysql_field_name($result, $i) == "kohde"
 				or mysql_field_name($result, $i) == "status"				
 				or mysql_field_name($result, $i) == "projekti"

@@ -324,6 +324,7 @@
 				<option value='6' $sel[6]>".t("Perjantai")."</option>
 				<option value='7' $sel[7]>".t("Lauantai")."</option>
 				<option value='1' $sel[1]>".t("Sunnuntai")."</option>
+				<option value='9' $sel[9]>".t("Laskut lähetetään vain ohittamalla laskutusvkopv")."</option>
 				</select></td>";
 			$jatko = 0;
 	}

@@ -21,8 +21,9 @@
 	// oletetaan yhtiön valuutta jos sitä ei tiedetä
 	if ($laskurow["valkoodi"] == "") $laskurow["valkoodi"] = $yhtiorow["valkoodi"];
 
-	// oletetaan tuotteen alvi
+	// oletetaan tuotteen alvi ja valuutta
 	$alehinta_alv = "";
+	$alehinta_val = $yhtiorow["valkoodi"];
 
 	// jos meillä on lasku menossa ulkomaille
 	if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
@@ -73,8 +74,11 @@
 			$aperuste .= "Käyttäjän antama hinta ";
 		}
 
+		$alehinta_val = $laskurow["valkoodi"];
+
 		if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$hinta = round(yhtioval($hinta, $laskurow["vienti_kurssi"]),2);
+			$alehinta_val = $yhtiorow["valkoodi"];
 		}
 	}
 	elseif ($hinta == '') {
@@ -249,6 +253,7 @@
 				$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
 				$netto			= $hrow["laji"];
 				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
+				$alehinta_val	= $laskurow["valkoodi"];
 			}
 		}
 
@@ -312,8 +317,9 @@
 					$ale	= 0;
 				}
 
-				$hinta 		= yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
-				$aperuste	.= "Asiakkaan tuotteen nettohinta laskun valuutassa. ";
+				$hinta         = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+				$aperuste     .= "Asiakkaan tuotteen nettohinta laskun valuutassa. ";
+				$alehinta_val  = $laskurow["valkoodi"];
 			}
 		}
 
@@ -392,8 +398,9 @@
 					$ale	= 0;
 				}
 
-				$hinta 		= yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
-				$aperuste	.= "Asiakkaan tuotealeryhmän nettohinta laskun valuutassa. ";
+				$hinta        = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+				$aperuste    .= "Asiakkaan tuotealeryhmän nettohinta laskun valuutassa. ";
+				$alehinta_val = $laskurow["valkoodi"];
 			}
 		}
 
@@ -473,8 +480,9 @@
 					$ale	= 0;
 				}
 
-				$hinta 		= yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
-				$aperuste	.= "Asiakasaleryhmän tuotteen nettohinta laskun valuutassa. ";
+				$hinta        = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+				$aperuste    .= "Asiakasaleryhmän tuotteen nettohinta laskun valuutassa. ";
+				$alehinta_val = $laskurow["valkoodi"];
 			}
 		}
 
@@ -555,8 +563,9 @@
 					$ale	= 0;
 				}
 
-				$hinta 		= yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
-				$aperuste	.= "Asiakasaleryhmän tuotealeryhmän nettohinta laskun valuutassa. ";
+				$hinta        = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+				$aperuste    .= "Asiakasaleryhmän tuotealeryhmän nettohinta laskun valuutassa. ";
+				$alehinta_val = $laskurow["valkoodi"];
 			}
 		}
 
@@ -631,6 +640,7 @@
 				$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
 				$netto			= $hrow["laji"];
 				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
+				$alehinta_val   = $laskurow["valkoodi"];
 			}
 		}
 

@@ -2479,8 +2479,8 @@ if ($tee == '') {
  					<input type='hidden' name='tiedot_laskulta' value='$tiedot_laskulta'>
  					<input type='hidden' name='asiakasid' value='$asiakasid'>";
 
-					echo "<input type='radio' onclick='submit()' name='tilausrivi_alvillisuus' value='K' $sele[K]> Verolliset hinnat ";
-					echo "<input type='radio' onclick='submit()' name='tilausrivi_alvillisuus' value='E' $sele[E]> Verottomat hinnat ";
+					echo "<input type='radio' onclick='submit()' name='tilausrivi_alvillisuus' value='K' $sele[K]> ".t("Verolliset hinnat")." ";
+					echo "<input type='radio' onclick='submit()' name='tilausrivi_alvillisuus' value='E' $sele[E]> ".t("Verottomat hinnat")." ";
 
 					echo "</form>";
 				}
@@ -2994,6 +2994,10 @@ if ($tee == '') {
 					else {
 						require ("inc/alehinta.inc");
 						require ("tilauskasittely/alv.inc");
+					}
+
+					if ($alehinta_val != $laskurow["valkoodi"]) {
+						$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
 					}
 
 					// halutaan alvittomat hinnat

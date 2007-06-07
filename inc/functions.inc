@@ -191,7 +191,7 @@ if (!function_exists("t")) {
 				else {
 					$stringi = $sanakirjarow["fi"];
 				}
-				
+
 				//Päivitetään aikaleima
 				$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
 				$sanakirjaresultupd = mysql_query($sanakirjaqueryupd, $link) or pupe_error($sanakirjaqueryupd);
@@ -234,7 +234,6 @@ if (!function_exists("alias")) {
 		return $stringi;
 	}
 }
-
 
 if (!function_exists("kuuluukovarastoon")) {
 	function kuuluukovarastoon($hyllyalue, $hyllynro, $varasto = '', $yhtio = '') {
@@ -293,6 +292,7 @@ if (!function_exists("mm_pt")) {
 		return $pointseja;
 	}
 }
+
 if (!function_exists("pt_mm")) {
 	function pt_mm($pointseja) {
 		$millimetreja = round($pointseja * 0.3527777778,2);
@@ -1449,13 +1449,16 @@ if (!function_exists("tuotteen_myyntihinta")) {
 	function tuotteen_myyntihinta ($laskurow, $trow, $kpl) {
 		global $yhtiorow, $kukarow;
 
+		// palautetaan tuotteen SVH laskun valuutassa
 		// tämä funktion on kopsattu alehinta.incistä sopivilta osilta
-		$hinta = 0;
+		$hinta 			= 0;
+		$netto			= "";
+		$valuutta		= "";
 
 		// 5. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-			$query = "	SELECT hinta, laji
+			$query = "	SELECT *
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
@@ -1471,16 +1474,16 @@ if (!function_exists("tuotteen_myyntihinta")) {
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow       	= mysql_fetch_array ($hresult);
-				$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
+				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
-				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
+				$valuutta		= $hrow["valkoodi"];
 			}
 		}
 
 		// 6. hinnasto.hinta tuotteen nettohinta hinnastosta yhtiön valuutassa
 		if ($hinta == 0) {
 
-			$query = "	SELECT hinta, laji
+			$query = "	SELECT *
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
@@ -1498,22 +1501,22 @@ if (!function_exists("tuotteen_myyntihinta")) {
 				$hrow       	= mysql_fetch_array ($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
-				$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
+				$valuutta		= $hrow["valkoodi"];
 			}
 		}
 
 		// 15. tuote.nettohinta (tuotteen nettohinta)
 		if ($hinta == 0 and $trow['nettohinta'] > 0) {
+
 			$hinta 			= $trow['nettohinta'];
-			$aperuste 		.= "Tuotteen nettohinta. ";
 			$netto 			= 'N';
-			$ale			= 0;
+			$valuutta		= $yhtiorow["valkoodi"];
 		}
 
 		// 16. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
 		if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 
-			$query = "	SELECT hinta, laji
+			$query = "	SELECT *
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
@@ -1529,16 +1532,16 @@ if (!function_exists("tuotteen_myyntihinta")) {
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow			= mysql_fetch_array ($hresult);
-				$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
+				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
-				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
+				$valuutta		= $hrow["valkoodi"];
 			}
 		}
 
 		// 17. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtion valuutassa
 		if ($hinta == 0) {
 
-			$query = "	SELECT hinta, laji
+			$query = "	SELECT *
 						FROM hinnasto
 						WHERE yhtio  = '$kukarow[yhtio]'
 						and tuoteno  = '$trow[tuoteno]'
@@ -1556,14 +1559,22 @@ if (!function_exists("tuotteen_myyntihinta")) {
 				$hrow			= mysql_fetch_array ($hresult);
 				$hinta 			= $hrow["hinta"];
 				$netto			= $hrow["laji"];
-				$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
+				$valuutta		= $hrow["valkoodi"];
 			}
 		}
 
 		// 18. tuote.myyntihinta (tuotteen bruttohinta)
 		if ($hinta == 0) {
+
 			$hinta		= $trow['myyntihinta'];
-			$aperuste	.= "Tuotteen myyntihinta. ";
+			$netto 		= '';
+			$valuutta	= $yhtiorow["valkoodi"];
+		}
+
+		if ($valuutta == "") $valuutta = $yhtiorow["valkoodi"];
+
+		if ($laskurow["valkoodi"] != $valuutta) {
+			$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
 		}
 
 		return $hinta;

@@ -259,7 +259,7 @@
 	
 		//oikeeta laitaa
 		$pdf->draw_text(302,  617, "Toimituslauseke Leveransklausul",					$firstpage, $norm);
-		$pdf->draw_text(302,  582, $rakir_row["toimitusehto"],							$firstpage, $kirj);
+		$pdf->draw_text(302,  582, $postirow["toimitusehto"],							$firstpage, $kirj);
 		$pdf->draw_rectangle(579,300,579,545,											$firstpage, $rectparam);
 		$pdf->draw_text(302,  573, "Rahdinmaksaja Fraktbetalare",						$firstpage, $norm);
 		$pdf->draw_text(302,  559, $rahdinmaksaja,										$firstpage, $kirj);

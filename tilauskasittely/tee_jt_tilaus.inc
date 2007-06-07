@@ -428,6 +428,11 @@
 					$perheid2		 	= $lisataanrow["perheid2"];
 					$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);
 
+					// jos meill‰ on valuuttalasku k‰‰nnet‰‰n t‰ss‰vaiheessa hinta valuttaan, koska lisaarivi k‰‰nt‰‰ sen takasi yhtiˆn valuuttaan
+					if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["valkoodi"] != "") {
+						$hinta = round(laskuval($hinta, $laskurow["vienti_kurssi"]), 2);
+					}
+
 					require("lisaarivi.inc");
 
 					$kpl = $talteen_kpl; // lis‰‰rivi rikko t‰n, otetaan haltuun

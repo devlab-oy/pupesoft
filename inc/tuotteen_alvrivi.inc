@@ -4,18 +4,28 @@
 	$jatko = 1; // oletetaan normaali käsittely
 	$tyyppi = 1; // oletetaan rivin näkyvyys
 
+	if (file_exists("../inc/alvpopup.inc")) {
+		require ("../inc/alvpopup.inc");
+	}
+	else {
+		require ("alvpopup.inc");
+	}
+
 	if (mysql_field_name($result, $i) == "yhtio") {
 		$tyyppi = 0;
 	}
 
 	if (mysql_field_name($result, $i) == "maa") {
+
+		$maa=$trow[$i];
+
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''
 					ORDER BY koodi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel = "";
@@ -84,6 +94,38 @@
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "alv") {
+		
+		if($maa!="") {
+			//	Osataanko tämän maan alv=
+			$query = "	SELECT selite
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]' and laji = 'alvulk' and selitetark_2='$maa'
+						ORDER BY jarjestys,selite";
+			$vresult = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($vresult) > 0) {
+				$ulos = "<td><select name='$nimi'>";
+				$sel = '';
+
+				$ulos .= "<option value = ''>".t("Valitse oikea ALV");
+
+				while ($vrow=mysql_fetch_array($vresult)) {
+					$sel = "";
+					if ($trow[$i] == $vrow['selite']) {
+						$sel = "selected";
+					}
+					$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] %";
+				}
+				$ulos .= "</select></td>";
+
+				$jatko=0;
+			}
+			else {
+				
+			}
+		}
 	}
 	
 ?>

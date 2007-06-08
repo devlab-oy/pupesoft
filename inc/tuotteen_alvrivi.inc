@@ -15,6 +15,10 @@
 		$tyyppi = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tuoteno") {
+		$tuoteno = $trow[$i];
+	}
+
 	if (mysql_field_name($result, $i) == "maa") {
 
 		$maa=$trow[$i];
@@ -22,11 +26,13 @@
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''
+					and koodi != '{$yhtiorow["maakoodi"]}'
 					ORDER BY koodi";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
-
+		
+		$ulos .= "<option value = ''>".t("Valitse maa")."</option>";
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel = "";
 			if ($trow[$i] == $vrow["koodi"]) {
@@ -99,33 +105,24 @@
 	if (mysql_field_name($result, $i) == "alv") {
 		
 		if($maa!="") {
-			//	Osataanko tämän maan alv=
-			$query = "	SELECT selite
-						FROM avainsana
-						WHERE yhtio = '$kukarow[yhtio]' and laji = 'alvulk' and selitetark_2='$maa'
-						ORDER BY jarjestys,selite";
+			//	Onko tämä viranomaistuote? Näille voidaan antaa alv vaikkei meillä ole toimipaikkaa ko. maassa
+			$query = "	SELECT tunnus
+						FROM tuote
+						WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and tuotetyyppi='B'";
 			$vresult = mysql_query($query) or pupe_error($query);
-			if (mysql_num_rows($vresult) > 0) {
-				$ulos = "<td><select name='$nimi'>";
-				$sel = '';
-
-				$ulos .= "<option value = ''>".t("Valitse oikea ALV");
-
-				while ($vrow=mysql_fetch_array($vresult)) {
-					$sel = "";
-					if ($trow[$i] == $vrow['selite']) {
-						$sel = "selected";
-					}
-					$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] %";
-				}
-				$ulos .= "</select></td>";
-
-				$jatko=0;
+			if(mysql_num_rows($vresult)==1) {
+				$lisa="lista";
 			}
 			else {
-				
+				$lisa="";
 			}
+			
+			$ulos = "<td>".alv_popup_oletus('alv',$trow[$i], $maa, $lisa)."</td>";
 		}
+		else {
+			$ulos = "<td>".t("Valitse ensin maa")."</td>";
+		}
+		$jatko=0;
 	}
 	
 ?>

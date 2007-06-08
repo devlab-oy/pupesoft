@@ -35,7 +35,7 @@ if (!function_exists("alv_popup")) {
 }
 
 if (!function_exists("alv_popup_oletus")) {
-	function alv_popup_oletus($nimi, $oletus, $maa = '') {
+	function alv_popup_oletus($nimi, $oletus, $maa = '', $tapa = '') {
 
 		// tarvitaan yhtiörowta ja kukarowta
 		global $yhtiorow, $kukarow;
@@ -46,17 +46,25 @@ if (!function_exists("alv_popup_oletus")) {
 		$lisa = "";
 
 		// syötettiin maa
-		if ($maa != "" and $maa != $yhtiorow["maa"]) {
-			// tutkitaan ollaanko siellä alv-rekisteröity
-			$query = "select * from yhtion_toimipaikat where yhtio = '$kukarow[yhtio]' and maa = '$maa' and vat_numero != ''";
-			$alhire = mysql_query($query) or pupe_error($query);
+		if ($maa != "" and $maa != $yhtiorow["maa"]) {			
 
-			// ollaan alv-rekisteröity, haetaan oikea ALV-kanta
-			if (mysql_num_rows($alhire) == 1) {
+			//	Otetaan pelkkä ulkomaan-alv lista, käytetään mm. matkalaskuilla
+			if($tapa == "lista") {
 				$laji = "alvulk";
-				$lisa = "and selitetark_2 = '$maa'";
+				$lisa = "and selitetark_2 = '$maa'";		
 			}
-		}
+			else {
+				// tutkitaan ollaanko siellä alv-rekisteröity
+				$query = "select * from yhtion_toimipaikat where yhtio = '$kukarow[yhtio]' and maa = '$maa' and vat_numero != ''";
+				$alhire = mysql_query($query) or pupe_error($query);
+
+				// ollaan alv-rekisteröity, haetaan oikea ALV-kanta
+				if (mysql_num_rows($alhire) == 1) {
+					$laji = "alvulk";
+					$lisa = "and selitetark_2 = '$maa'";
+				}
+			}
+		}			
 
 		$query = "	SELECT selite
 					FROM avainsana
@@ -65,7 +73,13 @@ if (!function_exists("alv_popup_oletus")) {
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($vresult) == 0) {
-			echo "<font class = 'error'>".t("Yrityksen ALV%tit puuttuu!")."'$kukarow[yhtio]'</font>";
+			if($tapa=="lista") {
+				echo "<font class = 'error'>".t("Kohdemaan ALV ei määritelty!")." '$maa'</font>";
+			}
+			else {
+				echo "<font class = 'error'>".t("Yrityksen ALV%tit puuttuu!")." '$kukarow[yhtio]'</font>";
+			}
+			
 		}
 		else {
 

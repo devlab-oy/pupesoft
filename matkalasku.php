@@ -1,6 +1,7 @@
 <?php
 
 require ("inc/parametrit.inc");
+require ("inc/alvpopup.inc");
 
 echo "<font class='head'>".t('Matkalaskut')."</font><hr><br><br>";
 
@@ -198,12 +199,20 @@ if($tee=="MUOKKAA") {
 		
 		function korjaa_ostovelka($ltunnus) {
 			global $yhtiorow, $kukarow;
-			
+
 			if($debug==1) echo "Korjataan ostovelka laskulle $ltunnus<br>";
 			
 			if($yhtiorow["ostovelat"] == "") {
 				echo "Ostovelkatiliˆinti puuttuu<br>";
 				return false;
+			}
+			
+			if($poistakuva > 0) {
+				$query = " delete from liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and tyyppi='lasku' and liitostunnus='$tilausnumero' and tunnus = '$poistakuva'";
+				$result = mysql_query($query) or pupe_error($query);
+				if(mysql_affected_rows($result)==0) {
+					echo "<font class='error'>".t("HEI!! Ei koitetan runkata systeemi‰ S***na!!")."</font><br>";
+				}
 			}
 			
 			$query = "	SELECT sum((-1*summa)) summa, count(*) kpl
@@ -255,6 +264,21 @@ if($tee=="MUOKKAA") {
 
 			if($debug==1) echo "Korjattiin ostovelkatiliˆinti uusi summa on {$summarow[summa]}";
 			
+			//	P‰ivitet‰‰n laskun summa
+			$query = " update lasku set summa='".(-1*$summarow["summa"])."' where yhtio='$kukarow[yhtio]' and tunnus='$ltunnus'";
+			$updres=mysql_query($query) or pupe_error($query);
+
+			//	Ollaanko viel‰ synkiss‰?
+			$query = "	SELECT sum(rivihinta) summa
+						FROM tilausrivi
+						WHERE yhtio='$kukarow[yhtio]' and otunnus='$ltunnus' and tyyppi='M'";
+			$result=mysql_query($query) or pupe_error($query);
+			$rivisumma=mysql_fetch_array($result);
+			$ero=round($rivisumma["summa"],2)+round($summarow["summa"],2);
+			if($ero<>0) {
+				echo "	<font class='error'>".t("VIRHE!!! Matkalasku ja kirjanpito ei t‰sm‰‰!!!")."</font><br>
+						<font class='message'>".t("Heitto on")." $ero [rivit {$rivirow[summa]}] (kp {$summarow["summa"]})</font><br>";
+			}
 		}
 		
 		$query 	= "	select *
@@ -284,13 +308,6 @@ if($tee=="MUOKKAA") {
 				
 				// Poistetaan muokattava tilausrivi
 				if($tilausrivi["perheid"]>0) {
-					$query = "	SELECT sum(rivihinta) summa
-								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' and perheid = '$rivitunnus'";
-					$result = mysql_query($query) or pupe_error($query);
-					$tarkrow=mysql_fetch_array($result);					
-					$tiliointisumma=$tarkrow["summa"];
-					
 					$query = "	DELETE from tilausrivi
 								WHERE yhtio = '$kukarow[yhtio]' and perheid = '$rivitunnus'";
 					$result = mysql_query($query) or pupe_error($query);
@@ -383,19 +400,36 @@ if($tee=="MUOKKAA") {
 					$loppu=mktime($loppuhh, $loppumm, 0, $loppukk, $loppupp, $loppuvv);
 					
 					//	Tarkastetaan ett‰ t‰ll‰ v‰lill‰ ei jo ole jotain arvoa
-					$query = "	SELECT tilausrivi.tunnus
-								FROM tilausrivi
-								JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+					//	HUOM! Koitetaan tarkastaa kaikki k‰ytt‰j‰n matkalaskut..
+					$query = "	SELECT lasku.toim_nimi, lasku.summa, lasku.tapvm tapvm, 
+									tilausrivi.nimitys, tilausrivi.tuoteno, date_format(tilausrivi.kerattyaika, '%d.%m.%Y') kerattyaika, date_format(tilausrivi.toimitettuaika, '%d.%m.%Y') toimitettuaika, tilausrivi.kommentti kommentti
+								FROM lasku
+								LEFT JOIN tilausrivi on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi 	= 'M'
+								JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuotetyyppi IN ('A')
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-								and tyyppi 	= 'M'
-								and otunnus = '$tilausnumero'
-								and (	(kerattyaika > '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika <= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm') or 
+								and lasku.tilaustyyppi	= 'M'
+								and lasku.tila IN ('H','Y','M','P','Q')
+								and liitostunnus = '$laskurow[liitostunnus]'
+								and (	(kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika <= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm') or 
 										(kerattyaika <  '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika > '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm') or
-										(toimitettuaika > '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika <= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm'))
-								and tuotetyyppi IN ('A','B')";
+										(toimitettuaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika <= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm'))
+								GROUP BY otunnus";
 					$result = mysql_query($query) or pupe_error($query);
 					if(mysql_num_rows($result)>0) {
-						$errori .= "<font class='error'>".t("VIRHE!!! Annettu p‰iv‰m‰‰r‰ menee yli jo annetun p‰iv‰m‰‰r‰n kanssa")."</font><br>";
+						$errori .= "<font class='error'>".t("VIRHE!!! P‰iv‰m‰‰r‰ on menee p‰‰llekk‰in toisen matkalaskun kanssa")."</font><br>";
+						
+						$errori .= "<table><tr><th>".t("Asiakas")."</th><th>".t("viesti")."</th><th>".t("Summa/tapvm")."</th><th>".t("Tuote")."</th><th>".t("Ajalla")."</th><th>".t("Viesti")."</th></tr>";
+						while($erow=mysql_fetch_array($result)) {
+							$errori .=  "<tr>
+											<td>{$erow[toim_nimi]}</td>
+											<td>{$erow[viesti]}</td>
+											<td>{$erow[summa]}@{$erow[tapvm]}</td>
+											<td>{$erow[tuoteno]} - {$erow[nimitys]}</td>
+											<td>{$erow[kerattyaika]} - {$erow[toimitettuaika]}</td>
+											<td>{$erow[kommentti]}</td>
+										</tr>";
+						}
+						$errori .= "</table><br><br>";
 					}
 					
 					$paivat=$puolipaivat=$ylitunnit=$tunnit=0;
@@ -649,17 +683,7 @@ if($tee=="MUOKKAA") {
 				
 				//	Fiksataan ostovelka
 				korjaa_ostovelka($tilausnumero);
-				$tyhjenna="JOO";
-				
-				//	P‰ivitet‰‰n laskun summa
-				$query = "	SELECT sum(rivihinta) summa
-							FROM tilausrivi
-							WHERE yhtio='$kukarow[yhtio]' and otunnus='$tilausnumero' and tyyppi='M'";
-				$result=mysql_query($query) or pupe_error($query);
-				$summarow=mysql_fetch_array($result);
-				
-				$query = " update lasku set summa='$summarow[summa]' where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
-				$updres=mysql_query($query) or pupe_error($query);
+				$tyhjenna="JOO";				
 			}
 		}
 		
@@ -689,12 +713,6 @@ if($tee=="MUOKKAA") {
 		
 		// kirjoitellaan otsikko
 		echo "<table>";
-
-		// t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
-		echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off' enctype='multipart/form-data'>
-				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-				<input type='hidden' name='tee' value='TALLENNA'>";
-
 		echo "<tr>";
 		echo "<th align='left'>".t("Asiakas").":</th>";
 
@@ -703,6 +721,11 @@ if($tee=="MUOKKAA") {
 		echo "</tr>";
 		
 		if($laskurow["tila"]=="H" and $laskurow["hyvaksyja_nyt"]==$kukarow["kuka"] and $kukarow["taso"]==2) {
+
+			// t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
+			echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off' enctype='multipart/form-data'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='hidden' name='tee' value='TALLENNA'>";
 
 			echo "	<tr><th>".t("Viite")."</th>
 					<td><input type='text' size='30' name='viesti' value='{$laskurow["viite"]}'></td></tr>";
@@ -715,19 +738,36 @@ if($tee=="MUOKKAA") {
 			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='$tilausnumero'";
 			$liiteres=mysql_query($query) or pupe_error($query);
 			if(mysql_num_rows($liiteres)>0) {
+				if($laskurow["hyvaksyja_nyt"]==$kukarow["kuka"] and $kukarow["taso"]==2) {
+					$lisa = "&nbsp;&nbsp;&nbsp;&nbsp;<a href='#' onclick='submit();'>*poista*</a>";
+				}
+				else {
+					$lisa = "";
+				}
 				while($liiterow=mysql_fetch_array($liiteres)) {
-					echo "<a href='$PHP_SELF?tee=$tee&tilausnumero=$tilausnumero&id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+					echo "<a href='$PHP_SELF?tee=$tee&tilausnumero=$tilausnumero&id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a>$lisa <br>\n";
 				}
 			}
 
 			echo "</td></tr>";
 
-			echo "	<tr><td class='back' colspan='2'><br></td></tr>
-					<tr><td class='back' colspan='2'><font class='message'>".t("Liit‰ kuittikopio")."</font></td></tr>
+			echo "	<tr>
+						<td class='back' colspan='2'><br></td>
+					</tr>
+					<tr>
+						<td class='back' colspan='2'><font class='message'>".t("Liit‰ kuittikopio")."</font></td>
+					</tr>
 
-					<tr><th>".t("Kuvan selite")."</th><th>".t("Tiedosto")."</th></tr>
-					<tr><td><input type='text' name='kuvaselite' value='$kuvaselite'></td><td><input name='userfile' type='file' onchange='submit();'></td><td class='back'><input type='submit' value='".t("Tallenna")."'</td></tr>";
-			echo "</form></table><br>";
+					<tr>
+						<th>".t("Kuvan selite")."</th><th>".t("Tiedosto")."</th>
+					</tr>
+					<tr>
+						<td><input type='text' name='kuvaselite' value='$kuvaselite'></td>
+						<td><input name='userfile' type='file' onchange='submit();'></td>
+						<td class='back'><input type='submit' value='".t("Tallenna")."'</td>
+					</tr>";
+			echo "</form>
+					</table><br>";
 
 			echo "<table><tr>";
 			echo "<th colspan='4'>".t('Lis‰‰ kulu').":</th>";
@@ -868,8 +908,37 @@ if($tee=="MUOKKAA") {
 				$leveys=80;
 			}
 			elseif($tyyppi=="B") {
-				echo "<th>".t("Kustannuspaikka")."</th><th>".t("Kpl")."</th><th>".t("Hinta")."</th></tr>";
-				echo "<tr><td>$kustannuspaikka</td><td><input type='text' name='kpl' value='$kpl' size='4'></td>";
+				$lisa = "";
+				if($maa!="" and $maa!=$yhtiorow["maa"]) {
+					$lisa = "<th>".t("Ulkomaan ALV")."</th>";
+				}
+				
+				echo "<th>".t("Kustannuspaikka")."</th><th>".t("Kohdemaa")."</th><th>".t("Kpl")."</th><th>".t("Hinta")."</th><th>".t("Alv")."</th>$lisa</tr>";
+				echo "<tr><td>$kustannuspaikka</td>";
+				
+				$query = "	SELECT distinct koodi, nimi
+							FROM maat
+							WHERE nimi != ''
+							ORDER BY koodi";
+				$vresult = mysql_query($query) or pupe_error($query);
+
+ 				echo "<td><select name='maa' onchange='submit();'>";
+
+				while ($vrow = mysql_fetch_array($vresult)) {
+					$sel = "";
+					if ($maa == "" and $yhtiorow["maa"] == $vrow["koodi"]) {
+						$sel = "selected";
+					}
+					elseif($maa == $vrow["koodi"]) {
+						$sel = "selected";
+					}
+					
+					echo "<option value = '$vrow[koodi]' $sel>".t($vrow["nimi"])."</option>";
+				}
+
+ 				echo "</select></td>";
+								
+				echo "<td><input type='text' name='kpl' value='$kpl' size='4'></td>";
 				
 				//	Hinta saadaan antaa, jos meill‰ ei ole ennettu hintaa
 				if($trow["myyntihinta"] > 0) {
@@ -878,8 +947,28 @@ if($tee=="MUOKKAA") {
 				else {
 					echo "<td><input type='text' name='hinta' value='$hinta' size='4'></td>";
 				}
-				
-				$cols=3;
+
+				if($maa!="" and $maa!=$yhtiorow["maa"]) {
+					
+					echo "<td>0 %</td>";
+					
+					$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$maa' and tuoteno='$tuoteno' limit 1";
+					$alhire = mysql_query($query) or pupe_error($query);
+
+					// ei lˆytynyt alvia, se on pakko lˆyty‰
+					if (mysql_num_rows($alhire) == 0) {
+						echo "<td><font class='error'>PUUTTUU</font></td>";
+					}
+					else {
+						$alehi_alrow     = mysql_fetch_array($alhire);
+						echo "<td>".$alehi_alrow["alv"]."</td>";
+					}
+				}
+				else {
+					echo "<td>{$trow["alv"]}</td>";
+				}
+								
+				$cols=5;
 				$leveys=50;				
 			}
 			
@@ -929,32 +1018,41 @@ if($tee=="MUOKKAA") {
 				}
 				$eka="";
 				
-				echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
-				echo "<input type='hidden' name='tee' value='$tee'>";
-				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-				echo "<input type='hidden' name='tapa' value='MUOKKAA'>";		
-				echo "<input type='hidden' name='rivitunnus' value='$row[tunnus]'>";
-				
 				echo "<tr><td>$row[nimitys]</td><td>$row[kustannuspaikka]</td><td align='right'>$row[kpl]</td><td align='right'>$row[hinta]</td><td align='right'>$row[rivihinta]</td>";
 				
 				if(($row["perheid"]==$row["tunnus"] or $row["perheid"]==0) and ($laskurow["hyvaksyja_nyt"]==$kukarow["kuka"] and $kukarow["taso"]==2)) {
+					echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+					echo "<input type='hidden' name='tee' value='$tee'>";
+					echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+					echo "<input type='hidden' name='tapa' value='MUOKKAA'>";		
+					echo "<input type='hidden' name='rivitunnus' value='$row[tunnus]'>";
 					echo "<td class='back'><input type='submit' value='".t("Muokkaa")."'></td>";
-					if($row["tuotetyyppi"] == "A") {
-						echo "<tr><th>".t("Ajalla").":</th><td colspan='4'>$row[ajalla]</td></tr>";
-					}					
+					echo "</form>";
+					
+					echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
+					echo "<input type='hidden' name='tee' value='$tee'>";
+					echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+					echo "<input type='hidden' name='tapa' value='POISTA'>";		
+					echo "<input type='hidden' name='rivitunnus' value='$row[tunnus]'>";
+					echo "<td class='back'><input type='submit' value='".t("Poista")."'></td>";
+					echo "</form>";
 				}
 				echo "</tr>";
 				
 				if($row["kommentti"]!="") {
 					echo "<tr><th>".t("Kommentti").":</th><td colspan='4'>$row[kommentti]</td></tr>";
 				}
+
+				if($row["tuotetyyppi"] == "A" and ($row["perheid"]==$row["tunnus"] or $row["perheid"]==0)) {
+					echo "<tr><th>".t("Ajalla").":</th><td colspan='4'>$row[ajalla]</td></tr>";
+				}					
 						
-				echo "</tr></form>";
+				echo "</tr>";
 				
 				$summa+=$row["rivihinta"];
 			}			
 
-			echo "<tr><td class='back'></td><th colspan='3' style='text-align:right;'>".t("Yhteens‰")."</th><th style='text-align:right;'>".number_format($summa,2, ', ', ' ')."</th></tr>";
+			echo "<tr><td colspan='2' class='back'></td><th colspan='2' style='text-align:right;'>".t("Yhteens‰")."</th><th style='text-align:right;'>".number_format($summa,2, ', ', ' ')."</th></tr>";
 		}
 		else {
 			echo "<table>";
@@ -964,7 +1062,7 @@ if($tee=="MUOKKAA") {
 				<tr>";
 
 		if($saa_hyvaksya=="JOO" and $laskurow["tila"]=="H" and $laskurow["hyvaksyja_nyt"]==$kukarow["kuka"] and $kukarow["taso"]==2) {
-			echo "<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
+			echo "<form name='valmis' action='$PHP_SELF' method='post' autocomplete='off'>
 					<input type='hidden' name='tee' value='HYVAKSY'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<td class='back' align='left'><input type='submit' value='".t("Hyv‰ksy ja l‰het‰ eteenp‰in")."'></td></form>";
@@ -975,7 +1073,7 @@ if($tee=="MUOKKAA") {
 
 		echo "		<td colspan='4' class='back' align='right'></td>
 
-					<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off'>
+					<form name='palaa' action='$PHP_SELF' method='post'>
 					<td class='back'><input type='submit' value='".t("Palaa")."'></td></form></tr></table>";
 		
 	}

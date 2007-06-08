@@ -117,12 +117,13 @@
 				$lisa="";
 			}
 			
-			$ulos = "<td>".alv_popup_oletus('alv',$trow[$i], $maa, $lisa)."</td>";
+			$ulos = "<td>".alv_popup_oletus("t[$i]",$trow[$i], $maa, $lisa)."</td>";
 		}
 		else {
 			$ulos = "<td>".t("Valitse ensin maa")."</td>";
 		}
-		$jatko=0;
+		
+		$jatko = 0;
 	}
 	
 ?>

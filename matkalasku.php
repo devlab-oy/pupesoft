@@ -10,11 +10,18 @@ if($tee == "HYVAKSY") {
 	$tunnus=$tilausnumero;
 	$tee="H";
 	$kutsuja="MATKALASKU";
+	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
+	$result=mysql_query($query) or pupe_error($query);
+	$laskurow=mysql_fetch_array($result);
 	
-	//	Päivitetään tapvm
-	$viesti = t("Matkalasku").date("d").".".date("m").".".date("Y");
-	$query = " update lasku set tapvm=now(), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tilausnumero'";
-	$updres = mysql_query($query) or pupe_error($query);
+	if($laskurow["tapvm"] == "0000-00-00") {
+		//	Päivitetään tapvm
+		$viesti = t("Matkalasku")." ".date("d").".".date("m").".".date("Y")." - {$laskurow["viesti"]}";
+		$query = " update lasku set tapvm=now(), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tilausnumero'";
+
+		$query = " update tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tilausnumero' and korjattu=''";
+		$updres = mysql_query($query) or pupe_error($query);		
+	}
 	
     require("hyvak.php");
 	
@@ -294,7 +301,10 @@ if($tee=="MUOKKAA") {
 
 		//	Muokataan kuluriviä, poistetaan koko nippu ja laitetaan muokattavaksi
 		if($rivitunnus>0) {
-			$query	= "	SELECT tilausrivi.*, tuote.tuotetyyppi, tuote.tilino, tilausrivin_lisatiedot.tiliointirivitunnus
+			$query	= "	SELECT tilausrivi.*, tuote.tuotetyyppi, tuote.tilino, 
+						tilausrivin_lisatiedot.tiliointirivitunnus,
+						tilausrivin_lisatiedot.kulun_kohdemaa,
+						tilausrivin_lisatiedot.kulun_kohdemaan_alv
 						FROM tilausrivi use index (PRIMARY)
 						LEFT JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 						LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
@@ -350,8 +360,10 @@ if($tee=="MUOKKAA") {
 					$hinta		= $tilausrivi["hinta"];					
 					$kommentti	= $tilausrivi["kommentti"];
 					$rivitunnus	= $tilausrivi["tunnus"];
-					
 					$tyyppi		= $tilausrivi["tuotetyyppi"];
+					
+					$alvulk		= $tilausrivi["kulun_kohdemaan_alv"];
+					$maa		= $tilausrivi["kulun_kohdemaa"];
 				}
 				else {
 					$tyhjenna="joo";
@@ -547,9 +559,23 @@ if($tee=="MUOKKAA") {
 						$hinta 	= str_replace(",",".",$hinta_array[$trow["tuoteno"]]);
 						$rivihinta = round($kpl*$hinta,2);
 						
+						echo "maa: $maa alvuk: $alvuk<br>";
 						//	Ratkaistaan alv..
 						if($tyyppi=="B") {
-							$vero = $trow["alv"];
+							//	Haetaan tuotteen oletusalv jos ollaan ulkomailla, tälläin myös kotimaan alv on aina zero
+							if($maa!="" and $maa!=$yhtiorow["maa"]) {
+								if($alvulk=="") {
+									$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$maa' and tuoteno='$tuoteno' limit 1";
+									$alhire = mysql_query($query) or pupe_error($query);
+									$alvrow=mysql_fetch_array($alhire);
+									$alvulk=$alvrow["alv"];									
+								}
+								
+								$vero=0;
+							}
+							else {
+								$vero = $trow["alv"];
+							}
 						}
 						else {
 							$vero = 0;
@@ -613,7 +639,7 @@ if($tee=="MUOKKAA") {
 				*/
 				
 				$summa = round($summa,2);
-
+				
 				if ($vero != 0) { // Netotetaan alvi
 					$alv = round($summa - $summa / (1 + ($vero / 100)),2);
 					$summa -= $alv;
@@ -657,7 +683,7 @@ if($tee=="MUOKKAA") {
 							aputunnus = $isa";
 					$result = mysql_query($query) or pupe_error($query);
 				}
-				
+								
 				//	Laitetaan lisätietoihin ainakin se ulkomaanalv jne..
 				$query  = "	SELECT *
 							FROM tilausrivin_lisatiedot
@@ -677,7 +703,9 @@ if($tee=="MUOKKAA") {
 					$where = "";
 				}					
 
-				$query .= "	tiliointirivitunnus = '$isa'";
+				$query .= "	tiliointirivitunnus = '$isa',
+							kulun_kohdemaa		= '$maa',
+							kulun_kohdemaan_alv	= '$alvulk'";
 				$query = $query.$where;
 				$updres=mysql_query($query) or pupe_error($query);
 				
@@ -911,6 +939,10 @@ if($tee=="MUOKKAA") {
 				$lisa = "";
 				if($maa!="" and $maa!=$yhtiorow["maa"]) {
 					$lisa = "<th>".t("Ulkomaan ALV")."</th>";
+					$cols=6;
+				}
+				else {
+					$cols=5;
 				}
 				
 				echo "<th>".t("Kustannuspaikka")."</th><th>".t("Kohdemaa")."</th><th>".t("Kpl")."</th><th>".t("Hinta")."</th><th>".t("Alv")."</th>$lisa</tr>";
@@ -952,23 +984,23 @@ if($tee=="MUOKKAA") {
 					
 					echo "<td>0 %</td>";
 					
-					$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$maa' and tuoteno='$tuoteno' limit 1";
-					$alhire = mysql_query($query) or pupe_error($query);
+					//	Haetaan oletusalv tuotteelta
+					if($alvulk=="") {
+						$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$maa' and tuoteno='$tuoteno' limit 1";
+						$alhire = mysql_query($query) or pupe_error($query);
+						$alvrow=mysql_fetch_array($alhire);
+						$alvulk=$alvrow["alv"];
+						if($alvulk=="") {
+							echo "<font class='error'>".t("Kulun arvonlisäveroa kohdemaassa ei ole määritelty")."</font><br>";
+						}
+					}
 
-					// ei löytynyt alvia, se on pakko löytyä
-					if (mysql_num_rows($alhire) == 0) {
-						echo "<td><font class='error'>PUUTTUU</font></td>";
-					}
-					else {
-						$alehi_alrow     = mysql_fetch_array($alhire);
-						echo "<td>".$alehi_alrow["alv"]."</td>";
-					}
+					echo "<td>".alv_popup_oletus("alvulk",$alvulk, $maa, 'lista')."</td>";
 				}
 				else {
 					echo "<td>{$trow["alv"]}</td>";
 				}
 								
-				$cols=5;
 				$leveys=50;				
 			}
 			

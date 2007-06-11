@@ -19,7 +19,7 @@ if ($tee == "muokkaa") {
 	$prioriteetti = $rivi["prioriteetti"];
 	$prio_sel[$prioriteetti] = "SELECTED";
 
-	echo "<form method='post' action='todo.php'>
+	echo "<form method='post' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>
 	<input type='hidden' name='tee' value='paivita'>
 	<input type='hidden' name='tunnus' value='$rivi[tunnus]'>
 	<input type='hidden' name='vanhakuittaus' value='$rivi[kuittaus]'>
@@ -170,7 +170,7 @@ if ($tee == "") {
 	$formi	= "haku";
 	$kentta = "kuvaus_haku";
 
-	echo "<form name='haku' action='$PHP_SELF' method='post'>";
+	echo "<form name='haku' action='todo.php' method='post'>";
 	echo "<input type='hidden' name='sort' value = '$sort'>";
 	echo "<tr>";
 	echo "<td></td>";
@@ -202,11 +202,11 @@ if ($tee == "") {
 
 		echo "<tr class='aktiivi'>";
 
-		echo "<form method='post' name='todo' action='todo.php$sortlisa' autocomplete='off'>";
+		echo "<form method='post' name='todo' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='valmis'>";
 		echo "<input type='hidden' name='tunnus' value='$rivi[tunnus]'>";
 
-		echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa'>$numero</a></th>";
+		echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>$numero</a></th>";
 
 		$rivi["kuvaus"] = str_replace("\n", "<br>", $rivi["kuvaus"]);
 
@@ -226,8 +226,51 @@ if ($tee == "") {
 
 	echo "</table><br>";
 
+	echo "
+	<br><font class='head'>LISÄÄ UUSI</font><hr>
 
+	<form name='uusi' method='post' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>
+	<input type='hidden' name='tee' value='uusi'>
 
+	<table>
+		<tr>
+			<th>kuvaus</th>
+			<th>pyytäjä</th>
+			<th>aika-arvio</th>
+			<th>deadline</th>
+			<th>projekti</th>
+			<th>prio</th>
+			<th></th>
+		</tr>
+		<tr>
+			<td><textarea name='kuvaus' cols='80' rows='2'></textarea></td>
+			<td><input name='pyytaja' type='text' size='15'></td>
+			<td><input name='kesto_arvio' type='text' size='6'></td>
+			<td><input name='deadline' type='text' size='10'</td>
+			<td><input name='projekti' type='text' size='15'></td>
+
+			<td>
+				<select name='prioriteetti'>
+				<option value='0'>bug</option>
+				<option value='1'>1</option>
+				<option value='2'>2</option>
+				<option value='3'>3</option>
+				<option value='4'>4</option>
+				<option value='5'>5</option>
+				<option value='6'>6</option>
+				<option value='7'>7</option>
+				<option value='8'>8</option>
+				<option value='9' selected>9</option>
+				</select>
+			</td>
+
+			<td><input value='go' type='submit'></td>
+
+		</tr>
+
+	</table>
+	</form>";
+	
 	$query = "select * from todo where yhtio = '$kukarow[yhtio]' and kuittaus != '' order by aika desc limit 20";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -273,51 +316,6 @@ if ($tee == "") {
 	}
 
 	echo "</table>";
-
-	echo "
-	<br><font class='head'>LISÄÄ UUSI</font><hr>
-
-	<form name='uusi' method='post' action='todo.php'>
-	<input type='hidden' name='tee' value='uusi'>
-
-	<table>
-		<tr>
-			<th>kuvaus</th>
-			<th>pyytäjä</th>
-			<th>aika-arvio</th>
-			<th>deadline</th>
-			<th>projekti</th>
-			<th>prio</th>
-			<th></th>
-		</tr>
-		<tr>
-			<td><textarea name='kuvaus' cols='80' rows='2'></textarea></td>
-			<td><input name='pyytaja' type='text' size='15'></td>
-			<td><input name='kesto_arvio' type='text' size='6'></td>
-			<td><input name='deadline' type='text' size='10'</td>
-			<td><input name='projekti' type='text' size='15'></td>
-
-			<td>
-				<select name='prioriteetti'>
-				<option value='0'>bug</option>
-				<option value='1'>1</option>
-				<option value='2'>2</option>
-				<option value='3'>3</option>
-				<option value='4'>4</option>
-				<option value='5'>5</option>
-				<option value='6'>6</option>
-				<option value='7'>7</option>
-				<option value='8'>8</option>
-				<option value='9' selected>9</option>
-				</select>
-			</td>
-
-			<td><input value='go' type='submit'></td>
-
-		</tr>
-
-	</table>
-	</form>";
 
 }
 

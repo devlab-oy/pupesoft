@@ -939,5 +939,63 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "oletus_lahetekpl") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 0) {
+			$sel0 = "selected";
+		}
+		elseif ($trow[$i] == 1) {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == 2) {
+			$sel2 = "selected";
+		}
+		elseif ($trow[$i] == 3) {
+			$sel3 = "selected";
+		}
+
+		$ulos .= "<option value='0' $sel0>".t("Lähetteestä tulostetaan 0 kopiota.")."</option>";
+		$ulos .= "<option value='1' $sel1>".t("Lähetteestä tulostetaan 1 kopiota.")."</option>";
+		$ulos .= "<option value='2' $sel2>".t("Lähetteestä tulostetaan 2 kopiota.")."</option>";
+		$ulos .= "<option value='3' $sel3>".t("Lähetteestä tulostetaan 3 kopiota.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "oletus_oslappkpl") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] == 0) {
+			$sel0 = "selected";
+		}
+		elseif ($trow[$i] == 1) {
+			$sel1 = "selected";
+		}
+		elseif ($trow[$i] == 2) {
+			$sel2 = "selected";
+		}
+		elseif ($trow[$i] == 3) {
+			$sel3 = "selected";
+		}
+
+		$ulos .= "<option value='0' $sel0>".t("Osoitelapusta tulostetaan 0 kopiota.")."</option>";
+		$ulos .= "<option value='1' $sel1>".t("Osoitelapusta tulostetaan 1 kopiota.")."</option>";
+		$ulos .= "<option value='2' $sel2>".t("Osoitelapusta tulostetaan 2 kopiota.")."</option>";
+		$ulos .= "<option value='3' $sel3>".t("Osoitelapusta tulostetaan 3 kopiota.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 ?>

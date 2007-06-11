@@ -269,7 +269,7 @@ if ($tee == "") {
 		</tr>
 
 	</table>
-	</form>";
+	</form><br><br>";
 	
 	$query = "select * from todo where yhtio = '$kukarow[yhtio]' and kuittaus != '' order by aika desc limit 20";
 	$result = mysql_query($query) or pupe_error($query);

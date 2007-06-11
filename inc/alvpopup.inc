@@ -10,10 +10,27 @@ if (!function_exists("alv_popup")) {
 
 		$ulos = "";
 
-		$query = "	SELECT selite
+		$laji = "'alv'";
+		$lisa = "";
+
+		// tutkitaan ollaanko jossain alv-rekisteröity
+		$query = "select group_concat(concat(\"'\",maa,\"'\") SEPARATOR ',') maat from yhtion_toimipaikat where yhtio = '$kukarow[yhtio]' and maa != '' and vat_numero != ''";
+		$alhire = mysql_query($query) or pupe_error($query);
+
+		// ollaan alv-rekisteröity, haetaan oikea ALV-kanta
+		if (mysql_num_rows($alhire) == 1) {
+			$vrow = mysql_fetch_array($alhire);
+
+			if ($vrow["maat"] != NULL) {
+				$laji = "'alvulk', 'alv'";
+				$lisa = "and ((selitetark_2 in ($vrow[maat]) and laji = 'alvulk') or laji = 'alv') ";
+			}
+		}
+
+		$query = "	SELECT distinct selite
 					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv'
-					ORDER BY jarjestys,selite";
+					WHERE yhtio = '$kukarow[yhtio]' and laji in ($laji) $lisa
+					ORDER BY laji,jarjestys,selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($vresult) == 0) {
@@ -21,8 +38,8 @@ if (!function_exists("alv_popup")) {
 		}
 		else {
 			$ulos = "<select name='$nimi'>";
-			while ($vrow=mysql_fetch_array($vresult)) {
-				$sel="";
+			while ($vrow = mysql_fetch_array($vresult)) {
+				$sel = "";
 				if ($oletus == $vrow['selite']) {
 					$sel = "selected";
 				}
@@ -46,12 +63,12 @@ if (!function_exists("alv_popup_oletus")) {
 		$lisa = "";
 
 		// syötettiin maa
-		if ($maa != "" and $maa != $yhtiorow["maa"]) {			
+		if ($maa != "" and $maa != $yhtiorow["maa"]) {
 
 			//	Otetaan pelkkä ulkomaan-alv lista, käytetään mm. matkalaskuilla
-			if($tapa == "lista") {
+			if ($tapa == "lista") {
 				$laji = "alvulk";
-				$lisa = "and selitetark_2 = '$maa'";		
+				$lisa = "and selitetark_2 = '$maa'";
 			}
 			else {
 				// tutkitaan ollaanko siellä alv-rekisteröity
@@ -64,7 +81,7 @@ if (!function_exists("alv_popup_oletus")) {
 					$lisa = "and selitetark_2 = '$maa'";
 				}
 			}
-		}			
+		}
 
 		$query = "	SELECT selite
 					FROM avainsana
@@ -73,13 +90,13 @@ if (!function_exists("alv_popup_oletus")) {
 		$vresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($vresult) == 0) {
-			if($tapa=="lista") {
+			if ($tapa == "lista") {
 				echo "<font class = 'error'>".t("Kohdemaan ALV ei määritelty!")." '$maa'</font>";
 			}
 			else {
 				echo "<font class = 'error'>".t("Yrityksen ALV%tit puuttuu!")." '$kukarow[yhtio]'</font>";
 			}
-			
+
 		}
 		else {
 
@@ -90,7 +107,7 @@ if (!function_exists("alv_popup_oletus")) {
 			}
 			$ulos .= "<option value = '' $sel>".t("Oletus");
 
-			while ($vrow=mysql_fetch_array($vresult)) {
+			while ($vrow = mysql_fetch_array($vresult)) {
 				$sel = "";
 				if ($oletus == $vrow['selite']) {
 					$sel = "selected";
@@ -106,18 +123,18 @@ if (!function_exists("alv_popup_oletus")) {
 if (!function_exists("alv_oletus")) {
 	function alv_oletus() {
 		global $kukarow;
-		$ulos=0;
+		$ulos = 0;
 		$query = "	SELECT selite
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark != ''
 					ORDER BY jarjestys,selite";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		if(mysql_num_rows($vresult) != 1) {
+		if (mysql_num_rows($vresult) != 1) {
 			echo "<font class = 'error'>".t("Yrityksen oletusALV%tit puuttuu tai niitä on monta!")."</font>";
 		}
 		else {
-			$vrow=mysql_fetch_array($vresult);
+			$vrow = mysql_fetch_array($vresult);
 			$ulos = $vrow['selite'];
 		}
 		return $ulos;

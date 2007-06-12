@@ -56,6 +56,7 @@
 					and hetiera != 'H'
 					and maksuehto.jv = ''";
 		$result = mysql_query($query) or pupe_error($query);
+		
 		if (mysql_num_rows($result) == 0) {
 			$yhtiorow['karayksesta_rahtikirjasyottoon'] = '';
 		}
@@ -664,65 +665,73 @@
 				
 				//Tulostetaan uusi l‰hete jos k‰ytt‰j‰ valitsi drop-downista printterin
 				//Paitsi jos tilauksen tila p‰ivitettiin sellaiseksi, ett‰ l‰hetett‰ ei kuulu tulostaa
-				if ($valittu_tulostin != '') {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE tunnus in ($tilausnumeroita)
+							and yhtio = '$kukarow[yhtio]'
+							and alatila = 'C'";
+				$lasresult = mysql_query($query) or pupe_error($query);
 
-					$query = "	SELECT *
-								FROM lasku
-								WHERE tunnus in ($tilausnumeroita)
-								and yhtio = '$kukarow[yhtio]'
-								and alatila = 'C'";
-					$lasresult = mysql_query($query) or pupe_error($query);
+				while($laskurow = mysql_fetch_array($lasresult)) {
 
-					while($laskurow = mysql_fetch_array($lasresult)) {
+					//tulostetaan faili ja valitaan sopivat printterit
+					if ($laskurow["varasto"] == '') {
+						$query = "	select *
+									from varastopaikat
+									where yhtio='$kukarow[yhtio]'
+									order by alkuhyllyalue,alkuhyllynro
+									limit 1";
+					}
+					else {
+						$query = "	select *
+									from varastopaikat
+									where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
+									order by alkuhyllyalue,alkuhyllynro";
+					}
+					$prires = mysql_query($query) or pupe_error($query);
 
-						//tulostetaan faili ja valitaan sopivat printterit
-						if ($laskurow["varasto"] == '') {
-							$query = "	select *
-										from varastopaikat
-										where yhtio='$kukarow[yhtio]'
-										order by alkuhyllyalue,alkuhyllynro
-										limit 1";
+					if (mysql_num_rows($prires) > 0) {
+						
+						$prirow= mysql_fetch_array($prires);
+
+						// k‰teinen muuttuja viritet‰‰n tilaus-valmis.inc:iss‰ jos maksuehto on k‰teinen
+						// ja silloin pit‰‰ kaikki l‰hetteet tulostaa aina printteri5:lle (lasku printteri)
+						if ($kateinen == 'X') {
+							$apuprintteri = $prirow['printteri5']; // laskuprintteri
 						}
 						else {
-							$query = "	select *
-										from varastopaikat
-										where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[varasto]'
-										order by alkuhyllyalue,alkuhyllynro";
-						}
-						$prires= mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($prires)>0) {
-							$prirow= mysql_fetch_array($prires);
-
-							// k‰teinen muuttuja viritet‰‰n tilaus-valmis.inc:iss‰ jos maksuehto on k‰teinen
-							// ja silloin pit‰‰ kaikki l‰hetteet tulostaa aina printteri5:lle (lasku printteri)
-							if ($kateinen=='X') {
-								$apuprintteri=$prirow['printteri5']; // laskuprintteri
+							if ($valittu_tulostin == "oletukselle") {
+								$apuprintteri = $prirow['printteri1']; // l‰heteprintteri
 							}
 							else {
-								if ($valittu_tulostin == "oletukselle") {
-									$apuprintteri = $prirow['printteri1']; // l‰heteprintteri
-								}
-								else {
-									$apuprintteri = $valittu_tulostin;
-								}
+								$apuprintteri = $valittu_tulostin;
 							}
-
-							//haetaan l‰hetteen tulostuskomento
-							$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
-							$kirres= mysql_query($query) or pupe_error($query);
-							$kirrow= mysql_fetch_array($kirres);
-							$komento=$kirrow['komento'];
-
-							//haetaan osoitelapun tulostuskomento
-							$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri3]'";
-							$kirres= mysql_query($query) or pupe_error($query);
-							$kirrow= mysql_fetch_array($kirres);
-							$oslapp=$kirrow['komento'];
-
 						}
 
-						//hatetaan asiakkaan l‰hetetyyppi
+						//haetaan l‰hetteen tulostuskomento
+						$query   = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+						$kirres  = mysql_query($query) or pupe_error($query);
+						$kirrow  = mysql_fetch_array($kirres);
+						$komento = $kirrow['komento'];
+						
+												
+						if ($valittu_oslapp_tulostin == "oletukselle") {
+							$apuprintteri = $prirow['printteri3']; // osoitelappuprintteri
+						}
+						else {
+							$apuprintteri = $valittu_oslapp_tulostin;
+						}						
+
+						//haetaan osoitelapun tulostuskomento
+						$query  = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+						$kirres = mysql_query($query) or pupe_error($query);
+						$kirrow = mysql_fetch_array($kirres);
+						$oslapp = $kirrow['komento'];
+					}
+						
+					if ($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) {
+
+						// Haetaan asiakkaan l‰hetetyyppi
 						$query = "	SELECT lahetetyyppi, luokka, puhelin
 									FROM asiakas
 									WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
@@ -733,7 +742,7 @@
 							require_once ($asrow["lahetetyyppi"]);
 						}
 						else {
-							//Haetaan yhtiˆn oletusl‰hetetyyppi
+							// Haetaan yhtiˆn oletusl‰hetetyyppi
 							$query = "	SELECT selite
 										FROM avainsana
 										WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
@@ -824,24 +833,35 @@
 						loppu($firstpage, 1);
 
 						//tulostetaan sivu
+						if ($lahetekpl > 0) {
+							$komento .= " -#$lahetekpl ";
+						}
+						
+						echo "$komento<br>";
+						
 						print_pdf($komento);
+					}
 
-						//tulostetaan osoitelappu
-						//jos osoitelappuprintteri lˆytyy tulostetaan osoitelappu..
+
+					if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
+						$valittu_oslapp_tulostin 	= "";
+						$oslapp 					= '';
+						$oslappkpl 					= 0;
+					}
+					
+					// Tulostetaan osoitelappu
+					if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
 						$tunnus = $laskurow["tunnus"];
 						
-						if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
-							$oslapp = '';
-							$oslappkpl = 0;
+						if ($oslappkpl > 0) {
+							$oslapp .= " -#$oslappkpl ";
 						}
 						
-						if ($oslapp != '' and $oslappkpl != 0) {
-							if ($oslappkpl > 0) {
-								$oslapp .= " -#$oslappkpl ";
-							}
-							require ("osoitelappu_pdf.inc");
-						}
+						echo "$oslapp<br>";
+						
+						require ("osoitelappu_pdf.inc");
 					}
+					
 					echo "<br><br>";
 				} //tulostetaan uusi l‰hete jos k‰ytt‰j‰ ruksasi ruudun. lopuu t‰h‰n
 			}
@@ -1285,10 +1305,12 @@
 			// Jos kyseess‰ ei ole valmistus tulostetaan virallinen l‰hete
 			$sel 		= "";
 			$oslappkpl 	= "";
-
+			$lahetekpl  = "";
+			
 			if ($toim != 'VALMISTUS') {
 				$sel 		= 'SELECTED';
-				$oslappkpl 	= 1;
+				$oslappkpl 	= $yhtiorow["oletus_oslappkpl"];
+				$lahetekpl 	= $yhtiorow["oletus_lahetekpl"];
 			}
 			
 			$spanni = 2;
@@ -1297,7 +1319,7 @@
 				$spanni = 3;
 			}
 			
-			echo "<tr><th colspan='$spanni'>".t("Tulosta uusi l‰hete").": ";
+			echo "<tr><th>".t("L‰hete").":</th><th colspan='$spanni'>";
 
 			$query = "	SELECT *
 						FROM kirjoittimet
@@ -1315,14 +1337,35 @@
 				echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
 			}
 
-			echo "</select>";
+			echo "</select> ".t("Kpl").": <input type='text' size='4' name='lahetekpl' value='$lahetekpl'></th><th></th>";
+			
+			if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {	
+				echo "<th></th>";
+			}
+			
+			echo "</tr>";
+			
+			echo "<tr>";
 			
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '') {
-				echo t(" Osoitelappum‰‰r‰").":</th>";
-				echo "<th><input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th>";
+				echo "<th>".t("Osoitelappu").":</th>";
+				
+				echo "<th colspan='$spanni'>";
+				
+				mysql_data_seek($kirre, 0);
+
+				echo "<select name='valittu_oslapp_tulostin'>";		
+				echo "<option value=''>".t("Ei tulosteta")."</option>";
+				echo "<option value='oletukselle' $sel>".t("Oletustulostimelle")."</option>";
+
+				while ($kirrow = mysql_fetch_array($kirre)) {
+					echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
+				}
+
+				echo "</select> ".t("Kpl").": <input type='text' size='4' name='oslappkpl' value='$oslappkpl'></th>";
 			}
 			else {
-				echo "</th>";
+				echo "<th></th><th></th>";
 			}
 			
 			if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {	

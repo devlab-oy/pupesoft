@@ -414,8 +414,15 @@
 
 	echo "</table>";
 	
-	if($laskurow["jaksotettu"]>0) {
-		echo "<b>".t("Maksusopimus").":</b><hr><br>";
+	if($laskurow["jaksotettu"]<>0) {
+		echo "<br><b>".t("Maksusopimus").":</b><hr>";
+		
+		if($laskurow["jaksotettu"]<0) {
+			$sopimus = (-1) * $laskurow["jaksotettu"];
+		}
+		else {
+			$sopimus = $laskurow["jaksotettu"];
+		}
 		
 		echo "<table><tr><th>#</th><th>".t("Osuus-%")."</th><th>".t("Maksuehto/Kuvaus")."</th><th>".t("Lis‰tiedot/Ohje")."</th><th>".t("Summa")."</th><th>".t("Laskunro")."</th><th>".t("Laskun pvm")."</th><th>".t("Er‰p‰iv‰")."</th><th>".t("Maksup‰iv‰")."</th></tr>";
 		$query = "	SELECT maksupositio.*, round(osuus,0) osuus, 
@@ -429,7 +436,7 @@
 					LEFT JOIN lasku ON lasku.yhtio=maksupositio.yhtio and lasku.tunnus=maksupositio.uusiotunnus
 					LEFT JOIN lasku myre ON myre.yhtio=lasku.yhtio and myre.laskunro=lasku.laskunro and myre.tila='U'
 					LEFT JOIN maksuehto on maksuehto.yhtio=maksupositio.yhtio and maksuehto.tunnus=maksupositio.maksuehto
-					WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = $laskurow[jaksotettu]
+					WHERE maksupositio.yhtio = '$kukarow[yhtio]' and otunnus = '$sopimus'
 					ORDER BY tunnus";
 		$maksusopres = mysql_query($query) or pupe_error($query);
 		$i=0;
@@ -448,6 +455,76 @@
 				</tr>";
 		}
 		echo "</table><br>";
+	}
+
+	if($laskurow["tunnusnippu"]>0) {
+		echo "<br><b>".t("Liitetyt tilaukset").":</b><hr>";
+				
+		$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
+						FROM lasku use index (yhtio_tila_luontiaika)
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnusnippu = '$laskurow[tunnusnippu]'
+						and tila IN ('L','G','E','V','W','N','R','A')";
+		$result = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($result)!=0) {
+
+			echo "<table>";
+			echo "<tr>";
+			for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
+				echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+			}
+			echo "<th align='left'>".t("Tyyppi")."</th>";
+			echo "</tr>";
+
+			while ($row = mysql_fetch_array($result)) {
+
+				$ero="td";
+				if ($tunnus==$row['tilaus']) $ero="th";
+
+				echo "<tr class='aktiivi'>";
+				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
+					if (mysql_field_name($result,$i) == 'toimaika') {
+						echo "<$ero>".tv1dateconv($row[$i])."</$ero>";
+					}
+					else {
+						echo "<$ero>$row[$i]</$ero>";						
+					}
+
+				}
+
+				$laskutyyppi	= $row["tila"];
+				$alatila		= $row["alatila"];
+
+				//tehd‰‰n selv‰kielinen tila/alatila
+				require "../inc/laskutyyppi.inc";
+
+				echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
+
+				echo "<form method='post' action='$PHP_SELF'><td class='back'>
+						<input type='hidden' name='tee' value='NAYTATILAUS'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='asiakasid' value='$asiakasid'>
+						<input type='hidden' name='toimittajaid' value='$toimittajaid'>		
+						<input type='hidden' name='tunnus' value='$row[tilaus]'>
+						<input type='hidden' name='otunnus' value='{$laskurow["tunnusnippu"]}'>
+						<input type='hidden' name='nippu' value='{$laskurow["tunnusnippu"]}'>
+						<input type='hidden' name='nimi' value='$nimi'>
+						<input type='hidden' name='ppa' value='$ppa'>
+						<input type='hidden' name='kka' value='$kka'>
+						<input type='hidden' name='vva' value='$vva'>
+						<input type='hidden' name='ppl' value='$ppl'>
+						<input type='hidden' name='kkl' value='$kkl'>
+						<input type='hidden' name='vvl' value='$vvl'>
+						<input type='submit' value='".t("N‰yt‰ tilaus")."'></td></form>";
+
+				echo "</tr>";
+			}
+			echo "</table><br>";
+		}
+		else {
+			echo t("Ei tilauksia")."...<br><br>";
+		}		
 	}
 	
 ?>

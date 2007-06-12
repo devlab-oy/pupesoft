@@ -83,7 +83,7 @@
 				$nimi = $yhtiorow["nimi"];
 			}
 			
-			$pdf_tarjous->draw_text(mm_pt(8),	mm_pt(15), $yhtiorow["nimi"]."    ".$yhtiorow["osoite"].",  ".$yhtiorow["postino"]." ".$yhtiorow["postitp"].",  ".$yhtiorow["maa"],		$firstpage, $footer_helvetica);
+			$pdf_tarjous->draw_text(mm_pt(8),	mm_pt(15), $nimi."    ".$yhtiorow["osoite"].",  ".$yhtiorow["postino"]." ".$yhtiorow["postitp"].",  ".$yhtiorow["maa"],		$firstpage, $footer_helvetica);
 			$pdf_tarjous->draw_text(570-$footerpala,		mm_pt(15), "T  ".$yhtiorow["puhelin"]."    W  ".$yhtiorow["www"],		$firstpage, $footer_helvetica);
 			
 			//Palautetan luotu sivu

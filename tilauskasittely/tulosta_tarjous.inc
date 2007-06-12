@@ -69,21 +69,22 @@
 			$vv = substr($laskurow["luontiaika"],0,4);
 
 			$luotoaik = date("d.m.Y",mktime(0, 0, 0, $kk, $pp, $vv));
-			$pdf_tarjous->draw_text(mm_pt(10),  mm_pt(219), $laskurow["nimi"], 										$firstpage, $headersin);
+			
+			if ($laskurow["toim_nimi"] != $laskurow["nimi"] and $laskurow["toim_nimi"] != '') {
+				$laskunimi =  $laskurow["toim_nimi"];
+			}
+			else {
+				$laskunimi =  $laskurow["nimi"];
+			}
+			
+			$pdf_tarjous->draw_text(mm_pt(10),  mm_pt(219), $laskunimi, 										$firstpage, $headersin);
 			$pdf_tarjous->draw_text(mm_pt(155),  mm_pt(232), t("Tarjous $luotoaik", $kieli),						$firstpage, $kasi_helvetica);
 			
 			// footeri
 			
 			$footerpala = $pdf_tarjous->strlen("T  ".$yhtiorow["puhelin"]."    W  ".$yhtiorow["www"], $footer_helvetica);
 			
-			if ( $yhtiorow["toim_nimi"] !=  $yhtiorow["nimi"] and $yhtiorow["toim_nimi"] != '') {
-				$nimi = $yhtiorow["toim_nimi"];
-			}
-			else {
-				$nimi = $yhtiorow["nimi"];
-			}
-			
-			$pdf_tarjous->draw_text(mm_pt(8),	mm_pt(15), $nimi."    ".$yhtiorow["osoite"].",  ".$yhtiorow["postino"]." ".$yhtiorow["postitp"].",  ".$yhtiorow["maa"],		$firstpage, $footer_helvetica);
+			$pdf_tarjous->draw_text(mm_pt(8),	mm_pt(15), $yhtiorow["nimi"]."    ".$yhtiorow["osoite"].",  ".$yhtiorow["postino"]." ".$yhtiorow["postitp"].",  ".$yhtiorow["maa"],		$firstpage, $footer_helvetica);
 			$pdf_tarjous->draw_text(570-$footerpala,		mm_pt(15), "T  ".$yhtiorow["puhelin"]."    W  ".$yhtiorow["www"],		$firstpage, $footer_helvetica);
 			
 			//Palautetan luotu sivu

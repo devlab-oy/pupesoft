@@ -317,7 +317,7 @@
 			$lisa .= " and suoritus.valkoodi = '$valuutta' ";
 		}
 
-		$maxrows = 200;
+		$maxrows = 500;
 		$query = "	SELECT ".$kentat."
 					FROM suoritus
 					WHERE yhtio ='$kukarow[yhtio]' and kohdpvm='0000-00-00'  $lisa
@@ -389,7 +389,7 @@
 
 		echo "</table>";
 		if($row >= $maxrows) {
-			echo "".t("Kysely on liian iso esitettäväksi, ainoastaan ensimmäiset")." $row ".t("riviä on näkyvillä. Ole hyvä, ja rajaa hakuehtoja").".";
+			echo "<br>".t("Kysely on liian iso esitettäväksi, ainoastaan ensimmäiset")." $maxrows ".t("riviä on näkyvillä. Ole hyvä, ja rajaa hakuehtoja").".";
 		}
 	}
 		//echo "Query: ". $query;

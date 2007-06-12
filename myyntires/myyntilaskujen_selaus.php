@@ -26,7 +26,7 @@
 
 // Myyntilaskuissa tila=U, kun lasku on laskutettu, X, jos lasku on lähetetty verkkolaskuna
 // Alatila on A kun lasku on laskuttamatta.
-	$maxrows = 200;
+	$maxrows = 500;
 	$query = "SELECT COALESCE(l.laskunro,'-') laskunro, l.nimi nimi, l.nimitark nimitark, l.erpcm erpcm, l.summa summa, l.viite viite, l.tunnus tunnus, ytunnus
 			FROM lasku l WHERE l.yhtio ='$kukarow[yhtio]' and l.tila = 'U' and l.mapvm='0000-00-00' $lisa
 			 ORDER BY $jarjestys LIMIT $maxrows";
@@ -77,7 +77,7 @@ $result = mysql_query($query) or pupe_error($query);
 
 	echo "</tr></table></form>";
 	if($row >= $maxrows) {
-		echo "".t("Kysely on liian iso esitettäväksi, ainoastaan ensimmäiset")." $row ".t("riviä on näkyvillä. Ole hyvä, ja rajaa hakuehtoja").".";
+		echo "<br>".t("Kysely on liian iso esitettäväksi, ainoastaan ensimmäiset")." $maxrows ".t("riviä on näkyvillä. Ole hyvä, ja rajaa hakuehtoja").".";
 	}
 
 	//echo "Query: ". $query;

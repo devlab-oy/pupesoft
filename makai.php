@@ -491,6 +491,7 @@
 								if (!isset($edmaksu_tili)) {
 									$yritystilino =  $laskurow["ytilino"];
 									$yrityytunnus =  $yhtiorow['ytunnus'];
+									
 									if ($kotimaa == "FI") {
 										require("inc/lum2otsik.inc");
 									}
@@ -503,6 +504,7 @@
 									$edyritystilino 	= $yritystilino;
 									$edyritystilinimi 	= $laskurow["tilinimi"];
 								}
+								
 								$yritysnimi 	= strtoupper($yhtiorow["nimi"]);
 								$yritysosoite 	= strtoupper($yhtiorow["osoite"]);
 								$yritystilino 	= $laskurow["ytilino"];
@@ -520,6 +522,7 @@
 								$laskupankki4  	= $laskurow["pankki4"];
 								$laskuswift 	= $laskurow["swift"];
 								$laskuyritivaluutta  = $laskurow["yritivalkoodi"];
+								
 								if ($kotimaa == "FI") {
 									require("inc/lum2rivi.inc");
 								}

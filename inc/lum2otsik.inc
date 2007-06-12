@@ -3,8 +3,8 @@
 	//print "<pre>";
 	
 	$ulos = "LUM200 ";
-  	$ulos .= sprintf ('%011.11s', $ytunnus);		//ytunnus
-	$ulos .= sprintf ('%5.5s', $lum_et_5kentta);		//asiakastunnus
+  	$ulos .= sprintf ('%011.11s', $yrityytunnus);	//ytunnus
+	$ulos .= sprintf ('%5.5s', $lum_et_5kentta);	//asiakastunnus
 	$ulos .= "   ";
 	$luonti = getdate();
 

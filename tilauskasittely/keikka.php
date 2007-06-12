@@ -490,7 +490,7 @@ if ($toiminto == "" and $ytunnus != "") {
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				// pit‰‰ olla yht‰monta sarjanumeroa liitettyn‰ kun kamaa viety varastoon
-				if (mysql_num_rows($sarjares) != abs($toimrow["kpl"])+abs($toimrow["varattu"])) {
+				if (mysql_num_rows($sarjares) != abs($toimrow["kpl"])) {
 					$sarjanrook  = 1; // ei ole kaikilla tuotteilla sarjanumeroa
 					$sarjanrot = "kesken";
 				}

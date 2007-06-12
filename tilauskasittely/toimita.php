@@ -13,7 +13,8 @@
 						WHERE otunnus = '$otunnus' 
 						and var not in ('P','J') 
 						and yhtio = '$kukarow[yhtio]' 
-						and keratty != ''";
+						and keratty != ''
+						and tyyppi = 'L'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//p‰ivitet‰‰n noutaja laskulle...

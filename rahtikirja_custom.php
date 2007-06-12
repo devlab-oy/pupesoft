@@ -1,6 +1,6 @@
 <?php
 require ("inc/parametrit.inc");
-echo "<h2>Tyhjä rahtikirja</h2>";
+echo "<font class='head'>".t("Tyhjä rahtikirja").":</font><hr><br>";
 
 if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 
@@ -119,13 +119,17 @@ if (isset($_POST['ytunnus']) && $asiakasid !== false) {
 } else {
 ?>
 <table>
-    <tr><th><?php echo t('Hae asiakas') ?></th><td><form action='' method='POST'><input type="text" name="ytunnus" value=""></td>
+    <tr><th><?php echo t('Hae asiakas') ?></th><td><form action='' method='POST' name='haku'><input type="text" name="ytunnus" value=""></td>
         <td><input type="submit" value="Etsi"></td>
     </tr>
     </form>
 </table>
 
 <?php
+
+	$formi = "haku";
+	$kentta = "ytunnus";
+
 }
 
 if ($asiakasid) {
@@ -151,21 +155,25 @@ if ($asiakasid) {
 	<?php foreach (pupe_varasto_fetch_all() as $key => $val): ?>
 		<option value="<?php echo $key ?>"><?php echo $val ?></option>
 	<?php endforeach; ?>
-	<option value=''>
 	</select></td>
 </tr>
 <tr>
 	<th><?php echo t('Toimitustapa') ?></th>
 	<td><select name='toimitustapa' onchange='document.rahtikirja.submit();'>
 	    <?php
+			$toimitustapa_val = "";
 	        $toimtavat = pupe_toimitustapa_fetch_all();
+	
 		    foreach ($toimtavat as $toimt): ?>
 			<?php 
+			
 			// onko tämä valittu
 			$sel = '';
-			if (isset($_POST['toimitustapa']) && $_POST['toimitustapa'] == $toimt['selite']) {
+			if ((isset($_POST['toimitustapa']) && $_POST['toimitustapa'] == $toimt['selite']) or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
 				$sel = "selected";
-			} 
+				$toimitustapa_val = $toimt['selite'];
+			}
+			 
 			?>
 			<option <?php echo $sel ?> value="<?php echo $toimt['selite'] ?>"><?php echo asana('TOIMITUSTAPA_', $toimt['selite']) ?></option>
 		<?php endforeach; ?>
@@ -175,15 +183,22 @@ if ($asiakasid) {
 </tr>
 
 <?php
+
 $merahti = true;
-$sel = '';
-if (isset($_POST['merahti']) && $_POST['merahti'] === '0') {
+$sel 	 = '';
+
+// haetaan toimitustavan tiedot tarkastuksia varten
+$apuqu2 = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa_val'";
+$meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
+$meapu2row = mysql_fetch_array($meapu2);
+
+if ($meapu2row["merahti"] == "") {
 	$merahti = false;
 	$sel = "selected";
 }
 ?>
 
-<tr><th>Rahti</th><td><select name='merahti' onChange="document.rahtikirja.submit();">
+<tr><th>Rahti</th><td><select name='merahti'">
 	<option value='1'>Lähettäjä</option>
 	<option <?php echo $sel ?> value='0'>Vastaanottaja</option>
 	</select></td>

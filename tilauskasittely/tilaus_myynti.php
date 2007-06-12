@@ -172,7 +172,7 @@ $ale 	= str_replace(',','.',$ale);
 $kpl 	= str_replace(',','.',$kpl);
 
 // jos ei olla postattu mitään, niin halutaan varmaan tehdä kokonaan uusi tilaus..
-if ($kukarow["extranet"] == "" and count($_POST) == 0 and $from != "LASKUTATILAUS") {
+if ($kukarow["extranet"] == "" and count($_POST) == 0 and ($from != "LASKUTATILAUS" and $from != "VALITSETOIMITUS")) {
 	$tila				= '';
 	$tilausnumero		= '';
 	$laskurow			= '';
@@ -430,7 +430,14 @@ if ((int) $kukarow["kesken"] != 0) {
 //tietyissä keisseissä tilaus lukitaan (ei syöttöriviä eikä muota muokkaa/poista-nappuloita)
 $muokkauslukko = "";
 
-if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or $toim == "PROJEKTI" or ($toim=="TARJOUS" and $projektilla>0)) {
+//	Projekti voidaan poistaa vain jos meillä ei ole sillä mitään toimituksia
+if ($laskurow["tunnusnippu"] > 0 and $toim=="PROJEKTI") {
+	$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
+	$abures = mysql_query($query) or pupe_error($query);
+	$projektilask = (int) mysql_num_rows($abures);
+}
+
+if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or ($toim == "PROJEKTI" and $projektilask>0) or ($toim=="TARJOUS" and $projektilla>0)) {
 	$muokkauslukko = "LUKOSSA";
 }
 
@@ -659,22 +666,14 @@ if ($tee == 'POISTA') {
 		echo "<font class='message'>".t("Osatoimitus")." $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
 
 		if($projektilla>0) {
-			$tee				= '';
 			$tilausnumero		= $laskurow["tunnusnippu"];
-			$kukarow["kesken"]	= $tilausnumero;
-			$projektilla		= $tilausnumero;
-			$aktivoinnista		= "";
-			$toim				= "PROJEKTI";
-			$muokkauslukko		= "LUKOSSA";
 
 			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
-
-			$query 	= "	select *
-						from lasku
-						where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$laskurow = mysql_fetch_array($result);
+			
+			//	Hypätään takaisin otsikolle
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$PHP_SELF?toim=PROJEKTI&tilausnumero=$tilausnumero&from=VALITSETOIMITUS'>";
+			die();
 		}
 		else {
 			$tee				= '';
@@ -889,22 +888,14 @@ if ($tee == "VALMIS") {
 		echo "<font class='message'>Osatoimitus $otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
 
 		if($projektilla>0) {
-			$tee				= '';
 			$tilausnumero		= $laskurow["tunnusnippu"];
-			$kukarow["kesken"]	= $tilasnumero;
-			$projektilla		= $tilausnumero;
-			$aktivoinnista		= "";
-			$toim				= "PROJEKTI";
-			$muokkauslukko		= "LUKOSSA";
 
 			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
-
-			$query 	= "	select *
-						from lasku
-						where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$laskurow = mysql_fetch_array($result);
+			
+			//	Hypätään takaisin otsikolle
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$PHP_SELF?toim=PROJEKTI&tilausnumero=$tilausnumero&from=VALITSETOIMITUS'>";
+			die();
 		}
 		else {
 			$tee				= '';
@@ -1177,7 +1168,14 @@ if ($tee == '') {
 			<input type='hidden' name='projektilla' value='$projektilla'>
 			<td class='back'><input type='Submit' value='".t("Lisaa kulut")."' Style='font-size: 8pt; padding:0;'></td>
 			</form>";
-
+			
+			echo "<form action = '../tilausmemo.php' method='post'>
+			<input type='hidden' name='tilaustunnus' value='$tilausnumero'>
+			<input type='hidden' name='toim' value='TILAUSMEMO'>			
+			<td class='back'><input type='Submit' value='".t("Tilausmemo")."' Style='font-size: 8pt; padding:0;'></td>
+			</form>";
+			
+			
 		}
 
 		echo "	<form action='tuote_selaus_haku.php' method='post'>
@@ -2406,7 +2404,7 @@ if ($tee == '') {
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila IN ('L','G','E','V','W','N','R','A')";
+						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila IN ('L','G','E','V','W','N','R','A') and tunnusnippu>0";
 			$result = mysql_query($query) or pupe_error($query);
 			$toimrow = mysql_fetch_array($result);
 

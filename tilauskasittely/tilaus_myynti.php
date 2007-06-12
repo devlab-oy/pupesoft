@@ -1169,12 +1169,12 @@ if ($tee == '') {
 			<td class='back'><input type='Submit' value='".t("Lisaa kulut")."' Style='font-size: 8pt; padding:0;'></td>
 			</form>";
 			
+			/*
 			echo "<form action = '../tilausmemo.php' method='post'>
 			<input type='hidden' name='tilaustunnus' value='$tilausnumero'>
-			<input type='hidden' name='toim' value='TILAUSMEMO'>			
 			<td class='back'><input type='Submit' value='".t("Tilausmemo")."' Style='font-size: 8pt; padding:0;'></td>
 			</form>";
-			
+			*/
 			
 		}
 

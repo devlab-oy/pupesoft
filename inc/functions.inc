@@ -1445,6 +1445,7 @@ if (!function_exists("jalkilaskentafunktio")) {
 	}
 }
 
+
 if (!function_exists("tuotteen_myyntihinta")) {
 	function tuotteen_myyntihinta ($laskurow, $trow, $kpl) {
 		global $yhtiorow, $kukarow;
@@ -1581,6 +1582,31 @@ if (!function_exists("tuotteen_myyntihinta")) {
 
 	}
 
+}
+
+if (!function_exists("kalenteritapahtuma")) {
+	function kalenteritapahtuma ($tyyppi, $tapa, $viesti, $liitostunnus, $kuittaus="", $henkilo="", $otunnus="") {
+		global $yhtiorow, $kukarow;
+		
+		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		$asrow = mysql_fetch_array($result);
+
+		//Tehdään asiakasmemotapahtuma jos se on tarpeellinen
+		$kysely = "	INSERT INTO kalenteri
+					SET tapa 		= '$tapa',
+					asiakas  	 	= '$asrow[ytunnus]',
+					liitostunnus	= '$liitostunnus',
+					henkilo  		= '$henkilo',
+					kuka     		= '$kukarow[kuka]',
+					yhtio    		= '$kukarow[yhtio]',
+					tyyppi   		= '$tyyppi',
+					pvmalku  		= now(),
+					otunnus  		= '$otunnus',
+					kuittaus  		= '$kuittaus',										
+					kentta01 		= '$viesti'";
+ 		$result = mysql_query($kysely) or pupe_error($kysely);
+	}
 }
 
 ?>

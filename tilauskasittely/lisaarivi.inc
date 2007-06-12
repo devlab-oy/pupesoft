@@ -428,7 +428,7 @@
 				// usort($zzrow, "zzrowcmp");
 
 				foreach($zzrow as $zrow) {
-					if ($varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or $laskurow["varasto"] == $zrow["varasto"]))) {
+					if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or $laskurow["varasto"] == $zrow["varasto"]))) {
 
 						if ($lisaarivi_debug==1) echo "Myyd‰‰n paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
 
@@ -495,7 +495,7 @@
 		$kkres  = mysql_query($query) or die($query);
 
 		// jos result on nolla, saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi
-		if ((mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta or $varataan_saldoa == "EI") {
+		if ($yhtiorow["puute_jt_oletus"] == "O" or (mysql_num_rows($kkres) == 0 and $osatoimkielto == "") or $saldoyhteensa >= $toimittamatta or $varataan_saldoa == "EI") {
 
 			if ($lisaarivi_debug==1) echo "Saadaan myyd‰ osatoimitus tai jos meill‰ on saldoa tarpeeksi. Saldoa $saldoyhteensa Toimittamatta $toimittamatta<br>";
 
@@ -509,7 +509,7 @@
 				if ($lisaarivi_debug==1) echo "Halutaan myyd‰ paikalta $paikka<br>";
 
 				foreach ($myy_tuoteno as $i => $tuoteno) {
-					if ($myy_kpl[$i] >= $toimittamatta and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1]  == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i]) {
+					if ($yhtiorow["puute_jt_oletus"] == "O" or ($myy_kpl[$i] >= $toimittamatta and $paikat[0] == $myy_hyllyalue[$i] and $paikat[1]  == $myy_hyllynro[$i] and $paikat[2] == $myy_hyllyvali[$i] and $paikat[3] == $myy_hyllytaso[$i])) {
 						//Otetaan t‰m‰
 						$myy_tuoteno   = array();
 						$myy_kpl       = array();
@@ -570,7 +570,7 @@
 
 						if ($lisaarivi_debug==1) echo "Normaalituote $tuoteno, toimittamatta $toimittamatta<br>";
 
-						if ($myy_kpl[$i] >= $toimittamatta or $varataan_saldoa == "EI") {
+						if ($yhtiorow["puute_jt_oletus"] == "O" or $myy_kpl[$i] >= $toimittamatta or $varataan_saldoa == "EI") {
 							$myy_kpl[$i] = $toimittamatta; // jos t‰ll‰ paikalla on saldoa enemm‰n kun tarvitaan, otetaan sitten vaan tarvittava m‰‰r‰
 						}
 
@@ -762,7 +762,7 @@
 											jaksotettu	= '$jaksotettu'";
 
 								if ($trow['ei_saldoa'] != '' and $yhtiorow["kerataanko_saldottomat"] == '') {
-									$query .= ", kerattyaika = now()";
+									$query .= ", keratty = 'saldoton', kerattyaika = now()";
 								}
 
 								$result = mysql_query($query) or die($query);

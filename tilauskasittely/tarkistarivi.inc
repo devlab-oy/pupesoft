@@ -246,14 +246,14 @@
 		require("suoratoimitusvalinta.inc");
 
 		// Kääydään läpi oman varaston paikat
-		if ((in_array($row["var"], array('','H','S','T','U','J')) and mysql_num_rows($omavarastores) >= $omapaikatraja) or (in_array($row["var"], array('S','T','U','J')) and mysql_num_rows($omavarastores) > 0)) {
+		if (in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or (in_array($row["var"], array('','H','S','T','U','J')) and mysql_num_rows($omavarastores) >= $omapaikatraja) or (in_array($row["var"], array('S','T','U','J')) and mysql_num_rows($omavarastores) > 0)) {
 
 			while($alkurow = mysql_fetch_array($omavarastores)) {
 				if ($alkurow["hyllyalue"] != "!!M" and ($alkurow["varastotyyppi"] != "E" or $laskurow["varasto"] == $alkurow["varastotunnus"] or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
 
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"]);
 
-					if ($myytavissa >= $kpl_st or ($row["var"] != "P" and $toim != "TARJOUS" and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])) {
+					if (in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or $myytavissa >= $kpl_st or ($row["var"] != "P" and $toim != "TARJOUS" and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])) {
 
 						$sel = "";						
 						
@@ -276,7 +276,9 @@
 		//	Jos ollaan livahdettu puutteeksi koitetaan josko tätä voitasiin myydä erikokisvarastosta
 		elseif($row["var"] == "P" and mysql_num_rows($omavarastores) > 0) {
 			while($alkurow = mysql_fetch_array($omavarastores)) {
+				
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"]);
+				
 				if($myytavissa > 0 and ($alkurow["varastotyyppi"] == "E" or $alkurow["hyllyalue"] == "!!M")) {
 					if($kukarow["extranet"] != "") {
 						$varaosakommentti .= t("Tuote saatavissa asiakaspalvelun kautta")."!<br>";

@@ -836,9 +836,7 @@
 						if ($lahetekpl > 0) {
 							$komento .= " -#$lahetekpl ";
 						}
-						
-						echo "$komento<br>";
-						
+												
 						print_pdf($komento);
 					}
 
@@ -856,9 +854,7 @@
 						if ($oslappkpl > 0) {
 							$oslapp .= " -#$oslappkpl ";
 						}
-						
-						echo "$oslapp<br>";
-						
+												
 						require ("osoitelappu_pdf.inc");
 					}
 					

@@ -113,8 +113,9 @@ echo "	<table>
 		<tr>
 		<th>".t("Ytunnus")."</th>
 		<th>".t("Asiakas")."</th>
-		<th>".t("Kohdistamattomia suorituksia")."</th>
-		<th>".t("Avoimia laskuja")."
+		<th>".t("Suorituksia")."</th>
+		<th>".t("Viitteellisiä")."<br>".t("suorituksia")."</th>
+		<th>".t("Avoimia")."<br>".t("laskuja")."
 		</tr>";
 
 while ($asiakas = mysql_fetch_array($result)) {
@@ -132,7 +133,8 @@ while ($asiakas = mysql_fetch_array($result)) {
 	echo "<tr class='aktiivi'>
 			<td>$asiakas[ytunnus]</td>
 			<td>$asiakas[nimi]</td>
-			<td>$asiakas[maara] / $asiakas[viitteita]</td>
+			<td>$asiakas[maara]</td>
+			<td>$asiakas[viitteita]</td>
 			<td>$lasku[maara]</td>";
 
 	echo "<form action='$PHP_SELF' method='POST'>";

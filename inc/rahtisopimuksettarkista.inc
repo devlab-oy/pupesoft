@@ -10,13 +10,36 @@
 
 
 	if (mysql_field_name($result, $i) == "ytunnus") {
-		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and ytunnus='$t[$i]'";
-		$tarkrow = mysql_query($query) or pupe_error($query);
-
-		// löytykö yhtään tai onko kyseessä oman yrityksen ytunnus
-		if ((mysql_num_rows($tarkrow)==0) and ($t[$i]!=$yhtiorow['ytunnus'])) {
-			$virhe[$i] = "".t("Ytunnus ei löydy")."";
-			$errori = 1;
-		}
+		$chytunnus = $t[$i];
+		
+		if ($chytunnus != '') {
+			$query = "	SELECT ytunnus
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
+			$sresult = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($sresult) == 0) {
+				
+				$ytunnus 		= $chytunnus;
+				$kutsuja 		= "yllapito.php";
+				$ulos 			= "";				
+				require("asiakashaku.inc");
+				
+				if ($ulos != "" and $ytunnus == "") {
+					$alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
+					$virhe[$i]    = t("Valitse asiakas!");
+				}
+				elseif ($ytunnus != "") {
+					$t[$i]  = $ytunnus;
+					$virhe[$i] = t("Asiakas löytyi!");
+				}	
+				else {
+					$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");	
+				}	
+				
+				$errori = 1;
+			}
+		}	
 	}
+	
 ?>

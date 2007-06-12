@@ -26,4 +26,9 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
+		$ulos = "<td>".$alasveto[$i]."</td>";
+		$jatko = 0;
+	}
 ?>

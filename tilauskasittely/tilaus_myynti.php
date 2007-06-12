@@ -1975,8 +1975,8 @@ if ($tee == '') {
 			$kommentti_array = array();
 			$lapsenlap_array = array();
 
-			function rekursiivinen_resepti($pertuoteno) {
-				global $kukarow, $tuoteno_array, $riikoko, $perkpl, $kpl_array, $kommentti_array, $lapsenlap_array;
+			function rekursiivinen_resepti($pertuoteno, $perkpl) {
+				global $kukarow, $tuoteno_array, $riikoko, $kpl_array, $kommentti_array, $lapsenlap_array;
 
 				$query = "	SELECT tuoteno, kerroin
 							FROM tuoteperhe
@@ -2004,8 +2004,7 @@ if ($tee == '') {
 								$lt = strtoupper($perherow["tuoteno"]);
 
 								$tuoteno_array[]		= $lt; // lis‰t‰‰n tuoteno arrayseen
-								$kpl_array[$lt]			= round($perkpl * $perherow["kerroin"],2);
-								$perkpl					= $kpl_array[$lt];
+								$kpl_array[$lt]			= round($perkpl * $perherow["kerroin"],2);								
 								$kommentti_array[$lt] 	= "Valmista $pertuoteno:n raaka-aineeksi $kpl_array[$lt] kappaletta.";
 								$lapsenlap_array[$lt] 	= $lt;
 								$riikoko++;
@@ -2014,8 +2013,7 @@ if ($tee == '') {
 								$lt = strtoupper($perherow["tuoteno"]);
 
 								$kpl_array[$lt]		   += round($perkpl * $perherow["kerroin"],2);
-								$perkpl					= $kpl_array[$lt];
-								$kommentti_array[$lt]  .= " Valmista $pertuoteno:n raaka-aineeksi ".round($perkpl * $perherow["kerroin"],2)." kappaletta.";
+								$kommentti_array[$lt]  .= "<br>Valmista $pertuoteno:n raaka-aineeksi ".round($perkpl * $perherow["kerroin"],2)." kappaletta.";
 							}
 						}
 					}
@@ -2023,15 +2021,14 @@ if ($tee == '') {
 			}
 
 			$riikoko = count($tuoteno_array);
-			$perkpl = $kayttajan_kpl;
 
 			for($rii=0; $rii < $riikoko; $rii++) {
 
 				if ($kpl != '' and !is_array($kpl_array) and $rii == 0) {
 					$kpl_array[$tuoteno_array[$rii]] = $kayttajan_kpl;
 				}
-
-				rekursiivinen_resepti($tuoteno_array[$rii]);
+								
+				rekursiivinen_resepti($tuoteno_array[$rii], $kpl_array[$tuoteno_array[$rii]]);
 			}
 		}
 
@@ -2394,7 +2391,7 @@ if ($tee == '') {
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
-			$order = "ORDER BY tilausrivi.perheid desc, tunnus";
+			$order = "ORDER by sorttauskentta desc, tunnus";
 			$tilrivity	= "'L','V','W','M'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
@@ -2668,34 +2665,38 @@ if ($tee == '') {
 					else {
 						echo "<tr><td valign='top'>$rivino</td>";
 					}
+					
+					$borderlask		= 0;
+					$pknum			= 0;
 				}
 
 				$classlisa = "";
 
-				if($borderlask == 1 and $pkrow[1] == 1 and $pknum == 1) {
+				if($borderlask == 1 and $pkrow[1] == 1 and $pknum == 1) {					
 					$classlisa = $class." style='border-top: 1px solid; border-bottom: 1px solid; border-right: 1px solid;' ";
 					$class    .= " style=' border-top: 1px solid; border-bottom: 1px solid;' ";
-
+					
 					$borderlask--;
 				}
-				elseif($borderlask == $pkrow[1] and $pkrow[1] > 0) {
+				elseif($borderlask == $pkrow[1] and $pkrow[1] > 0) {				
 					$classlisa = $class." style='border-top: 1px solid; border-right: 1px solid;' ";
 					$class    .= " style='border-top: 1px solid;' ";
+					
 					$borderlask--;
 				}
-				elseif($borderlask == 1) {
-					if ($pknum > 1) {
+				elseif($borderlask == 1) {					
+					if ($row["kommentti"] != '') {
+						$classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
+						$class    .= " style='font-style:italic; ' ";
+					}
+					else {
 						$classlisa = $class." style='font-style:italic; border-bottom: 1px solid; border-right: 1px solid;' ";
 						$class    .= " style='font-style:italic; border-bottom: 1px solid;' ";
 					}
-					else {
-						$classlisa = $class." style='border-bottom: 1px solid; border-right: 1px solid;' ";
-						$class    .= " style='border-bottom: 1px solid;' ";
-					}
 
 					$borderlask--;
 				}
-				elseif($borderlask > 0 and $borderlask < $pknum) {
+				elseif($borderlask > 0 and $borderlask < $pknum) {					
 					$classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
 					$class    .= " style='font-style:italic;' ";
 					$borderlask--;
@@ -3290,7 +3291,7 @@ if ($tee == '') {
 					$cspan = 10;
 
 					if ($toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
-						$cspan -= 5;
+						$cspan -= 6;
 					}
 
 					if ($kukarow['hinnat'] == 1) {
@@ -3304,12 +3305,22 @@ if ($tee == '') {
 					}
 
 					echo "<tr>";
-
-					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td>&nbsp;</td>";
+					
+					if ($borderlask == 0 and $pknum > 1) {
+						$kommclass = " style='border-bottom: 1px solid; border-right: 1px solid;'";	
+					}
+					elseif($pknum > 0) {
+						$kommclass = " style='border-right: 1px solid;'";	
+					}
+					else {
+						$kommclass = "";
 					}
 
-					echo "<td colspan='$cspan' valign='top'>".t("Kommentti").": $row[kommentti]</td>";
+					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+						echo "<td $kommclass>&nbsp;</td>";
+					}
+
+					echo "<td $kommclass colspan='$cspan' valign='top'>".t("Kommentti").":<br>$row[kommentti]</td>";
 
 					echo "</tr>";
 				}

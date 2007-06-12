@@ -60,7 +60,7 @@
 	}
 	else {
 		$postiennakkomaara  = "";
-		$postiennakkotilino = "";
+		$postiennakkotilino = "$yhtiorow[pankkitili1]";
 		$postiennakkoviite  = "";
 	}
 	

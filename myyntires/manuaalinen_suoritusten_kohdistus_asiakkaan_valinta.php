@@ -96,7 +96,7 @@ if ($maa != "") {
 	$lisa .= " and a.maa = '$maa' ";
 }
 
-$query = "	SELECT a.nimi nimi, a.ytunnus ytunnus, s.asiakas_tunnus tunnus, COUNT(s.asiakas_tunnus) maara, sum(if(s.viite>0, 1,0)) viitteita
+$query = "	SELECT s.asiakas_tunnus tunnus, group_concat(distinct a.nimi) nimi, group_concat(distinct a.ytunnus) ytunnus, COUNT(s.asiakas_tunnus) maara, sum(if(s.viite>0, 1,0)) viitteita
 			FROM suoritus s, asiakas a
 			WHERE s.asiakas_tunnus<>0
 			AND s.asiakas_tunnus=a.tunnus
@@ -111,7 +111,8 @@ $result = mysql_query($query) or pupe_error($query);
 
 echo "	<table>
 		<tr>
-		<th>Asiakas</th>
+		<th>".t("Ytunnus")."</th>
+		<th>".t("Asiakas")."</th>
 		<th>".t("Kohdistamattomia suorituksia")."</th>
 		<th>".t("Avoimia laskuja")."
 		</tr>";
@@ -129,6 +130,7 @@ while ($asiakas = mysql_fetch_array($result)) {
 	$lasku = mysql_fetch_array ($lresult);
 
 	echo "<tr class='aktiivi'>
+			<td>$asiakas[ytunnus]</td>
 			<td>$asiakas[nimi]</td>
 			<td>$asiakas[maara] / $asiakas[viitteita]</td>
 			<td>$lasku[maara]</td>";

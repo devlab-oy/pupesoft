@@ -1,8 +1,8 @@
 <?php
 	if ($muutparametrit != '') list($laji, $vv, $kk, $pp ,$tee) = split("/",$muutparametrit);
-	
+
 	echo "<font class=head>".t("Avoimet laskut")."</font><hr>";
-	
+
 	if ($tee != '') {	// Tarkistetaan pvm
 		// muutetaan numeroiksi
 		$kk += 0;
@@ -42,7 +42,7 @@
 		if (!isset($pp)) $pp = date("j",mktime(0,0,0,$kuu,0,$year));
 
 		$sel[$laji] = " selected ";
-		
+
 		echo "<form name = 'valinta' action = 'raportit.php?tee=X' method='post'>
 				<input type = 'hidden' name = 'toim' value = 'avoimet'>
 				<table>
@@ -58,7 +58,7 @@
 				<option value='O'  $sel[O]>".t("ostolaskut")."
 				<option value='OK' $sel[OK]>".t("ostolaskut konserni")."
 				</select></td>";
-		
+
 		echo "<tr><th>".t("Maksuehto").":</th>";
 		echo "<td colspan='3'><select name='maksuehto'>";
 		echo "<option value=''>".t("Ei valintaa")."";
@@ -67,7 +67,7 @@
 					FROM maksuehto
 					".avain('join','MEHTOKATXT_')."
 					".avain('join2','MEHTOTXT_')."
-					WHERE maksuehto.yhtio = '$kukarow[yhtio]' 
+					WHERE maksuehto.yhtio = '$kukarow[yhtio]'
 					and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$srow[maa]%')
 					order by maksuehto.jarjestys, mehto, maksuehto.tunnus";
 		$mresult = mysql_query($query) or pupe_error($query);
@@ -80,7 +80,7 @@
 			echo "<option value='$row[0]' $sel>$row[1]";
 		}
 		echo "</select></td>";
-		
+
 		echo "<tr><th>".t("Näytä laskut, joilta puuttuu kaikki tiliöinnit")."	</th>
 				<td colspan='3'><input type = 'checkbox' name = 'rikki'></td></tr>
 				<tr><th>".t("Vain toimittaja/asiakas")."	</th>
@@ -129,10 +129,10 @@
 
 			$query = "	SELECT lasku.liitostunnus, ytunnus, nimi, concat_ws(' ', viite, viesti) maksutieto, lasku.tapvm tapvm, mapvm, olmapvm, erpcm, tiliointi.summa * -1 avoinsaldo
 						FROM lasku use index (yhtio_tila_tapvm)
-						JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio 
-						and lasku.tunnus	= tiliointi.ltunnus 
-						and lasku.tapvm		= tiliointi.tapvm 
-						and tilino			= '$tili' 
+						JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
+						and lasku.tunnus	= tiliointi.ltunnus
+						and lasku.tapvm		= tiliointi.tapvm
+						and tilino			= '$tili'
 						and korjattu		= ''
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (mapvm > '$pvm' or mapvm='0000-00-00')
@@ -144,13 +144,13 @@
 
 			// poimitaan kuluva päivä, raportin timestampille
 			$today = date("Y-m-d");
-			
+
 			echo "<font class='message'>".t("Avoimet")." $lista</font><br><font class='message'>".t("Raportti otettu")." ".tv1dateconv($today)."</font><br>";
 
 			if ($toimittajaid == '') {
 				echo "<font class='message'>".t("Yrityksellä")." $yhtiorow[nimi] ".t("oli")." ".tv1dateconv($pvm)." ".t("seuraavat avoimet")." $lista:</font><br>";
 			}
-			
+
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>".t("Ytunnus")."</th>";
@@ -167,43 +167,43 @@
 
 			while ($trow=mysql_fetch_array ($result)) {
 				if (($rikki == 'on' and $trow['avoinsaldo']==0) or $trow['avoinsaldo']!=0) {
-					
+
 					$summa += $trow['avoinsaldo'];
-					
+
 					echo "<tr>";
 					echo "<td><a href='../myyntires/myyntilaskut_asiakasraportti.php?tunnus=$row[liitostunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maksutieto]</td>";
 					echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
-					
+
 					if ($trow["mapvm"] != '0000-00-00') echo "<td>".tv1dateconv($trow["mapvm"])."</td>";
 					else echo "<td></td>";
-					
+
 					echo "<td>".tv1dateconv($trow["olmapvm"])."</td>";
 					echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
-					echo "<td align='right'>$trow[avoinsaldo]</td>";										
+					echo "<td align='right'>$trow[avoinsaldo]</td>";
 					echo "</tr>";
 				}
 			}
 	        $query = "	SELECT sum(summa) saldo FROM tiliointi
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and korjattu = '' 
-						and tapvm >= '$yhtiorow[tilikausi_alku]' 
+						WHERE yhtio = '$kukarow[yhtio]'
+						and korjattu = ''
+						and tapvm >= '$yhtiorow[tilikausi_alku]'
 						and tapvm <= '$pvm'
 						and tilino = '$tili'";
 			$result = mysql_query($query) or pupe_error($query);
 			$trow = mysql_fetch_array ($result);
 
 			$erotus=$trow['saldo']+$summa;
-			
+
 			$summa = sprintf("%01.2f", $summa);
 			$summa = str_replace('.',',',$summa);
 			echo "<tr><th>".t("Avoimet yhteensä").":</th><th colspan='6'></th><td align='right'>$summa</td></tr>";
-			
+
 			$summa = sprintf("%01.2f", $trow['saldo']);
 			$summa = str_replace('.',',',$summa);
 			echo "<tr><th>".t("Kirjanpito yhteensä").":</th><th colspan='6'></th><td align='right'>$summa</td></tr>";
-			
+
 			$summa = sprintf("%01.2f", $erotus);
 			$summa = str_replace('.',',',$summa);
 			echo "<tr><th>".t("Ero").":</th><th colspan='6'></th><td align='right'>$summa</td></tr>";
@@ -221,7 +221,7 @@
 			else {
 				$indeksi = " use index (yhtio_tila_mapvm) ";
 			}
-			
+
 			if ($maksuehto != '') {
 				$lisa3 = " and lasku.maksuehto = '$maksuehto' ";
 			}
@@ -232,8 +232,8 @@
 			elseif ($laji == 'MF') 	$tili = $yhtiorow['factoringsaamiset'];
 			else 					$tili = $yhtiorow['myyntisaamiset'];
 
-			$query = "	SELECT lasku.liitostunnus, lasku.ytunnus, lasku.nimi, lasku.laskunro maksutieto, lasku.tapvm tapvm, lasku.mapvm, lasku.erpcm, lasku.summa laskunsumma, lasku.summa-lasku.saldo_maksettu avoinsaldo2, 
-						sum(tiliointi.summa) avoinsaldo,						
+			$query = "	SELECT lasku.liitostunnus, lasku.ytunnus, lasku.nimi, lasku.laskunro maksutieto, lasku.tapvm tapvm, lasku.mapvm, lasku.erpcm, lasku.summa laskunsumma, lasku.summa-lasku.saldo_maksettu avoinsaldo2, lasku.tunnus laskutunnus,
+						sum(tiliointi.summa) avoinsaldo,
 						sum(if(tiliointi.tapvm=lasku.tapvm, tiliointi.summa, 0)) alkusaldo
 						FROM lasku $indeksi
 						JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
@@ -254,13 +254,13 @@
 
 			// poimitaan kuluva päivä, raportin timestampille
 			$today = date("Y-m-d");
-			
+
 			echo "<font class='message'>".t("Avoimet")." $lista</font><br><font class='message'>".t("Raportti otettu")." ".tv1dateconv($today)."</font><br>";
 
 			if ($toimittajaid == '') {
 				echo "<font class='message'>".t("Yrityksellä")." $yhtiorow[nimi] ".t("oli")." ".tv1dateconv($pvm)." ".t("seuraavat avoimet")." $lista:</font><br>";
 			}
-			
+
 			echo "<table>";
 			echo "<tr>";
 			echo "<th>".t("Ytunnus")."</th>";
@@ -286,7 +286,7 @@
 
 				if (($rikki == 'on' and $trow['alkusaldo'] == 0) or $trow['alkusaldo'] != 0) {
 
-					if ($trow['alkusaldo'] == 0) { 
+					if ($trow['alkusaldo'] == 0) {
 						// Tämä on tullut konversiosta ja siltä puuttuu laskun myyntisaatavat vienti
 						$trow['avoinsaldo'] = $trow['laskunsumma'] + $trow['avoinsaldo'];
 					}
@@ -298,33 +298,33 @@
 					echo "<td $class>$trow[nimi]</td>";
 					echo "<td $class>$trow[maksutieto]</td>";
 					echo "<td $class>".tv1dateconv($trow["tapvm"])."</td>";
-					
+
 					if ($trow["mapvm"] != '0000-00-00') echo "<td $class>".tv1dateconv($trow["mapvm"])."</td>";
 					else echo "<td $class></td>";
-					
+
 					echo "<td $class>".tv1dateconv($trow["erpcm"])."</td>";
-					echo "<td align='right' $class>$trow[avoinsaldo]</td>";										
-					
-					if ($trow["avoinsaldo"] != $trow["avoinsaldo2"]) echo "<td><font class='error'>/$trow[avoinsaldo2]</font></td><td class='back'> VIRHE: Kirjanpito/Lasku! Summat heittävät!</td>";
-					
+					echo "<td align='right' $class>$trow[avoinsaldo]</td>";
+
+					if ($trow["avoinsaldo"] != $trow["avoinsaldo2"]) echo "<td class='back'><font class='error'>VIRHE: Lasku / Kirjanpito summat heittävät!</font></td><td class='back' nowrap> ($trow[avoinsaldo2] / <a href='muutosite.php?tee=E&tunnus=$trow[laskutunnus]'>$trow[avoinsaldo]</a>)</td>";
+
 					echo "</tr>";
 				}
 			}
 
 			//Listataan vielä kohdistamattomat
-			$query = "	SELECT asiakas.tunnus, asiakas.ytunnus, nimi_maksaja, viite, kirjpvm, '', '',  tiliointi.summa avoinsaldo, round(suoritus.summa*if(suoritus.kurssi=0, 1, kurssi),2)*-1 avoinsaldo2
+			$query = "	SELECT asiakas.tunnus, asiakas.ytunnus, nimi_maksaja, viite, kirjpvm, '', '',  tiliointi.summa avoinsaldo, round(suoritus.summa*if(suoritus.kurssi=0, 1, kurssi),2)*-1 avoinsaldo2, tiliointi.ltunnus
 				  		FROM suoritus
 						JOIN tiliointi on tiliointi.tunnus = suoritus.ltunnus and tiliointi.tilino='$tili' and tiliointi.korjattu = ''
-				  		LEFT JOIN asiakas on suoritus.yhtio=asiakas.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus 
-				  		WHERE suoritus.yhtio = '$kukarow[yhtio]' 
-						and kirjpvm <= '$pvm' 
+				  		LEFT JOIN asiakas on suoritus.yhtio=asiakas.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus
+				  		WHERE suoritus.yhtio = '$kukarow[yhtio]'
+						and kirjpvm <= '$pvm'
 						and kohdpvm  = '0000-00-00'
 						$lisa2
 				  		ORDER BY ytunnus";
 			$result = mysql_query($query) or pupe_error($query);
 
 			while ($trow = mysql_fetch_array ($result)) {
-				
+
 					$summa += $trow["avoinsaldo"];
 
 					echo "<tr>";
@@ -334,17 +334,19 @@
 					echo "<td>".tv1dateconv($trow["kirjpvm"])."</td>";
 					echo "<td></td>";
 					echo "<td></td>";
-					echo "<td align='right'><font class='error'>$trow[avoinsaldo]</font></td>";	
-					if ($trow["avoinsaldo"] != $trow["avoinsaldo2"]) echo "<td><font class='error'>/$trow[avoinsaldo2]</font></td><td class='back'> VIRHE: Kirjanpito/Suoritus! Summat heittävät!</td>";										
+					echo "<td align='right'><font class='error'>$trow[avoinsaldo]</font></td>";
+
+					if ($trow["avoinsaldo"] != $trow["avoinsaldo2"]) echo "<td class='back'><font class='error'>VIRHE: Kirjanpito / Suoritus summat heittävät!</font></td><td class='back' nowrap> (<a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[avoinsaldo]</a> / $trow[avoinsaldo2])</td>";
+
 					echo "</tr>";
-				
+
 			}
 
-	        $query = "	SELECT sum(summa) saldo 
+	        $query = "	SELECT sum(summa) saldo
 						FROM tiliointi
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and korjattu = '' 
-						and tapvm >= '$yhtiorow[tilikausi_alku]' 
+						WHERE yhtio = '$kukarow[yhtio]'
+						and korjattu = ''
+						and tapvm >= '$yhtiorow[tilikausi_alku]'
 						and tapvm <= '$pvm'
 						and tilino ='$tili'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -355,7 +357,7 @@
 			$summa = sprintf("%01.2f", $summa);
 			$summa = str_replace('.',',',$summa);
 	        echo "<tr><th>".t("Avoimet yhteensä").":</th><th colspan='5'></th><td align='right'>$summa</td></tr>";
-			
+
 			$summa = sprintf("%01.2f", $trow['saldo']);
         	$summa = str_replace('.',',',$summa);
 			echo "<tr><th>".t("Kirjanpito yhteensä").":</th><th colspan='5'></th><td align='right'>$summa</td></tr>";

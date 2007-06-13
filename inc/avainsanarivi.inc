@@ -283,7 +283,7 @@
 		$ulos  = "<td><select name='$nimi'>";
 		
 		foreach ($selitteet as $selite) {
-			if ($selite == $trow[$i]) {
+			if (strtoupper($selite) == strtoupper($trow[$i])) {
 				$sel = "SELECTED";
 			}
 			else {

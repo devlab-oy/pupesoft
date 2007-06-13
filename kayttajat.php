@@ -36,7 +36,7 @@
 		$krow["oletus_asiakas"] = "";
 		$tee = "MUUTA";
 		$firname = "";
-		
+
 		$query = "UPDATE kuka SET oletus_asiakas = '' WHERE tunnus='$selkuka'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
@@ -57,7 +57,7 @@
 	if ($tee == 'delpsw') {
 		$query = "	UPDATE kuka
 					SET salasana = '',
-					muuttaja	 = '$kukarow[kuka]', 
+					muuttaja	 = '$kukarow[kuka]',
 					muutospvm	 = now()
 					WHERE kuka='$selkuka'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -104,14 +104,14 @@
 			$salasana 						= $monta['salasana'];
 			$kassamyyja 					= $monta['kassamyyja'];
 			$dynaaminen_kassamyynti			= $monta['dynaaminen_kassamyynti'];
-			$jyvitys 						= $monta['jyvitys'];			
+			$jyvitys 						= $monta['jyvitys'];
 			$oletus_ohjelma 				= $monta['oletus_ohjelma'];
 			$resoluutio 					= $monta['resoluutio'];
 			$extranet 						= $monta['extranet'];
 			$hyvaksyja 						= $monta['hyvaksyja'];
 			$naytetaan_katteet_tilauksella	= $monta['naytetaan_katteet_tilauksella'];
 			$profile 						= $monta['profiilit'];
-			$piirit	 						= $monta['piirit'];			
+			$piirit	 						= $monta['piirit'];
 
 			echo "<font class='message'>".t("Käyttäjä")." $monta[kuka] ($monta[nimi]) ".t("löytyi muista yrityksistä.")."<br>";
 			echo t("Hänelle lisätään nyt myös oikeudet yritykselle")." $yhtio.<br>".t("Käyttäjätiedot kopioidaan yhtiöstä")." $monta[yhtio].</font><br>";
@@ -125,11 +125,11 @@
 				}
 				$profile = substr($profile,0,-1);
 			}
-			
+
 			if (count($piiri)>0) {
 				$piirit = implode(",", $piiri);
 			}
-			
+
 			$password = md5(trim($password));
 			if ($salasana == "") $salasana = $password; // jos meillä ei ole kopioitua salasanaa toisesta yrityksestä, käytetään syötettyä
 
@@ -183,7 +183,7 @@
 			$query = "	DELETE FROM oikeu
 						WHERE yhtio='$yhtio' and kuka='$ktunnus' and lukittu=''";
 			$pres = mysql_query($query) or pupe_error($query);
-			
+
 			if (count($profiilit) > 0 and $profiilit[0] !='') {
 
 				//käydään uudestaan profiili läpi
@@ -279,14 +279,14 @@
 			if (count($piiri)>0) {
 				$piirit = implode(",", $piiri);
 			}
-			
+
 			//päivitetään salasana
 			if (trim($password) != '') {
 				$password = md5(trim($password));
 
 				$query = "	UPDATE kuka
 							SET salasana = '$password',
-							muuttaja	 = '$kukarow[kuka]', 
+							muuttaja	 = '$kukarow[kuka]',
 							muutospvm	 = now()
 							WHERE kuka='$kuka'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -319,7 +319,7 @@
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
 						profiilit 		= '$profile',
 						piirit			= '$piirit',
-						muuttaja		= '$kukarow[kuka]', 
+						muuttaja		= '$kukarow[kuka]',
 						muutospvm		= now()
 						WHERE kuka='$kuka' and yhtio='$yhtio'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -332,7 +332,7 @@
 
 			//päivitetään oikeudet jos profiileja on olemassa
 			$profiilit = explode(',', trim($profile));
-			
+
 
 			//poistetaan käyttäjän vanhat profiilioikeudet
 			$query = "	DELETE FROM oikeu
@@ -448,23 +448,27 @@
 			if ($toim != 'extranet') {
 				echo "</select></td></tr>";
 
-				$sel9 = $sel2 = $sel1 = "";
+				$sel9 = $sel3 = $sel2 = $sel1 = "";
 
-				if ($krow["taso"] == "9") {
-					$sel9 = "SELECTED";
-				}
 				if ($krow["taso"] == "1") {
 					$sel1 = "SELECTED";
 				}
 				if ($krow["taso"] == "2") {
 					$sel2 = "SELECTED";
 				}
-				echo "<tr><th align='left'>".t("Taso").":</th>";
+				if ($krow["taso"] == "3") {
+					$sel3 = "SELECTED";
+				}
+				if ($krow["taso"] == "9") {
+					$sel9 = "SELECTED";
+				}
 
+				echo "<tr><th align='left'>".t("Taso").":</th>";
 				echo "<td><select name='taso'>";
 				echo "<option value='9' $sel9>".t("Taso 9 Aloittelijahyväksyjä, tiliöintejä ei näytetä")."</option>";
 				echo "<option value='1' $sel1>".t("Taso 1 Perushyväksyjä, tiliöntejä ei voi muuttaa")."</option>";
 				echo "<option value='2' $sel2>".t("Taso 2 Tehohyväksyjä, tiliöntejä voi muuttaa")."</option>";
+				echo "<option value='3' $sel3>".t("Taso 3 Tehohyväksyjä, lukittujakin tiliöintejä voi muuttaa")."</option>";
 				echo "</select></td></tr>";
 			}
 			else {
@@ -560,7 +564,7 @@
 			}
 
 			echo "</select></td></tr>";
-			
+
 			if ($toim != 'extranet') {
 				echo "<tr><th align='left'>".t("Henkilökohtainen tulostin:")."</td>";
 				echo "<td><select name='kirjoitin'><option value=''>".t("Ei oletuskirjoitinta")."</option>";
@@ -590,7 +594,7 @@
 				}
 
 				echo "</select></td></tr>";
-				
+
 				echo "<tr><th align='left'>".t("Dynaaminen kassamyyjä").":</td>";
 
 				$sel1="";
@@ -716,10 +720,10 @@
 						<option value='Y' $sel2>".t("Kate näytetään")."</option>
 						<option value='N' $sel3>".t("Katetta ei näytetä")."</option>
 						</select></td></tr>";
-						
+
 				echo "<tr><th align='left'>".t("Lomaoikeus").":</th>
 						<td><input type='text' name='lomaoikeus' size='3' value='$krow[lomaoikeus]'></td></tr>";
-						
+
 				echo "<tr><th align='left'>".t("Asema").":</td>";
 				echo "<td><select name='asema'><option value=''>".t("Ei asemaa")."</option>";
 
@@ -733,8 +737,8 @@
 				}
 
 				echo "</select></td></tr>";
-				
-				
+
+
 				echo "<tr><th align='left'>".t("Toimipaikka").":</td>";
 				echo "<td><select name='toimipaikka'><option value=''>".t("Oletustoimipaikka")."</option>";
 
@@ -748,10 +752,10 @@
 				}
 
 				echo "</select></td></tr>";
-			
+
 				//	Jos vain valitut henkilöt saa jyvitellä hintoja näytetään tämän valinta
 				if($yhtiorow["salli_jyvitys_myynnissa"] == "V") {
-					
+
 					if ($krow['jyvitys'] == "") {
 						$sel1 = "SELECTED";
 						$sel2 = "";
@@ -760,12 +764,12 @@
 						$sel1 = "";
 						$sel2 = "SELECTED";
 					}
-					
+
 					echo "<tr><th align='left'>".t("Jyvitys").":</td>";
 					echo "<td><select name='jyvitys'>
 							<option value='' $sel1>".t("Ei saa jyvittää myyntitilauksella")."</option>
 							<option value='X' $sel2>".t("Saa jyvittää myyntitilauksella")."</option>";
-					echo "</select></td></tr>";					
+					echo "</select></td></tr>";
 				}
 			}
 			$andextra = "";
@@ -825,7 +829,7 @@
 			echo "<tr><th valign='top'>Piirit:</th><td>";
 			while ($prow = mysql_fetch_array($pres)) {
 
-				
+
 				$chk = "";
 
 				if(in_array($prow["selite"], $piirit)) {
@@ -833,7 +837,7 @@
 				}
 
 				echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
-				
+
 			}
 			echo "</td></tr>";
 

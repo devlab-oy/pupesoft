@@ -47,8 +47,8 @@
 		sort($lista);
 
 		for ($i=0; $i < count($lista); $i++) {
-			if (($kotimaa == "FI" and substr($file,0, 5+strlen($kukarow["yhtio"])) == "lm03-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
-				echo "<option value='$file' $sel>$file</option>";
+			if (($kotimaa == "FI" and substr($lista[$i],0, 5+strlen($kukarow["yhtio"])) == "lm03-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($lista[$i],0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
+				echo "<option value='$lista[$i]' $sel>$lista[$i]</option>";
 			}
 		}
 		
@@ -59,7 +59,7 @@
 		echo "<br><br>";
 
 		if ($kotimaa == "FI") {
-			echo "<font class='message'>Ulkomaan LUM3-maksuaineisto:</font><br>";
+			echo "<font class='message'>Ulkomaan LUM2-maksuaineisto:</font><br>";
 		}
 		else {
 			echo "<font class='message'>Betalningsuppdrang via Bankgirot - Utlandsbetalningar:</font><hr>";
@@ -71,9 +71,19 @@
 		echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 		echo "<select name='filenimi' multiple='FALSE' size='10'>";
 
+		$i=0;
+		unset($lista);
+		
 		while ($file = readdir($handle)) {
-			if (($kotimaa == "FI" and substr($file, 0, 5+strlen($kukarow["yhtio"])) == "lum3-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($file,0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
-				echo "<option value='$file' $sel>$file</option>";
+		  	$lista[$i] = $file;
+		 	$i++;
+		}
+
+		sort($lista);
+
+		for ($i=0; $i < count($lista); $i++) {
+			if (($kotimaa == "FI" and substr($lista[$i], 0, 5+strlen($kukarow["yhtio"])) == "lum3-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($lista[$i],0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
+				echo "<option value='$lista[$i]' $sel>$lista[$i]</option>";
 			}
 		}
 		closedir($handle);

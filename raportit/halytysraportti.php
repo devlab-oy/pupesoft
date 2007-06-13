@@ -1281,7 +1281,7 @@
 						$rivi .= "\"$row[tuotekorkeus]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["tuotekorkeus"]);
+							$worksheet->writeNumber($excelrivi, $excelsarake, $row["tuotekorkeus"]);
 							$excelsarake++;
 						}
 					}
@@ -1290,7 +1290,7 @@
 						$rivi .= "\"$row[tuoteleveys]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["tuoteleveys"]);
+							$worksheet->writeNumber($excelrivi, $excelsarake, $row["tuoteleveys"]);
 							$excelsarake++;
 						}
 					}
@@ -1299,7 +1299,7 @@
 						$rivi .= "\"$row[tuotesyvyys]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["tuotesyvyys"]);
+							$worksheet->writeNumber($excelrivi, $excelsarake, $row["tuotesyvyys"]);
 							$excelsarake++;
 						}
 					}
@@ -1308,7 +1308,7 @@
 						$rivi .= "\"$row[tuotemassa]\"\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["tuotemassa"]);
+							$worksheet->writeNumber($excelrivi, $excelsarake, $row["tuotemassa"]);
 							$excelsarake++;
 						}
 					}

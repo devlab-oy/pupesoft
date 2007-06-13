@@ -497,7 +497,7 @@
 				$alatila		= $row["alatila"];
 
 				//tehd‰‰n selv‰kielinen tila/alatila
-				require "../inc/laskutyyppi.inc";
+				require "inc/laskutyyppi.inc";
 
 				echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 

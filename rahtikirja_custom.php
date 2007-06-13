@@ -120,7 +120,7 @@ if (isset($_POST['ytunnus']) && $asiakasid !== false) {
 ?>
 <table>
     <tr><th><?php echo t('Hae asiakas') ?></th><td><form action='' method='POST' name='haku'><input type="text" name="ytunnus" value=""></td>
-        <td><input type="submit" value="Etsi"></td>
+        <td><input type="submit" value="<?php echo t('Etsi') ?>"></td>
     </tr>
     </form>
 </table>
@@ -198,13 +198,13 @@ if ($meapu2row["merahti"] == "") {
 }
 ?>
 
-<tr><th>Rahti</th><td><select name='merahti'">
+<tr><th><?php echo t('Rahti') ?></th><td><select name='merahti'>
 	<option value='1'>Lähettäjä</option>
 	<option <?php echo $sel ?> value='0'>Vastaanottaja</option>
 	</select></td>
 </tr>
 <tr>
-	<th>Rahtisopimus</th>
+	<th><?php echo t('Rahtisopimus') ?></th>
 	<?php
 	$toimitustapa = $toimtavat[0]['selite'];
 	if (isset($_POST['toimitustapa'])) {
@@ -215,7 +215,7 @@ if ($meapu2row["merahti"] == "") {
 </tr>
 
 <?php
-	echo "<tr><th>Lähettäjän viite</th><td><input type=hidden name='asiakas' value='{$asiakasrow['ytunnus']}'><input type='text' name='viitelah'></td></tr>";
+	echo "<tr><th>". t('Lähettäjän viite') . "</th><td><input type=hidden name='asiakas' value='{$asiakasrow['ytunnus']}'><input type='text' name='viitelah'></td></tr>";
 	echo "<tr><th>Vastaanottajan viite</th><td><input type='text' name='viitevas'></td></tr>";
     echo "<tr><th>" . t('Tulostin') . "</th><td><select name='tulostin'>";
     

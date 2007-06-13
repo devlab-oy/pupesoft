@@ -160,6 +160,12 @@
 		if ($trow[$i] == 'TYOM_TYOSTATUS') {
 			$sel51 = "selected";
 		}
+		if ($trow[$i] == 'JAKELULISTA') {
+			$sel52 = "selected";
+		}
+		if ($trow[$i] == 'VAKIOVIESTI') {
+			$sel53 = "selected";
+		}
 		
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
@@ -214,6 +220,8 @@
 		$ulos .= "<option value='SARJANUMERON_LI'".$sel49.">".t("Sarjanumeron lisätieto")."</option>";
 		$ulos .= "<option value='TYOM_TYOJONO'"   .$sel50.">".t("Työmääräysten työjono")."</option>";
 		$ulos .= "<option value='TYOM_TYOSTATUS'" .$sel51.">".t("Työmääräysten työstatus")."</option>";
+		$ulos .= "<option value='JAKELULISTA'" 	  .$sel52.">".t("Email jakelulista")."</option>";
+		$ulos .= "<option value='VAKIOVIESTI'"    .$sel53.">".t("Vakioviesti")."</option>";				
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

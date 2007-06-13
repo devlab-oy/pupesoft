@@ -7,163 +7,163 @@
 		$tyyppi = 0;
 	}
 	if ($i == 1) {
-		if ($trow[$i] == 'T') {
+		if (strtoupper($trow[$i]) == 'T') {
 			$sel01 = "selected";
 		}
-		if ($trow[$i] == 'O') {
+		if (strtoupper($trow[$i]) == 'O') {
 			$sel02 = "selected";
 		}
-		if ($trow[$i] == 'Y') {
+		if (strtoupper($trow[$i]) == 'Y') {
 			$sel03 = "selected";
 		}
-		if ($trow[$i] == 'C') {
+		if (strtoupper($trow[$i]) == 'C') {
 			$sel04 = "selected";
 		}
-		if ($trow[$i] == 'ASIAKASLUOKKA') {
+		if (strtoupper($trow[$i]) == 'ASIAKASLUOKKA') {
 			$sel05 = "selected";
 		}
-		if ($trow[$i] == 'S') {
+		if (strtoupper($trow[$i]) == 'S') {
 			$sel06 = "selected";
 		}
-		if ($trow[$i] == 'KM') {
+		if (strtoupper($trow[$i]) == 'KM') {
 			$sel07 = "selected";
 		}
-		if ($trow[$i] == 'KT') {
+		if (strtoupper($trow[$i]) == 'KT') {
 			$sel08 = "selected";
 		}
-		if ($trow[$i] == 'pakkaus') {
+		if (strtoupper($trow[$i]) == 'pakkaus') {
 			$sel09 = "selected";
 		}
-		if ($trow[$i] == 'TV') {
+		if (strtoupper($trow[$i]) == 'TV') {
 			$sel10 = "selected";
 		}
-		if ($trow[$i] == 'TRY') {
+		if (strtoupper($trow[$i]) == 'TRY') {
 			$sel11 = "selected";
 		}
-		if ($trow[$i] == 'OSASTO') {
+		if (strtoupper($trow[$i]) == 'OSASTO') {
 			$sel12 = "selected";
 		}
-		if ($trow[$i] == 'KALETAPA') {
+		if (strtoupper($trow[$i]) == 'KALETAPA') {
 			$sel13 = "selected";
 		}
-		if ($trow[$i] == 'TUOTEULK') {
+		if (strtoupper($trow[$i]) == 'TUOTEULK') {
 			$sel14 = "selected";
 		}
-		if ($trow[$i] == 'ASIAKASOSASTO') {
+		if (strtoupper($trow[$i]) == 'ASIAKASOSASTO') {
 			$sel15 = "selected";
 		}
-		if ($trow[$i] == 'ASIAKASRYHMA') {
+		if (strtoupper($trow[$i]) == 'ASIAKASRYHMA') {
 			$sel16 = "selected";
 		}
-		if ($trow[$i] == 'ALV') {
+		if (strtoupper($trow[$i]) == 'ALV') {
 			$sel17 = "selected";
 		}
-		if ($trow[$i] == 'LAHETETYYPPI') {
+		if (strtoupper($trow[$i]) == 'LAHETETYYPPI') {
 			$sel18 = "selected";
 		}
-		if ($trow[$i] == 'TULLI') {
+		if (strtoupper($trow[$i]) == 'TULLI') {
 			$sel19 = "selected";
 		}
-		if ($trow[$i] == 'KASSA') {
+		if (strtoupper($trow[$i]) == 'KASSA') {
 			$sel20 = "selected";
 		}
-		if ($trow[$i] == 'HENKILO_OSASTO') {
+		if (strtoupper($trow[$i]) == 'HENKILO_OSASTO') {
 			$sel21 = "selected";
 		}
-		if ($trow[$i] == 'PIIRI') {
+		if (strtoupper($trow[$i]) == 'PIIRI') {
 			$sel22 = "selected";
 		}
-		if ($trow[$i] == 'TOIMEHTO') {
+		if (strtoupper($trow[$i]) == 'TOIMEHTO') {
 			$sel23 = "selected";
 		}
-		if ($trow[$i] == 'RAHTIKIRJA') {
+		if (strtoupper($trow[$i]) == 'RAHTIKIRJA') {
 			$sel24 = "selected";
 		}
-		if ($trow[$i] == 'MYSQLALIAS') {
+		if (strtoupper($trow[$i]) == 'MYSQLALIAS') {
 			$sel25 = "selected";
 		}
-		if ($trow[$i] == 'LASKUKUVAUS') {
+		if (strtoupper($trow[$i]) == 'LASKUKUVAUS') {
 			$sel26 = "selected";
 		}
-		if ($trow[$i] == 'KERAYSLISTA') {
+		if (strtoupper($trow[$i]) == 'KERAYSLISTA') {
 			$sel27 = "selected";
 		}
-		if ($trow[$i] == 'PAKKAUSKUVAUS') {
+		if (strtoupper($trow[$i]) == 'PAKKAUSKUVAUS') {
 			$sel28 = "selected";
 		}
-		if ($trow[$i] == 'ALVULK') {
+		if (strtoupper($trow[$i]) == 'ALVULK') {
 			$sel29 = "selected";
 		}
-		if ($trow[$i] == 'KUKAASEMA') {
+		if (strtoupper($trow[$i]) == 'KUKAASEMA') {
 			$sel30 = "selected";
 		}
-		if ($trow[$i] == 'SEURANTA') {
+		if (strtoupper($trow[$i]) == 'SEURANTA') {
 			$sel31 = "selected";
 		}
-		if ($trow[$i] == 'TRIVITYYPPI') {
+		if (strtoupper($trow[$i]) == 'TRIVITYYPPI') {
 			$sel32 = "selected";
 		}
-		if ($trow[$i] == 'OSASTO_SE') {
+		if (strtoupper($trow[$i]) == 'OSASTO_SE') {
 			$sel33 = "selected";
 		}
-		if ($trow[$i] == 'TRY_SE') {
+		if (strtoupper($trow[$i]) == 'TRY_SE') {
 			$sel34 = "selected";
 		}
-		if ($trow[$i] == 'TOIMITUSTAPA_SE') {
+		if (strtoupper($trow[$i]) == 'TOIMITUSTAPA_SE') {
 			$sel35 = "selected";
 		}
-		if ($trow[$i] == 'MEHTOTXT_SE') {
+		if (strtoupper($trow[$i]) == 'MEHTOTXT_SE') {
 			$sel36 = "selected";
 		}
-		if ($trow[$i] == 'MEHTOKATXT_SE') {
+		if (strtoupper($trow[$i]) == 'MEHTOKATXT_SE') {
 			$sel37 = "selected";
 		}
-		if ($trow[$i] == 'ASOSASTO_SE') {
+		if (strtoupper($trow[$i]) == 'ASOSASTO_SE') {
 			$sel38 = "selected";
 		}
-		if ($trow[$i] == 'ASRYHMA_SE') {
+		if (strtoupper($trow[$i]) == 'ASRYHMA_SE') {
 			$sel39 = "selected";
 		}
-		if ($trow[$i] == 'LAHETETYYPPI_SE') {
+		if (strtoupper($trow[$i]) == 'LAHETETYYPPI_SE') {
 			$sel40 = "selected";
 		}
-		if ($trow[$i] == 'TV_SE') {
+		if (strtoupper($trow[$i]) == 'TV_SE') {
 			$sel41 = "selected";
 		}
-		if ($trow[$i] == 'ASLUOKKA_SE') {
+		if (strtoupper($trow[$i]) == 'ASLUOKKA_SE') {
 			$sel42 = "selected";
 		}
-		if ($trow[$i] == 'KM_SE') {
+		if (strtoupper($trow[$i]) == 'KM_SE') {
 			$sel43 = "selected";
 		}
-		if ($trow[$i] == 'KT_SE') {
+		if (strtoupper($trow[$i]) == 'KT_SE') {
 			$sel44 = "selected";
 		}
-		if ($trow[$i] == 'RAHTIKIRJA_SE') {
+		if (strtoupper($trow[$i]) == 'RAHTIKIRJA_SE') {
 			$sel45 = "selected";
 		}
-		if ($trow[$i] == 'Y_SE') {
+		if (strtoupper($trow[$i]) == 'Y_SE') {
 			$sel46 = "selected";
 		}
-		if ($trow[$i] == 'S_SE') {
+		if (strtoupper($trow[$i]) == 'S_SE') {
 			$sel47 = "selected";
 		}
-		if ($trow[$i] == 'PAKKAUS_SE') {
+		if (strtoupper($trow[$i]) == 'PAKKAUS_SE') {
 			$sel48 = "selected";
 		}
-		if ($trow[$i] == 'SARJANUMERON_LI') {
+		if (strtoupper($trow[$i]) == 'SARJANUMERON_LI') {
 			$sel49 = "selected";
 		}
-		if ($trow[$i] == 'TYOM_TYOJONO') {
+		if (strtoupper($trow[$i]) == 'TYOM_TYOJONO') {
 			$sel50 = "selected";
 		}
-		if ($trow[$i] == 'TYOM_TYOSTATUS') {
+		if (strtoupper($trow[$i]) == 'TYOM_TYOSTATUS') {
 			$sel51 = "selected";
 		}
-		if ($trow[$i] == 'JAKELULISTA') {
+		if (strtoupper($trow[$i]) == 'JAKELULISTA') {
 			$sel52 = "selected";
 		}
-		if ($trow[$i] == 'VAKIOVIESTI') {
+		if (strtoupper($trow[$i]) == 'VAKIOVIESTI') {
 			$sel53 = "selected";
 		}
 		

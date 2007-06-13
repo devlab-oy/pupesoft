@@ -165,16 +165,17 @@ if ($asiakasid) {
 	        $toimtavat = pupe_toimitustapa_fetch_all();
 	
 		    foreach ($toimtavat as $toimt): ?>
-			<?php 
+			    <?php 
 			
-			// onko tämä valittu
-			$sel = '';
-			if ((isset($_POST['toimitustapa']) && $_POST['toimitustapa'] == $toimt['selite']) or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
-				$sel = "selected";
-				$toimitustapa_val = $toimt['selite'];
-			}
+    			// onko tämä valittu
+    			$sel = '';
+    			if ((isset($_POST['toimitustapa']) && $_POST['toimitustapa'] == $toimt['selite']) 
+    			or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
+    				$sel = "selected";
+    				$toimitustapa_val = $toimt['selite'];
+    			}
 			 
-			?>
+			    ?>
 			<option <?php echo $sel ?> value="<?php echo $toimt['selite'] ?>"><?php echo asana('TOIMITUSTAPA_', $toimt['selite']) ?></option>
 		<?php endforeach; ?>
 		</select>
@@ -184,21 +185,30 @@ if ($asiakasid) {
 
 <?php
 
-$merahti = true;
-$sel 	 = '';
-
-// haetaan toimitustavan tiedot tarkastuksia varten
-$apuqu2 = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa_val'";
-$meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
-$meapu2row = mysql_fetch_array($meapu2);
-
-if ($meapu2row["merahti"] == "") {
-	$merahti = false;
-	$sel = "selected";
+// jos toimitustapaa EI submitattu niin haetaan kannasta
+if (! isset($_POST['toimitustapa'])) {
+    $merahti = true;
+    $sel 	 = '';
+    
+    // haetaan toimitustavan tiedot tarkastuksia varten
+    $apuqu2 = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa_val'";
+    $meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
+    $meapu2row = mysql_fetch_array($meapu2);
+    
+    if ($meapu2row["merahti"] == "") {
+    	$merahti = false;
+    	$sel = "selected";
+    }
+} else {
+    
+    $sel = '';
+    if (isset($_POST['merahti']) && $_POST['merahti'] === '0') {
+        $sel = 'selected';
+    }
 }
 ?>
 
-<tr><th><?php echo t('Rahti') ?></th><td><select name='merahti'>
+<tr><th><?php echo t('Rahti') ?></th><td><select name='merahti' onChange='document.rahtikirja.submit();'>
 	<option value='1'>Lähettäjä</option>
 	<option <?php echo $sel ?> value='0'>Vastaanottaja</option>
 	</select></td>
@@ -206,7 +216,7 @@ if ($meapu2row["merahti"] == "") {
 <tr>
 	<th><?php echo t('Rahtisopimus') ?></th>
 	<?php
-	$toimitustapa = $toimtavat[0]['selite'];
+	$toimitustapa = $toimitustapa_val;
 	if (isset($_POST['toimitustapa'])) {
 		$toimitustapa = $_POST['toimitustapa'];
 	}

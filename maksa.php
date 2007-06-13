@@ -34,9 +34,9 @@
 	}
 
 	if ($tee == 'Z') {
-		// Tarkistetaan  laskujen oletus maksupvm, eli poistetaan vanhentuneet kassa-alet
+		// Tarkistetaan  laskujen oletusmaksupvm, eli poistetaan vanhentuneet kassa-alet
 		$query = "UPDATE lasku
-	                  SET olmapvm=if(kapvm<now(),if(kapvm='0000-00-00',erpcm,kapvm),erpcm)
+	                  SET olmapvm=if(kapvm='0000-00-00',if(kapvm<now(),erpcm, kapvm),erpcm)
 	                  WHERE yhtio='$kukarow[yhtio]' and tila in ('H', 'M')";
 		$result = mysql_query($query) or pupe_error($query);
 		$tee = "V";

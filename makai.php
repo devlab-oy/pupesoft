@@ -366,7 +366,7 @@
 				echo "<tr><th>".t("Tallenna aineisto").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='$kaunisnimi'>";
+				echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimi'>";
 				echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
 				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 				echo "</table>";	
@@ -493,6 +493,15 @@
 									$yrityytunnus =  $yhtiorow['ytunnus'];
 									
 									if ($kotimaa == "FI") {
+										//haetaan tämän tilin tiedot
+										if(isset($pankkitiedot[$yritystilino])) {
+											foreach($pankkitiedot[$yritystilino] as $key => $value) {
+												${$key} = $value;
+											}
+										}
+										else { 
+											die(t("Kadotin tämän pankin maksuaineistotiedot!"));						
+										}
 										require("inc/lum2otsik.inc");
 									}
 									else {

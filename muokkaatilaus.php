@@ -43,6 +43,9 @@
 	elseif ($toim == "PROJEKTI") {
 		$otsikko = t("tilauksia");
 	}
+	elseif ($toim == "VALMISTUSMYYNTI" or $toim == "VALMISTUSMYYNTISUPER") {
+		$otsikko = t("tilauksia ja valmistuksia");
+	}
 	else {
 		$otsikko = t("myyntitilausta");
 		$toim = "";
@@ -55,12 +58,6 @@
 		$query = "	SELECT *
 					FROM lasku use index (tila_index)
 					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'G'";
-		$eresult = mysql_query($query) or pupe_error($query);
-	}
-	elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
-		$query = "	SELECT *
-					FROM lasku use index (tila_index)
-					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'V'";
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
 	elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
@@ -101,6 +98,12 @@
 					GROUP BY lasku.tunnus";
 		$eresult = mysql_query($query) or pupe_error($query);
 	}
+	elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
+		$query = "	SELECT *
+					FROM lasku use index (tila_index)
+					WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'V'";
+		$eresult = mysql_query($query) or pupe_error($query);
+	}
 	elseif ($toim == "" or $toim == "SUPER") {
 		$query = "	SELECT *
 					FROM lasku use index (tila_index)
@@ -122,7 +125,7 @@
 	}
 
 
-	if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET") {
+	if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET" and $toim != "VALMISTUSMYYNTI" and $toim != "VALMISTUSMYYNTISUPER") {
 		if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
 			// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
 			if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO") {
@@ -333,7 +336,9 @@
 	elseif ($toim == 'VALMISTUS') {
 		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, lasku.luontiaika, laatija, viesti tilausviite,$toimaikalisa alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='V' and alatila in ('','A','B','J')
+					WHERE lasku.yhtio = '$kukarow[yhtio]' 
+					and tila='V' 
+					and alatila in ('','A','B','J')
 					$haku
 					order by lasku.luontiaika desc
 					LIMIT 50";
@@ -342,12 +347,68 @@
 	elseif ($toim == "VALMISTUSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, lasku.luontiaika, laatija, viesti tilausviite,$toimaikalisa alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='V' and alatila in ('','A','B','C','J')
+					WHERE lasku.yhtio = '$kukarow[yhtio]' 
+					and tila='V' 
+					and alatila in ('','A','B','C','J')
 					$haku
 					order by lasku.luontiaika desc
 					LIMIT 50";
 		$miinus = 3;
 	}
+	elseif($toim == "VALMISTUSMYYNTI") {
+		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra, tilaustyyppi
+					FROM lasku use index (tila_index)
+					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
+					$seurantalisa
+					WHERE lasku.yhtio = '$kukarow[yhtio]' 
+					and lasku.tila in('L','N','V') 
+					and lasku.alatila in ('A','')
+					$haku
+					HAVING extra = '' or extra is null
+					order by lasku.luontiaika desc
+					LIMIT 50";
+		
+		// haetaan kaikkien avoimien tilausten arvo
+		$sumquery = "	SELECT 
+						round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, 
+						round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, 
+						count(distinct lasku.tunnus) kpl
+						FROM lasku use index (tila_index)
+						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus) and tilausrivi.tyyppi IN ('L','W')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in('L','N','V') 
+						and lasku.alatila in ('A','')
+						and tilaustyyppi != 'W'";
+		$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+		$sumrow = mysql_fetch_array($sumresult);			
+			
+		$miinus = 4;
+	}
+	elseif($toim == "VALMISTUSMYYNTISUPER") {
+		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila, tilaustyyppi
+					FROM lasku use index (tila_index)
+					WHERE lasku.yhtio = '$kukarow[yhtio]' 
+					and tila in ('L','N','V') 
+					and alatila not in ('X','V')
+					$haku
+					order by lasku.luontiaika desc
+					LIMIT 50";
+
+		// haetaan kaikkien avoimien tilausten arvo
+		$sumquery = "	SELECT 
+						round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, 
+						round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, 
+						count(distinct lasku.tunnus) kpl
+						FROM lasku use index (tila_index)
+						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus) and tilausrivi.tyyppi IN ('L','W')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and tila in ('L','N','V') 
+						and alatila not in ('X','V')
+						and tilaustyyppi != 'W'";
+		$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+		$sumrow = mysql_fetch_array($sumresult);
+
+		$miinus = 3;
+	}		
 	elseif ($toim == "TYOMAARAYS") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila
 					FROM lasku use index (tila_index)
@@ -596,20 +657,20 @@
 
 				for ($i=0; $i<mysql_num_fields($result)-$miinus; $i++) {
 					if (mysql_field_name($result,$i) == 'luontiaika' or mysql_field_name($result,$i) == 'toimaika') {
-						echo "<td>".tv1dateconv($row[$i],"pitka")."</td>";
+						echo "<td valign='top'>".tv1dateconv($row[$i],"pitka")."</td>";
 					}
 					else {
-						echo "<td>$row[$i]</td>";
+						echo "<td valign='top'>$row[$i]</td>";
 					}
 					
 				}
 
 				if ($row["tila"] == "N" and $row["alatila"] == "U") {
 					if ($jtok == 0) {
-						echo "<td><font color='#00FF00'>Voidaan toimittaa</font></td>";
+						echo "<td valign='top'><font color='#00FF00'>Voidaan toimittaa</font></td>";
 					}
 					else {
-						echo "<td><font color='#FF0000'>Ei voida toimittaa</font></td>";
+						echo "<td valign='top'><font color='#FF0000'>Ei voida toimittaa</font></td>";
 					}
 				}
 				else {
@@ -619,19 +680,28 @@
 
 					//tehd‰‰n selv‰kielinen tila/alatila
 					require "inc/laskutyyppi.inc";
+					
+					$tarkenne = " ";
 
-					echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
+					if ($row["tila"] == "V" and $row["tilaustyyppi"] == "V") {
+						$tarkenne = " (".t("Asiakkaalle").") ";
+					}
+					elseif ($row["tila"] == "V" and  $row["tilaustyyppi"] == "W") {
+						$tarkenne = " (".t("Varastoon").") ";
+					}
+
+					echo "<td valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")."</td>";
 				}
 
 				// tehd‰‰n aktivoi nappi.. kaikki mit‰ n‰ytet‰‰n saa aktvoida, joten tarkkana queryn kanssa.
-				if ($toim == "" or $toim == "SUPER" or $toim == "EXTRANET" or $toim == "ENNAKKO" or $toim == "JTTOIMITA" or $toim == "LASKUTUSKIELTO") {
+				if ($toim == "" or $toim == "SUPER" or $toim == "EXTRANET" or $toim == "ENNAKKO" or $toim == "JTTOIMITA" or $toim == "LASKUTUSKIELTO"or (($toim == "VALMISTUSMYYNTI" or $toim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
 					$aputoim1 = "RIVISYOTTO";
 					$aputoim2 = "PIKATILAUS";
 
 					$lisa1 = t("Rivisyˆttˆˆn");
 					$lisa2 = t("Pikatilaukseen");
 				}
-				elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
+				elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER" or (($toim == "VALMISTUSMYYNTI" or $toim == "VALMISTUSMYYNTISUPER") and $row["tila"] == "V")) {
 					$aputoim1 = "VALMISTAASIAKKAALLE";
 					$lisa1 = t("Muokkaa");
 
@@ -711,7 +781,7 @@
 						<input type='hidden' name='tee' value='AKTIVOI'>
 						<input type='hidden' name='tilausnumero' value='$row[tilaus]'>";
 
-				if ($toim == "" or $toim == "SUPER" or $toim == "EXTRANET" or $toim == "ENNAKKO" or $toim == "JTTOIMITA" or $toim == "LASKUTUSKIELTO") {
+				if ($toim == "" or $toim == "SUPER" or $toim == "EXTRANET" or $toim == "ENNAKKO" or $toim == "JTTOIMITA" or $toim == "LASKUTUSKIELTO"or (($toim == "VALMISTUSMYYNTI" or $toim == "VALMISTUSMYYNTISUPER") and $row["tila"] != "V")) {
 					echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
 				}
 

@@ -833,7 +833,7 @@
 						loppu($firstpage, 1);
 
 						//tulostetaan sivu
-						if ($lahetekpl > 0) {
+						if ($lahetekpl > 1) {
 							$komento .= " -#$lahetekpl ";
 						}
 												
@@ -851,7 +851,7 @@
 					if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
 						$tunnus = $laskurow["tunnus"];
 						
-						if ($oslappkpl > 0) {
+						if ($oslappkpl > 1) {
 							$oslapp .= " -#$oslappkpl ";
 						}
 												

@@ -7,7 +7,7 @@
 
 	if ($tee != '') {
 
-		$rivi = "Tullinimike\tMaa\tTuotenumero\tNimitys\r\n";
+		$rivi = "Tullinimike\tTullinimitys\tMaa\tTuotenumero\tNimitys\r\n";
 		$virtu= "";
 
 		// tehd‰‰n tullin aineisto
@@ -23,15 +23,17 @@
 		while ($row  = mysql_fetch_array($result)) {
 
 			// katotaanonko oikea tullinimike
-			$query = "select cn from tullinimike where cn='$row[tullinimike1]' and kieli = '$yhtiorow[kieli]'";
+			$query = "select cn, dm from tullinimike where cn='$row[tullinimike1]' and kieli = '$yhtiorow[kieli]'";
 			$tulre = mysql_query($query) or pupe_error($query);
-
+			
+			$tullinimikeres = mysql_fetch_array($tulre);
+			
 			if (mysql_num_rows($tulre)==0) {
 				$virtu .= "'$row[tullinimike1]',";
 			}
 
 			// kirjoitetaan rivi
-			$rivi .= "$row[tullinimike1]\t$row[alkuperamaa]\t$row[tuoteno]\t".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\r\n";
+			$rivi .= "{$row['tullinimike1']}\t{$tullinimikeres['dm']}\t{$row['alkuperamaa']}\t$row[tuoteno]\t".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\r\n";
 		}
 
 		if ($virtu == "") {
@@ -42,18 +44,18 @@
 
 			$bound     = uniqid(time()."_") ;
 
-			$headeri   = "From: <$yhtiorow[postittaja_email]>\r\n";
-			$headeri  .= "MIME-Version: 1.0\r\n" ;
-			$headeri  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
+			$headeri   = "From: <$yhtiorow[postittaja_email]>\n";
+			$headeri  .= "MIME-Version: 1.0\n" ;
+			$headeri  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-			$content   = "--$bound\r\n";
-			$content  .= "Content-Type: application/pdf; name=\"$failinimi\"\r\n" ;
-			$content  .= "Content-Transfer-Encoding: base64\r\n" ;
-			$content  .= "Content-Disposition: inline; filename=\"$failinimi\"\r\n\r\n";
+			$content   = "--$bound\n";
+			$content  .= "Content-Type: text/plain; name=\"$failinimi\"\n" ;
+			$content  .= "Content-Transfer-Encoding: base64\n" ;
+			$content  .= "Content-Disposition: inline; filename=\"$failinimi\"\n\n";
 
 			$content .= chunk_split(base64_encode($rivi));
-			$content .= "\r\n" ;
-			$content .= "--$bound\r\n";
+			$content .= "\n" ;
+			$content .= "--$bound\n";
 
 			$boob     = mail($kukarow[eposti], $otsikko, $content, $headeri, "-f $yhtiorow[postittaja_email]");
 

@@ -20,7 +20,8 @@ if (!function_exists('tulosta_tarjous')) {
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_kaupallinen ON laskun_lisatiedot.yhtio=yhteyshenkilo_kaupallinen.yhtio and laskun_lisatiedot.yhteyshenkilo_kaupallinen=yhteyshenkilo_kaupallinen.tunnus
 					LEFT JOIN kuka AS laatija ON laatija.yhtio='$kukarow[yhtio]' and lasku.laatija=laatija.kuka
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tunnus  = '$otunnus'";
+					and lasku.tunnus  = '$otunnus'
+					GROUP BY lasku.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 

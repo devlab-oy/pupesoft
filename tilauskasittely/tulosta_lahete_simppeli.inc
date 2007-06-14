@@ -50,7 +50,8 @@ if (!function_exists('tulosta_lahete')) {
 					LEFT JOIN maat lasku_maa ON lasku_maa.koodi=lasku.maa 
 					LEFT JOIN maat toim_maa ON toim_maa.koodi=lasku.toim_maa
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tunnus  = '$otunnus'";
+					and lasku.tunnus  = '$otunnus'
+					GROUP BY lasku.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 				

@@ -877,7 +877,7 @@
 					}
 				}
 				else {
-					require_once('../pdflib/phppdflib.class.php');
+					require_once('pdflib/phppdflib.class.php');
 
 					require('tulosta_sadvientiilmo.inc');
 
@@ -920,7 +920,7 @@
 			if ($toim == "VIENTIERITTELY") {
 				$uusiotunnus = $laskurow["tunnus"];
 
-				require_once('../pdflib/phppdflib.class.php');
+				require_once('pdflib/phppdflib.class.php');
 				require('tulosta_vientierittely.inc');
 
 				//keksit‰‰n uudelle failille joku varmasti uniikki nimi:

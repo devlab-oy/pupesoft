@@ -14,7 +14,7 @@ if ($tee == 'eposti') {
 	
 	$ytunnus = $toimas;
 
-	require('../pdflib/phppdflib.class.php');
+	require('pdflib/phppdflib.class.php');
 
 	// defaultteja
 	$lask = 1;

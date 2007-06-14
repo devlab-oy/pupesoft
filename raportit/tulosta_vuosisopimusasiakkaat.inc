@@ -1,6 +1,6 @@
 <?php
 
-require("../pdflib/phppdflib.class.php");
+require("pdflib/phppdflib.class.php");
 
 //PDF parametrit
 $pdf = new pdffile;

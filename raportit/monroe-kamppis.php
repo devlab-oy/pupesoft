@@ -1,6 +1,6 @@
 <?php
 
-require("../pdflib/phppdflib.class.php");
+require("pdflib/phppdflib.class.php");
 require("../inc/connect.inc");
 
 echo "Haetaan asiakkaita: ";

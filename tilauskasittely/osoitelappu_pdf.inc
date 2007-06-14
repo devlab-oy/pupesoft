@@ -5,13 +5,6 @@
 // $kukarow[yhtio] jostain saadaan yhtio
 // $yhtiorow array josta saada lähettäjän tiedot
 
-//jos tullaan roottidirikasta tehdään näin
-if ($juuresta == 'joo') {
-	$reqpolku = '';
-}
-else {
-	$reqpolku = '../';
-}
 
 //Tulostetaan standardi kolliosoitelappu
 $query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
@@ -75,11 +68,11 @@ $sscc = $sscc.$loppu;
 //PDF:n luonti ja defaultit
 define (__TRACE_ENABLED__, false);
 define (__DEBUG_ENABLED__, false);
-require_once($reqpolku."barcode/barcode.php");
-require_once($reqpolku."barcode/debug.php");
-require_once($reqpolku."barcode/c39object.php");
-require_once($reqpolku."barcode/c128aobject.php");
-require_once($reqpolku."pdflib/phppdflib.class.php");
+require_once("barcode/barcode.php");
+require_once("barcode/debug.php");
+require_once("barcode/c39object.php");
+require_once("barcode/c128aobject.php");
+require_once("pdflib/phppdflib.class.php");
 
 //PDF parametrit
 $pdf = new pdffile;
@@ -311,7 +304,7 @@ fclose($fh);
 //testaukseen voi myös laittaa sähköpostiin
 //$liite = $pdffilenimi;
 //$aihe = "Kolliosoitelappu";
-//require($reqpolku."inc/sahkoposti.inc");
+//require("inc/sahkoposti.inc");
 
 //itse print komento...
 // itse print komento...
@@ -320,7 +313,7 @@ if ($oslapp == 'email') {
 	$liite = $pdffilenimi;
 	$kutsu = "Osoitelappu";
 
-	require($reqpolku."inc/sahkoposti.inc");
+	require("inc/sahkoposti.inc");
 }
 elseif ($tee == 'NAYTATILAUS') {
 	//Työnnetään tuo pdf vaan putkeen!

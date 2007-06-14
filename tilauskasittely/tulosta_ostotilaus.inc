@@ -37,7 +37,7 @@
 	else {
 		
 		if($yhtiorow["ostotilaustyyppi"]==1) {
-			require_once('../pdflib/pupepdf.class.php');
+			require_once('pdflib/pupepdf.class.php');
 
 			if (!function_exists('tulosta_ostotilaus')) {
 				function tulosta_ostotilaus ($otunnus, $komento, $kieli = "", $tee) {
@@ -438,7 +438,7 @@
 			tulosta_ostotilaus($otunnus, $komento["Ostotilaus"], $kieli = "", $tee);
 		}
 		else {
-			require_once('../pdflib/phppdflib.class.php');
+			require_once('pdflib/phppdflib.class.php');
 
 			$pdf = new pdffile;
 			$pdf->set_default('margin', 0);

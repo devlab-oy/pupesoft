@@ -1,6 +1,6 @@
 <?php
 
-require_once('../pdflib/phppdflib.class.php');
+require_once('pdflib/phppdflib.class.php');
 
 class PDF extends pdffile {
 

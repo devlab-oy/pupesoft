@@ -1,6 +1,6 @@
 <?php
 
-require_once('../pdflib/pupepdf.class.php');
+require_once('pdflib/pupepdf.class.php');
 
 if (!function_exists('tulosta_tilausvahvistus')) {
 	function tulosta_tilausvahvistus ($otunnus, $komento, $kieli = "", $tee) {

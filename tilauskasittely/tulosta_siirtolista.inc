@@ -4,16 +4,9 @@
 define (__TRACE_ENABLED__, false);
 define (__DEBUG_ENABLED__, false);
 
-if ($kukarow["extranet"] == '') {
-	require_once("../barcode/barcode.php");
-	require_once("../barcode/c39object.php");
-	require_once("../pdflib/phppdflib.class.php");
-}
-else {
-	require_once("barcode/barcode.php");
-	require_once("barcode/c39object.php");
-	require_once("pdflib/phppdflib.class.php");
-}
+require_once("barcode/barcode.php");
+require_once("barcode/c39object.php");
+require_once("pdflib/phppdflib.class.php");
 
 $p["height"] = 10;
 $p["font"] = "Times-Roman";

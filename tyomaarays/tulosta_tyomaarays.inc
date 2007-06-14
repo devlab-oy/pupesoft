@@ -1,8 +1,8 @@
 <?php
 
-	require_once("../barcode/barcode.php");
-	require_once("../barcode/c39object.php");
-	require_once("../pdflib/phppdflib.class.php");
+	require_once("barcode/barcode.php");
+	require_once("barcode/c39object.php");
+	require_once("pdflib/phppdflib.class.php");
 	
 	$rectparam["width"] = 0.3;
 	

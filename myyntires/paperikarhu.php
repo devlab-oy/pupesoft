@@ -228,7 +228,7 @@
 
 	require('../inc/parametrit.inc');
 
-	require('../pdflib/phppdflib.class.php');
+	require('pdflib/phppdflib.class.php');
 
 	//echo "<font class='message'>Karhukirje tulostuu...</font>";
 	flush();

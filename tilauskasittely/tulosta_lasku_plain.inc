@@ -1,6 +1,6 @@
 <?php
 
-require_once('../pdflib/phppdflib.class.php');
+require_once('pdflib/phppdflib.class.php');
 
 $rectparam["width"] = 0.3;
 
@@ -20,7 +20,6 @@ $italic["font"] = "Times-Italic";
 $kala = 540;
 $lask = 1;
 $sivu = 1;
-
 
 // laskun alku ja loppu functiot...
 if (!function_exists('alku')) {

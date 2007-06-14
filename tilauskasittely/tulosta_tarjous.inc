@@ -35,7 +35,7 @@
 	$rectparam["width"]			= 0.2;
 
 	//Haetaan pdflibrary
-	require_once('../pdflib/phppdflib.class.php');
+	require_once('pdflib/phppdflib.class.php');
 
 	//muutamat funktiot...
 	if (!function_exists('alku')) {

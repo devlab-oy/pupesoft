@@ -3,7 +3,7 @@
 	//Ohjelma vatii muuttujan $otunnus joka viittaa ostolaskuun johon rivit on kohdistettu.
 	// sekä $laskurow arrayn jossa on select tähti from lasku jossa tunnus on $otunnus
 
-	require_once('../pdflib/phppdflib.class.php');
+	require_once('pdflib/phppdflib.class.php');
 
 	$pdf = new pdffile;
 	$pdf->set_default('margin', 0);

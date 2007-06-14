@@ -1299,12 +1299,11 @@
 			}
 
 			// Jos kyseessä ei ole valmistus tulostetaan virallinen lähete
-			$sel 		= "";
-			$oslappkpl 	= "";
-			$lahetekpl  = "";
+			$sel 		= "SELECTED";
+			$oslappkpl 	= 0;
+			$lahetekpl  = 0;
 			
 			if ($toim != 'VALMISTUS') {
-				$sel 		= 'SELECTED';
 				$oslappkpl 	= $yhtiorow["oletus_oslappkpl"];
 				$lahetekpl 	= $yhtiorow["oletus_lahetekpl"];
 			}

@@ -94,7 +94,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 		if ($session != "") {
 			$query = "	UPDATE kuka
 						SET session = ''
-						WHERE session = '$session'";
+						WHERE session = '" . mysql_real_escape_string($session) . "'";
 			$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui sis‰‰nkirjautumisessa");
 		}
 

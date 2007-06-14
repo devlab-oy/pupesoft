@@ -143,7 +143,7 @@ if ($session != '') {
 
 	$query = "	SELECT *
 				FROM kuka
-				WHERE session='$session'";
+				WHERE session='" . mysql_real_escape_string($session) . "'";
 	$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
 	
 	if (mysql_num_rows($result) != 1 or strlen($session) != 25) {

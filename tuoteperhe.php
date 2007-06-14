@@ -46,7 +46,19 @@
 						<input type='hidden' name='tee' value='KOPIOI'>
 						<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
 				
-				echo "<tr><th>".t("Syötä isä jolle perhe kopioidaan").": </th><td><input type='text' name='kop_isatuo' value='$kop_isatuo' size='20'></td>";
+				echo "<tr><th>";
+				
+				if ($toim == "PERHE") {
+					echo t("Syötä isä jolle perhe kopioidaan");
+				}
+				elseif ($toim == "LISAVARUSTE") {
+					echo t("Syötä tuote jolle lisävarusteet kopioidaan");
+				}
+				else {
+					echo t("Syötä valmiste jolle resepti kopioidaan");
+				}
+				
+				echo ": </th><td><input type='text' name='kop_isatuo' value='$kop_isatuo' size='20'></td>";
 				
 				foreach($kop_tuoteno as $tuoteno) {					
 										
@@ -91,13 +103,38 @@
 					}
 				}
 				
-				echo "<br><br><font class='message'>".t("Tuoteperhe kopioitu")."!</font><br>";
+				echo "<br><br><font class='message'>";
+				
+				if ($toim == "PERHE") {
+					echo t("Tuoteperhe kopioitu");
+				}
+				elseif ($toim == "LISAVARUSTE") {
+					echo t("Lisävarusteet kopioitu");
+				}
+				else {
+					echo t("Resepti kopioitu");
+				}
+				
+				echo "!</font><br>";
+				
 				$hakutuoteno = $kop_isatuo;
 				$isatuoteno  = $kop_isatuo;
 				$tee 		 = "";
 			}
 			else {
-				echo "<br><br><font class='error'>".t("Tuotetta ei löydy järjestelmästä tai tuotteella on jo perhe")."!</font><br>";
+				echo "<br><br><font class='error'>";
+				
+				if ($toim == "PERHE") {
+					echo t("Tuotetta ei löydy järjestelmästä tai tuotteella on jo perhe");
+				}
+				elseif ($toim == "LISAVARUSTE") {
+					echo t("Tuotetta ei löydy järjestelmästä tai tuotteella on jo lisävarusteita");
+				}
+				else {
+					echo t("Tuotetta ei löydy järjestelmästä tai tuotteella on jo resepti");
+				}
+				
+				echo "!</font><br>";
 				$tee = "";
 			}
 		}

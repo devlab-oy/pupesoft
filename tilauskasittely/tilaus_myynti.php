@@ -746,8 +746,35 @@ if ($tee == "VALMIS") {
 
 	///* Reload ja back-nappulatsekki *///
 	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
-		echo "<font class='error'> ".t("Taisit painaa takaisin tai p‰ivit‰ nappia. N‰in ei saa tehd‰")."! </font>";
+		echo "<font class='error'> ".t("Taisit painaa takaisin tai p‰ivit‰ nappia. N‰in ei saa tehd‰")."! </font><br>";
 		exit;
+	}
+	
+	// Tsekataan jos ollaan tehty asiakkaallevalmistus jossa ei ole yht‰‰n valmistettavaa rivi‰
+	$msiirto = "";
+	
+	if ($toim == "VALMISTAASIAKKAALLE") {
+		$query = "	select yhtio
+					from tilausrivi
+					where yhtio = '$kukarow[yhtio]'
+					and otunnus = '$kukarow[kesken]'
+					and tyyppi in ('W','M','V')
+					and varattu  > 0";
+		$sres  = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($sres) == 0) {
+			echo "<font class='message'> ".t("Ei valmistettavaa. Valmistus siirrettiin myyntipuolelle")."! </font><br>";
+			
+			$query  = "	update lasku set
+						tila 	= 'N',
+						alatila	= ''
+						where yhtio = '$kukarow[yhtio]'
+						and tunnus = '$kukarow[kesken]'
+						and tila = 'V'";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			$msiirto = "MYYNTI";
+		}
 	}
 
 	// Tulostetaan tarjous
@@ -792,7 +819,7 @@ if ($tee == "VALMIS") {
 		require("../tyomaarays/tyomaarays.inc");
 	}
 	// Siirtolista, myyntitili, valmistus valmis
-	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI")) {
+	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") and $msiirto == "") {
 		require ("tilaus-valmis-siirtolista.inc");
 	}
 	// Projekti, t‰ll‰ ei ole mit‰‰n rivej‰ joten nollataan vaan muuttujat
@@ -2634,7 +2661,8 @@ if ($tee == '') {
 								from tilausrivi
 								where yhtio = '$kukarow[yhtio]'
 								$tunnuslisa
-								$pklisa";
+								$pklisa
+								and tyyppi != 'D'";
 					$pkres = mysql_query($query) or pupe_error($query);
 					$pkrow = mysql_fetch_array($pkres);
 

@@ -113,7 +113,7 @@
 						//	Laitetaan perustiedot oikealle		
 						$h=250;
 						$s=$pdf->teeSarakkeet(array(100,35));
-						foreach(array("tilaus", "päiväys", "toimitustapa", "toimitusehto") as $key) {
+						foreach(array("tilaus", "päiväys", "huolitsija", "toimitusehto") as $key) {
 							if($key == "päiväys") {
 								$laskurow[$key] = strftime("%x",strtotime($laskurow[$key]));
 							}

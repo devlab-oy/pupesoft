@@ -22,11 +22,20 @@
 	}
 
 	// katotaan ihan aluksi, onko tämä jo kerätty...
-	$query = "	select *
+	if ($yhtiorow["kerataanko_saldottomat"] != "") {
+		$klisa = "";
+	}
+	else {
+		$klisa = " and tuote.ei_saldoa = '' ";
+	}
+	
+	$query = "	select tilausrivi.*
 				from tilausrivi use index (yhtio_otunnus)
-				where yhtio='$kukarow[yhtio]'
-				and otunnus='$laskurow[tunnus]'
-				and keratty!=''";
+				join tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+				where tilausrivi.yhtio='$kukarow[yhtio]'
+				and tilausrivi.otunnus='$laskurow[tunnus]'
+				and tilausrivi.keratty!=''
+				$klisa";
 	$keres = mysql_query($query) or pupe_error($query);
 
 	// jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan)...
@@ -41,7 +50,13 @@
 					and keratty=''";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "<font class='message'>".t("Siirtolistalla oli jo kerättyjä rivejä, joten lähetettä ei tulosteta").".<br>".t("Jos haluat lähetteen tulosta lähetteen kopio, siirtolistanumero on")." $laskurow[tunnus].</font><br><br>";
+		
+		if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+			echo "<font class='message'>".t("Valmistuksella oli jo kerättyjä rivejä, joten lähetettä ei tulosteta").".<br>".t("Jos haluat lähetteen tulosta lähetteen kopio, valmistusnumero on")." $laskurow[tunnus].</font><br><br>";
+		}
+		else {
+			echo "<font class='message'>".t("Siirtolistalla oli jo kerättyjä rivejä, joten lähetettä ei tulosteta").".<br>".t("Jos haluat lähetteen tulosta lähetteen kopio, siirtolistanumero on")." $laskurow[tunnus].</font><br><br>";
+		}
 
 		if ($laskurow["eilahetetta"] != '') {
 			$query  = "	update lasku

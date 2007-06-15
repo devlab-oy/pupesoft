@@ -22,20 +22,13 @@
 	}
 
 	// katotaan ihan aluksi, onko tämä jo kerätty...
-	if ($yhtiorow["kerataanko_saldottomat"] != "") {
-		$klisa = "";
-	}
-	else {
-		$klisa = " and tuote.ei_saldoa = '' ";
-	}
-	
 	$query = "	select tilausrivi.*
 				from tilausrivi use index (yhtio_otunnus)
 				join tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 				where tilausrivi.yhtio='$kukarow[yhtio]'
 				and tilausrivi.otunnus='$laskurow[tunnus]'
 				and tilausrivi.keratty!=''
-				$klisa";
+				$lisasalker";
 	$keres = mysql_query($query) or pupe_error($query);
 
 	// jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan)...

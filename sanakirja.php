@@ -169,7 +169,7 @@ if (sizeof($kieli) > 0) {
 			echo "</tr>";
 		}
 
-		echo "<tr><th>Yhteens‰ k‰‰nt‰m‰tt‰ $laskkaannos</th></tr>";
+		echo "<tr><th colspan='2'>".t("Yhteens‰")." $laskkaannos ".t("rivi‰")."</th></tr>";
 
 		echo "</table>";
 		echo "<input type='hidden' name='maxtunnus' value='$maxtunnus'>";

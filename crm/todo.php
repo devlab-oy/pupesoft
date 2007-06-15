@@ -303,7 +303,7 @@ if ($tee == "") {
 			$numero ++;
 
 			echo "<tr class='aktiivi'>";
-			echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa'>$numero</a></th>";
+			echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>$numero</a></th>";
 			echo "<td width='550'>$rivi[kuvaus]</td>";
 			echo "<td>$rivi[pyytaja]</td>";
 			echo "<td>$rivi[projekti]</td>";

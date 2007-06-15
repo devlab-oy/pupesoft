@@ -144,13 +144,22 @@ else {
 			$itsetulostus = "X";
 		}
 	}
+	
+	if ($yhtiorow["kerataanko_saldottomat"] == '') {
+		$lisasalker = " and tuote.ei_saldoa = '' ";
+	}
+	else {
+		$lisasalker = " ";
+	}
 
 	// Katotaan, onko tämä jo kerätty...
-	$query = "	select * 
-				from tilausrivi 
-				where yhtio  = '$kukarow[yhtio]' 
-				and otunnus	 = '$laskurow[tunnus]' 
-				and keratty	!= ''";
+	$query = "	select tilausrivi.*
+				from tilausrivi use index (yhtio_otunnus)
+				join tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+				where tilausrivi.yhtio='$kukarow[yhtio]'
+				and tilausrivi.otunnus='$laskurow[tunnus]'
+				and tilausrivi.keratty!=''
+				$lisasalker";
 	$keres = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($keres) > 0 or ($laskurow["tila"] == 'L' and ($laskurow["alatila"] == 'C' or $laskurow["alatila"] == 'B' or $laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E'))) {
@@ -158,7 +167,12 @@ else {
 		//jos otsikko sanoo, että tilaus on kerätty mutta rivit kuitenkaan ei ole kerätty niin merkataan ne kumminkin kerätyiksi
 		//tai jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan) niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
 		
-		$query = "UPDATE tilausrivi SET keratty='$kukarow[kuka]', kerattyaika=now() where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and keratty='' and var != 'J'";
+		$query = "	UPDATE tilausrivi 
+					SET keratty='$kukarow[kuka]', kerattyaika=now() 
+					WHERE yhtio='$kukarow[yhtio]' 
+					and otunnus='$laskurow[tunnus]' 
+					and keratty='' 
+					and var != 'J'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Laitetaan rivit toimitetuiksi jos otsikko sanoo toimitettu

@@ -2,35 +2,34 @@
 
 require ("inc/parametrit.inc");
 
-echo "<font class='head'>".t("Sanakirja")."</font><hr>";
+$sanakirja_kielet = array("en", "se", "de", "dk");
 
+echo "<font class='head'>".t("Sanakirja")."</font><hr>";
 
 echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";
 echo "<table><tr>";
 echo "<th>".t("Valitse k‰‰nnett‰v‰t kielet")."</th>";
 echo "<td><table>";
 
-$query  = "show columns from sanakirja";
-$fields =  mysql_query($query);
-
 $r = 0;
 
-while ($apurow = mysql_fetch_array($fields)) {
+// k‰yd‰‰n l‰pi mahdolliset kielet
+foreach ($sanakirja_kielet as $sanakirja_kieli) {
 
-	if ($apurow[0] != "tunnus" and $apurow[0] != "fi") {
-		$query = "select distinct nimi from maat where koodi='$apurow[0]'";
-		$maare = mysql_query($query);
-		$maaro = mysql_fetch_array($maare);
-		$maa   = strtolower($maaro["nimi"]);
-		if ($maa=="") $maa = $apurow[0];
+	$query = "select distinct nimi from maat where koodi='$sanakirja_kieli'";
+	$maare = mysql_query($query);
+	$maaro = mysql_fetch_array($maare);
+	$maa   = strtolower($maaro["nimi"]);
 
-		$sels = '';
-		if ($kieli[$r] == $apurow[0]) {
-			$sels = "CHECKED";
-		}
+	if ($maa == "") $maa = $sanakirja_kieli;
 
-		echo "<tr><td>".t("$maa")."</td><td><input type='checkbox' name='kieli[$r]' value='$apurow[0]' $sels></td></tr>";
+	$sels = '';
+
+	if ($kieli[$r] == $sanakirja_kieli) {
+		$sels = "CHECKED";
 	}
+
+	echo "<tr><td>".t("$maa")."</td><td><input type='checkbox' name='kieli[$r]' value='$sanakirja_kieli' $sels></td></tr>";
 	$r++;
 }
 
@@ -59,24 +58,23 @@ echo "<td><select name='etsi_kieli'>";
 
 echo "<option value=''>".t("Ei etsit‰")."</option>";
 
-$query  = "show columns from sanakirja";
-$fields =  mysql_query($query);
+$sel = "";
+if ($etsi_kieli == "fi") $sel = "selected";
 
-while ($apurow = mysql_fetch_array($fields)) {
+echo "<option value='fi' $sel>".t("fi - suomi")."</option>";
 
-	if ($apurow[0] != "tunnus") {
-		$query = "select distinct nimi from maat where koodi='$apurow[0]'";
-		$maare = mysql_query($query);
-		$maaro = mysql_fetch_array($maare);
-		$maa   = strtolower($maaro["nimi"]);
-		if ($maa=="") $maa = $apurow[0];
+foreach ($sanakirja_kielet as $sanakirja_kieli) {
+	$query = "select distinct nimi from maat where koodi='$sanakirja_kieli'";
+	$maare = mysql_query($query);
+	$maaro = mysql_fetch_array($maare);
+	$maa   = strtolower($maaro["nimi"]);
+	if ($maa=="") $maa = $sanakirja_kieli;
 
-		$sel = '';
+	$sel = '';
 
-		if ($apurow[0] == $etsi_kieli) $sel = "SELECTED";
+	if ($sanakirja_kieli == $etsi_kieli) $sel = "SELECTED";
 
-		echo "<option value='$apurow[0]' $sel>".t("$maa")."</option>";
-	}
+	echo "<option value='$sanakirja_kieli' $sel>".t("$maa")."</option>";
 }
 
 echo "</select></td>";
@@ -90,21 +88,14 @@ echo "</table><br>";
 
 if ($maxtunnus > 0) {
 
-	$query  = "show columns from sanakirja";
-	$fields =  mysql_query($query);
-
 	// k‰yd‰‰n l‰pi mahdolliset kielet
-	while ($apurow = mysql_fetch_array($fields)) {
-		// kieli ei saa olla tunnus tai fi
-		if ($apurow[0] != "tunnus" and $apurow[0] != "fi") {
-			// loopataan kunnes p‰‰st‰‰n maxtunnukseen
-			for ($i=0; $i<=$maxtunnus; $i++) {
-				// eli etsit‰‰n kielen nimisesta arraysta indexill‰ $i
-				if (${$apurow[0]}[$i] != "") {
-					$value = addslashes(trim(${$apurow[0]}[$i])); // spacella pystyy tyhjent‰m‰‰n kent‰n, mutta ei tallenneta sit‰
-					$query = "update sanakirja set $apurow[0]='$value', muuttaja='$kukarow[kuka]', muutospvm=now() where tunnus='$i'";
-					$result = mysql_query($query) or pupe_error($query);
-				}
+	foreach ($sanakirja_kielet as $sanakirja_kieli) {
+		for ($i=0; $i<=$maxtunnus; $i++) {
+			// eli etsit‰‰n kielen nimisesta arraysta indexill‰ $i
+			if (${$sanakirja_kieli}[$i] != "") {
+				$value = addslashes(trim(${$sanakirja_kieli}[$i])); // spacella pystyy tyhjent‰m‰‰n kent‰n, mutta ei tallenneta sit‰
+				$query = "update sanakirja set $sanakirja_kieli='$value', muuttaja='$kukarow[kuka]', muutospvm=now() where tunnus='$i'";
+				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
 	}
@@ -160,9 +151,9 @@ if (sizeof($kieli) > 0) {
 		echo "<tr>";
 		for ($i=1; $i<mysql_num_fields($result); $i++) echo "<th>".mysql_field_name($result, $i)."</th>";
 		echo "</tr>";
-		
+
 		$laskkaannos = 0;
-		
+
 		while ($row = mysql_fetch_array($result)) {
 			echo "<tr class='aktiivi'>";
 			echo "<td>$row[fi]</td>";
@@ -172,12 +163,12 @@ if (sizeof($kieli) > 0) {
 			for ($i=2; $i<mysql_num_fields($result); $i++) {
 				echo "<td><input type='text' size='30' name='".mysql_field_name($result, $i)."[$row[tunnus]]' value='".htmlspecialchars($row[$i],ENT_QUOTES)."'></td>";
 			}
-			
+
 			$laskkaannos++;
-			
+
 			echo "</tr>";
 		}
-		
+
 		echo "<tr><th>Yhteens‰ k‰‰nt‰m‰tt‰ $laskkaannos</th></tr>";
 
 		echo "</table>";

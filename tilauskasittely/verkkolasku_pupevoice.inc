@@ -28,6 +28,8 @@ if (!function_exists('pupevoice_otsik')) {
 		fputs($tootxml, "</CHN>\n");
 		fputs($tootxml, "<SellerPartyInformation>\n");
 
+		$vatnumero = $yhtiorow["ovttunnus"];
+		
 		/*
 		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
 		if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
@@ -41,12 +43,14 @@ if (!function_exists('pupevoice_otsik')) {
 				$alhiro = mysql_fetch_array($alhire);
 				$yhtiorow['puhelin']	= $alhiro['puhelin'];
 				$yhtiorow['fax']		= $alhiro['fax'];
+				$vatnumero				= $alhiro['vat_numero'];
 			}
 		}
 		*/
 
 		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],			$tootxml);
 		xml_add("SellerPartyDomicile", 					$yhtiorow['kotipaikka'],		$tootxml);
+		xml_add("SellerPartyVat", 						$vatnumero,						$tootxml);
 		xml_add("SellerOrganisationName", 				$yhtiorow['nimi'], 				$tootxml);
 		xml_add("SellerStreetName", 					$yhtiorow['osoite'], 			$tootxml);
 		xml_add("SellerPostCode", 						$yhtiorow['postino'], 			$tootxml);

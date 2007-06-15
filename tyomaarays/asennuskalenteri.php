@@ -1,7 +1,7 @@
 <?php
 
 	// Parametrit
-	require('inc/parametrit.inc');
+	require('../inc/parametrit.inc');
 	
 	
 	// scripti balloonien tekemiseen

@@ -174,7 +174,7 @@ if ($monta > 1 and $monta <= $limit) {
 		echo $lause;
 
 		echo "<table border='0'>";
-		echo "<tr>
+		echo "<tr class='aktiivi'>
 				<th>".t("ytunnus")."</th>
 				<th>".t("asnro")."</th>
 				<th>".t("lasknimi/toimnimi")."</th>
@@ -218,7 +218,7 @@ if ($monta > 1 and $monta <= $limit) {
 				$brpostitp = '<br>'.$asiakas['toim_postitp'];
 			}
 			
-			echo "<tr>
+			echo "<tr class='aktiivi'>
 					<td>$asiakas[ytunnus]</td>
 					<td>$asiakas[asiakasnro]</td>
 					<td>$asiakas[nimi] $brnim</td>

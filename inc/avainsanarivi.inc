@@ -166,6 +166,10 @@
 		if (strtoupper($trow[$i]) == 'VAKIOVIESTI') {
 			$sel53 = "selected";
 		}
+		if (strtoupper($trow[$i]) == 'TYOM_TYOLINJA') {
+			$sel54 = "selected";
+		}
+		
 		
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
 
@@ -221,7 +225,8 @@
 		$ulos .= "<option value='TYOM_TYOJONO'"   .$sel50.">".t("Työmääräysten työjono")."</option>";
 		$ulos .= "<option value='TYOM_TYOSTATUS'" .$sel51.">".t("Työmääräysten työstatus")."</option>";
 		$ulos .= "<option value='JAKELULISTA'" 	  .$sel52.">".t("Email jakelulista")."</option>";
-		$ulos .= "<option value='VAKIOVIESTI'"    .$sel53.">".t("Vakioviesti")."</option>";				
+		$ulos .= "<option value='VAKIOVIESTI'"    .$sel53.">".t("Vakioviesti")."</option>";	
+		$ulos .= "<option value='TYOM_TYOLINJA'"  .$sel54.">".t("Työmääräysten työlinja")."</option>";			
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

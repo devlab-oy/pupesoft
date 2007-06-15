@@ -2,15 +2,42 @@
 
 	// Parametrit
 	require('inc/parametrit.inc');
+	
+	
+	// scripti balloonien tekemiseen
+	echo "
+		<script>
+		var DH = 0;var an = 0;var al = 0;var ai = 0;if (document.getElementById) {ai = 1; DH = 1;}else {if (document.all) {al = 1; DH = 1;} else { browserVersion = parseInt(navigator.appVersion); if ((navigator.appName.indexOf('Netscape') != -1) && (browserVersion == 4)) {an = 1; DH = 1;}}} function fd(oi, wS) {if (ai) return wS ? document.getElementById(oi).style:document.getElementById(oi); if (al) return wS ? document.all[oi].style: document.all[oi]; if (an) return document.layers[oi];}
+		function pw() {return window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;}
+		function mouseX(evt) {if (evt.pageX) return evt.pageX; else if (evt.clientX)return evt.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft); else return null;}
+		function mouseY(evt) {if (evt.pageY) return evt.pageY; else if (evt.clientY)return evt.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop); else return null;}
+		function popUp(evt,oi) {if (DH) {var wp = pw(); ds = fd(oi,1); dm = fd(oi,0); st = ds.visibility; if (dm.offsetWidth) ew = dm.offsetWidth; else if (dm.clip.width) ew = dm.clip.width; if (st == \"visible\" || st == \"show\") { ds.visibility = \"hidden\"; } else {tv = mouseY(evt) + 20; lv = mouseX(evt) - (ew/4); if (lv < 2) lv = 2; else if (lv + ew > wp) lv -= ew/2; if (!an) {lv += 'px';tv += 'px';} ds.left = lv; ds.top = tv; ds.visibility = \"visible\";}}}
+		</script>
+	";
+	
+	
 
 	echo "<font class='head'>".t("Asennuskalenteri").":</font><hr><br>";
 
 	$AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
-	$ASENTAJA_ARRAY = array("Pekka","Sauli","Lefa");
+	
+	$query = "	SELECT selite, selitetark
+				FROM avainsana
+				WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOLINJA'
+				ORDER BY jarjestys, selite";
+	$kires = mysql_query($query) or pupe_error($query);
 
+	$ASENTAJA_ARRAY = array();
+	$ASENTAJA_ARRAY_TARK = array();
+
+	while ($kirow = mysql_fetch_array($kires)) {
+		$ASENTAJA_ARRAY[] = $kirow["selite"];
+		$ASENTAJA_ARRAY_TARK[] = $kirow["selitetark"];
+	}
+	
 	//kuukaudet ja päivät ja ajat
 	$MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
-	$DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai", "Lauantai", "Sunnuntai");
+	$DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai");
 	
 	// otetaan oletukseksi tämä kuukausi ja tämä vuosi
 	if ($month == '') 	$month = date("n");
@@ -211,7 +238,7 @@
 			echo "<input type='hidden' name='tyotunnus' 	value='$tyotunnus'>";
 		}
 		
-		echo "<tr><th>Asentaja:</th><td>$ASENTAJA_ARRAY[$asentaja]</td></tr>";
+		echo "<tr><th>Asentaja:</th><td>$ASENTAJA_ARRAY_TARK[$asentaja]</td></tr>";
 		echo "<tr><th>Työjono:</th><td>$tyojono</td></tr>";
 		
 		if (!isset($lday)) $lday     = $day;
@@ -272,10 +299,11 @@
 	if ($tee == "") {
 		echo "<table>";
 		echo "<th>".t("Kuukausi").":</th>";
-		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth'> << </a></td>";
+		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&tyojono=$tyojono'> << </a></td>";
 		echo "<td>
 				<form method='POST' action='$PHP_SELF'>
 				<input type='hidden' name='liitostunnus'  value='$liitostunnus'>
+				<input type='hidden' name='tyojono'  value='$tyojono'>				
 				<select name='month' Onchange='submit();'>";
 
 		$i=1;   
@@ -291,7 +319,7 @@
 		}
 	
 		echo "</select></td>";
-		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth'> >> </a></td>";
+		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&tyojono=$tyojono'> >> </a></td>";
 		
 		echo "<th>".t("Työjono").":</th><td>";
 				
@@ -331,7 +359,7 @@
 					<tr>";
 				
 			for($s=0; $s < sizeof($ASENTAJA_ARRAY); $s++) {
-				echo "<td align='center' width='35' nowrap>$ASENTAJA_ARRAY[$s]</td>";
+				echo "<td align='center' width='35' nowrap>$ASENTAJA_ARRAY_TARK[$s]</td>";
 			}
 	        echo "	</tr>
 					</table>
@@ -353,6 +381,8 @@
 		for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
 			echo "<td>&nbsp;</td>";
 		}
+		
+		$div_arrayt = array();
 	
 	    for($i = 1; $i <= days_in_month($month, $year); $i++) {
 						
@@ -360,9 +390,11 @@
 				
 				echo "<td class='day'><b>$i</b><br>";
 
-				$query = "	SELECT kalenteri.kuka, kalenteri.liitostunnus, kalenteri.pvmalku, kalenteri.pvmloppu
+				$query = "	SELECT kalenteri.kuka, kalenteri.liitostunnus, kalenteri.pvmalku, kalenteri.pvmloppu, lasku.nimi, tyomaarays.komm1
 							FROM kalenteri
 							LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
+							LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus
+							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE kalenteri.yhtio = '$kukarow[yhtio]'
 							and kalenteri.tyyppi = 'asennuskalenteri'
 							and kalenteri.tapa	= '$tyojono'
@@ -383,7 +415,14 @@
 								$lopp = str_replace(array(":","-"," "), "", substr($vrow["pvmloppu"],0,16));
 							
 								if ($alku <= $slot and $lopp > $slot and $vrow["kuka"] == $b) {
-									$varaukset[$b][$a] = $ASENTAJA_ARRAY[$vrow["kuka"]]."|||".$vrow["liitostunnus"];
+									
+									if (!in_array($vrow["liitostunnus"], $div_arrayt)) {
+										$div_arrayt[] = $vrow["liitostunnus"];
+										
+										echo "<div id='$vrow[liitostunnus]' style='position:absolute; z-index:100; visibility:hidden; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>Työmääräys: $vrow[liitostunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"])."<br><a href='#' onclick=\"popUp(event,'$vrow[liitostunnus]')\">Sulje</a></div>";																
+									}
+									
+									$varaukset[$b][$a] = $vrow["nimi"]."|||".$vrow["liitostunnus"];
 								}
 							}
 						}
@@ -397,15 +436,14 @@
 					for($b = 0; $b < count($ASENTAJA_ARRAY); $b++) {
 				
 						if (isset($varaukset[$b][$a])) {
-							list($varausid, $pinnamies) = explode("|||", $varaukset[$b][$a]);
-					
-							echo "<th align='center' style='width: 35px; height: 15px;'><a class='td' href='tyojono.php?myyntitilaus_haku=$pinnamies'>$pinnamies</a></th>";
+							list($nimi, $tilausnumero) = explode("|||", $varaukset[$b][$a]);
+							echo "<td class='tumma' align='center' style='width: 35px; height: 15px;'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$tilausnumero</a></th>";
 						}
 						elseif($liitostunnus > 0 and $tyojono != "") {
-		                    echo "<th align='center' style='width: 35px; height: 15px;'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$AIKA_ARRAY[$a]&tee=VARAA'>&nbsp;</a></th>";			
+		                    echo "<td class='tumma' align='center' style='width: 35px; height: 15px;'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$AIKA_ARRAY[$a]&tee=VARAA'>&nbsp;</a></th>";			
 		                }				
 						else {
-							echo "<th align='center' style='width: 35px; height: 15px;'>&nbsp;</th>";
+							echo "<td class='tumma' align='center' style='width: 35px; height: 15px;'>&nbsp;</th>";
 						}
 					}
 					echo "</tr>";

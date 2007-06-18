@@ -644,9 +644,7 @@
 							order by id, tuote.tuoteno, varastopaikka";
 			}
 			$res = mysql_query($query) or pupe_error($query);
-			
-			echo "$query<br><br>";
-			
+						
 			//	Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
 			if(!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";
 			if(!isset($valitut["poistuvat"])) $valitut["poistuvat"] = "checked";

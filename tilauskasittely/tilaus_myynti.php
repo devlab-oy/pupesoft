@@ -670,7 +670,7 @@ if ($tee == 'POISTA') {
 
 			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			//	Hyp‰t‰‰n takaisin otsikolle
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$PHP_SELF?toim=PROJEKTI&tilausnumero=$tilausnumero&from=VALITSETOIMITUS'>";
 			die();
@@ -749,10 +749,10 @@ if ($tee == "VALMIS") {
 		echo "<font class='error'> ".t("Taisit painaa takaisin tai p‰ivit‰ nappia. N‰in ei saa tehd‰")."! </font><br>";
 		exit;
 	}
-	
+
 	// Tsekataan jos ollaan tehty asiakkaallevalmistus jossa ei ole yht‰‰n valmistettavaa rivi‰
 	$msiirto = "";
-	
+
 	if ($toim == "VALMISTAASIAKKAALLE") {
 		$query = "	select yhtio
 					from tilausrivi
@@ -761,10 +761,10 @@ if ($tee == "VALMIS") {
 					and tyyppi in ('W','M','V')
 					and varattu  > 0";
 		$sres  = mysql_query($query) or pupe_error($query);
-		
+
 		if (mysql_num_rows($sres) == 0) {
 			echo "<font class='message'> ".t("Ei valmistettavaa. Valmistus siirrettiin myyntipuolelle")."! </font><br>";
-			
+
 			$query  = "	update lasku set
 						tila 	= 'N',
 						alatila	= ''
@@ -772,7 +772,7 @@ if ($tee == "VALMIS") {
 						and tunnus = '$kukarow[kesken]'
 						and tila = 'V'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			$msiirto = "MYYNTI";
 		}
 	}
@@ -919,7 +919,7 @@ if ($tee == "VALMIS") {
 
 			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			//	Hyp‰t‰‰n takaisin otsikolle
 			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$PHP_SELF?toim=PROJEKTI&tilausnumero=$tilausnumero&from=VALITSETOIMITUS'>";
 			die();
@@ -1195,14 +1195,14 @@ if ($tee == '') {
 			<input type='hidden' name='projektilla' value='$projektilla'>
 			<td class='back'><input type='Submit' value='".t("Lisaa kulut")."' Style='font-size: 8pt; padding:0;'></td>
 			</form>";
-			
+
 			/*
 			echo "<form action = '../tilausmemo.php' method='post'>
 			<input type='hidden' name='tilaustunnus' value='$tilausnumero'>
 			<td class='back'><input type='Submit' value='".t("Tilausmemo")."' Style='font-size: 8pt; padding:0;'></td>
 			</form>";
 			*/
-			
+
 		}
 
 		echo "	<form action='tuote_selaus_haku.php' method='post'>
@@ -2031,7 +2031,7 @@ if ($tee == '') {
 								$lt = strtoupper($perherow["tuoteno"]);
 
 								$tuoteno_array[]		= $lt; // lis‰t‰‰n tuoteno arrayseen
-								$kpl_array[$lt]			= round($perkpl * $perherow["kerroin"],2);								
+								$kpl_array[$lt]			= round($perkpl * $perherow["kerroin"],2);
 								$kommentti_array[$lt] 	= "Valmista $pertuoteno:n raaka-aineeksi $kpl_array[$lt] kappaletta.";
 								$lapsenlap_array[$lt] 	= $lt;
 								$riikoko++;
@@ -2054,7 +2054,7 @@ if ($tee == '') {
 				if ($kpl != '' and !is_array($kpl_array) and $rii == 0) {
 					$kpl_array[$tuoteno_array[$rii]] = $kayttajan_kpl;
 				}
-								
+
 				rekursiivinen_resepti($tuoteno_array[$rii], $kpl_array[$tuoteno_array[$rii]]);
 			}
 		}
@@ -2693,26 +2693,26 @@ if ($tee == '') {
 					else {
 						echo "<tr><td valign='top'>$rivino</td>";
 					}
-					
+
 					$borderlask		= 0;
 					$pknum			= 0;
 				}
 
 				$classlisa = "";
 
-				if($borderlask == 1 and $pkrow[1] == 1 and $pknum == 1) {					
+				if($borderlask == 1 and $pkrow[1] == 1 and $pknum == 1) {
 					$classlisa = $class." style='border-top: 1px solid; border-bottom: 1px solid; border-right: 1px solid;' ";
 					$class    .= " style=' border-top: 1px solid; border-bottom: 1px solid;' ";
-					
+
 					$borderlask--;
 				}
-				elseif($borderlask == $pkrow[1] and $pkrow[1] > 0) {				
+				elseif($borderlask == $pkrow[1] and $pkrow[1] > 0) {
 					$classlisa = $class." style='border-top: 1px solid; border-right: 1px solid;' ";
 					$class    .= " style='border-top: 1px solid;' ";
-					
+
 					$borderlask--;
 				}
-				elseif($borderlask == 1) {					
+				elseif($borderlask == 1) {
 					if ($row["kommentti"] != '') {
 						$classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
 						$class    .= " style='font-style:italic; ' ";
@@ -2724,7 +2724,7 @@ if ($tee == '') {
 
 					$borderlask--;
 				}
-				elseif($borderlask > 0 and $borderlask < $pknum) {					
+				elseif($borderlask > 0 and $borderlask < $pknum) {
 					$classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
 					$class    .= " style='font-style:italic;' ";
 					$borderlask--;
@@ -3333,12 +3333,12 @@ if ($tee == '') {
 					}
 
 					echo "<tr>";
-					
+
 					if ($borderlask == 0 and $pknum > 1) {
-						$kommclass = " style='border-bottom: 1px solid; border-right: 1px solid;'";	
+						$kommclass = " style='border-bottom: 1px solid; border-right: 1px solid;'";
 					}
 					elseif($pknum > 0) {
-						$kommclass = " style='border-right: 1px solid;'";	
+						$kommclass = " style='border-right: 1px solid;'";
 					}
 					else {
 						$kommclass = "";
@@ -3780,6 +3780,7 @@ if ($tee == '') {
 				$toimi			= "";
 				$tilaus_on_jo 	= "KYLLA";
 				$superit		= "";
+				$varastosta		= array();
 
 				if ($toim == 'SIIRTOLISTA') {
 					$toimi = "JOO";
@@ -3796,7 +3797,13 @@ if ($tee == '') {
 					}
 				}
 
-				require ('jtselaus.php');
+				if (mysql_num_rows($vtresult) != 0 and count($varastosta) != 0) {
+					require ('jtselaus.php');
+				}
+				else {
+					echo "<font class='message'>".t("Ei toimitettavia JT-rivej‰!")."</font>";
+				}
+
 			}
 	    }
 	}

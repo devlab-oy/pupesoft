@@ -17,7 +17,7 @@
 	// ja ett‰ toimittajan tiedoissa on varmasti kaikki EDI mokkulat p‰‰ll‰
 	// ja oletusvienti on jotain vaihto-omaisuutta
 	$query = "	select tyyppi_tieto, liitostunnus, toim_tuoteno
-				from tuotteen_toimittajat, toimi
+				from tuotteen_toimittajat use index (yhtio_tuoteno), toimi use index (PRIMARY)
 				where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 				and tuotteen_toimittajat.tuoteno = '$suora_tuoteno'
 				and toimi.yhtio         = tuotteen_toimittajat.yhtio
@@ -39,8 +39,8 @@
 	while ($superrow = mysql_fetch_array($superjtres)) {
 		$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus vartunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso,
 					if(varastopaikat.maa = '$yhtiorow[maa]', 1,2) as sorttaus, sum(saldo) saldo, varastopaikat.maa varastomaa
-					from tuotepaikat
-					join yhtio on yhtio.yhtio=tuotepaikat.yhtio
+					from tuotepaikat use index (tuote_index)
+					join yhtio use index (yhtio_index) on (yhtio.yhtio=tuotepaikat.yhtio)
 					join varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
 					and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 					and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))

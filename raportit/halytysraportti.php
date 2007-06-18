@@ -542,6 +542,22 @@
 			$varastot 		 = " HAVING varastopaikat.tunnus in ($varastot) or varastopaikat.tunnus is null ";
 			$varastot_yhtiot = " yhtio in ($varastot_yhtiot) ";
 
+			
+			//Tuotekannassa voi olla tuotteen mitat kahdella eri tavalla
+			// leveys x korkeus x syvyys
+			// leveys x korkeus x pituus
+			$query = "	SHOW columns
+						FROM tuote
+						LIKE 'tuotepituus'";
+			$spres = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($spres) == 1) {
+				$splisa = "tuote.tuotepituus tuotesyvyys";
+			}
+			else {
+				$splisa = "tuote.tuotesyvyys";
+			}
+			
 			//Ajetaan raportti tuotteittain
 			if ($paikoittain == '') {
 				$query = "	select
@@ -569,7 +585,7 @@
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
-							tuote.tuotesyvyys,
+							$splisa,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon
 							FROM tuote
@@ -608,7 +624,7 @@
 							tuote.tuotekorkeus,
 							tuote.tuoteleveys,
 							tuote.tuotemassa,
-							tuote.tuotesyvyys,
+							$splisa,
 							tuote.lyhytkuvaus,
 							tuote.hinnastoon,
 							concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso) varastopaikka,
@@ -628,6 +644,9 @@
 							order by id, tuote.tuoteno, varastopaikka";
 			}
 			$res = mysql_query($query) or pupe_error($query);
+			
+			echo "$query<br><br>";
+			
 			//	Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
 			if(!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";
 			if(!isset($valitut["poistuvat"])) $valitut["poistuvat"] = "checked";

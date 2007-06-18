@@ -107,7 +107,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kukaan")."";
+		$ulos = "<td><select name='$nimi'><option value=''>".t("Ei kukaan")."";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";

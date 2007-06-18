@@ -162,7 +162,7 @@ else {
 				$lisasalker";
 	$keres = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($keres) > 0 or ($laskurow["tila"] == 'L' and ($laskurow["alatila"] == 'C' or $laskurow["alatila"] == 'B' or $laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E'))) {
+	if (mysql_num_rows($keres) > 0 or ($laskurow["tila"] == 'L' and ($laskurow["alatila"] == 'C' or $laskurow["alatila"] == 'B' or $laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E' or $laskurow["alatila"] == 'J'))) {
 		//tila L ja alatila C, B, D, E niin tilaus on kerätty otsikko
 		//jos otsikko sanoo, että tilaus on kerätty mutta rivit kuitenkaan ei ole kerätty niin merkataan ne kumminkin kerätyiksi
 		//tai jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan) niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
@@ -176,7 +176,7 @@ else {
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Laitetaan rivit toimitetuiksi jos otsikko sanoo toimitettu
-		if ($laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E') {
+		if ($laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E' or $laskurow["alatila"] == 'J') {
 			$query = "	UPDATE tilausrivi 
 						SET toimitettu='$kukarow[kuka]', toimitettuaika=now() 
 						WHERE yhtio		 = '$kukarow[yhtio]' 

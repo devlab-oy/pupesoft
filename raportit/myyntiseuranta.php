@@ -1401,7 +1401,7 @@
 			echo "</select></td>";
 			echo "</tr></table><br>\n";
 
-			echo "<table width='100%'><tr valign='top'><td><table><tr><td class='back'>";
+			echo "<table><tr valign='top'><td><table><tr><td class='back'>";
 
 			// n‰ytet‰‰n soveltuvat osastot
 			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
@@ -1435,7 +1435,7 @@
 			echo "</table>";
 			echo "</td>";
 
-			echo "<td colspan='3'><table><tr><td valign='top' class='back'>";
+			echo "<td><table><tr><td valign='top' class='back'>";
 
 			// n‰ytet‰‰n soveltuvat tryt
 			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
@@ -1484,7 +1484,7 @@
 			}
 
 			echo "<table>";
-			echo "<tr><th colspan='2'>".t("Valitse piiri(t)").":</th></tr>";
+			echo "<tr><th colspan='2'>".t("Valitse asiakaspiiri(t)").":</th></tr>";
 			echo "<tr><td><input type='checkbox' name='mul_pii' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
 
 			while ($rivi = mysql_fetch_array($res2)) {

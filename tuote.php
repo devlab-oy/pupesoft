@@ -153,7 +153,7 @@
 					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
 					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin,
-					group_concat(distinct concat_ws(' ',tuotteen_toimittajat.ostohinta,tuotteen_toimittajat.valuutta) order by tuotteen_toimittajat.tunnus separator '<br>') ostohinta
+					group_concat(distinct concat_ws(' ',tuotteen_toimittajat.ostohinta,upper(tuotteen_toimittajat.valuutta)) order by tuotteen_toimittajat.tunnus separator '<br>') ostohinta
 					FROM tuote
 					LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -260,22 +260,22 @@
 
 			//3
 			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Netto/Ovh")."</th><th>".t("Ostohinta")."</th><th>".t("Kehahinta")."</th><th>".t("Vihahinta")."</th>";
-			echo "<tr><td>$tuoterow[toim_tuoteno]</td>
-						<td align='right'>$tuoterow[myyntihinta] $yhtiorow[valkoodi]$valuuttalisa</td>
-						<td align='right'>$tuoterow[nettohinta]/$tuoterow[myymalahinta]</td>
-						<td align='right'>$tuoterow[ostohinta]</td>
-						<td align='right'>$tuoterow[kehahin]</td>
-						<td align='right'>$tuoterow[vihahin] $tuoterow[vihapvm]</td>
+			echo "<tr><td valign='top' >$tuoterow[toim_tuoteno]</td>
+						<td valign='top' align='right'>$tuoterow[myyntihinta] $yhtiorow[valkoodi]$valuuttalisa</td>
+						<td valign='top' align='right'>$tuoterow[nettohinta]/$tuoterow[myymalahinta]</td>
+						<td valign='top' align='right'>$tuoterow[ostohinta]</td>
+						<td valign='top' align='right'>$tuoterow[kehahin]</td>
+						<td valign='top' align='right'>$tuoterow[vihahin] $tuoterow[vihapvm]</td>
 				</tr>";
 
 			//4
 			echo "<tr><th>".t("Hälyraja")."</th><th>".t("Tilerä")."</th><th>".t("Toierä")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
-			echo "<tr><td align='right'>$tuoterow[halytysraja]</td>
-						<td align='right'>$tuoterow[osto_era]</td>
-						<td align='right'>$tuoterow[myynti_era]</td>
-						<td align='right'>$tuoterow[tuotekerroin]</td>
-						<td align='right'>$tuoterow[tarrakerroin]</td>
-						<td align='right'>$tuoterow[tarrakpl]</td>
+			echo "<tr><td valign='top' align='right'>$tuoterow[halytysraja]</td>
+						<td valign='top' align='right'>$tuoterow[osto_era]</td>
+						<td valign='top' align='right'>$tuoterow[myynti_era]</td>
+						<td valign='top' align='right'>$tuoterow[tuotekerroin]</td>
+						<td valign='top' align='right'>$tuoterow[tarrakerroin]</td>
+						<td valign='top' align='right'>$tuoterow[tarrakpl]</td>
 					</tr>";
 
 			//5

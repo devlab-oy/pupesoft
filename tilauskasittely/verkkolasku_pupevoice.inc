@@ -53,7 +53,7 @@ if (!function_exists('pupevoice_otsik')) {
 				$yhtiorow["postitp"] 	= $lasrow["yhtio_postitp"];
 				$yhtiorow["maa"] 		= $lasrow["yhtio_maa"];
 				$yhtiorow["kotipaikka"]	= $lasrow["yhtio_kotipaikka"];
-				$vatnumero				= $lasrow["ovttunnus"];
+				$vatnumero				= $lasrow["yhtio_ovttunnus"];
 
 			}
 

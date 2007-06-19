@@ -15,7 +15,14 @@ while ($row = mysql_fetch_array($result)) {
 	$table = $row[0];
 
 	// check table for errors
-	$query = "check    table $table";
+	$query = "check table $table";
+	echo sprintf("%-37s",  $query);
+	$chkre = mysql_query($query);
+	$chkro = mysql_fetch_array($chkre);
+	echo " -> $chkro[Msg_text]\n";
+	
+	// check table for errors
+	$query = "repair table $table";
 	echo sprintf("%-37s",  $query);
 	$chkre = mysql_query($query);
 	$chkro = mysql_fetch_array($chkre);

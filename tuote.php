@@ -216,20 +216,34 @@
 			$peralresult = mysql_query($query) or pupe_error($query);
 			$peralrow = mysql_fetch_array($peralresult);
 
-			// katotaan onko tuotteelle valuuttahintoja
-			$query = "	select *
-						from hinnasto
+			$query = "	select distinct valkoodi, maa from hinnasto
 						where yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$tuoterow[tuoteno]'
-						and valkoodi != '$yhtiorow[valkoodi]'
 						and laji = ''
-						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-						order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)";
-			$hintaresult = mysql_query($query) or pupe_error($query);
+						order by maa, valkoodi";
+			$hintavalresult = mysql_query($query) or pupe_error($query);
 
 			$valuuttalisa = "";
-			while ($hintarow = mysql_fetch_array($hintaresult)) {
-				$valuuttalisa .= "<br>$hintarow[hinta] $hintarow[valkoodi] ";
+
+			while ($hintavalrow = mysql_fetch_array($hintavalresult)) {
+
+				// katotaan onko tuotteelle valuuttahintoja
+				$query = "	select *
+							from hinnasto
+							where yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tuoterow[tuoteno]'
+							and valkoodi = '$hintavalrow[valkoodi]'
+							and maa = '$hintavalrow[maa]'
+							and laji = ''
+							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+							limit 1";
+				$hintaresult = mysql_query($query) or pupe_error($query);
+
+				while ($hintarow = mysql_fetch_array($hintaresult)) {
+					$valuuttalisa .= "<br>$hintarow[maa]: $hintarow[hinta] $hintarow[valkoodi]";
+				}
+
 			}
 
 			//eka laitetaan tuotteen yleiset (aika staattiset) tiedot
@@ -247,14 +261,22 @@
 			//3
 			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Netto/Ovh")."</th><th>".t("Ostohinta")."</th><th>".t("Kehahinta")."</th><th>".t("Vihahinta")."</th>";
 			echo "<tr><td>$tuoterow[toim_tuoteno]</td>
-					<td>$tuoterow[myyntihinta] $yhtiorow[valkoodi] $valuuttalisa</td><td>$tuoterow[nettohinta]/$tuoterow[myymalahinta]</td><td>$tuoterow[ostohinta]</td>
-					<td>$tuoterow[kehahin]</td><td>$tuoterow[vihahin] $tuoterow[vihapvm]</td></tr>";
+						<td align='right'>$tuoterow[myyntihinta] $yhtiorow[valkoodi]$valuuttalisa</td>
+						<td align='right'>$tuoterow[nettohinta]/$tuoterow[myymalahinta]</td>
+						<td align='right'>$tuoterow[ostohinta]</td>
+						<td align='right'>$tuoterow[kehahin]</td>
+						<td align='right'>$tuoterow[vihahin] $tuoterow[vihapvm]</td>
+				</tr>";
 
 			//4
 			echo "<tr><th>".t("Hälyraja")."</th><th>".t("Tilerä")."</th><th>".t("Toierä")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
-			echo "<tr><td>$tuoterow[halytysraja]</td>
-					<td>$tuoterow[osto_era]</td><td>$tuoterow[myynti_era]</td><td>$tuoterow[tuotekerroin]</td>
-					<td>$tuoterow[tarrakerroin]</td><td>$tuoterow[tarrakpl]</td></tr>";
+			echo "<tr><td align='right'>$tuoterow[halytysraja]</td>
+						<td align='right'>$tuoterow[osto_era]</td>
+						<td align='right'>$tuoterow[myynti_era]</td>
+						<td align='right'>$tuoterow[tuotekerroin]</td>
+						<td align='right'>$tuoterow[tarrakerroin]</td>
+						<td align='right'>$tuoterow[tarrakpl]</td>
+					</tr>";
 
 			//5
 			echo "<tr><th>".t("Tullinimike")."</th><th colspan='4'>".t("Tullinimikkeen kuvaus")."</th><th>".t("Toinen paljous")."</th></tr>";
@@ -331,14 +353,14 @@
 			echo "<table>";
 			echo "<tr>";
 			echo "<td class='back' valign='top' align='left'>";
-			
+
 			if ($yhtiorow["saldo_kasittely"] == "T") {
 				$aikalisa = date("Y-m-d");
 			}
 			else {
 				$aikalisa = "";
 			}
-			
+
 			if ($tuoterow["ei_saldoa"] == '') {
 				// Saldot
 				echo "<table>";
@@ -481,7 +503,7 @@
 						}
 					}
 					echo "<tr><th>".t("Suoratoimitettavissa Yhteensä")."</th><td align='right'>".sprintf("%.02f",$kokonaissaldo)."</td></tr>";
-					
+
 					echo "</table></td></tr>";
 				}
 			}
@@ -489,7 +511,7 @@
 			echo "</td>";
 			echo "</tr><tr><td class='back' valign='top' align='left' colspan='2'>";
 
-			
+
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT lasku.nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
 						if(tilausrivi.tyyppi!='O', tilausrivi.kerayspvm, tilausrivi.toimaika) kerayspvm,
@@ -506,7 +528,7 @@
 						and tilausrivi.var not in ('P')
 						ORDER BY kerayspvm";
 			$jtresult = mysql_query($query) or pupe_error($query);
-			
+
 			if (mysql_num_rows($jtresult) != 0) {
 
 				// Avoimet rivit
@@ -567,13 +589,13 @@
 						$tyyppi = t("Asiakkaallevalmistus");
 						$merkki = "+";
 					}
-					
+
 					if($jtrow["varasto"] != "") {
 						$tyyppi = $tyyppi." - ".$jtrow["varasto"];
 					}
-					
+
 					list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["kerayspvm"]);
-					
+
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
 							<td><a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]'>$jtrow[tunnus]</a>$keikka</td>

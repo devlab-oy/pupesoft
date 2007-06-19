@@ -335,7 +335,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../raportit/myyntiseuranta.php?asiakas=$ytunnus&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Myynninseuranta")."</a></td>";
+				echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=MYYNTI&tee=go&ppa=$ppa&kka=$kka&vva=$vva&ppl=$ppl&kkl=$kkl&vvl=$vvl&tuoteosasto2=kaikki&yhtiot[]=$kukarow[yhtio]&jarjestys[]=&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Myynninseuranta")."</a></td>";
 			}
 			else {
 				echo "<td>".t("Myynninseuranta")."</td>";
@@ -354,7 +354,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) > 0) {
-				echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
+				echo "<td><a href='../raportit/asiakasinfo.php?ytunnus=$ytunnus&asiakasid={$asiakasrow["tunnus"]}&rajaus=ALENNUKSET&lopetus=../crm/asiakasmemo.php////ytunnus=$ytunnus//asiakasid=$asiakasid'>".t("Näytä alennustaulukko")."</a></td>";
 			}
 			else {
 				echo "<td><u>".t("(Näytä alennustaulukko)")."</u></td>";

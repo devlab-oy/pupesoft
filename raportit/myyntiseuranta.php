@@ -9,7 +9,11 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	require("../inc/parametrit.inc");
+	if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+		require ("../inc/parametrit.inc");
+		
+		echo "<font class='head'>".t("Myyntiseuranta")."</font><hr>";
+	}
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		readfile("/tmp/".$tmpfilenimi);
@@ -17,7 +21,6 @@
 	}
 	else {
 
-		echo "<font class='head'>".t("Myyntiseuranta")."</font><hr>";
 
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--
@@ -1644,14 +1647,9 @@
 			echo "<input type='submit' value='".t("Aja raportti")."'>";
 			echo "</form>";
 		}
-		else {
-			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
-			$lopetus = str_replace('////','?', $lopetus);
-			$lopetus = str_replace('//','&',  $lopetus);
-			echo "<br><br>";
-			echo "<a href='$lopetus'>".t("Palaa edelliseen n‰kym‰‰n")."</a>";
-		}
 
-		require ("../inc/footer.inc");
+		if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
+			require ("../inc/footer.inc");
+		}
 	}
 ?>

@@ -64,10 +64,14 @@
 				}
 			}
 
-			$pp = substr($laskurow["luontiaika"],8,2);
+			/*$pp = substr($laskurow["luontiaika"],8,2);
 			$kk = substr($laskurow["luontiaika"],5,2);
-			$vv = substr($laskurow["luontiaika"],0,4);
-
+			$vv = substr($laskurow["luontiaika"],0,4);*/
+			
+			$pp = date("m");
+			$kk = date("Y");
+			$vv = date("d");
+			
 			$luotoaik = date("d.m.Y",mktime(0, 0, 0, $kk, $pp, $vv));
 			
 			if ($laskurow["toim_nimi"] != $laskurow["nimi"] and $laskurow["toim_nimi"] != '') {

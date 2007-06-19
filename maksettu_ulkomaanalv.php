@@ -91,6 +91,7 @@ if($tee == "aja") {
 				tapvm>='$alku' and
 				tapvm<='$loppu'
 				{$lisa["where"]}
+				and kulun_kohdemaa NOT IN ('','{$yhtiorow[maa]}')
 				ORDER BY kulun_kohdemaa, tapvm";
 	$result = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($result)>0) {
@@ -129,12 +130,11 @@ if($tee == "aja") {
 		if(is_array($summat)) {
 			echo "<font class='message'>".t("Takaisinperitt‰v‰‰ maittain")."</font><br>";
 			echo "<table><tr><th>".t("Maa")."</th><th>".t("Summa")."</th></tr>";
-			foreach($summat as $maa => $summa) {
-				echo "<tr><td>$maa</td><td>".number_format($summa ,2, '.', ' ')."</td></tr>";
+			foreach($summat as $kmaa => $summa) {
+				echo "<tr><td>$kmaa</td><td>".number_format($summa ,2, '.', ' ')."</td></tr>";
 			}
 			echo "</table><br>";
 		}
-	
 	}
 	else {
 		echo "<font class='message'>".t("Ei maksettua ulkomaanarvonlis‰veroa valitulla jaksolla")."</font><br>";

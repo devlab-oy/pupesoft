@@ -29,8 +29,7 @@ if (!function_exists('pupevoice_otsik')) {
 		fputs($tootxml, "<SellerPartyInformation>\n");
 
 		$vatnumero = $yhtiorow["ovttunnus"];
-		
-		/*
+
 		// jos meill‰ on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
 		if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
 
@@ -38,15 +37,27 @@ if (!function_exists('pupevoice_otsik')) {
 			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
-			// k‰ytet‰‰n t‰n toimipaikan yhteystietoja
 			if (mysql_num_rows($alhire) == 1) {
+
+				// haetaan toimipaikan tiedot
 				$alhiro = mysql_fetch_array($alhire);
+
+				// fax ja puhelin ei ole laskulla
 				$yhtiorow['puhelin']	= $alhiro['puhelin'];
 				$yhtiorow['fax']		= $alhiro['fax'];
-				$vatnumero				= $alhiro['vat_numero'];
+
+				// loput tiedot otetaan laskulta
+				$yhtiorow["nimi"] 		= $lasrow["yhtio_nimi"];
+				$yhtiorow["osoite"] 	= $lasrow["yhtio_osoite"];
+				$yhtiorow["postino"] 	= $lasrow["yhtio_postino"];
+				$yhtiorow["postitp"] 	= $lasrow["yhtio_postitp"];
+				$yhtiorow["maa"] 		= $lasrow["yhtio_maa"];
+				$yhtiorow["kotipaikka"]	= $lasrow["yhtio_kotipaikka"];
+				$vatnumero				= $lasrow["ovttunnus"];
+
 			}
+
 		}
-		*/
 
 		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],			$tootxml);
 		xml_add("SellerPartyDomicile", 					$yhtiorow['kotipaikka'],		$tootxml);

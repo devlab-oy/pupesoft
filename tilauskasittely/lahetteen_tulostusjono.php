@@ -12,29 +12,40 @@
 	";
 
 	if ($toim == 'SIIRTOLISTA') {
-		$tila 		= "G";
-		$lalatila	= "J";
-		$tilaustyyppi = " and tilaustyyppi!='M' ";
+		$tila 				= "G";
+		$lalatila			= "J";
+		$tila_lalatila_lisa = "";
+		$tilaustyyppi 		= " and tilaustyyppi!='M' ";
 	}
 	elseif ($toim == 'SIIRTOTYOMAARAYS') {
-		$tila 		= "S";
-		$lalatila	= "J";
-		$tilaustyyppi = " and tilaustyyppi='S' ";
+		$tila 				= "S";
+		$lalatila			= "J";
+		$tila_lalatila_lisa = "";
+		$tilaustyyppi 		= " and tilaustyyppi='S' ";
 	}
 	elseif ($toim == 'MYYNTITILI') {
-		$tila 		= "G";
-		$lalatila	= "J";
-		$tilaustyyppi = " and tilaustyyppi='M' ";
+		$tila 				= "G";
+		$lalatila			= "J";
+		$tila_lalatila_lisa = "";
+		$tilaustyyppi 		= " and tilaustyyppi='M' ";
 	}
 	elseif ($toim == 'VALMISTUS') {
-		$tila 		= "V";
-		$lalatila	= "J";
-		$tilaustyyppi = "";
+		$tila 				= "V";
+		$lalatila			= "J";
+		$tila_lalatila_lisa = "";
+		$tilaustyyppi 		= "";
+	}
+	elseif ($toim == 'VALMISTUSMYYNTI') {
+		$tila 				= "V";
+		$lalatila			= "J";
+		$tila_lalatila_lisa = " or (lasku.tila='N' and lasku.alatila='A')";
+		$tilaustyyppi 		= "";
 	}
 	else {
-		$tila 		= "N";
-		$lalatila	= "A";
-		$tilaustyyppi = "";
+		$tila 				= "N";
+		$lalatila			= "A";
+		$tila_lalatila_lisa = "";
+		$tilaustyyppi 		= "";
 	}
 
 	if ($tee2 == 'NAYTATILAUS') {
@@ -95,8 +106,7 @@
 					$query    = "	select *
 									from lasku
 									where tunnus in ($tilausnumeroita)
-									and tila	= '$tila'
-									and alatila	= '$lalatila'
+									and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa)
 									and yhtio	= '$kukarow[yhtio]'
 									LIMIT 1";
 					$result   = mysql_query($query) or pupe_error($query);
@@ -515,8 +525,7 @@
 					LEFT JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus
 					WHERE
 					lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tila = '$tila'
-					and lasku.alatila = '$lalatila'
+					and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa)
 					$haku
 					$tilaustyyppi
 					$grouppi

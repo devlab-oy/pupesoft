@@ -13,31 +13,37 @@
 
 	if ($toim == 'SIIRTOLISTA') {
 		echo "<font class='head'>".t("Ker‰‰ siirtolista").":</font><hr>";
-		$tila = "G";
+		$tila = "'G'";
 		$tyyppi = "'G'";
 		$tilaustyyppi = " and tilaustyyppi!='M' ";
 	}
 	elseif ($toim == 'SIIRTOTYOMAARAYS') {
 		echo "<font class='head'>".t("Ker‰‰ sis‰inen tyˆm‰‰r‰ys").":</font><hr>";
-		$tila = "S";
+		$tila = "'S'";
 		$tyyppi = "'G'";
 		$tilaustyyppi = " and tilaustyyppi='S' ";
 	}
 	elseif ($toim == 'MYYNTITILI') {
 		echo "<font class='head'>".t("Ker‰‰ myyntitili").":</font><hr>";
-		$tila = "G";
+		$tila = "'G'";
 		$tyyppi = "'G'";
 		$tilaustyyppi = " and tilaustyyppi='M' ";
 	}
 	elseif ($toim == 'VALMISTUS') {
 		echo "<font class='head'>".t("Ker‰‰ valmistus").":</font><hr>";
-		$tila = "V";
+		$tila = "'V'";
+		$tyyppi = "'V','L'";
+		$tilaustyyppi = "";
+	}
+	elseif ($toim == 'VALMISTUSMYYNTI') {
+		echo "<font class='head'>".t("Ker‰‰ tilaus tai valmistus").":</font><hr>";
+		$tila = "'V','L'";
 		$tyyppi = "'V','L'";
 		$tilaustyyppi = "";
 	}
 	else {
 		echo "<font class='head'>".t("Ker‰‰ tilaus").":</font><hr>";
-		$tila = "L";
+		$tila = "'L'";
 		$tyyppi = "'L'";
 		$tilaustyyppi = "";
 	}
@@ -76,7 +82,11 @@
 		//haetaan kaikki t‰lle klˆntille kuuluvat otsikot
 		$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
 					FROM lasku
-					WHERE yhtio='$kukarow[yhtio]' and kerayslista='$id' and kerayslista != 0 and tila='$tila' $tilaustyyppi
+					WHERE yhtio='$kukarow[yhtio]' 
+					and kerayslista='$id' 
+					and kerayslista != 0 
+					and tila in ($tila)
+					$tilaustyyppi
 					HAVING tunnukset is not null";
 		$toimresult = mysql_query($query) or pupe_error($query);
 
@@ -546,8 +556,11 @@
 			if ($keraamaton > 0) {
 				// Jos tilauksella oli yht‰‰n ker‰‰m‰tˆnt‰ rivi‰
 				$query  = "	update lasku
-							set alatila='C'
-							where yhtio='$kukarow[yhtio]' and tunnus in ($tilausnumeroita) and tila = '$tila' and alatila='A'";
+							set alatila = 'C'
+							where yhtio = '$kukarow[yhtio]' 
+							and tunnus in ($tilausnumeroita) 
+							and tila in ($tila)
+							and alatila = 'A'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				//Jos ker‰yspoikkeamia syntyi, niin l‰hetet‰‰n mailit myyj‰lle ja asiakkaalle
@@ -880,7 +893,7 @@
 					$rahtikirjaan = 'mennaan';
 				}
 				else {
-					$tilausnumeroita 	= '';
+					$tilausnumeroita = '';
 					$rahtikirjaan = '';
 					$id = 0;
 				}
@@ -1044,7 +1057,7 @@
 					tilausrivi use index (yhtio_otunnus)
 					where
 					lasku.yhtio						= '$kukarow[yhtio]'
-					and lasku.tila					= '$tila'
+					and lasku.tila					in ($tila)
 					and lasku.alatila				= 'A'
 					and tilausrivi.yhtio			= lasku.yhtio
 					and tilausrivi.otunnus			= lasku.tunnus
@@ -1122,7 +1135,11 @@
 		//haetaan kaikki t‰lle klˆntille kuuluvat otsikot
 		$query = "	SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ',') tunnukset
 					FROM lasku
-					WHERE yhtio='$kukarow[yhtio]' and kerayslista='$id' and kerayslista != 0 and tila='$tila' $tilaustyyppi
+					WHERE yhtio		= '$kukarow[yhtio]' 
+					and kerayslista	= '$id' 
+					and kerayslista != 0 
+					and tila		in ($tila)
+					$tilaustyyppi
 					HAVING tunnukset is not null";
 		$toimresult = mysql_query($query) or pupe_error($query);
 
@@ -1151,7 +1168,10 @@
 						clearing,
 						tila
 						FROM lasku LEFT JOIN kuka ON lasku.myyja = kuka.tunnus
-						WHERE lasku.tunnus in ($tilausnumeroita) and lasku.yhtio='$kukarow[yhtio]' and tila='$tila' and alatila='A'";
+						WHERE lasku.tunnus in ($tilausnumeroita) 
+						and lasku.yhtio = '$kukarow[yhtio]' 
+						and tila in ($tila)
+						and alatila	= 'A'";
 			$result = mysql_query($query) or pupe_error($query);
 			$row    = mysql_fetch_array($result);
 

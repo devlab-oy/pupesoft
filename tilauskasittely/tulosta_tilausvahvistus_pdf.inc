@@ -236,7 +236,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 		//	K‰sitell‰‰n tuoterivit
 		$query = "	SELECT tilausrivi.*, 
 					if(tilausrivi.perheid=0,$rivihinta,$perherivihinta) rivihinta, (jt+varattu) kpl,
-					tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, tilausrivin_lisatiedot.ei_nayteta, ei_saldoa, $sorttauskentta
+					$hinta_riv hinta, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, tilausrivin_lisatiedot.ei_nayteta, ei_saldoa, $sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus

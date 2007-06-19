@@ -258,7 +258,25 @@
 		}
 
 		$laskurow = mysql_fetch_array($result);
-
+		
+		//	Jos tehd‰‰n matkalaskun ensimm‰inen hyv‰ksynt‰..
+		if($laskurow["tilaustyyppi"] == "M" and $laskurow["h1time"]=="0000-00-00 00:00:00") {
+			
+			$query = "select * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+			$toimires = mysql_query($query) or pupe_error($query);
+			$toimirow = mysql_fetch_array($toimires);
+			
+			//	P‰ivitet‰‰n tapvm ja viesti laskulle
+			$viesti = t("Matkalasku").date("d").".".date("m").".".date("Y");
+			$query = " update lasku set tapvm=now(), erpcm=DATE_ADD(now(), INTERVAL {$toimirow["oletus_erapvm"]} DAY), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
+			$updres = mysql_query($query) or pupe_error($query);
+			
+			//	P‰ivitet‰‰n tiliˆintien tapvm as well
+			$query = " update tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
+			$updres = mysql_query($query) or pupe_error($query);
+			
+		}
+		
 		// Kuka hyv‰ksyi??
 		if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak1']) {
 			$kentta = "h1time";

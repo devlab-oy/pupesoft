@@ -5,34 +5,8 @@ require ("inc/alvpopup.inc");
 
 echo "<font class='head'>".t('Matkalaskut')."</font><hr><br><br>";
 
-if ($tee == "HYVAKSY") {
-
-	$tunnus=$tilausnumero;
-	$tee="H";
-	$kutsuja="MATKALASKU";
-	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
-	$result=mysql_query($query) or pupe_error($query);
-	$laskurow=mysql_fetch_array($result);
-
-	if ($laskurow["tapvm"] == "0000-00-00") {
-		//	Päivitetään tapvm
-		$viesti = t("Matkalasku")." ".date("d").".".date("m").".".date("Y")." - {$laskurow["viesti"]}";
-		$query = " update lasku set tapvm=now(), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tilausnumero'";
-
-		$query = " update tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tilausnumero' and korjattu=''";
-		$updres = mysql_query($query) or pupe_error($query);
-	}
-
-    require("hyvak.php");
-
-	$tee="";
-	$tunnus=0;
-	$tilausnumero=0;
-
-}
-
-if ($tee == "POISTA") {
-
+if($tee == "POISTA") {
+	
 	$tunnus=$tilausnumero;
 	$tee="D";
 	$kutsuja="MATKALASKU";
@@ -112,14 +86,15 @@ if ($tee == "UUSI") {
 						vienti_kurssi 	= '1',
 						laatija 		= '$kukarow[kuka]',
 						luontiaika 		= now(),
-						liitostunnus 	= '$asiakasid',
+						liitostunnus 	= '{$trow["tunnus"]}',
 						hyvaksynnanmuutos = '$trow[oletus_hyvaksynnanmuutos]',
 						suoraveloitus 	= '',
 						tilaustyyppi	= 'M'";
 
 			$result = mysql_query($query) or pupe_error($query);
 			$tilausnumero = mysql_insert_id();
-
+			
+			//	Tänne voisi laittaa myös tuon asiakasidn jos tästä voitaisiin lähettää myös lasku asiakkaalle
 			$query = "INSERT into laskun_lisatiedot set
 						yhtio = '$kukarow[yhtio]',
 						otunnus = '$tilausnumero'";
@@ -193,12 +168,12 @@ if ($tee == "TALLENNA") {
 							$kuvaselite = "";
 						}
 						break;
-				}
+			}
 			}
 
 			if ($errormsg != "") {
 				echo "<font class='error'>$errormsg</font><br>";
-			}
+		}
 		}
 
 		$query = "	UPDATE lasku SET
@@ -226,15 +201,11 @@ if ($tee == "MUOKKAA") {
 				echo "Ostovelkatiliöinti puuttuu<br>";
 				return false;
 			}
-
-			if ($poistakuva > 0) {
-				$query = " delete from liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and tyyppi='lasku' and liitostunnus='$tilausnumero' and tunnus = '$poistakuva'";
-				$result = mysql_query($query) or pupe_error($query);
-				if (mysql_affected_rows($result) == 0) {
-					echo "<font class='error'>".t("HEI!! Ei koitetan runkata systeemiä S***na!!")."</font><br>";
-				}
-			}
-
+			
+			$query = "	select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$ltunnus'";
+			$result=mysql_query($query) or pupe_error($query);
+			$laskurow=mysql_num_rows($result);
+						
 			$query = "	SELECT sum((-1*summa)) summa, count(*) kpl
 						FROM tiliointi
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -273,7 +244,7 @@ if ($tee == "MUOKKAA") {
 
 			$query .= "		summa='{$summarow[summa]}',
 							kustp= '',
-							tapvm = '0000-00-00',
+							tapvm = '$laskurow[tapvm]',
 							vero = '',
 							lukko = '',
 							tosite = '$tositenro',
@@ -300,7 +271,15 @@ if ($tee == "MUOKKAA") {
 						<font class='message'>".t("Heitto on")." $ero [rivit {$rivirow[summa]}] (kp {$summarow["summa"]})</font><br>";
 			}
 		}
-
+		
+		if($poistakuva > 0) {
+			$query = " delete from liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and tyyppi='lasku' and liitostunnus='$tilausnumero' and tunnus = '$poistakuva'";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_affected_rows($result)==0) {
+				echo "<font class='error'>".t("HEI!! Ei koitetan runkata systeemiä S***na!!")."</font><br>";
+			}
+		}
+		
 		$query 	= "	select *
 						from lasku
 						where tunnus='$tilausnumero' and yhtio='$kukarow[yhtio]' and tilaustyyppi='M' and tila IN ('H','Y','M','P','Q')";
@@ -435,9 +414,9 @@ if ($tee == "MUOKKAA") {
 								and lasku.tilaustyyppi	= 'M'
 								and lasku.tila IN ('H','Y','M','P','Q')
 								and liitostunnus = '$laskurow[liitostunnus]'
-								and (	(kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika <= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm') or
-										(kerattyaika <  '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika > '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm') or
-										(toimitettuaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika <= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm'))
+								and (	(kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika <= '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or 
+										(kerattyaika <  '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika > '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
+										(toimitettuaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika <= '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm'))
 								GROUP BY otunnus";
 					$result = mysql_query($query) or pupe_error($query);
 					if (mysql_num_rows($result)>0) {
@@ -571,8 +550,7 @@ if ($tee == "MUOKKAA") {
 						$kpl 	= str_replace(",",".",$kpl_array[$trow["tuoteno"]]);
 						$hinta 	= str_replace(",",".",$hinta_array[$trow["tuoteno"]]);
 						$rivihinta = round($kpl*$hinta,2);
-
-						echo "maa: $maa alvuk: $alvuk<br>";
+						
 						//	Ratkaistaan alv..
 						if ($tyyppi == "B") {
 							//	Haetaan tuotteen oletusalv jos ollaan ulkomailla, tälläin myös kotimaan alv on aina zero
@@ -587,8 +565,8 @@ if ($tee == "MUOKKAA") {
 								$vero=0;
 							}
 							else {
-								$vero = $trow["alv"];
-							}
+							$vero = $trow["alv"];
+						}
 						}
 						else {
 							$vero = 0;
@@ -667,7 +645,7 @@ if ($tee == "MUOKKAA") {
 								kustp = '$kustp',
 								kohde = '$kohde',
 								projekti = '$projekti',
-								tapvm = '0000-00-00',
+								tapvm = '$laskurow[tapvm]',
 								summa = '$summa',
 								vero = '$vero',
 								selite = '$selite',
@@ -686,7 +664,7 @@ if ($tee == "MUOKKAA") {
 							kustp = '',
 							kohde = '',
 							projekti = '',
-							tapvm = '0000-00-00',
+							tapvm = '$laskurow[tapvm]',
 							summa = '$alv',
 							vero = '',
 							selite = '$selite',
@@ -999,13 +977,13 @@ if ($tee == "MUOKKAA") {
 
 					//	Haetaan oletusalv tuotteelta
 					if ($alvulk == "") {
-						$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$maa' and tuoteno='$tuoteno' limit 1";
-						$alhire = mysql_query($query) or pupe_error($query);
+					$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$maa' and tuoteno='$tuoteno' limit 1";
+					$alhire = mysql_query($query) or pupe_error($query);
 						$alvrow=mysql_fetch_array($alhire);
 						$alvulk=$alvrow["alv"];
 						if ($alvulk == "") {
 							echo "<font class='error'>".t("Kulun arvonlisäveroa kohdemaassa ei ole määritelty")."</font><br>";
-						}
+					}
 					}
 
 					echo "<td>".alv_popup_oletus("alvulk",$alvulk, $maa, 'lista')."</td>";
@@ -1106,17 +1084,7 @@ if ($tee == "MUOKKAA") {
 		echo "	<tr><td class='back'><br></td></tr>
 				<tr>";
 
-		if ($saa_hyvaksya == "JOO" and $laskurow["tila"] == "H" and $laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2) {
-			echo "<form name='valmis' action='$PHP_SELF' method='post' autocomplete='off'>
-					<input type='hidden' name='tee' value='HYVAKSY'>
-					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<td class='back' align='left'><input type='submit' value='".t("Hyväksy ja lähetä eteenpäin")."'></td></form>";
-		}
-		else {
-			echo "<td class='back' align='left'></td>";
-		}
-
-		echo "		<td colspan='4' class='back' align='right'></td>
+		echo "		<td colspan='5' class='back' align='right'></td>
 
 					<form name='palaa' action='$PHP_SELF' method='post'>
 					<td class='back'><input type='submit' value='".t("Palaa")."'></td></form></tr></table>";
@@ -1145,10 +1113,10 @@ if ($tee == "") {
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and tila = 'H'
 				and (
-					hyvak2='{$kukarow["kuka"]}' or
-					hyvak3='{$kukarow["kuka"]}' or
-					hyvak4='{$kukarow["kuka"]}' or
-					hyvak5='{$kukarow["kuka"]}'
+					(hyvak2='{$kukarow["kuka"]}' and h2time='0000-00-00 00:00:00') or
+					(hyvak3='{$kukarow["kuka"]}' and h3time='0000-00-00 00:00:00') or
+					(hyvak4='{$kukarow["kuka"]}' and h4time='0000-00-00 00:00:00') or
+					(hyvak5='{$kukarow["kuka"]}' and h5time='0000-00-00 00:00:00')
 				)
 				and tilaustyyppi = 'M'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -1218,7 +1186,7 @@ if ($tee == "") {
 				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tila IN ('H','Y','M','P','Q') and h1time != '0000-00-00 00:00:00'
-				and hyvak1 = '{$kukarow["kuka"]}'
+				and hyvak1 = '{$kukarow[kuka]}'
 				and tilaustyyppi = 'M'";
 	$result=mysql_query($query) or pupe_error($query);
 

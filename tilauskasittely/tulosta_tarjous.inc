@@ -68,9 +68,9 @@
 			$kk = substr($laskurow["luontiaika"],5,2);
 			$vv = substr($laskurow["luontiaika"],0,4);*/
 			
-			$pp = date("m");
-			$kk = date("Y");
-			$vv = date("d");
+			$pp = date("d");
+			$kk = date("m");
+			$vv = date("Y");
 			
 			$luotoaik = date("d.m.Y",mktime(0, 0, 0, $kk, $pp, $vv));
 			

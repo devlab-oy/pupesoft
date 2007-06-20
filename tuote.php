@@ -805,7 +805,7 @@
 
 			$vararvo_nyt = sprintf('%.2f',$kokonaissaldo_tapahtumalle*$tuoterow["kehahin"]);
 
-			echo "<tr>
+			echo "<tr class='aktiivi'>
 					<td colspan='4'>".t("Varastonarvo nyt").":</td>
 					<td align='right'>$tuoterow[kehahin]</td>
 					<td align='right'>$vararvo_nyt</td>
@@ -818,7 +818,7 @@
 				$vararvo_nyt -= $prow["arvo"];
 
 				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
-					echo "<tr>";
+					echo "<tr class='aktiivi'>";
 					echo "<td nowrap>$prow[kuka]</td>";
 					echo "<td nowrap>";
 

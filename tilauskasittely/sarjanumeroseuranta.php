@@ -670,7 +670,7 @@
 	while ($sarjarow = mysql_fetch_array($sarjares)) {
 
 		if (function_exists("sarjanumeronlisatiedot_popup")) {
-			list($divitx, $text_output) = sarjanumeronlisatiedot_popup ($sarjarow["tunnus"], '', 'popup', '');
+			list($divitx, $text_output, $kuvalisa_bin, $hankintahinta) = sarjanumeronlisatiedot_popup ($sarjarow["tunnus"], '', 'popup', '', '');
 			$divit .= $divitx;
 		}
 

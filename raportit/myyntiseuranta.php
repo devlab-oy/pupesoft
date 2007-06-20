@@ -12,7 +12,6 @@
 	if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
 		require ("../inc/parametrit.inc");
 		
-		echo "<font class='head'>".t("Myyntiseuranta")."</font><hr>";
 	}
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -20,7 +19,7 @@
 		exit;
 	}
 	else {
-
+		echo "<font class='head'>".t("Myyntiseuranta")."</font><hr>";
 
 		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
 			<!--

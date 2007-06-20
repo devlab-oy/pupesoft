@@ -136,7 +136,7 @@ if ($tee == "") {
 		$lisa .= " and deadline like '%$deadline_haku%' ";
 	}
 	if ($prioriteetti_haku != "") {
-		$lisa .= " and prioriteetti like '%$prioriteetti_haku%' ";
+		$lisa .= " and prioriteetti = '$prioriteetti_haku' ";
 	}
 	
 	$query = "	select *, if(deadline='0000-00-00','9999-99-99',deadline) deadline 

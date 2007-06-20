@@ -1318,12 +1318,14 @@
 				$tilausnumeroita = $laskurow["tunnus"];
 				
 				//generoidaan lähetteelle ja keräyslistalle rivinumerot
-				$query = "  SELECT *
-							FROM tilausrivi
-							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
-							ORDER BY perheid desc, tunnus";
+				$query = " 	SELECT *, if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, tilausrivi.tunnus, if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskentta
+							FROM tilausrivi use index (yhtio_otunnus)
+							WHERE otunnus = '$laskurow[tunnus]'
+							and yhtio = '$kukarow[yhtio]'
+							and var in ('','H')
+							ORDER by sorttauskentta desc, tunnus";
 				$result = mysql_query($query) or pupe_error($query);
-
+				
 				//generoidaan rivinumerot
 				$rivinumerot = array();
 

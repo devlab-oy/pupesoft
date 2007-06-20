@@ -116,12 +116,12 @@
 	}
 
 	// Jos kyseessä on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
-	if (substr($paikka,0,3) == "###") {
+	if (substr($paikka,0,3) == "¡¡¡") {
 		$var 		 = "T";
 		$rivinumero  = substr($paikka, 3);
 		$paikka		 = "#";
 	}
-	elseif ($var == "T" and substr($paikka,0,3) != "###" and substr($paikka,0,3) != "!!!") {
+	elseif ($var == "T" and substr($paikka,0,3) != "¡¡¡" and substr($paikka,0,3) != "!!!") {
 		$var 		= "";
 		$rivinumero	= "";
 	}
@@ -780,8 +780,15 @@
 
 								if ($myy_tyyppi[$indeksi] == "NORMAALI" and $myy_sarjatunnus > 0) {
 
+									$query = "	SELECT *
+												FROM sarjanumeroseuranta
+												WHERE tunnus	= '$myy_sarjatunnus'
+												and tuoteno		= '$myy_tuoteno[$indeksi]'";
+									$sres = mysql_query($query) or pupe_error($query);																
+									$srow = mysql_fetch_array($sres);
+									
 									if ($varattu > 0) {
-										$tunken = "myyntirivitunnus";
+										$tunken = "myyntirivitunnus";																				
 									}
 									else {
 										$tunken = "ostorivitunnus";
@@ -794,6 +801,15 @@
 												and tuoteno			 = '$myy_tuoteno[$indeksi]'
 												and $tunken 		 = 0";
 									$sres = mysql_query($query) or pupe_error($query);
+									
+									if ($srow["kaytetty"] == 'K') {
+										$query = "	UPDATE tilausrivi
+													SET alv=alv+500
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tunnus  = '$lisatty_tun'
+													and alv < 500";
+										$sarjares = mysql_query($query) or pupe_error($query);
+									}
 
 									$myy_sarjatunnus = 0;
 								}
@@ -1319,6 +1335,15 @@
 								and tuoteno		= '$trow[tuoteno]'";
 					$sres = mysql_query($query) or pupe_error($query);
 					$srow = mysql_fetch_array($sres);
+					
+					if ($srow["kaytetty"] == 'K') {
+						$query = "	UPDATE tilausrivi
+									SET alv=alv+500
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus  = '$lisatty_tun'
+									and alv < 500";
+						$sarjares = mysql_query($query) or pupe_error($query);
+					}
 
 					if ($var == "S") {
 						// jos syötetään sarjanumertollinen tuote suoratoimitukseen niin liitetään tämä myyntirivi siihen kiinni

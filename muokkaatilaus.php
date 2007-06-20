@@ -337,32 +337,61 @@
 		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, lasku.luontiaika, laatija, viesti tilausviite,$toimaikalisa alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
-					and tila='V' 
+					and tila = 'V' 
 					and alatila in ('','A','B','J')
 					$haku
 					order by lasku.luontiaika desc
 					LIMIT 50";
+					
+		// haetaan kaikkien avoimien tilausten arvo
+		$sumquery = "	SELECT 
+						round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, 
+						round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, 
+						count(distinct lasku.tunnus) kpl
+						FROM lasku use index (tila_index)
+						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus) and tilausrivi.tyyppi IN ('L','W')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and tila = 'V' 
+						and alatila in ('','A','B','J')
+						and tilaustyyppi != 'W'";
+		$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+		$sumrow = mysql_fetch_array($sumresult);
+		
 		$miinus = 3;
 	}
 	elseif ($toim == "VALMISTUSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi vastaanottaja, ytunnus, lasku.luontiaika, laatija, viesti tilausviite,$toimaikalisa alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
-					and tila='V' 
+					and tila = 'V' 
 					and alatila in ('','A','B','C','J')
 					$haku
 					order by lasku.luontiaika desc
 					LIMIT 50";
+
+		// haetaan kaikkien avoimien tilausten arvo
+		$sumquery = "	SELECT 
+						round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, 
+						round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, 
+						count(distinct lasku.tunnus) kpl
+						FROM lasku use index (tila_index)
+						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus) and tilausrivi.tyyppi IN ('L','W')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and tila = 'V' 
+						and alatila in ('','A','B','C','J')
+						and tilaustyyppi != 'W'";
+		$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+		$sumrow = mysql_fetch_array($sumresult);
+
 		$miinus = 3;
 	}
-	elseif($toim == "VALMISTUSMYYNTI") {
+	elseif ($toim == "VALMISTUSMYYNTI") {
 		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra, tilaustyyppi
 					FROM lasku use index (tila_index)
 					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
 					$seurantalisa
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
-					and lasku.tila in('L','N','V') 
-					and lasku.alatila in ('A','')
+					and ((tila='V' and alatila in ('','A','B','J')) or (lasku.tila in ('L','N') and lasku.alatila in ('A','')))
 					$haku
 					HAVING extra = '' or extra is null
 					order by lasku.luontiaika desc
@@ -375,15 +404,15 @@
 						count(distinct lasku.tunnus) kpl
 						FROM lasku use index (tila_index)
 						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus) and tilausrivi.tyyppi IN ('L','W')
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in('L','N','V') 
-						and lasku.alatila in ('A','')
+						WHERE lasku.yhtio = '$kukarow[yhtio]' 
+						and ((tila='V' and alatila in ('','A','B','J')) or (lasku.tila in ('L','N') and lasku.alatila in ('A','')))
 						and tilaustyyppi != 'W'";
 		$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 		$sumrow = mysql_fetch_array($sumresult);			
 			
 		$miinus = 4;
 	}
-	elseif($toim == "VALMISTUSMYYNTISUPER") {
+	elseif ($toim == "VALMISTUSMYYNTISUPER") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' 
@@ -564,7 +593,9 @@
 					FROM lasku use index (tila_index)
 					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
 					$seurantalisa
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in('L','N') and lasku.alatila in('A','')
+					WHERE lasku.yhtio = '$kukarow[yhtio]' 
+					and lasku.tila in ('L','N') 
+					and lasku.alatila in ('A','')
 					$haku
 					HAVING extra = '' or extra is null
 					order by lasku.luontiaika desc
@@ -675,8 +706,8 @@
 				}
 				else {
 
-					$laskutyyppi=$row["tila"];
-					$alatila=$row["alatila"];
+					$laskutyyppi = $row["tila"];
+					$alatila	 = $row["alatila"];
 
 					//tehdään selväkielinen tila/alatila
 					require "inc/laskutyyppi.inc";

@@ -683,17 +683,13 @@
 					$row["yksikko"] = $rarrow["toim_yksikko"];
 				}
 
-				$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],				$firstpage, $p);
-				$pdf->draw_text(170, $kala, "(".$row["tuoteno"].")",			$firstpage, $p);
-				
-				if ($row["toimaika"] != $laskurow["toimaika"]) {
-						$pdf->draw_text(285, $kala, tv1dateconv($row["toimaika"]),		$firstpage, $p);
-				}
-				
+				$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],									$firstpage, $p);
+				$pdf->draw_text(170, $kala, "(".$row["tuoteno"].")",								$firstpage, $p);
+				$pdf->draw_text(285, $kala, tv1dateconv($row["toimaika"]),							$firstpage, $p);
 				$pdf->draw_text(360, $kala, sprintf('%.2f',$row["varattu"])." ".$row["yksikko"], 	$firstpage, $p);
-				$pdf->draw_text(413, $kala, sprintf('%.2f',$row["hinta"]),		$firstpage, $p);
-				$pdf->draw_text(463, $kala, sprintf('%.2f',$row["ale"])."%",		$firstpage, $p);
-				$pdf->draw_text(512, $kala, sprintf('%.2f',$row["rivihinta"]), 	$firstpage, $p);
+				$pdf->draw_text(413, $kala, sprintf('%.2f',$row["hinta"]),							$firstpage, $p);
+				$pdf->draw_text(463, $kala, sprintf('%.2f',$row["ale"])."%",						$firstpage, $p);
+				$pdf->draw_text(512, $kala, sprintf('%.2f',$row["rivihinta"]), 						$firstpage, $p);
 
 	            if ($nimitykset != "") {
 

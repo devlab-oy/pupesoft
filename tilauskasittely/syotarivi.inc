@@ -23,25 +23,25 @@
 					<th align='left'>".t("Hinta")."</th>
 					<th align='left'>".t("Ale")."</th>
 					<th align='left'>".t("Netto")."</th>
-					<td class='back'></td>
+					<td valign='top' class='back'></td>
 				</tr>
 			<tr>";
 
 
 		if ($ulos == '') {
-			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
 		}
 		else {
-			echo "<td>$ulos</td>";
+			echo "<td valign='top'>$ulos</td>";
 		}
 
-		echo "	<td><input type='text' name='kpl' size='5' maxlength='5' value='$kpl'></td>
-				<td><input type='text' name='var' size='2' maxlength='1' value='$var'></td>
-				<td><input type='text' name='hinta' size='5' maxlength='12' value='$hinta'></td>
-				<td><input type='text' name='ale' size='5' maxlength='6' value='$ale'></td>
-				<td><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
-				<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
-				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
+		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='5' value='$kpl'></td>
+				<td valign='top'><input type='text' name='var' size='2' maxlength='1' value='$var'></td>
+				<td valign='top'><input type='text' name='hinta' size='5' maxlength='12' value='$hinta'></td>
+				<td valign='top'><input type='text' name='ale' size='5' maxlength='6' value='$ale'></td>
+				<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
+				<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
+				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
 			</tr>";
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
@@ -83,19 +83,19 @@
 				$keraysppa = substr($kerayspvm, 8, 2);
 			}
 
-			echo "<td colspan='2'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
-			echo "<td colspan='4'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";
+			echo "<td valign='top' colspan='2'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
+			echo "<td valign='top' colspan='4'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";
 			echo "<tr>";
 			
 			
 			echo "<tr><th colspan='6' align='left'>".t("Rivikommentti").":</tg></tr>";
-			echo "<tr><td colspan='6'><input type='text' value='$kommentti' name='kommentti' size='75' maxlength='255'></td></tr>";
+			echo "<tr><td valign='top' colspan='6'><textarea name='kommentti' cols='50' rows='2' wrap='hard'>$kommentti</textarea></td></tr>";
 
 			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T")) {
 				echo "<tr>
 						<th colspan='6' align='left'>".t("Tuotteen nimitys")."</th>
 						</tr><tr>
-						<td class='back' colspan='6'><input type='text' maxlength='35' size='75' name='tuotenimitys' value = '$tuotenimitys'></td></tr>";
+						<td valign='top' class='back' colspan='6'><input type='text' maxlength='35' size='50' name='tuotenimitys' value = '$tuotenimitys'></td></tr>";
 			}
 
 			//Jos emill‰ on marginaalimyynti‰ niin pit‰‰ muistaa ja kertoa se myˆs lis‰‰riville
@@ -128,21 +128,21 @@
 				<th align='left'>".t("Ale")."</th>
 				<th align='left'>".t("Netto")."</th>
 				<th align='left'>".t("Alv")."</th>
-				<td class='back'></td>
+				<td valign='top' class='back'></td>
 				</tr>";
 
 
 		echo "<tr>";
 
 		if ($ulos == '') {
-			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
 		}
 		else {
-			echo "<td>$ulos</td>";
+			echo "<td valign='top'>$ulos</td>";
 		}
 
 		echo "
-			<td><input type='text' size='5' name='kpl' value='$kpl'></td>";
+			<td valign='top'><input type='text' size='5' name='kpl' value='$kpl'></td>";
 
 		$selh = $selj = $selp = "";
 
@@ -159,7 +159,7 @@
 			$selw = "SELECTED";
 		}
 
-		echo "<td><select name='var'>";
+		echo "<td valign='top'><select name='var'>";
 		echo "<option value=''>".t("Oletus")."</option>";
 		echo "<option value='J' $selj>".t("JT")."</option>";
 		echo "<option value='H' $selh>".t("Hyv‰ksy")."</option>";
@@ -171,8 +171,8 @@
 		
 		echo "</select></td>";
 
-		echo "<td><input type='text' size='5' name='hinta' value='$hinta'></td>
-			<td><input type='text' size='5' name='ale' value='$ale'></td>";
+		echo "<td valign='top'><input type='text' size='5' name='hinta' value='$hinta'></td>
+			<td valign='top'><input type='text' size='5' name='ale' value='$ale'></td>";
 
 		$chke = $chkn = "";
 
@@ -183,27 +183,27 @@
 			$chke = 'SELECTED';
 		}
 
-		echo "<td><select name='netto'>";
+		echo "<td valign='top'><select name='netto'>";
 		echo "<option value=''>".t("Oletus")."</option>";
 		echo "<option value='N' $chkn>".t("N-Netto")."</option>";
 		echo "<option value='E' $chke>".t("E-Netto")."</option>";
 		echo "</select></td>";
 
 		if (isset($alv) and $alv >= 500) {
-			echo "<td>".t("M.V.")."</td>";
+			echo "<td valign='top'>".t("M.V.")."</td>";
 			echo "<input type='hidden' name='alv' value='$alv'>";
 		}
 		else {
-			echo "<td>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
+			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
 
-		echo "<td class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+		echo "<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>
 				<th align='left'>".t("Ker‰ysaika")."</th>
 				<th align='left' colspan='2'>".t("Toimitusaika")."</th>
 				<th colspan='4' align='left'>".t("Kommentti")."</th>
-				<td class='back'></td>
+				<td valign='top' class='back'></td>
 				</tr>";
 		echo "<tr>";
 		
@@ -237,9 +237,9 @@
 			$keraysppa = substr($kerayspvm, 8, 2);
 		}
 		
-		echo "<td><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
-		echo "<td colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";		
-		echo "<td colspan='4'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>";
+		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
+		echo "<td valign='top' colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";		
+		echo "<td valign='top' colspan='4'><textarea name='kommentti' cols='32' rows='2' wrap='hard'>$kommentti</textarea></td>";
 
 		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T"))) {
 			echo "</tr>
@@ -247,10 +247,10 @@
 					<th colspan='7' align='left'>".t("Tuotteen nimitys")."</th>
 					</tr>
 				<tr>
-					<td colspan='7'><input type='text' maxlength='35' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
+					<td valign='top' colspan='7'><input type='text' maxlength='35' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
 		}
 
-		echo "<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td></tr>";
+		echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td></tr>";
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
@@ -285,19 +285,19 @@
 		echo "<tr>";
 
 		if ($tila == "LISAARESEPTIIN") {
-			echo "<td>$perheid $perheid2</td>";
+			echo "<td valign='top'>$perheid $perheid2</td>";
 		}
 
 		if ($ulos == '') {
-			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
 		}
 		else {
-			echo "<td>$ulos</td>";
+			echo "<td valign='top'>$ulos</td>";
 		}
 
-		echo "<td><input type='text' size='5' name='kpl' value='$kpl'></td>";
+		echo "<td valign='top'><input type='text' size='5' name='kpl' value='$kpl'></td>";
 
-		echo "<td class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+		echo "<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		
 		echo "<tr>";
@@ -312,7 +312,7 @@
 		echo "<tr>";
 		
 		if ($tila == "LISAARESEPTIIN") {
-			echo "<td></td>";
+			echo "<td valign='top'></td>";
 		}
 
 		if ($toimaika == "" or $toimaika == "0000-00-00") {
@@ -345,8 +345,8 @@
 			$keraysppa = substr($kerayspvm, 8, 2);
 		}
 
-		echo "<td><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
-		echo "<td><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";		
+		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
+		echo "<td valign='top'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";		
 		
 		echo "<tr>";
 		
@@ -360,11 +360,11 @@
 		echo "<tr>";
 		
 		if ($tila == "LISAARESEPTIIN") {
-			echo "<td></td>";
+			echo "<td valign='top'></td>";
 		}
 				
-		echo "<td colspan='2'><input type='text' size='40' name='kommentti' value = '$kommentti'></td>
-				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td></tr>";
+		echo "<td valign='top' colspan='2'><textarea name='kommentti' cols='40' rows='2' wrap='hard'>$kommentti</textarea></td>
+				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td></tr>";
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
@@ -403,11 +403,11 @@
 		echo "<table>";
 		echo "<tr>";
 		echo "<input type='hidden' name='tuoteno' value='$hi_tuoteno'>
-				<td><input type='text' name='kpl' size='5' maxlength='5' value='$kpl' onKeyUp='DisableText();'></td>";
+				<td valign='top'><input type='text' name='kpl' size='5' maxlength='5' value='$kpl' onKeyUp='DisableText();'></td>";
 
-		echo "	<td> $varaosavirhe </td> ";
+		echo "	<td valign='top'> $varaosavirhe </td> ";
 
-		echo "<td><input type='submit' value='".t("Lis‰‰")."'></td>";
+		echo "<td valign='top'><input type='submit' value='".t("Lis‰‰")."'></td>";
 
 		echo "</form>";
 		echo "</tr>";
@@ -420,26 +420,26 @@
 				<tr>
 					<th align='left'>".t("Tuotenumero")."</th>
 					<th align='left'>".t("M‰‰r‰")."</th>
-					<td class='back'></td>
+					<td valign='top' class='back'></td>
 				</tr>
 			<tr>";
 
 		echo "<input type='hidden' name='var' value='$var'>";
 
 		if ($ulos == '') {
-			echo "<td><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
+			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
 		}
 		else {
-			echo "<td>$ulos</td>";
+			echo "<td valign='top'>$ulos</td>";
 		}
 
-		echo "	<td><input type='text' name='kpl' size='5' maxlength='5' value='$kpl'></td>
-				<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
-				<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
+		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='5' value='$kpl'></td>
+				<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
+				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
 			</tr>";
 
 		echo "<tr><th colspan='2'>".t("Rivikommentti").":</th></tr>";
-		echo "<tr><td class='back' colspan='2'><input type='text' value='$kommentti' name='kommentti' size='30' maxlength='255'></td></tr>";
+		echo "<tr><td valign='top' class='back' colspan='2'><textarea name='kommentti' cols='30' rows='2' wrap='hard'>$kommentti</textarea></td></tr>";
 		echo "</form>";
 		echo "</table>";
 	}

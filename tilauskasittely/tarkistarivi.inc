@@ -311,7 +311,7 @@
 				}
 
 				// tallennetaan riville toimittajan tunnus
-				$paikat .= "<option value='###$krow[liitostunnus]' $sel1>".t("Tilaa varastoon")."</option>";
+				$paikat .= "<option value='¡¡¡$krow[liitostunnus]' $sel1>".t("Tilaa varastoon")."</option>";
 				$paikat .= "<option value='!!!$krow[liitostunnus]' $sel2>".t("Tilaa asiakkaalle")."</option>";
 				$paikatlask=$paikatlask+2;
 			}

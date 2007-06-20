@@ -208,8 +208,8 @@ if (!function_exists('rivi_valm')) {
 			                                                                            									
 			                                                                            									
 			$pdf_valm->draw_text(125, $kala_valm, $row["tuoteno"],															$firstpage_valm, $pb);
-			$pdf_valm->draw_text(405, $kala_valm, $lapskpl, 																			$firstpage_valm, $pb);
-			$pdf_valm->draw_text(465, $kala_valm, $row["tilkpl"]." ".$row["yksikko"],			 										$firstpage_valm, $pb);
+			$pdf_valm->draw_text(405, $kala_valm, $lapskpl, 																$firstpage_valm, $pb);
+			$pdf_valm->draw_text(465, $kala_valm, $row["tilkpl"]." ".$row["yksikko"],			 							$firstpage_valm, $pb);
 			
 			if ($row["keratty"] != '') {
 				$pdf_valm->draw_text(525, $kala_valm, $row['varattu'], 														$firstpage_valm, $pb);

@@ -300,19 +300,19 @@
 		}
 
 		// Kuka hyväksyy seuraavaksi??
-		if ($laskurow['h5time'] == '0000-00-00 00:00:00' and strlen($laskurow['hyvak5']) != 0) {
+		if ($laskurow['h5time'] == '0000-00-00 00:00:00' and strlen(trim($laskurow['hyvak5'])) != 0) {
 			$hyvaksyja_nyt = $laskurow['hyvak5'];
 		}
-		if ($laskurow['h4time'] == '0000-00-00 00:00:00' and strlen($laskurow['hyvak4']) != 0) {
+		if ($laskurow['h4time'] == '0000-00-00 00:00:00' and strlen(trim($laskurow['hyvak4'])) != 0) {
 			$hyvaksyja_nyt = $laskurow['hyvak4'];
 		}
-		if ($laskurow['h3time'] == '0000-00-00 00:00:00' and strlen($laskurow['hyvak3']) != 0) {
+		if ($laskurow['h3time'] == '0000-00-00 00:00:00' and strlen(trim($laskurow['hyvak3'])) != 0) {
 			$hyvaksyja_nyt = $laskurow['hyvak3'];
 		}
-		if ($laskurow['h2time'] == '0000-00-00 00:00:00' and strlen($laskurow['hyvak2']) != 0) {
+		if ($laskurow['h2time'] == '0000-00-00 00:00:00' and strlen(trim($laskurow['hyvak2'])) != 0) {
 			$hyvaksyja_nyt = $laskurow['hyvak2'];
 		}
-		if ($laskurow['h1time'] == '0000-00-00 00:00:00' and strlen($laskurow['hyvak1']) != 0) {
+		if ($laskurow['h1time'] == '0000-00-00 00:00:00' and strlen(trim($laskurow['hyvak1'])) != 0) {
 			$hyvaksyja_nyt = $laskurow['hyvak1'];
 		}
 

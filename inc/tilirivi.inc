@@ -21,7 +21,7 @@
 		$sel = array();
 		$sel[$trow[$i]] = "SELECTED";
 
-		$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='S' order by taso+0";
+		$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='S' order by taso";
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>\n";
@@ -41,7 +41,7 @@
 		$sel = array();
 		$sel[$trow[$i]] = "SELECTED";
 
-		$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='U' order by taso+0";
+		$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='U' order by taso";
 		$tasoresu = mysql_query($query) or pupe_error($query);
 
 		$ulos = "<td><select name='$nimi'>\n";

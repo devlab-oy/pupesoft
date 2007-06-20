@@ -17,9 +17,9 @@ if (!function_exists('tulosta_lasku')) {
 			$mika = "otunnus";
 		}
 
-		// Haetaan laskun tiedot
+		// Haetaan laskun tiedot ja joinataan viimeisimmän laskun_lisätiedot...
 		$query = "	SELECT lasku.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.tapvm päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
-					(select if(count(distinct(left(toimitettuaika,10)))>1,'".t("useita")."', max(toimitettuaika)) from tilausrivi where yhtio=lasku.yhtio and $mika=lasku.tunnus) toimituspvm, '$yhtiorow[viivastyskorko]%' viivästyskorko, 
+					(select if(count(distinct(left(toimitettuaika,10)))>1,'".t("useita")."', max(toimitettuaika)) from tilausrivi where yhtio=lasku.yhtio and $mika=lasku.tunnus) toimituspvm, '$yhtiorow[viivastyskorko]%' viivästyskorko, laskun_lisatiedot.rivihintoja_ei_nayteta,
 					concat_ws(' ', postino, postitp) postiosoite,
 					concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
 					yhteyshenkilo_kaupallinen.nimi asiakkaan_kaupallinen_käsittelijä,
@@ -27,7 +27,7 @@ if (!function_exists('tulosta_lasku')) {
 					SUBSTRING(lasku_maa.nimi FROM 6) maa,
 					SUBSTRING(toim_maa.nimi FROM 6) toim_maa
 					FROM lasku
-					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and if(laskunro>0, (select max(tunnus) from lasku l where l.yhtio=lasku.yhtio and l.laskunro=lasku.laskunro and l.tila='L'), lasku.tunnus)=laskun_lisatiedot.otunnus
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus					
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_kaupallinen ON laskun_lisatiedot.yhtio=yhteyshenkilo_kaupallinen.yhtio and laskun_lisatiedot.yhteyshenkilo_kaupallinen=yhteyshenkilo_kaupallinen.tunnus
 					LEFT JOIN kuka AS laatija ON laatija.yhtio='$kukarow[yhtio]' and lasku.laatija=laatija.kuka
@@ -36,9 +36,10 @@ if (!function_exists('tulosta_lasku')) {
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tunnus  = '$otunnus'
 					GROUP BY lasku.tunnus";
+					
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
-				
+
 		if ($kieli== '') {
 			$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
 			$kielresult = mysql_query($querykiel) or pupe_error($querykiel);

@@ -85,7 +85,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 		$asiakaslisa = " and asiakas.ytunnus >= '$syot_ytunnus' ";
 	}
 
-	$query = "	SELECT GROUP_CONCAT(distinct lasku.tunnus) karhuttavat, sum(summa) karhuttava_summa
+	$query = "	SELECT asiakas.ytunnus, GROUP_CONCAT(distinct lasku.tunnus) karhuttavat, sum(summa) karhuttava_summa
 				FROM lasku
 				JOIN (	SELECT lasku.tunnus,
 						maksuehto.jv,
@@ -110,7 +110,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 				$asiakaslisa
 				GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
 				HAVING karhuttava_summa > 0
-				ORDER BY lasku.ytunnus";
+				ORDER BY asiakas.ytunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {

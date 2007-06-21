@@ -431,7 +431,7 @@
 							FROM tilausrivi left join tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 							WHERE tilausrivi.otunnus = '$otunnus'
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi in ('L','G','W')
+							and tilausrivi.tyyppi in ('L','G')
 							ORDER BY sorttauskentta";
 				$riresult = mysql_query($query) or pupe_error($query);
 

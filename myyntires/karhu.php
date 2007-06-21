@@ -17,8 +17,40 @@ if ($kukarow["kirjoitin"] == 0) {
 	$tee = "";
 }
 
+if (strlen($yhtiorow['karhuviesti1']) < 6) {
+    echo "<font class='error'>".t("Yhtiöllä ei ole yhtään karhuviestiä tallennettuna. Ei voida karhuta").".</font><br>";
+    $tee = '';
+}
+
 if ($tee == 'LAHETA') {
-	require ('paperikarhu.php');
+	// kirjeen lähetyksen status
+	$ekarhu_success = true;
+
+	try {
+		
+		// koitetaan lähettää eKirje sekä tulostaa
+		require ('paperikarhu.php');
+
+	} catch (Exception $e) {
+		$ekarhu_success = false;
+		echo "<font class='error'>Ei voitu lähettää karhua eKirjeenä, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
+	}
+	
+	// poistetaan karhuttu vain jos karhun lähetys onnistui,
+	// muuten voidaan kokeilla samaa uudestaan!!!!!
+	if ($ekarhu_success) {
+		array_shift($karhuttavat);
+	}
+	
+	// jatketaan karhuamista
+	$tee = "KARHUA";
+	
+}
+
+// ohitetaanko asiakas?
+if ($tee == 'OHITA') {
+	array_shift($karhuttavat);
+	
 	$tee = "KARHUA";
 }
 
@@ -169,7 +201,46 @@ if ($tee == 'KARHUA')  {
 	<tr><th>".t("Nimitark")."</th><td>$asiakastiedot[nimitark]</td></tr>
 	<tr><th>".t("Osoite")."</th><td>$asiakastiedot[osoite]</td></tr>
 	<tr><th>".t("Postinumero")."</th><td>$asiakastiedot[postino] $asiakastiedot[postitp]</td></tr>";
-	echo "</table>";
+	
+	echo "<tr><th>". t('Karhuviesti') ."</th><td>";
+	
+	$max = 0;
+	while ($lasku = mysql_fetch_array($result)) {
+		if ($lasku['karhuttu'] > $max) {
+			$max = $lasku['karhuttu'];
+		}
+	}
+	
+	$sel1 = $sel2 = $sel3 = '';
+	if ($max >= 3) {
+		$sel3 = 'selected';
+	} elseif ($max == 2) {
+		$sel2 = 'selected';
+	} else {
+		$sel1 = 'selected';
+	}
+	
+	if (strlen(trim($yhtiorow['karhuviesti2'])) == 0) {
+		$disabled2 = 'disabled';
+	}
+	
+	if (strlen(trim($yhtiorow['karhuviesti3'])) == 0) {
+		$disabled3 = 'disabled';
+	}
+	
+	mysql_data_seek($result,0);
+	?>
+	<form name='lahetaformi' action='' method='post'>
+	<select name='karhuviesti'>
+	    <option <?php echo $sel1 ?> value=1><?php echo t('Karhuviesti 1') ?></option>
+	    <option <?php echo $sel2 . ' ' . $disabled2 ?> value=2><?php echo t('Karhuviesti 2') ?></option>
+	    <option <?php echo $sel3 . ' ' . $disabled3 ?> value=3><?php echo t('Karhuviesti 3') ?></option>
+	</select>
+	</td>
+	</tr>
+	</table>
+	        
+	<?php
 
 	echo "</td><td valign='top' class='back'>";
 
@@ -201,18 +272,20 @@ if ($tee == 'KARHUA')  {
 
 	echo "</table>";
 	echo "</td></tr></table><br>";
-
-	//Poistetaan arraysta käytetyt tunnukset
-	unset($karhuttavat[0]);
-
+	
+	if (isset($ekirje_config) && is_array($ekirje_config)) {
+		$submit_text = 'Lähetä eKirje';
+	} else {
+		$submit_text = 'Tulosta paperille';
+	}
+	
 	echo "<table>";
 	echo "<tr>";
-	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t("Lähetä")."'></td>";
+	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t($submit_text)."'></td>";
 	echo "<td class='back'><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";
 	echo "</tr>";
 	echo "</table><br>";
 
-	echo "<form name='lahetaformi' action='$PHP_SELF' method='post'>";
 	echo "<table><tr>";
 	echo "<th>".t("Laskunpvm")."</th>";
 	echo "<th>".t("Laskunro")."</th>";
@@ -224,7 +297,7 @@ if ($tee == 'KARHUA')  {
 	echo "<th>".t("Lasku karhutaan")."</th></tr>";
 	$summmmma = 0;
 
-	while ($lasku=mysql_fetch_array($result)) {
+	while ($lasku = mysql_fetch_array($result)) {
 		echo "<tr class='aktiivi'><td>";
 		if ($kukarow['taso'] < 2) {
 			echo $lasku["tapvm"];
@@ -271,7 +344,7 @@ if ($tee == 'KARHUA')  {
 		echo "\n<input type='hidden' name='karhuttavat[]' value='$tunnukset'>";
 	}
 
-	echo "<td class='back'><input name='$kentta' type='submit' value='".t("Lähetä")."'></td></form>";
+	echo "<td class='back'><input name='$kentta' type='submit' value='".t($submit_text)."'></td></form>";
 
 	echo "<form name='ohitaformi' action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='tee' value='KARHUA'>";
@@ -282,7 +355,8 @@ if ($tee == 'KARHUA')  {
 		echo "\n<input type='hidden' name='karhuttavat[]' value='$tunnukset'>";
 	}
 
-	echo "<td class='back'><input type='submit' value='".t("Ohita")."'></td>";
+	echo "<td class='back'><input type='hidden' name='tee' value='OHITA'>
+		<input type='submit' value='".t("Ohita")."'></td>";
 	echo "</form></tr>";
 	echo "</table>";
 

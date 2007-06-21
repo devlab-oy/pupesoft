@@ -23,8 +23,9 @@
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
-	function alku () {
-		global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli;
+	function alku ($viesti = null) {
+		global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu,
+			$rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli;
 
 		$firstpage = $pdf->new_page("a4");
 		$pdf->enable('template');
@@ -40,73 +41,98 @@
 
 		//Otsikko
 		//$pdf->draw_rectangle(830, 20,  800, 580, $firstpage, $rectparam);
-		$pdf->draw_text(30, 815,  $yhtiorow["nimi"], $firstpage);
-		$pdf->draw_text(280, 815, t("MAKSUKEHOTUS", $kieli), 	$firstpage);
-		$pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
+		$pdf->draw_text(30, 805,  $yhtiorow["nimi"], $firstpage);
+		$pdf->draw_text(320, 780, t("MAKSUKEHOTUS", $kieli), 	$firstpage);
+		$pdf->draw_text(470, 780, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
 
-		//Vasen sarake
+		// lähettäjä
+		//$pdf->draw_text(mm_pt(22), mm_pt(272), t("Lähettäjä", $kieli), 	$firstpage, $pieni);
+		$iso = array('height' => 11, 'font' => 'Times-Roman');
+		$pdf->draw_text(mm_pt(22), mm_pt(268), strtoupper($yhtiorow["nimi"]), 		$firstpage, $iso);
+		$pdf->draw_text(mm_pt(22), mm_pt(264), strtoupper($yhtiorow["nimitark"]), 	$firstpage, $iso);
+		$pdf->draw_text(mm_pt(22), mm_pt(260), strtoupper($yhtiorow["osoite"]), 		$firstpage, $iso);
+		$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iso);
+		//$pdf->draw_text(mm_pt(22), mm_pt(252), strtoupper($yhtiorow["maa"]), 		$firstpage, $iso);
+		
+		// vastaanottaja
 		//$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
-		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(50, 717, $asiakastiedot["nimi"], 		$firstpage, $norm);
-		$pdf->draw_text(50, 707, $asiakastiedot["nimitark"], 	$firstpage, $norm);
-		$pdf->draw_text(50, 697, $asiakastiedot["osoite"], 		$firstpage, $norm);
-		$pdf->draw_text(50, 687, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"], $firstpage, $norm);
-		$pdf->draw_text(50, 677, $asiakastiedot["maa"], 		$firstpage, $norm);
-
-		$pdf->draw_rectangle(737, 300, 716, 580, $firstpage, $rectparam);
-		$pdf->draw_text(310, 729, t("Ytunnus/Asiakasnumero", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(310, 717, $asiakastiedot["ytunnus"], 			$firstpage, $norm);
-
+		//$pdf->draw_text(mm_pt(22), mm_pt(237), t("Vastaanottaja", $kieli), 	$firstpage, $pieni);
+		$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["nimi"]), 		$firstpage, $iso);
+		$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["nimitark"]), 	$firstpage, $iso);
+		$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["osoite"]), 		$firstpage, $iso);
+		$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iso);
+		
+		// jos vastaanottaja on eri maassa kuin yhtio niin lisätään maan nimi
+		if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
+			$query = sprintf(
+					"SELECT nimi from maat where koodi='%s' AND ryhma_tunnus = ''",
+					mysql_real_escape_string($asiakastiedot['maa'])
+			);
+			
+			$maa_result = mysql_query($query) or pupe_error($query);
+			$maa_nimi = mysql_fetch_array($maa_result);
+			$pdf->draw_text(mm_pt(22), mm_pt(218), $maa_nimi['nimi'], $firstpage, $iso);
+		}
+		
 
 		//Oikea sarake
-		$pdf->draw_rectangle(800, 300, 779, 580, 				$firstpage, $rectparam);
-		$pdf->draw_rectangle(800, 420, 779, 580, 				$firstpage, $rectparam);
-		$pdf->draw_text(310, 792, t("Päivämäärä", $kieli), 		$firstpage, $pieni);
-		$pdf->draw_text(310, 782, date('Y-m-d'), 				$firstpage, $norm);
-		$pdf->draw_text(430, 792, t("Asiaa hoitaa", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(430, 782, $yrow["nimi"], 				$firstpage, $norm);
+		$pdf->draw_rectangle(760, 320, 739, 575, 				$firstpage, $rectparam);
+		$pdf->draw_rectangle(760, 420, 739, 575, 				$firstpage, $rectparam);
+		$pdf->draw_text(330, 752, t("Päivämäärä", $kieli), 		$firstpage, $pieni);
+		$pdf->draw_text(330, 742, date('Y-m-d'), 				$firstpage, $norm);
+		$pdf->draw_text(430, 752, t("Asiaa hoitaa", $kieli), 	$firstpage, $pieni);
+		$pdf->draw_text(430, 742, $yrow["nimi"], 				$firstpage, $norm);
 
-		$pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
-		$pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
-		$pdf->draw_text(310, 771, t("Eräpäivä", $kieli), $firstpage, $pieni);
-
+		$pdf->draw_rectangle(739, 320, 718, 575, $firstpage, $rectparam);
+		$pdf->draw_rectangle(739, 420, 718, 575, $firstpage, $rectparam);
+		$pdf->draw_text(330, 731, t("Eräpäivä", $kieli), $firstpage, $pieni);
+		
 		$paiva	   = date("j");
 		$kuu   	   = date("n");
 		$year  	   = date("Y");
 		$seurday   = date("j",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
 		$seurmonth = date("n",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
 		$seuryear  = date("Y",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-		$pdf->draw_text(310, 761, $seuryear."-".$seurmonth."-".$seurday, $firstpage, $norm);
+		$pdf->draw_text(330, 721, $seuryear."-".$seurmonth."-".$seurday, $firstpage, $norm);
+		
+		$pdf->draw_text(430, 731, t("Puhelin", $kieli), $firstpage, $pieni);
+		$pdf->draw_text(430, 721, $yrow["puhno"], $firstpage, $norm);
+		
+		$pdf->draw_rectangle(718, 320, 697, 575, $firstpage, $rectparam);
+		$pdf->draw_rectangle(718, 420, 697, 575, $firstpage, $rectparam);
+		$pdf->draw_text(330, 710, t("Viivästykorko", $kieli), 	$firstpage, $pieni);
+		$pdf->draw_text(330, 700, $yhtiorow["viivastyskorko"], 	$firstpage, $norm);
+		$pdf->draw_text(430, 710, t("Sähköposti", $kieli), 		$firstpage, $pieni);
+		$pdf->draw_text(430, 700, $yrow["eposti"], 				$firstpage, $norm);
+		
+		$pdf->draw_rectangle(697, 320, 676, 575, $firstpage, $rectparam);
+		$pdf->draw_text(330, 689, t("Ytunnus/Asiakasnumero", $kieli), 	$firstpage, $pieni);
+		$pdf->draw_text(330, 679, $asiakastiedot["ytunnus"], 			$firstpage, $norm);
 
-		$pdf->draw_text(430, 771, t("Puhelin", $kieli), $firstpage, $pieni);
-		$pdf->draw_text(430, 761, $yrow["puhno"], $firstpage, $norm);
-
-		$pdf->draw_rectangle(758, 300, 737, 580, $firstpage, $rectparam);
-		$pdf->draw_rectangle(758, 420, 737, 580, $firstpage, $rectparam);
-		$pdf->draw_text(310, 750, t("Viivästykorko", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(310, 740, $yhtiorow["viivastyskorko"], 	$firstpage, $norm);
-		$pdf->draw_text(430, 750, t("Sähköposti", $kieli), 		$firstpage, $pieni);
-		$pdf->draw_text(430, 740, $yrow["eposti"], 				$firstpage, $norm);
-
+		//Rivit alkaa täsä kohtaa
+		$kala = 540;
+		
+		// lisätään karhuviesti kirjeeseen
 		if ($sivu == 1) {
-			//Rivit alkaa täsä kohtaa
-			$kala = 490;
-
-			$pdf->draw_text(80,  650, t("Arvoisa asiakkaamme.", $kieli),														$firstpage, $norm);
-			$pdf->draw_text(80,  630, t("Huomautamme kohteliaimmin, että allaolevan laskelman mukainen saatavamme on erääntynyt.", $kieli),	$firstpage, $norm);
-			$pdf->draw_text(80,  610, t("Pyydämme ystävällisesti suoritustanne viikon kuluessa.", $kieli),						$firstpage, $norm);
-			$pdf->draw_text(80,  600, t("Muussa tapauksessa katsomme teidän suostuvan siihen, että", $kieli),		$firstpage, $norm);
-			$pdf->draw_text(80,  590, t("voimme periä saatavamme perimiskuluineen Lakimiesten Perintätoimiston kautta ja", $kieli),			$firstpage, $boldi);
-			$pdf->draw_text(80,  580, t("siirtämään teidät jälkivaatimusasiakkaaksi.", $kieli),			$firstpage, $boldi);
-			$pdf->draw_text(80,  560, t("Jos suorituksenne on jo matkalla, on tämä kirje aiheeton.", $kieli),					$firstpage, $norm);
-			$pdf->draw_text(80,  540, t("Yhteyshenkilömme", $kieli).": $yrow[nimi] / $yrow[puhno]",							$firstpage, $norm);
+			// tehdään riveistä max 90 merkkiä
+			$viesti = wordwrap($viesti, 90, "\n");
+			
+            $i = 0;
+            $rivit = explode("\n", $viesti);
+			$rivit[] = '';
+			$rivit[] = t("Yhteyshenkilömme", $kieli) . ": $yrow[nimi] / $yrow[puhno]";
+            foreach ($rivit as $rivi) {
+				// laitetaan 
+                $pdf->draw_text(80, $kala, t($rivi, $kieli), $firstpage, $norm);
+				
+				// seuraava rivi tulee 10 pistettä alemmas kuin tämä rivi
+				$kala -= 10;
+                $i++;
+            }
 		}
-		else {
-			$kala = 620;
-		}
-
-
-
+		
+		$kala -= 10;
+		
 		//Laskurivien otsikkotiedot
 		//eka rivi
 		$pdf->draw_text(30,  $kala, t("Laskun numero", $kieli),				$firstpage, $pieni);
@@ -132,15 +158,23 @@
 
 	function rivi ($firstpage, $summa) {
 		global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
-
-		if (($lask == 29 and $sivu == 1) or ($lask == 37 and $sivu > 1)) {
+		
+		// siirrytäänkö uudelle sivulle?
+		if ($kala < 123) {
 			$sivu++;
 			loppu($firstpage,'');
 			$firstpage = alku();
-			$kala = 605;
 			$lask = 1;
 		}
-
+		/*
+		if (($lask == 21 and $sivu == 1) or ($lask == 31 and $sivu > 1)) {
+			$sivu++;
+			loppu($firstpage,'');
+			$firstpage = alku();
+			$kala = 525;
+			$lask = 1;
+		}
+		*/
 		$pdf->draw_text(30,  $kala, $row["laskunro"],	$firstpage, $norm);
 		$pdf->draw_text(120, $kala, $row["tapvm"], 		$firstpage, $norm);
 		$pdf->draw_text(200, $kala, $row["erpcm"], 		$firstpage, $norm);
@@ -226,7 +260,7 @@
 
 	}
 
-	require('../inc/parametrit.inc');
+	require('inc/parametrit.inc');
 
 	require('pdflib/phppdflib.class.php');
 
@@ -314,19 +348,29 @@
 	$kaatosumma=$kaato["summa"] * -1;
 	if (!$kaatosumma) $kaatosumma='0.00';
 
-	$karhukierros=uusi_karhukierros($kukarow['yhtio']);
-	$firstpage = alku();
+
+    if (isset($_POST['karhuviesti'])) {
+        $karhuviesti = $yhtiorow['karhuviesti' . (int) $_POST['karhuviesti']];
+    } else {
+        // otetaan defaulttina eka viesti
+        $karhuviesti = $yhtiorow['karhuviesti1'];
+    }
+	
+	$firstpage = alku($karhuviesti);
 
 	$summa=0.0;
+	$rivit = array();
 	while ($row = mysql_fetch_array($result)) {
-		liita_lasku($karhukierros,$row['tunnus']);
-		$summa=rivi($firstpage,$summa);
+		$rivit[] = $row;
+		$summa = rivi($firstpage,$summa);
 	}
-
+	
+	// loppusumma
 	$loppusumma = sprintf('%.2f', $summa+$kaatosumma);
-
+	
+	// viimenen sivu
 	loppu($firstpage,$loppusumma);
-
+	
 	//keksitään uudelle failille joku varmasti uniikki nimi:
 	list($usec, $sec) = explode(' ', microtime());
 	mt_srand((float) $sec + ((float) $usec * 100000));
@@ -336,15 +380,74 @@
 	$fh = fopen($pdffilenimi, "w");
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
+	
+	
+	// jos on olemassa ekirje configuraatio niin
+	if (isset($ekirje_config) && is_array($ekirje_config)) {
+		
+		// ---------------------------------------------------------------------
+		// tähän ekirjeen lähetys
+	
+		// pdfekirje luokka
+		include 'inc/ekirje.inc';
+		
+		$ekirje_tunnus = date('dmY') . $asiakastiedot['tunnus'];
+	
+		$info = array(
+			'tunniste'              => $ekirje_tunnus, // asiakkaan oma kirjeen tunniste
+	        'kirjeluokka'           => '1',                    // 1 = priority, 2 = economy
+	        'osasto'                => 'false',                // osastokohtainen erittely
+	        'file_id'               => $ekirje_tunnus,          // lähettäjän tunniste tiedostolle
+	        'kirje_id'              => $ekirje_tunnus,          // kirjeen id
+			'contact_name'          => $kukarow['nimi'],
+			'contact_email'         => $kukarow['eposti'],
+			'contact_phone'         => $kukarow['puhno'],
+			'yritys_nimi'           => trim($yhtiorow['nimi'] . ' ' . $yhtiorow['nimitark']),
+			'yritys_osoite'         => $yhtiorow['osoite'],
+			'yritys_postino'        => $yhtiorow['postino'],
+			'yritys_postitp'        => $yhtiorow['postitp'],
+	        'yritys_maa'            => $yhtiorow['maa'],
+	        'vastaanottaja_nimi'    => trim($asiakastiedot['nimi'] . ' ' . $asiakastiedot['nimitark']),
+	        'vastaanottaja_osoite'  => $asiakastiedot['osoite'],
+	        'vastaanottaja_postino' => $asiakastiedot['postino'],
+	        'vastaanottaja_postitp' => $asiakastiedot['postitp'],
+	        'vastaanottaja_maa'     => $asiakastiedot['maa'],
+	        'sivumaara'             => $sivu,
+		);
+	
+		// otetaan configuraatio filestä salasanat ja muut
+		$info = array_merge($info, (array) $ekirje_config);
+	
+		$ekirje = new Pupe_Pdfekirje($info);
+	
+		//koitetaan lähettää eKirje
+		$ekirje->send($pdffilenimi);
+		
+		// poistetaan filet omalta koneelta
+		$ekirje->clean();
+	}
+	
+	// ------------------------------------------------------------------------
+	//
+	// nyt kirjoitetaan tiedot vasta kantaan kun tiedetään että kirje
+	// on lähtenyt Itellaan tai tulostetaan kirje ainoastaan
+	$karhukierros = uusi_karhukierros($kukarow['yhtio']);
 
-	// itse print komento...
-	$query = "	select komento
-				from kirjoittimet
-				where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kirjoitin]'";
-	$kires = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($kires) == 1) {
-		$kirow=mysql_fetch_array($kires);
-		$line = exec("$kirow[komento] $pdffilenimi");
+	foreach ($rivit as $row) {
+		liita_lasku($karhukierros,$row['tunnus']);
+	}
+	
+	// tulostetaan jos ekirje tunnareita ei ole
+	if (! isset($ekirje_config) || ! is_array($ekirje_config)) {
+		// itse print komento...
+		$query = "	select komento
+					from kirjoittimet
+					where yhtio='{$kukarow['yhtio']}' and tunnus = '{$kukarow['kirjoitin']}'";
+		$kires = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($kires) == 1) {
+			$kirow = mysql_fetch_array($kires);
+			$line = exec("{$kirow['komento']} $pdffilenimi");
+		}
 	}
 ?>

@@ -134,8 +134,7 @@ if ($tee == "ALOITAKARHUAMINEN") {
 						and lasku.summa	!= 0
 						$maksuehtolista
 						group by lasku.tunnus
-						HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))
-						and (maksuehto.jv is null or maksuehto.jv = '')) as laskut
+						HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut
 				JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
 				WHERE lasku.tunnus = laskut.tunnus
 				$konslisa
@@ -171,10 +170,12 @@ if ($tee == 'KARHUA')  {
 				lasku.erpcm, lasku.laskunro, lasku.tapvm, lasku.tunnus,
 				TO_DAYS(now())-TO_DAYS(lasku.erpcm) as ika,
 				max(karhukierros.pvm) as kpvm,
-				count(distinct karhu_lasku.ktunnus) as karhuttu
+				count(distinct karhu_lasku.ktunnus) as karhuttu,
+				if(maksuehto.jv!='', '".t("Jälkivaatimus")."' ,'') jv
 				FROM lasku
 				LEFT JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
 				LEFT JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
+				LEFT JOIN maksuehto on (maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto)
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tunnus in ($karhuttavat[0])
 				GROUP BY lasku.tunnus
@@ -229,6 +230,7 @@ if ($tee == 'KARHUA')  {
 	}
 	
 	mysql_data_seek($result,0);
+	
 	?>
 	<form name='lahetaformi' action='' method='post'>
 	<select name='karhuviesti'>
@@ -305,29 +307,37 @@ if ($tee == 'KARHUA')  {
 	while ($lasku = mysql_fetch_array($result)) {
 		echo "<tr class='aktiivi'><td>";
 		if ($kukarow['taso'] < 2) {
-			echo $lasku["tapvm"];
+			echo tv1dateconv($lasku["tapvm"]);
 		}
 		else {
-			echo "<a href = '../muutosite.php?tee=E&tunnus=$lasku[tunnus]'>$lasku[tapvm]</a>";
+			echo "<a href = '../muutosite.php?tee=E&tunnus=$lasku[tunnus]'>".tv1dateconv($lasku["tapvm"])."</a>";
 		}
 		echo "</td><td>";
 		echo "<a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&laskunro=$lasku[laskunro]'>$lasku[laskunro]</a>";
 		echo "</td><td>";
 		echo $lasku["summa"];
 		echo "</td><td>";
-		echo $lasku["erpcm"];
+		echo tv1dateconv($lasku["erpcm"]);
 		echo "</td><td>";
 		echo $lasku["ika"];
 		echo "</td><td>";
 		echo $lasku["karhuttu"];
 		echo "</td><td>";
-		echo $lasku["kpvm"];
-		echo "</td><td>";
-		echo "<input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' checked>";
+		
+		if ($lasku["kpvm"] != '')
+			echo tv1dateconv($lasku["kpvm"]);
+		
+		echo "</td>";
 
+		if ($lasku["jv"] == "") {
+			$chk = "checked";
+		}
+		else {
+			$chk = "";
+		}
+		echo "<td><input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv]</td></tr>\n";
+		
 		$summmmma += $lasku["summa"];
-
-		echo "</td></tr>\n";
 	}
 
 	$summmmma -= $kaatosumma;

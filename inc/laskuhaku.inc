@@ -75,6 +75,12 @@ if ($tee == 'K') {
 	$jarj = "nimi, summa";
 }
 
+// W = Etsit‰‰n Viestill‰ laskulta
+if ($tee == 'W') {
+	$ehto = "tila in ('H','Y','M','P','Q') and viesti like '%$summa1%'";
+	$jarj = "nimi, summa";
+}
+
 if ($tee != '') {
 
 	$alku += 0;
@@ -186,6 +192,7 @@ if ($tee == '') {
 			<option value = 'N'>".t("nimell‰")."
 			<option value = 'V'>".t("viitteell‰")."
 			<option value = 'K'>".t("kommentilla")."
+			<option value = 'W'>".t("viestill‰")."			
 			</select></td>
 			<td><input type = 'text' name = 'summa1' size=8> - <input type = 'text' name = 'summa2' size=8></td>
 			<td><input type = 'submit' value = '".t("Valitse")."'></td>

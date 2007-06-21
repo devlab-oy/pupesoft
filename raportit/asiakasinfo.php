@@ -3,7 +3,17 @@
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 $useslave = 1;
 
+if (isset($_POST["tee"])) {
+	if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+}
+
 require ("../inc/parametrit.inc");
+
+if (isset($tee) and $tee == "lataa_tiedosto") {
+	readfile("/tmp/".$tmpfilenimi);
+	exit;
+}
 
 if ($tee == 'eposti') {
 
@@ -134,7 +144,22 @@ if ($ytunnus!='') {
 
 // jos meill‰ on onnistuneesti valittu asiakas
 if ($ytunnus!='') {
+	
+	if(include('Spreadsheet/Excel/Writer.php')) {
+		//keksit‰‰n failille joku varmasti uniikki nimi:
+		list($usec, $sec) = explode(' ', microtime());
+		mt_srand((float) $sec + ((float) $usec * 100000));
+		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 
+		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+		$worksheet =& $workbook->addWorksheet('Sheet 1');
+
+		$format_bold =& $workbook->addFormat();
+		$format_bold->setBold();
+		
+		$excelrivi = 0;
+	}
+	
 	echo "<table><tr>";
 	echo "<th valign='top'>".t("ytunnus")."</th>";
 	echo "<th valign='top'>".t("asnro")."</th>";
@@ -220,16 +245,16 @@ if ($ytunnus!='') {
 			}
 
 			$pylvaat = "<table border='0' cellpadding='0' cellspacing='0'><tr>
-			<td valign='bottom' align='center'><img src='../pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
-			<td valign='bottom' align='center'><img src='../pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
-			<td valign='bottom' align='center'><img src='../pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro] %'></td>
+			<td style='vertical-align: bottom; text-align: center;'><img src='../pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
+			<td style='vertical-align: bottom; text-align: center;'><img src='../pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
+			<td style='vertical-align: bottom; text-align: center;'><img src='../pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro] %'></td>
 			</tr></table>";
 
 			if ($sumrow['katepro']=='') $sumrow['katepro'] = '0.0';
-			echo "<td valign='bottom' class='back'>";
+			echo "<td class='back' style='vertical-align: bottom;'>";
 
 			echo "<table width='60'>";
-			echo "<tr><td nowrap align='center' height='55' valign='bottom'>$pylvaat</td></tr>";
+			echo "<tr><td nowrap align='center' height='55' style='vertical-align: bottom;'>$pylvaat</td></tr>";
 			echo "<tr><td nowrap align='right'><font class='info'>$sumrow[kausi]</font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='info'><font class='myynti'>$sumrow[myynti]</font></font></td></tr>";
 			echo "<tr><td nowrap align='right'><font class='info'><font class='kate'>$sumrow[kate]</font></font></td></tr>";
@@ -402,17 +427,29 @@ if ($ytunnus!='') {
 	if($rajaus == "" or $rajaus == "ALENNUKSET") {
 		echo "<br><font class='message'>".t("Asiakkaan alennusryhm‰t, alennustaulukko ja alennushinnat")."</font><hr>";
 		echo "<br><a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&lopetus=$lopetus'>".t("Tulosta alennustaulukko")."</a><br><br>";
-		if ($asale!='') {
+		if ($asale!='' or $yhdistetty!='') {
 			// tehd‰‰n asiakkaan alennustaulukot
 			$query = "select * from perusalennus where yhtio='$kukarow[yhtio]' order by ryhma";
 			$result = mysql_query($query) or pupe_error($query);
 
-			$asale  = "<table>";
+			$asale  = "<table><caption><font class='message'>".t("Aletaulukko")."</font></caption>";
 			$asale .= "<tr><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Prosentti")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th><th>".t("Tyyppi")."</th></tr>";
+
+			if(isset($workbook) and $yhdistetty=="") {
+				$worksheet->write($excelrivi, 0, "Ytunnus", $format_bold);
+				$worksheet->write($excelrivi, 1, "AS-Ryhm‰", $format_bold);
+				$worksheet->write($excelrivi, 2, "Tuoteno", $format_bold);
+				$worksheet->write($excelrivi, 3, "Aleryhm‰", $format_bold);				
+				$worksheet->write($excelrivi, 4, "Prosentti", $format_bold);
+				$worksheet->write($excelrivi, 5, "Alkupvm", $format_bold);
+				$worksheet->write($excelrivi, 6, "Loppupvm", $format_bold);
+				$worksheet->write($excelrivi, 7, "Tyyppi", $format_bold);
+				$excelrivi++;
+			}
 
 			while ($alerow = mysql_fetch_array($result)) {
 
-				$mita  = "Perus";
+				$mita   = "<font class='info'>".t("Perus")."</font>";
 				$ryhma = $alerow['ryhma'];
 				$ale   = $alerow['alennus'];
 				$showytunnus = 'PERUS';
@@ -420,7 +457,7 @@ if ($ytunnus!='') {
 
 
 				if ($ale != 0.00) {
-					$asale .= "<tr>
+					$asale .= "<tr class='aktiivi'>
 						<td><font class='info'>$showytunnus	<font></td>
 						<td><font class='info'>$ryhma	<font></td>
 						<td><font class='info'>$ale		<font></td>
@@ -431,11 +468,14 @@ if ($ytunnus!='') {
 				}
 			}
 
-			$query = "select * from asiakasalennus where yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or asiakas_ryhma = '$asiakasrow[ryhma]') order by asiakas_ryhma, ytunnus, ryhma, tuoteno";
+			$query = "	SELECT asiakasalennus.*, tuote.nimitys, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
+						FROM asiakasalennus
+						LEFT JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno
+						WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or asiakas_ryhma = '$asiakasrow[ryhma]') order by asiakas_ryhma, ytunnus, asiakasalennus.ryhma, asiakasalennus.tuoteno";
 			$asres = mysql_query($query) or pupe_error($query);
 
 			while ($asrow = mysql_fetch_array($asres)) {
-				$mita  = "<font class='katepros'>".t("Asiakas")."</font>";
+				$mita  = "<font class='info'>".t("Asiakas")."</font>";
 
 				if ($asrow['asiakas_ryhma'] != '') {
 					$showytunnus = "(RY) ".$asrow['asiakas_ryhma'];
@@ -446,40 +486,85 @@ if ($ytunnus!='') {
 
 				if ($asrow['ryhma'] != '') {
 					$showryhma = "(RY) ".$asrow['ryhma'];
+					$asrow['tuoteno']=$asrow['nimitys']='';
 				}
 				else {
-					$showryhma = $asrow['tuoteno'];
+					$showryhma = $asrow['tuoteno']." ".$asrow['nimitys'];
 				}
 
 				$ryhma = $asrow['ryhma'];
 				$ale   = $asrow['alennus'];
-
-				$asale .= "<tr>
-					<td><font class='info'>$showytunnus	<font></td>
-					<td><font class='info'>$showryhma	<font></td>
-					<td><font class='info'>$ale		<font></td>
-					<td><font class='info'>$asrow[alkupvm]<font></td>
-					<td><font class='info'>$asrow[loppupvm]<font></td>
-					<td><font class='info'>$mita	<font></td>
-					</tr>";
+				
+				if($yhdistetty=='') {
+					$asale .= "<tr class='aktiivi'>
+						<td><font class='info'>$showytunnus	<font></td>
+						<td><font class='info'>$showryhma	<font></td>
+						<td><font class='info'>$ale		<font></td>
+						<td><font class='info'>$asrow[alkupvm]<font></td>
+						<td><font class='info'>$asrow[loppupvm]<font></td>
+						<td><font class='info'>$mita	<font></td>
+						</tr>";
+						
+					if(isset($workbook) and $yhdistetty=="") {
+						$worksheet->write($excelrivi, 0, $asrow['asiakas_ryhma'], $format_bold);
+						$worksheet->write($excelrivi, 1, $asrow['ytunnus'], $format_bold);
+						$worksheet->write($excelrivi, 2, $asrow['tuoteno']." ".$asrow['nimitys'], $format_bold);
+						$worksheet->write($excelrivi, 3, $asrow['ryhma'], $format_bold);				
+						$worksheet->write($excelrivi, 4, $asrow['alennus'], $format_bold);
+						$worksheet->write($excelrivi, 5, $asrow["alkupvm"], $format_bold);
+						$worksheet->write($excelrivi, 6, $asrow["loppupvm"], $format_bold);
+						$worksheet->write($excelrivi, 7, $mita, $format_bold);
+						$excelrivi++;
+					}						
+				}
+				else {
+					unset($dadaArray);					
+					$dadaArray["ytunnus"]		= $showytunnus;
+					$dadaArray["asiakas_ryhma"]	= $asrow['ryhma'];
+					$dadaArray["tuoteno"]		= $asrow['tuoteno']." ".$asrow['nimitys'];
+					$dadaArray["ale"]			= $ale;
+					$dadaArray["alkupvm"]		= $asrow["alkupvm"];
+					$dadaArray["loppupvm"]		= $asrow["loppupvm"];
+					$dadaArray["mita"]			= $mita;
+					$yhdistetty_array[]	= $dadaArray;
+				}
 
 				if ($tee == 'eposti') {
 					rivi($firstpage);
 				}
 			}
-
-			$asale .= "</table>";
+			
+			if($yhdistetty=='') {
+				$asale .= "</table>";
+			}
+			else {
+				$asale = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ aletaulukko")."</a>";				
+			}
 		}
 		else {
 			$asale = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ aletaulukko")."</a>";
 		}
 
-		if ($ashin!='') {
+		if ($ashin!='' or $yhdistetty!='') {
 			// haetaan asiakas hintoaja
-			$ashin  = "<table>";
+			$ashin  = "<table><caption><font class='message'>".t("Asiakashinnat")."</font></caption>";
 			$ashin .= "<tr><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Hinta")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th></tr>";
 
-			$query = "select * from asiakashinta where yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or asiakas_ryhma = '$asiakasrow[ryhma]') order by asiakas_ryhma, ytunnus, ryhma, tuoteno";
+			if(isset($workbook) and $yhdistetty=="") {
+				$worksheet->write($excelrivi, 0, "Ytunnus", $format_bold);
+				$worksheet->write($excelrivi, 1, "AS-Ryhm‰", $format_bold);
+				$worksheet->write($excelrivi, 2, "Tuoteno", $format_bold);
+				$worksheet->write($excelrivi, 3, "Aleryhm‰", $format_bold);				
+				$worksheet->write($excelrivi, 4, "Hinta", $format_bold);
+				$worksheet->write($excelrivi, 5, "Alkupvm", $format_bold);
+				$worksheet->write($excelrivi, 6, "Loppupvm", $format_bold);
+				$excelrivi++;
+			}						
+
+			$query = "	SELECT asiakashinta.*, tuote.nimitys, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
+						FROM asiakashinta
+						LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
+						WHERE asiakashinta.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or asiakas_ryhma = '$asiakasrow[ryhma]') order by asiakas_ryhma, ytunnus, asiakashinta.ryhma, asiakashinta.tuoteno";
 			$asres = mysql_query($query) or pupe_error($query);
 
 			while ($asrow = mysql_fetch_array($asres)) {
@@ -493,35 +578,78 @@ if ($ytunnus!='') {
 
 				if ($asrow['ryhma'] != '') {
 					$showryhma = "(RY) ".$asrow['ryhma'];
+					$asrow['tuoteno']=$asrow['nimitys']='';					
 				}
 				else {
-					$showryhma = $asrow['tuoteno'];
+					$showryhma = $asrow['tuoteno']." ".$asrow['nimitys'];
 				}
 
 				$ryhma = $asrow['ryhma'];
 				$hinta   = $asrow['hinta'];
 
-				$ashin .= "<tr>
-					<td><font class='info'>$showytunnus	<font></td>
-					<td><font class='info'>$showryhma	<font></td>
-					<td><font class='info'>$hinta		<font></td>
-					<td><font class='info'>$asrow[alkupvm]<font></td>
-					<td><font class='info'>$asrow[loppupvm]<font></td>
-					</tr>";
+				if($yhdistetty=='') {
+					$ashin .= "<tr class='aktiivi'>
+						<td><font class='info'>$showytunnus	<font></td>
+						<td><font class='info'>$showryhma	<font></td>
+						<td><font class='info'>$hinta		<font></td>
+						<td><font class='info'>$asrow[alkupvm]<font></td>
+						<td><font class='info'>$asrow[loppupvm]<font></td>
+						</tr>";
+						
+					if(isset($workbook) and $yhdistetty=="") {
+						$worksheet->write($excelrivi, 0, $asrow['ytunnus']);
+						$worksheet->write($excelrivi, 1, $asrow['asiakas_ryhma']);
+						$worksheet->write($excelrivi, 2, $asrow['tuoteno']." ".$asrow['nimitys']);
+						$worksheet->write($excelrivi, 3, $asrow['ryhma']);				
+						$worksheet->write($excelrivi, 4, $asrow['hinta']);
+						$worksheet->write($excelrivi, 5, $asrow["alkupvm"]);
+						$worksheet->write($excelrivi, 6, $asrow["loppupvm"]);
+						$excelrivi++;
+					}												
+				}
+				else {
+					unset($dadaArray);
+					$dadaArray["ytunnus"]			= $asrow['ytunnus'];
+					$dadaArray["asiakas_ryhma"]		= $asrow['asiakas_ryhma'];
+					$dadaArray["ryhma"]				= $asrow['ryhma'];
+					$dadaArray["hinta"]				= $hinta;
+					$dadaArray["alkupvm"]			= $asrow["alkupvm"];
+					$dadaArray["loppupvm"]			= $asrow["loppupvm"];
+					$yhdistetty_array[] = $dadaArray;
+				}
 			}
-
-			$ashin .= "</table>";
+			
+			if($yhdistetty=='') {
+				$ashin .= "</table>";
+			}
+			else {
+				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&lopetus=$lopetus'>".t("N‰yt‰ asiakashinnat")."</a>";
+			}
 		}
 		else {
 			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&lopetus=$lopetus'>".t("N‰yt‰ asiakashinnat")."</a>";
 		}
 
-		if ($aletaulu!='' or $tee == 'eposti') {
+		if ($aletaulu!='' or $tee == 'eposti' or $yhdistetty!='') {
 			// tehd‰‰n asiakkaan alennustaulukko...
-			$aletaulu  = "<table>";
+			$aletaulu  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
 			$aletaulu .= "<tr><th>".t("Os")."</th><th>".t("Osasto")."</th><th>".t("Tryno")."</th><th>".t("Tuoteryhm‰")."</th><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Prosentti")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th><th>".t("Tyyppi")."</th></tr>";
+			if(isset($workbook) and $yhdistetty=="") {
+				$worksheet->write($excelrivi, 0, "Os", $format_bold);
+				$worksheet->write($excelrivi, 1, "Osasto", $format_bold);
+				$worksheet->write($excelrivi, 2, "Tryno", $format_bold);
+				$worksheet->write($excelrivi, 3, "Tuoteryhm‰", $format_bold);				
+				$worksheet->write($excelrivi, 4, "AS-Ryhm‰", $format_bold);
+				$worksheet->write($excelrivi, 5, "Tuoteno", $format_bold);
+				$worksheet->write($excelrivi, 6, "Aleryhm‰", $format_bold);
+				$worksheet->write($excelrivi, 7, "Prosentti", $format_bold);
+				$worksheet->write($excelrivi, 8, "Alkupvm", $format_bold);
+				$worksheet->write($excelrivi, 9, "Loppupvm", $format_bold);
+				$worksheet->write($excelrivi, 10, "Tyyppi", $format_bold);												
+				$excelrivi++;
+			}						
 
-			$query = "(select osasto, try, aleryhma, asiakasalennus.tuoteno, ryhma, ytunnus, asiakas_ryhma, alennus, alkupvm, loppupvm
+			$query = "(select osasto, try, aleryhma, asiakasalennus.tuoteno, tuote.nimitys, ryhma, ytunnus, asiakas_ryhma, alennus, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
 						from asiakasalennus, tuote
 						where asiakasalennus.yhtio = tuote.yhtio
 						and asiakasalennus.yhtio='$kukarow[yhtio]'
@@ -532,7 +660,7 @@ if ($ytunnus!='') {
 						and try != 0
 						group by 1,2,3,4,5,6,7,8,9,10)
 						UNION
-						(select osasto, try, aleryhma, asiakasalennus.tuoteno, ryhma, ytunnus, asiakas_ryhma, alennus, alkupvm, loppupvm
+						(select osasto, try, aleryhma, asiakasalennus.tuoteno, tuote.nimitys, ryhma, ytunnus, asiakas_ryhma, alennus, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
 						from asiakasalennus, tuote
 						where asiakasalennus.yhtio = tuote.yhtio
 						and asiakasalennus.yhtio='$kukarow[yhtio]'
@@ -543,7 +671,7 @@ if ($ytunnus!='') {
 						and try != 0
 						group by 1,2,3,4,5,6,7,8,9,10)
 						UNION
-						(select osasto, try, aleryhma, '1' as tuoteno, ryhma, '1' as ytunnus, '1' as asiakas_ryhma, alennus, 'perus' as alkupvm, '1' as loppupvm
+						(select osasto, try, aleryhma, '1' as tuoteno, tuote.nimitys, ryhma, '1' as ytunnus, '1' as asiakas_ryhma, alennus, 'perus' as alkupvm, '1' as loppupvm
 						from perusalennus, tuote
 						where 
 						perusalennus.yhtio = tuote.yhtio
@@ -559,24 +687,28 @@ if ($ytunnus!='') {
 
 			while ($alerow = mysql_fetch_array($result)) {
 				if ($alerow['alkupvm'] == 'perus') {
-						$mita   = "Perus";
-						$alerow['ytunnus'] = '';
-						$ale    = $alerow['alennus'];
-						$alerow['alkupvm'] = '----------';
-						$alerow['loppupvm'] = '----------';
+					$mita   = "<font class='info'>".t("Perus")."</font>";
+					$alerow['ytunnus'] = '';
+					$ale    = $alerow['alennus'];
+					$alerow['alkupvm'] = '----------';
+					$alerow['loppupvm'] = '----------';
 
 				}
 				else {
-					$mita   = "<font class='katepros'>".t("Asiakas")."</font>";
+					$mita   = "<font class='info'>".t("Asiakas")."</font>";
 					$ale    = $alerow['alennus'];
 					if ($alerow['ytunnus'] == '') {
-						$alerow['ytunnus'] = "(RY) ".$alerow['asiakas_ryhma'];
-					}
-					if ($alerow['tuoteno'] == '') {
-						$alerow['aleryhma'] = "(RY) ".$alerow['aleryhma'];
+						$showytunnus = "(RY) ".$alerow['asiakas_ryhma'];
 					}
 					else {
-						$alerow['aleryhma'] = $alerow['tuoteno'];
+						$showytunnus = $alerow['ytunnus'];
+					}
+					
+					if ($alerow['tuoteno'] == '') {
+						$showaleryhma = "(RY) ".$alerow['aleryhma'];
+					}
+					else {
+						$showaleryhma = $alerow['tuoteno']." ".$alerow['nimitys'];
 					}
 				}
 
@@ -600,29 +732,142 @@ if ($ytunnus!='') {
 
 				// n‰ytet‰‰n rivi vaan jos ale on olemassa ja se on erisuuri kuin nolla. Lis‰ksi tuoteryhm‰ll‰ on pakko olla nimi...
 				if ($ale != "" and $ale != 0.00) {
-					$aletaulu .= "<tr>
-						<td><font class='info'>$alerow[osasto]<font></td>
-						<td><font class='info'>$osaro[selitetark]<font></td>
-						<td><font class='info'>$alerow[try]<font></td>
-						<td><font class='info'>$tryro[selitetark]<font></td>
-						<td><font class='info'>$alerow[ytunnus]</td>
-						<td><font class='info'>$alerow[aleryhma]</td>
-						<td><font class='info'>$ale<font></td>
-						<td><font class='info'>$alerow[alkupvm]</td>
-						<td><font class='info'>$alerow[loppupvm]</td>
-						<td><font class='info'>$mita<font></td>
-						</tr>";
+					if($yhdistetty=='') {
+						$aletaulu .= "<tr class='aktiivi'>
+							<td><font class='info'>$alerow[osasto]<font></td>
+							<td><font class='info'>$osaro[selitetark]<font></td>
+							<td><font class='info'>$alerow[try]<font></td>
+							<td><font class='info'>$tryro[selitetark]<font></td>
+							<td><font class='info'>$showytunnus</td>
+							<td><font class='info'>$showaleryhma</td>
+							<td><font class='info'>$ale<font></td>
+							<td><font class='info'>$alerow[alkupvm]</td>
+							<td><font class='info'>$alerow[loppupvm]</td>
+							<td><font class='info'>$mita<font></td>
+							</tr>";
 
-					if ($tee == 'eposti') {
-						rivi ($firstpage, $osaro["selitetark"], $tryro["selitetark"], $alerow["ytunnus"], $alerow["aleryhma"], $ale);
+						if(isset($workbook) and $yhdistetty=="") {							
+							$worksheet->write($excelrivi, 0, $alerow["osasto"]);
+							$worksheet->write($excelrivi, 1, $osaro["selitetark"]);
+							$worksheet->write($excelrivi, 2, $alerow["try"]);
+							$worksheet->write($excelrivi, 3, $tryro["selitetark"]);				
+							$worksheet->write($excelrivi, 4, $alerow["ytunnus"]);
+							$worksheet->write($excelrivi, 5, $alerow['asiakas_ryhma']);
+							$worksheet->write($excelrivi, 6, $alerow['aleryhma']);
+							$worksheet->write($excelrivi, 7, trim($alerow['tuoteno']." ".$alerow['nimitys']));
+							$worksheet->write($excelrivi, 8, $alerow['alkupvm']);
+							$worksheet->write($excelrivi, 9, $alerow['loppupvm']);
+							$worksheet->write($excelrivi, 10, $mita);												
+							$excelrivi++;
+						}						
+							
+						if ($tee == 'eposti') {
+							rivi ($firstpage, $osaro["selitetark"], $tryro["selitetark"], $alerow["ytunnus"], $alerow["aleryhma"], $ale);
+						}
+					}
+					else {
+						unset($dadaArray);
+						if($alerow["aleryhma"]==0) $alerow["aleryhma"]="";
+						$dadaArray["osasto"]			= $alerow["osasto"];
+						$dadaArray["osasto_nimi"]		= $osaro["selitetark"];
+						$dadaArray["try"]				= $alerow["try"];
+						$dadaArray["try_nimi"]			= $tryro["selitetark"];
+						$dadaArray["ytunnus"]			= $alerow["ytunnus"];
+						$dadaArray["ryhma"]				= $alerow["aleryhma"];
+						$dadaArray["tuoteno"]			= $alerow['tuoteno']." ".$alerow['nimitys'];
+						$dadaArray["ale"]				= $ale;
+						$dadaArray["alkupvm"]			= $asrow["alkupvm"];
+						$dadaArray["loppupvm"]			= $asrow["loppupvm"];
+						$dadaArray["mita"]				= $mita;						
+						$yhdistetty_array[] = $dadaArray;
 					}
 				}
 			}
-
-			$aletaulu .= "</table>";
+			
+			if($yhdistetty=='') {
+				$aletaulu .= "</table>";			
+			}
+			else {
+				$aletaulu = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+			}
 		}
 		else {
 			$aletaulu = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+		}
+
+
+		if ($yhdistetty!='' or $tee == 'eposti') {
+			// tehd‰‰n asiakkaan alennustaulukko...
+			$yhdistetty  = "<table><caption><font class='message'>".t("Yhdistetty alennustaulukko")."</font></caption>";
+			$yhdistetty .= "<tr>
+				<th>".t("Ytunnus")."</th>
+				<th>".t("AS-Ryhm‰")."</th>
+				<th>".t("Os")."</th>
+				<th>".t("Osasto")."</th>
+				<th>".t("Tryno")."</th>
+				<th>".t("Tuoteryhm‰")."</th>
+				<th>".t("Aleryhm‰")."</th>	
+				<th>".t("Tuoteno")."</th>							
+				<th>".t("Prosentti")."</th>
+				<th>".t("Hinta")."</th>
+				<th>".t("Alkupvm")."</th>
+				<th>".t("Loppupvm")."</th>
+				<th>".t("Tyyppi")."</th>
+				</tr>";
+			
+			if(isset($workbook)) {							
+				$worksheet->write($excelrivi, 0, "Ytunnus", $format_bold);
+				$worksheet->write($excelrivi, 1, "Os", $format_bold);
+				$worksheet->write($excelrivi, 2, "Osasto", $format_bold);
+				$worksheet->write($excelrivi, 3, "Tryno", $format_bold);
+				$worksheet->write($excelrivi, 4, "Tuoteryhm‰", $format_bold);				
+				$worksheet->write($excelrivi, 5, "AS-Ryhm‰", $format_bold);
+				$worksheet->write($excelrivi, 6, "Tuoteno", $format_bold);
+				$worksheet->write($excelrivi, 7, "Aleryhm‰", $format_bold);
+				$worksheet->write($excelrivi, 8, "Hinta", $format_bold);			
+				$worksheet->write($excelrivi, 9, "Alkupvm", $format_bold);
+				$worksheet->write($excelrivi, 10, "Loppupvm", $format_bold);
+				$worksheet->write($excelrivi, 11, "Tyyppi", $format_bold);												
+				$excelrivi++;
+			}									
+			
+			foreach($yhdistetty_array as $value) {
+				$yhdistetty .= "<tr>
+					<font class='info'><td>{$value["ytunnus"]}</td></font>
+					<font class='info'><td>{$value["asiakas_ryhma"]}</td></font>
+					<font class='info'><td>{$value["osasto"]}</td></font>
+					<font class='info'><td>{$value["osasto_nimi"]}</td></font>
+					<font class='info'><td>{$value["try"]}</td></font>
+					<font class='info'><td>{$value["try_nimi"]}</td></font>
+					<font class='info'><td>{$value["ryhma"]}</td></font>					
+					<font class='info'><td>{$value["tuoteno"]}</td></font>
+					<font class='info'><td>{$value["ale"]}</td></font>
+					<font class='info'><td>{$value["hinta"]}</td></font>
+					<font class='info'><td>{$value["alkupvm"]}</td></font>
+					<font class='info'><td>{$value["loppupvm"]}</td></font>
+					<font class='info'><td>{$value["mita"]}</td></font>
+					</tr>";
+				
+				if(isset($workbook)) {
+					$worksheet->write($excelrivi, 0, $value["ytunnus"]);
+					$worksheet->write($excelrivi, 1, $value["osasto"]);
+					$worksheet->write($excelrivi, 2, $value["osasto_nimi"]);
+					$worksheet->write($excelrivi, 3, $value["try"]);
+					$worksheet->write($excelrivi, 4, $value["try_nimi"]);				
+					$worksheet->write($excelrivi, 5, $value["asiakas_ryhma"]);
+					$worksheet->write($excelrivi, 6, $value["tuoteno"]);
+					$worksheet->write($excelrivi, 7, $value["ale"]);
+					$worksheet->write($excelrivi, 8, $value["hinta"]);			
+					$worksheet->write($excelrivi, 9, $value["alkupvm"]);
+					$worksheet->write($excelrivi, 10, $value["loppupvm"]);
+					$worksheet->write($excelrivi, 11, strip_tags($value["mita"]));
+					$excelrivi++;
+				}
+			} 
+			$yhdistetty .= "</table>";
+		}
+		else {
+			$yhdistetty = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&yhdistetty=kylla&lopetus=$lopetus'>".t("Yhdistetty alennustaulukko")."</a>";
 		}
 
 		// piirret‰‰n ryhmist‰ ja hinnoista taulukko..
@@ -632,8 +877,24 @@ if ($ytunnus!='') {
 				<td valign='top' class='back'>$aletaulu</td>
 				<td class='back'></td>
 				<td valign='top' class='back'>$ashin</td>
+				<td class='back'></td>				
+				<td valign='top' class='back'>$yhdistetty</td>
 			</tr></table>";
-
+		
+		if(isset($workbook) and $excelrivi>1) {
+			$workbook->close();
+			
+			echo "<table>";
+			echo "<tr><th>".t("Tallenna tulos").":</th>";
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+			echo "<input type='hidden' name='kaunisnimi' value='Alennustaulukko.xls'>";
+			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+			echo "</table><br>";
+			
+		}
+		
 		if ($tee == 'eposti') {
 			//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());

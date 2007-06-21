@@ -281,7 +281,12 @@ if ($tee == 'KARHUA')  {
 	
 	echo "<table>";
 	echo "<tr>";
-	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t($submit_text)."'></td>";
+	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t('Tulosta paperille')."'></td>";
+
+	if (isset($ekirje_config) and is_array($ekirje_config)) {
+		echo "<td class='back'><input type='button' onclick='document.lahetaformi.ekirje_laheta.click();' value='".t('L‰het‰ eKirje')."'></td>";
+	}
+	
 	echo "<td class='back'><input type='button' onclick='javascript:document.ohitaformi.submit();' value='".t("Ohita")."'></td>";
 	echo "</tr>";
 	echo "</table><br>";
@@ -344,7 +349,14 @@ if ($tee == 'KARHUA')  {
 		echo "\n<input type='hidden' name='karhuttavat[]' value='$tunnukset'>";
 	}
 
-	echo "<td class='back'><input name='$kentta' type='submit' value='".t($submit_text)."'></td></form>";
+	echo "<td class='back'><input name='$kentta' type='submit' value='".t('Tulosta paperille')."'>";
+	
+	// voiko l‰hett‰‰ eKirjeen?
+	if (isset($ekirje_config) and is_array($ekirje_config)) {
+		echo "<input type='submit' name='ekirje_laheta' value='" . t('L‰het‰ eKirje') . "'>";
+	}
+	
+	echo "</td></form>";
 
 	echo "<form name='ohitaformi' action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='tee' value='KARHUA'>";

@@ -382,8 +382,10 @@
 	fclose($fh);
 	
 	
-	// jos on olemassa ekirje configuraatio niin
-	if (isset($ekirje_config) && is_array($ekirje_config)) {
+	// jos halutaan eKirje sek‰ configuraatio on olemassa niin
+	// l‰hetet‰‰n eKirje
+	if (isset($_POST['ekirje_laheta']) === true
+	and (isset($ekirje_config) and is_array($ekirje_config))) {
 		
 		// ---------------------------------------------------------------------
 		// t‰h‰n ekirjeen l‰hetys
@@ -437,8 +439,9 @@
 		liita_lasku($karhukierros,$row['tunnus']);
 	}
 	
-	// tulostetaan jos ekirje tunnareita ei ole
-	if (! isset($ekirje_config) || ! is_array($ekirje_config)) {
+	// tulostetaan jos ei l‰hetet‰ ekirjett‰
+	if (isset($_POST['ekirje_laheta']) === false) {
+		
 		// itse print komento...
 		$query = "	select komento
 					from kirjoittimet

@@ -113,17 +113,16 @@
 		$laskunroloppu	= "";
 	}
 
-	if ($tee == "" or $tee == 'ETSILASKU'){
+	if (($tee == "" or $tee == 'ETSILASKU') and $toim != 'SIIRTOLISTA'){
 		if ($ytunnus != '') {
-
 			if ($toim == 'OSTO' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'TUOTETARRA') {
 				require ("../inc/kevyt_toimittajahaku.inc");
 			}
-			elseif ($toim != 'SIIRTOLISTA') {
+			else {
 				require ("../inc/asiakashaku.inc");
 			}
-
 		}
+		
 		if ($ytunnus != '') {
 			$tee = "ETSILASKU";
 		}
@@ -133,6 +132,18 @@
 
 		if ($laskunro > 0) {
 			$tee = "ETSILASKU";
+		}
+
+		if ($otunnus > 0) {
+			$tee = 'ETSILASKU';
+		}
+	}
+	if (($tee == "" or $tee == 'ETSILASKU') and $toim == 'SIIRTOLISTA'){
+		if ($lahettava_varasto != '' or $vastaanottava_varasto != '') {
+			$tee = "ETSILASKU";
+		}
+		else {
+			$tee = "";
 		}
 
 		if ($otunnus > 0) {
@@ -246,9 +257,16 @@
 		if ($toim == "SIIRTOLISTA") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa tariffilista
 			$where1 = " lasku.tila = 'G' ";
-
-			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+			
+			$where2 = " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+							
+			if ($lahettava_varasto != '') {
+				$where2 .= " and lasku.varasto = '$lahettava_varasto'";
+			}
+			if ($vastaanottava_varasto != '') {
+				$where2 .= " and lasku.clearing = '$vastaanottava_varasto'";
+			}
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
@@ -1624,7 +1642,41 @@
 
 
 		if (trim($toim) == "SIIRTOLISTA") {
-			echo "<tr><th>".t("Varaston tunnus")."</th><input type='text' size='10' name='ytunnus'></td></tr>";
+			
+			echo "<tr><th>".t("Lähettävä varasto")."</th><td>";
+			
+			$query = "	SELECT *
+						FROM varastopaikat
+						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
+			$vtresult = mysql_query($query) or pupe_error($query);
+
+			echo "<select name='lahettava_varasto'>";
+			echo "<option value=''>".t("Valitse varasto")."</option>";
+
+			while ($vrow = mysql_fetch_array($vtresult)) {
+				echo "<option value='$vrow[tunnus]'>$vrow[maa] $vrow[nimitys]</option>";
+			}
+			echo "</select>";
+			
+			echo "</td></tr>";
+			
+			echo "<tr><th>".t("Vastaanottava varasto")."</th><td>";
+			
+			$query = "	SELECT *
+						FROM varastopaikat
+						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
+			$vtresult = mysql_query($query) or pupe_error($query);
+
+			echo "<select name='vastaanottava_varasto'>";
+			echo "<option value=''>".t("Valitse varasto")."</option>";
+
+			while ($vrow = mysql_fetch_array($vtresult)) {
+				echo "<option value='$vrow[tunnus]'>$vrow[maa] $vrow[nimitys]</option>";
+			}
+			echo "</select>";
+			
+			echo "</td></tr>";
+			
 			echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
 		}
 		else {

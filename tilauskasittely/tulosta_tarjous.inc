@@ -415,7 +415,7 @@
 			$lask--;
 			
 			// Lopputekstit
-			loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous[$sivu], 1, $total);
+			loppu_tarjous ($pdf_tarjous, $laskurow, $kieli, $page_tarjous[1], 1, $total);
 
 			// Tulostetaan sivu
 			print_pdf_tarjous ($pdf_tarjous, $komento, $tee);

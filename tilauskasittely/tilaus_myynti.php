@@ -3119,7 +3119,7 @@ if ($tee == '') {
 
 								while($kulukeikkarow = mysql_fetch_array($keikkares)) {
 									// Haetaan kaikki keikkaan liitettyjen laskujen summa
-									$query = "	SELECT round(sum(summa*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
+									$query = "	SELECT round(sum(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
 												FROM lasku
 												WHERE yhtio		= '$kukarow[yhtio]'
 												and tila 		= 'K'
@@ -3148,7 +3148,7 @@ if ($tee == '') {
 								//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on HYVITYSTÄ
 								
 								//Tähän hyvitysriviin liitetyt sarjanumerot
-								$query = "	SELECT sarjanumero
+								$query = "	SELECT sarjanumero, kaytetty
 											FROM sarjanumeroseuranta
 											WHERE yhtio 		= '$kukarow[yhtio]' 
 											and ostorivitunnus 	= '$row[tunnus]'";
@@ -3165,6 +3165,7 @@ if ($tee == '') {
 												WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]' 
 												and sarjanumeroseuranta.tuoteno 	= '$row[tuoteno]'
 												and sarjanumeroseuranta.sarjanumero = '$sarjarow[sarjanumero]'
+												and sarjanumeroseuranta.kaytetty 	= '$sarjarow[kaytetty]'
 												and sarjanumeroseuranta.myyntirivitunnus > 0
 												and sarjanumeroseuranta.ostorivitunnus   > 0
 												ORDER BY sarjanumeroseuranta.tunnus
@@ -3175,8 +3176,10 @@ if ($tee == '') {
 									$ostohinta += $sarjarow1["ostohinta"];
 								}
 								
-								// Kate = Hinta - Alkuperäinen ostohinta								
-								$kate = sprintf('%.2f',100 * ($kotisumma_alviton*-1 - $ostohinta)/$kotisumma_alviton)."%";	
+								// Kate = Hinta - Alkuperäinen ostohinta
+								if ($kotisumma_alviton != 0) {								
+									$kate = sprintf('%.2f',100 * ($kotisumma_alviton*-1 - $ostohinta)/$kotisumma_alviton)."%";	
+								}
 							}
 							else {
 								$kate = "N/A";

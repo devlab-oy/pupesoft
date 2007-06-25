@@ -125,7 +125,7 @@ if ($tulostakopio == "kylla") {
 }
 else {
 	if ($tulostuskpl == 0) {
-		$tulostakolli = 1;
+		$tulostakolli = 0;
 	}
 	else {
 		$tulostakolli = $tulostuskpl;
@@ -421,24 +421,25 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 }
 
+if ($tulostakolli > 0) {
+	//keksitään uudelle failille joku varmasti uniikki nimi:
+	$pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(),true)).".pdf";
 
-//keksitään uudelle failille joku varmasti uniikki nimi:
-$pdffilenimi = "/tmp/rahtikirja-".md5(uniqid(rand(),true)).".pdf";
+	//kirjoitetaan pdf faili levylle..
+	$fh = fopen($pdffilenimi, "w");
+	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+	fclose($fh);
 
-//kirjoitetaan pdf faili levylle..
-$fh = fopen($pdffilenimi, "w");
-if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-fclose($fh);
+	//tulostetaan PDF
+	$line = exec("$kirjoitin $pdffilenimi");
 
-//tulostetaan PDF
-$line = exec("$kirjoitin $pdffilenimi");
+	//väliaikaisesti myös emailiin
+	//$liite = $pdffilenimi;
+	//$kutsu = "PDF-rahtikirja";
+	//require("inc/sahkoposti.inc");
 
-//väliaikaisesti myös emailiin
-//$liite = $pdffilenimi;
-//$kutsu = "PDF-rahtikirja";
-//require("inc/sahkoposti.inc");
-
-//poistetaan tmp file samantien kuleksimasta...
-system("rm -f $pdffilenimi");		
+	//poistetaan tmp file samantien kuleksimasta...
+	system("rm -f $pdffilenimi");		
+}
 
 ?>

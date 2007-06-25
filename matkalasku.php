@@ -442,6 +442,10 @@ if ($tee == "MUOKKAA") {
 						}
 						$errori .= "</table><br><br>";
 					}
+					
+					if($loppuvv.$loppukk.$loppupp>date("Ymd")) {
+						$errori .= "<font class='error'>".t("VIRHE!!! Matkalaskua ei voi tehdä etukäteen!")."</font><br>";
+					}
 
 					$paivat=$puolipaivat=$ylitunnit=$tunnit=0;
 

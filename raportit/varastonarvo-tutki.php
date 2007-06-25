@@ -76,21 +76,23 @@ if ($tee == "tee") {
 		//Etsitään vastaavat kirjapidon viennit
 		$lvalinta = '';
 
-		if ($trow['laji'] == 'laskutus') $lvalinta = "tila = 'U' and alatila = 'X'";
+		if ($trow['laji'] == 'laskutus') $lvalinta = "tila = 'U' and alatila = 'X' and selite not like 'Varastoontulo%'";
 		if ($trow['laji'] == 'Inventointi') $lvalinta = "tila = 'X' and selite like '%inventoi%'";
 		if ($trow['laji'] == 'Epäkurantti') $lvalinta = "tila = 'X' and selite like '%epäkura%'";
-		if ($trow['laji'] == 'tulo') $lvalinta = "tila in ('H', 'M', 'P', 'Q', 'Y') and vienti not in ('A', 'D', 'G', '')";
+		if ($trow['laji'] == 'tulo') $lvalinta = " ((tila in ('H', 'M', 'P', 'Q', 'Y') and vienti not in ('A', 'D', 'G', '')) or (tila = 'U' and alatila = 'X' and selite like 'Varastoontulo%'))";
 
 		if ($lvalinta != '') {
-			$query  = "	SELECT sum(tiliointi.summa) summa FROM tiliointi use index (yhtio_tilino_tapvm), lasku
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tiliointi.tapvm >= '$vv-$kk-$pp' and
+			$query  = "	SELECT sum(tiliointi.summa) summa 
+						FROM tiliointi use index (yhtio_tilino_tapvm), lasku
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and 
+						tiliointi.tapvm >= '$vv-$kk-$pp' and
 						tiliointi.tapvm <= '$vv1-$kk1-$pp1' and
 						tiliointi.yhtio = lasku. yhtio and
 						tiliointi.ltunnus = lasku.tunnus and
 						tiliointi.tilino = '$yhtiorow[varasto]' and
-						tiliointi.korjattu = '' and
-						$lvalinta";
-			$lresult = mysql_query($query) or pupe_error($query);
+						tiliointi.korjattu = '' 
+						and $lvalinta";
+			$lresult = mysql_query($query) or pupe_error($query);			
 			$lrow = mysql_fetch_array ($lresult);
 
 			echo "<td align='right'>$lrow[summa]</td>";

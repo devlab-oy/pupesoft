@@ -3,7 +3,7 @@
 require ("inc/parametrit.inc");
 require ("inc/alvpopup.inc");
 
-echo "<font class='head'>".t('Matkalaskut')."</font><hr><br><br>";
+echo "<font class='head'>".t('Matkalasku / kulukorvaus')."</font><hr><br><br>";
 
 if($tee == "POISTA") {
 	
@@ -33,6 +33,13 @@ if ($tee == "UUSI") {
 		die("<font class='error'>".t("Lis‰‰ itsesi ensin toimittajaksi.")."</font>");
 	}
 
+	/*
+		T‰‰lt‰ lˆytyy kaikki verottajan ulkomaanp‰iv‰rahat, sek‰ ohjeet niiden k‰sittelyyn
+		http://www.vero.fi/default.asp?article=5516&domain=VERO_MAIN&path=5,298,305,316&language=FIN
+		
+		(tai hakusanalla p‰iv‰rahat yyyy)
+	*/
+	
 	$query = "	SELECT *
 				FROM tuote
 				JOIN tili ON tili.yhtio=tuote.yhtio and tili.tilino=tuote.tilino
@@ -524,6 +531,8 @@ if ($tee == "MUOKKAA") {
 				$selite="{$trow["tuoteno"]} - {$trow["nimitys"]} $kpl kpl · $hinta";
 			}
 
+			//	poistetan return carriage ja newline -> <br>
+			$kommentti = str_replace("\n","<br>",str_replace("\r","",$kommentti));
 			if ($kommentti != "") {
 				$selite .="<br><i>$kommentti</i>";
 			}
@@ -999,7 +1008,7 @@ if ($tee == "MUOKKAA") {
 
 
 			echo "<tr><th colspan='$cols'>".t("Kommentti")."</th></tr>";
-			echo "<tr><td colspan='$cols'><input type='text' name='kommentti' value='$kommentti' size='$leveys'></td>";
+			echo "<tr><td colspan='$cols'><textarea name='kommentti' rows='2' cols='80'>".str_replace("<br>","\n",$kommentti)."</textarea></td>";
 			echo "<td class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td></tr></table>";
 			echo "</form>";
 

@@ -3134,7 +3134,9 @@ if ($tee == '') {
 								}
 								
 								// Kate = Hinta - Ostohinta
-								$kate = sprintf('%.2f',100*($kotisumma_alviton - $ostohinta)/$kotisumma_alviton)."%";								
+								if ($kotisumma_alviton != 0) {
+									$kate = sprintf('%.2f',100*($kotisumma_alviton - $ostohinta)/$kotisumma_alviton)."%";
+								}
 							}
 							elseif ($kpl < 0 and $trow["osto_vai_hyvitys"] == "O") {
 								//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on OSTOA

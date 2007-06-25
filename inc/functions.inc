@@ -14,12 +14,19 @@ if (!function_exists("pupe_error")) {
 		$query = str_replace("\r", "", $query);
 		$query = ereg_replace("  +", " ", $query);
 
-		$debuggi = debug_backtrace();
+		$debuggi = array_reverse(debug_backtrace());
 
 		// tehd‰‰n errorimessage
 		$puperror  = "User:   {$kukarow["nimi"]} ({$kukarow["kuka"]}) @ {$yhtiorow["nimi"]} ({$yhtiorow["yhtio"]})\n\n";
-		$puperror .= "File:   {$debuggi[0]["file"]}\n";
-		$puperror .= "Line:   {$debuggi[0]["line"]}\n\n";
+
+		$nro = 1;
+		foreach ($debuggi as $debuggii) {
+			$puperror .= "File $nro:   {$debuggii["file"]}\n";
+			$puperror .= "Line $nro:   {$debuggii["line"]}\n";
+			$nro++;
+		}
+
+		$puperror .= "\n";
 		$puperror .= "Script: {$_SERVER["PHP_SELF"]}\n";
 		$puperror .= "Toim:   $toim\n\n";
 		$puperror .= "Error:  ".mysql_error()."\n\n";
@@ -29,7 +36,7 @@ if (!function_exists("pupe_error")) {
 		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: $yhtiorow[postittaja_email]\r\n", "-f $yhtiorow[postittaja_email]");
 
 		// kuollaan pois
-		exit("Kysely ei onnistunut tiedostossa $_SERVER[PHP_SELF].<br><br>$query<br><br>".mysql_error());
+		exit(nl2br($puperror));
 	}
 }
 

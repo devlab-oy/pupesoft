@@ -334,8 +334,28 @@
 
 	// ollaan valittu joku tunnus listasta ja halutaan liitt‰‰ se tilausriviin tai poistaa se tilausrivilt‰
 	if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
+		
+		$lisaysok = "OK";
+		
+		// Tutkitaan ettei liitet‰ sek‰ uusia ett‰ vanhoja sarjanumeroita samaan riviin
+		if (count($sarjataan) > 0) {
+			$ktark = implode(",", $sarjataan);
+			
+			$query = "	SELECT distinct kaytetty 
+						FROM sarjanumeroseuranta
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tunnus in ($ktark)";
+			$sarres = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($sarres) > 1) {
+				echo "<font class='error'>".t('Riviin ei voi liitt‰‰ sek‰ k‰ytettyj‰ ett‰ uusia sarjanumeroita')."</font><br><br>";	
+				
+				$lisaysok = "";
+			}
+		}
+		
 		// jos olemme ruksanneet v‰hemm‰n tai yht‰ paljon kuin tuotteita on rivill‰, voidaan p‰ivitt‰‰ muutokset
-		if ($rivirow["varattu"] >= count($sarjataan)) {
+		if ($rivirow["varattu"] >= count($sarjataan) and $lisaysok == "OK") {
 			foreach ($sarjat as $sarjatun) {
 				$query = "	SELECT tunnus, kaytetty, $tunnuskentta trivitunnus
 							FROM sarjanumeroseuranta
@@ -364,69 +384,65 @@
 		else {
 			echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).".</font><br><br>";
 		}
+		
+		if ($rivirow["varattu"] >= count($sarjataan) and count($sarjataan) > 0 and $lisaysok == "OK") {
+			foreach ($sarjataan as $sarjatun) {
+				if ($tunnuskentta == "ostorivitunnus") {
+					//Hanskataan sarjanumeron varastopaikkaa
+					$paikkalisa = "	,
+									hyllyalue	= '$rivirow[hyllyalue]',
+									hyllynro	= '$rivirow[hyllynro]',
+									hyllyvali	= '$rivirow[hyllyvali]',
+									hyllytaso	= '$rivirow[hyllytaso]'";
+				}
+				else {
+					$paikkalisa = "";
+				}
 
-		if ($rivirow["varattu"] >= count($sarjataan)) {
-			//jos mik‰‰n ei ole ruksattu niin ei tietenk‰‰n halutakkaan lis‰t‰ mit‰‰n sarjanumeroa
-			if (count($sarjataan) > 0) {
-				foreach ($sarjataan as $sarjatun) {
+				$query = "	UPDATE sarjanumeroseuranta
+							SET $tunnuskentta='$rivitunnus',
+							muuttaja	= '$kukarow[kuka]',
+							muutospvm	= now()
+							$paikkalisa
+							WHERE yhtio='$kukarow[yhtio]'
+							and tunnus='$sarjatun'";
+				$sarjares = mysql_query($query) or pupe_error($query);
 
-					if ($tunnuskentta == "ostorivitunnus") {
-						//Hanskataan sarjanumeron varastopaikkaa
-						$paikkalisa = "	,
-										hyllyalue	= '$rivirow[hyllyalue]',
-										hyllynro	= '$rivirow[hyllynro]',
-										hyllyvali	= '$rivirow[hyllyvali]',
-										hyllytaso	= '$rivirow[hyllytaso]'";
-					}
-					else {
-						$paikkalisa = "";
-					}
+				// Tutkitaan oliko t‰m‰ sarjanumero k‰ytettytuote?
+				$query = "	SELECT $tunnuskentta rivitunnus, kaytetty
+							FROM sarjanumeroseuranta
+							WHERE tunnus = '$sarjatun'";
+				$sarres = mysql_query($query) or pupe_error($query);
+				$sarjarow = mysql_fetch_array($sarres);
 
-					$query = "	UPDATE sarjanumeroseuranta
-								SET $tunnuskentta='$rivitunnus',
-								muuttaja	= '$kukarow[kuka]',
-								muutospvm	= now()
-								$paikkalisa
-								WHERE yhtio='$kukarow[yhtio]'
-								and tunnus='$sarjatun'";
+				if ($sarjarow["kaytetty"] == 'K') {
+					$query = "	UPDATE tilausrivi
+								SET alv=alv+500
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus  = '$sarjarow[rivitunnus]'
+								and alv < 500";
 					$sarjares = mysql_query($query) or pupe_error($query);
+				}
 
-					// Tutkitaan oliko t‰m‰ sarjanumero k‰ytettytuote?
-					$query = "	SELECT $tunnuskentta rivitunnus, kaytetty
-								FROM sarjanumeroseuranta
-								WHERE tunnus = '$sarjatun'";
-					$sarres = mysql_query($query) or pupe_error($query);
-					$sarjarow = mysql_fetch_array($sarres);
+				//Tutkitaan lis‰varusteita
+				if ($tunnuskentta == 'myyntirivitunnus') {
+					//Hanskataan sarjanumerollisten tuotteiden lis‰varusteet
+					if ($sarjatun > 0 and $rivitunnus > 0) {
+						require("sarjanumeron_lisavarlisays.inc");
 
-					if ($sarjarow["kaytetty"] == 'K') {
-						$query = "	UPDATE tilausrivi
-									SET alv=alv+500
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus  = '$sarjarow[rivitunnus]'
-									and alv < 500";
-						$sarjares = mysql_query($query) or pupe_error($query);
-					}
+						$palautus = lisavarlisays($sarjatun, $rivitunnus);
 
-					//Tutkitaan lis‰varusteita
-					if ($tunnuskentta == 'myyntirivitunnus') {
-						//Hanskataan sarjanumerollisten tuotteiden lis‰varusteet
-						if ($sarjatun > 0 and $rivitunnus > 0) {
-							require("sarjanumeron_lisavarlisays.inc");
+						if ($palautus != "OK") {
+							echo "<font class='error'>$palautus</font><br><br>";
 
-							$palautus = lisavarlisays($sarjatun, $rivitunnus);
-
-							if ($palautus != "OK") {
-								echo "<font class='error'>$palautus</font><br><br>";
-
-								$query = "	UPDATE sarjanumeroseuranta
-											SET $tunnuskentta='',
-											muuttaja	= '$kukarow[kuka]',
-											muutospvm	= now()
-											$paikkalisa
-											WHERE yhtio='$kukarow[yhtio]'
-											and tunnus='$sarjatun'";
-								$sarjares = mysql_query($query) or pupe_error($query);
-							}
+							$query = "	UPDATE sarjanumeroseuranta
+										SET $tunnuskentta='',
+										muuttaja	= '$kukarow[kuka]',
+										muutospvm	= now()
+										$paikkalisa
+										WHERE yhtio='$kukarow[yhtio]'
+										and tunnus='$sarjatun'";
+							$sarjares = mysql_query($query) or pupe_error($query);
 						}
 					}
 				}

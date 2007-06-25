@@ -211,15 +211,9 @@ if ($tee == 'KARHUA')  {
 			$max = $lasku['karhuttu'];
 		}
 	}
-	
-	$sel1 = $sel2 = $sel3 = '';
-	if ($max >= 3) {
-		$sel3 = 'selected';
-	} elseif ($max == 2) {
-		$sel2 = 'selected';
-	} else {
-		$sel1 = 'selected';
-	}
+
+	$disabled2 = '';
+	$disabled3 = '';
 	
 	if (strlen(trim($yhtiorow['karhuviesti2'])) == 0) {
 		$disabled2 = 'disabled';
@@ -227,6 +221,16 @@ if ($tee == 'KARHUA')  {
 	
 	if (strlen(trim($yhtiorow['karhuviesti3'])) == 0) {
 		$disabled3 = 'disabled';
+	}
+	
+	
+	$sel1 = $sel2 = $sel3 = '';
+	if (empty($disabled3) && $max >= 3) {
+		$sel3 = 'selected';
+	} elseif (empty($disabled2) && $max == 2) {
+		$sel2 = 'selected';
+	} else {
+		$sel1 = 'selected';
 	}
 	
 	mysql_data_seek($result,0);

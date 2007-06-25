@@ -14,7 +14,12 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 		exit;
 	}
 
-	echo "<font class='message'>".t("K‰sittelen")." $tyyppi ".t("tiedoston")."</font><br>";
+	echo "<font class='message'>".t("K‰sittelen")." $tyyppi ".t("tiedoston")."</font><br><br>";
+
+	if ($tyyppi=='multi') {
+		// tarvitaan $filename
+		require ("../inc/tilaus_in_multi.inc");
+	}
 
 	if ($tyyppi=='pos') {
 		// tarvitaan $filename
@@ -58,10 +63,11 @@ else {
 		<tr>
 			<th>".t("Tiedoston tyyppi")."</th>
 			<td><select name='tyyppi'>
-		 		<option value='edi'>".t("Editilaus")."
-		 		<option value='futursoft'>".t("Futursoft")."
-		 		<option value='pos'>".t("Kassap‰‰te")."
-		 		<option value='yct'>Yamaha Center
+		 		<option value='edi'>".t("Editilaus")."</option>
+		 		<option value='futursoft'>".t("Futursoft")."</option>
+		 		<option value='pos'>".t("Kassap‰‰te")."</option>
+		 		<option value='yct'>Yamaha Center</option>
+		 		<option value='multi'>Useita asiakkaita</option>
 				</select>
 		 	</td>
 		 </tr>

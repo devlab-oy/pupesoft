@@ -275,7 +275,7 @@
 			if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti ep‰onnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta READ, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ";
 			$locre = mysql_query($query) or pupe_error($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -303,8 +303,9 @@
 			}
 
 			$tulos_ulos_maksusoppari = "";
+			$tulos_ulos_sarjanumerot = "";
 
-			//haetaan kaikki laskutettavat tilaukset ja tehd‰‰n maksuehtosplittaukset jos niit‰ on
+			//haetaan kaikki laskutettavat tilaukset ja tehd‰‰n maksuehtosplittaukset ja muita tarkistuksia jos niit‰ on
 			$query = "	select *
 						from lasku
 						where yhtio	= '$kukarow[yhtio]'
@@ -315,12 +316,12 @@
 						$lasklisa";
 			$res   = mysql_query($query) or pupe_error($query);
 
-			//ja katotaan vaatiiko joku maksuehto uusia tilauksia
 			while ($laskurow = mysql_fetch_array($res)) {
 
-				$query    = "	SELECT tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno
+				$query    = "	SELECT tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys
 								FROM tilausrivi use index (yhtio_otunnus)
 								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.otunnus = '$laskurow[tunnus]'
 								and tilausrivi.tyyppi  = 'L'";
@@ -341,14 +342,64 @@
 								and $tunken = '$srow1[tunnus]'";
 					$sarjares2 = mysql_query($query) or pupe_error($query);
 					$srow2 = mysql_fetch_array($sarjares2);
-
+					
 					if ($srow2["kpl"] != abs($srow1["varattu"])) {
 						$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
 
 						if ($silent == "" or $silent == "VIENTI") {
-							$tulos_ulos_maksusoppari .= t("Tilaukselta puuttuu sarjanumeroita, ei voida laskuttaa").": $laskurow[tunnus] $laskurow[nimi]<br>\n";
+							$tulos_ulos_sarjanumerot .= t("Tilaukselta puuttuu sarjanumeroita, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
 						}
 					}
+					
+					if ($srow1["varattu"] < 0 and $srow1["osto_vai_hyvitys"] == "") {
+						//Jos tuotteella on sarjanumero ja kyseess‰ on HYVITYSTƒ
+
+						//T‰h‰n hyvitysriviin liitetyt sarjanumerot
+						$query = "	SELECT sarjanumero, kaytetty
+									FROM sarjanumeroseuranta
+									WHERE yhtio 		= '$kukarow[yhtio]' 
+									and ostorivitunnus 	= '$srow1[tunnus]'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+
+						while($sarjarowx = mysql_fetch_array($sarjares)) {
+							// Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
+							$query  = "	SELECT sarjanumeroseuranta.tunnus
+										FROM sarjanumeroseuranta
+										JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+										WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]' 
+										and sarjanumeroseuranta.tuoteno 	= '$srow1[tuoteno]'
+										and sarjanumeroseuranta.sarjanumero = '$sarjarowx[sarjanumero]'
+										and sarjanumeroseuranta.kaytetty 	= '$sarjarowx[kaytetty]'
+										and sarjanumeroseuranta.myyntirivitunnus > 0
+										and sarjanumeroseuranta.ostorivitunnus   > 0
+										ORDER BY sarjanumeroseuranta.tunnus DESC
+										LIMIT 1";
+							$sarjares1 = mysql_query($query) or pupe_error($query);
+							
+							if (mysql_num_rows($sarjares1) == 0) {
+								$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+
+								if ($silent == "" or $silent == "VIENTI") {
+									$tulos_ulos_sarjanumerot .= t("Hyvitett‰v‰‰ rivi‰ ei lˆydy, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+								}
+							}
+						}
+					}
+					
+					$query = "	SELECT distinct kaytetty 
+								FROM sarjanumeroseuranta
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and tuoteno = '$srow1[tuoteno]' 
+								and $tunken = '$srow1[tunnus]'";
+					$sarres = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($sarres) > 1) {
+						$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+
+						if ($silent == "" or $silent == "VIENTI") {
+							$tulos_ulos_sarjanumerot .= t("Riviin ei voi liitt‰‰ sek‰ k‰ytettyj‰ ett‰ uusia sarjanumeroita").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+						}
+					}	
 				}
 
 				$query = " 	select *
@@ -371,9 +422,14 @@
 					require("maksuehtosplittaus.inc");
 				}
 			}
+			
+			if (isset($tulos_ulos_sarjanumerot) and $tulos_ulos_sarjanumerot != '' and ($silent == "" or $silent == "VIENTI")) {
+				$tulos_ulos .= "<br>\n".t("Sarjanumerovirheet").":<br>\n";
+				$tulos_ulos .= $tulos_ulos_sarjanumerot;
+			}
 
 			if (isset($tulos_ulos_maksusoppari) and $tulos_ulos_maksusoppari != '' and ($silent == "" or $silent == "VIENTI")) {
-				$tulos_ulos .= "<br>\n".t("Maksusopimustilausket").":<br>\n";
+				$tulos_ulos .= "<br>\n".t("Maksusopimustilaukset").":<br>\n";
 				$tulos_ulos .= $tulos_ulos_maksusoppari;
 			}
 

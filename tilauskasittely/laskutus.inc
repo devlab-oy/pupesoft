@@ -100,7 +100,7 @@ else {
 			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"] * (1 + ($trow["alv"] / 100));	//Verollinen rivihinta valuutassa 
 			$loppusumma 		   += $hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100));									//Verollinen rivihinta
 		}
-		
+				
 		// Etsit‰‰n tuote
 		$query = "	SELECT kehahin, ei_saldoa, epakurantti1pvm, epakurantti2pvm, sarjanumeroseuranta
 					FROM tuote
@@ -199,7 +199,7 @@ else {
 								
 				while($kulukeikkarow = mysql_fetch_array($keikkares)) {
 					// Haetaan kaikki keikkaan liitettyjen laskujen summa
-					$query = "	SELECT round(sum(summa*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
+					$query = "	SELECT round(sum(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
 								FROM lasku
 								WHERE yhtio		= '$kukarow[yhtio]'
 								and tila 		= 'K'
@@ -207,7 +207,7 @@ else {
 								and vanhatunnus <> 0
 								and vienti in ('B','E','H')";
 					$result = mysql_query($query) or pupe_error($query);
-										
+														
 					$kulukulurow = mysql_fetch_array($result);
 					
 					$ostohinta	+= $kulukulurow["kulusumma"];
@@ -227,7 +227,7 @@ else {
 				
 				// Kate = 0
 				$kate 				= 0;
-				$turow["kehahin"] 	= round($hinta/$trow["varattu"],4);	
+				$turow["kehahin"] 	= round($hinta/$trow["varattu"],4) * -1;	
 											
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "tulo";
@@ -235,9 +235,52 @@ else {
 			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
 				
-				// Kate = -1 * ostohinta
-				$kate 				= -1 * round($hinta/$trow["varattu"],2);
-				$turow["kehahin"] 	= round($hinta/$trow["varattu"],4);	
+				//T‰h‰n hyvitysriviin liitetyt sarjanumerot
+				$query = "	SELECT *
+							FROM sarjanumeroseuranta
+							WHERE yhtio 		= '$kukarow[yhtio]' 
+							and ostorivitunnus 	= '$trow[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+				
+				$ostohinta = 0;
+				
+				while($sarjarow = mysql_fetch_array($sarjares)) {
+					
+					// Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
+					$query  = "	SELECT sarjanumeroseuranta.*, tilausrivi.rivihinta/tilausrivi.kpl ostohinta
+								FROM sarjanumeroseuranta
+								JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+								WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]' 
+								and sarjanumeroseuranta.tuoteno 	= '$trow[tuoteno]'
+								and sarjanumeroseuranta.sarjanumero = '$sarjarow[sarjanumero]'
+								and sarjanumeroseuranta.kaytetty 	= '$sarjarow[kaytetty]'
+								and sarjanumeroseuranta.myyntirivitunnus > 0
+								and sarjanumeroseuranta.ostorivitunnus   > 0
+								ORDER BY sarjanumeroseuranta.tunnus DESC
+								LIMIT 1";
+					$sarjares1 = mysql_query($query) or pupe_error($query);
+					$sarjarow1 = mysql_fetch_array($sarjares1);
+										
+					$ostohinta += $sarjarow1["ostohinta"];
+					
+					//Tehd‰‰n sarjanumerotauluun uusi vapaa sarjanumero-olio
+					$query = "	UPDATE sarjanumeroseuranta
+								SET myyntirivitunnus=ostorivitunnus, ostorivitunnus='$sarjarow1[ostorivitunnus]'
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and tunnus 	= '$sarjarow[tunnus]'";
+					$sarjares1 = mysql_query($query) or pupe_error($query);
+					
+					$query = "	INSERT into sarjanumeroseuranta 
+								(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu)
+								VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$sarjarow1[kaytetty]','$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]')";
+					$sarjares1 = mysql_query($query) or pupe_error($query);	
+				}
+				
+				// Kate = Hinta - Alkuper‰inen ostohinta
+				$kate = round($hinta - round($ostohinta/abs($trow["varattu"]), 4), 2);				
+								
+				//T‰m‰n sarjanumeroklˆntin ostohinta keskim‰‰rin
+				$turow["kehahin"] = round($ostohinta/$trow["varattu"], 4) * -1;	
 											
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";

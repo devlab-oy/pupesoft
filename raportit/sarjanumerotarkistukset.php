@@ -171,7 +171,7 @@
 							$lisa2
 							and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
 							$lisa3
-							order by sarjanumero, otunnus";
+							order by sarjanumero, otunnus";			
 			}
 			
 			$vresult = mysql_query($query) or pupe_error($query);
@@ -289,12 +289,18 @@
 				else {
 					echo "<td></td>";
 				}
-				
-				if ($vrow["sarjatunnus"] != "" and $vrow["css"] == $vrow["kpl"]) {
+								
+				if ($vrow["sarjatunnus"] != "" and $vrow["css"] == abs($vrow["kpl"])) {
 					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$vrow[tuoteno]&sarjanumero_haku=$vrow[sarjanumero]'>$vrow[sarjanumero]</a><br>$vrow[kaytetty]</td></tr>";
 				}
 				else {
-					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno=$vrow[tuoteno]&myyntirivitunnus=$vrow[myyntitunnus]&from=KORJAA&lopetus=ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//jarjestys_1=$jarjestys_1//jarjestys_2=$jarjestys_2//jarjestys_3=$jarjestys_3//jarjestys_4=$jarjestys_4//jarjestys_5=$jarjestys_5//jarjestys_6=$jarjestys_6'>Sarjanumero</a><br>&nbsp;</tr>";
+					if ($vrow["kpl"] > 0 and $tyyppi == "myynti") {
+						$lisays = "myyntirivitunnus=$vrow[myyntitunnus]";
+					}
+					else {
+						$lisays = "ostorivitunnus=$vrow[ostotunnus]";
+					}
+					echo "<td valign='top'><a href='../tilauskasittely/sarjanumeroseuranta.php?tuoteno=$vrow[tuoteno]&$lisays&from=KORJAA&lopetus=ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl//jarjestys_1=$jarjestys_1//jarjestys_2=$jarjestys_2//jarjestys_3=$jarjestys_3//jarjestys_4=$jarjestys_4//jarjestys_5=$jarjestys_5//jarjestys_6=$jarjestys_6'>Sarjanumero</a><br>&nbsp;</tr>";
 				}
 			}
 	

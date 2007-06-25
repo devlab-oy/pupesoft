@@ -784,6 +784,7 @@
 		$ulos .= "<option value = '7' $sel[7]>".t("Tuotenumeroj‰rjestys");
 		$ulos .= "<option value = '8' $sel[8]>".t("Tilausj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
 		$ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys");
+		$ulos .= "<option value = 'A' $sel[A]>".t("Tilausj‰rjestys, sama kuin ruudulla");
 
 		$ulos .= "</select></td>";
 

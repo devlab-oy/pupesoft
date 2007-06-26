@@ -3487,6 +3487,9 @@ if ($tee == '') {
 				$kate_ulkomaa			= 0;	// Ulkomaan toimitusten kate yhtiön valuutassa
 				$kate_ulkomaa_eieri		= 0;	// Ulkomaan toimitusten kate yhtiön valuutassa ilman erikoisalennusta
 
+				// typekästätään koska joskus tulee spacena.. en tajua.
+				$laskurow["erikoisale"] = (float) $laskurow["erikoisale"];
+
 				while ($alvrow = mysql_fetch_array($alvresult)) {
 
 					if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {

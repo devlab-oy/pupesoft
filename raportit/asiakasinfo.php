@@ -471,7 +471,7 @@ if ($ytunnus!='') {
 			$query = "	SELECT asiakasalennus.*, tuote.nimitys, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
 						FROM asiakasalennus
 						LEFT JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno
-						WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or asiakas_ryhma = '$asiakasrow[ryhma]') order by asiakas_ryhma, ytunnus, asiakasalennus.ryhma, asiakasalennus.tuoteno";
+						WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or (asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '')) order by asiakas_ryhma, ytunnus, asiakasalennus.ryhma, asiakasalennus.tuoteno";
 			$asres = mysql_query($query) or pupe_error($query);
 
 			while ($asrow = mysql_fetch_array($asres)) {
@@ -564,7 +564,7 @@ if ($ytunnus!='') {
 			$query = "	SELECT asiakashinta.*, tuote.nimitys, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
 						FROM asiakashinta
 						LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
-						WHERE asiakashinta.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or asiakas_ryhma = '$asiakasrow[ryhma]') order by asiakas_ryhma, ytunnus, asiakashinta.ryhma, asiakashinta.tuoteno";
+						WHERE asiakashinta.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or (asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!='')) order by asiakas_ryhma, ytunnus, asiakashinta.ryhma, asiakashinta.tuoteno";
 			$asres = mysql_query($query) or pupe_error($query);
 
 			while ($asrow = mysql_fetch_array($asres)) {
@@ -664,7 +664,7 @@ if ($ytunnus!='') {
 						from asiakasalennus, tuote
 						where asiakasalennus.yhtio = tuote.yhtio
 						and asiakasalennus.yhtio='$kukarow[yhtio]'
-						and asiakasalennus.asiakas_ryhma = '$asiakasrow[ryhma]'
+						and (asiakasalennus.asiakas_ryhma = '$asiakasrow[ryhma]' and asiakasalennus.asiakas_ryhma!='')
 						and if(asiakasalennus.tuoteno != '', asiakasalennus.tuoteno = tuote.tuoteno, asiakasalennus.ryhma = tuote.aleryhma)
 						and status in ('', 'A')
 						and osasto != 0

@@ -253,7 +253,7 @@
 		for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 			if ($i == 1) {
 				if (trim($trow[1]) == '') $trow[1] = "".t("*tyhjä*")."";
-				echo "<td><a href='asiakasmemo.php?ytunnus=$trow[ytunnus]'>$trow[1]</a></td>";
+				echo "<td><a href='asiakasmemo.php?ytunnus=$trow[ytunnus]&asiakasid=$trow[tunnus]'>$trow[1]</a></td>";
 			}
 			elseif(mysql_field_name($result,$i) == 'ytunnus') {
 				echo "<td><a href='../yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=crm/asiakaslista.php'>$trow[$i]</a></td>";

@@ -386,11 +386,9 @@ if (!function_exists('loppu')) {
 		global $pdf, $laskurow, $viite, $p, $total_sisainen, $rectparam, $kieli, $yhtiorow;
 		
 		$pdf->draw_text(30, 50, $yhtiorow["nimi"], 		$firstpage, $p);
-		$pdf->draw_text(30, 40, $yhtiorow["osoite"], 	$firstpage, $p);
-		$pdf->draw_text(30, 30, $yhtiorow["postino"], 	$firstpage, $p);
-		$pdf->draw_text(60, 30, $yhtiorow["postitp"], 	$firstpage, $p);
-		$pdf->draw_text(30, 20, $yhtiorow["maa"], 		$firstpage, $p);
-	
+		$pdf->draw_text(30, 40, t("puh. ").$yhtiorow["puhelin"], 	$firstpage, $p);
+		$pdf->draw_text(30, 20, t("email. ").$yhtiorow["email"], 	$firstpage, $p);
+		$pdf->draw_text(30, 10, t("www. ").$yhtiorow["www"], 		$firstpage, $p);
 	
 		$pdf->draw_paragraph(60,150,40,440, t("Tilausviite", $kieli).": ".$laskurow["viesti"], $firstpage, $p);
 		$pdf->draw_paragraph(40,150,10,540, t("Kommentti", $kieli).":   ".$laskurow["comments"], $firstpage, $p);

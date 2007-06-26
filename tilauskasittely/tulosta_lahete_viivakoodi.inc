@@ -332,7 +332,14 @@ if (!function_exists('rivi')) {
 				$futur = "";
 			}
 					
-			$pdf->draw_text(45,  $kala, "* $futur".$row["kommentti"],	$firstpage, $p);
+			if($pdf->strlen("* $futur".$row["kommentti"], $p)>530) {
+				$pdf->draw_paragraph($kala+$p["height"], 45, $kala-$p["height"]-2, 580, "* $futur".$row["kommentti"],	$firstpage, $p);			
+				$kala-=$p["height"]+2;
+			}
+			else {
+				$pdf->draw_text(45,  $kala, "* $futur".$row["kommentti"],	$firstpage, $p);
+			}				
+
 			
 			$kala = $kala - $rivinkorkeus;
 			$lask++;

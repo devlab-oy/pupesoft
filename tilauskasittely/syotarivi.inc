@@ -89,7 +89,7 @@
 			
 			
 			echo "<tr><th colspan='6' align='left'>".t("Rivikommentti").":</tg></tr>";
-			echo "<tr><td valign='top' colspan='6'><textarea name='kommentti' cols='50' rows='2' wrap='hard'>$kommentti</textarea></td></tr>";
+			echo "<tr><td valign='top' colspan='6'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea></td></tr>";
 
 			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T")) {
 				echo "<tr>
@@ -239,7 +239,7 @@
 		
 		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
 		echo "<td valign='top' colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";		
-		echo "<td valign='top' colspan='4'><textarea name='kommentti' cols='32' rows='2' wrap='hard'>$kommentti</textarea></td>";
+		echo "<td valign='top' colspan='4'><textarea name='kommentti' cols='32' rows='2' wrap='soft'>$kommentti</textarea></td>";
 
 		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T"))) {
 			echo "</tr>
@@ -363,7 +363,7 @@
 			echo "<td valign='top'></td>";
 		}
 				
-		echo "<td valign='top' colspan='2'><textarea name='kommentti' cols='40' rows='2' wrap='hard'>$kommentti</textarea></td>
+		echo "<td valign='top' colspan='2'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
 				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'></td></tr>";
 
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
@@ -439,7 +439,7 @@
 			</tr>";
 
 		echo "<tr><th colspan='2'>".t("Rivikommentti").":</th></tr>";
-		echo "<tr><td valign='top' class='back' colspan='2'><textarea name='kommentti' cols='30' rows='2' wrap='hard'>$kommentti</textarea></td></tr>";
+		echo "<tr><td valign='top' class='back' colspan='2'><textarea name='kommentti' cols='30' rows='2' wrap='soft'>$kommentti</textarea></td></tr>";
 		echo "</form>";
 		echo "</table>";
 	}

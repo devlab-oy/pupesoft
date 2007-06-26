@@ -354,7 +354,14 @@ if (!function_exists('rivi')) {
 				$futur = "";
 			}
 					
-			$pdf->draw_text(90,  $kala, "* $futur".$row["kommentti"],	$firstpage, $p);
+			if($pdf->strlen("* $futur".$row["kommentti"], $p)>485) {
+				$pdf->draw_paragraph($kala+$p["height"], 90, $kala-$p["height"]-2, 580, "* $futur".$row["kommentti"],	$firstpage, $p);			
+				$kala-=$p["height"]+2;
+			}
+			else {
+				$pdf->draw_text(90,  $kala, "* $futur".$row["kommentti"],	$firstpage, $p);
+			}				
+
 			
 			$kala = $kala - $rivinkorkeus;
 			$lask++;
@@ -387,8 +394,8 @@ if (!function_exists('loppu')) {
 		
 		$pdf->draw_text(30, 50, $yhtiorow["nimi"], 		$firstpage, $p);
 		$pdf->draw_text(30, 40, t("puh. ").$yhtiorow["puhelin"], 	$firstpage, $p);
-		$pdf->draw_text(30, 20, t("email. ").$yhtiorow["email"], 	$firstpage, $p);
-		$pdf->draw_text(30, 10, t("www. ").$yhtiorow["www"], 		$firstpage, $p);
+		$pdf->draw_text(30, 30, t("email. ").$yhtiorow["email"], 	$firstpage, $p);
+		$pdf->draw_text(30, 20, t("www. ").$yhtiorow["www"], 		$firstpage, $p);
 	
 		$pdf->draw_paragraph(60,150,40,440, t("Tilausviite", $kieli).": ".$laskurow["viesti"], $firstpage, $p);
 		$pdf->draw_paragraph(40,150,10,540, t("Kommentti", $kieli).":   ".$laskurow["comments"], $firstpage, $p);

@@ -8,7 +8,7 @@ if (mysql_field_name($result, $i) == "pankkitili1" or
 
 		$pankkitili = $t[$i];
 
-		require ('pankkitilinoikeellisuus.php');
+//		require ('pankkitilinoikeellisuus.php');
 
 		if ($pankkitili == '') {
 			$virhe[$i] = t("Pankkitili on virheellinen");

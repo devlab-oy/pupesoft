@@ -152,11 +152,20 @@ if ($ytunnus!='') {
 		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 
 		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		$worksheet =& $workbook->addWorksheet('Sheet 1');
+		$worksheet =& $workbook->addWorksheet(t('Asiakkaan alennukset'));
 
 		$format_bold =& $workbook->addFormat();
 		$format_bold->setBold();
 		
+		$format_percent =& $workbook->addFormat();
+		$format_percent->setNumFormat('0.00%');
+
+		$format_date =& $workbook->addFormat();
+		$format_date->setNumFormat('YYYY-MM-DD');
+
+		$format_curr =& $workbook->addFormat();
+		$format_curr->setNumFormat('0.00');
+				
 		$excelrivi = 0;
 	}
 	
@@ -479,7 +488,7 @@ if ($ytunnus!='') {
 			$asres = mysql_query($query) or pupe_error($query);
 
 			while ($asrow = mysql_fetch_array($asres)) {
-				$mita  = "<font class='info'>".t("Asiakas")."</font>";
+				$mita  = t("Asiakas");
 
 				if ($asrow['asiakas_ryhma'] != '') {
 					$showytunnus = "(RY) ".$asrow['asiakas_ryhma'];
@@ -506,18 +515,18 @@ if ($ytunnus!='') {
 						<td><font class='info'>$ale		<font></td>
 						<td><font class='info'>$asrow[alkupvm]<font></td>
 						<td><font class='info'>$asrow[loppupvm]<font></td>
-						<td><font class='info'>$mita	<font></td>
+						<td><font class='info'>$mita<font></td>
 						</tr>";
 						
 					if(isset($workbook) and $yhdistetty=="") {
-						$worksheet->write($excelrivi, 0, $asrow['asiakas_ryhma'], $format_bold);
-						$worksheet->write($excelrivi, 1, $asrow['ytunnus'], $format_bold);
-						$worksheet->write($excelrivi, 2, $asrow['tuoteno'], $format_bold);
-						$worksheet->write($excelrivi, 3, $asrow['ryhma'], $format_bold);				
-						$worksheet->write($excelrivi, 4, $asrow['alennus'], $format_bold);
-						$worksheet->write($excelrivi, 5, $asrow["alkupvm"], $format_bold);
-						$worksheet->write($excelrivi, 6, $asrow["loppupvm"], $format_bold);
-						$worksheet->write($excelrivi, 7, $mita, $format_bold);
+						$worksheet->write($excelrivi, 0, $asrow['asiakas_ryhma']);
+						$worksheet->write($excelrivi, 1, $asrow['ytunnus']);
+						$worksheet->write($excelrivi, 2, $asrow['tuoteno']);
+						$worksheet->write($excelrivi, 3, $asrow['ryhma']);				
+						$worksheet->write($excelrivi, 4, $ale/100, $format_percent);
+						$worksheet->write($excelrivi, 5, $asrow["alkupvm"], $format_date);
+						$worksheet->write($excelrivi, 6, $asrow["loppupvm"], $format_date);
+						$worksheet->write($excelrivi, 7, $mita);
 						$excelrivi++;
 					}						
 				}
@@ -610,9 +619,9 @@ if ($ytunnus!='') {
 						$worksheet->write($excelrivi, 1, $asrow['asiakas_ryhma']);
 						$worksheet->write($excelrivi, 2, $asrow['tuoteno']);
 						$worksheet->write($excelrivi, 3, $asrow['ryhma']);				
-						$worksheet->write($excelrivi, 4, $asrow['hinta']);
-						$worksheet->write($excelrivi, 5, $asrow["alkupvm"]);
-						$worksheet->write($excelrivi, 6, $asrow["loppupvm"]);
+						$worksheet->write($excelrivi, 4, $hinta, $format_curr);
+						$worksheet->write($excelrivi, 5, $asrow["alkupvm"], $format_date);
+						$worksheet->write($excelrivi, 6, $asrow["loppupvm"], $format_date);
 						$excelrivi++;
 					}												
 				}
@@ -649,13 +658,14 @@ if ($ytunnus!='') {
 				$worksheet->write($excelrivi, 1, "Osasto", $format_bold);
 				$worksheet->write($excelrivi, 2, "Tryno", $format_bold);
 				$worksheet->write($excelrivi, 3, "Tuoteryhmä", $format_bold);				
-				$worksheet->write($excelrivi, 4, "AS-Ryhmä", $format_bold);
-				$worksheet->write($excelrivi, 5, "Tuoteno", $format_bold);
-				$worksheet->write($excelrivi, 6, "Aleryhmä", $format_bold);
-				$worksheet->write($excelrivi, 7, "Prosentti", $format_bold);
-				$worksheet->write($excelrivi, 8, "Alkupvm", $format_bold);
-				$worksheet->write($excelrivi, 9, "Loppupvm", $format_bold);
-				$worksheet->write($excelrivi, 10, "Tyyppi", $format_bold);												
+				$worksheet->write($excelrivi, 4, "Ytunnus", $format_bold);
+				$worksheet->write($excelrivi, 5, "AS-Ryhmä", $format_bold);
+				$worksheet->write($excelrivi, 6, "Tuoteno", $format_bold);
+				$worksheet->write($excelrivi, 7, "Aleryhmä", $format_bold);
+				$worksheet->write($excelrivi, 8, "Prosentti", $format_bold);
+				$worksheet->write($excelrivi, 9, "Alkupvm", $format_bold);
+				$worksheet->write($excelrivi, 10, "Loppupvm", $format_bold);
+				$worksheet->write($excelrivi, 11, "Tyyppi", $format_bold);												
 				$excelrivi++;
 			}						
 
@@ -707,7 +717,7 @@ if ($ytunnus!='') {
 
 				}
 				else {
-					$mita   = "<font class='info'>".t("Asiakas")."</font>";
+					$mita   = t("Asiakas");
 					$ale    = $alerow['alennus'];
 					if ($alerow['ytunnus'] == '') {
 						$query = "	select *
@@ -789,9 +799,10 @@ if ($ytunnus!='') {
 							$worksheet->write($excelrivi, 5, $alerow['asiakas_ryhma']);
 							$worksheet->write($excelrivi, 6, $alerow['aleryhma']);
 							$worksheet->write($excelrivi, 7, $alerow['tuoteno']);
-							$worksheet->write($excelrivi, 8, $alerow['alkupvm']);
-							$worksheet->write($excelrivi, 9, $alerow['loppupvm']);
-							$worksheet->write($excelrivi, 10, $mita);												
+							$worksheet->write($excelrivi, 8, $ale/100, $format_percent);
+							$worksheet->write($excelrivi, 9, $alerow['alkupvm'], $format_date);
+							$worksheet->write($excelrivi, 10, $alerow['loppupvm'], $format_date);
+							$worksheet->write($excelrivi, 11, $mita);												
 							$excelrivi++;
 						}						
 							
@@ -807,6 +818,7 @@ if ($ytunnus!='') {
 						$dadaArray["try"]				= $alerow["try"];
 						$dadaArray["try_nimi"]			= $tryro["selitetark"];
 						$dadaArray["ytunnus"]			= $alerow["ytunnus"];
+						$dadaArray["asiakas_ryhma"]		= $alerow["asiakas_"];
 						$dadaArray["ryhma"]				= $alerow["aleryhma"];
 						$dadaArray["tuoteno"]			= $alerow['tuoteno'];
 						$dadaArray["ale"]				= $ale;
@@ -842,7 +854,7 @@ if ($ytunnus!='') {
 				<th>".t("Tuoteryhmä")."</th>
 				<th>".t("Aleryhmä")."</th>	
 				<th>".t("Tuoteno")."</th>							
-				<th>".t("Prosentti")."</th>
+				<th>".t("Alennus")."</th>
 				<th>".t("Hinta")."</th>
 				<th>".t("Alkupvm")."</th>
 				<th>".t("Loppupvm")."</th>
@@ -858,10 +870,11 @@ if ($ytunnus!='') {
 				$worksheet->write($excelrivi, 5, "AS-Ryhmä", $format_bold);
 				$worksheet->write($excelrivi, 6, "Tuoteno", $format_bold);
 				$worksheet->write($excelrivi, 7, "Aleryhmä", $format_bold);
-				$worksheet->write($excelrivi, 8, "Hinta", $format_bold);			
-				$worksheet->write($excelrivi, 9, "Alkupvm", $format_bold);
-				$worksheet->write($excelrivi, 10, "Loppupvm", $format_bold);
-				$worksheet->write($excelrivi, 11, "Tyyppi", $format_bold);												
+				$worksheet->write($excelrivi, 8, "Alennus", $format_bold);			
+				$worksheet->write($excelrivi, 9, "Hinta", $format_bold);			
+				$worksheet->write($excelrivi, 10, "Alkupvm", $format_bold);
+				$worksheet->write($excelrivi, 11, "Loppupvm", $format_bold);
+				$worksheet->write($excelrivi, 12, "Tyyppi", $format_bold);												
 				$excelrivi++;
 			}									
 			
@@ -890,11 +903,12 @@ if ($ytunnus!='') {
 					$worksheet->write($excelrivi, 4, $value["try_nimi"]);				
 					$worksheet->write($excelrivi, 5, $value["asiakas_ryhma"]);
 					$worksheet->write($excelrivi, 6, $value["tuoteno"]);
-					$worksheet->write($excelrivi, 7, $value["ale"]);
-					$worksheet->write($excelrivi, 8, $value["hinta"]);			
-					$worksheet->write($excelrivi, 9, $value["alkupvm"]);
-					$worksheet->write($excelrivi, 10, $value["loppupvm"]);
-					$worksheet->write($excelrivi, 11, strip_tags($value["mita"]));
+					$worksheet->write($excelrivi, 7, $value["ryhma"]);
+					$worksheet->write($excelrivi, 8, ($value["ale"])/100, $format_percent);					
+					$worksheet->write($excelrivi, 9, $value["hinta"], $format_curr);			
+					$worksheet->write($excelrivi, 10, $value["alkupvm"], $format_date);
+					$worksheet->write($excelrivi, 11, $value["loppupvm"], $format_date);
+					$worksheet->write($excelrivi, 12, strip_tags($value["mita"]));
 					$excelrivi++;
 				}
 			} 

@@ -207,7 +207,7 @@
 
 
 		if (mysql_field_name($result, $i) == "aleryhma") {
-			$query = "	SELECT tunnus, ryhma, alennus
+			$query = "	SELECT tunnus, ryhma, concat_ws(' - ', ryhma, selite) ryhma, alennus
 						FROM perusalennus
 						WHERE yhtio = '$kukarow[yhtio]'
 						ORDER BY ryhma";
@@ -219,7 +219,7 @@
 				if ($trow[$i] == $vrow[1]) {
 					$sel = "selected";
 				}
-				$ulos .= "<option value = '$vrow[1]' $sel>$vrow[1]</option>";
+				$ulos .= "<option value = '$vrow[1]' $sel>$vrow[2]</option>";
 			}
 			$ulos .= "</select></td>";
 			$jatko = 0;

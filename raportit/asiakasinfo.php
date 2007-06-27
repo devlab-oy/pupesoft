@@ -429,7 +429,7 @@ if ($ytunnus!='') {
 		echo "<br><a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&lopetus=$lopetus'>".t("Tulosta alennustaulukko")."</a><br><br>";
 		if ($asale!='' or $yhdistetty!='') {
 			// tehd‰‰n asiakkaan alennustaulukot
-			$query = "select * from perusalennus where yhtio='$kukarow[yhtio]' order by ryhma";
+			$query = "select *, concat_ws(' - ', ryhma, perusalennus.selite) ryhma from perusalennus where yhtio='$kukarow[yhtio]' order by ryhma";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$asale  = "<table><caption><font class='message'>".t("Aletaulukko")."</font></caption>";
@@ -468,10 +468,14 @@ if ($ytunnus!='') {
 				}
 			}
 
-			$query = "	SELECT asiakasalennus.*, tuote.nimitys, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
+			$query = "	SELECT asiakasalennus.*, if(asiakasalennus.tuoteno!='',concat(asiakasalennus.tuoteno,' - ', tuote.nimitys), '') tuoteno, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm, concat_ws(' - ', asiakas_ryhma, avainsana.selitetark) asiakas_ryhma, concat_ws(' - ', asiakasalennus.ryhma, perusalennus.selite) ryhma
 						FROM asiakasalennus
 						LEFT JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno
-						WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or (asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '')) order by asiakas_ryhma, ytunnus, asiakasalennus.ryhma, asiakasalennus.tuoteno";
+						LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
+						LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'						
+						WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or (asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '')) 
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						ORDER BY asiakas_ryhma, ytunnus, asiakasalennus.ryhma, asiakasalennus.tuoteno";
 			$asres = mysql_query($query) or pupe_error($query);
 
 			while ($asrow = mysql_fetch_array($asres)) {
@@ -486,10 +490,10 @@ if ($ytunnus!='') {
 
 				if ($asrow['ryhma'] != '') {
 					$showryhma = "(RY) ".$asrow['ryhma'];
-					$asrow['tuoteno']=$asrow['nimitys']='';
+					$asrow['tuoteno']='';
 				}
 				else {
-					$showryhma = $asrow['tuoteno']." ".$asrow['nimitys'];
+					$showryhma = $asrow['tuoteno'];
 				}
 
 				$ryhma = $asrow['ryhma'];
@@ -508,7 +512,7 @@ if ($ytunnus!='') {
 					if(isset($workbook) and $yhdistetty=="") {
 						$worksheet->write($excelrivi, 0, $asrow['asiakas_ryhma'], $format_bold);
 						$worksheet->write($excelrivi, 1, $asrow['ytunnus'], $format_bold);
-						$worksheet->write($excelrivi, 2, $asrow['tuoteno']." ".$asrow['nimitys'], $format_bold);
+						$worksheet->write($excelrivi, 2, $asrow['tuoteno'], $format_bold);
 						$worksheet->write($excelrivi, 3, $asrow['ryhma'], $format_bold);				
 						$worksheet->write($excelrivi, 4, $asrow['alennus'], $format_bold);
 						$worksheet->write($excelrivi, 5, $asrow["alkupvm"], $format_bold);
@@ -519,9 +523,10 @@ if ($ytunnus!='') {
 				}
 				else {
 					unset($dadaArray);					
-					$dadaArray["ytunnus"]		= $showytunnus;
-					$dadaArray["asiakas_ryhma"]	= $asrow['ryhma'];
-					$dadaArray["tuoteno"]		= $asrow['tuoteno']." ".$asrow['nimitys'];
+					$dadaArray["ytunnus"]		= $asrow['ytunnus'];
+					$dadaArray["asiakas_ryhma"]	= $asrow['asiakas_ryhma'];					
+					$dadaArray["ryhma"]			= $asrow['ryhma'];
+					$dadaArray["tuoteno"]		= $asrow['tuoteno'];
 					$dadaArray["ale"]			= $ale;
 					$dadaArray["alkupvm"]		= $asrow["alkupvm"];
 					$dadaArray["loppupvm"]		= $asrow["loppupvm"];
@@ -561,10 +566,14 @@ if ($ytunnus!='') {
 				$excelrivi++;
 			}						
 
-			$query = "	SELECT asiakashinta.*, tuote.nimitys, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
+			$query = "	SELECT asiakashinta.*, concat_ws(' - ', asiakas_ryhma, avainsana.selitetark) asiakas_ryhma, if(asiakashinta.tuoteno!='', concat(asiakashinta.tuoteno,' - ',tuote.nimitys), '') tuoteno, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm, concat_ws(' - ', asiakashinta.ryhma, perusalennus.selite) ryhma
 						FROM asiakashinta
 						LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
-						WHERE asiakashinta.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or (asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!='')) order by asiakas_ryhma, ytunnus, asiakashinta.ryhma, asiakashinta.tuoteno";
+						LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+						LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+						WHERE asiakashinta.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or (asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!=''))
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						ORDER BY asiakas_ryhma, ytunnus, asiakashinta.ryhma, asiakashinta.tuoteno";
 			$asres = mysql_query($query) or pupe_error($query);
 
 			while ($asrow = mysql_fetch_array($asres)) {
@@ -578,10 +587,10 @@ if ($ytunnus!='') {
 
 				if ($asrow['ryhma'] != '') {
 					$showryhma = "(RY) ".$asrow['ryhma'];
-					$asrow['tuoteno']=$asrow['nimitys']='';					
+					$asrow['tuoteno']='';					
 				}
 				else {
-					$showryhma = $asrow['tuoteno']." ".$asrow['nimitys'];
+					$showryhma = $asrow['tuoteno'];
 				}
 
 				$ryhma = $asrow['ryhma'];
@@ -599,7 +608,7 @@ if ($ytunnus!='') {
 					if(isset($workbook) and $yhdistetty=="") {
 						$worksheet->write($excelrivi, 0, $asrow['ytunnus']);
 						$worksheet->write($excelrivi, 1, $asrow['asiakas_ryhma']);
-						$worksheet->write($excelrivi, 2, $asrow['tuoteno']." ".$asrow['nimitys']);
+						$worksheet->write($excelrivi, 2, $asrow['tuoteno']);
 						$worksheet->write($excelrivi, 3, $asrow['ryhma']);				
 						$worksheet->write($excelrivi, 4, $asrow['hinta']);
 						$worksheet->write($excelrivi, 5, $asrow["alkupvm"]);
@@ -612,6 +621,7 @@ if ($ytunnus!='') {
 					$dadaArray["ytunnus"]			= $asrow['ytunnus'];
 					$dadaArray["asiakas_ryhma"]		= $asrow['asiakas_ryhma'];
 					$dadaArray["ryhma"]				= $asrow['ryhma'];
+					$dadaArray["tuoteno"]			= $asrow['tuoteno'];					
 					$dadaArray["hinta"]				= $hinta;
 					$dadaArray["alkupvm"]			= $asrow["alkupvm"];
 					$dadaArray["loppupvm"]			= $asrow["loppupvm"];
@@ -649,7 +659,7 @@ if ($ytunnus!='') {
 				$excelrivi++;
 			}						
 
-			$query = "(select osasto, try, aleryhma, asiakasalennus.tuoteno, tuote.nimitys, ryhma, ytunnus, asiakas_ryhma, alennus, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
+			$query = "	(select osasto, try, aleryhma, asiakasalennus.tuoteno, ryhma, ytunnus, asiakas_ryhma, alennus, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm, tuote.nimitys
 						from asiakasalennus, tuote
 						where asiakasalennus.yhtio = tuote.yhtio
 						and asiakasalennus.yhtio='$kukarow[yhtio]'
@@ -658,9 +668,10 @@ if ($ytunnus!='') {
 						and status in ('', 'A')
 						and osasto != 0
 						and try != 0
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						group by 1,2,3,4,5,6,7,8,9,10)
 						UNION
-						(select osasto, try, aleryhma, asiakasalennus.tuoteno, tuote.nimitys, ryhma, ytunnus, asiakas_ryhma, alennus, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm
+						(select osasto, try, aleryhma, asiakasalennus.tuoteno, ryhma, ytunnus, asiakas_ryhma, alennus, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm, tuote.nimitys
 						from asiakasalennus, tuote
 						where asiakasalennus.yhtio = tuote.yhtio
 						and asiakasalennus.yhtio='$kukarow[yhtio]'
@@ -669,9 +680,10 @@ if ($ytunnus!='') {
 						and status in ('', 'A')
 						and osasto != 0
 						and try != 0
+						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						group by 1,2,3,4,5,6,7,8,9,10)
 						UNION
-						(select osasto, try, aleryhma, '1' as tuoteno, tuote.nimitys, ryhma, '1' as ytunnus, '1' as asiakas_ryhma, alennus, 'perus' as alkupvm, '1' as loppupvm
+						(select osasto, try, aleryhma, '1' as tuoteno, ryhma, '1' as ytunnus, '1' as asiakas_ryhma, alennus, 'perus' as alkupvm, '1' as loppupvm, tuote.nimitys
 						from perusalennus, tuote
 						where 
 						perusalennus.yhtio = tuote.yhtio
@@ -698,6 +710,18 @@ if ($ytunnus!='') {
 					$mita   = "<font class='info'>".t("Asiakas")."</font>";
 					$ale    = $alerow['alennus'];
 					if ($alerow['ytunnus'] == '') {
+						$query = "	select *
+									from avainsana
+									where yhtio	= '$kukarow[yhtio]'
+									and laji	= 'ASIAKASRYHMA'
+									and selite	= '{$alerow["asiakas_ryhma"]}'";
+						$asryres = mysql_query($query) or pupe_error($query);
+						$asryrow = mysql_fetch_array($asryres);
+						
+						if($asryrow["selitetark"] != "") {
+							$alerow['asiakas_ryhma'] .= " - ".$asryrow["selitetark"];
+						}						
+						
 						$showytunnus = "(RY) ".$alerow['asiakas_ryhma'];
 					}
 					else {
@@ -705,10 +729,20 @@ if ($ytunnus!='') {
 					}
 					
 					if ($alerow['tuoteno'] == '') {
+						
+						$query = "select * from perusalennus where yhtio='$kukarow[yhtio]' and ryhma='{$alerow["aleryhma"]}'";
+						$ryres = mysql_query($query) or pupe_error($query);
+						$ryrow = mysql_fetch_array($ryres);
+						
+						if($ryrow["selite"] != "") {
+							$alerow['aleryhma'] .= " - ".$ryrow["selite"];
+						}
+						
 						$showaleryhma = "(RY) ".$alerow['aleryhma'];
+						$alerow['tuoteno'] = $alerow['nimitys'] = "";
 					}
 					else {
-						$showaleryhma = $alerow['tuoteno']." ".$alerow['nimitys'];
+						$alerow['tuoteno'] .= " - ".$alerow['nimitys'];
 					}
 				}
 
@@ -754,7 +788,7 @@ if ($ytunnus!='') {
 							$worksheet->write($excelrivi, 4, $alerow["ytunnus"]);
 							$worksheet->write($excelrivi, 5, $alerow['asiakas_ryhma']);
 							$worksheet->write($excelrivi, 6, $alerow['aleryhma']);
-							$worksheet->write($excelrivi, 7, trim($alerow['tuoteno']." ".$alerow['nimitys']));
+							$worksheet->write($excelrivi, 7, $alerow['tuoteno']);
 							$worksheet->write($excelrivi, 8, $alerow['alkupvm']);
 							$worksheet->write($excelrivi, 9, $alerow['loppupvm']);
 							$worksheet->write($excelrivi, 10, $mita);												
@@ -774,7 +808,7 @@ if ($ytunnus!='') {
 						$dadaArray["try_nimi"]			= $tryro["selitetark"];
 						$dadaArray["ytunnus"]			= $alerow["ytunnus"];
 						$dadaArray["ryhma"]				= $alerow["aleryhma"];
-						$dadaArray["tuoteno"]			= $alerow['tuoteno']." ".$alerow['nimitys'];
+						$dadaArray["tuoteno"]			= $alerow['tuoteno'];
 						$dadaArray["ale"]				= $ale;
 						$dadaArray["alkupvm"]			= $asrow["alkupvm"];
 						$dadaArray["loppupvm"]			= $asrow["loppupvm"];

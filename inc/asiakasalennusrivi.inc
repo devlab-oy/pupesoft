@@ -7,7 +7,7 @@
 		$tyyppi = 0;
 	}
 	if (mysql_field_name($result, $i) == "ryhma") {
-		$query = "	SELECT ryhma
+		$query = "	SELECT ryhma, concat_ws(' - ', ryhma, selite) ryhma
 					FROM perusalennus
 					WHERE yhtio='$kukarow[yhtio]'
 					ORDER BY ryhma+0";
@@ -20,7 +20,7 @@
 			if ($trow[$i] == $srow[0]) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value='$srow[0]' $sel>$srow[0]</option>";
+			$ulos .= "<option value='$srow[0]' $sel>$srow[1]</option>";
 		}
 		$ulos .= "</select></td>";
 		$jatko = 0;
@@ -42,7 +42,7 @@
 			if ($trow[$i] == $vrow['selite']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
+			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
 		}
        	
 		$ulos .= "</select></td>";

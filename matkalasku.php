@@ -245,6 +245,7 @@ if ($tee == "MUOKKAA") {
 				$query = "INSERT into tiliointi SET
 							yhtio ='$kukarow[yhtio]',
 							ltunnus = '$ltunnus',
+							lukko = '1',
 							tilino = '{$yhtiorow["ostovelat"]}',";
 				$where="";
 			}
@@ -996,9 +997,9 @@ if ($tee == "MUOKKAA") {
 						$alvulk=$alvrow["alv"];
 						if ($alvulk == "") {
 							echo "<font class='error'>".t("Kulun arvonlis‰veroa kohdemaassa ei ole m‰‰ritelty")."</font><br>";
+						}
 					}
-					}
-
+					
 					echo "<td>".alv_popup_oletus("alvulk",$alvulk, $maa, 'lista')."</td>";
 				}
 				else {

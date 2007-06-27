@@ -89,7 +89,7 @@ if ($tee == "tee") {
 						tiliointi.tapvm <= '$vv1-$kk1-$pp1' and
 						tiliointi.yhtio = lasku. yhtio and
 						tiliointi.ltunnus = lasku.tunnus and
-						tiliointi.tilino = '$yhtiorow[varasto]' and
+						tiliointi.tilino in  ('$yhtiorow[varasto]','$yhtiorow[matkalla_olevat]') and
 						tiliointi.korjattu = '' 
 						and $lvalinta";
 			$lresult = mysql_query($query) or pupe_error($query);			
@@ -112,7 +112,7 @@ if ($tee == "tee") {
 				tiliointi.tapvm >= '$vv-$kk-$pp' and
 				tiliointi.tapvm <= '$vv1-$kk1-$pp1' and
 				tiliointi.korjattu = '' and
-				tiliointi.tilino = '$yhtiorow[varasto]'";
+				tiliointi.tilino in  ('$yhtiorow[varasto]','$yhtiorow[matkalla_olevat]')";
 	$lresult = mysql_query($query) or pupe_error($query);
 	$lrow = mysql_fetch_array ($lresult);
 

@@ -624,9 +624,10 @@
 			if($raportti == "KULUTUS") $sele["K"] = "checked";
 			else $sele["M"] = "checked";
 			
-			echo "<form action='' method='post'>
+			echo "<form action='$PHP_SELF#Raportit' method='post'>
 					<input type='hidden' name='tuoteno' value='$tuoteno'>
-					<font class='message'>".t("Raportointi")."</font>
+					<input type='hidden' name='tee' value='Z'>
+					<font class='message'>".t("Raportointi")."</font><a href='#' name='Raportit'></a>
 					<input type='radio' onclick='submit()' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")." 
 					<input type='radio' onclick='submit()' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta")."
 				</form><hr>";

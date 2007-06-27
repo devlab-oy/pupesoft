@@ -788,6 +788,7 @@
 					
 				}
 				
+				//	Tutkitaan onko tää liian hias, indexi on ainakin vähän paska, toimitettuaikaa ei ole indexoitu
 				$query = "	SELECT
 							$select_summa
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
@@ -820,7 +821,13 @@
 						
 						$muutos="";
 						$muutos_abs = $lrow[$key] - $lrow["ed_".$key];
-						$muutos_suht = round((($lrow[$key] / $lrow["ed_".$key])-1)*100,2);
+						
+						if($lrow["ed_".$key]>0) {
+							$muutos_suht = round((($lrow[$key] / $lrow["ed_".$key])-1)*100,2);
+						}
+						else {
+							$muutos_suht=0;
+						}
 						
 						if($muutos_abs<>0) {
 							$muutos = "edellinen: ".(int)$lrow["ed_".$key]."{$trow["yksikko"]} muutos: $muutos_abs{$trow["yksikko"]}";
@@ -846,7 +853,13 @@
 					
 					$muutos="";
 					$muutos_abs = $summa - $ed_summa;
-					$muutos_suht = round((($summa / $ed_summa)-1)*100,2);
+					
+					if($ed_summa>0) {
+						$muutos_suht = round((($summa / $ed_summa)-1)*100,2);
+					}
+					else {
+						$muutos_suht=0;
+					}
 
 					if($muutos_abs<>0) {
 						$muutos = "edellinen: ".(int)$ed_summa."{$trow["yksikko"]} muutos: $muutos_abs{$trow["yksikko"]}";
@@ -877,7 +890,13 @@
 					
 					$muutos="";
 					$muutos_abs = $erittely[$kk] - $ed_erittely[$kk];
-					$muutos_suht = round((($erittely[$kk] / $erittely[$kk])-1)*100,2);
+
+					if($erittely[$kk]>0) {
+						$muutos_suht = round((($erittely[$kk] / $erittely[$kk])-1)*100,2);
+					}
+					else {
+						$muutos_suht=0;
+					}
 
 					if($muutos_abs<>0) {
 						$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{$trow["yksikko"]} muutos: $muutos_abs{$trow["yksikko"]}";
@@ -899,7 +918,13 @@
 				
 				$muutos="";
 				$muutos_abs = $gt - $ed_gt;
-				$muutos_suht = round((($gt / $ed_gt)-1)*100,2);
+				
+				if($ed_gt>0) {
+					$muutos_suht = round((($gt / $ed_gt)-1)*100,2);
+				}
+				else {
+					$muutos_suht=0;
+				}
 				
 				if($muutos_abs<>0) {
 					$muutos = "edellinen: ".(int)$ed_gt."{$trow["yksikko"]} muutos: $muutos_abs{$trow["yksikko"]}";

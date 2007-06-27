@@ -45,14 +45,12 @@ echo "<br><br>";
 if ($tee == "tee") {
 
 	// haetaan halutut varastotaphtumat
-	$query  = "	SELECT laji, count(*) kpl, round(sum(hinta*kpl),2) logistiikka
-				FROM tapahtuma, tuote
+	$query  = "	SELECT laji, count(*) kpl, round(sum(if(laji='tulo', kplhinta, hinta) * kpl),2) logistiikka
+				FROM tapahtuma
+				JOIN tuote ON tapahtuma.yhtio=tuote.yhtio and tapahtuma.tuoteno=tuote.tuoteno and tuote.ei_saldoa=''
 				WHERE tapahtuma.yhtio = '$kukarow[yhtio]' and
-					laadittu >= '$vv-$kk-$pp 00:00:00' and
-					laadittu <= '$vv1-$kk1-$pp1 23:59:59' and
-					tapahtuma.yhtio=tuote.yhtio and
-					tapahtuma.tuoteno=tuote.tuoteno and
-					ei_saldoa=''
+				laadittu >= '$vv-$kk-$pp 00:00:00' and
+				laadittu <= '$vv1-$kk1-$pp1 23:59:59'
 				GROUP BY laji";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -76,10 +74,10 @@ if ($tee == "tee") {
 		//Etsitään vastaavat kirjapidon viennit
 		$lvalinta = '';
 
-		if ($trow['laji'] == 'laskutus') $lvalinta = "tila = 'U' and alatila = 'X' and selite not like 'Varastoontulo%'";
-		if ($trow['laji'] == 'Inventointi') $lvalinta = "tila = 'X' and selite like '%inventoi%'";
+		if ($trow['laji'] == 'laskutus') 	$lvalinta = "tila = 'U' and alatila = 'X' and selite not like 'Varastoontulo%'";
+		if ($trow['laji'] == 'Inventointi') $lvalinta = "tila = 'X' and selite like 'Inventointi%'";
 		if ($trow['laji'] == 'Epäkurantti') $lvalinta = "tila = 'X' and selite like '%epäkura%'";
-		if ($trow['laji'] == 'tulo') $lvalinta = " ((tila in ('H', 'M', 'P', 'Q', 'Y') and vienti not in ('A', 'D', 'G', '')) or (tila = 'U' and alatila = 'X' and selite like 'Varastoontulo%'))";
+		if ($trow['laji'] == 'tulo') 		$lvalinta = " ((tila in ('H', 'M', 'P', 'Q', 'Y') and vienti not in ('A', 'D', 'G', '')) or (tila = 'U' and alatila = 'X' and selite like 'Varastoontulo%'))";
 
 		if ($lvalinta != '') {
 			$query  = "	SELECT sum(tiliointi.summa) summa 

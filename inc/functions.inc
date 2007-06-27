@@ -218,6 +218,27 @@ if (!function_exists("t")) {
 	}
 }
 
+/**
+ * 
+ * Hakee maan nimen
+ * 
+ * @param string Maa koodi
+ * 
+ * @return string Maan nimi
+ * 
+ */
+if (!function_exists("maa")) {
+	function maa($code) {
+		
+		$query = sprintf("SELECT nimi FROM maat where koodi ='%s' LIMIT 1", mysql_real_escape_string($code));
+		$res = mysql_query($query) or pupe_error($query);
+		$maa = mysql_fetch_array($res);
+		
+		// otetaan pois maa koodi
+		return substr($maa['nimi'], 4);
+	}
+}
+
 if (!function_exists("alias")) {
 	function alias($stringi, $taulu, $setti = '') {
 

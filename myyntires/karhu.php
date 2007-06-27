@@ -115,6 +115,8 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 	if ($syot_ytunnus != '') {
 		$asiakaslisa = " and asiakas.ytunnus >= '$syot_ytunnus' ";
+	} elseif (isset($_POST['ytunnus_spec']) && ! empty($_POST['ytunnus_spec'])) {
+		$asiakaslisa = sprintf(" and asiakas.ytunnus = '%s' ", mysql_real_escape_string($_POST['ytunnus_spec']));
 	}
 
 	$query = "	SELECT asiakas.ytunnus, GROUP_CONCAT(distinct lasku.tunnus) karhuttavat, sum(summa) karhuttava_summa
@@ -483,7 +485,8 @@ if ($tee == "") {
 
 	echo "<tr><th>".t("Ytunnus").":</th>";
 	echo "<td>";
-	echo "<input name='syot_ytunnus' type='text' value='$syot_ytunnus'></td>";
+	echo "<input name='ytunnus_spec' type='text' value=''></td></tr>";
+	echo "<tr><th>" . t('Aloita ytunnuksesta') . ":</th><td><input type='text' name='syot_ytunnus' value='$syot_ytunnus'></td></tr>";
 	echo "<td class='back'><input type='submit' value='".t("Aloita")."'></td>";
 	echo "</form></tr>";
 	echo "</table>";

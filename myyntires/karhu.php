@@ -26,14 +26,20 @@ if ($tee == 'LAHETA') {
 	// kirjeen l‰hetyksen status
 	$ekarhu_success = true;
 
-	try {
+	if (! empty($_POST['lasku_tunnus'])) {
 		
-		// koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
-		require ('paperikarhu.php');
+		try {
+		
+			// koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
+			require ('paperikarhu.php');
 
-	} catch (Exception $e) {
+		} catch (Exception $e) {
+			$ekarhu_success = false;
+			echo "<font class='error'>Ei voitu l‰hett‰‰ karhua eKirjeen‰, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
+		}
+	} else {
+		echo "<font class='error'>Et valinnut yht‰‰n laskua.</font>";
 		$ekarhu_success = false;
-		echo "<font class='error'>Ei voitu l‰hett‰‰ karhua eKirjeen‰, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
 	}
 	
 	// poistetaan karhuttu vain jos karhun l‰hetys onnistui,

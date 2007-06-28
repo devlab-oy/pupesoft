@@ -43,15 +43,15 @@
 	if ($from != '' and $rivitunnus != "") {
 		$query    = "	SELECT *
 						FROM tilausrivi use index (PRIMARY)
-						WHERE yhtio='$kukarow[yhtio]'
-						and tunnus='$rivitunnus'";
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$rivitunnus'";
 		$sarjares = mysql_query($query) or pupe_error($query);
 		$rivirow  = mysql_fetch_array($sarjares);
 
 		$query    = "	SELECT *
 						FROM lasku use index (PRIMARY)
-						WHERE yhtio='$kukarow[yhtio]'
-						and tunnus='$rivirow[otunnus]'";
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tunnus	= '$rivirow[otunnus]'";
 		$sarjares = mysql_query($query) or pupe_error($query);
 		$laskurow  = mysql_fetch_array($sarjares);
 
@@ -266,7 +266,9 @@
 
 	// ollaan syötetty uusi
 	if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
-
+		
+		$sarjanumero = trim($sarjanumero);
+		
 		$query = "	SELECT *
 					FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
 					WHERE yhtio = '$kukarow[yhtio]'
@@ -328,6 +330,9 @@
 		}
 		else {
 			$sarjarow = mysql_fetch_array($sarjares);
+			
+			$sarjanumero_haku = $sarjanumero;
+			
 			echo "<font class='error'>".t("Sarjanumero löytyy jo tuotteelta")." $sarjarow[tuoteno]/$sarjanumero.</font><br><br>";
 		}
 	}
@@ -684,7 +689,7 @@
 	echo "<input type='hidden' name='lisatieto_haku' 	value='$lisatieto_haku'>";
 
 	while ($sarjarow = mysql_fetch_array($sarjares)) {
-
+				
 		if (function_exists("sarjanumeronlisatiedot_popup")) {
 			list($divitx, $text_output, $kuvalisa_bin, $hankintahinta) = sarjanumeronlisatiedot_popup ($sarjarow["tunnus"], '', 'popup', '', '');
 			$divit .= $divitx;
@@ -710,7 +715,7 @@
 		}
 
 		echo "<tr>";
-		echo "<td valign='top'>$sarjarow[sarjanumero]</td>";
+		echo "<td valign='top'>$sarjarow[sarjanumero]<a name='$sarjarow[sarjanumero]'></a></td>";
 		echo "<td colspan='2' valign='top'>$sarjarow[tuoteno]<br>$sarjarow[nimitys]";
 		
 		if ($sarjarow["takuu_alku"] != '' and $sarjarow["takuu_alku"] != '0000-00-00') {

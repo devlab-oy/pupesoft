@@ -179,16 +179,21 @@
 
 	$count = count($array);
 
-	for ($i=0; $i<=$count; $i++) {
-		if (strlen($haku[$i]) > 0 && $i <= 1) {
-			$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
-			$ulisa .= "&haku[".$i."]=".$haku[$i];
-		}
-		elseif (strlen($haku[$i]) > 0 && $i == 2) {
-			$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
-			$ulisa .= "&haku[".$i."]=".$haku[$i];
-		}
-		elseif (strlen($haku[$i]) > 0) {
+	if (strlen($haku[0]) > 0) {
+		$lisa .= " and match (tuote.tuoteno) against ('$haku[0]*' IN BOOLEAN MODE) ";
+		$ulisa .= "&haku[".$i."]=".$haku[$i];
+	}
+	if (strlen($haku[1]) > 0) {
+		$lisa .= " and toim_tuoteno like '%$haku[1]%' ";
+		$ulisa .= "&haku[".$i."]=".$haku[$i];
+	}
+	if (strlen($haku[2]) > 0) {
+		$lisa .= " and match (tuote.nimitys) against ('$haku[2]*' IN BOOLEAN MODE) ";
+		$ulisa .= "&haku[".$i."]=".$haku[$i];
+	}
+	
+	for ($i=3; $i<=$count; $i++) {
+		if (strlen($haku[$i]) > 0) {
 			$lisa .= " and ".$array[$i]."='".$haku[$i]."'";
 			$ulisa .= "&haku[".$i."]=".$haku[$i];
 		}
@@ -281,8 +286,8 @@
 	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
 				".avain('join','OSASTO_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]'
-				and avainsana.laji='OSASTO'
+				WHERE avainsana.yhtio = '$kukarow[yhtio]'
+				and avainsana.laji = 'OSASTO'
 				$avainlisa
 				ORDER BY avainsana.jarjestys, avainsana.selite";
 	$sresult = mysql_query($query) or pupe_error($query);
@@ -403,13 +408,12 @@
 					$kohtapoislisa
 					GROUP BY 1,2
 					ORDER BY $jarjestys
+					LIMIT 500
 				) valitut
 				WHERE tuote_wrapper.yhtio = '$kukarow[yhtio]'
-				and valitut.tuoteno = tuote_wrapper.tuoteno
-				LIMIT 500";
-
+				and valitut.tuoteno = tuote_wrapper.tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
-
+	
 	if (mysql_num_rows($result) > 0) {
 		echo "<table>";
 

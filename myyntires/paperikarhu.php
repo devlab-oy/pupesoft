@@ -79,7 +79,7 @@
 		$pdf->draw_rectangle(760, 320, 739, 575, 				$firstpage, $rectparam);
 		$pdf->draw_rectangle(760, 420, 739, 575, 				$firstpage, $rectparam);
 		$pdf->draw_text(330, 752, t("Päivämäärä", $kieli), 		$firstpage, $pieni);
-		$pdf->draw_text(330, 742, date('Y-m-d'), 				$firstpage, $norm);
+		$pdf->draw_text(330, 742, tv1dateconv(date('Y-m-d')), 	$firstpage, $norm);
 		$pdf->draw_text(430, 752, t("Asiaa hoitaa", $kieli), 	$firstpage, $pieni);
 		$pdf->draw_text(430, 742, $yrow["nimi"], 				$firstpage, $norm);
 
@@ -90,10 +90,11 @@
 		$paiva	   = date("j");
 		$kuu   	   = date("n");
 		$year  	   = date("Y");
-		$seurday   = date("j",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-		$seurmonth = date("n",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
+		$seurday   = date("d",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
+		$seurmonth = date("m",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
 		$seuryear  = date("Y",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-		$pdf->draw_text(330, 721, $seuryear."-".$seurmonth."-".$seurday, $firstpage, $norm);
+		
+		$pdf->draw_text(330, 721, tv1dateconv($seuryear."-".$seurmonth."-".$seurday), $firstpage, $norm);
 		
 		$pdf->draw_text(430, 731, t("Puhelin", $kieli), $firstpage, $pieni);
 		$pdf->draw_text(430, 721, $yrow["puhno"], $firstpage, $norm);
@@ -166,22 +167,14 @@
 			$firstpage = alku();
 			$lask = 1;
 		}
-		/*
-		if (($lask == 21 and $sivu == 1) or ($lask == 31 and $sivu > 1)) {
-			$sivu++;
-			loppu($firstpage,'');
-			$firstpage = alku();
-			$kala = 525;
-			$lask = 1;
-		}
-		*/
-		$pdf->draw_text(30,  $kala, $row["laskunro"],	$firstpage, $norm);
-		$pdf->draw_text(120, $kala, $row["tapvm"], 		$firstpage, $norm);
-		$pdf->draw_text(200, $kala, $row["erpcm"], 		$firstpage, $norm);
-		$pdf->draw_text(280, $kala, $row["ika"], 		$firstpage, $norm);
-		$pdf->draw_text(340, $kala, $row["kpvm"],		$firstpage, $norm);
-		$pdf->draw_text(440, $kala, $row["summa"], 		$firstpage, $norm);
-		$pdf->draw_text(520, $kala, $row["karhuttu"]+1, $firstpage, $norm);
+		
+		$pdf->draw_text(30,  $kala, $row["laskunro"],					$firstpage, $norm);
+		$pdf->draw_text(120, $kala, tv1dateconv($row["tapvm"]), 		$firstpage, $norm);
+		$pdf->draw_text(200, $kala, tv1dateconv($row["erpcm"]), 		$firstpage, $norm);
+		$pdf->draw_text(280, $kala, $row["ika"], 						$firstpage, $norm);
+		$pdf->draw_text(340, $kala, tv1dateconv($row["kpvm"]),			$firstpage, $norm);
+		$pdf->draw_text(440, $kala, $row["summa"], 						$firstpage, $norm);
+		$pdf->draw_text(520, $kala, $row["karhuttu"]+1, 				$firstpage, $norm);
 		$kala = $kala - 13;
 
 		$lask++;
@@ -398,9 +391,9 @@
 		$ekirje_tunnus = date('dmY') . $asiakastiedot['tunnus'];
 	
 		$info = array(
-			'tunniste'              => $ekirje_tunnus, // asiakkaan oma kirjeen tunniste
-	        'kirjeluokka'           => '1',                    // 1 = priority, 2 = economy
-	        'osasto'                => 'false',                // osastokohtainen erittely
+			'tunniste'              => $ekirje_tunnus, 			// asiakkaan oma kirjeen tunniste
+	        'kirjeluokka'           => '1',                    	// 1 = priority, 2 = economy
+	        'osasto'                => 'false',                	// osastokohtainen erittely
 	        'file_id'               => $ekirje_tunnus,          // lähettäjän tunniste tiedostolle
 	        'kirje_id'              => $ekirje_tunnus,          // kirjeen id
 			'contact_name'          => $kukarow['nimi'],

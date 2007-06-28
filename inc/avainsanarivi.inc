@@ -169,6 +169,9 @@
 		if (strtoupper($trow[$i]) == 'TYOM_TYOLINJA') {
 			$sel54 = "selected";
 		}
+		if (strtoupper($trow[$i]) == 'KARHUVIESTI') {
+			$sel55 = "selected";
+		}
 		
 		
 		$ulos = "<td><select name='$nimi' onchange='submit();'>";
@@ -227,6 +230,7 @@
 		$ulos .= "<option value='JAKELULISTA'" 	  .$sel52.">".t("Email jakelulista")."</option>";
 		$ulos .= "<option value='VAKIOVIESTI'"    .$sel53.">".t("Vakioviesti")."</option>";	
 		$ulos .= "<option value='TYOM_TYOLINJA'"  .$sel54.">".t("Työmääräysten työlinja")."</option>";			
+		$ulos .= "<option value='KARHUVIESTI'"    .$sel55.">".t("Karhuviesti")."</option>";			
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -353,5 +357,36 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if ($sel55 == "selected") {
+		if (mysql_field_name($result, $i) == "selitetark"
+		|| mysql_field_name($result, $i) == "selitetark_2"
+		|| mysql_field_name($result, $i) == "selitetark_3") {
+			$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
+			$jatko = 0;
+		}
+		
+		if (mysql_field_name($result, $i) == "selite") {
+			$query = "	SELECT distinct koodi, nimi
+						FROM maat
+						WHERE nimi != ''
+						ORDER BY koodi";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$ulos = "<td><select name='$nimi'>";
 
+			while ($vrow=mysql_fetch_array($vresult)) {
+				$sel="";
+				if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
+					$sel = "selected";
+				}
+				elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
+					$sel = "selected";
+				}
+				$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+			}
+
+			$ulos .= "</select></td>";
+			$jatko = 0;
+		}
+	}
 ?>

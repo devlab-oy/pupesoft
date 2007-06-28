@@ -8,7 +8,7 @@
 		if (!mysql_num_rows($result)) {
 			$query = "INSERT INTO karhukierros (pvm,yhtio) values (current_date,'$yhtio')";
 			$result = mysql_query($query) or pupe_error($query);
-
+			
 			$query = "SELECT LAST_INSERT_ID() FROM karhukierros";
 			$result = mysql_query($query) or pupe_error($query);
 			$array = mysql_fetch_array($result);
@@ -345,13 +345,26 @@
 
 	$kaatosumma=$kaato["summa"] * -1;
 	if (!$kaatosumma) $kaatosumma='0.00';
-
-
+    
     if (isset($_POST['karhuviesti'])) {
-        $karhuviesti = $yhtiorow['karhuviesti' . (int) $_POST['karhuviesti']];
+		list($maa, $numero) = explode('-', $_POST['karhuviesti']);
+		
+		$query = sprintf(
+			"select * from avainsana where selite='%s' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'",
+			$maa
+		);
+		$res = mysql_query($query) or pupe_error();
+		$viestit = mysql_fetch_array($res);
+		
+		$viesti1 = $viestit['selitetark'];
+		$viesti2 = $viestit['selitetark_2'];
+		$viesti3 = $viestit['selitetark_3'];
+		
+        $karhuviesti = ${'viesti' . $numero};
+
     } else {
         // otetaan defaulttina eka viesti
-        $karhuviesti = $yhtiorow['karhuviesti1'];
+        $karhuviesti = 'Virhe';
     }
 	
 	$firstpage = alku($karhuviesti);

@@ -17,7 +17,11 @@ if ($kukarow["kirjoitin"] == 0) {
 	$tee = "";
 }
 
-if (strlen($yhtiorow['karhuviesti1']) < 6) {
+$query = "select * from avainsana where laji = 'KARHUVIESTI' and yhtio ='{$yhtiorow['yhtio']}'";
+$res = mysql_query($query) or pupe_error($query);
+
+if (mysql_num_rows($res) == 0) {
+
     echo "<font class='error'>".t("Yhtiöllä ei ole yhtään karhuviestiä tallennettuna. Ei voida karhuta").".</font><br>";
     $tee = '';
 }
@@ -25,7 +29,7 @@ if (strlen($yhtiorow['karhuviesti1']) < 6) {
 if ($tee == 'LAHETA') {
 	// kirjeen lähetyksen status
 	$ekarhu_success = true;
-
+	
 	if (! empty($_POST['lasku_tunnus'])) {
 		
 		try {
@@ -243,17 +247,41 @@ if ($tee == 'KARHUA')  {
 	
 	mysql_data_seek($result,0);
 	
+	$query = "select * from avainsana where laji = 'KARHUVIESTI' and yhtio ='{$yhtiorow['yhtio']}'";
+	$res = mysql_query($query) or pupe_error();
+	
 	?>
 	<form name='lahetaformi' action='' method='post'>
 	<select name='karhuviesti'>
-	    <option <?php echo $sel1 ?> value=1><?php echo t('Karhuviesti 1') ?></option>
-	    <option <?php echo $sel2 . ' ' . $disabled2 ?> value=2><?php echo t('Karhuviesti 2') ?></option>
-	    <option <?php echo $sel3 . ' ' . $disabled3 ?> value=3><?php echo t('Karhuviesti 3') ?></option>
+		<?php while ($viesti = mysql_fetch_array($res)): ?>
+			<?php
+			$viestit = array();
+			if (! empty($viesti['selitetark'])) {
+				$viestit['1'] = t('viesti 1');
+			}
+			if (! empty($viesti['selitetark_2'])) {
+				$viestit['2'] = t('viesti 2');
+			}
+			if (! empty($viesti['selitetark_3'])) {
+				$viestit['3'] = t('viesti 3');
+			}
+			?>
+			<?php foreach ($viestit as $numero => $teksti): ?>
+				<?php
+				$sel = '';
+				if ($asiakastiedot['maa'] == $viesti['selite'] && $numero == $max) {
+					$sel = 'selected';
+				} elseif ($asiakastiedot['maa'] == $viesti['selite'] && $max > $numero) {
+					$sel = 'selected';
+				}
+				?>
+	    		<option <?php echo $sel ?> value=<?php echo $viesti['selite'] . '-' . $numero ?>><?php echo maa($viesti['selite']) . ' ' . $teksti ?></option>
+			<?php endforeach; ?>
+		<?php endwhile; ?>
 	</select>
 	</td>
 	</tr>
 	</table>
-	        
 	<?php
 
 	echo "</td><td valign='top' class='back'>";
@@ -492,7 +520,7 @@ if ($tee == "") {
 	echo "<tr><th>".t("Ytunnus").":</th>";
 	echo "<td>";
 	echo "<input name='ytunnus_spec' type='text' value=''></td></tr>";
-	echo "<tr><th>" . t('Aloita ytunnuksesta') . ":</th><td><input type='text' name='syot_ytunnus' value='$syot_ytunnus'></td></tr>";
+	echo "<tr><th>" . t('Aloita ytunnuksesta') . "</th><td><input type='text' name='syot_ytunnus' value='$syot_ytunnus'></td></tr>";
 	echo "<td class='back'><input type='submit' value='".t("Aloita")."'></td>";
 	echo "</form></tr>";
 	echo "</table>";

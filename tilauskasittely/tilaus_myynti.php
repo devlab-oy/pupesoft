@@ -2948,13 +2948,16 @@ if ($tee == '') {
 						$tunken2 = "myyntirivitunnus";
 					}
 
-					$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and $tunken1='$row[tunnus]'";
+					$query = "	select count(*) kpl, min(sarjanumero) sarjanumero
+								from sarjanumeroseuranta 
+								where yhtio	 = '$kukarow[yhtio]' 
+								and tuoteno	 = '$row[tuoteno]' 
+								and $tunken1 = '$row[tunnus]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 
-
 					if ($sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
-						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
+						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim#$sarjarow[sarjanumero]' style='color:00FF00'>".t("S:nro ok")."</font></a>)";
 					}
 					else {
 						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim'>".t("S:nro")."</a>)";

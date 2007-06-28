@@ -202,11 +202,11 @@ if ($tee == "") {
 
 		echo "<tr class='aktiivi'>";
 
-		echo "<form method='post' name='todo' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku' autocomplete='off'>";
+		echo "<form method='post' name='todo' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku#ankkuri_$numero' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='valmis'>";
 		echo "<input type='hidden' name='tunnus' value='$rivi[tunnus]'>";
 
-		echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>$numero</a></th>";
+		echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku' name='ankkuri_$numero'>$numero</a></th>";
 
 		$rivi["kuvaus"] = str_replace("\n", "<br>", $rivi["kuvaus"]);
 

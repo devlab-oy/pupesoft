@@ -235,7 +235,7 @@ if (!function_exists("maa")) {
 		$maa = mysql_fetch_array($res);
 		
 		// otetaan pois maa koodi
-		return substr($maa['nimi'], 4);
+		return substr($maa['nimi'], 5);
 	}
 }
 

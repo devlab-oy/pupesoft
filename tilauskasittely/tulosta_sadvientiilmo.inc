@@ -440,8 +440,8 @@
 					}
 					$rivikohta = $rivikohta_bck;
 
-					$pdf2->draw_text(61,  mm_pt($rivikohta-36), "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), 	$lisalehti[$sivu], $kymppi);
-					$pdf2->draw_text(61,  mm_pt($rivikohta-41), "RET.EXP.", 															$lisalehti[$sivu], $kymppi);
+					$pdf2->draw_text(61,  mm_pt($rivikohta-36), "N380 $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), 	$lisalehti[$sivu], $kymppi);
+					$pdf2->draw_text(61,  mm_pt($rivikohta-41), "30400",														$lisalehti[$sivu], $kymppi);
 
 					$rivikohta -= 59;
 				}
@@ -499,7 +499,7 @@
 		$pdf2->draw_text(61,  616, $yhtiorow["postino"]."  ".$yhtiorow["postitp"], 	$pages[0], $kymppi);
 
 		//Kenttä 15 Lähetysmaan koodi
-		$pdf2->draw_text(350,  638, "FINLAND",				 						$pages[0], $kymppi);
+		$pdf2->draw_text(350,  638, "",						 						$pages[0], $kymppi);
 		$pdf2->draw_text(495,  638, "FI",				 							$pages[0], $kymppi);
 
 		//Kenttä 16
@@ -573,7 +573,7 @@
 		$pdf2->draw_text(195,  520, "O ".substr($sijaintipaikka,0,15), 							$pages[0], $kymppi);
 
 		//Kenttä 35 Bruttopaino
-		$pdf2->draw_text(480,  472, $kilot, 										$pages[0], $kymppi);
+		$pdf2->draw_text(480,  472, $kilot, 													$pages[0], $kymppi);
 
 		//Kenttä 36
 		//Tätä ei tässä täytetä
@@ -591,8 +591,8 @@
 		//Tätä ei tässä täytetä
 
 		//Kenttä 44 Lisätietoja
-		$pdf2->draw_text(61,  396, "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), $pages[0], $kymppi);
-		$pdf2->draw_text(61,  386, "RET.EXP.", 										$pages[0], $kymppi);
+		$pdf2->draw_text(61,  396, "N380 $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]), 	$pages[0], $kymppi);
+		$pdf2->draw_text(61,  386, "30400",					 										$pages[0], $kymppi);
 
 		if ($yhtiorow["kotitullauslupa"] != "") {
 			$pdf2->draw_text(61,  377, "Kotitullauslupa ".$yhtiorow["kotitullauslupa"].", Eteläinen tullipiiri",	$pages[0], $kymppi);

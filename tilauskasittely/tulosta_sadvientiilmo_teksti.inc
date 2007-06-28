@@ -71,7 +71,7 @@
 		
 		$tulosulos .= sprintf('%-8.8s', "");
 		$tulosulos .= sprintf('%-39.39s', "");
-		$tulosulos .= sprintf('%-16.16s', "FINLAND");
+		$tulosulos .= sprintf('%-16.16s', "");
 		$tulosulos .= sprintf('%-9.9s', "FI");
 		$tulosulos .= sprintf('%-5.5s', $laskurow["maa_maara"])."\r\n";
 		
@@ -227,10 +227,10 @@
 
 		//Kenttä 44 Lisätietoja
 		$tulosulos .= sprintf('%-8.8s', "");
-		$tulosulos .= sprintf('%-46.46s', "Kauppalasku: $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]))."\r\n";
+		$tulosulos .= sprintf('%-46.46s', "N380 $laskurow[laskunro] - ".tv1dateconv($laskurow["tapvm"]))."\r\n";
 
 		$tulosulos .= sprintf('%-8.8s', "");
-		$tulosulos .= sprintf('%-46.46s', "RET.EXP.")."\r\n";
+		$tulosulos .= sprintf('%-46.46s', "30400")."\r\n";
 
 		if ($yhtiorow["kotitullauslupa"] != "") {
 			$tulosulos .= sprintf('%-8.8s', "");

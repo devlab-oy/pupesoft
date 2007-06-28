@@ -515,21 +515,23 @@
 			$fields =  mysql_query($query);
 
 			while ($apurow = mysql_fetch_array($fields)) {
-				$sel = "";
-				if ($trow[$i] == $apurow[0]) {
-					$sel = "selected";
-				}
-				elseif ($trow[$i] == "" and $apurow[0] == $yhtiorow["kieli"]) {
-					$sel = "selected";
-				}
+				if (strlen($apurow[0]) == 2) {
+					$sel = "";
+					if ($trow[$i] == $apurow[0]) {
+						$sel = "selected";
+					}
+					elseif ($trow[$i] == "" and $apurow[0] == $yhtiorow["kieli"]) {
+						$sel = "selected";
+					}
 
-				if ($apurow[0] != "tunnus") {
-					$query = "select distinct nimi from maat where koodi='$apurow[0]'";
-					$maare = mysql_query($query);
-					$maaro = mysql_fetch_array($maare);
-					$maa   = strtolower($maaro["nimi"]);
-					if ($maa=="") $maa = $apurow[0];
-					$ulos .= "<option value='$apurow[0]' $sel>".t("$maa")."</option>";
+					if ($apurow[0] != "tunnus") {
+						$query = "select distinct nimi from maat where koodi='$apurow[0]'";
+						$maare = mysql_query($query);
+						$maaro = mysql_fetch_array($maare);
+						$maa   = strtolower($maaro["nimi"]);
+						if ($maa=="") $maa = $apurow[0];
+						$ulos .= "<option value='$apurow[0]' $sel>".t("$maa")."</option>";
+					}
 				}
 			}
 

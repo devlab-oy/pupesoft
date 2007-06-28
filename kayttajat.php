@@ -431,17 +431,19 @@
 			$fields =  mysql_query($query);
 
 			while ($apurow = mysql_fetch_array($fields)) {
-				$sel = "";
-				if ($krow["kieli"] == $apurow[0] or ($krow["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"])) {
-					$sel = "selected";
-				}
-				if ($apurow[0] != "tunnus") {
-					$query = "select distinct nimi from maat where koodi='$apurow[0]'";
-					$maare = mysql_query($query);
-					$maaro = mysql_fetch_array($maare);
-					$maa   = strtolower($maaro["nimi"]);
-					if ($maa=="") $maa = $apurow[0];
-					echo "<option value='$apurow[0]' $sel>".t($maa)."</option>";
+				if (strlen($apurow[0]) == 2) {
+					$sel = "";
+					if ($krow["kieli"] == $apurow[0] or ($krow["kieli"] == "" and $apurow[0] == $yhtiorow["kieli"])) {
+						$sel = "selected";
+					}
+					if ($apurow[0] != "tunnus") {
+						$query = "select distinct nimi from maat where koodi='$apurow[0]'";
+						$maare = mysql_query($query);
+						$maaro = mysql_fetch_array($maare);
+						$maa   = strtolower($maaro["nimi"]);
+						if ($maa=="") $maa = $apurow[0];
+						echo "<option value='$apurow[0]' $sel>".t($maa)."</option>";
+					}
 				}
 			}
 

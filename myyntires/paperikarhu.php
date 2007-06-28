@@ -347,22 +347,13 @@
 	if (!$kaatosumma) $kaatosumma='0.00';
     
     if (isset($_POST['karhuviesti'])) {
-		list($maa, $numero) = explode('-', $_POST['karhuviesti']);
-		
-		$query = sprintf(
-			"select * from avainsana where selite='%s' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'",
-			$maa
-		);
-		$res = mysql_query($query) or pupe_error();
+		$query 	 = "select * from avainsana where tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
+		$res 	 = mysql_query($query) or pupe_error();
 		$viestit = mysql_fetch_array($res);
 		
-		$viesti1 = $viestit['selitetark'];
-		$viesti2 = $viestit['selitetark_2'];
-		$viesti3 = $viestit['selitetark_3'];
-		
-        $karhuviesti = ${'viesti' . $numero};
-
-    } else {
+        $karhuviesti = $viestit["selite"];
+    } 
+	else {
         // otetaan defaulttina eka viesti
         $karhuviesti = 'Virhe';
     }

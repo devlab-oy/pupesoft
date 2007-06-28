@@ -218,15 +218,6 @@ if (!function_exists("t")) {
 	}
 }
 
-/**
- * 
- * Hakee maan nimen
- * 
- * @param string Maa koodi
- * 
- * @return string Maan nimi
- * 
- */
 if (!function_exists("maa")) {
 	function maa($code) {
 		
@@ -235,7 +226,7 @@ if (!function_exists("maa")) {
 		$maa = mysql_fetch_array($res);
 		
 		// otetaan pois maa koodi
-		return substr($maa['nimi'], 5);
+		return ucfirst(strtolower(substr($maa['nimi'], 5)));
 	}
 }
 

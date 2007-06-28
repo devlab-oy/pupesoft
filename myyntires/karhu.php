@@ -6,7 +6,7 @@ echo "<font class='head'>".t("Karhu")."</font><hr>";
 
 //vain n‰in monta p‰iv‰‰ sitten karhutut
 //laskut huomioidaan n‰kym‰sss‰
-$kpvm_aikaa = 10;
+$kpvm_aikaa = 0;
 
 //vain n‰in monta p‰iv‰‰ sitten er‰‰ntyneet
 //laskut huomioidaan n‰kym‰sss‰
@@ -223,66 +223,58 @@ if ($tee == 'KARHUA')  {
 			$max = $lasku['karhuttu'];
 		}
 	}
-
-	$disabled2 = '';
-	$disabled3 = '';
+		
+	mysql_data_seek($result,0);
 	
-	if (strlen(trim($yhtiorow['karhuviesti2'])) == 0) {
-		$disabled2 = 'disabled';
+	if ($asiakastiedot["kieli"] != "" and strtoupper($asiakastiedot["kieli"]) != strtoupper($yhtiorow["maa"])) {
+		$sorttaus = $asiakastiedot["kieli"];
+	}
+	else {
+		$sorttaus = $yhtiorow["maa"];
 	}
 	
-	if (strlen(trim($yhtiorow['karhuviesti3'])) == 0) {
-		$disabled3 = 'disabled';
-	}
 	
+	$query = "	select *, if(kieli='$sorttaus', concat(1, kieli), kieli) sorttaus
+				from avainsana 
+				where laji 	= 'KARHUVIESTI' 
+				and yhtio 	= '{$yhtiorow['yhtio']}' 
+				order by sorttaus, jarjestys";
+	$res = mysql_query($query) or pupe_error();
+		
+	echo "<form name='lahetaformi' action='$PHP_SELF' method='post'>";
+	echo "<select name='karhuviesti'>";
 	
 	$sel1 = $sel2 = $sel3 = '';
-	if (empty($disabled3) && $max >= 3) {
+	if ($max >= 2 and mysql_num_rows($res) > 2) {
 		$sel3 = 'selected';
-	} elseif (empty($disabled2) && $max == 2) {
+	} 
+	elseif ($max >= 1 and mysql_num_rows($res) > 1) {
 		$sel2 = 'selected';
-	} else {
+	} 
+	else {
 		$sel1 = 'selected';
 	}
 	
-	mysql_data_seek($result,0);
+	while ($viesti = mysql_fetch_array($res)) {
+		if ($viesti["kieli"] != $edkieli) {
+			$lask = 1;
+		}
+		
+		echo "<option value='$viesti[tunnus]' ${'sel'.$lask}>".maa($viesti["kieli"])." ".t("viesti")." $lask</option>";
+
+		if (${'sel'.$lask} != '') {
+			${'sel'.$lask} = "";
+		}
+
+		$edkieli = $viesti["kieli"];
+		$lask++;
+	}
 	
-	$query = "select * from avainsana where laji = 'KARHUVIESTI' and yhtio ='{$yhtiorow['yhtio']}'";
-	$res = mysql_query($query) or pupe_error();
-	
-	?>
-	<form name='lahetaformi' action='' method='post'>
-	<select name='karhuviesti'>
-		<?php while ($viesti = mysql_fetch_array($res)): ?>
-			<?php
-			$viestit = array();
-			if (! empty($viesti['selitetark'])) {
-				$viestit['1'] = t('viesti 1');
-			}
-			if (! empty($viesti['selitetark_2'])) {
-				$viestit['2'] = t('viesti 2');
-			}
-			if (! empty($viesti['selitetark_3'])) {
-				$viestit['3'] = t('viesti 3');
-			}
-			?>
-			<?php foreach ($viestit as $numero => $teksti): ?>
-				<?php
-				$sel = '';
-				if ($asiakastiedot['maa'] == $viesti['selite'] && $numero == $max) {
-					$sel = 'selected';
-				} elseif ($asiakastiedot['maa'] == $viesti['selite'] && $max > $numero) {
-					$sel = 'selected';
-				}
-				?>
-	    		<option <?php echo $sel ?> value=<?php echo $viesti['selite'] . '-' . $numero ?>><?php echo maa($viesti['selite']) . ' ' . $teksti ?></option>
-			<?php endforeach; ?>
-		<?php endwhile; ?>
+	echo "
 	</select>
 	</td>
 	</tr>
-	</table>
-	<?php
+	</table>";
 
 	echo "</td><td valign='top' class='back'>";
 

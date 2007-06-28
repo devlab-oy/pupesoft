@@ -6,7 +6,7 @@
 	if ($i == 0) { //yhtiötä ei näytetä
 		$tyyppi = 0;
 	}
-	if ($i == 1) {
+	if (mysql_field_name($result, $i) == "laji") {
 		if (strtoupper($trow[$i]) == 'T') {
 			$sel01 = "selected";
 		}
@@ -234,6 +234,41 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "kieli") {
+
+		$ulos = "<td><select name='$nimi'>";
+		$sel  = "";
+    	
+		$query  = "show columns from sanakirja";
+		$fields =  mysql_query($query);
+    	
+		while ($apurow = mysql_fetch_array($fields)) {
+			if (strlen($apurow[0]) == 2) {
+				$sel = "";
+				if ($trow[$i] == $apurow[0]) {
+					$sel = "selected";
+				}
+				elseif ($trow[$i] == "" and $apurow[0] == $yhtiorow["kieli"]) {
+					$sel = "selected";
+				}
+    	
+				if ($apurow[0] != "tunnus") {
+					$query = "select distinct nimi from maat where koodi='$apurow[0]'";
+					$maare = mysql_query($query);
+					$maaro = mysql_fetch_array($maare);
+					$maa   = strtolower($maaro["nimi"]);
+					if ($maa=="") $maa = $apurow[0];
+					$ulos .= "<option value='$apurow[0]' $sel>".t("$maa")."</option>";
+				}
+			}
+		}
+    	
+		$ulos .= "</select></td>";
+    	
+		$jatko = 0;
+	}
+	
 
 	if (mysql_field_name($result, $i) == "selite" and $sel27 == "selected") {
 
@@ -358,35 +393,8 @@
 		$jatko = 0;
 	}
 	
-	if ($sel55 == "selected") {
-		if (mysql_field_name($result, $i) == "selitetark"
-		|| mysql_field_name($result, $i) == "selitetark_2"
-		|| mysql_field_name($result, $i) == "selitetark_3") {
-			$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
-			$jatko = 0;
-		}
-		
-		if (mysql_field_name($result, $i) == "selite") {
-			$query = "	SELECT distinct koodi, nimi
-						FROM maat
-						WHERE nimi != ''
-						ORDER BY koodi";
-			$vresult = mysql_query($query) or pupe_error($query);
-			$ulos = "<td><select name='$nimi'>";
-
-			while ($vrow=mysql_fetch_array($vresult)) {
-				$sel="";
-				if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
-					$sel = "selected";
-				}
-				elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
-					$sel = "selected";
-				}
-				$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
-			}
-
-			$ulos .= "</select></td>";
-			$jatko = 0;
-		}
+	if ($sel55 == "selected" and mysql_field_name($result, $i) == "selite") {
+		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
+		$jatko = 0;
 	}
 ?>

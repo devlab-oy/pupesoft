@@ -864,14 +864,19 @@ if ($tila == '') {
 				$tunken = "ostorivitunnus";
 			}
 			
-			$query = "select * from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]' and $tunken='$rivirow[rivitunnus]'";
+			$query = "	select count(*) kpl, min(sarjanumero) sarjanumero
+						from sarjanumeroseuranta
+						where yhtio = '$kukarow[yhtio]' 
+						and tuoteno = '$rivirow[tuoteno]' 
+						and $tunken = '$rivirow[rivitunnus]'";
 			$sarjares = mysql_query($query) or pupe_error($query);
+			$sarjarow = mysql_fetch_array($sarjares);
 
-			if (mysql_num_rows($sarjares) == abs($rivirow["siskpl"])) {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa' style='color:00FF00'>Sarjanro OK</font></a>)";
+			if ($sarjarow["kpl"] == abs($rivirow["siskpl"])) {
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow[sarjanumero]' style='color:00FF00'>Sarjanro OK</font></a>)";
 			}
 			else {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa' style='color:DD0000'>Sarjanro</a>)";
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow[sarjanumero]' style='color:DD0000'>Sarjanro</a>)";
 			}
 		}
 		echo "</$td>";

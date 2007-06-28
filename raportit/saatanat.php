@@ -163,7 +163,7 @@
 		}
 
 		if ($savalkoodi != "") {
-			$salisa = " and lasku.valkoodi='$savalkoodi' ";
+			$salisa = " and valkoodi='$savalkoodi' ";
 		}
 		else {
 			$salisa = "";

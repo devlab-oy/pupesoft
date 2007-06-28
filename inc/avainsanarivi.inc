@@ -393,7 +393,12 @@
 		$jatko = 0;
 	}
 	
-	if ($sel55 == "selected" and mysql_field_name($result, $i) == "selite") {
+	if ($sel55 == "selected" and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark_2" or mysql_field_name($result, $i) == "selitetark_3")) {
+		$tyyppi = 0;
+		$jatko  = 0;
+	}
+	
+	if ($sel55 == "selected" and mysql_field_name($result, $i) == "selitetark") {
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;
 	}

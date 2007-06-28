@@ -347,11 +347,11 @@
 	if (!$kaatosumma) $kaatosumma='0.00';
     
     if (isset($_POST['karhuviesti'])) {
-		$query 	 = "select * from avainsana where tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
+		$query 	 = "select selitetark from avainsana where tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
 		$res 	 = mysql_query($query) or pupe_error();
 		$viestit = mysql_fetch_array($res);
 		
-        $karhuviesti = $viestit["selite"];
+        $karhuviesti = $viestit["selitetark"];
     } 
 	else {
         // otetaan defaulttina eka viesti

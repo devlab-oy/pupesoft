@@ -1,68 +1,141 @@
 <?php
 	require("inc/parametrit.inc");
 
+	if (($tee == 'N') or ($tee == 'E')) {
+		if ($tee == 'N') {
+			$oper='>';
+			$suun='';
+		}
+		else {
+			$oper='<';
+			$suun='desc';
+		}
+
+		$query = "	SELECT tuote.tuoteno, sum(saldo) saldo, status
+					FROM tuote
+					LEFT JOIN tuotepaikat ON tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.yhtio=tuote.yhtio
+					WHERE tuote.yhtio = '$kukarow[yhtio]'
+					and tuote.tuoteno " . $oper . " '$tuoteno'
+					GROUP BY tuote.tuoteno
+					HAVING status NOT IN ('P','X') or saldo > 0
+					ORDER BY tuote.tuoteno " . $suun . "
+					LIMIT 1";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 0) {
+			$trow = mysql_fetch_array ($result);
+			$tuoteno = $trow['tuoteno'];
+			$tee='Z';
+		}
+		else {
+			$varaosavirhe = t("Yhtään tuotetta ei löytynyt")."!";
+			$tuoteno = '';
+			$tee='Y';
+		}
+	}
+
 	echo "<font class='head'>".t("Tuotekysely")."</font><hr>";
-		 //syotetaan tuotenumero
-		$formi='formi';
-		$kentta = 'tuoteno';
 
-		echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
-		echo "<input type='hidden' name='tee' value='Z'>";
-		echo "<table><tr>";
-		echo "<th>".t("Anna tuotenumero").":</th>";
-		echo "<td><input type='text' name='tuoteno' value=''></td>";
-		echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
-		echo "</tr></table>";
-		echo "</form>";
+	if (($tee == 'Z') and ($tyyppi == '')) {
+		require "inc/tuotehaku.inc";
+	}
+	if (($tee == 'Z') and ($tyyppi != '')) {
 
-	if ($tee == 'Z') {
+		if ($tyyppi == 'TOIMTUOTENO') {
 
-		if(substr($tuoteno,0,1) == '*') { // Nyt me selataan
-			$tee = 'Y';
-			$query = "	SELECT tuoteno, nimitys
-						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and status NOT IN ('P','X')
-						and nimitys like '%" . substr($tuoteno,1) . "%'
-						ORDER BY tuoteno";
-		}
-		if (substr($tuoteno,-1) == '*') {
-			$tee = 'Y';
-			$query = "	SELECT tuoteno, nimitys
-						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]' 
-						and status NOT IN ('P','X')
-						and tuoteno like '" . substr($tuoteno,0,-1) . "%'
-						ORDER BY tuoteno";
-		}
-		if ($tee == 'Y') {
-			$tresult = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT tuotteen_toimittajat.tuoteno, sum(saldo) saldo, status
+						FROM tuotteen_toimittajat
+						JOIN tuote ON tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.status NOT IN ('P','X')
+						LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno
+						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+						and tuotteen_toimittajat.toim_tuoteno = '$tuoteno'
+						GROUP BY tuotteen_toimittajat.tuoteno
+						HAVING status NOT IN ('P','X') or saldo > 0
+						ORDER BY tuote.tuoteno";
+			$result = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($tresult) >  100) {
-				$kentta='tuoteno';
-				$varaosavirhe = "".t("Haulla loytyy liikaa tuotteita")."!";
-				$tuoteno='';
-				$tee = '';
+			if (mysql_num_rows($result) == 0) {
+				$varaosavirhe = t("VIRHE: Tiedolla ei löytynyt tuotetta")."!";
+				$tee = 'Y';
+			}
+			elseif (mysql_num_rows($result) > 1) {
+				$varaosavirhe = t("VIRHE: Tiedolla löytyi useita tuotteita")."!";
+				$tee = 'Y';
 			}
 			else {
-				if (mysql_num_rows($tresult) == 0) {
-					$kentta='tuoteno';
-					$varaosavirhe = "".t("Haulla ei loydy tuotteita")."!";
-					$tuoteno='';
-					$tee = '';
-				}
-				else {
-					//Tehdaan pop-up valmiiksi myohempaa kayttoa varten
-					$kentta = 'atil';
-					$ulos = "<select name='tuoteno'>";
-					while ($trow = mysql_fetch_array ($tresult)) {
-						$ulos .= "<option value='$trow[0]'>$trow[0] $trow[1]";
-					}
-					$ulos .= "</select>";
-				}
+				$tr = mysql_fetch_array($result);
+				$tuoteno = $tr["tuoteno"];
+			}
+		}
+		elseif ($tyyppi != '') {
+			$query = "	SELECT tuoteno
+						FROM tuotteen_avainsanat
+						WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno' and laji='$tyyppi'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) != 1) {
+				$varaosavirhe = t("VIRHE: Tiedolla ei löytynyt tuotetta")."!";
+				$tee = 'Y';
+			}
+			else {
+				$tr = mysql_fetch_array($result);
+				$tuoteno = $tr["tuoteno"];
 			}
 		}
 	}
+
+	if ($tee=='Y') echo "<font class='error'>$varaosavirhe</font>";
+
+	 //syotetaan tuotenumero
+	$formi  = 'formi';
+	$kentta = 'tuoteno';
+
+	echo "<table><tr>";;
+	echo "<form action='$PHP_SELF' method='post' name='$formi' autocomplete='off'>";
+	echo "<input type='hidden' name='tee' value='Z'>";
+
+	echo "<td class='back'><select name='tyyppi'>";
+	echo "<option value=''>".t("Tuotenumero").":</option>";
+	echo "<option value='TOIMTUOTENO'>".t("Toimittajan tuotenumero").":</option>";
+
+	$query = "	SELECT selite, selitetark
+				FROM avainsana
+				WHERE laji = 'TUOTEULK' and yhtio = '$kukarow[yhtio]'
+				ORDER BY jarjestys";
+	$vresult = mysql_query($query) or pupe_error($query);
+
+	while ($vrow = mysql_fetch_array($vresult)) {
+		echo "<option value='$vrow[selite]'>$vrow[selitetark]:</option>";
+	}
+
+	echo "</select></th>";
+	echo "<td class='back'><input type='text' name='tuoteno' value=''></td>";
+	echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+	echo "</form>";
+
+	//Jos ei haettu, annetaan 'edellinen' & 'seuraava'-nappi
+	if (($ulos=='') and ($tee=='Z')) {
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='tee' value='E'>";
+		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+		echo "<td class='back'>";
+		echo "<input type='Submit' value='".t("Edellinen")."'>";
+		echo "</td>";
+		echo "</form>";
+
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='tyyppi' value='$tyyppi'>";
+		echo "<input type='hidden' name='tee' value='N'>";
+		echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
+		echo "<td class='back'>";
+		echo "<input type='Submit' value='".t("Seuraava")."'>";
+		echo "</td>";
+		echo "</form>";
+	}
+	echo "</tr></table><br>";
+	
+	
 	//tuotteen varastostatus
 	if ($tee == 'Z') {
 		$query = "	SELECT tuote.*, date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
@@ -73,7 +146,6 @@
 					FROM tuote 
 					LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
 					WHERE tuote.yhtio = '$kukarow[yhtio]' 
-					and tuote.status NOT IN ('P','X')
 					and tuote.tuoteno = '$tuoteno'
 					GROUP BY tuote.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);

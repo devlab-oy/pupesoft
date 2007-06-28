@@ -517,32 +517,6 @@
 						//päivitetään alkuperäinen rivi
 						$query .= " WHERE tunnus='$kerivi[$i]' and yhtio='$kukarow[yhtio]'";
 						$result = mysql_query($query) or pupe_error($query);
-
-						if ($toim == 'SIIRTOLISTA') {
-							$tapquery = "SELECT * FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kerivi[$i]'";
-							$tapresult = mysql_query($tapquery) or pupe_error($tapquery);
-							$taprow = mysql_fetch_array($tapresult);
-
-							if ($taprow['varattu'] != 0) {
-								$tapsiirto = $taprow['varattu'] * -1;
-								$mista = $taprow['hyllyalue']."-".$taprow['hyllynro']."-".$taprow['hyllyvali']."-".$taprow['hyllytaso'];
-								
-								$query = "	INSERT into tapahtuma set
-											yhtio 		= '$kukarow[yhtio]',
-											tuoteno 	= '$taprow[tuoteno]',
-											kpl 		= '$tapsiirto',
-											hinta 		= '0',
-											laji 		= 'siirto',
-											selite 		= '".t("Paikasta")." $mista ".t("vähennettiin")." $taprow[varattu]',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= now()";
-								$result = mysql_query($query) or pupe_error($query);
-							}
-
-
-							$tapsiirto = '';
-							$mista = '';
-						}
 					}
 
 					//Keräämätön rivi
@@ -1289,15 +1263,19 @@
 							$tunken2 = "myyntirivitunnus";
 						}
 						
-						$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$row[puhdas_tuoteno]' and $tunken1='$row[tunnus]'";
+						$query = "	select count(*) kpl, min(sarjanumero) sarjanumero 
+									from sarjanumeroseuranta 
+									where yhtio  = '$kukarow[yhtio]' 
+									and tuoteno  = '$row[puhdas_tuoteno]' 
+									and $tunken1 = '$row[tunnus]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 						$sarjarow = mysql_fetch_array($sarjares);
 
 						if ($sarjarow["kpl"] == abs($row["varattu"])) {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id' style='color:00FF00'>sarjanro OK</font></a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#$sarjarow[sarjanumero]' style='color:00FF00'>sarjanro OK</font></a>)";
 						}
 						else {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id'>sarjanro</a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#$sarjarow[sarjanumero]'>sarjanro</a>)";
 						}
 					}
 					

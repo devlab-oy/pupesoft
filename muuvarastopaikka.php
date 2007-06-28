@@ -438,18 +438,16 @@
 			$minne = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
 			$mista = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
 		
-			if (($kutsuja == 'vastaanota.php' and $toim == 'MYYNTITILI') or ($kutsuja != 'vastaanota.php')) {
-				$query = "	INSERT into tapahtuma set
-							yhtio 		= '$kukarow[yhtio]',
-							tuoteno 	= '$tuotteet[$iii]',
-							kpl 		= $kappaleet[$iii] * -1,
-							hinta 		= '0',
-							laji 		= 'siirto',
-							selite 		= '".t("Paikasta")." $mista ".t("vähennettiin")." $kappaleet[$iii]',
-							laatija 	= '$kukarow[kuka]',
-							laadittu 	= now()";
-				$result = mysql_query($query) or pupe_error($query);
-			}
+			$query = "	INSERT into tapahtuma set
+						yhtio 		= '$kukarow[yhtio]',
+						tuoteno 	= '$tuotteet[$iii]',
+						kpl 		= $kappaleet[$iii] * -1,
+						hinta 		= '0',
+						laji 		= 'siirto',
+						selite 		= '".t("Paikasta")." $mista ".t("vähennettiin")." $kappaleet[$iii]',
+						laatija 	= '$kukarow[kuka]',
+						laadittu 	= now()";
+			$result = mysql_query($query) or pupe_error($query);
 		
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',

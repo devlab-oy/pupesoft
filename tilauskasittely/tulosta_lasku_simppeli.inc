@@ -507,6 +507,7 @@ if (!function_exists('tulosta_lasku')) {
 		// dynamiikkaa
 		if($h < 35) {
 			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
+			$h = 190;
 		}
 
 		if($laskurow["sisviesti1"] != "") {
@@ -520,6 +521,7 @@ if (!function_exists('tulosta_lasku')) {
 			
 		if($h < 35) {
 			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
+			$h = 190;			
 		}
 
 		$h=50;

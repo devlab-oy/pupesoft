@@ -6,7 +6,7 @@ echo "<font class='head'>".t("Karhu")."</font><hr>";
 
 //vain n‰in monta p‰iv‰‰ sitten karhutut
 //laskut huomioidaan n‰kym‰sss‰
-$kpvm_aikaa = 0;
+$kpvm_aikaa = 10;
 
 //vain n‰in monta p‰iv‰‰ sitten er‰‰ntyneet
 //laskut huomioidaan n‰kym‰sss‰

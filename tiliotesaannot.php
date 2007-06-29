@@ -45,6 +45,9 @@
 				$ok = 1;
 				$tee = '';
 			}
+			
+			$nimitieto=strtoupper($nimitieto);
+			
 			if (($nimitieto=="LUOTTOKUNTA-KREDITLAGET") or ($nimitieto=="LUOTTOKUNTA") or ($nimitieto=="LUOTTOKUNTA/VISA")) {
 				$query = "SELECT tilino
 							FROM tili

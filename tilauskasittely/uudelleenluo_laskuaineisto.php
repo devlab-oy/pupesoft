@@ -383,7 +383,7 @@
 								and uusiotunnus = '$lasrow[tunnus]'
 								and kpl<>0
 								and tilausrivi.tyyppi = 'L'
-								ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
+								ORDER BY otunnus, sorttauskentta, tunnus";
 					$tilres = mysql_query($query) or pupe_error($query);
 
 					$rivinumero = 1;

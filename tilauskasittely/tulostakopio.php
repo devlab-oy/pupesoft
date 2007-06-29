@@ -1045,7 +1045,7 @@
 								WHERE $where
 								and yhtio  = '$kukarow[yhtio]'
 								and tyyppi = 'L'
-								ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
+								ORDER BY otunnus, sorttauskentta, tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 
 					//kuollaan jos yhtään riviä ei löydy

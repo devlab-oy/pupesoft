@@ -310,7 +310,7 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 				where yhtio='$kukarow[yhtio]'
 				and otunnus in ($tunnukset)
 				and kpl != 0
-				order by otunnus, sorttauskentta, tuoteno, tunnus";
+				order by otunnus, sorttauskentta, tunnus";
 	$valsures = mysql_query($query) or pupe_error($query);
 
 	$edotunnus = '';

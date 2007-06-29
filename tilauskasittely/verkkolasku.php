@@ -1128,7 +1128,7 @@
 									and otunnus in ($tunnukset) 
 									and kpl<>0
 									and tilausrivi.tyyppi = 'L'
-									ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
+									ORDER BY otunnus, sorttauskentta, tunnus";
 						$tilres = mysql_query($query) or pupe_error($query);
 
 						$rivinumero = 1;
@@ -1413,7 +1413,7 @@
 										WHERE uusiotunnus='$laskurow[tunnus]' 
 										and yhtio='$kukarow[yhtio]'
 										and tyyppi='L'
-										ORDER BY otunnus, sorttauskentta, tuoteno, tunnus";
+										ORDER BY otunnus, sorttauskentta, tunnus";
 							$result = mysql_query($query) or pupe_error($query);
 
 							$sivu 	= 1;

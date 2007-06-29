@@ -179,6 +179,10 @@
 
 	$count = count($array);
 
+	/*
+	
+	match againstit ei toimi!!! Kokeile hakusanalla prt firmassa allr
+	
 	if (strlen($haku[0]) > 0) {
 		$lisa .= " and match (tuote.tuoteno) against ('$haku[0]*' IN BOOLEAN MODE) ";
 		$ulisa .= "&haku[".$i."]=".$haku[$i];
@@ -194,6 +198,22 @@
 	
 	for ($i=3; $i<=$count; $i++) {
 		if (strlen($haku[$i]) > 0) {
+			$lisa .= " and ".$array[$i]."='".$haku[$i]."'";
+			$ulisa .= "&haku[".$i."]=".$haku[$i];
+		}
+	}
+	*/
+	
+	for ($i=0; $i<=$count; $i++) {
+		if (strlen($haku[$i]) > 0 && $i <= 1) {
+			$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
+			$ulisa .= "&haku[".$i."]=".$haku[$i];
+		}
+		elseif (strlen($haku[$i]) > 0 && $i == 2) {
+			$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
+			$ulisa .= "&haku[".$i."]=".$haku[$i];
+		}
+		elseif (strlen($haku[$i]) > 0) {
 			$lisa .= " and ".$array[$i]."='".$haku[$i]."'";
 			$ulisa .= "&haku[".$i."]=".$haku[$i];
 		}

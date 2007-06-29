@@ -278,6 +278,9 @@
 		case "B":
 			$laskutyyppi = "Ostoskori";
 			break;
+		case "C":
+			$laskutyyppi = "Reklamaatio";
+			break;
 		case "0":
 			$laskutyyppi = "Ylläpitosopimus";
 			switch($alatila) {

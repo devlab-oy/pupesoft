@@ -194,7 +194,6 @@
 					if (mysql_num_rows($result) == 1) {
 						$row = mysql_fetch_array($result);
 
-
 						if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
 							//jos invataan raportin avulla niin tehd‰‰n p‰iv‰m‰‰rtsekit ja lasketaan saldo takautuvasti
 							$saldomuutos = 0;
@@ -222,13 +221,14 @@
 								}
 
 								//kuinka monta ker‰tty‰ oli listan ajohetkell‰, mutta nyt ne ovat laskutettu tai laskuttamatta
-								$query = "	SELECT ifnull(sum(if(laskutettuaika='0000-00-00 00:00:00', varattu, kpl)),0) keratty
+								$query = "	SELECT ifnull(sum(if(laskutettuaika='0000-00-00 00:00:00', varattu, kpl)), 0) keratty
 											FROM tilausrivi
 											WHERE yhtio 	= '$kukarow[yhtio]'
 											and tyyppi 		in ('L','G','V')
 											and tuoteno		= '$tuoteno'
-											and varattu    <> '0'
+											and varattu    <> 0
 											and kerattyaika		< '$row[inventointilista_aika]'
+											and kerattyaika		> '0000-00-00 00:00:00'
 											and (laskutettuaika	> '$row[inventointilista_aika]' or laskutettuaika	= '0000-00-00 00:00:00')
 											and hyllyalue	= '$hyllyalue'
 											and hyllynro 	= '$hyllynro'
@@ -239,12 +239,12 @@
 							}
 							else {
 								//Haetaan ker‰tty m‰‰r‰
-								$query = "	SELECT ifnull(sum(if(keratty!='',tilausrivi.varattu,0)),0) keratty
+								$query = "	SELECT ifnull(sum(if(keratty!='', tilausrivi.varattu, 0)), 0) keratty
 											FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 											WHERE yhtio 	= '$kukarow[yhtio]'
 											and tyyppi 		in ('L','G','V')
 											and tuoteno		= '$tuoteno'
-											and varattu    <> '0'
+											and varattu    <> 0
 											and laskutettu 	= ''
 											and hyllyalue	= '$hyllyalue'
 											and hyllynro 	= '$hyllynro'
@@ -253,7 +253,7 @@
 								$hylresult = mysql_query($query) or pupe_error($query);
 								$hylrow = mysql_fetch_array($hylresult);
 							}
-
+							
 							if (substr($kpl,0,1) == '+') {
 								$kpl = substr($kpl,1);
 								$kpl = $row['saldo'] + $kpl;
@@ -278,7 +278,6 @@
 							}
 
 							//echo "Tuoteno: $tuoteno Saldomuutos: $saldomuutos Ker‰tty: $hylrow[keratty] Syˆtetty: $kpl Hyllyss‰: $hyllyssa Nykyinen: $nykyinensaldo Erotus: $erotus<br>";
-
 
 							///* Inventointipoikkeama prosenteissa *///
 							if ($nykyinensaldo != 0) {
@@ -312,6 +311,7 @@
 							else {
 								$query .= " '".t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("t‰sm‰si.")." $lisaselite',";
 							}
+							
 							$query .= "	laatija  = '$kukarow[kuka]',
 										laadittu = now()";
 							$result = mysql_query($query) or pupe_error($query);
@@ -331,6 +331,7 @@
 							else {
 								$query .= " SET saldo = saldo, ";
 							}
+							
 							$query .= " saldoaika 				= now(),
 										inventointiaika 		= now(),
 										inventointipoikkeama 	= '$poikkeama',

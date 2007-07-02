@@ -1,4 +1,5 @@
 <?php
+	
 	require ("../inc/parametrit.inc");
 
 	echo "
@@ -353,102 +354,33 @@
 			echo "<font class='head'>".t("Tulosta ker‰yslista").":</font><hr>";
 		}
 
-		$formi	= "find";
-		$kentta	= "etsi";
-
-		echo "<table>";
-		echo "<form action='$PHP_SELF' name='find' method='post'>";
-		echo "<input type='hidden' name='toim' value='$toim'>";
-		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
-
-		$query = "	SELECT tunnus, nimitys
-					FROM varastopaikat
-					WHERE yhtio = '$kukarow[yhtio]'
-					ORDER BY nimitys";
-		$result = mysql_query($query) or pupe_error($query);
-
-		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
-
-		while ($row = mysql_fetch_array($result)){
-			$sel = '';
-			if (($row[0] == $tuvarasto) or ($kukarow['varasto'] == $row[0] and $tuvarasto=='')) {
-				$sel = 'selected';
-				$tuvarasto = $row[0];
+		/*
+			Oletuksia
+		*/
+		if(count($_POST)==0) {
+			
+			//	Selataan oletuksena vain seuraavan 3 p‰iv‰n ker‰yksi‰
+			$karajaus 	= 1;
+			
+			//	Varastorajaus jos k‰ytt‰j‰ll‰ on joku varasto valittuna
+			if($kukarow['varasto']>0) {
+				$tuvarasto 	= $kukarow['varasto'];
 			}
-			echo "<option value='$row[0]' $sel>$row[1]</option>";
-		}
-		echo "</select>";
-
-		$query = "	SELECT distinct maa
-					FROM varastopaikat
-					WHERE maa != '' and yhtio = '$kukarow[yhtio]'
-					ORDER BY maa";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) > 1) {
-			echo "<select name='tumaa' onchange='submit()'>";
-			echo "<option value=''>".t("Kaikki")."</option>";
-
-			while ($row = mysql_fetch_array($result)){
-				$sel = '';
-				if ($row[0] == $tumaa) {
-					$sel = 'selected';
-					$tumaa = $row[0];
-				}
-				echo "<option value='$row[0]' $sel>$row[0]</option>";
+			else {
+				$tuvarasto 	= "KAIKKI";
 			}
-			echo "</select>";
+			
+			$tutoimtapa = "KAIKKI";
+			$tutyyppi = "KAIKKI";
+			
+			$jarj = "prioriteetti";
 		}
-
-		echo "</td>";
-
-		echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
-
-		$sela = $selb = $selc = "";
-
-		if ($tutyyppi == "NORMAA") {
-			$sela = "SELECTED";
-		}
-		if ($tutyyppi == "ENNAKK") {
-			$selb = "SELECTED";
-		}
-		if ($tutyyppi == "JTTILA") {
-			$selc = "SELECTED";
-		}
-		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
-		echo "<option value='NORMAA' $sela>".t("N‰yt‰ normaalitilaukset")."</option>";
-		echo "<option value='ENNAKK' $selb>".t("N‰yt‰ ennakkotilausket")."</option>";
-		echo "<option value='JTTILA' $selc>".t("N‰yt‰ jt-tilausket")."</option>";
-
-		echo "</select></td></tr>";
-
-		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
-
-		$query = "	SELECT selite
-					FROM toimitustapa
-					WHERE yhtio = '$kukarow[yhtio]'
-					ORDER BY selite";
-		$result = mysql_query($query) or pupe_error($query);
-
-		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
-
-		while($row = mysql_fetch_array($result)){
-			$sel = '';
-			if($row[0] == $tutoimtapa) {
-				$sel = 'selected';
-				$tutoimtapa = $row[0];
-			}
-			echo "<option value='$row[0]' $sel>".asana('TOIMITUSTAPA_',$row[0])."</option>";
-		}
-
-		echo "</select></td>";
-
-		echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
-		echo "<input type='Submit' value='".t("Etsi")."'></form></td></tr>";
-
-		echo "</table>";
-
+		
 		$haku = '';
+		
+		if(is_numeric($karajaus)) {
+			$haku .= " and lasku.kerayspvm<=date_add(now(), INTERVAL $karajaus day)";
+		}
 
 		if (!is_numeric($etsi) and $etsi != '') {
 			$haku .= "and lasku.nimi LIKE '%$etsi%'";
@@ -486,6 +418,122 @@
 				$haku .= " and lasku.clearing='JT-TILAUS' ";
 			}
 		}
+		$formi	= "find";
+		$kentta	= "etsi";
+
+		echo "<table>";
+		echo "<form action='$PHP_SELF' name='find' method='post'>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' id='jarj' name='jarj' value='$jarj'>";
+		
+		echo "<tr><td>".t("Valitse varasto:")."</td><td><select name='tuvarasto' onchange='submit()'>";
+
+		$query = "	SELECT varastopaikat.tunnus, varastopaikat.nimitys, count(*) kpl
+					FROM varastopaikat
+					JOIN lasku ON varastopaikat.yhtio=lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.varasto=varastopaikat.tunnus
+					WHERE varastopaikat.yhtio = '$kukarow[yhtio]'
+					GROUP BY varastopaikat.tunnus
+					ORDER BY nimitys";			
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
+		
+		$sel=array();
+		$sel[$tuvarasto] = "SELECTED";
+		while ($row = mysql_fetch_array($result)){
+			echo "<option value='$row[0]' ".$sel[$row[0]].">$row[1] ({$row[kpl]})</option>";
+		}
+		echo "</select>";
+
+		$query = "	SELECT distinct varastopaikat.maa, count(*) kpl
+					FROM varastopaikat
+					JOIN lasku ON varastopaikat.yhtio=lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.maa=varastopaikat.maa
+					WHERE varastopaikat.maa != '' and varastopaikat.yhtio = '$kukarow[yhtio]'
+					GROUP by varastopaikat.maa
+					ORDER BY varastopaikat.maa";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 1) {
+			echo "<select name='tumaa' onchange='submit()'>";
+			echo "<option value=''>".t("Kaikki")."</option>";
+			
+			$sel=array();
+			$sel[$tumaa] = "selected";
+			while ($row = mysql_fetch_array($result)){
+				echo "<option value='$row[0]' ".$sel[$row[0]].">$row[0] ({$row[kpl]})</option>";
+			}
+			echo "</select>";
+		}
+
+		echo "</td>";
+
+		echo "<td>".t("Valitse tilaustyyppi:")."</td><td><select name='tutyyppi' onchange='submit()'>";
+		
+		$query = "	SELECT clearing, count(*) kpl
+					FROM lasku
+					WHERE yhtio='$kukarow[yhtio]' and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi
+					GROUP BY clearing
+					ORDER by clearing";
+		
+		$result = mysql_query($query) or pupe_error($query);
+		$sel=array();
+		$sel[$tutyyppi]="selected";
+		echo "<option value='KAIKKI' {$seltuty["KAIKKI"]}>".t("N‰yt‰ kaikki")."</option>";		
+		if(mysql_num_rows($result)>0) {
+			while($row = mysql_fetch_array($result)) {
+				if($row["clearing"] == "") {
+					echo "<option value='NORMAA' {$sel["NORMAA"]}>".t("N‰yt‰ normaalitilaukset")." ({$row["kpl"]})</option>";
+				}
+ 				elseif($row["clearing"] == "ENNAKKOTILAUS") {
+					echo "<option value='ENNAKK' {$sel["ENNAKK"]}>".t("N‰yt‰ ennakkotilaukset")." ({$row["kpl"]})</option>";
+				}
+ 				elseif($row["clearing"] == "JT-TILAUS") {
+					echo "<option value='JTTILA' {$sel["JTTILA"]}>".t("N‰yt‰ jt-tilaukset")." ({$row["kpl"]})</option>";
+				}
+			}
+		}
+
+		echo "</select></td></tr>";
+		
+		echo "<tr><td>".t("Valitse toimitustapa:")."</td><td><select name='tutoimtapa' onchange='submit()'>";
+
+		$query = "	SELECT selite, count(*) kpl
+					FROM toimitustapa
+					JOIN lasku ON toimitustapa.yhtio=lasku.yhtio and ((lasku.tila = '$tila' and lasku.alatila = '$lalatila') $tila_lalatila_lisa) $tilaustyyppi and lasku.toimitustapa=toimitustapa.selite
+					WHERE toimitustapa.yhtio = '$kukarow[yhtio]'
+					GROUP BY selite
+					ORDER BY selite";
+		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<option value='KAIKKI'>".t("N‰yt‰ kaikki")."</option>";
+		
+		$sel=array();
+		$sel[$tutoimtapa] = "selected";
+		while($row = mysql_fetch_array($result)){
+			echo "<option value='$row[0]' ".$sel[$row[0]].">".asana('TOIMITUSTAPA_',$row[0])." ({$row["kpl"]})</option>";
+		}
+
+		echo "</select></td><td></td><td></td>";
+		
+		$sel=array();
+		$sel[$karajaus] = "selected";
+		
+		echo "<tr><td>".t("Ker‰ysaikarajaus:")."</td>
+				<td>
+					<select name='karajaus' onchange='submit()'>
+						<option value='1' {$sel[1]}>".t("Huominen")."</option>
+						<option value='3' {$sel[3]}>".t("Seuraavat 3 p‰iv‰‰")."</option>
+						<option value='5' {$sel[5]}>".t("Seuraavat 5 p‰iv‰‰")."</option>
+						<option value='7' {$sel[7]}>".t("Seuraava viikko")."</option>
+						<option value='14' {$sel[14]}>".t("Seuraavat 2 viikkoa")."</option>
+						<option value='KAIKKI' {$sel["KAIKKI"]}>".t("N‰yt‰ kaikki")."</option>
+					</select>
+					
+				</td>";
+		echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
+		echo "<input type='Submit' value='".t("Etsi")."'></td></tr>";
+					
+		echo "</table>";
 
 		if($jarj != "") {
 			$jarjx = " ORDER BY t_tyyppi desc, $jarj ";
@@ -539,23 +587,23 @@
 			echo "<br>";
 			echo "<table>";
 			echo "<tr>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=prioriteetti'>".t("Pri")."</th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=varastonimi'>".t("Varastoon")."</th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=lasku.ytunnus'>".t("Asiakas")."</th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=lasku.nimi'>".t("Nimi")."</th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=kerayspvm'>".t("Ker‰yspvm")."</th>";
+			echo "<th><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."</th>";
+			echo "<th><a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</th>";
+			echo "<th><a href='#' onclick=\"getElementById('jarj').value='lasku.ytunnus'; document.forms['find'].submit();\">".t("Asiakas")."</th>";
+			echo "<th><a href='#' onclick=\"getElementById('jarj').value='lasku.nimi'; document.forms['find'].submit();\">".t("Nimi")."</th>";
+			echo "<th><a href='#' onclick=\"getElementById('jarj').value='kerayspvm'; document.forms['find'].submit();\">".t("Ker‰yspvm")."</th>";
 			
 			if ($kukarow['resoluutio'] == 'I') {
-				echo "<th><a href='$PHP_SELF?toim=$toim&jarj=toimaika'>".t("Toimaika")."</th>";
+				echo "<th><a href='#' onclick=\"getElementById('jarj').value='toimaika'; document.forms['find'].submit();\">".t("Toimaika")."</th>";
 			}
 			
-			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=toimitustapa'>".t("Toimitustapa")."</th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=tilauksia'>".t("Til.")."</th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&jarj=riveja'>".t("Riv")."</th>";
+			echo "<th><a href='#' onclick=\"getElementById('jarj').value='toimitustapa'; document.forms['find'].submit();\">".t("Toimitustapa")."</th>";
+			echo "<th><a href='#' onclick=\"getElementById('jarj').value='tilauksia'; document.forms['find'].submit();\">".t("Til.")."</th>";
+			echo "<th><a href='#' onclick=\"getElementById('jarj').value='riveja'; document.forms['find'].submit();\">".t("Riv")."</th>";
 			echo "<th>".t("Tulostin")."</th>";
 			echo "<th>".t("Tulosta")."</th>";
 			echo "<th>".t("N‰yt‰")."</th>";
-			echo "</tr>";
+			echo "</tr></form>";
 
 			$tulostakaikki_tun = "";
 			$edennakko = "";

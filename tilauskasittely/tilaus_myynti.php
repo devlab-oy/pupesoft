@@ -2666,6 +2666,15 @@ if ($tee == '') {
 				elseif ($row["var"] == "J") {
 					$class = " class='green' ";
 				}
+				elseif($yhtiorow["puute_jt_oletus"] == "H") {
+					//	Tarkastetaan saldo ja informoidaan k‰ytt‰j‰‰
+					if (array_sum(saldo_myytavissa($trow["tuoteno"]))<0) {
+						$class = " class='spec' ";
+					}
+					else {
+						$class = '';
+					}
+				}
 				else {
 					$class = '';
 				}

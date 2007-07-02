@@ -39,6 +39,9 @@ if ((int) $valitsetoimitus > 0) {
 	elseif ($toimrow["tila"] == "A") {
 		$toim = "TYOMAARAYS";
 	}
+	elseif ($toimrow["tila"] == "C") {
+		$toim = "REKLAMAATIO";
+	}
 	elseif ($toimrow["tila"] == "V") {
 		$toim = "VALMISTAASIAKKAALLE";
 	}
@@ -46,7 +49,7 @@ if ((int) $valitsetoimitus > 0) {
 		$toim = "PROJEKTI";
 	}
 }
-elseif(in_array($valitsetoimitus,array("TARJOUS","PIKATILAUS","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS"))) {
+elseif(in_array($valitsetoimitus,array("TARJOUS","PIKATILAUS","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO"))) {
 	$uusitoimitus = $valitsetoimitus;
 }
 
@@ -137,6 +140,9 @@ elseif ($toim == "EXTRANET") {
 }
 elseif ($toim == "TYOMAARAYS") {
 	$otsikko = t("Työmääräys");
+}
+elseif ($toim == "REKLAMAATIO") {
+	$otsikko = t("Reklamaatio");
 }
 elseif ($toim == "VALMISTAVARASTOON") {
 	$otsikko = t("Varastoonvalmistus");
@@ -394,7 +400,7 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 //Haetaan otsikon kaikki tiedot
 if ((int) $kukarow["kesken"] != 0) {
 
-	if ($kukarow["extranet"] == "" and $toim == "TYOMAARAYS") {
+	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO")) {
 		$query  = "	select *
 					from lasku, tyomaarays
 					where lasku.tunnus='$kukarow[kesken]'
@@ -407,9 +413,9 @@ if ((int) $kukarow["kesken"] != 0) {
 					from lasku
 					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	}
+	
 	$result  	= mysql_query($query) or pupe_error($query);
 	$laskurow   = mysql_fetch_array($result);
-
 	if($yhtiorow["tilauksen_kohteet"] == "K") {
 		$query 	= "	select *
 					from laskun_lisatiedot
@@ -814,9 +820,10 @@ if ($tee == "VALMIS") {
 		require("../tyomaarays/tyomaarays.inc");
 	}
 	// Työmääräys valmis
-	elseif ($kukarow["extranet"] == "" and $toim == "TYOMAARAYS") {
+	elseif ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO")) {
 		require("../tyomaarays/tyomaarays.inc");
 	}
+	
 	// Siirtolista, myyntitili, valmistus valmis
 	elseif ($kukarow["extranet"] == "" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "MYYNTITILI") and $msiirto == "") {
 		require ("tilaus-valmis-siirtolista.inc");
@@ -959,7 +966,7 @@ if ($tee == "VALMIS") {
 	}
 }
 
-if ($kukarow["extranet"] == "" and $toim == "TYOMAARAYS" and ($tee == "VAHINKO" or $tee == "LEPAA")) {
+if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and ($tee == "VAHINKO" or $tee == "LEPAA")) {
 	require("../tyomaarays/tyomaarays.inc");
 }
 
@@ -1229,7 +1236,7 @@ if ($tee == '') {
 					</form>";
 		}
 
-		if ($kukarow["extranet"] == "" and $toim == "TYOMAARAYS") {
+		if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == 'REKLAMAATIO')) {
 			echo "	<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
 					<input type='hidden' name='tee' value='VAHINKO'>
@@ -1432,6 +1439,7 @@ if ($tee == '') {
 			else {
 				echo "<option value='PIKATILAUS'>".T("Toimitus")."</option>";
 				echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
+				echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
 				echo "<option value='VALMISTAASIAKKAALLE'>".T("Valmistus")."</option>";
 				echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
 			}
@@ -2415,6 +2423,11 @@ if ($tee == '') {
 
 		if ($toim == "TYOMAARAYS") {
 			$order 	= "ORDER BY sorttauskenttatyomaarays DESC, tunnus";
+			$tilrivity	= "'L'";
+			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
+		}
+		elseif ($toim == "REKLAMAATIO") {
+			$order 	= "ORDER BY sorttauskentta DESC, tunnus";
 			$tilrivity	= "'L'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
@@ -3854,7 +3867,7 @@ if ($tee == '') {
 		}
 
 		// JT-rivikäyttöliittymä
-		if ($jt_kayttoliittyma == "kylla" and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
+		if ($jt_kayttoliittyma == "kylla" and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "REKLAMAATIO" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
 
 			//katotaan eka halutaanko asiakkaan jt-rivejä näkyviin
 			$asjtq = "select jtrivit from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
@@ -3946,7 +3959,20 @@ if ($tee == '') {
 					</form></td>";
 
 		}
+        
+        if($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "REKLAMAATIO") {
+			echo "	<td class='back'>
+					<form name='valmis' action='$PHP_SELF' method='post'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='projektilla' value='$projektilla'>
+					<input type='hidden' name='tee' value='LEPAA'>
+					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+					<input type='submit' value='* ".t("Reklamaatio lepäämään")." *'>
+					</form></td>";
 
+		}
+		
 		if($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "TARJOUS"  and $laskurow["liitostunnus"] > 0 and $tilausok == 0 and $rivilaskuri > 0) {
 
 			echo "<td class='back'>";

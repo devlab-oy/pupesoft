@@ -181,6 +181,9 @@
 		if ($toim == "TYOMAARAYS") {
 			echo "<font class='head'>".t("Työmääräyksen otsikko")."</font><hr>";
 		}
+		elseif ($toim == "REKLAMAATIO") {
+			echo "<font class='head'>".t("Reklamaatio otsikko")."</font><hr>";
+		}
 		elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
 			echo "<font class='head'>".t("Valmistuksen otsikko")."</font><hr>";
 		}
@@ -494,6 +497,9 @@
 
 			if ($toim == "TYOMAARAYS") {
 				echo "<tr><th colspan='4'>".t("Työmääräyksen tiedot").":</th></tr>";
+			}
+			elseif ($toim == "REKLAMAATIO") {
+				echo "<tr><th colspan='4'>".t("Reklamaation tiedot").":</th></tr>";
 			}
 			elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
 				echo "<tr><th colspan='4'>".t("Valmistuksen tiedot").":</th></tr>";
@@ -917,6 +923,14 @@
 				echo "<input type='hidden' name='tilaustyyppi' value='A'>";
 
 				echo "<td>".t("Työmääräys")."</td>";
+			}
+			elseif ($toim == "REKLAMAATIO") {
+				echo "<tr><td>".t("Tilaustyyppi").":</td>";
+
+				//Jos kyseessä on työmääräys
+				echo "<input type='hidden' name='tilaustyyppi' value='R'>";
+
+				echo "<td>".t("Reklamaatio")."</td>";
 			}
 			elseif ($toim == "TARJOUS") {
 				echo "<tr><td>".t("Tilaustyyppi").":</td>";
@@ -1371,12 +1385,12 @@
 						<td>".t("Työn suorittaja").":</td><td><input type='text' name='suorittaja' size='20' maxlengtd='15' value='$srow[suorittaja]'></td>
 						</tr>";	
 			}
-			if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
+			if ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO" or $toim == "TARJOUS" or $srow["tilaustyyppi"] == "T") {
 				echo "	<tr>
 						<td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td>
 						</tr>";
 			}
-			if ($toim == "TYOMAARAYS") {
+			if ($toim == "TYOMAARAYS" or $toim == 'REKLAMAATIO') {
 				echo "	<tr>
 						<td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td>
 						</tr>";
@@ -1517,6 +1531,9 @@
 
 			if ($toim == "TYOMAARAYS") {
 				echo "<tr><th colspan='3'>".t("Työmääräyksen kommentit").":</th></tr>";
+			}
+			elseif ($toim == "REKLAMAATIO") {
+				echo "<tr><th colspan='3'>".t("Valmistuksen kommentit").":</th></tr>";
 			}
 			elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
 				echo "<tr><th colspan='3'>".t("Valmistuksen kommentit").":</th></tr>";
@@ -1928,6 +1945,12 @@
 			}
 			$tee = "";
 		}
+		elseif ($toim == "REKLAMAATIO") {
+			if ($ylatila=='') {
+				$ylatila='C';
+			}
+			$tee = "";
+		}
 		elseif ($toim == "TARJOUS") {
 			if ($ylatila=='') {
 				$ylatila='T';
@@ -2034,7 +2057,7 @@
 			}
 		}
 
-		if ($toim == "TYOMAARAYS" or $toim == "TARJOUS" or $tilaustyyppi == "T") {
+		if ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO" or $toim == "TARJOUS" or $tilaustyyppi == "T") {
 			//otetaan kantaa pyörän malliin
 			if($merkki2 != 'eimenu'){
 				$merkki = $merkki2;

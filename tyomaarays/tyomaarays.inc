@@ -1,6 +1,6 @@
 <?php
 
-	if ($tee ==  "VALMIS" or $tee == "LEPAA") {
+	if (($tee ==  "VALMIS" or $tee == "LEPAA") and $toim != "REKLAMAATIO") {
 		//tulostetaan tilaus kun se on valmis
 		$otunnus = $kukarow["kesken"];
 
@@ -83,7 +83,7 @@
 		system("rm -f $pdffilenimi");
 	}
 
-	if ($toim == "TYOMAARAYS" and $tee == 'LEPAA') {
+	if (($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and $tee == 'LEPAA') {
 		$query = "UPDATE kuka SET kesken=0 WHERE session='$session'";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -108,6 +108,33 @@
 					SET tila='L'	
 					WHERE tunnus='$laskurow[tunnus]'
 					and tila='A'
+					and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+	
+		//Katotaan löytyykö tilausrivejä
+		$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$keres = mysql_query($query) or pupe_error($query);
+		
+		//Yhtään riviä ei ole
+		if(mysql_num_rows($keres) == 0) {
+			$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			// tilaus ei enää kesken...
+			$query	= "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+		else {
+			require("tilaus-valmis.inc");
+		}
+		$tee = "";
+	}
+	
+	if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
+		$query  = "	UPDATE lasku 
+					SET tila='L'	
+					WHERE tunnus='$laskurow[tunnus]'
+					and tila='C'
 					and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 	

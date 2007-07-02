@@ -3894,7 +3894,7 @@ if ($tee == '') {
 				$asiakasid		= $laskurow["liitostunnus"];
 
 				$automaaginen 	= "";
-				$tyyppi 		= "T";
+				$jarj	 		= "toimaika";
 				$tee			= "JATKA";
 				$tuotenumero	= "";
 				$toimi			= "";

@@ -7,7 +7,7 @@
 	if ($toim == 'MYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tilaukset").":</font><hr>";
 		
-		$til = " tila in ('L','U','N','R') ";
+		$til = " tila in ('L','U','N','R','E') ";
 	}
 	if ($toim == 'OSTO') {
 		echo "<font class='head'>".t("Toimittajan tilaukset").":</font><hr>";

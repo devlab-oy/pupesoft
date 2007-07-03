@@ -538,7 +538,7 @@
 								and abc_aputaulu.tuoteno = tuote.tuoteno 
 								and abc_aputaulu.tyyppi = '$abcrajaustapa') ";
 			}
-
+			
 			$varastot 		 = " HAVING varastopaikat.tunnus in ($varastot) or varastopaikat.tunnus is null ";
 			$varastot_yhtiot = " yhtio in ($varastot_yhtiot) ";
 
@@ -2234,7 +2234,7 @@
 						echo "<select name='abcrajaustapa'>
 						<option $sel[TK] value='TK'>Myyntikate</option>
 						<option $sel[TR] value='TR'>Myyntirivit</option>
-						<option $sel[TP] value='TK'>Myyntikappaleet</option>
+						<option $sel[TP] value='TP'>Myyntikappaleet</option>
 						</select>
 						</td></tr>";
 

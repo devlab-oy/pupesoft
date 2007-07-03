@@ -1020,7 +1020,7 @@ if ($tee == "MUOKKAA") {
 		}
 
 		//	rivit
-		$sorttauskentta = generoi_sorttauskentta(4);
+		$sorttauskentta = generoi_sorttauskentta(8);
 		$query = "	SELECT tilausrivi.*, tuotetyyppi, $sorttauskentta,
 					if (tuote.tuotetyyppi='A' or tuote.tuotetyyppi='B', concat(date_format(kerattyaika, '%d.%m.%Y %k:%i'),' - ',date_format(toimitettuaika, '%d.%m.%Y %k:%i')), '') ajalla,
 					concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka

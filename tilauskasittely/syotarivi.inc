@@ -16,7 +16,7 @@
 	if ($kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
 		// Pikatilauksen syöttörivi
 		echo "<table>
-				<tr>
+				<tr>$jarjlisa
 					<th align='left'>".t("Tuotenumero")."</th>
 					<th align='left'>".t("Määrä")."</th>
 					<th align='left'>".t("Var")."</th>
@@ -25,7 +25,7 @@
 					<th align='left'>".t("Netto")."</th>
 					<td valign='top' class='back'></td>
 				</tr>
-			<tr>";
+			<tr>$jarjlisa";
 
 
 		if ($ulos == '') {
@@ -41,17 +41,20 @@
 				<td valign='top'><input type='text' name='ale' size='5' maxlength='6' value='$ale'></td>
 				<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
 				<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
-				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
+				<td valign='top' class='back'>
+				<input type='hidden' name='perheid' value = '$perheid'>
+				<input type='hidden' name='perheid2' value = '$perheid2'>
+				<input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
 			</tr>";
 
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
 		if ($rivitunnus!='') {
-			echo "<tr>";
+			echo "<tr>$jarjlisa";
 
 			echo "	<th align='left' colspan='2'>".t("Keräysaika")."</th>
 					<th align='left' colspan='4'>".t("Toimitusaika")."</th>
 					</tr>";
-			echo "<tr>";
+			echo "<tr>$jarjlisa";
 
 			if ($toimaika == "" or $toimaika == "0000-00-00") {
 				$toimaika = $laskurow["toimaika"];
@@ -85,16 +88,16 @@
 
 			echo "<td valign='top' colspan='2'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
 			echo "<td valign='top' colspan='4'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";
-			echo "<tr>";
+			echo "<tr>$jarjlisa";
 			
 			
-			echo "<tr><th colspan='6' align='left'>".t("Rivikommentti").":</tg></tr>";
-			echo "<tr><td valign='top' colspan='6'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea></td></tr>";
+			echo "<tr>$jarjlisa<th colspan='6' align='left'>".t("Rivikommentti").":</tg></tr>";
+			echo "<tr>$jarjlisa<td valign='top' colspan='6'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea>";
 
 			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T")) {
-				echo "<tr>
+				echo "<tr>$jarjlisa
 						<th colspan='6' align='left'>".t("Tuotteen nimitys")."</th>
-						</tr><tr>
+						</tr><tr>$jarjlisa
 						<td valign='top' class='back' colspan='6'><input type='text' maxlength='35' size='50' name='tuotenimitys' value = '$tuotenimitys'></td></tr>";
 			}
 
@@ -111,16 +114,12 @@
 			echo "<input type='hidden' name='paikka' value='$paikka'>";
 		}
 
-		echo "<input type='hidden' name='perheid' value = '$perheid'>";
-		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
-
-		echo "</form>";
-		echo "</table>";
+		echo "</table></form>";
 	}
 	elseif ($kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO" or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "REKLAMAATIO")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
-				<tr>
+				<tr>$jarjlisa
 				<th align='left'>".t("Tuoteno")."</th>
 				<th align='left'>".t("Määrä")."</th>
 				<th align='left'>".t("Var")."</th>
@@ -132,7 +131,7 @@
 				</tr>";
 
 
-		echo "<tr>";
+		echo "<tr>$jarjlisa";
 
 		if ($ulos == '') {
 			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
@@ -199,13 +198,13 @@
 
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
-		echo "<tr>
+		echo "<tr>$jarjlisa
 				<th align='left'>".t("Keräysaika")."</th>
 				<th align='left' colspan='2'>".t("Toimitusaika")."</th>
 				<th colspan='4' align='left'>".t("Kommentti")."</th>
 				<td valign='top' class='back'></td>
 				</tr>";
-		echo "<tr>";
+		echo "<tr>$jarjlisa";
 		
 		if ($toimaika == "" or $toimaika == "0000-00-00") {
 			$toimaika = $laskurow["toimaika"];
@@ -243,14 +242,14 @@
 
 		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T"))) {
 			echo "</tr>
-				<tr>
+				<tr>$jarjlisa
 					<th colspan='7' align='left'>".t("Tuotteen nimitys")."</th>
 					</tr>
-				<tr>
+				<tr>$jarjlisa
 					<td valign='top' colspan='7'><input type='text' maxlength='35' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
 		}
 
-		echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'></td></tr>";
+		echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'>";
 
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
 		if ($rivitunnus!='') {
@@ -265,13 +264,12 @@
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";
 		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
 
-		echo "</form>";
-		echo "</table>";
+		echo "</td></tr></table></form>";
 	}
 	elseif ($kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
-				<tr>";
+				<tr>$jarjlisa";
 
 		if ($tila == "LISAARESEPTIIN") {
 			echo "<th align='left'>".t("Perhe")."</th>";
@@ -282,7 +280,7 @@
 				</tr>";
 
 
-		echo "<tr>";
+		echo "<tr>$jarjlisa";
 
 		if ($tila == "LISAARESEPTIIN") {
 			echo "<td valign='top'>$perheid $perheid2</td>";
@@ -300,7 +298,7 @@
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		
-		echo "<tr>";
+		echo "<tr>$jarjlisa";
 		
 		if ($tila == "LISAARESEPTIIN") {
 			echo "<th></th>";
@@ -309,7 +307,7 @@
 		echo "	<th align='left'>".t("Keräysaika")."</th>
 				<th align='left'>".t("Toimitusaika")."</th>
 				</tr>";
-		echo "<tr>";
+		echo "<tr>$jarjlisa";
 		
 		if ($tila == "LISAARESEPTIIN") {
 			echo "<td valign='top'></td>";
@@ -348,7 +346,7 @@
 		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
 		echo "<td valign='top'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";		
 		
-		echo "<tr>";
+		echo "<tr>$jarjlisa";
 		
 		if ($tila == "LISAARESEPTIIN") {
 			echo "<th></th>";
@@ -357,14 +355,14 @@
 		echo "<th colspan='2' align='left'>".t("Kommentti")."</th>
 				</tr>";
 
-		echo "<tr>";
+		echo "<tr>$jarjlisa";
 		
 		if ($tila == "LISAARESEPTIIN") {
 			echo "<td valign='top'></td>";
 		}
 				
 		echo "<td valign='top' colspan='2'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
-				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'></td></tr>";
+				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'>";
 
 		// jos meillä on rivi muuttuja täällä, niin ollaan muokkaamassa rivejä..
 		if ($rivitunnus!='') {
@@ -379,8 +377,7 @@
 		echo "<input type='hidden' name='perheid' value = '$perheid'>";
 		echo "<input type='hidden' name='perheid2' value = '$perheid2'>";
 
-		echo "</form>";
-		echo "</table>";
+		echo "</td></tr></table></form>";
 	}
 	elseif ($miniliittyma == "JOO") {
 
@@ -401,28 +398,26 @@
 
 		// näytetään tilauksen syöttörivi... aina.
 		echo "<table>";
-		echo "<tr>";
+		echo "<tr>$jarjlisa";
 		echo "<input type='hidden' name='tuoteno' value='$hi_tuoteno'>
 				<td valign='top'><input type='text' name='kpl' size='5' maxlength='5' value='$kpl' onKeyUp='DisableText();'></td>";
 
 		echo "	<td valign='top'> $varaosavirhe </td> ";
 
-		echo "<td valign='top'><input type='submit' value='".t("Lisää")."'></td>";
+		echo "<td valign='top'><input type='submit' value='".t("Lisää")."'>";
 
-		echo "</form>";
-		echo "</tr>";
-		echo "</table>";
+		echo "</td></tr></table></form>";
 
 	}
 	elseif ($kukarow["extranet"] != '') {
 		// Extranetin syöttörivi
 		echo "<table>
-				<tr>
+				<tr>$jarjlisa
 					<th align='left'>".t("Tuotenumero")."</th>
 					<th align='left'>".t("Määrä")."</th>
 					<td valign='top' class='back'></td>
 				</tr>
-			<tr>";
+			<tr>$jarjlisa";
 
 		echo "<input type='hidden' name='var' value='$var'>";
 
@@ -438,10 +433,9 @@
 				<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
 			</tr>";
 
-		echo "<tr><th colspan='2'>".t("Rivikommentti").":</th></tr>";
-		echo "<tr><td valign='top' class='back' colspan='2'><textarea name='kommentti' cols='30' rows='2' wrap='soft'>$kommentti</textarea></td></tr>";
-		echo "</form>";
-		echo "</table>";
+		echo "<tr>$jarjlisa<th colspan='2'>".t("Rivikommentti").":</th></tr>";
+		echo "<tr>$jarjlisa<td valign='top' class='back' colspan='2'><textarea name='kommentti' cols='30' rows='2' wrap='soft'>$kommentti</textarea>";
+		echo "</td></tr></table></form>";
 	}
 
 	// Kursorinohjausta

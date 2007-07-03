@@ -128,7 +128,7 @@ if (!function_exists('tulosta_tarjous')) {
 		
 		$pdf=alku($pdf, $laskurow,$kieli);
 		$h = 220;
-		$sorttauskentta = generoi_sorttauskentta(4);
+		$sorttauskentta = generoi_sorttauskentta(8);
 		$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)";
 		$perherivihinta = "	(select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi in  ('T'))";
 		

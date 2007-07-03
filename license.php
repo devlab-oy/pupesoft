@@ -101,5 +101,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  along with this program; if not, write to the Free Software
  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
 </pre>
-";
+
+<hr>
+
+<pre>
+Lullacons Pack 1 - Royalty Free Icons for Public Distribution
+by Nathan Haug and the Lullabot Team
+http://www.lullabot.com/icons
+September 26, 2006
+
+These icons are free to use, modify, and redistribute so long as this file is
+not separated from any icon included in this package. This restriction is
+applied to use of the iconset in part or in full. Original source files are
+available for free download at http://www.lullabot.com/icons. All icons copyleft
+Lullabot, 2006.
+
+Whole license is located at <a href='pics/lullacons/lullacons-readme.txt'>pics/lullacons/lullacons-readme.txt</a>
+
+</pre>
+"
 ?>

@@ -1008,4 +1008,25 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "tilausrivien_jarjestaminen") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1="";
+		$sel2="";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		else {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Tilausrivien järjestystä ei saa muuttaa")."</option>";
+		$ulos .= "<option value='X' $sel2>".t("Kaikki saavat muuttaa tilausrivien järjestystä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 ?>

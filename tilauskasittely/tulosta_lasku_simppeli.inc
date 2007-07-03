@@ -248,7 +248,7 @@ if (!function_exists('tulosta_lasku')) {
 			$lisa = "";
 		}
 		
-		$sorttauskentta = generoi_sorttauskentta(4);
+		$sorttauskentta = generoi_sorttauskentta(8);
 		if ($laskurow["tila"] == 'U') {
 			$where = " uusiotunnus='$otunnus' ";
 		}

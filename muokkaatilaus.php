@@ -803,11 +803,11 @@
 				}
 
 				// tehd‰‰n alertteja
-				if ($row["tila"] == "L" and $row["alatila"] == "A" and $toim == "") {
+				if ($row["tila"] == "L" and $row["alatila"] == "A") {
 					$pitaako_varmistaa = t("Ker‰yslista on jo tulostettu! Oletko varma, ett‰ haluat viel‰ muokata tilausta?");
 				}
 
-				if ($row["tila"] == "G" and $row["alatila"] == "A" and $toim == "SIIRTOLISTA") {
+				if ($row["tila"] == "G" and $row["alatila"] == "A") {
 					$pitaako_varmistaa = t("Siirtolista on jo tulostettu! Oletko varma, ett‰ haluat viel‰ muokata siirtolistaa?");
 				}
 

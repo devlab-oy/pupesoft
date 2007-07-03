@@ -486,7 +486,7 @@ if ($toiminto == "" and $ytunnus != "") {
 				}
 
 				// tilausrivin tunnus pitää löytyä sarjanumeroseurannasta
-				$query = "select * from sarjanumeroseuranta use index (yhtio_ostorivi) where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and $tunken='$toimrow[tunnus]'";
+				$query = "select distinct sarjanumero from sarjanumeroseuranta use index (yhtio_ostorivi) where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and $tunken='$toimrow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon

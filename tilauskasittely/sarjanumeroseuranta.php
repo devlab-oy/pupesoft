@@ -521,6 +521,7 @@
 					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
+					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					varastopaikat.nimitys								varastonimi,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
@@ -552,6 +553,7 @@
 					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
+					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					varastopaikat.nimitys								varastonimi,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
@@ -569,6 +571,7 @@
 					and sarjanumeroseuranta.ostorivitunnus in (0, $rivitunnus)
 					$lisa
 					$lisa2
+					GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero
 					ORDER BY sarjanumeroseuranta.sarjanumero";
 	}
 	else {
@@ -582,6 +585,7 @@
 					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
+					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					varastopaikat.nimitys								varastonimi,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
@@ -755,8 +759,16 @@
 				echo "<td valign='top'>".t("Lukittu")."</td>";
 			}
 			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") or ($from == "riviosto" or $from == "kohdista")) {
+				
+				if (($from == "riviosto" or $from == "kohdista") and $sarjarow["osto_laskaika"] > '0000-00-00') {
+					$dis = "DISABLED";
+				}
+				else {
+					$dis = "";
+				}
+				
 				echo "<input type='hidden' name='sarjat[]' value='$sarjarow[tunnus]'>";
-				echo "<td valign='top'><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit();'></td>";
+				echo "<td valign='top'><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit();' $dis></td>";
 			}
 		}
 

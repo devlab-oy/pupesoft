@@ -467,14 +467,14 @@
 		$miinus = 2;
 	}
 	elseif ($toim == "REKLAMAATIO") {
-		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila
+		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila, tilaustyyppi
 					FROM lasku use index (tila_index)
-					WHERE yhtio = '$kukarow[yhtio]' and tila in ('L', 'N') and tilaustyyppi='R' and alatila in ('','A','B','C','J')
+					WHERE yhtio = '$kukarow[yhtio]' and tila in ('L','N','C') and tilaustyyppi='R' and alatila in ('','A','B','C','J','D')
 					$haku
 					order by lasku.luontiaika desc
 					LIMIT 50";
 
-		$miinus = 2;
+		$miinus = 3;
 	}
 	elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
 			$query = "	SELECT tunnus tilaus, nimi varasto, ytunnus id, lasku.luontiaika, laatija, viesti tilausviite,$toimaikalisa alatila, tila
@@ -738,6 +738,9 @@
 					}
 					elseif ($row["tila"] == "V" and  $row["tilaustyyppi"] == "W") {
 						$tarkenne = " (".t("Varastoon").") ";
+					}
+					elseif(($row["tila"] == "N" or $row["tila"] == "L") and $row["tilaustyyppi"] == "R") {
+						$tarkenne = " (".t("Reklamaatio").") ";
 					}
 
 					echo "<td valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")."</td>";

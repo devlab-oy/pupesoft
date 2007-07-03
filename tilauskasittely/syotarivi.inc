@@ -117,7 +117,7 @@
 		echo "</form>";
 		echo "</table>";
 	}
-	elseif ($kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO" or $toim == "YLLAPITO" or $toim == "TARJOUS")) {
+	elseif ($kukarow["extranet"] == '' and ($toim == "RIVISYOTTO" or $toim == "VALMISTAASIAKKAALLE" or $toim == "TYOMAARAYS" or $aputoim == "RIVISYOTTO" or $toim == "YLLAPITO" or $toim == "TARJOUS" or $toim == "REKLAMAATIO")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>

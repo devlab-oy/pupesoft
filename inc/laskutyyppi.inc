@@ -40,10 +40,10 @@
 					$alatila = "Rahtikirjatiedot syötetty";
 					break;
 				case "C":
-					$alatila = "Tilaus kerätty";
+					$alatila = "Kerätty";
 					break;
 				case "D":
-					$alatila = "Tilaus toimitettu";
+					$alatila = "Toimitettu";
 					break;
 				case "J":
 					$alatila = "Odottaa loppulaskutusta";

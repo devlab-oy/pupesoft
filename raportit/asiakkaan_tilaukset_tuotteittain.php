@@ -73,24 +73,38 @@
 
 
 		if ($toim == 'OSTO') {
-			$tila = " ('O') ";
-			$tyyppi = "O";
+			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, ytunnus, 
+						if(nimi!=toim_nimi,concat(toim_nimi,'<br>(',nimi,')'), nimi) nimi, 
+						if(postitp!=toim_postitp,concat(toim_postitp,'<br>(',postitp,')'), postitp) postitp, 
+						tuoteno, REPLACE(kpl+varattu,'.',',') kpl, 
+						REPLACE(tilausrivi.hinta,'.',',') hinta, 
+						REPLACE(rivihinta,'.',',') rivihinta, 
+						lasku.toimaika, 
+						tilausrivi.laskutettuaika tuloutettu, 
+						lasku.tila, lasku.alatila
+						FROM tilausrivi, lasku
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and lasku.yhtio=tilausrivi.yhtio
+						and lasku.tunnus=tilausrivi.otunnus
+						and lasku.tila = 'O'
+						and tilausrivi.tyyppi = 'O'
+						and tilausrivi.laadittu >='$vva-$kka-$ppa 00:00:00'
+						and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
+						and lasku.tunnus=tilausrivi.otunnus ";
 		}
-		else {
-			$tila = " ('L','N','U') ";
-			$tyyppi =  "L";
+		else {			
+			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, if(nimi!=toim_nimi,concat(toim_nimi,'<br>(',nimi,')'), nimi) nimi, if(postitp!=toim_postitp,concat(toim_postitp,'<br>(',postitp,')'), postitp) postitp, tuoteno, REPLACE(kpl+varattu,'.',',') kpl, REPLACE(tilausrivi.hinta,'.',',') hinta, REPLACE(rivihinta,'.',',') rivihinta, lasku.toimaika, lasku.lahetepvm, lasku.tila, lasku.alatila
+						FROM tilausrivi, lasku
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and lasku.yhtio=tilausrivi.yhtio
+						and lasku.tunnus=tilausrivi.otunnus
+						and lasku.tila in ('L','N','U')
+						and tilausrivi.tyyppi = 'L'
+						and tilausrivi.laadittu >='$vva-$kka-$ppa 00:00:00'
+						and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
+						and lasku.tunnus=tilausrivi.otunnus ";
 		}
 
-		$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, if(nimi!=toim_nimi,concat(toim_nimi,'<br>(',nimi,')'), nimi) nimi, if(postitp!=toim_postitp,concat(toim_postitp,'<br>(',postitp,')'), postitp) postitp, tuoteno, REPLACE(kpl+varattu,'.',',') kpl, REPLACE(tilausrivi.hinta,'.',',') hinta, REPLACE(rivihinta,'.',',') rivihinta, lasku.toimaika, lasku.lahetepvm, lasku.tila, lasku.alatila
-					FROM tilausrivi, lasku
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-					and lasku.yhtio=tilausrivi.yhtio
-					and lasku.tunnus=tilausrivi.otunnus
-					and lasku.tila in $tila
-					and tilausrivi.tyyppi = '$tyyppi'
-					and tilausrivi.laadittu >='$vva-$kka-$ppa 00:00:00'
-					and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
-					and lasku.tunnus=tilausrivi.otunnus ";
 
 		if ($tuoteno != '') {
 			$query .= " and tilausrivi.tuoteno='$tuoteno' ";
@@ -104,16 +118,19 @@
 
 		$result = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($result)!=0) {
+		if (mysql_num_rows($result) > 0) {
 
 			echo "<br><table border='0' cellpadding='2' cellspacing='1'>";
 			echo "<tr>";
 			
-			for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
+			for ($i=1; $i < mysql_num_fields($result)-2; $i++) {
 				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=$tuoteno&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."'>".t(mysql_field_name($result,$i))."</a></th>";
 			}
 			
-			echo "<th align='left'>".t("Tyyppi")."</th>";
+			if ($toim != "OSTO") {
+				echo "<th align='left'>".t("Tyyppi")."</th>";
+			}
+			
 			echo "</tr>";
 
 			$kplsumma = 0;
@@ -122,35 +139,41 @@
 			
 			while ($row = mysql_fetch_array($result)) {
 
-				$ero="td";
-				if ($tunnus==$row['tilaus']) $ero="th";
+				$ero = "td";
+				if ($tunnus == $row['tilaus']) $ero="th";
 
 				echo "<tr class='aktiivi'>";
 				
-				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-					if (mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'lahetepvm') {
-						echo "<$ero>".tv1dateconv($row[$i],"pitka")."</$ero>";
+				for ($i=1; $i<mysql_num_fields($result)-2; $i++) {
+					if (mysql_field_name($result,$i) == 'kpl' or mysql_field_name($result,$i) == 'hinta' or mysql_field_name($result,$i) == 'rivihinta') {
+						echo "<$ero valign='top' align='right'>$row[$i]</$ero>";
+					}
+					elseif (mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'lahetepvm' or mysql_field_name($result,$i) == 'tuloutettu') {
+						echo "<$ero valign='top'>".tv1dateconv($row[$i],"pitka")."</$ero>";
 					}
 					else {
-						echo "<$ero>$row[$i]</$ero>";
+						echo "<$ero valign='top'>$row[$i]</$ero>";
 					}
 					
 				}
 
-				$laskutyyppi=$row["tila"];
-				$alatila=$row["alatila"];
+				
 
 				$kplsumma += $row["kpl"];
 				$hintasumma += $row["hinta"];
 				$rivihintasumma += $row["rivihinta"];
 				
+				if ($toim != "OSTO") {
+					$laskutyyppi=$row["tila"];
+					$alatila=$row["alatila"];
+					
+					//tehd‰‰n selv‰kielinen tila/alatila
+					require "../inc/laskutyyppi.inc";
+                	
+					echo "<$ero valign='top'>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
+				}
 				
-				//tehd‰‰n selv‰kielinen tila/alatila
-				require "../inc/laskutyyppi.inc";
-
-				echo "<$ero>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
-
-				echo "<form method='post' action='$PHP_SELF'><td class='back'>
+				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='tunnus' value='$row[tilaus]'>
@@ -168,7 +191,14 @@
 				echo "</tr>";
 			}
 			
-			echo "<tr><td colspan='7'>".t("Yhteens‰").":</td><td>$kplsumma</td><td>$hintasumma</td><td>$rivihintasumma</td><td colspan='2'></td></tr>";
+			if ($toim == "OSTO") {
+				$csp = 5;	
+			}
+			else {
+				$csp = 7;
+			}
+			
+			echo "<tr><td colspan='$csp'>".t("Yhteens‰").":</td><td>".sprintf('%.2f', $kplsumma)."</td><td>".sprintf('%.2f', $hintasumma)."</td><td>".sprintf('%.2f', $rivihintasumma)."</td><td colspan='2'></td></tr>";
 			
 			
 			echo "</table>";

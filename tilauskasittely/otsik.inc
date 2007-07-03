@@ -374,6 +374,7 @@
 				<input type='hidden' name='tunnusnippu' 					 value = '$srow[tunnusnippu]'>
 				<input type='hidden' name='projekti'						 value = '$srow[projekti]'>				
 				<input type='hidden' name='jaksotettu'	 					 value = '$srow[jaksotettu]'>
+				<input type='hidden' name='tunnusnippu_tarjous' 			 value = '$srow[tunnusnippu_tarjous]'>
 				<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
 
 
@@ -2103,6 +2104,7 @@
 						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
 						seuranta					= '$seuranta',
 						projekti					= '$projekti',						
+						tunnusnippu_tarjous			= '$tunnusnippu_tarjous',						
 						rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',
 						asiakkaan_kohde				= '$asiakkaan_kohde',
 						otunnus 					= '$kukarow[kesken]'";

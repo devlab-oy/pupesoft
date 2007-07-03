@@ -149,14 +149,17 @@
 						echo "<$ero valign='top' align='right'>$row[$i]</$ero>";
 					}
 					elseif (mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'lahetepvm' or mysql_field_name($result,$i) == 'tuloutettu') {
-						echo "<$ero valign='top'>".tv1dateconv($row[$i],"pitka")."</$ero>";
+						if (substr($row[$i], 0, 10) == '0000-00-00') {
+							echo "<$ero valign='top'></$ero>";
+						}
+						else {
+							echo "<$ero valign='top'>".tv1dateconv($row[$i],"pitka")."</$ero>";
+						}
 					}
 					else {
 						echo "<$ero valign='top'>$row[$i]</$ero>";
 					}
-					
 				}
-
 				
 
 				$kplsumma += $row["kpl"];

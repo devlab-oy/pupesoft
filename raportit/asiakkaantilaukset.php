@@ -24,6 +24,11 @@
 		
 		$til = " tila in ('L','0') ";
 	}
+	if ($toim == 'REKLAMAATIO') {
+		echo "<font class='head'>".t("Asiakkaan reklamaatiot").":</font><hr>";
+		
+		$til = " tila in ('L','N','C') and tilaustyyppi='R' ";
+	}
 	
 	if ($ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {
 	
@@ -56,7 +61,7 @@
 
 		require ("naytatilaus.inc");
 
-		if ($toim == "MYYNTI" or $toim == "TARJOUS") {
+		if ($toim == "MYYNTI" or $toim == "TARJOUS" or $toim == 'REKLAMAATIO') {
 			$query = "	SELECT *
 						FROM rahtikirjat
 						WHERE otsikkonro='$tunnus'
@@ -112,7 +117,7 @@
 	}
 	
 	if ($ytunnus != '' and ($otunnus == '' and $laskunro == '' and $sopimus == '')) {
-		if ($toim == 'MYYNTI' or $toim == "TARJOUS") {
+		if ($toim == 'MYYNTI' or $toim == "TARJOUS" or $toim == 'REKLAMAATIO') {
 			require ("../inc/asiakashaku.inc");
 		}
 		

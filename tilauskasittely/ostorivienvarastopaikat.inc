@@ -30,14 +30,14 @@ if ($tee == "valmis") {
 		$perheresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($perheresult) == 0) {
-			echo "<font style='error'>".t("Tilausrivi katosi!")."</font>";
+			echo "<font style='error'>".t("Tilausrivi katosi!")."$query</font><br>";
 		}
 		else {
 
 			while($tilausrivirow = mysql_fetch_array($perheresult)) {
 
 				// Jaaha mitäs tuotepaikalle pitäisi tehdä
-				if($tilausrivirow["perheid2"] != $tilausrivirow["tunnus"] and $tilausrivirow["perheid2"] > 0) {
+				if($tilausrivirow["perheid2"] != $tilausrivirow["tunnus"] and $tilausrivirow["perheid2"] > 0 and !isset($rivivarasto[$tilausrivirow["tunnus"]])) {
 					
 					$query = "	SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
 								from tuotepaikat
@@ -317,8 +317,8 @@ if ($tee == "") {
 	// otsikko valmis
 
 	//haetaan ostorivit
-	$query = "	SELECT tilausrivi.tuoteno, tilausrivi.tunnus, tilausrivi.hyllyalue r1, tilausrivi.hyllynro r2, tilausrivi.hyllyvali r3, tilausrivi.hyllytaso r4,
-				group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tilausrivi.varattu
+	$query = "	SELECT tilausrivi.tuoteno, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hyllyalue r1, tilausrivi.hyllynro r2, tilausrivi.hyllyvali r3, tilausrivi.hyllytaso r4,
+				group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno, tilausrivi.varattu, (select kpl from tilausrivi t2 where t2.yhtio=tilausrivi.yhtio and t2.tunnus=tilausrivi.perheid2 and t2.uusiotunnus='$otunnus') isakpl
 				FROM tilausrivi
 				JOIN tuote USING (yhtio, tuoteno)
 				JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
@@ -326,9 +326,9 @@ if ($tee == "") {
 				and tilausrivi.uusiotunnus='$otunnus'
 				and tilausrivi.tyyppi = 'O'
 				and tilausrivi.varattu <> 0
-				and (tilausrivi.perheid2=0 or tilausrivi.perheid2=tilausrivi.tunnus)
 				and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 				group by tilausrivi.tunnus
+				having (tilausrivi.perheid2=0 or tilausrivi.perheid2=tilausrivi.tunnus) or (isakpl != 0 and tilausrivi.perheid2 > 0 and (tilausrivi.hyllyalue='' or tilausrivi.hyllynro='' or tilausrivi.hyllyvali='' or tilausrivi.hyllytaso=''))
 				ORDER BY tuotteen_toimittajat.toim_tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
 

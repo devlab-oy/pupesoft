@@ -271,7 +271,7 @@
 			}
 
 			echo "<table>";
-			echo "<tr>";
+			echo "<tr>$jarjlisa";
 			echo "<th>".t("Ytunnus")."</th>";
 			echo "<th>".t("Nimi")."</th>";
 			echo "<th align='right'>".t("Alle 0 pv")."</th>";
@@ -317,7 +317,7 @@
 
 					if ($row["nimi"] != $row["toim_nimi"]) $row["nimi"] .= "<br>$row[toim_nimi]";
 
-					echo "<tr class='aktiivi'>";
+					echo "<tr class='aktiivi'>$jarjlisa";
 					echo "<td valign='top'><a href='../myyntires/myyntilaskut_asiakasraportti.php?tunnus=$row[litu]&tila=tee_raportti'>$row[ytunnus]</a></td>";
 					echo "<td valign='top'>$row[nimi]</td>";
 					echo "<td valign='top' align='right'>".str_replace(".",",",$row["aa"])."</td>";
@@ -396,7 +396,7 @@
 				
 					$summa += $trow["avoinsaldo"];
 
-					echo "<tr>";
+					echo "<tr>$jarjlisa";
 					echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi_maksaja]</td>";
 					echo "<td>$trow[viite]</td>";
@@ -411,7 +411,7 @@
 			
 			
 			if ($eiliittymaa != 'ON' or $rivilask >= 1) {
-				echo "<tr>";
+				echo "<tr>$jarjlisa";
 				echo "<td valign='top' class='tumma' align='right' colspan='2'>".t("Yhteensä").":</th>";
 				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aay))."</td>";
 				echo "<td valign='top' class='tumma' align='right'>".str_replace(".",",",sprintf('%.2f',$aabby))."</td>";

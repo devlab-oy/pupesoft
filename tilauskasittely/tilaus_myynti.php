@@ -2852,16 +2852,16 @@ if ($tee == '') {
 												<input type='hidden' name='menutila' value='$menutila'>
 												<input type='hidden' id='rivi_$rivino' name='jarjesta' value='$rivino'>";
 						if($rivino > 1) {
-							$buttonit .= "			<a href='#' onClick=\"getElementById('rivi_$rivino').value='moveUp'; document.forms['siirra_$rivino'].submit();\"><img src='../pics/lullacons/arrow-single-up-green.png'></a>
-													<a href='#' onClick=\"getElementById('rivi_$rivino').value='first'; document.forms['siirra_$rivino'].submit();\"><img src='../pics/lullacons/arrow-end-up-green.png'></a>";
+							$buttonit .= "			<a href='#' onClick=\"getElementById('rivi_$rivino').value='moveUp'; document.forms['siirra_$rivino'].submit();\"><img src='../pics/lullacons/arrow-single-up-green.png' border='0'></a>
+													<a href='#' onClick=\"getElementById('rivi_$rivino').value='first'; document.forms['siirra_$rivino'].submit();\"><img src='../pics/lullacons/arrow-end-up-green.png' border='0'></a>";
 						}
 						else {
 							$buttonit .= "			<img src='../pics/noimage.gif' width='25'>";
 							
 						}
 						if($rivilaskuri > $rivino) {
-							$buttonit .= "			<a href='#' onClick=\"getElementById('rivi_$rivino').value='moveDown'; document.forms['siirra_$rivino'].submit();\"><img src='../pics/lullacons/arrow-single-down-green.png'></a>
-													<a href='#' onClick=\"getElementById('rivi_$rivino').value='last'; document.forms['siirra_$rivino'].submit();\"><img src='../pics/lullacons/arrow-end-down-green.png'></a>";	
+							$buttonit .= "			<a href='#' onClick=\"getElementById('rivi_$rivino').value='moveDown'; document.forms['siirra_$rivino'].submit();\"><img src='../pics/lullacons/arrow-single-down-green.png' border='0'></a>
+													<a href='#' onClick=\"getElementById('rivi_$rivino').value='last'; document.forms['siirra_$rivino'].submit();\"><img src='../pics/lullacons/arrow-end-down-green.png' border='0'></a>";	
 						}
 						$buttonit .= " 		</form>
 										</td>";	

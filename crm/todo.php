@@ -196,6 +196,10 @@ if ($tee == "") {
 			$rivi["prioriteetti"] = "bug";
 		}
 
+		if ($rivi["prioriteetti"] == -1) {
+			$rivi["prioriteetti"] = "tarjouspyyntö";
+		}
+
 		if ($rivi["deadline"] == '9999-99-99') {
 			$rivi["deadline"] = "";
 		}
@@ -251,6 +255,7 @@ if ($tee == "") {
 
 			<td>
 				<select name='prioriteetti'>
+				<option value='-1'>tarjouspyyntö</option>
 				<option value='0'>bug</option>
 				<option value='1'>1</option>
 				<option value='2'>2</option>
@@ -298,6 +303,10 @@ if ($tee == "") {
 
 			if ($rivi["prioriteetti"] == 0) {
 				$rivi["prioriteetti"] = "bug";
+			}
+
+			if ($rivi["prioriteetti"] == -1) {
+				$rivi["prioriteetti"] = "tarjouspyyntö";
 			}
 
 			$numero ++;

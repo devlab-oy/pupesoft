@@ -786,7 +786,7 @@
 				$andextra = " and profiili like 'extranet%' ";
 			}
 
-			// oNko tämä extranetkäyttäjä
+			// Onko tämä extranetkäyttäjä
 			if ($toim == "extranet") {
 				echo "<input type='hidden' name='extranet' value='X'>";
 			}
@@ -803,7 +803,8 @@
 
 			$profiilit = explode(',', $krow["profiilit"]);
 
-			echo "<tr><th valign='top'>Piiirit:</th><td>";
+			echo "<tr><th valign='top'>".t("Profiilit").":</th><td>";
+			
 			while ($prow = mysql_fetch_array($pres)) {
 
 				$chk = "";
@@ -820,29 +821,33 @@
 			}
 			echo "</td></tr>";
 
-			$query = "	SELECT *
-						FROM avainsana
-						WHERE yhtio='$kukarow[yhtio]' and laji='PIIRI'
-						ORDER BY jarjestys";
-			$pres = mysql_query($query) or pupe_error($query);
+			
+			if ($toim != 'extranet') {
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio='$kukarow[yhtio]' and laji='PIIRI'
+							ORDER BY jarjestys";
+				$pres = mysql_query($query) or pupe_error($query);
 
-			$piirit = explode(',', $krow["piirit"]);
+				$piirit = explode(',', $krow["piirit"]);
 
-			echo "<tr><th valign='top'>Piirit:</th><td>";
-			while ($prow = mysql_fetch_array($pres)) {
+				echo "<tr><th valign='top'>".t("Piirit").":</th><td>";
+			
+				while ($prow = mysql_fetch_array($pres)) {
 
 
-				$chk = "";
+					$chk = "";
 
-				if(in_array($prow["selite"], $piirit)) {
-					$chk = "CHECKED";
+					if(in_array($prow["selite"], $piirit)) {
+						$chk = "CHECKED";
+					}
+
+					echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
+
 				}
-
-				echo "<input type='checkbox' name='piiri[]' value='$prow[selite]' $chk>$prow[selite] - $prow[selitetark]<br>";
-
+				echo "</td></tr>";
 			}
-			echo "</td></tr>";
-
+			
 			if ($selkuka == "UUSI" and $toim != "extranet") {
 				$query = "select yhtio, nimi from yhtio order by yhtio";
 				$yhres = mysql_query($query) or pupe_error($query);

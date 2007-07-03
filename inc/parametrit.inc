@@ -309,7 +309,7 @@ if ($session != '') {
 		}
 
 		header("Content-Type: text/html; charset=$charset");
-
+		echo "<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN' 'http://www.w3.org/TR/html4/loose.dtd'>";
 		echo "<html>";
 		echo "<head>";
 		echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";
@@ -323,7 +323,7 @@ if ($session != '') {
 			echo "<script type='text/javascript' language='javascript' src='$palvelin2/inc/pupe.js'></script>";    
 		}
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
-		echo "</head>";
+		echo "</head><body>";
 
 		/*if($suljeYllapito!="") {
 			$body_js="onblur='window.close();'";

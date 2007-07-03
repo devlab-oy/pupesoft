@@ -534,6 +534,7 @@ if (!function_exists('tulosta_lasku')) {
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus = $laskurow[maksuehto]";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
+		
 		$pdf->write($h, 1, 0, 		$s[0], t("Laskun pvm", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[0], 	$s[1], strftime("%x",strtotime($laskurow["tapvm"])), "norm", "L", "");
 		$h-=$pdf->ln();
@@ -541,7 +542,14 @@ if (!function_exists('tulosta_lasku')) {
 		$pdf->write($h, 1, $s[0], 	$s[1], t($row["teksti"], $kieli), "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Eräpäivä", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], strftime("%x",strtotime($laskurow["erpcm"])), "norm", "L", "");
+		
+		if ($row['kateinen'] != '') {
+			$erapaiva = t('MAKSETTU', $kieli);
+		} else {
+			$erapaiva = strftime("%x",strtotime($laskurow["erpcm"]));
+		}
+		
+		$pdf->write($h, 1, $s[0], 	$s[1], $erapaiva, "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Tilinumero", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[0], 	$s[1], 		$yhtiorow["pankkitili1"], "norm", "L", "");

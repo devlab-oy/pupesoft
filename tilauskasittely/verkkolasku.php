@@ -1372,27 +1372,28 @@
 
 						$otunnus = $laskurow["tunnus"];
 
+						// haetaan maksuehdon tiedot
+						$query  = "	select * from maksuehto
+									left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+									where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
+						$result = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($result) == 0) {
+							$masrow = array();
+						}
+						else {
+							$masrow = mysql_fetch_array($result);
+						}
+
+						//maksuehto tekstinä
+						$maksuehto 		= $masrow["teksti"]." ".$masrow["kassa_teksti"];
+						$kateistyyppi	= $masrow["kateinen"];
+						
 						if ($yhtiorow['laskutyyppi'] == 3) {
 							require_once ("tulosta_lasku_simppeli.inc");
 							tulosta_lasku($otunnus, $komento[ucfirst(strtolower($toim))], $kieli, $toim, $tee);
 						}
 						else {
-							// haetaan maksuehdon tiedot
-							$query  = "	select * from maksuehto
-										left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
-										where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
-							$result = mysql_query($query) or pupe_error($query);
-
-							if (mysql_num_rows($result) == 0) {
-								$masrow = array();
-							}
-							else {
-								$masrow = mysql_fetch_array($result);
-							}
-
-							//maksuehto tekstinä
-							$maksuehto 		= $masrow["teksti"]." ".$masrow["kassa_teksti"];
-							$kateistyyppi	= $masrow["kateinen"];
 
 							if ($yhtiorow['laskutyyppi'] == 0) {
 								require_once("tulosta_lasku.inc");

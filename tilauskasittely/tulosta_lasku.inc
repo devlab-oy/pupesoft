@@ -24,7 +24,7 @@ $arvo 	= 0;
 // laskun alku ja loppu funktiot...
 if (!function_exists('alku')) {
 	function alku () {
-		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kieli, $boldi, $kala;
+		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala;
 
 		//PDF parametrit
 		if (!isset($pdf)) {
@@ -119,7 +119,14 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 792, t("Laskun pvm", $kieli), 	$firstpage, $pieni);
 		$pdf->draw_text(310, 782, tv1dateconv($laskurow["tapvm"]),		$firstpage, $norm);
 		$pdf->draw_text(430, 792, t("Eräpäivä", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(430, 782, tv1dateconv($laskurow["erpcm"]), 		$firstpage, $norm);
+		
+		if ($kateistyyppi != '') {
+			$erapaiva = t('MAKSETTU');
+		} else {
+			$erapaiva = tv1dateconv($laskurow["erpcm"]);
+		}
+		
+		$pdf->draw_text(430, 782, $erapaiva, $firstpage, $norm);
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
@@ -444,7 +451,7 @@ if (!function_exists('rivi')) {
 if (!function_exists('loppu')) {
 	function loppu ($firstpage) {
 
-		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi;
+		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi, $kateistyyppi;
 
 		$vientikala = 0;
 
@@ -459,7 +466,14 @@ if (!function_exists('loppu')) {
 		$pdf->draw_rectangle(110+$vientikala, 540, 90+$vientikala, 580,	$firstpage, $rectparam);
 
 		$pdf->draw_text(30,  102+$vientikala, t("Eräpäivä", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(30,  92+$vientikala,  tv1dateconv($laskurow["erpcm"]),		$firstpage, $norm);
+		
+		if ($kateistyyppi != '') {
+			$erapaiva = t('MAKSETTU', $kieli);
+		} else {
+			$erapaiva = tv1dateconv($laskurow["erpcm"]);
+		}
+		
+		$pdf->draw_text(30,  92+$vientikala,  $erapaiva,		$firstpage, $norm);
 		$pdf->draw_text(217, 102+$vientikala, t("Viitenumero", $kieli),	$firstpage, $pieni);
 		$pdf->draw_text(217, 92+$vientikala,  $laskurow["viite"],		$firstpage, $norm);
 		$pdf->draw_text(404, 92+$vientikala,  t("Yhteensä", $kieli).":",$firstpage, $norm);

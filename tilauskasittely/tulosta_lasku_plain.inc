@@ -24,7 +24,7 @@ $sivu = 1;
 // laskun alku ja loppu functiot...
 if (!function_exists('alku')) {
 	function alku () {
-		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kieli, $boldi, $sispit, $sispit2, $italic, $lask, $kala;
+		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kateistyyppi, $kieli, $boldi, $sispit, $sispit2, $italic, $lask, $kala;
 
 		//PDF parametrit
 		if (!isset($pdf)) {
@@ -99,7 +99,14 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 792, t("Laskun pvm", $kieli), 	$firstpage, $pieni);
 		$pdf->draw_text(310, 782, tv1dateconv($laskurow["tapvm"]),		$firstpage, $norm);
 		$pdf->draw_text(430, 792, t("Eräpäivä", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(430, 782, tv1dateconv($laskurow["erpcm"]), 		$firstpage, $norm);
+		
+		if ($kateistyyppi != '') {
+			$erapaiva = t('MAKSETTU', $kieli);
+		} else {
+			$erapaiva = tv1dateconv($laskurow["erpcm"]);
+		}
+		
+		$pdf->draw_text(430, 782, $erapaiva, $firstpage, $norm);
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $firstpage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
@@ -280,7 +287,7 @@ if (!function_exists('rivi')) {
 if (!function_exists('loppu')) {
 	function loppu ($firstpage) {
 
-		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit;
+		global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $kateistyyppi;
 
 		if ($masrow["factoring"] != '') {
 			$pdf->draw_text(30, 130, "Vår fordran enligt denna faktura har överlåtits till S E B Finans AB (publ).", $firstpage);
@@ -294,7 +301,14 @@ if (!function_exists('loppu')) {
 		$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
 
 		$pdf->draw_text(30,  102, t("Eräpäivä", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(30,  92,  tv1dateconv($laskurow["erpcm"]),		$firstpage, $norm);
+		
+		if ($kateistyyppi != '') {
+			$erapaiva = t('MAKSETTU', $kieli);
+		} else {
+			$erapaiva = tv1dateconv($laskurow["erpcm"]);
+		}
+		
+		$pdf->draw_text(30,  92,  $erapaiva,		$firstpage, $norm);
 		$pdf->draw_text(217, 102, t("Viitenumero", $kieli),	$firstpage, $pieni);
 		$pdf->draw_text(217, 92,  $laskurow["viite"],		$firstpage, $norm);
 		$pdf->draw_text(404, 92,  t("Yhteensä", $kieli).":",$firstpage, $norm);

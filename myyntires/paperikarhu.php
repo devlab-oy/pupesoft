@@ -121,7 +121,7 @@
             $i = 0;
             $rivit = explode("\n", $viesti);
 			$rivit[] = '';
-			$rivit[] = t("Yhteyshenkilömme", $kieli) . ": $yrow[nimi] / $yrow[puhno]";
+			$rivit[] = t("Yhteyshenkilömme", $kieli) . ": $yrow[nimi] / $yrow[eposti] / $yrow[puhno]";
             foreach ($rivit as $rivi) {
 				// laitetaan 
                 $pdf->draw_text(80, $kala, t($rivi, $kieli), $firstpage, $norm);

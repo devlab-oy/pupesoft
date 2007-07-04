@@ -41,7 +41,7 @@ class Pupe_Pdfekirje {
         'asiakas_tunnus'        => null,            // asiakkaan itella tunnus
         'salasana'              => 'XXXX',
         'kirjeluokka'           => '1',             // 1 = priority, 2 = economy
-        'osasto'                => 'false',         // osastokohtainen erittely
+        'osasto'                => '',              // osastokohtainen erittely
         'file_id'               => null,            // lähettäjän tunniste tiedostolle
         'kirje_id'              => null,            // kirjeen id
 		'contact_name'          => null,
@@ -289,11 +289,12 @@ class Pupe_Pdfekirje {
 					<lb:Eu1 lb:name=":yritys_nimi" lb:address=":yritys_osoite" lb:postalCode=":yritys_postino" lb:city=":yritys_postitp" lb:countryCode=":yritys_maa"/>
 				</lb:SenderAddress>
 			</lb:Sender>
-			<lb:StdBundleProcessing lb:customerId=":asiakas_tunnus" lb:password=":salasana" lb:serviceFuntion="0" lb:electronicArchiving="T" lb:letterClass=":kirjeluokka" lb:envelope="S" lb:paper="0" lb:fileFormat="0" lb:departmentClassification=":osasto" lb:isDuplex="false"/>
+			<lb:StdBundleProcessing lb:customerId=":asiakas_tunnus" lb:password=":salasana" lb:serviceFuntion="0" lb:electronicArchiving="T" lb:letterClass=":kirjeluokka" lb:envelope="S" lb:paper="0" lb:fileFormat="0" lb:departmentClassification="true" lb:isDuplex="false"/>
 			<lb:ExternalFile lb:senderFileId=":file_id" lb:format="PDF" lb:fileName=":file_nimi"/>
 		</lb:BundleCommon>
 		<lb:Letter lb:senderLetterId=":kirje_id">
 			<lb:LetterMeta>
+				<lb:StdLetterProcessing lb:departmentClassificationCode=":osasto"/>
 				<lb:ReceiverAddress>
 					<lb:Eu1 lb:name=":vastaanottaja_nimi" lb:address=":vastaanottaja_osoite" lb:postalCode=":vastaanottaja_postino" lb:city=":vastaanottaja_postitp" lb:countryCode=":vastaanottaja_maa"/>
 				</lb:ReceiverAddress>

@@ -330,7 +330,7 @@ if ($session != '') {
 		else {
 			$body_js="";
 		}
-		echo "<body $body_js>";*/
+		echo "<body $body_js>";
 
 		if (basename($phpnimi) != 'indexvas.php') {
 			if (isset($toim) and $toim != '') {

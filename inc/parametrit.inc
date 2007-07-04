@@ -11,7 +11,7 @@ ini_set("include_path", ini_get("include_path").":".dirname(dirname(__FILE__)));
 foreach ($_GET as $key => $value) {
 	//$_GET[$key] = addslashes(trim($_GET[$key]));
 	$_GET[$key] = str_replace($serc, $repl, $_GET[$key]);
-	${$key} = str_replace($serc, $repl, $_GET[$key]);	
+	${$key} = str_replace($serc, $repl, $_GET[$key]);
 }
 
 // poistetaan hipsuja ja trimmataan kaikki post muuttujat!
@@ -80,12 +80,12 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 	$query = "select * from kuka where yhtio='$_GET[yhtio]' and kuka='$_GET[user]' and salasana='$_GET[pass]'";
 	$result = mysql_query($query) or die ("Sis‰‰nkirjaus ep‰onnistui!");
-		
+
 	if (mysql_num_rows($result) != 1) {
 		$query = "select * from kuka where yhtio='$_GET[yhtio]' and kuka='$_GET[user]' and salasana=md5('$_GET[pass]')";
 		$result = mysql_query($query) or die ("Sis‰‰nkirjaus ep‰onnistui!");
 	}
-	
+
 	if (mysql_num_rows($result) == 1) {
 
 		$apukukarow = mysql_fetch_array($result);
@@ -115,7 +115,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 					WHERE kuka = '$apukukarow[kuka]'
 			 		and yhtio != '$apukukarow[yhtio]'";
 		$result = mysql_query($query) or die ("P‰ivitys ep‰onnistui sis‰‰nkirjautumisessa");
-		
+
 		$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH)); // 12 tuntia voimassa
 
 		if ($bool === FALSE) {
@@ -145,13 +145,13 @@ if ($session != '') {
 				FROM kuka
 				WHERE session='" . mysql_real_escape_string($session) . "'";
 	$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
-	
+
 	if (mysql_num_rows($result) != 1 or strlen($session) != 25) {
 		if (isset($nayta_pdf) and $nayta_pdf == 1) {
 			echo "Your browser does not seem to support cookies.";
 			exit;
 		}
-		
+
 		$bool = setcookie("pupesoft_session", "", time()-432000, parse_url($palvelin, PHP_URL_PATH));
 
 		if ($bool === FALSE) {
@@ -309,7 +309,6 @@ if ($session != '') {
 		}
 
 		header("Content-Type: text/html; charset=$charset");
-		echo "<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN' 'http://www.w3.org/TR/html4/loose.dtd'>";
 		echo "<html>";
 		echo "<head>";
 		echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";
@@ -320,7 +319,7 @@ if ($session != '') {
 		echo $css;
 		echo "</style>";
 		if($pupejs==1 or $suljeYllapito!="") {
-			echo "<script type='text/javascript' language='javascript' src='$palvelin2/inc/pupe.js'></script>";    
+			echo "<script type='text/javascript' language='javascript' src='$palvelin2/inc/pupe.js'></script>";
 		}
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
 		echo "</head><body>";
@@ -332,7 +331,7 @@ if ($session != '') {
 			$body_js="";
 		}
 		echo "<body $body_js>";*/
-		
+
 		if (basename($phpnimi) != 'indexvas.php') {
 			if (isset($toim) and $toim != '') {
 				if (basename($phpnimi) == 'varauskalenteri.php') {

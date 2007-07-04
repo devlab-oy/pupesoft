@@ -531,15 +531,19 @@ if (!function_exists('tulosta_lasku')) {
 
 		$query = "	SELECT *
 					FROM maksuehto
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = $laskurow[maksuehto]";
+					left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+					WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.tunnus = $laskurow[maksuehto]";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
+		
+		$masrow = $row;
+		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 		
 		$pdf->write($h, 1, 0, 		$s[0], t("Laskun pvm", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[0], 	$s[1], strftime("%x",strtotime($laskurow["tapvm"])), "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Maksuehto", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], t($row["teksti"], $kieli), "norm", "L", "");
+		$pdf->write($h, 1, $s[0], 	$s[1], t($maksuehto, $kieli), "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Eräpäivä", $kieli).":", "norm", "L", "");
 		
@@ -549,13 +553,66 @@ if (!function_exists('tulosta_lasku')) {
 			$erapaiva = strftime("%x",strtotime($laskurow["erpcm"]));
 		}
 		
+		//Laitetaan pankkiyhteystiedot kuntoon
+		if ($masrow["factoring"] != "") {
+			$query = "	SELECT *
+						FROM factoring
+						WHERE yhtio 		= '{$kukarow['yhtio']}'
+						and factoringyhtio 	= '{$masrow['factoring']}'
+						and valkoodi 		= '{$laskurow['valkoodi']}'";
+			$fres = mysql_query($query) or pupe_error($query);
+			$frow = mysql_fetch_array($fres);
+			
+			$pankkitiedot["pankkinimi1"]  =	$frow["pankkinimi1"];
+			$pankkitiedot["pankkitili1"]  =	$frow["pankkitili1"];
+			$pankkitiedot["pankkiiban1"]  =	$frow["pankkiiban1"];
+			$pankkitiedot["pankkiswift1"] =	$frow["pankkiswift1"];
+			$pankkitiedot["pankkinimi2"]  =	$frow["pankkinimi2"];
+			$pankkitiedot["pankkitili2"]  =	$frow["pankkitili2"];
+			$pankkitiedot["pankkiiban2"]  =	$frow["pankkiiban2"];
+			$pankkitiedot["pankkiswift2"] = $frow["pankkiswift2"];
+			$pankkitiedot["pankkinimi3"]  =	"";
+			$pankkitiedot["pankkitili3"]  =	"";
+			$pankkitiedot["pankkiiban3"]  =	"";
+			$pankkitiedot["pankkiswift3"] =	"";
+			
+		}
+		elseif ($masrow["pankkinimi1"] != "") {
+			$pankkitiedot["pankkinimi1"]  =	$masrow["pankkinimi1"];
+			$pankkitiedot["pankkitili1"]  =	$masrow["pankkitili1"];
+			$pankkitiedot["pankkiiban1"]  =	$masrow["pankkiiban1"];
+			$pankkitiedot["pankkiswift1"] =	$masrow["pankkiswift1"];
+			$pankkitiedot["pankkinimi2"]  =	$masrow["pankkinimi2"];
+			$pankkitiedot["pankkitili2"]  =	$masrow["pankkitili2"];
+			$pankkitiedot["pankkiiban2"]  =	$masrow["pankkiiban2"];
+			$pankkitiedot["pankkiswift2"] = $masrow["pankkiswift2"];
+			$pankkitiedot["pankkinimi3"]  =	$masrow["pankkinimi3"];
+			$pankkitiedot["pankkitili3"]  =	$masrow["pankkitili3"];
+			$pankkitiedot["pankkiiban3"]  =	$masrow["pankkiiban3"];
+			$pankkitiedot["pankkiswift3"] =	$masrow["pankkiswift3"];
+		}
+		else {
+			$pankkitiedot["pankkinimi1"]  =	$yhtiorow["pankkinimi1"];
+			$pankkitiedot["pankkitili1"]  =	$yhtiorow["pankkitili1"];
+			$pankkitiedot["pankkiiban1"]  =	$yhtiorow["pankkiiban1"];
+			$pankkitiedot["pankkiswift1"] =	$yhtiorow["pankkiswift1"];
+			$pankkitiedot["pankkinimi2"]  =	$yhtiorow["pankkinimi2"];
+			$pankkitiedot["pankkitili2"]  =	$yhtiorow["pankkitili2"];
+			$pankkitiedot["pankkiiban2"]  =	$yhtiorow["pankkiiban2"];
+			$pankkitiedot["pankkiswift2"] = $yhtiorow["pankkiswift2"];
+			$pankkitiedot["pankkinimi3"]  =	$yhtiorow["pankkinimi3"];
+			$pankkitiedot["pankkitili3"]  =	$yhtiorow["pankkitili3"];
+			$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
+			$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
+		}
+		
 		$pdf->write($h, 1, $s[0], 	$s[1], $erapaiva, "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Tilinumero", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], 		$yhtiorow["pankkitili1"], "norm", "L", "");
+		$pdf->write($h, 1, $s[0], 	$s[1], 		$pankkitiedot["pankkitili1"], "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Viitenumero", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], 		$laskurow["viite"], "norm", "L", "");
+		$pdf->write($h, 1, $s[0], 	$s[1], 		$pankkitiedot["viite"], "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Summa", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[0], 	$s[1], 		money_format('%i',$laskusumma), "norm", "L", "");
@@ -564,10 +621,10 @@ if (!function_exists('tulosta_lasku')) {
 		for($i=1;$i<3;$i++) {
 			if($yhtiorow["pankkitili$i"] != "") {		
 				$h+=$pdf->ln();		
-				$pdf->write($h, 1, $s[1], 	$s[2], 	$yhtiorow["pankkinimi$i"], "snadi", "L", "");
-				$pdf->write($h, 1, $s[2], 	$s[3], 	$yhtiorow["pankkitili$i"], "snadi", "L", "");
-				$pdf->write($h, 1, $s[3], 	$s[4], 	$yhtiorow["pankkiiban$i"], "snadi", "L", "");
-				$pdf->write($h, 1, $s[4], 	0, 		$yhtiorow["pankkiswift$i"], "snadi", "L", "");								
+				$pdf->write($h, 1, $s[1], 	$s[2], 	$pankkitiedot["pankkinimi$i"], "snadi", "L", "");
+				$pdf->write($h, 1, $s[2], 	$s[3], 	$pankkitiedot["pankkitili$i"], "snadi", "L", "");
+				$pdf->write($h, 1, $s[3], 	$s[4], 	$pankkitiedot["pankkiiban$i"], "snadi", "L", "");
+				$pdf->write($h, 1, $s[4], 	0, 		$pankkitiedot["pankkiswift$i"], "snadi", "L", "");								
 			} 
 		}
 		$h+=$pdf->ln();		

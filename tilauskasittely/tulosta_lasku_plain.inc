@@ -317,30 +317,51 @@ if (!function_exists('loppu')) {
 
 		//Pankkiyhteystiedot
 		$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
-
+		
+		if ($masrow["pankkinimi1"] != "") {
+			$yhtiorow["pankkinimi1"]	= $masrow["pankkinimi1"];
+			$yhtiorow["pankkitili1"]	= $masrow["pankkitili1"];
+			$yhtiorow["pankkiiban1"]	= $masrow["pankkiiban1"];
+			$yhtiorow["pankkiswift1"]	= $masrow["pankkiswift1"];
+			$yhtiorow["pankkinimi2"]	= $masrow["pankkinimi2"];
+			$yhtiorow["pankkitili2"]	= $masrow["pankkitili2"];
+			$yhtiorow["pankkiiban2"]	= $masrow["pankkiiban2"];
+			$yhtiorow["pankkiswift2"]	= $masrow["pankkiswift2"];
+			$yhtiorow["pankkinimi3"]	= $masrow["pankkinimi3"];
+			$yhtiorow["pankkitili3"]	= $masrow["pankkitili3"];
+			$yhtiorow["pankkiiban3"]	= $masrow["pankkiiban3"];
+			$yhtiorow["pankkiswift3"]	= $masrow["pankkiswift3"];
+			
+		}
+		
 	    if ($masrow["factoring"] != '') {
+			$query = "	SELECT *
+						FROM factoring
+						WHERE yhtio 		= '{$kukarow['yhtio']}'
+						and factoringyhtio 	= '{$masrow['factoring']}'
+						and valkoodi 		= '{$laskurow['valkoodi']}'";
+			$fres = mysql_query($query) or pupe_error($query);
+			$frow = mysql_fetch_array($fres);
+			
+			$yhtiorow["pankkinimi1"]  =	$frow["pankkinimi1"];
+			$yhtiorow["pankkitili1"]  =	$frow["pankkitili1"];
+			$yhtiorow["pankkiiban1"]  =	$frow["pankkiiban1"];
+			$yhtiorow["pankkiswift1"] =	$frow["pankkiswift1"];
+			$yhtiorow["pankkinimi2"]  =	$frow["pankkinimi2"];
+			$yhtiorow["pankkitili2"]  =	$frow["pankkitili2"];
+			$yhtiorow["pankkiiban2"]  =	$frow["pankkiiban2"];
+			$yhtiorow["pankkiswift2"] = $frow["pankkiswift2"];
+			$yhtiorow["pankkinimi3"]  =	"";
+			$yhtiorow["pankkitili3"]  =	"";
+			$yhtiorow["pankkiiban3"]  =	"";
+			$yhtiorow["pankkiswift3"] =	"";
+			
 			$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
-        	$pdf->draw_text(30, 72,  $yhtiorow["factoring_pankkinimi1"]." ".$yhtiorow["factoring_pankkitili1"],	$firstpage, $norm);
-        	$pdf->draw_text(217, 72, $yhtiorow["factoring_pankkinimi2"]." ".$yhtiorow["factoring_pankkitili2"],	$firstpage, $norm);
-        	$pdf->draw_text(404, 72, $yhtiorow["factoring_pankkinimi3"]." ".$yhtiorow["factoring_pankkitili3"],	$firstpage, $norm);
+        	$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$firstpage, $norm);
+        	$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"],	$firstpage, $norm);
+        	$pdf->draw_text(404, 72, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkitili3"],	$firstpage, $norm);
 		}
 		else {
-
-			if ($masrow["pankkinimi1"] != "") {
-				$yhtiorow["pankkinimi1"]	= $masrow["pankkinimi1"];
-				$yhtiorow["pankkitili1"]	= $masrow["pankkitili1"];
-				$yhtiorow["pankkiiban1"]	= $masrow["pankkiiban1"];
-				$yhtiorow["pankkiswift1"]	= $masrow["pankkiswift1"];
-				$yhtiorow["pankkinimi2"]	= $masrow["pankkinimi2"];
-				$yhtiorow["pankkitili2"]	= $masrow["pankkitili2"];
-				$yhtiorow["pankkiiban2"]	= $masrow["pankkiiban2"];
-				$yhtiorow["pankkiswift2"]	= $masrow["pankkiswift2"];
-				$yhtiorow["pankkinimi3"]	= $masrow["pankkinimi3"];
-				$yhtiorow["pankkitili3"]	= $masrow["pankkitili3"];
-				$yhtiorow["pankkiiban3"]	= $masrow["pankkiiban3"];
-				$yhtiorow["pankkiswift3"]	= $masrow["pankkiswift3"];
-			}
-
 		    $pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
         	$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$firstpage, $norm);
         	$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"],	$firstpage, $norm);

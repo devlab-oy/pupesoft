@@ -503,7 +503,96 @@ if (!function_exists('loppu')) {
 
 		//Pankkiyhteystiedot
 		$pdf->draw_rectangle(90+$vientikala, 20, 20, 580,	$firstpage, $rectparam);
+		
+		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
+		if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
 
+			// haetaan toimipaikan tiedot
+			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
+
+				// haetaan toimipaikan tiedot
+				$alhiro = mysql_fetch_array($alhire);
+
+				// fax ja puhelin ei ole laskulla
+				$yhtiorow['puhelin']	= $alhiro['puhelin'];
+				$yhtiorow['fax']		= $alhiro['fax'];
+
+				// loput tiedot otetaan laskulta
+				$yhtiorow["nimi"] 		= $lasrow["yhtio_nimi"];
+				$yhtiorow["osoite"] 	= $lasrow["yhtio_osoite"];
+				$yhtiorow["postino"] 	= $lasrow["yhtio_postino"];
+				$yhtiorow["postitp"] 	= $lasrow["yhtio_postitp"];
+				$yhtiorow["maa"] 		= $lasrow["yhtio_maa"];
+				$yhtiorow["kotipaikka"]	= $lasrow["yhtio_kotipaikka"];
+				$vatnumero				= $lasrow["yhtio_ovttunnus"];
+
+			}
+		}
+		
+		//Haetaan factoringsopimuksen tiedot
+		if ($masrow["factoring"] != '') {
+			$query = "	SELECT *
+						FROM factoring
+						WHERE yhtio 		= '{$kukarow['yhtio']}'
+						and factoringyhtio 	= '{$masrow['factoring']}'
+						and valkoodi 		= '{$lasrow['valkoodi']}'";
+			$fres = mysql_query($query) or pupe_error($query);
+			$frow = mysql_fetch_array($fres);
+		}
+		else {
+			unset($frow);
+		}
+		
+		$pankkitiedot = array();
+		
+		//Laitetaan pankkiyhteystiedot kuntoon
+		if ($masrow["factoring"] != "") {
+			$pankkitiedot["pankkinimi1"]  =	$frow["pankkinimi1"];
+			$pankkitiedot["pankkitili1"]  =	$frow["pankkitili1"];
+			$pankkitiedot["pankkiiban1"]  =	$frow["pankkiiban1"];
+			$pankkitiedot["pankkiswift1"] =	$frow["pankkiswift1"];
+			$pankkitiedot["pankkinimi2"]  =	$frow["pankkinimi2"];
+			$pankkitiedot["pankkitili2"]  =	$frow["pankkitili2"];
+			$pankkitiedot["pankkiiban2"]  =	$frow["pankkiiban2"];
+			$pankkitiedot["pankkiswift2"] = $frow["pankkiswift2"];
+			$pankkitiedot["pankkinimi3"]  =	"";
+			$pankkitiedot["pankkitili3"]  =	"";
+			$pankkitiedot["pankkiiban3"]  =	"";
+			$pankkitiedot["pankkiswift3"] =	"";
+			
+		}
+		elseif ($masrow["pankkinimi1"] != "") {
+			$pankkitiedot["pankkinimi1"]  =	$masrow["pankkinimi1"];
+			$pankkitiedot["pankkitili1"]  =	$masrow["pankkitili1"];
+			$pankkitiedot["pankkiiban1"]  =	$masrow["pankkiiban1"];
+			$pankkitiedot["pankkiswift1"] =	$masrow["pankkiswift1"];
+			$pankkitiedot["pankkinimi2"]  =	$masrow["pankkinimi2"];
+			$pankkitiedot["pankkitili2"]  =	$masrow["pankkitili2"];
+			$pankkitiedot["pankkiiban2"]  =	$masrow["pankkiiban2"];
+			$pankkitiedot["pankkiswift2"] = $masrow["pankkiswift2"];
+			$pankkitiedot["pankkinimi3"]  =	$masrow["pankkinimi3"];
+			$pankkitiedot["pankkitili3"]  =	$masrow["pankkitili3"];
+			$pankkitiedot["pankkiiban3"]  =	$masrow["pankkiiban3"];
+			$pankkitiedot["pankkiswift3"] =	$masrow["pankkiswift3"];
+		}
+		else {
+			$pankkitiedot["pankkinimi1"]  =	$yhtiorow["pankkinimi1"];
+			$pankkitiedot["pankkitili1"]  =	$yhtiorow["pankkitili1"];
+			$pankkitiedot["pankkiiban1"]  =	$yhtiorow["pankkiiban1"];
+			$pankkitiedot["pankkiswift1"] =	$yhtiorow["pankkiswift1"];
+			$pankkitiedot["pankkinimi2"]  =	$yhtiorow["pankkinimi2"];
+			$pankkitiedot["pankkitili2"]  =	$yhtiorow["pankkitili2"];
+			$pankkitiedot["pankkiiban2"]  =	$yhtiorow["pankkiiban2"];
+			$pankkitiedot["pankkiswift2"] = $yhtiorow["pankkiswift2"];
+			$pankkitiedot["pankkinimi3"]  =	$yhtiorow["pankkinimi3"];
+			$pankkitiedot["pankkitili3"]  =	$yhtiorow["pankkitili3"];
+			$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
+			$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
+		}
+		
 	    if ($masrow["factoring"] != '') {
 			// jos factoroidaan tulostaan eri kentät
 			$query = "	SELECT *
@@ -541,9 +630,8 @@ if (!function_exists('loppu')) {
 	        	$pdf->draw_text(30, 72,  $frow["pankkinimi1"]." ".$frow["pankkitili1"],		$firstpage, $norm);
 	        	$pdf->draw_text(217, 72, $frow["pankkinimi2"]." ".$frow["pankkitili2"],		$firstpage, $norm);
 			}
-		}
-		else {
-
+		} else {
+			/*
 			if ($masrow["pankkinimi1"] != "") {
 				$yhtiorow["pankkinimi1"]	= $masrow["pankkinimi1"];
 				$yhtiorow["pankkitili1"]	= $masrow["pankkitili1"];
@@ -558,46 +646,45 @@ if (!function_exists('loppu')) {
 				$yhtiorow["pankkiiban3"]	= $masrow["pankkiiban3"];
 				$yhtiorow["pankkiswift3"]	= $masrow["pankkiswift3"];
 			}
-
+			*/
 			// ei factoroida niin normitiedot
 			if ($laskurow["vienti"] != "" or strtoupper($laskurow["maa"]) != strtoupper($yhtiorow["maa"])) {
 				// viennissä tällästä
 				$pdf->draw_text(30,  102, t("Pankkiyhteys", $kieli),													$firstpage, $pieni);
 
-				$pdf->draw_text(30,  92, $yhtiorow["pankkinimi1"]."  ".$yhtiorow["pankkitili1"],						$firstpage, $norm);
+				$pdf->draw_text(30,  92, $pankkitiedot["pankkinimi1"]."  ".$pankkitiedot["pankkitili1"],						$firstpage, $norm);
 
-				if($yhtiorow["pankkiiban1"]) {
-					$pdf->draw_text(217, 92, "IBAN: ".$yhtiorow["pankkiiban1"],											$firstpage, $norm);
+				if($pankkitiedot["pankkiiban1"]) {
+					$pdf->draw_text(217, 92, "IBAN: ".$pankkitiedot["pankkiiban1"],											$firstpage, $norm);
 				}
-				if($yhtiorow["pankkiswift1"]) {
-					$pdf->draw_text(404, 92, "SWIFT: ".$yhtiorow["pankkiswift1"],										$firstpage, $norm);
-				}
-
-				$pdf->draw_text(30,  82, $yhtiorow["pankkinimi2"]."  ".$yhtiorow["pankkitili2"],						$firstpage, $norm);
-
-				if($yhtiorow["pankkiiban2"]) {
-					$pdf->draw_text(217, 82, "IBAN: ".$yhtiorow["pankkiiban2"],											$firstpage, $norm);
-				}
-				if($yhtiorow["pankkiswift2"]) {
-					$pdf->draw_text(404, 82, "SWIFT: ".$yhtiorow["pankkiswift2"],										$firstpage, $norm);
+				if($pankkitiedot["pankkiswift1"]) {
+					$pdf->draw_text(404, 92, "SWIFT: ".$pankkitiedot["pankkiswift1"],										$firstpage, $norm);
 				}
 
-				$pdf->draw_text(30,  72, $yhtiorow["pankkinimi3"]."  ".$yhtiorow["pankkitili3"],						$firstpage, $norm);
+				$pdf->draw_text(30,  82, $pankkitiedot["pankkinimi2"]."  ".$pankkitiedot["pankkitili2"],						$firstpage, $norm);
 
-				if($yhtiorow["pankkiiban3"]) {
-					$pdf->draw_text(217, 72, "IBAN: ".$yhtiorow["pankkiiban3"],											$firstpage, $norm);
+				if($pankkitiedot["pankkiiban2"]) {
+					$pdf->draw_text(217, 82, "IBAN: ".$pankkitiedot["pankkiiban2"],											$firstpage, $norm);
 				}
-				if($yhtiorow["pankkiswift3"]) {
-					$pdf->draw_text(404, 72, "SWIFT: ".$yhtiorow["pankkiswift3"],										$firstpage, $norm);
+				if($pankkitiedot["pankkiswift2"]) {
+					$pdf->draw_text(404, 82, "SWIFT: ".$pankkitiedot["pankkiswift2"],										$firstpage, $norm);
 				}
-			}
-			else {
+
+				$pdf->draw_text(30,  72, $pankkitiedot["pankkinimi3"]."  ".$pankkitiedot["pankkitili3"],						$firstpage, $norm);
+
+				if($pankkitiedot["pankkiiban3"]) {
+					$pdf->draw_text(217, 72, "IBAN: ".$pankkitiedot["pankkiiban3"],											$firstpage, $norm);
+				}
+				if($pankkitiedot["pankkiswift3"]) {
+					$pdf->draw_text(404, 72, "SWIFT: ".$pankkitiedot["pankkiswift3"],										$firstpage, $norm);
+				}
+			} else {
 				// ja normitilauksissa tällästä
 			    $pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),														$firstpage, $pieni);
-	        	$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],							$firstpage, $norm);
-	        	$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"],							$firstpage, $norm);
-	        	$pdf->draw_text(404, 72, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkitili3"],							$firstpage, $norm);
-	        }
+	        	$pdf->draw_text(30, 72,  $pankkitiedot["pankkinimi1"]." ".$pankkitiedot["pankkitili1"],							$firstpage, $norm);
+	        	$pdf->draw_text(217, 72, $pankkitiedot["pankkinimi2"]." ".$pankkitiedot["pankkitili2"],							$firstpage, $norm);
+	        	$pdf->draw_text(404, 72, $pankkitiedot["pankkinimi3"]." ".$pankkitiedot["pankkitili3"],							$firstpage, $norm);
+            }
 		}
 
 		//Alimmat kolme laatikkoa, yhtiötietoja

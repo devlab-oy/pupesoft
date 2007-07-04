@@ -373,6 +373,9 @@
 						$order  .= "tuote.tuoteno, ";
 						$gluku++;
 					}
+					if ($sarjanumerot != '') {
+						$select .= "group_concat(concat(tilausrivi.tunnus,'#',tilausrivi.kpl)) sarjanumero, ";
+					}
 				}
 
 				if ($mukaan == "tuotemyyja") {
@@ -805,6 +808,36 @@
 								$row[$i] = 0;
 							}
 						}
+						
+						// jos kyseessa on sarjanumero
+						if (mysql_field_name($result, $i) == "sarjanumero") {
+							$sarjat = explode(",", $row[$i]);
+							
+							$row[$i] = "";
+							
+							foreach($sarjat as $sarja) {
+								list($s,$k) = explode("#", $sarja);
+								
+								if ($k < 0) {
+									$tunken = "ostorivitunnus";
+								}
+								else {
+									$tunken = "myyntirivitunnus";
+								}
+								
+								$query = "	SELECT sarjanumero
+											FROM sarjanumeroseuranta
+											WHERE yhtio in ($yhtio) 
+											and $tunken=$s";
+								$osre = mysql_query($query) or pupe_error($query);
+																
+								if (mysql_num_rows($osre) > 0) {
+									$osrow= mysql_fetch_array($osre);
+									$row[$i] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=$osrow[sarjanumero]'>".$osrow['sarjanumero']."</a><br>";
+								}
+							}
+							$row[$i] = substr($row[$i], 0, -4);
+						}
 
 						// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 						if ($gluku > 1) {
@@ -955,14 +988,21 @@
 
 						// hoidetaan pisteet piluiksi!!
 						if (mysql_field_type($result,$i) == 'real' or substr(mysql_field_name($result, $i),0 ,4) == 'kate') {
-							echo "<td align='right'>".sprintf("%.02f",$row[$i])."</td>";
+							echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
 							if(isset($workbook)) {
 								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
 							}
 						}
+						elseif (mysql_field_name($result, $i) == 'sarjanumero') {
+							echo "<td valign='top'>$row[$i]</td>";
+
+							if(isset($workbook)) {
+								$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", "\n", $row[$i])));
+							}
+						}
 						else {
-							echo "<td>$row[$i]</td>";
+							echo "<td valign='top'>$row[$i]</td>";
 
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, $row[$i]);
@@ -1526,20 +1566,21 @@
 			echo "</table><br>";
 
 			// lisärajaukset näkymä..
-			if ($ruksit[1]  != '') $ruk1chk  = "CHECKED";
-			if ($ruksit[2]  != '') $ruk2chk  = "CHECKED";
-			if ($ruksit[3]  != '') $ruk3chk  = "CHECKED";
-			if ($ruksit[4]  != '') $ruk4chk  = "CHECKED";
-			if ($ruksit[5]  != '') $ruk5chk  = "CHECKED";
-			if ($ruksit[6]  != '') $ruk6chk  = "CHECKED";
-			if ($ruksit[7]  != '') $ruk7chk  = "CHECKED";
-			if ($ruksit[8]  != '') $ruk8chk  = "CHECKED";
-			if ($ruksit[9]  != '') $ruk9chk  = "CHECKED";
-			if ($ruksit[10] != '') $ruk10chk = "CHECKED";
-			if ($nimitykset != '')   $nimchk = "CHECKED";
-			if ($kateprossat != '')  $katchk = "CHECKED";
-			if ($osoitetarrat != '') $tarchk = "CHECKED";
-			if ($piiyhteensa != '')  $piychk = "CHECKED";
+			if ($ruksit[1]  != '') 		$ruk1chk  = "CHECKED";
+			if ($ruksit[2]  != '') 		$ruk2chk  = "CHECKED";
+			if ($ruksit[3]  != '') 		$ruk3chk  = "CHECKED";
+			if ($ruksit[4]  != '') 		$ruk4chk  = "CHECKED";
+			if ($ruksit[5]  != '') 		$ruk5chk  = "CHECKED";
+			if ($ruksit[6]  != '') 		$ruk6chk  = "CHECKED";
+			if ($ruksit[7]  != '') 		$ruk7chk  = "CHECKED";
+			if ($ruksit[8]  != '') 		$ruk8chk  = "CHECKED";
+			if ($ruksit[9]  != '') 		$ruk9chk  = "CHECKED";
+			if ($ruksit[10] != '') 		$ruk10chk = "CHECKED";
+			if ($nimitykset != '')   	$nimchk   = "CHECKED";
+			if ($kateprossat != '')  	$katchk   = "CHECKED";
+			if ($osoitetarrat != '') 	$tarchk   = "CHECKED";
+			if ($piiyhteensa != '')  	$piychk   = "CHECKED";
+			if ($sarjanumerot != '')  	$sarjachk = "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -1606,6 +1647,12 @@
 				<tr>
 				<th>".t("Näytä tuotteiden nimitykset")."</th>
 				<td><input type='checkbox' name='nimitykset' $nimchk></td>
+				<td></td>
+				<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
+				</tr>
+				<tr>
+				<th>".t("Näytä sarjanumerot")."</th>
+				<td><input type='checkbox' name='sarjanumerot' $sarjachk></td>
 				<td></td>
 				<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
 				</tr>

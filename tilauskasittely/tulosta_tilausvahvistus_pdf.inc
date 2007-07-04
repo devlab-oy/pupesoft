@@ -531,7 +531,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 				
 				echo t("Tilausvahvistus tulostuu")."...<br>";
 				unset($returnvalue);
-				$line = exec("$komento $pdf_laskufilenimi", $output, $returnvalue);
+				$line = exec("$komento $pdf_tilausvahvistusfilenimi", $output, $returnvalue);
 			}
 			if(mysql_num_rows($result) == 0 or $returnvalue!=0) {
 				echo "<font class='error'>".t("Tilausvahvistuksen tulostus epäonnistui")."!!!</font><br>\n";	

@@ -553,6 +553,32 @@ if (!function_exists('tulosta_lasku')) {
 			$erapaiva = strftime("%x",strtotime($laskurow["erpcm"]));
 		}
 		
+		if ($laskurow["yhtio_ovttunnus"] != "") {
+
+			// haetaan toimipaikan tiedot
+			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
+
+				// haetaan toimipaikan tiedot
+				$alhiro = mysql_fetch_array($alhire);
+
+				// fax ja puhelin ei ole laskulla
+				$yhtiorow['puhelin']	= $alhiro['puhelin'];
+				$yhtiorow['fax']		= $alhiro['fax'];
+			}
+			
+			// loput tiedot otetaan laskulta
+			$yhtiorow["nimi"] 		= $laskurow["yhtio_nimi"];
+			$yhtiorow["osoite"] 	= $laskurow["yhtio_osoite"];
+			$yhtiorow["postino"] 	= $laskurow["yhtio_postino"];
+			$yhtiorow["postitp"] 	= $laskurow["yhtio_postitp"];
+			$yhtiorow["maa"] 		= $laskurow["yhtio_maa"];
+			$yhtiorow["kotipaikka"]	= $laskurow["yhtio_kotipaikka"];
+			$vatnumero				= $laskurow["yhtio_ovttunnus"];
+		}
+        
 		//Laitetaan pankkiyhteystiedot kuntoon
 		if ($masrow["factoring"] != "") {
 			$query = "	SELECT *

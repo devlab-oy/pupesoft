@@ -505,10 +505,10 @@ if (!function_exists('loppu')) {
 		$pdf->draw_rectangle(90+$vientikala, 20, 20, 580,	$firstpage, $rectparam);
 		
 		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
-		if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
+		if ($laskurow["yhtio_ovttunnus"] != "") {
 
 			// haetaan toimipaikan tiedot
-			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
+			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {
@@ -520,16 +520,16 @@ if (!function_exists('loppu')) {
 				$yhtiorow['puhelin']	= $alhiro['puhelin'];
 				$yhtiorow['fax']		= $alhiro['fax'];
 
-				// loput tiedot otetaan laskulta
-				$yhtiorow["nimi"] 		= $lasrow["yhtio_nimi"];
-				$yhtiorow["osoite"] 	= $lasrow["yhtio_osoite"];
-				$yhtiorow["postino"] 	= $lasrow["yhtio_postino"];
-				$yhtiorow["postitp"] 	= $lasrow["yhtio_postitp"];
-				$yhtiorow["maa"] 		= $lasrow["yhtio_maa"];
-				$yhtiorow["kotipaikka"]	= $lasrow["yhtio_kotipaikka"];
-				$vatnumero				= $lasrow["yhtio_ovttunnus"];
-
 			}
+			
+			// loput tiedot otetaan laskulta
+			$yhtiorow["nimi"] 		= $laskurow["yhtio_nimi"];
+			$yhtiorow["osoite"] 	= $laskurow["yhtio_osoite"];
+			$yhtiorow["postino"] 	= $laskurow["yhtio_postino"];
+			$yhtiorow["postitp"] 	= $laskurow["yhtio_postitp"];
+			$yhtiorow["maa"] 		= $laskurow["yhtio_maa"];
+			$yhtiorow["kotipaikka"]	= $laskurow["yhtio_kotipaikka"];
+			$vatnumero				= $laskurow["yhtio_ovttunnus"];
 		}
 		
 		//Haetaan factoringsopimuksen tiedot

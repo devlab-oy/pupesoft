@@ -48,7 +48,7 @@ if ((int) $valitsetoimitus > 0) {
 		$toim = "PROJEKTI";
 	}
 }
-elseif(in_array($valitsetoimitus,array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO"))) {
+elseif(in_array($valitsetoimitus,array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 	$uusitoimitus = $valitsetoimitus;
 }
 
@@ -618,7 +618,7 @@ if(in_array($jarjesta, array("moveUp", "moveDown", "first", "last")) and $rivitu
 	if($laskurow["tunnusnippu"]>0) {
 		$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila IN ('L','G','E','V','W','N','R','A') and tunnusnippu>0";
+					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '{$laskurow["tunnusnippu"]}' and tila IN ('L','G','E','V','W','N','R','A','T') and tunnusnippu>0";
 		$result = mysql_query($query) or pupe_error($query);
 		$toimrow = mysql_fetch_array($result);
 
@@ -1186,7 +1186,7 @@ if ($tee == '') {
 
  	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0) {
-		if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO"))) {
+		if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 			$jarjlisa="<td class='back' width='55px'></td>";
 		}
 		else {
@@ -2566,7 +2566,7 @@ if ($tee == '') {
 		}
 		
 		//	Tämä ylikirjoittaa järjestyksen, näinollen tv printin rivit menee loogisessa järjestyksessä
-		if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO"))) {
+		if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 			$order = "ORDER BY sorttauskentta asc, tunnus";
 		}
 		
@@ -2590,7 +2590,7 @@ if ($tee == '') {
 
 		if ($rivilaskuri != 0) {
 						
-			if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO"))) {
+			if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 				$rivino = 0;
 			}
 			else {
@@ -2799,7 +2799,7 @@ if ($tee == '') {
 					}
 				}
 				
-				if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO"))) {
+				if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 					$rivino++;
 				}
 				else {
@@ -2850,7 +2850,7 @@ if ($tee == '') {
 					echo "<tr>$jarjlisa<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$rivino</td>";
 				}
 				elseif($row["perheid"] == 0 and $row["perheid2"] == 0) {
-					if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO"))) {
+					if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 						$buttonit =  "	<td class='back'>
 											<form action='$PHP_SELF#rivi_$rivino' name='siirra_$rivino' method='post'>
 												<input type='hidden' name='toim' value='$toim'>
@@ -3806,7 +3806,7 @@ if ($tee == '') {
 
 				$ycspan=4;
 				
-				if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO"))) {
+				if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 					$ycspan++;
 				}
 				if ($kukarow['hinnat'] == 1) {
@@ -3957,7 +3957,7 @@ if ($tee == '') {
 						$jyvsumma = '0.00';
 					}
 					
-					if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO"))) {
+					if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 						$xcolspan= $ycspan-5;
 					}
 					else {

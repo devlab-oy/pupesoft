@@ -322,9 +322,9 @@ if ($session != '') {
 			echo "<script type='text/javascript' language='javascript' src='$palvelin2/inc/pupe.js'></script>";
 		}
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
-		echo "</head><body>";
+		echo "</head>";
 
-		/*if($suljeYllapito!="") {
+		if($suljeYllapito!="") {
 			$body_js="onblur='window.close();'";
 		}
 		else {

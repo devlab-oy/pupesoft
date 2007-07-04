@@ -51,7 +51,7 @@
 		$pdf->draw_text(mm_pt(22), mm_pt(268), strtoupper($yhtiorow["nimi"]), 		$firstpage, $iso);
 		$pdf->draw_text(mm_pt(22), mm_pt(264), strtoupper($yhtiorow["nimitark"]), 	$firstpage, $iso);
 		$pdf->draw_text(mm_pt(22), mm_pt(260), strtoupper($yhtiorow["osoite"]), 		$firstpage, $iso);
-		$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iso);
+		$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]), $firstpage, $iso);
 		//$pdf->draw_text(mm_pt(22), mm_pt(252), strtoupper($yhtiorow["maa"]), 		$firstpage, $iso);
 		
 		// vastaanottaja
@@ -393,7 +393,7 @@
 		$info = array(
 			'tunniste'              => $ekirje_tunnus, 			// asiakkaan oma kirjeen tunniste
 	        'kirjeluokka'           => '1',                    	// 1 = priority, 2 = economy
-	        'osasto'                => 'false',                	// osastokohtainen erittely
+	        'osasto'                => $kukarow['yhtio'],       // osastokohtainen erittely = mikä yritys
 	        'file_id'               => $ekirje_tunnus,          // lähettäjän tunniste tiedostolle
 	        'kirje_id'              => $ekirje_tunnus,          // kirjeen id
 			'contact_name'          => $kukarow['nimi'],

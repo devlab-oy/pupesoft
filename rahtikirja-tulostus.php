@@ -16,40 +16,45 @@
 
 	if ($tee == 'tulosta') {
 
-		echo "<font class='message'>".t("Tulostetaan rahtikirjat toimitustavalle").": $toimitustapa.";
-
-		echo "</font><hr>";
-
 		// haetaan toimitustavan tiedot
-		$query    = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+		$query    = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
 		$toitares = mysql_query($query) or pupe_error($query);
 		$toitarow = mysql_fetch_array($toitares);
 
-		if ($komento == '') {
-			// haetaan printterin tiedot
-			$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
-			$pres  = mysql_query($query) or pupe_error($query);
-			$print = mysql_fetch_array($pres);
+		// haetaan rahtikirjan tyyppi
+		$query    = "select * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'RAHTIKIRJA' and selite = '$toitarow[rahtikirja]'";
+		$avainres = mysql_query($query) or pupe_error($query);
+		$avainrow = mysql_fetch_array($avainres);
 
-			if ($toitarow['hetiera'] == 'H') // jos pit‰‰ tulostaa heti
-				$mika="printteri4"; // valitaan tarraprintteri
-			else {
-				if (strpos($toitarow['rahtikirja'],'pdf') === false) {
-					$mika = "printteri2"; //matriisi
-				}
-				else {
-					$mika = "printteri6"; //laser
-				}
-			}
+		// haetaan printterin tiedot
+		$query = "select * from varastopaikat where yhtio = '$kukarow[yhtio]' and tunnus = '$varasto'";
+		$pres  = mysql_query($query) or pupe_error($query);
+		$print = mysql_fetch_array($pres);
+
+		if ($komento != "") {
+			$kirjoitin_tunnus = $komento; // jos ollaan valittu oma printteri
+		}
+		elseif ($avainrow["selitetark_2"] == "1") {
+			$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
+		}
+		elseif ($avainrow["selitetark_2"] == "2") {
+			$kirjoitin_tunnus = $print["printteri4"]; // Rahtikirja A5
+		}
+		elseif ($avainrow["selitetark_2"] == "3") {
+			$kirjoitin_tunnus = $print["printteri2"]; // Rahtikirja matriisi
+		}
+		elseif ($toitarow['hetiera'] == 'H') {
+			$kirjoitin_tunnus = $print["printteri4"]; // Rahtikirja A5
+		}
+		elseif (strpos($toitarow['rahtikirja'],'pdf') === false) {
+			$kirjoitin_tunnus = $print["printteri2"]; // Rahtikirja matriisi
 		}
 		else {
-			//hetitulostukset voidaan ohjata k‰ytt‰j‰n valitsemalle printterille
-			$mika="printteri4";
-			$print[$mika] = $komento;
+			$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
 		}
 
 		// haetaan printterille tulostuskomento
-		$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$print[$mika]'";
+		$query = "select * from kirjoittimet where yhtio = '$kukarow[yhtio]' and tunnus = '$kirjoitin_tunnus'";
 		$pres  = mysql_query($query) or pupe_error($query);
 		$print = mysql_fetch_array($pres);
 
@@ -58,6 +63,8 @@
 		$pvm       = date("j.n.Y");
 
 		if ($kirjoitin == '') die (t("Valitsemallesi varastolle ole ole m‰‰ritelty tarvittavaa rahtikirja-tulostinta")." ($mika)!");
+
+		echo "<font class='message'>".t("Tulostetaan rahtikirjat toimitustavalle").": $toimitustapa<br>".t("Kirjoitin").": $print[kirjoitin]</font><hr>";
 
 		// jos meill‰ printterille joku spessu osoitetieto niin k‰ytet‰‰n sen tietoja l‰hett‰j‰n tietoina
 		if ($print["nimi"] != "") {
@@ -85,7 +92,7 @@
 		}
 
 		// haetaan kaikki distinct rahtikirjat..
-		$query = "	select distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp, 
+		$query = "	select distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
 					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti
 					from rahtikirjat

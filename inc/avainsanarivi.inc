@@ -402,4 +402,21 @@
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;
 	}
+
+	// rahtikirjatyyppi
+	if (mysql_field_name($result, $i) == "selitetark_2" and $sel24 == "selected") {
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos = "<td><select name = '$nimi'>";
+		$ulos .= "<option value = ''>".t("Oletus")."</option>";
+		$ulos .= "<option value = '1' $sel[1]>".t("Tulostintyyppi")." - ".t("Laser A4")."</option>";
+		$ulos .= "<option value = '2' $sel[2]>".t("Tulostintyyppi")." - ".t("Laser A5")."</option>";
+		$ulos .= "<option value = '3' $sel[3]>".t("Tulostintyyppi")." - ".t("Matriisi")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+
+
 ?>

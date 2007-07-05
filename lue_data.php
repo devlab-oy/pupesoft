@@ -91,7 +91,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	$eiyhtiota = "";
 
 	require ("inc/pakolliset_sarakkeet.inc");	
-	list($pakolliset, $kielletyt, $wherelliset)=pakolliset_sarakkeet($table);
+	list($pakolliset, $kielletyt, $wherelliset) = pakolliset_sarakkeet($table);
 	
 	// $trows 		sis‰lt‰‰ kaikki taulun sarakkeet tietokannasta
 	// $otsikot 	sis‰lt‰‰ kaikki sarakkeet saadusta tiedostosta
@@ -126,7 +126,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				if (in_array($column, $pakolliset)) {
 					// pushataan positio indeksiin, ett‰ tiedet‰‰n miss‰ kohtaa avaimet tulevat
 					$pos = array_search($column, $otsikot);
-					$indeksi[] = $pos;
+					$indeksi[$column] = $pos;
 					$tarkea++;
 				}
 				if (in_array($column, $kielletyt)) {
@@ -138,7 +138,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				if (is_array($wherelliset) and in_array($column, $wherelliset)) {
 					// katotaan ett‰ m‰‰ritellyt where lausekeen ehdot lˆytyv‰t
 					$pos = array_search($column, $otsikot);
-					$indeksi_where[] = $pos;
+					$indeksi_where[$column] = $pos;
 					$wheretarkea++;
 				}
 
@@ -375,7 +375,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$rivi[$r] = str_replace(",",".",$rivi[$r]);
 					}
 
-					// tehd‰‰n riville oikeellisuus tsekkej‰
+					// tehd‰‰n riville oikeellisuustsekkej‰
 					if ($otsikot[$r] == 'TULLINIMIKE1') {
 						// jos ollaan syˆtetty tullinimike niin sen pit‰‰ olla oikein
 						if ((int) $rivi[$r] != 0) {
@@ -401,7 +401,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 					}
 
-					// tehd‰‰n riville oikeellisuus tsekkej‰ aina jos otsikk on tuoteno, paitsi asiakasalennus ja asiakashinta tapauksissa, koska t‰‰ joudutaan silloin tekem‰‰n toisella tavalla muualla
+					// tehd‰‰n riville oikeellisuustsekkej‰ aina jos otsikk on tuoteno, paitsi asiakasalennus ja asiakashinta tapauksissa, koska t‰‰ joudutaan silloin tekem‰‰n toisella tavalla muualla
 					if ($otsikot[$r] == 'TUOTENO' and  ($table != 'tuote' or strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') and $table != 'asiakasalennus' and $table != 'asiakashinta') {
 
 						$tpque = "select tunnus from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$rivi[$r]'";
@@ -413,7 +413,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 					}
 
-					// tehd‰‰n riville oikeellisuus tsekkej‰ aina jos table on tuote ja kyseseess‰ on projekti kohde tai kustp
+					// tehd‰‰n riville oikeellisuustsekkej‰ aina jos table on tuote ja kyseseess‰ on projekti kohde tai kustp
 					if (($otsikot[$r] == 'PROJEKTI' or $otsikot[$r] == 'KOHDE' or $otsikot[$r] == 'KUSTP') and  $table == 'tuote' and $rivi[$r] != "") {
 
 						if ($otsikot[$r] == 'PROJEKTI') $tyyppi = "P";
@@ -455,19 +455,25 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 					}
 
-					// tehd‰‰n riville oikeellisuus tsekkej‰
+					// tehd‰‰n riville oikeellisuustsekkej‰
 					if ($table == 'yhteensopivuus_tuote' and $otsikot[$r] == 'ATUNNUS') {
 
-						$tpque = "select tunnus from yhteensopivuus_auto where yhtio='$kukarow[yhtio]' and tunnus='$rivi[$r]'";
-						$tpres = mysql_query($tpque) or pupe_error($tpque);
-
+						if ($rivi[$indeksi["TYYPPI"]] == "HA") {
+							$tpque = "select tunnus from yhteensopivuus_auto where yhtio='$kukarow[yhtio]' and tunnus='$rivi[$r]'";
+							$tpres = mysql_query($tpque) or pupe_error($tpque);
+						}
+						else {
+							$tpque = "select tunnus from yhteensopivuus_mp where yhtio='$kukarow[yhtio]' and tunnus='$rivi[$r]' and tyyppi = '".$rivi[$indeksi["TYYPPI"]]."'";
+							$tpres = mysql_query($tpque) or pupe_error($tpque);
+						}
+												
 						if (mysql_num_rows($tpres) == 0) {
-							echo t("Automallia")." '$rivi[$r]' ".t("ei lˆydy! Rivi‰ ei p‰ivitetty/lis‰tty")."!<br>";
-							$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
+							//echo t("Mallia")." '$rivi[$r]' ".t("ei lˆydy! Rivi‰ ei p‰ivitetty/lis‰tty")."!<br>";
+							//$hylkaa++; // ei p‰ivitet‰ t‰t‰ rivi‰
 						}
 					}
 
-					// tehd‰‰n riville oikeellisuus tsekkej‰
+					// tehd‰‰n riville oikeellisuustsekkej‰
 					if ($table == 'tuotepaikat' and $otsikot[$r] == 'OLETUS') {
 						// $tuoteno pit‰s olla jo aktivoitu ylh‰‰ll‰
 						// haetaan tuotteen varastopaikkainfo
@@ -512,7 +518,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$eilisataeikamuuteta = "joo";
 					}
 
-					// tehd‰‰n riville oikeellisuus tsekkej‰
+					// tehd‰‰n riville oikeellisuustsekkej‰
 					if ($table == 'sanakirja' and $otsikot[$r] == 'FI') {
 						// jos ollaan mulkkaamassa RU tai EE ni tehd‰‰n utf-8 -> latin-1 konversio FI kent‰ll‰
 						 if (in_array("RU", $otsikot) or in_array("EE", $otsikot)) {
@@ -521,7 +527,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						}
 					}
 
-					// tehd‰‰n riville oikeellisuus tsekkej‰
+					// tehd‰‰n riville oikeellisuustsekkej‰
 					if ($table == 'tuotteen_toimittajat' and $otsikot[$r] == 'TOIMITTAJA') {
 
 						$tpque = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$rivi[$r]' order by tunnus limit 1";
@@ -785,6 +791,7 @@ else
 					<option value='tuotteen_avainsanat'>".t("Tuotteen avainsanat")."</option>
 					<option value='kalenteri'>".t("Kalenteritietoja")."</option>
 					<option value='yhteensopivuus_auto'>".t("Yhteensopivuus automallit")."</option>
+					<option value='yhteensopivuus_mp'>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote'>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='tuotteen_orginaalit'>".t("Tuotteiden originaalit")."</option>
 					<option value='autodata'>".t("Autodatatiedot")."</option>

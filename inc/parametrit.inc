@@ -244,6 +244,18 @@ if ($session != '') {
 
 	// haetaan jotain tarpeellisia funktioita mukaan..
 	require ("functions.inc");
+	
+	//	Käsitelläänkö suorituskykylogia?
+	$query 	= "describe suorituskykyloki";
+	$suores = mysql_query($query);
+	if (mysql_error() == "") {
+		//	Tehdääns tästä array jotta näitä muuttujia voidaan heitellä suoraan sql kyselyihin
+		$suorituskykyloki["status"]				= "ON";
+		$suorituskykyloki["MYSQL-LOCK-WRITE"]	= ", suorituskykyloki WRITE";
+	}
+	else {
+		unset($suorituskykyloki);
+	}
 
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");

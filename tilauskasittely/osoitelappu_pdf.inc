@@ -7,7 +7,11 @@
 
 
 //Tulostetaan standardi kolliosoitelappu
-$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+$query = "	SELECT lasku.*, if(yhteyshenkilo.nimi!='',concat_ws(' / ', yhteyshenkilo.nimi,if(yhteyshenkilo.gsm!='',yhteyshenkilo.gsm,if(yhteyshenkilo.puh!='',yhteyshenkilo.puh,NULL))),'') yhteyshenkilo
+			FROM lasku
+			LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+			LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
+			WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus'";
 $tempr = mysql_query($query) or pupe_error($query);
 $laskurow = mysql_fetch_array($tempr);
 
@@ -276,7 +280,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(20), mm_pt(55), $laskurow["toimitustapa"],											$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow['viesti'],													$firstpage, $kirj);
-
+	if($laskurow['yhteyshenkilo']!= "") {
+		$pdf->draw_text(mm_pt(20), mm_pt(40), $laskurow['yhteyshenkilo'],													$firstpage, $kirj);
+	}
+	
+	
 	//tänne ohjeisiin tulee lopullisen asiakkaan tiedot jos kyseessä on koontikuljetus
 	$query = "	select hetiera
 				from toimitustapa

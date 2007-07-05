@@ -1605,7 +1605,7 @@
 				$tunnus = $laskurow["tunnus"];
 				$oslapp = $komento["Osoitelappu"];
 
-				$query = "  SELECT GROUP_CONCAT(DISTINCT tunnus ORDER BY tunnus SEPARATOR ', ') tunnukset
+				$query = "  SELECT GROUP_CONCAT(DISTINCT if(tunnusnippu>0, concat(tunnusnippu,'/',tunnus),tunnus) ORDER BY tunnus SEPARATOR ', ') tunnukset
 							FROM lasku
 							WHERE yhtio='$kukarow[yhtio]' and tila='L' and kerayslista='$laskurow[kerayslista]' and kerayslista != 0";
 				$toimresult = mysql_query($query) or pupe_error($query);

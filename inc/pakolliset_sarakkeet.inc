@@ -96,10 +96,16 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("MERKKI","MALLI","MALLITARKENNE","KORITYYPPI","CC","MOOTTORITYYPPI","POLTTOAINE","SYLINTERIMAARA","SYLINTERINHALKAISIJA","TEHO_KW","TEHO_HV","ALKUKK","ALKUVUOSI","LOPPUKK","LOPPUVUOSI","LISATIEDOT","AUTODATA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				$wherelliset = array("MERKKI","MALLI","MALLITARKENNE","KORITYYPPI","CC","MOOTTORITYYPPI","POLTTOAINE","SYLINTERIMAARA","SYLINTERINHALKAISIJA","TEHO_KW","TEHO_HV","ALKUKK","ALKUVUOSI","LOPPUKK","LOPPUVUOSI","LISATIEDOT","AUTODATA");
-				break;
+				break;			
+			case "yhteensopivuus_mp" :
+				$pakolliset  = array("TYYPPI","MERKKI","CC","MALLI","VM");
+				$kielletyt   = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$wherelliset = array("TYYPPI","MERKKI","CC","MALLI","VM");
+				break;					
 			case "yhteensopivuus_tuote" :
-				$pakolliset = array("ATUNNUS","TUOTENO");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$pakolliset  = array("TYYPPI","ATUNNUS","TUOTENO");
+				$kielletyt   = array("LAATIJA","LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$wherelliset = array("TYYPPI","ATUNNUS","TUOTENO");
 				break;
 			case "tuotteen_orginaalit" :
 				$pakolliset = array("TUOTENO","ORIG_TUOTENO");

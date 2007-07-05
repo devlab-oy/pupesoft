@@ -8,7 +8,7 @@
 
 	if ($tee == 'T') {
 
-		$query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE {$suorituskykyloki["MYSQL-LOCK-WRITE"]}";
+		$query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$query  = "	SELECT a.tunnus atunnus, b.tunnus btunnus, a.ltunnus altunnus, b.ltunnus bltunnus, a.kirjpvm akirjpvm, a.summa asumma, b.kirjpvm bkirjpvm, b.summa bsumma
@@ -102,6 +102,9 @@
 		}
 		$tee = '';
 		echo "<font class='message'>".t("Kohdistus on ok!")."</font><br>";
+
+		$query  = "UNLOCK TABLES";
+		$result = mysql_query($query) or pupe_error($query);
 	}
 
 	if ($tee == '') {

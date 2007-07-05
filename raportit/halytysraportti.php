@@ -1819,7 +1819,8 @@
 									from yhteensopivuus_tuote
 									join yhteensopivuus_rekisteri on (yhteensopivuus_rekisteri.yhtio = yhteensopivuus_tuote.yhtio and yhteensopivuus_rekisteri.autoid = yhteensopivuus_tuote.atunnus)
 									where yhteensopivuus_tuote.yhtio='$kukarow[yhtio]' 
-									and yhteensopivuus_tuote.tuoteno in ('$row[tuoteno]' $korvaavat_tunrot)";
+									and yhteensopivuus_tuote.tuoteno in ('$row[tuoteno]' $korvaavat_tunrot)
+									 and yhteensopivuus_tuote.tyyppi='HA'";
 						$asresult = mysql_query($query) or pupe_error($query);
 						$kasrow = mysql_fetch_array($asresult);
 				

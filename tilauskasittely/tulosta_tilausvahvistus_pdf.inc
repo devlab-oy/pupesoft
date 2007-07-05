@@ -300,16 +300,12 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 
 					$ei_valia = "";
 					if($row["kommentti"] != "") {
-						if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[0]) {
-							$pdf->write($h, 2, 0, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln(2);
-						} 
-						else {
-							$pdf->write($h, 1, 0, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln();
-						}
+						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
+						$pdf->write($h, $nb, 5, $s[1], $row["kommentti"], "snadi", "L", "I");	
+						$h-=$pdf->ln($nb);					
 						$ei_valia = "OK";
 					}
+
 					if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
 						$pdf->write($h, 1, 0, $s[0], t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "norm", "L", "I");
 						$h-=$pdf->ln();

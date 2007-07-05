@@ -31,7 +31,7 @@
 		if (strtoupper($trow[$i]) == 'KT') {
 			$sel08 = "selected";
 		}
-		if (strtoupper($trow[$i]) == 'pakkaus') {
+		if (strtoupper($trow[$i]) == 'PAKKAUS') {
 			$sel09 = "selected";
 		}
 		if (strtoupper($trow[$i]) == 'TV') {

@@ -333,7 +333,7 @@
 
 			if (mysql_error() == "" and file_exists("yhteensopivuus_tuote.php")) {
 
-				$query = "select count(*) countti from yhteensopivuus_tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+				$query = "select count(*) countti from yhteensopivuus_tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]' and tyyppi='HA'";
 				$yhtresult = mysql_query($query) or pupe_error($query);
 				$yhtrow = mysql_fetch_array($yhtresult);
 

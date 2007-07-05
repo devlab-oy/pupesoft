@@ -615,10 +615,10 @@ if($tee == "LISAAKULUT") {
 
 if(in_array($jarjesta, array("moveUp", "moveDown", "first", "last")) and $rivitunnus>0) {
 	
-	if($laskurow["tunnusnippu"]>0) {
+	if($laskurow["tunnusnippu"]>0 and $toim !="TARJOUS") {
 		$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 					FROM lasku
-					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '{$laskurow["tunnusnippu"]}' and tila IN ('L','G','E','V','W','N','R','A','T') and tunnusnippu>0";
+					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '{$laskurow["tunnusnippu"]}' and tila IN ('L','G','E','V','W','N','R','A') and tunnusnippu>0";
 		$result = mysql_query($query) or pupe_error($query);
 		$toimrow = mysql_fetch_array($result);
 
@@ -641,7 +641,7 @@ if(in_array($jarjesta, array("moveUp", "moveDown", "first", "last")) and $rivitu
 		$ehto = "order by tunnus desc limit 1";
 	}
 
-	$query = "select tunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and otunnus IN ($tunnarit) $ehto";
+	$query = "select tunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tyyppi !='D' and otunnus IN ($tunnarit) $ehto";
 	$result = mysql_query($query) or pupe_error($query);
 	$row = mysql_fetch_array($result);
 
@@ -668,9 +668,9 @@ if(in_array($jarjesta, array("moveUp", "moveDown", "first", "last")) and $rivitu
 		//	Kaikki OK vaihdetaan data p‰ikseen
 		$query = "UPDATE tilausrivi SET $kohdeupd WHERE yhtio = '$kukarow[yhtio]' and otunnus='{$kukarow["kesken"]}' and tunnus='$rivitunnus'";
 		$updres=mysql_query($query) or pupe_error($query);
-		
+
 		$query = "UPDATE tilausrivi SET $lahdeupd WHERE yhtio = '$kukarow[yhtio]' and otunnus='{$kukarow["kesken"]}' and tunnus='$kohde'";
-		$updres=mysql_query($query) or pupe_error($query);		
+		$updres=mysql_query($query) or pupe_error($query);
 	}
 	else {
 		echo "<font class='error'>".t("VIRHE!!! rivi‰ ei voi siirt‰‰!")."</font><br>";
@@ -2953,7 +2953,7 @@ if ($tee == '') {
 						echo "</select></form>";
 
 
-						if($yhtiorow['tilauksen_kohteet'] == 'K') {
+						if($yhtiorow['tilauksen_kohteet'] == 'K' and $lasklisatied_row["asiakkaan_kohde"]>0) {
 							if(!is_resource($posres)) {
 								$posq = "SELECT * FROM asiakkaan_positio WHERE yhtio = '$kukarow[yhtio]' and asiakkaan_kohde = '$lasklisatied_row[asiakkaan_kohde]'";
 								$posres = mysql_query($posq) or pupe_error($posq);
@@ -2964,7 +2964,7 @@ if ($tee == '') {
 							}
 
 
-							echo "	<form name='asiakkaan_positio' action='$PHP_SELF' method='post'>
+							echo "	<form name='asiakkaan_positio_$rivino' action='$PHP_SELF' method='post'>
 									<input type='hidden' name='toim' value='$toim'>
 									<input type='hidden' name='lopetus' value='$lopetus'>
 									<input type='hidden' name='projektilla' value='$projektilla'>
@@ -2972,7 +2972,7 @@ if ($tee == '') {
 									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
 									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
-									<select id='asiakkaan_positio_$rivino' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id,'asiakkaan_positio');\" Style='font-size: 8pt; padding:0;'>
+									<select id='asiakkaan_positio_$rivino' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id,'asiakkaan_positio_$rivino');\" Style='font-size: 8pt; padding:0;'>
 									<option value=''>Asiakkaalla ei ole positiota</option>";
 
 							if(mysql_num_rows($posres) > 0) {
@@ -2991,6 +2991,9 @@ if ($tee == '') {
 										$optlisa
 									</optgroup>
 									</select></form>";
+						}
+						elseif ($yhtiorow['tilauksen_kohteet'] == 'K') {
+							echo "<font class='info'>".t("Kohdetta ei valittu")."</font>";
 						}
 						echo "</td>";
 

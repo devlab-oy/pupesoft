@@ -1147,12 +1147,12 @@
 						and tila in ($tila)
 						and alatila	= 'A'";
 			$result = mysql_query($query) or pupe_error($query);
-			$row    = mysql_fetch_array($result);
+			$otsik_row    = mysql_fetch_array($result);
 
-			echo "<tr><th>" . t("Tilaus") ."</th><td>$tilausnumeroita $row[clearing]</td></tr>";
-			echo "<tr><th>" . t("Asiakas") ."</th><td>$row[nimi]<br>$row[toim_nimi]</td></tr>";
-			echo "<tr><th>" . t("Laskutusosoite") ."</th><td>$row[osoite], $row[postitp]</td></tr>";
-			echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$row[toim_osoite], $row[toim_postitp]</td></tr>";
+			echo "<tr><th>" . t("Tilaus") ."</th><td>$tilausnumeroita $otsik_row[clearing]</td></tr>";
+			echo "<tr><th>" . t("Asiakas") ."</th><td>$otsik_row[nimi]<br>$otsik_row[toim_nimi]</td></tr>";
+			echo "<tr><th>" . t("Laskutusosoite") ."</th><td>$otsik_row[osoite], $otsik_row[postitp]</td></tr>";
+			echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$otsik_row[toim_osoite], $otsik_row[toim_postitp]</td></tr>";
 		}
 
 		$query = "	SELECT
@@ -1250,6 +1250,7 @@
 							<td><input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]'> $puute";
 
 					if ($row["sarjanumeroseuranta"] != "") {						
+						
 						if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
 							$tunken1 = "siirtorivitunnus";
 							$tunken2 = "siirtorivitunnus";
@@ -1301,7 +1302,7 @@
 			$oslappkpl 	= 0;
 			$lahetekpl  = 0;
 			
-			if ($toim != 'VALMISTUS') {
+			if ($toim != 'VALMISTUS' and $otsik_row["tila"] != 'V') {
 				$oslappkpl 	= $yhtiorow["oletus_oslappkpl"];
 				$lahetekpl 	= $yhtiorow["oletus_lahetekpl"];
 			}

@@ -12,23 +12,23 @@ if (is_numeric($toimittajaid) and $toimittajaid > 0) {
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }
-if ($monta==0 and $ytunnus != '') {
+if ($monta == 0 and $ytunnus != '') {
 	//etsit‰‰n eka koko ytunnuksella
-	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus'";
+	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and tyyppi != 'P'";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 
-	if ($monta==0) {
+	if ($monta == 0) {
 		// kokeillaan ytunnuksen alulla
-		$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus like '$ytunnus%'";
+		$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and ytunnus like '$ytunnus%' and tyyppi != 'P'";
 		$result = mysql_query($query) or pupe_error($query);
 		$monta  = mysql_num_rows($result);
 	}
 }
 
-if ($monta==0 and $ytunnus != '') {
+if ($monta == 0 and $ytunnus != '') {
 	// kokeillaan nimen osalla
-	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and nimi like '%$ytunnus%'";
+	$query	= "SELECT * from toimi where yhtio='$kukarow[yhtio]' and nimi like '%$ytunnus%' and tyyppi != 'P'";
 	$result = mysql_query($query) or pupe_error($query);
 	$monta  = mysql_num_rows($result);
 }

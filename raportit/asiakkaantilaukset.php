@@ -9,6 +9,11 @@
 		
 		$til = " tila in ('L','U','N','R','E') ";
 	}
+	if ($toim == 'VALMISTUSMYYNTI') {
+		echo "<font class='head'>".t("Asiakkaan tilaukset ja valmistukset").":</font><hr>";
+		
+		$til = " tila in ('L','U','N','R','E','V') ";
+	}
 	if ($toim == 'OSTO') {
 		echo "<font class='head'>".t("Toimittajan tilaukset").":</font><hr>";
 		
@@ -61,7 +66,7 @@
 
 		require ("naytatilaus.inc");
 
-		if ($toim == "MYYNTI" or $toim == "TARJOUS" or $toim == 'REKLAMAATIO') {
+		if ($toim == "MYYNTI" or $toim == "TARJOUS" or $toim == 'REKLAMAATIO' or $toim == 'VALMISTUSMYYNTI') {
 			$query = "	SELECT *
 						FROM rahtikirjat
 						WHERE otsikkonro='$tunnus'
@@ -117,7 +122,7 @@
 	}
 	
 	if ($ytunnus != '' and ($otunnus == '' and $laskunro == '' and $sopimus == '')) {
-		if ($toim == 'MYYNTI' or $toim == "TARJOUS" or $toim == 'REKLAMAATIO') {
+		if ($toim == 'MYYNTI' or $toim == "TARJOUS" or $toim == 'REKLAMAATIO' or $toim == 'VALMISTUSMYYNTI') {
 			require ("../inc/asiakashaku.inc");
 		}
 		
@@ -178,14 +183,31 @@
 			<input type='hidden' name='nimi' value='$nimi'>
 			<input type='hidden' name='tee' value='TULOSTA'>";
 
+		
+		if ($asiakasid > 0) {
+			$query  = "SELECT concat_ws(' ', nimi, nimitark) nimi FROM asiakas WHERE yhtio='$kukarow[yhtio]' and tunnus='$asiakasid'";
+			$result = mysql_query($query) or pupe_error($query);
+			$asiakasrow 	= mysql_fetch_array($result);
+		
+			echo "<table><tr><th>Valittu asiakas:</th><td>$asiakasrow[nimi]</td></tr></table><br>";
+		}
+		elseif ($toimittajaid > 0) {
+			$query  = "SELECT concat_ws(' ', nimi, nimitark) nimi FROM toimi WHERE yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
+			$result = mysql_query($query) or pupe_error($query);
+			$asiakasrow 	= mysql_fetch_array($result);
+			
+			echo "<table><tr><th>Valittu toimittaja:</th><td>$asiakasrow[nimi]</td></tr></table><br>";
+		}
+		
+		
 		echo "<table>";
 
 		if (!isset($kka))
-			$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+			$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 		if (!isset($vva))
-			$vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+			$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 		if (!isset($ppa))
-			$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+			$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
 		if (!isset($kkl))
 			$kkl = date("m");
@@ -302,16 +324,17 @@
 
 			while ($row = mysql_fetch_array($result)) {
 
-				$ero="td";
-				if ($tunnus==$row['tilaus']) $ero="th";
+				$ero = "td";
+				if ($tunnus==$row['tilaus']) $ero = "th";
 
 				echo "<tr class='aktiivi'>";
+				
 				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 					if (mysql_field_name($result,$i) == 'toimaika') {
-						echo "<$ero>".tv1dateconv($row[$i])."</$ero>";
+						echo "<$ero valign='top'>".tv1dateconv($row[$i])."</$ero>";
 					}
 					else {
-						echo "<$ero>$row[$i]</$ero>";						
+						echo "<$ero valign='top'>$row[$i]</$ero>";						
 					}
 
 				}
@@ -322,7 +345,7 @@
 				//tehd‰‰n selv‰kielinen tila/alatila
 				require "../inc/laskutyyppi.inc";
 
-				echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
+				echo "<$ero valign='top'>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 
 				echo "<form method='post' action='$PHP_SELF'><td class='back'>
 						<input type='hidden' name='tee' value='NAYTATILAUS'>
@@ -366,28 +389,37 @@
 		}
 	}
 
-	// N‰ytet‰‰n muuten vaan sopivia tilauksia
-	echo "<br><table>";
-	echo "<form action = '$PHP_SELF' method = 'post'>
-		<input type='hidden' name='toim' value='$toim'>";
-
-	if ($toim == "OSTO") {
-		echo "<tr><th>".t("Toimittajan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+	if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
+		// N‰ytet‰‰n muuten vaan sopivia tilauksia
+		echo "<br><table>";
+		echo "<form action = '$PHP_SELF' method = 'post'>
+			<input type='hidden' name='toim' value='$toim'>";
+    	
+		if ($toim == "OSTO") {
+			echo "<tr><th>".t("Toimittajan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+		}
+		else {
+			echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+		}
+		if($toim=="YLLAPITO") {
+			echo "<tr><th>".t("Sopimusnumero")."</th><td class='back'></td><td><input type='text' size='10' name='sopimus'></td></tr>";
+		}
+		else {
+			echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
+		}
+		echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";
+		echo "</table>";
+    	
+		echo "<br><input type='submit' value='".t("Etsi")."'>";
+		echo "</form>";
 	}
 	else {
-		echo "<tr><th>".t("Asiakkaan nimi")."</th><td class='back'></td><td><input type='text' size='10' name='ytunnus'></td></tr>";
+		echo "<br>";
+		echo "<form action = '$PHP_SELF' method = 'post'>
+			<input type='hidden' name='toim' value='$toim'>";
+		echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
+		echo "</form>";
 	}
-	if($toim=="YLLAPITO") {
-		echo "<tr><th>".t("Sopimusnumero")."</th><td class='back'></td><td><input type='text' size='10' name='sopimus'></td></tr>";
-	}
-	else {
-		echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
-	}
-	echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";
-	echo "</table>";
-
-	echo "<br><input type='submit' value='".t("Etsi")."'>";
-	echo "</form>";
-
+	
 	require ("../inc/footer.inc");
 ?>

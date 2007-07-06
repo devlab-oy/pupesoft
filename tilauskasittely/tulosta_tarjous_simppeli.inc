@@ -243,7 +243,7 @@ if (!function_exists('tulosta_tarjous')) {
 						}
 						
 						$pdf->write($h, 1, 0, $s[1], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
-						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"])), "norm", "R", "");
+						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"], $kieli)), "norm", "R", "");
 						if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 							$pdf->write($h, 1, $s[2], $s[3], money_format('%!i',$row["hinta"]), "norm", "R", "");
 							$pdf->write($h, 1, $s[3], $s[4], money_format('%!i',$row["rivihinta"]), "norm", "R", "");						
@@ -266,7 +266,7 @@ if (!function_exists('tulosta_tarjous')) {
 					//	Meillä on vaan näytettävä tuoteperhetuote					
 					else {
 						$pdf->write($h, 1, 5, $s[1], $row["tuoteno"]." ".$row["nimitys"], "snadi", "L", "");
-						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"])), "snadi", "R", "");
+						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"], $kieli)), "snadi", "R", "");
 						$h-=$pdf->ln();
 						
 						if($row["kommentti"] != "") {

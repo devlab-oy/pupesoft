@@ -323,7 +323,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 				//	Meillä on vaan näytettävä tuoteperhetuote
 				else {
 					$pdf->write($h, 1, 5, $s[0], $row["tuoteno"]." ".$row["nimitys"], "snadi", "L", "");
-					$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower(t($row["yksikko"]), $kieli), "snadi", "R", "");					
+					$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower(t($row["yksikko"], $kieli), $kieli), "snadi", "R", "");					
 					$h-=$pdf->ln(1.5);
 
 					if($row["kommentti"] != "") {

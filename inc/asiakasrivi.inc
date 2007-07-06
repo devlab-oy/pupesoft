@@ -38,7 +38,7 @@
 		if ($trow[$i] == 'H') {
 			$sel1 = "SELECTED";
 		}
-		elseif ($trow[$i] == 'P') {
+		elseif (strtoupper($trow[$i]) == 'P') {
 			$sel2 = "SELECTED";
 		}
 

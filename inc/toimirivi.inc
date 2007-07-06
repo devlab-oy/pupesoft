@@ -339,11 +339,13 @@
 		$selo = $sels = "";
 		if ($trow[$i] == 'O') $selo = "selected";
 		if ($trow[$i] == 'S') $sels = "selected";
+		if ($trow[$i] == 'P') $selp = "selected";
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>Normaali toimittaja</option>";
-		$ulos .= "<option value='O' $selo>Online toimittaja</option>";
-		$ulos .= "<option value='S' $sels>Sisäinen toimittaja</option>";
+		$ulos .= "<option value=''>".t("Normaali toimittaja")."</option>";
+		$ulos .= "<option value='O' $selo>".t("Online toimittaja")."</option>";
+		$ulos .= "<option value='S' $sels>".t("Sisäinen toimittaja")."</option>";
+		$ulos .= "<option value='P' $selp>".t("Poistettu / Ei käytössä")."</option>";
 		$ulos .= "</select></td>";
 		
 		$jatko = 0;

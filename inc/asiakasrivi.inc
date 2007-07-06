@@ -45,7 +45,7 @@
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value = ''>".t("Yritys")."</option>";
 		$ulos .= "<option value = 'H' $sel1>".t("Yksityishenkilö")."</option>";
-		$ulos .= "<option value = 'P' $sel2>".t("Poistettu")."</option>";
+		$ulos .= "<option value = 'P' $sel2>".t("Poistettu / Ei käytössä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}

@@ -286,6 +286,11 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 					//	Jos meillä on isätuote fiksataan yksikköhinta
 					if($row["perheid"]==$row["tunnus"]) {
 						$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),2);
+						
+						//	Ale 100 on varmaan feikki joten se piilotetaan..
+						if($row["ale"] == 100) {
+							$row["ale"] = "";
+						}
 					}
 					$rivi="isa";
 				}
@@ -353,7 +358,10 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 				}
 
 				$h-=$pdf->ln(0.5);
-				$grand_total+=$row["rivihinta"];
+				
+				if($rivi=="isa") {
+					$grand_total+=$row["rivihinta"];
+				}
 			}
 			$h-=$pdf->ln(3);
 		}			

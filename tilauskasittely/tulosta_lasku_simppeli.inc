@@ -328,91 +328,111 @@ if (!function_exists('tulosta_lasku')) {
 					unset($edperhe);
 				}
 				
+				//	Jos meillä on "normaali tuote"
 				if($row["perheid"]==0 or $row["perheid"]==$row["tunnus"]) {
-					$pdf->write($h, 1, 0, $s[0], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
-					$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower($row["yksikko"]), "norm", "R", "");
+					$offset=0;					
+					$style_rivi = "norm";
+					$style_rivi2 = "snadi";					
+					$style_komm = "snadi";
+					//	Jos meillä on isätuote fiksataan yksikköhinta
+					if($row["perheid"]==$row["tunnus"]) {
+						$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),2);
+						
+						//	Ale 100 on varmaan feikki joten se piilotetaan..
+						if($row["ale"] == 100) {
+							$row["ale"] = "";
+						}
+					}
+					$rivi="isa";
+				}
+				//	Meillä on lapsituote
+				else{
+					$offset=5;
+					$style_rivi = "snadi";
+					$style_rivi2 = "snadi";										
+					$style_komm = "snadi";
+					$rivi="lapsi";
+				}
+				$pdf->write($h, 1, $offset, $s[0], $row["tuoteno"]." ".$row["nimitys"], $style_rivi, "L", "");
+				$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower($row["yksikko"]), $style_rivi, "R", "");
+				
+				if($rivi=="isa") {
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
-						$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), "norm", "R", "");
+						$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), $style_rivi, "R", "");
 						if ($row["alv"] >= 500) {
-							$pdf->write($h, 1, $s[2], $s[3], t("M.V.", $kieli), "norm", "R", "");					
+							$pdf->write($h, 1, $s[2], $s[3], t("M.V.", $kieli), $style_rivi, "R", "");					
 						}
 						else {
-							$pdf->write($h, 1, $s[2], $s[3], $row["alv"]."%", "norm", "R", "");					
+							$pdf->write($h, 1, $s[2], $s[3], $row["alv"]."%", $style_rivi, "R", "");					
 						}
 						//	veroton rivihinta
-						$pdf->write($h, 1, $s[3], 0, money_format('%!i',$row["rivihinta"]), "norm", "R", "");						
+						$pdf->write($h, 1, $s[3], 0, money_format('%!i',$row["rivihinta"]), $style_rivi, "R", "");						
 					}
 					$h-=$pdf->ln();
 
 					if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {
-						$pdf->write($h, 1, $s[0], $s[1], strftime("%x",strtotime($row["toimitettuaika"])), "snadi", "R", "I");
+						$pdf->write($h, 1, $s[0], $s[1], strftime("%x",strtotime($row["toimitettuaika"])), $style_rivi2, "R", "I");
 					}
 
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
-						if($alenaytetaan=="OK") {
-							$pdf->write($h, 1, $s[1], $s[2], $row["ale"]."%", "snadi", "R", "I");				
+						if($alenaytetaan=="OK" and $row["ale"] > 0) {
+							$pdf->write($h, 1, $s[1], $s[2], $row["ale"]."%", $style_rivi2, "R", "I");
 						}
 						//	verollinen rivihinta jos ei marginaalimyyntiä
 						if ($row["alv"] < 500) {
-							$pdf->write($h, 1, $s[3], 0, money_format('%!i',$row["rivihinta"]*(1+($row["alv"]/100))), "snadi", "R", "I");
+							$pdf->write($h, 1, $s[3], 0, money_format('%!i',$row["rivihinta"]*(1+($row["alv"]/100))), $style_rivi2, "R", "I");
 						}
 					}
-					if($row["kommentti"] != "") {
-						$abuw=$pdf->pt_mm($pdf->strlen($row["otunnus"]."/", $fonts["snadi"])+1);
-						$pdf->write($h, 1, 0, $abuw, $row["otunnus"]."/", "snadi", "L", "");
-						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-$abuw));
-						$pdf->write($h, $nb, $abuw, $s[0], $row["kommentti"], "snadi", "L", "I");	
-						$h-=$pdf->ln($nb);					
-					}
-					else {
-						$pdf->write($h, 1, 0, $s[0], $row["otunnus"], "snadi", "L", "I");	
-						$h-=$pdf->ln();					
-					}
-
-					if ($row["alv"] >= 500) {
-						$pdf->write($h, 1, 0, $s[0], t("Ei sisällä vähennettävää veroa", $kieli), "snadi", "L", "I");	
-						$h-=$pdf->ln();
-					}
-
-					//	Vientilaskulle annetaan hieman lisäinfoa!
-					if ($laskurow["vienti"] != "" and $row["ei_saldoa"] == "") {
-						$pdf->write($h, 1, 5, $s[0], "Country of Origin: ".$row["alkuperamaa"], "snadi", "L", "I");	
-						$h-=$pdf->ln();
-						$pdf->write($h, 1, 5, $s[0], "Customs tariff number: ".$row["tullinimike1"], "snadi", "L", "I");	
-						$h-=$pdf->ln();
-						if($row["tullikohtelu"] != "") {
-							$pdf->write($h, 1, 5, $s[0], t("Vientikohtelu", $kieli).": ".$row["tullikohtelu"], "snadi", "L", "I");	
-							$h-=$pdf->ln();						
-						}
-					}
-
-					if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
-						$pdf->write($h, 1, 0, 0, t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "snadi", "L", "I");
-						$h-=$pdf->ln();
-					}
-					$summa+=$row["rivihinta"];
-					$summa_verolla+=($row["rivihinta"]*(1+($row["alv"]/100)));
-
-					$h-=$pdf->ln(0.5);					
 				}
 				else {
-					$pdf->write($h, 1, 5, $s[0], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
-					$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower($row["yksikko"]), "norm", "R", "");
-					$h-=$pdf->ln(1);
-
-					if($row["kommentti"] != "") {
-						if($pdf->pt_mm($pdf->writeStrlen($row["otunnus"]."/".$row["kommentti"], "snadi")) > $s[0]) {
-							$pdf->write($h, 2, 5, $s[0], $row["otunnus"]."/* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln(2);
-						} 
-						else {
-							$pdf->write($h, 1, 5, $s[0], $row["otunnus"]."/* ".$row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln();
-						}
-					}
-					
-					$edperhe=$row["perheid"];
+					$h-=$pdf->ln();
 				}
+				
+				if($row["kommentti"] != "" and $rivi=="isa") {
+					$abuw=$pdf->pt_mm($pdf->strlen($row["otunnus"]."/", $fonts["snadi"])+1);
+					$pdf->write($h, 1, $offset, $abuw, $row["otunnus"]."/", $style_komm, "L", "");
+					$nb=$pdf->countParagraphHeight($row["kommentti"], $style_komm, ($s[0]-$abuw));
+					$pdf->write($h, $nb, $abuw+$offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
+					$h-=$pdf->ln($nb);					
+				}
+				if($row["kommentti"] != "") {
+					$nb=$pdf->countParagraphHeight($row["kommentti"], $style_komm, ($s[0]-$abuw));
+					$pdf->write($h, $nb, $offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
+					$h-=$pdf->ln($nb);					
+				}
+				else {
+					$pdf->write($h, 1, $offset, $s[0], $row["otunnus"]."/", $style_komm, "L", "I");	
+					$h-=$pdf->ln();
+				}
+
+				if ($row["alv"] >= 500) {
+					$pdf->write($h, 1, 5+$offset, $s[0], t("Ei sisällä vähennettävää veroa", $kieli), "snadi", "L", "I");	
+					$h-=$pdf->ln();
+				}
+
+				//	Vientilaskulle annetaan hieman lisäinfoa!
+				if ($laskurow["vienti"] != "" and $row["ei_saldoa"] == "") {
+					$pdf->write($h, 1, 5+$offset, $s[0], "Country of Origin: ".$row["alkuperamaa"], "snadi", "L", "I");	
+					$h-=$pdf->ln();
+					$pdf->write($h, 1, 5+$offset, $s[0], "Customs tariff number: ".$row["tullinimike1"], "snadi", "L", "I");	
+					$h-=$pdf->ln();
+					if($row["tullikohtelu"] != "") {
+						$pdf->write($h, 1, 5+$offset, $s[0], t("Vientikohtelu", $kieli).": ".$row["tullikohtelu"], "snadi", "L", "I");	
+						$h-=$pdf->ln();						
+					}
+				}
+
+				if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
+					$pdf->write($h, 1, 5+$offset, 0, t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "snadi", "L", "I");
+					$h-=$pdf->ln();
+				}
+				
+				if($rivi=="isa") {
+					$summa+=$row["rivihinta"];
+					$summa_verolla+=($row["rivihinta"]*(1+($row["alv"]/100)));						
+				}
+
+				$h-=$pdf->ln(0.5);					
 			}
 		}
 		$h-=$pdf->ln(3);			

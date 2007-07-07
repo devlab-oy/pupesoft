@@ -280,59 +280,80 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 				
 				//	Jos meillä on "normaali tuote"
 				if($row["perheid"]==0 or $row["perheid"]==$row["tunnus"]) {
-					
+					$offset=0;					
+					$style_rivi = "norm";
+					$style_rivi2 = "snadi";					
+					$style_komm = "snadi";
 					//	Jos meillä on isätuote fiksataan yksikköhinta
 					if($row["perheid"]==$row["tunnus"]) {
 						$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),2);
 					}
-					
-					$pdf->write($h, 1, 0, $s[0], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
-					$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower(t($row["yksikko"], $kieli)), "norm", "R", "");
+					$rivi="isa";
+				}
+				//	Meillä on lapsituote
+				else{
+					$offset=5;
+					$style_rivi = "snadi";
+					$style_rivi2 = "snadi";										
+					$style_komm = "snadi";
+					$rivi="lapsi";
+				}
+
+				$pdf->write($h, 1, $offset, $s[0], $row["tuoteno"]." ".$row["nimitys"], $style_rivi, "L", "");
+				$pdf->write($h, 1, $offset, $s[1], $row["kpl"]." ".strtolower(t($row["yksikko"], $kieli)), $style_rivi, "R", "");
+				
+				if($rivi=="isa") {
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
-						$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), "norm", "R", "");
-						$pdf->write($h, 1, $s[2], 0, money_format('%!i',$row["rivihinta"]), "norm", "R", "");				
+						$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), $style_rivi, "R", "");
+						$pdf->write($h, 1, $s[2], 0, money_format('%!i',$row["rivihinta"]), $style_rivi, "R", "");				
 					}
 					$h-=$pdf->ln();
-					$pdf->write($h, 1, $s[0], $s[1], strftime("%x",strtotime($row["toimaika"])), "snadi", "R", "I");
+					$pdf->write($h, 1, $s[0], $s[1], strftime("%x",strtotime($row["toimaika"])), $style_rivi2, "R", "I");
 					if($alenaytetaan=="OK" and $row["ale"] > 0) {
-						$pdf->write($h, 1, $s[1], $s[2], $row["ale"]."%", "snadi", "R", "I");
+						$pdf->write($h, 1, $s[1], $s[2], $row["ale"]."%", $style_rivi2, "R", "I");
 					}
-
-					$ei_valia = "";
-					if($row["kommentti"] != "") {
-						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
-						$pdf->write($h, $nb, 5, $s[1], $row["kommentti"], "snadi", "L", "I");	
-						$h-=$pdf->ln($nb);					
-						$ei_valia = "OK";
-					}
-
-					if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
-						$pdf->write($h, 1, 0, $s[0], t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", "norm", "L", "I");
-						$h-=$pdf->ln();
-						$ei_valia = "OK";					
-					}
-
-					$summa += $row["rivihinta"];
-					if($ei_valia == "OK") {
-						$h-=$pdf->ln(0.5);
-					}
-					else {
-						$h-=$pdf->ln(1.5);
-					}					
+					$h-=$pdf->ln();					
 				}
-				//	Meillä on vaan näytettävä tuoteperhetuote
 				else {
-					$pdf->write($h, 1, 5, $s[0], $row["tuoteno"]." ".$row["nimitys"], "snadi", "L", "");
-					$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower(t($row["yksikko"], $kieli), $kieli), "snadi", "R", "");					
-					$h-=$pdf->ln(1.5);
-
-					if($row["kommentti"] != "") {
-						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
-						$pdf->write($h, $nb, 5, $s[0], $row["kommentti"], "snadi", "L", "I");	
-						$h-=$pdf->ln($nb);					
-					}
-					$edperhe=$row["perheid"];					
+					$h-=$pdf->ln();
 				}
+
+				$ei_valia = "";
+				if($row["kommentti"] != "") {
+					$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
+					$pdf->write($h, $nb, 5+$offset, $s[1], $row["kommentti"], $style_komm, "L", "I");	
+					$h-=$pdf->ln($nb);					
+				}
+
+				//	Oisko sarjanumeroita
+				if ($row["kpl"]+$row["varattu"] > 0){
+					$sarjanutunnus = "myyntirivitunnus";
+				}
+				else {
+					$sarjanutunnus = "ostorivitunnus";
+				}
+
+				$query = "	select *
+							from sarjanumeroseuranta
+							where yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+							and $sarjanutunnus='$row[tunnus]'
+							and sarjanumero != ''";
+				$sarjares = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($sarjares) > 0){
+					while($sarjarow = mysql_fetch_array($sarjares)) {
+						$pdf->write($h, 1, 5+$offset, $s[0], t("sn", $kieli).": $sarjarow[sarjanumero]", $style_komm, "L", "I");
+						$h-=$pdf->ln();
+					}
+				}
+
+				if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {
+					$pdf->write($h, 1, 5+$offset, $s[0], t("RS-koodi", $kieli).": $laskurow[asiakkaan_kohde]-$row[asiakkaan_positio]", $style_komm, "L", "I");
+					$h-=$pdf->ln();
+				}
+
+				$h-=$pdf->ln(0.5);
 			}
 			$grand_total+=$summa;
 			$h-=$pdf->ln(3);

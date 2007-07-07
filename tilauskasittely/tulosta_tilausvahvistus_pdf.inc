@@ -251,7 +251,6 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 		if(mysql_num_rows($riresult)>0) {
 
 			$s=$pdf->teeSarakkeet(array(105,20,25));
-			$summa = 0;
 			unset($edperhe);
 			
 			while ($row = mysql_fetch_array($riresult)) {
@@ -355,9 +354,9 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 
 				$h-=$pdf->ln(0.5);
 			}
-			$grand_total+=$summa;
+
+			$grand_total+=$row["rivihinta"];
 			$h-=$pdf->ln(3);
-			
 		}			
 
 		$pdf->write($h, 1, $s[0], $s[2], t("Tilaus yhteensä alv 0%",$kieli).": ", "norm", "R", "B");

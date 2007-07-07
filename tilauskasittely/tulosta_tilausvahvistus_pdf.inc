@@ -353,9 +353,8 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 				}
 
 				$h-=$pdf->ln(0.5);
+				$grand_total+=$row["rivihinta"];
 			}
-
-			$grand_total+=$row["rivihinta"];
 			$h-=$pdf->ln(3);
 		}			
 

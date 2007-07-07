@@ -81,9 +81,15 @@
 			$tyyppi = 2;
 		}
 
-		if (mysql_field_name($result, $i) == "tuoteno" and $uusi=='') {
-			$tyyppi = 3;
-			$tuoteno = $trow[$i]; // otetaan t‰‰ talteen
+		if (mysql_field_name($result, $i) == "tuoteno") {
+			$tuoteno = $trow[$i]; // otetaan t‰‰ talteen				
+			if($uusi == "") {
+				$tyyppi = 3;
+			}
+			else {
+				$ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size'><td>";	
+				$jatko=0;
+			}
 		}
 
 		if (mysql_field_name($result, $i) == "try") {

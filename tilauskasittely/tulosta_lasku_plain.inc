@@ -432,7 +432,13 @@ if (!function_exists('loppu')) {
 		else {
 			$uytunnus = $yhtiorow["ytunnus"];
 		}
-
+        
+        if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
+            $uytunnus = $laskurow['yhtio_ovttunnus'];
+        } else {
+    		$uytunnus = $yhtiorow["maa"]."-".$uytunnus;
+        }
+        
 		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$firstpage, $pieni);
 		$pdf->draw_text(444, 55, $uytunnus,							$firstpage, $pieni);
 		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$firstpage, $pieni);

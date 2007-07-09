@@ -168,8 +168,7 @@ if (isset($usea) and $usea == 1) {
 				FROM kuka, yhtio
 				WHERE kuka='$user' and yhtio.yhtio=kuka.yhtio 
 				ORDER BY nimi";
-	$result = mysql_query($query)
-		or die ("Kysely ei onnistu $query");
+	$result = mysql_query($query) or pupe_error($query);;
 
 	if (mysql_num_rows($result) == 0) {
 		echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä",$browkieli)."!";

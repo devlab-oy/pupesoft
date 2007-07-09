@@ -624,8 +624,10 @@
 			echo "</td>";		
 		}
 
-		// Näytetään poistonappi, jos se on sallittu
-		if (($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $oikeurow['paivitys'] == '1') {
+		// Näytetään poistonappi, jos se on sallittu ja lasku ei ole keikalla
+		$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
+		$keikres = mysql_query($query) or pupe_error($query);
+		if (($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0) {
 
 			echo "	<td class='back'><form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
 					<input type='hidden' name='tee' value='D'>
@@ -1284,8 +1286,10 @@
 						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 						<td class='back' valign='top'><input type='Submit' value='".t("Lisää kommentti")."'></td></form>";
 				}
-
-				if ($oikeurow['paivitys'] == '1') {
+				
+				$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='{$trow["tunnus"]}'";
+				$keikres = mysql_query($query) or pupe_error($query);
+				if ($oikeurow['paivitys'] == '1' and mysql_num_rows($keikres)==0) {
 					echo "<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
 							 <input type='hidden' name='tee' value='D'>
 							 <input type='hidden' name = 'nayta' value='$nayta'>
@@ -1297,8 +1301,10 @@
 			echo "</tr>";
 		}
 		echo "</table>";
-
-		if ($oikeurow['paivitys'] == '1' and $kukarow['taso'] == 1) {
+		
+		$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='{$trow["tunnus"]}'";
+		$keikres = mysql_query($query) or pupe_error($query);
+		if ($oikeurow['paivitys'] == '1' and $kukarow['taso'] == 1 and mysql_num_rows($keikres)==0) {
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 					function verify() {
 						msg = '".t("Haluatko todella poistaa tämän laskun ja sen kaikki tiliöinnit? Tämä voi olla kirjanpitorikos!")."';

@@ -61,6 +61,95 @@
 			$tee = "N";
 		}
 
+		if (is_uploaded_file($_FILES['tositefile']['tmp_name'])) {
+			
+			//	ei koskaan p‰ivitet‰ automaattisesti
+			$tee = "N";
+			
+			// otetaan file extensio
+			$path_parts = pathinfo($_FILES['tositefile']['name']);
+			$ext = strtoupper($path_parts['extension']);
+			
+			// extensio pit‰‰ olla oikein
+			if (!in_array($ext, array("XLS","CSV","TXT"))) {
+				echo "<font class='error'>".t("Ainoastaan .xls .cvs .txt tiedostot sallittuja")."! $ext</font>";
+				$fnimi = "";
+			}
+			// ja file jonkun kokonen
+			elseif ($_FILES['tositefile']['size'] == 0) {
+				echo "<font class='error'>".t("Tiedosto on tyhj‰")."!</font>";
+				$fnimi = "";
+			}
+			else {
+				if(in_array($ext, array("TXT","CSV"))) {
+					$file=file($_FILES['tositefile']['tmp_name'], FILE_IGNORE_NEW_LINES);
+				}
+				else {
+					require_once ('excel_reader/reader.php');
+
+					// ExcelFile
+					$data = new Spreadsheet_Excel_Reader();
+
+					// Set output Encoding.
+					$data->setOutputEncoding('CP1251');
+					$data->setRowColOffset(0);
+					$data->read($_FILES['tositefile']['tmp_name']);
+					
+					$file = $data->sheets[0]['cells'];
+				}
+				
+				$maara=0;
+				foreach($file as $key => $value) {
+					
+					
+					if($maara==0) {
+						if(is_array($value)) {
+							foreach($value as $v8) {
+								$otsikot[]=strtolower($v8);
+							}
+						}
+						else {
+							$rivi=explode("\t",strtolower($key));
+							$otsikot=$rivi;
+						}	
+					}
+					else {
+						if(is_array($value)) {
+							$rivi=$value;
+						}
+						else {
+							$rivi=explode("\t",$key);
+						}
+
+						if(count($rivi)<>count($otsikot)) {
+							echo "<font class='error'>".t("VIRHE!!! aineistovirhe")."rivilla: $maara (".count($rivi)." != ".count($otsikot).")</font>";
+							break;
+						}
+					
+						$rivi=array_combine($otsikot, $rivi);
+						
+						$isumma[$maara] 	= (float) $rivi["summa"];
+						$itili[$maara]  	= (int) $rivi["tilino"];
+						$ikustp[$maara] 	= (int) $rivi["kustp"];
+						$ikustp[$maara]		= (int) $rivi["kustp"];
+						$ikohde[$maara]		= (int) $rivi["kohde"];
+						$ivero[$maara]		= (int) $rivi["alv"];
+						$iselite[$maara] 	= $rivi["selite"];  
+					}
+				
+					$maara++;
+				}
+			
+				//	Lis‰t‰‰n viel‰ 2 tyhj‰‰ rivi‰ loppuun
+				$maara+=2;
+			}
+		}
+		elseif (isset($_FILES['tositefile']['error']) and $_FILES['tositefile']['error'] != 4) {
+			// nelonen tarkoittaa, ettei mit‰‰n file‰ uploadattu.. eli jos on joku muu errori niin ei p‰‰stet‰ eteenp‰in
+			echo "<font class='error'>".t("Tositetiedoston sis‰‰nluku ep‰onnistui")."! (Error: ".$_FILES['userfile']['error'].")</font><br>";
+			$tee = "N";
+		}
+
 		$turvasumma = $summa;
 		$kuittiok = 0; // Onko joku vienneist‰ kassa-tili, jotta kuitti voidaan tulostaa
 
@@ -188,6 +277,8 @@
 		$summa="";
 		$nimi="";
 		$kuitti="";
+		
+		echo "<font class='message'>".t("Tosite luotu")."</font><br>";
 	}
 
 
@@ -211,7 +302,8 @@
 		<option value ='33'>32
 		</select>
 		</td><td><input type = 'submit' value = '".t("Perusta")."'></td>
-		</tr></table></form>";
+		</tr>
+		</table></form>";
 	      $tee='N'; // menn‰‰n suoraan uudelle tositteelle..
 
 
@@ -310,10 +402,21 @@
 		if ($kuitti != '') $kuitti = 'checked';
 		if ($kukarow['kirjoitin'] != '') echo " ".t("Tulosta kuitti")." <input type='checkbox' name='kuitti' $kuitti>";
 		echo "</td></tr>";
-
-		echo "<td colspan = '2'>
-				".t("Selite")." <input type='text' name='selite' value='$selite' maxlength='150' size=60></td></tr>";
-
+		
+		if(is_readable("excel_reader/reader.php")) {
+			$excel = ".xls, ";
+		}
+		else {
+			$excel = "";
+		}
+		
+		echo "	<td colspan = '2'>".t("Selite")." <input type='text' name='selite' value='$selite' maxlength='150' size=60></td>
+				</tr>
+				<tr>
+					<td>".t("Lue tosite tiedostosta")."</td>
+					<td><input type='file' name='tositefile' onchage='submit()'><br><font class='info'>".t("Vain $excel.txt ja .cvs tiedosto sallittuja")."</td>
+				</tr>";
+			
 		// annetaan mahdollisuus lis‰t‰ laskun kuva vaan jos dirikka on oikein ja writable...
 		if (is_writable($yhtiorow['lasku_polku_abs'])) {
 			echo "<tr><td>".t("Mahdollinen tositteen kuva/liite")."</td>";

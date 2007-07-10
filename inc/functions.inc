@@ -127,7 +127,10 @@ if (!function_exists("js_popup")) {
 }
 
 if (!function_exists("tv1dateconv")) {
-	function tv1dateconv($date, $pitka="") {
+	function tv1dateconv($date, $pitka = "") {
+
+		global $laskurow;
+
 		//kääntää mysqln vvvv-kk-pp muodon muotoon pp.kk.vvvv
 		//2007-05-09 12:18:18
 		if (strlen($date) > 10 and $pitka != "") {
@@ -137,7 +140,13 @@ if (!function_exists("tv1dateconv")) {
 			$jatko = "";
 		}
 
-		return substr($date,8,2).".".substr($date,5,2).".".substr($date,0,4).$jatko;
+		if ($laskurow["maa"] == "SE") {
+			return substr($date,0,4)."-".substr($date,5,2)."-".substr($date,8,2).$jatko;
+		}
+		else {
+			return substr($date,8,2).".".substr($date,5,2).".".substr($date,0,4).$jatko;
+		}
+
 	}
 }
 
@@ -220,11 +229,11 @@ if (!function_exists("t")) {
 
 if (!function_exists("maa")) {
 	function maa($code) {
-		
+
 		$query = sprintf("SELECT nimi FROM maat where koodi ='%s' LIMIT 1", mysql_real_escape_string($code));
 		$res = mysql_query($query) or pupe_error($query);
 		$maa = mysql_fetch_array($res);
-		
+
 		// otetaan pois maa koodi
 		return ucfirst(strtolower(substr($maa['nimi'], 5)));
 	}
@@ -911,18 +920,18 @@ if (!function_exists("generoi_sorttauskentta")) {
 		$sorttauskentta = "";
 
 		// varastopaikkajärjestys, tuoteperheet pidetään yhdessä, erikoistuotteet loppuun
-		if ($jarjestys == "0") {			
-			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)), 
-									if(tilausrivi.perheid > 0, (select concat(rpad(upper(t2.hyllyalue), 5, '0'),lpad(upper(t2.hyllynro), 5, '0'),lpad(upper(t2.hyllyvali), 5, '0'),lpad(upper(t2.hyllytaso), 5, '0'), t2.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid), 
-								   		if(tilausrivi.perheid2 > 0, (select concat(rpad(upper(t3.hyllyalue), 5, '0'),lpad(upper(t3.hyllynro), 5, '0'),lpad(upper(t3.hyllyvali), 5, '0'),lpad(upper(t3.hyllytaso), 5, '0'), t3.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2), 
+		if ($jarjestys == "0") {
+			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno)),
+									if(tilausrivi.perheid > 0, (select concat(rpad(upper(t2.hyllyalue), 5, '0'),lpad(upper(t2.hyllynro), 5, '0'),lpad(upper(t2.hyllyvali), 5, '0'),lpad(upper(t2.hyllytaso), 5, '0'), t2.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid),
+								   		if(tilausrivi.perheid2 > 0, (select concat(rpad(upper(t3.hyllyalue), 5, '0'),lpad(upper(t3.hyllynro), 5, '0'),lpad(upper(t3.hyllyvali), 5, '0'),lpad(upper(t3.hyllytaso), 5, '0'), t3.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno))) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2),
 											tilausrivi.tuoteno))) as sorttauskentta";
 		}
 
 		// varastopaikkajärjestys, tuoteperheet pidetään yhdessä
-		elseif ($jarjestys == "1") {		
-			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno), 
-									if(tilausrivi.perheid > 0, (select concat(rpad(upper(t2.hyllyalue), 5, '0'),lpad(upper(t2.hyllynro), 5, '0'),lpad(upper(t2.hyllyvali), 5, '0'),lpad(upper(t2.hyllytaso), 5, '0'), t2.tuoteno, rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid), 
-								   		if(tilausrivi.perheid2 > 0, (select concat(rpad(upper(t3.hyllyalue), 5, '0'),lpad(upper(t3.hyllynro), 5, '0'),lpad(upper(t3.hyllyvali), 5, '0'),lpad(upper(t3.hyllytaso), 5, '0'), t3.tuoteno, rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2), 
+		elseif ($jarjestys == "1") {
+			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno),
+									if(tilausrivi.perheid > 0, (select concat(rpad(upper(t2.hyllyalue), 5, '0'),lpad(upper(t2.hyllynro), 5, '0'),lpad(upper(t2.hyllyvali), 5, '0'),lpad(upper(t2.hyllytaso), 5, '0'), t2.tuoteno, rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid),
+								   		if(tilausrivi.perheid2 > 0, (select concat(rpad(upper(t3.hyllyalue), 5, '0'),lpad(upper(t3.hyllynro), 5, '0'),lpad(upper(t3.hyllyvali), 5, '0'),lpad(upper(t3.hyllytaso), 5, '0'), t3.tuoteno, rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0'), tilausrivi.tuoteno) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2),
 											tilausrivi.tuoteno))) as sorttauskentta";
 		}
 
@@ -939,17 +948,17 @@ if (!function_exists("generoi_sorttauskentta")) {
 
 		// tuotenumerojärjestys, tuoteperheet pidetään yhdessä, erikoistuotteet loppuun
 		elseif ($jarjestys == "4") {
-			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), tilausrivi.tuoteno), 
-									if(tilausrivi.perheid > 0, (select concat(t2.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), tilausrivi.tuoteno)) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid), 
-										if(tilausrivi.perheid2 > 0, (select concat(t3.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), tilausrivi.tuoteno)) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2), 
+			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), tilausrivi.tuoteno),
+									if(tilausrivi.perheid > 0, (select concat(t2.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), tilausrivi.tuoteno)) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid),
+										if(tilausrivi.perheid2 > 0, (select concat(t3.tuoteno, if (tilausrivi.hyllyalue = '' and tilausrivi.hyllynro = '' and tilausrivi.hyllyvali = '' and tilausrivi.hyllytaso = '', concat('ÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖÖ', tilausrivi.tuoteno), tilausrivi.tuoteno)) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2),
 											tilausrivi.tuoteno))) as sorttauskentta";
 		}
 
 		// tuotenumerojärjestys, tuoteperheet pidetään yhdessä
 		elseif ($jarjestys == "5") {
-			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, tilausrivi.tuoteno, 
-									if(tilausrivi.perheid > 0, (select concat(t2.tuoteno, tilausrivi.tuoteno) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid), 
-										if(tilausrivi.perheid2 > 0, (select concat(t3.tuoteno, tilausrivi.tuoteno) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2), 
+			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, tilausrivi.tuoteno,
+									if(tilausrivi.perheid > 0, (select concat(t2.tuoteno, tilausrivi.tuoteno) from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid),
+										if(tilausrivi.perheid2 > 0, (select concat(t3.tuoteno, tilausrivi.tuoteno) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2),
 											tilausrivi.tuoteno))) as sorttauskentta";
 		}
 
@@ -966,17 +975,17 @@ if (!function_exists("generoi_sorttauskentta")) {
 
 		// tilausjärjestys, tuoteperheet pidetään yhdessä
 		elseif ($jarjestys == "8") {
-			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, tilausrivi.tunnus, 
-									if (tilausrivi.perheid > 0, concat(tilausrivi.perheid, tilausrivi.tunnus), 
-										if(tilausrivi.perheid2 > 0, concat(tilausrivi.perheid2, tilausrivi.tunnus), 
+			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, tilausrivi.tunnus,
+									if (tilausrivi.perheid > 0, concat(tilausrivi.perheid, tilausrivi.tunnus),
+										if(tilausrivi.perheid2 > 0, concat(tilausrivi.perheid2, tilausrivi.tunnus),
 											tilausrivi.tunnus))) as sorttauskentta";
 		}
-		
+
 		// käänteinen tilausjärjestys, tuoteperheet pidetään yhdessä ((melkein) sama kuin tilaus myynnissä)
 		elseif ($jarjestys == "A") {
-			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, tilausrivi.tunnus, 
-									if (tilausrivi.perheid > 0, tilausrivi.perheid, 
-										if(tilausrivi.perheid2 > 0, tilausrivi.perheid2, 
+			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, tilausrivi.tunnus,
+									if (tilausrivi.perheid > 0, tilausrivi.perheid,
+										if(tilausrivi.perheid2 > 0, tilausrivi.perheid2,
 											tilausrivi.tunnus))) * -1 as sorttauskentta";
 		}
 
@@ -984,7 +993,7 @@ if (!function_exists("generoi_sorttauskentta")) {
 		elseif ($jarjestys == "9") {
 			$sorttauskentta = "tilausrivi.tunnus as sorttauskentta";
 		}
-		
+
 		// joku default
 		else {
 			$sorttauskentta = "tilausrivi.tunnus as sorttauskentta";
@@ -1604,7 +1613,7 @@ if (!function_exists("tuotteen_myyntihinta")) {
 if (!function_exists("kalenteritapahtuma")) {
 	function kalenteritapahtuma ($tyyppi, $tapa, $viesti, $liitostunnus, $kuittaus="", $henkilo="", $otunnus="") {
 		global $yhtiorow, $kukarow;
-		
+
 		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$asrow = mysql_fetch_array($result);
@@ -1620,7 +1629,7 @@ if (!function_exists("kalenteritapahtuma")) {
 					tyyppi   		= '$tyyppi',
 					pvmalku  		= now(),
 					otunnus  		= '$otunnus',
-					kuittaus  		= '$kuittaus',										
+					kuittaus  		= '$kuittaus',
 					kentta01 		= '$viesti'";
  		$result = mysql_query($kysely) or pupe_error($kysely);
 	}

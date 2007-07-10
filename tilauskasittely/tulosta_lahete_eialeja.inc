@@ -114,11 +114,16 @@ if (!function_exists('alku')) {
 	
 		//maksuehto tekstinä
 		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+		
+		// haetaan max(kerattyaika)
+		$query  = "SELECT max(kerattyaika) as kerattyaika from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
+		$keraresult = mysql_query($query) or pupe_error($query);
+		$kerarow = mysql_fetch_array($keraresult);
 			
 		$pdf->draw_rectangle(780, 380, 680, 580, $firstpage, $rectparam);
 		$pdf->draw_text(390, 760, t("Asiakasnumero", $kieli).": ".$laskurow["ytunnus"], 							$firstpage, $p);
-		$pdf->draw_text(390, 750, t("Päiväys", $kieli).": ".substr($laskurow["lahetepvm"],0,10) , 					$firstpage, $p);
-		$pdf->draw_text(390, 740, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], 	$firstpage, $p);
+		$pdf->draw_text(390, 750, t("Päiväys", $kieli).": ".tv1dateconv($kerarow["kerattyaika"]), 					$firstpage, $p);
+		$pdf->draw_text(390, 740, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . tv1dateconv($laskurow["luontiaika"], "pitka"), 	$firstpage, $p);
 		$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], 						$firstpage, $p);
 		$pdf->draw_text(390, 710, t("Toimitusehto", $kieli).": ".$laskurow["toimitusehto"], 						$firstpage, $p);
 		$pdf->draw_text(390, 700, t("Maksuehto", $kieli).": ".$maksuehto, 											$firstpage, $p);

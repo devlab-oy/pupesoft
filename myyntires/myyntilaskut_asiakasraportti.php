@@ -287,14 +287,8 @@
 				$salisa = " and lasku.valkoodi='$savalkoodi' ";
 			}
 
-			if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi) and $valuutassako == 'V') {
-				$selectit = "	laskunro, tapvm, erpcm, summa_valuutassa-saldo_maksettu_valuutassa summa, kapvm, kasumma_valuutassa kasumma, mapvm,
-								TO_DAYS(mapvm) - TO_DAYS(erpcm) ika, viikorkoeur korko, olmapvm korkolaspvm, lasku.tunnus, saldo_maksettu_valuutassa saldo_maksettu ";
-			}
-			else {
-				$selectit = "	laskunro, tapvm, erpcm, summa-saldo_maksettu summa, kapvm, kasumma, mapvm,
-								TO_DAYS(mapvm) - TO_DAYS(erpcm) ika, viikorkoeur korko, olmapvm korkolaspvm, lasku.tunnus, saldo_maksettu" ;
-			}
+			$selectit = "	laskunro, tapvm, erpcm, summa-saldo_maksettu summa, summa_valuutassa-saldo_maksettu_valuutassa summa_valuutassa, kapvm, kasumma, kasumma_valuutassa, mapvm,
+								TO_DAYS(mapvm) - TO_DAYS(erpcm) ika, viikorkoeur korko, olmapvm korkolaspvm, lasku.tunnus, saldo_maksettu, saldo_maksettu_valuutassa, valkoodi" ;
 
 			$query = "	SELECT
 						$selectit
@@ -344,13 +338,6 @@
 					echo "<option value = '$aasrow[valuutat]' $sel>$aasrow[valuutat]</option>";
 				}
 
-				if ($savalkoodi != "" and strtoupper($yhtiorow['valkoodi']) != strtoupper($savalkoodi)) {
-					echo "	<th>".t("Summat").":</th>
-							<td><select name='valuutassako' onchange='submit();'>
-							<option value = ''>".t("Yrityksen valuutassa")."</option>
-							<option value = 'V' $chk4>".t("Laskun valuutassa")."</option>
-							</select></td>";
-				}
 			}
 
 			echo "</tr>";
@@ -374,7 +361,7 @@
 			echo "<td class='back'></td></tr>";
 			echo "<tr>";
 
-			for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
+			for ($i = 0; $i < mysql_num_fields($result)-6; $i++) {
 				echo "<td><input type='text' size='$kentankoko[$i]' name = 'haku[$i]' value = '$haku[$i]'></td>";
 			}
 
@@ -394,13 +381,26 @@
 				if ($maksurow["saldo_maksettu"] != 0 and $maksurow["mapvm"] == "0000-00-00") {
 					$maksurow["summa"] .= "*";
 				}
-				echo "<td align='right'>$maksurow[summa]</td>";
+				echo "<td align='right'>$maksurow[summa] {$yhtiorow['valkoodi']}";
+				if ($maksurow['summa_valuutassa'] != 0 and $maksurow['summa'] != $maksurow['summa_valuutassa']) {
+					echo "<br />{$maksurow['summa_valuutassa']} {$maksurow['valkoodi']}";
+				}
+				
+				echo "</td>";
 
 				if ($maksurow["kapvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["kapvm"])."</td>";
 				else echo "<td></td>";
 
-				if ($maksurow["kasumma"] != 0) echo "<td align='right'>$maksurow[kasumma]</td>";
-				else echo "<td></td>";
+				if ($maksurow["kasumma"] != 0) {
+					echo "<td align='right'>$maksurow[kasumma]";
+					if ($maksurow['kasumma_valuutassa'] != 0 and $maksurow['kasumma'] != $maksurow['kasumma_valuutassa']) {
+						echo "<br />" . $maksurow['kasumma_valuutassa'] . ' ' . $maksurow['valkoodi'];
+					}
+					echo "</td>";
+				}
+				else {
+					 echo "<td></td>";
+				}
 
 				if ($maksurow["mapvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["mapvm"])."</td>";
 				else echo "<td></td>";

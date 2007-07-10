@@ -166,7 +166,6 @@ if (!function_exists("dateconv")) {
 
 if (!function_exists("t")) {
 	function t($stringi, $kieli = "") {
-
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
 		global $yhtiorow, $kukarow, $useslave, $link;
 
@@ -222,8 +221,15 @@ if (!function_exists("t")) {
 			$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
 			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 2)!");
 		}
-
-		return $stringi;
+		
+		//	Palautetaan muotoiltu stringi!!!
+		if(func_num_args()>2) {
+		    $arg = func_get_args();
+			return sprintf($stringi, $arg[2],$arg[3],$arg[4],$arg[5],$arg[6]);
+		}
+		else {
+			return $stringi;
+		}
 	}
 }
 

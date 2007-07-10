@@ -1627,7 +1627,7 @@ if ($tee == '') {
 					echo "<font class='error'>".t("HUOM!!!!!! Asiakas on myyntikiellossa")."!!!!!<br></font>";
 				}
 
-				echo "$faktarow[fakta]&nbsp;</td></tr>\n";
+				echo "<strong>$faktarow[fakta]</strong>&nbsp;</td></tr>\n";
 			}
 		}
 		else {

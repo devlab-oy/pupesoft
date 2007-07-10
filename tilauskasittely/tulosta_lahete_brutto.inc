@@ -372,7 +372,7 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(30, 50, $yhtiorow["nimi"], 		$firstpage, $p);
 		$pdf->draw_text(30, 40, t("puh. ").$yhtiorow["puhelin"], 	$firstpage, $p);
 		$pdf->draw_text(30, 30, t("email. ").$yhtiorow["email"], 	$firstpage, $p);
-		$pdf->draw_text(30, 20, t("www. ").$yhtiorow["www"], 		$firstpage, $p);
+		$pdf->draw_text(30, 20, t("fax. ").$yhtiorow["fax"], 		$firstpage, $p);
 	
 		$pdf->draw_paragraph(60,150,40,540, t("Tilausviite", $kieli).": ".$laskurow["viesti"], $firstpage, $p);
 		$pdf->draw_paragraph(40,150,10,540, t("Kommentti", $kieli).":   ".$laskurow["comments"], $firstpage, $p);

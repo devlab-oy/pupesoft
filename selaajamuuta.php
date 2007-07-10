@@ -1,6 +1,16 @@
 <?php
 	require "inc/parametrit.inc";
 
+	echo "
+		<script>
+		var DH = 0;var an = 0;var al = 0;var ai = 0;if (document.getElementById) {ai = 1; DH = 1;}else {if (document.all) {al = 1; DH = 1;} else { browserVersion = parseInt(navigator.appVersion); if ((navigator.appName.indexOf('Netscape') != -1) && (browserVersion == 4)) {an = 1; DH = 1;}}} function fd(oi, wS) {if (ai) return wS ? document.getElementById(oi).style:document.getElementById(oi); if (al) return wS ? document.all[oi].style: document.all[oi]; if (an) return document.layers[oi];}
+		function pw() {return window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;}
+		function mouseX(evt) {if (evt.pageX) return evt.pageX; else if (evt.clientX)return evt.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft); else return null;}
+		function mouseY(evt) {if (evt.pageY) return evt.pageY; else if (evt.clientY)return evt.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop); else return null;}
+		function popUp(evt,oi) {if (DH) {var wp = pw(); ds = fd(oi,1); dm = fd(oi,0); st = ds.visibility; if (dm.offsetWidth) ew = dm.offsetWidth; else if (dm.clip.width) ew = dm.clip.width; if (st == \"visible\" || st == \"show\") { ds.visibility = \"hidden\"; } else {tv = mouseY(evt) + 20; lv = mouseX(evt) - (ew/4); if (lv < 2) lv = 2; else if (lv + ew > wp) lv -= ew/2; if (!an) {lv += 'px';tv += 'px';} ds.left = lv; ds.top = tv; ds.visibility = \"visible\";}}}
+		</script>
+	";
+	
 	echo "<font class='head'>".t("Tiliöintien muutos/selailu")."</font><hr>";
 
 	if ((($tee == 'U') or ($tee == 'P') or ($tee == 'M') or ($tee == 'J')) and ($oikeurow['paivitys'] != 1)) {
@@ -12,8 +22,8 @@
 		$query = "SELECT ebid, nimi, concat_ws(' ', tapvm, mapvm) laskunpvm FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 		$result = mysql_query ($query) or die ("Kysely ei onnistu $query");
 		if (mysql_num_rows($result) > 0) {
-			$trow=mysql_fetch_array ($result);
-			$laskunpvm = $trow['laskunpvm'];
+			$laskurow=mysql_fetch_array ($result);
+			$laskunpvm = $laskurow['laskunpvm'];
 		}
 		else {
 			echo "".t("Lasku katosi")." $tunnus";
@@ -53,7 +63,7 @@
 
 //Ylös hakukriteerit
 	if ($viivatut == 'on') $viivacheck='checked';
-	echo "<div id='ylos' style='height:30px;width:800px;overflow:auto;'>
+	echo "<div id='ylos' style='height:50px;width:800px;overflow:auto;z-index:30;'>
 			<form name = 'valinta' action = '$PHP_SELF' method='post'>
 			<table>
 			<tr><th>".t("Anna kausi, muodossa kk-vvvv").":</th>
@@ -77,21 +87,30 @@
 
 
 // Vasemmalle laskuluettelo
+	if ($vv < 2000) $vv += 2000;
+	$lvv=$vv;
+	$lkk=$kk;
+	$lkk++;
+	if ($lkk > 12) {
+		$lkk='01';
+		$lvv++;
+	}
 	
-	$query = "	SELECT tunnus, nimi, $pvm, summa
+	
+	$query = "	SELECT tunnus, nimi, $pvm, summa, comments
 				FROM lasku use index (yhtio_tila_tapvm)
-				WHERE yhtio = '$kukarow[yhtio]' and left($pvm,7) = '$vv-$kk' and $lajiv
+				WHERE yhtio = '$kukarow[yhtio]' and $pvm >= '$vv-$kk-01' and $pvm < '$lvv-$lkk-01' and $lajiv
 				ORDER BY tapvm desc, summa desc";
 
 	$result = mysql_query($query) or pupe_error($query);
-
+	$loppudiv ='';
 	if (mysql_num_rows($result) == 0) {
 		echo "<font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font>";
 
 	}
 	else {
-		echo "<div id='vasen' style='height:300px;width:300px;overflow:auto;float:left;'><table><tr>";
-		for ($i = 1; $i < mysql_num_fields($result); $i++) {
+		echo "<div id='vasen' style='height:300px;width:330px;overflow:auto;float:left;z-index:20;'><table><tr>";
+		for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
 		}
 		echo "</tr>";
@@ -108,7 +127,7 @@
 				$tyylil='</th>';
 				$seuraava = 1;
 			}
-			for ($i=1; $i<mysql_num_fields($result); $i++) {
+			for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 				if ($i==1) {
 					if (strlen($trow[$i])==0) $trow[$i]="(tyhjä)";
 					echo "$tyylia<a href name='$trow[tunnus]'><a href='$PHP_SELF?tee=E&tunnus=$trow[tunnus]&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$trow[tunnus]'>$trow[$i]</a></a>$tyylil";
@@ -118,6 +137,15 @@
 					echo "$tyylia$trow[$i]$tyylil";
 				}
 			}
+			
+			if ($trow['comments'] != '') {
+				$loppudiv .= "<div id='".$trow['tunnus']."' style='position:absolute; z-index:1; visibility:hidden; width:500px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px; overflow:visible;'>";
+				$loppudiv .= $trow["comments"]."<br></div>";
+				echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'".$trow['tunnus']."')\" onmouseover=\"popUp(event,'".$trow['tunnus']."')\"><img src='pics/lullacons/alert.png'></a></td>";
+			}
+			else 
+				echo "<td></td>";
+			
 			echo "</tr>";
 		}
 	}
@@ -125,7 +153,7 @@
 
 
 // Oikealle tiliöinnit
-	echo "<div id='oikea' style='height:300px;width:750px;overflow:auto;float:none;'>";
+	echo "<div id='oikea' style='height:300px;width:750px;overflow:auto;float:none;z-index:10;'>";
 	
 	if ($tee == 'P') { // Olemassaolevaa tiliöintiä muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
 		$query = "SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm
@@ -212,12 +240,12 @@
 	echo "</div>";
 	
 //Alaosan laskun kuva
-	echo "<div id='alas' style='height:100px;width:800px;overflow:auto; float:none;'>";
+	echo "<div id='alas' style='height:200px;width:1010px;overflow:auto; float:none;'>";
 	if ($tunnus != '') {
-		if (strlen($trow['ebid']) > 0) {
-			$ebid = $trow['ebid'];
+		if (strlen($laskurow['ebid']) > 0) {
+			$ebid = $laskurow['ebid'];
 			require "inc/ebid.inc";
-			echo "<iframe src='$url' name='alaikkuna' width='100%' align='bottom' scrolling='auto'></iframe>";
+			echo "<iframe src='$url' name='alaikkuna' width='1000px' align='bottom' scrolling='auto'></iframe>";
 		}
 		else {
 			//	Onko kuva tietokannassa?
@@ -229,7 +257,7 @@
 				}
 			}
 			else {
-				echo "<font class='message'>".t("Paperilasku! Kuvaa ei ole saatavilla")."</font>";
+				echo "<font class='message'>".t("Paperilasku! Kuvaa ei ole saatavilla ($laskurow[ebid])")."</font>";
 			}
 		}
 	}
@@ -237,5 +265,6 @@
 		echo "<font class='message'> ".t("Laskua ei ole valittu")."</font>";
 	}
 	echo "</div>";
+	echo $loppudiv;
 	require "inc/footer.inc";
 ?>

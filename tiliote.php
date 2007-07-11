@@ -18,7 +18,7 @@
 	else {
 		require ("inc/parametrit.inc");
 
-		echo "<font class='head'>Tiliotteen, LMP:n ja viitemaksujen käsittely</font><hr><br><br>";
+		echo "<font class='head'>Tiliotteen, LMP:n, kurssien ja viitemaksujen käsittely</font><hr><br><br>";
 	}
 
 	// katotaan onko faili uploadttu

@@ -75,7 +75,7 @@ if ($monta > 1 and $monta <= $limit) {
 		echo "<input type='hidden' name='ytunnus' value='$numero'>";
 		echo "<tr>
 				<td>$toimittaja[ytunnus]</td>
-				<td>$toimittaja[nimi]</td>
+				<td>$toimittaja[nimi] $toimittaja[nimitark]</td>
 				<td>$toimittaja[osoite]</td>
 				<td>$toimittaja[postino]</td>
 				<td>$toimittaja[postitp]</td>";

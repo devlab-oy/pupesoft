@@ -11,7 +11,7 @@
 		if (strlen($kausi) == 10) $laji = 'o';
 
 		if ($laji == 'O') {
-			$query = "	SELECT ytunnus, nimi, postitp
+			$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, postitp
 						FROM toimi
 						WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -91,7 +91,7 @@
 			
 			if ($ytunnus != "") {
 				//Jos taas p‰‰ss‰t‰‰n $ytunnusta niin haetaan sen perusteella
-				$query = "	SELECT ytunnus, nimi, postitp
+				$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, postitp
 							FROM toimi
 							WHERE ytunnus 	= '$ytunnus' 
 							and yhtio 		= '$kukarow[yhtio]'
@@ -101,7 +101,7 @@
 			}
 			else {
 				//Jos k‰ytet‰‰n $tunnusta niin k‰ytet‰‰n liitostunnusta
-				$query = "	SELECT ytunnus, nimi, postitp
+				$query = "	SELECT ytunnus, concat_ws(' ', nimi, nimitark) nimi, postitp
 							FROM toimi
 							WHERE tunnus 	= '$tunnus' 
 							and yhtio 		= '$kukarow[yhtio]'";
@@ -248,7 +248,7 @@
 	}
 	
 	if ($lisat != '') {
-		$query = "	SELECT toimi.tunnus, toimi.ytunnus, toimi.nimi, toimi.postitp, round(sum(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi)),2) avoimet
+		$query = "	SELECT toimi.tunnus, toimi.ytunnus, concat_ws(' ', toimi.nimi, toimi.nimitark) nimi, toimi.postitp, round(sum(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi)),2) avoimet
 					FROM toimi
 					LEFT JOIN lasku ON toimi.yhtio=lasku.yhtio and toimi.tunnus=lasku.liitostunnus and tila in ('H','M')
 					WHERE toimi.yhtio='$kukarow[yhtio]' $lisat

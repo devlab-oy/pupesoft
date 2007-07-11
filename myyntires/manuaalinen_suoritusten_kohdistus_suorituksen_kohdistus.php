@@ -85,7 +85,7 @@ $result = mysql_query($query) or pupe_error($query);
 
 if ($ytunnusrow=mysql_fetch_array($result)) {
 	$ytunnus = $ytunnusrow[0];
-} 
+}
 else {
 	echo "<font class='head'>".t("Asiakkaalta ei löydy y-tunnusta")."</font>";
 	exit;
@@ -96,15 +96,15 @@ if (strtoupper($suoritus['valkoodi']) != strtoupper($yhtiorow['valkoodi'])) {
 }
 else {
 	$query = "SELECT summa-saldo_maksettu summa, kasumma, ";
-	
+
 }
 
 $query .= " laskunro, erpcm, kapvm, viite, lasku.tunnus
 			FROM lasku USE INDEX (yhtio_tila_mapvm)
-           	WHERE yhtio  = '$kukarow[yhtio]' 
+           	WHERE yhtio  = '$kukarow[yhtio]'
 			and tila     = 'U'
-			and mapvm    = '0000-00-00' 
-			and valkoodi = '$valkoodi' 
+			and mapvm    = '0000-00-00'
+			and valkoodi = '$valkoodi'
 			and (ytunnus = '$ytunnus' or nimi = '$asiakas_nimi' or liitostunnus = '$asiakas_tunnus')
 			$lisa
 			ORDER BY $jarjestys";
@@ -136,12 +136,12 @@ while ($maksurow=mysql_fetch_array ($result)) {
   $query="select count(*) maara from tiliointi where tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.ltunnus = '$maksurow[tunnus]' and tilino='$suoritus_ttilino'";
   $cresult = mysql_query($query) or pupe_error($query);
   $maararow=mysql_fetch_array ($cresult);
-  
+
 	if ($maararow['maara'] > 0) {
 	  	$laskucount++;
 		$lasku_tunnus = $maksurow['tunnus'];
 		$bruttokale = $maksurow['summa']-$maksurow['kasumma'];
-		
+
 		echo "<tr class='aktiivi'><th>";
 		echo "<input type='checkbox' name='lasku_tunnukset[]' value='$lasku_tunnus' onclick='javascript:paivita1(this)'>";
 		echo "<input type='hidden' name='lasku_summa' value='$maksurow[summa]'>";
@@ -153,11 +153,16 @@ while ($maksurow=mysql_fetch_array ($result)) {
 	else {
 		echo "<tr><th colspan = '2'>".t('Väärä saamisettili')." ($suoritus_ttilino)</th>";
 	}
-	for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
-		echo "<td>$maksurow[$i]</td>";
-	}
+
+	echo "<td>$maksurow[summa]</td>";
+	echo "<td>$maksurow[kasumma]</td>";
+	echo "<td><a href='../muutosite.php?tee=E&tunnus=$maksurow[tunnus]'>$maksurow[laskunro]</a></td>";
+	echo "<td>$maksurow[erpcm]</td>";
+	echo "<td>$maksurow[kapvm]</td>";
+	echo "<td>$maksurow[viite]</td>";
 	echo "<th></th></tr>\n";
 }
+
 echo "<input type='hidden' name='suoritus_tunnus' value='$suoritus_tunnus'>";
 echo "</th></tr>";
 echo "<tr><th colspan='9'> ".t("L = lasku ilman kassa-alennusta K = lasku kassa-alennuksella")."</th></tr>";
@@ -173,12 +178,12 @@ echo "<script language='JavaScript'><!--
 	function paivita1(checkboxi) {";
 
 if($laskucount==1)
-     echo " 
+     echo "
 		if(checkboxi==document.forms[2].elements['lasku_tunnukset[]']) {
        		document.forms[2].elements['lasku_tunnukset_kale[]'].checked=false;
     	}";
-else { 
-	echo "	
+else {
+	echo "
 		for(i=0;i<document.forms[2].elements['lasku_tunnukset[]'].length;i++) {
       		if(checkboxi==document.forms[2].elements['lasku_tunnukset[]'][i]) {
          		document.forms[2].elements['lasku_tunnukset_kale[]'][i].checked=false;
@@ -188,16 +193,16 @@ else {
 echo "
   		paivitaSumma();
 	}
-	
+
 	function paivita2(checkboxi) {";
 
 if($laskucount==1) {
-     echo "	
+     echo "
 		if(checkboxi==document.forms[2].elements['lasku_tunnukset_kale[]']) {
        		document.forms[2].elements['lasku_tunnukset[]'].checked=false;
     	}";
 }
-else { 
+else {
 	echo "
 		for(i=0;i<document.forms[2].elements['lasku_tunnukset_kale[]'].length;i++) {
       		if(checkboxi==document.forms[2].elements['lasku_tunnukset_kale[]'][i]) {
@@ -207,13 +212,13 @@ else {
 }
 echo "	paivitaSumma();
 	}
-	
+
 	function paivitaSumma() {
   		var i;
   		var summa=0.0;";
 
 if($laskucount == 1) {
-     echo "	
+     echo "
 		if(document.forms[2].elements['lasku_tunnukset[]'].checked) {
         	summa+=1.0*document.forms[2].lasku_summa.value;
       	}
@@ -253,8 +258,8 @@ echo "	document.forms[0].summa.value=Math.round(summa*100)/100;
 		var maara=0;
 		var kmaara=0;";
 
-if($laskucount>1) 
-	echo "	
+if($laskucount>1)
+	echo "
 		for(i=0;i<document.forms[2].elements['lasku_tunnukset[]'].length;i++) {
 			if(document.forms[2].elements['lasku_tunnukset[]'][i].checked) {
         		maara+=1.0;
@@ -263,7 +268,7 @@ if($laskucount>1)
     	for(i=0;i<document.forms[2].elements['lasku_tunnukset_kale[]'].length;i++) {
       		if(document.forms[2].elements['lasku_tunnukset_kale[]'][i].checked) {
         		kmaara+=1.0;
-      		}	
+      		}
     	}
 
 		maara = maara + kmaara;
@@ -288,7 +293,7 @@ if($laskucount==1) {
        		maara=1;
     	}";
 }
-	
+
 echo "
 		if ((maara==0) == true) {
 			alert('".t("Jotta voit kohdistaa, on ainakin yksi lasku valittava. Jos mitään kohdistettavaa ei löydy, klikkaa menusta Manuaalikohdistus päästäksesi takaisin alkuun")."');

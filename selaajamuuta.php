@@ -98,7 +98,7 @@
 	
 	
 	$query = "	SELECT tunnus, nimi, $pvm, summa, comments
-				FROM lasku use index (yhtio_tila_tapvm)
+				FROM lasku
 				WHERE yhtio = '$kukarow[yhtio]' and $pvm >= '$vv-$kk-01' and $pvm < '$lvv-$lkk-01' and $lajiv
 				ORDER BY tapvm desc, summa desc";
 

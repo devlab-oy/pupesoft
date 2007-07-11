@@ -63,7 +63,7 @@
 
 //Ylös hakukriteerit
 	if ($viivatut == 'on') $viivacheck='checked';
-	echo "<div id='ylos' style='height:50px;width:800px;overflow:auto;z-index:30;'>
+	echo "<div id='ylos' style=''>
 			<form name = 'valinta' action = '$PHP_SELF' method='post'>
 			<table>
 			<tr><th>".t("Anna kausi, muodossa kk-vvvv").":</th>
@@ -109,7 +109,8 @@
 
 	}
 	else {
-		echo "<div id='vasen' style='height:300px;width:330px;overflow:auto;float:left;z-index:20;'><table><tr>";
+		$seutunnus = 0;
+		echo "<div id='vasen' style='position: absolute; top: 100px; height: 200px; width:520px; overflow: scroll;'><table><tr>";
 		echo "<th></th>";
 		for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
@@ -121,6 +122,8 @@
 				$seutunnus = $trow['tunnus'];
 				$seuraava = 0;
 			}
+
+			
 			$tyylia='<td>';
 			$tyylil='</td>';
 			if ($trow['tunnus']==$tunnus) {
@@ -154,12 +157,12 @@
 	echo "</tr></table></div>";
 
 //Oikealla laskun kuva
-	echo "<div id='oikea' style='height:300px; width:470x; overflow:auto; float:left;'>";
+	echo "<div id='oikea' style='position: absolute; top: 100px; left: 525px; height: 700px; width:520px; overflow: scroll;'>";
 	if ($tunnus != '') {
 		if (strlen($laskurow['ebid']) > 0) {
 			$ebid = $laskurow['ebid'];
 			require "inc/ebid.inc";
-			echo "<iframe src='$url' name='alaikkuna' width='465px' height='300px' align='bottom' scrolling='auto'></iframe>";
+			echo "<iframe src='$url' name='alaikkuna' width='510px' height='800px' align='bottom' scrolling='auto'></iframe>";
 		}
 		else {
 			//	Onko kuva tietokannassa?
@@ -181,7 +184,7 @@
 	echo "</div>";
 
 // Alas tiliöinnit
-	echo "<div id='alas' style='height:300px; width:800px; overflow:auto; float:left;'>";
+	echo "<div id='alas' style='position: absolute; top: 300px; height: 500px; width:520px; overflow: scroll;''>";
 	 
 	if ($tee == 'P') { // Olemassaolevaa tiliöintiä muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
 		$query = "SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm
@@ -267,7 +270,7 @@
 	
 	echo $loppudiv;
 	
-	echo "<div id='footer' style='position:static;'>",
+	echo "<div id='footer' style='position: absolute; top:780px;'>",
 	require "inc/footer.inc";
 	echo "</div>";
 ?>

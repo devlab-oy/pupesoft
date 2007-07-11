@@ -7,6 +7,31 @@
 
 	$index = "";
 
+	if ($tee == 'VS') { // S = Etsitään summaa laskulta
+		$summa1 = str_replace( ",", ".", $summa1);
+		$summa2 = str_replace( ",", ".", $summa2);
+	
+		if (strlen($summa2) == 0) {
+			$summa2 = $summa1;
+		}
+	
+		$summa1 += 0;
+		$summa2 += 0;
+
+		$ehto = "tila = 'U' and ";
+
+		$index = " use index (yhtio_tila_summavaluutassa) ";
+	
+		if ($summa1 == $summa2) {
+			$ehto .= "summa_valuutassa = " . $summa1;
+			$jarj = "tapvm desc";
+		}
+		else {
+			$ehto .= "summa_valuutassa >= " . $summa1 . " and summa_valuutassa <= " . $summa2;
+			$jarj = "summa_valuutassa, tapvm";
+		}
+	}
+
 	if ($tee == 'S') { // S = Etsitään summaa laskulta
 		$summa1 = str_replace( ",", ".", $summa1);
 		$summa2 = str_replace( ",", ".", $summa2);
@@ -142,6 +167,7 @@
 				<td>Valitse lasku</td>
 				<td><select name = 'tee'>
 				<option value = 'S'>".t("summalla")."
+				<option value = 'VS'>".t("valuuttasummalla")."
 				<option value = 'N'>".t("nimellä")."
 				<option value = 'V'>".t("viitteellä")."
 				<option value = 'L'>".t("laskunnumerolla")."

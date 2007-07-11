@@ -422,15 +422,17 @@ else {
 	if (abs($orow["hinta"]-$loppusumma_valuutassa) <= 0.5) {
 		$loppusumma_valuutassa = sprintf("%.2f",$orow["hinta"]);
 	}
-	
-	// Laskun loppusumma pyöristetään vain jos laskun valuutta on yhtiön kotivaluutassa
-	if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"])) and ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o')) {
-        $loppusumma = round($loppusumma,0);
-	}
-	
-	// Valuuttasummakin pyöristetään jos on tarvetta
+
+	// jos halutaan pyöristää laskun loppusumma
 	if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
-        $loppusumma_valuutassa = round($loppusumma_valuutassa,0);
+		// jos ollaan kotivaluutassa pyoristetääm loppusumma
+		if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
+        	$loppusumma = round($loppusumma,0);
+		}
+		// jos ollaan eri kuin kotivaluutassa pyöristetään loppusumma_valuutassa
+		if (trim(strtoupper($orow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$loppusumma_valuutassa = round($loppusumma_valuutassa,0);
+		}
 	}
 	
 	$query = "	UPDATE lasku

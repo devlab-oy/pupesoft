@@ -6,10 +6,21 @@ $tulos_ulos_tiliointi = "";
 
 //Tehtaan tiliointiaineisto suoraan sql:lla
 $query = "	SELECT tilausrivi.alv,
-			tuote.tilino, tuote.tilino_eu, tuote.tilino_ei_eu,
-			tuote.kustp, tuote.kohde, tuote.projekti,
-			tuotteen_alv.tilino alvtilino, tuotteen_alv.kustp alvkusp, tuotteen_alv.kohde alvkohde, tuotteen_alv.projekti alvprojekti,
-			yhtion_toimipaikat.tilino yhtiotilino, yhtion_toimipaikat.kustp yhtiokusp, yhtion_toimipaikat.kohde yhtiokohde, yhtion_toimipaikat.projekti yhtioprojekti, yhtion_toimipaikat.vat_numero,
+			tuote.tilino,
+			tuote.tilino_eu,
+			tuote.tilino_ei_eu,
+			tuote.kustp,
+			tuote.kohde,
+			tuote.projekti,
+			tuotteen_alv.tilino alvtilino,
+			tuotteen_alv.kustp alvkusp,
+			tuotteen_alv.kohde alvkohde,
+			tuotteen_alv.projekti alvprojekti,
+			yhtion_toimipaikat.tilino yhtiotilino,
+			yhtion_toimipaikat.kustp yhtiokusp,
+			yhtion_toimipaikat.kohde yhtiokohde,
+			yhtion_toimipaikat.projekti yhtioprojekti,
+			yhtion_toimipaikat.vat_numero,
 			sum(tilausrivi.rivihinta) summa,
 			sum(tilausrivi.kate) kate,
 			sum(if(tuote.ei_saldoa='', tilausrivi.rivihinta-tilausrivi.kate,0)) varmuutos,
@@ -18,7 +29,7 @@ $query = "	SELECT tilausrivi.alv,
 			FROM tilausrivi
 			LEFT JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 			LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio and tuotteen_alv.tuoteno = tilausrivi.tuoteno and tuotteen_alv.maa = '$lasku[maa]' and tuotteen_alv.maa != '')
-			LEFT JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = tilausrivi.yhtio and yhtion_toimipaikat.vat_numero = '$lasku[yhtio_ovttunnus]' and yhtion_toimipaikat.vat_numero != '')
+			LEFT JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = tilausrivi.yhtio and yhtion_toimipaikat.tunnus = '$lasku[yhtio_toimipaikka]')
 			WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
 			and tilausrivi.tyyppi		 = 'L'
 			and tilausrivi.yhtio		 = '$kukarow[yhtio]'
@@ -148,14 +159,14 @@ else {
 			// Valitaan myyntitili, tässä on normaalimyyntiä
 			$selite 	= "Lasku ". $lasku['nimi']." ".$lasku['nimitark'];
 
-			// jos meillä on VAT-numero
+			// jos meillä on toimipaikan VAT-numero niin sen tiliöintisäännöt menee kaiken ohi
 			if ($xrow["vat_numero"] != "") {
 
-				// ensiks kokeillaan tuotteen alv-liitoksen tiliöintisääntöjä
-				$tilino 		= (int) $xrow['alvtilino'];
-				$kustp			= (int) $xrow["alvkustp"];
-				$kohde 			= (int) $xrow["alvkohde"];
-				$projekti		= (int) $xrow["alvprojekti"];
+				// kokeillaan tuotteen alv-liitoksen tiliöintisääntöjä
+				$tilino 	= (int) $xrow['alvtilino'];
+				$kustp		= (int) $xrow["alvkustp"];
+				$kohde 		= (int) $xrow["alvkohde"];
+				$projekti	= (int) $xrow["alvprojekti"];
 
 				// sitten toimipaikan tiliöintisääntöjä
 				if ($tilino == 0) {
@@ -186,6 +197,20 @@ else {
 
 			$tiliointisumma = $xrow['summa'];
 			$alv = round($xrow['alv'] / 100 * $tiliointisumma, 2);
+		}
+
+		// sitten katellaan taas toimipaikan tiliöintisääntöjä
+		if ($tilino == 0) {
+			$tilino = (int) $xrow['yhtiotilino'];
+		}
+		if ($kustp == 0) {
+			$kustp = (int) $xrow["yhtiokustp"];
+		}
+		if ($kohde == 0) {
+			$kohde = (int) $xrow["yhtiokohde"];
+		}
+		if ($projekti == 0) {
+			$projekti = (int) $xrow["yhtioprojekti"];
 		}
 
 		// jos ei vieläkään löydy otetaan tilit yhtiöltä

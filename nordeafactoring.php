@@ -201,6 +201,8 @@
 					round(lasku.viikorkopros*100,0) viikorkopros,
 					round(abs(lasku.summa*100),0) summa,
 					round(abs(lasku.kasumma*100),0) kasumma,
+					round(abs(lasku.summa_valuutassa*100),0) summa_valuutassa,
+					round(abs(lasku.kasumma_valuutassa*100),0) kasumma_valuutassa,
 					lasku.toim_nimi,
 					lasku.toim_nimitark,
 					lasku.toim_osoite,
@@ -252,22 +254,10 @@
 				$asires = mysql_query($query) or pupe_error($query);
 				$asirow = mysql_fetch_array($asires);
 
-				//Valuuttalaskuissa laskun loppusummma lasketaan tilausriveiltä
+				// Valuuttalasku
 				if ($laskurow["vienti_kurssi"] != 0 and $laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {					
-					$aquery = "	SELECT
-								sum(round(if(alv<500, (1+(alv/100)), (1+((alv-500)/100))) * tilausrivi.rivihinta / $laskurow[vienti_kurssi], 2)) summa
-								FROM tilausrivi
-								WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' 
-								and tilausrivi.yhtio = '$kukarow[yhtio]'";
-					$ares = mysql_query($aquery) or pupe_error($aquery);
-					$arow = mysql_fetch_array($ares);
-				
-					if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asirow["laskunsummapyoristys"] == 'o') {
-				        $arow["summa"] = round($arow["summa"],0);
-					}
-					
-					$laskurow["summa"] 		= abs(round($arow["summa"] * 100, 0));
-					$laskurow["kasumma"]	= abs(round($laskurow["kasumma"] / $laskurow["vienti_kurssi"] * 100, 0));
+					$laskurow["summa"]   = $laskurow["summa_valuutassa"];
+					$laskurow["kasumma"] = $laskurow["kasumma_valuutassa"];
 				}
 
 				if ($asirow["asiakasnro"] == 0 or !is_numeric($asirow["asiakasnro"]) or strlen($asirow["asiakasnro"]) > 6) {

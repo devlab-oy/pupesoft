@@ -13,7 +13,7 @@
 		$tvs_tila 	= "S";
 		$tvs_tyyppi	= "'G'";
 	}
-	
+
 	if ($yhtiorow["kerataanko_saldottomat"] == '') {
 		$lisasalker = " and tuote.ei_saldoa = '' ";
 	}
@@ -43,7 +43,7 @@
 					and keratty=''";
 		$result = mysql_query($query) or pupe_error($query);
 
-		
+
 		if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 			echo "<font class='message'>".t("Valmistuksella oli jo ker‰ttyj‰ rivej‰, joten l‰hetett‰ ei tulosteta").".<br>".t("Jos haluat l‰hetteen tulosta l‰hetteen kopio, valmistusnumero on")." $laskurow[tunnus].</font><br><br>";
 		}
@@ -103,7 +103,7 @@
 				$varaston_row = mysql_fetch_array($varaston_res);
 
 				$ultilno = '';
-				
+
 				// katotaan pit‰‰kˆ tilaukselle tehd‰ intrastat
 				// varasto pit‰‰ lˆyty‰, toimitusosoitteen maa ja varastonmaa pit‰‰ lˆyty‰ ja kauppatapahtuman_luonnetta ei saa olla annettu viel‰
 				if (mysql_num_rows($varaston_res) == 1 and $laskurow["toim_maa"] != "" and $varaston_row["maa"] != "") {
@@ -162,6 +162,7 @@
 							yhtio_maa				= '$laskurow[yhtio_maa]',
 							yhtio_ovttunnus			= '$laskurow[yhtio_ovttunnus]',
 							yhtio_kotipaikka		= '$laskurow[yhtio_kotipaikka]',
+							yhtio_toimipaikka		= '$laskurow[yhtio_toimipaikka]',
 							alatila					= '$laskurow[alatila]',
 							alv						= '$laskurow[alv]',
 							chn						= '$laskurow[chn]',
@@ -217,7 +218,7 @@
 							jaksotettu				= '$laskurow[jaksotettu]',
 							kuljetusmuoto			= '$laskurow[kuljetusmuoto]',
 							kauppatapahtuman_luonne	= '$laskurow[kauppatapahtuman_luonne]',
-							ultilno					= '$ultilno', 
+							ultilno					= '$ultilno',
 							maa_maara				= '$laskurow[maa_maara]'";
 
 					$uusires = mysql_query($query) or pupe_error($query);
@@ -243,7 +244,7 @@
 								poistumistoimipaikka_koodi 			= '$laskurow[poistumistoimipaikka_koodi]',
 								bruttopaino 						= '$laskurow[bruttopaino]',
 								lisattava_era 						= '$laskurow[lisattava_era]',
-								vahennettava_era 					= '$laskurow[vahennettava_era]'								
+								vahennettava_era 					= '$laskurow[vahennettava_era]'
 								where yhtio = '$kukarow[yhtio]' and
 								tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);
@@ -259,26 +260,26 @@
 					$ohno  = mysql_query($query) or pupe_error($query);
 				}
 			}
-			
+
 			$query = "select tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$laskurow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($result) > 1) {
-				
+
 				$montakotilausta = mysql_num_rows($result);
-				
+
 				while ($row = mysql_fetch_array($result)) {
-					
+
 					$upviesti = $row["sisviesti2"]." ".t("tilaus jakaantunut")." $montakotilausta ".t("tilaukseksi")."!";
-					
+
 					$query = "update lasku set sisviesti2 = '$upviesti' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]'";
 					$upresult = mysql_query($query) or pupe_error($query);
 				}
 			}
-			
+
 			//tyhjennet‰‰n muuttujat
 			$varasto 	= '';
-			$edvarasto 	= '';									
-			
+			$edvarasto 	= '';
+
 			//loopataan kaikki yhdest‰ tilausesta syntyneet l‰hetteet
 			foreach ($tvs_tilausnumerot as $tvs_tilausnumero) {
 				//luetaan laskun tiedot uudestaan t‰ss‰, per splitti
@@ -414,15 +415,15 @@
 
 				// Generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-					$query = " 	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, 
-								tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys, 
+					$query = " 	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno,
+								tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
 								sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt,
 								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";
-					$lisa = " 	and tilausrivi.tyyppi in ($tvs_tyyppi) 
+					$lisa = " 	and tilausrivi.tyyppi in ($tvs_tyyppi)
 								GROUP BY 1,2,3,4,5,6,7,8 ";
 				}
 				else {
-					$query = " 	SELECT tilausrivi.*, 
+					$query = " 	SELECT tilausrivi.*,
 								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";
 					$lisa = " ";
 				}
@@ -568,9 +569,9 @@
 						echo t("Valmistus tulostuu")."!<br><br>";
 					}
 					else {
-						echo t("Siirtolista tulostuu")."!<br><br>";	
+						echo t("Siirtolista tulostuu")."!<br><br>";
 					}
-					
+
 					$query = "	UPDATE lasku
 								SET alatila='A', lahetepvm=now()
 								where yhtio='$kukarow[yhtio]'
@@ -589,14 +590,14 @@
 					echo t("Siirtolistalla ei ollut mit‰‰n ker‰tt‰v‰‰")."!<br><br>";
 					$eikeralatila = "E";
 				}
-				
+
 				$query = "	UPDATE lasku
 							SET alatila = '$eikeralatila', lahetepvm = now()
 							where yhtio	= '$kukarow[yhtio]'
 							and tunnus 	= '$laskurow[tunnus]'
 							and tila	= '$tvs_tila'
 							and alatila	in ('','J')";
-				$result = mysql_query($query) or pupe_error($query);				
+				$result = mysql_query($query) or pupe_error($query);
 			}
 		}
 	}

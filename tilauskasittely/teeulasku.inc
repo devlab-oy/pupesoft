@@ -137,7 +137,7 @@ if ($lasrow["vienti"] == 'E') {
 	$abulisares = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($abulisares) == 0) {
-		$lisa_comments .= "Reverse charge, intangible service. \n";	
+		$lisa_comments .= "Reverse charge, intangible service. \n";
 	}
 	else {
 		$lisa_comments .= "VAT 0% Intra community supply. \n";
@@ -204,6 +204,7 @@ $query = "	INSERT into lasku SET
 			yhtio_maa							= '$lasrow[yhtio_maa]',
 			yhtio_ovttunnus						= '$lasrow[yhtio_ovttunnus]',
 			yhtio_kotipaikka					= '$lasrow[yhtio_kotipaikka]',
+			yhtio_toimipaikka					= '$lasrow[yhtio_toimipaikka]',
 			aktiivinen_kuljetus 				= '$lasrow[aktiivinen_kuljetus]',
 			aktiivinen_kuljetus_kansallisuus	= '$lasrow[aktiivinen_kuljetus_kansallisuus]',
 			alv									= '$lasrow[alv]',

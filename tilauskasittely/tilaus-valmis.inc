@@ -144,7 +144,7 @@ else {
 			$itsetulostus = "X";
 		}
 	}
-	
+
 	if ($yhtiorow["kerataanko_saldottomat"] == '') {
 		$lisasalker = " and tuote.ei_saldoa = '' ";
 	}
@@ -166,30 +166,30 @@ else {
 		//tila L ja alatila C, B, D, E niin tilaus on kerätty otsikko
 		//jos otsikko sanoo, että tilaus on kerätty mutta rivit kuitenkaan ei ole kerätty niin merkataan ne kumminkin kerätyiksi
 		//tai jos yksikin rivi on kerätty (lähetettä ei tulosteta uudestaan) niin päivitetään keräämättömät rivit kerätyksi aktiiviselle käyttäjälle
-		
-		$query = "	UPDATE tilausrivi 
-					SET keratty='$kukarow[kuka]', kerattyaika=now() 
-					WHERE yhtio='$kukarow[yhtio]' 
-					and otunnus='$laskurow[tunnus]' 
-					and keratty='' 
+
+		$query = "	UPDATE tilausrivi
+					SET keratty='$kukarow[kuka]', kerattyaika=now()
+					WHERE yhtio='$kukarow[yhtio]'
+					and otunnus='$laskurow[tunnus]'
+					and keratty=''
 					and var != 'J'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Laitetaan rivit toimitetuiksi jos otsikko sanoo toimitettu
 		if ($laskurow["alatila"] == 'D' or $laskurow["alatila"] == 'E' or $laskurow["alatila"] == 'J') {
-			$query = "	UPDATE tilausrivi 
-						SET toimitettu='$kukarow[kuka]', toimitettuaika=now() 
-						WHERE yhtio		 = '$kukarow[yhtio]' 
-						and otunnus		 = '$laskurow[tunnus]' 
-						and keratty		!= '' 
-						and toimitettu	 = '' 
+			$query = "	UPDATE tilausrivi
+						SET toimitettu='$kukarow[kuka]', toimitettuaika=now()
+						WHERE yhtio		 = '$kukarow[yhtio]'
+						and otunnus		 = '$laskurow[tunnus]'
+						and keratty		!= ''
+						and toimitettu	 = ''
 						and var 		!= 'J'
 						and tyyppi 		!= 'D'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
 		$tilaus_valmis_ulos .= "<font class='message'>".t("Tilauksella oli jo kerättyjä rivejä, joten lähetettä ei tulosteta").".<br>".t("Jos haluat lähetteen tulosta lähetteen kopio. Tilausnumero on")." $laskurow[tunnus].</font><br><br>";
-		
+
 		// jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
 		if ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
 			if ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '') {
@@ -556,7 +556,7 @@ else {
 				$varaston_row = mysql_fetch_array($varaston_res);
 
 				$ultilno = '';
-				
+
 				// katotaan pitääkö tilaukselle tehdä intrastat
 				// varasto pitää löytyä, toimitusosoitteen maa ja varastonmaa pitää löytyä ja kauppatapahtuman_luonnetta ei saa olla annettu vielä
 				if (mysql_num_rows($varaston_res) == 1 and $laskurow["toim_maa"] != "" and $varaston_row["maa"] != "") {
@@ -615,6 +615,7 @@ else {
 							yhtio_maa							= '$laskurow[yhtio_maa]',
 							yhtio_ovttunnus						= '$laskurow[yhtio_ovttunnus]',
 							yhtio_kotipaikka					= '$laskurow[yhtio_kotipaikka]',
+							yhtio_toimipaikka					= '$laskurow[yhtio_toimipaikka]',
 							alatila								= 'A',
 							alv									= '$laskurow[alv]',
 							chn									= '$laskurow[chn]',
@@ -709,7 +710,7 @@ else {
 								poistumistoimipaikka_koodi 			= '$laskurow[poistumistoimipaikka_koodi]',
 								bruttopaino 						= '$laskurow[bruttopaino]',
 								lisattava_era 						= '$laskurow[lisattava_era]',
-								vahennettava_era 					= '$laskurow[vahennettava_era]'								
+								vahennettava_era 					= '$laskurow[vahennettava_era]'
 								where yhtio ='$kukarow[yhtio]' and
 								tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);

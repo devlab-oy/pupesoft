@@ -1862,7 +1862,7 @@
 		if ($kasitoimehto2 != '') {
 			$toimitusehto2 = trim($toimitusehto2." ".$kasitoimehto2);
 		}
-
+		
 		// poikkeava laskutusosoite
 		if ($alv_velvollisuus != "") {
 
@@ -1879,6 +1879,7 @@
 				$yhtiorow["maa"] 		= $apualvrow["maa"];
 				$yhtiorow["ovttunnus"] 	= $apualvrow["vat_numero"];
 				$yhtiorow["kotipaikka"]	= $apualvrow["kotipaikka"];
+				$kukarow["toimipaikka"]	= $apualvrow["tunnus"]; // ylikirjoitetaan myös käyttäjän oletustoimipaikka
 			}
 
 		}
@@ -1894,6 +1895,7 @@
 					yhtio_maa							= '$yhtiorow[maa]',
 					yhtio_ovttunnus						= '$yhtiorow[ovttunnus]',
 					yhtio_kotipaikka					= '$yhtiorow[kotipaikka]',
+					yhtio_toimipaikka					= '$kukarow[toimipaikka]',
 					ytunnus								= '$ytunnus',
 					nimi 								= '$nimi',
 					nimitark 							= '$nimitark',

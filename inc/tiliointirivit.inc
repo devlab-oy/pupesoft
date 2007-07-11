@@ -4,14 +4,22 @@
 	require "alvpopup.inc";
 
 	echo "<table><tr>";
-	echo "<th>".t("Tili")."</th><th>".t("Tarkenne")."</th><th>".t("Summa")."</th><th>".t("Vero")."</th><th>".t("Tapvm/Selite")."</th>";
-
+			// Selaajatarkista.php:n yhteydessä selite omalle riville
+	if (isset($seutunnus)) {
+		echo "<th>".t("Tili")."</th><th>".t("Tarkenne")."</th><th>".t("Summa")."</th><th>".t("Vero")."</th>";
+		if ($viivatut == 'on') echo "<th></th>";
+		echo "</tr><tr><th colspan='3'>".t("Tapvm/Selite")."</th>";
+	}
+	else {
+		echo "<th>".t("Tili")."</th><th>".t("Tarkenne")."</th><th>".t("Summa")."</th><th>".t("Vero")."</th><th>".t("Tapvm/Selite")."</th>";
+	}
+	
 	if ($viivatut == 'on') {
 		echo "<th>Poistettu/Laadittu</th>";
 	}
 
 	// Tämä toimii vain selaajatarkista.php:n yhteydessä
-	if ($seutunnus != 0) {
+	if (isset($seutunnus)) {
 		echo "<th><a href = '$PHP_SELF?tee=E&tunnus=$seutunnus&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$seutunnus'>>></a></th>";
 	}
 	else {
@@ -136,7 +144,15 @@
 			echo "<td></td>";
 		}
 
-		echo "<td>";
+
+		// Selaajatarkista.php:n yhteydessä selite omalle riville
+		if (isset($seutunnus)) {
+			if ($viivatut == 'on') echo "<td></td>";
+			echo "</tr><tr><td colspan='3'>";
+		}
+		else {
+			echo "<td>";
+		}
 
 		echo "<input type='text' name='selite' value = '$selite'>
 				<br>".t("Jaksota")."<input type='checkbox' name = 'jaksota'></td>";
@@ -149,6 +165,7 @@
 		$formi = 'uusi';
 		$kentta = 'tili';
 	}
+	
 	$lisa='';
 	$slisa='';
 
@@ -165,12 +182,14 @@
 		$slAsa = "concat_ws('/',if(tosite<>0,concat_ws('-',left(tosite,2), 1*right(tosite,6)), '".t('#NA')."'),tiliointi.tilino,tili.nimi)";
 	}
 
-	$query = "	SELECT lukko, tiliointi.tunnus, $slAsa, tiliointi.kustp,
-				tiliointi.kohde, tiliointi.projekti,
-				tiliointi.summa, vero, concat_ws('/', tapvm,selite)
+	$query = "	SELECT lukko, tiliointi.tunnus, $slAsa, concat_ws('/', a.nimi, b.nimi, c.nimi),
+				tiliointi.summa, vero, concat_ws('/', tapvm, selite) selite
 				$slisa
 				FROM tiliointi
 				LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
+				LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
+				LEFT JOIN kustannuspaikka b ON b.yhtio = '$kukarow[yhtio]' and b.tunnus = tiliointi.kohde and b.tyyppi = 'O'
+				LEFT JOIN kustannuspaikka c ON c.yhtio = '$kukarow[yhtio]' and c.tunnus = tiliointi.projekti and c.tyyppi = 'P'
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tiliointi.ltunnus = '$tunnus' $lisa
 				ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.tunnus";
 	$result = mysql_query($query) or pupe_error($query);
@@ -196,59 +215,35 @@
 
 		for ($i=2; $i < mysql_num_fields($result)-$poistasarake; $i++) {
 
-			if ($viivatut == 'on' and $trow['poistettu'] != '') {
-				echo "<th>";
+
+			// Tämä toimii vain selaajatarkista.php:n yhteydessä
+			if (isset($seutunnus) and mysql_field_name($result,$i)=='selite') {
+				if ($viivatut == 'on' and $trow['poistettu'] != '') {
+					echo "<th></th></tr><tr><th colspan='3'>";
+				}
+				else {
+					echo "<td></td></tr><tr><td colspan='3'>";
+				}
+
 			}
 			else {
-				echo "<td>";
-			}
-
-			// here we go again...
-			if ($i == 3) {
-				// Meillä on kustannuspaikka
-				if (strlen($trow[$i]) > 0) {
-					$query = "	SELECT nimi
-                         		FROM kustannuspaikka
-                         		WHERE yhtio = '$kukarow[yhtio]' and
-								tunnus = '$trow[$i]' and
-								tyyppi = 'K'";
-					$xresult = mysql_query($query) or pupe_error($query);
-					$xrow=mysql_fetch_array ($xresult);
-					echo "$xrow[0]/";
+				if ($viivatut == 'on' and $trow['poistettu'] != '') {
+					echo "<th>";
 				}
-				$i++;
-
-				// Meillä on kohde
-				if (strlen($trow[$i]) > 0) {
-					$query = "	SELECT nimi
-								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$trow[$i]' and tyyppi = 'O'";
-					$xresult = mysql_query($query) or pupe_error($query);
-					$xrow=mysql_fetch_array ($xresult);
-					echo "$xrow[0]/";
-				}
-				$i++;
-
-				// Meillä on projekti
-				if (strlen($trow[$i]) > 0) {
-					$query = "	SELECT nimi
-								FROM kustannuspaikka
-								WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$trow[$i]' and tyyppi = 'P'";
-					$xresult = mysql_query($query) or pupe_error($query);
-					$xrow = mysql_fetch_array ($xresult);
-					echo "$xrow[0]/";
+				else {
+					echo "<td>";
 				}
 			}
-			else {
-				echo $trow[$i];
-			}
+									
+			echo $trow[$i];
+
 			if ($viivatut == 'on' and $trow['poistettu'] != '') {
 				echo "</th>";
 			}
 			else {
 				echo "</td>";
 			}
-
+			
 		}
 		if (($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["poistettu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
 			// Eli ei näytetä muuta-nappia, jos ei oikeuksia,
@@ -271,15 +266,15 @@
 			if ($maara > 1) {
 
 				if ($trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3)) {
-					echo "<td>".t("Lukittu")."";
+					echo "<td><img src=pics/lullacons/error.png>";
 					//Rivi on poistettu
 					if ($trow['poistettu'] != '') {
-						echo " ".t("ja poistettu")."";
+						echo "<img src=pics/lullacons/mini-trash.png>";
 					}
 					echo "</td></tr>";
 				}
 				else {
-					echo "<td>".t("Poistettu")."</td></tr>";
+					echo "<td><img src=pics/lullacons/mini-trash.png></td></tr>";
 				}
 			}
 			else {
@@ -287,14 +282,14 @@
 			}
 		}
 
-		list($kala,$selite) = split("/", $trow[8]);
+		list($kala,$selite) = split("/", $trow['selite']);
 
 		if (strpos($trow['Tapvm/Selite'], "/") === FALSE) {
 			$selite="";
 		}
 
 		if ($trow['poistettu'] == '') {
-			$yhtsum += $trow[6]; //Riviä ei ole poistettu
+			$yhtsum += $trow['summa']; //Riviä ei ole poistettu
 		}
 	}
 
@@ -302,8 +297,14 @@
 	if (round($yhtsum,2) == 0) {
 		$yhtok = "".t("Tiliöinti ok")."!";
 	}
-	echo "<tr><td>$yhtok</td><td></td><td>" . round($yhtsum,2) . "</td><td></td>";
-
+	
+	if (isset($seutunnus)) {
+		echo "<tr><td>$yhtok</td><td></td><td>" . round($yhtsum,2) . "</td>";
+	}
+	else {
+		echo "<tr><td>$yhtok</td><td></td><td>" . round($yhtsum,2) . "</td><td></td>";
+	}
+	
 	echo "<td>";
 	// Tehdään boxi, jolla saadaan poistetut näkyviin
 	echo "<form action = '$PHP_SELF#$tunnus' method='post'><input type='hidden' name=tee value='E'>
@@ -319,7 +320,9 @@
 
 	if ($viivatut != '') echo "<td></td>";
 
-	echo "<td></td></tr>";
+	if (!isset($seutunnus)) echo "<td></td>";
+	
+	echo "</tr>";
 	echo "</table><br><br>";
 
 ?>

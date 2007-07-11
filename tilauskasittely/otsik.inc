@@ -91,6 +91,26 @@
 		unset($jatka);
 	}
 
+	//	Tarkastetaan käsinsyötetty viite
+	if (isset($jatka) and $kasinsyotetty_viite!="" and $yhtiorow["viitteen_kasinsyotto"]!="") {
+		$oviite	= $viite;
+		$viite	= $kasinsyotetty_viite;
+		require("inc/tarkistaviite.inc");
+		$viite=$oviite;
+
+		if($ok<>1) {
+			echo "<font class='error'>".t("VIRHE: Syötetty viite '%' on väärin", $kieli, $kasinsyotetty_viite)."!</font><br>";
+			$tee	= "OTSIK";			
+			unset($jatka);
+		}		
+		else{
+			$ketjutus = "o";
+		}
+	}
+	else {
+		$kasinsyotetty_viite = "";
+	}
+
 	$erpcm_virhe = ""; // apumuuttuja
 	$erpcm_kasin = ""; // apumuuttuja
 	$meapurow    = array();
@@ -617,6 +637,18 @@
 				</td>
 				</tr>";
 
+			if($yhtiorow["viitteen_kasinsyotto"] != "") {
+				
+				echo "<tr><td>".t("Viitenumero").":</td>
+					<td>";
+
+				echo "<input type='text' name='kasinsyotetty_viite' value='{$srow["kasinsyotetty_viite"]}' size='20'>";
+				
+				echo "	</td>
+						<td></td><td></td>
+						</tr>";
+			}
+			
 			echo "<tr><td>".t("Toimitustapa").":</td>";
 			echo "<td><select name='toimitustapa'>";
 
@@ -2106,6 +2138,7 @@
 						projekti					= '$projekti',						
 						tunnusnippu_tarjous			= '$tunnusnippu_tarjous',						
 						rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',
+						kasinsyotetty_viite			= '$kasinsyotetty_viite',
 						asiakkaan_kohde				= '$asiakkaan_kohde',
 						otunnus 					= '$kukarow[kesken]'";
 			$query3 .= $postquery3;

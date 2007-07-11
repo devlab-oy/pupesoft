@@ -26,8 +26,8 @@
 		if ($argc == 0) die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
 
 		// otetaan tietokanta connect
-		require ("../inc/connect.inc");
-		require ("../inc/functions.inc");
+		require ("inc/connect.inc");
+		require ("inc/functions.inc");
 
 		// hmm.. j‰nn‰‰
 		$kukarow['yhtio'] = $argv[1];
@@ -275,7 +275,7 @@
 			if (!$tootedi = fopen($nimiedi, "w")) die("Filen $nimiedi luonti ep‰onnistui!");
 
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ";
+			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, tilausrivi as t3 READ, tilausrivin_lisatiedot READ, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka READ, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE";
 			$locre = mysql_query($query) or pupe_error($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -822,9 +822,27 @@
 					else {
 						$viite = $lasno;
 					}
-
-					require('../inc/generoiviite.inc');
-
+					
+					//	Onko k‰sinsyˆtetty viite?
+					$query = "SELECT kasinsyotetty_viite FROM laskun_lisatiedot WHERE yhtio='{$kukarow["yhtio"]}' and otunnus IN ($tunnukset) and kasinsyotetty_viite != ''";
+					$tarkres=mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($tarkres) == 1) {
+						$tarkrow=mysql_fetch_array($tarkres) or pupe_error($tarkres);
+						$viite=$tarkrow["kasinsyotetty_viite"];
+						require('inc/tarkistaviite.inc');
+						
+						//	Jos viitenumero on v‰‰rin menn‰‰n oletuksilla!
+						if($ok!=1) {
+							$viite=$lasno;
+							$tulos_ulos .= "<font class='message'><br>\n".t("HUOM!!! laskun '%s' k‰sinsyotetty viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", $kieli, $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
+							require('inc/generoiviite.inc');
+						}
+						unset($oviite);		
+					}
+					else {
+						require('inc/generoiviite.inc');
+					}
+					
 					// p‰ivitet‰‰n ketjuun kuuluville laskuille sama laskunumero ja viite..
 					$query  = "update lasku set laskunro='$lasno', viite='$viite' where yhtio='$kukarow[yhtio]' and tunnus in ($tunnukset)";
 					$result = mysql_query($query) or pupe_error($query);
@@ -1317,7 +1335,7 @@
 					// t‰t‰ ei ajata eik‰ k‰ytet‰, mutta jos tulee ftp errori niin echotaan t‰‰ meiliin, niin ei tartte k‰sin kirjotella resendi‰
 					$cmd = "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
 
-					require ("../inc/ftp-send.inc");
+					require ("inc/ftp-send.inc");
 
 					if ($silent == "") {
 						$tulos_ulos .= $tulos_ulos_ftp;
@@ -1341,7 +1359,7 @@
 					$ftppath = $edi_ftppath;
 					$ftpfile = realpath($nimiedi);
 
-					require ("../inc/ftp-send.inc");
+					require ("inc/ftp-send.inc");
 
 					if ($silent == "") {
 						$tulos_ulos .= $tulos_ulos_ftp;
@@ -1802,7 +1820,7 @@
 	}
 
 	if ($komentorivilta != "ON" and strpos($_SERVER['SCRIPT_NAME'], "verkkolasku.php") !== FALSE) {
-		require ("../inc/footer.inc");
+		require ("inc/footer.inc");
 	}
 
 ?>

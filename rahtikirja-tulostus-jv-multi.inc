@@ -180,6 +180,26 @@
 		$lasno = $lrow[0] + 1;
 		$viite = $lasno + 99900000000; //T‰st‰ voimme tunnistaa, ett‰ viite kuuluu j‰lkivaatimukselle
 
+		//	Onko k‰sinsyˆtetty viite?
+		$query = "SELECT kasinsyotetty_viite FROM laskun_lisatiedot WHERE yhtio='{$kukarow["yhtio"]}' and otunnus IN ($oikeatunnus) and kasinsyotetty_viite != ''";
+		$tarkres=mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($tarkres) == 1) {
+			$tarkrow=mysql_fetch_array($tarkres) or pupe_error($tarkres);
+			$viite=$tarkrow["kasinsyotetty_viite"];
+			require('inc/tarkistaviite.inc');
+			
+			//	Jos viitenumero on v‰‰rin menn‰‰n oletuksilla!
+			if($ok!=1) {
+				$viite=$lasno + 99900000000;
+				echo "<font class='message'><br>\n".t("HUOM!!! laskun '%s' k‰sinsyotetty viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", $kieli, $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
+				require('inc/generoiviite.inc');
+			}
+			unset($oviite);		
+		}
+		else {
+			require('inc/generoiviite.inc');
+		}
+
 		require("inc/generoiviite.inc");
 
 		// p‰ivitet‰‰n tilauksille laskunumero ja viite..

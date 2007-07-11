@@ -17,6 +17,10 @@
 		$toim_kutsu = "RIVISYOTTO";
 	}
 
+	$query    = "select * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
+	$result   = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array($result);
+
 	if (is_numeric($ostoskori)) {
 		echo "<table><tr><td class='back'>";
 		echo "	<form method='post' action='$kori_polku'>
@@ -34,7 +38,8 @@
 				</form>";
 		echo "</td></tr></table>";
 	}
-	elseif ($kukarow["kesken"] != 0) {
+	elseif ($kukarow["kesken"] != 0 and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N")) {
+
 		if ($kukarow["extranet"] != "") {
 			$toim_kutsu = "EXTRANET";
 		}
@@ -46,11 +51,6 @@
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
 				</form>";
 	}
-
-
-	$query    = "select * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-	$result   = mysql_query($query) or pupe_error($query);
-	$laskurow = mysql_fetch_array($result);
 
 	// Tarkistetaan tilausrivi
 	if ($tee == 'TI' and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
@@ -180,9 +180,9 @@
 	$count = count($array);
 
 	/*
-	
+
 	match againstit ei toimi!!! Kokeile hakusanalla prt firmassa allr
-	
+
 	if (strlen($haku[0]) > 0) {
 		$lisa .= " and match (tuote.tuoteno) against ('$haku[0]*' IN BOOLEAN MODE) ";
 		$ulisa .= "&haku[".$i."]=".$haku[$i];
@@ -195,7 +195,7 @@
 		$lisa .= " and match (tuote.nimitys) against ('$haku[2]*' IN BOOLEAN MODE) ";
 		$ulisa .= "&haku[".$i."]=".$haku[$i];
 	}
-	
+
 	for ($i=3; $i<=$count; $i++) {
 		if (strlen($haku[$i]) > 0) {
 			$lisa .= " and ".$array[$i]."='".$haku[$i]."'";
@@ -203,7 +203,7 @@
 		}
 	}
 	*/
-	
+
 	for ($i=0; $i<=$count; $i++) {
 		if (strlen($haku[$i]) > 0 && $i <= 1) {
 			$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
@@ -397,7 +397,7 @@
 		else {
 			require ("footer.inc");
 		}
-		
+
 		exit;
 	}
 
@@ -433,7 +433,7 @@
 				WHERE tuote_wrapper.yhtio = '$kukarow[yhtio]'
 				and valitut.tuoteno = tuote_wrapper.tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($result) > 0) {
 		echo "<table>";
 
@@ -520,7 +520,7 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				$nimitys = "<table width='100%'>";
-				
+
 				if(mysql_num_rows($sarjares)>0) {
 					while ($sarjarow = mysql_fetch_array($sarjares)) {
 						if($sarjarow["nimitys"] != "") {
@@ -529,12 +529,12 @@
 						else {
 							$nimitys .= "<tr><td>$row[nimitys]</td></tr>";
 						}
-					}					
+					}
 				}
 				else {
-					$nimitys .= "<tr><td>$row[nimitys]</td></tr>";					
+					$nimitys .= "<tr><td>$row[nimitys]</td></tr>";
 				}
-				
+
 				$nimitys .= "</table>";
 
 				$row["nimitys"] = $nimitys;
@@ -597,24 +597,35 @@
 
 			}
 			else {
-				// katotaan onko tuotteelle valuuttahintoja
-				$query = "	select *
-							from hinnasto
+				$query = "	SELECT distinct valkoodi, maa from hinnasto
 							where yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$row[tuoteno]'
-							and valkoodi != '$yhtiorow[valkoodi]'
 							and laji = ''
-							and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-							order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)";
-				$hintaresult = mysql_query($query) or pupe_error($query);
+							order by maa, valkoodi";
+				$hintavalresult = mysql_query($query) or pupe_error($query);
 
-				while ($hintarow = mysql_fetch_array($hintaresult)) {
-					$myyntihinta .= "<br>$hintarow[hinta] $hintarow[valkoodi]";
+				while ($hintavalrow = mysql_fetch_array($hintavalresult)) {
+
+					// katotaan onko tuotteelle valuuttahintoja
+					$query = "	SELECT *
+								from hinnasto
+								where yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$row[tuoteno]'
+								and valkoodi = '$hintavalrow[valkoodi]'
+								and maa = '$hintavalrow[maa]'
+								and laji = ''
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+								order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+								limit 1";
+					$hintaresult = mysql_query($query) or pupe_error($query);
+
+					while ($hintarow = mysql_fetch_array($hintaresult)) {
+						$myyntihinta .= "<br>$hintarow[maa]: $hintarow[hinta] $hintarow[valkoodi]";
+					}
 				}
-
 			}
 
-			echo "<td valign='top' class='$vari'>$myyntihinta</td>";
+			echo "<td valign='top' class='$vari' align='right'>$myyntihinta</td>";
 			echo "<td valign='top' class='$vari'>$row[aleryhma]</td>";
 
 			if ($lisatiedot != "" and $kukarow["extranet"] == "") {
@@ -749,7 +760,7 @@
 					while ($saldorow = mysql_fetch_array ($varresult)) {
 
 						list($saldo, $hyllyssa, $myytavissa, $sallittu) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], $laskurow["toim_maa"]);
-						
+
 						//	Listataan vain varasto jo se ei ole kielletty
 						if($sallittu === TRUE) {
 							// hoidetaan pois problematiikka jos meillä on orpoja (tuotepaikattomia) tuotteita varaamassa saldoa
@@ -769,7 +780,7 @@
 							echo "<tr>
 									<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
 									<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." $row[yksikko]</td>
-									</tr>";							
+									</tr>";
 						}
 					}
 					echo "</table></td>";

@@ -326,7 +326,7 @@
 				}
 		}
 		else {
-			if ($prow["kpl"]+$prow["varattu"] > 0){
+			if ($prow["kpl"]+$prow["jt"] > 0){
 				$sarjanutunnus = "myyntirivitunnus";
 			}
 			else {

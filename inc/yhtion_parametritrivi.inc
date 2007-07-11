@@ -101,6 +101,7 @@
 		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");		
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
 		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2");		
+		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");		
 
 		
 		$ulos .= "</select></td>";

@@ -1009,6 +1009,9 @@
 					}
 					elseif ($yhtiorow['laskutyyppi'] == 2) {
 						require_once("tulosta_lasku_perhe.inc");
+					}
+					elseif ($yhtiorow['laskutyyppi'] == 4) {
+						require_once("tulosta_lasku_plain.inc");
 					} else {
 						require_once("tulosta_lasku_plain.inc");
 					}

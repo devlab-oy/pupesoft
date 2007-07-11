@@ -234,7 +234,13 @@ if (!function_exists('alku')) {
 if (!function_exists('rivi')) {
 	function rivi ($firstpage) {
 		global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $yhtiorow, $kukarow;
-
+		
+		// laskutyyppi 4
+		if ($yhtiorow['laskutyyppi'] == 4) {
+			rivi2($firstpage);
+			return;
+		}
+		
 		if ($lask == 14) {
 			$sivu++;
 			loppu($firstpage);
@@ -283,6 +289,88 @@ if (!function_exists('rivi')) {
 		$lask++;
 	}
 }
+
+if (!function_exists('rivi2')) {
+	function rivi2 ($firstpage) {
+		global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $yhtiorow, $kukarow;
+
+		if ($lask == 14) {
+			$sivu++;
+			loppu($firstpage);
+			$firstpage = alku();
+			$kala = 540;
+			$lask = 1;
+		}
+
+		if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
+			$laji = 'nimitys_'.strtolower($kieli);
+			$query = "SELECT selite FROM tuotteen_avainsanat WHERE yhtio = '$kukarow[yhtio]' and laji = '$laji' and tuoteno = '$row[tuoteno]' LIMIT 1";
+			$nimresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($nimresult)>0) {
+				$nimrow=mysql_fetch_array($nimresult);
+				$row['nimitys']=$nimrow['selite'];
+			}
+		}
+		
+		// rivitetään tuotenimitys
+		
+		// jos pidempi kuin 34 merkkiä niin tehdään pidempi kommenttirivi
+		// ja rivitetään
+		if (strlen($row['nimitys']) > 34) {
+			$kala2 = $kala;
+			$rivit = explode("\n", wordwrap($row['nimitys'], 90, "\n"));
+			$pos = 0;
+			for ($i=0; $i<count($rivit); $i++) {
+				$kala2 = $kala - (15 * $i);
+				$pdf->draw_text(35,  $kala2, $rivit[$i],	$firstpage, $norm);
+				$pos += 27;
+			}
+
+			// asetetaan kala takaisin oikeaksi
+			$kala = $kala2;
+			$kala -= 15;
+		} else {
+			// lyhyt kommentti
+			$pdf->draw_text(35,  $kala, $row['nimitys'],	$firstpage, $norm);
+		}
+		
+		$pdf->draw_text(210, $kala, $row["tuoteno"], 	$firstpage, $norm);
+		$pdf->draw_text(350, $kala, $row["kpl"], 		$firstpage, $norm);
+		$pdf->draw_text(410, $kala, $row["hinta"], 		$firstpage, $norm);
+		$pdf->draw_text(470, $kala, $row["ale"],		$firstpage, $norm);
+		$pdf->draw_text(530, $kala, $row["rivihinta"], 	$firstpage, $norm);
+		
+		// pistetäänkö kommenttirivi
+		if (strlen(trim($row['kommentti'])) != 0) {
+			// kommentti myös rivitetään
+			$kommentti_rivit = explode("\n", $row['kommentti']);
+			foreach ($kommentti_rivit as $kommentti) {
+				$kala -= 10;
+				$pdf->draw_text(35, $kala, $kommentti,	$firstpage, $pieni);
+			}
+		}
+		
+//		$pdf->draw_text(350, $kala, $row["yksikko"],	$firstpage, $pieni);
+
+/*
+		$row["toimitettuaika"] = substr($row["toimitettuaika"],0,10);
+
+		if ($row["toimitettuaika"] == "0000-00-00") {
+			$row["toimitettuaika"] = "";
+		}
+
+		$pdf->draw_text(410, $kala, $row["toimitettuaika"], 	$firstpage, $pieni);
+*/
+		$verollinenhinta = round($row["rivihinta"]*(1+($row["alv"]/100)),2);
+		$verollinenhinta = sprintf('%.2f',$verollinenhinta );
+
+
+		$kala = $kala - 15;
+		$lask++;
+	}
+}
+
 
 if (!function_exists('loppu')) {
 	function loppu ($firstpage) {

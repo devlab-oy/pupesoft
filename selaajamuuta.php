@@ -110,6 +110,7 @@
 	}
 	else {
 		echo "<div id='vasen' style='height:300px;width:330px;overflow:auto;float:left;z-index:20;'><table><tr>";
+		echo "<th></th>";
 		for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i))."</th>";
 		}
@@ -127,6 +128,15 @@
 				$tyylil='</th>';
 				$seuraava = 1;
 			}
+			
+			if ($trow['comments'] != '') {
+				$loppudiv .= "<div id='".$trow['tunnus']."' style='position:absolute; z-index:1; visibility:hidden; width:250px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px; overflow:visible;'>";
+				$loppudiv .= $trow["comments"]."<br></div>";
+				echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'".$trow['tunnus']."')\" onmouseover=\"popUp(event,'".$trow['tunnus']."')\"><img src='pics/lullacons/alert.png'></a></td>";
+			}
+			else 
+				echo "<td></td>";
+				
 			for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 				if ($i==1) {
 					if (strlen($trow[$i])==0) $trow[$i]="(tyhjä)";
@@ -137,24 +147,42 @@
 					echo "$tyylia$trow[$i]$tyylil";
 				}
 			}
-			
-			if ($trow['comments'] != '') {
-				$loppudiv .= "<div id='".$trow['tunnus']."' style='position:absolute; z-index:1; visibility:hidden; width:500px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px; overflow:visible;'>";
-				$loppudiv .= $trow["comments"]."<br></div>";
-				echo "<td valign='top'><a class='menu' onmouseout=\"popUp(event,'".$trow['tunnus']."')\" onmouseover=\"popUp(event,'".$trow['tunnus']."')\"><img src='pics/lullacons/alert.png'></a></td>";
-			}
-			else 
-				echo "<td></td>";
-			
+						
 			echo "</tr>";
 		}
 	}
 	echo "</tr></table></div>";
 
+//Oikealla laskun kuva
+	echo "<div id='oikea' style='height:300px; width:470x; overflow:auto; float:left;'>";
+	if ($tunnus != '') {
+		if (strlen($laskurow['ebid']) > 0) {
+			$ebid = $laskurow['ebid'];
+			require "inc/ebid.inc";
+			echo "<iframe src='$url' name='alaikkuna' width='465px' height='300px' align='bottom' scrolling='auto'></iframe>";
+		}
+		else {
+			//	Onko kuva tietokannassa?
+			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
+			$liiteres=mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($liiteres)>0) {
+				while($liiterow=mysql_fetch_array($liiteres)) {
+					echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
+				}
+			}
+			else {
+				echo "<font class='message'>".t("Paperilasku! Kuvaa ei ole saatavilla ($laskurow[ebid])")."</font>";
+			}
+		}
+	}
+	else {
+		echo "<font class='message'> ".t("Laskua ei ole valittu")."</font>";
+	}
+	echo "</div>";
 
-// Oikealle tiliöinnit
-	echo "<div id='oikea' style='height:300px;width:750px;overflow:auto;float:none;z-index:10;'>";
-	
+// Alas tiliöinnit
+	echo "<div id='alas' style='height:300px; width:800px; overflow:auto; float:left;'>";
+	 
 	if ($tee == 'P') { // Olemassaolevaa tiliöintiä muutetaan, joten yliviivataan rivi ja annetaan perustettavaksi
 		$query = "SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm
 					FROM tiliointi
@@ -218,12 +246,10 @@
 		if ($tee == 'F') {
 // Laskun tilausrivit
 			require "inc/tilausrivit.inc";
-			$tee = '';
 		}
 		else {
 // Tositteen tiliöintirivit...
 			require "inc/tiliointirivit.inc";
-			$tee = "";
 		}
 // Tehdään nappula, jolla voidaan vaihtaa näkymäksi tilausrivit/tiliöintirivit
 		if ($tee == 'F') {
@@ -235,36 +261,13 @@
 			$fnappula = 'tilausrivit';
 		}
 		
-		echo "<a href = '$PHP_SELF?tee=$ftee&tunnus=$tunnus&laji=$laji&vv=$vv&kk=$kk&viivatut=on#$tunnus'>$fnappula</a>";
+		echo "<a href = '$PHP_SELF?tee=$ftee&tunnus=$tunnus&laji=$laji&vv=$vv&kk=$kk&viivatut=$viivatut#$tunnus'>$fnappula</a>";
 	}
 	echo "</div>";
 	
-//Alaosan laskun kuva
-	echo "<div id='alas' style='height:200px;width:1010px;overflow:auto; float:none;'>";
-	if ($tunnus != '') {
-		if (strlen($laskurow['ebid']) > 0) {
-			$ebid = $laskurow['ebid'];
-			require "inc/ebid.inc";
-			echo "<iframe src='$url' name='alaikkuna' width='1000px' align='bottom' scrolling='auto'></iframe>";
-		}
-		else {
-			//	Onko kuva tietokannassa?
-			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-			$liiteres=mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($liiteres)>0) {
-				while($liiterow=mysql_fetch_array($liiteres)) {
-					echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-				}
-			}
-			else {
-				echo "<font class='message'>".t("Paperilasku! Kuvaa ei ole saatavilla ($laskurow[ebid])")."</font>";
-			}
-		}
-	}
-	else {
-		echo "<font class='message'> ".t("Laskua ei ole valittu")."</font>";
-	}
-	echo "</div>";
 	echo $loppudiv;
+	
+	echo "<div id='footer' style='position:static;'>",
 	require "inc/footer.inc";
+	echo "</div>";
 ?>

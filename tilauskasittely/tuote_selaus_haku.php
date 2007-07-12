@@ -231,8 +231,8 @@
 		$poislisa  = " and status != 'P' ";
 		$poischeck = "";
 	}
-
-	if ($poistuvat != "") {
+	
+	if ($poistuvat != "" or (! isset($submit) and $yhtiorow['poistuvat_tuotteet'] == 'X')) {
 		$kohtapoislisa  = "";
 		$kohtapoischeck = "CHECKED";
 	}
@@ -379,14 +379,14 @@
 	echo t("Lis‰tiedot")."<input type='checkbox' name='lisatiedot' $lisacheck><br>";
 
 	if ($kukarow["extranet"] == "") {
-		echo t("Poistuvat")."<input type='checkbox' name='poistuvat' $kohtapoischeck>";
+		echo t("Poistuvat")."<input type='checkbox' name='poistuvat' value='X' $kohtapoischeck>";
 		echo t("Poistetut")."<input type='checkbox' name='poistetut' $poischeck>";
 	}
 
 	echo "</td>";
 
 
-	echo "<td class='back' valign='bottom' nowrap><input type='Submit' value = '".t("Etsi")."'></td></form></tr>";
+	echo "<td class='back' valign='bottom' nowrap><input type='Submit' name='submit' value = '".t("Etsi")."'></td></form></tr>";
 	echo "</table><br>";
 
 	// Ei listata mit‰‰n jos k‰ytt‰j‰ ei ole tehnyt mit‰‰n rajauksia

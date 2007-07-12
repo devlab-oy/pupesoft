@@ -60,14 +60,14 @@
 					$haku1 = " and nimi like '%$toimittaja%' ";
 				}
 
-				$query = "select tunnus, ytunnus, nimi, postino, postitp, if(maa='$yhtiorow[maa]', tilinumero, ultilno) tilinumero from toimi where yhtio='$kukarow[yhtio]' $haku1";
+				$query = "select tunnus, ytunnus, nimi, nimitark, postino, postitp, if(maa='$yhtiorow[maa]', tilinumero, ultilno) tilinumero from toimi where yhtio='$kukarow[yhtio]' $haku1";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
 					$toim_valinta[$toimtunnus] = "<select name='toimittajatunnus'>";
 
 					while ($toimrows = mysql_fetch_array($result)) {
-						$toim_valinta[$toimtunnus] .= "<option value='$toimrows[tunnus]'>$toimrows[ytunnus] $toimrows[nimi] $toimrows[postino] $toimrows[postitp] $toimrows[tilinumero]</option>";
+						$toim_valinta[$toimtunnus] .= "<option value='$toimrows[tunnus]'>$toimrows[ytunnus] $toimrows[nimi] $toimrows[nimitark] $toimrows[postino] $toimrows[postitp] $toimrows[tilinumero]</option>";
 					}
 
 					$toim_valinta[$toimtunnus] .= "</select>";
@@ -83,7 +83,7 @@
 				$toim_valinta[$toimtunnus] = "<select name='toimittajatunnus'>";
 
 				while ($toimrows = mysql_fetch_array($result)) {
-					$toim_valinta[$toimtunnus] .= "<option value='$toimrows[tunnus]'>$toimrows[ytunnus] $toimrows[nimi]</option>";
+					$toim_valinta[$toimtunnus] .= "<option value='$toimrows[tunnus]'>$toimrows[ytunnus] $toimrows[nimi] $toimrows[nimitark]</option>";
 				}
 
 				$toim_valinta[$toimtunnus] .= "</select>";
@@ -217,7 +217,7 @@
 				echo "$toim_valinta[0]";
 			}
 			elseif($tuotoimirow["tunnus"] > 0) {
-				echo "<input type='hidden' name='toimittajatunnus' 	value='$tuotoimirow[tunnus]'>$tuotoimirow[nimi] - $tuotoimirow[ovttunnus]";
+				echo "<input type='hidden' name='toimittajatunnus' 	value='$tuotoimirow[tunnus]'>$tuotoimirow[nimi] $tuotoimirow[nimitark] - $tuotoimirow[ovttunnus]";
 			}
 			else {
 				echo "<input type='text' name='toimittaja' 	value='$toimittaja'>";
@@ -286,7 +286,7 @@
 
 				// haetaan toimittajan nimi jos ytunnuksessa ei ole vikaaa
 				if ($toimerrorit[$trow["tunnus"]]["toimittaja"] == "") {
-					$query   = "select nimi from toimi where yhtio='$kukarow[yhtio]' and tunnus='$trow[liitostunnus]'";
+					$query   = "select nimi, nimitark from toimi where yhtio='$kukarow[yhtio]' and tunnus='$trow[liitostunnus]'";
 					$vresult = mysql_query($query) or pupe_error($query);
 					$tvrosw  = mysql_fetch_array($vresult);
 				}
@@ -303,7 +303,7 @@
 					echo "$toim_valinta[$toimtunnus]";
 				}
 				else {
-					echo "$trow[toimittaja] $tvrosw[nimi] ($trow[liitostunnus])";
+					echo "$trow[toimittaja] $tvrosw[nimi] $tvrosw[nimitark] ($trow[liitostunnus])";
 				}
 
 				echo "</td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toimittaja"]."</td></tr>";

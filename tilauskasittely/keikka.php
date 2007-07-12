@@ -225,11 +225,11 @@ if ($toiminto == "" and $ytunnus == "") {
 	$toiminto = "";
 
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
-	$query = "	select ytunnus, nimi, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(*) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat
+	$query = "	select ytunnus, nimi, nimitark, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(*) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat
 				from lasku
 				where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0
 				group by liitostunnus, ytunnus, nimi, osoite, postitp, swift
-				order by nimi, ytunnus";
+				order by nimi, nimitark, ytunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 0) {
@@ -254,7 +254,7 @@ if ($toiminto == "" and $ytunnus == "") {
 				echo "<td valign='top'>$row[ytunnus]</td>";
 			}
 
-			echo "<td>$row[nimi]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[keikat]</td><td>$row[kpl]</td>";
+			echo "<td>$row[nimi] $row[nimitark]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[keikat]</td><td>$row[kpl]</td>";
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
 			echo "<td><input type='submit' value='".t("Valitse")."'></td>";

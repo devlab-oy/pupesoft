@@ -53,7 +53,7 @@
 			
 			#TODO
 			//jos Juppe on joskus väärässä niin mennään tähän. Tämä kaatuu jos tulos on liian iso.
-			if ('JUPPE' == 'VAARASSA') {
+			if ($kukarow['kuka'] == 'anttih') {
 				
 				if(include('Spreadsheet/Excel/Writer.php')) {
 				
@@ -63,9 +63,9 @@
 					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 				
 					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-					$worksheet =& $workbook->addWorksheet('Sheet 1');
+					$worksheet = $workbook->addWorksheet('Sheet 1');
 			
-					$format_bold =& $workbook->addFormat();
+					$format_bold = $workbook->addFormat();
 					$format_bold->setBold();
 			
 					$excelrivi = 0;

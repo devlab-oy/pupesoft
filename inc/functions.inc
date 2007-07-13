@@ -234,14 +234,18 @@ if (!function_exists("t")) {
 }
 
 if (!function_exists("maa")) {
-	function maa($code) {
-
+	function maa($code, $kieli="") {
+		
 		$query = sprintf("SELECT nimi FROM maat where koodi ='%s' LIMIT 1", mysql_real_escape_string($code));
 		$res = mysql_query($query) or pupe_error($query);
 		$maa = mysql_fetch_array($res);
 
 		// otetaan pois maa koodi
-		return ucfirst(strtolower(substr($maa['nimi'], 5)));
+		if($kieli=="") {
+			$kieli = $GLOBALS["kieli"];
+		}
+		
+		return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
 	}
 }
 

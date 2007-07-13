@@ -398,12 +398,7 @@ if (!function_exists('tulosta_tarjous')) {
 
 		$pdf->write($h, 1, 0, 20, t("email", $kieli), "norm", "L", "");
 		$pdf->write($h, 1, 20, 0, $kukarow["eposti"], "norm", "L", "");
-		
-		//	Loppuun duusataan yrityksen perustiedot
-		$query="select SUBSTRING(nimi FROM 6) nimi from maat where koodi='$yhtiorow[maa]'";
-		$maares=mysql_query($query) or pupe_error($query);
-		$maa=mysql_fetch_array($maares);
-		
+				
 		$h = 15;
 		$s=$pdf->teeSarakkeet(array(70,15,58,15));
 		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");
@@ -433,7 +428,7 @@ if (!function_exists('tulosta_tarjous')) {
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["www"], "norm", "L", "");		
 		$h-=$pdf->ln();
 
-		$pdf->write($h, 1, 0, $s[0], 		t($maa["nimi"],$kieli), "norm", "L", "");
+		$pdf->write($h, 1, 0, $s[0], 		strtoupper(maa($yhtiorow["maa"],$kieli)), "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Email", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["email"], "norm", "L", "");
 				

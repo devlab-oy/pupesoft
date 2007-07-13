@@ -23,19 +23,14 @@ if (!function_exists('tulosta_lasku')) {
 					concat_ws(' ', postino, postitp) postiosoite,
 					concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
 					yhteyshenkilo_kaupallinen.nimi asiakkaan_kaupallinen_käsittelijä,
-					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö,
-					SUBSTRING(lasku_maa.nimi FROM 6) maa,
-					SUBSTRING(toim_maa.nimi FROM 6) toim_maa
+					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö
 					FROM lasku
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and if(laskunro>0, (select max(tunnus) from lasku l where l.yhtio=lasku.yhtio and l.laskunro=lasku.laskunro and l.tila='L'), lasku.tunnus)=laskun_lisatiedot.otunnus
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus					
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_kaupallinen ON laskun_lisatiedot.yhtio=yhteyshenkilo_kaupallinen.yhtio and laskun_lisatiedot.yhteyshenkilo_kaupallinen=yhteyshenkilo_kaupallinen.tunnus
 					LEFT JOIN kuka AS laatija ON laatija.yhtio='$kukarow[yhtio]' and lasku.laatija=laatija.kuka
-					LEFT JOIN maat lasku_maa ON lasku_maa.koodi=lasku.maa 
-					LEFT JOIN maat toim_maa ON toim_maa.koodi=lasku.toim_maa
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tunnus  = '$otunnus'
-					GROUP BY lasku.tunnus";
+					and lasku.tunnus  = '$otunnus'";
 					
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
@@ -167,7 +162,7 @@ if (!function_exists('tulosta_lasku')) {
 					$h-=$pdf->ln();
 					foreach(array("nimi", "nimitark", "osoite", "postiosoite", "maa") as $key) {
 						if($key == "maa") {
-							$pdf->writeToTemplate($h, 1, 0, $s[0], t($laskurow[$key], $kieli), "norm", "L", "", $tid);
+							$pdf->writeToTemplate($h, 1, 0, $s[0], strtoupper(maa($laskurow[$key], $kieli)), "norm", "L", "", $tid);
 						}
 						else {
 							$pdf->writeToTemplate($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "", $tid);
@@ -180,7 +175,7 @@ if (!function_exists('tulosta_lasku')) {
 					$h-=$pdf->ln();
 					foreach(array("toim_nimi", "toim_nimitark", "toim_osoite", "toim_postiosoite", "toim_maa") as $key) {
 						if($key == "toim_maa") {
-							$pdf->writeToTemplate($h, 1, 0, $s[0], t($laskurow[$key], $kieli), "norm", "L", "", $tid);
+							$pdf->writeToTemplate($h, 1, 0, $s[0], strtoupper(maa($laskurow[$key], $kieli)), "norm", "L", "", $tid);
 						}
 						else {
 							$pdf->writeToTemplate($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "", $tid);
@@ -267,13 +262,12 @@ if (!function_exists('tulosta_lasku')) {
 		}
 		
 		// haetaan tilauksen kaikki rivit
-		$query = "  SELECT tilausrivi.*, if(perheid=0,rivihinta, (select sum(t.rivihinta) from tilausrivi t where $where and t.perheid=tilausrivi.perheid)) rivihinta, maat.nimi alkuperamaa, tuote.ei_saldoa ei_saldoa, tuote.tullinimike1, tuote.tullikohtelu,
+		$query = "  SELECT tilausrivi.*, if(perheid=0,rivihinta, (select sum(t.rivihinta) from tilausrivi t where $where and t.perheid=tilausrivi.perheid)) rivihinta, tuote.ei_saldoa ei_saldoa, tuote.tullinimike1, tuote.tullikohtelu,
 					$lisa $sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno 
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-					LEFT JOIN maat on maat.koodi=tuotteen_toimittajat.alkuperamaa
 					WHERE $where and (perheid=0 or perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta='' or tilausrivin_lisatiedot.ei_nayteta IS NULL)
 					GROUP BY tilausrivi.tunnus
 					ORDER BY otunnus, sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
@@ -435,7 +429,7 @@ if (!function_exists('tulosta_lasku')) {
 				
 				//	Vientilaskulle annetaan hieman lisäinfoa!
 				if ($laskurow["vienti"] != "" and $row["ei_saldoa"] == "") {
-					$pdf->write($h, 1, 5+$offset, $s[0], "Country of Origin: ".$row["alkuperamaa"], "snadi", "L", "I");	
+					$pdf->write($h, 1, 5+$offset, $s[0], "Country of Origin: ".strtoupper(maa($row["alkuperamaa"], $kieli)), "snadi", "L", "I");	
 					$h-=$pdf->ln();
 					$pdf->write($h, 1, 5+$offset, $s[0], "Customs tariff number: ".$row["tullinimike1"], "snadi", "L", "I");	
 					$h-=$pdf->ln();
@@ -701,12 +695,7 @@ if (!function_exists('tulosta_lasku')) {
 		$pdf->write($h, 1, $s[2], $s[3], t("Tilinumero", $kieli), "norm", "L", "");				
 		$pdf->write($h, 1, $s[3], $s[4], t("IBAN", $kieli), "norm", "L", "");
 		$pdf->write($h, 1, $s[4], 0, t("SWIFT", $kieli), "norm", "L", "");		
-		
-		//	Loppuun duusataan yrityksen perustiedot
-		$query="select SUBSTRING(nimi FROM 6) nimi from maat where koodi='$yhtiorow[maa]'";
-		$maares=mysql_query($query) or pupe_error($query);
-		$maa=mysql_fetch_array($maares);
-		
+				
 		$h = 15;
 		$s=$pdf->teeSarakkeet(array(70,15,58,15));
 		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");
@@ -755,7 +744,7 @@ if (!function_exists('tulosta_lasku')) {
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["www"], "norm", "L", "");		
 		$h-=$pdf->ln();
 
-		$pdf->write($h, 1, 0, $s[0], 		t($maa["nimi"],$kieli), "norm", "L", "");
+		$pdf->write($h, 1, 0, $s[0], 		strtoupper(maa($yhtiorow["maa"], $kieli)), "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Email", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["email"], "norm", "L", "");
 		

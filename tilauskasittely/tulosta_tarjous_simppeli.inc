@@ -103,7 +103,7 @@ if (!function_exists('tulosta_tarjous')) {
 					$h=250;
 					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Asiakas", $kieli).":", "norm", "L", "B", $tid);
 					$h-=$pdf->ln();
-					foreach(array("yhteyshenkilo_tekninen_nimi","nimi", "nimitark", "osoite", "postiosoite") as $key) {
+					foreach(array("yhteyshenkilo_tekninen_nimi","toim_nimi", "toim_nimitark", "toim_osoite", "toim_postiosoite") as $key) {
 						if($laskurow[$key]!="") {
 							$pdf->writeToTemplate($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "", $tid);
 							$h-=$pdf->ln();					

@@ -316,13 +316,11 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 					if($alenaytetaan=="OK" and $row["ale"] > 0) {
 						$pdf->write($h, 1, $s[1], $s[2], $row["ale"]."%", $style_rivi2, "R", "I");
 					}
-					$h-=$pdf->ln();					
 				}
 				else {
 					$h-=$pdf->ln();
 				}
 
-				$ei_valia = "";
 				if($row["kommentti"] != "") {
 					$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
 					$pdf->write($h, $nb, 5+$offset, $s[1], $row["kommentti"], $style_komm, "L", "I");	

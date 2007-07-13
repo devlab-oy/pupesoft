@@ -395,9 +395,9 @@ if (!function_exists('tulosta_lasku')) {
 					$pdf->write($h, $nb, $abuw+$offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
 					$h-=$pdf->ln($nb);					
 				}
-				if($row["kommentti"] != "") {
+				elseif($row["kommentti"] != "") {
 					$nb=$pdf->countParagraphHeight($row["kommentti"], $style_komm, ($s[0]-$abuw));
-					$pdf->write($h, $nb, $offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
+					$pdf->write($h, $nb, 5+$offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
 					$h-=$pdf->ln($nb);					
 				}
 				else {
@@ -410,6 +410,29 @@ if (!function_exists('tulosta_lasku')) {
 					$h-=$pdf->ln();
 				}
 
+				//	Oisko sarjanumeroita
+				if ($row["kpl"]+$row["varattu"] > 0){
+					$sarjanutunnus = "myyntirivitunnus";
+				}
+				else {
+					$sarjanutunnus = "ostorivitunnus";
+				}
+
+				$query = "	select *
+							from sarjanumeroseuranta
+							where yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+							and $sarjanutunnus='$row[tunnus]'
+							and sarjanumero != ''";
+				$sarjares = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($sarjares) > 0){
+					while($sarjarow = mysql_fetch_array($sarjares)) {
+						$pdf->write($h, 1, 5+$offset, $s[0], t("sn", $kieli).": $sarjarow[sarjanumero]", $style_komm, "L", "I");
+						$h-=$pdf->ln();
+					}
+				}
+				
 				//	Vientilaskulle annetaan hieman lisäinfoa!
 				if ($laskurow["vienti"] != "" and $row["ei_saldoa"] == "") {
 					$pdf->write($h, 1, 5+$offset, $s[0], "Country of Origin: ".$row["alkuperamaa"], "snadi", "L", "I");	

@@ -196,7 +196,6 @@
 		$ulos .= "<option value='TULLI'"		  .$sel19.">".t("Poistumistoimipaikka")."</option>";
 		$ulos .= "<option value='KASSA'"		  .$sel20.">".t("Kassa")."</option>";
 		$ulos .= "<option value='HENKILO_OSASTO'" .$sel21.">".t("Henkilöosasto")."</option>";
-		$ulos .= "<option value='TOIMEHTO'"       .$sel22.">".t("Toimitusehto")."</option>";
 		$ulos .= "<option value='PIIRI'"          .$sel22.">".t("Asiakkaan piiri")."</option>";
 		$ulos .= "<option value='TOIMEHTO'"       .$sel23.">".t("Toimitusehto")."</option>";
 		$ulos .= "<option value='RAHTIKIRJA'"     .$sel24.">".t("Rahtikirjatyyppi")."</option>";

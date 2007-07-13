@@ -18,7 +18,7 @@ else {
 	$session = "";
 }
 
-//	Luotetaan ett√§ meid√§n k√§ytt√§j√§t ei feikkaa referer urlia!
+//	Luotetaan ett‰ meid‰n k‰ytt‰j‰t ei feikkaa referer urlia!
 list($refererurl)=explode("?",$_SERVER["HTTP_REFERER"]);
 
 if($refererurl!="") {

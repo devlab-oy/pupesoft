@@ -1,12 +1,12 @@
 <?php
 
 /*
-	T√§nne tarvitaan: 
+	T‰nne tarvitaan: 
 	$jysum joka on loppusumma joka tilaukselle halutaan
 	$tilausnumero
 	
-	Jos jyvsumma on negatiivinen on se alennuksen m√§√§r√§
-	Jos jyvsumma sis√§lt√§√§ % merkin annetaan erikoisalennusta
+	Jos jyvsumma on negatiivinen on se alennuksen m‰‰r‰
+	Jos jyvsumma sis‰lt‰‰ % merkin annetaan erikoisalennusta
 	
 	$yhtiorow["jyvita_alennus"] 
 		''  = Alennus jokaisen rivin hintaan
@@ -47,7 +47,7 @@ if($anna_ea == "TOKI" and ($jysum < 0 or $jysum >= 100)) {
 	echo "<font class='error'>".t("Erikoisalennus tulee olla")." 0 - 100%!!</font><br>";		
 }
 elseif($jysum <= 0 and $anna_ea != "TOKI") {
-	echo "<font class='error'>".t("Kamaa ei kannata myyd√§ tappiolla")."!!</font><br>";		
+	echo "<font class='error'>".t("Kamaa ei kannata myyd‰ tappiolla")."!!</font><br>";		
 }
 else {
 	
@@ -63,10 +63,10 @@ else {
 		$laskurow["erikoisale"] = $jysum;				
 	}
 	elseif($yhtiorow["jyvita_alennus"] == "T" or ($yhtiorow["jyvita_alennus"] == "P" and $toim == "PROJEKTI")) {
-		// 	Alennus lis√§t√§√§n alennustuotteelle 
-		//	TODO t√§m√§ on osittain turhaa koska projektia ei ole viel√§ k√∂yt√∂ss√§, kohta on!
+		// 	Alennus lis‰t‰‰n alennustuotteelle 
+		//	TODO t‰m‰ on osittain turhaa koska projektia ei ole viel‰ kˆytˆss‰, kohta on!
 		
-		echo "jyvitet√§√§n tuotteella";
+		echo "jyvitet‰‰n tuotteella";
 		
 		$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[alennus_tuotenumero]'";
 		$rhire = mysql_query($query) or pupe_error($query);
@@ -89,13 +89,13 @@ else {
 		}
 	}
 	else {
-		//	Jyvitet√§√§n riveille uusihinta ja tallennetaan sy√∂tetty summa lasku.hinta-kentt√§√§n			
+		//	Jyvitet‰‰n riveille uusihinta ja tallennetaan syˆtetty summa lasku.hinta-kentt‰‰n			
 		// huomioidaan hyvitysrivit ja ei muuteta niitten hintoja
 		$halu_summa = $jysum - $nega_summa;
 		
 		$jypro = $halu_summa/$plus_summa;
 
-		// Rullataan tilausrivej√§
+		// Rullataan tilausrivej‰
 		$query = "	SELECT tunnus, tuoteno, hinta, tilkpl, ale
 					FROM tilausrivi 
 					where yhtio 	 = '$kukarow[yhtio]' 
@@ -117,7 +117,7 @@ else {
 		
 		$jysum = round($jysum,2);
 		
-		//  P√§ivitet√§√§n laskulle hinta-kentt√§√§n sy√∂tetty summa
+		//  P‰ivitet‰‰n laskulle hinta-kentt‰‰n syˆtetty summa
 		$query	= "update lasku set hinta = '$jysum' where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 		$result	= mysql_query($query) or pupe_error($query);
 		

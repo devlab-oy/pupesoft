@@ -5,15 +5,14 @@ if (mysql_field_name($result, $i) == "kohde") {
 				FROM asiakkaan_kohde
 				WHERE yhtio='$kukarow[yhtio]' and tunnus = '$t[$i]'";
 	$sresult = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($sresult) < 1) {
-		$virhe[$i] = "".t("Kohde puuttuu tai sitÃ¤ ei lÃ¶ydy!")."";
+		$virhe[$i] = "".t("Kohde puuttuu tai sitä ei löydy!")."";
 		$errori = 1;
 	}
-	
+
 	$kohde = $t[$i];
 }
-
 
 // tarkistetaan onko kohde jo olemassa
 if (mysql_field_name($result, $i) == "positio") {
@@ -23,7 +22,7 @@ if (mysql_field_name($result, $i) == "positio") {
 	$sresult = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($sresult)>1) {
 		$virhe[$i] = t("Kohteella on jo tämä positio perustettuna!");
-		$errori = 1;		
+		$errori = 1;
 	}
 }
 
@@ -45,7 +44,7 @@ if (mysql_field_name($result, $i) == "muokannut") {
 
 if (mysql_field_name($result, $i) == "muokattu") {
 	$t[$i] = date('Y-m-d H:i:s');
-	
+
 }
 
 ?>

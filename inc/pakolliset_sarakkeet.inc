@@ -1,12 +1,12 @@
 <?php
 	
 /*
-	YllÃ¤pidetÃ¤Ã¤n taulujen pakollisia saraketietoja
+	Ylläpidetään taulujen pakollisia saraketietoja
 	
 	list($pakolliset, $kielletyt, $wherelliset)=pakolliset_sarakkeet($table);
 */
 
-// mÃ¤Ã¤ritellÃ¤Ã¤n pakolliset sarakkeet
+// määritellään pakolliset sarakkeet
 if (!function_exists("pakolliset_sarakkeet")) {
 	function pakolliset_sarakkeet($table) {
 		global $yhtiorow;
@@ -22,7 +22,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "asiakas" :
-				//	TÃ¤mÃ¤ estÃ¤Ã¤ syncronoinnin muilla kuin suomalaisilla toimittajilla..
+				//	Tämä estää syncronoinnin muilla kuin suomalaisilla toimittajilla..
 				if (strtoupper($yhtiorow['maa']) == 'FI') {
 					$pakolliset = array("YTUNNUS");
 					$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TOIM_OVTTUNNUS");
@@ -158,7 +158,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			default :
-				echo t("Miten tÃ¤nne pÃ¤Ã¤sit!");
+				echo t("Miten tänne pääsit!");
 				exit;
 		}
 

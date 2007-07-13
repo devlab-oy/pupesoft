@@ -5,13 +5,13 @@ function yllapito(url, tag, submitOnSelect) {
 	toim=url.substr(0,url.indexOf("&"));
 	valinta=select.options[select.selectedIndex].value;
 
-	//	Jos meill√§ on valintana uusi, siirryt√§√§n tekem√§√§n uusi tietue!
+	//	Jos meill‰ on valintana uusi, siirryt‰‰n tekem‰‰n uusi tietue!
 	if(isNaN(valinta)) {
 		
 		var width=0;
 		var height=0;
 		
-		//	Koitetaan tehd√§ aina kaunis ja sopiva poppari
+		//	Koitetaan tehd‰ aina kaunis ja sopiva poppari
 		switch (toim) {
 			case 'yhteyshenkilo':
 				width=400;
@@ -29,10 +29,10 @@ function yllapito(url, tag, submitOnSelect) {
 		}
 		
 		if(height==0 || width==0) {
-			alert('Yll√§pitotoimintoa '+toim+' ei tunneta!');
+			alert('Yll‰pitotoimintoa '+toim+' ei tunneta!');
 		}
 		else {
-			//	Tehd√§√§n uutta
+			//	Tehd‰‰n uutta
 			if(valinta=='uusi') {
 				newwindow=window.open('../yllapito.php?popparista=JOO&uusi=1&suljeYllapito='+tag+'&toim='+url, 'yllapito', 'width='+height+',height='+height+',top=100,left=100,scrollbars=no,resizable=yes');
 			}
@@ -48,7 +48,7 @@ function yllapito(url, tag, submitOnSelect) {
 	}
 	else {
 		
-		// Onko meill√§ muokkaus?		
+		// Onko meill‰ muokkaus?		
 		sain='en';
 		for(i=0;i<=select.options.length-1;i++) {
 			if(select.options[i].value.substring(0,7)=='muokkaa') {
@@ -111,7 +111,7 @@ function suljeYllapito(sID,value,text) {
 		newOpt.text=text;
 		newOpt.value=value;
 
-		//	Jos p√§ivitettiin yhteyshenkil√∂it√§ meid√§n pit√§√§ list√§t√§ ne kaikkiin valikkoihin..			
+		//	Jos p‰ivitettiin yhteyshenkilˆit‰ meid‰n pit‰‰ list‰t‰ ne kaikkiin valikkoihin..			
 		sela='EI'
 		if(sID=='yhteyshenkilo_kaupallinen') {
 			sela=window.opener.document.getElementById('yhteyshenkilo_tekninen');

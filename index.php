@@ -10,7 +10,7 @@ if ($go == '') {
 	else 						$go		= "";	
 }
 
-$go2 = $go; // ei laiteta tervetuloa.phpt√§ oletukseksi indexvassiin
+$go2 = $go; // ei laiteta tervetuloa.phpt‰ oletukseksi indexvassiin
 if ($go == '') $go = 'tervetuloa.php';
 
 $colwidth = '180';

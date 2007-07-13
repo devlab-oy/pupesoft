@@ -9,20 +9,20 @@
 	$aika      = round($endtime-$starttime,4);
 
 	$useslave  = 0;
-	
+
 	if (require("connect.inc")) {
-		
-		//	Tarkastetaan k√§sitell√§√§nk√∂ suorituskykyongelmia
+
+		//	Tarkastetaan k‰sitell‰‰nkˆ suorituskykyongelmia
 		$query 	= "describe suorituskykyloki";
 		$suores = mysql_query($query);
 
 		if (mysql_error() == "") {
-			
+
 			$starttime = date("Y-m-d H:i:s", $starttime);
 			$endtime = date("Y-m-d H:i:s", $endtime);
-						
+
 			$suoque = "	INSERT INTO suorituskykyloki
-						SET yhtio	 	= '$kukarow[yhtio]',        
+						SET yhtio	 	= '$kukarow[yhtio]',
 						skripti      	= '".$_SERVER['SCRIPT_NAME']."',
 						suoritusalku	= '$starttime',
 						suoritusloppu	= '$endtime',
@@ -32,7 +32,8 @@
 			$suores = mysql_query($suoque) or pupe_error($suoque);
 		}
 	}
-	
+
 	echo "<br><font class='info'><br>$aika</font>";
 	echo "</body></html>";
+
 ?>

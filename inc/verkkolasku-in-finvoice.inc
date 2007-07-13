@@ -1,44 +1,44 @@
 <?php
 
-//echo "k√§sitell√§√§n saapuva Finvoice BuyerPartyDetails\n".print_r($xml->xpath('BuyerPartyDetails'));
-$xyhtio 				= $xml->xpath('BuyerPartyDetails/BuyerOrganisationUnitNumber');		 			// 	T√§t√§ kovin harvoin t√§√§ll√§ aineistossa v√§litet√§√§n yritet√§√§n nyt kuitenkin..
-if($xyhtio[0] == "") { 																					/* 	tehd√§√§n oletus ovttunnus ytunnuksen pohjalta */
-	$xyhtio	= $xml->xpath('BuyerPartyDetails/BuyerPartyIdentifier'); 									// 	ytynnus v√§liviivalla
-	if($xyhtio[0] == "") $xml->xpath('BuyerPartyDetails/BuyerOrganisationTaxCode'); 					// t√§m√§ voisi l√∂yty√∂ my√∂s t√§√§lt√§
+//echo "k‰sitell‰‰n saapuva Finvoice BuyerPartyDetails\n".print_r($xml->xpath('BuyerPartyDetails'));
+$xyhtio 				= $xml->xpath('BuyerPartyDetails/BuyerOrganisationUnitNumber');		 			// 	T‰t‰ kovin harvoin t‰‰ll‰ aineistossa v‰litet‰‰n yritet‰‰n nyt kuitenkin..
+if($xyhtio[0] == "") { 																					/* 	tehd‰‰n oletus ovttunnus ytunnuksen pohjalta */
+	$xyhtio	= $xml->xpath('BuyerPartyDetails/BuyerPartyIdentifier'); 									// 	ytynnus v‰liviivalla
+	if($xyhtio[0] == "") $xml->xpath('BuyerPartyDetails/BuyerOrganisationTaxCode'); 					// t‰m‰ voisi lˆytyˆ myˆs t‰‰lt‰
 	$ytunnus = str_replace("-","",$xyhtio[0]);
 	$xyhtio[0] = "0037".$ytunnus."00001";
 	unset($ytunnus);
 }
-$xverkkotunnus_vas 		= array("");																	//	T√§t√§ ei oikein tartteta finvoicessa, toivottavasti l√∂ytyy oikea yhtio ilmankin..
+$xverkkotunnus_vas 		= array("");																	//	T‰t‰ ei oikein tartteta finvoicessa, toivottavasti lˆytyy oikea yhtio ilmankin..
 $xlaskun_tyyppi 		= $xml->xpath('InvoiceDetails/InvoiceTypeCode');						
-if($xlaskun_tyyppi[0] == "INV02") $xlaskun_tyyppi[0] = "381";											/*	Hyvityslaskut pit√§√§ merkata hyvitykseksi jotta ne osataan k√§sitell√§ oikein */
+if($xlaskun_tyyppi[0] == "INV02") $xlaskun_tyyppi[0] = "381";											/*	Hyvityslaskut pit‰‰ merkata hyvitykseksi jotta ne osataan k‰sitell‰ oikein */
 $xlaskunro 				= $xml->xpath('InvoiceDetails/InvoiceNumber');	
-$xlaskun_ebid[0] 		= "/".basename($file);								//	N√§m√§ tallennetaan levylle joten t√§m√§ on tiedoston nimi
+$xlaskun_ebid[0] 		= "/".basename($file);								//	N‰m‰ tallennetaan levylle joten t‰m‰ on tiedoston nimi
 $xlaskun_paiva			= $xml->xpath('EpiDetails/EpiIdentificationDetails/EpiDate');
 $xlaskun_erapaiva		= $xml->xpath('EpiDetails/EpiPaymentInstructionDetails/EpiDateOptionDate');
-if($xlaskun_erapaiva[0] == "")	{																		//	T√§m√§ voi l√∂yty√§ my√∂s maksatustiedoista
+if($xlaskun_erapaiva[0] == "")	{																		//	T‰m‰ voi lˆyty‰ myˆs maksatustiedoista
 	$xlaskun_erapaiva		= $xml->xpath('PaymentTermsDetails/InvoiceDueDate');
 }
 $xlaskuttajan_ovt		= $xml->xpath('SellerPartyDetails/SellerOrganisationUnitNumber');
-if($xlaskuttajan_ovt[0] == "") { 																		/* 	tehd√§√§n oletus ovttunnus ytunnuksen pohjalta */
-	$xlaskuttajan_ovt	= $xml->xpath('SellerPartyDetails/SellerPartyIdentifier'); 						// 	ytynnus v√§liviivalla
-	if($xlaskuttajan_ovt[0] == "") $xlaskuttajan_ovt = $xml->xpath('SellerPartyDetails/SellerOrganisationTaxCode'); // t√§m√§ voisi l√∂yty√∂ my√∂s t√§√§lt√§
+if($xlaskuttajan_ovt[0] == "") { 																		/* 	tehd‰‰n oletus ovttunnus ytunnuksen pohjalta */
+	$xlaskuttajan_ovt	= $xml->xpath('SellerPartyDetails/SellerPartyIdentifier'); 						// 	ytynnus v‰liviivalla
+	if($xlaskuttajan_ovt[0] == "") $xlaskuttajan_ovt = $xml->xpath('SellerPartyDetails/SellerOrganisationTaxCode'); // t‰m‰ voisi lˆytyˆ myˆs t‰‰lt‰
 	$ytunnus = $xlaskuttajan_ovt[0];	
 	$xlaskuttajan_ovt[0] = "0037".str_replace("-","",$ytunnus)."00001";
 	unset($ytunnus);
 }
 $xlaskuttaja			= $xml->xpath('SellerPartyDetails/SellerOrganisationName');
 $xlaskun_pankkiviite	= $xml->xpath('EpiDetails/EpiIdentificationDetails/EpiReference');
-if($xlaskun_pankkiviite[0] == "") {																		/*	Vaihtoehtoinen paikka mist√§ tieto voidaan l√∂yt√§√§ */
+if($xlaskun_pankkiviite[0] == "") {																		/*	Vaihtoehtoinen paikka mist‰ tieto voidaan lˆyt‰‰ */
 	$xlaskun_pankkiviite	= $xml->xpath('InvoiceDetails/SellerReferenceIdentifier');
 }
 $xlaskun_summa_eur		= $xml->xpath('EpiDetails/EpiPaymentInstructionDetails/EpiInstructedAmount');
-$xlaskun_asiakastunnus	= $xyhtio [0];																	//	t√§m√§ taitaa olla sama kuin tuo ytunnus?
+$xlaskun_asiakastunnus	= $xyhtio [0];																	//	t‰m‰ taitaa olla sama kuin tuo ytunnus?
 
-//echo "k√§sitell√§√§n saapuva Finvoice BuyerPartyDetails\n".print_r($xml->xpath('InvoiceRow'));
+//echo "k‰sitell‰‰n saapuva Finvoice BuyerPartyDetails\n".print_r($xml->xpath('InvoiceRow'));
 $tuotetiedot = $xml->xpath('InvoiceRow');
 
-//echo "Tuotetiedot l√∂ydetty! Niit√§ on " . sizeof($tuotetiedot) . "\n";
+//echo "Tuotetiedot lˆydetty! Niit‰ on " . sizeof($tuotetiedot) . "\n";
 $i = 0;
 $xtuoteno	= array();
 $tuoteno	= array();
@@ -58,14 +58,14 @@ if (sizeof($tuotetiedot) > 0) {
 	foreach ($tuotetiedot as $tuotetieto) {
 		$xtuoteno[$i]	= $tuotetieto->xpath('ArticleIdentifier');
 		$tuoteno[$i]	= $xtuoteno[$i][0];
-		if($tuoteno[$i] != "") {																			/*	Meill√§ voi olla pelkk√§ "kommenttirivi", n√§it√§ on turha k√§sitell√§ */
+		if($tuoteno[$i] != "") {																			/*	Meill‰ voi olla pelkk‰ "kommenttirivi", n‰it‰ on turha k‰sitell‰ */
 			// veroton rivihinta
 			$xrsumma[$i]	= $tuotetieto->xpath('RowAmount');
 			$rsumma[$i]		= $xrsumma[$i][0];
 			$xvat[$i]		= $tuotetieto->xpath('RowVatRatePercent');
-			if (is_array($xvat[$i])) $vat[$i] = $xvat[$i][0]; // N√§in voimme pohtia oliko t√§√§ll√§ tuo segmentti
+			if (is_array($xvat[$i])) $vat[$i] = $xvat[$i][0]; // N‰in voimme pohtia oliko t‰‰ll‰ tuo segmentti
 			$xrinfo[$i] 	= $tuotetieto-> xpath('RowFreeText');
-			if(is_array($xrinfo[$i])) {							//	Meill√§ on MONTA selitett√§ niputetaan yhteen..
+			if(is_array($xrinfo[$i])) {							//	Meill‰ on MONTA selitett‰ niputetaan yhteen..
 				foreach($xrinfo[$i] as $xln) {
 					$rinfo[$i] .= " / $xln";
 				}
@@ -73,14 +73,14 @@ if (sizeof($tuotetiedot) > 0) {
 			else {
 				$rinfo[$i] = $xrinfo[$i][0];
 			}		
-			// laskutettu m√§√§r√§
+			// laskutettu m‰‰r‰
 			$xrkpl[$i] 		= $tuotetieto-> xpath('DeliveredQuantity');
 			$rkpl[$i] 		= $xrkpl[$i][0];
 			$xrivino[$i] 	= array("");
 			$rrivino[$i]	= $xrivino[$i][0];			
 		}
 		else {
-			//	Poistetaan t√§m√§ tietue	
+			//	Poistetaan t‰m‰ tietue	
 			unset($tuoteno[$i]);
 			$i--;
 		}

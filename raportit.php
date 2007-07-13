@@ -1,6 +1,6 @@
 <?php
 
-///* TÃ¤mÃ¤ skripti kÃ¤yttÃ¤Ã¤ slave-tietokantapalvelinta *///
+///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	if ((($toim != 'hyvaksynta') or ($tee != 'T')) and ($toim !='maksuvalmius')) $useslave = 1;
 	require ("inc/parametrit.inc");
 

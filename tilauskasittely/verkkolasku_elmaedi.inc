@@ -123,7 +123,7 @@ if (!function_exists('elmaedi_lasku_loppu')) {
 if (!function_exists('elmaedi_aineisto_loppu')) {
 	function elmaedi_aineisto_loppu($tootedi, $timestamppi) {
 	
-		//LopputÃ¤git mukaan, paitsi jos failit on tyhjiÃ¤
+		//Lopputägit mukaan, paitsi jos failit on tyhjiä
 		$fstat = fstat($tootedi);
 
 		if ($fstat["size"] > 0) {

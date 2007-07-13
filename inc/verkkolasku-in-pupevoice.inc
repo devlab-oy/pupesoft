@@ -15,12 +15,12 @@ $xlaskun_pankkiviite	= $xml->xpath('Group1/RFF[@eC506.1153="PQ"]/@eC506.1154');
 $xlaskun_asiakastunnus	= $xml->xpath('Group2[NAD/@e3035="IV"]/Group3/RFF/@eC506.1154');
 $xlaskun_summa_eur		= $xml->xpath('Group48/MOA[@eC516.5025="9" and @eC516.6345="EUR"]/@eC516.5004');
 
-// jos ei lÃ¶ytynyt EUR summaa kokeillaan ilman valkoodia
+// jos ei löytynyt EUR summaa kokeillaan ilman valkoodia
 if ((float) $xlaskun_summa_eur[0] == 0) {
 	$xlaskun_summa_eur = $xml->xpath('Group48/MOA[@eC516.5025="9" and @eC516.6345=""]/@eC516.5004');
 }
 
-// jos ei sillonkaan lÃ¶ytynyt summaa niin haetaan kokonaan ilman valkoodi segmenttiÃ¤
+// jos ei sillonkaan löytynyt summaa niin haetaan kokonaan ilman valkoodi segmenttiä
 if ((float) $xlaskun_summa_eur[0] == 0) {
 	$xlaskun_summa_eur = $xml->xpath('Group48/MOA[@eC516.5025="9"]/@eC516.5004');
 }
@@ -28,7 +28,7 @@ if ((float) $xlaskun_summa_eur[0] == 0) {
 //echo "Laskun perustiedot parseroitu!\n";
 $tuotetiedot = $xml->xpath('Group25');
 
-//echo "Tuotetiedot lÃ¶ydetty! NiitÃ¤ on " . sizeof($tuotetiedot) . "\n";
+//echo "Tuotetiedot löydetty! Niitä on " . sizeof($tuotetiedot) . "\n";
 $i = 0;
 $xtuoteno	= array();
 $tuoteno	= array();
@@ -51,17 +51,17 @@ if (sizeof($tuotetiedot) > 0) {
 		$xrsumma[$i]	= $tuotetieto->xpath('Group26/MOA[@eC516.5025="203"]/@eC516.5004');
 		$rsumma[$i]		= $xrsumma[$i][0];
 		$xvat[$i]		= $tuotetieto->xpath('Group33/TAX[@eC241.5153="VAT"]/@eC243.5278');
-		if (is_array($xvat[$i])) $vat[$i] = $xvat[$i][0]; // NÃ¤in voimme pohtia oliko tÃ¤Ã¤llÃ¤ tuo segmentti
+		if (is_array($xvat[$i])) $vat[$i] = $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
 		$xrinfo[$i] 	= $tuotetieto-> xpath('IMD/@eC273.7008.1');
 		$info[$i] 		= $xrinfo[$i][0];
-		// laskutettu mÃ¤Ã¤rÃ¤
+		// laskutettu määrä
 		$xrkpl[$i] 		= $tuotetieto-> xpath('QTY[@eC186.6063="12"]/@eC186.6060');
 		$rkpl[$i] 		= $xrkpl[$i][0];
 		$xrivino[$i] 	= $tuotetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154');
 		$rrivino[$i]	= $xrivino[$i][0];
 
 
-		// jotkut toimittajat lÃ¤hettÃ¤Ã¤ laskutetun summan 47 segmentissÃ¤ eikÃ¤ 12 niinku kuuluis
+		// jotkut toimittajat lähettää laskutetun summan 47 segmentissä eikä 12 niinku kuuluis
 		if ((float) $rkpl[$i] == 0) {
 			$xrkpl[$i] = $tuotetieto-> xpath('QTY[@eC186.6063="47"]/@eC186.6060');
 			$rkpl[$i]  = $xrkpl[$i][0];
@@ -70,10 +70,10 @@ if (sizeof($tuotetiedot) > 0) {
 		//echo "Summa: $rsumma[$i] ($vat[$i])\n";
 		$i++;
 
-		// Ei oteta vielÃ¤ kÃ¤yttÃ¶Ã¶n
-		// Jos tuotetiedot ovatkin erittelyissÃ¤ (Schenker)
+		// Ei oteta vielä käyttöön
+		// Jos tuotetiedot ovatkin erittelyissä (Schenker)
 		// $tarkennetiedot = $xml->xpath('Group25/Group38');
-		// echo "Tarkenteet lÃ¶ydetty! NiitÃ¤ on " . sizeof($tarkennetiedot) . "\n";
+		// echo "Tarkenteet löydetty! Niitä on " . sizeof($tarkennetiedot) . "\n";
 		// if (sizeof($tarkennetiedot) > 0) {
 		// 	foreach ($tarkennetiedot as $tarkennetieto) {
 		// 		$xtuoteno[$i]	= $tarkennetieto->xpath('ALC/@eC214.7161');
@@ -82,11 +82,11 @@ if (sizeof($tuotetiedot) > 0) {
 		// 		$xrsumma[$i]	= $tarkennetieto->xpath('Group41/MOA/@eC516.5004');
 		// 		$rsumma[$i]		= $xrsumma[$i][0];
 		// 		$xvat[$i]		= $tarkennetieto->xpath('Group43/TAX[@eC241.5153="VAT"]/@eC243.5278');
-		// 		if (is_array($xvat[$i])) $vat[$i] = $xvat[$i][0]; // NÃ¤in voimme pohtia oliko tÃ¤Ã¤llÃ¤ tuo segmentti
+		// 		if (is_array($xvat[$i])) $vat[$i] = $xvat[$i][0]; // Näin voimme pohtia oliko täällä tuo segmentti
 		// 		$xrinfo[$i] 	= $tarkennetieto-> xpath('ALC/@eC214.7160.1');
 		// 		$info[$i] 		= $xrinfo[$i][0];
 		// 		$rkpl=0;
-		// 		// laskutettu mÃ¤Ã¤rÃ¤
+		// 		// laskutettu määrä
 		// 		$xrivino[$i] 	= $tarkennetieto->xpath('Group29/RFF[@eC506.1153="CR"]/@eC506.1154');
 		// 		$rrivino[$i]	= $xrivino[$i][0];
 		// 		echo "Tarkenne: $tuoteno[$i] '$info[$i]' Kpl: $rkpl[$i] ";

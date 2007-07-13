@@ -3,7 +3,7 @@ require('inc/parametrit.inc');
 echo "<br><font class='head'>".t("Suoraveloitusten kohdistus suorituksiin")."</font><hr>";
 
 if ($tee == 'V') {
-// Lasku on valittu ja sit√§ tili√∂id√§√§n (suoritetaan)
+// Lasku on valittu ja sit‰ tiliˆid‰‰n (suoritetaan)
 	$query = "SELECT *
 			FROM tiliointi
 			WHERE tunnus='$stunnus' and yhtio = '$kukarow[yhtio]' and tilino ='$yhtiorow[selvittelytili]'";
@@ -29,7 +29,7 @@ if ($tee == 'V') {
 
 	$laskurow=mysql_fetch_array($result);
 
-// Oletustili√∂innit
+// Oletustiliˆinnit
 // Ostovelat
 	$query = "INSERT into tiliointi set
 			yhtio ='$kukarow[yhtio]',
@@ -65,7 +65,7 @@ if ($tee == 'V') {
 	$tee='';
 }
 
-if ($tee=='') { //N√§ytet√§√§n kohdistamattomat
+if ($tee=='') { //N‰ytet‰‰n kohdistamattomat
 	echo "<table>";
 	$query = "SELECT nimi nimi, l.tapvm tapvm, ifnull(t.tapvm, 'Ei sopivaa suoritusta') suorituspvm, t.selite tilioteselite, l.summa,
 			l.tunnus, t.tunnus stunnus

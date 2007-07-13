@@ -82,7 +82,7 @@ class PDF extends pdffile {
 			setlocale(LC_MONETARY, 'fi_FI');	
 		}
 		
-		//	Asetetaan pÃ¤ivÃ¤ys..
+		//	Asetetaan päiväys..
 		if($maa == "US") {
 			setlocale(LC_TIME, 'en_US');
 		}
@@ -106,7 +106,7 @@ class PDF extends pdffile {
 		foreach($sarakkeet as $w) {
 			$tw += $w;
 
-			//	mennÃ¤Ã¤n liian leveeksi!
+			//	mennään liian leveeksi!
 			if($tw > $wmax) {
 				$s[] = $wmax;
 				return $s;

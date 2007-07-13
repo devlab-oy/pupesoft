@@ -429,7 +429,7 @@ if (!function_exists('tulosta_lasku')) {
 				
 				//	Vientilaskulle annetaan hieman lisäinfoa!
 				if ($laskurow["vienti"] != "" and $row["ei_saldoa"] == "") {
-					$pdf->write($h, 1, 5+$offset, $s[0], "Country of Origin: ".strtoupper(maa($row["alkuperamaa"], $kieli)), "snadi", "L", "I");	
+					$pdf->write($h, 1, 5+$offset, $s[0], "Country of Origin: ".strtoupper(maa($row["alkuperamaa"], $kieli)), "snadi", "L", "I");	
 					$h-=$pdf->ln();
 					$pdf->write($h, 1, 5+$offset, $s[0], "Customs tariff number: ".$row["tullinimike1"], "snadi", "L", "I");	
 					$h-=$pdf->ln();

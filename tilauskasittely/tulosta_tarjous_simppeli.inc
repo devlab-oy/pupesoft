@@ -459,7 +459,7 @@ if (!function_exists('tulosta_tarjous')) {
 			$liite = $pdf_tarjousfilenimi;
 			$kutsu = "Tarjous $laskurow[tarjous]";
 
-			echo t("Tarjous l‰hetet‰‰n osoitteeseen '$kukarow[eposti]'")."...<br>";
+			echo t("Tarjous l‰hetet‰‰n osoitteeseen")." $kukarow[eposti]...<br>";
 
 			if ($kukarow["extranet"] == '') {
 				require("../inc/sahkoposti.inc");

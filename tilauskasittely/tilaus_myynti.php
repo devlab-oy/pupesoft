@@ -3494,6 +3494,8 @@ if ($tee == '') {
 									</form>
 								</td>";
 					}
+					
+					echo "<tr>";
 				}
 
 				if ($varaosavirhe != '') {
@@ -3591,7 +3593,9 @@ if ($tee == '') {
 								</form>";
 					}
 				}
-				echo "</tr>";
+				else {
+					echo "</tr>";
+				}
 
 				if ($row['kommentti'] != '') {
 					$cspan = 10;

@@ -387,7 +387,7 @@ if (!function_exists('tulosta_tarjous')) {
 		}
 		
 		$pdf->write($h, 1, 0, 0, t("Parhain terveisin",$kieli), "norm", "L", "");
-		$h-=$pdf->ln(1.5);
+		$h-=$pdf->ln(2);
 
 		$pdf->write($h, 1, 0, 0, $kukarow["nimi"], "norm", "L", "B");
 		$h-=$pdf->ln();

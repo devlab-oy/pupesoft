@@ -52,14 +52,17 @@
 
 	if (mysql_field_name($result, $i) == "konserniyhtio") {
 
-		$sel = '';
+		$sela = $selb = '';
 		if ($trow[$i] != '') {
-			$sel = "SELECTED";
+			$selb = "SELECTED";
+		}
+		else {
+			$sela = "SELECTED";
 		}
 
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value = ''>".t("Ei")."</option>";
-		$ulos .= "<option value = 'o' $sel>".t("Kyllä")."</option>";
+		$ulos .= "<option value = '' $sela>".t("Ei")."</option>";
+		$ulos .= "<option value = 'o' $selb>".t("Kyllä")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
@@ -468,13 +471,13 @@
 
 	if (mysql_field_name($result, $i) == "ketjutus") {
 
-			$sel='';
-			if ($trow[$i]=='E') $sel='SELECTED';
-
+			$sela = $selb = '';
+			if ($trow[$i]=='E') $selb='SELECTED';
+			else $sela = "SELECTED";
 			$ulos = "<td>
 				<select name='$nimi'>
-				<option value=''      >".t("Laskut saa ketjuttaa")."</option>
-				<option value='E' $sel>".t("Ei ketjuteta laskuja")."</option>
+				<option value='' $sela>".t("Laskut saa ketjuttaa")."</option>
+				<option value='E' $selb>".t("Ei ketjuteta laskuja")."</option>
 				</select></td>";
 			$jatko = 0;
 	}

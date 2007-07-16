@@ -3498,8 +3498,6 @@ if ($tee == '') {
 									</form>
 								</td>";
 					}
-					
-					echo "<tr>";
 				}
 
 				if ($varaosavirhe != '') {

@@ -207,27 +207,33 @@
 	if ($tee=='valitse') {
 
 		if ($otunnus == "") {
-			$query = "	select distinct rahtikirjanro
+			$query = "	select rahtikirjanro, sum(kilot) paino
 						from rahtikirjat
 						where yhtio		= '$kukarow[yhtio]' and
 						tulostuspaikka	= '$varasto' and
 						toimitustapa	= '$toimitustapa' and
 						tulostettu		> '$vv-$kk-$pp 00:00:00' and
-						tulostettu		< '$vv-$kk-$pp 23:59:59'";
+						tulostettu		< '$vv-$kk-$pp 23:59:59'
+						GROUP BY rahtikirjanro";
 		}
 		else {
-			$query = "	select distinct rahtikirjanro
+		    $query = "select rahtikirjanro from rahtikirjat where otsikkonro= '$otunnus'
+		            and yhtio='{$kukarow['yhtio']}'";
+		    $res = mysql_query($query) or pupe_error($query);
+		    $rahtikirjanro = mysql_fetch_array($res);
+		    
+			$query = "	select rahtikirjanro, sum(kilot) paino
 						from rahtikirjat
 						where yhtio		= '$kukarow[yhtio]'
-						and otsikkonro	= '$otunnus'
-						and tulostettu != '0000-00-00 00:00:00'";
+						and rahtikirjanro	= '{$rahtikirjanro['rahtikirjanro']}'
+						and tulostettu != '0000-00-00 00:00:00'
+						GROUP BY rahtikirjanro";
 
 			$toimitustapa = "";
 			$varasto = "";
 		}
 
 		$result = mysql_query($query) or pupe_error($query);
-
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='message'>$toimitustapa: $vv-$kk-$pp<br><br>".t("Yhtään rahtikirjaa ei löytynyt")."!</font><br><br>";
 			$tee = "";
@@ -258,6 +264,7 @@
 			echo "<th>".t("Asiakas")."</th>";
 			echo "<th>".t("Osoite")."</th>";
 			echo "<th>".t("Postino")."</th>";
+			echo "<th>".t("Paino KG")."</th>";
 			echo "<th>".t("Valitse")."</th>";
 			echo "</tr>";
 
@@ -278,6 +285,7 @@
 					echo "<td>$orow[nimi] $orow[nimitark]</td>";
 					echo "<td>$orow[toim_osoite]</td>";
 					echo "<td>$orow[toim_postino] $orow[toim_postitp]</td>";
+					echo "<td style='text-align: right;'>" . round($row['paino'], 2) . "</td>";
 					echo "<td><input type='checkbox' name='rtunnukset[]' value='$row[rahtikirjanro]' checked></td>";
 					echo "</tr>";
 				}

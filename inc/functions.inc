@@ -33,7 +33,7 @@ if (!function_exists("pupe_error")) {
 		$puperror .= "$query\n\n";
 
 		// l‰hetet‰‰n se meilitse adminille
-		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: $yhtiorow[postittaja_email]\r\n", "-f $yhtiorow[postittaja_email]");
+		mail($yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
 
 		// kuollaan pois
 		exit(nl2br($puperror));

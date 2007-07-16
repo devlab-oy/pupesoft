@@ -19,11 +19,6 @@
 	if (mysql_field_name($result, $i) == "css_extranet") {
 		$ulos = "<td><textarea cols='55' rows='7' name='css_extranet'>$trow[$i]</textarea><input type='hidden' name='cssextraneti' value='$i'></td>";
 		$jatko = 0;
-	}
-    
-    if (mysql_field_name($result, $i) == "karhuviesti1" or mysql_field_name($result, $i) == "karhuviesti2" or mysql_field_name($result, $i) == "karhuviesti3") {
-		$ulos = "<td><textarea cols='55' rows='7' name='$nimi'>$trow[$i]</textarea></td>";
-		$jatko = 0;
 	} 
 
 	if (mysql_field_name($result, $i) == "verkkolasku_lah") {

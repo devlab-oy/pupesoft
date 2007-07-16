@@ -406,9 +406,9 @@
 			if ($jatko == 0) {
 				if($yllapito_tarkista_oikeellisuus!="") {
 					//	Tehdään tarkastuksia, Tämä sallisi myös muiden tagien "oikeellisuuden" määrittelemisen suhteellisen helposti
-					$checks["select"] 	= "/\<select.*option+[^>]*\s*selected\s*>.*\<\/select\>/";
+					$checks["select"] 	= "/\<select.*option+[^>]*\s+selected\s*>.*\<\/select\>/";
 					//$checks["textarea"] = "/.*\<textarea.*\<\/textarea\>.*/";
-					$matches = preg_replace($checks, "", strip_tags($ulos,"<select>"));
+					$matches = preg_replace($checks, "", strip_tags($ulos,"<select><option>"));
 					if($matches!="") {
 						$ulos .= "<td class='back'><pre>OBS!! '".$trow[$i]."'</pre></td>";
 					}

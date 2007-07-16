@@ -4,7 +4,7 @@
 	echo "<font class='head'>".t("Luo siirtolista tuotepaikkojen h‰lytysrajojen perusteella")."</font><hr>";
 
 	if ($tee == 'M') {
-		if ($kohdevarasto != '' and $lahdevarasto != '' and $kohdevarasto != $lahdevarasto) {
+		if ($kohdevarasto != '' and !empty($lahdevarastot) and !in_array($kohdevarasto, $lahdevarastot)) {
 			$lask = 0;
 
 			$lisa = "";
@@ -74,8 +74,10 @@
 			if ((int) $olliriveja == 0 or $olliriveja == '') {
 				$olliriveja = 20;
 			}
-
-			while ($pairow = mysql_fetch_array($resultti)) {
+			
+			// tehd‰‰n jokaiselle valitulle lahdevarastolle erikseen
+			foreach ($lahdevarastot as $lahdevarasto) {
+				while ($pairow = mysql_fetch_array($resultti)) {
 
 				if ($tehtyriveja == 0 or $tehtyriveja == (int) $olliriveja+1) {
 					$jatka		= "kala";
@@ -144,7 +146,7 @@
 				}
 
 				//katotaan myyt‰viss‰ m‰‰r‰
-				list(, , $saldo_myytavissa) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", "$lahdevarasto");
+				list(, , $saldo_myytavissa) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
 				
 				$saldo_myytavissa = (float) $saldo_myytavissa;
 				
@@ -204,6 +206,7 @@
 					}
 				}
 			}
+			}
 			echo "</table><br>";
 			//echo "lask = $lask<br><br>";
 			if ($lask == 0) {
@@ -240,9 +243,9 @@
 		echo "<form name = 'valinta' action = '$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='M'>
 				<table>";
-
+				
 		echo "<tr><th>".t("L‰hdevarasto, eli varasto josta ker‰t‰‰n").":</th>";
-		echo "<td colspan='4'><select name='lahdevarasto'><option value=''>".t("Valitse")."</option>";
+		echo "<td colspan='4'>";
 
 		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
 		$vares = mysql_query($query) or pupe_error($query);
@@ -250,17 +253,17 @@
 		while ($varow = mysql_fetch_array($vares))
 		{
 			$sel='';
-			if ($varow['tunnus']==$lahdevarasto) $sel = 'selected';
+			if (is_array($lahdevarastot) && in_array($varow['tunnus'], $lahdevarastot)) $sel = 'checked';
 
 			$varastomaa = '';
 			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
-				$varastomaa = strtoupper($varow['maa']);
+				$varastomaa = '(' . maa(strtoupper($varow['maa'])) . ')';
 			}
 
-			echo "<option value='$varow[tunnus]' $sel>$varastomaa $varow[nimitys]</option>";
+			echo "<input type='checkbox' name='lahdevarastot[]' value='$varow[tunnus]' $sel />$varow[nimitys] $varastomaa<br />";
 		}
 
-		echo "</select></td></tr>";
+		echo "</td></tr>";
 
 		echo "<tr><th>".t("Kohdevarasto, eli varasto jonne l‰hetet‰‰n").":</th>";
 		echo "<td colspan='4'><select name='kohdevarasto'><option value=''>".t("Valitse")."</option>";

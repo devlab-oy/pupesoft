@@ -733,7 +733,7 @@
 			if ($trow[$i] == $vrow['nimi']) {
 					$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
+			$ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
 		}
 
 		$ulos .= "</select></td>";

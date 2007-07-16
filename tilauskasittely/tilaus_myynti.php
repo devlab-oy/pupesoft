@@ -1191,7 +1191,7 @@ if ($tee == '') {
  	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0) {
 		if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
-			$jarjlisa="<td class='back' width='55px'></td>";
+			$jarjlisa="<td class='back' width='55px'>&nbsp;</td>";
 		}
 		else {
 			$jarjlisa="";
@@ -2610,7 +2610,7 @@ if ($tee == '') {
 				echo "</font></td></tr>";
 			}
 			else {
-				echo "<tr>$jarjlisa<td class='back' colspan='2'><font class='message'>";
+				echo "<tr>$jarjlisa<td class='back' colspan='5'><font class='message'>";
 
 				echo t("Tilausrivit").":</font>";
 
@@ -2851,11 +2851,25 @@ if ($tee == '') {
 					$pknum = $pkrow[0] + $pkrow[1];
 					$borderlask = $pkrow[1];
 
-					echo "<tr>$jarjlisa<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$rivino</td>";
+					echo "<tr>";
+					
+					if ($jarjlisa != "") {
+						echo "<td rowspan='$pknum' width='55' class='back'>&nbsp;</td>";
+					}
+
+					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$rivino</td>";
 				}
 				elseif($row["perheid"] == 0 and $row["perheid2"] == 0) {
 					if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
-						$buttonit =  "	<td class='back'>
+						
+						if($row["kommentti"] != "") {
+							$buttonlisa = " rowspan='2' ";
+						}
+						else {
+							$buttonlisa = "";
+						}
+						
+						$buttonit =  "	<td class='back' $buttonlisa valign='top' width='55'>
 											<form action='$PHP_SELF#rivi_$rivino' name='siirra_$rivino' method='post'>
 												<input type='hidden' name='toim' value='$toim'>
 												<input type='hidden' name='lopetus' value='$lopetus'>
@@ -3593,6 +3607,10 @@ if ($tee == '') {
 								<input type='hidden' name='menutila' value='$menutila'>
 								<td class='back' valign='top' nowrap><input type='submit' Style='font-size: 8pt; padding:0;' value='".t("Lisää lisävarusteita")."'></td>
 								</form>";
+						echo "</tr>";
+					}
+					else {
+						echo "</tr>";
 					}
 				}
 				else {
@@ -3616,7 +3634,7 @@ if ($tee == '') {
 						$cspan++;
 					}
 
-					echo "<tr>$jarjlisa";
+					echo "<tr>";
 
 					if ($borderlask == 0 and $pknum > 1) {
 						$kommclass = " style='border-bottom: 1px solid; border-right: 1px solid;'";

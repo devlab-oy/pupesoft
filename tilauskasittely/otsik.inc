@@ -1591,6 +1591,9 @@
 			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>(".t("keräyslista + lähete").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>(".t("lasku").")</td></tr>";
+			if($toim == "TARJOUS") {
+				echo "<tr><td>".t("Saateteksti")." :</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td>(".t("Tarjous").")</td></tr>";
+			}
 			echo "</table><br>";
 
 			echo "<table>";
@@ -2138,6 +2141,7 @@
 						yhteyshenkilo_tekninen		= '$yhteyshenkilo_tekninen',
 						seuranta					= '$seuranta',
 						projekti					= '$projekti',						
+						saate						= '$saate',						
 						tunnusnippu_tarjous			= '$tunnusnippu_tarjous',						
 						rivihintoja_ei_nayteta		= '$rivihintoja_ei_nayteta',
 						kasinsyotetty_viite			= '$kasinsyotetty_viite',

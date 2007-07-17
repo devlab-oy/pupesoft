@@ -8,12 +8,12 @@ if (!function_exists('tulosta_tarjous')) {
 
 		// Haetaan laskun tiedot
 		$vquery="select count(*) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tunnus<=lasku.tunnus and l.tila='T'";
-		$query = "	SELECT lasku.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika päiväys, laskun_lisatiedot.asiakkaan_kohde, laskun_lisatiedot.rivihintoja_ei_nayteta,
+		$query = "	SELECT lasku.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika päiväys, laskun_lisatiedot.asiakkaan_kohde, laskun_lisatiedot.rivihintoja_ei_nayteta, viesti asiakkaan_viite,
 					if(tunnusnippu>0,concat(lasku.tunnusnippu,'/',($vquery)),lasku.tunnus) tarjous,
 					date_add(lasku.luontiaika, INTERVAL $yhtiorow[tarjouksen_voimaika] DAY) voimassa, 
 					concat_ws(' ', postino, postitp) postiosoite,
-					yhteyshenkilo_kaupallinen.nimi yhteyshenkilo_kaupallinen_nimi,
-					yhteyshenkilo_tekninen.nimi yhteyshenkilo_tekninen_nimi
+					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö,
+					laskun_lisatiedot.saate saate
 					FROM lasku
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus					
@@ -98,12 +98,23 @@ if (!function_exists('tulosta_tarjous')) {
 						$pdf->writeToTemplate($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "", $tid);
 						$h-=$pdf->ln();					
 					}
+					$h-=$pdf->ln(0.5);
 
+					foreach(array("asiakkaan_viite", "asiakkaan_yhteyshenkilö") as $key) {
+						if($laskurow[$key] != "") {
+							$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
+							$h-=$pdf->ln();		
+							$nb=$pdf->countParagraphHeight($laskurow[$key], "norm", (-1*($s[0])));										
+							$pdf->writeToTemplate($h, $nb, $s[0], 0, $laskurow[$key], "norm", "L", "", $tid);
+							$h-=$pdf->ln($nb);					
+						}
+					}
+					
 					//	Laitetaan toimitustiedot vasemmalle
 					$h=250;
 					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Asiakas", $kieli).":", "norm", "L", "B", $tid);
 					$h-=$pdf->ln();
-					foreach(array("yhteyshenkilo_tekninen_nimi","toim_nimi", "toim_nimitark", "toim_osoite", "toim_postiosoite") as $key) {
+					foreach(array("saate","toim_nimi", "toim_nimitark", "toim_osoite", "toim_postiosoite") as $key) {
 						if($laskurow[$key]!="") {
 							$pdf->writeToTemplate($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "", $tid);
 							$h-=$pdf->ln();					
@@ -124,7 +135,7 @@ if (!function_exists('tulosta_tarjous')) {
 		}
 		
 		$pdf=alku($pdf, $laskurow,$kieli);
-		$h = 230;		
+		$h = 220;		
 		$pdf->write($h, 1, 0, 0, t("Kiitos mielenkiinnostanne tuotteitamme kohtaan. Haluamme tarjota teille seuraavia tuotteita.", $kieli), "norm", "L", "");
 		$h-=$pdf->ln(4);					
 

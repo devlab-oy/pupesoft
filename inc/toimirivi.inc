@@ -37,8 +37,12 @@
 				FROM yriti
 				WHERE yhtio = '$kukarow[yhtio]'";
 		$vresult = mysql_query($query) or pupe_error($query);
-
-		$ulos = "<td><select name='$nimi'><option value = '0'>".t("Ei suoriteta automaattisesti")."";
+		
+		$sel="";
+		if((int)$trow[$i] == 0) {
+			$sel="selected";
+		}
+		$ulos = "<td><select name='$nimi'><option value = '0' $sel>".t("Ei suoriteta automaattisesti")."";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 
@@ -62,7 +66,7 @@
 		$chk1 = '';
 		$chk2 = '';
 
-		if ($trow[$i] == "") {
+		if (trim($trow[$i]) == "") {
 			$chk1 = 'selected';
 		}
 		else {
@@ -107,7 +111,12 @@
 					WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'><option value=''>".t("Ei kukaan")."";
+		
+		$sel="";
+		if (trim($trow[$i]) == "") {
+			$sel = "selected";
+		}
+		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kukaan")."";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -127,7 +136,12 @@
 					tyyppi = 'K'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."";
+		
+		$sel="";
+		if (trim($trow[$i]) == "") {
+			$sel = "selected";
+		}
+		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kustannuspaikkaa")."";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -149,7 +163,12 @@
 						tyyppi = 'O'
 						ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kohdetta")."";
+
+		$sel="";
+		if (trim($trow[$i]) == "") {
+			$sel = "selected";
+		}
+		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kohdetta")."";
 		
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -171,7 +190,12 @@
 					tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-		$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei projektia")."";
+
+		$sel="";
+		if (trim($trow[$i]) == "") {
+			$sel = "selected";
+		}
+		$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei projektia")."";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -225,7 +249,11 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
 
-		$ulos .= "<option value = '' >".t("Ei valintaa")."</option>";
+		$sel="";
+		if ((int)$trow[$i] == 0) {
+			$sel = "selected";
+		}
+		$ulos .= "<option value = '' $sel>".t("Ei valintaa")."</option>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -248,7 +276,11 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 		$ulos = "<td><select name='$nimi'>";
 
-		$ulos .= "<option value = '' >".t("Ei valintaa")."</option>";
+		$sel="";
+		if ((int)$trow[$i] == 0) {
+			$sel = "selected";
+		}
+		$ulos .= "<option value = '' $sel>".t("Ei valintaa")."</option>";
 
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
@@ -324,9 +356,10 @@
 
 		$selo = $sels = "";
 		if ($trow[$i] == 'S') $sels = "selected";
-
+		else $selo = "selected";
+		
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>Ei automaattitoimitusta</option>";
+		$ulos .= "<option value='' $selo>Ei automaattitoimitusta</option>";
 		$ulos .= "<option value='S' $sels>Suoratoimitukset toimitetaan automaattisesti</option>";
 		$ulos .= "</select></td>";
 		
@@ -336,13 +369,14 @@
 	
 	if (mysql_field_name($result, $i) == "tyyppi") {
 
-		$selo = $sels = "";
+		$selo = $sels = $selp = $sel = "";
 		if ($trow[$i] == 'O') $selo = "selected";
-		if ($trow[$i] == 'S') $sels = "selected";
-		if ($trow[$i] == 'P') $selp = "selected";
-
+		elseif ($trow[$i] == 'S') $sels = "selected";
+		elseif ($trow[$i] == 'P') $selp = "selected";
+		else $sel = "selected";
+		
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Normaali toimittaja")."</option>";
+		$ulos .= "<option value='' $sel>".t("Normaali toimittaja")."</option>";
 		$ulos .= "<option value='O' $selo>".t("Online toimittaja")."</option>";
 		$ulos .= "<option value='S' $sels>".t("Sisäinen toimittaja")."</option>";
 		$ulos .= "<option value='P' $selp>".t("Poistettu / Ei käytössä")."</option>";

@@ -445,7 +445,17 @@
 		
 		if (mysql_num_rows($kires) == 1) {
 			$kirow = mysql_fetch_array($kires);
-			$line = exec("{$kirow['komento']} $pdffilenimi");
+			if($kirow["komento"] == "email") {
+				$liite = $pdffilenimi;
+				$kutsu = "Karhukirje ".$asiakastiedot["ytunnus"];
+				echo t("Karhukirje lähetetään osoitteeseen '$kukarow[eposti]'")."...\n";
+
+				require("inc/sahkoposti.inc");				
+			}
+			else {
+				$line = exec("{$kirow['komento']} $pdffilenimi");
+			}
+			
 		}
 	}
 ?>

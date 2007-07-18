@@ -760,7 +760,7 @@
 			}
 			elseif (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") or ($from == "riviosto" or $from == "kohdista")) {
 				
-				if (($from == "riviosto" or $from == "kohdista") and $sarjarow["osto_laskaika"] > '0000-00-00') {
+				if (($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON" and $sarjarow["osto_laskaika"] > '0000-00-00') {
 					$dis = "DISABLED";
 				}
 				else {

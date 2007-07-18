@@ -136,8 +136,9 @@ if (!function_exists('tulosta_tarjous')) {
 		
 		$pdf=alku($pdf, $laskurow,$kieli);
 		$h = 220;		
-		$pdf->write($h, 1, 0, 0, t($laskurow["saate"], $kieli), "norm", "L", "");
-		$h-=$pdf->ln(4);					
+		$nb=$pdf->countParagraphHeight($laskurow["saate"], "norm", 0);					
+		$pdf->write($h, $nb, 0, 0, t($laskurow["saate"], $kieli), "norm", "L", "");
+		$h-=$pdf->ln($nb+3);
 
 		$sorttauskentta = generoi_sorttauskentta(8);
 		$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)";
@@ -207,13 +208,13 @@ if (!function_exists('tulosta_tarjous')) {
 				}
 				$h-=$pdf->ln(3);
 
-				$pdf->write($h, 1, 0, $s[1], t("Tuote", $kieli)." / ".t("Määrä", $kieli), "norm", "L", "B");
+				$pdf->write($h, 1, 0, $s[1], t("Tuote", $kieli)." / ".t("Kommentti", $kieli), "norm", "L", "B");
+				$pdf->write($h, 1, $s[1], $s[2], t("Määrä", $kieli), "norm", "R", "B");
+				$pdf->write($h, 1, $s[2], $s[3], t("Hinta/yks", $kieli), "norm", "R", "B");
 				if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 					$pdf->write($h, 1, $s[2], $s[3], t("Hinta/yks", $kieli), "norm", "R", "B");
 					$pdf->write($h, 1, $s[3], $s[4], t("Yhteensä", $kieli), "norm", "R", "B");					
 				}
-				$h-=$pdf->ln();
-				$pdf->write($h, 1, 0, $s[1], t("Kommentti", $kieli), "norm", "L", "B");
 				$h-=$pdf->ln(1.5);
 
 				while ($row = mysql_fetch_array($riresult)) {
@@ -320,7 +321,7 @@ if (!function_exists('tulosta_tarjous')) {
 		if($laskurow["sisviesti1"] != "") {
 			//	Maksusopimus
 			$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
-			$h-=$pdf->ln(1.25);
+			$h-=$pdf->ln(2.25);
 			$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm")+2;
 			$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
 			$h-=$pdf->ln($nb+0.5);
@@ -372,7 +373,7 @@ if (!function_exists('tulosta_tarjous')) {
 			
 			//	Maksusopimus
 			$pdf->write($h, 1, 0, 0, t("MAKSUEHTO", $kieli), "norm", "L", "B");
-			$h-=$pdf->ln(1.25);
+			$h-=$pdf->ln(2.25);
 			
 			$query = "	SELECT teksti
 						FROM maksuehto

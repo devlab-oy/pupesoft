@@ -114,7 +114,7 @@ if (!function_exists('tulosta_tarjous')) {
 					$h=250;
 					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Asiakas", $kieli).":", "norm", "L", "B", $tid);
 					$h-=$pdf->ln();
-					foreach(array("saate","toim_nimi", "toim_nimitark", "toim_osoite", "toim_postiosoite") as $key) {
+					foreach(array("toim_nimi", "toim_nimitark", "toim_osoite", "toim_postiosoite") as $key) {
 						if($laskurow[$key]!="") {
 							$pdf->writeToTemplate($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "", $tid);
 							$h-=$pdf->ln();					
@@ -136,7 +136,7 @@ if (!function_exists('tulosta_tarjous')) {
 		
 		$pdf=alku($pdf, $laskurow,$kieli);
 		$h = 220;		
-		$pdf->write($h, 1, 0, 0, t("Kiitos mielenkiinnostanne tuotteitamme kohtaan. Haluamme tarjota teille seuraavia tuotteita.", $kieli), "norm", "L", "");
+		$pdf->write($h, 1, 0, 0, t($laskurow["saate"], $kieli), "norm", "L", "");
 		$h-=$pdf->ln(4);					
 
 		$sorttauskentta = generoi_sorttauskentta(8);
@@ -207,8 +207,7 @@ if (!function_exists('tulosta_tarjous')) {
 				}
 				$h-=$pdf->ln(3);
 
-				$pdf->write($h, 1, 0, $s[1], t("Tuote", $kieli)." /", "norm", "L", "B");
-				$pdf->write($h, 1, $s[1], $s[2], t("Määrä", $kieli), "norm", "R", "B");				
+				$pdf->write($h, 1, 0, $s[1], t("Tuote", $kieli)." / ".t("Määrä", $kieli), "norm", "L", "B");
 				if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 					$pdf->write($h, 1, $s[2], $s[3], t("Hinta/yks", $kieli), "norm", "R", "B");
 					$pdf->write($h, 1, $s[3], $s[4], t("Yhteensä", $kieli), "norm", "R", "B");					
@@ -389,16 +388,16 @@ if (!function_exists('tulosta_tarjous')) {
 		
 		
 		//	Allekirjoituspohjat
-		if($h < 37) {
+		if($h < 41) {
 			$pdf = alku($pdf, $laskurow,$kieli);
-			$h = 37;
+			$h = 41;
 		}
 		else {
-			$h = 37;
+			$h = 41;
 		}
 		
 		$pdf->write($h, 1, 0, 0, t("Parhain terveisin",$kieli), "norm", "L", "");
-		$h-=$pdf->ln(2);
+		$h-=$pdf->ln(3);
 
 		$pdf->write($h, 1, 0, 0, $kukarow["nimi"], "norm", "L", "B");
 		$h-=$pdf->ln();

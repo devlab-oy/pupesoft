@@ -1592,6 +1592,12 @@
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>(".t("lasku").")</td></tr>";
 			if($toim == "TARJOUS") {
+				if($kukarow["kesken"] == 0) {
+					$query = "	SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji = 'saate'";
+					$saateres = mysql_query($query) or pupe_error($query);
+					$saaterow = mysql_fetch_array($saateres);
+					$srow["saate"] = $saaterow["selite"];
+				}
 				echo "<tr><td>".t("Saateteksti")." :</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td>(".t("Tarjous").")</td></tr>";
 			}
 			echo "</table><br>";

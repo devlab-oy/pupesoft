@@ -161,7 +161,7 @@ if (sizeof($kieli) > 0) {
 			if ($row['tunnus'] > $maxtunnus) $maxtunnus = $row['tunnus'];
 
 			for ($i=2; $i<mysql_num_fields($result); $i++) {
-				echo "<td><input type='text' size='30' name='".mysql_field_name($result, $i)."[$row[tunnus]]' value='".htmlspecialchars($row[$i],ENT_QUOTES)."'></td>";
+				echo "<td><input type='text' size='30' name='".mysql_field_name($result, $i)."[$row[tunnus]]' value='".trim(htmlspecialchars($row[$i],ENT_QUOTES))."'></td>";
 			}
 
 			$laskkaannos++;
@@ -169,7 +169,7 @@ if (sizeof($kieli) > 0) {
 			echo "</tr>";
 		}
 
-		echo "<tr><th colspan='2'>".t("Yhteensä")." $laskkaannos ".t("riviä")."</th></tr>";
+		echo "<tr><th colspan='".mysql_num_rows($result)."'>".t("Yhteensä")." $laskkaannos ".t("riviä")."</th></tr>";
 
 		echo "</table>";
 		echo "<input type='hidden' name='maxtunnus' value='$maxtunnus'>";

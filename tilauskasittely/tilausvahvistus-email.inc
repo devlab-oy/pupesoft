@@ -48,23 +48,23 @@ if ($virexx == 0) {
 	if (mysql_num_rows($tilvahresult) > 0) {
 
 		if ($laskurow["tilaustyyppi"] == 'E') {
-			$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								.t("Tilausvahvistus Ennakkomyynti", $kieli)."\r\n";
+			$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								.t("Tilausvahvistus Ennakkomyynti", $kieli)."\n";
 		}
 		else {
-			$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								.t("Tilausvahvistus", $kieli)."\r\n";
+			$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								.t("Tilausvahvistus", $kieli)."\n";
 		}
 
-		$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\r\n";
-		$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\r\n";
-		$ulos .= "\r\n";
-		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")									.t("Toimitusosoite", $kieli).":\r\n";
-		$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\r\n";
-		$ulos .= sprintf("%-50.s",$laskurow['nimitark'])							.$laskurow['toim_nimitark']."\r\n";
-		$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\r\n";
-		$ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])	.$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\r\n";
-		$ulos .= "\r\n";
-		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])	.t("Tilausnumero", $kieli).": ".$laskurow['tunnus']."\r\n";
-		$ulos .= sprintf("%-50.s",t("Tilausviite", $kieli).": ".$laskurow['viesti'])		.t("Myyjä", $kieli).": ".$krow['nimi']."\r\n";
+		$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\n";
+		$ulos .= sprintf("%-50.s",$yhtiorow['postino']." ".$yhtiorow['postitp'])	.tv1dateconv($laskurow['luontiaika'])."\n";
+		$ulos .= "\n";
+		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).":")									.t("Toimitusosoite", $kieli).":\n";
+		$ulos .= sprintf("%-50.s",$laskurow['nimi'])								.$laskurow['toim_nimi']."\n";
+		$ulos .= sprintf("%-50.s",$laskurow['nimitark'])							.$laskurow['toim_nimitark']."\n";
+		$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\n";
+		$ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])	.$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\n";
+		$ulos .= "\n";
+		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])	.t("Tilausnumero", $kieli).": ".$laskurow['tunnus']."\n";
+		$ulos .= sprintf("%-50.s",t("Tilausviite", $kieli).": ".$laskurow['viesti'])		.t("Myyjä", $kieli).": ".$krow['nimi']."\n";
 
 		if ($laskurow['erikoisale'] > 0) {
 			$ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");
@@ -73,13 +73,13 @@ if ($virexx == 0) {
 		if ($laskurow['comments']!='')
 			$ulos .= t("Kommentti", $kieli).": ".$laskurow['comments']."\n";
 
-		$ulos .= "\r\n";
+		$ulos .= "\n";
 
-		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("EAN", $kieli)."          ".t("Kpl", $kieli)."   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli)."\r\n";
-		$ulos .= "----------------------------------------------------------------------------------------------\r\n";
+		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("EAN", $kieli)."          ".t("Kpl", $kieli)."   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli)."\n";
+		$ulos .= "----------------------------------------------------------------------------------------------\n";
 
 		$rivino = 0;
-		$liite  = t("Rivino", $kieli)."\t".t("Nimitys", $kieli)."\t".t("Tuoteno", $kieli)."\t".t("Varattu", $kieli)."\t".t("Hinta", $kieli)."\t".t("Ale", $kieli)."\r\n";
+		$liite  = t("Rivino", $kieli)."\t".t("Nimitys", $kieli)."\t".t("Tuoteno", $kieli)."\t".t("Varattu", $kieli)."\t".t("Hinta", $kieli)."\t".t("Ale", $kieli)."\n";
 
 		while ($tvtilausrivirow=mysql_fetch_array($tilvahresult)) {
 			$rivino++;
@@ -119,7 +119,7 @@ if ($virexx == 0) {
 				$ulos .= sprintf("%5.s"  ,$tvtilausrivirow['ale'])."%";
 			}
 
-			$ulos .= "\r\n";
+			$ulos .= "\n";
 
 			if ($nimitysloput != "") {
 				$ulos .= "    ".sprintf("%-77.77s",$nimitysloput)."\n";
@@ -145,7 +145,7 @@ if ($virexx == 0) {
 			else {
 				$liite .= $tvtilausrivirow['ale'];
 			}
-			$liite .= "\r\n";
+			$liite .= "\n";
 
 		}
 
@@ -154,24 +154,24 @@ if ($virexx == 0) {
 	///* Kompostoidaan meili *///
 	$bound = uniqid(time()."_") ;
 
-	$header  = "From: <$yhtiorow[postittaja_email]>\r\n";
-	$header .= "MIME-Version: 1.0\r\n";
-	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n";
+	$header  = "From: <$yhtiorow[postittaja_email]>\n";
+	$header .= "MIME-Version: 1.0\n";
+	$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
 
-	$content = "--$bound\r\n";
+	$content = "--$bound\n";
 
-	$content .= "Content-Type: text/plain;\r\n";
-	$content .= "Content-Transfer-Encoding: quoted-printable\r\n";
+	$content .= "Content-Type: text/plain;\n";
+	$content .= "Content-Transfer-Encoding: quoted-printable\n";
 	$content .= $ulos;
-	$content .= "\r\n" ;
+	$content .= "\n" ;
 
-	$content .= "--$bound\r\n";
+	$content .= "--$bound\n";
 
-	$content .= "Content-Type: text/plain;\r\n" ;
-	$content .= "Content-Transfer-Encoding: 7bit\r\n" ;
-	$content .= "Content-Disposition: attachment; filename=\"tilvahv.txt\"\r\n\r\n";
+	$content .= "Content-Type: text/plain;\n" ;
+	$content .= "Content-Transfer-Encoding: 7bit\n" ;
+	$content .= "Content-Disposition: attachment; filename=\"tilvahv.txt\"\n\n";
 	$content .= $liite;
-	$content .= "\r\n" ;
+	$content .= "\n" ;
 
 
 

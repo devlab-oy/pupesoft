@@ -152,13 +152,16 @@
 
 		if (mysql_field_name($result, $i) == "ei_saldoa") {
 
-			$sel = '';
+			$sel = $sela = "";
 			if ($trow[$i] != '') {
 				$sel = "SELECTED";
 			}
-
+			else {
+				$sela = "SELECTED";
+			}
+			
 			$ulos  = "<td><select name='$nimi'>";
-			$ulos .= "<option value = ''>".t("Saldollinen tuote")."</option>";
+			$ulos .= "<option value = '' $sela>".t("Saldollinen tuote")."</option>";
 			$ulos .= "<option value = 'o' $sel>".t("Saldoton tuote")."</option>";
 			$ulos .= "</select></td>";
 			$jatko = 0;
@@ -166,13 +169,16 @@
 
 		if (mysql_field_name($result, $i) == "kommentoitava") {
 
-			$sel = '';
+			$sel = $sela = "";
 			if ($trow[$i] != '') {
 				$sel = "SELECTED";
 			}
+			else {
+				$sela = "SELECTED";
+			}
 
 			$ulos  = "<td><select name='$nimi'>";
-			$ulos .= "<option value = ''>".t("Normaalik‰sittely")."</option>";
+			$ulos .= "<option value = ' $sela>".t("Normaalik‰sittely")."</option>";
 			$ulos .= "<option value = 'o' $sel>".t("Tuotteelle on annettava rivikommentti")."</option>";
 			$ulos .= "</select></td>";
 			$jatko = 0;
@@ -180,13 +186,16 @@
 
 		if (mysql_field_name($result, $i) == "vaaditaan_kpl2") {
 
-			$sel = '';
+			$sel = $sela = "";
 			if ($trow[$i] != '') {
 				$sel = "SELECTED";
 			}
+			else {
+				$sela = "SELECTED";
+			}
 
 			$ulos  = "<td><select name='$nimi'>";
-			$ulos .= "<option value = ''>".t("Normaalik‰sittely")."</option>";
+			$ulos .= "<option value = '' $sela>".t("Normaalik‰sittely")."</option>";
 			$ulos .= "<option value = 'P' $sel>".t("M‰‰r‰ on perheen is‰n position pituus")."</option>";
 			$ulos .= "</select></td>";
 			$jatko = 0;
@@ -307,16 +316,19 @@
 
 		if (mysql_field_name($result, $i) == "hinnastoon") {
 
-				$sel="";
-				if ($trow[$i] == 'E') {
-					$sel = "selected";
-				}
+			$sel = $sela = "";
+			if ($trow[$i] != '') {
+				$sel = "SELECTED";
+			}
+			else {
+				$sela = "SELECTED";
+			}
 
-				$ulos = "<td><select name = '$nimi'>
-					<option value=''>".t("Tuote n‰ytet‰‰n hinnastossa")."</option>
-					<option value='E' $sel>".t("Tuotetta ei n‰ytet‰ hinnastossa")."</option>
-					</select></td>";
-				$jatko = 0;
+			$ulos = "<td><select name = '$nimi'>
+				<option value='' $sela>".t("Tuote n‰ytet‰‰n hinnastossa")."</option>
+				<option value='E' $sel>".t("Tuotetta ei n‰ytet‰ hinnastossa")."</option>
+				</select></td>";
+			$jatko = 0;
 		}
 
 		if (mysql_field_name($result, $i) == "myyjanro") {
@@ -365,7 +377,12 @@
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
-			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
+
+			$sel="";
+			if ($trow[$i] == "") {
+				$sel = "selected";
+			}
+			$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kustannuspaikkaa")."</option>";
 
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";
@@ -384,7 +401,12 @@
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
-			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kohdetta")."</option>";
+			
+			$sel="";
+			if ($trow[$i] == "") {
+				$sel = "selected";
+			}
+			$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei kohdetta")."</option>";
 
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";
@@ -403,7 +425,12 @@
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 						ORDER BY nimi";
 			$vresult = mysql_query($query) or pupe_error($query);
-			$ulos = "<td><select name='$nimi'><option value=' '>".t("Ei projektia")."</option>";
+			
+			$sel="";
+			if ($trow[$i] == "") {
+				$sel = "selected";
+			}
+			$ulos = "<td><select name='$nimi'><option value='' $sel>".t("Ei projektia")."</option>";
 
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";

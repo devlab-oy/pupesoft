@@ -406,11 +406,15 @@
 			if ($jatko == 0) {
 				if($yllapito_tarkista_oikeellisuus!="") {
 					//	Tehdään tarkastuksia, Tämä sallisi myös muiden tagien "oikeellisuuden" määrittelemisen suhteellisen helposti
-					$checks["select"] 	= "/\<select.*option+[^>]*\s+selected\s*>.*\<\/select\>/";
-					//$checks["textarea"] = "/.*\<textarea.*\<\/textarea\>.*/";
-					$matches = preg_replace($checks, "", strip_tags($ulos,"<select><option>"));
-					if($matches!="") {
-						$ulos .= "<td class='back'><pre>OBS!! '".$trow[$i]."'</pre></td>";
+					//	Jostainsyystä multiline ei toimi kunnolla?
+					$search = "/.*<(select)[^>]*>(.*)<\/select>.*/mi";
+					preg_match($search, $ulos, $matches);
+					if(strtolower($matches[1]) == "select") {
+						$search = "/\s+selected\s*>/i";
+						preg_match($search, $matches[2], $matches2);
+						if(count($matches2)==0) {
+							$ulos .= "<td class='back'><font class='error'>OBS!! '".$trow[$i]."'</font></td>";
+						}						
 					}
 				}
 				echo $ulos;

@@ -134,8 +134,9 @@
 		$jatko = 0;
 	}
 
-	if	((mysql_field_name($result, $i) == "oletus_kulutili") or
-		(mysql_field_name($result, $i) == "oletus_rahatili")) {
+	if	(mysql_field_name($result, $i) == "oletus_kulutili" or
+		mysql_field_name($result, $i) == "oletus_selvittelytili" or
+		mysql_field_name($result, $i) == "oletus_rahatili") {
 
 		if ($ulosarray[$i] != '') {
 			$ulos=$ulosarray[$i];

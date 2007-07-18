@@ -157,6 +157,14 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("LIITOSTUNNUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
+			case "kustannuspaikka" :
+				$pakolliset = array("TYYPPI", "NIMI");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				break;
+			case "taso" :
+				$pakolliset = array("TYYPPI", "LAJI", "TASO", "NIMI");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				break;
 			default :
 				echo t("Miten t‰nne p‰‰sit!");
 				exit;

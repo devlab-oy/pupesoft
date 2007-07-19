@@ -670,6 +670,8 @@ if (!function_exists("lpr")) {
 			$kirjoitin = mysql_fetch_array($kirre);
 		}
 
+		$str = ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#\n]", " ", $str);
+
 		$from = array ('ä','å','ö','Ä','Å','Ö','|');
 
 		if ($kirjoitin["merkisto"] == 1) {
@@ -692,7 +694,6 @@ if (!function_exists("lpr")) {
 		file_put_contents($tmpfile, $str);
 		exec("$kirjoitin[komento] $tmpfile");
 		unlink($tmpfile);
-
 	}
 }
 

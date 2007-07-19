@@ -670,13 +670,6 @@ if (!function_exists("lpr")) {
 			$kirjoitin = mysql_fetch_array($kirre);
 		}
 
-		$pipe = popen("$kirjoitin[komento]", 'w');
-
-		if (!$pipe) {
-			echo "pipe failed";
-			return;
-		}
-
 		$from = array ('ä','å','ö','Ä','Å','Ö','|');
 
 		if ($kirjoitin["merkisto"] == 1) {
@@ -695,8 +688,10 @@ if (!function_exists("lpr")) {
 			$str = utf8_encode($str);														// UTF8 charset käännös suoraan yhellä rivillä
 		}
 
-		fputs($pipe,$str);
-		pclose($pipe);
+		$tmpfile = "/tmp/" . md5(uniqid(rand(),true)) . ".txt";
+		file_put_contents($tmpfile, $str);
+		exec("$kirjoitin[komento] $tmpfile");
+		unlink($tmpfile);
 
 	}
 }

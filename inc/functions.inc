@@ -236,7 +236,7 @@ if (!function_exists("t")) {
 if (!function_exists("maa")) {
 	function maa($code, $kieli="") {
 		
-		$query = sprintf("SELECT nimi FROM maat where koodi ='%s' LIMIT 1", mysql_real_escape_string($code));
+		$query = sprintf("SELECT nimi FROM maat where koodi = '%s' LIMIT 1", mysql_real_escape_string(substr($code, 0 ,2)));
 		$res = mysql_query($query) or pupe_error($query);
 		$maa = mysql_fetch_array($res);
 

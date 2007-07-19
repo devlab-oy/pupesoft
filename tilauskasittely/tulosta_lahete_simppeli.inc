@@ -208,7 +208,7 @@ if (!function_exists('tulosta_lahete')) {
 						$pdf->writeToTemplate($h, 1, $s[3], 0, t("Veroton arvo", $kieli), "norm", "R", "B", $tid2);
 					}
 					$h-=$pdf->ln();
-					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus")."/".t("Kommentti", $kieli), "norm", "L", "B", $tid2);
+					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus", $kieli)."/".t("Kommentti", $kieli), "norm", "L", "B", $tid2);
 					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Tilattu", $kieli), "norm", "R", "B", $tid2);
 					if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
 						if($alenaytetaan=="OK") {
@@ -374,14 +374,14 @@ if (!function_exists('tulosta_lahete')) {
 					//	Vientilaskulle annetaan hieman lisäinfoa!
 					if ($laskurow["vienti"] != "" or $toim == "PAKKALISTA") {
 						$h-=$pdf->ln(0.5);
-						$pdf->write($h, 1, 5, 40, t("Alkuperämaa").":", "snadi", "L", "I");	
+						$pdf->write($h, 1, 5, 40, t("Alkuperämaa", $kieli).":", "snadi", "L", "I");	
 						$pdf->write($h, 1, 40, 0, strtoupper(maa($row["alkuperamaa"], $kieli)), "snadi", "L", "I");						
 						$h-=$pdf->ln();
-						$pdf->write($h, 1, 5, 40, t("Tullinimike").":", "snadi", "L", "I");	
+						$pdf->write($h, 1, 5, 40, t("Tullinimike", $kieli).":", "snadi", "L", "I");	
 						$pdf->write($h, 1, 40, 0, $row["tullinimike1"], "snadi", "L", "I");						
 						$h-=$pdf->ln();
 						if($row["tullikohtelu"] != "") {
-							$pdf->write($h, 1, 5, 40, t("Vientikohtelu").":", "snadi", "L", "I");	
+							$pdf->write($h, 1, 5, 40, t("Vientikohtelu", $kieli).":", "snadi", "L", "I");	
 							$pdf->write($h, 1, 40, 0, $row["tullikohtelu"], "snadi", "L", "I");						
 							$h-=$pdf->ln();						
 						}
@@ -478,22 +478,22 @@ if (!function_exists('tulosta_lahete')) {
 
 				if($rahtirow["kilot"]>0) {
 					$pdf->write($h, 1, 5, 40, 		t("Bruttopaino", $kieli).":", "norm", "L", "");
-					$pdf->write($h, 1, 40, 0, 	$rahtirow["kilot"]." ".t("kg"), "norm", "L", "");					
+					$pdf->write($h, 1, 40, 0, 	$rahtirow["kilot"]." ".t("kg", $kieli), "norm", "L", "");					
 					$h-=$pdf->ln(1);					
 				}
 				if($rahtirow["nettopaino"]>0) {
 					$pdf->write($h, 1, 5, 40, 		t("Nettopaino", $kieli).":", "norm", "L", "");
-					$pdf->write($h, 1, 40, 0, 	$rahtirow["nettopaino"]." ".t("kg"), "norm", "L", "");					
+					$pdf->write($h, 1, 40, 0, 	$rahtirow["nettopaino"]." ".t("kg", $kieli), "norm", "L", "");					
 					$h-=$pdf->ln(1);					
 				}
 				if($rahtirow["kuutiot"]>0) {
 					$pdf->write($h, 1, 5, 40, 		t("Kuutiot", $kieli).":", "norm", "L", "");
-					$pdf->write($h, 1, 40, 0, 	$rahtirow["kuutiot"]." ".t("m³"), "norm", "L", "");					
+					$pdf->write($h, 1, 40, 0, 	$rahtirow["kuutiot"]." ".t("m³", $kieli), "norm", "L", "");					
 					$h-=$pdf->ln(1);					
 				}
 				if($rahtirow["lavametrit"]>0) {
 					$pdf->write($h, 1, 5, 40, 		t("Lavametrit", $kieli).":", "norm", "L", "");
-					$pdf->write($h, 1, 40, 0, 	$rahtirow["lavametrit"]." ".t("m"), "norm", "L", "");					
+					$pdf->write($h, 1, 40, 0, 	$rahtirow["lavametrit"]." ".t("m", $kieli), "norm", "L", "");
 					$h-=$pdf->ln(1);					
 				}
 

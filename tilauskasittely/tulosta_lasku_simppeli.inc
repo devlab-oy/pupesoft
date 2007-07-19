@@ -18,7 +18,7 @@ if (!function_exists('tulosta_lasku')) {
 		}
 
 		// Haetaan laskun tiedot ja joinataan viimeisimmän laskun_lisätiedot...
-		$query = "	SELECT lasku.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.tapvm päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
+		$query = "	SELECT lasku.*, if(laskunro=0, '', laskunro) laskunro, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.tapvm päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
 					(select if(count(distinct(left(toimitettuaika,10)))>1,'".t("useita")."', max(toimitettuaika)) from tilausrivi where yhtio=lasku.yhtio and $mika=lasku.tunnus) toimituspvm, '$yhtiorow[viivastyskorko]%' viivästyskorko, laskun_lisatiedot.rivihintoja_ei_nayteta,
 					concat_ws(' ', postino, postitp) postiosoite,
 					concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
@@ -137,7 +137,7 @@ if (!function_exists('tulosta_lasku')) {
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, strftime("%x",strtotime($laskurow[$key])), "norm", "L", "", $tid);
 
 						}
-						else {
+						elseif($laskurow[$key]!="") {
 							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "", $tid);
 						}
@@ -196,7 +196,7 @@ if (!function_exists('tulosta_lasku')) {
 						$pdf->writeToTemplate($h, 1, $s[3], 0, t("Veroton arvo", $kieli), "norm", "R", "B", $tid2);	
 					}
 					$h-=$pdf->ln();
-					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus")."/".t("Kommentti", $kieli), "norm", "L", "B", $tid2);
+					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus", $kieli)."/".t("Kommentti", $kieli), "norm", "L", "B", $tid2);
 					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimituspvm", $kieli), "norm", "R", "B", $tid2);
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
 						if($alenaytetaan=="OK") {
@@ -262,7 +262,7 @@ if (!function_exists('tulosta_lasku')) {
 		}
 		
 		// haetaan tilauksen kaikki rivit
-		$query = "  SELECT tilausrivi.*, if(perheid=0,rivihinta, (select sum(t.rivihinta) from tilausrivi t where $where and t.perheid=tilausrivi.perheid)) rivihinta, tuote.ei_saldoa ei_saldoa, tuote.tullinimike1, tuote.tullikohtelu,
+		$query = "  SELECT tilausrivi.*, if(perheid=0,rivihinta, (select sum(t.rivihinta) from tilausrivi t where $where and t.perheid=tilausrivi.perheid)) rivihinta, tuote.ei_saldoa ei_saldoa, tuote.tullinimike1, tuote.tullikohtelu, alkuperamaa,
 					$lisa $sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -429,12 +429,16 @@ if (!function_exists('tulosta_lasku')) {
 				
 				//	Vientilaskulle annetaan hieman lisäinfoa!
 				if ($laskurow["vienti"] != "" and $row["ei_saldoa"] == "") {
-					$pdf->write($h, 1, 5+$offset, $s[0], "Country of Origin: ".strtoupper(maa($row["alkuperamaa"], $kieli)), "snadi", "L", "I");	
+					$h-=$pdf->ln(0.5);
+					$pdf->write($h, 1, 5, 40, t("Alkuperämaa", $kieli).":", "snadi", "L", "I");	
+					$pdf->write($h, 1, 40, 0, strtoupper(maa($row["alkuperamaa"], $kieli)), "snadi", "L", "I");						
 					$h-=$pdf->ln();
-					$pdf->write($h, 1, 5+$offset, $s[0], "Customs tariff number: ".$row["tullinimike1"], "snadi", "L", "I");	
+					$pdf->write($h, 1, 5, 40, t("Tullinimike", $kieli).":", "snadi", "L", "I");	
+					$pdf->write($h, 1, 40, 0, $row["tullinimike1"], "snadi", "L", "I");						
 					$h-=$pdf->ln();
 					if($row["tullikohtelu"] != "") {
-						$pdf->write($h, 1, 5+$offset, $s[0], t("Vientikohtelu", $kieli).": ".$row["tullikohtelu"], "snadi", "L", "I");	
+						$pdf->write($h, 1, 5, 40, t("Vientikohtelu", $kieli).":", "snadi", "L", "I");	
+						$pdf->write($h, 1, 40, 0, $row["tullikohtelu"], "snadi", "L", "I");						
 						$h-=$pdf->ln();						
 					}
 				}

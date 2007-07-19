@@ -461,7 +461,7 @@ if (!function_exists('tulosta_lahete')) {
 	
 		if(mysql_num_rows($rahtires)>0) {
 		
-			if(!in_array($laskurow["alatila"], array("D","J","E","V","X"))) {
+			if(!in_array($laskurow["alatila"], array("B", "D","J","E","V","X"))) {
 				$otsik = "PAKKAUSSUUNNITELMA";
 			}
 			else {

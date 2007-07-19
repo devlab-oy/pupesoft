@@ -670,8 +670,6 @@ if (!function_exists("lpr")) {
 			$kirjoitin = mysql_fetch_array($kirre);
 		}
 
-		$str = ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#\n]", " ", $str);
-
 		$from = array ('ä','å','ö','Ä','Å','Ö','|');
 
 		if ($kirjoitin["merkisto"] == 1) {
@@ -689,6 +687,8 @@ if (!function_exists("lpr")) {
 		elseif ($kirjoitin["merkisto"] == 4) {
 			$str = utf8_encode($str);														// UTF8 charset käännös suoraan yhellä rivillä
 		}
+
+		$str = ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#\n]", " ", $str);
 
 		$tmpfile = "/tmp/" . md5(uniqid(rand(),true)) . ".txt";
 		file_put_contents($tmpfile, $str);

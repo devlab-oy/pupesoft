@@ -1762,9 +1762,10 @@ if ($tee == '') {
 			$lisaalisa = " positio = '$positio'";
 		}
 
-		$query = "	SELECT tilausrivi.tunnus
+		$query = "	SELECT tilausrivi.tunnus, tuote.vaaditaan_kpl2, if(tilausrivin_lisatiedot.pituus>0, tilausrivi.hinta/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.hinta) yksikkohinta
 					FROM tilausrivi
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+					LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.otunnus = '$kukarow[kesken]'
 					and (tilausrivi.tunnus = '$rivitunnus' or (tilausrivi.perheid!=0 and tilausrivi.perheid = '$rivitunnus' and tilausrivin_lisatiedot.ei_nayteta = 'P') or (tilausrivi.perheid2!=0 and tilausrivi.perheid2 = '$rivitunnus' and tilausrivin_lisatiedot.ei_nayteta = 'P'))";
@@ -1795,6 +1796,26 @@ if ($tee == '') {
 							lisatty		= now(),
 							lisannyt 	= '$kukarow[kuka]'";
 				$result = mysql_query($query) or pupe_error($query);
+			}
+			
+			//	Korjataan tuotteen yksikköhinta.. tuo em homma on se tapa jolla se kuuluisi tehdä, mutta nyt käytönnössä se on aika vaikea toteuttaa..
+			if($lapsi["vaaditaan_kpl2"] == "P") {
+				
+				$query  = "	SELECT if(pituus=0,'1000',pituus) pituus
+							FROM asiakkaan_positio
+							WHERE yhtio			 = '$kukarow[yhtio]'
+							and tunnus = '$asiakkaan_positio'";
+				$posres = mysql_query($query) or pupe_error($query);
+				$posrow=mysql_fetch_array($posres);
+
+				$uhinta = round(($posrow["pituus"] * $lapsi["yksikkohinta"])/1000, 2);
+
+				$query = "	UPDATE tilausrivi SET hinta = '$uhinta' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '{$lapsi["tunnus"]}'";
+				$updre = mysql_query($query) or pupe_error($query);
+				
+				$query = "	UPDATE tilausrivin_lisatiedot SET pituus = '{$posrow["pituus"]}' WHERE yhtio = '$kukarow[yhtio]' and tilausrivitunnus = '{$lapsi["tunnus"]}'";				
+				$updre = mysql_query($query) or pupe_error($query);
+								
 			}
 		}
 
@@ -2972,15 +2993,8 @@ if ($tee == '') {
 
 
 						if($yhtiorow['tilauksen_kohteet'] == 'K' and $lasklisatied_row["asiakkaan_kohde"]>0) {
-							if(!is_resource($posres)) {
-								$posq = "SELECT * FROM asiakkaan_positio WHERE yhtio = '$kukarow[yhtio]' and asiakkaan_kohde = '$lasklisatied_row[asiakkaan_kohde]'";
-								$posres = mysql_query($posq) or pupe_error($posq);
-							}
-							else {
-								// tästä ei halutakkaan erroria..
-								@mysql_data_seek($posres,0);
-							}
-
+							$posq = "SELECT * FROM asiakkaan_positio WHERE yhtio = '$kukarow[yhtio]' and asiakkaan_kohde = '$lasklisatied_row[asiakkaan_kohde]'";
+							$posres = mysql_query($posq) or pupe_error($posq);
 
 							echo "	<form name='asiakkaan_positio_$rivino' action='$PHP_SELF' method='post'>
 									<input type='hidden' name='toim' value='$toim'>

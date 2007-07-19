@@ -1009,7 +1009,7 @@
 				
 				if ($yhtiorow['laskutyyppi'] == 3) {
 					require_once ("tulosta_lasku_simppeli.inc");
-					tulosta_lasku($otunnus, $komento[ucfirst(strtolower($toim))], $kieli, $toim, $tee);
+					tulosta_lasku($otunnus, $komento["Lasku"], $kieli, $toim, $tee);
 					$tee = '';
 				}
 				else {

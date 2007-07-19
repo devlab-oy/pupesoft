@@ -469,7 +469,7 @@ if (!function_exists('tulosta_lahete')) {
 			}
 		
 			$h-=$pdf->ln(2);
-			$pdf->write($h, 1, 0, 0, 		t($otsik).$lisa, "norm", "L", "B");
+			$pdf->write($h, 1, 0, 0, 		t($otsik, $kieli), "norm", "L", "B");
 						
 			$h-=$pdf->ln(1.5);
 			while ($rahtirow = mysql_fetch_array($rahtires)) {

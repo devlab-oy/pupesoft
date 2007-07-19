@@ -55,6 +55,9 @@
 	if ($toim == "LAHETE") {
 		$fuse = t("L‰hete");
 	}
+	if ($toim == "PAKKALISTA") {		//	T‰m‰ on about yhdistetty vienti-erittely ja l‰hete
+		$fuse = t("Pakkalista");
+	}
 	if ($toim == "KERAYSLISTA") {
 		$fuse = t("Ker‰yslista");
 	}
@@ -334,7 +337,7 @@
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_tapvm) ";
 		}
-		if ($toim == "LAHETE") {
+		if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
 			//myyntitilaus. Tulostetaan l‰hete.
 			$where1 = " lasku.tila in ('L','N','V') ";
 
@@ -733,6 +736,12 @@
 			$tulostimet[0] = 'L‰hete';
 			if ($kappaleet > 0 and $komento["L‰hete"] != 'email') {
 				$komento["L‰hete"] .= " -# $kappaleet ";
+			}
+		}
+		if ($toim == "Pakkalista") {
+			$tulostimet[0] = 'Pakkalista';
+			if ($kappaleet > 0 and $komento["pakkalista"] != 'email') {
+				$komento["Pakkalista"] .= " -# $kappaleet ";
 			}
 		}
 		if ($toim == "KERAYSLISTA") {
@@ -1390,7 +1399,7 @@
 				$tee = '';
 			}
 
-			if ($toim == "LAHETE") {
+			if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
 				//hatetaan asiakkaan l‰hetetyyppi
 				$query = "  SELECT lahetetyyppi, luokka, puhelin
 							FROM asiakas
@@ -1430,7 +1439,7 @@
 						$tulostusversio = $asrow["lahetetyyppi"];						
 					}
 					
-					tulosta_lahete($otunnus, $komento["L‰hete"], $kieli = "", $tee, $tulostusversio);
+					tulosta_lahete($otunnus, $komento["L‰hete"], $kieli = "", $toim, $tee, $tulostusversio);
 				}
 				else {
 					//tehd‰‰n uusi PDF failin olio

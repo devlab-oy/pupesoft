@@ -3,8 +3,10 @@
 require_once('pdflib/pupepdf.class.php');
 
 if (!function_exists('tulosta_lahete')) {
-	function tulosta_lahete ($otunnus, $komento, $kieli = "", $tee, $tulostusversio) {
-		global $yhtiorow, $kukarow, $fonts, $_SERVER, $lahete_param;
+	function tulosta_lahete ($otunnus, $komento, $kieli = "", $toim,  $tee, $tulostusversio) {
+		global $yhtiorow, $kukarow, $fonts, $_SERVER, $lahete_param, $sarakkeet;
+		
+		$toim="PAKKALISTA";
 		
 		//	Tarkastetaan tila...
 		$query = "select tila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
@@ -17,23 +19,6 @@ if (!function_exists('tulosta_lahete')) {
 			$mika = "otunnus";
 		}
 		
-		//	Suorastaan hämmentävää kikkailua..
-		$lahete_param=array();
-		switch ($tulostusversio) {
-			case "tulosta_lahete_simppeli_ei_hintoja_ei_aleja.inc":
-				$lahete_param["ale"]= "ei";
-				$lahete_param["hinnat"]= "ei";				
-				break;
-			case "tulosta_lahete_simppeli_ei_aleja.inc":
-				$lahete_param["ale"]= "ei";
-				$lahete_param["hinnat"]= "on";				
-				break;				
-			default:
-				$lahete_param["ale"]= "on";
-				$lahete_param["hinnat"]= "on";				
-				break;
-		}
-
 		// Haetaan laskun tiedot
 		$query = "	SELECT lasku.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.tapvm päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, lasku.tunnus toimitus, viesti asiakkaan_viite, comments lisätiedot, lasku.ytunnus asiakkaan_VAT, toimaika toimitusaika, kerayspvm keräysaika,
 					(select if(count(distinct(keratty))>1,'".t("useita")."', keratty) from tilausrivi,tuote where tilausrivi.yhtio=lasku.yhtio and tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa='' and $mika=lasku.tunnus) käsittelijä,
@@ -57,12 +42,31 @@ if (!function_exists('tulosta_lahete')) {
 			$kielrow = mysql_fetch_array($kielresult);
 			$kieli = strtolower($kielrow['kieli']);
 		}				
-		
-		if($laskurow["rivihintoja_ei_nayteta"]) {
-			$lahete_param["ale"]= "ei";
-			$lahete_param["hinnat"]= "ei";				
+
+		//	Suorastaan hämmentävää kikkailua..
+		if($laskurow["rivihintoja_ei_nayteta"] or $toim == "PAKKALISTA") {
+			$tulostusversio = "tulosta_lahete_simppeli_ei_hintoja_ei_aleja.inc";
 		}
 		
+		$lahete_param=array();
+		switch ($tulostusversio) {
+			case "tulosta_lahete_simppeli_ei_hintoja_ei_aleja.inc":
+				$lahete_param["ale"]= "ei";
+				$lahete_param["hinnat"]= "ei";
+				$sarakkeet["rivi"] = array(140,15,0,0);
+				break;
+			case "tulosta_lahete_simppeli_ei_aleja.inc":
+				$lahete_param["ale"]= "ei";
+				$lahete_param["hinnat"]= "on";
+				$sarakkeet["rivi"] = array(115,15,0,15);				
+				break;				
+			default:
+				$lahete_param["ale"]= "on";
+				$lahete_param["hinnat"]= "on";
+				$sarakkeet["rivi"] = array(95,15,20,15);
+				break;
+		}
+
 		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 			$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
 		}
@@ -74,7 +78,7 @@ if (!function_exists('tulosta_lahete')) {
 		
 		if (!function_exists('alku')) {
 			function alku ($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param, $riviotsikot="") {
-				global $yhtiorow, $kukarow, $fonts;
+				global $yhtiorow, $kukarow, $fonts, $sarakkeet;
 
 				if(!is_object($pdf)) {
 
@@ -191,7 +195,7 @@ if (!function_exists('tulosta_lahete')) {
 					//	Tehdään template
 					$tid2=$pdf->template->create();
 					
-					$s=$pdf->teeSarakkeet(array(95,15,20,15));
+					$s=$pdf->teeSarakkeet($sarakkeet["rivi"]);
 					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tuote", $kieli), "norm", "L", "B", $tid2);
 					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimitettu", $kieli), "norm", "R", "B", $tid2);
 					if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
@@ -231,7 +235,7 @@ if (!function_exists('tulosta_lahete')) {
 		}
 		
 		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param, "JOO");
-		$h = 180;
+		$h = 185;
 		
 		$sorttauskentta = generoi_sorttauskentta();
 		if ($laskurow["tila"] == 'U') {
@@ -255,7 +259,7 @@ if (!function_exists('tulosta_lahete')) {
 		$perherivihinta = "	(select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi!='D')";
 		
 		// haetaan tilauksen kaikki rivit
-		$query = "  SELECT tilausrivi.*, tuote.ei_saldoa ei_saldoa, tuote.tullinimike1, tuote.tullikohtelu,
+		$query = "  SELECT tilausrivi.*, tuote.ei_saldoa ei_saldoa, tuote.tullinimike1, tuote.tullikohtelu, tuotteen_toimittajat.alkuperamaa as alkuperamaa,
 					if(tilausrivi.perheid=0,$rivihinta,$perherivihinta) rivihinta,
 					$sorttauskentta
 					FROM tilausrivi
@@ -264,6 +268,7 @@ if (!function_exists('tulosta_lahete')) {
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE $where and (perheid=0 or perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta='' or tilausrivin_lisatiedot.ei_nayteta IS NULL)
 					and tilausrivi.tyyppi!='D'
+					GROUP BY tilausrivi.tunnus
 					ORDER BY otunnus, sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
 
@@ -279,7 +284,7 @@ if (!function_exists('tulosta_lahete')) {
 		
 		if(mysql_num_rows($riresult)>0) {
 		
-			$s=$pdf->teeSarakkeet(array(95,15,20,15));	
+			$s=$pdf->teeSarakkeet($sarakkeet["rivi"]);	
 			$summa=$summa_netto=0;
 			unset($edperhe);
 			
@@ -363,13 +368,17 @@ if (!function_exists('tulosta_lahete')) {
 					}
 
 					//	Vientilaskulle annetaan hieman lisäinfoa!
-					if ($laskurow["vienti"] != "") {
-						$pdf->write($h, 1, 5, $s[0], "Country of Origin: ".strtoupper(maa($row["alkuperamaa"], $kieli)), "snadi", "L", "I");	
+					if ($laskurow["vienti"] != "" or $toim == "PAKKALISTA") {
+						$h-=$pdf->ln(0.5);
+						$pdf->write($h, 1, 5, 40, t("Alkuperämaa").":", "snadi", "L", "I");	
+						$pdf->write($h, 1, 40, 0, strtoupper(maa($row["alkuperamaa"], $kieli)), "snadi", "L", "I");						
 						$h-=$pdf->ln();
-						$pdf->write($h, 1, 5, $s[0], "Customs tariff number: ".$row["tullinimike1"], "snadi", "L", "I");	
+						$pdf->write($h, 1, 5, 40, t("Tullinimike").":", "snadi", "L", "I");	
+						$pdf->write($h, 1, 40, 0, $row["tullinimike1"], "snadi", "L", "I");						
 						$h-=$pdf->ln();
 						if($row["tullikohtelu"] != "") {
-							$pdf->write($h, 1, 0, $s[0], t("Vientikohtelu", $kieli).": ".$row["tullikohtelu"], "snadi", "L", "I");	
+							$pdf->write($h, 1, 5, 40, t("Vientikohtelu").":", "snadi", "L", "I");	
+							$pdf->write($h, 1, 40, 0, $row["tullikohtelu"], "snadi", "L", "I");						
 							$h-=$pdf->ln();						
 						}
 					}
@@ -437,7 +446,57 @@ if (!function_exists('tulosta_lahete')) {
 			$pdf->write($h, 1, 0, $s[2], t("Lähetys yhteensä", $kieli).":", "norm", "R", "B");
 			$pdf->write($h, 1, $s[2], 0, money_format('%i',$kaikkiyhteensa), "norm", "R", "B");
 		}		
-				
+		
+		
+		//	Olisiko jo pakkaustietoja
+		$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametrit, sum(nettopaino) nettopaino, concat_ws(' ',pakkaus, pakkauskuvaus, lisatiedot) tiedot, toimitustapa
+					FROM rahtikirjat
+					WHERE yhtio = '{$kukarow["yhtio"]}' and otsikkonro = '{$laskurow["tunnus"]}'
+					GROUP BY pakkaus, pakkauskuvaus, lisatiedot";
+		$rahtires = mysql_query($query) or pupe_error($query);
+	
+		if(mysql_num_rows($rahtires)>0) {
+		
+			if(!in_array($laskurow["alatila"], array("D","J","E","V","X"))) {
+				$otsik = "PAKKAUSSUUNNITELMA";
+			}
+			else {
+				$otsik = "PAKKAUSTIEDOT";
+			}
+		
+			$h-=$pdf->ln(2);
+			$pdf->write($h, 1, 0, 0, 		t($otsik).$lisa, "norm", "L", "B");
+						
+			$h-=$pdf->ln(1.5);
+			while ($rahtirow = mysql_fetch_array($rahtires)) {
+				$pdf->write($h, 1, 0, $s[0], 		$rahtirow["kollit"]." ".t("kpl")." ".$rahtirow["tiedot"], "norm", "L", "");
+				$h-=$pdf->ln(1.25);
+
+				if($rahtirow["kilot"]>0) {
+					$pdf->write($h, 1, 5, 40, 		t("Bruttopaino", $kieli).":", "norm", "L", "");
+					$pdf->write($h, 1, 40, 0, 	$rahtirow["kilot"]." ".t("kg"), "norm", "L", "");					
+					$h-=$pdf->ln(1);					
+				}
+				if($rahtirow["nettopaino"]>0) {
+					$pdf->write($h, 1, 5, 40, 		t("Nettopaino", $kieli).":", "norm", "L", "");
+					$pdf->write($h, 1, 40, 0, 	$rahtirow["nettopaino"]." ".t("kg"), "norm", "L", "");					
+					$h-=$pdf->ln(1);					
+				}
+				if($rahtirow["kuutiot"]>0) {
+					$pdf->write($h, 1, 5, 40, 		t("Kuutiot", $kieli).":", "norm", "L", "");
+					$pdf->write($h, 1, 40, 0, 	$rahtirow["kuutiot"]." ".t("m³"), "norm", "L", "");					
+					$h-=$pdf->ln(1);					
+				}
+				if($rahtirow["lavametrit"]>0) {
+					$pdf->write($h, 1, 5, 40, 		t("Lavametrit", $kieli).":", "norm", "L", "");
+					$pdf->write($h, 1, 40, 0, 	$rahtirow["lavametrit"]." ".t("m"), "norm", "L", "");					
+					$h-=$pdf->ln(1);					
+				}
+
+				$h-=$pdf->ln(1);				
+			}				
+		}		
+		
 		$h = 15;
 		$s=$pdf->teeSarakkeet(array(70,15,58,15));
 		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");

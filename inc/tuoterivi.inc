@@ -36,35 +36,40 @@
 			// Tyyppiä ei saa vaihtaa, jos tuotteella on saldoa
 			$query = "	SELECT sum(saldo) saldo
 						FROM tuotepaikat
-						WHERE yhtio='$kukarow[yhtio]' and tuoteno='$trow[tuoteno]'";
+						WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]' and tuoteno != ''";
 			$sresult = mysql_query($query) or pupe_error($query);
 			$srow = mysql_fetch_array($sresult);
 
+			$selv = "";
+			$selp = "";
+			$selr = "";
+			$selk = "";
+			$sela = "";
+			$selb = "";
+
+			if ($trow[$i] == '')  $selv = "SELECTED";
+			if ($trow[$i] == 'P') $selp = "SELECTED";
+			if ($trow[$i] == 'R') $selr = "SELECTED";
+			if ($trow[$i] == 'K') $selk = "SELECTED";
+			if ($trow[$i] == 'A') $sela = "SELECTED";
+			if ($trow[$i] == 'B') $selb = "SELECTED";
+
 			if ($srow['saldo'] == 0) {
 				$ulos = "<td><select name='$nimi'>";
-
-				if($trow[$i]=='') $selv="SELECTED";
-				if($trow[$i]=='P') $selp="SELECTED";
-				if($trow[$i]=='R') $selr="SELECTED";
-				if($trow[$i]=='K') $selk="SELECTED";
-				if($trow[$i]=='A') $sela="SELECTED";
-				if($trow[$i]=='B') $selb="SELECTED";
-
-				$ulos .= "<option value='' $selv>".t("Valmiste")."</option>";
+				$ulos .= "<option value='' $selv>".t("Normaali / Valmiste")."</option>";
 				//$ulos .= "<option value='P' $selp>".t("Puolivalmiste")."</option>";
 				$ulos .= "<option value='R' $selr>".t("Raaka-aine")."</option>";
 				$ulos .= "<option value='K' $selk>".t("Palvelu")."</option>";
 				$ulos .= "<option value='A' $sela>".t("Viranomaistuote - Päiväraha")."</option>";
 				$ulos .= "<option value='B' $selb>".t("Viranomaistuote - Muu kulu")."</option>";
-
 				$ulos .= "</select></td>";
 			}
 			else {
 				$ulos="<td>";
-				if($trow[$i]=='') $ulos.=t("Valmiste");
-				//if($trow[$i]=='P') $ulos.=t("Puolivalmiste");
-				if($trow[$i]=='R') $ulos.=t("Raaka-aine");
-				if($trow[$i]=='K') $ulos.=t("Palvelu");
+				if ($trow[$i] == '') $ulos.=t("Valmiste");
+				//if ($trow[$i]=='P') $ulos.=t("Puolivalmiste");
+				if ($trow[$i] == 'R') $ulos.=t("Raaka-aine");
+				if ($trow[$i] == 'K') $ulos.=t("Palvelu");
 				$ulos.=" (Ei voida muuttaa, koska tuotteella on saldoa $srow[0])<input type = 'hidden' name = '$nimi' value = '$trow[$i]' size='$size'>";
 				$ulos.="</td>";
 			}

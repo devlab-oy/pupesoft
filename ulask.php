@@ -105,13 +105,15 @@ if ($tee == 'I') {
 		
 		// lis‰t‰‰n kuva
 		$query = "	insert into liitetiedostot set
-					yhtio    = '{$kukarow['yhtio']}',
-					liitos   = 'lasku',
-					data     = '$data',
-					selite   = '$selite',
-					filename = '$filename',
-					filesize = '$filesize',
-					filetype = '$filetype'";
+					yhtio      = '{$kukarow['yhtio']}',
+					liitos     = 'lasku',
+					laatija    = '{$kukarow['kuka']}',
+					luontiaika = now(),
+					data       = '$data',
+					selite     = '$selite',
+					filename   = '$filename',
+					filesize   = '$filesize',
+					filetype   = '$filetype'";
 		
 		$result = mysql_query($query) or pupe_error($query);
 		$liitostunnus = mysql_insert_id();

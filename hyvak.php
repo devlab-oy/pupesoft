@@ -2,7 +2,7 @@
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php")  !== FALSE) {
 		require ("inc/parametrit.inc");
-		echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr>";		
+		echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr>";
 	}
 	require ("inc/alvpopup.inc");
 	require_once ("inc/tilinumero.inc");
@@ -17,7 +17,7 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -29,8 +29,8 @@
 		}
 		else {
 			echo "Tietosuojaongelma! Et ole oikea käyttäjä";
-			
-			
+
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -48,7 +48,7 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -102,7 +102,7 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -156,7 +156,7 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus</font>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -183,7 +183,7 @@
 
 		if (mysql_num_rows($result) !=1 ) {
 			echo t('lasku kateissa') . "$tunnus</font>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -209,7 +209,7 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -218,7 +218,7 @@
 
 		if ($laskurow['hyvak1'] != $laskurow['hyvaksyja_nyt'] or $laskurow['hyvaksynnanmuutos'] == '') {
 			echo pupe_eror('lasku on väärässä tilassa');
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -252,31 +252,31 @@
 
 		if (mysql_num_rows($result) !=1 ) {
 			echo t('lasku kateissa') . "$tunnus<br>".t('Paina reload nappia')."</font>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
 
 		$laskurow = mysql_fetch_array($result);
-		
+
 		//	Jos tehdään matkalaskun ensimmäinen hyväksyntä..
 		if($laskurow["tilaustyyppi"] == "M" and $laskurow["h1time"]=="0000-00-00 00:00:00") {
-			
+
 			$query = "select * from toimi where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 			$toimires = mysql_query($query) or pupe_error($query);
 			$toimirow = mysql_fetch_array($toimires);
-			
+
 			//	Päivitetään tapvm ja viesti laskulle
 			$viesti = t("Matkalasku").date("d").".".date("m").".".date("Y");
 			$query = " update lasku set tapvm=now(), erpcm=DATE_ADD(now(), INTERVAL {$toimirow["oletus_erapvm"]} DAY), viesti ='$viesti' where yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 			$updres = mysql_query($query) or pupe_error($query);
-			
+
 			//	Päivitetään tiliöintien tapvm as well
 			$query = " update tiliointi set tapvm=now() where yhtio = '$kukarow[yhtio]' and ltunnus='$tunnus'";
 			$updres = mysql_query($query) or pupe_error($query);
-			
+
 		}
-		
+
 		// Kuka hyväksyi??
 		if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak1']) {
 			$kentta = "h1time";
@@ -388,7 +388,7 @@
 
 		if (mysql_num_rows($result) == 0) {
 			echo t("Tiliöintiä ei löydy")."! $query";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -455,7 +455,7 @@
 
 		if (mysql_num_rows($result) != 1) {
 			echo t("Laskua ei enää löydy! Systeemivirhe!");
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -475,7 +475,7 @@
 
 				if (mysql_num_rows($result) == 0) {
 					echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
-					
+
 					require ("inc/footer.inc");
 					exit;
 				}
@@ -496,7 +496,7 @@
 
 					if (mysql_num_rows($result) == 0) {
 						echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
-						
+
 						require ("inc/footer.inc");
 						exit;
 					}
@@ -518,7 +518,7 @@
 
 					if (mysql_num_rows($result) == 0) {
 						echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
-						
+
 						require ("inc/footer.inc");
 						exit;
 					}
@@ -547,7 +547,7 @@
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Lasku katosi")."</b><br>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -724,7 +724,7 @@
 				// Käydään sama data läpi uudestaan
 				if (!mysql_data_seek ($vresult, 0)) {
 					echo "mysql_data_seek failed!";
-					
+
 					require ("inc/footer.inc");
 					exit;
 				}
@@ -1046,54 +1046,57 @@
 				}
 			}
 
-			if ($iframe == "" and $laskurow["ebid"] != "") {
-		  		echo "<form action = '$PHP_SELF' method='post'>
-		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-						<input type='hidden' name='iframe' value = '$iframe'>
-						<input type='hidden' name='id' value = '$id'>
-		  				<input type='hidden' name = 'iframe' value='yes'>
-		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
-		  				<td class='back'><input type='Submit' value='".t("Avaa lasku tähän ikkunaan")."'></td>
-						</form>";
-			}
-			elseif ($iframe == 'yes' and $laskurow["ebid"] != "") {
-		  		echo "<form action = '$PHP_SELF' method='post'>
-		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
-						<input type='hidden' name='iframe' value = '$iframe'>
-						<input type='hidden' name='id' value = '$id'>		
-		  				<input type='hidden' name = 'iframe' value=''>
-		  				<input type='hidden' name = 'nayta' value='$nayta'>
-		  				<input type='hidden' name = 'tee' value = ''>
-		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>
-						</form>";
-			}
-
 			//	Onko kuva tietokannassa?
 			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-			$liiteres=mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($liiteres)>0) {
+			$liiteres = mysql_query($query) or pupe_error($query);
+
+			// yli yks tehdään dropdowni
+			if (mysql_num_rows($liiteres) > 1) {
 				echo "<form action = '$PHP_SELF' method='post'>
 		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
 		  				<input type='hidden' name = 'iframe' value='yes'>
 		  				<input type='hidden' name = 'nayta' value='$nayta'>
 		  				<input type='hidden' name = 'tee' value = ''>
-						<th>".t("Näytä tilauksen lasku")."</th>
+						<td>".t("Näytä tilauksen lasku")."</td>
 		  				<td class='back'><select name='id' onchange='submit();'>
 							<option value=''>Valitse lasku</option>";
-		
-				while($liiterow=mysql_fetch_array($liiteres)) {
-					if($id==$liiterow["tunnus"]) $sel = "selected";
+
+				while ($liiterow = mysql_fetch_array($liiteres)) {
+					if ($id == $liiterow["tunnus"]) $sel = "selected";
 					else $sel = "";
 					echo "<option value='{$liiterow["tunnus"]}' $sel>{$liiterow["selite"]}</option>";
 				}
 				echo "	</select>
 						</td>
 					</form>";
-				
 			}
-			else {
-				echo t("Paperilasku");
+			elseif (mysql_num_rows($liiteres) == 1) {
+				$liiterow = mysql_fetch_array($liiteres);
+				$id = $liiterow["tunnus"];
+			}
+
+			// jos vain yks tai verkkolasku niin tehdään nappejä
+			if ($iframe == "" and ($laskurow["ebid"] != "" or mysql_num_rows($liiteres) == 1)) {
+		  		echo "<form action = '$PHP_SELF' method='post'>
+		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+						<input type='hidden' name = 'iframe' value = '$iframe'>
+						<input type='hidden' name = 'id' value = '$id'>
+		  				<input type='hidden' name = 'iframe' value='yes'>
+		  				<input type='hidden' name = 'nayta' value='$nayta'>
+		  				<input type='hidden' name = 'tee' value = ''>
+		  				<td class='back'><input type='Submit' value='".t("Avaa lasku tähän ikkunaan")."'></td>
+						</form>";
+			}
+			elseif ($iframe == 'yes' and ($laskurow["ebid"] != "" or mysql_num_rows($liiteres) == 1)) {
+		  		echo "<form action = '$PHP_SELF' method='post'>
+		  				<input type='hidden' name = 'tunnus' value='$tunnus'>
+						<input type='hidden' name = 'iframe' value = '$iframe'>
+						<input type='hidden' name = 'id' value = '$id'>
+		  				<input type='hidden' name = 'iframe' value=''>
+		  				<input type='hidden' name = 'nayta' value='$nayta'>
+		  				<input type='hidden' name = 'tee' value = ''>
+		  				<td class='back'><input type='Submit' value='".t("Sulje lasku")."'></td>
+						</form>";
 			}
 
 			echo "</tr></table>";
@@ -1139,13 +1142,14 @@
 			echo "</tr></table><br>";
 		}
 
-		if ($iframe == 'yes' and ($laskurow["ebid"] != "" or $id>0)) {
+		if ($iframe == 'yes' and ($laskurow["ebid"] != "" or $id > 0)) {
 		    if ($_POST['id'] > 0) {
 				$url = "view.php?id={$_POST['id']}";
-			} else {
+			}
+			else {
 				$url = ebid($laskurow['tunnus'], 'alaikkuna');
 			}
-			
+
 			echo "<iframe src='$url' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
 		}
 
@@ -1179,7 +1183,7 @@
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<b>".t("Sinulla ei ole hyväksymättömiä laskuja")."</b><br>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 		}
@@ -1221,7 +1225,7 @@
 			echo "<td valign='top'>$trow[postitp]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[summa] $trow[valkoodi]</td>";
-			
+
 			// tehdään lasku linkki
 			echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 
@@ -1246,7 +1250,7 @@
 						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
 						<td class='back' valign='top'><input type='Submit' value='".t("Lisää kommentti")."'></td></form>";
 				}
-				
+
 				$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='{$trow["tunnus"]}'";
 				$keikres = mysql_query($query) or pupe_error($query);
 				if ($oikeurow['paivitys'] == '1' and mysql_num_rows($keikres)==0) {
@@ -1261,7 +1265,7 @@
 			echo "</tr>";
 		}
 		echo "</table>";
-		
+
 		$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='{$trow["tunnus"]}'";
 		$keikres = mysql_query($query) or pupe_error($query);
 		if ($oikeurow['paivitys'] == '1' and $kukarow['taso'] == 1 and mysql_num_rows($keikres)==0) {

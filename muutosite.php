@@ -644,11 +644,16 @@
 			echo "<td></td>";
 		}
 		
-		echo "<td><form method='get' action='liitetiedostot.php?liitos=lasku&id=$tunnus'>
-			<input type='hidden' name='id' value='$tunnus'/>
-			<input type='hidden' name='liitos' value='lasku'/>
-			<input type='submit' value='" . t('N‰yt‰ liitteet')."'/>
-			</form></td>";
+		$queryoik = "SELECT tunnus from oikeu where nimi='liitetiedostot.php' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+		$res = mysql_query($queryoik) or pupe_error($queryoik);
+		
+		if (mysql_num_rows($res) == 1) {
+			echo "<td><form method='get' action='liitetiedostot.php?liitos=lasku&id=$tunnus'>
+				<input type='hidden' name='id' value='$tunnus'/>
+				<input type='hidden' name='liitos' value='lasku'/>
+				<input type='submit' value='" . t('N‰yt‰ liitteet')."'/>
+				</form></td>";
+		}
 		
 		// N‰ytet‰‰n nappi vain jos tieoja on
 		if ($trow['vienti'] != '' and $trow['vienti'] != 'A' and $trow['vienti'] != 'D' and $trow['vienti'] != 'G') {

@@ -245,7 +245,7 @@ if ($toiminto == "kululaskut") {
 					<td>$llrow[valkoodi]</td>
 					<td>$llrow[viite]</td>";
 			
-			$query  = "	select ebid
+			$query  = "	select tunnus
 						from lasku
 						where yhtio	= '$kukarow[yhtio]' 
 						and tunnus	= '$llrow[vanhatunnus]'";
@@ -253,7 +253,7 @@ if ($toiminto == "kululaskut") {
 			$osresrow = mysql_fetch_array($osresres);
 			
 			// tehd‰‰n lasku linkki
-			echo "<td>".ebid($laskurow['tunnus']) ."</td>";
+			echo "<td>" . ebid($osresrow['tunnus']) . "</td>";
 			
 			echo "<td>$llrow[vienti]</td>";
 			

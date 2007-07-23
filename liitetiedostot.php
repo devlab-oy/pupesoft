@@ -54,8 +54,8 @@ and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 					yhtio    = '{$kukarow['yhtio']}',
 					liitos   = '". mysql_real_escape_string($_GET['liitos']) . "',
 					liitostunnus = '" . (int) $_GET['id']. "',
+					laatija    = '{$kukarow['kuka']}',
 					luontiaika = now(),
-					laatija  = '{$kukarow['kuka']}',
 					data     = '$data',
 					selite   = '$filename',
 					filename = '$filename',
@@ -120,12 +120,15 @@ if (isset($_GET['liitos']) and $_GET['liitos'] == 'lasku' and isset($_GET['id'])
 
 	echo "</table>";
 	
-	echo "<p>Lis‰‰ uusi tiedosto: <form method='post' name='kuva' enctype='multipart/form-data' action='$PHP_SELF'>
-			<input type='file' name='userfile'/>
-			<input type='hidden' name='tee' value='file'/>
-			<input type='hidden' name='liitos' value='lasku'/>
-			<input type='submit' name='submit' value='" . t('Liit‰ tiedosto') . "'/>
-		</form></p>";
+	if (! in_array($laskurow['tila'], array('P', 'Y'))) {
+	
+		echo "<p>Lis‰‰ uusi tiedosto: <form method='post' name='kuva' enctype='multipart/form-data' action='$PHP_SELF'>
+				<input type='file' name='userfile'/>
+				<input type='hidden' name='tee' value='file'/>
+				<input type='hidden' name='liitos' value='lasku'/>
+				<input type='submit' name='submit' value='" . t('Liit‰ tiedosto') . "'/>
+			</form></p>";
+	}
 	
 	$query = "SELECT liitostunnus,tunnus,filename,filesize,selite,filetype,laatija,luontiaika 
 			FROM liitetiedostot
@@ -163,14 +166,15 @@ if (isset($_GET['liitos']) and $_GET['liitos'] == 'lasku' and isset($_GET['id'])
 			<td>". $liite['laatija']  . "</td>
 			";
 		
-		if (! in_array($laskurow['tila'], array('P', 'Y'))) {
-			echo "<td><form method='post' action='view.php?id={$liite['tunnus']}'><input type='submit' value='" . t('N‰yt‰ lasku')."'/></form></td>
-				<td><form action='' method='post'>
-				<input type='hidden' name='tunnus' value='{$liite['tunnus']}'/>
-				<input type='submit' name='poista' value='Poista'/
-				    onclick='return confirm(\"" . t('Haluatko varmasti poistaa t‰m‰n liitteen') . "\");'/>
-				</form></td>";
-		}
+			echo "<td><form method='post' action='view.php?id={$liite['tunnus']}'><input type='submit' value='" . t('N‰yt‰ lasku')."'/></form></td>";
+
+			if (! in_array($laskurow['tila'], array('P', 'Y'))) {
+				echo "<td><form action='' method='post'>
+					<input type='hidden' name='tunnus' value='{$liite['tunnus']}'/>
+					<input type='submit' name='poista' value='Poista'/
+					    onclick='return confirm(\"" . t('Haluatko varmasti poistaa t‰m‰n liitteen') . "\");'/>
+					</form></td>";
+			}
 		
 		echo "</tr>";
 	}

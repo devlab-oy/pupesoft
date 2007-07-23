@@ -221,7 +221,7 @@ if (!function_exists("t")) {
 			$link = mysql_connect ($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
 			mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (functions.inc 2)!");
 		}
-		
+
 		//	Palautetaan muotoiltu stringi!!!
 		if(func_num_args()>2) {
 		    $arg = func_get_args();
@@ -235,7 +235,7 @@ if (!function_exists("t")) {
 
 if (!function_exists("maa")) {
 	function maa($code, $kieli="") {
-		
+
 		$query = sprintf("SELECT nimi FROM maat where koodi = '%s' LIMIT 1", mysql_real_escape_string(substr($code, 0 ,2)));
 		$res = mysql_query($query) or pupe_error($query);
 		$maa = mysql_fetch_array($res);
@@ -244,7 +244,7 @@ if (!function_exists("maa")) {
 		if($kieli=="") {
 			$kieli = $GLOBALS["kieli"];
 		}
-		
+
 		return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
 	}
 }
@@ -1644,61 +1644,61 @@ if (!function_exists("kalenteritapahtuma")) {
 if (! function_exists('ebid')) {
 	function ebid($lasku_tunnus, $url_only = false) {
 		global $kukarow, $yhtiorow;
-		
+
 		$query = "SELECT * from lasku where tunnus=" . (int) $lasku_tunnus . " and yhtio='{$kukarow['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($res);
-		
+
 		if ($laskurow['ebid'] != "") {
-			
+
 			if (substr($laskurow['ebid'], 0, 1) == '/') {
 				// otetaan palvelin muuttujasta mahdolliset turhat alut pois
 				$alut    = array("http://","https://");
 				$apunimi = str_replace($alut, "", $yhtiorow['lasku_polku_http']);
-				
+
 				if ($_SERVER["HTTPS"] == "on") {
-					$url = "https://$apunimi".$ebid;
+					$url = "https://$apunimi".$laskurow["ebid"];
 				}
 				else {
-					$url = "http://$apunimi".$ebid;
+					$url = "http://$apunimi".$laskurow["ebid"];
 				}
-				
+
 				return "<a href='$url'>". t('Näytä lasku')."</a>";
 			}
-			
+
 			$ebid = $laskurow['ebid'];
-			
+
 			$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
 			$salasana		   = $yhtiorow['verkkosala_vas'];
-			
+
 			$timestamppi=gmdate("YmdHis")."Z";
-			
+
 			$urlhead = "http://www.verkkolasku.net";
 			$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
-			
+
 			$digest	 = md5($urlmain . "&" . $salasana);
 			$url	 = $urlhead.$urlmain."&DIGEST=$digest";
-			
+
 			if ($url_only) {
 				return $url;
 			}
-			
+
 			return "<a href='$url'>". t('Näytä lasku')."</a>";
 		}
 		else {
-			
+
 			$query = "SELECT tunnus from liitetiedostot where liitostunnus='{$laskurow['tunnus']}' and liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
 			$res = mysql_query($query) or pupe_error($query);
-			
+
 			$out = '';
 			while ($row = mysql_fetch_array($res)) {
 				$out .= "<a $target href='view.php?id={$row['tunnus']}'>". t('Näytä lasku') ."</a> ";
 			}
-			
+
 			if ($out != '') {
 				return $out;
 			}
-			
+
 			return t('Paperilasku');
 		}
 	}

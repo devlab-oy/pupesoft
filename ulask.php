@@ -791,17 +791,14 @@ if ($tee == 'P' or $tee == 'E') {
 
 		<tr>";
 
-	// annetaan mahdollisuus lisätä laskun kuva vaan jos dirikka on oikein ja writable...
-	if (is_writable($yhtiorow['lasku_polku_abs'])) {
-		echo "<td>".t("Laskun kuva")."</td>";
+	echo "<td>".t("Laskun kuva")."</td>";
 
-		if (strlen($fnimi) > 0) {
-			echo "<td>".t("Kuva jo tallessa")."!<input name='fnimi' type='hidden' value = '$fnimi'></td>";
-		}
-		else {
-			echo "<input type='hidden' name='MAX_FILE_SIZE' value='8000000'>";
-			echo "<td><input name='userfile' type='file'></td>";
-		}
+	if (strlen($fnimi) > 0) {
+		echo "<td>".t("Kuva jo tallessa")."!<input name='fnimi' type='hidden' value = '$fnimi'></td>";
+	}
+	else {
+		echo "<input type='hidden' name='MAX_FILE_SIZE' value='8000000'>";
+		echo "<td><input name='userfile' type='file'></td>";
 	}
 
 	echo "</tr>";

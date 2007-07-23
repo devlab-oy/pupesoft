@@ -618,7 +618,7 @@
 			echo "<tr><th>comments</th><td>$trow[comments]</td></tr>";
 
 			// tehd‰‰n lasku linkki
-			echo "<tr><td></td><td>".ebid($trow['tunnus']) ."</td></tr>";
+			echo "<tr><td></td><td>".ebid($tunnus) ."</td></tr>";
 			
 		}
 		else {
@@ -626,7 +626,7 @@
 			echo "<tr><td>".t("Muu tosite")."</td>";
 
 			// tehd‰‰n lasku linkki
-			echo "<td>".ebid($trow['tunnus']) ."</td></tr>";
+			echo "<td>".ebid($tunnus) ."</td></tr>";
 
 		}
 		echo "<tr>";
@@ -651,7 +651,7 @@
 			echo "<td><form method='get' action='liitetiedostot.php?liitos=lasku&id=$tunnus'>
 				<input type='hidden' name='id' value='$tunnus'/>
 				<input type='hidden' name='liitos' value='lasku'/>
-				<input type='submit' value='" . t('N‰yt‰ liitteet')."'/>
+				<input type='submit' value='" . t('Muokkaa liitteit‰')."'/>
 				</form></td>";
 		}
 		

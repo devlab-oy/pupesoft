@@ -1652,7 +1652,17 @@ if (! function_exists('ebid')) {
 		if ($laskurow['ebid'] != "") {
 
 			if (substr($laskurow['ebid'], 0, 1) == '/') {
-				$url = $palvelin2.$laskurow["ebid"];
+
+				// otetaan palvelin muuttujasta mahdolliset turhat alut pois
+				$alut    = array("http://","https://");
+				$apunimi = str_replace($alut, "", $yhtiorow['lasku_polku_http']);
+
+				if ($_SERVER["HTTPS"] == "on") {
+					$url = "https://$apunimi".$laskurow["ebid"];
+				}
+				else {
+					$url = "http://$apunimi".$laskurow["ebid"];
+				}
 
 				if ($url_only) {
 					return $url;

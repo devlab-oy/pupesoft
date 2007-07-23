@@ -252,24 +252,8 @@ if ($toiminto == "kululaskut") {
 			$osresres = mysql_query($query) or pupe_error($query);
 			$osresrow = mysql_fetch_array($osresres);
 			
-			if (strlen($osresrow['ebid']) > 0) {
-				$ebid = $osresrow['ebid'];
-				require "../inc/ebid.inc";
-				echo "<td><a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
-			}
-			else {
-				//	Onko kuva tietokannassa?
-				echo "<td valign='top'>";
-				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-				$liiteres=mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($liiteres)>0) {
-					while($liiterow=mysql_fetch_array($liiteres)) {
-						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-					}
-				}
-				echo "</td>";		
-
-			}
+			// tehd‰‰n lasku linkki
+			echo "<td>".ebid($laskurow['tunnus']) ."</td>";
 			
 			echo "<td>$llrow[vienti]</td>";
 			
@@ -411,23 +395,8 @@ if ($tee == "haku") {
 					<td valign='top'>$llrow[valkoodi]</td>
 					<td valign='top'>$llrow[viite]</td>";
 					
-			if (strlen($llrow['ebid']) > 0) {
-				$ebid = $llrow['ebid'];
-				require "../inc/ebid.inc";
-				echo "<td valign='top'><a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
-			}
-			else {
-				//	Onko kuva tietokannassa?
-				echo "<td valign='top'>";
-				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-				$liiteres=mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($liiteres)>0) {
-					while($liiterow=mysql_fetch_array($liiteres)) {
-						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-					}
-				}
-				echo "</td>";		
-			}
+			// tehd‰‰n lasku linkki
+			echo "<td>".ebid($laskurow['tunnus']) ."</td>";
 					
 			echo "<td valign='top'>$llrow[vienti]</td>";
 

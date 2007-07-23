@@ -58,7 +58,7 @@ if ($tee == 'VIIVA') {
 if ($tee == 'I') {
 
 	$errormsg = "";
-
+	$kuva = false;
 	// Talletetaan k‰ytt‰j‰n nimell‰ tositteen/liitteen kuva, jos sellainen tuli
 	// koska, jos tulee virheit‰ tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
 	if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
@@ -90,11 +90,33 @@ if ($tee == 'I') {
 			$fnimi = "";
 		}
 		// Talletetaan laskun kuva oikeaan paikkaan
+		/*
 		elseif (!move_uploaded_file($_FILES['userfile']['tmp_name'] , $lopnimi)) {
 			$errormsg .= t("Laskun")." ".$_FILES['userfile']['tmp_name']." ".t("tallennus ep‰onnistui paikkaan")." $fnimi<br>";
 			$tee = "E";
 			$fnimi = "";
 		}
+		*/
+		$filetype = $_FILES['userfile']['type'];
+		$filesize = $_FILES['userfile']['size'];
+		$filename = $_FILES['userfile']['name'];
+		
+		$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
+		
+		// lis‰t‰‰n kuva
+		$query = "	insert into liitetiedostot set
+					yhtio    = '{$kukarow['yhtio']}',
+					liitos   = 'lasku',
+					data     = '$data',
+					selite   = '$selite',
+					filename = '$filename',
+					filesize = '$filesize',
+					filetype = '$filetype'";
+		
+		$result = mysql_query($query) or pupe_error($query);
+		$liitostunnus = mysql_insert_id();
+		$kuva = $liitostunnus;
+		
 	}
 	elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
 		// nelonen tarkoittaa, ettei mit‰‰n file‰ uploadattu.. eli jos on joku muu errori niin ei p‰‰stet‰ eteenp‰in
@@ -1071,6 +1093,10 @@ if ($tee == 'I') {
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm);
 	}
 	
+	if ($kuva) {
+		$ebid = '';
+	}
+	
 	// Kirjoitetaan lasku
 	$query = "INSERT into lasku set
 			yhtio = '$kukarow[yhtio]',
@@ -1121,7 +1147,13 @@ if ($tee == 'I') {
 
 	$result = mysql_query($query) or pupe_error($query);
 	$tunnus = mysql_insert_id ($link);
-
+	
+	if ($kuva) {
+		// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
+		$query = "update liitetiedostot set liitostunnus='$tunnus', selite='{$trow['nimi']} $summa $valkoodi' where tunnus='$kuva'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+	
 	$omasumma = round($summa * $vrow['kurssi'],2);
 	$vassumma = -1 * $omasumma;
 

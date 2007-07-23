@@ -603,26 +603,7 @@
 		echo "<td>$laskurow[kotisumma] $yhtiorow[valkoodi]</td>";
 		echo "<td>$laskurow[summa] $laskurow[valkoodi]</td>";
 
-		if ($laskurow["ebid"] != "") {
-			$ebid = $laskurow["ebid"];
-			require ("inc/ebid.inc");
-			echo "<td><a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
-		}
-		else {
-			//	Onko kuva tietokannassa?
-			echo "<td valign='top'>";
-			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-			$liiteres=mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($liiteres)>0) {
-				while($liiterow=mysql_fetch_array($liiteres)) {
-					echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-				}
-			}
-			else {
-				echo t("Paperilasku");
-			}
-			echo "</td>";		
-		}
+		echo "<td>".ebid($laskurow["tunnus"]) . "</td>";
 
 		// N‰ytet‰‰n poistonappi, jos se on sallittu ja lasku ei ole keikalla
 		$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
@@ -1159,12 +1140,10 @@
 		}
 
 		if ($iframe == 'yes' and ($laskurow["ebid"] != "" or $id>0)) {
-			if($id>0) {
-				$url="view.php?id=$id";
-			}
-			else {
-				$ebid = $laskurow["ebid"];
-				require ("inc/ebid.inc");				
+		    if ($_POST['id'] > 0) {
+				$url = "view.php?id={$_POST['id']}";
+			} else {
+				$url = ebid($laskurow['tunnus'], 'alaikkuna');
 			}
 			
 			echo "<iframe src='$url' name='alaikkuna' width='100%' height='60%' align='bottom' scrolling='auto'></iframe>";
@@ -1242,28 +1221,9 @@
 			echo "<td valign='top'>$trow[postitp]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[summa] $trow[valkoodi]</td>";
-
-			if ($trow["ebid"] != "") {
-				$ebid = $trow["ebid"];
-				require ("inc/ebid.inc");
-				echo "<td valign='top'><a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
-			}
-			else {
-				
-				//	Onko kuva tietokannassa?
-				echo "<td valign='top'>";
-				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$trow["tunnus"]}'";
-				$liiteres=mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($liiteres)>0) {
-					while($liiterow=mysql_fetch_array($liiteres)) {
-						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-					}
-				}
-				else {
-					echo t("Paperilasku");
-				}
-				echo "</td>";
-			}
+			
+			// tehd‰‰n lasku linkki
+			echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 
 			echo "	<form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tunnus' value='$trow[tunnus]'>

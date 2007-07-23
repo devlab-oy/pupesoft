@@ -1,7 +1,7 @@
 <?php
 	require ("inc/parametrit.inc");
 	
-	//Verkkolaskuille ei ole vakiopaikkaa! Anna t‰ss‰ polut miss‰ haluat laskuja s‰ilytt‰‰
+	//Verkkolaskuille ei ole vakiopaikkaa! Anna t√§ss√§ polut miss√§ haluat laskuja s√§ilytt√§√§
 	$poistetut='/home/jarmo/einv/hylatyt';
 	$vaarat="/home/jarmo/einv/error";
 	$oikeat="/home/jarmo/einv";
@@ -45,8 +45,8 @@
 					$t[$i]=utf8_decode($result[0]['e3164']);
 				if (mysql_field_name($resultx, $i) == "tilinumero") {
 					$t[$i]=$result4[0]['eC078.3194'];
-					if ((int) substr($t[$i],0,2) == 0) {  //Tuolla oli maa --> T‰m‰ on iban
-						$t[$i] = substr($t[$i],4); // J‰tet‰‰n 4 ekaa pois.
+					if ((int) substr($t[$i],0,2) == 0) {  //Tuolla oli maa --> T√§m√§ on iban
+						$t[$i] = substr($t[$i],4); // J√§tet√§√§n 4 ekaa pois.
 					}
 				}
 				if (mysql_field_name($resultx, $i) == "maa")
@@ -61,7 +61,7 @@
 			echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 			echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 			echo "<input type = 'hidden' name = 'upd' value ='1'>";
-			// Kokeillaan geneerist‰
+			// Kokeillaan geneerist√§
 			$query = "	SELECT *
 						FROM $toim
 						WHERE tunnus = '$tunnus'";
@@ -81,11 +81,11 @@
 				elseif	(mysql_field_len($result,$i)<5)	$size='5';
 				else	$size='10';
 
-		 		$maxsize = mysql_field_len($result,$i); // Jotta t‰t‰ voidaan muuttaa
+		 		$maxsize = mysql_field_len($result,$i); // Jotta t√§t√§ voidaan muuttaa
 
 				require ("inc/$toim"."rivi.inc");
 
-				// N‰it‰ kentti‰ ei ikin‰ saa p‰ivitt‰‰ k‰yttˆliittym‰st‰
+				// N√§it√§ kentti√§ ei ikin√§ saa p√§ivitt√§√§ k√§ytt√∂liittym√§st√§
 				if (mysql_field_name($result, $i) == "laatija" or
 					mysql_field_name($result, $i) == "muutospvm" or
 					mysql_field_name($result, $i) == "muuttaja" or
@@ -123,12 +123,12 @@
 	 				}
 				}
 
-				// $tyyppi --> 0 rivi‰ ei n‰ytet‰ ollenkaan
-				// $tyyppi --> 1 rivi n‰ytet‰‰n normaalisti
-				// $tyyppi --> 1.5 rivi n‰ytet‰‰n normaalisti ja se on p‰iv‰m‰‰r‰kentt‰
-				// $tyyppi --> 2 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, eik‰ sen arvoa p‰vitet‰
-				// $tyyppi --> 3 rivi n‰ytet‰‰n, mutta sit‰ ei voida muokata, mutta sen arvo p‰ivitet‰‰n
-				// $tyyppi --> 4 rivi‰ ei n‰ytet‰ ollenkaan, mutta sen arvo p‰ivitet‰‰n
+				// $tyyppi --> 0 rivi√§ ei n√§ytet√§ ollenkaan
+				// $tyyppi --> 1 rivi n√§ytet√§√§n normaalisti
+				// $tyyppi --> 1.5 rivi n√§ytet√§√§n normaalisti ja se on p√§iv√§m√§√§r√§kentt√§
+				// $tyyppi --> 2 rivi n√§ytet√§√§n, mutta sit√§ ei voida muokata, eik√§ sen arvoa p√§vitet√§
+				// $tyyppi --> 3 rivi n√§ytet√§√§n, mutta sit√§ ei voida muokata, mutta sen arvo p√§ivitet√§√§n
+				// $tyyppi --> 4 rivi√§ ei n√§ytet√§ ollenkaan, mutta sen arvo p√§ivitet√§√§n
 
 				if ($tyyppi > 0 and $tyyppi < 4) {
 					echo "<tr>";
@@ -177,18 +177,18 @@
 		}
 		if ($tapa == 'U') {
 			passthru("mv $vaarat/$tiedosto $oikeat/");
-			echo "<font class='message'>Tiedosto k‰sitell‰‰n uudestaan</font><br>";
+			echo "<font class='message'>Tiedosto k√§sitell√§√§n uudestaan</font><br>";
 		}
 		 
 		if ($tapa == 'P') {
 			passthru("mv $vaarat/$tiedosto $poistetut/");
-			echo "<font class='message'>Tiedosto hyl‰ttiin</font><br>";
+			echo "<font class='message'>Tiedosto hyl√§ttiin</font><br>";
 		}
 	}
 	
 	$laskuri = 0;
 	$valitutlaskut = 0;
-	echo "<font class='head'>".t("Hyl‰tyt verkkolaskut")."</font><hr>";
+	echo "<font class='head'>".t("Hyl√§tyt verkkolaskut")."</font><hr>";
 	if ($handle = opendir($vaarat)) {
 		echo "<table><tr>";
 		echo "<th>Toiminto</th><th>ly & ovt</th><th>Nimi</th><th>Maskutili & summa</th></tr><tr>";
@@ -198,7 +198,7 @@
 				$xmlstr=file_get_contents($vaarat."/".$file);
 				$xml = simplexml_load_string($xmlstr);
 				
-				$ok=0; //Ei t‰m‰n yrityksen lasku
+				$ok=0; //Ei t√§m√§n yrityksen lasku
 				$result=$xml->xpath('Group2/NAD[@e3035="IV"]');
 				$tunnistus = (string) $result[0]['eC082.3039'];
 				if ((string) $result[0]['eC082.3039'] != $yhtiorow['ovttunnus']) {
@@ -231,7 +231,7 @@
 					if (mysql_num_rows($result) == 1) $ok = 1;
 						
 					if ($ok == 0) {
-						// Yritet‰‰n laventaa ytunnuksella
+						// Yritet√§√§n laventaa ytunnuksella
 						$ytunnus = (int) substr($xresult[0]['eC082.3039'],4,8);
 						$query  = "SELECT * FROM toimi WHERE ytunnus='$ytunnus' and yhtio='$yhtiorow[yhtio]'";
 						$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
@@ -239,20 +239,20 @@
 					}
 					
 					if ($ok == 0) {
-						// Yritet‰‰n tarkentaa nimell‰
+						// Yritet√§√§n tarkentaa nimell√§
 						$query = "SELECT * FROM toimi WHERE ytunnus='$ytunnus' and yhtio='$yhtiorow[yhtio]' and nimi='".utf8_decode($xresult[0]['eC080.3036.1'])."'";
 						$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 						if (mysql_num_rows($result) == 1) $ok = 1;
 					}
 
 					if ($ok == 0) {
-						// kokeillaan pelk‰ll‰ nimell‰
+						// kokeillaan pelk√§ll√§ nimell√§
 						$query = "SELECT * FROM toimi WHERE yhtio='$yhtiorow[yhtio]' and nimi='".utf8_decode($xresult[0]['eC080.3036.1'])."'";
 						$result = mysql_query($query) or die ("$query<br><br>".mysql_error());	
 						if (mysql_num_rows($result) == 1) $ok = 1;
 					}
 
-					//Olisiko toimittaja sittenkin jossain (v‰‰rin perustettu)
+					//Olisiko toimittaja sittenkin jossain (v√§√§rin perustettu)
 					if ($ok == 0) {
 						$siivottu = utf8_decode($xresult[0]['eC080.3036.1']);
 						$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($siivottu));
@@ -268,7 +268,7 @@
 							while ($lahellarow=mysql_fetch_array($lahellaresult)) {
 								echo "<option value='$lahellarow[tunnus]'>$lahellarow[nimi]";
 							}
-							echo "</select><input type='submit' value ='P‰ivit‰ toimittaja'></form>";
+							echo "</select><input type='submit' value ='P√§ivit√§ toimittaja'></form>";
 						}
 						echo "<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name= 'tiedosto' value ='$file'>
@@ -277,11 +277,11 @@
 					else echo "<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name= 'tiedosto' value ='$file'>
 						<input type='hidden' name= 'tapa' value ='U'>
-						<input type='submit' value ='K‰sittele uudestaan'></form>";
+						<input type='submit' value ='K√§sittele uudestaan'></form>";
 					echo "<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name= 'tiedosto' value ='$file'>
 						<input type='hidden' name= 'tapa' value ='P'>
-						<input type='submit' value ='Hylk‰‰'></form>";
+						<input type='submit' value ='Hylk√§√§'></form>";
 					echo "</td>";
 					//echo "koko " . sizeof($result4)."\n";
 					//echo $result4[0]->asXml()."\n";
@@ -297,8 +297,21 @@
 					echo "<td>".$xresult4[0]['eC078.3194']."<br>";
 					echo $laskun_summa_eur. "<br>";
 					$ebid = $xresult3[0]['eC506.1154'];
-					require "inc/ebid.inc";
-					echo "<a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
+					
+					$ebid = $laskurow['ebid'];
+
+					$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
+					$salasana		   = $yhtiorow['verkkosala_vas'];
+
+					$timestamppi=gmdate("YmdHis")."Z";
+
+					$urlhead = "http://www.verkkolasku.net";
+					$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+
+					$digest	 = md5($urlmain . "&" . $salasana);
+					$url	 = $urlhead.$urlmain."&DIGEST=$digest";
+					echo "<a href='$url'>". t('N√§yt√§ lasku')."</a>";
+					
 					$valitutlaskut++;
 				}
 				//else echo "<td>Yrityksen: ". $tunnistus ." lasku</td>";
@@ -310,7 +323,7 @@
 		echo "</table>";
 	}
 	if ($valitutlaskut == 0) {
-		echo "<font class='message'>Ei hyl‰ttyj‰ laskuja</font><br>";
+		echo "<font class='message'>Ei hyl√§ttyj√§ laskuja</font><br>";
 	}
 	echo $laskuri;
 	require "inc/footer.inc";

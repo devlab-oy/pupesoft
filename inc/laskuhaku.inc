@@ -114,30 +114,12 @@ if ($tee != '') {
 			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 
 				if ($i == 6) {
-					if (strlen($trow[$i]) > 0) {
-						$ebid = $trow[$i];
-						require "inc/ebid.inc";
-						echo "<td><a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
-					}
-					else {
-						//	Onko kuva tietokannassa?
-						echo "<td valign='top'>";
-						$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-						$liiteres=mysql_query($query) or pupe_error($query);
-						if(mysql_num_rows($liiteres)>0) {
-							while($liiterow=mysql_fetch_array($liiteres)) {
-								echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-							}
-						}
-						else {
-							echo t("Paperilasku");
-						}
-						echo "</td>";		
-					}
+					// tehd‰‰n lasku linkki
+					echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 				}
 				else {
 					if ($i == 0) { // Linkki tositteelle, jos kayttaja saa sita tehda
-						if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2) {
+						if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2 and $kukarow['taso'] != 3) {
 							echo "<td>$trow[tapvm]</td>";
 						}
 						else {

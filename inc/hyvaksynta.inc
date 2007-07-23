@@ -146,27 +146,9 @@
 			echo "<$erotin>$trow[postitp]</$erotin>";
 			echo "<$erotin style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</$erotin>";
 			echo "<$erotin style='text-align: right;'>$trow[summa] $trow[valkoodi]</$erotin>";
-
-			if (strlen($trow["ebid"]) > 0) {
-				$ebid = $trow["ebid"];
-				require "inc/ebid.inc";
-				echo "<$erotin><a href='$url'>".t("N‰yt‰ lasku")."</a></$erotin>";
-			}
-			else {
-				//	Onko kuva tietokannassa?
-				echo "<$erotin valign='top'>";
-				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-				$liiteres=mysql_query($query) or pupe_error($query);
-				if(mysql_num_rows($liiteres)>0) {
-					while($liiterow=mysql_fetch_array($liiteres)) {
-						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-					}
-				}
-				else {
-					echo t("Paperilasku");
-				}
-				echo "</$erotin>";		
-			}
+			
+			// tehd‰‰n lasku linkki
+			echo "<$erotin>". ebid($trow['tunnus']) ."</$erotin>";
 			
 			echo "	<form action = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$kuka' method = 'post'>
 					<input type = 'hidden' name = 'mika' value = '$trow[tunnus]'>";

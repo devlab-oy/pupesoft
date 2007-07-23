@@ -634,11 +634,7 @@ if ($tila == '') {
 	
 	while ($muutkeikrow = mysql_fetch_array($muutkeikres)) {
 		$ebid = $muutkeikrow['ebid'];
-		require "../inc/ebid.inc";
-		
-		echo "<div id='$muutkeikrow[tunnus]' style='position:absolute; z-index:100; visibility:hidden; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>$muutkeikrow[nimi] $muutkeikrow[summa]</div>";
-		
-		echo "<a href='$url' onmouseout=\"popUp(event,'$muutkeikrow[tunnus]')\" onmouseover=\"popUp(event,'$muutkeikrow[tunnus]')\">$laskakak</a> ";
+		echo ebid($muutkeikrow['tunnus']);
 		
 		$laskakak++;
 	}

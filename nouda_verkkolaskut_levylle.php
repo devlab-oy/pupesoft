@@ -2,7 +2,7 @@
 	require ("inc/parametrit.inc");
 	echo "<font class='head'>Toimittajan verkkolaskujen siirto levylle</font><hr><br>";
 
-	if ($tee == 'A') { // N‰ytet‰‰n toimittajan laskuja joille lis‰tietoja voi syˆtt‰‰
+	if ($tee == 'A') { // N√§ytet√§√§n toimittajan laskuja joille lis√§tietoja voi sy√∂tt√§√§
 		$query = "SELECT tosite, lasku.tunnus, ebid
 					  FROM lasku, tiliointi
 					  WHERE lasku.yhtio='$kukarow[yhtio]' and ytunnus='$tunnus' and ebid <> '' and
@@ -16,8 +16,19 @@
 
 		while ($laskurow=mysql_fetch_array($result)) {
 			$ebid=$laskurow['ebid'];
-			require ("inc/ebid.inc");
 			echo "Haen $ebid";
+			
+			$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
+			$salasana		   = $yhtiorow['verkkosala_vas'];
+			
+			$timestamppi = gmdate("YmdHis")."Z";
+			
+			$urlhead = "http://www.verkkolasku.net";
+			$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+			
+			$digest	 = md5($urlmain . "&" . $salasana);
+			$url	 = $urlhead.$urlmain."&DIGEST=$digest";
+			
 			$sisalto = file_get_contents($url);
 			$tyofile="/tmp/" . $laskurow['tunnus'];
 //			$tyofile="/var/data/kuvat/" . $laskurow['tunnus'];
@@ -57,8 +68,19 @@
 
 		while ($laskurow=mysql_fetch_array($result)) {
 			$ebid=$laskurow['ebid'];
-			require ("inc/ebid.inc");
 			echo "Haen $ebid";
+			
+			$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
+			$salasana		   = $yhtiorow['verkkosala_vas'];
+			
+			$timestamppi = gmdate("YmdHis")."Z";
+			
+			$urlhead = "http://www.verkkolasku.net";
+			$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+			
+			$digest	 = md5($urlmain . "&" . $salasana);
+			$url	 = $urlhead.$urlmain."&DIGEST=$digest";
+			
 			$sisalto = file_get_contents($url);
 			$tyofile="/tmp/" . $laskurow['tunnus'];
 //			$tyofile="/var/data/kuvat/" . $laskurow['tunnus'];
@@ -106,10 +128,10 @@
 
 		$result = mysql_query ($query) or die ("Kysely ei onnistu $query");
 		if (mysql_num_rows($result) == 0) {
-			echo "<b>Haulla ei lˆytynyt yht‰‰n toimittajaa</b>";
+			echo "<b>Haulla ei l√∂ytynyt yht√§√§n toimittajaa</b>";
 		}
 		if (mysql_num_rows($result) > 20 && $tila != '') {
-			echo "<b>Haulla lˆytyi liikaa toimittajia. Tarkenna hakua!</b><br><br>";
+			echo "<b>Haulla l√∂ytyi liikaa toimittajia. Tarkenna hakua!</b><br><br>";
 			$tila = '';
 		}
 		elseif(mysql_num_rows($result) <= 20) {

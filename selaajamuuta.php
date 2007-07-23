@@ -159,24 +159,8 @@
 //Oikealla laskun kuva
 	echo "<div id='oikea' style='position: absolute; top: 100px; left: 525px; height: 700px; width:520px; overflow: scroll;'>";
 	if ($tunnus != '') {
-		if (strlen($laskurow['ebid']) > 0) {
-			$ebid = $laskurow['ebid'];
-			require "inc/ebid.inc";
-			echo "<iframe src='$url' name='alaikkuna' width='510px' height='800px' align='bottom' scrolling='auto'></iframe>";
-		}
-		else {
-			//	Onko kuva tietokannassa?
-			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-			$liiteres=mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($liiteres)>0) {
-				while($liiterow=mysql_fetch_array($liiteres)) {
-					echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-				}
-			}
-			else {
-				echo "<font class='message'>".t("Paperilasku! Kuvaa ei ole saatavilla ($laskurow[ebid])")."</font>";
-			}
-		}
+		// tehd‰‰n lasku linkki
+		echo "<td>".ebid($laskurow['tunnus']) ."</td>";
 	}
 	else {
 		echo "<font class='message'> ".t("Laskua ei ole valittu")."</font>";

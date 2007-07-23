@@ -617,52 +617,16 @@
 			// en jaksa mietti‰ indeksilukuja perkele!
 			echo "<tr><th>comments</th><td>$trow[comments]</td></tr>";
 
-			if (strlen($trow['ebid']) > 0) {
-				$ebid = $trow['ebid'];
-				require "inc/ebid.inc";
-				echo "<td></td><td><a href='$url'>".t("N‰yt‰ lasku")."</a></td></tr>";
-			}
-			else {
-				//	Onko kuva tietokannassa?
-				echo "<td></td><td>";
-				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-				$liiteres = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($liiteres)>0) {
-					while ($liiterow=mysql_fetch_array($liiteres)) {
-						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-					}
-				}
-
-				echo "</td></tr>";
-			}
+			// tehd‰‰n lasku linkki
+			echo "<tr><td></td><td>".ebid($trow['tunnus']) ."</td></tr>";
+			
 		}
 		else {
 			// Muu tosite
 			echo "<tr><td>".t("Muu tosite")."</td>";
 
-			if (strlen($trow['ebid']) > 0) {
-				$ebid = $trow['ebid'];
-				require "inc/ebid.inc";
-				echo "<td><a href='$url'>".t("N‰yt‰ tosite/liite")."</a></td></tr>";
-			}
-			else {
-				//	Onko kuva tietokannassa?
-				echo "<td valign='top'>";
-				$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-				$liiteres=mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($liiteres) > 0) {
-					while ($liiterow = mysql_fetch_array($liiteres)) {
-						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-					}
-				}
-				else {
-					echo t("Paperilasku");
-				}
-				echo "</td>";
-
-				echo "</tr>";
-			}
+			// tehd‰‰n lasku linkki
+			echo "<td>".ebid($trow['tunnus']) ."</td></tr>";
 
 		}
 		echo "<tr>";
@@ -679,7 +643,13 @@
 		else {
 			echo "<td></td>";
 		}
-
+		
+		echo "<td><form method='get' action='liitetiedostot.php?liitos=lasku&id=$tunnus'>
+			<input type='hidden' name='id' value='$tunnus'/>
+			<input type='hidden' name='liitos' value='lasku'/>
+			<input type='submit' value='" . t('N‰yt‰ liitteet')."'/>
+			</form></td>";
+		
 		// N‰ytet‰‰n nappi vain jos tieoja on
 		if ($trow['vienti'] != '' and $trow['vienti'] != 'A' and $trow['vienti'] != 'D' and $trow['vienti'] != 'G') {
 			if ($tee2 != 1) {

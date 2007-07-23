@@ -1641,4 +1641,67 @@ if (!function_exists("kalenteritapahtuma")) {
 	}
 }
 
+if (! function_exists('ebid')) {
+	function ebid($lasku_tunnus, $url_only = false) {
+		global $kukarow, $yhtiorow;
+		
+		$query = "SELECT * from lasku where tunnus=" . (int) $lasku_tunnus . " and yhtio='{$kukarow['yhtio']}'";
+		$res = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($res);
+		
+		if ($laskurow['ebid'] != "") {
+			
+			if (substr($laskurow['ebid'], 0, 1) == '/') {
+				// otetaan palvelin muuttujasta mahdolliset turhat alut pois
+				$alut    = array("http://","https://");
+				$apunimi = str_replace($alut, "", $yhtiorow['lasku_polku_http']);
+				
+				if ($_SERVER["HTTPS"] == "on") {
+					$url = "https://$apunimi".$ebid;
+				}
+				else {
+					$url = "http://$apunimi".$ebid;
+				}
+				
+				return "<a href='$url'>". t('Näytä lasku')."</a>";
+			}
+			
+			$ebid = $laskurow['ebid'];
+			
+			$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
+			$salasana		   = $yhtiorow['verkkosala_vas'];
+			
+			$timestamppi=gmdate("YmdHis")."Z";
+			
+			$urlhead = "http://www.verkkolasku.net";
+			$urlmain = "/view/ebs-2.0/$verkkolaskutunnus/visual?DIGEST-ALG=MD5&DIGEST-KEY-VERSION=1&EBID=$ebid&TIMESTAMP=$timestamppi&VERSION=ebs-2.0";
+			
+			$digest	 = md5($urlmain . "&" . $salasana);
+			$url	 = $urlhead.$urlmain."&DIGEST=$digest";
+			
+			if ($url_only) {
+				return $url;
+			}
+			
+			return "<a href='$url'>". t('Näytä lasku')."</a>";
+		}
+		else {
+			
+			$query = "SELECT tunnus from liitetiedostot where liitostunnus='{$laskurow['tunnus']}' and liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
+			$res = mysql_query($query) or pupe_error($query);
+			
+			$out = '';
+			while ($row = mysql_fetch_array($res)) {
+				$out .= "<a $target href='view.php?id={$row['tunnus']}'>". t('Näytä lasku') ."</a> ";
+			}
+			
+			if ($out != '') {
+				return $out;
+			}
+			
+			return t('Paperilasku');
+		}
+	}
+}
+
 ?>

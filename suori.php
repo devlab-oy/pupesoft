@@ -293,30 +293,8 @@
 
 		for ($i=0; $i<8; $i++) {
 			if (mysql_field_name($result,$i) == 'ebid') {
-				if (strlen($laskurow[$i]) > 0) {
-					$ebid = $laskurow[$i];
-					require "inc/ebid.inc";
-					echo "<td><a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
-				}
-				else {
-					//	Onko kuva tietokannassa?
-					echo "<td valign='top'>";
-					
-					$query = "	SELECT * 
-								FROM liitetiedostot 
-								WHERE yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-					$liiteres = mysql_query($query) or pupe_error($query);
-					
-					if (mysql_num_rows($liiteres) > 0) {
-						while($liiterow = mysql_fetch_array($liiteres)) {
-							echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-						}
-					}	
-					else {
-						echo t("Paperilasku");
-					}
-					echo "</td>";
-				}
+				// tehd‰‰n lasku linkki
+				echo "<td>".ebid($laskurow['tunnus']) ."</td>";
 			}
 			else {
 				echo "<td>$laskurow[$i]</td>";
@@ -427,29 +405,8 @@
 			echo "<td valign='top' align='right'>$trow[kotisumma]</td>";
 			echo "<td valign='top' align='right'>$trow[summa]</td>";
 		
-			if (strlen($trow["ebid"]) > 0) {
-				$ebid = $trow["ebid"];
-				require "inc/ebid.inc";
-				
-				echo "<td valign='top'><a href='$url'>".t("N‰yt‰ lasku")."</a></td>";
-			}
-			else {
-				//	Onko kuva tietokannassa?
-				echo "<td valign='top'>";
-				
-				$query = "select * FROM liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='{$laskurow["tunnus"]}'";
-				$liiteres = mysql_query($query) or pupe_error($query);
-				
-				if (mysql_num_rows($liiteres)>0) {
-					while($liiterow = mysql_fetch_array($liiteres)) {
-						echo "<a href='view.php?id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a><br>";
-					}
-				}
-				else {
-					echo t("Paperilasku");
-				}
-				echo "</td>";		
-			}
+			// tehd‰‰n lasku linkki
+			echo "<td>".ebid($trow['tunnus']) ."</td>";
 
 			echo "<td><form action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='V'>

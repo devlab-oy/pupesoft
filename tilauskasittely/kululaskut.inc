@@ -396,7 +396,7 @@ if ($tee == "haku") {
 					<td valign='top'>$llrow[viite]</td>";
 					
 			// tehd‰‰n lasku linkki
-			echo "<td>".ebid($laskurow['tunnus']) ."</td>";
+			echo "<td>".ebid($llrow['tunnus']) ."</td>";
 					
 			echo "<td valign='top'>$llrow[vienti]</td>";
 

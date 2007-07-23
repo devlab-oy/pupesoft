@@ -1643,7 +1643,7 @@ if (!function_exists("kalenteritapahtuma")) {
 
 if (! function_exists('ebid')) {
 	function ebid($lasku_tunnus, $url_only = false) {
-		global $kukarow, $yhtiorow;
+		global $kukarow, $yhtiorow, $palvelin2;
 
 		$query = "SELECT * from lasku where tunnus=" . (int) $lasku_tunnus . " and yhtio='{$kukarow['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);
@@ -1652,16 +1652,7 @@ if (! function_exists('ebid')) {
 		if ($laskurow['ebid'] != "") {
 
 			if (substr($laskurow['ebid'], 0, 1) == '/') {
-				// otetaan palvelin muuttujasta mahdolliset turhat alut pois
-				$alut    = array("http://","https://");
-				$apunimi = str_replace($alut, "", $yhtiorow['lasku_polku_http']);
-
-				if ($_SERVER["HTTPS"] == "on") {
-					$url = "https://$apunimi".$laskurow["ebid"];
-				}
-				else {
-					$url = "http://$apunimi".$laskurow["ebid"];
-				}
+				$url = $palvelin2.$laskurow["ebid"];
 
 				if ($url_only) {
 					return $url;
@@ -1696,7 +1687,7 @@ if (! function_exists('ebid')) {
 
 			$out = '';
 			while ($row = mysql_fetch_array($res)) {
-				$out .= "<a $target href='view.php?id={$row['tunnus']}'>". t('Näytä lasku') ."</a> ";
+				$out .= "<a $target href='".$palvelin2."view.php?id={$row['tunnus']}'>". t('Näytä lasku') ."</a> ";
 			}
 
 			if ($out != '') {

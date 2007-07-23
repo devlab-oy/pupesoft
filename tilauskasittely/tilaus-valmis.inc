@@ -536,6 +536,7 @@ else {
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
 						and tilausrivi.hyllyalue != ''
+						and varattu > 0
 						ORDER BY sorttauskentta";
 			$result = mysql_query($query) or pupe_error($query);
 

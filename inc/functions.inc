@@ -1663,6 +1663,10 @@ if (! function_exists('ebid')) {
 					$url = "http://$apunimi".$laskurow["ebid"];
 				}
 
+				if ($url_only) {
+					return $url;
+				}
+
 				return "<a href='$url'>". t('Näytä lasku')."</a>";
 			}
 

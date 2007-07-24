@@ -10,7 +10,7 @@
 		}
 	}
 
-	require("inc/parametrit.inc");
+	require("../inc/parametrit.inc");
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
 		echo "$file";

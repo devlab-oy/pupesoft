@@ -153,7 +153,7 @@
 			$and .= " and tuoteno = '$chtuoteno'";
 		}
 		$aquery = "	SELECT ytunnus
-					FROM asiakasalennus
+					FROM asiakashinta
 					WHERE yhtio='$kukarow[yhtio]'$and and alkupvm = '$chalkupvm' and loppupvm = '$chloppupvm'";
 		$dsresult = mysql_query($aquery) or pupe_error($aquery);
 		

@@ -34,7 +34,7 @@ if (!function_exists('pupevoice_otsik')) {
 		if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
 
 			// haetaan toimipaikan tiedot
-			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
+			$alhqur = "select * from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {

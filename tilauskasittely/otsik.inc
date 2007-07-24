@@ -90,6 +90,24 @@
 
 		unset($jatka);
 	}
+	
+	//	Tarkastetaan toimitustapa saadaanko laittaa jälkivaatimuksia
+	if (isset($jatka)) {
+		
+		$query = "SELECT tunnus FROM maksuehto WHERE yhtio ='{$kukarow["yhtio"]}' and tunnus = '$maksuehto' and jv != ''";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result) > 0) {
+			$query = "SELECT tunnus FROM toimitustapa WHERE yhtio ='{$kukarow["yhtio"]}' and selite = '$toimitustapa' and jvkielto != ''";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result) > 0) {
+				echo "<font class='error'>".t("VIRHE: Toimitustavalle on jälkivaatimuskielto").":</font><br>";
+				$tee	= "OTSIK";
+				$tila 	= "";
+
+				unset($jatka);
+			}
+		}
+	}
 
 	//	Tarkastetaan käsinsyötetty viite
 	if (isset($jatka) and $kasinsyotetty_viite!="" and $yhtiorow["viitteen_kasinsyotto"]!="") {

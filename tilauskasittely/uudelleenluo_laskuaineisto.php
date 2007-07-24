@@ -125,10 +125,10 @@
 			if (!isset($kieli)) {
 				$kieli = "";
 			}
-			
+
 			//Timestamppi EDI-failiin alkuu ja loppuun
 			$timestamppi=gmdate("YmdHis");
-			
+
 			//Hetaan laskut jotka laitetaan aineistoon
 			$query = "	select *
 			            from lasku
@@ -137,12 +137,12 @@
 			            and alatila = 'X'
 			            and laskunro in ($laskunumerot)";
 			$res   = mysql_query($query) or pupe_error($query);
-			
+
 			$lkm = count(explode(',', $laskunumerot));
-			
+
 			echo "<br><font class='message'>".t("Syötit")." $lkm ".t("laskua").".</font><br>";
 			echo "<font class='message'>".t("Aineistoon lisätään")." ".mysql_num_rows($res)." ".t("laskua").".</font><br><br>";
-			
+
 			while ($lasrow = mysql_fetch_array($res)) {
 				// Haetaan maksuehdon tiedot
 				$query  = "	select * from maksuehto
@@ -174,9 +174,9 @@
 				else {
 					unset($frow);
 				}
-				
+
 				$pankkitiedot = array();
-				
+
 				//Laitetaan pankkiyhteystiedot kuntoon
 				if ($masrow["factoring"] != "") {
 					$pankkitiedot["pankkinimi1"]  =	$frow["pankkinimi1"];
@@ -191,7 +191,7 @@
 					$pankkitiedot["pankkitili3"]  =	"";
 					$pankkitiedot["pankkiiban3"]  =	"";
 					$pankkitiedot["pankkiswift3"] =	"";
-					
+
 				}
 				elseif ($masrow["pankkinimi1"] != "") {
 					$pankkitiedot["pankkinimi1"]  =	$masrow["pankkinimi1"];
@@ -221,7 +221,7 @@
 					$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
 					$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
 				}
-				
+
 
 				// tässä pohditaan laitetaanko verkkolaskuputkeen
 				if (($lasrow["vienti"] == "" or ($lasrow["vienti"] == "E" and $lasrow["chn"] == "020")) and $masrow["itsetulostus"] == "" and $lasrow["sisainen"] == "" and $masrow["kateinen"] == "" and abs($lasrow["summa"]) != 0) {
@@ -264,7 +264,7 @@
 						$asiakas_apu_row = array();
 					}
 
-					if ($asiakas_apu_row["kieli"] == "SE") {
+					if (strtoupper($asiakas_apu_row["kieli"]) == "SE") {
 						$laskun_kieli = "SE";
 					}
 					elseif ($kieli != "") {
@@ -280,34 +280,34 @@
 					if (trim($lasrow['sisviesti1']) != '') {
 						$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $lasrow['sisviesti1']);
 					}
-					
+
 					///* Jos tämä on valuuttalasku *///
 					if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 						$lasrow["kasumma"] 	= $lasrow["kasumma_valuutassa"];
 						$lasrow["summa"] 	= $lasrow["summa_valuutassa"];
 						$lasrow["arvo"]		= $lasrow["arvo_valuutassa"];
 					}
-					
+
 					// Ulkomaisen ytunnuksen korjaus
 					if (substr(trim(strtoupper($lasrow["ytunnus"])),0,2) != strtoupper($lasrow["maa"]) and trim(strtoupper($lasrow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
 						$lasrow["ytunnus"] = strtoupper($lasrow["maa"])."-".$lasrow["ytunnus"];
 					}
-					
+
 					$query = "	SELECT min(date_format(toimitettuaika, '%Y-%m-%d')) mint, max(date_format(toimitettuaika, '%Y-%m-%d')) maxt
-								FROM tilausrivi 
-								WHERE yhtio = '$kukarow[yhtio]' 
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
 								and uusiotunnus = '$lasrow[tunnus]'
 								and toimitettuaika != '0000-00-00'";
 					$toimaikares = mysql_query($query) or pupe_error($query);
 					$toimaikarow = mysql_fetch_array($toimaikares);
-					
+
 					if ($toimaikarow["mint"] == "0000-00-00") {
 						$toimaikarow["mint"] = date("Y-m-d");
 					}
 					if ($toimaikarow["maxt"] == "0000-00-00") {
 						$toimaikarow["maxt"] = date("Y-m-d");
 					}
-																	
+
 					//Kirjoitetaan failiin laskun otsikkotiedot
 					if ($lasrow["chn"] == "111") {
 						elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
@@ -322,7 +322,7 @@
 					// Tarvitaan rivien eri verokannat
 					$alvquery = "	SELECT distinct alv
 									FROM tilausrivi
-									WHERE yhtio = '$kukarow[yhtio]'  
+									WHERE yhtio = '$kukarow[yhtio]'
 									and uusiotunnus = '$lasrow[tunnus]'
 									and tyyppi	= 'L'
 									ORDER BY alv";
@@ -351,7 +351,7 @@
 						}
 						$aresult = mysql_query($aquery) or pupe_error($aquery);
 						$alvrow = mysql_fetch_array($aresult);
-						
+
 						// Kirjotetaan failiin arvierittelyt
 						if ($lasrow["chn"] == "111") {
 							elmaedi_alvierittely($tootedi, $alvrow);
@@ -363,7 +363,7 @@
 							pupevoice_alvierittely($tootxml, $alvrow);
 						}
 					}
-																							
+
 
 					//Kirjoitetaan otsikkojen lopputiedot
 					if ($lasrow["chn"] == "111") {
@@ -379,7 +379,7 @@
 					// Kirjoitetaan rivitietoja tilausriveiltä
 					$query = "	SELECT *, if(date_format(toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(toimitettuaika, '%Y-%m-%d')) toimitettuaika, $sorttauskentta
 								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' 
+								WHERE yhtio = '$kukarow[yhtio]'
 								and uusiotunnus = '$lasrow[tunnus]'
 								and kpl<>0
 								and tilausrivi.tyyppi = 'L'
@@ -390,12 +390,12 @@
 
 					while ($tilrow = mysql_fetch_array($tilres)) {
 
-						if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {								
-							$query = "	SELECT selite 
-										FROM tuotteen_avainsanat 
-										WHERE yhtio = '$kukarow[yhtio]' 
-										and laji 	= 'nimitys_".strtolower($laskun_kieli)."' 
-										and tuoteno = '$tilrow[tuoteno]' 
+						if (strtolower($laskun_kieli) != strtolower($yhtiorow['kieli'])) {
+							$query = "	SELECT selite
+										FROM tuotteen_avainsanat
+										WHERE yhtio = '$kukarow[yhtio]'
+										and laji 	= 'nimitys_".strtolower($laskun_kieli)."'
+										and tuoteno = '$tilrow[tuoteno]'
 										and selite != ''
 										LIMIT 1";
 							$nimresult = mysql_query($query) or pupe_error($query);
@@ -405,13 +405,13 @@
 								$tilrow['nimitys'] = $nimrow['selite'];
 							}
 						}
-						
+
 						//Käytetyn tavaran myynti
-						if ($tilrow["alv"] >= 500) { 
+						if ($tilrow["alv"] >= 500) {
 							$tilrow["alv"] = 0;
 							$tilrow["kommentti"] .= "|Ei sisällä vähennettävää veroa.";
 						}
-						
+
 						//Hetaan sarjanumeron tiedot
 						if ($tilrow["kpl"] > 0){
 							$sarjanutunnus = "myyntirivitunnus";
@@ -434,26 +434,25 @@
 						while($sarjarow = mysql_fetch_array($sarjares)) {
 							$tilrow["kommentti"] .= "# $sarjarow[sarjanumero]|";
 						}
-						
+
 						if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-							// Yksikköhinta
-							$tilrow["hinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"]), 2);
-							
 							// Rivihinta
 							if ($yhtiorow["alv_kasittely"] == '') {
 								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100) / (1+$tilrow["alv"]/100), 2);
 							}
 							else {
 								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100), 2);
-							}								
+							}
+							// Yksikköhinta
+							$tilrow["hinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"]), 2);
 						}
-													
+
 						$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);
 						$totalvat  = round($tilrow['rivihinta']+$vatamount, 2);
 
 						$tilrow['kommentti'] 	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#]", " ", $tilrow['kommentti']);
 						$tilrow['nimitys'] 		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#]", " ", $tilrow['nimitys']);
-						
+
 						if ($lasrow["chn"] == "111") {
 							elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 						}
@@ -587,7 +586,7 @@
 			echo "<input type='submit' value='Luo aineisto'>";
 			echo "</form>";
 		}
-		
+
 		// poistetaan lukot
 		$query = "UNLOCK TABLES";
 		$locre = mysql_query($query) or pupe_error($query);

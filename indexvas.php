@@ -9,7 +9,6 @@ else {
 	require ("functions.inc");
 }
 
-
 if ($yhtiorow["logo"] != '' and file($yhtiorow["logo"]) !== FALSE) {
 
 	$image = getimagesize($yhtiorow["logo"]);
@@ -47,9 +46,9 @@ else {
 
 // mitä sovelluksia käyttäjä saa käyttää
 $query = "	SELECT distinct sovellus
-			FROM oikeu
+			FROM oikeu use index (oikeudet_index)
 			WHERE yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' $extralisa
-			order by sovellus";
+			ORDER BY sovellus";
 $result = mysql_query($query) or pupe_error($query);
 
 // löytyi usea sovellus
@@ -57,7 +56,13 @@ if (mysql_num_rows($result) > 1) {
 
 	// jos ollaan tulossa loginista, valitaan oletussovellus...
 	if (isset($go) and $go != "") {
-		$query = "select sovellus from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi='$go' order by sovellus, jarjestys limit 1";
+		$query = "	SELECT sovellus use index (oikeudet_index) 
+					FROM oikeu
+					WHERE yhtio = '$kukarow[yhtio]' and 
+					kuka = '$kukarow[kuka]' and 
+					nimi = '$go' 
+					ORDER BY sovellus, jarjestys 
+					LIMIT 1";
 		$gores = mysql_query($query) or pupe_error($query);
 		$gorow = mysql_fetch_array($gores);
 		$sovellus = $gorow["sovellus"];
@@ -102,7 +107,7 @@ echo "<tr><td class='back'><a class='menu' href='logout.php' target='main'>".t("
 // Mitä käyttäjä saa tehdä?
 // Valitaan ensin vain ylätaso jarjestys2='0'
 $query = "	SELECT nimi, jarjestys
-			FROM oikeu
+			FROM oikeu use index (sovellus_index)
 			WHERE yhtio		= '$kukarow[yhtio]' 
 			and kuka		= '$kukarow[kuka]' 
 			and sovellus	= '$sovellus' 
@@ -115,7 +120,7 @@ while ($orow = mysql_fetch_array($result)) {
 
 	// tutkitaan onko meillä alamenuja
 	$query = "SELECT nimi, nimitys, alanimi
-			FROM oikeu
+			FROM oikeu use index (sovellus_index)
 			WHERE yhtio		= '$kukarow[yhtio]' 
 			and kuka		= '$kukarow[kuka]' 
 			and sovellus	= '$sovellus' 

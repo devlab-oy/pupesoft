@@ -32,7 +32,7 @@ if ($tee == 'eposti') {
 	$sivu = 1;
 
 	function alku () {
-		global $yhtiorow, $firstpage, $pdf, $sivu, $rectparam, $norm, $pieni, $ytunnus, $kukarow, $kala, $tid, $otsikkotid;
+		global $yhtiorow, $firstpage, $pdf, $sivu, $rectparam, $norm, $norm_bold, $pieni, $ytunnus, $kukarow, $kala, $tid, $otsikkotid;
 		
 		if(!isset($pdf)) {
 			//PDF parametrit
@@ -67,19 +67,18 @@ if ($tee == 'eposti') {
 			$tid=$pdf->template->create();
 			$pdf->template->rectangle($tid, 20, 20,  0, 580, $rectparam);
 			$pdf->template->text($tid, 30,  5, $yhtiorow["nimi"], $pieni);
-			$pdf->template->text($tid, 120, 5, t("Asiakkaan")." ($ytunnus) $assrow[nimi] $assrow[nimitark] ".t("alennustaulukko"));
+			$pdf->template->text($tid, 170, 5, "$assrow[nimi] $assrow[nimitark] ($ytunnus) ".t("alennustaulukko"));
 			$pdf->template->text($tid, 500, 5, t("Sivu").": $sivu", $pieni);
 			$pdf->template->place($tid, $firstpage, 0, 800);
 			
 			//	Tehd‰‰n otsikkoheader
-			$otsikkotid=$pdf->template->create();			
-			$pdf->template->text($otsikkotid, 30,  0, t("Osasto"), $norm_bold);
-			$pdf->template->text($otsikkotid, 130, 0, t("Tuoteryh"), $norm_bold);
-			$pdf->template->text($otsikkotid, 250, 0, t("Selite"), $norm_bold);
-			$pdf->template->text($otsikkotid, 420, 0, t("Aleryhm‰"), $norm_bold);
-			$pdf->template->text($otsikkotid, 520, 0, t("Alennus"), $norm_bold);
-			$pdf->template->place($otsikkotid, $firstpage, 0, 675, $norm_bold);
-			$kala = 660;			
+			$otsikkotid=$pdf->template->create();
+			$pdf->template->text($otsikkotid, 30,  20, t("Osasto"), $norm_bold);						
+			$pdf->template->text($otsikkotid, 30,   0, t("Tuoteryhm‰")."/".t("Tuotenumero"), $norm_bold);
+			$pdf->template->text($otsikkotid, 330,  0, t("Aleryhm‰"), $norm_bold);
+			$pdf->template->text($otsikkotid, 520,  0, t("Alennus"), $norm_bold);
+			$pdf->template->place($otsikkotid, $firstpage, 0, 665, $norm_bold);
+			$kala = 650;			
 			
 			//	Asiakastiedot
 			//$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
@@ -95,24 +94,38 @@ if ($tee == 'eposti') {
 			//	Liitet‰‰n vaan valmiit templatet uudelle sivulle
 			$firstpage = $pdf->new_page("a4");
 			$pdf->template->place($tid, $firstpage, 0, 800);
-			$pdf->template->place($otsikkotid, $firstpage, 0, 770);
+			$pdf->template->place($otsikkotid, $firstpage, 0, 760);
 		}
 	}
 
-	function rivi ($firstpage, $osasto, $try, $nimi, $ryhma, $ale) {
-		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $pieni;
+	function rivi ($firstpage, $osasto, $try, $tuote, $ryhma, $ale) {
+		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $norm_bold, $pieni;
+		
+		static $edosasto;
 
 		if (($sivu == 1 and $lask == 43) or ($sivu > 1 and $lask == 50)) {
 			$sivu++;
 			$firstpage = alku();
-			$kala = 770;
+			$kala = 760;
 			$lask = 1;
 		}
-
-		$pdf->draw_text(30,  $kala, $osasto, 									$firstpage, $norm);
-		$pdf->draw_text(130, $kala, substr($try,0,16), 										$firstpage, $norm);
-		$pdf->draw_text(250, $kala, $nimi, 										$firstpage, $norm);
-		$pdf->draw_text(410, $kala, sprintf('%10s',sprintf('%.2d',$ryhma)), 	$firstpage, $norm);
+		
+		//	Vaihdetaan osastoa
+		if($osasto != $edosasto) {
+			$kala = $kala - 15;						
+			$pdf->draw_text(30,  $kala, $osasto, 									$firstpage, $norm_bold);
+			$kala = $kala - 25;			
+		}
+		
+		$edosasto = $osasto;
+		
+		if($tuote == " - ") {
+			$pdf->draw_text(30,  $kala, $try, 										$firstpage, $norm);
+		}
+		else {
+			$pdf->draw_text(60, $kala, $tuote, 									$firstpage, $norm);
+		}
+		$pdf->draw_text(310, $kala, sprintf('%10s',$ryhma), 	$firstpage, $norm);
 		$pdf->draw_text(490, $kala, sprintf('%10s',sprintf('%.2d',$ale))."%", 	$firstpage, $norm);
 
 
@@ -347,7 +360,7 @@ if ($ytunnus!='') {
 						from avainsana
 						".avain('join','TRY_')."
 						where avainsana.yhtio	= '$kukarow[yhtio]'
-						and avainsana.laji	= 'try'
+						and avainsana.laji	= 'TRY'
 						and avainsana.selite	= '$sumrow[try]'";
 			$avainresult = mysql_query($query) or pupe_error($query);
 			$tryrow = mysql_fetch_array($avainresult);
@@ -356,7 +369,7 @@ if ($ytunnus!='') {
 						from avainsana
 						".avain('join','OSASTO_')."
 						where avainsana.yhtio	= '$kukarow[yhtio]'
-						and avainsana.laji	= 'osasto'
+						and avainsana.laji	= 'OSASTO'
 						and avainsana.selite	= '$sumrow[osasto]'";
 			$avainresult = mysql_query($query) or pupe_error($query);
 			$osastorow = mysql_fetch_array($avainresult);
@@ -432,485 +445,469 @@ if ($ytunnus!='') {
 			$ytunnus 	= $asiakas;
 		}
 	}
-
+	
+	$yhdistetty_array = array();
 	if($rajaus == "" or $rajaus == "ALENNUKSET") {
 		echo "<br><font class='message'>".t("Asiakkaan alennusryhm‰t, alennustaulukko ja alennushinnat")."</font><hr>";
 		echo "<br><a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&lopetus=$lopetus'>".t("Tulosta alennustaulukko")."</a><br><br>";
-		if ($asale!='' or $yhdistetty!='') {
-			// tehd‰‰n asiakkaan alennustaulukot
-			$query = "select *, concat_ws(' - ', ryhma, perusalennus.selite) ryhma from perusalennus where yhtio='$kukarow[yhtio]' order by ryhma";
-			$result = mysql_query($query) or pupe_error($query);
-
-			$asale  = "<table><caption><font class='message'>".t("Aletaulukko")."</font></caption>";
-			$asale .= "<tr><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Prosentti")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th><th>".t("Tyyppi")."</th></tr>";
-
-			if(isset($workbook) and $yhdistetty=="") {
-				$worksheet->write($excelrivi, 0, "Ytunnus", $format_bold);
-				$worksheet->write($excelrivi, 1, "AS-Ryhm‰", $format_bold);
-				$worksheet->write($excelrivi, 2, "Tuoteno", $format_bold);
-				$worksheet->write($excelrivi, 3, "Aleryhm‰", $format_bold);				
-				$worksheet->write($excelrivi, 4, "Prosentti", $format_bold);
-				$worksheet->write($excelrivi, 5, "Alkupvm", $format_bold);
-				$worksheet->write($excelrivi, 6, "Loppupvm", $format_bold);
-				$worksheet->write($excelrivi, 7, "Tyyppi", $format_bold);
-				$excelrivi++;
+		
+		if ($asale!='' or $aletaulu!='' or $yhdistetty != "" or $tee == "eposti") {
+			
+			$taulu  = "";
+			
+			if($aletaulu != "" or $tee == "eposti") {
+				$tuotejoin = "	LEFT JOIN tuote ON tuote.yhtio=perusalennus.yhtio and tuote.aleryhma=perusalennus.ryhma and osasto != 0 and try != 0";
+				$tuotegroup = "GROUP BY try, osasto";
+				$tuotecols = ", osasto, try";
+				$order = "osasto, try, tuoteno, prio";
 			}
-
-			while ($alerow = mysql_fetch_array($result)) {
-
-				$mita   = "<font class='info'>".t("Perus")."</font>";
-				$ryhma = $alerow['ryhma'];
-				$ale   = $alerow['alennus'];
-				$showytunnus = 'PERUS';
-
-
-
-				if ($ale != 0.00) {
-					$asale .= "<tr class='aktiivi'>
-						<td><font class='info'>$showytunnus	<font></td>
-						<td><font class='info'>$ryhma	<font></td>
-						<td><font class='info'>$ale		<font></td>
-						<td><font class='info'>----------<font></td>
-						<td><font class='info'>----------<font></td>
-						<td><font class='info'>$mita	<font></td>
-						</tr>";
-				}
+			else {
+				$tuotejoin = "";
+				$tuotegroup = "";
+				$tuotecols = "";
+				$order = "alennusryhm‰ , prio , asiakasryhm‰";				
 			}
+			
+			$query = "
+						/*	Asiakasalennus ytunnuksella	tuoteno*/	
+						(							
+							SELECT '1' prio,
+								asiakasalennus.alennus,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi, 
+								'' asiakasryhm‰,
+								'' asiakasryhm‰_nimi,
+								asiakasalennus.ryhma alennusryhm‰,
+								perusalennus.selite alennusryhm‰_nimi,
+								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'asiakasale' tyyppi $tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							LEFT JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno
+							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakas_ryhma='' and asiakasalennus.tuoteno!=''
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						)
+						UNION
+						/*	Asiakasalennus ytunnuksella	 ryhma*/	
+						(							
+							SELECT '2' prio,
+								asiakasalennus.alennus,
+								'' tuoteno, 
+								'' tuoteno_nimi,
+								'' asiakasryhm‰,
+								'' asiakasryhm‰_nimi,
+								asiakasalennus.ryhma alennusryhm‰,
+								perusalennus.selite alennusryhm‰_nimi,
+								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'asiakasale' tyyppi $tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakas_ryhma='' and asiakasalennus.tuoteno=''
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							$tuotegroup
+						)
+						UNION
 
-			$query = "	SELECT asiakasalennus.*, if(asiakasalennus.tuoteno!='',concat(asiakasalennus.tuoteno,' - ', tuote.nimitys), '') tuoteno, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm, concat_ws(' - ', asiakas_ryhma, avainsana.selitetark) asiakas_ryhma, concat_ws(' - ', asiakasalennus.ryhma, perusalennus.selite) ryhma
-						FROM asiakasalennus
-						LEFT JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno
-						LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
-						LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'						
-						WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or (asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '')) 
-						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-						ORDER BY asiakas_ryhma, ytunnus, asiakasalennus.ryhma, asiakasalennus.tuoteno";
+						/*	Asiakasalennus Ryhm‰ll‰	 tuote */
+						(
+
+							SELECT '3' prio,
+								asiakasalennus.alennus,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhm‰,
+								avainsana.selitetark asiakasryhm‰_nimi,
+								asiakasalennus.ryhma alennusryhm‰,
+								perusalennus.selite alennusryhm‰_nimi,
+								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'asiakasryhm‰ale' tyyppi $tuotecols
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							LEFT JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno
+							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '' and ytunnus='' and asiakasalennus.tuoteno!=''
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						)
+						UNION
+						/*	Asiakasalennus Ryhm‰ll‰	ryhma */
+						(
+
+							SELECT '4' prio,
+								asiakasalennus.alennus,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								asiakas_ryhma asiakasryhm‰,
+								avainsana.selitetark asiakasryhm‰_nimi,
+								asiakasalennus.ryhma alennusryhm‰,
+								perusalennus.selite alennusryhm‰_nimi,
+								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if(loppupvm='0000-00-00','',loppupvm) loppupvm,
+								'asiakasryhm‰ale' tyyppi $tuotecols			
+							FROM asiakasalennus
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							$tuotejoin
+							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '' and ytunnus='' and asiakasalennus.tuoteno=''
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+							$tuotegroup
+						)
+							UNION
+						/*	Perusalennus	*/
+						(	
+							SELECT '5' prio,
+								alennus,
+								'' tuoteno,
+								'' tuoteno_nimi,
+								'' asiakasryhm‰,
+								'' asiakasryhm‰_nimi,
+								ryhma alennusryhm‰,
+								perusalennus.selite alennusryhm‰_nimi,
+								'' alkupvm,
+								'' loppupvm,
+								'perusale' tyyppi $tuotecols
+							FROM perusalennus
+							$tuotejoin
+							WHERE perusalennus.yhtio='{$kukarow["yhtio"]}' and alennus>0
+							$tuotegroup
+						)	
+						ORDER BY $order";
 			$asres = mysql_query($query) or pupe_error($query);
 
-			while ($asrow = mysql_fetch_array($asres)) {
-				$mita  = t("Asiakas");
-
-				if ($asrow['asiakas_ryhma'] != '') {
-					$showytunnus = "(RY) ".$asrow['asiakas_ryhma'];
+			if($aletaulu != "" or $tee == "eposti") {
+				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
+				if($kukarow["extranet"] != "") {
+					$otsik = array("osasto", "try", "alennusryhm‰", "tuoteno", "alennus", "alkupvm", "loppuvm");
+					$otsik_spread = array("osasto", "try", "alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppuvm");					
 				}
 				else {
-					$showytunnus = $asrow['ytunnus'];
-				}
-
-				if ($asrow['ryhma'] != '') {
-					$showryhma = "(RY) ".$asrow['ryhma'];
-					$asrow['tuoteno']='';
-				}
-				else {
-					$showryhma = $asrow['tuoteno'];
-				}
-
-				$ryhma = $asrow['ryhma'];
-				$ale   = $asrow['alennus'];
-				
-				if($yhdistetty=='') {
-					$asale .= "<tr class='aktiivi'>
-						<td><font class='info'>$showytunnus	<font></td>
-						<td><font class='info'>$showryhma	<font></td>
-						<td><font class='info'>$ale		<font></td>
-						<td><font class='info'>$asrow[alkupvm]<font></td>
-						<td><font class='info'>$asrow[loppupvm]<font></td>
-						<td><font class='info'>$mita<font></td>
-						</tr>";
-						
-					if(isset($workbook) and $yhdistetty=="") {
-						$worksheet->write($excelrivi, 0, $asrow['asiakas_ryhma']);
-						$worksheet->write($excelrivi, 1, $asrow['ytunnus']);
-						$worksheet->write($excelrivi, 2, $asrow['tuoteno']);
-						$worksheet->write($excelrivi, 3, $asrow['ryhma']);				
-						$worksheet->write($excelrivi, 4, $ale/100, $format_percent);
-						$worksheet->write($excelrivi, 5, $asrow["alkupvm"], $format_date);
-						$worksheet->write($excelrivi, 6, $asrow["loppupvm"], $format_date);
-						$worksheet->write($excelrivi, 7, $mita);
-						$excelrivi++;
-					}						
-				}
-				else {
-					unset($dadaArray);					
-					$dadaArray["ytunnus"]		= $asrow['ytunnus'];
-					$dadaArray["asiakas_ryhma"]	= $asrow['asiakas_ryhma'];					
-					$dadaArray["ryhma"]			= $asrow['ryhma'];
-					$dadaArray["tuoteno"]		= $asrow['tuoteno'];
-					$dadaArray["ale"]			= $ale;
-					$dadaArray["alkupvm"]		= $asrow["alkupvm"];
-					$dadaArray["loppupvm"]		= $asrow["loppupvm"];
-					$dadaArray["mita"]			= $mita;
-					$yhdistetty_array[]	= $dadaArray;
-				}
-
-				if ($tee == 'eposti') {
-					rivi($firstpage);
+					$otsik = array("osasto", "try", "alennusryhm‰",  "tuoteno", "asiakasryhm‰", "alennus", "alkupvm", "loppuvm", "tyyppi");
+					$otsik_spread = array("osasto", "try", "alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhm‰",  "asiakasryhm‰_nimi", "alennus", "alkupvm", "loppuvm");
 				}
 			}
-			
-			if($yhdistetty=='') {
-				$asale .= "</table>";
+			elseif($yhdistetty != "") {
+				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
+				if($kukarow["extranet"] != "") {
+					$otsik = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "osasto", "try", "alennus", "alkupvm", "loppuvm");					
+					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "osasto", "try", "alennus", "alkupvm", "loppuvm");					
+				}
+				else {
+					$otsik = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhm‰",  "asiakasryhm‰_nimi", "osasto", "try", "alennus", "alkupvm", "loppuvm");
+					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhm‰",  "asiakasryhm‰_nimi", "osasto", "try", "alennus", "alkupvm", "loppuvm");
+				}
 			}
 			else {
-				$asale = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ aletaulukko")."</a>";				
-			}
-		}
-		else {
-			$asale = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ aletaulukko")."</a>";
-		}
-
-		if ($ashin!='' or $yhdistetty!='') {
-			// haetaan asiakas hintoaja
-			$ashin  = "<table><caption><font class='message'>".t("Asiakashinnat")."</font></caption>";
-			$ashin .= "<tr><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Hinta")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th></tr>";
-
-			if(isset($workbook) and $yhdistetty=="") {
-				$worksheet->write($excelrivi, 0, "Ytunnus", $format_bold);
-				$worksheet->write($excelrivi, 1, "AS-Ryhm‰", $format_bold);
-				$worksheet->write($excelrivi, 2, "Tuoteno", $format_bold);
-				$worksheet->write($excelrivi, 3, "Aleryhm‰", $format_bold);				
-				$worksheet->write($excelrivi, 4, "Hinta", $format_bold);
-				$worksheet->write($excelrivi, 5, "Alkupvm", $format_bold);
-				$worksheet->write($excelrivi, 6, "Loppupvm", $format_bold);
-				$excelrivi++;
-			}						
-
-			$query = "	SELECT asiakashinta.*, concat_ws(' - ', asiakas_ryhma, avainsana.selitetark) asiakas_ryhma, if(asiakashinta.tuoteno!='', concat(asiakashinta.tuoteno,' - ',tuote.nimitys), '') tuoteno, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm, concat_ws(' - ', asiakashinta.ryhma, perusalennus.selite) ryhma
-						FROM asiakashinta
-						LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
-						LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
-						LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
-						WHERE asiakashinta.yhtio='$kukarow[yhtio]' and (ytunnus='$ytunnus' or (asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!=''))
-						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-						ORDER BY asiakas_ryhma, ytunnus, asiakashinta.ryhma, asiakashinta.tuoteno";
-			$asres = mysql_query($query) or pupe_error($query);
-
-			while ($asrow = mysql_fetch_array($asres)) {
-
-				if ($asrow['asiakas_ryhma'] != '') {
-					$showytunnus = "(RY) ".$asrow['asiakas_ryhma'];
+				$ulos  = "<table><caption><font class='message'>".t("Aletaulukko")."</font></caption>";
+				if($kukarow["extranet"] != "") {
+					$otsik = array("alennusryhm‰", "tuoteno", "alennus", "alkupvm", "loppuvm");
+					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppuvm");
 				}
 				else {
-					$showytunnus = $asrow['ytunnus'];
-				}
-
-				if ($asrow['ryhma'] != '') {
-					$showryhma = "(RY) ".$asrow['ryhma'];
-					$asrow['tuoteno']='';					
-				}
-				else {
-					$showryhma = $asrow['tuoteno'];
-				}
-
-				$ryhma = $asrow['ryhma'];
-				$hinta   = $asrow['hinta'];
-
-				if($yhdistetty=='') {
-					$ashin .= "<tr class='aktiivi'>
-						<td><font class='info'>$showytunnus	<font></td>
-						<td><font class='info'>$showryhma	<font></td>
-						<td><font class='info'>$hinta		<font></td>
-						<td><font class='info'>$asrow[alkupvm]<font></td>
-						<td><font class='info'>$asrow[loppupvm]<font></td>
-						</tr>";
-						
-					if(isset($workbook) and $yhdistetty=="") {
-						$worksheet->write($excelrivi, 0, $asrow['ytunnus']);
-						$worksheet->write($excelrivi, 1, $asrow['asiakas_ryhma']);
-						$worksheet->write($excelrivi, 2, $asrow['tuoteno']);
-						$worksheet->write($excelrivi, 3, $asrow['ryhma']);				
-						$worksheet->write($excelrivi, 4, $hinta, $format_curr);
-						$worksheet->write($excelrivi, 5, $asrow["alkupvm"], $format_date);
-						$worksheet->write($excelrivi, 6, $asrow["loppupvm"], $format_date);
-						$excelrivi++;
-					}												
-				}
-				else {
-					unset($dadaArray);
-					$dadaArray["ytunnus"]			= $asrow['ytunnus'];
-					$dadaArray["asiakas_ryhma"]		= $asrow['asiakas_ryhma'];
-					$dadaArray["ryhma"]				= $asrow['ryhma'];
-					$dadaArray["tuoteno"]			= $asrow['tuoteno'];					
-					$dadaArray["hinta"]				= $hinta;
-					$dadaArray["alkupvm"]			= $asrow["alkupvm"];
-					$dadaArray["loppupvm"]			= $asrow["loppupvm"];
-					$yhdistetty_array[] = $dadaArray;
+					$otsik = array("alennusryhm‰",  "tuoteno", "asiakasryhm‰", "alennus", "alkupvm", "loppuvm", "tyyppi");
+					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "asiakasryhm‰", "alennus", "alkupvm", "loppuvm");
 				}
 			}
 			
-			if($yhdistetty=='') {
-				$ashin .= "</table>";
-			}
-			else {
-				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&lopetus=$lopetus'>".t("N‰yt‰ asiakashinnat")."</a>";
-			}
-		}
-		else {
-			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&lopetus=$lopetus'>".t("N‰yt‰ asiakashinnat")."</a>";
-		}
-
-		if ($aletaulu!='' or $tee == 'eposti' or $yhdistetty!='') {
-			// tehd‰‰n asiakkaan alennustaulukko...
-			$aletaulu  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
-			$aletaulu .= "<tr><th>".t("Os")."</th><th>".t("Osasto")."</th><th>".t("Tryno")."</th><th>".t("Tuoteryhm‰")."</th><th>".t("Ytunnus")."/<br>".t("AS-Ryhm‰")."</th><th>".t("Tuoteno")."/<br>".t("Aleryhm‰")."</th><th>".t("Prosentti")."</th><th>".t("Alkupvm")."</th><th>".t("Loppupvm")."</th><th>".t("Tyyppi")."</th></tr>";
-			if(isset($workbook) and $yhdistetty=="") {
-				$worksheet->write($excelrivi, 0, "Os", $format_bold);
-				$worksheet->write($excelrivi, 1, "Osasto", $format_bold);
-				$worksheet->write($excelrivi, 2, "Tryno", $format_bold);
-				$worksheet->write($excelrivi, 3, "Tuoteryhm‰", $format_bold);				
-				$worksheet->write($excelrivi, 4, "Ytunnus", $format_bold);
-				$worksheet->write($excelrivi, 5, "AS-Ryhm‰", $format_bold);
-				$worksheet->write($excelrivi, 6, "Tuoteno", $format_bold);
-				$worksheet->write($excelrivi, 7, "Aleryhm‰", $format_bold);
-				$worksheet->write($excelrivi, 8, "Prosentti", $format_bold);
-				$worksheet->write($excelrivi, 9, "Alkupvm", $format_bold);
-				$worksheet->write($excelrivi, 10, "Loppupvm", $format_bold);
-				$worksheet->write($excelrivi, 11, "Tyyppi", $format_bold);												
-				$excelrivi++;
-			}						
-
-			$query = "	(select osasto, try, aleryhma, asiakasalennus.tuoteno, ryhma, ytunnus, asiakas_ryhma, alennus, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm, tuote.nimitys
-						from asiakasalennus, tuote
-						where asiakasalennus.yhtio = tuote.yhtio
-						and asiakasalennus.yhtio='$kukarow[yhtio]'
-						and asiakasalennus.ytunnus = '$ytunnus'
-						and if(asiakasalennus.tuoteno != '', asiakasalennus.tuoteno = tuote.tuoteno, asiakasalennus.ryhma = tuote.aleryhma)
-						and status in ('', 'A')
-						and osasto != 0
-						and try != 0
-						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-						group by 1,2,3,4,5,6,7,8,9,10)
-						UNION
-						(select osasto, try, aleryhma, asiakasalennus.tuoteno, ryhma, ytunnus, asiakas_ryhma, alennus, if(alkupvm='0000-00-00','',alkupvm) alkupvm, if(loppupvm='0000-00-00','',loppupvm) loppupvm, tuote.nimitys
-						from asiakasalennus, tuote
-						where asiakasalennus.yhtio = tuote.yhtio
-						and asiakasalennus.yhtio='$kukarow[yhtio]'
-						and (asiakasalennus.asiakas_ryhma = '$asiakasrow[ryhma]' and asiakasalennus.asiakas_ryhma!='')
-						and if(asiakasalennus.tuoteno != '', asiakasalennus.tuoteno = tuote.tuoteno, asiakasalennus.ryhma = tuote.aleryhma)
-						and status in ('', 'A')
-						and osasto != 0
-						and try != 0
-						and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-						group by 1,2,3,4,5,6,7,8,9,10)
-						UNION
-						(select osasto, try, aleryhma, '1' as tuoteno, ryhma, '1' as ytunnus, '1' as asiakas_ryhma, alennus, 'perus' as alkupvm, '1' as loppupvm, tuote.nimitys
-						from perusalennus, tuote
-						where 
-						perusalennus.yhtio = tuote.yhtio
-						and perusalennus.ryhma = tuote.aleryhma
-						and perusalennus.yhtio = '$kukarow[yhtio]' 
-						and alennus > 0
-						and status in ('', 'A')
-						and osasto != 0
-						and try != 0
-						group by 1,2,3,4,5,6,7,8,9,10)
-						order by osasto+0, try+0, aleryhma";
-			$result = mysql_query($query) or pupe_error($query);
-
-			while ($alerow = mysql_fetch_array($result)) {
-				if ($alerow['alkupvm'] == 'perus') {
-					$mita   = "<font class='info'>".t("Perus")."</font>";
-					$alerow['ytunnus'] = '';
-					$ale    = $alerow['alennus'];
-					$alerow['alkupvm'] = '----------';
-					$alerow['loppupvm'] = '----------';
-
+			// Duusataan otsikot
+			if($yhdistetty == "") {
+				$ulos  .= "<tr>";
+				foreach($otsik as $o) {
+					$ulos .= "<th>".ucfirst($o)."</th>";
 				}
-				else {
-					$mita   = t("Asiakas");
-					$ale    = $alerow['alennus'];
-					if ($alerow['ytunnus'] == '') {
-						$query = "	select *
-									from avainsana
-									where yhtio	= '$kukarow[yhtio]'
-									and laji	= 'ASIAKASRYHMA'
-									and selite	= '{$alerow["asiakas_ryhma"]}'";
-						$asryres = mysql_query($query) or pupe_error($query);
-						$asryrow = mysql_fetch_array($asryres);
-						
-						if($asryrow["selitetark"] != "") {
-							$alerow['asiakas_ryhma'] .= " - ".$asryrow["selitetark"];
-						}						
-						
-						$showytunnus = "(RY) ".$alerow['asiakas_ryhma'];
-					}
-					else {
-						$showytunnus = $alerow['ytunnus'];
-					}
-					
-					if ($alerow['tuoteno'] == '') {
-						
-						$query = "select * from perusalennus where yhtio='$kukarow[yhtio]' and ryhma='{$alerow["aleryhma"]}'";
-						$ryres = mysql_query($query) or pupe_error($query);
-						$ryrow = mysql_fetch_array($ryres);
-						
-						if($ryrow["selite"] != "") {
-							$alerow['aleryhma'] .= " - ".$ryrow["selite"];
-						}
-						
-						$showaleryhma = "(RY) ".$alerow['aleryhma'];
-						$alerow['tuoteno'] = $alerow['nimitys'] = "";
-					}
-					else {
-						$alerow['tuoteno'] .= " - ".$alerow['nimitys'];
-					}
+				$ulos  .= "</tr>";				
+			}
+
+			if(isset($workbook) and $yhdistetty == "") {
+				foreach($otsik_spread as $key => $value) {
+					$worksheet->write($excelrivi, $key, ucfirst($value), $format_bold);
 				}
-
-				$query = "	select avainsana.selite, ".avain('select')."
-							from avainsana
-							".avain('join','TRY_')."
-							where avainsana.yhtio	= '$kukarow[yhtio]'
-							and avainsana.laji	= 'try'
-							and avainsana.selite	= '$alerow[try]'";
-				$tryre = mysql_query($query) or pupe_error($query);
-				$tryro = mysql_fetch_array($tryre);
-
-				$query = "	select avainsana.selite, ".avain('select')."
-							from avainsana
-							".avain('join','OSASTO_')."
-							where avainsana.yhtio	= '$kukarow[yhtio]'
-							and avainsana.laji	= 'osasto'
-							and avainsana.selite	= '$alerow[osasto]'";
-				$osare = mysql_query($query) or pupe_error($query);
-				$osaro = mysql_fetch_array($osare);
-
-				// n‰ytet‰‰n rivi vaan jos ale on olemassa ja se on erisuuri kuin nolla. Lis‰ksi tuoteryhm‰ll‰ on pakko olla nimi...
-				if ($ale != "" and $ale != 0.00) {
-					if($yhdistetty=='') {
-						$aletaulu .= "<tr class='aktiivi'>
-							<td><font class='info'>$alerow[osasto]<font></td>
-							<td><font class='info'>$osaro[selitetark]<font></td>
-							<td><font class='info'>$alerow[try]<font></td>
-							<td><font class='info'>$tryro[selitetark]<font></td>
-							<td><font class='info'>$showytunnus</td>
-							<td><font class='info'>$showaleryhma</td>
-							<td><font class='info'>$ale<font></td>
-							<td><font class='info'>$alerow[alkupvm]</td>
-							<td><font class='info'>$alerow[loppupvm]</td>
-							<td><font class='info'>$mita<font></td>
-							</tr>";
-
-						if(isset($workbook) and $yhdistetty=="") {							
-							$worksheet->write($excelrivi, 0, $alerow["osasto"]);
-							$worksheet->write($excelrivi, 1, $osaro["selitetark"]);
-							$worksheet->write($excelrivi, 2, $alerow["try"]);
-							$worksheet->write($excelrivi, 3, $tryro["selitetark"]);				
-							$worksheet->write($excelrivi, 4, $alerow["ytunnus"]);
-							$worksheet->write($excelrivi, 5, $alerow['asiakas_ryhma']);
-							$worksheet->write($excelrivi, 6, $alerow['aleryhma']);
-							$worksheet->write($excelrivi, 7, $alerow['tuoteno']);
-							$worksheet->write($excelrivi, 8, $ale/100, $format_percent);
-							$worksheet->write($excelrivi, 9, $alerow['alkupvm'], $format_date);
-							$worksheet->write($excelrivi, 10, $alerow['loppupvm'], $format_date);
-							$worksheet->write($excelrivi, 11, $mita);												
-							$excelrivi++;
-						}						
-							
-						if ($tee == 'eposti') {
-							rivi ($firstpage, $osaro["selitetark"], $tryro["selitetark"], $alerow["ytunnus"], $alerow["aleryhma"], $ale);
-						}
-					}
-					else {
-						unset($dadaArray);
-						if($alerow["aleryhma"]==0) $alerow["aleryhma"]="";
-						$dadaArray["osasto"]			= $alerow["osasto"];
-						$dadaArray["osasto_nimi"]		= $osaro["selitetark"];
-						$dadaArray["try"]				= $alerow["try"];
-						$dadaArray["try_nimi"]			= $tryro["selitetark"];
-						$dadaArray["ytunnus"]			= $alerow["ytunnus"];
-						$dadaArray["asiakas_ryhma"]		= $alerow["asiakas_"];
-						$dadaArray["ryhma"]				= $alerow["aleryhma"];
-						$dadaArray["tuoteno"]			= $alerow['tuoteno'];
-						$dadaArray["ale"]				= $ale;
-						$dadaArray["alkupvm"]			= $asrow["alkupvm"];
-						$dadaArray["loppupvm"]			= $asrow["loppupvm"];
-						$dadaArray["mita"]				= $mita;						
-						$yhdistetty_array[] = $dadaArray;
-					}
-				}
-			}
-			
-			if($yhdistetty=='') {
-				$aletaulu .= "</table>";			
-			}
-			else {
-				$aletaulu = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
-			}
-		}
-		else {
-			$aletaulu = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
-		}
-
-
-		if ($yhdistetty!='' or $tee == 'eposti') {
-			// tehd‰‰n asiakkaan alennustaulukko...
-			$yhdistetty  = "<table><caption><font class='message'>".t("Yhdistetty alennustaulukko")."</font></caption>";
-			$yhdistetty .= "<tr>
-				<th>".t("Ytunnus")."</th>
-				<th>".t("AS-Ryhm‰")."</th>
-				<th>".t("Os")."</th>
-				<th>".t("Osasto")."</th>
-				<th>".t("Tryno")."</th>
-				<th>".t("Tuoteryhm‰")."</th>
-				<th>".t("Aleryhm‰")."</th>	
-				<th>".t("Tuoteno")."</th>							
-				<th>".t("Alennus")."</th>
-				<th>".t("Hinta")."</th>
-				<th>".t("Alkupvm")."</th>
-				<th>".t("Loppupvm")."</th>
-				<th>".t("Tyyppi")."</th>
-				</tr>";
-			
-			if(isset($workbook)) {							
-				$worksheet->write($excelrivi, 0, "Ytunnus", $format_bold);
-				$worksheet->write($excelrivi, 1, "Os", $format_bold);
-				$worksheet->write($excelrivi, 2, "Osasto", $format_bold);
-				$worksheet->write($excelrivi, 3, "Tryno", $format_bold);
-				$worksheet->write($excelrivi, 4, "Tuoteryhm‰", $format_bold);				
-				$worksheet->write($excelrivi, 5, "AS-Ryhm‰", $format_bold);
-				$worksheet->write($excelrivi, 6, "Tuoteno", $format_bold);
-				$worksheet->write($excelrivi, 7, "Aleryhm‰", $format_bold);
-				$worksheet->write($excelrivi, 8, "Alennus", $format_bold);			
-				$worksheet->write($excelrivi, 9, "Hinta", $format_bold);			
-				$worksheet->write($excelrivi, 10, "Alkupvm", $format_bold);
-				$worksheet->write($excelrivi, 11, "Loppupvm", $format_bold);
-				$worksheet->write($excelrivi, 12, "Tyyppi", $format_bold);												
 				$excelrivi++;
 			}									
 			
-			foreach($yhdistetty_array as $value) {
-				$yhdistetty .= "<tr>
-					<font class='info'><td>{$value["ytunnus"]}</td></font>
-					<font class='info'><td>{$value["asiakas_ryhma"]}</td></font>
-					<font class='info'><td>{$value["osasto"]}</td></font>
-					<font class='info'><td>{$value["osasto_nimi"]}</td></font>
-					<font class='info'><td>{$value["try"]}</td></font>
-					<font class='info'><td>{$value["try_nimi"]}</td></font>
-					<font class='info'><td>{$value["ryhma"]}</td></font>					
-					<font class='info'><td>{$value["tuoteno"]}</td></font>
-					<font class='info'><td>{$value["ale"]}</td></font>
-					<font class='info'><td>{$value["hinta"]}</td></font>
-					<font class='info'><td>{$value["alkupvm"]}</td></font>
-					<font class='info'><td>{$value["loppupvm"]}</td></font>
-					<font class='info'><td>{$value["mita"]}</td></font>
-					</tr>";
+			unset($edryhma);
+			unset($edryhma2);
+			$osastot 	= array();
+			$tryt 		= array();			
+			
+			//	Haetaan osastot ja avainsanat muistiin
+			$query = "	SELECT * FROM avainsana WHERE yhtio = '{$kukarow["yhtio"]}' and laji = 'OSASTO'";
+			$tryres = mysql_query($query) or pupe_error($query);
+			while($tryrow = mysql_fetch_array($tryres)) {
+				$osastot[$tryrow["selite"]] = $tryrow["selitetark"];
+			}
+
+			$query = "	SELECT * FROM avainsana WHERE yhtio = '{$kukarow["yhtio"]}' and laji = 'TRY'";
+			$tryres = mysql_query($query) or pupe_error($query);
+			while($tryrow = mysql_fetch_array($tryres)) {
+				$tryt[$tryrow["selite"]] = $tryrow["selitetark"];
+			}
+			
+			while ($asrow = mysql_fetch_array($asres)) {
+				
+				//	Suodatetaan extranetk‰ytt‰jilta muut aleprossat
+				if((($kukarow["extranet"] != "" or $tee == "eposti") and ($edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti") ) {
+					
+					$edryhma 	= $asrow["alennusryhm‰"];
+					$edtuoteno 	= $asrow["tuoteno"];
+															
+					if(isset($workbook) and $yhdistetty == "") {
+						foreach($otsik_spread as $key => $value) {
+							$worksheet->write($excelrivi, $key, $asrow[$value]);
+						}
+						$excelrivi++;
+					}									
+
+					$dada = array();
+					$ulos .= "<tr>";
+
+					foreach($otsik as $o) {
+
+						if($yhdistetty != "") {
+							$dada[$o] = $asrow[$o];
+						}
+						else {
+							//	Kaunistetaan ulostusta..
+							if($asrow[$o."_nimi"] != "") {
+								$arvo = $asrow[$o]." - ".$asrow[$o."_nimi"];
+							}
+							elseif($o == "osasto" and $osastot[$asrow[$o]]) {
+								$arvo = $asrow[$o]." - ".$osastot[$asrow[$o]];
+								$osasto = $arvo;
+							}
+							elseif($o == "try" and $tryt[$asrow[$o]] != "") {
+								$arvo = $asrow[$o]." - ".$tryt[$asrow[$o]];
+								$try = $arvo;
+							}
+							else {
+								$arvo = $asrow[$o];
+							}
+							
+							$ulos .= "<td><font class='info'>$arvo<font></td>";
+						}
+					}
+					$ulos .= "</tr>";						
+
+					if($yhdistetty != "") {
+						$yhdistetty_array[] = $dada;
+					}
+
+					if ($tee == 'eposti') {
+						rivi($firstpage, $osasto, $try, $asrow["tuoteno"]." - ".$asrow["tuoteno_nimi"], $asrow["alennusryhm‰"], $asrow["alennus"]);
+					}
+				}
+			}
+			
+			$ulos .= "</table>";
+			
+			//	Liitet‰‰n ulostus oikeaan muuttujaan
+			if($aletaulu != "") {
+				$aletaulu = $ulos;
+				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
+			}
+			elseif($asale != "") {
+				$asale = $ulos;
+				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+			}
+			else {
+				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
+				$ulos = "";				
+			}
+		}
+		else {
+			$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
+			$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+		}
+		
+		
+		if ($ashin!='' or $yhdistetty != "") {
+			// haetaan asiakashintoja			
+			$ashin  = "<table><caption><font class='message'>".t("Asiakashinnat")."</font></caption>";
+			if($yhdistetty != "") {
+				if($kukarow["extranet"] != "") {
+					$otsik = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
+					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
+				}
+				else {
+					$otsik = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
+					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
+				}				
+			}
+			else {
+				if($kukarow["extranet"] != "") {
+					$otsik = array("alennusryhm‰", "tuoteno", "hinta", "alkupvm", "loppuvm");
+					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
+				}
+				else {
+					$otsik = array("alennusryhm‰", "tuoteno", "asiakasryhm‰", "hinta", "alkupvm", "loppuvm");
+					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
+				}
+			}
+			
+			// Duusataan otsikot
+			if(isset($workbook) and $yhdistetty == "") {
+				foreach($otsik_spread as $key => $value) {
+					$worksheet->write($excelrivi, $key, ucfirst($value), $format_bold);
+				}
+				$excelrivi++;
+			}									
+				
+			if($hdistetty == "") {
+				$ashin  .= "<tr>";
+				foreach($otsik as $o) {
+					$ashin .= "<th>".ucfirst($o)."</th>";
+				}
+				$ashin  .= "</tr>";				
+			}
+
+			$query = "	
+						(
+							SELECT '1' prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhm‰,
+								avainsana.selitetark asiakasryhm‰_nimi,
+								asiakashinta.ryhma alennusryhm‰,
+								perusalennus.selite alennusryhm‰_nimi,
+								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if(loppupvm='0000-00-00','',loppupvm) loppupvm
+							FROM asiakashinta
+							LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!=''
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
+						)
+						UNION
+						(
+							SELECT '2' prio,
+								hinta,
+								tuote.tuoteno,
+								tuote.nimitys tuoteno_nimi,
+								asiakas_ryhma asiakasryhm‰,
+								avainsana.selitetark asiakasryhm‰_nimi,
+								asiakashinta.ryhma alennusryhm‰,
+								perusalennus.selite alennusryhm‰_nimi,
+								if(alkupvm='0000-00-00','',alkupvm) alkupvm,
+								if(loppupvm='0000-00-00','',loppupvm) loppupvm
+							FROM asiakashinta
+							LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
+							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and ytunnus = '$asiakasrow[ytunnus]' and ytunnus!=''
+								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+						)
+						ORDER BY alennusryhm‰, tuoteno, prio";
+			$asres = mysql_query($query) or pupe_error($query);
+
+			while ($asrow = mysql_fetch_array($asres)) {
+				
+				//	Suodatetaan extranetk‰ytt‰jilta muut hinnat
+				if((($kukarow["extranet"] != "" or $tee == "eposti") and ($edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti") ) {
+					$edryhma 	= $asrow["alennusryhm‰"];
+					$edtuoteno 	= $asrow["tuoteno"];
+					
+					if(isset($workbook) and $yhdistetty == "") {
+						foreach($otsik_spread as $key => $value) {
+							$worksheet->write($excelrivi, $key, $asrow[$value]);
+						}
+						$excelrivi++;
+					}									
+
+					$dada = array();
+					$ashin .= "<tr>";
+					foreach($otsik as $o) {
+						
+						if($yhdistetty != "") {
+							$dada[$o] = $asrow[$o];
+						}
+						else {
+							//	Kaunistetaan ulostusta..
+							if($asrow[$o."_nimi"] != "") {
+								$arvo = $asrow[$o]." - ".$asrow[$o."_nimi"];
+							}
+							else {
+								$arvo = $asrow[$o];							
+							}
+
+							$ashin .= "<td><font class='info'>$arvo<font></td>";	
+						}
+					}
+					$ashin .= "</tr>";						
+					
+					if($yhdistetty != "") {
+						$yhdistetty_array[] = $dada;
+					}
+				}
+			}
+			
+			$ashin .= "</table>";
+			
+			if($yhdistetty != "") {
+				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&lopetus=$lopetus'>".t("N‰yt‰ asikashinnat")."</a>";
+			}
+		}
+		else {
+			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&lopetus=$lopetus'>".t("N‰yt‰ asikashinnat")."</a>";				
+		}
+		
+		if ($yhdistetty!='') {
+
+			// tehd‰‰n yhdistetty alennustaulukko...
+			$yhdistetty  = "<table><caption><font class='message'>".t("Yhdistetty alennustaulukko")."</font></caption>";
+			
+			if($kukarow["extranet"] != "") {
+				$otsik = array("alennusryhm‰",  "tuoteno", "alennus", "hinta", "alkupvm", "loppuvm");
+				$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "hinta", "alkupvm", "loppuvm");
+			}
+			else {
+				$otsik = array("alennusryhm‰",  "tuoteno", "asiakasryhm‰", "alennus", "hinta", "alkupvm", "loppuvm", "tyyppi");
+				$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "hinta", "alkupvm", "loppuvm");
+			}
+			
+			// Duusataan otsikot
+			if(isset($workbook)) {
+				foreach($otsik_spread as $key => $value) {
+					$worksheet->write($excelrivi, $key, ucfirst($value), $format_bold);
+				}
+				$excelrivi++;
+			}									
+
+			$yhdistetty  .= "<tr>";
+			foreach($otsik as $o) {
+				$yhdistetty .= "<th>".ucfirst($o)."</th>";
+			}
+			$yhdistetty  .= "</tr>";				
+						
+			foreach($yhdistetty_array as $key => $value) {
 				
 				if(isset($workbook)) {
-					$worksheet->write($excelrivi, 0, $value["ytunnus"]);
-					$worksheet->write($excelrivi, 1, $value["osasto"]);
-					$worksheet->write($excelrivi, 2, $value["osasto_nimi"]);
-					$worksheet->write($excelrivi, 3, $value["try"]);
-					$worksheet->write($excelrivi, 4, $value["try_nimi"]);				
-					$worksheet->write($excelrivi, 5, $value["asiakas_ryhma"]);
-					$worksheet->write($excelrivi, 6, $value["tuoteno"]);
-					$worksheet->write($excelrivi, 7, $value["ryhma"]);
-					$worksheet->write($excelrivi, 8, ($value["ale"])/100, $format_percent);					
-					$worksheet->write($excelrivi, 9, $value["hinta"], $format_curr);			
-					$worksheet->write($excelrivi, 10, $value["alkupvm"], $format_date);
-					$worksheet->write($excelrivi, 11, $value["loppupvm"], $format_date);
-					$worksheet->write($excelrivi, 12, strip_tags($value["mita"]));
+					foreach($otsik_spread as $key => $xvalue) {
+						$worksheet->write($excelrivi, $key, $value[$xvalue]);
+					}
 					$excelrivi++;
 				}
+
+				$yhdistetty .= "<tr>";
+				foreach($otsik as $o) {			
+					//	Kaunistetaan ulostusta..
+					if($value[$o."_nimi"] != "") {
+						$arvo = $value[$o]." - ".$value[$o."_nimi"];
+					}
+					else {
+						$arvo = $value[$o];							
+					}
+
+					$yhdistetty .= "<td><font class='info'>$arvo<font></td>";
+				}
+				
+				$yhdistetty .= "</tr>";				
 			} 
 			$yhdistetty .= "</table>";
 		}
@@ -957,7 +954,7 @@ if ($ytunnus!='') {
 			// itse print komento...
 			if ($komento["Alennustaulukko"] == 'email') {
 				$liite = $pdffilenimi;
-				$kutsu = "Alennustaulukko";
+				$kutsu = "Alennustaulukko - ".trim($asiakasrow["nimi"]." ".$asiakasrow["nimitark"]);
 
 				require("../inc/sahkoposti.inc");
 			}

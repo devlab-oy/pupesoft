@@ -4,7 +4,8 @@
 
 	echo "<font class='head'>".t("Uusi muu tosite")."</font><hr>";
 
-	if ($tee == 'I') { // Tarkistetetaan syˆtteet perustusta varten
+	// Tarkistetetaan syˆtteet perustusta varten
+	if ($tee == 'I') {
 		$totsumma = 0;
 		$summa = str_replace ( ",", ".", $summa);
 
@@ -27,7 +28,7 @@
 			$path_parts = pathinfo($_FILES['userfile']['name']);
 			$ext = $path_parts['extension'];
 			if (strtoupper($ext) == "JPEG") $ext = "jpg";
-			
+
 			// laskun polku
 			$polku = $yhtiorow['lasku_polku_abs'];
 			// uniikki filenimi (t‰m‰ tallennetaan kantaan, huom eka / on pakollinen, sill‰ erotetaan scannatut ja verkkolaskut!!)
@@ -62,14 +63,14 @@
 		}
 
 		if (is_uploaded_file($_FILES['tositefile']['tmp_name'])) {
-			
+
 			//	ei koskaan p‰ivitet‰ automaattisesti
 			$tee = "N";
-			
+
 			// otetaan file extensio
 			$path_parts = pathinfo($_FILES['tositefile']['name']);
 			$ext = strtoupper($path_parts['extension']);
-			
+
 			// extensio pit‰‰ olla oikein
 			if (!in_array($ext, array("XLS","CSV","TXT"))) {
 				echo "<font class='error'>".t("Ainoastaan .xls .cvs .txt tiedostot sallittuja")."! $ext</font>";
@@ -94,14 +95,14 @@
 					$data->setOutputEncoding('CP1251');
 					$data->setRowColOffset(0);
 					$data->read($_FILES['tositefile']['tmp_name']);
-					
+
 					$file = $data->sheets[0]['cells'];
 				}
-				
+
 				$maara=0;
 				foreach($file as $key => $value) {
-					
-					
+
+
 					if($maara==0) {
 						if(is_array($value)) {
 							foreach($value as $v8) {
@@ -111,7 +112,7 @@
 						else {
 							$rivi=explode("\t",strtolower($key));
 							$otsikot=$rivi;
-						}	
+						}
 					}
 					else {
 						if(is_array($value)) {
@@ -125,21 +126,21 @@
 							echo "<font class='error'>".t("VIRHE!!! aineistovirhe")."rivilla: $maara (".count($rivi)." != ".count($otsikot).")</font>";
 							break;
 						}
-					
+
 						$rivi=array_combine($otsikot, $rivi);
-						
+
 						$isumma[$maara] 	= (float) $rivi["summa"];
 						$itili[$maara]  	= (int) $rivi["tilino"];
 						$ikustp[$maara] 	= (int) $rivi["kustp"];
 						$ikustp[$maara]		= (int) $rivi["kustp"];
 						$ikohde[$maara]		= (int) $rivi["kohde"];
 						$ivero[$maara]		= (int) $rivi["alv"];
-						$iselite[$maara] 	= $rivi["selite"];  
+						$iselite[$maara] 	= $rivi["selite"];
 					}
-				
+
 					$maara++;
 				}
-			
+
 				//	Lis‰t‰‰n viel‰ 2 tyhj‰‰ rivi‰ loppuun
 				$maara+=2;
 			}
@@ -179,7 +180,7 @@
 					$ivirhe[$i] .= t('Rivilt‰ puuttuu summa').'<br>';
 					$gok = 1;
 				}
-				
+
 				$ulos='';
 				$virhe = '';
 				$tili = $itili[$i];
@@ -206,6 +207,7 @@
 			}
 
 		}
+
 		if ($kuitti != '') {
 			if ($kassaok==0) {
 				$gok=1;
@@ -216,18 +218,22 @@
 				echo "<font class='error'>".t("Kuitille on annettava nimi")."</font><br>";
 			}
 		}
+
 		if (abs($totsumma) >= 0.01 and $heittook  == '') {
 				$gok=1;
 				echo "<font class='error'>".t("Tositteen summat eiv‰t mene tasan")."</font><br>";
 		}
-		if ($gok == 1) { // Jossain tapahtui virhe
+
+ 		// Jossain tapahtui virhe
+		if ($gok == 1) {
 			echo "<font class='error'>".t("Jossain oli virheit‰/muutoksia")."!</font><br>";
 			$tee = 'N';
 		}
+
 		$summa = $turvasumma;
 	}
-// Kirjoitetaan tosite jos tiedot ok!
 
+	// Kirjoitetaan tosite jos tiedot ok!
 	if ($tee == 'I') {
 
 		// Talletetaan tositteen/liitteen kuva, jos sellainen tuli
@@ -250,7 +256,8 @@
 
 //		echo "$query <br>";
 		$tunnus = mysql_insert_id ($link);
-// Tehd‰‰n tiliˆinnit
+
+		// Tehd‰‰n tiliˆinnit
 		for ($i=1; $i<$maara; $i++) {
 			if (strlen($itili[$i]) > 0) {
 				$tili = $itili[$i];
@@ -277,13 +284,13 @@
 		$summa="";
 		$nimi="";
 		$kuitti="";
-		
+
 		echo "<font class='message'>".t("Tosite luotu")."</font><br>";
 	}
 
-
-
 	if ($kukarow['kirjoitin'] == '') echo "<font class='message'>".t("Sinulla ei ole oletuskirjoitinta. Et voi tulostaa kuitteja")."!</font><br>";
+
+	// Tehd‰‰n haluttu m‰‰r‰ tiliˆintirivej‰
 
 	echo "<form action = 'tosite.php' method='post'>
 		<input type='hidden' name='tee'value='N'>
@@ -303,15 +310,14 @@
 		</select>
 		</td><td><input type = 'submit' value = '".t("Perusta")."'></td>
 		</tr>
-		</table></form>";
-	      $tee='N'; // menn‰‰n suoraan uudelle tositteelle..
+		</table></form><br>";
 
+	$tee='N'; // menn‰‰n suoraan uudelle tositteelle..
 
-     // Uusi tosite
+	// Uusi tosite
 	if ($tee == 'N') {
 
 		if ($maara=='') $maara='3'; //n‰ytet‰‰n defaulttina kaks
-
 
 		//p‰iv‰m‰‰r‰n tarkistus
 		$tilalk = split("-", $yhtiorow["tilikausi_alku"]);
@@ -384,9 +390,11 @@
 				}
 			</SCRIPT>";
 
-
 		$formi = 'tosite';
 		$kentta = 'tpp';
+
+		echo "<font class='message'>Syˆt‰ tositteen otsikkotiedot:</font>";
+
 		echo "<form name = 'tosite' action = 'tosite.php' method='post' enctype='multipart/form-data' onSubmit = 'return verify()'>
 				<input type='hidden' name='tee' value='I'>
 				<input type='hidden' name='maara' value='$maara'>
@@ -402,24 +410,20 @@
 		if ($kuitti != '') $kuitti = 'checked';
 		if ($kukarow['kirjoitin'] != '') echo " ".t("Tulosta kuitti")." <input type='checkbox' name='kuitti' $kuitti>";
 		echo "</td></tr>";
-		
+
 		if(is_readable("excel_reader/reader.php")) {
 			$excel = ".xls, ";
 		}
 		else {
 			$excel = "";
 		}
-		
+
 		echo "	<td colspan = '2'>".t("Selite")." <input type='text' name='selite' value='$selite' maxlength='150' size=60></td>
-				</tr>
-				<tr>
-					<td>".t("Lue tosite tiedostosta")."</td>
-					<td><input type='file' name='tositefile' onchage='submit()'><br><font class='info'>".t("Vain $excel.txt ja .cvs tiedosto sallittuja")."</td>
 				</tr>";
-			
+
 		// annetaan mahdollisuus lis‰t‰ laskun kuva vaan jos dirikka on oikein ja writable...
 		if (is_writable($yhtiorow['lasku_polku_abs'])) {
-			echo "<tr><td>".t("Mahdollinen tositteen kuva/liite")."</td>";
+			echo "<tr><td>".t("Tositteen kuva/liite")."</td>";
 
 			if (strlen($fnimi) > 0) {
 				echo "<td>".t("Kuva jo tallessa")."!<input name='fnimi' type='hidden' value = '$fnimi'></td>";
@@ -432,21 +436,35 @@
 
 		echo "</table>";
 
-// Tehd‰‰n haluttu m‰‰r‰ tiliˆintirivej‰
-		echo "<br><br><table>
+		echo "<br><font class='message'>Lue tositteen rivit tiedostosta:</font>";
+
+		echo "<table>
+				<tr>
+					<th>".t("Valitse tiedosto")."</th>
+					<td><input type='file' name='tositefile' onchage='submit()'>  <font class='info'>".t("Vain $excel.txt ja .cvs tiedosto sallittuja")."</td>
+				</tr>
+			</table>";
+
+		echo "<br><font class='message'>Tai syˆt‰ tositteen rivit k‰sin:</font>";
+
+
+		echo "<table>
 		      <tr><th>".t("Tili")."</th><th>".t("Tarkenne")."</th>
 		      <th>".t("Summa")."</th><th>".t("Vero")."</th></tr>";
 
 		for ($i=1; $i<$maara; $i++) {
 			echo "<tr>";
+
 			if ($iulos[$i] == '') {
 				//Annetaan selv‰kielinen nimi
 				$tilinimi='';
+
 				if ($itili[$i] != '') {
 					$query = "SELECT nimi
 								FROM tili
 								WHERE yhtio = '$kukarow[yhtio]' and tilino = '$itili[$i]'";
 					$vresult = mysql_query($query) or pupe_error($query);
+
 					if (mysql_num_rows($vresult) == 1) {
 						$vrow=mysql_fetch_array($vresult);
 						$tilinimi = $vrow['nimi'] . "<br>";
@@ -457,7 +475,8 @@
 			else {
 				echo "<td>$iulos[$i]</td>";
 			}
-// Tehd‰‰n kustannuspaikkapopup
+
+			// Tehd‰‰n kustannuspaikkapopup
 			$query = "SELECT tunnus, nimi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa <> 'E'
@@ -465,6 +484,7 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 			echo "<td><select name='ikustp[$i]'>";
 			echo "<option value =' '>".t("Ei kustannuspaikkaa")."";
+
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";
 				if ($ikustp[$i] == $vrow[0]) {
@@ -474,7 +494,7 @@
 			}
 			echo "</select><br>";
 
-// Tehd‰‰n kohdepopup
+			// Tehd‰‰n kohdepopup
 			$query = "SELECT tunnus, nimi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O' and kaytossa <> 'E'
@@ -482,6 +502,7 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 			echo "<select name='ikohde[$i]'>";
 			echo "<option value =' '>".t("Ei kohdetta")."";
+
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";
 				if ($ikohde[$i] == $vrow[0]) {
@@ -491,7 +512,7 @@
 			}
 			echo "</select><br>";
 
-// Tehd‰‰n projektipopup
+			// Tehd‰‰n projektipopup
 			$query = "SELECT tunnus, nimi
 						FROM kustannuspaikka
 						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P' and kaytossa <> 'E'
@@ -499,6 +520,7 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 			echo "<select name='iprojekti[$i]'>";
 			echo "<option value =' '>".t("Ei projektia")."";
+
 			while ($vrow=mysql_fetch_array($vresult)) {
 				$sel="";
 				if ($iprojekti[$i] == $vrow[0]) {
@@ -524,6 +546,7 @@
 			echo "<tr><td colspan = '5'>
 			      ".t("Selite").":<input type='text' name='iselite[$i]' value='$iselite[$i]' maxlength='150' size=60><br><br></td></tr>";
 		}
+
 		if ($gok==1) {
 			echo "<tr><td>".t("Tosite yhteens‰")."</td><td>";
 			$heittotila == '';
@@ -535,7 +558,9 @@
 			else echo "$totsumma";
 			echo "</td><td></td><td></td></tr>";
 		}
+
 		echo "</table><input type='Submit' value = '".t("Tee tosite")."'></form>";
+
 	}
 
 	require "inc/footer.inc";

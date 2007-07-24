@@ -28,15 +28,7 @@
 			$path_parts = pathinfo($_FILES['userfile']['name']);
 			$ext = $path_parts['extension'];
 			if (strtoupper($ext) == "JPEG") $ext = "jpg";
-
-			// laskun polku
-			$polku = $yhtiorow['lasku_polku_abs'];
-			// uniikki filenimi (t‰m‰ tallennetaan kantaan, huom eka / on pakollinen, sill‰ erotetaan scannatut ja verkkolaskut!!)
-			// otetaan nimest‰ 31 ekaa merkki‰ ja lis‰t‰‰n .EXT niin tulee 35 merkki‰ joka on tietokannassa kent‰n pituus.. kenties ois pit‰ny muuttaa tietokantaaa???
-			$fnimi = substr("/".$kukarow['yhtio']."-".$kukarow['kuka']."-".md5(uniqid(rand(),true)),0,31).".$ext";
-			// t‰nne siirret‰‰n
-			$lopnimi = $polku.$fnimi;
-
+			
 			// extensio pit‰‰ olla oikein
 			if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
 				echo "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
@@ -49,11 +41,28 @@
 				$tee = "N";
 				$fnimi = "";
 			}
-			// Talletetaan laskun kuva oikeaan paikkaan
-			elseif (!move_uploaded_file($_FILES['userfile']['tmp_name'] , $lopnimi)) {
-				echo t("Laskun")." ".$_FILES['userfile']['tmp_name']." ".t("tallennus ep‰onnistui paikkaan")." $fnimi<br>";
-				$tee = "N";
-				$fnimi = "";
+			// Talletetaan laskun kuva kantaan
+			else {
+				$filetype = $_FILES['userfile']['type'];
+				$filesize = $_FILES['userfile']['size'];
+				$filename = $_FILES['userfile']['name'];
+
+				$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
+
+				// lis‰t‰‰n kuva
+				$query = "	insert into liitetiedostot set
+							yhtio      = '{$kukarow['yhtio']}',
+							liitos     = 'lasku',
+							laatija    = '{$kukarow['kuka']}',
+							luontiaika = now(),
+							data       = '$data',
+							filename   = '$filename',
+							filesize   = '$filesize',
+							filetype   = '$filetype'";
+
+				$result = mysql_query($query) or pupe_error($query);
+				$liitostunnus = mysql_insert_id();
+				$fnimi = $liitostunnus;
 			}
 		}
 		elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
@@ -236,18 +245,9 @@
 	// Kirjoitetaan tosite jos tiedot ok!
 	if ($tee == 'I') {
 
-		// Talletetaan tositteen/liitteen kuva, jos sellainen tuli
-		if(strlen($fnimi) > 0) {
-			$ebid = $fnimi;
-		}
-		else {
-			$ebid = "";
-		}
-
 		$query = "	INSERT into lasku set
 						yhtio = '$kukarow[yhtio]',
 						tapvm = '$tpv-$tpk-$tpp',
-						ebid = '$ebid',
 						nimi = '$nimi',
 						tila = 'X',
 						laatija = '$kukarow[kuka]',
@@ -256,7 +256,13 @@
 
 //		echo "$query <br>";
 		$tunnus = mysql_insert_id ($link);
-
+		
+		if ($fnimi) {
+			// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
+			$query = "update liitetiedostot set liitostunnus='$tunnus', selite='$selite $summa' where tunnus='$fnimi'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+		
 		// Tehd‰‰n tiliˆinnit
 		for ($i=1; $i<$maara; $i++) {
 			if (strlen($itili[$i]) > 0) {
@@ -421,17 +427,14 @@
 		echo "	<td colspan = '2'>".t("Selite")." <input type='text' name='selite' value='$selite' maxlength='150' size=60></td>
 				</tr>";
 
-		// annetaan mahdollisuus lis‰t‰ laskun kuva vaan jos dirikka on oikein ja writable...
-		if (is_writable($yhtiorow['lasku_polku_abs'])) {
-			echo "<tr><td>".t("Tositteen kuva/liite")."</td>";
+		echo "<tr><td>".t("Tositteen kuva/liite")."</td>";
 
-			if (strlen($fnimi) > 0) {
-				echo "<td>".t("Kuva jo tallessa")."!<input name='fnimi' type='hidden' value = '$fnimi'></td>";
-			}
-			else {
-				echo "<input type='hidden' name='MAX_FILE_SIZE' value='8000000'>";
-				echo "<td><input name='userfile' type='file'></td></tr>";
-			}
+		if (strlen($fnimi) > 0) {
+			echo "<td>".t("Kuva jo tallessa")."!<input name='fnimi' type='hidden' value = '$fnimi'></td>";
+		}
+		else {
+			echo "<input type='hidden' name='MAX_FILE_SIZE' value='8000000'>";
+			echo "<td><input name='userfile' type='file'></td></tr>";
 		}
 
 		echo "</table>";

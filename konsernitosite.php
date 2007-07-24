@@ -17,21 +17,28 @@
 			$gok = 1; //  Tositetta ei kirjoiteta kantaan vielä
 		}
 
-// Talletetaan käyttäjän nimellä tositteen/liitteen kuva, jos sellainen tuli
-// koska, jos tulee virheitä tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
-//              echo "$userfile_size koko $userfile nimi --> ";
-		if($userfile_size > 0) {
-// Tallennuspaikka on etsittävä
-			$polku = $yhtiorow['lasku_polku_abs'];
-			$faili = $userfile;
-// Generoidaan tiedostonimi
-			$fnimi = "/" . $kukarow['kuka'] . ".jpg";
-			$fnimi = $polku . $fnimi;
-//                      echo "$fnimi <br>";
-// Talletetaan laskun kuva oikeaan paikkaan
-			if(!move_uploaded_file($userfile , $fnimi)) {
-				echo "".t("Laskun")." $userfile ".t("tallennus epäonnistui paikkaan")." $fnimi<br>";
-			}
+		$kuva = false;
+		if(is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+			$filetype = $_FILES['userfile']['type'];
+			$filesize = $_FILES['userfile']['size'];
+			$filename = $_FILES['userfile']['name'];
+
+			$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
+
+			// lisätään kuva
+			$query = "	insert into liitetiedostot set
+						yhtio      = '{$kukarow['yhtio']}',
+						liitos     = 'lasku',
+						laatija    = '{$kukarow['kuka']}',
+						luontiaika = now(),
+						data       = '$data',
+						filename   = '$filename',
+						filesize   = '$filesize',
+						filetype   = '$filetype'";
+			
+			$result = mysql_query($query) or pupe_error($query);
+			$liitostunnus = mysql_insert_id();
+			$fnimi = $liitostunnus;
 		}
 
 
@@ -111,37 +118,21 @@
 // Kirjoitetaan tosite jos tiedot ok!
 
 	if ($tee == 'I') {
-// Talletetaan tositteen/liitteen kuva, jos sellainen tuli
-//              echo "$userfile_size koko $userfile nimi --> ";
-		if(strlen($fnimi) > 0) {
-// Tallennuspaikka on etsittävä
-			$polku = $yhtiorow['lasku_polku_abs'];
-			$faili = $fnimi;
-			$fnimi = "";
-// Generoidaan tiedostonimi
-			srand ((double) microtime() * 1000000);
-			for ($i=0; $i<25; $i++) {
-				$fnimi = $fnimi . chr(rand(65,90)) ;
-			}
-			$fnimi = "/" . $fnimi . ".jpg";
-			$ebid = $fnimi;
-			$fnimi = $polku . $fnimi;
-//                      echo "$fnimi <br>";
-// Talletetaan laskun kuva oikeaan paikkaan
-			if(!rename($faili , $fnimi)) {
-				echo "".t("Laskun")." $faili ".t("tallennus epäonnistui paikkaan")." $fnimi<br>";
-			}
-		}
-
+		
 		$query = "	INSERT into lasku set
 						yhtio = '$kukarow[yhtio]',
 						tapvm = '$tpv-$tpk-$tpp',
-						ebid = '$ebid',
 						tila = 'X',
 						laatija = '$kukarow[kuka]',
 						luontiaika = now()";
 		$result = mysql_query($query) or pupe_error($query);
-		$tunnus = mysql_insert_id ($link);
+		$tunnus = mysql_insert_id($link);
+		
+		if ($fnimi) {
+			// päivitetään kuvalle vielä linkki toiseensuuntaa
+			$query = "update liitetiedostot set liitostunnus='$tunnus', selite='$selite $summa' where tunnus='$fnimi'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
 		
 		$totsumma = 0;
 		$totmaara = $omaara+$vmaara; // Yhteensä tarvittavien tiliöintirivien määrä
@@ -157,7 +148,7 @@
 	// Aloitetaan vieraan yrityksen tiliöinnit
 				$totsumma = 0;
 				$turvayhtio=$kukarow['yhtio'];
-				$kukarow['yhtio']=$vastaanottaja;
+				$kukarow['yhtio'] = $vastaanottaja;
 				$query = "SELECT *
 							  FROM yhtio
 							  WHERE  yhtio = '$kukarow[yhtio]'";
@@ -172,12 +163,34 @@
 				$query = "	INSERT into lasku set
 								yhtio = '$kukarow[yhtio]',
 								tapvm = '$tpv-$tpk-$tpp',
-								ebid = '$ebid',
 								tila = 'X',
 								laatija = '$kukarow[kuka]',
 								luontiaika = now()";
 				$result = mysql_query($query) or pupe_error($query);
 				$tunnus = mysql_insert_id ($link);
+				
+				if (strlen($fnimi) != '') {
+					// kopioidaan liitetiedosto toiselta riviltä
+					$query = "SELECT * from liitetiedostot where tunnus='$fnimi'";
+					$res = mysql_query($query) or pupe_error($query);
+					$liite = mysql_fetch_assoc($res);
+				
+					// nämä arvot vaihdetaan ainoastaan
+					$liite['liitostunnus'] = $tunnus;
+					$liite['yhtio']        = $kukarow['yhtio'];
+					unset($liite['tunnus']);
+					
+					$cols = array();
+					foreach ($liite as $col => $val) {
+						$cols[] =  "$col = '" . mysql_real_escape_string($val) . "'";
+					}
+				
+					$ins = "INSERT into liitetiedostot set " . implode(', ', $cols);
+					mysql_query($ins) or pupe_error($ins);
+					
+					$fnimi = '';
+				}
+				
 			}
 			if (strlen($itili[$i]) > 0) {
 		// Tehdään tiliöinnit

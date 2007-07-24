@@ -350,7 +350,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 					$h-=$pdf->ln();
 				}
 
-				$h-=$pdf->ln(0.5);
+				$h-=$pdf->ln();
 				
 				if($rivi=="isa") {
 					$grand_total+=$row["rivihinta"];

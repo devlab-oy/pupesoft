@@ -177,7 +177,7 @@
 		if ($tuoterow["tuoteno"] != "" and (!in_array($tuoterow["status"], array('P', 'X')) or $salro["saldo"] != 0)) {
 
 			// Laitetaan kehahin oikein...
-			if ($tuoterow['sarjanumeroseuranta'] != "") {
+			if ($tuoterow['sarjanumeroseuranta'] == "S") {
 				$query = "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -267,7 +267,7 @@
 						<td valign='top' align='right'>$tuoterow[nettohinta]/$tuoterow[myymalahinta]</td>
 						<td valign='top' align='right'>$tuoterow[ostohinta]</td>
 						<td valign='top' align='right'>$tuoterow[kehahin]</td>
-						<td valign='top' align='right'>$tuoterow[vihahin] $tuoterow[vihapvm]</td>
+						<td valign='top' align='right'>$tuoterow[vihahin] ".tv1dateconv($tuoterow["vihapvm"])."</td>
 				</tr>";
 
 			//4
@@ -287,7 +287,7 @@
 
 			//6
 			echo "<tr><th>".t("Luontipvm")."</th><th>".t("Muutospvm")."</th><th>".t("Epäkurantti1pvm")."</th><th>".t("Epäkurantti2pvm")."</th><th colspan='2'>".t("Tuotteen kuvaus")."</th></tr>";
-			echo "<tr><td>$tuoterow[luonti]</td><td>$tuoterow[muutos]</td><td>$tuoterow[epakurantti1pvm]</td><td>$tuoterow[epakurantti2pvm]</td><td colspan='2'>$tuoterow[kuvaus]&nbsp;</td></tr>";
+			echo "<tr><td>".tv1dateconv($tuoterow["luonti"])."</td><td>".tv1dateconv($tuoterow["muutos"])."</td><td>".tv1dateconv($tuoterow["epakurantti1pvm"])."</td><td>".tv1dateconv($tuoterow["epakurantti2pvm"])."</td><td colspan='2'>$tuoterow[kuvaus]&nbsp;</td></tr>";
 
 
 			//7
@@ -373,23 +373,49 @@
 				$kokonaishyllyssa = 0;
 				$kokonaismyytavissa = 0;
 
-				//saldot per varastopaikka
-				$query = "	SELECT tuotepaikat.*,
-							varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi,
-							concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-				 			FROM tuotepaikat
-							JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-							and tuotepaikat.tuoteno = '$tuoteno'
-							ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+				//saldot per varastopaikka			
+				if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
+					$query = "	SELECT tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+								sarjanumeroseuranta.sarjanumero era,
+								concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
+								varastopaikat.nimitys
+					 			FROM tuote
+								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+								and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+								and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+								JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio 
+								and sarjanumeroseuranta.tuoteno = tuote.tuoteno
+								and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
+								and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro
+								and sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
+								and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
+								WHERE tuote.yhtio = '$kukarow[yhtio]'
+								and tuote.tuoteno = '$tuoteno'
+								GROUP BY 1,2,3,4,5,6,7,8,9,10,11
+								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";			
+				}
+				else {
+					$query = "	SELECT tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
+								varastopaikat.nimitys
+					 			FROM tuote
+								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+								and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+								and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+								WHERE tuote.yhtio = '$kukarow[yhtio]'
+								and tuote.tuoteno = '$tuoteno'
+								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";	
+				}
 				$sresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
 
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $aikalisa);
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $aikalisa, $saldorow["era"]);
 
 						//summataan kokonaissaldoa
 						$kokonaissaldo += $saldo;
@@ -517,7 +543,7 @@
 
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT lasku.nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
-						if(tilausrivi.tyyppi!='O', tilausrivi.kerayspvm, tilausrivi.toimaika) kerayspvm,
+						if(tilausrivi.tyyppi!='O', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
 						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
@@ -529,7 +555,7 @@
 						and tilausrivi.laskutettuaika = '0000-00-00'
 						and (tilausrivi.varattu != 0 or jt != 0)
 						and tilausrivi.var not in ('P')
-						ORDER BY kerayspvm";
+						ORDER BY pvm";
 			$jtresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($jtresult) != 0) {
@@ -597,13 +623,13 @@
 						$tyyppi = $tyyppi." - ".$jtrow["varasto"];
 					}
 
-					list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["kerayspvm"]);
+					list(, , $myyta) = saldo_myytavissa($tuoteno, "KAIKKI", '', '', '', '', '', '', '', $jtrow["pvm"]);
 
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
 							<td><a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]'>$jtrow[tunnus]</a>$keikka</td>
 							<td>$tyyppi</td>
-							<td>".tv1dateconv($jtrow["kerayspvm"])."</td>
+							<td>".tv1dateconv($jtrow["pvm"])."</td>
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
 							<td align='right'>".sprintf('%.2f', $myyta)."</td>
 							</tr>";
@@ -617,7 +643,7 @@
 			echo "</table><br>";
 
 			if(!isset($raportti)) {
-				if($trow["tuotetyyppi"] == "R") $raportti="KULUTUS";
+				if($tuoterow["tuotetyyppi"] == "R") $raportti="KULUTUS";
 				else $raportti="MYYNTI";
 			}
 			
@@ -830,7 +856,7 @@
 						}
 						
 						if($muutos_abs<>0) {
-							$muutos = "edellinen: ".(int)$lrow["ed_".$key]."{$trow["yksikko"]} muutos: $muutos_abs{$trow["yksikko"]}";
+							$muutos = "edellinen: ".(int)$lrow["ed_".$key]."{$tuoterow["yksikko"]} muutos: $muutos_abs{$tuoterow["yksikko"]}";
 						}
 						
 						if($muutos_suht<>0 and $lrow[$key]<>0 and $lrow["ed_".$key] <> 0) {
@@ -862,7 +888,7 @@
 					}
 
 					if($muutos_abs<>0) {
-						$muutos = "edellinen: ".(int)$ed_summa."{$trow["yksikko"]} muutos: $muutos_abs{$trow["yksikko"]}";
+						$muutos = "edellinen: ".(int)$ed_summa."{$tuoterow["yksikko"]} muutos: $muutos_abs{$tuoterow["yksikko"]}";
 					}
 					
 					if($muutos_suht<>0 and $summa<>0 and $ed_summa<>0) {
@@ -899,7 +925,7 @@
 					}
 
 					if($muutos_abs<>0) {
-						$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{$trow["yksikko"]} muutos: $muutos_abs{$trow["yksikko"]}";
+						$muutos = "edellinen: ".(int)$ed_erittely[$kk]."{$tuoterow["yksikko"]} muutos: $muutos_abs{$tuoterow["yksikko"]}";
 					}
 					
 					if($muutos_suht<>0 and $erittely[$kk]<>0 and $ed_erittely[$kk]<>0) {
@@ -927,7 +953,7 @@
 				}
 				
 				if($muutos_abs<>0) {
-					$muutos = "edellinen: ".(int)$ed_gt."{$trow["yksikko"]} muutos: $muutos_abs{$trow["yksikko"]}";
+					$muutos = "edellinen: ".(int)$ed_gt."{$tuoterow["yksikko"]} muutos: $muutos_abs{$tuoterow["yksikko"]}";
 				}
 				
 				if($muutos_suht<>0 and $gt<>0 and $ed_gt <> 0) {
@@ -937,9 +963,10 @@
 				echo "<td class='tumma' title='$muutos'>".number_format($gt, 2, ',', ' ')."</td><tr></table><br><br>";
 			}
 
-			if ($tuoterow["sarjanumeroseuranta"] != "") {
+			if ($tuoterow["sarjanumeroseuranta"] == "S") {
 				
 				echo "<font class='message'>".t("Sarjanumerot")."</font><hr>";
+				
 				$query	= "	SELECT sarjanumeroseuranta.*, tilausrivi_osto.tunnus, if(tilausrivi_osto.rivihinta=0 and tilausrivi_osto.tyyppi='L', tilausrivi_osto.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi_osto.alv<500, (1+tilausrivi_osto.alv/100), 1) * if(tilausrivi_osto.netto='N', (1-tilausrivi_osto.ale/100), (1-(tilausrivi_osto.ale+lasku_osto.erikoisale-(tilausrivi_osto.ale*lasku_osto.erikoisale/100))/100)), if(tilausrivi_osto.rivihinta!=0 and tilausrivi_osto.kpl!=0, tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 0)) ostosumma,
 							tilausrivi_osto.nimitys nimitys
 							FROM sarjanumeroseuranta
@@ -961,6 +988,51 @@
 
 					while($sarjarow = mysql_fetch_array($sarjares)) {
 						echo "<tr><td>$sarjarow[nimitys]</td><td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=$sarjarow[sarjanumero]'>$sarjarow[sarjanumero]</a></td><td align='right'>".sprintf('%.2f', $sarjarow["ostosumma"])."</td></tr>";
+					}
+
+					echo "</table><br>";
+				}
+			}
+			elseif ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
+				echo "<font class='message'>".t("Eränumerot")."</font><hr>";
+				
+				$query	= "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto, sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso, count(*) kpl
+							FROM sarjanumeroseuranta
+							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
+							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+							and sarjanumeroseuranta.tuoteno = '$tuoterow[tuoteno]'
+							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+							and tilausrivi_osto.laskutettuaika != '0000-00-00'
+							GROUP BY sarjanumeroseuranta.sarjanumero";
+				$sarjares = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($sarjares) > 0) {
+					echo "<table>";
+					echo "<tr><th colspan='4'>".t("Varasto").":</th></tr>";
+					echo "<th>".t("Eränumero")."</th>";
+					
+					if ($tuoterow["sarjanumeroseuranta"] == "F") {
+						echo "<th>".t("Parasta ennen")."</th>";	
+					}
+					
+					echo "<th>".t("Kpl")."</th>";
+					echo "<th>".t("Lisätieto")."</th></tr>";
+
+					while($sarjarow = mysql_fetch_array($sarjares)) {
+						echo "<tr>
+								<td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=$sarjarow[sarjanumero]'>$sarjarow[sarjanumero]</a></td>";
+						
+						if ($tuoterow["sarjanumeroseuranta"] == "F") {
+							echo "<td>".tv1dateconv($sarjarow["parasta_ennen"])."</td>";	
+						}
+						
+						echo "<td align='right'>$sarjarow[kpl]</td>";
+						
+						
+								
+						echo "<td>$sarjarow[lisatieto]</td></tr>";
 					}
 
 					echo "</table><br>";
@@ -1045,7 +1117,7 @@
 				$ehto  = " and tapahtuma.laadittu >= date_sub(now(), interval 6 month) ";
 			}
 
-			$query = "	SELECT concat_ws('@', tapahtuma.laatija, tapahtuma.laadittu) kuka, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
+			$query = "	SELECT tapahtuma.laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
 						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
 						LEFT JOIN tilausrivi use index (primary) ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus
@@ -1072,7 +1144,7 @@
 
 				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
 					echo "<tr class='aktiivi'>";
-					echo "<td nowrap>$prow[kuka]</td>";
+					echo "<td nowrap>$prow[laatija]@".tv1dateconv($prow["laadittu"], "pitka")."</td>";
 					echo "<td nowrap>";
 
 					if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {

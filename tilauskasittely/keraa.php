@@ -99,7 +99,7 @@
 			$tilausnumeroita = $id;
 		}
 
-		// katotaan aluks onko yht‰‰n tuotetta sarjanumeroseurannassa t‰ll‰ ker‰yslitalla
+		// katotaan aluks onko yht‰‰n tuotetta sarjanumeroseurannassa t‰ll‰ ker‰yslistalla
 		$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu, tuote.sarjanumeroseuranta
 					FROM tilausrivi use index (yhtio_otunnus)
 					JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
@@ -766,9 +766,11 @@
 						//generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
 						$query = "	SELECT tilausrivi.*,
 									round((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
+									tuote.sarjanumeroseuranta,
 									$sorttauskentta,
 									$lisa2
-									FROM tilausrivi left join tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+									FROM tilausrivi 
+									JOIN tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 									WHERE tilausrivi.otunnus = '$otunnus'
 									and tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.tyyppi in ('L','G','W')
@@ -1249,7 +1251,7 @@
 							<td>$row[varattu]</td>
 							<td><input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]'> $puute";
 
-					if ($row["sarjanumeroseuranta"] != "") {						
+					if ($row["sarjanumeroseuranta"] == "S") {						
 						
 						if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
 							$tunken1 = "siirtorivitunnus";
@@ -1273,10 +1275,39 @@
 						$sarjarow = mysql_fetch_array($sarjares);
 
 						if ($sarjarow["kpl"] == abs($row["varattu"])) {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#$sarjarow[sarjanumero]' style='color:00FF00'>sarjanro OK</font></a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#$sarjarow[sarjanumero]' style='color:00FF00'>".t("S:nro OK")."</font></a>)";
 						}
 						else {
-							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#$sarjarow[sarjanumero]'>sarjanro</a>)";
+							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[puhdas_tuoteno]&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#$sarjarow[sarjanumero]'>".t("S:nro")."</a>)";
+						}
+					}
+					elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") {
+						if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
+							$tunken1 = "siirtorivitunnus";
+							$tunken2 = "siirtorivitunnus";
+						}
+						elseif ($row["varattu"] < 0) {
+							$tunken1 = "ostorivitunnus";
+							$tunken2 = "myyntirivitunnus";
+						}
+						else {
+							$tunken1 = "myyntirivitunnus";
+							$tunken2 = "myyntirivitunnus";
+						}
+						
+						$query = "	select sarjanumero, parasta_ennen
+									from sarjanumeroseuranta 
+									where yhtio  = '$kukarow[yhtio]' 
+									and tuoteno  = '$row[puhdas_tuoteno]' 
+									and $tunken1 = '$row[tunnus]'
+									LIMIT 1";
+						$sarjares = mysql_query($query) or pupe_error($query);
+						$sarjarow = mysql_fetch_array($sarjares);
+						
+						echo t("Er‰").": $sarjarow[sarjanumero]";
+						
+						if ($row["sarjanumeroseuranta"] == "F") {
+							echo " ".t("Parasta ennen").": ".tv1dateconv($sarjarow["parasta_ennen"]);
 						}
 					}
 					

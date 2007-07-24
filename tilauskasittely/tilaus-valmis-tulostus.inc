@@ -111,6 +111,7 @@
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "	SELECT tilausrivi.*,
 					round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
+					tuote.sarjanumeroseuranta,
 					$sorttauskentta,
 					$lisa2
 					FROM tilausrivi, tuote

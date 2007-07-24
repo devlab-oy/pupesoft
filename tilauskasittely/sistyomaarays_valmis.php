@@ -71,7 +71,7 @@
 					while ($lisarow = mysql_fetch_array($kres)) {
 						$ostohinta = 0;
 						
-						if ($lisarow["sarjanumeroseuranta"] != '') {
+						if ($lisarow["sarjanumeroseuranta"] == "S") {
 							//Hateaan lisävarusteen ostohinta
 							$query = "	SELECT round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl,2) ostohinta
 										FROM sarjanumeroseuranta 

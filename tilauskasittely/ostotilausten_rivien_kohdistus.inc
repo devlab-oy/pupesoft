@@ -169,7 +169,7 @@ if ($tila == 'uusirivi') {
 	}
 
 	$rivinotunnus = $otunnus;
-	$toimaika = date('Y')."-".date('n')."-".date('d');
+	$toimaika = date('Y')."-".date('m')."-".date('d');
 
 	require('syotarivi_ostotilaus.inc');
 	require('../inc/footer.inc');
@@ -180,11 +180,14 @@ if ($tila == 'uusirivi') {
 if ($tee == 'TI' or $tee == "Y") {
 	// Parametreja joita tarkistarivi tarvitsee
 	$laskurow["tila"] 	= "O";
-	//$toim_tarkistus 	= "EI"; // miksi ei haluttaisi tarkistaa???
 	$toim_tarkistus 	= "KYLLA!";
 	$prow["tuoteno"] 	= $tuoteno;
 	$prow["var"]		= $rivinvar;
 	$kukarow["kesken"]	= $rivinotunnus;
+
+	if (checkdate($toimkka,$toimppa,$toimvva)) {
+		$toimaika = $toimvva."-".$toimkka."-".$toimppa;
+	}
 
 	if ($hinta == "") {
 		$query = "	SELECT *
@@ -926,21 +929,33 @@ if ($tila == '') {
 		
 		echo "<br>$rivirow[toim_tuoteno]";
 
-		$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]'";
+		$query = "	SELECT sarjanumeroseuranta 
+					FROM tuote 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tuoteno = '$rivirow[tuoteno]'";
 		$sarjares = mysql_query($query) or pupe_error($query);
 		$sarjarow = mysql_fetch_array($sarjares);
 
 		if ($sarjarow["sarjanumeroseuranta"] != "") {
 			if ($rivirow["siskpl"] < 0) {
 				$tunken = "myyntirivitunnus";
+				$tunind = "yhtio_myyntirivi";
 			}
 			else {
 				$tunken = "ostorivitunnus";
+				$tunind = "yhtio_ostorivi";
 			}
 			
-			$query = "	select count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
-						from sarjanumeroseuranta
-						where yhtio = '$kukarow[yhtio]' 
+			if ($sarjarow["sarjanumeroseuranta"] == "S") {
+				$lisasarjalisays = "distinct";
+			}
+			else {
+				$lisasarjalisays = "";
+			}
+			
+			$query = "	SELECT count($lisasarjalisays sarjanumero) kpl, min(sarjanumero) sarjanumero
+						FROM sarjanumeroseuranta
+						WHERE yhtio = '$kukarow[yhtio]' 
 						and tuoteno = '$rivirow[tuoteno]' 
 						and $tunken = '$rivirow[rivitunnus]'";
 			$sarjares = mysql_query($query) or pupe_error($query);

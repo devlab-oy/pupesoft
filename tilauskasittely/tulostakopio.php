@@ -540,9 +540,10 @@
 		// Etsit‰‰n muutettavaa tilausta
 		$query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro, 
 					concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus, 
-					if(lasku.tapvm='0000-00-00', DATE_FORMAT(lasku.luontiaika, '%e.%c.%Y'), DATE_FORMAT(lasku.tapvm, '%e.%c.%Y')) Pvm, 
+					if(lasku.tapvm = '0000-00-00', lasku.luontiaika, lasku.tapvm) Pvm, 
 					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija, 
-					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa, DATE_FORMAT(toimaika, '%e.%c.%Y') Toimitusaika, 
+					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa, 
+					toimaika Toimitusaika, 
 					lasku.tila, lasku.alatila
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
@@ -577,7 +578,8 @@
 
 			for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
 				$jarj = $i+1;
-				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=$jarj'>".t(mysql_field_name($result,$i))."</a></th>";
+				
+				echo "<th><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=$jarj'>".t(mysql_field_name($result,$i))."</a></th>";
 			}
 			echo "<th>".t("Tyyppi")."</th>";
 
@@ -602,8 +604,19 @@
 
 				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 					
+					if ($i==4 or $i==6 or $i==7) {
+						$ali = " align='right' ";
+					}
+					else {
+						$ali = " align='left' ";
+					}
 					
-					echo "<$ero>$row[$i]</$ero>";
+					if ($i==4 or $i==7) {
+						echo "<$ero $ali>".tv1dateconv($row[$i])."</$ero>";
+					}
+					else {
+						echo "<$ero $ali>$row[$i]</$ero>";
+					}
 				}
 
 				$laskutyyppi = $row["tila"];
@@ -1013,17 +1026,7 @@
 					$tee = '';
 				}
 				else {
-					if ($yhtiorow['laskutyyppi'] == 0) {
-						require_once("tulosta_lasku.inc");
-					}
-					elseif ($yhtiorow['laskutyyppi'] == 2) {
-						require_once("tulosta_lasku_perhe.inc");
-					}
-					elseif ($yhtiorow['laskutyyppi'] == 4) {
-						require_once("tulosta_lasku_plain.inc");
-					} else {
-						require_once("tulosta_lasku_plain.inc");
-					}
+					require_once("tulosta_lasku.inc");
 
 					if ($laskurow["tila"] == 'U') {
 						$where = " uusiotunnus='$otunnus' ";
@@ -1070,14 +1073,13 @@
 					$arvo 	= 0;
 
 					// aloitellaan laskun teko
-					$firstpage = alku();
+					$page[$sivu] = alku();
 
 					while ($row = mysql_fetch_array($result)) {
-						rivi($firstpage);
+						rivi($page[$sivu]);
 					}
 
-					loppu($firstpage);
-					alvierittely ($firstpage);
+					alvierittely($page[$sivu]);
 
 					//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 					list($usec, $sec) = explode(' ', microtime());
@@ -1108,7 +1110,7 @@
 					system("rm -f $pdffilenimi");
 
 					unset($pdf);
-					unset($firstpage);					
+					unset($page);					
 					
 					if ($tee != 'NAYTATILAUS') {
 						echo t("Lasku tulostuu")."...<br>";
@@ -1556,6 +1558,7 @@
 				//generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
 				$query = "  SELECT tilausrivi.*,
 							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
+							tuote.sarjanumeroseuranta,
 							if(perheid = 0,
 								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
 								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)

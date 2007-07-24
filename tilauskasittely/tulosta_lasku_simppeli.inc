@@ -10,6 +10,7 @@ if (!function_exists('tulosta_lasku')) {
 		$query = "select tila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
 		$res=mysql_query($query) or pupe_error($query);
 		$laskurow=mysql_fetch_array($res);
+		
 		if ($laskurow["tila"] == 'U') {
 			$mika = "uusiotunnus";
 		}
@@ -28,10 +29,9 @@ if (!function_exists('tulosta_lasku')) {
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and if(laskunro>0, (select max(tunnus) from lasku l where l.yhtio=lasku.yhtio and l.laskunro=lasku.laskunro and l.tila='L'), lasku.tunnus)=laskun_lisatiedot.otunnus
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus					
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_kaupallinen ON laskun_lisatiedot.yhtio=yhteyshenkilo_kaupallinen.yhtio and laskun_lisatiedot.yhteyshenkilo_kaupallinen=yhteyshenkilo_kaupallinen.tunnus
-					LEFT JOIN kuka AS laatija ON laatija.yhtio='$kukarow[yhtio]' and lasku.laatija=laatija.kuka
+					LEFT JOIN kuka AS laatija ON laatija.yhtio=lasku.yhtio and lasku.laatija=laatija.kuka
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and lasku.tunnus  = '$otunnus'";
-					
+					and lasku.tunnus  = '$otunnus'";			
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 
@@ -116,6 +116,7 @@ if (!function_exists('tulosta_lasku')) {
 					//	Laitetaan perustiedot oikealle		
 					$h=260;
 					$s=$pdf->teeSarakkeet(array(105,30));
+					
 					if($laskurow["projekti"] > 0) {
 						//	Onko nippulla projektia?
 						$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
@@ -262,13 +263,13 @@ if (!function_exists('tulosta_lasku')) {
 		}
 		
 		// haetaan tilauksen kaikki rivit
-		$query = "  SELECT tilausrivi.*, if(perheid=0,rivihinta, (select sum(t.rivihinta) from tilausrivi t where $where and t.perheid=tilausrivi.perheid)) rivihinta, tuote.ei_saldoa ei_saldoa, tuote.tullinimike1, tuote.tullikohtelu, alkuperamaa,
+		$query = "  SELECT tilausrivi.*, if(perheid=0,rivihinta, (select sum(t.rivihinta) from tilausrivi t where t.yhtio='$kukarow[yhtio]' and $where and t.perheid=tilausrivi.perheid)) rivihinta, tuote.ei_saldoa ei_saldoa, tuote.tullinimike1, tuote.tullikohtelu, alkuperamaa,
 					$lisa $sorttauskentta
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno 
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-					WHERE $where and (perheid=0 or perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta='' or tilausrivin_lisatiedot.ei_nayteta IS NULL)
+					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and $where and (perheid=0 or perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta='' or tilausrivin_lisatiedot.ei_nayteta IS NULL)
 					GROUP BY tilausrivi.tunnus
 					ORDER BY otunnus, sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
@@ -774,7 +775,7 @@ if (!function_exists('tulosta_lasku')) {
 		fclose($fh);
 		
 		//	Jos ollaan verkkolaskumoduulissa tulostus hoidetaan toisella tapaa
-		if(!strpos($_SERVER["SCRIPT_NAME"], "tulostakopio.php")) {
+		if(!strpos($_SERVER["SCRIPT_NAME"], "tulostakopio.php") and !strpos($_SERVER["SCRIPT_NAME"], "tulostasisaiset.php")) {
 			//haetaan varaston tiedot
 			if ($yhtiorow["lasku_tulostin"] == "AUTOMAAGINEN_VALINTA") {
 				if ($varasto != 0) {
@@ -854,6 +855,7 @@ if (!function_exists('tulosta_lasku')) {
 								from kirjoittimet
 								where yhtio='$kukarow[yhtio]' and komento='$komento'";
 				$kires = mysql_query($querykieli) or pupe_error($querykieli);
+				
 				if(mysql_num_rows($kires) > 0) {
 					$kirow = mysql_fetch_array($kires);
 					echo t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";						
@@ -862,6 +864,7 @@ if (!function_exists('tulosta_lasku')) {
 					unset($returnvalue);
 					$line = exec("$komento $pdf_laskufilenimi", $output, $returnvalue);
 				}
+				
 				if(mysql_num_rows($result) == 0 or $returnvalue!=0) {
 					echo "<font class='error'>".t("Laskun tulostus epäonnistui")."!!!</font><br>\n";	
 				}

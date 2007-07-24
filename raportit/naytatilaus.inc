@@ -362,7 +362,7 @@
 				$sarjanutunnus = "ostorivitunnus";
 			}
 		}
-		$query = "	select *
+		$query = "	select distinct sarjanumero
 					from sarjanumeroseuranta
 					where yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$prow[tuoteno]'

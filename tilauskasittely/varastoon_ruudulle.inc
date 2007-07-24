@@ -203,7 +203,11 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 
 	//Keskihankintahintaa yll‰pidet‰‰n vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
-	if ($tuorow["sarjanumeroseuranta"] == "") {
+	if ($tuorow["sarjanumeroseuranta"] == "S") {
+		//Laitetaan kehahintamuuttujaan t‰m‰n keikan ostohinta jotta tapahtumat n‰ytt‰isiv‰t fiksuja lukuja
+		$kehahin = $ohinta;	
+	}
+	else {
 		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0) {
 			// kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa
 			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']),4);
@@ -212,10 +216,6 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 			// Jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n keikan hinnasta
 			$kehahin = round($ohinta,4);
 		}
-	}
-	else {
-		//Laitetaan kehahintamuuttujaan t‰m‰n keikan ostohinta jotta tapahtumat n‰ytt‰isiv‰t fiksuja lukuja
-		$kehahin = $ohinta;
 	}
 
 	echo "<tr>";
@@ -240,13 +240,13 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		<td align='right'>".sprintf('%.4f',$ohinta)."</td>
 		<td align='right'>".sprintf('%.4f',round($ohinta*$tilrivirow['varattu'],4))." $kuluteksti</td>";
 
-	if ($tuorow["sarjanumeroseuranta"] == "") {
-		echo "	<td align='right'>$tuorow[kehahin]</td>
-				<td align='right'>".sprintf('%.4f',$kehahin)."</td>";
-	}
-	else {
+	if ($tuorow["sarjanumeroseuranta"] == "S") {
 		echo "	<td align='right'></td>
 				<td align='right'></td>";
+	}
+	else {
+		echo "	<td align='right'>$tuorow[kehahin]</td>
+				<td align='right'>".sprintf('%.4f',$kehahin)."</td>";	
 	}
 
 	$chk = "";

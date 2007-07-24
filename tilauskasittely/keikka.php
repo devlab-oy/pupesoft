@@ -484,9 +484,20 @@ if ($toiminto == "" and $ytunnus != "") {
 				else {
 					$tunken = "ostorivitunnus";
 				}
+				
+				if ($sarjarow["sarjanumeroseuranta"] == "S") {
+					$lisasarjalisays = "distinct";
+				}
+				else {
+					$lisasarjalisays = "";
+				}
 
 				// tilausrivin tunnus pitää löytyä sarjanumeroseurannasta
-				$query = "select distinct sarjanumero from sarjanumeroseuranta use index (yhtio_ostorivi) where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and $tunken='$toimrow[tunnus]'";
+				$query = "	SELECT $lisasarjalisays sarjanumero 
+							FROM sarjanumeroseuranta use index (yhtio_ostorivi) 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$toimrow[tuoteno]' 
+							and $tunken = '$toimrow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon

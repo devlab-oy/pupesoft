@@ -339,7 +339,7 @@ if (!function_exists("pt_mm")) {
 }
 
 if (!function_exists("saldo_myytavissa")) {
-	function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '') {
+	function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
 
 		// Tämä funktio palauttaa myytävissä olevan saldon sallituista varastoista (tyyppi='')
 		// Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
@@ -468,18 +468,44 @@ if (!function_exists("saldo_myytavissa")) {
 			}
 
 			// Saldo varastoista
-			$query = "	SELECT tuotepaikat.*, varastopaikat.tyyppi
-						FROM tuotepaikat
-						LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
-						and $valinta1
-						concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
-						concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-						WHERE tuotepaikat.yhtio = '$yhtiolisa'
-						and tuotepaikat.tuoteno = '$tuoteno'
-						$valinta2
-						$valinta3";
+			if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {						
+				$query = "	SELECT count(sarjanumeroseuranta.sarjanumero) saldo, 
+							tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi, 
+							if(tilausrivi_myynti.laskutettuaika is null, '0000-00-00', tilausrivi_myynti.laskutettuaika) laskutettuaika
+							FROM tuotepaikat
+							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
+							and $valinta1
+							concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+							concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+							JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero)  ON sarjanumeroseuranta.yhtio = tuotepaikat.yhtio 
+							and sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno  
+							and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
+							and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro
+							and sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
+							and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
+							and sarjanumeroseuranta.sarjanumero = '$era'
+							JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.laskutettuaika != '0000-00-00'
+							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+							WHERE tuotepaikat.yhtio = '$yhtiolisa'
+							and tuotepaikat.tuoteno = '$tuoteno'
+							$valinta2
+							GROUP BY tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi
+							HAVING laskutettuaika = '0000-00-00' ".str_replace("HAVING", "and", $valinta3);
+			}
+			else {
+				$query = "	SELECT tuotepaikat.*, varastopaikat.tyyppi
+							FROM tuotepaikat
+							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
+							and $valinta1
+							concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+							concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+							WHERE tuotepaikat.yhtio = '$yhtiolisa'
+							and tuotepaikat.tuoteno = '$tuoteno'
+							$valinta2
+							$valinta3";
+			}
 			$result = mysql_query($query) or die($query);
-
+			
 			if (mysql_num_rows($result) == 0) {
 				return array(FALSE, FALSE, FALSE, FALSE);
 			}
@@ -495,84 +521,139 @@ if (!function_exists("saldo_myytavissa")) {
 					$saldo += $row["saldo"];
 
 					// Myyntirivien, varastosiirtojen ja valmistusten ennakkopoistot ja kerätyt rivit
-					$query = "	SELECT
-								ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,
-								ifnull(sum(tilausrivi.varattu),0) varattu
-								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-								WHERE tilausrivi.yhtio = '$yhtiolisa'
-								and tilausrivi.tyyppi in ('L','G','V')
-								and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
-								and tilausrivi.tuoteno = '$tuoteno'
-								and tilausrivi.varattu > 0
-								and tilausrivi.hyllyalue = '$row[hyllyalue]'
-								and tilausrivi.hyllynro  = '$row[hyllynro]'
-								and tilausrivi.hyllyvali = '$row[hyllyvali]'
-								and tilausrivi.hyllytaso = '$row[hyllytaso]'
-								$kerayslisa ";
+					if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+						$query = "	SELECT
+									ifnull(sum(if(tilausrivi.keratty!='' and tilausrivi.keratty is not null, 1, 0)),0) keratty,
+									ifnull(sum(1),0) varattu
+									FROM sarjanumeroseuranta
+									JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.laskutettuaika != '0000-00-00'
+									JOIN tilausrivi use index (yhtio_tyyppi_tuoteno_varattu) ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+									and tilausrivi.tuoteno   = sarjanumeroseuranta.tuoteno
+									and tilausrivi.hyllyalue = sarjanumeroseuranta.hyllyalue
+									and tilausrivi.hyllynro  = sarjanumeroseuranta.hyllynro
+									and tilausrivi.hyllyvali = sarjanumeroseuranta.hyllyvali
+									and tilausrivi.hyllytaso = sarjanumeroseuranta.hyllytaso
+									and tilausrivi.tyyppi in ('L','G','V')
+									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+									and tilausrivi.varattu > 0
+									and tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus
+									$kerayslisa
+									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+									WHERE sarjanumeroseuranta.yhtio 	= '$yhtiolisa'
+									and sarjanumeroseuranta.tuoteno 	= '$tuoteno'
+									and sarjanumeroseuranta.hyllyalue 	= '$row[hyllyalue]'
+									and sarjanumeroseuranta.hyllynro  	= '$row[hyllynro]'
+									and sarjanumeroseuranta.hyllyvali 	= '$row[hyllyvali]'
+									and sarjanumeroseuranta.hyllytaso 	= '$row[hyllytaso]'
+									and sarjanumeroseuranta.myyntirivitunnus > 0
+									and sarjanumeroseuranta.sarjanumero	= '$era'";
+					}
+					else {
+						$query = "	SELECT
+									ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty,
+									ifnull(sum(tilausrivi.varattu),0) varattu
+									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+									WHERE tilausrivi.yhtio = '$yhtiolisa'
+									and tilausrivi.tyyppi in ('L','G','V')
+									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+									and tilausrivi.tuoteno = '$tuoteno'
+									and tilausrivi.varattu > 0
+									and tilausrivi.hyllyalue = '$row[hyllyalue]'
+									and tilausrivi.hyllynro  = '$row[hyllynro]'
+									and tilausrivi.hyllyvali = '$row[hyllyvali]'
+									and tilausrivi.hyllytaso = '$row[hyllytaso]'
+									$kerayslisa";
+					}
+										
 					$ennresult = mysql_query($query) or die($query);
 					$ennrow = mysql_fetch_array($ennresult);
 
 					$myytavissa += $row["saldo"] - $ennrow["varattu"] - $row["saldo_varattu"];
-					$hyllyssa   += $row["saldo"] - $ennrow["keratty"];
-
-					// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon
+					$hyllyssa   += $row["saldo"] - $ennrow["keratty"];					
+										
 					if ($pvm != '') {
-						$query = "	SELECT
-									ifnull(sum(tilausrivi.varattu),0)*-1 varattu
-									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu), lasku use index (primary)
-									WHERE tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-									and tilausrivi.yhtio = '$yhtiolisa'
-									and tilausrivi.tyyppi = 'W'
-									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
-									and tilausrivi.tuoteno = '$tuoteno'
-									and tilausrivi.varattu > 0
-									and tilausrivi.hyllyalue = '$row[hyllyalue]'
-									and tilausrivi.hyllynro  = '$row[hyllynro]'
-									and tilausrivi.hyllyvali = '$row[hyllyvali]'
-									and tilausrivi.hyllytaso = '$row[hyllytaso]'
-									and tilausrivi.kerayspvm <= '$pvm'
-									and lasku.tilaustyyppi = 'W'";
+						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon
+						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+							$query = "	SELECT
+										ifnull(sum(tilausrivi.varattu),0) varattu
+										FROM sarjanumeroseuranta
+										JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.laskutettuaika  != '0000-00-00'
+										JOIN tilausrivi use index (yhtio_tyyppi_tuoteno_varattu) ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+										and tilausrivi.tuoteno   = sarjanumeroseuranta.tuoteno  
+										and tilausrivi.hyllyalue = sarjanumeroseuranta.hyllyalue
+										and tilausrivi.hyllynro  = sarjanumeroseuranta.hyllynro
+										and tilausrivi.hyllyvali = sarjanumeroseuranta.hyllyvali
+										and tilausrivi.hyllytaso = sarjanumeroseuranta.hyllytaso
+										and tilausrivi.tyyppi	 = 'W'
+										and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+										and tilausrivi.varattu 	 > 0
+										and tilausrivi.kerayspvm <= '$pvm'
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
+										WHERE sarjanumeroseuranta.yhtio 		 = '$yhtiolisa'
+										and sarjanumeroseuranta.tuoteno 		 = '$tuoteno'
+										and sarjanumeroseuranta.hyllyalue 		 = '$row[hyllyalue]'
+										and sarjanumeroseuranta.hyllynro  		 = '$row[hyllynro]'
+										and sarjanumeroseuranta.hyllyvali 		 = '$row[hyllyvali]'
+										and sarjanumeroseuranta.hyllytaso 		 = '$row[hyllytaso]'
+										and sarjanumeroseuranta.myyntirivitunnus = 0
+										and sarjanumeroseuranta.sarjanumero		 = '$era'";
+						}
+						else {
+							$query = "	SELECT
+										ifnull(sum(tilausrivi.varattu),0) varattu
+										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+										JOIN lasku use index (primary) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tilaustyyppi = 'W'
+										WHERE tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+										and tilausrivi.yhtio = '$yhtiolisa'
+										and tilausrivi.tyyppi = 'W'
+										and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+										and tilausrivi.tuoteno = '$tuoteno'
+										and tilausrivi.varattu > 0
+										and tilausrivi.hyllyalue = '$row[hyllyalue]'
+										and tilausrivi.hyllynro  = '$row[hyllynro]'
+										and tilausrivi.hyllyvali = '$row[hyllyvali]'
+										and tilausrivi.hyllytaso = '$row[hyllytaso]'
+										and tilausrivi.kerayspvm <= '$pvm'";
+						}
 						$valmresult = mysql_query($query) or die($query);
 						$valmrow = mysql_fetch_array($valmresult);
 
-						$myytavissa -= $valmrow["varattu"];
-
-						$query = "	SELECT
-									ifnull(sum(tilausrivi.varattu),0)*-1 varattu
-									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-									WHERE tilausrivi.yhtio = '$yhtiolisa'
-									and tilausrivi.tyyppi = '0'
-									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
-									and tilausrivi.tuoteno = '$tuoteno'
-									and tilausrivi.varattu > 0
-									and tilausrivi.hyllyalue = '$row[hyllyalue]'
-									and tilausrivi.hyllynro  = '$row[hyllynro]'
-									and tilausrivi.hyllyvali = '$row[hyllyvali]'
-									and tilausrivi.hyllytaso = '$row[hyllytaso]'
-									and tilausrivi.toimaika <= '$pvm'";
-						$ostresult = mysql_query($query) or die($query);
-						$ostrow = mysql_fetch_array($ostresult);
-
-						$myytavissa -= $ostrow["varattu"];
+						$myytavissa += $valmrow["varattu"];
 					}
 				}
-
+				
+				
 				// jos lasketaan tulevaisuuteen niin otetaan ostorivit huomioon
 				if ($pvm != '') {
-
-					$query = "	SELECT
-								ifnull(sum(tilausrivi.varattu),0)*-1 varattu
-								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-								WHERE tilausrivi.yhtio = '$yhtiolisa'
-								and tilausrivi.tyyppi = 'O'
-								and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
-								and tilausrivi.tuoteno = '$tuoteno'
-								and tilausrivi.varattu > 0
-								and tilausrivi.toimaika <= '$pvm'";
+					if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+						$query = "	SELECT
+									ifnull(sum(tilausrivi.varattu),0) varattu
+									FROM sarjanumeroseuranta
+									JOIN tilausrivi use index (yhtio_tyyppi_tuoteno_varattu) ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+									and tilausrivi.tuoteno = sarjanumeroseuranta.tuoteno  
+									and tilausrivi.tyyppi  = 'O'
+									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+									and tilausrivi.varattu > 0
+									and tilausrivi.toimaika <= '$pvm'
+									WHERE sarjanumeroseuranta.yhtio 	 = '$yhtiolisa'
+									and sarjanumeroseuranta.tuoteno 	 = '$tuoteno'
+									and sarjanumeroseuranta.sarjanumero	 = '$era'";
+					}
+					else {
+						$query = "	SELECT
+									ifnull(sum(tilausrivi.varattu),0) varattu
+									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+									WHERE tilausrivi.yhtio 	= '$yhtiolisa'
+									and tilausrivi.tyyppi 	= 'O'
+									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+									and tilausrivi.tuoteno 	= '$tuoteno'
+									and tilausrivi.varattu 	> 0
+									and tilausrivi.toimaika <= '$pvm'";
+					}
 					$ostresult = mysql_query($query) or die($query);
 					$ostrow = mysql_fetch_array($ostresult);
 
-					$myytavissa -= $ostrow["varattu"];
+					$myytavissa += $ostrow["varattu"];
 				}
 
 
@@ -1487,7 +1568,6 @@ if (!function_exists("jalkilaskentafunktio")) {
 		require("tilauskasittely/jalkilaskenta.inc");
 	}
 }
-
 
 if (!function_exists("tuotteen_myyntihinta")) {
 	function tuotteen_myyntihinta ($laskurow, $trow, $kpl) {

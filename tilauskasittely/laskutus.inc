@@ -174,7 +174,7 @@ else {
 				}
 			}
 			
-			if ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] > 0) {
+			if ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] > 0) {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
 				
 				// Tuotteen ostohinta
@@ -222,7 +222,7 @@ else {
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";
 			}
-			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
+			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
 				
 				// Kate = 0
@@ -232,7 +232,7 @@ else {
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "tulo";
 			}
-			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] != "" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
+			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
 				
 				//T‰h‰n hyvitysriviin liitetyt sarjanumerot
@@ -455,8 +455,11 @@ else {
 				and yhtio	 = '$kukarow[yhtio]'";
 	$laskutusres = mysql_query($query) or pupe_error($query);
 	
-	$id = 0; // Ei en‰‰ kesken
+	$id = 0; 
 	
+	// Ei en‰‰ kesken
+	$query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kesken='$kukarow[kesken]'";
+	$laskutusres = mysql_query($query) or pupe_error($query);	
 } // end tilaus ei lˆydy else haara
 
 //echotaan rudulle jos kyseess‰ ei ole batch-ajo

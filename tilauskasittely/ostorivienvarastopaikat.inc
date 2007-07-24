@@ -173,11 +173,11 @@ if ($tee == "valmis") {
 							and tyyppi		= 'O'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				//Päivitetään myös sarjanumero-oliot jos meillä on niitä
+				// Päivitetään myös sarjanumero-oliot jos meillä on niitä
 				$query = "	SELECT sarjanumeroseuranta
 							FROM tuote
-							WHERE yhtio='$kukarow[yhtio]'
-							and tuoteno='$tilausrivirow[tuoteno]'";
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$tilausrivirow[tuoteno]'";
 				$tres = mysql_query($query) or pupe_error($query);
 				$trow = mysql_fetch_array($tres);
 
@@ -190,6 +190,7 @@ if ($tee == "valmis") {
 								muuttaja		= '$kukarow[kuka]', 
 								muutospvm		= now()
 								WHERE yhtio			= '$kukarow[yhtio]'
+								and tuoteno 		= '$tilausrivirow[tuoteno]'
 								and ostorivitunnus	= '$tilausrivirow[tunnus]'";
 					$result = mysql_query($query) or pupe_error($query);
 				}

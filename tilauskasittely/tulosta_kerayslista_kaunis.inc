@@ -381,6 +381,28 @@ if (!function_exists('rivi')) {
 
 			
 			$kala = $kala - $rivinkorkeus;
+			
+			if ($row["sarjanumeroseuranta"] != "") {
+				$query	= "	SELECT distinct sarjanumero, parasta_ennen
+		   					FROM sarjanumeroseuranta
+		   					WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+		   					and myyntirivitunnus = '$row[tunnus]'
+		   					LIMIT 1";
+		   		$sarjares = mysql_query($query) or pupe_error($query);
+		   		
+				while ($sarjarow = mysql_fetch_array($sarjares)) {
+					if ($row["sarjanumeroseuranta"] == "S") {
+						$row["kommentti"] .= " \n".t("S:nro").": ".$sarjarow["sarjanumero"];		
+					}
+					elseif ($row["sarjanumeroseuranta"] == "E") {
+						$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"];	
+					}
+					elseif ($row["sarjanumeroseuranta"] == "F") {
+						$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen").": ".tv1dateconv($sarjarow["parasta_ennen"]);	
+					}
+				}
+			}
 
 			if (trim($row["kommentti"]) != '' or $row["tilaajanrivinro"] != 0) {
 

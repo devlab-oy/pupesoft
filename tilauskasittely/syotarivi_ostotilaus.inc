@@ -38,8 +38,8 @@
 	}
 
 	echo "<td>$kpl</td>
-		<td><input type='text' size='5' name='kpl' value='$kpl'></td>
-		<td><input type='text' size='5' name='hinta' value = '$hinta'></td>
+		<td><input type='text' size='7' name='kpl' value='$kpl'></td>
+		<td><input type='text' size='7' name='hinta' value = '$hinta'></td>
 		<td><input type='text' size='5' name='ale' value = '$ale'></td>";
 
 	if ($alv=='') $alv=$laskurow['alv'];

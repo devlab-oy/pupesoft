@@ -1244,6 +1244,7 @@ if ($tee == '') {
 						<input type='hidden' name='projektilla' value='$projektilla'>
 						<input type='hidden' name='aktivoinnista' value='true'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+				
 				if ($jt_kayttoliittyma == "kylla") {
 					echo "	<input type='hidden' name='jt_kayttoliittyma' value=''>
 							<input type='submit' value='".t("Piilota JT-rivit")."' Style='font-size: 8pt; padding:0;'>";
@@ -1894,22 +1895,22 @@ if ($tee == '') {
 
 		$query	= "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta
 					FROM tilausrivi use index (PRIMARY)
-					LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.otunnus = '$kukarow[kesken]'
 					and tilausrivi.tunnus  = '$rivitunnus'";
 		$result = mysql_query($query) or pupe_error($query);
-
+				
 		if (mysql_num_rows($result) == 1) {
 
-			$tilausrivi  = mysql_fetch_array($result);
+			$tilausrivi = mysql_fetch_array($result);
 
 			// Poistetaan muokattava tilausrivi
-			$query = "	DELETE from tilausrivi
+			$query = "	DELETE FROM tilausrivi
 						WHERE tunnus = '$rivitunnus'";
 			$result = mysql_query($query) or pupe_error($query);
-
-			// Tehdään pari juttua jos tuote on sarjanuerosaurannassa
+			
+			// Tehdään pari juttua jos tuote on sarjanumeroseurannassa
 			if ($tilausrivi["sarjanumeroseuranta"] != '') {
 				//Nollataan sarjanumero
 				if ($tilausrivi["varattu"] < 0) {
@@ -1919,24 +1920,31 @@ if ($tee == '') {
 					$tunken = "myyntirivitunnus";
 				}
 
-				$query = "SELECT tunnus FROM sarjanumeroseuranta WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivi[tuoteno]' and $tunken='$tilausrivi[tunnus]'";
+				$query = "	SELECT group_concat(tunnus) tunnukset 
+							FROM sarjanumeroseuranta 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$tilausrivi[tuoteno]' 
+							and $tunken = '$tilausrivi[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 				$sarjarow = mysql_fetch_array($sarjares);
 
 				//Pidetään sarjatunnus muistissa
 				if ($tapa != "POISTA") {
-					$myy_sarjatunnus = $sarjarow["tunnus"];
+					$myy_sarjatunnus = $sarjarow["tunnukset"];					
 				}
 
 				// pitäisikö tässä poistaa myös rivit ostokeiseissä niinkuin POISTA ja HYLKAATARJOUS keisseissä
-				$query = "update sarjanumeroseuranta set $tunken=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilausrivi[tuoteno]' and $tunken='$tilausrivi[tunnus]'";
-				$sarjares = mysql_query($query) or pupe_error($query);
-
+				$query = "	UPDATE sarjanumeroseuranta 
+							SET $tunken = 0 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$tilausrivi[tuoteno]' 
+							and $tunken = '$tilausrivi[tunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);				
 			}
-
+			
 			// Poistetaan myös tuoteperheen lapset
 			if ($tapa != "VAIHDA") {
-				$query = "	DELETE from tilausrivi
+				$query = "	DELETE FROM tilausrivi
 							WHERE perheid 	= '$rivitunnus'
 							and otunnus		= '$kukarow[kesken]'
 							and yhtio		= '$kukarow[yhtio]'";
@@ -2992,7 +3000,7 @@ if ($tee == '') {
 						echo "</select></form>";
 
 
-						if($yhtiorow['tilauksen_kohteet'] == 'K' and $lasklisatied_row["asiakkaan_kohde"]>0) {
+						if($yhtiorow['tilauksen_kohteet'] == 'K' and $lasklisatied_row["asiakkaan_kohde"] > 0) {
 							$posq = "SELECT * FROM asiakkaan_positio WHERE yhtio = '$kukarow[yhtio]' and asiakkaan_kohde = '$lasklisatied_row[asiakkaan_kohde]'";
 							$posres = mysql_query($posq) or pupe_error($posq);
 
@@ -3100,11 +3108,31 @@ if ($tee == '') {
 						$varastoro = mysql_fetch_array($varastore);
 
 						if (strtoupper($varastoro['maa']) != strtoupper($yhtiorow['maa'])) {
-							echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varastoro['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
+							echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varastoro['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
 						}
 						else {
-							echo "<td $class align='left' valign='top'>$row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
+							echo "<td $class align='left' valign='top'>$row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
 						}
+						
+						if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and !in_array($row["var"], array('P','J','S','T','U'))) {
+					   		$query	= "	SELECT sarjanumeroseuranta.sarjanumero era, sarjanumeroseuranta.parasta_ennen
+					   					FROM sarjanumeroseuranta
+					   					WHERE yhtio = '$kukarow[yhtio]'
+										and tuoteno = '$row[tuoteno]'
+					   					and myyntirivitunnus = '$row[tunnus]'
+					   					LIMIT 1";
+					   		$sarjares = mysql_query($query) or pupe_error($query);
+					   		$sarjarow = mysql_fetch_array($sarjares);
+							
+								
+							echo ", $sarjarow[era]";
+
+							if ($trow["sarjanumeroseuranta"] == "F") {
+								echo " ".tv1dateconv($sarjarow["parasta_ennen"]);
+							}
+						}
+						
+						echo "</td>";
 					}
 				}
 				elseif($kukarow['extranet'] == '') {
@@ -3136,7 +3164,7 @@ if ($tee == '') {
 				}
 
 				// Näytetäänkö sarjanumerolinkki
-				if ($row["sarjanumeroseuranta"] != "" and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
+				if ($row["sarjanumeroseuranta"] == "S" and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
 
 					if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 						$tunken1 = "siirtorivitunnus";
@@ -3193,7 +3221,7 @@ if ($tee == '') {
 					}
 
 
-					if ($kpl_ruudulle < 0 and $row["sarjanumeroseuranta"] != "") {
+					if ($kpl_ruudulle < 0 and $row["sarjanumeroseuranta"] == "S") {
 
 						echo "<td $class align='right' valign='top' nowrap>";
 
@@ -3298,7 +3326,7 @@ if ($tee == '') {
 						// Tän rivin kate
 						$kate = 0;
 
-						if ($kukarow['extranet'] == '' and $row["sarjanumeroseuranta"] != "") {
+						if ($kukarow['extranet'] == '' and $row["sarjanumeroseuranta"] == "S") {
 							
 							if ($kpl > 0) {
 								//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
@@ -3760,9 +3788,13 @@ if ($tee == '') {
 						$rivikate 		= 0;	// Rivin kate yhtiön valuutassa
 						$rivikate_eieri	= 0;	// Rivin kate yhtiön valuutassa ilman erikoisalennusta
 
-						if ($arow["sarjanumeroseuranta"] != "") {
+						if ($arow["sarjanumeroseuranta"] == "S") {
 
-							$query = "select ostorivitunnus from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$arow[tuoteno]' and myyntirivitunnus='$arow[tunnus]'";
+							$query = "	SELECT ostorivitunnus 
+										from sarjanumeroseuranta 
+										where yhtio = '$kukarow[yhtio]' 
+										and tuoteno = '$arow[tuoteno]' 
+										and myyntirivitunnus = '$arow[tunnus]'";
 							$sarjares = mysql_query($query) or pupe_error($query);
 							$sarjarow = mysql_fetch_array($sarjares);
 

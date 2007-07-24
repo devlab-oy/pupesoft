@@ -1,4 +1,5 @@
 <?php
+
 ///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 $useslave = 1;
 
@@ -348,7 +349,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	$query = "	SELECT
 				$merkkilisa1
 				sum(
-					if(	tuote.sarjanumeroseuranta = '', tuotepaikat.saldo*if(tuote.epakurantti1pvm='0000-00-00', tuote.kehahin, tuote.kehahin/2),
+					if(	tuote.sarjanumeroseuranta = 'S', 
 						(	SELECT tuotepaikat.saldo*if(tuote.epakurantti1pvm='0000-00-00', avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl), avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)/2)
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -356,7 +357,8 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 							WHERE sarjanumeroseuranta.yhtio = tuotepaikat.yhtio and sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno
 							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'
-						)
+						), 
+						tuotepaikat.saldo*if(tuote.epakurantti1pvm='0000-00-00', tuote.kehahin, tuote.kehahin/2)
 					)
 				) varasto
 				FROM tuotepaikat

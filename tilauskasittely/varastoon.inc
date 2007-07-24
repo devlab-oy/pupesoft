@@ -158,7 +158,11 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	$ohinta  = round($ohinta / $tilrivirow['varattu'],4); // yhden tuotteen hinta kaikkine kuluineen
 
 	//Keskihankintahintaa yll‰pidet‰‰n vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
-	if ($tuorow["sarjanumeroseuranta"] == "") {
+	if ($tuorow["sarjanumeroseuranta"] == "S") {
+		//Laitetaan kehahintamuuttujaan t‰m‰n keikan ostohinta jotta tapahtumat n‰ytt‰isiv‰t fiksuja lukuja
+		$kehahin = $ohinta;
+	}
+	else {
 		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0) {
 			// kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa
 			if ($debug >= 1) echo "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: kehahin = ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu])</font><br>";
@@ -167,11 +171,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		else {
 			// Jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n keikan hinnasta
 			$kehahin = round($ohinta,4);
-		}
-	}
-	else {
-		//Laitetaan kehahintamuuttujaan t‰m‰n keikan ostohinta jotta tapahtumat n‰ytt‰isiv‰t fiksuja lukuja
-		$kehahin = $ohinta;
+		}	
 	}
 
 	$summa += round($ohinta*$tilrivirow['varattu'],2);
@@ -200,11 +200,11 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$resultxxx = mysql_query($query) or pupe_error($query);
 
 
-		if ($tuorow["sarjanumeroseuranta"] == "") {
-			$kehalis = " kehahin = '$kehahin', ";
+		if ($tuorow["sarjanumeroseuranta"] == "S") {
+			$kehalis = "";
 		}
 		else {
-			$kehalis = "";
+			$kehalis = " kehahin = '$kehahin', ";
 		}
 
 		// p‰ivitet‰‰n tuote
@@ -357,13 +357,13 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		<td align='right'>" . round($ohinta*$tilrivirow['varattu'],2) . " $kuluteksti</td>";
 
 
-	if ($tuorow["sarjanumeroseuranta"] == "") {
-		echo "	<td align='right'>$tuorow[kehahin]</td>
-				<td align='right'>$kehahin $uusikehahin</td>";
-	}
-	else {
+	if ($tuorow["sarjanumeroseuranta"] == "S") {
 		echo "	<td align='right'></td>
 				<td align='right'></td>";
+	}
+	else {
+		echo "	<td align='right'>$tuorow[kehahin]</td>
+				<td align='right'>$kehahin $uusikehahin</td>";
 	}
 
 	if ($tilrivirow["var"] != '') {

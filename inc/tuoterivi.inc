@@ -210,17 +210,16 @@
 
 			$ulos = "<td><select name='$nimi'>";
 
-			$sel1=$sel2="";
+			$sel = array();
+			$sel[$trow[$i]] = "selected";
 
-			if ($trow[$i] == '') {
-				$sel1 = "selected";
-			}
-			if ($trow[$i] == 'S') {
-				$sel2 = "selected";
-			}
-
-			$ulos .= "<option value = ''  $sel1>".t("Ei seurantaa")."</option>";
-			$ulos .= "<option value = 'S' $sel2>".t("Sarjanumeroseuranta")."</option>";
+			$ulos .= "<option value = ''>".t("Ei seurantaa")."</option>";
+			$ulos .= "<option value = 'S' $sel[S]>".t("Sarjanumeroseuranta")."</option>";
+			$ulos .= "<option value = 'E' $sel[E]>".t("Eränumeroseuranta")."</option>";
+			$ulos .= "<option value = 'F' $sel[F]>".t("Eränumeroseuranta parasta-ennen päivällä")."</option>";
+			
+			
+			
 			$ulos .= "</select></td>";
 			$jatko = 0;
 		}

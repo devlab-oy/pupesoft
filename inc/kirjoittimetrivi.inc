@@ -20,6 +20,7 @@
 				<option value='2' $sel[2]>DOS</option>
 				<option value='3' $sel[3]>ANSI</option>
 				<option value='4' $sel[4]>UTF8</option>
+				<option value='5' $sel[5]>Scandic off</option>
 				</select></td>";
 			$jatko = 0;
 	}

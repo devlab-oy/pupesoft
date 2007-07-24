@@ -670,40 +670,40 @@ if (!function_exists("lpr")) {
 			$kirjoitin = mysql_fetch_array($kirre);
 		}
 
-		$pipe = popen("$kirjoitin[komento]", 'w');
+		$pipe = popen($kirjoitin["komento"], 'w');
 
 		if (!$pipe) {
 			echo "pipe failed";
 			return;
 		}
 
-		// sallitut merkit, muut menee spaceks...
-		$str = ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#]\n", " ", $str);
+		// sallitut merkit listattu, kaikki muut menee spaceks...
+		$str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n]", " ", $str);
 
 		// merkistökonversio
-		$from = array ('ä','å','ö','Ä','Å','Ö','|');
+		$from = array('ä','å','ö','Ä','Å','Ö','|');
 
 		if ($kirjoitin["merkisto"] == 1) {
-			$to	= array ('{','}','|','[',']','\\',chr(179));										// 7 bittiset
+			$to	= array('{','}','|','[',']','\\',chr(179));											// 7 bittiset
 			$str = str_replace($from, $to, $str);
-//			echo "<font class='message'>Konvertoidaan tuloste 7-bittiseen merkistöön.</font><br>";
 		}
 		elseif ($kirjoitin["merkisto"] == 2) {
-			$to	= array (chr(132),chr(134),chr(148),chr(142),chr(143),chr(153),chr(179));			// DOS charset
+			$to	= array(chr(132),chr(134),chr(148),chr(142),chr(143),chr(153),chr(179));			// DOS charset
 			$str = str_replace($from, $to, $str);
-//			echo "<font class='message'>Konvertoidaan tuloste DOS merkistöön.</font><br>";
 		}
 		elseif ($kirjoitin["merkisto"] == 3) {
-			$to	= array (chr(228),chr(229),chr(246),chr(196),chr(197),chr(214),chr(124));			// ANSI charset
+			$to	= array(chr(228),chr(229),chr(246),chr(196),chr(197),chr(214),chr(124));			// ANSI charset
 			$str = str_replace($from, $to, $str);
-//			echo "<font class='message'>Konvertoidaan tuloste ANSI merkistöön.</font><br>";
 		}
 		elseif ($kirjoitin["merkisto"] == 4) {
 			$str = utf8_encode($str);																// UTF8 charset käännös suoraan yhellä rivillä
-//			echo "<font class='message'>Konvertoidaan tuloste UTF8 merkistöön.</font><br>";
+		}
+		elseif ($kirjoitin["merkisto"] == 5) {
+			$to	= array('a','a','o','A','A','O',' ');												// Ääkköset kokonaan pois
+			$str = str_replace($from, $to, $str);
 		}
 
-		fputs($pipe,$str);
+		fputs($pipe, $str);
 		pclose($pipe);
 	}
 }

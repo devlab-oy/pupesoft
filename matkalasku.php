@@ -254,7 +254,6 @@ if ($tee == "MUOKKAA") {
 							kustp= '',
 							tapvm = '$laskurow[tapvm]',
 							vero = '',
-							lukko = '',
 							tosite = '$tositenro',
 							laatija = '$kukarow[kuka]',
 							laadittu = now()";

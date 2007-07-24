@@ -678,7 +678,7 @@ if (!function_exists("lpr")) {
 		}
 
 		// sallitut merkit, muut menee spaceks...
-		$str = ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#]", " ", $str);
+		$str = ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#]\n", " ", $str);
 
 		// merkistökonversio
 		$from = array ('ä','å','ö','Ä','Å','Ö','|');

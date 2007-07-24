@@ -670,6 +670,17 @@ if (!function_exists("lpr")) {
 			$kirjoitin = mysql_fetch_array($kirre);
 		}
 
+		$pipe = popen("$kirjoitin[komento]", 'w');
+
+		if (!$pipe) {
+			echo "pipe failed";
+			return;
+		}
+
+		// sallitut merkit, muut menee spaceks...
+		$str = ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#]", " ", $str);
+
+		// merkistökonversio
 		$from = array ('ä','å','ö','Ä','Å','Ö','|');
 
 		if ($kirjoitin["merkisto"] == 1) {
@@ -688,12 +699,8 @@ if (!function_exists("lpr")) {
 			$str = utf8_encode($str);														// UTF8 charset käännös suoraan yhellä rivillä
 		}
 
-		$str = ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+()%#\n]", " ", $str);
-
-		$tmpfile = "/tmp/" . md5(uniqid(rand(),true)) . ".txt";
-		file_put_contents($tmpfile, $str);
-		exec("$kirjoitin[komento] $tmpfile");
-		unlink($tmpfile);
+		fputs($pipe,$str);
+		pclose($pipe);
 	}
 }
 

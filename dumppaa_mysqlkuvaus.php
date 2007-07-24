@@ -9,10 +9,10 @@
 
 	//Hardcoodataan failin nimi /tmp diririkkaan
 	$tmpfilenimi = $kukarow["yhtio"]."_mysqlkuvays.sql";
-	
+
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
-			readfile("/tmp/".$tmpfilenimi);			
+			readfile("/tmp/".$tmpfilenimi);
 			exit;
 		}
 	}
@@ -21,16 +21,16 @@
 
 
 		$ulos = array();
-		
+
 		///usr/bin/mysqldump --> toimii ainakin fedorassa ja ubuntussa by default
-		$kala = exec("/usr/bin/mysqldump -u $dbuser --password=$dbpass $dbkanta --no-data", $ulos);
-		
+		$kala = exec("/usr/bin/mysqldump -u $dbuser --host=$dbhost --password=$dbpass $dbkanta --no-data", $ulos);
+
 		if (!$toot = fopen("/tmp/".$tmpfilenimi, "w")) die("Filen /tmp/$tmpfilenimi luonti epäonnistui!");
-				
+
 		foreach($ulos as $print) {
-			fputs($toot, $print."\r\n");		
+			fputs($toot, $print."\r\n");
 		}
-		
+
 		echo "<table>";
 		echo "<tr><th>".t("Tallenna tulos").":</th>";
 		echo "<form method='post' action='$PHP_SELF'>";
@@ -39,9 +39,9 @@
 		echo "<input type='hidden' name='tmpfilenimi' value='$tmpfilenimi'>";
 		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 		echo "</table><br>";
-		
+
 		foreach($ulos as $print) {
-			echo "$print<br>";			
+			echo "$print<br>";
 		}
 
 		require("inc/footer.inc");

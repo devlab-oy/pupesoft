@@ -1197,9 +1197,6 @@
 							}
 
 							if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-								// Yksikköhinta
-								$tilrow["hinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"]), 2);
-
 								// Rivihinta
 								if ($yhtiorow["alv_kasittely"] == '') {
 									$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100) / (1+$tilrow["alv"]/100), 2);
@@ -1207,6 +1204,8 @@
 								else {
 									$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100), 2);
 								}
+								// Yksikköhinta
+								$tilrow["hinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"]), 2);
 							}
 
 							$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);

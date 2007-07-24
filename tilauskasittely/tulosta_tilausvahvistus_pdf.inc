@@ -517,7 +517,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 				$kutsu = "Tilausvahvistus $laskurow[tunnus]";				
 			}
 
-			echo t("Tilausvahvistus l‰hetet‰‰n osoitteeseen '$kukarow[eposti]'")."...\n";
+			echo t("Tilausvahvistus l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...\n";
 
 			if ($kukarow["extranet"] == '') {
 				require("../inc/sahkoposti.inc");

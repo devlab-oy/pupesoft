@@ -835,7 +835,7 @@ if (!function_exists('tulosta_lasku')) {
 				$liite = $pdf_laskufilenimi;
 				$kutsu = ucfirst(strtolower($otsikko))." $laskurow[laskunro]";
 				
-				echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen '$kukarow[eposti]'")."...<br>";
+				echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...<br>";
 
 				if ($kukarow["extranet"] == '') {
 					require("../inc/sahkoposti.inc");

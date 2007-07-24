@@ -448,7 +448,7 @@
 			if($kirow["komento"] == "email") {
 				$liite = $pdffilenimi;
 				$kutsu = "Karhukirje ".$asiakastiedot["ytunnus"];
-				echo t("Karhukirje l‰hetet‰‰n osoitteeseen '$kukarow[eposti]'")."...\n";
+				echo t("Karhukirje l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...\n";
 
 				require("inc/sahkoposti.inc");				
 			}

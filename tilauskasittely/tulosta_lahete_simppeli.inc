@@ -559,7 +559,7 @@ if (!function_exists('tulosta_lahete')) {
 			$liite = $pdf_lahetefilenimi;
 			$kutsu = ucfirst(strtolower($otsikko))." $laskurow[tunnus]";
 			
-			echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen '$kukarow[eposti]'")."...<br>";
+			echo t(ucfirst(strtolower($otsikko))." l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...<br>";
 
 			if ($kukarow["extranet"] == '') {
 				require("../inc/sahkoposti.inc");

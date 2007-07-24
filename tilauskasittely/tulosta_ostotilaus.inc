@@ -398,7 +398,7 @@
 							$kutsu = "Ostotilaus $laskurow[tunnus]";				
 						}
 
-						$tulosta_ostotilaus_ulos .= t("Ostotilaus l‰hetet‰‰n osoitteeseen '$kukarow[eposti]'")."...<br>";
+						$tulosta_ostotilaus_ulos .= t("Ostotilaus l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...<br>";
 
 						if ($kukarow["extranet"] == '') {
 							require("../inc/sahkoposti.inc");

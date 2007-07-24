@@ -36,8 +36,8 @@
 			echo "<font class='message'>Tiedosto '$filenimi' ei auennut!</font>";
 			exit;
 		}
-		$tietue = fgets($fd);	
-		
+		$tietue = fgets($fd);
+
 		// luetaanko kursseja?
 		if (substr($tietue, 5, 12) == 'Tilivaluutan') {
 			// luetaan sis‰‰n kurssit
@@ -46,7 +46,7 @@
 			require 'inc/footer.inc';
 			die();
 		}
-		
+
 		$query= "LOCK TABLE tiliotedata WRITE, yriti READ";
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
 
@@ -55,10 +55,9 @@
 		$aineistores = mysql_query($query) or pupe_error($query);
 		$aineistorow = mysql_fetch_array($aineistores);
 
-		
 		$xtyyppi = 0;
-		$virhe	 = 0;	
-		
+		$virhe	 = 0;
+
 		while (!feof($fd)) {
 			$tietue = str_replace ("{", "‰", $tietue);
 			$tietue = str_replace ("|", "ˆ", $tietue);
@@ -123,14 +122,14 @@
 
 				if (mysql_num_rows($tiliotedatares) > 0) {
 					$tiliotedatarow = mysql_fetch_array($tiliotedatares);
-					
+
 					if ($tiliotedatarow["aineisto"] == $aineistorow["aineisto"]) {
-						echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteytt‰ helpdeskiin!<br>Tili = $tilino Ajalta $alkupvm - $loppupvm Yritystunnus $yritirow[yhtio]</font><br><br>";	
+						echo "<font class='error'>Aineisto esiintyy tiedostossa moneen kertaan.<br>Tiedosto viallinen, ei voida jatkaa, ota yhteytt‰ helpdeskiin!<br>Tili = $tilino Ajalta $alkupvm - $loppupvm Yritystunnus $yritirow[yhtio]</font><br><br>";
 					}
 					else {
 						echo "<font class='error'>T‰m‰ aineisto on jo aiemmin k‰sitelty! Tili = $tilino Ajalta $alkupvm - $loppupvm Yritystunnus $yritirow[yhtio]</font><br><br>";
 					}
-					
+
 					$xtyyppi=0;
 					$virhe++;
 				}
@@ -144,20 +143,22 @@
 
 			$tietue = fgets($fd, 4096);
 		}
-		
-		
-		//Jos meill‰ tuli virheit‰ 
+
+		//Jos meill‰ tuli virheit‰
 		if ($virhe > 0) {
 			echo "<font class='error'>Aineisto oli virheellinen. Sit‰ ei voitu tallentaa j‰rjestelm‰‰n.</font>";
-			
+
 			//Poistetaan aineistot tiliotedatasta
 			$query = "delete from tiliotedata where aineisto ='$aineistorow[aineisto]'";
 			$tiliotedataresult = mysql_query($query) or pupe_error($query);
-			
-			require("inc/footer.inc");	
+
+			$query = "unlock tables";
+			$tiliotedataresult = mysql_query($query) or pupe_error($query);
+
+			require("inc/footer.inc");
 			exit;
 		}
-		
+
 		$query = "UNLOCK TABLES";
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
 
@@ -224,39 +225,39 @@
 
 function lue_kurssit($file, $handle) {
 	global $yhtiorow, $kukarow;
-	
+
 	// luetaan koko file arrayhyn
 	$rivit = file($file);
-	
+
 	// 2 ekaa rivi‰ pois
 	array_shift($rivit);
 	array_shift($rivit);
-	
+
 	$datetime = date('Y-m-d H:i:s');
-	
+
 	$valuutat = array();
 	foreach ($rivit as $rivi) {
 		// valuutan nimi
 		$valuutta = substr($rivi, 0, 3);
-		
+
 		if (in_array($valuutta, $valuutat)) {
 			continue;
 		}
-		
-		// itse kurssi 
+
+		// itse kurssi
 		$kurssi = (float) str_replace(',', '.', trim(substr($rivi, 5, 15)));
-		
+
 		// suhde euroon
 		$kurssi = round(1 / $kurssi, 6);
-		
+
 		$query = "update valuu set kurssi='$kurssi', muutospvm = '$datetime', muuttaja = '{$kukarow['kuka']}'
 				where yhtio='{$kukarow['yhtio']}' and nimi='$valuutta'";
-				
+
 		$result = mysql_query($query) or pupe_error($query);
-		
+
 		// t‰m‰ valuutta on nyt p‰ivitetty!
 		$valuutat[] = $valuutta;
-		
+
 		echo "<font class='message'>Haettiin kurssi valuutalle $valuutta: $kurssi</font>";
 
 		if (mysql_affected_rows() != 0) {

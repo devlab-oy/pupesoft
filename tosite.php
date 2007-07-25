@@ -91,7 +91,7 @@
 				$fnimi = "";
 			}
 			else {
-				if(in_array($ext, array("TXT","CSV"))) {
+				if (in_array($ext, array("TXT","CSV"))) {
 					$file=file($_FILES['tositefile']['tmp_name'], FILE_IGNORE_NEW_LINES);
 				}
 				else {
@@ -108,12 +108,11 @@
 					$file = $data->sheets[0]['cells'];
 				}
 
-				$maara=0;
+				$maara = 0;
 				foreach($file as $key => $value) {
 
-
-					if($maara==0) {
-						if(is_array($value)) {
+					if ($maara == 0) {
+						if (is_array($value)) {
 							foreach($value as $v8) {
 								$otsikot[]=strtolower($v8);
 							}
@@ -124,15 +123,15 @@
 						}
 					}
 					else {
-						if(is_array($value)) {
+						if (is_array($value)) {
 							$rivi=$value;
 						}
 						else {
 							$rivi=explode("\t",$key);
 						}
 
-						if(count($rivi)<>count($otsikot)) {
-							echo "<font class='error'>".t("VIRHE!!! aineistovirhe")."rivilla: $maara (".count($rivi)." != ".count($otsikot).")</font>";
+						if (count($rivi)<>count($otsikot)) {
+							echo "<font class='error'>".t("VIRHE!!! aineistovirhe rivill‰").": $maara otsikoiden ja arvojen m‰‰r‰ ei ole sama! (".count($rivi)." != ".count($otsikot).")</font>";
 							break;
 						}
 

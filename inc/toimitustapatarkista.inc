@@ -9,19 +9,19 @@
 		}
 	}
 
-	if ((mysql_field_name($result, $i)=="hetiera") and ($t[$i]!=''))
+	if ((mysql_field_name($result, $i)=="tulostustapa") and ($t[$i]!=''))
 	{
 		// otetaan arvo talteen
-		$apuhetiera = $t[$i];
-		if ($t[$i]!='H' and $t[$i]!='E' and $t[$i]!='K')
+		$aputulostustapa = $t[$i];
+		if ($t[$i]!='H' and $t[$i]!='E' and $t[$i]!='K' and $t[$i]!='L')
 		{
-			$virhe[$i] = "".t("Syötä H = heti , E = erätulostus tai K = koontirahtikirja!")."";
+			$virhe[$i] = "".t("Syötä H = hetitulostus , E = erätulostus tai K = koonti-hetitulostus tai K = koonti-erätulostus!")."";
 			$errori = 1;
 		}
 	}
 
 	if ((mysql_field_name($result, $i)=="multi_jv") and ($t[$i]!='')) {
-		if ($apuhetiera == 'H' and $t[$i] != '') {
+		if ($aputulostustapa == 'H' and $t[$i] != '') {
 			$virhe[$i] = "".t("Multi-jälkivaatimus toimii vain erärahtikirjoissa")."!";
 			$errori = 1;
 		}

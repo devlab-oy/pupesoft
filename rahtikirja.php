@@ -285,7 +285,7 @@
 				$row = mysql_fetch_array($result);
 
 				// tämä toimitustapa pitäisi tulostaa nyt..
-				if ($row['nouto']=='' and ($row['hetiera']=='H' or $row['hetiera']=='K')) {
+				if ($row['nouto']=='' and ($row['tulostustapa']=='H' or $row['tulostustapa']=='K')) {
 					// rahtikirjojen tulostus vaatii seuraavat muuttujat:
 
 					// $toimitustapa	toimitustavan selite
@@ -662,7 +662,7 @@
 					lasku.toimitustapa toimitustapa,
 					toimitustapa.nouto nouto,
 					$selectmaksuehto
-					if(toimitustapa.hetiera='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti,
+					if(toimitustapa.tulostustapa='K', toimitustapa.tunnus, lasku.tunnus) kimppakyyti,
 					lasku.vienti,
 					date_format(lasku.luontiaika, '%Y-%m-%d') laadittux,
 					date_format(lasku.toimaika, '%Y-%m-%d') toimaika,
@@ -880,7 +880,7 @@
 					varastopaikat use index (PRIMARY)
 					where lasku.yhtio='$kukarow[yhtio]'
 					and	tila='$tila'
-					and (alatila in ('B','E') or (alatila='D' and hetiera='H'))
+					and (lasku.alatila in ('B','E') or (lasku.alatila='D' and toimitustapa.tulostustapa='H'))
 					and toimitustapa.yhtio=lasku.yhtio
 					and toimitustapa.selite=lasku.toimitustapa
 					and rahtikirjat.yhtio=lasku.yhtio
@@ -1011,12 +1011,12 @@
 
 		while ($row = mysql_fetch_array($result)) {
 			if ($otsik['toimitustapa'] == $row['selite'] and $toimitustapa=='') {
-				$hetiera 		= $row['hetiera'];
+				$tulostustapa 	= $row['tulostustapa'];
 				$select 		= 'selected';
 				$toimitustapa 	= $row['selite'];
 			}
 			elseif ($toimitustapa == $row['selite']) {
-				$hetiera 		= $row['hetiera'];
+				$tulostustapa 	= $row['tulostustapa'];
 				$select 		= 'selected';
 				$toimitustapa 	= $row['selite'];
 			}
@@ -1103,7 +1103,7 @@
 			echo "<input type='hidden' name='tulostuspaikka' value='$row[0]'>";
 		}
 
-		if (strtoupper($hetiera) == 'H' or strtoupper($hetiera) == 'K') {
+		if (strtoupper($tulostustapa) == 'H' or strtoupper($tulostustapa) == 'K') {
 			$query = "	SELECT *
 						FROM kirjoittimet
 						WHERE
@@ -1126,7 +1126,7 @@
 		echo "</tr>";
 
 		// jos meillä on hetitulostettava jälkivaatimus-tilaus niin (annetaan mahdollisuus tulostaa) TULOSTETAAN lasku heti
-		if ((strtoupper($hetiera) == 'H' or strtoupper($hetiera) == 'K') and $marow["jv"] != "") {
+		if ((strtoupper($tulostustapa) == 'H' or strtoupper($tulostustapa) == 'K') and $marow["jv"] != "") {
 
 			echo "<tr><td class='back'><br></td></tr>";
 			echo "<tr>";
@@ -1244,6 +1244,7 @@
 			<td>$row[selite]</td>
 			<td>$row[selitetark]</td>";
 
+			/*
 			$query = "	SELECT distinct selite, selitetark
 						FROM avainsana
 						WHERE yhtio='$kukarow[yhtio]' and laji='PAKKAUSKUVAUS'
@@ -1263,6 +1264,8 @@
 				}
 				echo "</select></td>";
 			}
+			*/
+			echo "<td><input type='text' size='10' name='pakkauskuvaustark[$i]' value='$pakkauskuvaustark[$i]'></td>";
 
 			echo "</tr>";
 

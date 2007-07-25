@@ -72,7 +72,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "hetiera") {
+	if (mysql_field_name($result, $i) == "tulostustapa") {
 			$sel		= array();
 			$pv			= $trow[$i];
 			$sel[$pv]	= " selected";
@@ -81,7 +81,8 @@
 				<select name='$nimi'>
 				<option value='E' $sel[E]>".t("Erätulostus")."</option>
 				<option value='H' $sel[H]>".t("Hetitulostus")."</option>
-				<option value='K' $sel[K]>".t("Koontitulostus")."</option>
+				<option value='K' $sel[K]>".t("Koonti-hetitulostus")."</option>
+				<option value='L' $sel[L]>".t("Koonti-erätulostus")."</option>
 				</select></td>";
 			$jatko = 0;
 	}

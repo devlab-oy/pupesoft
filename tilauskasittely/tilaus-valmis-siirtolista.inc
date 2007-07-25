@@ -69,7 +69,7 @@
 			$laskurow['varasto'] = 0;
 
 			//Toimitustava hetier‰ tarvitaan
-			$query = "select hetiera from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
+			$query = "select tulostustapa from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$totarowx = mysql_fetch_array($result);
 
@@ -151,7 +151,7 @@
 				}
 
 				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["hetiera"] != 'H') and $laskurow["splittauskielto"] != "E") {
+				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") {
 
 					//tehd‰‰n uusi otsikko
 					$query = "INSERT into lasku SET

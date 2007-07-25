@@ -59,7 +59,7 @@
 					and toimitustapa.yhtio = '$kukarow[yhtio]'
 					and lasku.tunnus = '$id' 
 					and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')
-					and hetiera != 'H'
+					and tulostustapa != 'H'
 					and maksuehto.jv = ''";
 		$result = mysql_query($query) or pupe_error($query);
 		

@@ -316,7 +316,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(20), mm_pt(45), "Paketteja - Paket - Packages: ".$kollityht,							$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(20), mm_pt(40), $laskurow['viesti'],													$firstpage, $kirj);
 
-	if ($rakir_row['hetiera'] == 'K') {
+	if ($rakir_row['tulostustapa'] == 'K') {
 		$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
 	}
 	// ylh‰‰ll‰ on "oikee" tapa tehd‰, mutta me ei tiedet‰ t‰ss‰ vaiheessa kollien m‰‰r‰‰ eik‰ painoa

@@ -15,6 +15,8 @@
 	}
 
 	if ($tee == 'tulosta') {
+		
+		list($toimitustapa, $varasto) = explode("!!!!", $toimitustapa_varasto);
 
 		// haetaan toimitustavan tiedot
 		$query    = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
@@ -43,7 +45,7 @@
 		elseif ($avainrow["selitetark_2"] == "3") {
 			$kirjoitin_tunnus = $print["printteri2"]; // Rahtikirja matriisi
 		}
-		elseif ($toitarow['hetiera'] == 'H') {
+		elseif ($toitarow['tulostustapa'] == 'H') {
 			$kirjoitin_tunnus = $print["printteri4"]; // Rahtikirja A5
 		}
 		elseif (strpos($toitarow['rahtikirja'],'pdf') === false) {
@@ -90,6 +92,8 @@
 		else {
 			$jvehto = " ";
 		}
+		
+		
 
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	select distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
@@ -137,7 +141,7 @@
 			}
 
 			// Katsotaan onko tämä koontikuljetus
-			if ($toitarow["hetiera"] == "K") {
+			if ($toitarow["tulostustapa"] == "K" or $toitarow["tulostustapa"] == "L") {
 				// Monen asiakkaan rahtikirjat tulostuu aina samalle paperille
 				$asiakaslisa = " ";
 
@@ -421,7 +425,7 @@
 		$query = "UNLOCK TABLES";
 		$res   = mysql_query($query) or pupe_error($query);
 
-		if ($toitarow['hetiera'] == 'H' or $toitarow['hetiera'] == 'K') {
+		if ($toitarow['tulostustapa'] == 'H' or $toitarow['tulostustapa'] == 'K') {
 			$tee = 'XXX';
 		}
 		else {
@@ -436,14 +440,18 @@
 	if($tee == '') {
 
 		// haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
-		$query = "	select distinct lasku.toimitustapa
+		$query = "	select distinct lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys
 					from rahtikirjat
 					join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
-					join toimitustapa on lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite and toimitustapa.hetiera = 'E' and toimitustapa.nouto = ''
+					join toimitustapa on lasku.yhtio = toimitustapa.yhtio 
+					and lasku.toimitustapa = toimitustapa.selite 
+					and toimitustapa.tulostustapa in ('E','L') 
+					and toimitustapa.nouto = ''
 					left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+					left join varastopaikat on varastopaikat.yhtio=rahtikirjat.yhtio and varastopaikat.tunnus=rahtikirjat.tulostuspaikka
 					where rahtikirjat.tulostettu = '0000-00-00 00:00:00'
 					and rahtikirjat.yhtio = '$kukarow[yhtio]'
-					ORDER BY lasku.toimitustapa";
+					ORDER BY varastopaikat.tunnus, lasku.toimitustapa";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -452,45 +460,13 @@
 
 				echo "<table>";
 			echo "<tr><td>".t("Valitse toimitustapa").":</td>";
-			echo "<td><select name='toimitustapa'>";
+			echo "<td><select name='toimitustapa_varasto'>";
 
 			while ($rakir_row = mysql_fetch_array($result)) {
-				echo "<option value='$rakir_row[toimitustapa]'>$rakir_row[toimitustapa]";
+				echo "<option value='$rakir_row[toimitustapa]!!!!$rakir_row[tunnus]'>$rakir_row[nimitys] - $rakir_row[toimitustapa]</option>";
 			}
 
 			echo "</select></td></tr>";
-
-			// haetaan kaikki varastot
-
-			$query  = "SELECT tunnus, nimitys, printteri7 FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-
-			// jos löytyy enemmän kuin yksi, tehdään varasto popup..
-			if (mysql_num_rows($result) > 1) {
-				echo "<tr><td>".t("Valitse varasto").":</td>";
-				echo "<td><select id='varasto' name='varasto' onchange=\"vId=document.getElementById(this.id).options[document.getElementById(this.id).options.selectedIndex].id; document.getElementById('kirjoitin').options.selectedIndex=document.getElementById('K'+vId).index;\">";
-				
-				if((int)$varasto == 0) $varasto = $kukarow["varasto"];
-
-				$sel=array();
-				$sel[$varasto] = "SELECTED";
-				
-				while ($rakir_row = mysql_fetch_array($result)) {
-					
-					//	Fallback..
-					if((int)$varasto == 0) {
-						$varasto = $rakir_row["tunnus"];
-						$sel[$varasto] = "SELECTED";						
-					}
-					echo "<option id='V$rakir_row[printteri7]' value='$rakir_row[tunnus]' ".$sel[$rakir_row["tunnus"]].">$rakir_row[nimitys]";
-				}
-
-				echo "</select></td></tr>";
-			}
-			else {
-				$rakir_row = mysql_fetch_array($result);
-				echo "<input type='hidden' name='varasto' value='$rakir_row[tunnus]'>";
-			}
 
 			echo "<tr><td>".t("Tulosta kaikki rahtikirjat").":</td>";
 			echo "<td><input type='radio' name='jv' value='' checked></td></tr>";

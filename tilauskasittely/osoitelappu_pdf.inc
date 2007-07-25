@@ -286,13 +286,13 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	
 	
 	//t‰nne ohjeisiin tulee lopullisen asiakkaan tiedot jos kyseess‰ on koontikuljetus
-	$query = "	select hetiera
+	$query = "	select tulostustapa
 				from toimitustapa
 				where yhtio = '$kukarow[yhtio]'
 				and selite  = '$laskurow[toimitustapa]'";
 	$hetir = mysql_query($query) or pupe_error($query);
 	$hetirow = mysql_fetch_array($hetir);
-	if ($hetirow['hetiera'] == 'K') {
+	if ($hetirow['tulostustapa'] == 'K') {
 		$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
 	}
 	// ylh‰‰ll‰ on "oikee" tapa tehd‰, mutta me ei tiedet‰ t‰ss‰ vaiheessa kollien m‰‰r‰‰ eik‰ painoa

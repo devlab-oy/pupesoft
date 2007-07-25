@@ -307,10 +307,10 @@
 					<td class='$class' align='right'>$ruuhinta</td>";
 
 			if ($saldo > 0) {
-				echo "<td align='center'><img width='12px' heigth='12px' src='pics/vihrea.png'></td>";
+				echo "<td align='center'><img width='12px' heigth='12px' src='../pics/vihrea.png'></td>";
 			}
 			else {
-				echo "<td align='center'><img width='12px' heigth='12px' src='pics/punainen.png'></td>";
+				echo "<td align='center'><img width='12px' heigth='12px' src='../pics/punainen.png'></td>";
 			}
 
 			if ($kukarow["kesken"] != 0) {

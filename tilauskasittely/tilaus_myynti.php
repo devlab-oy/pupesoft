@@ -1895,7 +1895,7 @@ if ($tee == '') {
 
 		$query	= "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta
 					FROM tilausrivi use index (PRIMARY)
-					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+					LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 					where tilausrivi.yhtio = '$kukarow[yhtio]'
 					and tilausrivi.otunnus = '$kukarow[kesken]'
 					and tilausrivi.tunnus  = '$rivitunnus'";

@@ -56,8 +56,8 @@ if (mysql_num_rows($result) > 1) {
 
 	// jos ollaan tulossa loginista, valitaan oletussovellus...
 	if (isset($go) and $go != "") {
-		$query = "	SELECT sovellus use index (oikeudet_index) 
-					FROM oikeu
+		$query = "	SELECT sovellus
+					FROM oikeu use index (oikeudet_index) 
 					WHERE yhtio = '$kukarow[yhtio]' and 
 					kuka = '$kukarow[kuka]' and 
 					nimi = '$go' 

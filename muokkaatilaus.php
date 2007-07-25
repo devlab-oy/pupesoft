@@ -10,7 +10,7 @@
 	elseif ($toim == "ENNAKKO") {
 		$otsikko = t("ennakkotilausta");
 	}
-	elseif ($toim == "TYOMAARAYS") {
+	elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
 		$otsikko = t("työmääräystä");
 	}
 	elseif ($toim == "REKLAMAATIO") {
@@ -167,6 +167,13 @@
 			}
 			elseif ($toim == "TARJOUSSUPER") {
 				$aputoim1 = "TARJOUS";
+				$lisa1 = t("Muokkaa");
+
+				$aputoim2 = "";
+				$lisa2 = "";
+			}
+			elseif ($toim == "TYOMAARAYSSUPER") {
+				$aputoim1 = "TYOMAARAYS";
 				$lisa1 = t("Muokkaa");
 
 				$aputoim2 = "";
@@ -777,6 +784,13 @@
 				}
 				elseif ($toim == "TARJOUSSUPER") {
 					$aputoim1 = "TARJOUS";
+					$lisa1 = t("Muokkaa");
+
+					$aputoim2 = "";
+					$lisa2 = "";
+				}
+				elseif ($toim == "TYOMAARAYSSUPER") {
+					$aputoim1 = "TYOMAARAYS";
 					$lisa1 = t("Muokkaa");
 
 					$aputoim2 = "";

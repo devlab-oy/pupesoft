@@ -1190,7 +1190,22 @@
 
 		echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 		
-		$query  = "	SELECT round(sum(tuotekorkeus*tuoteleveys*tuotesyvyys*(varattu+kpl)),10) tilavuus, sum(varattu+kpl) kpl, sum(if(tuotekorkeus!=0 and tuoteleveys!=0 and tuotesyvyys!=0, varattu+kpl, 0)) kplok
+		//Tuotekannassa voi olla tuotteen mitat kahdella eri tavalla
+		// leveys x korkeus x syvyys
+		// leveys x korkeus x pituus
+		$query = "	SHOW columns
+					FROM tuote
+					LIKE 'tuotepituus'";
+		$spres = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($spres) == 1) {
+			$splisa = "tuotepituus";
+		}
+		else {
+			$splisa = "tuotesyvyys";
+		}
+		
+		$query  = "	SELECT round(sum(tuotekorkeus*tuoteleveys*$splisa*(varattu+kpl)),10) tilavuus, sum(varattu+kpl) kpl, sum(if(tuotekorkeus!=0 and tuoteleveys!=0 and $splisa!=0, varattu+kpl, 0)) kplok
 					FROM tilausrivi
 					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.otunnus = '$otsik[tunnus]'";

@@ -288,12 +288,11 @@
 				if ($row['nouto']=='' and ($row['tulostustapa']=='H' or $row['tulostustapa']=='K')) {
 					// rahtikirjojen tulostus vaatii seuraavat muuttujat:
 
-					// $toimitustapa	toimitustavan selite
-					// $varasto 		varastopaikan tunnus
-					// $tee				tässä pitää olla teksti tulosta
-
-					$varasto	= $tulostuspaikka;
-					$tee		= "tulosta";
+					// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
+					// $tee						tässä pitää olla teksti tulosta
+					
+					$toimitustapa_varasto = $toimitustapa."!!!!".$tulostuspaikka;
+					$tee				  = "tulosta";
 
 					require ("rahtikirja-tulostus.php");
 

@@ -462,16 +462,27 @@
 
 			// haetaan kaikki varastot
 
-			$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+			$query  = "SELECT tunnus, nimitys, printteri7 FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// jos löytyy enemmän kuin yksi, tehdään varasto popup..
 			if (mysql_num_rows($result) > 1) {
 				echo "<tr><td>".t("Valitse varasto").":</td>";
-				echo "<td><select name='varasto'>";
+				echo "<td><select id='varasto' name='varasto' onchange=\"vId=document.getElementById(this.id).options[document.getElementById(this.id).options.selectedIndex].id; document.getElementById('kirjoitin').options.selectedIndex=document.getElementById('K'+vId).index;\">";
+				
+				if((int)$varasto == 0) $varasto = $kukarow["varasto"];
 
+				$sel=array();
+				$sel[$varasto] = "SELECTED";
+				
 				while ($rakir_row = mysql_fetch_array($result)) {
-					echo "<option value='$rakir_row[tunnus]'>$rakir_row[nimitys]";
+					
+					//	Fallback..
+					if((int)$varasto == 0) {
+						$varasto = $rakir_row["tunnus"];
+						$sel[$varasto] = "SELECTED";						
+					}
+					echo "<option id='V$rakir_row[printteri7]' value='$rakir_row[tunnus]' ".$sel[$rakir_row["tunnus"]].">$rakir_row[nimitys]";
 				}
 
 				echo "</select></td></tr>";
@@ -491,8 +502,15 @@
 			echo "<td><input type='radio' name='jv' value='eijv'></td></tr>";
 
 			echo "<tr><td>".t("Valitse jälkivaatimuslaskujen tulostuspaikka").":</td>";
-			echo "<td><select name='laskukomento'>";
+			echo "<td><select id='kirjoitin' name='laskukomento'>";
 			echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+
+			$query = "SELECT printteri7 FROM varastopaikat WHERE yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
+			$jvres = mysql_query($query) or pupe_error($query);
+			$jvrow = mysql_fetch_array($jvres);
+			$e = $jvrow["printteri7"];
+			$sel = array();
+			$sel[$e] = "SELECTED";
 
 			$query = "	select *
 						from kirjoittimet
@@ -501,7 +519,7 @@
 			$kires = mysql_query($query) or pupe_error($query);
 
 			while ($kirow = mysql_fetch_array($kires)) {
-				echo "<option value='$kirow[komento]'>$kirow[kirjoitin]</option>";
+				echo "<option id='KV$kirow[tunnus]' value='$kirow[komento]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
 			}
 
 			echo "</select></td></tr>";

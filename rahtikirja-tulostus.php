@@ -16,8 +16,8 @@
 
 	if ($tee == 'tulosta') {
 		
-		list($toimitustapa, $varasto) = explode("!!!!", $toimitustapa_varasto);
-
+		list($toimitustapa, $varasto, $crap) = explode("!!!!", $toimitustapa_varasto);
+		
 		// haetaan toimitustavan tiedot
 		$query    = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and selite = '$toimitustapa'";
 		$toitares = mysql_query($query) or pupe_error($query);
@@ -440,7 +440,7 @@
 	if($tee == '') {
 
 		// haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
-		$query = "	select distinct lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys
+		$query = "	select distinct lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7
 					from rahtikirjat
 					join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
 					join toimitustapa on lasku.yhtio = toimitustapa.yhtio 
@@ -460,10 +460,15 @@
 
 				echo "<table>";
 			echo "<tr><td>".t("Valitse toimitustapa").":</td>";
-			echo "<td><select name='toimitustapa_varasto'>";
+			echo "<td><select name='toimitustapa_varasto' onchange=\"document.getElementById('kirjoitin').options.selectedIndex=document.getElementById('K'+this.value.substr(this.value.indexOf('!!!!!')+5)).index;\">";
 
 			while ($rakir_row = mysql_fetch_array($result)) {
-				echo "<option value='$rakir_row[toimitustapa]!!!!$rakir_row[tunnus]'>$rakir_row[nimitys] - $rakir_row[toimitustapa]</option>";
+				$sel = "";
+				if($rakir_row["tunnus"] == $kukarow["varasto"] and $varasto == "") {
+					$sel = "selected";
+					$varasto = $rakir_row["tunnus"];
+				}
+				echo "<option value='$rakir_row[toimitustapa]!!!!$rakir_row[tunnus]!!!!!$rakir_row[printteri7]' $sel>$rakir_row[nimitys] - $rakir_row[toimitustapa]</option>";
 			}
 
 			echo "</select></td></tr>";
@@ -488,6 +493,7 @@
 			$sel = array();
 			$sel[$e] = "SELECTED";
 
+			
 			$query = "	select *
 						from kirjoittimet
 						where yhtio='$kukarow[yhtio]'
@@ -495,7 +501,7 @@
 			$kires = mysql_query($query) or pupe_error($query);
 
 			while ($kirow = mysql_fetch_array($kires)) {
-				echo "<option id='KV$kirow[tunnus]' value='$kirow[komento]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
+				echo "<option id='K$kirow[tunnus]' value='$kirow[komento]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
 			}
 
 			echo "</select></td></tr>";

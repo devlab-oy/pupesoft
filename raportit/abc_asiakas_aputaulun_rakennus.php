@@ -422,8 +422,8 @@ if ($tee == "") {
 	echo "<option value='kate'>Katteen mukaan</option>";
 	echo "<option value='myynti'>Myynnin mukaan</option>";
 	echo "<option value='kpl'>Kappaleiden mukaan</option>";
+	echo "<option value='rivia'>Rivim‰‰r‰n mukaan</option>";
 	echo "</select></td></tr>";
-
 
 	echo "<tr><td colspan='4' class='back'><br></td></tr>";
 	echo "<tr><th colspan='1'>".t("Kustannukset valitulla kaudella")."</th>

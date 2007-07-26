@@ -3,11 +3,13 @@
 	echo "<font class='head'>".t("ABC-Analyysiä: ABC-Luokkayhteenveto")." $yhtiorow[nimi]<hr></font>";
 
 	// tutkaillaan saadut muuttujat
-	$osasto = trim($osasto);
-	$try    = trim($try);
+	$osasto 		= trim($osasto);
+	$try    		= trim($try);
+	$tuotemerkki    = trim($tuotemerkki);
 
-	if ($osasto == "")	$osasto = trim($osasto2);
-	if ($try    == "")	$try = trim($try2);
+	if ($osasto 	 == "")	$osasto 	 = trim($osasto2);
+	if ($try    	 == "")	$try 		 = trim($try2);
+	if ($tuotemerkki == "")	$tuotemerkki = trim($tuotemerkki2);
 
 	if ($ed == 'on')	$chk = "CHECKED";
 	else				$chk = "";
@@ -16,6 +18,7 @@
 	echo "<form action='$PHP_SELF' method='post' autocomplete='OFF'>";
 	echo "<input type='hidden' name='tee' value='YHTEENVETO'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
+	
 	echo "<table>";
 
 	echo "<tr>";
@@ -25,7 +28,8 @@
 	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
 				".avain('join','OSASTO_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'";
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO'
+				ORDER BY selite";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='osasto2'>";
@@ -47,7 +51,8 @@
 	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana
 				".avain('join','TRY_')."
-				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'";
+				WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY'
+				ORDER BY selite";
 	$sresult = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='try2'>";
@@ -60,12 +65,34 @@
 	}
 
 	echo "</select></td>";
+	echo "</tr>";
+	
+	echo "<tr>";
+	echo "<th>".t("Syötä tai valitse tuotemerkki").":</th>";
+	echo "<td><input type='text' name='tuotemerkki' size='10'></td>";
+
+	$query = "	SELECT distinct tuotemerkki
+				FROM abc_aputaulu
+				WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != ''
+				ORDER BY tuotemerkki";
+	$sresult = mysql_query($query) or pupe_error($query);
+
+	echo "<td><select name='tuotemerkki2'>";
+	echo "<option value=''>".t("Tuotemerkki")."</option>";
+
+	while ($srow = mysql_fetch_array($sresult)) {
+		if ($tuotemerkki == $srow[0]) $sel = "selected";
+		else $sel = "";
+		echo "<option value='$srow[0]' $sel>$srow[0]</option>";
+	}
+
+	echo "</select></td>";
 	echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 	echo "</tr>";
-	echo "</table>";
+	
 	echo "</form>";
-
-
+	echo "</table><br>";
+	
 	if ($tee == "YHTEENVETO") {
 
 		echo "<table>";
@@ -97,13 +124,16 @@
 
 		echo "</tr>\n";
 
-		$osastolisa = $trylisa = "";
+		$osastolisa = $trylisa = $tuotemerkkilisa = "";
 
 		if ($osasto != '') {
 			$osastolisa = " and osasto='$osasto' ";
 		}
 		if ($try != '') {
 			$trylisa = " and try='$try' ";
+		}
+		if ($tuotemerkki != '') {
+			$tuotemerkkilisa = " and tuotemerkki='$tuotemerkki' ";
 		}
 
 		//kauden yhteismyynnit ja katteet
@@ -114,7 +144,8 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tyyppi='$abcchar'
 					$osastolisa
-					$trylisa";
+					$trylisa
+					$tuotemerkkilisa";
 		$sumres = mysql_query($query) or pupe_error($query);
 		$sumrow = mysql_fetch_array($sumres);
 
@@ -155,6 +186,7 @@
 					and tyyppi='$abcchar'
 					$osastolisa
 					$trylisa
+					$tuotemerkkilisa
 					GROUP BY luokka
 					ORDER BY luokka, $abcwhat desc";
 		$res = mysql_query($query) or pupe_error($query);
@@ -168,7 +200,9 @@
 
 			$l = $row["luokka"];
 
-			echo "<td><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]'>$ryhmanimet[$l]</a></td>";
+			echo "<td><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'>$ryhmanimet[$l]</a></td>";
+			
+			
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["max"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["min"]))."</td>";

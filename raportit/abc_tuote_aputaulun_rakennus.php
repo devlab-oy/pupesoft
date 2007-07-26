@@ -178,6 +178,7 @@ if ($tee == 'YHTEENVETO') {
 				tilausrivi.tuoteno,
 				ifnull(tuote.try,'#') try,
 				ifnull(tuote.osasto,'#') osasto,
+				ifnull(tuote.tuotemerkki,'#') tuotemerkki,
 				tuote.luontiaika,
 				sum(if(tyyppi='L' and (var='H' or var=''), 1, 0))			rivia,
 				sum(if(tyyppi='L' and (var='H' or var=''), kpl, 0))			kpl,
@@ -195,7 +196,7 @@ if ($tee == 'YHTEENVETO') {
 				and tilausrivi.tyyppi in ('L','O')
 				and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'
 				and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
-				GROUP BY 1,2,3,4
+				GROUP BY 1,2,3,4,5
 	   			ORDER BY $abcwhat desc";
 	$res = mysql_query($query) or pupe_error($query);
 
@@ -253,6 +254,7 @@ if ($tee == 'YHTEENVETO') {
 					luokka				= '$luokka',
 					tuoteno				= '$row[tuoteno]',
 					osasto				= '$row[osasto]',
+					tuotemerkki			= '$row[tuotemerkki]',
 					try					= '$row[try]',
 					summa				= '$row[summa]',
 					kate				= '$row[kate]',
@@ -292,6 +294,7 @@ if ($tee == 'YHTEENVETO') {
 				tuote.try,
 				tuote.osasto,
 				tuote.luontiaika,
+				tuote.tuotemerkki,
 				abc_aputaulu.luokka,
 				sum(saldo) saldo,
 				sum(saldo) * if(epakurantti2pvm='0000-00-00', if(epakurantti1pvm='0000-00-00', kehahin, kehahin/2), 0) vararvo
@@ -301,7 +304,7 @@ if ($tee == 'YHTEENVETO') {
 				and abc_aputaulu.tuoteno = tuotepaikat.tuoteno
 				and tyyppi = '$abcchar')
 				WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-				GROUP BY 1,2,3,4,5
+				GROUP BY 1,2,3,4,5,6
 				HAVING saldo > 0 and luokka is null";
 	$tuores = mysql_query($query) or pupe_error($query);
 
@@ -315,6 +318,7 @@ if ($tee == 'YHTEENVETO') {
 					tuoteno				= '$row[tuoteno]',
 					osasto				= '$row[osasto]',
 					try					= '$row[try]',
+					tuotemerkki			= '$row[tuotemerkki]',
 					vararvo				= '$row[vararvo]',
 					tuote_luontiaika	= '$row[luontiaika]'";
 		$insres = mysql_query($query) or pupe_error($query);
@@ -509,6 +513,7 @@ if ($tee == "") {
 	echo "<option value='kate'>Katteen mukaan</option>";
 	echo "<option value='myynti'>Myynnin mukaan</option>";
 	echo "<option value='kpl'>Kappaleiden mukaan</option>";
+	echo "<option value='rivia'>Rivim‰‰r‰n mukaan</option>";
 	echo "</select></td></tr>";
 
 	echo "<tr><td colspan='4' class='back'><br></td></tr>";

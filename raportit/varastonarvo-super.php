@@ -329,6 +329,29 @@
 
 		echo "</select></td>";
 		echo "</tr>\n";
+		
+		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+		$vares = mysql_query($query) or pupe_error($query);
+
+		echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
+			. t('Saat kaikki varastot jos et valitse yht‰‰n') 
+			. "</span></th>
+		    <td>";
+        
+		$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+		
+        while ($varow = mysql_fetch_array($vares)) {
+			$sel = '';
+			if (in_array($varow['tunnus'], $varastot)) {
+				$sel = 'checked';
+			}
+			
+			echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
+		}
+		
+		echo "
+		    </td>
+		</tr>";
 		echo "</table>";
 		
 		echo "<br><table>";
@@ -467,7 +490,7 @@
 						$tuotemerkkilisa
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$result = mysql_query($query) or pupe_error($query);
-								
+			
 			$lask  = 0;
 			$varvo = 0; // t‰h‰n summaillaan
 	
@@ -500,6 +523,10 @@
 					$worksheet->write($excelrivi, $excelsarake, t("Hyllyvali"), $format_bold);
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, t("Hyllytaso"), $format_bold);
+					$excelsarake++;
+				}
+				elseif (! empty($varastot)) {
+					$worksheet->write($excelrivi, $excelsarake, t("Varastot"), 	$format_bold);
 					$excelsarake++;
 				}
 				
@@ -579,23 +606,38 @@
 				if ($row['epakurantti2pvm'] != '0000-00-00') {
 					$kerroin = 0;
 				}
-
+                
+				$concat = '';
+                $joinlisa = '';
+                $wherelisa = '';
+                if (! empty($varastot)) {
+					$concat = ", group_concat(varastopaikat.nimitys separator ', ') varastot";
+					$wherelisa = "and varastopaikat.tunnus IN (" . implode(', ', $varastot) . ")";
+					
+					$joinlisa = " JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio and
+                        concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+                        concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))";
+                }
+                
 				// tuotteen m‰‰r‰ varastossa nyt
-				
 				if ($summaustaso == "S") {
-					$query = "	SELECT sum(saldo) varasto
-				   				FROM tuotepaikat use index (tuote_index)
-				   				WHERE yhtio = '$kukarow[yhtio]'
-				   				and tuoteno = '$row[tuoteno]'";
+					$query = "SELECT sum(saldo) varasto $concat
+								FROM tuotepaikat use index (tuote_index)
+								$joinlisa
+								WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+								and tuotepaikat.tuoteno = '$row[tuoteno]'
+								$wherelisa";
 				}
 				else {
-					$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, saldo varasto
-				   				FROM tuotepaikat use index (tuote_index)
-				   				WHERE yhtio = '$kukarow[yhtio]'
-				   				and tuoteno = '$row[tuoteno]'";
+					$query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, saldo varasto
+								FROM tuotepaikat use index (tuote_index)
+								$joinlisa
+								WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+								and tuotepaikat.tuoteno = '$row[tuoteno]'
+								$wherelisa";
 				}
 				$vres = mysql_query($query) or pupe_error($query);
-				
+
 				while ($vrow = mysql_fetch_array($vres)) {
 
 					// arvo historiassa: lasketaan (nykyinen varastonarvo) - muutoshinta
@@ -719,6 +761,11 @@
 								$worksheet->write($excelrivi, $excelsarake, $vrow["hyllyvali"], $format_bold);
 								$excelsarake++;
 								$worksheet->write($excelrivi, $excelsarake, $vrow["hyllytaso"], $format_bold);
+								$excelsarake++;
+								
+							}
+							elseif (! empty($varastot)) {
+								$worksheet->write($excelrivi, $excelsarake, $vrow["varastot"]);
 								$excelsarake++;
 							}
 							

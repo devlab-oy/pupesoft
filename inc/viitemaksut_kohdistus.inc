@@ -39,29 +39,33 @@
 				yhtio.pyoristys pyoristys,
 				yhtio.valkoodi yhtiovaluutta,
 				yhtio.myynninvaluuttaero valuuttaerotili,
+				yhtio.selvittelytili,
 				yriti.factoring factoring,
 				yriti.oletus_rahatili kassatili,
-				factoring.pankki_tili ftilino
+				yriti.oletus_selvittelytili,
+				factoring.pankki_tili ftilino,
+				(select count(*) from tiliointi WHERE tiliointi.yhtio = suoritus.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.tilino = IF(yriti.factoring != '', yhtio.factoringsaamiset, yhtio.myyntisaamiset)) saamisetkpl
 				FROM yhtio
 				JOIN lasku use index (yhtio_tila_mapvm) ON (lasku.yhtio = yhtio.yhtio and lasku.tila = 'U' and lasku.alatila = 'X' and lasku.mapvm = '0000-00-00')
 				JOIN yriti ON (yriti.yhtio = yhtio.yhtio)
 				JOIN suoritus use index (yhtio_viite) ON (suoritus.yhtio = lasku.yhtio and suoritus.viite = lasku.viite and suoritus.valkoodi=lasku.valkoodi and suoritus.tilino = yriti.tilino and suoritus.kohdpvm = '0000-00-00' and suoritus.ltunnus=0)
 				JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
 				LEFT JOIN factoring ON (factoring.yhtio = lasku.yhtio and factoring.valkoodi = lasku.valkoodi and factoring.factoringyhtio = maksuehto.factoring)
-				HAVING 
+				HAVING saamisetkpl > 0 AND (
 				(laskuvaluutta  = yhtiovaluutta and (kapvm >= adddate(kirjpvm,-4) and abs(laskusumma-saldo_maksettu-kasumma-suoritettu) < 0.01) or (abs(laskusumma-saldo_maksettu-suoritettu) < 0.01)) or
-				(laskuvaluutta != yhtiovaluutta and (kapvm >= adddate(kirjpvm,-4) and abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-kasumma_valuutassa-suoritettu) < 0.01) or (abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-suoritettu) < 0.01))";
+				(laskuvaluutta != yhtiovaluutta and (kapvm >= adddate(kirjpvm,-4) and abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-kasumma_valuutassa-suoritettu) < 0.01) or (abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-suoritettu) < 0.01))
+				)";
 	$suorires = mysql_query($query) or pupe_error($query);
 
-	while ($row = mysql_fetch_array($suorires)) {				
-		
+	while ($row = mysql_fetch_array($suorires)) {
+
 		if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
 			$alennus = round(($row["laskutettu_valuutassa"]-$row["suoritettu"]) * $row["suorituskurssi"],2);
 		}
 		else {
 			$alennus = $row["laskutettu"]-$row["suoritettu"];
 		}
-		
+
 		#Katsotaan ensin, ettei t‰t‰ laskua ole jo suoritettu/maksettu
 		#Eli keissi jossa asiakas maksaa saman laskun kahteen kertaan samassa viiteaineistossa
 		$query = "	SELECT tunnus, liitostunnus, maksuehto
@@ -85,13 +89,13 @@
 				$row["myyntisaamiset"] = $row["konsernimyyntisaamiset"];
 			}
 
-			#Onko t‰m‰ sittenkin factoringia
+			# Onko t‰m‰ sittenkin factoringia
 			if ($row["factoring"] != "") {
 				$row["myyntisaamiset"] = $row["factoringsaamiset"];
 			}
 
-			#Myyntisaamiset
-			$query = "INSERT INTO tiliointi(yhtio, laatija,laadittu,tapvm,ltunnus,tilino,summa,selite) values ('$row[suoriyhtio]','automaattikohdistus',now(),'$row[kirjpvm]','$row[laskutunnus]','$row[myyntisaamiset]',-$row[laskutettu],'Automaattikohdistettu asiakkaan suoritus')";
+			# Myyntisaamiset
+			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite) values ('$row[suoriyhtio]', 'automaattikohdistus', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[myyntisaamiset]', -$row[laskutettu], 'Automaattikohdistettu asiakkaan suoritus')";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
@@ -100,13 +104,13 @@
 			else {
 				$suoritettu_kassaan = $row["suoritettu"];
 			}
-			
-			#Kassatili
-			$query = "INSERT INTO tiliointi(yhtio, laatija,laadittu,tapvm,ltunnus,tilino,summa,selite) values ('$row[suoriyhtio]','automaattikohdistus',now(),'$row[kirjpvm]','$row[laskutunnus]','$row[kassatili]',$suoritettu_kassaan,'Automaattikohdistettu asiakkaan suoritus')";
+
+			# Kassatili
+			$query = "INSERT INTO tiliointi (yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite) values ('$row[suoriyhtio]', 'automaattikohdistus', now(), '$row[kirjpvm]', '$row[laskutunnus]', '$row[kassatili]', $suoritettu_kassaan, 'Automaattikohdistettu asiakkaan suoritus')";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			// Mahdollinen kassa-alennus
-			if($alennus != 0) {
+			if ($alennus != 0) {
 				// Kassa-alessa on huomioitava alv, joka voi olla useita vientej‰
 				$totkasumma = 0;
 
@@ -118,17 +122,17 @@
 							and tapvm   	 = '$row[tapvm]'
 							and abs(summa)  <> 0
 							and tilino 		<> '$row[myyntisaamiset]'
-							and tilino	    <> '$row[konsernimyyntisaamiset]' 
+							and tilino	    <> '$row[konsernimyyntisaamiset]'
 							and tilino 		<> '$row[alvtili]'
 							and tilino 		<> '$row[varasto]'
 							and tilino 		<> '$row[varastomuu]'
 							and tilino 		<> '$row[pyoristys]'
 							and tilino 		<> '$row[alennustili]'
-							and tilino		<> '$row[factoringsaamiset]' 
+							and tilino		<> '$row[factoringsaamiset]'
 							and korjattu	 = ''";
 				$tilres = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($tilres) == 0) {					
+				if (mysql_num_rows($tilres) == 0) {
 					$query = "	INSERT INTO tiliointi
 								SET yhtio	= '$row[suoriyhtio]',
 								laatija 	= 'automaattikohdistus',
@@ -139,12 +143,12 @@
 								summa 		= '$alennus',
 								vero		= '0',
 								selite 		= 'Automaattikohdistettu asiakkaan suoritus (alv ongelma)'";
-					$insres = mysql_query($query) or pupe_error($query);						
+					$insres = mysql_query($query) or pupe_error($query);
 				}
 				else {
-					
+
 					$aputunnus = 0;
-					
+
 					while ($tiliointirow = mysql_fetch_array($tilres)) {
 						$alv 	= 0;
 						$summa 	= sprintf('%.2f', $tiliointirow["summa"] * -1 * (1+$tiliointirow["vero"]/100) / $row["laskusumma"] * $alennus);
@@ -157,10 +161,10 @@
 							#$summa on alviton alennus
 							$summa -= $alv;
 						}
-						
+
 						// Kuinka paljon olemme kumulatiivisesti tiliˆineet
 						$totkasumma += $summa + $alv;
-						
+
 						# Etsit‰‰n korjattava vienti
 						if ($alv != 0) {
 							#Lis‰t‰‰n myynnin kassa-alennuskirjaus ilman veroa
@@ -168,8 +172,8 @@
 										SET yhtio	= '$row[suoriyhtio]',
 										laatija 	= 'automaattikohdistus',
 										laadittu 	= now(),
-										kustp		= '$tiliointirow[kustp]', 
-										kohde		= '$tiliointirow[kohde]', 
+										kustp		= '$tiliointirow[kustp]',
+										kohde		= '$tiliointirow[kohde]',
 										projekti	= '$tiliointirow[projekti]',
 										tapvm 		= '$row[kirjpvm]',
 										ltunnus 	= '$row[laskutunnus]',
@@ -201,8 +205,8 @@
 										SET yhtio	= '$row[suoriyhtio]',
 										laatija 	= 'automaattikohdistus',
 										laadittu 	= now(),
-										kustp		= '$tiliointirow[kustp]', 
-										kohde		= '$tiliointirow[kohde]', 
+										kustp		= '$tiliointirow[kustp]',
+										kohde		= '$tiliointirow[kohde]',
 										projekti	= '$tiliointirow[projekti]',
 										tapvm 		= '$row[kirjpvm]',
 										ltunnus 	= '$row[laskutunnus]',
@@ -213,23 +217,23 @@
 							$aputunnus = mysql_insert_id();
 						}
 					}
-				
+
 					//Hoidetaan mahdolliset pyˆristykset
 					$heitto = $totkasumma - $alennus;
-					
-					if (abs($heitto) >= 0.01) {						
+
+					if (abs($heitto) >= 0.01) {
 						$query = "	UPDATE tiliointi SET summa = summa - $totkasumma + $alennus
 									WHERE tunnus = '$aputunnus' and yhtio='$row[suoriyhtio]'";
 						$xresult = mysql_query($query) or pupe_error($query);
-						
+
 						$aputunnus = 0;
 					}
 				}
 			}
-			
+
 			// tuliko valuuttaeroa?
 			if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
-				
+
 				$valero = round($row["laskutettu"] - $suoritettu_kassaan - $alennus,2);
 
 				if (abs($valero) >= 0.01) {
@@ -259,36 +263,34 @@
 
 	echo "<font class='message'>".t("Tehd‰‰n kohdistamattomista laskuja...")."</font><br>";
 
-	$query = "	SELECT 
-				suoritus.tunnus tunnus, 
+	$query = "	SELECT
+				suoritus.tunnus tunnus,
 				suoritus.yhtio yhtio,
-				suoritus.summa summa, 
-				suoritus.kirjpvm, 
+				suoritus.summa summa,
+				suoritus.kirjpvm,
 				suoritus.valkoodi suoritusvaluutta,
 				suoritus.kurssi suorituskurssi,
 				suoritus.nimi_maksaja,
-				yhtio.myyntisaamiset, 
+				yhtio.myyntisaamiset,
 				yhtio.valkoodi yhtiovaluutta,
-				yhtio.factoringsaamiset, 
+				yhtio.factoringsaamiset,
 				yriti.factoring,
-				yriti.oletus_rahatili
-				FROM yhtio, suoritus, yriti
-				WHERE suoritus.kohdpvm = '0000-00-00'
-				AND suoritus.tilino=yriti.tilino
-				AND yriti.yhtio=yhtio.yhtio
-				AND suoritus.yhtio=yhtio.yhtio
-				AND suoritus.ltunnus = 0
+				yriti.oletus_rahatili,
+				yriti.oletus_selvittelytili
+				FROM yhtio
+				JOIN yriti ON (yriti.yhtio = yhtio.yhtio)
+				JOIN suoritus ON (suoritus.yhtio = yhtio.yhtio AND suoritus.tilino = yriti.tilino AND suoritus.kohdpvm = '0000-00-00' AND suoritus.ltunnus = 0)
 				ORDER BY yhtio";
 	$suorires = mysql_query($query) or pupe_error($query);
 
 	$laskut = array();
 
 	while ($row = mysql_fetch_array($suorires)) {
-		
+
 		if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
 			$row["summa"] = round($row["summa"] * $row["suorituskurssi"],2);
 		}
-		
+
 		if (!isset($laskut[$row["yhtio"]])) {
 			$query = "INSERT into lasku set yhtio = '$row[yhtio]', tapvm = now(), tila = 'X', laatija = 'viitesiirrot', luontiaika = now()";
 			$insres = mysql_query($query) or pupe_error($query);
@@ -297,18 +299,24 @@
 		}
 
 		if ($laskut[$row["yhtio"]] > 0) {
-			#Onko t‰m‰ sittenkin factoringia
+
+			# Onko t‰m‰ sittenkin factoringia
 			if ($row["factoring"] != "") {
 				$row["myyntisaamiset"] = $row["factoringsaamiset"];
 			}
 
-			#Myyntisaamiset
-			$query = "INSERT INTO tiliointi(yhtio, laatija,laadittu,tapvm,ltunnus,tilino,summa,selite,lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[myyntisaamiset]', -$row[summa],' maksoi viitteell‰ v‰‰rin','1')";
+			# Jos meill‰ on oletus selvittelytili niin pistet‰‰n aina sinne tilille
+			if ($row["oletus_selvittelytili"] != "") {
+				$row["myyntisaamiset"] = $row["oletus_selvittelytili"];
+			}
+
+			# Myyntisaamiset tai selvittely
+			$query = "INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[myyntisaamiset]', -$row[summa],' maksoi viitteell‰ v‰‰rin','1')";
 			$insres = mysql_query($query) or pupe_error($query);
 			$tlast_id = mysql_insert_id();
 
-			#Kassatili
-			$query = "INSERT INTO tiliointi(yhtio, laatija,laadittu,tapvm,ltunnus,tilino,summa,selite,aputunnus,lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[oletus_rahatili]', $row[summa],' maksoi viitteell‰ v‰‰rin','$tlast_id','1')";
+			# Kassatili
+			$query = "INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, aputunnus, lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[oletus_rahatili]', $row[summa],' maksoi viitteell‰ v‰‰rin','$tlast_id','1')";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			$query = "UPDATE suoritus SET ltunnus='$tlast_id' WHERE tunnus='$row[tunnus]'";

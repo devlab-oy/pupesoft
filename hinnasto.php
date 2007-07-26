@@ -4,7 +4,7 @@
 $useslave = 1;
 if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 	header("Content-type: application/force-download");
-	header("Content-Disposition: attachment; filename=futurhinnasto.zip");
+	header("Content-Disposition: attachment; filename=hinnasto.zip");
 	header("Content-Description: File Transfer");
 	
 	$filenimi = '/tmp/' . basename($_POST['filenimi']);

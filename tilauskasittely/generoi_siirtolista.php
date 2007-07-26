@@ -160,12 +160,10 @@
 									exit;
 								}
 
-								/*
 								$query = "select nimitys from varastopaikat where yhtio='{$kukarow["yhtio"]}' and tunnus = '$lahdevarasto'";
 								$varres = mysql_query($query) or pupe_error($query);
 								$varrow = mysql_fetch_array($varres);
 								echo "<br><font class='message'>".t("Tehtiin siirtolistalle otsikko %s lähdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
-								*/
 
 								//	Otetaan luotu otsikko talteen
 								$otsikot[] = $kukarow["kesken"];
@@ -210,7 +208,7 @@
 
 								$tehtyriveja ++;
 							
-								echo "<font class='info'>".t("Siirtolistalle lisättiin %s tuotetta %s", $kieli, $siirretaan." ".$trow["yksikko"], $trow["tuoteno"])."</font><br>";							
+								//echo "<font class='info'>".t("Siirtolistalle lisättiin %s tuotetta %s", $kieli, $siirretaan." ".$trow["yksikko"], $trow["tuoteno"])."</font><br>";							
 
 							}
 							else {

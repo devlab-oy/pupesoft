@@ -90,8 +90,13 @@
 		$result = mysql_query($query) or pupe_error($query);
 
 		synkronoi($toim, $tunnus, $trow);
-		$tunnus = 0;
-
+		
+		//	Jos poistetaan perheen osa palataan perheelle
+		if($seuraavatunnus > 0) $tunnus = $seuraavatunnus;
+		else $tunnus = 0;
+		
+		$seuraavatunnus = 0;
+		
 		// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 		if ($lopetus != '') {
 			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
@@ -238,7 +243,7 @@
 
 			$uusi 	 = 0;
 
-			if (isset($yllapitonappi)) {
+			if (isset($yllapitonappi) and $lukossa != "ON" or isset($paluunappi)) {
 				$tunnus  = 0;
 				$kikkeli = 0;
 			}
@@ -460,6 +465,12 @@
 		}
 
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
+		
+		if($lukossa == "ON") {
+			echo "<input type='hidden' name='lukossa' value = '$lukossa'>";
+			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";			
+		}
+		
 		echo "</form>";
 
 		if ($saakopoistaa == "") {
@@ -480,6 +491,7 @@
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>						
 						<input type = 'hidden' name = 'del' value ='1'>
+						<input type='hidden' name='seuraavatunnus' value = '$seuraavatunnus'>
 						<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'></form>";
 				}
 			}

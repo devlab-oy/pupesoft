@@ -1800,4 +1800,42 @@ if (! function_exists('ebid')) {
 	}
 }
 
+if (! function_exists('ta')) {
+	function ta($kieli, $laji, $selite, $return = "selite", $selitetark="", $selitetark_2 = "", $selitetark_3 = "") {
+		global $kukarow, $yhtiorow;
+		
+		//	Jos kielet matchaa niin palautetaan suoraan vastaus
+		if($kieli == $yhtiorow["kieli"]) {
+			return $selite;
+		}
+		
+		$lisa = "";
+		if($selitetark != "") {
+			$lisa .= " and avainsana.selitetark = '$selitetark'";
+		}
+
+		if($selitetark_2 != "") {
+			$lisa .= " and avainsana.selitetark_2 = '$selitetark_2'";
+		}
+
+		if($selitetark_3 != "") {
+			$lisa .= " and avainsana.selitetark_3 = '$selitetark_3'";
+		}
+		
+		//	Tutkitaan onko käännös
+		$query = "	SELECT a.*
+					FROM avainsana
+					RIGHT JOIN avainsana a ON avainsana.yhtio = a.yhtio and avainsana.laji = a.laji and avainsana.perhe=a.perhe and a.kieli = '$kieli'
+					WHERE avainsana.yhtio = '{$kukarow["yhtio"]}' and avainsana.laji = '$laji' and avainsana.kieli = '{$yhtiorow["kieli"]}' and avainsana.selite = '$selite' $lisa and avainsana.perhe>0";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result) == 1) {
+			$row = mysql_fetch_array($result);
+			return $row[$return];
+		}
+		else {
+			return $selite;
+		}
+	}
+}
+
 ?>

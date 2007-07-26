@@ -3800,7 +3800,7 @@ if ($tee == '') {
 
 							if ($sarjarow["ostorivitunnus"] != 0 and $sarjarow["ostorivitunnus"] != $arow["tunnus"] and $arow["varattu"] > 0) {
 
-								$limitti = (int) round($arow["varattu"],0);
+								$limitti = (int) abs(round($arow["varattu"],0));
 
 								$query = "	select sum(rivihinta/kpl) rivihinta
 											from tilausrivi

@@ -132,7 +132,7 @@
 							muuttaja		= '$kukarow[kuka]',
 							muutospvm		= now(), 
 							takuu_alku		= '$tvva-$tkka-$tppa',
-							takuu_loppu		= '$tvvl-$tkkl-$tppl',
+							takuu_loppu		= '$tvvl-$tkkl-$tppl'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$sarjatunnus'";
 				$sarjares = mysql_query($query) or pupe_error($query);

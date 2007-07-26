@@ -5,7 +5,6 @@
 
 	if ($tee == 'M') {
 		if ($kohdevarasto != '' and !empty($lahdevarastot) and !in_array($kohdevarasto, $lahdevarastot)) {
-			$lask = 0;
 
 			$lisa = "";
 			$abcjoin = "";
@@ -68,166 +67,177 @@
 			$resultti = mysql_query($query) or pupe_error($query);
 			$luku = mysql_num_rows($result);
 
-			$tehtyriveja = 0;
-			$otsikoita = 0;
-
 			if ((int) $olliriveja == 0 or $olliriveja == '') {
 				$olliriveja = 20;
 			}
 			
+			//	Otetaan luodut otsikot talteen
+			$otsikot = array();
+			
+			//	Varmistetaan ettei olla missään kesken
+			$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
+			$delresult = mysql_query($query) or pupe_error($query);
+			$kukarow["kesken"] = 0;
+			
 			// tehdään jokaiselle valitulle lahdevarastolle erikseen
 			foreach ($lahdevarastot as $lahdevarasto) {
+				
+				//	Varmistetaan että aloitetaan aina uusi otsikko uudelle varastolle
+				$tehtyriveja = 0;
+
 				while ($pairow = mysql_fetch_array($resultti)) {
+				
+					//katotaan paljonko sinne on jo menossa
+					$query = "SELECT sum(varattu) varattu
+								FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$pairow[tuoteno]'
+								and varattu > 0
+								and tyyppi = 'G'
+								and lasku.clearing = '$kohdevarasto'";
+					$vanresult = mysql_query($query) or pupe_error($query);
+					$vanhatrow = mysql_fetch_array($vanresult);
 
-				if ($tehtyriveja == 0 or $tehtyriveja == (int) $olliriveja+1) {
-					$jatka		= "kala";
-					if ($kukarow['kesken'] != 0) {
-						$query = "	UPDATE lasku SET alatila = 'J' WHERE tunnus = '$kukarow[kesken]'";
-						$delresult = mysql_query($query) or pupe_error($query);
+					if ($pairow['tilausmaara'] > 0 and $pairow['tarve'] > 0) {
+						$pairow['tarve'] = $pairow['tilausmaara'];
+					}
+				
+					//ja vähennetään se tarpeesta
+					//$pairow['tarve'] = $pairow['tarve'] - $vanhatrow['varattu'];
+				
+					//ei lähetetä lisää jos on jo matkalla
+					if ($vanhatrow['varattu'] > 0) {
+						$pairow['tarve'] = 0;
 					}
 
-
-					$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
-					$delresult = mysql_query($query) or pupe_error($query);
-
-					$kukarow["kesken"] = 0;
-
-					$tilausnumero = $kukarow["kesken"];
-					$clearing 	= $kohdevarasto;
-					$toimpp 	= $kerpp = date(j);
-					$toimkk 	= $kerkk = date(n);
-					$toimvv 	= $kervv = date(Y);
-					$comments 	= $kukarow["nimi"]." Generoi hälytysrajojen perusteella";
-					$viesti 	= $kukarow["nimi"]." Generoi hälytysrajojen perusteella";
-					$varasto 	= $lahdevarasto;
-					$toim = "SIIRTOLISTA";
-					
-					//kato et tää toimii!!! siis osoitteet!!!!
-					require ("otsik_siirtolista.inc");
-
-					$query = "	SELECT *
-								FROM lasku
-								WHERE tunnus = '$kukarow[kesken]'";
-					$aresult = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($aresult) == 0) {
-						echo "<font class='message'>".t("VIRHE: Tilausta ei löydy")."!<br><br></font>";
-						exit;
-					}
-					$laskurow = mysql_fetch_array($aresult);
-
-					$tehtyriveja = 1;
-					$otsikoita ++;
-
-				}
+					//katotaan myytävissä määrä
+					list(, , $saldo_myytavissa) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
 				
-				//katotaan paljonko sinne on jo menossa
-				$query = "SELECT sum(varattu) varattu
-							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$pairow[tuoteno]'
-							and varattu > 0
-							and tyyppi = 'G'
-							and lasku.clearing = '$kohdevarasto'";
-				$vanresult = mysql_query($query) or pupe_error($query);
-				$vanhatrow = mysql_fetch_array($vanresult);
-
-				if ($pairow['tilausmaara'] > 0 and $pairow['tarve'] > 0) {
-					$pairow['tarve'] = $pairow['tilausmaara'];
-				}
+					$saldo_myytavissa = (float) $saldo_myytavissa;
 				
-				//ja vähennetään se tarpeesta
-				//$pairow['tarve'] = $pairow['tarve'] - $vanhatrow['varattu'];
-				
-				//ei lähetetä lisää jos on jo matkalla
-				if ($vanhatrow['varattu'] > 0) {
-					$pairow['tarve'] = 0;
-				}
-
-				//katotaan myytävissä määrä
-				list(, , $saldo_myytavissa) = saldo_myytavissa($pairow["tuoteno"], "KAIKKI", $lahdevarasto);
-				
-				$saldo_myytavissa = (float) $saldo_myytavissa;
-				
-				if ($saldo_myytavissa > 0 and $pairow['tarve'] > 0) {
+					if ($saldo_myytavissa > 0 and $pairow['tarve'] > 0) {
 			
-					if ($pairow['tarve'] >= $saldo_myytavissa) {
-						$siirretaan = floor($saldo_myytavissa / 2);
-					}
-					else {
-						$siirretaan = $pairow['tarve'];
-					}
-
-					if ($siirretaan > 0) {
-
-						$query = "	SELECT *
-									FROM tuote
-									WHERE tuoteno='$pairow[tuoteno]' and yhtio='$kukarow[yhtio]'";
-						$rarresult = mysql_query($query) or pupe_error($query);
-
-						if(mysql_num_rows($rarresult) == 1) {
-
-							$trow = mysql_fetch_array($rarresult);
-							$toimaika 	= $laskurow["toimaika"];
-							$kerayspvm	= $laskurow["kerayspvm"];
-							$tuoteno	= $pairow["tuoteno"];
-							$kpl		= $siirretaan;
-							//$paikka		= "$uuspairow[hyllyalue]#$uuspairow[hyllynro]#$uuspairow[hyllyvali]#$uuspairow[hyllytaso]";
-							$varasto	= $lahdevarasto;
-							$hinta 		= "";
-							$netto 		= "";
-							$ale 		= "";
-							$var		= "";
-							
-							$korvaavakielto		= 1;
-							$perhekielto		= 1;
-							$orvoteikiinnosta	= "EITOD";
-							
-							require ('lisaarivi.inc');
-
-							$tuoteno	= '';
-							$kpl		= '';
-							$hinta		= '';
-							$ale		= '';
-							$alv		= 'X';
-							$var		= '';
-							$toimaika	= '';
-							$kerayspvm	= '';
-							$kommentti	= '';
-
-							$tehtyriveja ++;
-
+						if ($pairow['tarve'] >= $saldo_myytavissa) {
+							$siirretaan = floor($saldo_myytavissa / 2);
 						}
 						else {
-							echo t("VIRHE: Tuotetta ei löydy")."!<br>";
+							$siirretaan = $pairow['tarve'];
 						}
-						$lask++;
+
+						if ($siirretaan > 0) {
+						
+							//	Onko meillä jo otsikko vai pitääkö tehdä uusi?
+							if ($tehtyriveja == 0 or $tehtyriveja == (int) $olliriveja+1) {
+								
+								$jatka		= "kala";
+							
+								$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
+								$delresult = mysql_query($query) or pupe_error($query);
+
+								$kukarow["kesken"] = 0;
+
+								$tilausnumero = $kukarow["kesken"];
+								$clearing 	= $kohdevarasto;
+								$toimpp 	= $kerpp = date(j);
+								$toimkk 	= $kerkk = date(n);
+								$toimvv 	= $kervv = date(Y);
+								$comments 	= $kukarow["nimi"]." Generoi hälytysrajojen perusteella";
+								$viesti 	= $kukarow["nimi"]." Generoi hälytysrajojen perusteella";
+								$varasto 	= $lahdevarasto;
+								$toim = "SIIRTOLISTA";
+
+								//kato et tää toimii!!! siis osoitteet!!!!
+								require ("otsik_siirtolista.inc");
+
+								$query = "	SELECT *
+											FROM lasku
+											WHERE tunnus = '$kukarow[kesken]'";
+								$aresult = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($aresult) == 0) {
+									echo "<font class='message'>".t("VIRHE: Tilausta ei löydy")."!<br><br></font>";
+									exit;
+								}
+
+								/*
+								$query = "select nimitys from varastopaikat where yhtio='{$kukarow["yhtio"]}' and tunnus = '$lahdevarasto'";
+								$varres = mysql_query($query) or pupe_error($query);
+								$varrow = mysql_fetch_array($varres);
+								echo "<br><font class='message'>".t("Tehtiin siirtolistalle otsikko %s lähdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"])."</font><br>";
+								*/
+
+								//	Otetaan luotu otsikko talteen
+								$otsikot[] = $kukarow["kesken"];
+								
+								$laskurow = mysql_fetch_array($aresult);
+							}
+						
+							$query = "	SELECT *
+										FROM tuote
+										WHERE tuoteno='$pairow[tuoteno]' and yhtio='$kukarow[yhtio]'";
+							$rarresult = mysql_query($query) or pupe_error($query);
+
+							if(mysql_num_rows($rarresult) == 1) {
+
+								$trow = mysql_fetch_array($rarresult);
+								$toimaika 	= $laskurow["toimaika"];
+								$kerayspvm	= $laskurow["kerayspvm"];
+								$tuoteno	= $pairow["tuoteno"];
+								$kpl		= $siirretaan;
+								//$paikka		= "$uuspairow[hyllyalue]#$uuspairow[hyllynro]#$uuspairow[hyllyvali]#$uuspairow[hyllytaso]";
+								$varasto	= $lahdevarasto;
+								$hinta 		= "";
+								$netto 		= "";
+								$ale 		= "";
+								$var		= "";
+							
+								$korvaavakielto		= 1;
+								$perhekielto		= 1;
+								$orvoteikiinnosta	= "EITOD";
+							
+								require ('lisaarivi.inc');
+
+								$tuoteno	= '';
+								$kpl		= '';
+								$hinta		= '';
+								$ale		= '';
+								$alv		= 'X';
+								$var		= '';
+								$toimaika	= '';
+								$kerayspvm	= '';
+								$kommentti	= '';
+
+								$tehtyriveja ++;
+							
+								echo "<font class='info'>".t("Siirtolistalle lisättiin %s tuotetta %s", $kieli, $siirretaan." ".$trow["yksikko"], $trow["tuoteno"])."</font><br>";							
+
+							}
+							else {
+								echo t("VIRHE: Tuotetta ei löydy")."!<br>";
+							}
+						}
 					}
 				}
 			}
-			}
 			echo "</table><br>";
-			//echo "lask = $lask<br><br>";
-			if ($lask == 0) {
-				echo "<font class='error'>".t("Yhtään riviä ei voitu toimittaa lähdevarastosta kohdevarastoon")."!!!!</font><br>";
-				$query = "	SELECT tunnus FROM tilausrivi WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
-				$okdelresult = mysql_query($query) or pupe_error($query);
 
-				if (mysql_num_rows($okdelresult) == 0 and $kukarow['kesken'] != 0) {
-					$query = "	UPDATE lasku SET tila = 'D', alatila = 'G' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
-					$delresult = mysql_query($query) or pupe_error($query);
-				}
-				elseif ($kukarow['kesken'] != 0){
-					echo "<font class='error'>".t("APUAAAA tilauksella")." $kukarow[kesken] ".t("on rivejä vaikka luultiin että ei olisi!!!!!")."<br></font><br>";
-				}
-
+			if (count($otsikot) == 0) {
+				echo "<font class='error'>".t("Kohdevaraston hälyrajat on paukkunut eikä kamaa saatu mistään toimitettua")."!!!!</font><br>";
 			}
 			else {
-				echo "<font class='message'>".t("Luotiin")." $otsikoita ".t("siirtolistaa")."</font><br><br><br>";
-				$query = "	UPDATE lasku SET alatila = 'J' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
-				$delresult = mysql_query($query) or pupe_error($query);
+				echo "<font class='message'>".t("Luotiin %s siirtolistaa", $kieli, count($otsikot))."</font><br><br><br>";
+				
+				if($kesken != "X") {
+					$query = "	UPDATE lasku SET alatila = 'J' WHERE yhtio = '$kukarow[yhtio]' and tunnus IN (".implode(",",$otsikot).")";
+					$delresult = mysql_query($query) or pupe_error($query);
+					echo "<font class='message'>".t("Siirtolistat siirretiin tulostusjonoon", $kieli, count($otsikot))."</font><br><br><br>";
+				}
+				else {
+					echo "<font class='message'>".t("Siirtolistat jätettiin kesken")."</font><br><br><br>";
+				}
 			}
+
 			$query = "	UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
 			$delresult = mysql_query($query) or pupe_error($query);
 			$tee = "";
@@ -287,6 +297,14 @@
 		echo "</select></td></tr>";
 
 		echo "<tr><th>".t("Rivejä per tilaus (tyhjä = 20)").":</th><td><input type='text' size='8' value='$olliriveja' name='olliriveja'></td>";
+		
+		if($kesken == "X") {
+			$c = "checked";
+		}
+		else {
+			$c = "";
+		}
+		echo "<tr><th>".t("Jätä tilaus kesken").":</th><td><input type='checkbox' name = 'kesken' value='X' $c></td>";
 
 		echo "<tr><th>".t("Osasto")."</th><td>";
 

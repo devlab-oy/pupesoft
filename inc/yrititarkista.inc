@@ -8,8 +8,8 @@
 	}
 
 	if (mysql_field_name($result, $i) == "oletus_rahatili" or
-		mysql_field_name($result, $i) == "oletus_selvittelytili" or
-		mysql_field_name($result, $i) == "oletus_kulutili") {
+		mysql_field_name($result, $i) == "oletus_kulutili" or
+		(mysql_field_name($result, $i) == "oletus_selvittelytili" and $t[$i] != "")) {
 
 		$query = "	SELECT nimi
 					FROM tili

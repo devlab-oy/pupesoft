@@ -36,25 +36,12 @@
 		if (count($komento) == 0) {
 			require("../inc/valitse_tulostin.inc");
 		}
-		
-		if ($toimas == "") {
-			$query = "	SELECT nimi, nimitark, osoite, postino, postitp, maa
-						FROM asiakas
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
-		}
-		else {
-			$query = "	SELECT 
-						if(toim_nimi!='', toim_nimi, nimi) nimi, 
-						if(toim_nimitark!='', toim_nimitark, nimitark) nimitark, 
-						if(toim_osoite!='', toim_osoite, osoite) osoite, 
-						if(toim_postino!='', toim_postino, postino) postino, 
-						if(toim_postitp!='', toim_postitp, postitp) postitp, 
-						if(toim_maa!='', toim_maa, maa) maa
-						FROM asiakas
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
-		}		
-		$res = mysql_query($query) or pupe_error($query);
 
+		$query = "	SELECT *
+					FROM asiakas
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($otunnus)";
+		$res = mysql_query($query) or pupe_error($query);
+	    
 		$laskuri = 1;
 		$sarake  = 1;	
 		$sisalto = "";
@@ -78,6 +65,28 @@
 		
 		while ($row = mysql_fetch_array($res)) {
 			
+    	    // k‰ytet‰‰n toim_ tietoja jos niin halutaan
+    		if ($_POST['toimas'] == 'on') {
+				
+				// tarkistetaan tiedot
+				$nimi    = (trim($row['toim_nimi']) != '')       ? true : false;
+				$osoite  = (trim($row['toim_osoite']) != '')     ? true : false;
+				$postino = (trim($row['toim_postino']) != ''
+							and $row['toim_postino'] != '00000') ? true : false;
+				$postitp = (trim($row['toim_postitp']) != '')    ? true : false;
+				$maa     = (trim($row['toim_maa']) != '')        ? true : false;
+
+ 				// ovatko tiedot validit
+				if ($nimi and $osoite and $postino and $postitp and $maa) {
+					$row['nimi']     = $row['toim_nimi'];
+					$row['nimitark'] = $row['toim_nimitark'];
+					$row['osoite']   = $row['toim_osoite'];
+					$row['postino']  = $row['toim_postino'];
+					$row['postitp']  = $row['toim_postitp'];
+					$row['maa']      = $row['toim_maa'];
+				}
+    		}
+    	    
 			if ($sarake == 3) {
 				$lisa = " ";
 			}
@@ -131,7 +140,7 @@
 		
 		// itse print komento...
 		if ($komento["Tarrat"] == 'email') {
-						
+			
 			$liite = $filenimi.".ps";
 			$kutsu = "Tarrat.ps";
 			$ctype = "ps";
@@ -139,7 +148,8 @@
 			require("../inc/sahkoposti.inc");
 		}
 		else {
-			$line = exec($komento["Tarrat"]." ".$filenimi.".ps");
+			$cmd = $komento["Tarrat"]." ".$filenimi.".ps";
+			$line = exec($cmd);
 		}
 		
 		//poistetaan tmp file samantien kuleksimasta...
@@ -227,7 +237,7 @@
 		$otunnus = substr($otunnus,0,-1);
 
 		echo "<table>";
-		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas'></td></tr>";
+		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on'></td></tr>";
 		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
 				<td><select name='raportti'>
 				<option value='33'>33 ".t("Tarraa")."</option>

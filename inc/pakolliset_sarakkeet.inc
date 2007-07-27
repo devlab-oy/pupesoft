@@ -110,6 +110,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "tuotteen_orginaalit" :
 				$pakolliset = array("TUOTENO","ORIG_TUOTENO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$wherelliset = array("TUOTENO", "ORIG_TUOTENO", "MERKKI");
 				break;
 			case "autodata" :
 				$pakolliset = array("AUTODATAID");

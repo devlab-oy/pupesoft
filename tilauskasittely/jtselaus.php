@@ -40,6 +40,7 @@
 
 			$asiakasno 		= $asiakas["ytunnus"];
 			$asiakasid		= $asiakas["tunnus"];
+			
 			if ($asiakas["toim_nimi"] == "") {
 				$asiakasmaa = $asiakas["maa"];
 			}
@@ -689,10 +690,10 @@
 
 								if ($tilaus_on_jo == "") {
 									echo "<th valign='top'>".t("Ytunnus")."<br>".t("Nimi")."<br>".t("Toim_Nimi")."</th>";
-
-									if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-										echo "<th valign='top'>".t("Tilausnro")."<br>".t("Viesti.")."</th>";
-									}
+								}
+								
+								if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
+									echo "<th valign='top'>".t("Tilausnro")."<br>".t("Viesti.")."</th>";
 								}
 
 								echo "<th valign='top'>".t("JT")."<br>".t("Hinta")."<br>".t("Ale")."</th>";
@@ -878,10 +879,10 @@
 									}
 
 									echo "$jtrow[toim_nimi]</td>";
-
-									if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-										echo "<td valign='top' $class>$jtrow[otunnus]<br>$jtrow[viesti]</td>";
-									}
+								}
+								
+								if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
+									echo "<td valign='top' $class>$jtrow[otunnus]<br>$jtrow[viesti]</td>";
 								}
 
 								if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "") {

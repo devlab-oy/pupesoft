@@ -474,7 +474,10 @@ if ($ytunnus!='') {
 			echo "<input type='hidden' name='asiakasid' value = '$asiakasid'>";
 			echo "<input type='hidden' name='ytunnus' value = '$ytunnus'>";
 			echo "<input type='hidden' name='rajaus' value = '$rajaus'>";
-			echo "<input type='hidden' name='lopetus' value = '$lopetus'>";						
+			echo "<input type='hidden' name='asale' value = '$asale'>";						
+			echo "<input type='hidden' name='ashin' value = '$ashin'>";						
+			echo "<input type='hidden' name='aletaul' value = '$aletaul'>";
+			echo "<input type='hidden' name='yhdistetty' value = '$yhdistetty'>";						
 			echo "<input type='radio' onclick='submit()' name='rajattunakyma' value='' $sela> ".t("Normaalinäkymä"); 
 			echo "<input type='radio' onclick='submit()' name='rajattunakyma' value='JOO' $selb> ".t("Extranetnäkymä");
 			echo "</form><br>";
@@ -490,13 +493,13 @@ if ($ytunnus!='') {
 				$tuotejoin = "	LEFT JOIN tuote ON tuote.yhtio=perusalennus.yhtio and tuote.aleryhma=perusalennus.ryhma and osasto != 0 and try != 0";
 				$tuotegroup = "GROUP BY try, osasto";
 				$tuotecols = ", osasto, try";
-				$order = "osasto, try, tuoteno, prio";
+				$order = "osasto+0, try+0, tuoteno, prio";
 			}
 			else {
 				$tuotejoin = "";
 				$tuotegroup = "";
 				$tuotecols = "";
-				$order = "alennusryhmä , prio , asiakasryhmä";				
+				$order = "alennusryhmä+0 , prio , asiakasryhmä";				
 			}
 			
 			$query = "

@@ -158,28 +158,30 @@ if ($ytunnus!='') {
 // jos meill‰ on onnistuneesti valittu asiakas
 if ($ytunnus!='') {
 	
-	if(include('Spreadsheet/Excel/Writer.php')) {
-		//keksit‰‰n failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+	if($tee != "eposti") {
+		if(include('Spreadsheet/Excel/Writer.php')) {
+			//keksit‰‰n failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 
-		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-		$worksheet =& $workbook->addWorksheet(t('Asiakkaan alennukset'));
+			$workbook_ale = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+			$worksheet =& $workbook_ale->addWorksheet(t('Asiakkaan alennukset'));
 
-		$format_bold =& $workbook->addFormat();
-		$format_bold->setBold();
-		
-		$format_percent =& $workbook->addFormat();
-		$format_percent->setNumFormat('0.00%');
+			$format_bold =& $workbook_ale->addFormat();
+			$format_bold->setBold();
 
-		$format_date =& $workbook->addFormat();
-		$format_date->setNumFormat('YYYY-MM-DD');
+			$format_percent =& $workbook_ale->addFormat();
+			$format_percent->setNumFormat('0.00%');
 
-		$format_curr =& $workbook->addFormat();
-		$format_curr->setNumFormat('0.00');
-				
-		$excelrivi = 0;
+			$format_date =& $workbook_ale->addFormat();
+			$format_date->setNumFormat('YYYY-MM-DD');
+
+			$format_curr =& $workbook_ale->addFormat();
+			$format_curr->setNumFormat('0.00');
+
+			$excelrivi = 0;
+		}		
 	}
 	
 	echo "<table><tr>";
@@ -425,30 +427,39 @@ if ($ytunnus!='') {
 			$kkl = date("m");
 			$vvl = date("Y");
 			$ppl = date("d");
-
+			
+			$otee = $tee;
+			$oasiakasrow = $asiakasrow;
+			
 			$asiakasid		= $asiakasrow["tunnus"];
 			$asiakas		= $ytunnus;
 			$tee			= "go";
 			$tuoteosasto2	= "kaikki";
 			$yhtiot[]		= $kukarow["yhtio"];
+			$jarjestys[1]	= "on";
 			
 			//	Huijataan myyntiseurantaa
 			if($lopetus == "") $lopetus = "block";
 			
-			echo "<br><font class='message'>".t("Myyntiseuranta")."</font>";
-			echo "<hr>";
+
 			require("myyntiseuranta.php");
 			
 			if($lopetus == "block") $lopetus = "";
 			
-			//	Korjataan ytunnus
+			//	Korjataan ytunnus ja tee
 			$ytunnus 	= $asiakas;
+			$tee 		= $otee;
+			$asiakasrow = $oasiakasrow;
 		}
 	}
 	
 	$yhdistetty_array = array();
 	if($rajaus == "" or $rajaus == "ALENNUKSET") {
-				
+		
+		if($rajaus == "") {
+			echo "<a href='#' name='alennukset'></a>";
+		}
+		
 		echo "<br><font class='message'>".t("Asiakkaan alennusryhm‰t, alennustaulukko ja alennushinnat")."</font><hr>";
 		
 		if($kukarow["extranet"] == "") {
@@ -459,7 +470,7 @@ if ($ytunnus!='') {
 			else {
 				$selb = "checked";
 			}
-			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<form method='post' action='$PHP_SELF#alennukset'>";
 			echo "<input type='hidden' name='asiakasid' value = '$asiakasid'>";
 			echo "<input type='hidden' name='ytunnus' value = '$ytunnus'>";
 			echo "<input type='hidden' name='rajaus' value = '$rajaus'>";
@@ -469,7 +480,7 @@ if ($ytunnus!='') {
 			echo "</form><br>";
 		}
 		
-		echo "<br><a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("Tulosta alennustaulukko")."</a><br><br>";
+		echo "<br><a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Tulosta alennustaulukko")."</a><br><br>";
 		
 		if ($asale!='' or $aletaulu!='' or $yhdistetty != "" or $tee == "eposti") {
 			
@@ -640,7 +651,7 @@ if ($ytunnus!='') {
 				$ulos  .= "</tr>";				
 			}
 
-			if(isset($workbook) and $yhdistetty == "") {
+			if(isset($workbook_ale) and $yhdistetty == "") {
 				foreach($otsik_spread as $key => $value) {
 					$worksheet->write($excelrivi, $key, ucfirst($value), $format_bold);
 				}
@@ -673,7 +684,7 @@ if ($ytunnus!='') {
 					$edryhma 	= $asrow["alennusryhm‰"];
 					$edtuoteno 	= $asrow["tuoteno"];
 															
-					if(isset($workbook) and $yhdistetty == "") {
+					if(isset($workbook_ale) and $yhdistetty == "") {
 						foreach($otsik_spread as $key => $value) {
 							$worksheet->write($excelrivi, $key, $asrow[$value]);
 						}
@@ -725,21 +736,21 @@ if ($ytunnus!='') {
 			//	Liitet‰‰n ulostus oikeaan muuttujaan
 			if($aletaulu != "") {
 				$aletaulu = $ulos;
-				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
+				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ alennukset")."</a>";
 			}
 			elseif($asale != "") {
 				$asale = $ulos;
-				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ alennustaulukot")."</a>";
 			}
 			else {
-				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
-				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
+				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ alennustaulukot")."</a>";
+				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ alennukset")."</a>";
 				$ulos = "";				
 			}
 		}
 		else {
-			$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
-			$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+			$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ alennukset")."</a>";
+			$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ alennustaulukot")."</a>";
 		}
 		
 		
@@ -766,7 +777,7 @@ if ($ytunnus!='') {
 			}
 			
 			// Duusataan otsikot
-			if(isset($workbook) and $yhdistetty == "") {
+			if(isset($workbook_ale) and $yhdistetty == "") {
 				foreach($otsik_spread as $key => $value) {
 					$worksheet->write($excelrivi, $key, ucfirst($value), $format_bold);
 				}
@@ -831,7 +842,7 @@ if ($ytunnus!='') {
 					$edryhma 	= $asrow["alennusryhm‰"];
 					$edtuoteno 	= $asrow["tuoteno"];
 					
-					if(isset($workbook) and $yhdistetty == "") {
+					if(isset($workbook_ale) and $yhdistetty == "") {
 						foreach($otsik_spread as $key => $value) {
 							$worksheet->write($excelrivi, $key, $asrow[$value]);
 						}
@@ -868,11 +879,11 @@ if ($ytunnus!='') {
 			$ashin .= "</table>";
 			
 			if($yhdistetty != "") {
-				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ asikashinnat")."</a>";
+				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ asikashinnat")."</a>";
 			}
 		}
 		else {
-			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ asikashinnat")."</a>";				
+			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("N‰yt‰ asikashinnat")."</a>";				
 		}
 		
 		if ($yhdistetty!='') {
@@ -890,7 +901,7 @@ if ($ytunnus!='') {
 			}
 			
 			// Duusataan otsikot
-			if(isset($workbook)) {
+			if(isset($workbook_ale)) {
 				foreach($otsik_spread as $key => $value) {
 					$worksheet->write($excelrivi, $key, ucfirst($value), $format_bold);
 				}
@@ -905,7 +916,7 @@ if ($ytunnus!='') {
 						
 			foreach($yhdistetty_array as $key => $value) {
 				
-				if(isset($workbook)) {
+				if(isset($workbook_ale)) {
 					foreach($otsik_spread as $key => $xvalue) {
 						$worksheet->write($excelrivi, $key, $value[$xvalue]);
 					}
@@ -930,7 +941,7 @@ if ($ytunnus!='') {
 			$yhdistetty .= "</table>";
 		}
 		else {
-			$yhdistetty = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&yhdistetty=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("Yhdistetty alennustaulukko")."</a>";
+			$yhdistetty = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&yhdistetty=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Yhdistetty alennustaulukko")."</a>";
 		}
 
 		// piirret‰‰n ryhmist‰ ja hinnoista taulukko..
@@ -944,8 +955,8 @@ if ($ytunnus!='') {
 				<td valign='top' class='back'>$yhdistetty</td>
 			</tr></table>";
 		
-		if(isset($workbook) and $excelrivi>1) {
-			$workbook->close();
+		if(isset($workbook_ale) and $excelrivi>1) {
+			$workbook_ale->close();
 			
 			echo "<table>";
 			echo "<tr><th>".t("Tallenna tulos").":</th>";

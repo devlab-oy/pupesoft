@@ -210,7 +210,6 @@ if (!function_exists('tulosta_tarjous')) {
 
 				$pdf->write($h, 1, 0, $s[1], t("Tuote", $kieli)." / ".t("Kommentti", $kieli), "norm", "L", "B");
 				$pdf->write($h, 1, $s[1], $s[2], t("Määrä", $kieli), "norm", "R", "B");
-				$pdf->write($h, 1, $s[2], $s[3], t("Hinta/yks", $kieli), "norm", "R", "B");
 				if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 					$pdf->write($h, 1, $s[2], $s[3], t("Hinta/yks", $kieli), "norm", "R", "B");
 					$pdf->write($h, 1, $s[3], $s[4], t("Yhteensä", $kieli), "norm", "R", "B");					
@@ -254,7 +253,7 @@ if (!function_exists('tulosta_tarjous')) {
 						}
 						
 						$pdf->write($h, 1, 0, $s[1], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
-						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"], $kieli)), "norm", "R", "");
+						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "norm", "R", "");
 						if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 							$pdf->write($h, 1, $s[2], $s[3], money_format('%!i',$row["hinta"]), "norm", "R", "");
 							$pdf->write($h, 1, $s[3], $s[4], money_format('%!i',$row["rivihinta"]), "norm", "R", "");						
@@ -277,7 +276,7 @@ if (!function_exists('tulosta_tarjous')) {
 					//	Meillä on vaan näytettävä tuoteperhetuote					
 					else {
 						$pdf->write($h, 1, 5, $s[1], $row["tuoteno"]." ".$row["nimitys"], "snadi", "L", "");
-						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(t($row["yksikko"], $kieli)), "snadi", "R", "");
+						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "snadi", "R", "");
 						$h-=$pdf->ln();
 						
 						if($row["kommentti"] != "") {

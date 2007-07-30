@@ -252,7 +252,7 @@
 							}
 
 							$pdf->write($h, 1, 0, $s[0], $row["toim_tuoteno"]." ".$row["toim_nimitys"], "norm", "L", "");
-							$pdf->write($h, 1, $s[0], $s[1], $row["varattu"]." ".strtolower($row["yksikko"]), "norm", "R", "");
+							$pdf->write($h, 1, $s[0], $s[1], $row["varattu"]." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "norm", "R", "");
 							$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), "norm", "R", "");
 							$pdf->write($h, 1, $s[2], 0, money_format('%!i',$row["rivihinta"]), "norm", "R", "");				
 							$h-=$pdf->ln();

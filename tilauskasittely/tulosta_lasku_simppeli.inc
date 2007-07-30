@@ -115,7 +115,7 @@ if (!function_exists('tulosta_lasku')) {
 
 					//	Laitetaan perustiedot oikealle		
 					$h=260;
-					$s=$pdf->teeSarakkeet(array(105,30));
+					$s=$pdf->teeSarakkeet(array(102,33));
 					
 					if($laskurow["projekti"] > 0) {
 						//	Onko nippulla projektia?
@@ -349,7 +349,7 @@ if (!function_exists('tulosta_lasku')) {
 					$rivi="lapsi";
 				}
 				$pdf->write($h, 1, $offset, $s[0], $row["tuoteno"]." ".$row["nimitys"], $style_rivi, "L", "");
-				$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".strtolower($row["yksikko"]), $style_rivi, "R", "");
+				$pdf->write($h, 1, $s[0], $s[1], $row["kpl"]." ".ta($kieli, "Y", $row["yksikko"]), $style_rivi, "R", "");
 				
 				if($rivi=="isa") {
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
@@ -567,7 +567,7 @@ if (!function_exists('tulosta_lasku')) {
 		}
 
 		$h=50;
-		$s=$pdf->teeSarakkeet(array(25,30,45,25,35));		
+		$s=$pdf->teeSarakkeet(array(31,30,45,25,35));		
 		$pdf->write($h, 1, 0, $s[1], t("MAKSUTIEDOT", $kieli), "norm", "L", "B");
 		$h-=$pdf->ln(1.25);
 

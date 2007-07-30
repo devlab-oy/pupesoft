@@ -86,7 +86,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 
 					//	Laitetaan perustiedot oikealle		
 					$h=260;
-					$s=$pdf->teeSarakkeet(array(105,30));
+					$s=$pdf->teeSarakkeet(array(102,33));
 					if($laskurow["projekti"] > 0) {
 						//	Onko nippulla projektia?
 						$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
@@ -299,7 +299,7 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 				}
 
 				$pdf->write($h, 1, $offset, $s[0], $row["tuoteno"]." ".$row["nimitys"], $style_rivi, "L", "");
-				$pdf->write($h, 1, $offset, $s[1], $row["kpl"]." ".strtolower(t($row["yksikko"], $kieli)), $style_rivi, "R", "");
+				$pdf->write($h, 1, $offset, $s[1], $row["kpl"]." ".strtolower(ta($kieli, "Y", $row["yksikko"])), $style_rivi, "R", "");
 				
 				if($rivi=="isa") {
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {

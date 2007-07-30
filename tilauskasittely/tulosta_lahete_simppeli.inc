@@ -124,7 +124,7 @@ if (!function_exists('tulosta_lahete')) {
 
 					//	Laitetaan perustiedot oikealle		
 					$h=260;
-					$s=$pdf->teeSarakkeet(array(105,30));
+					$s=$pdf->teeSarakkeet(array(102,33));
 					if($laskurow["projekti"] > 0) {
 						//	Onko nippulla projektia?
 						$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
@@ -325,7 +325,7 @@ if (!function_exists('tulosta_lahete')) {
 					$pdf->write($h, 1, 0, $s[0], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
 
 					if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-						$pdf->write($h, 1, $s[0], $s[1], (($row['varattu']+$row['kpl'])*1)." ".strtolower(t($row["yksikko"], $kieli)), "norm", "R", "");					
+						$pdf->write($h, 1, $s[0], $s[1], (($row['varattu']+$row['kpl'])*1)." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "norm", "R", "");					
 					}
 					else {	
 						if ($row["jt"] != 0) { // jälkitoimitus
@@ -354,7 +354,7 @@ if (!function_exists('tulosta_lahete')) {
 					}
 					$h-=$pdf->ln();
 
-					$pdf->write($h, 1, $s[0], $s[1], ($row['tilkpl']*1)." ".strtolower(t($row["yksikko"], $kieli)), "snadi", "R", "I");
+					$pdf->write($h, 1, $s[0], $s[1], ($row['tilkpl']*1)." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "snadi", "R", "I");
 
 					if($lahete_param["ale"] == "on" and $lahete_param["hinnat"] == "on") {
 						if($alenaytetaan=="OK") {
@@ -405,7 +405,7 @@ if (!function_exists('tulosta_lahete')) {
 					$pdf->write($h, 1, 5, $s[0], $row["tuoteno"]." ".$row["nimitys"], "snadi", "L", "");
 
 					if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
-						$pdf->write($h, 1, $s[0], $s[1], (($row['varattu']+$row['kpl'])*1)." ".strtolower(t($row["yksikko"], $kieli)), "snadi", "R", "");					
+						$pdf->write($h, 1, $s[0], $s[1], (($row['varattu']+$row['kpl'])*1)." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "snadi", "R", "");					
 					}
 					else {	
 						if ($row["jt"] != 0) { // jälkitoimitus

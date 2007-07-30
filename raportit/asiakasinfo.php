@@ -448,8 +448,28 @@ if ($ytunnus!='') {
 	
 	$yhdistetty_array = array();
 	if($rajaus == "" or $rajaus == "ALENNUKSET") {
+				
 		echo "<br><font class='message'>".t("Asiakkaan alennusryhm‰t, alennustaulukko ja alennushinnat")."</font><hr>";
-		echo "<br><a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&lopetus=$lopetus'>".t("Tulosta alennustaulukko")."</a><br><br>";
+		
+		if($kukarow["extranet"] == "") {
+			$sela = $selb = "";
+			if($rajattunakyma != "JOO") {
+				$sela = "checked";
+			}
+			else {
+				$selb = "checked";
+			}
+			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='asiakasid' value = '$asiakasid'>";
+			echo "<input type='hidden' name='ytunnus' value = '$ytunnus'>";
+			echo "<input type='hidden' name='rajaus' value = '$rajaus'>";
+			echo "<input type='hidden' name='lopetus' value = '$lopetus'>";						
+			echo "<input type='radio' onclick='submit()' name='rajattunakyma' value='' $sela> ".t("Normaalin‰kym‰"); 
+			echo "<input type='radio' onclick='submit()' name='rajattunakyma' value='JOO' $selb> ".t("Extranetn‰kym‰");
+			echo "</form><br>";
+		}
+		
+		echo "<br><a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("Tulosta alennustaulukko")."</a><br><br>";
 		
 		if ($asale!='' or $aletaulu!='' or $yhdistetty != "" or $tee == "eposti") {
 			
@@ -581,7 +601,7 @@ if ($ytunnus!='') {
 
 			if($aletaulu != "" or $tee == "eposti") {
 				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
-				if($kukarow["extranet"] != "") {
+				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("osasto", "try", "alennusryhm‰", "tuoteno", "alennus", "alkupvm", "loppuvm");
 					$otsik_spread = array("osasto", "try", "alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppuvm");					
 				}
@@ -592,7 +612,7 @@ if ($ytunnus!='') {
 			}
 			elseif($yhdistetty != "") {
 				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
-				if($kukarow["extranet"] != "") {
+				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "osasto", "try", "alennus", "alkupvm", "loppuvm");					
 				}
 				else {
@@ -601,7 +621,7 @@ if ($ytunnus!='') {
 			}
 			else {
 				$ulos  = "<table><caption><font class='message'>".t("Aletaulukko")."</font></caption>";
-				if($kukarow["extranet"] != "") {
+				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("alennusryhm‰", "tuoteno", "alennus", "alkupvm", "loppuvm");
 					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppuvm");
 				}
@@ -648,7 +668,7 @@ if ($ytunnus!='') {
 			while ($asrow = mysql_fetch_array($asres)) {
 				
 				//	Suodatetaan extranetk‰ytt‰jilta muut aleprossat
-				if((($kukarow["extranet"] != "" or $tee == "eposti"  or $yhdistetty != "") and ($edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == "") ) {
+				if((($kukarow["extranet"] != "" or $tee == "eposti"  or $yhdistetty != "" or $rajattunakyma == "JOO") and ($edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == ""  and $rajattunakyma != "JOO")) {
 					
 					$edryhma 	= $asrow["alennusryhm‰"];
 					$edtuoteno 	= $asrow["tuoteno"];
@@ -705,21 +725,21 @@ if ($ytunnus!='') {
 			//	Liitet‰‰n ulostus oikeaan muuttujaan
 			if($aletaulu != "") {
 				$aletaulu = $ulos;
-				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
+				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
 			}
 			elseif($asale != "") {
 				$asale = $ulos;
-				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
 			}
 			else {
-				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
-				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
+				$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+				$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
 				$ulos = "";				
 			}
 		}
 		else {
-			$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
-			$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
+			$asale 		= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennukset")."</a>";
+			$aletaulu 	= "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ alennustaulukot")."</a>";
 		}
 		
 		
@@ -727,7 +747,7 @@ if ($ytunnus!='') {
 			// haetaan asiakashintoja			
 			$ashin  = "<table><caption><font class='message'>".t("Asiakashinnat")."</font></caption>";
 			if($yhdistetty != "") {
-				if($kukarow["extranet"] != "") {
+				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
 				}
 				else {
@@ -735,7 +755,7 @@ if ($ytunnus!='') {
 				}				
 			}
 			else {
-				if($kukarow["extranet"] != "") {
+				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("alennusryhm‰", "tuoteno", "hinta", "alkupvm", "loppuvm");
 					$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
 				}
@@ -807,7 +827,7 @@ if ($ytunnus!='') {
 			while ($asrow = mysql_fetch_array($asres)) {
 				
 				//	Suodatetaan extranetk‰ytt‰jilta muut hinnat
-				if((($kukarow["extranet"] != "" or $tee == "eposti" or $yhdistetty != "") and ($edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == "") ) {
+				if((($kukarow["extranet"] != "" or $tee == "eposti" or $yhdistetty != "" or $rajattunakyma == "JOO") and ($edryhma != $asrow["alennusryhm‰"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == "" or $rajattunakyma != "JOO") ) {
 					$edryhma 	= $asrow["alennusryhm‰"];
 					$edtuoteno 	= $asrow["tuoteno"];
 					
@@ -848,11 +868,11 @@ if ($ytunnus!='') {
 			$ashin .= "</table>";
 			
 			if($yhdistetty != "") {
-				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&lopetus=$lopetus'>".t("N‰yt‰ asikashinnat")."</a>";
+				$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ asikashinnat")."</a>";
 			}
 		}
 		else {
-			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&lopetus=$lopetus'>".t("N‰yt‰ asikashinnat")."</a>";				
+			$ashin = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&ashin=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("N‰yt‰ asikashinnat")."</a>";				
 		}
 		
 		if ($yhdistetty!='') {
@@ -860,7 +880,7 @@ if ($ytunnus!='') {
 			// tehd‰‰n yhdistetty alennustaulukko...
 			$yhdistetty  = "<table><caption><font class='message'>".t("Yhdistetty alennustaulukko")."</font></caption>";
 			
-			if($kukarow["extranet"] != "") {
+			if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 				$otsik = array("alennusryhm‰",  "tuoteno", "alennus", "hinta", "alkupvm", "loppuvm");
 				$otsik_spread = array("alennusryhm‰", "alennusryhm‰_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "hinta", "alkupvm", "loppuvm");
 			}
@@ -910,7 +930,7 @@ if ($ytunnus!='') {
 			$yhdistetty .= "</table>";
 		}
 		else {
-			$yhdistetty = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&yhdistetty=kylla&lopetus=$lopetus'>".t("Yhdistetty alennustaulukko")."</a>";
+			$yhdistetty = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&yhdistetty=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus'>".t("Yhdistetty alennustaulukko")."</a>";
 		}
 
 		// piirret‰‰n ryhmist‰ ja hinnoista taulukko..

@@ -8,11 +8,12 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "perhe") {
-		
+
+		echo "tunnus: $tunnus ";		
 		if(${$nimi} > 0) $tunnus = ${$nimi};
+		echo "tunnus: $tunnus nimi: $nimi<br>";
 		
 		if($tunnus > 0) {	
-
 			$query = "select perhe, laji, jarjestys from avainsana where yhtio = '{$kukarow["yhtio"]}' and tunnus = '$tunnus'";
 			$pres = mysql_query($query) or pupe_error($query);
 			$prow = mysql_fetch_array($pres);
@@ -63,7 +64,7 @@
 				$tyyppi = 0;
 			}
 		}
-		else {
+		else {			
 			//	Arvotaan uusi perhetunnus
 			if($perhe == 0) {
 				$tyyppi = 4;
@@ -71,16 +72,16 @@
 				 			FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]'";
 				$pres = mysql_query($query) or pupe_error($query);
-				$perhe = mysql_fetch_array($pres);
-				$trow[$i] = ($perhe["perhe"]+1);				
+				$perse = mysql_fetch_array($pres);
+				$trow[$i] = $perhe = ($perse["perhe"]+1);
 			}
 			else {
 				$ulos = "<td><input type='hidden' name = '$nimi' value='$perhe'><input type='hidden' name = 'perhe' value='$perhe'></td>";
 				$jatko = 0;
 				$trow[$i] = $perhe;
 			}
+			echo "perhe: $perhe<br>";
 		}
-		
 	}
 	
 

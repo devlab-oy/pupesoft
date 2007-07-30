@@ -67,12 +67,12 @@ if ($tee == 'I') {
 		$path_parts = pathinfo($_FILES['userfile']['name']);
 		$ext = $path_parts['extension'];
 		if (strtoupper($ext) == "JPEG") $ext = "jpg";
-		
+
 		// laskun polku
 		$polku = $yhtiorow['lasku_polku_abs'];
 		// uniikki filenimi (t‰m‰ tallennetaan kantaan, huom eka / on pakollinen, sill‰ erotetaan scannatut ja verkkolaskut!!)
 		// otetaan nimest‰ 31 ekaa merkki‰ ja lis‰t‰‰n .EXT niin tulee 35 merkki‰ joka on tietokannassa kent‰n pituus.. kenties ois pit‰ny muuttaa tietokantaaa???
-		
+
 		$fnimi = substr("/".$kukarow['yhtio']."-".$kukarow['kuka']."-".md5(uniqid(rand(),true)),0,31).".$ext";
 		// t‰nne siirret‰‰n
 		$lopnimi = $polku.$fnimi;
@@ -100,32 +100,43 @@ if ($tee == 'I') {
 		$filetype = $_FILES['userfile']['type'];
 		$filesize = $_FILES['userfile']['size'];
 		$filename = $_FILES['userfile']['name'];
-		
-		$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
-		
-		// lis‰t‰‰n kuva
-		$query = "	insert into liitetiedostot set
-					yhtio      = '{$kukarow['yhtio']}',
-					liitos     = 'lasku',
-					laatija    = '{$kukarow['kuka']}',
-					luontiaika = now(),
-					data       = '$data',
-					selite     = '$selite',
-					filename   = '$filename',
-					filesize   = '$filesize',
-					filetype   = '$filetype'";
-		
+
+		$query = "SHOW variables like 'max_allowed_packet'";
 		$result = mysql_query($query) or pupe_error($query);
-		$liitostunnus = mysql_insert_id();
-		$kuva = $liitostunnus;
-		
+		$varirow = mysql_fetch_array($result);
+
+		if ($filesize > $varirow[1]) {
+			$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
+			$tee = "E";
+			$fnimi = "";
+		}
+
+		// jos ei virheit‰..
+		if ($tee == "I") {
+			$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
+
+			// lis‰t‰‰n kuva
+			$query = "	insert into liitetiedostot set
+						yhtio      = '{$kukarow['yhtio']}',
+						liitos     = 'lasku',
+						laatija    = '{$kukarow['kuka']}',
+						luontiaika = now(),
+						data       = '$data',
+						selite     = '$selite',
+						filename   = '$filename',
+						filesize   = '$filesize',
+						filetype   = '$filetype'";
+			$result = mysql_query($query) or pupe_error($query);
+			$liitostunnus = mysql_insert_id();
+			$kuva = $liitostunnus;
+		}
 	}
 	elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
 		// nelonen tarkoittaa, ettei mit‰‰n file‰ uploadattu.. eli jos on joku muu errori niin ei p‰‰stet‰ eteenp‰in
 		$errormsg .=  "<font class='error'>".t("Laskun kuvan l‰hetys ep‰onnistui")."! (Error: ".$_FILES['userfile']['error'].")</font><br>";
 		$tee = "E";
 	}
-		
+
 	if (isset($toitilinumero)) {
 		$query = "SELECT * FROM toimi WHERE tunnus = '$toimittajaid'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -143,7 +154,7 @@ if ($tee == 'I') {
 			$tilino = $pankkitili; //Jos t‰m‰ ei siis onnistu puuttuu tilinumero ja se huomataan myˆhemmin
 			if ($tilino == '') unset($toitilinumero); //Ei p‰ivitet‰
 		}
-		
+
 		if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
 			$query = "update toimi set tilinumero='$toitilinumero' where yhtio='$kukarow[yhtio]' and tunnus='$toimittajaid'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -154,7 +165,7 @@ if ($tee == 'I') {
 			$trow['swift']=$toiswift;
 			$result = mysql_query($query) or pupe_error($query);
 		}
-	}	
+	}
 	// Hoidetaan pilkut pisteiksi....
 	$kassaale = str_replace ( ",", ".", $kassaale);
 	$summa    = str_replace ( ",", ".", $summa);
@@ -277,7 +288,7 @@ if ($tee == 'I') {
 	if ($maara == 2 and strlen($isumma[1]) == 0) {
 		$isumma[1] = $summa;
 	}
-	
+
 	if ($maara > 1) {
 		if ($syottotyyppi=='prosentti') {
 			$viimeinensumma=0;
@@ -303,7 +314,7 @@ if ($tee == 'I') {
 			}
 		}
 	}
-	
+
  	// K‰yd‰‰n tiliˆinnit l‰pi
 	for ($i=1; $i<$maara; $i++) {
 
@@ -406,9 +417,9 @@ if ($tee == 'I') {
 
 
 if ($tee == 'Y') {
-	
+
 	require ("inc/kevyt_toimittajahaku.inc");
-	
+
 	// Toimittaja lˆytyi
 	if ($toimittajaid != 0) {
 		$tee 	= "P";
@@ -742,11 +753,11 @@ if ($tee == 'P' or $tee == 'E') {
 		<tr>
 			<td>".t("Viesti")."</td><td><input type='text' maxlength='70' size='60' name='viesti' value='$viesti'></td>
 		</tr>";
-		
+
 		echo "<tr>
 			<td>".t("Kommentti")."</td><td><input type='text' name='komm' size='60' value='$komm'></td>
 		</tr>";
-		
+
 /*
 		echo "<tr>
 			<td>".t("Sis‰inen tieto1")."</td><td><input type='text' maxlength='20' name='sis1' value='$sis1'></td>
@@ -911,7 +922,7 @@ if ($tee == 'P' or $tee == 'E') {
 		if (isset($syottotyyppi)) {
 			if ($syottotyyppi=='prosentti') $syottotyyppiprosentti = 'checked';
 		}
-		
+
 		echo "<hr><table>
 			<tr><th>".t("Tili")."</th><th>".t("Kustannuspaikka")."</th>
 			<th><input type='radio' name='syottotyyppi' value =  'summa' $syottotyyppisaldo>".t("Summa")."<input type='radio' name='syottotyyppi' value =  'prosentti' $syottotyyppiprosentti>".t("Prosentti")."</th><th>".t("Vero")."</th></tr>";
@@ -1087,15 +1098,15 @@ if ($tee == 'I') {
 		if ($tositenrorow['nro'] < $alaraja) $tositenrorow['nro'] = 41000001;
 		$tositenro=$tositenrorow['nro'];
 	}
-	
+
 	if ($komm != "") {
 		$komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") " . trim($komm);
 	}
-	
+
 	if ($kuva) {
 		$ebid = '';
 	}
-	
+
 	// Kirjoitetaan lasku
 	$query = "INSERT into lasku set
 			yhtio = '$kukarow[yhtio]',
@@ -1146,13 +1157,13 @@ if ($tee == 'I') {
 
 	$result = mysql_query($query) or pupe_error($query);
 	$tunnus = mysql_insert_id ($link);
-	
+
 	if ($kuva) {
 		// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
 		$query = "update liitetiedostot set liitostunnus='$tunnus', selite='{$trow['nimi']} $summa $valkoodi' where tunnus='$kuva'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
-	
+
 	$omasumma = round($summa * $vrow['kurssi'],2);
 	$vassumma = -1 * $omasumma;
 
@@ -1186,7 +1197,7 @@ if ($tee == 'I') {
 	// Nyt on saatava pyˆristykset ok
 	$veroton = 0;
 	$muusumma = 0;
-	
+
 	for ($i=1; $i<$maara; $i++) {
 		$isumma[$i] = round($isumma[$i] * $vrow['kurssi'],2);
 
@@ -1197,7 +1208,7 @@ if ($tee == 'I') {
 			$muusumma += $isumma[$i] + $ialv[$i];
 		}
 		else {
-			$muusumma += $isumma[$i];	
+			$muusumma += $isumma[$i];
 		}
 		$veroton  += $isumma[$i];
 	}
@@ -1207,7 +1218,7 @@ if ($tee == 'I') {
 		for ($i=1; $i<$maara; $i++) {
 			if ($isumma[$i] != 0) {
 				$isumma[$i] += $omasumma-$muusumma;
-				$i=$maara; 
+				$i=$maara;
 			}
 		}
 	}
@@ -1533,7 +1544,7 @@ if ($tee == 'I') {
 
 		//Luodaan uusi keikka
 		$aladellaa = "En haluu dellata!";
-		
+
 		require("inc/verkkolasku-in-luo-keikkafile.inc");
 
 		echo "$laskuvirhe<br><br>";
@@ -1565,7 +1576,7 @@ if ($tee == 'I') {
 			$PHP_SELF = "tilauskasittely/keikka.php";
 			$alku = "";
 			$toimittajaid = $trow["tunnus"];
-			
+
 			require("tilauskasittely/ostotilausten_rivien_kohdistus.inc");
 			exit;
 		}

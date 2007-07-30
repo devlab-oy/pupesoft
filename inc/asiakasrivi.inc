@@ -645,7 +645,7 @@
 			if ($trow[$i] == $vrow['selite']) {
 				$sel = "selected";
 			}
-			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
+			$ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
 		}
 
 		$ulos .= "</select></td>";

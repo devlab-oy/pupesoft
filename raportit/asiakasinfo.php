@@ -28,7 +28,6 @@ if ($tee == 'eposti') {
 	require('pdflib/phppdflib.class.php');
 
 	// defaultteja
-	$lask = 1;
 	$sivu = 1;
 
 	function alku () {
@@ -99,22 +98,21 @@ if ($tee == 'eposti') {
 	}
 
 	function rivi ($firstpage, $osasto, $try, $tuote, $ryhma, $ale) {
-		global $pdf, $kala, $sivu, $lask, $rectparam, $norm, $norm_bold, $pieni;
+		global $pdf, $kala, $sivu, $rectparam, $norm, $norm_bold, $pieni;
 		
 		static $edosasto;
 
-		if (($sivu == 1 and $lask == 43) or ($sivu > 1 and $lask == 50)) {
+		if ($kala < 40) {
 			$sivu++;
 			$firstpage = alku();
 			$kala = 760;
-			$lask = 1;
 		}
 		
 		//	Vaihdetaan osastoa
 		if($osasto != $edosasto) {
-			$kala = $kala - 15;						
+			$kala -= 15;						
 			$pdf->draw_text(30,  $kala, $osasto, 									$firstpage, $norm_bold);
-			$kala = $kala - 25;			
+			$kala -= 25;			
 		}
 		
 		$edosasto = $osasto;
@@ -128,9 +126,7 @@ if ($tee == 'eposti') {
 		$pdf->draw_text(310, $kala, sprintf('%10s',$ryhma), 	$firstpage, $norm);
 		$pdf->draw_text(490, $kala, sprintf('%10s',sprintf('%.2d',$ale))."%", 	$firstpage, $norm);
 
-
-		$kala = $kala - 15;
-		$lask++;
+		$kala -= 15;
 	}
 
 	//tehd‰‰n eka sivu

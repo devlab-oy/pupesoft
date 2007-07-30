@@ -100,8 +100,10 @@ if (round($maara,2) != 0) { // Onko jotain kirjattavaa (tämä toimii jopa vastavi
         // Merkataan tämä kirjaus tiliotteelle
         $query= "UPDATE tiliotedata SET kasitelty = now(), tiliointitunnus=" . mysql_insert_id ($link) . " WHERE tunnus='$tiliotedataid'";
 		$dummyresult = mysql_query($query) or pupe_error($query);
+		
 		// Merkataan käsitellyiksi & lisätään linkki
 		$vastavienti += $maara;
+		
 		echo "<font class='message'>*** ".t("tiliöinti luotu")." ($tiliotesaantotilino) ***</font><br>";
 	}
 }

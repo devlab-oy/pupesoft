@@ -338,6 +338,22 @@ if (!function_exists("pt_mm")) {
 	}
 }
 
+if (!function_exists("table_exists")) {
+	function table_exists($taulu) {
+		global $dbkanta;
+		
+		//	Ei kaaduta errorista
+		$query = "show tables where tables_in_$dbkanta = '$taulu';";
+		$result = mysql_query($query);
+		if (mysql_num_rows($result) == 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+}
+
 if (!function_exists("saldo_myytavissa")) {
 	function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
 
@@ -1805,7 +1821,7 @@ if (! function_exists('ta')) {
 		global $kukarow, $yhtiorow;
 		
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus
-		if($kieli == $yhtiorow["kieli"]) {
+		if($kieli == $yhtiorow["kieli"] and $return == "selite") {
 			return $selite;
 		}
 		

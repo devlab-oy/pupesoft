@@ -491,9 +491,9 @@ if ($ytunnus!='') {
 			
 			if($aletaulu != "" or $tee == "eposti") {
 				$tuotejoin = "	LEFT JOIN tuote ON tuote.yhtio=perusalennus.yhtio and tuote.aleryhma=perusalennus.ryhma and osasto != 0 and try != 0";
-				$tuotegroup = "GROUP BY try, osasto";
+				$tuotegroup = "GROUP BY try, osasto, aleryhma";
 				$tuotecols = ", osasto, try";
-				$order = "osasto+0, try+0, tuoteno, prio";
+				$order = "osasto+0, try+0, alennusryhmä+0, tuoteno, prio";
 			}
 			else {
 				$tuotejoin = "";
@@ -617,11 +617,11 @@ if ($ytunnus!='') {
 				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
 				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
 					$otsik = array("osasto", "try", "alennusryhmä", "tuoteno", "alennus", "alkupvm", "loppuvm");
-					$otsik_spread = array("osasto", "try", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppuvm");					
+					$otsik_spread = array("osasto", "osasto_nimi", "try",  "try_nimi", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppuvm");					
 				}
 				else {
 					$otsik = array("osasto", "try", "alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "alkupvm", "loppuvm", "tyyppi");
-					$otsik_spread = array("osasto", "try", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhmä",  "asiakasryhmä_nimi", "alennus", "alkupvm", "loppuvm");
+					$otsik_spread = array("osasto", "osasto_nimi", "try",  "try_nimi", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhmä",  "asiakasryhmä_nimi", "alennus", "alkupvm", "loppuvm");
 				}
 			}
 			elseif($yhdistetty != "") {
@@ -689,7 +689,15 @@ if ($ytunnus!='') {
 															
 					if(isset($workbook_ale) and $yhdistetty == "") {
 						foreach($otsik_spread as $key => $value) {
-							$worksheet->write($excelrivi, $key, $asrow[$value]);
+							if($value == "osasto_nimi") {
+								$worksheet->write($excelrivi, $key, $osastot[$asrow["osasto"]]);
+							}
+							elseif($value == "try_nimi") {
+								$worksheet->write($excelrivi, $key, $tryt[$asrow["try"]]);
+							}
+							else {
+								$worksheet->write($excelrivi, $key, $asrow[$value]);
+							}
 						}
 						$excelrivi++;
 					}									

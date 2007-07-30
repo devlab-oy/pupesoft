@@ -37,6 +37,10 @@ and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 	$filesize = $_FILES['userfile']['size'];
 	$filename = $_FILES['userfile']['name'];
 
+	$query = "SHOW variables like 'max_allowed_packet'";
+	$result = mysql_query($query) or pupe_error($query);
+	$varirow = mysql_fetch_array($result);
+
 	$path_parts = pathinfo($_FILES['userfile']['name']);
 	$ext = $path_parts['extension'];
 	if (strtoupper($ext) == "JPEG") $ext = "jpg";
@@ -48,6 +52,9 @@ and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 	// ja file jonkun kokonen
 	elseif ($_FILES['userfile']['size'] == 0) {
 		$errormsg .= "<font class='error'>".t("Tiedosto on tyhjä")."!</font>";
+	}
+	elseif ($filesize > $varirow[1]) {
+		$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
 	}
 
 	if (empty($errormsg)) {

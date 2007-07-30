@@ -24,11 +24,19 @@
 		// koska, jos tulee virheit‰ tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
 		if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 
+			$filetype = $_FILES['userfile']['type'];
+			$filesize = $_FILES['userfile']['size'];
+			$filename = $_FILES['userfile']['name'];
+
 			// otetaan file extensio
 			$path_parts = pathinfo($_FILES['userfile']['name']);
 			$ext = $path_parts['extension'];
 			if (strtoupper($ext) == "JPEG") $ext = "jpg";
-			
+
+			$query = "SHOW variables like 'max_allowed_packet'";
+			$result = mysql_query($query) or pupe_error($query);
+			$varirow = mysql_fetch_array($result);
+
 			// extensio pit‰‰ olla oikein
 			if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
 				echo "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
@@ -41,12 +49,13 @@
 				$tee = "N";
 				$fnimi = "";
 			}
+			elseif ($filesize > $varirow[1]) {
+				echo "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
+				$tee = "N";
+				$fnimi = "";
+			}
 			// Talletetaan laskun kuva kantaan
 			else {
-				$filetype = $_FILES['userfile']['type'];
-				$filesize = $_FILES['userfile']['size'];
-				$filename = $_FILES['userfile']['name'];
-
 				$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
 
 				// lis‰t‰‰n kuva
@@ -255,13 +264,13 @@
 
 //		echo "$query <br>";
 		$tunnus = mysql_insert_id ($link);
-		
+
 		if ($fnimi) {
 			// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
 			$query = "update liitetiedostot set liitostunnus='$tunnus', selite='$selite $summa' where tunnus='$fnimi'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
-		
+
 		// Tehd‰‰n tiliˆinnit
 		for ($i=1; $i<$maara; $i++) {
 			if (strlen($itili[$i]) > 0) {

@@ -55,18 +55,27 @@ if ($tee == 'LISAA') {
 
 			$selite = trim($otsikko);
 
-			// lis‰t‰‰n kuva
-			$query = "	insert into liitetiedostot set
-						yhtio    = '$kukarow[yhtio]',
-						liitos   = 'kalenteri',
-						data     = '$data',
-						selite   = '$selite',
-						filename = '$filename',
-						filesize = '$filesize',
-						filetype = '$filetype'";
+			$query = "SHOW variables like 'max_allowed_packet'";
 			$result = mysql_query($query) or pupe_error($query);
-			$liitostunnus = mysql_insert_id();
-			$kuva = $liitostunnus;
+			$varirow = mysql_fetch_array($result);
+
+			if ($filesize > $varirow[1]) {
+				echo "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
+			}
+			else {
+				// lis‰t‰‰n kuva
+				$query = "	insert into liitetiedostot set
+							yhtio    = '$kukarow[yhtio]',
+							liitos   = 'kalenteri',
+							data     = '$data',
+							selite   = '$selite',
+							filename = '$filename',
+							filesize = '$filesize',
+							filetype = '$filetype'";
+				$result = mysql_query($query) or pupe_error($query);
+				$liitostunnus = mysql_insert_id();
+				$kuva = $liitostunnus;
+			}
 		}
 
 		$uutinen = nl2br(strip_tags($uutinen, '<a>'));
@@ -190,7 +199,7 @@ if ($tee == "SYOTA") {
 			<th>".t("P‰iv‰m‰‰r‰")."</th>
 			<td>$rivi[pvmalku]</td>
 		 </tr>";
-		
+
 	echo "<tr><th>".t("Kieli").":&nbsp;</th><td><select name='lang'>";
 
 	$query  = "show columns from sanakirja";

@@ -6,7 +6,7 @@ require ("inc/alvpopup.inc");
 echo "<font class='head'>".t('Matkalasku / kulukorvaus')."</font><hr><br><br>";
 
 if($tee == "POISTA") {
-	
+
 	$tunnus=$tilausnumero;
 	$tee="D";
 	$kutsuja="MATKALASKU";
@@ -36,10 +36,10 @@ if ($tee == "UUSI") {
 	/*
 		Täältä löytyy kaikki verottajan ulkomaanpäivärahat, sekä ohjeet niiden käsittelyyn
 		http://www.vero.fi/default.asp?article=5516&domain=VERO_MAIN&path=5,298,305,316&language=FIN
-		
+
 		(tai hakusanalla päivärahat yyyy)
 	*/
-	
+
 	$query = "	SELECT *
 				FROM tuote
 				JOIN tili ON tili.yhtio=tuote.yhtio and tili.tilino=tuote.tilino
@@ -100,7 +100,7 @@ if ($tee == "UUSI") {
 
 			$result = mysql_query($query) or pupe_error($query);
 			$tilausnumero = mysql_insert_id();
-			
+
 			//	Tänne voisi laittaa myös tuon asiakasidn jos tästä voitaisiin lähettää myös lasku asiakkaalle
 			$query = "INSERT into laskun_lisatiedot set
 						yhtio = '$kukarow[yhtio]',
@@ -155,9 +155,20 @@ if ($tee == "TALLENNA") {
 						$ext = $path_parts['extension'];
 						if (strtoupper($ext) == "JPEG") $ext = "jpg";
 
+						$query = "SHOW variables like 'max_allowed_packet'";
+						$result = mysql_query($query) or pupe_error($query);
+						$varirow = mysql_fetch_array($result);
+
+						$filetype = $_FILES['userfile']['type'];
+						$filesize = $_FILES['userfile']['size'];
+						$filename = $_FILES['userfile']['name'];
+
 						// extensio pitää olla oikein
 						if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
 							$errormsg .= "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
+						}
+						elseif ($filesize > $varirow[1]) {
+							$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
 						}
 						else {
 							// lisätään kuva
@@ -208,11 +219,11 @@ if ($tee == "MUOKKAA") {
 				echo "Ostovelkatiliöinti puuttuu<br>";
 				return false;
 			}
-			
+
 			$query = "	select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$ltunnus'";
 			$result=mysql_query($query) or pupe_error($query);
 			$laskurow=mysql_num_rows($result);
-						
+
 			$query = "	SELECT sum((-1*summa)) summa, count(*) kpl
 						FROM tiliointi
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -278,7 +289,7 @@ if ($tee == "MUOKKAA") {
 						<font class='message'>".t("Heitto on")." $ero [rivit {$rivirow[summa]}] (kp {$summarow["summa"]})</font><br>";
 			}
 		}
-		
+
 		if($poistakuva > 0) {
 			$query = " delete from liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and tyyppi='lasku' and liitostunnus='$tilausnumero' and tunnus = '$poistakuva'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -286,7 +297,7 @@ if ($tee == "MUOKKAA") {
 				echo "<font class='error'>".t("HEI!! Ei koitetan runkata systeemiä S***na!!")."</font><br>";
 			}
 		}
-		
+
 		$query 	= "	select *
 						from lasku
 						where tunnus='$tilausnumero' and yhtio='$kukarow[yhtio]' and tilaustyyppi='M' and tila IN ('H','Y','M','P','Q')";
@@ -421,7 +432,7 @@ if ($tee == "MUOKKAA") {
 								and lasku.tilaustyyppi	= 'M'
 								and lasku.tila IN ('H','Y','M','P','Q')
 								and liitostunnus = '$laskurow[liitostunnus]'
-								and (	(kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika <= '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or 
+								and (	(kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika <= '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
 										(kerattyaika <  '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika > '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
 										(toimitettuaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika <= '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm'))
 								GROUP BY otunnus";
@@ -442,7 +453,7 @@ if ($tee == "MUOKKAA") {
 						}
 						$errori .= "</table><br><br>";
 					}
-					
+
 					if($loppuvv.$loppukk.$loppupp>date("Ymd")) {
 						$errori .= "<font class='error'>".t("VIRHE!!! Matkalaskua ei voi tehdä etukäteen!")."</font><br>";
 					}
@@ -563,7 +574,7 @@ if ($tee == "MUOKKAA") {
 						$kpl 	= str_replace(",",".",$kpl_array[$trow["tuoteno"]]);
 						$hinta 	= str_replace(",",".",$hinta_array[$trow["tuoteno"]]);
 						$rivihinta = round($kpl*$hinta,2);
-						
+
 						//	Ratkaistaan alv..
 						if ($tyyppi == "B") {
 							//	Haetaan tuotteen oletusalv jos ollaan ulkomailla, tälläin myös kotimaan alv on aina zero
@@ -998,7 +1009,7 @@ if ($tee == "MUOKKAA") {
 							echo "<font class='error'>".t("Kulun arvonlisäveroa kohdemaassa ei ole määritelty")."</font><br>";
 						}
 					}
-					
+
 					echo "<td>".alv_popup_oletus("alvulk",$alvulk, $maa, 'lista')."</td>";
 				}
 				else {

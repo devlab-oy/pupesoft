@@ -8,7 +8,7 @@ if (isset($_POST["tee"])) {
 	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require ("inc/parametrit.inc");
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
 	readfile("/tmp/".$tmpfilenimi);
@@ -20,7 +20,7 @@ if ($tee == 'eposti') {
 	if ($komento == '') {
 		$tulostimet[] = "Alennustaulukko";
 		$toimas = $ytunnus;
-		require("../inc/valitse_tulostin.inc");
+		require("inc/valitse_tulostin.inc");
 	}
 	
 	$ytunnus = $toimas;
@@ -135,21 +135,43 @@ if ($tee == 'eposti') {
 
 echo "<font class='head'>".t("Asiakkaan perustiedot")."</font><hr><br><br>";
 
-//	Jos tullaan muualta ei anneta valita uutta asiakasta
-if($lopetus=="") {
-	echo "<form name=asiakas action='asiakasinfo.php' method='post' autocomplete='off'>";
-	echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
-	echo "<table><tr>";
-	echo "<th>".t("Anna asiakasnumero tai osa nimestä")."</th>";
-	echo "<td><input type='text' name='ytunnus'></td>";
-	echo "<td class='back'><input type='submit' value='".t("Hae")."'>";
-	echo "</tr></table>";
-	echo "</form><br><br>";	
+//	Haardkoodataan exranetrajaus vain alennukseen 
+if($kukarow["extranet"]  != "") {
+	$rajaus = "ALENNUKSET";
+	
+	//Haetaan asiakkaan tunnuksella
+	$query  = "	SELECT *
+				FROM asiakas
+				WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) == 1) {
+		$asiakas = mysql_fetch_array($result);
+		$ytunnus = $asiakas["ytunnus"];
+	}
+	else {
+		echo t("<font class='error'>VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."</font><br><br>";
+		exit;
+	}
+}
+else {
+	//	Jos tullaan muualta ei anneta valita uutta asiakasta
+	if($lopetus == "") {
+		echo "<form name=asiakas action='asiakasinfo.php' method='post' autocomplete='off'>";
+		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
+		echo "<table><tr>";
+		echo "<th>".t("Anna asiakasnumero tai osa nimestä")."</th>";
+		echo "<td><input type='text' name='ytunnus'></td>";
+		echo "<td class='back'><input type='submit' value='".t("Hae")."'>";
+		echo "</tr></table>";
+		echo "</form><br><br>";	
+	}
 }
 
 if ($ytunnus!='') {
-	require ("../inc/asiakashaku.inc");
-}
+	require ("inc/asiakashaku.inc");
+}	
+
 
 // jos meillä on onnistuneesti valittu asiakas
 if ($ytunnus!='') {
@@ -199,7 +221,7 @@ if ($ytunnus!='') {
 	//$ckatepr = "#00dd00";
 	$maxcol  = 12; // montako columnia näyttö on
 
-	if($lopetus == "") {
+	if($lopetus == "" and $kukarow["extranet"] == "") {
 		if($rajaus=="MYYNTI") $sel["M"] = "checked";
 		elseif($rajaus=="ALENNUKSET") $sel["A"] = "checked";		
 		else $sel["K"] = "checked";
@@ -265,9 +287,9 @@ if ($ytunnus!='') {
 			}
 
 			$pylvaat = "<table border='0' cellpadding='0' cellspacing='0'><tr>
-			<td style='vertical-align: bottom; text-align: center;'><img src='../pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
-			<td style='vertical-align: bottom; text-align: center;'><img src='../pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
-			<td style='vertical-align: bottom; text-align: center;'><img src='../pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro] %'></td>
+			<td style='vertical-align: bottom; text-align: center;'><img src='pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
+			<td style='vertical-align: bottom; text-align: center;'><img src='pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
+			<td style='vertical-align: bottom; text-align: center;'><img src='pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro] %'></td>
 			</tr></table>";
 
 			if ($sumrow['katepro']=='') $sumrow['katepro'] = '0.0';
@@ -992,7 +1014,7 @@ if ($ytunnus!='') {
 				$liite = $pdffilenimi;
 				$kutsu = "Alennustaulukko - ".trim($asiakasrow["nimi"]." ".$asiakasrow["nimitark"]);
 
-				require("../inc/sahkoposti.inc");
+				require("inc/sahkoposti.inc");
 			}
 			elseif ($komento["Alennustaulukko"] != '' and $komento["Alennustaulukko"] != 'edi') {
 				$line = exec("$komento[Alennustaulukko] $pdffilenimi");
@@ -1017,6 +1039,6 @@ if ($lopetus != '') {
 $formi  = "asiakas";
 $kentta = "ytunnus";
 
-require ("../inc/footer.inc");
+require ("inc/footer.inc");
 
 ?>

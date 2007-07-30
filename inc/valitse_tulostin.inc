@@ -56,15 +56,17 @@
 	echo "<tr><td>".t("Kpl")."</td><td><input type='text' name='kappaleet' size='3'></td></tr>";
 	
 	echo "<tr><td>".t("Valitse kieli")."</td>";
+
 	///* Haetaan asiakkaan kieli *///
 	if ($otunnus != '' or $laskunro != '') {
+		
 		$querykieli = "	SELECT ytunnus
 						FROM lasku WHERE";
 
 		if ($otunnus > 0) {
 			$querykieli .= " tunnus='$otunnus' ";
 		}
-		if ($laskunro > 0 and $toim != "OSTO") {
+		elseif ($laskunro > 0 and $toim != "OSTO") {
 			if ($otunnus > 0) {
 				$querykieli .= " and laskunro='$laskunro' ";
 			}
@@ -72,9 +74,13 @@
 				$querykieli .= " tila='U' and laskunro='$laskunro' ";
 			}
 		}
+		else {
+			$querykieli .= " and tunnus='$kukarow[kesken]' ";	
+		}
+		
 		$querykieli .= " AND yhtio ='$kukarow[yhtio]'";
-
 		$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
+				
 		$asrow = mysql_fetch_array($resultkieli);
 
 		$querykieli = "	SELECT kieli, email
@@ -89,7 +95,7 @@
 			$sel[$asrow["kieli"]] = "SELECTED";
 		}
 		else {
-		$sel[$yhtiorow["kieli"]] = "SELECTED";
+			$sel[$yhtiorow["kieli"]] = "SELECTED";
 		}
 	}
 	else {
@@ -163,6 +169,7 @@
 
 
 	echo "</table><br><input type='submit' value='".t("Tulosta")."'></form>";
+	
 	//lopetetaan tähän, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
 	require("footer.inc");
 	exit;

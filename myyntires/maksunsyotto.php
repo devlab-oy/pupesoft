@@ -423,16 +423,22 @@ if ($ytunnus != '' and $tee == "") {
 	<input type='submit' name='jatko' value='".t("Tallenna suoritus")."'>
 	<input type='submit' name='jatko' value='".t("Tallenna suoritus ja siirry kohdistukseen")."'>
 	</form>";
+
+	$formi = "formi";
+	$kentta = "summa";
 }
 
 
 if ($tee == "" and $ytunnus == "") {
 
-	echo "<br><form action = '$PHP_SELF' method='post'>
+	echo "<br><form action = '$PHP_SELF' method='post' name='maksaja'>
 			".t("Maksaja").":
 			<input type='text' name='ytunnus'>
 			<input type='hidden' name='tee' value='ETSI'>
 			<input type='submit' value='".t("Etsi")."'></form>";
+
+	$formi = "maksaja";
+	$kentta = "ytunnus";
 }
 
 require ("../inc/footer.inc");

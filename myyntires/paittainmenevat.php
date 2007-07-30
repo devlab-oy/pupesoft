@@ -11,16 +11,12 @@
 		$query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$query  = "	SELECT a.tunnus atunnus, b.tunnus btunnus, a.ltunnus altunnus, b.ltunnus bltunnus, a.kirjpvm akirjpvm, a.summa asumma, b.kirjpvm bkirjpvm, b.summa bsumma
-					FROM suoritus a, suoritus b
+		$query  = "	SELECT a.tunnus atunnus, b.tunnus btunnus, a.ltunnus altunnus, b.ltunnus bltunnus, a.kirjpvm akirjpvm, a.summa asumma, b.kirjpvm bkirjpvm, b.summa bsumma, a.nimi_maksaja
+					FROM suoritus a
+					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.summa * -1 = a.summa)
 					WHERE a.yhtio = '$kukarow[yhtio]' and
-					b.yhtio = '$kukarow[yhtio]' and
 					a.kohdpvm = '0000-00-00' and
-					b.kohdpvm = '0000-00-00' and
-					a.asiakas_tunnus = b.asiakas_tunnus and
-					a.summa < 0 and
-					a.valkoodi = b.valkoodi and
-					a.summa = -1 * b.summa";
+					a.summa <= 0";
 		$paaresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($paaresult) > 0) {
@@ -86,6 +82,7 @@
 							if ($debug == 1) echo "$query<br>";
 							else $result = mysql_query($query) or pupe_error($query);
 
+							echo "<font class='message'>".t("Kohdistus ok!")." $suoritusrow[nimi_maksaja] ".($tiliointi2row["summa"]*1)." / ".($tiliointi2row["summa"]*-1)."</font><br>";
 						}
 						else {
 							echo "J‰rjestelm‰virhe 1";
@@ -100,8 +97,6 @@
 				}
 			}
 		}
-		$tee = '';
-		echo "<font class='message'>".t("Kohdistus on ok!")."</font><br>";
 
 		$query  = "UNLOCK TABLES";
 		$result = mysql_query($query) or pupe_error($query);
@@ -110,17 +105,12 @@
 	if ($tee == '') {
 
 		//Etsit‰‰n p‰itt‰in menev‰t suoritukset
-		$query = "	SELECT a.tunnus, a.kirjpvm, a.summa,
-					b.tunnus, b.kirjpvm, b.summa
-					FROM suoritus a, suoritus b
+		$query = "	SELECT a.nimi_maksaja, a.kirjpvm, a.summa, b.nimi_maksaja, b.kirjpvm, b.summa
+					FROM suoritus a
+					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.summa * -1 = a.summa)
 					WHERE a.yhtio = '$kukarow[yhtio]' and
-					b.yhtio = '$kukarow[yhtio]' and
 					a.kohdpvm = '0000-00-00' and
-					b.kohdpvm = '0000-00-00' and
-					a.asiakas_tunnus = b.asiakas_tunnus and
-					a.summa < 0 and
-					a.valkoodi = b.valkoodi and
-					a.summa = -1 * b.summa";
+					a.summa <= 0";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {

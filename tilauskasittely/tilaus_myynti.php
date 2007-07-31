@@ -3835,9 +3835,7 @@ if ($tee == '') {
 
 								$ostohinta	+= $kulukulurow["kulusumma"];
 							}
-							
-							echo "$arow[kotirivihinta] - $ostohinta<br>";
-							
+														
 							$rivikate 		= $arow["kotirivihinta"] - $ostohinta;
 							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $ostohinta;
 							

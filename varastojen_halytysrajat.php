@@ -71,12 +71,30 @@ if ($apienin == 99999999 and $lsuurin == 0) {
 $apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
 $lpvm = substr($lsuurin,0,4)."-".substr($lsuurin,4,2)."-".substr($lsuurin,6,2);
 
+if (isset($tuoteno)) {
+	require 'inc/tuotehaku.inc';
+	
+	if (empty($trow)) {
+		$tee = '';
+	}
+}
+
+if ((isset($_POST['muutparametrit']) and $_POST['muutparametrit'] != '') and ! isset($tuoteno)) {
+	$tuoteno = $muutparametrit;
+}
+
 // katsotaan tarvitaanko mennä toimittajahakuun
-if (($ytunnus != "" and $toimittajaid == "") or ($edytunnus != $ytunnus)) {
-	if ($edytunnus != $ytunnus) $toimittajaid = "";
+if ($ytunnus_haku != "") {
+	$ytunnus = $ytunnus_haku;
+	if (isset($tuoteno)) {
+		$muutparametrit = $tuoteno;
+	}
+	
+	$toimittajaid = "";
 	require ("inc/kevyt_toimittajahaku.inc");
-	$ytunnus = $toimittajarow["ytunnus"];
+	$toimittajaid  = $toimittajarow["tunnus"];
 	$tee = "";
+	$ytunnus = '';
 }
 
 if ($tee == "paivita") {
@@ -363,7 +381,31 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 		<input type='hidden' name='tee' value='selaa'>";
 
 	echo "<table>\n";
-
+	
+	echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus_haku' value=''> $toimittajarow[nimi]";
+	if ($toimittajaid != '') {
+		echo t('Valittu toimittaja') . " $toimittajaid";
+	}
+	
+	echo "</td></tr>";
+	//echo "<input type='hidden' name='edytunnus' value='$ytunnus'>";
+	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+	
+	if (! empty($varaosavirhe)) {
+		$varaosavirhe .= "<br />";
+	}
+	
+	echo "<tr><th>".t("Tuotenumero (haku)")."</th><td>$varaosavirhe";
+	if (isset($tuoteno) and trim($ulos) != '') {
+		echo $ulos;
+	} else {
+		echo "<input type='text' size='20' name='tuoteno' value='$tuoteno'>";
+	}
+	
+	echo "</td></tr></table>";
+	
+	echo "<table>";
+	
 	//Valitaan varastot
 	$query = "	SELECT *
 				FROM varastopaikat
@@ -516,13 +558,6 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	echo "<option value='vainuudet'>".t("Listaa vain uudet tuotteet")."</option>";
 	echo "</select>";
 	echo "</td></tr>";
-
-	echo "<tr><th>".t("Tuotenumero")."</th><td><input type='text' size='20' name='tuoteno' value='$tuoteno'></td></tr>";
-
-
-	echo "<tr><th>".t("Toimittaja")."</th><td><input type='text' size='20' name='ytunnus' value='$ytunnus'> $toimittajarow[nimi]</td></tr>";
-	echo "<input type='hidden' name='edytunnus' value='$ytunnus'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 
 	//	Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
 	if(!isset($poistetut)) $poistetut = "checked";

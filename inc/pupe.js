@@ -191,3 +191,43 @@ function showhide(layer_ref) {
 		hza.style.display = state;
 	}
 }
+
+function getMouseX(e) {
+	if (e.pageX) return e.pageX;
+	else if (e.clientX)
+	
+	return e.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft);
+	else return null;
+}
+function getMouseY(e) {
+	if (e.pageY) return e.pageY;
+	else if (e.clientY)return e.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop); else return null;
+}
+
+function tipper(e, oi) {	
+
+	ds = document.getElementById(oi).style;
+
+	if (e.type == "mouseout") {
+		ds.visibility = "hidden";
+	}
+	else {
+
+		var wp = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
+
+		if(ds.offsetWidth) ew = dm.offsetWidth;
+		else if (ds.clip.width) ew = ds.clip.width;
+		else ew = 0;
+		
+		tv = getMouseY(e) + 20;
+		lv = getMouseX(e) - (ew/4)+20;
+		
+		if (lv < 2) lv = 2;
+		else if (lv + ew > wp) lv -= ew/2; 
+
+		ds.left = lv;
+		ds.top = tv;
+		
+		ds.visibility = "visible";
+	}
+}

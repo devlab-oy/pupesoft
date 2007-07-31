@@ -1,5 +1,7 @@
 <?php
-
+	
+	$pupejs=1;
+	
 	if (file_exists("../inc/parametrit.inc")) {
 		require ("../inc/parametrit.inc");
 		require ("../verkkokauppa/ostoskori.inc");
@@ -545,7 +547,43 @@
 				echo "<td valign='top' class='$vari'>$lisakala $row[tuoteno]</td>";
 			}
 			else {
-				echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a></td>";
+				
+				if(!isset($originaalit)) {
+					$orginaaalit = table_exists("tuotteen_orginaalit");
+				}
+				
+				//	Liitet‰‰n originaalitietoja
+				if($orginaaalit === true) {
+					$id=md5(uniqid());
+					$query = "	SELECT * 
+								FROM tuotteen_orginaalit
+								WHERE yhtio = '{$kukarow["yhtio"]}' and tuoteno = '{$row["tuoteno"]}'";
+					$orgres = mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($orgres)) {
+						echo "<div id='$id' class='popup'>
+						<table width='300px' align='center'>
+						<caption><font class='head'>Tuotteen originaalit</font></caption>
+						<tr>
+							<th>".t("Tuotenumero")."</th>
+							<th>".t("Merkki")."</th>						
+							<th>".t("Hinta")."</th>
+						</tr>";
+
+						while($orgrow = mysql_fetch_array($orgres)) {
+							echo "<tr>
+									<td>{$orgrow["orig_tuoteno"]}</td>
+									<td>{$orgrow["merkki"]}</td>
+									<td>{$orgrow["orig_hinta"]}</td>								
+								</tr>";
+						}
+						
+						echo "</table></div>";
+					}
+					
+					$linkkilisa = "onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"";
+				}
+				
+				echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z' $linkkilisa>$lisakala $row[tuoteno]</a></td>";
 			}
 			echo "<td valign='top' class='$vari'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 

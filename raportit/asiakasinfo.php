@@ -22,15 +22,15 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 
 if ($tee == 'eposti') {
 	
-	if($kukarow["extranet"] != "") {
-		$komento = "email";
-	}
-	else {
+	if($kukarow["extranet"] == "") {
 		if ($komento == '') {
 			$tulostimet[] = "Alennustaulukko";
 			$toimas = $ytunnus;
 			require("inc/valitse_tulostin.inc");
 		}
+	}
+	else {
+		$komento["Alennustaulukko"] = "email";
 	}
 	
 	$ytunnus = $toimas;

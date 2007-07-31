@@ -575,7 +575,7 @@
 				}
 				
 				if($kukarow["extranet"] != "") {
-					$linkkilisa = "&nbsp;&nbsp;<a src='#' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"><img src='pics/lullacons/info.png'></a>";
+					$linkkilisa = "&nbsp;&nbsp;<a src='#' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"><img src='pics/lullacons/info.png' height='13'></a>";
 				}
 				else {
 					$linkkilisa = "&nbsp;&nbsp;<a src='#' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"><img src='../pics/lullacons/info.png' height='13'></a>";
@@ -586,7 +586,7 @@
 			}
 			
 			if ($kukarow["extranet"] != "") {
-				echo "<td valign='top' class='$vari' $linkkilisa>$lisakala $row[tuoteno]$linkkilisa</td>";
+				echo "<td valign='top' class='$vari'>$lisakala $row[tuoteno]$linkkilisa</td>";
 			}
 			else {
 				echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a>$linkkilisa</td>";

@@ -103,7 +103,19 @@ if ($tee == 'AKTIVOI') {
 		}
 
 		$kukarow['kesken'] 	 = $tilausnumero;
-		$tee = "";
+		
+		//	T‰‰ll‰ muutetaan yleens‰ vain toimitusaikoja tms..
+		if($from == "PROJEKTIKALENTERI") {
+			$tee = "OTSIK";
+			$query = "	SELECT liitostunnus FROM lasku WHERE yhtio = '{$kukarow["yhtio"]}' and tunnus='{$kukarow["kesken"]}'";
+			$tarkres = mysql_query($query) or pupe_error($query);
+			$tarkrow = mysql_fetch_array($tarkres);
+			$asiakasid=$tarkrow["liitostunnus"];
+			$tiedot_laskulta = "YES";
+		}
+		else {
+			$tee = "";
+		}
 	}
 }
 
@@ -177,7 +189,7 @@ $ale 	= str_replace(',','.',$ale);
 $kpl 	= str_replace(',','.',$kpl);
 
 // jos ei olla postattu mit‰‰n, niin halutaan varmaan tehd‰ kokonaan uusi tilaus..
-if ($kukarow["extranet"] == "" and count($_POST) == 0 and ($from != "LASKUTATILAUS" and $from != "VALITSETOIMITUS")) {
+if ($kukarow["extranet"] == "" and count($_POST) == 0 and ($from != "LASKUTATILAUS" and $from != "VALITSETOIMITUS" and $from != "PROJEKTIKALENTERI")) {
 	$tila				= '';
 	$tilausnumero		= '';
 	$laskurow			= '';

@@ -3332,16 +3332,21 @@ if ($tee == '') {
 								//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
 
 								// Tuotteen ostohinta
-								$query = "	SELECT round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0)), 2) ostosumma
+								$query = "	SELECT 
+											sum(tilausrivi.rivihinta/tilausrivi.kpl) kplhinta,
+											sum(tilausrivi.hinta * (1-(tilausrivi.ale/100))) kplhinta_eiloppulaskettu
 											FROM sarjanumeroseuranta
 											JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 											WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
-											and sarjanumeroseuranta.myyntirivitunnus = '$row[tunnus]'
-											HAVING ostosumma!=0";
+											and sarjanumeroseuranta.myyntirivitunnus = '$row[tunnus]'";
 								$sarjares = mysql_query($query) or pupe_error($query);
 								$sarjarow = mysql_fetch_array($sarjares);
 
-								$ostohinta = (float) $sarjarow["ostosumma"];
+								$ostohinta = (float) $sarjarow["kplhinta"];
+								
+								if($ostohinta == 0 and $sarjarow["kplhinta_eiloppulaskettu"] != 0) {
+									$ostohinta = (float) $sarjarow["kplhinta_eiloppulaskettu"];
+								}
 
 								// Katsotaan onko sarjanumerolle liitetty kulukeikka
 								$query  = "	select lasku.laskunro
@@ -3789,37 +3794,53 @@ if ($tee == '') {
 						$rivikate_eieri	= 0;	// Rivin kate yhtiön valuutassa ilman erikoisalennusta
 
 						if ($arow["sarjanumeroseuranta"] == "S") {
-
-							$query = "	SELECT ostorivitunnus 
-										from sarjanumeroseuranta 
-										where yhtio = '$kukarow[yhtio]' 
-										and tuoteno = '$arow[tuoteno]' 
-										and myyntirivitunnus = '$arow[tunnus]'";
+							
+							// Tuotteen ostohinta
+							$query = "	SELECT 
+										sum(tilausrivi.rivihinta/tilausrivi.kpl) kplhinta,
+										sum(tilausrivi.hinta * (1-(tilausrivi.ale/100))) kplhinta_eiloppulaskettu
+										FROM sarjanumeroseuranta
+										JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+										WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
+										and sarjanumeroseuranta.myyntirivitunnus = '$arow[tunnus]'";
 							$sarjares = mysql_query($query) or pupe_error($query);
 							$sarjarow = mysql_fetch_array($sarjares);
 
-							if ($sarjarow["ostorivitunnus"] != 0 and $sarjarow["ostorivitunnus"] != $arow["tunnus"] and $arow["varattu"] > 0) {
-
-								$limitti = (int) abs(round($arow["varattu"],0));
-
-								$query = "	select sum(rivihinta/kpl) kplhinta,
-											sum(tilausrivi.hinta * (1-(tilausrivi.ale/100))) kplhinta_eiloppulaskettu
-											from tilausrivi
-											where yhtio='$kukarow[yhtio]' and tuoteno='$arow[tuoteno]' and tunnus='$sarjarow[ostorivitunnus]'
-											LIMIT $limitti";
-								$sarjares = mysql_query($query) or pupe_error($query);
-
-								if (mysql_num_rows($sarjares) > 0) {
-									$sarjarow = mysql_fetch_array($sarjares);
-
-									if($sarjarow["kplhinta"] == 0 and $sarjarow["kplhinta_eiloppulaskettu"] != 0) {
-										$sarjarow["kplhinta"] = $sarjarow["kplhinta_eiloppulaskettu"];
-									}
-
-									$rivikate 		= $arow["kotirivihinta"] - $sarjarow["kplhinta"];
-									$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $sarjarow["kplhinta"];
-								}
+							$ostohinta = (float) $sarjarow["kplhinta"];
+							
+							if($ostohinta == 0 and $sarjarow["kplhinta_eiloppulaskettu"] != 0) {
+								$ostohinta = (float) $sarjarow["kplhinta_eiloppulaskettu"];
 							}
+
+							// Katsotaan onko sarjanumerolle liitetty kulukeikka
+							$query  = "	select lasku.laskunro
+										FROM sarjanumeroseuranta
+										JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
+										WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
+										and sarjanumeroseuranta.myyntirivitunnus = '$arow[tunnus]'";
+							$keikkares = mysql_query($query) or pupe_error($query);
+
+							while($kulukeikkarow = mysql_fetch_array($keikkares)) {
+								// Haetaan kaikki keikkaan liitettyjen laskujen summa
+								$query = "	SELECT round(sum(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
+											FROM lasku
+											WHERE yhtio		= '$kukarow[yhtio]'
+											and tila 		= 'K'
+											and laskunro 	= '$kulukeikkarow[laskunro]'
+											and vanhatunnus <> 0
+											and vienti in ('B','E','H')";
+								$result = mysql_query($query) or pupe_error($query);
+
+								$kulukulurow = mysql_fetch_array($result);
+
+								$ostohinta	+= $kulukulurow["kulusumma"];
+							}
+							
+							echo "$arow[kotirivihinta] - $ostohinta<br>";
+							
+							$rivikate 		= $arow["kotirivihinta"] - $ostohinta;
+							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $ostohinta;
+							
 						}
 						else {
 							$rivikate 		= $arow["kotirivihinta"]  - ($arow["kehahin"]*$arow["varattu"]);

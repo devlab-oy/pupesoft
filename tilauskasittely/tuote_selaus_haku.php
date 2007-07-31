@@ -574,17 +574,22 @@
 					echo "</table></div>";
 				}
 				
-				$linkkilisa = "onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"";
+				if($kukarow["extranet"] != "") {
+					$linkkilisa = "&nbsp;&nbsp;<a src='#' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"><img src='pics/lullacons/info.png'></a>";
+				}
+				else {
+					$linkkilisa = "&nbsp;&nbsp;<a src='#' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"><img src='../pics/lullacons/info.png' height='13'></a>";
+				}
 			}
 			else {
 				$linkkilisa = "";
 			}
 			
 			if ($kukarow["extranet"] != "") {
-				echo "<td valign='top' class='$vari' $linkkilisa>$lisakala $row[tuoteno]</td>";
+				echo "<td valign='top' class='$vari' $linkkilisa>$lisakala $row[tuoteno]$linkkilisa</td>";
 			}
 			else {
-				echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z' $linkkilisa>$lisakala $row[tuoteno]</a></td>";
+				echo "<td valign='top' class='$vari'><a href='../tuote.php?tuoteno=$row[tuoteno]&tee=Z'>$lisakala $row[tuoteno]</a>$linkkilisa</td>";
 			}
 			echo "<td valign='top' class='$vari'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 

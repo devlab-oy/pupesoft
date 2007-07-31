@@ -4,7 +4,7 @@ require ('inc/parametrit.inc');
 
 echo "<font class='head'>".t("Liitetiedostot")."</font><hr>";
 
-if (! isset($_GET['liitos']) and ! isset($_GET['id'])) {
+if (! isset($_REQUEST['liitos']) and ! isset($_REQUEST['id'])) {
 	echo "<form action='' method='get'>
 		<table>
 		<tr>
@@ -27,8 +27,8 @@ if (! isset($_GET['liitos']) and ! isset($_GET['id'])) {
 // uusi upload?
 if (isset($_POST['tee'])
 and $_POST['tee'] == 'file'
-and isset($_GET['liitos'])
-and isset($_GET['id'])
+and isset($_REQUEST['liitos'])
+and isset($_REQUEST['id'])
 and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 
     $errormsg = '';
@@ -63,8 +63,8 @@ and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		// lis‰t‰‰n kuva
 		$query = "	insert into liitetiedostot set
 					yhtio    = '{$kukarow['yhtio']}',
-					liitos   = '". mysql_real_escape_string($_GET['liitos']) . "',
-					liitostunnus = '" . (int) $_GET['id']. "',
+					liitos   = '". mysql_real_escape_string($_REQUEST['liitos']) . "',
+					liitostunnus = '" . (int) $_REQUEST['id']. "',
 					laatija    = '{$kukarow['kuka']}',
 					luontiaika = now(),
 					data     = '$data',
@@ -77,13 +77,13 @@ and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$liitostunnus = mysql_insert_id();
 		$kuva = $liitostunnus;
 
-		$query = "SELECT * from lasku where tunnus=" . (int) $_GET['id'] . " and yhtio='{$kukarow['yhtio']}'";
+		$query = "SELECT * from lasku where tunnus=" . (int) $_REQUEST['id'] . " and yhtio='{$kukarow['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($res);
 
 		// nollataan hyv‰ksyj‰t jos jokin n‰ist‰ tiloista
 		if (in_array($laskurow['tila'], array('H', 'M', 'Q'))) {
-			nollaa_hyvak((int) $_GET['id']);
+			nollaa_hyvak((int) $_REQUEST['id']);
 		}
 	} else {
 		echo $errormsg;
@@ -91,26 +91,26 @@ and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 }
 
 // poistetaanko liite?
-if (isset($_POST['poista']) and isset($_POST['tunnus']) and isset($_GET['liitos']) and isset($_GET['id'])) {
+if (isset($_POST['poista']) and isset($_POST['tunnus']) and isset($_REQUEST['liitos']) and isset($_REQUEST['id'])) {
 
-	settype($_GET['id'], 'int');
+	settype($_REQUEST['id'], 'int');
 	$query = "DELETE from liitetiedostot where tunnus='{$_POST['tunnus']}' and yhtio='{$kukarow['yhtio']}'";
 	mysql_query($query) or pupe_error($query);
 
-	$query = "SELECT * from lasku where tunnus=" . (int) $_GET['id'] . " and yhtio='{$kukarow['yhtio']}'";
+	$query = "SELECT * from lasku where tunnus=" . (int) $_REQUEST['id'] . " and yhtio='{$kukarow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($res);
 
 	if (in_array($laskurow['tila'], array('H', 'M', 'Q'))) {
-		nollaa_hyvak($_GET['id']);
+		nollaa_hyvak($_REQUEST['id']);
 	}
 }
 
-if (isset($_GET['liitos']) and $_GET['liitos'] == 'lasku' and isset($_GET['id'])) {
+if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_REQUEST['id'])) {
 
 	echo "<h2>Lasku</h2>";
 
-	$query = "SELECT * from lasku where tunnus=" . (int) $_GET['id'] . " and yhtio='{$kukarow['yhtio']}'";
+	$query = "SELECT * from lasku where tunnus=" . (int) $_REQUEST['id'] . " and yhtio='{$kukarow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($res);
 
@@ -131,8 +131,9 @@ if (isset($_GET['liitos']) and $_GET['liitos'] == 'lasku' and isset($_GET['id'])
 	echo "</table>";
 
 	if (! in_array($laskurow['tila'], array('P', 'Y'))) {
-		echo "<p>Lis‰‰ uusi tiedosto: <form method='post' name='kuva' enctype='multipart/form-data' action='$PHP_SELF'>
+		echo "<p>Lis‰‰ uusi tiedosto: <form method='post' name='kuva' enctype='multipart/form-data'>
 				<input type='file' name='userfile'/>
+				<input type='hidden' name='id' value='" . $_REQUEST['id'] ."'>
 				<input type='hidden' name='tee' value='file'/>
 				<input type='hidden' name='liitos' value='lasku'/>
 				<input type='submit' name='submit' value='" . t('Liit‰ tiedosto') . "'/>
@@ -141,7 +142,7 @@ if (isset($_GET['liitos']) and $_GET['liitos'] == 'lasku' and isset($_GET['id'])
 
 	$query = "	SELECT liitostunnus,tunnus,filename,filesize,selite,filetype,laatija,luontiaika
 				FROM liitetiedostot
-				WHERE liitostunnus=" . (int) $_GET['id'] . " AND liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
+				WHERE liitostunnus=" . (int) $_REQUEST['id'] . " AND liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error($query);
 
 	echo "<table>

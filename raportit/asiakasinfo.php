@@ -8,7 +8,12 @@ if (isset($_POST["tee"])) {
 	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-require ("inc/parametrit.inc");
+if($kukarow["extranet"] != "") {
+	require ("parametrit.inc");
+}
+else {
+	require ("inc/parametrit.inc");
+}
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
 	readfile("/tmp/".$tmpfilenimi);
@@ -16,11 +21,16 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 
 if ($tee == 'eposti') {
-
-	if ($komento == '') {
-		$tulostimet[] = "Alennustaulukko";
-		$toimas = $ytunnus;
-		require("inc/valitse_tulostin.inc");
+	
+	if($kukarow["extranet"] != "") {
+		$komento = "email";
+	}
+	else {
+		if ($komento == '') {
+			$tulostimet[] = "Alennustaulukko";
+			$toimas = $ytunnus;
+			require("inc/valitse_tulostin.inc");
+		}
 	}
 	
 	$ytunnus = $toimas;
@@ -169,13 +179,17 @@ else {
 }
 
 if ($ytunnus!='') {
-	require ("inc/asiakashaku.inc");
+	if($kukarow["extranet"] != "") {
+		require ("asiakashaku.inc");
+	}
+	else {
+		require ("inc/asiakashaku.inc");
+	}
 }	
 
 
 // jos meillä on onnistuneesti valittu asiakas
 if ($ytunnus!='') {
-	
 	if($tee != "eposti") {
 		if(include('Spreadsheet/Excel/Writer.php')) {
 			//keksitään failille joku varmasti uniikki nimi:
@@ -1014,7 +1028,12 @@ if ($ytunnus!='') {
 				$liite = $pdffilenimi;
 				$kutsu = "Alennustaulukko - ".trim($asiakasrow["nimi"]." ".$asiakasrow["nimitark"]);
 
-				require("inc/sahkoposti.inc");
+				if($kukarow["extranet"] != "") {
+					require("sahkoposti.inc");
+				}
+				else {
+					require("inc/sahkoposti.inc");
+				}
 			}
 			elseif ($komento["Alennustaulukko"] != '' and $komento["Alennustaulukko"] != 'edi') {
 				$line = exec("$komento[Alennustaulukko] $pdffilenimi");
@@ -1039,6 +1058,13 @@ if ($lopetus != '') {
 $formi  = "asiakas";
 $kentta = "ytunnus";
 
-require ("inc/footer.inc");
+if($kukarow["extranet"] != "") {
+	require ("footer.inc");
+}
+else {
+	require ("inc/footer.inc");	
+}
+
+
 
 ?>

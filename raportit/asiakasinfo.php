@@ -996,7 +996,7 @@ if ($ytunnus!='') {
 				<td valign='top' class='back'>$ashin</td>
 				<td class='back'></td>				
 				<td valign='top' class='back'>$yhdistetty</td>
-			</tr></table>";
+			</tr></table><br>";
 		
 		if(isset($workbook_ale) and $excelrivi>1) {
 			$workbook_ale->close();
@@ -1008,7 +1008,7 @@ if ($ytunnus!='') {
 			echo "<input type='hidden' name='kaunisnimi' value='Alennustaulukko.xls'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-			echo "</table><br>";
+			echo "</table><br><br>";
 			
 		}
 		
@@ -1024,7 +1024,7 @@ if ($ytunnus!='') {
 			fclose($fh);
 
 			// itse print komento...
-			if ($komento["Alennustaulukko"] == 'email') {
+			if ($komento["Alennustaulukko"] == 'email' or $kukarow["extranet"] != "") {
 				$liite = $pdffilenimi;
 				$kutsu = "Alennustaulukko - ".trim($asiakasrow["nimi"]." ".$asiakasrow["nimitark"]);
 
@@ -1034,9 +1034,13 @@ if ($ytunnus!='') {
 				else {
 					require("inc/sahkoposti.inc");
 				}
+				
+				echo "<br><br>".t("Alennustaulukko l‰hetet‰‰n osoitteeseen $kukarow[eposti]")."...<br>";
 			}
 			elseif ($komento["Alennustaulukko"] != '' and $komento["Alennustaulukko"] != 'edi') {
 				$line = exec("$komento[Alennustaulukko] $pdffilenimi");
+				
+				echo "<br><br>".t("Tulostetaan alennustaulukko $kukarow[eposti]")."...<br>";
 			}
 
 			//poistetaan tmp file samantien kuleksimasta...
@@ -1050,7 +1054,7 @@ if ($lopetus != '') {
 	// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
 	$lopetus = str_replace('////','?', $lopetus);
 	$lopetus = str_replace('//','&',  $lopetus);
-	echo "<br><br>";
+	echo "<br>";
 	echo "<a href='$lopetus'>".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";	
 }
 

@@ -321,7 +321,12 @@ if ($session != '') {
 		echo $css;
 		echo "</style>";
 		if($pupejs==1 or $suljeYllapito!="") {
-			echo "<script type='text/javascript' language='javascript' src='$palvelin2/inc/pupe.js'></script>";
+			if($kukarow["extranet"] != "") {
+				echo "<script type='text/javascript' language='javascript' src='$palvelin2/pupe.js'></script>";
+			}
+			else {
+				echo "<script type='text/javascript' language='javascript' src='$palvelin2/inc/pupe.js'></script>";
+			}
 		}
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
 		echo "</head>";

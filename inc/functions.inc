@@ -1854,4 +1854,19 @@ if (! function_exists('ta')) {
 	}
 }
 
+if(!function_exists("size_readable")) {
+	function size_readable($size) {
+
+		$units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
+
+	    $i = 0;
+	    while ($size >= 1024) {
+	        $size /= 1024;
+	        $i++;
+	    }
+			
+	    return round($size, 2).$units[$i];
+	}	
+}
+
 ?>

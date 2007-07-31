@@ -177,7 +177,7 @@
 			if ($laji=='OK') 	$tili=$yhtiorow['konserniostovelat'];
 			else 				$tili=$yhtiorow['ostovelat'];
 
-			$query = "	SELECT lasku.liitostunnus, ytunnus, nimi, concat_ws(' ', viite, viesti) maksutieto, lasku.tapvm tapvm, mapvm, olmapvm, erpcm, tiliointi.summa * -1 avoinsaldo
+			$query = "	SELECT lasku.liitostunnus, ytunnus, nimi, concat_ws(' ', viite, viesti) maksutieto, lasku.tapvm tapvm, mapvm, olmapvm, erpcm, tiliointi.summa * -1 avoinsaldo, comments
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
 						and lasku.tunnus	= tiliointi.ltunnus
@@ -223,7 +223,9 @@
 					echo "<tr>";
 					echo "<td><a href='../myyntires/myyntilaskut_asiakasraportti.php?tunnus=$row[liitostunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi]</td>";
-					echo "<td>$trow[maksutieto]</td>";
+					echo "<td>$trow[maksutieto]";
+					if ($trow["comments"] != "") echo "<br>$trow[comments]";
+					echo "</td>";
 					echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 
 					if ($trow["mapvm"] != '0000-00-00') echo "<td>".tv1dateconv($trow["mapvm"])."</td>";

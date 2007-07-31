@@ -8,11 +8,11 @@ if (isset($_POST["tee"])) {
 	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-if($kukarow["extranet"] != "") {
-	require ("parametrit.inc");
+if (file_exists("../inc/parametrit.inc")) {
+	require ("../inc/parametrit.inc");
 }
 else {
-	require ("inc/parametrit.inc");
+	require ("parametrit.inc");
 }
 
 if (isset($tee) and $tee == "lataa_tiedosto") {

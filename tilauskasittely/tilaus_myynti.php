@@ -3802,7 +3802,8 @@ if ($tee == '') {
 
 								$limitti = (int) abs(round($arow["varattu"],0));
 
-								$query = "	select sum(rivihinta/kpl) rivihinta
+								$query = "	select sum(rivihinta/kpl) kplhinta,
+											sum(tilausrivi.hinta * (1-(tilausrivi.ale/100))) kplhinta_eiloppulaskettu
 											from tilausrivi
 											where yhtio='$kukarow[yhtio]' and tuoteno='$arow[tuoteno]' and tunnus='$sarjarow[ostorivitunnus]'
 											LIMIT $limitti";
@@ -3811,8 +3812,12 @@ if ($tee == '') {
 								if (mysql_num_rows($sarjares) > 0) {
 									$sarjarow = mysql_fetch_array($sarjares);
 
-									$rivikate 		= $arow["kotirivihinta"] - $sarjarow["rivihinta"];
-									$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $sarjarow["rivihinta"];
+									if($sarjarow["kplhinta"] == 0 and $sarjarow["kplhinta_eiloppulaskettu"] != 0) {
+										$sarjarow["kplhinta"] = $sarjarow["kplhinta_eiloppulaskettu"];
+									}
+
+									$rivikate 		= $arow["kotirivihinta"] - $sarjarow["kplhinta"];
+									$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $sarjarow["kplhinta"];
 								}
 							}
 						}

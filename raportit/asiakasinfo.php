@@ -8,7 +8,7 @@ if (isset($_POST["tee"])) {
 	if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 }
 
-if($kukarow["extranet"] != "") {
+if($kukarow["extranet"] != "") {
 	require ("parametrit.inc");
 }
 else {
@@ -179,7 +179,7 @@ else {
 }
 
 if ($ytunnus!='') {
-	if($kukarow["extranet"] != "") {
+	if($kukarow["extranet"] != "") {
 		require ("asiakashaku.inc");
 	}
 	else {
@@ -1028,7 +1028,7 @@ if ($ytunnus!='') {
 				$liite = $pdffilenimi;
 				$kutsu = "Alennustaulukko - ".trim($asiakasrow["nimi"]." ".$asiakasrow["nimitark"]);
 
-				if($kukarow["extranet"] != "") {
+				if($kukarow["extranet"] != "") {
 					require("sahkoposti.inc");
 				}
 				else {
@@ -1058,7 +1058,7 @@ if ($lopetus != '') {
 $formi  = "asiakas";
 $kentta = "ytunnus";
 
-if($kukarow["extranet"] != "") {
+if($kukarow["extranet"] != "") {
 	require ("footer.inc");
 }
 else {

@@ -21,6 +21,8 @@ foreach ($_POST as $key => $value) {
 	${$key} = str_replace($serc, $repl, $_POST[$key]);
 }
 
+$PHP_SELF = $_SERVER["SCRIPT_NAME"];
+
 $timeparts = explode(" ",microtime());
 $starttime = $timeparts[1].substr($timeparts[0],1);
 

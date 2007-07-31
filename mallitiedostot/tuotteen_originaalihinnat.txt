@@ -1,2 +1,0 @@
-orig_tuoteno	orig_hinta
-a2	12,2

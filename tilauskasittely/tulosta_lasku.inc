@@ -61,6 +61,14 @@ if (!function_exists('alku')) {
 		else {
 			$pdf->draw_text(30, 815,  $yhtiorow["nimi"], $thispage);
 		}
+		
+		// Asiakkaan tiedot
+		$query 	= "	SELECT *
+					from asiakas
+					where tunnus	= '$laskurow[liitostunnus]' 
+					and yhtio		= '$kukarow[yhtio]'";
+		$result  	= mysql_query($query) or pupe_error($query);
+		$asiakasrow = mysql_fetch_array($result);
 
 		//Otsikko
 		if ($laskurow["vienti"] == "") {
@@ -178,14 +186,24 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(695, 420, 674, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 687, t("Asiakkaan Y-tunnus", $kieli), 	$thispage, $pieni);
 
-		if (substr(trim(strtoupper($laskurow["ytunnus"])),0,2) != strtoupper($laskurow["maa"]) and trim(strtoupper($laskurow["maa"])) != trim(strtoupper($yhtiorow["maa"]))) {
+		if (substr(trim(strtoupper($laskurow["ytunnus"])),0,2) != strtoupper($laskurow["maa"]) and 
+			trim(strtoupper($laskurow["maa"])) != trim(strtoupper($yhtiorow["maa"])) and 
+			trim(strtoupper($laskurow["maa"])) != "") {
+				
 			$laskurow["ytunnus"] = strtoupper($laskurow["maa"])."-".$laskurow["ytunnus"];
 		}
 
 		$pdf->draw_text(310, 677, $laskurow["ytunnus"], 			$thispage, $norm);
 		$pdf->draw_text(430, 687, t("Asiakasnumero", $kieli), 		$thispage, $pieni);
-		$pdf->draw_text(430, 677, $laskurow["ytunnus"], 			$thispage, $norm);
-
+		
+		
+		if(trim($asiakasrow["asiakasnro"]) != "") {
+			$pdf->draw_text(430, 677, $asiakasrow["asiakasnro"], 		$thispage, $norm);
+		} 
+		else {
+			$pdf->draw_text(430, 677, $laskurow["ytunnus"], 			$thispage, $norm);
+		}
+		
 		$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(674, 420, 653, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 666, t("Toimitustapa", $kieli), 	$thispage, $pieni);

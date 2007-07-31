@@ -28,12 +28,12 @@ if ($tee == 'eposti') {
 			$toimas = $ytunnus;
 			require("inc/valitse_tulostin.inc");
 		}
+		
+		$ytunnus = $toimas;		
 	}
 	else {
 		$komento["Alennustaulukko"] = "email";
 	}
-	
-	$ytunnus = $toimas;
 
 	require('pdflib/phppdflib.class.php');
 

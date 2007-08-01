@@ -318,20 +318,20 @@ if ($session != '') {
 		echo "<META Http-Equiv='Expires' Content='0'>";
 		echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
 		if($kukarow["extranet"]!="") {
-			echo "<link rel='stylesheet' type='text/css' href='$palvelin2/inc/main.css'>";
+			echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}main.css'>";
 		}
 		else {
-			echo "<link rel='stylesheet' type='text/css' href='$palvelin2/main.css'>";
+			echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/main.css'>";
 		}
 		echo "<style type='text/css'>";
 		echo $css;
 		echo "</style>";
 		if($pupejs==1 or $suljeYllapito!="") {
 			if($kukarow["extranet"] != "") {
-				echo "<script type='text/javascript' language='javascript' src='$palvelin2/pupe.js'></script>";
+				echo "<script type='text/javascript' language='javascript' src='{$palvelin2}pupe.js'></script>";
 			}
 			else {
-				echo "<script type='text/javascript' language='javascript' src='$palvelin2/inc/pupe.js'></script>";
+				echo "<script type='text/javascript' language='javascript' src='{$palvelin2}inc/pupe.js'></script>";
 			}
 		}
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";

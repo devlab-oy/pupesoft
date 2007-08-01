@@ -367,7 +367,7 @@ if (!function_exists('tulosta_lahete')) {
 					}
 					if($row["kommentti"] != "") {
 						$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
-						$pdf->write($h, $nb, 5, $s[1], $row["kommentti"], "snadi", "L", "I");	
+						$pdf->write($h, $nb, 5, $s[0], $row["kommentti"], "snadi", "L", "I");	
 						$h-=$pdf->ln($nb);					
 					}
 

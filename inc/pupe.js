@@ -205,8 +205,9 @@ function getMouseY(e) {
 }
 
 function tipper(e, oi) {	
-
-	ds = document.getElementById(oi).style;
+	
+	de = document.getElementById(oi);
+	ds = de.style;
 
 	if (e.type == "mouseout") {
 		ds.visibility = "hidden";
@@ -214,17 +215,32 @@ function tipper(e, oi) {
 	else {
 
 		var wp = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
-
-		if(ds.offsetWidth) ew = dm.offsetWidth;
-		else if (ds.clip.width) ew = ds.clip.width;
+		var hp = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
+		
+		if(de.clientWidth) ew = de.clientWidth;
+		else if (de.clip.width) ew = de.clip.width;
 		else ew = 0;
-		
-		tv = getMouseY(e) + 20;
-		lv = getMouseX(e) - (ew/4)+20;
-		
-		if (lv < 2) lv = 2;
-		else if (lv + ew > wp) lv -= ew/2; 
 
+		if(de.clientHeight) eh = de.clientHeight;
+		else if (de.clip.height) eh = de.clip.height;
+		else eh = 0;
+		
+		tv = getMouseY(e)+20;
+		lv = getMouseX(e)+20;
+		
+		w = wp - lv - ew
+		if (w<20) {
+			lv += w - 20
+		}
+		if(lv < 0) lv = 0;
+
+		h = hp - tv - eh
+		if (h<20) {
+			tv = tv - 60 - eh
+		}
+		if(tv < 0) tv = 0;
+		
+		
 		ds.left = lv;
 		ds.top = tv;
 		

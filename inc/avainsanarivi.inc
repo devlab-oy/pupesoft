@@ -9,9 +9,7 @@
 	
 	if (mysql_field_name($result, $i) == "perhe") {
 
-		echo "tunnus: $tunnus ";		
 		if(${$nimi} > 0) $tunnus = ${$nimi};
-		echo "tunnus: $tunnus nimi: $nimi<br>";
 		
 		if($tunnus > 0) {	
 			$query = "select perhe, laji, jarjestys from avainsana where yhtio = '{$kukarow["yhtio"]}' and tunnus = '$tunnus'";

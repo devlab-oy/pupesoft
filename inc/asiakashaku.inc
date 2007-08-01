@@ -249,6 +249,7 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='lopetus' 		  value='$lopetus'>";
 			echo "<input type='hidden' name='myyja' 		  value='$myyja'>";
 			echo "<input type='hidden' name='myyjanro' 		  value='$myyjanro'>";
+			echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
 			echo "<input type='submit' value='".t("Valitse")."'>";
 			echo "</td>";
 			echo "</form>";

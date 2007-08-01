@@ -547,7 +547,7 @@
 			}
 			
 			//	Liitet‰‰n originaalitietoja
-			if($orginaaalit === true) {
+			if($orginaaalit === true and 1==2) {
 				$id=md5(uniqid());
 				$query = "	SELECT * 
 							FROM tuotteen_orginaalit

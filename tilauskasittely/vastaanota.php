@@ -535,7 +535,46 @@
 		$kentta = "etsi";
 
 		// tehd‰‰n etsi valinta
-		echo "<form action='$PHP_SELF' name='find' method='post'>".t("Etsi siirtolistaa").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
+		echo "<table><form action='$PHP_SELF' name='find' method='post'><tr><th>".t("Etsi siirtolistaa").":</th>
+		<td><input type='text' name='etsi'></td>";
+		echo "<tr><th>Varasto</th><td><select name='varasto'>";
+		
+		echo "<option value=''>" . t('Kaikki varastot') . "</option>";
+		
+		$query  = "SELECT tunnus, nimitys, maa FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+		$vares = mysql_query($query) or pupe_error($query);
+
+		while ($varow = mysql_fetch_array($vares))
+		{
+			$sel='';
+			if ($varow['tunnus'] == $varasto) $sel = 'selected';
+
+			$varastomaa = '';
+			if (strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
+				$varastomaa = strtoupper($varow['maa']);
+			}
+
+			echo "<option value='$varow[tunnus]' $sel>$varastomaa $varow[nimitys]</option>";
+		}
+
+		echo "</select></td></tr>";
+		
+		$query = "	SELECT distinct koodi, nimi
+					FROM maat
+					WHERE nimi != ''
+					ORDER BY koodi";
+		$vresult = mysql_query($query) or pupe_error($query);
+		echo "<tr><th>" . t('Maa') . "</th><td><select name='maa'>";
+
+		echo "<option value=''>" . t('Kaikki maat') . "</option>";
+		
+		while ($maarow = mysql_fetch_array($vresult)) {
+			$sel = ($maarow['koodi'] == $_POST['maa']) ? 'selected' : '';
+			
+			echo "<option value='{$maarow['koodi']}' $sel>{$maarow['nimi']}</option>";
+		}
+		
+		echo "</select></td><td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr></form>";
 
 		$haku = '';
 		if (is_string($etsi))  $haku = " and nimi LIKE '%$etsi%' ";
@@ -545,18 +584,33 @@
 		if ($toim == "MYYNTITILI") {
 			$myytili = " and tilaustyyppi='M' ";
 		}
-
+		
+		$varasto = '';
+		if (isset($_POST['varasto']) and !empty($_POST['varasto'])) {
+			$varasto = ' AND lasku.clearing=' . (int) $_POST['varasto'];
+		}
+		
+		$maa = '';
+		if (isset($_POST['maa']) and !empty($_POST['maa'])) {
+			$varasto = " AND varastopaikat.maa='" . mysql_real_escape_string($_POST['maa']) . "'";
+		}
+		
 		$query = "	select distinct otunnus, count(rahtikirjat.tunnus) rtunnuksia, ultilno
 					from tilausrivi
-					JOIN lasku on lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='G' and lasku.alatila in ('B','C','D')
+					JOIN lasku on lasku.yhtio=tilausrivi.yhtio
+						and lasku.tunnus=tilausrivi.otunnus
+						and lasku.tila='G'
+						and lasku.alatila in ('B','C','D')
 					LEFT JOIN rahtikirjat use index (otsikko_index) ON rahtikirjat.otsikkonro=lasku.tunnus and rahtikirjat.yhtio=lasku.yhtio
+					LEFT JOIN varastopaikat ON lasku.clearing=varastopaikat.tunnus
 					where tilausrivi.yhtio='$kukarow[yhtio]'
 					and toimitettu=''
 					and keratty!=''
+					$varasto
 					GROUP BY 1
 					HAVING ultilno not in ('-1','-2') or rtunnuksia > 0";
 		$tilre = mysql_query($query) or pupe_error($query);
-
+		
 		while ($tilrow = mysql_fetch_array($tilre)) {
 
 			if ($toim == "MYYNTITILI") {

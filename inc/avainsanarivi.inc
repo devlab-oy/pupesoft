@@ -78,7 +78,6 @@
 				$jatko = 0;
 				$trow[$i] = $perhe;
 			}
-			echo "perhe: $perhe<br>";
 		}
 	}
 	

@@ -632,14 +632,10 @@ if ($tila == '') {
 				and l1.laskunro		= '$laskurow[laskunro]' 
 				and l1.vanhatunnus  > 0";
 	$muutkeikres = mysql_query($query) or pupe_error($query);
-	
-	$laskakak = 1;
-	
+		
 	while ($muutkeikrow = mysql_fetch_array($muutkeikres)) {
 		$ebid = $muutkeikrow['ebid'];
 		echo ebid($muutkeikrow['tunnus']);
-		
-		$laskakak++;
 	}
 	
 	echo "</td>

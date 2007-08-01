@@ -81,6 +81,12 @@ if ($tee == 'W') {
 	$jarj = "nimi, summa";
 }
 
+// T = Laskun tunnus
+if ($tee == 'T') {
+	$ehto = "tila in ('H','Y','M','P','Q') and tunnus = '$summa1'";
+	$jarj = "nimi, summa";
+}
+
 if ($tee != '') {
 
 	$alku += 0;

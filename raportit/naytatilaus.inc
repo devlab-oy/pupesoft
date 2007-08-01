@@ -252,25 +252,39 @@
 	}
 	
 	if ($laskurow["tila"] == 'K') {
-		$query = "	select l2.ebid, l2.nimi, l2.summa, l2.tunnus
-					FROM lasku l1
-					JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.vanhatunnus=l2.tunnus and l2.ebid!=''
-					WHERE l1.yhtio		= '$kukarow[yhtio]' 
-					and l1.tila			= 'K' 
-					and l1.laskunro		= '$laskurow[laskunro]' 
-					and l1.vanhatunnus  > 0";
-		$muutkeikres = mysql_query($query) or pupe_error($query);
+		$query = "	SELECT yhtio
+					FROM oikeu
+					WHERE yhtio	= '$kukarow[yhtio]'
+					and kuka	= '$kukarow[kuka]'
+					and nimi	= 'raportit.php'
+					and alanimi = 'laskuhaku'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 0) {
 		
-		if (mysql_num_rows($muutkeikres) > 0) {
-			echo "<tr><th colspan='9'>".t("Keikkaan liitetyt ostolaskut:")."</th></tr>";
-			echo "<tr><td colspan='9'>";
+			$query = "	select l2.ebid, l2.nimi, l2.summa, l2.tunnus
+						FROM lasku l1
+						JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.vanhatunnus=l2.tunnus and l2.ebid!=''
+						WHERE l1.yhtio		= '$kukarow[yhtio]' 
+						and l1.tila			= 'K' 
+						and l1.laskunro		= '$laskurow[laskunro]' 
+						and l1.vanhatunnus  > 0";
+			$muutkeikres = mysql_query($query) or pupe_error($query);
 		
-			while ($muutkeikrow = mysql_fetch_array($muutkeikres)) {
-				$ebid = $muutkeikrow['ebid'];
-				echo ebid($muutkeikrow['tunnus']);
-			}
+			if (mysql_num_rows($muutkeikres) > 0) {
+				echo "<tr><th colspan='9'>".t("Keikkaan liitetyt ostolaskut:")."</th></tr>";
+				echo "<tr><td colspan='9'>";
+		
+				while ($muutkeikrow = mysql_fetch_array($muutkeikres)) {
+					$ebid = $muutkeikrow['ebid'];
+				
+					$laskakak = 1;
+				
+					echo $laskakak.": <a href='../raportit.php?toim=laskuhaku&tee=T&summa1=$muutkeikrow[tunnus]'>$muutkeikrow[summa]</a> ".ebid($muutkeikrow['tunnus'])."<br>";
+				}
 			
-			echo "</td></tr>";
+				echo "</td></tr>";
+			}
 		}
 	}
 

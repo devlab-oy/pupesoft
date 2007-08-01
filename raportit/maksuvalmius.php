@@ -62,7 +62,7 @@
 			echo "<td>$rivi[olmapvm]</td>";
 			echo "<td align='right'>$rivi[myynti]</td>";
 			if ($aika == "pv") {
-				echo "<td align='right'><a href='../raportit.php?toim=laskuhaku&tee=M&pvm=$rivi[olmapvm]'>$rivi[osto]</td>";
+				echo "<td align='right'><a href='../raportit.php?toim=laskuhaku&tee=M&pvm=$rivi[olmapvm]'>$rivi[osto]</a></td>";
 			}
 			else {
 				echo "<td align='right'>$rivi[osto]</td>";

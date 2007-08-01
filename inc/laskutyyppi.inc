@@ -10,6 +10,11 @@
 			break;
 		case "K":
 			$laskutyyppi = "Saapuva ostotilaus";
+			
+			switch($alatila) {
+				case "X":
+					$alatila = "Valmis";
+			}
 			break;
 		case "Y":
 			$laskutyyppi = "Maksettu";

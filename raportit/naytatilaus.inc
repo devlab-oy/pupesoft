@@ -250,6 +250,29 @@
 		echo str_replace("\n", "<br>", $comments);
 		echo "</td></tr>";
 	}
+	
+	if ($laskurow["tila"] == 'K') {
+		$query = "	select l2.ebid, l2.nimi, l2.summa, l2.tunnus
+					FROM lasku l1
+					JOIN lasku l2 ON l1.yhtio=l2.yhtio and l1.vanhatunnus=l2.tunnus and l2.ebid!=''
+					WHERE l1.yhtio		= '$kukarow[yhtio]' 
+					and l1.tila			= 'K' 
+					and l1.laskunro		= '$laskurow[laskunro]' 
+					and l1.vanhatunnus  > 0";
+		$muutkeikres = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($muutkeikres) > 0) {
+			echo "<tr><th colspan='9'>".t("Keikkaan liitetyt ostolaskut:")."</th></tr>";
+			echo "<tr><td colspan='9'>";
+		
+			while ($muutkeikrow = mysql_fetch_array($muutkeikres)) {
+				$ebid = $muutkeikrow['ebid'];
+				echo ebid($muutkeikrow['tunnus']);
+			}
+			
+			echo "</td></tr>";
+		}
+	}
 
 	echo "</table>";
 

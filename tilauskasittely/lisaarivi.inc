@@ -826,7 +826,7 @@
 												WHERE tunnus	IN ($myy_sarjatunnus)
 												and tuoteno		= '$myy_tuoteno[$indeksi]'
 												ORDER BY tunnus
-												LIMIT ". (int) $varattu;
+												LIMIT ". (int) abs($varattu);
 									$sres = mysql_query($query) or pupe_error($query);																
 																		
 									while ($srow = mysql_fetch_array($sres)) {														
@@ -871,7 +871,7 @@
 												and hyllyvali   = '$myy_hyllyvali[$indeksi]'
 												and sarjanumero = '$myy_era[$indeksi]'
 												ORDER BY tunnus
-												LIMIT ". (int) $varattu;
+												LIMIT ". (int) abs($varattu);
 									$sres = mysql_query($query) or pupe_error($query);
 								}
 
@@ -1395,7 +1395,7 @@
 								WHERE tunnus 	IN ($myy_sarjatunnus)
 								and tuoteno		= '$trow[tuoteno]'
 								ORDER BY tunnus
-								LIMIT ". (int) ($varattu+$jt);
+								LIMIT ". (int) abs($varattu+$jt);
 					$sres = mysql_query($query) or pupe_error($query);
 
 					while($srow = mysql_fetch_array($sres)) {

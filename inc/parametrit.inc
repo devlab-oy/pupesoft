@@ -317,6 +317,12 @@ if ($session != '') {
 		echo "<META Http-Equiv='Pragma' Content='no-cache'>";
 		echo "<META Http-Equiv='Expires' Content='0'>";
 		echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
+		if($kukarow["extranet"]!="") {
+			echo "<link rel='stylesheet' type='text/css' href='$palvelin2/inc/main.css'>";
+		}
+		else {
+			echo "<link rel='stylesheet' type='text/css' href='$palvelin2/main.css'>";
+		}
 		echo "<style type='text/css'>";
 		echo $css;
 		echo "</style>";

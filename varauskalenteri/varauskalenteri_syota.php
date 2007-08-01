@@ -3,6 +3,7 @@
 	echo "<br>
 			<form action='$PHP_SELF' method='POST'>
 			<input type='hidden' name='tee' value='LISAA'>
+			<input type='hidden' name='lopetus' value='$lopetus'>			
 			<input type='hidden' name='year'  value='$year'>
 			<input type='hidden' name='month' value='$month'>
 			<input type='hidden' name='day'   value='$day'>

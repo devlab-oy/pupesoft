@@ -1,0 +1,20 @@
+div.popup {
+	position:absolute; 
+	z-index:100; 
+	visibility: hidden;
+	background:#eee; 
+	border: 2px #4d4d4d solid;
+	padding: 5px;
+}
+img.edit {
+	height: 13px;
+	width: 13px;
+	border-style: none;
+	border-width: 0;
+}
+img.info {
+	height: 13px;
+	width: 13px;
+	border-style: none;
+	border-width: 0;
+}

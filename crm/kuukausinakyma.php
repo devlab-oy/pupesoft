@@ -1,24 +1,10 @@
 <?php
-
+	
+	$pupejs=1;
+	
 	//parametrit
-	include('../inc/parametrit.inc');
-
-	echo "
-		<script>
-		var DH = 0;var an = 0;var al = 0;var ai = 0;if (document.getElementById) {ai = 1; DH = 1;}else {if (document.all) {al = 1; DH = 1;} else { browserVersion = parseInt(navigator.appVersion); if ((navigator.appName.indexOf('Netscape') != -1) && (browserVersion == 4)) {an = 1; DH = 1;}}} function fd(oi, wS) {if (ai) return wS ? document.getElementById(oi).style:document.getElementById(oi); if (al) return wS ? document.all[oi].style: document.all[oi]; if (an) return document.layers[oi];}
-
-		function pw() {return window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;}
-
-		function mouseX(evt) {if (evt.pageX) return evt.pageX; else if (evt.clientX)return evt.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft); else return null;}
-
-		function mouseY(evt) {if (evt.pageY) return evt.pageY; else if (evt.clientY)return evt.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop); else return null;}
-
-		function popUp(evt,oi) {if (DH) {var wp = pw(); ds = fd(oi,1); dm = fd(oi,0); st = ds.visibility; if (dm.offsetWidth) ew = dm.offsetWidth; else if (dm.clip.width) ew = dm.clip.width; if (st == \"visible\" || st == \"show\") { ds.visibility = \"hidden\"; } else {tv = mouseY(evt) + 20; lv = mouseX(evt) - (ew/4); if (lv < 2) lv = 2; else if (lv + ew > wp) lv -= ew/2; if (!an) {lv += 'px';tv += 'px';} ds.left = lv; ds.top = tv; ds.visibility = \"visible\";}}}
-		</script>
-	";
-
-
-
+	include('inc/parametrit.inc');
+	
 	//N‰ytet‰‰n aina konsernikohtaisesti
 	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 	$result = mysql_query($query) or pupe_error($query);
@@ -102,6 +88,8 @@
 	$mymonth = to_mysql($month);
 	$myday = to_mysql($day);
 
+	$lopetus = "../crm/kuukausinakyma.php////osasto=$osasto//year=$year//month=$month//day=$pva";
+	
 	echo "<font class='head'>".t("Kuukausin‰kym‰").": ". $MONTH_ARRAY[$month] ." $year</font><hr>";
 
 	echo "<table>";
@@ -119,7 +107,7 @@
 		else {
 			$sel = "";
 		}
-		print "<option value='$i' $sel>$val</option>";
+		echo "<option value='$i' $sel>$val</option>";
 		$i++;
 	}
 
@@ -147,7 +135,7 @@
 		$osasto = "";
 	}
 
-	print "<option value='kaikki'>".t("N‰ytet‰‰n kaikki")."</option>";
+	echo "<option value='kaikki'>".t("N‰ytet‰‰n kaikki")."</option>";
 
 	while($row = mysql_fetch_array($result)) {
 		if($row["osasto"] == $osasto) {
@@ -156,7 +144,7 @@
 		else {
 			$sel = "";
 		}
-		print "<option value='$row[osasto]' $sel>$row[osasto]</option>";
+		echo "<option value='$row[osasto]' $sel>$row[osasto]</option>";
 
 	}
 
@@ -167,7 +155,21 @@
 		$sel = "";
 	}
 
-	print "<option value='varauskalenterit' $sel>".t("Varauskalenterit")."</option>";
+	echo "<option value='varauskalenterit' $sel>".t("Varauskalenterit")."</option>";
+
+	//	Onko projekteja?
+	$query = "SELECT tunnus FROM lasku WHERE yhtio='{$kukarow["yhtio"]}' and tila = 'R' LIMIT 1";
+	$tarkres = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($tarkres)==1) {
+		if($osasto == "projektikalenterit") {
+			$sel = "selected";
+		}
+		else {
+			$sel = "";
+		}
+
+		echo "<option value='projektikalenterit' $sel>".t("Projektikalenterit")."</option>";		
+	}
 
 	echo "</select></td></form>";
 
@@ -206,7 +208,7 @@
 			echo "<tr><td class='back'></td></tr>";
 
 			echo "<tr>";
-			echo "<th>$row[osasto]</th>";
+			echo "<th>$row[osasto]</th><th></th>";
 
 			$y = weekday_number("1", $month, $year);
 			$x = days_in_month($month, $year);
@@ -236,7 +238,7 @@
 			$varitys = "td";
 		}
 
-		echo "<tr><$varitys><a href='$PHP_SELF?day=1&month=$month&year=$year&valkuka=$row[kuka]&osasto=$osasto' title='$row[nimi]'>".substr($nimi[0],0,1).". $nimi[1]</a></$varitys>";
+		echo "<tr><$varitys><a href='$PHP_SELF?day=1&month=$month&year=$year&valkuka=$row[kuka]&osasto=$osasto' title='$row[nimi]'>".substr($nimi[0],0,1).". $nimi[1]</a></$varitys><td></td>";
 
 		for($i = 1; $i <= days_in_month($month, $year); $i++) {
 			$pva = to_mysql($i);
@@ -290,14 +292,14 @@
 					}
 					echo "</div>";
 	
-					echo "<$varitys align='center' width='35'><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=$krow[kello]&year=$krow[vuosi]&kuu=$krow[kuu]&paiva=$krow[paiva]&tunnus=$krow[tunnus]&konserni=XXX' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
+					echo "<$varitys align='center' width='35'><a class='td' href='kalenteri.php?valitut=$row[kuka]&kenelle=$row[kuka]&tee=SYOTA&kello=$krow[kello]&year=$krow[vuosi]&kuu=$krow[kuu]&paiva=$krow[paiva]&tunnus=$krow[tunnus]&konserni=XXX' onmouseout=\"tipper(event,'$krow[tunnus]')\" onmouseover=\"tipper(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
 				}
 				else {
 					echo "	<div id='$krow[tunnus]' style='position:absolute; z-index:100; visibility:hidden; width:200px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>
 							$krow[kello]-$krow[lkello] $row[nimi]<br>$krow[selitetark].<br>$krow[kentta01]
 							</div>";
 	
-					echo "<$varitys align='center' width='35'><a class='td' href='#' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
+					echo "<$varitys align='center' width='35'><a class='td' href='#' onmouseout=\"tipper(event,'$krow[tunnus]')\" onmouseover=\"tipper(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";
 				}
 			}
 			else {
@@ -317,13 +319,120 @@
 	}
 
 	echo "<tr><td class='back'><br></td></tr>";
+	
+	if ($osasto == "" or $osasto == "projektikalenterit") {
+		if ($edosasto != $row["osasto"] or ($edosasto=="")) {
+			echo "<tr><td class='back'></td></tr>";
 
+			echo "<tr>";
+			echo "<th>".t("Projektikalenterit")."</th><th></th>";
+			$y = weekday_number("1", $month, $year);
+			$x = days_in_month($month, $year);
+			$u = 1;
+
+			for($r = $y; $r < sizeof($DAY_ARRAY); $r++) {
+				echo "<th>$DAY_ARRAY[$r]<br>$u</th>";
+
+				if ($r == 6) {
+					$r = -1;
+
+					echo "<td class='back'></td>";
+				}
+
+				if ($u >= $x) {
+					break;
+				}
+				$u++;
+			}
+			echo "</tr>";
+		}
+		
+		//	Haetaan kaikki projektiotsikot
+		$query = "	SELECT tunnusnippu, nimi, nimitark, seuranta
+					FROM lasku
+					LEFT JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio and otunnus=lasku.tunnus
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and tila IN ('R','N','L') and alatila != 'X' and tunnusnippu = lasku.tunnus
+					ORDER BY tunnusnippu";
+		$result = mysql_query($query) or pupe_error($query);
+
+		while($row = mysql_fetch_array($result)) {
+			
+			$href = "../tilauskasittely/tilaus_myynti.php?toim=PROJEKTI&tee=AKTIVOI&tilausnumero={$row["tunnusnippu"]}&from=VALITSETOIMITUS&lopetus=$lopetus";
+			echo "<tr class='aktiivi'><td NOWRAP>{$row[tunnusnippu]} - {$row[seuranta]} - {$row[nimi]}</td><td><a href='$href'><img src='../pics/lullacons/folder-open-green.png' class='edit'></a></td>";
+
+			for($i = 1; $i <= days_in_month($month, $year); $i++) {
+				$pva = to_mysql($i);
+
+				$query = "	SELECT 	tunnus, nimi, tila, alatila, 
+									toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
+									date_format(kerayspvm, '%d. %m. %Y') kerayspvm, date_format(toimaika, '%d. %m. %Y') toimaika
+							FROM lasku
+							WHERE tunnusnippu = '{$row["tunnusnippu"]}' and tila IN ('L','G','E','V','W','N')
+							and (kerayspvm <= '$year-$mymonth-$pva 23:59:00' or left(kerayspvm,10) = '0000-00-00') and toimaika >= '$year-$mymonth-$pva 00:00:00'
+								
+							$konsernit1";
+				$kresult = mysql_query($query) or pupe_error($query);
+				
+				echo "<td align='center' NOWRAP>";
+				unset($id);	
+				while ($krow = mysql_fetch_array($kresult)) {
+					
+					//	Ekalla kiekalla tehd‰‰n v‰li
+					if(isset($id)) echo "<br>";
+
+					$laskutyyppi = $krow["tila"];
+					$alatila	 = $krow["alatila"];
+
+					//tehd‰‰n selv‰kielinen tila/alatila
+					require "inc/laskutyyppi.inc";
+				
+					$id=md5(uniqid());
+					echo "<div id='$id' class='popup' style=\"width: 500px\">
+					<table width='500px' align='center'>
+					<caption><font class='head'>{$krow["tunnus"]} - ".t($laskutyyppi)." ".t($alatila)."</font></caption>
+					<tr>
+						<th>".t("Toimitusosoite")."</th>
+						<th>".t("Ker‰ysaika")."</th>						
+						<th>".t("Toimitusaika")."</th>
+					</tr>
+					<tr>
+						<td>{$krow["toim_nimi"]}<br>{$krow["toim_nimitark"]}<br>{$krow["toim_osoite"]}<br>{$krow["toim_postino"]} {$krow["toim_postitp"]}<br>".maa($krow["toim_maa"])."</td>
+						<td>{$krow["kerayspvm"]}</td>
+						<td>{$krow["toimaika"]}</td>
+					</tr>
+					</table>
+					</div>";
+					
+					echo $krow["tunnus"]."&nbsp;";
+					
+					if($krow["alatila"] != "X") {
+						$href = "../tilauskasittely/tilaus_myynti.php?toim=PROJEKTI&tee=AKTIVOI&tilausnumero={$krow["tunnus"]}&from=PROJEKTIKALENTERI&lopetus=$lopetus";
+						echo "&nbsp;<a href='$href'><img src='../pics/lullacons/folder-open-green.png' class='info'></a>";	
+					}
+					
+					echo "&nbsp;<img src='../pics/lullacons/info.png' class='info' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\" onclick=\"$onclick\"><br>";	
+					
+				}
+				
+				echo "</td>";
+				
+				if (weekday_number($i, $month, $year)==6) {
+					echo "<td class='back'></td>";
+				}
+				echo "\n";
+			}
+
+			echo "</tr>";
+		}
+	}
+	
 	if ($osasto == "" or $osasto == "varauskalenterit") {
 		if ($edosasto != $row["osasto"] or ($edosasto=="")) {
 			echo "<tr><td class='back'></td></tr>";
 
 			echo "<tr>";
-			echo "<th>".t("Varauskalenterit")."</th>";
+			echo "<th>".t("Varauskalenterit")."</th><th></th>";
 			$y = weekday_number("1", $month, $year);
 			$x = days_in_month($month, $year);
 			$u = 1;
@@ -356,7 +465,7 @@
 
 		while($row = mysql_fetch_array($result)) {
 
-			echo "<tr><td width='35'>$row[alanimi]</td>";
+			echo "<tr><td width='35'>$row[alanimi]</td><td></td>";
 
 			for($i = 1; $i <= days_in_month($month, $year); $i++) {
 				$pva = to_mysql($i);
@@ -376,7 +485,7 @@
 				$krow = mysql_fetch_array($kresult);
 
 				if($krow["nimi"] == '') {
-					echo "<td align='center' width='35'><a class='td' href='../varauskalenteri/varauskalenteri.php?tee=SYOTA&year=$year&month=$month&day=$pva&toim=$row[alanimi]'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></td>";
+					echo "<td align='center' width='35'><a class='td' href='../varauskalenteri/varauskalenteri.php?lopetus=$lopetus&tee=SYOTA&year=$year&month=$month&day=$pva&toim=$row[alanimi]'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></td>";
 				}
 				else {
 					echo "<div id='$krow[tunnus]' style='position:absolute; z-index:100; visibility:hidden; width:200px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>";
@@ -392,7 +501,7 @@
 
 
 					$nimi = explode(' ', $krow["nimi"]);
-					echo "<td align='center' width='35'><a class='td' href='../varauskalenteri/varauskalenteri.php?tee=NAYTA&year=$year&month=$month&day=$pva&tunnus=$krow[tunnus]&toim=$row[alanimi]' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">".substr($nimi[0],0,1).".".substr($nimi[1],0,1).".</a></td>";
+					echo "<td align='center' width='35'><a class='td' href='../varauskalenteri/varauskalenteri.php?lopetus=$lopetus&tee=NAYTA&year=$year&month=$month&day=$pva&tunnus=$krow[tunnus]&toim=$row[alanimi]' onmouseout=\"tipper(event,'$krow[tunnus]')\" onmouseover=\"tipper(event,'$krow[tunnus]')\">".substr($nimi[0],0,1).".".substr($nimi[1],0,1).".</a></td>";
 				}
 
 				if (weekday_number($i, $month, $year)==6) {
@@ -409,6 +518,6 @@
 
 	echo "</table>";
 
-	require ("../inc/footer.inc");
+	require ("inc/footer.inc");
 
 ?>

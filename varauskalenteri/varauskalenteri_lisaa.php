@@ -94,4 +94,11 @@
 	$result = mysql_query($query) or pupe_error($query);
 	
 	echo "<br><br>".t("Tapahtuma lisätty varauskalenteriin")."!";
+	
+	if($lopetus != "") {
+		$lopetus = str_replace('////','?', $lopetus);
+		$lopetus = str_replace('//','&',  $lopetus);
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
+		exit;
+	}
 ?>

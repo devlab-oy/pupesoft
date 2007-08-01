@@ -110,17 +110,17 @@
 							and tyyppi = 'L'";
 				$result = mysql_query($query) or pupe_error($query);
 
-				// laskutetaan tilaus
-				$laskutettavat  = $ok;
-				$tee 			= "TARKISTA";
-				$laskutakaikki 	= "KYLLA";
-				$silent		 	= "KYLLA";
+				if($jatakesken != "JOO") {
+					// laskutetaan tilaus
+					$laskutettavat  = $ok;
+					$tee 			= "TARKISTA";
+					$laskutakaikki 	= "KYLLA";
+					$silent		 	= "KYLLA";
 
-				$laskuta_message .= ", laskutetaan tilaus $ok päivälle ".date("d.m.Y").".</font><br>";
-				require("verkkolasku.php");
-
+					$laskuta_message .= ", laskutetaan tilaus $ok päivälle ".date("d.m.Y").".</font><br>";
+					require("verkkolasku.php");					
+				}
 			}
-
 		}
 
 		echo "$laskuta_message<br>";
@@ -303,6 +303,8 @@
 			echo "<tr><th>".t("Laskuttamatta summa yhteensä").": </th><td align='right'>$summayhteensa $yhtiorow[valkoodi]</td></tr>";
 			echo "</table>";
 		}
+
+		echo "<br>".t("Älä aja laskutusta").": <input type='checkbox' name='jatakesken' value='JOO'>";
 
 		echo "<br><input type='submit' value='Laskuta'>";
 		echo "</form>";

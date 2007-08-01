@@ -52,10 +52,10 @@
 		$otsikko_nappi = $toim;
 	}
 
-
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
 
-	if ($oikeurow['paivitys'] != '1') { // Saako paivittaa
+	// Saako paivittaa
+	if ($oikeurow['paivitys'] != '1') {
 		if ($uusi == 1) {
 			echo "<b>".t("Sinulla ei ole oikeutta lisätä tätä tietoa")."</b><br>";
 			$uusi = '';
@@ -254,13 +254,28 @@
 	}
 
 	// Rakennetaan hakumuuttujat kuntoon
-	$array = split(",", $kentat);
-    $count = count($array);
+	if (isset($hakukentat)) {
+		$array = split(",", $hakukentat);
+	}
+	else {
+		$array = split(",", $kentat);
+	}
+	
+	$count = count($array);
 
 	for ($i=0; $i<=$count; $i++) {
     	if (strlen($haku[$i]) > 0) {
-        	$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-    		$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+        	
+			if (strpos($array[$i], "/") !== FALSE) {
+				list($a, $b) = explode("/", $array[$i]);
+				
+				$lisa .= " and (".$a." like '%".$haku[$i]."%' or ".$b." like '%".$haku[$i]."%') ";
+			}
+			else {
+				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+			}
+			
+			$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
     	}
     }
     if (strlen($ojarj) > 0) {
@@ -272,14 +287,13 @@
 
         $query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa ";
         $query .= "$ryhma ORDER BY $jarjestys LIMIT 350";
-
 		$result = mysql_query($query) or pupe_error($query);
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type='hidden' name='uusi' value='1'>
 					<input type='hidden' name='toim' value='$aputoim'>
-					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form><br>";
+					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form><br><br>";
 		}
 
 		echo "	<table><tr class='aktiivi'>
@@ -308,10 +322,10 @@
 			for ($i=1; $i<mysql_num_fields($result); $i++) {
 				if ($i == 1) {
 					if (trim($trow[1]) == '') $trow[1] = "".t("*tyhjä*")."";
-					echo "<td><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]'>$trow[1]</a></td>";
+					echo "<td valign='top'><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]'>$trow[1]</a></td>";
 				}
 				else {
-					echo "<td>$trow[$i]</td>";
+					echo "<td valign='top'>$trow[$i]</td>";
 				}
 			}
 			echo "</tr>";

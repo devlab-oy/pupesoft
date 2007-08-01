@@ -42,6 +42,8 @@
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssextranet)) {
 		$t[$cssextraneti] = $apucssextranet;
 	}
+	
+	$rajauslisa	= "";
 
 	require ("inc/$toim.inc");
 
@@ -284,24 +286,42 @@
 
 	// Nyt selataan
 	if ($tunnus == 0 and $uusi == 0 and $errori == '') {
+		if ($limit != "NO") {
+			$limiitti = " LIMIT 350";
+		}
+		else {
+			$limiitti = "";
+		}
 
-        $query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa ";
-        $query .= "$ryhma ORDER BY $jarjestys LIMIT 350";
+		$query = "SELECT " . $kentat . " FROM $toim WHERE yhtio = '$kukarow[yhtio]' $lisa $rajauslisa";
+        $query .= "$ryhma ORDER BY $jarjestys $limiitti";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if ($toim != "yhtio" and $toim != "yhtion_parametrit") {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
-					<input type='hidden' name='uusi' value='1'>
-					<input type='hidden' name='toim' value='$aputoim'>
-					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form><br><br>";
+					<input type = 'hidden' name = 'uusi' value = '1'>
+					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'limit' value = '$limit'>
+					<input type = 'hidden' name = 'laji' value = '$laji'>
+					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 		}
-
-		echo "	<table><tr class='aktiivi'>
+		
+		if (mysql_num_rows($result) >= 350) {
+			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
+					<input type = 'hidden' name = 'toim' value = '$aputoim'>
+					<input type = 'hidden' name = 'limit' value = 'NO'>
+					<input type = 'hidden' name = 'laji' value = '$laji'>
+					<input type = 'submit' value = '".t("Näytä kaikki")."'></form>";
+		}
+		
+		echo "	<br><br><table><tr class='aktiivi'>
 				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
-				<input type='hidden' name='toim' value='$aputoim'>";
+				<input type = 'hidden' name = 'toim' value = '$aputoim'>
+				<input type = 'hidden' name = 'limit' value = '$limit'>
+				<input type = 'hidden' name = 'laji' value = '$laji'>";
 
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
-			echo "<th><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
+			echo "<th><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
 
 			if 	(mysql_field_len($result,$i)>10) $size='20';
 			elseif	(mysql_field_len($result,$i)<5)  $size='5';
@@ -322,7 +342,7 @@
 			for ($i=1; $i<mysql_num_fields($result); $i++) {
 				if ($i == 1) {
 					if (trim($trow[1]) == '') $trow[1] = "".t("*tyhjä*")."";
-					echo "<td valign='top'><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]'>$trow[1]</a></td>";
+					echo "<td valign='top'><a href='yllapito.php?ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&laji=$laji'>$trow[1]</a></td>";
 				}
 				else {
 					echo "<td valign='top'>$trow[$i]</td>";
@@ -341,6 +361,8 @@
 
 		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa' name='mainform' method = 'post' autocomplete='off'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
+		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
+		echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
 		echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";		
@@ -500,7 +522,9 @@
 				if ($rajattu_nakyma == '') {
 					echo "<br><br>
 						<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()'>
-						<input type = 'hidden' name = 'toim' value='$aputoim'>
+						<input type = 'hidden' name = 'toim' value = '$aputoim'>
+						<input type = 'hidden' name = 'limit' value = '$limit'>
+						<input type = 'hidden' name = 'laji' value = '$laji'>
 						<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 						<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>						
@@ -535,8 +559,10 @@
 	elseif ($toim != "yhtio" and $toim != "yhtion_parametrit") {
 		echo "<br>
 				<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
-				<input type = 'hidden' name = 'toim' value='$aputoim'>
-				<input type = 'hidden' name = 'uusi' value ='1'>
+				<input type = 'hidden' name = 'toim' value = '$aputoim'>
+				<input type = 'hidden' name = 'limit' value = '$limit'>
+				<input type = 'hidden' name = 'laji' value = '$laji'>
+				<input type = 'hidden' name = 'uusi' value = '1'>
 				<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 	}
 

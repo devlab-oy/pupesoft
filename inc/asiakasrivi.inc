@@ -32,18 +32,24 @@
 
 	if (mysql_field_name($result, $i) == "laji") {
 
-		$sel = '';
+		$sel  = '';
 		$sel1 = '';
 		$sel2 = '';
 		
-		if ($trow[$i] == 'H') {
+		if(!isset($trow[$i])) {
+			$trow[$i] = $laji;
+		}
+		
+		if (strtoupper($trow[$i]) == 'H') {
 			$sel1 = "SELECTED";
 		}
 		elseif (strtoupper($trow[$i]) == 'P') {
 			$sel2 = "SELECTED";
 		}
-		else $sel = "SELECTED";
-
+		else {
+			$sel = "SELECTED";
+		}
+		
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' $sel>".t("Yritys")."</option>";
 		$ulos .= "<option value = 'H' $sel1>".t("Yksityishenkilö")."</option>";

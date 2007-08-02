@@ -680,7 +680,7 @@ if (!function_exists('tulosta_lasku')) {
 		$pdf->write($h, 1, $s[0], 	$s[1], 		$pankkitiedot["pankkitili1"], "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Viitenumero", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], 		$pankkitiedot["viite"], "norm", "L", "");
+		$pdf->write($h, 1, $s[0], 	$s[1], 		$laskurow["viite"], "norm", "L", "");
 		$h-=$pdf->ln();
 		$pdf->write($h, 1, 0, 		$s[0], t("Summa", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[0], 	$s[1], 		money_format('%i',$laskusumma), "norm", "L", "");

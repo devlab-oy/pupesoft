@@ -97,6 +97,12 @@ if ($tee != '') {
 				WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status in ('','a') and hinnastoon != 'E'
 				ORDER BY tuote.osasto+0, tuote.try+0";
 	$result = mysql_query($query) or pupe_error($query);
+	
+	if (mysql_num_rows($result) == 0) {
+		echo t('Yhtään tuotetta ei löytynyt hinnastoon.') . '<br />';
+		die();
+	}
+	
 	flush();
 
 	// kirjoitetaan tmp file
@@ -105,7 +111,13 @@ if ($tee != '') {
 	if (!$fh = fopen("/tmp/" . $filenimi, "w+")) {
 		die("filen luonti epäonnistui!");
 	}
-
+	
+	// katsotaan mikä hinnastoformaatti
+	$rivifile = 'inc/hinnastorivi' . basename($_POST['hinnasto']) . '.inc';
+	if (file_exists($rivifile)) {
+		require $rivifile;
+	}
+	
 	while ($tuoterow = mysql_fetch_array($result)) {
 		
 		$query = "	SELECT tuote.*, korvaavat.id
@@ -116,11 +128,6 @@ if ($tee != '') {
 		$trresult = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($trresult);
 		
-		// katsotaan mikä hinnastoformaatti
-		$rivifile = 'inc/hinnastorivi' . basename($_POST['hinnasto']) . '.inc';
-		if (file_exists($rivifile)) {
-			require $rivifile;
-		}
 		
 		// tehdään yksi rivi
 		$ulos = hinnastorivi($row);

@@ -1418,6 +1418,7 @@ if ($tee == '') {
 
 	//Oletetaan, että tilaus on ok, $tilausok muuttujaa summataan alempana jos jotain virheitä ilmenee
 	$tilausok = 0;
+	$sarjapuuttuu = 0;
 
 	$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
@@ -3176,7 +3177,7 @@ if ($tee == '') {
 				}
 
 				// Näytetäänkö sarjanumerolinkki
-				if ($row["sarjanumeroseuranta"] == "S" and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
+				if (($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T") and $row["var"] != 'P' and $row["var"] != 'T' and $row["var"] != 'U') {
 
 					if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 						$tunken1 = "siirtorivitunnus";
@@ -3206,6 +3207,7 @@ if ($tee == '') {
 						echo " (<a href='sarjanumeroseuranta.php?tuoteno=$row[tuoteno]&$tunken2=$row[tunnus]&from=$toim'>".t("S:nro")."</a>)";
 
 						if ($laskurow['sisainen'] != '' or $laskurow['ei_lahetetta'] != '') {
+							$sarjapuuttuu++;
 							$tilausok++;
 						}
 					}
@@ -4417,6 +4419,9 @@ if ($tee == '') {
 			}
 
 			echo "</td>";
+		}
+		elseif($sarjapuuttuu > 0) {
+			echo "<font class='error'>".t("VIRHE: Tilaukselta puuttuu sarjanumeroita!")."</font>";
 		}
 
 

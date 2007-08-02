@@ -125,7 +125,7 @@
 			$sarjarow = mysql_fetch_array($sarjares);
 
 			if ($sarjarow["kpl"] != abs($toimrow["varattu"])) {
-				echo "<font class='error'>Sarjanumeroseurannassa oleville tuotteille pit‰‰ liitt‰‰ sarjanumero, ennenkuin ker‰yksen voi suorittaa. Tuote: $toimrow[tuoteno]</font><br><br>";
+				echo "<font class='error'>".t("Sarjanumeroseurannassa oleville tuotteille on liitett‰v‰ sarjanumero ennen ker‰yst‰")."! ".t("Tuote").": $toimrow[tuoteno].</font><br><br>";
 				$tee = "";
 			}
 		}
@@ -1251,7 +1251,7 @@
 							<td>$row[varattu]</td>
 							<td><input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]'> $puute";
 
-					if ($row["sarjanumeroseuranta"] == "S") {						
+					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T") {						
 						
 						if ($toim == 'SIIRTOTYOMAARAYS' or $toim == 'SIIRTOLISTA') {
 							$tunken1 = "siirtorivitunnus";

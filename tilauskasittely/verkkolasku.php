@@ -1293,7 +1293,7 @@
 				}
 			}
 			else {
-				$tulos_ulos .= "<br>\n".t("Yhtään laskutettavaa tilausta ei löytynyt")."!<br>\n";	
+				$tulos_ulos .= "<br>\n".t("Yhtään laskutettavaa tilausta ei löytynyt")."!<br><br>\n";	
 			}
 			
 			// suljetaan faili

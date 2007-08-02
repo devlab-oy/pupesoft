@@ -368,6 +368,22 @@
 			}
 
 			echo "<font class='message'>".t("Lisättiin sarjanumero")." $sarjanumero.</font><br><br>";
+			
+			
+			// Yritetään liittää luotu sarjanumero tähän riviin
+			if($rivitunnus > 0) {
+				
+				if ($valitut_sarjat != "") {
+					$valitut_sarjat = $valitut_sarjat.",".$tun;
+				}
+				else {
+					$valitut_sarjat = $tun;
+				}
+				
+				$sarjataan 	= explode(",", $valitut_sarjat);
+				$sarjat		= explode(",", $valitut_sarjat);
+				$formista	= "kylla";
+			}
 
 			$sarjanumero	= "";
 			$lisatieto		= "";
@@ -396,6 +412,34 @@
 			
 			echo "<font class='message'>".t("Lisättiin eränumero")." $sarjanumero.</font><br><br>";
 
+			$sarjanumero	= "";
+			$lisatieto		= "";
+			$kaytetty		= "";
+		}
+		elseif (mysql_num_rows($sarjares) == 0 and $rivirow["sarjanumeroseuranta"] == "T") {
+			//jos ollaan syötetty kokonaan uusi sarjanuero
+			$query = "	INSERT into sarjanumeroseuranta (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu)
+						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl')";
+			$sarjares = mysql_query($query) or pupe_error($query);
+			$tun = mysql_insert_id();
+			
+			echo "<font class='message'>".t("Lisättiin sarjanumero")." $sarjanumero.</font><br><br>";
+			
+			// Yritetään liittää luotu sarjanumero tähän riviin
+			if($rivitunnus > 0) {
+				
+				if ($valitut_sarjat != "") {
+					$valitut_sarjat = $valitut_sarjat.",".$tun;
+				}
+				else {
+					$valitut_sarjat = $tun;
+				}
+				
+				$sarjataan 	= explode(",", $valitut_sarjat);
+				$sarjat		= explode(",", $valitut_sarjat);
+				$formista	= "kylla";
+			}
+			
 			$sarjanumero	= "";
 			$lisatieto		= "";
 			$kaytetty		= "";
@@ -661,7 +705,7 @@
 					and (sarjanumeroseuranta.myyntirivitunnus in (0, $rivitunnus) or lasku_myynti.tila='T')
 					$lisa
 					$lisa2
-					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
+					ORDER BY sarjanumeroseuranta.sarjanumero+0, sarjanumeroseuranta.tunnus";
 	}
 	elseif((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi == "ON")) {
 		// Haetaan vain sellaiset sarjanumerot jotka on vielä vapaita
@@ -691,7 +735,7 @@
 					$lisa
 					$lisa2
 					GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero
-					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
+					ORDER BY sarjanumeroseuranta.sarjanumero+0, sarjanumeroseuranta.tunnus";
 	}
 	else {
 		// Näytetään kaikki
@@ -720,7 +764,7 @@
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					$lisa
 					$lisa2
-					ORDER BY sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus
+					ORDER BY sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.sarjanumero+0, sarjanumeroseuranta.tunnus
 					LIMIT 50";
 	}
 	$sarjares = mysql_query($query) or pupe_error($query);
@@ -763,10 +807,6 @@
 					return confirm(msg);
 				}
 			</SCRIPT>";
-
-	//Kursorinohjaus
-	$formi	= "haku";
-	$kentta = "sarjanumero_haku";
 
 	echo "<form name='haku' action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='$tunnuskentta' 	value = '$rivitunnus'>";
@@ -811,6 +851,8 @@
 	echo "<input type='hidden' name='ostotilaus_haku' 	value='$ostotilaus_haku'>";
 	echo "<input type='hidden' name='myyntitilaus_haku'	value='$myyntitilaus_haku'>";
 	echo "<input type='hidden' name='lisatieto_haku' 	value='$lisatieto_haku'>";
+	
+	$valitut_sarjat = array();
 
 	while ($sarjarow = mysql_fetch_array($sarjares)) {
 				
@@ -878,7 +920,10 @@
 		if (($sarjarow[$tunnuskentta] == 0 or $sarjarow["myynti_tila"] == 'T' or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
 			$chk = "";
 			if ($sarjarow[$tunnuskentta] == $rivitunnus) {
-				$chk="CHECKED";
+				$chk = "CHECKED";
+				
+				// Tätä voidaan tarvita myöhemmin
+				$valitut_sarjat[] = $sarjarow["tunnus"];
 			}
 
 			if ($tunnuskentta == "ostorivitunnus" and $sarjarow["kpl"] != 0) {
@@ -948,7 +993,17 @@
 		$lisatieto 		= '';
 		$chk 			= '';
 	}
-
+	
+	//Kursorinohjaus
+	if($rivirow["sarjanumeroseuranta"] == "T") {
+		$formi	= "sarjaformi";
+		$kentta = "sarjanumero";	
+	}
+	else {
+		$formi	= "haku";
+		$kentta = "sarjanumero_haku";
+	}
+	
 	if ($rivirow["tuoteno"] != '') {
 		echo "	<form name='sarjaformi' action='$PHP_SELF' method='post'>
 				<input type='hidden' name='$tunnuskentta' 		value='$rivitunnus'>
@@ -957,7 +1012,8 @@
 				<input type='hidden' name='aputoim' 			value='$aputoim'>
 				<input type='hidden' name='otunnus' 			value='$otunnus'>
 				<input type='hidden' name='muut_siirrettavat'	value='$muut_siirrettavat'>
-				<input type='hidden' name='toiminto' 			value='LISAA'>";
+				<input type='hidden' name='toiminto' 			value='LISAA'>
+				<input type='hidden' name='valitut_sarjat' 		value='".implode(",", $valitut_sarjat)."'>";
 
 		if ($rivirow["tuoteno"] != '' and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F")) {
 			$query = "	SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
@@ -987,6 +1043,11 @@
 			}
 			
 			echo "<tr><th>".t("Lisätieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$lisatieto</textarea></td></tr>";
+		}
+		elseif($rivirow["sarjanumeroseuranta"] == "T") {
+			echo "<br><table>";
+			echo "<tr><th colspan='2'>".t("Lisää uusi sarjanumero")."</th></tr>";
+			echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td></tr>";
 		}
 		else {
 			$query = "	SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero

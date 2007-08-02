@@ -417,7 +417,7 @@ else {
 			$laskutettavat	= $laskurow["tunnus"];
 			$tee 			= "TARKISTA";
 			$laskutakaikki 	= "KYLLA";
-			$silent		 	= "KYLLA";
+			$silent		 	= "VIENTI";
 
 			if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
 				$valittu_tulostin = $kukarow["kirjoitin"];
@@ -500,7 +500,7 @@ else {
 				$laskutettavat	= $laskurow["tunnus"];
 				$tee 			= "TARKISTA";
 				$laskutakaikki 	= "KYLLA";
-				$silent		 	= "KYLLA";
+				$silent		 	= "VIENTI";
 
 				if ($kukarow["kirjoitin"] != 0 and $valittu_tulostin == 0) {
 					$valittu_tulostin = $kukarow["kirjoitin"];

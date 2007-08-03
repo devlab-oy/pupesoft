@@ -81,10 +81,11 @@
 			
 			// tehd‰‰n jokaiselle valitulle lahdevarastolle erikseen
 			foreach ($lahdevarastot as $lahdevarasto) {
-				
 				//	Varmistetaan ett‰ aloitetaan aina uusi otsikko uudelle varastolle
 				$tehtyriveja = 0;
-
+				
+				// menn‰‰n aina varmasti alkuun
+				mysql_data_seek($resultti, 0);
 				while ($pairow = mysql_fetch_array($resultti)) {
 				
 					//katotaan paljonko sinne on jo menossa
@@ -177,7 +178,6 @@
 							$rarresult = mysql_query($query) or pupe_error($query);
 
 							if(mysql_num_rows($rarresult) == 1) {
-
 								$trow = mysql_fetch_array($rarresult);
 								$toimaika 	= $laskurow["toimaika"];
 								$kerayspvm	= $laskurow["kerayspvm"];

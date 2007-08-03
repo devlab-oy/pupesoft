@@ -225,7 +225,7 @@
 		echo "<td></td><td>";
 		
 		//Jos tämä on selvittelyssä, niin annetaan mahdollisuus suorittaa!
-		if ((($tiliointirow['korjattu'] == "0000-00-00 00:00:00") or ($tiliointirow['korjattu'] == "@0000-00-00 00:00:00")) and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili']) and ($kuittikoodi==' ')) {
+		if (($tiliointirow['korjattu'] == "0000-00-00 00:00:00" or $tiliointirow['korjattu'] == "@0000-00-00 00:00:00") and ($tiliointirow['tilino'] == $yhtiorow['selvittelytili']) and ($kuittikoodi==' ')) {
 			//Olisiko tämä meidän toimittaja
 			$tpv = substr($pvm,0,2);
 			$tpk = substr($pvm,2,2);

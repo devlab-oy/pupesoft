@@ -250,9 +250,12 @@ function lue_kurssit($file, $handle) {
 		// suhde euroon
 		$kurssi = round(1 / $kurssi, 6);
 
-		$query = "update valuu set kurssi='$kurssi', muutospvm = '$datetime', muuttaja = '{$kukarow['kuka']}'
-				where yhtio='{$kukarow['yhtio']}' and nimi='$valuutta'";
-
+		$query = "	UPDATE valuu SET 
+					kurssi = '$kurssi', 
+					muutospvm = '$datetime', 
+					muuttaja = '{$kukarow['kuka']}'
+					WHERE yhtio = '{$kukarow['yhtio']}' and 
+					nimi = '$valuutta'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// tämä valuutta on nyt päivitetty!
@@ -266,4 +269,5 @@ function lue_kurssit($file, $handle) {
 		echo "<br>";
 	}
 }
+
 ?>

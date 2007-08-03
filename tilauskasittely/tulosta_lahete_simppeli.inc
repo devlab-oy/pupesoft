@@ -580,14 +580,14 @@ if (!function_exists('tulosta_lahete')) {
 			$kires = mysql_query($querykieli) or pupe_error($querykieli);
 			if(mysql_num_rows($kires) > 0) {
 				$kirow = mysql_fetch_array($kires);
-				echo t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";						
+				echo t("Lähete tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";						
 				
-				echo t("Lasku tulostuu")."...<br>";
+				echo t("Lähete tulostuu")."...<br>";
 				unset($returnvalue);
 				$line = exec("$komento $pdf_lahetefilenimi", $output, $returnvalue);
 			}
 			if(mysql_num_rows($result) == 0 or $returnvalue!=0) {
-				echo "<font class='error'>".t("Laskun tulostus epäonnistui")."!!!</font><br>\n";	
+				echo "<font class='error'>".t("Lähetteen tulostus epäonnistui")."!!!</font><br>\n";	
 			}
 		}			
 

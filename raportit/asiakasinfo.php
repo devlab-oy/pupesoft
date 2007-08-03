@@ -301,9 +301,9 @@ if ($ytunnus!='') {
 			}
 
 			$pylvaat = "<table border='0' cellpadding='0' cellspacing='0'><tr>
-			<td style='vertical-align: bottom; text-align: center;'><img src='pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
-			<td style='vertical-align: bottom; text-align: center;'><img src='pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
-			<td style='vertical-align: bottom; text-align: center;'><img src='pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro] %'></td>
+			<td style='vertical-align: bottom; text-align: center;'><img src='".$palvelin2."pics/blue.png' height='$hmyynti' width='12' alt='".t("myynti")." $sumrow[myynti]'></td>
+			<td style='vertical-align: bottom; text-align: center;'><img src='".$palvelin2."pics/orange.png' height='$hkate' width='12' alt='".t("kate")." $sumrow[kate]'></td>
+			<td style='vertical-align: bottom; text-align: center;'><img src='".$palvelin2."pics/green.png' height='$hkatepro' width='12' alt='".t("katepro")." $sumrow[katepro] %'></td>
 			</tr></table>";
 
 			if ($sumrow['katepro']=='') $sumrow['katepro'] = '0.0';

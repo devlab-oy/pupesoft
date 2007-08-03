@@ -84,8 +84,7 @@ if (!function_exists('alku')) {
 		$i["color"]['blue']  = 0;
 		$i["color"]['green'] = 0;
 
-		$pdf->draw_text(400, 795, $laskurow["hyvaksynnanmuutos"], $firstpage, $i);
-
+		$pdf->draw_text(400, 785, $laskurow["hyvaksynnanmuutos"], $firstpage, $i);
 
 		$pdf->draw_rectangle(780, 20,  680, 200, $firstpage, $rectparam);
 		$pdf->draw_text(30, 760, t("Toimitusosoite", $kieli).":", 								$firstpage, $p);

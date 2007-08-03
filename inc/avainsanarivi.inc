@@ -434,32 +434,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-
-	if (mysql_field_name($result, $i) == "selite" and $sel18 == "selected") {
-
-		$handle = opendir("tilauskasittely");
-
-		$ulos  = "<td><select name='$nimi'>";
-
-		$ulos .= "<option value=''></option>";
-
-		while ($file = readdir($handle)) {
-			if (substr($file,0,14) == 'tulosta_lahete') {
-				$sel = "";
-
-				if ($file == $trow[$i]) {
-					$sel = "SELECTED";
-				}
-
-				$ulos .= "<option value='$file' $sel>".t($file)."</option>";
-			}
-		}
-		closedir($handle);
-
-		$ulos .= "</select></td>";
-		$jatko = 0;
-	}
-	
+		
 	if (mysql_field_name($result, $i) == "selitetark_2" and $sel29 == "selected") {
 
 		$query = "	SELECT distinct koodi, nimi

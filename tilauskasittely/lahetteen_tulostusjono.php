@@ -90,9 +90,6 @@
 		}
 
 		if (is_array($tilausnumerorypas)) {
-
-			$kerayslista = $yhtiorow["lahetteen_tulostustapa"];
-
 			foreach($tilausnumerorypas as $tilausnumeroita) {
 				// katsotaan, ettei tilaus ole kenell‰k‰‰n auki ruudulla
 				$query = "	SELECT *

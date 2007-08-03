@@ -41,17 +41,43 @@ if (!function_exists('alku')) {
 
 		$firstpage = $pdf->new_page("a4");
 		
-		$pdf->draw_rectangle(825, 20,  780, 580, 													$firstpage, $rectparam);
-		$pdf->draw_text(30, 815, $yhtiorow["nimi"], 												$firstpage, $p);
-		$pdf->draw_text(30, 805, $yhtiorow["osoite"], 												$firstpage, $p);
-		$pdf->draw_text(30, 795, $yhtiorow["postino"], 												$firstpage, $p);
-		$pdf->draw_text(60, 795, $yhtiorow["postitp"], 												$firstpage, $p);
-		$pdf->draw_text(30, 785, $yhtiorow["maa"], 													$firstpage, $p);
-		$pdf->draw_text(250,810, t("Keräilylista", $kieli), 										$firstpage);
-		$pdf->draw_text(260,785, t("Toimituspvm", $kieli).": ".tv1dateconv($laskurow["toimaika"]), 	$firstpage, $p);
-		$pdf->draw_text(320,810, t("Sivu", $kieli)." $sivu", 										$firstpage, $p);
-		$pdf->draw_text(135,795, t("Tilausnumero(t)", $kieli).": ".$tilausnumeroita, 				$firstpage, $p);
-		$pdf->draw_text(135,785, t("Keräyspvm", $kieli).": ".tv1dateconv(substr($laskurow["kerayspvm"],0,10)), 	$firstpage, $p);
+		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
+			
+			$filename = $yhtiorow["lasku_logo"];
+
+			$fh = fopen($filename, "r");
+			$data = fread($fh, filesize($filename));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+
+			if(!$image) {
+				echo t("Logokuvavirhe").": ".$image.$data;
+			}
+			else {
+				$logoparam = array();
+				$logoparam['scale'] = 0.15;
+				
+				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+				$iy    = $isizelogo[1]*0.15*0.35714;	// kuvan y-korkeus millimetreissä
+				
+				$placement = $pdf->image_place($image, mm_pt(292-$iy), mm_pt(7), $firstpage, $logoparam);
+			}
+		}
+		else {
+			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 												$firstpage, $p);
+			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 												$firstpage, $p);
+			$pdf->draw_text(30, 795, $yhtiorow["postino"], 												$firstpage, $p);
+			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 												$firstpage, $p);
+			$pdf->draw_text(30, 785, $yhtiorow["maa"], 													$firstpage, $p);
+		}
+		
+		
+		$pdf->draw_text(310,815, t("Keräilylista", $kieli), 										$firstpage);
+		$pdf->draw_text(270,785, t("Toimituspvm", $kieli).": ".tv1dateconv($laskurow["toimaika"]), 	$firstpage, $p);
+		$pdf->draw_text(390, 815, t("Sivu", $kieli)." $sivu", 										$firstpage, $p);
+		$pdf->draw_text(145,795, t("Tilausnumero(t)", $kieli).": ".$tilausnumeroita, 				$firstpage, $p);
+		$pdf->draw_text(145,785, t("Keräyspvm", $kieli).": ".tv1dateconv(substr($laskurow["kerayspvm"],0,10)), 	$firstpage, $p);
 
 		$i["height"] = 28;
 		$i["font"] = "Times-Roman";
@@ -88,13 +114,13 @@ if (!function_exists('alku')) {
 		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 
 		$pdf->draw_rectangle(780, 380, 680, 580, $firstpage, $rectparam);
-		$pdf->draw_text(390, 760, t("Asiakasnumero", $kieli).": ".$laskurow["ytunnus"], 							$firstpage, $p);
-		$pdf->draw_text(390, 750, t("Päiväys", $kieli).": ".substr($laskurow["lahetepvm"],0,10) , 					$firstpage, $p);
-		$pdf->draw_text(390, 740, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . $laskurow["luontiaika"], 	$firstpage, $p);
-		$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], 						$firstpage, $p);
-		$pdf->draw_text(390, 710, t("Toimitusehto", $kieli).": ".$laskurow["toimitusehto"], 						$firstpage, $p);
-		$pdf->draw_text(390, 700, t("Maksuehto", $kieli).": ".$maksuehto, 											$firstpage, $p);
-		$pdf->draw_text(390, 690, t("Tilausviite", $kieli).": ".substr($laskurow["viesti"],0,18), 					$firstpage, $p);
+		$pdf->draw_text(390, 760, t("Asiakasnumero", $kieli).": ".$laskurow["ytunnus"], 											$firstpage, $p);
+		$pdf->draw_text(390, 750, t("Päiväys", $kieli).": ".tv1dateconv(substr($laskurow["lahetepvm"],0,10)) , 						$firstpage, $p);
+		$pdf->draw_text(390, 740, t("Laatija", $kieli).": ".$laskurow["laatija"] . "@" . tv1dateconv($laskurow["luontiaika"], 1), 	$firstpage, $p);
+		$pdf->draw_text(390, 720, t("Toimitustapa", $kieli).": ".$laskurow["toimitustapa"], 										$firstpage, $p);
+		$pdf->draw_text(390, 710, t("Toimitusehto", $kieli).": ".$laskurow["toimitusehto"], 										$firstpage, $p);
+		$pdf->draw_text(390, 700, t("Maksuehto", $kieli).": ".$maksuehto, 															$firstpage, $p);
+		$pdf->draw_text(390, 690, t("Tilausviite", $kieli).": ".substr($laskurow["viesti"],0,18), 									$firstpage, $p);
 		
 		//viivakoodin arvo
 		$barcode  = $laskurow["tunnus"];

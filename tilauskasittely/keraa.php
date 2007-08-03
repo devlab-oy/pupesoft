@@ -105,7 +105,8 @@
 					JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
 					tilausrivi.otunnus in ($tilausnumeroita) and
-					tilausrivi.tyyppi in ('L','G')";
+					tilausrivi.tyyppi in ('L','G')
+					and tilausrivi.var not in ('P','T','U','J')";
 		$toimresult = mysql_query($query) or pupe_error($query);
 
 		while ($toimrow = mysql_fetch_array($toimresult)) {
@@ -717,20 +718,24 @@
 					}
 						
 					if ($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0) {
-
-						// Haetaan asiakkaan lähetetyyppi
-						$query = "	SELECT lahetetyyppi, luokka, puhelin
+						
+						$otunnus = $laskurow["tunnus"];
+						
+						//hatetaan asiakkaan lähetetyyppi
+						$query = "  SELECT lahetetyyppi, luokka, puhelin
 									FROM asiakas
 									WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 						$result = mysql_query($query) or pupe_error($query);
 						$asrow = mysql_fetch_array($result);
 
+						$lahetetyyppi = "";
+
 						if ($asrow["lahetetyyppi"] != '' and file_exists($asrow["lahetetyyppi"])) {
-							require_once ($asrow["lahetetyyppi"]);
+							$lahetetyyppi = $asrow["lahetetyyppi"];
 						}
 						else {
-							// Haetaan yhtiön oletuslähetetyyppi
-							$query = "	SELECT selite
+							//Haetaan yhtiön oletuslähetetyyppi
+							$query = "  SELECT selite
 										FROM avainsana
 										WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
 										ORDER BY jarjestys, selite
@@ -739,94 +744,108 @@
 							$vrow = mysql_fetch_array($vres);
 
 							if ($vrow["selite"] != '' and file_exists($vrow["selite"])) {
-								require_once ($vrow["selite"]);
-							}
-							else {
-								echo "<font class='error'>".t("Emme löytäneet yhtään lähetetyyppiä. Lähetettä ei voida tulostaa.")."</font><br>";
+								$lahetetyyppi = $vrow["selite"];
 							}
 						}
 
-						$otunnus = $laskurow["tunnus"];
-
-						//tehdään uusi PDF failin olio
-						$pdf= new pdffile;
-						$pdf->set_default('margin', 0);
-
-						//ovhhintaa tarvitaan jos lähetetyyppi on sellainen, että sinne tulostetaan bruttohinnat
-						if ($yhtiorow["alv_kasittely"] != "") {
-							$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta*(1+(tilausrivi.alv/100))),2) ovhhinta ";
+						if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
+							require_once ("tulosta_lahete_alalasku.inc");
+						}	
+						elseif (strpos($lahetetyyppi,'simppeli') !== FALSE) {
+							require_once ("$lahetetyyppi");
 						}
 						else {
-							$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
+							require_once ("tulosta_lahete.inc");
 						}
 
-						// katotaan miten halutaan sortattavan
-						$sorttauskentta = generoi_sorttauskentta();
-
-						//generoidaan lähetteelle ja keräyslistalle rivinumerot
-						$query = "	SELECT tilausrivi.*,
-									round((tilausrivi.varattu+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
-									tuote.sarjanumeroseuranta,
-									$sorttauskentta,
-									$lisa2
-									FROM tilausrivi 
-									JOIN tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-									WHERE tilausrivi.otunnus = '$otunnus'
-									and tilausrivi.yhtio = '$kukarow[yhtio]'
-									and tilausrivi.tyyppi in ('L','G','W')
-									ORDER BY sorttauskentta";
-						$riresult = mysql_query($query) or pupe_error($query);
-
-						//generoidaan rivinumerot
-						$rivinumerot = array();
-
-						$kal = 1;
-
-						while ($row = mysql_fetch_array($riresult)) {
-							$rivinumerot[$row["tunnus"]] = $row["tunnus"];
-						}
-
-						sort($rivinumerot);
-
-						$kal = 1;
-
-						foreach($rivinumerot as $rivino) {
-							$rivinumerot[$rivino] = $kal;
-							$kal++;
-						}
-
-						mysql_data_seek($riresult,0);
-
-						//pdf:n header..
-						$firstpage = alku();
-
-
-						while ($row = mysql_fetch_array($riresult)) {
-							//piirrä rivi
-							$firstpage = rivi($firstpage);
-
-							if ($row["netto"] != 'N' and $row["laskutettu"] == "") {
-								$total += $row["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT.. (pitää olla laskuttamaton, muuten erikoisale on jo jyvitetty)
+						//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
+						if(function_exists("tulosta_lahete")) {
+							if($vrow["selite"] != '') {
+								$tulostusversio = $vrow["selite"];
 							}
 							else {
-								$total_netto += $row["rivihinta"]; // lasketaan tilauksen loppusummaa NETTORIVIT..
+								$tulostusversio = $asrow["lahetetyyppi"];						
 							}
+
+							tulosta_lahete($otunnus, $komento["Lähete"], $kieli = "", $toim, $tee, $tulostusversio);
 						}
+						else {
+							// katotaan miten halutaan sortattavan
+							$sorttauskentta = generoi_sorttauskentta();
 
-						//Vikan rivin loppuviiva
-						$x[0] = 20;
-						$x[1] = 580;
-						$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
-						$pdf->draw_line($x, $y, $firstpage, $rectparam);
+							if($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
+								$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
+							}
+							else {
+								$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
+							} 
 
-						loppu($firstpage, 1);
+							//generoidaan lähetteelle ja keräyslistalle rivinumerot
+							$query = "  SELECT tilausrivi.*,							
+										round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) ovhhinta,
+										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta,
+										$sorttauskentta
+										FROM tilausrivi
+										JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+										JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+										WHERE tilausrivi.otunnus = '$otunnus'
+										and tilausrivi.yhtio = '$kukarow[yhtio]'
+										$tyyppilisa
+										ORDER BY sorttauskentta";
+							$riresult = mysql_query($query) or pupe_error($query);
 
-						//tulostetaan sivu
-						if ($lahetekpl > 1) {
-							$komento .= " -#$lahetekpl ";
-						}
+							//generoidaan rivinumerot
+							$rivinumerot = array();
+
+							while ($row = mysql_fetch_array($riresult)) {
+								$rivinumerot[$row["tunnus"]] = $row["tunnus"];
+							}
+
+							sort($rivinumerot);
+
+							$kal = 1;
+
+							foreach($rivinumerot as $rivino) {
+								$rivinumerot[$rivino] = $kal;
+								$kal++;
+							}
+
+							mysql_data_seek($riresult,0);
+
+
+							unset($pdf);
+							unset($page);
+
+							$sivu  = 1;
+							$total = 0;
+							
+							// Aloitellaan lähetteen teko
+							$page[$sivu] = alku();
+
+							while ($row = mysql_fetch_array($riresult)) {
+								rivi($page[$sivu]);
+								$total+= $row["rivihinta"];
+							}
+
+							//Vikan rivin loppuviiva
+							$x[0] = 20;
+							$x[1] = 580;
+							$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
+							$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
+
+							loppu($page[$sivu], 1);
+
+							if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
+								alvierittely($page[$sivu]);
+							}
+						
+							//tulostetaan sivu
+							if ($lahetekpl > 1) {
+								$komento .= " -#$lahetekpl ";
+							}
 												
-						print_pdf($komento);
+							print_pdf($komento);
+						}
 					}
 
 

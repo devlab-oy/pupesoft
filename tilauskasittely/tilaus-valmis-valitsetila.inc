@@ -235,11 +235,10 @@
 					and tila in ('N','L')
 					and alatila in ('','A','F')";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///
 		if ($yhtiorow["lahetteen_tulostustapa"] != "K") {
-			$tilausnumeroita 	= $laskurow["tunnus"];
-			$kerayslista 		= "K";
+			$tilausnumeroita = $laskurow["tunnus"];
 			
 			require("tilaus-valmis-tulostus.inc");
 		}

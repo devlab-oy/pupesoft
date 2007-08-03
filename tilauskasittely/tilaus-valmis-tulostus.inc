@@ -2,13 +2,11 @@
 	//sisään halutaan $laskurow jossa on tulostettavan tilauksen tiedot
 	//jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
-
 	// katotaan ihan aluksi, että meillä on edellytykset tulostukselle...
 	$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]'";
 	$prires= mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($prires) != 0) {
-
 		$prirow= mysql_fetch_array($prires);
 		$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri1]'";
 		$kirres= mysql_query($query) or pupe_error($query);
@@ -20,7 +18,7 @@
 		die ("<font class='error'>Yhtään varastoa ei ole määritelty. Lähetteitä ei voida tulostaa...</font>");
 	}
 
-	//tarkistetan tulostuksessa syntyviä virheitä
+	// tarkistetan tulostuksessa syntyviä virheitä
 	$virheellinen = '';
 
 	// emuloidaan transactioita mysql LOCK komennolla
@@ -37,83 +35,39 @@
 	// Katsotaan, että tämä keräyslista ei ole jo tulostettu
 	if($chk_row["ok"] == $chk_row["kaikki"]) {
 
-		if ($kerayslista == 'K') {
-			//keräyslistan tulostusta varten
-			if ($yhtiorow["kerailylistatyyppi"] != "" and file_exists($yhtiorow["kerailylistatyyppi"])) {
-				require_once ($yhtiorow["kerailylistatyyppi"]);
-			}
-			else {
-				require_once ("tulosta_lahete_kerayslista.inc");
-			}
-
-			// keräyslistat sortataan aina näin
-			$sorttauskentta = "if(perheid = 0,
-								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
-								) as sorttauskentta";
+		//keräyslistan tulostusta varten
+		if ($yhtiorow["kerailylistatyyppi"] != "" and file_exists($yhtiorow["kerailylistatyyppi"])) {
+			require_once ($yhtiorow["kerailylistatyyppi"]);
 		}
 		else {
-			//hatetaan asiakkaan lähetetyyppi
-			$query = "	SELECT lahetetyyppi, luokka, puhelin
-						FROM asiakas
-						WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$asrow = mysql_fetch_array($result);
-
-			if ($asrow["lahetetyyppi"] != '' and file_exists($asrow["lahetetyyppi"])) {
-				require_once ($asrow["lahetetyyppi"]);
-			}
-			else {
-				//Haetaan yhtiön oletuslähetetyyppi
-				$query = "	SELECT selite
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
-							ORDER BY jarjestys, selite
-							LIMIT 1";
-				$vres = mysql_query($query) or pupe_error($query);
-				$vrow = mysql_fetch_array($vres);
-
-				if ($vrow["selite"] != '' and file_exists($vrow["selite"])) {
-					require_once ($vrow["selite"]);
-				}
-				else {
-					echo "<font class='error'>".t("Emme löytäneet yhtään lähetetyyppiä. Lähetettä ei voida tulostaa.")."</font><br>";
-				}
-			}
-
-			// katotaan miten halutaan lähete sortattavan
-			$sorttauskentta = generoi_sorttauskentta();
+			require_once ("tulosta_lahete_kerayslista.inc");
 		}
-
-		//korjataan tää päivämäärä kuntoon jota ei vielä ole
+        
+		// keräyslistat sortataan aina näin
+		$sorttauskentta = "if(perheid = 0,
+							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+							) as sorttauskentta";
+		
+		// korjataan tää päivämäärä kuntoon jota ei vielä ole
 		$laskurow["lahetepvm"] = date("Y-m-d");
 
-		//tehdään uusi PDF failin olio
-		$pdf= new pdffile;
+		// tehdään uusi PDF failin olio
+		$pdf = new pdffile;
 		$pdf->set_default('margin', 0);
 
-		//keräyslistalle ei tulosteta saldottomia tuotteita
-		if ($kerayslista == 'K' and $yhtiorow["kerataanko_saldottomat"] == '') {
+		// keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
+		if ($yhtiorow["kerataanko_saldottomat"] == '') {
 			$lisa1 = " and tuote.ei_saldoa = '' ";
 		}
 		else {
 			$lisa1 = " ";
 		}
 
-		//ovhhintaa tarvitaan jos lähetetyyppi on sellainen, että sinne tulostetaan bruttohinnat
-		if ($yhtiorow["alv_kasittely"] != "") {
-			$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta*(1+(tilausrivi.alv/100))),2) ovhhinta ";
-		}
-		else {
-			$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
-		}
-
-		//generoidaan lähetteelle ja keräyslistalle rivinumerot
+		// generoidaan keräyslistalle rivinumerot
 		$query = "	SELECT tilausrivi.*,
-					round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
 					tuote.sarjanumeroseuranta,
-					$sorttauskentta,
-					$lisa2
+					$sorttauskentta
 					FROM tilausrivi, tuote
 					WHERE tilausrivi.otunnus in ($tilausnumeroita)
 					and tilausrivi.yhtio   = '$kukarow[yhtio]'
@@ -122,44 +76,36 @@
 					and tilausrivi.tyyppi  != 'D'
 					$lisa1
 					ORDER BY sorttauskentta";
-		$result = mysql_query($query) or pupe_error($query);
+		$riresult = mysql_query($query) or pupe_error($query);
 
-		//generoidaan rivinumerot
+		// generoidaan rivinumerot
 		$rivinumerot = array();
+
+		while ($row = mysql_fetch_array($riresult)) {
+			$rivinumerot[$row["tunnus"]] = $row["tunnus"];
+		}
+
+		sort($rivinumerot);
 
 		$kal = 1;
 
-		while ($row = mysql_fetch_array($result)) {
-			if ($kerayslista == 'K') {
-				$rivinumerot[$row["tunnus"]] = $kal;
-				$kal++;
-			}
-			else {
-				$rivinumerot[$row["tunnus"]] = $row["tunnus"];
-			}
+		foreach($rivinumerot as $rivino) {
+			$rivinumerot[$rivino] = $kal;
+			$kal++;
 		}
 
-		if ($kerayslista != 'K') {
-			sort($rivinumerot);
+		mysql_data_seek($riresult,0);
 
-			$kal = 1;
-
-			foreach($rivinumerot as $rivino) {
-				$rivinumerot[$rivino] = $kal;
-				$kal++;
-			}
-		}
-
-		mysql_data_seek($result,0);
+		$paino = 0;
+		$sivu  = 0;
 
 		//pdf:n header..
 		$firstpage = alku();
-		$paino = 0;
+		
 
-		while ($row = mysql_fetch_array($result)) {
+		while ($row = mysql_fetch_array($riresult)) {
 			//piirrä rivi
 			$firstpage = rivi($firstpage);
-			$total += $row["rivihinta"];
 		}
 
 		//Vikan rivin loppuviiva
@@ -172,7 +118,7 @@
 
 
 		//tulostetaan faili ja valitaan sopivat printterit
-		if ($laskurow["varasto"] == '') {
+		if ($laskurow["varasto"] == 0) {
 			$query = "	select *
 						from varastopaikat
 						where yhtio='$kukarow[yhtio]'
@@ -188,15 +134,15 @@
 		$prires= mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($prires) > 0) {
-			$prirow= mysql_fetch_array($prires);
+			$prirow = mysql_fetch_array($prires);
 
 			// käteinen muuttuja viritetään tilaus-valmis.inc:issä jos maksuehto on käteinen
 			// ja silloin pitää kaikki lähetteet tulostaa aina printteri5:lle (lasku printteri)
-			if ($kateinen=='X') {
-				$apuprintteri=$prirow['printteri5']; // laskuprintteri
+			if ($kateinen == 'X') {
+				$apuprintteri = $prirow['printteri5']; // laskuprintteri
 			}
 			else {
-				$apuprintteri=$prirow['printteri1']; // läheteprintteri
+				$apuprintteri = $prirow['printteri1']; // läheteprintteri
 
 				//haetaan optimaalinen tulostin tälle lähetteelle
 				$tilaus  = $tilausnumeroita;
@@ -215,35 +161,25 @@
 			}
 
 			//haetaan lähetteen tulostuskomento
-			$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
-			$kirres= mysql_query($query) or pupe_error($query);
-			$kirrow= mysql_fetch_array($kirres);
-			$komento=$kirrow['komento'];
-
-			//haetaan osoitelapun tulostuskomento
-			$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$prirow[printteri3]'";
-			$kirres= mysql_query($query) or pupe_error($query);
-			$kirrow= mysql_fetch_array($kirres);
-			$oslapp=$kirrow['komento'];
-
+			$query   = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$apuprintteri'";
+			$kirres  = mysql_query($query) or pupe_error($query);
+			$kirrow  = mysql_fetch_array($kirres);
+			$komento = $kirrow['komento'];
 		}
 
-		//tulostetaan sivu
-		print_pdf($komento);
-
+		if ($komento != "") {
+			//tulostetaan sivu
+			print_pdf($komento);
+		}
+		else {
+			$returnvalue = 1;
+		}
+		
 		if ($returnvalue != 0) {
 			echo "<font class='error'>Lähetteen tulostus epäonnistui! Tilaus $laskurow[tunnus] siirrettiin tulostusjonoon.
 					Käy tulostamassa lähete <a href='lahetteen_tulostusjono.php'>tulostusjonosta</a>.</font><br>";
 
 			$virheellinen = "X"; //Merkataan epäonnistuneeksi
-		}
-
-		if ($kerayslista != 'K') {
-			//jos osoitelappuprintteri löytyy tulostetaan osoitelappu..
-			$tunnus = $laskurow["tunnus"];
-			if ($oslapp!='') {
-				require ("osoitelappu_pdf.inc");
-			}
 		}
 
 		// jos meillä oli lähetteen tulostusongelmia
@@ -268,6 +204,7 @@
 	else {
 		echo "<font class='error'>".t("VIRHE: Lähete/Keräyslista on jo tulostettu!")."</font><br>";
 	}
+	
 	// poistetaan lukot
 	$query ="UNLOCK TABLES";
 	$res   = mysql_query($query) or pupe_error($query);

@@ -512,19 +512,34 @@ if (!function_exists('rivi')) {
 		if(substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
 				// tulosta_lahete.inc
-				$summa += $row['rivihinta'];
+				if ($row["jt"] == 0 and $row["var"] != 'P') {
+					$summa += $row['rivihinta'];
+				}
+				else {
+					$row['rivihinta'] = 0;
+				}
 				
 				rivi_hinta_ale($thispage);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
 				// tulosta_lahete_brutto.inc
-				$summa += round($row['ovhhinta'] * $kpl_rivilla, 2);
+				if ($row["jt"] == 0 and $row["var"] != 'P') {
+					$summa += round($row['ovhhinta'] * $kpl_rivilla, 2);
+				}
+				else {
+					$row['rivihinta'] = 0;
+				}
 				
 				rivi_brutto($thispage);
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eialeja.inc") {
 				//tulosta_lahete_eialeja.inc
-				$summa += $row['brutto_rivihinta'];
+				if ($row["jt"] == 0 and $row["var"] != 'P') {
+					$summa += $row['brutto_rivihinta'];
+				}
+				else {
+					$row['rivihinta'] = 0;
+				}
 				
 				rivi_eialeja($thispage);
 			}

@@ -1455,8 +1455,12 @@
 					else {
 						$tulostusversio = $asrow["lahetetyyppi"];						
 					}
-					
-					tulosta_lahete($otunnus, $komento[ucfirst(strtolower($toim))], $kieli = "", $toim, $tee, $tulostusversio);
+					if($toim == "PAKKALISTA") {
+						tulosta_lahete($otunnus, $komento["Pakkalista"], $kieli = "", $toim, $tee, $tulostusversio);
+					}
+					else {
+						tulosta_lahete($otunnus, $komento["Lähete"], $kieli = "", $toim, $tee, $tulostusversio);
+					}
 				}
 				else {
 					// katotaan miten halutaan sortattavan

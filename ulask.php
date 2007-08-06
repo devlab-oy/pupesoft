@@ -58,24 +58,14 @@ if ($tee == 'VIIVA') {
 if ($tee == 'I') {
 
 	$errormsg = "";
-	$kuva = false;
 	// Talletetaan käyttäjän nimellä tositteen/liitteen kuva, jos sellainen tuli
 	// koska, jos tulee virheitä tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
 	if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-
+		$kuva = false;
 		// otetaan file extensio
 		$path_parts = pathinfo($_FILES['userfile']['name']);
 		$ext = $path_parts['extension'];
 		if (strtoupper($ext) == "JPEG") $ext = "jpg";
-
-		// laskun polku
-		$polku = $yhtiorow['lasku_polku_abs'];
-		// uniikki filenimi (tämä tallennetaan kantaan, huom eka / on pakollinen, sillä erotetaan scannatut ja verkkolaskut!!)
-		// otetaan nimestä 31 ekaa merkkiä ja lisätään .EXT niin tulee 35 merkkiä joka on tietokannassa kentän pituus.. kenties ois pitäny muuttaa tietokantaaa???
-
-		$fnimi = substr("/".$kukarow['yhtio']."-".$kukarow['kuka']."-".md5(uniqid(rand(),true)),0,31).".$ext";
-		// tänne siirretään
-		$lopnimi = $polku.$fnimi;
 
 		// extensio pitää olla oikein
 		if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
@@ -108,7 +98,6 @@ if ($tee == 'I') {
 		if ($filesize > $varirow[1]) {
 			$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
 			$tee = "E";
-			$fnimi = "";
 		}
 
 		// jos ei virheitä..
@@ -806,8 +795,8 @@ if ($tee == 'P' or $tee == 'E') {
 
 	echo "<td>".t("Laskun kuva")."</td>";
 
-	if (strlen($fnimi) > 0) {
-		echo "<td>".t("Kuva jo tallessa")."!<input name='fnimi' type='hidden' value = '$fnimi'></td>";
+	if ($kuva) {
+		echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>";
 	}
 	else {
 		echo "<input type='hidden' name='MAX_FILE_SIZE' value='8000000'>";
@@ -1071,14 +1060,6 @@ if ($tee == 'I') {
 	$olmapvm = $erv . "-" . $erk . "-" . $erp;
 	if (strlen(trim($kap)) > 0) {
 		$olmapvm = $kav . "-" . $kak . "-" . $kap;
-	}
-
-	// Talletetaan tositteen/liitteen kuva, jos sellainen tuli
-	if (strlen($fnimi) > 0) {
-		$ebid = $fnimi;
-	}
-	else {
-		$ebid = "";
 	}
 
 	// Jotkut maat (kaikki paitsi Suomi) vaativat toistaiseksi toistenroita :( Taklataan sitä tässä

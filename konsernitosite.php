@@ -159,7 +159,7 @@
 					require "inc/footer.inc";
 					exit;
 				}
-				$yhtiorow=mysql_fetch_array ($result);
+				$yhtiorow = mysql_fetch_array ($result);
 				$query = "	INSERT into lasku set
 								yhtio = '$kukarow[yhtio]',
 								tapvm = '$tpv-$tpk-$tpp',
@@ -169,7 +169,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$tunnus = mysql_insert_id ($link);
 				
-				if (strlen($fnimi) != '') {
+				if (! empty($fnimi)) {
 					// kopioidaan liitetiedosto toiselta riviltä
 					$query = "SELECT * from liitetiedostot where tunnus='$fnimi'";
 					$res = mysql_query($query) or pupe_error($query);
@@ -311,7 +311,7 @@
 			echo "<td><input type='text' name='summa' value='$summa'></td></tr>";
 			echo "<td colspan = '2'>".t("Selite"). " <input type='text' name='selite' value='$selite' maxlength='150' size=60></td></tr>
 			      <tr><td>".t("Mahdollinen tositteen kuva/liite")."</td>";
-			if (strlen($fnimi) > 0) {
+			if (! empty($fnimi)) {
 				echo "<td>".t("Liite jo tallessa")."!<input name='fnimi' type='hidden' value = '$fnimi'></td></tr></table>";
 			}
 			else {

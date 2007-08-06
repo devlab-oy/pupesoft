@@ -579,6 +579,30 @@
 								and tila='$tvs_tila'
 								and alatila in ('','J')";
 					$result = mysql_query($query) or pupe_error($query);
+					
+					// ollaan k‰sitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..
+					if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $toim!="TARJOUS") {
+
+						echo "<font class='message'>Osatoimitus $otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
+
+						if($projektilla>0) {
+							$tilausnumero		= $laskurow["tunnusnippu"];
+
+							$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+							$result = mysql_query($query) or pupe_error($query);
+
+							//	Hyp‰t‰‰n takaisin otsikolle
+							echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$PHP_SELF?toim=PROJEKTI&tilausnumero=$tilausnumero&from=VALITSETOIMITUS'>";
+							die();
+						}
+						else {
+							$tee				= '';
+							$tilausnumero		= '';
+							$laskurow			= '';
+							$kukarow['kesken']	= '';
+						}
+					}
+					
 				}
 			}
 			else {

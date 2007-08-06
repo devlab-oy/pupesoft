@@ -1,22 +1,23 @@
 <?php
 
-	//p‰ivitet‰‰n kukarow[kesken] kun k‰ytt‰j‰ tekee uutta tilausta
-	if ($tee == '') {
+	//t‰ss‰ joko tehd‰‰n uutta otsikkoa tai muutetaan olemassa olevaa
+	if ($tee == '' or $kopioitava_otsikko != 0) {
 		//p‰ivitet‰‰n kukarow[kesken] kun k‰ytt‰j‰ tekee uutta tilausta
 		if ($tila == '' and !isset($jatka)) {
 			$query = "	UPDATE kuka
 						SET kesken=0
 						WHERE session = '$session'";
 			$result = mysql_query($query) or pupe_error($query);
-			$kukarow['kesken'] = 0;
-			$tilausnumero = 0;
-		}
 
-		//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
-		if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-			echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
-			exit;
+			$kukarow['kesken'] 	= 0;
+			$tilausnumero 		= 0;
 		}
+	}
+
+	//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
+	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
+		echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+		exit;
 	}
 
 	if ($tila == '') {
@@ -59,20 +60,27 @@
 			$qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
 		}
 
-		if ($kukarow["kesken"] != 0) {
+		if ($kopioitava_otsikko > 0) {
+			$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
+						FROM lasku
+						LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+						WHERE lasku.tunnus = '$kopioitava_otsikko'";
+		}
+		elseif ($kukarow["kesken"] != 0) {
 			$squery = "	SELECT *, hyvaksynnanmuutos as luokka
 						FROM lasku
 						$qlisa
 						WHERE tunnus = '$kukarow[kesken]'";
-			$sresult = mysql_query($squery) or pupe_error($squery);
-			$srow = mysql_fetch_array($sresult);
-
-			// jos meill‰ on jo alatila ja tila ei muokkailla niit‰!
-			$alatila="";
-			$ylatila="";
-			if ($srow['alatila'] != '') $alatila=$srow['alatila'];
-			if ($srow['tila'] != '')    $ylatila=$srow['tila'];
 		}
+		$sresult = mysql_query($squery) or pupe_error($squery);
+		$srow = mysql_fetch_array($sresult);
+
+		// jos meill‰ on jo alatila ja tila ei muokkailla niit‰!
+		$alatila="";
+		$ylatila="";
+		if ($srow['alatila'] != '') $alatila=$srow['alatila'];
+		if ($srow['tila'] != '')    $ylatila=$srow['tila'];
 
 		echo "<table>";
 
@@ -95,6 +103,8 @@
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='projektilla' value='$projektilla'>";		
+		echo "<input type='hidden' name='tunnusnippu' value='{$srow["tunnusnippu"]}'>";			
 		echo "<input type='hidden' name='ylatila' value='$ylatila'>";
 		echo "<input type='hidden' name='alatila' value='$alatila'>";
 
@@ -445,6 +455,7 @@
 					alatila 			= '$alatila',
 					varasto 			= '$varasto',
 					hyvaksynnanmuutos 	= '$luokka',
+					tunnusnippu			= '$tunnusnippu',					
 					toimitustapa		= '$toimitustapa'";
 
 		if ($toim == "VALMISTAVARASTOON") {

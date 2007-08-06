@@ -44,11 +44,14 @@ if ((int) $valitsetoimitus > 0) {
 	elseif ($toimrow["tila"] == "V") {
 		$toim = "VALMISTAASIAKKAALLE";
 	}
+	elseif ($toimrow["tila"] == "W") {
+		$toim = "VALMISTAVARASTOON";
+	}
 	elseif ($toimrow["tila"] == "R") {
 		$toim = "PROJEKTI";
 	}
 }
-elseif(in_array($valitsetoimitus,array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
+elseif(in_array($valitsetoimitus,array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
 	$uusitoimitus = $valitsetoimitus;
 }
 
@@ -1514,7 +1517,7 @@ if ($tee == '') {
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and (lasku.tunnusnippu = '$laskurow[tunnusnippu]' $hakulisa)
-						and lasku.tila IN ('L','N','A','T','G','S','V','O','R')
+						and lasku.tila IN ('L','N','A','T','G','S','V','W','O','R')
 						and if('$tila' = 'MUUTA', alatila != 'X', lasku.tunnus=lasku.tunnus)
 						GROUP BY lasku.tunnus";
 			$toimres = mysql_query($query) or pupe_error($query);
@@ -1545,7 +1548,7 @@ if ($tee == '') {
 				echo "<option value='PIKATILAUS'>".T("Toimitus")."</option>";
 				echo "<option value='TYOMAARAYS'>".T("Työmääräys")."</option>";
 				echo "<option value='REKLAMAATIO'>".T("Reklamaatio")."</option>";
-				echo "<option value='VALMISTAASIAKKAALLE'>".T("Valmistus")."</option>";
+				echo "<option value='VALMISTAVARASTOON'>".T("Valmistus")."</option>";
 				echo "<option value='SIIRTOLISTA'>".T("Siirtolista")."</option>";
 			}
 
@@ -2594,11 +2597,11 @@ if ($tee == '') {
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila IN ('L','G','E','V','W','N','R','A') and tunnusnippu>0";
+						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tila IN ('L','G','E','N','R','A') and tunnusnippu>0";
 			$result = mysql_query($query) or pupe_error($query);
 			$toimrow = mysql_fetch_array($result);
 
-			$tunnuslisa = " and tilausrivi.otunnus in ($toimrow[tunnukset]) ";
+			$tunnuslisa = " and tilausrivi.otunnus in ($toimrow[tunnukset]) and (perheid = tilausrivi.tunnus or perheid = 0) and (perheid2 = tilausrivi.tunnus or perheid2 = 0)";
 		}
 		elseif ($toim == "YLLAPITO") {
 			$order = "ORDER by sorttauskentta desc, tunnus";

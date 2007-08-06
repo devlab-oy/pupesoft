@@ -265,7 +265,7 @@
 				//HUOM: Laitetaan clearing kentt‰‰n jotain speciaalia
 				elseif (mysql_field_name($stresult,$i)=='clearing') {
 					if ($toim == "ENNAKKO") {
-						$$query .= "clearing='ENNAKKOTILAUS',";
+						$query .= "clearing='ENNAKKOTILAUS',";
 					}
 					elseif ($otsikkorivi['tila'] == 'G') {
 						$query .= "clearing='".$otsikkorivi[$i]."',";

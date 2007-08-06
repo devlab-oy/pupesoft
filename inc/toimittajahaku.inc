@@ -71,7 +71,7 @@
 			echo "</tr>";
 			
 			while ($trow=mysql_fetch_array ($result)) {
-				echo "<tr>";
+				echo "<tr class='aktiivi'>";
 				for ($i=0; $i<mysql_num_fields($result); $i++) {
 					if ($i==0) {
 						echo "<td><a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=O&tunnus=$tunnus&kausi=$trow[$i]'>$trow[$i]</a></td>";
@@ -156,7 +156,7 @@
 				echo "</tr>";
 
 				while ($trow=mysql_fetch_array ($result)) {
-					echo "<tr>";
+					echo "<tr class='aktiivi'>";
 					for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
 						if ($i == 4) {
 							// tehdään lasku linkki

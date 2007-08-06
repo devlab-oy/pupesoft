@@ -115,7 +115,7 @@ if ($tee != '') {
 
 	while ($trow = mysql_fetch_array($result)) {
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 

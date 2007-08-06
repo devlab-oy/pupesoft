@@ -140,7 +140,10 @@ if (!function_exists("tv1dateconv")) {
 			$jatko = "";
 		}
 
-		if ($laskurow["maa"] == "SE") {
+		if ($date == "0000-00-00" or $date == "0000-00-00 00:00:00") {
+			return "";
+		}
+		elseif ($laskurow["maa"] == "SE") {
 			return substr($date,0,4)."-".substr($date,5,2)."-".substr($date,8,2).$jatko;
 		}
 		else {

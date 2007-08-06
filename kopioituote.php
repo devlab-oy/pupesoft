@@ -55,13 +55,17 @@
 					elseif (mysql_field_name($stresult,$i)=='luontiaika') {
 						$query .= mysql_field_name($stresult,$i)."=now(),";
 					}
+					// luontiaika
+					elseif (mysql_field_name($stresult,$i)=='muutospvm') {
+						$query .= mysql_field_name($stresult,$i)."=now(),";
+					}
+					
 					// n‰m‰ kent‰t tyhjennet‰‰n
 					elseif (mysql_field_name($stresult,$i)=='kehahin' or
 							mysql_field_name($stresult,$i)=='vihahin' or
 							mysql_field_name($stresult,$i)=='vihapvm' or
 							mysql_field_name($stresult,$i)=='epakurantti1pvm' or
-							mysql_field_name($stresult,$i)=='epakurantti2pvm' or
-							mysql_field_name($stresult,$i)=='muutospvm') {
+							mysql_field_name($stresult,$i)=='epakurantti2pvm') {
 						$query .= mysql_field_name($stresult,$i)."='',";
 					}
 					// ja kaikki muut paitsi tunnus sellaisenaan

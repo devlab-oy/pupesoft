@@ -162,7 +162,7 @@
 		if ($errori == "") {
 			if ($tunnus == "") {
 				// Taulun ensimmäinen kenttä on aina yhtiö
-				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now() ";
+				$query = "INSERT into $toim SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i])) {

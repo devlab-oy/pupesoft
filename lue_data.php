@@ -351,7 +351,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		if($tila != 'ohita') {
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 				if ($eiyhtiota == "") {
-					$query = "INSERT into $table SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now() ";
+					$query = "INSERT into $table SET yhtio='$kukarow[yhtio]', laatija='$kukarow[kuka]', luontiaika=now(), muuttaja='$kukarow[kuka]', muutospvm=now() ";
 				}
 				elseif ($eiyhtiota == "TRIP") {
 					$query = "INSERT into $table SET laatija='$kukarow[kuka]', luontiaika=now() ";

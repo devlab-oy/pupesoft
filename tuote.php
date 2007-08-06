@@ -195,6 +195,14 @@
 			if ($tuoterow['epakurantti1pvm'] != '0000-00-00') $tuoterow['kehahin'] = $tuoterow['kehahin'] / 2;
 			if ($tuoterow['epakurantti2pvm'] != '0000-00-00') $tuoterow['kehahin'] = 0;
 
+			// Hinnastoon
+			if (strtoupper($tuoterow['hinnastoon']) == 'E') {
+			 	$tuoterow['hinnastoon'] = "<font style='color:FF0000'>".t("Ei")."</font>";
+			}
+			else {
+				$tuoterow['hinnastoon'] = "<font style='color:00FF00'>".t("Kyllä")."</font>";
+			}
+
 			//tullinimike
 			$cn1 = $tuoterow["tullinimike1"];
 			$cn2 = substr($tuoterow["tullinimike1"],0,6);
@@ -252,8 +260,8 @@
 			echo "<table>";
 
 			//1
-			echo "<tr><th>".t("Tuotenumero")."</th><th>".t("Yksikkö")."</th><th>".t("Eankoodi")."</th><th colspan='3'>".t("Nimitys")."</th>";
-			echo "<tr><td>$tuoterow[tuoteno]</td><td>$tuoterow[yksikko]</td><td>$tuoterow[eankoodi]</td><td colspan='4'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td></tr>";
+			echo "<tr><th>".t("Tuotenumero")."</th><th>".t("Yksikkö")."</th><th>".t("Eankoodi")."</th><th colspan='2'>".t("Nimitys")."</th><th>".t("Hinnastoon")."</th>";
+			echo "<tr><td>$tuoterow[tuoteno]</td><td>$tuoterow[yksikko]</td><td>$tuoterow[eankoodi]</td><td colspan='2'>".substr(asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']),0,100)."</td><td>$tuoterow[hinnastoon]</td></tr>";
 
 			//2
 			echo "<tr><th>".t("Osasto/try")."</th><th>".t("Toimittaja")."</th><th>".t("Aleryhmä")."</th><th>".t("Tähti")."</th><th>".t("Perusalennus")."</th><th>".t("VAK")."</th></tr>";
@@ -543,7 +551,7 @@
 
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT lasku.nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
-						if(tilausrivi.tyyppi!='O', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
+						if(tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
 						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus

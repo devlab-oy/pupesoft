@@ -60,27 +60,29 @@
 			$qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
 		}
 
-		if ($kopioitava_otsikko > 0) {
-			$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
-						FROM lasku
-						LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
-						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
-						WHERE lasku.tunnus = '$kopioitava_otsikko'";
-		}
-		elseif ($kukarow["kesken"] != 0) {
-			$squery = "	SELECT *, hyvaksynnanmuutos as luokka
-						FROM lasku
-						$qlisa
-						WHERE tunnus = '$kukarow[kesken]'";
-		}
-		$sresult = mysql_query($squery) or pupe_error($squery);
-		$srow = mysql_fetch_array($sresult);
+		if($kopioitava_otsikko > 0 or $kukarow["kesken"] > 0) {
+			if ($kopioitava_otsikko > 0) {
+				$squery = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
+							FROM lasku
+							LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+							WHERE lasku.tunnus = '$kopioitava_otsikko'";
+			}
+			elseif ($kukarow["kesken"] != 0) {
+				$squery = "	SELECT *, hyvaksynnanmuutos as luokka
+							FROM lasku
+							$qlisa
+							WHERE tunnus = '$kukarow[kesken]'";
+			}
+			$sresult = mysql_query($squery) or pupe_error($squery);
+			$srow = mysql_fetch_array($sresult);
 
-		// jos meillä on jo alatila ja tila ei muokkailla niitä!
-		$alatila="";
-		$ylatila="";
-		if ($srow['alatila'] != '') $alatila=$srow['alatila'];
-		if ($srow['tila'] != '')    $ylatila=$srow['tila'];
+			// jos meillä on jo alatila ja tila ei muokkailla niitä!
+			$alatila="";
+			$ylatila="";
+			if ($srow['alatila'] != '') $alatila=$srow['alatila'];
+			if ($srow['tila'] != '')    $ylatila=$srow['tila'];
+		}
 
 		echo "<table>";
 

@@ -369,9 +369,8 @@
 						FROM lasku
 						WHERE tunnusnippu = '{$row["tunnusnippu"]}' and tila IN ('L','G','E','V','W','N','A') and alatila != 'X' and clearing NOT IN ('loppulasku', 'ENNAKKOLASKU')
 						and (	
-								(kerayspvm >= '$year-$mymonth-01 00:00:00' and toimaika < '$year-".($mymonth+1)."-01 00:00:00') or
-								(kerayspvm <= '$year-$mymonth-01 00:00:00' and toimaika <= '$year-".($mymonth+1)."-01 00:00:00') or
-								(kerayspvm >= '$year-$mymonth-01 00:00:00' and toimaika > '$year-".($mymonth+1)."-01 00:00:00') or 
+								(kerayspvm >= '$year-$mymonth-01 00:00:00' and kerayspvm < '$year-".($mymonth+1)."-01 00:00:00') or
+								(toimaika >= '$year-$mymonth-01 00:00:00' and toimaika < '$year-".($mymonth+1)."-01 00:00:00') or 
 								(kerayspvm <= '$year-$mymonth-01 00:00:00' and toimaika > '$year-".($mymonth+1)."-01 00:00:00')
 							)
 						$konsernit1

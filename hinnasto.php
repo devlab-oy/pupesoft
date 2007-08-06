@@ -92,12 +92,28 @@ if ($tee != '') {
 		}
 	}
 	
+	$query = "SELECT maa, valkoodi, vienti, ytunnus, tunnus liitostunnus from asiakas where tunnus={$kukarow['oletus_asiakas']} and yhtio ='{$kukarow['yhtio']}'";
+	$res = mysql_query($query) or pupe_error($query);
+	
+	// käytetään tätä laskurowna
+	$laskurowfake = mysql_fetch_array($res);
+	
+	
+	$query = "SELECT kurssi from valuu where nimi='{$laskurowfake['valkoodi']}' and yhtio = '{$kukarow['yhtio']}'";
+	$res = mysql_query($query) or pupe_error($query);
+	$kurssi = mysql_fetch_array($res);
+	
+	// asetetaan vienti kurssi
+	$laskurowfake['vienti_kurssi'] = $kurssi['kurssi'];
+	
 	$query = "	SELECT tuote.tuoteno
 				FROM tuote
 				WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status in ('','a') and hinnastoon != 'E'
+				and ((tuote.vienti = '' or tuote.vienti like '%-{$laskurowfake['maa']}%' or tuote.vienti like '%+%')
+				and tuote.vienti not like '%+{$laskurowfake['maa']}%')
 				ORDER BY tuote.osasto+0, tuote.try+0";
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	if (mysql_num_rows($result) == 0) {
 		echo t('Yhtään tuotetta ei löytynyt hinnastoon.') . '<br />';
 		die();
@@ -106,7 +122,7 @@ if ($tee != '') {
 	flush();
 
 	// kirjoitetaan tmp file
-	$filenimi = "$kukarow[yhtio]-".t("hindisk")."-".md5(uniqid(rand(),true)).".txt";
+	$filenimi = "{$kukarow['yhtio']}-".t("hinnasto")."-".md5(uniqid(rand(),true)).".txt";
 
 	if (!$fh = fopen("/tmp/" . $filenimi, "w+")) {
 		die("filen luonti epäonnistui!");
@@ -116,6 +132,8 @@ if ($tee != '') {
 	$rivifile = 'inc/hinnastorivi' . basename($_POST['hinnasto']) . '.inc';
 	if (file_exists($rivifile)) {
 		require $rivifile;
+	} else {
+		die($rivifile . ' ei löydy');
 	}
 	
 	while ($tuoterow = mysql_fetch_array($result)) {
@@ -128,9 +146,8 @@ if ($tee != '') {
 		$trresult = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($trresult);
 		
-		
 		// tehdään yksi rivi
-		$ulos = hinnastorivi($row);
+		$ulos = hinnastorivi($row, $laskurowfake);
 		
 		fwrite($fh, $ulos);
 	}
@@ -221,7 +238,7 @@ echo "</select></td><th>tai syötä käsin</th><td><input type='text' name='try2' v
 	<td>
 		<select name='hinnasto'>
 			<option value='futur'>" . t('Futursoft') . "</option>
-			<option value='hindisk'>" . t('Hindisk') . "</option>
+			<option value='vienti'>" . t('Vientihinnasto') . "</option>
 		</select>
 	</td>
 	</tr>

@@ -37,8 +37,8 @@ else {
 
 mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta (connect.inc)!");
 
-// HUOMHUOM!!
-$query = "SET SESSION group_concat_max_len = 100000, max_allowed_packet = 2095104";
+// HUOMHUOM!! 52MB max paketti, eli isompia liitetiedostoja ei voi liittää
+$query = "SET SESSION group_concat_max_len = 100000, max_allowed_packet = 52428800";
 $result = mysql_query($query) or die("Parametrien asentelu epäonnistui!");
 
 ?>

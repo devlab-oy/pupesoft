@@ -96,7 +96,7 @@ if ($tee == 'I') {
 		$varirow = mysql_fetch_array($result);
 
 		if ($filesize > $varirow[1]) {
-			$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
+			$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! (mysql: $varirow[1]) </font>";
 			$tee = "E";
 		}
 
@@ -122,7 +122,12 @@ if ($tee == 'I') {
 	}
 	elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
 		// nelonen tarkoittaa, ettei mit‰‰n file‰ uploadattu.. eli jos on joku muu errori niin ei p‰‰stet‰ eteenp‰in
-		$errormsg .=  "<font class='error'>".t("Laskun kuvan l‰hetys ep‰onnistui")."! (Error: ".$_FILES['userfile']['error'].")</font><br>";
+		if ($_FILES['userfile']['error'] == 1) {
+			$errormsg .=  "<font class='error'>".t("Liitetiedosto on liian suuri")."! (php: (".ini_get("upload_max_filesize")."))</font><br>";
+		}
+		else {
+			$errormsg .=  "<font class='error'>".t("Laskun kuvan l‰hetys ep‰onnistui")."! (Error: ".$_FILES['userfile']['error'].")</font><br>";
+		}
 		$tee = "E";
 	}
 

@@ -453,7 +453,7 @@ if (!function_exists('tulosta_lahete')) {
 		
 		
 		//	Olisiko jo pakkaustietoja
-		$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametrit, sum(nettopaino) nettopaino, concat_ws(' ',pakkaus, pakkauskuvaus, lisatiedot) tiedot, toimitustapa
+		$query = "	SELECT sum(kollit) kollit, round(sum(kilot), 2) kilot, round(sum(kuutiot), 2) kuutiot, round(sum(lavametri), 2) lavametrit, round(sum(nettopaino), 2) nettopaino, concat_ws(' ',pakkaus, pakkauskuvaus, lisatiedot) tiedot, toimitustapa
 					FROM rahtikirjat
 					WHERE yhtio = '{$kukarow["yhtio"]}' and otsikkonro = '{$laskurow["tunnus"]}'
 					GROUP BY pakkaus, pakkauskuvaus, lisatiedot";

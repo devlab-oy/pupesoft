@@ -24,7 +24,8 @@ if (($kukarow["extranet"] != '' and $toim != 'EXTRANET') or ($kukarow["extranet"
 if ((int) $valitsetoimitus > 0) {
 	$tee = "AKTIVOI";
 	$tilausnumero = $valitsetoimitus;
-
+	$from = "VALITSETOIMITUS";
+	
 	$query = "select tila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 	$result = mysql_query($query) or pupe_error($query);
 	$toimrow = mysql_fetch_array($result);
@@ -746,17 +747,16 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 	$result = mysql_query($query) or pupe_error($query);
 
 	if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $toim!="TARJOUS" and $toim!="PROJEKTI") {
-
-		echo "<font class='message'>".t("Osatoimitus")." $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
+		
+		$aika=date("d.m.y @ G:i:s", time());
+		echo "<font class='message'>".t("Osatoimitus")." ($aika) $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
 
 		if($projektilla>0) {
 			$tilausnumero		= $laskurow["tunnusnippu"];
 
-			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-			$result = mysql_query($query) or pupe_error($query);
-
 			//	Hypätään takaisin otsikolle
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$PHP_SELF?toim=PROJEKTI&tilausnumero=$tilausnumero&from=VALITSETOIMITUS'>";
+			echo "<font class='info'>".t("Palataan projektille odota hetki..")."</font><br>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF?toim=PROJEKTI&valitsetoimitus=$tilausnumero'>";
 			die();
 		}
 		else {
@@ -826,7 +826,7 @@ if (isset($tyhjenna)) {
 }
 
 // Tilaus valmis
-if ($tee == "VALMIS" and $muokkauslukko == "") {
+if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 	///* Reload ja back-nappulatsekki *///
 	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -1000,17 +1000,16 @@ if ($tee == "VALMIS" and $muokkauslukko == "") {
 
 	// ollaan käsitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..
 	if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $toim!="TARJOUS") {
-
-		echo "<font class='message'>Osatoimitus $otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
+		
+		$aika=date("d.m.y @ G:i:s", time());
+		echo "<font class='message'>".t("Osatoimitus")." $otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
 
 		if($projektilla>0) {
 			$tilausnumero		= $laskurow["tunnusnippu"];
 
-			$query	= "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-			$result = mysql_query($query) or pupe_error($query);
-
 			//	Hypätään takaisin otsikolle
-			echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$PHP_SELF?toim=PROJEKTI&tilausnumero=$tilausnumero&from=VALITSETOIMITUS'>";
+			echo "<font class='info'>".t("Palataan projektille odota hetki..")."</font><br>";
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF?toim=PROJEKTI&valitsetoimitus=$tilausnumero'>";
 			die();
 		}
 		else {

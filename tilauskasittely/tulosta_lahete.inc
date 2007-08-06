@@ -276,7 +276,7 @@ if (!function_exists('rivi_otsikot')) {
 
 if (!function_exists('rivi')) {
 	function rivi($thispage) {
-		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $summa, $p, $pp, $rivinkorkeus;
+		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $jtid, $summa, $p, $pp, $rivinkorkeus;
 			
 		// viivat rivien väliin...
 		$x[0] = 20;
@@ -295,6 +295,20 @@ if (!function_exists('rivi')) {
 
 			$page[$sivu] = alku();
 			$thispage    = $page[$sivu];
+		}
+		
+		// JT-rivit pikkasen alaspäin omalla otsikolla
+		if ($jtid == "0" and $row["jtsort"] != "0") {						
+			$kala = $kala-20;
+			
+			$x[0] = 20;
+			$x[1] = 580;
+			$y[0] = $y[1] = $kala - 4;
+			$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
+				
+			$pdf->draw_text(25,  $kala, "#",									$thispage, $p);
+			$pdf->draw_text(45,  $kala, t("Jälkitoimitukseen", $kieli).":",		$thispage, $p);
+			$kala = $kala-$rivinkorkeus;
 		}
 		
 		//Kieliversiooitu tuotteen nimitys
@@ -411,6 +425,7 @@ if (!function_exists('rivi')) {
 		}
 		
 		$perheid 	 = $row["perheid"];
+		$jtid		 = $row["jtsort"];
 		$piilotarivi = "";
 		
 		// Alennus kuntoon
@@ -478,11 +493,7 @@ if (!function_exists('rivi')) {
 		$row["kpl"] 	= ($row["kpl"]*1);
 		$kpl_rivilla 	= ($row["kpl"]+$row["varattu"]+$row["jt"]);
 		
-		if ($row["keratty"] == '') {
-			$row["varattu"] = "";
-			$row["kpl"] 	= "";
-		}
-		elseif ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
+		if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
 			$row['varattu'] = ($row['varattu']+$row['kpl'])." ".strtolower($row["yksikko"]);
 		}
 		else {	
@@ -491,6 +502,10 @@ if (!function_exists('rivi')) {
 			}
 			elseif ($row["var"] == 'P') { // puute
 				$row['varattu'] = t("PUUTE", $kieli);
+			}
+			else {
+				$row["varattu"] = "";
+				$row["kpl"] 	= "";
 			}
 		}
 		

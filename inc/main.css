@@ -11,10 +11,12 @@ img.edit {
 	width: 13px;
 	border-style: none;
 	border-width: 0;
+	background-color: inherit;
 }
 img.info {
 	height: 13px;
 	width: 13px;
 	border-style: none;
 	border-width: 0;
+	background-color: inherit;
 }

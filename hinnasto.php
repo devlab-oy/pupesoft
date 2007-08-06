@@ -231,6 +231,7 @@ echo "</select></td><th>tai syötä käsin</th><td><input type='text' name='try2' v
 		<input type='text' name='pp' value='$pp' size='3'>
 		<input type='text' name='kk' value='$kk' size='3'>
 		<input type='text' name='vv' value='$vv' size='5'>
+		" . t('ppkkvvvv') . "
 	</td>
 	</tr>
 	<tr>

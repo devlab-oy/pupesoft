@@ -2115,7 +2115,9 @@
 				// avataan projekti kirjanpitoon
 				$query = " insert into kustannuspaikka set nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o'";
 				$result = mysql_query($query) or pupe_error($query);
-				$projekti = mysql_insert_id();				
+				$projekti = mysql_insert_id();
+				
+				$projektilla = $tilausnumero;
 			}
 		}
 

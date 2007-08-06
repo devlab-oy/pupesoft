@@ -72,7 +72,7 @@ if (!function_exists('tulosta_lahete')) {
 			$hinta_riv = "tilausrivi.hinta";
 		}
 		
-		if($toim == "PAKKALISTA") {
+		if($toim != "PAKKALISTA") {
 			$otsikko = "LÄHETE";
 		}
 		else {

@@ -1498,7 +1498,7 @@ if ($tee == '') {
 		echo "<tr>$jarjlisa";
 		echo "<th align='left'>".t("Tilausnumero").":</th>";
 
-		if ($laskurow["tunnusnippu"] > 0) {
+		if ($laskurow["tunnusnippu"] > 0 and ($projektilla > 0 or $toim == "TARJOUS")) {
 
 			echo "<td><select Style=\"width: 230px; font-size: 8pt; padding: 0\" name='valitsetoimitus' onchange='submit();'>";
 

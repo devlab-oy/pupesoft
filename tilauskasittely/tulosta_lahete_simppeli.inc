@@ -473,7 +473,7 @@ if (!function_exists('tulosta_lahete')) {
 						
 			$h-=$pdf->ln(1.5);
 			while ($rahtirow = mysql_fetch_array($rahtires)) {
-				$pdf->write($h, 1, 0, $s[0], 		$rahtirow["kollit"]." ".t("kpl")." ".$rahtirow["tiedot"], "norm", "L", "");
+				$pdf->write($h, 1, 0, $s[0], 		$rahtirow["kollit"]." ".t("kpl", $kieli)." ".$rahtirow["tiedot"], "norm", "L", "");
 				$h-=$pdf->ln(1.25);
 
 				if($rahtirow["kilot"]>0) {

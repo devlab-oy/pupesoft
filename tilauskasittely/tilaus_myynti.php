@@ -447,7 +447,7 @@ if ((int) $kukarow["kesken"] != 0) {
 }
 
 //tietyiss‰ keisseiss‰ tilaus lukitaan (ei syˆttˆrivi‰ eik‰ muota muokkaa/poista-nappuloita)
-$muokkauslukko = "";
+$muokkauslukko = $state = "";
 
 //	Projekti voidaan poistaa vain jos meill‰ ei ole sill‰ mit‰‰n toimituksia
 if ($laskurow["tunnusnippu"] > 0 and $toim=="PROJEKTI") {
@@ -456,12 +456,13 @@ if ($laskurow["tunnusnippu"] > 0 and $toim=="PROJEKTI") {
 	$projektilask = (int) mysql_num_rows($abures);
 }
 
-if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or ($toim == "PROJEKTI" and $projektilask>0) or ($toim=="TARJOUS" and $projektilla>0)) {
+if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or ($toim == "PROJEKTI" and $projektilask>0) or ($toim=="TARJOUS" and $projektilla>0) or $laskurow["alatila"] == "X" or ($laskurow["tila"] == "L" and $laskurow["alatila"] == "J")) {
 	$muokkauslukko = "LUKOSSA";
+	$state = "DISABLED";
 }
 
 // Hyv‰ksyt‰‰n tajous ja tehd‰‰n tilaukset
-if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS") {
+if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS" and $muokkauslukko == "") {
 
 	///* Reload ja back-nappulatsekki *///
 	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -514,7 +515,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYVAKSYTARJOUS") {
 }
 
 // Hyl‰t‰‰n tarjous
-if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS") {
+if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko == "") {
 
 	///* Reload ja back-nappulatsekki *///
 	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -607,14 +608,14 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS") {
 }
 
 // Laskutetaan myyntitili
-if ($kukarow["extranet"] == "" and $tee == "LASKUTAMYYNTITILI") {
+if ($kukarow["extranet"] == "" and $tee == "LASKUTAMYYNTITILI" and $muokkauslukko == "") {
 	$tilatapa = "LASKUTA";
 
 	require ("laskuta_myyntitilirivi.inc");
 }
 
 // Laitetaan myyntitili takaisin lep‰‰m‰‰n
-if ($kukarow["extranet"] == "" and $tee == "LEPAAMYYNTITILI") {
+if ($kukarow["extranet"] == "" and $tee == "LEPAAMYYNTITILI" and $muokkauslukko == "") {
 	$tilatapa = "LEPAA";
 
 	require ("laskuta_myyntitilirivi.inc");
@@ -693,7 +694,7 @@ if(in_array($jarjesta, array("moveUp", "moveDown", "first", "last")) and $rivitu
 }
 
 // Poistetaan tilaus
-if ($tee == 'POISTA') {
+if ($tee == 'POISTA' and $muokkauslukko == "") {
 
 	// poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
 	$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]' and var<>'P'";
@@ -795,7 +796,7 @@ if ($tee == 'POISTA') {
 }
 
 //Lis‰t‰‰n t‰n asiakkaan valitut JT-rivit t‰lle tilaukselle
-if ($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen") {
+if ($tee == "JT_TILAUKSELLE" and $tila == "jttilaukseen" and $muokkauslukko == "") {
 	$tilaus_on_jo 	= "KYLLA";
 
 	require("jtselaus.php");
@@ -825,7 +826,7 @@ if (isset($tyhjenna)) {
 }
 
 // Tilaus valmis
-if ($tee == "VALMIS") {
+if ($tee == "VALMIS" and $muokkauslukko == "") {
 
 	///* Reload ja back-nappulatsekki *///
 	if ($kukarow["kesken"] == '' or $kukarow["kesken"] == '0') {
@@ -1482,7 +1483,7 @@ if ($tee == '') {
 						ORDER BY jarjestys,selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 
-			echo "<td><select name='toimitustapa' onchange='submit()'>";
+			echo "<td><select name='toimitustapa' onchange='submit()' $state>";
 
 			while($row = mysql_fetch_array($tresult)) {
 				$sel = "";
@@ -1559,7 +1560,7 @@ if ($tee == '') {
 		}
 
 		echo "<th>".t("Tilausviite").":</th><td>";
-		echo "<input type='text' size='30' name='viesti' value='$laskurow[viesti]'><input type='submit' value='".t("Tallenna")."'></td></tr>\n";
+		echo "<input type='text' size='30' name='viesti' value='$laskurow[viesti]' $state><input type='submit' value='".t("Tallenna")."' $state></td></tr>\n";
 
 		echo "<tr>$jarjlisa";
 
@@ -1587,7 +1588,7 @@ if ($tee == '') {
 						ORDER BY avainsana.jarjestys, avainsana.selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 
-			echo "<td><select name='tilausvahvistus' onchange='submit()'>";
+			echo "<td><select name='tilausvahvistus' onchange='submit()' $state>";
 			echo "<option value=' '>".t("Ei Vahvistusta")."</option>";
 
 			while($row = mysql_fetch_array($tresult)) {
@@ -1609,8 +1610,8 @@ if ($tee == '') {
 				echo "<th align='left'>".t("Laatija").":</th>";
 			}
 
-			echo "<td><input type='text' name='myyjanro' size='8'> tai ";
-			echo "<select name='myyja' onchange='submit()'>";
+			echo "<td><input type='text' name='myyjanro' size='8' $state> tai ";
+			echo "<select name='myyja' onchange='submit()' $state>";
 
 			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
 						FROM kuka
@@ -3000,7 +3001,7 @@ if ($tee == '') {
 								<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
 								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
-								<select name='positio' onchange='submit();' Style='font-size: 8pt; padding:0;'>";
+								<select name='positio' onchange='submit();' Style='font-size: 8pt; padding:0;' $state>";
 
 						$query = "	SELECT selite, selitetark
 									FROM avainsana
@@ -3028,7 +3029,7 @@ if ($tee == '') {
 									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
 									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
-									<select id='asiakkaan_positio_$rivino' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id,'asiakkaan_positio_$rivino');\" Style='font-size: 8pt; padding:0;'>
+									<select id='asiakkaan_positio_$rivino' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id,'asiakkaan_positio_$rivino');\" Style='font-size: 8pt; padding:0;' $state>
 									<option value=''>Asiakkaalla ei ole positiota</option>";
 
 							if(mysql_num_rows($posres) > 0) {

@@ -470,7 +470,12 @@
 					$suoritussumma += $trow["suoritussumma"];
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
+					if ($trow["tunnus"] != NULL) {
+						echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
+					}
+					else {
+						echo "<td>*".t("ei asiakasta")."*</td>";
+					}
 					echo "<td>$trow[nimi_maksaja]</td>";
 					echo "<td>$trow[viite]</td>";
 					echo "<td>".tv1dateconv($trow["kirjpvm"])."</td>";

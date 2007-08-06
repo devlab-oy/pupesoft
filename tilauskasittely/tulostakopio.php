@@ -751,7 +751,7 @@
 				$komento["Lähete"] .= " -# $kappaleet ";
 			}
 		}
-		if ($toim == "Pakkalista") {
+		if ($toim == "PAKKALISTA") {
 			$tulostimet[0] = 'Pakkalista';
 			if ($kappaleet > 0 and $komento["pakkalista"] != 'email') {
 				$komento["Pakkalista"] .= " -# $kappaleet ";
@@ -1456,7 +1456,7 @@
 						$tulostusversio = $asrow["lahetetyyppi"];						
 					}
 					
-					tulosta_lahete($otunnus, $komento["Lähete"], $kieli = "", $toim, $tee, $tulostusversio);
+					tulosta_lahete($otunnus, $komento[ucfirst(strtolower($toim))], $kieli = "", $toim, $tee, $tulostusversio);
 				}
 				else {
 					// katotaan miten halutaan sortattavan

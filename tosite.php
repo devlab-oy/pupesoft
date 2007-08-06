@@ -41,18 +41,18 @@
 			if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
 				echo "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
 				$tee = "N";
-				$fnimi = "";
+				$kuva = "";
 			}
 			// ja file jonkun kokonen
 			elseif ($_FILES['userfile']['size'] == 0) {
 				echo "<font class='error'>".t("Tiedosto on tyhj‰")."!</font>";
 				$tee = "N";
-				$fnimi = "";
+				$kuva = "";
 			}
 			elseif ($filesize > $varirow[1]) {
 				echo "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
 				$tee = "N";
-				$fnimi = "";
+				$kuva = "";
 			}
 			// Talletetaan laskun kuva kantaan
 			else {
@@ -70,8 +70,7 @@
 							filetype   = '$filetype'";
 
 				$result = mysql_query($query) or pupe_error($query);
-				$liitostunnus = mysql_insert_id();
-				$fnimi = $liitostunnus;
+				$kuva = mysql_insert_id();
 			}
 		}
 		elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
@@ -265,9 +264,9 @@
 //		echo "$query <br>";
 		$tunnus = mysql_insert_id ($link);
 
-		if ($fnimi) {
+		if ($kuva) {
 			// p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa
-			$query = "update liitetiedostot set liitostunnus='$tunnus', selite='$selite $summa' where tunnus='$fnimi'";
+			$query = "update liitetiedostot set liitostunnus='$tunnus', selite='$selite $summa' where tunnus='$kuva'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 
@@ -298,6 +297,7 @@
 		$summa="";
 		$nimi="";
 		$kuitti="";
+		$kuva = "";
 
 		echo "<font class='message'>".t("Tosite luotu")."</font><br>";
 	}
@@ -437,8 +437,8 @@
 
 		echo "<tr><td>".t("Tositteen kuva/liite")."</td>";
 
-		if (strlen($fnimi) > 0) {
-			echo "<td>".t("Kuva jo tallessa")."!<input name='fnimi' type='hidden' value = '$fnimi'></td>";
+		if (strlen($kuva) > 0) {
+			echo "<td>".t("Kuva jo tallessa")."!<input name='kuva' type='hidden' value = '$kuva'></td>";
 		}
 		else {
 			echo "<input type='hidden' name='MAX_FILE_SIZE' value='8000000'>";

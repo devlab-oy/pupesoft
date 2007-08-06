@@ -385,7 +385,7 @@ if (!function_exists('rivi')) {
 				}
 				else {
 					$oikpos = $pdf->strlen($rivipaikkahyllyssa, $p);					
-					$pdf->draw_text(465-$oikpos, $kala, $$rivipaikkahyllyssa,	$firstpage, $p);					
+					$pdf->draw_text(465-$oikpos, $kala, $rivipaikkahyllyssa,	$firstpage, $p);					
 				}
 			}
 

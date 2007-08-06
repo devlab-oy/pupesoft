@@ -255,7 +255,9 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(15),	mm_pt(133), $laskurow['toim_nimitark'],						$firstpage, $iso);
 	$pdf->draw_text(mm_pt(15),	mm_pt(126), $laskurow['toim_osoite'],						$firstpage, $iso);
 	$pdf->draw_text(mm_pt(15),	mm_pt(119), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $huge);
-	$pdf->draw_text(mm_pt(15),	mm_pt(112), strtoupper(maa($laskurow["toim_maa"], $kieli)),	$firstpage, $huge);
+	
+	//macce kommentoi tämän koska toimitustapa ja puhelin menivät liian alas.
+	//$pdf->draw_text(mm_pt(15),	mm_pt(112), strtoupper(maa($laskurow["toim_maa"], $kieli)),	$firstpage, $huge);
 
 	$query = "	select *
 				from asiakas
@@ -264,7 +266,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$tempr = mysql_query($query) or pupe_error($query);
 	$asiakasrow = mysql_fetch_array($tempr);
 
-	$pdf->draw_text(mm_pt(15),	mm_pt(105),  "Puh -Tel - Tel: ",		$firstpage, $otsik);
+	/*$pdf->draw_text(mm_pt(15),	mm_pt(105),  "Puh -Tel - Tel: ",		$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(38),	mm_pt(105), $asiakasrow['puhelin'],		$firstpage, $kirj);
 
 	$pdf->draw_text(mm_pt(65), mm_pt(105), "Toimitustapa:",				$firstpage, $otsik);
@@ -275,7 +277,20 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_rectangle(mm_pt(103),mm_pt(5),mm_pt(108),mm_pt(5),		$firstpage, $rectparam);
 
 	$pdf->draw_rectangle(mm_pt(103),mm_pt(138),mm_pt(102),mm_pt(143),	$firstpage, $rectparam);
-	$pdf->draw_rectangle(mm_pt(103),mm_pt(143),mm_pt(108),mm_pt(143),	$firstpage, $rectparam);
+	$pdf->draw_rectangle(mm_pt(103),mm_pt(143),mm_pt(108),mm_pt(143),	$firstpage, $rectparam);*/
+	
+	$pdf->draw_text(mm_pt(15),	mm_pt(112),  "Puh -Tel - Tel: ",		$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(38),	mm_pt(112), $asiakasrow['puhelin'],		$firstpage, $kirj);
+
+	$pdf->draw_text(mm_pt(65), mm_pt(112), "Toimitustapa:",				$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(87), mm_pt(112), $laskurow["toimitustapa"],	$firstpage, $kirj);
+
+
+	$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(110),mm_pt(10),		$firstpage, $rectparam);
+	$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(115),mm_pt(5),		$firstpage, $rectparam);
+
+	$pdf->draw_rectangle(mm_pt(110),mm_pt(138),mm_pt(110),mm_pt(143),	$firstpage, $rectparam);
+	$pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),	$firstpage, $rectparam);
 
 	//Kuljetusohjeet = viivakoodi tulee tähän
 	$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);

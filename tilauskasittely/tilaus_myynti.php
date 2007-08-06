@@ -4063,7 +4063,7 @@ if ($tee == '') {
 
 
 				//annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
-				if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") and $toim != "PROJEKTI") {
+				if ($kukarow["extranet"] == "" and (($yhtiorow["salli_jyvitys_myynnissa"] == "" and $kukarow['kassamyyja'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') or ($yhtiorow["salli_jyvitys_myynnissa"] == "K") or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") and $toim == "PROJEKTI") {
 
 					echo "<tr>$jarjlisa";
 					
@@ -4078,7 +4078,7 @@ if ($tee == '') {
 						$xcolspan= $ycspan-4;
 					}
 					
-					if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") {
+					if ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
 						echo "	<th colspan='2' nowrap>".t("Näytä lomake").":</th>
 								<td colspan='2' nowrap>
 								<form name='valmis' action='tulostakopio.php' method='post' name='tulostakopio'>
@@ -4088,7 +4088,7 @@ if ($tee == '') {
 
 						echo "<select name='toim' Style='font-size: 8pt; padding:0;'>";
 
-						if (file_exists("tulosta_tarjous.inc")) {
+						if (file_exists("tulosta_tarjous.inc") and $toim == "TARJOUS") {
 							echo "<option value='TARJOUS'>Tarjous</option>";
 						}
 						if (file_exists("tulosta_myyntisopimus.inc")) {
@@ -4109,6 +4109,10 @@ if ($tee == '') {
 						if (file_exists("tulosta_rekisteriilmoitus.inc")) {
 							echo "<option value='REKISTERIILMOITUS'>Rekisteröinti-ilmoitus</option>";
 						}
+						if ($toim == "PROJEKTI") {
+							echo "<option value='TILAUSVAHVISTUS'>Tilausvahvistus</option>";
+						}
+						
 						echo "		</select>
 								<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."' Style='font-size: 8pt; padding:0;'>
 								<input type='submit' name='TULOSTA' value='".t("Tulosta")."' Style='font-size: 8pt; padding:0;'>

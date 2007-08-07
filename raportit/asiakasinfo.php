@@ -508,7 +508,7 @@ if ($ytunnus!='') {
 			echo "<input type='hidden' name='rajaus' value = '$rajaus'>";
 			echo "<input type='hidden' name='asale' value = '$asale'>";						
 			echo "<input type='hidden' name='ashin' value = '$ashin'>";						
-			echo "<input type='hidden' name='aletaul' value = '$aletaul'>";
+			echo "<input type='hidden' name='aletaulu' value = '$aletaulu'>";
 			echo "<input type='hidden' name='yhdistetty' value = '$yhdistetty'>";						
 			echo "<input type='radio' onclick='submit()' name='rajattunakyma' value='' $sela> ".t("Normaalinäkymä"); 
 			echo "<input type='radio' onclick='submit()' name='rajattunakyma' value='JOO' $selb> ".t("Extranetnäkymä");
@@ -712,11 +712,12 @@ if ($ytunnus!='') {
 			}
 			
 			while ($asrow = mysql_fetch_array($asres)) {
-				
+								
 				//	Suodatetaan extranetkäyttäjilta muut aleprossat
-				if((($kukarow["extranet"] != "" or $tee == "eposti"  or $yhdistetty != "" or $rajattunakyma == "JOO") and ($edryhma != $asrow["alennusryhmä"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == ""  and $rajattunakyma != "JOO")) {
+				if((($kukarow["extranet"] != "" or $tee == "eposti"  or $yhdistetty != "" or $rajattunakyma == "JOO") and ($edtry != $asrow["try"] or $edryhma != $asrow["alennusryhmä"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == ""  and $rajattunakyma != "JOO")) {
 					
 					$edryhma 	= $asrow["alennusryhmä"];
+					$edtry 		= $asrow["try"];					
 					$edtuoteno 	= $asrow["tuoteno"];
 															
 					if(isset($workbook_ale) and $yhdistetty == "") {

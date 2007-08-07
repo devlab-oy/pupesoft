@@ -109,7 +109,7 @@
 				echo "<td>";
 				if ($viite > 0) {
 					echo "<font class='message'>Pupesoft: ".t("maksukanditaatti viiteno")."</font><br>";
-					$query = "SELECT *
+					$query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 								FROM lasku
 								WHERE viite = '$viite' and summa = $maara * -1 and yhtio = '$yritirow[4]' and tila = 'Q'";
 					$result = mysql_query($query) or pupe_error($query);
@@ -123,7 +123,7 @@
 				}
 				if ($loytyi == 0) {
 					echo "<font class='message'>Pupesoft: ".t("maksukanditaatti nimi & m‰‰r‰")."</font><br>";
-					$query = "SELECT *
+					$query = "SELECT *, round(summa * vienti_kurssi, 2) 'vietysumma', round(kasumma * vienti_kurssi, 2) 'vietykasumma'
 								FROM lasku
 								WHERE left(nimi,35) = left('$maksaa',35) and summa = $maara * -1 and yhtio = '$yritirow[4]' and tila = 'Q'";
 					$result = mysql_query($query) or pupe_error($query);

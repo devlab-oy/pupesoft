@@ -111,7 +111,7 @@
 	echo "</form>";
 	echo "</table><br>";
 
-	$kentat = array('luokka','tuoteno','osasto','try','summa','kate','katepros','kateosuus','vararvo','varaston_kiertonop','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht','total');
+	$kentat = array('luokka','tuoteno','nimitys','osasto','try','tulopvm','summa','kate','katepros','kateosuus','vararvo','varaston_kiertonop','kpl','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht','total');
 
 	for ($i=0; $i<=count($kentat); $i++) {
 		if (strlen($haku[$i]) > 0 and $kentat[$i] != 'kateosuus') {
@@ -165,7 +165,9 @@
 	$query = "	SELECT
 				luokka,
 				tuoteno,
+				nimitys,
 				osasto,
+				tulopvm,
 				try,
 				tuotemerkki,
 				summa,
@@ -206,14 +208,17 @@
 	echo "<tr>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=luokka&sort=asc$ulisa'>".t("ABC")."<br>".t("Luokka")."</th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=tuoteno&sort=asc$ulisa'>".t("Tuoteno")."</a><br>&nbsp;</th>";
+	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=nimitys&sort=asc$ulisa'>".t("Nimitys")."</a><br>&nbsp;</th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=osasto&sort=asc$ulisa'>".t("Osasto")."</a><br>&nbsp;</th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=try&sort=asc$ulisa'>".t("Try")."</a><br>&nbsp;</th>";
+	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=tulopvm&sort=desc$ulisa'>".t("Tulopvm")."<br>".t("tot")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=summa&sort=desc$ulisa'>".t("Myynti")."<br>".t("tot")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=kate&sort=desc$ulisa'>".t("Kate")."<br>".t("tot")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=katepros&sort=desc$ulisa'>".t("Kate")."<br>%</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=kateosuus&sort=desc$ulisa'>".t("Osuus")." %<br>".t("kat").".</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=vararvo&sort=desc$ulisa'>".t("Varast").".<br>".t("arvo")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=varaston_kiertonop&sort=desc$ulisa'>".t("Varast").".<br>".t("kiert").".</a></th>";
+	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=kpl&sort=desc$ulisa'>".t("Myynti")."<br>".t("KPL")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=myyntierankpl&sort=desc$ulisa'>".t("Myyerä")."<br>".t("KPL")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=myyntieranarvo&sort=desc$ulisa'>".t("Myyerä")."<br>$yhtiorow[valkoodi]</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=rivia&sort=desc$ulisa'>Myyty<br>".t("rivejä")."</a></th>";
@@ -248,21 +253,20 @@
 			echo "<tr>";
 
 			$l = $row["luokka"];
-			echo "<td><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'>$ryhmanimet[$l]</a></td>";
 
+			echo "<td><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'>$ryhmanimet[$l]</a></td>";
 			echo "<td><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
-			
-			
+			echo "<td>$row[nimitys]</td>";
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&tuotemerkki=$tuotemerkki'>$row[osasto]</a></td>";
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&try=$row[try]&tuotemerkki=$tuotemerkki'>$row[try]</a></td>";
-			
-			
+			echo "<td>$row[tulopvm]</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kate"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["katepros"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kateosuus"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["vararvo"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["varaston_kiertonop"]))."</td>";
+			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kpl"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["myyntierankpl"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["myyntieranarvo"]))."</td>";
 			echo "<td align='right'>".str_replace(".",",",sprintf('%.0f',$row["rivia"]))."</td>";
@@ -321,13 +325,14 @@
 
 
 		echo "<tr>";
-		echo "<td colspan='4' class='spec'>Yhteensä:</td>";
+		echo "<td colspan='6' class='spec'>Yhteensä:</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmamyyntiyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakateyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$kateprosenttiyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$kateosuusyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmanvarastonarvoyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$kiertonopeusyht))."</td>";
+		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakplyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$myyntieranakplyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$myyntieranarvoyht))."</td>";
 		echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.0f',$rivilkmyht))."</td>";

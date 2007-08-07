@@ -108,7 +108,7 @@
 			$valinta = "luokka_try";
 		}
 
-		$kentat = array($valinta,'luokka','tuoteno','osasto','try','summa','kate','katepros','kateosuus','vararvo','varaston_kiertonop','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht','total');
+		$kentat = array($valinta,'luokka','tuoteno','nimitys','osasto','try','tulopvm','summa','kate','katepros','kateosuus','vararvo','varaston_kiertonop','kpl','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht','total');
 
 		for ($i=0; $i<=count($kentat); $i++) {
 			if (strlen($haku[$i]) > 0 and $kentat[$i] != 'kateosuus') {
@@ -152,6 +152,8 @@
 					$valinta,
 					tuoteno,
 					osasto,
+					nimitys,
+					tulopvm,
 					try,
 					summa,
 					kate,
@@ -192,8 +194,10 @@
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=$valinta&sort=asc$ulisa'>$otsikko<br>".t("Luokka")."</a></th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=luokka&sort=asc$ulisa'>".t("ABC")."<br>".t("Luokka")."</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=tuoteno&sort=asc$ulisa'>".t("Tuoteno")."</a><br>&nbsp;</th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=nimitys&sort=asc$ulisa'>".t("Nimitys")."</a><br>&nbsp;</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=osasto&sort=asc$ulisa'>".t("Osasto")."</a><br>&nbsp;</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=try&sort=asc$ulisa'>".t("Try")."</a><br>&nbsp;</th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=tulopvm&sort=desc$ulisa'>".t("Tulopvm")."<br>".t("tot")."</a></th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=summa&sort=desc$ulisa'>".t("Myynti")."<br>".t("tot")."</a></th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=kate&sort=desc$ulisa'>".t("Kate")."<br>".t("tot")."</a></th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=katepros&sort=desc$ulisa'>".t("Kate")."<br>%</a></th>";
@@ -257,8 +261,10 @@
 				echo "<td><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&luokka=$l&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'>$ryhmanimet[$l]</a></td>";
 
 				echo "<td><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
+				echo "<td>$row[nimitys]</td>";
 				echo "<td nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$row[osasto]&tuotemerkki=$row[tuotemerkki]'>$row[osasto] $keyosa[selitetark]</a></td>";
 				echo "<td nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$row[osasto]&try=$row[try]&tuotemerkki=$row[tuotemerkki]'>$row[try] $keytry[selitetark]</a></td>";
+				echo "<td>$row[tulopvm]</td>";
 				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
 				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kate"]))."</td>";
 				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["katepros"]))."</td>";
@@ -308,7 +314,7 @@
 			$ostoeranakplyht 	= round ($ryhmaostotkplyht / $ryhmaostotrivityht,2);
 
 			echo "<tr>";
-			echo "<td colspan='5' class='spec'>".t("Yhteensä").":</td>";
+			echo "<td colspan='7' class='spec'>".t("Yhteensä").":</td>";
 			echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmamyyntiyht))."</td>";
 			echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$ryhmakateyht))."</td>";
 			echo "<td align='right' class='spec'>".str_replace(".",",",sprintf('%.1f',$kateprosenttiyht))."</td>";

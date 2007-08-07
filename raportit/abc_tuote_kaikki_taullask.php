@@ -95,7 +95,7 @@
 	echo "</table><br>";
 
 	if ($aja == "AJA") {
-		
+				
 		echo "<pre>";
 		echo "ABC\t";
 		echo "Tuoteno\t";
@@ -104,12 +104,14 @@
 		echo "Merkki\t";
 		echo "Osasto\t";
 		echo "Try\t";
+		echo "Tulopvm\t";
 		echo "Myynti$yhtiorow[valkoodi]\t";
 		echo "Kate\t";
 		echo "Kate%\t";
 		echo "Kateosuus\t";
 		echo "Vararvo\t";
 		echo "Kierto\t";
+		echo "MyyntiKpl\t";
 		echo "MyyntieraKpl\t";
 		echo "Myyntiera$yhtiorow[valkoodi]\t";
 		echo "Myyntirivit\t";
@@ -172,6 +174,7 @@
 						try,
 						summa,
 						kate,
+						tulopvm,
 						katepros,
 						if ($sumrow[yhtkate] = 0, 0, kate/$sumrow[yhtkate]*100)	kateosuus,
 						vararvo,
@@ -230,12 +233,14 @@
 					echo "$tuorow[tuotemerkki]\t";
 					echo "$row[osasto]\t";
 					echo "$row[try]\t";
+					echo "$row[tulopvm]\t";
 					echo str_replace(".",",",sprintf('%.1f',$row["summa"]))."\t";
 					echo str_replace(".",",",sprintf('%.1f',$row["kate"]))."\t";
 					echo str_replace(".",",",sprintf('%.1f',$row["katepros"]))."\t";
 					echo str_replace(".",",",sprintf('%.1f',$row["kateosuus"]))."\t";
 					echo str_replace(".",",",sprintf('%.1f',$row["vararvo"]))."\t";
 					echo str_replace(".",",",sprintf('%.1f',$row["varaston_kiertonop"]))."\t";
+					echo str_replace(".",",",sprintf('%.1f',$row["kpl"]))."\t";
 					echo str_replace(".",",",sprintf('%.1f',$row["myyntierankpl"]))."\t";
 					echo str_replace(".",",",sprintf('%.1f',$row["myyntieranarvo"]))."\t";
 					echo str_replace(".",",",sprintf('%.0f',$row["rivia"]))."\t";

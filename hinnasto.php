@@ -18,7 +18,7 @@ require('inc/parametrit.inc');
 
 echo "<font class='head'>".t("Hinnastoajo").":</font><hr>";
 
-if (empty(trim($kukarow['oletus_asiakas']))) {
+if (empty($kukarow['oletus_asiakas'])) {
 	echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n.")."<br><br>";
 	die();
 }

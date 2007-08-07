@@ -2,7 +2,7 @@
 
 	if ($argc == 2 and strlen($argv[1]) < 5) {
 
-		require("inc/connect.inc");
+		require("../inc/connect.inc");
 
 		$yhtio = mysql_real_escape_string($argv[1]);
 

@@ -19,7 +19,7 @@ if (!function_exists('tulosta_lasku')) {
 		}
 
 		// Haetaan laskun tiedot ja joinataan viimeisimmän laskun_lisätiedot...
-		$query = "	SELECT lasku.*, if(laskunro=0, '', laskunro) laskunro, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.tapvm päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
+		$query = "	SELECT lasku.*, if(laskunro=0, '', laskunro) laskunro, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, if(lasku.tapvm='0000-00-00', now(), lasku.tapvm) päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
 					(select if(count(distinct(left(toimitettuaika,10)))>1,'".t("useita")."', max(toimitettuaika)) from tilausrivi where yhtio=lasku.yhtio and $mika=lasku.tunnus) toimituspvm, '$yhtiorow[viivastyskorko]%' viivästyskorko, laskun_lisatiedot.rivihintoja_ei_nayteta,
 					concat_ws(' ', postino, postitp) postiosoite,
 					concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
@@ -133,13 +133,12 @@ if (!function_exists('tulosta_lasku')) {
 					}
 
 					foreach($kentat as $key) {
-						if($key == "päiväys") {
-							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
+						$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
+						if($key == "päiväys") {							
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, strftime("%x",strtotime($laskurow[$key])), "norm", "L", "", $tid);
 
 						}
 						elseif($laskurow[$key]!="") {
-							$pdf->writeToTemplate($h, 1, $s[0], $s[1], t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 							$pdf->writeToTemplate($h, 1, $s[1]+2, 0, $laskurow[$key], "norm", "L", "", $tid);
 						}
 						$h-=$pdf->ln();

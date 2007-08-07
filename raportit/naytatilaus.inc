@@ -280,7 +280,7 @@
 				
 					$laskakak = 1;
 				
-					echo $laskakak.": <a href='../raportit.php?toim=laskuhaku&tee=T&summa1=$muutkeikrow[tunnus]'>$muutkeikrow[summa]</a> ".ebid($muutkeikrow['tunnus'])."<br>";
+					echo $laskakak.": <a href='".$palvelin2."raportit.php?toim=laskuhaku&tee=T&summa1=$muutkeikrow[tunnus]'>$muutkeikrow[summa]</a> ".ebid($muutkeikrow['tunnus'])."<br>";
 				}
 			
 				echo "</td></tr>";
@@ -413,9 +413,8 @@
 			$prow["kommentti"] .= "<br>";
 		}
 		while($sarjarow = mysql_fetch_array($sarjares)) {
-			$prow["kommentti"] .= "# <a href='sarjanumeroseuranta.php?tuoteno_haku=$prow[tuoteno]&sarjanumero_haku=$sarjarow[sarjanumero]'>$sarjarow[sarjanumero]</a><br>";
+			$prow["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$prow[tuoteno]&sarjanumero_haku=$sarjarow[sarjanumero]'>$sarjarow[sarjanumero]</a><br>";
 		}
-		
 		
 		if ($prow["kommentti"] != '') {
 			echo "<tr>";

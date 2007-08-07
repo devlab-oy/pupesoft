@@ -212,6 +212,8 @@ if ($tee == "" and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 
 	else {
 		$ytunnus = $syotetty_ytunnus;
 	}
+	
+	$kutsuja    = "otsik.inc";
 
 	if (file_exists("../inc/asiakashaku.inc")) {
 		require ("../inc/asiakashaku.inc");
@@ -229,7 +231,7 @@ if ($tee == "" and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 
 //Luodaan otsikko
 if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or ((int) $kukarow["kesken"] != 0 and $asiakasid != '' and $kukarow["extranet"] == "")) or ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)) {
 
-	if ($asiakasid != '') {
+	if ($asiakasid != '') {		
 		$nimi 			   	   	   			= $asiakasrow["nimi"];
 		$nimitark 		   	   	   			= $asiakasrow["nimitark"];
 		$osoite 		   	   	   			= $asiakasrow["osoite"];

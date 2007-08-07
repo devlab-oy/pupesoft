@@ -215,6 +215,10 @@
 				}
 
 				$lopetus .= "yllapidossa=$toim&yllapidontunnus=$tunnus";
+				
+				if (strpos($lopetus, "tilaus_myynti.php") !== FALSE) {
+					$lopetus.= "&asiakasid=$tunnus";
+				}
 
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;

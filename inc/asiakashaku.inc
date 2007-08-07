@@ -281,7 +281,16 @@ if ($monta > $limit) {
 	$ytunnus = "";
 }
 
-if ($kutsuja != "yllapito.php") {
+if ($kutsuja == "otsik.inc") {
+	$query = "	SELECT yhtio
+				FROM oikeu
+				WHERE yhtio	= '$kukarow[yhtio]'
+				and kuka	= '$kukarow[kuka]'
+				and nimi	= 'yllapito.php'
+				and alanimi = 'asiakas!!!VAHITTAISMYYNTI!!!true'
+				and paivitys != ''";
+	$oikeuresult1 = mysql_query($query) or pupe_error($query);
+
 	$query = "	SELECT yhtio
 				FROM oikeu
 				WHERE yhtio	= '$kukarow[yhtio]'
@@ -289,34 +298,39 @@ if ($kutsuja != "yllapito.php") {
 				and nimi	= 'yllapito.php'
 				and alanimi = 'asiakas'
 				and paivitys != ''";
-	$oikeuresult = mysql_query($query) or pupe_error($query);
-
-	if ($monta != 1 and mysql_num_rows($oikeuresult) > 0) {
-		//Annetaan mahdollisuus perustaa uusi asiakas
-
-		echo "<table border='0'>";
-
-		echo "<tr><td>".t("Oikeaa asiakasta ei löytynyt. Perusta uusi asiakas")."</td>";
-		echo "<td class='back'>";
-		echo "<form action='../yllapito.php' method='post'>";
-		echo "<input type='hidden' name='lopetus' 	value='tilauskasittely/tilaus_myynti.php////toim=$toim'>";
-		echo "<input type='hidden' name='toim'		value='asiakas!!!VAHITTAISMYYNTI!!!true'>";
-		echo "<input type='hidden' name='uusi'		value='1'>";
-		echo "<input type='submit' value='".t("Uusi henkilöasiakas")."'>";
-		echo "</form>";
-		echo "</td>";
+	$oikeuresult2 = mysql_query($query) or pupe_error($query);
 	
-		echo "<td class='back'>";
-		echo "<form action='../yllapito.php' method='post'>";
-		echo "<input type='hidden' name='lopetus' 	value='tilauskasittely/tilaus_myynti.php////toim=$toim'>";
-		echo "<input type='hidden' name='toim'		value='asiakas'>";
-		echo "<input type='hidden' name='uusi'		value='1'>";
-		echo "<input type='submit' value='".t("Uusi yritysasiakas")."'>";
-		echo "</form>";
-		echo "</td>";
+	if ($monta != 1 and (mysql_num_rows($oikeuresult1) > 0 or mysql_num_rows($oikeuresult2) > 0)) {
+
+		//Annetaan mahdollisuus perustaa uusi asiakas
+		echo "<table border='0'>";
+		echo "<tr><td>".t("Oikeaa asiakasta ei löytynyt. Perusta uusi asiakas")."</td>";
+	
+		if (mysql_num_rows($oikeuresult1) > 0) {
+			echo "<td class='back'>";
+			echo "<form action='../yllapito.php' method='post'>";
+			echo "<input type='hidden' name='lopetus' 	value='tilauskasittely/tilaus_myynti.php////toim=$toim'>";
+			echo "<input type='hidden' name='toim'		value='asiakas!!!VAHITTAISMYYNTI!!!true'>";
+			echo "<input type='hidden' name='laji'		value='H'>";
+			echo "<input type='hidden' name='uusi'		value='1'>";
+			echo "<input type='submit' value='".t("Uusi henkilöasiakas")."'>";
+			echo "</form>";
+			echo "</td>";
+		}
+	
+		if (mysql_num_rows($oikeuresult2) > 0) {
+			echo "<td class='back'>";
+			echo "<form action='../yllapito.php' method='post'>";
+			echo "<input type='hidden' name='lopetus' 	value='tilauskasittely/tilaus_myynti.php////toim=$toim'>";
+			echo "<input type='hidden' name='toim'		value='asiakas'>";
+			echo "<input type='hidden' name='laji'		value='Y'>";
+			echo "<input type='hidden' name='uusi'		value='1'>";
+			echo "<input type='submit' value='".t("Uusi yritysasiakas")."'>";
+			echo "</form>";
+			echo "</td>";
+		}
 	
 		echo "</tr>";
-
 		echo "</table><br>";
 	}
 }

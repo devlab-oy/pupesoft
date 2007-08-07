@@ -72,6 +72,7 @@
 		//tehdään asiakashaku yhteensopivuus
 		$ytunnus 	= $nimi;
 		$asiakasid	= "";
+		$kutsuja    = "otsik.inc";
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
 		require ("../inc/asiakashaku.inc");

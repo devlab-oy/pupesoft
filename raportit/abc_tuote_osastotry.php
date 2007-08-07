@@ -197,7 +197,7 @@
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=nimitys&sort=asc$ulisa'>".t("Nimitys")."</a><br>&nbsp;</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=osasto&sort=asc$ulisa'>".t("Osasto")."</a><br>&nbsp;</th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=try&sort=asc$ulisa'>".t("Try")."</a><br>&nbsp;</th>";
-		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=tulopvm&sort=desc$ulisa'>".t("Tulopvm")."<br>".t("tot")."</a></th>";
+		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=tulopvm&sort=desc$ulisa'>".t("Tulopvm")."</a></th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=summa&sort=desc$ulisa'>".t("Myynti")."<br>".t("tot")."</a></th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=kate&sort=desc$ulisa'>".t("Kate")."<br>".t("tot")."</a></th>";
 		echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&valinta=$valinta&order=katepros&sort=desc$ulisa'>".t("Kate")."<br>%</a></th>";
@@ -264,7 +264,7 @@
 				echo "<td>$row[nimitys]</td>";
 				echo "<td nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$row[osasto]&tuotemerkki=$row[tuotemerkki]'>$row[osasto] $keyosa[selitetark]</a></td>";
 				echo "<td nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$row[osasto]&try=$row[try]&tuotemerkki=$row[tuotemerkki]'>$row[try] $keytry[selitetark]</a></td>";
-				echo "<td>$row[tulopvm]</td>";
+				echo "<td>".tv1dateconv($row["tulopvm"])."</td>";
 				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
 				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["kate"]))."</td>";
 				echo "<td align='right'>".str_replace(".",",",sprintf('%.1f',$row["katepros"]))."</td>";

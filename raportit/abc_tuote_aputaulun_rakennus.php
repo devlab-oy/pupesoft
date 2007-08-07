@@ -179,7 +179,8 @@ if ($tee == 'YHTEENVETO') {
 				ifnull(tuote.try,'#') try,
 				ifnull(tuote.osasto,'#') osasto,
 				ifnull(tuote.tuotemerkki,'#') tuotemerkki,
-				tuote.luontiaika,
+				ifnull(tuote.nimitys,'#') tuotenimitys,
+				ifnull(tuote.luontiaika,'#') luontiaika,
 				sum(if(tyyppi='L' and (var='H' or var=''), 1, 0))			rivia,
 				sum(if(tyyppi='L' and (var='H' or var=''), kpl, 0))			kpl,
 				sum(if(tyyppi='L' and (var='H' or var=''), rivihinta, 0))	summa,
@@ -248,14 +249,25 @@ if ($tee == 'YHTEENVETO') {
 		if ($row["osto_rivia"] != 0) $ostoeranakpl = round ($row["osto_kpl"] / $row["osto_rivia"],2);
 		else $ostoeranakpl = 0;
 
+		// ensimm‰inen tulo
+		$query = "	SELECT ifnull(left(min(laadittu),10), 0) tulopvm
+					FROM tapahtuma USE INDEX (yhtio_tuote_laadittu) 
+					WHERE yhtio = '$kukarow[yhtio]' and 
+					tuoteno = '$row[tuoteno]' and 
+					laji = 'tulo'";
+		$insres = mysql_query($query) or pupe_error($query);
+		$tulorow = mysql_fetch_array($insres);			
+		
 		$query = "	INSERT INTO abc_aputaulu
 					SET yhtio			= '$kukarow[yhtio]',
 					tyyppi				= '$abcchar',
 					luokka				= '$luokka',
 					tuoteno				= '$row[tuoteno]',
+					nimitys				= '$row[tuotenimitys]',
 					osasto				= '$row[osasto]',
 					tuotemerkki			= '$row[tuotemerkki]',
 					try					= '$row[try]',
+					tulopvm				= '$tulorow[tulopvm]',
 					summa				= '$row[summa]',
 					kate				= '$row[kate]',
 					katepros			= '$kateprosentti',
@@ -295,6 +307,7 @@ if ($tee == 'YHTEENVETO') {
 				tuote.osasto,
 				tuote.luontiaika,
 				tuote.tuotemerkki,
+				tuote.nimitys,
 				abc_aputaulu.luokka,
 				sum(saldo) saldo,
 				sum(saldo) * if(epakurantti2pvm='0000-00-00', if(epakurantti1pvm='0000-00-00', kehahin, kehahin/2), 0) vararvo
@@ -311,14 +324,25 @@ if ($tee == 'YHTEENVETO') {
 	// ja k‰yd‰‰n kaikki ne tuotteet l‰pi ja lis‰t‰‰n abc_aputauluun
 	while ($row = mysql_fetch_array($tuores)) {
 
+		// ensimm‰inen tulo
+		$query = "	SELECT ifnull(left(min(laadittu),10), 0) tulopvm
+					FROM tapahtuma USE INDEX (yhtio_tuote_laadittu) 
+					WHERE yhtio = '$kukarow[yhtio]' and 
+					tuoteno = '$row[tuoteno]' and 
+					laji = 'tulo'";
+		$insres = mysql_query($query) or pupe_error($query);
+		$tulorow = mysql_fetch_array($insres);
+		
 		$query = "	INSERT INTO abc_aputaulu
 					SET yhtio			= '$kukarow[yhtio]',
 					tyyppi				= '$abcchar',
 					luokka				= '8',
 					tuoteno				= '$row[tuoteno]',
+					nimitys				= '$row[nimitys]',
 					osasto				= '$row[osasto]',
 					try					= '$row[try]',
 					tuotemerkki			= '$row[tuotemerkki]',
+					tulopvm				= '$tulorow[tulopvm]',
 					vararvo				= '$row[vararvo]',
 					tuote_luontiaika	= '$row[luontiaika]'";
 		$insres = mysql_query($query) or pupe_error($query);

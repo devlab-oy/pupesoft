@@ -451,7 +451,7 @@
 
 			//tehdään selväkielinen tila/alatila
 			require "inc/laskutyyppi.inc";
-			$varaosakommentti .= ("Tuotetta on siirtolistalla")." ".$siirtorow["tunnus"]." $alatila {$siirtorow["kpl"]}{$trow["yksikko"]} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]}<br>";
+			$varaosakommentti .= ("Tuotetta on siirtolistalla")." {$siirtorow["kpl"]}{$trow["yksikko"]} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} <i>$alatila</i><br>";
 		}
 	}
 	

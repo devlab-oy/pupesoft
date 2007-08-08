@@ -24,7 +24,8 @@ if (!function_exists('tulosta_lasku')) {
 					concat_ws(' ', postino, postitp) postiosoite,
 					concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
 					yhteyshenkilo_kaupallinen.nimi asiakkaan_kaupallinen_käsittelijä,
-					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö
+					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö,
+					lasku.tunnus toimitus
 					FROM lasku
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and if(laskunro>0, (select max(tunnus) from lasku l where l.yhtio=lasku.yhtio and l.laskunro=lasku.laskunro and l.tila='L'), lasku.tunnus)=laskun_lisatiedot.otunnus
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus					
@@ -117,19 +118,30 @@ if (!function_exists('tulosta_lasku')) {
 					$h=260;
 					$s=$pdf->teeSarakkeet(array(102,33));
 					
-					if($laskurow["projekti"] > 0) {
-						//	Onko nippulla projektia?
-						$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R'";
-						$abures = mysql_query($query) or pupe_error($query);
-						if(mysql_num_rows($abures)>0) {
-							$kentat = array("laskunro", "päiväys", "toimituspvm", "projekti", "valuutta", "viivästyskorko", "toimitustapa", "toimitusehto", "asiakkaan_VAT");							
+					$query = "select tunnus from lasku where yhtio ='$kukarow[yhtio]' and tunnusnippu='$laskurow[projekti]' and tila = 'R' and tunnusnippu>0";
+					$abures = mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($abures) == 1) {
+						$tyyppi = "projekti";
+					}
+					else {
+						$tyyppi = "tilaus";
+					}
+					
+					if($laskurow["tunnusnippu"]>0) {
+						if($laskurow["tila"] != 'U') {
+							$kentat = array("laskunro", "päiväys", "toimituspvm", $tyyppi, "toimitus", "valuutta", "viivästyskorko", "toimitustapa", "toimitusehto", "asiakkaan_VAT");	
 						}
 						else {
-							$kentat = array("laskunro", "päiväys", "toimituspvm", "tilaus", "valuutta", "viivästyskorko", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
+							$kentat = array("laskunro", "päiväys", "toimituspvm", $tyyppi, "valuutta", "viivästyskorko", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
 						}
 					}
 					else {
-						$kentat = array("laskunro", "päiväys", "toimituspvm", "tilaus", "valuutta", "viivästyskorko", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
+						if($laskurow["tila"] != 'U') {
+							$kentat = array("laskunro", "päiväys", "toimituspvm", "tilaus", "valuutta", "viivästyskorko", "toimitustapa", "toimitusehto", "asiakkaan_VAT");	
+						}
+						else {
+							$kentat = array("laskunro", "päiväys", "toimituspvm", "valuutta", "viivästyskorko", "toimitustapa", "toimitusehto", "asiakkaan_VAT");
+						}
 					}
 
 					foreach($kentat as $key) {
@@ -196,7 +208,13 @@ if (!function_exists('tulosta_lasku')) {
 						$pdf->writeToTemplate($h, 1, $s[3], 0, t("Veroton arvo", $kieli), "norm", "R", "B", $tid2);	
 					}
 					$h-=$pdf->ln();
-					$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus", $kieli)."/".t("Kommentti", $kieli), "norm", "L", "B", $tid2);
+
+					if($laskurow != "U") {
+						$pdf->writeToTemplate($h, 1, 0, $s[0], t("Kommentti", $kieli), "norm", "L", "B", $tid2);	
+					}
+					else {
+						$pdf->writeToTemplate($h, 1, 0, $s[0], t("Tilaus", $kieli)."/".t("Kommentti", $kieli), "norm", "L", "B", $tid2);
+					}
 					$pdf->writeToTemplate($h, 1, $s[0], $s[1], t("Toimituspvm", $kieli), "norm", "R", "B", $tid2);
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
 						if($alenaytetaan=="OK") {
@@ -236,8 +254,8 @@ if (!function_exists('tulosta_lasku')) {
 				$hinta_riv = "tilausrivi.hinta";
 			}
 
-			$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
-						varattu kpl, ";
+			$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
+						(jt+varattu+kpl) kpl, ";
 		}
 		else {
 			$lisa = "";
@@ -383,10 +401,16 @@ if (!function_exists('tulosta_lasku')) {
 				}
 				
 				if($row["kommentti"] != "" and $rivi=="isa") {
-					$abuw=$pdf->pt_mm($pdf->strlen($row["otunnus"]."/", $fonts["snadi"])+1);
-					$pdf->write($h, 1, $offset, $abuw, $row["otunnus"]."/", $style_komm, "L", "");
-					$nb=$pdf->countParagraphHeight($row["kommentti"], $style_komm, ($s[0]-$abuw));
-					$pdf->write($h, $nb, $abuw+$offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
+					if($laskurow["tila"] != "U") {
+						$nb=$pdf->countParagraphHeight($row["kommentti"], $style_komm, ($s[0]-$abuw));
+						$pdf->write($h, $nb, $offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
+					}
+					else {
+						$abuw=$pdf->pt_mm($pdf->strlen($row["otunnus"]."/", $fonts["snadi"])+1);
+						$pdf->write($h, 1, $offset, $abuw, $row["otunnus"]."/", $style_komm, "L", "");
+						$nb=$pdf->countParagraphHeight($row["kommentti"], $style_komm, ($s[0]-$abuw));
+						$pdf->write($h, $nb, $abuw+$offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
+					}
 					$h-=$pdf->ln($nb);					
 				}
 				elseif($row["kommentti"] != "") {
@@ -394,7 +418,7 @@ if (!function_exists('tulosta_lasku')) {
 					$pdf->write($h, $nb, 5+$offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
 					$h-=$pdf->ln($nb);					
 				}
-				else {
+				elseif($laskurow["tila"] != "U") {
 					$pdf->write($h, 1, $offset, $s[0], $row["otunnus"]."/", $style_komm, "L", "I");	
 					$h-=$pdf->ln();
 				}

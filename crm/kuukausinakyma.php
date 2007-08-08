@@ -320,7 +320,10 @@
 
 	echo "<tr><td class='back'><br></td></tr>";
 	
-	if ($osasto == "" or $osasto == "projektikalenterit") {
+	$query = "SELECT tunnus FROM lasku WHERE yhtio='{$kukarow["yhtio"]}' and tila = 'R' LIMIT 1";
+	$tarkres = mysql_query($query) or pupe_error($query);
+	
+	if (($osasto == "" or $osasto == "projektikalenterit") and mysql_num_rows($tarkrs) == 1) {
 		if ($edosasto != $row["osasto"] or ($edosasto=="")) {
 			echo "<tr><td class='back'></td></tr>";
 

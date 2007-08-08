@@ -177,7 +177,7 @@ class Pupe_Pdfekirje {
 		
 		// korvataan placeholderit oikeilla tiedoilla
         foreach ($info as $key => $val) {
-            $xml = str_replace(":$key", $val, $xml);
+            $xml = str_replace(":$key", htmlentities($val, ENT_QUOTES), $xml);
         }
         
 		$file = $this->_info['tmp_dir'] . 'ekirje-' . $this->_info['kirje_id'] . '.xml';

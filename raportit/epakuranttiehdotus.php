@@ -16,6 +16,7 @@ if ($tyyppi == 'taysi') $chk2 = "checked";
 // defaultteja
 if (!isset($alkupvm))  $alkupvm  = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 if (!isset($loppupvm)) $loppupvm = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+if (!isset($taysraja)) $taysraja = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 if (!isset($raja))     $raja = "0.5";
 
 // errorcheckej‰
@@ -26,6 +27,11 @@ if (!checkdate(substr($alkupvm,5,2), substr($alkupvm,8,2), substr($alkupvm,0,4))
 
 if (!checkdate(substr($loppupvm,5,2), substr($loppupvm,8,2), substr($loppupvm,0,4))) {
 	echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")." $loppupvm!</font><br><br>";
+	unset($subnappi);
+}
+
+if (!checkdate(substr($taysraja,5,2), substr($taysraja,8,2), substr($taysraja,0,4))) {
+	echo "<font class='error'>".t("Virheellinen p‰iv‰m‰‰r‰")." $taysraja!</font><br><br>";
 	unset($subnappi);
 }
 
@@ -47,6 +53,11 @@ echo "</tr>";
 echo "<tr>";
 echo "<th>".t("Anna ep‰kuranttiusraja (kierto)").":</th>";
 echo "<td colspan='2'><input type='text' name='raja' value='$raja'></td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Anna t‰ysep‰kuranttisuuden alaraja pvm").":</th>";
+echo "<td colspan='2'><input type='text' name='taysraja' value='$taysraja'></td><td class='back'>(Tuote on pit‰nyt laittaa puoliep‰kurantiksi ennen t‰t‰ p‰iv‰‰, jotta ehdotetaan t‰ysep‰kurantiksi)</td>";
 echo "</tr>";
 
 echo "<tr>";
@@ -89,7 +100,7 @@ if ($subnappi != '') {
 	}
 
 	// etsit‰‰n saldolliset tuotteet
-	$query  = "	select tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, if(epakurantti1pvm='0000-00-00', tuote.kehahin, round(tuote.kehahin/2,4)) kehahin, tuote.vihapvm,
+	$query  = "	select tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, if(epakurantti1pvm='0000-00-00', tuote.kehahin, round(tuote.kehahin/2,4)) kehahin, tuote.vihapvm, epakurantti1pvm,
 				(select group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') from tuotteen_toimittajat where tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno) toimittaja, ifnull(sum(saldo),0) saldo
 				from tuote
 				LEFT JOIN tuotepaikat on tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
@@ -118,11 +129,15 @@ if ($subnappi != '') {
 		// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
 		list($vv1,$kk1,$pp1) = split("-",$taprow["max"]);
 		list($vv2,$kk2,$pp2) = split("-",$alkupvm);
+		list($vv3,$kk3,$pp3) = split("-",$row["epakurantti1pvm"]);
+		list($vv4,$kk4,$pp4) = split("-",$taysraja);
 		$saapunut = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 		$alaraja  = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
+		$epaku1pv = (int) date('Ymd',mktime(0,0,0,$kk3,$pp3,$vv3));
+		$epa2raja = (int) date('Ymd',mktime(0,0,0,$kk4,$pp4,$vv4));
 
 		// t‰t‰ tuotetta on saapunut ennen myyntirajauksen alarajaa, joten otetaan k‰sittelyyn
-		if ($saapunut < $alaraja) {
+		if (($saapunut < $alaraja) and (($tyyppi == 'taysi' and $epaku1pv < $epa2raja) or ($tyyppi == 'puoli'))) {
 
 			// haetaan tuotteen myydyt kappaleet
 			$query  = "SELECT ifnull(sum(kpl),0) kpl FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and tuoteno='$row[tuoteno]' and laskutettuaika >= '$alkupvm' and laskutettuaika <= '$loppupvm'";
@@ -159,6 +174,7 @@ if ($subnappi != '') {
 			}
 
 		} // end saapunut ennen alarajaa
+
 		flush();
 	}
 

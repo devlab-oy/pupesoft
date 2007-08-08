@@ -3584,7 +3584,7 @@ if ($tee == '') {
 					echo "<td class='back' valign='top'><font class='error'>$varaosavirhe</font></td>";
 				}
 				if ($varaosakommentti != '') {
-					echo "<td class='back' valign='top'><font class='message'>$varaosakommentti</font></td>";
+					echo "<td class='back' valign='top'><font class='info'>$varaosakommentti</font></td>";
 				}
 
 				$varaosavirhe = "";

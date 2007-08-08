@@ -203,7 +203,7 @@
 		}
 
 		//Katotaan voidaanko tämä myydä joltain toiselta paikalta	
-		if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {			
+		if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
 			
 			if ($trow["sarjanumeroseuranta"] == "F") {
 				$pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
@@ -380,7 +380,7 @@
 		}
 		else {
 			$paikat = "";
-		}
+		}		
 	}
 	elseif ($trow["ei_saldoa"] != "" and $row["tyyppi"] != "E" and $kpl_st > 0 and $row["tunnus"] == $row["perheid"] and in_array($row["var"], array('S','P','J'))) {
 		
@@ -433,6 +433,26 @@
 		$paikat .= "<option value='J' $sel2>".t("Jälkitoimitus")."</option>";
 		$paikat .= "<option value='X' $sel3>".t("Suoratoimita")."</option>";
 		$paikat = "<select Style='font-size: 8pt; padding:0;' name='var' onchange='submit();'>".$paikat."</select>";
+	}
+	
+	//	Onko tätä varattuna siirtolistalla?
+	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P"))) {
+		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus
+					FROM lasku
+					RIGHT JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tuoteno = '{$trow["tuoteno"]}'
+					LEFT JOIN varastopaikat lahde ON lahde.yhtio = lasku.yhtio and lahde.tunnus = lasku.varasto
+					LEFT JOIN varastopaikat kohde ON kohde.yhtio = lasku.yhtio and kohde.tunnus = lasku.clearing					
+					WHERE lasku.yhtio = '{$kukarow["yhtio"]}' and tila = 'G' and alatila !='D'
+					GROUP BY tuoteno, lasku.tunnus";
+		$siirtores = mysql_query($query) or pupe_error($query);
+		while($siirtorow = mysql_fetch_array($siirtores)) {
+			$laskutyyppi = $siirtorow["tila"];
+			$alatila	 = $siirtorow["alatila"];
+
+			//tehdään selväkielinen tila/alatila
+			require "inc/laskutyyppi.inc";
+			$varaosakommentti .= ("Tuotetta on siirtolistalla")." ".$siirtorow["tunnus"]." $alatila {$siirtorow["kpl"]}{$trow["yksikko"]} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]}<br>";
+		}
 	}
 	
 	if ($row["alv"] == -999.99) {

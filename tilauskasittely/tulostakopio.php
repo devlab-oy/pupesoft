@@ -423,7 +423,7 @@
 		}
 		if ($toim == "PROFORMA") {
 			//myyntitilaus. Tulostetaan proforma.
-			$where1 = " lasku.tila in ('L','U') ";
+			$where1 = " (lasku.tila in ('L','U','N') or (tila = 'N' and alatila IN ('A','T','U')))";
 
 			if ($ytunnus{0} == '£') {
 				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'

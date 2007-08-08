@@ -555,8 +555,10 @@
 				$orginaaalit = table_exists("tuotteen_orginaalit");
 			}
 			
+			$linkkilisa = "";
+			
 			//	Liitet‰‰n originaalitietoja
-			if($orginaaalit === true and 1==2) {
+			if($orginaaalit === true) {
 				$id = md5(uniqid());
 				
 				$query = "	SELECT * 
@@ -564,8 +566,8 @@
 							WHERE yhtio = '{$kukarow["yhtio"]}' and tuoteno = '{$row["tuoteno"]}'";
 				$orgres = mysql_query($query) or pupe_error($query);
 				
-				if(mysql_num_rows($orgres)) {
-					echo "<div id='$id' class='popup'>
+				if(mysql_num_rows($orgres)>0) {
+					$linkkilisa = "<div id='$id' class='popup' style=\"width: 300px\">
 					<table width='300px' align='center'>
 					<caption><font class='head'>Tuotteen originaalit</font></caption>
 					<tr>
@@ -575,25 +577,23 @@
 					</tr>";
 
 					while($orgrow = mysql_fetch_array($orgres)) {
-						echo "<tr>
+
+						$linkkilisa .= "<tr>
 								<td>{$orgrow["orig_tuoteno"]}</td>
 								<td>{$orgrow["merkki"]}</td>
 								<td>{$orgrow["orig_hinta"]}</td>								
 							</tr>";
 					}
 					
-					echo "</table></div>";
-				}
-				
-				if($kukarow["extranet"] != "") {
-					$linkkilisa = "&nbsp;&nbsp;<a src='#' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"><img src='pics/lullacons/info.png' height='13'></a>";
-				}
-				else {
-					$linkkilisa = "&nbsp;&nbsp;<a src='#' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"><img src='../pics/lullacons/info.png' height='13'></a>";
-				}
-			}
-			else {
-				$linkkilisa = "";
+					$linkkilisa .= "</table></div>";
+					
+					if($kukarow["extranet"] != "") {
+						$linkkilisa .= "&nbsp;&nbsp;<a src='#' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"><img src='pics/lullacons/info.png' height='13'></a>";
+					}
+					else {
+						$linkkilisa .= "&nbsp;&nbsp;<a src='#' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"><img src='../pics/lullacons/info.png' height='13'></a>";
+					}
+				}				
 			}
 			
 			if ($kukarow["extranet"] != "") {

@@ -459,9 +459,9 @@ if ($laskurow["tunnusnippu"] > 0 and $toim=="PROJEKTI") {
 	$projektilask = (int) mysql_num_rows($abures);
 }
 
-if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or ($toim == "PROJEKTI" and $projektilask>0) or ($toim=="TARJOUS" and $projektilla>0) or $laskurow["alatila"] == "X" or ($laskurow["tila"] == "L" and $laskurow["alatila"] == "J")) {
-	$muokkauslukko = "LUKOSSA";
-	$state = "DISABLED";
+if ($kukarow["extranet"] == "" and ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") or ($toim == "PROJEKTI" and $projektilask>0) or ($toim=="TARJOUS" and $projektilla>0) or $laskurow["alatila"] == "X") {
+	$muokkauslukko 	= "LUKOSSA";
+	$state 			= "DISABLED";
 }
 
 // Hyv‰ksyt‰‰n tajous ja tehd‰‰n tilaukset
@@ -3703,20 +3703,23 @@ if ($tee == '') {
 					echo "<tr>";
 
 					if ($borderlask == 0 and $pknum > 1) {
-						$kommclass = " style='border-bottom: 1px solid; border-right: 1px solid;'";
+						$kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
+						$kommclass2 = " style='border-bottom: 1px solid;'";
 					}
 					elseif($pknum > 0) {
-						$kommclass = " style='border-right: 1px solid;'";
+						$kommclass1 = " style='border-right: 1px solid;'";
+						$kommclass2 = " style='border-right: 1px solid;'";
 					}
 					else {
-						$kommclass = "";
+						$kommclass1 = "";
+						$kommclass2 = "";
 					}
 
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td $kommclass>&nbsp;</td>";
+						echo "<td $kommclass2>&nbsp;</td>";
 					}
 
-					echo "<td $kommclass colspan='$cspan' valign='top'>".t("Kommentti").":<br>".str_replace("\n", "<br>", $row["kommentti"])."</td>";
+					echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br>".str_replace("\n", "<br>", $row["kommentti"])."</td>";
 
 					echo "</tr>";
 				}

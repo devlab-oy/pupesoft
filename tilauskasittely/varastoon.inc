@@ -110,7 +110,13 @@ require_once ('inc/ProgressBar.class.php');
 $bar = new ProgressBar();
 $elements = mysql_num_rows($presult); // total number of elements to process
 
-echo "<font class='message'>".t("Suoritetaan j‰lkilaskentaa %s tuotteelle", "", $elements).":<br></font>";
+// jos kyseess‰ on ihan virallinen varastonarvonlaskenta, tehd‰‰n n‰in
+if ($toiminto == "kaikkiok" and $tee == "varma") {
+	echo "<font class='message'>".t("Suoritetaan j‰lkilaskentaa %s tuotteelle", "", $elements).":<br></font>";
+}
+else {
+	echo "<font class='message'>".t("Vied‰‰n varastoon %s tuotetta", "", $elements).":<br></font>";
+}
 
 $bar->initialize($elements); // print the empty bar
 

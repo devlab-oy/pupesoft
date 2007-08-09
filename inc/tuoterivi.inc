@@ -268,7 +268,7 @@
 	if (mysql_field_name($result, $i) == "hinnastoon") {
 
 		$sel = $sela = "";
-		if ($trow[$i] != '') {
+		if ($trow[$i] == 'E') {
 			$sel = "SELECTED";
 		}
 		else {

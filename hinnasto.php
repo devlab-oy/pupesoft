@@ -14,14 +14,11 @@ if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 	exit;
 }
 
-require('inc/parametrit.inc');
+if (! @include('inc/parametrit.inc')) {
+	require 'parametrit.inc';
+}
 
 echo "<font class='head'>".t("Hinnastoajo").":</font><hr>";
-
-if (empty($kukarow['oletus_asiakas'])) {
-	echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
-	die();
-}
 
 if ($tee != '') {
 	$where1 = '';
@@ -97,12 +94,22 @@ if ($tee != '') {
 		}
 	}
 	
-	$query = "SELECT maa, valkoodi, vienti, ytunnus, tunnus liitostunnus from asiakas where tunnus={$kukarow['oletus_asiakas']} and yhtio ='{$kukarow['yhtio']}'";
-	$res = mysql_query($query) or pupe_error($query);
-	
-	// käytetään tätä laskurowna
-	$laskurowfake = mysql_fetch_array($res);
-	
+	// jos ei olla extranetissa niin otetaan valuuttatiedot yhtiolta
+	// maa, valkoodi, ytunnus
+	if (empty($kukarow['extranet'])) {
+		$laskurowfake = array(
+			'valkoodi' => $yhtiorow['valkoodi'],
+			'maa'      => $yhtiorow['maa'],
+			'ytunnus'  => $yhtiorow['ytunnus'],
+		);
+	} else {
+		// otetaan valuuttatiedot oletus asiakkaalta
+		$query = "SELECT maa, valkoodi, ytunnus from asiakas where tunnus='{$kukarow['oletus_asiakas']}' and yhtio ='{$kukarow['yhtio']}'";
+		$res = mysql_query($query) or pupe_error($query);
+		
+		// käytetään tätä laskurowna
+		$laskurowfake = mysql_fetch_assoc($res);
+	}
 	
 	$query = "SELECT kurssi from valuu where nimi='{$laskurowfake['valkoodi']}' and yhtio = '{$kukarow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error($query);
@@ -134,7 +141,13 @@ if ($tee != '') {
 	}
 	
 	// katsotaan mikä hinnastoformaatti
-	$rivifile = 'inc/hinnastorivi' . basename($_POST['hinnasto']) . '.inc';
+	
+	if (empty($kukarow['extranet'])) {
+		$rivifile = 'inc/hinnastorivi' . basename($_POST['hinnasto']) . '.inc';
+	} else {
+		$rivifile = 'hinnastorivi' . basename($_POST['hinnasto']) . '.inc';
+	}
+	
 	if (file_exists($rivifile)) {
 		require $rivifile;
 	} else {
@@ -174,7 +187,9 @@ if ($tee != '') {
 	echo "</form></table>";
 
 	//lopetetaan tähän
-	require ("inc/footer.inc");
+	if (! @include('inc/footer.inc')) {
+		require 'footer.inc';
+	}
 	exit;
 }
 
@@ -252,5 +267,7 @@ echo "</select></td><th>tai syötä käsin</th><td><input type='text' name='try2' v
 
 echo "<br><input type='submit' value='".t("Lähetä")."'></form>";
 
-require ("inc/footer.inc");
+if (! @include('inc/footer.inc')) {
+	require 'footer.inc';
+}
 ?>

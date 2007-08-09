@@ -694,7 +694,8 @@ if ($tila == 'kohdistaminen') {
 				tiliointi.tilino ttilino,
 				asiakas.nimi,
 				asiakas.ytunnus,
-				yriti.oletus_selvittelytili
+				yriti.oletus_selvittelytili,
+				asiakas.konserniyhtio
 				FROM suoritus
 				JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio and tiliointi.tunnus = suoritus.ltunnus)
 				LEFT JOIN asiakas ON (asiakas.yhtio = suoritus.yhtio and asiakas.tunnus = suoritus.asiakas_tunnus)
@@ -771,7 +772,7 @@ if ($tila == 'kohdistaminen') {
 	if ($suoritus["oletus_selvittelytili"] != "") {
 		echo "<option value='$suoritus[oletus_selvittelytili]' $sel4>".t("Pankkitilin selvittelytili")." ($suoritus[oletus_selvittelytili])</option>";
 	}
-	if ($trow['konserniyhtio'] != "") {
+	if ($suoritus['konserniyhtio'] != "") {
 		echo "<option value='$yhtiorow[konsernisaamiset]' $sel5>".t("Konsernisaamiset")." ($yhtiorow[konsernisaamiset])</option>";
 	}
 	echo "</select></td>";

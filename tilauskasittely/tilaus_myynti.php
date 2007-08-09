@@ -3384,9 +3384,9 @@ if ($tee == '') {
 												and laskunro 	= '$kulukeikkarow[laskunro]'
 												and vanhatunnus <> 0
 												and vienti in ('B','E','H')";
-									$result = mysql_query($query) or pupe_error($query);
+									$iresult = mysql_query($query) or pupe_error($query);
 
-									$kulukulurow = mysql_fetch_array($result);
+									$kulukulurow = mysql_fetch_array($iresult);
 
 									$ostohinta	+= $kulukulurow["kulusumma"];
 								}
@@ -3851,9 +3851,9 @@ if ($tee == '') {
 											and laskunro 	= '$kulukeikkarow[laskunro]'
 											and vanhatunnus <> 0
 											and vienti in ('B','E','H')";
-								$result = mysql_query($query) or pupe_error($query);
+								$iresult = mysql_query($query) or pupe_error($query);
 
-								$kulukulurow = mysql_fetch_array($result);
+								$kulukulurow = mysql_fetch_array($iresult);
 
 								$ostohinta	+= $kulukulurow["kulusumma"];
 							}

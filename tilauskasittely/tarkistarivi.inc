@@ -436,7 +436,6 @@
 	}
 	
 	//	Onko tätä varattuna siirtolistalla?
-	/*
 	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P"))) {
 		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus
 					FROM lasku USE INDEX (tila_index)
@@ -453,10 +452,10 @@
 
 			//tehdään selväkielinen tila/alatila
 			require "inc/laskutyyppi.inc";
+			
 			$varaosakommentti .= ("Siirtolistalla").": {$siirtorow["kpl"]}{$trow["yksikko"]} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} <i>($alatila)</i><br>";
 		} 
 	}
-	*/
 	
 	if ($row["alv"] == -999.99) {
 		$varaosavirhe .= t("VIRHE: Tuotteelle ei löytynyt ALV-prosenttia asiakkaan maahan!")."<br>";

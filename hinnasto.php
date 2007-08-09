@@ -6,7 +6,7 @@ if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 	header("Content-type: application/force-download");
 	header("Content-Disposition: attachment; filename=hinnasto.zip");
 	header("Content-Description: File Transfer");
-	
+
 	$filenimi = '/tmp/' . basename($_POST['filenimi']);
 	readfile($filenimi);
 
@@ -54,7 +54,7 @@ if ($tee != '') {
 
 	if ($try != '') {
 		$where2 = " try ='$try' ";
-	}		
+	}
 	elseif ($try2 != '') {
 		$tryt = split(" ",$try2);
 
@@ -86,14 +86,14 @@ if ($tee != '') {
 	if (strlen($where2) > 0 && strlen($where1) > 0) {
 		$where = "(". $where1." or ".$where2.")  and ";
 	}
-	
+
 	if (isset($_POST['pp']) && isset($_POST['kk']) && isset($_POST['vv'])) {
 		if (strlen(trim($_POST['vv'])) > 0 and strlen(trim($_POST['kk'])) > 0 and strlen(trim($_POST['pp'])) > 0) {
 			$pvm = mysql_real_escape_string("{$_POST['vv']}-{$_POST['kk']}-{$_POST['pp']}");
 			$where .= "muutospvm >= '" . $pvm . "' and ";
 		}
 	}
-	
+
 	// jos ei olla extranetissa niin otetaan valuuttatiedot yhtiolta
 	// maa, valkoodi, ytunnus
 	if (empty($kukarow['extranet'])) {
@@ -106,20 +106,21 @@ if ($tee != '') {
 		// otetaan valuuttatiedot oletus asiakkaalta
 		$query = "SELECT maa, valkoodi, ytunnus from asiakas where tunnus='{$kukarow['oletus_asiakas']}' and yhtio ='{$kukarow['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);
-		
+
 		// käytetään tätä laskurowna
 		$laskurowfake = mysql_fetch_assoc($res);
 	}
-	
+
 	$query = "SELECT kurssi from valuu where nimi='{$laskurowfake['valkoodi']}' and yhtio = '{$kukarow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error($query);
 	$kurssi = mysql_fetch_array($res);
-	
+
 	// asetetaan vienti kurssi
 	$laskurowfake['vienti_kurssi'] = $kurssi['kurssi'];
-	
-	$query = "	SELECT tuote.tuoteno
+
+	$query = "	SELECT tuote.*, korvaavat.id
 				FROM tuote
+				LEFT JOIN korvaavat use index (yhtio_tuoteno) ON (tuote.tuoteno=korvaavat.tuoteno and tuote.yhtio=korvaavat.yhtio)
 				WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status in ('','a') and hinnastoon != 'E'
 				and ((tuote.vienti = '' or tuote.vienti like '%-{$laskurowfake['maa']}%' or tuote.vienti like '%+%')
 				and tuote.vienti not like '%+{$laskurowfake['maa']}%')
@@ -130,7 +131,7 @@ if ($tee != '') {
 		echo t('Yhtään tuotetta ei löytynyt hinnastoon.') . '<br />';
 		die();
 	}
-	
+
 	flush();
 
 	// kirjoitetaan tmp file
@@ -139,43 +140,35 @@ if ($tee != '') {
 	if (!$fh = fopen("/tmp/" . $filenimi, "w+")) {
 		die("filen luonti epäonnistui!");
 	}
-	
+
 	// katsotaan mikä hinnastoformaatti
-	
+
 	if (empty($kukarow['extranet'])) {
 		$rivifile = 'inc/hinnastorivi' . basename($_POST['hinnasto']) . '.inc';
-	} else {
+	}
+	else {
 		$rivifile = 'hinnastorivi' . basename($_POST['hinnasto']) . '.inc';
 	}
-	
+
 	if (file_exists($rivifile)) {
 		require $rivifile;
-	} else {
+	}
+	else {
 		die($rivifile . ' ei löydy');
 	}
-	
-	while ($tuoterow = mysql_fetch_array($result)) {
-		
-		$query = "	SELECT tuote.*, korvaavat.id
-					FROM tuote
-					LEFT JOIN korvaavat use index (yhtio_tuoteno) ON tuote.tuoteno=korvaavat.tuoteno and tuote.yhtio=korvaavat.yhtio
-					WHERE tuote.yhtio='{$kukarow['yhtio']}' and tuote.tuoteno='{$tuoterow['tuoteno']}'";
 
-		$trresult = mysql_query($query) or pupe_error($query);
-		$row = mysql_fetch_array($trresult);
-		
+	while ($tuoterow = mysql_fetch_array($result)) {
 		// tehdään yksi rivi
-		$ulos = hinnastorivi($row, $laskurowfake);
-		
+		$ulos = hinnastorivi($tuoterow, $laskurowfake);
 		fwrite($fh, $ulos);
 	}
-	
+
 	fclose($fh);
-	
+
 	//pakataan faili
 	$cmd = "cd /tmp/;/usr/bin/zip {$kukarow['yhtio']}.{$kukarow['kuka']}.zip $filenimi";
 	$palautus = exec($cmd);
-    
+
     // poistetaan tmp file
 	system("rm -f " . '/tmp/' . $filenimi);
 

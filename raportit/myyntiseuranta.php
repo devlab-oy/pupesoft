@@ -10,7 +10,7 @@
 	}
 
 	if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
-		require ("../inc/parametrit.inc");		
+		require ("../inc/parametrit.inc");
 	}
 
 	if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -53,7 +53,7 @@
 
 			list($tee,$ajotapa,$ajotapanlisa,$yhtiot, $asiakasosasto, $asiakasosasto2, $asiakasryhma, $asiakasryhma2,
 			$mul_osasto, $mul_piiri, $mul_try, $asiakas, $toimittaja, $jarjestys, $ruksit, $nimitykset, $kateprossat, $piiyhteensa,
-			$osoitetarrat, $varastonkierto, $katekierto, $ppa, $kka, $vva, $ppl, $kkl, $vvl) = explode("//", $muutparametrit);
+			$osoitetarrat, $ppa, $kka, $vva, $ppl, $kkl, $vvl) = explode("//", $muutparametrit);
 
 			if ($yhtiot != "") $yhtiot_x 			= explode("!!", $yhtiot);
 			else unset($yhtiot);
@@ -259,7 +259,7 @@
 				$muutparametrit .= "//";
 			}
 
-			$muutparametrit .= $nimitykset."//".$kateprossat."//".$piiyhteensa."//".$osoitetarrat."//".$varastonkierto."//".$katekierto."//".$ppa."//".$kka."//".$vva."//".$ppl."//".$kkl."//".$vvl;
+			$muutparametrit .= $nimitykset."//".$kateprossat."//".$piiyhteensa."//".$osoitetarrat."//".$ppa."//".$kka."//".$vva."//".$ppl."//".$kkl."//".$vvl;
 		}
 
 		if ($tee == 'go' and $asiakas != '') {
@@ -299,8 +299,6 @@
 			$group  = "";
 			$order  = "";
 			$select = "";
-			$varastonarvo = "";
-			$varastonarvokielto = "";			
 			$gluku  = 0;
 
 			// näitä käytetään queryssä
@@ -377,15 +375,6 @@
 					if ($sarjanumerot != '') {
 						$select .= "group_concat(concat(tilausrivi.tunnus,'#',tilausrivi.kpl)) sarjanumero, ";
 					}
-					$varastonarvo="JOO";
-					
-					if($varastonkierto != "") {
-						$varastonkierto = "JOO";
-					}
-					
-					if($katekierto != "") {
-						$katekierto = "JOO";
-					}
 				}
 
 				if ($mukaan == "tuotemyyja") {
@@ -394,8 +383,6 @@
 					$select .= "tuote.myyjanro tuotemyyja, ";
 					$order  .= "tuote.myyjanro,";
 					$gluku++;
-					
-					$varastonarvo="JOO";
 				}
 
 				if ($mukaan == "asiakasmyyja") {
@@ -412,8 +399,6 @@
 					$select .= "tuote.ostajanro tuoteostaja, ";
 					$order  .= "tuote.ostajanro,";
 					$gluku++;
-					
-					$varastonarvo="JOO";
 				}
 
 				if ($mukaan == "merkki") {
@@ -422,8 +407,6 @@
 					$select .= "tuote.tuotemerkki merkki, ";
 					$order  .= "tuote.tuotemerkki,";
 					$gluku++;
-					
-					$varastonarvo="JOO";
 				}
 
 				if ($mukaan == "toimittaja") {
@@ -466,8 +449,6 @@
 				$select .= "tuote.osasto tuos, ";
 				$order  .= "tuote.osasto+0,";
 				$gluku++;
-				
-				$varastonarvo="JOO";
 			}
 
 			if ($mul_try != "") {
@@ -476,8 +457,6 @@
 				$select .= "tuote.try tury, ";
 				$order  .= "tuote.try+0,";
 				$gluku++;
-				
-				$varastonarvo="JOO";
 			}
 
 			if ($mul_piiri != "") {
@@ -515,12 +494,36 @@
 				$lisa .= " and asiakas.piiri in $sel_piiri ";
 			}
 
+
 			if ($toimittaja != "") {
-				$lisa .= " and tilausrivi.tuoteno in (select tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and toimittaja='$toimittaja') ";
+				$query = "select tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and toimittaja='$toimittaja'";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) > 0) {
+					$lisa .= " and tilausrivi.tuoteno in (";
+					while ($toimirow = mysql_fetch_array($result)) {
+						$lisa .= "'$toimirow[tuoteno]',";
+					}
+					$lisa = substr($lisa,0,-1).")";
+				}
+				else {
+					echo "<font class='error'>Toimittajan $toimittaja tuotteita ei löytynyt! Ajetaan ajo ilman rajausta!</font><br><br>";
+					$toimittaja = "";
+				}
 			}
 
 			if ($asiakas != "") {
-				$lisa .= " and lasku.liitostunnus in (select tunnus from asiakas where yhtio in ($yhtio) and ytunnus = '$asiakas' $asiakasrajaus) ";
+				$query = "select group_concat(tunnus) from asiakas where yhtio in ($yhtio) and ytunnus = '$asiakas' $asiakasrajaus";
+				$result = mysql_query($query) or pupe_error($query);
+
+				$asiakasrow = mysql_fetch_array($result);
+				if (trim($asiakasrow[0]) != "") {
+					$lisa .= " and lasku.liitostunnus in ($asiakasrow[0]) ";
+				}
+				else {
+					echo "<font class='error'>Asiakasta $asiakas ei löytynyt! Ajetaan ajo ilman rajausta!</font><br><br>";
+					$asiakas = "";
+				}
 			}
 
 			if ($kateprossat != "") {
@@ -555,18 +558,7 @@
 			else {
 				$tilauslisa3 = "";
 			}
-			
-			$varastolisa = '';
-			if ($varastonarvo == "JOO") {
-				$varastolisa .= ", '' vanyt, '' vaed, '' vaind";
-			}
-			if ($varastonkierto == "JOO") {
-				$varastolisa .= ", '' vaki";
-			}
-			if($katekierto == "JOO") {
-				$varastolisa .= ", '' katek ";
-			}
- 
+
 			$query = "	SELECT $select
 						$tilauslisa1
 						sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0)) myykplnyt,
@@ -589,7 +581,6 @@
 						tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) /
 						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',
 						tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)),2) nettokateind
-						$varastolisa
 						$tilauslisa3
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tilausrivi use index ($index) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.$ouusio=lasku.tunnus and tilausrivi.tyyppi='L'
@@ -626,7 +617,7 @@
 			}
 
 			if ($query != "") {
-				
+
 				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
 					if(include('Spreadsheet/Excel/Writer.php')) {
 
@@ -688,99 +679,6 @@
 				$tarra_aineisto = "";
 
 				while ($row = mysql_fetch_array($result)) {
-					
-					$tuotenot = "";
-					if($varastonarvo == "JOO") {
-						if($row["tuoteno"] != "") {
-							$tuotenot = $row["tuoteno"];
-						}
-						else {
-							$wlisa = "";
-							if($mul_osasto != "") {
-								$wlisa .= " and osasto = '{$row["tuos"]}'";
-							}
-							if($mul_try != "") {
-								$wlisa .= " and try = '{$row["tury"]}'";
-							}
-							if($row["tuotemyyja"] != "") {
-								$wlisa .= " and myyjanro = '{$row["tuotemyyja"]}'";
-							}
-							if($row["tuoteostaja"] != "") {
-								$wlisa .= " and ostajanro = '{$row["tuoteostaja"]}'";
-							}
-							
-							$query = "	SELECT group_concat(tuoteno SEPARATOR '\',\'') tuotenot FROM tuote WHERE yhtio='{$kukarow["yhtio"]}' and tuoteno != '' $wlisa";
-							$apures = mysql_query($query) or pupe_error($query);
-
-							$apurow = mysql_fetch_array($apures);
-							$tuotenot = $apurow["tuotenot"];							
-						}
-
-						if($tuotenot != "") {
-							if($aburow["sarjanumeroseuranta"] != "") {
-								$query	= "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
-											FROM sarjanumeroseuranta
-											LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-											LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-											WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' and sarjanumeroseuranta.tuoteno IN ('$tuotenot')
-											and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-											and tilausrivi_osto.laskutettuaika != '0000-00-00'";
-								$sarjares = mysql_query($query) or pupe_error($query);
-								$sarjarow = mysql_fetch_array($sarjares);
-								
-								$kehahin = sprintf('%.2f', $sarjarow["kehahin"]);
-
-							}
-							else {
-								$kehahin = $aburow["kehahin"];
-							}
-
-							$query = "	SELECT sum(saldo * if(epakurantti2pvm!='0000-00-00', 0, if(epakurantti1pvm!='0000-00-00', 0.5, 1)) * kehahin) varasto
-										FROM tuotepaikat use index (tuote_index)
-										JOIN tuote ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
-										WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-										and tuotepaikat.tuoteno IN ('$tuotenot')";
-							$vres = mysql_query($query) or pupe_error($query);
-							$vrow = mysql_fetch_array($vres);
-
-							$row["vanyt"] = $vrow["varasto"];
-
-							// tuotteen muutos varastossa annetun päivän jälkeen
-							/* TÄMÄ MENEE ABOUT VÄHÄN OHI, MUTTA AIKA LÄHELLEKKIN */
-							$query = "	SELECT sum(kpl*hinta) muutos
-							 			FROM tapahtuma use index (yhtio_tuote_laadittu)
-							 			WHERE yhtio = '{$kukarow[yhtio]}'
-							 			and tuoteno IN ('$tuotenot')
-							 			and laadittu >= '$vva-$kka-$ppa 00:00:00'";
-							$mres = mysql_query($query) or pupe_error($query);
-							$mrow = mysql_fetch_array($mres);
-
-							$row["vaed"] = $row["vanyt"] - $mrow["muutos"];
-							
-							$kerroin = 1;
-
-							if($row["vaed"] <> 0) {
-								$row["vaind"] = round($row["vanyt"]/$row["vaed"], 2);
-							}
-							else {
-								$row["vaind"] = 0;
-							}
-							
-							if($row["vanyt"] > 0 and ($row["myyntinyt"]-$row["katenyt"]) > 0 and ($varastonkierto == "JOO" or $katekierto == "JOO")) {
-								$row["vaki"] = round($row["vanyt"]/($row["myyntinyt"]-$row["katenyt"]), 2);
-							}
-							else {
-								$row["vaki"] = "";
-							}
-							
-							if($row["vaki"] > 0 and $row["katenyt"] > 0 and $row["myyntinyt"] > 0 and $katekierto == "JOO") {
-								$row["katek"] = $row["vaki"]*($row["katenyt"]/$row["myyntinyt"]);
-							}
-							else {
-								$row["katek"] = "";
-							}
-						}						
-					}
 
 					if ($osoitetarrat != "" and $row[0] > 0) {
 						$tarra_aineisto .= $row[0].",";
@@ -911,29 +809,29 @@
 								$row[$i] = 0;
 							}
 						}
-						
+
 						// jos kyseessa on sarjanumero
 						if (mysql_field_name($result, $i) == "sarjanumero") {
 							$sarjat = explode(",", $row[$i]);
-							
+
 							$row[$i] = "";
-							
+
 							foreach($sarjat as $sarja) {
 								list($s,$k) = explode("#", $sarja);
-								
+
 								if ($k < 0) {
 									$tunken = "ostorivitunnus";
 								}
 								else {
 									$tunken = "myyntirivitunnus";
 								}
-								
+
 								$query = "	SELECT sarjanumero
 											FROM sarjanumeroseuranta
-											WHERE yhtio in ($yhtio) 
+											WHERE yhtio in ($yhtio)
 											and $tunken=$s";
 								$osre = mysql_query($query) or pupe_error($query);
-																
+
 								if (mysql_num_rows($osre) > 0) {
 									$osrow= mysql_fetch_array($osre);
 									$row[$i] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=$osrow[sarjanumero]'>".$osrow['sarjanumero']."</a><br>";
@@ -941,65 +839,16 @@
 							}
 							$row[$i] = substr($row[$i], 0, -4);
 						}
-						
-						// varastonarvo nyt
-						if (mysql_field_name($result, $i) == "vanyt") {
-							if ($row["vanyt"] != 0) {
-								$row[$i] = $row["vanyt"];
-							}
-							else {
-								$row[$i] = 0;
-							}
-						}
-
-						// varastonarvo ed
-						if (mysql_field_name($result, $i) == "vaed") {
-							if ($row["vaed"] != 0) {
-								$row[$i] = $row["vaed"];
-							}
-							else {
-								$row[$i] = 0;
-							}
-						}
-
-						if (mysql_field_name($result, $i) == "vaind") {
-							if ($row["vaind"] != 0) {
-								$row[$i] = $row["vaind"];
-							}
-							else {
-								$row[$i] = 0;
-							}
-						}
-
-						if (mysql_field_name($result, $i) == "vaki") {
-							if ($row["vaki"] != 0) {
-								$row[$i] = $row["vaki"];
-							}
-							else {
-								$row[$i] = 0;
-							}
-						}
-
-						if (mysql_field_name($result, $i) == "katek") {
-							if ($row["katek"] != 0) {
-								$row[$i] = $row["katek"];
-							}
-							else {
-								$row[$i] = 0;
-							}
-						}
-						
 
 						// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 						if ($gluku > 1) {
 
 							if ($edluku != $row[0] and $edluku != 'x' and $mukaan != 'tuote' and $piiyhteensa == '') {
 
-								$myyntiind = $kateind = $nettokateind = $vaind = 0;
-								if ($myyntied    	<> 0) $myyntiind    = round($myyntinyt/$myyntied,2);
-								if ($kateed      	<> 0) $kateind      = round($katenyt/$kateed,2);
-								if ($nettokateed 	<> 0) $nettokateind = round($nettokatenyt/$nettokateed,2);
-								if ($vaed 			<> 0) $vaind	 	= round($vanyt/$vaed,2);
+								$myyntiind = $kateind = $nettokateind = 0;
+								if ($myyntied    <> 0) $myyntiind    = round($myyntinyt/$myyntied,2);
+								if ($kateed      <> 0) $kateind      = round($katenyt/$kateed,2);
+								if ($nettokateed <> 0) $nettokateind = round($nettokatenyt/$nettokateed,2);
 
 								$apu = mysql_num_fields($result)-11;
 
@@ -1015,18 +864,6 @@
 									$apu -= 2;
 								}
 
-								if($varastonarvo == "JOO") {
-									$apu = $apu - 3;
-								}								
-
-								if($varastonkierto == "JOO") {
-									$apu = $apu - 1;
-								}								
-
-								if($katekierto == "JOO") {
-									$apu = $apu - 1;
-								}								
-								
 								echo "<td class='tumma' colspan='$apu'>$edluku ".t("yhteensä")."</th>";
 
 								if ($ajotapa == 'tilausjaauki') {
@@ -1067,22 +904,8 @@
 
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokatenyt))."</td>";
 								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateed))."</td>";
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td>\n";
+								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td></tr>\n";
 
-								if($varastonarvo == "JOO") {
-									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$vanyt))."</td>";
-									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$vaed))."</td>";
-									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$vaind))."</td>";
-								}
-								if($varastonkierto == "JOO") {
-									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$vaki))."</td>";
-								}
-								if($katekierto == "JOO") {
-									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$katek))."</td>";
-								}
-								
-								echo "</tr>\n";
-								
 								if(isset($workbook)) {
 									$excelsarake=0;
 
@@ -1145,24 +968,6 @@
 									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateed), $format_bold);
 									$excelsarake++;
 									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateind), $format_bold);
-									$excelsarake++;
-									
-									if($varastonarvo == "JOO") {
-										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$vanyt), $format_bold);
-										$excelsarake++;
-										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$vaed), $format_bold);
-										$excelsarake++;
-										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$vaind), $format_bold);
-										$excelsarake++;
-									}
-									if($varastonkierto == "JOO") {
-										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$vaki), $format_bold);
-										$excelsarake++;
-									}
-									if($katekierto == "JOO") {
-										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$katek), $format_bold);
-										$excelsarake++;
-									}
 									$excelrivi++;
 								}
 
@@ -1178,17 +983,12 @@
 								$kateed       				= "0";
 								$nettokatenyt 				= "0";
 								$nettokateed  				= "0";
-								$vanyt						= "0";
-								$vaned						= "0";
-								$vaki						= "0";
-								$katek						= "0";
-								
 							}
 							$edluku = $row[0];
 						}
 
 						// hoidetaan pisteet piluiksi!!
-						if (mysql_field_type($result,$i) == 'real' or substr(mysql_field_name($result, $i),0 ,4) == 'kate' or mysql_field_name($result, $i) == 'vanyt' or mysql_field_name($result, $i) == 'vaed' or mysql_field_name($result, $i) == 'vaind' or mysql_field_name($result, $i) == 'vaki' or mysql_field_name($result, $i) == 'katek') {
+						if (mysql_field_type($result,$i) == 'real' or substr(mysql_field_name($result, $i),0 ,4) == 'kate') {
 							echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
 							if(isset($workbook)) {
@@ -1225,8 +1025,6 @@
 					$kateed          			+= $row['kateed'];
 					$nettokatenyt    			+= $row['nettokatenyt'];
 					$nettokateed     			+= $row['nettokateed'];
-					$vanyt		       			+= $row['vanyt'];
-					$vaed	 					+= $row['vaed'];
 
 					$totmyykpllaskuttamattanyt  += $row['myykpllaskuttamattanyt'];
 					$totmyyntilaskuttamattanyt  += $row['myyntilaskuttamattanyt'];
@@ -1238,8 +1036,7 @@
 					$totkateed       			+= $row['kateed'];
 					$totnettokatenyt 			+= $row['nettokatenyt'];
 					$totnettokateed  			+= $row['nettokateed'];
-					$totvanyt       			+= $row['vanyt'];
-					$totvaed 					+= $row['vaed'];
+
 				}
 
 				$apu = mysql_num_fields($result)-11;
@@ -1256,33 +1053,16 @@
 					$apu -= 2;
 				}
 
-				if($varastonarvo == "JOO") {
-					$apu = $apu - 3;
-				}								
-
-				if($varastonkierto == "JOO") {
-					$apu = $apu - 1;
-				}			
-				
-				if($katekierto == "JOO") {
-					$apu = $apu - 1;
-				}								
-									
-				
 				// jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 				if ($gluku > 1 and $mukaan != 'tuote' and $piiyhteensa == '') {
 
-					$myyntiind = $kateind = $nettokateind = $vaind = $katek = $vaki = 0;
-					if ($myyntied    <> 0) 			$myyntiind    = round($myyntinyt/$myyntied,2);
-					if ($kateed      <> 0) 			$kateind      = round($katenyt/$kateed,2);
-					if ($nettokateed <> 0) 			$nettokateind = round($nettokatenyt/$nettokateed,2);
-					if ($vaed 		 <> 0) 			$vaind 		  = round($vanyt/$vaed,2);
-					if(($myyntinyt-$katenyt >0))	$vaki		  = round($vanyt/($myyntinyt-$katenyt),2);
-					if(($myyntinyt >0))				$katek		  = round(($vanyt/$myyntinyt)/$katenyt);
-									
+					$myyntiind = $kateind = $nettokateind = 0;
+					if ($myyntied    <> 0) $myyntiind    = round($myyntinyt/$myyntied,2);
+					if ($kateed      <> 0) $kateind      = round($katenyt/$kateed,2);
+					if ($nettokateed <> 0) $nettokateind = round($nettokatenyt/$nettokateed,2);
+
 		  		  	echo "<tr><th colspan='$apu'>$edluku ".t("yhteensä")."</td>";
 
-					
 					if ($ajotapa == 'tilausjaauki') {
 						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myykpllaskuttamattanyt))."</td>";
 					}
@@ -1321,22 +1101,8 @@
 
 					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokatenyt))."</td>";
 					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateed))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td>";
-					
-					if($varastonarvo == "JOO") {
-						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$vanyt))."</td>";
-						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$vaed))."</td>";
-						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$vaind))."</td>";						
-					}					
-					if($varastonkierto == "JOO") {
-						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$vaki))."</td>";
-					}
-					if($katekierto == "JOO") {
-						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$katek))."</td>";
-					}
-					
-					echo "</tr>\n";
-					
+					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td></tr>\n";
+
 					if(isset($workbook)) {
 						$excelsarake=0;
 
@@ -1399,36 +1165,15 @@
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateed), $format_bold);
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateind), $format_bold);
-						$excelsarake++;
-						
-						if($varastonarvo == "JOO") {
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$vanyt), $format_bold);
-							$excelsarake++;
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$vaed), $format_bold);
-							$excelsarake++;
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$vaind), $format_bold);
-							$excelsarake++;
-						}
-						if($varastonkierto == "JOO") {
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$vaki), $format_bold);
-							$excelsarake++;
-						}
-						if($katekierto == "JOO") {
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$katek), $format_bold);
-							$excelsarake++;
-						}
 						$excelrivi++;
 					}
 				}
 
-				$myyntiind = $kateind = $nettokateind = $totvaind = $totvaki = $totkatek = 0;
-				if ($totmyyntied    <> 0) 				$myyntiind    	= round($totmyyntinyt/$totmyyntied,2);
-				if ($totkateed      <> 0) 				$kateind      	= round($totkatenyt/$totkateed,2);
-				if ($totnettokateed <> 0) 				$nettokateind 	= round($totnettokatenyt/$totnettokateed,2);
-				if ($totvaed 		<> 0) 				$totvaind 	  	= round($totvanyt/$totvaed,2);
-				if (($totmyyntinyt-$totkatenyt) <> 0) 	$totvaki 	  	= round($totvanyt/($totmyyntinyt-$totkatenyt),2);				
-				if ($totmyyntinyt<> 0)					$totkatek	  	= round(($totvaki/($totkatenyt / $totmyyntinyt)), 2);
-				
+				$myyntiind = $kateind = $nettokateind = 0;
+				if ($totmyyntied    <> 0) $myyntiind    = round($totmyyntinyt/$totmyyntied,2);
+				if ($totkateed      <> 0) $kateind      = round($totkatenyt/$totkateed,2);
+				if ($totnettokateed <> 0) $nettokateind = round($totnettokatenyt/$totnettokateed,2);
+
 				echo "<tr><th colspan='$apu'>".t("Kaikki yhteensä")."</td>";
 
 				if ($ajotapa == 'tilausjaauki') {
@@ -1469,19 +1214,9 @@
 
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totnettokatenyt))."</td>";
 				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totnettokateed))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td>";
+				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td></tr>\n";
 
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totvanyt))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totvaed))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totvaind))."</td>";
-				if($varastonkierto == "JOO") {
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totvaki))."</td>";
-				}
-				if($katekierto == "JOO") {
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totkatek))."</td>";
-				}
-
-				echo "</tr>\n</table>";
+				echo "</table>";
 
 				if(isset($workbook)) {
 					$excelsarake=0;
@@ -1545,24 +1280,6 @@
 					$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$totnettokateed), $format_bold);
 					$excelsarake++;
 					$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$totnettokateind), $format_bold);
-					$excelsarake++;
-
-					if($varastonarvo == "JOO") {
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totvanyt), $format_bold);
-						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totvaed), $format_bold);
-						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totvaind), $format_bold);
-						$excelsarake++;
-					}
-					if($varastonkierto == "JOO") {
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totvaki), $format_bold);
-						$excelsarake++;
-					}
-					if($katekierto == "JOO") {
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totkatek), $format_bold);
-						$excelsarake++;
-					}
 					$excelrivi++;
 
 					// We need to explicitly close the workbook
@@ -1850,24 +1567,22 @@
 			echo "</table><br>";
 
 			// lisärajaukset näkymä..
-			if ($ruksit[1]  != '') 			$ruk1chk  = "CHECKED";
-			if ($ruksit[2]  != '') 			$ruk2chk  = "CHECKED";
-			if ($ruksit[3]  != '') 			$ruk3chk  = "CHECKED";
-			if ($ruksit[4]  != '') 			$ruk4chk  = "CHECKED";
-			if ($ruksit[5]  != '') 			$ruk5chk  = "CHECKED";
-			if ($ruksit[6]  != '') 			$ruk6chk  = "CHECKED";
-			if ($ruksit[7]  != '') 			$ruk7chk  = "CHECKED";
-			if ($ruksit[8]  != '') 			$ruk8chk  = "CHECKED";
-			if ($ruksit[9]  != '') 			$ruk9chk  = "CHECKED";
-			if ($ruksit[10] != '') 			$ruk10chk = "CHECKED";
-			if ($nimitykset != '')   		$nimchk   = "CHECKED";
-			if ($kateprossat != '')  		$katchk   = "CHECKED";
-			if ($osoitetarrat != '') 		$tarchk   = "CHECKED";
-			if ($piiyhteensa != '')  		$piychk   = "CHECKED";
-			if ($sarjanumerot != '')  		$sarjachk = "CHECKED";
-			if ($varastonkierto != '')  	$vachk 	  = "CHECKED";
-			if ($katekierto != '')  		$katekchk = "CHECKED";
-			
+			if ($ruksit[1]  != '') 		$ruk1chk  = "CHECKED";
+			if ($ruksit[2]  != '') 		$ruk2chk  = "CHECKED";
+			if ($ruksit[3]  != '') 		$ruk3chk  = "CHECKED";
+			if ($ruksit[4]  != '') 		$ruk4chk  = "CHECKED";
+			if ($ruksit[5]  != '') 		$ruk5chk  = "CHECKED";
+			if ($ruksit[6]  != '') 		$ruk6chk  = "CHECKED";
+			if ($ruksit[7]  != '') 		$ruk7chk  = "CHECKED";
+			if ($ruksit[8]  != '') 		$ruk8chk  = "CHECKED";
+			if ($ruksit[9]  != '') 		$ruk9chk  = "CHECKED";
+			if ($ruksit[10] != '') 		$ruk10chk = "CHECKED";
+			if ($nimitykset != '')   	$nimchk   = "CHECKED";
+			if ($kateprossat != '')  	$katchk   = "CHECKED";
+			if ($osoitetarrat != '') 	$tarchk   = "CHECKED";
+			if ($piiyhteensa != '')  	$piychk   = "CHECKED";
+			if ($sarjanumerot != '')  	$sarjachk = "CHECKED";
+
 			echo "<table>
 				<tr>
 				<th>".t("Lisärajaus")."</th>
@@ -1957,16 +1672,6 @@
 				<td><input type='checkbox' name='osoitetarrat' $tarchk></td>
 				<td></td>
 				<td class='back'>".t("(Toimii vain jos listaat asiakkaittain)")."</td>
-				</tr>
-				<th>".t("Näytä varastonkierto")."</th>
-				<td><input type='checkbox' name='varastonkierto' $vachk></td>
-				<td></td>
-				<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
-				</tr>
-				<th>".t("Näytä Kate-kierto")."</th>
-				<td><input type='checkbox' name='katekierto' $katekchk></td>
-				<td></td>
-				<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
 				</tr>
 				</table><br>";
 

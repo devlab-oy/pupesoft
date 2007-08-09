@@ -73,13 +73,12 @@ if (!function_exists('alku')) {
 				echo t("Logokuvavirhe").": ".$image.$data;
 			}
 			else {
-				$logoparam = array();
-				$logoparam['scale'] = 0.15;
-				
 				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-				$iy    = $isizelogo[1]*0.15*0.35714;	// kuvan y-korkeus millimetreissä
 				
-				$placement = $pdf->image_place($image, mm_pt(292-$iy), mm_pt(7), $thispage, $logoparam);
+				$logoparam = array();
+				$logoparam['scale'] = 40 / $isizelogo[1];
+								
+				$placement = $pdf->image_place($image, 785, 20, $thispage, $logoparam);
 			}
 		}
 		else {

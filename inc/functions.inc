@@ -1585,6 +1585,8 @@ if (!function_exists("jalkilaskentafunktio")) {
 		*/
 
 		require("tilauskasittely/jalkilaskenta.inc");
+		
+		return $uusikehahin;
 	}
 }
 

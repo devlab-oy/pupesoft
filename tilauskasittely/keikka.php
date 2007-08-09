@@ -169,7 +169,7 @@ if ($toiminto == "kaikkiok" or $toiminto == "kalkyyli") {
 		$ytunnus = "";
 		$toiminto = "dummieimit‰‰n";
 	}
-}
+}  
 
 // lasketaan lopullinen varastonarvo
 if ($toiminto == "kaikkiok") {
@@ -527,7 +527,7 @@ if ($toiminto == "" and $ytunnus != "") {
 
 			if ($llrow["vosumma"] != 0) $llrow["vosumma"] = "($llrow[vosumma])"; else $llrow["vosumma"]=""; // kaunistellaan summa sulkuihin
 			if ($llrow["kusumma"] != 0) $llrow["kusumma"] = "($llrow[kusumma])"; else $llrow["kusumma"]=""; // kaunistellaan summa sulkuihin
-			if ($llrow["volasku"] == "") $llrow["volasku"] = 0; // kaunistellaan tyhj‰t nollaks
+			if ($llrow["volasku"] == "") $llrow["volasku"] = $kohok = 0; // kaunistellaan tyhj‰t nollaks eik‰ anneta j‰lkilaskea, jos ei ole vaihto-omaisuuslaskua
 			if ($llrow["kulasku"] == "") $llrow["kulasku"] = 0; // kaunistellaan tyhj‰t nollaks
 
 			echo "<tr class='aktiivi'>";

@@ -4,9 +4,9 @@
 
 $debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
-echo "<table>";
+$varastoon_msg = "<table>";
 
-echo "<th valign='top'>".t("Tuoteno")."</th>
+$varastoon_msg .= "<th valign='top'>".t("Tuoteno")."</th>
 			<th valign='top'>".t("Määrä")."<br>".t("sis").".</th>
 			<th valign='top'>".t("Määrä")."<br>".t("ulk").".</th>
 			<th valign='top'>".t("Ostohinta")."<br>".t("ulk").".</th>
@@ -98,6 +98,7 @@ else {
 		$rahtitapa  = t("Kulusumma");
 	}
 }
+
 echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
 echo "<font class='message'>".t("Rahdin määrä yhteensä").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 
@@ -105,7 +106,16 @@ $summa = 0;
 $superirivit = '';
 $rivia = 0;
 
+require_once ('inc/ProgressBar.class.php');
+$bar = new ProgressBar();
+$elements = mysql_num_rows($presult); // total number of elements to process
+
+echo "<font class='message'>".t("Suoritetaan jälkilaskentaa %s tuotteelle", "", $elements).":<br></font>";
+
+$bar->initialize($elements); // print the empty bar
+
 while ($tilrivirow = mysql_fetch_array($presult)) {
+
 	// lasketaan keskihankintahinta, tarvitaan tuotteen saldo ja tuotteen tiedot
 	$query  = "select sum(saldo) saldo from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
 	$salres = mysql_query($query) or pupe_error($query);
@@ -165,7 +175,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	else {
 		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0) {
 			// kehahin matikka, tuotteella pitää olla saldoa ennen ja jälkeen että edes tehdään matikkaa
-			if ($debug >= 1) echo "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: kehahin = ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu])</font><br>";
+			if ($debug >= 1) $varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: kehahin = ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu])</font><br>";
 			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']),4);
 		}
 		else {
@@ -188,7 +198,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$pvm		= $tilrivirow["laskutettuaika"]; // koska tämä tuote oli viety varastoon
 		$rivitunnus = $tilrivirow["tunnus"]; // rivin tunnus, tällä löydetään varmasti oikea tapahtuma
 
-		require("jalkilaskenta.inc");
+		$uusikehahin = jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus);
 
 		$uusikehahin = "-> $uusikehahin";
 	}
@@ -255,7 +265,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_affected_rows() == 0) {
-			echo "<font class='error'>".t("Varastopaikka")." $tilrivirow[hyllyalue]-$tilrivirow[hyllynro]-$tilrivirow[hyllytaso]-$tilrivirow[hyllyvali] ".t("ei löydy vaikka se on syötetty tilausriville! Koitetaan päivittää oletustapaikkaa!")."</font>";
+			$varastoon_msg .= "<font class='error'>".t("Varastopaikka")." $tilrivirow[hyllyalue]-$tilrivirow[hyllynro]-$tilrivirow[hyllytaso]-$tilrivirow[hyllyvali] ".t("ei löydy vaikka se on syötetty tilausriville! Koitetaan päivittää oletustapaikkaa!")."</font>";
 
 			$query = "	UPDATE tuotepaikat set
 	   		 			saldo       	= saldo+$tilrivirow[varattu],
@@ -269,7 +279,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 	   		if (mysql_affected_rows() == 0) {
 
-	   			echo "<br><font class='error'>".t("Tuotteella")." $tilrivirow[tuoteno] ".t("ei ole oletuspaikkaakaaaaan")."!!!</font><br><br>";
+	   			$varastoon_msg .= "<br><font class='error'>".t("Tuotteella")." $tilrivirow[tuoteno] ".t("ei ole oletuspaikkaakaaaaan")."!!!</font><br><br>";
 
 				// haetaan firman eka varasto, tökätään kama sinne ja tehdään siitä oletuspaikka
 				$query = "select alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' and tyyppi='' order by alkuhyllyalue, alkuhyllynro limit 1";
@@ -290,7 +300,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					$hyllyrow["alkuhyllynro"]  = "0";
 				}
 
-	   			echo "<br><font class='error'>".t("Tehtiin oletuspaikka")." $tilrivirow[tuoteno]: $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0</font><br><br>";
+	   			$varastoon_msg .= "<br><font class='error'>".t("Tehtiin oletuspaikka")." $tilrivirow[tuoteno]: $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0</font><br><br>";
 
 				// lisätään paikka
 				$query = "	INSERT INTO tuotepaikat set
@@ -320,7 +330,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 				$result = mysql_query($query) or pupe_error($query);
 	   		}
 			else {
-				echo "<font class='error'>".t("Huh, se onnistui!")."</font><br>";
+				$varastoon_msg .= "<font class='error'>".t("Huh, se onnistui!")."</font><br>";
 			}
 		}
 
@@ -345,7 +355,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 
 	// näytetään ruudulla
-	echo "<tr>
+	$varastoon_msg .= "<tr>
 		<td>$tilrivirow[tuoteno]</td>
 		<td align='right'>$tilrivirow[varattu]</td>
 		<td align='right'>" . round($tilrivirow['varattu']*$tuorow['tuotekerroin'],2) . "</td>
@@ -358,23 +368,28 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 
 	if ($tuorow["sarjanumeroseuranta"] == "S") {
-		echo "	<td align='right'></td>
+		$varastoon_msg .= "	<td align='right'></td>
 				<td align='right'></td>";
 	}
 	else {
-		echo "	<td align='right'>$tuorow[kehahin]</td>
+		$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]</td>
 				<td align='right'>$kehahin $uusikehahin</td>";
 	}
 
 	if ($tilrivirow["var"] != '') {
-		echo "<td>".t("ei tullia")."</td>";
+		$varastoon_msg .= "<td>".t("ei tullia")."</td>";
 	}
 	else {
-		echo "<td></td>";
+		$varastoon_msg .= "<td></td>";
 	}
 
-	echo "</tr>";
+	$varastoon_msg .= "</tr>";
+	
+	$bar->increase(); //calls the bar with every processed element
+	
 }
+
+echo $varastoon_msg."<br>";
 
 // jos kyseessä on ihan virallinen varastonarvonlaskenta, tehdään näin
 if ($toiminto == "kaikkiok" and $tee == "varma") {
@@ -450,7 +465,7 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 		}
 	}
 	else {
-		echo "<font class='error'>".t("En löytänyt keikan vaihto-omaisuuslaskua! PAHA VIRHE!")."<br><br>$query</font><br>";
+		echo "<font class='error'>".t("En löytänyt keikan vaihto-omaisuuslaskua! PAHA VIRHE!")."<br><br></font>";
 	}
 }
 

@@ -35,14 +35,14 @@ if ($monta == 0 and $ytunnus != '') {
 
 if ($monta==0) {
 	echo "<font class='error'>".t("Toimittajaa")." '$ytunnus' ".t("ei löydy")."!</font><br>";
-	$ytunnus = "";
-	$toimittajaid = "";
+	$ytunnus 		= "";
+	$toimittajaid 	= "";
 }
 
 if ($monta==1) {
-	$toimittajarow = mysql_fetch_array($result);
-	$ytunnus = $toimittajarow['ytunnus'];
-	$toimittajaid = $toimittajarow['tunnus'];
+	$toimittajarow 	= mysql_fetch_array($result);
+	$ytunnus 		= $toimittajarow['ytunnus'];
+	$toimittajaid 	= $toimittajarow['tunnus'];
 }
 
 if ($monta > 1 and $monta <= $limit) {

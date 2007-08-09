@@ -7,9 +7,20 @@
 		echo "<font class='head'>".t("Asiakkaan tuoteostot").":</font><hr>";
 	}
 	if ($toim == 'OSTO') {
-		echo "<font class='head'>".t("Tilautut tuotteet").":</font><hr>";
+		echo "<font class='head'>".t("Tilatut tuotteet").":</font><hr>";
 	}
+	
+	if (isset($muutparametrit) and $muutparametrit != '') {
+		$muut = explode('/',$muutparametrit);
 
+		$vva 		= $muut[0];
+		$kka 		= $muut[1];
+		$ppa 		= $muut[2];
+		$vvl 		= $muut[3];
+		$kkl		= $muut[4];
+		$ppl 		= $muut[5];
+		$tuoteno	= $muut[6];
+	}
 
 	if ($tee == 'NAYTATILAUS') {
 		require ("naytatilaus.inc");
@@ -17,54 +28,86 @@
 		$tee = "TULOSTA";
 	}
 
-
-	if ($ytunnus != '') {
+	if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
+		
+		$muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl."/".$tuoteno;
+		
 		if ($toim == 'MYYNTI') {
 			require ("../inc/asiakashaku.inc");
 		}
 		if ($toim == 'OSTO') {
 			require ("../inc/kevyt_toimittajahaku.inc");
-			$asiakasid = $toimittajarow['tunnus'];
 		}
 	}
-
-	if ($ytunnus != '' or $tuoteno != '') {
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
-			<input type='hidden' name='ytunnus' value='$ytunnus'>
-			<input type='hidden' name='asiakasid' value='$asiakasid'>
+	
+	if ($tuoteno != '') {
+		require ('inc/tuotehaku.inc');
+	}
+	
+	
+	//Etsi-kenttä
+	echo "<br><table><form action = '$PHP_SELF' method='post'>
 			<input type='hidden' name='toim' value='$toim'>
-			<input type='hidden' name='tuoteno' value='$tuoteno'>
-			<input type='hidden' name='tee' value='TULOSTA'>";
+			<input type='hidden' name='tee' value='ETSI'>";
+			
+	if ($kka == '')
+		$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if ($vva == '')
+		$vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+	if ($ppa == '')
+		$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
-		echo "<table>";
+	if ($kkl == '')
+		$kkl = date("m");
+	if ($vvl == '')
+		$vvl = date("Y");
+	if ($ppl == '')
+		$ppl = date("d");
 
-		if ($kka == '')
-			$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-		if ($vva == '')
-			$vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-		if ($ppa == '')
-			$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+	if ($toim == 'MYYNTI') {
+		echo "<tr><th>".t("Asiakas").":</th>";
+	}
+	if ($toim == 'OSTO') {
+		echo "<tr><th>".t("Toimittaja").":</th>";
+	}
+	
+	if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
+		if ($toim == 'MYYNTI') {
+			echo "<td colspan='3'>$asiakasrow[nimi]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
+		}
+		if ($toim == 'OSTO') {
+			echo "<td colspan='3'>$toimittajarow[nimi]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
+		}
+	}
+	else {
+		echo "<td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='20'></td></tr>";
+	}
+	
+	
+	echo "	<tr><th>".t("Syötä tuotenumero").":</th>
+			<td colspan='3'>";
+	
+	if (isset($tuoteno) and trim($ulos) != '') {
+		echo $ulos;
+	} 
+	else {
+		echo "<input type='text' name='tuoteno' value='$tuoteno' size='20'>";
+	}
+			
+	echo "</td></tr>";
+			
+	echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
+			<td><input type='text' name='kka' value='$kka' size='3'></td>
+			<td><input type='text' name='vva' value='$vva' size='5'></td>
+			</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
+			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
+			<td><input type='text' name='kkl' value='$kkl' size='3'></td>
+			<td><input type='text' name='vvl' value='$vvl' size='5'></td>
+			<td><input type='submit' value='".t("Etsi")."'></td></tr></form></table>";
 
-		if ($kkl == '')
-			$kkl = date("m");
-		if ($vvl == '')
-			$vvl = date("Y");
-		if ($ppl == '')
-			$ppl = date("d");
-
-		echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
-				<td><input type='text' name='ppa' value='$ppa' size='3'></td>
-				<td><input type='text' name='kka' value='$kka' size='3'></td>
-				<td><input type='text' name='vva' value='$vva' size='5'></td>
-				</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
-				<td><input type='text' name='ppl' value='$ppl' size='3'></td>
-				<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-				<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-	echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr></form></table>";
-
-
-
-		if ($jarj != ''){
+	if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {		
+		if ($jarj != '') {
 			$jarj = "ORDER BY $jarj";
 		}
 		else {
@@ -74,8 +117,8 @@
 
 		if ($toim == 'OSTO') {
 			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, ytunnus, 
-						if(nimi!=toim_nimi,concat(toim_nimi,'<br>(',nimi,')'), nimi) nimi, 
-						if(postitp!=toim_postitp,concat(toim_postitp,'<br>(',postitp,')'), postitp) postitp, 
+						if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi, 
+						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp, 
 						tuoteno, REPLACE(kpl+varattu,'.',',') kpl, 
 						REPLACE(tilausrivi.hinta,'.',',') hinta, 
 						REPLACE(rivihinta,'.',',') rivihinta, 
@@ -86,14 +129,22 @@
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and lasku.yhtio=tilausrivi.yhtio
 						and lasku.tunnus=tilausrivi.otunnus
-						and lasku.tila = 'O'
+						and lasku.tila IN ('O','K')
 						and tilausrivi.tyyppi = 'O'
 						and tilausrivi.laadittu >='$vva-$kka-$ppa 00:00:00'
 						and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
 						and lasku.tunnus=tilausrivi.otunnus ";
 		}
 		else {			
-			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, if(nimi!=toim_nimi,concat(toim_nimi,'<br>(',nimi,')'), nimi) nimi, if(postitp!=toim_postitp,concat(toim_postitp,'<br>(',postitp,')'), postitp) postitp, tuoteno, REPLACE(kpl+varattu,'.',',') kpl, REPLACE(tilausrivi.hinta,'.',',') hinta, REPLACE(rivihinta,'.',',') rivihinta, lasku.toimaika, lasku.lahetepvm, lasku.tila, lasku.alatila
+			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, 
+						if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi,
+						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp, 
+						tuoteno, REPLACE(kpl+varattu,'.',',') kpl, 
+						REPLACE(tilausrivi.hinta,'.',',') hinta, 
+						REPLACE(rivihinta,'.',',') rivihinta, 
+						lasku.toimaika, 
+						lasku.lahetepvm, 
+						lasku.tila, lasku.alatila
 						FROM tilausrivi, lasku
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and lasku.yhtio=tilausrivi.yhtio
@@ -104,18 +155,19 @@
 						and tilausrivi.laadittu <='$vvl-$kkl-$ppl 23:59:59'
 						and lasku.tunnus=tilausrivi.otunnus ";
 		}
-
-
+		
 		if ($tuoteno != '') {
 			$query .= " and tilausrivi.tuoteno='$tuoteno' ";
 		}
 
-		if ($ytunnus != '') {
+		if ((int) $asiakasid > 0) {
 			$query .= " and lasku.liitostunnus = '$asiakasid' ";
 		}
+		if ((int) $toimittajaid > 0) {
+			$query .= " and lasku.liitostunnus = '$toimittajaid' ";
+		}
 
-		$query .= "$jarj";
-
+		$query .= "$jarj";		
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -208,33 +260,9 @@
 		}
 		
 		else {
-			echo "".t("Ei ostettuja tuotteita")."...<br><br>";
+			echo t("Ei ostettuja tuotteita")."...<br><br>";
 		}
 	}
-
-	//Etsi-kenttä
-	echo "<br><table><form action = '$PHP_SELF' method='post'>
-			<input type='hidden' name='toim' value='$toim'>
-			<input type='hidden' name='ppa' value='$ppa'>
-			<input type='hidden' name='kka' value='$kka'>
-			<input type='hidden' name='vva' value='$vva'>
-			<input type='hidden' name='ppl' value='$ppl'>
-			<input type='hidden' name='kkl' value='$kkl'>
-			<input type='hidden' name='vvl' value='$vvl'>";
-
-
-	if ($toim == 'MYYNTI') {
-		echo "<tr><th>".t("Asiakas").":</th>";
-	}
-	if ($toim == 'OSTO') {
-		echo "<tr><th>".t("Toimittaja").":</th>";
-	}
-
-	echo "<td><input type='text' name='ytunnus' value='$ytunnus' size='20'></td></tr>
-			<tr><th>".t("Syötä tuotenumero").":</th>
-			<td><input type='text' name='tuoteno' value='$tuoteno' size='20'></td>
-			<td><input type='hidden' name='tee' value='ETSI'>
-			<input type='submit' value='".t("Etsi")."'></td></tr></form></table>";
 
 	require ("../inc/footer.inc");
 ?>

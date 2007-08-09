@@ -515,36 +515,12 @@
 				$lisa .= " and asiakas.piiri in $sel_piiri ";
 			}
 
-
 			if ($toimittaja != "") {
-				$query = "select tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and toimittaja='$toimittaja'";
-				$result = mysql_query($query) or pupe_error($query);
-
-				if (mysql_num_rows($result) > 0) {
-					$lisa .= " and tilausrivi.tuoteno in (";
-					while ($toimirow = mysql_fetch_array($result)) {
-						$lisa .= "'$toimirow[tuoteno]',";
-					}
-					$lisa = substr($lisa,0,-1).")";
-				}
-				else {
-					echo "<font class='error'>Toimittajan $toimittaja tuotteita ei löytynyt! Ajetaan ajo ilman rajausta!</font><br><br>";
-					$toimittaja = "";
-				}
+				$lisa .= " and tilausrivi.tuoteno in (select tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and toimittaja='$toimittaja') ";
 			}
 
 			if ($asiakas != "") {
-				$query = "select group_concat(tunnus) from asiakas where yhtio in ($yhtio) and ytunnus = '$asiakas' $asiakasrajaus";
-				$result = mysql_query($query) or pupe_error($query);
-
-				$asiakasrow = mysql_fetch_array($result);
-				if (trim($asiakasrow[0]) != "") {
-					$lisa .= " and lasku.liitostunnus in ($asiakasrow[0]) ";
-				}
-				else {
-					echo "<font class='error'>Asiakasta $asiakas ei löytynyt! Ajetaan ajo ilman rajausta!</font><br><br>";
-					$asiakas = "";
-				}
+				$lisa .= " and lasku.liitostunnus in (select tunnus from asiakas where yhtio in ($yhtio) and ytunnus = '$asiakas' $asiakasrajaus) ";
 			}
 
 			if ($kateprossat != "") {

@@ -438,11 +438,11 @@
 	//	Onko tätä varattuna siirtolistalla?
 	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0 and in_array($row["var"], array("J","U","T","P"))) {
 		$query = "	SELECT kohde.nimitys kohde, lahde.nimitys lahde, tila, alatila, sum(varattu+jt+kpl) kpl, lasku.tunnus
-					FROM lasku
-					RIGHT JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tuoteno = '{$trow["tuoteno"]}'
-					LEFT JOIN varastopaikat lahde ON lahde.yhtio = lasku.yhtio and lahde.tunnus = lasku.varasto
-					LEFT JOIN varastopaikat kohde ON kohde.yhtio = lasku.yhtio and kohde.tunnus = lasku.clearing					
-					WHERE lasku.yhtio = '{$kukarow["yhtio"]}' and tila = 'G' and alatila !='D'
+					FROM lasku USE INDEX (tila_index)
+					RIGHT JOIN tilausrivi USE INDEX (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi != 'D' and tuoteno = '{$trow["tuoteno"]}')
+					LEFT JOIN varastopaikat lahde USE INDEX (PRIMARY) ON (lahde.yhtio = lasku.yhtio and lahde.tunnus = lasku.varasto)
+					LEFT JOIN varastopaikat kohde USE INDEX (PRIMARY) ON (kohde.yhtio = lasku.yhtio and kohde.tunnus = lasku.clearing)					
+					WHERE lasku.yhtio = '{$kukarow["yhtio"]}' and tila = 'G' and alatila != 'V'
 					GROUP BY tuoteno, lasku.tunnus";
 		$siirtores = mysql_query($query) or pupe_error($query);
 		while($siirtorow = mysql_fetch_array($siirtores)) {
@@ -451,8 +451,8 @@
 
 			//tehdään selväkielinen tila/alatila
 			require "inc/laskutyyppi.inc";
-			$varaosakommentti .= ("Tuotetta on siirtolistalla")." {$siirtorow["kpl"]}{$trow["yksikko"]} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} <i>$alatila</i><br>";
-		}
+			$varaosakommentti .= ("Siirtolistalla").": {$siirtorow["kpl"]}{$trow["yksikko"]} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} <i>($alatila)</i><br>";
+		} 
 	}
 	
 	if ($row["alv"] == -999.99) {

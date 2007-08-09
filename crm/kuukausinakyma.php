@@ -380,17 +380,60 @@
 			//echo str_replace("\t", " ", $query)."<br>";
 			unset($eka);
 			if(mysql_num_rows($kresult)>0) {
-				echo "<tr class='aktiivi'><td rowspan='".mysql_num_rows($kresult)."' NOWRAP>{$row[tunnusnippu]} - {$row[seuranta]} - {$row[nimi]}</td><td rowspan='".mysql_num_rows($kresult)."'><a href='$href'><img src='../pics/lullacons/folder-open-green.png' class='edit'></a></td>";
+
+				echo "<tr class='aktiivi'><td rowspan='".mysql_num_rows($kresult)."' NOWRAP>{$row[tunnusnippu]} - {$row[seuranta]} - {$row[nimi]}</td><td rowspan='".mysql_num_rows($kresult)."'>";
+				
+				//	Tehd‰‰n infobalooni				
+				$id=md5(uniqid());
+				echo "<div id='$id' class='popup' style=\"width: 500px\">
+				<table width='500px' align='center'>
+				<caption><font class='head'>".t("TOIMITUKSET")."</font></caption>
+				<tr>
+					<th>".t("Toimitus")."</th>
+					<th>".t("Ker‰ysaika")."</th>						
+					<th>".t("Toimitusaika")."</th>
+				</tr>";
+				
+				while ($krow = mysql_fetch_array($kresult)) {
+					$laskutyyppi = $krow["tila"];
+					$alatila 	 = $krow["alatila"];
+				 	require ("../inc/laskutyyppi.inc");
+					
+					echo "
+					<tr>
+						<td>{$krow["tunnus"]} - ".t($laskutyyppi)." ".t($alatila)."</td>
+						<td>{$krow["kerayspvm"]}</td>
+						<td>{$krow["toimaika"]}</td>												
+					</tr>";										
+				}
+				mysql_data_seek($kresult, 0);	
+				echo "</table></div>";					
+
+				echo "<a href='$href'><img src='../pics/lullacons/folder-open-green.png' class='edit'></a>&nbsp;<img src='../pics/lullacons/info.png' class='info' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\"></td>";
 
 				while ($krow = mysql_fetch_array($kresult)) {
-					
 					if(isset($eka)) {
 						echo "<tr>";
 					}
 					else $eka = true;
 					
-					$vari = "rgb(".rand(0,255).",".rand(0,255).",".rand(0,255).")";
-
+					if($krow["tila"] == "L" or $krow["tila"] == "N") {
+						$vari = "rgb(".rand(80,100).",".rand(150,255).",".rand(20,40).")";
+						$vari2 = "green";						
+					}
+					elseif($krow["tila"] == "V" or $krow["tila"] == "W") {
+						$vari = "rgb(".rand(20,40).",".rand(80,100).",".rand(150,255).")";
+						$vari2 = "blue";
+					}
+					elseif($krow["tila"] == "A") {
+						$vari = "rgb(".rand(210,255).",".rand(180,255).",0)";
+						$vari2 = "yellow";
+					}
+					else {
+						$vari = "rgb(".rand(200,255).",135,135)";
+						$vari2 = "black";
+					}
+					
 					if($krow["toimpvm"] < $krow["kerpvm"]) {
 						$krow["toimpvm"] = days_in_month($month, $year);
 					}
@@ -409,7 +452,7 @@
 							}
 								
 							$paivia++;
-							echo "<td colspan = '$paivia' style=\"background-color: $vari; text-align: center;\" NOWRAP>";
+							echo "<td colspan = '$paivia' style=\"border: 2px solid $vari2; background-color: $vari; text-align: center;\" NOWRAP>";
 							
 							$laskutyyppi = $krow["tila"];
 							$alatila 	 = $krow["alatila"];
@@ -429,8 +472,36 @@
 								<td>{$krow["kerayspvm"]}</td>
 								<td>{$krow["toimaika"]}</td>
 							</tr>
-							</table>
-							</div>";
+							</table>";
+						
+							$query = "	SELECT concat_ws(' ',tuoteno, nimitys) tuote, (varattu+jt) maara, kommentti
+										FROM tilausrivi
+										WHERE yhtio = '{$kukarow["yhtio"]}' and  otunnus = '{$krow["tunnus"]}' and tyyppi != 'D' and (perheid = 0 or perheid = tunnus)";
+							$rivires = mysql_query($query) or pupe_error($query);
+							if(mysql_num_rows($rivires)) {
+								echo "<br><table width='500px' align='center'>
+								<tr>
+									<th>".t("Tuote")."</th>
+									<th>".t("m‰‰r‰")."</th>						
+								</tr>";
+								
+								while($rivirow = mysql_fetch_array($rivires)) {
+									echo "
+									<tr>
+										<td>{$rivirow["tuote"]}</td>
+										<td>{$rivirow["maara"]}</td>
+									</tr>";
+									if($rivirow["kommentti"] != "") {
+										echo "
+										<tr>
+											<td colspan = '2'><em> *{$rivirow["kommentti"]}</em></td>
+										</tr>";										
+									}
+								}			
+								echo "</table>";					
+							}
+
+							echo "</div>";
 							
 							echo "<font style=\"color: black; text-shadow: #e8ffe0 2px 2px 2px;\">{$krow["tunnus"]}</font>";
 							
@@ -443,7 +514,7 @@
 								echo "&nbsp;<a href='$href'><img src='../pics/lullacons/folder-open-green.png' class='info'></a>";
 							}
 							
-							echo "&nbsp;<img src='../pics/lullacons/info.png' class='info' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\" onclick=\"$onclick\">";
+							echo "&nbsp;<img src='../pics/lullacons/info.png' class='info' onmouseover=\"tipper(event, '$id');\" onmouseout=\"tipper(event, '$id');\">";
 							
 							echo "</td>";							
 						}

@@ -8,9 +8,8 @@
 		$query = "	select * 
 					from lasku 
 					where yhtio	 = '$kukarow[yhtio]'
-					and tila	 = 'V'
-					and alatila  in ('V','C')
-					and tunnus	 = '$id'";
+					and tunnus	 = '$id'
+					and ((tila = 'V' and alatila  in ('V','C')) or (tila = 'L' and alatila  != 'X' and tilaustyyppi='V'))";
 		$res = mysql_query($query) or pupe_error($query);
 				
 		if (mysql_num_rows($res) != 1) {

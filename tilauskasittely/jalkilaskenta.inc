@@ -658,7 +658,7 @@ if ($tuoteno != '') {
 			$pvm = $tapahtuma["laadittu"]; // kääntöpisteen tarkka aika talteen
 		}
 
-		if (($tuote['epakurantti1pvm'] != '0000-00-00') or ($tuote['epakurantti1pvm'] != '0000-00-00')) {
+		if (($tuote['epakurantti1pvm'] != '0000-00-00') or ($tuote['epakurantti2pvm'] != '0000-00-00')) {
 			echo "<font class='error'>".t("Tätä tuotetta ei enää voi korjata")."</font><br>";
 			if ($jalkilaskenta_debug > 1) echo "$query<br>";
 			$jlerror=1;
@@ -713,7 +713,7 @@ if ($tuoteno != '') {
 				$result = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($result) > 0) {
-					$trow = mysql_fetch_array ($result);
+					$trow = mysql_fetch_array($result);
 					$uusikehahin = $trow["hinta"];
 				}
 				else {
@@ -755,6 +755,7 @@ if ($tuoteno != '') {
 						$jlerror = 0;
 						$eka = 1;
 						$laskuja = 0;
+						$korjattavia_laskuja = 0;
 						$kpl = 0;
 						$vlaadittu = '3000-01-01'; // varmuuden vuoks ettei korjailla nollasta lähtien jos käy jotain todellaa weird...
 
@@ -772,13 +773,14 @@ if ($tuoteno != '') {
 							if (($trow['laji'] == 'tulo' or $trow['laji'] == 'valmistus') and $eka == 0) {
 
 								// jos ollaan käsitelty jo jotain laskuja, niin nyt on sitte alkamassa uusi tulo ni korjataan laskut ja nollataan laskurit
-								if ($laskuja != 0) {
+								if ($korjattavia_laskuja != 0) {
 									// korjaus
 									if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Korjataan! Laskuja ($laskuja) Kpl: $kpl Saldo: $uusisaldo Keskihinta: $uusikehahin Alku: $vlaadittu Loppu: $trow[laadittu] Case: 1</font><br>";
 									$mitenkavi = korjaalaskut($tuoteno, $uusikehahin, $vlaadittu, $trow['laadittu'], 0);
 									$uusisaldo += $kpl;
 									// nollaillaan
 									$laskuja = 0;
+									$korjattavia_laskuja = 0;
 									$kpl = 0;
 								}
 
@@ -807,6 +809,11 @@ if ($tuoteno != '') {
 							if ($trow['laji'] == 'laskutus' and $eka == 0) {
 								$laskuja++;
 								$kpl += $trow['kpl'];
+
+								// plussaillaan tätä vaan jos hinta muuttuu niin tiedetään pitääkö tehdä jälkilaskentaa
+								if ($trow["hinta"] != $uusikehahin) {
+									$korjattavia_laskuja++;
+								}
 							}
 
 							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo
@@ -900,15 +907,18 @@ if ($tuoteno != '') {
 									$kulutuslisa = "";
 								}
 								
-								$query = "UPDATE tapahtuma SET hinta='$uusikehahin' $kulutuslisa WHERE tunnus='$trow[tunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'kulutus')";
-								if ($jalkilaskenta_debug > 1) echo "$query<br>";
-								$upresu = mysql_query($query) or pupe_error($query);
+								// päivitetään hinta vain jos hinta on eri 
+								if ($trow["hinta"] != $uusikehahin) {
+									$query = "UPDATE tapahtuma SET hinta = '$uusikehahin' $kulutuslisa WHERE tunnus = '$trow[tunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'kulutus')";
+									if ($jalkilaskenta_debug > 1) echo "$query<br>";
+									$upresu = mysql_query($query) or pupe_error($query);
+								}
 							}
 
 						} // end while
 
 						// jos meillä on jotain korjattavia laskuja, jota ei korjattu whilen sisällä ni korjataan ne ny
-						if ($laskuja != 0 and $eka == 0) {
+						if ($korjattavia_laskuja != 0 and $eka == 0) {
 							$uusisaldo += $kpl;
 							if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Korjataan! Laskuja ($laskuja) Kpl: $kpl Saldo: $uusisaldo Keskihinta: $uusikehahin Alku: $vlaadittu Loppu: 3000-01-01 Case: 2</font><br>";
 							$mitenkavi = korjaalaskut($tuoteno, $uusikehahin, $vlaadittu, '3000-01-01', 0);

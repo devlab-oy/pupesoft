@@ -47,7 +47,12 @@ if (!function_exists('tulosta_lasku')) {
 		if ($laskurow["vienti"] == "") {
 			if ($laskurow["summa"] >= 0) {
 				if ($toim == 'PROFORMA') {
-					$otsikko = "PROFORMALASKU";
+					if($laskurow["toim_maa"] == "US") {
+						$otsikko = "TULLAUSLASKU";
+					}
+					else {
+						$otsikko = "PROFORMALASKU";
+					}					
 				}
 				else {
 					$otsikko = "LASKU";
@@ -59,7 +64,12 @@ if (!function_exists('tulosta_lasku')) {
 		}
 		else {
 			if ($toim == 'PROFORMA') {
-				$otsikko = "PROFORMALASKU";
+				if($laskurow["toim_maa"] == "US") {
+					$otsikko = "TULLAUSLASKU";
+				}
+				else {
+					$otsikko = "PROFORMALASKU";
+				}					
 			}
 			elseif ($kateiskuitti != ""){
 				$otsikko = "KÄTEISKUITTI";					
@@ -481,9 +491,12 @@ if (!function_exists('tulosta_lasku')) {
 			}
 		}
 		$h-=$pdf->ln(3);			
-		
+				
 		// Alv erittely!
 		$s=$pdf->teeSarakkeet(array(140,15,35));
+		if($toim == "PROFORMA") {
+			$pdf->write($h, 1, 0, 90, t("ARVO VAIN TULLIA VARTEN", $kieli), "norm", "R", "B");
+		}
 		$pdf->write($h, 1, 0, $s[0], t("Veroton arvo yhteensä", $kieli).":", "norm", "R", "B");
 		if ($toim == 'PROFORMA' or ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])))) {
 			$pdf->write($h, 1, $s[1], 0, money_format('%i',$summa), "norm", "R", "B");
@@ -570,7 +583,7 @@ if (!function_exists('tulosta_lasku')) {
 		
 		
 		// dynamiikkaa
-		if($h < 35) {
+		if($h < 50) {
 			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
 			$h = 190;
 		}
@@ -584,147 +597,199 @@ if (!function_exists('tulosta_lasku')) {
 			$h-=$pdf->ln($nb);					
 		}
 			
-		if($h < 35) {
+		if($h < 50) {
 			$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli);
 			$h = 190;			
 		}
 
-		$h=50;
-		$s=$pdf->teeSarakkeet(array(31,30,45,25,35));		
-		$pdf->write($h, 1, 0, $s[1], t("MAKSUTIEDOT", $kieli), "norm", "L", "B");
-		$h-=$pdf->ln(1.25);
+		$h = 50;
+		if($toim != "PROFORMA") {
+			$s=$pdf->teeSarakkeet(array(31,30,45,25,35));		
+			$pdf->write($h, 1, 0, $s[1], t("MAKSUTIEDOT", $kieli), "norm", "L", "B");
+			$h-=$pdf->ln(1.25);
 
-		$query = "	SELECT *
-					FROM maksuehto
-					left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
-					WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.tunnus = $laskurow[maksuehto]";
-		$result = mysql_query($query) or pupe_error($query);
-		$row = mysql_fetch_array($result);
-		
-		$masrow = $row;
-		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
-		
-		$pdf->write($h, 1, 0, 		$s[0], t("Laskun pvm", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], strftime("%x",strtotime($laskurow["tapvm"])), "norm", "L", "");
-		$h-=$pdf->ln();
-		$pdf->write($h, 1, 0, 		$s[0], t("Maksuehto", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], t($maksuehto, $kieli), "norm", "L", "");
-		$h-=$pdf->ln();
-		$pdf->write($h, 1, 0, 		$s[0], t("Eräpäivä", $kieli).":", "norm", "L", "");
-		
-		if ($row['kateinen'] != '') {
-			$erapaiva = t('MAKSETTU', $kieli);
-		} else {
-			$erapaiva = strftime("%x",strtotime($laskurow["erpcm"]));
-		}
-		
-		if ($laskurow["yhtio_ovttunnus"] != "") {
+			$query = "	SELECT *
+						FROM maksuehto
+						left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
+						WHERE maksuehto.yhtio = '$kukarow[yhtio]' and maksuehto.tunnus = $laskurow[maksuehto]";
+			$result = mysql_query($query) or pupe_error($query);
+			$row = mysql_fetch_array($result);
 
-			// haetaan toimipaikan tiedot
-			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
-			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+			$masrow = $row;
+			$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 
-			if (mysql_num_rows($alhire) == 1) {
+			$pdf->write($h, 1, 0, 		$s[0], t("Laskun pvm", $kieli).":", "norm", "L", "");
+			$pdf->write($h, 1, $s[0], 	$s[1], strftime("%x",strtotime($laskurow["tapvm"])), "norm", "L", "");
+			$h-=$pdf->ln();
+			$pdf->write($h, 1, 0, 		$s[0], t("Maksuehto", $kieli).":", "norm", "L", "");
+			$pdf->write($h, 1, $s[0], 	$s[1], t($maksuehto, $kieli), "norm", "L", "");
+			$h-=$pdf->ln();
+			$pdf->write($h, 1, 0, 		$s[0], t("Eräpäivä", $kieli).":", "norm", "L", "");
+
+			if ($row['kateinen'] != '') {
+				$erapaiva = t('MAKSETTU', $kieli);
+			} else {
+				$erapaiva = strftime("%x",strtotime($laskurow["erpcm"]));
+			}
+
+			if ($laskurow["yhtio_ovttunnus"] != "") {
 
 				// haetaan toimipaikan tiedot
-				$alhiro = mysql_fetch_array($alhire);
+				$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
+				$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
-				// fax ja puhelin ei ole laskulla
-				$yhtiorow['puhelin']	= $alhiro['puhelin'];
-				$yhtiorow['fax']		= $alhiro['fax'];
+				if (mysql_num_rows($alhire) == 1) {
+
+					// haetaan toimipaikan tiedot
+					$alhiro = mysql_fetch_array($alhire);
+
+					// fax ja puhelin ei ole laskulla
+					$yhtiorow['puhelin']	= $alhiro['puhelin'];
+					$yhtiorow['fax']		= $alhiro['fax'];
+				}
+
+				// loput tiedot otetaan laskulta
+				$yhtiorow["nimi"] 		= $laskurow["yhtio_nimi"];
+				$yhtiorow["osoite"] 	= $laskurow["yhtio_osoite"];
+				$yhtiorow["postino"] 	= $laskurow["yhtio_postino"];
+				$yhtiorow["postitp"] 	= $laskurow["yhtio_postitp"];
+				$yhtiorow["maa"] 		= $laskurow["yhtio_maa"];
+				$yhtiorow["kotipaikka"]	= $laskurow["yhtio_kotipaikka"];
+				$vatnumero				= $laskurow["yhtio_ovttunnus"];
 			}
-			
-			// loput tiedot otetaan laskulta
-			$yhtiorow["nimi"] 		= $laskurow["yhtio_nimi"];
-			$yhtiorow["osoite"] 	= $laskurow["yhtio_osoite"];
-			$yhtiorow["postino"] 	= $laskurow["yhtio_postino"];
-			$yhtiorow["postitp"] 	= $laskurow["yhtio_postitp"];
-			$yhtiorow["maa"] 		= $laskurow["yhtio_maa"];
-			$yhtiorow["kotipaikka"]	= $laskurow["yhtio_kotipaikka"];
-			$vatnumero				= $laskurow["yhtio_ovttunnus"];
+
+			//Laitetaan pankkiyhteystiedot kuntoon
+			if ($masrow["factoring"] != "") {
+				$query = "	SELECT *
+							FROM factoring
+							WHERE yhtio 		= '{$kukarow['yhtio']}'
+							and factoringyhtio 	= '{$masrow['factoring']}'
+							and valkoodi 		= '{$laskurow['valkoodi']}'";
+				$fres = mysql_query($query) or pupe_error($query);
+				$frow = mysql_fetch_array($fres);
+
+				$pankkitiedot["pankkinimi1"]  =	$frow["pankkinimi1"];
+				$pankkitiedot["pankkitili1"]  =	$frow["pankkitili1"];
+				$pankkitiedot["pankkiiban1"]  =	$frow["pankkiiban1"];
+				$pankkitiedot["pankkiswift1"] =	$frow["pankkiswift1"];
+				$pankkitiedot["pankkinimi2"]  =	$frow["pankkinimi2"];
+				$pankkitiedot["pankkitili2"]  =	$frow["pankkitili2"];
+				$pankkitiedot["pankkiiban2"]  =	$frow["pankkiiban2"];
+				$pankkitiedot["pankkiswift2"] = $frow["pankkiswift2"];
+				$pankkitiedot["pankkinimi3"]  =	"";
+				$pankkitiedot["pankkitili3"]  =	"";
+				$pankkitiedot["pankkiiban3"]  =	"";
+				$pankkitiedot["pankkiswift3"] =	"";
+
+			}
+			elseif ($masrow["pankkinimi1"] != "") {
+				$pankkitiedot["pankkinimi1"]  =	$masrow["pankkinimi1"];
+				$pankkitiedot["pankkitili1"]  =	$masrow["pankkitili1"];
+				$pankkitiedot["pankkiiban1"]  =	$masrow["pankkiiban1"];
+				$pankkitiedot["pankkiswift1"] =	$masrow["pankkiswift1"];
+				$pankkitiedot["pankkinimi2"]  =	$masrow["pankkinimi2"];
+				$pankkitiedot["pankkitili2"]  =	$masrow["pankkitili2"];
+				$pankkitiedot["pankkiiban2"]  =	$masrow["pankkiiban2"];
+				$pankkitiedot["pankkiswift2"] = $masrow["pankkiswift2"];
+				$pankkitiedot["pankkinimi3"]  =	$masrow["pankkinimi3"];
+				$pankkitiedot["pankkitili3"]  =	$masrow["pankkitili3"];
+				$pankkitiedot["pankkiiban3"]  =	$masrow["pankkiiban3"];
+				$pankkitiedot["pankkiswift3"] =	$masrow["pankkiswift3"];
+			}
+			else {
+				$pankkitiedot["pankkinimi1"]  =	$yhtiorow["pankkinimi1"];
+				$pankkitiedot["pankkitili1"]  =	$yhtiorow["pankkitili1"];
+				$pankkitiedot["pankkiiban1"]  =	$yhtiorow["pankkiiban1"];
+				$pankkitiedot["pankkiswift1"] =	$yhtiorow["pankkiswift1"];
+				$pankkitiedot["pankkinimi2"]  =	$yhtiorow["pankkinimi2"];
+				$pankkitiedot["pankkitili2"]  =	$yhtiorow["pankkitili2"];
+				$pankkitiedot["pankkiiban2"]  =	$yhtiorow["pankkiiban2"];
+				$pankkitiedot["pankkiswift2"] = $yhtiorow["pankkiswift2"];
+				$pankkitiedot["pankkinimi3"]  =	$yhtiorow["pankkinimi3"];
+				$pankkitiedot["pankkitili3"]  =	$yhtiorow["pankkitili3"];
+				$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
+				$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
+			}
+
+			$pdf->write($h, 1, $s[0], 	$s[1], $erapaiva, "norm", "L", "");
+			$h-=$pdf->ln();
+			$pdf->write($h, 1, 0, 		$s[0], t("Tilinumero", $kieli).":", "norm", "L", "");
+			$pdf->write($h, 1, $s[0], 	$s[1], 		$pankkitiedot["pankkitili1"], "norm", "L", "");
+			$h-=$pdf->ln();
+			$pdf->write($h, 1, 0, 		$s[0], t("Viitenumero", $kieli).":", "norm", "L", "");
+			$pdf->write($h, 1, $s[0], 	$s[1], 		$laskurow["viite"], "norm", "L", "");
+			$h-=$pdf->ln();
+			$pdf->write($h, 1, 0, 		$s[0], t("Summa", $kieli).":", "norm", "L", "");
+			$pdf->write($h, 1, $s[0], 	$s[1], 		money_format('%i',$laskusumma), "norm", "L", "");
+			$h-=$pdf->ln();		
+			//Duusataan pankkitiedot ovelsati reversenä!
+			for($i=1;$i<3;$i++) {
+				if($yhtiorow["pankkitili$i"] != "") {		
+					$h+=$pdf->ln();		
+					$pdf->write($h, 1, $s[1], 	$s[2], 	$pankkitiedot["pankkinimi$i"], "snadi", "L", "");
+					$pdf->write($h, 1, $s[2], 	$s[3], 	$pankkitiedot["pankkitili$i"], "snadi", "L", "");
+					$pdf->write($h, 1, $s[3], 	$s[4], 	$pankkitiedot["pankkiiban$i"], "snadi", "L", "");
+					$pdf->write($h, 1, $s[4], 	0, 		$pankkitiedot["pankkiswift$i"], "snadi", "L", "");								
+				} 
+			}
+			$h+=$pdf->ln();		
+			$pdf->write($h, 1, $s[1], $s[2], t("Pankki", $kieli), "norm", "L", "");		
+			$pdf->write($h, 1, $s[2], $s[3], t("Tilinumero", $kieli), "norm", "L", "");				
+			$pdf->write($h, 1, $s[3], $s[4], t("IBAN", $kieli), "norm", "L", "");
+			$pdf->write($h, 1, $s[4], 0, t("SWIFT", $kieli), "norm", "L", "");					
 		}
-        
-		//Laitetaan pankkiyhteystiedot kuntoon
-		if ($masrow["factoring"] != "") {
-			$query = "	SELECT *
-						FROM factoring
-						WHERE yhtio 		= '{$kukarow['yhtio']}'
-						and factoringyhtio 	= '{$masrow['factoring']}'
-						and valkoodi 		= '{$laskurow['valkoodi']}'";
-			$fres = mysql_query($query) or pupe_error($query);
-			$frow = mysql_fetch_array($fres);
+		elseif($toim == "PROFORMA" and $laskurow["alatila"] != "X") {
 			
-			$pankkitiedot["pankkinimi1"]  =	$frow["pankkinimi1"];
-			$pankkitiedot["pankkitili1"]  =	$frow["pankkitili1"];
-			$pankkitiedot["pankkiiban1"]  =	$frow["pankkiiban1"];
-			$pankkitiedot["pankkiswift1"] =	$frow["pankkiswift1"];
-			$pankkitiedot["pankkinimi2"]  =	$frow["pankkinimi2"];
-			$pankkitiedot["pankkitili2"]  =	$frow["pankkitili2"];
-			$pankkitiedot["pankkiiban2"]  =	$frow["pankkiiban2"];
-			$pankkitiedot["pankkiswift2"] = $frow["pankkiswift2"];
-			$pankkitiedot["pankkinimi3"]  =	"";
-			$pankkitiedot["pankkitili3"]  =	"";
-			$pankkitiedot["pankkiiban3"]  =	"";
-			$pankkitiedot["pankkiswift3"] =	"";
-			
-		}
-		elseif ($masrow["pankkinimi1"] != "") {
-			$pankkitiedot["pankkinimi1"]  =	$masrow["pankkinimi1"];
-			$pankkitiedot["pankkitili1"]  =	$masrow["pankkitili1"];
-			$pankkitiedot["pankkiiban1"]  =	$masrow["pankkiiban1"];
-			$pankkitiedot["pankkiswift1"] =	$masrow["pankkiswift1"];
-			$pankkitiedot["pankkinimi2"]  =	$masrow["pankkinimi2"];
-			$pankkitiedot["pankkitili2"]  =	$masrow["pankkitili2"];
-			$pankkitiedot["pankkiiban2"]  =	$masrow["pankkiiban2"];
-			$pankkitiedot["pankkiswift2"] = $masrow["pankkiswift2"];
-			$pankkitiedot["pankkinimi3"]  =	$masrow["pankkinimi3"];
-			$pankkitiedot["pankkitili3"]  =	$masrow["pankkitili3"];
-			$pankkitiedot["pankkiiban3"]  =	$masrow["pankkiiban3"];
-			$pankkitiedot["pankkiswift3"] =	$masrow["pankkiswift3"];
-		}
-		else {
-			$pankkitiedot["pankkinimi1"]  =	$yhtiorow["pankkinimi1"];
-			$pankkitiedot["pankkitili1"]  =	$yhtiorow["pankkitili1"];
-			$pankkitiedot["pankkiiban1"]  =	$yhtiorow["pankkiiban1"];
-			$pankkitiedot["pankkiswift1"] =	$yhtiorow["pankkiswift1"];
-			$pankkitiedot["pankkinimi2"]  =	$yhtiorow["pankkinimi2"];
-			$pankkitiedot["pankkitili2"]  =	$yhtiorow["pankkitili2"];
-			$pankkitiedot["pankkiiban2"]  =	$yhtiorow["pankkiiban2"];
-			$pankkitiedot["pankkiswift2"] = $yhtiorow["pankkiswift2"];
-			$pankkitiedot["pankkinimi3"]  =	$yhtiorow["pankkinimi3"];
-			$pankkitiedot["pankkitili3"]  =	$yhtiorow["pankkitili3"];
-			$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
-			$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
+			//	Olisiko jo pakkaustietoja
+			$query = "	SELECT sum(kollit) kollit, round(sum(kilot), 2) kilot, round(sum(kuutiot), 2) kuutiot, round(sum(lavametri), 2) lavametrit, round(sum(nettopaino), 2) nettopaino, concat_ws(' ',pakkaus, pakkauskuvaus, lisatiedot) tiedot, toimitustapa
+						FROM rahtikirjat
+						WHERE yhtio = '{$kukarow["yhtio"]}' and otsikkonro = '{$laskurow["tunnus"]}'
+						GROUP BY pakkaus, pakkauskuvaus, lisatiedot";
+			$rahtires = mysql_query($query) or pupe_error($query);
+
+			if(mysql_num_rows($rahtires)>0) {
+
+				if(!in_array($laskurow["alatila"], array("B", "D","J","E","V","X"))) {
+					$otsik = "PAKKAUSSUUNNITELMA";
+				}
+				else {
+					$otsik = "PAKKAUSTIEDOT";
+				}
+
+				$pdf->write($h, 1, 0, 0, 		t($otsik, $kieli), "norm", "L", "B");
+
+				$h-=$pdf->ln(1.5);
+				while ($rahtirow = mysql_fetch_array($rahtires)) {
+					$pdf->write($h, 1, 0, $s[0], 		$rahtirow["kollit"]." ".t("kpl", $kieli)." ".$rahtirow["tiedot"], "norm", "L", "");
+					$h-=$pdf->ln(1.25);
+
+					if($rahtirow["kilot"]>0) {
+						$pdf->write($h, 1, 5, 40, 		t("Bruttopaino", $kieli).":", "norm", "L", "");
+						$pdf->write($h, 1, 40, 0, 	$rahtirow["kilot"]." ".t("kg", $kieli), "norm", "L", "");					
+						$h-=$pdf->ln(1);					
+					}
+					if($rahtirow["nettopaino"]>0) {
+						$pdf->write($h, 1, 5, 40, 		t("Nettopaino", $kieli).":", "norm", "L", "");
+						$pdf->write($h, 1, 40, 0, 	$rahtirow["nettopaino"]." ".t("kg", $kieli), "norm", "L", "");					
+						$h-=$pdf->ln(1);					
+					}
+					if($rahtirow["kuutiot"]>0) {
+						$pdf->write($h, 1, 5, 40, 		t("Kuutiot", $kieli).":", "norm", "L", "");
+						$pdf->write($h, 1, 40, 0, 	$rahtirow["kuutiot"]." ".t("m³", $kieli), "norm", "L", "");					
+						$h-=$pdf->ln(1);					
+					}
+					if($rahtirow["lavametrit"]>0) {
+						$pdf->write($h, 1, 5, 40, 		t("Lavametrit", $kieli).":", "norm", "L", "");
+						$pdf->write($h, 1, 40, 0, 	$rahtirow["lavametrit"]." ".t("m", $kieli), "norm", "L", "");
+						$h-=$pdf->ln(1);					
+					}
+
+					$h-=$pdf->ln(1);				
+				}				
+			}
 		}
 		
-		$pdf->write($h, 1, $s[0], 	$s[1], $erapaiva, "norm", "L", "");
-		$h-=$pdf->ln();
-		$pdf->write($h, 1, 0, 		$s[0], t("Tilinumero", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], 		$pankkitiedot["pankkitili1"], "norm", "L", "");
-		$h-=$pdf->ln();
-		$pdf->write($h, 1, 0, 		$s[0], t("Viitenumero", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], 		$laskurow["viite"], "norm", "L", "");
-		$h-=$pdf->ln();
-		$pdf->write($h, 1, 0, 		$s[0], t("Summa", $kieli).":", "norm", "L", "");
-		$pdf->write($h, 1, $s[0], 	$s[1], 		money_format('%i',$laskusumma), "norm", "L", "");
-		$h-=$pdf->ln();		
-		//Duusataan pankkitiedot ovelsati reversenä!
-		for($i=1;$i<3;$i++) {
-			if($yhtiorow["pankkitili$i"] != "") {		
-				$h+=$pdf->ln();		
-				$pdf->write($h, 1, $s[1], 	$s[2], 	$pankkitiedot["pankkinimi$i"], "snadi", "L", "");
-				$pdf->write($h, 1, $s[2], 	$s[3], 	$pankkitiedot["pankkitili$i"], "snadi", "L", "");
-				$pdf->write($h, 1, $s[3], 	$s[4], 	$pankkitiedot["pankkiiban$i"], "snadi", "L", "");
-				$pdf->write($h, 1, $s[4], 	0, 		$pankkitiedot["pankkiswift$i"], "snadi", "L", "");								
-			} 
-		}
-		$h+=$pdf->ln();		
-		$pdf->write($h, 1, $s[1], $s[2], t("Pankki", $kieli), "norm", "L", "");		
-		$pdf->write($h, 1, $s[2], $s[3], t("Tilinumero", $kieli), "norm", "L", "");				
-		$pdf->write($h, 1, $s[3], $s[4], t("IBAN", $kieli), "norm", "L", "");
-		$pdf->write($h, 1, $s[4], 0, t("SWIFT", $kieli), "norm", "L", "");		
-				
-		$h = 15;
+		$h = 15;		
 		$s=$pdf->teeSarakkeet(array(70,15,58,15));
 		$pdf->write($h, 1, 0, $s[0], 		$yhtiorow["nimi"], "norm", "L", "B");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Puh", $kieli).":", "norm", "L", "");

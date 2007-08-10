@@ -364,7 +364,7 @@ if ($ytunnus != '' and $tee == "") {
 
 	echo "<tr><th>".t("Kohdistus")."</th><td>";
 	if ($asiakas['konserniyhtio'] != '') {
-		echo "<input type='hidden' name='vastatili' value='konserni'>".t("Konsernisaamiset")."";
+		echo "<input type='hidden' name='vastatili' value='konserni'>".t("Konsernimyyntisaamiset")."";
 	}
 	else {
 		echo "<input type='radio' name='vastatili' value='myynti' $sel1> ".t("Myyntisaamiset")."

@@ -256,7 +256,7 @@
 			if ($suoritus['ttilino'] == $suoritus["oletus_selvittelytili"]) {
 				$sel4 = "selected";
 			}
-			if ($suoritus['ttilino'] == $yhtiorow["konsernisaamiset"]) {
+			if ($suoritus['ttilino'] == $yhtiorow["konsernimyyntisaamiset"]) {
 				$sel5 = "selected";
 			}
 
@@ -269,7 +269,7 @@
 				echo "<option value='$suoritus[oletus_selvittelytili]' $sel4>".t("Pankkitilin selvittelytili")." ($suoritus[oletus_selvittelytili])</option>";
 			}
 			if ($trow['konserniyhtio'] != "") {
-				echo "<option value='$yhtiorow[konsernisaamiset]' $sel5>".t("Konsernisaamiset")." ($yhtiorow[konsernisaamiset])</option>";
+				echo "<option value='$yhtiorow[konsernimyyntisaamiset]' $sel5>".t("Konsernimyyntisaamiset")." ($yhtiorow[konsernimyyntisaamiset])</option>";
 			}
 			echo "</select></td>";
 

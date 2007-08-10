@@ -754,7 +754,7 @@ if ($tila == 'kohdistaminen') {
 	if ($suoritus['ttilino'] == $suoritus["oletus_selvittelytili"]) {
 		$sel4 = "selected";
 	}
-	if ($suoritus['ttilino'] == $yhtiorow["konsernisaamiset"]) {
+	if ($suoritus['ttilino'] == $yhtiorow["konsernimyyntisaamiset"]) {
 		$sel5 = "selected";
 	}
 
@@ -762,6 +762,7 @@ if ($tila == 'kohdistaminen') {
 	echo "<input type='hidden' name='tunnus' value='$suoritus[tunnus]'>";
 	echo "<input type='hidden' name='tila' value='vaihdasuorituksentili'>";
 	echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas_tunnus'>";
+	echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
 	echo "<input type='hidden' name='suoritus_tunnus' value='$suoritus_tunnus'>";
 
 	echo "<td><select name='vastatili' onchange='submit();'>";
@@ -773,7 +774,7 @@ if ($tila == 'kohdistaminen') {
 		echo "<option value='$suoritus[oletus_selvittelytili]' $sel4>".t("Pankkitilin selvittelytili")." ($suoritus[oletus_selvittelytili])</option>";
 	}
 	if ($suoritus['konserniyhtio'] != "") {
-		echo "<option value='$yhtiorow[konsernisaamiset]' $sel5>".t("Konsernisaamiset")." ($yhtiorow[konsernisaamiset])</option>";
+		echo "<option value='$yhtiorow[konsernimyyntisaamiset]' $sel5>".t("Konsernimyyntisaamiset")." ($yhtiorow[konsernimyyntisaamiset])</option>";
 	}
 	echo "</select></td>";
 	echo "</form>\n\n";
@@ -787,7 +788,7 @@ if ($tila == 'kohdistaminen') {
 	if ($osasuoritus == '1') $osacheck = 'checked';
 	if ($pyoristys_virhe_ok == '1') $pyocheck = 'checked';
 
-	echo "<form action = '$PHP_SELF?tila=$tila&asiakas_tunnus=$asiakas_tunnus' method = 'post' name='summat'>";
+	echo "<form method = 'post' name='summat'>";
 	echo "<table>";
 	echo "<tr><th>".t("Summa")."</th><td><input type='text' name='summa' value='0.0' readonly></td>";
 	echo "<th>".t("Erotus")."</th><td><input type='text' name='jaljella' value='$suoritus_summa' readonly></td></tr>";

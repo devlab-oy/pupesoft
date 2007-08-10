@@ -453,7 +453,7 @@
 						suoritus.summa,
 						suoritus.valkoodi
 				  		FROM suoritus
-						LEFT JOIN tiliointi ON (tiliointi.tunnus = suoritus.ltunnus and tiliointi.tilino = '$tili' and tiliointi.korjattu = '')
+						LEFT JOIN tiliointi ON (tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '')
 				  		LEFT JOIN asiakas ON (suoritus.yhtio = asiakas.yhtio and suoritus.asiakas_tunnus = asiakas.tunnus)
 				  		WHERE suoritus.yhtio = '$kukarow[yhtio]'
 						and kirjpvm <= '$pvm'

@@ -1259,10 +1259,15 @@
 							<td>*</td>
 							<td>$row[tuoteno]</td>
 							<td>$row[varattu]</td>
-							<td>".t("Saldoton tuote")."</td>
-							</tr>
+							<td>".t("Saldoton tuote")."</td>";
+							
+					if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {					
+						echo "<td></td>";
+					}
+							
+					echo "	</tr>
 							<input type='hidden' name='kerivi[]' value='$row[tunnus]'>
-							<input type='hidden' name='maara[$row[tunnus]]'>";
+							<input type='hidden' name='maara[$row[tunnus]]'>";			
 				}
 				else {
 					echo "	<tr class='aktiivi'>

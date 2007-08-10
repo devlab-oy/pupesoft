@@ -3,7 +3,7 @@
 	$pupejs=1;
 	
 	//parametrit
-	include('inc/parametrit.inc');
+	include('../inc/parametrit.inc');
 	
 	//N‰ytet‰‰n aina konsernikohtaisesti
 	$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";

@@ -388,7 +388,7 @@
 				
 				$lahetetyyppi = "";
 
-				if ($asrow["lahetetyyppi"] != '' and file_exists($asrow["lahetetyyppi"])) {
+				if ($asrow["lahetetyyppi"] != '') {
 					$lahetetyyppi = $asrow["lahetetyyppi"];
 				}
 				else {

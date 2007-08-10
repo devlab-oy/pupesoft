@@ -1416,10 +1416,10 @@
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($result);
-				
+								
 				$lahetetyyppi = "";
 
-				if ($asrow["lahetetyyppi"] != '' and file_exists($asrow["lahetetyyppi"])) {
+				if ($asrow["lahetetyyppi"] != '') {
 					$lahetetyyppi = $asrow["lahetetyyppi"];
 				}
 				else {
@@ -1436,7 +1436,7 @@
 						$lahetetyyppi = $vrow["selite"];
 					}
 				}
-				
+								
 				if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 					require_once ("tulosta_lahete_alalasku.inc");
 				}	
@@ -1446,7 +1446,7 @@
 				else {
 					require_once ("tulosta_lahete.inc");
 				}
-							
+											
 				//	Jos meillä on funktio tulosta_lahete meillä on suora funktio joka hoitaa koko tulostuksen
 				if(function_exists("tulosta_lahete")) {
 					if($vrow["selite"] != '') {

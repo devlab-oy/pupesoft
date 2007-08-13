@@ -1150,7 +1150,7 @@
 
 			echo "<tr><td class='back'><br></td></tr>";
 			echo "<tr>";
-			echo "<th colspan='3'><font class='message'>".t("Valitse jälkivaatimuslaskujen tulostuspaikka")."</font></th>";
+			echo "<th colspan='3'><font class='error'>".t("Valitse jälkivaatimuslaskujen tulostuspaikka")."</font></th>";
 			echo "<td><select name='laskutulostin'>";
 			echo "<option value=''>".t("Ei tulosteta laskua")."</option>";
 

@@ -857,7 +857,7 @@
 	while ($sarjarow = mysql_fetch_array($sarjares)) {
 				
 		if (file_exists('sarjanumeron_lisatiedot_popup.inc') and $sarjanumeronLisatiedot == "OK") {
-			list($divitx, $text_output, $kuvalisa_bin, $hankintahinta) = sarjanumeronlisatiedot_popup ($sarjarow["tunnus"], '', 'popup', '', '');
+			list($divitx, $text_output, $kuvalisa_bin, $hankintahinta, $tuotemyyntihinta) = sarjanumeronlisatiedot_popup ($sarjarow["tunnus"], '', 'popup', '', '');
 			$divit .= $divitx;
 		}
 

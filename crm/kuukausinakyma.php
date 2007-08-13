@@ -287,7 +287,7 @@
 						mysql_data_seek($kresult,0);
 	
 						while ($krow2 = mysql_fetch_array($kresult)) {
-							echo "$krow2[kello]-$krow2[lkello] $row2[nimi]<br>".t("$krow2[selitetark]").".<br>$krow2[kentta01]<br><br>";
+							echo "$krow2[kello]-$krow2[lkello] $row2[nimi]<br>$krow2[selitetark].<br>$krow2[kentta01]<br><br>";
 						}
 					}
 					echo "</div>";
@@ -296,7 +296,7 @@
 				}
 				else {
 					echo "	<div id='$krow[tunnus]' style='position:absolute; z-index:100; visibility:hidden; width:200px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>
-							$krow[kello]-$krow[lkello] $row[nimi]<br>".t("$krow[selitetark]").".<br>$krow[kentta01]
+							$krow[kello]-$krow[lkello] $row[nimi]<br>$krow[selitetark].<br>$krow[kentta01]
 							</div>";
 	
 					echo "<$varitys align='center' width='35'><a class='td' href='#' onmouseout=\"tipper(event,'$krow[tunnus]')\" onmouseover=\"tipper(event,'$krow[tunnus]')\">$etufontti $krow[tapa] $takafontti</a></$varitys>";

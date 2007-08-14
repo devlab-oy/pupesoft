@@ -490,11 +490,11 @@
 								$riviresult = mysql_query($querys) or pupe_error($querys);
 							}
 							
-							//p‰ivitet‰‰n tuoteperheiden saldottomat j‰senet oikeisiin m‰‰riin
+							//p‰ivitet‰‰n tuoteperheiden saldottomat j‰senet oikeisiin m‰‰riin (ne voi olla alkuper‰isell‰kin l‰hetteel‰ == vanhatunnus)
 							if ($tilrivirow["perheid"] != 0) {
 								$query1 = "	SELECT tilausrivi.tunnus
 											FROM tilausrivi, tuote
-											WHERE tilausrivi.otunnus = '$tilrivirow[otunnus]'
+											WHERE tilausrivi.otunnus in ('$tilrivirow[otunnus]', '$otsikkorivi[vanhatunnus]')
 											and tilausrivi.tunnus	!= '$kerivi[$i]'
 											and tilausrivi.perheid	 = '$tilrivirow[perheid]'
 											and tilausrivi.yhtio	 = '$kukarow[yhtio]'

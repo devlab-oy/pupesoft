@@ -9,8 +9,9 @@ if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
 
 	$filenimi = '/tmp/' . basename($_POST['filenimi']);
 	readfile($filenimi);
-
-	system("rm -f " . '/tmp/' . basename($filenimi));
+    
+    // tuhotaan edellinen
+	unlink('/tmp/' . basename($filenimi));
 	exit;
 }
 
@@ -166,11 +167,11 @@ if ($tee != '') {
 	fclose($fh);
 
 	//pakataan faili
-	$cmd = "cd /tmp/;/usr/bin/zip {$kukarow['yhtio']}.{$kukarow['kuka']}.zip $filenimi";
+	$cmd = "/usr/bin/zip -j /tmp/{$kukarow['yhtio']}.{$kukarow['kuka']}.zip /tmp/$filenimi";
 	$palautus = exec($cmd);
-
+	
     // poistetaan tmp file
-	system("rm -f " . '/tmp/' . $filenimi);
+	unlink('/tmp/' . $filenimi);
 
 	$filenimi = "/tmp/{$kukarow['yhtio']}.{$kukarow['kuka']}.zip";
 	echo "<br><table><tr><th>".t("Tallenna hinnasto tiedostoon")."</th>";

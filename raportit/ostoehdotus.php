@@ -542,8 +542,10 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 				tuote.nimitys,
 				tuote.myynti_era,
 				tuote.myyntihinta,
-				tuote.epakurantti1pvm,
-				tuote.epakurantti2pvm,
+				tuote.epakurantti25pvm,
+				tuote.epakurantti50pvm,
+				tuote.epakurantti75pvm,
+				tuote.epakurantti100pvm,
 				tuote.tuotemerkki,
 				tuote.osasto,
 				tuote.try,
@@ -596,8 +598,10 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
 		// kaunistellaan kenttiä
 		if ($row["luontiaika"] == "0000-00-00 00:00:00") $row["luontiaika"] = "";
-		if ($row['epakurantti1pvm'] == '0000-00-00')     $row['epakurantti1pvm'] = "";
-		if ($row['epakurantti2pvm'] == '0000-00-00')     $row['epakurantti1pvm'] = "";
+		if ($row['epakurantti25pvm'] == '0000-00-00')     $row['epakurantti25pvm'] = "";
+		if ($row['epakurantti50pvm'] == '0000-00-00')     $row['epakurantti50pvm'] = "";
+		if ($row['epakurantti75pvm'] == '0000-00-00')     $row['epakurantti75pvm'] = "";
+		if ($row['epakurantti100pvm'] == '0000-00-00')     $row['epakurantti50pvm'] = "";
 
 		// haetaan abc luokille nimet
 		$abcnimi = $ryhmanimet[$row["abcluokka"]];
@@ -651,10 +655,14 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		$tuoterivi .= str_replace(".",",",$toimirow['ostohinta'])."\t";
 		$headerivi .= "".t("myyntihinta")."\t";
 		$tuoterivi .= str_replace(".",",",$row['myyntihinta'])."\t";
-		$headerivi .= "".t("epäkurantti1")."\t";
-		$tuoterivi .= "$row[epakurantti1pvm]\t";
-		$headerivi .= "".t("epäkurantti2")."\t";
-		$tuoterivi .= "$row[epakurantti2pvm]\t";
+		$headerivi .= "".t("epäkurantti25%")."\t";
+		$tuoterivi .= "$row[epakurantti25pvm]\t";
+		$headerivi .= "".t("epäkurantti50%")."\t";
+		$tuoterivi .= "$row[epakurantti50pvm]\t";
+		$headerivi .= "".t("epäkurantti75%")."\t";
+		$tuoterivi .= "$row[epakurantti75pvm]\t";
+		$headerivi .= "".t("epäkurantti100%")."\t";
+		$tuoterivi .= "$row[epakurantti100pvm]\t";
 		$headerivi .= "".t("tuotekerroin")."\t";
 		$tuoterivi .= str_replace(".",",",$toimirow['tuotekerroin'])."\t";
 		$headerivi .= "".t("aleryhmä")."\t";

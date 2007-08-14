@@ -350,7 +350,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 				$merkkilisa1
 				sum(
 					if(	tuote.sarjanumeroseuranta = 'S', 
-						(	SELECT tuotepaikat.saldo*if(tuote.epakurantti1pvm='0000-00-00', avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl), avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)/2)
+						(	SELECT tuotepaikat.saldo*if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl), avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)*0.75), avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)*0.5), avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)*0.25)
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -358,11 +358,11 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'
 						), 
-						tuotepaikat.saldo*if(tuote.epakurantti1pvm='0000-00-00', tuote.kehahin, tuote.kehahin/2)
+						tuotepaikat.saldo*if(tuote.epakurantti75pvm='0000-00-00', if(tuote.epakurantti50pvm='0000-00-00', if(tuote.epakurantti25pvm='0000-00-00', tuote.kehahin, tuote.kehahin*0.75), tuote.kehahin*0.5), tuote.kehahin*0.25)
 					)
 				) varasto
 				FROM tuotepaikat
-				JOIN tuote ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '' and tuote.epakurantti2pvm = '0000-00-00' $trylisa)
+				JOIN tuote ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '' and tuote.epakurantti100pvm = '0000-00-00' $trylisa)
 				$varastojoini
 				WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 				and tuotepaikat.saldo <> 0

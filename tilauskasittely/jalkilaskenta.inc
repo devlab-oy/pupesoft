@@ -658,7 +658,8 @@ if ($tuoteno != '') {
 			$pvm = $tapahtuma["laadittu"]; // kääntöpisteen tarkka aika talteen
 		}
 
-		if (($tuote['epakurantti1pvm'] != '0000-00-00') or ($tuote['epakurantti2pvm'] != '0000-00-00')) {
+		if (($tuote['epakurantti25pvm'] != '0000-00-00') or ($tuote['epakurantti50pvm'] != '0000-00-00') or ($tuote['epakurantti75pvm'] != '0000-00-00') or ($tuote['epakurantti50pvm'] != '0000-00-00')) {
+
 			echo "<font class='error'>".t("Tätä tuotetta ei enää voi korjata")."</font><br>";
 			if ($jalkilaskenta_debug > 1) echo "$query<br>";
 			$jlerror=1;

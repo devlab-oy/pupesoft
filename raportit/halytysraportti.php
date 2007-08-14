@@ -191,8 +191,10 @@
 		
 		$sarakkeet["SARAKE19"] 	= t("ostohinta")."\t";
 		$sarakkeet["SARAKE20"] 	= t("myyntihinta")."\t";
-		$sarakkeet["SARAKE21"] 	= t("epakurantti1pvm")."\t";
-		$sarakkeet["SARAKE22"] 	= t("epakurantti2pvm")."\t";
+		$sarakkeet["SARAKE20Z"] = t("epakurantti25pvm")."\t";
+		$sarakkeet["SARAKE21"] 	= t("epakurantti50pvm")."\t";
+		$sarakkeet["SARAKE21B"]	= t("epakurantti75pvm")."\t";
+		$sarakkeet["SARAKE22"] 	= t("epakurantti100pvm")."\t";
 		$sarakkeet["SARAKE23"] 	= t("oletussaldo")."\t";
 		$sarakkeet["SARAKE24"] 	= t("hyllypaikka")."\t";
 
@@ -570,8 +572,10 @@
 							tuote.kuvaus,
 							tuote.myynti_era,
 							tuote.myyntihinta,
-							tuote.epakurantti1pvm,
-							tuote.epakurantti2pvm,
+							tuote.epakurantti25pvm,
+							tuote.epakurantti50pvm,
+							tuote.epakurantti75pvm,
+							tuote.epakurantti100pvm,
 							tuote.tuotemerkki,
 							tuote.osasto,
 							tuote.try,
@@ -609,8 +613,10 @@
 							tuote.kuvaus,
 							tuote.myynti_era,
 							tuote.myyntihinta,
-							tuote.epakurantti1pvm,
-							tuote.epakurantti2pvm,
+							tuote.epakurantti25pvm,
+							tuote.epakurantti50pvm,
+							tuote.epakurantti75pvm,
+							tuote.epakurantti100pvm,
 							tuote.tuotemerkki,
 							tuote.osasto,
 							tuote.try,
@@ -1356,25 +1362,47 @@
 							$excelsarake++;
 						}
 					}
-			
-					if($valitut["SARAKE21"] != '') {
-						if ($row['epakurantti1pvm'] == '0000-00-00') $row['epakurantti1pvm'] = "";
 				
-						$rivi .= "$row[epakurantti1pvm]\t";
+					if($valitut["SARAKE20Z"] != '') {
+						if ($row['epakurantti25pvm'] == '0000-00-00') $row['epakurantti25pvm'] = "";
+				
+						$rivi .= "$row[epakurantti25pvm]\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti1pvm"]);
+							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti25pvm"]);
+							$excelsarake++;
+						}
+					}
+					
+					if($valitut["SARAKE21"] != '') {
+						if ($row['epakurantti50pvm'] == '0000-00-00') $row['epakurantti50pvm'] = "";
+				
+						$rivi .= "$row[epakurantti50pvm]\t";
+				
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti50pvm"]);
+							$excelsarake++;
+						}
+					}
+					
+					if($valitut["SARAKE21B"] != '') {
+						if ($row['epakurantti75pvm'] == '0000-00-00') $row['epakurantti75pvm'] = "";
+				
+						$rivi .= "$row[epakurantti75pvm]\t";
+				
+						if(isset($workbook)) {
+							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti75pvm"]);
 							$excelsarake++;
 						}
 					}
 
 					if($valitut["SARAKE22"] != '') {
-						if ($row['epakurantti2pvm'] == '0000-00-00') $row['epakurantti2pvm'] = "";
+						if ($row['epakurantti100pvm'] == '0000-00-00') $row['epakurantti100pvm'] = "";
 				
-						$rivi .= "$row[epakurantti2pvm]\t";
+						$rivi .= "$row[epakurantti100pvm]\t";
 				
 						if(isset($workbook)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti2pvm"]);
+							$worksheet->write($excelrivi, $excelsarake, $row["epakurantti100pvm"]);
 							$excelsarake++;
 						}
 					}

@@ -946,6 +946,27 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "epakur_kehahin_paivitys") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] != 'X') {
+			$sel1 = "selected";
+		}
+		else {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value='' $sel1>".t("Epäkuranttiuspoisto EI MUUTA kehahintaa.")."</option>";
+		$ulos .= "<option value='X' $sel2>".t("Epäkuranttiuspoisto MUUTTAA kehahintaa.")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "oletus_lahetekpl") {
 
 		$ulos = "<td><select name='$nimi'>";

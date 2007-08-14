@@ -1,5 +1,5 @@
 <?php
-
+	
 	require("inc/parametrit.inc");
 
 	if ($tee == 'NAYTATILAUS') {
@@ -191,9 +191,12 @@
 
 				$tuoterow["kehahin"] = sprintf('%.4f', $sarjarow["kehahin"]);
 			}
-
-			if ($tuoterow['epakurantti1pvm'] != '0000-00-00') $tuoterow['kehahin'] = $tuoterow['kehahin'] / 2;
-			if ($tuoterow['epakurantti2pvm'] != '0000-00-00') $tuoterow['kehahin'] = 0;
+			
+			if 		($tuoterow['epakurantti100pvm'] != '0000-00-00') $tuoterow['kehahin'] = 0;
+			elseif 	($tuoterow['epakurantti75pvm'] != '0000-00-00') $tuoterow['kehahin'] = $tuoterow['kehahin'] * 0.25;
+			elseif 	($tuoterow['epakurantti50pvm'] != '0000-00-00') $tuoterow['kehahin'] = $tuoterow['kehahin'] * 0.5;
+			elseif 	($tuoterow['epakurantti25pvm'] != '0000-00-00') $tuoterow['kehahin'] = $tuoterow['kehahin'] * 0.75;
+			
 
 			// Hinnastoon
 			if (strtoupper($tuoterow['hinnastoon']) == 'E') {
@@ -294,11 +297,14 @@
 
 
 			//6
-			echo "<tr><th>".t("Luontipvm")."</th><th>".t("Muutospvm")."</th><th>".t("Epäkurantti1pvm")."</th><th>".t("Epäkurantti2pvm")."</th><th colspan='2'>".t("Tuotteen kuvaus")."</th></tr>";
-			echo "<tr><td>".tv1dateconv($tuoterow["luonti"])."</td><td>".tv1dateconv($tuoterow["muutos"])."</td><td>".tv1dateconv($tuoterow["epakurantti1pvm"])."</td><td>".tv1dateconv($tuoterow["epakurantti2pvm"])."</td><td colspan='2'>$tuoterow[kuvaus]&nbsp;</td></tr>";
-
-
+			echo "<tr><th>".t("Luontipvm")."</th><th>".t("Muutospvm")."</th><th>".t("Epäkurantti25pvm")."</th><th>".t("Epäkurantti50pvm")."</th><th>".t("Epäkurantti75pvm")."</th><th>".t("Epäkurantti100pvm")."</th></tr>";
+			echo "<tr><td>".tv1dateconv($tuoterow["luonti"])."</td><td>".tv1dateconv($tuoterow["muutos"])."</td><td>".tv1dateconv($tuoterow["epakurantti25pvm"])."</td><td>".tv1dateconv($tuoterow["epakurantti50pvm"])."</td><td>".tv1dateconv($tuoterow["epakurantti75pvm"])."</td><td>".tv1dateconv($tuoterow["epakurantti100pvm"])."</td></tr>";
+			
 			//7
+			echo "<tr><th colspan='6'>".t("Tuotteen kuvaus")."</th></tr>";
+			echo "<td colspan='6'>$tuoterow[kuvaus]&nbsp;</td></tr>";
+			
+			//8
 			echo "<tr><th>".t("Info")."</th><th colspan='5'>".t("Avainsanat")."</th></tr>";
 			echo "<tr><td>$tuoterow[muuta]&nbsp;</td><td colspan='5'>$tuoterow[lyhytkuvaus]</td></tr>";
 

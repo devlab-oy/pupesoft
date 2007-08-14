@@ -1,4 +1,5 @@
 <?php
+
 	// Tämä rutiini määrittelee riville hinnan ja alennuksen
 
 	// siihen tarvitaan:
@@ -109,12 +110,18 @@
 				//Tässä katotaan onko epäkuranttiutta
 				$kokoepakurantti = "";
 
-				if ($trow["epakurantti2pvm"] != "0000-00-00") {
+				if ($trow["epakurantti100pvm"] != "0000-00-00") {
 					$trow["kehahin"] = 0;
 					$kokoepakurantti = "ON";
 				}
-				elseif ($trow["epakurantti1pvm"] != "0000-00-00") {
-					$trow["kehahin"] = $trow["kehahin"]/2;
+				elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
+					$trow["kehahin"] = $trow["kehahin"] * 0.25;
+				}
+				elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
+					$trow["kehahin"] = $trow["kehahin"] * 0.5;
+				}
+				elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
+					$trow["kehahin"] = $trow["kehahin"] * 0.75;
 				}
 
 				// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa
@@ -162,12 +169,18 @@
 				//Tässä katotaan onko epäkuranttiutta
 				$kokoepakurantti = "";
 
-				if ($trow["epakurantti2pvm"] != "0000-00-00") {
+				if ($trow["epakurantti100pvm"] != "0000-00-00") {
 					$trow["kehahin"] = 0;
 					$kokoepakurantti = "ON";
 				}
-				elseif ($trow["epakurantti1pvm"] != "0000-00-00") {
-					$trow["kehahin"] = $trow["kehahin"]/2;
+				elseif ($trow["epakurantti75pvm"] != "0000-00-00") {
+					$trow["kehahin"] = $trow["kehahin"] * 0.25;
+				}
+				elseif ($trow["epakurantti50pvm"] != "0000-00-00") {
+					$trow["kehahin"] = $trow["kehahin"] * 0.5;
+				}
+				elseif ($trow["epakurantti25pvm"] != "0000-00-00") {
+					$trow["kehahin"] = $trow["kehahin"] * 0.75;
 				}
 
 				// Kehahinta saa olla nolla vain jos tuote on kokoepäkurantti, muuten katemyynti ei onnaa

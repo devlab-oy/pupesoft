@@ -64,8 +64,10 @@
 					elseif (mysql_field_name($stresult,$i)=='kehahin' or
 							mysql_field_name($stresult,$i)=='vihahin' or
 							mysql_field_name($stresult,$i)=='vihapvm' or
-							mysql_field_name($stresult,$i)=='epakurantti1pvm' or
-							mysql_field_name($stresult,$i)=='epakurantti2pvm') {
+							mysql_field_name($stresult,$i)=='epakurantti25pvm' or
+							mysql_field_name($stresult,$i)=='epakurantti50pvm' or
+							mysql_field_name($stresult,$i)=='epakurantti75pvm' or
+							mysql_field_name($stresult,$i)=='epakurantti100pvm') {
 						$query .= mysql_field_name($stresult,$i)."='',";
 					}
 					// ja kaikki muut paitsi tunnus sellaisenaan

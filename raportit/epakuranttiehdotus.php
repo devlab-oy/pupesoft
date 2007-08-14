@@ -1,4 +1,5 @@
 <?php
+
 ///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
 $useslave = 1;
 require ("../inc/parametrit.inc");
@@ -7,11 +8,15 @@ echo "<font class='head'>".t("Ep‰kuranttiehdotus")."</font><hr>";
 
 // nollataan muuttujat
 $epakuranttipvm = "";
-$chk1 = "checked";
+$chk1 = "";
 $chk2 = "";
+$chk3 = "";
+$chk4 = "";
 
-if ($tyyppi == 'puoli') $chk1 = "checked";
-if ($tyyppi == 'taysi') $chk2 = "checked";
+if ($tyyppi == '25') $chk1 = "checked";
+if ($tyyppi == 'puoli') $chk2 = "checked";
+if ($tyyppi == '75') $chk3 = "checked";
+if ($tyyppi == 'taysi') $chk4 = "checked";
 
 // defaultteja
 if (!isset($alkupvm))  $alkupvm  = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
@@ -40,8 +45,10 @@ echo "<table>";
 
 echo "<tr>";
 echo "<th>".t("Valitse ehdotus").":</th>";
-echo "<td>".t("Puoliep‰kurantti")." <input type='radio' name='tyyppi' value='puoli' $chk1></td>";
-echo "<td>".t("T‰ysiep‰kurantti")." <input type='radio' name='tyyppi' value='taysi' $chk2></td>";
+echo "<td colspan='2'>| 25% <input type='radio' name='tyyppi' value='25' $chk1>";
+echo " | ".t("Puoli")." <input type='radio' name='tyyppi' value='puoli' $chk2>";
+echo " | 75% <input type='radio' name='tyyppi' value='75' $chk3>";
+echo " | ".t("T‰ysi")." <input type='radio' name='tyyppi' value='taysi' $chk4> |</td>";
 echo "</tr>";
 
 echo "<tr>";
@@ -86,21 +93,33 @@ if ($subnappi != '') {
 		$lisa .= "and try='$try' ";
 		$msg  .= ", tuoteryhm‰ $try";
 	}
-
+	
+	if ($tyyppi == '25') {
+		// 25ep‰kurantteja etsitt‰ess‰ tuote ei saa olla puoli eik‰ t‰ysiep‰kurantti
+		$epakuranttipvm = "and epakurantti25pvm='0000-00-00' and epakurantti50pvm='0000-00-00' and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
+		echo "<font class='message'>".t("25% ep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
+	}
+	
 	if ($tyyppi == 'puoli') {
 		// puoliep‰kurantteja etsitt‰ess‰ tuote ei saa olla puoli eik‰ t‰ysiep‰kurantti
-		$epakuranttipvm = "and epakurantti1pvm='0000-00-00' and epakurantti2pvm='0000-00-00'";
+		$epakuranttipvm = "and epakurantti50pvm='0000-00-00' and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
 		echo "<font class='message'>".t("Puoliep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
+	}
+	
+	if ($tyyppi == '75') {
+		// 75ep‰kurantteja etsitt‰ess‰ tuote ei saa olla puoli eik‰ t‰ysiep‰kurantti
+		$epakuranttipvm = "and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
+		echo "<font class='message'>".t("75% ep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
 	}
 
 	if ($tyyppi == 'taysi') {
 		// t‰ysiep‰kurantteja etsitt‰ess‰ tuotteen pit‰‰ olla puoliep‰kurantti mutta ei t‰ysep‰kurantti
-		$epakuranttipvm = "and epakurantti1pvm!='0000-00-00' and epakurantti2pvm='0000-00-00'";
+		$epakuranttipvm = "and epakurantti100pvm='0000-00-00'";
 		echo "<font class='message'>".t("T‰ysiep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
 	}
 
 	// etsit‰‰n saldolliset tuotteet
-	$query  = "	select tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, if(epakurantti1pvm='0000-00-00', tuote.kehahin, round(tuote.kehahin/2,4)) kehahin, tuote.vihapvm, epakurantti1pvm,
+	$query  = "	SELECT tuote.tuoteno, tuote.osasto, tuote.try, tuote.myyntihinta, tuote.nimitys, tuote.tahtituote, round(if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25),4) kehahin, tuote.vihapvm, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm,
 				(select group_concat(distinct tuotteen_toimittajat.toimittaja separator '/') from tuotteen_toimittajat where tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno) toimittaja, ifnull(sum(saldo),0) saldo
 				from tuote
 				LEFT JOIN tuotepaikat on tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
@@ -117,27 +136,37 @@ if ($subnappi != '') {
 	echo "".t("osasto")."\t".t("try")."\t".t("kpl")."\t".t("saldo")."\t".t("kierto")."\t".t("tahtituote")."\t".t("eka saapuminen")."\t".t("vika saapuminen")."\t".t("hinta")."\t".t("kehahin")."\t".t("tuoteno")."\t".t("nimitys")."\t".t("toimittaja")."\n";
 
 	while ($row = mysql_fetch_array($result)) {
-
+		
+		if ($row["epakurantti75pvm"] != "0000-00-00") {
+			$epispvm = $row["epakurantti75pvm"];
+		}
+		elseif ($row["epakurantti50pvm"] != "0000-00-00") {
+			$epispvm = $row["epakurantti50pvm"];
+		}
+		elseif ($row["epakurantti25pvm"] != "0000-00-00") {
+			$epispvm = $row["epakurantti25pvm"];
+		}
+		
 		// jos meill‰ on tuotteen vihapvm k‰ytet‰‰n sit‰, muuten eka from 70s...
 		if ($row["vihapvm"] == "0000-00-00") $row["vihapvm"] = '1970-01-01';
 
 		// haetaan eka ja vika saapumisp‰iv‰
-		$query  = "select date_format(ifnull(min(laadittu),'1970-01-01'),'%Y-%m-%d') min, date_format(ifnull(max(laadittu),'$row[vihapvm]'),'%Y-%m-%d') max from tapahtuma where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and laji='Tulo'";
+		$query  = "SELECT date_format(ifnull(min(laadittu),'1970-01-01'),'%Y-%m-%d') min, date_format(ifnull(max(laadittu),'$row[vihapvm]'),'%Y-%m-%d') max from tapahtuma where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and laji='Tulo'";
 		$tapres = mysql_query($query) or pupe_error($query);
 		$taprow = mysql_fetch_array($tapres);
 
 		// verrataan v‰h‰n p‰iv‰m‰‰ri‰. onpa vittumaista PHP:ss‰!
-		list($vv1,$kk1,$pp1) = split("-",$taprow["max"]);
-		list($vv2,$kk2,$pp2) = split("-",$alkupvm);
-		list($vv3,$kk3,$pp3) = split("-",$row["epakurantti1pvm"]);
-		list($vv4,$kk4,$pp4) = split("-",$taysraja);
+		list($vv1,$kk1,$pp1) = split("-",$taprow["max"]); //$saapunut
+		list($vv2,$kk2,$pp2) = split("-",$alkupvm); //$alaraja
+		list($vv3,$kk3,$pp3) = split("-",$epispvm); //$epaku1pv
+		list($vv4,$kk4,$pp4) = split("-",$taysraja); //$epa2raja
 		$saapunut = (int) date('Ymd',mktime(0,0,0,$kk1,$pp1,$vv1));
 		$alaraja  = (int) date('Ymd',mktime(0,0,0,$kk2,$pp2,$vv2));
 		$epaku1pv = (int) date('Ymd',mktime(0,0,0,$kk3,$pp3,$vv3));
 		$epa2raja = (int) date('Ymd',mktime(0,0,0,$kk4,$pp4,$vv4));
 
 		// t‰t‰ tuotetta on saapunut ennen myyntirajauksen alarajaa, joten otetaan k‰sittelyyn
-		if (($saapunut < $alaraja) and (($tyyppi == 'taysi' and $epaku1pv < $epa2raja) or ($tyyppi == 'puoli'))) {
+		if (($saapunut < $alaraja) and (($tyyppi != '25' and $epaku1pv < $epa2raja) or ($tyyppi == '25'))) {
 
 			// haetaan tuotteen myydyt kappaleet
 			$query  = "SELECT ifnull(sum(kpl),0) kpl FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and tuoteno='$row[tuoteno]' and laskutettuaika >= '$alkupvm' and laskutettuaika <= '$loppupvm'";

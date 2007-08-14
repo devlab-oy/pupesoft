@@ -1,4 +1,5 @@
 <?php
+
 	// käytetään slavea
 	$useslave = 1;
 
@@ -478,7 +479,7 @@
 						if(atry.selite is not null, atry.selite, 0) try, 
 						if(aosa.selite is not null, aosa.selite, 0) osasto,
 						tuote.tuotemerkki,
-						tuote.nimitys, tuote.kehahin, tuote.epakurantti1pvm, tuote.epakurantti2pvm, tuote.sarjanumeroseuranta
+						tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta
 						FROM tuote
 						LEFT JOIN avainsana atry use index (yhtio_laji_selite) on atry.yhtio=tuote.yhtio and atry.selite=tuote.try and atry.laji='TRY'
 						LEFT JOIN avainsana aosa use index (yhtio_laji_selite) on aosa.yhtio=tuote.yhtio and aosa.selite=tuote.osasto and aosa.laji='OSASTO'
@@ -600,10 +601,17 @@
 				
 				// katotaan onko tuote epäkurantti nyt
 				$kerroin = 1;
-				if ($row['epakurantti1pvm'] != '0000-00-00') {
+				
+				if ($row['epakurantti25pvm'] != '0000-00-00') {
+					$kerroin = 0.75;
+				}
+				if ($row['epakurantti50pvm'] != '0000-00-00') {
 					$kerroin = 0.5;
 				}
-				if ($row['epakurantti2pvm'] != '0000-00-00') {
+				if ($row['epakurantti75pvm'] != '0000-00-00') {
+					$kerroin = 0.25;
+				}
+				if ($row['epakurantti100pvm'] != '0000-00-00') {
 					$kerroin = 0;
 				}
                 

@@ -1,5 +1,5 @@
 <?php
-
+	
 	$riviok = 0;
 	$saako_hyvaksya = 0;
 	$varaosavirhe = "";
@@ -25,8 +25,8 @@
 	}
 
 	// katsotaan, ettei tilata epäkuranttia tuotetta
-	if (($trow["epakurantti1pvm"] != '0000-00-00' or $trow["epakurantti2pvm"] != '0000-00-00') and $riviok == 0) {
-		$varaosavirhe .= t("VIRHE: Tuote on epäkurantti, sitä ei voi tilata!")."<br>1/2: $trow[epakurantti1pvm]<br>1/1: $trow[epakurantti2pvm]";
+	if (($trow["epakurantti25pvm"] != '0000-00-00' or $trow["epakurantti50pvm"] != '0000-00-00' or $trow["epakurantti75pvm"] != '0000-00-00' or $trow["epakurantti100pvm"] != '0000-00-00') and $riviok == 0) {
+		$varaosavirhe .= t("VIRHE: Tuote on epäkurantti, sitä ei voi tilata!")."<br>1/4: $trow[epakurantti25pvm]<br>1/2: $trow[epakurantti50pvm]<br>3/4: $trow[epakurantti75pvm]<br>1/1: $trow[epakurantti100pvm]";
 		$riviok++;
 		$tilausok++;
 	}

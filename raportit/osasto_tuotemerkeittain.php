@@ -1,4 +1,5 @@
 <?php
+
 ///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 $useslave = 1;
 
@@ -245,14 +246,14 @@ if ($tee == 'go') {
 						echo "<td align='right'><b>".str_replace(".",",",$kateosuus)."%</b></td>";
 
 
-						$query = "	SELECT sum(tuotepaikat.saldo*if(epakurantti1pvm='0000-00-00', kehahin, kehahin/2)) varasto
+						$query = "	SELECT sum(tuotepaikat.saldo*if(epakurantti50pvm='0000-00-00', kehahin, kehahin/2)) varasto
 									FROM tuotepaikat, tuote
 									WHERE tuote.tuoteno 	  = tuotepaikat.tuoteno
 									and tuote.yhtio 		  = '$kukarow[yhtio]'
 									and tuotepaikat.yhtio 	  = '$kukarow[yhtio]'
 									and tuote.osasto 		  = '$yhtrow[osasto]'
 									and tuote.ei_saldoa 	  = ''
-									and tuote.epakurantti2pvm = '0000-00-00'";
+									and tuote.epakurantti100pvm = '0000-00-00'";
 						$vresult = mysql_query($query) or pupe_error($query);
 						$vrow = mysql_fetch_array($vresult);
 
@@ -304,7 +305,7 @@ if ($tee == 'go') {
 					echo "<td align='right'>".str_replace(".",",",$indkate)."</td>";
 					echo "<td align='right'>".str_replace(".",",",$kateosuus)."%</td>";
 
-					$query = "	SELECT sum(tuotepaikat.saldo*if(epakurantti1pvm='0000-00-00', kehahin, kehahin/2)) varasto
+					$query = "	SELECT sum(tuotepaikat.saldo*if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25)) varasto
 								FROM tuotepaikat, tuote
 								WHERE tuote.tuoteno 	  = tuotepaikat.tuoteno
 								and tuote.yhtio 		  = '$kukarow[yhtio]'
@@ -312,7 +313,7 @@ if ($tee == 'go') {
 								and tuote.osasto 		  = '$yhtrow[osasto]'
 								and tuote.try 			  = '$yhtrow[try]'
 								and tuote.ei_saldoa 	  = ''
-								and tuote.epakurantti2pvm = '0000-00-00'";
+								and tuote.epakurantti100pvm = '0000-00-00'";
 					$vresult = mysql_query($query) or pupe_error($query);
 					$vrow = mysql_fetch_array($vresult);
 

@@ -1,4 +1,5 @@
 <?php
+
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
 	require('../inc/parametrit.inc');
@@ -94,7 +95,8 @@
 
 			//varaston arvo
 			$varastonarvo = 0;
-			$query = "	SELECT sum(tuotepaikat.saldo*if(epakurantti1pvm='0000-00-00', kehahin, kehahin/2)) varasto
+			
+			$query = "	SELECT sum(tuotepaikat.saldo*if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25)) varasto
 						FROM tuotepaikat, tuote
 						WHERE tuote.tuoteno 	  = tuotepaikat.tuoteno
 						and tuote.yhtio 		  = '$kukarow[yhtio]'
@@ -102,7 +104,7 @@
 						and tuote.osasto 		  = '$trow[osasto]'
 						and tuote.try 			  = '$trow[try]'
 						and tuote.ei_saldoa 	  = ''
-						and tuote.epakurantti2pvm = '0000-00-00'";
+						and tuote.epakurantti100pvm = '0000-00-00'";
 			$result4 = mysql_query($query) or pupe_error($query);
 			$rowARVO = mysql_fetch_array($result4);
 			$varastonarvo = round($rowARVO["varasto"] - $muutosval, 2);

@@ -497,18 +497,32 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 							}
 						}
 					}
-
-					if ($table == 'tuote' and ($otsikot[$r] == 'EPAKURANTTI1PVM' or $otsikot[$r] == 'EPAKURANTTI2PVM')) {
+					
+					if ($table == 'tuote' and ($otsikot[$r] == 'EPAKURANTTI25PVM' or $otsikot[$r] == 'EPAKURANTTI50PVM' or $otsikot[$r] == 'EPAKURANTTI75PVM' or $otsikot[$r] == 'EPAKURANTTI100PVM')) {
 
 						// $tuoteno pit‰s olla jo aktivoitu ylh‰‰ll‰
-						if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikot[$r] == 'EPAKURANTTI1PVM') {
+						if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikot[$r] == 'EPAKURANTTI25PVM') {
+							$tee = "25paalle";
+						}
+						elseif ($tee == "") {
+							$tee = "pois";
+						}
+						
+						if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikot[$r] == 'EPAKURANTTI50PVM') {
 							$tee = "puolipaalle";
 						}
 						elseif ($tee == "") {
 							$tee = "pois";
 						}
+						
+						if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikot[$r] == 'EPAKURANTTI75PVM') {
+							$tee = "75paalle";
+						}
+						elseif ($tee == "") {
+							$tee = "pois";
+						}
 
-						if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikot[$r] == 'EPAKURANTTI2PVM') {
+						if (trim($rivi[$r]) != '' and trim($rivi[$r]) != '0000-00-00' and $otsikot[$r] == 'EPAKURANTTI100PVM') {
 							$tee = "paalle";
 						}
 						elseif ($tee == "") {
@@ -754,7 +768,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 			if ($hylkaa == 0) {
 				$iresult = mysql_query($query) or pupe_error($query);
-
+				
 				// tehd‰‰n ep‰kunrattijutut
 				if ($tee != "") {
 					require("epakurantti.inc");

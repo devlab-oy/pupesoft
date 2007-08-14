@@ -1,4 +1,5 @@
 <?php
+
 ///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 $useslave = 1;
 
@@ -96,8 +97,10 @@ if ($osasto != "" and $try != "") {
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
 				tuote.yhtio = tilausrivi.yhtio and
 				tuote.tuoteno = tilausrivi.tuoteno and
-				tuote.epakurantti1pvm = '0000-00-00' and
-				tuote.epakurantti2pvm = '0000-00-00' and
+				tuote.epakurantti25pvm = '0000-00-00' and
+				tuote.epakurantti50pvm = '0000-00-00' and
+				tuote.epakurantti75pvm = '0000-00-00' and
+				tuote.epakurantti100pvm = '0000-00-00' and
 				tilausrivi.tyyppi = 'L' and
 				tilausrivi.osasto = '$osasto' and
 				tilausrivi.try = '$try' and

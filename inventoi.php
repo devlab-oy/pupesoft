@@ -1,4 +1,5 @@
 <?php
+
 	require ("inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Inventointi")."</font><hr>";
@@ -288,8 +289,13 @@
 								$poikkeama = ($erotus/1)*100;
 							}
 
-							if ($row['epakurantti1pvm'] != '0000-00-00') $row['kehahin'] = $row['kehahin'] / 2;
-							if ($row['epakurantti2pvm'] != '0000-00-00') $row['kehahin'] = 0;
+							if 		($row['epakurantti100pvm'] != '0000-00-00') $row['kehahin'] = 0;							
+							elseif 	($row['epakurantti75pvm'] != '0000-00-00') $row['kehahin'] = $row['kehahin'] * 0.25;
+							elseif 	($row['epakurantti50pvm'] != '0000-00-00') $row['kehahin'] = $row['kehahin'] * 0.5;
+							elseif	($row['epakurantti25pvm'] != '0000-00-00') $row['kehahin'] = $row['kehahin'] * 0.75;
+
+
+
 
 
 							///* Tehd‰‰n tapahtuma *///

@@ -1,5 +1,5 @@
 <?php
-
+	
 	$ulos = "";
 	$jatko = 1; // oletetaan normaali käsittely
 	$tyyppi = 1; // oletetaan rivin näkyvyys
@@ -28,8 +28,10 @@
 		mysql_field_name($result, $i) == "vihapvm" or
 		mysql_field_name($result, $i) == "saldo" or
 		mysql_field_name($result, $i) == "saldoaika" or
-		mysql_field_name($result, $i) == "epakurantti1pvm" or
-		mysql_field_name($result, $i) == "epakurantti2pvm") {
+		mysql_field_name($result, $i) == "epakurantti25pvm" or
+		mysql_field_name($result, $i) == "epakurantti50pvm" or
+		mysql_field_name($result, $i) == "epakurantti75pvm" or
+		mysql_field_name($result, $i) == "epakurantti100pvm") {
 		$tyyppi = 2;
 	}
 

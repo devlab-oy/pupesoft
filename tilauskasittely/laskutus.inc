@@ -102,7 +102,7 @@ else {
 		}
 				
 		// Etsit‰‰n tuote
-		$query = "	SELECT kehahin, ei_saldoa, epakurantti1pvm, epakurantti2pvm, sarjanumeroseuranta
+		$query = "	SELECT kehahin, ei_saldoa, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, epakurantti100pvm, sarjanumeroseuranta
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]'";
 		$laskutusres = mysql_query($query) or pupe_error($query);
@@ -117,8 +117,11 @@ else {
 			$turow = mysql_fetch_array ($laskutusres);
 
 			// Lasketaan tilausrivin arvo ja kate
-			if ($turow['epakurantti1pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] / 2;
-			if ($turow['epakurantti2pvm'] != '0000-00-00') $turow['kehahin'] = 0;
+			if 		($turow['epakurantti100pvm'] != '0000-00-00') $turow['kehahin'] = 0;
+			elseif	($turow['epakurantti75pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] * 0.25;
+			elseif 	($turow['epakurantti50pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] * 0.5;
+			elseif 	($turow['epakurantti25pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] * 0.75;
+
 
 			$apuhinta1 = round($hinta,2);
 			$apuhinta2 = round($trow['varattu'] * $hinta,2);

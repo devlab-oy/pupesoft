@@ -159,7 +159,7 @@
 		if ($asos == $asosrow["selite"]) {
 			$sel2 = "selected";
 		}
-		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] $asosrow[selitetark]</option>";
+		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
 	}
 	echo "</select></td>";
 	
@@ -172,9 +172,10 @@
 	echo "<th>".t("Näytä konsernin kaikki asiakkaat").":</th><td><input type='checkbox' name='konserni' $chk onclick='submit();'></td>";
 	echo "</tr>\n\n";
 	
-	$query = "	SELECT distinct piiri
+	$query = "	SELECT distinct piiri, selitetark
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and piiri != '' order by piiri+0";
+				LEFT JOIN avainsana ON avainsana.yhtio=asiakas.yhtio and avainsana.laji='PIIRI' and selite = piiri
+				WHERE asiakas.yhtio='$kukarow[yhtio]' and piiri != '' order by piiri+0";
 	$asosresult = mysql_query($query) or pupe_error($query);
 	
 	echo "<tr><th>".t("Valitse asiakkaan piiri").":</th><td><select name='aspiiri' onchange='submit();'>";
@@ -185,7 +186,7 @@
 		if ($aspiiri == $asosrow["piiri"]) {
 			$sel2 = "selected";
 		}
-		echo "<option value='$asosrow[piiri]' $sel2>$asosrow[piiri]</option>";
+		echo "<option value='$asosrow[piiri]' $sel2>$asosrow[piiri] - $asosrow[selitetark]</option>";
 	}
 	echo "</select></td>";
 	
@@ -203,15 +204,16 @@
 		if ($asryhma == $asosrow["selite"]) {
 			$sel2 = "selected";
 		}
-		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] $asosrow[selitetark]</option>";
+		echo "<option value='$asosrow[selite]' $sel2>$asosrow[selite] - $asosrow[selitetark]</option>";
 	}
 	
 	echo "</select></td></tr>\n\n";
 					
 					
-	$query = "	SELECT distinct myyjanro
+	$query = "	SELECT distinct asiakas.myyjanro, kuka.kuka
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and myyjanro!=0  order by myyjanro";
+				LEFT JOIN kuka ON kuka.yhtio = asiakas.yhtio and kuka.myyja=asiakas.myyjanro
+				WHERE asiakas.yhtio='$kukarow[yhtio]' and asiakas.myyjanro!=0  order by myyjanro";
 	$asosresult = mysql_query($query) or pupe_error($query);
 	
 	echo "<tr>";
@@ -223,7 +225,7 @@
 		if ($asmyyja == $asosrow["myyjanro"]) {
 			$sel2 = "selected";
 		}
-		echo "<option value='$asosrow[myyjanro]' $sel2>$asosrow[myyjanro]</option>";
+		echo "<option value='$asosrow[myyjanro]' $sel2>$asosrow[myyjanro] - $asosrow[kuka]</option>";
 	}
 	
 	echo "</select></td></tr>\n\n";				

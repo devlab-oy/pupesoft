@@ -1209,7 +1209,7 @@
 			$osumapros = "N/A";
 		}
 
-		echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s KG, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
+		echo "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 		
 		//Tuotekannassa voi olla tuotteen mitat kahdella eri tavalla
 		// leveys x korkeus x syvyys
@@ -1240,9 +1240,9 @@
 			$osumapros = "N/A";
 		}
 		
-		$tilavuusrow["tilavuus"] = round($tilavuusrow["tilavuus"],6);
+		$tilavuusrow["tilavuus"] = round($tilavuusrow["tilavuus"],3);
 
-		echo "<font class='message'>".t("Tilauksen tilavuus tuoterekisterin tietojen mukaan on").": $tilavuusrow[tilavuus] , $osumapros ".t("%:lle kappaleista on annettu koko.")."</font><br>";
+		echo "<font class='message'>".t("Tilauksen tilavuus tuoterekisterin tietojen mukaan on").": $tilavuusrow[tilavuus] m&sup3; , $osumapros ".t("%:lle kappaleista on annettu koko.")."</font><br>";
 		
 		echo "<table>";
 

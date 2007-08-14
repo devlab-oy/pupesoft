@@ -900,6 +900,22 @@ if (!function_exists("asana")) {
 				return $sana;
 			}
 		}
+		else {
+			if ($kukarow["kieli"] != $yhtiorow["kieli"]) {
+				$query = "select selitetark from avainsana where yhtio = '$kukarow[yhtio]' and laji = '$laji' and selite = '$sana' LIMIT 1";
+				$result = mysql_query($query) or pupe_error($query);
+				if (mysql_num_rows($result) > 0) {
+					$row = mysql_fetch_array($result);
+					return $row["selitetark"];
+				}
+				else {
+					return $sana;
+				}
+			}
+			else {
+				return $sana;
+			}
+		}
 	}
 
 	/*esimerkki
@@ -958,7 +974,7 @@ if (!function_exists("nimitys")) {
 
 // helpotetaan queryn tekoa.
 if (!function_exists("avain")) {
-	function avain($laji, $joini = '', $kieli = '') {
+	function avain($laji, $joini = '', $kieli = '', $as = '') {
 
 		global $kukarow, $yhtiorow;
 
@@ -984,6 +1000,13 @@ if (!function_exists("avain")) {
 			$returni = " selitetark ";
 			$joinaa = "avainsana";
 		}
+		
+		if ($as == '') {
+			$as = $returni;
+		}
+		else {
+			$as = " ".$as." ";
+		}
 
 		if ($kieli != $yhtiorow["kieli"]) {
 			if ($laji == 'join') {
@@ -997,10 +1020,10 @@ if (!function_exists("avain")) {
 				}
 			}
 			elseif ($laji == 'select') {
-				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) ".trim($returni)." ";
+				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) ".trim($as)." ";
 			}
 			elseif ($laji == 'select2') {
-				$returni = " if(isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) ".trim($returni)." ";
+				$returni = " if(isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) ".trim($as)." ";
 			}
 			elseif ($laji == 'selectcon') {
 				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) ";

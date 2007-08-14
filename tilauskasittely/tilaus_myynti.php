@@ -1255,7 +1255,14 @@ if ($tee == '') {
 			$jtapurow = mysql_fetch_array($jtapuresult);
 
 			if ($jtapurow["kpl"] > 0) {
-				echo "	<td class='back'><form action='$PHP_SELF' method='post'>
+				if($kaytiin_otsikolla == "NOJOO!") {
+					$class = 'tumma';
+				}
+				else {
+					$class = 'back';
+				}
+				
+				echo "	<td class='$class'><form action='$PHP_SELF' method='post'>
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='projektilla' value='$projektilla'>

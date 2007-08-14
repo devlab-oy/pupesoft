@@ -19,13 +19,13 @@ if ($tilvahasiakas['fax'] == '') {
 else {
 
 	if ($kukarow['extranet'] == '') {
-		$nimi = "../dataout/tilvafax-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+		$tilvahvfilenimi = "../dataout/tilvafax-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 	}
 	else {
-		$nimi = "dataout/tilvafax-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+		$tilvahvfilenimi = "dataout/tilvafax-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 	}
 
-	if (!$toot = fopen($nimi, "w")) die(t("TILAUSVAHVISTUS: Tiedoston luonti epäonnistui")."!");
+	if (!$toot = fopen($tilvahvfilenimi, "w")) die(t("TILAUSVAHVISTUS: Tiedoston luonti epäonnistui")."!");
 
 	$query = "SELECT tilausrivi.tunnus, eankoodi, myyntihinta, aleryhma,
 					tilausrivi.tuoteno, varattu, toimaika, kommentti, tilkpl, tilausrivi.alv, tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, jt, var
@@ -127,7 +127,7 @@ else {
 	$ftpuser = $faxuser;
 	$ftppass = $faxpass;
 	$ftppath = $faxpath;
-	$ftpfile = realpath($nimi);
+	$ftpfile = realpath($tilvahvfilenimi);
 
 	if ($kukarow["extranet"] == '') {
 		require ("../inc/ftp-send.inc");

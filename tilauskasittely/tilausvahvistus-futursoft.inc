@@ -4,13 +4,13 @@
 // tarvitaan $yhtiorow array
 
 if ($kukarow['extranet'] == '') {
-	$nimi = "../dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
+	$tilvahvfilenimi = "../dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
 }
 else {
-	$nimi = "dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
+	$tilvahvfilenimi = "dataout/tilvahv_".$kukarow["yhtio"]."_".$laskurow["tunnus"].".dat";
 }
 
-if (!$toot = fopen($nimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
+if (!$toot = fopen($tilvahvfilenimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 
 $query = "SELECT tilausrivi.tunnus, eankoodi,
 		tilausrivi.tuoteno, varattu, toimaika, kommentti, tilkpl, tilausrivi.alv, tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
@@ -92,7 +92,7 @@ if (mysql_num_rows($tilvahresult) > 0) {
 	// lähetetään ftpllä
 	if ($laskurow["toim_ovttunnus"] == "") $laskurow["toim_ovttunnus"] = $laskurow["ovttunnus"];
 
-	$ftpnimi = $kukarow["yhtio"].$laskurow["toim_ovttunnus"]."-".basename($nimi);
+	$ftpnimi = $kukarow["yhtio"].$laskurow["toim_ovttunnus"]."-".basename($tilvahvfilenimi);
 
 	if ($futurtilvahhost != "" and $futurtilvahuser != "" and $futurtilvahpass != "") {
 
@@ -105,7 +105,7 @@ if (mysql_num_rows($tilvahresult) > 0) {
 
 		// jos login ok kokeillaan uploadata
 		if ($login_result) {
-			$upload = ftp_put($conn_id, $ftpnimi, realpath($nimi), FTP_ASCII);
+			$upload = ftp_put($conn_id, $ftpnimi, realpath($tilvahvfilenimi), FTP_ASCII);
 		}
 
 		if ($conn_id) {

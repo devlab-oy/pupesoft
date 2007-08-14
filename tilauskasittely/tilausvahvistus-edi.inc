@@ -4,13 +4,13 @@
 // tarvitaan $yhtiorow array
 
 if ($kukarow['extranet'] == '') {
-	$nimi = "../dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+	$tilvahvfilenimi = "../dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 }
 else {
-	$nimi = "dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+	$tilvahvfilenimi = "dataout/tilvahvi-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
 }
 
-if (!$toot = fopen($nimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
+if (!$toot = fopen($tilvahvfilenimi, "w")) die("TILAUSVAHVISTUS: Tiedoston luonti ei onnistu!");
 
 $query = "SELECT tilausrivi.tunnus, eankoodi,
 		tilausrivi.tuoteno, varattu, toimaika, kommentti, tilkpl, tilausrivi.alv, tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.laatija, tilausrivi.tilaajanrivinro
@@ -133,13 +133,13 @@ if (mysql_num_rows($tilvahresult) > 0)
 	$ftpuser = $tilvahuser;
 	$ftppass = $tilvahpass;
 	$ftppath = $tilvahpath;
-	$ftpfile = realpath($nimi);
+	$ftpfile = realpath(tilvahvfilenimi);
 
 	require ("../inc/ftp-send.inc");
 
 
 #	// n‰ytet‰‰n faili ruudulla...
-#	$toot = fopen($nimi,"r");
+#	$toot = fopen(tilvahvfilenimi,"r");
 #
 #	$contents = "";
 #	while (!feof ($toot)) {

@@ -256,6 +256,9 @@
 			if (strtoupper($trow[$i]) == 'KARHUVIESTI') {
 				$sel55 = "selected";
 			}
+			if (strtoupper($trow[$i]) == 'VARASTOLUOKKA') {
+				$sel56 = "selected";
+			}
 
 
 			$ulos = "<td><select name='$nimi' onchange='submit();'>";
@@ -313,7 +316,8 @@
 			$ulos .= "<option value='JAKELULISTA'" 	  .$sel52.">".t("Email jakelulista")."</option>";
 			$ulos .= "<option value='VAKIOVIESTI'"    .$sel53.">".t("Vakioviesti")."</option>";	
 			$ulos .= "<option value='TYOM_TYOLINJA'"  .$sel54.">".t("Työmääräysten työlinja")."</option>";			
-			$ulos .= "<option value='KARHUVIESTI'"    .$sel55.">".t("Karhuviesti")."</option>";			
+			$ulos .= "<option value='KARHUVIESTI'"    .$sel55.">".t("Karhuviesti")."</option>";	
+			$ulos .= "<option value='VARASTOLUOKKA'"  .$sel56.">".t("Varastoluokka")."</option>";								
 			$ulos .= "</select></td>";
 			$jatko = 0;			
 		}

@@ -226,13 +226,21 @@
 		elseif ($toim == "SIIRTOTYOMAARAYS") {
 			echo "<th>".t("Asennusprioriteetti")."</th><td>";
 		}
-
-		$query = "	SELECT avainsana.selite, ".avain('select')."
+		
+		//	Olisiko erikseen varastoluokkia?
+		$query = "	SELECT selite, selitetark
 					FROM avainsana
-					".avain('join','ASLUOKKA_')."
-					WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'ASIAKASLUOKKA'
-					ORDER BY avainsana.jarjestys, avainsana.selite";
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'VARASTOLUOKKA'
+					ORDER BY jarjestys, selite";
 		$tresult = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($tresult) == 0) {
+			$query = "	SELECT avainsana.selite, ".avain('select')."
+						FROM avainsana
+						".avain('join','ASLUOKKA_')."
+						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'ASIAKASLUOKKA'
+						ORDER BY avainsana.jarjestys, avainsana.selite";
+			$tresult = mysql_query($query) or pupe_error($query);			
+		}
 
 		echo "<select name='luokka'><option value=''>".t("Oletus")."</option>";
 
@@ -242,7 +250,7 @@
 			if ($row[0] == $srow["luokka"]) $sel = 'selected';
 
 
-			echo "<option value='$row[0]' $sel>$row[1]</option>";
+			echo "<option value='$row[0]' $sel>$row[0] - $row[1]</option>";
 		}
 		echo "</select>";
 

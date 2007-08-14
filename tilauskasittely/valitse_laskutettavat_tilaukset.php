@@ -558,13 +558,13 @@
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
-			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivejä")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th><tr>";
+			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivejä")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th></tr>";
 
 			$arvoyhteensa = 0;
 			$tilauksiayhteensa = 0;
 
 			while ($tilrow = mysql_fetch_array($tilre)) {
-				echo "	<tr>
+				echo "	<tr class='aktiivi'>
 						<td valign='top'>$tilrow[tunnukset_ruudulle]</td>
 						<td valign='top'>$tilrow[ytunnus]</td>
 						<td valign='top'>$tilrow[nimi] $tilrow[nimitark]</td>

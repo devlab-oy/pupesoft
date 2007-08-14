@@ -348,11 +348,14 @@ else {
 
 		$xrow = mysql_fetch_array($presult);
 
-		if ($xrow['abs_pvm'] == '0000-00-00') {
+		if ($xrow['abs_pvm'] == '0000-00-00' and $xrow["rel_pvm"] != 0) {
 			$erapvm = "adddate('$laskutuspvm', interval $xrow[rel_pvm] day)";
 		}
-		else {
+		elseif ($xrow['abs_pvm'] != '0000-00-00') {
 			$erapvm = "'$xrow[abs_pvm]'";
+		}
+		else {
+			$erapvm = "'$laskutuspvm'";
 		}
 
 		if ($xrow['kassa_teksti']!='') {

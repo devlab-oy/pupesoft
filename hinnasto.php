@@ -94,7 +94,11 @@ if ($tee != '') {
 			$where .= "muutospvm >= '" . $pvm . "' and ";
 		}
 	}
-
+    
+    if (isset($_POST['tuotemerkki']) and strlen($_POST['tuotemerkki']) > 0) {
+        $where .= "tuote.tuotemerkki = '" . mysql_real_escape_string($_POST['tuotemerkki']) . "' and ";
+    }
+    
 	// jos ei olla extranetissa niin otetaan valuuttatiedot yhtiolta
 	// maa, valkoodi, ytunnus
 	if (empty($kukarow['extranet'])) {
@@ -118,7 +122,7 @@ if ($tee != '') {
 
 	// asetetaan vienti kurssi
 	$laskurowfake['vienti_kurssi'] = $kurssi['kurssi'];
-
+    
 	$query = "	SELECT tuote.*, korvaavat.id
 				FROM tuote
 				LEFT JOIN korvaavat use index (yhtio_tuoteno) ON (tuote.tuoteno=korvaavat.tuoteno and tuote.yhtio=korvaavat.yhtio)
@@ -127,7 +131,6 @@ if ($tee != '') {
 				and tuote.vienti not like '%+{$laskurowfake['maa']}%')
 				ORDER BY tuote.osasto+0, tuote.try+0";
 	$result = mysql_query($query) or pupe_error($query);
-
 	if (mysql_num_rows($result) == 0) {
 		echo t('Yhtään tuotetta ei löytynyt hinnastoon.') . '<br />';
 		die();
@@ -238,8 +241,26 @@ while($srow = mysql_fetch_array ($sresult)) {
 	}
 	echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 }
-echo "</select></td><th>tai syötä käsin</th><td><input type='text' name='try2' value='$try' size='15'></td></tr>
-	<tr>
+echo "</select></td><th>tai syötä käsin</th><td><input type='text' name='try2' value='$try' size='15'></td></tr>";
+
+$query = "	SELECT distinct tuotemerkki
+			FROM tuote
+			WHERE yhtio='{$kukarow['yhtio']}' and tuotemerkki != ''
+			ORDER BY tuotemerkki";
+$sresult = mysql_query($query) or pupe_error($query);
+
+echo "<tr><th>".t('Valitse tuotemerkki alasvetovalikosta')."</th><td><select name='tuotemerkki'>";
+echo "<option value=''>".t("Tuotemerkki")."</option>";
+
+while ($srow = mysql_fetch_array($sresult)) {
+	if ($tuotemerkki == $srow[0]) $sel = "selected";
+	else $sel = "";
+	echo "<option value='$srow[0]' $sel>$srow[0]</option>";
+}
+
+echo "</select></td></tr>";
+
+echo "<tr>
 	<th>" .t('Muutospäivämäärä') . "</th>
 	<td>
 		<input type='text' name='pp' value='$pp' size='3'>

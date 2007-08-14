@@ -58,7 +58,7 @@
 				LEFT JOIN asiakkaan_kohde ON laskun_lisatiedot.yhtio=asiakkaan_kohde.yhtio and laskun_lisatiedot.asiakkaan_kohde=asiakkaan_kohde.tunnus
 				LEFT JOIN yhteyshenkilo ON laskun_lisatiedot.yhtio=yhteyshenkilo.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo.tunnus
 				LEFT JOIN kuka ON laskun_lisatiedot.yhtio=kuka.yhtio and laskun_lisatiedot.projektipaallikko=kuka.kuka
-				WHERE laskun_lisatiedot.yhtio='{$kukarow["yhtio"]}' and laskun_lisatiedot.otunnus='$laskurow[tunnus]'";
+				WHERE laskun_lisatiedot.yhtio='{$kukarow["yhtio"]}' and laskun_lisatiedot.otunnus='$laskurow[tunnus]' and seuranta!=''";
 	$lisares=mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($lisares)>0) {
 		$lisarow=mysql_fetch_array($lisares);

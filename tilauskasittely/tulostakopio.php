@@ -7,11 +7,11 @@
 	if(isset($_POST["TULOSTA"])) {
 		$_POST["tee"] = "TULOSTA";
 	}
-		
+
 	if(isset($_POST["komento"]) and in_array("PDF_RUUDULLE", $_POST["komento"]) !== false) {
 		$_POST["tee"] = "NAYTATILAUS";
 	}
-	
+
 	if($_POST["tee"] == 'NAYTATILAUS') $nayta_pdf=1; //Generoidaan .pdf-file
 
 	require('../inc/parametrit.inc');
@@ -125,7 +125,7 @@
 				require ("../inc/asiakashaku.inc");
 			}
 		}
-		
+
 		if ($ytunnus != '') {
 			$tee = "ETSILASKU";
 		}
@@ -260,10 +260,10 @@
 		if ($toim == "SIIRTOLISTA") {
 			//ostolasku jolle on kohdistettu rivej‰. T‰lle oliolle voidaan tulostaa tariffilista
 			$where1 = " lasku.tila = 'G' ";
-			
+
 			$where2 = " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
-							
+
 			if ($lahettava_varasto != '') {
 				$where2 .= " and lasku.varasto = '$lahettava_varasto'";
 			}
@@ -480,7 +480,7 @@
 
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
-			
+
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
@@ -538,12 +538,12 @@
 		}
 
 		// Etsit‰‰n muutettavaa tilausta
-		$query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro, 
-					concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus, 
-					if(lasku.tapvm = '0000-00-00', lasku.luontiaika, lasku.tapvm) Pvm, 
-					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija, 
-					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa, 
-					toimaika Toimitusaika, 
+		$query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro,
+					concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus,
+					if(lasku.tapvm = '0000-00-00', lasku.luontiaika, lasku.tapvm) Pvm,
+					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija,
+					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa,
+					toimaika Toimitusaika,
 					lasku.tila, lasku.alatila
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
@@ -578,7 +578,7 @@
 
 			for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
 				$jarj = $i+1;
-				
+
 				echo "<th><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=$jarj'>".t(mysql_field_name($result,$i))."</a></th>";
 			}
 			echo "<th>".t("Tyyppi")."</th>";
@@ -603,14 +603,14 @@
 				echo "<tr>";
 
 				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-					
+
 					if ($i==4 or $i==6 or $i==7) {
 						$ali = " align='right' ";
 					}
 					else {
 						$ali = " align='left' ";
 					}
-					
+
 					if ($i==4 or $i==7) {
 						echo "<$ero $ali>".tv1dateconv($row[$i])."</$ero>";
 					}
@@ -886,13 +886,13 @@
 				require('tulosta_purkulista.inc');
 				$tee = '';
 			}
-			
+
 			if ($toim == "TUOTETARRA") {
 				$otunnus = $laskurow["tunnus"];
 				require('tulosta_tuotetarrat.inc');
 				$tee = '';
 			}
-			
+
 			if($toim == "TARIFFI") {
 				$otunnus = $laskurow["tunnus"];
 				require('tulosta_tariffilista.inc');
@@ -1000,14 +1000,14 @@
 
 			if ($toim == "LASKU" or $toim == 'PROFORMA') {
 				$otunnus = $laskurow["tunnus"];
-				
+
 				// haetaan maksuehdon tiedot
-				$query  = "	select * 
-							from maksuehto 
+				$query  = "	select *
+							from maksuehto
 							left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 							where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				if (mysql_num_rows($result) == 0) {
 					$masrow = array();
 					if ($laskurow["erpcm"] == "0000-00-00") {
@@ -1017,11 +1017,11 @@
 				else {
 					$masrow = mysql_fetch_array($result);
 				}
-				
+
 				//maksuehto tekstin‰
 				$maksuehto      = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 				$kateistyyppi   = $masrow["kateinen"];
-				
+
 				if ($yhtiorow['laskutyyppi'] == 3) {
 					require_once ("tulosta_lasku_simppeli.inc");
 					tulosta_lasku($otunnus, $komento["Lasku"], $kieli, $toim, $tee);
@@ -1072,7 +1072,7 @@
 
 					unset($pdf);
 					unset($page);
-					
+
 					$sivu 	= 1;
 					$summa 	= 0;
 					$arvo 	= 0;
@@ -1115,8 +1115,8 @@
 					system("rm -f $pdffilenimi");
 
 					unset($pdf);
-					unset($page);					
-					
+					unset($page);
+
 					if ($tee != 'NAYTATILAUS') {
 						echo t("Lasku tulostuu")."...<br>";
 						$tee = '';
@@ -1126,9 +1126,9 @@
 
 			if ($toim == "TILAUSVAHVISTUS") {
 				$otunnus = $laskurow["tunnus"];
-				
+
 				require_once ("tulosta_tilausvahvistus_pdf.inc");
-				
+
 				tulosta_tilausvahvistus($otunnus, $komento["Tilausvahvistus"], $kieli, $tee);
 
 				$tee = '';
@@ -1137,9 +1137,9 @@
 			if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL") {
 				$otunnus = $laskurow["tunnus"];
 				list ($toimalku, $hinnat) = explode("!!!", $toim);
-				
+
 				require_once ("tulosta_tarjous.inc");
-				
+
 				tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat);
 
 				$tee = '';
@@ -1149,7 +1149,7 @@
 
 				$otunnus = $laskurow["tunnus"];
 				list ($toimalku, $hinnat) = explode("!!!", $toim);
-				
+
 				require_once ("tulosta_myyntisopimus.inc");
 
 				tulosta_myyntisopimus($otunnus, $komento["Myyntisopimus"], $kieli, $tee, $hinnat);
@@ -1203,7 +1203,7 @@
 
 			if ($toim == "TYOMAARAYS") {
 				//Tehd‰‰n joini
-				$query = "  SELECT tyomaarays.*, lasku.* 
+				$query = "  SELECT tyomaarays.*, lasku.*
 							FROM lasku
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE lasku.yhtio='$kukarow[yhtio]'
@@ -1218,8 +1218,8 @@
 							WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$asiakasrow = mysql_fetch_array($result);
-				
-				
+
+
 				if ($laskurow["tila"] == 'U') {
 					$where = " uusiotunnus='$laskurow[tunnus]' ";
 				}
@@ -1229,7 +1229,7 @@
 
 				// aloitellaan laskun teko
 				$firstpage = alku();
-				
+
 				tyokommentit($firstpage);
 
 				// haetaan tilauksen kaikki rivit
@@ -1290,10 +1290,10 @@
 				if ($tilausnumeroita == '') {
 					$tilausnumeroita = $laskurow['tunnus'];
 				}
-				
+
 				#todo pit‰‰ lis‰t‰ tulosta_siirtolista.inc:iin toimitustapa, tilausviite ja katsoa ett‰ varastot menee oikein.
 				//require_once ("tulosta_siirtolista.inc");
-				
+
 				require_once ("tulosta_lahete_kerayslista.inc");
 
 				//tehd‰‰n uusi PDF failin olio
@@ -1352,7 +1352,7 @@
 				$pdf_valm->set_default('margin', 0);
 
 				$tilausnumeroita = $laskurow["tunnus"];
-				
+
 				//generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
 				$query = " 	SELECT *, if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, tilausrivi.tunnus, if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskentta
 							FROM tilausrivi use index (yhtio_otunnus)
@@ -1361,7 +1361,7 @@
 							and var in ('','H')
 							ORDER by sorttauskentta desc, tunnus";
 				$result = mysql_query($query) or pupe_error($query);
-				
+
 				//generoidaan rivinumerot
 				$rivinumerot = array();
 
@@ -1407,16 +1407,16 @@
 			}
 
 			if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
-				
+
 				$otunnus = $laskurow["tunnus"];
-				
+
 				//hatetaan asiakkaan l‰hetetyyppi
 				$query = "  SELECT lahetetyyppi, luokka, puhelin
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($result);
-								
+
 				$lahetetyyppi = "";
 
 				if ($asrow["lahetetyyppi"] != '') {
@@ -1436,24 +1436,24 @@
 						$lahetetyyppi = $vrow["selite"];
 					}
 				}
-								
+
 				if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 					require_once ("tulosta_lahete_alalasku.inc");
-				}	
+				}
 				elseif (strpos($lahetetyyppi,'simppeli') !== FALSE) {
 					require_once ("$lahetetyyppi");
 				}
 				else {
 					require_once ("tulosta_lahete.inc");
 				}
-											
+
 				//	Jos meill‰ on funktio tulosta_lahete meill‰ on suora funktio joka hoitaa koko tulostuksen
 				if(function_exists("tulosta_lahete")) {
 					if($vrow["selite"] != '') {
 						$tulostusversio = $vrow["selite"];
 					}
 					else {
-						$tulostusversio = $asrow["lahetetyyppi"];						
+						$tulostusversio = $asrow["lahetetyyppi"];
 					}
 					if($toim == "PAKKALISTA") {
 						tulosta_lahete($otunnus, $komento["Pakkalista"], $kieli = "", $toim, $tee, $tulostusversio);
@@ -1471,10 +1471,10 @@
 					}
 					else {
 						$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
-					} 
+					}
 
 					//generoidaan l‰hetteelle ja ker‰yslistalle rivinumerot
-					$query = "  SELECT tilausrivi.*,							
+					$query = "  SELECT tilausrivi.*,
 								round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) ovhhinta,
 								round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta,
 								$sorttauskentta,
@@ -1491,7 +1491,7 @@
 					//generoidaan rivinumerot
 					$rivinumerot = array();
 
-					while ($row = mysql_fetch_array($riresult)) {						
+					while ($row = mysql_fetch_array($riresult)) {
 						$rivinumerot[$row["tunnus"]] = $row["tunnus"];
 					}
 
@@ -1506,13 +1506,13 @@
 
 					mysql_data_seek($riresult,0);
 
-					
+
 					unset($pdf);
 					unset($page);
-					
+
 					$sivu  = 1;
 					$total = 0;
-					
+
 					// Aloitellaan l‰hetteen teko
 					$page[$sivu] = alku();
 
@@ -1520,7 +1520,7 @@
 						rivi($page[$sivu]);
 						$total+= $row["rivihinta"];
 					}
-					
+
 					//Vikan rivin loppuviiva
 					$x[0] = 20;
 					$x[1] = 580;
@@ -1528,13 +1528,13 @@
 					$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
 
 					loppu($page[$sivu], 1);
-					
+
 					if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 						alvierittely($page[$sivu]);
 					}
-					
+
 					//tulostetaan sivu
-					print_pdf($komento["L‰hete"]);					
+					print_pdf($komento["L‰hete"]);
 				}
 
 				$tee = '';
@@ -1641,7 +1641,7 @@
 				}
 				$tee = '';
 			}
-			
+
 			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 			if ($lopetus != '') {
 				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
@@ -1664,9 +1664,9 @@
 
 
 		if (trim($toim) == "SIIRTOLISTA") {
-			
+
 			echo "<tr><th>".t("L‰hett‰v‰ varasto")."</th><td>";
-			
+
 			$query = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
@@ -1679,11 +1679,11 @@
 				echo "<option value='$vrow[tunnus]'>$vrow[maa] $vrow[nimitys]</option>";
 			}
 			echo "</select>";
-			
+
 			echo "</td></tr>";
-			
+
 			echo "<tr><th>".t("Vastaanottava varasto")."</th><td>";
-			
+
 			$query = "	SELECT *
 						FROM varastopaikat
 						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
@@ -1696,9 +1696,9 @@
 				echo "<option value='$vrow[tunnus]'>$vrow[maa] $vrow[nimitys]</option>";
 			}
 			echo "</select>";
-			
+
 			echo "</td></tr>";
-			
+
 			echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
 		}
 		else {
@@ -1709,9 +1709,16 @@
 				echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
 			}
 			echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
-			echo "<tr>
-					<th>".t("Laskunumero")."</th>
-					<td><input type='text' size='10' name='laskunro'></td>
+			echo "<tr>";
+
+			if ($toim == "PURKU" or $toim == "TARIFFI") {
+				echo "<th>".t("Keikkanumero")."</th>";
+			}
+			else {
+				echo "<th>".t("Laskunumero")."</th>";
+			}
+
+			echo "	<td><input type='text' size='10' name='laskunro'></td>
 					<td><input type='text' size='10' name='laskunroloppu'></td></tr>";
 		}
 
@@ -1719,7 +1726,7 @@
 
 		echo "<br><input type='submit' value='".t("Jatka")."'>";
 		echo "</form>";
-		
+
 		$formi  = 'hakuformi';
 		$kentta = 'ytunnus';
 	}

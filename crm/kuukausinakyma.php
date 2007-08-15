@@ -349,18 +349,36 @@
 			echo "</tr>";
 		}
 		
+		//	Haetaan sallitut seurannat
+		$query = "	SELECT group_concat(distinct selite SEPARATOR \"','\") lajit
+					FROM avainsana
+					WHERE yhtio = '{$kukarow["yhtio"]}' and laji = 'SEURANTA' and selitetark_2 = 'kale'
+					GROUP BY laji";
+		$abures = mysql_query($query) or pupe_error($query);
+		$aburow = mysql_fetch_array($abures);
+		if($aburow["lajit"] != "") {
+			$lajilisa = " and seuranta IN ('','{$aburow["lajit"]}')";
+		}
+		
 		//	Haetaan kaikki projektiotsikot
-		$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tunnusnippu, nimi, nimitark, seuranta
+		$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) projekti, nimi, nimitark, seuranta, tunnusnippu, lasku.tunnus, tila, alatila
 					FROM lasku
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio and otunnus=lasku.tunnus
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
-					and (tila =  'R' and alatila IN ('', 'A') or tila IN ('N','L') and alatila != 'X') and (tunnusnippu = lasku.tunnus or tunnusnippu = 0)
+					and (tila =  'R' and alatila IN ('', 'A') or (tila IN ('N','L') and alatila != 'X' $lajilisa)) and (tunnusnippu = lasku.tunnus or tunnusnippu = 0)
 					ORDER BY tunnusnippu";
 		$result = mysql_query($query) or pupe_error($query);
 
 		while($row = mysql_fetch_array($result)) {
 			
-			$href = "../tilauskasittely/tilaus_myynti.php?toim=PROJEKTI&tee=AKTIVOI&tilausnumero={$row["tunnusnippu"]}&from=VALITSETOIMITUS&lopetus=$lopetus";
+			$href = "../tilauskasittely/tilaus_myynti.php?toim=PROJEKTI&valitsetoimitus={$row["projekti"]}&lopetus=$lopetus";
+			
+			if($row["tunnusnippu"] == 0) {
+				$nippu = " lasku.tunnus = '{$row["tunnus"]}'";
+			}
+			else {
+				$nippu = " tunnusnippu = '{$row["tunnusnippu"]}'";
+			}
 			
 			$query = "	SELECT 	tunnus, nimi, tila, alatila, 
 								toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
@@ -368,7 +386,7 @@
 								day(kerayspvm) kerpvm,
 								day(toimaika) toimpvm
 						FROM lasku
-						WHERE tunnusnippu = '{$row["tunnusnippu"]}' and tila IN ('L','G','E','V','W','N','A') and alatila != 'X' and clearing NOT IN ('loppulasku', 'ENNAKKOLASKU')
+						WHERE $nippu and ((tila IN ('L','G','E','V','W','A') and alatila NOT IN ('X','J')) or tila = 'N') and clearing NOT IN ('loppulasku', 'ENNAKKOLASKU')
 						and (	
 								(kerayspvm >= '$year-$mymonth-01 00:00:00' and kerayspvm < '$year-".($mymonth+1)."-01 00:00:00') or
 								(toimaika >= '$year-$mymonth-01 00:00:00' and toimaika < '$year-".($mymonth+1)."-01 00:00:00') or 
@@ -381,13 +399,21 @@
 			unset($eka);
 			if(mysql_num_rows($kresult)>0) {
 
-				echo "<tr class='aktiivi'><td rowspan='".mysql_num_rows($kresult)."' NOWRAP>{$row[tunnusnippu]} - {$row[seuranta]} - {$row[nimi]}</td><td rowspan='".mysql_num_rows($kresult)."'>";
+				echo "<tr class='aktiivi'><td rowspan='".mysql_num_rows($kresult)."' NOWRAP>{$row[projekti]} - {$row[seuranta]} - {$row[nimi]}</td><td rowspan='".mysql_num_rows($kresult)."' NOWRAP>";
 				
 				//	Tehdään infobalooni				
 				$id=md5(uniqid());
+				$laskutyyppi = $row["tila"];
+				$alatila 	 = $row["alatila"];
+			 	require ("../inc/laskutyyppi.inc");
+				
+				if($row["tunnusnippu"] > 0) {
+					$laskutyyppi .= " TOIMITUKSET";
+				}
+				
 				echo "<div id='$id' class='popup' style=\"width: 500px\">
 				<table width='500px' align='center'>
-				<caption><font class='head'>".t("TOIMITUKSET")."</font></caption>
+				<caption><font class='head'>$laskutyyppi</font></caption>
 				<tr>
 					<th>".t("Toimitus")."</th>
 					<th>".t("Keräysaika")."</th>						

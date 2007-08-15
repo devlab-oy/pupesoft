@@ -287,7 +287,7 @@ if ($kutsuja == "otsik.inc") {
 				WHERE yhtio	= '$kukarow[yhtio]'
 				and kuka	= '$kukarow[kuka]'
 				and nimi	= 'yllapito.php'
-				and alanimi = 'asiakas!!!VAHITTAISMYYNTI!!!true'
+				and alanimi = 'asiakas!!!VAHITTAISMYYNTI!!!true&laji=H'
 				and paivitys != ''";
 	$oikeuresult1 = mysql_query($query) or pupe_error($query);
 

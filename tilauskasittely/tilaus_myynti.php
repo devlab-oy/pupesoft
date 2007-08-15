@@ -3356,48 +3356,8 @@ if ($tee == '') {
 							
 							if ($kpl > 0) {
 								//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
-
-								// Tuotteen ostohinta
-								$query = "	SELECT 
-											sum(tilausrivi.rivihinta/tilausrivi.kpl) kplhinta,
-											sum(tilausrivi.hinta * (1-(tilausrivi.ale/100))) kplhinta_eiloppulaskettu
-											FROM sarjanumeroseuranta
-											JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-											WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
-											and sarjanumeroseuranta.myyntirivitunnus = '$row[tunnus]'";
-								$sarjares = mysql_query($query) or pupe_error($query);
-								$sarjarow = mysql_fetch_array($sarjares);
-
-								$ostohinta = (float) $sarjarow["kplhinta"];
-								
-								if($ostohinta == 0 and $sarjarow["kplhinta_eiloppulaskettu"] != 0) {
-									$ostohinta = (float) $sarjarow["kplhinta_eiloppulaskettu"];
-								}
-
-								// Katsotaan onko sarjanumerolle liitetty kulukeikka
-								$query  = "	select lasku.laskunro
-											FROM sarjanumeroseuranta
-											JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
-											WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
-											and sarjanumeroseuranta.myyntirivitunnus = '$row[tunnus]'";
-								$keikkares = mysql_query($query) or pupe_error($query);
-
-								while($kulukeikkarow = mysql_fetch_array($keikkares)) {
-									// Haetaan kaikki keikkaan liitettyjen laskujen summa
-									$query = "	SELECT round(sum(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
-												FROM lasku
-												WHERE yhtio		= '$kukarow[yhtio]'
-												and tila 		= 'K'
-												and laskunro 	= '$kulukeikkarow[laskunro]'
-												and vanhatunnus <> 0
-												and vienti in ('B','E','H')";
-									$iresult = mysql_query($query) or pupe_error($query);
-
-									$kulukulurow = mysql_fetch_array($iresult);
-
-									$ostohinta	+= $kulukulurow["kulusumma"];
-								}
-								
+								$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);
+																													
 								// Kate = Hinta - Ostohinta
 								if ($kotisumma_alviton != 0) {
 									$kate = sprintf('%.2f',100*($kotisumma_alviton - $ostohinta)/$kotisumma_alviton)."%";
@@ -3823,48 +3783,9 @@ if ($tee == '') {
 						$rivikate_eieri	= 0;	// Rivin kate yhtiön valuutassa ilman erikoisalennusta
 
 						if ($arow["sarjanumeroseuranta"] == "S") {
-							
-							// Tuotteen ostohinta
-							$query = "	SELECT 
-										sum(tilausrivi.rivihinta/tilausrivi.kpl) kplhinta,
-										sum(tilausrivi.hinta * (1-(tilausrivi.ale/100))) kplhinta_eiloppulaskettu
-										FROM sarjanumeroseuranta
-										JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-										WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
-										and sarjanumeroseuranta.myyntirivitunnus = '$arow[tunnus]'";
-							$sarjares = mysql_query($query) or pupe_error($query);
-							$sarjarow = mysql_fetch_array($sarjares);
-
-							$ostohinta = (float) $sarjarow["kplhinta"];
-							
-							if($ostohinta == 0 and $sarjarow["kplhinta_eiloppulaskettu"] != 0) {
-								$ostohinta = (float) $sarjarow["kplhinta_eiloppulaskettu"];
-							}
-
-							// Katsotaan onko sarjanumerolle liitetty kulukeikka
-							$query  = "	select lasku.laskunro
-										FROM sarjanumeroseuranta
-										JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
-										WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
-										and sarjanumeroseuranta.myyntirivitunnus = '$arow[tunnus]'";
-							$keikkares = mysql_query($query) or pupe_error($query);
-
-							while($kulukeikkarow = mysql_fetch_array($keikkares)) {
-								// Haetaan kaikki keikkaan liitettyjen laskujen summa
-								$query = "	SELECT round(sum(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
-											FROM lasku
-											WHERE yhtio		= '$kukarow[yhtio]'
-											and tila 		= 'K'
-											and laskunro 	= '$kulukeikkarow[laskunro]'
-											and vanhatunnus <> 0
-											and vienti in ('B','E','H')";
-								$iresult = mysql_query($query) or pupe_error($query);
-
-								$kulukulurow = mysql_fetch_array($iresult);
-
-								$ostohinta	+= $kulukulurow["kulusumma"];
-							}
-														
+							//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
+							$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $arow["tunnus"]);
+						
 							$rivikate 		= $arow["kotirivihinta"] - $ostohinta;
 							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $ostohinta;
 							

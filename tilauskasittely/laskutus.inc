@@ -179,42 +179,7 @@ else {
 			
 			if ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] > 0) {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
-				
-				// Tuotteen ostohinta
-				$query = "	SELECT round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0)), 2) ostosumma
-							FROM sarjanumeroseuranta
-							JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-							WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
-							and sarjanumeroseuranta.myyntirivitunnus = '$trow[tunnus]'
-							HAVING ostosumma!=0";
-				$sarjares = mysql_query($query) or pupe_error($query);
-				$sarjarow = mysql_fetch_array($sarjares);
-								
-				$ostohinta = (float) $sarjarow["ostosumma"];
-				
-				// Katsotaan onko sarjanumerolle liitetty kulukeikka
-				$query  = "	select lasku.laskunro
-							FROM sarjanumeroseuranta
-							JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
-							WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]' 
-							and sarjanumeroseuranta.myyntirivitunnus = '$trow[tunnus]'";
-				$keikkares = mysql_query($query) or pupe_error($query);
-								
-				while($kulukeikkarow = mysql_fetch_array($keikkares)) {
-					// Haetaan kaikki keikkaan liitettyjen laskujen summa
-					$query = "	SELECT round(sum(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
-								FROM lasku
-								WHERE yhtio		= '$kukarow[yhtio]'
-								and tila 		= 'K'
-								and laskunro 	= '$kulukeikkarow[laskunro]'
-								and vanhatunnus <> 0
-								and vienti in ('B','E','H')";
-					$result = mysql_query($query) or pupe_error($query);
-														
-					$kulukulurow = mysql_fetch_array($result);
-					
-					$ostohinta	+= $kulukulurow["kulusumma"];
-				}
+				$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $trow["tunnus"]);
 					
 				// Kate = Hinta - Ostohinta
 				$kate = round($hinta - round($ostohinta/$trow["varattu"], 4), 2);				

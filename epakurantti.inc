@@ -1,7 +1,6 @@
 <?php
 
 // tarvitaan $kukarow, $tuoteno ja $tee jossa on paalle, puolipaalle tai pois
-
 $debug = 0;
 
 if ($tuoteno != "") {

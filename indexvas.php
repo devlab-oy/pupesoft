@@ -9,7 +9,7 @@ else {
 	require ("functions.inc");
 }
 
-if ($yhtiorow["logo"] != '' and file($yhtiorow["logo"]) !== FALSE) {
+if ($yhtiorow["logo"] != '' and @file($yhtiorow["logo"]) !== FALSE) {
 
 	$image = getimagesize($yhtiorow["logo"]);
 	$ix    = $image[0];			// kuvan x

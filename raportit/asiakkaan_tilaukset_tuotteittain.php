@@ -1,7 +1,16 @@
 <?php
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
+	if (isset($_POST["tee"])) {
+		if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+	}
 	require ("../inc/parametrit.inc");
+
+	if (isset($tee) and $tee == "lataa_tiedosto") {
+		readfile("/tmp/".$tmpfilenimi);
+		exit;
+	}
 
 	if ($toim == 'MYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tuoteostot").":</font><hr>";
@@ -106,7 +115,27 @@
 			<td><input type='text' name='vvl' value='$vvl' size='5'></td>
 			<td><input type='submit' value='".t("Etsi")."'></td></tr></form></table>";
 
-	if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {		
+	if ($ytunnus != '' or $tuoteno != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
+		
+		if(include('Spreadsheet/Excel/Writer.php')) {
+
+			//keksitään failille joku varmasti uniikki nimi:
+			list($usec, $sec) = explode(' ', microtime());
+			mt_srand((float) $sec + ((float) $usec * 100000));
+			$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+
+			$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+			$worksheet =& $workbook->addWorksheet('Sheet 1');
+
+			$format_bold =& $workbook->addFormat();
+			$format_bold->setBold();
+
+			$format_num =& $workbook->addFormat();
+			$format_num->setNumFormat('0.00');
+
+			$excelrivi = 0;
+		}
+			
 		if ($jarj != '') {
 			$jarj = "ORDER BY $jarj";
 		}
@@ -139,9 +168,9 @@
 			$query = "	SELECT distinct tilausrivi.tunnus, otunnus tilaus, laskunro, ytunnus, 
 						if(nimi!=toim_nimi and toim_nimi!='', concat(nimi,'<br>(',toim_nimi,')'), nimi) nimi,
 						if(postitp!=toim_postitp and toim_postitp!='', concat(postitp,'<br>(',toim_postitp,')'), postitp) postitp, 
-						tuoteno, REPLACE(kpl+varattu,'.',',') kpl, 
-						REPLACE(tilausrivi.hinta,'.',',') hinta, 
-						REPLACE(rivihinta,'.',',') rivihinta, 
+						tuoteno, (kpl+varattu) kpl, 
+						tilausrivi.hinta hinta, 
+						rivihinta rivihinta, 
 						lasku.toimaika, 
 						lasku.lahetepvm, 
 						lasku.tila, lasku.alatila
@@ -177,10 +206,22 @@
 			
 			for ($i=1; $i < mysql_num_fields($result)-2; $i++) {
 				echo "<th align='left'><a href='$PHP_SELF?tee=$tee&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&tuoteno=$tuoteno&ytunnus=$ytunnus&asiakasid=$asiakasid&jarj=".mysql_field_name($result,$i)."'>".t(mysql_field_name($result,$i))."</a></th>";
+				
+				if(isset($workbook)) {
+					$worksheet->write($excelrivi, ($i-1), ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+				}
 			}
 			
 			if ($toim != "OSTO") {
 				echo "<th align='left'>".t("Tyyppi")."</th>";
+				
+				if(isset($workbook)) {
+					$worksheet->write($excelrivi, $i, t("Tyyppi"), $format_bold);
+				}
+			}
+			
+			if(isset($workbook)) {
+				$excelrivi++;
 			}
 			
 			echo "</tr>";
@@ -190,7 +231,9 @@
 			$rivihintasumma = 0;
 			
 			while ($row = mysql_fetch_array($result)) {
-
+				
+				$excelsarake = 0;
+				
 				$ero = "td";
 				if ($tunnus == $row['tilaus']) $ero="th";
 
@@ -198,7 +241,7 @@
 				
 				for ($i=1; $i<mysql_num_fields($result)-2; $i++) {
 					if (mysql_field_name($result,$i) == 'kpl' or mysql_field_name($result,$i) == 'hinta' or mysql_field_name($result,$i) == 'rivihinta') {
-						echo "<$ero valign='top' align='right'>$row[$i]</$ero>";
+						echo "<$ero valign='top' align='right'>".str_replace(".", ",", $row[$i])."</$ero>";
 					}
 					elseif (mysql_field_name($result,$i) == 'toimaika' or mysql_field_name($result,$i) == 'lahetepvm' or mysql_field_name($result,$i) == 'tuloutettu') {
 						if (substr($row[$i], 0, 10) == '0000-00-00') {
@@ -211,13 +254,22 @@
 					else {
 						echo "<$ero valign='top'>$row[$i]</$ero>";
 					}
+					
+					if(isset($workbook)) {
+						if (mysql_field_name($result,$i) == 'kpl' or mysql_field_name($result,$i) == 'hinta' or mysql_field_name($result,$i) == 'rivihinta') {
+							$worksheet->writeNumber($excelrivi, $excelsarake, $row[$i], $format_num);
+						}
+						else {
+							$worksheet->write($excelrivi, $excelsarake, $row[$i]);
+						}
+						$excelsarake++;
+					}
 				}
 				
-
 				$kplsumma += $row["kpl"];
 				$hintasumma += $row["hinta"];
 				$rivihintasumma += $row["rivihinta"];
-				
+
 				if ($toim != "OSTO") {
 					$laskutyyppi=$row["tila"];
 					$alatila=$row["alatila"];
@@ -226,6 +278,10 @@
 					require "../inc/laskutyyppi.inc";
                 	
 					echo "<$ero valign='top'>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
+					
+					if(isset($workbook)) {
+						$worksheet->write($excelrivi, $i, t("$laskutyyppi")." ".t("$alatila"));
+					}
 				}
 				
 				echo "<form method='post' action='$PHP_SELF'><td class='back' valign='top'>
@@ -244,17 +300,49 @@
 						<input type='submit' value='".t("Näytä tilaus")."'></td></form>";
 
 				echo "</tr>";
+				
+				if(isset($workbook)) {
+					$excelrivi++;
+				}
 			}
 			
 			if ($toim == "OSTO") {
 				$csp = 5;	
 			}
 			else {
-				$csp = 7;
+				$csp = 6;
 			}
 			
-			echo "<tr><td colspan='$csp'>".t("Yhteensä").":</td><td>".sprintf('%.2f', $kplsumma)."</td><td>".sprintf('%.2f', $hintasumma)."</td><td>".sprintf('%.2f', $rivihintasumma)."</td><td colspan='2'></td></tr>";
+			echo "<tr><td colspan='$csp'>".t("Yhteensä").":</td><td>".sprintf('%01.2f', $kplsumma)."</td><td>".sprintf('%01.2f', $hintasumma)."</td><td>".sprintf('%01.2f', $rivihintasumma)."</td><td colspan='2'></td></tr>";
 			
+			if(isset($workbook)) {
+				if($toim == "OSTO") {
+					$worksheet->writeFormula($excelrivi, 5, "=sum(F2:F$excelrivi)");
+					$worksheet->writeFormula($excelrivi, 6, "=sum(G2:G$excelrivi)");
+					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
+				}
+				else {
+					$worksheet->writeFormula($excelrivi, 6, "=sum(G2:G$excelrivi)");
+					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
+					$worksheet->writeFormula($excelrivi, 8, "=sum(I2:I$excelrivi)");
+				}
+				$workbook->close();
+				
+				echo "<table>";
+				echo "<tr><th>".t("Tallenna tulos").":</th>";
+				echo "<form method='post' action='$PHP_SELF'>";
+				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				if($toim == "MYYNTI") {
+					echo "<input type='hidden' name='kaunisnimi' value='Asiakkaan_tuoteostot-$ytunnus.xls'>";
+				}
+				else {
+					echo "<input type='hidden' name='kaunisnimi' value='Toimittajalta_tilatut-$ytunnus.xls'>";
+				}
+				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+				echo "</table><br>";
+							
+			}
 			
 			echo "</table>";
 		}

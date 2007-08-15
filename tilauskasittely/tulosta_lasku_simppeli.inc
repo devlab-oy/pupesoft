@@ -20,7 +20,7 @@ if (!function_exists('tulosta_lasku')) {
 
 		// Haetaan laskun tiedot ja joinataan viimeisimmän laskun_lisätiedot...
 		$query = "	SELECT lasku.*, if(laskunro=0, '', laskunro) laskunro, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, if(lasku.tapvm='0000-00-00', now(), lasku.tapvm) päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
-					(select if(count(distinct(left(toimitettuaika,10)))>1,'".t("useita")."', max(toimitettuaika)) from tilausrivi where yhtio=lasku.yhtio and $mika=lasku.tunnus) toimituspvm, '$yhtiorow[viivastyskorko]%' viivästyskorko, laskun_lisatiedot.rivihintoja_ei_nayteta,
+					(select if(count(distinct(left(toimitettuaika,10)))>1,'".t("useita", $kieli)."', max(toimitettuaika)) from tilausrivi where yhtio=lasku.yhtio and $mika=lasku.tunnus) toimituspvm, '$yhtiorow[viivastyskorko]%' viivästyskorko, laskun_lisatiedot.rivihintoja_ei_nayteta,
 					concat_ws(' ', postino, postitp) postiosoite,
 					concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
 					yhteyshenkilo_kaupallinen.nimi asiakkaan_kaupallinen_käsittelijä,
@@ -43,6 +43,10 @@ if (!function_exists('tulosta_lasku')) {
 			$kielrow = mysql_fetch_array($kielresult);
 			$kieli = strtolower($kielrow['kieli']);
 		}				
+		
+		if($laskurow["toim_nimi"] == "Useita") {
+			$laskurow["toim_nimi"] = t("Useita", $kieli);
+		}
 		
 		if ($laskurow["vienti"] == "") {
 			if ($laskurow["summa"] >= 0) {
@@ -487,7 +491,7 @@ if (!function_exists('tulosta_lasku')) {
 					$summa_verolla+=($row["rivihinta"]*(1+($row["alv"]/100)));						
 				}
 
-				$h-=$pdf->ln(0.5);					
+				$h-=$pdf->ln(1.5);
 			}
 		}
 		$h-=$pdf->ln(3);			

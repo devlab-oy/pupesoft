@@ -46,8 +46,27 @@ function kopioitiliointipaittain($tunnus, $type = '') {
 
 	$query = substr($query,0,-2);
 	$result = mysql_query($query) or pupe_error($query);
-	
+
 	echo "$query<br>";
+}
+
+if ($tila == "muokkaasuoritusta") {
+
+	if ($saamis == $kassa or $saamis == "" or $kassa == "") {
+		echo "<font class='error'>Virheellisesti valittu kassa-/saamistili!</font><br><br>";
+	}
+	else {
+		// laitetaan ensiksi kassatiliöinti pointtaamaan saamistiliöintiin
+		$query = "update tiliointi set aputunnus = '$saamis' where yhtio = '$kukarow[yhtio]' and tunnus = '$kassa'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		// sitten laitetaan suoritus pointtaamaan saamistiliöintiin
+		$query = "update suoritus set ltunnus = '$saamis' where yhtio = '$kukarow[yhtio]' and tunnus = '$suoritus_tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+
+	$tila = "vaihdasuorituksentili";
+
 }
 
 if ($tila == "vaihdasuorituksentili") {
@@ -71,15 +90,108 @@ if ($tila == "vaihdasuorituksentili") {
 
 		$suoritus = mysql_fetch_array($result);
 
-		// Muutetaan tiliöinti
-		$query = "	UPDATE tiliointi
-					set tilino = '$vastatili'
-					where yhtio = '$kukarow[yhtio]' AND tunnus = '$suoritus[ltunnus]' AND korjattu = ''";
+		// katotaan löytyykö tiliöinti
+		$query = "	SELECT tunnus
+					FROM tiliointi
+					WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$suoritus[ltunnus]' AND korjattu = ''";
 		$result = mysql_query($query) or pupe_error($query);
+
+		// tiliöintiä ei löydy tai halutaan mennä runkslaamaan
+		if (mysql_affected_rows() == 0 or $vaihdasuorituksentiliointitunnuksia != "") {
+
+			// katotaan onko se ylikirjattu
+			$query = "	SELECT *
+						FROM tiliointi
+						WHERE yhtio = '$kukarow[yhtio]' AND
+						tunnus = '$suoritus[ltunnus]'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if ($rivi = mysql_fetch_array($result)) {
+
+				// löydettiin dellattu tiliöinti, annetaan käyttäjän valita saamistili ja kassatili tälle suoritukselle...
+				// listataan kaikki tositteen validit tapahtumat
+				$query = "	SELECT tiliointi.*, tili.nimi
+							FROM tiliointi
+							LEFT JOIN tili on (tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino)
+							WHERE tiliointi.yhtio = '$kukarow[yhtio]' AND
+							tiliointi.ltunnus = '$rivi[ltunnus]' AND
+							tiliointi.korjattu = ''";
+				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) == 0) {
+					echo "<font class='error'>Tällä suorituksella ei ole tiliöintejä! ($suoritus[nimi_maksaja] $suoritus[summa] $suoritus[valkoodi]) Lisää se tositteelle saamis- ja kassatili ja kokeile uudestaan!</font>";
+					echo " (<a href='../muutosite.php?tee=E&tunnus=$rivi[ltunnus]'>Muokkaa tositetta</a>)<br><br>";
+				}
+				else {
+					echo "<font class='message'>Tällä suorituksella ei ole saamis-/kassatiliä! ($suoritus[nimi_maksaja] $suoritus[summa] $suoritus[valkoodi])<br>";
+					echo "Valitse suorituksen tiliöinnit listalta: </font>";
+					echo " (<a href='../muutosite.php?tee=E&tunnus=$rivi[ltunnus]'>Muokkaa tositetta</a>)<br><br>";
+
+					echo "<table>";
+					echo "<tr>";
+					echo "<th>saamis</th>";
+					echo "<th>kassa</th>";
+					echo "<th>tilino</th>";
+					echo "<th>kustp</th>";
+					echo "<th>kohde</th>";
+					echo "<th>projekti</th>";
+					echo "<th>selite</th>";
+					echo "<th>summa</th>";
+					echo "<th>alv</th>";
+					echo "<th>tapvm</th>";
+					echo "<th>laatija</th>";
+					echo "</tr>";
+
+					echo "<form method='post'>";
+					echo "<input type='hidden' name='tila' value='muokkaasuoritusta'>";
+					echo "<input type='hidden' name='vastatili' value='$vastatili'>";
+//					echo "<input type='hidden' name='tunnus' value='$tunnus'>";
+					echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas_tunnus'>";
+					echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
+					echo "<input type='hidden' name='suoritus_tunnus' value='$suoritus_tunnus'>";
+
+					while ($tilioinnit = mysql_fetch_array($result)) {
+						echo "<tr>";
+						$chk="";
+						if ($tilioinnit["tunnus"] == $suoritus["ltunnus"]) $chk = "checked";
+						echo "<td><input type='radio' name='saamis' value='$tilioinnit[tunnus]' $chk></td>";
+						$chk="";
+						if ($tilioinnit["aputunnus"] == $suoritus["ltunnus"]) $chk = "checked";
+						echo "<td><input type='radio' name='kassa' value='$tilioinnit[tunnus]' $chk></td>";
+						echo "<td>$tilioinnit[tilino] / $tilioinnit[nimi]</td>";
+						echo "<td>$tilioinnit[kustp]</td>";
+						echo "<td>$tilioinnit[kohde]</td>";
+						echo "<td>$tilioinnit[projekti]</td>";
+						echo "<td>$tilioinnit[selite]</td>";
+						echo "<td>$tilioinnit[summa]</td>";
+						echo "<td>$tilioinnit[alv]</td>";
+						echo "<td>$tilioinnit[tapvm]</td>";
+						echo "<td>$tilioinnit[laatija] @ $tilioinnit[laadittu]</td>";
+						echo "</tr>";
+					}
+					echo "</table>";
+
+					echo "<br><input type='submit' value='Päivitä suoritus'>";
+					echo "</form>";
+
+					// tähän loppuu tämä rundi
+					exit;
+				}
+			}
+			else {
+				echo "<font class='error'>".t("Emme löydä tälle suoritukselle mitään kirjanpitotapahtumia. Ei voida jatkaa")."!</font><br><br>";
+			}
+		}
+		else {
+			// Muutetaan tiliöinti
+			$query = "	UPDATE tiliointi
+						SET tilino = '$vastatili'
+						WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$suoritus[ltunnus]' AND korjattu = ''";
+			$result = mysql_query($query) or pupe_error($query);
+		}
 	}
 	else {
-		echo "<font class='error'>".t("Suoritus kateissa")."!</font><br><br>";
-		exit;
+		echo "<font class='error'>".t("Suoritus kateissa, tiliä ei voida vaihtaa")."!</font><br><br>";
 	}
 
 	$tila = "kohdistaminen";
@@ -192,13 +304,7 @@ if ($tila == 'tee_kohdistus') {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='error'>".t("Suorituksen saamiset-tiliöinnit eivät löydy!")."</font>";
-
-			$query = "select ltunnus from tiliointi where yhtio='$errorrow[yhtio]' and tunnus='$errorrow[ltunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
-			$errorrow = mysql_fetch_array ($result);
-
-			echo "<br><br><a href='../muutosite.php?tee=E&tunnus=$errorrow[ltunnus]'>Näytä tosite</a>";
+			echo "<font class='error'>".t("Suorituksen saamiset-tiliöinnit eivät löydy! Vaihda suorituksen saamiset-tiliä!")."</font>";
 			exit;
 		}
 
@@ -264,7 +370,7 @@ if ($tila == 'tee_kohdistus') {
 
 			// Tuliko valuuttaeroa?
 			if (abs($valuuttaero) >= 0.01) {
-				$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite) 
+				$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite)
 		            		VALUES ('$kukarow[yhtio]','$kukarow[kuka]',now(), '$suoritus[maksupvm]', '$ltunnus', '$suoritus[myynninvaluuttaero_tilino]', $valuuttaero,'Manuaalisesti kohdistettu suoritus (osasuoritus)')";
 				$result = mysql_query($query) or pupe_error($query);
 			}
@@ -638,10 +744,8 @@ if ($tila == 'suorituksenvalinta') {
 		echo "</tr>";
 
 		echo "<form action = '$PHP_SELF?tila=kohdistaminen' method = 'post'>";
-
-		if (isset($asiakas_nimi)) {
-			echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
-		}
+		echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas_tunnus'>";
+		echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
 
 		$r=1;
 		while ($suoritus=mysql_fetch_array ($result)) {
@@ -725,6 +829,7 @@ if ($tila == 'kohdistaminen') {
 	echo "<th>maksupvm</th>";
 	echo "<th>kirjpvm</th>";
 	echo "<th>suorituksen saamisettili</th>";
+	echo "<th></th>";
 	echo "</tr>";
 
 	echo "<tr>";
@@ -777,6 +882,14 @@ if ($tila == 'kohdistaminen') {
 		echo "<option value='$yhtiorow[konsernimyyntisaamiset]' $sel5>".t("Konsernimyyntisaamiset")." ($yhtiorow[konsernimyyntisaamiset])</option>";
 	}
 	echo "</select></td>";
+	echo "<td>";
+	if ($kukarow["taso"] == 3) {
+		echo "<input type='checkbox' name='vaihdasuorituksentiliointitunnuksia'>";
+	}
+	else {
+		echo "<input type='hidden' name='vaihdasuorituksentiliointitunnuksia' value=''>";
+	}
+	echo "</td>";
 	echo "</form>\n\n";
 
 	echo "</tr>";

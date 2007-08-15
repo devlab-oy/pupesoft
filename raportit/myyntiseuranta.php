@@ -425,6 +425,13 @@
 					$gluku++;
 				}
 
+				if ($mukaan == "myyja") {
+					if ($group!="") $group .= ",lasku.myyja";
+					else $group  .= "lasku.myyja";
+					$select .= "lasku.myyja myyja, ";
+					$order  .= "lasku.myyja,";
+					$gluku++;
+				}
 			}
 
 			if ($asiakasosasto != "") {
@@ -1577,6 +1584,7 @@
 			if ($ruksit[8]  != '') 		$ruk8chk  = "CHECKED";
 			if ($ruksit[9]  != '') 		$ruk9chk  = "CHECKED";
 			if ($ruksit[10] != '') 		$ruk10chk = "CHECKED";
+			if ($ruksit[11] != '')		$ruk11chk = "CHECKED";			
 			if ($nimitykset != '')   	$nimchk   = "CHECKED";
 			if ($kateprossat != '')  	$katchk   = "CHECKED";
 			if ($osoitetarrat != '') 	$tarchk   = "CHECKED";
@@ -1641,6 +1649,11 @@
 				<td><input type='text' name='jarjestys[10]' size='2' value='$jarjestys[10]'></td>
 				<td><input type='checkbox' name='ruksit[10]' value='tilaustyyppi' $ruk10chk></td>
 				<td class='back'>".t("(Toimii vain jos ajat raporttia tilauksista)")."</td>
+				</tr>
+				<tr>
+				<th>".t("Listaa myyjittäin")."</th>
+				<td><input type='text' name='jarjestys[11]' size='2' value='$jarjestys[11]'></td>
+				<td><input type='checkbox' name='ruksit[11]' value='myyja' $ruk11chk></td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

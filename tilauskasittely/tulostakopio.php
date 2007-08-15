@@ -13,8 +13,13 @@
 	}
 
 	if($_POST["tee"] == 'NAYTATILAUS') $nayta_pdf=1; //Generoidaan .pdf-file
-
-	require('../inc/parametrit.inc');
+	
+	if (file_exists("../inc/parametrit.inc")) {
+		require('../inc/parametrit.inc');
+	}
+	else {
+		require('inc/parametrit.inc');
+	}
 
 	if ($toim == "") $toim = "LASKU";
 

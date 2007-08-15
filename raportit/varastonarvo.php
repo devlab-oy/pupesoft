@@ -354,7 +354,9 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-							WHERE sarjanumeroseuranta.yhtio = tuotepaikat.yhtio and sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno
+							WHERE sarjanumeroseuranta.yhtio = tuotepaikat.yhtio 
+							and sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno
+							and sarjanumeroseuranta.myyntirivitunnus != -1
 							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'
 						), 

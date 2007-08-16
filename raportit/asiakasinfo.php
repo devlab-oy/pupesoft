@@ -539,7 +539,7 @@ if ($ytunnus!='') {
 						(							
 							SELECT '1' prio,
 								asiakasalennus.alennus,
-								tuote.tuoteno,
+								asiakasalennus.tuoteno,
 								tuote.nimitys tuoteno_nimi, 
 								'' asiakasryhmä,
 								'' asiakasryhmä_nimi,
@@ -584,7 +584,7 @@ if ($ytunnus!='') {
 
 							SELECT '3' prio,
 								asiakasalennus.alennus,
-								tuote.tuoteno,
+								asiakasalennus.tuoteno,
 								tuote.nimitys tuoteno_nimi,
 								asiakas_ryhma asiakasryhmä,
 								avainsana.selitetark asiakasryhmä_nimi,
@@ -840,7 +840,7 @@ if ($ytunnus!='') {
 						(
 							SELECT '1' prio,
 								hinta,
-								tuote.tuoteno,
+								asiakashinta.tuoteno,
 								tuote.nimitys tuoteno_nimi,
 								asiakas_ryhma asiakasryhmä,
 								avainsana.selitetark asiakasryhmä_nimi,
@@ -860,7 +860,7 @@ if ($ytunnus!='') {
 						(
 							SELECT '2' prio,
 								hinta,
-								tuote.tuoteno,
+								asiakashinta.tuoteno,
 								tuote.nimitys tuoteno_nimi,
 								asiakas_ryhma asiakasryhmä,
 								avainsana.selitetark asiakasryhmä_nimi,

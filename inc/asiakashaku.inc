@@ -310,7 +310,7 @@ if ($kutsuja == "otsik.inc") {
 			echo "<td class='back'>";
 			echo "<form action='../yllapito.php' method='post'>";
 			echo "<input type='hidden' name='lopetus' 	value='tilauskasittely/tilaus_myynti.php////toim=$toim'>";
-			echo "<input type='hidden' name='toim'		value='asiakas!!!VAHITTAISMYYNTI!!!true&laji=Htrue'>";
+			echo "<input type='hidden' name='toim'		value='asiakas!!!VAHITTAISMYYNTI!!!true'>";
 			echo "<input type='hidden' name='laji'		value='H'>";
 			echo "<input type='hidden' name='uusi'		value='1'>";
 			echo "<input type='submit' value='".t("Uusi henkilöasiakas")."'>";

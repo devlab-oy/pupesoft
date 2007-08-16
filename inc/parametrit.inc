@@ -168,16 +168,17 @@ if ($session != '') {
 
  	// Tänne pääsee aina!
 	if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
-
+		
 		// No niin nyt meillä on käyttäjä, mutta saako hän tehdä tätä????
 		if(isset($toim)) {
-			$toimlisa = " and alanimi='$toim'";
+			// Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
+			$toimlisa = " and substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi))) ='$toim'";
 		}
 		else {
 			$toimlisa = "";
 		}
 
-		$query = "	SELECT *
+		$query = "	SELECT *, substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi))) 
 					FROM oikeu
 					WHERE yhtio = '$kukarow[yhtio]'
 					and kuka = '$kukarow[kuka]'

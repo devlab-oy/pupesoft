@@ -1188,15 +1188,19 @@
 		echo "<tr><td class='back'><font class='message'>".t("Toimita varastosta:")."</font></td></tr>";
 
 		while ($vrow = mysql_fetch_array($vtresult)) {
-			if (($vrow["tyyppi"] != 'E') or ($kukarow["varasto"] == $vrow["tunnus"])) {
 
 				$sel = "";
 				if ($varastosta[$vrow["tunnus"]] == $vrow["tunnus"]) {
 					$sel = 'CHECKED';
 				}
-
-				echo "<tr><th>$vrow[nimitys]</th><td><input type='checkbox' name='varastosta[$vrow[tunnus]]' value='$vrow[tunnus]' $sel></td></tr>";
-			}
+				
+				$huomio = "";
+				
+				if ($vrow['tyyppi'] == 'E') {
+					$huomio = "<td class='back'><font class='error'>".t("HUOM!!! Erikoisvarasto!")."</font></td>";
+				}
+				
+				echo "<tr><th>$vrow[nimitys]</th><td><input type='checkbox' name='varastosta[$vrow[tunnus]]' value='$vrow[tunnus]' $sel></td>$huomio</tr>";
 		}
 
 		$query = "	select varastopaikat.tunnus, varastopaikat.nimitys, yhtio.nimi
@@ -1220,9 +1224,9 @@
 			if ($suorana != '' and count($suoravarasto)==0) $sel = 'CHECKED';
 			echo "<tr><td class='back'><br></td></tr><tr><td class='back'><font class='message'>".t("Toimita suoratoimituksena varastosta:")."</font></td></tr>";
 			echo "<tr><th>".t("Toimita kaikista varastoista (manuaalivalinta)")."</th><td><input type='checkbox' name='suorana' value='suora' $sel></td></tr>";
-
+			
 			while($superjtrow=mysql_fetch_array($superjtres)) {
-				if(array_search($superjtrow["tunnus"], $suoravarasto)!== false) {
+				if (array_search($superjtrow["tunnus"], (array) $suoravarasto)!== false) {
 					$sel = "checked";
 				}
 				else {

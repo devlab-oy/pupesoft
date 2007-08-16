@@ -58,8 +58,14 @@ if (!function_exists('alku')) {
 				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
 				
 				$logoparam = array();
-				$logoparam['scale'] = 50 / $isizelogo[1];
-								
+				
+				if ($isizelogo[0] > $isizelogo[1]) {
+					$logoparam['scale'] = 120 / $isizelogo[0];
+				}
+				else {
+					$logoparam['scale'] = 50  / $isizelogo[1];
+				}
+							
 				$placement = $pdf->image_place($image, 785, 20, $firstpage, $logoparam);
 			}
 		}

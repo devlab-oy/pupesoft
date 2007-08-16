@@ -77,7 +77,7 @@ if (!function_exists('alku')) {
 				
 				$logoparam = array();
 				
-				if ($isizelogo[0] > $isizelogo[1]) {
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
 					$logoparam['scale'] = 120 / $isizelogo[0];
 				}
 				else {

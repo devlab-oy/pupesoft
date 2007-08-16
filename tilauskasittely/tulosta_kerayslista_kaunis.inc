@@ -55,21 +55,20 @@ if (!function_exists('alku')) {
 				echo t("Logokuvavirhe").": ".$image.$data;
 			}
 			else {
-				$logoparam = array();
-				$logoparam['scale'] = 0.15;
-				
 				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-				$iy    = $isizelogo[1]*0.15*0.35714;	// kuvan y-korkeus millimetreissä
 				
-				$placement = $pdf->image_place($image, mm_pt(292-$iy), mm_pt(7), $firstpage, $logoparam);
+				$logoparam = array();
+				$logoparam['scale'] = 50 / $isizelogo[1];
+								
+				$placement = $pdf->image_place($image, 785, 20, $thispage, $logoparam);
 			}
 		}
 		else {
-			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 												$firstpage, $p);
-			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 												$firstpage, $p);
-			$pdf->draw_text(30, 795, $yhtiorow["postino"], 												$firstpage, $p);
-			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 												$firstpage, $p);
-			$pdf->draw_text(30, 785, $yhtiorow["maa"], 													$firstpage, $p);
+			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$thispage, $p);
+			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$thispage, $p);
+			$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$thispage, $p);
+			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$thispage, $p);
+			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $p);
 		}
 		
 		$pdf->draw_text(310,815, t("Keräilylista", $kieli), 										$firstpage);

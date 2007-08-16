@@ -60,15 +60,15 @@ if (!function_exists('alku')) {
 				$logoparam = array();
 				$logoparam['scale'] = 50 / $isizelogo[1];
 								
-				$placement = $pdf->image_place($image, 785, 20, $thispage, $logoparam);
+				$placement = $pdf->image_place($image, 785, 20, $firstpage, $logoparam);
 			}
 		}
 		else {
-			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$thispage, $p);
-			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$thispage, $p);
-			$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$thispage, $p);
-			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$thispage, $p);
-			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $p);
+			$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$firstpage, $p);
+			$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$firstpage, $p);
+			$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$firstpage, $p);
+			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$firstpage, $p);
+			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$firstpage, $p);
 		}
 		
 		$pdf->draw_text(310,815, t("Keräilylista", $kieli), 										$firstpage);

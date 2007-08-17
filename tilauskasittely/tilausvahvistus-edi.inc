@@ -133,7 +133,7 @@ if (mysql_num_rows($tilvahresult) > 0)
 	$ftpuser = $tilvahuser;
 	$ftppass = $tilvahpass;
 	$ftppath = $tilvahpath;
-	$ftpfile = realpath(tilvahvfilenimi);
+	$ftpfile = realpath($tilvahvfilenimi);
 
 	require ("../inc/ftp-send.inc");
 

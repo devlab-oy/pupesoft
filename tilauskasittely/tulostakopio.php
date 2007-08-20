@@ -97,8 +97,21 @@
 		$fuse = t("Rekisteröinti-ilmoitus");
 	}
 
-	if($tee != 'NAYTATILAUS') echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
+	if (isset($muutparametrit) and $muutparametrit != '') {
+		$muut = explode('/',$muutparametrit);
 
+		$vva 		= $muut[0];
+		$kka 		= $muut[1];
+		$ppa 		= $muut[2];
+		$vvl 		= $muut[3];
+		$kkl		= $muut[4];
+		$ppl 		= $muut[5];
+	}
+
+	if($tee != 'NAYTATILAUS') {
+		echo "<font class='head'>".sprintf(t("Tulosta %s kopioita"), $fuse).":</font><hr><br>";
+	}
+	
 	if ($laskunro > 0 and $laskunroloppu > 0 and $laskunro < $laskunroloppu) {
 		$tee = "TULOSTA";
 
@@ -122,7 +135,10 @@
 	}
 
 	if (($tee == "" or $tee == 'ETSILASKU') and $toim != 'SIIRTOLISTA'){
-		if ($ytunnus != '') {
+		
+		$muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl;
+		
+		if ($ytunnus != '' or (int) $asiakasid > 0 or (int) $toimittajaid > 0) {
 			if ($toim == 'OSTO' or $toim == 'PURKU' or $toim == 'TARIFFI' or $toim == 'TUOTETARRA') {
 				require ("../inc/kevyt_toimittajahaku.inc");
 			}
@@ -146,6 +162,7 @@
 			$tee = 'ETSILASKU';
 		}
 	}
+	
 	if (($tee == "" or $tee == 'ETSILASKU') and $toim == 'SIIRTOLISTA'){
 		if ($lahettava_varasto != '' or $vastaanottava_varasto != '') {
 			$tee = "ETSILASKU";
@@ -159,17 +176,98 @@
 		}
 	}
 
-	if ($tee == "ETSILASKU") {
-		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
+	if($tee != 'NAYTATILAUS') {
+		//syötetään tilausnumero
+		echo "<form method='post' action='$PHP_SELF' autocomplete='off' name='hakuformi'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='toim' value='$toim'>
-				<input type='hidden' name='ytunnus' value='$ytunnus'>
-				<input type='hidden' name='asiakasid' value='$asiakasid'>
-				<input type='hidden' name='toimittajaid' value='$toimittajaid'>
 				<input type='hidden' name='tee' value='ETSILASKU'>";
-
+				
 		echo "<table>";
-
+    
+		if (trim($toim) == "SIIRTOLISTA") {
+    
+			echo "<tr><th>".t("Lähettävä varasto")."</th><td colspan='3'>";
+    
+			$query = "	SELECT *
+						FROM varastopaikat
+						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
+			$vtresult = mysql_query($query) or pupe_error($query);
+    
+			echo "<select name='lahettava_varasto'>";
+			echo "<option value=''>".t("Valitse varasto")."</option>";
+    
+			while ($vrow = mysql_fetch_array($vtresult)) {
+				if ($lahettava_varasto == $vrow["tunnus"]) {
+					$sel = "SELECTED";
+				}
+				else {
+					$sel = "";
+				}
+			
+				echo "<option value='$vrow[tunnus]' $sel>$vrow[maa] $vrow[nimitys]</option>";
+			}
+			echo "</select>";
+    
+			echo "</td></tr>";
+    
+			echo "<tr><th>".t("Vastaanottava varasto")."</th><td colspan='3'>";
+    
+			$query = "	SELECT *
+						FROM varastopaikat
+						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
+			$vtresult = mysql_query($query) or pupe_error($query);
+    
+			echo "<select name='vastaanottava_varasto'>";
+			echo "<option value=''>".t("Valitse varasto")."</option>";
+    
+			while ($vrow = mysql_fetch_array($vtresult)) {
+				if ($vastaanottava_varasto == $vrow["tunnus"]) {
+					$sel = "SELECTED";
+				}
+				else {
+					$sel = "";
+				}
+				echo "<option value='$vrow[tunnus]' $sel>$vrow[maa] $vrow[nimitys]</option>";
+			}
+			echo "</select>";
+    
+			echo "</td></tr>";
+    
+			echo "<tr><th>".t("Tilausnumero")."</th><td colspan='3'><input type='text' size='15' name='otunnus'></td></tr>";
+		}
+		else {
+			if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
+				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA") {
+					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'>$toimittajarow[nimi]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td><td><a href='$PHP_SELF?lopetus=$lopetus&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka'>Vaihda toimittaja</a></td></tr>";
+				}
+				else {
+					echo "<th>".t("Asiakkaan nimi")."</th><td colspan='3'>$asiakasrow[nimi]<input type='hidden' name='asiakasid' value='$asiakasid'></td><td><a href='$PHP_SELF?lopetus=$lopetus&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka'>Vaihda asiakas</a></td></tr>";
+				}
+			}
+			else {
+				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA") {
+					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>";
+				}
+				else {
+					echo "<th>".t("Asiakkaan nimi")."</th><td colspan='3'><input type='text' name='ytunnus' value='$ytunnus' size='15'></td></tr>";
+				}
+			}
+			
+			echo "<tr><th>".t("Tilausnumero")."</th><td colspan='3'><input type='text' size='15' name='otunnus'></td></tr>";
+			echo "<tr>";
+    
+			if ($toim == "PURKU" or $toim == "TARIFFI") {
+				echo "<th>".t("Keikkanumero")."</th>";
+			}
+			else {
+				echo "<th>".t("Laskunumero")."</th>";
+			}
+    
+			echo "	<td colspan='3'><input type='text' size='15' name='laskunro'></td>
+					<td colspan='3'><input type='text' size='15' name='laskunroloppu'></td></tr>";
+		}
+	
 		if ($toim == "OSOITELAPPU") {
 			//osoitelapuille on vähän eri päivämäärävaatimukset kuin muilla
 			if (!isset($kka))
@@ -196,25 +294,31 @@
 			if (!isset($ppa))
 				$ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 		}
-
+    
 		if (!isset($kkl))
 			$kkl = date("m");
 		if (!isset($vvl))
 			$vvl = date("Y");
 		if (!isset($ppl))
 			$ppl = date("d");
-
-		echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
+    
+		echo "<tr><th>".t("Alkupäivämäärä (pp-kk-vvvv)")."</th>
 				<td><input type='text' name='ppa' value='$ppa' size='3'></td>
 				<td><input type='text' name='kka' value='$kka' size='3'></td>
 				<td><input type='text' name='vva' value='$vva' size='5'></td>
-				</tr><tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
+				</tr><tr><th>".t("loppupäivämäärä (pp-kk-vvvv)")."</th>
 				<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 				<td><input type='text' name='kkl' value='$kkl' size='3'></td>
-				<td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr></form></table><br>";
-
-
+				<td><input type='text' name='vvl' value='$vvl' size='5'></td>
+				<td class='back'><input type='submit' value='".t("Etsi")."'></td>";		
+		echo "</table>";
+	    echo "</form><br>";
+    
+		$formi  = 'hakuformi';
+		$kentta = 'ytunnus';
+	}
+	
+	if ($tee == "ETSILASKU") {
 		$where1 = "";
 		$where2 = "";
 
@@ -684,7 +788,7 @@
 			echo "</table>";
 		}
 		else {
-			echo t("Ei tilauksia")."...<br><br>";
+			echo "<font class='error'>".t("Ei tilauksia")."...</font><br><br>";
 		}
 	}
 
@@ -1659,82 +1763,7 @@
 		}
 	}
 
-
-	if ($tee == '') {
-		//syötetään tilausnumero
-		echo "<table>";
-		echo "<form action = '$PHP_SELF' method = 'post' name='hakuformi'>
-				<input type='hidden' name='lopetus' value='$lopetus'>
-				<input type='hidden' name='toim' value='$toim'>";
-
-
-		if (trim($toim) == "SIIRTOLISTA") {
-
-			echo "<tr><th>".t("Lähettävä varasto")."</th><td>";
-
-			$query = "	SELECT *
-						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
-			$vtresult = mysql_query($query) or pupe_error($query);
-
-			echo "<select name='lahettava_varasto'>";
-			echo "<option value=''>".t("Valitse varasto")."</option>";
-
-			while ($vrow = mysql_fetch_array($vtresult)) {
-				echo "<option value='$vrow[tunnus]'>$vrow[maa] $vrow[nimitys]</option>";
-			}
-			echo "</select>";
-
-			echo "</td></tr>";
-
-			echo "<tr><th>".t("Vastaanottava varasto")."</th><td>";
-
-			$query = "	SELECT *
-						FROM varastopaikat
-						WHERE yhtio = '$kukarow[yhtio]' order by nimitys";
-			$vtresult = mysql_query($query) or pupe_error($query);
-
-			echo "<select name='vastaanottava_varasto'>";
-			echo "<option value=''>".t("Valitse varasto")."</option>";
-
-			while ($vrow = mysql_fetch_array($vtresult)) {
-				echo "<option value='$vrow[tunnus]'>$vrow[maa] $vrow[nimitys]</option>";
-			}
-			echo "</select>";
-
-			echo "</td></tr>";
-
-			echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
-		}
-		else {
-			if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA") {
-				echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
-			}
-			else {
-				echo "<tr><th>".t("Asiakkaan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
-			}
-			echo "<tr><th>".t("Tilausnumero")."</th><td><input type='text' size='10' name='otunnus'></td></tr>";
-			echo "<tr>";
-
-			if ($toim == "PURKU" or $toim == "TARIFFI") {
-				echo "<th>".t("Keikkanumero")."</th>";
-			}
-			else {
-				echo "<th>".t("Laskunumero")."</th>";
-			}
-
-			echo "	<td><input type='text' size='10' name='laskunro'></td>
-					<td><input type='text' size='10' name='laskunroloppu'></td></tr>";
-		}
-
-		echo "</table>";
-
-		echo "<br><input type='submit' value='".t("Jatka")."'>";
-		echo "</form>";
-
-		$formi  = 'hakuformi';
-		$kentta = 'ytunnus';
-	}
+	
 
 	require ('../inc/footer.inc');
 ?>

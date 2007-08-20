@@ -28,7 +28,15 @@ while (!feof ($fd)) {
  		// asiakas vaihtuu, uusi otsikko
  		if ($ytunnus != $edytunnus) {
  
- 			$query = "	SELECT * 
+ 			$query = "	UPDATE kuka
+						SET kesken=0
+						WHERE session = '$session'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$kukarow['kesken'] 	= 0;
+			$tilausnumero 		= 0;
+
+			$query = "	SELECT tunnus 
  						FROM asiakas
  						WHERE yhtio = '$kukarow[yhtio]' and 
  						ytunnus = '$ytunnus' 
@@ -39,70 +47,14 @@ while (!feof ($fd)) {
  			if (mysql_num_rows($result) == 0) {
  				die ("virheellinen asiakasnumero tiedostossa! $ytunnus");
  			}
- 
  			$arow = mysql_fetch_array($result);
- 
- 			// Lis‰t‰‰n otsikko
- 			$query = "	INSERT into lasku SET
- 						yhtio_nimi							= '$yhtiorow[nimi]',
- 						yhtio_osoite						= '$yhtiorow[osoite]',
- 						yhtio_postino						= '$yhtiorow[postino]',
- 						yhtio_postitp						= '$yhtiorow[postitp]',
- 						yhtio_maa							= '$yhtiorow[maa]',
- 						yhtio_ovttunnus						= '$yhtiorow[ovttunnus]',
- 						yhtio_kotipaikka					= '$yhtiorow[kotipaikka]',
- 						alatila 		   					= '',
- 						alv     		   					= '$arow[alv]',
- 						chn	    		   					= '$arow[chn]',
- 						comments 		   					= '',
- 						kerayspvm 		   					=  now(),
- 						ketjutus		   					= '$arow[ketjutus]',
- 						laatija 		   					= '$kukarow[kuka]',
- 						laskutusvkopv	   					= '$arow[laskutusvkopv]',
- 						luontiaika		   					=  now(),
- 						maa     		   					= '$arow[maa]',
- 						maksuehto 		   					= '$arow[maksuehto]',
- 						myyja 			   					= '$kukarow[myyja]',
- 						nimi    		   					= '$arow[nimi]',
- 						nimitark 		   					= '$arow[nimitark]',
- 						osoite 			   					= '$arow[osoite]',
- 						ovttunnus 		   					= '$arow[ovttunnus]',
- 						postino 		   					= '$arow[postino]',
- 						postitp 		   					= '$arow[postitp]',
- 						tila    		   					= 'N',
- 						tilausvahvistus    					= '$arow[tilausvahvistus]',
- 						erikoisale		   					= '$arow[erikoisale]',
- 						toim_maa		   					= '$arow[toim_maa]',
- 						toim_nimi		   					= '$arow[toim_nimi]',
- 						toim_nimitark	   					= '$arow[toim_nimitark]',
- 						toim_osoite		   					= '$arow[toim_osoite]',
- 						toim_ovttunnus 	   					= '$arow[toim_ovttunnus]',
- 						toim_postino	   					= '$arow[toim_postino]',
- 						toim_postitp	   					= '$arow[toim_postitp]',
- 						toimaika 		   					=  now(),
- 						kohdistettu 	   					= '',
- 						toimitustapa 	   					= '$arow[toimitustapa]',
- 						toimitusehto 	   					= '$arow[toimitusehto]',
- 						verkkotunnus	   					= '$arow[verkkotunnus]',
- 						valkoodi		   					= '$yhtiorow[valkoodi]',
- 						liitostunnus       					= '$arow[tunnus]',
- 						vienti			   					= '$arow[vienti]',
- 						viesti 			   					= '',
- 						sisviesti1         					= '$arow[sisviesti1]',
- 						sisviesti2         					= '',
- 						yhtio 			   					= '$kukarow[yhtio]',
- 						ytunnus			   					= '$arow[ytunnus]',
- 						viitetxt		   					= '',
- 						aktiivinen_kuljetus					= '$arow[aktiivinen_kuljetus]',
- 						kuljetusmuoto						= '$arow[kuljetusmuoto]',
- 						kauppatapahtuman_luonne				= '$arow[kauppatapahtuman_luonne]',
- 						maa_maara							= '$arow[maa_maara]'";
- 			$result = mysql_query($query) or die($query);
- 			$id = mysql_insert_id();
+ 			
+			// Luodaan uusi myyntitilausotsikko
+ 			require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
+
+			$id = luo_myyntitilausotsikko($arow["tunnus"]);
  		
  			echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
-
-			$kukarow["kesken"] = $id;
 
  			// haetaan tilauksen tiedot
  			$query    = "select * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
@@ -125,7 +77,7 @@ while (!feof ($fd)) {
  			//lis‰t‰‰n rivi
  			require ("lisaarivi.inc");
  		}
- 
+
  		$edytunnus = $ytunnus;
 
 	}

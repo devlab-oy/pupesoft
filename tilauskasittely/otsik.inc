@@ -2048,8 +2048,8 @@
 			$id = mysql_insert_id();
 
 			$query = "	UPDATE kuka
-						SET kesken='$id'
-						WHERE session = '$session'";
+						SET kesken = '$id'
+						WHERE session = '$kukarow[session]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$kukarow["kesken"] = $id;

@@ -991,22 +991,26 @@ if ($tee == '') {
 		// haetaan maksuehdoen tiedot tarkastuksia varten
 		$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
-		$meapurow = mysql_fetch_array($meapu);
+		
+		if (mysql_num_rows($meapu) == 1 and $toimitustapa != '') {
+			$meapurow = mysql_fetch_array($meapu);
 
-		// jos kyseessä oli käteinen
-		if ($meapurow["kateinen"] != "") {
-			// haetaan toimitustavan tiedot tarkastuksia varten
-			$apuqu2 = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
-			$meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
-			$meapu2row = mysql_fetch_array($meapu2);
+			// jos kyseessä oli käteinen
+			if ($meapurow["kateinen"] != "") {
+				// haetaan toimitustavan tiedot tarkastuksia varten
+				$apuqu2 = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+				$meapu2 = mysql_query($apuqu2) or pupe_error($apuqu2);
+				$meapu2row = mysql_fetch_array($meapu2);
 
-			// ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
-			if ($meapu2row["nouto"] == "") {
-				$apuqu = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and nouto != '' order by jarjestys limit 1";
-				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
-				$apuro = mysql_fetch_array($meapu);
-				$toimitustapa = $apuro['selite'];
-				echo "<font class='error'>".t("Toimitustapa on oltava nouto, koska maksuehto on käteinen")."!</font><br><br>";
+				// ja toimitustapa ei ole nouto laitetaan toimitustavaksi nouto... hakee järjestyksessä ekan
+				if ($meapu2row["nouto"] == "") {
+					$apuqu = "select * from toimitustapa where yhtio = '$kukarow[yhtio]' and nouto != '' order by jarjestys limit 1";
+					$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+					$apuro = mysql_fetch_array($meapu);
+					$toimitustapa = $apuro['selite'];
+				
+					echo "<font class='error'>".t("Toimitustapa on oltava nouto, koska maksuehto on käteinen")."!</font><br><br>";
+				}
 			}
 		}
 

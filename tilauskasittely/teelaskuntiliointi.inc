@@ -45,8 +45,6 @@ else {
 
 	$varmuutos  = 0;
 	$vastasumma = 0;
-	$marginaali = 0;
-	$ostosumma  = 0;
 
 	// Tehdaan myynnin kirjaukset
 	while ($xrow = mysql_fetch_array($xresult)) {
@@ -64,41 +62,6 @@ else {
 
 		// Valitaan myyntitili, jos rivillä on alv yli 500 niin kyseessä on marginaalimyyntiä
 		if ($xrow["alv"] >= 500 and $xrow["marginaaliostot"] == "EI") {
-			// Tuotteiden ostohinnat
-			$query = "	SELECT round(sum(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0)), 2) ostosumma
-						FROM sarjanumeroseuranta
-						JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-						WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]'
-						and sarjanumeroseuranta.myyntirivitunnus in ($xrow[tunnukset])
-						HAVING ostosumma!=0";
-			$xsarjares = mysql_query($query) or pupe_error($query);
-			$sarjarow = mysql_fetch_array($xsarjares);
-
-			$ostohinta = (float) $sarjarow["ostosumma"];
-
-			// Katsotaan onko sarjanumerolle liitetty kulukeikka
-			$query  = "	select lasku.laskunro
-						FROM sarjanumeroseuranta
-						JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
-						WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]'
-						and sarjanumeroseuranta.myyntirivitunnus in ($xrow[tunnukset])";
-			$keikkares = mysql_query($query) or pupe_error($query);
-
-			while ($kulukeikkarow = mysql_fetch_array($keikkares)) {
-				// Haetaan kaikki keikkaan liitettyjen laskujen summa
-				$query = "	SELECT round(sum(summa*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
-							FROM lasku
-							WHERE yhtio		= '$kukarow[yhtio]'
-							and tila 		= 'K'
-							and laskunro 	= '$kulukeikkarow[laskunro]'
-							and vanhatunnus <> 0
-							and vienti in ('B','E','H')";
-				$kukeikkares = mysql_query($query) or pupe_error($query);
-				$kulukulurow = mysql_fetch_array($kukeikkares);
-
-				$ostohinta	+= $kulukulurow["kulusumma"];
-			}
-
 			// Valitaan myyntitili, tässä on marginaalimyyntiä
 			$selite 	= "Marginaaliverolasku/Myynti ". $lasku['nimi']." ".$lasku['nimitark'];
 
@@ -106,11 +69,8 @@ else {
 			$tilino_eu 		= (int) $yhtiorow['myynti_marginaali'];
 			$tilino_ei_eu	= (int) $yhtiorow['myynti_marginaali'];
 
-			//Myyntimarginaali
-			$marginaali = $xrow['summa'] - $ostohinta;
-
 			//Tilioidaan veroton osuus marginaalimyynnistä
-			$tiliointisumma = $ostosumma = $ostohinta;
+			$tiliointisumma = $xrow['summa'] - $xrow['kate'];
 
 			//Tiliöidään margiinaalimyyntitapahtuma
 			$query = "	INSERT into tiliointi set
@@ -129,9 +89,13 @@ else {
 						laadittu 	= now()";
 			$laskutusres = mysql_query($query) or pupe_error($query);
 
+			$vastasumma += $tiliointisumma;
+
 			//Sitten pitää vielä tilioidä itse marginaali joka on normaalia verollista myyntiä
 			$selite 		= "Marginaaliverolasku/Marginaali ". $lasku['nimi']." ".$lasku['nimitark'];
-			$tiliointisumma = $marginaali;
+			
+			//Myyntimarginaali
+			$tiliointisumma = $xrow['kate'];
 			$lukko			= "1";
 
 			//Poistetaan 500 yksikköä alvista
@@ -240,50 +204,52 @@ else {
 		if ($lasku['vienti'] == 'K') $tilino = $tilino_ei_eu;
 
 		//Tiliöidään myynti
-		$query = "	INSERT into tiliointi set
-					yhtio 		= '$kukarow[yhtio]',
-					ltunnus		= '$tunnus',
-					tilino		= '$tilino',
-					kustp 		= '$kustp',
-					kohde 		= '$kohde',
-					projekti	= '$projekti',
-					tapvm 		= '$tapvm',
-					summa 		= $tiliointisumma * -1,
-					vero 		= '$xrow[alv]',
-					selite 		= '$selite',
-					lukko 		= '$lukko',
-					laatija 	= '$kukarow[kuka]',
-					laadittu 	= now()";
-		$laskutusres = mysql_query($query) or pupe_error($query);
-
-		$lukko = "";
-
-		//Tiliöidaan ALV, jos sitä on
-		if ($xrow['alv'] > 0) {
-
-			$onkoalvia = "kylla"; // apumuuttuja, että tiedetään alempana, että tehtiin alvikirjauksia
-
-			$isa = mysql_insert_id ($link);
+		if ($tiliointisumma != 0) {
 			$query = "	INSERT into tiliointi set
 						yhtio 		= '$kukarow[yhtio]',
-						ltunnus 	= '$tunnus',
-						tilino 		= '$yhtiorow[alv]',
-						kustp 		= '',
-						kohde 		= '',
-						projekti 	= '',
+						ltunnus		= '$tunnus',
+						tilino		= '$tilino',
+						kustp 		= '$kustp',
+						kohde 		= '$kohde',
+						projekti	= '$projekti',
 						tapvm 		= '$tapvm',
-						summa 		= $alv * -1,
-						vero 		= '0',
+						summa 		= $tiliointisumma * -1,
+						vero 		= '$xrow[alv]',
 						selite 		= '$selite',
-						lukko 		= '1',
+						lukko 		= '$lukko',
 						laatija 	= '$kukarow[kuka]',
-						laadittu 	= now(),
-						aputunnus	= $isa";
+						laadittu 	= now()";
 			$laskutusres = mysql_query($query) or pupe_error($query);
+			$isa = mysql_insert_id ($link);
+		
+			$lukko = "";
+
+			//Tiliöidaan ALV, jos sitä on
+			if ($xrow['alv'] > 0) {
+
+				$onkoalvia = "kylla"; // apumuuttuja, että tiedetään alempana, että tehtiin alvikirjauksia
+
+				$query = "	INSERT into tiliointi set
+							yhtio 		= '$kukarow[yhtio]',
+							ltunnus 	= '$tunnus',
+							tilino 		= '$yhtiorow[alv]',
+							kustp 		= '',
+							kohde 		= '',
+							projekti 	= '',
+							tapvm 		= '$tapvm',
+							summa 		= $alv * -1,
+							vero 		= '0',
+							selite 		= '$selite',
+							lukko 		= '1',
+							laatija 	= '$kukarow[kuka]',
+							laadittu 	= now(),
+							aputunnus	= $isa";
+				$laskutusres = mysql_query($query) or pupe_error($query);
+			}
 		}
 
 		//Lasketaan vastasummaa jotta voidaan tutkia pyöristyseroa
-		$vastasumma += $tiliointisumma + $alv + $ostosumma;
+		$vastasumma += $tiliointisumma + $alv;
 
 		//Lasketaan varastonmuutos
 		$varmuutos = $xrow["varmuutos"];

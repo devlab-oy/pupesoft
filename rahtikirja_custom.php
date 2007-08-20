@@ -18,8 +18,13 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	$count = 0;
 	
 	// k‰yd‰‰n jokainen pakkaustyypii l‰pi (yksi rivi rahtikirjassa)
-	for ($i = 0; $i < count($_POST['kilot']); $i++) {
+	for ($i = 0; $i < count($pakkaus); $i++) {
 		
+		// jotain syˆtettiin
+		$_POST['kilot'][$i]		= str_replace(',', '.', $_POST['kilot'][$i]);
+		$_POST['kollit'][$i]	= str_replace(',', '.', $_POST['kollit'][$i]);
+		$_POST['kuutiot'][$i]	= str_replace(',', '.', $_POST['kuutiot'][$i]);
+		$_POST['lavametri'][$i]	= str_replace(',', '.', $_POST['lavametri'][$i]);
 		
 		if((isset($_POST['kilot'][$i]) && is_numeric($_POST['kilot'][$i]))
 		|| (isset($_POST['kollit'][$i]) && is_numeric($_POST['kollit'][$i]))
@@ -28,14 +33,14 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 			
 			$count++;
 			
-			// jotain syˆtettiin
 			$data = array(
 				'pakkaus'           => strip_tags($_POST['pakkaus'][$i]),
 				'pakkauskuvaus'     => strip_tags($_POST['pakkauskuvaus'][$i]),
-				'kilot'             => (int) $_POST['kilot'][$i],
-	        	'kollit'            => (int) $_POST['kollit'][$i],
-	        	'kuutiot'           => (int) $_POST['kuutiot'][$i],
-	        	'lavametri'         => (int) $_POST['lavametri'][$i],
+				'kilot'             => $_POST['kilot'][$i],
+	        	'kollit'            => $_POST['kollit'][$i],
+	        	'kuutiot'           => $_POST['kuutiot'][$i],
+	        	'lavametri'         => $_POST['lavametri'][$i],
+				'pakkauskuvaustark' => $_POST['pakkauskuvaustark'][$i]
 			);
 			
 			$data = array_merge($clean, $data);
@@ -274,6 +279,8 @@ if (! isset($_POST['toimitustapa'])) {
     	    <td><input type='text' size='3' value='' name='lavametri[$i]'></td>
     	    <td>{$row['selite']}</td>
 			<td>{$row['selitetark']}</td>";
+
+		echo "<td><input type='text' size='10' name='pakkauskuvaustark[$i]'></td>";
         
     	$i++;
     }
@@ -296,20 +303,21 @@ function pupe_rahtikirja_insert($data)
 {
 	// alustetaan tiedot jotka insertoidaan
 	$alustus = array(
-		'yhtio'         => $GLOBALS['yhtiorow']['yhtio'],
-		'merahti'       => null,
-		'rahtisopimus'  => null,
-		'pakkaus'       => null,
-		'pakkauskuvaus' => null,
-		'toimitustapa'  => null,
-		'otsikkonro'    => 0,
-		'rahtikirjanro' => null,
-		'viitelah'      => null,
-		'viitevas'      => null,
-        'kilot'         => 0,
-        'kollit'        => 0,
-        'kuutiot'       => 0,
-        'lavametri'     => 0,
+		'yhtio'         	=> $GLOBALS['yhtiorow']['yhtio'],
+		'merahti'       	=> null,
+		'rahtisopimus'  	=> null,
+		'pakkaus'       	=> null,
+		'pakkauskuvaus' 	=> null,
+		'toimitustapa'  	=> null,
+		'otsikkonro'    	=> 0,
+		'rahtikirjanro' 	=> null,
+		'viitelah'      	=> null,
+		'viitevas'      	=> null,
+        'kilot'         	=> 0,
+        'kollit'        	=> 0,
+        'kuutiot'       	=> 0,
+        'lavametri'     	=> 0,
+		'pakkauskuvaustark' => null,
 	);
 	
 	$data = array_merge($alustus, $data);
@@ -319,7 +327,7 @@ function pupe_rahtikirja_insert($data)
 	}
 	
 	$query = sprintf(
-		"INSERT INTO rahtikirjat (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri)
+		"INSERT INTO rahtikirjat (yhtio, merahti, rahtisopimus, pakkaus, pakkauskuvaus, toimitustapa, otsikkonro, rahtikirjanro, viitelah, viitevas, kilot, kollit, kuutiot, lavametri, pakkauskuvaustark)
 		values('%s')",
 		implode("','", array_values($data))
 	);

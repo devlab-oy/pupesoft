@@ -329,14 +329,14 @@
 				if ($mukaan == "ytunnus" and $osoitetarrat == "") {
 					if ($group!="") $group .= ",asiakas.tunnus";
 					else $group  .= "asiakas.tunnus";
-					$select .= "concat_ws(' ', asiakas.ytunnus, asiakas.toim_ovttunnus, asiakas.toim_nimi) ytunnus, ";
+					$select .= "concat_ws(' ',asiakas.ytunnus,asiakas.toim_ovttunnus,asiakas.toim_nimi) ytunnus, ";
 					$order  .= "asiakas.ytunnus,";
 					$gluku++;
 				}
 				elseif ($mukaan == "ytunnus" and $osoitetarrat != "") {
 					if ($group!="") $group .= ",asiakas.tunnus";
 					else $group  .= "asiakas.tunnus";
-					$select .= "asiakas.tunnus, concat_ws(' ', asiakas.ytunnus, asiakas.toim_ovttunnus, asiakas.toim_nimi) ytunnus, ";
+					$select .= "asiakas.tunnus, concat_ws(' ',asiakas.ytunnus,asiakas.toim_ovttunnus,asiakas.toim_nimi) ytunnus, ";
 					$order  .= "asiakas.ytunnus,";
 					$gluku++;
 				}
@@ -533,31 +533,16 @@
 				}
 			}
 
+			$vvaa = $vva - '1';
+			$vvll = $vvl - '1';
+			
 			if ($kateprossat != "") {
 				$katelisa = " 0 kateprosnyt, 0 kateprosed, ";
 			}
 			else {
 				$katelisa = "";
 			}
-
-			// Jos ei olla valittu mitään
-			if ($group == "") {
-				$select = "tuote.yhtio, ";
-				$group = "lasku.yhtio";
-			}
-
-			$vvaa = $vva - '1';
-			$vvll = $vvl - '1';
-
-			if ($ajotapa == 'tilausjaauki') {
-				$tilauslisa1 = " sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.varattu+tilausrivi.jt,0)) myykpllaskuttamattanyt, ";
-				$tilauslisa2 = " sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) myyntilaskuttamattanyt, ";
-			}
-			else {
-				$tilauslisa1 = "";
-				$tilauslisa2 = "";
-			}
-
+			
 			if ($ajotapanlisa == "erikseen") {
 				$tilauslisa3 = ", if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt>0, 'Veloitus', 'Hyvitys') rivityyppi";
 				$group .= ", rivityyppi";
@@ -565,31 +550,71 @@
 			else {
 				$tilauslisa3 = "";
 			}
+			
+			// Jos ei olla valittu mitään
+			if ($group == "") {
+				$select = "tuote.yhtio, ";
+				$group = "lasku.yhtio";
+			}
+			
+			$query = "	SELECT $select";
+	
+			// generoidaan selectit
+			if ($kuukausittain != "") {
+				$MONTH_ARRAY  	= array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+				
+				$startmonth	= date("Ymd",mktime(0, 0, 0, $kka, 1,  $vva));
+				$endmonth 	= date("Ymd",mktime(0, 0, 0, $kkl, 1,  $vvl));
+				
+				for ($i = $startmonth;  $i <= $endmonth;) {
+					
+					$alku  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
+					$loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)));
+					
+					$alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)-1));
+					$loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)-1));
+					
+					if ($ajotapa == 'tilausjaauki') {
+						$query .= "sum(if(tilausrivi.laadittu >= '$alku 00:00:00'  and tilausrivi.laadittu <= '$loppu 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) '".$MONTH_ARRAY[(substr($i,4,2)*1)]." ".substr($i,0,4)." ".t("Laskuttamatta")."',";
+					}
 
-			$query = "	SELECT $select
-						$tilauslisa1
-						sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0)) myykplnyt,
-						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)) myykpled,
-						$tilauslisa2
-						sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) myyntinyt,
-						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)) myyntied,
-						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) /
-						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)),2) myyntiind,
-						sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)) katenyt,
-						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)) kateed,
-						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)) /
-						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)),2) kateind,
-						$katelisa
-						sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',
-						tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokatenyt,
-						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',
-						tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokateed,
-						round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl',
-						tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) /
-						sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',
-						tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)),2) nettokateind
-						$tilauslisa3
-						FROM lasku use index (yhtio_tila_tapvm)
+					$query .= " sum(if(tilausrivi.laskutettuaika >= '$alku'  and tilausrivi.laskutettuaika <= '$loppu', tilausrivi.rivihinta,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".substr($i,0,4)." ".t("Myynti")."',";
+					$query .= " sum(if(tilausrivi.laskutettuaika >= '$alku_ed'  and tilausrivi.laskutettuaika <= '$loppu_ed', tilausrivi.rivihinta,0)) '".substr($MONTH_ARRAY[(substr($i,4,2)*1)],0,3)." ".(substr($i,0,4)-1)." ".t("Myynti")."',";
+					
+										
+					$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
+				}
+				
+				// Vika pilkku pois
+				$query = substr($query, 0 ,-1);
+			}
+			else {
+				
+				if ($ajotapa == 'tilausjaauki') {
+					$query .= "sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.varattu+tilausrivi.jt,0)) myykpllaskuttamattanyt, ";
+				}
+								
+				$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kpl,0)) myykplnyt,
+							sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kpl,0)) myykpled, ";
+			
+				if ($ajotapa == 'tilausjaauki') {
+					$query .= "sum(if(tilausrivi.laadittu >= '$vva-$kka-$ppa 00:00:00'  and tilausrivi.laadittu <= '$vvl-$kkl-$ppl 23:59:59' and tilausrivi.laskutettuaika= '0000-00-00', tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),0)) myyntilaskuttamattanyt, ";
+				}
+				
+				$query .= "	sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) myyntinyt,
+							sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)) myyntied,
+							round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.rivihinta,0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.rivihinta,0)),2) myyntiind,
+							sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)) katenyt,
+							sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)) kateed,
+							round(sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate,0)) /sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl',tilausrivi.kate,0)),2) kateind,
+							$katelisa
+							sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokatenyt,
+							sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokateed,
+							sum(if(tilausrivi.laskutettuaika >= '$vva-$kka-$ppa'  and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) / sum(if(tilausrivi.laskutettuaika >= '$vvaa-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvll-$kkl-$ppl', tilausrivi.kate - (tilausrivi.kate*IFNULL(asiakas.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(toimitustapa.kuluprosentti,0)/100) - (tilausrivi.kate*IFNULL(tuote.kuluprosentti,0)/100),0)) nettokateind
+							$tilauslisa3";
+			}
+			
+			$query .= "	FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tilausrivi use index ($index) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.$ouusio=lasku.tunnus and tilausrivi.tyyppi='L'
 						LEFT JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 						LEFT JOIN asiakas use index (PRIMARY) ON asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
@@ -597,7 +622,7 @@
 						WHERE lasku.yhtio in ($yhtio)
 						$asiakasrajaus and
 						lasku.tila in ($tila)";
-
+						
 			if ($ajotapa == 'tilausjaauki') {
 				$query .= "	and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
 							and ((lasku.luontiaika >= '$vva-$kka-$ppa 00:00:00'  and lasku.luontiaika <= '$vvl-$kkl-$ppl 23:59:59') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))";
@@ -609,7 +634,7 @@
 
 			$query .= "	$lisa
 						group by $group
-						order by $order myyntinyt";
+						order by $order 1";
 
 			// ja sitten ajetaan itte query
 			if ($query != "") {
@@ -624,7 +649,6 @@
 			}
 
 			if ($query != "") {
-
 				if (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta.php") !== FALSE) {
 					if(include('Spreadsheet/Excel/Writer.php')) {
 
@@ -669,7 +693,9 @@
 				echo "<table><tr>";
 
 				// echotaan kenttien nimet
-				for ($i=0; $i < mysql_num_fields($result); $i++) echo "<th>".t(mysql_field_name($result,$i))."</th>";
+				for ($i=0; $i < mysql_num_fields($result); $i++) { 
+					echo "<th>".t(mysql_field_name($result,$i))."</th>";
+				}
 
 				if(isset($workbook)) {
 					for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
@@ -679,10 +705,9 @@
 				echo "</tr>\n";
 				$ulos .= "\r\n";
 
-				$edluku = "x"; // katellaan muuttuuko joku arvo
-				$myyntinyt = $myyntied = $katenyt = $kateed = $nettokatenyt = $nettokateed = $myyntikplnyt = $myyntikpled = 0;
-				$totmyyntinyt = $totmyyntied = $totkatenyt = $totkateed = $totnettokatenyt = $totnettokateed = $totmyyntikplnyt = $totmyyntikpled = 0;
-
+				$edluku 		= "x";
+				$valisummat 	= array();
+				$totsummat  	= array();
 				$tarra_aineisto = "";
 
 				while ($row = mysql_fetch_array($result)) {
@@ -692,6 +717,7 @@
 					}
 
 					echo "<tr>";
+					
 					// echotaan kenttien sisältö
 					for ($i=0; $i < mysql_num_fields($result); $i++) {
 
@@ -848,152 +874,43 @@
 						}
 
 						// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
-						if ($gluku > 1) {
-
-							if ($edluku != $row[0] and $edluku != 'x' and $mukaan != 'tuote' and $piiyhteensa == '') {
-
-								$myyntiind = $kateind = $nettokateind = 0;
-								if ($myyntied    <> 0) $myyntiind    = round($myyntinyt/$myyntied,2);
-								if ($kateed      <> 0) $kateind      = round($katenyt/$kateed,2);
-								if ($nettokateed <> 0) $nettokateind = round($nettokatenyt/$nettokateed,2);
-
-								$apu = mysql_num_fields($result)-11;
-
-								if ($ajotapanlisa == "erikseen") {
-									$apu -= 1;
+						if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '') {
+							$excelsarake = $myyntiind = $kateind = $nettokateind = 0;	
+							
+							foreach($valisummat as $vnim => $vsum) {
+								if ((string) $vsum != '') {
+									$vsum = sprintf("%.2f", $vsum);
 								}
-
-								if ($ajotapa == 'tilausjaauki') {
-									$apu -= 2;
+								
+								if ($vnim == "kateprosnyt") {
+									if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / $valisummat["myyntinyt"] * 100, 2);
 								}
-
-								if ($kateprossat != "") {
-									$apu -= 2;
+								if ($vnim == "kateprosed") {
+									if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / $valisummat["myyntied"] * 100, 2);
 								}
-
-								echo "<td class='tumma' colspan='$apu'>$edluku ".t("yhteensä")."</th>";
-
-								if ($ajotapa == 'tilausjaauki') {
-									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myykpllaskuttamattanyt))."</td>";
+								if ($vnim == "myyntiind") {
+									if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
 								}
-
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntikplnyt))."</td>";
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntikpled))."</td>";
-
-								if ($ajotapa == 'tilausjaauki') {
-									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntilaskuttamattanyt))."</td>";
+								if ($vnim == "kateind") {
+									if ($valisummat["kateed"] <> 0) 		$vsum = round($valisummat["katenyt"] / $valisummat["kateed"],2);
 								}
-
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntinyt))."</td>";
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntied))."</td>";
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntiind))."</td>";
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$katenyt))."</td>";
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateed))."</td>";
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateind))."</td>";
-
-								if ($kateprossat != "") {
-									if ($myyntinyt != 0) {
-										$kprny = round($katenyt / $myyntinyt * 100, 2);
-									}
-									else {
-										$kprny = 0;
-									}
-									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kprny))."</td>";
-
-									if ($myyntied != 0) {
-										$kpred = round($kateed / $myyntied * 100, 2);
-									}
-									else {
-										$kpred = 0;
-									}
-									echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kpred))."</td>";
+								if ($vnim == "nettokateind") {
+									if ($valisummat["nettokateed"] <> 0) 	$vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
 								}
-
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokatenyt))."</td>";
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateed))."</td>";
-								echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td></tr>\n";
-
-								if(isset($workbook)) {
-									$excelsarake=0;
-
-									$worksheet->write($excelrivi, $excelsarake, $edluku." ".t("yhteensä"), $format_bold);
-
-									for($iii = 0; $iii < $apu; $iii++) {
-										$excelsarake++;
-									}
-
-									if ($ajotapa == 'tilausjaauki') {
-										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myykpllaskuttamattanyt), $format_bold);
-										$excelsarake++;
-									}
-
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntikplnyt), $format_bold);
-									$excelsarake++;
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntikpled), $format_bold);
-									$excelsarake++;
-
-									if ($ajotapa == 'tilausjaauki') {
-										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntilaskuttamattanyt), $format_bold);
-										$excelsarake++;
-									}
-
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntinyt), $format_bold);
-									$excelsarake++;
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntied), $format_bold);
-									$excelsarake++;
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntiind), $format_bold);
-									$excelsarake++;
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$katenyt), $format_bold);
-									$excelsarake++;
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kateed), $format_bold);
-									$excelsarake++;
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kateind), $format_bold);
-									$excelsarake++;
-
-									if ($kateprossat != "") {
-										if ($myyntinyt != 0) {
-											$kprny = round($katenyt / $myyntinyt * 100, 2);
-										}
-										else {
-											$kprny = 0;
-										}
-										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kprny), $format_bold);
-										$excelsarake++;
-
-										if ($myyntied != 0) {
-											$kpred = round($kateed / $myyntied * 100, 2);
-										}
-										else {
-											$kpred = 0;
-										}
-										$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kpred), $format_bold);
-										$excelsarake++;
-									}
-
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokatenyt), $format_bold);
-									$excelsarake++;
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateed), $format_bold);
-									$excelsarake++;
-									$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateind), $format_bold);
-									$excelrivi++;
-								}
-
-								echo "<tr>";
-
-								$myykpllaskuttamattanyt    	= "0";
-								$myyntilaskuttamattanyt    	= "0";
-								$myyntikplnyt 				= "0";
-								$myyntikpled  				= "0";
-								$myyntinyt    				= "0";
-								$myyntied     				= "0";
-								$katenyt      				= "0";
-								$kateed       				= "0";
-								$nettokatenyt 				= "0";
-								$nettokateed  				= "0";
+								
+								echo "<td class='tumma' align='right'>$vsum</td>";
+								
+								$worksheet->writeNumber($excelrivi, $excelsarake, $vsum, $format_bold);
+								$excelsarake++;
+								
 							}
-							$edluku = $row[0];
+							$excelrivi++;
+							echo "</tr><tr>";
+							
+							$valisummat = array();	
 						}
-
+						$edluku = $row[0];
+						
 						// hoidetaan pisteet piluiksi!!
 						if (mysql_field_type($result,$i) == 'real' or substr(mysql_field_name($result, $i),0 ,4) == 'kate') {
 							echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
@@ -1021,29 +938,17 @@
 					echo "</tr>\n";
 					$excelrivi++;
 
-
-					$myykpllaskuttamattanyt    	+= $row['myykpllaskuttamattanyt'];
-					$myyntilaskuttamattanyt    	+= $row['myyntilaskuttamattanyt'];
-					$myyntikplnyt    			+= $row['myykplnyt'];
-					$myyntikpled     			+= $row['myykpled'];
-					$myyntinyt       			+= $row['myyntinyt'];
-					$myyntied        			+= $row['myyntied'];
-					$katenyt         			+= $row['katenyt'];
-					$kateed          			+= $row['kateed'];
-					$nettokatenyt    			+= $row['nettokatenyt'];
-					$nettokateed     			+= $row['nettokateed'];
-
-					$totmyykpllaskuttamattanyt  += $row['myykpllaskuttamattanyt'];
-					$totmyyntilaskuttamattanyt  += $row['myyntilaskuttamattanyt'];
-					$totmyyntikplnyt 			+= $row['myykplnyt'];
-					$totmyyntikpled  			+= $row['myykpled'];
-					$totmyyntinyt    			+= $row['myyntinyt'];
-					$totmyyntied     			+= $row['myyntied'];
-					$totkatenyt      			+= $row['katenyt'];
-					$totkateed       			+= $row['kateed'];
-					$totnettokatenyt 			+= $row['nettokatenyt'];
-					$totnettokateed  			+= $row['nettokateed'];
-
+					for ($i=0; $i < mysql_num_fields($result); $i++) {
+						
+						if($i < substr_count($select, ", ")) {
+							$valisummat[mysql_field_name($result, $i)] = "";
+							$totsummat[mysql_field_name($result, $i)]  = "";
+						}
+						else {
+							$valisummat[mysql_field_name($result, $i)] += $row[mysql_field_name($result, $i)];
+							$totsummat[mysql_field_name($result, $i)]  += $row[mysql_field_name($result, $i)];
+						}
+					}
 				}
 
 				$apu = mysql_num_fields($result)-11;
@@ -1063,232 +968,78 @@
 				// jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 				if ($gluku > 1 and $mukaan != 'tuote' and $piiyhteensa == '') {
 
-					$myyntiind = $kateind = $nettokateind = 0;
-					if ($myyntied    <> 0) $myyntiind    = round($myyntinyt/$myyntied,2);
-					if ($kateed      <> 0) $kateind      = round($katenyt/$kateed,2);
-					if ($nettokateed <> 0) $nettokateind = round($nettokatenyt/$nettokateed,2);
-
-		  		  	echo "<tr><th colspan='$apu'>$edluku ".t("yhteensä")."</td>";
-
-					if ($ajotapa == 'tilausjaauki') {
-						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myykpllaskuttamattanyt))."</td>";
+					echo "<tr>";
+					
+					$excelsarake = $myyntiind = $kateind = $nettokateind = 0;	
+					
+					foreach($valisummat as $vnim => $vsum) {
+						if ((string) $vsum != '') {
+							$vsum = sprintf("%.2f", $vsum);
+						}
+						
+						if ($vnim == "kateprosnyt") {
+							if ($valisummat["myyntinyt"] <> 0) 		$vsum = round($valisummat["katenyt"] / $valisummat["myyntinyt"] * 100, 2);
+						}
+						if ($vnim == "kateprosed") {
+							if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["kateed"] / $valisummat["myyntied"] * 100, 2);
+						}
+						if ($vnim == "myyntiind") {
+							if ($valisummat["myyntied"] <> 0) 		$vsum = round($valisummat["myyntinyt"] / $valisummat["myyntied"],2);
+						}
+						if ($vnim == "kateind") {
+							if ($valisummat["kateed"] <> 0) 		$vsum = round($valisummat["katenyt"] / $valisummat["kateed"],2);
+						}
+						if ($vnim == "nettokateind") {
+							if ($valisummat["nettokateed"] <> 0) 	$vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
+						}
+						
+						echo "<td class='tumma' align='right'>$vsum</td>";
+						
+						$worksheet->writeNumber($excelrivi, $excelsarake, $vsum, $format_bold);
+						$excelsarake++;
+						
 					}
+					$excelrivi++;
+					echo "</tr>";	
+				}
 
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntikplnyt))."</td>";
-		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntikpled))."</td>";
-
-					if ($ajotapa == 'tilausjaauki') {
-						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntilaskuttamattanyt))."</td>";
+				echo "<tr>";
+				
+				$excelsarake = $myyntiind = $kateind = $nettokateind = 0;	
+				
+				foreach($totsummat as $vnim => $vsum) {
+					if ((string) $vsum != '') {
+						$vsum = sprintf("%.2f", $vsum);
 					}
-
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntinyt))."</td>";
-		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntied))."</td>";
-		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntiind))."</td>";
-		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$katenyt))."</td>";
-		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateed))."</td>";
-		  		  	echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateind))."</td>";
-
-					if ($kateprossat != "") {
-						if ($myyntinyt != 0) {
-							$kprny = round($katenyt / $myyntinyt * 100, 2);
-						}
-						else {
-							$kprny = 0;
-						}
-						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kprny))."</td>";
-
-						if ($myyntied != 0) {
-							$kpred = round($kateed / $myyntied * 100, 2);
-						}
-						else {
-							$kpred = 0;
-						}
-						echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kpred))."</td>";
+					
+					if ($vnim == "kateprosnyt") {
+						if ($totsummat["myyntinyt"] <> 0) 		$vsum = round($totsummat["katenyt"] / $totsummat["myyntinyt"] * 100, 2);
 					}
-
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokatenyt))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateed))."</td>";
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td></tr>\n";
+					if ($vnim == "kateprosed") {
+						if ($totsummat["myyntied"] <> 0) 		$vsum = round($totsummat["kateed"] / $totsummat["myyntied"] * 100, 2);
+					}
+					if ($vnim == "myyntiind") {
+						if ($totsummat["myyntied"] <> 0) 		$vsum = round($totsummat["myyntinyt"] / $totsummat["myyntied"],2);
+					}
+					if ($vnim == "kateind") {
+						if ($totsummat["kateed"] <> 0) 		$vsum = round($totsummat["katenyt"] / $totsummat["kateed"],2);
+					}
+					if ($vnim == "nettokateind") {
+						if ($totsummat["nettokateed"] <> 0) 	$vsum = round($totsummat["nettokatenyt"] / $totsummat["nettokateed"],2);
+					}
+					
+					echo "<td class='tumma' align='right'>$vsum</td>";
 
 					if(isset($workbook)) {
-						$excelsarake=0;
-
-						$worksheet->write($excelrivi, $excelsarake, $edluku." ".t("yhteensä"), $format_bold);
-
-						for($iii = 0; $iii < $apu; $iii++) {
-							$excelsarake++;
-						}
-
-						if ($ajotapa == 'tilausjaauki') {
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myykpllaskuttamattanyt), $format_bold);
-							$excelsarake++;
-						}
-
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntikplnyt), $format_bold);
+						$worksheet->writeNumber($excelrivi, $excelsarake, $vsum, $format_bold);
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntikpled), $format_bold);
-						$excelsarake++;
-
-						if ($ajotapa == 'tilausjaauki') {
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntilaskuttamattanyt), $format_bold);
-							$excelsarake++;
-						}
-
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntinyt), $format_bold);
-						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntied), $format_bold);
-						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$myyntiind), $format_bold);
-						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$katenyt), $format_bold);
-						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kateed), $format_bold);
-						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kateind), $format_bold);
-						$excelsarake++;
-
-						if ($kateprossat != "") {
-							if ($myyntinyt != 0) {
-								$kprny = round($katenyt / $myyntinyt * 100, 2);
-							}
-							else {
-								$kprny = 0;
-							}
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kprny), $format_bold);
-							$excelsarake++;
-
-							if ($myyntied != 0) {
-								$kpred = round($kateed / $myyntied * 100, 2);
-							}
-							else {
-								$kpred = 0;
-							}
-							$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kpred), $format_bold);
-							$excelsarake++;
-						}
-
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokatenyt), $format_bold);
-						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateed), $format_bold);
-						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$nettokateind), $format_bold);
-						$excelrivi++;
 					}
 				}
-
-				$myyntiind = $kateind = $nettokateind = 0;
-				if ($totmyyntied    <> 0) $myyntiind    = round($totmyyntinyt/$totmyyntied,2);
-				if ($totkateed      <> 0) $kateind      = round($totkatenyt/$totkateed,2);
-				if ($totnettokateed <> 0) $nettokateind = round($totnettokatenyt/$totnettokateed,2);
-
-				echo "<tr><th colspan='$apu'>".t("Kaikki yhteensä")."</td>";
-
-				if ($ajotapa == 'tilausjaauki') {
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totmyykpllaskuttamattanyt))."</td>";
-				}
-
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totmyyntikplnyt))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totmyyntikpled))."</td>";
-
-				if ($ajotapa == 'tilausjaauki') {
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totmyyntilaskuttamattanyt))."</td>";
-				}
-
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totmyyntinyt))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totmyyntied))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$myyntiind))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totkatenyt))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totkateed))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kateind))."</td>";
-
-				if ($kateprossat != "") {
-					if ($totmyyntinyt != 0) {
-						$kprny = round($totkatenyt / $totmyyntinyt * 100, 2);
-					}
-					else {
-						$kprny = 0;
-					}
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kprny))."</td>";
-
-					if ($totmyyntied != 0) {
-						$kpred = round($totkateed / $totmyyntied * 100, 2);
-					}
-					else {
-						$kpred = 0;
-					}
-					echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$kpred))."</td>";
-				}
-
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totnettokatenyt))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$totnettokateed))."</td>";
-				echo "<td class='tumma' align='right'>".str_replace(".", ",", sprintf("%.02f",$nettokateind))."</td></tr>\n";
-
-				echo "</table>";
-
+				$excelrivi++;
+				
+				echo "</tr></table>";
+				
 				if(isset($workbook)) {
-					$excelsarake=0;
-
-					$worksheet->write($excelrivi, $excelsarake, t("Kaikki yhteensä"), $format_bold);
-
-					for($iii = 0; $iii < $apu; $iii++) {
-						$excelsarake++;
-					}
-
-					if ($ajotapa == 'tilausjaauki') {
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totmyykpllaskuttamattanyt), $format_bold);
-						$excelsarake++;
-					}
-
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totmyyntikplnyt), $format_bold);
-					$excelsarake++;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totmyyntikpled), $format_bold);
-					$excelsarake++;
-
-					if ($ajotapa == 'tilausjaauki') {
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totmyyntilaskuttamattanyt), $format_bold);
-						$excelsarake++;
-					}
-
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totmyyntinyt), $format_bold);
-					$excelsarake++;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totmyyntied), $format_bold);
-					$excelsarake++;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totmyyntiind), $format_bold);
-					$excelsarake++;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totkatenyt), $format_bold);
-					$excelsarake++;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totkateed), $format_bold);
-					$excelsarake++;
-					$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$totkateind), $format_bold);
-					$excelsarake++;
-
-					if ($kateprossat != "") {
-						if ($totmyyntinyt != 0) {
-							$kprny = round($totkatenyt / $totmyyntinyt * 100, 2);
-						}
-						else {
-							$kprny = 0;
-						}
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kprny), $format_bold);
-						$excelsarake++;
-
-						if ($totmyyntied != 0) {
-							$kpred = round($totkateed / $totmyyntied * 100, 2);
-						}
-						else {
-							$kpred = 0;
-						}
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kpred), $format_bold);
-						$excelsarake++;
-					}
-
-					$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$totnettokatenyt), $format_bold);
-					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$totnettokateed), $format_bold);
-					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$totnettokateind), $format_bold);
-					$excelrivi++;
-
 					// We need to explicitly close the workbook
 					$workbook->close();
 
@@ -1590,6 +1341,7 @@
 			if ($osoitetarrat != '') 	$tarchk   = "CHECKED";
 			if ($piiyhteensa != '')  	$piychk   = "CHECKED";
 			if ($sarjanumerot != '')  	$sarjachk = "CHECKED";
+			if ($kuukausittain != '')	$kuuchk	  = "CHECKED";
 
 			echo "<table>
 				<tr>
@@ -1679,6 +1431,12 @@
 				<th>".t("Piilota välisummat")."</th>
 				<td><input type='checkbox' name='piiyhteensa' $piychk></td>
 				<td></td>
+				</tr>
+				<tr>
+				<th>".t("Tulosta myynti kuukausittain")."</th>
+				<td><input type='checkbox' name='kuukausittain' $kuuchk></td>
+				<td></td>
+				<td class='back'></td>
 				</tr>
 				<tr>
 				<th>".t("Tulosta osoitetarrat")."</th>

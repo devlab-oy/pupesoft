@@ -78,15 +78,31 @@ if ($tila == 'muokkaa_rivi' and $tee != 'TY' and $tee != 'TI') {
 
 	// Tehd‰‰n pari juttua jos tuote on sarjanuerosaurannassa
 	if($trow["sarjanumeroseuranta"] != '') {
+		
 		//Nollataan sarjanumero
-		$query = "SELECT tunnus FROM sarjanumeroseuranta WHERE yhtio='$kukarow[yhtio]' and tuoteno='$trow[tuoteno]' and ostorivitunnus='$trow[tunnus]'";
+		if ($trow["varattu"] > 0) {
+			$tunken = "ostorivitunnus";
+		}
+		else {
+			$tunken = "myyntirivitunnus";
+		}
+
+		$query = "	SELECT group_concat(tunnus) tunnukset 
+					FROM sarjanumeroseuranta 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tuoteno = '$trow[tuoteno]' 
+					and $tunken = '$trow[tunnus]'";
 		$sarjares = mysql_query($query) or pupe_error($query);
 		$sarjarow = mysql_fetch_array($sarjares);
 
 		//Pidet‰‰n sarjatunnus muistissa
-		$osto_sarjatunnus = $sarjarow["tunnus"];
+		$osto_sarjatunnus = $sarjarow["tunnukset"];
 
-		$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$trow[tuoteno]' and ostorivitunnus='$trow[tunnus]'";
+		$query = "	UPDATE sarjanumeroseuranta 
+					SET $tunken = 0 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tuoteno = '$trow[tuoteno]' 
+					and $tunken = '$trow[tunnus]'";
 		$sarjares = mysql_query($query) or pupe_error($query);
 	}
 	
@@ -328,25 +344,43 @@ if ($tila == 'tee_kohdistus') {
 	if(is_array($rivi_kpl)) {
 		foreach ($rivi_kpl as $tunnus => $kpl) {
 			$kpl    = str_replace(",",".", $kpl);
-			$query  = "select kpl, varattu from tilausrivi where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+			$query  = "	SELECT kpl, varattu, tuoteno 
+						FROM tilausrivi 
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$rivi	= mysql_fetch_array($result);
 
 			// jos t‰t‰ rivi‰ ei ole viel‰ viety varastoon ni p‰ivitet‰‰n varattu kentt‰‰
 			if ($rivi["kpl"] == 0 and $rivi["varattu"] != 0 and $kpl != 0) {
-				$query = "update tilausrivi set varattu='$kpl' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and varattu<>'$kpl'";
+				$query = "	UPDATE tilausrivi 
+							set varattu='$kpl' 
+							where yhtio='$kukarow[yhtio]' 
+							and tunnus='$tunnus' 
+							and varattu<>'$kpl'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 
-			// jos t‰m‰ rivi on jo viety varastoon ni p‰ivitet‰‰n kpl kentt‰‰
-			if ($rivi["kpl"] != 0 and $rivi["varattu"] == 0 and $kpl != 0) {
-				$query = "update tilausrivi set kpl='$kpl' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and kpl<>'$kpl'";
+			if($rivi["kpl"] == 0 and strtoupper($kpl) == "DEL") {
+				$query = "	DELETE FROM tilausrivi 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tunnus = '$tunnus' 
+							and tyyppi = 'O'";
 				$result = mysql_query($query) or pupe_error($query);
-			}
-
-			if(strtoupper($kpl) == "DEL") {
-				$query = "DELETE FROM tilausrivi WHERE yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and tyyppi='O'";
-				$result = mysql_query($query) or pupe_error($query);
+				
+				//Nollataan sarjanumero
+				if ($rivi["varattu"] > 0) {
+					$tunken = "ostorivitunnus";
+				}
+				else {
+					$tunken = "myyntirivitunnus";
+				}
+				
+				$query = "	UPDATE sarjanumeroseuranta 
+							SET $tunken = 0 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$rivi[tuoteno]' 
+							and $tunken = '$tunnus'";
+				$sarjares = mysql_query($query) or pupe_error($query);				
 			}
 		}
 	}

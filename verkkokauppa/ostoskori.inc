@@ -26,6 +26,9 @@ if (!function_exists("check_ostoskori")) {
 			$asiakasrow = mysql_fetch_array($result);
 		}
 
+		$query = "LOCK TABLE lasku WRITE, avainsana READ";
+		$koriresult = mysql_query($query) or pupe_error($query);
+		
 		// kaikki ok, etsitään kori
 		$query = "	SELECT *
 					FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
@@ -65,6 +68,9 @@ if (!function_exists("check_ostoskori")) {
 			echo "<font class='error'>Too many ostoskories löyty!</font><br>";
 			$palautus = false;
 		}
+
+		$query = "UNLOCK TABLES";
+		$koriresult = mysql_query($query) or pupe_error($query);
 
 		return $palautus;
 	}

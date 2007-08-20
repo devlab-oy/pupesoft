@@ -185,13 +185,16 @@ if ($toiminto == "kalkyyli") {
 if ($ytunnus != "" or $toimittajaid != "") {
 	$keikkamonta = 0;
 	$hakutunnus = $ytunnus;
-
+	$hakuid		= $toimittajaid;
+	
 	require ("../inc/kevyt_toimittajahaku.inc");
 
 	$keikkamonta += $monta;
 
-	if ($ytunnus == "") {
-		$ytunnus = $hakutunnus;
+	if ($ytunnus == "") {	
+		$ytunnus   = $hakutunnus;
+		$asiakasid = $hakuid;
+
 		require ("../inc/asiakashaku.inc");
 
 		$toimittajaid  = $asiakasid;

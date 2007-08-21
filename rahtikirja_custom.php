@@ -40,17 +40,17 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	        	'kollit'            => $_POST['kollit'][$i],
 	        	'kuutiot'           => $_POST['kuutiot'][$i],
 	        	'lavametri'         => $_POST['lavametri'][$i],
-				'pakkauskuvaustark' => $_POST['pakkauskuvaustark'][$i]
-			);
+				'pakkauskuvaustark' => $_POST['pakkauskuvaustark'][$i]);
 			
 			$data = array_merge($clean, $data);
 
 			if ($count === 1) {
 				// eka rivi, insertoidaan ja otetaan tunnus
 				$otsikkonro = pupe_rahtikirja_insert($data);
-			} else {
-				$data['otsikkonro'] = $otsikkonro;
-				$data['rahtikirjanro'] = $otsikkonro;
+			} 
+			else {
+				$data['otsikkonro'] 	= $otsikkonro * -1;
+				$data['rahtikirjanro'] 	= $otsikkonro * -1;
 				pupe_rahtikirja_insert($data);
 			}
 		}
@@ -59,8 +59,8 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	// korjataan ensimm‰inen rivi jossa on v‰‰r‰ otsikkonro sek‰ rahtikirjanro
 	$query = sprintf(
 		"UPDATE rahtikirjat set otsikkonro = '%s', rahtikirjanro = '%s' where tunnus = '%s'",
-		(int) $otsikkonro,
-		(int) $otsikkonro,
+		(int) $otsikkonro * -1,
+		(int) $otsikkonro * -1,
 		(int) $otsikkonro
 	);
 	
@@ -70,7 +70,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	// 
 	// TULOSTUS!!!
 	
-	$data = pupe_rahtikirja_fetch($otsikkonro);
+	$data = pupe_rahtikirja_fetch(($otsikkonro * -1));
 	
 	$GLOBALS['lotsikot']  = $data['lotsikot'];
 	$GLOBALS['pakkaus']   = $data['pakkaus'];
@@ -375,7 +375,7 @@ function pupe_rahtikirja_fetch($otsikkonro)
 		}
 		
 		// asetetaan rivitiedot
-		$data['lotsikot'][$i]  = $rahtikirja['rahtikirjanro'];
+		$data['lotsikot'][$i]  = abs($rahtikirja['rahtikirjanro']);
 		$data['pakkaus'][$i]   = $rahtikirja['pakkaus'];
 		$data['kilot'][$i]     = $rahtikirja['kilot'];
 		$data['kollit'][$i]    = $rahtikirja['kollit'];

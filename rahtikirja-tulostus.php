@@ -229,7 +229,7 @@
 					$lavatyht   += $pak[4];
 				}
 
-				//haetaan asiakkaasn rahtisopimusnumero
+				//haetaan asiakkaan rahtisopimusnumero
 				$query = "	SELECT *
 							FROM rahtisopimukset
 							WHERE toimitustapa = '$toimitustapa'

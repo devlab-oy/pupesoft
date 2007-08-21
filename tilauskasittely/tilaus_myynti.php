@@ -1317,6 +1317,9 @@ if ($tee == '') {
 			if ($kukarow["extranet"] != "") {
 				$extralisa = " and (extranet = 'K' or selite = '$laskurow[toimitustapa]') ";
 			}
+			else {
+				$extralisa = " and (extranet = '' or selite = '$laskurow[toimitustapa]') ";
+			}
 
 			$query = "	SELECT tunnus, selite
 						FROM toimitustapa

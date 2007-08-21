@@ -675,6 +675,7 @@
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]'
 						and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
+						and (extranet = '' or selite = '$srow[toimitustapa]')
 						ORDER BY jarjestys,selite";
 			$tresult = mysql_query($query) or pupe_error($query);
 

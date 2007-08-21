@@ -177,6 +177,18 @@ class Pupe_Pdfekirje {
 		
 		// korvataan placeholderit oikeilla tiedoilla
         foreach ($info as $key => $val) {
+			$val = str_replace(
+				array('<', '>', '"', "'", '&'),
+				array(
+					htmlentities('<'),
+					htmlentities('>'),
+					htmlentities('"', ENT_QUOTES),
+					htmlentities("'", ENT_QUOTES),
+					htmlentities('&'),
+				),
+				$val
+			);
+			
             $xml = str_replace(":$key", htmlentities($val, ENT_QUOTES), $xml);
         }
         

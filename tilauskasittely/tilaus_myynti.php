@@ -238,8 +238,13 @@ if ($tee == "" and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 
 //Luodaan otsikko
 if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and ($tuoteno != '' or $asiakasid != '')) or ((int) $kukarow["kesken"] != 0 and $asiakasid != '' and $kukarow["extranet"] == "")) or ($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0)) {
 	// Luodaan uusi myyntitilausotsikko
-	require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
-		
+	if ($kukarow["extranet"] == "") {
+		require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
+	}
+	else {
+		require_once("luo_myyntitilausotsikko.inc");
+	}
+	
 	$tilausnumero = luo_myyntitilausotsikko($asiakasid);
 	$kaytiin_otsikolla = "NOJOO!";
 }

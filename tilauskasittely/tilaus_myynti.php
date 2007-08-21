@@ -266,7 +266,8 @@ if ((int) $kukarow["kesken"] != 0) {
 					from lasku
 					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	}
-
+	
+	
 	$result  	= mysql_query($query) or pupe_error($query);
 	$laskurow   = mysql_fetch_array($result);
 	if($yhtiorow["tilauksen_kohteet"] == "K") {
@@ -972,7 +973,7 @@ if ($tee == '') {
 	}
 
 	// Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty
-	if ($toimitustapa != '' or $tilausvahvistus != '' or $viesti != '' or $myyjanro != '' or $myyja != '') {
+	if ($pikaotsikko=='TRUE' and ($toimitustapa != '' or $tilausvahvistus != '' or $viesti != '' or $myyjanro != '' or $myyja != '')) {
 
 		if ($myyjanro != '') {
 			$apuqu = "	select *
@@ -1293,6 +1294,8 @@ if ($tee == '') {
 
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0) {
+		
+		echo "<input type='hidden' name='pikaotsikko' value='TRUE'>";
 
 		echo "<tr>$jarjlisa";
 
@@ -1324,7 +1327,7 @@ if ($tee == '') {
 			else {
 				$extralisa = " and (extranet = '' or selite = '$laskurow[toimitustapa]') ";
 			}
-
+			
 			$query = "	SELECT tunnus, selite
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]' $extralisa

@@ -189,7 +189,7 @@ class Pupe_Pdfekirje {
 				$val
 			);
 			
-            $xml = str_replace(":$key", htmlentities($val, ENT_QUOTES), $xml);
+            $xml = str_replace(":$key", $val, $xml);
         }
         
 		$file = $this->_info['tmp_dir'] . 'ekirje-' . $this->_info['kirje_id'] . '.xml';

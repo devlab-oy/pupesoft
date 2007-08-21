@@ -399,7 +399,7 @@
 				$query = "	SELECT selite, selitetark
 							FROM avainsana
 							WHERE yhtio = '$kukarow[yhtio]' and laji = 'KALETAPA'
-							ORDER BY selite";
+							ORDER BY jarjestys, selite";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 

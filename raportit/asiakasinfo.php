@@ -712,9 +712,22 @@ if ($ytunnus!='') {
 			}
 			
 			while ($asrow = mysql_fetch_array($asres)) {
+				
+				$tyhja = 0;
+				//	Onko perusalessa tyhjä ryhmä?
+				if($asrow["prio"] == 5) {
+					$query = "	SELECT tunnus
+								FROM tuote
+								WHERE yhtio='{$kukarow["yhtio"]}' and aleryhma = '{$asrow["alennusryhmä"]}' and hinnastoon != 'E' and status != 'P' and osasto != 0 and try != 0
+								LIMIT 1";
+					$testres = mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($testres) == 0) {
+						$tyhja = 1;
+					}
+				}							
 								
 				//	Suodatetaan extranetkäyttäjilta muut aleprossat
-				if((($kukarow["extranet"] != "" or $tee == "eposti"  or $yhdistetty != "" or $rajattunakyma == "JOO") and ($edtry != $asrow["try"] or $edryhma != $asrow["alennusryhmä"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == ""  and $rajattunakyma != "JOO")) {
+				if((((($kukarow["extranet"] != "" or $tee == "eposti"  or $yhdistetty != "" or $rajattunakyma == "JOO") and ($edtry != $asrow["try"] or $edryhma != $asrow["alennusryhmä"] or $edtuoteno != $asrow["tuoteno"])) or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == ""  and $rajattunakyma != "JOO"))) and $tyhja == 0) {
 					
 					$edryhma 	= $asrow["alennusryhmä"];
 					$edtry 		= $asrow["try"];					

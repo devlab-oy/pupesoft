@@ -126,7 +126,6 @@ if ($kukarow["extranet"] != '') {
 //katsotaan ett‰ kukarow kesken, $tilausnumero ja $kukarow[kesken] stemmaavat kesken‰‰n
 if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 	echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
-	echo "$tilausnumero != $kukarow[kesken] and ($tilausnumero != '' or (int) $kukarow[kesken] != 0) and $aktivoinnista != 'true')";
 	exit;
 }
 
@@ -449,22 +448,20 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
 // Laskutetaan myyntitili
 if ($kukarow["extranet"] == "" and $tee == "LASKUTAMYYNTITILI" and $muokkauslukko == "") {
 	$tilatapa = "LASKUTA";
-
 	require ("laskuta_myyntitilirivi.inc");
 }
 
 // Laitetaan myyntitili takaisin lep‰‰m‰‰n
 if ($kukarow["extranet"] == "" and $tee == "LEPAAMYYNTITILI" and $muokkauslukko == "") {
 	$tilatapa = "LEPAA";
-
 	require ("laskuta_myyntitilirivi.inc");
 }
 
-if($tee == "MAKSUSOPIMUS") {
+if ($tee == "MAKSUSOPIMUS") {
 	require("maksusopimus.inc");
 }
 
-if($tee == "LISAAKULUT") {
+if ($tee == "LISAAKULUT") {
 	require("lisaa_kulut.inc");
 }
 

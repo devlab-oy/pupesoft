@@ -2,7 +2,7 @@
 
 if(!function_exists("luo_myyntitilausotsikko")) {
 	function luo_myyntitilausotsikko($asiakasid) {
-		global $kukarow, $yhtiorow, $toim;
+		global $kukarow, $yhtiorow, $toim, $session;
 	
 		$query	= "	SELECT * 
 					FROM asiakas 

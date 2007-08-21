@@ -2050,7 +2050,7 @@
 
 			$query = "	UPDATE kuka
 						SET kesken = '$id'
-						WHERE session = '$kukarow[session]'";
+						WHERE session = '$session'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$kukarow["kesken"] = $id;

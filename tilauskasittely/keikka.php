@@ -190,7 +190,7 @@ if ($ytunnus != "" or $toimittajaid != "") {
 	require ("../inc/kevyt_toimittajahaku.inc");
 
 	$keikkamonta += $monta;
-
+/*
 	if ($ytunnus == "") {	
 		$ytunnus   = $hakutunnus;
 		$asiakasid = $hakuid;
@@ -201,7 +201,7 @@ if ($ytunnus != "" or $toimittajaid != "") {
 		$toimittajarow = $asiakasrow;
 		$keikkamonta  += $monta;
 	}
-
+*/
 	if ($keikkamonta > 1) {
 		$toimittajaid  = "";
 		$toimittajarow = "";

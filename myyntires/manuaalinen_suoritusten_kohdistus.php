@@ -241,7 +241,7 @@ if ($tila == 'tee_kohdistus') {
 		}
 	}
 
-	$query = "LOCK TABLES yriti READ, yhtio READ, tili READ, lasku WRITE, suoritus WRITE, tiliointi WRITE, sanakirja WRITE";
+	$query = "LOCK TABLES yriti READ, yhtio READ, tili READ, lasku WRITE, suoritus WRITE, tiliointi WRITE, tiliointi as tiliointi2 WRITE, sanakirja WRITE";
 	$result = mysql_query($query) or pupe_error($query);
 
 	// haetaan suorituksen tiedot
@@ -263,6 +263,7 @@ if ($tila == 'tee_kohdistus') {
 				FROM suoritus
 				JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
 				JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio and tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '')
+				JOIN tiliointi AS tiliointi2 ON (tiliointi2.yhtio = suoritus.yhtio and tiliointi2.aputunnus = tiliointi.tunnus and tiliointi2.korjattu = '')
 				JOIN yhtio ON (yhtio.yhtio = suoritus.yhtio)
 				WHERE suoritus.yhtio = '$kukarow[yhtio]' and
 				suoritus.tunnus = '$suoritus_tunnus' and
@@ -305,6 +306,19 @@ if ($tila == 'tee_kohdistus') {
 
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Suorituksen saamiset-tiliöinnit eivät löydy! Vaihda suorituksen saamiset-tiliä!")."</font>";
+			exit;
+		}
+
+		$errorrow = mysql_fetch_array ($result);
+
+		$query = "	SELECT * FROM tiliointi
+					WHERE yhtio = '$errorrow[yhtio]' and
+					aputunnus = '$errorrow[tunnus]' and
+					korjattu = ''";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "<font class='error'>".t("Suorituksen raha-tiliöinnit eivät löydy!")."</font>";
 			exit;
 		}
 

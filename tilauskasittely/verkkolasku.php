@@ -813,7 +813,7 @@
 									GROUP BY factoring.sopimusnumero, maksuehto.factoring";
 						$fres = mysql_query($query) or pupe_error($query);
 						$frow = mysql_fetch_array($fres);
-
+						
 						//Nordean viitenumero rakentuu hieman eri lailla ku normaalisti
 						if ($frow["sopimusnumero"] > 0 and $frow["factoring"] == 'NORDEA') {
 							$viite = $frow["sopimusnumero"]."0".sprintf('%08d', $lasno);
@@ -824,25 +824,48 @@
 						else {
 							$viite = $lasno;
 						}
-					
+						
+						// Tutkitaan k‰ytet‰‰nkˆ maksuehdon pankkiyhteystietoja
+						$query  = "	SELECT pankkiyhteystiedot.viite
+									FROM lasku
+									JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
+									JOIN pankkiyhteystiedot ON maksuehto.yhtio=pankkiyhteystiedot.yhtio and maksuehto.pankkiyhteystiedot = pankkiyhteystiedot.tunnus and pankkiyhteystiedot.viite = 'SE'
+									WHERE lasku.yhtio = '$kukarow[yhtio]'
+									and lasku.tunnus in ($tunnukset)";
+						$pankres = mysql_query($query) or pupe_error($query);
+						
+						$seviite = "";
+						
+						if(mysql_num_rows($pankres) > 0) {
+							$seviite = "SE";
+						}
+						
 						//	Onko k‰sinsyˆtetty viite?
 						$query = "SELECT kasinsyotetty_viite FROM laskun_lisatiedot WHERE yhtio='{$kukarow["yhtio"]}' and otunnus IN ($tunnukset) and kasinsyotetty_viite != ''";
 						$tarkres=mysql_query($query) or pupe_error($query);
 						if(mysql_num_rows($tarkres) == 1) {
 							$tarkrow=mysql_fetch_array($tarkres) or pupe_error($tarkres);
 							$viite=$tarkrow["kasinsyotetty_viite"];
-							require('inc/tarkistaviite.inc');
-						
-							//	Jos viitenumero on v‰‰rin menn‰‰n oletuksilla!
-							if($ok!=1) {
-								$viite=$lasno;
-								$tulos_ulos .= "<font class='message'><br>\n".t("HUOM!!! laskun '%s' k‰sinsyotetty viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", $kieli, $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
-								require('inc/generoiviite.inc');
+							if ($seviite != 'SE') {
+								require('inc/tarkistaviite.inc');
+
+								//	Jos viitenumero on v‰‰rin menn‰‰n oletuksilla!
+								if($ok!=1) {
+									$viite=$lasno;
+									$tulos_ulos .= "<font class='message'><br>\n".t("HUOM!!! laskun '%s' k‰sinsyotetty viitenumero '%s' on v‰‰rin! Laskulle annettii uusi viite '%s'", $kieli, $lasno, $tarkrow["kasinsyotetty_viite"], $viite)."!</font><br>\n<br>\n";
+									require('inc/generoiviite.inc');
+								}
 							}
-							unset($oviite);		
+							unset($oviite);
 						}
 						else {
-							require('inc/generoiviite.inc');
+							if ($seviite == 'SE') {
+								require('inc/generoiviite_se.inc');								
+							}
+							else {
+								require('inc/generoiviite.inc');								
+							}
+
 						}
 					
 						// p‰ivitet‰‰n ketjuun kuuluville laskuille sama laskunumero ja viite..

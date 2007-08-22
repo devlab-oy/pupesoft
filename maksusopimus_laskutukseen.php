@@ -298,25 +298,36 @@
 			$lahteva_lasku = ($aburow["laskutettu"] + 1)."/".$aburow["yhteensa"];
 
 			// varmistetaan että laskutus näyttäisi olevan OK!!
-			if($aburow["yhteensa"] - $aburow["laskutettu"] != 1) {
+			if($aburow["yhteensa"] - $aburow["laskutettu"] > 1) {
 				echo "<font class='error'>".t("VIRHE: Koitetaan loppulaskuttaa mutta positioita on jäljellä enemmän kuin yksi!")."</font><br><br>";
 				return 0;
 			}
 			
 			//	Tarkastetaan että meillä on ok maksuehto loppulaskutukseen!!!
-			$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$posrow[maksuehto]' and jaksotettu=''";
+			$apuqu = "	SELECT * 
+						from maksuehto 
+						where yhtio='$kukarow[yhtio]' and tunnus='$posrow[maksuehto]' and jaksotettu=''";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 			
-			if(mysql_num_rows($meapu)>0) {
+			if(mysql_num_rows($meapu) > 0) {
 				$meapurow = mysql_fetch_array($meapu);
+				
 				if($meapurow["erapvmkasin"] != "" and $posrow["erpcm"] == "0000-00-00") {
 					echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehdon eräpäivä puuttuu")."!!!</font><br><br>";
 					return 0;
 				}
 			}
 			else {
-				echo "<font class='error'>".t("VIRHE: Loppulaskun maksuehto ei voi olla tyyppi jaksotettu")."!!!</font><br><br>";
-				return 0;
+				$apuqu = "	SELECT erpcm
+							from lasku 
+							where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
+				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+				$meapurow = mysql_fetch_array($meapu);
+								
+				if($meapurow["erpcm"] == "0000-00-00") {
+					echo "<font class='error'>".t("VIRHE: Loppulaskun eräpäivä puuttuu")."!!!</font><br><br>";
+					return 0;
+				}
 			}
 
 
@@ -359,7 +370,7 @@
 			$query = "update maksupositio set uusiotunnus='$vikatunnus' where tunnus = '$posrow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if ($posrow["erpcm"] != "0000-00-00") {
+			if ($posrow["erpcm"] != "0000-00-00" and $posrow["erpcm"] != "") {
 				$erlisa = " erpcm = '$posrow[erpcm]',";
 			}
 			else {
@@ -478,7 +489,6 @@
 			echo "</tr>";
 
 			while($row = mysql_fetch_array($result)) {
-
 				// seuraava positio on tämä siis
 				$query = "	SELECT maksupositio.*, maksuehto.teksti
 							FROM maksupositio
@@ -524,7 +534,7 @@
 						</table>";
 
 				// loppulaskutetaan maksusopimus
-				if($row["yhteensa_kpl"] - $row["laskutettu_kpl"] == 1) {
+				if($row["yhteensa_kpl"] - $row["laskutettu_kpl"] <= 1) {
 					// tarkastetaan onko kaikki jo toimitettu ja tämä on good to go
 					$query = "	SELECT
 								sum(if(lasku.tila='L' and lasku.alatila IN ('J','X'),1,0)) tilaok,

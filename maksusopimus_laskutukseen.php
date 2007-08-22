@@ -438,12 +438,6 @@
 			$tee = "";
 		}
 
-		if ($tee == "sulje") {
-			echo "ei osata viel, sorry";
-			$tee = "";
-		}
-
-
 		if($tee == "") {
 
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
@@ -558,21 +552,6 @@
 								</form>";
 					}
 					echo "</tr>";
-				}
-				elseif($row["yhteensa_kpl"] - $row["laskutettu_kpl"] == 0) {
-					// suljetaan projektia
-					$msg = t("Oletko varma, että haluat sulkea projektin")." $row[tunnus]\\n";
-
-					echo "<td class='back'>
-							<form method='post' action='$PHP_SELF' onSubmit='return verify(\"$msg\");'>
-							<input type='hidden' name = 'toim' value='$toim'>
-							<input type='hidden' name = 'tunnus' value='$row[jaksotettu]'>
-							<input type='hidden' name = 'tee' value='sulje'>
-							<input type='submit' name = 'submit' value='".t("Sulje projekti")."'>
-							</form></td>";
-
-					echo "</tr>";
-
 				}
 				elseif($row["tekematta_kpl"] > 1) {
 					// muuten tämä on vain ennakkolaskutusta

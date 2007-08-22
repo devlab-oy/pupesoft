@@ -167,8 +167,8 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			default :
-				echo t("Miten t‰nne p‰‰sit!");
-				exit;
+				$pakolliset = array("TUNTEMATON_TAULU");
+				$kielletyt = array();
 		}
 
 		return array($pakolliset, $kielletyt, $wherelliset);

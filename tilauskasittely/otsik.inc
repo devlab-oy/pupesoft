@@ -628,9 +628,9 @@
 				echo t("Ei käytössä");
 			}
 			else {
-				echo "<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
-					<input type='text' name='erpcmkk' value='$erpcmkk' size='3'>
-					<input type='text' name='erpcmvv' value='$erpcmvv' size='6'>";
+				echo "	<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
+						<input type='text' name='erpcmkk' value='$erpcmkk' size='3'>
+						<input type='text' name='erpcmvv' value='$erpcmvv' size='6'>";
 			}
 			echo "</td>";
 
@@ -1852,7 +1852,7 @@
 		}
 
 		// jos kyseessä oli käsin syötetty eräpäivä ja maksuehto on väärin laitetaan oikea maksuehto... hakee järjestyksessä ekan
-		if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "") {
+		if ($erpcm_kasin == "KYLLA" and $meapurow["erapvmkasin"] == "" and $meapurow["jaksotettu"] == "") {
 			$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
 			$erpres = mysql_query($erpquery) or pupe_error($erpquery);
 			$erprow = mysql_fetch_array($erpres);

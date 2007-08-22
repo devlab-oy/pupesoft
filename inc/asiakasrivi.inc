@@ -168,7 +168,7 @@
 		}
 
 		$ulos .= "</td>";
-		$ulos.= "<td class='back'>".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/$kukarow[kieli]/vieshome.htm'>".t("t‰‰lt‰")."</td>";
+		$ulos.= "<td class='back'>".t("Voit tarkistaa ytunnuksen")." <a target='YTJ' href='http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome&selectedLanguage=".strtoupper($kukarow["kieli"])."'>".t("t‰‰lt‰")."</td>";
 		$jatko = 0;
 	}
 

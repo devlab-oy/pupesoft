@@ -125,7 +125,7 @@ if ($kukarow["extranet"] != '') {
 
 //katsotaan ett‰ kukarow kesken, $tilausnumero ja $kukarow[kesken] stemmaavat kesken‰‰n
 if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-	echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+	echo "<br><br><br>".t("2 VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
 	exit;
 }
 
@@ -965,7 +965,7 @@ if ($tee == '') {
 
 	//katsotaan ett‰ kukarow kesken ja $kukarow[kesken] stemmaavat kesken‰‰n
 	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-		echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+		echo "<br><br><br>".t("3 VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
 		exit;
 	}
 	if ($kukarow['kesken'] != '0') {

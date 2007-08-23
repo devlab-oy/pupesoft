@@ -13,7 +13,7 @@
 			$tilausnumero 		= 0;
 		}
 	}
-	
+
 	//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
 	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 		echo "<br><br><br>".t("VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
@@ -395,13 +395,14 @@
 					tila = 'O'";
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
+		$id = mysql_insert_id();
 
-		if ((int) $kukarow["kesken"] == 0) {
-			$id = mysql_insert_id();
-
+		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 			$query = "	UPDATE kuka
-						SET kesken='$id'
-						WHERE session = '$session'";
+						SET kesken = '$id'
+						WHERE yhtio = '$kukarow[yhtio]' AND
+						kuka = '$kukarow[kuka]' AND
+						session = '$session'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$kukarow["kesken"] = $id;
@@ -409,6 +410,6 @@
 		}
 
 		//menn‰‰n tilaukselle
-		$tee = "Y";		
+		$tee = "Y";
 	}
 ?>

@@ -1,8 +1,8 @@
 <?php
 
 if(!function_exists("luo_myyntitilausotsikko")) {
-	function luo_myyntitilausotsikko($asiakasid) {
-		global $kukarow, $yhtiorow, $toim, $session, $tilausnumero;
+	function luo_myyntitilausotsikko($asiakasid, $tilausnumero = '') {
+		global $kukarow, $yhtiorow, $toim, $session;
 	
 		$query	= "	SELECT * 
 					FROM asiakas 

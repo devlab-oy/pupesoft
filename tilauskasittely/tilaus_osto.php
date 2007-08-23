@@ -35,7 +35,11 @@
 			exit;
 		}
 		else {
-			$query = "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$query = "	UPDATE kuka 
+						SET kesken = '$tilausnumero' 
+						WHERE yhtio = '$kukarow[yhtio]' AND 
+						kuka = '$kukarow[kuka]' AND 
+						session = '$session'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$kukarow['kesken'] 	 = $tilausnumero;

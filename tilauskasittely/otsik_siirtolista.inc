@@ -105,8 +105,8 @@
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 		echo "<input type='hidden' name='tee' value='OTSIK'>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
-		echo "<input type='hidden' name='projektilla' value='$projektilla'>";		
-		echo "<input type='hidden' name='tunnusnippu' value='{$srow["tunnusnippu"]}'>";			
+		echo "<input type='hidden' name='projektilla' value='$projektilla'>";
+		echo "<input type='hidden' name='tunnusnippu' value='{$srow["tunnusnippu"]}'>";
 		echo "<input type='hidden' name='ylatila' value='$ylatila'>";
 		echo "<input type='hidden' name='alatila' value='$alatila'>";
 
@@ -226,7 +226,7 @@
 		elseif ($toim == "SIIRTOTYOMAARAYS") {
 			echo "<th>".t("Asennusprioriteetti")."</th><td>";
 		}
-		
+
 		//	Olisiko erikseen varastoluokkia?
 		$query = "	SELECT selite, selitetark
 					FROM avainsana
@@ -239,7 +239,7 @@
 						".avain('join','ASLUOKKA_')."
 						WHERE avainsana.yhtio = '$kukarow[yhtio]' and avainsana.laji = 'ASIAKASLUOKKA'
 						ORDER BY avainsana.jarjestys, avainsana.selite";
-			$tresult = mysql_query($query) or pupe_error($query);			
+			$tresult = mysql_query($query) or pupe_error($query);
 		}
 
 		echo "<select name='luokka'><option value=''>".t("Oletus")."</option>";
@@ -465,7 +465,7 @@
 					alatila 			= '$alatila',
 					varasto 			= '$varasto',
 					hyvaksynnanmuutos 	= '$luokka',
-					tunnusnippu			= '$tunnusnippu',					
+					tunnusnippu			= '$tunnusnippu',
 					toimitustapa		= '$toimitustapa'";
 
 		if ($toim == "VALMISTAVARASTOON") {
@@ -488,13 +488,14 @@
 
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
+		$id = mysql_insert_id();
 
-		if ($kukarow["kesken"] == 0) {
-			$id = mysql_insert_id();
-
+		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 			$query = "	UPDATE kuka
 						SET kesken = '$id'
-						WHERE yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+						WHERE yhtio = '$kukarow[yhtio]' AND
+						kuka = '$kukarow[kuka]' AND
+						session = '$session'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$kukarow["kesken"] = $id;

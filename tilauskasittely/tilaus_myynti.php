@@ -43,7 +43,11 @@ if ($tee == 'AKTIVOI') {
 		exit;
 	}
 	else {
-		$query = "update kuka set kesken='$tilausnumero' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+		$query = "	UPDATE kuka
+					SET kesken = '$tilausnumero'
+					WHERE yhtio = '$kukarow[yhtio]' AND
+					kuka = '$kukarow[kuka]' AND
+					session = '$session'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// Näin ostataan valita pikatilaus
@@ -245,7 +249,7 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 		require_once("luo_myyntitilausotsikko.inc");
 	}
 
-	$tilausnumero = luo_myyntitilausotsikko($asiakasid);
+	$tilausnumero = luo_myyntitilausotsikko($asiakasid, $tilausnumero);
 	$kukarow["kesken"] = $tilausnumero;
 	$kaytiin_otsikolla = "NOJOO!";
 }
@@ -266,8 +270,8 @@ if ((int) $kukarow["kesken"] != 0) {
 					from lasku
 					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	}
-	
-	
+
+
 	$result  	= mysql_query($query) or pupe_error($query);
 	$laskurow   = mysql_fetch_array($result);
 	if($yhtiorow["tilauksen_kohteet"] == "K") {
@@ -1294,7 +1298,7 @@ if ($tee == '') {
 
 	// jos asiakasnumero on annettu
 	if ($laskurow["liitostunnus"] > 0) {
-		
+
 		echo "<input type='hidden' name='pikaotsikko' value='TRUE'>";
 
 		echo "<tr>$jarjlisa";
@@ -1327,7 +1331,7 @@ if ($tee == '') {
 			else {
 				$extralisa = " and (extranet = '' or selite = '$laskurow[toimitustapa]') ";
 			}
-			
+
 			$query = "	SELECT tunnus, selite
 						FROM toimitustapa
 						WHERE yhtio = '$kukarow[yhtio]' $extralisa

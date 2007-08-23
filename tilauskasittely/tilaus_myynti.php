@@ -275,6 +275,11 @@ if ((int) $kukarow["kesken"] != 0) {
 
 	if (mysql_num_rows($result) == 0) {
 		echo "<br><br><br>".t("VIRHE: Tilaustasi ei löydy tai se on mitätöity")."!<br><br><br>";
+		$query = "	UPDATE kuka
+					SET kesken = 0
+					WHERE yhtio = '$kukarow[yhtio]' AND
+					kuka = '$kukarow[kuka]'";
+		$result = mysql_query($query) or pupe_error($query);
 		exit;
 	}
 

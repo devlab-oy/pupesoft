@@ -258,12 +258,10 @@ function lue_kurssit($file, $handle) {
 		// tämä valuutta on nyt päivitetty!
 		$valuutat[] = $valuutta;
 
-		echo "<font class='message'>Haettiin kurssi valuutalle $valuutta: $kurssi</font>";
-
 		if (mysql_affected_rows() != 0) {
-			echo "<font class='message'> ... Kurssi päivitetty.</font>";
+			echo "<font class='message'>Päivitettiin kurssi valuutalle $valuutta: ".round(1/$kurssi,6)."</font><br>";
 		}
-		echo "<br>";
+
 	}
 }
 

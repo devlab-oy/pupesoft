@@ -66,7 +66,7 @@
 		// Hateaan tilauksen tiedot
 		$query = "	SELECT *
 					FROM lasku
-					WHERE tunnus = '$kukarow[kesken]'";
+					WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]' and tila = 'O'";
 		$aresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($aresult) == 0) {

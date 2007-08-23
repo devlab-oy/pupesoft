@@ -263,16 +263,21 @@ if ((int) $kukarow["kesken"] != 0) {
 					where lasku.tunnus='$kukarow[kesken]'
 					and lasku.yhtio='$kukarow[yhtio]'
 					and tyomaarays.yhtio=lasku.yhtio
-					and tyomaarays.otunnus=lasku.tunnus";
+					and tyomaarays.otunnus=lasku.tunnus
+					and lasku.tila != 'D'";
 	}
 	else {
 		$query 	= "	select *
 					from lasku
-					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
+					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]' and tila != 'D'";
+	}
+	$result  	= mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) == 0) {
+		echo "<br><br><br>".t("VIRHE: Tilaustasi ei löydy tai se on mitätöity")."!<br><br><br>";
+		exit;
 	}
 
-
-	$result  	= mysql_query($query) or pupe_error($query);
 	$laskurow   = mysql_fetch_array($result);
 	if($yhtiorow["tilauksen_kohteet"] == "K") {
 		$query 	= "	select *

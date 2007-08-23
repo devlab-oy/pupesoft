@@ -502,7 +502,7 @@
 			$tilausnumero = $id;
 		}
 
-		if ($toim == "SIIRTOTYOMAARAYS") {
+		if ($toim == "SIIRTOTYOMAARAYS" and (int) $kukarow["kesken"] != 0) {
 			//otetaan kantaa pyörän malliin
 			if($merkki2 != 'eimenu'){
 				$merkki = $merkki2;

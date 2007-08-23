@@ -226,6 +226,7 @@
 function lue_kurssit($file, $handle) {
 	global $yhtiorow, $kukarow;
 
+	ini_set("auto_detect_line_endings", 1);
 	// luetaan koko file arrayhyn
 	$rivit = file($file);
 
@@ -233,28 +234,24 @@ function lue_kurssit($file, $handle) {
 	array_shift($rivit);
 	array_shift($rivit);
 
-	$datetime = date('Y-m-d H:i:s');
-
 	$valuutat = array();
 	foreach ($rivit as $rivi) {
 		// valuutan nimi
 		$valuutta = substr($rivi, 0, 3);
+		$datetime = date('Y-m-d H:i:s');
 
 		if (in_array($valuutta, $valuutat)) {
 			continue;
 		}
 
 		// itse kurssi
-		$kurssi = (float) str_replace(',', '.', trim(substr($rivi, 5, 15)));
-
-		// suhde euroon
-		$kurssi = round(1 / $kurssi, 6);
+		$kurssi = (float) str_replace(array(',', ' '), array('.',''), trim(substr($rivi, 5, 15)));
 
 		$query = "	UPDATE valuu SET 
-					kurssi = '$kurssi', 
+					kurssi = round(1 / $kurssi, 6), 
 					muutospvm = '$datetime', 
 					muuttaja = '{$kukarow['kuka']}'
-					WHERE yhtio = '{$kukarow['yhtio']}' and 
+					WHERE yhtio = '{$kukarow['yhtio']}' AND 
 					nimi = '$valuutta'";
 		$result = mysql_query($query) or pupe_error($query);
 

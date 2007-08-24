@@ -735,7 +735,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 	echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
-	$query = "	SELECT distinct avainsana.selite, group_concat(".avain('select')." SEPARATOR ' / ') selitetark
+	$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
 				FROM avainsana
 				".avain('join','OSASTO_')."
 				WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji='OSASTO'
@@ -759,7 +759,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 			<tr><th>".t("Tuoteryhm‰")."</th><td colspan='3'>";
 
 	//Tehd‰‰n osasto & tuoteryhm‰ pop-upit
-	$query = "	SELECT distinct avainsana.selite, group_concat(".avain('select')." SEPARATOR ' / ') selitetark
+	$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
 				FROM avainsana
 				".avain('join','TRY_')."
 				WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji = 'TRY'

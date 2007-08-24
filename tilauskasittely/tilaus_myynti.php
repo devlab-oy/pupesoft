@@ -16,6 +16,44 @@ else {
 	require ("alvpopup.inc");
 }
 
+// Vaihdetaan tietyn projektin toiseen toimitukseen
+//	HUOM! tämä käyttää aktivointia joten tämä on oltava aika alussa!! (valinta on onchage submit rivisyötössä joten noita muita paremetreja ei oikein voi passata eteenpäin..)
+if ((int) $valitsetoimitus > 0) {
+	
+	$tee = "AKTIVOI";
+	$tilausnumero = $valitsetoimitus;
+	$from = "VALITSETOIMITUS";
+
+	$query = "select tila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
+	$result = mysql_query($query) or pupe_error($query);
+	$toimrow = mysql_fetch_array($result);
+
+	if ($toimrow["tila"] == "L" or $toimrow["tila"] == "N") {
+		$toim = "RIVISYOTTO";
+	}
+	elseif ($toimrow["tila"] == "T") {
+		$toim = "TARJOUS";
+	}
+	elseif ($toimrow["tila"] == "A") {
+		$toim = "TYOMAARAYS";
+	}
+	elseif ($toimrow["tila"] == "C") {
+		$toim = "REKLAMAATIO";
+	}
+	elseif ($toimrow["tila"] == "V") {
+		$toim = "VALMISTAASIAKKAALLE";
+	}
+	elseif ($toimrow["tila"] == "W") {
+		$toim = "VALMISTAVARASTOON";
+	}
+	elseif ($toimrow["tila"] == "R") {
+		$toim = "PROJEKTI";
+	}
+}
+elseif(in_array($valitsetoimitus, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
+	$uusitoimitus = $valitsetoimitus;
+}
+
 if (($kukarow["extranet"] != '' and $toim != 'EXTRANET') or ($kukarow["extranet"] == "" and $toim == "EXTRANET")) {
 	//aika jännä homma jos tänne jouduttiin
 	exit;
@@ -131,42 +169,6 @@ if ($kukarow["extranet"] != '') {
 if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 	echo "<br><br><br>".t("2 VIRHE: Sinulla on useita tilauksia auki")."! ".t("Käy aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
 	exit;
-}
-
-// Vaihdetaan tietyn projektin toiseen toimitukseen
-if ((int) $valitsetoimitus > 0) {
-	$tee = "AKTIVOI";
-	$tilausnumero = $valitsetoimitus;
-	$from = "VALITSETOIMITUS";
-
-	$query = "select tila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
-	$result = mysql_query($query) or pupe_error($query);
-	$toimrow = mysql_fetch_array($result);
-
-	if ($toimrow["tila"] == "L" or $toimrow["tila"] == "N") {
-		$toim = "RIVISYOTTO";
-	}
-	elseif ($toimrow["tila"] == "T") {
-		$toim = "TARJOUS";
-	}
-	elseif ($toimrow["tila"] == "A") {
-		$toim = "TYOMAARAYS";
-	}
-	elseif ($toimrow["tila"] == "C") {
-		$toim = "REKLAMAATIO";
-	}
-	elseif ($toimrow["tila"] == "V") {
-		$toim = "VALMISTAASIAKKAALLE";
-	}
-	elseif ($toimrow["tila"] == "W") {
-		$toim = "VALMISTAVARASTOON";
-	}
-	elseif ($toimrow["tila"] == "R") {
-		$toim = "PROJEKTI";
-	}
-}
-elseif(in_array($valitsetoimitus, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","VALMISTAVARASTOON","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
-	$uusitoimitus = $valitsetoimitus;
 }
 
 //jos jostain tullaan ilman $toim-muuttujaa

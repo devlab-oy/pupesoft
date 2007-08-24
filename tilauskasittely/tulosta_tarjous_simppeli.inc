@@ -161,14 +161,14 @@ if (!function_exists('tulosta_tarjous')) {
 		foreach(array("Tuotteet","Palvelut","Alennukset","Ylläpito", "Optio") as $key) {
 			
 			$query = "";
-			if($key == "Tuotteet") {
+			if($key == "Alennukset"){
+				$query = "$q $w and tilkpl < 0";
+			}			
+			elseif($key == "Tuotteet") {
 				$query = "$q $w and (tuote.ei_saldoa = '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Tuotteet')";
 			}
 			elseif($key == "Palvelut"){
 				$query = "$q $w and (tuote.ei_saldoa != '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Palvelut')";
-			}
-			elseif($key == "Alennukset"){
-				$query = "$q $w and tilkpl < 0 and (tilausrivin_lisatiedot.positio != 'Optio' and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Alennukset')";
 			}
 			elseif($key == "Ylläpito"){
 				$query = "$q $w and tilausrivin_lisatiedot.positio = 'Ylläpito'";

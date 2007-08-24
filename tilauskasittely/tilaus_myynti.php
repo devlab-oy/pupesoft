@@ -19,7 +19,7 @@ else {
 // Vaihdetaan tietyn projektin toiseen toimitukseen
 //	HUOM! tämä käyttää aktivointia joten tämä on oltava aika alussa!! (valinta on onchage submit rivisyötössä joten noita muita paremetreja ei oikein voi passata eteenpäin..)
 if ((int) $valitsetoimitus > 0) {
-	
+
 	$tee = "AKTIVOI";
 	$tilausnumero = $valitsetoimitus;
 	$from = "VALITSETOIMITUS";
@@ -147,7 +147,7 @@ if ($kukarow["extranet"] != '') {
 	// Haetaan asiakkaan tunnuksella
 	$query  = "	SELECT *
 				FROM asiakas
-				WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+				WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 1) {
@@ -156,7 +156,22 @@ if ($kukarow["extranet"] != '') {
 		$asiakasid 	= $extra_asiakas["tunnus"];
 
 		if ($kukarow["kesken"] != 0) {
-			$tilausnumero = $kukarow["kesken"];
+			// varmistetaan, että tilaus on oikeasti kesken ja tälle asiakkaalle
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]' AND
+						tunnus = '$kukarow[kesken]' AND
+						liitostunnus = '$asiakasid' AND
+						tila = 'N'";
+			$result = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($result) == 1) {
+				$tilausnumero = $kukarow["kesken"];
+			}
+			else {
+				$tilausnumero = "";
+				$kukarow["kesken"] = "";
+			}
 		}
 	}
 	else {
@@ -260,18 +275,18 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 if ((int) $kukarow["kesken"] != 0) {
 
 	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO")) {
-		$query  = "	select *
-					from lasku, tyomaarays
-					where lasku.tunnus='$kukarow[kesken]'
-					and lasku.yhtio='$kukarow[yhtio]'
-					and tyomaarays.yhtio=lasku.yhtio
-					and tyomaarays.otunnus=lasku.tunnus
-					and lasku.tila != 'D'";
+		$query  = "	SELECT *
+					FROM lasku, tyomaarays
+					WHERE lasku.tunnus='$kukarow[kesken]'
+					AND lasku.yhtio='$kukarow[yhtio]'
+					AND tyomaarays.yhtio=lasku.yhtio
+					AND tyomaarays.otunnus=lasku.tunnus
+					AND lasku.tila != 'D'";
 	}
 	else {
-		$query 	= "	select *
-					from lasku
-					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]' and tila != 'D'";
+		$query 	= "	SELECT *
+					FROM lasku
+					WHERE tunnus='$kukarow[kesken]' AND yhtio='$kukarow[yhtio]' AND tila != 'D' AND alatila != 'X'";
 	}
 	$result  	= mysql_query($query) or pupe_error($query);
 
@@ -285,7 +300,7 @@ if ((int) $kukarow["kesken"] != 0) {
 		exit;
 	}
 
-	$laskurow   = mysql_fetch_array($result);
+	$laskurow = mysql_fetch_array($result);
 	if($yhtiorow["tilauksen_kohteet"] == "K") {
 		$query 	= "	select *
 					from laskun_lisatiedot

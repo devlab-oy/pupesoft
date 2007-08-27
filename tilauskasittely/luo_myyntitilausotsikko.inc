@@ -1,18 +1,18 @@
 <?php
 
 if(!function_exists("luo_myyntitilausotsikko")) {
-	function luo_myyntitilausotsikko($asiakasid, $tilausnumero = '') {
+	function luo_myyntitilausotsikko($asiakasid, $tilausnumero = '', $myyjanro = '') {
 		global $kukarow, $yhtiorow, $toim, $session;
-	
-		$query	= "	SELECT * 
-					FROM asiakas 
+
+		$query	= "	SELECT *
+					FROM asiakas
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus  = '$asiakasid'";
 		$result = mysql_query($query) or pupe_error($query);
-		
-		if (mysql_num_rows($result) == 1) {		
+
+		if (mysql_num_rows($result) == 1) {
 			$asiakasrow  = mysql_fetch_array($result);
-			
+
 			$ytunnus 							= $asiakasrow["ytunnus"];
 			$nimi 			   	   	   			= $asiakasrow["nimi"];
 			$nimitark 		   	   	   			= $asiakasrow["nimitark"];
@@ -67,11 +67,33 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$apuro = mysql_fetch_array($meapu);
 			$maksaja = $apuro['merahti'];
 
-			if ($kukarow["myyja"] == 0) {
-				$myyja = $kukarow["tunnus"];
+			if ($myyjanro != "") {
+				$apuqu = "	select *
+							from kuka use index (yhtio_myyja)
+							where yhtio='$kukarow[yhtio]' and myyja='$myyjanro'";
+				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+
+				if (mysql_num_rows($meapu)==1) {
+					$apuro = mysql_fetch_array($meapu);
+					$myyja = $apuro['tunnus'];
+				}
+				elseif (mysql_num_rows($meapu)>1) {
+					echo "<font class='error'>".t("Syöttämäsi myyjänumero")." $myyjanro ".t("löytyi usealla käyttäjällä")."!</font><br><br>";
+					$myyjanro = "";
+				}
+				else {
+					echo "<font class='error'>".t("Syöttämäsi myyjänumero")." $myyjanro ".t("ei löytynyt")."!</font><br><br>";
+					$myyjanro = "";
+				}
 			}
-			else {
-				$myyja = $kukarow["myyja"];
+
+			if ($myyjanro == "") {
+				if ($kukarow["myyja"] == 0) {
+					$myyja = $kukarow["tunnus"];
+				}
+				else {
+					$myyja = $kukarow["myyja"];
+				}
 			}
 
 			$alv 				= $asiakasrow["alv"];
@@ -192,7 +214,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 		$override_ytunnus_check = "YES";
 
 		require ("otsik.inc");
-		
+
 		return $tilausnumero;
 	}
 }

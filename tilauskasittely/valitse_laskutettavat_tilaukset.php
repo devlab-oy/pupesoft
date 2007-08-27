@@ -530,6 +530,7 @@
 		$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
 					lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maksuehto,
+					lasku.tila, lasku.alatila,
 					maksuehto.teksti meh,
 					maksuehto.kassa_teksti mehka,
 					group_concat(distinct lasku.tunnus) tunnukset,
@@ -558,12 +559,19 @@
 
 		if (mysql_num_rows($tilre) > 0) {
 			echo "<table>";
-			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivej‰")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th></tr>";
+			echo "<tr><th>".t("Tilaukset")."</th><th>".t("Asiakas")."</th><th>".t("Ytunnus")."</th><th>".t("Tilauksia")."</th><th>".t("Rivej‰")."</th><th>".t("Arvo")."</th><th>".t("Maksuehto")."</th><th>".t("Tyyppi")."</th></tr>";
 
 			$arvoyhteensa = 0;
 			$tilauksiayhteensa = 0;
 
 			while ($tilrow = mysql_fetch_array($tilre)) {
+				
+				$laskutyyppi	= $tilrow["tila"];
+				$alatila		= $tilrow["alatila"];
+
+				//tehd‰‰n selv‰kielinen tila/alatila
+				require "../inc/laskutyyppi.inc";
+				
 				echo "	<tr class='aktiivi'>
 						<td valign='top'>$tilrow[tunnukset_ruudulle]</td>
 						<td valign='top'>$tilrow[ytunnus]</td>
@@ -571,7 +579,8 @@
 						<td valign='top'>$tilrow[tilauksia]</td>
 						<td valign='top'>$tilrow[riveja]</td>
 						<td valign='top' align='right'>$tilrow[arvo]</td>
-						<td valign='top'>$tilrow[mehka] $tilrow[meh]</td>";
+						<td valign='top'>$tilrow[mehka] $tilrow[meh]</td>
+						<td valign='top'>".t($laskutyyppi)." ".t($alatila)."</td>";
 
 				echo "	<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='tee' value='VALITSE'>

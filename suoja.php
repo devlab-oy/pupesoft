@@ -34,7 +34,7 @@
 				list ($nimi, $alanimi, $sov) = split("#", $rastit);
 
 				//haetaan menu itemi
-				$query = "	SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2
+				$query = "	SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
 							FROM oikeu
 							WHERE kuka='' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -51,6 +51,7 @@
 							nimitys		= '$trow[nimitys]', 
 							jarjestys 	= '$trow[jarjestys]',
 							jarjestys2	= '$trow[jarjestys2]',
+							hidden		= '$trow[hidden]',
 							yhtio		= '$kukarow[yhtio]'";
 
 				$result = mysql_query($query) or pupe_error($query);

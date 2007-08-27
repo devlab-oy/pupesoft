@@ -9,7 +9,10 @@ $uusi2    = $_POST['uusi2'];
 
 require ("functions.inc");
 
-if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
+if (file_exists(basename($_SERVER["SCRIPT_URI"]))) $go = basename($_SERVER["SCRIPT_URI"]);
+
+//kayttaja on syottanyt tietonsa login formiin
+if ($user != '') {
 
 	$login    = "yes";
 	$extranet = 1;
@@ -59,7 +62,7 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 
 				$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
 				
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2'>";
+				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=$go'>";
 				exit;
 			}
 		}
@@ -104,7 +107,7 @@ echo "
 
 ";
 
-if ($usea=='1') {
+if ($usea == '1') {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio
 				FROM kuka, yhtio
 				WHERE kuka='$user' and yhtio.yhtio=kuka.yhtio";
@@ -127,8 +130,9 @@ if ($usea=='1') {
 			echo "<td><font class='menu'>$yrow[$i]</font></td>";
 		}
 		echo "<form action = 'login_extranet.php' method='post'>";
+		echo "<input type='hidden' name='go'       value='$go'>";
 		echo "<input type='hidden' name='user'     value='$user'>";
-		echo "<input type='hidden' name='salamd5' value='$vertaa'>";
+		echo "<input type='hidden' name='salamd5'  value='$vertaa'>";
 		echo "<input type='hidden' name='yhtio'    value='$yrow[yhtio]'>";
 		echo "<td><input type='submit' value='".t("Valitse")."'></td></tr></form>";
 	}
@@ -141,7 +145,7 @@ else {
 	echo "
 			<table class='login'>
 				<form name='login' target='_top' action='index.php' method='post'>
-
+				<input type='hidden' name='go' value='$go'>
 				<tr><td><font class='menu'>".t("Käyttäjätunnus",$browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
 				<tr><td><font class='menu'>".t("Salasana",$browkieli).":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
 			</table>

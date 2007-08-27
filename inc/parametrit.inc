@@ -76,7 +76,6 @@ else {
 if(!isset($login))		$login = "";
 if(!isset($extranet)) 	$extranet = "";
 
-
 // jos saamme n‰m‰ muuttujat getiss‰, kokeillaan logata niill‰ sis‰‰n
 if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
 
@@ -130,12 +129,12 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 }
 // jos sessionia ei ole ja ei olla loginissa, menn‰‰n login ruutuun ja exit...
-elseif ($session == '' and $login != 'yes' and $extranet == '') {
+elseif ($session == '' and $login != 'yes' and $extranet == '' and file_exists("login.php")) {
 	require("login.php");
 	exit;
 }
 // jos sessionia ei ole ja ei olla extranet loginissa, menn‰‰n extranet login ruutuun ja exit...
-elseif ($session == '' and $login != 'yes' and $extranet == 1) {
+elseif ($session == '' and $login != 'yes') {
 	require("login_extranet.php");
 	exit;
 }

@@ -71,7 +71,7 @@ if ($apienin == 99999999 and $lsuurin == 0) {
 $apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
 $lpvm = substr($lsuurin,0,4)."-".substr($lsuurin,4,2)."-".substr($lsuurin,6,2);
 
-if (isset($tuoteno)) {
+if (isset($tuoteno) and $tuoteno != '') {
 	require 'inc/tuotehaku.inc';
 	
 	if (empty($trow)) {

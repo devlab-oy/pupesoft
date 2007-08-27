@@ -151,7 +151,9 @@
 				$errori = 1;
 			}
 
-			require "inc/".$toim."tarkista.inc";
+			if (isset($t[$i])) {
+				require "inc/".$toim."tarkista.inc";
+			}
 		}
 
 		if ($errori != '') {

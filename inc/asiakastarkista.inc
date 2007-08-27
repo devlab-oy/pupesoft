@@ -96,14 +96,14 @@
 	if (mysql_field_name($result, $i) == "maa") {
 
 		if (strtoupper($t[$i]) == 'FI') {
-			require ("tarkistaytunnus.inc");
+			// require ("tarkistaytunnus.inc");
 
 			if ($ok == 0) {
 				//$virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
 				//$errori = 1;
 			}
 			else {
-				$t[$ytunnus_tunnus] = $ytunnus;
+				// $t[$ytunnus_tunnus] = $ytunnus;
 			}
 		}
 		elseif ($yhtiorow["maa"] == 'FI' and strtoupper($t[$i]) == 'SE' and strtoupper(substr($t[$ytunnus_tunnus], 0, 2)) != "SE") {

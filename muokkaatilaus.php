@@ -721,9 +721,9 @@
 		$miinus = 3;
 	}
 	elseif ($toim == 'YLLAPITO') {
-		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, kuka2.nimi laatija, kuka.nimi myyjä, lasku.alatila, lasku.tila, tunnusnippu
+		$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, if(kuka1.kuka != kuka2.kuka, concat_ws(' / ', kuka1.nimi, kuka2.nimi), kuka1.nimi) laatija, lasku.alatila, lasku.tila, tunnusnippu
 					FROM lasku use index (tila_index)
-					LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja)
+					LEFT JOIN kuka as kuka1 ON (kuka1.yhtio=lasku.yhtio and kuka1.tunnus=lasku.myyja)
 					LEFT JOIN kuka as kuka2 ON (kuka2.yhtio=lasku.yhtio and kuka2.kuka=lasku.laatija)
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = '0' and alatila NOT IN ('D')
 					$haku

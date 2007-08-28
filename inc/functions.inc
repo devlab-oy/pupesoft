@@ -1946,4 +1946,39 @@ if(!function_exists("sarjanumeron_ostohinta")) {
 	}	
 }
 
+if(!function_exists("remove_duplicates")) {
+	function remove_duplicates($table, $yhtio) {
+
+		$query  = "describe $table";
+		$fieldresult = mysql_query($query) or pupe_error($query);
+
+		$group = "";
+		
+		while ($fields = mysql_fetch_array($fieldresult)) {						
+			if ($fields[0] != "tunnus" and 
+				$fields[0] != "laatija"	and
+				$fields[0] != "luontiaika" and
+				$fields[0] != "muutospvm" and
+				$fields[0] != "muuttaja") {
+				
+				$group .= $fields[0].",";
+			}
+		}
+		
+		$group = substr($group, 0, -1);
+		
+		$query = "	SELECT $group, count(*) countkpltahti, group_concat(tunnus) tunnukset
+					FROM $table
+					WHERE yhtio = '$yhtio'
+					GROUP BY $group
+					HAVING countkpltahti > 1";
+		$result = mysql_query($query) or pupe_error($query);
+
+		while ($row = mysql_fetch_array($result)) {
+			$query = "DELETE FROM $table WHERE yhtio = '$yhtio' and tunnus in ($row[tunnukset]) LIMIT ".($row["countkpltahti"]-1);
+			$delresult = mysql_query($query) or pupe_error($query);			
+		}
+	}	
+}
+
 ?>

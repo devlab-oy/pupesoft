@@ -37,13 +37,14 @@ if ($tee == 'eposti') {
 
 	require('pdflib/phppdflib.class.php');
 
-	// defaultteja
-	$sivu = 1;
-
 	function alku () {
-		global $yhtiorow, $firstpage, $pdf, $sivu, $rectparam, $norm, $norm_bold, $pieni, $ytunnus, $kukarow, $kala, $tid, $otsikkotid;
+		global $yhtiorow, $firstpage, $pdf, $rectparam, $norm, $norm_bold, $pieni, $ytunnus, $kukarow, $kala, $tid, $otsikkotid;
+
+		static $sivu;
+		$sivu++;
 		
-		if(!isset($pdf)) {
+		if(!isset($pdf)) {			
+			
 			//PDF parametrit
 			$pdf = new pdffile;
 			$pdf->enable('template');	
@@ -77,7 +78,6 @@ if ($tee == 'eposti') {
 			$pdf->template->rectangle($tid, 20, 20,  0, 580, $rectparam);
 			$pdf->template->text($tid, 30,  5, $yhtiorow["nimi"], $pieni);
 			$pdf->template->text($tid, 170, 5, "$assrow[nimi] $assrow[nimitark] ($ytunnus) ".t("alennustaulukko"));
-			$pdf->template->text($tid, 500, 5, t("Sivu").": $sivu", $pieni);
 			$pdf->template->place($tid, $firstpage, 0, 800);
 			
 			//	Tehdään otsikkoheader
@@ -103,17 +103,19 @@ if ($tee == 'eposti') {
 			//	Liitetään vaan valmiit templatet uudelle sivulle
 			$firstpage = $pdf->new_page("a4");
 			$pdf->template->place($tid, $firstpage, 0, 800);
-			$pdf->template->place($otsikkotid, $firstpage, 0, 760);
+			$pdf->template->place($otsikkotid, $firstpage, 0, 760);			
 		}
+		
+		$pdf->draw_text(520, 805, t("Sivu").": $sivu", $firstpage, $norm);
+		
 	}
 
 	function rivi ($firstpage, $osasto, $try, $tuote, $ryhma, $ale) {
-		global $pdf, $kala, $sivu, $rectparam, $norm, $norm_bold, $pieni;
+		global $pdf, $kala, $rectparam, $norm, $norm_bold, $pieni;
 		
 		static $edosasto;
 
-		if ($kala < 40) {
-			$sivu++;
+		if ($kala < 80) {
 			$firstpage = alku();
 			$kala = 760;
 		}

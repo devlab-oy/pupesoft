@@ -461,32 +461,41 @@ if (!function_exists('rivi_original')) {
 			}
 		}
 		
-		//Tuoteno
-		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,22),					$thispage, $norm);
-
-		//Nimitys
-		$pdf->draw_text(190, $kala, $row["tuoteno"], 								$thispage, $norm);
-
-		//Määrä
-		$pdf->draw_text(340, $kala, $row["kpl"], 									$thispage, $norm);
-
-		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
-		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$pdf->draw_text(390, $kala, sprintf('%.2f', laskuval($row["hinta"], $laskurow["vienti_kurssi"])),	$thispage, $norm);
+		$query = "	SELECT vienti_kurssi 
+					FROM lasku 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tunnus 	= '$row[otunnus]'";
+		$valres = mysql_query($query) or pupe_error($query);
+		$valrow = mysql_fetch_array($valres);
+		
+		if ($valrow["vienti_kurssi"] > 0) {
+			$kurssi = $valrow["vienti_kurssi"];
 		}
 		else {
-			$pdf->draw_text(390, $kala, $row["hinta"], 								$thispage, $norm);
+			$kurssi = 1;
 		}
+		
+		//Tuoteno
+		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,22),						$thispage, $norm);
+
+		//Nimitys
+		$pdf->draw_text(190, $kala, $row["tuoteno"], 									$thispage, $norm);
+
+		//Määrä
+		$pdf->draw_text(340, $kala, $row["kpl"], 										$thispage, $norm);
+
+		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
+		$pdf->draw_text(390, $kala, sprintf('%.2f', laskuval($row["hinta"], $kurssi)),	$thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
-			$pdf->draw_text(450, $kala, ($row["ale"]*1),							$thispage, $norm);
+			$pdf->draw_text(450, $kala, ($row["ale"]*1),								$thispage, $norm);
 		}
 	
 		//Rivihinta valuutassa
-		if ($toim != "PROFORMA" and $laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+		if ($toim != "PROFORMA" and $kurssi != 1) {
 			// Tän rivin alviton rivihinta
-			$row["rivihinta"] = laskuval($row["hinta"], $laskurow["vienti_kurssi"])*$row["kpl"]*(1-$row["ale"]/100);
+			$row["rivihinta"] = laskuval($row["hinta"], $kurssi)*$row["kpl"]*(1-$row["ale"]/100);
 
 			if ($yhtiorow["alv_kasittely"] == '') {
 				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
@@ -495,21 +504,21 @@ if (!function_exists('rivi_original')) {
 
 		//Rivihinta
 		$oikpos = $pdf->strlen(sprintf('%.2f', $row["rivihinta"]), $norm);
-		$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $row["rivihinta"]), 			$thispage, $norm);
+		$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $row["rivihinta"]), 		$thispage, $norm);
 		
 		//Arvonlisävero
 		if ($row["alv"] >= 500) {
-			$pdf->draw_text(550, $kala, t("M.V."),	 								$thispage, $norm);
+			$pdf->draw_text(550, $kala, t("M.V."),	 									$thispage, $norm);
 		}
 		else {
-			$pdf->draw_text(550, $kala, ($row["alv"]*1)."%",						$thispage, $norm);
+			$pdf->draw_text(550, $kala, ($row["alv"]*1)."%",							$thispage, $norm);
 		}
 
 		// Ensimmäinen rivi piirretty
 		$kala = $kala - 10;
 
 		//Yksikkö
-		$pdf->draw_text(340, $kala, $row["yksikko"],								$thispage, $pieni);
+		$pdf->draw_text(340, $kala, $row["yksikko"],									$thispage, $pieni);
 
 		//Toimitusaika
 		if (substr($row["toimitettuaika"],0,10) != "0000-00-00") {
@@ -631,22 +640,30 @@ if (!function_exists('rivi_plain')) {
 				$row['nimitys'] = $nimrow['selite'];
 			}
 		}
-
-		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,27),	$thispage, $norm);
-		$pdf->draw_text(210, $kala, $row["tuoteno"], 	$thispage, $norm);
 		
-		$oikpos = $pdf->strlen($row["kpl"], $norm);
-		$pdf->draw_text(380-$oikpos, $kala, $row["kpl"], 			$thispage, $norm);
-		
-		
-		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
-		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$pdf->draw_text(410, $kala, sprintf('%.2f', laskuval($row["hinta"], $laskurow["vienti_kurssi"])),	$thispage, $norm);
+		$query = "	SELECT vienti_kurssi 
+					FROM lasku 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tunnus 	= '$row[otunnus]'";
+		$valres = mysql_query($query) or pupe_error($query);
+		$valrow = mysql_fetch_array($valres);
+        
+		if ($valrow["vienti_kurssi"] > 0) {
+			$kurssi = $valrow["vienti_kurssi"];
 		}
 		else {
-			$oikpos = $pdf->strlen(sprintf('%.2f', $row["hinta"]), $norm);
-			$pdf->draw_text(455-$oikpos, $kala, sprintf('%.2f', $row["hinta"]), 			$thispage, $norm);
+			$kurssi = 1;
 		}
+
+		$pdf->draw_text(35,  $kala, substr($row["nimitys"],0,27),											$thispage, $norm);
+		$pdf->draw_text(210, $kala, $row["tuoteno"], 														$thispage, $norm);
+		
+		$oikpos = $pdf->strlen($row["kpl"], $norm);
+		$pdf->draw_text(380-$oikpos, $kala, $row["kpl"], 													$thispage, $norm);
+		
+		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
+		$oikpos = $pdf->strlen(sprintf('%.2f', laskuval($row["hinta"], $kurssi)), $norm);
+		$pdf->draw_text(455-$oikpos, $kala, sprintf('%.2f', laskuval($row["hinta"], $kurssi)),	$thispage, $norm);	
 		
 		//Alennus
 		if ($row["ale"] != 0) {			
@@ -655,9 +672,9 @@ if (!function_exists('rivi_plain')) {
 		}
 		
 		//Rivihinta valuutassa
-		if ($toim != "PROFORMA" and $laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+		if ($toim != "PROFORMA" and $kurssi != 1) {
 			// Tän rivin alviton rivihinta
-			$row["rivihinta"] = laskuval($row["hinta"], $laskurow["vienti_kurssi"])*$row["kpl"]*(1-$row["ale"]/100);
+			$row["rivihinta"] = laskuval($row["hinta"], $kurssi)*$row["kpl"]*(1-$row["ale"]/100);
 
 			if ($yhtiorow["alv_kasittely"] == '') {
 				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
@@ -708,6 +725,20 @@ if (!function_exists('rivi_plain_2')) {
 			}
 		}
 		
+		$query = "	SELECT vienti_kurssi 
+					FROM lasku 
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tunnus 	= '$row[otunnus]'";
+		$valres = mysql_query($query) or pupe_error($query);
+		$valrow = mysql_fetch_array($valres);
+        
+		if ($valrow["vienti_kurssi"] > 0) {
+			$kurssi = $valrow["vienti_kurssi"];
+		}
+		else {
+			$kurssi = 1;
+		}
+		
 		// rivitetään tuotenimitys
 		// jos pidempi kuin 34 merkkiä niin tehdään pidempi kommenttirivi
 		// ja rivitetään
@@ -736,14 +767,10 @@ if (!function_exists('rivi_plain_2')) {
 		$pdf->draw_text(380-$oikpos, $kala, $row["kpl"], 			$thispage, $norm);
 		
 		
-		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
-		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$pdf->draw_text(410, $kala, sprintf('%.2f', laskuval($row["hinta"], $laskurow["vienti_kurssi"])),	$thispage, $norm);
-		}
-		else {
-			$oikpos = $pdf->strlen(sprintf('%.2f', $row["hinta"]), $norm);
-			$pdf->draw_text(455-$oikpos, $kala, sprintf('%.2f', $row["hinta"]), 			$thispage, $norm);
-		}
+		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)		
+		$oikpos = $pdf->strlen(sprintf('%.2f', laskuval($row["hinta"], $kurssi)), $norm);
+		$pdf->draw_text(455-$oikpos, $kala, sprintf('%.2f', laskuval($row["hinta"], $kurssi)), 			$thispage, $norm);
+		
 		
 		//Alennus
 		if ($row["ale"] != 0) {			
@@ -752,9 +779,9 @@ if (!function_exists('rivi_plain_2')) {
 		}
 		
 		//Rivihinta valuutassa
-		if ($toim != "PROFORMA" and $laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+		if ($toim != "PROFORMA" and $kurssi != 1) {
 			// Tän rivin alviton rivihinta
-			$row["rivihinta"] = laskuval($row["hinta"], $laskurow["vienti_kurssi"])*$row["kpl"]*(1-$row["ale"]/100);
+			$row["rivihinta"] = laskuval($row["hinta"], $kurssi)*$row["kpl"]*(1-$row["ale"]/100);
 
 			if ($yhtiorow["alv_kasittely"] == '') {
 				$row["rivihinta"] = $row["rivihinta"] / (1+$row["alv"]/100);
@@ -1178,44 +1205,46 @@ if (!function_exists('alvierittely')) {
 		$alvquery = "	SELECT distinct alv
 						FROM tilausrivi
 						WHERE $where 
-						and yhtio='$kukarow[yhtio]'
-						and tyyppi='L'
+						and yhtio	= '$kukarow[yhtio]'
+						and tyyppi	= 'L'
 						ORDER BY alv";
 		$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 		$kala -= 10;
 
 		while ($alvrow = mysql_fetch_array($alvresult)) {
+			
 			// Valuuttajutut kuntoon
-			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-				$rivihinta_q 	= "(rivihinta/$laskurow[vienti_kurssi])";
-				$hinta_q 		= "(hinta/$laskurow[vienti_kurssi])";
-			}
-			else {
-				$rivihinta_q 	= "rivihinta";
-				$hinta_q 		= "hinta";
-			}
-
 			if ($alvrow["alv"] >= 500 and $toim != 'PROFORMA') {
-				$aquery = "	SELECT sum(0) alvrivihinta, sum($rivihinta_q) rivihinta
+				$aquery = "	SELECT 
+							round(sum(0),2) alvrivihinta, 
+							round(sum(tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta
 							FROM tilausrivi
-							WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
+							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus 
+							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
 			}
 			elseif ($alvrow["alv"] >= 500) {
-				$aquery = "	SELECT round(0) alvrivihinta, round(sum($hinta_q*varattu*(1-ale/100)),2) rivihinta
+				$aquery = "	SELECT 
+							round(sum(0),2) alvrivihinta, 
+							round(sum((tilausrivi.hinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*tilausrivi.varattu*(1-tilausrivi.ale/100)),2) rivihinta
 							FROM tilausrivi
-							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
+							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus 
+							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
 			}
 			elseif ($alvrow["alv"] < 500 and $toim != 'PROFORMA') {
-				$aquery = "	SELECT round(sum($rivihinta_q*(alv/100)),2) alvrivihinta, sum($rivihinta_q) rivihinta
+				$aquery = "	SELECT 
+							round(sum((tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.alv/100)),2) alvrivihinta, 
+							round(sum(tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta
 							FROM tilausrivi
-							WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
+							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus 
+							WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
 			}
 			else {
 				$aquery = "	SELECT
-							round(sum($hinta_q / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * if(netto='N', (1-ale/100), (1-(ale+$laskurow[erikoisale]-(ale*$laskurow[erikoisale]/100))/100)) * (alv/100)),2) alvrivihinta,
-							round(sum($hinta_q / if('$yhtiorow[alv_kasittely]' = '', (1+alv/100), 1) * varattu * if(netto='N', (1-ale/100), (1-(ale+$laskurow[erikoisale]-(ale*$laskurow[erikoisale]/100))/100))),2) rivihinta
+							round(sum((tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) * (tilausrivi.alv/100)),2) alvrivihinta,
+							round(sum((tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)) / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * tilausrivi.varattu * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),2) rivihinta
 							FROM tilausrivi
-							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]' and tyyppi='L'";
+							JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+							WHERE tilausrivi.otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.alv='$alvrow[alv]' and tilausrivi.tyyppi='L'";
 			}
 			$aresult = mysql_query($aquery) or pupe_error($aquery);
 			$arow = mysql_fetch_array($aresult);

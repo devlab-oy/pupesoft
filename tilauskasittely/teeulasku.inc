@@ -268,7 +268,6 @@ $query = "	INSERT into lasku SET
 			tullausnumero						= '$lasrow[tullausnumero]',
 			vahennettava_era					= '$lasrow[vahennettava_era]',
 			valkoodi							= '$lasrow[valkoodi]',
-			vienti_kurssi						= '$lasrow[vienti_kurssi]',
 			verkkotunnus						= '$lasrow[verkkotunnus]',
 			vienti 								= '$lasrow[vienti]',
 			viesti								= '$viestit',

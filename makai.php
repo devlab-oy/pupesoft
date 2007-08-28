@@ -45,7 +45,7 @@
 			$pankkitiedot = array();
 
 			while ($row=mysql_fetch_array($result)) {
-				if (substr($row["tilino"], 0, 1) >= '0' and substr($row["tilino"], 0, 1) <= '9') {
+				if ((substr($row["tilino"], 0, 1) >= '0' and substr($row["tilino"], 0, 1) <= '9') or substr($row["tilino"], 0, 1) <= 'K') {
 					
 					$pankkitili = $row["tilino"];
 					
@@ -61,13 +61,13 @@
 						
 						echo "Päivitin tilin $row[nimi]<br><br>";
 					}
-					
+										
 					//Haetaan tilinumeron perusteella pankin tiedot
 					$pankkitiedot[$pankkitili] = pankkitiedot($pankkitili, $row["asiakastunnus"]);	
 				}
 			}
 		}
-		
+				
 		// --- LM03/Eli kotimaan maksujen aineisto
 		
 		//Tutkitaan onko kotimaan aineistossa monta maksupäivää?
@@ -83,6 +83,7 @@
 		if (mysql_num_rows($pvmresult) != 0) {
 		
 			$generaatio = 1;
+			
 			//Päätetääm maksuaineston tiedostonimi
 			if ($kotimaa == "FI") {
 				$kaunisnimi = "lm03-$kukarow[yhtio]-" . date("d.m.y.H.i.s") . "-". $generaatio . ".txt";
@@ -205,7 +206,7 @@
 							exit;
 						}
 					}
-							
+												
 					if($kotimaa == "FI") {
 						//haetaan tämän tilin tiedot
 						if(isset($pankkitiedot[$yritystilino])) {
@@ -297,16 +298,11 @@
 				
 					if ($yhtiorow['pankkitiedostot']!='') {
 						if (is_resource($toot)) { 
-							fclose($toot);					
-							//Laitetaan sähköpostiin jos yhtiorow pankki_polusta löytyy @-merkki
-							if (strpos($yhtiorow["pankki_polku"],"@") !== FALSE) {
-								$liite = $nimi;
-								$kutsu = t("Maksuaineisto");
-								$kukarow["eposti"] = $yhtiorow["pankki_polku"];
-								$ctype = "TEXT";
+							fclose($toot);	
 							
-								require("inc/sahkoposti.inc");
-							}
+							if ($tiedostonimi == "") {
+								$tiedostonimi = $kaunisnimi;
+							}				
 
 							echo "<tr><th>".t("Tallenna aineisto").":</th>";
 							echo "<form method='post' action='$PHP_SELF'>";
@@ -348,19 +344,13 @@
 			if (is_resource($toot)) { 
 				fclose($toot);
 				
+				if ($tiedostonimi == "") {
+					$tiedostonimi = $kaunisnimi;
+				}
+				
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th>".t("Aineiston kokonaissumma on").":</th><td>".sprintf('%.2f',$totsumma)."</td></tr>";
 				echo "<tr><th>".t("Summa koostuu").":</th><td>$totkpl ".t("laskusta")."</td></tr>";
-				
-				//Laitetaan sähköpostiin jos yhtiorow pankki_polusta löytyy @-merkki
-				if (strpos($yhtiorow["pankki_polku"],"@") !== FALSE) {
-					$liite = $nimi;
-					$kutsu = t("Maksuaineisto");
-					$kukarow["eposti"] = $yhtiorow["pankki_polku"];
-					$ctype = "TEXT";
-				
-					require("inc/sahkoposti.inc");
-				}
 				
 				echo "<tr><td class='back'><br></td></tr>";
 				echo "<tr><th>".t("Tallenna aineisto").":</th>";
@@ -436,7 +426,7 @@
 				echo "<tr><th>".t("Ulkomaan maksujen tiedoston nimi on")."</th><td>$kaunisnimi</td></tr>";
 				echo "<tr><td class='back'><br></td></tr>";
 				
-				echo "<tr><th>".t("Maksutili")."<td>$pvmrow[ytilino]</td></tr><tr><th>Laskujen valuutta</th><td>$pvmrow[valkoodi]</td></tr>";
+				echo "<tr><th>".t("Maksutili")."<td>$pvmrow[ytilino]</td></tr><tr><th>".t("Laskujen valuutta")."</th><td>$pvmrow[valkoodi]</td></tr>";
 
 				//Maksetaan hyvityslaskut alta pois, jos niitä on
 				$query = "SELECT maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sum(if(alatila='K', summa-kasumma, summa)) summa
@@ -453,6 +443,7 @@
 
 				if (mysql_num_rows($hyvitysresult) > 0 ) {
 					echo "<tr><th>".t("Maksan hyvityslaskut").":</th><td>".mysql_num_rows($hyvitysresult)."</td></tr>";
+					
 					while ($hyvitysrow=mysql_fetch_array($hyvitysresult)) {
 						$query = "	SELECT maksu_tili,
 							left(concat_ws(' ', lasku.nimi, nimitark),45) nimi,
@@ -724,14 +715,9 @@
 
 					if ($yhtiorow['pankkitiedostot'] != '') {
 						fclose($toot);
-						//Laitetaan sähköpostiin jos yhtiorow pankki_polusta löytyy @-merkki
-						if (strpos($yhtiorow["pankki_polku"],"@") !== FALSE) {
-							$liite = $nimi;
-							$kutsu = t("Ulkomaanmaksuaineisto");
-							$kukarow["eposti"] = $yhtiorow["pankki_polku"];
-							$ctype = "TEXT";
 						
-							require("inc/sahkoposti.inc");
+						if ($tiedostonimilum2 == "") {
+							$tiedostonimilum2 = $kaunisnimi;
 						}
 
 						echo "<tr><td class='back'><br></td></tr>";
@@ -740,7 +726,7 @@
 						echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 						echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
 						echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
-						echo "<td><input type='submit' value='Tallenna'></td></tr></form>";
+						echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 					}
 		
 					$query = "	UPDATE lasku SET tila = 'Q'
@@ -756,14 +742,10 @@
 			}
 
 			if (is_resource($toot)) {
-				//Laitetaan sähköpostiin jos yhtiorow pankki_polusta löytyy @-merkki
-				if (strpos($yhtiorow["pankki_polku"],"@") !== FALSE) {
-					$liite = $nimi;
-					$kutsu = t("Ulkomaanmaksuaineisto");
-					$kukarow["eposti"] = $yhtiorow["pankki_polku"];
-					$ctype = "TEXT";
+				fclose($toot);
 				
-					require("inc/sahkoposti.inc");
+				if ($tiedostonimilum2 == "") {
+					$tiedostonimilum2 = $kaunisnimi;
 				}
 
 				echo "<tr><td class='back'><br></td></tr>";
@@ -772,7 +754,7 @@
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 				echo "<input type='hidden' name='kaunisnimi' value='$tiedostonimilum2'>";
 				echo "<input type='hidden' name='filenimi' value='$kaunisnimi'>";
-				echo "<td><input type='submit' value='Tallenna'></td></tr></form>";
+				echo "<td><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			}
 
 			echo "<tr><td class='back'><br></td></tr>";

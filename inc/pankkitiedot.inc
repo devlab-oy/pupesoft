@@ -37,7 +37,7 @@ function pankkitiedot($tilino, $asiakastunnus) {
 	$pankki["lmp_mt_4kentta"]	= "$tilino";
 	$pankki["lmp_st_4kentta"]	= "$tilino";
 	$pankki["tiedostonimi"] 	= "XXXXXXXX.DAT";
-	$pankki["tiedostonimilum2"] 	= "XXXXLUM2.DAT";
+	$pankki["tiedostonimilum2"] = "XXXXLUM2.DAT";
 
 	switch ($tmp_tilino) {
 		case (1) : //Nordea
@@ -105,7 +105,13 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			$pankki["rahalaitos"]		= '8 ';
 			$pankki["pankkilaitos"] 	= "Sampo";
 			$pankki["tiedostonimi"] 	= "LEOL2L.DAT";
-			$pankki["tiedostonimilum2"] 	= "LEUM2L.DAT";
+			$pankki["tiedostonimilum2"]	= "LEUM2L.DAT";
+			break;
+		case ("K") : //Maksetaan kassasta
+			$pankki["rahalaitos"]		= '  ';
+			$pankki["pankkilaitos"] 	= "Kassa";
+			$pankki["tiedostonimi"] 	= "Kassa.DAT";
+			$pankki["tiedostonimilum2"] = "Kassa_ulk.DAT";
 			break;
 	}
 

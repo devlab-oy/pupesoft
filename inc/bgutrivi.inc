@@ -1,5 +1,4 @@
 <?php
-
 	if (!function_exists("cobolkikka")) {
 		function cobolkikka($numero) {
 			$viimeinen = substr((string) $numero, -1 ,1);
@@ -39,8 +38,8 @@
 		}
 	}						
 		
-
-	if ($laskurow['alatila'] == 'K') { // maksetaan k‰teisalennuksella
+	if ($laskurow['alatila'] == 'K') {
+		// maksetaan k‰teisalennuksella
 		$laskusumma = $laskurow['summa'] - $laskurow['kasumma'];
 	}
 	else {
@@ -49,41 +48,31 @@
 	
 	$ulklaskusumma=round($laskurow['kurssi']*$laskusumma,2);
 			
-	//print "<pre>";
-	$ulos = "2";
+	$ulos  = "2";
 	$ulos .= sprintf ('%-7.7s', $laskurow['ytunnus']);
 	$ulos .= sprintf ('%-30.30s', strtoupper($laskurow['nimi']));
 	$ulos .= sprintf ('%-35.35s', strtoupper($laskurow['nimitark']));
 	$ulos .= '       '; // 7 tyhj‰‰
-	//print strlen($ulos) . "/" . $ulos;
-	//print "</pre>";
 	fputs($toot,$ulos . "\r\n");
 	
-	//print "<pre>";
-	$ulos = "3";
+	$ulos  = "3";
 	$ulos .= sprintf ('%-7.7s', $laskurow['ytunnus']);
 	$ulos .= sprintf ('%-30.30s', strtoupper($laskurow['osoite']));
 	$ulos .= sprintf ('%-35.35s', strtoupper($laskurow['maa']. "-" . $laskurow['postino'] . " " . $laskurow['postitp']));
 	$ulos .= '0';
 	$ulos .= sprintf ('%-2.2s', $laskurow['maa']);
 	$ulos .= " 010"; // Ei aavistustakaan, mutta n‰in oli esimerkiss‰
-	//print strlen($ulos) . "/" . $ulos;
-	//print "</pre>";
 	fputs($toot,$ulos . "\r\n");
 
-	//print "<pre>";	
-	$ulos = "4";
+	$ulos  = "4";
 	$ulos .= sprintf ('%-7.7s', $laskurow['ytunnus']);
 	$ulos .= sprintf ('%-12.12s', strtoupper($laskurow['swift']));
 	$ulos .= sprintf ('%-30.30s', $laskurow['ultilno']);
 	$ulos .= sprintf ('%-30.30s', ' ');
-	//print strlen($ulos) . "/" . $ulos;
-	//print "</pre>";
 	fputs($toot,$ulos . "\r\n");
 
 	if ($laskusumma < 0) {
-		//print "<pre>";	
-		$ulos = "5";
+		$ulos  = "5";
 		$ulos .= sprintf ('%-7.7s', $laskurow['ytunnus']);
 		$ulos .= sprintf ('%-25.25s', $laskurow['viesti'] . " " . $laskurow['tunnus']);
 		$ulos .= sprintf ('%011.11d', cobolkikka($ulklaskusumma*100));
@@ -93,14 +82,11 @@
 		$ulos .= '0 ';
 		$ulos .= sprintf ('%013.13d', $laskusumma*100);
 		$ulos .= ' 0';
-		//print strlen($ulos) . "/" . $ulos;
-		//print "</pre>";
 		fputs($toot,$ulos . "\r\n");
 	}
 
 	if ($laskusumma > 0) {
-		//print "<pre>";	
-		$ulos = "6";
+		$ulos  = "6";
 		$ulos .= sprintf ('%-7.7s', $laskurow['ytunnus']);
 		$ulos .= sprintf ('%-25.25s', $laskurow['viesti'] . " " . $laskurow['tunnus']);
 		$ulos .= sprintf ('%011.11d', $ulklaskusumma*100);
@@ -110,9 +96,6 @@
 		$ulos .= '0 ';
 		$ulos .= sprintf ('%013.13d', $laskusumma*100);
 		$ulos .= ' 0';
-		//print strlen($ulos) . "/" . $ulos;
-		//print "</pre>";
 		fputs($toot,$ulos . "\r\n");
 	}	
-	
-	?>
+?>

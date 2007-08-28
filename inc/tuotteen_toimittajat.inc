@@ -501,9 +501,7 @@
 				}
 
 				echo "</tr>";
-
 				echo "</table>";
-				echo "<hr>";
 			}
 			
 			if ($rajattu_nakyma == '') {
@@ -515,7 +513,7 @@
 				<input type='hidden' name='tuoteno' value='$tuoteno'>
 				<input type='submit' value='".t("Lisää uusi toimittaja")."'></form>";
 			}
-
+			echo "<hr><br><br>";
 		}
 	}
 

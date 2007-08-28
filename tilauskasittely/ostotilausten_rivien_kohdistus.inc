@@ -439,25 +439,37 @@ if ($tila == '') {
 	// jos ollaan liitetty jo vaihto-omaisuuslasku, käytetään sen vientikenttää
 	if ($kulurow["vienti"] != "") $laskurow["vienti"] = $kulurow["vienti"];
 
+	$alvti = " tuote.alv ";
+
 	// jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi
-	if ($laskurow['vienti']=='C' or $laskurow['vienti']=='J') {
+	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
+
 		$alvit = " * (1+tuote.alv/100) ";
+
+		if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+			// tutkitaan ollaanko siellä alv-rekisteröity
+			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			// ollaan alv-rekisteröity
+			if (mysql_num_rows($alhire) == 1) {
+				$alvit = " * (1+tuotteen_alv.alv/100) ";
+				$alvti = " ifnull(tuotteen_alv.alv, 0) ";
+			}
+		}
+
 	}
 	else {
 		$alvit = "";
 	}
 
 	$query    = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale $alvit) hinta
-					FROM tilausrivi use index (uusiotunnus_index),
-					tuote use index (tuoteno_index),
-					tuotteen_toimittajat
+					FROM tilausrivi use index (uusiotunnus_index)
+					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$toimittajaid')
+					LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 					WHERE tilausrivi.yhtio ='$kukarow[yhtio]'
-					AND tilausrivi.uusiotunnus = '$otunnus'
-					AND tuote.yhtio = tilausrivi.yhtio
-					AND tuote.tuoteno = tilausrivi.tuoteno
-					AND tuotteen_toimittajat.yhtio = tilausrivi.yhtio
-					AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno
-					AND tuotteen_toimittajat.liitostunnus = '$toimittajaid'";
+					AND tilausrivi.uusiotunnus = '$otunnus'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$hintarow = mysql_fetch_array($result);
 
@@ -483,7 +495,7 @@ if ($tila == '') {
 							"round((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),4) ulkkpl",
 							"tilausrivi.hinta hinta",
 							"tilausrivi.ale ale",
-							"tuote.alv alv",
+							"$alvti alv",
 							"round((tilausrivi.varattu+tilausrivi.kpl) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) rivihinta",
 							"round((tilausrivi.varattu+tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * $erikoisale $alvit ,2) alerivihinta",
 							"tilausrivi.kate kuluhinta",
@@ -574,6 +586,7 @@ if ($tila == '') {
 				JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' $tilaajanrivinro $lisa2
 				JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.liitostunnus = '$laskurow[liitostunnus]'
 				and lasku.tila in ('O','K')

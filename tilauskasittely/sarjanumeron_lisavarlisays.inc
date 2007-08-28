@@ -10,7 +10,6 @@
 			$result  	= mysql_query($query) or pupe_error($query);
 			$laskurow   = mysql_fetch_array($result);
 			
-			
 			//Tutkitaan lisävarusteita
 			$query = "	SELECT tilausrivi_osto.perheid2
 						FROM sarjanumeroseuranta 
@@ -32,16 +31,17 @@
 				$ostorow = mysql_fetch_array($sarjares);
 								
 				// Haetaan muut lisävarusteet
-				$query = "	SELECT tuoteno, round(kpl/$ostorow[kpl]) kpl, round(tilkpl/$ostorow[kpl]) tilkpl, tilkpl sistyomaarayskpl, var, tyyppi, concat_ws('#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka
+				$query = "	SELECT tuoteno, round(kpl/$ostorow[kpl]) kpl, round(tilkpl/$ostorow[kpl]) tilkpl, tilkpl sistyomaarayskpl, var, 
+							tyyppi, concat_ws('#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilaajanrivinro
 							FROM tilausrivi 
 							WHERE yhtio  = '$kukarow[yhtio]' 
 							and perheid2 = '$sarjarow[perheid2]'
 							and tyyppi  != 'D'
 							and tunnus  != '$sarjarow[perheid2]'
 							and perheid2!= 0";
-				$sarjares = mysql_query($query) or pupe_error($query);
-				
-				if (mysql_num_rows($sarjares) > 0) {
+				$sarjares1 = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($sarjares1) > 0) {
 					$query = "	SELECT tunnus, perheid2, (varattu+jt) kpl
 								FROM tilausrivi 
 								WHERE yhtio  = '$kukarow[yhtio]' 
@@ -63,7 +63,7 @@
 						$myyrow["perheid2"] = $myyrow["tunnus"];	
 					}
 						
-					while ($sarjarow = mysql_fetch_array($sarjares)) {
+					while ($sarjarow = mysql_fetch_array($sarjares1)) {
 
 						// haetaan tuotteen tiedot
 						$query = "	select *
@@ -118,9 +118,24 @@
 								$rivitunnus		 = "";
 								$korvaavakielto	 = "";
 								$varataan_saldoa = "";
-								$myy_sarjatunnus = ""; // Pitää fixata (jos lapsikin on sarjanumeroseurannassa)
 								$perheid 		 = 0;
-		
+								
+								// Jos lisävaruste on pultattu kiinni laitteeseen sisäisellä työmääräyksellä
+								// niin silloin, jos lisävauste on sarjanumeroitava, niin sarjanumeron tunnus tulee
+								// lisävarusterivin tilaajanrivinro-kentässä
+								if ($sarjarow["tyyppi"] == 'G' and $sarjarow["tilaajanrivinro"] > 0) {
+									$query = "	SELECT tunnus, myyntirivitunnus
+												FROM sarjanumeroseuranta 
+												WHERE yhtio	= '$kukarow[yhtio]' 
+												and tunnus  = '$sarjarow[tilaajanrivinro]'
+												and myyntirivitunnus = 0";
+									$tarkres = mysql_query($query) or pupe_error($query);
+									
+									if (mysql_num_rows($tarkres) == 1) {
+										$myy_sarjatunnus = $sarjarow["tilaajanrivinro"];
+									}
+								}
+								
 								// jos meillä on ostoskori muuttujassa numero, niin halutaan lisätä tuotteita siihen ostoskoriin
 								if (is_numeric($ostoskori)) {
 									lisaa_ostoskoriin ($ostoskori, $laskurow["liitostunnus"], $tuoteno, $kpl);
@@ -137,6 +152,8 @@
 							}
 						}
 					}
+					
+					echo "<br><br>";
 				}
 			}
 			

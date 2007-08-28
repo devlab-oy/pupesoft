@@ -70,11 +70,12 @@
 
 					while ($lisarow = mysql_fetch_array($kres)) {
 						$ostohinta = 0;
+						$ostorivinsarjanumero = 0;
 						
 						if ($lisarow["sarjanumeroseuranta"] == "S") {
 							//Hateaan lisävarusteen ostohinta
-							$query = "	SELECT round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl,2) ostohinta
-										FROM sarjanumeroseuranta 
+							$query = "	SELECT round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl,2) ostohinta, sarjanumeroseuranta.tunnus
+										FROM sarjanumeroseuranta
 										JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus 
 										WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' 
 										and sarjanumeroseuranta.tuoteno = '$lisarow[tuoteno]' 
@@ -82,7 +83,8 @@
 							$sarjares = mysql_query($query) or pupe_error($query);
 							$sarjarow2 = mysql_fetch_array($sarjares);
 
-							$ostohinta = $sarjarow2["ostohinta"];
+							$ostohinta 				= $sarjarow2["ostohinta"];
+							$ostorivinsarjanumero	= $sarjarow2["tunnus"];
 						}
 						else {
 							// Lisävaruste on bulkkikamaa
@@ -92,9 +94,18 @@
 						$ostohinta = (int) $ostohinta;
 						
 						//Ruuvataan liitetyt lisävarusteet kiinni laitteen alkuperäiseen ostoriviin
+						// Jos lisävauste on sarjanumeroitava, niin sarjanumeron tunnus menee
+						// lisävarusterivin tilaajanrivinro-kentässä
 						$query = "	UPDATE tilausrivi 
-									SET perheid2='$sarjarow[ostorivitunnus]', rivihinta=round(varattu*$ostohinta,2), toimitettu='$kukarow[kuka]', toimitettuaika = now(), tilkpl=varattu, varattu = 0 
-									WHERE yhtio='$kukarow[yhtio]' and tunnus='$lisarow[rivitunnus]'";
+									SET perheid2	= '$sarjarow[ostorivitunnus]', 
+									rivihinta		= round(varattu*$ostohinta,2), 
+									toimitettu		= '$kukarow[kuka]', 
+									toimitettuaika 	= now(), 
+									tilkpl			= varattu, 
+									varattu 		= 0,
+									tilaajanrivinro = '$ostorivinsarjanumero' 
+									WHERE yhtio = '$kukarow[yhtio]' 
+									and tunnus  = '$lisarow[rivitunnus]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 
 						if ($lisarow["ei_saldoa"] == '') {

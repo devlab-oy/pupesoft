@@ -32,7 +32,7 @@
 								
 				// Haetaan muut lisävarusteet
 				$query = "	SELECT tuoteno, round(kpl/$ostorow[kpl]) kpl, round(tilkpl/$ostorow[kpl]) tilkpl, tilkpl sistyomaarayskpl, var, 
-							tyyppi, concat_ws('#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilaajanrivinro
+							tyyppi, concat_ws('#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilaajanrivinro, perheid2
 							FROM tilausrivi 
 							WHERE yhtio  = '$kukarow[yhtio]' 
 							and perheid2 = '$sarjarow[perheid2]'
@@ -128,7 +128,7 @@
 												FROM sarjanumeroseuranta 
 												WHERE yhtio	= '$kukarow[yhtio]' 
 												and tunnus  = '$sarjarow[tilaajanrivinro]'
-												and myyntirivitunnus = 0";
+												and siirtorivitunnus = '$sarjarow[perheid2]'";
 									$tarkres = mysql_query($query) or pupe_error($query);
 									
 									if (mysql_num_rows($tarkres) == 1) {

@@ -38,16 +38,117 @@
 
 			//-->
 			</script>";
+			
+		if(!function_exists("vararvo")) {
+			function vararvo($tuoteno, $vv, $kk, $pp) {
+				global $kukarow, $yhtiorow;
+			
+				$kehahin = 0;
+				
+				$query  = "	SELECT tuote.tuoteno, tuote.tuotemerkki, tuote.nimitys, tuote.kehahin, tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, tuote.sarjanumeroseuranta
+							FROM tuote
+							WHERE tuote.yhtio 	= '$kukarow[yhtio]'
+							and tuote.ei_saldoa = ''
+							and tuote.tuoteno 	= '$tuoteno'";
+				$result = mysql_query($query) or pupe_error($query);
+				$row = mysql_fetch_array($result);
+				
+				// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilˆiden ostohinnoista (ostetut yksilˆt jotka eiv‰t viel‰ ole myyty(=laskutettu))
+				if ($row["sarjanumeroseuranta"] == "S") {
+					$query	= "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
+								FROM sarjanumeroseuranta
+								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+								LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+								WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' 
+								and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+								and sarjanumeroseuranta.myyntirivitunnus != -1
+								and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+								and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+					$sarjares = mysql_query($query) or pupe_error($query);
+					$sarjarow = mysql_fetch_array($sarjares);
 
-			//	Jos k‰ytt‰j‰ll‰ on valittu piirej‰ niin sallitaan vain ko. piirin/piirien hakeminen
-			if($kukarow["piirit"] != "")	 {
-				$asiakasrajaus = "and piiri IN ($kukarow[piirit])";
-				$asiakasrajaus_avainsana = "and selite IN ($kukarow[piirit])";
+					$kehahin = sprintf('%.2f', $sarjarow["kehahin"]);
+				}
+				else {
+					$kehahin = sprintf('%.2f', $row["kehahin"]);
+				}
+
+				// tuotteen muutos varastossa annetun p‰iv‰n j‰lkeen
+				$query = "	SELECT sum(kpl * if(laji in ('tulo','valmistus'), kplhinta, hinta)) muutoshinta, sum(kpl) muutoskpl
+				 			FROM tapahtuma use index (yhtio_tuote_laadittu)
+				 			WHERE yhtio = '$kukarow[yhtio]'
+				 			and tuoteno = '$row[tuoteno]'
+				 			and laadittu > '$vv-$kk-$pp 23:59:59'";
+				$mres = mysql_query($query) or pupe_error($query);
+				$mrow = mysql_fetch_array($mres);
+
+				// katotaan onko tuote ep‰kurantti nyt
+				$kerroin = 1;
+
+				if ($row['epakurantti25pvm'] != '0000-00-00') {
+					$kerroin = 0.75;
+				}
+				if ($row['epakurantti50pvm'] != '0000-00-00') {
+					$kerroin = 0.5;
+				}
+				if ($row['epakurantti75pvm'] != '0000-00-00') {
+					$kerroin = 0.25;
+				}
+				if ($row['epakurantti100pvm'] != '0000-00-00') {
+					$kerroin = 0;
+				}
+
+				// tuotteen m‰‰r‰ varastossa nyt
+				$query = "	SELECT sum(saldo) varasto
+							FROM tuotepaikat use index (tuote_index)
+							WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+							and tuotepaikat.tuoteno = '$row[tuoteno]'";
+				$vres = mysql_query($query) or pupe_error($query);
+				$vrow = mysql_fetch_array($vres);
+				
+				// arvo historiassa: lasketaan (nykyinen varastonarvo) - muutoshinta
+				$muutoshinta = ($vrow["varasto"] * $kehahin * $kerroin) - $mrow["muutoshinta"];
+
+				// saldo historiassa: lasketaan nykyiset kpl - muutoskpl
+				$muutoskpl = $vrow["varasto"] - $mrow["muutoskpl"];
+
+				// haetaan tuotteen myydyt kappaleet
+				$query  = "	SELECT ifnull(sum(kpl),0) kpl 
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) 
+							WHERE yhtio='$kukarow[yhtio]' and tyyppi='L' and tuoteno='$row[tuoteno]' and laskutettuaika <= '$vv-$kk-$pp' and laskutettuaika >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)";
+				$xmyyres = mysql_query($query) or pupe_error($query);
+				$xmyyrow = mysql_fetch_array($xmyyres);
+
+				// haetaan tuotteen kulutetut kappaleet
+				$query  = "	SELECT ifnull(sum(kpl),0) kpl 
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika) 
+							WHERE yhtio='$kukarow[yhtio]' and tyyppi='V' and tuoteno='$row[tuoteno]' and toimitettuaika <= '$vv-$kk-$pp' and toimitettuaika >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)";
+				$xkulres = mysql_query($query) or pupe_error($query);
+				$xkulrow = mysql_fetch_array($xkulres);
+
+				// lasketaan varaston kiertonopeus
+				if ($muutoskpl > 0) {
+					$kierto = round(($xmyyrow["kpl"] + $xkulrow["kpl"]) / $muutoskpl, 2);
+				}
+				else {
+					$kierto = 0;
+				}
+				
+				return array($muutoshinta, $kierto);
 			}
-			else {
-				$asiakasrajaus="";
-				$asiakasrajaus_avainsana = "";
-			}
+		}	
+			
+			
+
+		//	Jos k‰ytt‰j‰ll‰ on valittu piirej‰ niin sallitaan vain ko. piirin/piirien hakeminen
+		if($kukarow["piirit"] != "")	 {
+			$asiakasrajaus = "and piiri IN ($kukarow[piirit])";
+			$asiakasrajaus_avainsana = "and selite IN ($kukarow[piirit])";
+		}
+		else {
+			$asiakasrajaus="";
+			$asiakasrajaus_avainsana = "";
+		}
 
 		if (isset($muutparametrit)) {
 
@@ -374,6 +475,9 @@
 					}
 					if ($sarjanumerot != '') {
 						$select .= "group_concat(concat(tilausrivi.tunnus,'#',tilausrivi.kpl)) sarjanumero, ";
+					}
+					if ($varastonarvo != '') {
+						$select .= "0 varastonarvo, 0 kierto, ";
 					}
 				}
 
@@ -873,8 +977,19 @@
 							$row[$i] = substr($row[$i], 0, -4);
 						}
 
+						// jos kyseessa on varastonarvo
+						if (mysql_field_name($result, $i) == "varastonarvo") {
+							list($varvo, $kierto) = vararvo($row["tuoteno"], $vvl, $kkl, $ppl);
+														
+							$row[$i] = $varvo;
+						}
+						
+						if (mysql_field_name($result, $i) == "kierto") {
+							$row[$i] = $kierto;
+						}
+
 						// Jos gruupataan enemm‰n kuin yksi taso niin tehd‰‰n v‰lisumma
-						if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '') {
+						if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE) {
 							$excelsarake = $myyntiind = $kateind = $nettokateind = 0;	
 							
 							foreach($valisummat as $vnim => $vsum) {
@@ -912,7 +1027,7 @@
 						$edluku = $row[0];
 						
 						// hoidetaan pisteet piluiksi!!
-						if (mysql_field_type($result,$i) == 'real' or substr(mysql_field_name($result, $i),0 ,4) == 'kate') {
+						if (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate') {
 							echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
 							if(isset($workbook)) {
@@ -1022,7 +1137,7 @@
 						if ($totsummat["myyntied"] <> 0) 		$vsum = round($totsummat["myyntinyt"] / $totsummat["myyntied"],2);
 					}
 					if ($vnim == "kateind") {
-						if ($totsummat["kateed"] <> 0) 		$vsum = round($totsummat["katenyt"] / $totsummat["kateed"],2);
+						if ($totsummat["kateed"] <> 0) 			$vsum = round($totsummat["katenyt"] / $totsummat["kateed"],2);
 					}
 					if ($vnim == "nettokateind") {
 						if ($totsummat["nettokateed"] <> 0) 	$vsum = round($totsummat["nettokatenyt"] / $totsummat["nettokateed"],2);
@@ -1342,6 +1457,8 @@
 			if ($piiyhteensa != '')  	$piychk   = "CHECKED";
 			if ($sarjanumerot != '')  	$sarjachk = "CHECKED";
 			if ($kuukausittain != '')	$kuuchk	  = "CHECKED";
+			if ($varastonarvo != '')	$varvochk = "CHECKED";
+			
 
 			echo "<table>
 				<tr>
@@ -1419,6 +1536,12 @@
 				<tr>
 				<th>".t("N‰yt‰ sarjanumerot")."</th>
 				<td><input type='checkbox' name='sarjanumerot' $sarjachk></td>
+				<td></td>
+				<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
+				</tr>
+				<tr>
+				<th>".t("N‰yt‰ varastonarvo")."</th>
+				<td><input type='checkbox' name='varastonarvo' $varvochk></td>
 				<td></td>
 				<td class='back'>".t("(Toimii vain jos listaat tuotteittain)")."</td>
 				</tr>

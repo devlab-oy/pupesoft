@@ -82,7 +82,7 @@
 		sort($lista);
 
 		for ($i=0; $i < count($lista); $i++) {
-			if (($kotimaa == "FI" and substr($lista[$i], 0, 5+strlen($kukarow["yhtio"])) == "lum3-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($lista[$i],0, 4+strlen($kukarow["yhtio"])) == "bg-$kukarow[yhtio]-")) {
+			if (($kotimaa == "FI" and substr($lista[$i], 0, 5+strlen($kukarow["yhtio"])) == "lum3-$kukarow[yhtio]") or ($kotimaa == "SE" and substr($lista[$i],0, 4+strlen($kukarow["yhtio"])) == "bgut-$kukarow[yhtio]-")) {
 				echo "<option value='$lista[$i]' $sel>$lista[$i]</option>";
 			}
 		}

@@ -55,7 +55,7 @@
 		closedir($handle);
 
 		echo "</select>";
-		echo "<input type='submit' value='Tallenna'></form>";
+		echo "<input type='submit' value='".t("Tallenna")."'></form>";
 		echo "<br><br>";
 
 		if ($kotimaa == "FI") {
@@ -89,7 +89,7 @@
 		closedir($handle);
 
 		echo "</select>";
-		echo "<input type='submit' value='Tallenna'></form>";
+		echo "<input type='submit' value='".t("Tallenna")."'></form>";
 		echo "<br><br>";
 
 		require ("inc/footer.inc");

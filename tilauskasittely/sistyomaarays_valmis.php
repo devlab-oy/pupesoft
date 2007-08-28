@@ -130,9 +130,9 @@
 						$sarjares = mysql_query($query) or pupe_error($query);
 						
 						if ($lisarow["sarjanumeroseuranta"] != '') {
-							//Irroitetaan lisävarusteen sarjanumero
+							//Varataan sarjanumero jatkojalostettavalle tuotteelle
 							$query = "	UPDATE sarjanumeroseuranta 
-										SET siirtorivitunnus = 0 
+										SET siirtorivitunnus = $sarjarow[ostorivitunnus] 
 										WHERE yhtio='$kukarow[yhtio]' and tuoteno='$lisarow[tuoteno]' and siirtorivitunnus='$lisarow[rivitunnus]'";
 							$sarjares = mysql_query($query) or pupe_error($query);
 						}

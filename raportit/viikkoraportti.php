@@ -10,11 +10,25 @@ $kukarow['yhtio'] = addslashes(trim($argv[1]));
 $pomomail = addslashes(trim($argv[2]));
 $pomomail2 = addslashes(trim($argv[3]));
 
-$query    = "select * from yhtio where yhtio='$kukarow[yhtio]'";
+$query    = "SELECT * FROM yhtio WHERE yhtio='$kukarow[yhtio]'";
 $yhtiores = mysql_query($query) or die($query);
 
 if (mysql_num_rows($yhtiores)==1) {
 	$yhtiorow = mysql_fetch_array($yhtiores);
+
+	$query = "	SELECT *
+				FROM yhtion_parametrit
+				WHERE yhtio='$kukarow[yhtio]'";
+	$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+
+	if (mysql_num_rows($result) == 1) {
+		$yhtion_parametritrow = mysql_fetch_array($result);
+
+		// lisätään kaikki yhtiorow arrayseen
+		foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
+			$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+		}
+	}
 }
 else {
 	die ("Yhtiö $kukarow[yhtio] ei löydy!");

@@ -284,9 +284,10 @@ if ((int) $kukarow["kesken"] != 0) {
 					AND lasku.tila != 'D'";
 	}
 	else {
+		// varmistetaan, että ei dellattu, ei laskutettu (X saa olla alatila jos tila on 0)
 		$query 	= "	SELECT *
 					FROM lasku
-					WHERE tunnus='$kukarow[kesken]' AND yhtio='$kukarow[yhtio]' AND tila != 'D' AND alatila != 'X'";
+					WHERE tunnus='$kukarow[kesken]' AND yhtio='$kukarow[yhtio]' AND tila != 'D' AND (alatila != 'X' or tila = '0')";
 	}
 	$result  	= mysql_query($query) or pupe_error($query);
 
@@ -4148,7 +4149,7 @@ if ($tee == '') {
 		}
 
 		//Näytetään tilaus valmis nappi
-		if (($muokkauslukko == "" or $toim=="PROJEKTI") and $laskurow["liitostunnus"] > 0 and $tilausok == 0 and $rivilaskuri > 0) {
+		if (($muokkauslukko == "" or $toim=="PROJEKTI" or $toim=="YLLAPITO") and $laskurow["liitostunnus"] > 0 and $tilausok == 0 and $rivilaskuri > 0) {
 
 			echo "<td class='back' valign='top'>";
 

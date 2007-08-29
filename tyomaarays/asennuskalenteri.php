@@ -359,7 +359,7 @@
 					<tr>";
 				
 			for($s=0; $s < sizeof($ASENTAJA_ARRAY); $s++) {
-				echo "<td align='center' nowrap width='".(round(100/sizeof($ASENTAJA_ARRAY)))."%'>$ASENTAJA_ARRAY[$s]</td>";
+				echo "<td align='center' nowrap width='35px'>$ASENTAJA_ARRAY[$s]</td>";
 			}
 	        echo "	</tr>
 					</table>
@@ -438,13 +438,13 @@
 				
 						if (isset($varaukset[$b][$a])) {
 							list($nimi, $tilausnumero) = explode("|||", $varaukset[$b][$a]);
-							echo "<td align='center' width='".(round(100/sizeof($ASENTAJA_ARRAY)))."%'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$tilausnumero</a></th>";
+							echo "<td align='center' width='35px'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$tilausnumero</a></th>";
 						}
 						elseif($liitostunnus > 0 and $tyojono != "") {
-		                    echo "<td align='center' width='".(round(100/sizeof($ASENTAJA_ARRAY)))."%'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$AIKA_ARRAY[$a]&tee=VARAA'>&nbsp;</a></th>";			
+		                    echo "<td align='center' width='35px'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$AIKA_ARRAY[$a]&tee=VARAA'>&nbsp;</a></th>";			
 		                }				
 						else {
-							echo "<td align='center' width='".(round(100/sizeof($ASENTAJA_ARRAY)))."%'>&nbsp;</th>";
+							echo "<td align='center' width='35px'>&nbsp;</th>";
 						}
 					}
 					echo "</tr>";

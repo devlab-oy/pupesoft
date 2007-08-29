@@ -376,7 +376,7 @@
 		}
 
 		if ($paikat != "" and $paikatlask > 1) {
-			$paikat = "<select Style='font-size: 8pt; padding:0;' name='paikka' onchange='submit();'>".$paikat."</select>";
+			$paikat = "<select name='paikka' onchange='submit();'>".$paikat."</select>";
 		}
 		else {
 			$paikat = "";
@@ -432,7 +432,7 @@
 		$paikat .= "<option value='P'  $sel1>".t("Jätä puutteeksi")."</option>";
 		$paikat .= "<option value='J' $sel2>".t("Jälkitoimitus")."</option>";
 		$paikat .= "<option value='X' $sel3>".t("Suoratoimita")."</option>";
-		$paikat = "<select Style='font-size: 8pt; padding:0;' name='var' onchange='submit();'>".$paikat."</select>";
+		$paikat = "<select name='var' onchange='submit();'>".$paikat."</select>";
 	}
 	
 	//	Onko tätä varattuna siirtolistalla?

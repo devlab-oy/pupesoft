@@ -280,7 +280,7 @@
 						<input type='hidden' name='nimitys_haku'             value='$nimitys_haku'>
 						<input type='hidden' name='ostotilaus_haku'         value='$ostotilaus_haku'>
 						<input type='hidden' name='sarjanumero_haku'         value='$sarjanumero_haku'>
-						<select name='osto_vai_hyvitys' onchange='submit();' Style='font-size: 8pt; padding:0;'>
+						<select name='osto_vai_hyvitys' onchange='submit();'>
 						<option value=''  $sel1>".("Hyvitys")."</option>
 						<option value='O' $sel2>".("Osto")."</option>
 						</select>

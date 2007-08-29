@@ -1097,7 +1097,7 @@ if ($tee == '') {
 					<input type='hidden' name='projektilla' value='$projektilla'>
 					<input type='hidden' name='tiedot_laskulta' value='YES'>
 					<input type='hidden' name='asiakasid' value='$laskurow[liitostunnus]'>
-					<input type='submit' ACCESSKEY='m' value='".t("Muuta Otsikkoa")."' Style='font-size: 8pt; padding:0;'>
+					<input type='submit' ACCESSKEY='m' value='".t("Muuta Otsikkoa")."'>
 					</form></td>";
 		}
 
@@ -1135,11 +1135,11 @@ if ($tee == '') {
 
 				if ($jt_kayttoliittyma == "kylla") {
 					echo "	<input type='hidden' name='jt_kayttoliittyma' value=''>
-							<input type='submit' value='".t("Piilota JT-rivit")."' Style='font-size: 8pt; padding:0;'>";
+							<input type='submit' value='".t("Piilota JT-rivit")."'>";
 				}
 				else {
 					echo "	<input type='hidden' name='jt_kayttoliittyma' value='kylla'>
-							<input type='submit' value='".t("Näytä JT-rivit")."' Style='font-size: 8pt; padding:0;'>";
+							<input type='submit' value='".t("Näytä JT-rivit")."'>";
 				}
 				echo "</form></td>";
 			}
@@ -1161,7 +1161,7 @@ if ($tee == '') {
 				<input type='hidden' name='toim' value='$toim'>
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='projektilla' value='$projektilla'>
-				<input type='Submit' value='".t("Maksusuunnitelma")."' Style='font-size: 8pt; padding:0;'>
+				<input type='Submit' value='".t("Maksusuunnitelma")."'>
 				</form>
 				</td>
 				";
@@ -1177,14 +1177,14 @@ if ($tee == '') {
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='projektilla' value='$projektilla'>
-						<input type='Submit' value='".t("Lisaa kulut")."' Style='font-size: 8pt; padding:0;'>
+						<input type='Submit' value='".t("Lisaa kulut")."'>
 					</form>
 				</td>";
 
 			/*
 			echo "<form action = '../tilausmemo.php' method='post'>
 			<input type='hidden' name='tilaustunnus' value='$tilausnumero'>
-			<td class='back'><input type='Submit' value='".t("Tilausmemo")."' Style='font-size: 8pt; padding:0;'></td>
+			<td class='back'><input type='Submit' value='".t("Tilausmemo")."'></td>
 			</form>";
 			*/
 
@@ -1193,7 +1193,7 @@ if ($tee == '') {
 		echo "	<td class='back'>
 					<form action='tuote_selaus_haku.php' method='post'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>
-						<input type='submit' value='".t("Selaa tuotteita")."' Style='font-size: 8pt; padding:0;'>
+						<input type='submit' value='".t("Selaa tuotteita")."'>
 					</form>
 				</td>";
 
@@ -1202,7 +1202,7 @@ if ($tee == '') {
 			echo 	"<td class='back'>
 						<form action='../yhteensopivuus.php' method='post'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>
-						<input type='submit' value='".t("Malliselain")."' Style='font-size: 8pt; padding:0;'>
+						<input type='submit' value='".t("Malliselain")."'>
 						</form>
 					</td>";
 		}
@@ -1215,7 +1215,7 @@ if ($tee == '') {
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='projektilla' value='$projektilla'>
-						<input type='Submit' value='".t("Lisää vahinkotiedot")."' Style='font-size: 8pt; padding:0;'>
+						<input type='Submit' value='".t("Lisää vahinkotiedot")."'>
 					</form>
 					</td>";
 		}
@@ -1239,10 +1239,10 @@ if ($tee == '') {
 				<input type='hidden' name='lopetus' value='$lopetus'>
 				<input type='hidden' name='projektilla' value='$projektilla'>";
 		if ($toim != "VALMISTAVARASTOON") {
-			echo "<input type='Submit' value='".t("Lue tilausrivit tiedostosta")."' Style='font-size: 8pt; padding:0;'>";
+			echo "<input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'>";
 		}
 		else {
-			echo "<input type='Submit' value='".t("Lue valmistusrivit tiedostosta")."' Style='font-size: 8pt; padding:0;'>";
+			echo "<input type='Submit' value='".t("Lue valmistusrivit tiedostosta")."'>";
 		}
 
 		echo "</form></td>";
@@ -1258,7 +1258,7 @@ if ($tee == '') {
 						<input type='hidden' name='id' value='$tilausnumero'>
 						<input type='hidden' name='rakirno' value='$tilausnumero'>
 						<input type='hidden' name='tunnukset' value='$tilausnumero'>
-						<input type='Submit' value='".t("Rahtikirjan esisyöttö")."' Style='font-size: 8pt; padding:0;'>
+						<input type='Submit' value='".t("Rahtikirjan esisyöttö")."'>
 					</form>
 				</td>";
 		}
@@ -1271,7 +1271,7 @@ if ($tee == '') {
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='projektilla' value='$projektilla'>
-						<input type='Submit' value='".t("Rahoituslaskelma")."' Style='font-size: 8pt; padding:0;'>
+						<input type='Submit' value='".t("Rahoituslaskelma")."'>
 					</form>
 				</td>";
 		}
@@ -1284,7 +1284,7 @@ if ($tee == '') {
 						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
 						<input type='hidden' name='projektilla' value='$projektilla'>
-						<input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."' Style='font-size: 8pt; padding:0;'>
+						<input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."'>
 					</form>
 				</td>";
 		}
@@ -2887,7 +2887,7 @@ if ($tee == '') {
 								<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
 								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
-								<select name='positio' onchange='submit();' Style='font-size: 8pt; padding:0;' $state>";
+								<select name='positio' onchange='submit();' $state>";
 
 						$query = "	SELECT selite, selitetark
 									FROM avainsana
@@ -2915,7 +2915,7 @@ if ($tee == '') {
 									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
 									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
-									<select id='asiakkaan_positio_$rivino' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id,'asiakkaan_positio_$rivino');\" Style='font-size: 8pt; padding:0;' $state>
+									<select id='asiakkaan_positio_$rivino' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id,'asiakkaan_positio_$rivino');\" $state>
 									<option value=''>Asiakkaalla ei ole positiota</option>";
 
 							if(mysql_num_rows($posres) > 0) {
@@ -3146,7 +3146,7 @@ if ($tee == '') {
 								<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
 								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE_OSTO_VAI_HYVITYS'>
-								<select name='osto_vai_hyvitys' onchange='submit();' Style='font-size: 8pt; padding:0;'>
+								<select name='osto_vai_hyvitys' onchange='submit();'>
 								<option value=''  $sel1>$kpl_ruudulle ".("Hyvitys")."</option>
 								<option value='O' $sel2>$kpl_ruudulle ".("Osto")."</option>
 								</select>
@@ -3323,7 +3323,7 @@ if ($tee == '') {
 									<input type='hidden' name='tuotenimitys' value='$row[nimitys]'>
 									<input type='hidden' name='tila' value = 'MUUTA'>
 									<input type='hidden' name='tapa' value = 'MUOKKAA'>
-									<input type='Submit' Style='font-size: 8pt; padding:0;' value='".t("Muokkaa")."'>
+									<input type='Submit' value='".t("Muokkaa")."'>
 								</form>
 							</td>";
 
@@ -3337,7 +3337,7 @@ if ($tee == '') {
 									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' name='tila' value = 'MUUTA'>
 									<input type='hidden' name='tapa' value = 'POISTA'>
-									<input type='Submit' Style='font-size: 8pt; padding:0;' value='".t("Poista")."'>
+									<input type='Submit' value='".t("Poista")."'>
 								</form>
 							</td>";
 
@@ -3368,7 +3368,7 @@ if ($tee == '') {
 										$plisax
 										<input type='hidden' name='perheid' value = '$row[perheid]'>
 										<input type='hidden' name='perheid2' value = '$row[perheid2]'>
-										<input type='Submit' Style='font-size: 8pt; padding:0;' value='$nappulanteksti'>
+										<input type='Submit' value='$nappulanteksti'>
 									</form>
 								</td>";
 					}
@@ -3387,7 +3387,7 @@ if ($tee == '') {
 											<input type='hidden' name='menutila' value='$menutila'>
 											<input type='hidden' name='tila' value = 'MUUTA'>
 											<input type='hidden' name='tapa' value = 'POISJTSTA'>
-											<input type='Submit' Style='font-size: 8pt; padding:0;' value='".t("Toimita")."'>
+											<input type='Submit' value='".t("Toimita")."'>
 										</form>
 									</td>";
 						}
@@ -3404,7 +3404,7 @@ if ($tee == '') {
 										<input type='hidden' name='menutila' value='$menutila'>
 										<input type='hidden' name='tila' value = 'MUUTA'>
 										<input type='hidden' name='tapa' value = 'JT'>
-										<input type='Submit' Style='font-size: 8pt; padding:0;' value='".t("Jälkitoim")."'>
+										<input type='Submit' value='".t("Jälkitoim")."'>
 									</form>
 								</td>";
 					}
@@ -3420,7 +3420,7 @@ if ($tee == '') {
 										<input type='hidden' name='menutila' value='$menutila'>
 										<input type='hidden' name='tila' value = 'MUUTA'>
 										<input type='hidden' name='tapa' value = 'PUUTE'>
-										<input type='Submit' Style='font-size: 8pt; padding:0;' value='".t("Puute")."'>
+										<input type='Submit' value='".t("Puute")."'>
 									</form>
 								</td>";
 					}
@@ -3435,7 +3435,7 @@ if ($tee == '') {
 										<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
 										<input type='hidden' name='menutila' value='$menutila'>
 										<input type='hidden' name='tila' value = 'OOKOOAA'>
-										<input type='Submit' Style='font-size: 8pt; padding:0;' value='".t("Hyväksy")."'>
+										<input type='Submit' value='".t("Hyväksy")."'>
 									</form>
 								</td>";
 					}
@@ -3511,7 +3511,7 @@ if ($tee == '') {
 							$lislask++;
 
 							if ($lislask == mysql_num_rows($lisaresult)) {
-								echo "<td class='back' valign='top'><input type='submit' Style='font-size: 8pt; padding:0;' value='".t("Lisää")."'></td>";
+								echo "<td class='back' valign='top'><input type='submit' value='".t("Lisää")."'></td>";
 								echo "</form>";
 							}
 
@@ -3532,7 +3532,7 @@ if ($tee == '') {
 						echo "	<input type='hidden' name='tila' value='LISLISAV'>
 								<input type='hidden' name='rivitunnus' value='$row[tunnus]'>
 								<input type='hidden' name='menutila' value='$menutila'>
-								<td class='back' valign='top' nowrap><input type='submit' Style='font-size: 8pt; padding:0;' value='".t("Lisää lisävarusteita")."'></td>
+								<td class='back' valign='top' nowrap><input type='submit' value='".t("Lisää lisävarusteita")."'></td>
 								</form>";
 						echo "</tr>";
 					}
@@ -3913,7 +3913,7 @@ if ($tee == '') {
 									<input type='hidden' name='projektilla' value='$projektilla'>
 									<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>";
 
-						echo "<select name='toim' Style='font-size: 8pt; padding:0;'>";
+						echo "<select name='toim'>";
 
 						if (file_exists("tulosta_tarjous.inc") and $toim == "TARJOUS") {
 							echo "<option value='TARJOUS'>Tarjous</option>";
@@ -3941,8 +3941,8 @@ if ($tee == '') {
 						}
 
 						echo "		</select>
-								<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."' Style='font-size: 8pt; padding:0;'>
-								<input type='submit' name='TULOSTA' value='".t("Tulosta")."' Style='font-size: 8pt; padding:0;'>
+								<input type='submit' name='NAYTATILAUS' value='".t("Näytä")."'>
+								<input type='submit' name='TULOSTA' value='".t("Tulosta")."'>
 							</form>
 							</td>
 							<td class='back' colspan='$xcolspan'></td>";
@@ -3975,7 +3975,7 @@ if ($tee == '') {
 
 					echo "<td class='spec'>$laskurow[valkoodi]</td>";
 
-					echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."' Style='font-size: 8pt; padding:0;'></form></td>
+					echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."'></form></td>
 							</tr>";
 				}
 			}

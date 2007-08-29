@@ -266,16 +266,16 @@
 						<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name='tee' value='osamaksusoppari'>
 						<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
-						<input type='Submit' value='".t("Rahoituslaskelma")."' Style='font-size: 8pt; padding:0;'>
+						<input type='Submit' value='".t("Rahoituslaskelma")."'>
 						</form>
 						<form action='$PHP_SELF' method='post'>
 						<input type='hidden' name='tee' value='vakuutushakemus'>
 						<input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
-						<input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."' Style='font-size: 8pt; padding:0;'></form>
+						<input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."'></form>
 						<form method='post' action='$PHP_SELF'>
 						<input type='hidden' name='tee' value='TULOSTA'>
 						<input type='hidden' name='otunnus' value='$row[Tilaus]'>
-						<input type='Submit' value='".t("Tulosta Lomakkeita")."' Style='font-size: 8pt; padding:0;'></form>
+						<input type='Submit' value='".t("Tulosta Lomakkeita")."'></form>
 						</td>";
 
 				echo "</tr>";

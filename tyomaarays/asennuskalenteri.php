@@ -388,7 +388,7 @@
 						
 			if (date('N', mktime(0, 0, 0, $month, $i, $year))-1 < count($DAY_ARRAY)) {
 				
-				echo "<td class='back' align='center'><b>$i</b><br>";
+				echo "<td class='back' align='center'>";
 
 				$query = "	SELECT kalenteri.kuka, kalenteri.liitostunnus, kalenteri.pvmalku, kalenteri.pvmloppu, lasku.nimi, tyomaarays.komm1
 							FROM kalenteri
@@ -430,7 +430,8 @@
 				}
 		
 				echo "<table width='100%'>";
-		
+				echo "<tr><td class='tumma' align='center' colspan='".count($ASENTAJA_ARRAY)."'><b>$i</b></th></tr>";
+				
 				for($a = 0; $a < count($AIKA_ARRAY); $a++) {
 					echo "<tr>";
 					for($b = 0; $b < count($ASENTAJA_ARRAY); $b++) {

@@ -350,16 +350,16 @@
 		echo "<table width='100%'>";
 		echo "<tr>";
 	
-		echo "<th>Aika</th>";
+		echo "<th width='5%'>Aika</th>";
 		
 		for($r=0; $r < sizeof($DAY_ARRAY); $r++) {
-			echo "	<th nowrap><b>$DAY_ARRAY[$r]</b>
+			echo "	<th width='19%' nowrap><b>$DAY_ARRAY[$r]</b>
 					<br>
 					<table width='100%'>
 					<tr>";
 				
 			for($s=0; $s < sizeof($ASENTAJA_ARRAY); $s++) {
-				echo "<td align='center' width='35' nowrap>$ASENTAJA_ARRAY[$s]</td>";
+				echo "<td align='center' nowrap>$ASENTAJA_ARRAY[$s]</td>";
 			}
 	        echo "	</tr>
 					</table>
@@ -379,7 +379,7 @@
 	
 		// Kirjotetaan alkuun tyhjiä soluja
 		for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
-			echo "<td>&nbsp;</td>";
+			echo "<td class='back'>&nbsp;</td>";
 		}
 		
 		$div_arrayt = array();
@@ -388,7 +388,7 @@
 						
 			if (date('N', mktime(0, 0, 0, $month, $i, $year))-1 < count($DAY_ARRAY)) {
 				
-				echo "<td class='day'><b>$i</b><br>";
+				echo "<td class='back' align='center'><b>$i</b><br>";
 
 				$query = "	SELECT kalenteri.kuka, kalenteri.liitostunnus, kalenteri.pvmalku, kalenteri.pvmloppu, lasku.nimi, tyomaarays.komm1
 							FROM kalenteri
@@ -437,13 +437,13 @@
 				
 						if (isset($varaukset[$b][$a])) {
 							list($nimi, $tilausnumero) = explode("|||", $varaukset[$b][$a]);
-							echo "<td class='tumma' align='center' style='width: 35px; height: 15px;'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$tilausnumero</a></th>";
+							echo "<td align='center'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$tilausnumero</a></th>";
 						}
 						elseif($liitostunnus > 0 and $tyojono != "") {
-		                    echo "<td class='tumma' align='center' style='width: 35px; height: 15px;'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$AIKA_ARRAY[$a]&tee=VARAA'>&nbsp;</a></th>";			
+		                    echo "<td align='center'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$AIKA_ARRAY[$a]&tee=VARAA'>&nbsp;</a></th>";			
 		                }				
 						else {
-							echo "<td class='tumma' align='center' style='width: 35px; height: 15px;'>&nbsp;</th>";
+							echo "<td align='center'>&nbsp;</th>";
 						}
 					}
 					echo "</tr>";
@@ -472,7 +472,7 @@
 		// Kirjotetaan loppuun tyhjiä soluja
 		if (weekday_number($i, $month, $year) < count($DAY_ARRAY) and weekday_number($i, $month, $year) > 0) {
 			for ($a = weekday_number($i, $month, $year); $a <= count($DAY_ARRAY)-1; $a++) {
-				echo "<td>&nbsp;</td>";
+				echo "<td class='back'>&nbsp;</td>";
 			}
 		}
 		echo "</tr>";

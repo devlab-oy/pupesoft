@@ -359,7 +359,7 @@
 					<tr>";
 				
 			for($s=0; $s < sizeof($ASENTAJA_ARRAY); $s++) {
-				echo "<td align='center' width='35' nowrap>$ASENTAJA_ARRAY_TARK[$s]</td>";
+				echo "<td align='center' width='35' nowrap>$ASENTAJA_ARRAY[$s]</td>";
 			}
 	        echo "	</tr>
 					</table>

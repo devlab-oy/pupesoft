@@ -923,7 +923,7 @@ if ($tila == 'kohdistaminen') {
 	echo "</form>";
 
 	//N‰ytet‰‰n laskut!
-	$kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite';
+	$kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
 	$kentankoko = array(10,10,15,10,10,15);
 	$array = split(",", $kentat);
 	$count = count($array);
@@ -963,7 +963,7 @@ if ($tila == 'kohdistaminen') {
 		$query = "SELECT summa-saldo_maksettu summa, kasumma, ";
 	}
 
-	$query .= " laskunro, erpcm, kapvm, viite, lasku.tunnus
+	$query .= " laskunro, erpcm, kapvm, viite, ytunnus, lasku.tunnus
 				FROM lasku USE INDEX (yhtio_tila_mapvm)
 	           	WHERE yhtio  = '$kukarow[yhtio]'
 				and tila     = 'U'
@@ -1027,6 +1027,7 @@ if ($tila == 'kohdistaminen') {
 		echo "<td>$maksurow[erpcm]</td>";
 		echo "<td>$maksurow[kapvm]</td>";
 		echo "<td>$maksurow[viite]</td>";
+		echo "<td>$maksurow[ytunnus]</td>";
 		echo "<th></th>";
 		echo "<td class='back'>$errormessage</td>";
 		echo "</tr>\n";
@@ -1034,7 +1035,7 @@ if ($tila == 'kohdistaminen') {
 
 	echo "<input type='hidden' name='suoritus_tunnus' value='$suoritus_tunnus'>";
 	echo "</th></tr>";
-	echo "<tr><th colspan='9'> ".t("L = lasku ilman kassa-alennusta K = lasku kassa-alennuksella")."</th></tr>";
+	echo "<tr><th colspan='10'> ".t("L = lasku ilman kassa-alennusta K = lasku kassa-alennuksella")."</th></tr>";
 	echo "</table>";
 	echo "<table>";
 	echo "<tr><th>".t("Kirjaa erotus kassa-aleen")."</th><td><input type='checkbox' name='pyoristys_virhe_ok' value='1' $pyocheck></td>";

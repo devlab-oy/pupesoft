@@ -350,10 +350,10 @@
 		echo "<table width='100%'>";
 		echo "<tr>";
 	
-		echo "<th width='5%'>Aika</th>";
+		echo "<th>Aika</th>";
 		
 		for($r=0; $r < sizeof($DAY_ARRAY); $r++) {
-			echo "	<th width='19%' nowrap><b>$DAY_ARRAY[$r]</b>
+			echo "	<th nowrap><b>$DAY_ARRAY[$r]</b>
 					<br>
 					<table width='100%'>
 					<tr>";

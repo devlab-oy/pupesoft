@@ -1,5 +1,5 @@
 <?php
-
+	
 	//Fontit
 	$headersin["font"] 					= "Helvetica-Bold";
 	$headersin["height"]				= 14;
@@ -122,6 +122,9 @@
 			
 			if($row["toimaika"] == '0000-00-00' or $row["toimaika"] == $laskurow["toimaika"]) {
 				$pdf_tarjous->draw_text(mm_pt(15), mm_pt($kala), "Toimitusaika: Avoin",		$page_tarjous, $kymppi_helvetica);
+			}
+			elseif ($row["toimaika"] != '0000-00-00' and $row["toimaika"] < $laskurow["toimaika"]) {
+				$pdf_tarjous->draw_text(mm_pt(15), mm_pt($kala), "Toimitusaika ".tv1dateconv($laskurow["toimaika"]),		$page_tarjous, $kymppi_helvetica);
 			}
 			else {
 				$pdf_tarjous->draw_text(mm_pt(15), mm_pt($kala), "Toimitusaika ".tv1dateconv($row["toimaika"]),		$page_tarjous, $kymppi_helvetica);

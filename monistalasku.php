@@ -349,6 +349,15 @@ if ($tee=='MONISTA') {
 							$values .= ", ''";
 						}
 						break;
+					case 'vienti_kurssi';
+						$vquery = "	SELECT kurssi
+									FROM valuu
+									WHERE yhtio = '$kukarow[yhtio]'
+									and nimi= '$monistarow[valkoodi]'";
+						$vresult = mysql_query($vquery) or pupe_error($vquery);
+						$valrow = mysql_fetch_array($vresult);
+						$values .= ", '$valrow[kurssi]'";
+						break;
 					default:
 						$values .= ", '".$monistarow[$i]."'";
 				}

@@ -559,10 +559,11 @@
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT lasku.nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
 						if(tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
-						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var
+						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
+						LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi in ('L','E','O','G','V','W')
 						and tilausrivi.tuoteno = '$tuoteno'
@@ -597,8 +598,8 @@
 						$tyyppi = t("Ostotilaus");
 						$merkki = "+";
 
-						if ($jtrow["laskunro"] > 0) {
-							$keikka = " / ".$jtrow["laskunro"];
+						if ($jtrow["keikkanro"] > 0) {
+							$keikka = " / ".$jtrow["keikkanro"];
 						}
 					}
 					elseif($jtrow["tyyppi"] == "E") {

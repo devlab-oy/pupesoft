@@ -82,10 +82,10 @@
 	
 	if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
 		if ($toim == 'MYYNTI') {
-			echo "<td colspan='3'>$asiakasrow[nimi]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
+			echo "<td colspan='3'>$asiakasrow[nimi] $asiakasrow[nimitark]<input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
 		}
 		if ($toim == 'OSTO') {
-			echo "<td colspan='3'>$toimittajarow[nimi]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
+			echo "<td colspan='3'>$toimittajarow[nimi] $toimittajarow[nimitark]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
 		}
 	}
 	else {

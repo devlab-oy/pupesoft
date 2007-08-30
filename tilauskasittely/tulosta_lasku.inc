@@ -378,15 +378,15 @@ if (!function_exists('rivi_otsikot')) {
 		//Laskurivien otsikkotiedot
 		if ($yhtiorow['laskutyyppi'] == 1 or $yhtiorow['laskutyyppi'] == 4) {
 			//eka rivi
-			$pdf->draw_text(35,  $kala, t("Tuotenimi", $kieli),				$thispage, $pieni);
-			$pdf->draw_text(210, $kala, t("Tuotenumero", $kieli),			$thispage, $pieni);
+			$pdf->draw_text(20,  $kala, t("Tuotenimi", $kieli),				$thispage, $pieni);
+			$pdf->draw_text(250, $kala, t("Tuotenumero", $kieli),			$thispage, $pieni);
 			$pdf->draw_text(360, $kala, t("Määrä", $kieli),					$thispage, $pieni);
 			$pdf->draw_text(430, $kala, t("A-hinta", $kieli),				$thispage, $pieni);
 			$pdf->draw_text(475, $kala, t("Alennus", $kieli)."-%",			$thispage, $pieni);
 			$pdf->draw_text(530, $kala, t("Veroton arvo", $kieli),			$thispage, $pieni);
 			                                                            	
 			//toka rivi                                                 	
-			$pdf->draw_text(35,  $kala-9, t("Lisätietoja", $kieli),			$thispage, $pieni);
+			$pdf->draw_text(20,  $kala-9, t("Lisätietoja", $kieli),			$thispage, $pieni);
 		}
 		else {
 			//eka rivi
@@ -740,15 +740,15 @@ if (!function_exists('rivi_plain_2')) {
 		}
 		
 		// rivitetään tuotenimitys
-		// jos pidempi kuin 34 merkkiä niin tehdään pidempi kommenttirivi
+		// jos pidempi kuin 68 merkkiä niin tehdään pidempi kommenttirivi
 		// ja rivitetään
-		if (strlen($row['nimitys']) > 34) {
+		if (strlen($row['nimitys']) > 68) {
 			$kala2 = $kala;
 			$rivit = explode("\n", wordwrap($row['nimitys'], 90, "\n"));
 			$pos = 0;
 			for ($i=0; $i<count($rivit); $i++) {
 				$kala2 = $kala - (15 * $i);
-				$pdf->draw_text(35,  $kala2, $rivit[$i],	$thispage, $norm);
+				$pdf->draw_text(20,  $kala2, $rivit[$i],	$thispage, $norm);
 				$pos += 27;
 			}
 
@@ -758,10 +758,10 @@ if (!function_exists('rivi_plain_2')) {
 		} 
 		else {
 			// lyhyt kommentti
-			$pdf->draw_text(35,  $kala, $row['nimitys'],	$thispage, $norm);
+			$pdf->draw_text(20,  $kala, $row['nimitys'],	$thispage, $norm);
 		}
 
-		$pdf->draw_text(210, $kala, $row["tuoteno"], 	$thispage, $norm);
+		$pdf->draw_text(250, $kala, $row["tuoteno"], 	$thispage, $norm);
 		
 		$oikpos = $pdf->strlen($row["kpl"], $norm);
 		$pdf->draw_text(380-$oikpos, $kala, $row["kpl"], 			$thispage, $norm);
@@ -794,7 +794,7 @@ if (!function_exists('rivi_plain_2')) {
 		
 		$kala = $kala - 10;
 
-		$pdf->draw_text(35,  $kala, $row["kommentti"],	$thispage, $pieni);
+		$pdf->draw_text(20,  $kala, $row["kommentti"],	$thispage, $pieni);
 		
 		$kala = $kala - 15;
 

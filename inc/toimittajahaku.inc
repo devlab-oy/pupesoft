@@ -1,9 +1,9 @@
 <?php
 
 	echo "<font class='head'>".t("Toimittajan laskut")."</font><hr>";
-	
-	if ($tee == 'A') { // N‰ytet‰‰n toimittajan laskuja
-
+		
+	if ($tee == 'A') {
+		// N‰ytet‰‰n toimittajan laskuja
 		//Jos k‰ytet‰‰n $tunnusta niin k‰ytet‰‰n liitostunnusta
 		//Jos taas p‰‰ss‰t‰‰n $ytunnusta niin haetaan sen perusteella
 		 
@@ -22,6 +22,7 @@
 		 	$trow=mysql_fetch_array ($result);
 			
 			echo "<b>$trow[ytunnus]</b> $trow[nimi] $trow[postitp]<br><br>";
+			
 			$lisa='';
 			
 			if (!isset($kausi)) $kausi='';
@@ -121,6 +122,8 @@
 				
 				echo "<br>";
 				
+				echo "<a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO'>N‰yt‰ kaikki laskut</a><br><br>";
+				
 				$lisa = '';
 			
 				if ($laji=='M'){
@@ -133,6 +136,10 @@
 				if ($laji == 'o') $lisa = " and tapvm = '$kausi'";
 			 
 				$alku += 0;
+				
+				if ($limit != "NO") {
+					$limlis = " LIMIT $alku, 50 ";
+				}
 
 				$query = "	SELECT tapvm, erpcm, summa, valkoodi, ebid, tila, tunnus
 						  	FROM lasku
@@ -141,7 +148,7 @@
 							$lisa
 						  	and tila in ('H', 'M', 'P', 'Q', 'Y')  
 						  	ORDER BY tapvm desc 
-							LIMIT $alku, 50";			
+							$limlis";			
 				$result = mysql_query($query) or pupe_error($query);
 				$seraavako = mysql_num_rows($result);
 
@@ -155,8 +162,11 @@
 				}
 				echo "</tr>";
 
+				$yhteensa = 0;
+				
 				while ($trow=mysql_fetch_array ($result)) {
 					echo "<tr class='aktiivi'>";
+					
 					for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
 						if ($i == 4) {
 							// tehd‰‰n lasku linkki
@@ -165,12 +175,12 @@
 						else {
 							if ($i == 0) { // Linkki tositteelle
 								if ($kukarow['taso'] < 2) {
-									echo "<td>$trow[tapvm]</td>";
+									echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 								}
 								else {
 									echo "<td>";
 									echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>";
-									echo "$trow[$i]</td>";
+									echo tv1dateconv($trow[$i])."</td>";
 								}
 							}
 							else {
@@ -178,6 +188,14 @@
 									$laskutyyppi = $trow[$i];
 									require "inc/laskutyyppi.inc";
 									echo "<td>$laskutyyppi</td>";
+								}
+								elseif ($i == 1) {
+									echo "<td align='right'>".tv1dateconv($trow[$i])."</td>";									
+								}
+								elseif ($i == 2) {
+									echo "<td align='right'>$trow[$i]</td>";
+									
+									$yhteensa += $trow[$i];
 								}
 								else {
 									echo "<td>$trow[$i]</td>";
@@ -187,22 +205,25 @@
 					}
 					echo "</tr>";
 				}
-				echo "</table><br>";
-			
-				if ($alku > 0) {
-					$siirry = $alku - 50;
-					echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Edelliset")."</a> ";
-				}
-				else {
-					echo t("Edelliset")." ";
-				}
-			
-				if ($seraavako >= 50) {
-					$siirry = $alku + 50;
-					echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Seuraavat")."</a> ";
-					echo "<br><br>";
-				}
 				
+				echo "<tr><th colspan='2'>".t("Yhteens‰:")."</th><td>$yhteensa</td></tr>";
+				echo "</table><br>";
+				
+				if ($limit != "NO") {
+					if ($alku > 0) {
+						$siirry = $alku - 50;
+						echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Edelliset")."</a> ";
+					}
+					else {
+						echo t("Edelliset")." ";
+					}
+			
+					if ($seraavako >= 50) {
+						$siirry = $alku + 50;
+						echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Seuraavat")."</a> ";
+						echo "<br><br>";
+					}
+				}
 				require "footer.inc";
 				exit;
 			}

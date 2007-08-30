@@ -1208,7 +1208,13 @@
 					// itse print komento...
 					if ($komento["Lasku"] == 'email') {
 						$liite = $pdffilenimi;
-						$kutsu = "Lasku";
+						if($laskurow["laskunro"] > 0) {
+							$kutsu = "Lasku {$laskurow["laskunro"]}";
+						}
+						else {
+							$kutsu = "Lasku";
+						}
+						
 
 						require("../inc/sahkoposti.inc");
 					}

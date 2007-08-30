@@ -1015,7 +1015,10 @@
 								
 								echo "<td class='tumma' align='right'>$vsum</td>";
 								
-								$worksheet->writeNumber($excelrivi, $excelsarake, $vsum, $format_bold);
+								if(isset($workbook)) {
+									$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
+								}
+								
 								$excelsarake++;
 								
 							}
@@ -1110,7 +1113,10 @@
 						
 						echo "<td class='tumma' align='right'>$vsum</td>";
 						
-						$worksheet->writeNumber($excelrivi, $excelsarake, $vsum, $format_bold);
+						if(isset($workbook)) {
+							$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
+						}
+						
 						$excelsarake++;
 						
 					}
@@ -1146,7 +1152,7 @@
 					echo "<td class='tumma' align='right'>$vsum</td>";
 
 					if(isset($workbook)) {
-						$worksheet->writeNumber($excelrivi, $excelsarake, $vsum, $format_bold);
+						$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
 						$excelsarake++;
 					}
 				}

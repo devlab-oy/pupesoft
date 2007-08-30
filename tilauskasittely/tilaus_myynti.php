@@ -414,6 +414,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
 			// dellataan koko rivi jos sit‰ ei ole viel‰ myyty
 			$query = "delete from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
 			$sarjares = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_affected_rows() == 0) {
 				// merkataan osorivitunnus nollaksi
 				$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
@@ -588,6 +589,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 			// dellataan koko rivi jos sit‰ ei ole viel‰ myyty
 			$query = "delete from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
 			$sarjares = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_affected_rows() == 0) {
 				// merkataan osorivitunnus nollaksi
 				$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
@@ -1807,7 +1809,10 @@ if ($tee == '') {
 			// Tehd‰‰n pari juttua jos tuote on sarjanumeroseurannassa
 			if ($tilausrivi["sarjanumeroseuranta"] != '') {
 				//Nollataan sarjanumero
-				if ($tilausrivi["varattu"] < 0) {
+				if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
+					$tunken = "siirtorivitunnus";
+				}
+				elseif ($tilausrivi["varattu"] < 0) {
 					$tunken = "ostorivitunnus";
 				}
 				else {
@@ -3502,10 +3507,10 @@ if ($tee == '') {
 							echo "<td valign='top'><input type='text' name='kpl_array[$prow[tuoteno]]'   size='2' maxlength='8'		Style='font-size: 8pt; padding:0;'></td>";
 
 							if ($toim != "SIIRTOTYOMAARAYS") {
-								echo "<td valign='top'><input type='text' name='var_array[$prow[tuoteno]]'   size='2' maxlength='1' 	Style='font-size: 8pt; padding:0;'></td>
-								  	<td valign='top'><input type='text' name='hinta_array[$prow[tuoteno]]' size='5' maxlength='12' 	Style='font-size: 8pt; padding:0;'></td>
-								  	<td valign='top'><input type='text' name='ale_array[$prow[tuoteno]]'   size='5' maxlength='6' 	Style='font-size: 8pt; padding:0;'></td>
-								  	<td valign='top'><input type='text' name='netto_array[$prow[tuoteno]]' size='2' maxlength='1' 	Style='font-size: 8pt; padding:0;'></td>";
+								echo "	<td valign='top'><input type='text' name='var_array[$prow[tuoteno]]'   size='2' maxlength='1'></td>
+										<td valign='top'><input type='text' name='netto_array[$prow[tuoteno]]' size='2' maxlength='1'></td>  	
+										<td valign='top'><input type='text' name='hinta_array[$prow[tuoteno]]' size='5' maxlength='12'></td>
+								  		<td valign='top'><input type='text' name='ale_array[$prow[tuoteno]]'   size='5' maxlength='6'></td>";
 							}
 
 							$lislask++;

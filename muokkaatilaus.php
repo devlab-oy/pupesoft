@@ -491,7 +491,7 @@
 		$miinus = 3;
 	}
 	elseif ($toim == "VALMISTUSMYYNTI") {
-		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra, tilaustyyppi
+		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.viesti, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra, tilaustyyppi
 					FROM lasku use index (tila_index)
 					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
 					$seurantalisa
@@ -518,8 +518,9 @@
 		$miinus = 4;
 	}
 	elseif ($toim == "VALMISTUSMYYNTISUPER") {
-		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila, tilaustyyppi
+		$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.viesti, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra, tilaustyyppi
 					FROM lasku use index (tila_index)
+					LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
 					WHERE lasku.yhtio = '$kukarow[yhtio]'
 					and tila in ('L','N','V')
 					and alatila not in ('X','V')
@@ -541,7 +542,7 @@
 		$sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 		$sumrow = mysql_fetch_array($sumresult);
 
-		$miinus = 3;
+		$miinus = 4;
 	}
 	elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
 		$query = "	SELECT tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila

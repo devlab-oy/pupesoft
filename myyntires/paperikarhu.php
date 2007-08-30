@@ -25,12 +25,10 @@
 
 	function alku ($viesti = null) {
 		global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu,
-			$rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli;
+			$rectparam, $norm, $pieni, $boldi, $kaatosumma, $kieli, $_POST;
 
 		$firstpage = $pdf->new_page("a4");
 		$pdf->enable('template');
-		$tid = $pdf->template->create();
-		$pdf->template->size($tid, 600, 830);
 
 		//Haetaan yhteyshenkilon tiedot
 		$apuqu = "	select *
@@ -40,40 +38,87 @@
 		$yrow = mysql_fetch_array($yres);
 
 		//Otsikko
-		//$pdf->draw_rectangle(830, 20,  800, 580, $firstpage, $rectparam);
-		$pdf->draw_text(30, 805,  $yhtiorow["nimi"], $firstpage);
 		$pdf->draw_text(320, 780, t("MAKSUKEHOTUS", $kieli), 	$firstpage);
 		$pdf->draw_text(470, 780, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
-
-		// l‰hett‰j‰
-		//$pdf->draw_text(mm_pt(22), mm_pt(272), t("L‰hett‰j‰", $kieli), 	$firstpage, $pieni);
-		$iso = array('height' => 11, 'font' => 'Times-Roman');
-		$pdf->draw_text(mm_pt(22), mm_pt(268), strtoupper($yhtiorow["nimi"]), 		$firstpage, $iso);
-		$pdf->draw_text(mm_pt(22), mm_pt(264), strtoupper($yhtiorow["nimitark"]), 	$firstpage, $iso);
-		$pdf->draw_text(mm_pt(22), mm_pt(260), strtoupper($yhtiorow["osoite"]), 		$firstpage, $iso);
-		$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]), $firstpage, $iso);
-		//$pdf->draw_text(mm_pt(22), mm_pt(252), strtoupper($yhtiorow["maa"]), 		$firstpage, $iso);
 		
-		// vastaanottaja
-		//$pdf->draw_rectangle(737, 20,  674, 300, $firstpage, $rectparam);
-		//$pdf->draw_text(mm_pt(22), mm_pt(237), t("Vastaanottaja", $kieli), 	$firstpage, $pieni);
-		$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["nimi"]), 		$firstpage, $iso);
-		$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["nimitark"]), 	$firstpage, $iso);
-		$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["osoite"]), 		$firstpage, $iso);
-		$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iso);
-		
-		// jos vastaanottaja on eri maassa kuin yhtio niin lis‰t‰‰n maan nimi
-		if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
-			$query = sprintf(
-					"SELECT nimi from maat where koodi='%s' AND ryhma_tunnus = ''",
-					mysql_real_escape_string($asiakastiedot['maa'])
-			);
+		//Yhtiˆn nimi
+		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"]) and isset($_POST['ekirje_laheta']) === false) {
 			
-			$maa_result = mysql_query($query) or pupe_error($query);
-			$maa_nimi = mysql_fetch_array($maa_result);
-			$pdf->draw_text(mm_pt(22), mm_pt(218), $maa_nimi['nimi'], $firstpage, $iso);
+			$filename = $yhtiorow["lasku_logo"];
+
+			$fh = fopen($filename, "r");
+			$data = fread($fh, filesize($filename));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+
+			if(!$image) {
+				echo t("Logokuvavirhe").": ".$image.$data;
+			}
+			else {
+				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+				
+				$logoparam = array();
+				
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
+					$logoparam['scale'] = 120 / $isizelogo[0];
+				}
+				else {
+					$logoparam['scale'] = 50  / $isizelogo[1];
+				}
+								
+				$placement = $pdf->image_place($image, 785, 20, $firstpage, $logoparam);
+			}
+		}
+		else {
+			$pdf->draw_text(30, 805,  $yhtiorow["nimi"], $firstpage);
 		}
 		
+		if (isset($_POST['ekirje_laheta']) === false) {
+			// vastaanottaja
+			$pdf->draw_text(50, 720, $asiakastiedot["nimi"], 															$firstpage, $iso);
+			$pdf->draw_text(50, 708, $asiakastiedot["nimitark"], 														$firstpage, $iso);
+			$pdf->draw_text(50, 694, $asiakastiedot["osoite"], 															$firstpage, $iso);
+			$pdf->draw_text(50, 681, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"],							$firstpage, $iso);
+			
+			// jos vastaanottaja on eri maassa kuin yhtio niin lis‰t‰‰n maan nimi
+			if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
+				$query = sprintf(
+						"SELECT nimi from maat where koodi='%s' AND ryhma_tunnus = ''",
+						mysql_real_escape_string($asiakastiedot['maa'])
+				);
+			
+				$maa_result = mysql_query($query) or pupe_error($query);
+				$maa_nimi = mysql_fetch_array($maa_result);
+				$pdf->draw_text(50, 668, $asiakastiedot["maa"], 														$firstpage, $iso);
+			}
+		}
+		else {
+			// l‰hett‰j‰
+			$iso = array('height' => 11, 'font' => 'Times-Roman');
+			$pdf->draw_text(mm_pt(22), mm_pt(268), strtoupper($yhtiorow["nimi"]), 										$firstpage, $iso);
+			$pdf->draw_text(mm_pt(22), mm_pt(264), strtoupper($yhtiorow["nimitark"]), 									$firstpage, $iso);
+			$pdf->draw_text(mm_pt(22), mm_pt(260), strtoupper($yhtiorow["osoite"]), 									$firstpage, $iso);
+			$pdf->draw_text(mm_pt(22), mm_pt(256), strtoupper($yhtiorow["postino"]." ".$yhtiorow["postitp"]), 			$firstpage, $iso);
+		
+			// vastaanottaja
+			$pdf->draw_text(mm_pt(22), mm_pt(234), strtoupper($asiakastiedot["nimi"]), 									$firstpage, $iso);
+			$pdf->draw_text(mm_pt(22), mm_pt(230), strtoupper($asiakastiedot["nimitark"]), 								$firstpage, $iso);
+			$pdf->draw_text(mm_pt(22), mm_pt(226), strtoupper($asiakastiedot["osoite"]), 								$firstpage, $iso);
+			$pdf->draw_text(mm_pt(22), mm_pt(222), strtoupper($asiakastiedot["postino"]." ".$asiakastiedot["postitp"]), $firstpage, $iso);
+		
+			// jos vastaanottaja on eri maassa kuin yhtio niin lis‰t‰‰n maan nimi
+			if ($yhtiorow['maa'] != $asiakastiedot['maa']) {
+				$query = sprintf(
+						"SELECT nimi from maat where koodi='%s' AND ryhma_tunnus = ''",
+						mysql_real_escape_string($asiakastiedot['maa'])
+				);
+			
+				$maa_result = mysql_query($query) or pupe_error($query);
+				$maa_nimi = mysql_fetch_array($maa_result);
+				$pdf->draw_text(mm_pt(22), mm_pt(218), $maa_nimi['nimi'], 												$firstpage, $iso);
+			}
+		}	
 
 		//Oikea sarake
 		$pdf->draw_rectangle(760, 320, 739, 575, 				$firstpage, $rectparam);
@@ -182,7 +227,6 @@
 		return($summa);
 	}
 
-
 	function loppu ($firstpage, $summa) {
 
 		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $factoringrow, $maksuehtotiedot;
@@ -255,7 +299,6 @@
 
 	require('pdflib/phppdflib.class.php');
 
-	//echo "<font class='message'>Karhukirje tulostuu...</font>";
 	flush();
 
 	//PDF parametrit
@@ -376,11 +419,9 @@
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
 	fclose($fh);
 	
-	
 	// jos halutaan eKirje sek‰ configuraatio on olemassa niin
 	// l‰hetet‰‰n eKirje
-	if (isset($_POST['ekirje_laheta']) === true
-	and (isset($ekirje_config) and is_array($ekirje_config))) {
+	if (isset($_POST['ekirje_laheta']) === true and (isset($ekirje_config) and is_array($ekirje_config))) {
 		
 		// ---------------------------------------------------------------------
 		// t‰h‰n ekirjeen l‰hetys
@@ -436,7 +477,6 @@
 	
 	// tulostetaan jos ei l‰hetet‰ ekirjett‰
 	if (isset($_POST['ekirje_laheta']) === false) {
-		
 		// itse print komento...
 		$query = "	select komento
 					from kirjoittimet

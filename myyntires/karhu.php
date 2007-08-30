@@ -33,7 +33,6 @@ if ($tee == 'LAHETA') {
 	if (! empty($_POST['lasku_tunnus'])) {
 		
 		try {
-		
 			// koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
 			require ('paperikarhu.php');
 

@@ -40,10 +40,34 @@
 		echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 		echo "</table><br>";
 
+		/*
 		foreach($ulos as $print) {
 			echo "$print<br>";
 		}
+		*/
+		
+		$curlfile = "/tmp/".$tmpfilenimi;
+		
+		$ch  = curl_init();
+		curl_setopt ($ch, CURLOPT_URL, "http://www.pupesoft.com/sqlupdate/index.php");
+		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+		curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+		curl_setopt ($ch, CURLOPT_HEADER, 1);
+		curl_setopt ($ch, CURLOPT_POST, 1);
+		curl_setopt ($ch, CURLOPT_POSTFIELDS, array('tee' => "remotefile", 'userfile' => "@$curlfile"));
+		curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt ($ch, CURLOPT_HEADER, FALSE);
+		$result = curl_exec ($ch);
 
+		if ($result === FALSE) { 
+			echo "<font class='error'>VIRHE:</font><br>";
+		   	echo curl_errno($ch) . " - " . curl_error($ch) . "</font><br>";
+		}
+		curl_close ($ch);
+		
+		echo "<pre>$result</pre>";
+		
+				
 		require("inc/footer.inc");
 	}
 

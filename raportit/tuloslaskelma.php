@@ -33,12 +33,12 @@
 		if ($tyyppi == "1") {
 			// Vastaavaa Varat
 			$kirjain = "U";
-			$aputyyppi = 1;	
+			$aputyyppi = 1;
 		}
 		elseif ($tyyppi == "2") {
 			// Vastattavaa Velat
 			$kirjain = "U";
-			$aputyyppi = 2;		
+			$aputyyppi = 2;
 		}
 		elseif ($tyyppi == "3") {
 			// Ulkoinen tuloslaskelma
@@ -152,10 +152,10 @@
 
 		// sortataan array indexin (tason) mukaan
 		ksort($tasonimi);
-		
+
 		// loopataan tasot läpi
 		foreach ($tasonimi as $key => $value) {
-			
+
 			$key = str_replace("Ö", "", $key); // Ö-kirjaimet pois
 
 			// tulostaan rivi vain jos se kuuluu rajaukseen
@@ -172,7 +172,7 @@
 				$rivi .= "<th>$value</th>";
 				foreach ($kaudet as $kausi) {
 
-					// formatoidaan luku toivottuun muotoon 
+					// formatoidaan luku toivottuun muotoon
 					$apu = sprintf($muoto, $summa[$kausi][$key] / $tarkkuus);
 
 					if ($apu == 0) {
@@ -185,7 +185,7 @@
 					$rivi .= "<td class='$class' align='right'>$apu</td>";
 				}
 				$rivi .= "</tr>\n";
-				
+
 				// kakkostason jälkeen aina yks tyhjä rivi.. paitsi jos otetaan vain kakkostason raportti
 				if (strlen($key) == 2 and $rtaso > 2) {
 					$rivi .= "<tr><td class='back'>&nbsp;</td></tr>";
@@ -193,7 +193,7 @@
 
 				// jos jollain kaudella oli summa != 0 niin tulostetaan rivi
 				if ($tulos > 0) echo $rivi;
-	
+
 			}
 		}
 
@@ -360,9 +360,9 @@
 				<option $sel[2] value='2'>".t("Taso 1")."</option>
 				<option $sel[3] value='3'>".t("Taso 2")."</option>
 				<option $sel[4] value='4'>".t("Taso 3")."</option>
-				<option $sel[5] value='5'>".t("Taso 4")."</option>
-				<option $sel[6] value='6'>".t("Tili taso")."</option>
-				</select></td></tr>";
+				<option $sel[5] value='5'>".t("Taso 4")."</option>";
+//	echo "<option $sel[6] value='6'>".t("Tili taso")."</option>";
+	echo "</select></td></tr>";
 
 	$sel = array();
 	if ($tarkkuus == "") $tarkkuus = 1;

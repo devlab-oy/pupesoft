@@ -313,7 +313,8 @@
 				$csp = 6;
 			}
 			
-			echo "<tr><td colspan='$csp'>".t("Yhteensä").":</td><td>".sprintf('%01.2f', $kplsumma)."</td><td>".sprintf('%01.2f', $hintasumma)."</td><td>".sprintf('%01.2f', $rivihintasumma)."</td><td colspan='2'></td></tr>";
+			echo "<tr><td colspan='$csp'>".t("Yhteensä").":</td><td>".sprintf('%01.2f', $kplsumma)."</td><td>".sprintf('%01.2f', $hintasumma)."</td><td>".sprintf('%01.2f', $rivihintasumma)."</td></tr>";
+			echo "</table>";
 			
 			if(isset($workbook)) {
 				if($toim == "OSTO") {
@@ -328,23 +329,23 @@
 				}
 				$workbook->close();
 				
-				echo "<table>";
+				echo "<br><table>";
 				echo "<tr><th>".t("Tallenna tulos").":</th>";
 				echo "<form method='post' action='$PHP_SELF'>";
 				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+				
 				if($toim == "MYYNTI") {
 					echo "<input type='hidden' name='kaunisnimi' value='Asiakkaan_tuoteostot-$ytunnus.xls'>";
 				}
 				else {
 					echo "<input type='hidden' name='kaunisnimi' value='Toimittajalta_tilatut-$ytunnus.xls'>";
 				}
+				
 				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
 				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table><br>";
+				echo "</table>";
 							
-			}
-			
-			echo "</table>";
+			}	
 		}
 		
 		else {

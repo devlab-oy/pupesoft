@@ -424,7 +424,47 @@
 			foreach ($jarjestys as $i => $arvo) {
 				if ($ruksit[$i] != "") $apu[] = $ruksit[$i];
 			}
+			
+			if ($asiakasosasto != "") {
+				if ($group!="") $group .= ",asiakas.osasto";
+				else $group .= "asiakas.osasto";
+				$select .= "asiakas.osasto asos, ";
+				$order  .= "asiakas.osasto+0,";
+				$gluku++;
+			}
 
+			if ($asiakasryhma != "") {
+				if ($group!="") $group .= ",asiakas.ryhma";
+				else $group .= "asiakas.ryhma";
+				$select .= "asiakas.ryhma asry, ";
+				$order  .= "asiakas.ryhma+0,";
+				$gluku++;
+			}
+
+			if ($mul_osasto  != "") {
+				if ($group!="") $group .= ",tuote.osasto";
+				else $group .= "tuote.osasto";
+				$select .= "tuote.osasto tuos, ";
+				$order  .= "tuote.osasto+0,";
+				$gluku++;
+			}
+
+			if ($mul_try != "") {
+				if ($group!="") $group .= ",tuote.try";
+				else $group .= "tuote.try";
+				$select .= "tuote.try 'tuoteryhmä', ";
+				$order  .= "tuote.try+0,";
+				$gluku++;
+			}
+
+			if ($mul_piiri != "") {
+				if ($group!="") $group .= ",asiakas.piiri";
+				else $group .= "asiakas.piiri";
+				$select .= "asiakas.piiri aspiiri, ";
+				$order  .= "asiakas.piiri+0,";
+				$gluku++;
+			}
+			
 			foreach ($apu as $mukaan) {
 
 				if ($mukaan == "ytunnus" and $osoitetarrat == "") {
@@ -536,46 +576,6 @@
 					$order  .= "lasku.myyja,";
 					$gluku++;
 				}
-			}
-
-			if ($asiakasosasto != "") {
-				if ($group!="") $group .= ",asiakas.osasto";
-				else $group .= "asiakas.osasto";
-				$select .= "asiakas.osasto asos, ";
-				$order  .= "asiakas.osasto+0,";
-				$gluku++;
-			}
-
-			if ($asiakasryhma != "") {
-				if ($group!="") $group .= ",asiakas.ryhma";
-				else $group .= "asiakas.ryhma";
-				$select .= "asiakas.ryhma asry, ";
-				$order  .= "asiakas.ryhma+0,";
-				$gluku++;
-			}
-
-			if ($mul_osasto  != "") {
-				if ($group!="") $group .= ",tuote.osasto";
-				else $group .= "tuote.osasto";
-				$select .= "tuote.osasto tuos, ";
-				$order  .= "tuote.osasto+0,";
-				$gluku++;
-			}
-
-			if ($mul_try != "") {
-				if ($group!="") $group .= ",tuote.try";
-				else $group .= "tuote.try";
-				$select .= "tuote.try tury, ";
-				$order  .= "tuote.try+0,";
-				$gluku++;
-			}
-
-			if ($mul_piiri != "") {
-				if ($group!="") $group .= ",asiakas.piiri";
-				else $group .= "asiakas.piiri";
-				$select .= "asiakas.piiri aspiiri, ";
-				$order  .= "asiakas.piiri+0,";
-				$gluku++;
 			}
 
 			if ($asiakasryhma  == "kaikki") {
@@ -833,7 +833,7 @@
 										WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO' and avainsana.selite='$row[$i]' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
-								$osrow= mysql_fetch_array($osre);
+								$osrow = mysql_fetch_array($osre);
 								$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 							}
 						}
@@ -846,7 +846,7 @@
 										WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA' and avainsana.selite='$row[$i]' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
-								$osrow= mysql_fetch_array($osre);
+								$osrow = mysql_fetch_array($osre);
 								$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 							}
 						}
@@ -859,20 +859,20 @@
 										WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='OSASTO' and avainsana.selite='$row[$i]' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
-								$osrow= mysql_fetch_array($osre);
+								$osrow = mysql_fetch_array($osre);
 								$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 							}
 						}
 
 						// jos kyseessa on tuoteosasto, haetaan sen nimi
-						if (mysql_field_name($result, $i) == "tury") {
+						if (mysql_field_name($result, $i) == "tuoteryhmä") {
 							$query = "	SELECT avainsana.selite, ".avain('select')."
 										FROM avainsana
 										".avain('join','TRY_')."
 										WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='TRY' and avainsana.selite='$row[$i]' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
-								$osrow= mysql_fetch_array($osre);
+								$osrow = mysql_fetch_array($osre);
 								$row[$i] = $row[$i] ." ". $osrow['selitetark'];
 							}
 						}
@@ -884,7 +884,7 @@
 										WHERE yhtio in ($yhtio) and ytunnus='$row[$i]' and ytunnus!='' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
-								$osrow= mysql_fetch_array($osre);
+								$osrow = mysql_fetch_array($osre);
 								$row[$i] = $row[$i] ." ". $osrow['nimi'];
 							}
 						}
@@ -896,7 +896,7 @@
 										WHERE yhtio in ($yhtio) and myyja='$row[$i]' and myyja!='0' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
-								$osrow= mysql_fetch_array($osre);
+								$osrow = mysql_fetch_array($osre);
 								$row[$i] = $row[$i] ." ". $osrow['nimi'];
 							}
 						}
@@ -908,7 +908,7 @@
 										WHERE yhtio in ($yhtio) and myyja='$row[$i]' and myyja!='0' limit 1";
 							$osre = mysql_query($query) or pupe_error($query);
 							if (mysql_num_rows($osre) == 1) {
-								$osrow= mysql_fetch_array($osre);
+								$osrow = mysql_fetch_array($osre);
 								$row[$i] = $row[$i] ." ". $osrow['nimi'];
 							}
 						}
@@ -970,7 +970,7 @@
 								$osre = mysql_query($query) or pupe_error($query);
 
 								if (mysql_num_rows($osre) > 0) {
-									$osrow= mysql_fetch_array($osre);
+									$osrow = mysql_fetch_array($osre);
 									$row[$i] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=$osrow[sarjanumero]'>".$osrow['sarjanumero']."</a><br>";
 								}
 							}
@@ -984,6 +984,7 @@
 							$row[$i] = $varvo;
 						}
 						
+						// jos kyseessa on varastonkierto
 						if (mysql_field_name($result, $i) == "kierto") {
 							$row[$i] = $kierto;
 						}
@@ -1030,7 +1031,7 @@
 						$edluku = $row[0];
 						
 						// hoidetaan pisteet piluiksi!!
-						if (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate') {
+						if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate')) {
 							echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
 							if(isset($workbook)) {

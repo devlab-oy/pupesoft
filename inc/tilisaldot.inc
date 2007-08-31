@@ -63,7 +63,7 @@
 				$lisa = "tapvm >= '$alkupvm' and tapvm < '$loppupvm'";
 			}
 		}
-		if ($tilino!='') 
+		if ($tilino!='') {
 			$query = "	SELECT tapvm, tiliointi.tilino, nimi, count(*) Vientejä, sum(summa) Saldo
 						FROM tiliointi
 						LEFT JOIN tili ON tili.yhtio = '$kukarow[yhtio]' and tiliointi.tilino = tili.tilino
@@ -72,22 +72,32 @@
 							$lisa
 						GROUP BY tapvm, tiliointi.tilino
 						ORDER BY tapvm";
-	    else
-	    $query = "	SELECT tiliointi.tilino, nimi, count(*) Vientejä, sum(summa) Saldo
-					FROM tiliointi
-					LEFT JOIN tili ON tili.yhtio = '$kukarow[yhtio]' and tiliointi.tilino = tili.tilino
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
-						tiliointi.korjattu='' and
-						$lisa
-					GROUP BY tiliointi.tilino
-					ORDER BY tiliointi.tilino";
-
+		}
+	    else {
+			$query = "	SELECT tiliointi.tilino, nimi, count(*) Vientejä, sum(summa) Saldo
+						FROM tiliointi
+						LEFT JOIN tili ON tili.yhtio = '$kukarow[yhtio]' and tiliointi.tilino = tili.tilino
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+							tiliointi.korjattu='' and
+							$lisa
+						GROUP BY tiliointi.tilino
+						ORDER BY tiliointi.tilino";
+		}
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";
 		for ($i = 0; $i < mysql_num_fields($result); $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i)) . "</font></th>";
+			
+			if(isset($workbook)) {
+				$worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+			}
 		}
+		
+		if(isset($workbook)) {
+			$excelrivi++;
+		}
+		
 		if (($tilino != '') and ($kumulat == 'on')) echo "<th>".t("kumulatiivinen")."</th>";
 		echo "</tr>";
 		
@@ -112,12 +122,21 @@
 						else
 							echo "<td><a href='raportit.php?toim=paakirja&tee=K&tili=$trow[$i]&tkausi=$tkausi'>$trow[$i]</a></td>";
 				}
-				else 
+				else {
 					echo "<td>$trow[$i]</td>";
+				}
+				
+				if(isset($workbook)) {
+					$worksheet->write($excelrivi, $i, $trow[$i]);
+				}
 			}
 			$summa += $trow['Saldo'];
 			if (($tilino != '') and ($kumulat == 'on')) echo "<td align = 'right'>$summa</td>";
 			echo "</tr>";
+			
+			if(isset($workbook)) {
+				$excelrivi++;
+			}
 		}
 		echo "</table><br>";
 	}
@@ -164,8 +183,10 @@
 				</td></tr>
 				<tr><th>".t("per päivä tilistä")."</th>
 				<td><input type = 'text' name = 'tilino'></td></tr>								
-				<th>".t("kumulatiivinen")."</th>
+				<tr><th>".t("kumulatiivinen")."</th>
 				<td><input type = 'checkbox' name = 'kumulat'></td></tr>
+				<tr><th>".t("Tee Excel")."</th>
+				<td><input type = 'checkbox' name = 'excel'  value = 'YES'></td></tr>
 				<tr><th><input type = 'submit' value = '".t("Näytä")."'></th><td></td></tr></table></form>";
 	}
 

@@ -172,8 +172,8 @@
 		echo "</tr>";
 		echo "<tr><th>".t("Vain asiakas")."</th><td><input type='text' name='asia_ytunnus' value='$asiakasrow[ytunnus]'> $asiakasrow[nimi] <input type='hidden' name='asiakasid' value='$asiakasid'></td></tr>";
 		echo "<tr><th>".t("Vain toimittaja")."</th><td><input type='text' name='toim_ytunnus' value='$toimittajarow[ytunnus]'> $toimittajarow[nimi] <input type='hidden' name='toimittajaid' value='$toimittajaid'></td></tr>";
-		echo "<tr><th>".t("Excel muoto")."</th><td><input type='checkbox' name='excel'></td></tr>";
 		echo "<tr><th>".t("Vain k‰sin viedyt")."</th><td><input type='checkbox' name='kasin'></td></tr>";
+		echo "<tr><th>".t("Tee Excel")."</th><td><input type='checkbox' name='excel' value = 'YES'></td></tr>";		
 		echo "</table><br>
 		      <input type = 'submit' value = '".t("N‰yt‰")."'></form>";
 		$formi = 'valinta';
@@ -309,13 +309,23 @@
 	echo "<table><tr>";
 	for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
 		echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
+		
+		if(isset($workbook)) {
+			$worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+		}
 	}
 
-	if (strlen(trim($tili)) > 0) echo "<th>".t("kum. summa")."</th>";
+	if(isset($workbook)) {
+		$excelrivi++;
+	}
 
+	if (strlen(trim($tili)) > 0) {
+		echo "<th>".t("kum. summa")."</th>";
+		if(isset($workbook)) {
+			$worksheet->write($excelrivi, $i, t("kum. summa"), $format_bold);
+		}
+	}
 	echo "</tr>";
-
-
 
 	//tilin alkusaldo
 	if (strlen(trim($tili)) > 0) {
@@ -333,32 +343,32 @@
 
 		for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
 
-			if ($i == 0) {
-				if ($excel=='') { // Jos halutaan excel muotoa niin ei tehd‰ t‰t‰..
+			if(isset($workbook)) {
+				$worksheet->write($excelrivi, $i, $trow[$i]);
+			}
 
-					if ($edtrow[$i] == $trow[$i]) { // Vaihtuiko joku??
-						$trow[$i] = "&nbsp";
+			if ($i == 0) {
+				if ($edtrow[$i] == $trow[$i]) { // Vaihtuiko joku??
+					$trow[$i] = "&nbsp";
+				}
+				else {
+					if ($eka != 0) {
+						echo "<td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right'>";
+						printf("%.2f", $summa);
+						echo "</td><td>*</td>";
+
+						if (strlen(trim($tili)) > 0) {
+							echo "<td></td>";
+						}
+
+						echo "</tr><tr>";
+						$summa = 0;
 					}
 					else {
-						if ($eka != 0) {
-							echo "<td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right'>";
-							printf("%.2f", $summa);
-							echo "</td><td>*</td>";
-
-							if (strlen(trim($tili)) > 0) {
-								echo "<td></td>";
-							}
-
-							echo "</tr><tr>";
-							$summa = 0;
-						}
-						else {
-							$eka = 1;
-						}
-						$edtrow[0] = $trow[0];
+						$eka = 1;
 					}
+					$edtrow[0] = $trow[0];
 				}
-
 			}
 
 			if ($i > 5) {
@@ -373,14 +383,9 @@
 
 					echo "<td align='right' $class>";
 
-					if($excel=='') { // tehd‰‰n linkki jos ei haluta excel muodossa
-						echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'><font $class>";
-						echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
-						echo "</font></a>";
-					}
-					else {
-						echo "<font $class>".str_replace(".",",",sprintf("%.2f", $trow[$i]))."</font>";
-					}
+					echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[ltunnus]'><font $class>";
+					echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
+					echo "</font></a>";
 					echo "</td>";
 
 					if ($trow[$i] < 0 )
@@ -398,55 +403,62 @@
 			}
 			else {
 
-				if (($i == 5) and ($excel!=''))$trow[$i]=str_replace("<br>"," ",$trow[$i]);
+				if (($i == 5))$trow[$i]=str_replace("<br>"," ",$trow[$i]);
 
 				echo "<td>$trow[$i]</td>";
 			}
 		}
-
+		
 		if (strlen(trim($tili)) > 0) {
 			//lasketaan ja echotaan kumulatiivinen summa
 			$kumsumma += $trow["summa"];
 			echo "<td align='right'>".str_replace(".",",",sprintf("%.2f",$kumsumma))."</td>";
+			
+			if(isset($workbook)) {
+				$worksheet->write($excelrivi, $i+1, $kumsumma);
+			}
 		}
+		
 		echo "</tr>";
+		
+		if(isset($workbook)) {
+			$excelrivi++;
+		}
 	}
 
-	if ($excel=='') { // Jos halutaan excel muotoa niin ei tehd‰ t‰t‰..
-		echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteens‰")."</td>";
-		echo "<td align = 'right'>";
-		printf("%.2f", $summamiinus);
-		echo "</td><td>*</td>";
+	echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteens‰")."</td>";
+	echo "<td align = 'right'>";
+	printf("%.2f", $summamiinus);
+	echo "</td><td>*</td>";
 
-		if (strlen(trim($tili)) > 0) {
-			echo "<td></td>";
-		}
-
-		echo "</tr>";
-
-		echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteens‰")."</td>";
-		echo "<td align = 'right'>";
-		printf("%.2f", $summaplus);
-		echo "</td><td>*</td>";
-
-		if (strlen(trim($tili)) > 0) {
-			echo "<td></td>";
-		}
-
-		echo "</tr>";
-
-		$summa += $summaplus + $summamiinus;
-		echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteens‰")."</td>";
-		echo "<td align = 'right'>";
-		printf("%.2f", $summa);
-		echo "</td><td>*</td>";
-
-		if (strlen(trim($tili)) > 0) {
-			echo "<td></td>";
-		}
-
-		echo "</tr>";
+	if (strlen(trim($tili)) > 0) {
+		echo "<td></td>";
 	}
+
+	echo "</tr>";
+
+	echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteens‰")."</td>";
+	echo "<td align = 'right'>";
+	printf("%.2f", $summaplus);
+	echo "</td><td>*</td>";
+
+	if (strlen(trim($tili)) > 0) {
+		echo "<td></td>";
+	}
+
+	echo "</tr>";
+
+	$summa += $summaplus + $summamiinus;
+	echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteens‰")."</td>";
+	echo "<td align = 'right'>";
+	printf("%.2f", $summa);
+	echo "</td><td>*</td>";
+
+	if (strlen(trim($tili)) > 0) {
+		echo "<td></td>";
+	}
+
+	echo "</tr>";
 
 	echo "</table><br>";
 ?>

@@ -10,6 +10,10 @@ if (mysql_field_name($result, $i) == "taso") {
 		$virhe[$i] = t("Taso on syötettävä!");
 		$errori = 1;
 	}
+	elseif (strpos(trim($t[$i]), "Ö") !== FALSE ) {
+		$virhe[$i] = t("Ö ei ole sallittu kirjain tasossa!");
+		$errori = 1;
+	}
 	else {
 		$query   = "select tunnus from taso where yhtio='$kukarow[yhtio]' and taso = BINARY '$t[$i]' and tyyppi='$tyyppitalteen' and tunnus != '$tunnus'";
 		$sresult = mysql_query($query) or pupe_error($query);

@@ -187,8 +187,8 @@
 
 							// lis‰t‰‰n ostotilausrivi
 							$query = "	insert into tilausrivi
-										(perheid2, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, kommentti, toimaika, hyllyalue, hyllynro, hyllyvali, hyllytaso) values
-										('$pid','$osstu[ostohinta]','$tilrivirow[nimitys]','$tilrivirow[tuoteno]', '$tilrivirow[kpl]', '$tilrivirow[jt]', '$tunnus', '$kukarow[yhtio]', 'O','$tilrivirow[kommentti]', '$tilrivirow[toimaika]', '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]')";
+										(perheid2, hinta, nimitys, tuoteno, tilkpl, varattu, otunnus, yhtio, tyyppi, kommentti, toimaika, hyllyalue, hyllynro, hyllyvali, hyllytaso, laatija, laadittu) values
+										('$pid','$osstu[ostohinta]','$tilrivirow[nimitys]','$tilrivirow[tuoteno]', '$tilrivirow[kpl]', '$tilrivirow[jt]', '$tunnus', '$kukarow[yhtio]', 'O','$tilrivirow[kommentti]', '$tilrivirow[toimaika]', '$jtstu[hyllyalue]','$jtstu[hyllynro]','$jtstu[hyllyvali]','$jtstu[hyllytaso]', '$kukarow[kuka]', now())";
 							$updre = mysql_query($query) or pupe_error($query);
 
 							$tilauksesta_ostotilaus .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lis‰tty ostotilaukselle: $tunnus</font><br>";

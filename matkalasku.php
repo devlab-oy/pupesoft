@@ -821,9 +821,11 @@ if ($tee == "MUOKKAA") {
 				switch ($viranomaistyyppi) {
 					case "A":
 						$tyyppi_nimi="Päiväraha";
+						$lisat = " and left(tuote.tuoteno, 3) != 'PPR'";
 						break;
 					case "B":
 						$tyyppi_nimi="Muu kulu";
+						$lisat = "";	
 						break;
 				}
 
@@ -833,7 +835,8 @@ if ($tee == "MUOKKAA") {
 							WHERE tuote.yhtio='$kukarow[yhtio]'
 							and tuotetyyppi='$viranomaistyyppi'
 							and status !='P'
-							and tuote.tilino!=''";
+							and tuote.tilino!=''
+							$lisat";
 				$tres=mysql_query($query) or pupe_error($query);
 				$valinta="";
 				if (mysql_num_rows($tres)>0){

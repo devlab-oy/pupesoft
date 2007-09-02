@@ -387,7 +387,7 @@ if ($tee == "MUOKKAA") {
 			$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tuotetyyppi='$tyyppi' and status !='P'";
 			$tres=mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($tres)<>1) {
-				echo "<font class='error'>".t("VIRHE!!! Viranomaistuote0 puuttuu")." $lisaa_tuoteno $query</font><br>";
+				echo "<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu")." $lisaa_tuoteno</font><br>";
 			}
 			else {
 				$trow=mysql_fetch_array($tres);
@@ -470,10 +470,35 @@ if ($tee == "MUOKKAA") {
 						$paivat++;
 					}
 					elseif ($ylitunnit > 6 and $trow["vienti"] == "FI") {
-						$puolipaivat++;
+						
+						//	Tarkastetaan ett‰ p‰iv‰rahalle on puolip‰iv‰raha
+						$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuotetyyppi='$tyyppi' and tuoteno='P$tuoteno'";
+						$tres2=mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($tres2)<>1) {
+							$errori .= t("<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (2). Puolip‰iv‰rahaa ei voitu lis‰t‰!")."</font><br>");
+						}
+						else {
+							$trow2=mysql_fetch_array($tres2);
+							$puolipaivat++;
+							
+							$tuoteno_array[$trow2["tuoteno"]]		=$trow2["tuoteno"];
+							$kpl_array[$trow2["tuoteno"]]			=$puolipaivat;
+
+							$alkuaika_array[$trow2["tuoteno"]]		="$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm:00";
+							$loppuaika_array[$trow2["tuoteno"]]		="$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm:00";
+
+							$hinta=$trow2["myyntihinta"];
+							$hinta_array[$trow2["tuoteno"]]			= $hinta;
+
+							$selite.="<br>{$trow2["tuoteno"]} - {$trow2["nimitys"]} $puolipaivat kpl · $hinta";
+							
+						}
 					}
 					elseif ($ylitunnit <= 10 and $trow["vienti"] != "FI" and $paivat == 0) {
 						$errori .= "<font class='error'>".t("VIRHE!!! Ulkomaanp‰iv‰rahalla on oltava v‰hint‰‰n 10 tuntia")."</font><br>";
+						
+						//	T‰nne pit‰isi joskus koodata se puolikas ulkomaanp‰iv‰raha..
 					}
 
 					if ($paivat>0) {
@@ -487,31 +512,6 @@ if ($tee == "MUOKKAA") {
 						$hinta_array[$trow["tuoteno"]]		= $hinta;
 
 						$selite="{$trow["tuoteno"]} - {$trow["nimitys"]} $paivat kpl · $hinta";
-					}
-
-					if ($puolipaivat>0) {
-						//	Tarkastetaan ett‰ p‰iv‰rahalle on puolip‰iv‰raha
-						$query = "	select * from tuote where yhtio='$kukarow[yhtio]' and tuotetyyppi='$tyyppi' and tuoteno='P$tuoteno'";
-						$tres2=mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($tres2)<>1) {
-							die("<font class='error'>".t("VIRHE!!! Viranomaistuote2 puuttuu")." $query	</font><br>");
-						}
-						else {
-							$trow2=mysql_fetch_array($tres2);
-						}
-
-						$tuoteno_array[$trow2["tuoteno"]]		=$trow2["tuoteno"];
-						$kpl_array[$trow2["tuoteno"]]			=$puolipaivat;
-
-						$alkuaika_array[$trow2["tuoteno"]]		="$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm:00";
-						$loppuaika_array[$trow2["tuoteno"]]		="$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm:00";
-
-						$hinta=$trow2["myyntihinta"];
-						$hinta_array[$trow2["tuoteno"]]			= $hinta;
-
-						$selite.="<br>{$trow2["tuoteno"]} - {$trow2["nimitys"]} $puolipaivat kpl · $hinta";
-
 					}
 
 					$selite .= "<br>Ajalla: $alkupp.$alkukk.$alkuvv klo. $alkuhh:$alkumm - $loppupp.$loppukk.$loppuvv klo. $loppuhh:$loppumm";
@@ -644,7 +644,7 @@ if ($tee == "MUOKKAA") {
 						$summa+=$rivihinta;
 					}
 					else {
-						echo "<font class='error'>".t("VIRHE!!! Viranomaistuote1 puuttuu")." $lisaa_tuoteno $query</font><br>";
+						echo "<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (1)")." $lisaa_tuoteno</font><br>";
 					}
 				}
 
@@ -879,7 +879,7 @@ if ($tee == "MUOKKAA") {
 				$trow=mysql_fetch_array($tres);
 			}
 			else {
-				die("<font class='error'>".t("VIRHE!!! Viranomaistuote3 puuttuu")."<br>$query</font><br>");
+				die("<font class='error'>".t("VIRHE!!! Viranomaistuote puuttuu (3)")."</font><br>");
 			}
 
 			echo "<font class='message'>".t("Lis‰‰")." $trow[nimitys]</font><hr><br>$errori";

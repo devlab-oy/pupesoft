@@ -819,6 +819,7 @@ else
 					<option value='toimitustapa'>".t("Toimitustapoja")."</option>
 					<option value='tuotteen_alv'>".t("Tuotteiden ulkomaan ALV")."</option>
 					<option value='sarjanumeron_lisatiedot'>".t("Sarjanumeron lisätiedot")."</option>
+					<option value='taso'>".t("Tilikartan rakenne")."</option>
 					</select></td>
 			</tr>
 

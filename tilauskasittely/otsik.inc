@@ -94,19 +94,34 @@
 
 	//	Tarkastetaan toimitustapa saadaanko laittaa jälkivaatimuksia
 	if (isset($jatka)) {
-
 		$query = "SELECT tunnus FROM maksuehto WHERE yhtio ='{$kukarow["yhtio"]}' and tunnus = '$maksuehto' and jv != ''";
 		$result = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($result) > 0) {
-			$query = "SELECT tunnus FROM toimitustapa WHERE yhtio ='{$kukarow["yhtio"]}' and selite = '$toimitustapa' and jvkielto != ''";
+			
+			//	Denial by toimitustapa
+			$query = "SELECT tunnus FROM toimitustapa WHERE yhtio = '{$kukarow["yhtio"]}' and selite = '$toimitustapa' and jvkielto != ''";
 			$result = mysql_query($query) or pupe_error($query);
+			
 			if(mysql_num_rows($result) > 0) {
-				echo "<font class='error'>".t("VIRHE: Toimitustavalle on jälkivaatimuskielto").":</font><br>";
+				echo "<font class='error'>".t("VIRHE: Toimitustavalle on jälkivaatimuskielto")."</font><br>";
 				$tee	= "OTSIK";
 				$tila 	= "";
 
 				unset($jatka);
 			}
+
+			//	Denial by maa			
+			$query = "SELECT maa FROM varastopaikat WHERE yhtio = '{$kukarow["yhtio"]}' and tunnus = '$varasto'";
+			$result = mysql_query($query) or pupe_error($query);
+			$vara = mysql_fetch_array($result);
+			if($vara["maa"] != "" and $vara["maa"] != $yhtiorow["maa"]) {
+				echo "<font class='error'>".t("VIRHE: Jälkitoimitus ei sallittu myytäessä ulkomaille")."</font><br>";
+				$tee	= "OTSIK";
+				$tila 	= "";
+
+				unset($jatka);
+			}
+			
 		}
 	}
 
@@ -285,7 +300,10 @@
 							and tunnus	 		= '$kukarow[kesken]'
 							and liitostunnus	= 0";
 				$result = mysql_query($query) or pupe_error($query);
-
+				if(mysql_affected_rows($restul)>0) {
+					echo "<font class='message'>".t("HUOM! Uudet otsikkotiedot haettu asiakasrekisteristä.")."</font><br>";
+				}
+				
 				$query = "	UPDATE laskun_lisatiedot
 							SET kolm_ovttunnus	= '$assrow[kolm_ovttunnus]',
 							kolm_nimi   		= '$assrow[kolm_nimi]',
@@ -299,6 +317,7 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tiedot_laskulta = "YES";
+				
 			}
 
 			if (substr($asiakasid,0,1) == "£") {
@@ -333,6 +352,15 @@
 			}
 			$sresult = mysql_query($squery) or pupe_error($squery);
 			$srow = mysql_fetch_array($sresult);
+			
+			//	Ylikirjoitetaan oletusarvot otsikon tiedoilla!
+			if($otsikolta == "YES" and $from != "vaihdaasiakas") {
+				foreach($_POST as $key => $val) {
+					if(!in_array($key, array("tila", "alatila"))) {
+						$srow[$key] = $val;
+					}
+				}				
+			}
 		}
 
 		//Tutkitaan onko tilauksella rivejä
@@ -388,35 +416,6 @@
 
 		}
 
-		echo "	<input type='hidden' name='ylatila' 						 value = '$ylatila'>
-				<input type='hidden' name='alatila' 						 value = '$alatila'>
-				<input type='hidden' name='poistumistoimipaikka_koodi'       value = '$srow[poistumistoimipaikka_koodi]'>
-				<input type='hidden' name='kuljetusmuoto'                    value = '$srow[kuljetusmuoto]'>
-				<input type='hidden' name='kauppatapahtuman_luonne'          value = '$srow[kauppatapahtuman_luonne]'>
-				<input type='hidden' name='aktiivinen_kuljetus_kansallisuus' value = '$srow[aktiivinen_kuljetus_kansallisuus]'>
-				<input type='hidden' name='aktiivinen_kuljetus'              value = '$srow[aktiivinen_kuljetus]'>
-				<input type='hidden' name='kontti'                           value = '$srow[kontti]'>
-				<input type='hidden' name='sisamaan_kuljetusmuoto'           value = '$srow[sisamaan_kuljetusmuoto]'>
-				<input type='hidden' name='sisamaan_kuljetus_kansallisuus'   value = '$srow[sisamaan_kuljetus_kansallisuus]'>
-				<input type='hidden' name='sisamaan_kuljetus'                value = '$srow[sisamaan_kuljetus]'>
-				<input type='hidden' name='maa_maara'                        value = '$srow[maa_maara]'>
-				<input type='hidden' name='laskutusvkopv' 					 value = '$srow[laskutusvkopv]'>
-				<input type='hidden' name='ovttunnus' 						 value = '$srow[ovttunnus]'>
-				<input type='hidden' name='toim_ovttunnus' 					 value = '$srow[toim_ovttunnus]'>
-				<input type='hidden' name='kolm_ovttunnus' 					 value = '$srow[kolm_ovttunnus]'>
-				<input type='hidden' name='chn' 							 value = '$srow[chn]'>
-				<input type='hidden' name='verkkotunnus' 					 value = '$srow[verkkotunnus]'>
-				<input type='hidden' name='ytunnus' 						 value = '$srow[ytunnus]'>
-				<input type='hidden' name='maa' 							 value = '$srow[maa]'>
-				<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
-				<input type='hidden' name='kolm_maa' 						 value = '$srow[kolm_maa]'>
-				<input type='hidden' name='tunnusnippu' 					 value = '$srow[tunnusnippu]'>
-				<input type='hidden' name='projekti'						 value = '$srow[projekti]'>
-				<input type='hidden' name='jaksotettu'	 					 value = '$srow[jaksotettu]'>
-				<input type='hidden' name='tunnusnippu_tarjous' 			 value = '$srow[tunnusnippu_tarjous]'>
-				<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
-
-
 		//jos käyttäjällä on oletusaiskas
 		if ($kukarow["oletus_asiakas"] != 0 and $srow["nimi"] == '') {
 			$query  = "	SELECT *
@@ -466,7 +465,35 @@
 			$kentta = "nimi";
 		}
 		else {
-			echo "<input type='hidden' name='asiakasid' value='$asiakasid'>";
+			echo "	<input type='hidden' name='asiakasid' value='$asiakasid'>
+					<input type='hidden' name='ylatila' 						 value = '$ylatila'>
+					<input type='hidden' name='alatila' 						 value = '$alatila'>
+					<input type='hidden' name='otsikolta' 						 value = 'YES'>
+					<input type='hidden' name='poistumistoimipaikka_koodi'       value = '$srow[poistumistoimipaikka_koodi]'>
+					<input type='hidden' name='kuljetusmuoto'                    value = '$srow[kuljetusmuoto]'>
+					<input type='hidden' name='kauppatapahtuman_luonne'          value = '$srow[kauppatapahtuman_luonne]'>
+					<input type='hidden' name='aktiivinen_kuljetus_kansallisuus' value = '$srow[aktiivinen_kuljetus_kansallisuus]'>
+					<input type='hidden' name='aktiivinen_kuljetus'              value = '$srow[aktiivinen_kuljetus]'>
+					<input type='hidden' name='kontti'                           value = '$srow[kontti]'>
+					<input type='hidden' name='sisamaan_kuljetusmuoto'           value = '$srow[sisamaan_kuljetusmuoto]'>
+					<input type='hidden' name='sisamaan_kuljetus_kansallisuus'   value = '$srow[sisamaan_kuljetus_kansallisuus]'>
+					<input type='hidden' name='sisamaan_kuljetus'                value = '$srow[sisamaan_kuljetus]'>
+					<input type='hidden' name='maa_maara'                        value = '$srow[maa_maara]'>
+					<input type='hidden' name='laskutusvkopv' 					 value = '$srow[laskutusvkopv]'>
+					<input type='hidden' name='ovttunnus' 						 value = '$srow[ovttunnus]'>
+					<input type='hidden' name='toim_ovttunnus' 					 value = '$srow[toim_ovttunnus]'>
+					<input type='hidden' name='kolm_ovttunnus' 					 value = '$srow[kolm_ovttunnus]'>
+					<input type='hidden' name='chn' 							 value = '$srow[chn]'>
+					<input type='hidden' name='verkkotunnus' 					 value = '$srow[verkkotunnus]'>
+					<input type='hidden' name='ytunnus' 						 value = '$srow[ytunnus]'>
+					<input type='hidden' name='maa' 							 value = '$srow[maa]'>
+					<input type='hidden' name='toim_maa' 						 value = '$srow[toim_maa]'>
+					<input type='hidden' name='kolm_maa' 						 value = '$srow[kolm_maa]'>
+					<input type='hidden' name='tunnusnippu' 					 value = '$srow[tunnusnippu]'>
+					<input type='hidden' name='projekti'						 value = '$srow[projekti]'>
+					<input type='hidden' name='jaksotettu'	 					 value = '$srow[jaksotettu]'>
+					<input type='hidden' name='tunnusnippu_tarjous' 			 value = '$srow[tunnusnippu_tarjous]'>
+					<input type='hidden' name='liitostunnus' 					 value = '$srow[liitostunnus]'>";
 
 			echo "<td valign='top'>";
 			echo "<table cellpadding='1' cellspacing='1'>";

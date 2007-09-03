@@ -266,8 +266,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 		//tilauksessa
 		$query = "	SELECT sum(tilausrivi.varattu) tilattu
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-					JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-					$varastotapa
+					JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $varastotapa)					
 					WHERE tilausrivi.yhtio in ($yhtiot)
 					and tilausrivi.tyyppi = 'O'
 					and tilausrivi.tuoteno = '$row[tuoteno]'

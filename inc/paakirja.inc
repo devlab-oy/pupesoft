@@ -337,6 +337,7 @@
 
 	$summaplus = 0.0;
 	$summamiinus = 0.0;
+	$summa = 0.0;
 
 	while ($trow=mysql_fetch_array ($result)) {
 		echo "<tr>";
@@ -392,6 +393,8 @@
 						$summamiinus += $trow[$i];
 					else
 						$summaplus += $trow[$i];
+						
+					$summa += $trow[$i];
 
 				 }
 				 else {
@@ -425,7 +428,17 @@
 			$excelrivi++;
 		}
 	}
+	
+	echo "<tr><td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right'>";
+	printf("%.2f", $summa);
+	echo "</td><td>*</td>";
 
+	if (strlen(trim($tili)) > 0) {
+		echo "<td></td>";
+	}
+
+	echo "</tr>";
+						
 	echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteensä")."</td>";
 	echo "<td align = 'right'>";
 	printf("%.2f", $summamiinus);

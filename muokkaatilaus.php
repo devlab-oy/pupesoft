@@ -817,7 +817,7 @@
 
 		if (mysql_num_rows($result) != 0) {
 		
-			if(include('Spreadsheet/Excel/Writer.php')) {
+			if(@include('Spreadsheet/Excel/Writer.php')) {
 		
 				//keksit‰‰n failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());

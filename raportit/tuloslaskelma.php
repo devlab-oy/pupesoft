@@ -34,21 +34,25 @@
 			// Vastaavaa Varat
 			$kirjain = "U";
 			$aputyyppi = 1;
+			$tilikarttataso = "ulkoinen_taso";
 		}
 		elseif ($tyyppi == "2") {
 			// Vastattavaa Velat
 			$kirjain = "U";
 			$aputyyppi = 2;
+			$tilikarttataso = "ulkoinen_taso";
 		}
 		elseif ($tyyppi == "3") {
 			// Ulkoinen tuloslaskelma
 			$kirjain = "U";
 			$aputyyppi = 3;
+			$tilikarttataso = "ulkoinen_taso";
 		}
 		else {
 			// Sisäinen tuloslaskelma
 			$kirjain = "S";
 			$aputyyppi = 3;
+			$tilikarttataso = "sisainen_taso";
 		}
 
 		$query = "	SELECT *
@@ -69,6 +73,7 @@
 		$startmonth	= date("Ymd", mktime(0, 0, 0, $plvk, 1, $plvv));
 		$endmonth 	= date("Ymd", mktime(0, 0, 0, $alvk, 1, $alvv));
 		$annettualk = date("Y-m-d", mktime(0, 0, 0, $plvk, 1, $plvv));
+		$annettuabu = date("Ym", mktime(0, 0, 0, $plvk, 1, $plvv));
 		$totalloppu = date("Y-m-d", mktime(0, 0, 0, $alvk+1, 1, $alvv));
 
 		if ($vertailued != "") {
@@ -79,11 +84,14 @@
 		}
 
 		$alkuquery = "";
-
+		$budjejoin = "";
+		
 		for ($i = $startmonth;  $i <= $endmonth;) {
 
-			$alku   = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
-			$loppu  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)));
+			$alku    = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
+			$loppu   = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)));
+			$bukausi = date("Ym", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
+
 			$headny = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
 
 			$alkuquery .= " sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny', \n";
@@ -96,6 +104,16 @@
 
 				$alkuquery .= " sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed', \n";
 				$kaudet[] = $headed;
+			}
+
+			// sisäisessä tuloslaskelmassa voidaan joinata budjetti
+			if ($vertailubu != "" and $kirjain == "S") {
+				//$alkuquery .= " (SELECT sum(budjetti.summa) 'budj $headny' FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi = '$bukausi' $lisa2), \n";
+				$alkuquery .= " if(budjetti.kausi = '$bukausi', min(budjetti.summa), 0) 'budj $headny', ";
+//				$alkuquery .= " if budjetti.kausi 'budj $headny', ";
+
+				$budjejoin = " LEFT JOIN budjetti USE INDEX (yhtio_taso_kausi) ON (budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi >= '$annettuabu' $lisa2) ";
+				$kaudet[] = "budj $headny";
 			}
 
 			$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
@@ -124,14 +142,16 @@
 			$query = "	SELECT $alkuquery
 						sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) 'Total'
 					 	FROM tili
-						JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm < '$totalloppu' $lisa)
+						LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm < '$totalloppu' $lisa)
+						$budjejoin
 						WHERE tili.yhtio = '$kukarow[yhtio]' AND
-						tili.sisainen_taso = '$tasorow[taso]'";
+						tili.$tilikarttataso = '$tasorow[taso]'
+						group by tili.$tilikarttataso";
 			$tilires = mysql_query($query) or pupe_error($query);
 
 			while ($tilirow = mysql_fetch_array ($tilires)) {
 				// summataan kausien saldot
-				foreach ($kaudet as $kausi) {
+				foreach ($kaudet as $kausi) {					
 					// summataan kaikkia pienempiä summaustasoja
 					for ($i = $tasoluku - 1 ; $i >= 0; $i--) {
 						$summa[$kausi][$taso[$i]] += $tilirow[$kausi];
@@ -141,12 +161,12 @@
 
 		}
 
-		echo "$joni<br><br><table>";
+		echo "<table>";
 
 		// printataan headerit
-		echo "<tr><td class='back' colspan='1'></td>";
+		echo "<tr><td class='back' colspan='2'></td>";
 		foreach ($kaudet as $kausi) {
-			echo "<td class='tumma' align='right'>$kausi</td>";
+			echo "<td class='tumma' align='right' valign='bottom'>$kausi</td>";
 		}
 		echo "</tr>\n";
 
@@ -168,12 +188,19 @@
 				if (strlen($key) < 3) $class = "tumma";
 
 				$rivi  = "<tr>";
-//				$rivi .= "<th>$key</th>";
-				$rivi .= "<th>$value</th>";
+				$rivi .= "<th nowrap>$key</th>";
+				$rivi .= "<th nowrap>$value</th>";
 				foreach ($kaudet as $kausi) {
 
+					$query = "select summattava_taso from taso where yhtio='$kukarow[yhtio]' and taso='$key' and summattava_taso != ''";
+					$summares = mysql_query($query) or pupe_error($query);
+
+					if ($summarow = mysql_fetch_array ($summares)) {
+						$summa[$kausi][$key] = $summa[$kausi][$key] + $summa[$kausi][$summares["summattava_taso"]];
+					}
+
 					// formatoidaan luku toivottuun muotoon
-					$apu = sprintf($muoto, $summa[$kausi][$key] / $tarkkuus);
+					$apu = sprintf($muoto, $summa[$kausi][$key] * -1 / $tarkkuus);
 
 					if ($apu == 0) {
 						$apu = ""; // nollat spaseiks
@@ -182,7 +209,7 @@
 						$tulos++; // summaillaan tätä jos meillä oli rivillä arvo niin osataan tulostaa
 					}
 
-					$rivi .= "<td class='$class' align='right'>$apu</td>";
+					$rivi .= "<td class='$class' align='right' nowrap>$apu</td>";
 				}
 				$rivi .= "</tr>\n";
 

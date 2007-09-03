@@ -85,7 +85,7 @@
 
 		$alkuquery = "";
 		$budjejoin = "";
-		
+
 		for ($i = $startmonth;  $i <= $endmonth;) {
 
 			$alku    = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
@@ -132,12 +132,10 @@
 			$tasonimi[$apusort] = $tasorow["nimi"];
 
 			// pilkotaan taso osiin
-			$taso[0] = substr($tasorow["taso"], 0, 1);
-			$taso[1] = substr($tasorow["taso"], 0, 2);
-			$taso[2] = substr($tasorow["taso"], 0, 3);
-			$taso[3] = substr($tasorow["taso"], 0, 4);
-			$taso[4] = substr($tasorow["taso"], 0, 5);
-			$taso[5] = substr($tasorow["taso"], 0, 6);
+			$taso = array();
+			for ($i=0; $i < $tasoluku; $i++) {
+				$taso[$i] = substr($tasorow["taso"], 0, $i+1);
+			}
 
 			$query = "	SELECT $alkuquery
 						sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) 'Total'
@@ -151,7 +149,7 @@
 
 			while ($tilirow = mysql_fetch_array ($tilires)) {
 				// summataan kausien saldot
-				foreach ($kaudet as $kausi) {					
+				foreach ($kaudet as $kausi) {
 					// summataan kaikkia pienempiä summaustasoja
 					for ($i = $tasoluku - 1 ; $i >= 0; $i--) {
 						$summa[$kausi][$taso[$i]] += $tilirow[$kausi];
@@ -379,16 +377,21 @@
 	echo "</select></td></tr>";
 
 	$sel = array();
-	if ($rtaso == "") $rtaso = "2";
+	if ($rtaso == "") $rtaso = "1";
 	$sel[$rtaso] = "SELECTED";
 
 	echo "<tr><th>".t("Raportointitaso")."</th>
-			<td><select name='rtaso'>
-				<option $sel[2] value='2'>".t("Taso 1")."</option>
-				<option $sel[3] value='3'>".t("Taso 2")."</option>
-				<option $sel[4] value='4'>".t("Taso 3")."</option>
-				<option $sel[5] value='5'>".t("Taso 4")."</option>";
-//	echo "<option $sel[6] value='6'>".t("Tili taso")."</option>";
+			<td><select name='rtaso'>";
+
+	$query = "select max(length(taso)) taso from taso where yhtio = '$kukarow[yhtio]'";
+	$vresult = mysql_query($query) or pupe_error($query);
+	$vrow = mysql_fetch_array($vresult);
+
+	for ($i=0; $i < $vrow["taso"]; $i++) {
+		echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
+	}
+//	echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Tili taso")."</option>\n";
+
 	echo "</select></td></tr>";
 
 	$sel = array();

@@ -150,8 +150,7 @@ if ($tee == "SYOTTO") {
 		$result = mysql_query($unlockquery);
 		die ("Kysely ei onnistu $query");
 	}
-
-	$suoritus_tunnus=mysql_insert_id();
+	$suoritus_tunnus = mysql_insert_id();
 
 	echo "<font class='message'>".t("Suoritus tallennettu").".</font><br>";
 
@@ -190,9 +189,10 @@ if ($tee == "SYOTTO") {
 
 	// takasin jonnekin
 	if ($jatko != t("Tallenna suoritus")) {
-		$oikeus=1;
-		$PHP_SELF='manuaalinen_suoritusten_kohdistus.php';
-		require("manuaalinen_suoritusten_kohdistus_suorituksen_kohdistus.php");
+		$oikeus = 1;
+		$tila = "kohdistaminen";
+		$PHP_SELF = 'manuaalinen_suoritusten_kohdistus.php';
+		require("manuaalinen_suoritusten_kohdistus.php");
 		exit;
 	}
 

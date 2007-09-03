@@ -1,7 +1,10 @@
 <?php
 
-require("../inc/parametrit.inc");
-require("../inc/tilinumero.inc");
+if (strpos($_SERVER['SCRIPT_NAME'], "manuaalinen_suoritusten_kohdistus")  !== FALSE) {
+	require ("../inc/parametrit.inc");
+}
+
+require_once("../inc/tilinumero.inc");
 
 function kopioitiliointipaittain($tunnus, $type = '') {
 
@@ -447,7 +450,14 @@ if ($tila == 'tee_kohdistus') {
 		$laskujen_summa = 0;
 
 		if($laskutunnukset != 0) {
-			$query = "	SELECT summa - saldo_maksettu AS summa, summa_valuutassa - saldo_maksettu_valuutassa AS summa_valuutassa, 0 AS alennus, 0 AS alennus_valuutassa, tunnus, vienti_kurssi, tapvm
+			$query = "	SELECT summa - saldo_maksettu AS summa, 
+						summa_valuutassa - saldo_maksettu_valuutassa AS summa_valuutassa, 
+						0 AS alennus, 
+						0 AS alennus_valuutassa, 
+						tunnus, 
+						vienti_kurssi, 
+						tapvm, 
+						summa as alkup_summa
 						FROM lasku WHERE tunnus IN ($laskutunnukset)
 						and yhtio = '$kukarow[yhtio]'
 						and mapvm = '0000-00-00'";
@@ -467,7 +477,14 @@ if ($tila == 'tee_kohdistus') {
 
 		// Alennukset
 		if($laskutunnuksetkale != 0) {
-			$query = "	SELECT summa - saldo_maksettu AS summa, summa_valuutassa - saldo_maksettu_valuutassa AS summa_valuutassa, kasumma AS alennus, kasumma_valuutassa AS alennus_valuutassa, tunnus, vienti_kurssi, tapvm
+			$query = "	SELECT summa - saldo_maksettu AS summa, 
+						summa_valuutassa - saldo_maksettu_valuutassa AS summa_valuutassa, 
+						kasumma AS alennus, 
+						kasumma_valuutassa AS alennus_valuutassa, 
+						tunnus, 
+						vienti_kurssi, 
+						tapvm, 
+						summa as alkup_summa
 						FROM lasku WHERE tunnus IN ($laskutunnuksetkale)
 						AND yhtio = '$kukarow[yhtio]'
 						and mapvm = '0000-00-00'";
@@ -598,8 +615,8 @@ if ($tila == 'tee_kohdistus') {
 
 						while ($tiliointirow = mysql_fetch_array ($yresult)) {
 							// Kuinka paljon on tämän viennin osuus
-							$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) * -1 / $lasku["summa"] * $lasku["alennus"],2);
-
+							$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) * -1 / $lasku["alkup_summa"] * $lasku["alennus"],2);
+												
 							if ($tiliointirow['vero'] != 0) { // Netotetaan alvi
 								//$alv:ssa on alennuksen alv:n maara
 								$alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)),2);

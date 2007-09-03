@@ -464,6 +464,9 @@ if ($tee == "MUOKKAA") {
 					$tunnit=($loppu-$alku)/3600;
 					$paivat=floor($tunnit/24);
 
+					$alkuaika	= "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm:00";
+					$loppuaika	= "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm:00";
+
 					$ylitunnit=$tunnit-($paivat*24);
 
 					if ($ylitunnit > 10) {
@@ -482,14 +485,11 @@ if ($tee == "MUOKKAA") {
 							$trow2=mysql_fetch_array($tres2);
 							$puolipaivat++;
 							
-							$tuoteno_array[$trow2["tuoteno"]]		=$trow2["tuoteno"];
-							$kpl_array[$trow2["tuoteno"]]			=$puolipaivat;
-
-							$alkuaika_array[$trow2["tuoteno"]]		="$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm:00";
-							$loppuaika_array[$trow2["tuoteno"]]		="$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm:00";
+							$tuoteno_array[$trow2["tuoteno"]]	=$trow2["tuoteno"];
+							$kpl_array[$trow2["tuoteno"]]		=$puolipaivat;
 
 							$hinta=$trow2["myyntihinta"];
-							$hinta_array[$trow2["tuoteno"]]			= $hinta;
+							$hinta_array[$trow2["tuoteno"]]		= $hinta;
 
 							$selite.="<br>{$trow2["tuoteno"]} - {$trow2["nimitys"]} $puolipaivat kpl · $hinta";
 							
@@ -500,13 +500,11 @@ if ($tee == "MUOKKAA") {
 						
 						//	T‰nne pit‰isi joskus koodata se puolikas ulkomaanp‰iv‰raha..
 					}
-
-					if ($paivat>0) {
-						$tuoteno_array[$tuoteno]				=$tuoteno;
-						$kpl_array[$tuoteno]					=$paivat;
-
-						$alkuaika_array[$tuoteno]				="$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm:00";
-						$loppuaika_array[$tuoteno]				="$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm:00";
+					
+					//	Lis‰t‰‰n myˆs saldoton isatuote jotta tied‰mme mist‰ puolip‰iv‰raha periytyy!
+					if ($paivat>0 or $puolipaivat > 0) {
+						$tuoteno_array[$tuoteno]			=$tuoteno;
+						$kpl_array[$tuoteno]				=$paivat;
 
 						$hinta=$trow["myyntihinta"];
 						$hinta_array[$trow["tuoteno"]]		= $hinta;
@@ -556,6 +554,7 @@ if ($tee == "MUOKKAA") {
 			$perheid=$isatunnus=0;
 
 			if ($errori == "") {
+				$tuoteno_array = array_reverse($tuoteno_array);
 				foreach($tuoteno_array as $lisaa_tuoteno) {
 
 					//	Haetaan tuotteen tiedot
@@ -624,8 +623,8 @@ if ($tee == "MUOKKAA") {
 									perheid		= '$perheid',
 									tunnus 		= '$rivitunnus',
 									nimitys 	= '$trow[nimitys]',
-									kerattyaika = '$alkuaika_array[$tuoteno]',
-									toimitettuaika = '$loppuaika_array[$tuoteno]'";
+									kerattyaika = '$alkuaika',
+									toimitettuaika = '$loppuaika'";
 						$insres = mysql_query($query) or die($query);
 						$lisatty_tun = mysql_insert_id();
 
@@ -1032,12 +1031,18 @@ if ($tee == "MUOKKAA") {
 
 		}
 
-		//	rivit
+		/*	
+			rivit
+			
+			Piilotetaan rivit joilla ei ole kappaleita (p‰iv‰raha, jos vain puolikas..)
+		*/
 		$sorttauskentta = generoi_sorttauskentta(8);
 		$query = "	SELECT tilausrivi.*, tuotetyyppi, $sorttauskentta,
 					if (tuote.tuotetyyppi='A' or tuote.tuotetyyppi='B', concat(date_format(kerattyaika, '%d.%m.%Y %k:%i'),' - ',date_format(toimitettuaika, '%d.%m.%Y %k:%i')), '') ajalla,
-					concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka
-					FROM tilausrivi
+					concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka, 
+					if(tilausrivi.perheid=0, tilausrivi.tunnus, (select max(tunnus) from tilausrivi t use index(yhtio_otunnus) where tilausrivi.yhtio = t.yhtio and tilausrivi.otunnus = t.otunnus and tilausrivi.perheid=t.perheid and tilausrivi.tyyppi=t.tyyppi)) viimonen,
+					if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) perhe
+					FROM tilausrivi use index(yhtio_otunnus)
 					LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
 					LEFT JOIN tiliointi ON tiliointi.yhtio=tilausrivin_lisatiedot.yhtio and tiliointi.tunnus=tilausrivin_lisatiedot.tiliointirivitunnus
@@ -1046,6 +1051,7 @@ if ($tee == "MUOKKAA") {
 					LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio=kohde.yhtio and tiliointi.kohde=kohde.tunnus
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					and otunnus='$tilausnumero'
+					and tilausrivi.kpl > 0
 					and tilausrivi.tyyppi='M'
 					ORDER BY sorttauskentta, tunnus";
 		$result = mysql_query($query) or pupe_error($query);
@@ -1054,28 +1060,37 @@ if ($tee == "MUOKKAA") {
 		$saa_hyvaksya="";
 		if (mysql_num_rows($result)>0) {
 
-			echo "<br><br><font class='message'>".t("Rivit")."</font><hr><table>";
+			echo "<br><br><font class='message'>".t("Rivit")."</font><hr><table cellpadding='0' cellspacing='0'>";
 
 			$saa_hyvaksya="JOO";
 
 			echo "<tr><th>".t("Kulu")."</th><th>".t("Kustannuspaikka")."</th><th>".t("Kpl")."</th><th>".t("Hinta")."</th><th>".t("Yhteens‰")."</th></tr>";
 			$eka="joo";
+			$edperhe = 0;
 			$summa=0;
 			while ($row=mysql_fetch_array($result)) {
 
-				if (($row["perheid"] == $row["tunnus"] or $row["perheid"] == 0) and $eka != "joo") {
-					echo "<tr><td class='back' height='5'></td></tr>";
+				if (($row["perhe"] != $edperhe) and $eka != "joo") {
+					echo "<tr><td class='back' colspan = '5' height='10'\"></td></tr>";
 				}
 				$eka="";
-
-				echo "<tr><td>$row[nimitys]</td><td>$row[kustannuspaikka]</td><td align='right'>$row[kpl]</td><td align='right'>$row[hinta]</td><td align='right'>$row[rivihinta]</td>";
-
-				if (($row["perheid"] == $row["tunnus"] or $row["perheid"] == 0) and ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2)) {
+				
+				if($row["perhe"] != $edperhe) {
+					$style = "style=\"font-weight: bold;\"";
+				}
+				else {
+					$style = "";
+				}
+				
+				echo "<tr><td $style>$row[nimitys]</td><td>$row[kustannuspaikka]</td><td align='right'>$row[kpl]</td><td align='right'>$row[hinta]</td><td align='right'>$row[rivihinta]</td>";
+				
+				//	Aina kun perhe vaihtuu voidaan n‰ytt‰‰ nappulat!
+				if (($row["perhe"] != $edperhe) and ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2)) {
 					echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
 					echo "<input type='hidden' name='tee' value='$tee'>";
 					echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 					echo "<input type='hidden' name='tapa' value='MUOKKAA'>";
-					echo "<input type='hidden' name='rivitunnus' value='$row[tunnus]'>";
+					echo "<input type='hidden' name='rivitunnus' value='$row[perhe]'>";
 					echo "<td class='back'><input type='submit' value='".t("Muokkaa")."'></td>";
 					echo "</form>";
 
@@ -1083,23 +1098,26 @@ if ($tee == "MUOKKAA") {
 					echo "<input type='hidden' name='tee' value='$tee'>";
 					echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
 					echo "<input type='hidden' name='tapa' value='POISTA'>";
-					echo "<input type='hidden' name='rivitunnus' value='$row[tunnus]'>";
+					echo "<input type='hidden' name='rivitunnus' value='$row[perhe]'>";
 					echo "<td class='back'><input type='submit' value='".t("Poista")."'></td>";
 					echo "</form>";
 				}
 				echo "</tr>";
-
-				if ($row["kommentti"] != "") {
-					echo "<tr><th>".t("Kommentti").":</th><td colspan='4'>$row[kommentti]</td></tr>";
-				}
-
-				if ($row["tuotetyyppi"] == "A" and ($row["perheid"] == $row["tunnus"] or $row["perheid"] == 0)) {
-					echo "<tr><th>".t("Ajalla").":</th><td colspan='4'>$row[ajalla]</td></tr>";
+				
+				//	Kommentit aina vain perheen loppuun!
+				if ($row["tunnus"] == $row["viimonen"]) {
+					if($row["kommentti"] != "") {
+						echo "<tr><th>".t("Kommentti").":</th><td colspan='4' style=\"font-style: italic;\">$row[kommentti]</td></tr>";
+					}				
+					if($row["tuotetyyppi"] == "A") {
+						echo "<tr><th>".t("Ajalla").":</th><td colspan='4' style=\"font-style: italic;\">$row[ajalla]</td></tr>";
+					}
 				}
 
 				echo "</tr>";
 
 				$summa+=$row["rivihinta"];
+				$edperhe = $row["perhe"];
 			}
 
 			echo "<tr><td colspan='2' class='back'></td><th colspan='2' style='text-align:right;'>".t("Yhteens‰")."</th><th style='text-align:right;'>".number_format($summa,2, ', ', ' ')."</th></tr>";

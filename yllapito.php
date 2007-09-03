@@ -543,7 +543,7 @@
 
 		echo "</td><td class='back' valign='top'>";
 
-		if ($errori == '' and $toim == "tuote") {
+		if ($errori == '' and $toim == "tuote" and $laji != "V") {
 			require ("inc/tuotteen_toimittajat.inc");
 		}
 

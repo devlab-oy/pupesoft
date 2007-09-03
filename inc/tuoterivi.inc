@@ -13,11 +13,15 @@
 		$sel[$trow[$i]] = "selected";
 	
 		$ulos = "<td><select name='$nimi'>";
-		$ulos .= "<option value=''>".t("Normaali / Valmiste")."</option>";
-		$ulos .= "<option value='R' $sel[R]>".t("Raaka-aine")."</option>";
-		$ulos .= "<option value='K' $sel[K]>".t("Palvelu")."</option>";
-		$ulos .= "<option value='A' $sel[A]>".t("Viranomaistuote - Päiväraha")."</option>";
-		$ulos .= "<option value='B' $sel[B]>".t("Viranomaistuote - Muu kulu")."</option>";
+		if($laji == "V") {
+			$ulos .= "<option value='A' $sel[A]>".t("Päiväraha")."</option>";
+			$ulos .= "<option value='B' $sel[B]>".t("Muu kulu")."</option>";			
+		}
+		else {
+			$ulos .= "<option value=''>".t("Normaali / Valmiste")."</option>";
+			$ulos .= "<option value='R' $sel[R]>".t("Raaka-aine")."</option>";
+			$ulos .= "<option value='K' $sel[K]>".t("Palvelu")."</option>";			
+		}
 		$ulos .= "</select></td>";
 	
 		$jatko=0;

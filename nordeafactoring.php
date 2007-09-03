@@ -216,7 +216,6 @@
 					DATE_FORMAT(lasku.kapvm, '%y%m%d') kapvm,
 					lasku.tunnus,
 					lasku.valkoodi,
-					lasku.vienti_kurssi,
 					lasku.liitostunnus
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='$factoringyhtio'
@@ -255,7 +254,7 @@
 				$asirow = mysql_fetch_array($asires);
 
 				// Valuuttalasku
-				if ($laskurow["vienti_kurssi"] != 0 and $laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {					
+				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {					
 					$laskurow["summa"]   = $laskurow["summa_valuutassa"];
 					$laskurow["kasumma"] = $laskurow["kasumma_valuutassa"];
 				}

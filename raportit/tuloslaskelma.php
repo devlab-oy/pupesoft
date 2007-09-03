@@ -136,7 +136,7 @@
 			for ($i=0; $i < $tasoluku; $i++) {
 				$taso[$i] = substr($tasorow["taso"], 0, $i+1);
 			}
-
+			
 			$query = "	SELECT $alkuquery
 						sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) 'Total'
 					 	FROM tili
@@ -159,10 +159,12 @@
 
 		}
 
+
 		echo "<table>";
 
 		// printataan headerit
 		echo "<tr><td class='back' colspan='2'></td>";
+
 		foreach ($kaudet as $kausi) {
 			echo "<td class='tumma' align='right' valign='bottom'>$kausi</td>";
 		}
@@ -178,7 +180,7 @@
 
 			// tulostaan rivi vain jos se kuuluu rajaukseen
 			if (strlen($key) <= $rtaso) {
-
+				
 				$class = "";
 				$tulos = 0;
 
@@ -186,8 +188,13 @@
 				if (strlen($key) < 3) $class = "tumma";
 
 				$rivi  = "<tr>";
+				
+				//$rivi .= "<th nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&tyyppi=$mty&tee=muuta'>$key</a></th>";
+				//$rivi .= "<th nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&edtaso=$edkey&tee=lisaa'>Uusi taso</a></th>";
+
 				$rivi .= "<th nowrap>$key</th>";
 				$rivi .= "<th nowrap>$value</th>";
+				
 				foreach ($kaudet as $kausi) {
 
 					$query = "select summattava_taso from taso where yhtio='$kukarow[yhtio]' and taso='$key' and summattava_taso != ''";
@@ -217,9 +224,12 @@
 				}
 
 				// jos jollain kaudella oli summa != 0 niin tulostetaan rivi
-				if ($tulos > 0) echo $rivi;
-
+				if ($tulos > 0) {
+					echo $rivi;
+				}
 			}
+			
+			$edkey = $key;
 		}
 
 		echo "</table>";
@@ -387,9 +397,10 @@
 	$vresult = mysql_query($query) or pupe_error($query);
 	$vrow = mysql_fetch_array($vresult);
 
-	for ($i=0; $i < $vrow["taso"]; $i++) {
+	for ($i=$vrow["taso"]-1; $i >= 0; $i--) {
 		echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
 	}
+
 //	echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Tili taso")."</option>\n";
 
 	echo "</select></td></tr>";

@@ -227,7 +227,6 @@
 			echo "</tr>";
 
 			$kplsumma = 0;
-			$hintasumma = 0;
 			$rivihintasumma = 0;
 			
 			while ($row = mysql_fetch_array($result)) {
@@ -267,7 +266,6 @@
 				}
 				
 				$kplsumma += $row["kpl"];
-				$hintasumma += $row["hinta"];
 				$rivihintasumma += $row["rivihinta"];
 
 				if ($toim != "OSTO") {
@@ -313,18 +311,18 @@
 				$csp = 6;
 			}
 			
-			echo "<tr><td colspan='$csp'>".t("Yhteensä").":</td><td>".sprintf('%01.2f', $kplsumma)."</td><td>".sprintf('%01.2f', $hintasumma)."</td><td>".sprintf('%01.2f', $rivihintasumma)."</td></tr>";
+			echo "<tr><td colspan='$csp'>".t("Yhteensä").":</td><td>".sprintf('%01.2f', $kplsumma)."</td><td></td><td>".sprintf('%01.2f', $rivihintasumma)."</td></tr>";
 			echo "</table>";
 			
 			if(isset($workbook)) {
 				if($toim == "OSTO") {
 					$worksheet->writeFormula($excelrivi, 5, "=sum(F2:F$excelrivi)");
-					$worksheet->writeFormula($excelrivi, 6, "=sum(G2:G$excelrivi)");
+					$worksheet->write($excelrivi, 6, "");
 					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
 				}
 				else {
 					$worksheet->writeFormula($excelrivi, 6, "=sum(G2:G$excelrivi)");
-					$worksheet->writeFormula($excelrivi, 7, "=sum(H2:H$excelrivi)");
+					$worksheet->write($excelrivi, 7, "");
 					$worksheet->writeFormula($excelrivi, 8, "=sum(I2:I$excelrivi)");
 				}
 				$workbook->close();

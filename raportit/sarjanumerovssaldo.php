@@ -63,7 +63,7 @@
 				
 				if ((float) $saldo != (float) $sarjarow["kpl"]) {
 					echo "<tr>
-							<td valign='top'>$row[tuoteno]</td><td valign='top'>$row[nimitys]</td>
+							<td valign='top'><a href='../inventoi.php?tee=INVENTOI&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td><td valign='top'>$row[nimitys]</td>
 							<td valign='top'>$saldorow[nimitys] $saldorow[tyyppi]</td>
 							<td valign='top'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
 							<td valign='top' align='right'>".sprintf("%.2f", $saldo)."</td>

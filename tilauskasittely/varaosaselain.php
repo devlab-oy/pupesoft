@@ -307,10 +307,20 @@
 					<td class='$class' align='right'>$ruuhinta</td>";
 
 			if ($saldo > 0) {
-				echo "<td align='center'><img width='12px' heigth='12px' src='../pics/vihrea.png'></td>";
+				if (file_exists("../pics/vihrea.png")) {
+					echo "<td align='center'><img width='12px' heigth='12px' src='../pics/vihrea.png'></td>";
+				}
+				else {
+					echo "<td align='center'><img width='12px' heigth='12px' src='pics/vihrea.png'></td>";
+				}
 			}
 			else {
-				echo "<td align='center'><img width='12px' heigth='12px' src='../pics/punainen.png'></td>";
+				if (file_exists("../pics/punainen.png")) {
+					echo "<td align='center'><img width='12px' heigth='12px' src='../pics/punainen.png'></td>";
+				}
+				else {
+					echo "<td align='center'><img width='12px' heigth='12px' src='pics/punainen.png'></td>";
+				}
 			}
 
 			if ($kukarow["kesken"] != 0) {

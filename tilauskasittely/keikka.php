@@ -230,7 +230,7 @@ if ($toiminto == "" and $ytunnus == "") {
 	$kaikkivarastossayhteensa = 0;
 
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
-	$query = "	SELECT ytunnus, nimi, nimitark, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(*) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat,
+	$query = "	SELECT ytunnus, nimi, nimitark, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(distinct lasku.tunnus) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat,
 				sum(tilausrivi.rivihinta) varastossaarvo
 				FROM lasku
 				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
@@ -247,7 +247,7 @@ if ($toiminto == "" and $ytunnus == "") {
 		echo "<br><font class='head'>".t("Keskener‰iset keikat")."</font><hr>";
 
 		echo "<table>";
-		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("keikkanumerot")."</th><th>".t("kpl")."</th><th>".t("arvo")."</th><th></th></tr>";
+		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("keikkanumerot")."</th><th>".t("kpl")."</th><th>".t("varastonarvo")."</th><th></th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
 
@@ -267,7 +267,7 @@ if ($toiminto == "" and $ytunnus == "") {
 			}
 
 			if ($row["varastossaarvo"] == 0) $row["varastossaarvo"] = "";
-			
+
 			echo "<td>$row[nimi] $row[nimitark]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[keikat]</td><td align='right'>$row[kpl]</td><td align='right'>$row[varastossaarvo]</td>";
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
@@ -413,7 +413,7 @@ if ($toiminto == "" and $ytunnus != "") {
 		while ($row = mysql_fetch_array($result)) {
 
 			// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
-			$query  = "	SELECT tilausrivi.*						
+			$query  = "	SELECT tilausrivi.*
 						FROM tilausrivi USE INDEX (uusiotunnus_index)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
 						tilausrivi.uusiotunnus = '$row[tunnus]' and

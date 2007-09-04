@@ -126,7 +126,7 @@
 				if ($vertailubu != "" and $kirjain == "S") {
 					//$alkuquery .= " (SELECT sum(budjetti.summa) 'budj $headny' FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi = '$bukausi' $lisa2), \n";
 					$alkuquery .= " if(budjetti.kausi = '$bukausi', min(budjetti.summa), 0) 'budj $headny', ";
-	//				$alkuquery .= " if budjetti.kausi 'budj $headny', ";
+					//$alkuquery .= " if budjetti.kausi 'budj $headny', ";
 
 					$budjejoin = " LEFT JOIN budjetti USE INDEX (yhtio_taso_kausi) ON (budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi >= '$annettuabu' $lisa2) ";
 					$kaudet[] = "budj $headny";
@@ -136,7 +136,11 @@
 			}
 
 			// yhteensäotsikkomukaan
-			$kaudet[] = "Total";
+			
+			$vka = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv));
+			$vkl = date("Y/m", mktime(0, 0, 0, $alvk+1, 1, $alvv));
+			
+			$kaudet[] = $vka." - ".$vkl;
 
 			while ($tasorow = mysql_fetch_array($tasores)) {
 
@@ -154,7 +158,7 @@
 				}
 
 				$query = "	SELECT $alkuquery
-							sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) 'Total'
+							sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl'
 						 	FROM tili
 							LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm < '$totalloppu' $lisa)
 							$budjejoin
@@ -251,7 +255,27 @@
 			echo "<table>";
 
 			// printataan headerit
-			echo "<tr><td class='back' colspan='1'></td>";
+			echo "<tr>";
+			
+			if ($toim == "TASOMUUTOS") {
+				
+				echo "	<form action = '".$palvelin2."tasomuutos.php' method='post'>
+						<input type = 'hidden' name = 'tee' value = 'tilitaso'>
+						<input type = 'hidden' name = 'kirjain' value = '$kirjain'>";
+				
+				$lopetus = "raportit/tuloslaskelma.php////";
+						
+				foreach ($_REQUEST as $key => $value) {
+					$lopetus .= $key."=".$value."//";
+				}
+				echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
+				
+				echo "<td class='back' colspan='3'></td>";
+			}
+			else {
+				echo "<td class='back' colspan='1'></td>";	
+			}
+			
 
 			for ($i = $alkukausi; $i < count($kaudet); $i++) {
 				echo "<td class='tumma' align='right' valign='bottom'>$kaudet[$i]</td>";
@@ -278,7 +302,13 @@
 					// laitetaan ykkös ja kakkostason rivit tummalla selkeyden vuoksi
 					if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
 
-					$rivi  = "<tr>";
+					$rivi  = "<tr>";					
+					
+					if ($toim == "TASOMUUTOS") {
+						$rivi .= "<td class='back' nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";
+						$rivi .= "<td class='back' nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&kirjain=$kirjain&edtaso=$edkey&tee=lisaa&lopetus=$lopetus'>Lisää taso tasoon $key</a></td>";
+					}
+					
 					$tilirivi = "";
 
 					if ($rtaso == "TILI") {
@@ -307,28 +337,36 @@
 
 							for ($tilii = $alkukausi + 1; $tilii < mysql_num_fields($summares); $tilii++) {
 								$apu = sprintf($muoto, $summarow[$tilii] * -1 / $tarkkuus);
+								if ($apu == 0) $apu = "";
+																	
 								$tilirivi2 .= "<td align='right' nowrap>$apu</td>";
 								if ($summarow[$tilii] != 0) $tulos++;
 							}
 
-							if ($tulos > 0) {
-								$tilirivi .= "<tr><td nowrap>$summarow[tilino] - $tilirow[nimi]</td>$tilirivi2</tr>";
+							if ($tulos > 0 or $toim == "TASOMUUTOS") {
+								
+								$tilirivi .= "<tr>";
+								
+								if ($toim == "TASOMUUTOS") {
+									$tilirivi .= "<td class='back' nowrap>$key</td>";
+									$tilirivi .= "<td class='back' nowrap><input type='checkbox' name='tiliarray[]' value=\"'$tilirow[tilino]'\"></td>";
+								}
+								
+								$tilirivi .= "<td nowrap>$tilirow[tilino] - $tilirow[nimi]</td>$tilirivi2</tr>";
 							}
 
 						}
 					}
 
-					//$rivi .= "<th nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&tyyppi=$mty&tee=muuta'>$key</a></th>";
-					//$rivi .= "<th nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&edtaso=$edkey&tee=lisaa'>Uusi taso</a></th>";
-
-//					$rivi .= "<th nowrap>$key</th>";
 					$rivi .= "<th nowrap>$value</th>";
 
 					$tulos = 0;
 
 					for ($i = $alkukausi; $i < count($kaudet); $i++) {
 
-						$query = "SELECT summattava_taso FROM taso WHERE yhtio = '$kukarow[yhtio]' and taso = '$key' and summattava_taso != '' and tyyppi = '$kirjain'";
+						$query = "	SELECT summattava_taso 
+									FROM taso 
+									WHERE yhtio = '$kukarow[yhtio]' and taso = '$key' and summattava_taso != '' and tyyppi = '$kirjain'";
 						$summares = mysql_query($query) or pupe_error($query);
 
 						if ($summarow = mysql_fetch_array ($summares)) {
@@ -347,6 +385,7 @@
 
 						$rivi .= "<td class='$class' align='right' nowrap>$apu</td>";
 					}
+					
 					$rivi .= "</tr>\n";
 
 					// kakkostason jälkeen aina yks tyhjä rivi.. paitsi jos otetaan vain kakkostason raportti
@@ -355,10 +394,11 @@
 					}
 
 					// jos jollain kaudella oli summa != 0 niin tulostetaan rivi
-					if ($tulos > 0) {
+					if ($tulos > 0 or $toim == "TASOMUUTOS") {
 
 						echo $tilirivi, $rivi;
 
+						
 						$left = 10+(strlen($key)-1)*3;
 						$pdf->draw_text($left,  $bottom, $value, $firstpage, $b);
 						$left = 150;
@@ -374,14 +414,17 @@
 						if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
 							$bottom -= $rivikork;
 						}
-
 					}
 				}
 
 				$edkey = $key;
 			}
-
+			
 			echo "</table>";
+
+			if ($toim == "TASOMUUTOS") {
+				echo "<br><input type='submit' value='".t("Anna tileille taso")."'></form><br><br>";
+			}
 
 			//keksitään uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
@@ -396,6 +439,7 @@
 			echo "<br><table>";
 			echo "<tr><th>".t("Tallenna pdf").":</th>";
 			echo "<form method='post' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
 			echo "<input type='hidden' name='kaunisnimi' value='$otsikko.pdf'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
@@ -412,6 +456,7 @@
 		echo "<br>";
 		echo "	<form action = 'tuloslaskelma.php' method='post'>
 				<input type = 'hidden' name = 'tltee' value = 'aja'>
+				<input type='hidden' name='toim' value='$toim'>
 				<table>";
 
 		echo "	<tr>

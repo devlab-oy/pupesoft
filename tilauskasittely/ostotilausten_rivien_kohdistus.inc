@@ -469,7 +469,8 @@ if ($tila == '') {
 					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$toimittajaid')
 					LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
 					WHERE tilausrivi.yhtio ='$kukarow[yhtio]'
-					AND tilausrivi.uusiotunnus = '$otunnus'";
+					AND tilausrivi.uusiotunnus = '$otunnus'
+					AND tilausrivi.tyyppi != 'D'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$hintarow = mysql_fetch_array($result);
 

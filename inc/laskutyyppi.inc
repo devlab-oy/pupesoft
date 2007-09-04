@@ -80,9 +80,11 @@
 					$alatila = "Odottaa hyv‰ksynt‰‰";
 					break;
 				case "T":
+					$laskutyyppi = "Myyntitilaus";				
 					$alatila = "odottaa JT tuotteita";
 					break;
 				case "U":
+					$laskutyyppi = "Kokonaistoimitus";
 					$alatila = "odottaa JT tuotteita";
 					break;
 			}

@@ -210,6 +210,7 @@ function tipper(e, oi) {
 	ds = de.style;
 
 	if (e.type == "mouseout") {
+		ds.display = "none";
 		ds.visibility = "hidden";
 	}
 	else {
@@ -244,6 +245,7 @@ function tipper(e, oi) {
 		ds.left = lv;
 		ds.top = tv;
 		
+		ds.display = "block";
 		ds.visibility = "visible";
 	}
 }

@@ -2,6 +2,7 @@ div.popup {
 	position:absolute; 
 	z-index:100; 
 	visibility: hidden;
+	display: none;	
 	background:#eee; 
 	border: 2px #4d4d4d solid;
 	padding: 5px;

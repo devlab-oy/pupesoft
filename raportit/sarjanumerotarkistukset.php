@@ -135,6 +135,7 @@
 							sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
 							tilausrivi.kpl, myyntilasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys, 
 							if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
+							tuote.kehahin,
 							(select count(*) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
 							FROM tilausrivi
 							JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
@@ -159,6 +160,7 @@
 							sarjanumeroseuranta.sarjanumero sarjanumero, sarjanumeroseuranta.tunnus sarjatunnus,
 							tilausrivi.kpl, ostolasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys, 
 							if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
+							tuote.kehahin,
 							(select count(*) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.ostorivitunnus=tilausrivi.tunnus) css
 							FROM tilausrivi
 							JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
@@ -209,8 +211,16 @@
 						<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td>
 						<td valign='top'>$vrow[nimitys]<br><font class='message'>$vrow[viesti]</font></td>
 						<td valign='top' align='right'>$vrow[rivihinta]</td>
-						<td valign='top' align='right'>$vrow[ostohinta]";
-				if ($keikkahinta != 0) echo "<br>".sprintf('%.2f', $keikkahinta);
+						<td valign='top' align='right'>";
+						
+				if ((float) $vrow["ostohinta"] == 0) {
+					echo "KEHA: $vrow[kehahin]";
+				}
+				else {
+					echo "$vrow[ostohinta]";			
+					if ($keikkahinta != 0) echo "<br>".sprintf('%.2f', $keikkahinta);
+				}
+				
 				echo "</td>";
 																							
 				$vrow["ostohinta"] = sprintf('%.2f', $keikkahinta+$vrow["ostohinta"]);

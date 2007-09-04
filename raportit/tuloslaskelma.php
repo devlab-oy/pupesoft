@@ -8,7 +8,7 @@
 
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
-			readfile("/tmp/".$tmpfilenimi);	
+			readfile("/tmp/".$tmpfilenimi);
 			exit;
 		}
 	}
@@ -144,7 +144,7 @@
 				$tasoluku = strlen($tasorow["taso"]);
 
 				// tasonimi talteen (rightpäddätään Ö:llä, niin saadaan oikeaan järjestykseen)
-				$apusort = str_pad($tasorow["taso"], 6, "Ö");
+				$apusort = str_pad($tasorow["taso"], 20, "Ö");
 				$tasonimi[$apusort] = $tasorow["nimi"];
 
 				// pilkotaan taso osiin
@@ -174,7 +174,7 @@
 				}
 
 			}
-		
+
 			// Haluaako käyttäjä nähä kaikki kaudet
 			if ($kaikkikaudet == "") {
 				$alkukausi = count($kaudet)-2;
@@ -185,7 +185,7 @@
 			else {
 				$alkukausi = 0;
 			}
-		
+
 			require_once('pdflib/phppdflib.class.php');
 
 			$pdf = new pdffile;
@@ -199,13 +199,13 @@
 			$b["font"] 		= "Times-Bold";
 			$rivikork 		= "15";
 			$saraklev 		= "50";
-		
+
 			function alku () {
 				global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi;
-			
+
 				$firstpage = $pdf->new_page("11.5x8in");
 				$bottom = "530";
-	
+
 				if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
 					$filename = $yhtiorow["lasku_logo"];
 
@@ -221,38 +221,38 @@
 					else {
 						$logoparam = array();
 						$logoparam['scale'] = 0.15;
-			
+
 						$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
 						$iy    = $isizelogo[1]*0.15*0.35714;	// kuvan y-korkeus millimetreissä
-			
+
 						$placement = $pdf->image_place($image, mm_pt(200-$iy), 10, $firstpage, $logoparam);
 					}
 				}
 				else {
 					$pdf->draw_text(10, 560,  $yhtiorow["nimi"], $firstpage);
 				}
-	
+
 				$pdf->draw_text(200,  560, $otsikko, $firstpage);
-			
+
 				$left 	= "150";
 
 				for ($i = $alkukausi; $i < count($kaudet); $i++) {
 					$oikpos = $pdf->strlen($kaudet[$i], $b);
 					$pdf->draw_text($left-$oikpos+$saraklev,  $bottom, $kaudet[$i], $firstpage, $b);
-				
+
 					$left += $saraklev;
 				}
 
 				$bottom -= $rivikork;
 			}
-		
+
 			alku();
 
 			echo "<table>";
 
 			// printataan headerit
-			echo "<tr><td class='back' colspan='2'></td>";
-		
+			echo "<tr><td class='back' colspan='1'></td>";
+
 			for ($i = $alkukausi; $i < count($kaudet); $i++) {
 				echo "<td class='tumma' align='right' valign='bottom'>$kaudet[$i]</td>";
 			}
@@ -267,28 +267,68 @@
 				$key = str_replace("Ö", "", $key); // Ö-kirjaimet pois
 
 				// tulostaan rivi vain jos se kuuluu rajaukseen
-				if (strlen($key) <= $rtaso) {
+				if (strlen($key) <= $rtaso or $rtaso == "TILI") {
+
 					if ($bottom < 20) {
 						alku();
 					}
-				
+
 					$class = "";
-					$tulos = 0;
 
 					// laitetaan ykkös ja kakkostason rivit tummalla selkeyden vuoksi
-					if (strlen($key) < 3) $class = "tumma";
+					if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
 
 					$rivi  = "<tr>";
+					$tilirivi = "";
+
+					if ($rtaso == "TILI") {
+
+						$class = "tumma";
+
+						$query = "SELECT * FROM tili WHERE yhtio = '$kukarow[yhtio]' and $tilikarttataso = '$key'";
+						$tilires = mysql_query($query) or pupe_error($query);
+
+						while ($tilirow = mysql_fetch_array($tilires)) {
+							$query = "	SELECT tilino, $alkuquery
+										sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) 'Total'
+										FROM tiliointi
+										WHERE yhtio = '$kukarow[yhtio]'
+										AND tilino = '$tilirow[tilino]'
+										AND korjattu = ''
+										AND tapvm >= '$totalalku'
+										AND tapvm < '$totalloppu'
+										$lisa
+										GROUP BY tilino";
+							$summares = mysql_query($query) or pupe_error($query);
+							$summarow = mysql_fetch_array($summares);
+
+							$tilirivi2 = "";
+							$tulos = 0;
+
+							for ($tilii = $alkukausi + 1; $tilii < mysql_num_fields($summares); $tilii++) {
+								$apu = sprintf($muoto, $summarow[$tilii] * -1 / $tarkkuus);
+								$tilirivi2 .= "<td align='right' nowrap>$apu</td>";
+								if ($summarow[$tilii] != 0) $tulos++;
+							}
+
+							if ($tulos > 0) {
+								$tilirivi .= "<tr><td nowrap>$summarow[tilino] - $tilirow[nimi]</td>$tilirivi2</tr>";
+							}
+
+						}
+					}
 
 					//$rivi .= "<th nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&tyyppi=$mty&tee=muuta'>$key</a></th>";
 					//$rivi .= "<th nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&edtaso=$edkey&tee=lisaa'>Uusi taso</a></th>";
 
-					$rivi .= "<th nowrap>$key</th>";
+//					$rivi .= "<th nowrap>$key</th>";
 					$rivi .= "<th nowrap>$value</th>";
+
+					$tulos = 0;
 
 					for ($i = $alkukausi; $i < count($kaudet); $i++) {
 
-						$query = "select summattava_taso from taso where yhtio = '$kukarow[yhtio]' and taso = '$key' and summattava_taso != '' and tyyppi = '$kirjain'";
+						$query = "SELECT summattava_taso FROM taso WHERE yhtio = '$kukarow[yhtio]' and taso = '$key' and summattava_taso != '' and tyyppi = '$kirjain'";
 						$summares = mysql_query($query) or pupe_error($query);
 
 						if ($summarow = mysql_fetch_array ($summares)) {
@@ -304,20 +344,21 @@
 						else {
 							$tulos++; // summaillaan tätä jos meillä oli rivillä arvo niin osataan tulostaa
 						}
-					
+
 						$rivi .= "<td class='$class' align='right' nowrap>$apu</td>";
 					}
 					$rivi .= "</tr>\n";
 
 					// kakkostason jälkeen aina yks tyhjä rivi.. paitsi jos otetaan vain kakkostason raportti
-					if (strlen($key) == 2 and $rtaso > 2) {
+					if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
 						$rivi .= "<tr><td class='back'>&nbsp;</td></tr>";
 					}
 
 					// jos jollain kaudella oli summa != 0 niin tulostetaan rivi
 					if ($tulos > 0) {
-						echo $rivi;
-					
+
+						echo $tilirivi, $rivi;
+
 						$left = 10+(strlen($key)-1)*3;
 						$pdf->draw_text($left,  $bottom, $value, $firstpage, $b);
 						$left = 150;
@@ -327,13 +368,13 @@
 							$pdf->draw_text($left-$oikpos+$saraklev, $bottom, sprintf($muoto, $summa[$kaudet[$i]][$key] * -1 / $tarkkuus), $firstpage, $p);
 							$left += $saraklev;
 						}
-					
+
 						$bottom -= $rivikork;
-					
-						if (strlen($key) == 2 and $rtaso > 2) {
+
+						if (strlen($key) == 2 and ($rtaso > 2 or $rtaso == "TILI")) {
 							$bottom -= $rivikork;
 						}
-					
+
 					}
 				}
 
@@ -341,7 +382,7 @@
 			}
 
 			echo "</table>";
-		
+
 			//keksitään uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
 			mt_srand((float) $sec + ((float) $usec * 100000));
@@ -351,7 +392,7 @@
 			$fh = fopen("/tmp/".$pdffilenimi, "w");
 			if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF Error $pdffilenimi");
 			fclose($fh);
-			
+
 			echo "<br><table>";
 			echo "<tr><th>".t("Tallenna pdf").":</th>";
 			echo "<form method='post' action='$PHP_SELF'>";
@@ -514,7 +555,6 @@
 		echo "</select></td></tr>";
 
 		$sel = array();
-		if ($rtaso == "") $rtaso = "1";
 		$sel[$rtaso] = "SELECTED";
 
 		echo "<tr><th>".t("Raportointitaso")."</th>
@@ -524,11 +564,11 @@
 		$vresult = mysql_query($query) or pupe_error($query);
 		$vrow = mysql_fetch_array($vresult);
 
+		echo "<option value='TILI'>".t("Tili taso")."</option>\n";
+
 		for ($i=$vrow["taso"]-1; $i >= 0; $i--) {
 			echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
 		}
-
-	//	echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Tili taso")."</option>\n";
 
 		echo "</select></td></tr>";
 
@@ -564,7 +604,7 @@
 				<td>
 				<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava")."
 				<input type='checkbox' name='vertailubu' $bchek DISABLED> ".t("Budjetti")."</td></tr>";
-			
+
 		$kauchek =  "";
 		if ($kaikkikaudet != "") $kauchek = "CHECKED";
 

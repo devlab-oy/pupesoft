@@ -82,7 +82,7 @@ and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$laskurow = mysql_fetch_array($res);
 
 		// nollataan hyv‰ksyj‰t jos jokin n‰ist‰ tiloista
-		if (in_array($laskurow['tila'], array('H', 'M', 'Q'))) {
+		if (in_array($laskurow['tila'], array('H', 'M', 'Q')) and $kukarow["taso"] != 3) {
 			nollaa_hyvak((int) $_REQUEST['id']);
 		}
 	} else {
@@ -101,7 +101,7 @@ if (isset($_POST['poista']) and isset($_POST['tunnus']) and isset($_REQUEST['lii
 	$res = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($res);
 
-	if (in_array($laskurow['tila'], array('H', 'M', 'Q'))) {
+	if (in_array($laskurow['tila'], array('H', 'M', 'Q')) and $kukarow["taso"] != 3) {
 		nollaa_hyvak($_REQUEST['id']);
 	}
 }
@@ -130,7 +130,7 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 
 	echo "</table>";
 
-	if (! in_array($laskurow['tila'], array('P', 'Y'))) {
+	if (! in_array($laskurow['tila'], array('P', 'Y')) or $kukarow["taso"] == "3") {
 		echo "<p>Lis‰‰ uusi tiedosto: <form method='post' name='kuva' enctype='multipart/form-data'>
 				<input type='file' name='userfile'/>
 				<input type='hidden' name='id' value='" . $_REQUEST['id'] ."'>
@@ -178,7 +178,7 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 
 			echo "<td><form method='post' action='view.php?id={$liite['tunnus']}'><input type='submit' value='" . t('N‰yt‰ lasku')."'/></form></td>";
 
-			if (! in_array($laskurow['tila'], array('P', 'Y'))) {
+			if (! in_array($laskurow['tila'], array('P', 'Y')) or $kukarow["taso"] == "3") {
 				echo "<td><form action='' method='post'>
 					<input type='hidden' name='tunnus' value='{$liite['tunnus']}'/>
 					<input type='submit' name='poista' value='Poista' onclick='return confirm(\"" . t('Haluatko varmasti poistaa t‰m‰n liitteen') . "\");'/>

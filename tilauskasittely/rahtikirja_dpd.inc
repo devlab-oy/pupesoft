@@ -1,343 +1,347 @@
 <?php
 
-// tarvitaan tilauksen tunnus muutujassa $tunnus
-// printterin komento muuttujassa $oslapp
-// $kukarow[yhtio] jostain saadaan yhtio
-// $yhtiorow array josta saada lähettäjän tiedot
+//jos on laitettu kollikenttään 0 niin ei yritetä luoda pdf:fää
+if ($kollityht > 0) {
+	
+	// tarvitaan tilauksen tunnus muutujassa $tunnus
+	// printterin komento muuttujassa $oslapp
+	// $kukarow[yhtio] jostain saadaan yhtio
+	// $yhtiorow array josta saada lähettäjän tiedot
 
-// nyt on kaikki tiedot rahtikirjaa varten haettu..
-//
-// arrayt:
-// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
-// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
-//
-// muuttujat:
-// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
-// mehto sisältää maksuehdon tiedot
-// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
-//
-// tulostetaan rahtikirja
+	// nyt on kaikki tiedot rahtikirjaa varten haettu..
+	//
+	// arrayt:
+	// toitarow, lotsikot, pakkaus, kilot, kollit, kuutiot, lavametri, vakit
+	// $rakir_row:sta löytyy asiakkaan tiedot ja $rivi:stä ytunnus
+	//
+	// muuttujat:
+	// otunnukset, rahdinmaksaja, rahtihinta, pvm, toimitustapa, kolliyht, kilotyht, kuutiotyht, kirjoitin
+	// mehto sisältää maksuehdon tiedot
+	// jv tapauksissa on myös yhteensa, summa, jvhinta, lasno ja viite muuttujat
+	//
+	// tulostetaan rahtikirja
 
-if ($tulostakopio == 'kylla') {
-	$lotsikot = $otsikot;
-}
+	if ($tulostakopio == 'kylla') {
+		$lotsikot = $otsikot;
+	}
 
-//	Näin se oli muuallakin onkai se sitten oikein?
-$rahtikirjanro = $lotsikot[0];
+	//	Näin se oli muuallakin onkai se sitten oikein?
+	$rahtikirjanro = $lotsikot[0];
 
-//Tulostetaan standardi kolliosoitelappu
-$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
-$tempr = mysql_query($query) or pupe_error($query);
-$laskurow = mysql_fetch_array($tempr);
+	//Tulostetaan standardi kolliosoitelappu
+	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
+	$tempr = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array($tempr);
 
-if (!function_exists('tarkiste')) {
+	if (!function_exists('tarkiste')) {
 
-	function tarkiste($sscc) {
+		function tarkiste($sscc) {
 
-		$kerroin = 3; // kerroin aluks 3
-		$summa   = 0; // summa nolla tietty
+			$kerroin = 3; // kerroin aluks 3
+			$summa   = 0; // summa nolla tietty
 
-		// loopataan luvut oikeelta vasemmalle
-		for ($i = 16; $i >= 0; $i--) { 
-			$summa += $kerroin * (ord($sscc{$i})-48); // lisätään summaan ko. luku * kerroin (tää hanskaa kirjaimet )
-			$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
+			// loopataan luvut oikeelta vasemmalle
+			for ($i = 16; $i >= 0; $i--) { 
+				$summa += $kerroin * (ord($sscc{$i})-48); // lisätään summaan ko. luku * kerroin (tää hanskaa kirjaimet )
+				$kerroin = 4 - $kerroin; // kerroin on vuorotellen 3 tai 1
+			}
+
+			$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mikä pitää lisätä, että päästään seuraavaan tasakymmeneen
+
+			return $sscc;
+		}
+	}
+
+	$apu_kollityht = $kollityht;
+	if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkkiä
+
+	//PDF:n luonti ja defaultit
+	define (__TRACE_ENABLED__, false);
+	define (__DEBUG_ENABLED__, false);
+	require_once("barcode/barcode.php");
+	require_once("barcode/debug.php");
+	require_once("barcode/c39object.php");
+	require_once("barcode/c128aobject.php");
+	require_once("pdflib/phppdflib.class.php");
+
+	//PDF parametrit
+	$pdf = new pdffile;
+	$pdf->set_default('margin-top', 	0);
+	$pdf->set_default('margin-bottom', 	0);
+	$pdf->set_default('margin-left', 	0);
+	$pdf->set_default('margin-right', 	0);
+	$rectparam["width"] = 0.3;
+
+	//fontit
+	$otsik["height"] = 10;
+	$otsik["font"] = "Helvetica";
+
+	$kirj["height"] = 12;
+	$kirj["font"] = "Helvetica-Bold";
+
+	$iso["height"] = 16;
+	$iso["font"] = "Helvetica-Bold";
+
+	$huge["height"] = 20;
+	$huge["font"] = "Helvetica-Bold";
+
+	$hugein["height"] = 28;
+	$hugein["font"] = "Helvetica-Bold";
+
+	//$tulostakolli = 1; // tulostetaan aina yksi kappale???miks???
+
+	$tulostakolli = $kollityht;
+
+	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
+	
+		// tehdään SSCC :
+		// (00) 
+		// 1 
+		// ytunnus (8)
+		// lähetenro (6)
+		// kollityht (2)
+		// tarkiste (1)
+	
+		//$prefix = "(00)"; // tää on turha
+		$sscc = 1;
+		$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
+		$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
+		$sscc .= sprintf('%02.02d', $tulostuskpl);
+		$loppu = tarkiste($sscc);
+		$sscc = $sscc.$loppu;
+	
+		// tehdään pdf:n uusi sivu
+		$firstpage = $pdf->new_page("420x590");
+	
+		//DPD-LOGOGO
+		if (file_exists("pics/dpd_logo.jpg")) {
+		
+			$filename = "pics/dpd_logo.jpg";
+
+			$fh = fopen($filename, "r");
+			$data = fread($fh, filesize($filename));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+
+			if(!$image) {
+				echo t("Logokuvavirhe").": ".$image.$data;
+			}
+			else {
+				$kala = array();
+				$kala['scale'] = 0.20;
+				$pdf->image_place($image, mm_pt(180), mm_pt(100), $firstpage,$kala);
+			}
 		}
 
-		$sscc = ceil($summa / 10) * 10 - $summa; // tarkiste on luku mikä pitää lisätä, että päästään seuraavaan tasakymmeneen
+		//Duusataan viivakoodia
+		$output      = "png";
+		$width       = "220";
+		$height      = "50";
+		$xres        = "1";
+		$font        = "2";
+		$drawtext    = "off";
+		$border      = "on";
+		$stretchtext = "off";
+		$style    = BCS_ALIGN_CENTER;
+		$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
+		$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
+		$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
+		$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
+		$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
+		$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
-		return $sscc;
-	}
-}
+		//luodaan viivakoodiolio kuljetusohjeelle = postino
+		$obj = "";
+		$obj = new c39object($width, $height, $style, $laskurow['toim_postino']);
 
-$apu_kollityht = $kollityht;
-if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkkiä
+		if ($obj) {
+			$obj->SetFont($font);
+			$obj->DrawObject($xres);
 
-//PDF:n luonti ja defaultit
-define (__TRACE_ENABLED__, false);
-define (__DEBUG_ENABLED__, false);
-require_once("barcode/barcode.php");
-require_once("barcode/debug.php");
-require_once("barcode/c39object.php");
-require_once("barcode/c128aobject.php");
-require_once("pdflib/phppdflib.class.php");
+			//flushataan barcode ja saadaam filenimi johon se tallennettiin
+			$nimi1 = $obj->FlushObject();
 
-//PDF parametrit
-$pdf = new pdffile;
-$pdf->set_default('margin-top', 	0);
-$pdf->set_default('margin-bottom', 	0);
-$pdf->set_default('margin-left', 	0);
-$pdf->set_default('margin-right', 	0);
-$rectparam["width"] = 0.3;
+			//keksitään uudelle failille joku varmasti uniikki nimi:
+			$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
 
-//fontit
-$otsik["height"] = 10;
-$otsik["font"] = "Helvetica";
+			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
-$kirj["height"] = 12;
-$kirj["font"] = "Helvetica-Bold";
+			$fh = fopen($nimi2, "r");
+			$data = fread($fh, filesize($nimi2));
+			fclose($fh);
+			$image = $pdf->png_embed($data);
 
-$iso["height"] = 16;
-$iso["font"] = "Helvetica-Bold";
+			if(!$image) {
+				echo "image create error";
+			}
+			// piirretään viivakoodi paprulle
+			$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
+			$pdf->draw_text(mm_pt(4), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
+			unset($obj);
 
-$huge["height"] = 20;
-$huge["font"] = "Helvetica-Bold";
-
-$hugein["height"] = 28;
-$hugein["font"] = "Helvetica-Bold";
-
-//$tulostakolli = 1; // tulostetaan aina yksi kappale???miks???
-
-$tulostakolli = $kollityht;
-
-for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
-	
-	// tehdään SSCC :
-	// (00) 
-	// 1 
-	// ytunnus (8)
-	// lähetenro (6)
-	// kollityht (2)
-	// tarkiste (1)
-	
-	//$prefix = "(00)"; // tää on turha
-	$sscc = 1;
-	$sscc .= sprintf("%08.08s",$yhtiorow["ytunnus"]);
-	$sscc .= sprintf('%06.06d', substr($laskurow["tunnus"], -6));
-	$sscc .= sprintf('%02.02d', $tulostuskpl);
-	$loppu = tarkiste($sscc);
-	$sscc = $sscc.$loppu;
-	
-	// tehdään pdf:n uusi sivu
-	$firstpage = $pdf->new_page("420x590");
-	
-	//DPD-LOGOGO
-	if (file_exists("pics/dpd_logo.jpg")) {
-		
-		$filename = "pics/dpd_logo.jpg";
-
-		$fh = fopen($filename, "r");
-		$data = fread($fh, filesize($filename));
-		fclose($fh);
-
-		$image = $pdf->jfif_embed($data);
-
-		if(!$image) {
-			echo t("Logokuvavirhe").": ".$image.$data;
+			//dellataan tmp filet kuleksimasta
+			system("rm -f $nimi1 $nimi2");
 		}
 		else {
-			$kala = array();
-			$kala['scale'] = 0.20;
-			$pdf->image_place($image, mm_pt(180), mm_pt(100), $firstpage,$kala);
-		}
-	}
-
-	//Duusataan viivakoodia
-	$output      = "png";
-	$width       = "220";
-	$height      = "50";
-	$xres        = "1";
-	$font        = "2";
-	$drawtext    = "off";
-	$border      = "on";
-	$stretchtext = "off";
-	$style    = BCS_ALIGN_CENTER;
-	$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
-	$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
-	$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
-	$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
-	$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
-	$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
-
-	//luodaan viivakoodiolio kuljetusohjeelle = postino
-	$obj = "";
-	$obj = new c39object($width, $height, $style, $laskurow['toim_postino']);
-
-	if ($obj) {
-		$obj->SetFont($font);
-		$obj->DrawObject($xres);
-
-		//flushataan barcode ja saadaam filenimi johon se tallennettiin
-		$nimi1 = $obj->FlushObject();
-
-		//keksitään uudelle failille joku varmasti uniikki nimi:
-		$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
-
-		passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-		$fh = fopen($nimi2, "r");
-		$data = fread($fh, filesize($nimi2));
-		fclose($fh);
-		$image = $pdf->png_embed($data);
-
-		if(!$image) {
-			echo "image create error";
-		}
-		// piirretään viivakoodi paprulle
-		$pdf->image_place($image, mm_pt(80), mm_pt(30), $firstpage); // Y, X
-		$pdf->draw_text(mm_pt(4), mm_pt(75), "Postinro - Postnr - Postal Code: $laskurow[toim_postino]",	$firstpage, $otsik);
-		unset($obj);
-
-		//dellataan tmp filet kuleksimasta
-		system("rm -f $nimi1 $nimi2");
-	}
-	else {
-		echo "object create error";
-	}
-
-	//Duusataan SSCC
-	$output      = "png";
-	$width       = "500";
-	$height      = "50";
-	$xres        = "1";
-	$font        = "2";
-	$drawtext    = "off";
-	$border      = "on";
-	$stretchtext = "off";
-	$style    = BCS_ALIGN_CENTER;
-	$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
-	$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
-	$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
-	$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
-	$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
-	$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
-
-	//luodaan viivakoodiolio kuljetusohjeelle = postino
-	$obj = "";
-	$obj = new c128aobject($width, $height, $style, $sscc);
-
-	if ($obj) {
-		$obj->SetFont($font);
-		$obj->DrawObject($xres);
-
-		//flushataan barcode ja saadaam filenimi johon se tallennettiin
-		$nimi1 = $obj->FlushObject();
-
-		//keksitään uudelle failille joku varmasti uniikki nimi:
-		$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
-
-		passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-		$fh = fopen($nimi2, "r");
-		$data = fread($fh, filesize($nimi2));
-		fclose($fh);
-		$image = $pdf->png_embed($data);
-
-		if(!$image) {
-			echo "image create error 2";
+			echo "object create error";
 		}
 
-		//tehää tästä vielä kaunis kattella
-		$sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
+		//Duusataan SSCC
+		$output      = "png";
+		$width       = "500";
+		$height      = "50";
+		$xres        = "1";
+		$font        = "2";
+		$drawtext    = "off";
+		$border      = "on";
+		$stretchtext = "off";
+		$style    = BCS_ALIGN_CENTER;
+		$style   |= ($output     == "png" ) ? BCS_IMAGE_PNG      : 0;
+		$style   |= ($output     == "jpeg") ? BCS_IMAGE_JPEG     : 0;
+		$style   |= ($border     == "on"  ) ? BCS_BORDER         : 0;
+		$style   |= ($drawtext   == "on"  ) ? BCS_DRAW_TEXT      : 0;
+		$style   |= ($stretchtext== "on"  ) ? BCS_STRETCH_TEXT   : 0;
+		$style   |= ($negative   == "on"  ) ? BCS_REVERSE_COLOR  : 0;
 
-		// piirretään viivakoodi paprulle
-		$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
-		$pdf->draw_text(mm_pt(4), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
-		unset($obj);
+		//luodaan viivakoodiolio kuljetusohjeelle = postino
+		$obj = "";
+		$obj = new c128aobject($width, $height, $style, $sscc);
 
-		//dellataan tmp filet kuleksimasta
-		system("rm -f $nimi1 $nimi2");
+		if ($obj) {
+			$obj->SetFont($font);
+			$obj->DrawObject($xres);
+
+			//flushataan barcode ja saadaam filenimi johon se tallennettiin
+			$nimi1 = $obj->FlushObject();
+
+			//keksitään uudelle failille joku varmasti uniikki nimi:
+			$nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
+
+			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
+
+			$fh = fopen($nimi2, "r");
+			$data = fread($fh, filesize($nimi2));
+			fclose($fh);
+			$image = $pdf->png_embed($data);
+
+			if(!$image) {
+				echo "image create error 2";
+			}
+
+			//tehää tästä vielä kaunis kattella
+			$sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
+
+			// piirretään viivakoodi paprulle
+			$pdf->image_place($image, mm_pt(10), mm_pt(-15), $firstpage); // Y, X
+			$pdf->draw_text(mm_pt(4), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
+			unset($obj);
+
+			//dellataan tmp filet kuleksimasta
+			system("rm -f $nimi1 $nimi2");
+		}
+		else {
+			echo "object create error 2";
+		}
+
+		// sitten aletaan piirtämään itse PDF sisältöä
+		// ensin isot viivat kohilleen
+		$pdf->draw_rectangle(585,5,5,415,														$firstpage, $rectparam);
+
+		//Mistä
+		$pdf->draw_text(mm_pt(4), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(4), mm_pt(195), $yhtiorow['nimi'],								$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(4), mm_pt(190), $yhtiorow['nimitark'],							$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(4), mm_pt(185), $yhtiorow['osoite'],								$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(4), mm_pt(180), $yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']),	$firstpage, $kirj);
+
+		$pdf->draw_text(mm_pt(4), mm_pt(175), "Puh -Tel - Tel: ",								$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(4), mm_pt(170), $yhtiorow['puhelin'],								$firstpage, $kirj);
+
+		$pdf->draw_text(mm_pt(70), mm_pt(175), "Läh.pvm. - Avs.dat. -  Desp.Date: ",			$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(70), mm_pt(170), date("d.m.Y") ,									$firstpage, $kirj);
+
+		$pdf->draw_text(mm_pt(4), mm_pt(165), "Lähettäjä - Avsändare - Sender: ",				$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(4), mm_pt(160), "$kukarow[nimi]" ,								$firstpage, $kirj);
+
+		$pdf->draw_text(mm_pt(70), mm_pt(165), "Viite - Referens - Reference: ",				$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(70), mm_pt(160), "$laskurow[viesti]" ,							$firstpage, $kirj);
+
+		$pdf->draw_text(mm_pt(4), mm_pt(155), "Tilaukset - Order - Orders: ",					$firstpage, $otsik);
+		if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
+		$pdf->draw_text(mm_pt(50), mm_pt(155), $tilausnumeroita, $firstpage, $kirj);
+
+		//Minne
+		$pdf->draw_rectangle(mm_pt(150),mm_pt(5),mm_pt(150),mm_pt(10),							$firstpage, $rectparam);
+		$pdf->draw_rectangle(mm_pt(150),mm_pt(5),mm_pt(145),mm_pt(5),							$firstpage, $rectparam);
+
+		$pdf->draw_rectangle(mm_pt(150),mm_pt(138),mm_pt(150),mm_pt(143),						$firstpage, $rectparam);
+		$pdf->draw_rectangle(mm_pt(150),mm_pt(143),mm_pt(145),mm_pt(143),						$firstpage, $rectparam);
+
+		$pdf->draw_text(mm_pt(15),	mm_pt(145), "Minne - Till - To: " ,							$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(15),	mm_pt(140), $laskurow['toim_nimi'],							$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(15),	mm_pt(135), $laskurow['toim_nimitark'],						$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(15),	mm_pt(130), $laskurow['toim_osoite'],						$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(15),	mm_pt(123), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $iso);
+	
+		$query = "	select *
+					from maat
+					where koodi = '$laskurow[toim_maa]'";
+		$tempr = mysql_query($query) or pupe_error($query);
+		$maarow = mysql_fetch_array($tempr);
+	
+		$pdf->draw_text(mm_pt(15),	mm_pt(116), substr($maarow['nimi'],5),								$firstpage, $iso);
+	
+	
+		$query = "	select *
+					from asiakas
+					where yhtio = '$kukarow[yhtio]'
+					and tunnus  = '$laskurow[liitostunnus]'";
+		$tempr = mysql_query($query) or pupe_error($query);
+		$asiakasrow = mysql_fetch_array($tempr);
+
+		$pdf->draw_text(mm_pt(15),	mm_pt(112),  "Puh -Tel - Tel: ",		$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(38),	mm_pt(112), $asiakasrow['puhelin'],		$firstpage, $kirj);
+
+		$pdf->draw_text(mm_pt(65), mm_pt(112), "Toimitustapa:",				$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(87), mm_pt(112), $laskurow["toimitustapa"],	$firstpage, $kirj);
+
+
+		$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(110),mm_pt(10),		$firstpage, $rectparam);
+		$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(115),mm_pt(5),		$firstpage, $rectparam);
+
+		$pdf->draw_rectangle(mm_pt(110),mm_pt(138),mm_pt(110),mm_pt(143),	$firstpage, $rectparam);
+		$pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),	$firstpage, $rectparam);
+
+		//Kuljetusohjeet = viivakoodi tulee tähän
+		$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
+		$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow["toimitustapa"],											$firstpage, $hugein);
+		$pdf->draw_text(mm_pt(20), mm_pt(45), "Paketteja - Paket - Packages: ".$kollityht,							$firstpage, $kirj);
+		$pdf->draw_text(mm_pt(20), mm_pt(40), $laskurow['viesti'],													$firstpage, $kirj);
+
+		if ($rakir_row['tulostustapa'] == 'K') {
+			$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
+		}
+		// ylhäällä on "oikee" tapa tehdä, mutta me ei tiedetä tässä vaiheessa kollien määrää eikä painoa
+		$pdf->draw_text(mm_pt(4), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
+		if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
+		$pdf->draw_text(mm_pt(50), mm_pt(30), $tilausnumeroita, $firstpage, $kirj);
 	}
-	else {
-		echo "object create error 2";
-	}
 
-	// sitten aletaan piirtämään itse PDF sisältöä
-	// ensin isot viivat kohilleen
-	$pdf->draw_rectangle(585,5,5,415,														$firstpage, $rectparam);
+	//keksitään uudelle failille joku varmasti uniikki nimi:
+	$pdffilenimi = "/tmp/dpdosoitelappu-".md5(uniqid(rand(),true)).".pdf";
 
-	//Mistä
-	$pdf->draw_text(mm_pt(4), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(4), mm_pt(195), $yhtiorow['nimi'],								$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(4), mm_pt(190), $yhtiorow['nimitark'],							$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(4), mm_pt(185), $yhtiorow['osoite'],								$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(4), mm_pt(180), $yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']),	$firstpage, $kirj);
+	//kirjoitetaan pdf faili levylle..
+	$fh = fopen($pdffilenimi, "w");
+	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+	fclose($fh);
 
-	$pdf->draw_text(mm_pt(4), mm_pt(175), "Puh -Tel - Tel: ",								$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(4), mm_pt(170), $yhtiorow['puhelin'],								$firstpage, $kirj);
+	//itse print komento...
+	$line = exec("$kirjoitin $pdffilenimi");
 
-	$pdf->draw_text(mm_pt(70), mm_pt(175), "Läh.pvm. - Avs.dat. -  Desp.Date: ",			$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(70), mm_pt(170), date("d.m.Y") ,									$firstpage, $kirj);
-
-	$pdf->draw_text(mm_pt(4), mm_pt(165), "Lähettäjä - Avsändare - Sender: ",				$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(4), mm_pt(160), "$kukarow[nimi]" ,								$firstpage, $kirj);
-
-	$pdf->draw_text(mm_pt(70), mm_pt(165), "Viite - Referens - Reference: ",				$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(70), mm_pt(160), "$laskurow[viesti]" ,							$firstpage, $kirj);
-
-	$pdf->draw_text(mm_pt(4), mm_pt(155), "Tilaukset - Order - Orders: ",					$firstpage, $otsik);
-	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
-	$pdf->draw_text(mm_pt(50), mm_pt(155), $tilausnumeroita, $firstpage, $kirj);
-
-	//Minne
-	$pdf->draw_rectangle(mm_pt(150),mm_pt(5),mm_pt(150),mm_pt(10),							$firstpage, $rectparam);
-	$pdf->draw_rectangle(mm_pt(150),mm_pt(5),mm_pt(145),mm_pt(5),							$firstpage, $rectparam);
-
-	$pdf->draw_rectangle(mm_pt(150),mm_pt(138),mm_pt(150),mm_pt(143),						$firstpage, $rectparam);
-	$pdf->draw_rectangle(mm_pt(150),mm_pt(143),mm_pt(145),mm_pt(143),						$firstpage, $rectparam);
-
-	$pdf->draw_text(mm_pt(15),	mm_pt(145), "Minne - Till - To: " ,							$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(15),	mm_pt(140), $laskurow['toim_nimi'],							$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(15),	mm_pt(135), $laskurow['toim_nimitark'],						$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(15),	mm_pt(130), $laskurow['toim_osoite'],						$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(15),	mm_pt(123), $laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $iso);
-	
-	$query = "	select *
-				from maat
-				where koodi = '$laskurow[toim_maa]'";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$maarow = mysql_fetch_array($tempr);
-	
-	$pdf->draw_text(mm_pt(15),	mm_pt(116), substr($maarow['nimi'],5),								$firstpage, $iso);
-	
-	
-	$query = "	select *
-				from asiakas
-				where yhtio = '$kukarow[yhtio]'
-				and tunnus  = '$laskurow[liitostunnus]'";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$asiakasrow = mysql_fetch_array($tempr);
-
-	$pdf->draw_text(mm_pt(15),	mm_pt(112),  "Puh -Tel - Tel: ",		$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(38),	mm_pt(112), $asiakasrow['puhelin'],		$firstpage, $kirj);
-
-	$pdf->draw_text(mm_pt(65), mm_pt(112), "Toimitustapa:",				$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(87), mm_pt(112), $laskurow["toimitustapa"],	$firstpage, $kirj);
-
-
-	$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(110),mm_pt(10),		$firstpage, $rectparam);
-	$pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(115),mm_pt(5),		$firstpage, $rectparam);
-
-	$pdf->draw_rectangle(mm_pt(110),mm_pt(138),mm_pt(110),mm_pt(143),	$firstpage, $rectparam);
-	$pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),	$firstpage, $rectparam);
-
-	//Kuljetusohjeet = viivakoodi tulee tähän
-	$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow["toimitustapa"],											$firstpage, $hugein);
-	$pdf->draw_text(mm_pt(20), mm_pt(45), "Paketteja - Paket - Packages: ".$kollityht,							$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(20), mm_pt(40), $laskurow['viesti'],													$firstpage, $kirj);
-
-	if ($rakir_row['tulostustapa'] == 'K') {
-		$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
-	}
-	// ylhäällä on "oikee" tapa tehdä, mutta me ei tiedetä tässä vaiheessa kollien määrää eikä painoa
-	$pdf->draw_text(mm_pt(4), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
-	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];
-	$pdf->draw_text(mm_pt(50), mm_pt(30), $tilausnumeroita, $firstpage, $kirj);
+	//poistetaan tmp file samantien kuleksimasta...
+	system("rm -f $pdffilenimi");
+	$pdffilenimi='';
 }
-
-//keksitään uudelle failille joku varmasti uniikki nimi:
-$pdffilenimi = "/tmp/dpdosoitelappu-".md5(uniqid(rand(),true)).".pdf";
-
-//kirjoitetaan pdf faili levylle..
-$fh = fopen($pdffilenimi, "w");
-if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-fclose($fh);
-
-//itse print komento...
-$line = exec("$kirjoitin $pdffilenimi");
-
-//poistetaan tmp file samantien kuleksimasta...
-system("rm -f $pdffilenimi");
-$pdffilenimi='';
 
 ?>

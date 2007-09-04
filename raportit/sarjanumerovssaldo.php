@@ -1,6 +1,6 @@
 <?php
 	
-	require("inc/parametrit.inc");
+	require("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Sarjanumero vs. Saldo")."</font><hr>";
 
@@ -85,6 +85,6 @@
 	}
 	
     echo "</table>";
-	require ("inc/footer.inc");
+	require ("../inc/footer.inc");
 	
 ?>

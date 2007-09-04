@@ -169,7 +169,7 @@ if ($toiminto == "kaikkiok" or $toiminto == "kalkyyli") {
 		$ytunnus = "";
 		$toiminto = "dummieimit‰‰n";
 	}
-}  
+}
 
 // lasketaan lopullinen varastonarvo
 if ($toiminto == "kaikkiok") {
@@ -186,12 +186,12 @@ if ($ytunnus != "" or $toimittajaid != "") {
 	$keikkamonta = 0;
 	$hakutunnus = $ytunnus;
 	$hakuid		= $toimittajaid;
-	
+
 	require ("../inc/kevyt_toimittajahaku.inc");
 
 	$keikkamonta += $monta;
 /*
-	if ($ytunnus == "") {	
+	if ($ytunnus == "") {
 		$ytunnus   = $hakutunnus;
 		$asiakasid = $hakuid;
 
@@ -227,12 +227,21 @@ if ($toiminto == "" and $ytunnus == "") {
 	$kentta   = "ytunnus";
 	$toiminto = "";
 
+	$kaikkivarastossayhteensa = 0;
+	$kaikkikohdistettuyhteensa = 0;
+
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
-	$query = "	select ytunnus, nimi, nimitark, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(*) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat
-				from lasku
-				where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus=0
-				group by liitostunnus, ytunnus, nimi, osoite, postitp, swift
-				order by nimi, nimitark, ytunnus";
+	$query = "	SELECT ytunnus, nimi, nimitark, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(*) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat,
+				tilausrivi.kpl * tilausrivi.hinta * if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi) varastossaarvo,
+				(tilausrivi.varattu + tilausrivi.kpl) * tilausrivi.hinta * if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi) yhteensaarvo
+				FROM lasku
+				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
+				WHERE lasku.yhtio = '$kukarow[yhtio]' and
+				lasku.tila = 'K' and
+				lasku.alatila = '' and
+				lasku.vanhatunnus = 0
+				GROUP BY liitostunnus, ytunnus, nimi, osoite, postitp, swift
+				ORDER BY nimi, nimitark, ytunnus";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 0) {
@@ -243,6 +252,9 @@ if ($toiminto == "" and $ytunnus == "") {
 		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("keikkanumerot")."</th><th>".t("kpl")."</th><th></th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
+
+			$kaikkikohdistettuyhteensa += $row["yhteensaarvo"];
+			$kaikkivarastossayhteensa += $row["varastossaarvo"];
 
 			echo "<tr class='aktiivi'>";
 
@@ -266,6 +278,14 @@ if ($toiminto == "" and $ytunnus == "") {
 		}
 
 		echo "</table>";
+
+		if ($kaikkikohdistettuyhteensa != 0 or $kaikkivarastossayhteensa != 0) {
+			echo "<br><table>";
+			echo "<tr><th>".t("Varastossa yhteens‰").": </th><td align='right'> ".round($kaikkivarastossayhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr><th>".t("Kohdistettu yhteens‰").": </th><td align='right'> ".round($kaikkikohdistettuyhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
+			echo "</table>";
+		}
+
 	}
 }
 
@@ -345,14 +365,14 @@ if ($toiminto == "" and $ytunnus != "") {
 	}
 
 	// etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
-	$query = "	select *
-				from lasku use index (tila_index)
-				where yhtio='$kukarow[yhtio]'
-				and liitostunnus='$toimittajaid'
-				and tila='K'
-				and alatila=''
-				and vanhatunnus=0
-				order by laskunro desc
+	$query = "	SELECT *
+				FROM lasku USE INDEX (tila_index)
+				where lasku.yhtio = '$kukarow[yhtio]'
+				and lasku.liitostunnus = '$toimittajaid'
+				and lasku.tila = 'K'
+				and lasku.alatila = ''
+				and lasku.vanhatunnus = 0
+				order by lasku.laskunro desc
 				$limitti";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -389,17 +409,29 @@ if ($toiminto == "" and $ytunnus != "") {
 		if (file_exists("/tmp/$kukarow[yhtio]-keikka.lock")) {
 			$keikkakesken = file_get_contents("/tmp/$kukarow[yhtio]-keikka.lock");
 		}
-		
+
+		$kaikkivarastossayhteensa = 0;
+		$kaikkikohdistettuyhteensa = 0;
+
 		while ($row = mysql_fetch_array($result)) {
 
 			// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
-			$query  = "select * from tilausrivi use index (uusiotunnus_index) where yhtio='$kukarow[yhtio]' and uusiotunnus='$row[tunnus]' and tyyppi='O'";
+			$query  = "	SELECT tilausrivi.*,
+						tilausrivi.kpl * tilausrivi.hinta * if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi) varastossaarvo,
+						(tilausrivi.varattu + tilausrivi.kpl) * tilausrivi.hinta * if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi) yhteensaarvo
+						FROM tilausrivi USE INDEX (uusiotunnus_index)
+						JOIN lasku USE INDEX (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
+						tilausrivi.uusiotunnus = '$row[tunnus]' and
+						tilausrivi.tyyppi = 'O'";
 			$tilres = mysql_query($query) or pupe_error($query);
 
 			$kplyhteensa = 0;  // apumuuttuja
 			$kplvarasto  = 0;  // apumuuttuja
 			$eipaikkoja  = 0;  // apumuuttuja
 			$eituotteet  = ""; // apumuuttuja
+			$varastossaarvo = 0; // apumuuttuja
+			$yhteensaarvo   = 0; // apumuuttuja
 
 			while ($rivirow = mysql_fetch_array($tilres)) {
 				$query = "select * from tuote where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]'";
@@ -407,6 +439,11 @@ if ($toiminto == "" and $ytunnus != "") {
 				$tuote = mysql_fetch_array($tuore);
 
 				$kplyhteensa++; // lasketaan montako tilausrivi‰ on kohdistettu
+
+				$yhteensaarvo += $rivirow["yhteensaarvo"];
+				$varastossaarvo += $rivirow["varastossaarvo"];
+				$kaikkikohdistettuyhteensa += $rivirow["yhteensaarvo"];
+				$kaikkivarastossayhteensa += $rivirow["varastossaarvo"];
 
 				if (($rivirow["kpl"] != 0 and $rivirow["varattu"] == 0) or ($rivirow["kpl"] == 0 and $rivirow["varattu"] == 0)) {
 					$kplvarasto++; // lasketaan montako tilausrivi‰ on viety varastoon
@@ -427,6 +464,20 @@ if ($toiminto == "" and $ytunnus != "") {
 						}
 					}
 				}
+			}
+
+			if ($yhteensaarvo != 0) {
+				$yhteensaarvo = "(".round($yhteensaarvo,2).")";
+			}
+			else {
+				$yhteensaarvo = "";
+			}
+
+			if ($varastossaarvo != 0) {
+				$varastossaarvo = "(".round($varastossaarvo,2).")";
+			}
+			else {
+				$varastossaarvo = "";
 			}
 
 			if ($eipaikkoja == 0 and $kplyhteensa > 0) {
@@ -487,7 +538,7 @@ if ($toiminto == "" and $ytunnus != "") {
 				else {
 					$tunken = "ostorivitunnus";
 				}
-				
+
 				if ($sarjarow["sarjanumeroseuranta"] == "S") {
 					$lisasarjalisays = "distinct";
 				}
@@ -496,10 +547,10 @@ if ($toiminto == "" and $ytunnus != "") {
 				}
 
 				// tilausrivin tunnus pit‰‰ lˆyty‰ sarjanumeroseurannasta
-				$query = "	SELECT $lisasarjalisays sarjanumero 
-							FROM sarjanumeroseuranta use index (yhtio_ostorivi) 
-							WHERE yhtio = '$kukarow[yhtio]' 
-							and tuoteno = '$toimrow[tuoteno]' 
+				$query = "	SELECT $lisasarjalisays sarjanumero
+							FROM sarjanumeroseuranta use index (yhtio_ostorivi)
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$toimrow[tuoteno]'
 							and $tunken = '$toimrow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 
@@ -550,7 +601,7 @@ if ($toiminto == "" and $ytunnus != "") {
 			echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
 			echo "<td valign='top'>$kohdistus<br>$lisatiedot</td>";
 			echo "<td valign='top'>$varastopaikat<br>$sarjanrot</td>";
-			echo "<td valign='top'>$kplyhteensa<br>$kplvarasto</td>";
+			echo "<td valign='top'>$kplyhteensa $yhteensaarvo<br>$kplvarasto $varastossaarvo</td>";
 			echo "<td valign='top'>$llrow[volasku] $llrow[vosumma]<br>$llrow[kulasku] $llrow[kusumma]</td>";
 
 			// jos t‰t‰ keikkaa ollaan just viem‰ss‰ varastoon ei tehd‰ dropdownia
@@ -604,6 +655,14 @@ if ($toiminto == "" and $ytunnus != "") {
 		}
 
 		echo "</table>";
+
+		if ($kaikkikohdistettuyhteensa != 0 or $kaikkivarastossayhteensa != 0) {
+			echo "<br><table>";
+			echo "<tr><th>".t("Varastossa yhteens‰").": </th><td align='right'>".round($kaikkivarastossayhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
+			echo "<tr><th>".t("Kohdistettu yhteens‰").": </th><td align='right'>".round($kaikkikohdistettuyhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
+			echo "</table>";
+		}
+
 	}
 }
 

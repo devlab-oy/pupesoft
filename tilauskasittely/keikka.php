@@ -228,12 +228,10 @@ if ($toiminto == "" and $ytunnus == "") {
 	$toiminto = "";
 
 	$kaikkivarastossayhteensa = 0;
-	$kaikkikohdistettuyhteensa = 0;
 
 	// n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
 	$query = "	SELECT ytunnus, nimi, nimitark, osoite, postitp, swift, group_concat(if(comments!='',comments,NULL) SEPARATOR '<br><br>') comments, liitostunnus, count(*) kpl, group_concat(distinct laskunro SEPARATOR ', ') keikat,
-				tilausrivi.kpl * tilausrivi.hinta * if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi) varastossaarvo,
-				(tilausrivi.varattu + tilausrivi.kpl) * tilausrivi.hinta * if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi) yhteensaarvo
+				sum(tilausrivi.rivihinta) varastossaarvo
 				FROM lasku
 				LEFT JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -253,7 +251,6 @@ if ($toiminto == "" and $ytunnus == "") {
 
 		while ($row = mysql_fetch_array($result)) {
 
-			$kaikkikohdistettuyhteensa += $row["yhteensaarvo"];
 			$kaikkivarastossayhteensa += $row["varastossaarvo"];
 
 			echo "<tr class='aktiivi'>";
@@ -279,10 +276,9 @@ if ($toiminto == "" and $ytunnus == "") {
 
 		echo "</table>";
 
-		if ($kaikkikohdistettuyhteensa != 0 or $kaikkivarastossayhteensa != 0) {
+		if ($kaikkivarastossayhteensa != 0) {
 			echo "<br><table>";
 			echo "<tr><th>".t("Varastossa yhteens‰").": </th><td align='right'> ".round($kaikkivarastossayhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
-			echo "<tr><th>".t("Kohdistettu yhteens‰").": </th><td align='right'> ".round($kaikkikohdistettuyhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
 			echo "</table>";
 		}
 
@@ -411,16 +407,12 @@ if ($toiminto == "" and $ytunnus != "") {
 		}
 
 		$kaikkivarastossayhteensa = 0;
-		$kaikkikohdistettuyhteensa = 0;
 
 		while ($row = mysql_fetch_array($result)) {
 
 			// tutkitaan onko kaikilla tuotteilla on joku varastopaikka
-			$query  = "	SELECT tilausrivi.*,
-						tilausrivi.kpl * tilausrivi.hinta * if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi) varastossaarvo,
-						(tilausrivi.varattu + tilausrivi.kpl) * tilausrivi.hinta * if(lasku.vienti_kurssi=0, 1, lasku.vienti_kurssi) yhteensaarvo
+			$query  = "	SELECT tilausrivi.*						
 						FROM tilausrivi USE INDEX (uusiotunnus_index)
-						JOIN lasku USE INDEX (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
 						tilausrivi.uusiotunnus = '$row[tunnus]' and
 						tilausrivi.tyyppi = 'O'";
@@ -431,7 +423,6 @@ if ($toiminto == "" and $ytunnus != "") {
 			$eipaikkoja  = 0;  // apumuuttuja
 			$eituotteet  = ""; // apumuuttuja
 			$varastossaarvo = 0; // apumuuttuja
-			$yhteensaarvo   = 0; // apumuuttuja
 
 			while ($rivirow = mysql_fetch_array($tilres)) {
 				$query = "select * from tuote where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]'";
@@ -440,10 +431,8 @@ if ($toiminto == "" and $ytunnus != "") {
 
 				$kplyhteensa++; // lasketaan montako tilausrivi‰ on kohdistettu
 
-				$yhteensaarvo += $rivirow["yhteensaarvo"];
-				$varastossaarvo += $rivirow["varastossaarvo"];
-				$kaikkikohdistettuyhteensa += $rivirow["yhteensaarvo"];
-				$kaikkivarastossayhteensa += $rivirow["varastossaarvo"];
+				$varastossaarvo += $rivirow["rivihinta"];
+				$kaikkivarastossayhteensa += $rivirow["rivihinta"];
 
 				if (($rivirow["kpl"] != 0 and $rivirow["varattu"] == 0) or ($rivirow["kpl"] == 0 and $rivirow["varattu"] == 0)) {
 					$kplvarasto++; // lasketaan montako tilausrivi‰ on viety varastoon
@@ -464,13 +453,6 @@ if ($toiminto == "" and $ytunnus != "") {
 						}
 					}
 				}
-			}
-
-			if ($yhteensaarvo != 0) {
-				$yhteensaarvo = "(".round($yhteensaarvo,2).")";
-			}
-			else {
-				$yhteensaarvo = "";
 			}
 
 			if ($varastossaarvo != 0) {
@@ -601,7 +583,7 @@ if ($toiminto == "" and $ytunnus != "") {
 			echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
 			echo "<td valign='top'>$kohdistus<br>$lisatiedot</td>";
 			echo "<td valign='top'>$varastopaikat<br>$sarjanrot</td>";
-			echo "<td valign='top'>$kplyhteensa $yhteensaarvo<br>$kplvarasto $varastossaarvo</td>";
+			echo "<td valign='top'>$kplyhteensa<br>$kplvarasto $varastossaarvo</td>";
 			echo "<td valign='top'>$llrow[volasku] $llrow[vosumma]<br>$llrow[kulasku] $llrow[kusumma]</td>";
 
 			// jos t‰t‰ keikkaa ollaan just viem‰ss‰ varastoon ei tehd‰ dropdownia
@@ -656,10 +638,9 @@ if ($toiminto == "" and $ytunnus != "") {
 
 		echo "</table>";
 
-		if ($kaikkikohdistettuyhteensa != 0 or $kaikkivarastossayhteensa != 0) {
+		if ($kaikkivarastossayhteensa != 0) {
 			echo "<br><table>";
 			echo "<tr><th>".t("Varastossa yhteens‰").": </th><td align='right'>".round($kaikkivarastossayhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
-			echo "<tr><th>".t("Kohdistettu yhteens‰").": </th><td align='right'>".round($kaikkikohdistettuyhteensa, 2)." $yhtiorow[valkoodi]</td></tr>";
 			echo "</table>";
 		}
 

@@ -649,18 +649,18 @@
 				$katelisaed  = "";
 			}
 			
+			// Jos ei olla valittu mit‰‰n
+			if ($group == "") {
+				$select = "tuote.yhtio, ";
+				$group = "lasku.yhtio";
+			}
+			
 			if ($ajotapanlisa == "erikseen") {
 				$tilauslisa3 = ", if(tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt>0, 'Veloitus', 'Hyvitys') rivityyppi";
 				$group .= ", rivityyppi";
 			}
 			else {
 				$tilauslisa3 = "";
-			}
-			
-			// Jos ei olla valittu mit‰‰n
-			if ($group == "") {
-				$select = "tuote.yhtio, ";
-				$group = "lasku.yhtio";
 			}
 			
 			$query = "	SELECT $select";

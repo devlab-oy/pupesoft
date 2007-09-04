@@ -534,13 +534,13 @@ if ($tuoteno != '') {
 			// P‰ivitet‰‰n ostotilausrivin rivihinta
 			$query  = "	UPDATE tilausrivi 
 						SET rivihinta = round($uusihinta*kpl,2) 
-						WHERE yhtio='$kukarow[yhtio]' 
-						and tunnus='$rivitunnus'";
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and tunnus = '$rivitunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			
 			// P‰ivitet‰‰n korjattava tapahtuma
 			$query = "	UPDATE tapahtuma 
-						SET kplhinta='$uusihinta', selite = concat(selite,', j‰lkilaskentahinta = ', $uusihinta) 
+						SET kplhinta = '$uusihinta', selite = concat(selite,', j‰lkilaskentahinta = ', $uusihinta) 
 						WHERE yhtio = '$kukarow[yhtio]' 
 						and laji in ('tulo','valmistus') 
 						and rivitunnus='$rivitunnus'";
@@ -556,7 +556,7 @@ if ($tuoteno != '') {
 			if ($jalkilaskenta_debug > 1) echo "$query<br>";
 
 			while ($sarjarow = mysql_fetch_array($sarjares)) {
-				//Hetaaan laskutetut myntirivit
+				// Hetaaan laskutetut myntirivit
 				$query = "	SELECT *
 							FROM tilausrivi
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -571,33 +571,12 @@ if ($tuoteno != '') {
 				if (mysql_num_rows($rivires) == 1) {
 					$rivirow = mysql_fetch_array($rivires);
 					
-					//Haetaan nyt t‰m‰n myyntirivin kaikki ostorivit
-					$query = "	SELECT ostorivitunnus
-								FROM sarjanumeroseuranta
-								WHERE yhtio 			= '$kukarow[yhtio]'
-								and tuoteno				= '$tuoteno'
-								and myyntirivitunnus	= '$rivirow[tunnus]'
-								and ostorivitunnus		> 0";
-					$ostosarjares = mysql_query($query) or pupe_error($query);
-					
-					$uusisarjahin = 0;
-					
-					while($ostosarjarow = mysql_fetch_array($ostosarjares)) {
-						$query = "	SELECT tilausrivi.rivihinta/tilausrivi.kpl hinta
-									FROM tilausrivi
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus = '$ostosarjarow[ostorivitunnus]'
-									and laskutettuaika != '0000-00-00'
-									and kpl > 0";
-						$hinrivires = mysql_query($query) or pupe_error($query);
-												
-						$hinrivirow = mysql_fetch_array($hinrivires);
-						$uusisarjahin += $hinrivirow["hinta"];
-						
-					}
-					$uusisarjahin = round($uusisarjahin/$rivirow["kpl"],2);
+					// Haetaan nyt t‰m‰n myyntirivin kaikki ostohinnat
+					$uusisarjahin = sarjanumeron_ostohinta("myyntirivitunnus", $rivirow["tunnus"]);
 																
-					if ($uusisarjahin != 0) {															
+					if ($uusisarjahin != 0 and $uusihinta <> $uusisarjahin) {
+						if ($jalkilaskenta_debug >= 1) echo "<font class='message'>T‰n tuotteen ostohinta:$uusihinta - Myyyntirivin ($rivirow[tunnus]) ostohinta keskim‰‰rin:$uusisarjahin</font><br>";															
+						
 						$uusihinta = $uusisarjahin;
 					}
 					

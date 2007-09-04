@@ -247,7 +247,7 @@ if ($toiminto == "" and $ytunnus == "") {
 		echo "<br><font class='head'>".t("Keskeneräiset keikat")."</font><hr>";
 
 		echo "<table>";
-		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("keikkanumerot")."</th><th>".t("kpl")."</th><th></th></tr>";
+		echo "<tr><th>".t("ytunnus")."</th><th>".t("nimi")."</th><th>".t("osoite")."</th><th>".t("swift")."</th><th>".t("keikkanumerot")."</th><th>".t("kpl")."</th><th>".t("arvo")."</th><th></th></tr>";
 
 		while ($row = mysql_fetch_array($result)) {
 
@@ -266,7 +266,9 @@ if ($toiminto == "" and $ytunnus == "") {
 				echo "<td valign='top'>$row[ytunnus]</td>";
 			}
 
-			echo "<td>$row[nimi] $row[nimitark]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[keikat]</td><td>$row[kpl]</td>";
+			if ($row["varastossaarvo"] == 0) $row["varastossaarvo"] = "";
+			
+			echo "<td>$row[nimi] $row[nimitark]</td><td>$row[osoite] $row[postitp]</td><td>$row[swift]</td><td>$row[keikat]</td><td align='right'>$row[kpl]</td><td align='right'>$row[varastossaarvo]</td>";
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$row[liitostunnus]'>";
 			echo "<td><input type='submit' value='".t("Valitse")."'></td>";

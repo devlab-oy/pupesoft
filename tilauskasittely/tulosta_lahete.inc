@@ -70,7 +70,7 @@ if (!function_exists('alku')) {
 			$image = $pdf->jfif_embed($data);
 
 			if(!$image) {
-				echo t("Logokuvavirhe").": ".$image.$data;
+				echo t("Logokuvavirhe");
 			}
 			else {
 				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);

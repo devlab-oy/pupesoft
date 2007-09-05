@@ -46,7 +46,7 @@ if (!function_exists('alku')) {
 			$image = $pdf->jfif_embed($data);
 
 			if(!$image) {
-				echo t("Logokuvavirhe").": ".$image.$data;
+				echo t("Logokuvavirhe");
 			}
 			else {
 				$logoparam = array();
@@ -293,7 +293,7 @@ if (!function_exists('uusi_sivu')) {
 			$image = $pdf->jfif_embed($data);
 
 			if(!$image) {
-				echo t("Logokuvavirhe").": ".$image.$data;
+				echo t("Logokuvavirhe");
 			}
 			else {
 				$logoparam = array();

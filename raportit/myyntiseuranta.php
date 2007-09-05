@@ -138,8 +138,6 @@
 			}
 		}	
 			
-			
-
 		//	Jos k‰ytt‰j‰ll‰ on valittu piirej‰ niin sallitaan vain ko. piirin/piirien hakeminen
 		if($kukarow["piirit"] != "")	 {
 			$asiakasrajaus = "and piiri IN ($kukarow[piirit])";
@@ -153,7 +151,7 @@
 		if (isset($muutparametrit)) {
 
 			list($tee,$ajotapa,$ajotapanlisa,$yhtiot, $asiakasosasto, $asiakasosasto2, $asiakasryhma, $asiakasryhma2,
-			$mul_osasto, $mul_piiri, $mul_try, $asiakas, $toimittaja, $jarjestys, $ruksit, $nimitykset, $kateprossat, $piiyhteensa,
+			$mul_osasto, $mul_piiri, $mul_try, $asiakas, $toimittaja, $jarjestys, $ruksit, $rajaus, $nimitykset, $kateprossat, $piiyhteensa,
 			$osoitetarrat, $ppa, $kka, $vva, $ppl, $kkl, $vvl) = explode("//", $muutparametrit);
 
 			if ($yhtiot != "") $yhtiot_x 			= explode("!!", $yhtiot);
@@ -166,6 +164,8 @@
 			else unset($jarjestys);
 			if ($ruksit != "") $ruksit_x 			= explode("!!", $ruksit);
 			else unset($ruksit);
+			if ($rajaus != "") $rajaus_x 			= explode("!!", $rajaus);
+			else unset($rajaus);
 			if ($mul_piiri != "") $mul_piiri_x 		= explode("!!", $mul_piiri);
 			else unset($mul_piiri);
 
@@ -221,6 +221,15 @@
 					list ($b, $c) = explode("#", $a);
 
 					$ruksit[$b] = $c;
+				}
+			}
+			if (count($rajaus_x) > 0) {
+				$rajaus = array();
+
+				foreach($rajaus_x as $a) {
+					list ($b, $c) = explode("#", $a);
+
+					$rajaus[$b] = $c;
 				}
 			}
 		}
@@ -287,7 +296,7 @@
 			$tee = "";
 		}
 
-		if ($tee == 'go' and $asiakas != '' or $toimittaja != '') {
+		if ($tee == 'go' and ($asiakas != '' or $toimittaja != '')) {
 			$muutparametrit = $tee."//".$ajotapa."//".$ajotapanlisa."//";
 
 			if (count($yhtiot) > 0) {
@@ -314,8 +323,8 @@
 				$muutparametrit .= "//";
 			}
 
-			if (count($mul_try) > 0) {
-				foreach($mul_try as $a => $b) {
+			if (count($mul_piiri) > 0) {
+				foreach($mul_piiri as $a => $b) {
 					$muutparametrit .= "$a#".$b."!!";
 				}
 
@@ -324,9 +333,9 @@
 			else {
 				$muutparametrit .= "//";
 			}
-
-			if (count($mul_piiri) > 0) {
-				foreach($mul_piiri as $a => $b) {
+			
+			if (count($mul_try) > 0) {
+				foreach($mul_try as $a => $b) {
 					$muutparametrit .= "$a#".$b."!!";
 				}
 
@@ -351,6 +360,17 @@
 
 			if (count($ruksit) > 0) {
 				foreach($ruksit as $a => $b) {
+					$muutparametrit .= "$a#".$b."!!";
+				}
+
+				$muutparametrit = substr($muutparametrit, 0, -2)."//";
+			}
+			else {
+				$muutparametrit .= "//";
+			}
+			
+			if (count($rajaus) > 0) {
+				foreach($rajaus as $a => $b) {
 					$muutparametrit .= "$a#".$b."!!";
 				}
 
@@ -422,7 +442,7 @@
 			$apu = array();
 
 			foreach ($jarjestys as $i => $arvo) {
-				if ($ruksit[$i] != "") $apu[] = $ruksit[$i];
+				if ($ruksit[$i] != "") $apu[$i] = $ruksit[$i];
 			}
 			
 			if ($asiakasosasto != "") {
@@ -465,7 +485,7 @@
 				$gluku++;
 			}
 			
-			foreach ($apu as $mukaan) {
+			foreach ($apu as $i => $mukaan) {
 
 				if ($mukaan == "ytunnus" and $osoitetarrat == "") {
 					if ($group!="") $group .= ",asiakas.tunnus";
@@ -488,6 +508,10 @@
 					$select .= "asiakas.piiri piiri, ";
 					$order  .= "asiakas.piiri,";
 					$gluku++;
+
+					if ($rajaus[$i] != "") {
+						$lisa .= " and asiakas.piiri='$rajaus[$i]' ";
+					}
 				}
 
 				if ($mukaan == "maa") {
@@ -496,6 +520,10 @@
 					$select .= "asiakas.maa maa, ";
 					$order  .= "asiakas.maa,";
 					$gluku++;
+					
+					if ($rajaus[$i] != "") {
+						$lisa .= " and asiakas.maa='$rajaus[$i]' ";
+					}
 				}
 
 				if ($mukaan == "tuote") {
@@ -519,6 +547,10 @@
 					if ($varastonarvo != '') {
 						$select .= "0 varastonarvo, 0 kierto, ";
 					}
+					
+					if ($rajaus[$i] != "") {
+						$lisa .= " and tuote.tuoteno='$rajaus[$i]' ";
+					}
 				}
 
 				if ($mukaan == "tuotemyyja") {
@@ -527,6 +559,10 @@
 					$select .= "tuote.myyjanro tuotemyyja, ";
 					$order  .= "tuote.myyjanro,";
 					$gluku++;
+					
+					if ($rajaus[$i] != "") {
+						$lisa .= " and tuote.myyjanro='$rajaus[$i]' ";
+					}
 				}
 
 				if ($mukaan == "asiakasmyyja") {
@@ -535,6 +571,10 @@
 					$select .= "asiakas.myyjanro asiakasmyyja, ";
 					$order  .= "asiakas.myyjanro,";
 					$gluku++;
+					
+					if ($rajaus[$i] != "") {
+						$lisa .= " and asiakas.myyjanro='$rajaus[$i]' ";
+					}
 				}
 
 				if ($mukaan == "tuoteostaja") {
@@ -543,6 +583,10 @@
 					$select .= "tuote.ostajanro tuoteostaja, ";
 					$order  .= "tuote.ostajanro,";
 					$gluku++;
+					
+					if ($rajaus[$i] != "") {
+						$lisa .= " and tuote.ostajanro='$rajaus[$i]' ";
+					}
 				}
 
 				if ($mukaan == "merkki") {
@@ -551,6 +595,10 @@
 					$select .= "tuote.tuotemerkki merkki, ";
 					$order  .= "tuote.tuotemerkki,";
 					$gluku++;
+					
+					if ($rajaus[$i] != "") {
+						$lisa .= " and tuote.tuotemerkki='$rajaus[$i]' ";
+					}
 				}
 
 				if ($mukaan == "toimittaja") {
@@ -567,6 +615,10 @@
 					$select .= "lasku.clearing tilaustyyppi, ";
 					$order  .= "lasku.clearing,";
 					$gluku++;
+					
+					if ($rajaus[$i] != "") {
+						$lisa .= " and lasku.clearing='$rajaus[$i]' ";
+					}
 				}
 
 				if ($mukaan == "myyja") {
@@ -575,6 +627,16 @@
 					$select .= "lasku.myyja myyja, ";
 					$order  .= "lasku.myyja,";
 					$gluku++;
+					
+					if ($rajaus[$i] != "") {
+						$query = "	SELECT group_concat(tunnus) tunnus
+									FROM kuka
+									WHERE yhtio in ($yhtio) and nimi like '$rajaus[$i]%'";
+						$osre = mysql_query($query) or pupe_error($query);
+						$osrow = mysql_fetch_array($osre);
+						
+						$lisa .= " and lasku.myyja in ($osrow[tunnus]) ";
+					}
 				}
 			}
 
@@ -1471,22 +1533,7 @@
 
 			echo "</tr>\n";
 			echo "</table><br>";
-
-			// t‰h‰n loppuu "perusn‰kym‰"...
-
-			echo "<table>
-			<tr>
-			<th>".t("Vain asiakas ytunnus")."</th>
-			<td><input type='text' name='asiakas' value='$asiakas'></td>
-			</tr>";
-
-			echo "<tr>
-			<th>".t("Vain toimittaja ytunnus")."</th>
-			<td><input type='text' name='toimittaja' value='$toimittaja'></td>
-			</tr>";
-
-			echo "</table><br>";
-
+			
 			// lis‰rajaukset n‰kym‰..
 			if ($ruksit[1]  != '') 		$ruk1chk  = "CHECKED";
 			if ($ruksit[2]  != '') 		$ruk2chk  = "CHECKED";
@@ -1507,70 +1554,80 @@
 			if ($kuukausittain != '')	$kuuchk	  = "CHECKED";
 			if ($varastonarvo != '')	$varvochk = "CHECKED";
 			if ($piiloed != '')			$piiloedchk = "CHECKED";
-
+			
 			echo "<table>
 				<tr>
 				<th>".t("Lis‰rajaus")."</th>
 				<th>".t("Prio")."</th>
 				<th> x</th>
+				<th>".t("Rajaus")."</th>
 				</tr>
 				<tr>
 				<th>".t("Listaa asiakkaittain")."</th>
 				<td><input type='text' name='jarjestys[1]' size='2' value='$jarjestys[1]'></td>
 				<td><input type='checkbox' name='ruksit[1]' value='ytunnus' $ruk1chk></td>
-				<td class='back'>".t("(Rajaa ylh‰‰lt‰ mahdollisimman pieni ryhm‰, muuten lista on todella pitk‰)")."</td>
+				<td><input type='text' name='asiakas' value='$asiakas'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa tuotteittain")."</th>
 				<td><input type='text' name='jarjestys[2]' size='2' value='$jarjestys[2]'></td>
 				<td><input type='checkbox' name='ruksit[2]' value='tuote' $ruk2chk></td>
-				<td class='back'>".t("(Rajaa ylh‰‰lt‰ mahdollisimman pieni ryhm‰, muuten lista on todella pitk‰)")."</td>
+				<td><input type='text' name='rajaus[2]' value='$rajaus[2]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa piireitt‰in")."</th>
 				<td><input type='text' name='jarjestys[3]' size='2' value='$jarjestys[3]'></td>
 				<td><input type='checkbox' name='ruksit[3]' value='piiri' $ruk3chk></td>
+				<td><input type='text' name='rajaus[3]' value='$rajaus[3]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa tuotemyyjitt‰in")."</th>
 				<td><input type='text' name='jarjestys[4]' size='2' value='$jarjestys[4]'></td>
 				<td><input type='checkbox' name='ruksit[4]' value='tuotemyyja' $ruk4chk></td>
+				<td><input type='text' name='rajaus[4]' value='$rajaus[4]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa asiakasmyyjitt‰in")."</th>
 				<td><input type='text' name='jarjestys[5]' size='2' value='$jarjestys[5]'></td>
 				<td><input type='checkbox' name='ruksit[5]' value='asiakasmyyja' $ruk5chk></td>
+				<td><input type='text' name='rajaus[5]' value='$rajaus[5]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa tuoteostajittain")."</th>
 				<td><input type='text' name='jarjestys[6]' size='2' value='$jarjestys[6]'></td>
 				<td><input type='checkbox' name='ruksit[6]' value='tuoteostaja' $ruk6chk></td>
+				<td><input type='text' name='rajaus[6]' value='$rajaus[6]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa maittain")."</th>
 				<td><input type='text' name='jarjestys[7]' size='2' value='$jarjestys[7]'></td>
 				<td><input type='checkbox' name='ruksit[7]' value='maa' $ruk7chk></td>
+				<td><input type='text' name='rajaus[7]' value='$rajaus[7]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa merkeitt‰in")."</th>
 				<td><input type='text' name='jarjestys[8]' size='2' value='$jarjestys[8]'></td>
 				<td><input type='checkbox' name='ruksit[8]' value='merkki' $ruk8chk></td>
+				<td><input type='text' name='rajaus[8]' value='$rajaus[8]'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa toimittajittain")."</th>
 				<td><input type='text' name='jarjestys[9]' size='2' value='$jarjestys[9]'></td>
 				<td><input type='checkbox' name='ruksit[9]' value='toimittaja' $ruk9chk></td>
+				<td><input type='text' name='toimittaja' value='$toimittaja'></td>
 				</tr>
 				<tr>
 				<th>".t("Listaa tilaustyypeitt‰in")."</th>
 				<td><input type='text' name='jarjestys[10]' size='2' value='$jarjestys[10]'></td>
 				<td><input type='checkbox' name='ruksit[10]' value='tilaustyyppi' $ruk10chk></td>
+				<td><input type='text' name='rajaus[10]' value='$rajaus[10]'></td>
 				<td class='back'>".t("(Toimii vain jos ajat raporttia tilauksista)")."</td>
 				</tr>
 				<tr>
 				<th>".t("Listaa myyjitt‰in")."</th>
 				<td><input type='text' name='jarjestys[11]' size='2' value='$jarjestys[11]'></td>
 				<td><input type='checkbox' name='ruksit[11]' value='myyja' $ruk11chk></td>
+				<td><input type='text' name='rajaus[11]' value='$rajaus[11]'></td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

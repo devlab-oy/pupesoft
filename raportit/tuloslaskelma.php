@@ -640,22 +640,25 @@
 				<option $sel[2] value='2'>2 ".t("desimaalia")."</option>
 				</select></td></tr>";
 
+		$kauchek =  "";
+		if ($kaikkikaudet != "") $kauchek = "SELECTED";
+
+		echo "<tr><th>".t("Näkymä")."</th>";
+
+		echo "<td><select name='kaikkikaudet'>
+				<option value=''>".t("Näytä vain viimeisin kausi")."</option>
+				<option value='o' $kauchek>".t("Näytä kaikki kaudet")."</option>
+				</select></td></tr>";
 
 		$vchek = $bchek = "";
 		if ($vertailued != "") $vchek = "CHECKED";
 		if ($vertailubu != "") $bchek = "CHECKED";
 
-		echo "<tr><th>".t("Vertailu")."</th>
-				<td>
-				<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava")."
-				<input type='checkbox' name='vertailubu' $bchek DISABLED> ".t("Budjetti")."</td></tr>";
-
-		$kauchek =  "";
-		if ($kaikkikaudet != "") $kauchek = "CHECKED";
-
-		echo "<tr><th>".t("Näytä kaikki kaudet")."</th>
-				<td>
-				<input type='checkbox' name='kaikkikaudet' $kauchek></td></tr>";
+		echo "<tr><th>".t("Vertailu")."</th>";
+		echo "<td>";
+		echo "&nbsp;<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava");
+//		echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek DISABLED> ".t("Budjetti");
+		echo "</td></tr>";
 
 		echo "</table><br>
 		      <input type = 'submit' value = '".t("Näytä")."'></form>";

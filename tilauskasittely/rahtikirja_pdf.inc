@@ -16,6 +16,16 @@
 	if ($tulostakopio == 'kylla') {
 		$lotsikot = $otsikot;
 	}
+	
+	//	Jos tämä on osa "kokonaistoimitusta", merkataan alkuperäinen tilausnumero alkuun
+	if($rakir_row["tunnusnippu"]>0) {
+		foreach ($lotsikot as &$o) {
+			if($o <> $rakir_row["tunnusnippu"]) {
+				$o = "{$rakir_row["tunnusnippu"]}/$o";
+			}
+		}
+	}
+	
 	// onko tämä tyhjä rahtikirja (custom)?
 	if (! isset($GLOBALS['tyhja'])) {
 		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
@@ -35,6 +45,16 @@
 			$rakir_row['toim_osoite']  = $rakir_row['osoite'];
 			$rakir_row['toim_nimi']    = $rakir_row['nimi'];
 		}
+	}
+	
+	//	Olisiko mitään lisätietoja?
+	$query = "	SELECT yhteyshenkilo.nimi, yhteyshenkilo.puh
+				FROM laskun_lisatiedot
+				JOIN yhteyshenkilo ON yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_tekninen
+				WHERE laskun_lisatiedot.yhtio = '{$kukarow["yhtio"]}' and laskun_lisatiedot.otunnus IN ($otunnukset)";
+	$lisatiedres = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($lisatiedres)==0) {
+		$lisatiedres = false;
 	}
 	
 	
@@ -242,8 +262,8 @@
 		//toimitusosoite
 		$pdf->draw_rectangle(667,60,645,300,											$firstpage, $rectparam); 
 		$pdf->draw_text(62,  661, "Tavaran toimitusosoite",								$firstpage, $norm);
-		$pdf->draw_text(65,  648,  $rakir_row['toim_nimi'],	$firstpage, $kirj); 
-		$pdf->draw_text(65,  626,  $rakir_row['toim_osoite'],	$firstpage, $kirj); 
+		$pdf->draw_text(65,  648,  $rakir_row['toim_nimi']." ".$rakir_row['toim_nimitark'],	$firstpage, $kirj); 
+		$pdf->draw_text(65,  626,  $rakir_row['toim_osoite'],							$firstpage, $kirj); 
 		$pdf->draw_rectangle(645,60,623,300,											$firstpage, $rectparam);
 		//oikee
 		
@@ -253,9 +273,9 @@
 		//Lastauspaikka
 		$pdf->draw_rectangle(623,60,535,300,											$firstpage, $rectparam);
 		$pdf->draw_text(62,  617, "Lähtö- ja lastauspaikka",							$firstpage, $norm);
-		$pdf->draw_text(65,  593,  $yhtiorow["postino"]."   ".$yhtiorow["postitp"],		$firstpage, $kirj);
+		$pdf->draw_text(65,  593,  $yhtiorow["postino"]."   ".strtoupper($yhtiorow["postitp"]),		$firstpage, $kirj);
 		$pdf->draw_text(62,  573, "Määräpaikan postinumero ja -toimipaikka",			$firstpage, $norm);
-		$pdf->draw_text(65,  550,  $rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"], $firstpage, $kirj);
+		$pdf->draw_text(65,  550,  $rakir_row["toim_postino"]." ".strtoupper($rakir_row["toim_postitp"]), $firstpage, $kirj);
 	
 		//oikeeta laitaa
 		$pdf->draw_text(302,  617, "Toimituslauseke Leveransklausul",					$firstpage, $norm);
@@ -356,6 +376,16 @@
 		//kuljetusohjeita
 		$pdf->draw_text(62, 382 , "Kuljetusohjeet Transportinstruktioner",				$firstpage, $norm);
 		$pdf->draw_text(62, 311 , "Muut tiedot Tillägsuppgifter",						$firstpage, $norm);
+		if($lisatiedres !== false) {
+			$ahven = 311;
+			while($lisatiedot = mysql_fetch_array($lisatiedres)) {
+				if($lisatiedot["nimi"] != "") {
+					$ahven -= 10;
+					$pdf->draw_text(62, $ahven , trim($lisatiedot["nimi"]." ".$lisatiedot["puh"]),										$firstpage, $norm);
+				}
+			}
+		}
+		
 		//laatikot
 		$pdf->draw_text(305, 325 , "Lisät eriteltynä:",									$firstpage, $norm);
 		$pdf->draw_rectangle(278,303,256,420,											$firstpage, $rectparam);

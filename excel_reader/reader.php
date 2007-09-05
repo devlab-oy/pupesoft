@@ -21,14 +21,13 @@
 * @package    Spreadsheet_Excel_Reader
 * @author     Vadim Tkachenko <vt@apachephp.com>
 * @license    http://www.php.net/license/3_0.txt  PHP License 3.0
-* @version    CVS: $Id: reader.php 19 2007-03-13 12:42:41Z shangxiao $
-* @link       http://pear.php.net/package/Spreadsheet_Excel_Reader
+	* @link       http://pear.php.net/package/Spreadsheet_Excel_Reader
 * @see        OLE, Spreadsheet_Excel_Writer
 */
 
 
 //require_once 'PEAR.php';
-require_once 'Spreadsheet/Excel/Reader/OLERead.php';
+require_once 'oleread.inc';
 //require_once 'OLE.php';
 
 define('SPREADSHEET_EXCEL_READER_BIFF8',             0x600);

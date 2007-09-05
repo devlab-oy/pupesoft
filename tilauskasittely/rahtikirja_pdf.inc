@@ -48,6 +48,7 @@
 	}
 	
 	//	Olisiko mit‰‰n lis‰tietoja?
+	/*
 	$query = "	SELECT yhteyshenkilo.nimi, yhteyshenkilo.puh
 				FROM laskun_lisatiedot
 				JOIN yhteyshenkilo ON yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_tekninen
@@ -56,7 +57,7 @@
 	if(mysql_num_rows($lisatiedres)==0) {
 		$lisatiedres = false;
 	}
-	
+	*/
 	
 	//if ($rahsoprow['rahtisopimus']=='')	$rahsoprow['rahtisopimus']	= "000000";
 	//if ($toitarow['sopimusnro']=='')	$toitarow['sopimusnro']		= "000000";

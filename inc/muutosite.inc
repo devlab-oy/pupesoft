@@ -784,7 +784,7 @@ if ($tila == '') {
 				<td><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
 				<td><input type = 'submit' value = '".t("Lisää")."'></td></tr></form>";
 
-	if (($kukarow['kuka'] == $trow['hyvaksyja_nyt']) and ($trow['tila'] == 'H') and (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) and $kukarow['taso'] != 1) {
+	if (($trow['tila'] == 'H' or $trow["tila"] == 'M') and strtoupper($trow['maa']) == strtoupper($yhtiorow['maa']) and $kukarow['taso'] != 1) {
 		echo "<form action = '$PHP_SELF?tee=M&tila=T' method='post'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
 				<tr><th>".t("Muuta maksutili")."</th>

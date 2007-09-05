@@ -564,7 +564,7 @@ if ($tuoteno != '') {
 							and tyyppi = 'L'
 							and uusiotunnus != 0
 							and laskutettuaika != '0000-00-00'
-							and kpl > 0";
+							and kpl != 0";
 				$rivires = mysql_query($query) or pupe_error($query);
 				if ($jalkilaskenta_debug > 1) echo "$query<br>";
 

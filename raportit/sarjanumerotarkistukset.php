@@ -138,7 +138,7 @@
 							tuote.kehahin,
 							(select count(*) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
 							FROM tilausrivi
-							JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+							JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta='S'
 							LEFT JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tuoteno=sarjanumeroseuranta.tuoteno and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN tilausrivi ostorivi ON ostorivi.yhtio=sarjanumeroseuranta.yhtio and ostorivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 							LEFT JOIN lasku myyntilasku ON myyntilasku.yhtio=tilausrivi.yhtio and myyntilasku.tunnus=tilausrivi.otunnus
@@ -163,7 +163,7 @@
 							tuote.kehahin,
 							(select count(*) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.ostorivitunnus=tilausrivi.tunnus) css
 							FROM tilausrivi
-							JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+							JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta='S'
 							LEFT JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tuoteno=sarjanumeroseuranta.tuoteno and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
 							LEFT JOIN tilausrivi myyntirivi ON myyntirivi.yhtio=sarjanumeroseuranta.yhtio and myyntirivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN lasku ostolasku ON ostolasku.yhtio=tilausrivi.yhtio and ostolasku.tunnus=tilausrivi.otunnus
@@ -177,8 +177,7 @@
 			}
 			
 			$vresult = mysql_query($query) or pupe_error($query);
-						
-	
+				
 			while ($vrow = mysql_fetch_array($vresult)) {	
 				
 				$keikkahinta = 0;
@@ -211,10 +210,10 @@
 						<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td>
 						<td valign='top'>$vrow[nimitys]<br><font class='message'>$vrow[viesti]</font></td>
 						<td valign='top' align='right'>$vrow[rivihinta]</td>
-						<td valign='top' align='right'>";
+						<td valign='top' align='right' nowrap>";
 						
-				if ((float) $vrow["ostohinta"] == 0) {
-					echo "KEHA: $vrow[kehahin]";
+				if ((float) $vrow["ostohinta"] == 0 and $vrow["kehahin"] > 0) {
+					echo "<font style='color: 00FF00;'>$vrow[kehahin]</font>";
 				}
 				else {
 					echo "$vrow[ostohinta]";			

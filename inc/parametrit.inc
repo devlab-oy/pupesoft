@@ -340,7 +340,7 @@ if ($session != '') {
 		}
 		echo "<body $body_js>";
 
-		if (basename($phpnimi) != 'indexvas.php') {
+		if (basename($phpnimi) != 'indexvas.php' and $_GET["ohje"] != "off") {
 			if (isset($toim) and $toim != '') {
 				if (basename($phpnimi) == 'varauskalenteri.php') {
 					$urltoim = "";

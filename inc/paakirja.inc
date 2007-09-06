@@ -461,7 +461,7 @@
 
 	echo "</tr>";
 
-	$summa += $summaplus + $summamiinus;
+	$summa = $summaplus + $summamiinus;
 	echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")."</td>";
 	echo "<td align = 'right'>";
 	printf("%.2f", $summa);

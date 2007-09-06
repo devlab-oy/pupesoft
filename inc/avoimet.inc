@@ -93,6 +93,11 @@
 				<td colspan='3'><input type = 'checkbox' name = 'rikki'></td>
 				</tr>";
 
+			echo "	<tr>
+					<th>".t("Älä näytä laskujen kommentteja").":</th>
+					<td colspan='3'><input type = 'checkbox' name = 'naytetaankokommentit'></td>
+					</tr>";
+
 		$query = "	SELECT nimi, tunnus
  	                FROM valuu
  	             	WHERE yhtio = '$kukarow[yhtio]'
@@ -262,11 +267,11 @@
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maksutieto]";
 
-					if ($trow["comments"] != "") {
-						echo "<div id='$trow[laskunro]' style='position:absolute; z-index:100; visibility:hidden; width:500px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>";
+					if ($trow["comments"] != "" and $naytetaankokommentit == "") {
+						echo "<a onmouseout=\"popUp(event,'$trow[tunnus]')\" onmouseover=\"popUp(event,'$trow[tunnus]')\"> ?</a></td>";
+						echo "<div id='$trow[tunnus]' style='position:absolute; z-index:100; visibility:hidden; width:500px; background:#555555; color:#FFFFFF; border: 1px solid; padding:5px;'>";
 						echo $trow["comments"];
 						echo "</div>";
-						echo "  <a class='menu' onmouseout=\"popUp(event,'$trow[laskunro]')\" onmouseover=\"popUp(event,'$trow[laskunro]')\">?</a></td>";
 					}
 
 					echo "</td>";

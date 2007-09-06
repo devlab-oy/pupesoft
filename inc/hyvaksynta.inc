@@ -45,7 +45,7 @@
 			$mita="";
 
 			// Aikaikkunan poisto, joku muu ehti ennen meitä
-			if ($trow['hyvaksyja_nyt'] = $kuka) {
+			if ($trow['hyvaksyja_nyt'] == $kuka) {
 				if (($trow['hyvak1'] == $kuka) and ($trow['h1time'] == '0000-00-00 00:00:00')) $mita = "hyvak1";
 				elseif (($trow['hyvak2'] == $kuka) and ($trow['h2time'] == '0000-00-00 00:00:00')) $mita = "hyvak2";
 				elseif (($trow['hyvak3'] == $kuka) and ($trow['h3time'] == '0000-00-00 00:00:00')) $mita = "hyvak3";

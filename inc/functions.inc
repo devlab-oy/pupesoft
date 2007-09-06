@@ -344,7 +344,7 @@ if (!function_exists("pt_mm")) {
 if (!function_exists("table_exists")) {
 	function table_exists($taulu) {
 		global $dbkanta;
-		
+
 		//	Ei kaaduta errorista
 		$query = "show tables where tables_in_$dbkanta = '$taulu';";
 		$result = mysql_query($query);
@@ -487,17 +487,17 @@ if (!function_exists("saldo_myytavissa")) {
 			}
 
 			// Saldo varastoista
-			if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {						
-				$query = "	SELECT count(sarjanumeroseuranta.sarjanumero) saldo, 
-							tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi, 
+			if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+				$query = "	SELECT count(sarjanumeroseuranta.sarjanumero) saldo,
+							tuotepaikat.saldo_varattu, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, varastopaikat.tyyppi,
 							if(tilausrivi_myynti.laskutettuaika is null, '0000-00-00', tilausrivi_myynti.laskutettuaika) laskutettuaika
 							FROM tuotepaikat
 							LEFT JOIN varastopaikat on varastopaikat.yhtio=tuotepaikat.yhtio
 							and $valinta1
 							concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
 							concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-							JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero)  ON sarjanumeroseuranta.yhtio = tuotepaikat.yhtio 
-							and sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno  
+							JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero)  ON sarjanumeroseuranta.yhtio = tuotepaikat.yhtio
+							and sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno
 							and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
 							and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro
 							and sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
@@ -524,7 +524,7 @@ if (!function_exists("saldo_myytavissa")) {
 							$valinta3";
 			}
 			$result = mysql_query($query) or die($query);
-			
+
 			if (mysql_num_rows($result) == 0) {
 				return array(FALSE, FALSE, FALSE, FALSE);
 			}
@@ -583,13 +583,13 @@ if (!function_exists("saldo_myytavissa")) {
 									and tilausrivi.hyllytaso = '$row[hyllytaso]'
 									$kerayslisa";
 					}
-										
+
 					$ennresult = mysql_query($query) or die($query);
 					$ennrow = mysql_fetch_array($ennresult);
 
 					$myytavissa += $row["saldo"] - $ennrow["varattu"] - $row["saldo_varattu"];
-					$hyllyssa   += $row["saldo"] - $ennrow["keratty"];					
-										
+					$hyllyssa   += $row["saldo"] - $ennrow["keratty"];
+
 					if ($pvm != '') {
 						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon
 						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
@@ -598,7 +598,7 @@ if (!function_exists("saldo_myytavissa")) {
 										FROM sarjanumeroseuranta
 										JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.laskutettuaika  != '0000-00-00'
 										JOIN tilausrivi use index (yhtio_tyyppi_tuoteno_varattu) ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
-										and tilausrivi.tuoteno   = sarjanumeroseuranta.tuoteno  
+										and tilausrivi.tuoteno   = sarjanumeroseuranta.tuoteno
 										and tilausrivi.hyllyalue = sarjanumeroseuranta.hyllyalue
 										and tilausrivi.hyllynro  = sarjanumeroseuranta.hyllynro
 										and tilausrivi.hyllyvali = sarjanumeroseuranta.hyllyvali
@@ -640,8 +640,8 @@ if (!function_exists("saldo_myytavissa")) {
 						$myytavissa += $valmrow["varattu"];
 					}
 				}
-				
-				
+
+
 				// jos lasketaan tulevaisuuteen niin otetaan ostorivit huomioon
 				if ($pvm != '') {
 					if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
@@ -649,7 +649,7 @@ if (!function_exists("saldo_myytavissa")) {
 									ifnull(sum(tilausrivi.varattu),0) varattu
 									FROM sarjanumeroseuranta
 									JOIN tilausrivi use index (yhtio_tyyppi_tuoteno_varattu) ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
-									and tilausrivi.tuoteno = sarjanumeroseuranta.tuoteno  
+									and tilausrivi.tuoteno = sarjanumeroseuranta.tuoteno
 									and tilausrivi.tyyppi  = 'O'
 									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
 									and tilausrivi.varattu > 0
@@ -1000,7 +1000,7 @@ if (!function_exists("avain")) {
 			$returni = " selitetark ";
 			$joinaa = "avainsana";
 		}
-		
+
 		if ($as == '') {
 			$as = $returni;
 		}
@@ -1608,7 +1608,7 @@ if (!function_exists("jalkilaskentafunktio")) {
 		*/
 
 		require("tilauskasittely/jalkilaskenta.inc");
-		
+
 		return $uusikehahin;
 	}
 }
@@ -1847,12 +1847,12 @@ if (! function_exists('ebid')) {
 if (! function_exists('ta')) {
 	function ta($kieli, $laji, $selite, $return = "selite", $selitetark="", $selitetark_2 = "", $selitetark_3 = "") {
 		global $kukarow, $yhtiorow;
-		
+
 		//	Jos kielet matchaa niin palautetaan suoraan vastaus
 		if($kieli == $yhtiorow["kieli"] and $return == "selite") {
 			return $selite;
 		}
-		
+
 		$lisa = "";
 		if($selitetark != "") {
 			$lisa .= " and avainsana.selitetark = '$selitetark'";
@@ -1865,7 +1865,7 @@ if (! function_exists('ta')) {
 		if($selitetark_3 != "") {
 			$lisa .= " and avainsana.selitetark_3 = '$selitetark_3'";
 		}
-		
+
 		//	Tutkitaan onko käännös
 		$query = "	SELECT a.*
 					FROM avainsana
@@ -1892,57 +1892,57 @@ if(!function_exists("size_readable")) {
 	        $size /= 1024;
 	        $i++;
 	    }
-			
+
 	    return round($size, 2).$units[$i];
-	}	
+	}
 }
 
 if(!function_exists("sarjanumeron_ostohinta")) {
 	function sarjanumeron_ostohinta($kentta, $arvo) {
 		global $kukarow, $yhtiorow;
-		
+
 		// Funktio laskee yhden kappaleen ostohinnan
-		
+
 		$ostorivit = "";
 		$ostohinta = 0;
-		
+
 		// Tuotteen ostohinta
 		if ($kentta != "ostorivitunnus") {
 			$query = "	SELECT group_concat(distinct tilausrivi.tunnus) tunnukset
 						FROM sarjanumeroseuranta
 						JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' 
-						and sarjanumeroseuranta.$kentta = '$arvo'";	
+						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+						and sarjanumeroseuranta.$kentta = '$arvo'";
 			$otsores = mysql_query($query) or pupe_error($query);
-			$ostorow = mysql_fetch_array($otsores);	
-			
-			$ostorivit = $ostorow["tunnukset"];				
+			$ostorow = mysql_fetch_array($otsores);
+
+			$ostorivit = $ostorow["tunnukset"];
 		}
 		else {
-			$ostorivit = $arvo;	
+			$ostorivit = $arvo;
 		}
-		
+
 		if($ostorivit != '') {
-			$query = "	SELECT 
+			$query = "	SELECT
 						round(if(tilausrivi.kpl!=0, tilausrivi.rivihinta/tilausrivi.kpl, 0), 2) ostosumma,
 						round(tilausrivi.hinta * (1-(tilausrivi.ale/100)), 2) ostosumma_eiloppulaskettu
 						FROM tilausrivi
-						WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tunnus  IN ($ostorivit)";
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$sarjarow = mysql_fetch_array($sarjares);
 
 			$ostohinta = (float) $sarjarow["ostosumma"];
-				
+
 			if ($ostohinta == 0 and $sarjarow["ostosumma_eiloppulaskettu"] != 0) {
 				$ostohinta = (float) $sarjarow["ostosumma_eiloppulaskettu"];
 			}
-		
+
 			// Katsotaan onko sarjanumerolle liitetty kulukeikka
 			$query  = "	SELECT lasku.laskunro
 						FROM sarjanumeroseuranta
 						JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
-						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' 
+						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 						and sarjanumeroseuranta.$kentta = '$arvo'";
 			$keikkares = mysql_query($query) or pupe_error($query);
 
@@ -1958,13 +1958,13 @@ if(!function_exists("sarjanumeron_ostohinta")) {
 				$result = mysql_query($query) or pupe_error($query);
 
 				$kulukulurow = mysql_fetch_array($result);
-			
+
 				$ostohinta	+= $kulukulurow["kulusumma"];
 			}
 		}
-			
+
 	    return $ostohinta;
-	}	
+	}
 }
 
 if(!function_exists("remove_duplicates")) {
@@ -1974,20 +1974,20 @@ if(!function_exists("remove_duplicates")) {
 		$fieldresult = mysql_query($query) or pupe_error($query);
 
 		$group = "";
-		
-		while ($fields = mysql_fetch_array($fieldresult)) {						
-			if ($fields[0] != "tunnus" and 
+
+		while ($fields = mysql_fetch_array($fieldresult)) {
+			if ($fields[0] != "tunnus" and
 				$fields[0] != "laatija"	and
 				$fields[0] != "luontiaika" and
 				$fields[0] != "muutospvm" and
 				$fields[0] != "muuttaja") {
-				
+
 				$group .= $fields[0].",";
 			}
 		}
-		
+
 		$group = substr($group, 0, -1);
-		
+
 		$query = "	SELECT $group, count(*) countkpltahti, group_concat(tunnus) tunnukset
 					FROM $table
 					WHERE yhtio = '$yhtio'
@@ -1997,9 +1997,58 @@ if(!function_exists("remove_duplicates")) {
 
 		while ($row = mysql_fetch_array($result)) {
 			$query = "DELETE FROM $table WHERE yhtio = '$yhtio' and tunnus in ($row[tunnukset]) LIMIT ".($row["countkpltahti"]-1);
-			$delresult = mysql_query($query) or pupe_error($query);			
+			$delresult = mysql_query($query) or pupe_error($query);
 		}
-	}	
+	}
+}
+
+if(!function_exists("enable_ajax")) {
+	function enable_ajax() {
+
+		/*
+		tätä voidaan käyttää koodista sitte näin:
+		echo "<a href='javascript:sndReq(\"123\", \"tuote.php?tee=Z&tuoteno=a2\")'>tuotekysely a2</a><br>";
+		echo "<br><br><div id='123'></div>";
+		*/
+
+		echo "
+
+<SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+<!--
+	function createRequestObject() {
+		var ro;
+		var browser = navigator.appName;
+
+		if (browser == \"Microsoft Internet Explorer\") {
+			ro = new ActiveXObject(\"Microsoft.XMLHTTP\");
+		}
+		else {
+			ro = new XMLHttpRequest();
+		}
+		return ro;
+	}
+
+	var http = createRequestObject();
+
+	function sndReq(div, urli) {
+		id = div;
+		http.open('get', urli);
+		http.onreadystatechange = handleResponse;
+		http.send(null);
+	}
+
+	function handleResponse() {
+		if (http.readyState == 4) {
+			var response = http.responseText;
+			document.getElementById(id).innerHTML = response;
+		}
+	}
+//-->
+</script>
+
+";
+
+	}
 }
 
 ?>

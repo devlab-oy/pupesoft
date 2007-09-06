@@ -31,7 +31,7 @@
 
  		// Muutetaan hyväksyntää
 		if ((strlen($mika) > 0) and (strlen($nimi) > 0)) {
-			$query = "	SELECT hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, h1time, h2time, h3time, h4time
+			$query = "	SELECT hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, h1time, h2time, h3time, h4time, h5time
 					  	FROM lasku
 					  	WHERE tunnus = '$mika' and yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);

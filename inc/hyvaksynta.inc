@@ -105,7 +105,7 @@
 		$query = "	SELECT tapvm, kapvm, erpcm, if(alatila='',nimi,concat_ws('<br>', nimi, comments)) nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma',
 					summa, valkoodi, ebid, tunnus, alatila
 					FROM lasku
-					WHERE hyvaksyja_nyt='$kuka' and yhtio = '$kukarow[yhtio]'
+					WHERE hyvaksyja_nyt='$kuka' and yhtio = '$kukarow[yhtio]' and tila in ('H','Y','M','P','Q')
 					ORDER BY erpcm";
 		$result = mysql_query($query) or pupe_error($query);
 

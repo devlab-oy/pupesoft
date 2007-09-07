@@ -2030,11 +2030,15 @@ if(!function_exists("enable_ajax")) {
 
 	var http = createRequestObject();
 
-	function sndReq(div, urli) {
+	function sndReq(div, urli, href) {
 		id = div;
 		http.open('get', urli);
 		http.onreadystatechange = handleResponse;
 		http.send(null);
+
+		if (href != \"\") {
+			chgHref(href, 'javascript:toggleGroup(\"' + div + '\")');
+		}
 	}
 
 	function handleResponse() {
@@ -2043,6 +2047,20 @@ if(!function_exists("enable_ajax")) {
 			document.getElementById(id).innerHTML = response;
 		}
 	}
+
+	function chgHref(id, urli) {
+		document.getElementById(id).href = urli;
+	}
+
+	function toggleGroup(id) {
+		if (document.getElementById(id).style.display != 'none') {
+			document.getElementById(id).style.display = 'none';
+		}
+		else {
+			document.getElementById(id).style.display = 'block';
+		}
+	}
+
 //-->
 </script>
 

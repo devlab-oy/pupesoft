@@ -2039,6 +2039,7 @@ if(!function_exists("enable_ajax")) {
 		if (href != \"\") {
 			chgHref(href, 'javascript:toggleGroup(\"' + div + '\")');
 		}
+		document.getElementById(id).style.display = 'block';
 	}
 
 	function handleResponse() {

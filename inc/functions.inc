@@ -2185,8 +2185,8 @@ function getMouseX(e) {
 		x = e.pageX;
 	}
 	else if (e.clientX) 	{
-		x = e.clientX + document.body.scrollTop
-			+ document.documentElement.scrollTop;
+		x = e.clientX + document.body.scrollLeft
+			+ document.documentElement.scrollLeft;
 	}
 	return x;
 }
@@ -2230,10 +2230,12 @@ function popUp(e, oi) {
 		// relatiivinen sijainti
 		var y = getMouseY(e)+10;
 		var x = getMouseX(e)+10;
-
-
+		
+		var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
+		var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+		
 		//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
-		if(eh != null && ew != null && x != null && y != null) {			
+		if(eh != null && ew != null && x != null && y != null) {
 
 			c=0;
 			//	Riittääkö leveys
@@ -2245,8 +2247,8 @@ function popUp(e, oi) {
 			if (wh - y - eh < -5 && c > 10) {
 				y -= eh + 22;
 			}
-			else if(y + eh + 2 > wh) {
-				y -= y+eh-wh+2;
+			else if(y - scrollY + eh + 2 > wh) {
+				y -= y - scrollY + eh - wh + 20;
 			}
 
 			//	Oikea laita on kuitenkin aina tärkein!

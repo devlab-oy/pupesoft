@@ -19,13 +19,19 @@ if ($kukarow['resoluutio'] == 'P') {
 	$colwidth = '45';
 }
 
-echo "<html>
+echo "
+<html>
 	<head>
-	<title>$yhtiorow[nimi]</title>
-	<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>
-	<meta http-equiv='Pragma' content='no-cache'>
-	<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
+		<title>$yhtiorow[nimi]</title>
+		<link rel='shortcut icon' href='http://www.pupesoft.com/pupeicon.gif'>
+		<meta http-equiv='Pragma' content='no-cache'>
+		<meta http-equiv='Content-Type' content='text/html; charset=iso-8859-1'>
 	</head>
+
+	<noscript>
+		Your browser does not support Javascript!
+	</noscript>
+
 	<frameset cols='$colwidth,*' border='0' frameborder='no'>
 		<frameset rows='*,1' border='0' frameborder='no'>
 		<frame noresize src='indexvas.php?go=$go2' name='menu'>
@@ -34,6 +40,7 @@ echo "<html>
 		<frame src='$go' name='main'>
 		<noframes>Your browser does not support frames!</noframes>
 	</frameset> 
-	</html>"; 
+
+</html>"; 
 
 ?>

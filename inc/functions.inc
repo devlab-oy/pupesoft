@@ -40,92 +40,6 @@ if (!function_exists("pupe_error")) {
 	}
 }
 
-if (!function_exists("js_popup")) {
-	// scripti balloonien tekemiseen
-	function js_popup ($vasen_offset) {
-
-		if ($vasen_offset == '' or !is_numeric($vasen_offset)) {
-			$vasen_offset = 0;
-		}
-
-		return "<script>
-				var DH = 0;
-				var an = 0;
-				var al = 0;
-				var ai = 0;
-
-				if (document.getElementById) {
-					ai = 1; DH = 1;
-				}
-				else {
-					if (document.all) {
-						al = 1; DH = 1;
-					}
-					else {
-						browserVersion = parseInt(navigator.appVersion);
-
-						if ((navigator.appName.indexOf('Netscape') != -1) && (browserVersion == 4)) {
-							an = 1; DH = 1;
-						}
-					}
-				}
-
-				function fd(oi, wS) {
-					if (ai) return wS ? document.getElementById(oi).style:document.getElementById(oi);
-					if (al) return wS ? document.all[oi].style: document.all[oi]; if (an) return document.layers[oi];
-				}
-
-				function pw() {
-					return window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
-				}
-
-				function mouseX(evt) {
-					if (evt.pageX) return evt.pageX;
-					else if (evt.clientX)return evt.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft);
-					else return null;
-				}
-
-				function mouseY(evt) {
-					if (evt.pageY) return evt.pageY;
-					else if (evt.clientY)return evt.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
-					else return null;
-				}
-
-				function popUp(evt,oi) {
-					if (DH) {
-						var wp = pw();
-						ds = fd(oi,1);
-						dm = fd(oi,0);
-						st = ds.visibility;
-
-						if (dm.offsetWidth) ew = dm.offsetWidth;
-						else if (dm.clip.width) ew = dm.clip.width;
-
-						if (st == \"visible\" || st == \"show\") {
-							ds.visibility = \"hidden\";
-						}
-						else {
-							tv = mouseY(evt) + 20;
-							lv = mouseX(evt) - ew - $vasen_offset;
-
-							if (lv < 2) lv = 2;
-							else if (lv + ew > wp) lv -= ew/2;
-
-							if (!an) {
-								lv += 'px';
-								tv += 'px';
-							}
-
-							ds.left = lv;
-							ds.top = tv;
-							ds.visibility = \"visible\";
-						}
-					}
-				}
-				</script>";
-	}
-}
-
 if (!function_exists("tv1dateconv")) {
 	function tv1dateconv($date, $pitka = "") {
 
@@ -2010,17 +1924,16 @@ if(!function_exists("enable_ajax")) {
 		echo "<a href='javascript:sndReq(\"123\", \"tuote.php?tee=Z&tuoteno=a2\")'>tuotekysely a2</a><br>";
 		echo "<br><br><div id='123'></div>";
 		*/
+?>
 
-		echo "
-
-<SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
 <!--
 	function createRequestObject() {
 		var ro;
 		var browser = navigator.appName;
 
-		if (browser == \"Microsoft Internet Explorer\") {
-			ro = new ActiveXObject(\"Microsoft.XMLHTTP\");
+		if (browser == "Microsoft Internet Explorer") {
+			ro = new ActiveXObject("Microsoft.XMLHTTP");
 		}
 		else {
 			ro = new XMLHttpRequest();
@@ -2036,8 +1949,8 @@ if(!function_exists("enable_ajax")) {
 		http.onreadystatechange = handleResponse;
 		http.send(null);
 
-		if (href != \"\") {
-			chgHref(href, 'javascript:toggleGroup(\"' + div + '\")');
+		if (href != "") {
+			chgHref(href, 'javascript:toggleGroup("' + div + '")');
 		}
 		document.getElementById(id).style.display = 'block';
 	}
@@ -2065,7 +1978,295 @@ if(!function_exists("enable_ajax")) {
 //-->
 </script>
 
-";
+<?php
+	}
+}
+
+if(!function_exists("js_yllapito")) {
+	function js_yllapito() {
+?>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+<!--
+function yllapito(url, tag, submitOnSelect) {
+	select=document.getElementById(tag);
+
+	toim=url.substr(0,url.indexOf("&"));
+	valinta=select.options[select.selectedIndex].value;
+
+	//	Jos meillä on valintana uusi, siirrytään tekemään uusi tietue!
+	if(isNaN(valinta)) {
+
+		var width=0;
+		var height=0;
+
+		//	Koitetaan tehdä aina kaunis ja sopiva poppari
+		switch (toim) {
+			case 'yhteyshenkilo':
+				width=400;
+				height=400;
+				break;
+
+			case 'asiakkaan_positio':
+				width=380;
+				height=450;
+				break;	
+			case 'asiakkaan_kohde':
+				width=400;
+				height=400;
+				break;
+		}
+
+		if(height==0 || width==0) {
+			alert('Ylläpitotoimintoa '+toim+' ei tunneta!');
+		}
+		else {
+			//	Tehdään uutta
+			if(valinta=='uusi') {
+				newwindow=window.open('../yllapito.php?popparista=JOO&uusi=1&suljeYllapito='+tag+'&toim='+url, 'yllapito', 'width='+height+',height='+height+',top=100,left=100,scrollbars=no,resizable=yes');
+			}
+			//	Muokataan valittua
+			else if (valinta.indexOf('\muokkaa#[0-9]+\b')) {
+				tunnus=valinta.slice(valinta.indexOf("#")+1);
+				newwindow=window.open('../yllapito.php?popparista=JOO&tunnus='+tunnus+'&suljeYllapito='+tag+'&toim='+url, 'yllapito', 'width='+height+',height='+height+',top=100,left=100,scrollbars=no,resizable=yes');
+			}
+			else {
+				//alert('DONT FUCK THE SYSTEM \"'+valinta+'\"');
+			}
+		}		
+	}
+	else {
+
+		// Onko meillä muokkaus?		
+		sain='en';
+		for(i=0;i<=select.options.length-1;i++) {
+			if(select.options[i].value.substring(0,7)=='muokkaa') {
+				if(valinta=='') {
+					select.options[i]=null;
+					sain='JOO';					
+				}
+				else {
+					select.options[i].value='muokkaa#'+valinta;
+					sain='JOO';					
+				}
+			}
+		}
+
+		//	Joudutaan duusaamaan kokonaan uusi..
+		if(sain=='en') {
+			var newOpt=document.createElement('option');
+			newOpt.text='Muokkaa';
+			newOpt.value='muokkaa#'+valinta;
+
+			try {
+				select.add(newOpt, select.options[select.options.length-1]);
+			}
+			catch(ex) {
+				select.add(newOpt, select.options[select.options.length-1]);
+			}
+
+		}
+		 if (submitOnSelect) {
+			document.forms[submitOnSelect].submit();
+		}
+	}
+}
+function suljeYllapito(sID,value,text) {
+
+	//	Wanhaa on muokattu, submittoidaan formi tarvittaessa..
+	if(sID.substring(0,2)=='P_') {
+		sID=sID.substr(2);
+
+		sel=window.opener.document.getElementById(sID);
+
+		//	merkataan oikea valituksi
+		for(i in sel.options) {
+			if(sel.options[i].value==value) {
+				sel.selectedIndex=i;
+				sel.options[i].text=text;
+			}
+		}
+
+		if(sID=='asiakkaan_positio') {
+			window.opener.document.forms[sID].submit();
+		}
+		window.close();
+	}
+	else {
+
+		//	Paivitetaan ja valitaan select option
+		var newOpt=document.createElement('option');
+		newOpt.text=text;
+		newOpt.value=value;
+
+		//	Jos päivitettiin yhteyshenkilöitä meidän pitää listätä ne kaikkiin valikkoihin..			
+		sela='EI'
+		if(sID=='yhteyshenkilo_kaupallinen') {
+			sela=window.opener.document.getElementById('yhteyshenkilo_tekninen');
+		}
+		else if (sID=='yhteyshenkilo_tekninen') {
+			sela=window.opener.document.getElementById('yhteyshenkilo_kaupallinen');
+		}
+
+		if(sela!='EI') {
+			var newOpt2=document.createElement('option');			
+			newOpt2.text=text;
+			newOpt2.value=value;
+
+			try {
+				sela.add(newOpt2, sela.options[1]);
+			}
+			catch(ex) {
+				sela.add(newOpt2, 1);
+			}
+		}
+
+		sel=window.opener.document.getElementById(sID);
+
+		try {
+			sel.add(newOpt, sel.options[1]);
+		}
+		catch(ex) {
+			sel.add(newOpt, 1);
+		}
+
+		//	Valitaan uusi arvo
+		sel.selectedIndex=1;
+
+
+
+		window.close();
+
+	}	
+}
+//-->
+</script>
+<?php		
+	}
+}
+
+if(!function_exists("js_toimehtoTarkenne")) {
+	function js_toimehtoTarkenne() {
+?>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+<!--
+function toimehtoTarkenne(toimehto) {
+	tehto=document.getElementById(toimehto);
+	tehtoLisa=document.getElementById(toimehto+'Lisa');
+
+	teksti=tehto.options[tehto.selectedIndex].text;
+	arvo=tehto.options[tehto.selectedIndex].value;	
+
+	i=teksti.indexOf("-");
+	if(i>0) {
+		tarkenne=teksti.substr((i+1));
+		tehtoLisa.value=tarkenne;
+	}
+	else {
+		tehtoLisa.value='';
+	}
+}
+//-->
+</script>
+<?php		
+	}
+}
+
+if (!function_exists("js_popup")) {
+	// scripti balloonien tekemiseen
+	function js_popup () {
+
+?>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+<!--
+
+function getMouseX(e) {
+	var x = null;
+	if (e.pageX) 	{
+		x = e.pageX;
+	}
+	else if (e.clientX) 	{
+		x = e.clientX + document.body.scrollTop
+			+ document.documentElement.scrollTop;
+	}
+	return x;
+}
+function getMouseY(e) {
+	var y = null;
+	if (e.pageY) 	{
+		y = e.pageY;
+	}
+	else if (e.clientY) 	{
+		y = e.clientY + document.body.scrollTop
+			+ document.documentElement.scrollTop;
+	}
+
+	return y;
+}
+function popUp(e, oi) {	
+	var de = document.getElementById(oi);
+	var ds = de.style;
+
+	if (e.type == "mouseout") {
+		ds.display = "none";
+		ds.visibility = "hidden";
+	}
+	else {
+
+		ds.display = "block";
+
+		//	Detectoidaan ikkunan koko
+		var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
+		var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
+
+		//	Detectoidaan div:n koko
+		if(de.clientHeight) eh = de.clientHeight;
+		else if (de.clip.height) eh = de.clip.height;
+		else eh = null;
+
+		if(de.clientWidth) ew = de.clientWidth;
+		else if (de.clip.width) ew = de.clip.width;
+		else ew = null;
+
+		// relatiivinen sijainti
+		var y = getMouseY(e)+10;
+		var x = getMouseX(e)+10;
+
+
+		//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
+		if(eh != null && ew != null && x != null && y != null) {			
+
+			c=0;
+			//	Riittääkö leveys
+			if(x+ew-2>ww) {
+				c=x+ew-ww+2;
+				x -= c;
+			}
+
+			if (wh - y - eh < -5 && c > 10) {
+				y -= eh + 22;
+			}
+			else if(y + eh + 2 > wh) {
+				y -= y+eh-wh+2;
+			}
+
+			//	Oikea laita on kuitenkin aina tärkein!
+			if(x<2) {
+				x=2;
+			}		
+			if(y<2) {
+				y=2;
+			}		
+		}
+
+		ds.left=x;
+		ds.top=y;
+
+		ds.visibility = "visible";
+	}
+}
+//-->
+</script>
+<?php		
 
 	}
 }

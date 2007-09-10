@@ -124,15 +124,7 @@ if ($tee == "paivita") {
 if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 	// scripti balloonien tekemiseen
-	echo "
-		<script>
-		var DH = 0;var an = 0;var al = 0;var ai = 0;if (document.getElementById) {ai = 1; DH = 1;}else {if (document.all) {al = 1; DH = 1;} else { browserVersion = parseInt(navigator.appVersion); if ((navigator.appName.indexOf('Netscape') != -1) && (browserVersion == 4)) {an = 1; DH = 1;}}} function fd(oi, wS) {if (ai) return wS ? document.getElementById(oi).style:document.getElementById(oi); if (al) return wS ? document.all[oi].style: document.all[oi]; if (an) return document.layers[oi];}
-		function pw() {return window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;}
-		function mouseX(evt) {if (evt.pageX) return evt.pageX; else if (evt.clientX)return evt.clientX + (document.documentElement.scrollLeft ?  document.documentElement.scrollLeft : document.body.scrollLeft); else return null;}
-		function mouseY(evt) {if (evt.pageY) return evt.pageY; else if (evt.clientY)return evt.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop); else return null;}
-		function popUp(evt,oi) {if (DH) {var wp = pw(); ds = fd(oi,1); dm = fd(oi,0); st = ds.visibility; if (dm.offsetWidth) ew = dm.offsetWidth; else if (dm.clip.width) ew = dm.clip.width; if (st == \"visible\" || st == \"show\") { ds.visibility = \"hidden\"; } else {tv = mouseY(evt) + 20; lv = mouseX(evt) - (ew/2); if (lv < 2) lv = 2; else if (lv + ew > wp) lv -= ew/2; if (!an) {lv += 'px';tv += 'px';} ds.left = lv; ds.top = tv; ds.visibility = \"visible\";}}}
-		</script>
-	";
+	js_popup();
 
 	$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
 	$vtresult = mysql_query($query) or pupe_error($query);
@@ -339,8 +331,8 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		echo "</tr>\n";
 
 		// teh‰‰n popup divi myynneist‰
-		$divit .= "<div id='$row[paikkatunnus]' style='position:absolute; z-index:100; visibility:hidden; background:#555555; color:#FFFFFF; border: 1px solid; padding:0px;'>";
-		$divit .= "<table><tr>";
+		$divit .= "<div id='$row[paikkatunnus]' class='popup' style='width:750px;'>";
+		$divit .= "<table style='width:750px;'><tr>";
 		$divit .= "<th nowrap>".t("Kok.Myynti 1")."</th>";
 		$divit .= "<th nowrap>".t("Var.Myynti 1")."</th>";
 		$divit .= "<th nowrap>".t("Kok.Myynti 2")."</th>";

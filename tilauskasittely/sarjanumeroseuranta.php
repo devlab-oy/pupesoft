@@ -821,7 +821,7 @@
 	if (file_exists('sarjanumeron_lisatiedot_popup.inc') and $sarjanumeronLisatiedot == "OK") {
 		require("sarjanumeron_lisatiedot_popup.inc");
 	
-		echo js_popup(500);	
+		echo js_popup();	
 	}
 
 	

@@ -119,9 +119,10 @@
 					$konsernit
 					and tyyppi 	= 'asennuskalenteri'
 					and tapa    = '$tyojono' 
-					and (	(pvmalku >= '$year-$month-$day $aika:00' and pvmalku <= '$year-$month-$day $aika:00') or 
-							(pvmalku <  '$year-$month-$day $aika:00' and pvmloppu > '$lyear-$lmonth-$lday $laika:00') or
-							(pvmloppu>= '$year-$month-$day $aika:00' and pvmloppu<= '$lyear-$lmonth-$lday $laika:00'))
+					and kuka 	= '$asentaja'
+					and (	(pvmalku >= '$year-$month-$day $aika:00' and pvmalku  < '$lyear-$lmonth-$lday $laika:00') or 
+							(pvmalku  < '$year-$month-$day $aika:00' and pvmloppu > '$lyear-$lmonth-$lday $laika:00') or
+							(pvmloppu > '$year-$month-$day $aika:00' and pvmloppu<= '$lyear-$lmonth-$lday $laika:00'))
 					and tunnus != '$tyotunnus'
 					order by pvmalku";		
 		$result = mysql_query($query) or pupe_error($query);
@@ -235,15 +236,14 @@
 		if (!isset($lmonth)) $lmonth = $month;
 		if (!isset($lyear)) $lyear   = $year;
 		
-		echo  "<tr>
-			<th nowrap>".t("Kesto").":</th>
-			<td>$aika - 
-			<input type='text' size='3' name='lday' 	value='$lday'>
-			<input type='text' size='3' name='lmonth'   value='$lmonth'>
-			<input type='text' size='5' name='lyear'  	value='$lyear'>
-			<select name='laika'>";
-
+		echo  "<tr><th nowrap>".t("Työn alku").":</th><td>".tv1dateconv("$year-$month-$day")." - $aika</td></tr>";
 		
+		echo  "<tr>
+			<th nowrap>".t("Työn loppu").":</th>
+			<td><input type='text' size='3' name='lday' value='$lday'>
+			<input type='text' size='3' name='lmonth'   value='$lmonth'>
+			<input type='text' size='5' name='lyear'  	value='$lyear'> - <select name='laika'>";
+
 		$whileaika = $AIKA_ARRAY[0];
 		if (!isset($aikaloppu)) $aikaloppu = date("H:i", mktime(substr($aika,0,2), substr($aika,3,2)+60, 0));
 		
@@ -337,7 +337,7 @@
 	}
 	
 	if ($tee == "" and $tyojono != "") {
-		echo "<table width='100%'>";
+		echo "<table>";
 		echo "<tr>";
 	
 		echo "<th>Aika</th>";
@@ -368,17 +368,20 @@
 		echo "</td>";
 	
 		// Kirjotetaan alkuun tyhjiä soluja
-		for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
-			echo "<td class='back'>&nbsp;</td>";
+		if (weekday_number("1", $month, $year) < 5) {
+			for ($i = 0; $i < weekday_number("1", $month, $year); $i++) {
+				echo "<td class='back'>&nbsp;</td>";
+			}
 		}
 		
 		$div_arrayt = array();
-	
+		$solu = 0;
+		
 	    for($i = 1; $i <= days_in_month($month, $year); $i++) {
 						
 			if (date('N', mktime(0, 0, 0, $month, $i, $year))-1 < count($DAY_ARRAY)) {
 				
-				echo "<td class='back' align='center'>";
+				echo "<td class='back' align='center'>$rivi";
 
 				$query = "	SELECT kalenteri.kuka, kalenteri.liitostunnus, kalenteri.pvmalku, kalenteri.pvmloppu, lasku.nimi, tyomaarays.komm1
 							FROM kalenteri
@@ -444,9 +447,11 @@
 		
 				echo "</table>";
 				echo "</td>";
+
+				$solu++;
 			}
 		
-			if (weekday_number($i, $month, $year) == 6) {
+			if (weekday_number($i, $month, $year) == 6 and $solu > 0) {
 				// Rivinvaihto jos seuraava viikko on olemassa
 				if (days_in_month($month, $year)!=$i) {
 					echo "</tr><tr>";
@@ -468,6 +473,7 @@
 				echo "<td class='back'>&nbsp;</td>";
 			}
 		}
+		
 		echo "</tr>";
 		echo "</table>";		
 	}

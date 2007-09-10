@@ -39,7 +39,7 @@
 				</form>";
 		echo "</td></tr></table>";
 	}
-	elseif ($kukarow["kesken"] != 0 and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "N")) {
+	elseif ($kukarow["kesken"] != 0 and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T")) {
 
 		if ($kukarow["extranet"] != "") {
 			$toim_kutsu = "EXTRANET";

@@ -1233,8 +1233,8 @@
 
 			echo "<td valign='top'>";
 			
-			echo tv1dateconv($laskurow["erpcm"]);
-			if ($laskurow["kapvm"] != "0000-00-00") echo "<br>".tv1dateconv($laskurow["kapvm"]);
+			echo tv1dateconv($trow["erpcm"]);
+			if ($trow["kapvm"] != "0000-00-00") echo "<br>".tv1dateconv($trow["kapvm"]);
 			
 			echo "</td>";
 			

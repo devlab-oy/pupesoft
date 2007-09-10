@@ -13,10 +13,15 @@ $chk2 = "";
 $chk3 = "";
 $chk4 = "";
 
-if ($tyyppi == '25') $chk1 = "checked";
-if ($tyyppi == 'puoli') $chk2 = "checked";
-if ($tyyppi == '75') $chk3 = "checked";
-if ($tyyppi == 'taysi') $chk4 = "checked";
+if ($tyyppi == '25') $chk1 = "selected";
+if ($tyyppi == 'puoli') $chk2 = "selected";
+if ($tyyppi == '75') $chk3 = "selected";
+if ($tyyppi == 'taysi') $chk4 = "selected";
+
+if ($tuotetyyppi == '25') $tchk1 = "selected";
+if ($tuotetyyppi == 'puoli') $tchk2 = "selected";
+if ($tuotetyyppi == '75') $tchk3 = "selected";
+if ($tuotetyyppi == 'taysi') $tchk4 = "selected";
 
 // defaultteja
 if (!isset($alkupvm))  $alkupvm  = date("Y-m-d",mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
@@ -45,10 +50,27 @@ echo "<table>";
 
 echo "<tr>";
 echo "<th>".t("Valitse ehdotus").":</th>";
-echo "<td colspan='2'>| 25% <input type='radio' name='tyyppi' value='25' $chk1>";
-echo " | ".t("Puoli")." <input type='radio' name='tyyppi' value='puoli' $chk2>";
-echo " | 75% <input type='radio' name='tyyppi' value='75' $chk3>";
-echo " | ".t("T‰ysi")." <input type='radio' name='tyyppi' value='taysi' $chk4> |</td>";
+echo "<td colspan='2'>";
+echo "<select name='tyyppi'>";
+echo "<option $chk1 value='25'>25% ep‰kuranttiehdotus</option>";
+echo "<option $chk2 value='puoli'>Puoliep‰kuranttiehdotus</option>";
+echo "<option $chk3 value='75'>75% ep‰kuranttiehdotus</option>";
+echo "<option $chk4 value='taysi'>T‰ysep‰kuranttiehdotus</option>";
+echo "</select>";
+echo "</td>";
+echo "</tr>";
+
+echo "<tr>";
+echo "<th>".t("Tuoterajaus").":</th>";
+echo "<td colspan='2'>";
+echo "<select name='tuotetyyppi'>";
+echo "<option value=''>N‰yt‰ kaikki tuotteet</option>";
+echo "<option $tchk1 value='25'>N‰yt‰ vain 25% ep‰kurantit</option>";
+echo "<option $tchk2 value='puoli'>N‰yt‰ vain puoliep‰kurantit</option>";
+echo "<option $tchk3 value='75'>N‰yt‰ vain 75% ep‰kurantit</option>";
+echo "<option $tchk4 value='taysi'>N‰yt‰ vain t‰ysep‰kurantit</option>";
+echo "</select>";
+echo "</td>";
 echo "</tr>";
 
 echo "<tr>";
@@ -64,7 +86,7 @@ echo "</tr>";
 
 echo "<tr>";
 echo "<th>".t("Anna t‰ysep‰kuranttisuuden alaraja pvm").":</th>";
-echo "<td colspan='2'><input type='text' name='taysraja' value='$taysraja'></td><td class='back'>(Tuote on pit‰nyt laittaa puoliep‰kurantiksi ennen t‰t‰ p‰iv‰‰, jotta ehdotetaan t‰ysep‰kurantiksi)</td>";
+echo "<td colspan='2'><input type='text' name='taysraja' value='$taysraja'></td><td class='back'>(Tuote on pit‰nyt laittaa edelliselle ep‰kuranttiustasolle ennen t‰t‰ p‰iv‰‰, jotta ehdotetaan seuraavaan ep‰kuranttitasoon)</td>";
 echo "</tr>";
 
 echo "<tr>";
@@ -75,7 +97,7 @@ echo "</tr>";
 
 echo "</table>";
 echo "<br><input type='submit' name='subnappi' value='Do it!'>";
-echo "</form>";
+echo "</form><br><br>";
 
 if ($subnappi != '') {
 
@@ -93,7 +115,7 @@ if ($subnappi != '') {
 		$lisa .= "and try='$try' ";
 		$msg  .= ", tuoteryhm‰ $try";
 	}
-	
+
 	if ($tyyppi == '25') {
 		// 25ep‰kurantteja etsitt‰ess‰ tuote ei saa olla puoli eik‰ t‰ysiep‰kurantti
 		$epakuranttipvm = "and epakurantti25pvm='0000-00-00' and epakurantti50pvm='0000-00-00' and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
@@ -105,7 +127,7 @@ if ($subnappi != '') {
 		$epakuranttipvm = "and epakurantti50pvm='0000-00-00' and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
 		echo "<font class='message'>".t("Puoliep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
 	}
-	
+
 	if ($tyyppi == '75') {
 		// 75ep‰kurantteja etsitt‰ess‰ tuote ei saa olla puoli eik‰ t‰ysiep‰kurantti
 		$epakuranttipvm = "and epakurantti75pvm='0000-00-00' and epakurantti100pvm='0000-00-00'";
@@ -116,6 +138,22 @@ if ($subnappi != '') {
 		// t‰ysiep‰kurantteja etsitt‰ess‰ tuotteen pit‰‰ olla puoliep‰kurantti mutta ei t‰ysep‰kurantti
 		$epakuranttipvm = "and epakurantti100pvm='0000-00-00'";
 		echo "<font class='message'>".t("T‰ysiep‰kuranttiehdotus, myydyt kappaleet")." $alkupvm - $loppupvm, ".t("kiertoraja")." $raja$msg. ".t("Viimeinen saapuminen ennen")." $alkupvm.</font><br><br>";
+	}
+
+	if ($tuotetyyppi == "25") {
+		$epakuranttipvm = "and epakurantti25pvm != '0000-00-00' and epakurantti50pvm = '0000-00-00' and epakurantti75pvm = '0000-00-00' and epakurantti100pvm = '0000-00-00'";
+	}
+
+	if ($tuotetyyppi == "puoli") {
+		$epakuranttipvm = "and epakurantti25pvm != '0000-00-00' and epakurantti50pvm != '0000-00-00' and epakurantti75pvm = '0000-00-00' and epakurantti100pvm = '0000-00-00'";
+	}
+
+	if ($tuotetyyppi == "75") {
+		$epakuranttipvm = "and epakurantti25pvm != '0000-00-00' and epakurantti50pvm != '0000-00-00' and epakurantti75pvm != '0000-00-00' and epakurantti100pvm = '0000-00-00'";
+	}
+
+	if ($tuotetyyppi == "taysi") {
+		$epakuranttipvm = "and epakurantti25pvm != '0000-00-00' and epakurantti50pvm != '0000-00-00' and epakurantti75pvm != '0000-00-00' and epakurantti100pvm != '0000-00-00'";
 	}
 
 	// etsit‰‰n saldolliset tuotteet
@@ -136,7 +174,7 @@ if ($subnappi != '') {
 	echo "".t("osasto")."\t".t("try")."\t".t("kpl")."\t".t("saldo")."\t".t("kierto")."\t".t("tahtituote")."\t".t("eka saapuminen")."\t".t("vika saapuminen")."\t".t("hinta")."\t".t("kehahin")."\t".t("tuoteno")."\t".t("nimitys")."\t".t("toimittaja")."\n";
 
 	while ($row = mysql_fetch_array($result)) {
-		
+
 		if ($row["epakurantti75pvm"] != "0000-00-00") {
 			$epispvm = $row["epakurantti75pvm"];
 		}
@@ -146,7 +184,7 @@ if ($subnappi != '') {
 		elseif ($row["epakurantti25pvm"] != "0000-00-00") {
 			$epispvm = $row["epakurantti25pvm"];
 		}
-		
+
 		// jos meill‰ on tuotteen vihapvm k‰ytet‰‰n sit‰, muuten eka from 70s...
 		if ($row["vihapvm"] == "0000-00-00") $row["vihapvm"] = '1970-01-01';
 

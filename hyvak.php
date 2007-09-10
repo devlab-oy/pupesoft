@@ -538,8 +538,7 @@
 
 		// Lasku on valittu ja sitä tiliöidään
 		$query = "	SELECT *,
-					concat_ws('@', laatija, luontiaika) kuka, if(kapvm != '0000-00-00',
-					concat_ws('<br>',kapvm,erpcm),erpcm) erpcmkapcm,
+					concat_ws('@', laatija, luontiaika) kuka, 
 					round(summa * vienti_kurssi, 2) kotisumma
 					FROM lasku
 					WHERE tunnus='$tunnus' and yhtio = '$kukarow[yhtio]'";
@@ -566,17 +565,22 @@
 		echo "<td>$laskurow[kuka]</td>";
 
 		if ($kukarow['taso'] == 2 and $laskurow['hyvak1'] == $kukarow['kuka']) {
-			echo "<td><a href='$PHP_SELF?tee=M&tunnus=$tunnus'>$laskurow[tapvm]</a></td>";
+			echo "<td><a href='$PHP_SELF?tee=M&tunnus=$tunnus'>".tv1dateconv($laskurow["tapvm"])."</a></td>";
 		}
 		else {
-			echo "<td>$laskurow[tapvm]</td>";
+			echo "<td>".tv1dateconv($laskurow["tapvm"])."</td>";
 		}
 
 		if ($laskurow['suoraveloitus'] != '') {
 			echo "<td><font class = 'error'>".t("Suoraveloitus")."</font></td>";
 		}
 		else {
-			echo "<td>$laskurow[erpcmkapcm]</td>";
+			echo "<td>";
+			
+			echo tv1dateconv($laskurow["erpcm"]);
+			if ($laskurow["kapvm"] != "0000-00-00") echo "<br>".tv1dateconv($laskurow["kapvm"]);
+			
+			echo "</td>";
 		}
 
 		echo "</tr>";
@@ -626,22 +630,6 @@
 		}
 
 		echo "</tr>";
-
-		if ($laskurow["h1time"] == "0000-00-00 00:00:00") $laskurow["h1time"] = "";
-		if ($laskurow["h2time"] == "0000-00-00 00:00:00") $laskurow["h2time"] = "";
-		if ($laskurow["h3time"] == "0000-00-00 00:00:00") $laskurow["h3time"] = "";
-		if ($laskurow["h4time"] == "0000-00-00 00:00:00") $laskurow["h4time"] = "";
-		if ($laskurow["h5time"] == "0000-00-00 00:00:00") $laskurow["h5time"] = "";
-
-		if ($laskurow["hyvak1"] != "") {
-			echo "<tr><th>".t("Hyväksyjät")."</th><th colspan='2'>".t("Hyväksytty")."</th></tr>";
-			echo "<tr><td>1. $laskurow[hyvak1]</td><td colspan='2'>$laskurow[h1time]</td></tr>";
-		}
-		if ($laskurow["hyvak2"] != "") echo "<tr><td>2. $laskurow[hyvak2]</td><td colspan='2'>$laskurow[h2time]</td></tr>";
-		if ($laskurow["hyvak3"] != "")echo "<tr><td>3. $laskurow[hyvak3]</td><td colspan='2'>$laskurow[h3time]</td></tr>";
-		if ($laskurow["hyvak4"] != "")echo "<tr><td>4. $laskurow[hyvak4]</td><td colspan='2'>$laskurow[h4time]</td></tr>";
-		if ($laskurow["hyvak5"] != "")echo "<tr><td>5. $laskurow[hyvak5]</td><td colspan='2'>$laskurow[h5time]</td></tr>";
-
 		echo "</table>";
 
 		if ($laskurow["comments"] != "") {
@@ -696,7 +684,7 @@
 					 <input type='hidden' name = 'nayta' value='$nayta'>
 					 <input type='hidden' name='tunnus' value='$tunnus'>
 					 <input type='hidden' name='iframe' value = '$iframe'>
-					 <input type='hidden' name='id' value = '$id'><tr>";
+					 <input type='hidden' name='id' value = '$id'>";
 
 			echo "<tr><th colspan='2'>".t("Hyväksyjät")."</th></tr>";
 
@@ -742,6 +730,37 @@
 
 			echo "</table></td><td width='30px' class='back'></td>";
 		}
+		else {
+
+			echo "<td class='back' valign='top'><table>";
+			echo "<tr><th>".t("Hyväksyjä")."</th><th>".t("Hyväksytty")."</th><th></th></tr>";
+
+			for ($i=1; $i<6; $i++) {
+				$hyind = "hyvak".$i;
+				$htind = "h".$i."time";
+				
+				if ($laskurow[$hyind] != '') {
+					$query = "	SELECT kuka, nimi
+					          	FROM kuka
+					          	WHERE yhtio = '$kukarow[yhtio]' 
+								and hyvaksyja = 'o'
+								and kuka = '$laskurow[$hyind]'
+					          	ORDER BY nimi";
+					$vresult = mysql_query($query) or pupe_error($query);
+					$vrow = mysql_fetch_array($vresult);
+				
+					echo "<tr><td>$i. $vrow[nimi]</td><td>";
+					
+					if ($laskurow[$htind] != '0000-00-00 00:00:00') {
+						echo tv1dateconv($laskurow[$htind], "P");
+					}
+					
+					echo "</td><td>".t("Lukittu")."</td></tr>";
+				}
+			}
+
+			echo "</table></td><td width='30px' class='back'></td>";
+		}
 
 		echo "</tr></table>";
 
@@ -759,7 +778,7 @@
 		// Tätä ei siis tehdä jos kyseessä on kevenetty versio
 		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) {
 
-			echo "<table>
+			echo "<br><table>
 					<tr>
 					<th colspan='2'>".t("Tili")."</th>
 					<th>".t("Tarkenne")."</th>
@@ -1172,7 +1191,7 @@
 		if ($nayta != '') $nayta = '';
 		else $nayta = "and alatila != 'H'";
 
-		$query = "	SELECT *, if(kapvm!='0000-00-00',concat_ws('<br>',kapvm,erpcm),erpcm) erpcmkapcm, round(summa * vienti_kurssi, 2) kotisumma
+		$query = "	SELECT *, round(summa * vienti_kurssi, 2) kotisumma
 				 	FROM lasku
 				  	WHERE hyvaksyja_nyt = '$kukarow[kuka]'
 					and yhtio = '$kukarow[yhtio]'
@@ -1212,7 +1231,13 @@
 				echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."</td>";
 			}
 
-			echo "<td valign='top'>".tv1dateconv($trow["erpcmkapcm"])."</td>";
+			echo "<td valign='top'>";
+			
+			echo tv1dateconv($laskurow["erpcm"]);
+			if ($laskurow["kapvm"] != "0000-00-00") echo "<br>".tv1dateconv($laskurow["kapvm"]);
+			
+			echo "</td>";
+			
 			echo "<td valign='top'>$trow[ytunnus]</td>";
 
 			if ($trow['comments'] != '') {

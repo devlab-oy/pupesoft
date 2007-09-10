@@ -835,7 +835,8 @@ if ($tee == "MUOKKAA") {
 							and tuotetyyppi='$viranomaistyyppi'
 							and status !='P'
 							and tuote.tilino!=''
-							$lisat";
+							$lisat
+							ORDER BY tuote.nimitys";
 				$tres=mysql_query($query) or pupe_error($query);
 				$valinta="";
 				if (mysql_num_rows($tres)>0){

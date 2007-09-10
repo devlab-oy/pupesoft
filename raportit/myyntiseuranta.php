@@ -552,7 +552,7 @@
 						$lisa .= " and tuote.tuoteno='$rajaus[$i]' ";
 					}
 				}
-
+				
 				if ($mukaan == "tuotemyyja") {
 					if ($group!="") $group .= ",tuote.myyjanro";
 					else $group  .= "tuote.myyjanro";
@@ -638,6 +638,13 @@
 						$lisa .= " and lasku.myyja in ($osrow[tunnus]) ";
 					}
 				}
+			}
+			
+			if ($tilrivikomm != "") {
+				if ($group!="") $group .= ",tilausrivi.tunnus";
+				else $group  .= "tilausrivi.tunnus";
+				$select .= "tilausrivi.kommentti, ";
+				$gluku++;
 			}
 
 			if ($asiakasryhma  == "kaikki") {
@@ -832,11 +839,14 @@
 
 				$result = mysql_query($query) or pupe_error($query);
 
+				/*
+				Ei rajausta nyt koska se rajas liikaa
+
 				if (mysql_num_rows($result) > 4000) {
 					echo "<font class='message'>".t("Hakutulos oli liian suuri. Tee tarkempi rajaus")."!<br></font>";
 					$query = "";
 				}
-
+				*/
 			}
 
 			if ($query != "") {
@@ -1554,6 +1564,8 @@
 			if ($kuukausittain != '')	$kuuchk	  = "CHECKED";
 			if ($varastonarvo != '')	$varvochk = "CHECKED";
 			if ($piiloed != '')			$piiloedchk = "CHECKED";
+			if ($tilrivikomm != '')	$tilrivikommchk = "CHECKED";
+			
 			
 			echo "<table>
 				<tr>
@@ -1669,6 +1681,12 @@
 				<tr>
 				<th>".t("Piilota edellisen kauden sarakkeet")."</th>
 				<td><input type='checkbox' name='piiloed' $piiloedchk></td>
+				<td></td>
+				<td class='back'></td>
+				</tr>
+				<tr>
+				<th>".t("Näytä tilausrivin kommentti")."</th>
+				<td><input type='checkbox' name='tilrivikomm' $tilrivikommchk></td>
 				<td></td>
 				<td class='back'></td>
 				</tr>

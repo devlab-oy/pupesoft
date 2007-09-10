@@ -1,6 +1,5 @@
 <?php
 //	Ladataan javahelpperit
-$pupejs=1;
 
 if (file_exists("../inc/parametrit.inc")) {
 	require ("../inc/parametrit.inc");

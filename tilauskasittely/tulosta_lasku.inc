@@ -957,6 +957,7 @@ if (!function_exists('loppu')) {
 				// fax ja puhelin ei ole laskulla
 				$yhtiorow['puhelin']	= $alhiro['puhelin'];
 				$yhtiorow['fax']		= $alhiro['fax'];
+				$yhtiorow['email']		= $alhiro['email'];
 
 			}
 			

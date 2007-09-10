@@ -38,6 +38,7 @@
 						fax 			= '$fax',
 						www 			= '$www',
 						fakta 			= '$fakta',
+						tilausyhteyshenkilo = '$tilausyhteyshenkilo',
 						muuttaja		= '$kukarow[kuka]', 
 						muutospvm		= now()
 						where yhtio = '$kukarow[yhtio]' 
@@ -71,6 +72,7 @@
 						fax 			= '$fax',
 						www 			= '$www',
 						fakta 			= '$fakta',
+						tilausyhteyshenkilo = '$tilausyhteyshenkilo',
 						laatija			= '$kukarow[kuka]',
 						luontiaika		= now()";
 			$result = mysql_query($query) or pupe_error($query);
@@ -84,14 +86,15 @@
 
 			echo "<table>";
 
-			echo "<tr><th>".t("nimi")."</th>			<td><input type='text' name='henkilonimi' 		value='$henkilonimi'></tr>";
-			echo "<tr><th>".t("titteli")."</th>			<td><input type='text' name='titteli' 			value='$titteli'></tr>";
-			echo "<tr><th>".t("email")."</th>			<td><input type='text' name='email' 			value='$email'></tr>";
-			echo "<tr><th>".t("puh")."</th>				<td><input type='text' name='puh' 				value='$puh'></tr>";
-			echo "<tr><th>".t("gsm")."</th>				<td><input type='text' name='gsm' 				value='$gsm'></tr>";
-			echo "<tr><th>".t("fax")."</th>				<td><input type='text' name='fax' 				value='$fax'></tr>";
-			echo "<tr><th>".t("www")."</th>				<td><input type='text' name='www' 				value='$www'></tr>";
-			echo "<tr><th>".t("fakta")."</th>			<td><input type='text' name='fakta'			 	value='$fakta'></tr>";
+			echo "<tr><th>".t("nimi")."</th>				<td><input type='text' name='henkilonimi' 			value='$henkilonimi'></td></tr>";
+			echo "<tr><th>".t("titteli")."</th>				<td><input type='text' name='titteli' 				value='$titteli'></td></tr>";
+			echo "<tr><th>".t("email")."</th>				<td><input type='text' name='email' 				value='$email'></td></tr>";
+			echo "<tr><th>".t("puh")."</th>					<td><input type='text' name='puh' 					value='$puh'></td></tr>";
+			echo "<tr><th>".t("gsm")."</th>					<td><input type='text' name='gsm' 					value='$gsm'></td></tr>";
+			echo "<tr><th>".t("fax")."</th>					<td><input type='text' name='fax' 					value='$fax'></td></tr>";
+			echo "<tr><th>".t("www")."</th>					<td><input type='text' name='www' 					value='$www'></td></tr>";
+			echo "<tr><th>".t("fakta")."</th>				<td><input type='text' name='fakta'			 		value='$fakta'></td></tr>";
+			echo "<tr><th>".t("Tilausyhteyshenkilö")."</th>	<td><select name='tilausyhteyshenkilo'><option value = ''>".t("Ei")."</option><option value = 'o'>".t("Kyllä")."</option></select></td></tr>";
 
 			echo "</table><hr>";
 
@@ -114,14 +117,24 @@
 				echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 				echo "<table>";
 				
-				echo "<tr><th>".t("nimi")."</th>			<td><input type='text' name='henkilonimi' 		value='$trow[nimi]'></tr>";
-				echo "<tr><th>".t("titteli")."</th>			<td><input type='text' name='titteli'		 	value='$trow[titteli]'></tr>";
-				echo "<tr><th>".t("email")."</th>			<td><input type='text' name='email'			 	value='$trow[email]'></tr>";
-				echo "<tr><th>".t("puh")."</th>				<td><input type='text' name='puh'		 		value='$trow[puh]'></tr>";
-				echo "<tr><th>".t("gsm")."</th>				<td><input type='text' name='gsm' 				value='$trow[gsm]'></tr>";
-				echo "<tr><th>".t("fax")."</th>				<td><input type='text' name='fax'		 		value='$trow[fax]'></tr>";
-				echo "<tr><th>".t("www")."</th>				<td><input type='text' name='www' 				value='$trow[www]'></tr>";
-				echo "<tr><th>".t("fakta")."</th>			<td><input type='text' name='fakta'			 	value='$trow[fakta]'></tr>";
+				echo "<tr><th>".t("nimi")."</th>			<td><input type='text' name='henkilonimi' 		value='$trow[nimi]'></td></tr>";
+				echo "<tr><th>".t("titteli")."</th>			<td><input type='text' name='titteli'		 	value='$trow[titteli]'></td></tr>";
+				echo "<tr><th>".t("email")."</th>			<td><input type='text' name='email'			 	value='$trow[email]'></td></tr>";
+				echo "<tr><th>".t("puh")."</th>				<td><input type='text' name='puh'		 		value='$trow[puh]'></td></tr>";
+				echo "<tr><th>".t("gsm")."</th>				<td><input type='text' name='gsm' 				value='$trow[gsm]'></td></tr>";
+				echo "<tr><th>".t("fax")."</th>				<td><input type='text' name='fax'		 		value='$trow[fax]'></td></tr>";
+				echo "<tr><th>".t("www")."</th>				<td><input type='text' name='www' 				value='$trow[www]'></td></tr>";
+				echo "<tr><th>".t("fakta")."</th>			<td><input type='text' name='fakta'			 	value='$trow[fakta]'></td></tr>";
+				
+				$sel = $sela = "";
+				if ($trow["tilausyhteyshenkilo"] != '') {
+					$sel = "SELECTED";
+				}
+				else {
+					$sela = "SELECTED";
+				}
+				
+				echo "<tr><th>".t("Tilausyhteyshenkilö")."</th>	<td><select name='tilausyhteyshenkilo'><option value = '' $sela>".t("Ei")."</option><option value = 'o' $sel>".t("Kyllä")."</option></select></td></tr>";
 
 				echo "<tr><td class='back'>";
 				echo "<input type='hidden' name='tee' value='update'>";

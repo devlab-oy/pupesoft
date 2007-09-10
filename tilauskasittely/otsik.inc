@@ -38,7 +38,8 @@
 					toim_osoite    		= '',
 					toim_postino  		= '',
 					toim_postitp 		= '',
-					toim_maa    		= ''
+					toim_maa    		= '',
+					tilausyhteyshenkilo	= ''
 					WHERE yhtio 		= '$kukarow[yhtio]'
 					and tunnus	 		= '$kukarow[kesken]'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -157,7 +158,7 @@
 	}
 
 	if ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
-
+		
 		$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
 		$erpres = mysql_query($erpquery) or pupe_error($erpquery);
 
@@ -167,10 +168,23 @@
 
 		if (!checkdate($erpcmkk, $erpcmpp, $erpcmvv) or mysql_num_rows($erpres) == 0) {
 			if (mysql_num_rows($erpres) == 0) {
-				echo "<font class='error'>".t("VIRHE: Yritykseltä ei löydy sopivaa maksuehtoa eräpäivän käsinsyöttöön")."!</font><br>";
+				if ($kukarow['extranet'] != '') {
+					echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
+					exit;
+				}
+				else {
+					echo "<font class='error'>".t("VIRHE: Yritykseltä ei löydy sopivaa maksuehtoa eräpäivän käsinsyöttöön")."!</font><br>";
+				}
+
 			}
 			else {
-				echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+				if ($kukarow['extranet'] != '') {
+					echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään.")."<br><br>";
+					exit;
+				}
+				else {
+					echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+				}
 			}
 			$tee	= "OTSIK";
 			unset($jatka);
@@ -786,6 +800,16 @@
 			else {
 				echo "<input type='text' name='toimpp' value='$toimpp' size='3'><input type='text' name='toimkk' value='$toimkk' size='3'><input type='text' name='toimvv' value='$toimvv' size='6'>
 					<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'>";
+				
+				if ($srow["toimvko"] == 'V') {
+					$toimvko = date("W", strtotime($srow["toimaika"]));
+				}
+				else {
+					$toimvko = "";
+				}
+				
+				echo "".t("Vko")."<input type='text' name='toimvko' value='$toimvko' size='2'>
+					<input type='hidden' name='vtoimvko' value='".$srow["toimvko"]."'>";
 			}
 
 			echo "</td>";
@@ -838,6 +862,16 @@
 			else {
 				echo "<input type='text' name='kerpp' value='$kerpp' size='3'><input type='text' name='kerkk' value='$kerkk' size='3'><input type='text' name='kervv' value='$kervv' size='6'>
 						<input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'>";
+						
+				if ($srow["keraysvko"] == 'V') {
+					$keraysvko = date("W", strtotime($srow["kerayspvm"]));
+				}
+				else {
+					$keraysvko = "";
+				}
+
+				echo "".t("Vko")."<input type='text' name='keraysvko' value='$keraysvko' size='2'>
+					<input type='hidden' name='vtoimvko' value='".$srow["keraysvko"]."'>";
 			}
 			echo "</td>";
 
@@ -1133,9 +1167,11 @@
 			$sisah = '';
 			$osath = '';
 			$laskkielto = '';
+			$jtki = "";
 			if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
 			if ($srow['ketjutus']    != '') $eiket = 'CHECKED';
 			if ($srow['sisainen']    != '') $sisah = 'CHECKED';
+			if ($srow['jtkielto']    != '') $jtki  = 'CHECKED';
 
 			// Tarjouksia ei oletuksena osatoimiteta
 			if ($srow['osatoimitus'] != '' or ($toim == "TARJOUS" and $kukarow["kesken"] == 0)) $osath = 'CHECKED';
@@ -1268,7 +1304,9 @@
 			}
 
 			echo "<td>".t("Tilausta ei osatoimiteta").":</td><td><input type='checkbox' name='osatoimitus' $osath></td></tr>";
-
+			
+			echo "<tr><td></td><td></td><td>".t("Ei jälkitoimituksia").":</td><td><input type='checkbox' value='o' name='jtkielto' $jtki></td></tr>";
+			
 			if($yhtiorow["tilauksen_seuranta"] == "K") {
 				//seuranta
 				$query = "	SELECT selite, concat_ws(' - ',selite, selitetark)
@@ -1640,8 +1678,34 @@
 			else {
 				$extralisa = "";
 			}
-
-			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>(".t("keräyslista + lähete + lasku$extralisa").")</td></tr>";
+			
+			echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
+			
+			$yhteysquery = "SELECT * FROM yhteyshenkilo where yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]' and tyyppi = 'A' and tilausyhteyshenkilo != ''";
+			$yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
+			if (mysql_num_rows($yhteysresult) > 0) {
+				echo "<td colspan = '1'><select name='seltilausyhteyshenkilo'>";
+				echo "<option value = ''>".t("Ei valintaa")."</option>";
+				while ($yhteysrow = mysql_fetch_array($yhteysresult)) {
+					$sela = "";
+					if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
+						$sela = "SELECTED";
+						$srow["tilausyhteyshenkilo"] = "";
+					}
+					echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
+					
+				}
+				echo "</select>";
+				echo "<input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+			}
+			else {
+				echo "<td colspan = '1'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+			}
+			
+			echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+			echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+			
+			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>(".t("tilausvahvistus + keräyslista + lähete + lasku$extralisa").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>(".t("keräyslista + lähete").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>(".t("lasku$extralisa").")</td></tr>";
@@ -1790,7 +1854,45 @@
 
 		//Erikoisalennuksen desimaalipilkku
 		$erikoisale = str_replace (",", ".", $erikoisale);
-
+		
+		// ollaan annettu toimitusviikko jolloin pannaan toimvko kenttään V ja päivämääräksi sen viikon sunnuntain
+		$nyviikko = date("W");
+		
+		if ($toimvko != '') {
+			if ($toimvko < $nyviikko) {
+				$toimvko = "+".(52 - $nyviikko) + $toimvko;	
+			}
+			elseif ($toimvko == $nyviikko) {
+				$toimvko = "this";	
+			}
+			else {
+				$toimvko = "+".$toimvko - $nyviikko;	
+			}
+			
+			// $sunnuntai =  date("Y",strtotime("$toimvko weeks Sunday"))."-".date("m",strtotime("$toimvko weeks Sunday"))."-".date("d",strtotime("$toimvko weeks Sunday"));
+			$toimvv = date("Y",strtotime("$toimvko weeks Sunday"));
+			$toimkk	= date("m",strtotime("$toimvko weeks Sunday"));
+			$toimpp = date("d",strtotime("$toimvko weeks Sunday"));
+			$toimvko = "V";
+		}
+		
+		if ($keraysvko != '') {
+			if ($keraysvko < $nyviikko) {
+				$keraysvko = "+".(52 - $nyviikko) + $keraysvko;	
+			}
+			elseif ($keraysvko == $nyviikko) {
+				$keraysvko = "this";	
+			}
+			else {
+				$keraysvko = "+".$keraysvko - $nyviikko;	
+			}
+			
+			$kervv = date("Y",strtotime("$keraysvko weeks Sunday"));
+			$kerkk = date("m",strtotime("$keraysvko weeks Sunday"));
+			$kerpp = date("d",strtotime("$keraysvko weeks Sunday"));
+			$keraysvko = "V";
+		}
+		
 		if ($kukarow["kesken"] == 0) {
 			$query = "INSERT into ";
 			$postquery = ",laatija = '$kukarow[kuka]', luontiaika=NOW()";
@@ -1809,12 +1911,12 @@
 			// Pidetään huolta tilausrivien toimituspäivistä ja kerayspaivasta
 			$query = "	UPDATE tilausrivi
 						SET kerayspvm = '".$kervv."-".$kerkk."-".$kerpp."'
-						WHERE otunnus = '$kukarow[kesken]' and kerayspvm='$vkerayspvm' and yhtio='$kukarow[yhtio]'";
+						WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and kerayspvm = '$vkerayspvm'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "	UPDATE tilausrivi
 						SET toimaika = '".$toimvv."-".$toimkk."-".$toimpp."'
-						WHERE otunnus = '$kukarow[kesken]' and toimaika='$vtoimaika' and yhtio='$kukarow[yhtio]'";
+						WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and toimaika = '$vtoimaika'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$query = "UPDATE ";
@@ -1855,6 +1957,10 @@
 			$tpostino  = $postino;
 			$tpostitp  = $postitp;
 			$toim_maa  = $maa;
+		}
+		
+		if ($tilausyhteyshenkilo == '' and $seltilausyhteyshenkilo != '') {
+			$tilausyhteyshenkilo = $seltilausyhteyshenkilo;
 		}
 
 		// haetaan maksuehdoen tiedot tarkastuksia varten
@@ -1974,7 +2080,9 @@
 					toim_maa 							= '$toim_maa',
 					verkkotunnus						= '$verkkotunnus',
 					toimaika 							= '$toimvv-$toimkk-$toimpp',
+					toimvko	 							= '$toimvko',
 					kerayspvm 							= '$kervv-$kerkk-$kerpp',
+					keraysvko 							= '$keraysvko',
 					erpcm								= '$erpcmvv-$erpcmkk-$erpcmpp',
 					maksuehto 							= '$maksuehto',
 					toimitustapa 						= '$toimitustapa',
@@ -1985,6 +2093,9 @@
 					comments 							= '$comments',
 					ovttunnus 							= '$ovttunnus',
 					toim_ovttunnus 						= '$toim_ovttunnus',
+					tilausyhteyshenkilo					= '$tilausyhteyshenkilo',
+					asiakkaan_tilausnumero				= '$asiakkaan_tilausnumero',
+					kohde								= '$kohde',
 					viesti 								= '$viesti',
 					chn									= '$chn',
 					kuljetus 							= '$kuljetus',
@@ -2023,6 +2134,7 @@
 					tunnusnippu							= '$tunnusnippu',
 					jaksotettu							= '$jaksotettu',
 					splittauskielto						= '$splittauskielto',
+					jtkielto							= '$jtkielto',
 					maa_maara							= '$maa_maara'";
 
 		if ($toim == "MYYNTITILI") {

@@ -63,8 +63,15 @@ if ($virexx == 0) {
 		$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])	.$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\n";
 		$ulos .= "\n";
-		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])	.t("Tilausnumero", $kieli).": ".$laskurow['tunnus']."\n";
-		$ulos .= sprintf("%-50.s",t("Tilausviite", $kieli).": ".$laskurow['viesti'])		.t("Myyjä", $kieli).": ".$krow['nimi']."\n";
+		
+		if ($laskurow['toimvko'] == 'V') {
+			$laskurow["toimaika"] = t("Viikko")." ".date("W", strtotime($laskurow["toimaika"]));
+		}
+		
+		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])		.t("Toimitusaika", $kieli).": ".$laskurow['toimaika']."\n";
+		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
+		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])	.t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
+		$ulos .= sprintf("%-50.s",t("Kohde", $kieli).": ".$laskurow['kohde'])					.t("Myyjä", $kieli).": ".$krow['nimi']."\n";
 
 		if ($laskurow['erikoisale'] > 0) {
 			$ulos .= sprintf("%-50.s",t("Erikoisalennus", $kieli).": ".$laskurow['erikoisale']."%\n");

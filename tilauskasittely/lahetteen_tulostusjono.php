@@ -154,6 +154,8 @@
 					if(min(lasku.clearing)='','N',if(min(lasku.clearing)='JT-TILAUS','J',if(min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
 					left(min(lasku.kerayspvm),10) kerayspvm,
 					left(min(lasku.toimaika),10) toimaika,
+					keraysvko,
+					toimvko,
 					varastopaikat.nimitys varastonimi,
 					varastopaikat.tunnus varastotunnus,
 					lasku.tunnus otunnus,
@@ -263,10 +265,23 @@
 					}
 
 					echo "<$ero valign='top'>$tilrow[viesti]</$ero>";
-					echo "<$ero valign='top'>".tv1dateconv($tilrow["kerayspvm"])."</$ero>";
 					
+					if ($tilrow['keraysvko'] == 'V') {
+						echo "<$ero valign='top'>".t("Vko")." ".date("W", strtotime($tilrow["kerayspvm"]))."</$ero>";
+					}
+					else {
+						echo "<$ero valign='top'>".tv1dateconv($tilrow["kerayspvm"])."</$ero>";
+					}
+
+
 					if ($kukarow['resoluutio'] == 'I') {
-						echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";
+						if ($tilrow["toimvko"] == 'V') {
+							echo "<$ero valign='top'>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]))."</$ero>";
+						}
+						else {
+							echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";
+						}
+
 					}
 					
 					echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
@@ -551,6 +566,8 @@
 					if(min(lasku.clearing)='','N',if(min(lasku.clearing)='JT-TILAUS','J',if(min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
 					left(min(lasku.kerayspvm),10) kerayspvm,
 					left(min(lasku.toimaika),10) toimaika,
+					keraysvko,
+					toimvko,
 					varastopaikat.nimitys varastonimi,
 					varastopaikat.tunnus varastotunnus,
 					GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ',') otunnus,
@@ -630,10 +647,23 @@
 					echo "<$ero valign='top'>$tilrow[toim_nimi]</$ero>";
 				}
 
-				echo "<$ero valign='top'>".tv1dateconv($tilrow["kerayspvm"])."</$ero>";
+				
+				if ($tilrow['keraysvko'] == 'V') {
+					echo "<$ero valign='top'>".t("Vko")." ".date("W", strtotime($tilrow["kerayspvm"]))."</$ero>";
+				}
+				else {
+					echo "<$ero valign='top'>".tv1dateconv($tilrow["kerayspvm"])."</$ero>";
+				}
+				
 				
 				if ($kukarow['resoluutio'] == 'I') {
-					echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";
+					if ($tilrow["toimvko"] == 'V') {
+						echo "<$ero valign='top'>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]))."</$ero>";
+					}
+					else {
+						echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";
+					}
+					
 				}
 				
 				echo "<$ero valign='top'>$tilrow[toimitustapa]</$ero>";

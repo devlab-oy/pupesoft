@@ -1067,6 +1067,19 @@
 							if (trim($lasrow['sisviesti1']) != '') {
 								$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $lasrow['sisviesti1']);
 							}
+							
+							//tilausyhteyshenkilo asiakkaan_tilausnumero kohde
+							if (trim($lasrow['tilausyhteyshenkilo']) != '') {
+								$lasrow['sisviesti1'] .= "|"."Tilaaja: ".$lasrow['tilausyhteyshenkilo'];
+							}
+							
+							if (trim($lasrow['asiakkaan_tilausnumero']) != '') {
+								$lasrow['sisviesti1'] .= "|"."Tilaajan tilausnumero: ".$lasrow['asiakkaan_tilausnumero'];								
+							}
+							
+							if (trim($lasrow['kohde']) != '') {
+								$lasrow['sisviesti1'] .= "|"."Kohde: ".$lasrow['kohde'];								
+							}
 
 							///* Jos tämä on valuuttalasku *///
 							if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -1432,6 +1445,19 @@
 						//maksuehto tekstinä
 						$maksuehto 		= $masrow["teksti"]." ".$masrow["kassa_teksti"];
 						$kateistyyppi	= $masrow["kateinen"];
+						
+						//tilausyhteyshenkilo asiakkaan_tilausnumero kohde
+						if (trim($laskurow['tilausyhteyshenkilo']) != '') {
+							$laskurow['sisviesti1'] .= "\n"."Tilaaja: ".$laskurow['tilausyhteyshenkilo'];
+						}
+						
+						if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
+							$laskurow['sisviesti1'] .= "\n"."Tilaajan tilausnumero: ".$laskurow['asiakkaan_tilausnumero'];								
+						}
+						
+						if (trim($laskurow['kohde']) != '') {
+							$laskurow['sisviesti1'] .= "\n"."Kohde: ".$laskurow['kohde'];								
+						}
 
 						if ($yhtiorow['laskutyyppi'] == 3) {
 							require_once ("tulosta_lasku_simppeli.inc");

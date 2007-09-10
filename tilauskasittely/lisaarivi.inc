@@ -1131,6 +1131,19 @@
 
 				$hinta = $rarrow["ostohinta"];
 			}
+			
+			if ($laskurow['tila'] == 'O' and $ale == "") {
+				$query = "	SELECT alennus
+							FROM tuotteen_toimittajat
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$trow[tuoteno]'
+							and liitostunnus = '$laskurow[liitostunnus]'
+							LIMIT 1";
+				$rarres = mysql_query($query) or pupe_error($query);
+				$rarrow	 = mysql_fetch_array($rarres);
+
+				$ale = $rarrow["alennus"];
+			}
 
 			if ($laskurow['tila'] != 'O') {
 				if ($kukarow["extranet"] != '') {

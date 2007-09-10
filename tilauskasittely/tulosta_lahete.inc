@@ -856,7 +856,36 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(30, 30, t("email. ").$yhtiorow["email"], 	$thispage, $p);
 		$pdf->draw_text(30, 20, t("fax. ").$yhtiorow["fax"], 		$thispage, $p);
 	
-		$pdf->draw_paragraph(60,200,40,440, t("Tilausviite", $kieli).": ".$laskurow["viesti"], $thispage, $p);
+		//$pdf->draw_paragraph(60,200,40,440, t("Tilausviite", $kieli).": ".$laskurow["viesti"], $thispage, $p);
+		
+		//tilausyhteyshenkilo asiakkaan_tilausnumero kohde
+		if (trim($laskurow['tilausyhteyshenkilo']) != '') {
+			$laskurow['tilausyhteyshenkilo'] = "Tilaaja: ".$laskurow['tilausyhteyshenkilo'];
+			if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
+				$laskurow['tilausyhteyshenkilo'] .= " / ";
+			}		
+		}
+		else {
+			$laskurow['tilausyhteyshenkilo'] = "";
+		}
+		
+		if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
+			$laskurow['asiakkaan_tilausnumero'] = "Tilaajan tilausnumero: ".$laskurow['asiakkaan_tilausnumero'];								
+		}
+		else {
+			$laskurow['asiakkaan_tilausnumero'] = "";
+		}
+		
+		if (trim($laskurow['kohde']) != '') {
+			$laskurow['kohde'] = "Kohde: ".$laskurow['kohde'];								
+		}
+		else {
+			$laskurow['kohde'] = "";
+		}
+		
+		$pdf->draw_text(200, 50, $laskurow['tilausyhteyshenkilo'].$laskurow['asiakkaan_tilausnumero'], 	$thispage, $p);
+		$pdf->draw_text(200, 40, $laskurow['kohde'], 	$thispage, $p);
+		
 		$pdf->draw_paragraph(40,200,10,440, t("Kommentti", $kieli).":   ".$laskurow["comments"], $thispage, $p);
 		
 		if ($tots == 1 and $summa != 0) {	

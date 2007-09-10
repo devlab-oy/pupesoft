@@ -314,6 +314,10 @@ if ((int) $kukarow["kesken"] != 0) {
 	}
 
 	if ($laskurow["toim_maa"] == "") $laskurow["toim_maa"] = $yhtiorow['maa'];
+	
+	if ($laskurow['jtkielto'] != '') {
+		$yhtiorow["puute_jt_oletus"] = "";
+	}
 
 }
 
@@ -3397,7 +3401,7 @@ if ($tee == '') {
 						}
 					}
 
-					if ($row["var"] == "P" and $saako_jalkitoimittaa == 0) {
+					if ($row["var"] == "P" and $saako_jalkitoimittaa == 0 and $laskurow["jtkielto"] == "") {
 						echo "	<td class='back' valign='top' nowrap>
 									<form action='$PHP_SELF' method='post' name='jalkitoimita'>
 										<input type='hidden' name='toim' value='$toim'>

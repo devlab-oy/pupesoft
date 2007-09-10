@@ -6,12 +6,12 @@ $tulos_ulos_tiliointi = "";
 
 //Tehtaan tiliointiaineisto suoraan sql:lla
 $query = "	SELECT tilausrivi.alv,
-			tuote.tilino,
-			tuote.tilino_eu,
-			tuote.tilino_ei_eu,
-			tuote.kustp,
-			tuote.kohde,
-			tuote.projekti,
+			if(tuote.tilino != '', tuote.tilino, asiakas.tilino) as tilino,
+			if(tuote.tilino_eu != '', tuote.tilino_eu, asiakas.tilino) as tilino_eu,
+			if(tuote.tilino_ei_eu != '', tuote.tilino_ei_eu, asiakas.tilino) as tilino_ei_eu,
+			if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp,
+			if(tuote.kohde != '', tuote.kohde, asiakas.kohde) as kohde ,
+			if(tuote.projekti != '', tuote.projekti, asiakas.projekti) as projekti,
 			tuotteen_alv.tilino alvtilino,
 			tuotteen_alv.kustp alvkusp,
 			tuotteen_alv.kohde alvkohde,
@@ -27,9 +27,11 @@ $query = "	SELECT tilausrivi.alv,
 			GROUP_CONCAT(tilausrivi.tunnus SEPARATOR ',') tunnukset,
 			if(tilausrivi.alv >= 500 and tilausrivi.kpl < 0, 'KYLLA', 'EI') marginaaliostot
 			FROM tilausrivi
+			JOIN LASKU on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
 			LEFT JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 			LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio and tuotteen_alv.tuoteno = tilausrivi.tuoteno and tuotteen_alv.maa = '$lasku[maa]' and tuotteen_alv.maa != '')
 			LEFT JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = tilausrivi.yhtio and yhtion_toimipaikat.tunnus = '$lasku[yhtio_toimipaikka]')
+			LEFT JOIN asiakas ON (tilausrivi.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus)
 			WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
 			and tilausrivi.tyyppi		 = 'L'
 			and tilausrivi.yhtio		 = '$kukarow[yhtio]'

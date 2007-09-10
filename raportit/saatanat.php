@@ -221,10 +221,8 @@
 
 		if (mysql_num_rows($result) > 0) {
 
-			if ($eiliittymaa != 'ON' and file_exists("Spreadsheet/Excel/Writer.php")) {
-
-				include('Spreadsheet/Excel/Writer.php');
-
+			if ($eiliittymaa != 'ON' and include('Spreadsheet/Excel/Writer.php')) {
+				
 				//keksit‰‰n failille joku varmasti uniikki nimi:
 				list($usec, $sec) = explode(' ', microtime());
 				mt_srand((float) $sec + ((float) $usec * 100000));

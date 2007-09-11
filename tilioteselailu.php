@@ -1,6 +1,11 @@
 <?php
 	require "inc/parametrit.inc";
 
+	if ($lataa_tiedosto == 1) {
+		echo $file;
+		exit;
+	}
+	
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	//Olemme tulossa takain suorituksista
@@ -73,7 +78,7 @@
 		}
 
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
-
+		$txttieto = "";
 		if (mysql_num_rows($tiliotedataresult) == 0) {
 			echo "<font class='message'>".t("Tuollaista aineistoa ei löytynyt")."! $query</font><br>";
 			$tee = '';
@@ -91,8 +96,18 @@
 				if ($tiliotedatarow['tyyppi'] == 3) {
 					require "inc/naytaviitteet.inc";
 				}
+				
+				$txttieto .= $tiliotedatarow["tieto"];
 			}
 			echo "</table>";
+			
+			echo "<br><form>";
+			echo "<input type='hidden' name='file' value='$txttieto'>";
+			echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+			echo "<input type='hidden' name='kaunisnimi' value='$tiliotedatarow[tyyppi]-$tilino-$pvm.txt'>";
+			echo "<input type='submit' value='Tallenna tiedosto'>";
+			echo "</form>";
+						
 		}
 	}
 

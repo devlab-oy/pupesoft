@@ -5,7 +5,7 @@
 		echo $file;
 		exit;
 	}
-	
+
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	//Olemme tulossa takain suorituksista
@@ -20,7 +20,7 @@
 			require ("inc/footer.inc");
 			exit;
 		}
-		else { 
+		else {
 			$yritirow = mysql_fetch_array ($result);
 			$tee = 'T';
 			$tilino = $yritirow['tilino'];
@@ -57,7 +57,7 @@
 		else {
 			$pvm = $vv . "-" . $kk . "-" . $pp;
 		}
-		$tee = '';		
+		$tee = '';
 	}
 
 	if ($tee == 'T') {
@@ -78,7 +78,10 @@
 		}
 
 		$tiliotedataresult = mysql_query($query) or pupe_error($query);
+
 		$txttieto = "";
+		$txtfile  = "$tilino-$pvm.txt";
+
 		if (mysql_num_rows($tiliotedataresult) == 0) {
 			echo "<font class='message'>".t("Tuollaista aineistoa ei löytynyt")."! $query</font><br>";
 			$tee = '';
@@ -96,18 +99,18 @@
 				if ($tiliotedatarow['tyyppi'] == 3) {
 					require "inc/naytaviitteet.inc";
 				}
-				
+
 				$txttieto .= $tiliotedatarow["tieto"];
 			}
 			echo "</table>";
-			
+
 			echo "<br><form>";
 			echo "<input type='hidden' name='file' value='$txttieto'>";
 			echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
-			echo "<input type='hidden' name='kaunisnimi' value='$tiliotedatarow[tyyppi]-$tilino-$pvm.txt'>";
+			echo "<input type='hidden' name='kaunisnimi' value='$txtfile'>";
 			echo "<input type='submit' value='Tallenna tiedosto'>";
 			echo "</form>";
-						
+
 		}
 	}
 
@@ -153,7 +156,7 @@
 
 		$chk = array();
 		$chk[$tyyppi] = "selected";
-		
+
 		echo "</select></td></tr>
 				<tr>
 				<th>Laji</th>

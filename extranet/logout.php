@@ -1,10 +1,13 @@
 <?php
-	require ("parametrit.inc");
+	ob_start();
+	require ("inc/parametrit.inc");
 
-	$query = "UPDATE kuka set session='' where session='$session' and extranet!=''";
+	$query = "UPDATE kuka set session='', kesken='' where session='$session'";
 	$result = mysql_query($query) or pupe_error($query);
 
-	setcookie("pupesoft_session", "", time()-432000);
+	$bool = setcookie("pupesoft_session", "", time()-43200, parse_url($palvelin, PHP_URL_PATH));
+
+	ob_end_flush();
 
 	if ($toim=='change')
 	{
@@ -17,10 +20,17 @@
 				change.submit();
 			</script>";
 	}
-	else
-	{
-		echo "<script>
-				setTimeout(\"parent.location.href='$palvelin2'\",0);
-			</script>";
+	else {
+		
+		if($location != "") {
+			echo "<script>
+					setTimeout(\"parent.location.href='$location'\",0);
+					</script>";
+		}
+		else {
+			echo "<script>
+					setTimeout(\"parent.location.href='$palvelin2'\",0);
+					</script>";
+		}
 	}
 ?>

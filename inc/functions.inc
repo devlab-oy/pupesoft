@@ -1918,7 +1918,14 @@ if(!function_exists("remove_duplicates")) {
 
 if(!function_exists("enable_ajax")) {
 	function enable_ajax() {
-
+		global $palvelin2, $kukarow;
+		
+		if($kukarow["extranet"] != "") {
+			$imgUrl = $palvelin2."loading_blue_small.gif";
+		}
+		else {
+			$imgUrl = $palvelin2."pics/loading_blue_small.gif";
+		}
 		/*
 		t‰t‰ voidaan k‰ytt‰‰ koodista sitte n‰in:
 		echo "<a href='javascript:sndReq(\"123\", \"tuote.php?tee=Z&tuoteno=a2\")'>tuotekysely a2</a><br>";
@@ -1949,7 +1956,7 @@ if(!function_exists("enable_ajax")) {
 		http.onreadystatechange = handleResponse;
 		http.send(null);
 
-		document.getElementById(id).innerHTML = 'ladataan...';		
+		document.getElementById(id).innerHTML = "<img src='<?php echo $imgUrl; ?>' style='position: absolute; top: 50%; left: 50%;'>";
 
 		if (href) {
 			chgHref(href, 'javascript:toggleGroup("' + div + '")');

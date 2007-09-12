@@ -224,7 +224,11 @@
 
 		if (mysql_num_rows($result) != 1) {
 			$kentta = 'tuoteno';
-			$varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei löydy järjestelmästä")."!<br>";
+			
+			if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_myynti.php") === FALSE or $kukarow['extranet'] != '') {
+				$varaosavirhe .= t("VIRHE: Tuotenumeroa")." $tuoteno ".t("ei löydy järjestelmästä")."!<br>";
+			}
+		
 			$tee = "Y";
 		}
 		else {

@@ -631,11 +631,14 @@
 					if ($rajaus[$i] != "") {
 						$query = "	SELECT group_concat(tunnus) tunnus
 									FROM kuka
-									WHERE yhtio in ($yhtio) and nimi like '$rajaus[$i]%'";
+									WHERE yhtio in ($yhtio) 
+									and (nimi like '%$rajaus[$i]%' or kuka = '$rajaus[$i]')";
 						$osre = mysql_query($query) or pupe_error($query);
 						$osrow = mysql_fetch_array($osre);
-						
-						$lisa .= " and lasku.myyja in ($osrow[tunnus]) ";
+
+						if ($osrow["tunnus"] != "") {						
+							$lisa .= " and lasku.myyja in ($osrow[tunnus]) ";
+						}
 					}
 				}
 			}
@@ -839,14 +842,12 @@
 
 				$result = mysql_query($query) or pupe_error($query);
 
-				/*
-				Ei rajausta nyt koska se rajas liikaa
-
-				if (mysql_num_rows($result) > 4000) {
-					echo "<font class='message'>".t("Hakutulos oli liian suuri. Tee tarkempi rajaus")."!<br></font>";
-					$query = "";
+				$rivilimitti = 2000;
+				
+				if (mysql_num_rows($result) > $rivilimitti) {
+					echo "<br><font class='error'>".t("Hakutulos oli liian suuri")."!</font><br>";
+					echo "<font class='error'>".t("Tallenna/avaa tulos excelissä")."!</font><br><br>";
 				}
-				*/
 			}
 
 			if ($query != "") {
@@ -891,11 +892,11 @@
 					</tr>\n";
 				echo "</table><br>";
 
-				echo "<table><tr>";
+				if (mysql_num_rows($result) <= $rivilimitti) echo "<table><tr>";
 
 				// echotaan kenttien nimet
 				for ($i=0; $i < mysql_num_fields($result); $i++) { 
-					echo "<th>".t(mysql_field_name($result,$i))."</th>";
+					if (mysql_num_rows($result) <= $rivilimitti) echo "<th>".t(mysql_field_name($result,$i))."</th>";
 				}
 
 				if(isset($workbook)) {
@@ -903,21 +904,30 @@
 					$excelrivi++;
 				}
 
-				echo "</tr>\n";
-				$ulos .= "\r\n";
-
+				if (mysql_num_rows($result) <= $rivilimitti) echo "</tr>\n";
+				
 				$edluku 		= "x";
 				$valisummat 	= array();
 				$totsummat  	= array();
 				$tarra_aineisto = "";
+				
+				if (mysql_num_rows($result) > $rivilimitti) {
+					
+					require_once ('inc/ProgressBar.class.php');
+					$bar = new ProgressBar();
+					$elements = mysql_num_rows($result); // total number of elements to process
+					$bar->initialize($elements); // print the empty bar
+				}
 
 				while ($row = mysql_fetch_array($result)) {
+					
+					if (mysql_num_rows($result) > $rivilimitti) $bar->increase();
 
 					if ($osoitetarrat != "" and $row[0] > 0) {
 						$tarra_aineisto .= $row[0].",";
 					}
 
-					echo "<tr>";
+					if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
 					
 					// echotaan kenttien sisältö
 					for ($i=0; $i < mysql_num_fields($result); $i++) {
@@ -1103,7 +1113,7 @@
 						}
 
 						// Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
-						if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE) {
+						if ($gluku > 1 and $edluku != $row[0] and $edluku != 'x' and $piiyhteensa == '' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
 							$excelsarake = $myyntiind = $kateind = $nettokateind = 0;	
 							
 							foreach($valisummat as $vnim => $vsum) {
@@ -1127,7 +1137,7 @@
 									if ($valisummat["nettokateed"] <> 0) 	$vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
 								}
 								
-								echo "<td class='tumma' align='right'>$vsum</td>";
+								if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 								
 								if(isset($workbook)) {
 									$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
@@ -1137,7 +1147,7 @@
 								
 							}
 							$excelrivi++;
-							echo "</tr><tr>";
+							if (mysql_num_rows($result) <= $rivilimitti) echo "</tr><tr>";
 							
 							$valisummat = array();	
 						}
@@ -1145,21 +1155,21 @@
 						
 						// hoidetaan pisteet piluiksi!!
 						if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int' or substr(mysql_field_name($result, $i),0 ,4) == 'kate')) {
-							echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
+							if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f",$row[$i])."</td>";
 
 							if(isset($workbook)) {
 								$worksheet->writeNumber($excelrivi, $i, sprintf("%.02f",$row[$i]));
 							}
 						}
 						elseif (mysql_field_name($result, $i) == 'sarjanumero') {
-							echo "<td valign='top'>$row[$i]</td>";
+							if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", "\n", $row[$i])));
 							}
 						}
 						else {
-							echo "<td valign='top'>$row[$i]</td>";
+							if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
 							if(isset($workbook)) {
 								$worksheet->writeString($excelrivi, $i, $row[$i]);
@@ -1167,7 +1177,7 @@
 						}
 					}
 
-					echo "</tr>\n";
+					if (mysql_num_rows($result) <= $rivilimitti) echo "</tr>\n";
 					$excelrivi++;
 
 					for ($i=0; $i < mysql_num_fields($result); $i++) {
@@ -1200,7 +1210,7 @@
 				// jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
 				if ($gluku > 1 and $mukaan != 'tuote' and $piiyhteensa == '') {
 
-					echo "<tr>";
+					if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
 					
 					$excelsarake = $myyntiind = $kateind = $nettokateind = 0;	
 					
@@ -1225,7 +1235,7 @@
 							if ($valisummat["nettokateed"] <> 0) 	$vsum = round($valisummat["nettokatenyt"] / $valisummat["nettokateed"],2);
 						}
 						
-						echo "<td class='tumma' align='right'>$vsum</td>";
+						if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 						
 						if(isset($workbook)) {
 							$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
@@ -1235,10 +1245,10 @@
 						
 					}
 					$excelrivi++;
-					echo "</tr>";	
+					if (mysql_num_rows($result) <= $rivilimitti) echo "</tr>";	
 				}
 
-				echo "<tr>";
+				if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";
 				
 				$excelsarake = $myyntiind = $kateind = $nettokateind = 0;	
 				
@@ -1263,7 +1273,7 @@
 						if ($totsummat["nettokateed"] <> 0) 	$vsum = round($totsummat["nettokatenyt"] / $totsummat["nettokateed"],2);
 					}
 					
-					echo "<td class='tumma' align='right'>$vsum</td>";
+					if (mysql_num_rows($result) <= $rivilimitti) echo "<td class='tumma' align='right'>$vsum</td>";
 
 					if(isset($workbook)) {
 						$worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
@@ -1272,7 +1282,9 @@
 				}
 				$excelrivi++;
 				
-				echo "</tr></table>";
+				if (mysql_num_rows($result) <= $rivilimitti) echo "</tr></table>";
+
+				echo "<br>";
 				
 				if(isset($workbook)) {
 					// We need to explicitly close the workbook
@@ -1296,6 +1308,7 @@
 					echo "<br>";
 				}
 			}
+			echo "<br><br><hr>";
 		}
 
 		if ($lopetus == "") {

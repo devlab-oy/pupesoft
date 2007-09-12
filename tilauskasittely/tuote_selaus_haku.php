@@ -565,7 +565,7 @@
 							WHERE yhtio = '{$kukarow["yhtio"]}' and tuoteno = '{$row["tuoteno"]}'";
 				$orgres = mysql_query($query) or pupe_error($query);
 
-				if(mysql_num_rows($orgres)==0) {
+				if(mysql_num_rows($orgres)>0) {
 					$linkkilisa = "<div id='$id' class='popup' style='width: 300px'>
 					<table width='300px' align='center'>
 					<caption><font class='head'>Tuotteen originaalit</font></caption>

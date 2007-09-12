@@ -291,10 +291,10 @@ if ($tee == "MUOKKAA") {
 		}
 
 		if($poistakuva > 0) {
-			$query = " delete from liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and tyyppi='lasku' and liitostunnus='$tilausnumero' and tunnus = '$poistakuva'";
+			$query = " delete from liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos='lasku' and liitostunnus='$tilausnumero' and tunnus = '$poistakuva'";
 			$result = mysql_query($query) or pupe_error($query);
-			if(mysql_affected_rows($result)==0) {
-				echo "<font class='error'>".t("HEI!! Ei koitetan runkata systeemiä S***na!!")."</font><br>";
+			if(mysql_affected_rows()==0) {
+				echo "<font class='error'>".t("VIRHE!!! Koititte poistaa liitetiedoston jota ei ole!")."</font><br>";
 			}
 		}
 
@@ -780,13 +780,13 @@ if ($tee == "MUOKKAA") {
 			$query = "select * from liitetiedostot where yhtio='{$kukarow[yhtio]}' and liitos='lasku' and liitostunnus='$tilausnumero'";
 			$liiteres=mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($liiteres)>0) {
-				if ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2) {
-					$lisa = "&nbsp;&nbsp;&nbsp;&nbsp;<a href='#' onclick='submit();'>*poista*</a>";
-				}
-				else {
-					$lisa = "";
-				}
 				while ($liiterow=mysql_fetch_array($liiteres)) {
+					if ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2) {
+						$lisa = "&nbsp;&nbsp;&nbsp;&nbsp;<a href='matkalasku.php?tee=$tee&tilausnumero=$tilausnumero&poistakuva={$liiterow["tunnus"]}'>*".t("poista")."*</a>";
+					}
+					else {
+						$lisa = "";
+					}
 					echo "<a href='$PHP_SELF?tee=$tee&tilausnumero=$tilausnumero&id={$liiterow["tunnus"]}'>{$liiterow["selite"]}</a>$lisa <br>\n";
 				}
 			}
@@ -1147,7 +1147,7 @@ if ($tee == "") {
 	echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
 	echo "<input type='hidden' name='tee' value='UUSI'>";
 	echo "<table><tr>";
-	echo "<th>".t('Perusta uusi matkalasku asiakkaalle')."</th>";
+	echo "<th>".t("Perusta uusi matkalasku asiakkaalle")."</th>";
 	echo "<td class='back'><input type='text' size='30' name='ytunnus'></td>";
 	echo "<td class='back'><input type='Submit' value='".t("Perusta")."'></td>";
 	echo "</tr></table>";
@@ -1169,7 +1169,7 @@ if ($tee == "") {
 
 	if (mysql_num_rows($result)) {
 
-		echo "<br><br><font class='message'>".t("Hyväksynnässä olevat laskut")."</font><hr>";
+		echo "<br><br><font class='message'>".t("Hyväksynnässä olevat matkalaskut")."</font><hr>";
 
 		echo "<table><tr><th>".t("Käyttäjä")."</th><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><tr>";
 		while ($row=mysql_fetch_array($result)) {
@@ -1205,7 +1205,7 @@ if ($tee == "") {
 
 	if (mysql_num_rows($result)) {
 
-		echo "<br><br><font class='message'>".t("Avoimet matkalaskut")."</font><hr>";
+		echo "<br><br><font class='message'>".t("Avoimet matkalaskusi")."</font><hr>";
 
 		echo "<table><tr><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><tr>";
 		while ($row=mysql_fetch_array($result)) {
@@ -1238,7 +1238,7 @@ if ($tee == "") {
 
 	if (mysql_num_rows($result)) {
 
-		echo "<br><br><font class='message'>".t("Vanhat matkalaskut")."</font><hr>";
+		echo "<br><br><font class='message'>".t("Vanhat matkalaskusi")."</font><hr>";
 
 		echo "<table><tr><th>".t("Asiakas")."</th><th>".t("Viesti")."</th><th>".t("Summa")."</th><th>".t("Tila")."</th><tr>";
 		while ($row=mysql_fetch_array($result)) {

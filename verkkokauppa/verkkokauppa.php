@@ -25,7 +25,7 @@ if(!function_exists("menu")) {
 	function menu($osasto="", $merkki="") {
 		global $yhtiorow, $kukarow;
 		
-		$val = "<a href=\"javascript:sndReq('menu', 'verkkokauppa.php?tee=menu&osasto=&try=&merkki=')\">nollaa meny</a><br>";
+		$val = "";
 		
 		$query = "	SELECT selite osasto, selitetark nimi
 		 			FROM avainsana

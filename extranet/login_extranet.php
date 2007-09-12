@@ -62,7 +62,13 @@ if ($user != '') {
 
 				$bool = setcookie("pupesoft_session", $session, time()+43200, parse_url($palvelin, PHP_URL_PATH));
 				
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=$go'>";
+				if($location != "") {
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$location'>";
+				}
+				else {
+					echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$palvelin2?go=$go'>";
+				}
+				
 				exit;
 			}
 		}
@@ -131,6 +137,7 @@ if ($usea == '1') {
 		}
 		echo "<form action = 'login_extranet.php' method='post'>";
 		echo "<input type='hidden' name='go'       value='$go'>";
+		echo "<input type='hidden' name='location' value='$location'>";		
 		echo "<input type='hidden' name='user'     value='$user'>";
 		echo "<input type='hidden' name='salamd5'  value='$vertaa'>";
 		echo "<input type='hidden' name='yhtio'    value='$yrow[yhtio]'>";
@@ -146,6 +153,7 @@ else {
 			<table class='login'>
 				<form name='login' target='_top' action='index.php' method='post'>
 				<input type='hidden' name='go' value='$go'>
+				<input type='hidden' name='location' value='$location'>
 				<tr><td><font class='menu'>".t("Käyttäjätunnus",$browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>
 				<tr><td><font class='menu'>".t("Salasana",$browkieli).":</font></td><td><input type='password' name='salasana' size='15' maxlength='30'></td></tr>
 			</table>

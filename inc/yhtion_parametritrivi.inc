@@ -222,28 +222,14 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$sel1 = "";
-		$sel2 = "";
-		$sel3 = "";
-		$sel4 = "";
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
 
-		if ($trow[$i] == "") {
-			$sel1 = "selected";
-		}
-		elseif ($trow[$i] == "P") {
-			$sel2 = "selected";
-		}
-		elseif ($trow[$i] == "J") {
-			$sel3 = "selected";
-		}
-		elseif ($trow[$i] == "Q") {
-			$sel4 = "selected";
-		}
-
-		$ulos .= "<option value = ''  $sel1>".t("Puuterivej‰ ja JT-rivej‰ EI ker‰t‰")."</option>";
-		$ulos .= "<option value = 'P' $sel2>".t("Puuterivit ker‰t‰‰n")."</option>";
-		$ulos .= "<option value = 'J' $sel3>".t("JT-rivit ker‰t‰‰n")."</option>";
-		$ulos .= "<option value = 'Q' $sel4>".t("Puuterivit ja JT-rivit ker‰t‰‰n")."</option>";
+		$ulos .= "<option value = ''>".t("Puuterivej‰ ja JT-rivej‰ EI ker‰t‰")."</option>";
+		$ulos .= "<option value = 'P' $sel[P]>".t("Puuterivit ker‰t‰‰n")."</option>";
+		$ulos .= "<option value = 'J' $sel[J]>".t("JT-rivit ker‰t‰‰n")."</option>";
+		$ulos .= "<option value = 'Q' $sel[Q]>".t("Puuterivit ja JT-rivit ker‰t‰‰n")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -360,23 +346,16 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$sel1 = "";
-		$sel2 = "";
-		$sel3 = "";
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
 
-		if ($trow[$i] == "") {
-			$sel1 = "selected";
-		}
-		elseif ($trow[$i] == "Y") {
-			$sel2 = "selected";
-		}
-		elseif ($trow[$i] == "Z") {
-			$sel3 = "selected";
-		}
-
-		$ulos .= "<option value=''  $sel1>".t("Myyntitilaukselta ei voi luoda ostorivej‰")."</option>";
-		$ulos .= "<option value='Y' $sel2>".t("Myyntitilaukselta voi luoda ostorivej‰")."</option>";
-		$ulos .= "<option value='Z' $sel3>".t("Myyntitilaukselta voi luoda ostorivej‰ tai ostotilaus")."</option>";
+		$ulos .= "<option value=''>".t("Myyntitilaukselta ei voi luoda ostorivej‰")."</option>";
+		$ulos .= "<option value='Y' $sel[Y]>".t("Myyntitilaukselta voi luoda ostorivej‰ asiakkaalle ja varastoon")."</option>";
+		$ulos .= "<option value='V' $sel[V]>".t("Myyntitilaukselta voi luoda ostorivej‰ varastoon")."</option>";
+		$ulos .= "<option value='Z' $sel[Z]>".t("Myyntitilaukselta voi luoda ostorivej‰ tai ostotilaus asiakkaalle ja varastoon")."</option>";
+		$ulos .= "<option value='X' $sel[X]>".t("Myyntitilaukselta voi luoda ostorivej‰ tai ostotilaus varastoon")."</option>";
+		
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -386,28 +365,14 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$sel1 = "";
-		$sel2 = "";
-		$sel3 = "";
-		$sel4 = "";
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
 
-		if ($trow[$i] == "") {
-			$sel1 = "selected";
-		}
-		elseif ($trow[$i] == "P") {
-			$sel2 = "selected";
-		}
-		elseif ($trow[$i] == "J") {
-			$sel3 = "selected";
-		}
-		elseif ($trow[$i] == "Q") {
-			$sel4 = "selected";
-		}
-
-		$ulos .= "<option value = ''  $sel1>".t("Tilausta EI ker‰t‰ jos listalla on vain Puuterivej‰ JA/TAI JT-rivej‰")."</option>";
-		$ulos .= "<option value = 'P' $sel2>".t("Tilaus ker‰t‰‰n jos listalla on vain Puuterivej‰")."</option>";
-		$ulos .= "<option value = 'J' $sel3>".t("Tilaus ker‰t‰‰n jos listalla on vain JT-rivej‰")."</option>";
-		$ulos .= "<option value = 'Q' $sel4>".t("Tilaus ker‰t‰‰n jos listalla on vain Puuterivej‰ JA/TAI JT-rivej‰")."</option>";
+		$ulos .= "<option value = ''>".t("Tilausta EI ker‰t‰ jos listalla on vain Puuterivej‰ JA/TAI JT-rivej‰")."</option>";
+		$ulos .= "<option value = 'P' $sel[P]>".t("Tilaus ker‰t‰‰n jos listalla on vain Puuterivej‰")."</option>";
+		$ulos .= "<option value = 'J' $sel[J]>".t("Tilaus ker‰t‰‰n jos listalla on vain JT-rivej‰")."</option>";
+		$ulos .= "<option value = 'Q' $sel[Q]>".t("Tilaus ker‰t‰‰n jos listalla on vain Puuterivej‰ JA/TAI JT-rivej‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

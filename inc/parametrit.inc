@@ -128,77 +128,115 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 }
 // jos sessionia ei ole ja ei olla loginissa, mennään login ruutuun ja exit...
-elseif ($session == '' and $login != 'yes' and $extranet == '' and file_exists("login.php")) {
+elseif ($session == '' and $login != 'yes' and $extranet == '' and file_exists("login.php") and $phpnimi != 'verkkokauppa.php') {
 	require("login.php");
 	exit;
 }
 // jos sessionia ei ole ja ei olla extranet loginissa, mennään extranet login ruutuun ja exit...
-elseif ($session == '' and $login != 'yes') {
+elseif ($session == '' and $login != 'yes' and $phpnimi != 'verkkokauppa.php') {
 	require("login_extranet.php");
 	exit;
 }
 
 // jos meillä on sessio
-if ($session != '') {
-
-	$query = "	SELECT *
-				FROM kuka
-				WHERE session='" . mysql_real_escape_string($session) . "'";
-	$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
-
-	if (mysql_num_rows($result) != 1 or strlen($session) != 25) {
-		if (isset($nayta_pdf) and $nayta_pdf == 1) {
-			echo "Your browser does not seem to support cookies.";
-			exit;
-		}
-
-		$bool = setcookie("pupesoft_session", "", time()-432000, parse_url($palvelin, PHP_URL_PATH));
-
-		if ($bool === FALSE) {
-			echo "Your browser does not seem to support cookies.";
-		}
-		else {
-			echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
-		}
-		exit;
-	}
-	$kukarow = mysql_fetch_array($result);
-
- 	// Tänne pääsee aina!
-	if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
+if ($session != '' or $phpnimi == "verkkokauppa.php") {
+	
+	if($phpnimi == "verkkokauppa.php") {
+		//	Täällä ei ole mitään oikeuksia
+		$oikeurow = array();
 		
-		// No niin nyt meillä on käyttäjä, mutta saako hän tehdä tätä????
-		if(isset($toim)) {
-			// Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
-			$toimlisa = " and substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi))) ='$toim'";
+		//	Kirjataan verkkokauppakäyttäjä
+		if($session == "") {
+			$kukarow["kuka"] 	= "www";
+			$kukarow["nimi"] 	= "Verkkokauppa";
+			$kukarow["yhtio"] 	= $oletusyhtio;	
 		}
 		else {
-			$toimlisa = "";
-		}
+			$query = "	SELECT *
+						FROM kuka
+						WHERE session='" . mysql_real_escape_string($session) . "'";
+			$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
 
-		$query = "	SELECT *, substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi))) 
-					FROM oikeu
-					WHERE yhtio = '$kukarow[yhtio]'
-					and kuka = '$kukarow[kuka]'
-					and nimi = '$phpnimi'
-					$toimlisa";
+			if (mysql_num_rows($result) != 1 or strlen($session) != 25) {
+				if (isset($nayta_pdf) and $nayta_pdf == 1) {
+					echo "Your browser does not seem to support cookies.";
+					exit;
+				}
+
+				$bool = setcookie("pupesoft_session", "", time()-432000, parse_url($palvelin, PHP_URL_PATH));
+
+				if ($bool === FALSE) {
+					echo "Your browser does not seem to support cookies.";
+				}
+				else {
+					echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
+				}
+				exit;
+			}
+			$kukarow = mysql_fetch_array($result);			
+		}
+		
+	}
+	else {
+		$query = "	SELECT *
+					FROM kuka
+					WHERE session='" . mysql_real_escape_string($session) . "'";
 		$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
 
-		if (mysql_num_rows($result) == 0) {
+		if (mysql_num_rows($result) != 1 or strlen($session) != 25) {
+			if (isset($nayta_pdf) and $nayta_pdf == 1) {
+				echo "Your browser does not seem to support cookies.";
+				exit;
+			}
 
-			echo "<table width='100%' height='70%'>
-					<tr><td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>
-					<img src='http://www.pupesoft.com/pupesoft.gif'><br><br>";
-			if (strlen($toim) == 0) {
-				echo "Käyttäjä $kukarow[kuka] pyysi toimintoa $phpnimi, joka on kielletty!";
+			$bool = setcookie("pupesoft_session", "", time()-432000, parse_url($palvelin, PHP_URL_PATH));
+
+			if ($bool === FALSE) {
+				echo "Your browser does not seem to support cookies.";
 			}
 			else {
-				echo "Käyttäjä $kukarow[kuka] pyysi toimintoa $phpnimi alamenu $toim, joka on kielletty!";
+				echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
 			}
-			echo "</td></tr></table>";
 			exit;
 		}
-		$oikeurow = mysql_fetch_array($result);
+		$kukarow = mysql_fetch_array($result);
+
+	 	// Tänne pääsee aina!
+		if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
+
+			// No niin nyt meillä on käyttäjä, mutta saako hän tehdä tätä????
+			if(isset($toim)) {
+				// Luetaan alanimeä vain ekaan &-merkkiin saakka koska joskus kantaan on tallennettu myös jotain lisätietoja toisessa muuttujassa
+				$toimlisa = " and substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi))) ='$toim'";
+			}
+			else {
+				$toimlisa = "";
+			}
+
+			$query = "	SELECT *, substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi))) 
+						FROM oikeu
+						WHERE yhtio = '$kukarow[yhtio]'
+						and kuka = '$kukarow[kuka]'
+						and nimi = '$phpnimi'
+						$toimlisa";
+			$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
+
+			if (mysql_num_rows($result) == 0) {
+
+				echo "<table width='100%' height='70%'>
+						<tr><td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>
+						<img src='http://www.pupesoft.com/pupesoft.gif'><br><br>";
+				if (strlen($toim) == 0) {
+					echo "Käyttäjä $kukarow[kuka] pyysi toimintoa $phpnimi, joka on kielletty!";
+				}
+				else {
+					echo "Käyttäjä $kukarow[kuka] pyysi toimintoa $phpnimi alamenu $toim, joka on kielletty!";
+				}
+				echo "</td></tr></table>";
+				exit;
+			}
+			$oikeurow = mysql_fetch_array($result);
+		}
 	}
 
 	$query = "	SELECT *
@@ -242,12 +280,13 @@ if ($session != '') {
 			}
 	 	}
 	}
-
+	
 	// haetaan jotain tarpeellisia funktioita mukaan..
 	require ("functions.inc");
 
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
+	
 
 	if (isset($nayta_pdf) and $nayta_pdf == 1) {
 		header("Content-Type: application/pdf");

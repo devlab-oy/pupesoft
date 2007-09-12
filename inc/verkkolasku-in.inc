@@ -647,9 +647,9 @@
 
 						$summa = (float) $rsumma[$i];
 
- 						//Hyvityslasku
-						if ($laskun_tyyppi == "381") {
-							$summa = $summa*-1;
+ 						//Hyvityslasku tai summa alle nolla
+						if ($laskun_tyyppi == "381" or $omasumma < 0) {
+							$summa = $summa * -1;
 						}
 
 						//if (strlen($vat[$i]) == 0) $vat[$i]=$oletusalvi;

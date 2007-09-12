@@ -81,7 +81,7 @@ if ($eipaikkoja == 0) {
 			echo "<input type='hidden' name='tee' value='varastoon'>";
 			echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 			echo "<input type='submit' value='".t("Hyvältä näyttää, vie varastoon!")."'>";
-			echo "</form>";
+			echo "</form><br><br>";
 
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";

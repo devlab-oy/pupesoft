@@ -6,7 +6,7 @@
 						ORDER BY toimaika, tunnus";
 		}
 		//nämä ovat ostoreskontran laskuja ja sillon pitää löytää keikan perusteella rivit
-		elseif ($trow['tila'] == 'Y' or $trow['tila'] == 'M' or $trow['tila'] == 'P') {
+		elseif (in_array($trow['tila'], array('H','Y','M','P','Q'))) {
 			$query = "	SELECT laskunro
 						FROM lasku
 						WHERE vanhatunnus = '$tunnus' and yhtio='$kukarow[yhtio]' and tila = 'K' limit 1";

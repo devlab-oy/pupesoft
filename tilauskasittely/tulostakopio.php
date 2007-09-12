@@ -1654,8 +1654,21 @@
 					$x[1] = 580;
 					$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
 					$pdf->draw_line($x, $y, $page[$sivu], $rectparam);
-
+					
 					loppu($page[$sivu], 1);
+					
+					//katotaan onko laskutus nouto
+					$query = "  SELECT toimitustapa.nouto, maksuehto.kateinen
+								FROM lasku 
+								JOIN toimitustapa ON lasku.yhtio = toimitustapa.yhtio and lasku.toimitustapa = toimitustapa.selite
+								JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+								WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$laskurow[tunnus]'
+								and toimitustapa.nouto != '' and maksuehto.kateinen = ''";
+					$kures = mysql_query($query) or pupe_error($query);
+					
+					if (mysql_num_rows($kures) > 0) {
+						kuittaus();
+					}
 
 					if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 						alvierittely($page[$sivu]);

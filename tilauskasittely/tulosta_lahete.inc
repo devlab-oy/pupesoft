@@ -899,6 +899,20 @@ if (!function_exists('loppu')) {
 	}
 }
 
+if (!function_exists('kuittaus')) {
+	function kuittaus () {
+		global $pdf, $laskurow, $viite, $p, $summa, $rectparam, $kieli, $yhtiorow;
+		
+		$sivu++;
+
+		$page[$sivu] = alku();
+		$thispage    = $page[$sivu];
+		
+		$pdf->draw_text(50, 400, t("Allekirjoitus").": _____________________", 	$thispage, $p);
+		$pdf->draw_text(300, 400, t("Nimenselvennys").": _____________________", 	$thispage, $p);
+	}
+}
+
 if (!function_exists('print_pdf')) {
 	function print_pdf ($komento) {
 		global $pdf, $kukarow, $yhtiorow, $kateinen, $returnvalue, $kieli, $tee;

@@ -257,11 +257,16 @@
 					echo "<$ero valign='top'>$tilrow[tunnus]</$ero>";
 					echo "<$ero valign='top'>$tilrow[ytunnus]</$ero>";
 
+					$nimitarklisa = "";
+
 					if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
 						echo "<$ero valign='top'>$tilrow[nimi]</$ero>";
 					}
 					else {
-						echo "<$ero valign='top'>$tilrow[toim_nimi]</$ero>";
+						if ($tilrow['toim_nimitark'] != '') {
+							$nimitarklisa = ", $tilrow[toim_nimitark]";
+						}
+						echo "<$ero valign='top'>$tilrow[toim_nimi]$nimitarklisa</$ero>";
 					}
 
 					echo "<$ero valign='top'>$tilrow[viesti]</$ero>";

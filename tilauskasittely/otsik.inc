@@ -346,7 +346,7 @@
 			}
 			elseif ($asiakasid != "" and $tiedot_laskulta == "") {
 				// asiakashaussa pit‰‰ olla vakio columni kohdistettu, jonka arvo on O ett‰ saadaan OLETUS toimitustapa haettua asiakashaunkin yhteydess‰
-				$squery = "	SELECT *, tunnus liitostunnus, 'O' kohdistettu
+				$squery = "	SELECT *, tunnus liitostunnus, 'O' kohdistettu, '' kohde
 							FROM asiakas
 							WHERE tunnus = '$asiakasid'";
 			}

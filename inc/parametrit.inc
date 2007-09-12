@@ -147,9 +147,10 @@ if ($session != '' or $phpnimi == "verkkokauppa.php") {
 		
 		//	Kirjataan verkkokauppakäyttäjä
 		if($session == "") {
-			$kukarow["kuka"] 	= "www";
-			$kukarow["nimi"] 	= "Verkkokauppa";
-			$kukarow["yhtio"] 	= $oletusyhtio;	
+			$kukarow["kuka"] 		= "www";
+			$kukarow["nimi"] 		= "Verkkokauppa";
+			$kukarow["extranet"] 	= "X";			
+			$kukarow["yhtio"] 		= $oletusyhtio;	
 		}
 		else {
 			$query = "	SELECT *

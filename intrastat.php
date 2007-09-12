@@ -63,6 +63,13 @@
 			$where2 = " and (lasku.vienti = 'E' or lasku.ultilno = '-1') ";
 			$where3 = " and lasku.ultilno = '-1' ";
 		}
+		
+		if ($lisavar == "S") {
+			$lisavarlisa = "  and (tilausrivi.perheid2=0 or tilausrivi.perheid2=tilausrivi.tunnus) ";
+		}
+		else {
+			$lisavarlisa = "";	
+		}
 
 		// t‰ss‰ tulee sitten nimiketietueet unionilla
 		$query = "	(SELECT
@@ -84,10 +91,11 @@
 					/ lasku.summa) * lasku.bruttopaino), 0), 1) as paino,
 					if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 					group_concat(lasku.tunnus) as kaikkitunnukset,
+					group_concat(distinct tilausrivi.perheid2) as perheid2set,
 					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
 					'Keikka' as tapa
 					FROM lasku use index (yhtio_tila_mapvm)
-					JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
+					JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
 					WHERE lasku.kohdistettu = 'X'
@@ -116,10 +124,11 @@
 					if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
 					if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 					group_concat(lasku.tunnus) as kaikkitunnukset,
+					group_concat(distinct tilausrivi.perheid2) as perheid2set,
 					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
 					'Lasku' as tapa					
 					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
 					WHERE lasku.tila = 'L'
@@ -148,10 +157,11 @@
 					if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
 					round(sum(tilausrivi.rivihinta), 0) rivihinta,
 					group_concat(lasku.tunnus) as kaikkitunnukset,
+					group_concat(distinct tilausrivi.perheid2) as perheid2set,
 					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,
 					'Siirtolista' as tapa
 					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0
+					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
 					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
 					WHERE lasku.tila = 'G'
@@ -164,7 +174,6 @@
 					GROUP BY tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
 
 					ORDER BY laskunro, tuoteno ";
-
 		$result = mysql_query($query) or pupe_error($query);
 
 		$nim     = "";
@@ -188,6 +197,11 @@
 		$ulos .= "<th>Paino</th>";
 		$ulos .= "<th>Toinen paljous</th>";
 		$ulos .= "<th>Kpl</th>";
+		
+		if ($lisavar == "S") {
+			$ulos .= "<th>Tehdaslis‰varusteet</th>";
+		}
+		
 		$ulos .= "<th>Virhe</th>";
 		$ulos .= "</tr>";
 
@@ -246,6 +260,42 @@
 			// tehd‰‰n tarkistukset
 			require ("inc/intrastat_tarkistukset.inc");
 
+			if ($row["perheid2set"] != "0" and $lisavar == "S") {
+				$query  = "	SELECT ";
+				
+				if ($row["tapa"] != "Keikka") {
+					$query .= "	if (round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi *
+								(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
+								/ lasku.summa) * lasku.bruttopaino), 0) > 0.5,
+								round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi *
+								(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
+								/ lasku.summa) * lasku.bruttopaino), 0), 1) as paino,
+								if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta";
+				}
+				elseif ($row["tapa"] != "Lasku") {
+					$query .= "	if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
+								if(round(sum(tilausrivi.rivihinta),0) > 0.50,round(sum(tilausrivi.rivihinta),0), 1) rivihinta";
+				}
+				else {
+					$query .= "	if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
+								round(sum(tilausrivi.rivihinta), 0) rivihinta";
+				}
+
+				$query .= "	FROM tilausrivi use index (yhtio_perheid2)
+							JOIN lasku ON tilausrivi.otunnus = lasku.tunnus and tilausrivi.yhtio = lasku.yhtio 
+							JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.kpl > 0
+							and tilausrivi.perheid2 > 0
+							and tilausrivi.perheid2 != tilausrivi.tunnus
+							and tilausrivi.perheid2 in ($row[perheid2set])";
+				$lisavarres = mysql_query($query) or pupe_error($query);
+				$lisavarrow = mysql_fetch_array($lisavarres);
+				
+				$row["paino"] 		+= $lisavarrow["paino"];
+				$row["rivihinta"] 	+= $lisavarrow["rivihinta"];
+			}
+				
 			// 3. Nimiketietue
 			$nim .= sprintf ('%-3.3s', 		"NIM");																								//tietuetunnus
 			$nim .= sprintf ('%05d', 		$lask);																								//j‰rjestysnumero
@@ -285,20 +335,30 @@
 
 			// tehd‰‰n kaunista ruutukamaa
 			$ulos .= "<tr>";
-			$ulos .= "<td>".$row["laskunro"]."</td>";
-			$ulos .= "<td>".$row["tuoteno"]."</td>";
-			$ulos .= "<td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
-			$ulos .= "<td>".$row["tullinimike1"]."</td>";
-			$ulos .= "<td>".$row["kauppatapahtuman_luonne"]."</td>";
-			$ulos .= "<td>".$row["alkuperamaa"]."</td>";
-			$ulos .= "<td>".$row["maa_lahetys"]."</td>";
-			$ulos .= "<td>".$row["maa_maara"]."</td>";
-			$ulos .= "<td>".$row["kuljetusmuoto"]."</td>";
-			$ulos .= "<td align='right'>".$row["rivihinta"]."</td>";
-			$ulos .= "<td align='right'>".$row["paino"]."</td>";
-			$ulos .= "<td>".$row["su"]."</td>";
-			$ulos .= "<td align='right'>".$row["kpl"]."</td>";
-			$ulos .= "<td><font class='error'>".$virhetxt."</font></td>";
+			$ulos .= "<td valign='top'>".$row["laskunro"]."</td>";
+			$ulos .= "<td valign='top'>".$row["tuoteno"]."</td>";
+			$ulos .= "<td valign='top'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
+			$ulos .= "<td valign='top'>".$row["tullinimike1"]."</td>";
+			$ulos .= "<td valign='top'>".$row["kauppatapahtuman_luonne"]."</td>";
+			$ulos .= "<td valign='top'>".$row["alkuperamaa"]."</td>";
+			$ulos .= "<td valign='top'>".$row["maa_lahetys"]."</td>";
+			$ulos .= "<td valign='top'>".$row["maa_maara"]."</td>";
+			$ulos .= "<td valign='top'>".$row["kuljetusmuoto"]."</td>";
+			$ulos .= "<td valign='top' align='right'>".$row["rivihinta"]."</td>";
+			$ulos .= "<td valign='top' align='right'>".$row["paino"]."</td>";
+			$ulos .= "<td valign='top'>".$row["su"]."</td>";
+			$ulos .= "<td valign='top' align='right'>".$row["kpl"]."</td>";
+			
+			if ($lisavar == "S") {
+				if ($row["perheid2set"] != "0") {
+					$ulos .= "<td valign='top'>Tehdaslis‰varusteet:<br>Paino: $lisavarrow[paino]<br>Arvo: $lisavarrow[rivihinta]</td>";
+				}
+				else {
+					$ulos .= "<td valign='top'></td>";
+				}
+			}
+			
+			$ulos .= "<td valign='top'><font class='error'>".$virhetxt."</font></td>";
 			$ulos .= "</tr>";
 
 			// tehd‰‰n tilastoarvolistausta
@@ -356,6 +416,11 @@
 		$ulos .= "<th></th>";
 		$ulos .= "<th>$totkpl</th>";
 		$ulos .= "<th></th>";
+		
+		if ($lisavar == "S") {
+			$ulos .= "<th></th>";
+		}
+		
 		$ulos .= "</tr>";
 		$ulos .= "</table>";
 
@@ -488,6 +553,7 @@
 	$sel1[$outputti] = "SELECTED";
 	$sel2[$tapa]     = "SELECTED";
 	$sel3[$lahetys]  = "SELECTED";
+	$sel4[$lisavar]  = "SELECTED";
 
 	echo "<br>
 
@@ -528,6 +594,14 @@
 			<option value='mina' $sel3[mina]>L‰het‰ aineisto vain minulle</option>
 			<option value='tuli' $sel3[tuli]>L‰het‰ aineisto vain tulliin</option>
 			<option value='mole' $sel3[mole]>L‰het‰ aineisto tulliin sek‰ minulle</option>
+			</select>
+		</tr>
+		<tr>
+			<th>Tehdaslis‰varusteet</th>
+			<td>
+			<select name='lisavar'>
+			<option value='O' $sel4[O]>Omilla riveill‰‰n</option>
+			<option value='S' $sel4[S]>Yhdistet‰‰n laitteeseen</option>
 			</select>
 		</tr>
 	</table>

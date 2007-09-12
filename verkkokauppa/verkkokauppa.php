@@ -159,64 +159,69 @@ if($tee == "tilaa") {
 
 if($tee == "tilatut") {
 	
-	$ulos = "<font class='head'>".t("Tilauksen tuotteet")." {$kukarow["kesken"]}</font><br>
-			<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&merkki=$merkki')\">Takaisin selaimelle</a>&nbsp;&nbsp;";
-			
-	$query = "	SELECT count(*) rivei
-				FROM tilausrivi 
-				WHERE yhtio = '{$kukarow["yhtio"]}' and otunnus = '{$kukarow["kesken"]}' and tyyppi = 'L'";
-	$result = mysql_query($query) or pupe_error($query);
-	$row = mysql_fetch_array($result);
-	
-	if($row["rivei"] > 0) {
-		$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilaa')\";>Tilaa tuotteet</a>&nbsp;&nbsp;";
-		$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&merkki=$merkki')\" disabled>Mitätöi tilaus</a>";
-	}		
-	
-	$ulos .= "<br><br>";
-
-
-	$query = "	SELECT tuoteno, nimitys, tilausrivi.hinta, round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta, (varattu+jt) varattu, tilausrivi.tunnus
-				FROM tilausrivi
-				JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
-				otunnus = '$kukarow[kesken]' and
-				tyyppi = 'L'
-				and var != 'P'
-				GROUP BY tilausrivi.tunnus";
-	$riviresult = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($riviresult) > 0) {
-		$ulos .=  "<table style = 'width: 600px;'>
-					<tr>
-						<th>Tuoteno</th>
-						<th>Nimitys</th>
-						<th>Määrä</th>
-						<th>Yksikköhinta</th>
-						<th>Rivihinta</th>
-						<td class='back'></td>
-					</tr>";
-
-		
-
-		while ($koririvi = mysql_fetch_array($riviresult)) {
-
-			$ulos .= "<tr>
-						<td>$koririvi[tuoteno]</td>
-						<td>$koririvi[nimitys]</td>
-						<td>$koririvi[varattu]</td>
-						<td>$koririvi[hinta]</td>
-						<td>$koririvi[rivihinta]</td>
-						<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&merkki=$merkki')\">Poista</a></td>
-					</tr>";
-
-		}
+	if($kukarow["kesken"] == 0) {
+		$tee = "selaa";
 	}
 	else {
-		$ulos .= "<font class='message'>Tilauksessa ei ole tavaraa.</font><br>";
+		$ulos = "<font class='head'>".t("Tilauksen tuotteet")." {$kukarow["kesken"]}</font><br>
+				<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&merkki=$merkki')\">Takaisin selaimelle</a>&nbsp;&nbsp;";
+
+		$query = "	SELECT count(*) rivei
+					FROM tilausrivi 
+					WHERE yhtio = '{$kukarow["yhtio"]}' and otunnus = '{$kukarow["kesken"]}' and tyyppi = 'L'";
+		$result = mysql_query($query) or pupe_error($query);
+		$row = mysql_fetch_array($result);
+
+		if($row["rivei"] > 0) {
+			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilaa')\";>Tilaa tuotteet</a>&nbsp;&nbsp;";
+			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&merkki=$merkki')\" disabled>Mitätöi tilaus</a>";
+		}		
+
+		$ulos .= "<br><br>";
+
+
+		$query = "	SELECT tuoteno, nimitys, tilausrivi.hinta, round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta, (varattu+jt) varattu, tilausrivi.tunnus
+					FROM tilausrivi
+					JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
+					otunnus = '$kukarow[kesken]' and
+					tyyppi = 'L'
+					and var != 'P'
+					GROUP BY tilausrivi.tunnus";
+		$riviresult = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($riviresult) > 0) {
+			$ulos .=  "<table style = 'width: 600px;'>
+						<tr>
+							<th>Tuoteno</th>
+							<th>Nimitys</th>
+							<th>Määrä</th>
+							<th>Yksikköhinta</th>
+							<th>Rivihinta</th>
+							<td class='back'></td>
+						</tr>";
+
+
+
+			while ($koririvi = mysql_fetch_array($riviresult)) {
+
+				$ulos .= "<tr>
+							<td>$koririvi[tuoteno]</td>
+							<td>$koririvi[nimitys]</td>
+							<td>$koririvi[varattu]</td>
+							<td>$koririvi[hinta]</td>
+							<td>$koririvi[rivihinta]</td>
+							<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&merkki=$merkki')\">Poista</a></td>
+						</tr>";
+
+			}
+		}
+		else {
+			$ulos .= "<font class='message'>Tilauksessa ei ole tavaraa.</font><br>";
+		}
+
+		die($ulos);		
 	}
-	
-	die($ulos);
 }
 
 if($tee == "selaa") {
@@ -249,9 +254,13 @@ if($tee == "selaa") {
 	$request 				= "true"; 
 
 	require("tuote_selaus_haku.php");
-
-	$dada = "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$osasto&merkki=$merkki')\">Tilauksen tuotteet</a><br><br>".ob_get_contents();
+	
+	$dada = ob_get_contents();	
 	ob_end_clean();
+	
+	if($kukarow["kesken"] > 0) {
+		$dada = "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$osasto&merkki=$merkki')\">Tilauksen tuotteet</a><br><br>".$dada;
+	}
 	
 	die($dada);
 }

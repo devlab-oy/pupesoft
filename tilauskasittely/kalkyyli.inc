@@ -4,7 +4,13 @@
 file_put_contents("/tmp/$kukarow[yhtio]-keikka.lock", "$otunnus");
 
 // katsotaan, että kaikilla tuotteilla on joku varastopaikka
-$query  = "select * from tilausrivi where uusiotunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+$query  = "	SELECT * 
+			FROM tilausrivi 
+			WHERE yhtio = '$kukarow[yhtio]' and 
+			uusiotunnus = '$otunnus' and
+			varattu <> 0 and 
+			tyyppi = 'O' and 
+			netto = ''";
 $result = mysql_query($query) or pupe_error($query);
 
 $eipaikkoja = 0;  // apumuuttuja

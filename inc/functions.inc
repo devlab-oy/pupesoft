@@ -1919,13 +1919,14 @@ if(!function_exists("remove_duplicates")) {
 if(!function_exists("enable_ajax")) {
 	function enable_ajax() {
 		global $palvelin2, $kukarow;
-		
+
 		if($kukarow["extranet"] != "") {
 			$imgUrl = $palvelin2."loading_blue_small.gif";
 		}
 		else {
 			$imgUrl = $palvelin2."pics/loading_blue_small.gif";
 		}
+
 		/*
 		t‰t‰ voidaan k‰ytt‰‰ koodista sitte n‰in:
 		echo "<a href='javascript:sndReq(\"123\", \"tuote.php?tee=Z&tuoteno=a2\")'>tuotekysely a2</a><br>";
@@ -1950,18 +1951,22 @@ if(!function_exists("enable_ajax")) {
 
 	var http = createRequestObject();
 
-	function sndReq(div, urli, href) {
+	function sndReq(div, urli, href, load) {
 		id = div;
 		http.open('get', urli);
 		http.onreadystatechange = handleResponse;
 		http.send(null);
 
-		document.getElementById(id).innerHTML = "<img src='<?php echo $imgUrl; ?>' style='position: absolute; top: 50%; left: 50%;'>";
+		if (load) {
+			document.getElementById(id).innerHTML = "<div style='filter:alpha(opacity=0); -moz-opacity:0.7; opacity: 0.7; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0c0c0c;'><img style='position: absolute; top: 50%; left: 50%;' src='<?php echo $imgUrl; ?>'></div>";
+		}
 
 		if (href) {
-			chgHref(href, 'javascript:toggleGroup("' + div + '")');
+			chgHref(href, 'javascript:toggleGroup("' + id + '")');
 		}
+
 		document.getElementById(id).style.display = 'block';
+
 	}
 
 	function handleResponse() {
@@ -1984,60 +1989,10 @@ if(!function_exists("enable_ajax")) {
 		}
 	}
 
-	//	Form Submittia varten
-	var http_request = false;
-	function makeRequest(url, parameters) {
-		http_request = false;
-		if (window.XMLHttpRequest) { // Mozilla, Safari,...
-			http_request = new XMLHttpRequest();
-			if (http_request.overrideMimeType) {
-				// set type accordingly to anticipated content type
-				//http_request.overrideMimeType('text/xml');
-				http_request.overrideMimeType('text/html');
-			}
-		} 
-		else if (window.ActiveXObject) { // IE
-			try {
-				http_request = new ActiveXObject("Msxml2.XMLHTTP");
-			} 
-			catch (e) {
-				try {
-					http_request = new ActiveXObject("Microsoft.XMLHTTP");
-            		}
-					catch (e) {
-						
-				}
-			}
-		}
-      
-		if (!http_request) {
-			alert('Cannot create XMLHTTP instance');
-			return false;
-		}
-		
-		http_request.onreadystatechange = alertContents;
-		http_request.open('GET', url + parameters, true);
-		http_request.send(null);
-	}
+	function get(div, urli, minne, href, load) {
 
-	function alertContents() {
-		if (http_request.readyState == 4) {
-			if (http_request.status == 200) {
-				result = http_request.responseText;
-				if(document.getElementById('returnMsg')) {
-					document.getElementById('returnMsg').innerHTML = result;
-				}
-			}
-			else {
-				alert('There was a problem with the request.');
-			}
-		}
-	}
-
-	function get(url, id) {
-		
-		obj = document.getElementById(id);
-		getstr = '?ohje=off&';
+		obj = document.getElementById(div);
+		getstr = "&";
 
  		for (i=0; i<obj.length; i++) {
 			if (obj.elements[i].tagName == "INPUT") {
@@ -2047,7 +2002,7 @@ if(!function_exists("enable_ajax")) {
 					//	Tyhjennet‰‰n..
 					if(obj.elements[i].type == "text") {
 						obj.elements[i].value = '';
-					}					
+					}
 				}
 				else if (obj.elements[i].type == "checkbox") {
 					if (obj.elements[i].checked) {
@@ -2066,13 +2021,12 @@ if(!function_exists("enable_ajax")) {
 			if (obj.elements[i].tagName == "SELECT") {
 				var sel = obj.elements[i];
 				getstr += sel.name + "=" + sel.options[sel.selectedIndex].value + "&";
-			}			
-		}		
+			}
+		}
 
-		makeRequest(url, getstr);
-	
+		sndReq(minne, urli + getstr + '&ohje=off', href, load);
 	}
-	
+
 //-->
 </script>
 
@@ -2107,7 +2061,7 @@ function yllapito(url, tag, submitOnSelect) {
 			case 'asiakkaan_positio':
 				width=380;
 				height=450;
-				break;	
+				break;
 			case 'asiakkaan_kohde':
 				width=400;
 				height=400;
@@ -2130,21 +2084,21 @@ function yllapito(url, tag, submitOnSelect) {
 			else {
 				//alert('DONT FUCK THE SYSTEM \"'+valinta+'\"');
 			}
-		}		
+		}
 	}
 	else {
 
-		// Onko meill‰ muokkaus?		
+		// Onko meill‰ muokkaus?
 		sain='en';
 		for(i=0;i<=select.options.length-1;i++) {
 			if(select.options[i].value.substring(0,7)=='muokkaa') {
 				if(valinta=='') {
 					select.options[i]=null;
-					sain='JOO';					
+					sain='JOO';
 				}
 				else {
 					select.options[i].value='muokkaa#'+valinta;
-					sain='JOO';					
+					sain='JOO';
 				}
 			}
 		}
@@ -2196,7 +2150,7 @@ function suljeYllapito(sID,value,text) {
 		newOpt.text=text;
 		newOpt.value=value;
 
-		//	Jos p‰ivitettiin yhteyshenkilˆit‰ meid‰n pit‰‰ list‰t‰ ne kaikkiin valikkoihin..			
+		//	Jos p‰ivitettiin yhteyshenkilˆit‰ meid‰n pit‰‰ list‰t‰ ne kaikkiin valikkoihin..
 		sela='EI'
 		if(sID=='yhteyshenkilo_kaupallinen') {
 			sela=window.opener.document.getElementById('yhteyshenkilo_tekninen');
@@ -2206,7 +2160,7 @@ function suljeYllapito(sID,value,text) {
 		}
 
 		if(sela!='EI') {
-			var newOpt2=document.createElement('option');			
+			var newOpt2=document.createElement('option');
 			newOpt2.text=text;
 			newOpt2.value=value;
 
@@ -2234,11 +2188,11 @@ function suljeYllapito(sID,value,text) {
 
 		window.close();
 
-	}	
+	}
 }
 //-->
 </script>
-<?php		
+<?php
 	}
 }
 
@@ -2252,7 +2206,7 @@ function toimehtoTarkenne(toimehto) {
 	tehtoLisa=document.getElementById(toimehto+'Lisa');
 
 	teksti=tehto.options[tehto.selectedIndex].text;
-	arvo=tehto.options[tehto.selectedIndex].value;	
+	arvo=tehto.options[tehto.selectedIndex].value;
 
 	i=teksti.indexOf("-");
 	if(i>0) {
@@ -2265,7 +2219,7 @@ function toimehtoTarkenne(toimehto) {
 }
 //-->
 </script>
-<?php		
+<?php
 	}
 }
 
@@ -2300,7 +2254,7 @@ function getMouseY(e) {
 
 	return y;
 }
-function popUp(e, oi) {	
+function popUp(e, oi) {
 	var de = document.getElementById(oi);
 	var ds = de.style;
 
@@ -2328,10 +2282,10 @@ function popUp(e, oi) {
 		// relatiivinen sijainti
 		var y = getMouseY(e)+10;
 		var x = getMouseX(e)+10;
-		
+
 		var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
 		var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
-		
+
 		//	Jos saimme riitt‰v‰sti tietoa voimme kalkuloida oikean position
 		if(eh != null && ew != null && x != null && y != null) {
 
@@ -2352,10 +2306,10 @@ function popUp(e, oi) {
 			//	Oikea laita on kuitenkin aina t‰rkein!
 			if(x<2) {
 				x=2;
-			}		
+			}
 			if(y<2) {
 				y=2;
-			}		
+			}
 		}
 
 		ds.left=x;
@@ -2366,7 +2320,7 @@ function popUp(e, oi) {
 }
 //-->
 </script>
-<?php		
+<?php
 
 	}
 }

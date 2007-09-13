@@ -21,21 +21,7 @@
 		$tem_tuoteno = $t[$i];
 	}
 
-	if (mysql_field_name($result, $i) == "nimitys") {
-		// Nimitystä ei saa vaihtaa, jos tuote on viranomaistuote
-		$query  = "	SELECT nimitys 
-	    			FROM tuote 
-	    			WHERE yhtio = '$kukarow[yhtio]' 
-	    			and tuoteno = '$tem_tuoteno'
-					and tuotetyyppi in ('A','B')";
-	    $sresult = mysql_query($query) or pupe_error($query);
-	    $srow = mysql_fetch_array($sresult);
-	
-		if (mysql_num_rows($sresult) > 0 and trim(strtoupper($srow["nimitys"])) != trim(strtoupper($t[$i]))) {
-			$virhe[$i] = t("Viranomaistuotteen nimitystä ei voi muuttaa")."! ";
-			$errori = 1;	
-		}
-		
+	if (mysql_field_name($result, $i) == "nimitys") {		
 		if (trim($t[$i]) == '') {
 			$virhe[$i] .= t("Nimitys puuttuu")."!";
 			$errori = 1;

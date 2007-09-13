@@ -7,6 +7,28 @@
 	if (mysql_field_name($result, $i) == "yhtio") {
 		$tyyppi = 0;
 	}
+	
+	//	Tuoteno talteen
+	if (mysql_field_name($result, $i) == "tuoteno") {
+		$tuoteno = $trow[$i];
+	}
+
+	if (mysql_field_name($result, $i) == "nimitys") {
+		
+		//	Jos meillä on jokin viranomaistuote huomautetaan että nimitystä ei venksailla
+		
+		$query  = "	SELECT tunnus 
+	    			FROM tuote 
+	    			WHERE yhtio = '$kukarow[yhtio]' 
+	    			and tuoteno = '$tuoteno'
+					and tuotetyyppi in ('A','B')";
+	    $sresult = mysql_query($query) or pupe_error($query);
+	
+		if(mysql_num_rows($sresult) != 0) {
+			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td><td class = 'back'><font class='info'>".t("Huom! Viranomaistuotteen nimiystä ei tulisi muuttaa!")."</font></td>";
+			$jatko=0;
+		}
+	}
 
 	if (mysql_field_name($result, $i) == "tuotetyyppi") {
 		$sel = array();

@@ -2024,7 +2024,7 @@ if(!function_exists("enable_ajax")) {
 			}
 		}
 
-		sndReq(minne, urli + getstr + '&ohje=off', href, load);
+		sndReq(minne, urli + getstr, href, load);
 	}
 
 //-->

@@ -161,52 +161,6 @@
 								and alv >= 500";
 					$sarjares = mysql_query($query) or pupe_error($query);
 				}
-
-				if($sarjanumeronLisatiedot=="OK") {
-
-					$query = "	SELECT *
-								FROM tuote
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$sarrow[tuoteno]'";
-					$tuoteres = mysql_query($query) or pupe_error($query);
-					$tuoterow = mysql_fetch_array($tuoteres);
-
-					$query = "	SELECT selitetark
-								FROM avainsana
-								WHERE yhtio 	 = '$kukarow[yhtio]'
-								and laji 		 = 'SARJANUMERON_LI'
-								and selite  	 = 'MERKKI'
-								and selitetark_2 = '$tuoterow[tuotemerkki]'
-								ORDER BY jarjestys, selitetark_2";
-					$vresult = mysql_query($query) or pupe_error($query);
-					$vrow = mysql_fetch_array($vresult);
-				
-					$query = "	SELECT yhtio
-								FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
-								WHERE sarjanumeron_lisatiedot.yhtio		 = '$kukarow[yhtio]'
-								and sarjanumeron_lisatiedot.liitostunnus = '$sarjatunnus'";
-					$lisatietores_apu = mysql_query($query) or pupe_error($query);
-
-					if (mysql_num_rows($lisatietores_apu) == 0) {
-						$query = "	INSERT INTO sarjanumeron_lisatiedot
-									SET yhtio			= '$kukarow[yhtio]',
-									liitostunnus		= '$sarjatunnus',
-									laatija 			= '$kukarow[kuka]',
-									luontiaika 			= now(),
-									Varirunko			= '$tuoterow[vari]',
-									Suurin_henkiloluku	= '$tuoterow[suurin_henkiloluku]',
-									Runkotyyppi			= '$tuoterow[runkotyyppi]',
-									Materiaali			= '$tuoterow[materiaali]',
-									Koneistus			= '$tuoterow[koneistus]',
-									Tyyppi				= '$tuoterow[laitetyyppi]',
-									Kilpi				= '$tuoterow[kilpi]',
-									Sprinkleri 			= '$tuoterow[sprinkleri]',
-									Teho_kw				= '$tuoterow[teho_kw]',
-									Malli				= '$tuoterow[nimitys]',
-									Merkki				= '$vrow[selitetark]'";
-						$lisatietores_apu = mysql_query($query) or pupe_error($query);
-					}
-				}
 			}
 
 			echo "<font class='message'>".t("Pävitettiin sarjanumeron tiedot")."!</font><br><br>";
@@ -360,6 +314,8 @@
 							liitostunnus		= '$tun',
 							laatija 			= '$kukarow[kuka]',
 							luontiaika 			= now(),
+							Leveys				= '$tuoterow[tuoteleveys]',
+							Pituus				= '$tuoterow[tuotepituus]',
 							Varirunko			= '$tuoterow[vari]',
 							Suurin_henkiloluku	= '$tuoterow[suurin_henkiloluku]',
 							Runkotyyppi			= '$tuoterow[runkotyyppi]',

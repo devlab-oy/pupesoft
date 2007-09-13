@@ -118,23 +118,23 @@
 
 	// Jos kyseessä on rivi joka halutaan tilata ihan normaalisti joltain toimittajalta
 	if (substr($paikka,0,3) == "¡¡¡") {
-		$var 		 = "T";
-		$rivinumero  = substr($paikka, 3);
-		$paikka		 = "#";
+		$var 		 		= "T";
+		$toimittajan_tunnus	= substr($paikka, 3);
+		$paikka		 		= "#";	
 	}
 	elseif ($var == "T" and substr($paikka,0,3) != "¡¡¡" and substr($paikka,0,3) != "!!!") {
-		$var 		= "";
-		$rivinumero	= "";
+		$var 				= "";
+		$toimittajan_tunnus	= "";
 	}
 
 	if (substr($paikka,0,3) == "!!!") {
-		$var 		 = "U";
-		$rivinumero  = substr($paikka, 3);
-		$paikka		 = "#";
+		$var 		 		= "U";
+		$toimittajan_tunnus	= substr($paikka, 3);
+		$paikka		 		= "#";
 	}
 	elseif ($var == "U" and substr($paikka,0,3) != "!!!") {
-		$var 		= "";
-		$rivinumero	= "";
+		$var 				= "";
+		$toimittajan_tunnus	= "";
 	}
 
 	// Jos kyseessä on suoratoimitus joka tilataan toisesta firmasta suoraan
@@ -802,7 +802,37 @@
 
 								$result = mysql_query($query) or die($query.mysql_error());
 								$lisatty_tun = mysql_insert_id();
+								
+								$query  = "	SELECT *
+											FROM tilausrivin_lisatiedot
+											WHERE yhtio			 = '$kukarow[yhtio]'
+											and tilausrivitunnus = '$lisatty_tun'";
+								$lisatied_res = mysql_query($query) or pupe_error($query);
 
+								if (mysql_num_rows($lisatied_res) > 0) {
+									$lisatied_row = mysql_fetch_array($lisatied_res);
+
+									$query = "	UPDATE tilausrivin_lisatiedot
+												SET 
+												tilausrivilinkki	= '$tilausrivilinkki',
+												toimittajan_tunnus	= '$toimittajan_tunnus',
+												muutospvm			= now(),
+												muuttaja			= '$kukarow[kuka]'
+												WHERE yhtio			 = '$kukarow[yhtio]'
+												and tilausrivitunnus = '$lisatty_tun'";
+									$result = mysql_query($query) or pupe_error($query);
+								}
+								else {
+									$query = "	INSERT INTO tilausrivin_lisatiedot
+												SET yhtio			= '$kukarow[yhtio]',
+												tilausrivilinkki	= '$tilausrivilinkki',
+												toimittajan_tunnus	= '$toimittajan_tunnus',
+												tilausrivitunnus	= '$lisatty_tun',
+												luontiaika			= now(),
+												laatija 			= '$kukarow[kuka]'";
+									$result = mysql_query($query) or pupe_error($query);
+								}
+																
 								$lisatyt_rivit1[] = $lisatty_tun;
 
 								if ($myy_tyyppi[$indeksi] == "NORMAALI") {
@@ -910,37 +940,19 @@
 										$result = mysql_query($query) or pupe_error($query);
 									}
 
-
 									if ($myy_lapsi_ein[$indeksi] != "") {
-										$query  = "	SELECT *
-													FROM tilausrivin_lisatiedot
-													WHERE yhtio			 = '$kukarow[yhtio]'
-													and tilausrivitunnus = '$lisatty_tun'";
-										$lisatied_res = mysql_query($query) or pupe_error($query);
-
-										if (mysql_num_rows($lisatied_res) > 0) {
-											$lisatied_row = mysql_fetch_array($lisatied_res);
-
-											$query = "	UPDATE tilausrivin_lisatiedot
-														SET ei_nayteta 	= '$myy_lapsi_ein[$indeksi]'
-														WHERE tunnus 	= '$lisatty_tun'";
-											$result = mysql_query($query) or pupe_error($query);
-										}
-										else {
-											$query = "	INSERT INTO tilausrivin_lisatiedot
-														SET yhtio		= '$kukarow[yhtio]',
-														tilausrivitunnus= '$lisatty_tun',
-														ei_nayteta 		= '$myy_lapsi_ein[$indeksi]',
-														lisatty			= now(),
-														lisannyt 		= '$kukarow[kuka]'";
-											$result = mysql_query($query) or pupe_error($query);
-										}
+										$query = "	UPDATE tilausrivin_lisatiedot
+													SET ei_nayteta 	= '$myy_lapsi_ein[$indeksi]', 
+													muutospvm		= now(),
+													muuttaja		= '$kukarow[kuka]'
+													WHERE tunnus 	= '$lisatty_tun'";
+										$result = mysql_query($query) or pupe_error($query);
 									}
 								}
 
-								$rivitunnus	= "";
-								$kommentti 	= "";
-								$tuotenimitys = "";
+								$rivitunnus		= "";
+								$kommentti 		= "";
+								$tuotenimitys 	= "";
 
 								$hinta = $saasto_hinta;
 								$ale   = $saasto_ale;
@@ -1343,6 +1355,11 @@
 				// lisätään saatu nimitys kaikille tuotteille
 				$trow["nimitys"] = addslashes($tuotenimitys);
 			}
+			
+			// JT-rivikommentti
+			if ((int) $rivitunnus == 0 and $var == "J"and strpos($kommentti, "(".t("Jälkitoimitus").":") === false) {
+				$kommentti = "(".t("Jälkitoimitus").": ".tv1dateconv(date("Y-m-d")).") \n".$kommentti;
+			}
 
 			// lisätään puuterivi
 			$query = "	INSERT into tilausrivi set
@@ -1383,7 +1400,37 @@
 			}
 			$result = mysql_query($query) or die($query);
 			$lisatty_tun = mysql_insert_id();
+			
+			$query  = "	SELECT *
+						FROM tilausrivin_lisatiedot
+						WHERE yhtio			 = '$kukarow[yhtio]'
+						and tilausrivitunnus = '$lisatty_tun'";
+			$lisatied_res = mysql_query($query) or pupe_error($query);
 
+			if (mysql_num_rows($lisatied_res) > 0) {
+				$lisatied_row = mysql_fetch_array($lisatied_res);
+
+				$query = "	UPDATE tilausrivin_lisatiedot
+							SET 
+							tilausrivilinkki	= '$tilausrivilinkki',
+							toimittajan_tunnus	= '$toimittajan_tunnus',
+							muutospvm			= now(),
+							muuttaja			= '$kukarow[kuka]'
+							WHERE yhtio			 = '$kukarow[yhtio]'
+							and tilausrivitunnus = '$lisatty_tun'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+			else {
+				$query = "	INSERT INTO tilausrivin_lisatiedot
+							SET yhtio			= '$kukarow[yhtio]',
+							tilausrivilinkki	= '$tilausrivilinkki',
+							toimittajan_tunnus	= '$toimittajan_tunnus',
+							tilausrivitunnus	= '$lisatty_tun',
+							luontiaika			= now(),
+							laatija 			= '$kukarow[kuka]'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+			
 			$lisatyt_rivit2[] = $lisatty_tun;
 
 			if ($i == 0) {

@@ -102,12 +102,14 @@ else {
 echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
 echo "<font class='message'>".t("Rahdin määrä yhteensä").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 
-$summa = 0;
+$summa		 = 0;
 $superirivit = '';
-$rivia = 0;
+$jtrivit	 = '';
+$jtvarastot	 = array();
+$rivia 		 = 0;
 
 require_once ('inc/ProgressBar.class.php');
-$bar = new ProgressBar();
+//$bar = new ProgressBar();
 $elements = mysql_num_rows($presult); // total number of elements to process
 
 // jos kyseessä on ihan virallinen varastonarvonlaskenta, tehdään näin
@@ -118,7 +120,7 @@ else {
 	echo "<font class='message'>".t("Viedään varastoon %s tuotetta", "", $elements).":<br></font>";
 }
 
-$bar->initialize($elements); // print the empty bar
+//$bar->initialize($elements); // print the empty bar
 
 while ($tilrivirow = mysql_fetch_array($presult)) {
 
@@ -209,12 +211,12 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$uusikehahin = "-> $uusikehahin";
 	}
 	else {
+		
 		// päivitetään tilausrivin rivihintaa
 		$query  = "	UPDATE tilausrivi set
 					rivihinta = '$rivihin'
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$tilrivirow[tunnus]'";
 		$resultxxx = mysql_query($query) or pupe_error($query);
-
 
 		if ($tuorow["sarjanumeroseuranta"] == "S") {
 			$kehalis = "";
@@ -269,20 +271,32 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					hyllyvali   	= '$tilrivirow[hyllyvali]'
 					limit 1";
 		$result = mysql_query($query) or pupe_error($query);
-
+		$jtvarastot[$tilrivirow["tunnus"]] = array($tilrivirow["hyllyalue"], $tilrivirow["hyllynro"]);
+		
 		if (mysql_affected_rows() == 0) {
 			$varastoon_msg .= "<font class='error'>".t("Varastopaikka")." $tilrivirow[hyllyalue]-$tilrivirow[hyllynro]-$tilrivirow[hyllytaso]-$tilrivirow[hyllyvali] ".t("ei löydy vaikka se on syötetty tilausriville! Koitetaan päivittää oletustapaikkaa!")."</font>";
 
-			$query = "	UPDATE tuotepaikat set
-	   		 			saldo       	= saldo+$tilrivirow[varattu],
+			$query = "	UPDATE tuotepaikat
+	   		 			SET saldo      	= saldo+$tilrivirow[varattu],
 						saldo_varattu 	= saldo_varattu + if($tilrivirow[tunnus] != $tilrivirow[perheid2] and $tilrivirow[perheid2]>0, $tilrivirow[varattu], 0),
 	   		 			saldoaika   	= now()
-	   		 			where yhtio 	= '$kukarow[yhtio]' and
+	   		 			WHERE yhtio 	= '$kukarow[yhtio]' and
 	   		 			tuoteno     	= '$tilrivirow[tuoteno]' and
 	   		 			oletus     	   != ''
-	   		 			limit 1";
+	   		 			LIMIT 1";
 			$result = mysql_query($query) or pupe_error($query);
-
+			
+			$query = "	SELECT hyllyalue, hyllynro
+						FROM tuotepaikat
+						WHERE yhtio 	= '$kukarow[yhtio]' and
+	   		 			tuoteno     	= '$tilrivirow[tuoteno]' and
+	   		 			oletus     	   != ''
+	   		 			LIMIT 1";
+			$olpares = mysql_query($query) or pupe_error($query);
+			$olparow = mysql_fetch_array($tuores);
+			
+			$jtvarastot[$tilrivirow["tunnus"]] = array($olparow["hyllyalue"], $olparow["hyllynro"]);
+			
 	   		if (mysql_affected_rows() == 0) {
 
 	   			$varastoon_msg .= "<br><font class='error'>".t("Tuotteella")." $tilrivirow[tuoteno] ".t("ei ole oletuspaikkaakaaaaan")."!!!</font><br><br>";
@@ -321,6 +335,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 							hyllytaso   	= '0',
 							hyllyvali   	= '0'";
 				$result = mysql_query($query) or pupe_error($query);
+				$jtvarastot[$tilrivirow["tunnus"]] = array($hyllyrow["alkuhyllyalue"], $hyllyrow["alkuhyllynro"]);
 
 				// tehdään tapahtuma
 				$query = "	INSERT into tapahtuma set
@@ -341,7 +356,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		}
 
 		// päivitetään tilaus saapuneeksi varastoon
-		//päivitetään myös tehdaslisävarusteet saapuneiksi
+		// päivitetään myös tehdaslisävarusteet saapuneiksi
 		$query  = "	UPDATE tilausrivi set
 					kpl     = varattu,
 					varattu = 0,
@@ -356,8 +371,18 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		if ($tilrivirow['tilaajanrivinro'] <> 0) {
 			$superirivit .= "'$tilrivirow[tunnus]',";
 		}
-
-
+		
+		//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
+	   	$query = "	SELECT tilausrivi.tunnus
+	   				FROM tilausrivin_lisatiedot
+	   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+	   				WHERE tilausrivin_lisatiedot.yhtio 			 = '$kukarow[yhtio]' 
+	   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$tilrivirow[tunnus]'";
+		$varastoon_result = mysql_query($query) or pupe_error($query);
+		
+		if ($varastoon_row = mysql_fetch_array($varastoon_result)) {
+			$jtrivit .= "$varastoon_row[tunnus],";
+		}
 	}
 
 	// näytetään ruudulla
@@ -391,7 +416,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 	$varastoon_msg .= "</tr>";
 	
-	$bar->increase(); //calls the bar with every processed element
+	//$bar->increase(); //calls the bar with every processed element
 	
 }
 
@@ -483,16 +508,62 @@ echo "</table><br>";
 
 echo "<font class='message'>".t("Vientiin keikan")." $laskurow[laskunro] ".t("rivit varastoon")."! $rivia ".t("riviä").".</font><br><br>";
 
-$query = "SELECT automaatti_toimitus FROM toimi where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
-$result   = mysql_query($query) or pupe_error($query);
-$atrow = mysql_fetch_array($result);
+$query 	= "SELECT automaatti_toimitus FROM toimi where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
+$result	= mysql_query($query) or pupe_error($query);
+$atrow 	= mysql_fetch_array($result);
 
 // jos ei olla virallisessa toimitellaan suoratoimituksia
 if ($toiminto != "kaikkiok" and $superirivit != "" and $suoratoimitus == '' and $atrow['automaatti_toimitus'] == 'S') {
-	$superirivit = substr($superirivit,0,-1);
-	$mista = 'varastoon.inc';
+	$superirivit 	= substr($superirivit,0,-1);
+	$mista 			= 'varastoon.inc';
+	
 	require('jt_super_laskuta.inc');
+	
 	echo "<br><font class='message'>$laskuvirhe</font><br><br>";
+}
+
+// Toimitetaan asiakkaalle korvamerkityt jtrivit
+if ($toiminto != "kaikkiok" and $jtrivit != "") {
+	$jtrivit 	= substr($jtrivit,0,-1);
+	$mista 		= 'varastoon.inc';
+	
+	$varastosta = array();
+	
+	foreach ($jtvarastot as $varasto) {
+		$v = kuuluukovarastoon($varasto[0], $varasto[1]);
+		
+		if ($v > 0 and !in_array($v, $varastosta)) {
+			$varastosta[$v] = $v;			
+		}
+	}
+	
+	
+	function jt_toimita ($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen) {
+		global $yhtiorow, $kukarow, $oikeurow;
+		
+		$toimittaja		= "";
+		$toimittajaid	= "";
+		$asiakasno 		= "";
+		$asiakasid		= "";
+		$asiakasmaa 	= "";
+		$jarj	 		= "tuoteno";
+		$tuotenumero	= "";
+		$tilaus			= "";			
+		$toimi			= "";
+		$superit		= "";
+		$tilaus_on_jo	= "";
+		$tee 			= "JATKA";
+		
+		$vain_rivit 		= $jtrivit;
+		$from_varastoon_inc = "varastoon.inc";
+		
+		require('jtselaus.php');
+			
+	}
+
+	jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "automaaginen");
+	jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen");
+	
 }
 
 echo "<hr>";

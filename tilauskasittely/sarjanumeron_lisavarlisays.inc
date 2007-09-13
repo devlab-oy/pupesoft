@@ -33,7 +33,7 @@
 				// Haetaan muut lisävarusteet
 				$query = "	SELECT tuoteno, round(kpl/$ostorow[kpl]) kpl, round(tilkpl/$ostorow[kpl]) tilkpl, tilkpl sistyomaarayskpl, var, 
 							tyyppi, concat_ws('#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilaajanrivinro, perheid2
-							FROM tilausrivi 
+							FROM tilausrivi use index (yhtio_perheid2)
 							WHERE yhtio  = '$kukarow[yhtio]' 
 							and perheid2 = '$sarjarow[perheid2]'
 							and tyyppi  != 'D'
@@ -99,7 +99,7 @@
 			
 							//Tutkitaan vielä ettei tämä lisävaruste ole jo tän tuotteen alla
 							$query = "	SELECT tunnus
-										FROM tilausrivi 
+										FROM tilausrivi use index (yhtio_perheid2) 
 										WHERE yhtio  = '$kukarow[yhtio]' 
 										and tuoteno  = '$tuoteno'
 										and perheid2 = '$perheid2'";

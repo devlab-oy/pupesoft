@@ -704,24 +704,27 @@ if ($tee == "MUOKKAA") {
 							WHERE yhtio			 = '$kukarow[yhtio]'
 							and tilausrivitunnus = '$isatunnus'";
 				$lisatied_res = mysql_query($query) or pupe_error($query);
+				
 				if (mysql_num_rows($lisatied_res) > 0) {;
 					$query = "	UPDATE tilausrivin_lisatiedot SET ";
 					$where = "	WHERE yhtio='{$kukarow[yhtio]}' and tilausrivitunnus = '$isatunnus'";
 				}
 				else {
 					$query = "	INSERT INTO tilausrivin_lisatiedot SET
-									yhtio				= '$kukarow[yhtio]',
-									lisatty				= now(),
-									tilausrivitunnus	= '$isatunnus',
-									lisannyt 			= '$kukarow[kuka]',";
+								yhtio				= '$kukarow[yhtio]',
+								luontiaika			= now(),
+								tilausrivitunnus	= '$isatunnus',
+								laatija 			= '$kukarow[kuka]',";
 					$where = "";
 				}
 
 				$query .= "	tiliointirivitunnus = '$isa',
 							kulun_kohdemaa		= '$maa',
-							kulun_kohdemaan_alv	= '$alvulk'";
-				$query = $query.$where;
-				$updres=mysql_query($query) or pupe_error($query);
+							kulun_kohdemaan_alv	= '$alvulk',
+							muutospvm			= now(),
+							muuttaja			= '$kukarow[kuka]'";
+				$query  = $query.$where;
+				$updres = mysql_query($query) or pupe_error($query);
 
 				//	Fiksataan ostovelka
 				korjaa_ostovelka($tilausnumero);

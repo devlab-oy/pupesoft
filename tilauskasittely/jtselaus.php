@@ -71,6 +71,9 @@
 			$asiakasmaa = $asiakas["toim_maa"];
 		}
 	}
+	
+	// Haetaan tee_jt_tilaus-funktio
+	require ("tee_jt_tilaus.inc");
 
 	//JT-rivit on poimittu
 	if ($oikeurow['paivitys'] == '1' and ($tee == 'POIMI' or $tee == "JT_TILAUKSELLE")) {
@@ -105,8 +108,9 @@
 					$mista = 'jtrivit_tilaukselle.inc';
 					require("laskealetuudestaan.inc");
 				}
-
-				require ('tee_jt_tilaus.inc');
+				
+				// Toimitetaan jtrivit
+				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput);
 			}
 		}
 
@@ -172,7 +176,7 @@
 	}
 
 	//Tutkitaan onko käyttäjällä keskenolevia jt-rivejä
-	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "") {
+	if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "" and $tilaus_on_jo == "" and $from_varastoon_inc == "" ) {
 
 		if ($toim == "ENNAKKO") {
 			$query = "	SELECT *
@@ -416,6 +420,10 @@
 
 		if ($tilaus != '') {
 			$tilausrivilisa .= " and tilausrivi.otunnus = '$tilaus' ";
+		}
+		
+		if ($vain_rivit != '') {
+			$tilausrivilisa .= " and tilausrivi.tunnus in ($vain_rivit) ";
 		}
 
 		if ($tilaus_on_jo == "KYLLA" and $toim == 'SIIRTOLISTA' and $laskurow['clearing'] != '') {
@@ -661,7 +669,7 @@
 									$varastoista = implode(",",$suoravarasto);
 								}
 								else {
-									$varastoista="";
+									$varastoista = "";
 								}
 								require("suoratoimitusvalinta.inc");
 							}
@@ -919,18 +927,20 @@
 								$juresult = mysql_query($query) or pupe_error($query);
 								$jurow    = mysql_fetch_array ($juresult);
 
-								// Jos riittää kaikille
+								// Riittää kaikille
 								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "")  and $perheok==0) {
 
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
-									if ($kukarow["extranet"] == "" and $automaaginen!='') {
+									if ($kukarow["extranet"] == "" and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
 										echo "<font class='message'>".t("Tuote")." $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
 
 										// Pomitaan tämä rivi/perhe
-										$loput[$tunnukset] = "KAIKKI";
-										$tunnusarray = explode(',', $tunnukset);
-
-										require("tee_jt_tilaus.inc");
+										$loput[$tunnukset] 	= "KAIKKI";
+										$kpl[$tunnukset] 	= 0;
+										$tunnusarray 		= explode(',', $tunnukset);
+																				
+										// Toimitetaan jtrivit
+										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput);
 									}
 									else {
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
@@ -961,7 +971,20 @@
 								}
 								// Riittää tälle riville mutta ei kaikille
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa >= $jtrow["jt"] and $perheok==0) {
-									if ($automaaginen == '') {
+									
+									// Jos haluttiin toimittaa tämä rivi automaagisesti
+									if ($kukarow["extranet"] == "" and $automaaginen == 'tosi_automaaginen') {
+										echo "<font class='message'>".t("Tuote")." $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
+
+										// Pomitaan tämä rivi/perhe
+										$loput[$tunnukset] 	= "KAIKKI";
+										$kpl[$tunnukset] 	= 0;
+										$tunnusarray 		= explode(',', $tunnukset);
+																				
+										// Toimitetaan jtrivit
+										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput);
+									}
+									elseif($automaaginen == "") {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!</font></td>";
 										echo "	<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>
 												<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI'></td>
@@ -972,7 +995,7 @@
 									}
 								}
 								// Suoratoimitus
-								elseif ($paikatlask > 0 and $automaaginen == ''and $kukarow['extranet'] == '') {
+								elseif ($paikatlask > 0 and $automaaginen == '' and $kukarow['extranet'] == '') {
 									echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
 									$varalisa = "<br><select name='suoratoimpaikka[$tunnukset]'><option value=''>".t("Ei toimiteta")."</option>".$paikat."</select>";
@@ -994,6 +1017,7 @@
 									echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA'></td>";
 									echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
 								}
+								// Ei riitä koko riville
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
 									if ($automaaginen == '') {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:orange;'>".t("Ei riitä koko riville")."!</font></td>";
@@ -1005,7 +1029,7 @@
 												<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
 									}
 								}
-								// ja muuten ei voida sitten toimittaa ollenkaan
+								// Riviä ei voida toimittaa
 								else {
 									if ($automaaginen == '') {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:red;'>".t("Riviä ei voida toimittaa")."!</font></td>";
@@ -1172,7 +1196,7 @@
 		}
 	}
 
-	if ($tilaus_on_jo == "" and $tee == '') {
+	if ($tilaus_on_jo == "" and $from_varastoon_inc == "" and $tee == '') {
 
 		echo "<br><font class='message'>".t("Valinnat")."</font><br><br>";
 
@@ -1217,6 +1241,7 @@
 					and toimi.oletus_vienti in ('C','F','I')
 					ORDER BY tyyppi_tieto";
 		$superjtres  = mysql_query($query) or pupe_error($query);
+		
 		if (mysql_num_rows($superjtres) > 0) {
 
 			//	Piilotetaan tämä jos meillä on jo jotain suoravarastoja valittuna (tämä toiminto depracoituu enivei)
@@ -1265,7 +1290,7 @@
 
 		echo "	<tr>
 				<th>".t("Toimita selkeät rivit automaagisesti")."</th>
-				<td><input type='checkbox' name='automaaginen' $sel onClick = 'return verify()'></td>
+				<td><input type='checkbox' name='automaaginen' value='tosi_automaaginen' $sel onClick = 'return verify()'></td>
 			</tr>";
 
 		echo "</table>";

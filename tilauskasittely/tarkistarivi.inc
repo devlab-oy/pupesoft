@@ -189,12 +189,11 @@
 		
 		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V') {
 			// Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
-			$query = "	select tyyppi_tieto, liitostunnus, toimi.nimi
-						from tuotteen_toimittajat, toimi
-						where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-						and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'
-						and toimi.yhtio	 = tuotteen_toimittajat.yhtio
-						and toimi.tunnus = tuotteen_toimittajat.liitostunnus";
+			$query = "	SELECT tyyppi_tieto, liitostunnus, toimi.nimi
+						FROM tuotteen_toimittajat use index (yhtio_tuoteno)
+						JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+						WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+						and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'";
 			$toimpaikres  = mysql_query($query) or pupe_error($query);
 
 			if(mysql_num_rows($toimpaikres) > 0) {
@@ -356,7 +355,7 @@
 				$sel1 = "";
 				$sel2 = "";
 
-				if ($row["tilaajanrivinro"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
+				if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
 					if ($row["var"] == 'T') {
 						$sel1 = "SELECTED";
 					}
@@ -366,8 +365,12 @@
 				}
 
 				// tallennetaan riville toimittajan tunnus
-				$paikat .= "<option value='¡¡¡$krow[liitostunnus]' $sel1>".t("Tilaa varastoon")."</option>";
-				$paikat .= "<option value='!!!$krow[liitostunnus]' $sel2>".t("Tilaa asiakkaalle")."</option>";
+				$paikat .= "<option value='¡¡¡$krow[liitostunnus]' $sel1>$krow[nimi] --> ".t("varastoon")."</option>";
+				
+				if($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y") {
+					$paikat .= "<option value='!!!$krow[liitostunnus]' $sel2>$krow[nimi] --> ".t("asiakkaalle")."</option>";
+				}
+				
 				$paikatlask=$paikatlask+2;
 			}
 		}
@@ -376,7 +379,7 @@
 		}
 
 		if ($paikat != "" and $paikatlask > 1) {
-			$paikat = "<select name='paikka' onchange='submit();'>".$paikat."</select>";
+			$paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
 		}
 		else {
 			$paikat = "";
@@ -454,7 +457,22 @@
 			require "inc/laskutyyppi.inc";
 			
 			$varaosakommentti .= ("Siirtolistalla").": {$siirtorow["kpl"]}{$trow["yksikko"]} {$siirtorow["lahde"]} -> {$siirtorow["kohde"]} <i>($alatila)</i><br>";
-		} 
+		}
+	}
+	
+	//	Onko tätä ostotilauksella?
+	if ($kukarow["extranet"] == "" and $trow["ei_saldoa"] == "" and $row["tilausrivilinkki"] > 0) {
+		$query = "	SELECT tilausrivi.otunnus, lasku.nimi
+					FROM tilausrivi
+					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+					and tilausrivi.tunnus  = '$row[tilausrivilinkki]'";
+		$siirtores = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($siirtores) > 0) {
+			$siirtorow = mysql_fetch_array($siirtores);
+			$varaosakommentti .= "Ostotilauksella: $siirtorow[nimi] $siirtorow[otunnus]<br>";
+		}
 	}
 	
 	if ($row["alv"] == -999.99) {

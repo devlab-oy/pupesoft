@@ -24,7 +24,9 @@
 			$lisatied_row = mysql_fetch_array($lisatied_res);
 
 			$query = "	UPDATE tilausrivin_lisatiedot
-						SET osto_vai_hyvitys = '$osto_vai_hyvitys'
+						SET osto_vai_hyvitys 	= '$osto_vai_hyvitys',
+						muutospvm				= now(),
+						muuttaja				= '$kukarow[kuka]'
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tilausrivitunnus = '$rivitunnus'
 						and tunnus 	= '$lisatied_row[tunnus]'";
@@ -32,11 +34,11 @@
 		}
 		else {
 			$query = "	INSERT INTO tilausrivin_lisatiedot
-						SET yhtio = '$kukarow[yhtio]',
+						SET yhtio 		 = '$kukarow[yhtio]',
 						tilausrivitunnus = '$rivitunnus',
 						osto_vai_hyvitys = '$osto_vai_hyvitys',
-						lisatty	= now(),
-						lisannyt = '$kukarow[kuka]'";
+						luontiaika		 = now(),
+						laatija 		 = '$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
 		}
 

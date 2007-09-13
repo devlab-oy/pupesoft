@@ -1042,7 +1042,20 @@ if ($tila == '') {
 		if ($rivirow["toimaika"] != "0000-00-00") {
 			echo tv1dateconv($rivirow["toimaika"]);
 		}
-
+		
+		//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
+	   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi
+	   				FROM tilausrivin_lisatiedot
+	   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+	   				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+	   				and tilausrivin_lisatiedot.tilausrivilinkki  = '$rivirow[rivitunnus]'";
+		$varastoon_result = mysql_query($query) or pupe_error($query);
+		
+		if ($varastoon_row = mysql_fetch_array($varastoon_result)) {
+			$rivirow["kommentti"] .= "<br>".t("Tilattu asiakkaalle").": ".$varastoon_row["nimi"];
+		}
+		
 		echo "<br>$rivirow[kommentti]</$td>";
 
 		//Tutkitaan tuotteiden lisävarusteita

@@ -266,11 +266,11 @@
 				$takafontti = "";
 	
 				if ($krow["kuittaus"] == "" and ($krow["selitetark"] == "Palkaton vapaa" or $krow["selitetark"] == "Sairasloma" or $krow["selitetark"] == "Kesäloma" or $krow["selitetark"] == "Talviloma" or $krow["selitetark"] == "Ylityövapaa")) {
-					$etufontti = "<font color='#FF0000'>";
+					$etufontti = "<font style='color:#FF0000;'>";
 					$takafontti = "</font>";
 				}
 				elseif ($krow["kuittaus"] != "" and ($krow["selitetark"] == "Palkaton vapaa" or $krow["selitetark"] == "Sairasloma" or $krow["selitetark"] == "Kesäloma" or $krow["selitetark"] == "Talviloma" or $krow["selitetark"] == "Ylityövapaa")) {
-					$etufontti = "<font color='#00FF00'>";
+					$etufontti = "<font style='color:#00FF00;'>";
 					$takafontti = "</font>";
 				}
 	

@@ -163,6 +163,31 @@
 		echo "</tr>";
 		echo "</table>";
 
+		
+		if ($osasto != "") {
+			$rukOchk = "CHECKED";
+		}
+		else {
+			$rukOchk = "";
+		}
+		if ($tuoteryhma != "") {
+			$rukTchk = "CHECKED";
+		}
+		else {
+			$rukTchk = "";
+		}
+		
+		echo "<br><table>
+			<tr>
+			<th>".t("Listaa tuotteet jotka ei kuulu mihink‰‰n osastoon")."</th>
+			<td><input type='checkbox' name='osasto' value='tyhjat' $rukOchk></td>
+			</tr>
+			<tr>
+			<th>".t("Listaa tuotteet jotka ei kuulu mihink‰‰n tuoteryhm‰‰n")."</th>
+			<td><input type='checkbox' name='tuoteryhma' value='tyhjat' $rukTchk></td>
+			</tr></table>";
+		
+
 		echo "<br><table>";
 		
 		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
@@ -184,9 +209,7 @@
 			echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
 		}
 		
-		echo "
-		    </td>
-		</tr>";
+		echo "</td></tr>";
 		echo "</table>";
 		
 		echo "<br><table>";
@@ -263,9 +286,10 @@
 		echo "</form>";
 
 
-		if (!empty($varastot) or count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tmr) > 0 or $tuotteet != '') {
+		if (!empty($varastot) or count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tmr) > 0 or $tuotteet != '' or $tuoteryhma != '' or $osasto != '') {
 
-			$lisa = "";
+			$lisa  = "";
+			$lisa2 = "";
 			
 			if (count($mul_osasto) > 0) {
 				$sel_osasto = "('".str_replace(',','\',\'',implode(",", $mul_osasto))."')";
@@ -293,7 +317,7 @@
 				$lisa .= "and tuote.tuoteno in (".substr($tuoterajaus, 0, -1).") ";
 			}
 
-			if (!empty($varastot)) {				
+			if (!empty($varastot)) {
 				$lisa .= " and varastopaikat.tunnus IN (" . implode(', ', $varastot) . ")";
             }
 			
@@ -309,15 +333,15 @@
 			
 			
 			if ($tuoteryhma == "tyhjat") {
-				$trylisa2 .= " HAVING try='0' ";
+				$lisa2 .= " HAVING try='0' ";
 			}
 			
 			if ($osasto == "tyhjat") {
 				if ($tuoteryhma == "tyhjat") {
-					$trylisa2 .= " or osasto='0' ";
+					$lisa2 .= " or osasto='0' ";
 				}
 				else {
-					$trylisa2 .= " HAVING osasto='0' ";
+					$lisa2 .= " HAVING osasto='0' ";
 				}
 			}
 		
@@ -330,6 +354,7 @@
 						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm, 
 						tuote.sarjanumeroseuranta,
 						group_concat(tuotepaikat.tunnus) paikkatun,
+						group_concat(varastopaikat.nimitys) varastot,
 						$saldolisa
 						FROM tuote
 						$varlisa
@@ -340,10 +365,11 @@
 		                concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
 		                concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))
 						$varlisa
-						WHERE tuote.yhtio = '$kukarow[yhtio]'
+						WHERE tuote.yhtio 	= '$kukarow[yhtio]'
 						and tuote.ei_saldoa = ''
 						$lisa
 						$saldogrou
+						$lisa2
 						ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
 			$result = mysql_query($query) or pupe_error($query);
 						
@@ -605,7 +631,7 @@
 							$excelsarake++;
 							
 						}
-						elseif (! empty($varastot)) {
+						elseif (!empty($varastot)) {
 							$worksheet->write($excelrivi, $excelsarake, $row["varastot"]);
 							$excelsarake++;
 						}

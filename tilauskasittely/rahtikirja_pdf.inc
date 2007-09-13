@@ -27,14 +27,15 @@
 	}
 	
 	// onko tämä tyhjä rahtikirja (custom)?
-	if (! isset($GLOBALS['tyhja'])) {
+	if (!isset($GLOBALS['tyhja'])) {
 		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$postirow = mysql_fetch_array($tempr);
 		
 		// lähettäjän viite otetaan laskulta
 		$viitelah = $lotsikot[0];
-	} else {
+	} 
+	else {
 		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='{$GLOBALS['asiakasid']}'";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$rakir_row = mysql_fetch_array($tempr);
@@ -202,23 +203,106 @@
 					
 		// sitten aletaan piirtämään itse PDF sisältöä
 		$pdf->draw_text(302,  812,  "RAHTIKIRJA FRAKTSEDEL",							$firstpage, $iso);
-	
-		//osoitetiedot yms
-		//toimittaja
-		$pdf->draw_rectangle(810,60,777,300,											$firstpage, $rectparam);
-		$pdf->draw_text(62,  803,  "Lähettäjä Avsändare",								$firstpage, $norm);
-		$pdf->draw_text(240, 803,  "Asiakasnro Kundnr",									$firstpage, $norm);
-		$pdf->draw_text(65,  782,  $yhtiorow["nimi"],  									$firstpage, $kirj);
-		$pdf->draw_text(240, 782,  $toitarow['sopimusnro'],								$firstpage, $kirj);
-		$pdf->draw_rectangle(777,60,755,300,											$firstpage, $rectparam);
-		$pdf->draw_text(65,  758,  $yhtiorow["osoite"],									$firstpage, $kirj);	
-		$pdf->draw_rectangle(755,60,733,300,											$firstpage, $rectparam);
-		$pdf->draw_text(65,  736,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"]."    ".$yhtiorow["puhelin"],		$firstpage, $kirj);
+		
+		if ($yhtiorow["oslapp_rakir_logo"] != '' and trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
+
+			$filename = $yhtiorow["lasku_logo"];
+
+			$fh = fopen($filename, "r");
+			$data = fread($fh, filesize($filename));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+
+			if(!$image) {
+				echo t("Logokuvavirhe");
+			}
+			else {
+				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+
+				$logoparam = array();
+
+				// Logosta tulee max: 50pt korkea ja 120pt leveä (17.64mm x 42.33mm)
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
+					$logoparam['scale'] = 120 / $isizelogo[0];
+				}
+				else {
+					$logoparam['scale'] = 50  / $isizelogo[1];
+				}
+
+				//$pdf->draw_rectangle(840,25,780,25+120, $firstpage, $rectparam);
+				$placement = $pdf->image_place($image, 820-($logoparam['scale']*$isizelogo[1]), 25, $firstpage, $logoparam);
+			}
+			
+			//osoitetiedot yms
+			//toimittaja
+			$pdf->draw_rectangle(769,60,752,300,											$firstpage, $rectparam);
+			$pdf->draw_text(62,  763,  "Lähettäjä Avsändare",								$firstpage, $norm);
+			$pdf->draw_text(240, 763,  "Asiakasnro Kundnr",									$firstpage, $norm);
+			$pdf->draw_text(65,  755,  $yhtiorow["nimi"],  									$firstpage, $kirj);
+			$pdf->draw_text(240, 755,  $toitarow['sopimusnro'],								$firstpage, $kirj);
+			$pdf->draw_rectangle(752,60,740,300,											$firstpage, $rectparam);
+			$pdf->draw_text(65,  743,  $yhtiorow["osoite"],									$firstpage, $kirj);	
+			$pdf->draw_rectangle(740,60,728,300,											$firstpage, $rectparam);
+			$pdf->draw_text(65,  731,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"]."    ".$yhtiorow["puhelin"],		$firstpage, $kirj);
+			
+			//vastaanottaja	
+			$pdf->draw_rectangle(713,60,696,300,											$firstpage, $rectparam);
+			$pdf->draw_text(62,  707,  "Vastaanottaja Mottagare",							$firstpage, $norm);
+			$pdf->draw_text(240, 707,  "Asiakasnro Kundnr",									$firstpage, $norm);
+			$pdf->draw_text(65,  699,  $rakir_row["nimi"],									$firstpage, $kirj);
+			$pdf->draw_text(240, 699,  $rahsoprow['rahtisopimus'],							$firstpage, $kirj);
+			$pdf->draw_rectangle(696,60,684,300,											$firstpage, $rectparam);
+			$pdf->draw_text(65,  687,  $rakir_row["osoite"],								$firstpage, $kirj);
+			$pdf->draw_rectangle(684,60,672,300,											$firstpage, $rectparam);
+			$pdf->draw_text(65,  675,  $rakir_row["postino"]."  ".$rakir_row["postitp"],	$firstpage, $kirj);
+			
+			//toimitusosoite
+			$pdf->draw_rectangle(657,60,640,300,												$firstpage, $rectparam); 
+			$pdf->draw_rectangle(640,60,628,300,												$firstpage, $rectparam);
+
+			$pdf->draw_text(62,  651, "Tavaran toimitusosoite:",								$firstpage, $norm);
+			$pdf->draw_text(65,  643,  $rakir_row['toim_nimi']." ".$rakir_row['toim_nimitark'],	$firstpage, $kirj); 
+			$pdf->draw_text(65,  631,  $rakir_row['toim_osoite'],								$firstpage, $kirj);
+			
+		}
+		else {
+			//osoitetiedot yms
+		  	//toimittaja
+		   	$pdf->draw_rectangle(810,60,777,300,											$firstpage, $rectparam);
+		   	$pdf->draw_text(62,  803,  "Lähettäjä Avsändare",								$firstpage, $norm);
+		   	$pdf->draw_text(240, 803,  "Asiakasnro Kundnr",									$firstpage, $norm);
+		   	$pdf->draw_text(65,  782,  $yhtiorow["nimi"],  									$firstpage, $kirj);
+		   	$pdf->draw_text(240, 782,  $toitarow['sopimusnro'],								$firstpage, $kirj);
+		   	$pdf->draw_rectangle(777,60,755,300,											$firstpage, $rectparam);
+		   	$pdf->draw_text(65,  758,  $yhtiorow["osoite"],									$firstpage, $kirj);	
+		   	$pdf->draw_rectangle(755,60,733,300,											$firstpage, $rectparam);
+		   	$pdf->draw_text(65,  736,  $yhtiorow["postino"]."  ".$yhtiorow["postitp"]."    ".$yhtiorow["puhelin"],		$firstpage, $kirj);
+		   	
+		   	//vastaanottaja	
+		   	$pdf->draw_rectangle(733,60,711,300,											$firstpage, $rectparam);
+		   	$pdf->draw_text(62,  726,  "Vastaanottaja Mottagare",							$firstpage, $norm);
+		   	$pdf->draw_text(240, 726,  "Asiakasnro Kundnr",									$firstpage, $norm);
+		   	$pdf->draw_text(65,  714,  $rakir_row["nimi"],									$firstpage, $kirj);
+		   	$pdf->draw_text(240, 714,  $rahsoprow['rahtisopimus'],							$firstpage, $kirj);
+		   	$pdf->draw_rectangle(711,60,689,300,											$firstpage, $rectparam);
+		   	$pdf->draw_text(65,  692,  $rakir_row["osoite"],								$firstpage, $kirj);
+		   	$pdf->draw_rectangle(689,60,667,300,											$firstpage, $rectparam);
+		   	$pdf->draw_text(65,  670,  $rakir_row["postino"]."  ".$rakir_row["postitp"],	$firstpage, $kirj);
+           	
+		   	//toimitusosoite
+		   	$pdf->draw_rectangle(667,60,645,300,											$firstpage, $rectparam); 
+		   	$pdf->draw_rectangle(645,60,623,300,											$firstpage, $rectparam);	
+		   	$pdf->draw_text(62,  661, "Tavaran toimitusosoite",								$firstpage, $norm);
+		   	$pdf->draw_text(65,  648,  $rakir_row['toim_nimi']." ".$rakir_row['toim_nimitark'],	$firstpage, $kirj); 
+		   	$pdf->draw_text(65,  626,  $rakir_row['toim_osoite'],							$firstpage, $kirj);			
+		}
+
 		//oikeeta
 		$pdf->draw_text(302,  803,  "Lähetyspäivämäärä Avsändningsdatum",				$firstpage, $norm);
 		$pdf->draw_text(302,  788,  date("d.m.Y"),										$firstpage, $kirj);
 		$pdf->draw_text(302,  782,  "Lähettäjän viite Avsändarens referens",			$firstpage, $norm);
-		$pdf->draw_text(302,  767,  $viitelah,										$firstpage, $kirj);
+		$pdf->draw_text(302,  767,  $viitelah,											$firstpage, $kirj);
 		$pdf->draw_text(302,  761,  "Vastaanottajan viite Mottagarens referens",		$firstpage, $norm);
 		
 		if (! isset($GLOBALS['tyhja'])) {
@@ -236,40 +320,18 @@
 		}
 		
 		$pdf->draw_text(302,  746,  $viestirow["viesti"],								$firstpage, $kirj);
-		
-		$pdf->draw_rectangle(733,60,733,545,											$firstpage, $rectparam);
-		
-		//vastaanottaja	
-		$pdf->draw_rectangle(733,60,711,300,											$firstpage, $rectparam);
-		$pdf->draw_text(62,  726,  "Vastaanottaja Mottagare",							$firstpage, $norm);
-		$pdf->draw_text(240, 726,  "Asiakasnro Kundnr",									$firstpage, $norm);
-		$pdf->draw_text(65,  714,  $rakir_row["nimi"],									$firstpage, $kirj);
-		$pdf->draw_text(240, 714,  $rahsoprow['rahtisopimus'],							$firstpage, $kirj);
-		$pdf->draw_rectangle(711,60,689,300,											$firstpage, $rectparam);
-		$pdf->draw_text(65,  692,  $rakir_row["osoite"],								$firstpage, $kirj);
-		$pdf->draw_rectangle(689,60,667,300,											$firstpage, $rectparam);
-		$pdf->draw_text(65,  670,  $rakir_row["postino"]."  ".$rakir_row["postitp"],	$firstpage, $kirj);
-		
+				
 		//oikee
 		if ($toitarow['rahdinkuljettaja'] == '') {
 			$toitarow['rahdinkuljettaja'] = $toitarow['selite'];
 		}
-		
+		$pdf->draw_rectangle(733,300,667,545,												$firstpage, $rectparam);	
 		$pdf->draw_text(302,  726,  "Rahdinkuljettaja ja / tai huolitsijaTransportföretag och / eller Speditör", $firstpage, $norm);
-		$pdf->draw_text(302, 670,  $toitarow['rahdinkuljettaja'],						$firstpage, $kirj);
+		$pdf->draw_text(302, 670,  $toitarow['rahdinkuljettaja'],							$firstpage, $kirj);
 	
-		$pdf->draw_rectangle(667,60,667,545,											$firstpage, $rectparam);
-	
-		//toimitusosoite
-		$pdf->draw_rectangle(667,60,645,300,											$firstpage, $rectparam); 
-		$pdf->draw_text(62,  661, "Tavaran toimitusosoite",								$firstpage, $norm);
-		$pdf->draw_text(65,  648,  $rakir_row['toim_nimi']." ".$rakir_row['toim_nimitark'],	$firstpage, $kirj); 
-		$pdf->draw_text(65,  626,  $rakir_row['toim_osoite'],							$firstpage, $kirj); 
-		$pdf->draw_rectangle(645,60,623,300,											$firstpage, $rectparam);
 		//oikee
-		
 		//tähän viivakoodia
-		$pdf->draw_rectangle(623,60,623,545,											$firstpage, $rectparam);
+		$pdf->draw_rectangle(667,300,623,545,											$firstpage, $rectparam);
 	
 		//Lastauspaikka
 		$pdf->draw_rectangle(623,60,535,300,											$firstpage, $rectparam);
@@ -377,8 +439,10 @@
 		//kuljetusohjeita
 		$pdf->draw_text(62, 382 , "Kuljetusohjeet Transportinstruktioner",				$firstpage, $norm);
 		$pdf->draw_text(62, 311 , "Muut tiedot Tillägsuppgifter",						$firstpage, $norm);
-		if($lisatiedres !== false) {
+
+		if(is_resource($lisatiedres)) {
 			$ahven = 311;
+			
 			while($lisatiedot = mysql_fetch_array($lisatiedres)) {
 				if($lisatiedot["nimi"] != "") {
 					$ahven -= 10;
@@ -461,7 +525,7 @@
 		$pdf->draw_text(244, 42 , "Nimenselvennykset Namnförtydliganden",				$firstpage, $kirj); 
 	
 		//noita ulkokehän viivoja ja vähä muuta
-		$pdf->draw_rectangle(810,60,55,60,												$firstpage, $rectparam);
+		$pdf->draw_rectangle(535,60,55,60,												$firstpage, $rectparam);
 		$pdf->draw_text(25, 70 , $tulostuskpl,											$firstpage, $huge);
 		if	($tulostuskpl == 1) $pdf->draw_text(25, 30 , "Kuljetusliike",				$firstpage, $kirj);
 		if	($tulostuskpl == 2) $pdf->draw_text(25, 30 , "Kuljetusliike",				$firstpage, $kirj);

@@ -218,10 +218,40 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 	// sitten aletaan piirtämään itse PDF sisältöä
 	// ensin isot viivat kohilleen
-	$pdf->draw_rectangle(585,5,5,415,														$firstpage, $rectparam);
+	$pdf->draw_rectangle(585,5,5,415, $firstpage, $rectparam);
 
+	if ($yhtiorow["oslapp_rakir_logo"] != '' and trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
+		
+		$filename = $yhtiorow["lasku_logo"];
+
+		$fh = fopen($filename, "r");
+		$data = fread($fh, filesize($filename));
+		fclose($fh);
+
+		$image = $pdf->jfif_embed($data);
+
+		if(!$image) {
+			echo t("Logokuvavirhe");
+		}
+		else {
+			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+			
+			$logoparam = array();
+							
+			// Logosta tulee max: 50pt korkea ja 120pt leveä (17.64mm x 42.33mm)
+			if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
+				$logoparam['scale'] = 120 / $isizelogo[0];
+			}
+			else {
+				$logoparam['scale'] = 50  / $isizelogo[1];
+			}
+							
+			$placement = $pdf->image_place($image, 580-($logoparam['scale']*$isizelogo[1]), 410-($logoparam['scale']*$isizelogo[0]), $firstpage, $logoparam);
+		}
+	}
+	
 	//Mistä
-	$pdf->draw_text(mm_pt(4), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(4), mm_pt(200), "Mistä - Från - From: ".pt_mm(120),							$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(4), mm_pt(195), $yhtiorow['nimi'],								$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(4), mm_pt(190), $yhtiorow['nimitark'],							$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(4), mm_pt(185), $yhtiorow['osoite'],								$firstpage, $kirj);

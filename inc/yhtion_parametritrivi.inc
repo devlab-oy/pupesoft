@@ -1052,4 +1052,25 @@
 		
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "oslapp_rakir_logo") {
+		
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1="";
+		$sel2="";
+
+		if ($trow[$i] == "") {
+			$sel1 = "selected";
+		}
+		else {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value=''  $sel1>".t("Logoa ei tulosteta rahtikirjaan eikä osoitelappuun")."</option>";
+		$ulos .= "<option value='X' $sel2>".t("Logo tulostetaan rahtikirjaan ja osoitelappuun")."</option>";
+		$ulos .= "</select></td>";
+		
+		$jatko = 0;
+	}
 ?>

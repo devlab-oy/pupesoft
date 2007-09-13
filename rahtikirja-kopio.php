@@ -217,11 +217,13 @@
 						GROUP BY rahtikirjanro";
 		}
 		else {
-		    $query = "select rahtikirjanro from rahtikirjat where otsikkonro= '$otunnus'
-		            and yhtio='{$kukarow['yhtio']}'";
+		    $query = "	SELECT rahtikirjanro 
+						from rahtikirjat 
+						where otsikkonro= '$otunnus'
+		            	and yhtio='{$kukarow['yhtio']}'";
 		    $res = mysql_query($query) or pupe_error($query);
 		    $rahtikirjanro = mysql_fetch_array($res);
-		    
+
 			$query = "	select rahtikirjanro, sum(kilot) paino
 						from rahtikirjat
 						where yhtio		= '$kukarow[yhtio]'

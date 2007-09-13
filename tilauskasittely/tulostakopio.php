@@ -1777,7 +1777,7 @@
 
 				$tilausnumeroita = $toimrow["tunnukset"];
 
-				if ($oslapp != '') {
+				if ($oslapp != '' or $tee == 'NAYTATILAUS') {
 					require('osoitelappu_pdf.inc');
 				}
 				$tee = '';

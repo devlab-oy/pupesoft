@@ -152,6 +152,31 @@
 		$tee = "";
 	}
 	
+	if ($tee == 'CLEANTUOTTEETTOMAT') {
+ 		$query = "	DELETE 
+					FROM tuotepaikat
+ 					WHERE yhtio = '$kukarow[yhtio]' 
+ 					and tunnus  in (".implode(",", $paikkatunnus).")";
+ 		$presult = mysql_query($query) or pupe_error($query);
+
+		$tee = "";
+	}
+	
+	if ($tee == 'CLEANTUNTEMATTOMAT') {
+		
+ 		$query = "	UPDATE tuotepaikat
+  					SET 
+					hyllyalue 	= '$hyllyalue',
+					hyllynro 	= '$hyllynro ',
+					hyllyvali 	= '$hyllyvali',
+					hyllytaso 	= '$hyllytaso'
+ 					WHERE yhtio = '$kukarow[yhtio]' 
+ 					and tunnus  in (".implode(",", $paikkatunnus).")";
+ 		$presult = mysql_query($query) or pupe_error($query);
+		
+		$tee = "";
+	}
+	
 	if ($tee == 'LISTAAOLETUKSET') {
 		
 		$query = "	SELECT tuoteno, sum(if(oletus!='', 1, 0)) oletukset 
@@ -222,6 +247,96 @@
 			echo "</table><br><br>";
 			echo "<input type='submit' value='".t("Korjaa tuotepaikat")."'></form>";
 			echo "</table><br><br>";
+		}
+		else {
+			echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
+			$tee = "";
+		}
+	}
+
+	if ($tee == 'LISTAATUNTEMATTOMAT') {
+		
+		$query = "	SELECT tuotepaikat.tunnus ttun, tuotepaikat.tuoteno, tuotepaikat.saldo, tuotepaikat.oletus, concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) paikka, varastopaikat.tunnus
+		 			FROM tuotepaikat
+					LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+					and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+					and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+					HAVING varastopaikat.tunnus is null
+					ORDER BY tuotepaikat.tuoteno";
+		$result = mysql_query($query) or pupe_error($query);
+	
+		if (mysql_num_rows($result) > 0) {
+
+			echo "<table>";
+			echo "<tr><th>".t("Tuoteno")."</th>";
+			echo "<th>".t("Saldo")."</th>";
+			echo "<th>".t("Varastopaikka")."</th></tr>";
+
+			echo "<form method='POST' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='CLEANTUNTEMATTOMAT'>";
+
+			while ($lrow = mysql_fetch_array($result)) {
+				
+				echo "<input type='hidden' name='paikkatunnus[$lrow[ttun]]' value='$lrow[ttun]'>";
+				
+				echo "<td><a href='tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>$lrow[saldo]</td><td>$lrow[paikka]</td></tr>";
+			}
+
+			echo "<tr><td colspan='3' class='back'><br><br></td></tr>";
+
+			echo "</table><br>";
+			
+			echo "<table><tr><th>".t("Siirrä paikalle")."</th></tr>
+			<tr><td>
+			".t("Alue")." <input type = 'text' name = 'hyllyalue' size = '5' maxlength='5' value = ''>
+			".t("Nro")."  <input type = 'text' name = 'hyllynro'  size = '5' maxlength='5' value = ''>
+			".t("Väli")." <input type = 'text' name = 'hyllyvali' size = '5' maxlength='5' value = ''>
+			".t("Taso")." <input type = 'text' name = 'hyllytaso' size = '5' maxlength='5' value = ''>
+			</td></tr>";
+			echo "</table><br>";
+			
+			echo "<input type='submit' value='".t("Korjaa tuotepaikat")."'></form>";
+			echo "</table><br><br>";
+		}
+		else {
+			echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
+			$tee = "";
+		}
+	}
+	
+	if ($tee == 'LISTAATUOTTEETTOMAT') {
+		
+		$query = "	SELECT tuotepaikat.tunnus ttun, tuotepaikat.tuoteno, tuotepaikat.saldo, tuotepaikat.oletus, concat_ws('-', tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) paikka, tuote.tunnus
+		 			FROM tuotepaikat
+					LEFT JOIN tuote ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
+					WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+					HAVING tuote.tunnus is null
+					ORDER BY tuotepaikat.tuoteno";
+		$result = mysql_query($query) or pupe_error($query);
+	
+		if (mysql_num_rows($result) > 0) {
+
+			echo "<table>";
+			echo "<tr><th>".t("Tuoteno")."</th>";
+			echo "<th>".t("Saldo")."</th>";
+			echo "<th>".t("Varastopaikka")."</th></tr>";
+			
+			echo "<form method='POST' action='$PHP_SELF'>";
+			echo "<input type='hidden' name='tee' value='CLEANTUOTTEETTOMAT'>";
+			
+			while ($lrow = mysql_fetch_array($result)) {				
+				
+				echo "<input type='hidden' name='paikkatunnus[$lrow[ttun]]' value='$lrow[ttun]'>";
+				
+				echo "<td><a href='tuote.php?tee=Z&tuoteno=$lrow[tuoteno]'>$lrow[tuoteno]</a></td><td>$lrow[saldo]</td><td>$lrow[paikka]</td></tr>";
+			}
+
+			echo "<tr><td colspan='3' class='back'><br><br></td></tr>";
+			echo "</table><br>";
+			
+			echo "<input type='submit' value='".t("Poista tuotepaikat")."'></form>";
+			
 		}
 		else {
 			echo t("Yhtään tuotetta ei löytynyt")."!<br><br>";
@@ -477,6 +592,20 @@
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='LISTAAOLETUKSET'>";
 		echo "<tr><th>".t("Listaa tuotteet joilla on virheellisiä oletuspaikkoja")."</th><td></td>";
+		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
+		echo "</form>";
+		
+		echo "<tr><td class='back'><br></tr>";
+		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<input type='hidden' name='tee' value='LISTAATUNTEMATTOMAT'>";
+		echo "<tr><th>".t("Listaa tuotteet joiden varastopaikka ei kuulu mihinkään varastoon")."</th><td></td>";
+		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
+		echo "</form>";
+		
+		echo "<tr><td class='back'><br></tr>";
+		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<input type='hidden' name='tee' value='LISTAATUOTTEETTOMAT'>";
+		echo "<tr><th>".t("Listaa tuotepaikat joiden tuotetta ei löydy")."</th><td></td>";
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td></tr>";
 		echo "</form>";
 		

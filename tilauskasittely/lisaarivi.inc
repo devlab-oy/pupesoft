@@ -87,7 +87,7 @@
 
 	// debuggia varten, laita 1 jos haluut messuja
 	$lisaarivi_debug = 0;
-
+	
 	if ($laskurow['tila'] == 'O') {
 		$rivityyppi = 'O';	// Ostotilausrivi
 	}
@@ -452,34 +452,53 @@
 
 				// n‰in tehtiin vaan ennen
 				// usort($zzrow, "zzrowcmp");
+				
+				
+				if(count($zzrow) > 0) {
+					// Jos tuotteella on tuotepaikkoja
+					foreach($zzrow as $zrow) {
+						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or $laskurow["varasto"] == $zrow["varasto"]))) {
 
-				foreach($zzrow as $zrow) {
-					if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or $laskurow["varasto"] == $zrow["varasto"]))) {
+							if ($lisaarivi_debug==1) echo "Myyd‰‰n paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
 
-						if ($lisaarivi_debug==1) echo "Myyd‰‰n paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
+							// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
+							$myy_tuoteno[$i]   = strtoupper($tuoteno);
+							$myy_kpl[$i]       = $zrow["myytavissa"];
+							$myy_hyllyalue[$i] = $zrow["hyllyalue"];
+							$myy_hyllynro[$i]  = $zrow["hyllynro"];
+							$myy_hyllyvali[$i] = $zrow["hyllyvali"];
+							$myy_hyllytaso[$i] = $zrow["hyllytaso"];
+							$myy_varasto[$i]   = $zrow["varasto"];
+							$myy_era[$i]   	   = $zrow["era"];
 
-						// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
-						$myy_tuoteno[$i]   = strtoupper($tuoteno);
-						$myy_kpl[$i]       = $zrow["myytavissa"];
-						$myy_hyllyalue[$i] = $zrow["hyllyalue"];
-						$myy_hyllynro[$i]  = $zrow["hyllynro"];
-						$myy_hyllyvali[$i] = $zrow["hyllyvali"];
-						$myy_hyllytaso[$i] = $zrow["hyllytaso"];
-						$myy_varasto[$i]   = $zrow["varasto"];
-						$myy_era[$i]   	   = $zrow["era"];
-
-						if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
-							$myy_tyyppi[$i] = "NORMAALI";
-							$saldoyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien isien saldoa yhteens‰.
+							if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
+								$myy_tyyppi[$i] = "NORMAALI";
+								$saldoyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien isien saldoa yhteens‰.
+							}
+							else {
+								$myy_tyyppi[$i] = "LAPSITUOTE";
+								$lapsiyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien lapsien saldoa yhteens‰.
+							}
+							//Kasvatetaan indeksi‰
+							$i++;
 						}
-						else {
-							$myy_tyyppi[$i] = "LAPSITUOTE";
-							$lapsiyhteensa += $zrow["myytavissa"]; // summaillaan kaikkien lapsien saldoa yhteens‰.
-						}
-						//Kasvatetaan indeksi‰
-						$i++;
-					}
-				} // end foreach tuotepaikat
+					} // end foreach tuotepaikat
+				}
+				elseif ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI") {
+					// Jos tuotteella taas ei ole ollenkaan tuotepaikkoja ja myyd‰‰n kuitenkin (eli ei piitata saldoista)
+					
+					if ($lisaarivi_debug==1) echo "Tuotteella ei ole yht‰‰n tuotepaikkaa! Myyd‰‰n silti koska saldoista ei nyt piitata!<br>";
+					
+					$myy_tuoteno[$i]   = strtoupper($tuoteno);
+					$myy_kpl[$i]       = $toimittamatta;
+					$myy_hyllyalue[$i] = "";
+					$myy_hyllynro[$i]  = "";
+					$myy_hyllyvali[$i] = "";
+					$myy_hyllytaso[$i] = "";
+					$myy_varasto[$i]   = "";
+					$myy_era[$i]   	   = "";
+					$myy_tyyppi[$i]    = "NORMAALI";
+				}
 			}
 			else {
 				// Saldottomat tuotteet

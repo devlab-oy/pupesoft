@@ -1666,7 +1666,7 @@
 								and toimitustapa.nouto != '' and maksuehto.kateinen = ''";
 					$kures = mysql_query($query) or pupe_error($query);
 					
-					if (mysql_num_rows($kures) > 0) {
+					if (mysql_num_rows($kures) > 0 and $yhtiorow["lahete_nouto_allekirjoitus"] != "") {
 						kuittaus();
 					}
 

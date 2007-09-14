@@ -1358,7 +1358,7 @@
 			
 			// JT-rivikommentti
 			if ((int) $rivitunnus == 0 and $var == "J"and strpos($kommentti, "(".t("J‰lkitoimitus").":") === false) {
-				$kommentti = "(".t("J‰lkitoimitus").": ".tv1dateconv(date("Y-m-d")).") \n".$kommentti;
+				//$kommentti = "(".t("J‰lkitoimitus").": ".tv1dateconv(date("Y-m-d")).") \n".$kommentti;
 			}
 
 			// lis‰t‰‰n puuterivi

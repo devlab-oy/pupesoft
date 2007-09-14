@@ -410,7 +410,7 @@ if (!function_exists("saldo_myytavissa")) {
 							and $valinta1
 							concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
 							concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-							JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero)  ON sarjanumeroseuranta.yhtio = tuotepaikat.yhtio
+							JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tuotepaikat.yhtio
 							and sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno
 							and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
 							and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro

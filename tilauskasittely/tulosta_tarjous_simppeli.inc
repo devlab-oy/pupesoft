@@ -165,10 +165,10 @@ if (!function_exists('tulosta_tarjous')) {
 				$query = "$q $w and tilkpl < 0";
 			}			
 			elseif($key == "Tuotteet") {
-				$query = "$q $w and (tuote.ei_saldoa = '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Tuotteet')";
+				$query = "$q $w and (tuote.ei_saldoa = '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio='') or tilausrivin_lisatiedot.positio = 'Tuotteet')";
 			}
 			elseif($key == "Palvelut"){
-				$query = "$q $w and (tuote.ei_saldoa != '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio IS NULL) or tilausrivin_lisatiedot.positio = 'Palvelut')";
+				$query = "$q $w and (tuote.ei_saldoa != '' and tilkpl > 0 and ((tilausrivin_lisatiedot.positio != 'Optio' and tilausrivin_lisatiedot.positio != 'Ylläpito') or tilausrivin_lisatiedot.positio='') or tilausrivin_lisatiedot.positio = 'Palvelut')";
 			}
 			elseif($key == "Ylläpito"){
 				$query = "$q $w and tilausrivin_lisatiedot.positio = 'Ylläpito'";

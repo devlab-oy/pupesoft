@@ -21,10 +21,6 @@ if ($kollityht > 0) {
 	//
 	// tulostetaan rahtikirja
 
-	if ($tulostakopio == 'kylla') {
-		$lotsikot = $otsikot;
-	}
-
 	//	Näin se oli muuallakin onkai se sitten oikein?
 	$rahtikirjanro = $lotsikot[0];
 

@@ -13,10 +13,6 @@
 	//
 	// tulostetaan rahtikirja
 	
-	if ($tulostakopio == 'kylla') {
-		$lotsikot = $otsikot;
-	}
-	
 	//	Jos tämä on osa "kokonaistoimitusta", merkataan alkuperäinen tilausnumero alkuun
 	if($rakir_row["tunnusnippu"]>0) {
 		foreach ($lotsikot as &$o) {
@@ -125,6 +121,8 @@
 	else {
 		$tulostakolli = 3;
 	}
+	
+	$tulostakolli = 1;
 	
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			
@@ -388,6 +386,8 @@
 		
 		//kollit
 		$pdf->draw_text(62, 510, $lotsikot[0],											$firstpage, $kirj);
+		if ($astilnrot[0] != '') $pdf->draw_text(62, 502, t("Astilnro").": ".$astilnrot[0],	$firstpage, $kirj);
+		
 		$pdf->draw_text(183, 510, $kollit[0]."  ". $pakkaus[0],							$firstpage, $kirj); 
 		$pdf->draw_text(246, 510, $pakkauskuvaus[0],									$firstpage, $kirj); 		
 		$pdf->draw_text(246, 500, $vakit[0]." ".$lisatiedot[0],							$firstpage, $kirj);	
@@ -395,6 +395,7 @@
 		$pdf->draw_text(486, 510, $kuutiot[0],											$firstpage, $kirj);
 		
 		$pdf->draw_text(62, 490, $lotsikot[1],											$firstpage, $kirj);
+		if ($astilnrot[1] != '') $pdf->draw_text(62, 482, t("Astilnro").": ".$astilnrot[1],	$firstpage, $kirj);
 		$pdf->draw_text(183, 490, $kollit[1]."  ". $pakkaus[1],							$firstpage, $kirj);
 		$pdf->draw_text(246, 490, $pakkauskuvaus[1],									$firstpage, $kirj); 				
 		$pdf->draw_text(246, 480, $vakit[1]." ".$lisatiedot[1],							$firstpage, $kirj);
@@ -402,6 +403,7 @@
 		$pdf->draw_text(486, 490 , $kuutiot[1],											$firstpage, $kirj); 	
 		
 		$pdf->draw_text(62, 470, $lotsikot[2],											$firstpage, $kirj);
+		if ($astilnrot[2] != '') $pdf->draw_text(62, 462, t("Astilnro").": ".$astilnrot[2],	$firstpage, $kirj);
 		$pdf->draw_text(183, 470, $kollit[2]."  ". $pakkaus[2],							$firstpage, $kirj);
 		$pdf->draw_text(246, 470, $pakkauskuvaus[2],									$firstpage, $kirj); 				
 		$pdf->draw_text(246, 460, $vakit[2]." ".$lisatiedot[2],							$firstpage, $kirj);
@@ -409,6 +411,7 @@
 		$pdf->draw_text(486, 470, $kuutiot[2],											$firstpage, $kirj);
 		
 		$pdf->draw_text(62, 450, $lotsikot[3],											$firstpage, $kirj);
+		if ($astilnrot[3] != '') $pdf->draw_text(62, 442, t("Astilnro").": ".$astilnrot[3],	$firstpage, $kirj);
 		$pdf->draw_text(183, 450, $kollit[3]."  ". $pakkaus[3],							$firstpage, $kirj);
 		$pdf->draw_text(246, 450, $pakkauskuvaus[3],									$firstpage, $kirj); 		
 		$pdf->draw_text(246, 440, $vakit[3]." ".$lisatiedot[3],							$firstpage, $kirj);
@@ -416,6 +419,7 @@
 		$pdf->draw_text(486, 450, $kuutiot[3],											$firstpage, $kirj);
 		
 		$pdf->draw_text(62, 430, $lotsikot[4],											$firstpage, $kirj);
+		if ($astilnrot[4] != '') $pdf->draw_text(62, 422, t("Astilnro").": ".$astilnrot[4],	$firstpage, $kirj);
 		$pdf->draw_text(183, 430, $kollit[4]."  ". $pakkaus[4],							$firstpage, $kirj);
 		$pdf->draw_text(246, 430, $pakkauskuvaus[4],									$firstpage, $kirj); 		
 		$pdf->draw_text(246, 420, $vakit[4]." ".$lisatiedot[4],							$firstpage, $kirj);

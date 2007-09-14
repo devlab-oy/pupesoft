@@ -121,7 +121,6 @@ if ($tulostakopio == "kylla") {
 	$splitti = array();
 	$splitti = split(' ',trim($rakir));
 	$tulostakolli = count($splitti);
-	//echo "kala $tulostakolli<br>";
 }
 else {
 	if ($tulostuskpl == 0) {

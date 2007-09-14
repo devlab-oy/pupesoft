@@ -93,8 +93,6 @@
 			$jvehto = " ";
 		}
 		
-		
-
 		// haetaan kaikki distinct rahtikirjat..
 		$query = "	select distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
@@ -116,21 +114,22 @@
 
 		while ($rakir_row = mysql_fetch_array($rakir_res)) {
 			// muutama muuttuja tarvitaan
-			$pakkaus       = array();
-			$kilot         = array();
-			$kollit        = array();
-			$kuutiot       = array();
-			$lavametri     = array();
-			$lotsikot      = array();
-			$vakit         = array();
-			$kilotyht      = 0;
-			$lavatyht      = 0;
-			$kollityht     = 0;
-			$kuutiotyht    = 0;
-			$tulostuskpl   = 0;
-			$otunnukset    = "";
-			$tunnukset     = "";
-			$rahtikirjanro = "";
+			$pakkaus       	= array();
+			$kilot         	= array();
+			$kollit        	= array();
+			$kuutiot       	= array();
+			$lavametri     	= array();
+			$lotsikot      	= array();
+			$astilnrot		= array();
+			$vakit         	= array();
+			$kilotyht      	= 0;
+			$lavatyht      	= 0;
+			$kollityht     	= 0;
+			$kuutiotyht    	= 0;
+			$tulostuskpl   	= 0;
+			$otunnukset    	= "";
+			$tunnukset     	= "";
+			$rahtikirjanro 	= "";
 
 
 			if ($rakir_row['merahti'] == 'K') {
@@ -174,11 +173,11 @@
 			}
 
 			// haetaan tälle rahtikirjalle kuuluvat tunnukset
-			$query = "	select rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv
-						from rahtikirjat
+			$query = "	SELECT rahtikirjat.tunnus rtunnus, lasku.tunnus otunnus, merahti, lasku.ytunnus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.asiakkaan_tilausnumero
+						FROM rahtikirjat
 						join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
 						left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
-						where rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
+						WHERE rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
 						and rahtikirjat.yhtio			= '$kukarow[yhtio]'
 						and rahtikirjat.toimitustapa	= '$toimitustapa'
 						and rahtikirjat.tulostuspaikka	= '$varasto'
@@ -194,9 +193,10 @@
 				$tunnukset    .="'$rivi[rtunnus]',";
 
 				//otsikkonumerot talteen, nämä printataan paperille
-				if (!in_array($rivi['otunnus'], $lotsikot))
-					$lotsikot[] = $rivi['otunnus'];
-
+				if (!in_array($rivi['otunnus'], $lotsikot)) {
+					$lotsikot[] 	= $rivi['otunnus'];
+					$astilnrot[]	= $rivi['asiakkaan_tilausnumero'];
+				}
 				// otetaan jokuvaan rtunnus talteen uniikisi numeroksi
 				// tarvitaan postin rahtikirjoissa
 				$rtunnus = $rivi["rtunnus"];

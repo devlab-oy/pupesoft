@@ -1,9 +1,5 @@
 <?php
 
-if ($tulostakopio == 'kylla') {
-	$lotsikot = $otsikot;
-}
-
 $tulostusnimi = $rakir_row['toim_nimi']." ".$rakir_row['toim_nimitark'];
 
 // rahtikirjanumero on ensimmäisen tilauksen tilausnumero...

@@ -768,7 +768,6 @@
 					<option value='' $sela>".t("Ei tulosteta allekirjoitussivua")."</option>
 					<option value='K' $selb>".t("Tulostetaan allekirjoitussivu")."</option>		
 				</select><td>";
-		
 
 		$jatko = 0;
 	}

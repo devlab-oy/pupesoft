@@ -495,7 +495,7 @@ if ($toiminto == "" and $ytunnus != "") {
 			}
 
 			// katotaan onko kaikki sarjanumerot ok
-			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl
+			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl, tuote.sarjanumeroseuranta
 						FROM tilausrivi use index (uusiotunnus_index)
 						JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 						WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
@@ -514,24 +514,26 @@ if ($toiminto == "" and $ytunnus != "") {
 				else {
 					$tunken = "ostorivitunnus";
 				}
-
-				if ($sarjarow["sarjanumeroseuranta"] == "S") {
-					$lisasarjalisays = "distinct";
+				
+				if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T") {
+					$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
+								FROM sarjanumeroseuranta
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$toimrow[tuoteno]'
+								and $tunken = '$toimrow[tunnus]'";
 				}
 				else {
-					$lisasarjalisays = "";
+					$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
+								FROM sarjanumeroseuranta
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$toimrow[tuoteno]'
+								and $tunken = '$toimrow[tunnus]'";
 				}
-
-				// tilausrivin tunnus pitää löytyä sarjanumeroseurannasta
-				$query = "	SELECT $lisasarjalisays sarjanumero
-							FROM sarjanumeroseuranta use index (yhtio_ostorivi)
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$toimrow[tuoteno]'
-							and $tunken = '$toimrow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
+				$sarjarow = mysql_fetch_array($sarjares);
 
 				// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon
-				if (mysql_num_rows($sarjares) != abs($toimrow["kpl"])) {
+				if ($sarjarow["kpl"] != abs($toimrow["kpl"])) {
 					$sarjanrook  = 1; // ei ole kaikilla tuotteilla sarjanumeroa
 					$sarjanrot = "kesken";
 				}

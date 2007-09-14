@@ -274,24 +274,35 @@
 		
 		$sarjanumero = trim($sarjanumero);
 		
-		$query = "	SELECT *
-					FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
-					WHERE yhtio = '$kukarow[yhtio]'
-					and sarjanumero = '$sarjanumero'
-					and tuoteno = '$rivirow[tuoteno]'
-					and (ostorivitunnus=0 or myyntirivitunnus=0)";
+		if($rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "S") {
+			$query = "	SELECT *
+						FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
+						WHERE yhtio 		= '$kukarow[yhtio]'
+						and sarjanumero 	= '$sarjanumero'
+						and tuoteno 		= '$rivirow[tuoteno]'
+						and (ostorivitunnus = 0 or myyntirivitunnus = 0)";
+		}
+		else {
+			$query = "	SELECT *
+						FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
+						WHERE yhtio 		= '$kukarow[yhtio]'
+						and sarjanumero 	= '$sarjanumero'
+						and tuoteno 		= '$rivirow[tuoteno]'
+						and myyntirivitunnus= 0";	
+		}
 		$sarjares = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($sarjares) == 0 and $rivirow["sarjanumeroseuranta"] == "S") {
+		if (mysql_num_rows($sarjares) == 0) {
 			
 			//jos ollaan syötetty kokonaan uusi sarjanuero
 			$query = "	INSERT into sarjanumeroseuranta 
-						(yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)
-						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]')";
+						(yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)
+						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$rivirow[varattu]','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]')";
 			$sarjares = mysql_query($query) or pupe_error($query);
+			
 			$tun = mysql_insert_id();
 
-			if($sarjanumeronLisatiedot == "OK") {
+			if($sarjanumeronLisatiedot == "OK" and ($rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "S")) {
 				$query = "	SELECT *
 							FROM tuote
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -330,8 +341,13 @@
 				$lisatietores_apu = mysql_query($query) or pupe_error($query);
 			}
 
-			echo "<font class='message'>".t("Lisättiin sarjanumero")." $sarjanumero.</font><br><br>";
 			
+			if($rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "S") {
+				echo "<font class='message'>".t("Lisättiin sarjanumero")." $sarjanumero.</font><br><br>";
+			}
+			else {
+				echo "<font class='message'>".t("Lisättiin eränumero")." $sarjanumero.</font><br><br>";
+			}
 			
 			// Yritetään liittää luotu sarjanumero tähän riviin
 			if($rivitunnus > 0) {
@@ -348,61 +364,6 @@
 				$formista	= "kylla";
 			}
 
-			$sarjanumero	= "";
-			$lisatieto		= "";
-			$kaytetty		= "";
-		}
-		elseif (mysql_num_rows($sarjares) == 0 and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F")) {
-			
-			$tun = array();
-			
-			for($lisi = 0; $lisi < $rivirow["varattu"]; $lisi++) {
-				// Jos ollaan syötetty kokonaan uusi sarjanumero
-				$query = "	INSERT into sarjanumeroseuranta (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)
-							VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]')";
-				$sarjares = mysql_query($query) or pupe_error($query);
-				
-				$tun[] = mysql_insert_id();
-			}
-			
-			$ktark = implode(",", $tun);
-			
-			$query = "	UPDATE sarjanumeroseuranta
-						SET perheid = '$tun[0]'
-						WHERE yhtio	= '$kukarow[yhtio]'
-						and tunnus in ($ktark)";
-			$sarjares = mysql_query($query) or pupe_error($query);
-			
-			echo "<font class='message'>".t("Lisättiin eränumero")." $sarjanumero.</font><br><br>";
-
-			$sarjanumero	= "";
-			$lisatieto		= "";
-			$kaytetty		= "";
-		}
-		elseif (mysql_num_rows($sarjares) == 0 and $rivirow["sarjanumeroseuranta"] == "T") {
-			//jos ollaan syötetty kokonaan uusi sarjanuero
-			$query = "	INSERT into sarjanumeroseuranta (yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)
-						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]')";
-			$sarjares = mysql_query($query) or pupe_error($query);
-			$tun = mysql_insert_id();
-			
-			echo "<font class='message'>".t("Lisättiin sarjanumero")." $sarjanumero.</font><br><br>";
-			
-			// Yritetään liittää luotu sarjanumero tähän riviin
-			if($rivitunnus > 0) {
-				
-				if ($valitut_sarjat != "") {
-					$valitut_sarjat = $valitut_sarjat.",".$tun;
-				}
-				else {
-					$valitut_sarjat = $tun;
-				}
-				
-				$sarjataan 	= explode(",", $valitut_sarjat);
-				$sarjat		= explode(",", $valitut_sarjat);
-				$formista	= "kylla";
-			}
-			
 			$sarjanumero	= "";
 			$lisatieto		= "";
 			$kaytetty		= "";
@@ -432,27 +393,9 @@
 			$sarres = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($sarres) > 1) {
-				echo "<font class='error'>".t('Riviin ei voi liittää vain yhden erän tuotteita')."</font><br><br>";	
+				echo "<font class='error'>".t('Riviin voi liittää vain yhden erän tuotteita')."</font><br><br>";	
 				
 				$lisaysok = "";
-			}
-			
-			if ($lisaysok == "OK") {
-				$query = "	SELECT group_concat(tunnus) tunnukset
-							FROM sarjanumeroseuranta
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and perheid in ($ktark)";
-				$sarres = mysql_query($query) or pupe_error($query);
-				$sarrow = mysql_fetch_array($sarres);
-				
-				if ($sarrow["tunnukset"] == "") {
-					echo "<font class='error'>".t('Riviin ei voi liittää vain yhden erän tuotteita')."</font><br><br>";	
-				
-					$lisaysok = "";
-				}
-				else {					
-					$sarjataan = explode(',', $sarrow["tunnukset"]);
-				}
 			}
 		}
 		
@@ -475,19 +418,7 @@
 		
 		// jos olemme ruksanneet vähemmän tai yhtä paljon kuin tuotteita on rivillä, voidaan päivittää muutokset
 		if ($rivirow["varattu"] >= count($sarjataan) and $lisaysok == "OK") {
-			foreach ($sarjat as $sarjatun) {
-				
-				if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
-					$query = "	SELECT group_concat(tunnus) tunnukset
-								FROM sarjanumeroseuranta
-								WHERE yhtio	= '$kukarow[yhtio]'
-								and perheid = '$sarjatun'";
-					$sarres = mysql_query($query) or pupe_error($query);
-					$sarrow = mysql_fetch_array($sarres);
-
-					$sarjatun = $sarrow["tunnukset"];
-				}
-				
+			foreach ($sarjat as $sarjatun) {				
 				$query = "	SELECT tunnus, kaytetty, $tunnuskentta trivitunnus
 							FROM sarjanumeroseuranta
 							WHERE tunnus in ($sarjatun)";

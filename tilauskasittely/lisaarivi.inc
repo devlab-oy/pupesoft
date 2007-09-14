@@ -321,10 +321,11 @@
 
 				// Käydään läpi tuotepaikat		
 				if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
-					$query = "	SELECT tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
-								concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
+								concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
+								varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
 					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -336,15 +337,18 @@
 								and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro
 								and sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
 								and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
+								and sarjanumeroseuranta.myyntirivitunnus = 0
+								and sarjanumeroseuranta.era_kpl != 0
 								WHERE tuote.yhtio = '$kukarow[yhtio]'
 								and tuote.tuoteno = '$tuoteno'
-								GROUP BY 1,2,3,4,5,6,7,8,9,10
+								GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
 								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";			
 				}
 				else {
-					$query = "	SELECT tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
-								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
+								varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
 					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -903,25 +907,45 @@
 								if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and $myy_era[$indeksi] != "") {
 									
 									if ($varattu > 0) {
-										$tunken = "myyntirivitunnus";																				
+										$tunken = "myyntirivitunnus";
+										
+										$query = "	SELECT ostorivitunnus
+													FROM sarjanumeroseuranta
+													WHERE yhtio		= '$kukarow[yhtio]'
+													and tuoteno		= '$myy_tuoteno[$indeksi]'
+													and hyllyalue   = '$myy_hyllyalue[$indeksi]'
+													and hyllynro    = '$myy_hyllynro[$indeksi]'
+													and hyllytaso   = '$myy_hyllytaso[$indeksi]'
+													and hyllyvali   = '$myy_hyllyvali[$indeksi]'
+													and sarjanumero = '$myy_era[$indeksi]'";
+										$lisa_res = mysql_query($query) or pupe_error($query);
+										$lisa_row = mysql_fetch_array($lisa_res);
+										
+										$oslisa = " ostorivitunnus ='$lisa_row[ostorivitunnus]', ";
 									}
 									else {
 										$tunken = "ostorivitunnus";
+										$oslisa = "";
 									}
-
-									$query = "	UPDATE sarjanumeroseuranta
-												SET $tunken 	= '$lisatty_tun'
-												WHERE yhtio		= '$kukarow[yhtio]'
-												and tuoteno		= '$myy_tuoteno[$indeksi]'
-												and $tunken 	= 0
-												and hyllyalue   = '$myy_hyllyalue[$indeksi]'
-												and hyllynro    = '$myy_hyllynro[$indeksi]'
-												and hyllytaso   = '$myy_hyllytaso[$indeksi]'
-												and hyllyvali   = '$myy_hyllyvali[$indeksi]'
-												and sarjanumero = '$myy_era[$indeksi]'
-												ORDER BY tunnus
-												LIMIT ". (int) abs($varattu);
-									$sres = mysql_query($query) or pupe_error($query);
+									
+									$query = "	INSERT into sarjanumeroseuranta 
+												SET yhtio 	= '$kukarow[yhtio]',
+												tuoteno		= '$myy_tuoteno[$indeksi]',
+												lisatieto 	= '$lisa_row[lisatieto]',
+												$tunken 	= '$lisatty_tun', 
+												$oslisa
+												kaytetty	= '$lisa_row[kaytetty]',
+												era_kpl		= '',
+												laatija		= '$kukarow[kuka]', 
+												luontiaika	= now(),
+												takuu_alku 	= '$lisa_row[takuu_alku]',
+												takuu_loppu	= '$lisa_row[takuu_loppu]',
+												hyllyalue   = '$myy_hyllyalue[$indeksi]',
+												hyllynro    = '$myy_hyllynro[$indeksi]',
+												hyllytaso   = '$myy_hyllytaso[$indeksi]',
+												hyllyvali   = '$myy_hyllyvali[$indeksi]',
+												sarjanumero = '$myy_era[$indeksi]'";								
+									$lisa_res = mysql_query($query) or pupe_error($query);
 								}
 
 								if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {

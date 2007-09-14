@@ -390,11 +390,11 @@
 
 				//saldot per varastopaikka			
 				if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
-					$query = "	SELECT tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
 								concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-								varastopaikat.nimitys
+								varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
 					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -406,16 +406,18 @@
 								and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro
 								and sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
 								and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
+								and sarjanumeroseuranta.myyntirivitunnus = 0
+								and sarjanumeroseuranta.era_kpl != 0
 								WHERE tuote.yhtio = '$kukarow[yhtio]'
 								and tuote.tuoteno = '$tuoteno'
-								GROUP BY 1,2,3,4,5,6,7,8,9,10,11
-								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";			
+								GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";		
 				}
 				else {
-					$query = "	SELECT tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
+					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-								varastopaikat.nimitys
+								varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
 					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
@@ -474,7 +476,7 @@
 				$kokonaissaldo_tapahtumalle = $kokonaissaldo;
 
 				// katsotaan onko t‰lle tuotteelle yht‰‰n sis‰ist‰ toimittajaa ja ett‰ toimittajan tiedoissa on varmasti kaikki EDI mokkulat p‰‰ll‰ ja oletusvienti on jotain vaihto-omaisuutta
-				$query = "	select tyyppi_tieto, liitostunnus
+				$query = "	SELECT tyyppi_tieto, liitostunnus
 							from tuotteen_toimittajat, toimi
 							where tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 							and tuotteen_toimittajat.tuoteno = '$tuoteno'
@@ -1013,17 +1015,14 @@
 			elseif ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
 				echo "<font class='message'>".t("Er‰numerot")."</font><hr>";
 				
-				$query	= "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto, sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso, count(*) kpl
+				$query	= "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.parasta_ennen, sarjanumeroseuranta.lisatieto, 
+							sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso, 
+							sarjanumeroseuranta.era_kpl kpl
 							FROM sarjanumeroseuranta
-							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-							LEFT JOIN lasku lasku_osto   use index (PRIMARY) ON lasku_osto.yhtio=sarjanumeroseuranta.yhtio and lasku_osto.tunnus=tilausrivi_osto.uusiotunnus
 							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 							and sarjanumeroseuranta.tuoteno = '$tuoterow[tuoteno]'
-							and sarjanumeroseuranta.myyntirivitunnus != -1
-							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-							and tilausrivi_osto.laskutettuaika != '0000-00-00'
-							GROUP BY sarjanumeroseuranta.sarjanumero";
+							and sarjanumeroseuranta.myyntirivitunnus = 0
+							and sarjanumeroseuranta.era_kpl != 0";
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sarjares) > 0) {

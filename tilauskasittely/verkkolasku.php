@@ -318,7 +318,7 @@
 
 			while ($laskurow = mysql_fetch_array($res)) {
 
-				$query    = "	SELECT tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys
+				$query    = "	SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys
 								FROM tilausrivi use index (yhtio_otunnus)
 								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
@@ -334,24 +334,41 @@
 					else {
 						$tunken = "myyntirivitunnus";
 					}
+					
+					if ($srow1["sarjanumeroseuranta"] == "S" or $srow1["sarjanumeroseuranta"] == "T") {
+						$query = "	SELECT count(distinct sarjanumero) kpl
+									FROM sarjanumeroseuranta
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$srow1[tuoteno]'
+									and $tunken = '$srow1[tunnus]'";
+						$sarjares2 = mysql_query($query) or pupe_error($query);
+						$srow2 = mysql_fetch_array($sarjares2);
 
-					$query = "	SELECT count(*) kpl
-								FROM sarjanumeroseuranta
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$srow1[tuoteno]'
-								and $tunken = '$srow1[tunnus]'";
-					$sarjares2 = mysql_query($query) or pupe_error($query);
-					$srow2 = mysql_fetch_array($sarjares2);
+						if ($srow2["kpl"] != abs($srow1["varattu"])) {
+							$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
 
-					if ($srow2["kpl"] != abs($srow1["varattu"])) {
-						$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
-
-						if ($silent == "" or $silent == "VIENTI") {
-							$tulos_ulos_sarjanumerot .= t("Tilaukselta puuttuu sarjanumeroita, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+							if ($silent == "" or $silent == "VIENTI") {
+								$tulos_ulos_sarjanumerot .= t("Tilaukselta puuttuu sarjanumeroita, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+							}
 						}
 					}
+					else {
+						$query = "	SELECT count(*) kpl
+									FROM sarjanumeroseuranta
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$srow1[tuoteno]'
+									and $tunken = '$srow1[tunnus]'";
+						$sarjares2 = mysql_query($query) or pupe_error($query);
+						$srow2 = mysql_fetch_array($sarjares2);
 
-					if ($srow1["varattu"] < 0 and $srow1["osto_vai_hyvitys"] == "") {
+						if ($srow2["kpl"] != 1) {
+							if ($silent == "" or $silent == "VIENTI") {
+								$tulos_ulos_sarjanumerot .= t("Tilaukselta puuttuu eränumeroita, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+							}
+						}
+					}					
+
+					if ($srow1["sarjanumeroseuranta"] == "S" and $srow1["varattu"] < 0 and $srow1["osto_vai_hyvitys"] == "") {
 						//Jos tuotteella on sarjanumero ja kyseessä on HYVITYSTÄ
 
 						//Tähän hyvitysriviin liitetyt sarjanumerot

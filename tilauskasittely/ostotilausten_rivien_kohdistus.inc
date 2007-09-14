@@ -986,18 +986,20 @@ if ($tila == '') {
 				$tunind = "yhtio_ostorivi";
 			}
 
-			if ($sarjarow["sarjanumeroseuranta"] == "S") {
-				$lisasarjalisays = "distinct";
+			if ($sarjarow["sarjanumeroseuranta"] == "S" or $sarjarow["sarjanumeroseuranta"] == "T") {
+				$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
+							FROM sarjanumeroseuranta
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$rivirow[tuoteno]'
+							and $tunken = '$rivirow[rivitunnus]'";
 			}
 			else {
-				$lisasarjalisays = "";
+				$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
+							FROM sarjanumeroseuranta
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$rivirow[tuoteno]'
+							and $tunken = '$rivirow[rivitunnus]'";
 			}
-
-			$query = "	SELECT count($lisasarjalisays sarjanumero) kpl, min(sarjanumero) sarjanumero
-						FROM sarjanumeroseuranta
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tuoteno = '$rivirow[tuoteno]'
-						and $tunken = '$rivirow[rivitunnus]'";
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$sarjarow = mysql_fetch_array($sarjares);
 

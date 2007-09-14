@@ -551,8 +551,7 @@
 				}
 			}
 
-			// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
-			if ($row["sarjanumeroseuranta"] == "S") {
+			if ($row["sarjanumeroseuranta"] != "") {
 				$query	= "	SELECT sarjanumeroseuranta.*, tilausrivi_osto.nimitys nimitys
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -562,34 +561,27 @@
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 				
-				$nimitys = "";
+				// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
+				if ($row["sarjanumeroseuranta"] == "S") {
+					$nimitys = "";
+				
+					if(mysql_num_rows($sarjares) > 0) {
+						$nimitys .= "<table width='100%' valign='top'>";
 
-				if(mysql_num_rows($sarjares) > 0) {
-					$nimitys .= "<table width='100%' valign='top'>";
-
-					while ($sarjarow = mysql_fetch_array($sarjares)) {
-						if($sarjarow["nimitys"] != "") {
-							$nimitys .= "<tr><td valign='top'>$sarjarow[nimitys]</td></tr>";
+						while ($sarjarow = mysql_fetch_array($sarjares)) {
+							if($sarjarow["nimitys"] != "") {
+								$nimitys .= "<tr><td valign='top'>$sarjarow[nimitys]</td></tr>";
+							}
+							else {
+								$nimitys .= "<tr><td valign='top'>$row[nimitys]</td></tr>";
+							}
 						}
-						else {
-							$nimitys .= "<tr><td valign='top'>$row[nimitys]</td></tr>";
-						}
+					
+						$nimitys .= "</table>";
+					
+						$row["nimitys"] = $nimitys;
 					}
-					
-					$nimitys .= "</table>";
-					
-					$row["nimitys"] = $nimitys;
 				}				
-			}
-			elseif ($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") {
-				$query	= "	SELECT sarjanumeroseuranta.*
-							FROM sarjanumeroseuranta
-							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
-							and (tilausrivi_myynti.tunnus is null)
-							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
-				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 			
 			if(!isset($originaalit)) {
@@ -832,22 +824,25 @@
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
 								concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-					 			varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
-								FROM tuote
+								varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+					 			FROM tuote
 								JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 								JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+								$sallitut_maat_lisa
 								and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
 								and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-								$sallitut_maat_lisa
-								LEFT JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio and sarjanumeroseuranta.tuoteno = tuote.tuoteno
+								JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio 
+								and sarjanumeroseuranta.tuoteno = tuote.tuoteno
 								and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
 								and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro
 								and sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
 								and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
+								and sarjanumeroseuranta.myyntirivitunnus = 0
+								and sarjanumeroseuranta.era_kpl != 0
 								WHERE tuote.$yhtiot
 								and tuote.tuoteno = '$row[tuoteno]'
-								GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
-								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";			
+								GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";		
 				}
 				else {
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
@@ -862,7 +857,7 @@
 								and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 								WHERE tuote.$yhtiot
 								and tuote.tuoteno = '$row[tuoteno]'
-								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";	
+								ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 				}
 				$varresult = mysql_query($query) or pupe_error($query);
 

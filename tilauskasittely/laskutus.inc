@@ -128,6 +128,40 @@ else {
 						
 			//Paivitetaan tuotteen saldo jos saldoa on varattu
 			if ($turow['ei_saldoa'] == '' and $trow['varattu'] != 0) {
+				
+				if ($turow["sarjanumeroseuranta"] == "E" or $turow["sarjanumeroseuranta"] == "F") {
+					if ($trow["varattu"] > 0) {
+						
+						$query = "	SELECT ostorivitunnus
+									FROM sarjanumeroseuranta
+									WHERE yhtio			 = '$kukarow[yhtio]'
+									and tuoteno			 = '$trow[tuoteno]'
+									and myyntirivitunnus = '$trow[tunnus]'
+									LIMIT 1";
+						$lisa_res = mysql_query($query) or pupe_error($query);
+						$lisa_row = mysql_fetch_array($lisa_res);
+						
+						$query = "	UPDATE sarjanumeroseuranta
+									SET era_kpl = era_kpl-$trow[varattu]
+									WHERE yhtio 			= '$kukarow[yhtio]' 
+									and tuoteno				= '$trow[tuoteno]' 
+									and ostorivitunnus 		= '$lisa_row[ostorivitunnus]'
+									and myyntirivitunnus 	= 0
+									LIMIT 1";
+						$lisa_res = mysql_query($query) or pupe_error($query);
+						
+						$query = "	UPDATE sarjanumeroseuranta
+									SET era_kpl = era_kpl+$trow[varattu]
+									WHERE yhtio			 = '$kukarow[yhtio]'
+									and tuoteno			 = '$trow[tuoteno]'
+									and myyntirivitunnus = '$trow[tunnus]'
+									LIMIT 1";
+						$lisa_res = mysql_query($query) or pupe_error($query);
+					}
+				}
+				
+				
+				
 				///* P‰ivitet‰‰n saldo tilausrivin osoittamalla paikalla *///
 				$query = "	UPDATE tuotepaikat
 							SET saldo = saldo-$trow[varattu],

@@ -130,12 +130,12 @@
 
 	if (mysql_field_name($result, $i) == "maa") {
 
-		if (strtoupper($t[$i]) == 'FI') {
-			// require ("tarkistaytunnus.inc");
+		if (strtoupper($t[$i]) == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "A")) {
+			require ("tarkistaytunnus.inc");
 
 			if ($ok == 0) {
-				//$virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
-				//$errori = 1;
+				$virhe[$ytunnus_tunnus] = t("Virheellinen y-tunnus")."! $t[$i] -> $ytunnus";
+				$errori = 1;
 			}
 			else {
 				// $t[$ytunnus_tunnus] = $ytunnus;

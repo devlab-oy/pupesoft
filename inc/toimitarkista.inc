@@ -90,7 +90,7 @@
 	if ((mysql_field_name($result, $i) == "ytunnus") and (trim($t[$i])!='')) {
 		$ytunnus = trim($t[$i]);
 		
-		if ($tmp_maakoodi=='FI') {
+		if ($tmp_maakoodi == 'FI' and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "T")) {
 
 			$hetu = $ytunnus; // hetu talteen
 			require ("tarkistaytunnus.inc");
@@ -107,7 +107,7 @@
 				}
 			}
 			else {
-				$t[$i] = $ytunnus;
+//				$t[$i] = $ytunnus;
 			}
 		}
 		else { // ulkomaalainen saa olla mitä se haluaa

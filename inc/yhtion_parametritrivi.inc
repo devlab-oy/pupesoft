@@ -1093,4 +1093,22 @@
 		
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "ytunnus_tarkistukset") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Tarkistetaan kotimaiset toimittajat ja asiakkaat")."</option>";
+		$ulos .= "<option value = 'T' $sel[T]>".t("Tarkistetaan vain kotimaiset toimittajat")."</option>";
+		$ulos .= "<option value = 'A' $sel[A]>".t("Tarkistetaan vain kotimaiset asiakkaat")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Ei ytunnus tarkistuksia")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 ?>

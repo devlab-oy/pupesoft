@@ -112,8 +112,21 @@
 			else {
 				$tunken = "myyntirivitunnus";
 			}
-
-			$query = "select count(*) kpl from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$toimrow[tuoteno]' and $tunken='$toimrow[tunnus]'";
+			
+			if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T") {
+				$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
+							FROM sarjanumeroseuranta
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$toimrow[tuoteno]'
+							and $tunken = '$toimrow[tunnus]'";
+			}
+			else {
+				$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
+							FROM sarjanumeroseuranta
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$toimrow[tuoteno]'
+							and $tunken = '$toimrow[tunnus]'";
+			}
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$sarjarow = mysql_fetch_array($sarjares);
 

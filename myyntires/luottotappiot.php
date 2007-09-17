@@ -32,7 +32,7 @@ if ($tila == 'K') {
 
 	while ($lasku = mysql_fetch_array($laskuresult)) {
 
-		if ($lasku['tilino'] != $yhtiorow['myyntisaamiset']) {
+		if ($lasku['tilino'] != $yhtiorow['myyntisaamiset'] and $lasku['tilino'] != $yhtiorow['factorincsaamiset'] and $lasku['tilino'] != $yhtiorow['konsernimyyntisaamiset']) {
 			// Hoidetaan alv
 			$alv = round($lasku['summa'] * $lasku['vero'] / 100, 2);
 
@@ -94,12 +94,14 @@ if ($tila == 'K') {
 					laatija		= '$kukarow[kuka]',
 					laadittu	= now()";
 			$result = mysql_query($query) or pupe_error($query);
-			$query = "UPDATE lasku set mapvm = '$tpv-$tpk-$tpp' where yhtio ='$kukarow[yhtio]' and tunnus = '$lasku[ltunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
 		}
 
-		echo "<font class='message'>".t("Lasku %s %s %s on tiliöity luottotappioksi", '', $lasku["laskunro"], $lasku["summa"], $yhtiorow["valkoodi"])."!</font><br>";
+		$query = "UPDATE lasku set mapvm = '$tpv-$tpk-$tpp' where yhtio ='$kukarow[yhtio]' and tunnus = '$lasku[ltunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+
 	}
+
+	echo "<font class='message'>".t("Laskut on tiliöity luottotappioksi")."!</font><br>";
 
 }
 

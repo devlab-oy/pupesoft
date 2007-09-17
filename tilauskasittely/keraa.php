@@ -128,7 +128,7 @@
 				}
 			}
 			else {
-				$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
+				$query = "	SELECT count(*) kpl
 							FROM sarjanumeroseuranta
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$toimrow[tuoteno]'

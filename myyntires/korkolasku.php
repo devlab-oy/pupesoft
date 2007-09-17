@@ -69,7 +69,7 @@ if ($tee == "ALOITAKOROTUS") {
 						round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2) korkosumma,
 						maksuehto.jv
 						FROM lasku use index (yhtio_tila_mapvm)
-						JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino = '$yhtiorow[myyntisaamiset]' and tiliointi.tapvm > lasku.erpcm)
+						JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino = '$yhtiorow[myyntisaamiset]' and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
 						LEFT JOIN maksuehto on (maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto)						
 						WHERE lasku.yhtio 	= '$kukarow[yhtio]'
 						and lasku.tila 		= 'U'
@@ -79,7 +79,7 @@ if ($tee == "ALOITAKOROTUS") {
 						and lasku.olmapvm	= '0000-00-00'
 						HAVING ika > $min_myoh and korkosumma != 0 and (maksuehto.jv is null or maksuehto.jv = '')) as laskut
 				JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus		
-				JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino = '$yhtiorow[myyntisaamiset]' and tiliointi.tapvm > lasku.erpcm)
+				JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino = '$yhtiorow[myyntisaamiset]' and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
 				WHERE lasku.tunnus = laskut.tunnus
 				$konslisa
 				$asiakaslisa
@@ -114,7 +114,7 @@ if ($tee == "KOROTA")  {
 				if (count(*) > 1, 'useita', to_days(tiliointi.tapvm) - to_days(lasku.erpcm)) as ika,
 				sum(round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2)) as korkosumma
 				FROM lasku
-				JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino = '$yhtiorow[myyntisaamiset]' and tiliointi.tapvm > lasku.erpcm)
+				JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino = '$yhtiorow[myyntisaamiset]' and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
 				LEFT JOIN maksuehto on (maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto)
 				WHERE lasku.yhtio = '$kukarow[yhtio]'
 				and lasku.tunnus in ($korotettavat[0])

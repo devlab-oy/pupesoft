@@ -155,7 +155,7 @@
 					round(sum(tilausrivi.kpl),0) kpl,
 					tullinimike.su_vientiilmo su,
 					if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
-					round(sum(tilausrivi.rivihinta), 0) rivihinta,
+					if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 					group_concat(lasku.tunnus) as kaikkitunnukset,
 					group_concat(distinct tilausrivi.perheid2) as perheid2set,
 					group_concat(concat(\"'\",tuote.tuoteno,\"'\") SEPARATOR ',') as kaikkituotteet,

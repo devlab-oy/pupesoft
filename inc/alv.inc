@@ -1,7 +1,8 @@
 <?php
+
 	if ($tee == '') {
 			echo "<font class='head'>".t("Arvonlisäverolaskelma")."</font><hr>";
-	        
+
 			echo "<form action = 'raportit.php' method='post'>
 					<input type = 'hidden' name = 'toim' value = 'alv'>
 					<input type = 'hidden' name = 'tee' value = '1'>
@@ -68,42 +69,46 @@
 					</td>
 					<td><input type = 'submit' value = '".t("Näytä")."'></td>
 					</tr></table></form>";
-			
+
 			require ("inc/footer.inc");
 			exit;
 	}
+
 	if ($tee == 1) {
+
 		$lokk = $alvk + 1;
 		$lovv = $alvv;
+
 		if ($lokk > 12) {
 			$lokk -= 12;
 			$lovv++;
 		}
 		$alloppu = $lovv . "-" . $lokk . "-01";
-		
+
 		echo "<font class='head'>".t("Arvonlisäverolaskelma kaudelta")." $alvv-$alvk</font><hr>";
-		
+
 		if ($ruotsi != 'on') {
-			$query = "SELECT if(lasku.tila='U','".t("myyntireskontra")."', if(lasku.tila='X','".t("muu")."','".t("ostoreskontra")."')) tyyppi, vero,
+
+			$query = "	SELECT if(lasku.tila='U','".t("myyntireskontra")."', if(lasku.tila='X','".t("muu")."','".t("ostoreskontra")."')) tyyppi, vero,
 						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
 						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
-					FROM tiliointi, tili, lasku
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tili.yhtio = tiliointi.yhtio and
-						tiliointi.tilino = tili.tilino and
-						tiliointi.korjattu='' and
-						tiliointi.tapvm >= '" . $alvv  . "-" . $alvk . "-01' and
-						tiliointi.tapvm < '" . $alloppu  . "' and
-						vero > 0 and
-						lasku.yhtio=tiliointi.yhtio and
-						lasku.tunnus = tiliointi.ltunnus
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+						tiliointi.korjattu = '' and
+						tiliointi.tapvm >= '$alvv-$alvk-01' and
+						tiliointi.tapvm < '$alloppu' and
+						tiliointi.vero > 0
 						group by tyyppi, vero";
-			$result = mysql_query($query) or pupe_error($query);		
+			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<table><tr>";
 			for ($i = 0; $i < mysql_num_fields($result); $i++) {
 				echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
 			}
 			echo "</tr>";
+
 			while ($trow=mysql_fetch_array ($result)) {
 				echo "<tr>
 					<td>$trow[tyyppi]</td>
@@ -111,19 +116,22 @@
 					<td align = 'right'>$trow[Bruttosumma]</td>
 					<td align = 'right'>$trow[Verot]</td>
 					<td align = 'right'>$trow[Kpl]</td></tr>";
-				
+
 			}
 			echo "</table><br><br>";
 		}
-		
-		echo "".t("Käsiviennit")."<br>";
-		$query = "SELECT ltunnus, tiliointi.tapvm, tiliointi.summa, concat_ws(' ',selite, lasku.nimi) selite
-					FROM tiliointi, lasku
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tiliointi.korjattu='' and
-						aputunnus='' and
-						tiliointi.tapvm >= '" . $alvv  . "-" . $alvk . "-01' and
-						tiliointi.tapvm < '" . $alloppu  . "' and
-						tilino = $yhtiorow[alv] and lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus";
+
+		echo t("Käsiviennit")."<br>";
+
+		$query = "	SELECT ltunnus, tiliointi.tapvm, tiliointi.summa, concat_ws(' ',selite, lasku.nimi) selite
+					FROM tiliointi
+					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+					tiliointi.korjattu = '' and
+					tiliointi.aputunnus = '' and
+					tiliointi.tapvm >= '$alvv-$alvk-01' and
+					tiliointi.tapvm < '$alloppu' and
+					tiliointi.tilino = '$yhtiorow[alv]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";
@@ -131,7 +139,7 @@
 			echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
 		}
 
-		while ($trow=mysql_fetch_array ($result)) {
+		while ($trow = mysql_fetch_array ($result)) {
 			echo "<tr>";
 			for ($i = 0; $i < mysql_num_fields($result); $i++) {
 				if ($i == 0) {
@@ -150,35 +158,35 @@
 			echo "</tr>";
 		}
 		echo "</table><br><br>";
-		
-		if ($ruotsi != 'on') 
-			$query = "SELECT vero, tiliointi.tilino, nimi, round(sum(summa * (1+vero/100)),2) Bruttosumma,
+
+		if ($ruotsi != 'on') {
+			$query = "	SELECT vero, tiliointi.tilino, nimi, round(sum(summa * (1+vero/100)),2) Bruttosumma,
 						round(sum(summa * vero / 100),2) Verot, count(*) Kpl
-					FROM tiliointi, tili
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tili.yhtio = tiliointi.yhtio and
-						tiliointi.tilino = tili.tilino and
-						tiliointi.korjattu='' and
-						tiliointi.tapvm >= '" . $alvv  . "-" . $alvk . "-01' and
-						tiliointi.tapvm < '" . $alloppu  . "' and
+						FROM tiliointi
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+						tiliointi.korjattu = '' and
+						tiliointi.tapvm >= '$alvv-$alvk-01' and
+						tiliointi.tapvm < '$alloppu' and
 						vero > 0
-					GROUP BY vero, tiliointi.tilino
-					ORDER BY vero, tiliointi.tilino";
-		else
-			$query = "SELECT concat_ws(' ',vero, if(lasku.tila='U','".t("ulos")."','".t("sisään")."')) vero, tiliointi.tilino, tili.nimi,
+						GROUP BY vero, tiliointi.tilino
+						ORDER BY vero, tiliointi.tilino";
+		}
+		else {
+			$query = "	SELECT concat_ws(' ',vero, if(lasku.tila='U','".t("ulos")."','".t("sisään")."')) vero, tiliointi.tilino, tili.nimi,
 						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
 						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
-					FROM tiliointi, tili, lasku
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tili.yhtio = tiliointi.yhtio and
-						tiliointi.tilino = tili.tilino and
-						tiliointi.korjattu='' and
-						tiliointi.tapvm >= '" . $alvv  . "-" . $alvk . "-01' and
-						tiliointi.tapvm < '" . $alloppu  . "' and
-						vero > 0 and
-						lasku.yhtio=tiliointi.yhtio and
-						lasku.tunnus = tiliointi.ltunnus
-					GROUP BY vero, tiliointi.tilino
-					ORDER BY vero, tiliointi.tilino";
-
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						tiliointi.korjattu = '' and
+						tiliointi.tapvm >= '$alvv-$alvk-01' and
+						tiliointi.tapvm < '$alloppu' and
+						tiliointi.vero > 0 and
+						GROUP BY vero, tiliointi.tilino
+						ORDER BY vero, tiliointi.tilino";
+		}
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";
@@ -237,13 +245,14 @@
 	if ($tee == '2') {
 		echo "<font class='head'>".t("Alv-tarkistus kaudelta")." $alvv-$alvk</font><hr>";
 		echo "".t("Tarkistetaan automaattiviennit")."<br>";
-		$query = "SELECT tunnus, ltunnus, tapvm, summa, selite, round(summa * vero / 100 ,2) Verot
+
+		$query = "	SELECT tunnus, ltunnus, tapvm, summa, selite, round(summa * vero / 100 ,2) Verot
 					FROM tiliointi
 					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
-						tiliointi.korjattu='' and
-						left(tapvm,7) = '" . $alvv  . "-" . $alvk . "' and
-						vero > 0 and
-						selite <> 'Myyntikirja'";
+					tiliointi.korjattu = '' and
+					left(tapvm,7) = '" . $alvv  . "-" . $alvk . "' and
+					vero > 0 and
+					selite <> 'Myyntikirja'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";
@@ -255,10 +264,10 @@
 
 		while ($trow=mysql_fetch_array ($result)) {
 			// Etsitään vastaava automaattitiliöinti
-			$query = "SELECT summa, ltunnus
-					FROM tiliointi
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
-						tiliointi.korjattu='' and
+			$query = "	SELECT summa, ltunnus
+						FROM tiliointi
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+						tiliointi.korjattu = '' and
 						aputunnus = '$trow[0]'";
 			$xresult = mysql_query($query) or pupe_error($query);
 
@@ -299,11 +308,14 @@
 		echo "</table><br>Done!<br><br>";
 
 		echo "".t("Tarkistetaan epäilyttävät käsiviennit")."<br>";
-		$query = "SELECT ltunnus, tapvm, summa, selite
+		$query = "	SELECT ltunnus, tapvm, summa, selite
 					FROM tiliointi
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tiliointi.korjattu='' and
-							aputunnus='' and left(tapvm,7) = '" . $alvv  . "-" . $alvk . "' and selite != 'Myyntikirja'
-							and tilino = $yhtiorow[alv]";
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+					tiliointi.korjattu = '' and
+					aputunnus = '' and
+					left(tapvm,7) = '" . $alvv  . "-" . $alvk . "' and
+					selite != 'Myyntikirja' and
+					tilino = '$yhtiorow[alv]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";

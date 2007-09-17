@@ -1192,7 +1192,7 @@ if ($tee == '') {
 						<input type='hidden' name='projektilla' value='$projektilla'>
 						<input type='hidden' name='aktivoinnista' value='true'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-/*
+
 				if ($jt_kayttoliittyma == "kylla") {
 					echo "	<input type='hidden' name='jt_kayttoliittyma' value=''>
 							<input type='submit' value='".t("Piilota JT-rivit")."'>";
@@ -1200,7 +1200,7 @@ if ($tee == '') {
 				else {
 					echo "	<input type='hidden' name='jt_kayttoliittyma' value='kylla'>
 							<input type='submit' value='".t("Näytä JT-rivit")."'>";
-				} */
+				}
 				echo "</form></td>";
 			}
 		}
@@ -3988,7 +3988,7 @@ if ($tee == '') {
 		}
 
 		// JT-rivikäyttöliittymä
-		if ($jt_kayttoliittyma == "kyllaPOISKAYTOSTA" and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "REKLAMAATIO" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
+		if ($jt_kayttoliittyma == "kylla" and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "REKLAMAATIO" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
 
 			//katotaan eka halutaanko asiakkaan jt-rivejä näkyviin
 			$asjtq = "select jtrivit from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";

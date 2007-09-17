@@ -4,11 +4,13 @@
 	// $tunnusarray array jossa on k‰sitelt‰vien tilausrivien tunnukset arrayssa
 	// $kpl[$tunnukset]   = monta toimitetaan
 	// $loput[$tunnukset] = KAIKKI/POISTA/JATA/MITA/SUORA mit‰ tehd‰‰n lopuille
+	// $suoratoimpaikka[$tunnukset] = paikat josta myyd‰‰n suoratoimituksia
+	// $tilaus_on_jo = KYLLA niin lis‰t‰‰n rivit $kukarow[kesken] tilaukselle
 	
 	if (!function_exists("tee_jt_tilaus")) {
-		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput) {
+		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka = '', $tilaus_on_jo = '') {
 			global $yhtiorow, $kukarow, $toim;
-			
+
 			if ($loput[$tunnukset] == 'MITA') {
 				if ($toim == "ENNAKKO") {
 					$query = "	DELETE FROM tilausrivi
@@ -65,11 +67,13 @@
 					$query = "	SELECT *
 								FROM lasku
 								WHERE yhtio	= '$kukarow[yhtio]' and
-								tunnus		= '$kukarow[kesken]'";
+								tunnus		= '$kukarow[kesken]' and 
+								tila        in ('N', 'L', 'E', 'G')";
 					$stresult = mysql_query($query) or pupe_error($query);
 				}
 				else {
-					$query = "SELECT * FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$isarivirow[otunnus]'";
+					// tila pit‰‰ olla l‰hete, tilaus, ennakko tai siirtolista
+					$query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$isarivirow[otunnus]' and tila in ('N', 'L', 'E', 'G')";
 					$stresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($stresult) == 0) {

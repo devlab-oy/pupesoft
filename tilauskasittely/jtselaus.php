@@ -59,16 +59,22 @@
 				$tee = "JATKA";
 			}
 		}
+		else {
+			die("Asiakastietojasi ei löydy!");
+		}
 	}
 	elseif ($tilaus_on_jo != '') {
 		$query  = "	SELECT *
 					FROM lasku
-					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[kesken]' and tila IN ('N', 'L', 'E', 'G')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 1) {
 			$asiakas = mysql_fetch_array($result);
 			$asiakasmaa = $asiakas["toim_maa"];
+		}
+		else {
+			die("Tilausta ei löydy!");
 		}
 	}
 	
@@ -110,7 +116,7 @@
 				}
 				
 				// Toimitetaan jtrivit
-				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput);
+				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo);
 			}
 		}
 
@@ -940,7 +946,8 @@
 										$tunnusarray 		= explode(',', $tunnukset);
 																				
 										// Toimitetaan jtrivit
-										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput);
+										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo);
+										
 									}
 									else {
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
@@ -982,7 +989,8 @@
 										$tunnusarray 		= explode(',', $tunnukset);
 																				
 										// Toimitetaan jtrivit
-										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput);
+										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo);
+										
 									}
 									elseif($automaaginen == "") {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!</font></td>";

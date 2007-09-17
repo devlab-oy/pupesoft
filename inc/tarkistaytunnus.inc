@@ -50,7 +50,6 @@ if ($tulo <> 0) {
 // oliko tarkastusmerkki ok
 if ($tulo == $tmerkki) {
 	$ok = 1;
-	$ytunnus = (int) $ytunnus; // etunollat vielä pois
 }
 else {
 	$ok = 0;

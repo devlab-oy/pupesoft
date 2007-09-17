@@ -107,7 +107,7 @@
 				}
 			}
 			else {
-//				$t[$i] = $ytunnus;
+				$t[$i] = $ytunnus;
 			}
 		}
 		else { // ulkomaalainen saa olla mitä se haluaa

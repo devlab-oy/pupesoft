@@ -138,7 +138,7 @@
 				$errori = 1;
 			}
 			else {
-				// $t[$ytunnus_tunnus] = $ytunnus;
+				 $t[$ytunnus_tunnus] = $ytunnus;
 			}
 		}
 		elseif ($yhtiorow["maa"] == 'FI' and strtoupper($t[$i]) == 'SE' and strtoupper(substr($t[$ytunnus_tunnus], 0, 2)) != "SE") {

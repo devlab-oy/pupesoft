@@ -136,7 +136,7 @@
 				$sarjares2 = mysql_query($query) or pupe_error($query);
 				$sarjarow = mysql_fetch_array($sarjares2);
 
-				if ($sarjarow["kpl"] != abs($toimrow["varattu"])) {
+				if ($sarjarow["kpl"] != 1) {
 					echo "<font class='error'>".t("Eränumeroseurannassa oleville tuotteille on liitettävä eränumero ennen keräystä")."! ".t("Tuote").": $toimrow[tuoteno].</font><br><br>";
 					$tee = "";
 				}

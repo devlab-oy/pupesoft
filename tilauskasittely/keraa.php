@@ -113,12 +113,19 @@
 				$tunken = "myyntirivitunnus";
 			}
 			
-			if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T") {
+			if ($srow1["sarjanumeroseuranta"] == "S" or $srow1["sarjanumeroseuranta"] == "T") {
 				$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
 							FROM sarjanumeroseuranta
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$toimrow[tuoteno]'
 							and $tunken = '$toimrow[tunnus]'";
+				$sarjares2 = mysql_query($query) or pupe_error($query);
+				$sarjarow = mysql_fetch_array($sarjares2);
+
+				if ($sarjarow["kpl"] != abs($toimrow["varattu"])) {
+					echo "<font class='error'>".t("Sarjanumeroseurannassa oleville tuotteille on liitettävä sarjanumero ennen keräystä")."! ".t("Tuote").": $toimrow[tuoteno].</font><br><br>";
+					$tee = "";
+				}
 			}
 			else {
 				$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
@@ -126,13 +133,13 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$toimrow[tuoteno]'
 							and $tunken = '$toimrow[tunnus]'";
-			}
-			$sarjares = mysql_query($query) or pupe_error($query);
-			$sarjarow = mysql_fetch_array($sarjares);
+				$sarjares2 = mysql_query($query) or pupe_error($query);
+				$sarjarow = mysql_fetch_array($sarjares2);
 
-			if ($sarjarow["kpl"] != abs($toimrow["varattu"])) {
-				echo "<font class='error'>".t("Sarjanumeroseurannassa oleville tuotteille on liitettävä sarjanumero ennen keräystä")."! ".t("Tuote").": $toimrow[tuoteno].</font><br><br>";
-				$tee = "";
+				if ($sarjarow["kpl"] != abs($toimrow["varattu"])) {
+					echo "<font class='error'>".t("Eränumeroseurannassa oleville tuotteille on liitettävä eränumero ennen keräystä")."! ".t("Tuote").": $toimrow[tuoteno].</font><br><br>";
+					$tee = "";
+				}
 			}
 		}
 	}

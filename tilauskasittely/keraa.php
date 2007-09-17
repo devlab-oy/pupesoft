@@ -113,7 +113,7 @@
 				$tunken = "myyntirivitunnus";
 			}
 			
-			if ($srow1["sarjanumeroseuranta"] == "S" or $srow1["sarjanumeroseuranta"] == "T") {
+			if ($toimrow["sarjanumeroseuranta"] == "S" or $toimrow["sarjanumeroseuranta"] == "T") {
 				$query = "	SELECT count(distinct sarjanumero) kpl, min(sarjanumero) sarjanumero
 							FROM sarjanumeroseuranta
 							WHERE yhtio = '$kukarow[yhtio]'

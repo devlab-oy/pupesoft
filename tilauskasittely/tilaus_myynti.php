@@ -1057,7 +1057,7 @@ if ($tee == '') {
 
 	//katsotaan ett‰ kukarow kesken ja $kukarow[kesken] stemmaavat kesken‰‰n
 	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
-		echo "<br><br><br>".t("3 VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
+		echo "<br><br><br>".t("3 VIRHE: Sinulla on useita tilauksia auki")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").". $tilausnumero / $kukarow[kesken]<br><br><br>";
 		exit;
 	}
 	if ($kukarow['kesken'] != '0') {
@@ -1192,7 +1192,7 @@ if ($tee == '') {
 						<input type='hidden' name='projektilla' value='$projektilla'>
 						<input type='hidden' name='aktivoinnista' value='true'>
 						<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-
+/*
 				if ($jt_kayttoliittyma == "kylla") {
 					echo "	<input type='hidden' name='jt_kayttoliittyma' value=''>
 							<input type='submit' value='".t("Piilota JT-rivit")."'>";
@@ -1200,7 +1200,7 @@ if ($tee == '') {
 				else {
 					echo "	<input type='hidden' name='jt_kayttoliittyma' value='kylla'>
 							<input type='submit' value='".t("N‰yt‰ JT-rivit")."'>";
-				}
+				} */
 				echo "</form></td>";
 			}
 		}
@@ -3988,7 +3988,7 @@ if ($tee == '') {
 		}
 
 		// JT-rivik‰yttˆliittym‰
-		if ($jt_kayttoliittyma == "kylla" and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "REKLAMAATIO" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
+		if ($jt_kayttoliittyma == "kyllaPOISKAYTOSTA" and $laskurow["liitostunnus"] > 0 and $toim != "TYOMAARAYS" and $toim != "REKLAMAATIO" and $toim != "VALMISTAVARASTOON" and $toim != "MYYNTITILI" and $toim != "TARJOUS") {
 
 			//katotaan eka halutaanko asiakkaan jt-rivej‰ n‰kyviin
 			$asjtq = "select jtrivit from asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";

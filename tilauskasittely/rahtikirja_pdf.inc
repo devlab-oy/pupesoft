@@ -121,9 +121,7 @@
 	else {
 		$tulostakolli = 3;
 	}
-	
-	$tulostakolli = 1;
-	
+		
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			
 		// tehdään pdf:n uusi sivu

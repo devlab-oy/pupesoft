@@ -807,7 +807,7 @@ else {
 
 					if ($tilvakir = mysql_fetch_array($tilvares)) {
 						require_once ("tulosta_tilausvahvistus_pdf.inc");
-						tulosta_tilausvahvistus($tilausnumero, $tilvakir["komento"]);
+						tulosta_tilausvahvistus($laskurow["tunnus"], $tilvakir["komento"]);
 					}
 				}
 

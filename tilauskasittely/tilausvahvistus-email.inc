@@ -3,32 +3,53 @@
 // tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
+require_once ("tulosta_tilausvahvistus_pdf.inc");
+
 $query         = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 $tilvahresult  = mysql_query($query) or pupe_error($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
 
 $virexx = 0;
-if (strpos(" ".$laskurow['tilausvahvistus'],'S')) {
-	if ($tilvahasiakas['email']=='') {
 
+// asiakkaan sähköpostiin
+if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
+
+	if ($tilvahasiakas['email'] == '') {
 		$tilvah_nimi = $tilvahasiakas["nimi"];
 		if ($tilvahasiakas["toim_nimi"] != "" and $tilvahasiakas["toim_nimi"] != $tilvahasiakas["nimi"]) {
 			$tilvah_nimi .= " / ".$tilvahasiakas["toim_nimi"];
 		}
-
 		echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole sähköpostiosoitetta")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
 		$virexx++;
 	}
-}
-if (strpos(" ".$laskurow['tilausvahvistus'],'O')) {
-	if ($kukarow['eposti']=='') {
-		echo "<font class='error'>".t("TILAUSVAHVISTUS: Sinulla ei ole sähköpostiosoitetta")."!</font><br><br>";
-		$virexx++;
+	else {
+		$komento = "asiakasemail".$tilvahasiakas['email'];
+		// lähetetään PDF vahvistus vain jos meillä on P kirjain vahvistuksessa
+		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
+			tulosta_tilausvahvistus($laskurow["tunnus"], $komento);
+		}
 	}
 }
 
+// omaan sähköpostiin
+if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 
-if ($virexx == 0) {
+	if ($kukarow['eposti'] == '') {
+		echo "<font class='error'>".t("TILAUSVAHVISTUS: Sinulla ei ole sähköpostiosoitetta")."!</font><br><br>";
+		$virexx++;
+	}
+	else {
+		$komento = "email";
+		// lähetetään PDF vahvistus vain jos meillä on P kirjain vahvistuksessa
+		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
+			tulosta_tilausvahvistus($laskurow["tunnus"], $komento);
+		}
+	}
+}
+
+// lähetetään textimuotoinen tilausvahvistusmeili jos miellä ei ole P:kirjainta vahvistuksessa
+if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
+
 	$query = "	SELECT tilausrivi.tunnus, eankoodi, myyntihinta, aleryhma,
 				tilausrivi.tuoteno, varattu, toimaika, kommentti, tilkpl, tilausrivi.alv, tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, jt, var
 				FROM tilausrivi
@@ -63,11 +84,11 @@ if ($virexx == 0) {
 		$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])	.$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\n";
 		$ulos .= "\n";
-		
+
 		if ($laskurow['toimvko'] == 'V') {
 			$laskurow["toimaika"] = t("Viikko")." ".date("W", strtotime($laskurow["toimaika"]));
 		}
-		
+
 		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])		.t("Toimitusaika", $kieli).": ".$laskurow['toimaika']."\n";
 		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])			.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
 		$ulos .= sprintf("%-50.s",t("Tilaaja", $kieli).": ".$laskurow['tilausyhteyshenkilo'])	.t("Tilaajan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero']."\n";
@@ -136,7 +157,7 @@ if ($virexx == 0) {
 				$ulos .= "     * ".sprintf("%-75.75s",$tvtilausrivirow['kommentti'])."\n";
 			}
 
-			///* Tehrään liitetiedosto *///
+			// Tehrään liitetiedosto
 			$liite .= $rivino."\t".$tvtilausrivirow['nimitys']."\t".$tvtilausrivirow['tuoteno']."\t".$tvtilausrivirow['varattu']."\t";
 
 			if ($naytatvale==2) {
@@ -158,7 +179,7 @@ if ($virexx == 0) {
 
 	} // end rivejä löytyi
 
-	///* Kompostoidaan meili *///
+	// Kompostoidaan meili
 	$bound = uniqid(time()."_") ;
 
 	$header  = "From: <$yhtiorow[postittaja_email]>\n";
@@ -180,20 +201,19 @@ if ($virexx == 0) {
 	$content .= $liite;
 	$content .= "\n" ;
 
-
-
-	if (strpos(" ".$laskurow['tilausvahvistus'],'S')) {
+	if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 		unset($boob);
 		$boob = mail($tilvahasiakas['email'], $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli), $content, $header, "-f $yhtiorow[postittaja_email]");
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'O')) {
+	if (strpos($laskurow['tilausvahvistus'],'O') !== FALSE) {
 		unset($boob);
 		$boob = mail($kukarow['eposti']		, $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli), $content, $header, "-f $yhtiorow[postittaja_email]");
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
-} // end email löytyi
+
+}
 
 $ulos = "";
 

@@ -8,11 +8,15 @@ if (empty($argv)) {
     die('<p>Tämän scriptin voi ajaa ainoastaan komentoriviltä.</p>');
 }
 
+if ($argv[1] == '') {
+	die("Yhtiö on annettava!!");
+}
+
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
 // kaikki virheilmotukset
-ini_set('error_reporting', E_ALL | E_STRICT);
+//ini_set('error_reporting', E_ALL | E_STRICT);
 
 $path            = '/tmp/';
 $path_nimike     = $path . 'NIMIKE.txt';
@@ -22,10 +26,16 @@ $path_varasto    = $path . 'VARASTO.txt';
 $path_tapahtumat = $path . 'TAPAHTUMAT.txt';
 $path_myynti     = $path . 'MYYNTI.txt';
 
-$kukarow = array(
-	'kuka'  => 'anttih',
-	'yhtio' => 'artr',
-);
+
+
+/*$kukarow = array(
+	'kuka'  => 'macce',
+	'yhtio' => $argv[1];
+);*/
+
+$kukarow = array();
+
+$kukarow["yhtio"] = $argv[1];
 
 $query = "SELECT * from yhtio where yhtio='{$kukarow['yhtio']}'";
 $res = mysql_query($query) or pupe_error($query);
@@ -40,7 +50,7 @@ $params = mysql_fetch_assoc($res);
 $yhtiorow = array_merge($yhtiorow, $params);
 
 // ajetaan kaikki operaatiot
-//nimike();
+nimike();
 asiakas();
 toimittaja();
 varasto();

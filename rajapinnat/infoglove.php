@@ -7,8 +7,12 @@ if (empty($argv)) {
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+if (empty($argv)) {
+    die('<p>Tämän scriptin voi ajaa ainoastaan komentoriviltä.</p>');
+}
+
 if ($argv[1] == '') {
-	die("Yhtio on annettava!!");
+	die("Yhtiö on annettava!!");
 }
 
 $kukarow['yhtio'] = $argv[1];

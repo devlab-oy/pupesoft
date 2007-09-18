@@ -29,7 +29,7 @@ else {
 	require ("../inc/parametrit.inc");
 }
 
-echo "<font class='head'>Elmatuote</font><hr>";
+$ulos = "<font class='head'>Elmatuote</font><hr>";
 
 if ($aja=='run') {
 
@@ -43,8 +43,7 @@ if ($aja=='run') {
 	$query = "select * from tuote where yhtio = '$kukarow[yhtio]' and hinnastoon != 'E' and status NOT IN ('P','X')";
 	$res   = mysql_query($query) or pupe_error($query);
 
-	echo "<font class='message'>K‰sitell‰‰n tuotteita (".mysql_num_rows($res)." kpl)...<br>";
-	flush();
+	$ulos .= "<font class='message'>K‰sitell‰‰n tuotteita (".mysql_num_rows($res)." kpl)...<br>";
 
 	// arvioidaan kestoa
 	$arvio     = array();
@@ -146,38 +145,17 @@ if ($aja=='run') {
 		// kirjotetaan tietue failiin
 		if (fwrite($handle, $ulos) === FALSE) die("failin kirjoitus ep‰onnistui");
 
-		// tehd‰‰n arvio kauan t‰m‰ kest‰‰.. wau! :)
-		if (count($arvio)<=$joukko)
-		{
-			$timeparts = explode(" ",microtime());
-			$endtime   = $timeparts[1].substr($timeparts[0],1);
-			$arvio[]   = round($endtime-$alkuaika,4);
-
-			if (count($arvio)==$joukko)
-			{
-				$ka   = array_sum($arvio) / count($arvio);
-				$aika = round(mysql_num_rows($res) * $ka, 4);
-				echo "<font class='message'>Arvioitu kesto $aika sec.</font><br>";
-				flush();
-			}
-			else
-			{
-				$timeparts = explode(" ",microtime());
-				$alkuaika  = $timeparts[1].substr($timeparts[0],1);
-			}
-		}
 	}
 
 	// faili kiinni
 	fclose($handle);
 
 	$timeparts = explode(" ",microtime());
-	$endtime   = $timeparts[1].substr($timeparts[0],1);
-	$aika      = round($endtime-$starttime,4);
+	$endtime   = $timeparts[1].substr($timeparts[0], 1);
+	$aika      = round($endtime-$starttime, 4);
 
-	echo "<font class='message'>Todellinen kesto $aika sec.</font><br>";
-	echo "<font class='message'>L‰hetet‰‰n tiedosto Elmaan...</font>";
-	flush();
+	$ulos .= "<font class='message'>Kesto $aika sec.</font><br>";
+	$ulos .= "<font class='message'>L‰hetet‰‰n tiedosto Elmaan...</font>";
 
 	//pakataan faili
 	#$cmd = "/usr/bin/bzip2 $elma";
@@ -196,8 +174,7 @@ if ($aja=='run') {
 	require ("../inc/ftp-send.inc");
 
 	//L‰hetet‰‰n tiedosto asiakkaille suoraan jotka haluavat sen ilman Elmaa
-	echo "<font class='message'>L‰hetet‰‰n tiedosto Asiakkaille...</font><br>";
-	flush();
+	$ulos .= "<font class='message'>L‰hetet‰‰n tiedosto Asiakkaille...</font><br>";
 
 	$query  = "select * from asiakas where yhtio='$kukarow[yhtio]' and fakta like '%ELMATUOTE-SƒHK÷POSTILLA%' and email!=''";
 	$kores  = mysql_query($query) or pupe_error($query);
@@ -230,12 +207,20 @@ if ($aja=='run') {
 			$mail .= "\n" ;
 
 			$boob = mail($korow["email"], "Varastotilanne - $yhtiorow[nimi]", $mail, $header);
-			if ($boob === FALSE) echo "S‰hkˆpostin l‰hetys ep‰onnistui<br>";
+			if ($boob === FALSE) $ulos .= "S‰hkˆpostin l‰hetys ep‰onnistui<br>";
 		}
 	}
 
 	if ($palautus == 0)
-		echo "<font class='message'>Valmis.</font><br><br>";
+		$ulos .= "<font class='message'>Valmis.</font><br><br>";
+
+	// komentorivilt‰
+	if (trim($argv[1]) != '') {
+		$ulos = strip_tags($ulos, "<br>");
+		$ulos = str_replace("<br>", "/n", $ulos);
+	}
+
+	echo "$ulos";
 
 }
 else {

@@ -1,5 +1,8 @@
 <?php
 
+	$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
+	$DAY_ARRAY_EN = array("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday");
+
 	//tässä joko tehdään uutta otsikkoa tai muutetaan olemassa olevaa
 	if ($tee == '' or $kopioitava_otsikko != 0) {
 		//päivitetään kukarow[kesken] kun käyttäjä tekee uutta tilausta
@@ -801,15 +804,31 @@
 				echo "<input type='text' name='toimpp' value='$toimpp' size='3'><input type='text' name='toimkk' value='$toimkk' size='3'><input type='text' name='toimvv' value='$toimvv' size='6'>
 					<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'>";
 				
-				if ($srow["toimvko"] == 'V') {
+				if ($srow["toimvko"] != '') {
 					$toimvko = date("W", strtotime($srow["toimaika"]));
 				}
 				else {
 					$toimvko = "";
 				}
 				
-				echo "".t("Vko")."<input type='text' name='toimvko' value='$toimvko' size='2'>
+				echo t("Vko").": <input type='text' name='toimvko' value='$toimvko' size='2'>
 					<input type='hidden' name='vtoimvko' value='".$srow["toimvko"]."'>";
+				
+				echo "<select name='toimvkopva'>";
+				echo "<option value=''></option>";
+				
+				foreach ($DAY_ARRAY as $di => $day) {
+					if ($srow["toimvko"] == $di) {
+						$sel = "SELECTED";
+					}
+					else {
+						$sel = "";
+					}
+					
+					echo "<option value='$di' $sel>$day</option>";
+				}
+				
+				echo "</select>";
 			}
 
 			echo "</td>";
@@ -863,15 +882,31 @@
 				echo "<input type='text' name='kerpp' value='$kerpp' size='3'><input type='text' name='kerkk' value='$kerkk' size='3'><input type='text' name='kervv' value='$kervv' size='6'>
 						<input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'>";
 						
-				if ($srow["keraysvko"] == 'V') {
+				if ($srow["keraysvko"] != '') {
 					$keraysvko = date("W", strtotime($srow["kerayspvm"]));
 				}
 				else {
 					$keraysvko = "";
 				}
 
-				echo "".t("Vko")."<input type='text' name='keraysvko' value='$keraysvko' size='2'>
-					<input type='hidden' name='vtoimvko' value='".$srow["keraysvko"]."'>";
+				echo t("Vko").": <input type='text' name='keraysvko' value='$keraysvko' size='2'>
+					<input type='hidden' name='vkeraysvko' value='".$srow["keraysvko"]."'>";
+					
+				echo "<select name='keraysvkopva'>";
+				echo "<option value=''></option>";
+				
+				foreach ($DAY_ARRAY as $di => $day) {
+					if ($srow["keraysvko"] == $di) {
+						$sel = "SELECTED";
+					}
+					else {
+						$sel = "";
+					}
+					
+					echo "<option value='$di' $sel>$day</option>";
+				}
+				
+				echo "</select>";
 			}
 			echo "</td>";
 
@@ -1246,7 +1281,7 @@
 				$kasitoimehto = $row["selitetark"];
 			}
 
-			echo "<input type='text' id='toimitusehtoLisa' name='kasitoimehto' value='$kasitoimehto' size='20'>";
+			echo " <input type='text' id='toimitusehtoLisa' name='kasitoimehto' value='$kasitoimehto' size='20'>";
 
 			echo "</td>";
 
@@ -1869,11 +1904,14 @@
 				$toimvko = "+".$toimvko - $nyviikko;	
 			}
 			
-			// $sunnuntai =  date("Y",strtotime("$toimvko weeks Sunday"))."-".date("m",strtotime("$toimvko weeks Sunday"))."-".date("d",strtotime("$toimvko weeks Sunday"));
-			$toimvv = date("Y",strtotime("$toimvko weeks Sunday"));
-			$toimkk	= date("m",strtotime("$toimvko weeks Sunday"));
-			$toimpp = date("d",strtotime("$toimvko weeks Sunday"));
-			$toimvko = "V";
+			if ($toimvkopva == "") {
+				$toimvkopva = 6;
+			}
+			
+			$toimvv  = date("Y",strtotime("$toimvko weeks ".$DAY_ARRAY_EN[$toimvkopva]));
+			$toimkk	 = date("m",strtotime("$toimvko weeks ".$DAY_ARRAY_EN[$toimvkopva]));
+			$toimpp  = date("d",strtotime("$toimvko weeks ".$DAY_ARRAY_EN[$toimvkopva]));
+			$toimvko = $toimvkopva;
 		}
 		
 		if ($keraysvko != '') {
@@ -1887,10 +1925,14 @@
 				$keraysvko = "+".$keraysvko - $nyviikko;	
 			}
 			
-			$kervv = date("Y",strtotime("$keraysvko weeks Sunday"));
-			$kerkk = date("m",strtotime("$keraysvko weeks Sunday"));
-			$kerpp = date("d",strtotime("$keraysvko weeks Sunday"));
-			$keraysvko = "V";
+			if ($keraysvkopva == "") {
+				$keraysvkopva = 6;
+			}
+			
+			$kervv 	   	= date("Y",strtotime("$keraysvko weeks ".$DAY_ARRAY_EN[$keraysvkopva]));
+			$kerkk 	   	= date("m",strtotime("$keraysvko weeks ".$DAY_ARRAY_EN[$keraysvkopva]));
+			$kerpp 	   	= date("d",strtotime("$keraysvko weeks ".$DAY_ARRAY_EN[$keraysvkopva]));
+			$keraysvko 	= $keraysvkopva;
 		}
 		
 		if ($kukarow["kesken"] == 0) {

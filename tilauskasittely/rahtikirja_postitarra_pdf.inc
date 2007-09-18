@@ -76,7 +76,16 @@ switch ($keku) {
 		break;		
 }
 
-if ($rahdinmaksaja=="Lähettäjä") $rahdinmaksaja="";
+if ($rahdinmaksaja == 'Lähettäjä') {
+	$rahdinmaksaja		= "";
+	$rahdinmaksajan_nr 	= "";
+}
+elseif(trim($rahsoprow['rahtisopimus']) != "") {
+	$rahdinmaksajan_nr 	= $rahsoprow['rahtisopimus'];	
+}
+else {
+	$rahdinmaksajan_nr 	= $rahdinmaksaja;
+}
 
 //PDF:n luonti ja defaultit
 define (__TRACE_ENABLED__, false);
@@ -117,19 +126,7 @@ $kala = 575;
 $lask = 1;
 $sivu = 1;
 
-if ($tulostakopio == "kylla") {
-	$splitti = array();
-	$splitti = split(' ',trim($rakir));
-	$tulostakolli = count($splitti);
-}
-else {
-	if ($tulostuskpl == 0) {
-		$tulostakolli = 0;
-	}
-	else {
-		$tulostakolli = $tulostuskpl;
-	}	
-}
+$tulostakolli = $tulostuskpl;
 
 // tulostetaan niin monta lappua kun on kollejakin
 for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
@@ -139,19 +136,15 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	
 	$toitarow['sopimusnro'] = sprintf("%06d",$toitarow['sopimusnro']);	// sopimunumeron tulee olla kuus pitkä
 
-	// tehdään viivakoodi (jonne laitetaan aina arwin sopimusnumero)	
-	if ($tulostakopio == "kylla") {
-		$viiva2 = $splitti[$tulostuskpl-1];
-	}
-	else {
-		$viiva2  = "JJFI";
-		$viiva2 .= $toitarow['sopimusnro'];
-		$sopnro = $toitarow['sopimusnro']; // käytetään edi sanomassa
-		$viiva2 .= $kuka.$oma;
+	// tehdään viivakoodi (jonne laitetaan aina meidän sopimusnumero)	
+	$viiva2  = "JJFI";
+	$viiva2 .= $toitarow['sopimusnro'];
+	$sopnro  = $toitarow['sopimusnro']; // käytetään edi sanomassa
+	$viiva2 .= $kuka.$oma;
 
-		// erotellaan spacella jokainen rahtikirjanumero
-		$rahtikirjanro .= "$viiva2 ";		
-	}
+	// erotellaan spacella jokainen rahtikirjanumero
+	$rahtikirjanro .= "$viiva2 ";		
+	
 	// tehdään pdf:n uusi sivu
 	$firstpage = $pdf->new_page("a5");
 	
@@ -290,9 +283,9 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(18,  510, $yhtiorow["postino"]." ".$yhtiorow["postitp"],$firstpage, $norm);
 
 	$pdf->draw_text(18,  490,  "Vastaanottaja Addressat To", 				$firstpage, $pieni); // x,y	
-	$pdf->draw_text(18,  480,  $rakir_row["toim_nimi"],	 						$firstpage, $iso);
-	$pdf->draw_text(18,  470,  $rakir_row["toim_nimitark"], 						$firstpage, $iso);
-	$pdf->draw_text(18,  460,  $rakir_row["toim_osoite"],	 						$firstpage, $iso);
+	$pdf->draw_text(18,  480,  $rakir_row["toim_nimi"],	 					$firstpage, $iso);
+	$pdf->draw_text(18,  470,  $rakir_row["toim_nimitark"], 				$firstpage, $iso);
+	$pdf->draw_text(18,  460,  $rakir_row["toim_osoite"],	 				$firstpage, $iso);
 	$pdf->draw_text(18,  430,  $rakir_row["toim_postino"]." ".$rakir_row["toim_postitp"],$firstpage, $isobold);
 	
 	$pdf->draw_text(200,  480,  $asiakasrow["puhelin"],						$firstpage, $pieni);
@@ -331,7 +324,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(18,  374,  "Viitenumero Referensnummer",				$firstpage, $pieni); // x,y
 
 	// vähä arvoja
-	$pdf->draw_text(190, 405,  $rahdinmaksaja,								$firstpage, $iso); // x,y
+	$pdf->draw_text(190, 405,  $rahdinmaksajan_nr,							$firstpage, $isobold); // x,y
 	$pdf->draw_text(18,  384,  $postiennakkomaara,							$firstpage, $iso); // x,y
 	$pdf->draw_text(222, 384,  $postiennakkotilino,							$firstpage, $iso); // x,y
 	$pdf->draw_text(112, 370,  $postiennakkoviite,							$firstpage, $iso); // x,y

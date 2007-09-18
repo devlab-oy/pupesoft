@@ -218,7 +218,7 @@
 
 				$lopetus .= "yllapidossa=$toim&yllapidontunnus=$tunnus";
 				
-				if (strpos($lopetus, "tilaus_myynti.php") !== FALSE) {
+				if (strpos($lopetus, "tilaus_myynti.php") !== FALSE and $toim == "asiakas") {
 					$lopetus.= "&asiakasid=$tunnus";
 				}
 

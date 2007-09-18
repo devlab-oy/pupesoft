@@ -18,12 +18,17 @@
 		$ulos = "<td><select name='$nimi'>";
 		while ($srow = mysql_fetch_array($sresult)) {
 			$sel = '';
-			if ($trow[$i] == $srow['selite']) {
+			if ($trow[$i] == $srow['selite'] or $srow['selite'] == $toimitustapa) {
 				$sel = "selected";
 			}
 			$ulos .= "<option value='$srow[selite]' $sel>".asana('TOIMITUSTAPA_',$srow['selite'])."</option>";
 		}
 		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "ytunnus" and !isset($alasveto[$i]) and $ytunnus != "") {
+		$ulos = "<td><input type = 'text' name = '$nimi' value = '$ytunnus' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
 		$jatko = 0;
 	}
 	

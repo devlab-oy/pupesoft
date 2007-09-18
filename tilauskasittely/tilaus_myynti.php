@@ -135,7 +135,7 @@ if ($kukarow["extranet"] == "" and count($_POST) == 0 and ($from != "LASKUTATILA
 	$tilausnumero		= '';
 	$laskurow			= '';
 	$kukarow["kesken"]	= '';
-
+	
 	//varmistellaan ettei vanhat kummittele...
 	$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
@@ -233,6 +233,7 @@ $kpl 	= str_replace(',','.',$kpl);
 
 // asiakasnumero on annettu, etsit‰‰n tietokannasta...
 if ($tee == "" and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or ($kukarow["extranet"] == "" and ($syotetty_ytunnus != '' or $asiakasid != '')))) {
+		
 	if (substr($ytunnus,0,1) == "£") {
 		$ytunnus = $asiakasid;
 	}
@@ -1429,7 +1430,27 @@ if ($tee == '') {
 				}
 				echo "<option value='$row[selite]' $sel>".asana('TOIMITUSTAPA_',$row['selite'])."";
 			}
-			echo "</select></td>";
+			echo "</select>";
+			
+			$query = "	SELECT *
+						FROM rahtisopimukset
+						WHERE toimitustapa = '$laskurow[toimitustapa]'
+						and  ytunnus = '$laskurow[ytunnus]'";
+			$pahsopres = mysql_query($query) or pupe_error($query);
+			$rahsoprow = mysql_fetch_array($pahsopres);
+			
+			if ($rahsoprow["tunnus"] > 0) {
+				$ylisa = "&tunnus=$rahsoprow[tunnus]";
+			}
+			else {
+				$ylisa = "&uusi=1&ytunnus=$laskurow[ytunnus]&toimitustapa=$laskurow[toimitustapa]";
+				$rahsoprow["rahtisopimus"] = t("Lis‰‰ rahtisopimus");
+			}
+			
+			echo " <a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rahsoprow[rahtisopimus]</a>";
+			
+			
+			echo "</td>";
 		}
 
 		echo "</tr>";

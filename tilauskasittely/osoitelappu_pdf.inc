@@ -251,7 +251,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	}
 	
 	//Mistä
-	$pdf->draw_text(mm_pt(4), mm_pt(200), "Mistä - Från - From: ".pt_mm(120),							$firstpage, $otsik);
+	$pdf->draw_text(mm_pt(4), mm_pt(200), "Mistä - Från - From: ",							$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(4), mm_pt(195), $yhtiorow['nimi'],								$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(4), mm_pt(190), $yhtiorow['nimitark'],							$firstpage, $kirj);
 	$pdf->draw_text(mm_pt(4), mm_pt(185), $yhtiorow['osoite'],								$firstpage, $kirj);
@@ -306,14 +306,38 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_rectangle(mm_pt(110),mm_pt(138),mm_pt(110),mm_pt(143),	$firstpage, $rectparam);
 	$pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),	$firstpage, $rectparam);
 
-	//Kuljetusohjeet = viivakoodi tulee tähän
+	// Kuljetusohjeet = viivakoodi tulee tähän
 	$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
-	$pdf->draw_text(mm_pt(20), mm_pt(55), $laskurow["toimitustapa"],											$firstpage, $kirj);
-	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow['viesti'],													$firstpage, $kirj);
-	if($laskurow['yhteyshenkilo']!= "") {
-		$pdf->draw_text(mm_pt(20), mm_pt(40), $laskurow['yhteyshenkilo'],													$firstpage, $kirj);
+	
+	// Onko tilaus jälkivaatimus
+	$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+	$meapurow = mysql_fetch_array($meapu);
+	
+	if ($meapurow["jv"] != "") {
+		$jvlisays =  " - ".t("Jälkivaatimus");
+	}
+	else {
+		$jvlisays =  "";	
 	}
 	
+	$pdf->draw_text(mm_pt(20), mm_pt(55), $laskurow["toimitustapa"].$jvlisays,									$firstpage, $kirj);
+	$pdf->draw_text(mm_pt(20), mm_pt(50), $laskurow['viesti'],													$firstpage, $kirj);
+	
+	//kolliluku
+	$query = "	SELECT sum(kollit) kollit
+				FROM rahtikirjat
+				WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
+	$pakka = mysql_query($query) or pupe_error($query);
+	$pak = mysql_fetch_array($pakka);
+
+	if ((int) $pak["kollit"] > 0) {
+		$pdf->draw_text(mm_pt(20), mm_pt(45), t("Kollimäärä").": ".$pak["kollit"],								$firstpage, $kirj);
+	}
+	
+	if($laskurow['yhteyshenkilo'] != "") {
+		$pdf->draw_text(mm_pt(20), mm_pt(40), $laskurow['yhteyshenkilo'],										$firstpage, $kirj);
+	}
 	
 	//tänne ohjeisiin tulee lopullisen asiakkaan tiedot jos kyseessä on koontikuljetus
 	$query = "	select tulostustapa
@@ -322,9 +346,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 				and selite  = '$laskurow[toimitustapa]'";
 	$hetir = mysql_query($query) or pupe_error($query);
 	$hetirow = mysql_fetch_array($hetir);
+	
 	if ($hetirow['tulostustapa'] == 'K') {
 		$pdf->draw_paragraph(mm_pt(50), mm_pt(20), mm_pt(25), mm_pt(140), $laskurow['sisviesti1'], $firstpage, $kirj);
 	}
+	
 	// ylhäällä on "oikee" tapa tehdä, mutta me ei tiedetä tässä vaiheessa kollien määrää eikä painoa
 	$pdf->draw_text(mm_pt(4), mm_pt(30), "Tilaukset - Order - Orders: ",	$firstpage, $otsik);
 	if ($tilausnumeroita == "") $tilausnumeroita = $laskurow["tunnus"];

@@ -62,12 +62,12 @@
 	//tsekataan kuka maksaa rahdin ja laitetaan oikeat tiedot rahdinmaksajan ruutuun
 	if ($rahdinmaksaja == 'Vastaanottaja') {
 		$rahdinmaksajan_nr 	= $rahsoprow['rahtisopimus'];
-		//$rahdinmaksaja 		= $rakir_row["nimi"];
+		//$rahdinmaksaja 	= $rakir_row["nimi"];
 	}
 	
 	if ($rahdinmaksaja == 'Lähettäjä') {
 		$rahdinmaksajan_nr 	= $toitarow['sopimusnro'];
-		//$rahdinmaksaja 		= $yhtiorow["nimi"];
+		//$rahdinmaksaja 	= $yhtiorow["nimi"];
 	}
 	
 	// postiennakko
@@ -218,9 +218,9 @@
 
 				$logoparam = array();
 
-				// Logosta tulee max: 50pt korkea ja 120pt leveä (17.64mm x 42.33mm)
-				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
-					$logoparam['scale'] = 120 / $isizelogo[0];
+				// Logosta tulee max: 50pt korkea ja 240pt leveä (17.64mm x 84.66mm)
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {
+					$logoparam['scale'] = 240 / $isizelogo[0];
 				}
 				else {
 					$logoparam['scale'] = 50  / $isizelogo[1];

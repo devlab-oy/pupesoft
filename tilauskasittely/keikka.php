@@ -458,7 +458,7 @@ if ($toiminto == "" and $ytunnus != "") {
 
 			if ($eipaikkoja == 0 and $kplyhteensa > 0) {
 				$varok=1;
-				$varastopaikat = "<font color='#00FF00'>".t("ok")."</font>";
+				$varastopaikat = "<font style='color:#00FF00;'>".t("ok")."</font>";
 			}
 			else {
 				$varok=0;
@@ -477,7 +477,7 @@ if ($toiminto == "" and $ytunnus != "") {
 
 			if (mysql_num_rows($okres)==0) {
 				$lisok=1;
-				$lisatiedot = "<font color='#00FF00'>".t("ok")."</font>";
+				$lisatiedot = "<font style='color:#00FF00;'>".t("ok")."</font>";
 			}
 			else {
 				$lisok=0;
@@ -487,7 +487,7 @@ if ($toiminto == "" and $ytunnus != "") {
 			// katotaan onko kohdistus tehty pennilleen
 			if ($row["kohdistettu"] == 'K') {
 				$kohok=1;
-				$kohdistus = "<font color='#00FF00'>".t("ok")."</font>";
+				$kohdistus = "<font style='color:#00FF00;'>".t("ok")."</font>";
 			}
 			else {
 				$kohok=0;
@@ -495,7 +495,7 @@ if ($toiminto == "" and $ytunnus != "") {
 			}
 
 			// katotaan onko kaikki sarjanumerot ok
-			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl, tuote.sarjanumeroseuranta
+			$query = "	SELECT tilausrivi.tunnus, tilausrivi.tuoteno, tilausrivi.varattu+tilausrivi.kpl kpl, tuote.sarjanumeroseuranta, tilausrivi.uusiotunnus
 						FROM tilausrivi use index (uusiotunnus_index)
 						JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
 						WHERE tilausrivi.yhtio='$kukarow[yhtio]' and
@@ -504,9 +504,14 @@ if ($toiminto == "" and $ytunnus != "") {
 			$toimresult = mysql_query($query) or pupe_error($query);
 
 			$sarjanrook = 0;
-			$sarjanrot = "<font color='#00FF00'>".t("ok")."</font>";
+			$sarjanrot = "<font style='color:#00FF00;'>".t("ok")."</font>";
+			$uusiot = array();
 
 			while ($toimrow = mysql_fetch_array($toimresult)) {
+
+				if (!in_array($toimrow["uusiotunnus"], $uusiot)) {
+					$uusiot[] = $toimrow["uusiotunnus"];
+				}
 
 				if ($toimrow["kpl"] < 0) {
 					$tunken = "myyntirivitunnus";
@@ -579,7 +584,22 @@ if ($toiminto == "" and $ytunnus != "") {
 			echo "<td valign='top'>$row[ytunnus]<br>$row[nimi]</td>";
 			echo "<td valign='top'>$kohdistus<br>$lisatiedot</td>";
 			echo "<td valign='top'>$varastopaikat<br>$sarjanrot</td>";
-			echo "<td valign='top'>$kplyhteensa<br>$kplvarasto $varastossaarvo</td>";
+			
+			
+			if (count($uusiot) > 0) {
+				echo "<div id='keikka_$row[laskunro]' class='popup' style='width:100px;'>";
+				echo t("Tilaukset").":<br><br>";
+				echo implode("<br>", $uusiot);
+				echo "</div>";
+				echo "<td valign='top'><a class='td' onmouseout=\"popUp(event,'keikka_$row[laskunro]')\" onmouseover=\"popUp(event,'keikka_$row[laskunro]')\">$kplyhteensa<br>$kplvarasto $varastossaarvo</a></td>";
+			}
+			else {
+				echo "<td valign='top'>$kplyhteensa<br>$kplvarasto $varastossaarvo</td>";
+			}
+			
+			
+			
+			
 			echo "<td valign='top'>$llrow[volasku] $llrow[vosumma]<br>$llrow[kulasku] $llrow[kusumma]</td>";
 
 			// jos tätä keikkaa ollaan just viemässä varastoon ei tehdä dropdownia

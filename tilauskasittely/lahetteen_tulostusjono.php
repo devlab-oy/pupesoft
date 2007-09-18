@@ -1,6 +1,8 @@
 <?php
 	
 	require ("../inc/parametrit.inc");
+	
+	$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
 
 	js_popup();
 
@@ -271,8 +273,14 @@
 
 					echo "<$ero valign='top'>$tilrow[viesti]</$ero>";
 					
-					if ($tilrow['keraysvko'] == 'V') {
-						echo "<$ero valign='top'>".t("Vko")." ".date("W", strtotime($tilrow["kerayspvm"]))."</$ero>";
+					if ($tilrow['keraysvko'] != '') {
+						echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["kerayspvm"]));
+						
+						if ($tilrow['keraysvko'] != '6') {
+							echo "/".$DAY_ARRAY[$tilrow["keraysvko"]];
+						}
+						
+						echo "</$ero>";
 					}
 					else {
 						echo "<$ero valign='top'>".tv1dateconv($tilrow["kerayspvm"])."</$ero>";
@@ -280,8 +288,14 @@
 
 
 					if ($kukarow['resoluutio'] == 'I') {
-						if ($tilrow["toimvko"] == 'V') {
-							echo "<$ero valign='top'>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]))."</$ero>";
+						if ($tilrow["toimvko"] != '') {
+							echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]));
+							
+							if ($tilrow['toimvko'] != '6') {
+								echo "/".$DAY_ARRAY[$tilrow["toimvko"]];
+							}
+							
+							echo "</$ero>";
 						}
 						else {
 							echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";
@@ -380,9 +394,7 @@
 			}
 			
 			$tutoimtapa = "KAIKKI";
-			$tutyyppi = "KAIKKI";
-			
-			$jarj = "prioriteetti";
+			$tutyyppi 	= "KAIKKI";			
 		}
 		
 		$haku = '';
@@ -653,8 +665,14 @@
 				}
 
 				
-				if ($tilrow['keraysvko'] == 'V') {
-					echo "<$ero valign='top'>".t("Vko")." ".date("W", strtotime($tilrow["kerayspvm"]))."</$ero>";
+				if ($tilrow['keraysvko'] != '') {					
+					echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["kerayspvm"]));
+					
+					if ($tilrow['keraysvko'] != '6') {
+						echo "/".$DAY_ARRAY[$tilrow["keraysvko"]];
+					}
+					
+					echo "</$ero>";
 				}
 				else {
 					echo "<$ero valign='top'>".tv1dateconv($tilrow["kerayspvm"])."</$ero>";
@@ -662,8 +680,14 @@
 				
 				
 				if ($kukarow['resoluutio'] == 'I') {
-					if ($tilrow["toimvko"] == 'V') {
-						echo "<$ero valign='top'>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]))."</$ero>";
+					if ($tilrow["toimvko"] != '') {
+						echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]));
+						
+						if ($tilrow['toimvko'] != '6') {
+							echo "/".$DAY_ARRAY[$tilrow["toimvko"]];
+						}
+						
+						echo "</$ero>";
 					}
 					else {
 						echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";

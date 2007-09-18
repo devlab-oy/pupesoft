@@ -21,11 +21,11 @@ if ($tee == "update") {
 	}
 
 	// Hoidetaan pilkut pisteiksi....
-	$rahti_etu = str_replace ( ",", ".", $rahti_etu);
-	$rahti = str_replace ( ",", ".", $rahti);
+	$rahti_etu 		= str_replace ( ",", ".", $rahti_etu);
+	$rahti 			= str_replace ( ",", ".", $rahti);
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
-	$erikoisale = str_replace ( ",", ".", $erikoisale);
-	$toimaika = $vv."-".$kk."-".$pp;
+	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
+	$toimaika 		= $vv."-".$kk."-".$pp;
 
 	//Jos käyttäjä on syöttänyt alvillisen hinnan niin poistetaan alvi
 	if ((int) $alv != 0) {
@@ -137,6 +137,10 @@ if ($tee == "") {
 		if($row[0] == $laskurow["maa_lahetys"]) {
 			$sel = 'selected';
 		}
+		elseif($laskurow["maa_lahetys"] == "" and $row[0] == $toimittaja["maa_lahetys"]) {
+			$sel = "selected";
+		}
+		
 		echo "<option value='$row[0]' $sel>$row[1]</option>";
 	}
 	echo "</select></td>";
@@ -229,12 +233,36 @@ if ($tee == "") {
 
 	//Haetaan alvifunktio
 	require ('../inc/alvpopup.inc');
+	
+	
+	if ($laskurow["bruttopaino"] == 0) {
+		$query  = "	SELECT round(sum(tuotemassa*(varattu+kpl)),2) massa, sum(varattu+kpl) kpl, sum(if(tuotemassa!=0, varattu+kpl, 0)) kplok
+					FROM tilausrivi
+					JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '')
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.uusiotunnus = '$laskurow[tunnus]'";
+		$painoresult = mysql_query($query) or pupe_error($query);
+		$painorow = mysql_fetch_array($painoresult);
 
-	echo "<tr><td>".t("Nettopaino").":</td><td colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td></tr>";
-	echo "<tr><td>".t("Eturahti").":</td><td><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td>".t("ALV").": ".alv_popup_oletus('alv',0)."</td><td> ".t("vaihto-omaisuuslaskun valuutassa")."</td></tr>";
-	echo "<tr><td>".t("Arvioitu kuluprosentti").":</td><td colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
-	echo "<tr><td>".t("Kulusumma")." $yhtiorow[valkoodi]:</td><td colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
-	echo "<tr><td>".t("Erikoisalennus").":</td><td colspan='3'><input type='text' name='erikoisale' value='$laskurow[erikoisale]'></td></tr>";
+		if ($painorow["kpl"] > 0) {
+			$osumapros = round($painorow["kplok"] / $painorow["kpl"] * 100, 2);
+		}
+		else {
+			$osumapros = "N/A";
+		}
+		
+		$laskurow["bruttopaino"] = $painorow["massa"];
+		
+		$lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
+	}
+
+	
+	
+
+	echo "<tr><td valign='top'>".t("Nettopaino").":</td><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back'>$lisamassa</td></tr>";
+	echo "<tr><td valign='top'>".t("Eturahti").":</td><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td valign='top' nowrap>".t("ALV").": ".alv_popup_oletus('alv',0)."</td><td> ".t("vaihto-omaisuuslaskun valuutassa")."</td></tr>";
+	echo "<tr><td valign='top'>".t("Arvioitu kuluprosentti").":</td><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
+	echo "<tr><td valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</td><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
+	echo "<tr><td valign='top'>".t("Erikoisalennus").":</td><td valign='top' colspan='3'><input type='text' name='erikoisale' value='$laskurow[erikoisale]'></td></tr>";
 
 	if ($laskurow["toimaika"] != '0000-00-00') {
 		$vv = substr($laskurow["toimaika"],0,4);

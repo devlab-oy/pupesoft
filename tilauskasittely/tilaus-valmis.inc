@@ -58,6 +58,20 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 
 	if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
 		require("tilausvahvistus-futursoft.inc");
+
+	if (strpos(" ".$laskurow['tilausvahvistus'],'P')) {
+		$query = "	SELECT komento
+					FROM kirjoittimet
+					WHERE yhtio = '$kukarow[yhtio]' and
+					tunnus = '$kukarow[kirjoitin]'";
+		$tilvares = mysql_query($query) or pupe_error($query);
+
+		if ($tilvakir = mysql_fetch_array($tilvares)) {
+			require_once ("tulosta_tilausvahvistus_pdf.inc");
+			tulosta_tilausvahvistus($laskurow["tunnus"], $tilvakir["komento"]);
+		}
+	}
+
 }
 elseif ($laskurow["tilaustyyppi"] == '0') {
 		// Yll‰pitosopimus
@@ -783,6 +797,19 @@ else {
 
 				if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
 					require("tilausvahvistus-futursoft.inc");
+
+				if (strpos(" ".$laskurow['tilausvahvistus'],'P')) {
+					$query = "	SELECT komento
+								FROM kirjoittimet
+								WHERE yhtio = '$kukarow[yhtio]' and
+								tunnus = '$kukarow[kirjoitin]'";
+					$tilvares = mysql_query($query) or pupe_error($query);
+
+					if ($tilvakir = mysql_fetch_array($tilvares)) {
+						require_once ("tulosta_tilausvahvistus_pdf.inc");
+						tulosta_tilausvahvistus($tilausnumero, $tilvakir["komento"]);
+					}
+				}
 
 				///* T‰ss‰ katotaan onko l‰hetteell‰ tosiaan mit‰‰n ker‰tt‰v‰‰ *///
 				$kutsuja = "tilaus-valmis.inc";

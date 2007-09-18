@@ -3,7 +3,7 @@
 require_once('pdflib/pupepdf.class.php');
 
 if (!function_exists('tulosta_tilausvahvistus')) {
-	function tulosta_tilausvahvistus ($otunnus, $komento, $kieli = "", $tee) {
+	function tulosta_tilausvahvistus ($otunnus, $komento, $kieli = "", $tee = "") {
 		global $yhtiorow, $kukarow, $fonts;
 
 		// Haetaan laskun tiedot
@@ -539,8 +539,6 @@ if (!function_exists('tulosta_tilausvahvistus')) {
 			if(mysql_num_rows($kires) > 0) {
 				$kirow = mysql_fetch_array($kires);
 				echo t("Tilausvahvistus tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";						
-				
-				echo t("Tilausvahvistus tulostuu")."...<br>";
 				unset($returnvalue);
 				$line = exec("$komento $pdf_tilausvahvistusfilenimi", $output, $returnvalue);
 			}

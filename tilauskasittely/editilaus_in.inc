@@ -141,7 +141,7 @@ while (!feof ($fd)) {
 				// Arwidson häkki Arwidson Automotivea varten
 				if ($tieto == 1066781) $tieto = 7495288;
 
-				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2')";
+				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
 				$result = mysql_query($query) or die($query);
 			}
 

@@ -6,9 +6,12 @@
 	// $loput[$tunnukset] = KAIKKI/POISTA/JATA/MITA/SUORA mit‰ tehd‰‰n lopuille
 	// $suoratoimpaikka[$tunnukset] = paikat josta myyd‰‰n suoratoimituksia
 	// $tilaus_on_jo = KYLLA niin lis‰t‰‰n rivit $kukarow[kesken] tilaukselle
+	// $olpaikalta = pakotetaan myym‰‰n oletuspaikalta
+	// $varataan_saldoa = varataanko saldoa
+	// $alv = alviprossa
 	
 	if (!function_exists("tee_jt_tilaus")) {
-		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka = '', $tilaus_on_jo = '') {
+		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka = '', $tilaus_on_jo = '', $olpaikalta = '', $varataan_saldoa = '', $alv = '') {
 			global $yhtiorow, $kukarow, $toim;
 
 			if ($loput[$tunnukset] == 'MITA') {

@@ -133,14 +133,15 @@ while (!feof ($fd)) {
 
 			if (mysql_num_rows($result) != 1) {
 				// kokeillaan v‰‰nt‰‰ luvusta ytunnus
-				$tieto = substr($tieto, 4, 9) * 1;
-
+				$tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
+				$tieto2 = substr($tieto, 4, 8);     // etunollilla
+				
 				// Arwidson h‰kki Arwidson Baltia varten
 				if ($tieto == 0) $tieto = 1066781;
 				// Arwidson h‰kki Arwidson Automotivea varten
 				if ($tieto == 1066781) $tieto = 7495288;
 
-				$query = "SELECT * FROM yhtio WHERE ytunnus='$tieto'";
+				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2')";
 				$result = mysql_query($query) or die($query);
 			}
 

@@ -87,7 +87,7 @@
 			}
 		}
 
-		// jos ollaan muokkaamassa rivejä poistetaan eka vanhat rahtikirjattiedot..
+		// jos ollaan muokkaamassa rivejä poistetaan eka vanhat rahtikirjatiedot..
 		if ($tutkimus > 0) {
 
 			if ($muutos == 'yes') {
@@ -123,6 +123,36 @@
 			else {
 				$alatilassa = " and lasku.alatila = 'C' ";
 			}
+			
+			//	Jostain vuotaa muuttuja ja joudutaan ikuiseen looppiin. Tämä näyttää toimivan
+			if(!function_exists("lisaarivi")) {
+				function lisaarivi ($otunnus, $tuoteno, $kpl, $hinta = "") {
+					global $kukarow, $yhtiorow;
+
+					$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
+					$rhire = mysql_query($query) or pupe_error($query);
+					$laskurow = mysql_fetch_array($rhire);
+
+					$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+					$rhire = mysql_query($query) or pupe_error($query);
+					$trow  = mysql_fetch_array($rhire);
+
+					$varataan_saldoa 	= "EI";
+					$kukarow["kesken"]	= $otunnus;
+					$korvaavakielto 	= "ON";
+					$toimaika			= $laskurow["toimaika"];
+					$kerayspvm			= $laskurow["kerayspvm"];
+					
+					require("tilauskasittely/lisaarivi.inc");
+					
+					//	Merkataan tämä rivi kerätyksi ja toimitetuksi..
+					$query = "	update tilausrivi set 
+								kerattyaika	= now(),
+								keratty		= '{$kukarow["kuka"]}'
+								where yhtio = '$kukarow[yhtio]' and tunnus='{$lisatyt_rivit1[0]}'";
+					$updres = mysql_query($query) or pupe_error($query);										
+				}
+			}
 
 			// saadaanko näille tilauksille syöttää rahtikirjoja
 			$query = "	SELECT
@@ -150,6 +180,39 @@
 
 			echo "<font class='head'>".t("Lisättiin rahtikirjaan")."</font><hr>";
 			echo "<table>";
+			
+			if ($yhtiorow['rahti_ja_kasittelykulut_kasin'] != '') {
+				$k_rahtikulut = str_replace(',', '.', $k_rahtikulut);
+				$k_kasitkulut = str_replace(',', '.', $k_kasitkulut);
+				
+				if ($k_rahtikulut > 0) {
+					$query = "	UPDATE tilausrivi 
+								SET tyyppi='D',
+								kommentti = concat(kommentti, ' $kukarow[kuka] muutti rahtikuluja rahtikirjan syötössä.')
+								WHERE yhtio='$kukarow[yhtio]' 
+								and otunnus='$otsikkonro' 
+								and tuoteno='$yhtiorow[rahti_tuotenumero]'
+								and uusiotunnus=0
+								and tyyppi != 'D'";
+					$result = mysql_query($query) or pupe_error($query);
+					
+					lisaarivi($otsikkonro, $yhtiorow["rahti_tuotenumero"], 1, $k_rahtikulut);
+				}
+				
+				if ($k_kasitkulut > 0) {
+					$query = "	UPDATE tilausrivi 
+								SET tyyppi='D', 
+								kommentti = concat(kommentti, ' $kukarow[kuka] muutti käsittelykuluja rahtikirjan syötössä.')
+								WHERE yhtio='$kukarow[yhtio]' 
+								and otunnus='$otsikkonro' 
+								and tuoteno='$yhtiorow[kasittelykulu_tuotenumero]'
+								and uusiotunnus=0
+								and tyyppi != 'D'";
+					$result = mysql_query($query) or pupe_error($query);
+					
+					lisaarivi($otsikkonro, $yhtiorow["kasittelykulu_tuotenumero"], 1, $k_kasitkulut);
+				}
+			}
 
 			for ($i=0; $i<count($pakkaus); $i++) {
 
@@ -190,43 +253,15 @@
 										FROM avainsana
 										JOIN tuote ON tuote.yhtio=avainsana.yhtio and tuote.tuoteno=avainsana.selitetark_2
 										WHERE avainsana.yhtio='$kukarow[yhtio]'
-											and avainsana.laji='pakkaus' 
-											and avainsana.selite='$pakkaus[$i]'
-											and selitetark='$pakkauskuvaus[$i]'
-											and tuoteno != ''";
+										and avainsana.laji='pakkaus' 
+										and avainsana.selite='$pakkaus[$i]'
+										and selitetark='$pakkauskuvaus[$i]'
+										and tuoteno != ''";
 							$pakres = mysql_query($query) or pupe_error($query);
+							
 							if(mysql_num_rows($pakres) == 1) {
 								$pakrow = mysql_fetch_array($pakres);
 								
-								//	Jostain vuotaa muuttuja ja joudutaan ikuiseen looppiin. Tämä näyttää toimivan
-								if(!function_exists(lisaarivi)) {
-									function lisaarivi ($otunnus, $tuoteno, $kpl) {
-										global $kukarow, $yhtiorow;
-
-										$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
-										$rhire = mysql_query($query) or pupe_error($query);
-										$laskurow = mysql_fetch_array($rhire);
-
-										$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
-										$rhire = mysql_query($query) or pupe_error($query);
-										$trow  = mysql_fetch_array($rhire);
-
-										$varataan_saldoa 	= "EI";
-										$kukarow["kesken"]	= $otunnus;
-										$korvaavakielto 	= "ON";
-										$toimaika			= $laskurow["toimaika"];
-										$kerayspvm			= $laskurow["kerayspvm"];
-										
-										require("tilauskasittely/lisaarivi.inc");
-										
-										//	Merkataan tämä rivi kerätyksi ja toimitetuksi..
-										$query = "	update tilausrivi set 
-														kerattyaika	= now(),
-														keratty		= '{$kukarow["kuka"]}'
-													where yhtio = '$kukarow[yhtio]' and tunnus='{$lisatyt_rivit1[0]}'";
-										$updres = mysql_query($query) or pupe_error($query);										
-									}
-								}
 								lisaarivi($otsikkonro, $pakrow["selitetark_2"], $kollit[$i]);
 							}
 							
@@ -1308,6 +1343,71 @@
 		}
 		
 		echo "</table>";
+		
+		if ($yhtiorow['rahti_ja_kasittelykulut_kasin'] != '') {
+
+			echo "<br><table>";
+			
+			$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+			$rhire = mysql_query($query) or pupe_error($query);
+			
+			
+			
+			if (mysql_num_rows($rhire) == 1) {
+				$trow  = mysql_fetch_array($rhire);
+				
+				$query = "	SELECT 
+							round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
+							round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
+				 			FROM tilausrivi 
+							JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+							and tilausrivi.otunnus = '$otsik[tunnus]' 
+							and tilausrivi.tuoteno = '$yhtiorow[rahti_tuotenumero]'
+							and tilausrivi.tyyppi != 'D'";
+				$rhire = mysql_query($query) or pupe_error($query);
+				$rrow  = mysql_fetch_array($rhire);
+				
+				if ($yhtiorow["alv_kasittely"] == '') {
+					$k_rahtikulut = $rrow["summa"];
+				}
+				else {
+					$k_rahtikulut = $rrow["arvo"];
+				}
+				
+				echo "<tr><th>".t("Rahti").":</th><td><input type='text' size='6' name='k_rahtikulut' value='$k_rahtikulut'></td><td>$yhtiorow[valkoodi]</td></tr>";
+			}
+			
+			$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[kasittelykulu_tuotenumero]'";
+			$rhire = mysql_query($query) or pupe_error($query);
+			
+			if (mysql_num_rows($rhire) == 1) {
+				$trow  = mysql_fetch_array($rhire);
+				
+				$query = "	SELECT 
+							round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
+							round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
+				 			FROM tilausrivi 
+							JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
+							and tilausrivi.otunnus = '$otsik[tunnus]' 
+							and tilausrivi.tuoteno = '$yhtiorow[kasittelykulu_tuotenumero]'
+							and tilausrivi.tyyppi != 'D'";
+				$rhire = mysql_query($query) or pupe_error($query);
+				$rrow  = mysql_fetch_array($rhire);
+				
+				if ($yhtiorow["alv_kasittely"] == '') {
+					$k_kasitkulut = $rrow["summa"];
+				}
+				else {
+					$k_kasitkulut = $rrow["arvo"];
+				}
+				
+				echo "<tr><th>".t("Käsittelykulut").":</th><td><input type='text' size='6' name='k_kasitkulut' value='$k_kasitkulut'></td><td>$yhtiorow[valkoodi]</td></tr>";
+			}
+
+			echo "</table>";
+		}
 		
 		if ($yhtiorow['karayksesta_rahtikirjasyottoon'] == '' or $mista != 'keraa.php') {
 			

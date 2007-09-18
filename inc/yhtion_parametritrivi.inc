@@ -1111,4 +1111,19 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "rahti_ja_kasittelykulut_kasin") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Rahtikirjan syötössä ei syötetä rahti ja käsittelykuluja")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Rahtikirjan syötössä voi syöttää rahti ja käsittelykuluja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 ?>

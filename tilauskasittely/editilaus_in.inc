@@ -146,7 +146,7 @@ while (!feof ($fd)) {
 			}
 
 			if (mysql_num_rows($result) != 1) {
-				$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2'\n";
+				$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
 				echo $edi_ulos;
 				exit;
 			}

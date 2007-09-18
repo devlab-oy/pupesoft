@@ -133,8 +133,8 @@ while (!feof ($fd)) {
 
 			if (mysql_num_rows($result) != 1) {
 				// kokeillaan vääntää luvusta ytunnus
-				$tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
 				$tieto2 = substr($tieto, 4, 8);     // etunollilla
+				$tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
 				
 				// Arwidson häkki Arwidson Baltia varten
 				if ($tieto == 0) $tieto = 1066781;
@@ -146,7 +146,7 @@ while (!feof ($fd)) {
 			}
 
 			if (mysql_num_rows($result) != 1) {
-				$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto'\n";
+				$edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2'\n";
 				echo $edi_ulos;
 				exit;
 			}

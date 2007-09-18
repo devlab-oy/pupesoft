@@ -59,7 +59,7 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 	if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
 		require("tilausvahvistus-futursoft.inc");
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'P')) {
+	if (strpos(" ".$laskurow['tilausvahvistus'],'K')) {
 		$query = "	SELECT komento
 					FROM kirjoittimet
 					WHERE yhtio = '$kukarow[yhtio]' and
@@ -798,7 +798,7 @@ else {
 				if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
 					require("tilausvahvistus-futursoft.inc");
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'P')) {
+				if (strpos(" ".$laskurow['tilausvahvistus'],'K')) {
 					$query = "	SELECT komento
 								FROM kirjoittimet
 								WHERE yhtio = '$kukarow[yhtio]' and

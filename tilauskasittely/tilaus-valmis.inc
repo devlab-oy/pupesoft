@@ -809,7 +809,7 @@ else {
 					if ($tilvakir = mysql_fetch_array($tilvares)) {
 						$komento["Tilausvahvistus"] = $tilvakir["komento"];
 
-						require_once ("tulosta_tilausvahvistus_pdf.inc");
+						require("tulosta_tilausvahvistus_pdf.inc");
 					}
 				}
 

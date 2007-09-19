@@ -24,8 +24,8 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 		// l‰hetet‰‰n PDF vahvistus vain jos meill‰ on P kirjain vahvistuksessa
 		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
 			$komento["Tilausvahvistus"] = "asiakasemail".$tilvahasiakas['email'];
-						
-			require_once ("tulosta_tilausvahvistus_pdf.inc");
+									
+			require("tulosta_tilausvahvistus_pdf.inc");
 		}
 	}
 }
@@ -42,7 +42,7 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
 			$komento["Tilausvahvistus"] = "email";
 			
-			require_once ("tulosta_tilausvahvistus_pdf.inc");
+			require("tulosta_tilausvahvistus_pdf.inc");
 		}
 	}
 }

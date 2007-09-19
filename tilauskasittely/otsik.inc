@@ -1718,6 +1718,7 @@
 			
 			$yhteysquery = "SELECT * FROM yhteyshenkilo where yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]' and tyyppi = 'A' and tilausyhteyshenkilo != ''";
 			$yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
+			
 			if (mysql_num_rows($yhteysresult) > 0) {
 				echo "<td colspan = '1'><select name='seltilausyhteyshenkilo'>";
 				echo "<option value = ''>".t("Ei valintaa")."</option>";
@@ -1739,11 +1740,11 @@
 			
 			echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
 			echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
-			
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>(".t("tilausvahvistus + keräyslista + lähete + lasku$extralisa").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>(".t("keräyslista + lähete").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>(".t("lasku$extralisa").")</td></tr>";
+			
 			if($toim == "TARJOUS") {
 				if($kukarow["kesken"] == 0) {
 					$query = "	SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji = 'saate'";

@@ -59,14 +59,14 @@ if (!function_exists('alku')) {
 				
 				$logoparam = array();
 								
-				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
-					$logoparam['scale'] = 120 / $isizelogo[0];
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 20) {
+					$logoparam['scale'] = 240 / $isizelogo[0];
 				}
 				else {
-					$logoparam['scale'] = 50  / $isizelogo[1];
+					$logoparam['scale'] = 20  / $isizelogo[1];
 				}
 								
-				$placement = $pdf->image_place($image, 785, 20, $firstpage, $logoparam);
+				$placement = $pdf->image_place($image, 830-($logoparam['scale']*$isizelogo[1]), 20, $firstpage, $logoparam);
 			}
 		}
 		else {

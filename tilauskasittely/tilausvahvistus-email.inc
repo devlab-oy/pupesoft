@@ -3,8 +3,6 @@
 // tarvitaan $laskurow array
 // tarvitaan $yhtiorow array
 
-require_once ("tulosta_tilausvahvistus_pdf.inc");
-
 $query         = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
 $tilvahresult  = mysql_query($query) or pupe_error($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
@@ -22,11 +20,12 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 		echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole sähköpostiosoitetta")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
 		$virexx++;
 	}
-	else {
-		$komento = "asiakasemail".$tilvahasiakas['email'];
+	else {		
 		// lähetetään PDF vahvistus vain jos meillä on P kirjain vahvistuksessa
 		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
-			tulosta_tilausvahvistus($laskurow["tunnus"], $komento);
+			$komento["Tilausvahvistus"] = "asiakasemail".$tilvahasiakas['email'];
+						
+			require_once ("tulosta_tilausvahvistus_pdf.inc");
 		}
 	}
 }
@@ -38,11 +37,12 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 		echo "<font class='error'>".t("TILAUSVAHVISTUS: Sinulla ei ole sähköpostiosoitetta")."!</font><br><br>";
 		$virexx++;
 	}
-	else {
-		$komento = "email";
+	else {		
 		// lähetetään PDF vahvistus vain jos meillä on P kirjain vahvistuksessa
 		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
-			tulosta_tilausvahvistus($laskurow["tunnus"], $komento);
+			$komento["Tilausvahvistus"] = "email";
+			
+			require_once ("tulosta_tilausvahvistus_pdf.inc");
 		}
 	}
 }

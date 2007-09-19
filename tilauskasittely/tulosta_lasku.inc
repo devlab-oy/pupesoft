@@ -16,6 +16,9 @@ $boldi["font"] 			= "Times-Bold";
 $pieni_boldi["height"] 	= 8;
 $pieni_boldi["font"] 	= "Times-Bold";
 
+$iso["height"] 			= 14;
+$iso["font"] 			= "Helvetica-Bold";
+
 // defaultteja
 $sivu 	= 1;
 $summa 	= 0;
@@ -23,7 +26,7 @@ $arvo 	= 0;
 
 if (!function_exists('alku')) {
 	function alku () {
-		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala;
+		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala;
 
 		//PDF parametrit
 		if (!isset($pdf)) {
@@ -37,6 +40,7 @@ if (!function_exists('alku')) {
 		$thispage = $pdf->new_page("a4");
 
 		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
+			
 			$filename = $yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
@@ -49,13 +53,18 @@ if (!function_exists('alku')) {
 				echo t("Logokuvavirhe");
 			}
 			else {
-				$logoparam = array();
-				$logoparam['scale'] = 0.15;
-				
 				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-				$iy    = $isizelogo[1]*0.15*0.35714;	// kuvan y-korkeus millimetreissä
 				
-				$placement = $pdf->image_place($image, mm_pt(292-$iy), mm_pt(7), $thispage, $logoparam);
+				$logoparam = array();
+								
+				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {
+					$logoparam['scale'] = 240 / $isizelogo[0];
+				}
+				else {
+					$logoparam['scale'] = 50  / $isizelogo[1];
+				}
+								
+				$placement = $pdf->image_place($image, 830-($logoparam['scale']*$isizelogo[1]), 20, $thispage, $logoparam);
 			}
 		}
 		else {
@@ -74,28 +83,28 @@ if (!function_exists('alku')) {
 		if ($laskurow["vienti"] == "") {
 			if ($laskurow["summa"] >= 0) {
 				if ($toim == 'PROFORMA') {
-					$pdf->draw_text(310, 815, t("Proformalasku", $kieli), $thispage);
+					$pdf->draw_text(310, 815, t("Proformalasku", $kieli), $thispage, $iso);
 				}
 				else {
-					$pdf->draw_text(310, 815, t("Lasku", $kieli), $thispage);					
+					$pdf->draw_text(310, 815, t("Lasku", $kieli), $thispage, $iso);
 				}
 			}
 			else {
-				$pdf->draw_text(310, 815, t("Hyvityslasku", $kieli), $thispage);
+				$pdf->draw_text(310, 815, t("Hyvityslasku", $kieli), $thispage, $iso);
 			}
 		}
 		else {
 			if ($toim == 'PROFORMA') {
-				$pdf->draw_text(310, 815, t("Proformalasku", $kieli), $thispage);
+				$pdf->draw_text(310, 815, t("Proformalasku", $kieli), $thispage, $iso);
 			}
 			elseif ($kateiskuitti != ""){
-				$pdf->draw_text(310, 815, t("Käteiskuitti", $kieli),  $thispage);
+				$pdf->draw_text(310, 815, t("Käteiskuitti", $kieli),  $thispage, $iso);
 			}
 			elseif ($laskurow["summa"] >= 0) {
-				$pdf->draw_text(310, 815, t("Vientilasku", $kieli), $thispage);
+				$pdf->draw_text(310, 815, t("Vientilasku", $kieli), $thispage, $iso);
 			}
 			else {
-				$pdf->draw_text(310, 815, t("Viennin hyvityslasku", $kieli), $thispage);
+				$pdf->draw_text(310, 815, t("Viennin hyvityslasku", $kieli), $thispage, $iso);
 			}
 		}
 
@@ -145,7 +154,18 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(758, 300, 737, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 750, t("Maksuehto", $kieli), $thispage, $pieni);
-		$pdf->draw_text(310, 740, $maksuehto, $thispage, $norm);
+
+		for($s = strlen($maksuehto); $s > 0; $s--) {
+			if($pdf->strlen($maksuehto, $norm) > 110) {
+				$maksuehto = substr($maksuehto, 0, $s);
+			}
+			else {
+				break;
+			}
+		}
+		
+		$pdf->draw_text(310, 740, pdf_substr($maksuehto, 110, $pdf, $norm), $thispage, $norm);
+		
 		$pdf->draw_text(430, 750, t("Kassa-alennus", $kieli)." ".$laskurow["valkoodi"], $thispage, $pieni);
 
 		if ($laskurow["kasumma"] != 0.00) {
@@ -207,7 +227,9 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(674, 420, 653, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 666, t("Toimitustapa", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(310, 656, $laskurow["toimitustapa"], 	$thispage, $norm);
+				
+		$pdf->draw_text(310, 656, pdf_substr($laskurow["toimitustapa"], 110, $pdf, $norm), 	$thispage, $norm);
+		
 		$pdf->draw_text(430, 666, t("Toimituspvm", $kieli), 	$thispage, $pieni);
 		
 		//	Onko meillä monta toimituspäivää vai ei?
@@ -237,32 +259,69 @@ if (!function_exists('alku')) {
 
 		$pdf->draw_rectangle(653, 300, 632, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 645, t("Toimitusehto", $kieli), $thispage, $pieni);
-		$pdf->draw_text(310, 635, $laskurow["toimitusehto"], $thispage, $norm);
+		$pdf->draw_text(310, 635, pdf_substr($laskurow["toimitusehto"], 270, $pdf, $norm), $thispage, $norm);
 
 		$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 624, t("Lisätietoja", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(310, 614, $laskurow["viesti"], 			$thispage, $norm);
+		$pdf->draw_text(310, 614, pdf_substr($laskurow["viesti"], 270, $pdf, $norm), 		$thispage, $norm);
 
 		$pdf->draw_text(310, 595, t("Mahdolliset muistutukset tehtävä 8 päivän kuluessa", $kieli), $thispage, $pieni);
 
-		//Tulostetaan laskun kommentti
+		$komm = "";
+		
+		if (trim($laskurow['tilausyhteyshenkilo']) != '') {
+			$komm .= "\n".t("Tilaaja").":###".$laskurow['tilausyhteyshenkilo'];
+		}
+	
+		if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
+			$komm .= "\n".t("Tilauksenne").":###".$laskurow['asiakkaan_tilausnumero'];								
+		}
+	
+		if (trim($laskurow['kohde']) != '') {
+			$komm .= "\n".t("Kohde").":###".$laskurow['kohde'];								
+		}
+	
+		if (trim($laskurow['viesti']) != '' and $pdf->strlen($laskurow["viesti"], $norm) > 270) {
+			$komm .= "\n".t("Lisätietoja").":###".$laskurow['viesti'];								
+		}
+		
 		if (trim($laskurow['sisviesti1']) != '') {
-			$pdf->draw_text(35, 577, t("Huomautukset", $kieli).":", $thispage, $norm);
+			$komm .= "\n".t("Kommentti").":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 100, "\n###");							
+		}
+		
+		//Tulostetaan laskun kommentti
+		if (trim($komm) != '') {
+			$kommentit = explode("\n", trim($komm));
 
-			$kommentit = explode("\n", trim($laskurow['sisviesti1']));
-
-			$pohja = 565;
-
+			$pohja  = 577;
+			$maxoik = 0;
+			
 			foreach($kommentit as $kommentti) {
-				$pdf->draw_text(35, $pohja, trim($kommentti), $thispage, $norm);
-				$pohja = $pohja - 10;
+				if(strpos($kommentti, "###") !== FALSE) {
+					list($o, $v) = explode("###", $kommentti);
+				
+					$oikpos = $pdf->strlen($o, $norm);
+				
+					if ($oikpos > $maxoik) {
+						$maxoik = $oikpos;
+					}
+				}
 			}
 
-			// viivat rivien väliin...
-			$x[0] = 35;
-			$x[1] = 580;
-			$y[0] = $y[1] = $pohja+5;
-			$pdf->draw_line($x, $y, $thispage, $rectparam);
+			foreach($kommentit as $kommentti) {
+				
+				if (strpos($kommentti, "###") !== false) {
+					list($o, $v) = explode("###", $kommentti);
+					
+					$pdf->draw_text(35, $pohja, trim($o), $thispage, $norm);
+					$pdf->draw_text(35+$maxoik+5, $pohja, trim($v), $thispage, $norm);
+				}
+				else {
+					$pdf->draw_text(35, $pohja, trim($kommentti), $thispage, $norm);
+				}
+				
+				$pohja = $pohja - 10;
+			}
 
 			$kala = $pohja-10;
 

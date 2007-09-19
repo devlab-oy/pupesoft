@@ -218,7 +218,6 @@
 
 				$logoparam = array();
 
-				// Logosta tulee max: 50pt korkea ja 240pt leveä (17.64mm x 84.66mm)
 				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {
 					$logoparam['scale'] = 240 / $isizelogo[0];
 				}
@@ -226,8 +225,7 @@
 					$logoparam['scale'] = 50  / $isizelogo[1];
 				}
 
-				//$pdf->draw_rectangle(840,25,780,25+120, $firstpage, $rectparam);
-				$placement = $pdf->image_place($image, 820-($logoparam['scale']*$isizelogo[1]), 25, $firstpage, $logoparam);
+				$placement = $pdf->image_place($image, 830-($logoparam['scale']*$isizelogo[1]), 20, $firstpage, $logoparam);
 			}
 			
 			//osoitetiedot yms

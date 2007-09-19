@@ -1,4 +1,5 @@
 <?php
+
 // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow array, $yhtiorow array
 
 $tilaus_valmis_ulos = "";
@@ -67,11 +68,11 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 		$tilvares = mysql_query($query) or pupe_error($query);
 
 		if ($tilvakir = mysql_fetch_array($tilvares)) {
+			$komento["Tilausvahvistus"] = $tilvakir["komento"];
+			
 			require_once ("tulosta_tilausvahvistus_pdf.inc");
-			tulosta_tilausvahvistus($laskurow["tunnus"], $tilvakir["komento"]);
 		}
 	}
-
 }
 elseif ($laskurow["tilaustyyppi"] == '0') {
 		// Ylläpitosopimus
@@ -806,8 +807,9 @@ else {
 					$tilvares = mysql_query($query) or pupe_error($query);
 
 					if ($tilvakir = mysql_fetch_array($tilvares)) {
+						$komento["Tilausvahvistus"] = $tilvakir["komento"];
+
 						require_once ("tulosta_tilausvahvistus_pdf.inc");
-						tulosta_tilausvahvistus($laskurow["tunnus"], $tilvakir["komento"]);
 					}
 				}
 

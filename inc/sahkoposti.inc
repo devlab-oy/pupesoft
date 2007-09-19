@@ -10,7 +10,7 @@
 
 	if (substr($komento,0,12) == 'asiakasemail') {
 		$varaposti = $kukarow['eposti'];
-		$kukarow['eposti'] = substr($komento,13);
+		$kukarow['eposti'] = substr($komento,12);
 	}
 
 	$bound = uniqid(time()."_") ;
@@ -45,7 +45,7 @@
 
 	$content .= chunk_split(base64_encode($sisalto));
 	$content .= "\n" ;
-
+	
 	$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - $kutsu", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";

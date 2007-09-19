@@ -241,6 +241,24 @@ if (!function_exists("kuuluukovarastoon")) {
 	}
 }
 
+if (!function_exists("pdf_substr")) {
+	function pdf_substr($str, $len, $pdf, $param) {
+		
+		for($s = strlen($str); $s > 0; $s--) {
+			if($pdf->strlen($str, $param) > $len) {
+				$str = substr($str, 0, $s);
+			}
+			else {
+				break;
+			}
+		}
+		
+		return $str;
+	}
+}
+
+
+
 if (!function_exists("mm_pt")) {
 	function mm_pt($millimetreja) {
 		$pointseja = round($millimetreja / 0.3527777778,2);

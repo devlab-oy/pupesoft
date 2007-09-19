@@ -63,6 +63,12 @@
 	}
 		
 	if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
+		
+		//korjataan hintaa ja aleprossaa
+		$hinta	= str_replace(',','.',$hinta);
+		$ale 	= str_replace(',','.',$ale);
+		$kpl 	= str_replace(',','.',$kpl);
+		
 		// Hateaan tilauksen tiedot
 		$query = "	SELECT *
 					FROM lasku
@@ -336,9 +342,8 @@
 			$multi = "TRUE";
 			require("../inc/tuotehaku.inc");
 		}
-		
+				
 		if ($tee == 'TI' and (trim($tuoteno) != '' or is_array($tuoteno_array)) and ($kpl != '' or is_array($kpl_array))) {
-
 			if (!is_array($tuoteno_array) and trim($tuoteno) != "") {
 				$tuoteno_array[] = $tuoteno;
 			}
@@ -506,7 +511,7 @@
 			echo "<tr><th>".t("Tila")."</th><th>".t("Toimaika")."</th><th>".t("Tilausnumero")."</th><td class='back'></td></tr>";
 
 			echo "<tr><td>$laskurow[tila]</td>
-				<td>$laskurow[toimaika]</td><td>$laskurow[tunnus]</td>
+				<td>".tv1dateconv($laskurow["toimaika"])."</td><td>$laskurow[tunnus]</td>
 				<form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='mikrotila'>
 				<input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -694,23 +699,23 @@
 					echo "<tr>";
 
 					if ($prow["perheid2"] == 0 or $prow["perheid2"] == $prow["tunnus"]) {
-						echo "<td class='$class'>$lask</td>";
+						echo "<td valign='top' class='$class'>$lask</td>";
 						$lask++;
 						$class = "";
 					}
 					else {
-						echo "<td class='back'></td>";
+						echo "<td valign='top' class='back'></td>";
 						$class = "spec";
 					}
 
-					echo "<td class='$class'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
-					echo "<td class='$class'>$prow[paikka]</td>";
+					echo "<td valign='top' class='$class'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
+					echo "<td valign='top' class='$class'>$prow[paikka]</td>";
 
 					$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$prow[tuoteno]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 
-					echo "<td><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a>";
+					echo "<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a>";
 
 					if ($sarjarow["sarjanumeroseuranta"] != "") {
 						$query = "	select count(*) kpl 
@@ -730,12 +735,12 @@
 					echo "</td>";
 
 
-					echo "<td class='$class'>$prow[toim_tuoteno]</td>";
-					echo "<td class='$class' align='right'>$prow[tilattu]</td>";
-					echo "<td class='$class' align='right'>$prow[hinta]</td>";
-					echo "<td class='$class' align='right'>$prow[ale]</td>";
-					echo "<td class='$class' align='right'>$prow[alv]</td>";
-					echo "<td class='$class' align='right'>$prow[rivihinta]</td>";
+					echo "<td valign='top' class='$class'>$prow[toim_tuoteno]</td>";
+					echo "<td valign='top' class='$class' align='right'>$prow[tilattu]</td>";
+					echo "<td valign='top' class='$class' align='right'>$prow[hinta]</td>";
+					echo "<td valign='top' class='$class' align='right'>$prow[ale]</td>";
+					echo "<td valign='top' class='$class' align='right'>$prow[alv]</td>";
+					echo "<td valign='top' class='$class' align='right'>$prow[rivihinta]</td>";
 
 
 					if ($prow["uusiotunnus"] == 0) {
@@ -745,7 +750,7 @@
 
 						echo "	<form action='$PHP_SELF' method='post'>
 								<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-								<td class='back' nowrap>
+								<td valign='top' class='back' nowrap>
 								<input type='hidden' name='rivitunnus' value = '$prow[tunnus]'>
 								<input type='hidden' name='menutila' value = '$menutila'>
 								<input type='hidden' name='tee' value = 'PV'>
@@ -753,7 +758,7 @@
 								</td></form>";
 
 						if ($varaosavirhe != '') {
-							echo "<td class='back'>$varaosavirhe</td>";
+							echo "<td valign='top' class='back'>$varaosavirhe</td>";
 						}
 
 						if ($varaosavirhe == "") {

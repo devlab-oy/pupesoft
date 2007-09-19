@@ -128,7 +128,7 @@
 			}
 
 			$varaosavirhe .= "	<font class='message'>
-								".t("Päivitä tuotteen ostohinta").":<br> $trow[ostohinta] $trow[valuutta] -> $prow[hinta] $trow[valuutta]</font>
+								".t("Päivitä tuotteen ostohinta").":<br> $trow[ostohinta] $trow[valuutta] -> $prow[hinta] $trow[valuutta]</font><br>
 								<input type='submit' name='JOPA' value='".t("Päivitä")."'> <input type='submit' name='ALPA' value='".t("Älä päivitä")."'></form>";
 		}
 	}

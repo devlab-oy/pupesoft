@@ -99,10 +99,9 @@
 	if (in_array($trow["status"], array("P","X")) and $row["var2"] != "OK") {
 		$varaosavirhe .= t("HUOM: T‰m‰ on poistuva tuote!")."<br>";
 		$riviok++;
-		$tilausok++;
-		$saako_hyvaksya++;
+//		$tilausok++;
+//		$saako_hyvaksya++;
 	}
-
 
 	if (in_array($trow["status"], array("P","X")) and $row["var"] == "J") {
 		$varaosavirhe .= t("VIRHE: T‰m‰ on poistuva tuote, ei voida j‰tt‰‰ j‰lkitoimitukseen!")."<br>";

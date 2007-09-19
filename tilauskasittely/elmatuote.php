@@ -29,7 +29,7 @@ else {
 	require ("../inc/parametrit.inc");
 }
 
-$ulos = "<font class='head'>Elmatuote</font><hr>";
+$echoulos = "<font class='head'>Elmatuote</font><hr>";
 
 if ($aja=='run') {
 
@@ -43,7 +43,7 @@ if ($aja=='run') {
 	$query = "select * from tuote where yhtio = '$kukarow[yhtio]' and hinnastoon != 'E' and status NOT IN ('P','X')";
 	$res   = mysql_query($query) or pupe_error($query);
 
-	$ulos .= "<font class='message'>K‰sitell‰‰n tuotteita (".mysql_num_rows($res)." kpl)...<br>";
+	$echoulos .= "<font class='message'>K‰sitell‰‰n tuotteita (".mysql_num_rows($res)." kpl)...<br>";
 
 	// arvioidaan kestoa
 	$arvio     = array();
@@ -154,8 +154,8 @@ if ($aja=='run') {
 	$endtime   = $timeparts[1].substr($timeparts[0], 1);
 	$aika      = round($endtime-$starttime, 4);
 
-	$ulos .= "<font class='message'>Kesto $aika sec.</font><br>";
-	$ulos .= "<font class='message'>L‰hetet‰‰n tiedosto Elmaan...</font>";
+	$echoulos .= "<font class='message'>Kesto $aika sec.</font><br>";
+	$echoulos .= "<font class='message'>L‰hetet‰‰n tiedosto Elmaan...</font>";
 
 	//pakataan faili
 	#$cmd = "/usr/bin/bzip2 $elma";
@@ -174,7 +174,7 @@ if ($aja=='run') {
 	require ("../inc/ftp-send.inc");
 
 	//L‰hetet‰‰n tiedosto asiakkaille suoraan jotka haluavat sen ilman Elmaa
-	$ulos .= "<font class='message'>L‰hetet‰‰n tiedosto Asiakkaille...</font><br>";
+	$echoulos .= "<font class='message'>L‰hetet‰‰n tiedosto Asiakkaille...</font><br>";
 
 	$query  = "select * from asiakas where yhtio='$kukarow[yhtio]' and fakta like '%ELMATUOTE-SƒHK÷POSTILLA%' and email!=''";
 	$kores  = mysql_query($query) or pupe_error($query);
@@ -207,20 +207,23 @@ if ($aja=='run') {
 			$mail .= "\n" ;
 
 			$boob = mail($korow["email"], "Varastotilanne - $yhtiorow[nimi]", $mail, $header);
-			if ($boob === FALSE) $ulos .= "S‰hkˆpostin l‰hetys ep‰onnistui<br>";
+			if ($boob === FALSE) $echoulos .= "S‰hkˆpostin l‰hetys ep‰onnistui<br>";
 		}
 	}
 
 	if ($palautus == 0)
-		$ulos .= "<font class='message'>Valmis.</font><br><br>";
+		$echoulos .= "<font class='message'>Valmis.</font><br><br>";
 
 	// komentorivilt‰
 	if (trim($argv[1]) != '') {
-		$ulos = strip_tags($ulos, "<br>");
-		$ulos = str_replace("<br>", "/n", $ulos);
+		$echoulos = strip_tags($echoulos, "<br>");
+		$echoulos = str_replace("<br>", "\n", $echoulos);
+		echo "$echoulos\n\n";
 	}
-
-	echo "$ulos";
+	else {
+		echo "$echoulos";
+		require ("../inc/footer.inc");
+	}
 
 }
 else {
@@ -228,8 +231,8 @@ else {
 	echo "<input type='hidden' name='aja' value='run'>";
 	echo "<input type='submit' value='Aja Elmatuote!'>";
 	echo "</form>";
-}
 
-require ("../inc/footer.inc");
+	require ("../inc/footer.inc");
+}
 
 ?>

@@ -483,14 +483,20 @@
 	}
 
 	if (mysql_field_name($result, $i) == "kerayspoikkeama") {
-			$sel		= array();
-			$pv			= $trow[$i];
-			$sel[$pv]	= " selected";
-
+			$sel			= array();
+			
+			if ($trow[$i] == "") {
+				$sel[$yhtiorow["kerayspoikkeamaviestin_lahetys"]] = " selected";
+			}
+			else {
+				$sel[$trow[$i]]	= " selected";
+			}
+			
 			$ulos = "<td>
 				<select name='$nimi'>
-				<option value='0' $sel[0]>".t("L‰hetet‰‰n")."</option>
-				<option value='1' $sel[1]>".t("Ei l‰hetet‰")."</option>
+				<option value='0' $sel[0]>".t("L‰hetet‰‰n asiakkaalle ja myyj‰lle")."</option>
+				<option value='2' $sel[2]>".t("L‰hetet‰‰n vain myyj‰lle")."</option>
+				<option value='1' $sel[1]>".t("Ei l‰hetet‰ ollenkaan")."</option>
 				</select></td>";
 			$jatko = 0;
 	}

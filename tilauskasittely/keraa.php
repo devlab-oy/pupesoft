@@ -604,16 +604,16 @@
 							}
 						}
 
-
 						$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, kuka.nimi kukanimi
 									FROM lasku
 									JOIN asiakas on asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 									LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
-									WHERE lasku.tunnus='$otsrow[otunnus]' and lasku.yhtio='$kukarow[yhtio]'";
+									WHERE lasku.tunnus	= '$otsrow[otunnus]' 
+									and lasku.yhtio		= '$kukarow[yhtio]'";
 						$result = mysql_query($query) or pupe_error($query);
 						$laskurow = mysql_fetch_array($result);
 
-						$header  = "From: <$yhtiorow[postittaja_email]>\r\n";
+						$header = "From: <$yhtiorow[postittaja_email]>\r\n";
 
 						$ulos  = sprintf("%-50.s",$yhtiorow['nimi'])								."".t("Ker‰yspoikkeamat")."\r\n";
 						$ulos .= sprintf("%-50.s",$yhtiorow['osoite'])								."\r\n";
@@ -628,24 +628,28 @@
 						$ulos .= sprintf("%-50.s","".t("Toimitus").": ".$laskurow['toimitustapa'])			."".t("Tilausnumero").": ".$laskurow['tunnus']."\r\n";
 						$ulos .= sprintf("%-50.s","".t("Tilausviite").": ".$laskurow['viesti'])				."".t("Myyj‰").": ".$laskurow['kukanimi']."\r\n";
 
-						if ($laskurow['comments']!='')
+						if ($laskurow['comments'] != '') {
 							$ulos .= "".t("Kommentti").": ".$laskurow['comments']."\n";
-							$ulos .= "\r\n";
-							$ulos .= "".t("Nimitys")."                       ".t("Tuotenumero")."          ".t("Tilattu")."            ".t("Toimitetaan")."\r\n";
-							$ulos .= "---------------------------------------------------------------------------------\r\n";
-							$ulos .= $rivit."\r\n";
+						}
+						
+						$ulos .= "\r\n";
+						$ulos .= "".t("Nimitys")."                       ".t("Tuotenumero")."          ".t("Tilattu")."            ".t("Toimitetaan")."\r\n";
+						$ulos .= "---------------------------------------------------------------------------------\r\n";
+						$ulos .= $rivit."\r\n";
 
-
+						
+						// L‰hetet‰‰n ker‰yspoikkeama asiakkaalle
 						if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
 							$boob = mail($laskurow["email"],  "$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat")."", $ulos, $header, "-f $yhtiorow[postittaja_email]");
 							if ($boob===FALSE) echo " - ".t("Email l‰hetys ep‰onnistui")."!<br>";
 						}
 
-						if ($kukarow["eposti"] != '') {
+						// L‰hetet‰‰n ker‰yspoikkeama myyj‰lle
+						if ($kukarow["eposti"] != '' and ($laskurow["kerayspoikkeama"] == 0 or $laskurow["kerayspoikkeama"] == 2)) {
 							if (($laskurow["email"] == '' or $boob === FALSE) and $laskurow["kerayspoikkeama"] == 0) {
 								$ulos = t("Asiakkaalta puuttuu s‰hkˆpostiosoite! Ker‰yspoikkeamia ei voitu l‰hett‰‰!")."\r\n\r\n\r\n".$ulos;
 							}
-							elseif ($laskurow["kerayspoikkeama"] == 1) {
+							elseif ($laskurow["kerayspoikkeama"] == 2) {
 								$ulos = t("Asiakkaalle on merkitty ett‰ h‰n ei halua ker‰yspoikkeama ilmoituksia!")."\r\n\r\n\r\n".$ulos;
 							}
 							else {

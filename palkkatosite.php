@@ -2,7 +2,7 @@
 
 if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
-	// Tämä on Pretaxin palkkaohjelmiston normaali siirtomuoto (kirpi.txt)
+	// Tämä on Pretaxin palkkaohjelmiston normaali siirtomuoto ver 2
 	
 	if ($_FILES['userfile']['size']==0){
 		die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
@@ -13,15 +13,21 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	
 	$maara=1;
 	
-	$tpv=substr($rivi,4,2);
-	$tpk=substr($rivi,6,2);
-	$tpp=substr($rivi,8,2);
+	$tpv=substr($rivi,39,4);
+	$tpk=substr($rivi,43,2);
+	$tpp=substr($rivi,45,2);
 		
 	while (!feof($file)) {
 
-		$isumma[$maara] = (float) substr($rivi,53,14) / 100;
+/*		$isumma[$maara] = (float) substr($rivi,53,14) / 100;
 		$itili[$maara]  = (int) substr($rivi,10,6);
-		$ikustp[$maara] = (int) substr($rivi,16,3);
+		$ikustp[$maara] = substr($rivi,16,3);
+		$iselite[$maara] = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;  
+*/
+
+		$isumma[$maara] = (float) substr($rivi,117,16) / 100;
+		$itili[$maara]  = (int) substr($rivi,190,7);
+		$ikustp[$maara] = (int) substr($rivi,198,3);
 		$iselite[$maara] = "Palkkatosite ". $tpp . "." . $tpk . "." . $tpv;  
 
 		$maara++;

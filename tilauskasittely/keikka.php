@@ -417,11 +417,16 @@ if ($toiminto == "" and $ytunnus != "") {
 			$eipaikkoja  = 0;  // apumuuttuja
 			$eituotteet  = ""; // apumuuttuja
 			$varastossaarvo = 0; // apumuuttuja
+			$uusiot = array();
 
 			while ($rivirow = mysql_fetch_array($tilres)) {
 				$query = "select * from tuote where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]'";
 				$tuore = mysql_query($query) or pupe_error($query);
 				$tuote = mysql_fetch_array($tuore);
+				
+				if (!in_array($rivirow["otunnus"], $uusiot)) {
+					$uusiot[] = $rivirow["otunnus"];
+				}
 
 				$kplyhteensa++; // lasketaan montako tilausriviä on kohdistettu
 
@@ -505,14 +510,9 @@ if ($toiminto == "" and $ytunnus != "") {
 
 			$sarjanrook = 0;
 			$sarjanrot = "<font style='color:#00FF00;'>".t("ok")."</font>";
-			$uusiot = array();
 
 			while ($toimrow = mysql_fetch_array($toimresult)) {
-
-				if (!in_array($toimrow["uusiotunnus"], $uusiot)) {
-					$uusiot[] = $toimrow["uusiotunnus"];
-				}
-
+				
 				if ($toimrow["kpl"] < 0) {
 					$tunken = "myyntirivitunnus";
 				}
@@ -596,9 +596,6 @@ if ($toiminto == "" and $ytunnus != "") {
 			else {
 				echo "<td valign='top'>$kplyhteensa<br>$kplvarasto $varastossaarvo</td>";
 			}
-			
-			
-			
 			
 			echo "<td valign='top'>$llrow[volasku] $llrow[vosumma]<br>$llrow[kulasku] $llrow[kusumma]</td>";
 

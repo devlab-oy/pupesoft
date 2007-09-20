@@ -646,16 +646,10 @@
 			echo "<hr>";
 
 			//Listataan tilauksessa olevat tuotteet
-			$jarjestys = "sorttauskentta desc, tilausrivi.tunnus";
-
-			if (strlen($ojarj) > 0) {
-				$jarjestys = $ojarj;
-			}
-
 			$query = "	SELECT tilausrivi.nimitys, concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 						tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu',
 						round((varattu+jt)*tilausrivi.hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),2) rivihinta,
-						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale, tilausrivi.varattu varattukpl,
+						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale, tilausrivi.varattu varattukpl, tilausrivi.kommentti,
 						if(tilausrivi.perheid2=0, tilausrivi.tunnus, tilausrivi.perheid2) as sorttauskentta,
 						tilausrivi.var
 						FROM tilausrivi
@@ -664,7 +658,7 @@
 						WHERE otunnus = '$kukarow[kesken]'
 						and tilausrivi.yhtio='$kukarow[yhtio]'
 						and tilausrivi.tyyppi='O'
-						ORDER BY $jarjestys";
+						ORDER BY sorttauskentta desc, tilausrivi.tunnus";
 			$presult = mysql_query($query) or pupe_error($query);
 
 			$rivienmaara = mysql_num_rows($presult);
@@ -686,7 +680,7 @@
 			$yhteensa 		= 0;
 			$nettoyhteensa 	= 0;
 			$eimitatoi 		= '';
-			$lask 			= 1;
+			$lask 			= mysql_num_rows($presult);
 			$tilausok 		= 0;
 
 			while ($prow = mysql_fetch_array ($presult)) {
@@ -700,7 +694,7 @@
 
 					if ($prow["perheid2"] == 0 or $prow["perheid2"] == $prow["tunnus"]) {
 						echo "<td valign='top' class='$class'>$lask</td>";
-						$lask++;
+						$lask--;
 						$class = "";
 					}
 					else {
@@ -824,6 +818,10 @@
 						echo "<td class='back'>".t("Lukittu")."</td>";
 						$eimitatoi = "EISAA";
 						echo "</tr>";
+					}
+					
+					if ($prow["kommentti"] != "") {
+						echo "<tr><td></td><td colspan='9'>".t("Kommentti").": $prow[kommentti]</td></tr>";
 					}
 				}
 			}

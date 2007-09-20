@@ -11,7 +11,10 @@
 		else {
 			$hakyhtio = $kukarow["yhtio"];
 		}
-
+		
+		//	Trimmataan tyhjät merkit
+		$uustuoteno = trim($uustuoteno);
+		
 		$query = "	SELECT tunnus
 					FROM tuote
 					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";

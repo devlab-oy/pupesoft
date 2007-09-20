@@ -125,9 +125,10 @@
 							kaytetty		= '$kaytetty',
 							muuttaja		= '$kukarow[kuka]',
 							muutospvm		= now(), 
+							era_kpl			= '$era_kpl',
 							parasta_ennen 	= '$pevva-$pekka-$peppa'
 							WHERE yhtio = '$kukarow[yhtio]'
-							and perheid  = '$sarjatunnus'";
+							and tunnus  = '$sarjatunnus'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 			else {
@@ -170,6 +171,7 @@
 			$sarjatunnus	= "";
 			$toiminto		= "";
 			$kaytetty		= "";
+			$era_kpl		= "";
 		}
 		else {
 			$query = "	SELECT sarjanumeroseuranta.* , tuote.tuoteno, tuote.nimitys
@@ -219,6 +221,10 @@
 				}
 				
 				echo "<td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'></td></tr>";
+				
+				if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
+					echo "<tr><th>".t("Er‰n suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$muutarow[era_kpl]'></td></tr>";
+				}
 				
 				if ($rivirow["sarjanumeroseuranta"] == "F") {
 					
@@ -273,6 +279,7 @@
 	if ($toiminto == 'LISAA' and trim($sarjanumero) != '') {
 		
 		$sarjanumero = trim($sarjanumero);
+		$insok = "OK";
 		
 		if($rivirow["sarjanumeroseuranta"] == "T" or $rivirow["sarjanumeroseuranta"] == "S") {
 			$query = "	SELECT *
@@ -283,6 +290,11 @@
 						and (ostorivitunnus = 0 or myyntirivitunnus = 0)";
 		}
 		else {
+			if ((float) $era_kpl == 0) {
+				$insok = "EI";
+				echo "<font class='error'>".t("Er‰lle on syˆtett‰v‰ kappalem‰‰r‰")." $rivirow[tuoteno]/$sarjanumero.</font><br><br>";
+			}
+			
 			$query = "	SELECT *
 						FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
 						WHERE yhtio 		= '$kukarow[yhtio]'
@@ -292,12 +304,12 @@
 		}
 		$sarjares = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($sarjares) == 0) {
+		if (mysql_num_rows($sarjares) == 0 and $insok == "OK") {
 			
 			//jos ollaan syˆtetty kokonaan uusi sarjanuero
 			$query = "	INSERT into sarjanumeroseuranta 
 						(yhtio, tuoteno, sarjanumero, lisatieto, $tunnuskentta, kaytetty, era_kpl, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)
-						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$rivirow[varattu]','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]')";
+						VALUES ('$kukarow[yhtio]','$rivirow[tuoteno]','$sarjanumero','$lisatieto','','$kaytetty','$era_kpl','$kukarow[kuka]',now(),'$tvva-$tkka-$tppa','$tvvl-$tkkl-$tppl', '$rivirow[hyllyalue]', '$rivirow[hyllynro]', '$rivirow[hyllyvali]', '$rivirow[hyllytaso]')";
 			$sarjares = mysql_query($query) or pupe_error($query);
 			
 			$tun = mysql_insert_id();
@@ -367,8 +379,9 @@
 			$sarjanumero	= "";
 			$lisatieto		= "";
 			$kaytetty		= "";
+			$era_kpl		= "";
 		}
-		else {
+		elseif ($insok != "EI") {
 			$sarjarow = mysql_fetch_array($sarjares);
 			
 			$sarjanumero_haku = $sarjanumero;
@@ -386,14 +399,15 @@
 		if (count($sarjataan) > 0 and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F")) {
 			$ktark = implode(",", $sarjataan);
 			
-			$query = "	SELECT distinct sarjanumero 
+			$query = "	SELECT sum(era_kpl) kpl 
 						FROM sarjanumeroseuranta
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tunnus in ($ktark)";
 			$sarres = mysql_query($query) or pupe_error($query);
+			$sarrow = mysql_fetch_array($sarres);
 			
-			if (mysql_num_rows($sarres) > 1) {
-				echo "<font class='error'>".t('Riviin voi liitt‰‰ vain yhden er‰n tuotteita')."</font><br><br>";	
+			if ($rivirow["varattu"] < $sarrow["kpl"]) {
+				echo "<font class='error'>".t('Riviin voi liitt‰‰ vain yhden er‰n tuotteita')." $rivirow[varattu] < $sarrow[kpl]</font><br><br>";	
 				
 				$lisaysok = "";
 			}
@@ -587,7 +601,8 @@
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					varastopaikat.nimitys								varastonimi,
-					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
+					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
+					era_kpl
 					FROM sarjanumeroseuranta use index (yhtio_myyntirivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -620,7 +635,7 @@
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
-					count(*) kappaleita
+					era_kpl
 					FROM sarjanumeroseuranta use index (yhtio_ostorivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -650,7 +665,7 @@
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
-					count(*) kappaleita
+					era_kpl
 					FROM sarjanumeroseuranta use index (yhtio_ostorivi)
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -680,7 +695,8 @@
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					varastopaikat.nimitys								varastonimi,
-					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka
+					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
+					era_kpl
 					FROM sarjanumeroseuranta
 					LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
 					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -813,7 +829,7 @@
 		echo "<td valign='top'>".strtoupper($sarjarow["sarjanumero"])."<a name='$sarjarow[sarjanumero]'></a>";
 		
 		if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
-			echo "<br>".t("Er‰ss‰").": $sarjarow[kappaleita] $rivirow[yksikko]";
+			echo "<br>".t("Er‰ss‰").": $sarjarow[era_kpl] $rivirow[yksikko]";
 		}
 		
 		echo "</td>";
@@ -986,6 +1002,9 @@
 			echo "<br><table>";
 			echo "<tr><th colspan='2'>".t("Lis‰‰ uusi er‰numero")."</th></tr>";
 			echo "<tr><th>".t("Er‰numero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td><td class='back'><a href='#' onclick='document.sarjaformi.sarjanumero.value=\"$nxt\";'>".t("Seuraava er‰")."</a></td></tr>";
+			
+			echo "<tr><th>".t("Er‰n suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$era_kpl'></td></tr>";
+			
 			
 			if ($rivirow["sarjanumeroseuranta"] == "F") {
 				echo "<tr><th>".t("Parasta ennen")."</th><td>

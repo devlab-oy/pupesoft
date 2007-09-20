@@ -113,7 +113,7 @@
 		echo "<tr><td valign='top'>".t("Osoite").": </td><td><input type='text' name='osoite' size='35' maxlength='31' value='$srow[osoite]'></td></tr>";
 		echo "<tr><td valign='top'>".t("Postitp").": </td><td><input type='text' name='postino' size='6' maxlength='6' value='$srow[postino]'>";
 		echo "<input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'>";
-
+		echo "<input type='hidden' name='maa' value='$srow[maa]'>";
 		if ($kukarow["kesken"] != 0) {
 			echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
 		}
@@ -165,7 +165,8 @@
 		echo "<tr><td> </td><td><input type='text' name='tnimitark' size='35' maxlength='31'  value='$srow[toim_nimitark]'></td></tr>";
 		echo "<tr><td valign='top'>".t("Osoite").": </td><td><input type='text' name='tosoite' size='35' maxlength='31' value='$srow[toim_osoite]'></td></tr>";
 		echo "<tr><td valign='top'>".t("Postitp").": </td><td><input type='text' name='tpostino' size='6' maxlength='6' value='$srow[toim_postino]'>";
-		echo " <input type='text' name='tpostitp' size='21' maxlength='20' value='$srow[toim_postitp]'></td></tr>";
+		echo "<input type='text' name='tpostitp' size='21' maxlength='20' value='$srow[toim_postitp]'></td></tr>";
+		echo "<input type='hidden' name='tmaa' value='$srow[toim_maa]'>";
 		echo "</table>";
 		echo "</td></tr>";
 
@@ -324,12 +325,12 @@
 			$edioro = mysql_fetch_array($ediotr);
 
 			// laitetaan toimipisteen tiedot toimitusosoitteeseen jos siell‰ ei viel‰ muuta ole
-			$tnimi     = $edioro["nimi"];
-			$tnimitark = $edioro["nimitark"];
-			$tosoite   = $edioro["osoite"];
-			$tpostino  = $edioro["postino"];
-			$tpostitp  = $edioro["postitp"];
-			$toim_maa  = $edioro["maa"];
+			$tnimi     	= $edioro["nimi"];
+			$tnimitark 	= $edioro["nimitark"];
+			$tosoite   	= $edioro["osoite"];
+			$tpostino  	= $edioro["postino"];
+			$tpostitp  	= $edioro["postitp"];
+			$tmaa  		= $edioro["maa"];
 		}
 
 		// varmistellaan, ett‰ meill‰ menee jotain toimitusosoite kentt‰‰n
@@ -339,7 +340,7 @@
 			$tosoite   = $yhtiorow["osoite"];
 			$tpostino  = $yhtiorow["postino"];
 			$tpostitp  = $yhtiorow["postitp"];
-			$toim_maa  = $yhtiorow["maa"];
+			$tmaa  	   = $yhtiorow["maa"];
 		}
 
 		$crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
@@ -358,7 +359,7 @@
 					toim_osoite 		= '$tosoite',
 					toim_postino 		= '$tpostino',
 					toim_postitp 		= '$tpostitp',
-					toim_maa 			= '$toim_maa',
+					toim_maa 			= '$tmaa',
 					verkkotunnus		= '$verkkotunnus',
 					toimaika 			= '".$toimvv."-".$toimkk."-".$toimpp."',
 					kerayspvm 			= '".$kervv."-".$kerkk."-".$kerpp."',

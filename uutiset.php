@@ -104,6 +104,7 @@ if ($tee == 'LISAA') {
 					kentta03 	= '$kuva',
 					konserni 	= '$konserni',
 					kieli 		= '$lang',
+					kokopaiva	= '$kokopaiva',
 					kuittaus	= '$lukittu'";
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
@@ -120,9 +121,10 @@ if ($tee == 'LISAA') {
 	else {
 
 		echo "<font class='error'>".t("Sekä otsikko että uutinen on syötettävä!")."</font><br><br>";
-		$rivi["kentta01"] = $otsikko;
-		$rivi["kentta02"] = $uutinen;
-		$rivi["konserni"] = $konserni;
+		$rivi["kentta01"]  = $otsikko;
+		$rivi["kentta02"]  = $uutinen;
+		$rivi["konserni"]  = $konserni;
+		$rivi["kokopaiva"] = $kokopaiva;
 		$tee = "SYOTA";
 	}
 }
@@ -188,9 +190,6 @@ if ($tee == "SYOTA") {
 			</tr>";
 	}
 
-	if ($rivi['konserni'] != "") $check = "CHECKED";
-	else $check = "";
-
 	echo "<tr>
 			<th>".t("Toimittaja")."</th>
 			<td>$kukarow[nimi]</td>
@@ -219,8 +218,20 @@ if ($tee == "SYOTA") {
 			echo "<option value='$apurow[0]' $sel>".t($maa)."</option>";
 		}
 	}
+	
+	if ($rivi['kokopaiva'] != "") $check = "CHECKED";
+	else $check = "";
+	
+	echo "<tr>
+		<th>".t("Prioriteetti")."</th>
+		<td><input type='checkbox' name='kokopaiva' $check> ".t("Näytetäänkö uutinen aina päällimmäisenä")."</td>
+	</tr>";
 
 	if ($yhtiorow['konserni'] != '') {
+		
+		if ($rivi['konserni'] != "") $check = "CHECKED";
+		else $check = "";
+		
 		echo "<tr>
 			<th>".t("Konserni")."</th>
 			<td><input type='checkbox' name='konserni' $check> ".t("Näytetäänkö uutinen konsernin kaikilla yrityksillä")."</td>
@@ -370,7 +381,7 @@ if ($tee == '') {
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
 				where tyyppi='$tyyppi' and $ehto
-				order by pvmalku desc, kalenteri.tunnus desc
+				order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
 				$limit";
 	$result = mysql_query($query) or pupe_error($query);
 

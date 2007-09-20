@@ -33,7 +33,7 @@ if (!isset($tee) or $tee == '') {
 				from kalenteri
 				left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
 				where tyyppi='uutinen' $lisa and $ehto
-				order by pvmalku desc, kalenteri.tunnus desc
+				order by kokopaiva desc, pvmalku desc, kalenteri.tunnus desc
 				$limit";
 
 	$result = mysql_query($query) or pupe_error($query);

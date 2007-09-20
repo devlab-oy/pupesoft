@@ -118,6 +118,10 @@ if (!function_exists('alku')) {
 			$query  = "SELECT max(kerattyaika) as kerattyaika from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$laskurow[tunnus]'";
 			$keraresult = mysql_query($query) or pupe_error($query);
 			$kerarow = mysql_fetch_array($keraresult);
+			
+			if ($kerarow["kerattyaika"] == "0000-00-00 00:00:00") {
+				$kerarow["kerattyaika"] = date("Y-m-d H:i:s");
+			}
 		}
 		
 		if ($tyyppi == "TILAUSVAHVISTUS") {
@@ -150,9 +154,27 @@ if (!function_exists('alku')) {
 
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
+		$pdf->draw_rectangle(800, 420, 779, 580, $thispage, $rectparam);
+		
 		$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
+		$pdf->draw_text(430, 792, t("Toimitusaika", $kieli), 	$thispage, $pieni);
 		$pdf->draw_text(310, 782, $laskurow["tunnus"],			$thispage, $boldi);
 		
+		
+		if ($laskurow["toimvko"] != '') {
+			$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
+			
+			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
+			
+			if ($laskurow['toimvko'] != '6') {
+				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
+			}
+			
+			$pdf->draw_text(430, 782, $taika, 								$thispage, $norm);
+		}
+		else {			
+			$pdf->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$thispage, $norm);
+		}
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
@@ -1060,7 +1082,9 @@ if (!function_exists('loppu')) {
 		
 		if ($tots == 1 and $summa != 0) {	
 			$pdf->draw_text(450, 72, t("Yhteensä", $kieli).":", $thispage, $norm);
-			$pdf->draw_text(500, 72, sprintf("%.2f", $summa)." ".$laskurow["valkoodi"], $thispage, $norm);
+						
+			$oikpos = $pdf->strlen(sprintf('%.2f',$summa)." ".$laskurow["valkoodi"], $norm);					
+			$pdf->draw_text(575-$oikpos, 72, sprintf('%.2f',$summa)." ".$laskurow["valkoodi"], $thispage, $norm);
 		}
 		
 		if ($tots != 1) {

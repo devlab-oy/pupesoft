@@ -1,30 +1,10 @@
 <?php
 
-	//hatetaan asiakkaan lähetetyyppi
-	$query = "  SELECT lahetetyyppi, luokka, puhelin
-				FROM asiakas
-				WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
-	$result = mysql_query($query) or pupe_error($query);
-	$asrow = mysql_fetch_array($result);
-
-	$lahetetyyppi = "";
-
-	if ($asrow["lahetetyyppi"] != '') {
-		$lahetetyyppi = $asrow["lahetetyyppi"];
+	if ($naytatvale == 2) {
+		$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 	}
 	else {
-		//Haetaan yhtiön oletuslähetetyyppi
-		$query = "  SELECT selite
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'LAHETETYYPPI'
-					ORDER BY jarjestys, selite
-					LIMIT 1";
-		$vres = mysql_query($query) or pupe_error($query);
-		$vrow = mysql_fetch_array($vres);
-
-		if ($vrow["selite"] != '' and file_exists($vrow["selite"])) {
-			$lahetetyyppi = $vrow["selite"];
-		}
+		$lahetetyyppi = "tulosta_lahete.inc";
 	}
 
 	require_once ("tulosta_lahete.inc");

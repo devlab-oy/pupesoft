@@ -203,7 +203,6 @@
 	
 	echo "</tr>";
 
-
 	echo "<tr>
 			<th>".t("Laskunro")."</th>
 			<th colspan='2'>".t("Laskun pvm")."</th>
@@ -226,29 +225,50 @@
 		echo "<td>$laskurow[rahti_huolinta]</td>";
 	}
 	
-	$comments = "";
 	
-	if ($laskurow["viesti"] != "")
-		$comments .= $laskurow["viesti"]."\n";
+	$komm = "";	
+	
+	if (trim($laskurow['tilausyhteyshenkilo']) != '') {
+		$komm .= "\n".t("Tilaaja").":###".$laskurow['tilausyhteyshenkilo'];
+	}
 
-	if ($laskurow["comments"] != "")
-		$comments .= $laskurow["comments"]."\n";
-	
-	if ($laskurow["sisviesti2"] != "")
-		$comments .= $laskurow["sisviesti2"]."\n";
-	
-	if ($laskurow["sisviesti1"] != "")
-		$comments .= $laskurow["sisviesti1"]."\n";
-	
-	if ($laskurow["noutaja"] != '') {
-		$comments .= "\n".t("Noutaja").": $laskurow[noutaja]";
+	if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
+		$komm .= "\n".t("Tilauksenne").":###".$laskurow['asiakkaan_tilausnumero'];								
+	}
+
+	if (trim($laskurow['kohde']) != '') {
+		$komm .= "\n".t("Kohde").":###".$laskurow['kohde'];								
+	}
+
+	if (trim($laskurow['viesti']) != '') {
+		$komm .= "\n".t("Lisätietoja").":###".$laskurow['viesti'];								
 	}
 	
-	if ($comments != "") {
-		echo "<tr><th colspan='9'>".t("Kommentit:")."</th></tr>";
-		echo "<tr><td colspan='9'>";
-		echo str_replace("\n", "<br>", $comments);
-		echo "</td></tr>";
+	if (trim($laskurow['comments']) != '') {
+		$komm .= "\n".t("Kommentti")." 1:###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+	}
+		
+	if ($laskurow["sisviesti2"] != "") {
+		$komm .= "\n".t("Kommentti")." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 100, "\n###");
+	}
+	
+	if ($laskurow["sisviesti1"] != "") {
+		$komm .= "\n".t("Kommentti")." 3:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 100, "\n###");
+	}
+	
+	if ($laskurow["noutaja"] != '') {
+		$komm .= "\n".t("Noutaja").":###$laskurow[noutaja]";
+	}
+	
+	if ($komm != "") {
+		$kommentit = explode("\n", trim($komm));
+
+		foreach($kommentit as $kommentti) {
+			
+			list($o, $v) = explode("###", $kommentti);
+			
+			echo "<tr><th>$o</th><td colspan='8'>$v</td></tr>";
+		}
 	}
 	
 	if ($laskurow["tila"] == 'K') {

@@ -237,13 +237,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
 			
 			$logoparam = array();
-							
-			// Logosta tulee max: 50pt korkea ja 120pt leveä (17.64mm x 42.33mm)
-			if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
-				$logoparam['scale'] = 120 / $isizelogo[0];
+			
+			if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (200 / $isizelogo[0]) <= 40) {
+				$logoparam['scale'] = 200 / $isizelogo[0];
 			}
 			else {
-				$logoparam['scale'] = 50  / $isizelogo[1];
+				$logoparam['scale'] = 40  / $isizelogo[1];
 			}
 							
 			$placement = $pdf->image_place($image, 580-($logoparam['scale']*$isizelogo[1]), 410-($logoparam['scale']*$isizelogo[0]), $firstpage, $logoparam);

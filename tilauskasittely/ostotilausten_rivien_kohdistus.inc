@@ -1019,25 +1019,25 @@ if ($tila == '') {
 
 		// jos riviä ei ole vielä viety varastoon, voidaan muuttaa kappaleita
 		if ($rivirow["varattu"] != 0) {
-			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='$rivirow[siskpl]' style='text-align:right'><br>$rivirow[ulkkpl]</$td>";
+			echo "<$td $class valign='top' align='right'><input size='5' type='text' name='rivi_kpl[$rivirow[rivitunnus]]' value='". (float) $rivirow["siskpl"]."' style='text-align:right'><br>". (float) $rivirow["ulkkpl"]."</$td>";
 		}
 		else {
-			echo "<$td $class valign='top' align='right'>$rivirow[siskpl]<br>$rivirow[ulkkpl]</$td>";
+			echo "<$td $class valign='top' align='right'>". (float) $rivirow["siskpl"]."<br>". (float) $rivirow["ulkkpl"]."</$td>";
 		}
 
 		echo "<$td $class valign='top' align='right'><input size='7' type='text' name='rivi_hinta[$rivirow[rivitunnus]]' value='$rivirow[hinta]' style='text-align:right'><br>$kulurow[valkoodi]</$td>";
-		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_ale[$rivirow[rivitunnus]]' value='$rivirow[ale]' style='text-align:right'>";
+		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_ale[$rivirow[rivitunnus]]' value='". (float) $rivirow["ale"]."' style='text-align:right'>";
 
 		if ($laskurow['vienti']=='C' or $laskurow['vienti']=='J') {
-			echo "<br>$rivirow[alv]";
+			echo "<br>". (float) $rivirow["alv"];
 		}
 		else {
-			echo "<br>0.00";
+			echo "<br>0";
 		}
 		echo "</$td>";
 
 
-		echo "<$td $class valign='top' align='right'>$rivirow[rivihinta]<br>$rivirow[alerivihinta]</$td>";
+		echo "<$td $class valign='top' align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 		echo "<$td $class valign='top' align='right'><input size='4' type='text' name='rivi_kuluhinta[$rivirow[rivitunnus]]' value='$rivirow[kuluhinta]' style='text-align:right'><br>$yhtiorow[valkoodi]</$td>";
 		echo "<$td $class valign='top'>";
 

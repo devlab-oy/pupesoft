@@ -501,7 +501,7 @@
 				}
 
 				//Tutkitaan lisävarusteita
-				if ($tunnuskentta == 'myyntirivitunnus') {
+				if ($tunnuskentta == 'myyntirivitunnus' and $from != "riviosto" and $from != "kohdista") {
 					//Hanskataan sarjanumerollisten tuotteiden lisävarusteet
 					if ($sarjatun > 0 and $rivitunnus > 0) {
 						require("sarjanumeron_lisavarlisays.inc");

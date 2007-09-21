@@ -9,7 +9,7 @@
 	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	//Olemme tulossa takain suorituksista
-	if ($tee == 'Z') {
+	if ($tee == 'Z' or $tiliote == 'Z') {
 		$query = "	SELECT tilino FROM yriti
 					WHERE tunnus = $mtili and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -147,6 +147,8 @@
 			  <tr>
 			  <th>".t("Pankkitili")."</th>
 			  <td><select name='tilino'>";
+
+		echo "<option value=''>".t("Näytä kaikki")."</option>";
 
 		while ($yritirow = mysql_fetch_array ($result)) {
 			$chk = "";

@@ -252,8 +252,10 @@
 
 			if (mysql_num_rows($suoasiresult) > 0) {
 				$suoasirow = mysql_fetch_array ($suoasiresult);
-				echo "<font class='message'><a href='myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z'>".t("Myyntisuoritus")."</a></font>";
+				echo "<font class='message'><a href='myyntires/maksunsyotto.php?asiakasid=$suoasirow[tunnus]&ytunnus=$suoasirow[ytunnus]&summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z'>".t("Myyntisuoritus")." ".substr($suoasirow["nimi"], 0, 34)."</a></font><br>";
 			}
+			echo "<font class='message'><a href='myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z'>".t("Myyntisuoritus muu")." </a></font>";
+
 		}
 		echo "</td><td>";
 

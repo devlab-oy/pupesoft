@@ -8,7 +8,7 @@ if ($tee != "CHECK" or $tiliote != 'Z') {
 }
 
 //Tultiinko tiliotteelta ja olisiko tämä jo viety?
-if ($tiliote == 'Z' and $ytunnus != '') {
+if ($tiliote == 'Z' and $ytunnus != '' and $asiakasid != '') {
 	$query = "select tunnus from suoritus where yhtio='$kukarow[yhtio]' and asiakas_tunnus='$asiakasid' and summa='$summa' and kirjpvm = '$vva-$kka-$ppa'";
 	$result = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($result) != 0)
@@ -231,6 +231,9 @@ if ($ytunnus != '' and $tee == "ETSI") {
 			require ("../inc/asiakashaku.inc");
 		}
 	}
+
+	// otetaan muutparametrit takas
+	list ($tiliote,$summa,$ppa,$kka,$vva,$mtili) = explode("#", $muutparametrit);
 }
 
 
@@ -456,6 +459,7 @@ if ($tee == "" and $ytunnus == "") {
 	echo "<br><form action = '$PHP_SELF' method='post' name='maksaja'>
 			".t("Maksaja").":
 			<input type='text' name='ytunnus'>
+			<input type='hidden' name='muutparametrit' value='$tiliote#$summa#$ppa#$kka#$vva#$mtili'>
 			<input type='hidden' name='tee' value='ETSI'>
 			<input type='submit' value='".t("Etsi")."'></form>";
 

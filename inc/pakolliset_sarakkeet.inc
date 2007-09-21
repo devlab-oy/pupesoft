@@ -64,7 +64,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$wherelliset = array("YTUNNUS", "ASIAKAS_RYHMA", "TUOTENO", "RYHMA");
 				break;
 			case "perusalennus" :
-				$pakolliset = array("ALENNUS","RYHMA");
+				$pakolliset = array("RYHMA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "yhteyshenkilo" :

@@ -678,14 +678,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 								echo t("Hintaa ei saa nollata!")."<br>";
 							}
 						}
-						elseif ($table=='asiakasalennus' and $otsikot[$r] == 'ALENNUS') {
-							if ($rivi[$r] != 0 and $rivi[$r] != '') {
-								$query .= ", $otsikot[$r]='$rivi[$r]' ";
-							}
-							elseif($rivi[$r] == 0) {
-								echo t("Alennusta ei saa nollata!")."<br>";
-							}
-						}
 						elseif ($table=='avainsana' and $otsikot[$r] == 'SELITE') {
 							if ($rivi[$r] != 0 and $rivi[$r] != '') {
 								$query .= ", $otsikot[$r]='$rivi[$r]' ";

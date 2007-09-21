@@ -3,11 +3,12 @@
 require ("../inc/parametrit.inc");
 require_once ("../inc/tilinumero.inc");
 
-if (($tee != "CHECK") or ($tiliote != 'Z'))
+if ($tee != "CHECK" or $tiliote != 'Z') {
 	echo "<font class='head'>".t("Suorituksen käsinsyöttö")."</font><hr>";
+}
 
 //Tultiinko tiliotteelta ja olisiko tämä jo viety?
-if (($tiliote == 'Z') and ($ytunnus!='')) {
+if ($tiliote == 'Z' and $ytunnus != '') {
 	$query = "select tunnus from suoritus where yhtio='$kukarow[yhtio]' and asiakas_tunnus='$asiakasid' and summa='$summa' and kirjpvm = '$vva-$kka-$ppa'";
 	$result = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($result) != 0)
@@ -59,7 +60,6 @@ if ($tee == "CHECK") {
 		$tee = "SYOTTO";
 	}
 }
-
 
 if ($tee == "SYOTTO") {
 
@@ -208,23 +208,44 @@ if ($tee == "SYOTTO") {
 
 }
 
-
 if ($ytunnus != '' and $tee == "ETSI") {
+
+	$laskunro = $ytunnus; // haku talteen
 
 	require ("../inc/asiakashaku.inc");
 	$tee = "";
+
+	// jos ei löytynyt ytunnuksella kokeillaan laskunumerolla
+	if ($ytunnus == "" and is_numeric($laskunro)) {
+		$query = "	SELECT liitostunnus
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' and
+					tila = 'U' and
+					alatila = 'X' and
+					laskunro = '$laskunro'";
+		$result  = mysql_query($query) or pupe_error($query);
+
+		if ($asiakas = mysql_fetch_array($result)) {
+			echo "<font class='message'>".t("Maksaja löytyi laskunumerolla")." $laskunro:</font><br>";
+			$asiakasid = $asiakas["liitostunnus"];
+			require ("../inc/asiakashaku.inc");
+		}
+	}
 }
 
 
 // meillä on ytunnus, tehdään syöttöruutu
 if ($ytunnus != '' and $tee == "") {
-	if ($tiliote == 'Z') { // Meitä on kutsuttu tiliotteelta!
+
+	// Meitä on kutsuttu tiliotteelta!
+	if ($tiliote == 'Z') {
 		echo "<form action = '../tilioteselailu.php' method='post'>
 			<input type='hidden' name='mtili' value='$mtili'>
 			<input type='hidden' name='tee' value='Z'>
 			<input type='hidden' name='pvm' value='$vva-$kka-$ppa'>
 			<input type='Submit' value='".t("Palaa tiliotteelle")."'></form>";
 	}
+
 	//päivämäärän tarkistus
 	$tilalk = split("-", $yhtiorow["tilikausi_alku"]);
 	$tillop = split("-", $yhtiorow["tilikausi_loppu"]);
@@ -298,14 +319,14 @@ if ($ytunnus != '' and $tee == "") {
 	echo "<form action='$PHP_SELF' method='post' onSubmit = 'return verify()' name='formi'>";
 	echo "<input type='hidden' name='tee' value='CHECK'/>\n";
 
-
-	if ($ytunnus{0} == "£")
+	if ($ytunnus{0} == "£") {
 		$query = "SELECT concat('£',tunnus) tunnus, nimi, ytunnus FROM lasku WHERE ytunnus='".substr($ytunnus, 1)."' and yhtio = '$kukarow[yhtio]'";
-	else
-		$query = "SELECT asiakas.tunnus, asiakas.nimi, ytunnus, konserniyhtio, factoring FROM asiakas
-					LEFT JOIN maksuehto ON maksuehto.tunnus=asiakas.maksuehto
-					WHERE asiakas.tunnus='$asiakasid' and asiakas.yhtio='$kukarow[yhtio]'";
-
+	}
+	else {
+		$query = "	SELECT asiakas.tunnus, asiakas.nimi, ytunnus, konserniyhtio, factoring FROM asiakas
+					LEFT JOIN maksuehto ON maksuehto.tunnus = asiakas.maksuehto
+					WHERE asiakas.tunnus = '$asiakasid' and asiakas.yhtio = '$kukarow[yhtio]'";
+	}
 	$result  = mysql_query($query) or pupe_error($query);
 	$asiakas = mysql_fetch_array($result);
 
@@ -327,12 +348,13 @@ if ($ytunnus != '' and $tee == "") {
 
 	$query  = "SELECT * FROM yriti WHERE yhtio = '$kukarow[yhtio]'";
 	$result = mysql_query($query) or pupe_error($query);
+
 	$sel='';
 	echo "<select name='tilino'>";
 	echo "<option value='0'>".t("Valitse")."</option>\n";
 
 	while ($row = mysql_fetch_array($result)) {
-		if (($tilino == 0) and ($row['oletus_rahatili'] == $yhtiorow['selvittelytili'])) $sel='selected';
+		if ($tilino == 0 and $row['oletus_rahatili'] == $yhtiorow['selvittelytili']) $sel='selected';
 		if ($tilino == $row['tilino']) $sel='selected';
 		echo "<option value='$row[tunnus]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])." $row[valkoodi]</option>\n";
 		$sel='';
@@ -340,7 +362,7 @@ if ($ytunnus != '' and $tee == "") {
 	echo "</select>";
 
 	// Tehdään kustannuspaikkapopup
-	$query = "SELECT tunnus, nimi
+	$query = "	SELECT tunnus, nimi
 				FROM kustannuspaikka
 				WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and kaytossa <> 'E'
 				ORDER BY nimi";
@@ -430,7 +452,7 @@ if ($ytunnus != '' and $tee == "") {
 
 
 if ($tee == "" and $ytunnus == "") {
-
+	echo "<font class='message'>Voit etsiä maksajaa nimen, ytunnuksen tai laskunumeron perusteella.</font><br>";
 	echo "<br><form action = '$PHP_SELF' method='post' name='maksaja'>
 			".t("Maksaja").":
 			<input type='text' name='ytunnus'>

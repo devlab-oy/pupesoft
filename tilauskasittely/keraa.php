@@ -753,7 +753,7 @@
 						$otunnus = $laskurow["tunnus"];
 
 						//hatetaan asiakkaan lähetetyyppi
-						$query = "  SELECT lahetetyyppi, luokka, puhelin
+						$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 									FROM asiakas
 									WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 						$result = mysql_query($query) or pupe_error($query);

@@ -178,30 +178,10 @@ if (!function_exists('alku')) {
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-		$pdf->draw_text(310, 771, t("Y-tunnus", $kieli), 					$thispage, $pieni);
-		
-		//jos on suomalainen yritys tehd‰‰n ytunnus n‰tiks
-		if (strtoupper($laskurow["maa"])== 'FI') {
-			//muutetaan ytunnus takas oikean n‰kˆseks
-			$ytunpit = 8-strlen($laskurow["ytunnus"]);
-
-			if ($ytunpit > 0) {
-				$uytunnus = $laskurow["ytunnus"];
-				while ($ytunpit > 0) {
-				    $uytunnus = "0".$uytunnus; $ytunpit--;
-				}
-			}
-			else {
-				$uytunnus = $laskurow["ytunnus"];
-			}
-
-			$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
-		}
-		else {
-			$uytunnus = $laskurow["ytunnus"];
-		}
-
-		$pdf->draw_text(310, 761, $uytunnus, 									$thispage, $norm);
+		$pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 					$thispage, $pieni);
+		$pdf->draw_text(310, 761, $asrow["asiakasnro"], 						$thispage, $norm);
+		$pdf->draw_text(430, 771, t("P‰iv‰ys", $kieli), 						$thispage, $pieni);
+		$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 		$thispage, $norm);
 		$pdf->draw_text(430, 771, t("P‰iv‰ys", $kieli), 						$thispage, $pieni);
 		$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 		$thispage, $norm);
 
@@ -472,30 +452,8 @@ if (!function_exists('uusi_sivu')) {
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-		$pdf->draw_text(310, 771, t("Y-tunnus", $kieli), 					$thispage, $pieni);
-		
-		//jos on suomalainen yritys tehd‰‰n ytunnus n‰tiks
-		if (strtoupper($laskurow["maa"])== 'FI') {
-			//muutetaan ytunnus takas oikean n‰kˆseks
-			$ytunpit = 8-strlen($laskurow["ytunnus"]);
-
-			if ($ytunpit > 0) {
-				$uytunnus = $laskurow["ytunnus"];
-				while ($ytunpit > 0) {
-				    $uytunnus = "0".$uytunnus; $ytunpit--;
-				}
-			}
-			else {
-				$uytunnus = $laskurow["ytunnus"];
-			}
-
-			$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
-		}
-		else {
-			$uytunnus = $laskurow["ytunnus"];
-		}
-
-		$pdf->draw_text(310, 761, $uytunnus, 									$thispage, $norm);
+		$pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 					$thispage, $pieni);
+		$pdf->draw_text(310, 761, $asrow["asiakasnro"], 						$thispage, $norm);
 		$pdf->draw_text(430, 771, t("P‰iv‰ys", $kieli), 						$thispage, $pieni);
 		$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 		$thispage, $norm);
 		
@@ -779,12 +737,12 @@ if (!function_exists('rivi')) {
                     LEFT JOIN hinnasto on tuote.yhtio = hinnasto.yhtio and tuote.tuoteno = hinnasto.tuoteno and hinnasto.valkoodi = '$laskurow[valkoodi]'
                     WHERE tuote.tuoteno='$row[tuoteno]' and tuote.yhtio='$kukarow[yhtio]'";
         $asresult = mysql_query($query) or pupe_error($query);
-		$asrow = mysql_fetch_array($asresult);
+		$asrow1 = mysql_fetch_array($asresult);
 	
 		//saadaan l‰hetteen summa menem‰‰n oikein, taaksep‰in yhteensopivasti
-		$row["brutto_rivihinta"] 	= $asrow["myyntihinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]);
-		$row["myyntihinta"] 		= $asrow["myyntihinta"];
-		$row["aleryhma"] 			= $asrow["aleryhma"];
+		$row["brutto_rivihinta"] 	= $asrow1["myyntihinta"] * ($row["kpl"]+$row["varattu"]+$row["jt"]);
+		$row["myyntihinta"] 		= $asrow1["myyntihinta"];
+		$row["aleryhma"] 			= $asrow1["aleryhma"];
 		
 		if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
 			$row["hinta"] 	  = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]),2);

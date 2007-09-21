@@ -24,7 +24,12 @@
 	
 	// onko tämä tyhjä rahtikirja (custom)?
 	if (!isset($GLOBALS['tyhja'])) {
-		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
+		$query = "	SELECT * 
+					FROM lasku 
+					WHERE yhtio='$kukarow[yhtio]' 
+					and tunnus in ($otunnukset) 
+					order by tunnus 
+					limit 1";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$postirow = mysql_fetch_array($tempr);
 		
@@ -32,7 +37,12 @@
 		$viitelah = $lotsikot[0];
 	} 
 	else {
-		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='{$GLOBALS['asiakasid']}'";
+		$query = "	SELECT asiakas.*, rahtikirjat.merahti, rahtikirjat.rahtisopimus
+					FROM asiakas 
+					join rahtikirjat on rahtikirjat.yhtio = asiakas.yhtio and rahtikirjat.otsikkonro = '".($otsikkonro * -1)."'
+					WHERE asiakas.yhtio	= '$kukarow[yhtio]' 
+					and asiakas.tunnus	= '{$GLOBALS['asiakasid']}'
+					LIMIT 1";
 		$tempr = mysql_query($query) or pupe_error($query);
 		$rakir_row = mysql_fetch_array($tempr);
 		
@@ -55,19 +65,14 @@
 		$lisatiedres = false;
 	}
 	*/
-	
-	//if ($rahsoprow['rahtisopimus']=='')	$rahsoprow['rahtisopimus']	= "000000";
-	//if ($toitarow['sopimusnro']=='')	$toitarow['sopimusnro']		= "000000";
-	
+
 	//tsekataan kuka maksaa rahdin ja laitetaan oikeat tiedot rahdinmaksajan ruutuun
 	if ($rahdinmaksaja == 'Vastaanottaja') {
-		$rahdinmaksajan_nr 	= $rahsoprow['rahtisopimus'];
-		//$rahdinmaksaja 	= $rakir_row["nimi"];
+		$rahdinmaksajan_nr 	= $rakir_row['rahtisopimus'];
 	}
 	
 	if ($rahdinmaksaja == 'Lähettäjä') {
 		$rahdinmaksajan_nr 	= $toitarow['sopimusnro'];
-		//$rahdinmaksaja 	= $yhtiorow["nimi"];
 	}
 	
 	// postiennakko
@@ -245,7 +250,7 @@
 			$pdf->draw_text(62,  707,  "Vastaanottaja Mottagare",							$firstpage, $norm);
 			$pdf->draw_text(240, 707,  "Asiakasnro Kundnr",									$firstpage, $norm);
 			$pdf->draw_text(65,  699,  $rakir_row["nimi"],									$firstpage, $kirj);
-			$pdf->draw_text(240, 699,  $rahsoprow['rahtisopimus'],							$firstpage, $kirj);
+			$pdf->draw_text(240, 699,  $rakir_row['rahtisopimus'],							$firstpage, $kirj);
 			$pdf->draw_rectangle(696,60,684,300,											$firstpage, $rectparam);
 			$pdf->draw_text(65,  687,  $rakir_row["osoite"],								$firstpage, $kirj);
 			$pdf->draw_rectangle(684,60,672,300,											$firstpage, $rectparam);
@@ -278,7 +283,7 @@
 		   	$pdf->draw_text(62,  726,  "Vastaanottaja Mottagare",							$firstpage, $norm);
 		   	$pdf->draw_text(240, 726,  "Asiakasnro Kundnr",									$firstpage, $norm);
 		   	$pdf->draw_text(65,  714,  $rakir_row["nimi"],									$firstpage, $kirj);
-		   	$pdf->draw_text(240, 714,  $rahsoprow['rahtisopimus'],							$firstpage, $kirj);
+		   	$pdf->draw_text(240, 714,  $rakir_row['rahtisopimus'],							$firstpage, $kirj);
 		   	$pdf->draw_rectangle(711,60,689,300,											$firstpage, $rectparam);
 		   	$pdf->draw_text(65,  692,  $rakir_row["osoite"],								$firstpage, $kirj);
 		   	$pdf->draw_rectangle(689,60,667,300,											$firstpage, $rectparam);

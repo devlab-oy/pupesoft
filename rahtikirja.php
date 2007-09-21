@@ -1111,15 +1111,14 @@
 		$rares = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($rares) == 1) {
-			$rarow=mysql_fetch_array($rares);
-			$rahtisopimus=$rarow['rahtisopimus'];
+			$rarow = mysql_fetch_array($rares);
+			$rahtisopimus = $rarow['rahtisopimus'];
 		}
 
-		if ($otsik['rahtisopimus']!='') $rahtisopimus=$otsik['rahtisopimus'];
+		if ($otsik['rahtisopimus'] != '') $rahtisopimus = $otsik['rahtisopimus'];
 
 		//tehdään rahtisopimuksen syöttö
 		echo "<th align='left'>".t("Rahtisopimus")."</th><td><input value='$rahtisopimus' type='text' name='rahtisopimus' size='20'></td></tr>";
-
 
 		// haetaan kaikki varastot
 		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";

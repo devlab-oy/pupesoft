@@ -80,8 +80,8 @@ if ($rahdinmaksaja == 'Lähettäjä') {
 	$rahdinmaksaja		= "";
 	$rahdinmaksajan_nr 	= "";
 }
-elseif(trim($rahsoprow['rahtisopimus']) != "") {
-	$rahdinmaksajan_nr 	= $rahsoprow['rahtisopimus'];	
+elseif(trim($rakir_row['rahtisopimus']) != "") {
+	$rahdinmaksajan_nr 	= $rakir_row['rahtisopimus'];	
 }
 else {
 	$rahdinmaksajan_nr 	= $rahdinmaksaja;

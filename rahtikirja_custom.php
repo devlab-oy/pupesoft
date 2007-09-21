@@ -95,15 +95,13 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 		    'selite'           => $data['toimitustapa'],
 		    'rahdinkuljettaja' => '',
 		);
-	} else {
+	} 
+	else {
 		$rahdinmaksaja = 'Vastaanottaja';
-		$rahsoprow = array('rahtisopimus' => $data['rahtisopimus']);
-
 		$toitarow = array(
 		    'selite'           => $data['toimitustapa'],
 		    'rahdinkuljettaja' => '',
-		);
-		
+		);	
 	}
 	
 	$query = "SELECT komento from kirjoittimet where tunnus=". (int) $_POST['tulostin']

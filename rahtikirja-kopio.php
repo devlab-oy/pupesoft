@@ -189,14 +189,6 @@
 					$lavatyht   += $pak[4];
 				}
 
-				//haetaan asiakkaan rahtisopimusnumero
-				$query = "	SELECT *
-							FROM rahtisopimukset
-							WHERE toimitustapa = '$toimitustapa'
-							and  ytunnus = '$rivi[ytunnus]'";
-				$pahsopres = mysql_query($query) or pupe_error($query);
-				$rahsoprow = mysql_fetch_array($pahsopres);
-
 				$tulostuskpl = $kollityht;
 
 				//haetaan rahtikirjan kaikki vakkoodit arrayseen

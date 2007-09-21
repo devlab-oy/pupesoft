@@ -357,9 +357,11 @@ if ($session != '' or $phpnimi == "verkkokauppa.php") {
 		echo "<META Http-Equiv='Expires' Content='0'>";
 		echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
 		
-		echo "<style type='text/css'>";
-		echo $css;
-		echo "</style>";
+		if ($_GET["no_css"] != "yes") {
+			echo "<style type='text/css'>";
+			echo $css;
+			echo "</style>";
+		}
 		
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
 		echo "</head>";

@@ -246,20 +246,16 @@
 	}
 
 	if (strlen(trim($kohde)) > 0) {
-		$lisa .= " and kohde = '" . $kohde . "'";
-		$lisa2 .= " and kohde = '" . $kohde . "'";
+		$lisa .= " and tiliointi.kohde = '" . $kohde . "'";
+		$lisa2 .= " and tiliointi.kohde = '" . $kohde . "'";
 	}
 	if (strlen(trim($proj)) > 0) {
 		$lisa .= " and tiliointi.projekti = '" . $proj . "'";
 		$lisa2 .= " and tiliointi.projekti = '" . $proj . "'";
 	}
 	if (strlen(trim($kustp)) > 0) {
-		$lisa .= " and kustp = '" . $kustp . "'";
-		$lisa2 .= " and kustp = '" . $kustp . "'";
-	}
-	if (strlen(trim($proj)) > 0) {
-		$lisa .= " and tiliointi.projekti = '" . $proj . "'";
-		$lisa2 .= " and tiliointi.projekti = '" . $proj . "'";
+		$lisa .= " and tiliointi.kustp = '" . $kustp . "'";
+		$lisa2 .= " and tiliointi.kustp = '" . $kustp . "'";
 	}
 
 	if ($tili2 == 0) $tili2 = $tili;

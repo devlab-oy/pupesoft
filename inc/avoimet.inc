@@ -1,4 +1,5 @@
 <?php
+
 	if ($muutparametrit != '') list($laji, $vv, $kk, $pp ,$tee) = split("/",$muutparametrit);
 
 	echo "<font class=head>".t("Avoimet laskut")."</font><hr>";
@@ -54,8 +55,9 @@
 
 		$sel[$laji] = " selected ";
 
-		echo "	<form name = 'valinta' action = 'raportit.php?tee=X' method='post'>
+		echo "	<form name = 'valinta' action = 'raportit.php' method='post'>
 				<input type = 'hidden' name = 'toim' value = 'avoimet'>
+				<input type = 'hidden' name = 'tee' value = 'X'>
 				<table>
 				<tr>
 				<th>".t("Anna p‰iv‰m‰‰r‰, muodossa pp-kk-vvvv:")."</th>
@@ -70,6 +72,7 @@
 				<option value='M'  $sel[M]>".t("myyntilaskut")."</option>
 				<option value='MF' $sel[MF]>".t("myyntilaskut factoring")."</option>
 				<option value='MK' $sel[MK]>".t("myyntilaskut konserni")."</option>
+				<option value='MA' $sel[MA]>".t("myyntilaskut+factoring+konserni")."</option>
 				<option value='O'  $sel[O]>".t("ostolaskut")."</option>
 				<option value='OK' $sel[OK]>".t("ostolaskut konserni")."</option>
 				</select></td>
@@ -166,7 +169,8 @@
 		$formi = 'valinta';
 		$kentta = 'pp';
 	}
-	else {
+
+	if ($tee != '') {
 
 		switch ($laji) {
 			case 'M' :
@@ -337,9 +341,10 @@
 
 			$tili = 0;
 
-			if ($laji == 'MK') 		$tili = $yhtiorow['konsernimyyntisaamiset'];
-			elseif ($laji == 'MF') 	$tili = $yhtiorow['factoringsaamiset'];
-			else 					$tili = $yhtiorow['myyntisaamiset'];
+			if ($laji == 'MK') 		$tili = "'$yhtiorow[konsernimyyntisaamiset]'";
+			elseif ($laji == 'MF') 	$tili = "'$yhtiorow[factoringsaamiset]'";
+			elseif ($laji == 'MA') 	$tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
+			else 					$tili = "'$yhtiorow[myyntisaamiset]'";
 
 			$query = "	SELECT lasku.*,
 						lasku.laskunro maksutieto,
@@ -351,7 +356,7 @@
 						FROM lasku $indeksi
 						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
 						and lasku.tunnus		= tiliointi.ltunnus
-						and tiliointi.tilino	= '$tili'
+						and tiliointi.tilino	in ($tili)
 						and tiliointi.korjattu	= ''
 						and tiliointi.tapvm		<= '$pvm')
 				  		WHERE lasku.yhtio		= '$kukarow[yhtio]'
@@ -363,7 +368,7 @@
 						$lisa3
 						$valkoodi
 						$maa
-						GROUP BY lasku.liitostunnus, lasku.ytunnus, lasku.nimi, lasku.laskunro, lasku.tapvm, lasku.mapvm, lasku.erpcm, lasku.summa
+						GROUP BY lasku.tunnus
 						ORDER BY lasku.ytunnus, lasku.laskunro";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -405,10 +410,10 @@
 
 				if (($rikki == 'on' and $trow['tiliointiavoinsaldo'] == 0) or $trow['tiliointiavoinsaldo'] != 0) {
 
-					$summa				+= $trow['tiliointiavoinsaldo'];
-					$summatotal			+= $trow['tiliointisumma'];
-					$laskusumma			+= $trow['laskuavoinsaldo'];
-					$laskusummatotal	+= $trow['laskusumma'];
+					$summa				+= $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
+					$summatotal			+= $trow['tiliointisumma'];			// paljo kirjanpidossa laskun alkuper‰nen loppusumma
+					$laskusumma			+= $trow['laskuavoinsaldo'];		// paljo laskulla avoimena
+					$laskusummatotal	+= $trow['laskusumma'];				// paljo laskulla laskun alkuper‰nen loppusumma
 
 					echo "<tr class='aktiivi'>";
 					echo "<td $class><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[liitostunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
@@ -496,49 +501,55 @@
 					echo "</tr>";
 			}
 
-	        $query = "	SELECT sum(summa) saldo
-						FROM tiliointi
-						WHERE yhtio = '$kukarow[yhtio]'
-						and korjattu = ''
-						and tapvm >= '$yhtiorow[tilikausi_alku]'
-						and tapvm <= '$pvm'
-						and tilino = '$tili'";
-			$result = mysql_query($query) or pupe_error($query);
-			$trow = mysql_fetch_array ($result);
-
-			$trow["saldo"] 	= sprintf("%01.2f", $trow["saldo"]);
 			$summa 			= sprintf("%01.2f", $summa);
 			$summatotal 	= sprintf("%01.2f", $summatotal);
 			$suoritussumma 	= sprintf("%01.2f", $suoritussumma);
-			$erotus 		= $suoritussumma + $summa - $trow["saldo"];
-			$erotus 		= sprintf("%01.2f", $erotus);
 
 	        echo "<tr>";
-			echo "<th colspan='6'>".t("Kohdistamattomat suoritukset yhteens‰").":</th>";
-			echo "<th align='right' nowrap></th>";
+			echo "<th colspan='7'>".t("Avoimet yhteens‰").":</th>";
+			echo "<th align='right' nowrap>$summa</th>";				// t‰ss‰ kirjanpidosta osasuoritukset poistettuna
+			echo "<th align='right' nowrap>$yhtiorow[valkoodi]</th>";
+			echo "</tr>";
+
+	        echo "<tr>";
+			echo "<th colspan='7'>".t("Kohdistamattomat suoritukset yhteens‰").":</th>";
 			echo "<th align='right' nowrap>$suoritussumma</th>";
 			echo "<th align='right' nowrap>$yhtiorow[valkoodi]</th>";
 			echo "</tr>";
 
 	        echo "<tr>";
-			echo "<th colspan='6'>".t("Avoimet yhteens‰").":</th>";
-			echo "<th align='right' nowrap>$summatotal</th>";
-			echo "<th align='right' nowrap>$summa</th>";
+			echo "<th colspan='7'>".t("Erotus avoimet - kohdistamattomat").":</th>";
+			echo "<th align='right' nowrap>".sprintf("%01.2f", ($summa + $suoritussumma))."</th>"; // t‰ss‰ kirjanpidosta osasuoritukset poistettuna
 			echo "<th align='right' nowrap>$yhtiorow[valkoodi]</th>";
 			echo "</tr>";
 
 			// ei rajauksia, voidaan n‰ytt‰‰ erotus kirjanpitoon
 			if ($lisa1 == "" and $lisa3 == "" and $valkoodi == "" and $maa == "") {
+
+		        $query = "	SELECT sum(summa) saldo
+							FROM tiliointi
+							WHERE yhtio = '$kukarow[yhtio]'
+							and korjattu = ''
+							and tapvm >= '$yhtiorow[tilikausi_alku]'
+							and tapvm <= '$pvm'
+							and tilino in ($tili)";
+				$result = mysql_query($query) or pupe_error($query);
+				$trow = mysql_fetch_array ($result);
+
+				$trow["saldo"] 	= sprintf("%01.2f", $trow["saldo"]);
+				$erotus 		= $suoritussumma + $summa - $trow["saldo"];
+				$erotus 		= sprintf("%01.2f", $erotus);
+
+				echo "<tr><td class='back' colspan='9'>&nbsp;</td></tr>";
+
 		        echo "<tr>";
-				echo "<th colspan='6'>".t("Tili %s yhteens‰", "", $tili).":</th>";
-				echo "<th align='right' nowrap></th>";
+				echo "<th colspan='7'>".t("Kirjanpidon tili %s yhteens‰", "", $tili).":</th>";
 				echo "<th align='right' nowrap>$trow[saldo]</th>";
 				echo "<th align='right' nowrap>$yhtiorow[valkoodi]</th>";
 				echo "</tr>";
 
 		        echo "<tr>";
-				echo "<th colspan='6'>".t("Erotus").":</th>";
-				echo "<th align='right' nowrap></th>";
+				echo "<th colspan='7'>".t("Erotus avoimet - kohdistamattomat - kirjanpito").":</th>";
 				echo "<th align='right' nowrap>$erotus</th>";
 				echo "<th align='right' nowrap>$yhtiorow[valkoodi]</th>";
 				echo "</tr>";

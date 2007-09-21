@@ -181,32 +181,25 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 771, t("Y-tunnus", $kieli), 					$thispage, $pieni);
 		
 		//jos on suomalainen yritys tehdään ytunnus nätiks
-		if (strtoupper($yhtiorow["maa"])== 'FI') {
+		if (strtoupper($laskurow["maa"])== 'FI') {
 			//muutetaan ytunnus takas oikean näköseks
-			$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
+			$ytunpit = 8-strlen($laskurow["ytunnus"]);
 
 			if ($ytunpit > 0) {
-				$uytunnus = $yhtiorow["ytunnus"];
+				$uytunnus = $laskurow["ytunnus"];
 				while ($ytunpit > 0) {
 				    $uytunnus = "0".$uytunnus; $ytunpit--;
 				}
 			}
 			else {
-				$uytunnus = $yhtiorow["ytunnus"];
+				$uytunnus = $laskurow["ytunnus"];
 			}
 
 			$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
 		}
 		else {
-			$uytunnus = $yhtiorow["ytunnus"];
+			$uytunnus = $laskurow["ytunnus"];
 		}
-
-        if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-            $uytunnus = $laskurow['yhtio_ovttunnus'];
-        } 
-		else {
-    		$uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-        }
 
 		$pdf->draw_text(310, 761, $uytunnus, 									$thispage, $norm);
 		$pdf->draw_text(430, 771, t("Päiväys", $kieli), 						$thispage, $pieni);
@@ -482,32 +475,25 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(310, 771, t("Y-tunnus", $kieli), 					$thispage, $pieni);
 		
 		//jos on suomalainen yritys tehdään ytunnus nätiks
-		if (strtoupper($yhtiorow["maa"])== 'FI') {
+		if (strtoupper($laskurow["maa"])== 'FI') {
 			//muutetaan ytunnus takas oikean näköseks
-			$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
+			$ytunpit = 8-strlen($laskurow["ytunnus"]);
 
 			if ($ytunpit > 0) {
-				$uytunnus = $yhtiorow["ytunnus"];
+				$uytunnus = $laskurow["ytunnus"];
 				while ($ytunpit > 0) {
 				    $uytunnus = "0".$uytunnus; $ytunpit--;
 				}
 			}
 			else {
-				$uytunnus = $yhtiorow["ytunnus"];
+				$uytunnus = $laskurow["ytunnus"];
 			}
 
 			$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
 		}
 		else {
-			$uytunnus = $yhtiorow["ytunnus"];
+			$uytunnus = $laskurow["ytunnus"];
 		}
-
-        if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-            $uytunnus = $laskurow['yhtio_ovttunnus'];
-        } 
-		else {
-    		$uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-        }
 
 		$pdf->draw_text(310, 761, $uytunnus, 									$thispage, $norm);
 		$pdf->draw_text(430, 771, t("Päiväys", $kieli), 						$thispage, $pieni);

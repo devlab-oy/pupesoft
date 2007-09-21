@@ -2,7 +2,7 @@
 
 	require ("../inc/parametrit.inc");
 
-	echo "<font class='head'>".t("Irrota lisävarutse laitteesta").":<hr></font>";
+	echo "<font class='head'>".t("Irrota lisävaruste laitteesta").":<hr></font>";
 
 	if ($tee == "VALMIS") {
 		

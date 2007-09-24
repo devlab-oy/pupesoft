@@ -555,8 +555,8 @@
 			require ("inc/toimittajan_yhteyshenkilo.inc");
 		}
 
-		if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
-			require ("inc/sarjanumeron_lisatiedot_kuvat.inc");
+		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or $toim == "tuote")) {
+			require ("inc/liitaliitetiedostot.inc");
 		}
 
 		echo "</td></tr></table>";

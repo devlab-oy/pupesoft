@@ -101,6 +101,39 @@ if ($kukarow['taso'] != 1) {
 		$tila='X';
 	}
 
+	// Laskun maksutilintarkastus (ulkomaat)
+	if ($tila == 'TU') {
+		if (($ultilno == '') or ($swift == '')) {
+			echo "<font class='error'>".t("IBAN & SWIFT on annettava")."</font><br>";
+			$tee='E';
+			$tila='';
+		}
+		$ultilno = strtoupper($ultilno);
+		$swift = strtoupper($swift);
+	}
+
+	// Jaaha p‰ivit‰mme maksutilin! (ulkomaat)
+	if ($tila == 'TU') {
+		$query = "SELECT comments, ultilno, swift FROM lasku
+				WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) !=1) {
+			echo t('lasku kateissa') . "$tunnus</font>";
+			exit;
+		}
+
+		$trow=mysql_fetch_array ($result);
+
+		$kommentti = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ". sprintf(t('Laskun maksutili muutettiin. Vanha oli %s %s.'), $trow['ultilno'], $trow['swift']) ."<br>" . $trow['comments'];
+
+		//P‰ivitet‰‰n lasku
+		$query = "UPDATE lasku set ultilno='$ultilno', swift='$swift',
+						comments = '$kommentti' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$tee='E';
+		$tila='X';
+	}
 	//T‰‰ll‰ tarkistetaan pvm
 	if ($tila == 'P') {
 		//	$kk = substr($trow[1],5,2);
@@ -784,12 +817,25 @@ if ($tila == '') {
 				<td><input type = 'text' name = 'komm' size='40' value = '$komm'></td>
 				<td><input type = 'submit' value = '".t("Lis‰‰")."'></td></tr></form>";
 
-	if (($trow['tila'] == 'H' or $trow["tila"] == 'M') and strtoupper($trow['maa']) == strtoupper($yhtiorow['maa']) and $kukarow['taso'] != 1) {
-		echo "<form action = '$PHP_SELF?tee=M&tila=T' method='post'>
+	//if (($trow['tila'] == 'H' or $trow["tila"] == 'M') and $kukarow['taso'] != 1) {
+
+	if ($trow['tila'] == 'H' and $kukarow['kuka'] == $trow['hyvaksyja_nyt'] and $kukarow['taso'] != 1) {
+		if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
+			echo "<form action = '$PHP_SELF?tee=M&tila=T' method='post'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
 				<tr><th>".t("Muuta maksutili")."</th>
 				<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
 				<td><input type = 'submit' value = '".t("Muuta")."'></td></tr></form>";
+		}
+		else {
+			echo "<form action = '$PHP_SELF?tee=M&tila=TU' method='post'>
+				<input type = 'hidden' name='tunnus' value='$tunnus'>
+				<tr><th>".t('Muuta ulkomaanmaksutilinumero')."</th>
+				<td><input type = 'text' name = 'ultilno' size='40' value = '$trow[ultilno]'></td><td></td></tr>
+				<tr><th>".t('SWIFT')."</th>
+				<td><input type = 'text' name = 'swift' size='40' value = '$trow[swift]'></td>
+				<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr></form>";
+		}
 	}
 	echo "</table><br><br>";
 }

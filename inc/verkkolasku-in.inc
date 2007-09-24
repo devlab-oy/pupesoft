@@ -103,7 +103,7 @@
 
 			if (!isset($yhtiorow)) {
 				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin admineille!
-				$query = "select admin_email, postittaja_email from yhtion_parametrit where admin_email != '' and postittaja_email != ''";
+				$query = "select distinct admin_email, postittaja_email from yhtion_parametrit where admin_email != '' and postittaja_email != ''";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 
 				$return .= "Laskun vastaanottajaa ei löytynyt ovt-tunnuksella '$yhtio' eikä verkkotunnuksella '$verkkotunnus_vas'!\n";

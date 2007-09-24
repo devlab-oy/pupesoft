@@ -8,7 +8,7 @@
 		function verkkolasku_in ($file) {
 
 			global $kukarow;
-			
+
 			if (!is_file($file)) {
 				echo ("Tiedostoa $file ei löydy!\n");
 				return ("Tiedostoa $file ei löydy!");
@@ -103,12 +103,15 @@
 
 			if (!isset($yhtiorow)) {
 				// ei löydetty VASTAANOTTAVAA yhtiötä, lähetetään meili kaikille tän serverin admineille!
-				$query = "select group_concat(distinct admin_email) admin_email from yhtion_parametrit where admin_email != ''";
+				$query = "select admin_email, postittaja_email from yhtion_parametrit where admin_email != '' and postittaja_email != ''";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
-				$yhtiorow = mysql_fetch_array($result);
 
 				$return .= "Laskun vastaanottajaa ei löytynyt ovt-tunnuksella '$yhtio' eikä verkkotunnuksella '$verkkotunnus_vas'!\n";
-				mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[admin_email]>\n", "-f $yhtiorow[postittaja_email]");
+
+				while ($yhtiorow = mysql_fetch_array($result)) {
+					mail($yhtiorow['admin_email'], "Verkkolaskun vastaanotto epäonnistui", $return, "From: <$yhtiorow[admin_email]>\n", "-f $yhtiorow[postittaja_email]");
+				}
+
 				return ($return);
 			}
 			else {
@@ -792,7 +795,7 @@
 	    	$meili = "Verkkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLaskunro: $laskun_numero\nPäivä: $laskun_paiva\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
 		    $tulos = mail($yhtiorow['admin_email'], $sub, $meili, "From: <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-			if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[admin_email]<br>";			
+			if ($tulos === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $yhtiorow[admin_email]<br>";
 			return 0;
 		}
 	}

@@ -39,9 +39,14 @@
 		$tietue = fgets($fd);
 
 		// luetaanko kursseja?
-		if (substr($tietue, 5, 12) == 'Tilivaluutan') {
-			// luetaan sis‰‰n kurssit
+		if (substr($tietue, 5, 12) == "Tilivaluutan") {
 			lue_kurssit($filenimi, $fd);
+			fclose($fd);
+			require 'inc/footer.inc';
+			die();
+		}
+		elseif (substr($tietue, 0, 7) == "VK01000") {
+			lue_kurssit($filenimi, $fd, 2); // tyyppi kaks
 			fclose($fd);
 			require 'inc/footer.inc';
 			die();
@@ -223,33 +228,46 @@
 
 	require("inc/footer.inc");
 
-function lue_kurssit($file, $handle) {
+function lue_kurssit($file, $handle, $tyyppi = '') {
 	global $yhtiorow, $kukarow;
 
 	ini_set("auto_detect_line_endings", 1);
 	// luetaan koko file arrayhyn
 	$rivit = file($file);
 
-	// 2 ekaa rivi‰ pois
-	array_shift($rivit);
-	array_shift($rivit);
-
+	if ($tyyppi == 2) {
+		// eka rivi pois
+		array_shift($rivit);
+	}
+	else {
+		// 2 ekaa rivi‰ pois
+		array_shift($rivit);
+		array_shift($rivit);
+	}
+	
 	$valuutat = array();
-	foreach ($rivit as $rivi) {
-		// valuutan nimi
-		$valuutta = substr($rivi, 0, 3);
-		$datetime = date('Y-m-d H:i:s');
 
-		if (in_array($valuutta, $valuutat)) {
+	foreach ($rivit as $rivi) {
+
+		if ($tyyppi == 2) {
+			$valuutta      = substr($rivi, 25, 3);																// valuutan nimi
+			$vastavaluutta = substr($rivi, 28, 3);																// vastavaluutta
+			$kurssi        = (float) substr($rivi, 31, 13) / 10000000;											// kurssi
+		}
+		else {
+			$valuutta      = substr($rivi, 0, 3);																// valuutan nimi
+			$vastavaluutta = "EUR";																				// vastavaluutta
+			$kurssi        = (float) str_replace(array(',', ' '), array('.',''), trim(substr($rivi, 5, 15)));	// kurssi			
+		}
+
+		// ei p‰ivitet‰ jos ollaan jo p‰ivitetty tai v‰‰r‰ vastavaluutta
+		if (in_array($valuutta, $valuutat) or $vastavaluutta != $yhtiorow["valkoodi"]) {
 			continue;
 		}
 
-		// itse kurssi
-		$kurssi = (float) str_replace(array(',', ' '), array('.',''), trim(substr($rivi, 5, 15)));
-
 		$query = "	UPDATE valuu SET 
 					kurssi = round(1 / $kurssi, 6), 
-					muutospvm = '$datetime', 
+					muutospvm = now(), 
 					muuttaja = '{$kukarow['kuka']}'
 					WHERE yhtio = '{$kukarow['yhtio']}' AND 
 					nimi = '$valuutta'";

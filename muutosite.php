@@ -603,9 +603,14 @@
 				else {
 					//Ulkomaan ostolaskuille
 					if (strtoupper($trow[9]) != 'FI') {
+						//Lis‰t‰‰n maksaja
+						echo "<tr><th>".t("Maksaja")."</th><td>$trow[Maksaja]</td></tr>";
+							
 						for ($i = 21; $i < 29; $i++) {
-							echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
+							if ($trow[$i] != '') {
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
 									<td>$trow[$i]</td></tr>";
+							}
 						}
 					}
 					else {
@@ -616,11 +621,12 @@
 						}
 					}
 					if ($trow['maksajanpankkitili'] != '') {
-						echo "<tr><th>Oma pankkitili</th><td>$trow[maksajanpankkitili]</td></tr>";
+						echo "<tr><th>".t("Oma pankkitili")."</th><td>$trow[maksajanpankkitili]</td></tr>";
 					}
 				}
 				// en jaksa mietti‰ indeksilukuja perkele!
-				echo "<tr><th>comments</th><td>$trow[comments]</td></tr>";
+				if ($trow[comments] != '')
+					echo "<tr><th>".t("comments")."</th><td>$trow[comments]</td></tr>";
 
 				// tehd‰‰n lasku linkki
 				echo "<tr><td></td><td>".ebid($tunnus) ."</td></tr>";

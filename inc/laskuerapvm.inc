@@ -1,6 +1,6 @@
 <?php
 	
-	echo "<font class='head'>".t("Laskut per eräpvm")."</font><hr>";
+	echo "<font class='head'>".t("Avoimet laskut per eräpvm")."</font><hr>";
 
 	$sel1 = $sel2 = $sel3 = "";
 	
@@ -39,13 +39,14 @@
 		if ($aika == 'kk') {
 			$tapa = "LEFT(erpcm,7)";
 		}
-		$query = "SELECT $tapa aika, sum(summa * valuu.kurssi) summa, count(*) kpl
+		$query = "	SELECT $tapa aika, sum(summa * valuu.kurssi) summa, count(*) kpl
 					FROM lasku, valuu
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and valuu.yhtio = '$kukarow[yhtio]' and
-					lasku.valkoodi = valuu.nimi and lasku.tila in ('H','Y','M','P','Q')
+					WHERE lasku.yhtio = '$kukarow[yhtio]' 
+					and valuu.yhtio = '$kukarow[yhtio]' 
+					and lasku.valkoodi = valuu.nimi 
+					and lasku.tila in ('H','M','P','Q')
 					GROUP BY Aika
 					ORDER BY Aika";
-
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table>";

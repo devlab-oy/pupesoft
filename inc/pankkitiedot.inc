@@ -79,6 +79,7 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			$pankki["rahalaitos"]		= '4 ';
 			$pankki["pankkilaitos"] 	= "Nooa";
 			$pankki["tiedostonimilum2"]	= "XXXXLUM2.DAT";
+			$pankki["ytunnus"]		= sprintf("%010.10s",$yhtiorow["ytunnus"])." ";
 			break;
 		case (5) : //osuuspankit (Op), OKO ja Okopankki
 			$pankki["rahalaitos"]		= '5 ';

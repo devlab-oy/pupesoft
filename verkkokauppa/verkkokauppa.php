@@ -1,51 +1,35 @@
 <?php	
 
-if($_REQUEST["tee"] == "logout") {
-	
-	
-	ob_start();
-	require ("parametrit.inc");
-	
-	
-	$query = "UPDATE kuka set session='', kesken='' where session='$session'";
-	$result = mysql_query($query) or pupe_error($query);
-	$bool = setcookie("pupesoft_session", "", time()-43200);
-	ob_end_flush();
-		
-	setcookie("pupesoft_session", "", time()-432000);
-	echo "<META HTTP-EQUIV='Refresh' CONTENT='2;URL=".$palvelin2."verkkokauppa.php'>";
-	exit;
-}
-
 $_GET["ohje"] = "off";
 
 require ("parametrit.inc");
 
 if(!function_exists("menu")) {
-	function menu($osasto="", $merkki="") {
+	function menu($osasto="") {
 		global $yhtiorow, $kukarow;
 		
 		$val = "";
 		
-		$query = "	SELECT selite osasto, selitetark nimi
-		 			FROM avainsana
-					WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'OSASTO'
-					ORDER BY selite+0";
-		$ores = mysql_query($query) or pupe_error($query);
-		while($orow = mysql_fetch_array($ores)) {			
-				
-			$val .=  "<a href='javascript:sndReq(\"menu\", \"verkkokauppa.php?tee=menu&osasto={$orow["osasto"]}\")'>{$orow["nimi"]}</a><br>";		
-			//	Piilotetaan ne joilla EI OLE siisitä nimeä
-			//	Laajennetaan merkki
-			if($orow["osasto"] == $osasto) {
-				$query = "	SELECT distinct(tuotemerkki) merkki
-				 			FROM tuote
-							WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and tuotemerkki != '' and status != 'P'";
-				$merkkires = mysql_query($query) or pupe_error($query);
-				while($merkkirow = mysql_fetch_array($merkkires)) {
-					$val .=  "&nbsp;&nbsp;&nbsp;&nbsp;<a href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto={$orow["osasto"]}&merkki={$merkkirow["merkki"]}\");'>{$merkkirow["merkki"]}</a><br>";
-				}
-			}					
+
+		if($osasto == "") {
+			$query = "	SELECT selite osasto, selitetark nimi
+			 			FROM avainsana
+						WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'OSASTO'
+						ORDER BY selite+0";
+			$ores = mysql_query($query) or pupe_error($query);
+			while($orow = mysql_fetch_array($ores)) {
+				$val .=  "<a id='{$orow["osasto"]}_P' href='javascript:sndReq(\"{$orow["osasto"]}_T\", \"verkkokauppa.php?tee=menu&osasto={$orow["osasto"]}\", \"{$orow["osasto"]}_P\", true)'>{$orow["nimi"]}</a><br><div id='{$orow["osasto"]}_T'></div>";
+			}
+		}
+		else {
+			$query = "	SELECT distinct try, selitetark trynimi
+			 			FROM tuote
+						JOIN avainsana ON tuote.yhtio = avainsana.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY'
+						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P'";
+			$tryres = mysql_query($query) or pupe_error($query);
+			while($tryrow = mysql_fetch_array($tryres)) {
+				$val .=  "&nbsp;&nbsp;&nbsp;&nbsp;<a id='{$tryrow["try"]}_T' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto={$osasto}&try={$tryrow["try"]}\", \"\", true);'>{$tryrow["trynimi"]}</a><br>";
+			}
 		}
 		
 		return $val;
@@ -53,7 +37,7 @@ if(!function_exists("menu")) {
 }
 
 if($tee == "menu") {
-	die(menu($osasto, $merkki));
+	die(menu($osasto, $try));
 }
 
 if($tee == "poistakori") {
@@ -147,12 +131,15 @@ if($tee == "tilaa") {
 			require("tilaus-valmis.inc");
 		}
 		
+		$ulos = "<font class='head'>Kiitos tilauksesta</font><br><br><font class='message'>Tilauksesi numero on {$kukarow["kesken"]}</font><br>";
+		
+		
 		// tilaus ei enää kesken...
 		$query	= "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 	
-	$ulos = "<font class='head'>Kiitos tilauksesta</font><br>";
+
 	die($ulos);
 }
 
@@ -164,7 +151,7 @@ if($tee == "tilatut") {
 	}
 	else {
 		$ulos = "<font class='head'>".t("Tilauksen tuotteet")." {$kukarow["kesken"]}</font><br>
-				<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&merkki=$merkki')\">Takaisin selaimelle</a>&nbsp;&nbsp;";
+				<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try')\">Takaisin selaimelle</a>&nbsp;&nbsp;";
 
 		$query = "	SELECT count(*) rivei
 					FROM tilausrivi 
@@ -174,7 +161,7 @@ if($tee == "tilatut") {
 
 		if($row["rivei"] > 0) {
 			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilaa')\";>Tilaa tuotteet</a>&nbsp;&nbsp;";
-			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&merkki=$merkki')\" disabled>Mitätöi tilaus</a>";
+			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try')\" disabled>Mitätöi tilaus</a>";
 		}		
 
 		$ulos .= "<br><br>";
@@ -186,7 +173,7 @@ if($tee == "tilatut") {
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
 					otunnus = '$kukarow[kesken]' and
 					tyyppi = 'L'
-					and var != 'P'
+					and var != 'D'
 					GROUP BY tilausrivi.tunnus";
 		$riviresult = mysql_query($query) or pupe_error($query);
 
@@ -211,7 +198,7 @@ if($tee == "tilatut") {
 							<td>$koririvi[varattu]</td>
 							<td>$koririvi[hinta]</td>
 							<td>$koririvi[rivihinta]</td>
-							<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&merkki=$merkki')\">Poista</a></td>
+							<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&try=$try')\">Poista</a></td>
 						</tr>";
 
 			}
@@ -231,13 +218,14 @@ if($tee == "selaa") {
 	$poistetut 	= "";
 	$poistuvat 	= "";
 	$lisatiedot	= "";
+	$ojarj		= "tuote_wrapper.tuotemerkki";
 	
 	$haku[0]	= "";	
 	$haku[1]	= "";	
 	$haku[2]	= "";
 	$haku[3]	= $osasto;	
-	$haku[4]	= "";
-	$haku[5]	= $merkki;	
+	$haku[4]	= $try;
+	$haku[5]	= "";	
 	
 	if($kukarow["kuka"] != "www" and $kukarow["kesken"] == 0) {
 		require_once("luo_myyntitilausotsikko.inc");
@@ -245,22 +233,11 @@ if($tee == "selaa") {
 		$kukarow["kesken"] = $tilausnumero;
 	}
 	
-	$kukarow["extranet"] 	= "X";
-	$rajattunakyma 			= "On";
-	$kori_polku				= "ostoskori.php";
-	$PHP_SELF				= "tuote_selaus_haku.php";
-	$toim_kutsu 			= "RIVISYOTTO";
-	$target 				= "input";
-	$request 				= "true"; 
-
 	require("tuote_selaus_haku.php");
 	
 	$dada = ob_get_contents();	
 	ob_end_clean();
 	
-	if($kukarow["kesken"] > 0) {
-		$dada = "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$osasto&merkki=$merkki')\">Tilauksen tuotteet</a><br><br>".$dada;
-	}
 	
 	die($dada);
 }
@@ -289,9 +266,11 @@ if($tee == "") {
 			<form action = '".$palvelin2."logout.php' method='post'>Tervetuloa {$kukarow["nimi"]}, <input type = 'hidden' name='location' value='".$palvelin."verkkokauppa.php'><input type='submit' value='".t("Kirjaudu ulos")."'></form><br>";
 	}
 	
-	echo "	<div id='menu' style='position:absolute; top: 50px; left: 0px; width: 250px'>".menu()."</div>
-			<div id='login' style='position:absolute; top: 0px; left: 200px; height: 20px;'>$login_screen</div>
-			<div id='selain' style='position:absolute; top: 50px; left: 200px; width: 650px'></div>
+	//$border = "border: 1px #88adeb solid;'";
+	
+	echo "	<div id='login' style='text-align: center; z-index: 0; height: 25px; $border'>$login_screen</div>
+			<div id='menu' style='float:left; width:  250px; z-index: 0; $border'>".menu()."</div>
+			<div id='selain' style='float:left; z-index: 0; $border'></div>
 			</body></html>";
 }
 

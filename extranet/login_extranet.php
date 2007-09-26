@@ -16,6 +16,7 @@ if ($user != '') {
 
 	$login    = "yes";
 	$extranet = 1;
+	$_GET["no_css"] = "yes";
 	require("parametrit.inc");
 
 	$session = "";
@@ -149,9 +150,17 @@ if ($usea == '1') {
 	echo "<font class='info'>Copyright &copy; 2002-".date("Y")." <a href='http://www.pupesoft.com/'>pupesoft.com</a> - <a href='license.php'>Licence Agreement</a></font>";
 }
 else {
+
+	//	Ei tehd‰ framesetti‰ jos hyp‰t‰‰n suoraan muualle
+	if($location != "") {
+		$target = "login_extranet.php";
+	}
+	else {
+		$target = "index.php";
+	}
 	echo "
 			<table class='login'>
-				<form name='login' target='_top' action='index.php' method='post'>
+				<form name='login' target='_top' action='$target' method='post'>
 				<input type='hidden' name='go' value='$go'>
 				<input type='hidden' name='location' value='$location'>
 				<tr><td><font class='menu'>".t("K‰ytt‰j‰tunnus",$browkieli).":</font></td><td><input type='text' value='' name='user' size='15' maxlength='30'></td></tr>

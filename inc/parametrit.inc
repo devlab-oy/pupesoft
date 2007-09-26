@@ -25,6 +25,9 @@ $PHP_SELF = $_SERVER["SCRIPT_NAME"];
 $timeparts = explode(" ",microtime());
 $starttime = $timeparts[1].substr($timeparts[0],1);
 
+//	T‰t‰ ei saa patchata muuttujasta!
+$verkkokauppa = "";
+
 // luodaan tietokantayhteys
 require("salasanat.php");
 
@@ -128,57 +131,34 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
 }
 // jos sessionia ei ole ja ei olla loginissa, menn‰‰n login ruutuun ja exit...
-elseif ($session == '' and $login != 'yes' and $extranet == '' and file_exists("login.php") and $phpnimi != 'verkkokauppa.php') {
+elseif ($session == '' and $login != 'yes' and $extranet == '' and file_exists("login.php") and $verkkokauppa == '') {
 	require("login.php");
 	exit;
 }
 // jos sessionia ei ole ja ei olla extranet loginissa, menn‰‰n extranet login ruutuun ja exit...
-elseif ($session == '' and $login != 'yes' and $phpnimi != 'verkkokauppa.php') {
+elseif ($session == '' and $login != 'yes' and $verkkokauppa == '') {
 	require("login_extranet.php");
 	exit;
 }
 
+//	Verkkokauppamoodissa ei koskaan ohjetta!
+if($verkkokauppa != "") $_GET["ohje"] = "off";
+
 // jos meill‰ on sessio
-if ($session != '' or $phpnimi == "verkkokauppa.php") {
-	
-	if($phpnimi == "verkkokauppa.php") {
+if ($session != '' or $verkkokauppa != "") {
+
+	//	Kirjataan verkkokauppak‰ytt‰j‰	
+	if($verkkokauppa != "" and $session == "") {
 		//	T‰‰ll‰ ei ole mit‰‰n oikeuksia
 		$oikeurow = array();
-		
-		//	Kirjataan verkkokauppak‰ytt‰j‰
-		if($session == "") {
-			$kukarow["kuka"] 		= "www";
-			$kukarow["nimi"] 		= "Verkkokauppa";
-			$kukarow["extranet"] 	= "X";			
-			$kukarow["yhtio"] 		= $oletusyhtio;	
-		}
-		else {
-			$query = "	SELECT *
-						FROM kuka
-						WHERE session='" . mysql_real_escape_string($session) . "'";
-			$result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
-
-			if (mysql_num_rows($result) != 1 or strlen($session) != 25) {
-				if (isset($nayta_pdf) and $nayta_pdf == 1) {
-					echo "Your browser does not seem to support cookies.";
-					exit;
-				}
-
-				$bool = setcookie("pupesoft_session", "", time()-432000, parse_url($palvelin, PHP_URL_PATH));
-
-				if ($bool === FALSE) {
-					echo "Your browser does not seem to support cookies.";
-				}
-				else {
-					echo "<script>setTimeout(\"parent.location.href='$palvelin2'\",0);</script>";
-				}
-				exit;
-			}
-			$kukarow = mysql_fetch_array($result);			
-		}
+		$kukarow["kuka"] 		= "www";
+		$kukarow["nimi"] 		= "Verkkokauppa";
+		$kukarow["extranet"] 	= "X";			
+		$kukarow["yhtio"] 		= $verkkokauppa;	
 		
 	}
 	else {
+
 		$query = "	SELECT *
 					FROM kuka
 					WHERE session='" . mysql_real_escape_string($session) . "'";

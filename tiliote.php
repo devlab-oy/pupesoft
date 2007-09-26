@@ -187,6 +187,12 @@
 			if ($tiliotedatarow['tyyppi'] == 3) {
 				require("inc/viitemaksut.inc");
 			}
+
+			// merkataan t‰m‰ tiliotedatarivi k‰sitellyksi
+			$query = "	UPDATE tiliotedata
+						SET kasitelty = now()
+						WHERE tunnus = '$tiliotedatarow[tunnus]'";
+			$updatekasitelty = mysql_query($query) or pupe_error($query);
 		}
 
 		if ($xtyyppi == 1) {
@@ -244,7 +250,7 @@ function lue_kurssit($file, $handle, $tyyppi = '') {
 		array_shift($rivit);
 		array_shift($rivit);
 	}
-	
+
 	$valuutat = array();
 
 	foreach ($rivit as $rivi) {
@@ -257,7 +263,7 @@ function lue_kurssit($file, $handle, $tyyppi = '') {
 		else {
 			$valuutta      = substr($rivi, 0, 3);																// valuutan nimi
 			$vastavaluutta = "EUR";																				// vastavaluutta
-			$kurssi        = (float) str_replace(array(',', ' '), array('.',''), trim(substr($rivi, 5, 15)));	// kurssi			
+			$kurssi        = (float) str_replace(array(',', ' '), array('.',''), trim(substr($rivi, 5, 15)));	// kurssi
 		}
 
 		// ei p‰ivitet‰ jos ollaan jo p‰ivitetty tai v‰‰r‰ vastavaluutta
@@ -265,11 +271,11 @@ function lue_kurssit($file, $handle, $tyyppi = '') {
 			continue;
 		}
 
-		$query = "	UPDATE valuu SET 
-					kurssi = round(1 / $kurssi, 6), 
-					muutospvm = now(), 
+		$query = "	UPDATE valuu SET
+					kurssi = round(1 / $kurssi, 6),
+					muutospvm = now(),
 					muuttaja = '{$kukarow['kuka']}'
-					WHERE yhtio = '{$kukarow['yhtio']}' AND 
+					WHERE yhtio = '{$kukarow['yhtio']}' AND
 					nimi = '$valuutta'";
 		$result = mysql_query($query) or pupe_error($query);
 

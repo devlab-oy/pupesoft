@@ -41,8 +41,12 @@
 				$kohdm_valkoodilisa = "";
 
 				if ($vasta_arvo != 0) {
-					//Määrä yhtiön valuutassa
+					// Määrä yhtiön valuutassa
 					$maara = $vasta_arvo;
+				}
+				else {
+					// Ei saatu summaa yhtiön valuutassa tiliotteelta, käännetään se kurssilla
+					$maara = round($kohdm * $kurssi, 2);
 				}
 			}
 			else {
@@ -211,8 +215,14 @@
 		}
 		else {
 			// Miksi ei tiliöity?
-			if ($kuittikoodi != ' ') echo "<font class='message'>".t("Hylätty, koska erittely tulossa")." ($kuittikoodi)</font><br>";
-			if ($toim != 'K') echo "<font class='message'>".t("Tili, raha- tai kulutili puuttuu")."!</font><br>";
+			if ($kuittikoodi != ' ') {
+				echo "<font class='message'>".t("Hylätty, koska erittely tulossa")." ($kuittikoodi)</font><br>";
+			}
+
+			if ($toim != 'K') {
+				echo "<font class='message'>".t("Tili, rahatili, kulutili tai tilin valuutta puuttuu/virheellinen")."!</font><br>";
+			}
+
 			if ($tiliotedataka != '0000-00-00') {
 				$query = "	SELECT tiliointi.tilino tilino, tili.nimi nimi, concat_ws('@',korjattu, korjausaika) korjattu, ltunnus
 							FROM tiliointi
@@ -295,6 +305,7 @@
 			$tkesken 	  = 1;
 			$maara 		  = 0;
 			$pankkitilino = substr($tietue, 9, 14);
+			$toim         = "K";
 
 			echo "<tr>";
 			echo "<td>" . substr($tietue,182,40) . "</td>";
@@ -316,16 +327,6 @@
 			echo "<td>".t("Kausi")."<br> $alkupvm - $loppupvm</td>";
 			echo "</tr>";
 
-			$tilinvaluutta = substr($tietue,96,3);
-
-			// Onko tämä valuuttatili
-			if ($tilinvaluutta != '' and trim(strtoupper($tilinvaluutta)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$valuuttatili = "ON";
-			}
-			else {
-				$valuuttatili = "";
-			}
-
 			echo "<tr>";
 			echo "<td>" . substr($tietue, 147, 18) . "</td>";
 			echo "<td>" . substr($tietue, 99, 30) . "<br>$tilinvaluutta $pankkitilino</td>";
@@ -341,16 +342,25 @@
 
 			if (mysql_num_rows($result) != 1) {
 				echo "<font class='error'> ".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>";
-				$toim='E';
+				$toim = 'E';
 			}
 			else {
 				$yritirow = mysql_fetch_array($result);
 
 				echo "<font class='message'> ".t("tili löytyi yrityksestä")." '$yritirow[yhtio]' ".t("vastuussa")." '$yritirow[hyvak]'</font><br>";
 
+				$tilinvaluutta = substr($tietue,96,3);
+
+				// Onko tämä valuuttatili
+				if ($tilinvaluutta != '' and trim(strtoupper($tilinvaluutta)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+					$valuuttatili = "ON";
+				}
+				else {
+					$valuuttatili = "";
+				}
+
 				if (strlen($yritirow['oletus_rahatili']) == 0 or strlen($yritirow['oletus_kulutili']) == 0) { // Tarkistetaan tilit
 					echo "<font class='error'> ".t("Tililtä puuttuu kulu tai rahatili")."</font>";
-
 					$toim = 'E';
 				}
 				else {
@@ -364,14 +374,11 @@
 
 				if (mysql_num_rows($result) != 1) {
 					echo "<font class='error'> ".t("Yritystä")." '$yritirow[yhtio]' ".t("ei löytynyt")."!</font><br>";
-
 					$toim = 'E';
 				}
 				else {
 					$yhtiorow = mysql_fetch_array($result);
 					echo "<font class='message'> ".t("Yritys löytyi")." '$yhtiorow[nimi]'<br>".t("ostovelat")." '$yhtiorow[ostovelat]' ".t("konserniostovelat")." '$yhtiorow[konserniostovelat]'</font><br>";
-
-					$toim = "K";
 				}
 
 				$query = "	SELECT *
@@ -381,7 +388,6 @@
 
 				if (mysql_num_rows($result) != 1) {
 					echo "<font class='error'> ".t("Valuuttaa")." '$tilinvaluutta' ".t("ei löytynyt")."!</font><br>";
-
 					$toim = 'E';
 				}
 				else {
@@ -391,7 +397,11 @@
 						echo "<font class='message'> ".t("Tiliote kirjataan kurssiin")." ".(round(1/$valuuttarow['kurssi'],6))." ($valuuttarow[kurssi])!</font><br>";
 					}
 
-					$toim = "K";
+					if ($valuuttatili == "ON" and trim(strtoupper($tilinvaluutta)) != trim(strtoupper($yritirow["valkoodi"]))) {
+						echo "<font class='error'> ".t("Tiliotteen valuuttakoodi on eri kuin yrityksen pankkitilin valuutta")."!</font>";
+						$toim = 'E';
+					}
+
 				}
 			}
 

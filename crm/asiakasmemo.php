@@ -232,7 +232,7 @@
 			if ($yhtunnus == "kaikki" or $yhtunnus == '') {
 				$yemail   = $asiakasrow["email"];
 				$ynimi    = "";
-				$ygsm     = $asiakasrow[""];
+				$ygsm     = $asiakasrow["gsm"];
 				$ypuh     = $asiakasrow["puhelin"];
 				$yfax     = $asiakasrow["fax"];
 				$ywww     = "";

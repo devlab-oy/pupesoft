@@ -284,15 +284,15 @@ if ((int) $kukarow["kesken"] != 0) {
 					AND lasku.tila != 'D'";
 	}
 	else {
-		// varmistetaan, että ei dellattu, ei laskutettu (X saa olla alatila jos tila on 0)
+		// pitää olla: siirtolista, sisäinen työmääräys, reklamaatio, tarjous, valmistus, myyntitilaus, ennakko, myyntitilaus, ylläpitosopimus, projekti
 		$query 	= "	SELECT *
 					FROM lasku
-					WHERE tunnus='$kukarow[kesken]' AND yhtio='$kukarow[yhtio]' AND tila != 'D' AND (alatila != 'X' or tila = '0')";
+					WHERE tunnus = '$kukarow[kesken]' AND yhtio = '$kukarow[yhtio]' AND tila in ('G','S','C','T','V','N','E','L','0','R') AND (alatila != 'X' or tila = '0')";
 	}
 	$result  	= mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) == 0) {
-		echo "<br><br><br>".t("VIRHE: Tilaustasi ei löydy tai se on mitätöity")."!<br><br><br>";
+		echo "<br><br><br>".t("VIRHE: Tilaustasi ei löydy tai se on mitätöity/laskutettu")."! ($kukarow[kesken])<br><br><br>";
 		$query = "	UPDATE kuka
 					SET kesken = 0
 					WHERE yhtio = '$kukarow[yhtio]' AND

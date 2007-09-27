@@ -715,6 +715,7 @@
 		$jatko = 0;
 	}
 	
+	
 	if (mysql_field_name($result, $i) == "rivinumero_syotto") {
 
 		$ulos = "<td><select name='$nimi'>";

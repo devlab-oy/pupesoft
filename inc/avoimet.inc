@@ -259,7 +259,7 @@
 					$summa += $trow['avoinsaldo'];
 
 					echo "<tr class='aktiivi'>";
-					echo "<td><a href='../myyntires/myyntilaskut_asiakasraportti.php?tunnus=$row[liitostunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
+					echo "<td><a href='$palvelin2","raportit.php?toim=toimittajahaku&tee=A&ytunnus=$trow[ytunnus]&alku=0&laji=M'>$trow[ytunnus]</a></td>";
 					echo "<td>$trow[nimi]</td>";
 					echo "<td>$trow[maksutieto]";
 

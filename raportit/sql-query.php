@@ -128,7 +128,7 @@
 						echo str_replace(".",",", $row[$i])."\t";
 					}
 					else {
-						echo "$row[$i]\t";
+						echo str_replace(array("\n", "\r", "<br>"), " ", $row[$i])."\t";
 					}
 				}
 				echo "\n";

@@ -45,7 +45,7 @@
 				<input type='hidden' name='hyllyvali'	value='$hyllyvali'>                        
 				<input type='hidden' name='hyllytaso'	value='$hyllytaso'>                        
 				<input type='hidden' name='from'		value='INVENTOINTI'>                       
-				<input type='hidden' name='lopetus'		value='tee=INVENTOI//tuoteno=$tuoteno'>";
+				<input type='hidden' name='lopetus'		value='$lopetus'>";
 				
 		echo "<tr><th>Inventoitavan yksilön hankintahinta:</th><td><input type='text' name='kehahin' size='10'	value='$kehahin'></td>
 				<td class='back'><input type='submit' value='".t("Jatka")."'></td></tr>";

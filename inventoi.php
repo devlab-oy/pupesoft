@@ -105,7 +105,7 @@
 				if ($kpl != '') {
 
 					//Sarjanumerot
-					if(is_array($sarjanumero_kaikki) and count($sarjanumero_valitut[$i]) != $kpl) {
+					if(is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != $kpl) {
 						echo "<font class='error'>".t("VIRHE: Sarjanumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno</font><br>";
 						$virhe = 1;
 					}
@@ -501,12 +501,12 @@
 			}
 			
 			$query = "	SELECT $select
-							FROM tuotepaikat USE INDEX (yhtio_inventointilista)
-							JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno and tuote.ei_saldoa = '')
-							WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-							and tuotepaikat.inventointilista = '$lista'
-							ORDER BY sorttauskentta, tuoteno
-							LIMIT $alku, 18";
+						FROM tuotepaikat USE INDEX (yhtio_inventointilista)
+						JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno and tuote.ei_saldoa = '')
+						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+						and tuotepaikat.inventointilista = '$lista'
+						ORDER BY sorttauskentta, tuoteno
+						LIMIT $alku, 18";
 			$saldoresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($saldoresult) == 0) {
@@ -554,32 +554,34 @@
 				$hyllyssa = sprintf('%.2f',$tuoterow['saldo']-$hylrow['keratty']);
 				$tdlisa = "<td valign='top'>".$tuoterow["saldo"]."</td><td valign='top'>$hylrow[ennpois]/$hylrow[keratty]</td><td valign='top'>".$hyllyssa."</td>";
 				
+				if ($tuoterow["sarjanumeroseuranta"] == "S") {
+					$query = "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta
+								FROM sarjanumeroseuranta
+								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+								LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+								WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
+								and sarjanumeroseuranta.tuoteno		= '$tuoterow[tuoteno]'
+								and sarjanumeroseuranta.myyntirivitunnus	!= -1
+								and (	(sarjanumeroseuranta.hyllyalue		= '$tuoterow[hyllyalue]' 
+										 and sarjanumeroseuranta.hyllynro 	= '$tuoterow[hyllynro]' 
+										 and sarjanumeroseuranta.hyllyvali 	= '$tuoterow[hyllyvali]' 
+										 and sarjanumeroseuranta.hyllytaso 	= '$tuoterow[hyllytaso]') 
+									 or ('$tuoterow[oletus]' != '' and 
+										(	SELECT tunnus 
+											FROM tuotepaikat tt 
+											WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
+											and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
+								and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00')
+								ORDER BY sarjanumero+0";
+					$sarjares = mysql_query($query) or pupe_error($query);
+				}
+				
 				if (($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $lista == '') or ($tuoterow["inventointilista"] == $lista and $tuoterow["inventointilista_aika"] != '0000-00-00 00:00:00')) {
 
 					echo "<tr>";
 					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']); 
 					
-					if ($tuoterow["sarjanumeroseuranta"] == "S") {
-						$query = "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta
-									FROM sarjanumeroseuranta
-									LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-									LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-									WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
-									and sarjanumeroseuranta.tuoteno		= '$tuoterow[tuoteno]'
-									and sarjanumeroseuranta.myyntirivitunnus	!= -1
-									and (	(sarjanumeroseuranta.hyllyalue		= '$tuoterow[hyllyalue]' 
-											 and sarjanumeroseuranta.hyllynro 	= '$tuoterow[hyllynro]' 
-											 and sarjanumeroseuranta.hyllyvali 	= '$tuoterow[hyllyvali]' 
-											 and sarjanumeroseuranta.hyllytaso 	= '$tuoterow[hyllytaso]') 
-										 or ('$tuoterow[oletus]' != '' and 
-											(	SELECT tunnus 
-												FROM tuotepaikat tt 
-												WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
-												and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
-									and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00')
-									ORDER BY sarjanumero+0";
-						$sarjares = mysql_query($query) or pupe_error($query);
-						
+					if ($tuoterow["sarjanumeroseuranta"] == "S") {	
 						if (mysql_num_rows($sarjares) > 0) {
 							echo "<br><table>";
 							
@@ -603,7 +605,7 @@
 						}
 					}
 					if ($tuoterow["sarjanumeroseuranta"] == "S") {
-						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=$tuoterow[tuoteno]&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=tee=INVENTOI//tuoteno=$tuoteno'>".t("Uusi sarjanumero")."</a>";
+						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=$tuoterow[tuoteno]&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//alku=$alku'>".t("Uusi sarjanumero")."</a>";
 					}
 					
 					echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
@@ -637,20 +639,27 @@
 					echo "<tr>";
 					echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys']);
 					
-					if ($tuoterow["sarjanumeroseuranta"] == "S" and count(explode(",", $tuoterow["sarjanumerot"])) > 0) {
-						foreach (explode(",", $tuoterow["sarjanumerot"]) as $snro) {
-							echo "$snro<br>";
+					if ($tuoterow["sarjanumeroseuranta"] == "S") {
+						if (mysql_num_rows($sarjares) > 0) {
+							echo "<br><table>";
+							
+							while($sarjarow = mysql_fetch_array($sarjares)) {							
+								echo "<tr><td>$sarjarow[sarjanumero]</td><td>$sarjarow[ostohinta]</td></tr>";
+							}
+							
+							echo "</table>";
 						}
 					}
 					
 					echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
 
 					if ($viesti == '') {
-						echo "<td valign='top' class='green'>".t("Tuote on inventoitu!")."</td>";
+						echo "<td valign='top' class='green'>".t("Tuote on inventoitu!");
 					}
 					else {
-						echo "<td valign='top'><font class='error'>$viesti</font></td>";
+						echo "<td valign='top'><font class='error'>$viesti</font>";
 					}
+					echo "</td>";
 					echo "</tr>";
 				}
 				else {
@@ -724,9 +733,6 @@
 				</tr>
 				</form>
 				</table>";
-
-
-
 		echo "<br><br><table>";
 		echo "<tr><th colspan='3'>".t("Avoimet inventointilistat").":</th></tr>";
 

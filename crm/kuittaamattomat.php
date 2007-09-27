@@ -1,7 +1,7 @@
 <?php
 	require ("../inc/parametrit.inc");
 
-	if($tee == 'B'){   //Pitää lisätä uusi
+	if($tee == 'B') {   //Pitää lisätä uusi
 		$query = "	SELECT kalenteri.asiakas asiakas, yhteyshenkilo.tunnus yhenkilo, kentta01, tapa
 					FROM kalenteri
 					LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus
@@ -67,7 +67,7 @@
 				</table></form>";
 	}
 	
-	if($tee == "LISAAMUISTUTUS") {       //lisataan tapahtuma kalenteriin	
+	if($tee == "LISAAMUISTUTUS") {
 		$ok = '';
 	
 		if ($ytunnus != '') {
@@ -141,6 +141,7 @@
 	
 			$kysely = "	INSERT INTO kalenteri
 						SET asiakas  = '$ytunnus',
+						liitostunnus = '$asiakasid',
 						henkilo  = '$yhtunnus',
 						kuka     = '$ykuka',
 						yhtio    = '$kukarow[yhtio]',
@@ -151,7 +152,7 @@
 						pvmalku  = '$year-$kuu-$paiva'";
 			$result = mysql_query($kysely) or pupe_error($kysely);
 			
-			echo "".t("Lisätty muistutus päivälle:")."  <b>$year-$kuu-$paiva</b><br><br>";
+			echo t("Lisätty muistutus päivälle:")."  <b>$year-$kuu-$paiva</b><br><br>";
 			
 			if ($from != '') {
 				
@@ -233,7 +234,7 @@
 				<th>".t("Yhteydenottaja: ")."</th><td colspan='3'><select name='ykuka'>
 				<option value='$kukarow[kuka]'>".t("Itse")."</option>";
 
-		$query = "	SELECT kuka.tunnus, kuka.nimi, kuka.kuka
+		$query = "	SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
 					FROM kuka, oikeu
 					WHERE kuka.yhtio	= '$kukarow[yhtio]'
 					and oikeu.yhtio		= kuka.yhtio
@@ -362,7 +363,8 @@
 	
 	
 		//* listataan muistutukset *///
-		$query = "	SELECT kalenteri.tunnus, left(pvmalku,10) Päivämäärä, yhteyshenkilo.nimi Yhteyshenkilö, kalenteri.kentta01 Viesti, kalenteri.tapa Tapa, if(kalenteri.asiakas=0,'',kalenteri.asiakas) ytunnus, kalenteri.henkilo yhtunnus
+		$query = "	SELECT kalenteri.tunnus, left(pvmalku,10) Päivämäärä, yhteyshenkilo.nimi Yhteyshenkilö, kalenteri.kentta01 Viesti, kalenteri.tapa Tapa, 
+					if(kalenteri.asiakas=0,'',kalenteri.asiakas) ytunnus, kalenteri.henkilo yhtunnus, kalenteri.liitostunnus
 					FROM kalenteri
 					LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
 					where kalenteri.kuka = '$kuka'
@@ -401,7 +403,7 @@
 					echo "<td>&nbsp;$prow[$i]&nbsp;</td>";
 				}
 				
-				echo "<td><a href='asiakasmemo.php?ytunnus=$prow[ytunnus]&yhtunnus=$prow[yhtunnus]'>$prow[ytunnus] $asrow[nimi]</a></td>";
+				echo "<td><a href='asiakasmemo.php?ytunnus=$prow[ytunnus]&asiakasid=$prow[liitostunnus]&yhtunnus=$prow[yhtunnus]'>$prow[ytunnus] $asrow[nimi]</a></td>";
 				
 				echo "<td><input type='submit' value='".t("Kuittaa")."'></td>";			
 				echo "</tr></form>";		

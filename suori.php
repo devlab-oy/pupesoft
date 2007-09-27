@@ -3,7 +3,8 @@
 
 	echo "<font class='head'>".t("Laskujen suoritus")."</font><hr>";
 
-	if ($tiliote == 'Z') { // Meitä on kutsuttu tiliotteelta!
+	// Meitä on kutsuttu tiliotteelta!
+	if ($tiliote == 'Z') {
 		echo "<form action = 'tilioteselailu.php' method='post'>
 			<input type='hidden' name=mtili value='$mtili'>
 			<input type='hidden' name=tee   value='Z'>
@@ -391,7 +392,7 @@
 				$summahakuok=1;
 		}
 
-		if (($tiliotesumma == 0) or ($summahakuok == 0)) {
+		if ($tiliotesumma == 0 or $summahakuok == 0) {
 			$query = "	SELECT tunnus, nimi, tapvm, round((summa - if(alatila='K', kasumma, 0)) * vienti_kurssi, 2) 'kotisumma', concat_ws(' ',summa - if(alatila='K', kasumma, 0),valkoodi, if(alatila='K', '(K)','')) summa, ebid, valkoodi
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and maksu_tili='$mtili' and tila='Q'
@@ -440,6 +441,7 @@
 		}
 		echo "</table>";
 	}
+
 	if ($tee == '') {
 		// Tällä ollaan, jos olemme vasta valitsemassa pankkitiliä
 		$query = "	SELECT tunnus, nimi, tilino

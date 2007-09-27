@@ -54,11 +54,36 @@ $trow = mysql_fetch_array($result);
 
 //echo "'$tee', '$tila', '$tunnus'<br>";
 //Poistetaan suoraveloitus
-if ($tila == 'A') {
-	$query = "UPDATE lasku SET suoraveloitus = '' WHERE tunnus = $tunnus and yhtio = '$kukarow[yhtio]' and suoraveloitus='o'";
+if ($tila == 'A') {	
+	$query = "	UPDATE lasku SET 
+				suoraveloitus = '',
+				tila = if(hyvak1 != '', 'H', 'M'),
+				hyvaksyja_nyt = hyvak1,
+				h1time = '',
+				h2time = '',
+				h3time = '',
+				h4time = '',
+				h5time = ''
+				WHERE tunnus = '$tunnus' and 
+				yhtio = '$kukarow[yhtio]' and 
+				suoraveloitus != '' and
+				maksu_tili = ''";
 	$result = mysql_query($query) or pupe_error($query);
 	$tee = 'E';
 	$tila = '';
+
+	// haetaan laskun tiedot uudestaan
+	$query = "	SELECT *
+				FROM lasku
+				WHERE tunnus = '$tunnus'";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) != 1) {
+		echo "".t("Tositetta")." $tunnus ".t("ei löytynytkään")."!";
+		exit;
+	}
+
+	$trow = mysql_fetch_array($result);
 }
 
 // Tasolla 1 ei saa muuttaa tapvm_ää tai maksutiliä
@@ -621,7 +646,6 @@ if ($tila == 'W') {
 	$tila = 'X';
 }
 
-
 if ($tila == 'K') {
 		$query = "	SELECT comments
 					FROM lasku
@@ -803,12 +827,18 @@ if ($tila == '') {
 				<td><input type = 'submit' value = '".t("Päivitä")."'></td></tr></form>";
 	}
 
-	if (($trow['h1time'] == '0000-00-00 00:00:00') and ($trow['h2time'] == '0000-00-00 00:00:00') and ($trow['h3time'] == '0000-00-00 00:00:00') and ($trow['h4time'] == '0000-00-00 00:00:00') and ($trow['suoraveloitus'] != '') and ($trow['tila'] == 'H')) {
-		echo "<form action = '$PHP_SELF?tee=M&tila=A' method='post'>
+	// jos meillä on suoraveloitus jolla ei ole maksutiliä (eli tiliöintejä ei ole tehty), se voidaan poistaa jos hyväksyttävänä, valmismaksatukseen tai odottaa suoritusta
+	if ($trow['suoraveloitus'] != "" and $trow["maksu_tili"] == "" and in_array($trow['tila'], array('Q','M','H'))) {
+		echo "	<form action = '$PHP_SELF' method='post'>
+				<input type = 'hidden' name='tee' value='M'>
+				<input type = 'hidden' name='tila' value='A'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t("Poista suoraveloitus")."</th>
-				<td></td>
-				<td><input type = 'submit' value = '".t("Poista")."'></td></tr></form>";
+				<tr>
+				<th>".t("Poista suoraveloitus")."</th>
+				<td>Lasku siirtyy takaisin hyväksyntään</td>
+				<td><input type = 'submit' value = '".t("Poista")."'></td>
+				</tr>
+				</form>";
 	}
 
 	echo "<form action = '$PHP_SELF?tee=M&tila=K' method='post'>
@@ -823,14 +853,14 @@ if ($tila == '') {
 		if (strtoupper($trow['maa']) == strtoupper($yhtiorow['maa'])) {
 			echo "<form action = '$PHP_SELF?tee=M&tila=T' method='post'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t("Muuta maksutili")."</th>
+				<tr><th>".t("Muuta toimittajan pankkitiliä")."</th>
 				<td><input type = 'text' name = 'tili' size='40' value = '".tilinumero_print($trow['tilinumero'])."'></td>
 				<td><input type = 'submit' value = '".t("Muuta")."'></td></tr></form>";
 		}
 		else {
 			echo "<form action = '$PHP_SELF?tee=M&tila=TU' method='post'>
 				<input type = 'hidden' name='tunnus' value='$tunnus'>
-				<tr><th>".t('Muuta ulkomaanmaksutilinumero')."</th>
+				<tr><th>".t('Muuta toimitajan ulkomaanmaksutiliä')."</th>
 				<td><input type = 'text' name = 'ultilno' size='40' value = '$trow[ultilno]'></td><td></td></tr>
 				<tr><th>".t('SWIFT')."</th>
 				<td><input type = 'text' name = 'swift' size='40' value = '$trow[swift]'></td>

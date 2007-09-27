@@ -1321,8 +1321,13 @@ if ($tee == 'I') {
 	// Jos meillä on suoraveloitus
 	if ($osuoraveloitus != '') {
 
+		echo "<font class='message'>".t('Suoraveloitus');
+
 		 //Toimittajalla on pankkitili, teemme eräpäivälle suorituksen valmiiksi
 		if ($trow['oletus_suoravel_pankki'] > 0) {
+
+			echo " ".t('oletuspankkitilille').".</font><br>";
+
 			// Oletustiliöinnit
 			// Ostovelat
 			$query = "	INSERT into tiliointi set
@@ -1340,14 +1345,14 @@ if ($tee == 'I') {
 
 			// Rahatili
 			$query = "	INSERT into tiliointi set
-						yhtio ='$kukarow[yhtio]',
+						yhtio = '$kukarow[yhtio]',
 						ltunnus = '$tunnus',
 						tilino = '$yhtiorow[selvittelytili]',
 						tapvm = '$erv-$erk-$erp',
 						summa = $vassumma,
 						vero = 0,
 						lukko = '',
-						tosite='$tositenro',
+						tosite = '$tositenro',
 						laatija = '$kukarow[kuka]',
 						laadittu = now()";
 			$xresult = mysql_query($query) or pupe_error($query);
@@ -1357,7 +1362,7 @@ if ($tee == 'I') {
 							tila = 'Y',
 							mapvm = '$erv-$erk-$erp',
 							maksu_kurssi = 1
-							WHERE tunnus='$tunnus'";
+							WHERE tunnus = '$tunnus'";
 				$xresult = mysql_query($query) or pupe_error($query);
 				echo "<font class='message'>".t('Lasku merkittiin suoraan maksetuksi')."</font><br>";
 			}
@@ -1365,7 +1370,8 @@ if ($tee == 'I') {
 		else {
 		 	// Tämä on vain suoraveloitus
 			if ($tila == 'M') {
-				$query = "UPDATE lasku set tila = 'Q' WHERE tunnus='$tunnus'";
+				echo " ".t('ilman oletuspankkitiliä').".</font><br>";				
+				$query = "UPDATE lasku set tila = 'Q' WHERE tunnus = '$tunnus'";
 				$xresult = mysql_query($query) or pupe_error($query);
 				echo "<font class='message'>".t('Lasku merkittiin odottamaan suoritusta')."</font><br>";
 			}

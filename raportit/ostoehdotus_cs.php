@@ -37,8 +37,8 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
 
 	$laskuntoimmaa = "";
 	$riviheaderi   = "Total";
-	$returnstring1 = "";
-	$returnstring2 = "";
+	$returnstring1 = 0;
+	$returnstring2 = 0;
 
 	$varastotapa = " JOIN varastopaikat USE INDEX (PRIMARY) ON varastopaikat.yhtio = tilausrivi.yhtio
 						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
@@ -102,11 +102,11 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
 
 	// Myydyt kappaleet
 	//$returnstring2 .= "$riviheaderi: ";
-	$returnstring2 .= (float) $laskurow['kpl4']."<br>";
+	$returnstring2 += (float) $laskurow['kpl4'];
 
 	// Ennakkopoistot ja jt:t
 	//$returnstring1 .= "$riviheaderi varattu: ";
-	$returnstring1 .= (float) ($laskurow['ennpois'] + $laskurow['jt'])."<br>";
+	$returnstring1 += (float) ($laskurow['ennpois'] + $laskurow['jt']);
 	//$returnstring1 .= "$riviheaderi jt: ";
 	//$returnstring1 .= (float) $laskurow['jt']."<br>";
 	
@@ -126,7 +126,7 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
 
 		$varastotapa  = "";
 		$riviheaderi  = "";
-		$returnstring = "";
+		$returnstring = 0;
 
 		if ($myynti_varasto != "") {
 			$varastotapa = " and varastopaikat.tunnus = '$myynti_varasto' ";
@@ -159,14 +159,14 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
 		if (mysql_num_rows($result) > 0) {
 			while ($varrow = mysql_fetch_array($result)) {
 				//$returnstring .= $riviheaderi." saldo: ";
-				$returnstring .= (float) $varrow['saldo']."<br>";
+				$returnstring += (float) $varrow['saldo'];
 				//$returnstring .= $riviheaderi." hälytysraja: ";
 				//$returnstring .= (float) $varrow['halytysraja']."<br>";
 			}
 		}
 		else {
 			//$returnstring .= $riviheaderi." saldo: ";
-			$returnstring .= "0<br>";
+			$returnstring = 0;
 			//$returnstring .= $riviheaderi." hälytysraja: ";
 			//$returnstring .= "0<br>";
 		}
@@ -182,7 +182,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 
 		$varastotapa  = "";
 		$riviheaderi  = "Total";
-		$returnstring = "";
+		$returnstring = 0;
 
 		if ($myynti_varasto != "") {
 			$varastotapa = " and lasku.varasto = '$myynti_varasto' ";
@@ -231,14 +231,34 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 
 		// tilattu kpl
 		//$returnstring .= $riviheaderi." tilattu kpl: ";
-		$returnstring .= (float) $ostorow['tilattu']."<br>";
+		$returnstring += (float) $ostorow['tilattu'];
 
 		return $returnstring;
 }
 
-// ABC luokkanimet
-$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
-$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
+// Haetaan abc-parametrit
+$query = "	SELECT * 
+			FROM abc_parametrit
+			WHERE yhtio = '$kukarow[yhtio]'
+			and tyyppi 	= '$abcrajaustapa'
+			ORDER by luokka";
+$res = mysql_query($query) or pupe_error($query);
+
+$ryhmanimet   					= array();	
+$ryhmaprossat					= array();
+$kiertonopeus_tavoite 			= array();	       
+$palvelutaso_tavoite 			= array();	        
+$varmuusvarasto_pv   			= array();	        
+$toimittajan_toimitusaika_pv 	= array();	
+
+while ($row = mysql_fetch_array($res)) {
+	$ryhmanimet[] 					= $row["luokka"];
+	$ryhmaprossat[] 				= $row["osuusprosentti"];
+	$kiertonopeus_tavoite[] 		= $row["kiertonopeus_tavoite"];	       
+	$palvelutaso_tavoite[] 			= $row["palvelutaso_tavoite"];	        
+	$varmuusvarasto_pv[]   			= $row["varmuusvarasto_pv"];	        
+	$toimittajan_toimitusaika_pv[] 	= $row["toimittajan_toimitusaika_pv"];
+}
 
 // Tarvittavat päivämäärät
 if (!isset($kka1)) $kka1 = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -419,8 +439,6 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		$lisaa3 .= " and asiakas.konserniyhtio = '' ";
 	}
 
-	$abcnimi = $ryhmanimet[$abcrajaus];
-
 	// katsotaan valitut varastot
 	$query = "	SELECT *
 				FROM varastopaikat
@@ -477,10 +495,10 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
 	if ($abcrajaus != "") {
 		// joinataan ABC-aputaulu katteen mukaan lasketun luokan perusteella
-		$abcjoin = " JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
-					and abc_aputaulu.tuoteno = tuote.tuoteno
-					and abc_aputaulu.tyyppi = '$abcrajaustapa'
-					and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";
+		$abcjoin = " 	JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio
+						and abc_aputaulu.tuoteno = tuote.tuoteno
+						and abc_aputaulu.tyyppi = '$abcrajaustapa'
+						and (luokka <= '$abcrajaus' or luokka_osasto <= '$abcrajaus' or luokka_try <= '$abcrajaus' or tuote_luontiaika >= date_sub(current_date, interval 12 month) or abc_aputaulu.tuoteno in ($jt_tuotteet))) ";	
 	}
 	else {
 		$abcjoin = " LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa') ";
@@ -508,10 +526,6 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 				tuote.varmuus_varasto,
 				if(tuote.ei_varastoida='', '".t("Varastoitava")."','".t("Ei varastoida")."') ei_varastoida,
 				abc_aputaulu.luokka abcluokka,
-				abc_aputaulu.luokka_osasto abcluokka_osasto,
-				abc_aputaulu.luokka_try abcluokka_try,
-				abc_aputaulu.varaston_kiertonop,
-				abc_aputaulu.palvelutaso,
 				tuote.luontiaika
 				FROM tuote
 				$lisaa2
@@ -521,18 +535,13 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 				tuote.yhtio in ($yhtiot)
 				$lisaa
 				and tuote.ei_saldoa = ''
-				and tuote.tuoteno in ('004-0590-36','004-0628-36','004-0630-35')
 				GROUP BY tuote.tuoteno
 				ORDER BY id, tuote.tuoteno, yhtio";
 	$res = mysql_query($query) or pupe_error($query);
 
-	echo t("Tuotteita")." ".mysql_num_rows($res)." ".t("kpl").".<br>\n";
 	flush();
-
-	$rivi = "";
 	
 	echo "<table>";
-	
 	echo "<tr>";
 	
 	if ($useampi_yhtio > 1) {
@@ -540,8 +549,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	}
 	
 	echo "<th valign='top'>".t("Tuoteno")."<br>".t("Nimitys")."</th>";
-	//echo "<th valign='top'>".t("Palvelutaso")."<br>".t("Kierto")."</th>";
-	echo "<th valign='top'>".t("Varmuusvarasto")."<br>".t("Hälytysraja")."</th>";
+	//echo "<th valign='top'>".t("")."<br>".t("")."</th>";
+	echo "<th valign='top'>".t("Varmuusvarasto")."<br>".t("Tilauspiste")."</th>";
 	echo "<th valign='top'>".t("Saldo")."</th>";
 	echo "<th valign='top'>".t("Tilattu")."<br>".t("Varattu")."</th>";
 	echo "<th valign='top'>".t("Ostoehdotus")."<br>".t("Vuosikulutus")."</th>";
@@ -648,52 +657,59 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		// sitte vielä totalit
 		list($enp, $vku) = myynnit();
 		
-		if ($saldo - $enp < $row["halytysraja"]) {
-			$ostoehdotus = 
+		if (($saldot - $enp + $ostot) <= $row["halytysraja"]) {
+						
+			if ((float) $kiertonopeus_tavoite[$row["abcluokka"]] == 0) $kiertonopeus_tavoite[$row["abcluokka"]] = 1;
+			
+			// Lisätään varatut tilaukseen ja verrataan tilauspistettä vapaasaldoon
+			$vapaasaldo = ($saldot - $enp + $ostot);
+			
+			$lisa = (float) $row["halytysraja"] - $vapaasaldo;
+			
+			$ostoehdotus = round($lisa + (2 * (($vku / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"])),2);			
 		}
 		else {
 			$ostoehdotus = 0;
 		}
 		
+		if ($ostoehdotus > 0) {
+			echo "<tr>";
 		
+			if ($useampi_yhtio > 1) {
+				echo "<td>$row[yhtio]</td>";
+			}
 		
-		echo "<tr>";
+			echo "<td valign='top' $btl>$row[tuoteno]</td>";
+			//echo "<td valign='top' $bt  align='right'></td>";
+			echo "<td valign='top' $bt  align='right'>".(float) $row["varmuus_varasto"]."</td>";
+			echo "<td valign='top' $bt  align='right'>".(float) $saldot."</td>";
+			echo "<td valign='top' $bt  align='right'>".(float) $ostot."</td>";
+			echo "<td valign='top' $bt  align='right'><font style='color: 00FF00;'>$ostoehdotus</font></td>";
+			echo "<td valign='top' $bt  align='right'>".(float) $toimirow["osto_era"]."</td>";
+			echo "<td valign='top' $btr align='right'>".(float) $toimirow["toimitusaika"]." ".t("pva")."</td>";
+			echo "</tr>";
 		
-		if ($useampi_yhtio > 1) {
-			echo "<td>$row[yhtio]</td>";
+			echo "<tr>";
+		
+			if ($useampi_yhtio > 1) {
+				echo "<td>$row[yhtio]</td>";
+			}
+		
+			echo "<td valign='top' $bbl>$row[nimitys]</td>";
+			//echo "<td valign='top' $bb align='right'>".(float) $kiertonopeus_tavoite[$row["abcluokka"]]."</td>";
+			echo "<td valign='top' $bb align='right'>".(float) $row["halytysraja"]."</td>";
+			echo "<td valign='top' $bb></td>";
+			echo "<td valign='top' $bb align='right'>".(float) $enp."</td>";
+			echo "<td valign='top' $bb align='right'>".(float) $vku."</td>";
+			echo "<td valign='top' $bb>$row[ei_varastoida]</td>";
+			echo "<td valign='top' $bbr>".tv1dateconv(date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")+$toimirow["toimitusaika"], date("Y"))))."</td>";
+			echo "</tr>";
+		
+			echo "<tr style='height: 5px;'></tr>";
 		}
-		
-		echo "<td valign='top' $btl>$row[tuoteno]</td>";
-		//echo "<td valign='top' $bt  align='right'>".(float) $row["palvelutaso"]."</td>";
-		echo "<td valign='top' $bt  align='right'>".(float) $row["varmuus_varasto"]."</td>";
-		echo "<td valign='top' $bt  align='right'>".(float) $saldot."</td>";
-		echo "<td valign='top' $bt  align='right'>".(float) $ostot."</td>";
-		echo "<td valign='top' $bt  align='right'><font style='color: 00FF00;'>XXX</font></td>";
-		echo "<td valign='top' $bt  align='right'>".(float) $toimirow["osto_era"]."</td>";
-		echo "<td valign='top' $btr align='right'>".(float) $toimirow["toimitusaika"]." ".t("pva")."</td>";
-		echo "</tr>";
-		
-		echo "<tr>";
-		
-		if ($useampi_yhtio > 1) {
-			echo "<td>$row[yhtio]</td>";
-		}
-		
-		echo "<td valign='top' $bbl>$row[nimitys]</td>";
-		//echo "<td valign='top' $bb align='right'>".(float) $row["varaston_kiertonop"]."</td>";
-		echo "<td valign='top' $bb align='right'>".(float) $row["halytysraja"]."</td>";
-		echo "<td valign='top' $bb></td>";
-		echo "<td valign='top' $bb align='right'>".(float) $enp."</td>";
-		echo "<td valign='top' $bb align='right'>".(float) $vku."</td>";
-		echo "<td valign='top' $bb>$row[ei_varastoida]</td>";
-		echo "<td valign='top' $bbr>".tv1dateconv(date("Y-m-d",mktime(0, 0, 0, date("m"), date("d")+$toimirow["toimitusaika"], date("Y"))))."</td>";
-		echo "</tr>";
-		
-		echo "<tr style='height: 5px;'></tr>";
 	}
 	
 	echo "</table>";
-
 }
 
 // näytetään käyttöliittymä..
@@ -806,6 +822,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 		echo "<select name='abcrajaustapa'>
 		<option $sel[TK] value='TK'>".t("Myyntikate")."</option>
+		<option $sel[TM] value='TM'>".t("Myynti")."</option>
 		<option $sel[TR] value='TR'>".t("Myyntirivit")."</option>
 		<option $sel[TP] value='TP'>".t("Myyntikappaleet")."</option>
 		</select>

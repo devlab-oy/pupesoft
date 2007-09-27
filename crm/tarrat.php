@@ -20,7 +20,7 @@
 		}
 	}
 
-	if ($tee == "TULOSTA") {
+	if ($tee == "TULOSTA" and count($otunnus) > 0) {
 		$tulostimet[0] = 'Tarrat';
 
 		if (is_array($otunnus)) {

@@ -72,9 +72,19 @@ if ($tee == '') {
 
 	echo "<table>";
 
+	// katotaan jos meillä on jotain selvittelytilejä pankkitilien takana
+	$query = "	SELECT oletus_selvittelytili from yriti where yhtio='$kukarow[yhtio]' and oletus_selvittelytili!=''";
+	$result = mysql_query($query) or pupe_error($query);
+
+	$selvittelytilit = "'$yhtiorow[selvittelytili]',";
+	while ($trow = mysql_fetch_array($result)) {
+		$selvittelytilit .= "'$trow[oletus_selvittelytili]',";
+	}
+	$selvittelytilit = substr($selvittelytilit, 0, -1); // vika pilkku pois
+
 	$query = "	SELECT nimi nimi, lasku.tapvm tapvm, ifnull(tiliointi.tapvm, 'Ei sopivaa suoritusta') suorituspvm, tiliointi.selite tilioteselite, lasku.summa, lasku.tunnus, tiliointi.tunnus stunnus
 				FROM lasku use index (yhtio_tila_mapvm)
-				LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio and tiliointi.tilino = '$yhtiorow[selvittelytili]' and tiliointi.summa = lasku.summa and korjattu = '')
+				LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio and tiliointi.tilino in ($selvittelytilit) and tiliointi.summa = lasku.summa and korjattu = '')
 				WHERE lasku.yhtio  = '$kukarow[yhtio]'
 				AND lasku.tila = 'Q'
 				AND lasku.mapvm = '0000-00-00'

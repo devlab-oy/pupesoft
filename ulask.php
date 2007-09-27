@@ -1589,6 +1589,7 @@ if (strlen($tee) == 0) {
 		<option value ='4'>3
 		<option value ='8'>7
 		<option value ='16'>15</select></td>
+		<option value ='31'>30</select></td>
 		<td><input type = 'submit' value = '".t("Perusta")."'></td></tr></form>";
 
 	echo "<tr><td><form action = '$PHP_SELF?tee=Y' method='post'>".t("Perusta lasku toimittajan Y-tunnuksen/nimen perusteella")."</td>

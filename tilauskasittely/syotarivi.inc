@@ -3,7 +3,7 @@
 	$debug = 0;
 
 	if ($debug == 1) {
-		echo " kukarow[extranet] = $kukarow[extranet] | toim = $toim | miniliittyma = $miniliittyma | syotarivi = $syotarivi<br>";
+		echo " kukarow[extranet] = $kukarow[extranet] | toim = $toim | miniliittyma = $miniliittyma | syotarivi = $syotarivi | rivinumero = $rivinumero<br>";
 	}
 
 	if (file_exists("../inc/alvpopup.inc")) {
@@ -50,10 +50,21 @@
 		// jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
 		if ($rivitunnus!='') {
 			echo "<tr>$jarjlisa";
-
-			echo "	<th align='left' colspan='2'>".t("Ker‰ysaika")."</th>
-					<th align='left' colspan='4'>".t("Toimitusaika")."</th>
-					</tr>";
+			
+			$nrospanni = '4';
+			
+			if ($yhtiorow['rivinumero_syotto'] != '') {
+				$nrospanni = '3';
+			}
+			
+			echo "<th align='left' colspan='2'>".t("Ker‰ysaika")."</th>";
+			echo "<th align='left' colspan='$nrospanni'>".t("Toimitusaika")."</th>";
+			
+			if ($yhtiorow['rivinumero_syotto'] != '') {
+				echo "<th align='left'>".t("Rivinumero")."</th>";
+			}
+			
+			echo "</tr>";
 			echo "<tr>$jarjlisa";
 
 			if ($toimaika == "" or $toimaika == "0000-00-00") {
@@ -87,8 +98,13 @@
 			}
 
 			echo "<td valign='top' colspan='2'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
-			echo "<td valign='top' colspan='4'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td></tr>";
-			echo "<tr>$jarjlisa";
+			echo "<td valign='top' colspan='$nrospanni'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
+			
+			if ($yhtiorow['rivinumero_syotto'] != '') {
+				echo "<td valign='top'><input type='text' size='2' name='tilrivinumero' value='$rivinumero'></td>";
+			}
+			
+			echo "</tr><tr>$jarjlisa";
 			
 			
 			echo "<tr>$jarjlisa<th colspan='6' align='left'>".t("Rivikommentti").":</tg></tr>";
@@ -126,8 +142,13 @@
 				<th align='left'>".t("Hinta")."</th>
 				<th align='left'>".t("Ale")."</th>
 				<th align='left'>".t("Netto")."</th>
-				<th align='left'>".t("Alv")."</th>
-				<td valign='top' class='back'></td>
+				<th align='left'>".t("Alv")."</th>";
+		
+		if ($yhtiorow['rivinumero_syotto'] != '') {
+			echo 	"<th align='left'></th>";
+		}
+		
+		echo	"<td valign='top' class='back'></td>
 				</tr>";
 
 
@@ -195,14 +216,23 @@
 		else {
 			echo "<td valign='top'>".alv_popup_oletus('alv',$alv, $laskurow["maa"])."</td>";
 		}
+		
+		if ($yhtiorow['rivinumero_syotto'] != '') {
+			echo "<td valign='top'></td>";
+		}
 
 		echo "<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
 		echo "<tr>$jarjlisa
 				<th align='left'>".t("Ker‰ysaika")."</th>
 				<th align='left' colspan='2'>".t("Toimitusaika")."</th>
-				<th colspan='4' align='left'>".t("Kommentti")."</th>
-				<td valign='top' class='back'></td>
+				<th colspan='4' align='left'>".t("Kommentti")."</th>";
+		
+		if ($yhtiorow['rivinumero_syotto'] != '') {
+			echo "<th align='left'>".t("Rivinumero")."</th>";
+		}
+		
+		echo	"<td valign='top' class='back'></td>
 				</tr>";
 		echo "<tr>$jarjlisa";
 		
@@ -239,7 +269,11 @@
 		echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";		
 		echo "<td valign='top' colspan='2'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";		
 		echo "<td valign='top' colspan='4'><textarea name='kommentti' cols='32' rows='2' wrap='soft'>$kommentti</textarea></td>";
-
+		
+		if ($yhtiorow['rivinumero_syotto'] != '') {
+			echo "<td valign='top'><input type='text' size='2' name='tilrivinumero' value='$rivinumero'></td>";
+		}
+		
 		if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "RIVISYOTTO" or $toim == "TYOMAARAYS" or ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T"))) {
 			echo "</tr>
 				<tr>$jarjlisa

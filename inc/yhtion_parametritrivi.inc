@@ -714,7 +714,28 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "rivinumero_syotto") {
 
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($trow[$i] != '') {
+			$sel1 = "selected";
+		}
+		else {
+			$sel2 = "selected";
+		}
+
+		$ulos .= "<option value = '' $sel>".t("Rivinumeoita ei voi syöttää tilaukselle")."";
+		$ulos .= "<option value = 'K' $sel1>".t("Rivinumeoita voi syöttää tilaukselle")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "sad_lomake_tyyppi") {
 
 		$ulos = "<td><select name='$nimi'>";

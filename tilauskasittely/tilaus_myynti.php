@@ -753,6 +753,7 @@ if (isset($tyhjenna)) {
 	$perheid 	= '';
 	$perheid2  	= '';
 	$tuotenimitys = '';
+	$rivinumero = '';
 }
 
 // Tilaus valmis
@@ -2327,6 +2328,7 @@ if ($tee == '') {
 		$perheid			= '';
 		$perheid2			= '';
 		$tuotenimitys		= '';
+		$rivinumero			= '';
 	}
 
 	//Syöttörivi
@@ -2815,8 +2817,15 @@ if ($tee == '') {
 					if ($jarjlisa != "") {
 						echo "<td rowspan='$pknum' width='55' class='back'>&nbsp;</td>";
 					}
-
-					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$rivino</td>";
+					
+					$echorivino = $rivino;
+					if ($yhtiorow['rivinumero_syotto'] != '') {
+						if ($row['tilaajanrivinro'] != '' and $row['tilaajanrivinro'] != 0 and $echorivino != $row['tilaajanrivinro']) {
+							$echorivino .= " ($row[tilaajanrivinro])";
+						}
+					}
+					
+					echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;' >$echorivino</td>";
 				}
 				elseif($row["perheid"] == 0 and $row["perheid2"] == 0) {
 					if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
@@ -2855,12 +2864,19 @@ if ($tee == '') {
 					else {
 						$buttonit = "";
 					}
-
+					
+					$echorivino = $rivino;
+					if ($yhtiorow['rivinumero_syotto'] != '') {
+						if ($row['tilaajanrivinro'] != '' and $row['tilaajanrivinro'] != 0 and $echorivino != $row['tilaajanrivinro']) {
+							$echorivino .= " ($row[tilaajanrivinro])";
+						}
+					}
+					
 					if($row["kommentti"] != "") {
-						echo "<tr>$buttonit<td valign='top' rowspan='2'>$rivino</td>";
+						echo "<tr>$buttonit<td valign='top' rowspan='2'>$echorivino</td>";
 					}
 					else {
-						echo "<tr>$buttonit<td valign='top'>$rivino</td>";
+						echo "<tr>$buttonit<td valign='top'>$echorivino</td>";
 					}
 
 					$borderlask		= 0;

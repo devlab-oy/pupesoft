@@ -780,6 +780,20 @@
 								if($varataan_saldoa == "EI" and $rivityyppi == 'G') {
 									$varattu = 0;
 								}
+								
+								if ($yhtiorow['rivinumero_syotto'] != '') {
+									if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
+										$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
+										$triviresult = mysql_query($query) or pupe_error($query);
+										$trivinrow = mysql_fetch_array($triviresult);
+										
+										$rivinumero = $trivinrow["trivinro"]+1;
+									}
+									else {
+										$rivinumero = $tilrivinumero;
+									}
+									
+								}
 
 								// jos olemme saaneet tuotenimityksen syotarivistä ja sallimme nimityksen muutoksen
 								if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys != "")) {
@@ -1577,6 +1591,8 @@
 			$rivitunnus		= "";
 			$kommentti 		= "";
 			$tuotenimitys 	= "";
+			$rivinumero		= "";
+			$tilrivinumero	= "";
 		}
 	}
 ?>

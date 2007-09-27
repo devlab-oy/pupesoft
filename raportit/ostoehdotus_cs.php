@@ -65,27 +65,8 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
 	}
 
 	// tutkaillaan myynti
-	$query = "	SELECT
-				sum(if (tilausrivi.tyyppi = 'L' and laadittu >= '$vva1-$kka1-$ppa1' and laadittu <= '$vvl1-$kkl1-$ppl1' and var='P', tilkpl,0)) puutekpl1,
-				sum(if (tilausrivi.tyyppi = 'L' and laadittu >= '$vva2-$kka2-$ppa2' and laadittu <= '$vvl2-$kkl2-$ppl2' and var='P', tilkpl,0)) puutekpl2,
-				sum(if (tilausrivi.tyyppi = 'L' and laadittu >= '$vva3-$kka3-$ppa3' and laadittu <= '$vvl3-$kkl3-$ppl3' and var='P', tilkpl,0)) puutekpl3,
-				sum(if (tilausrivi.tyyppi = 'L' and laadittu >= '$vva4-$kka4-$ppa4' and laadittu <= '$vvl4-$kkl4-$ppl4' and var='P', tilkpl,0)) puutekpl4,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,kpl,0)) kpl1,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,kpl,0)) kpl2,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,kpl,0)) kpl3,
+	$query = "	SELECT	
 				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,kpl,0)) kpl4,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva1ed-$kka1ed-$ppa1ed' and laskutettuaika <= '$vvl1ed-$kkl1ed-$ppl1ed' ,kpl,0)) EDkpl1,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva2ed-$kka2ed-$ppa2ed' and laskutettuaika <= '$vvl2ed-$kkl2ed-$ppl2ed' ,kpl,0)) EDkpl2,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva3ed-$kka3ed-$ppa3ed' and laskutettuaika <= '$vvl3ed-$kkl3ed-$ppl3ed' ,kpl,0)) EDkpl3,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4ed-$kka4ed-$ppa4ed' and laskutettuaika <= '$vvl4ed-$kkl4ed-$ppl4ed' ,kpl,0)) EDkpl4,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.kate,0)) kate1,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,tilausrivi.kate,0)) kate2,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,tilausrivi.kate,0)) kate3,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.kate,0)) kate4,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva1-$kka1-$ppa1' and laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,rivihinta,0)) rivihinta1,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva2-$kka2-$ppa2' and laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,rivihinta,0)) rivihinta2,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva3-$kka3-$ppa3' and laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,rivihinta,0)) rivihinta3,
-				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,rivihinta,0)) rivihinta4,
 				sum(if (tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V', tilausrivi.varattu, 0)) ennpois,
 				sum(if (tilausrivi.tyyppi = 'L', tilausrivi.jt, 0)) jt,
 				sum(if (tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)) ennakko
@@ -96,27 +77,15 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
 				WHERE tilausrivi.yhtio in ($yhtiot)
 				and tilausrivi.tyyppi in ('L','V','E')
 				and tilausrivi.tuoteno = '$row[tuoteno]'
-				and ((tilausrivi.laskutettuaika >= '$apvm' and tilausrivi.laskutettuaika <= '$lpvm') or tilausrivi.laskutettuaika = '0000-00-00')";
+				and ((tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4') or tilausrivi.laskutettuaika = '0000-00-00')";
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($result);
 
 	// Myydyt kappaleet
-	//$returnstring2 .= "$riviheaderi: ";
 	$returnstring2 += (float) $laskurow['kpl4'];
-
-	// Ennakkopoistot ja jt:t
-	//$returnstring1 .= "$riviheaderi varattu: ";
 	$returnstring1 += (float) ($laskurow['ennpois'] + $laskurow['jt']);
-	//$returnstring1 .= "$riviheaderi jt: ";
-	//$returnstring1 .= (float) $laskurow['jt']."<br>";
-	
-	/*
-	$returnstring1 .= "$riviheaderi ennakkotilaus: ";
-	$returnstring1 .= (float) $laskurow['ennakko']."<br>";
-	*/
-	
-	return array($returnstring1, $returnstring2);
 
+	return array($returnstring1, $returnstring2);
 }
 
 function saldot($myynti_varasto = '', $myynti_maa = '') {
@@ -158,21 +127,14 @@ function saldot($myynti_varasto = '', $myynti_maa = '') {
 
 		if (mysql_num_rows($result) > 0) {
 			while ($varrow = mysql_fetch_array($result)) {
-				//$returnstring .= $riviheaderi." saldo: ";
 				$returnstring += (float) $varrow['saldo'];
-				//$returnstring .= $riviheaderi." hälytysraja: ";
-				//$returnstring .= (float) $varrow['halytysraja']."<br>";
 			}
 		}
 		else {
-			//$returnstring .= $riviheaderi." saldo: ";
 			$returnstring = 0;
-			//$returnstring .= $riviheaderi." hälytysraja: ";
-			//$returnstring .= "0<br>";
 		}
 
 		return $returnstring;
-
 }
 
 function ostot($myynti_varasto = '', $myynti_maa = '') {
@@ -230,7 +192,6 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 		$ostorow = mysql_fetch_array($result);
 
 		// tilattu kpl
-		//$returnstring .= $riviheaderi." tilattu kpl: ";
 		$returnstring += (float) $ostorow['tilattu'];
 
 		return $returnstring;
@@ -261,110 +222,12 @@ while ($row = mysql_fetch_array($res)) {
 }
 
 // Tarvittavat päivämäärät
-if (!isset($kka1)) $kka1 = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($vva1)) $vva1 = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($ppa1)) $ppa1 = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($kkl1)) $kkl1 = date("m");
-if (!isset($vvl1)) $vvl1 = date("Y");
-if (!isset($ppl1)) $ppl1 = date("d");
-
-if (!isset($kka2)) $kka2 = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-if (!isset($vva2)) $vva2 = date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-if (!isset($ppa2)) $ppa2 = date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-if (!isset($kkl2)) $kkl2 = date("m");
-if (!isset($vvl2)) $vvl2 = date("Y");
-if (!isset($ppl2)) $ppl2 = date("d");
-
-if (!isset($kka3)) $kka3 = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-if (!isset($vva3)) $vva3 = date("Y",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-if (!isset($ppa3)) $ppa3 = date("d",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-if (!isset($kkl3)) $kkl3 = date("m");
-if (!isset($vvl3)) $vvl3 = date("Y");
-if (!isset($ppl3)) $ppl3 = date("d");
-
 if (!isset($kka4)) $kka4 = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 if (!isset($vva4)) $vva4 = date("Y",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 if (!isset($ppa4)) $ppa4 = date("d",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 if (!isset($kkl4)) $kkl4 = date("m");
 if (!isset($vvl4)) $vvl4 = date("Y");
 if (!isset($ppl4)) $ppl4 = date("d");
-
-//Edellisen vuoden vastaavat kaudet
-$kka1ed = date("m",mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
-$vva1ed = date("Y",mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
-$ppa1ed = date("d",mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
-$kkl1ed = date("m",mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
-$vvl1ed = date("Y",mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
-$ppl1ed = date("d",mktime(0, 0, 0, $kkl1, $ppl1, $vvl1-1));
-
-$kka2ed = date("m",mktime(0, 0, 0, $kka2, $ppa2, $vva2-1));
-$vva2ed = date("Y",mktime(0, 0, 0, $kka2, $ppa2, $vva2-1));
-$ppa2ed = date("d",mktime(0, 0, 0, $kka2, $ppa2, $vva2-1));
-$kkl2ed = date("m",mktime(0, 0, 0, $kkl2, $ppl2, $vvl2-1));
-$vvl2ed = date("Y",mktime(0, 0, 0, $kkl2, $ppl2, $vvl2-1));
-$ppl2ed = date("d",mktime(0, 0, 0, $kkl2, $ppl2, $vvl2-1));
-
-$kka3ed = date("m",mktime(0, 0, 0, $kka3, $ppa3, $vva3-1));
-$vva3ed = date("Y",mktime(0, 0, 0, $kka3, $ppa3, $vva3-1));
-$ppa3ed = date("d",mktime(0, 0, 0, $kka3, $ppa3, $vva3-1));
-$kkl3ed = date("m",mktime(0, 0, 0, $kkl3, $ppl3, $vvl3-1));
-$vvl3ed = date("Y",mktime(0, 0, 0, $kkl3, $ppl3, $vvl3-1));
-$ppl3ed = date("d",mktime(0, 0, 0, $kkl3, $ppl3, $vvl3-1));
-
-$kka4ed = date("m",mktime(0, 0, 0, $kka4, $ppa4, $vva4-1));
-$vva4ed = date("Y",mktime(0, 0, 0, $kka4, $ppa4, $vva4-1));
-$ppa4ed = date("d",mktime(0, 0, 0, $kka4, $ppa4, $vva4-1));
-$kkl4ed = date("m",mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
-$vvl4ed = date("Y",mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
-$ppl4ed = date("d",mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
-
-//katotaan pienin alkupvm ja isoin loppupvm
-$apaiva1 = (int) date('Ymd',mktime(0,0,0,$kka1,$ppa1,$vva1));
-$apaiva2 = (int) date('Ymd',mktime(0,0,0,$kka2,$ppa2,$vva2));
-$apaiva3 = (int) date('Ymd',mktime(0,0,0,$kka3,$ppa3,$vva3));
-$apaiva4 = (int) date('Ymd',mktime(0,0,0,$kka4,$ppa4,$vva4));
-$apaiva5 = (int) date('Ymd',mktime(0,0,0,$kka1ed,$ppa1ed,$vva1ed));
-$apaiva6 = (int) date('Ymd',mktime(0,0,0,$kka2ed,$ppa2ed,$vva2ed));
-$apaiva7 = (int) date('Ymd',mktime(0,0,0,$kka3ed,$ppa3ed,$vva3ed));
-$apaiva8 = (int) date('Ymd',mktime(0,0,0,$kka4ed,$ppa4ed,$vva4ed));
-
-$lpaiva1 = (int) date('Ymd',mktime(0,0,0,$kkl1,$ppl1,$vvl1));
-$lpaiva2 = (int) date('Ymd',mktime(0,0,0,$kkl2,$ppl2,$vvl2));
-$lpaiva3 = (int) date('Ymd',mktime(0,0,0,$kkl3,$ppl3,$vvl3));
-$lpaiva4 = (int) date('Ymd',mktime(0,0,0,$kkl4,$ppl4,$vvl4));
-$lpaiva5 = (int) date('Ymd',mktime(0,0,0,$kkl1ed,$ppl1ed,$vvl1ed));
-$lpaiva6 = (int) date('Ymd',mktime(0,0,0,$kkl2ed,$ppl2ed,$vvl2ed));
-$lpaiva7 = (int) date('Ymd',mktime(0,0,0,$kkl3ed,$ppl3ed,$vvl3ed));
-$lpaiva8 = (int) date('Ymd',mktime(0,0,0,$kkl4ed,$ppl4ed,$vvl4ed));
-
-$apienin = 99999999;
-$lsuurin = 0;
-
-if ($apaiva1 <= $apienin and $apaiva1 != 19700101) $apienin = $apaiva1;
-if ($apaiva2 <= $apienin and $apaiva2 != 19700101) $apienin = $apaiva2;
-if ($apaiva3 <= $apienin and $apaiva3 != 19700101) $apienin = $apaiva3;
-if ($apaiva4 <= $apienin and $apaiva4 != 19700101) $apienin = $apaiva4;
-if ($apaiva5 <= $apienin and $apaiva5 != 19700101) $apienin = $apaiva5;
-if ($apaiva6 <= $apienin and $apaiva6 != 19700101) $apienin = $apaiva6;
-if ($apaiva7 <= $apienin and $apaiva7 != 19700101) $apienin = $apaiva7;
-if ($apaiva8 <= $apienin and $apaiva8 != 19700101) $apienin = $apaiva8;
-
-if ($lpaiva1 >= $lsuurin and $lpaiva1 != 19700101) $lsuurin = $lpaiva1;
-if ($lpaiva2 >= $lsuurin and $lpaiva2 != 19700101) $lsuurin = $lpaiva2;
-if ($lpaiva3 >= $lsuurin and $lpaiva3 != 19700101) $lsuurin = $lpaiva3;
-if ($lpaiva4 >= $lsuurin and $lpaiva4 != 19700101) $lsuurin = $lpaiva4;
-if ($lpaiva5 >= $lsuurin and $lpaiva5 != 19700101) $lsuurin = $lpaiva5;
-if ($lpaiva6 >= $lsuurin and $lpaiva6 != 19700101) $lsuurin = $lpaiva6;
-if ($lpaiva7 >= $lsuurin and $lpaiva7 != 19700101) $lsuurin = $lpaiva7;
-if ($lpaiva8 >= $lsuurin and $lpaiva8 != 19700101) $lsuurin = $lpaiva8;
-
-if ($apienin == 99999999 and $lsuurin == 0) {
-	$apienin = $lsuurin = date('Ymd'); // jos mitään ei löydy niin NOW molempiin. :)
-}
-
-$apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
-$lpvm = substr($lsuurin,0,4)."-".substr($lsuurin,4,2)."-".substr($lsuurin,6,2);
-
 
 // katsotaan tarvitaanko mennä toimittajahakuun
 if (($ytunnus != "" and $toimittajaid == "") or ($edytunnus != $ytunnus)) {
@@ -839,7 +702,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 			<th></th><th colspan='3'>".t("Alkupäivämäärä (pp-kk-vvvv)")."</th>
 			<th></th><th colspan='3'>".t("Loppupäivämäärä (pp-kk-vvvv)")."</th>
 			</tr>";
-
+/*
 	echo "	<tr><th>".t("Kausi 1")."</th>
 			<td><input type='text' name='ppa1' value='$ppa1' size='5'></td>
 			<td><input type='text' name='kka1' value='$kka1' size='5'></td>
@@ -869,8 +732,8 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 			<td><input type='text' name='kkl3' value='$kkl3' size='5'></td>
 			<td><input type='text' name='vvl3' value='$vvl3' size='5'></td>
 			</tr>";
-
-	echo "	<tr><th>".t("Kausi 4")."</th>
+*/
+	echo "	<tr><th>".t("Kausi")."</th>
 			<td><input type='text' name='ppa4' value='$ppa4' size='5'></td>
 			<td><input type='text' name='kka4' value='$kka4' size='5'></td>
 			<td><input type='text' name='vva4' value='$vva4' size='5'></td>

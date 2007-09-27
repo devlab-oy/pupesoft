@@ -395,7 +395,7 @@ if ($tila == 'tee_kohdistus') {
 			$kpl	  = str_replace(",",".", $kpl);
 			$perheid2 = substr($tunnus,0,strpos($tunnus,'##'));
 			$tuoteno  = substr($tunnus,  strpos($tunnus,'##')+2, strpos($tunnus,'#*#')-strpos($tunnus,'##')-2);
-			$hinta 	  = $lisavarusterivi_hinta[$tunnus];
+			$hinta 	  = str_replace(",", ".", $lisavarusterivi_hinta[$tunnus]);
 			$potunnus = substr($tunnus, strpos($tunnus,'#*#')+3);
 
 			if (abs($kpl) > 0 or strtoupper($kpl) == "DEL") {

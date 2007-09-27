@@ -18,6 +18,10 @@
 			break;
 		case "Y":
 			$laskutyyppi = "Maksettu";
+			switch($alatila) {
+				case "K":
+					$alatila = "käteisalennuksella";
+			}
 			break;
 		case "M":
 			$laskutyyppi = "Valmis maksatukseen";
@@ -31,6 +35,10 @@
 			break;
 		case "Q":
 			$laskutyyppi = "Odottaa suoritusta";
+			switch($alatila) {
+				case "K":
+					$alatila = "maksettu käteisalennuksella";
+			}
 			break;
 		case "X":
 			$laskutyyppi = "Muu tosite";

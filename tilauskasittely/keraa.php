@@ -1383,8 +1383,12 @@
 					echo "</td>";
 
 					if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
+						$kasittely = "";
+						if ($yhtiorow["kerayspoikkeama_kasittely"] == 'J') {
+							$kasittely = "JT";
+						}
 						echo "<td><select name='poikkeama_kasittely[$row[tunnus]]'>";
-						echo "<option value=''>".t("Oletus")."</option>";
+						echo "<option value='$kasittely'>".t("Oletus")."</option>";
 						echo "<option value='JT'>".t("JT")."</option>";
 						echo "<option value='PU'>".t("Puute")."</option>";
 						echo "<option value='UT'>".t("Uusi tilaus")."</option>";

@@ -159,8 +159,6 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
 	$tuoterivi .= str_replace(".",",",$laskurow['ennpois'])."\t";
 	$headerivi .= "$riviheaderi jt kpl\t";
 	$tuoterivi .= str_replace(".",",",$laskurow['jt'])."\t";
-	$headerivi .= "$riviheaderi siirtojt kpl\t";
-	$tuoterivi .= str_replace(".",",",$laskurow['siirtojt'])."\t";
 	$headerivi .= "$riviheaderi ennakkotilaus kpl\t";
 	$tuoterivi .= str_replace(".",",",$laskurow['ennakko'])."\t";
 

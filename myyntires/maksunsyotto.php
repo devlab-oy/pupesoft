@@ -399,11 +399,11 @@ if ($ytunnus != '' and $tee == "") {
 	<tr>
 		<th>".t("Maksupäivä (pp kk vvvv)")."</th>";
 
-		if (!isset($kka))
+		if ($kka == "")
 			$kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-		if (!isset($vva))
+		if ($vva == "")
 			$vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-		if (!isset($ppa))
+		if ($ppa == "")
 			$ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
 

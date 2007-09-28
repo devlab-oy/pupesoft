@@ -213,12 +213,12 @@
 			$yhtmaara = $kok['avoinmaara'];
 
 			echo "<tr>";
-			echo "<td align='right'>$kok[maara1]</td>";
-			echo "<td align='right'>$kok[maara2]</td>";
-			echo "<td align='right'>$kok[maara3]</td>";
-			echo "<td align='right'>$kok[maara4]</td>";
-			echo "<td align='right'>$kok[maara5]</td>";
-			echo "<td align='right'>$kok[maara6]</td>";
+			echo "<td align='right'>".(int) $kok["maara1"]."</td>";
+			echo "<td align='right'>".(int) $kok["maara2"]."</td>";
+			echo "<td align='right'>".(int) $kok["maara3"]."</td>";
+			echo "<td align='right'>".(int) $kok["maara4"]."</td>";
+			echo "<td align='right'>".(int) $kok["maara5"]."</td>";
+			echo "<td align='right'>".(int) $kok["maara6"]."</td>";
 			echo "</tr>";
 
 			if ($yhtmaara != 0) {

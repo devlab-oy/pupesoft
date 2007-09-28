@@ -86,14 +86,13 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
 				sum(if (tilausrivi.tyyppi = 'L' and laskutettuaika >= '$vva4-$kka4-$ppa4' and laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,rivihinta,0)) rivihinta4,
 				sum(if (tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V', tilausrivi.varattu, 0)) ennpois,
 				sum(if (tilausrivi.tyyppi = 'L', tilausrivi.jt, 0)) jt,
-				sum(if (tilausrivi.tyyppi = 'G', tilausrivi.jt, 0)) siirtojt,
 				sum(if (tilausrivi.tyyppi = 'E', tilausrivi.varattu, 0)) ennakko
 				FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 				JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa)
 				JOIN asiakas USE INDEX (PRIMARY) on (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus $lisaa3)
 				$varastotapa
 				WHERE tilausrivi.yhtio in ($yhtiot)
-				and tilausrivi.tyyppi in ('L','V','E','G')
+				and tilausrivi.tyyppi in ('L','V','E')
 				and tilausrivi.tuoteno = '$row[tuoteno]'
 				and ((tilausrivi.laskutettuaika >= '$apvm' and tilausrivi.laskutettuaika <= '$lpvm') or tilausrivi.laskutettuaika = '0000-00-00')";
 	$result   = mysql_query($query) or pupe_error($query);
@@ -266,17 +265,21 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 			}
 		}
 
-		//tilauksessa
-		$query = "	SELECT sum(tilausrivi.varattu) tilattu
+		//tilauksessa/siirtolistalla jt
+		$query = "	SELECT sum(if (tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)) tilattu,
+					sum(if (tilausrivi.tyyppi = 'G', tilausrivi.jt, 0)) siirtojt
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 					JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $varastotapa)					
 					WHERE tilausrivi.yhtio in ($yhtiot)
-					and tilausrivi.tyyppi = 'O'
+					and tilausrivi.tyyppi in ('O','G')
 					and tilausrivi.tuoteno = '$row[tuoteno]'
-					and tilausrivi.varattu > 0";
+					and (tilausrivi.varattu > 0 or tilausrivi.jt > 0)";
 		$result = mysql_query($query) or pupe_error($query);
 		$ostorow = mysql_fetch_array($result);
 
+		// siirtolista jt kpl
+		$headerivi .= "$riviheaderi siirtojt kpl\t";
+		$tuoterivi .= str_replace(".",",",$ostorow['siirtojt'])."\t";
 		// tilattu kpl
 		$headerivi .= "$riviheaderi tilattu kpl\t";
 		$tuoterivi .= str_replace(".",",",$ostorow['tilattu'])."\t";

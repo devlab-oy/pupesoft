@@ -97,7 +97,7 @@ $palautus = exec($cmd);
 // tarvitaan $infoglove_host $infoglove_user
 $cmd = "export SVN_SSH=\"ssh -i /home/$infoglove_user/.ssh/id_dsa\";cd /tmp/infoglove/;scp ".$kukarow['yhtio']."-infoglove.zip ".$infoglove_host.":.";
 //$palautus = exec($cmd);
-$palautus = echo "$cmd";
+echo "$cmd";
 
 //sit pit‰‰ dellata koko dirikka
 $cmd = "cd /tmp/;rm -rf infoglove/";

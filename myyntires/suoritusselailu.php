@@ -332,19 +332,28 @@
 
 		echo "<br><font class='message'>".t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("tästä")."</a> ".t("kaikki helpot").".</font><br><br>";
 
-		$tila = '';
-		$kentat = "nimi_maksaja, kirjpvm, suoritus.summa, suoritus.valkoodi, suoritus.tilino, viite, viesti, concat(asiakas.nimi, ' (', asiakas.ytunnus, ')') asiakas, tiliointi.tilino ttilino, suoritus.tunnus, asiakas_tunnus";
-	    $kentankoko = array(15,10,8,5,15,15,20,10,10);
-		$array = split(",", $kentat);
-		$count = count($array);
+		$tila 		= '';
+		$kentat 	= "nimi_maksaja, kirjpvm, suoritus.summa, suoritus.valkoodi, suoritus.tilino, viite, viesti, concat(asiakas.nimi, ' (', asiakas.ytunnus, ')') asiakas, tiliointi.tilino ttilino, suoritus.tunnus, asiakas_tunnus";
+	    $hakukentat = "nimi_maksaja, kirjpvm, suoritus.summa, suoritus.valkoodi, suoritus.tilino, viite, viesti, asiakas.nimi/asiakas.ytunnus, tiliointi.tilino, suoritus.tunnus, asiakas_tunnus";
+		$kentankoko = array(15,10,8,5,15,15,20,10,10);
+		$array 		= split(",", $hakukentat);
+		$count 		= count($array);
 
 		for ($i=0; $i<=$count; $i++) {
-				// tarkastetaan onko hakukentässä jotakin
-				if (strlen($haku[$i]) > 0) {
-					$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-					$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+	    	if (strlen($haku[$i]) > 0) {
+
+				if (strpos($array[$i], "/") !== FALSE) {
+					list($a, $b) = explode("/", $array[$i]);
+
+					$lisa .= " and (".$a." like '%".$haku[$i]."%' or ".$b." like '%".$haku[$i]."%') ";
 				}
-		}
+				else {
+					$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
+				}
+
+				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
+	    	}
+	    }
 
 		if (strlen($ojarj) > 0) {
 			$jarjestys = $ojarj;
@@ -362,6 +371,7 @@
 		}
 
 		$maxrows = 500;
+		
 		$query = "	SELECT $kentat
 					FROM suoritus
 					LEFT JOIN asiakas ON (asiakas.yhtio = suoritus.yhtio AND asiakas.tunnus = suoritus.asiakas_tunnus)

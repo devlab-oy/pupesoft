@@ -388,6 +388,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 				tuote.kehahin,
 				tuote.varmuus_varasto,
 				if(tuote.ei_varastoida='', '".t("Varastoitava")."','".t("Ei varastoida")."') ei_varastoida,
+				ei_varastoida ei_varastoida_clean,
 				abc_aputaulu.luokka abcluokka,
 				tuote.luontiaika
 				FROM tuote
@@ -529,7 +530,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			
 			$lisa = (float) $row["halytysraja"] - $vapaasaldo;
 			
-			$ostoehdotus = round($lisa + (2 * (($vku / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"])),2);			
+			if ($row["ei_varastoida_clean"] == "" or $lisa != 0) {
+				$ostoehdotus = round($lisa + (2 * (($vku / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"])),2);			
+			}
 		}
 		else {
 			$ostoehdotus = 0;

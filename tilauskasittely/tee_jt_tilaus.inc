@@ -426,7 +426,6 @@
 							$talteen_kpl		= $kpl; // lis‰‰rivi rikkoo t‰n, otetaan talteen
 							$kukarow["kesken"]	= $id;
 							$tuoteno 		 	= $lisataanrow["tuoteno"];
-							$hinta 			 	= $lisataanrow["hinta"];
 							$netto 			 	= $lisataanrow["netto"];
 							$ale 			 	= $lisataanrow["ale"];
 							$kpl				= $lisataanrow_kpl;
@@ -437,11 +436,17 @@
 							$var				= "";
 							$perheid		 	= $lisataanrow["perheid"];
 							$perheid2		 	= $lisataanrow["perheid2"];
-							$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);
+							$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);							
+						
+							if ($trow["alv"] != $lisataanrow["alv"] and $yhtiorow["alv_kasittely"] == "" and $lisataanrow["alv"] < 500) {
+								$hinta 			= sprintf('%.2f',round($lisataanrow["hinta"] / (1+$lisataanrow['alv']/100) * (1+$trow['alv']/100),2));
+							}
+							else {
+								$hinta			= $lisataanrow["hinta"];
+							}
 
-							// jos meill‰ on valuuttalasku k‰‰nnet‰‰n t‰ss‰vaiheessa hinta valuttaan, koska lisaarivi k‰‰nt‰‰ sen takasi yhtiˆn valuuttaan
-							if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["valkoodi"] != "") {
-								$hinta = round(laskuval($hinta, $laskurow["vienti_kurssi"]), 2);
+							if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+								$hinta 			= laskuval($hinta, $laskurow["vienti_kurssi"]);
 							}
 
 							require("lisaarivi.inc");

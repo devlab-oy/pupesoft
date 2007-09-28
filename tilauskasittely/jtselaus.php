@@ -236,13 +236,35 @@
 			exit;
 		}
 		$trow = mysql_fetch_array($result);
-
+		
 		$query = "	DELETE from tilausrivi
 					WHERE tunnus = '$jt_rivitunnus' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
+		
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$tuoterow = mysql_fetch_array($result);
+		
+		$query  = "	SELECT *
+					from lasku
+					WHERE yhtio='$kukarow[yhtio]' and tunnus = '$trow[otunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($result);
 
 		$tuoteno 		= $trow["tuoteno"];
-		$hinta 			= $trow["hinta"];
+		
+		if ($tuoterow["alv"] != $trow["alv"] and $yhtiorow["alv_kasittely"] == "" and $trow["alv"] < 500) {
+			$hinta 		= sprintf('%.2f',round($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100),2));
+		}
+		else {
+			$hinta		= $trow["hinta"];
+		}
+
+		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$hinta 		= laskuval($hinta, $laskurow["vienti_kurssi"]);
+		}
 
 		if ($toim == "ENNAKKO") {
 			$kpl 		= $trow["varattu"];

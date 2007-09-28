@@ -95,7 +95,7 @@ $palautus = exec($cmd);
 
 // sit pit‰is siirt‰‰ ssh:lla jonnekki
 // tarvitaan $infoglove_host $infoglove_user
-$cmd = "cd /tmp/infoglove/;scp -i /home/$infoglove_user/.ssh/id_dsa ".$kukarow['yhtio']."-infoglove.zip ".$infoglove_host.":.";
+$cmd = "cd /tmp/infoglove/;scp -i /home/$infoglove_user/.ssh/id_dsa ".$kukarow['yhtio']."-infoglove.zip ".$infoglove_user."@".$infoglove_host.":.";
 $palautus = exec($cmd);
 //echo "$cmd\n";
 

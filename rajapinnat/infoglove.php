@@ -7,10 +7,6 @@ if (empty($argv)) {
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
-if (empty($argv)) {
-    die('<p>Tämän scriptin voi ajaa ainoastaan komentoriviltä.</p>');
-}
-
 if ($argv[1] == '') {
 	die("Yhtiö on annettava!!");
 }
@@ -97,9 +93,14 @@ foreach ($keissit as $keissi) {
 $cmd = "cd /tmp/infoglove/;/usr/bin/zip ".$kukarow['yhtio']."-infoglove.zip *";
 $palautus = exec($cmd);
 
-// sit pitäis siirtää ftp:llä jonnekki
+// sit pitäis siirtää ssh:lla jonnekki
+// tarvitaan $infoglove_host $infoglove_user
+$cmd = "export SVN_SSH=\"ssh -i /home/$infoglove_user/.ssh/id_dsa\";cd /tmp/infoglove/;scp ".$kukarow['yhtio']."-infoglove.zip ".$infoglove_host.":.";
+//$palautus = exec($cmd);
+$palautus = echo "$cmd";
 
 //sit pitää dellata koko dirikka
-
+$cmd = "cd /tmp/;rm -rf infoglove/";
+$palautus = exec($cmd);
 
 ?>

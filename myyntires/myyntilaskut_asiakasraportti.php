@@ -14,15 +14,15 @@
 	function laskeMaksunopeus($ytunnus, $yhtio) {
 
 		// myohassa maksetut
-		$query="	SELECT sum(if(erpcm < mapvm, summa, 0)) myohassa, sum(summa-saldo_maksettu) yhteensa
+		$query="	SELECT sum(if(erpcm < mapvm, summa, 0)) myohassa, sum(summa) yhteensa
 					from lasku,
-					(select tunnus from asiakas where yhtio='$yhtio' and ytunnus='$ytunnus') valittu
-					where yhtio='$yhtio'
+					(select tunnus from asiakas where yhtio = '$yhtio' and ytunnus = '$ytunnus') valittu
+					where yhtio = '$yhtio'
 					and liitostunnus = valittu.tunnus
 					and tila = 'U'
 					and alatila = 'X'
 					and summa > 0
-					and mapvm > '0000-00-00'";
+					and mapvm != '0000-00-00'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskut = mysql_fetch_array($result);
 
@@ -198,9 +198,8 @@
 			echo "<table><tr><td class='back'>";
 
 			// ikäanalyysi
-			echo "<table><tr><th>&lt;-2</th><th>-2--1</th><th>0-15</th><th>16-30</th><th>31-60</th><th>&gt;60</th></tr>";
+			echo "<br><table><tr><th>&lt; -2</th><th>-2 - -1</th><th>0 - 15</th><th>16 - 30</th><th>31 - 60</th><th>&gt; 60</th></tr>";
 
-			$palkki_html = '';
 			$palkki_korkeus = 20;
 			$palkki_leveys = 300;
 
@@ -220,31 +219,32 @@
 			echo "<td align='right'>$kok[maara4]</td>";
 			echo "<td align='right'>$kok[maara5]</td>";
 			echo "<td align='right'>$kok[maara6]</td>";
-
-			if ($yhtmaara != 0) {
-				$palkki_html .= "<img src='$kuvaurl[0]' height='$palkki_korkeus' width='" . ($kok['maara1']/$yhtmaara) * $palkki_leveys ."'>";
-				$palkki_html .= "<img src='$kuvaurl[1]' height='$palkki_korkeus' width='" . ($kok['maara2']/$yhtmaara) * $palkki_leveys ."'>";
-				$palkki_html .= "<img src='$kuvaurl[2]' height='$palkki_korkeus' width='" . ($kok['maara3']/$yhtmaara) * $palkki_leveys ."'>";
-				$palkki_html .= "<img src='$kuvaurl[3]' height='$palkki_korkeus' width='" . ($kok['maara4']/$yhtmaara) * $palkki_leveys ."'>";
-				$palkki_html .= "<img src='$kuvaurl[4]' height='$palkki_korkeus' width='" . ($kok['maara5']/$yhtmaara) * $palkki_leveys ."'>";
-				$palkki_html .= "<img src='$kuvaurl[5]' height='$palkki_korkeus' width='" . ($kok['maara6']/$yhtmaara) * $palkki_leveys ."'>";
-			}
-
 			echo "</tr>";
 
+			if ($yhtmaara != 0) {
+				echo "<tr><td colspan='6' class='back'>";
+				echo "<img src='$kuvaurl[0]' height='$palkki_korkeus' width='" . ($kok['maara1']/$yhtmaara) * $palkki_leveys ."'>";
+				echo "<img src='$kuvaurl[1]' height='$palkki_korkeus' width='" . ($kok['maara2']/$yhtmaara) * $palkki_leveys ."'>";
+				echo "<img src='$kuvaurl[2]' height='$palkki_korkeus' width='" . ($kok['maara3']/$yhtmaara) * $palkki_leveys ."'>";
+				echo "<img src='$kuvaurl[3]' height='$palkki_korkeus' width='" . ($kok['maara4']/$yhtmaara) * $palkki_leveys ."'>";
+				echo "<img src='$kuvaurl[4]' height='$palkki_korkeus' width='" . ($kok['maara5']/$yhtmaara) * $palkki_leveys ."'>";
+				echo "<img src='$kuvaurl[5]' height='$palkki_korkeus' width='" . ($kok['maara6']/$yhtmaara) * $palkki_leveys ."'>";
+				echo "</td></tr>";
+			}
+
 			echo "</table>";
-			echo "</td><td class='back' align='center'>";
+
+			echo "</td><td class='back' align='center' width='300'>";
 
 			//visuaalinen esitys maksunopeudesta (hymynaama)
 			list ($naama, $nopeushtml) = laskeMaksunopeus($ytunnus, $kukarow["yhtio"]);
 
-			echo "$nopeushtml<br>";
-			echo "$palkki_html";
-			echo "</td><td class='back'>$naama</td></tr></table><br>";
+			echo "<br>$naama<br>$nopeushtml";
+			echo "</td></tr></table><br>";
 
 			//avoimet laskut
 			$kentat = 'laskunro, tapvm, erpcm, summa, kapvm, kasumma, mapvm, ika, viikorkoeur, olmapvm, tunnus';
-			$kentankoko = array(8,8,8,10,8,10,8,4,6,8);
+			$kentankoko = array(8,8,8,10,8,8,8,4,4,8);
 
 			$array = split(",", $kentat);
 			$count = count($array);
@@ -344,19 +344,20 @@
 			echo "</form>";
 			echo "</table><br>";
 
-			echo "<table>";
+			echo "<table cellpadding='2'>";
 			echo "<tr>";
 			echo "<form action = '$PHP_SELF?tila=$tila&tunnus=$tunnus&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi' method = 'post'>";
 			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=0".$ulisa."'>".t("Laskunro")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=1".$ulisa."'>".t("Pvm")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=2".$ulisa."'>".t("Eräpäivä")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=3".$ulisa."'>".t("Summa")."</a></th>";
-			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4".$ulisa."'>".t("Kassa-ale pvm")."</a></th>";
-			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5".$ulisa."'>".t("Kassa-ale summa")."</a></th>";
-			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6".$ulisa."'>".t("Maksupvm")."</a></th>";
+			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=4".$ulisa."'>".t("Kassa-ale")."<br>".t("pvm")."</a></th>";
+			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=5".$ulisa."'>".t("Kassa-ale")."<br>".t("summa")."</a></th>";
+			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=6".$ulisa."'>".t("Maksu")."<br>".t("pvm")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=7".$ulisa."'>".t("Ikä")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=8".$ulisa."'>".t("Korko")."</a></th>";
-			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9".$ulisa."'>".t("Korkolaskun pvm")."</a></th>";
+			echo "<th valign='top'><a href='$PHP_SELF?tunnus=$tunnus&tila=$tila&valintra=$valintra&valuutassako=$valuutassako&savalkoodi=$savalkoodi&ojarj=9".$ulisa."'>".t("Korkolasku")."<br>".t("pvm")."</a></th>";
+			echo "<th valign='top'>".t("Osasuoritukset")."</th>";
 
 			echo "<td class='back'></td></tr>";
 			echo "<tr>";
@@ -365,14 +366,22 @@
 				echo "<td><input type='text' size='$kentankoko[$i]' name = 'haku[$i]' value = '$haku[$i]'></td>";
 			}
 
-			echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
+			echo "<td></td><td class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
 			echo "</form>";
 
 			$summa = 0;
 
-			while ($maksurow=mysql_fetch_array ($result)) {
+			// haetaan kaikki yrityksen rahatilit mysql muodossa
+			$query  = "	SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
+						FROM yriti
+						WHERE yhtio = '$kukarow[yhtio]' and
+						oletus_rahatili != ''";
+			$ratire = mysql_query($query) or pupe_error($query);
+			$ratiro = mysql_fetch_array($ratire);
 
-				echo "<tr>";
+			while ($maksurow = mysql_fetch_array ($result)) {
+
+				echo "<tr class='aktiivi'>";
 				echo "<td><a href='../muutosite.php?tee=E&tunnus=$maksurow[tunnus]'>$maksurow[laskunro]</a></td>";
 
 				echo "<td align='right'>".tv1dateconv($maksurow["tapvm"])."</td>";
@@ -385,7 +394,7 @@
 				if ($maksurow['summa_valuutassa'] != 0 and $maksurow['summa'] != $maksurow['summa_valuutassa']) {
 					echo "<br />{$maksurow['summa_valuutassa']} {$maksurow['valkoodi']}";
 				}
-				
+
 				echo "</td>";
 
 				if ($maksurow["kapvm"] != '0000-00-00') echo "<td align='right'>".tv1dateconv($maksurow["kapvm"])."</td>";
@@ -414,6 +423,27 @@
 				else echo "<td></td>";
 
 				$summa+=$maksurow["summa"];
+
+				echo "<td align='right'>";
+				// jos rahatilejä löytyy etsitään suoritukst
+				if ($ratiro["rahatilit"] != "") {
+					$query = "	SELECT *
+								FROM tiliointi USE INDEX (tositerivit_index)
+								WHERE yhtio = '$kukarow[yhtio]' and
+								ltunnus = '$maksurow[tunnus]' and
+								tilino in ($ratiro[rahatilit]) and
+								korjattu = ''";
+					$lasktilitre = mysql_query($query) or pupe_error($query);
+
+					// listataan osasuoritukset jos maksupäivä on nollaa tai jos niitä on oli yks
+					if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
+						while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
+							echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
+						}
+					}
+				}
+				echo "</td>";
+
 				echo "<td class='back'></td></tr>";
 			}
 

@@ -137,9 +137,9 @@ while (!feof ($fd)) {
 				$tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
 				
 				// Arwidson häkki Arwidson Baltia varten
-				if ($tieto == 0) $tieto = 1066781;
+				if ($tieto == 0) $tieto = "07495288";
 				// Arwidson häkki Arwidson Automotivea varten
-				if ($tieto == 1066781) $tieto = 7495288;
+				if ($tieto == 1066781) $tieto = "07495288";
 
 				$query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
 				$result = mysql_query($query) or die($query);

@@ -474,8 +474,9 @@
 						LEFT JOIN lasku uusiolasku ON maksupositio.yhtio = uusiolasku.yhtio and maksupositio.uusiotunnus=uusiolasku.tunnus
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.jaksotettu > 0
-						and lasku.tila in ('L','N','R')
+						and lasku.tila in ('L','N','R') and alatila != 'X'
 						GROUP BY jaksotettu, nimi
+						HAVING yhteensa_kpl > laskutettu_kpl						
 						ORDER BY jaksotettu desc";
 			$result = mysql_query($query) or pupe_error($query);
 

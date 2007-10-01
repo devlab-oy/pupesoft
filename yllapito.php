@@ -79,7 +79,7 @@
 	}
 
 	// Tietue poistetaan
-	if ($del == 1 and $saakopoistaa == "") {
+	if ($del == 1) {
 
 		$query = "	SELECT *
 					FROM $toim
@@ -515,7 +515,8 @@
 		
 		echo "</form>";
 
-		if ($saakopoistaa == "") {
+		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
+		if ($toim == "avainsana") {
 			// Tehd‰‰n "poista tietue"-nappi
 			if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>

@@ -5,7 +5,7 @@
 		  		FROM lasku
 				LEFT JOIN valuu ON valuu.yhtio = lasku.yhtio and lasku.valkoodi	= valuu.nimi
 		  		WHERE lasku.yhtio = '$kukarow[yhtio]' 
-				and lasku.tila in ('H','Y','M','P','Q')
+				and lasku.tila in ('H','M','P','Q')
 		  		GROUP BY valkoodi
 		  		ORDER BY valkoodi";
 	$result = mysql_query($query) or pupe_error($query);

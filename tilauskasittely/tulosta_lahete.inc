@@ -229,23 +229,23 @@ if (!function_exists('alku')) {
 		$komm = "";
 		
 		if (trim($laskurow['tilausyhteyshenkilo']) != '') {
-			$komm .= "\n".t("Tilaaja").":###".$laskurow['tilausyhteyshenkilo'];
+			$komm .= "\n".t("Tilaaja", $kieli).":###".$laskurow['tilausyhteyshenkilo'];
 		}
 	
 		if (trim($laskurow['asiakkaan_tilausnumero']) != '') {
-			$komm .= "\n".t("Tilauksenne").":###".$laskurow['asiakkaan_tilausnumero'];								
+			$komm .= "\n".t("Tilauksenne", $kieli).":###".$laskurow['asiakkaan_tilausnumero'];								
 		}
 	
 		if (trim($laskurow['kohde']) != '') {
-			$komm .= "\n".t("Kohde").":###".$laskurow['kohde'];								
+			$komm .= "\n".t("Kohde", $kieli).":###".$laskurow['kohde'];								
 		}
 	
 		if (trim($laskurow['viesti']) != '') {
-			$komm .= "\n".t("Lisätietoja").":###".$laskurow['viesti'];								
+			$komm .= "\n".t("Lisätietoja", $kieli).":###".$laskurow['viesti'];								
 		}
 		
 		if (trim($laskurow['comments']) != '') {
-			$komm .= "\n".t("Kommentti").":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
 		}
 		
 		//Tulostetaan laskun kommentti

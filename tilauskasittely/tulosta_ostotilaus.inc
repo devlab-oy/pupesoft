@@ -640,8 +640,53 @@
 					$pdf->draw_text(310, 614, $laskurow["viesti"], 						$thispage, $norm);
 					
 					$pdf->draw_text(310, 600, t("Olkaa hyvä ja kirjoittakaa tilausnumero lähetteeseen, laskuun ja kirjeisiin", $kieli).".", $thispage, $pieni);
+					
+					$komm = "";
+					
+					if (trim($laskurow['comments']) != '') {
+						$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+					}
+					
+					//Tulostetaan laskun kommentti
+					if (trim($komm) != '') {
+						$kommentit = explode("\n", trim($komm));
 
-					$kala = 550;
+						$pohja  = 577;
+						$maxoik = 0;
+
+						foreach($kommentit as $kommentti) {
+							if(strpos($kommentti, "###") !== FALSE) {
+								list($o, $v) = explode("###", $kommentti);
+
+								$oikpos = $pdf->strlen($o, $norm);
+
+								if ($oikpos > $maxoik) {
+									$maxoik = $oikpos;
+								}
+							}
+						}
+
+						foreach($kommentit as $kommentti) {
+
+							if (strpos($kommentti, "###") !== false) {
+								list($o, $v) = explode("###", $kommentti);
+
+								$pdf->draw_text(35, $pohja, trim($o), $thispage, $norm);
+								$pdf->draw_text(35+$maxoik+5, $pohja, trim($v), $thispage, $norm);
+							}
+							else {
+								$pdf->draw_text(35, $pohja, trim($kommentti), $thispage, $norm);
+							}
+
+							$pohja = $pohja - 10;
+						}
+
+						$kala = $pohja-20;
+
+					}
+					else {
+						$kala = 565;
+					}
 
 					$pdf->draw_rectangle($kala+30, 20, 70, 580, $thispage, $rectparam);
 					

@@ -69,8 +69,8 @@
 		echo "<tr class='aktiivi'>";
 		echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
 		echo "<td>$trow[nimi]</td>";
-		echo "<td style='text-align: right;'>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
-		echo "<td style='text-align: right;'>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
+		echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
+		echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
 		echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 		echo "<td>$vienti</td>";
 		echo "</tr>";
@@ -129,7 +129,7 @@
 		echo "<td>$trow[kohdenimi]</td>";
 		echo "<td>$trow[projektinimi]</td>";
 		echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
-		echo "<td style='text-align: right;'>$trow[summa] $yhtiorow[valkoodi]</td>";
+		echo "<td style='text-align: right;' nowrap>$trow[summa] $yhtiorow[valkoodi]</td>";
 		echo "<td>$trow[alv]</td>";
 		echo "<td>$trow[selite]</td>";
 		echo "</tr>";
@@ -142,6 +142,49 @@
 	echo "<th colspan='5'>".t("Yhteensä")."</th>";
 	echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
 	echo "<th colspan='2'></th>";
+	echo "</tr>";
+	echo "</table><br>";
+
+	echo "<font class='head'>".t("Keikkojen eturahdit")."</font><hr>";
+
+	$query = "	SELECT *, lasku.rahti_etu*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) rahti
+				FROM lasku
+				WHERE lasku.yhtio = '$kukarow[yhtio]' and
+				lasku.tila = 'K' and
+				lasku.vanhatunnus = 0 and
+				lasku.tapvm >= '$avv-$akk-$app' and
+				lasku.tapvm <= '$lvv-$lkk-$lpp'
+				HAVING abs(rahti) > 0.05
+				ORDER BY lasku.tapvm, lasku.rahti_etu";
+	$result = mysql_query($query) or pupe_error($query);
+
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Keikka")."</th>";
+	echo "<th>".t("Ytunnus")."</th>";
+	echo "<th>".t("Nimi")."</th>";
+	echo "<th>".t("Tapvm")."</th>";
+	echo "<th>".t("Eturahti")."</th>";
+	echo "</tr>";
+
+	$yhteesa = 0;
+
+	while ($trow = mysql_fetch_array($result)) {
+
+		echo "<tr class='aktiivi'>";
+		echo "<td>$trow[laskunro]</td>";
+		echo "<td>$trow[ytunnus]</td>";
+		echo "<td>$trow[nimi]</td>";
+		echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
+		echo "<td style='text-align: right;' nowrap>".round($trow["rahti"],2)." $yhtiorow[valkoodi]</td>";
+		echo "</tr>";
+
+		$yhteesa += $trow["rahti"];
+	}
+
+	echo "<tr>";
+	echo "<th colspan='4'>".t("Yhteensä")."</th>";
+	echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
 	echo "</tr>";
 	echo "</table><br>";
 

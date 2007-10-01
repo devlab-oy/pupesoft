@@ -1,6 +1,6 @@
 <?php
 
-	echo "<font class='head'>".t("Laskut joita ei ole liitetty keikkoihin")."</font><hr>";
+	echo "<font class='head'>".t("Varastonarvo selvittelyä")."</font><hr>";
 
 	if (!isset($app)) $app = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
 	if (!isset($akk)) $akk = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")-1));
@@ -25,8 +25,9 @@
 	echo "</tr>";
 	echo "</table>";
 
-	
 	echo "</form>";
+
+	echo "<br><font class='head'>".t("Laskut joita ei ole liitetty keikkoihin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus
 				FROM lasku
@@ -40,7 +41,7 @@
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = mysql_query($query) or pupe_error($query);
 
-	echo "<br><table>";
+	echo "<table>";
 	echo "<tr>";
 	echo "<th>".t("Ytunnus")."</th>";
 	echo "<th>".t("Nimi")."</th>";
@@ -79,6 +80,66 @@
 
 	echo "<tr>";
 	echo "<th colspan='3'>".t("Yhteensä")."</th>";
+	echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+	echo "<th colspan='2'></th>";
+	echo "</tr>";
+	echo "</table><br>";
+
+	echo "<font class='head'>".t("Käsin viedyt tiliöinnit")."</font><hr>";
+
+	$query = "	SELECT tiliointi.*, tili.nimi tilinimi, kustannuspaikka1.nimi kustpnimi, kustannuspaikka2.nimi kohdenimi, kustannuspaikka3.nimi projektinimi
+				FROM lasku
+				JOIN tiliointi on (	tiliointi.yhtio = lasku.yhtio and 
+									tiliointi.ltunnus = lasku.tunnus and 
+									tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]') and 
+									tiliointi.korjattu = '' and 
+									tiliointi.selite not like ('Inventointi%') and
+									tiliointi.selite not like ('%epäkuranttimuutos') and
+									tiliointi.selite not like ('%epäkurantttimuutos'))
+				LEFT JOIN tili ON (tili.yhtio = lasku.yhtio and tili.tilino = tiliointi.tilino)
+				LEFT JOIN kustannuspaikka AS kustannuspaikka1 ON (kustannuspaikka1.yhtio = lasku.yhtio and kustannuspaikka1.tunnus = tiliointi.kustp)
+				LEFT JOIN kustannuspaikka AS kustannuspaikka2 ON (kustannuspaikka2.yhtio = lasku.yhtio and kustannuspaikka2.tunnus = tiliointi.kohde)
+				LEFT JOIN kustannuspaikka AS kustannuspaikka3 ON (kustannuspaikka3.yhtio = lasku.yhtio and kustannuspaikka3.tunnus = tiliointi.projekti)
+				WHERE lasku.yhtio = '$kukarow[yhtio]' and
+				lasku.tila = 'X' and
+				lasku.tapvm >= '$avv-$akk-$app' and
+				lasku.tapvm <= '$lvv-$lkk-$lpp'
+				ORDER BY tiliointi.tapvm, tiliointi.summa";
+	$result = mysql_query($query) or pupe_error($query);
+
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Tili")."</th>";
+	echo "<th>".t("Kustp")."</th>";
+	echo "<th>".t("Kohde")."</th>";
+	echo "<th>".t("Proj")."</th>";
+	echo "<th>".t("Tapvm")."</th>";
+	echo "<th>".t("Summa")."</th>";
+	echo "<th>".t("Alv")."</th>";
+	echo "<th>".t("Selite")."</th>";
+	echo "</tr>";
+
+	$yhteesa = 0;
+
+	while ($trow = mysql_fetch_array($result)) {
+
+		echo "<tr class='aktiivi'>";
+		echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tilino] - $trow[tilinimi]</a></td>";
+		echo "<td>$trow[kustpnimi]</td>";
+		echo "<td>$trow[kohdenimi]</td>";
+		echo "<td>$trow[projektinimi]</td>";
+		echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
+		echo "<td style='text-align: right;'>$trow[summa] $yhtiorow[valkoodi]</td>";
+		echo "<td>$trow[alv]</td>";
+		echo "<td>$trow[selite]</td>";
+		echo "</tr>";
+
+		$yhteesa += $trow["summa"];
+
+	}
+
+	echo "<tr>";
+	echo "<th colspan='5'>".t("Yhteensä")."</th>";
 	echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
 	echo "<th colspan='2'></th>";
 	echo "</tr>";

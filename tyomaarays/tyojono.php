@@ -21,14 +21,12 @@
 		echo "<th>Yhtiö</th>";
 	}
 			
-	echo "	<th>Työmääräys</th>
+	echo "	<th>Työmääräys<br>Tilausviite</th>
 			<th>Ytunnus / Asiakas</th>
 			<th>Työaika</th>
 			<th>Toimitetaan</th>
-			<th>Myyjä</th>
-			<th>Tyyppi</th>
-			<th>Työjono</th>
-			<th>Työstatus</th>
+			<th>Myyjä<br>Tyyppi</th>
+			<th>Työjono<br>Työstatus</th>
 			<th>Muokkaa</th>
 			</tr>";
 			
@@ -38,15 +36,15 @@
 		echo "<td></td>";
 	}
 	
-	echo "<td valign='top'><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
+	echo "<td valign='top'><input type='text' size='10'  name='myyntitilaus_haku'		value='$myyntitilaus_haku'><br>
+							<input type='text' size='10' name='viesti_haku'				value='$viesti_haku'></td>";
 	echo "<td valign='top'>	<input type='text' size='10' name='asiakasnumero_haku' 		value='$asiakasnumero_haku'><br>
 							<input type='text' size='10' name='asiakasnimi_haku' 		value='$asiakasnimi_haku'></td>";
 	echo "<td valign='top'></td>";
 	echo "<td valign='top'></td>";
 	echo "<td valign='top'></td>";
-	echo "<td valign='top'></td>";
-	echo "<td valign='top'><input type='text' size='10' name='tyojono_haku' 			value='$tyojono_haku'></td>";
-	echo "<td valign='top'><input type='text' size='10' name='tyostatus_haku' 		value='$tyostatus_haku'></td>";
+	echo "<td valign='top'><input type='text' size='10' name='tyojono_haku' 			value='$tyojono_haku'><br>
+								<input type='text' size='10' name='tyostatus_haku' 		value='$tyostatus_haku'></td>";
 	echo "<td valign='top'></td>";
 	echo "<td valign='top' class='back'><input type='submit' value='Hae'></td>";
 	echo "</tr>";
@@ -56,6 +54,10 @@
 
 	if ($myyntitilaus_haku != "") {
 		$lisa .= " and lasku.tunnus='$myyntitilaus_haku' ";
+	}
+	
+	if ($viesti_haku != "") {
+		$lisa .= " and lasku.viesti like '%$viesti_haku%' ";
 	}
 	
 	if ($asiakasnimi_haku != "") {
@@ -141,7 +143,7 @@
 			echo "<td valign='top' class='spec' onmouseout=\"popUp(event,'$vrow[tyomaarays]')\" onmouseover=\"popUp(event,'$vrow[tyomaarays]')\">$vrow[tyomaarays]</td>";
 		}
 		else {
-			echo "<td valign='top'>$vrow[tyomaarays]</td>";
+			echo "<td valign='top'>$vrow[tyomaarays]<br>$vrow[viesti]</td>";
 		}
 		
 		echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
@@ -171,10 +173,8 @@
 			echo "<td valign='top'>".tv1dateconv($vrow["toimaika"])."</td>";	
 		}
 		
-		echo "<td valign='top'>$vrow[myyja]</td>
-				<td valign='top'>".t("$laskutyyppi")." ".t("$alatila")."</td>
-				<td valign='top'>$vrow[tyojono]</td>
-				<td valign='top'>$vrow[tyostatus]</td>";
+		echo "<td valign='top'>$vrow[myyja]<br>".t("$laskutyyppi")." ".t("$alatila")."</td>
+				<td valign='top'>$vrow[tyojono]<br>$vrow[tyostatus]</td>";
 		
 		if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {		
 			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tyomaarays]&lopetus=../tyomaarays/tyojono.php////user=$kukarow[kuka]//pass=$kukarow[salasana]//yhtio=$kukarow[yhtio]//konserni=$konserni'>".t("Muokkaa")."</a></td>";

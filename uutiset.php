@@ -390,7 +390,7 @@ if ($tee == '') {
 
 	if (mysql_num_rows($result) > 0) {
 
-		echo "<table>";
+		echo "<table width='600'>";
 
 		while($uutinen = mysql_fetch_array($result)) {
 

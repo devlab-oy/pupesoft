@@ -982,7 +982,7 @@ if (!function_exists("avain")) {
 // Tehdään lähetteen ja laskun sorttauskentät
 if (!function_exists("generoi_sorttauskentta")) {
 
-	function generoi_sorttauskentta($jarjestys = "") {
+	function generoi_sorttauskentta($jarjestys = "", $toimittaja = 0) {
 
 		global $kukarow, $yhtiorow;
 
@@ -1065,6 +1065,20 @@ if (!function_exists("generoi_sorttauskentta")) {
 		// tilausjärjestys
 		elseif ($jarjestys == "9") {
 			$sorttauskentta = "tilausrivi.tunnus as sorttauskentta";
+		}
+		
+		// toimittajan tuotenumerojärjestys, tuoteperheet pidetään yhdessä
+		elseif ($jarjestys == "10") {
+			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno),
+									if(tilausrivi.perheid > 0, (select concat(if(tt2.toim_tuoteno!='', concat(tt2.toim_tuoteno,tilausrivi.perheid), concat(t2.tuoteno,tilausrivi.perheid)), if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)) 
+																from tilausrivi as t2
+																JOIN tuotteen_toimittajat tt2 ON t2.yhtio = tt2.yhtio and t2.tuoteno = tt2.tuoteno and tt2.liitostunnus = '$toimittaja'  
+																where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid),
+										if(tilausrivi.perheid2 > 0, (select concat(if(tt3.toim_tuoteno!='', concat(tt3.toim_tuoteno,tilausrivi.perheid2), concat(t3.tuoteno,tilausrivi.perheid2)), if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)) 
+																	from tilausrivi as t3 
+																	JOIN tuotteen_toimittajat tt3 ON t3.yhtio = tt3.yhtio and t3.tuoteno = tt3.tuoteno and tt3.liitostunnus = '$toimittaja'
+																	where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2),
+											if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)))) as sorttauskentta";
 		}
 
 		// joku default

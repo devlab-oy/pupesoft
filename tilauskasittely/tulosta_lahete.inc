@@ -176,6 +176,8 @@ if (!function_exists('alku')) {
 			$pdf->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$thispage, $norm);
 		}
 
+		if ($asrow["asiakasnro"] == "" and $laskurow["ytunnus"] != "") $asrow["asiakasnro"] = $laskurow["ytunnus"];
+		
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 771, t("Asiakasnumero", $kieli), 					$thispage, $pieni);
@@ -449,6 +451,8 @@ if (!function_exists('uusi_sivu')) {
 		else {			
 			$pdf->draw_text(430, 782, tv1dateconv($laskurow["toimaika"]), 	$thispage, $norm);
 		}
+
+		if ($asrow["asiakasnro"] == "" and $laskurow["ytunnus"] != "") $asrow["asiakasnro"] = $laskurow["ytunnus"];
 
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);

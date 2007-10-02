@@ -578,6 +578,10 @@
 	if ($varasto_haku != "") {
 		$lisa .= " and varastopaikat.nimitys like '%$varasto_haku%' ";
 	}
+	
+	if ($tervetuloa_haku != "") {
+		$lisa .= " and (lasku_osto.laatija='$kukarow[kuka]' or lasku_myynti.laatija='$kukarow[kuka]' or lasku_myynti.myyja='$kukarow[tunnus]')";
+	}
 
 	if ($nimitys_haku != "") {
 		$lisa2 = " HAVING nimitys like '%$nimitys_haku%' ";
@@ -721,10 +725,11 @@
 		echo "</table><br>";
 	}
 
-	if (file_exists('sarjanumeron_lisatiedot_popup.inc') and $sarjanumeronLisatiedot == "OK") {
-		require("sarjanumeron_lisatiedot_popup.inc");
-	
+	if ($sarjanumeronLisatiedot == "OK" and require('sarjanumeron_lisatiedot_popup.inc')) {		
 		echo js_popup();	
+	}
+	else {
+		$sarjanumeronLisatiedot = "";
 	}
 
 	
@@ -753,32 +758,34 @@
 				}
 			</SCRIPT>";
 
-	echo "<form name='haku' action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='$tunnuskentta' 	value = '$rivitunnus'>";
-	echo "<input type='hidden' name='from' 				value = '$from'>";
-	echo "<input type='hidden' name='lopetus' 			value = '$lopetus'>";
-	echo "<input type='hidden' name='aputoim' 			value = '$aputoim'>";
-	echo "<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>";
-	echo "<input type='hidden' name='toiminto' 			value = '$toiminto'>";
-	echo "<input type='hidden' name='sarjatunnus' 		value = '$sarjatunnus'>";
-	echo "<input type='hidden' name='otunnus' 			value = '$otunnus'>";
-	echo "<tr>";
-	echo "<td><input type='text' size='10' name='sarjanumero_haku' 		value='$sarjanumero_haku'></td>";
-	echo "<td><input type='text' size='10' name='tuoteno_haku' 			value='$tuoteno_haku'></td>";
-	echo "<td><input type='text' size='10' name='nimitys_haku' 			value='$nimitys_haku'></td>";
-	echo "<td><input type='text' size='10' name='varasto_haku' 			value='$varasto_haku'></td>";
-	echo "<td><input type='text' size='10' name='ostotilaus_haku' 		value='$ostotilaus_haku'></td>";
-	echo "<td><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
+	if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
+		echo "<form name='haku' action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='$tunnuskentta' 	value = '$rivitunnus'>";
+		echo "<input type='hidden' name='from' 				value = '$from'>";
+		echo "<input type='hidden' name='lopetus' 			value = '$lopetus'>";
+		echo "<input type='hidden' name='aputoim' 			value = '$aputoim'>";
+		echo "<input type='hidden' name='muut_siirrettavat' value = '$muut_siirrettavat'>";
+		echo "<input type='hidden' name='toiminto' 			value = '$toiminto'>";
+		echo "<input type='hidden' name='sarjatunnus' 		value = '$sarjatunnus'>";
+		echo "<input type='hidden' name='otunnus' 			value = '$otunnus'>";
+		echo "<tr>";
+		echo "<td><input type='text' size='10' name='sarjanumero_haku' 		value='$sarjanumero_haku'></td>";
+		echo "<td><input type='text' size='10' name='tuoteno_haku' 			value='$tuoteno_haku'></td>";
+		echo "<td><input type='text' size='10' name='nimitys_haku' 			value='$nimitys_haku'></td>";
+		echo "<td><input type='text' size='10' name='varasto_haku' 			value='$varasto_haku'></td>";
+		echo "<td><input type='text' size='10' name='ostotilaus_haku' 		value='$ostotilaus_haku'></td>";
+		echo "<td><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
 
-	if (($sarjarow[$tunnuskentta] == 0 or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
+		if (($sarjarow[$tunnuskentta] == 0 or $sarjarow[$tunnuskentta] == $rivitunnus) and $rivitunnus != '') {
+			echo "<td></td>";
+		}
+
 		echo "<td></td>";
+		echo "<td class='back'><input type='submit' value='Hae'></td>";
+		echo "</tr>";
+		echo "</form>";
 	}
-
-	echo "<td></td>";
-	echo "<td class='back'><input type='submit' value='Hae'></td>";
-	echo "</tr>";
-	echo "</form>";
-
+	
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='$tunnuskentta' 	value='$rivitunnus'>";
 	echo "<input type='hidden' name='from' 				value='$from'>";
@@ -801,8 +808,8 @@
 
 	while ($sarjarow = mysql_fetch_array($sarjares)) {
 				
-		if (file_exists('sarjanumeron_lisatiedot_popup.inc') and $sarjanumeronLisatiedot == "OK") {
-			list($divitx, $text_output, $kuvalisa_bin, $hankintahinta, $tuotemyyntihinta) = sarjanumeronlisatiedot_popup ($sarjarow["tunnus"], '', 'popup', '', '');
+		if ($sarjanumeronLisatiedot == "OK") {
+			list($divitx, $text_output, $kuvalisa_bin, $hankintahinta, $tuotemyyntihinta) = sarjanumeronlisatiedot_popup($sarjarow["tunnus"], '', 'popup', '', '');
 			$divit .= $divitx;
 		}
 
@@ -909,10 +916,14 @@
 				echo "<td valign='top'><input type='checkbox' name='sarjataan[]' value='$sarjarow[tunnus]' $chk onclick='submit();' $dis></td>";
 			}
 		}
+		
+		echo "<td valign='top' nowrap>";
 
 		//jos saa muuttaa niin n‰ytet‰‰n muokkaa linkki
-		echo "<td valign='top' nowrap><a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku'>".t("Muokkaa")."</a>";
-
+		if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
+			echo "<a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku'>".t("Muokkaa")."</a>";
+		}
+		
 		if ($sarjarow['ostorivitunnus'] > 0 and $from == "") {
 			if ($keikkarow["tunnus"] > 0) {
 				$keikkalisa = "&otunnus=$keikkarow[tunnus]";
@@ -939,7 +950,7 @@
 				$ylisa = "&liitostunnus=$sarjarow[tunnus]&uusi=1";
 			}
 
-			echo "<br><a href='../yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF////$tunnuskentta=$rivitunnus//from=$from//aputoim=$aputoim//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku//lisatieto_haku=$lisatieto_haku' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\">".t("Lis‰tiedot")."</a>";
+			echo "<br><a href='".$palvelin2."yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF////$tunnuskentta=$rivitunnus//from=$from//aputoim=$aputoim//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku//lisatieto_haku=$lisatieto_haku' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\">".t("Lis‰tiedot")."</a>";
 
 		}
 
@@ -1121,6 +1132,8 @@
 			</form>";
 	}
 
-	require ("../inc/footer.inc");
+	if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
+		require ("../inc/footer.inc");
+	}
 
 ?>

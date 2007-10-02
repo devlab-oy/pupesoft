@@ -951,7 +951,7 @@ if (!function_exists('rivi_hinta_ale')) {
 		$kala = $kala - $rivinkorkeus;
 		
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 580, $row["kommentti"],	$thispage, $norm);						
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 60, 580, $row["kommentti"],	$thispage, $norm);						
 			$kala = $pohja - $rivinkorkeus;
 		}
 	}
@@ -987,7 +987,7 @@ if (!function_exists('rivi_brutto')) {
 		$kala = $kala - $rivinkorkeus;
 		
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 580, $row["kommentti"],	$thispage, $norm);						
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 60, 580, $row["kommentti"],	$thispage, $norm);						
 			$kala = $pohja - $rivinkorkeus;
 		}
 	}
@@ -1021,7 +1021,7 @@ if (!function_exists('rivi_ei_ale_ei_hinta')) {
 		$kala = $kala - $rivinkorkeus;	
 		
 		if ($row["kommentti"] != '') {			
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 580, $row["kommentti"],	$thispage, $norm);	
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 60, 580, $row["kommentti"],	$thispage, $norm);	
 			$kala = $pohja - $rivinkorkeus;
 		}
 	}
@@ -1058,12 +1058,12 @@ if (!function_exists('rivi_eialeja')) {
 		if ($pdf->strlen($row["nimitys"], $norm) >= 135) {
 			$kala = $kala - $rivinkorkeus;
 		}
-		$pdf->draw_text(190, $kala, $row["nimitys"], 	$thispage, $norm);
+		$pdf->draw_text(190, $kala, $row["nimitys"], 										$thispage, $norm);
 	
 		$kala = $kala - $rivinkorkeus;
 		
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 580, $row["kommentti"],	$thispage, $norm);							
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 60, 580, $row["kommentti"],	$thispage, $norm);							
 			$kala = $pohja - $rivinkorkeus;
 		}
 	}
@@ -1096,7 +1096,7 @@ if (!function_exists('rivi_viivakoodi')) {
 		$kala = $kala - $rivinkorkeus;
 		
 		if ($row["kommentti"] != '') {
-			$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 580, $row["kommentti"],	$thispage, $norm);						
+			$pohja = $pdf->draw_paragraph($kala+$norm["height"]+5, 45, 60, 580, $row["kommentti"],	$thispage, $norm);						
 			$kala = $pohja - $rivinkorkeus;
 		}
 		

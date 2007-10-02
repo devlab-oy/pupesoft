@@ -219,33 +219,33 @@
 			$uusitee = "M";
 		}
 		
-		$tuotteet 	= array(0 => $tuoteno);
-		$kappaleet 	= array(0 => $asaldo); 
-		$lisavaruste= array(0 => "");
+		$tuotteet 	 = array(0 => $tuoteno);
+		$kappaleet 	 = array(0 => $asaldo); 
+		$lisavaruste = array(0 => "");
+		$otetaan	 = array(0 => $mista); 
+		$siirretaan	 = array(0 => $minne); 
 		
 		// Mist‰ varastosta otetaan?
 		$query = "	SELECT *
 					FROM tuotepaikat
-					WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$mista'";
+					WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$otetaan[0]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$mistarow = mysql_fetch_array($result);
 
 		if (mysql_num_rows($result) == 0) {
-			$mista = str_replace ( "#", " ", $mista);
-			echo "<font class='error'>".t("T‰m‰ varastopaikka katosi tuotteelta")." $mista</font><br><br>";
+			echo "<font class='error'>".t("T‰m‰ varastopaikka katosi tuotteelta")." $otetaan[0]</font><br><br>";
 			$tee = $uusitee;
 		}
 
 		// Minne varastoon vied‰‰n?
 		$query = "	SELECT *
 					FROM tuotepaikat
-					WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$minne'";
+					WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$siirretaan[0]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$minnerow = mysql_fetch_array($result);
 
 		if (mysql_num_rows($result) == 0) {
-			$minne = str_replace ( "#", " ", $minne);
-			echo "<font class='error'>".t("T‰m‰ varastopaikka katosi tuotteelta")." $minne</font><br><br>";
+			echo "<font class='error'>".t("T‰m‰ varastopaikka katosi tuotteelta")." $siirretaan[0]</font><br><br>";
 			$tee = $uusitee;
 		}
 		
@@ -328,7 +328,17 @@
 				
 				if (mysql_num_rows($result) == 1) {
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuotteet[$iii], '', '', '', $mistarow["hyllyalue"], $mistarow["hyllynro"], $mistarow["hyllyvali"], $mistarow["hyllytaso"]);
-				
+					
+					$lisavartprow = mysql_fetch_array($result);
+					
+					//Tutkitaan siirret‰‰nkˆ tietty‰ jo varattua lis‰varustetta
+					if($lisavaruste[$iii] == "LISAVARUSTE") {
+						// Tuotepaikka josta lis‰varuste otetaan
+						$otetaan[$iii] = $lisavartprow["tunnus"];
+						
+						$myytavissa += $kappaleet[$iii];
+					}
+					
 					if ($kappaleet[$iii] > $myytavissa) {
 						echo "Tuotetta ei voida siirt‰‰. Saldo ei riitt‰nyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
 						$saldook++;
@@ -355,8 +365,8 @@
 			
 					// Vastaanottavaa paikkaa ei lˆydy, perustetaan se
 					if (mysql_num_rows($result) == 0) {
-						$query = "INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, laatija, luontiaika)
-								  VALUES (
+						$query = "	INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, laatija, luontiaika)
+								  	VALUES (
 									'$kukarow[yhtio]',
 									'$minnerow[hyllyalue]',
 									'$minnerow[hyllynro]',
@@ -366,7 +376,13 @@
 									'$kukarow[kuka]',
 									now())";
 						$result = mysql_query($query) or die($query);
-
+						$lisatty_tun = mysql_insert_id();
+						
+						// Tuotepaikka jonne lis‰varuste vied‰‰n
+						if($lisavaruste[$iii] == "LISAVARUSTE") {
+							$siirretaan[$iii] = $lisatty_tun;
+						}
+						
 						$query = "	INSERT into tapahtuma set
 									yhtio 		= '$kukarow[yhtio]',
 									tuoteno 	= '$tuotteet[$iii]',
@@ -380,6 +396,14 @@
 						$result = mysql_query($query) or die($query);
 
 						echo t("Uusi varastopaikka luotiin tuotteelle").": $tuotteet[$iii] ($minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso])<br>";
+					}
+					else {
+						$lisavartprow = mysql_fetch_array($result);
+						
+						// Tuotepaikka jonne lis‰varuste vied‰‰n
+						if($lisavaruste[$iii] == "LISAVARUSTE") {
+							$siirretaan[$iii] = $lisavartprow["tunnus"];
+						}
 					}
 				}
 			}
@@ -420,9 +444,9 @@
 						muutospvm	= now()
 	                  	WHERE tuoteno 	= '$tuotteet[$iii]' 
 						and yhtio 		= '$kukarow[yhtio]' 
-						and tunnus		= '$mista'";
+						and tunnus		= '$otetaan[$iii]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
+						
 			// Minne varastoon vied‰‰n?
 			$query = "	UPDATE tuotepaikat 
 						set saldo 	= saldo + $kappaleet[$iii], 
@@ -432,11 +456,11 @@
 						muutospvm	= now()
 						WHERE tuoteno 	= '$tuotteet[$iii]' 
 						and yhtio 		= '$kukarow[yhtio]' 
-						and tunnus		= '$minne'";
+						and tunnus		= '$siirretaan[$iii]'";
 			$result = mysql_query($query) or pupe_error($query);
-			
-			$minne = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
-			$mista = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
+						
+			$minne_texti = $minnerow['hyllyalue']." ".$minnerow['hyllynro']." ".$minnerow['hyllyvali']." ".$minnerow['hyllytaso'];
+			$mista_texti = $mistarow['hyllyalue']." ".$mistarow['hyllynro']." ".$mistarow['hyllyvali']." ".$mistarow['hyllytaso'];
 		
 			$query = "	INSERT into tapahtuma set
 						yhtio 		= '$kukarow[yhtio]',
@@ -444,7 +468,7 @@
 						kpl 		= $kappaleet[$iii] * -1,
 						hinta 		= '0',
 						laji 		= 'siirto',
-						selite 		= '".t("Paikasta")." $mista ".t("v‰hennettiin")." $kappaleet[$iii]',
+						selite 		= '".t("Paikasta")." $mista_texti ".t("v‰hennettiin")." $kappaleet[$iii]',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = mysql_query($query) or pupe_error($query);
@@ -455,7 +479,7 @@
 						kpl 		= '$kappaleet[$iii]',
 						hinta 		= '0',
 						laji 		= 'siirto',
-						selite 		= '".t("Paikalle")." $minne ".t("lis‰ttiin")." $kappaleet[$iii]',
+						selite 		= '".t("Paikalle")." $minne_texti ".t("lis‰ttiin")." $kappaleet[$iii]',
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = mysql_query($query) or pupe_error($query);
@@ -500,7 +524,7 @@
 		$ahyllyvali = '';
 		$ahyllytaso = '';
 		$asaldo     = '';
-		$tee = $uusitee;
+		$tee 		= $uusitee;
 	}
 
 	// Uusi varstopaikka

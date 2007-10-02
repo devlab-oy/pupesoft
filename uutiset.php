@@ -1,12 +1,14 @@
 <?php
 
-$otsikko_apu = $_POST["otsikko"];
-$uutinen_apu = $_POST["uutinen"];
+if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
+	$otsikko_apu = $_POST["otsikko"];
+	$uutinen_apu = $_POST["uutinen"];
 
-require ("inc/parametrit.inc");
+	require ("inc/parametrit.inc");
 
-$otsikko = $otsikko_apu;
-$uutinen = $uutinen_apu;
+	$otsikko = $otsikko_apu;
+	$uutinen = $uutinen_apu;
+}
 
 if ($toim == "") {
 	echo "<font class='head'>".t("Intra Uutiset")."</font><hr>";
@@ -28,7 +30,6 @@ elseif ($toim == "RYJO") {
 	echo "<font class='head'>".t("Ryjo")."</font><hr>";
 	$tyyppi = "ryjo";
 }
-
 
 if ($toim == "VIIKKOPALAVERI" or $toim == "ASIAKASPALVELU" or $toim == "RYJO") {
 	$kulisa = "";
@@ -359,11 +360,13 @@ if ($tee == "PRINTTAA") {
 
 if ($tee == '') {
 
-	echo "<form method='post' action='$PHP_SELF'>
-		<input type='hidden' name='toim' value='$toim'>";
-	echo "<input type='hidden' name='tee' value='SYOTA'>";
-	echo "<input type='submit' value='".t("Lis‰‰ uusi uutinen")."'></td>";
-	echo "</form>";
+	if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
+		echo "<form method='post' action='$PHP_SELF'>
+			<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='tee' value='SYOTA'>";
+		echo "<input type='submit' value='".t("Lis‰‰ uusi uutinen")."'>";
+		echo "</form><br><br>";
+	}
 
 	if ($limit=="all") $limit = "";
 	elseif ($limit=="50") $limit = "limit 50";
@@ -418,61 +421,50 @@ if ($tee == '') {
 				$uutinen['nimi'] = $uutinen['toimittaja'];
 			}
 
-			echo "<tr><td class='back'>
-			<table width='400'>
-			<tr>
-			<td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td>
-			</tr><tr>
-			<td valign='top' align='center' width='140'><br>$kuva<br><br></td>
-			<td valign='top'>$uutinen[kentta02]</font>
-			<br>
-			<a href='$PHP_SELF?tee=PRINTTAA&toim=$toim&tun=$uutinen[tun]'>".t("Tulosta")."</a>
-			</td>
-			</tr><tr>
-			<th colspan='2'>";
+			echo "	<tr><td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td></tr>
+					<tr>
+					<td valign='top' align='center' width='140'><br>$kuva<br><br></td>
+					<td valign='top'>$uutinen[kentta02]</font><br><a href='$PHP_SELF?tee=PRINTTAA&toim=$toim&tun=$uutinen[tun]'>".t("Tulosta")."</a></td>
+					</tr>";
+			
+			echo"<tr><th colspan='2'>";
+			echo "Toimittaja: $uutinen[nimi]<br>P‰iv‰m‰‰r‰: $uutinen[pvmalku]";
 
-			echo "<table><tr><th>";
-			echo "Toimittaja: $uutinen[nimi]
-			<br>P‰iv‰m‰‰r‰: $uutinen[pvmalku]";
+			if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
+				if (($toim == "VIIKKOPALAVERI" or $toim == "ASIAKASPALVELU" or $toim == "RYJO") and ($uutinen["kuittaus"] == "")) {
+					echo "<br><br><form method='post' action='$PHP_SELF'>
+						<input type='hidden' name='toim' value='$toim'>";
+					echo "<input type='hidden' name='tee' value='SYOTA'>";
+					echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
+					echo "<input type='submit' value='".t("Muokkaa")."'>";
+					echo "</form> ";
 
-			if (($toim == "VIIKKOPALAVERI" or $toim == "ASIAKASPALVELU" or $toim == "RYJO") and ($uutinen["kuittaus"] == "")) {
-				echo "</th><th><form method='post' action='$PHP_SELF'>
-					<input type='hidden' name='toim' value='$toim'>";
-				echo "<input type='hidden' name='tee' value='SYOTA'>";
-				echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
-				echo "<input type='submit' value='".t("Muokkaa")."'>";
-				echo "</form>";
-				echo "</th><th>";
-
-				if ($uutinen["kuka"] == $kukarow["kuka"] and $uutinen["yhtio"] == $kukarow["yhtio"]) {
-					echo "<form method='post' action='$PHP_SELF'><input type='hidden' name='toim' value='$toim'>";
+					if ($uutinen["kuka"] == $kukarow["kuka"] and $uutinen["yhtio"] == $kukarow["yhtio"]) {
+						echo " <form method='post' action='$PHP_SELF'><input type='hidden' name='toim' value='$toim'>";
+						echo "<input type='hidden' name='tee' value='POISTA'>";
+						echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
+						echo "<input type='submit' value='".t("Poista")."'>";
+						echo "</form>";
+					}
+				}
+				elseif ($toim != "VIIKKOPALAVERI" and $toim != "ASIAKASPALVELU" and $toim != "RYJO" and $uutinen["kuka"] == $kukarow["kuka"] and $uutinen["yhtio"] == $kukarow["yhtio"]) {
+					echo "<br><br><form method='post' action='$PHP_SELF'>
+						<input type='hidden' name='toim' value='$toim'>";
+					echo "<input type='hidden' name='tee' value='SYOTA'>";
+					echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
+					echo "<input type='submit' value='".t("Muokkaa")."'>";
+					echo "</form> ";
+					echo " <form method='post' action='$PHP_SELF'>
+						<input type='hidden' name='toim' value='$toim'>";
 					echo "<input type='hidden' name='tee' value='POISTA'>";
 					echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
 					echo "<input type='submit' value='".t("Poista")."'>";
 					echo "</form>";
 				}
 			}
-			elseif ($toim != "VIIKKOPALAVERI" and $toim != "ASIAKASPALVELU" and $toim != "RYJO" and $uutinen["kuka"] == $kukarow["kuka"] and $uutinen["yhtio"] == $kukarow["yhtio"]) {
-				echo "</th><th><form method='post' action='$PHP_SELF'>
-					<input type='hidden' name='toim' value='$toim'>";
-				echo "<input type='hidden' name='tee' value='SYOTA'>";
-				echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
-				echo "<input type='submit' value='".t("Muokkaa")."'>";
-				echo "</form>";
-				echo "</th><th>";
-				echo "<form method='post' action='$PHP_SELF'>
-					<input type='hidden' name='toim' value='$toim'>";
-				echo "<input type='hidden' name='tee' value='POISTA'>";
-				echo "<input type='hidden' name='tunnus' value='$uutinen[tun]'>";
-				echo "<input type='submit' value='".t("Poista")."'>";
-				echo "</form>";
-			}
-
-			echo "</th></tr></table>";
-
-			echo "</th>
-			</tr>
-			</table><br></td></tr>\n";
+			echo "</th></tr>";
+			echo"<tr><td colspan='2' class='back'><br></td></tr>";	
+			
 		}
 		echo "</table>";
 
@@ -483,6 +475,8 @@ if ($tee == '') {
 
 }
 
-require("inc/footer.inc");
+if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
+	require("inc/footer.inc");
+}
 
 ?>

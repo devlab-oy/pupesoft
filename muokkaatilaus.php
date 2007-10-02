@@ -5,7 +5,9 @@
 		if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
 	}
 
-	require("inc/parametrit.inc");
+	if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+		require("inc/parametrit.inc");
+	}
 
 	if (isset($tee)) {
 		if ($tee == "lataa_tiedosto") {
@@ -65,224 +67,227 @@
 			$otsikko = t("myyntitilausta");
 			$toim = "";
 		}
+		
+		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+			
+			echo "<font class='head'>".t("Muokkaa")." $otsikko<hr></font>";
+				
+			// Tehdään popup käyttäjän lepäämässä olevista tilauksista
+			if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOLISTASUPER" or $toim == "MYYNTITILI" or $toim == "MYYNTITILISUPER") {
+				$query = "	SELECT *
+							FROM lasku use index (tila_index)
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'G'";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
+				$query = "	SELECT *
+							FROM lasku use index (tila_index)
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'S'";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='A' and alatila='' and tilaustyyppi='A'";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "REKLAMAATIO") {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='C' and alatila='' and tilaustyyppi='R'";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "TARJOUS" or $toim == "TARJOUSSUPER") {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='T' and alatila in ('','A') and tilaustyyppi='T'";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "OSTO") {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila = ''";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "OSTOSUPER") {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila = 'A'";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "ENNAKKO") {
+				$query = "	SELECT lasku.*
+							FROM lasku use index (tila_index), tilausrivi use index (yhtio_otunnus)
+							WHERE lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
+							and lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')  and lasku.tila='E' and lasku.alatila in ('','A','J') and lasku.tilaustyyppi = 'E' and tilausrivi.tyyppi = 'E'
+							GROUP BY lasku.tunnus";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
+				$query = "	SELECT *
+							FROM lasku use index (tila_index)
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'V'";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "" or $toim == "SUPER") {
+				$query = "	SELECT *
+							FROM lasku use index (tila_index)
+							WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and alatila='' and tila in ('N','E')";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "LASKUTUSKIELTO") {
+				$query = "	SELECT lasku.*
+							FROM lasku use index (tila_index)
+							JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila in ('N','L') and alatila != 'X'";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
+			elseif ($toim == "YLLAPITO") {
+				$query = "	SELECT lasku.*
+							FROM lasku use index (tila_index)
+							WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila = '0' and alatila not in ('V','D')";
+				$eresult = mysql_query($query) or pupe_error($query);
+			}
 
-		echo "<font class='head'>".t("Muokkaa")." $otsikko<hr></font>";
 
-		// Tehdään popup käyttäjän lepäämässä olevista tilauksista
-		if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOLISTASUPER" or $toim == "MYYNTITILI" or $toim == "MYYNTITILISUPER") {
-			$query = "	SELECT *
-						FROM lasku use index (tila_index)
-						WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'G'";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "SIIRTOTYOMAARAYS" or $toim == "SIIRTOTYOMAARAYSSUPER") {
-			$query = "	SELECT *
-						FROM lasku use index (tila_index)
-						WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'S'";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
-			$query = "	SELECT *
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='A' and alatila='' and tilaustyyppi='A'";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "REKLAMAATIO") {
-			$query = "	SELECT *
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='C' and alatila='' and tilaustyyppi='R'";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "TARJOUS" or $toim == "TARJOUSSUPER") {
-			$query = "	SELECT *
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='T' and alatila in ('','A') and tilaustyyppi='T'";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "OSTO") {
-			$query = "	SELECT *
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila = ''";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "OSTOSUPER") {
-			$query = "	SELECT *
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and tila='O' and alatila = 'A'";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "ENNAKKO") {
-			$query = "	SELECT lasku.*
-						FROM lasku use index (tila_index), tilausrivi use index (yhtio_otunnus)
-						WHERE lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-						and lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]')  and lasku.tila='E' and lasku.alatila in ('','A','J') and lasku.tilaustyyppi = 'E' and tilausrivi.tyyppi = 'E'
-						GROUP BY lasku.tunnus";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
-			$query = "	SELECT *
-						FROM lasku use index (tila_index)
-						WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]')  and alatila='' and tila = 'V'";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "" or $toim == "SUPER") {
-			$query = "	SELECT *
-						FROM lasku use index (tila_index)
-						WHERE yhtio = '$kukarow[yhtio]' and (laatija='$kukarow[kuka]' or tunnus='$kukarow[kesken]') and alatila='' and tila in ('N','E')";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "LASKUTUSKIELTO") {
-			$query = "	SELECT lasku.*
-						FROM lasku use index (tila_index)
-						JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila in ('N','L') and alatila != 'X'";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
-		elseif ($toim == "YLLAPITO") {
-			$query = "	SELECT lasku.*
-						FROM lasku use index (tila_index)
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and (lasku.laatija='$kukarow[kuka]' or lasku.tunnus='$kukarow[kesken]') and tila = '0' and alatila not in ('V','D')";
-			$eresult = mysql_query($query) or pupe_error($query);
-		}
+			if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET" and $toim != "VALMISTUSMYYNTI" and $toim != "VALMISTUSMYYNTISUPER") {
+				if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
+					// tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
+					if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO") {
+						$aputoim1 = "RIVISYOTTO";
+						$aputoim2 = "PIKATILAUS";
 
-
-		if ($toim != "MYYNTITILITOIMITA" and $toim != "EXTRANET" and $toim != "VALMISTUSMYYNTI" and $toim != "VALMISTUSMYYNTISUPER") {
-			if (isset($eresult) and  mysql_num_rows($eresult) > 0) {
-				// tehdään aktivoi nappi.. kaikki mitä näytetään saa aktvoida, joten tarkkana queryn kanssa.
-				if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO") {
-					$aputoim1 = "RIVISYOTTO";
-					$aputoim2 = "PIKATILAUS";
-
-					$lisa1 = t("Rivisyöttöön");
-					$lisa2 = t("Pikatilaukseen");
-				}
-				elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
-					$aputoim1 = "VALMISTAASIAKKAALLE";
-					$lisa1 = t("Muokkaa");
-
-					$aputoim2 = "";
-					$lisa2 = "";
-				}
-				elseif ($toim == "MYYNTITILISUPER") {
-					$aputoim1 = "MYYNTITILI";
-					$lisa1 = t("Muokkaa");
-
-					$aputoim2 = "";
-					$lisa2 = "";
-				}
-				elseif ($toim == "SIIRTOLISTASUPER") {
-					$aputoim1 = "SIIRTOLISTA";
-					$lisa1 = t("Muokkaa");
-
-					$aputoim2 = "";
-					$lisa2 = "";
-				}
-				elseif ($toim == "TARJOUSSUPER") {
-					$aputoim1 = "TARJOUS";
-					$lisa1 = t("Muokkaa");
-
-					$aputoim2 = "";
-					$lisa2 = "";
-				}
-				elseif ($toim == "TYOMAARAYSSUPER") {
-					$aputoim1 = "TYOMAARAYS";
-					$lisa1 = t("Muokkaa");
-
-					$aputoim2 = "";
-					$lisa2 = "";
-				}
-				elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
-					$aputoim1 = "";
-					$lisa1 = t("Muokkaa");
-
-					$aputoim2 = "";
-					$lisa2 = "";
-				}
-				else {
-					$aputoim1 = $toim;
-					$aputoim2 = "";
-
-					$lisa1 = t("Muokkaa");
-					$lisa2 = "";
-				}
-
-				if ($toim == "OSTO" or $toim == "OSTOSUPER") {
-					echo "<form method='post' action='tilauskasittely/tilaus_osto.php'>";
-				}
-				else {
-					echo "<form method='post' action='tilauskasittely/tilaus_myynti.php'>";
-				}
-
-				echo "	<input type='hidden' name='toim' value='$aputoim1'>
-						<input type='hidden' name='tee' value='AKTIVOI'>";
-
-				echo "<table>
-						<tr>
-						<th>".t("Kesken olevat").":</th>
-						<td><select name='tilausnumero'>";
-
-				while ($row = mysql_fetch_array($eresult)) {
-					$select="";
-					//valitaan keskenoleva oletukseksi..
-					if ($row['tunnus'] == $kukarow["kesken"]) {
-						$select="SELECTED";
+						$lisa1 = t("Rivisyöttöön");
+						$lisa2 = t("Pikatilaukseen");
 					}
-					echo "<option value='$row[tunnus]' $select>$row[tunnus]: $row[nimi] ($row[luontiaika])</option>";
+					elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER") {
+						$aputoim1 = "VALMISTAASIAKKAALLE";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "MYYNTITILISUPER") {
+						$aputoim1 = "MYYNTITILI";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "SIIRTOLISTASUPER") {
+						$aputoim1 = "SIIRTOLISTA";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "TARJOUSSUPER") {
+						$aputoim1 = "TARJOUS";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "TYOMAARAYSSUPER") {
+						$aputoim1 = "TYOMAARAYS";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "OSTO" or $toim == "OSTOSUPER") {
+						$aputoim1 = "";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					else {
+						$aputoim1 = $toim;
+						$aputoim2 = "";
+
+						$lisa1 = t("Muokkaa");
+						$lisa2 = "";
+					}
+
+					if ($toim == "OSTO" or $toim == "OSTOSUPER") {
+						echo "<form method='post' action='tilauskasittely/tilaus_osto.php'>";
+					}
+					else {
+						echo "<form method='post' action='tilauskasittely/tilaus_myynti.php'>";
+					}
+
+					echo "	<input type='hidden' name='toim' value='$aputoim1'>
+							<input type='hidden' name='tee' value='AKTIVOI'>";
+
+					echo "<table>
+							<tr>
+							<th>".t("Kesken olevat").":</th>
+							<td><select name='tilausnumero'>";
+
+					while ($row = mysql_fetch_array($eresult)) {
+						$select="";
+						//valitaan keskenoleva oletukseksi..
+						if ($row['tunnus'] == $kukarow["kesken"]) {
+							$select="SELECTED";
+						}
+						echo "<option value='$row[tunnus]' $select>$row[tunnus]: $row[nimi] ($row[luontiaika])</option>";
+					}
+
+					echo "</select></td>";
+
+					if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO") {
+						echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
+					}
+
+					echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
+					echo "</tr></table></form>";
 				}
-
-				echo "</select></td>";
-
-				if ($toim == "" or $toim == "SUPER" or $toim == "ENNAKKO" or $toim == "LASKUTUSKIELTO") {
-					echo "<td class='back'><input type='submit' name='$aputoim2' value='$lisa2'></td>";
+				else {
+					echo t("Sinulla ei ole aktiivisia eikä kesken olevia tilauksia").".<br>";
 				}
+			}
+		}
 
-				echo "<td class='back'><input type='submit' name='$aputoim1' value='$lisa1'></td>";
-				echo "</tr></table></form>";
+		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+			// Näytetään muuten vaan sopivia tilauksia
+			echo "<br><form action='$PHP_SELF' method='post'>
+					<input type='hidden' name='toim' value='$toim'>
+					<font class='head'>".t("Etsi")." $otsikko<hr></font>
+					".t("Syötä tilausnumero, nimen tai laatijan osa").":
+					<input type='text' name='etsi'>
+					<input type='Submit' value = '".t("Etsi")."'>
+					</form><br><br>";
+
+			// pvm 30 pv taaksepäin
+			$dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+			$mm = date("m",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+			$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+
+			$haku='';
+			if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%')";
+			if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%')";
+
+			$seuranta = "";
+			$seurantalisa = "";
+
+			if ($yhtiorow["tilauksen_seuranta"] !="") {
+				$seuranta = " seuranta, ";
+				$seurantalisa = "LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus";
+			}
+
+			if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET") {
+				$toimaikalisa = ' lasku.toimaika, ';
+			}
+
+
+			if ($limit == "") {
+				$rajaus = "LIMIT 50";
 			}
 			else {
-				echo t("Sinulla ei ole aktiivisia eikä kesken olevia tilauksia").".<br>";
+				$rajaus	= "";
 			}
 		}
-
-
-		// Näytetään muuten vaan sopivia tilauksia
-		echo "<br><form action='$PHP_SELF' method='post'>
-				<input type='hidden' name='toim' value='$toim'>
-				<font class='head'>".t("Etsi")." $otsikko<hr></font>
-				".t("Syötä tilausnumero, nimen tai laatijan osa").":
-				<input type='text' name='etsi'>
-				<input type='Submit' value = '".t("Etsi")."'>
-				</form><br><br>";
-
-		// pvm 30 pv taaksepäin
-		$dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
-		$mm = date("m",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
-		$yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
-
-		$haku='';
-		if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%')";
-		if (is_numeric($etsi)) $haku="and (lasku.tunnus like '$etsi%' or lasku.ytunnus like '$etsi%')";
-
-		$seuranta = "";
-		$seurantalisa = "";
-
-		if ($yhtiorow["tilauksen_seuranta"] !="") {
-			$seuranta = " seuranta, ";
-			$seurantalisa = "LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus";
-		}
-
-		if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET") {
-			$toimaikalisa = ' lasku.toimaika, ';
-		}
-
-
-		if ($limit == "") {
-			$rajaus = "LIMIT 50";
-		}
-		else {
-			$rajaus	= "";
-		}
-
 
 		// Etsitään muutettavaa tilausta
 		if ($toim == 'SUPER') {
@@ -1080,46 +1085,51 @@
 			}
 
 			echo "</table>";
+			
+			
+			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+				if (is_array($sumrow)) {
+					echo "<br><table>";
+					echo "<tr><th>".t("Arvo yhteensä")." ($sumrow[kpl] ".t("kpl")."): </th><td align='right'>$sumrow[arvo] $yhtiorow[valkoodi]</td></tr>";
+					echo "<tr><th>".t("Summa yhteensä").": </th><td align='right'>$sumrow[summa] $yhtiorow[valkoodi]</td></tr>";
+					echo "</table>";
+				}
 
-			if (is_array($sumrow)) {
-				echo "<br><table>";
-				echo "<tr><th>".t("Arvo yhteensä")." ($sumrow[kpl] ".t("kpl")."): </th><td align='right'>$sumrow[arvo] $yhtiorow[valkoodi]</td></tr>";
-				echo "<tr><th>".t("Summa yhteensä").": </th><td align='right'>$sumrow[summa] $yhtiorow[valkoodi]</td></tr>";
-				echo "</table>";
-			}
+				if (mysql_num_rows($result) == 50) {
+					// Näytetään muuten vaan sopivia tilauksia
+					echo "<br><table>";
 
-			if (mysql_num_rows($result) == 50) {
-				// Näytetään muuten vaan sopivia tilauksia
-				echo "<br><table>";
-
-				echo "<tr><th>".t("Listauksessa näkyy 50 ensimmäistä")." $otsikko.</th>
-					<form action='$PHP_SELF' method='post'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='etsi' value='$etsi'>
-					<input type='hidden' name='limit' value='NO'>
-					<td class='back'><input type='Submit' value = '".t("Näytä kaikki")."'></td>
-					</form></tr></table>";
-			}
+					echo "<tr><th>".t("Listauksessa näkyy 50 ensimmäistä")." $otsikko.</th>
+						<form action='$PHP_SELF' method='post'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='etsi' value='$etsi'>
+						<input type='hidden' name='limit' value='NO'>
+						<td class='back'><input type='Submit' value = '".t("Näytä kaikki")."'></td>
+						</form></tr></table>";
+				}
 		
-			if(isset($workbook)) {
+				if(isset($workbook)) {
 		
-				// We need to explicitly close the workbook
-				$workbook->close();
+					// We need to explicitly close the workbook
+					$workbook->close();
 		
-				echo "<br><table>";
-				echo "<tr><th>".t("Tallenna lista").":</th>";
-				echo "<form method='post' action='$PHP_SELF'>";
-				echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-				echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xls'>";
-				echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-				echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-				echo "</table><br>";
+					echo "<br><table>";
+					echo "<tr><th>".t("Tallenna lista").":</th>";
+					echo "<form method='post' action='$PHP_SELF'>";
+					echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+					echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xls'>";
+					echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+					echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+					echo "</table><br>";
+				}
 			}
 		}
 		else {
 			echo t("Ei tilauksia")."...";
 		}
 
-		require ("inc/footer.inc");
+		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+			require ("inc/footer.inc");
+		}
 	}
 ?>

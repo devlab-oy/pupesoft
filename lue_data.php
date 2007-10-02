@@ -801,6 +801,7 @@ else
 					<option value='yhteensopivuus_tuote'>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='tuotteen_orginaalit'>".t("Tuotteiden originaalit")."</option>
 					<option value='autodata'>".t("Autodatatiedot")."</option>
+					<option value='autodata_tuote'>".t("Autodata tuotetiedot")."</option>
 					<option value='rekisteritiedot'>".t("Rekisteritiedot")."</option>
 					<option value='sanakirja'>".t("Sanakirja")."</option>
 					<option value='tuotteen_toimittajat'>".t("Tuotteen toimittajat")."</option>

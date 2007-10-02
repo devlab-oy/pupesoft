@@ -116,6 +116,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("AUTODATAID");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
+			case "autodata_tuote" :
+				$pakolliset = array("TUOTERYHMA", "OP_REF");
+				$kielletyt = array();
+				break;
 			case "rekisteritiedot" :
 				$pakolliset = array("REKNO");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");

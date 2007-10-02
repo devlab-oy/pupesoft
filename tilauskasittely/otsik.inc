@@ -77,6 +77,7 @@
 		$ytunnus 	= $nimi;
 		$asiakasid	= "";
 		$kutsuja    = "otsik.inc";
+		$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim";
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
 		require ("../inc/asiakashaku.inc");
@@ -2242,7 +2243,7 @@
 
 			//	jos tehtiin tarjouksesta uusi versio kopioidaan vanhat rivit uudeksi pohjaksi..
 			//	Koska meillä on jo tässävaiheessa tunnusnippu, on tämän oltava uusi versio, eikä uusi tarjous
-			if($tunnusnippu>0 and $toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"]!="") {
+			if($tunnusnippu > 0 and $toim == "TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") {
 
 				// Haetaan tämän nipun viimeisin tarjous
 				$query = "	SELECT tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$tunnusnippu' and tunnus<'$kukarow[kesken]' and tila = 'T' order by tunnus desc LIMIT 1";

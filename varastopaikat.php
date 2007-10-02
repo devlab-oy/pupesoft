@@ -5,7 +5,7 @@ require ("inc/parametrit.inc");
 echo "<font class='head'>".t("Varastopaikat")."</font><hr>";
 
 // Tarkistetaan syˆtetyt tieedot
-if ($tee=='update') {
+if ($tee == 'update') {
 	//Katotaan osuuko alkuhyllyalue johonkin varastoon
 	$query = "	SELECT tunnus
 				FROM varastopaikat
@@ -16,28 +16,28 @@ if ($tee=='update') {
 				and yhtio = '$kukarow[yhtio]'";
 	$vares = mysql_query($query) or pupe_error($query);
 
-if (mysql_num_rows($vares) == 0) {
-		//Katotaan osuuko loppuhyllyalue johonkin varastoon
-		$query = "	SELECT tunnus
-					FROM varastopaikat
-					WHERE
-					tunnus != '$tunnus'
-					and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
-					and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
-					and yhtio = '$kukarow[yhtio]'";
-		$vares = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($vares) == 0) {
-			//Katotaan onko jo joku varasto syˆtetyn alueen sis‰ll‰
+	if (mysql_num_rows($vares) == 0) {
+			//Katotaan osuuko loppuhyllyalue johonkin varastoon
 			$query = "	SELECT tunnus
 						FROM varastopaikat
 						WHERE
 						tunnus != '$tunnus'
 						and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
-						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
+						and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
 						and yhtio = '$kukarow[yhtio]'";
 			$vares = mysql_query($query) or pupe_error($query);
-		}
+
+			if (mysql_num_rows($vares) == 0) {
+				//Katotaan onko jo joku varasto syˆtetyn alueen sis‰ll‰
+				$query = "	SELECT tunnus
+							FROM varastopaikat
+							WHERE
+							tunnus != '$tunnus'
+							and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
+							and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
+							and yhtio = '$kukarow[yhtio]'";
+				$vares = mysql_query($query) or pupe_error($query);
+			}
 	}
 
 	if (mysql_num_rows($vares) != 0) {
@@ -53,7 +53,13 @@ if (mysql_num_rows($vares) == 0) {
 }
 
 // p‰ivitet‰‰n varastopaikat...
-if ($tee=='update') {
+if ($tee == 'update') {
+
+	$alkuhyllyalue  = trim(strtoupper($alkuhyllyalue));
+	$alkuhyllynro   = trim(strtoupper($alkuhyllynro));
+	$loppuhyllyalue = trim(strtoupper($loppuhyllyalue));
+	$loppuhyllynro  = trim(strtoupper($loppuhyllynro));
+
 	$query  = "	update varastopaikat set
 				alkuhyllyalue	= '$alkuhyllyalue',
 				alkuhyllynro	= '$alkuhyllynro',
@@ -80,12 +86,11 @@ if ($tee=='update') {
 
 	echo "<h2>".t("Varastopaikat p‰ivitetty")."</h2>";
 
-	$tee=''; // n‰ytet‰‰n printerit
+	$tee = ''; // n‰ytet‰‰n printerit
 }
 
-
 // poistetaan varastopaikat
-if ($tee=='poista') {
+if ($tee == 'poista') {
 	$query = "delete from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -93,18 +98,16 @@ if ($tee=='poista') {
 }
 
 // tehd‰‰n uusi varastopaikat
-if ($tee=='uusi') {
-	$query = "insert into varastopaikat (yhtio) values ('$kukarow[yhtio]')";
+if ($tee == 'uusi') {
+	$query = "insert into varastopaikat (yhtio, alkuhyllyalue, alkuhyllynro, loppuhyllyalue, loppuhyllynro) values ('$kukarow[yhtio]','     ','     ','     ','     ')";
 	$result = mysql_query($query) or pupe_error($query);
 	$tunnus = mysql_insert_id($link);
 
-	$tee='edit'; // menn‰‰n muokkausruutuun
+	$tee = 'edit'; // menn‰‰n muokkausruutuun
 }
 
-
 // n‰ytet‰‰n muokkausruutu
-
-if ($tee=='edit') {
+if ($tee == 'edit') {
 	$query  = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' order by alkuhyllyalue, alkuhyllynro";
 	$result = mysql_query($query) or pupe_error($query);
 	$row    = mysql_fetch_array($result);
@@ -116,7 +119,8 @@ if ($tee=='edit') {
 	echo "<table>\n";
 
 	for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
-		if (substr(mysql_field_name($result,$i),0,9)=='printteri') {
+
+		if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
 
 			echo "<tr><th>";
 
@@ -166,7 +170,7 @@ if ($tee=='edit') {
 
 			echo "</td></tr>\n";
 		}
-		elseif (mysql_field_name($result,$i)=='tyyppi') {
+		elseif (mysql_field_name($result,$i) == 'tyyppi') {
 			echo "<tr><th>".t("Tyyppi")."</th><td>";
 
 			$sel1 = $sel2 = '';
@@ -221,66 +225,33 @@ if ($tee=='edit') {
 	echo "<input type='submit' value='".t("P‰ivit‰")."'></form>";
 }
 
-
-
 // n‰ytet‰‰n kaikki yhtion varastopaikat...
+if ($tee == '') {
 
-if ($tee=='') {
-	$query  = "select * from varastopaikat where yhtio='$kukarow[yhtio]' order by alkuhyllyalue, alkuhyllynro";
+	$query  = "	SELECT varastopaikat.*, 
+				concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) sorttaus 
+				FROM varastopaikat 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				ORDER by sorttaus";
 	$result = mysql_query($query) or pupe_error($query);
 
-
-	echo "<table border='0'><tr>";
-
-	for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
-		echo "<th>";
-
-		switch (mysql_field_name($result,$i)) {
-			// tehd‰‰n selkokieliset nimet... t‰m‰ tietysti olisi pit‰nyt tehd‰ tietokantaan suoraan mutta en jaksa en‰‰ muuttaa. :)
-			case "printteri1":
-				echo t("L‰hete/Ker‰yslista");
-				break;
-			case "printteri2":
-				echo t("Rahtikirja matriisi");
-				break;
-			case "printteri3":
-				echo t("Osoitelappu");
-				break;
-			case "printteri4":
-				echo t("Rahtikirja A5");
-				break;
-			case "printteri5":
-				echo t("Lasku");
-				break;
-			case "printteri6":
-				echo t("Rahtikirja A4");
-				break;
-			case "printteri7":
-				echo t("JV-lasku/-kuitti");
-				break;
-			default:
-				echo t(mysql_field_name($result,$i));
-		}
-
-		echo "</th>";
-	}
-
+	echo "<table><tr>";
+	echo "<th>".t("alkuhyllyalue")."</th>";
+	echo "<th>".t("alkuhyllynro")."</th>";
+	echo "<th>".t("loppuhyllyalue")."</th>";
+	echo "<th>".t("loppuhyllynro")."</th>";
+	echo "<th>".t("tyyppi")."</th>";
+	echo "<th>".t("nimitys")."</th>";
 	echo "<th colspan='2'></th></tr>";
 
-	while ($row=mysql_fetch_array($result)) {
+	while ($row = mysql_fetch_array($result)) {
 		echo "<tr>";
-
-		for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
-			if (substr(mysql_field_name($result,$i),0,9)=='printteri') {
-				$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$row[$i]'";
-				$kires = mysql_query($query) or pupe_error($query);
-				$kirow = mysql_fetch_array($kires);
-				echo "<td>$kirow[kirjoitin]</td>";
-			}
-			else {
-				echo "<td>$row[$i]</td>";
-			}
-		}
+		echo "<td>$row[alkuhyllyalue]</td>";
+		echo "<td>$row[alkuhyllynro]</td>";
+		echo "<td>$row[loppuhyllyalue]</td>";
+		echo "<td>$row[loppuhyllynro]</td>";
+		echo "<td>$row[tyyppi]</td>";
+		echo "<td>$row[nimitys]</td>";
 
 		echo "<form method='post' action='$PHP_SELF'>
 		<input type='hidden' name='tee' value='edit'>
@@ -302,7 +273,7 @@ if ($tee=='') {
 		echo "</tr>";
 	}
 
-	echo "</table><br><br>";
+	echo "</table><br>";
 
 	echo "<form method='post' action='$PHP_SELF'>
 	<input type='hidden' name='tee' value='uusi'>

@@ -36,25 +36,14 @@
 	if($chk_row["ok"] == $chk_row["kaikki"]) {
 
 		//keräyslistan tulostusta varten
-		if ($yhtiorow["kerailylistatyyppi"] != "" and file_exists($yhtiorow["kerailylistatyyppi"])) {
-			require_once ($yhtiorow["kerailylistatyyppi"]);
-		}
-		else {
-			require_once ("tulosta_lahete_kerayslista.inc");
-		}
-        
-		// keräyslistat sortataan aina näin
-		$sorttauskentta = "if(perheid = 0,
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
-							) as sorttauskentta";
+		require_once ("tulosta_lahete_kerayslista.inc");
 		
-		// korjataan tää päivämäärä kuntoon jota ei vielä ole
-		$laskurow["lahetepvm"] = date("Y-m-d");
-
-		// tehdään uusi PDF failin olio
-		$pdf = new pdffile;
-		$pdf->set_default('margin', 0);
+		//hatetaan asiakkaan tiedot
+		$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+					FROM asiakas
+					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+		$riresult = mysql_query($query) or pupe_error($query);
+		$asrow = mysql_fetch_array($riresult);
 
 		// keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
 		if ($yhtiorow["kerataanko_saldottomat"] == '') {
@@ -67,7 +56,10 @@
 		// generoidaan keräyslistalle rivinumerot
 		$query = "	SELECT tilausrivi.*,
 					tuote.sarjanumeroseuranta,
-					$sorttauskentta
+					if(perheid = 0,
+					(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+					(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+					) as sorttauskentta
 					FROM tilausrivi, tuote
 					WHERE tilausrivi.otunnus in ($tilausnumeroita)
 					and tilausrivi.yhtio   = '$kukarow[yhtio]'
@@ -78,43 +70,32 @@
 					ORDER BY sorttauskentta";
 		$riresult = mysql_query($query) or pupe_error($query);
 
-		// generoidaan rivinumerot
+		//generoidaan rivinumerot
 		$rivinumerot = array();
-
-		while ($row = mysql_fetch_array($riresult)) {
-			$rivinumerot[$row["tunnus"]] = $row["tunnus"];
-		}
-
-		sort($rivinumerot);
 
 		$kal = 1;
 
-		foreach($rivinumerot as $rivino) {
-			$rivinumerot[$rivino] = $kal;
+		while ($row = mysql_fetch_array($riresult)) {
+			$rivinumerot[$row["tunnus"]] = $kal;
 			$kal++;
 		}
 
 		mysql_data_seek($riresult,0);
 
-		$paino = 0;
-		$sivu  = 0;
+		unset($pdf);
+		unset($page);
 
-		//pdf:n header..
-		$firstpage = alku();
-		
+		$sivu  = 1;
+		$paino = 0;
+
+		// Aloitellaan lähetteen teko
+		$page[$sivu] = alku();
 
 		while ($row = mysql_fetch_array($riresult)) {
-			//piirrä rivi
-			$firstpage = rivi($firstpage);
+			rivi($page[$sivu]);
 		}
 
-		//Vikan rivin loppuviiva
-		$x[0] = 20;
-		$x[1] = 580;
-		$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
-		$pdf->draw_line($x, $y, $firstpage, $rectparam);
-
-		loppu($firstpage, 1);
+		loppu($page[$sivu], 1);
 
 
 		//tulostetaan faili ja valitaan sopivat printterit

@@ -151,7 +151,7 @@
 				}
 
 				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") {
+				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $toim != "SIIRTOTYOMAARAYS") {
 
 					//tehdään uusi otsikko
 					$query = "INSERT into lasku SET
@@ -367,7 +367,6 @@
 
 				//katotaan speciaalirivit joilla tilkpl = 999999999 and varattu = 0
 				//tällöin halutaan siirtää kaikki mitä hyllyssä on tällä hetkellä
-
 				while($crow = mysql_fetch_array($cresult)) {
 					if ($crow['varattu'] == 0 and $crow['tilkpl'] == 9999.99) {
 						//siirretään kaikki mitä paikalla on
@@ -413,22 +412,34 @@
 					}
 				}
 
-				// Generoidaan lähetteelle ja keräyslistalle rivinumerot
+
+				// Tulostetaan keraäyslista
+				require_once ("tulosta_lahete_kerayslista.inc");
+				
+				//hatetaan asiakkaan tiedot
+				$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+							FROM asiakas
+							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+				$riresult = mysql_query($query) or pupe_error($query);
+				$asrow = mysql_fetch_array($riresult);
+				
+				// Keräyslistan rivinumerot
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-					$query = " 	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno,
-								tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
-								sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt,
-								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";
+					$query = " 	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
+								sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, group_concat(tilausrivi.tunnus) tunnus,";
 					$lisa = " 	and tilausrivi.tyyppi in ($tvs_tyyppi)
 								GROUP BY 1,2,3,4,5,6,7,8 ";
 				}
 				else {
-					$query = " 	SELECT tilausrivi.*,
-								concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta";
+					$query = " 	SELECT tilausrivi.*,";
 					$lisa = " ";
 				}
 
-				$query .= "	FROM tilausrivi use index (yhtio_otunnus), tuote
+				$query .= "	if(perheid = 0,
+							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+							) as sorttauskentta
+							FROM tilausrivi use index (yhtio_otunnus), tuote
 							WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.var in ('','H')
@@ -436,42 +447,37 @@
 							and tuote.tuoteno=tilausrivi.tuoteno
 							$lisasalker
 							$lisa
-							ORDER BY tilausrivi.perheid, sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
+							ORDER BY sorttauskentta";
 				$result = mysql_query($query) or pupe_error($query);
 
-				//korjataan tää päivämäärä kuntoon jota ei vielä ole
-				$laskurow["lahetepvm"] = date("Y-m-d");
+				$tilausnumeroita = $laskurow["tunnus"];
+				
+				//generoidaan rivinumerot
+				$rivinumerot = array();
 
-				$tilausnumeroita = $laskurow['tunnus'];
-
-				//keräyslistan tulostusta varten
-				if ($yhtiorow["kerailylistatyyppi"] != "" and file_exists($yhtiorow["kerailylistatyyppi"])) {
-					require_once ($yhtiorow["kerailylistatyyppi"]);
-				}
-				else {
-					require_once ("tulosta_lahete_kerayslista.inc");
-				}
-
-				//tehdään uusi PDF failin olio
-				$pdf= new pdffile;
-				$pdf->set_default('margin', 0);
-
-				//pdf:n header..
-				$firstpage = alku();
+				$kal = 1;
 
 				while ($row = mysql_fetch_array($result)) {
-					//piirrä rivi
-					$firstpage = rivi($firstpage);
-					$total += $row["rivihinta"];
+					$rivinumerot[$row["tunnus"]] = $kal;
+					$kal++;
 				}
 
-				//Vikan rivin loppuviiva
-				$x[0] = 20;
-				$x[1] = 580;
-				$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
-				$pdf->draw_line($x, $y, $firstpage, $rectparam);
+				mysql_data_seek($result,0);
 
-				loppu($firstpage, 1);
+				unset($pdf);
+				unset($page);
+
+				$sivu  = 1;
+				$paino = 0;
+
+				// Aloitellaan lähetteen teko
+				$page[$sivu] = alku();
+
+				while ($row = mysql_fetch_array($result)) {
+					rivi($page[$sivu]);
+				}
+
+				loppu($page[$sivu], 1);
 
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 					$query = " 	SELECT *, if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, tilausrivi.tunnus, if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskentta
@@ -536,7 +542,7 @@
 					$kirrow= mysql_fetch_array($kirres);
 					$komento=$kirrow['komento'];
 
-					echo "$tunnus ".t("Siirtolista tulostetaan kirjoittimelle").": $kirrow[kirjoitin]<br>";
+					//echo "$tunnus ".t("Siirtolista tulostetaan kirjoittimelle").": $kirrow[kirjoitin]<br>";
 				}
 
 				//tulostetaan sivu
@@ -566,10 +572,7 @@
 				else {
 
 					if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-						echo t("Valmistus tulostuu")."!<br><br>";
-					}
-					else {
-						echo t("Siirtolista tulostuu")."!<br><br>";
+						echo t("Valmistus tulostuu")."...<br><br>";
 					}
 
 					$query = "	UPDATE lasku
@@ -602,7 +605,7 @@
 		}
 		
 		// ollaan käsitelty projektin osatoimitus joten palataan tunnusnipun otsikolle..
-		if($kuakrow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $projektilla > 0) {
+		if($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $projektilla > 0) {
 
 			$aika=date("d.m.y @ G:i:s", time());
 			echo "<font class='message'>".t("Osatoimitus")." $otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";

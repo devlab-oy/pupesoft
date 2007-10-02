@@ -1397,63 +1397,6 @@
 				}
 			}
 
-			if ($toim == "SIIRTOLISTA") {
-				if ($tilausnumeroita == '') {
-					$tilausnumeroita = $laskurow['tunnus'];
-				}
-
-				#todo pitää lisätä tulosta_siirtolista.inc:iin toimitustapa, tilausviite ja katsoa että varastot menee oikein.
-				//require_once ("tulosta_siirtolista.inc");
-
-				require_once ("tulosta_lahete_kerayslista.inc");
-
-				//tehdään uusi PDF failin olio
-				$pdf= new pdffile;
-				$pdf->set_default('margin', 0);
-
-				//generoidaan lähetteelle ja keräyslistalle rivinumerot
-				$query = "  SELECT *, concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
-							FROM tilausrivi
-							WHERE otunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
-							ORDER BY sorttauskentta, tuoteno";
-				$result = mysql_query($query) or pupe_error($query);
-
-				//generoidaan rivinumerot
-				$rivinumerot = array();
-
-				$kal = 1;
-
-				while ($row = mysql_fetch_array($result)) {
-					$rivinumerot[$row["tunnus"]] = $row["tunnus"];
-				}
-
-				sort($rivinumerot);
-
-				$kal = 1;
-
-				foreach($rivinumerot as $rivino) {
-					$rivinumerot[$rivino] = $kal;
-					$kal++;
-				}
-
-				mysql_data_seek($result,0);
-
-				//pdf:n header..
-				$firstpage = alku();
-
-				while ($row = mysql_fetch_array($result)) {
-					//piirrä rivi
-					$firstpage = rivi($firstpage);
-				}
-
-				loppu($firstpage, 1);
-
-				print_pdf($komento["Siirtolista"]);
-
-				echo t("Siirtolista tulostuu")."...<br>";
-				$tee = '';
-			}
-
 			if ($toim == "VALMISTUS") {
 
 				require_once ("tulosta_valmistus.inc");
@@ -1522,7 +1465,7 @@
 				$otunnus = $laskurow["tunnus"];
 
 				//hatetaan asiakkaan lähetetyyppi
-				$query = "  SELECT lahetetyyppi, luokka, puhelin
+				$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -1664,49 +1607,45 @@
 				$tee = '';
 			}
 
-			if ($toim == "KERAYSLISTA") {
+			if ($toim == "KERAYSLISTA" or $toim == "SIIRTOLISTA") {
 
-				//keräyslistan tulostusta varten
-				if ($yhtiorow["kerailylistatyyppi"] != "" and file_exists($yhtiorow["kerailylistatyyppi"])) {
-					require_once ($yhtiorow["kerailylistatyyppi"]);
-				}
-				else {
-					require_once ("tulosta_lahete_kerayslista.inc");
-				}
+				require_once ("tulosta_lahete_kerayslista.inc");
 
 				$otunnus = $laskurow["tunnus"];
-
-				//tehdään uusi PDF failin olio
-				$pdf= new pdffile;
-				$pdf->set_default('margin', 0);
-
-				//ovhhintaa tarvitaan jos lähetetyyppi on sellainen, että sinne tulostetaan bruttohinnat
-				if ($yhtiorow["alv_kasittely"] != "") {
-					$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta*(1+(tilausrivi.alv/100))),2) ovhhinta ";
+				
+				//hatetaan asiakkaan tiedot
+				$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+							FROM asiakas
+							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+				$result = mysql_query($query) or pupe_error($query);
+				$asrow = mysql_fetch_array($result);
+				
+				// keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
+				if ($yhtiorow["kerataanko_saldottomat"] == '') {
+					$lisa1 = " and tuote.ei_saldoa = '' ";
 				}
 				else {
-					$lisa2 = " round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta),2) ovhhinta ";
+					$lisa1 = " ";
 				}
 
-				//generoidaan lähetteelle ja keräyslistalle rivinumerot
+				//keräyslistan rivit
 				$query = "  SELECT tilausrivi.*,
-							round((tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * tilausrivi.hinta * (1-(tilausrivi.ale/100)),2) rivihinta,
 							tuote.sarjanumeroseuranta,
 							if(perheid = 0,
-								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-								(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
-							) as sorttauskentta,
-							$lisa2
+							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+							) as sorttauskentta
 							FROM tilausrivi, tuote
 							WHERE tilausrivi.otunnus = '$otunnus'
-							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.yhtio = tuote.yhtio
-							and tilausrivi.tuoteno = tuote.tuoteno
-							and tuote.ei_saldoa = ''
+							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
+							and tilausrivi.yhtio 	= tuote.yhtio
+							and tilausrivi.tuoteno  = tuote.tuoteno
+							$lisa1
 							ORDER BY sorttauskentta";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tilausnumeroita = $otunnus;
+				
 				//generoidaan rivinumerot
 				$rivinumerot = array();
 
@@ -1719,33 +1658,30 @@
 
 				mysql_data_seek($result,0);
 
-				//pdf:n header..
-				$firstpage = alku();
+				unset($pdf);
+				unset($page);
+
+				$sivu  = 1;
 				$paino = 0;
 
-				while ($row = mysql_fetch_array($result)) {
-					//piirrä rivi
-					$firstpage = rivi($firstpage);
+				// Aloitellaan lähetteen teko
+				$page[$sivu] = alku();
 
-					if ($row["netto"] != 'N' and $row["laskutettu"] == "") {
-						$total += $row["rivihinta"]; // lasketaan tilauksen loppusummaa MUUT RIVIT.. (ja laskuttamattomat)
-					}
-					else {
-						$total_netto += $row["rivihinta"]; // lasketaan tilauksen loppusummaa NETTORIVIT..
-					}
+				while ($row = mysql_fetch_array($result)) {
+					rivi($page[$sivu]);
 				}
 
-				//Vikan rivin loppuviiva
-				$x[0] = 20;
-				$x[1] = 580;
-				$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
-				$pdf->draw_line($x, $y, $firstpage, $rectparam);
-
-				loppu($firstpage, 1);
-
-				//tulostetaan sivu
-				print_pdf($komento["Keräyslista"]);
-				$tee = '';
+				loppu($page[$sivu], 1);
+				
+				if ($toim == "SIIRTOLISTA") {
+					print_pdf($komento["Siirtolista"]);
+					$tee = '';
+				}
+				else {
+					//tulostetaan sivu
+					print_pdf($komento["Keräyslista"]);
+					$tee = '';
+				}
 			}
 
 			if($toim == "OSOITELAPPU") {

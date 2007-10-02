@@ -681,7 +681,7 @@
 							$pohja = $pohja - 10;
 						}
 
-						$kala = $pohja-20;
+						$kala = $pohja - 25;
 
 					}
 					else {

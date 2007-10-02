@@ -126,10 +126,10 @@
 		if ($tee == "UUSIMEMO") {
 			
 			if (checkdate($mkka, $mppa, $mvva)) {
-				$pvmalku  = "'$mvva-$mkka-$mppa'";
+				$pvmalku  = "'$mvva-$mkka-$mppa $mhh:$mmm:00'";
 			}
 			else {
-				$pvmalku  = "now()";
+				$pvmalku  = "'".date("Y-m-d H:i:s")."'";
 			}
 			
 			if ($kuittaus == '' and $tyyppi == "Muistutus") {
@@ -152,6 +152,37 @@
 								laatija			= '$kukarow[kuka]',
 								luontiaika		= now()";
 					$result = mysql_query($kysely) or pupe_error($kysely);
+					$muist = mysql_insert_id();
+					
+					if ($tyyppi == "Muistutus") {
+						$ok = 1;
+
+						$query = "	SELECT *
+									FROM kuka
+									WHERE yhtio	= '$kukarow[yhtio]'
+									and kuka	= '$kuka'";
+						$result = mysql_query($query) or pupe_error($query);
+						$row = mysql_fetch_array($result);
+
+						// K‰yt‰j‰lle l‰hetet‰‰n tekstiviestimuistutus
+						if ($row["puhno"] != '' and strlen($viesti) > 0 and $sms_palvelin != "" and $sms_user != "" and $sms_pass != "") {
+
+							$teksti = substr("Muistutus $yhtiorow[nimi]. $tapa. ".$viesti, 0, 160);
+							$teksti = urlencode($teksti);
+
+							$retval = file_get_contents("$sms_palvelin?user=$sms_user&pass=$sms_pass&numero=$row[puhno]&viesti=$teksti&not_before_date=$mvva-$mkka-$mppa&not_before=$mhh:$mmm:00&yhtio=$kukarow[yhtio]&kalenteritunnus=$muist");
+
+							if (trim($retval) == "0") $ok = 0;
+						}
+
+						if ($ok == 1) {
+							echo "<font class='error'>VIRHE: Tekstiviestin l‰hetys ep‰onnistui! $retval</font><br><br>";
+						}
+
+						if ($ok == 0) {
+							echo "<font class='message'>Tekstiviestimuistutus lehetet‰‰n!</font><br><br>";
+						}
+					}
 				
 					$tapa     	= "";
 					$viesti   	= "";
@@ -161,6 +192,8 @@
 					$mvva 		= "";
 					$mkka 		= "";
 					$mppa 		= "";
+					$mhh 		= "";
+					$mmm		= "";
 					$kuka		= "";
 					$kuittaus 	= "";
 				}
@@ -190,6 +223,8 @@
 				$mvva 		= "";
 				$mkka 		= "";
 				$mppa 		= "";
+				$mhh 		= "";
+				$mmm		= "";
 				$kuka		= "";
 				$kuittaus 	= "";
 			}
@@ -258,6 +293,10 @@
 			$mvva 		= substr($korjrow["pvmalku"],0,4);
 			$mkka 		= substr($korjrow["pvmalku"],5,2);
 			$mppa 		= substr($korjrow["pvmalku"],8,2);
+			
+			$mhh 		= substr($korjrow["pvmalku"],11,2);
+			$mmm 		= substr($korjrow["pvmalku"],14,2);
+			
 			$kuka		= $korjrow["kuka"];
 			$kuittaus 	= $korjrow["kuittaus"];
 			
@@ -520,12 +559,19 @@
 					if (!isset($mvva))
 						$mvva = date("Y");
 					if (!isset($mppa))
-						$mppa = date("d");
-
-					echo "<tr><th>".t("Muistutusp‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
+						$mppa = date("d");	
+					if (!isset($mhh))
+						$mhh = "08";
+					if (!isset($mmm))
+						$mmm = "00";
+						
+					echo "<tr><th>".t("Muistutusp‰iv‰m‰‰r‰ (pp-kk-vvvv tt:mm)")."</th>
 							<td colspan='2'><input type='text' name='mppa' value='$mppa' size='3'>-
 							<input type='text' name='mkka' value='$mkka' size='3'>-
-							<input type='text' name='mvva' value='$mvva' size='5'></td></tr>";
+							<input type='text' name='mvva' value='$mvva' size='5'>
+							&nbsp;&nbsp;
+							<input type='text' name='mhh' value='$mhh' size='3'>:
+							<input type='text' name='mmm' value='$mmm' size='3'></td></tr>";
 				
 					if ($kuittaus == "E") {
 						$sel = "CHECKED";
@@ -568,7 +614,7 @@
 						</td></tr>";
 
 
-				echo "	<td align='right'>
+				echo "	<td colspan='3' align='right' class='back'>
 						<form action='$PHP_SELF' method='POST'>
 						<input type='hidden' name='tee' 		value='KORJAAMEMO'>
 						<input type='hidden' name='from' 		value='$from'>
@@ -577,9 +623,10 @@
 						<input type='hidden' name='asiakasid' 	value='$asiakasid'>
 						<input type='submit' name='submit' value='".t("Korjaa viimeisint‰")."'>
 						</form>
-						</td>";
-
+						</td></tr>";
+					
 				echo "</table>";
+				echo "<br>";
 			}
 
 			///* Haetaan memosta sisalto asiakkaan kohdalta *///

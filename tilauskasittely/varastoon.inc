@@ -569,9 +569,15 @@ if ($toiminto != "kaikkiok" and $jtrivit != "") {
 echo "<hr>";
 echo "<form action='$PHP_SELF' method='post'>";
 echo "<input type='hidden' name='toiminto' value=''>";
+echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
+echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+echo "<input type='submit' value='".t("Takaisin keikan valintaan")."'>";
+echo "</form>&nbsp;";
+echo "<form action='$PHP_SELF' method='post'>";
+echo "<input type='hidden' name='toiminto' value=''>";
 echo "<input type='hidden' name='toimittajaid' value=''>";
 echo "<input type='hidden' name='ytunnus' value=''>";
-echo "<input type='submit' value='".t("Takaisin keikan valintaan")."'>";
+echo "<input type='submit' value='".t("Takaisin toimittajan valintaan")."'>";
 echo "</form>";
 
 ?>

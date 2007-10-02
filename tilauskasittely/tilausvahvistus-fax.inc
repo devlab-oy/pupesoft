@@ -7,6 +7,8 @@ $query         = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus
 $tilvahresult  = mysql_query($query) or pupe_error($query);
 $tilvahasiakas = mysql_fetch_array($tilvahresult);
 
+$kieli = strtolower($tilvahasiakas['kieli']);
+
 if ($tilvahasiakas['fax'] == '') {
 
 	$tilvah_nimi = $tilvahasiakas["nimi"];

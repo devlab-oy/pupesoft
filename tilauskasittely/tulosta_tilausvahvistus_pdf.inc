@@ -1,5 +1,12 @@
 <?php
 
+	//hatetaan asiakkaan lähetetyyppi
+	$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+				FROM asiakas
+				WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$asrow = mysql_fetch_array($result);
+
 	if ($naytatvale == 2) {
 		$lahetetyyppi = "tulosta_lahete_eialeja.inc";
 	}

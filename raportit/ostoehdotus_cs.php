@@ -371,7 +371,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	$query = "	select
 				group_concat(tuote.yhtio) yhtio,
 				tuote.tuoteno,
-				tuote.halytysraja,
+				CEIL(tuote.halytysraja) halytysraja,
 				tuote.tahtituote,
 				tuote.status,
 				tuote.nimitys,
@@ -443,6 +443,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 					group_concat(distinct tuotteen_toimittajat.toim_nimitys order by tuotteen_toimittajat.tunnus separator '/') toim_nimitys,
 					group_concat(distinct tuotteen_toimittajat.ostohinta    order by tuotteen_toimittajat.tunnus separator '/') ostohinta,
 					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '/') tuotekerroin,
+					group_concat(distinct tuotteen_toimittajat.pakkauskoko  order by tuotteen_toimittajat.tunnus separator '/') pakkauskoko,
 					group_concat(distinct tuotteen_toimittajat.toimitusaika order by tuotteen_toimittajat.tunnus separator '/') toimitusaika
 					FROM tuotteen_toimittajat
 					WHERE yhtio in ($yhtiot)
@@ -551,7 +552,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			echo "<td valign='top' $bt  align='right'>".(float) $saldot."</td>";
 			echo "<td valign='top' $bt  align='right'>".(float) $ostot."</td>";
 			echo "<td valign='top' $bt  align='right'><font style='color: 00FF00;'>$ostoehdotus</font></td>";
-			echo "<td valign='top' $bt  align='right'>".(float) $toimirow["osto_era"]."</td>";
+			echo "<td valign='top' $bt  align='right'>".(float) $toimirow["pakkauskoko"]."</td>";
 			echo "<td valign='top' $btr align='right'>".(float) $toimirow["toimitusaika"]." ".t("pva")."</td>";
 			echo "</tr>";
 		

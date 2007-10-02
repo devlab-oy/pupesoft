@@ -40,7 +40,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "maa") {
+	if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "laskutus_maa") {
 		$query = "	SELECT distinct koodi, nimi
 					FROM maat
 					WHERE nimi != ''

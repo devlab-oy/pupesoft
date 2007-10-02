@@ -165,13 +165,25 @@
 						//	Sitten vielä tilaajatiedot
 						$pdf->write($h, 1, $s[0], 0, t("Laskutusosoite", $kieli).":", "norm", "L", "B");
 						$h-=$pdf->ln();
-						$pdf->write($h, 1, $s[0], 0, $yhtiorow["nimi"], "norm", "L", "");
-						$h-=$pdf->ln();
-						$pdf->write($h, 1, $s[0], 0, $yhtiorow["osoite"], "norm", "L", "");
-						$h-=$pdf->ln();
-						$pdf->write($h, 1, $s[0], 0, $yhtiorow["postino"]." ".$yhtiorow["positp"], "norm", "L", "");
-						$h-=$pdf->ln();
-						$pdf->write($h, 1, $s[0], 0, t($yhtiorow["maa"]), "norm", "L", "");
+						
+						if($yhtiorow["laskutus_nimi"] == "") {
+							$pdf->write($h, 1, $s[0], 0, $yhtiorow["nimi"], "norm", "L", "");
+							$h-=$pdf->ln();
+							$pdf->write($h, 1, $s[0], 0, $yhtiorow["osoite"], "norm", "L", "");
+							$h-=$pdf->ln();
+							$pdf->write($h, 1, $s[0], 0, $yhtiorow["postino"]." ".$yhtiorow["postitp"], "norm", "L", "");
+							$h-=$pdf->ln();
+							$pdf->write($h, 1, $s[0], 0, t($yhtiorow["maa"]), "norm", "L", "");
+						}
+						else {
+							$pdf->write($h, 1, $s[0], 0, $yhtiorow["laskutus_nimi"], "norm", "L", "");
+							$h-=$pdf->ln();
+							$pdf->write($h, 1, $s[0], 0, $yhtiorow["laskutus_osoite"], "norm", "L", "");
+							$h-=$pdf->ln();
+							$pdf->write($h, 1, $s[0], 0, $yhtiorow["laskutus_postino"]." ".$yhtiorow["laskutus_postitp"], "norm", "L", "");
+							$h-=$pdf->ln();
+							$pdf->write($h, 1, $s[0], 0, t($yhtiorow["laskutus_maa"]), "norm", "L", "");							
+						}
 						$h-=$pdf->ln();	
 																							
 						$h-=$pdf->ln(1.5);

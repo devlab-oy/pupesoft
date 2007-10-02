@@ -139,6 +139,11 @@
 					(SELECT laskunro, ytunnus, liitostunnus
 					FROM lasku use index (yhtio_tunnusnippu)
 					WHERE tunnusnippu = '$otunnus'
+					and yhtio = '$kukarow[yhtio]')
+					UNION
+					(SELECT laskunro, ytunnus, liitostunnus
+					FROM lasku use index (yhtio_asiakkaan_tilausnumero)
+					WHERE asiakkaan_tilausnumero = '$otunnus'
 					and yhtio = '$kukarow[yhtio]')";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);

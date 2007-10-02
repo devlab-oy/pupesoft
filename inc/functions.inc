@@ -48,7 +48,7 @@ if (!function_exists("tv1dateconv")) {
 		//kääntää mysqln vvvv-kk-pp muodon muotoon pp.kk.vvvv
 		//2007-05-09 12:18:18
 		if (strlen($date) > 10 and $pitka != "") {
-			$jatko = substr($date,10);
+			$jatko = substr($date,10, 6);
 		}
 		else {
 			$jatko = "";

@@ -16,6 +16,7 @@
 		}
 	}
 	else {
+			
 		$toim = strtoupper($toim);
 
 		if ($toim == "" or $toim == "SUPER") {
@@ -820,25 +821,25 @@
 		}
 		$result = mysql_query($query) or pupe_error($query);
 
-
 		if (mysql_num_rows($result) != 0) {
 		
-			if(@include('Spreadsheet/Excel/Writer.php')) {
+			if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+				if(@include('Spreadsheet/Excel/Writer.php')) {
 		
-				//keksitään failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
+					//keksitään failille joku varmasti uniikki nimi:
+					list($usec, $sec) = explode(' ', microtime());
+					mt_srand((float) $sec + ((float) $usec * 100000));
+					$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 		
-				$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-				$worksheet = $workbook->addWorksheet('Sheet 1');
+					$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+					$worksheet = $workbook->addWorksheet('Sheet 1');
 	
-				$format_bold = $workbook->addFormat();
-				$format_bold->setBold();
+					$format_bold = $workbook->addFormat();
+					$format_bold->setBold();
 	
-				$excelrivi = 0;
+					$excelrivi = 0;
+				}
 			}
-
 			echo "<table border='0' cellpadding='2' cellspacing='1'>";
 
 			echo "<tr>";

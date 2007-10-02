@@ -1125,7 +1125,7 @@
 			}
 		}
 		else {
-			echo t("Ei tilauksia")."...";
+			echo t("Ei tilauksia")."...<br>";
 		}
 
 		if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {

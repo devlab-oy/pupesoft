@@ -138,6 +138,7 @@
 						tuotekerroin	= '$tuotekerroin',
 						alkuperamaa		= '$alkuperamaa',
 						toimitusaika	= '$toimitusaika',
+						pakkauskoko		= '$pakkauskoko',
 						liitostunnus	= '$tuotoimirow[tunnus]'
 						where yhtio = '$kukarow[yhtio]' and tunnus = '$toimtunnus'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -171,6 +172,7 @@
 						tuotekerroin	= '$tuotekerroin',
 						alkuperamaa		= '$alkuperamaa',
 						toimitusaika	= '$toimitusaika',
+						pakkauskoko		= '$pakkauskoko',
 						liitostunnus	= '$tuotoimirow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
 			synkronoi("tuotteen_toimittajat", mysql_insert_id(), $origrow);			
@@ -231,6 +233,8 @@
 
 			
 			echo "<tr><th>".t("osto_era")."</th>			<td><input type='text' name='osto_era' 		value='$osto_era'>			</td><td class='back'>".$toimerrorit[0]["osto_era"]."</td></tr>";
+			echo "<tr><th>".t("pakkauskoko")."</th>			<td><input type='text' name='pakkauskoko'	value='$pakkauskoko'>		</td><td class='back'>".$toimerrorit[0]["pakkauskoko"]."</td></tr>";
+			echo "<tr><th>".t("toimitusaika")."</th>		<td><input type='text' name='toimitusaika'	value='$toimitusaika'>		</td><td class='back'>".$toimerrorit[0]["toimitusaika"]."</td></tr>";
 			echo "<tr><th>".t("ostohinta")."</th>			<td><input type='text' name='ostohinta' 	value='$ostohinta'>			</td><td class='back'>".$toimerrorit[0]["ostohinta"]."</td></tr>";
 			echo "<tr><th>".t("alennus")."</th>				<td><input type='text' name='alennus'	 	value='$alennus'>			</td><td class='back'>".$toimerrorit[0]["alennus"]."</td></tr>";
 			echo "<tr><th>".t("valuutta")."</th>			<td>$valuu																</td><td class='back'>".$toimerrorit[0]["valuutta"]."</td></tr>";
@@ -239,7 +243,7 @@
 			echo "<tr><th>".t("toim_yksikko")."</th>		<td><input type='text' name='toim_yksikko' maxlength='3' size='4' 	value='$toim_yksikko'>		</td><td class='back'>".$toimerrorit[0]["toim_yksikko"]."</td></tr>";			
 			echo "<tr><th>".t("tuotekerroin")."</th>		<td><input type='text' name='tuotekerroin'	value='$tuotekerroin'>		</td><td class='back'>".$toimerrorit[0]["tuotekerroin"]."</td></tr>";
 			echo "<tr><th>".t("alkuperamaa")."</th>			<td>$maat																</td><td class='back'>".$toimerrorit[0]["alkuperamaa"]."</td></tr>";
-			echo "<tr><th>".t("toimitusaika")."</th>		<td><input type='text' name='toimitusaika'	value='$toimitusaika'>		</td><td class='back'>".$toimerrorit[0]["toimitusaika"]."</td></tr>";
+			
 			echo "</table><hr>";
 
 			echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
@@ -304,7 +308,6 @@
 				echo "<table>";
 				echo "<tr><th>".t("toimittaja")."</th>	<td>";
 
-
 				if ($toim_valinta[$toimtunnus] != "") {
 					echo "$toim_valinta[$toimtunnus]";
 				}
@@ -341,6 +344,46 @@
 				}
 				else {
 					echo "<input type='hidden' name='osto_era'value='$trow[osto_era]'>";
+				}
+				
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.pakkauskoko'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td><input type='text' name='pakkauskoko'value='$trow[pakkauskoko]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["pakkauskoko"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("pakkauskoko")."</th><td><input type='text' name='pakkauskoko'value='$trow[pakkauskoko]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["pakkauskoko"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='pakkauskoko'value='$trow[pakkauskoko]'>";
+				}
+				
+				$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							and laji='MYSQLALIAS'
+							and selite='tuotteen_toimittajat.toimitusaika'
+							$al_lisa";
+				$al_res = mysql_query($query) or pupe_error($query);
+
+				if(mysql_num_rows($al_res) > 0) {
+					$al_row = mysql_fetch_array($al_res);
+
+					echo "<tr><th>$al_row[selitetark]</th><td><input type='text' name='toimitusaika'value='$trow[toimitusaika]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toimitusaika"]."</td></tr>";
+				}
+				elseif ($rajattu_nakyma == '') {
+						echo "<tr><th>".t("toimitusaika")."</th><td><input type='text' name='toimitusaika'value='$trow[toimitusaika]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toimitusaika"]."</td></tr>";
+				}
+				else {
+					echo "<input type='hidden' name='toimitusaika'value='$trow[toimitusaika]'>";
 				}
 				
 				$query = "	SELECT *
@@ -501,26 +544,6 @@
 				}
 				else {
 					echo "<input type='hidden' name='alkuperamaa'value='$trow[alkuperamaa]'>";
-				}
-				
-				$query = "	SELECT *
-							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]'
-							and laji='MYSQLALIAS'
-							and selite='tuotteen_toimittajat.toimitusaika'
-							$al_lisa";
-				$al_res = mysql_query($query) or pupe_error($query);
-
-				if(mysql_num_rows($al_res) > 0) {
-					$al_row = mysql_fetch_array($al_res);
-
-					echo "<tr><th>$al_row[selitetark]</th><td><input type='text' name='toimitusaika' value='$trow[toimitusaika]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toimitusaika"]."</td></tr>";
-				}
-				elseif ($rajattu_nakyma == '') {
-						echo "<tr><th>".t("toimitusaika")."</th><td><input type='text' name='toimitusaika' value='$trow[toimitusaika]'></td><td class='back'>".$toimerrorit[$trow["tunnus"]]["toimitusaika"]."</td></tr>";
-				}
-				else {
-					echo "<input type='hidden' name='toimitusaika'value='$trow[toimitusaika]'>";
 				}
 
 				echo "<tr><td class='back'>";

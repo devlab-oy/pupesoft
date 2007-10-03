@@ -45,28 +45,10 @@ if ($tee == "lisaalisaa") {
 		$tee = "lisaa";
 	}
 	
-	if ($kirjain == "1" and substr($uusitaso,0,1) != "1") {
-		// Vastaavaa Varat
-		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: 1!</font><br>";
+	if (substr($taso,0,1) != substr($uusitaso,0,1)) {
+
+		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: ".substr($taso,0,1)."!</font><br>";
 		
-		$tee = "lisaa";
-	}
-	elseif ($kirjain == "2" and substr($uusitaso,0,1) != "2") {
-		// Vastattavaa Velat
-		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: 2!</font><br>";
-
-		$tee = "lisaa";
-	}
-	elseif ($kirjain == "U" and substr($uusitaso,0,1) != "3") {
-		// Ulkoinen tuloslaskelma
-		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: 3!</font><br>";
-
-		$tee = "lisaa";
-	}
-	elseif(substr($uusitaso,0,1) != "3") {
-		// Sisäinen tuloslaskelma
-		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: 3!</font><br>";
-
 		$tee = "lisaa";
 	}
 	
@@ -159,6 +141,9 @@ if ($tee == "lisaa") {
 			<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
 			<table>";
 
+	$valittuu="";
+	if ($tyyppi='U') $valittuu="selected";
+
 	echo "
 		<tr><th align='left'>Sisennetäänkö ylemmät tasot</th><td>
 		<select name='sisennys'>
@@ -167,9 +152,8 @@ if ($tee == "lisaa") {
 		</select></td></tr>
 	
 		<tr><th align='left'>Tyyppi</th><td>
-		<select name='tyyppi'>
 		<option value = 'S' >Sisäinen</option>
-		<option value = 'U' >Ulkoinen</option>
+		<option value = 'U' $valittuu>Ulkoinen</option>
 		</select></td></tr>
 	
 		<tr><th align='left'>Laji</th>
@@ -195,28 +179,10 @@ if ($tee == "muutamuuta") {
 		$tee = "muuta";
 	}
 	
-	if ($kirjain == "1" and substr($uusitaso,0,1) != "1") {
-		// Vastaavaa Varat
-		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: 1!</font><br>";
+	if (substr($taso,0,1) != substr($uusitaso,0,1)) {
+
+		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: ".substr($taso,0,1)."!</font><br>";
 		
-		$tee = "muuta";
-	}
-	elseif ($kirjain == "2" and substr($uusitaso,0,1) != "2") {
-		// Vastattavaa Velat
-		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: 2!</font><br>";
-
-		$tee = "muuta";
-	}
-	elseif ($kirjain == "U" and substr($uusitaso,0,1) != "3") {
-		// Ulkoinen tuloslaskelma
-		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: 3!</font><br>";
-
-		$tee = "muuta";
-	}
-	elseif(substr($uusitaso,0,1) != "3") {
-		// Sisäinen tuloslaskelma
-		echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: 3!</font><br>";
-
 		$tee = "muuta";
 	}
 	
@@ -304,6 +270,7 @@ if ($tee == "muuta") {
 }
 
 if ($tee == "tilitasotilitaso") {
+
 	if ($kirjain == "S") {
 		$query = "	UPDATE tili
 					SET sisainen_taso = '$uusitaso'
@@ -339,7 +306,7 @@ if ($tee == "tilitaso") {
 
 	echo "<tr><th align='left'>Uusi tasokoodi</th>";		
 		
-	$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='S' order by taso";
+	$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='$kirjain' and left(taso,1)='$taso' order by taso";
 	$tasoresu = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='uusitaso'>\n";

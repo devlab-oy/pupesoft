@@ -65,6 +65,20 @@
 		
 		while ($row = mysql_fetch_array($res)) {
 			
+			$kysely = "	INSERT INTO kalenteri
+						SET tapa 		= '".t("Osoitetarrat")."',
+						asiakas  		= '$row[ytunnus]',
+						liitostunnus 	= '$row[tunnus]',
+						kuka     		= '$kukarow[kuka]',
+						yhtio    		= '$kukarow[yhtio]',
+						tyyppi   		= 'Memo',
+						pvmalku  		= now(),
+						kentta01 		= '$kukarow[nimi] tulosti osoitetarrat.\n$arvomatikka',
+						laatija			= '$kukarow[kuka]',
+						luontiaika		= now()";
+			$result = mysql_query($kysely) or pupe_error($kysely);
+			
+			
     	    // k‰ytet‰‰n toim_ tietoja jos niin halutaan
     		if ($_POST['toimas'] == 'on') {
 				
@@ -198,7 +212,10 @@
 					$limit";
 		$result = mysql_query($query) or pupe_error($query);
 			
-		echo "<form action = '$PHP_SELF' method = 'post'>";
+		echo "<form action = '$PHP_SELF' method = 'post'>
+		<input type='hidden' name='arvomatikka' value='$arvomatikka'>
+		<input type='hidden' name='raportti' value='$raportti'>
+		<input type='hidden' name='toimas' value='$toimas'>";
 				
 		echo "<table><tr>";
 		echo "<th></th>";
@@ -236,12 +253,22 @@
 
 		$otunnus = substr($otunnus,0,-1);
 
+		$tck = "";
+		$sel = "";
+		
+		if ($toimas != "") {
+			$tck = "CHECKED";
+		}
+		
+		$sel[$raportti] = "SELECTED";
+
 		echo "<table>";
-		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on'></td></tr>";
+		echo "<tr><th>".t("Asiakasmemon viesti").":</th><td><input type='text' size='20' name='arvomatikka' value='$arvomatikka'></td></tr>";
+		echo "<tr><th>".t("Tulosta toimitusosoitteen tiedot").":</th><td><input type='checkbox' name='toimas' value='on' $tck></td></tr>";
 		echo "<tr><th>".t("Valitse tarra-arkin tyyppi").":</th>
 				<td><select name='raportti'>
-				<option value='33'>33 ".t("Tarraa")."</option>
-				<option value='24'>24 ".t("Tarraa")."</option>
+				<option value='33' $sel[33]>33 ".t("Tarraa")."</option>
+				<option value='24' $sel[24]>24 ".t("Tarraa")."</option>
 				</select></td></tr>";
 		
 		echo "<tr><td class='back'><input type='Submit' value = '".t("Tulosta")."'></td><td class='back'></td></tr></table></form>";

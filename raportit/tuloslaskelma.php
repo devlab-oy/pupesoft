@@ -261,7 +261,8 @@
 				
 				echo "	<form action = '".$palvelin2."tasomuutos.php' method='post'>
 						<input type = 'hidden' name = 'tee' value = 'tilitaso'>
-						<input type = 'hidden' name = 'kirjain' value = '$kirjain'>";
+						<input type = 'hidden' name = 'kirjain' value = '$kirjain'>
+						<input type = 'hidden' name = 'taso' value = '$aputyyppi'>";
 				
 				$lopetus = "raportit/tuloslaskelma.php////";
 						

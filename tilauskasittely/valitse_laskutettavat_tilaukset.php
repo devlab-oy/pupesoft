@@ -17,12 +17,23 @@
 		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
 						and tilausrivi.varattu  != 0";
 	}
-	else {
+	elseif ($toim == "VAINOMATLASKUTA") {
+		echo "<font class='head'>".t("Laskuta tilaus").":</font><hr>";
+
+		$alatilat = " 	and (lasku.alatila = 'D' or (lasku.alatila = 'C' and lasku.eilahetetta != ''))";
+		$vientilisa = " and lasku.vienti = '' and (lasku.laatija = '$kukarow[kuka]' or lasku.myyja = '$kukarow[tunnus]')";
+		$muutlisa = "	and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
+						and tilausrivi.varattu  != 0";
+	}
+	elseif ($toim == "VIENTI") {
 		echo "<font class='head'>".t("Tulosta vientilaskuja").":</font><hr>";
 
 		$alatilat = " 	and lasku.alatila in ('E') ";
 		$vientilisa = " and lasku.vienti != '' ";
  		$muutlisa = "	and tilausrivi.laskutettu = '' ";
+	}
+	else {
+		exit;
 	}
 
 

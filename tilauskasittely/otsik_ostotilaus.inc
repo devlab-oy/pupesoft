@@ -281,9 +281,10 @@
 		echo "</select></td></tr>";
 
 		echo "<tr><td>".t("Tilausviite").":</td><td colspan='3'>
-			<input type='text' size='61' name='viesti' value='$srow[viesti]'></td>";
+			<input type='text' size='61' name='viesti' value='$srow[viesti]'> (".t("Ostotilaus").")</td>";
 		echo "</tr>";
-		echo "<tr><td>".t("Kommentit").":</td><td colspan='3'><textarea name='comments' rows='2' cols='60'>$srow[comments]</textarea></td></tr>";
+		echo "<tr><td>".t("Viesti").":</td><td colspan='3'><textarea name='sisviesti1' rows='2' cols='60'>$srow[sisviesti1]</textarea> (".t("Ostotilaus").")</td></tr>";
+		echo "<tr><td>".t("Kommentit").":</td><td colspan='3'><textarea name='comments' rows='2' cols='60'>$srow[comments]</textarea> (".t("Sisäinen").")</td></tr>";
 		echo "</table>";
 		echo "<input type='hidden' name='from' value='$from'><br>";
 		echo "<br><br>";
@@ -372,6 +373,7 @@
 					ovttunnus 			= '$ovttunnus',
 					toim_ovttunnus 		= '$toim_ovttunnus',
 					viesti 				= '$viesti',
+					sisviesti1			= '$sisviesti1',
 					chn					= '$chn',
 					kuljetus 			= '$kuljetus',
 					huolitsija 			= '$huolitsija',

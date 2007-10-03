@@ -549,8 +549,7 @@
 					else {
 						$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$thispage, $norm);
 						$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$thispage, $norm);
-						$pdf->draw_text(30, 795, $yhtiorow["postino"], 	$thispage, $norm);
-						$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$thispage, $norm);
+						$pdf->draw_text(30, 795, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$thispage, $norm);
 						$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $norm);
 					}
 
@@ -655,8 +654,8 @@
 					
 					$komm = "";
 					
-					if (trim($laskurow['comments']) != '') {
-						$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+					if (trim($laskurow['sisviesti1']) != '') {
+						$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 100, "\n###");							
 					}
 					
 					//Tulostetaan laskun kommentti

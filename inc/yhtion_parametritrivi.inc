@@ -580,28 +580,6 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "kerailylistatyyppi") {
-
-		$query = "	SELECT selite, selitetark
-					FROM avainsana
-					WHERE yhtio = '$kukarow[yhtio]' and laji = 'KERAYSLISTA'
-					ORDER BY jarjestys, selite";
-		$kires = mysql_query($query) or pupe_error($query);
-
-		$ulos = "<td><select name='$nimi'>";
-
-		while ($kirow=mysql_fetch_array($kires)) {
-			if ($kirow["selite"]==$trow[$i]) $select='SELECTED';
-			else $select = '';
-
-			$ulos .= "<option value='$kirow[selite]' $select>$kirow[selitetark]</option>";
-		}
-
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
 	if (mysql_field_name($result, $i) == "lasku_tulostin") {
 
 		$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' ORDER BY kirjoitin";

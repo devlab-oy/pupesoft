@@ -641,6 +641,18 @@
 						}
 					}
 				}
+				
+				if ($mukaan == "kustannuspaikka") {
+					if ($group!="") $group .= ",kustpaikka";
+					else $group  .= "kustpaikka";
+					$select .= "if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustpaikka, ";
+					$order  .= "kustpaikka,";
+					$gluku++;
+					
+					if ($rajaus[$i] != "") {
+						$lisa .= " and (tuote.kustp='$rajaus[$i]' or asiakas.kustannuspaikka='$rajaus[$i]') ";
+					}
+				}
 			}
 			
 			if ($tilrivikomm != "") {
@@ -840,7 +852,7 @@
 
 			// ja sitten ajetaan itte query
 			if ($query != "") {
-
+				
 				$result = mysql_query($query) or pupe_error($query);
 
 				$rivilimitti = 2000;
@@ -1570,6 +1582,7 @@
 			if ($ruksit[9]  != '') 		$ruk9chk  = "CHECKED";
 			if ($ruksit[10] != '') 		$ruk10chk = "CHECKED";
 			if ($ruksit[11] != '')		$ruk11chk = "CHECKED";			
+			if ($ruksit[12] != '')		$ruk12chk = "CHECKED";
 			if ($nimitykset != '')   	$nimchk   = "CHECKED";
 			if ($kateprossat != '')  	$katchk   = "CHECKED";
 			if ($osoitetarrat != '') 	$tarchk   = "CHECKED";
@@ -1654,6 +1667,12 @@
 				<td><input type='text' name='jarjestys[11]' size='2' value='$jarjestys[11]'></td>
 				<td><input type='checkbox' name='ruksit[11]' value='myyja' $ruk11chk></td>
 				<td><input type='text' name='rajaus[11]' value='$rajaus[11]'></td>
+				</tr>
+				<tr>
+				<th>".t("Listaa kustannuspaikoittain")."</th>
+				<td><input type='text' name='jarjestys[12]' size='2' value='$jarjestys[12]'></td>
+				<td><input type='checkbox' name='ruksit[12]' value='kustannuspaikka' $ruk12chk></td>
+				<td><input type='text' name='rajaus[12]' value='$rajaus[12]'></td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

@@ -157,18 +157,22 @@
 
 	echo "<font class='head'>".t("Varastonarvoon vaikuttavat laskut joilla ei ole varastokirjauksia")."</font><hr>";
 
-	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi.ltunnus
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus, tiliointi2.ltunnus
 				FROM lasku
-				LEFT JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and
-									tiliointi.ltunnus = lasku.tunnus and
-									tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]') and
-									tiliointi.korjattu = '')
+				LEFT JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
+									tiliointi1.ltunnus = lasku.tunnus and
+									tiliointi1.tilino in ('$yhtiorow[varastonmuutos]') and
+									tiliointi1.korjattu = '')
+				LEFT JOIN tiliointi AS tiliointi2 ON (tiliointi2.yhtio = lasku.yhtio and
+									tiliointi2.ltunnus = lasku.tunnus and
+									tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]') and
+									tiliointi2.korjattu = '')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
 				lasku.tila in ('H','Y','M','P','Q') and
 				lasku.vienti in ('B','C','J','E','F','K','H','I','L') and
 				lasku.tapvm >= '$avv-$akk-$app' and
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
-				HAVING tiliointi.ltunnus IS NULL
+				HAVING tiliointi1.ltunnus IS NULL or tiliointi2.ltunnus IS NULL
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = mysql_query($query) or pupe_error($query);
 

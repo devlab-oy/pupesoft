@@ -685,9 +685,9 @@
 			$sel = "selected";
 		}
 
-		$ulos .= "<option value = '' $sel>".t("Kassamyyj‰ saa hyvitt‰‰ myyntitilauksella")."";
-		$ulos .= "<option value = 'K' $sel1>".t("Kaikki saa hyvitt‰‰ myyntitilauksella")."";
-		$ulos .= "<option value = 'V' $sel2>".t("Vain valitut k‰ytt‰j‰t saa hyvitt‰‰ myyntitilauksella")."";
+		$ulos .= "<option value = '' $sel>".t("Kassamyyj‰ saa jyvitt‰‰ myyntitilauksella")."";
+		$ulos .= "<option value = 'K' $sel1>".t("Kaikki saa jyvitt‰‰ myyntitilauksella")."";
+		$ulos .= "<option value = 'V' $sel2>".t("Vain valitut k‰ytt‰j‰t saa jyvitt‰‰ myyntitilauksella")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

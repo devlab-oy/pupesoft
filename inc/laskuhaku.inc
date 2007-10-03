@@ -91,12 +91,13 @@ if ($tee != '') {
 
 	$alku += 0;
 
-	$query = "SELECT tapvm, erpcm, olmapvm, concat_ws(' ', nimi, nimitark) nimi,
-			  summa, valkoodi, ebid, tila, alatila, tunnus
-			  FROM lasku $index
-			  WHERE $ehto and yhtio='$kukarow[yhtio]'
-			  ORDER BY $jarj
-			  LIMIT $alku, 50";
+	$query = "	SELECT tapvm, erpcm, olmapvm, concat_ws('<br>', nimi, nimitark) nimi,
+				concat_ws(' ', viite, viesti) 'viite/viesti',
+			  	summa, valkoodi, ebid, tila, alatila, tunnus
+			  	FROM lasku $index
+			  	WHERE $ehto and yhtio='$kukarow[yhtio]'
+			  	ORDER BY $jarj
+			  	LIMIT $alku, 50";
 	$result = mysql_query($query) or pupe_error($query);
 	$seraavako = mysql_num_rows($result);
 
@@ -119,32 +120,32 @@ if ($tee != '') {
 
 			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 
-				if ($i == 6) {
+				if ($i == 0) { // Linkki tositteelle, jos kayttaja saa sita tehda
+					if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2 and $kukarow['taso'] != 3) {
+						echo "<td valign='top'>".tv1dateconv($trow[$i])."</td>";
+					}
+					else {
+						echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>".tv1dateconv($trow[$i])."</td>";
+					}
+				}	
+				elseif ($i == 1 or $i == 2) {
+					echo "<td valign='top'>".tv1dateconv($trow[$i])."</td>";
+				}
+				elseif ($i == 4) {
+					echo "<td valign='top' align='right'>$trow[$i]</td>";
+				}
+				elseif ($i == 7) {
 					// tehd‰‰n lasku linkki
 					echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 				}
+				elseif ($i == 8) { // Laskun tila
+					$laskutyyppi = $trow[$i];
+					$alatila     = $trow['alatila'];
+					require "inc/laskutyyppi.inc";
+					echo "<td valign='top'>".t("$laskutyyppi")." ".t("$alatila")."</td>";
+				}
 				else {
-					if ($i == 0) { // Linkki tositteelle, jos kayttaja saa sita tehda
-						if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2 and $kukarow['taso'] != 3) {
-							echo "<td>$trow[tapvm]</td>";
-						}
-						else {
-							echo "<td>";
-							echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>";
-							echo "$trow[$i]</td>";
-						}
-					}
-					else {
-						if ($i == 7) { // Laskun tila
-							$laskutyyppi = $trow[$i];
-							$alatila     = $trow['alatila'];
-							require "inc/laskutyyppi.inc";
-								echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
-						}
-						else {
-							echo "<td>$trow[$i]</td>";
-						}
-					}
+					echo "<td valign='top'>$trow[$i]</td>";
 				}
 			}
 		echo "</tr>";

@@ -19,7 +19,7 @@
 			if (mysql_num_rows($result) == 0) {
 			 	echo "<b>".t("Haulla ei löytynyt yhtään toimittajaa")."</b>";
 			}
-		 	$trow=mysql_fetch_array ($result);
+		 	$trow = mysql_fetch_array ($result);
 			
 			echo "<b>$trow[ytunnus]</b> $trow[nimi] $trow[postitp]<br><br>";
 			
@@ -141,7 +141,7 @@
 					$limlis = " LIMIT $alku, 50 ";
 				}
 
-				$query = "	SELECT tapvm, erpcm, summa, valkoodi, ebid, tila, tunnus
+				$query = "	SELECT tapvm, erpcm, summa, valkoodi, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus
 						  	FROM lasku
 						  	WHERE yhtio = '$kukarow[yhtio]' 
 						  	$toimiliilisa
@@ -168,40 +168,35 @@
 					echo "<tr class='aktiivi'>";
 					
 					for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
-						if ($i == 4) {
+						
+						if ($i == 0) { // Linkki tositteelle
+							if ($kukarow['taso'] < 2) {
+								echo "<td valign='top'>".tv1dateconv($trow["$i"])."</td>";
+							}
+							else {
+								echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>".tv1dateconv($trow[$i])."</td>";
+							}
+						}
+						elseif ($i == 1) {
+							echo "<td valign='top' align='right'>".tv1dateconv($trow[$i])."</td>";									
+						}
+						elseif ($i == 2) {
+							echo "<td valign='top' align='right'>$trow[$i]</td>";
+							
+							$yhteensa += $trow[$i];
+						}
+						elseif ($i == 5) {
 							// tehdään lasku linkki
 							echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
 						}
-						else {
-							if ($i == 0) { // Linkki tositteelle
-								if ($kukarow['taso'] < 2) {
-									echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
-								}
-								else {
-									echo "<td>";
-									echo "<a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>";
-									echo tv1dateconv($trow[$i])."</td>";
-								}
-							}
-							else {
-								if ($i == 5) { // Laskun tila
-									$laskutyyppi = $trow[$i];
-									require "inc/laskutyyppi.inc";
-									echo "<td>$laskutyyppi</td>";
-								}
-								elseif ($i == 1) {
-									echo "<td align='right'>".tv1dateconv($trow[$i])."</td>";									
-								}
-								elseif ($i == 2) {
-									echo "<td align='right'>$trow[$i]</td>";
-									
-									$yhteensa += $trow[$i];
-								}
-								else {
-									echo "<td>$trow[$i]</td>";
-								}
-							}
+						elseif ($i == 6) { // Laskun tila
+							$laskutyyppi = $trow[$i];
+							require "inc/laskutyyppi.inc";
+							echo "<td valign='top'>$laskutyyppi</td>";
 						}
+						else {
+							echo "<td valign='top'>$trow[$i]</td>";
+						}						
 					}
 					echo "</tr>";
 				}

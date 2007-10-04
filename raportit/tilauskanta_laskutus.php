@@ -81,15 +81,21 @@
 				$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
 			}
 			
+			if ($kustannuspaikka != '') {
+				$kustp1 = ", asiakas, tuote";
+				$kustp2 = "and asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and (tuote.kustp='$kustannuspaikka' or asiakas.kustannuspaikka='$kustannuspaikka')";
+			}
+			
 			// Vika pilkku pois
 			$query  = substr($query, 0 ,-2);
 			
-			$query .= "	FROM lasku use index (yhtio_tila_tapvm)
-						JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='L'
-						WHERE lasku.yhtio = '$kukarow[yhtio]'
+			$query .= "	FROM lasku use index (yhtio_tila_tapvm), tilausrivi use index (yhtio_otunnus) $kustp1
+						WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='L'
+						and lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('L','N')
 						and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-						and ((lasku.tapvm = '0000-00-00') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))";
+						and ((lasku.tapvm = '0000-00-00') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))
+						$kustp2";
 			$result = mysql_query($query) or pupe_error($query);
 			
 			//echo "<pre>$query</pre>";
@@ -133,6 +139,13 @@
 				<td>$kkl</td>
 				<td>$vvll</td>
 				</tr>\n";
+			if ($kustannuspaikka != '') {
+				echo "<tr>
+					<th>".t("Kustannuspaikka")."</th>
+					<td>$kustannuspaikka</td>
+					</tr>\n";
+				
+			}
 			echo "</table><br>";
 
 			echo "<table><tr>";
@@ -294,9 +307,30 @@
 				<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 				<td><input type='text' name='kkl' value='$kkl' size='3'></td>
 				<td><input type='text' name='vvl' value='$vvl' size='5'></td>
-				</tr>\n";
-			echo "</table>";
+				</tr>\n
+				</table>";
+			echo "<table><tr><th>".t("Valitse kustannuspaikka")."</th><td>";
 
+			$query = "	SELECT nimi, tunnus
+						FROM kustannuspaikka
+						WHERE yhtio='$kukarow[yhtio]' order by tunnus";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			echo "<select name='kustannuspaikka'>";
+			echo "<option value=''>".t("Kaikki kustannuspaikat")."</option>";
+
+			while ($srow = mysql_fetch_array($sresult)) {
+				$sel = '';
+				if ($kustannuspaikka == $srow[1]) {
+					$sel = "selected";
+				}
+				echo "<option value='$srow[1]' $sel>$srow[0]</option>";
+			}
+			echo "</select>";
+			echo "</tr>\n";
+			
+			echo "</table>";
+			
 			echo "<br>";
 			echo "<input type='submit' value='".t("Aja raportti")."'>";
 			echo "</form>";

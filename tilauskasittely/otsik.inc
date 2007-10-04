@@ -1,7 +1,7 @@
 <?php
 
-	$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
-	$DAY_ARRAY_EN = array("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday");
+	$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+	$DAY_ARRAY_EN = array(1=>"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday");
 
 	//t‰ss‰ joko tehd‰‰n uutta otsikkoa tai muutetaan olemassa olevaa
 	if ($tee == '' or $kopioitava_otsikko != 0) {
@@ -785,14 +785,14 @@
 
 			//voidaan tarvita jos asiakas on vaihdettu
 			if ($toimvv == '') {
-				$toimpp = date(j);
-				$toimkk = date(n);
-				$toimvv = date(Y);
+				$toimpp = date("j");
+				$toimkk = date("n");
+				$toimvv = date("Y");
 			}
 			if ($kervv == '') {
-				$kerpp = date(j);
-				$kerkk = date(n);
-				$kervv = date(Y);
+				$kerpp = date("j");
+				$kerkk = date("n");
+				$kervv = date("Y");
 			}
 
 
@@ -1892,10 +1892,12 @@
 		//Erikoisalennuksen desimaalipilkku
 		$erikoisale = str_replace (",", ".", $erikoisale);
 		
-		// ollaan annettu toimitusviikko jolloin pannaan toimvko kentt‰‰n V ja p‰iv‰m‰‰r‰ksi sen viikon sunnuntain
+		// ollaan annettu toimitusviikko
 		$nyviikko = date("W");
-		
+		$nypaiva  = date("N");
+				
 		if ($toimvko != '') {
+			
 			if ($toimvko < $nyviikko) {
 				$toimvko = "+".(52 - $nyviikko) + $toimvko;	
 			}
@@ -1907,13 +1909,27 @@
 			}
 			
 			if ($toimvkopva == "") {
-				$toimvkopva = 6;
+				$toimvkopva  = 7;
+				$toimvkopvat = 7;
+			}
+			else {
+				$toimvkopvat = $toimvkopva;
 			}
 			
-			$toimvv  = date("Y",strtotime("$toimvko weeks ".$DAY_ARRAY_EN[$toimvkopva]));
-			$toimkk	 = date("m",strtotime("$toimvko weeks ".$DAY_ARRAY_EN[$toimvkopva]));
-			$toimpp  = date("d",strtotime("$toimvko weeks ".$DAY_ARRAY_EN[$toimvkopva]));
-			$toimvko = $toimvkopva;
+			if ($toimvkopva < $nypaiva) {
+				$toimvkopva = "-".($nypaiva - $toimvkopva);	
+			}
+			elseif ($toimvkopva == $nypaiva) {
+				$toimvkopva = "this";	
+			}
+			else {
+				$toimvkopva = "+".($toimvkopva - $nypaiva);	
+			}
+								
+			$toimvv  = date("Y",strtotime($toimvko." week ".$toimvkopva." day"));
+			$toimkk	 = date("m",strtotime($toimvko." week ".$toimvkopva." day"));
+			$toimpp  = date("d",strtotime($toimvko." week ".$toimvkopva." day"));
+			$toimvko = $toimvkopvat;
 		}
 		
 		if ($keraysvko != '') {
@@ -1928,13 +1944,27 @@
 			}
 			
 			if ($keraysvkopva == "") {
-				$keraysvkopva = 6;
+				$keraysvkopva  = 7;
+				$keraysvkopvat = 7;
+			}
+			else {
+				$keraysvkopvat = $keraysvkopva;
 			}
 			
-			$kervv 	   	= date("Y",strtotime("$keraysvko weeks ".$DAY_ARRAY_EN[$keraysvkopva]));
-			$kerkk 	   	= date("m",strtotime("$keraysvko weeks ".$DAY_ARRAY_EN[$keraysvkopva]));
-			$kerpp 	   	= date("d",strtotime("$keraysvko weeks ".$DAY_ARRAY_EN[$keraysvkopva]));
-			$keraysvko 	= $keraysvkopva;
+			if ($keraysvkopva < $nypaiva) {
+				$keraysvkopva = "-".($nypaiva - $keraysvkopva);	
+			}
+			elseif ($keraysvkopva == $nypaiva) {
+				$keraysvkopva = "this";	
+			}
+			else {
+				$keraysvkopva = "+".($keraysvkopva - $nypaiva);	
+			}
+								
+			$kervv  = date("Y",strtotime($keraysvko." week ".$keraysvkopva." day"));
+			$kerkk	= date("m",strtotime($keraysvko." week ".$keraysvkopva." day"));
+			$kerpp  = date("d",strtotime($keraysvko." week ".$keraysvkopva." day"));
+			$keraysvko = $keraysvkopvat;
 		}
 		
 		if ($kukarow["kesken"] == 0) {

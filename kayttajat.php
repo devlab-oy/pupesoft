@@ -110,6 +110,7 @@
 			$extranet 						= $monta['extranet'];
 			$hyvaksyja 						= $monta['hyvaksyja'];
 			$naytetaan_katteet_tilauksella	= $monta['naytetaan_katteet_tilauksella'];
+			$naytetaan_asiakashinta			= $monta['naytetaan_asiakashinta'];			
 			$profile 						= $monta['profiilit'];
 			$piirit	 						= $monta['piirit'];
 
@@ -160,6 +161,7 @@
 						asema			= '$asema',
 						toimipaikka		= '$toimipaikka',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
+						naytetaan_asiakashinta = '$naytetaan_asiakashinta',
 						profiilit 		= '$profile',
 						piirit			= '$piirit',
 						laatija			= '$kukarow[kuka]',
@@ -317,6 +319,7 @@
 						jyvitys			= '$jyvitys',
 						oletus_ohjelma 	= '$oletus_ohjelma',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
+						naytetaan_asiakashinta = '$naytetaan_asiakashinta',						
 						profiilit 		= '$profile',
 						piirit			= '$piirit',
 						muuttaja		= '$kukarow[kuka]',
@@ -657,7 +660,15 @@
 
 				echo "</td></tr>";
 			}
-
+			
+			$sel=array();
+			$sel[$krow["naytetaan_asiakashinta"]] = "SELECTED";
+			echo "<tr><th align='left'>".t("N‰ytet‰‰n asiakashinta tuotehaussa").":</th>
+					<td><select name='naytetaan_asiakashinta'>
+					<option value=''  {$sel[""]}>".t("N‰ytet‰‰n tuotteen myyntihinta")."</option>
+					<option value='A' {$sel["A"]}>".t("N‰ytet‰‰n asiakashinta")."</option>
+					</select></td></tr>";
+			
 			if ($toim != 'extranet') {
 				echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
 				echo "<option value=''>".t("Ei oletusta")."</option>";

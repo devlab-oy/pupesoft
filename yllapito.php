@@ -4,6 +4,7 @@
 		$apucss = $_POST["css"];
 		$apucsspieni = $_POST["css_pieni"];
 		$apucssextranet = $_POST["css_extranet"];
+		$apucssverkkokauppa = $_POST["css_verkkokauppa"];		
 	}
 	else {
 		unset($apucss);
@@ -41,6 +42,9 @@
 	}
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssextranet)) {
 		$t[$cssextraneti] = $apucssextranet;
+	}
+	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssverkkokauppa)) {
+		$t[$cssverkkokauppa] = $apucssverkkokauppa;
 	}
 	
 	$rajauslisa	= "";

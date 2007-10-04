@@ -21,6 +21,11 @@
 		$jatko = 0;
 	} 
 
+	if (mysql_field_name($result, $i) == "css_verkkokauppa") {
+		$ulos = "<td><textarea cols='55' rows='7' name='css_verkkokauppa'>$trow[$i]</textarea><input type='hidden' name='cssverkkokauppa' value='$i'></td>";
+		$jatko = 0;
+	} 
+
 	if (mysql_field_name($result, $i) == "verkkolasku_lah") {
 
 		$ulos = "<td><select name='$nimi'>";

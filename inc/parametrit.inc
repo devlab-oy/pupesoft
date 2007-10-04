@@ -312,7 +312,10 @@ if ($session != '' or $verkkokauppa != "") {
 	}
 	elseif ($phpnimi != 'index.php') {
 
-		if ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
+		if ($verkkokauppa != "" and $yhtiorow['css_verkkokauppa'] != "") {
+			$css = $yhtiorow['css_verkkokauppa'];
+		}
+		elseif ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
 			$css = $yhtiorow["css_extranet"];
 		}
 		elseif ($kukarow['resoluutio'] == 'P' and $yhtiorow['css_pieni'] != "") {

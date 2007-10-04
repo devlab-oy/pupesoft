@@ -40,6 +40,115 @@ if($tee == "menu") {
 	die(menu($osasto, $try));
 }
 
+if($tee == "tuotteen_lisatiedot") {
+	
+	$query = "	SELECT kuvaus, lyhytkuvaus
+				FROM tuote
+				WHERE yhtio = '{$kukarow["yhtio"]}' and tuoteno = '$tuoteno'";
+	$result = mysql_query($query) or pupe_error($query);
+	$row = mysql_fetch_array($result);
+
+	//	Eka rivi aina head
+	if(trim($row["kuvaus"]) == "" and trim($row["lyhytkuvaus"]) == "") {
+		$row["tekstit"] = t("Tuotteestamme ei ole tällähetkellä lisätietoja..");
+	}
+	else {
+		$row["tekstit"] = $row["lyhytkuvaus"]."<br><br>".$row["kuvaus"];
+		$row["tekstit"] = preg_replace("/(.*)/", "<font class='head'>\$1</font>", $row["tekstit"], 1);
+	}
+	
+	// Shit! joudutaan tutkimaan mille välille tehdään li
+	$txt = explode("\n", $row["tekstit"]);
+	$onli = "";
+	$tekstit = "";
+	foreach($txt as $line) {
+
+		unset($matches);
+		unset($avaus);		
+		preg_match("/(\#{2}|\*{2})/", $line, $matches, PREG_OFFSET_CAPTURE);
+
+		if(count($matches)>0) {			
+			$line = substr($line, 2);
+
+			//	Avataan lista
+			if($matches[0][1] == 0 and $onli == "") {
+				$lista = $matches[0][0];
+				if($lista == "**") $onli = "ul";
+				if($lista == "##") $onli = "dl";
+
+				$avaus = "<$onli>";
+			}
+		}
+		elseif($onli != "") {
+			$line .= "</$onli>";
+			$onli = "";
+		}
+
+		//	Meillä on lista!
+		if($onli != "") {
+			$line = "$avaus<li>$line</li>";		
+		}
+		$tekstit .= $line."<br>";	
+	}
+	
+	
+	$from[]		= "/\?\?(.*)\?\?/m";
+	$to[]		= "<font class='italic'>\$1</font>";
+	$from[]		= "/\!\!(.*)\!\!/m";
+	$to[]		= "<font class='bold'>\$1</font>";
+	
+	$tekstit = preg_replace($from, $to, $tekstit);
+	
+	if($kukarow["kuka"] == "www") {
+		$liitetyypit = array("public");
+	}
+	else {
+		$liitetyypit = array("extranet","public");
+	}
+
+	//	Haetaan kaikki liitetiedostot
+	$query = "	SELECT liitetiedostot.tunnus, liitetiedostot.selite, liitetiedostot.kayttotarkoitus, avainsana.selitetark, avainsana.selitetark_2, (select tunnus from liitetiedostot l where l.yhtio=liitetiedostot.yhtio and l.liitos=liitetiedostot.liitos and l.selite=liitetiedostot.selite and l.kayttotarkoitus='TH') peukalokuva
+				FROM tuote
+				JOIN liitetiedostot ON liitetiedostot.yhtio = tuote.yhtio and liitos = 'TUOTE' and liitetiedostot.liitostunnus=tuote.tunnus 
+				JOIN avainsana ON avainsana.yhtio = liitetiedostot.yhtio and avainsana.laji = 'LITETY' and avainsana.selite!='TH' and avainsana.selite=liitetiedostot.kayttotarkoitus
+				WHERE tuote.yhtio = '{$kukarow["yhtio"]}' and tuoteno = '$tuoteno'
+				ORDER BY liitetiedostot.kayttotarkoitus IN ('TK') DESC, liitetiedostot.selite";
+	$result = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($result) > 0) {
+		
+		$liitetiedostot = $edkaytto = "";
+		
+		while($row = mysql_fetch_array($result)) {
+			if($row["kayttotarkoitus"] == "TK") {
+				if($row["peukalokuva"] > 0) {
+					$liitetiedostot .= "{$row["selite"]}<br><a href='view.php?id={$row["tunnus"]}' target='_blank'><img src='view.php?id={$row["peukalokuva"]}'></a><br><font class='info'>".t("Klikkaa kuvaa")."</info><br>";
+				}
+				else {
+					$liitetiedostot .= "<a href='view.php?id={$row["tunnus"]}' target='_blank'>{$row["selite"]}</a><br>";
+				}
+			}
+			else {				
+				if(in_array($row["selitetark_2"], $liitetyypit)) {
+					
+					if($edkaytto != $row["kayttotarkoitus"]) {
+						$liitetiedostot .= "<br><br><font class='bold'>{$row["selitetark"]}</font><br>";
+						$edkaytto = $row["kayttotarkoitus"];
+					}
+					
+					$liitetiedostot .= "<a href='view.php?id={$row["tunnus"]}'>{$row["selite"]}</a><br>";
+				}
+			}
+		}
+	}	
+
+	if($liitetiedostot == "") {
+		$liitetiedostot = "Tuotteesta ei ole kuvia";
+	}
+
+	//	Vasemmalla meillä on kaikki tekstit
+	echo "<table width='100%'><tr><td valign='top'>$tekstit</td><td valign='top'>$liitetiedostot</td></tr><tr><td class='back'><br></td></tr></table>";
+}
+
 if($tee == "poistakori") {
 	$query = "	SELECT tunnus
 				FROM lasku
@@ -229,7 +338,7 @@ if($tee == "selaa") {
 	
 	if($kukarow["kuka"] != "www" and $kukarow["kesken"] == 0) {
 		require_once("luo_myyntitilausotsikko.inc");
-		$tilausnumero = luo_myyntitilausotsikko($asiakasid, $tilausnumero, $myyjanro);
+		$tilausnumero = luo_myyntitilausotsikko($kukarow["oletus_asiakas"], $tilausnumero, "");
 		$kukarow["kesken"] = $tilausnumero;
 	}
 	

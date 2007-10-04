@@ -1150,4 +1150,19 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "myyntitilaus_asiakasmemo") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Myyntitilauksella ei n‰ytet‰ asiakasmemoa")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksella n‰ytet‰‰n asiakasmemo")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 ?>

@@ -243,7 +243,7 @@ if (!function_exists("kuuluukovarastoon")) {
 
 if (!function_exists("pdf_substr")) {
 	function pdf_substr($str, $len, $pdf, $param) {
-		
+
 		for($s = strlen($str); $s > 0; $s--) {
 			if($pdf->strlen($str, $param) > $len) {
 				$str = substr($str, 0, $s);
@@ -252,7 +252,7 @@ if (!function_exists("pdf_substr")) {
 				break;
 			}
 		}
-		
+
 		return $str;
 	}
 }
@@ -1066,16 +1066,16 @@ if (!function_exists("generoi_sorttauskentta")) {
 		elseif ($jarjestys == "9") {
 			$sorttauskentta = "tilausrivi.tunnus as sorttauskentta";
 		}
-		
+
 		// toimittajan tuotenumerojärjestys, tuoteperheet pidetään yhdessä
 		elseif ($jarjestys == "10") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno),
-									if(tilausrivi.perheid > 0, (select concat(if(tt2.toim_tuoteno!='', concat(tt2.toim_tuoteno,tilausrivi.perheid), concat(t2.tuoteno,tilausrivi.perheid)), if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)) 
+									if(tilausrivi.perheid > 0, (select concat(if(tt2.toim_tuoteno!='', concat(tt2.toim_tuoteno,tilausrivi.perheid), concat(t2.tuoteno,tilausrivi.perheid)), if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno))
 																from tilausrivi as t2
-																JOIN tuotteen_toimittajat tt2 ON t2.yhtio = tt2.yhtio and t2.tuoteno = tt2.tuoteno and tt2.liitostunnus = '$toimittaja'  
+																JOIN tuotteen_toimittajat tt2 ON t2.yhtio = tt2.yhtio and t2.tuoteno = tt2.tuoteno and tt2.liitostunnus = '$toimittaja'
 																where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.perheid),
-										if(tilausrivi.perheid2 > 0, (select concat(if(tt3.toim_tuoteno!='', concat(tt3.toim_tuoteno,tilausrivi.perheid2), concat(t3.tuoteno,tilausrivi.perheid2)), if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)) 
-																	from tilausrivi as t3 
+										if(tilausrivi.perheid2 > 0, (select concat(if(tt3.toim_tuoteno!='', concat(tt3.toim_tuoteno,tilausrivi.perheid2), concat(t3.tuoteno,tilausrivi.perheid2)), if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno))
+																	from tilausrivi as t3
 																	JOIN tuotteen_toimittajat tt3 ON t3.yhtio = tt3.yhtio and t3.tuoteno = tt3.tuoteno and tt3.liitostunnus = '$toimittaja'
 																	where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2),
 											if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)))) as sorttauskentta";
@@ -1985,13 +1985,13 @@ if(!function_exists("enable_ajax")) {
 	var http = createRequestObject();
 
 	function sndReq(div, urli, href, load, method, data) {
-		
+
 		id = div;
-		
+
 		if (load) {
 			document.getElementById(id).innerHTML = "<div style='filter:alpha(opacity=0); -moz-opacity:0.7; opacity: 0.7; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0c0c0c;' z-index: 100><img style='position: absolute; top: 50%; left: 50%;' src='<?php echo $imgUrl; ?>'></div>";
 		}
-		
+
 		if(method == "post") {
 			http.open('post', urli, true);
 			http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -2000,7 +2000,7 @@ if(!function_exists("enable_ajax")) {
 		else {
 			http.open('get', urli);
 		}
-		
+
 		http.onreadystatechange = handleResponse;
 		http.send(null);
 
@@ -2032,7 +2032,7 @@ if(!function_exists("enable_ajax")) {
 		}
 	}
 
-	function ajaxPost(formID, urli , minne, href, load) {
+	function ajaxPost(formID, urli , minne, href, load, method) {
 
 		obj = document.getElementById(formID);
 		getstr = "";
@@ -2060,10 +2060,9 @@ if(!function_exists("enable_ajax")) {
 				var sel = obj.elements[i];
 				getstr += sel.name + "=" + sel.options[sel.selectedIndex].value + "&";
 			}
-			
-			obj.elements[i].disabled = true;
 		}
-		sndReq(minne, urli, href, load, 'post', getstr);
+
+		sndReq(minne, urli, href, load, method, getstr);
 	}
 
 //-->

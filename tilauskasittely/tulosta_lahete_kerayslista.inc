@@ -234,6 +234,10 @@ if (!function_exists('alku')) {
 			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
 		}
 		
+		if (trim($laskurow['sisviesti2']) != '') {
+			$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 100, "\n###");							
+		}
+		
 		//Tulostetaan laskun kommentti
 		if (trim($komm) != '') {
 			$kommentit = explode("\n", trim($komm));
@@ -501,7 +505,7 @@ if (!function_exists('rivi_otsikot')) {
 		$pdf->draw_text(25,  $kala+15, "#",									$thispage, $norm);
 		$pdf->draw_text(45,  $kala+15, t("Paikka", $kieli),					$thispage, $norm);
 		$pdf->draw_text(125, $kala+15, t("Tuotenumero/Tuotenimi", $kieli),	$thispage, $norm);
-		$pdf->draw_text(330, $kala+15, t("Tomittajan tuoteno", $kieli),		$thispage, $norm);
+		$pdf->draw_text(330, $kala+15, t("Toimittajan tuoteno", $kieli),	$thispage, $norm);
 		$pdf->draw_text(425, $kala+15, t("Hyllyssä", $kieli),				$thispage, $norm);
 		$pdf->draw_text(473, $kala+15, t("Tilattu", $kieli),				$thispage, $norm);
 		$pdf->draw_text(530, $kala+15, t("Toimitus", $kieli),				$thispage, $norm);
@@ -710,15 +714,11 @@ if (!function_exists('rivi')) {
 
 			$pdf->draw_text(125, $kala, $row["nimitys"], 											$thispage, $norm);
 			
-			if($trow["tuotemassa"]>0) {
-				
-				$oikpos = $pdf->strlen((float) $trow["tuotemassa"]." kg", $norm);
-				$pdf->draw_text(520-$oikpos, $kala, (float) $trow["tuotemassa"]." kg",				$thispage, $norm);
-				
+			if($trow["tuotemassa"] > 0) {
 				$ypaino = (float) round(($row['varattu']+$row['kpl'])*$trow["tuotemassa"], 2);
 				
-				$oikpos = $pdf->strlen($ypaino." kg", $norm);
-				$pdf->draw_text(575-$oikpos, $kala, $ypaino." kg",									$thispage, $norm);
+				$oikpos = $pdf->strlen((float) $trow["tuotemassa"]." / ".$ypaino." kg", $pieni);
+				$pdf->draw_text(520-$oikpos, $kala, (float) $trow["tuotemassa"]." / ".$ypaino." kg",	$thispage, $pieni);
 				
 				$paino += $ypaino;
 			}

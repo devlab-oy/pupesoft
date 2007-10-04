@@ -1733,12 +1733,13 @@ if ($tee == '') {
 					</table>";
 		}
 		
-		echo "<br>";
-		$ytunnus	= $laskurow['ytunnus'];
-		$asiakasid  = $laskurow['liitostunnus'];
-		require ("../crm/asiakasmemo.php");
 		
-		
+		if ($yhtiorow["myyntitilaus_asiakasmemo"] == "K") {
+			echo "<br>";
+			$ytunnus	= $laskurow['ytunnus'];
+			$asiakasid  = $laskurow['liitostunnus'];
+			require ("../crm/asiakasmemo.php");
+		}
 	}
 	
 	echo "<br>";

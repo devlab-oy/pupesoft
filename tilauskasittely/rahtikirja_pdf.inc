@@ -39,7 +39,7 @@
 	else {
 		$query = "	SELECT asiakas.*, rahtikirjat.merahti, rahtikirjat.rahtisopimus
 					FROM asiakas 
-					join rahtikirjat on rahtikirjat.yhtio = asiakas.yhtio and rahtikirjat.otsikkonro = '".($otsikkonro * -1)."'
+					JOIN rahtikirjat on rahtikirjat.yhtio = asiakas.yhtio and rahtikirjat.otsikkonro = '".($otsikkonro * -1)."'
 					WHERE asiakas.yhtio	= '$kukarow[yhtio]' 
 					and asiakas.tunnus	= '{$GLOBALS['asiakasid']}'
 					LIMIT 1";
@@ -67,11 +67,14 @@
 	*/
 
 	//tsekataan kuka maksaa rahdin ja laitetaan oikeat tiedot rahdinmaksajan ruutuun
-	if ($rahdinmaksaja == 'Vastaanottaja') {
-		$rahdinmaksajan_nr 	= $rakir_row['rahtisopimus'];
+	if ($rakir_row['muumaksaja'] != '') {
+		$rahdinmaksaja = $rakir_row['muumaksaja'];
 	}
 	
-	if ($rahdinmaksaja == 'Lähettäjä') {
+	if ($rahdinmaksaja != 'Lähettäjä') {
+		$rahdinmaksajan_nr 	= $rakir_row['rahtisopimus'];
+	}
+	else {
 		$rahdinmaksajan_nr 	= $toitarow['sopimusnro'];
 	}
 	
@@ -126,6 +129,9 @@
 	else {
 		$tulostakolli = 3;
 	}
+	
+	// testiä varten
+	//$tulostakolli = 1;
 		
 	for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 			

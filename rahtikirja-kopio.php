@@ -63,19 +63,20 @@
 		}
 		
 		// haetaan kaikki distinct rahtikirjat..
-		$query = "	select distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
+		$query = "	SELECT distinct lasku.ytunnus, lasku.toim_maa, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_ovttunnus, lasku.toim_postino, lasku.toim_postitp,
 					lasku.maa, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.ovttunnus, lasku.postino, lasku.postitp,
-					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti
-					from rahtikirjat
-					join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio
-					left join maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja
+					FROM rahtikirjat
+					JOIN lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio
+					LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+					LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
 					where rahtikirjat.yhtio			= '$kukarow[yhtio]'
 					and rahtikirjat.toimitustapa	= '$toimitustapa'
 					and rahtikirjat.tulostuspaikka	= '$varasto'
 					and rahtikirjat.rahtikirjanro  in ('".str_replace(',','\',\'',implode(",", $rtunnukset))."')
 					order by lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, rahtikirjat.merahti, rahtikirjat.rahtisopimus";
 		$rakir_res = mysql_query($query) or pupe_error($query);
-
+		
 		if (mysql_num_rows($rakir_res) == 0) {
 			echo "<font class='message'>".t("Yhtään tulostettavaa rahtikirjaa ei löytynyt").".</font><br><br>";
 		}
@@ -106,7 +107,7 @@
 			else {
 				$rahdinmaksaja = "Vastaanottaja"; //tämä on defaultti
 			}
-
+			
 			// Katsotaan onko tämä koontikuljetus
 			if ($toitarow["tulostustapa"] == "K" or $toitarow["tulostustapa"] == "L") {
 				// Monen asiakkaan rahtikirjat tulostuu aina samalle paperille

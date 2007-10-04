@@ -1,5 +1,6 @@
 <?php
 
+
 if (file_exists("inc/parametrit.inc")) {
 	require ("inc/parametrit.inc");
 	require ("inc/functions.inc");

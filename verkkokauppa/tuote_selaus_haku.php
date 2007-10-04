@@ -461,13 +461,14 @@
 			echo js_popup(50);
 		}
 				
-		echo "<form id = 'lisaa' action=\"javascript:ajaxPost('tuote_selaus_haku.php', 'lisaa', 'selain');\" name='lisaa' method='post'>";
+		echo "<form id = 'lisaa' action=\"javascript:ajaxPost('tuote_selaus_haku.php', 'lisaa', 'selain', false, true);\" name='lisaa' method='post'>";
 		echo "<input type='hidden' name='haku[0]' value = '$haku[0]'>";
 		echo "<input type='hidden' name='haku[1]' value = '$haku[1]'>";
 		echo "<input type='hidden' name='haku[2]' value = '$haku[2]'>";
 		echo "<input type='hidden' name='haku[3]' value = '$haku[3]'>";
 		echo "<input type='hidden' name='haku[4]' value = '$haku[4]'>";
 		echo "<input type='hidden' name='haku[5]' value = '$haku[5]'>";
+		echo "<input type='hidden' name='ojarj'   value = '$ojarj'>";		
 		echo "<input type='hidden' name='tee' value = 'TI'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
@@ -495,7 +496,7 @@
 					}
 					
 					//	Merkki on tyhj‰, se vaatii myˆs v‰liotsikon
-					if($haku[5] == "" and $edtuotemerkki != $row["tuotemerkki"]) {
+					if($haku[5] == "" and strtolower($edtuotemerkki) != strtolower($row["tuotemerkki"])) {
 						$o["laji"] 	= "merkki";
 						$o["class"] = "message";
 						$o["style"]	= "style='text-align: left'";						
@@ -644,7 +645,7 @@
 							}
 						}
 					
-						$nimitys .= "</div>";
+						$nimitys .= "</table>";
 					
 						$row["nimitys"] = $nimitys;
 					}
@@ -720,7 +721,8 @@
 			}
 			
 			//	Extranetk‰ytt‰jille voidaan n‰ytt‰‰ myˆs se heid‰n asiakashinta..
-			if($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"]) {
+			// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
+			if($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
 
 				// siihen tarvitaan:
 				// $laskurow[] (laskun tiedot)
@@ -735,17 +737,11 @@
 				$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 				$tuoteres = mysql_query($query);
 				$trow = mysql_fetch_array($tuoteres);
-				require("alehinta.inc");
+				require("alehinta.inc");	
 				
-				
-				$myyntihinta = number_format($hinta * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}";
+				$myyntihinta = number_format($hinta * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}11";
 			}
-			else {
-				$myyntihinta = $row["myyntihinta"]. " $yhtiorow[valkoodi]";
-			}
-
-			// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
-			if ($kukarow["extranet"] != "") {
+			elseif ($kukarow["extranet"] != "") {
 
 				$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
 				$oleasres = mysql_query($query) or pupe_error($query);
@@ -753,7 +749,7 @@
 
 				if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
 
-					$myyntihinta = "$row[myyntihinta] $yhtiorow[valkoodi]";
+					$myyntihinta = number_format($row["myyntihinta"], 2, ',', ' '). " $yhtiorow[valkoodi]";
 
 					$query = "	select *
 								from hinnasto
@@ -776,7 +772,7 @@
 
 						if (mysql_num_rows($oleasres) == 1) {
 							$olhirow = mysql_fetch_array($olhires);
-							$myyntihinta = yhtioval($row["myyntihinta"], $olhirow["kurssi"]). " $oleasrow[valkoodi]";
+							$myyntihinta = number_format(yhtioval($row["myyntihinta"], $olhirow["kurssi"]), 2, ',', ' '). " $yhtiorow[valkoodi]";
 						}
 					}
 				}

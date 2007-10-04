@@ -426,7 +426,7 @@ if (!function_exists("saldo_myytavissa")) {
 							and $valinta1
 							concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
 							concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-							JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tuotepaikat.yhtio
+							JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero)  ON sarjanumeroseuranta.yhtio = tuotepaikat.yhtio
 							and sarjanumeroseuranta.tuoteno = tuotepaikat.tuoteno
 							and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
 							and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro
@@ -538,7 +538,7 @@ if (!function_exists("saldo_myytavissa")) {
 										and tilausrivi.tyyppi = 'W'
 										and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
 										and tilausrivi.tuoteno = '$tuoteno'
-										and tilausrivi.varattu > 0
+										and tilausrivi.varattu 	 > 0
 										and tilausrivi.hyllyalue = '$row[hyllyalue]'
 										and tilausrivi.hyllynro  = '$row[hyllynro]'
 										and tilausrivi.hyllyvali = '$row[hyllyvali]'
@@ -585,10 +585,10 @@ if (!function_exists("saldo_myytavissa")) {
 									and sarjanumeroseuranta.myyntirivitunnus 	= tilausrivi.tunnus
 									and sarjanumeroseuranta.sarjanumero 		= '$era'
 									WHERE tilausrivi.yhtio 	= '$yhtiolisa'
-									and tilausrivi.tyyppi 	= 'O'
+									and tilausrivi.tyyppi  = 'O'
 									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
 									and tilausrivi.tuoteno 	= '$tuoteno'
-									and tilausrivi.varattu 	> 0
+									and tilausrivi.varattu > 0
 									and tilausrivi.toimaika <= '$pvm'";
 					}
 					else {
@@ -1984,15 +1984,25 @@ if(!function_exists("enable_ajax")) {
 
 	var http = createRequestObject();
 
-	function sndReq(div, urli, href, load) {
+	function sndReq(div, urli, href, load, method, data) {
+		
 		id = div;
-		http.open('get', urli);
+		
+		if (load) {
+			document.getElementById(id).innerHTML = "<div style='filter:alpha(opacity=0); -moz-opacity:0.7; opacity: 0.7; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0c0c0c;' z-index: 100><img style='position: absolute; top: 50%; left: 50%;' src='<?php echo $imgUrl; ?>'></div>";
+		}
+		
+		if(method == "post") {
+			http.open('post', urli, true);
+			http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+			http.send(data);
+		}
+		else {
+			http.open('get', urli);
+		}
+		
 		http.onreadystatechange = handleResponse;
 		http.send(null);
-
-		if (load) {
-			document.getElementById(id).innerHTML = "<div style='filter:alpha(opacity=0); -moz-opacity:0.7; opacity: 0.7; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0c0c0c;'><img style='position: absolute; top: 50%; left: 50%;' src='<?php echo $imgUrl; ?>'></div>";
-		}
 
 		if (href) {
 			chgHref(href, 'javascript:toggleGroup("' + id + '")');
@@ -2022,24 +2032,19 @@ if(!function_exists("enable_ajax")) {
 		}
 	}
 
-	function get(div, urli, minne, href, load) {
+	function ajaxPost(urli, formID, minne, href, load) {
 
-		obj = document.getElementById(div);
-		getstr = "&";
+		obj = document.getElementById(formID);
+		getstr = "";
 
  		for (i=0; i<obj.length; i++) {
-			if (obj.elements[i].tagName == "INPUT") {
+			if (obj.elements[i].tagName == "INPUT" && obj.elements[i].value != "") {
 				if (obj.elements[i].type == "text" || obj.elements[i].type == "hidden") {
-					getstr += obj.elements[i].name + "=" + obj.elements[i].value + "&";
-
-					//	Tyhjennetään..
-					if(obj.elements[i].type == "text") {
-						obj.elements[i].value = '';
-					}
+					getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
 				}
 				else if (obj.elements[i].type == "checkbox") {
 					if (obj.elements[i].checked) {
-						getstr += obj.elements[i].name + "=" + obj.elements[i].value + "&";
+						getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
 					}
 					else {
 						getstr += obj.elements[i].name + "=&";
@@ -2047,7 +2052,7 @@ if(!function_exists("enable_ajax")) {
 				}
 				else if (obj.elements[i].type == "radio") {
 					if (obj.elements[i].checked) {
-						getstr += obj.elements[i].name + "=" + obj.elements[i].value + "&";
+						getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
 					}
 				}
 			}
@@ -2055,9 +2060,10 @@ if(!function_exists("enable_ajax")) {
 				var sel = obj.elements[i];
 				getstr += sel.name + "=" + sel.options[sel.selectedIndex].value + "&";
 			}
+			
+			obj.elements[i].disabled = true;
 		}
-
-		sndReq(minne, urli + getstr, href, load);
+		sndReq(minne, urli, href, load, 'post', getstr);
 	}
 
 //-->

@@ -2182,7 +2182,7 @@ if ($tee == '') {
 			}
 		}
 	}
-
+	
 	//Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
 	if ($kukarow["extranet"] == "" and $tila == "LISAARESEPTIIN") {
 		if ($teeperhe == "OK") {
@@ -2192,6 +2192,20 @@ if ($tee == '') {
 						and tunnus   = '$isatunnus'";
 			$presult = mysql_query($query) or pupe_error($query);
 			$perheid2 = $isatunnus;
+		}
+	}
+	
+	//Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
+	if ($kukarow["extranet"] == "" and $tila == "LISAAKERTARESEPTIIN") {
+		if ($teeperhe == "OK") {
+			$query = "	UPDATE tilausrivi
+						SET 
+						perheid	= '$isatunnus',
+						tyyppi	= 'W'
+						WHERE yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$isatunnus'";
+			$presult = mysql_query($query) or pupe_error($query);
+			$perheid = $isatunnus;
 		}
 	}
 
@@ -3598,8 +3612,26 @@ if ($tee == '') {
 									<input type='hidden' name='tapa' value = 'POISTA'>
 									<input type='Submit' value='".t("Poista")."'>
 								</form> ";
+								
+					if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["perheid"] == 0)) and $toim == 'VALMISTAVARASTOON' ) {
 
-					if (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" ) and $row["perheid2"] == 0 and $row["perheid"] == 0)) {
+						$nappulanteksti = t("Lis‰‰ reseptiin");
+
+						$plisax = "	<input type='hidden' name='teeperhe'  value = 'OK'>
+									<input type='hidden' name='isatunnus' value = '$row[tunnus]'>";
+
+						echo "<form action='$PHP_SELF' method='post' name='lisaakertareseptiin'>
+										<input type='hidden' name='toim' value='$toim'>
+										<input type='hidden' name='lopetus' value='$lopetus'>
+										<input type='hidden' name='projektilla' value='$projektilla'>
+										<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+										<input type='hidden' name='tila' value = 'LISAAKERTARESEPTIIN'>
+										$plisax
+										<input type='hidden' name='perheid' value = '$row[perheid]'>
+										<input type='Submit' value='$nappulanteksti'>
+									</form> ";
+					}
+					elseif (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" ) and $row["perheid2"] == 0 and $row["perheid"] == 0)) {
 
 						if ($row["perheid2"] == 0 and $row["perheid"] == 0) {
 							$nappulanteksti = t("Lis‰‰ tuote");
@@ -3607,7 +3639,7 @@ if ($tee == '') {
 							$plisax = "	<input type='hidden' name='teeperhe'  value = 'OK'>
 										<input type='hidden' name='isatunnus' value = '$row[tunnus]'>";
 						}
-						elseif($laskurow["tila"] == "V") {
+						elseif($laskurow["tila"] == "ksls") {
 							$nappulanteksti = t("Lis‰‰ reseptiin");
 							$plisax = "";
 						}

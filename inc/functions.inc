@@ -2032,7 +2032,7 @@ if(!function_exists("enable_ajax")) {
 		}
 	}
 
-	function ajaxPost(urli, formID, minne, href, load) {
+	function ajaxPost(formID, urli , minne, href, load) {
 
 		obj = document.getElementById(formID);
 		getstr = "";

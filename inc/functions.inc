@@ -1998,7 +1998,7 @@ if(!function_exists("enable_ajax")) {
 			http.send(data);
 		}
 		else {
-			http.open('get', urli);
+			http.open('get', urli + '&' + data);
 		}
 
 		http.onreadystatechange = handleResponse;

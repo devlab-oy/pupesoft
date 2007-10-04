@@ -566,30 +566,28 @@
 
 		// Vain ker‰yslistat saa groupata
 		if ($yhtiorow["lahetteen_tulostustapa"] == "K" and $yhtiorow["kerayslistojen_yhdistaminen"] == "Y") {
-			if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
-				$grouppi = "GROUP BY lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
-			}
-			else {
-				//t‰nne on nyt toistaiseksi lis‰tty toim_ovttunnus. Pit‰‰ ehk‰ keksi jotain muuta
-				$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi";
-			}
+			$grouppi = "GROUP BY lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, jvgrouppi, vientigrouppi, varastonimi, varastotunnus, keraysviikko";
 		}
 		else {
 			$grouppi = "GROUP BY lasku.tunnus";
 		}
 
-		$query = "	SELECT lasku.ytunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, if(maksuehto.jv!='', lasku.tunnus, '') jvgrouppi, if(lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
-					if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos) prioriteetti,
-					if(min(lasku.clearing)='','N',if(min(lasku.clearing)='JT-TILAUS','J',if(min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
-					left(min(lasku.kerayspvm),10) kerayspvm,
-					left(min(lasku.toimaika),10) toimaika,
-					keraysvko,
-					toimvko,
+		$query = "	SELECT lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, 
+					if(maksuehto.jv!='', lasku.tunnus, '') jvgrouppi, 
+					if(lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
 					varastopaikat.nimitys varastonimi,
 					varastopaikat.tunnus varastotunnus,
+					week(lasku.kerayspvm, 1) keraysviikko,				
+					min(if(lasku.hyvaksynnanmuutos = '', 'X', lasku.hyvaksynnanmuutos)) prioriteetti,
+					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
+					left(min(lasku.kerayspvm),10) kerayspvm,
+					left(min(lasku.toimaika),10) toimaika,
+					min(keraysvko),
+					min(toimvko),
 					GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ',') otunnus,
-					count(distinct otunnus) tilauksia, count(*) riveja,
-					GROUP_CONCAT(distinct(if(sisviesti2 != '', concat(lasku.tunnus,' - ', sisviesti2,'<br>'), NULL)) SEPARATOR '') ohjeet
+					count(distinct otunnus) tilauksia, 
+					count(*) riveja,
+					GROUP_CONCAT(distinct(if(sisviesti2 != '', concat(lasku.tunnus,' - ', sisviesti2,'<br>'), NULL)) SEPARATOR '') ohjeet					
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto

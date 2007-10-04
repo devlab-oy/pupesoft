@@ -538,7 +538,7 @@
 
 		// Lasku on valittu ja sitä tiliöidään
 		$query = "	SELECT *,
-					concat_ws('@', laatija, luontiaika) kuka, 
+					concat_ws('@', laatija, luontiaika) kuka,
 					round(summa * vienti_kurssi, 2) kotisumma
 					FROM lasku
 					WHERE tunnus='$tunnus' and yhtio = '$kukarow[yhtio]'";
@@ -576,10 +576,10 @@
 		}
 		else {
 			echo "<td>";
-			
+
 			echo tv1dateconv($laskurow["erpcm"]);
 			if ($laskurow["kapvm"] != "0000-00-00") echo "<br>".tv1dateconv($laskurow["kapvm"]);
-			
+
 			echo "</td>";
 		}
 
@@ -612,6 +612,7 @@
 		// Näytetään poistonappi, jos se on sallittu ja lasku ei ole keikalla
 		$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
 		$keikres = mysql_query($query) or pupe_error($query);
+
 		if (($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0) {
 
 			echo "	<td class='back'><form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
@@ -630,6 +631,17 @@
 		}
 
 		echo "</tr>";
+
+		if (trim($laskurow["viite"]) != "" or trim($laskurow["viesti"]) != "") {
+			echo "<tr>";
+			echo "<th colspan='3'>".t("Viite / Viesti")."</th>";
+			echo "</tr>";
+
+			echo "<tr>";
+			echo "<td colspan='3'>$laskurow[viite] $laskurow[viesti]</td>";
+			echo "</tr>";
+		}
+
 		echo "</table>";
 
 		if ($laskurow["comments"] != "") {
@@ -638,8 +650,6 @@
 			echo "<tr><td colspan='2'>$laskurow[comments]</td></tr>";
 			echo "</table>";
 		}
-
-		echo "</td></tr></table>";
 
 		// ykkös ja kakkostasolla voidaan antaa kommentti
 		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) {
@@ -738,23 +748,23 @@
 			for ($i=1; $i<6; $i++) {
 				$hyind = "hyvak".$i;
 				$htind = "h".$i."time";
-				
+
 				if ($laskurow[$hyind] != '') {
 					$query = "	SELECT kuka, nimi
 					          	FROM kuka
-					          	WHERE yhtio = '$kukarow[yhtio]' 
+					          	WHERE yhtio = '$kukarow[yhtio]'
 								and hyvaksyja = 'o'
 								and kuka = '$laskurow[$hyind]'
 					          	ORDER BY nimi";
 					$vresult = mysql_query($query) or pupe_error($query);
 					$vrow = mysql_fetch_array($vresult);
-				
+
 					echo "<tr><td>$i. $vrow[nimi]</td><td>";
-					
+
 					if ($laskurow[$htind] != '0000-00-00 00:00:00') {
 						echo tv1dateconv($laskurow[$htind], "P");
 					}
-					
+
 					echo "</td><td>".t("Lukittu")."</td></tr>";
 				}
 			}
@@ -1232,12 +1242,12 @@
 			}
 
 			echo "<td valign='top'>";
-			
+
 			echo tv1dateconv($trow["erpcm"]);
 			if ($trow["kapvm"] != "0000-00-00") echo "<br>".tv1dateconv($trow["kapvm"]);
-			
+
 			echo "</td>";
-			
+
 			echo "<td valign='top'>$trow[ytunnus]</td>";
 
 			if ($trow['comments'] != '') {

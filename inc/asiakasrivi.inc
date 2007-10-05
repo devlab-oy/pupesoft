@@ -214,12 +214,29 @@
 		$ulos .= "<option value = ''></option>";
 
 		$apu_asiakasnumero = 1;
+		
+		//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+		$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+					FROM yhtio 
+					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+					where konserni	 = '$yhtiorow[konserni]' 
+					and synkronoi like '%$toim%'";
+		$vresult = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($vresult) > 0) {
+			$srowapu = mysql_fetch_array($vresult);
+
+			$tarkyhtio = $srowapu["yhtiot"];
+		}
+		else {
+			$tarkyhtio = "'$kukarow[yhtio]'";
+		}
 
 		for ($monta = 0; $monta < 5;) {
 
 			$query = "	SELECT asiakasnro
 						FROM asiakas USE INDEX (asno_index)
-						WHERE yhtio='$kukarow[yhtio]'
+						WHERE yhtio in ($tarkyhtio)
 						and asiakasnro='$apu_asiakasnumero'";
 			$vresult = mysql_query($query) or pupe_error($query);
 
@@ -247,12 +264,29 @@
 
 			$apu_asiakasnumero = 1;
 
+			//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+			$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+						FROM yhtio 
+						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+						where konserni	 = '$yhtiorow[konserni]' 
+						and synkronoi like '%$toim%'";
+			$vresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($vresult) > 0) {
+				$srowapu = mysql_fetch_array($vresult);
+
+				$tarkyhtio = $srowapu["yhtiot"];
+			}
+			else {
+				$tarkyhtio = "'$kukarow[yhtio]'";
+			}
+
 			for ($monta = 0; $monta < 5;) {
 
 				$query = "	SELECT ytunnus
 							FROM asiakas USE INDEX (ytunnus_index)
-							WHERE yhtio='$kukarow[yhtio]'
-							and ytunnus='$apu_asiakasnumero'";
+							WHERE yhtio in ($tarkyhtio)
+							and ytunnus = '$apu_asiakasnumero'";
 				$vresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($vresult) == 0) {
@@ -372,6 +406,7 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
+	
 	if (mysql_field_name($result, $i) == "toimitustapa") {
 		$query = "	SELECT toimitustapa.tunnus, selite
 						FROM toimitustapa
@@ -512,8 +547,8 @@
 		$ulos = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''>".t("Ei oletustoimitusehtoa")."</option>";
 
-		while ($kirow=mysql_fetch_array($kires)) {
-			if ($kirow["toimehto"]==$trow[$i]) $select='SELECTED';
+		while ($kirow = mysql_fetch_array($kires)) {
+			if ($kirow["toimehto"] == $trow[$i]) $select = 'SELECTED';
 			else $select = '';
 
 			$ulos .= "<option value='$kirow[toimehto]' $select>$kirow[toimehto]</option>";
@@ -614,8 +649,7 @@
 			$jatko = 0;
 	}
 
-	if ((mysql_field_name($result, $i) == "fakta") or
-		(mysql_field_name($result, $i) == "sisviesti1")) {
+	if ((mysql_field_name($result, $i) == "fakta") or (mysql_field_name($result, $i) == "sisviesti1")) {
 		$ulos = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
 		$jatko = 0;
 	}
@@ -806,7 +840,6 @@
 		$jatko = 0;
 	}
 
-
 	if (mysql_field_name($result, $i) == "kauppatapahtuman_luonne") {
 
 		$ulos = "<td><select name='$nimi'>";
@@ -854,7 +887,7 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
+	if (mysql_field_name($result, $i) == "valkoodi") {
 		$query = "	SELECT nimi, tunnus
 	                FROM valuu
 	             	WHERE yhtio = '$kukarow[yhtio]'

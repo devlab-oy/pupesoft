@@ -89,26 +89,8 @@
 
 	if (mysql_field_name($result, $i) == "toim_ovttunnus") {
 		
-		//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
-		$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
-					FROM yhtio 
-					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-					where konserni	 = '$yhtiorow[konserni]' 
-					and synkronoi like '%$toim%'";
+		$query   = "select tunnus from asiakas where yhtio = '$kukarow[yhtio]' and ytunnus='$ytunnus' and ovttunnus='$ovttunnus' and toim_ovttunnus='$t[$i]' and tunnus != '$tunnus'";
 		$sresult = mysql_query($query) or pupe_error($query);
-		
-		if (mysql_num_rows($sresult) > 0) {
-			$srowapu = mysql_fetch_array($sresult);
-			
-			$tarkyhtio = $srowapu["yhtiot"];
-		}
-		else {
-			$tarkyhtio = "'$kukarow[yhtio]'";
-		}
-		
-		$query   = "select tunnus from asiakas where yhtio in ($tarkyhtio) and ytunnus='$ytunnus' and ovttunnus='$ovttunnus' and toim_ovttunnus='$t[$i]' and tunnus != '$tunnus'";
-		$sresult = mysql_query($query) or pupe_error($query);
-
 
 		if (mysql_num_rows($sresult) > 0) {
 			if ($alias_set == "VAHITTAISMYYNTI") {

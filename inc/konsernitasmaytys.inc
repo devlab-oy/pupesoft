@@ -7,7 +7,7 @@ while ($konsernirow=mysql_fetch_array ($konserniresult)) {
 	$query = "select * from yhtio where ytunnus='$yhtiorow[konserni]'";
 	$riviresult = mysql_query($query) or pupe_error($query);
 
-	echo "<tr><th colspan='4'>$konsernirow[nimi] ($konsernirow[ytunnus])</th></tr>";		
+	echo "<tr><th colspan='5'>$konsernirow[nimi] ($konsernirow[ytunnus])</th></tr>";		
 	$query = "select lasku.ytunnus, lasku.nimi, sum(tiliointi.summa) myyntisaamiset
 	from tiliointi, lasku
 	where tiliointi.yhtio='$konsernirow[yhtio]' and tilino = '$konsernirow[konsernimyyntisaamiset]' and tiliointi.tapvm > '2007-08-31' and korjattu='' and tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus
@@ -18,7 +18,7 @@ while ($konsernirow=mysql_fetch_array ($konserniresult)) {
 	for ($i = 0; $i < mysql_num_fields($result); $i++) {
 		echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
 	}
-	echo "<th></th>";
+	echo "<th>Ostovelat</th><th>Erotus</th>";
 	
 	while ($trow=mysql_fetch_array ($result)) {
 		echo "<tr>";
@@ -39,7 +39,10 @@ while ($konsernirow=mysql_fetch_array ($konserniresult)) {
 		}
 		else {
 			echo "<td>N/A</td>";
+			$ostovelatrow['ostovelat'] = 0;
 		}
+		
+		echo "<td>" . ($trow['myyntisaamiset'] + $ostovelatrow['ostovelat']) . "</td>";
 		echo "</tr>";
 	}
 }

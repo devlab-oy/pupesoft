@@ -102,6 +102,7 @@
 		echo "</tr>";
 		
 		$summa=0;
+		$summa2 = 0;
 		while ($trow=mysql_fetch_array ($result)) {
 			echo "<tr>";
 			for ($i=0; $i<mysql_num_fields($result); $i++) {
@@ -131,6 +132,7 @@
 				}
 			}
 			$summa += $trow['Saldo'];
+			$summa2 += $trow['Saldo'];
 			if (($tilino != '') and ($kumulat == 'on')) echo "<td align = 'right'>$summa</td>";
 			echo "</tr>";
 			
@@ -138,6 +140,8 @@
 				$excelrivi++;
 			}
 		}
+		if ($tilino == 0)
+			echo "<tr><td></td><td></td><td></td><td align='right'>".round($summa2,2)."</td>";
 		echo "</table><br>";
 	}
 	if ($tee == '') { // N‰ytet‰‰n valikko

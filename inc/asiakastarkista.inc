@@ -2,13 +2,45 @@
 
 	if (mysql_field_name($result, $i) == "ytunnus") {
 		if ($ytunnus_select != '') {
-			$t[$i] = $ytunnus_select;
+			// Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa
+			//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+			$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+						FROM yhtio 
+						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+						where konserni	 = '$yhtiorow[konserni]' 
+						and synkronoi like '%$toim%'";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sresult) > 0) {
+				$srowapu = mysql_fetch_array($sresult);
+
+				$tarkyhtio = $srowapu["yhtiot"];
+			}
+			else {
+				$tarkyhtio = "'$kukarow[yhtio]'";
+			}
+
+			$query   = "select tunnus from asiakas where yhtio in ($tarkyhtio) and ytunnus='$ytunnus_select' and tunnus != '$tunnus'";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sresult) > 0) {
+				if ($alias_set == "VAHITTAISMYYNTI") {
+					$virhe[$i] = t("Valitsemasi asiakasnumero ei ollutkaan vapaa.");
+				}
+				else {
+					$virhe[$i] = t("Valitsemasi ytunnus ei ollutkaan vapaa.");
+				}
+				$errori = 1;
+			}
+			else {
+				$t[$i] = $ytunnus_select;
+			}
 		}
 	}
 
-	if (mysql_field_name($result, $i) == "ytunnus") {
+	if (mysql_field_name($result, $i) == "ytunnus" and $virhe[$i] == "") {
 
-		$ytunnus = trim($t[$i]);
+		$ytunnus = $t[$i];
 		$ytunnus_tunnus = $i;
 
 		if ($ytunnus == "") {
@@ -20,22 +52,72 @@
 
 	if (mysql_field_name($result, $i) == "asiakasnro") {
 		if ($asiakasnro_select != '') {
-			$t[$i] = $asiakasnro_select;
-		}
-	}
+			// Jos selectoitu drop downista niin katotaan, että tämä on vielä vapaa
+			//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+			$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+						FROM yhtio 
+						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+						where konserni	 = '$yhtiorow[konserni]' 
+						and synkronoi like '%$toim%'";
+			$sresult = mysql_query($query) or pupe_error($query);
 
-	if (mysql_field_name($result, $i) == "toim_ovttunnus" and trim($t[$i]) != '') {
+			if (mysql_num_rows($sresult) > 0) {
+				$srowapu = mysql_fetch_array($sresult);
 
-		$query   = "select tunnus from asiakas where yhtio='$kukarow[yhtio]' and toim_ovttunnus='$t[$i]'";
-		$sresult = mysql_query($query) or pupe_error($query);
+				$tarkyhtio = $srowapu["yhtiot"];
+			}
+			else {
+				$tarkyhtio = "'$kukarow[yhtio]'";
+			}
 
-		if (mysql_num_rows($sresult) > 0) {
-			$srowapu = mysql_fetch_array($sresult);
-			// ei löydetty itteämme
-			if ($srowapu['tunnus'] != $tunnus) {
-				$virhe[$i] = t("Samalla toim_ovttunnuksella on useita asiakkaita! Lisää tarkenne toim_ovttunnukseen.");
+			$query   = "select tunnus from asiakas where yhtio in ($tarkyhtio) and asiakasnro='$asiakasnro_select' and tunnus != '$tunnus'";
+			$sresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($sresult) > 0) {
+				$virhe[$i] = t("Valitsemasi asiakasnumero ei ollutkaan vapaa.");
 				$errori = 1;
 			}
+			else {
+				$t[$i] = $asiakasnro_select;
+			}
+		}
+	}
+	
+	if (mysql_field_name($result, $i) == "ovttunnus") {
+		$ovttunnus = $t[$i];	
+	}
+
+	if (mysql_field_name($result, $i) == "toim_ovttunnus") {
+		
+		//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
+		$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+					FROM yhtio 
+					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
+					where konserni	 = '$yhtiorow[konserni]' 
+					and synkronoi like '%$toim%'";
+		$sresult = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($sresult) > 0) {
+			$srowapu = mysql_fetch_array($sresult);
+			
+			$tarkyhtio = $srowapu["yhtiot"];
+		}
+		else {
+			$tarkyhtio = "'$kukarow[yhtio]'";
+		}
+		
+		$query   = "select tunnus from asiakas where yhtio in ($tarkyhtio) and ytunnus='$ytunnus' and ovttunnus='$ovttunnus' and toim_ovttunnus='$t[$i]' and tunnus != '$tunnus'";
+		$sresult = mysql_query($query) or pupe_error($query);
+
+
+		if (mysql_num_rows($sresult) > 0) {
+			if ($alias_set == "VAHITTAISMYYNTI") {
+				$virhe[$i] = t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Asiakasnumeroon/Henkilötunnukseen.");
+			}
+			else {
+				$virhe[$i] = t("Samalla tiedoilla on useita asiakkaita! Lisää tarkenne Ytunnukseen/Ovttunnukseen/Toim_ovttunnukseen.");
+			}
+			$errori = 1;
 		}
 	}
 

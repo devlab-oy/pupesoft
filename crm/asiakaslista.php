@@ -68,12 +68,14 @@
 					FROM asiakas 
 					WHERE $konsernit 
 					$lisa";
+		$tiednimi = "asiakaslista.xls";
 	}
 	else {
 		$query = "	SELECT tunnus, if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, ytunnus, yhtio, nimi, puhelin
 					FROM asiakas 
 					WHERE $konsernit 
 					$lisa";
+		$tiednimi = "viikkosuunnitelma.xls";
 	}			
 				
 	if ($lisa == "") {
@@ -117,7 +119,7 @@
 					
 		$content .= "Content-Type: application/vnd.ms-excel\r\n" ;
 		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"viikkosuunnitelma.xls\"\r\n\r\n";
+		$content .= "Content-Disposition: attachment; filename=\"".$tiednimi."\"\r\n\r\n";
 		$content .= chunk_split(base64_encode($liite));
 		$content .= "\r\n";
 					
@@ -125,7 +127,7 @@
 		
 		if ($tee == "lahetalista") {
 			mail($to, "Asiakkaiden tiedot", $content, $header, "-f $yhtiorow[postittaja_email]");
-			echo "<br><br><font class='message'>".t("Asiakkaiden tiedot sähköpostiisi")."!</font><br><br><br>";
+			echo "<br><br><font class='message'>".t("Asiakkaiden tiedot sähköpostiisi")."!</font>$tiednimi<br><br><br>";
 		}
 		else {
 			mail($to, "Viikkosunnitelmapohja", $content, $header, "-f $yhtiorow[postittaja_email]");
@@ -137,8 +139,8 @@
 		
 	}
 
-	echo "<li><a href='$PHP_SELF?tee=laheta&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni".$ulisa."'>".t("Lähetä viikkosuunnitelmapohja sähköpostiisi")."</a><br>";
-	echo "<li><a href='$PHP_SELF?tee=lahetalista&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni".$ulisa."'>".t("Lähetä asiakaslista sähköpostiisi")."</a><br>";
+	echo "<li><a href='$PHP_SELF?tee=laheta&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&myyjanro=$asmyyja".$ulisa."'>".t("Lähetä viikkosuunnitelmapohja sähköpostiisi")."</a><br>";
+	echo "<li><a href='$PHP_SELF?tee=lahetalista&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&myyjanro=$asmyyja".$ulisa."'>".t("Lähetä asiakaslista sähköpostiisi")."</a><br>";
 	
 	echo "<br><table>
 			<form action='$PHP_SELF' method='post'>

@@ -800,6 +800,10 @@
 									// lis‰t‰‰n saatu nimitys kaikille tuotteille
 									$trow["nimitys"] = addslashes($tuotenimitys);
 								}
+								
+								if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
+									$kommentti = $trow["tilausrivi_kommentti"]."\n".$kommentti;
+								}
 
 								$query = "	INSERT into tilausrivi set
 											hyllyalue   = '$myy_hyllyalue[$indeksi]',
@@ -1416,6 +1420,10 @@
 			// JT-rivikommentti
 			if ((int) $rivitunnus == 0 and $var == "J"and strpos($kommentti, "(".t("J‰lkitoimitus").":") === false) {
 				//$kommentti = "(".t("J‰lkitoimitus").": ".tv1dateconv(date("Y-m-d")).") \n".$kommentti;
+			}
+			
+			if ($trow["tilausrivi_kommentti"] != "" and (int) $rivitunnus == 0) {
+				$kommentti = $trow["tilausrivi_kommentti"]."\n".$kommentti;
 			}
 
 			// lis‰t‰‰n puuterivi

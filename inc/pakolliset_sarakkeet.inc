@@ -35,7 +35,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 			case "toimi" :
 				$pakolliset = array("YTUNNUS");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
-				$wherelliset = array("YTUNNUS", "OVTTUNNUS");				
+				$wherelliset = array("YTUNNUS", "OVTTUNNUS", "TILINUMERO", "ULTILNO");				
 				break;
 			case "tullinimike" :
 				$pakolliset = array("CN","KIELI");

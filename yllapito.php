@@ -95,7 +95,7 @@
 					WHERE tunnus='$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		synkronoi($toim, $tunnus, $trow);
+		synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 		
 		//	Jos poistetaan perheen osa palataan perheelle
 		if($seuraavatunnus > 0) $tunnus = $seuraavatunnus;
@@ -122,7 +122,7 @@
 					WHERE tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
-
+		
 		// Tarkistetaan
 		$errori = '';
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
@@ -155,9 +155,7 @@
 				$errori = 1;
 			}
 
-			if (isset($t[$i])) {
-				require "inc/".$toim."tarkista.inc";
-			}
+			require "inc/".$toim."tarkista.inc";
 		}
 
 		if ($errori != '') {
@@ -197,15 +195,15 @@
 
 			if ($tunnus == '') {
 				$tunnus = mysql_insert_id();
-				$wanha="";
+				$wanha = "";
 			}
 			else {
 				//	Javalla tieto että tätä muokattiin..
-				$wanha="P_";
+				$wanha = "P_";
 			}
 			
-			//	Tämä funktio tekee myös oikeustarkistukset!
-			synkronoi($toim, $tunnus, $trow);
+			//	Tämä funktio tekee myös oikeustarkistukset!			
+			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
 			
 			// Siirrytään takaisin sieltä mistä tultiin
 			if ($lopetus != '') {

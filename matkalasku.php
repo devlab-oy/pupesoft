@@ -532,7 +532,7 @@ if ($tee == "MUOKKAA") {
 				if ($trow["myyntihinta"]>0) {
 					$hinta=$trow["myyntihinta"];
 				}
-
+				$hinta = str_replace ( ",", ".", $hinta);
 				if ($hinta<=0) {
 					$errori .= "<font class='error'>".t("VIRHE!!! Kulun hinta puuttuu")."</font><br>";
 				}

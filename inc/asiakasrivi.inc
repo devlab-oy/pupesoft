@@ -214,18 +214,24 @@
 		$ulos .= "<option value = ''></option>";
 
 		$apu_asiakasnumero = 1;
-		
+
 		//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
-		$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+		$query = "	SELECT *
 					FROM yhtio 
-					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
-					where konserni	 = '$yhtiorow[konserni]' 
+					JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
+					where konserni = '$yhtiorow[konserni]' 
 					and synkronoi like '%$toim%'";
 		$vresult = mysql_query($query) or pupe_error($query);
-
+		
 		if (mysql_num_rows($vresult) > 0) {
+			// haetaan konsernifirmat
+			$query = "	SELECT group_concat(concat('\'',yhtio.yhtio,'\'')) yhtiot
+						FROM yhtio 
+						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio = yhtio.yhtio
+						where konserni = '$yhtiorow[konserni]' 
+						and synkronoi like '%$toim%'";
+			$vresult = mysql_query($query) or pupe_error($query);
 			$srowapu = mysql_fetch_array($vresult);
-
 			$tarkyhtio = $srowapu["yhtiot"];
 		}
 		else {

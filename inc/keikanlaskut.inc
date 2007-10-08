@@ -29,7 +29,8 @@
 
 	echo "<br><font class='head'>".t("Laskut joita ei ole liitetty keikkoihin")."</font><hr>";
 
-	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
+				round(lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)),2) 'summaeur'
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
@@ -37,6 +38,7 @@
 				lasku.vienti in ('B','C','J','E','F','K','H','I','L') and
 				lasku.tapvm >= '$avv-$akk-$app' and
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
+				GROUP by lasku.tunnus
 				HAVING lasku2.tunnus IS NULL
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = mysql_query($query) or pupe_error($query);
@@ -81,6 +83,76 @@
 
 		echo "<tr>";
 		echo "<th colspan='3'>".t("Yhteensä")."</th>";
+		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+		echo "<th colspan='2'></th>";
+		echo "</tr>";
+		echo "</table><br>";
+	}
+	else {
+		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
+	}
+
+	echo "<br><font class='head'>".t("Rahtilaskut joita ei ole liitetty keikkoihin kokonaan")."</font><hr>";
+
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
+				round(lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)),2) 'summaeur', 
+				round(sum(lasku2.summa*(if(lasku2.maksu_kurssi=0, lasku2.vienti_kurssi, lasku2.maksu_kurssi))),2) 'summaeur2'
+				FROM lasku
+				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
+				WHERE lasku.yhtio = '$kukarow[yhtio]' and
+				lasku.tila in ('H','Y','M','P','Q') and
+				lasku.vienti in ('B','J','E','K','H','L') and
+				lasku.tapvm >= '$avv-$akk-$app' and
+				lasku.tapvm <= '$lvv-$lkk-$lpp'
+				GROUP by lasku.tunnus
+				HAVING summaeur != summaeur2
+				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) > 0 ) {
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Ytunnus")."</th>";
+		echo "<th>".t("Nimi")."</th>";
+		echo "<th>".t("Summa valuutassa")."</th>";
+		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Liitetty")."</th>";
+		echo "<th>".t("Liittämättä")."</th>";
+		echo "<th>".t("Tapvm")."</th>";
+		echo "<th>".t("Tyyppi")."</th>";
+		echo "</tr>";
+
+		$yhteesa = 0;
+
+		while ($trow = mysql_fetch_array($result)) {
+
+			$vienti = $trow["vienti"];
+			if ($trow["vienti"] == 'B') $vienti = t('Kotimaa huolinta/rahti');
+			if ($trow["vienti"] == 'C') $vienti = t('Kotimaa vaihto-omaisuus');
+			if ($trow["vienti"] == 'J') $vienti = t('Kotimaa raaka-aine');
+			if ($trow["vienti"] == 'E') $vienti = t('EU huolinta/rahti');
+			if ($trow["vienti"] == 'F') $vienti = t('EU vaihto-omaisuus');
+			if ($trow["vienti"] == 'K') $vienti = t('EU raaka-aine');
+			if ($trow["vienti"] == 'H') $vienti = t('ei-EU huolinta/rahti');
+			if ($trow["vienti"] == 'I') $vienti = t('ei-EU vaihto-omaisuus');
+			if ($trow["vienti"] == 'L') $vienti = t('ei-EU raaka-aine');
+
+			echo "<tr class='aktiivi'>";
+			echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
+			echo "<td>$trow[nimi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur2"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"]-$trow["summaeur2"])." $yhtiorow[valkoodi]</td>";
+			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
+			echo "<td>$vienti</td>";
+			echo "</tr>";
+
+			$yhteesa += ($trow["summaeur"] - $trow["summaeur2"]);
+		}
+
+		echo "<tr>";
+		echo "<th colspan='5'>".t("Yhteensä")."</th>";
 		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
 		echo "<th colspan='2'></th>";
 		echo "</tr>";

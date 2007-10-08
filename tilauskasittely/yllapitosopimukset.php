@@ -44,6 +44,94 @@
 			// monistetaan soppari
 			$ok = kopioi_tilaus($tilausnumero);
 
+			//	Haetaan se sopimuskausi ja kommentti
+			$query = "	SELECT lasku.viesti, laskun_lisatiedot.sopimus_kk, laskun_lisatiedot.sopimus_pp, UNIX_TIMESTAMP(laskun_lisatiedot.sopimus_alkupvm) sopimus_alkupvm, UNIX_TIMESTAMP(laskun_lisatiedot.sopimus_loppupvm) sopimus_loppupvm
+			 			FROM lasku
+						LEFT JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio and lasku.tunnus = laskun_lisatiedot.otunnus
+						WHERE lasku.yhtio = '{$kukarow["yhtio"]}' and lasku.tunnus = '$tilausnumero'";
+			$result = mysql_query($query) or pupe_error($query);
+			$soprow = mysql_fetch_array($result);
+
+			$sopimus_kk = explode(",",$soprow["sopimus_kk"]);
+			$sopimus_pp = explode(",",$soprow["sopimus_pp"]);			
+
+			$ipp = array_search($tapvmpp, $sopimus_pp);
+			$ikk = array_search($tapvmkk, $sopimus_kk);
+			
+			//	Ratkaistaan p‰iv‰m‰‰r‰t
+			if($ipp > 0) {
+				$edipp = $ipp-1;
+				$edtapvmpp = $sopimus_pp[$edipp];
+				$edtapvmkk = $tapvmkk;				
+			}
+			else {
+				$edtapvmpp = end($sopimus_pp);
+				if($ikk > 0) {
+					$edikk = $i-1;
+					$edtapvmkk = $sopimus_kk[$edikk];					
+				}
+				else {
+					$edtapvmkk = end($sopimus_kk);
+				}
+			}
+			
+			//	Ratkaistaan kuukaudet
+			if(count($sopimus_pp) == $ipp+1) {
+				$seikk = $seikk + 1;
+				$setapvmpp = $sopimus_pp[0];
+				$setapvmkk = $sopimus_kk[$seikk];					
+			}
+			else {
+				$seipp = $ipp+1;
+				$setapvmpp = $sopimus_pp[$seipp];
+				$setapvmkk = $sopimus_kk[$ikk];										
+			}
+			
+			//	Onko edellinen kuukausi viimevuodelta?
+			if($edtapvmkk > $tapvmkk) {
+ 				$edtapvmvv = $tapvmvv - 1; 
+			}
+			else {
+				$edtapvmvv = $tapvmvv;
+			}
+
+			//	Onko seuraava kuukausi ensivuodella?
+			if($setapvmkk < $tapvmkk) {
+ 				$setapvmvv = $tapvmvv + 1; 
+			}
+			else {
+				$setapvmvv = $tapvmvv;
+			}
+			
+			//	Katsotaan, ett‰ t‰m‰ aika ei ole ennen tai j‰lkeen sopimuksen voimassaoloajan..
+			$edstamp	= strtotime("$edtapvmpp/$edtapvmkk/$edtapvmvv");
+			$sestamp	= strtotime("$setapvmpp/$setapvmkk/$setapvmvv");
+
+			if($edstamp <= $soprow["sopimus_alkupvm"]) {
+				$edtapvmpp = date("d", $soprow["sopimus_alkupvm"]);
+				$edtapvmkk = date("m", $soprow["sopimus_alkupvm"]);
+				$edtapvmvv = date("Y", $soprow["sopimus_alkupvm"]);			
+			}
+
+			if($sestamp >= $soprow["sopimus_loppupvm"]) {
+				$setapvmpp = date("d", $soprow["sopimus_loppupvm"]);
+				$setapvmkk = date("m", $soprow["sopimus_loppupvm"]);
+				$setapvmvv = date("Y", $soprow["sopimus_loppupvm"]);			
+			}
+			
+			//	Korjataan kommentti
+			$from[]	= "/%ed/";
+			$to[]	= "$edtapvmpp.$edtapvmkk.$edtapvmvv - $tapvmpp.$tapvmkk.$tapvmvv";
+
+			$from[]	= "/%se/";
+			$to[]	= "$tapvmpp.$tapvmkk.$tapvmvv - $setapvmpp.$setapvmkk.$setapvmvv";
+			
+			//	Jos ei kirjoiteta oikein, poistetaan muuttuja
+			$from[]	= "/%[\w]{2}/";
+			$to[]	= "";
+			
+			$viesti = preg_replace($from, $to, $soprow["viesti"]);			
+			
 			if ($ok !== FALSE) {
 
 				$laskuta_message .= "<font class='message'>Monistetaan sopimus $tilausnumero ($tapvmpp.$tapvmkk.$tapvmvv)";
@@ -58,23 +146,24 @@
 
 				// p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
 				$query  = "	UPDATE lasku
-							SET tila = 'N',
-							alatila = '',
-							eilahetetta = 'o',
-							clearing = 'sopimus',
-							swift = '$tilausnumero',
-							tilaustyyppi = ''
-							WHERE yhtio = '$kukarow[yhtio]'
-							and tunnus  = '$ok'
-							and tila    = '0'";
+							SET tila 		= 'N',
+							alatila 		= '',
+							eilahetetta		= 'o',
+							clearing		= 'sopimus',
+							swift			= '$tilausnumero',
+							viesti			= '$viesti',
+							tilaustyyppi	= ''
+							WHERE yhtio 	= '$kukarow[yhtio]'
+							and tunnus  	= '$ok'
+							and tila    	= '0'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				// tyyppi takasin L, merkataan rivit ker‰tyks ja toimitetuks
 				$query = "	UPDATE tilausrivi
 							SET tyyppi	   = 'L'
-							WHERE yhtio	= '$kukarow[yhtio]'
-							and otunnus	= '$ok'
-							and tyyppi  = '0'";
+							WHERE yhtio		= '$kukarow[yhtio]'
+							and otunnus		= '$ok'
+							and tyyppi  	= '0'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				// haetaan laskun tiedot
@@ -92,9 +181,9 @@
 
 				// p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
 				$query  = "	UPDATE lasku
-							SET tila = 'L',
-							alatila = 'D',
-							luontiaika = '$tapahtumapvm'
+							SET tila 	= 'L',
+							alatila 	= 'D',
+							luontiaika 	= '$tapahtumapvm'
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus  = '$ok'
 							and tila = 'L'";

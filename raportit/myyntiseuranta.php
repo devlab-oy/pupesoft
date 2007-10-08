@@ -854,13 +854,17 @@
 			if ($query != "") {
 				
 				$result = mysql_query($query) or pupe_error($query);
-
-				$rivilimitti = 2000;
 				
-				if (mysql_num_rows($result) > $rivilimitti) {
-					echo "<br><font class='error'>".t("Hakutulos oli liian suuri")."!</font><br>";
+				if($vain_excel != "") {
 					echo "<font class='error'>".t("Tallenna/avaa tulos excelissä")."!</font><br><br>";
+					$rivilimitti = 0;
 				}
+				else {
+					if (mysql_num_rows($result) > $rivilimitti) {
+						echo "<br><font class='error'>".t("Hakutulos oli liian suuri")."!</font><br>";
+						echo "<font class='error'>".t("Tallenna/avaa tulos excelissä")."!</font><br><br>";
+					}	
+				}				
 			}
 
 			if ($query != "") {
@@ -1728,6 +1732,11 @@
 				<td><input type='checkbox' name='osoitetarrat' $tarchk></td>
 				<td></td>
 				<td class='back'>".t("(Toimii vain jos listaat asiakkaittain)")."</td>
+				</tr>
+				<th>".t("Raportti vain Exceliin")."</th>
+				<td><input type='checkbox' name='vain_excel' $tarchk></td>
+				<td></td>
+				<td class='back'></td>
 				</tr>
 				</table><br>";
 

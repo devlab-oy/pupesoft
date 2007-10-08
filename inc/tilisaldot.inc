@@ -6,9 +6,10 @@
 				$tee='';
 			}
 			$query = "	SELECT nimi
-					FROM tili
-					WHERE yhtio='$kukarow[yhtio]' and tilino = '$tilino'";
+						FROM tili
+						WHERE yhtio='$kukarow[yhtio]' and tilino = '$tilino'";
 			$sresult = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($sresult) != 1) {
 				echo "<font class='error'>".t("Tili puuttuu tai sitä ei löydy")."!</font><br>";
 				$tee='';
@@ -19,10 +20,11 @@
 		$lisa='';
 		$tkausi = (int) $tkausi;
 		if ($tkausi != 0) {
-			 $query = "SELECT tilikausi_alku, tilikausi_loppu
-					FROM tilikaudet
-					WHERE yhtio = '$kukarow[yhtio]' and tunnus = $tkausi";
+			 $query = "	SELECT tilikausi_alku, tilikausi_loppu
+						FROM tilikaudet
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = $tkausi";
 			$vresult = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($vresult) == 1) {
 				$tilikausirow=mysql_fetch_array($vresult);
 				$lisa = "tapvm >= '$tilikausirow[tilikausi_alku]' and tapvm <= '$tilikausirow[tilikausi_loppu]'";
@@ -68,8 +70,9 @@
 						FROM tiliointi
 						LEFT JOIN tili ON tili.yhtio = '$kukarow[yhtio]' and tiliointi.tilino = tili.tilino
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]' 
-							and tiliointi.korjattu='' and tiliointi.tilino='$tilino' and
-							$lisa
+						and tiliointi.korjattu='' 
+						and tiliointi.tilino='$tilino' 
+						and $lisa
 						GROUP BY tapvm, tiliointi.tilino
 						ORDER BY tapvm";
 		}
@@ -77,15 +80,16 @@
 			$query = "	SELECT tiliointi.tilino, nimi, count(*) Vientejä, sum(summa) Saldo
 						FROM tiliointi
 						LEFT JOIN tili ON tili.yhtio = '$kukarow[yhtio]' and tiliointi.tilino = tili.tilino
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
-							tiliointi.korjattu='' and
-							$lisa
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' 
+						and tiliointi.korjattu='' 
+						and $lisa
 						GROUP BY tiliointi.tilino
 						ORDER BY tiliointi.tilino";
 		}
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";
+		
 		for ($i = 0; $i < mysql_num_fields($result); $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i)) . "</font></th>";
 			
@@ -94,15 +98,23 @@
 			}
 		}
 		
+		if (($tilino != '') and ($kumulat == 'on')) {
+			echo "<th>".t("kumulatiivinen")."</th>";
+			
+			if(isset($workbook)) {
+				$worksheet->write($excelrivi, ($i+1), ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+			}
+		}
+		
 		if(isset($workbook)) {
 			$excelrivi++;
 		}
 		
-		if (($tilino != '') and ($kumulat == 'on')) echo "<th>".t("kumulatiivinen")."</th>";
 		echo "</tr>";
 		
-		$summa=0;
+		$summa	= 0;
 		$summa2 = 0;
+		
 		while ($trow=mysql_fetch_array ($result)) {
 			echo "<tr>";
 			for ($i=0; $i<mysql_num_fields($result); $i++) {
@@ -131,17 +143,25 @@
 					$worksheet->write($excelrivi, $i, $trow[$i]);
 				}
 			}
-			$summa += $trow['Saldo'];
+			$summa  += $trow['Saldo'];
 			$summa2 += $trow['Saldo'];
-			if (($tilino != '') and ($kumulat == 'on')) echo "<td align = 'right'>$summa</td>";
+			
+			if (($tilino != '') and ($kumulat == 'on')) {
+				echo "<td align = 'right'>$summa</td>";
+				
+				if(isset($workbook)) {
+					$worksheet->write($excelrivi, ($i+1), $trow[$i]);
+				}
+			}
+			
 			echo "</tr>";
 			
 			if(isset($workbook)) {
 				$excelrivi++;
 			}
 		}
-		if ($tilino == 0)
-			echo "<tr><td></td><td></td><td></td><td align='right'>".round($summa2,2)."</td>";
+		if ($tilino == 0) echo "<tr><td></td><td></td><td></td><td align='right'>".round($summa2,2)."</td>";
+		
 		echo "</table><br>";
 	}
 	if ($tee == '') { // Näytetään valikko
@@ -160,6 +180,7 @@
 					ORDER BY tilikausi_alku";
 		$vresult = mysql_query($query) or pupe_error($query);
 		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
+		
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($trow[$i] == $vrow["tunnus"]) {

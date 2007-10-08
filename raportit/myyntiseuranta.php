@@ -497,7 +497,7 @@
 				elseif ($mukaan == "ytunnus" and $osoitetarrat != "") {
 					if ($group!="") $group .= ",asiakas.tunnus";
 					else $group  .= "asiakas.tunnus";
-					$select .= "asiakas.tunnus, concat_ws(' ',asiakas.ytunnus,asiakas.toim_ovttunnus,asiakas.toim_nimi) ytunnus, ";
+					$select .= "asiakas.tunnus astunnus, concat_ws(' ',asiakas.ytunnus,asiakas.toim_ovttunnus,asiakas.toim_nimi) ytunnus, ";
 					$order  .= "asiakas.ytunnus,";
 					$gluku++;
 				}
@@ -710,8 +710,8 @@
 			if ($asiakas != "") {
 				$query = "select group_concat(tunnus) from asiakas where yhtio in ($yhtio) and ytunnus = '$asiakas' $asiakasrajaus";
 				$result = mysql_query($query) or pupe_error($query);
-
 				$asiakasrow = mysql_fetch_array($result);
+				
 				if (trim($asiakasrow[0]) != "") {
 					$lisa .= " and lasku.liitostunnus in ($asiakasrow[0]) ";
 				}
@@ -855,6 +855,8 @@
 				
 				$result = mysql_query($query) or pupe_error($query);
 				
+				$rivilimitti = 1000;
+				
 				if($vain_excel != "") {
 					echo "<font class='error'>".t("Tallenna/avaa tulos excelissä")."!</font><br><br>";
 					$rivilimitti = 0;
@@ -940,8 +942,8 @@
 					
 					if (mysql_num_rows($result) > $rivilimitti) $bar->increase();
 
-					if ($osoitetarrat != "" and $row[0] > 0) {
-						$tarra_aineisto .= $row[0].",";
+					if ($osoitetarrat != "" and $row["astunnus"] > 0) {
+						$tarra_aineisto .= $row["astunnus"].",";
 					}
 
 					if (mysql_num_rows($result) <= $rivilimitti) echo "<tr>";

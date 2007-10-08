@@ -90,19 +90,23 @@
 
 		echo "<table><tr>";
 		
+		$iiiiii = 0;
+		
 		for ($i = 0; $i < mysql_num_fields($result); $i++) {
 			echo "<th>" . t(mysql_field_name($result,$i)) . "</font></th>";
 			
 			if(isset($workbook)) {
 				$worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 			}
+			
+			$iiiiii++;
 		}
 		
 		if (($tilino != '') and ($kumulat == 'on')) {
 			echo "<th>".t("kumulatiivinen")."</th>";
 			
 			if(isset($workbook)) {
-				$worksheet->write($excelrivi, ($i+1), ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+				$worksheet->write($excelrivi, $iiiiii, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
 			}
 		}
 		
@@ -117,6 +121,9 @@
 		
 		while ($trow=mysql_fetch_array ($result)) {
 			echo "<tr>";
+			
+			$iiiiii = 0;
+			
 			for ($i=0; $i<mysql_num_fields($result); $i++) {
 				if ($i > 2) {
 					echo "<td align = 'right'>";
@@ -142,6 +149,8 @@
 				if(isset($workbook)) {
 					$worksheet->write($excelrivi, $i, $trow[$i]);
 				}
+				
+				$iiiiii++;
 			}
 			$summa  += $trow['Saldo'];
 			$summa2 += $trow['Saldo'];
@@ -150,7 +159,7 @@
 				echo "<td align = 'right'>$summa</td>";
 				
 				if(isset($workbook)) {
-					$worksheet->write($excelrivi, ($i+1), $trow[$i]);
+					$worksheet->write($excelrivi, $iiiiii, $summa);
 				}
 			}
 			

@@ -195,7 +195,7 @@
 		}
 
 		if ($tarra_aineisto != "") {
-			$lisa = " and tunnus in ($tarra_aineisto) ";
+			$lisa .= " and tunnus in ($tarra_aineisto) ";
 			$limit = "";
 		}
 		else {

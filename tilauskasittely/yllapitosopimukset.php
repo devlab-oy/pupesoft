@@ -41,9 +41,6 @@
 			$tilausnumero = $laskutatun[$pointteri];
 			list($tapvmvv,$tapvmkk,$tapvmpp) = split("-", $tapahtumapvm);
 
-			// monistetaan soppari
-			$ok = kopioi_tilaus($tilausnumero);
-
 			//	Haetaan se sopimuskausi ja kommentti
 			$query = "	SELECT lasku.viesti, laskun_lisatiedot.sopimus_kk, laskun_lisatiedot.sopimus_pp, UNIX_TIMESTAMP(laskun_lisatiedot.sopimus_alkupvm) sopimus_alkupvm, UNIX_TIMESTAMP(laskun_lisatiedot.sopimus_loppupvm) sopimus_loppupvm
 			 			FROM lasku
@@ -113,7 +110,7 @@
 				$edtapvmvv = date("Y", $soprow["sopimus_alkupvm"]);			
 			}
 
-			if($sestamp >= $soprow["sopimus_loppupvm"]) {
+			if($sestamp >= $soprow["sopimus_loppupvm"] and $soprow["sopimus_loppupvm"] > 0) {
 				$setapvmpp = date("d", $soprow["sopimus_loppupvm"]);
 				$setapvmkk = date("m", $soprow["sopimus_loppupvm"]);
 				$setapvmvv = date("Y", $soprow["sopimus_loppupvm"]);			
@@ -129,9 +126,10 @@
 			//	Jos ei kirjoiteta oikein, poistetaan muuttuja
 			$from[]	= "/%[\w]{2}/";
 			$to[]	= "";
-			
-			$viesti = preg_replace($from, $to, $soprow["viesti"]);			
-			
+
+			// monistetaan soppari
+			$ok = kopioi_tilaus($tilausnumero, array("viesti" => array("from" => $from, "to" => $to)), array("kommentti" => array("from" => $from, "to" => $to)));
+						
 			if ($ok !== FALSE) {
 
 				$laskuta_message .= "<font class='message'>Monistetaan sopimus $tilausnumero ($tapvmpp.$tapvmkk.$tapvmvv)";
@@ -151,7 +149,6 @@
 							eilahetetta		= 'o',
 							clearing		= 'sopimus',
 							swift			= '$tilausnumero',
-							viesti			= '$viesti',
 							tilaustyyppi	= ''
 							WHERE yhtio 	= '$kukarow[yhtio]'
 							and tunnus  	= '$ok'

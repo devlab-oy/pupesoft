@@ -3,7 +3,7 @@
 if (!function_exists("kopioi_tilaus")) {
 
 	// otetaan parametriksi tunnus
-	function kopioi_tilaus($tunnus) {
+	function kopioi_tilaus($tunnus, $muokkaa_lasku="", $muokkaa_rivi) {
 
 		// tarvitaan yhtiörowta ja kukarowta
 		global $yhtiorow, $kukarow;
@@ -31,7 +31,16 @@ if (!function_exists("kopioi_tilaus")) {
 
 		// monistetaan kaikki paitsi tunnus
 		for ($i = 1; $i < mysql_num_fields($monistares)-1; $i++) {
-			$fields .= ", ".mysql_field_name($monistares, $i);
+			$field = mysql_field_name($monistares, $i);
+			$fields .= ", $field";
+			
+			//	Muokkaukset
+			if(is_array($muokkaa_lasku[$field])) {
+				if($muokkaa_lasku[$field]["from"] != "" and $muokkaa_lasku[$field]["to"] != "") {
+					$monistarow[$i] = preg_replace($muokkaa_lasku[$field]["from"], $muokkaa_lasku[$field]["to"], $monistarow[$i]);
+				}
+			}
+			
 			$values .= ", '$monistarow[$i]'";
 		}
 
@@ -45,13 +54,23 @@ if (!function_exists("kopioi_tilaus")) {
 			$rvalues = "'$monistarow[0]'";
 
 			for ($i = 1; $i < mysql_num_fields($rivires)-1; $i++) {
-
+				
+				$field = mysql_field_name($rivires, $i);
+				
 				if (mysql_field_name($rivires, $i) == "otunnus") {
-					$rfields .= ", ".mysql_field_name($rivires, $i);
+					$rfields .= ", $field";
 					$rvalues .= ", '$utunnus'";
 				}
 				else {
-					$rfields .= ", ".mysql_field_name($rivires, $i);
+					
+					//	Muokkaukset
+					if(is_array($muokkaa_rivi[$field])) {
+						if($muokkaa_rivi[$field]["from"] != "" and $muokkaa_rivi[$field]["to"] != "") {
+							$rivirow[$i] = preg_replace($muokkaa_rivi[$field]["from"], $muokkaa_rivi[$field]["to"], $rivirow[$i]);
+						}
+					}
+					
+					$rfields .= ", $field";
 					$rvalues .= ", '$rivirow[$i]'";
 				}
 

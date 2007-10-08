@@ -4,7 +4,7 @@
 
 $tuoteno 	= korjattava tuote
 $pvm 		= mihin p‰iv‰‰n asti korjataan
-$uusihinta 	= mik‰ on tuon pvm:n oikea ostohinta (vai uusi keskihankintahinta!!?!)
+$uusihinta 	= mik‰ on tuon pvm:n oikea ostohinta 
 $rivitunnus = mik‰ on tapahtuman tehneen rivin tunnus
 
 Palautetaan $jlerror, joka on 1, jos jotain ep‰tavallista sattui
@@ -766,12 +766,8 @@ if ($tuoteno != '') {
 
 								if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Tulo. $trow[kpl] kappaletta. Saldo ennen tuloa: $uusisaldo Kehahin ennen tuloa: $uusikehahin Sort: Asc</font><br>";
 
-								// kehahin matikka. jos meill‰ on miinuskappaleita, k‰ytet‰‰n vaan vanhaa keharia
-								if ($trow['kpl'] < 0) {
-									if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Vanha kehahin: (Ei matikkaa, hyvitys): uusikehahin = $trow[kplhinta]</font><br>";
-								}
 								// kehahin matikka. lasketaan uusi kehahin jos p‰‰dyt‰‰n plussalle ja l‰hdet‰‰n plussalta
-								elseif ($uusisaldo + $trow['kpl'] > 0 and $uusisaldo > 0) {
+								if ($uusisaldo + $trow['kpl'] > 0 and $uusisaldo > 0 and ($uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl']) > 0) {
 									if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Uusi kehahin (Matikka): uusikehahin = ($uusikehahin * $uusisaldo + $trow[kplhinta] * $trow[kpl]) / ($uusisaldo + $trow[kpl])</font><br>";
 									$uusikehahin = round(($uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl']) / ($uusisaldo + $trow['kpl']),4);
 								}

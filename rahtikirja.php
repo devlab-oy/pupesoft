@@ -58,8 +58,8 @@
 
 				// lis‰t‰‰n rahtikirjatiedot (laitetaan poikkeava kentt‰‰n -9 niin tiedet‰‰n ett‰ esisyˆtetty)
 				$query  = "insert into rahtikirjat
-							(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,yhtio) values
-							('-9','$otsikkonro','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$kukarow[yhtio]')";
+							(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) values
+							('-9','$otsikkonro','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";
 				$result = mysql_query($query) or pupe_error($query);
 				$tutkimus++;
 			}
@@ -239,8 +239,8 @@
 
 						foreach ($tilaukset as $otsikkonro) {
 							$query  = "insert into rahtikirjat
-										(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,yhtio) values
-										('','$rakirno','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$kukarow[yhtio]')";
+										(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) values
+										('','$rakirno','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";
 							$result = mysql_query($query) or pupe_error($query);
 
 							if ($kollit[$i]=='') 	$kollit[$i]		= 0;
@@ -1176,7 +1176,18 @@
 		else {
 			echo "<th></th><td></td>";
 		}
-
+		
+		$query = "	SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
+					from rahtikirjat use index (otsikko_index)
+					where yhtio			= '$kukarow[yhtio]'
+					and otsikkonro		= '$id'
+					and rahtikirjanro	= '$rakirno'";
+		$viestirar = mysql_query($query) or pupe_error($query);
+		
+		$viestirarrow = mysql_fetch_array($viestirar);
+		
+		echo "<th>Kuljetusohje</th><td><textarea name='viesti'>$viestirarrow[viesti]</textarea></td>";
+		
 		echo "</tr>";
 
 		// jos meill‰ on hetitulostettava j‰lkivaatimus-tilaus niin (annetaan mahdollisuus tulostaa) TULOSTETAAN lasku heti

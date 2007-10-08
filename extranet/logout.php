@@ -2,7 +2,7 @@
 	ob_start();
 	require ("parametrit.inc");
 
-	$query = "UPDATE kuka set session='', kesken='' where session='$session'";
+	$query = "UPDATE kuka set session='' where session='$session'";
 	$result = mysql_query($query) or pupe_error($query);
 	$bool = setcookie("pupesoft_session", "", time()-43200, parse_url($palvelin, PHP_URL_PATH));
 

@@ -214,6 +214,7 @@
 			
 		echo "<form action = '$PHP_SELF' method = 'post'>
 		<input type='hidden' name='arvomatikka' value='$arvomatikka'>
+		<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
 		<input type='hidden' name='raportti' value='$raportti'>
 		<input type='hidden' name='toimas' value='$toimas'>";
 				
@@ -230,8 +231,9 @@
 		echo "</form>";
 
 
-		echo "<form action = '$PHP_SELF' method = 'post'>";
-		echo "<input type='hidden' name='tee' value='TULOSTA'>";
+		echo "<form action = '$PHP_SELF' method = 'post'>
+				<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>
+				<input type='hidden' name='tee' value='TULOSTA'>";
 
 		while ($trow = mysql_fetch_array ($result)) {
 			

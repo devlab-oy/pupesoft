@@ -222,7 +222,7 @@
 		echo "<th></th>";
 		
 		for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-			echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_table($result,$i).".".mysql_field_name($result,$i).$ulisa."'>".t(mysql_field_name($result,$i))."</a>";
+			echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_table($result,$i).".".mysql_field_name($result,$i).$ulisa."&raportti=$raportti&tarra_aineisto=$tarra_aineisto&arvomatikka=$arvomatikka&toimas=$toimas'>".t(mysql_field_name($result,$i))."</a>";
 
 			echo "<br><input type='text' size='10' name = 'haku[$i]' value = '$haku[$i]'></th>";
 		}

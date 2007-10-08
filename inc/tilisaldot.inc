@@ -106,7 +106,7 @@
 			echo "<th>".t("kumulatiivinen")."</th>";
 			
 			if(isset($workbook)) {
-				$worksheet->write($excelrivi, $iiiiii, ucfirst(t("kumulatiivinen"))), $format_bold);
+				$worksheet->write($excelrivi, $iiiiii, ucfirst(t("kumulatiivinen")), $format_bold);
 			}
 		}
 		

@@ -229,13 +229,14 @@
 							LEFT JOIN tili on tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
 							WHERE tiliointi.tunnus = '$tiliotedatatu'";
 				$tiliointiresult = mysql_query($query) or pupe_error($query);
-				$tiliointirow = mysql_fetch_array ($tiliointiresult);
+				
+				if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {
+					echo "<font class='message'>".t("Tapahtuma on käsitelty")." $tiliotedataka<br>";
+					echo t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
 
-				echo "<font class='message'>".t("Tapahtuma on käsitelty")." $tiliotedataka<br>";
-				echo t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
-
-				if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
-					echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font>";
+					if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
+						echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font>";
+					}
 				}
 			}
 		}

@@ -112,6 +112,8 @@
 			$lisa .= " and lasku.ytunnus='$sytunnus' ";
 			$useindex = " use index (yhtio_tila_ytunnus_tapvm) ";
 		}
+		
+		$yli = str_replace(',','.', $yli);
 
 		if ($yli != 0) {
 			$having = " HAVING ll >= $yli ";

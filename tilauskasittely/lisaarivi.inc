@@ -103,6 +103,9 @@
 	elseif($laskurow["tila"] == 'S') {
 		$rivityyppi = 'G';	// Sisäinen työmääräysrivi
 	}
+	elseif($laskurow["tila"] == 'V' and $perheid2 == "W") {
+		$rivityyppi = 'W';	// Valmistustilausrivi (Valmiste)
+	}
 	elseif($laskurow["tila"] == 'V') {
 		$rivityyppi = 'V';	// Valmistustilausrivi
 	}

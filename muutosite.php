@@ -45,13 +45,13 @@
 		}
 
 		// Tositeselailu
-		if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T') {
+		if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S') {
 
-			if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T') {
+			if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S') {
 
 				// Etsit‰‰n virheet vain kuluvalta tilikaudelta!
 				if ($tee == 'Z') {
-					$query = "SELECT ltunnus, tapvm, round(sum(summa),2) summa, 'n/a', 'n/a', 'n/a', selite
+					$query = "	SELECT ltunnus, tapvm, round(sum(summa),2) summa, 'n/a', 'n/a', 'n/a', selite
 								FROM tiliointi use index (yhtio_tapvm_tilino)
 								WHERE yhtio = '$kukarow[yhtio]' and korjattu='' and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]'
 								GROUP BY ltunnus, tapvm
@@ -59,16 +59,16 @@
 				}
 
 				if ($tee == 'X') {
-					$query = "SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
+					$query = "	SELECT ltunnus, tapvm, summa, 'n/a', 'n/a', 'n/a', selite
 								FROM tiliointi use index (yhtio_tilino_tapvm), tili use index (tili_index)
 								WHERE tiliointi.yhtio = '$kukarow[yhtio]' and tili.yhtio = '$kukarow[yhtio]' and
-										tiliointi.tilino = tili.tilino and
-										korjattu='' and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]' and
-										sisainen_taso like '3%' and kustp = '' and tiliointi.tilino!='$yhtiorow[myynti]' and tiliointi.tilino!='$yhtiorow[myynti_ei_eu]' and tiliointi.tilino!='$yhtiorow[myynti_eu]' and tiliointi.tilino!='$yhtiorow[varastonmuutos]' and tiliointi.tilino!='$yhtiorow[pyoristys]'";
+								tiliointi.tilino = tili.tilino and
+								korjattu='' and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]' and
+								sisainen_taso like '3%' and kustp = '' and tiliointi.tilino!='$yhtiorow[myynti]' and tiliointi.tilino!='$yhtiorow[myynti_ei_eu]' and tiliointi.tilino!='$yhtiorow[myynti_eu]' and tiliointi.tilino!='$yhtiorow[varastonmuutos]' and tiliointi.tilino!='$yhtiorow[pyoristys]'";
 				}
 
 				if ($tee == 'W') {
-					$query = "SELECT ltunnus, count(*) maara, round(sum(summa),2) heitto, 'n/a', 'n/a', 'n/a', selite
+					$query = "	SELECT ltunnus, count(*) maara, round(sum(summa),2) heitto, 'n/a', 'n/a', 'n/a', selite
 								FROM tiliointi use index (yhtio_tilino_tapvm)
 								WHERE yhtio='$kukarow[yhtio]' and korjattu='' and
 								tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]' and tilino = '$yhtiorow[ostovelat]'
@@ -77,7 +77,7 @@
 				}
 
 				if ($tee == 'T') {
-					$query = "SELECT ltunnus, count(*) maara, tila, 'n/a', 'n/a', 'n/a', selite
+					$query = "	SELECT ltunnus, count(*) maara, tila, 'n/a', 'n/a', 'n/a', selite
 								FROM tiliointi use index (yhtio_tilino_tapvm)
 								LEFT JOIN lasku ON  lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
 								WHERE tiliointi.yhtio='$kukarow[yhtio]' and korjattu='' and
@@ -85,6 +85,24 @@
 								GROUP BY ltunnus
 								HAVING maara > 1";
 				}
+				
+				if ($tee == 'S') {
+					$query = "	SELECT lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm,
+								if(sum(ifnull(t1.summa, 0))=0,0,1)+if(sum(ifnull(t2.summa, 0))=0,0,1)+if(sum(ifnull(t3.summa, 0))=0,0,1) korjattu,
+								count(distinct t1.tilino)+count(distinct t2.tilino)+count(distinct t3.tilino) saamistilej‰ 
+								FROM lasku
+								LEFT JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu = '' and t1.tilino='$yhtiorow[myyntisaamiset]' 
+								LEFT JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu = '' and t2.tilino='$yhtiorow[factoringsaamiset]'
+								LEFT JOIN tiliointi t3 ON lasku.yhtio=t3.yhtio and lasku.tunnus=t3.ltunnus and t3.korjattu = '' and t3.tilino='$yhtiorow[konsernimyyntisaamiset]'
+								WHERE lasku.yhtio	= '$kukarow[yhtio]' 
+								and lasku.tila		= 'U' 
+								and lasku.alatila	= 'X'
+								and lasku.tapvm >= '$yhtiorow[tilikausi_alku]' 
+								and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+								GROUP BY 1,2,3,4,5,6
+								HAVING saamistilej‰ > 1 and korjattu > 0";
+				}
+				
 			}
 			else {
 
@@ -768,32 +786,47 @@
 				  </tr>";
 			}
 
-			echo "
-				  <tr>
-				  <td></td>
-				  <td>".t("n‰yt‰ muutetut rivit")."</td>
-				  <td><input type='checkbox' name='viivatut'></td>
-				  <td><input type = 'submit' value = '".t("Etsi")."'></td></tr></form>
-				  <tr><form action = '$PHP_SELF?tee=Z' method='post'>
-				  <td>".t("Etsi virhett‰")."</td>
-				  <td>".t("n‰yt‰ tositteet, jotka eiv‰t stemmaa")."</td>
-				  <td></td>
-				  <td><input type = 'submit' value = '".t("N‰yt‰")."'></td></form>
-				  </tr><tr>
-				  <td><form action = '$PHP_SELF?tee=X' method='post'></td>
-				  <td>".t("n‰yt‰ tositteet, joilta puuttuu kustannuspaikka")."</td>
-				  <td></td>
-				  <td><input type = 'submit' value = '".t("N‰yt‰")."'></td></form>
-				  </tr><tr>
-				  <td><form action = '$PHP_SELF?tee=W' method='post'></td>
-				  <td>".t("n‰yt‰ tositteet, joiden ostovelat ei stemmaa")."</td>
-				  <td></td>
-				  <td><input type = 'submit' value = '".t("N‰yt‰")."'></td></form>
-				  </tr><tr>
-				  <td><form action = '$PHP_SELF?tee=T' method='post'></td>
-				  <td>".t("n‰yt‰ tositteet, joiden tila tuntuu v‰‰r‰lt‰")."</td>
-				  <td></td><form action = '$PHP_SELF?tee=M' method='post'>
-				  <td><input type = 'submit' value = '".t("N‰yt‰")."'></td></tr></form></table>";
+			echo "<tr>
+				  	<td></td>
+				  	<td>".t("n‰yt‰ muutetut rivit")."</td>
+				  	<td><input type='checkbox' name='viivatut'></td>
+				  	<td><input type = 'submit' value = '".t("Etsi")."'></form></td></tr>
+				
+				  	<tr>
+				  	<td>".t("Etsi virhett‰")."</td>
+				  	<td>".t("n‰yt‰ tositteet, jotka eiv‰t stemmaa")."</td>
+				  	<td></td>
+				  	<td><form action = '$PHP_SELF?tee=Z' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+				  	</tr>
+					
+					<tr>
+				  	<td></td>
+				  	<td>".t("n‰yt‰ tositteet, joilta puuttuu kustannuspaikka")."</td>
+				  	<td></td>
+				  	<td><form action = '$PHP_SELF?tee=X' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+				  	</tr>
+				
+					<tr>
+				  	<td></td>
+				  	<td>".t("n‰yt‰ tositteet, joiden ostovelat ei stemmaa")."</td>
+				  	<td></td>
+				  	<td><form action = '$PHP_SELF?tee=W' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+				  	</tr>
+				
+					<tr>
+				  	<td></td>
+				  	<td>".t("n‰yt‰ tositteet, joiden tila tuntuu v‰‰r‰lt‰")."</td>
+				  	<td></td>
+				  	<td><form action = '$PHP_SELF?tee=T' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+				  	</tr>
+					
+					<tr>
+				  	<td></td>
+				  	<td>".t("n‰yt‰ tositteet, joiden myyntisaamiset ovat v‰‰rin")."</td>
+				  	<td></td>
+				  	<td><form action = '$PHP_SELF?tee=S' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
+					</tr>
+					</table>";
 		}
 
 		require "inc/footer.inc";

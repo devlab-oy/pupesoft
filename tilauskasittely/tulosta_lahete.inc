@@ -162,7 +162,7 @@ if (!function_exists('alku')) {
 		
 		
 		if ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 			
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 			
@@ -438,7 +438,7 @@ if (!function_exists('uusi_sivu')) {
 		
 		
 		if ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 			
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 			

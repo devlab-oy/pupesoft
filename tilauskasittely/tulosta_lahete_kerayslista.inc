@@ -136,7 +136,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 		
 		if ($laskurow["keraysvko"] != '') {
-			$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
 
@@ -153,7 +153,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 		
 		if ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 
@@ -407,7 +407,7 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(310, 771, t("Keräysaika", $kieli), 					$thispage, $pieni);
 		
 		if ($laskurow["keraysvko"] != '') {
-			$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["kerayspvm"]));
 
@@ -424,7 +424,7 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(430, 771, t("Toimitusaika", $kieli), 				$thispage, $pieni);
 		
 		if ($laskurow["toimvko"] != '') {
-			$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
+			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 

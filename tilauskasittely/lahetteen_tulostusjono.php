@@ -2,7 +2,7 @@
 	
 	require ("../inc/parametrit.inc");
 	
-	$DAY_ARRAY = array("Ma","Ti","Ke","To","Pe","La","Su");
+	$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 
 	js_popup();
 

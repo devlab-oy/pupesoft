@@ -38,10 +38,11 @@ else {
 $query = "	SELECT * 
 			FROM tuote 
 			WHERE yhtio = '$kukarow[yhtio]' and 
-			epakurantti25pvm == '0000-00-00' and 
-			epakurantti50pvm == '0000-00-00' and 
-			epakurantti75pvm == '0000-00-00' and 
-			epakurantti100pvm == '0000-00-00'";
+			epakurantti25pvm = '0000-00-00' and 
+			epakurantti50pvm = '0000-00-00' and 
+			epakurantti75pvm = '0000-00-00' and 
+			epakurantti100pvm = '0000-00-00' and
+			ei_saldoa = ''";
 $tuores = mysql_query($query) or pupe_error($query);
 
 $tuoteyht = mysql_num_rows($tuores);

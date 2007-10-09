@@ -209,10 +209,10 @@
 				<input type='text' name='toimvv' value='$toimvv' size='6'>
 				<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'></td></tr>";
 
-		if ($toim == "SIIRTOTYOMAARAYS") {
+		if ($toim == "SIIRTOTYOMAARAYS" or $toim == "VALMISTAVARASTOON") {
 			if ($srow['eilahetetta'] != '') $eilah = 'CHECKED';
 
-			echo "<tr><th>".t("Suoraan valmiiksi")."</th><td><input type='checkbox' name='eilahe' $eilah></td></tr>";
+			echo "<tr><th>".t("Ohita keräys")."</th><td><input type='checkbox' name='eilahe' $eilah></td></tr>";
 		}
 
 		echo "<tr>";

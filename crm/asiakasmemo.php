@@ -12,7 +12,7 @@
 	echo "<font class='head'>".t("Asiakasmemo")."</font><hr>";
 	
 	if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") !== FALSE) {
-		if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "TYOMAARAYS") {
+		if ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "TYOMAARAYS" or $from == "TYOMAARAYS" or $from == "VALMISTAASIAKKAALLE") {
 			echo "<form method='post' action='".$palvelin2."tilauskasittely/tilaus_myynti.php'>
 				<input type='hidden' name='toim' value='$from'>
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>

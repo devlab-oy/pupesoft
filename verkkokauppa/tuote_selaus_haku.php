@@ -232,7 +232,12 @@
 			$ulisa .= "&haku[".$i."]=".$haku[$i];
 		}
 	}
-
+	
+	//	Verkkokaupassa selataan vain verkkokauppatuotteita
+	if($verkkokauppa != "") {
+		$lisa .= " and hinnastoon = 'W'";
+	}
+	
 	if (strlen($ojarj) > 0) {
 		$jarjestys = $ojarj;
 	}
@@ -461,7 +466,7 @@
 			echo js_popup(50);
 		}
 				
-		echo "<form id = 'lisaa' action=\"javascript:ajaxPost('lisaa', 'tuote_selaus_haku.php', 'selain', false, true);\" name='lisaa' method='post'>";
+		echo "<form id = 'lisaa' action=\"javascript:ajaxPost('lisaa', 'tuote_selaus_haku.php?', 'selain', false, true);\" name='lisaa' method='post'>";
 		echo "<input type='hidden' name='haku[0]' value = '$haku[0]'>";
 		echo "<input type='hidden' name='haku[1]' value = '$haku[1]'>";
 		echo "<input type='hidden' name='haku[2]' value = '$haku[2]'>";

@@ -15,7 +15,7 @@ if(!function_exists("menu")) {
 			$query = "	SELECT selite osasto, selitetark nimi
 			 			FROM avainsana
 						WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'OSASTO'
-						ORDER BY selite+0";
+						ORDER BY selitetark";
 			$ores = mysql_query($query) or pupe_error($query);
 			while($orow = mysql_fetch_array($ores)) {
 				$val .=  "<a id='{$orow["osasto"]}_P' href='javascript:sndReq(\"{$orow["osasto"]}_T\", \"verkkokauppa.php?tee=menu&osasto={$orow["osasto"]}\", \"{$orow["osasto"]}_P\", true)'>{$orow["nimi"]}</a><br><div id='{$orow["osasto"]}_T'></div>";
@@ -25,7 +25,8 @@ if(!function_exists("menu")) {
 			$query = "	SELECT distinct try, selitetark trynimi
 			 			FROM tuote
 						JOIN avainsana ON tuote.yhtio = avainsana.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY'
-						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P'";
+						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P' and hinnastoon = 'W'
+						ORDER BY selitetark";
 			$tryres = mysql_query($query) or pupe_error($query);
 			while($tryrow = mysql_fetch_array($tryres)) {
 				$val .=  "&nbsp;&nbsp;&nbsp;&nbsp;<a id='{$tryrow["try"]}_T' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto={$osasto}&try={$tryrow["try"]}\", \"\", true);'>{$tryrow["trynimi"]}</a><br>";
@@ -44,7 +45,7 @@ if($tee == "tuotteen_lisatiedot") {
 	
 	$query = "	SELECT kuvaus, lyhytkuvaus
 				FROM tuote
-				WHERE yhtio = '{$kukarow["yhtio"]}' and tuoteno = '$tuoteno'";
+				WHERE yhtio = '{$kukarow["yhtio"]}' and tuoteno = '$tuoteno' and hinnastoon = 'W'";
 	$result = mysql_query($query) or pupe_error($query);
 	$row = mysql_fetch_array($result);
 
@@ -111,7 +112,7 @@ if($tee == "tuotteen_lisatiedot") {
 				FROM tuote
 				JOIN liitetiedostot ON liitetiedostot.yhtio = tuote.yhtio and liitos = 'TUOTE' and liitetiedostot.liitostunnus=tuote.tunnus 
 				JOIN avainsana ON avainsana.yhtio = liitetiedostot.yhtio and avainsana.laji = 'LITETY' and avainsana.selite!='TH' and avainsana.selite=liitetiedostot.kayttotarkoitus
-				WHERE tuote.yhtio = '{$kukarow["yhtio"]}' and tuoteno = '$tuoteno'
+				WHERE tuote.yhtio = '{$kukarow["yhtio"]}' and tuoteno = '$tuoteno' and hinnastoon = 'W'
 				ORDER BY liitetiedostot.kayttotarkoitus IN ('TK') DESC, liitetiedostot.selite";
 	$result = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($result) > 0) {
@@ -375,11 +376,9 @@ if($tee == "") {
 			<form action = '".$palvelin2."logout.php' method='post'>Tervetuloa {$kukarow["nimi"]}, <input type = 'hidden' name='location' value='".$palvelin."verkkokauppa.php'><input type='submit' value='".t("Kirjaudu ulos")."'></form><br>";
 	}
 	
-	//$border = "border: 1px #88adeb solid;'";
-	
-	echo "	<div id='login' style='text-align: center; z-index: 0; height: 25px; $border'>$login_screen</div>
-			<div id='menu' style='float:left; width:  250px; z-index: 0; $border'>".menu()."</div>
-			<div id='selain' style='float:left; z-index: 0; $border'></div>
+	echo "	<div class='login' id='login'>$login_screen</div>
+			<div class='menu' id='menu'>".menu()."</div>
+			<div class='selain' id='selain'></div>
 			</body></html>";
 }
 

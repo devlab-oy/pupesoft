@@ -322,8 +322,9 @@
 		}
 
 		$ulos = "<td><select name = '$nimi'>
-			<option value='' $sela>".t("Tuote n‰ytet‰‰n hinnastossa")."</option>
-			<option value='E' $sel>".t("Tuotetta ei n‰ytet‰ hinnastossa")."</option>
+			<option value='' $sela>".t("Tuote n‰ytet‰‰n hinnastossa, mutta ei verkkokaupassa")."</option>
+			<option value='E' $sel>".t("Tuotetta ei n‰ytet‰ hinnastossa, eik‰ verkkokaupassa")."</option>
+			<option value='W' $sel>".t("Tuote n‰kyy hinnastossa ja weppikaupassa")."</option>			
 			</select></td>";
 		$jatko = 0;
 	}

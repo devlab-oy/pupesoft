@@ -92,20 +92,25 @@
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
 	}
 
-	echo "<br><font class='head'>".t("Rahtilaskut joita ei ole liitetty keikkoihin kokonaan")."</font><hr>";
+	echo "<br><font class='head'>".t("Rahtilaskut, joita ei ole liitetty kokonaan keikkoihin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
-				round(lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)),2) 'summaeur', 
-				round(sum(lasku2.summa*(if(lasku2.maksu_kurssi=0, lasku2.vienti_kurssi, lasku2.maksu_kurssi))),2) 'summaeur2'
+				sum(tiliointi.summa) 'varastossa', 
+				round(lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)),2) 'summaeur',
+				round(sum(lasku2.summa*(if(lasku2.maksu_kurssi=0, lasku2.vienti_kurssi, lasku2.maksu_kurssi))),2) 'kohdistettu'
 				FROM lasku
 				LEFT JOIN lasku AS lasku2 on (lasku2.yhtio = lasku.yhtio and lasku2.vanhatunnus = lasku.tunnus and lasku2.tila = 'K')
+				LEFT JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio and
+										tiliointi.ltunnus = lasku.tunnus and
+										tiliointi.tilino in ('$yhtiorow[varasto]','$yhtiorow[raaka_ainevarasto]') and
+										tiliointi.korjattu = '')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
 				lasku.tila in ('H','Y','M','P','Q') and
 				lasku.vienti in ('B','J','E','K','H','L') and
 				lasku.tapvm >= '$avv-$akk-$app' and
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
 				GROUP by lasku.tunnus
-				HAVING summaeur != summaeur2
+				HAVING varastossa != kohdistettu
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -114,10 +119,11 @@
 		echo "<tr>";
 		echo "<th>".t("Ytunnus")."</th>";
 		echo "<th>".t("Nimi")."</th>";
-		echo "<th>".t("Summa valuutassa")."</th>";
-		echo "<th>".t("Summa")."</th>";
-		echo "<th>".t("Liitetty")."</th>";
-		echo "<th>".t("Liittämättä")."</th>";
+		echo "<th>".t("Lasku valuutassa")."</th>";
+		echo "<th>".t("Lasku")."</th>";
+		echo "<th>".t("Liitetty keikkaan")."</th>";
+		echo "<th>".t("Varastotilillä")."</th>";
+		echo "<th>".t("Erotus")."</th>";
 		echo "<th>".t("Tapvm")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
 		echo "</tr>";
@@ -142,17 +148,18 @@
 			echo "<td>$trow[nimi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
 			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
-			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur2"])." $yhtiorow[valkoodi]</td>";
-			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"]-$trow["summaeur2"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["kohdistettu"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["varastossa"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["kohdistettu"]-$trow["varastossa"])." $yhtiorow[valkoodi]</td>";
 			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
 			echo "<td>$vienti</td>";
 			echo "</tr>";
 
-			$yhteesa += ($trow["summaeur"] - $trow["summaeur2"]);
+			$yhteesa += ($trow["kohdistettu"] - $trow["varastossa"]);
 		}
 
 		echo "<tr>";
-		echo "<th colspan='5'>".t("Yhteensä")."</th>";
+		echo "<th colspan='6'>".t("Yhteensä")."</th>";
 		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
 		echo "<th colspan='2'></th>";
 		echo "</tr>";
@@ -168,7 +175,7 @@
 				FROM lasku
 				JOIN tiliointi on (	tiliointi.yhtio = lasku.yhtio and
 									tiliointi.ltunnus = lasku.tunnus and
-									tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]') and
+									tiliointi.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]') and
 									tiliointi.korjattu = '' and
 									tiliointi.selite not like ('Inventointi%') and
 									tiliointi.selite not like ('%epäkuranttimuutos') and
@@ -233,11 +240,11 @@
 				FROM lasku
 				LEFT JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
 									tiliointi1.ltunnus = lasku.tunnus and
-									tiliointi1.tilino in ('$yhtiorow[varastonmuutos]') and
+									tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]') and
 									tiliointi1.korjattu = '')
 				LEFT JOIN tiliointi AS tiliointi2 ON (tiliointi2.yhtio = lasku.yhtio and
 									tiliointi2.ltunnus = lasku.tunnus and
-									tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]') and
+									tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and
 									tiliointi2.korjattu = '')
 				WHERE lasku.yhtio = '$kukarow[yhtio]' and
 				lasku.tila in ('H','Y','M','P','Q') and

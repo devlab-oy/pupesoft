@@ -211,281 +211,283 @@ if ($tee == "poista") {
 	$tee = "";
 }
 
-if ($toiminto == "kululaskut") {
+if($silent == "") {
+	if ($toiminto == "kululaskut") {
 
-	// katotaan onko liitettyjä laskuja
-	$query  = "	select *
-				from lasku
-				where yhtio='$kukarow[yhtio]' and tila='K' and alatila in ('','S') and vanhatunnus<>0 and laskunro='$laskurow[laskunro]'
-				order by tapvm desc";
-	$result = mysql_query($query) or pupe_error($query);
+		// katotaan onko liitettyjä laskuja
+		$query  = "	select *
+					from lasku
+					where yhtio='$kukarow[yhtio]' and tila='K' and alatila in ('','S') and vanhatunnus<>0 and laskunro='$laskurow[laskunro]'
+					order by tapvm desc";
+		$result = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($result) != 0) {
+		if (mysql_num_rows($result) != 0) {
 
-		echo "<br><font class='message'>".t("Liitetyt laskut")." (".t("keikka").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
-		echo "<table>";
-		echo "<tr>
-				<th>".t("Nimi")."</th>
-				<th>".t("Tapvm")."</th>
-				<th>".t("Summa")."</th>
-				<th>".t("Veroton")."</th>
-				<th>".t("Valuutta")."</th>
-				<th>".t("Viite")."</th>
-				<th>".t("Kuva")."</th>
-				<th>".t("Vienti")."</th>
-				</tr>";
-
-		while($llrow = mysql_fetch_array($result)) {
-
+			echo "<br><font class='message'>".t("Liitetyt laskut")." (".t("keikka").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
+			echo "<table>";
 			echo "<tr>
-					<td>$llrow[nimi]</td>
-					<td>$llrow[tapvm]</td>
-					<td align='right'>$llrow[summa]</td>
-					<td align='right'>$llrow[arvo]</td>
-					<td>$llrow[valkoodi]</td>
-					<td>$llrow[viite]</td>";
-			
-			$query  = "	select tunnus
-						from lasku
-						where yhtio	= '$kukarow[yhtio]' 
-						and tunnus	= '$llrow[vanhatunnus]'";
-			$osresres = mysql_query($query) or pupe_error($query);
-			$osresrow = mysql_fetch_array($osresres);
-			
-			// tehdään lasku linkki
-			echo "<td>" . ebid($osresrow['tunnus']) . "</td>";
-			
-			echo "<td>$llrow[vienti]</td>";
-			
-			echo "<td class='back'>
-					<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>
-					<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-					<input type='hidden' name='toiminto' value='kululaskut'>
-					<input type='hidden' name='poistavienti' value='$llrow[vienti]'>
-					<input type='hidden' name='tee' value='poista'>
-					<input type='hidden' name='otunnus' value='$otunnus'>
-					<input type='hidden' name='tunnus' value='$llrow[vanhatunnus]'>
-					<input type='hidden' name='poistasumma' value='$llrow[summa]'>
-					<input type='submit' value='".t("Poista")."'></form>
-					</td></tr>";
-		}
-		echo "</table>";
+					<th>".t("Nimi")."</th>
+					<th>".t("Tapvm")."</th>
+					<th>".t("Summa")."</th>
+					<th>".t("Veroton")."</th>
+					<th>".t("Valuutta")."</th>
+					<th>".t("Viite")."</th>
+					<th>".t("Kuva")."</th>
+					<th>".t("Vienti")."</th>
+					</tr>";
 
-		echo "<hr>";
-	}
+			while($llrow = mysql_fetch_array($result)) {
 
-	echo "<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-	echo "<input type='hidden' name='toiminto' value='kululaskut'>";
-	echo "<input type='hidden' name='tee' value='haku'>";
-	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+				echo "<tr>
+						<td>$llrow[nimi]</td>
+						<td>$llrow[tapvm]</td>
+						<td align='right'>$llrow[summa]</td>
+						<td align='right'>$llrow[arvo]</td>
+						<td>$llrow[valkoodi]</td>
+						<td>$llrow[viite]</td>";
 
-	echo "<br><font class='message'>".t("Liitä lasku")." (".t("keikka").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
-	echo "<table><tr>";
-	echo "<th>".t("Etsi lasku")."</th>";
-	echo "<th><select name='hakutapa'>";
-	echo "<option value='S'>".t("verollisella summalla")."</option>";
-	echo "<option value='N'>".t("nimellä")."</option>";
-	echo "<option value='V'>".t("viitteellä")."</option>";
-	echo "</select></th>";
-	echo "<td><input type='text' name='haku'></td>";
-	echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
-	echo "</tr></table>";
+				$query  = "	select tunnus
+							from lasku
+							where yhtio	= '$kukarow[yhtio]' 
+							and tunnus	= '$llrow[vanhatunnus]'";
+				$osresres = mysql_query($query) or pupe_error($query);
+				$osresrow = mysql_fetch_array($osresres);
 
-	echo "</form>";
+				// tehdään lasku linkki
+				echo "<td>" . ebid($osresrow['tunnus']) . "</td>";
 
-	// kursorinohjausta
-	$formi    = "haku";
-	$kentta   = "haku";
-}
+				echo "<td>$llrow[vienti]</td>";
 
-if ($tee == "haku") {
-
-	$lisa = ""; // no hacking
-	
-	if ($hakutapa == "S") {
-		$haku = (float) str_replace(",",".",$haku); // pilkut pisteiksi
-		$lisa = "and summa='$haku'";
-	}
-	
-	if ($hakutapa == "N") $lisa = "and nimi like '%$haku%'";
-	if ($hakutapa == "V") $lisa = "and viite='$haku'";
-
-	// katsotaan aluksi, ollaanko tähän keikkaan liitetty jo vaihto-omaisuuslasku
-	$query  = "	select *
-				from lasku
-				where yhtio='$kukarow[yhtio]' and tila='K' and alatila in ('','S') and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
-	$result = mysql_query($query) or pupe_error($query);
-
-	$vienti 	= "";
-	$valuutta 	= "";
-
-	//vaihto-omaisuuslasku/laskuja löytyi
-	if (mysql_num_rows($result) != 0) {
-		$vaihtrow = mysql_fetch_array($result);
-
-		//näitä tarvitaan jos haluamme liittää lisää vaihto-omaisuuslaskuja keikalle
-		$valuutta 	= $vaihtrow["valkoodi"];
-		$vienti		= $vaihtrow["vienti"];
-	}
-
-	// haetaan vaihto-omaisuus, rahti ja raaka-aine laskuja (kotimaa, ei-eu, eu) HUOMAA LIMIT!
-	$query = "	SELECT *
-				FROM lasku use index (kohdistus_index)
-				WHERE yhtio='$kukarow[yhtio]' and tila in ('H','Y','M','P','Q') and vienti in ('B','C','J','E','F','K','H','I','L')
-				$lisa
-				order by tapvm desc
-				LIMIT 50";
-	$result = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($result) == 0) {
-		echo "<font class='error'>".t("Yhtään sopivaa laskua ei löytynyt!")."</font><br><br>";
-		$tee = "";
-	}
-	else {
-
-		echo "<table>";
-		echo "<tr>
-				<th>".t("Nimi")."</th>
-				<th>".t("Tapvm")."</th>
-				<th>".t("Summa")."</th>
-				<th>".t("Veroton")."</th>
-				<th>".t("Valuutta")."</th>
-				<th>".t("Viite")."</th>
-				<th>".t("Kuva")."</th>
-				<th>".t("Vienti")."</th>
-				<th>".t("Liitettävissä")."</th>
-				<th>".t("Summa")."</th>
-				</tr>";
-
-		while($llrow = mysql_fetch_array($result)) {
-
-			//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
-			$query = "	select sum(summa) summa
-						from tiliointi
-						where yhtio	= '$kukarow[yhtio]'
-						and ltunnus	= '$llrow[tunnus]'
-						and tilino  = '$yhtiorow[alv]'
-						and korjattu = ''";
-			$alvires = mysql_query($query) or pupe_error($query);
-			$alvirow = mysql_fetch_array($alvires);
-
-			//Tässä on ostolasku verollinen summa
-			$verosumma = $llrow["summa"];
-
-			//Verojen määrä
-			$vero = $alvirow["summa"];
-
-			//Ja lopuksi vielä veroton summa
-			$verotonsumma = $verosumma - $vero;
-
-
-			echo "<tr><td valign='top'>$llrow[nimi]";
-			
-			if ($llrow["comments"] != '') {
-				echo "<br>$llrow[comments]";
+				echo "<td class='back'>
+						<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>
+						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+						<input type='hidden' name='toiminto' value='kululaskut'>
+						<input type='hidden' name='poistavienti' value='$llrow[vienti]'>
+						<input type='hidden' name='tee' value='poista'>
+						<input type='hidden' name='otunnus' value='$otunnus'>
+						<input type='hidden' name='tunnus' value='$llrow[vanhatunnus]'>
+						<input type='hidden' name='poistasumma' value='$llrow[summa]'>
+						<input type='submit' value='".t("Poista")."'></form>
+						</td></tr>";
 			}
-			
-			echo "</td>";
-			
-			
-			echo "	<td valign='top'>$llrow[tapvm]</td>
-					<td align='right' valign='top'>".sprintf('%.2f',$verosumma)."</td>
-					<td align='right' valign='top'>".sprintf('%.2f',$verotonsumma)."</td>
-					<td valign='top'>$llrow[valkoodi]</td>
-					<td valign='top'>$llrow[viite]</td>";
-					
-			// tehdään lasku linkki
-			echo "<td>".ebid($llrow['tunnus']) ."</td>";
-					
-			echo "<td valign='top'>$llrow[vienti]</td>";
+			echo "</table>";
 
-			$query = "	select sum(arvo) arvo, GROUP_CONCAT(DISTINCT laskunro ORDER BY laskunro SEPARATOR ', ') laskunrot
-						from lasku
-						where yhtio		= '$kukarow[yhtio]'
-						and tila		= 'K'
-						and vanhatunnus	= '$llrow[tunnus]'";
-			$apure = mysql_query($query) or pupe_error($query);
-			$apurow = mysql_fetch_array($apure);
+			echo "<hr>";
+		}
 
-			$summa_kaytettavissa = round(abs($verotonsumma) - abs($apurow["arvo"]),2);
+		echo "<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+		echo "<input type='hidden' name='toiminto' value='kululaskut'>";
+		echo "<input type='hidden' name='tee' value='haku'>";
+		echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 
-			if ($summa_kaytettavissa > 0) {
+		echo "<br><font class='message'>".t("Liitä lasku")." (".t("keikka").": $laskurow[laskunro] $laskurow[nimi])</font><br><br>";
+		echo "<table><tr>";
+		echo "<th>".t("Etsi lasku")."</th>";
+		echo "<th><select name='hakutapa'>";
+		echo "<option value='S'>".t("verollisella summalla")."</option>";
+		echo "<option value='N'>".t("nimellä")."</option>";
+		echo "<option value='V'>".t("viitteellä")."</option>";
+		echo "</select></th>";
+		echo "<td><input type='text' name='haku'></td>";
+		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
+		echo "</tr></table>";
 
-				if ($verotonsumma < 0) {
-					$lw = -1;
+		echo "</form>";
+
+		// kursorinohjausta
+		$formi    = "haku";
+		$kentta   = "haku";
+	}
+
+	if ($tee == "haku") {
+
+		$lisa = ""; // no hacking
+
+		if ($hakutapa == "S") {
+			$haku = (float) str_replace(",",".",$haku); // pilkut pisteiksi
+			$lisa = "and summa='$haku'";
+		}
+
+		if ($hakutapa == "N") $lisa = "and nimi like '%$haku%'";
+		if ($hakutapa == "V") $lisa = "and viite='$haku'";
+
+		// katsotaan aluksi, ollaanko tähän keikkaan liitetty jo vaihto-omaisuuslasku
+		$query  = "	select *
+					from lasku
+					where yhtio='$kukarow[yhtio]' and tila='K' and alatila in ('','S') and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti in ('C','F','I','J','K','L')";
+		$result = mysql_query($query) or pupe_error($query);
+
+		$vienti 	= "";
+		$valuutta 	= "";
+
+		//vaihto-omaisuuslasku/laskuja löytyi
+		if (mysql_num_rows($result) != 0) {
+			$vaihtrow = mysql_fetch_array($result);
+
+			//näitä tarvitaan jos haluamme liittää lisää vaihto-omaisuuslaskuja keikalle
+			$valuutta 	= $vaihtrow["valkoodi"];
+			$vienti		= $vaihtrow["vienti"];
+		}
+
+		// haetaan vaihto-omaisuus, rahti ja raaka-aine laskuja (kotimaa, ei-eu, eu) HUOMAA LIMIT!
+		$query = "	SELECT *
+					FROM lasku use index (kohdistus_index)
+					WHERE yhtio='$kukarow[yhtio]' and tila in ('H','Y','M','P','Q') and vienti in ('B','C','J','E','F','K','H','I','L')
+					$lisa
+					order by tapvm desc
+					LIMIT 50";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) == 0) {
+			echo "<font class='error'>".t("Yhtään sopivaa laskua ei löytynyt!")."</font><br><br>";
+			$tee = "";
+		}
+		else {
+
+			echo "<table>";
+			echo "<tr>
+					<th>".t("Nimi")."</th>
+					<th>".t("Tapvm")."</th>
+					<th>".t("Summa")."</th>
+					<th>".t("Veroton")."</th>
+					<th>".t("Valuutta")."</th>
+					<th>".t("Viite")."</th>
+					<th>".t("Kuva")."</th>
+					<th>".t("Vienti")."</th>
+					<th>".t("Liitettävissä")."</th>
+					<th>".t("Summa")."</th>
+					</tr>";
+
+			while($llrow = mysql_fetch_array($result)) {
+
+				//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
+				$query = "	select sum(summa) summa
+							from tiliointi
+							where yhtio	= '$kukarow[yhtio]'
+							and ltunnus	= '$llrow[tunnus]'
+							and tilino  = '$yhtiorow[alv]'
+							and korjattu = ''";
+				$alvires = mysql_query($query) or pupe_error($query);
+				$alvirow = mysql_fetch_array($alvires);
+
+				//Tässä on ostolasku verollinen summa
+				$verosumma = $llrow["summa"];
+
+				//Verojen määrä
+				$vero = $alvirow["summa"];
+
+				//Ja lopuksi vielä veroton summa
+				$verotonsumma = $verosumma - $vero;
+
+
+				echo "<tr><td valign='top'>$llrow[nimi]";
+
+				if ($llrow["comments"] != '') {
+					echo "<br>$llrow[comments]";
 				}
-				else {
-					$lw = 1;
-				}
 
-				$summa_kaytettavissa = $summa_kaytettavissa * $lw;
+				echo "</td>";
 
-				echo "<td class='green' align='right' valign='top'>".sprintf('%.2f',$summa_kaytettavissa)."</td>";
 
-				$voikolisata = "";
+				echo "	<td valign='top'>$llrow[tapvm]</td>
+						<td align='right' valign='top'>".sprintf('%.2f',$verosumma)."</td>
+						<td align='right' valign='top'>".sprintf('%.2f',$verotonsumma)."</td>
+						<td valign='top'>$llrow[valkoodi]</td>
+						<td valign='top'>$llrow[viite]</td>";
 
-				//kululaskut voidaan aina lisätä
-				if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
-					$voikolisata = "OK";
-				}
-				//jos tämä on vahto-omaisuuslasku pitää vielä tarkistaa vienti ja valuutta
-				elseif ($laskurow["alatila"] != "S" and $llrow["valkoodi"] == $valuutta and $llrow["vienti"] == $vienti and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
-					$voikolisata = "OK";
-				}
-				elseif ($laskurow["alatila"] != "S" and $vienti == '' and $valuutta == '' and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
-					$voikolisata = "OK";
-				}
+				// tehdään lasku linkki
+				echo "<td>".ebid($llrow['tunnus']) ."</td>";
 
-				if ($voikolisata == "OK") {
-					
-					echo "<form name='haku' action='$PHP_SELF' method='post'>";
-					
-					if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
-						echo "<td valign='top'><input type='text' name='liitasumma' size='8'></td>";
+				echo "<td valign='top'>$llrow[vienti]</td>";
+
+				$query = "	select sum(arvo) arvo, GROUP_CONCAT(DISTINCT laskunro ORDER BY laskunro SEPARATOR ', ') laskunrot
+							from lasku
+							where yhtio		= '$kukarow[yhtio]'
+							and tila		= 'K'
+							and vanhatunnus	= '$llrow[tunnus]'";
+				$apure = mysql_query($query) or pupe_error($query);
+				$apurow = mysql_fetch_array($apure);
+
+				$summa_kaytettavissa = round(abs($verotonsumma) - abs($apurow["arvo"]),2);
+
+				if ($summa_kaytettavissa > 0) {
+
+					if ($verotonsumma < 0) {
+						$lw = -1;
 					}
 					else {
-						echo "<td valign='top'></td>";
+						$lw = 1;
 					}
 
+					$summa_kaytettavissa = $summa_kaytettavissa * $lw;
 
-					echo "<td class='back' valign='top'>";
-					echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-					echo "<input type='hidden' name='toiminto' value='kululaskut'>";
-					echo "<input type='hidden' name='hakutapa' value='$hakutapa'>";
-					echo "<input type='hidden' name='haku' value='$haku'>";
-					echo "<input type='hidden' name='tee' value='liita'>";
-					echo "<input type='hidden' name='otunnus' value='$otunnus'>";
-					echo "<input type='hidden' name='laskutunnus' value='$llrow[tunnus]'>";
-					echo "<input type='submit' value='".t("Valitse")."'>";
-					echo "</td></tr>";
-					echo "</form>";
+					echo "<td class='green' align='right' valign='top'>".sprintf('%.2f',$summa_kaytettavissa)."</td>";
+
+					$voikolisata = "";
+
+					//kululaskut voidaan aina lisätä
+					if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
+						$voikolisata = "OK";
+					}
+					//jos tämä on vahto-omaisuuslasku pitää vielä tarkistaa vienti ja valuutta
+					elseif ($laskurow["alatila"] != "S" and $llrow["valkoodi"] == $valuutta and $llrow["vienti"] == $vienti and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
+						$voikolisata = "OK";
+					}
+					elseif ($laskurow["alatila"] != "S" and $vienti == '' and $valuutta == '' and ($llrow["vienti"] == "C" or $llrow["vienti"] == "F" or $llrow["vienti"] == "I" or $llrow["vienti"] == "J" or $llrow["vienti"] == "K" or $llrow["vienti"] == "L")) {
+						$voikolisata = "OK";
+					}
+
+					if ($voikolisata == "OK") {
+
+						echo "<form name='haku' action='$PHP_SELF' method='post'>";
+
+						if ($llrow["vienti"] != "C" and $llrow["vienti"] != "F" and $llrow["vienti"] != "I" and $llrow["vienti"] != "J" and $llrow["vienti"] != "K" and $llrow["vienti"] != "L") {
+							echo "<td valign='top'><input type='text' name='liitasumma' size='8'></td>";
+						}
+						else {
+							echo "<td valign='top'></td>";
+						}
+
+
+						echo "<td class='back' valign='top'>";
+						echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+						echo "<input type='hidden' name='toiminto' value='kululaskut'>";
+						echo "<input type='hidden' name='hakutapa' value='$hakutapa'>";
+						echo "<input type='hidden' name='haku' value='$haku'>";
+						echo "<input type='hidden' name='tee' value='liita'>";
+						echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+						echo "<input type='hidden' name='laskutunnus' value='$llrow[tunnus]'>";
+						echo "<input type='submit' value='".t("Valitse")."'>";
+						echo "</td></tr>";
+						echo "</form>";
+					}
+					else {
+						echo "<td class='spec' valign='top'>";
+						echo t("Tätä vaihto-omaisuuslaskua ei voida lisätä tälle keikalle")."!";
+						echo "</td></tr>";
+					}
 				}
 				else {
-					echo "<td class='spec' valign='top'>";
-					echo t("Tätä vaihto-omaisuuslaskua ei voida lisätä tälle keikalle")."!";
+					echo "<td valign='top' colspan='2'>";
+					echo t("Laskun summa on jo käytetty keikalla/keikoilla")." $apurow[laskunrot]!";
 					echo "</td></tr>";
 				}
 			}
-			else {
-				echo "<td valign='top' colspan='2'>";
-				echo t("Laskun summa on jo käytetty keikalla/keikoilla")." $apurow[laskunrot]!";
-				echo "</td></tr>";
-			}
+
+			echo "</table>";
 		}
-
-		echo "</table>";
 	}
-}
 
-if ($toiminto != "") {
-	echo "<hr>";
-	echo "<form action='$PHP_SELF' method='post'>";
-	echo "<input type='hidden' name='toiminto' value=''>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
-	echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-	echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
-	echo "</form>";
+	if ($toiminto != "") {
+		echo "<hr>";
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='toiminto' value=''>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+		echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
+		echo "</form>";
+	}	
 }
 
 ?>

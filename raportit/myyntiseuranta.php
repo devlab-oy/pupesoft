@@ -1577,27 +1577,28 @@
 			echo "</table><br>";
 			
 			// lisärajaukset näkymä..
-			if ($ruksit[1]  != '') 		$ruk1chk  = "CHECKED";
-			if ($ruksit[2]  != '') 		$ruk2chk  = "CHECKED";
-			if ($ruksit[3]  != '') 		$ruk3chk  = "CHECKED";
-			if ($ruksit[4]  != '') 		$ruk4chk  = "CHECKED";
-			if ($ruksit[5]  != '') 		$ruk5chk  = "CHECKED";
-			if ($ruksit[6]  != '') 		$ruk6chk  = "CHECKED";
-			if ($ruksit[7]  != '') 		$ruk7chk  = "CHECKED";
-			if ($ruksit[8]  != '') 		$ruk8chk  = "CHECKED";
-			if ($ruksit[9]  != '') 		$ruk9chk  = "CHECKED";
-			if ($ruksit[10] != '') 		$ruk10chk = "CHECKED";
-			if ($ruksit[11] != '')		$ruk11chk = "CHECKED";			
-			if ($ruksit[12] != '')		$ruk12chk = "CHECKED";
-			if ($nimitykset != '')   	$nimchk   = "CHECKED";
-			if ($kateprossat != '')  	$katchk   = "CHECKED";
-			if ($osoitetarrat != '') 	$tarchk   = "CHECKED";
-			if ($piiyhteensa != '')  	$piychk   = "CHECKED";
-			if ($sarjanumerot != '')  	$sarjachk = "CHECKED";
-			if ($kuukausittain != '')	$kuuchk	  = "CHECKED";
-			if ($varastonarvo != '')	$varvochk = "CHECKED";
+			if ($ruksit[1]  != '') 		$ruk1chk  	= "CHECKED";
+			if ($ruksit[2]  != '') 		$ruk2chk  	= "CHECKED";
+			if ($ruksit[3]  != '') 		$ruk3chk  	= "CHECKED";
+			if ($ruksit[4]  != '') 		$ruk4chk  	= "CHECKED";
+			if ($ruksit[5]  != '') 		$ruk5chk  	= "CHECKED";
+			if ($ruksit[6]  != '') 		$ruk6chk  	= "CHECKED";
+			if ($ruksit[7]  != '') 		$ruk7chk  	= "CHECKED";
+			if ($ruksit[8]  != '') 		$ruk8chk  	= "CHECKED";
+			if ($ruksit[9]  != '') 		$ruk9chk  	= "CHECKED";
+			if ($ruksit[10] != '') 		$ruk10chk 	= "CHECKED";
+			if ($ruksit[11] != '')		$ruk11chk 	= "CHECKED";			
+			if ($ruksit[12] != '')		$ruk12chk 	= "CHECKED";
+			if ($nimitykset != '')   	$nimchk   	= "CHECKED";
+			if ($kateprossat != '')  	$katchk   	= "CHECKED";
+			if ($osoitetarrat != '') 	$tarchk   	= "CHECKED";
+			if ($piiyhteensa != '')  	$piychk   	= "CHECKED";
+			if ($sarjanumerot != '')  	$sarjachk 	= "CHECKED";
+			if ($kuukausittain != '')	$kuuchk	  	= "CHECKED";
+			if ($varastonarvo != '')	$varvochk 	= "CHECKED";
 			if ($piiloed != '')			$piiloedchk = "CHECKED";
-			if ($tilrivikomm != '')	$tilrivikommchk = "CHECKED";
+			if ($tilrivikomm != '')		$tilrivikommchk = "CHECKED";
+			if ($vain_excel != '')		$vain_excelchk 	= "CHECKED";
 			
 			
 			echo "<table>
@@ -1736,7 +1737,7 @@
 				<td class='back'>".t("(Toimii vain jos listaat asiakkaittain)")."</td>
 				</tr>
 				<th>".t("Raportti vain Exceliin")."</th>
-				<td><input type='checkbox' name='vain_excel' $tarchk></td>
+				<td><input type='checkbox' name='vain_excel' $vain_excelchk></td>
 				<td></td>
 				<td class='back'></td>
 				</tr>

@@ -910,7 +910,7 @@
 			
 			$jaljella = round((float) $laskurow["summa"] - (float) $alvirow["summa"], 2);
 			
-			$query = "	SELECT lasku.laskunro, keikka.nimi, lasku.summa, keikka.comments, keikka.vanhatunnus vanhatunnus, keikka.tunnus tunnus, keikka.liitostunnus toimittajaid
+			$query = "	SELECT lasku.laskunro, keikka.nimi, lasku.summa, keikka.comments, keikka.vanhatunnus vanhatunnus, keikka.tunnus tunnus, keikka.liitostunnus toimittajaid, keikka.alatila
 						FROM lasku
 						JOIN lasku keikka ON keikka.yhtio = lasku.yhtio and keikka.laskunro = lasku.laskunro and keikka.tila = 'K'
 						WHERE lasku.yhtio	= '$kukarow[yhtio]'
@@ -919,17 +919,22 @@
 						HAVING vanhatunnus = 0";
 			$apure = mysql_query($query) or pupe_error($query);
 			if(mysql_num_rows($apure)>0) {
-				while($apurow = mysql_fetch_array($apure)) {	
-					echo "<form name='poista' action = '$PHP_SELF' method='post'>
-							<input type='hidden' name = 'keikalla' value = 'on'>
-							<input type='hidden' name = 'tee' value = 'poista'>
-							<input type='hidden' name = 'toimittajaid' value = '$apurow[toimittajaid]'>
-							<input type='hidden' name = 'poistavienti' value = '$apurow[vienti]'>
-							<input type='hidden' name = 'poistasumma' value = '$apurow[summa]'>							
-							<input type='hidden' name = 'otunnus' value = '$apurow[tunnus]'>
-							<input type='hidden' name = 'tunnus' value = '$tunnus'>";
-					echo "<tr><td>$apurow[laskunro] $apurow[nimi] ($apurow[comments])</td><td>$apurow[summa]</td><td class='back'><input type='submit' value='".t("poista")."'></tr>";
-					echo "</form>";
+				while($apurow = mysql_fetch_array($apure)) {
+					if($apurow["alatila"] != "X") {
+						echo "<form name='poista' action = '$PHP_SELF' method='post'>
+								<input type='hidden' name = 'keikalla' value = 'on'>
+								<input type='hidden' name = 'tee' value = 'poista'>
+								<input type='hidden' name = 'toimittajaid' value = '$apurow[toimittajaid]'>
+								<input type='hidden' name = 'poistavienti' value = '$apurow[vienti]'>
+								<input type='hidden' name = 'poistasumma' value = '$apurow[summa]'>							
+								<input type='hidden' name = 'otunnus' value = '$apurow[tunnus]'>
+								<input type='hidden' name = 'tunnus' value = '$tunnus'>";
+						echo "<tr><td>$apurow[laskunro] $apurow[nimi] ($apurow[comments])</td><td>$apurow[summa]</td><td class='back'><input type='submit' value='".t("poista")."'></tr>";
+						echo "</form>";						
+					}
+					else {
+						echo "<tr><td>$apurow[laskunro] $apurow[nimi] ($apurow[comments])</td><td>$apurow[summa]</td><td class='back'>".t("Lukittu")."</tr>";
+					}
 					
 					$jaljella -= $apurow["summa"];
 				}

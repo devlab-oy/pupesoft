@@ -31,8 +31,8 @@ $verkkokauppa = "";
 // luodaan tietokantayhteys
 require("salasanat.php");
 
-$link = mysql_connect ($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
-mysql_select_db ($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
+$link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteyttä. Se on pois päältä tai käyttäjätietosi ovat virheelliset.");
+mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta löydy palvelimelta!");
 
 // jos käytetään jotain kummallista porttia (ei http eikä https)
 $portti = "";

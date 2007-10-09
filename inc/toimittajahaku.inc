@@ -141,7 +141,7 @@
 					$limlis = " LIMIT $alku, 50 ";
 				}
 
-				$query = "	SELECT tapvm, erpcm, summa, valkoodi, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus
+				$query = "	SELECT tapvm, erpcm, summa, valkoodi, vienti, concat_ws(' ', viite, viesti) 'viite/viesti', ebid, tila, tunnus
 						  	FROM lasku
 						  	WHERE yhtio = '$kukarow[yhtio]' 
 						  	$toimiliilisa
@@ -157,51 +157,43 @@
 				}
 
 				echo "<table><tr>";
-				for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-					echo "<th>" . t(mysql_field_name($result,$i))."</th>";
-				}
+				echo "<th>".t("Tapvm/Erpvm")."</th>";
+				echo "<th>".t("Summa")."</th>";
+				echo "<th>".t("Valuutta")."</th>";
+				echo "<th>".t("Viite/Viesti")."</th>";
+				echo "<th>".t("EBID")."</th>";
+				echo "<th>".t("Tila/Vienti")."</th>";
 				echo "</tr>";
 
 				$yhteensa = 0;
 				
-				while ($trow=mysql_fetch_array ($result)) {
+				while ($trow = mysql_fetch_array ($result)) {
 					echo "<tr class='aktiivi'>";
 					
-					for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
-						
-						if ($i == 0) { // Linkki tositteelle
-							if ($kukarow['taso'] < 2) {
-								echo "<td valign='top'>".tv1dateconv($trow["$i"])."</td>";
-							}
-							else {
-								echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>".tv1dateconv($trow[$i])."</td>";
-							}
-						}
-						elseif ($i == 1) {
-							echo "<td valign='top' align='right'>".tv1dateconv($trow[$i])."</td>";									
-						}
-						elseif ($i == 2) {
-							echo "<td valign='top' align='right'>$trow[$i]</td>";
-							
-							$yhteensa += $trow[$i];
-						}
-						elseif ($i == 5) {
-							// tehd‰‰n lasku linkki
-							echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
-						}
-						elseif ($i == 6) { // Laskun tila
-							$laskutyyppi = $trow[$i];
-							require "inc/laskutyyppi.inc";
-							echo "<td valign='top'>$laskutyyppi</td>";
-						}
-						else {
-							echo "<td valign='top'>$trow[$i]</td>";
-						}						
+					if ($kukarow['taso'] != 1 and $kukarow['taso'] != 2 and $kukarow['taso'] != 3) {
+						echo "<td valign='top'>".tv1dateconv($trow["tapvm"])."<br>".tv1dateconv($trow["erpcm"])."</td>";
 					}
+					else {
+						echo "<td valign='top'><a href = 'muutosite.php?tee=E&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a><br>".tv1dateconv($trow["erpcm"])."</td>";
+					}
+					
+					echo "<td valign='top' align='right'>$trow[summa]</td>";
+					echo "<td valign='top'>$trow[valkoodi]</td>";
+					echo "<td valign='top'>".$trow["viite/viesti"]."</td>";
+					
+					// tehd‰‰n lasku linkki
+					echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
+					
+					$laskutyyppi = $trow["tila"];
+					require "inc/laskutyyppi.inc";
+					echo "<td valign='top'>$laskutyyppi<br>".ostolaskun_vienti($trow["vienti"])."</td>";
+					
+					$yhteensa += $trow["summa"];						
+				
 					echo "</tr>";
 				}
 				
-				echo "<tr><th colspan='2'>".t("Yhteens‰:")."</th><td>$yhteensa</td></tr>";
+				echo "<tr><th>".t("Yhteens‰:")."</th><td align='right'>$yhteensa</td></tr>";
 				echo "</table><br>";
 				
 				if ($limit != "NO") {

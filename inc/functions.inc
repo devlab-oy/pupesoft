@@ -2018,6 +2018,54 @@ if(!function_exists("remove_duplicates")) {
 	}
 }
 
+if (!function_exists("ostolaskun_vienti")) {
+	function ostolaskun_vienti($vienti) {
+		switch ($vienti) {
+			case 'A':
+		  		$cVal = t("Kotimaa");
+				break;
+			case 'B':
+				$cVal = t("Kotimaa huolinta/rahti");
+				break;
+			case 'C':
+				$cVal = t("Kotimaa vaihto-omaisuus");
+				break;
+			case 'J':
+				$cVal = t("Kotimaa raaka-aine");
+				break;
+			case 'D':
+				$cVal = t("EU");
+				break;
+			case 'E':
+				$cVal = t("EU huolinta/rahti");
+				break;
+			case 'F':
+				$cVal = t("EU vaihto-omaisuus");
+				break;
+			case 'K':
+				$cVal = t("EU raaka-aine");
+				break;
+			case 'G':
+				$cVal = t("ei-EU");
+				break;
+			case 'H':
+				$cVal = t("ei-EU huolinta/rahti");
+				break;
+			case 'I':
+				$cVal = t("ei-EU vaihto-omaisuus");
+				break;
+			case 'L':
+				$cVal = t("ei-EU raaka-aine");
+				break;	
+				
+			default:
+				$cVal = "";
+		}
+		
+		return $cVal;
+	}
+}
+
 if(!function_exists("enable_ajax")) {
 	function enable_ajax() {
 		global $palvelin2, $kukarow;

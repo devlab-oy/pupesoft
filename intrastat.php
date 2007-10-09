@@ -71,6 +71,15 @@
 			$lisavarlisa = "";	
 		}
 
+		if ($vaintullinimike != "") {
+			$vainnimikelisa = " and tuote.tullinimike1 = '$vaintullinimike' ";
+			$vainnimikegroup = " tilausrivi.tunnus, ";
+		}
+		else {
+			$vainnimikelisa = "";
+			$vainnimikegroup = "";			
+		}
+		
 		// t‰ss‰ tulee sitten nimiketietueet unionilla
 		$query = "	(SELECT
 					tuote.tullinimike1,
@@ -96,7 +105,7 @@
 					'Keikka' as tapa
 					FROM lasku use index (yhtio_tila_mapvm)
 					JOIN tilausrivi use index (uusiotunnus_index) ON tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
-					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
+					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
 					WHERE lasku.kohdistettu = 'X'
 					and lasku.tila = 'K'
@@ -106,7 +115,7 @@
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.mapvm >= '$vva-$kka-$ppa'
 					and lasku.mapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
+					GROUP BY $vainnimikegroup tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
 
 					UNION
 
@@ -129,7 +138,7 @@
 					'Lasku' as tapa					
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
-					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
+					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
 					WHERE lasku.tila = 'L'
 					and lasku.alatila = 'X'
@@ -139,7 +148,7 @@
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tapvm >= '$vva-$kka-$ppa'
 					and lasku.tapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
+					GROUP BY $vainnimikegroup tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
 
 					UNION
 
@@ -162,7 +171,7 @@
 					'Siirtolista' as tapa
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.otunnus=lasku.tunnus and tilausrivi.yhtio=lasku.yhtio and tilausrivi.kpl > 0 $lisavarlisa
-					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
+					JOIN tuote use index (tuoteno_index) ON tuote.yhtio=lasku.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = '' $vainnimikelisa
 					LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]' and tullinimike.cn != ''
 					WHERE lasku.tila = 'G'
 					and lasku.alatila = 'V'
@@ -171,7 +180,7 @@
 					and lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tapvm >= '$vva-$kka-$ppa'
 					and lasku.tapvm <= '$vvl-$kkl-$ppl'
-					GROUP BY tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
+					GROUP BY $vainnimikegroup tuote.tullinimike1, lasku.maa_lahetys, alkuperamaa, lasku.maa_maara, lasku.kuljetusmuoto, lasku.kauppatapahtuman_luonne)
 
 					ORDER BY laskunro, tuoteno ";
 		$result = mysql_query($query) or pupe_error($query);
@@ -334,11 +343,11 @@
 			$nim .= "\r\n";
 
 			// tehd‰‰n kaunista ruutukamaa
-			$ulos .= "<tr>";
+			$ulos .= "<tr class='aktiivi'>";
 			$ulos .= "<td valign='top'>".$row["laskunro"]."</td>";
 			$ulos .= "<td valign='top'>".$row["tuoteno"]."</td>";
 			$ulos .= "<td valign='top'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
-			$ulos .= "<td valign='top'>".$row["tullinimike1"]."</td>";
+ 			$ulos .= "<td valign='top'><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&vaintullinimike=$row[tullinimike1]'>$row[tullinimike1]</></td>";	//Tullinimike CN
 			$ulos .= "<td valign='top'>".$row["kauppatapahtuman_luonne"]."</td>";
 			$ulos .= "<td valign='top'>".$row["alkuperamaa"]."</td>";
 			$ulos .= "<td valign='top'>".$row["maa_lahetys"]."</td>";
@@ -364,7 +373,7 @@
 			// tehd‰‰n tilastoarvolistausta
 			$tilastoarvot .= "<tr>";
 			$tilastoarvot .= "<td>$lask</td>";																									//j‰rjestysnumero
-			$tilastoarvot .= "<td>$row[tullinimike1]</td>";																						//Tullinimike CN
+			$tilastoarvot .= "<td><a href='intrastat.php?tee=tulosta&tapa=$tapa&kk=$kk&vv=$vv&outputti=$outputti&lahetys=nope&lisavar=$lisavar&vaintullinimike=$row[tullinimike1]'>$row[tullinimike1]</></td>";	//Tullinimike CN
 
 			if ($tapa == "tuonti") {
 				$tilastoarvot .= "<td>$row[alkuperamaa]</td>";																					//alkuper‰maa

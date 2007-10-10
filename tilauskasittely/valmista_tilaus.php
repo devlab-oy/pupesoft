@@ -216,17 +216,17 @@
 								$atil = round($kokopros / 100 * $tilrivirow["varattu"],2);
 							}
 
-							$akerroin = $atil / $tilrivirow["varattu"];
-
+							$akerroin 		= $atil / $tilrivirow["varattu"];
 							$valmistetaan 	= "TILAUKSELTA";
 							$tuoteno 		= $tilrivirow["tuoteno"];
 							$tee			= "UV";
 							$varastopaikka  = $tilrivirow["paikka"];
+							$jaljella_tot	= 0;
 
 							require ("../valmistatuotteita.inc");
 
 							//jos valmistus meni ok, niin palautuu $tee == UV
-							if (round($jaljella,2) == 0 and $tee == "UV") {
+							if (round($jaljella_tot, 2) == 0 and $tee == "UV") {
 								//p‰ivitet‰‰n t‰m‰ perhe valmistetuksi
 								$query = "	UPDATE tilausrivi
 											SET toimitettu = '$kukarow[kuka]',
@@ -467,15 +467,10 @@
 
 			if ($vanhaid != $prow["perheid"] and $vanhaid != 'KALA') {
 				echo "<tr><td class='back' colspan='7'><br></td></tr>";
-
-				if($prow["tunnus"] == $prow["perheid"]) {
-					$class = "spec";
-				}
 			}
-			elseif ($vanhaid == 'KALA' and $prow["tunnus"] == $prow["perheid"]) {
+			if($prow["tyyppi"] == 'W' or $prow["tyyppi"] == 'M') {
 				$class = "spec";
 			}
-
 			if ($prow["tyyppi"] == 'D') {
 				$class = "green";
 			}
@@ -485,7 +480,7 @@
 			echo "<td class='$class'>$rivkpl</td>";
 			$rivkpl--;
 
-			echo "<td class='$class' align='right'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
+			echo "<td class='$class'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
 			echo "<td class='$class'><a href='../tuote.php?tee=Z&tuoteno=$prow[tuoteno]'>$prow[tuoteno]</a></td>";
 			echo "<td class='$class' align='right'>$prow[tilattu]</td>";
 
@@ -538,6 +533,9 @@
 
 			if ($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
 				echo "<td align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]]."</td>";
+			}
+			elseif ($prow["tunnus"] != $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
+				echo "<td align='center'>UVA</td>";
 			}
 			elseif($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] != "0000-00-00 00:00:00" and $toim == "KORJAA") {
 				//tutkitaan kuinka paljon t‰t‰ nyt oli valmistettu

@@ -54,8 +54,8 @@
 		if ($laskurow["eilahetetta"] != '') {
 			$query  = "	update lasku
 						set alatila = 'C'
-						where yhtio='$kukarow[yhtio]'
-						and tunnus = '$laskurow[tunnus]'";
+						where yhtio = '$kukarow[yhtio]'
+						and tunnus  = '$laskurow[tunnus]'";
 			$varresult = mysql_query($query) or pupe_error($query);
 		}
 

@@ -34,6 +34,10 @@ echo "<tr>";
 echo "<th>".t('Syötä loppu pp-kk-vvvv')."</th>";
 echo "<td><input type='text' name='pp1' size='5' value='$pp1'><input type='text' name='kk1' size='5' value='$kk1'><input type='text' name='vv1' size='7' value='$vv1'></td>";
 echo "</tr>";
+echo "<tr>";
+echo "<th>".t('Laskut')."</th>";
+echo "<td>Myyntilaskut <input type='radio' name='mitka' value='myynti'> Ostolaskut <input type='radio' name='mitka' value='osto'></td>";
+echo "</tr>";
 echo "</table>";
 
 echo "<br>";
@@ -43,6 +47,11 @@ echo "</form>";
 
 if ($tee == "tee") {
 	
+	if ($mitka = 'osto')
+		$valinta = "in ('H', 'M', 'P', 'Q', 'Y')";
+	else
+		$valinta = "='U')";
+
 	// haetaan halutut tiliöinnit
 	$query  = "	SELECT  concat_ws('/',t.tilino,ti.nimi) tili,
 				concat_ws('/',t.kustp,k.nimi) kustp,
@@ -56,7 +65,7 @@ if ($tee == "tee") {
 				LEFT JOIN kustannuspaikka ko on l.yhtio=ko.yhtio and t.kohde=ko.tunnus
 				LEFT JOIN kustannuspaikka p on l.yhtio=p.yhtio and t.projekti=p.tunnus
 				WHERE l.yhtio = '$kukarow[yhtio]' and l.tapvm >= '$vv-$kk-$pp' and
-						l.tapvm <= '$vv1-$kk1-$pp1' and l.tila='U'
+						l.tapvm <= '$vv1-$kk1-$pp1' and l.tila $valinta
 				GROUP BY 1,2,3,4";
 	$result = mysql_query($query) or pupe_error($query);
 	echo "<table>";

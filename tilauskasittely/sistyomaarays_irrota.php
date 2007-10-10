@@ -18,6 +18,25 @@
 					WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tunnus='$rivitunnus'";
 		$sarjares = mysql_query($query) or pupe_error($query);
 		
+		
+		// P‰ivitet‰‰n saldo_varattu-kentt‰‰
+		$query = "	SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, tilkpl
+					FROM tilausrivi
+					WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tunnus='$rivitunnus'";
+		$sarjares = mysql_query($query) or pupe_error($query);
+		$sarjarow = mysql_fetch_array($sarjares);
+		
+		$query = "	UPDATE tuotepaikat 
+					SET saldo_varattu = saldo_varattu - $sarjarow[tilkpl] 
+					WHERE yhtio		= '$kukarow[yhtio]' 
+					and tuoteno		= '$tuoteno'
+					and hyllyalue 	= '$sarjarow[hyllyalue]'
+					and hyllynro  	= '$sarjarow[hyllynro]'
+					and hyllyvali 	= '$sarjarow[hyllyvali]'
+					and hyllytaso 	= '$sarjarow[hyllytaso]'
+					LIMIT 1";
+		$sarjares = mysql_query($query) or pupe_error($query);
+	
 		echo t("Lis‰varuste irrotettu laitteesta")."!<br><br>";
 		
 		$tee = "";
@@ -46,11 +65,9 @@
 						and sarjanumeroseuranta.sarjanumero  = '$etsi'";
 			$sarjares = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($sarjares) == 1) {
-				$sarjarow = mysql_fetch_array($sarjares);
-				
-				echo "<br><br><table>";
-								
+			echo "<br><br><table>";
+			
+			while($sarjarow = mysql_fetch_array($sarjares)) {				
 				// Haetaan muut lis‰varusteet
 				$query = "	SELECT tuoteno, perheid2, tilkpl, tyyppi, tunnus
 							FROM tilausrivi use index (yhtio_perheid2)
@@ -85,9 +102,9 @@
 						
 						echo "</tr>";
 					}
-				}
-				echo "</table>";
+				}	
 			}
+			echo "</table>";
 		}
 	}
 	

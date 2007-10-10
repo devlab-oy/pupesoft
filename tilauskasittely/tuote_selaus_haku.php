@@ -39,7 +39,7 @@
 				</form>";
 		echo "</td></tr></table>";
 	}
-	elseif ($kukarow["kesken"] != 0 and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T")) {
+	elseif ($kukarow["kesken"] != 0 and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "T" or $laskurow["tila"] == "A" or $laskurow["tila"] == "S")) {
 
 		if ($kukarow["extranet"] != "") {
 			$toim_kutsu = "EXTRANET";
@@ -50,9 +50,9 @@
 				<input type='hidden' name='aktivoinnista' value='true'>
 				<input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
 				<input type='submit' value='".t("Takaisin tilaukselle")."'>
-				</form>";
+				</form><br><br>";
 	}
-
+	
 	// Tarkistetaan tilausrivi
 	if ($tee == 'TI' and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
 

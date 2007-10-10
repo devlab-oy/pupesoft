@@ -8,16 +8,12 @@
 
 		if ($yksittainen == "ON") {
 			//Tässä on haettava tulostettavan tilauksen tiedot
-			$query = "select otsikkonro from rahtikirjat where yhtio='$kukarow[yhtio]' and rahtikirjanro='$rtunnukset[0]' limit 1";
+			$query = "select toimitustapa, tulostuspaikka from rahtikirjat where yhtio='$kukarow[yhtio]' and rahtikirjanro='$rtunnukset[0]' limit 1";
 			$ores  = mysql_query($query) or pupe_error($query);
 			$rrow  = mysql_fetch_array($ores);
 
-			$query = "select toimitustapa, varasto from lasku where yhtio='$kukarow[yhtio]' and tunnus='$rrow[otsikkonro]'";
-			$ores  = mysql_query($query) or pupe_error($query);
-			$orow  = mysql_fetch_array($ores);
-
-			$toimitustapa	= $orow["toimitustapa"];
-			$varasto		= $orow["varasto"];
+			$toimitustapa	= $rrow["toimitustapa"];
+			$varasto		= $rrow["tulostuspaikka"];
 		}
 
 		// haetaan toimitustavan tiedot
@@ -78,7 +74,7 @@
 		$rakir_res = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($rakir_res) == 0) {
-			echo "<font class='message'>".t("Yhtään tulostettavaa rahtikirjaa ei löytynyt").".</font><br><br>";
+			echo "<font class='message'>".t("Yhtään tulostettavaa rahtikirjaa ei löytynyt").".$query</font><br><br>";
 		}
 
 		while ($rakir_row = mysql_fetch_array($rakir_res)) {

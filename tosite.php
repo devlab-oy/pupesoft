@@ -68,7 +68,6 @@
 							filename   = '$filename',
 							filesize   = '$filesize',
 							filetype   = '$filetype'";
-
 				$result = mysql_query($query) or pupe_error($query);
 				$kuva = mysql_insert_id();
 			}
@@ -84,12 +83,10 @@
 			//	ei koskaan p‰ivitet‰ automaattisesti
 			$tee = "N";
 
-			// otetaan file extensio
-			$path_parts = pathinfo($_FILES['tositefile']['name']);
-			$ext = strtoupper($path_parts['extension']);
+			list($name, $ext) = split("\.", $_FILES['tositefile']['name']);
 
 			// extensio pit‰‰ olla oikein
-			if (!in_array($ext, array("XLS","CSV","TXT"))) {
+			if (!in_array(strtoupper($ext), array("XLS","CSV","TXT"))) {
 				echo "<font class='error'>".t("Ainoastaan .xls .cvs .txt tiedostot sallittuja")."! $ext</font>";
 				$fnimi = "";
 			}
@@ -99,10 +96,7 @@
 				$fnimi = "";
 			}
 			else {
-				if (in_array($ext, array("TXT","CSV"))) {
-					$file=file($_FILES['tositefile']['tmp_name'], FILE_IGNORE_NEW_LINES);
-				}
-				else {
+				if (strtoupper($ext)=="XLS") {
 					require_once ('excel_reader/reader.php');
 
 					// ExcelFile
@@ -112,51 +106,67 @@
 					$data->setOutputEncoding('CP1251');
 					$data->setRowColOffset(0);
 					$data->read($_FILES['tositefile']['tmp_name']);
-
-					$file = $data->sheets[0]['cells'];
 				}
 
+				echo "<font class='message'>".t("Tutkaillaan mit‰ olet l‰hett‰nyt").".<br></font>";
+
+				// luetaan eka rivi tiedostosta..
+				if (strtoupper($ext) == "XLS") {
+					$otsikot = array();
+
+					for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
+						$otsikot[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
+					}
+				}
+				else {
+					$file	 = fopen($_FILES['tositefile']['tmp_name'],"r") or die (t("Tiedoston avaus ep‰onnistui")."!");
+
+					$rivi    = fgets($file);
+					$otsikot = explode("\t", strtoupper(trim($rivi)));
+				}
+
+				// luetaan tiedosto loppuun ja tehd‰‰n array koko datasta
+				$excelrivi[][] = array();
+
+				if (strtoupper($ext) == "XLS") {
+					for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
+						for ($excej = 0; $excej <= $data->sheets[0]['numCols']; $excej++) {
+							$excelrivi[$excei-1][$excej] = $data->sheets[0]['cells'][$excei][$excej];
+						}
+					}
+				}
+				else {
+					$rivi = fgets($file);
+
+					$excei = 0;
+
+					while (!feof($file)) {
+						// luetaan rivi tiedostosta..
+						$poista	 = array("'", "\\");
+						$rivi	 = str_replace($poista,"",$rivi);
+						$rivi	 = explode("\t", trim($rivi));
+
+						$excej = 0;
+						foreach ($rivi as $riv) {
+							$excelrivi[$excei][$excej] = $riv;
+							$excej++;
+						}
+						$excei++;
+
+						// luetaan seuraava rivi failista
+						$rivi = fgets($file);
+					}
+					fclose($file);
+				}
+				
 				$maara = 0;
-				foreach($file as $key => $value) {
-
-					if ($maara == 0) {
-						if (is_array($value)) {
-							foreach($value as $v8) {
-								$otsikot[]=strtolower($v8);
-							}
-						}
-						else {
-							$rivi=explode("\t",strtolower($key));
-							$otsikot=$rivi;
-						}
+				foreach ($excelrivi as $erivi) {
+					foreach ($erivi as $e => $eriv) {						
+						${"i".strtolower($otsikot[$e])}[$maara] = $eriv;						
 					}
-					else {
-						if (is_array($value)) {
-							$rivi=$value;
-						}
-						else {
-							$rivi=explode("\t",$key);
-						}
-
-						if (count($rivi)<>count($otsikot)) {
-							echo "<font class='error'>".t("VIRHE!!! aineistovirhe rivill‰").": $maara otsikoiden ja arvojen m‰‰r‰ ei ole sama! (".count($rivi)." != ".count($otsikot).")</font>";
-							break;
-						}
-
-						$rivi=array_combine($otsikot, $rivi);
-
-						$isumma[$maara] 	= (float) $rivi["summa"];
-						$itili[$maara]  	= (int) $rivi["tilino"];
-						$ikustp[$maara] 	= (int) $rivi["kustp"];
-						$ikustp[$maara]		= (int) $rivi["kustp"];
-						$ikohde[$maara]		= (int) $rivi["kohde"];
-						$ivero[$maara]		= (int) $rivi["alv"];
-						$iselite[$maara] 	= $rivi["selite"];
-					}
-
 					$maara++;
 				}
-
+			
 				//	Lis‰t‰‰n viel‰ 2 tyhj‰‰ rivi‰ loppuun
 				$maara+=2;
 			}
@@ -168,7 +178,7 @@
 		}
 
 		$turvasumma = $summa;
-		$kuittiok = 0; // Onko joku vienneist‰ kassa-tili, jotta kuitti voidaan tulostaa
+		$kuittiok 	= 0; // Onko joku vienneist‰ kassa-tili, jotta kuitti voidaan tulostaa
 
 		for ($i=1; $i<$maara; $i++) {
 			if ((strlen($itili[$i]) > 0) or (strlen($isumma[$i]) > 0)) { // K‰sitell‰‰nkˆ rivi??

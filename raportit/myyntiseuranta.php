@@ -1321,10 +1321,15 @@
 
 				if ($osoitetarrat != "" and $tarra_aineisto != '')  {
 					$tarra_aineisto = substr($tarra_aineisto, 0, -1);
-					echo "<br>";
-					echo "<a href='../crm/tarrat.php?tee=&tarra_aineisto=$tarra_aineisto'>".t("Tulosta tarrat")."</a>";
-					echo "<br>";
-					echo "<br>";
+					
+					
+					echo "<br><table>";
+					echo "<tr><th>".t("Tulosta osoitetarrat").":</th>";
+					echo "<form method='post' action='../crm/tarrat.php'>";
+					echo "<input type='hidden' name='tee' value=''>";
+					echo "<input type='hidden' name='tarra_aineisto' value='$tarra_aineisto'>";
+					echo "<td class='back'><input type='submit' value='".t("Siirry")."'></td></tr></form>";
+					echo "</table><br>";
 				}
 			}
 			echo "<br><br><hr>";

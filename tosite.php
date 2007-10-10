@@ -138,7 +138,7 @@
 				else {
 					$rivi = fgets($file);
 
-					$excei = 0;
+					$excei = 1;
 
 					while (!feof($file)) {
 						// luetaan rivi tiedostosta..

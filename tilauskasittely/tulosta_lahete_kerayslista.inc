@@ -103,7 +103,12 @@ if (!function_exists('alku')) {
 		
 		$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 	$thispage, $iso);
 		
-		$pdf->draw_text(310,815, t("Keräyslista", $kieli), 			$thispage, $iso);		
+		if ($tyyppi == "SIIRTOLISTA") {
+			$pdf->draw_text(310,815, t("Siirtolista", $kieli), 			$thispage, $iso);	
+		}
+		else {
+			$pdf->draw_text(310,815, t("Keräyslista", $kieli), 			$thispage, $iso);		
+		}
 		
 		$pdf->draw_text(310, 803, t("Sivu", $kieli), 				$thispage, $norm);
 		
@@ -167,9 +172,10 @@ if (!function_exists('alku')) {
 			$pdf->draw_text(430, 761, tv1dateconv($laskurow["toimaika"]), 	$thispage, $boldi);
 		}
 		
+		if ($asrow["asiakasnro"] == "" and $laskurow["ytunnus"] != "") $asrow["asiakasnro"] = $laskurow["ytunnus"];
+		
 		$pdf->draw_rectangle(758, 300, 737, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(758, 420, 737, 580, $thispage, $rectparam);
-		
 		$pdf->draw_text(310, 750, t("Asiakasnumero", $kieli), 		$thispage, $pieni);
 		$pdf->draw_text(310, 740, $asrow["asiakasnro"], 			$thispage, $norm);
 		$pdf->draw_text(430, 750, t("Päiväys", $kieli),				$thispage, $pieni);
@@ -194,7 +200,7 @@ if (!function_exists('alku')) {
 
 		$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 708, t("Toimitustapa", $kieli), 		$thispage, $pieni);
-		$pdf->draw_text(310, 698, $laskurow["toimitustapa"], 		$thispage, $norm);
+		$pdf->draw_text(310, 698, $laskurow["toimitustapa"], 		$thispage, $boldi);
 
 		$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 687, t("Toimitusehto", $kieli), 	$thispage, $pieni);
@@ -227,7 +233,7 @@ if (!function_exists('alku')) {
 		}
 	
 		if (trim($laskurow['viesti']) != '') {
-			$komm .= "\n".t("Lisätietoja", $kieli).":###".$laskurow['viesti'];								
+			$komm .= "\n".t("Tilausviite", $kieli).":###".$laskurow['viesti'];								
 		}
 		
 		if (trim($laskurow['comments']) != '') {
@@ -326,7 +332,7 @@ if (!function_exists('alku')) {
 }
 
 if (!function_exists('uusi_sivu')) {
-	function uusi_sivu () {
+	function uusi_sivu ($tyyppi = "") {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala, $tilausnumeroita;
 
 		$thispage = $pdf->new_page("a4");
@@ -515,7 +521,7 @@ if (!function_exists('rivi_otsikot')) {
 }
 
 if (!function_exists('rivi')) {
-	function rivi($thispage) {
+	function rivi($thispage, $tyyppi="") {
 		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $norm, $pieni, $rivinkorkeus, $paino;
 		
 		// viivat rivien väliin...
@@ -534,7 +540,7 @@ if (!function_exists('rivi')) {
 
 			loppu($thispage, 0);
 
-			$page[$sivu] = uusi_sivu();
+			$page[$sivu] = uusi_sivu($tyyppi);
 			$thispage    = $page[$sivu];
 
 		}
@@ -545,21 +551,24 @@ if (!function_exists('rivi')) {
 
 			$varastopaikka = $row["hyllyalue"] . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 
+			$row["perhe_kommentti"] = "";
+
+			// Info tuoteperheestä
 			if ($row["perheid"] > 0 and $perheid != $row["perheid"]) {
 				$numrows = 0;
 
 				$query = "	SELECT vanhatunnus
-							FROM lasku use index (PRIMARY)
+							FROM lasku
 							WHERE yhtio	= '$kukarow[yhtio]'
 							and tunnus	= '$row[otunnus]'";
 				$vtunres = mysql_query($query) or pupe_error($query);
 				$vtunrow = mysql_fetch_array($vtunres);
 
 				if ($vtunrow["vanhatunnus"] != 0) {
-					$query = " SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-							FROM lasku use index (yhtio_vanhatunnus)
-							WHERE yhtio         = '$kukarow[yhtio]'
-							and vanhatunnus     = '$vtunrow[vanhatunnus]'";
+					$query = " 	SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+								FROM lasku use index (yhtio_vanhatunnus)
+								WHERE yhtio		= '$kukarow[yhtio]'
+								and vanhatunnus = '$vtunrow[vanhatunnus]'";
 					$perheresult = mysql_query($query) or pupe_error($query);
 					$numrows = mysql_num_rows($perheresult);
 				}
@@ -567,37 +576,41 @@ if (!function_exists('rivi')) {
 				if ($numrows == 0 or $vtunrow["vanhatunnus"] == 0) {
 					$query = "  SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
 								FROM lasku use index (PRIMARY)
-								WHERE yhtio    = '$kukarow[yhtio]'
-								and tunnus    = '$row[otunnus]'";
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus  = '$row[otunnus]'";
 					$perheresult = mysql_query($query) or pupe_error($query);
-				}
+				}                        
 
 				if (mysql_num_rows($perheresult) > 0) {
 					$perherow = mysql_fetch_array($perheresult);
 
-					$query = "	SELECT tuoteno, nimitys
+					$query = "	SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys, varattu
 								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]'
-								and otunnus in ($perherow[tunnukset])
-								and perheid = '$row[perheid]'
-								ORDER by tunnus";
+								JOIN tuote tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.otunnus in ($perherow[tunnukset]) 
+								and tilausrivi.perheid = '$row[perheid]' 
+								ORDER BY tilausrivi.tunnus";
 					$perheresult = mysql_query($query) or pupe_error($query);
 
-					$litania = '';
-					while ($perherow = mysql_fetch_array($perheresult)) {
-						if ($litania == "") {
-								$litania .= $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"].":  ";
+					if (mysql_num_rows($perheresult) > 1) {
+						while ($perherow = mysql_fetch_array($perheresult)) {
+							if ($row["perhe_kommentti"] == "") {
+								$row["perhe_kommentti"] .= t("Tuoteperhe", $kieli).": ";
+								$row["perhe_kommentti"] .= $perherow["tuoteno"]." (".$row["varattu"].") ".$perherow["nimitys"].".\n".t("Sisältää tuotteet", $kieli).": ";
+							}
+							else {
+								$row["perhe_kommentti"] .= strtoupper($perherow["tuoteno"]).", ";
+							}
 						}
-						else {
-							$litania .= strtoupper($perherow["tuoteno"]).", ";
-						}
+						$row["perhe_kommentti"] = substr($row["perhe_kommentti"],0,-2);
 					}
-					$litania = substr($litania,0,-2);
-				}
-
-				$pdf->draw_text(42,  $kala, "# ".t("Tuoteperhe", $kieli).": ".$litania,	$thispage, $norm);
-
-				$kala = $kala - $rivinkorkeus;
+				}						
+			}
+			
+			if (trim($row["perhe_kommentti"]) != '') {
+				$pohja = $pdf->draw_paragraph($kala+$norm["height"], 45, 60, 480, $row["perhe_kommentti"],	$thispage, $norm);						
+				$kala = $pohja - $rivinkorkeus;
 			}
 
 			$pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],	$thispage, $pieni);

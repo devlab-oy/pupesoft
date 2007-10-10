@@ -647,7 +647,7 @@
 					$pdf->draw_text(310, 635, $laskurow["jakelu"], 						$thispage, $norm);
 
 					$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
-					$pdf->draw_text(310, 624, t("Lisätietoja", $kieli), 				$thispage, $pieni);
+					$pdf->draw_text(310, 624, t("Tilausviite", $kieli), 				$thispage, $pieni);
 					$pdf->draw_text(310, 614, $laskurow["viesti"], 						$thispage, $norm);
 					
 					$pdf->draw_text(310, 600, t("Olkaa hyvä ja kirjoittakaa tilausnumero lähetteeseen, laskuun ja kirjeisiin", $kieli).".", $thispage, $pieni);

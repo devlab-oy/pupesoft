@@ -412,7 +412,6 @@
 					}
 				}
 
-
 				// Tulostetaan keraäyslista
 				require_once ("tulosta_lahete_kerayslista.inc");
 				
@@ -469,12 +468,14 @@
 
 				$sivu  = 1;
 				$paino = 0;
+				$tyyppi = "SIIRTOLISTA";
+				
 
 				// Aloitellaan lähetteen teko
-				$page[$sivu] = alku();
+				$page[$sivu] = alku($tyyppi);
 
 				while ($row = mysql_fetch_array($result)) {
-					rivi($page[$sivu]);
+					rivi($page[$sivu], $tyyppi);
 				}
 
 				loppu($page[$sivu], 1);

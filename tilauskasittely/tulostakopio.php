@@ -1663,12 +1663,16 @@
 
 				$sivu  = 1;
 				$paino = 0;
+				
+				if ($toim == "SIIRTOLISTA") {
+					$tyyppi = "SIIRTOLISTA";
+				}
 
 				// Aloitellaan lähetteen teko
-				$page[$sivu] = alku();
+				$page[$sivu] = alku($tyyppi);
 
 				while ($row = mysql_fetch_array($result)) {
-					rivi($page[$sivu]);
+					rivi($page[$sivu], $tyyppi);
 				}
 
 				loppu($page[$sivu], 1);

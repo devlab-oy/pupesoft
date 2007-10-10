@@ -263,7 +263,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(310, 635, pdf_substr($laskurow["toimitusehto"], 270, $pdf, $norm), $thispage, $norm);
 
 		$pdf->draw_rectangle(632, 300, 611, 580, $thispage, $rectparam);
-		$pdf->draw_text(310, 624, t("Lisätietoja", $kieli), 	$thispage, $pieni);
+		$pdf->draw_text(310, 624, t("Tilausviite", $kieli), 	$thispage, $pieni);
 		$pdf->draw_text(310, 614, pdf_substr($laskurow["viesti"], 270, $pdf, $norm), 		$thispage, $norm);
 
 		$pdf->draw_text(310, 595, t("Mahdolliset muistutukset tehtävä 8 päivän kuluessa", $kieli), $thispage, $pieni);
@@ -283,7 +283,7 @@ if (!function_exists('alku')) {
 		}
 
 		if (trim($laskurow['viesti']) != '' and $pdf->strlen($laskurow["viesti"], $norm) > 270) {
-			$komm .= "\n".t("Lisätietoja", $kieli).":###".$laskurow['viesti'];
+			$komm .= "\n".t("Tilausviite", $kieli).":###".$laskurow['viesti'];
 		}
 
 		if (trim($laskurow['sisviesti1']) != '') {

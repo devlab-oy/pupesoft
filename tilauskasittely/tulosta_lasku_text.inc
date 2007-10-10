@@ -147,7 +147,7 @@ if (!function_exists('text_alku')) {
 		
 		$sisalto .= "\r\n";	
 		$sisalto .= sprintf('%-35.35s', '');
-		$sisalto .= sprintf('%-25.25s', t("Lisätietoja", $kieli).":");
+		$sisalto .= sprintf('%-25.25s', t("Tilausviite", $kieli).":");
 		
 		
 		

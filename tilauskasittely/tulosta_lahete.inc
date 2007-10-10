@@ -243,7 +243,7 @@ if (!function_exists('alku')) {
 		}
 	
 		if (trim($laskurow['viesti']) != '') {
-			$komm .= "\n".t("Lisätietoja", $kieli).":###".$laskurow['viesti'];								
+			$komm .= "\n".t("Tilausviite", $kieli).":###".$laskurow['viesti'];								
 		}
 		
 		if (trim($laskurow['comments']) != '') {

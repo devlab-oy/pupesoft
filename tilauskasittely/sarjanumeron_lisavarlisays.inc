@@ -31,14 +31,17 @@
 				$ostorow = mysql_fetch_array($sarjares);
 								
 				// Haetaan muut lisävarusteet
-				$query = "	SELECT tuoteno, round(kpl/$ostorow[kpl]) kpl, round(tilkpl/$ostorow[kpl]) tilkpl, tilkpl sistyomaarayskpl, var, 
-							tyyppi, concat_ws('#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilaajanrivinro, perheid2
+				$query = "	SELECT tilausrivi.tuoteno, round(tilausrivi.kpl/$ostorow[kpl]) kpl, round(tilausrivi.tilkpl/$ostorow[kpl]) tilkpl, 
+							tilausrivi.tilkpl sistyomaarayskpl, tilausrivi.var, tilausrivi.tyyppi, 
+							concat_ws('#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, 
+							tilausrivin_lisatiedot.sistyomaarays_sarjatunnus, tilausrivi.perheid2
 							FROM tilausrivi use index (yhtio_perheid2)
-							WHERE yhtio  = '$kukarow[yhtio]' 
-							and perheid2 = '$sarjarow[perheid2]'
-							and tyyppi  != 'D'
-							and tunnus  != '$sarjarow[perheid2]'
-							and perheid2!= 0";
+							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+							WHERE tilausrivi.yhtio  = '$kukarow[yhtio]' 
+							and tilausrivi.perheid2 = '$sarjarow[perheid2]'
+							and tilausrivi.tyyppi  != 'D'
+							and tilausrivi.tunnus  != '$sarjarow[perheid2]'
+							and tilausrivi.perheid2!= 0";
 				$sarjares1 = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sarjares1) > 0) {
@@ -122,17 +125,17 @@
 								
 								// Jos lisävaruste on pultattu kiinni laitteeseen sisäisellä työmääräyksellä
 								// niin silloin, jos lisävauste on sarjanumeroitava, niin sarjanumeron tunnus tulee
-								// lisävarusterivin tilaajanrivinro-kentässä
-								if ($sarjarow["tyyppi"] == 'G' and $sarjarow["tilaajanrivinro"] > 0) {
+								// lisävarusterivin sistyomaarays_sarjatunnus-kentässä
+								if ($sarjarow["tyyppi"] == 'G' and $sarjarow["sistyomaarays_sarjatunnus"] > 0) {
 									$query = "	SELECT tunnus, myyntirivitunnus
 												FROM sarjanumeroseuranta 
 												WHERE yhtio	= '$kukarow[yhtio]' 
-												and tunnus  = '$sarjarow[tilaajanrivinro]'
+												and tunnus  = '$sarjarow[sistyomaarays_sarjatunnus]'
 												and siirtorivitunnus = '$sarjarow[perheid2]'";
 									$tarkres = mysql_query($query) or pupe_error($query);
 									
 									if (mysql_num_rows($tarkres) == 1) {
-										$myy_sarjatunnus = $sarjarow["tilaajanrivinro"];
+										$myy_sarjatunnus = $sarjarow["sistyomaarays_sarjatunnus"];
 									}
 								}
 								

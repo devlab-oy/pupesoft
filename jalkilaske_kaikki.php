@@ -4,7 +4,7 @@
 if ($argc == 0) die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 
 $paiva = "2006-10-01";						// mistä eteenpäin lasketaan
-$kukarow["yhtio"] = "artr";					// mikä lafka
+$kukarow["yhtio"] = "allr";					// mikä lafka
 $kukarow['kuka'] = "mutantti";				// kuka korjaa
 chdir("/Users/joni/Sites/devlab/pupesoft"); // pupedirikka
 
@@ -55,6 +55,8 @@ echo "-----------------------\n";
 
 while ($tuote = mysql_fetch_array($tuores)) {
 
+	echo " $tuotenow/$tuoteyht ($laskettu jälkilaskettu)\r";
+
 	$query = "	SELECT * 
 				FROM tapahtuma 
 				WHERE yhtio = '$kukarow[yhtio]' and 
@@ -78,10 +80,10 @@ while ($tuote = mysql_fetch_array($tuores)) {
 	}
 
 	$tuotenow++;
-	echo " $tuotenow/$tuoteyht ($laskettu jälkilaskettu)\r";
 
 }
 
+echo " $tuotenow/$tuoteyht ($laskettu jälkilaskettu)\r";
 echo "\n";
 
 ?>

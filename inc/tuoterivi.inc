@@ -1,30 +1,30 @@
 <?php
-	
-	
+
+
 	$ulos = "";
 	$jatko = 1; // oletetaan normaali k‰sittely
 	$tyyppi = 1; // oletetaan rivin n‰kyvyys
-	
+
 	if (mysql_field_name($result, $i) == "yhtio") {
 		$tyyppi = 0;
 	}
-	
+
 	//	Tuoteno talteen
 	if (mysql_field_name($result, $i) == "tuoteno") {
 		$tuoteno = $trow[$i];
 	}
 
 	if (mysql_field_name($result, $i) == "nimitys") {
-		
+
 		//	Jos meill‰ on jokin viranomaistuote huomautetaan ett‰ nimityst‰ ei venksailla
-		
-		$query  = "	SELECT tunnus 
-	    			FROM tuote 
-	    			WHERE yhtio = '$kukarow[yhtio]' 
+
+		$query  = "	SELECT tunnus
+	    			FROM tuote
+	    			WHERE yhtio = '$kukarow[yhtio]'
 	    			and tuoteno = '$tuoteno'
 					and tuotetyyppi in ('A','B')";
 	    $sresult = mysql_query($query) or pupe_error($query);
-	
+
 		if(mysql_num_rows($sresult) != 0) {
 			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td><td class = 'back'><font class='info'>".t("Huom! Viranomaistuotteen nimiyst‰ ei tulisi muuttaa!")."</font></td>";
 			$jatko=0;
@@ -34,19 +34,19 @@
 	if (mysql_field_name($result, $i) == "tuotetyyppi") {
 		$sel = array();
 		$sel[$trow[$i]] = "selected";
-	
+
 		$ulos = "<td><select name='$nimi'>";
 		if($laji == "V") {
 			$ulos .= "<option value='A' $sel[A]>".t("P‰iv‰raha")."</option>";
-			$ulos .= "<option value='B' $sel[B]>".t("Muu kulu")."</option>";			
+			$ulos .= "<option value='B' $sel[B]>".t("Muu kulu")."</option>";
 		}
 		else {
 			$ulos .= "<option value=''>".t("Normaali / Valmiste")."</option>";
 			$ulos .= "<option value='R' $sel[R]>".t("Raaka-aine")."</option>";
-			$ulos .= "<option value='K' $sel[K]>".t("Palvelu")."</option>";			
+			$ulos .= "<option value='K' $sel[K]>".t("Palvelu")."</option>";
 		}
 		$ulos .= "</select></td>";
-	
+
 		$jatko=0;
 	}
 
@@ -63,13 +63,13 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tuoteno") {
-		$tuoteno = $trow[$i]; // otetaan t‰‰ talteen				
-		
+		$tuoteno = $trow[$i]; // otetaan t‰‰ talteen
+
 		if($uusi == "") {
 			$tyyppi = 3;
 		}
 		else {
-			$ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'><td>";	
+			$ulos = "<td><input type = 'hidden' name = 'uusi' value = '$uusi'><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'><td>";
 			$jatko=0;
 		}
 	}
@@ -141,14 +141,14 @@
 		else {
 			$sela = "SELECTED";
 		}
-	
+
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value = '' $sela>".t("Saldollinen tuote")."</option>";
 		$ulos .= "<option value = 'o' $sel>".t("Saldoton tuote")."</option>";
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
 	if (mysql_field_name($result, $i) == "ei_varastoida") {
 
 	       $sel = $sela = "";
@@ -213,7 +213,7 @@
 		$ulos .= "<option value = 'F' $sel[F]>".t("Er‰numeroseuranta parasta-ennen p‰iv‰ll‰. Osto-Myynti / Keskihinta-varastonarvo")."</option>";
 		$ulos .= "<option value = 'T' $sel[T]>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")."</option>";
 		$ulos .= "</select></td>";
-	
+
 		$jatko = 0;
 	}
 
@@ -313,18 +313,18 @@
 
 	if (mysql_field_name($result, $i) == "hinnastoon") {
 
-		$sel = $sela = "";
+		$sele = $selw = "";
 		if ($trow[$i] == 'E') {
-			$sel = "SELECTED";
+			$sele = "SELECTED";
 		}
-		else {
-			$sela = "SELECTED";
+		if ($trow[$i] == 'W') {
+			$selw = "SELECTED";
 		}
 
 		$ulos = "<td><select name = '$nimi'>
-			<option value='' $sela>".t("Tuote n‰ytet‰‰n hinnastossa, mutta ei verkkokaupassa")."</option>
-			<option value='E' $sel>".t("Tuotetta ei n‰ytet‰ hinnastossa, eik‰ verkkokaupassa")."</option>
-			<option value='W' $sel>".t("Tuote n‰kyy hinnastossa ja weppikaupassa")."</option>			
+			<option value=''>".t("Tuote n‰ytet‰‰n hinnastossa, mutta ei verkkokaupassa")."</option>
+			<option value='E' $sele>".t("Tuotetta ei n‰ytet‰ hinnastossa, eik‰ verkkokaupassa")."</option>
+			<option value='W' $selw>".t("Tuote n‰kyy hinnastossa ja weppikaupassa")."</option>
 			</select></td>";
 		$jatko = 0;
 	}
@@ -399,7 +399,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'O'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-	
+
 		$sel="";
 		if ($trow[$i] == "") {
 			$sel = "selected";
@@ -423,7 +423,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'P'
 					ORDER BY nimi";
 		$vresult = mysql_query($query) or pupe_error($query);
-	
+
 		$sel="";
 		if ($trow[$i] == "") {
 			$sel = "selected";
@@ -440,10 +440,10 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
-	
-	
-	
+
+
+
+
 	//* N‰m‰ sarakkeet eiv‰t v‰ltt‰m‰tt‰ lˆydy kaikista installaatioista (Laitemyyntispecific)*//
 	if (mysql_field_name($result, $i) == "vari") {
 		$query = "	SELECT *

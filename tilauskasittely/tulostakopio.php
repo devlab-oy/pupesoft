@@ -145,21 +145,10 @@
 			else {
 				require ("../inc/asiakashaku.inc");
 			}
-		}
-
-		if ($ytunnus != '') {
-			$tee = "ETSILASKU";
-		}
-		else {
-			$tee = "";
-		}
-
-		if ($laskunro > 0) {
-			$tee = "ETSILASKU";
-		}
-
-		if ($otunnus > 0) {
-			$tee = 'ETSILASKU';
+			
+			if ($ytunnus == "") {
+				$tee = "";
+			}
 		}
 	}
 	
@@ -324,54 +313,58 @@
 
 		if ($toim == "OSTO") {
 			//ostotilaus kyseessä, ainoa paperi joka voidaan tulostaa on itse tilaus
-			$where1 = " lasku.tila = 'O' ";
+			$where1 .= " lasku.tila = 'O' ";
 
-			$where2 = " and lasku.liitostunnus='$toimittajaid'
-						and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
+			
+			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "PURKU") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa purkulista
-			$where1 = " lasku.tila = 'K' ";
+			$where1 .= " lasku.tila = 'K' ";
 
-			$where2 = " and lasku.liitostunnus='$toimittajaid'
-						and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
+			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
+			
+			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "TARIFFI") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa tariffilista
-			$where1 = " lasku.tila in ('H','Y','M','P','Q') and lasku.kohdistettu in ('K','X') ";
+			$where1 .= " lasku.tila in ('H','Y','M','P','Q') and lasku.kohdistettu in ('K','X') ";
 
-			$where2 = " and lasku.liitostunnus='$toimittajaid'
-						and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
+			
+			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "TUOTETARRA") {
 			//Ostolasku, tuotetarrat. Tälle oliolle voidaan tulostaa tuotetarroja
-			$where1 = " lasku.tila in ('H','Y','M','P','Q') and lasku.kohdistettu in ('K','X') ";
+			$where1 .= " lasku.tila in ('H','Y','M','P','Q') and lasku.kohdistettu in ('K','X') ";
 
-			$where2 = " and lasku.liitostunnus='$toimittajaid'
-						and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			if ($toimittajaid > 0) $where2 .= " and lasku.liitostunnus='$toimittajaid'";
+			
+			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59' ";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "SIIRTOLISTA") {
 			//ostolasku jolle on kohdistettu rivejä. Tälle oliolle voidaan tulostaa tariffilista
-			$where1 = " lasku.tila = 'G' ";
+			$where1 .= " lasku.tila = 'G' ";
 
-			$where2 = " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+					     and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if ($lahettava_varasto != '') {
 				$where2 .= " and lasku.varasto = '$lahettava_varasto'";
@@ -385,17 +378,17 @@
 		}
 		if ($toim == "VALMISTUS") {
 			//valmistuslista
-			$where1 = " lasku.tila = 'V' ";
+			$where1 .= " lasku.tila = 'V' ";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
@@ -406,17 +399,17 @@
 		}
 		if ($toim == "LASKU") {
 			//myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
-			$where1 = " lasku.tila = 'U' ";
+			$where1 .= " lasku.tila = 'U' ";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
 			$where2 .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
@@ -427,17 +420,17 @@
 		}
 		if ($toim == "SAD") {
 			//myyntilasku. Tälle oliolle voidaan tulostaa laskun kopio
-			$where1 = " lasku.tila = 'U' and lasku.vienti = 'K' ";
+			$where1 .= " lasku.tila = 'U' and lasku.vienti = 'K' ";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
+				$where2 .= "and lasku.nimi      = '$asiakasrow[nimi]'
 							and lasku.nimitark  = '$asiakasrow[nimitark]'
 							and lasku.osoite    = '$asiakasrow[osoite]'
 							and lasku.postino   = '$asiakasrow[postino]'
 							and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
 			$where2 .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
@@ -448,38 +441,38 @@
 		}
 		if ($toim == "LAHETE" or $toim == "PAKKALISTA") {
 			//myyntitilaus. Tulostetaan lähete.
-			$where1 = " lasku.tila in ('L','N','V') ";
+			$where1 .= " lasku.tila in ('L','N','V') ";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
-			$where2 .= " and lasku.lahetepvm >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.lahetepvm <='$vvl-$kkl-$ppl 23:59:59'";
+			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
-			$use = "";
+			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "KERAYSLISTA") {
 			//myyntitilaus. Tulostetaan lähete.
-			$where1 = " lasku.tila in ('L','N') ";
+			$where1 .= " lasku.tila in ('L','N') ";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
@@ -490,17 +483,17 @@
 		}
 		if ($toim == "OSOITELAPPU") {
 			//myyntitilaus. Tulostetaan osoitelappuja.
-			$where1 = " lasku.tila in ('L','G') ";
+			$where1 .= " lasku.tila in ('L','G') ";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
@@ -511,17 +504,17 @@
 		}
 		if ($toim == "VIENTIERITTELY") {
 			//myyntitilaus. Tulostetaan vientieruttely.
-			$where1 = " lasku.tila = 'U' and lasku.vienti != '' ";
+			$where1 .= " lasku.tila = 'U' and lasku.vienti != '' ";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
 			$where2 .= " and lasku.tapvm >='$vva-$kka-$ppa 00:00:00'
@@ -532,59 +525,59 @@
 		}
 		if ($toim == "PROFORMA") {
 			//myyntitilaus. Tulostetaan proforma.
-			$where1 = " (lasku.tila in ('L','U','N') or (tila = 'N' and alatila IN ('A','T','U')))";
+			$where1 .= " (lasku.tila in ('L','U','N') or (tila = 'N' and alatila IN ('A','T','U')))";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
-			}
-
-			$where2 .= " and lasku.lahetepvm >='$vva-$kka-$ppa 00:00:00'
-						 and lasku.lahetepvm <='$vvl-$kkl-$ppl 23:59:59'";
-
-			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
-			$use = "";
-		}
-		if ($toim == "TILAUSVAHVISTUS") {
-			//myyntitilaus. Tulostetaan proforma.
-			$where1 = " lasku.tila in ('N','L','R')";
-
-			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
-			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
-			$use = "";
+			$use = " use index (yhtio_tila_luontiaika) ";
+		}
+		if ($toim == "TILAUSVAHVISTUS") {
+			//myyntitilaus. Tulostetaan proforma.
+			$where1 .= " lasku.tila in ('N','L','R')";
+
+			if ($ytunnus{0} == '£') {
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
+			}
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
+			}
+
+			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
+						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
+
+			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
+			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "TARJOUS" or $toim == "TARJOUS!!!VL" or $toim == "MYYNTISOPIMUS" or $toim == "MYYNTISOPIMUS!!!VL" or $toim == "OSAMAKSUSOPIMUS" or $toim == "LUOVUTUSTODISTUS" or $toim == "VAKUUTUSHAKEMUS" or $toim == "REKISTERIILMOITUS") {
 			// Tulostellaan venemyyntiin liittyviä osia
-			$where1 = " lasku.tila in ('L','T','N') ";
+			$where1 .= " lasku.tila in ('L','T','N') ";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
@@ -595,17 +588,17 @@
 		}
 		if ($toim == "TYOMAARAYS") {
 			/// Työmääräys
-			$where1 = " lasku.tila in ('L','A','N','S','T')";
+			$where1 .= " lasku.tila in ('L','A','N','S','T')";
 
 			if ($ytunnus{0} == '£') {
-				$where2 = " and lasku.nimi      = '$asiakasrow[nimi]'
-							and lasku.nimitark  = '$asiakasrow[nimitark]'
-							and lasku.osoite    = '$asiakasrow[osoite]'
-							and lasku.postino   = '$asiakasrow[postino]'
-							and lasku.postitp   = '$asiakasrow[postitp]' ";
+				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
+							 and lasku.nimitark  = '$asiakasrow[nimitark]'
+							 and lasku.osoite    = '$asiakasrow[osoite]'
+							 and lasku.postino   = '$asiakasrow[postino]'
+							 and lasku.postitp   = '$asiakasrow[postitp]' ";
 			}
-			else {
-				$where2 = " and lasku.liitostunnus  = '$asiakasid'";
+			elseif ($asiakasid > 0) {
+				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
@@ -1322,79 +1315,69 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$laskurow = mysql_fetch_array($result);
 
-				require_once('../tyomaarays/tulosta_tyomaarays.inc');
+				require_once ("tyomaarays/tulosta_tyomaarays.inc");
 
-				$query  = "	SELECT *
+				$otunnus = $laskurow["tunnus"];
+
+				//hatetaan asiakkaan tiedot
+				$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
 							FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
+							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
-				$asiakasrow = mysql_fetch_array($result);
+				$asrow = mysql_fetch_array($result);
 
 
-				if ($laskurow["tila"] == 'U') {
-					$where = " uusiotunnus='$laskurow[tunnus]' ";
-				}
-				else {
-					$where = " otunnus='$laskurow[tunnus]' ";
-				}
-
-				// aloitellaan laskun teko
-				$firstpage = alku();
-
-				tyokommentit($firstpage);
-
-				// haetaan tilauksen kaikki rivit
-				$query = "  SELECT tilausrivi.*, round(tilausrivi.varattu*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta,
-							if (tuotetyyppi='K','TT','VV') tuotetyyppi,
-							if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, tilausrivi.tunnus, if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskentta
+				//työmääräyksen rivit
+				$query = "  SELECT tilausrivi.*,
+							round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta,
+							tuote.sarjanumeroseuranta,
+							if(perheid = 0,
+							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+							) as sorttauskentta,
+							if (tuotetyyppi='K','TT','VV') tuotetyyppi
 							FROM tilausrivi
-							LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
-							WHERE $where
-							and tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi in ('L','G','T')
-							ORDER by tuotetyyppi, sorttauskentta desc, tunnus";
-				$presult = mysql_query($query) or pupe_error($query);
+							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+							WHERE tilausrivi.otunnus = '$otunnus'
+							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
+							and tilausrivi.yhtio 	= tuote.yhtio
+							and tilausrivi.tuoteno  = tuote.tuoteno
+							ORDER BY tuotetyyppi, sorttauskentta";
+				$result = mysql_query($query) or pupe_error($query);
 
-				$rivino = 1;
-				while ($row = mysql_fetch_array($presult)) {
-					rivi($firstpage);
-					$rivino++;
+				$tilausnumeroita = $otunnus;
+
+				//generoidaan rivinumerot
+				$rivinumerot = array();
+
+				$kal = 1;
+
+				while ($row = mysql_fetch_array($result)) {
+					$rivinumerot[$row["tunnus"]] = $kal;
+					$kal++;
 				}
 
-				loppu($firstpage);
+				mysql_data_seek($result,0);
 
-				//keksitään uudelle failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$pdffilenimi = "/tmp/Lasku_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
+				unset($pdf);
+				unset($page);
 
-				//kirjoitetaan pdf faili levylle..
-				$fh = fopen($pdffilenimi, "w");
-				if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-				fclose($fh);
+				$sivu  = 1;
+				$paino = 0;
 
-				// itse print komento...
-				if ($komento["Työmääräys"] == 'email') {
-					$liite = $pdffilenimi;
-					$kutsu = "Työmääräys";
+				// Aloitellaan lähetteen teko
+				$page[$sivu] = alku($tyyppi);
 
-					require("../inc/sahkoposti.inc");
-				}
-				elseif ($tee == 'NAYTATILAUS') {
-					//Työnnetään tuo pdf vaan putkeen!
-					echo file_get_contents($pdffilenimi);
-				}
-				elseif ($komento["Työmääräys"] != '' and $komento["Työmääräys"] != 'edi') {
-					$line = exec("$komento[Työmääräys] $pdffilenimi");
+				while ($row = mysql_fetch_array($result)) {
+					rivi($page[$sivu], $tyyppi);
 				}
 
-				//poistetaan tmp file samantien kuleksimasta...
-				system("rm -f $pdffilenimi");
+				loppu($page[$sivu], 1);
 
-				if ($tee != 'NAYTATILAUS') {
-					echo t("Työmääräys tulostuu")."...<br>";
-					$tee = '';
-				}
+				//tulostetaan sivu
+				print_pdf($komento["Työmääräys"]);
+				$tee = '';
 			}
 
 			if ($toim == "VALMISTUS") {

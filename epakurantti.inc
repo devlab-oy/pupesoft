@@ -112,7 +112,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 					tuoteno='$tuoterow[tuoteno]' and varattu=0 and tyyppi='O'";
 		$tilre = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($tilre) != 0) {
+		if (mysql_num_rows($tilre) != 0 and $tee != "pois") {
 			$tilro = mysql_fetch_array($tilre);
 			echo "<font class='error'>".t("Tuotetta on viemättä varastoon keikalla")." $tilro[laskunro]. ".t("Ei voida laittaa epäkurantiksi!")."</font><br>";
 			$tee = "";

@@ -167,7 +167,7 @@
  		$query = "	UPDATE tuotepaikat
   					SET 
 					hyllyalue 	= '$hyllyalue',
-					hyllynro 	= '$hyllynro ',
+					hyllynro 	= '$hyllynro',
 					hyllyvali 	= '$hyllyvali',
 					hyllytaso 	= '$hyllytaso'
  					WHERE yhtio = '$kukarow[yhtio]' 

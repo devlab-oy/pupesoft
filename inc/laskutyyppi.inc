@@ -47,7 +47,7 @@
 			$laskutyyppi = "Myyntitilaus";
 			switch($alatila) {
 				case "A":
-					$alatila = "Lähete tulostettu";
+					$alatila = "Keräyslista tulostettu";
 					break;
 				case "B":
 					$alatila = "Rahtikirjatiedot syötetty";

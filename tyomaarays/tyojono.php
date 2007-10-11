@@ -4,6 +4,26 @@
 
 	echo "<font class='head'>".t("Työjono").":</font><hr><br>";
 	
+	$AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
+	
+	$query = "	SELECT selite, selitetark
+				FROM avainsana
+				WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOLINJA'
+				ORDER BY jarjestys, selite";
+	$kires = mysql_query($query) or pupe_error($query);
+
+	$ASENTAJA_ARRAY = array();
+	$ASENTAJA_ARRAY_TARK = array();
+
+	while ($kirow = mysql_fetch_array($kires)) {
+		$ASENTAJA_ARRAY[] = $kirow["selite"];
+		$ASENTAJA_ARRAY_TARK[] = $kirow["selitetark"];
+	}
+	
+	//kuukaudet ja päivät ja ajat
+	$MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
+	$DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai");
+	
 	
 	echo "<form name='haku' action='$PHP_SELF' method='post'>";
 	
@@ -157,11 +177,11 @@
 					and kalenteri.liitostunnus = '$vrow[tyomaarays]'
 					order by pvmalku";
 		$kaleres = mysql_query($query) or pupe_error($query);
-		
+
 		echo "<td valign='top'>";
 		
 		while($kalerow = mysql_fetch_array($kaleres)) {
-			echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tyomaarays]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$kalerow[tunnus]&tee=MUOKKAA'>".substr(tv1dateconv($kalerow["pvmalku"], "X"), 0, 16)." - ".substr(tv1dateconv($kalerow["pvmloppu"], "X"), 0, 16)." ($kalerow[kuka])<br>";
+			echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tyomaarays]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$kalerow[tunnus]&tee=MUOKKAA'>".substr(tv1dateconv($kalerow["pvmalku"], "X"), 0, 16)." - ".substr(tv1dateconv($kalerow["pvmloppu"], "X"), 0, 16)." (".$ASENTAJA_ARRAY_TARK[$kalerow["kuka"]].")<br>";
 		}
 		
 		echo "</td>";

@@ -10,24 +10,7 @@
 			$tulostimet[0] = "Työmääräys";
 			require("../inc/valitse_tulostin.inc");
 		}
-
-		// haetaan maksuehdon tiedot
-		$query  = "select * from maksuehto where tunnus='$laskurow[maksuehto]'";
-		$result = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($result) == 0) {
-			$masrow = array();
-		}
-		else {
-			$masrow = mysql_fetch_array($result);
-		}
-	
-		//maksuehto tekstinä
-		$maksuehto 		= $masrow["teksti"]." ".$masrow["kassa_teksti"];
-		$kateistyyppi	= $masrow["kateinen"];
 		
-		require_once('tulosta_tyomaarays.inc');
-
 		if ($laskurow["tila"] == 'U') {
 			$where = " uusiotunnus='$laskurow[tunnus]' ";
 		}
@@ -35,52 +18,69 @@
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
 		
-		// aloitellaan laskun teko
-		$firstpage = alku();
-		tyokommentit($firstpage);
+		require_once ("tulosta_tyomaarays.inc");
 
-		// haetaan tilauksen kaikki rivit
-		$query = "	SELECT tilausrivi.*, round(tilausrivi.varattu*tilausrivi.hinta*(1-(tilausrivi.ale/100)),2) rivihinta, 
+		$otunnus = $laskurow["tunnus"];
+		
+		//hatetaan asiakkaan tiedot
+		$query = "  SELECT lahetetyyppi, luokka, puhelin, if(asiakasnro!='', asiakasnro, ytunnus) asiakasnro
+					FROM asiakas
+					WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$asrow = mysql_fetch_array($result);
+		
+		//työmääräyksen rivit
+		$query = "  SELECT tilausrivi.*,
+					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta,
+					tuote.sarjanumeroseuranta,
+					if(perheid = 0,
+					(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
+					(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
+					) as sorttauskentta,
 					if (tuotetyyppi='K','TT','VV') tuotetyyppi
 					FROM tilausrivi
-					LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno
-					WHERE $where
-					and tilausrivi.yhtio = '$kukarow[yhtio]'
-					and tilausrivi.tyyppi in ('L','G')
-					ORDER BY tuotetyyppi, tunnus";
-		$presult = mysql_query($query) or pupe_error($query);
+					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+					WHERE tilausrivi.otunnus = '$otunnus'
+					and tilausrivi.yhtio 	= '$kukarow[yhtio]'
+					and tilausrivi.yhtio 	= tuote.yhtio
+					and tilausrivi.tuoteno  = tuote.tuoteno
+					ORDER BY tuotetyyppi, sorttauskentta";
+		$result = mysql_query($query) or pupe_error($query);
 
-		$rivino = 1;			
-		while ($row = mysql_fetch_array($presult)) {
-			rivi($firstpage);
-			$rivino++;
+		$tilausnumeroita = $otunnus;
+		
+		//generoidaan rivinumerot
+		$rivinumerot = array();
+
+		$kal = 1;
+
+		while ($row = mysql_fetch_array($result)) {
+			$rivinumerot[$row["tunnus"]] = $kal;
+			$kal++;
 		}
 
-		loppu($firstpage);
+		mysql_data_seek($result,0);
+
+		unset($pdf);
+		unset($page);
+
+		$sivu  = 1;
+		$paino = 0;
 		
-		//keksitään uudelle failille joku varmasti uniikki nimi:
-		list($usec, $sec) = explode(' ', microtime());
-		mt_srand((float) $sec + ((float) $usec * 100000));
-		$pdffilenimi = "/tmp/Lasku_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
-		
-		//kirjoitetaan pdf faili levylle..
-		$fh = fopen($pdffilenimi, "w");
-		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
-		fclose($fh);
-		
-		// itse print komento...
-		if ($komento["Työmääräys"] == 'email') {
-			$liite = $pdffilenimi;
-			$kutsu = "Työmääräys";
-			
-			require("../inc/sahkoposti.inc");
+
+		// Aloitellaan lähetteen teko
+		$page[$sivu] = alku($tyyppi);
+
+		while ($row = mysql_fetch_array($result)) {
+			rivi($page[$sivu], $tyyppi);
 		}
-		elseif ($komento["Työmääräys"] != '' and $komento["Työmääräys"] != 'edi') {
-			$line = exec("$komento[Työmääräys] $pdffilenimi");
-		}
+
+		loppu($page[$sivu], 1);
 		
-		//poistetaan tmp file samantien kuleksimasta...
-		system("rm -f $pdffilenimi");
+		//tulostetaan sivu
+		print_pdf($komento["Työmääräys"]);
+		$tee = '';
 	}
 
 	if (($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and $tee == 'LEPAA') {

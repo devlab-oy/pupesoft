@@ -1,7 +1,8 @@
 <?php
+	
 	include('../inc/parametrit.inc');
 
-	echo "<font class='head'>Etsi työmääräys:</font><hr><br>";
+	echo "<font class='head'>".t("Etsi työmääräys").":</font><hr><br>";
 
 	if($tee == 'etsi') {
 		echo "<table>";	
@@ -37,19 +38,20 @@
 					and tyomaarays.yhtio=lasku.yhtio 
 					and tyomaarays.otunnus=lasku.tunnus
 					and lasku.tila in ('A','L','N')
-					and lasku.tilaustyyppi='A'
-					and $muu1 '$muu2'";
+					and lasku.tilaustyyppi = 'A'
+					and $muu1 '$muu2'
+					ORDER BY lasku.nimi, tyomaarays.suorittaja";
 		$sresult = mysql_query($squery) or pupe_error($query);
 			
 		if(mysql_num_rows($sresult) > 0){
 			echo "<tr>
-					<th>Työmääräysno:</th>
-					<th>Nimi:</th>
-					<th>Rekno:</th>
-					<th>Päivämäärä:</th>
-					<th>Kommentti:</th>
-					<th>Muokkaa:</th>
-					<th>Tulosta:</th>
+					<th>".t("Työmääräys").":</th>
+					<th>".t("Nimi").":</th>
+					<th>".t("Rekno").":</th>
+					<th>".t("Päivämäärä").":</th>
+					<th>".t("Työn kuvaus / Toimenpiteet").":</th>
+					<th>".t("Muokkaa").":</th>
+					<th>".t("Tulosta").":</th>
 				 </tr>";
 		
 			while($row = mysql_fetch_array($sresult)) {
@@ -59,13 +61,12 @@
 						<td valign='top'>$row[nimi]</td>
 						<td valign='top'>$row[rekno]</td>
 						<td valign='top'>".tv1dateconv(substr($row["luontiaika"],0,10))."</td>
-						<td><pre>$row[komm2]</pre></td>";
+						<td>".str_replace("\n", "<br>", $row["komm1"])."".str_replace("\n", "<br>", $row["komm2"])."</td>";
 				
 				if ($row["alatila"] == '' or $row["alatila"] == 'A' or $row["alatila"] == 'B' or$row["alatila"] == 'C' or $row["alatila"] == 'J') {
 					echo "<td valign='top'>
 							<form method='post' action='../tilauskasittely/tilaus_myynti.php'>
-							<input type='hidden' name='aktivoinnista' value='true'>
-							<input type='hidden' name='tee' value='aktivoi'>
+							<input type='hidden' name='tee' value='AKTIVOI'>
 							<input type='hidden' name='toim' value='TYOMAARAYS'>
 							<input type='hidden' name='tilausnumero' value='$row[laskutunnus]'>
 							<input type='submit' value = '".t("Muokkaa")."'></form></td>";
@@ -85,13 +86,13 @@
 			echo "</table><br>";
 		}
 		else{
-			echo "Yhtään työmääräystä ei löytynyt annetuilla ehdoilla!<br>";
+			echo t("Yhtään työmääräystä ei löytynyt annetuilla ehdoilla")."!<br>";
 		}
 	}
 	
 
 	echo "<table><tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>";
-	echo "<th colspan='4'>Hae työmääräykset väliltä: </th>";
+	echo "<th colspan='4'>".t("Hae työmääräykset väliltä").":</th>";
 		
 	if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 	if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -114,19 +115,19 @@
 	
 	
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Asiakkaan nimi:</th><td colspan='3'><input type='text' name='nimi' size='35'></td>
+		<th>".t("Asiakkaan nimi").":</th><td colspan='3'><input type='text' name='nimi' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Rekno:</th><td colspan='3'><input type='text' name='rekno' size='35'></td>
+		<th>".t("Rekno").":</th><td colspan='3'><input type='text' name='rekno' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Työmääräysno:</th><td colspan='3'><input type='text' name='eid' size='35'></td>
+		<th>".t("Työmääräysno").":</th><td colspan='3'><input type='text' name='eid' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Asiakasnumero:</th><td colspan='3'><input type='text' name='asno' size='35'></td>
+		<th>".t("Asiakasnumero").":</th><td colspan='3'><input type='text' name='asno' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "<tr><form method='post' action='$PHP_SELF'><input type='hidden' name='tee' value='etsi'>
-		<th>Valm.numero:</th><td colspan='3'><input type='text' name='valmno' size='35'></td>
+		<th>".t("Sarjanumero").":</th><td colspan='3'><input type='text' name='valmno' size='35'></td>
 		<td class='back'><input type='submit' value='Hae'></td></form></tr>";
 	echo "</table>";
 	

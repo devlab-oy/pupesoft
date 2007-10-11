@@ -62,11 +62,12 @@
 	if ($ytunnus != '') {
 		$tila = "tee_raportti";
 		require ("inc/asiakashaku.inc");
+		$tunnus = $asiakasid;
 	}
 
 	if ($tila == 'tee_raportti') {
 
-		if (isset($tunnus)) {
+		if ((int) $tunnus != 0) {
 			$haku_sql = "tunnus='$tunnus'";
 		}
 		else {

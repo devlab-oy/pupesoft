@@ -179,7 +179,7 @@
 						FROM tiliointi
 						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
 						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and 
 						tiliointi.korjattu = '' and
 						tiliointi.tapvm >= '$alvv-$alvk-01' and
 						tiliointi.tapvm < '$alloppu' and

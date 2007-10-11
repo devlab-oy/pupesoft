@@ -757,13 +757,16 @@
 		$jatko = 0;
 	}
 
-	if (mysql_field_name($result, $i) == "lahetteen_jarjestys") {
+	if (mysql_field_name($result, $i) == "lahetteen_jarjestys" or 
+		mysql_field_name($result, $i) == "laskun_jarjestys" or 
+		mysql_field_name($result, $i) == "tilauksen_jarjestys" or  
+		mysql_field_name($result, $i) == "kerayslistan_jarjestys" or 
+		mysql_field_name($result, $i) == "laskun_jarjestys") {
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$sela = $trow[$i];
 		$sel = array();
-		$sel[$sela] = "selected";
+		$sel[$trow[$i]] = "selected";
 
 		$ulos .= "<option value = '0' $sel[0]>".t("Varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰, erikoistuotteet loppuun");
 		$ulos .= "<option value = '1' $sel[1]>".t("Varastopaikkaj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
@@ -775,8 +778,27 @@
 		$ulos .= "<option value = '7' $sel[7]>".t("Tuotenumeroj‰rjestys");
 		$ulos .= "<option value = '8' $sel[8]>".t("Tilausj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
 		$ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys");
-		$ulos .= "<option value = 'A' $sel[A]>".t("Tilausj‰rjestys, sama kuin ruudulla");
 
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or 
+		mysql_field_name($result, $i) == "laskun_jarjestys_suunta" or 
+		mysql_field_name($result, $i) == "tilauksen_jarjestys_suunta" or  
+		mysql_field_name($result, $i) == "kerayslistan_jarjestys_suunta" or 
+		mysql_field_name($result, $i) == "laskun_jarjestys_suunta") {
+	
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = 'ASC'  $sel[ASC]>".t("Nouseva");
+		$ulos .= "<option value = 'DESC' $sel[DESC]>".t("Laskeva");
+		
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -181,7 +181,9 @@
 					maksuehto.teksti meh,
 					maksuehto.kassa_teksti mehka,
 					maksuehto.itsetulostus,
-					maksuehto.kateinen
+					maksuehto.kateinen,
+					round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo,
+					round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa
 					FROM lasku use index (tila_index)
 					JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
 					JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
@@ -193,7 +195,7 @@
 					$vientilisa
 					$muutlisa
 					GROUP BY lasku.tunnus
-					ORDER BY tunnus";
+					ORDER BY lasku.tunnus";
 		$res   = mysql_query($query) or pupe_error($query);
 
  		// Tehdään valinta
@@ -303,6 +305,7 @@
 
 			echo "<th>".t("Toimita")."</th>";
 			echo "<th>".t("Tilaus")."</th>";
+			echo "<th>".t("Arvo")."</th>";
 			echo "<th>".t("Laatija")."</th>";
 			echo "<th>".t("Laadittu")."</th>";
 			echo "<th>".t("Tyyppi")."</th>";
@@ -326,6 +329,7 @@
 				echo "<tr class='aktiivi'><td><input type='checkbox' name='tunnus[$row[tunnus]]' value='$row[tunnus]' checked></td>";
 
 				echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&toim=$toim&tunnukset=$tunnukset&tunnus=$row[tunnus]'>$row[tunnus]</a></td>";
+				echo "<td>$row[arvo]</td>";
 				echo "<td>$row[laatija]</td>";
 				echo "<td>$row[luontiaika]</td>";
 

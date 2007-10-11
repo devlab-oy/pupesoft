@@ -640,13 +640,19 @@
 		}
 
 		// Etsit‰‰n muutettavaa tilausta
-		$query = "  SELECT lasku.tunnus Tilaus, if(lasku.laskunro=0, '', laskunro) Laskunro,
-					concat_ws(' ', lasku.nimi, lasku.nimitark) Asiakas, lasku.ytunnus Ytunnus,
-					if(lasku.tapvm = '0000-00-00', lasku.luontiaika, lasku.tapvm) Pvm,
-					if(kuka.nimi!=''and kuka.nimi is not null, kuka.nimi, lasku.laatija) Laatija,
-					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) Summa,
+		$query = "  SELECT 
+					lasku.tunnus, 
+					if(lasku.laskunro=0, '', lasku.laskunro) laskunro,
+					lasku.ytunnus,
+					lasku.nimi, 
+					lasku.nimitark, 
+					if(lasku.tapvm = '0000-00-00', left(lasku.luontiaika,10), lasku.tapvm) pvm,
+					lasku.toimaika,
+					if(kuka.nimi !='' and kuka.nimi is not null, kuka.nimi, lasku.laatija) laatija,
+					if(lasku.summa=0, (SELECT round(sum(hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))), 2) FROM tilausrivi WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus), lasku.summa) summa,
 					toimaika Toimitusaika,
-					lasku.tila, lasku.alatila
+					lasku.tila, 
+					lasku.alatila
 					FROM lasku $use
 					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.laatija
 					WHERE $where1 $where2
@@ -657,36 +663,32 @@
 
 		if (mysql_num_rows($result) > 0) {
 
-			echo "<td class='back'>
-						<form method='post' action='$PHP_SELF'>
-						<input type='hidden' name='lopetus' value='$lopetus'>
-						<input type='hidden' name='tee' value='$tee'>
-						<input type='hidden' name='toim' value='$toim'>
-						<input type='hidden' name='tila' value='monta'>
-						<input type='hidden' name='ytunnus' value='$ytunnus'>
-						<input type='hidden' name='asiakasid' value='$asiakasid'>
-						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-						<input type='hidden' name='ppa' value='$ppa'>
-						<input type='hidden' name='kka' value='$kka'>
-						<input type='hidden' name='vva' value='$vva'>
-						<input type='hidden' name='ppl' value='$ppl'>
-						<input type='hidden' name='kkl' value='$kkl'>
-						<input type='hidden' name='vvl' value='$vvl'>
-						<input type='submit' value='".t("Tulosta useita kopioita")."'></form></td>";
-
-
-			echo "<table border='0' cellpadding='2' cellspacing='1'>";
-			echo "<tr>";
-
-			for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
-				$jarj = $i+1;
-
-				echo "<th><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=$jarj'>".t(mysql_field_name($result,$i))."</a></th>";
-			}
-			echo "<th>".t("Tyyppi")."</th>";
+			echo "	<form method='post' action='$PHP_SELF'>
+					<input type='hidden' name='lopetus' value='$lopetus'>
+					<input type='hidden' name='tee' value='$tee'>
+					<input type='hidden' name='toim' value='$toim'>
+					<input type='hidden' name='tila' value='monta'>
+					<input type='hidden' name='ytunnus' value='$ytunnus'>
+					<input type='hidden' name='asiakasid' value='$asiakasid'>
+					<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+					<input type='hidden' name='ppa' value='$ppa'>
+					<input type='hidden' name='kka' value='$kka'>
+					<input type='hidden' name='vva' value='$vva'>
+					<input type='hidden' name='ppl' value='$ppl'>
+					<input type='hidden' name='kkl' value='$kkl'>
+					<input type='hidden' name='vvl' value='$vvl'>
+					<input type='submit' value='".t("Tulosta useita kopioita")."'></form><br>";
+					
+			echo "<table><tr>";
+			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tunnus'>".t("Tilausnro")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
+			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.ytunnus'>".t("Ytunnus")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.nimi'>".t("Nimi")."</a></th>";
+			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=pvm'>".t("Pvm")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.toimaika'>".t("Toimaika")."</a></th>";
+			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laatija'>".t("Laatija")."</a></th>";
+			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=summa'>".t("Summa")."</a></th>";
+			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tila,lasku.alatila'>".t("Tyyppi")."</a></th>";
 
 			if ($tila == 'monta') {
-				echo "<th>".t("Tulosta")."</th>";
+				echo "<th valign='top'>".t("Tulosta")."</th>";
 
 				echo "  <form method='post' action='$PHP_SELF' autocomplete='off'>
 						<input type='hidden' name='lopetus' value='$lopetus'>
@@ -698,45 +700,33 @@
 
 			while ($row = mysql_fetch_array($result)) {
 				echo "<tr>";
+				
 				$ero="td";
-
-				if ($tunnus==$row['Tilaus']) $ero="th";
+				if ($tunnus==$row['tunnus']) $ero="th";
 
 				echo "<tr>";
-
-				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-
-					if ($i==4 or $i==6 or $i==7) {
-						$ali = " align='right' ";
-					}
-					else {
-						$ali = " align='left' ";
-					}
-
-					if ($i==4 or $i==7) {
-						echo "<$ero $ali>".tv1dateconv($row[$i])."</$ero>";
-					}
-					else {
-						echo "<$ero $ali>$row[$i]</$ero>";
-					}
-				}
-
+				echo "<$ero valign='top'>$row[tunnus]<br>$row[laskunro]</$ero>";
+				echo "<$ero valign='top'>$row[ytunnus]<br>$row[nimi]<br>$row[nimitark]</$ero>";
+				echo "<$ero valign='top'>".tv1dateconv($row["pvm"])."<br>".tv1dateconv($row["toimaika"])."</$ero>";
+				echo "<$ero valign='top'>$row[laatija]</$ero>";
+				echo "<$ero valign='top' align='right'>$row[summa]</$ero>";
+				
 				$laskutyyppi = $row["tila"];
 				$alatila     = $row["alatila"];
 
 				//tehd‰‰n selv‰kielinen tila/alatila
 				require "../inc/laskutyyppi.inc";
 
-				echo "<$ero>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
+				echo "<$ero valign='top'>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
 
 				if ($tila != 'monta') {
 
-					echo "<td class='back'>
+					echo "<td class='back' valign='top'>
 							<form method='post' action='$PHP_SELF'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='tee' value='NAYTAHTML'>
 							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='tunnus' value='$row[Tilaus]'>
+							<input type='hidden' name='tunnus' value='$row[tunnus]'>
 							<input type='hidden' name='ytunnus' value='$ytunnus'>
 							<input type='hidden' name='asiakasid' value='$asiakasid'>
 							<input type='hidden' name='toimittajaid' value='$toimittajaid'>
@@ -748,19 +738,17 @@
 							<input type='hidden' name='ppl' value='$ppl'>
 							<input type='hidden' name='kkl' value='$kkl'>
 							<input type='hidden' name='vvl' value='$vvl'>
-							<input type='submit' value='".t("N‰yt‰ ruudulla")."'></form></td>";
-
-					echo "<td class='back'>
+							<input type='submit' value='".t("N‰yt‰ ruudulla")."'></form>
+							<br>
 							<form method='post' action='$PHP_SELF' autocomplete='off'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
-							<input type='hidden' name='otunnus' value='$row[Tilaus]'>
+							<input type='hidden' name='otunnus' value='$row[tunnus]'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
-							<input type='submit' value='".t("N‰yt‰ pdf")."'></form></td>";
-
-					echo "<td class='back'>
+							<input type='submit' value='".t("N‰yt‰ pdf")."'></form>
+							<br>
 							<form method='post' action='$PHP_SELF' autocomplete='off'>
-							<input type='hidden' name='otunnus' value='$row[Tilaus]'>
+							<input type='hidden' name='otunnus' value='$row[tunnus]'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='TULOSTA'>
@@ -768,7 +756,7 @@
 				}
 
 				if ($tila == 'monta') {
-					echo "<td><input type='checkbox' name='tulostukseen[]' value='$row[Tilaus]'></td>";
+					echo "<td valign='top'><input type='checkbox' name='tulostukseen[]' value='$row[tunnus]'></td>";
 				}
 
 				echo "</tr>";

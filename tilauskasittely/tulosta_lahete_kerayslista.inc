@@ -397,11 +397,17 @@ if (!function_exists('uusi_sivu')) {
 		//maksuehto tekstinä
 		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 		
-		$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 	$thispage, $iso);
+		$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 			$thispage, $iso);
 		
-		$pdf->draw_text(310,815, t("Keräyslista", $kieli), 			$thispage, $iso);		
 		
-		$pdf->draw_text(310, 803, t("Sivu", $kieli), 				$thispage, $norm);
+		if ($tyyppi == "SIIRTOLISTA") {
+			$pdf->draw_text(310,815, t("Siirtolista", $kieli), 				$thispage, $iso);	
+		}
+		else {
+			$pdf->draw_text(310,815, t("Keräyslista", $kieli), 				$thispage, $iso);		
+		}
+				
+		$pdf->draw_text(310, 803, t("Sivu", $kieli), 						$thispage, $norm);
 
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);		

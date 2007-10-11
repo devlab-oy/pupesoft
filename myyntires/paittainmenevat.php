@@ -5,6 +5,39 @@
 	echo "<font class='head'>".t("Etsi ja poista päittäin menevät suoritukset")."</font><hr>";
 
 	//$debug = 1;
+	if ($tee == 'N') {
+
+		$query  = "LOCK TABLES suoritus as a READ, suoritus as b READ, suoritus WRITE, tiliointi WRITE, sanakirja WRITE";
+		$result = mysql_query($query) or pupe_error($query);
+
+		//Etsitään nolla suoritukset
+		$query = "	SELECT a.nimi_maksaja, a.kirjpvm, a.summa, a.ltunnus, a.tunnus
+					FROM suoritus a
+					WHERE a.yhtio = '$kukarow[yhtio]' and
+					a.kohdpvm = '0000-00-00' and
+					a.summa = 0";
+		$paaresult = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($paaresult) > 0) {
+
+			while ($suoritusrow = mysql_fetch_array ($paaresult)) {
+
+				$tapvm = $suoritusrow['kirjpvm'];
+
+				//Kirjataan suoritukset käytetyksi
+				$query = "UPDATE suoritus set kohdpvm = '$tapvm' where tunnus='$suoritusrow[tunnus]'";
+				if ($debug == 1) echo "$query<br>";
+				else $result = mysql_query($query) or pupe_error($query);
+
+				echo "<font class='message'>".t("Suoritus")." $suoritusrow[nimi_maksaja] $suoritusrow[summa] ".t("poistettu")."!</font><br>";
+			}
+
+		}
+
+		$query  = "UNLOCK TABLES";
+		$result = mysql_query($query) or pupe_error($query);
+
+	}
 
 	if ($tee == 'T') {
 
@@ -16,7 +49,7 @@
 					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.summa * -1 = a.summa)
 					WHERE a.yhtio = '$kukarow[yhtio]' and
 					a.kohdpvm = '0000-00-00' and
-					a.summa <= 0";
+					a.summa < 0";
 		$paaresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($paaresult) > 0) {
@@ -110,7 +143,7 @@
 					JOIN suoritus b ON (b.yhtio = a.yhtio and b.kohdpvm = a.kohdpvm and b.asiakas_tunnus = a.asiakas_tunnus and b.valkoodi = a.valkoodi and b.summa * -1 = a.summa)
 					WHERE a.yhtio = '$kukarow[yhtio]' and
 					a.kohdpvm = '0000-00-00' and
-					a.summa <= 0";
+					a.summa < 0";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
@@ -131,15 +164,49 @@
 				echo "</tr>";
 
 			}
-			echo "</table>";
+			echo "</table><br>";
 
 			echo "	<form action = '$php_self' method='post'>
 					<input type='hidden' name = 'tee' value='T'>
 					<input type='Submit' value='".t('Kohdista nämä tapahtumat päittäin')."'>
-					</form>";
+					</form><br>";
 		}
 		else {
-			echo "<font class='message'>" . t("Sopivia suorituksia ei löytynyt. Kaikki hyvin!") . "</font><br>";
+			echo "<font class='message'>" . t("Päittäin meneviä suorituksia ei löytynyt!") . "</font><br>";
+		}
+
+		//Etsitään nolla suoritukset
+		$query = "	SELECT a.nimi_maksaja, a.kirjpvm, a.summa
+					FROM suoritus a
+					WHERE a.yhtio = '$kukarow[yhtio]' and
+					a.kohdpvm = '0000-00-00' and
+					a.summa = 0";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 0) {
+
+			echo "<br><table><tr>";
+
+			for ($i = 0; $i < mysql_num_fields($result); $i++) {
+				echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+			}
+			echo "</tr>";
+
+			while ($trow = mysql_fetch_array ($result)) {
+
+				echo "<tr>";
+				for ($i=0; $i<mysql_num_fields($result); $i++) {
+					echo "<td>$trow[$i]</td>";
+				}
+				echo "</tr>";
+
+			}
+			echo "</table><br>";
+
+			echo "	<form action = '$php_self' method='post'>
+					<input type='hidden' name = 'tee' value='N'>
+					<input type='Submit' value='".t('Poista nämä nollatapahtumat')."'>
+					</form>";
 		}
 
 	}

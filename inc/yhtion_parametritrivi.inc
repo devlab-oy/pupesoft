@@ -125,6 +125,22 @@
 
 		$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tyomaaraystyyppi") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
+
+		$ulos .= "<option value = ''>".t("Normaali työmääräyspohja");
+		$ulos .= "<option value = 'P' $sel[P]>".t("Pelkistetty työmääräyspohja");		
+
+		
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "rahti_hinnoittelu") {
 

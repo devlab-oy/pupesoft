@@ -1047,17 +1047,9 @@ if (!function_exists("generoi_sorttauskentta")) {
 		// tilausjärjestys, tuoteperheet pidetään yhdessä
 		elseif ($jarjestys == "8") {
 			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, tilausrivi.tunnus,
-									if (tilausrivi.perheid > 0, concat(tilausrivi.perheid, tilausrivi.tunnus),
-										if(tilausrivi.perheid2 > 0, concat(tilausrivi.perheid2, tilausrivi.tunnus),
-											tilausrivi.tunnus))) as sorttauskentta";
-		}
-
-		// käänteinen tilausjärjestys, tuoteperheet pidetään yhdessä ((melkein) sama kuin tilaus myynnissä)
-		elseif ($jarjestys == "A") {
-			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, tilausrivi.tunnus,
 									if (tilausrivi.perheid > 0, tilausrivi.perheid,
 										if(tilausrivi.perheid2 > 0, tilausrivi.perheid2,
-											tilausrivi.tunnus))) * -1 as sorttauskentta";
+											tilausrivi.tunnus))) as sorttauskentta";
 		}
 
 		// tilausjärjestys

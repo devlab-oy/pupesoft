@@ -80,7 +80,6 @@
 		
 		//tulostetaan sivu
 		print_pdf($komento["Työmääräys"]);
-		$tee = '';
 	}
 
 	if (($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and $tee == 'LEPAA') {
@@ -181,6 +180,7 @@
 		else {
 			require("tilaus-valmis-siirtolista.inc");
 		}
+				
 		$tee = "";
 	}
 						

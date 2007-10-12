@@ -601,6 +601,8 @@
 				$where2 .= " and lasku.liitostunnus  = '$asiakasid'";
 			}
 
+			$where2 .= " and lasku.tilaustyyppi = 'A'";
+			
 			$where2 .= " and lasku.luontiaika >='$vva-$kka-$ppa 00:00:00'
 						 and lasku.luontiaika <='$vvl-$kkl-$ppl 23:59:59'";
 

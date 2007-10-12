@@ -131,9 +131,14 @@
 				$piirit = implode(",", $piiri);
 			}
 
-			$password = md5(trim($password));
-			if ($salasana == "") $salasana = $password; // jos meillä ei ole kopioitua salasanaa toisesta yrityksestä, käytetään syötettyä
-
+			if (trim($password) != '') {
+				$password = md5(trim($password));
+			}
+			
+			if ($salasana == "" and trim($password) != '') { 
+				$salasana = $password; // jos meillä ei ole kopioitua salasanaa toisesta yrityksestä, käytetään syötettyä
+			}
+			
 			$query = "	INSERT into kuka
 						SET nimi 		= '$firname',
 						kuka 			= '$ktunnus',

@@ -42,8 +42,8 @@
 	}
 			
 	echo "	<th>Työmääräys<br>Tilausviite</th>
-			<th>Ytunnus / Asiakas</th>
-			<th>Työaika</th>
+			<th>Ytunnus<br>Asiakas</th>
+			<th>Työaika<br>Työn suorittaja</th>
 			<th>Toimitetaan</th>
 			<th>Myyjä<br>Tyyppi</th>
 			<th>Työjono<br>Työstatus</th>
@@ -60,7 +60,8 @@
 							<input type='text' size='10' name='viesti_haku'				value='$viesti_haku'></td>";
 	echo "<td valign='top'>	<input type='text' size='10' name='asiakasnumero_haku' 		value='$asiakasnumero_haku'><br>
 							<input type='text' size='10' name='asiakasnimi_haku' 		value='$asiakasnimi_haku'></td>";
-	echo "<td valign='top'></td>";
+	echo "<td valign='top'><br>
+							<input type='text' size='10' name='suorittaja_haku' 		value='$suorittaja_haku'><br></td>";
 	echo "<td valign='top'></td>";
 	echo "<td valign='top'></td>";
 	echo "<td valign='top'><input type='text' size='10' name='tyojono_haku' 			value='$tyojono_haku'><br>
@@ -70,7 +71,8 @@
 	echo "</tr>";
 	echo "</form>";
 	
-	$lisa  = "";
+	$lisa   = "";
+	$lisa2  = "";
 
 	if ($myyntitilaus_haku != "") {
 		$lisa .= " and lasku.tunnus='$myyntitilaus_haku' ";
@@ -96,6 +98,10 @@
 		$lisa .= " and a2.selitetark like '$tyostatus_haku%' ";
 	}
 	
+	if ($suorittaja_haku != "") {
+		$lisa2 .= " HAVING suorittajanimi like '%$suorittaja_haku%' or asekalsuorittajanimi like '%$suorittaja_haku%' ";
+	}
+	
 	if (trim($konserni) != '') {
 		$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
 		$result = mysql_query($query) or pupe_error($query);
@@ -113,19 +119,44 @@
 	// scripti balloonien tekemiseen
 	js_popup();	
 	
-	//Myyydyt sarjanumerot joita ei olla ollenkaan ostettu
-	$query = "	SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, kuka.nimi myyja, tyomaarays.otunnus tyomaarays, a1.selite tyojonokoodi, a1.selitetark tyojono, a2.selitetark tyostatus, yhtio.nimi yhtio, yhtio.yhtio yhtioyhtio
+	// Myyydyt sarjanumerot joita ei olla ollenkaan ostettu
+	$query = "	SELECT 
+				lasku.tunnus,
+				lasku.viesti,
+				lasku.nimi,
+				lasku.tila, 
+				lasku.alatila,
+				lasku.ytunnus,
+				lasku.toimaika,
+				tyomaarays.komm1,
+				tyomaarays.komm2,
+				tyomaarays.tyojono,
+				tyomaarays.tyostatus,
+				kuka.nimi myyja, 
+				a1.selite tyojonokoodi, 
+				a1.selitetark tyojono, 
+				a2.selitetark tyostatus, 
+				yhtio.nimi yhtio, 
+				yhtio.yhtio yhtioyhtio,
+				a3.selitetark suorittajanimi,
+				group_concat(a4.selitetark) asekalsuorittajanimi,
+				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', a4.selitetark)) asennuskalenteri
 				FROM lasku
-				LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+				JOIN yhtio ON lasku.yhtio=yhtio.yhtio
 				JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
-				LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
-				LEFT JOIN avainsana a1 ON a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO' and a1.selite=tyomaarays.tyojono
+				LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
+				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
+				LEFT JOIN avainsana a1 ON a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono
 				LEFT JOIN avainsana a2 ON a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus
-				JOIN yhtio on lasku.yhtio=yhtio.yhtio
+				LEFT JOIN avainsana a3 ON a3.yhtio=tyomaarays.yhtio and a3.laji='TYOM_TYOLINJA'  and a3.selite=tyomaarays.suorittaja
+				LEFT JOIN kalenteri ON kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus
+				LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selite=kalenteri.kuka
 				WHERE $konsernit
 				and lasku.tila in ('A','L','N','S')
 				and lasku.alatila != 'X'
 				$lisa
+				GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18
+				$lisa2
 				ORDER BY toimaika";
 	$vresult = mysql_query($query) or pupe_error($query);
 
@@ -157,37 +188,35 @@
 		}
 		
 		if (trim($vrow["komm1"]) != "") {
-			echo "<div id='$vrow[tyomaarays]' class='popup' style='width:500px;'>";
-			echo "Työmääräys: $vrow[tyomaarays]<br><br>".str_replace("\n", "<br>", $vrow["komm1"])."<br><a href='#' onclick=\"popUp(event,'$vrow[tyomaarays]')\">Sulje</a>";
+			echo "<div id='$vrow[tunnus]' class='popup' style='width:500px;'>";
+			echo "Työmääräys: $vrow[tunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."<br><a href='#' onclick=\"popUp(event,'$vrow[tunnus]')\">Sulje</a>";
 			echo "</div>";		
-			echo "<td valign='top' class='spec' onmouseout=\"popUp(event,'$vrow[tyomaarays]')\" onmouseover=\"popUp(event,'$vrow[tyomaarays]')\">$vrow[tyomaarays]</td>";
+			echo "<td valign='top' class='spec' onmouseout=\"popUp(event,'$vrow[tunnus]')\" onmouseover=\"popUp(event,'$vrow[tunnus]')\">$vrow[tunnus]</td>";
 		}
 		else {
-			echo "<td valign='top'>$vrow[tyomaarays]<br>$vrow[viesti]</td>";
+			echo "<td valign='top'>$vrow[tunnus]<br>$vrow[viesti]</td>";
 		}
 		
 		echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
 		
 		
-		$query = "	SELECT kalenteri.kuka, kalenteri.liitostunnus, kalenteri.pvmalku, kalenteri.pvmloppu, kalenteri.tunnus
-					FROM kalenteri
-					LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
-					WHERE kalenteri.yhtio = '$kukarow[yhtio]'
-					and kalenteri.tyyppi = 'asennuskalenteri'
-					and kalenteri.liitostunnus = '$vrow[tyomaarays]'
-					order by pvmalku";
-		$kaleres = mysql_query($query) or pupe_error($query);
-
 		echo "<td valign='top'>";
 		
-		while($kalerow = mysql_fetch_array($kaleres)) {
-			echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tyomaarays]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$kalerow[tunnus]&tee=MUOKKAA'>".substr(tv1dateconv($kalerow["pvmalku"], "X"), 0, 16)." - ".substr(tv1dateconv($kalerow["pvmloppu"], "X"), 0, 16)." (".$ASENTAJA_ARRAY_TARK[$kalerow["kuka"]].")<br>";
+		if ($vrow["asennuskalenteri"] != "") {
+			foreach(explode(",", $vrow["asennuskalenteri"]) as $asekale) {
+				
+				list($a, $l, $s) = explode("##", $asekale);
+				
+				echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$kalerow[tunnus]&tee=MUOKKAA'>".tv1dateconv($a, "P")." - ".tv1dateconv($l, "P")." $s</a><br>";
+			}
 		}
+		
+		echo $vrow["suorittajanimi"];
 		
 		echo "</td>";
 				
 		if ($vrow["tyojono"] != "") {
-			echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tyomaarays]&tyojono=$vrow[tyojonokoodi]'>".tv1dateconv($vrow["toimaika"])."</a></td>";
+			echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]'>".tv1dateconv($vrow["toimaika"])."</a></td>";
 		}
 		else {
 			echo "<td valign='top'>".tv1dateconv($vrow["toimaika"])."</td>";	
@@ -197,10 +226,10 @@
 				<td valign='top'>$vrow[tyojono]<br>$vrow[tyostatus]</td>";
 		
 		if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {		
-			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tyomaarays]&lopetus=../tyomaarays/tyojono.php////user=$kukarow[kuka]//pass=$kukarow[salasana]//yhtio=$kukarow[yhtio]//konserni=$konserni'>".t("Muokkaa")."</a></td>";
+			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=../tyomaarays/tyojono.php////user=$kukarow[kuka]//pass=$kukarow[salasana]//yhtio=$kukarow[yhtio]//konserni=$konserni'>".t("Muokkaa")."</a></td>";
 		}
 		else {
-			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tyomaarays]&lopetus=../tyomaarays/tyojono.php////konserni=$konserni'>".t("Muokkaa")."</a></td>";
+			echo "<td valign='top'><a href='../tilauskasittely/tilaus_myynti.php?toim=$toimi&tee=AKTIVOI&from=LASKUTATILAUS&tilausnumero=$vrow[tunnus]&lopetus=../tyomaarays/tyojono.php////konserni=$konserni'>".t("Muokkaa")."</a></td>";
 		}
 				
 		echo "</tr>";

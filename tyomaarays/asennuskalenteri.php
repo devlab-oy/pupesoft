@@ -100,7 +100,7 @@
 	
 	if ($tee == "LISAA") {
 		
-		$alku  = str_replace(array(":","-"," "), "", "$year-$month-$day $AIKA_ARRAY[$aika]");
+		$alku  = str_replace(array(":","-"," "), "", "$year-$month-$day $aika");
 		$loppu = str_replace(array(":","-"," "), "", "$lyear-$lmonth-$lday $laika");
 		
 		//tarkistetaan, etta alku ja loppu ovat eri..
@@ -229,7 +229,7 @@
 			echo "<input type='hidden' name='tyotunnus' 	value='$tyotunnus'>";
 		}
 		
-		echo "<tr><th>Asentaja:</th><td>$ASENTAJA_ARRAY_TARK[$asentaja]</td></tr>";
+		echo "<tr><th>Asentaja:</th><td>$asentaja</td></tr>";
 		echo "<tr><th>Työjono:</th><td>$tyojono</td></tr>";
 		
 		if (!isset($lday)) $lday     = $day;
@@ -342,14 +342,14 @@
 	
 		echo "<th>Aika</th>";
 		
-		for($r=0; $r < sizeof($DAY_ARRAY); $r++) {
-			echo "	<th nowrap><b>$DAY_ARRAY[$r]</b>
+		foreach($DAY_ARRAY as $d) {
+			echo "	<th nowrap><b>$d</b>
 					<br>
 					<table width='100%'>
 					<tr>";
 				
-			for($s=0; $s < sizeof($ASENTAJA_ARRAY); $s++) {
-				echo "<td align='center' nowrap width='40px'>$ASENTAJA_ARRAY[$s]</td>";
+			foreach($ASENTAJA_ARRAY as $b) {
+				echo "<td align='center' nowrap width='40px'>$b</td>";
 			}
 	        echo "	</tr>
 					</table>
@@ -361,9 +361,10 @@
 		
 		echo "<td><br><table width='100%'>";
 		
-		for($a = 0; $a < count($AIKA_ARRAY); $a++) {
-			echo "<tr><td>$AIKA_ARRAY[$a]</td></tr>";
+		foreach($AIKA_ARRAY as $a) {
+			echo "<tr><td>$a</td></tr>";
 		}
+		
 		echo "</table>";
 		echo "</td>";
 	
@@ -401,19 +402,18 @@
 		
 				if (mysql_num_rows($vres) > 0) {
 					while($vrow = mysql_fetch_array($vres)) {
-						for($b = 0; $b < count($ASENTAJA_ARRAY); $b++) {
-							for($a = 0; $a < count($AIKA_ARRAY); $a++) {
-								$slot = str_replace(array(":","-"," "), "", $year."-".sprintf('%02d', $month)."-".sprintf('%02d', $i)." ".$AIKA_ARRAY[$a]);
+						foreach($ASENTAJA_ARRAY as $b) {	
+							foreach($AIKA_ARRAY as $a) {	
+								$slot = str_replace(array(":","-"," "), "", $year."-".sprintf('%02d', $month)."-".sprintf('%02d', $i)." ".$a);
 								$alku = str_replace(array(":","-"," "), "", substr($vrow["pvmalku"],0,16));
 								$lopp = str_replace(array(":","-"," "), "", substr($vrow["pvmloppu"],0,16));
-							
-								if ($alku <= $slot and $lopp > $slot and $vrow["kuka"] == $b) {
-									
+															
+								if ($alku <= $slot and $lopp > $slot and $vrow["kuka"] == $b) {									
 									if (!in_array($vrow["liitostunnus"], $div_arrayt)) {
 										$div_arrayt[] = $vrow["liitostunnus"];
 										
 										echo "<div id='$vrow[liitostunnus]' class='popup' style='width:500px;'>";
-										echo "Työmääräys: $vrow[liitostunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"])."<br><a href='#' onclick=\"popUp(event,'$vrow[liitostunnus]')\">Sulje</a>";
+										echo "Työmääräys: $vrow[liitostunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."<br><a href='#' onclick=\"popUp(event,'$vrow[liitostunnus]')\">Sulje</a>";
 										echo "</div>";
 									}
 									
@@ -427,16 +427,15 @@
 				echo "<table width='100%'>";
 				echo "<tr><td class='tumma' align='center' colspan='".count($ASENTAJA_ARRAY)."'><b>$i</b></th></tr>";
 				
-				for($a = 0; $a < count($AIKA_ARRAY); $a++) {
+				foreach($AIKA_ARRAY as $a) {
 					echo "<tr>";
-					for($b = 0; $b < count($ASENTAJA_ARRAY); $b++) {
-				
+					foreach($ASENTAJA_ARRAY as $b) {
 						if (isset($varaukset[$b][$a])) {
 							list($nimi, $tilausnumero) = explode("|||", $varaukset[$b][$a]);
 							echo "<td align='center' width='40px'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$tilausnumero</a></th>";
 						}
 						elseif($liitostunnus > 0 and $tyojono != "") {
-		                    echo "<td align='center' width='40px'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$AIKA_ARRAY[$a]&tee=VARAA'>&nbsp;</a></th>";			
+		                    echo "<td align='center' width='40px'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$a&tee=VARAA'>&nbsp;</a></th>";			
 		                }				
 						else {
 							echo "<td align='center' width='40px'>&nbsp;</th>";
@@ -458,8 +457,8 @@
 				
 					echo "<td><br><table width='100%'>";
 
-					for($a = 0; $a < count($AIKA_ARRAY); $a++) {
-						echo "<tr><td>$AIKA_ARRAY[$a]</td></tr>";
+					foreach($AIKA_ARRAY as $a) {
+						echo "<tr><td>$a</td></tr>";
 					}
 					echo "</table>";
 					echo "</td>";

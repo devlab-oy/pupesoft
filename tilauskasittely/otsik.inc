@@ -1515,26 +1515,26 @@
 						
 						echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";
 
-						$query = "	SELECT tunnus, kuka, nimi, myyja, asema
-									FROM kuka
-									WHERE yhtio = '$kukarow[yhtio]' and (extranet = '' or tunnus='".$srow[$kentta]."')
-									ORDER BY nimi";
+						
+						$query = "	SELECT selite, selitetark
+									FROM avainsana
+									WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOLINJA'
+									ORDER BY jarjestys, selite";
 						$yresult = mysql_query($query) or pupe_error($query);
+
+
+						echo "<option value=''>".t("Valitse")."</option>";
 
 						while($row = mysql_fetch_array($yresult)) {
 							$sel = "";
-							if ($srow[$kentta] == '' or $srow[$kentta] == 0) {
-								if ($row['nimi'] == $kukarow['nimi']) {
-									$sel = 'selected';
-								}
+
+							if ($row['selite'] == $srow[$kentta]) {
+								$sel = 'selected';
 							}
-							else {
-								if ($row['tunnus'] == $srow[$kentta]) {
-									$sel = 'selected';
-								}
-							}
-							echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
+							
+							echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
 						}
+
 						echo "</select></td>";
 					}
 					elseif ($kentta == "merkki") {

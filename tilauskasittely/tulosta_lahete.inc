@@ -618,7 +618,7 @@ if (!function_exists('rivi')) {
 		}
 
 		// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-		if ($kala <= 50) {
+		if ($kala <= 70) {
 			$sivu++;
 			
 			loppu($thispage, 0);
@@ -861,7 +861,7 @@ if (!function_exists('rivi')) {
 		}
 		
 		// Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-		if ($kala <= 50) {						
+		if ($kala <= 70) {						
 			$sivu++;
 
 			loppu($thispage, 0);

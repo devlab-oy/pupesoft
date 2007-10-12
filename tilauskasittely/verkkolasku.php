@@ -318,13 +318,13 @@
 
 			while ($laskurow = mysql_fetch_array($res)) {
 
-				$query    = "	SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys
-								FROM tilausrivi use index (yhtio_otunnus)
-								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
-								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-								and tilausrivi.otunnus = '$laskurow[tunnus]'
-								and tilausrivi.tyyppi  = 'L'";
+				$query = "	SELECT tuote.sarjanumeroseuranta, tilausrivi.tunnus, tilausrivi.varattu, tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys
+							FROM tilausrivi use index (yhtio_otunnus)
+							JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.sarjanumeroseuranta!=''
+							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+							and tilausrivi.otunnus = '$laskurow[tunnus]'
+							and tilausrivi.tyyppi  = 'L'";
 				$sarjares1 = mysql_query($query) or pupe_error($query);
 
 				while($srow1 = mysql_fetch_array($sarjares1)) {
@@ -362,6 +362,8 @@
 						$srow2 = mysql_fetch_array($sarjares2);
 
 						if ($srow2["kpl"] != 1) {
+							$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
+							
 							if ($silent == "" or $silent == "VIENTI") {
 								$tulos_ulos_sarjanumerot .= t("Tilaukselta puuttuu eränumeroita, ei voida laskuttaa").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
 							}
@@ -391,9 +393,9 @@
 										and sarjanumeroseuranta.ostorivitunnus   > 0
 										ORDER BY sarjanumeroseuranta.tunnus DESC
 										LIMIT 1";
-							$sarjares1 = mysql_query($query) or pupe_error($query);
+							$sarjares12 = mysql_query($query) or pupe_error($query);
 
-							if (mysql_num_rows($sarjares1) == 0) {
+							if (mysql_num_rows($sarjares12) == 0) {
 								$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
 
 								if ($silent == "" or $silent == "VIENTI") {

@@ -410,20 +410,21 @@
 		
 		//Haetaan sarjanumeron tiedot
 		if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
-				if ($prow["kpl"]+$prow["varattu"] > 0){
-					$sarjanutunnus = "ostorivitunnus";
-				}
-				else {
-					$sarjanutunnus = "myyntirivitunnus";
-				}
-		}
-		else {
-			if ($prow["kpl"]+$prow["jt"] > 0){
-				$sarjanutunnus = "myyntirivitunnus";
-			}
-			else {
+			if ($prow["kpl"]+$prow["varattu"] > 0){
 				$sarjanutunnus = "ostorivitunnus";
 			}
+			else {
+				$sarjanutunnus = "myyntirivitunnus";
+			}
+		}
+		else {
+			if ($prow["varattu"] < 0){
+				$sarjanutunnus = "ostorivitunnus";
+			}
+			else {
+				$sarjanutunnus = "myyntirivitunnus";
+			}
+
 		}
 		$query = "	select distinct sarjanumero
 					from sarjanumeroseuranta

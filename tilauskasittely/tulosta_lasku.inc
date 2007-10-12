@@ -639,11 +639,11 @@ if (!function_exists('rivi_original')) {
 		}
 
 		//Hetaan sarjanumeron tiedot
-		if ($row["kpl"]+$row["varattu"] > 0){
-			$sarjanutunnus = "myyntirivitunnus";
+		if ($toim == "PROFORMA" and $row["varattu"] < 0){
+			$sarjanutunnus = "ostorivitunnus";
 		}
 		else {
-			$sarjanutunnus = "ostorivitunnus";
+			$sarjanutunnus = "myyntirivitunnus";
 		}
 
 		$query = "	select distinct sarjanumero

@@ -13,7 +13,11 @@
 	if ($tee == "") {
 		$tee = "paiva";
 	}
-
+	
+	if ($tilhaku != '' and $toim == "KEIKKA" and $tee != 'tilaus') {
+		$tee = "tilhaku";
+	}
+	
 	if ($tee == "paiva" and !isset($vv) and !isset($kk) and !isset($pp)) {
 		$vv = date("Y");
 		$kk = date("m");
@@ -168,6 +172,17 @@
 					uusiotunnus = '$tunnus' and
 					tyyppi!='D'
 					ORDER BY tilausrivi.tunnus";
+		
+		// tilausnumerohaku
+		$query4 = "	SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
+					round(sum(tilausrivi.hinta*(1-(tilausrivi.ale/100))*(1-(lasku.erikoisale/100))*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
+					FROM tilausrivi use index (yhtio_otunnus)
+					JOIN lasku ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tila = 'K' and vanhatunnus = 0
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+					and otunnus = '$tilhaku'
+					and tyyppi!='D'
+					GROUP BY lasku.tunnus
+					ORDER BY luontiaika";
 	}
 
 	// tässä valmistusten queryt
@@ -273,6 +288,12 @@
 		echo "<br><br>";
 		//echo "$query3<br><br>";
 	}
+	elseif ($tee == 'tilhaku' and $toim == 'KEIKKA') {
+		$result = mysql_query($query4) or pupe_error($query4);
+		echo "<a href=$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp>".t("Päivänäkymä")."</a> - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
+		echo "<br><br>";
+		//echo "$query4<br><br>";
+	}
 	else {
 		echo "Kaboom!";
 		unset($result);
@@ -290,6 +311,12 @@
 		echo "<tr>";
 		echo "<th>".t("Hae nimellä tai numerolla").":</th>";
 		echo "<td><input type='text' name='haku' value='$haku'></td>";
+		if ($toim == "KEIKKA") {
+			echo "</tr>";
+			echo "<tr>";
+			echo "<th>".t("Hae tilausnumerolla").":</th>";
+			echo "<td><input type='text' name='tilhaku' value='$tilhaku'></td>";
+		}
 		echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
 		echo "</tr>";
 		echo "</table>";
@@ -320,6 +347,10 @@
 		if ($tee == "paiva") {
 			$teemita = "tilaus";
 		}
+		
+		if ($tee == 'tilhaku') {
+			$teemita = "tilaus";
+		}
 
 		// katotaan löytyykö oikeuksia vaihda_tilaan... tätä käytetään tuolla whilen sisällä
 		$oikeuquery = "select * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi like '%vaihda_tila.php'";
@@ -348,6 +379,7 @@
 				echo "<input type='hidden' name='toim' value='$toim'>";
 				echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 				echo "<input type='hidden' name='haku' value='$haku'>";
+				echo "<input type='hidden' name='tilhaku' value='$tilhaku'>";
 				echo "<td class='back'><input type='submit' value='".t("Näytä")."'></td>";
 				echo "</form>";
 			}

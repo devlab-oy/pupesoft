@@ -279,6 +279,30 @@
 		}
 
 		echo "</select></td></tr>";
+		
+		echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
+		
+		$yhteysquery = "SELECT * FROM yhteyshenkilo where yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]' and tyyppi = 'T' and tilausyhteyshenkilo != ''";
+		$yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
+		
+		if (mysql_num_rows($yhteysresult) > 0) {
+			echo "<td colspan = '3'><select name='seltilausyhteyshenkilo'>";
+			echo "<option value = ''>".t("Ei valintaa")."</option>";
+			while ($yhteysrow = mysql_fetch_array($yhteysresult)) {
+				$sela = "";
+				if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
+					$sela = "SELECTED";
+					$srow["tilausyhteyshenkilo"] = "";
+				}
+				echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
+				
+			}
+			echo "</select>";
+			echo "<input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'> (".t("Ostotilaus").")</td></tr>";
+		}
+		else {
+			echo "<td colspan = '3'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'> (".t("Ostotilaus").")</td></tr>";
+		}
 
 		echo "<tr><td>".t("Tilausviite").":</td><td colspan='3'>
 			<input type='text' size='61' name='viesti' value='$srow[viesti]'> (".t("Ostotilaus").")</td>";
@@ -343,6 +367,10 @@
 			$tpostitp  = $yhtiorow["postitp"];
 			$tmaa  	   = $yhtiorow["maa"];
 		}
+		
+		if ($tilausyhteyshenkilo == '' and $seltilausyhteyshenkilo != '') {
+			$tilausyhteyshenkilo = $seltilausyhteyshenkilo;
+		}
 
 		$crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
 		$comments = str_replace($crlf, " ", $comments);
@@ -366,6 +394,7 @@
 					kerayspvm 			= '".$kervv."-".$kerkk."-".$kerpp."',
 					maksuehto 			= '$maksuehto',
 					toimitustapa 		= '$toimitustapa',
+					tilausyhteyshenkilo	= '$tilausyhteyshenkilo',
 					toimitusehto 		= '$maksaja',
 					myyja 				= '$myyja',
 					alv 				= '$alv',

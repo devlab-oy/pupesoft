@@ -574,16 +574,25 @@
 					$pdf->draw_text(50, 614, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $thispage, $norm);
 					$pdf->draw_text(50, 604, $laskurow["toim_maa"], 		$thispage, $norm);
 
-
+					$query = "	SELECT *
+								FROM toimi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus 	= '$laskurow[liitostunnus]'
+								LIMIT 1";
+					$rarres = mysql_query($query) or pupe_error($query);
+					$toimirow = mysql_fetch_array($rarres);
+					
 					//Oikea sarake
 					$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);
+					$pdf->draw_rectangle(800, 420, 779, 580, $thispage, $rectparam);
 					$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
 					$pdf->draw_text(310, 782, $laskurow["tunnus"],			$thispage, $boldi);
-
+					$pdf->draw_text(430, 792, t("Toimittajan fax", $kieli), $thispage, $pieni);
+					$pdf->draw_text(430, 782, $toimirow["fax"],				$thispage, $norm);
 
 					$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 					$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
-					$pdf->draw_text(310, 771, t("Y-tunnus", $kieli), 					$thispage, $pieni);
+					$pdf->draw_text(310, 771, t("Y-tunnus", $kieli), 		$thispage, $pieni);
 
 					//jos on suomalainen yritys tehdään ytunnus nätiks
 					if (strtoupper($yhtiorow["maa"])== 'FI') {
@@ -627,8 +636,14 @@
 
 
 					$pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
-					$pdf->draw_text(310, 729, t("Kuljetus", $kieli), 					$thispage, $pieni);
-					$pdf->draw_text(310, 719, $laskurow["kuljetus"],	 				$thispage, $norm);
+					$pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
+					
+					$pdf->draw_text(310, 729, t("Yhteyshenkilö", $kieli),				$thispage, $pieni);
+					$pdf->draw_text(310, 719, $laskurow["tilausyhteyshenkilo"], 		$thispage, $norm);
+					
+					$pdf->draw_text(430, 729, t("Kuljetus", $kieli), 					$thispage, $pieni);
+					$pdf->draw_text(430, 719, $laskurow["kuljetus"],	 				$thispage, $norm);
+					
 
 					$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 					$pdf->draw_text(310, 708, t("Toimitusehto", $kieli), 				$thispage, $pieni);

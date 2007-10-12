@@ -140,7 +140,7 @@
 				yhtio.yhtio yhtioyhtio,
 				a3.selitetark suorittajanimi,
 				group_concat(a4.selitetark) asekalsuorittajanimi,
-				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', a4.selitetark)) asennuskalenteri
+				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', a4.selitetark, '##', kalenteri.tunnus)) asennuskalenteri
 				FROM lasku
 				JOIN yhtio ON lasku.yhtio=yhtio.yhtio
 				JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -205,9 +205,9 @@
 		if ($vrow["asennuskalenteri"] != "") {
 			foreach(explode(",", $vrow["asennuskalenteri"]) as $asekale) {
 				
-				list($a, $l, $s) = explode("##", $asekale);
+				list($a, $l, $s, $t) = explode("##", $asekale);
 				
-				echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$kalerow[tunnus]&tee=MUOKKAA'>".tv1dateconv($a, "P")." - ".tv1dateconv($l, "P")." $s</a><br>";
+				echo "<a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&tyotunnus=$t&tee=MUOKKAA'>".tv1dateconv($a, "P")." - ".tv1dateconv($l, "P")." $s</a><br>";
 			}
 		}
 		

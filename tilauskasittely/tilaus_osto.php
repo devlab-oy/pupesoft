@@ -820,9 +820,11 @@
 						echo "</tr>";
 					}
 					
-					if ($prow["kommentti"] != "") {
-						echo "<tr><td></td><td colspan='9'>".t("Kommentti").": $prow[kommentti]</td></tr>";
-					}
+					echo "<tr><td></td><td>".t("Toimitusaika").": ".tv1dateconv($prow[toimaika])."</td><td colspan='8'>".t("Kommentti").": $prow[kommentti]</td></tr>";
+					
+					/*if ($prow["kommentti"] != "") {
+						echo "<tr><td></td><td colspan='8'>".t("Kommentti").": $prow[kommentti]</td></tr>";
+					}*/
 				}
 			}
 

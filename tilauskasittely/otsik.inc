@@ -2385,7 +2385,7 @@
 
 				if($toim=="PROJEKTI") {
 					// avataan projekti kirjanpitoon
-					$query = " insert into kustannuspaikka set nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o'";
+					$query = " insert into kustannuspaikka set yhtio  = '{$kukarow["yhtio"]}' nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '{$kukarow["kuka"]}'";
 					$result = mysql_query($query) or pupe_error($query);
 					$projekti = mysql_insert_id();
 

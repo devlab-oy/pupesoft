@@ -321,7 +321,7 @@
 					ORDER BY jarjestys, selitetark_2";
 		$vresult = mysql_query($query) or pupe_error($query);
 
-		while ($vrow=mysql_fetch_array($vresult)) {
+		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
 			if ($tyojono == $vrow['selite']) {
 				$sel = "selected";
@@ -340,7 +340,7 @@
 		echo "<table>";
 		echo "<tr>";
 	
-		echo "<th>Aika</th>";
+		echo "<td class='back'></td>";
 		
 		foreach($DAY_ARRAY as $d) {
 			echo "	<th nowrap><b>$d</b>
@@ -359,10 +359,10 @@
 		echo "</tr>";
 		echo "<tr>";
 		
-		echo "<td><br><table width='100%'>";
+		echo "<td class='back'><br><table width='100%'>";
 		
 		foreach($AIKA_ARRAY as $a) {
-			echo "<tr><td>$a</td></tr>";
+			echo "<tr><td class='back'>$a</td></tr>";
 		}
 		
 		echo "</table>";
@@ -379,8 +379,12 @@
 		$solu = 0;
 		
 	    for($i = 1; $i <= days_in_month($month, $year); $i++) {
+				
+			$pvanro = date('w', mktime(0, 0, 0, $month, $i, $year));
+			
+			if ($pvanro == 0) $pvanro = 7; 
 						
-			if (date('N', mktime(0, 0, 0, $month, $i, $year))-1 < count($DAY_ARRAY)) {
+			if ($pvanro-1 < count($DAY_ARRAY)) {
 				
 				echo "<td class='back' align='center'>$rivi";
 
@@ -455,10 +459,10 @@
 				if (days_in_month($month, $year)!=$i) {
 					echo "</tr><tr>";
 				
-					echo "<td><br><table width='100%'>";
+					echo "<td class='back'><br><table width='100%'>";
 
 					foreach($AIKA_ARRAY as $a) {
-						echo "<tr><td>$a</td></tr>";
+						echo "<tr><td class='back'>$a</td></tr>";
 					}
 					echo "</table>";
 					echo "</td>";

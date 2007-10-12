@@ -2661,7 +2661,6 @@ if ($tee == '') {
 	if ((int) $kukarow["kesken"] != 0) {
 		
 		if (($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "TYOMAARAYS") and $laskurow["tunnusnippu"] > 0 and $projektilla == "") {
-			$order = "ORDER by sorttauskentta desc, tilausrivi.tunnus";
 			$tilrivity	= "'L','E'";
 			
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
@@ -2674,32 +2673,26 @@ if ($tee == '') {
 			$tunnuslisa = " and tilausrivi.otunnus in ($toimrow[tunnukset]) ";
 		}
 		elseif ($toim == "TYOMAARAYS") {
-			$order 	= "ORDER BY sorttauskenttatyomaarays DESC, tilausrivi.tunnus";
 			$tilrivity	= "'L'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		elseif ($toim == "REKLAMAATIO") {
-			$order 	= "ORDER BY sorttauskentta DESC, tilausrivi.tunnus";
 			$tilrivity	= "'L'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		elseif ($toim == "TARJOUS") {
-			$order = "ORDER by sorttauskentta desc, tilausrivi.tunnus";
 			$tilrivity	= "'T'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		elseif ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS" or $toim == "MYYNTITILI") {
-			$order = "ORDER by sorttauskentta desc, tilausrivi.tunnus";
 			$tilrivity	= "'G'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
-			$order = "ORDER by sorttauskentta desc, tilausrivi.tunnus";
 			$tilrivity	= "'L','V','W','M'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
 		elseif ($toim == "PROJEKTI") {
-			$order = "ORDER BY sorttauskentta desc, tilausrivi.tunnus";
 			$tilrivity	= "'L','G','E','V','W'";
 
 			$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset
@@ -2711,43 +2704,39 @@ if ($tee == '') {
 			$tunnuslisa = " and tilausrivi.otunnus in ($toimrow[tunnukset]) and (tilausrivi.perheid = tilausrivi.tunnus or tilausrivi.perheid = 0) and (tilausrivi.perheid2 = tilausrivi.tunnus or tilausrivi.perheid2 = 0)";
 		}
 		elseif ($toim == "YLLAPITO") {
-			$order = "ORDER by sorttauskentta desc, tilausrivi.tunnus";
+
 			$tilrivity	= "'L','0'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
-		else {
-			$order = "ORDER by sorttauskentta desc, tilausrivi.tunnus";
+		else {			
 			$tilrivity	= "'L','E'";
 			$tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
 		}
-
-		//	Tämä ylikirjoittaa järjestyksen, näinollen tv printin rivit menee loogisessa järjestyksessä
-		if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
-			$order = "ORDER BY sorttauskentta asc, tilausrivi.tunnus";
-		}
+		
+		// katotaan miten halutaan sortattavan
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
 		// Tilausrivit
 		$query  = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*,
 					if (tuotetyyppi='K','Työ','Varaosa') tuotetyyppi,
-					if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, tilausrivi.tunnus, if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskentta,
-					if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, if (tuotetyyppi='K','Työ','Varaosa'), if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskenttatyomaarays,
 					tuote.myyntihinta,
 					tuote.kehahin,
-					tuote.sarjanumeroseuranta
+					tuote.sarjanumeroseuranta,
+					$sorttauskentta
 					FROM tilausrivi use index (yhtio_otunnus)
 					LEFT JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno)
 					LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					$tunnuslisa
 					and tilausrivi.tyyppi in ($tilrivity)
-					$order";
+					ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$rivilaskuri = mysql_num_rows($result);
 
 		if ($rivilaskuri != 0) {
 
-			if ($yhtiorow["tilausrivien_jarjestaminen"] != "" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
+			if($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") { 
 				$rivino = 0;
 			}
 			else {
@@ -2945,14 +2934,13 @@ if ($tee == '') {
 				}
 				
 
-				if($yhtiorow["tilausrivien_jarjestaminen"]!="" and in_array($toim, array("TARJOUS","PIKATILAUS","RIVISYOTTO","VALMISTAASIAKKAALLE","SIIRTOLISTA","TYOMAARAYS", "REKLAMAATIO","PROJEKTI"))) {
+				if($yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") { 
 					$rivino++;
 				}
 				else {
 					$rivino--;
 				}
-
-
+				
 				// Tuoteperheiden lapsille ei näytetä rivinumeroa
 				if ($row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0) or ($row["perheid2"] == -1 or ($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")))) {
 

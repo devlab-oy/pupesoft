@@ -305,7 +305,8 @@ $montakotilausta = split(",", $tunnukset);
 // jos meillä on enemmän kuin yksi tilaus ja kyseessä ei ole laskutyyppi PLAIN, lasketaan välisummat tilausriveillä
 if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 
-	$sorttauskentta = generoi_sorttauskentta();
+	// katotaan miten halutaan sortattavan
+	$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 
 	//laitetaan välisummat rivin kommenttiin aina kun otunnus vaihtuu
 	$query = "	select otunnus, tunnus, $sorttauskentta
@@ -313,7 +314,7 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 				where yhtio='$kukarow[yhtio]'
 				and otunnus in ($tunnukset)
 				and kpl != 0
-				order by otunnus, sorttauskentta, tunnus";
+				ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 	$valsures = mysql_query($query) or pupe_error($query);
 
 	$edotunnus = '';

@@ -52,14 +52,13 @@
 		else {
 			$lisa1 = " ";
 		}
+		
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
 
 		// generoidaan keräyslistalle rivinumerot
 		$query = "	SELECT tilausrivi.*,
 					tuote.sarjanumeroseuranta,
-					if(perheid = 0,
-					(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-					(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
-					) as sorttauskentta
+					$sorttauskentta
 					FROM tilausrivi, tuote
 					WHERE tilausrivi.otunnus in ($tilausnumeroita)
 					and tilausrivi.yhtio   = '$kukarow[yhtio]'
@@ -67,7 +66,7 @@
 					and tilausrivi.tuoteno = tuote.tuoteno
 					and tilausrivi.tyyppi  != 'D'
 					$lisa1
-					ORDER BY sorttauskentta";
+					ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
 
 		//generoidaan rivinumerot

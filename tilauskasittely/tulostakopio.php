@@ -1128,7 +1128,7 @@
 					}
 
 					// katotaan miten halutaan sortattavan
-					$sorttauskentta = generoi_sorttauskentta();
+					$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 
 					if ($toim == 'PROFORMA') {
 						if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
@@ -1151,7 +1151,7 @@
 								WHERE $where
 								and yhtio  = '$kukarow[yhtio]'
 								and tyyppi = 'L'
-								ORDER BY otunnus, sorttauskentta, tunnus";
+								ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 
 					//kuollaan jos yhtään riviä ei löydy
@@ -1314,16 +1314,15 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($result);
 
+				// katotaan miten halutaan sortattavan
+				$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
 
 				//työmääräyksen rivit
 				$query = "  SELECT tilausrivi.*,
 							round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta,
 							tuote.sarjanumeroseuranta,
-							if(perheid = 0,
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
-							) as sorttauskentta,
-							if (tuotetyyppi='K','TT','VV') tuotetyyppi
+							$sorttauskentta,
+							if (tuotetyyppi='K', 1, 0) tuotetyyppi
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 							JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -1331,7 +1330,7 @@
 							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
 							and tilausrivi.yhtio 	= tuote.yhtio
 							and tilausrivi.tuoteno  = tuote.tuoteno
-							ORDER BY tuotetyyppi, sorttauskentta";
+							ORDER BY tuotetyyppi, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tilausnumeroita = $otunnus;
@@ -1372,20 +1371,20 @@
 
 				require_once ("tulosta_valmistus.inc");
 
-				//tehdään uusi PDF failin olio
-				$pdf_valm= new pdffile;
-				$pdf_valm->set_default('margin', 0);
-
-				$tilausnumeroita = $laskurow["tunnus"];
-
-				//generoidaan lähetteelle ja keräyslistalle rivinumerot
-				$query = " 	SELECT *, if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, tilausrivi.tunnus, if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskentta
+				$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+				
+				$query = " 	SELECT *, 
+							$sorttauskentta
 							FROM tilausrivi use index (yhtio_otunnus)
 							WHERE otunnus = '$laskurow[tunnus]'
 							and yhtio = '$kukarow[yhtio]'
 							and var in ('','H')
-							ORDER by sorttauskentta desc, tunnus";
+							ORDER BY sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
+
+				require_once ("tulosta_valmistus.inc");
+
+				$tilausnumeroita = $laskurow["tunnus"];
 
 				//generoidaan rivinumerot
 				$rivinumerot = array();
@@ -1393,41 +1392,28 @@
 				$kal = 1;
 
 				while ($row = mysql_fetch_array($result)) {
-					$rivinumerot[$row["tunnus"]] = $row["tunnus"];
-				}
-
-				sort($rivinumerot);
-
-				$kal = 1;
-
-				foreach($rivinumerot as $rivino) {
-					$rivinumerot[$rivino] = $kal;
+					$rivinumerot[$row["tunnus"]] = $kal;
 					$kal++;
 				}
 
 				mysql_data_seek($result,0);
 
-				//pdf:n header..
-				$firstpage_valm = alku_valm();
+				unset($pdf);
+				unset($page);
 
-				$perhe = "KALA";
+				$sivu  = 1;
+				$paino = 0;
+
+				// Aloitellaan lähetteen teko
+				$page[$sivu] = alku_valm($tyyppi);
 
 				while ($row = mysql_fetch_array($result)) {
-					//piirrä rivi
-					$firstpage_valm = rivi_valm($firstpage_valm);
+					rivi_valm($page[$sivu], $tyyppi);
 				}
 
-				$x[0] = 20;
-				$x[1] = 580;
-				$y[0] = $y[1] = $kala_valm+$rivinkorkeus-4;
-				$pdf_valm->draw_line($x, $y, $firstpage_valm, $rectparam);
-
-
-				loppu_valm($firstpage_valm, 1);
-
+				loppu_valm($page[$sivu], 1);
 				print_pdf_valm($komento["Valmistus"]);
 
-				echo t("Valmistus tulostuu")."...<br>";
 				$tee = '';
 			}
 
@@ -1489,7 +1475,7 @@
 				}
 				else {
 					// katotaan miten halutaan sortattavan
-					$sorttauskentta = generoi_sorttauskentta();
+					$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
 
 					if($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
 						$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
@@ -1510,7 +1496,7 @@
 								WHERE tilausrivi.otunnus = '$otunnus'
 								and tilausrivi.yhtio = '$kukarow[yhtio]'
 								$tyyppilisa
-								ORDER BY jtsort, sorttauskentta";
+								ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 					$riresult = mysql_query($query) or pupe_error($query);
 
 					//generoidaan rivinumerot
@@ -1598,21 +1584,20 @@
 				else {
 					$lisa1 = " ";
 				}
+				
+				$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
 
 				//keräyslistan rivit
 				$query = "  SELECT tilausrivi.*,
 							tuote.sarjanumeroseuranta,
-							if(perheid = 0,
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
-							) as sorttauskentta
+							$sorttauskentta
 							FROM tilausrivi, tuote
 							WHERE tilausrivi.otunnus = '$otunnus'
 							and tilausrivi.yhtio 	= '$kukarow[yhtio]'
 							and tilausrivi.yhtio 	= tuote.yhtio
 							and tilausrivi.tuoteno  = tuote.tuoteno
 							$lisa1
-							ORDER BY sorttauskentta";
+							ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tilausnumeroita = $otunnus;

@@ -45,9 +45,6 @@ if (!isset($ppl)) $ppl = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("
 
 if (!isset($abctyyppi)) $abctyyppi = "kate";
 
-$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
-$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
-
 // rakennetaan tiedot
 if ($tee == 'YHTEENVETO') {
 
@@ -67,8 +64,32 @@ if ($tee == 'YHTEENVETO') {
 		$abcwhat = "summa";
 		$abcchar = "TM";
 	}
+	
+	// Haetaan abc-parametrit
+	$query = "	SELECT * 
+				FROM abc_parametrit
+				WHERE yhtio = '$kukarow[yhtio]'
+				and tyyppi 	= '$abcchar'
+				ORDER by luokka";
+	$res = mysql_query($query) or pupe_error($query);
+	
+	$ryhmanimet   	= array();	
+	$ryhmaprossat	= array();
+	$sisainen_taso	= "";
+	
+	while ($row = mysql_fetch_array($res)) {
+		$ryhmanimet[] 	= $row["luokka"];
+		$ryhmaprossat[] = $row["osuusprosentti"];
+		
+		// Otetaan eka kulutaso
+		if ($sisainen_taso == "" and $row["kulujen_taso"] != "") {
+			$sisainen_taso = $row["kulujen_taso"]; 
+		}
+	}
+	
+	$i_luokka = count($ryhmaprossat)-1;
 
-	//siivotaan ensin aputaulu tyhj‰ksi
+	// siivotaan ensin aputaulu tyhj‰ksi
 	$query = "	DELETE from abc_aputaulu
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi = '$abcchar'";
@@ -120,13 +141,9 @@ if ($tee == 'YHTEENVETO') {
 
 		$kaudenostriviyht += $row["rivia_osto"];
 		$kaudenmyyriviyht += $row["rivia"];
-
 	}
 
- 	// t‰‰ on nyt hardcoodattu, eli milt‰ kirjanpidon tasolta otetaan kulut
-	$sisainen_taso		= "34";
-
-	if ($kustannuksetyht == "") {
+	if ($kustannuksetyht == "" and $sisainen_taso != "") {
 		// etsit‰‰n kirjanpidosta mitk‰ on meid‰n kulut samalta ajanjaksolta
 		$query  = "	SELECT sum(summa) summa
 					FROM tiliointi use index (yhtio_tapvm_tilino)
@@ -201,8 +218,8 @@ if ($tee == 'YHTEENVETO') {
 	   			ORDER BY $abcwhat desc";
 	$res = mysql_query($query) or pupe_error($query);
 
-	$i					= 0;
-	$ryhmaprossa		= 0;
+	$i				= 0;
+	$ryhmaprossa	= 0;
 
 	// otetaan takasin master yhteys
 	$useslave = 0;
@@ -225,7 +242,7 @@ if ($tee == 'YHTEENVETO') {
 		}
 		else {
 			// ei ole kelvollinen tuote laitetaan I-luokkaan
-			$luokka = 8;
+			$luokka = $i_luokka;
 		}
 
 		if ($row["summa"] != 0) $kateprosentti = round($row["kate"] / $row["summa"] * 100,2);
@@ -293,9 +310,9 @@ if ($tee == 'YHTEENVETO') {
 			$ryhmaprossa = 0;
 			$i++;
 
-			// ei menn‰ ikin‰ H-luokkaa pidemm‰lle
-			if ($i == 8) {
-				$i = 7;
+			// ei menn‰ ikin‰ tokavikaa-luokkaa pidemm‰lle
+			if ($i == $i_luokka) {
+				$i = $i_luokka-1;
 			}
 		}
 	}
@@ -336,7 +353,7 @@ if ($tee == 'YHTEENVETO') {
 		$query = "	INSERT INTO abc_aputaulu
 					SET yhtio			= '$kukarow[yhtio]',
 					tyyppi				= '$abcchar',
-					luokka				= '8',
+					luokka				= '$i_luokka',
 					tuoteno				= '$row[tuoteno]',
 					nimitys				= '$row[nimitys]',
 					osasto				= '$row[osasto]',
@@ -360,8 +377,8 @@ if ($tee == 'YHTEENVETO') {
 
 	// p‰ivitet‰‰n ensiks kaikki osastot ja tuoteryhm‰t I-luokkaan ja k‰yd‰‰n sitten p‰ivitt‰m‰ss‰ niit‰ oikeisiin luokkiin
 	$query = "	UPDATE abc_aputaulu SET
-				luokka_osasto = '8',
-				luokka_try = '8'
+				luokka_osasto = '$i_luokka',
+				luokka_try = '$i_luokka'
 				WHERE yhtio = '$kukarow[yhtio]'
 				and tyyppi = '$abcchar'";
 	$ires = mysql_query($query) or pupe_error($query);
@@ -429,9 +446,9 @@ if ($tee == 'YHTEENVETO') {
 				$ryhmaprossa = 0;
 				$i++;
 
-				// ei menn‰ ikin‰ H-luokkaa pidemm‰lle
-				if ($i == 8) {
-					$i = 7;
+				// ei menn‰ ikin‰ tokavikaa-luokkaa pidemm‰lle
+				if ($i == $i_luokka) {
+					$i = $i_luokka-1;
 				}
 			}
 		}
@@ -501,9 +518,9 @@ if ($tee == 'YHTEENVETO') {
 				$ryhmaprossa = 0;
 				$i++;
 
-				// ei menn‰ ikin‰ H-luokkaa pidemm‰lle
-				if ($i == 8) {
-					$i = 7;
+				// ei menn‰ ikin‰ tokavikaa-luokkaa pidemm‰lle
+				if ($i == $i_luokka) {
+					$i = $i_luokka-1;
 				}
 			}
 		}

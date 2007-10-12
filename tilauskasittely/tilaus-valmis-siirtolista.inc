@@ -422,7 +422,10 @@
 				$riresult = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($riresult);
 				
-				// Keräyslistan rivinumerot
+				
+				$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+				
+				// Keräyslistan rivit
 				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
 					$query = " 	SELECT tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso, tilausrivi.tuoteno, tilausrivi.yksikko, tilausrivi.var, tilausrivi.nimitys,
 								sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, group_concat(tilausrivi.tunnus) tunnus,";
@@ -434,10 +437,7 @@
 					$lisa = " ";
 				}
 
-				$query .= "	if(perheid = 0,
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-							(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
-							) as sorttauskentta
+				$query .= "	$sorttauskentta
 							FROM tilausrivi use index (yhtio_otunnus), tuote
 							WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -446,7 +446,7 @@
 							and tuote.tuoteno=tilausrivi.tuoteno
 							$lisasalker
 							$lisa
-							ORDER BY sorttauskentta";
+							ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tilausnumeroita = $laskurow["tunnus"];
@@ -468,9 +468,14 @@
 
 				$sivu  = 1;
 				$paino = 0;
-				$tyyppi = "SIIRTOLISTA";
 				
-
+				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+					$tyyppi = "";
+				}
+				else {
+					$tyyppi = "SIIRTOLISTA";
+				}
+				
 				// Aloitellaan lähetteen teko
 				$page[$sivu] = alku($tyyppi);
 
@@ -479,38 +484,8 @@
 				}
 
 				loppu($page[$sivu], 1);
-
-				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-					$query = " 	SELECT *, if(tilausrivi.perheid=0 and tilausrivi.perheid2=0, tilausrivi.tunnus, if(tilausrivi.perheid>0,tilausrivi.perheid,if(tilausrivi.perheid2>0,tilausrivi.perheid2,tilausrivi.tunnus))) as sorttauskentta
-								FROM tilausrivi use index (yhtio_otunnus)
-								WHERE otunnus = '$laskurow[tunnus]'
-								and yhtio = '$kukarow[yhtio]'
-								and var in ('','H')
-								ORDER by sorttauskentta desc, tunnus";
-					$result = mysql_query($query) or pupe_error($query);
-
-					require_once ("tulosta_valmistus.inc");
-
-					//tehdään uusi PDF failin olio
-					$pdf_valm= new pdffile;
-					$pdf_valm->set_default('margin', 0);
-
-					$firstpage_valm = alku_valm();
-
-					while ($row = mysql_fetch_array($result)) {
-						$firstpage_valm = rivi_valm($firstpage_valm);
-						$total += $row["rivihinta"];
-					}
-
-					$x[0] = 20;
-					$x[1] = 580;
-					$y[0] = $y[1] = $kala_valm+$rivinkorkeus-4;
-					$pdf_valm->draw_line($x, $y, $firstpage_valm, $rectparam);
-
-					loppu_valm($firstpage_valm, 1);
-				}
-
-
+				
+				
 				//tulostetaan failit ja valitaan sopivat printterit
 				if ($laskurow["varasto"] == '') {
 					$query = "	select *
@@ -542,23 +517,63 @@
 					$kirres= mysql_query($query) or pupe_error($query);
 					$kirrow= mysql_fetch_array($kirres);
 					$komento=$kirrow['komento'];
-
-					//echo "$tunnus ".t("Siirtolista tulostetaan kirjoittimelle").": $kirrow[kirjoitin]<br>";
 				}
 
 				//tulostetaan sivu
 				print_pdf($komento);
-
-				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-					print_pdf_valm($komento);
-				}
-
+				
 				if ($returnvalue != 0) {
-					echo "<font class='error'>".t("Lähetteen tulostus epäonnistui")."! ".t("Tilaus $laskurow[tunnus]")." ".t("siirrettiin tulostusjonoon").".
+					echo "<font class='error'>$komento".t("Keräyslistan tulostus epäonnistui")."! ".t("Tilaus $laskurow[tunnus]")." ".t("siirrettiin tulostusjonoon").".
 							".t("Käy tulostamassa lähete")." <a href='lahetteen_tulostusjono.php'>".t("tulostusjonosta")."</a>.</font><br>";
 					$virheellinen = "X"; //Merkataan epäonnistuneeksi
 				}
+				
+				if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
+					
+					$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+					
+					$query = " 	SELECT *, 
+								$sorttauskentta
+								FROM tilausrivi use index (yhtio_otunnus)
+								WHERE otunnus = '$laskurow[tunnus]'
+								and yhtio = '$kukarow[yhtio]'
+								and var in ('','H')
+								ORDER BY sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+					$result = mysql_query($query) or pupe_error($query);
 
+					require_once ("tulosta_valmistus.inc");
+
+					$tilausnumeroita = $laskurow["tunnus"];
+
+					//generoidaan rivinumerot
+					$rivinumerot = array();
+
+					$kal = 1;
+
+					while ($row = mysql_fetch_array($result)) {
+						$rivinumerot[$row["tunnus"]] = $kal;
+						$kal++;
+					}
+
+					mysql_data_seek($result,0);
+
+					unset($pdf);
+					unset($page);
+
+					$sivu  = 1;
+					$paino = 0;
+
+					// Aloitellaan lähetteen teko
+					$page[$sivu] = alku_valm($tyyppi);
+
+					while ($row = mysql_fetch_array($result)) {
+						rivi_valm($page[$sivu], $tyyppi);
+					}
+
+					loppu_valm($page[$sivu], 1);
+					print_pdf_valm($komento);
+				}
+				
 				// jos meillä oli lähetteen tulostusongelmia
 				if ($virheellinen == 'X') {
 					// merkataan lähete tulostusjonoon
@@ -571,11 +586,6 @@
 					$result = mysql_query($query) or pupe_error($query);
 				}
 				else {
-
-					if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
-						echo t("Valmistus tulostuu")."...<br><br>";
-					}
-
 					$query = "	UPDATE lasku
 								SET alatila='A', lahetepvm=now()
 								where yhtio='$kukarow[yhtio]'

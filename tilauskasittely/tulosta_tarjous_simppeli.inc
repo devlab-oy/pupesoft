@@ -140,7 +140,9 @@ if (!function_exists('tulosta_tarjous')) {
 		$pdf->write($h, $nb, 0, 0, t($laskurow["saate"], $kieli), "norm", "L", "");
 		$h-=$pdf->ln($nb+3);
 
-		$sorttauskentta = generoi_sorttauskentta(8);
+		// katotaan miten halutaan sortattavan
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+		
 		$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)";
 		$perherivihinta = "	(select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi in  ('T'))";
 		
@@ -158,6 +160,7 @@ if (!function_exists('tulosta_tarjous')) {
 					$ennakkolisa";
 		$grand_total=0;
 		$s=$pdf->teeSarakkeet(array(55,30,30,30));		
+		
 		foreach(array("Tuotteet","Palvelut","Alennukset","Ylläpito", "Optio") as $key) {
 			
 			$query = "";
@@ -184,7 +187,7 @@ if (!function_exists('tulosta_tarjous')) {
 				$h-=$pdf->ln(3);
 			}
 			
-			$query .= " ORDER BY otunnus, sorttauskentta";
+			$query .= " ORDER BY otunnus, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 			$riresult = mysql_query($query) or pupe_error($query);
 
 			if(mysql_num_rows($riresult)>0) {

@@ -264,6 +264,7 @@ if (!function_exists('tulosta_lasku')) {
 		
 		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, "JOO");
 		$h = 180;
+		
 		if ($toim == 'PROFORMA') {
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
 				$hinta_riv = "(tilausrivi.hinta/$laskurow[vienti_kurssi])";
@@ -279,7 +280,9 @@ if (!function_exists('tulosta_lasku')) {
 			$lisa = "";
 		}
 		
-		$sorttauskentta = generoi_sorttauskentta(8);
+		// katotaan miten halutaan sortattavan
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
+		
 		if ($laskurow["tila"] == 'U') {
 			$where = " uusiotunnus='$otunnus' ";
 		}
@@ -290,6 +293,7 @@ if (!function_exists('tulosta_lasku')) {
 		//	Voidaanko näyttää alet?
 		$query = "select tunnus from tilausrivi where yhtio = '$kukarow[yhtio]' and ale > 0 and $where";
 		$abures = mysql_query($query) or pupe_error($query);
+		
 		if(mysql_num_rows($abures) > 0) {
 			$alenaytetaan="OK";
 		}
@@ -306,7 +310,7 @@ if (!function_exists('tulosta_lasku')) {
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and $where and (perheid=0 or perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta='' or tilausrivin_lisatiedot.ei_nayteta IS NULL)
 					GROUP BY tilausrivi.tunnus
-					ORDER BY otunnus, sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
+					ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
 
 		//kuollaan jos yhtään riviä ei löydy

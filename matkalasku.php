@@ -1037,10 +1037,11 @@ if ($tee == "MUOKKAA") {
 
 		/*	
 			rivit
-			
 			Piilotetaan rivit joilla ei ole kappaleita (päiväraha, jos vain puolikas..)
 		*/
-		$sorttauskentta = generoi_sorttauskentta(8);
+		
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
+		
 		$query = "	SELECT tilausrivi.*, tuotetyyppi, $sorttauskentta,
 					if (tuote.tuotetyyppi='A' or tuote.tuotetyyppi='B', concat(date_format(kerattyaika, '%d.%m.%Y %k:%i'),' - ',date_format(toimitettuaika, '%d.%m.%Y %k:%i')), '') ajalla,
 					concat_ws('/',kustp.nimi,kohde.nimi,projekti.nimi) kustannuspaikka, 
@@ -1057,12 +1058,12 @@ if ($tee == "MUOKKAA") {
 					and otunnus='$tilausnumero'
 					and tilausrivi.kpl > 0
 					and tilausrivi.tyyppi='M'
-					ORDER BY sorttauskentta, tunnus";
+					ORDER BY sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
-
-		$saa_hyvaksya="";
-		if (mysql_num_rows($result)>0) {
+		$saa_hyvaksya = "";
+		
+		if (mysql_num_rows($result) > 0) {
 
 			echo "<br><br><font class='message'>".t("Rivit")."</font><hr><table cellpadding='0' cellspacing='0'>";
 

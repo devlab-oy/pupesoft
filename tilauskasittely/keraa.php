@@ -802,7 +802,7 @@
 						}
 						else {
 							// katotaan miten halutaan sortattavan
-							$sorttauskentta = generoi_sorttauskentta();
+							$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
 
 							if($laskurow["tila"] == "L" or $laskurow["tila"] == "N") {
 								$tyyppilisa = " and tilausrivi.tyyppi in ('L') ";
@@ -823,7 +823,7 @@
 										WHERE tilausrivi.otunnus = '$otunnus'
 										and tilausrivi.yhtio = '$kukarow[yhtio]'
 										$tyyppilisa
-										ORDER BY jtsort, sorttauskentta";
+										ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 							$riresult = mysql_query($query) or pupe_error($query);
 
 							//generoidaan rivinumerot

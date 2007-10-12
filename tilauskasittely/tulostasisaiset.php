@@ -94,7 +94,7 @@
 				}
 
 				// katotaan miten halutaan sortattavan
-				$sorttauskentta = generoi_sorttauskentta();
+				$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 
 				// haetaan tilauksen kaikki rivit
 				$query = "  SELECT *, $sorttauskentta
@@ -102,7 +102,7 @@
 							WHERE $where
 							and yhtio  = '$kukarow[yhtio]'
 							and tyyppi = 'L'
-							ORDER BY otunnus, sorttauskentta, tunnus";
+							ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 
 				//kuollaan jos yhtään riviä ei löydy

@@ -374,7 +374,7 @@
 					}
 
 					// katotaan miten halutaan sortattavan
-					$sorttauskentta = generoi_sorttauskentta();
+					$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 
 					// Kirjoitetaan rivitietoja tilausriveiltä
 					$query = "	SELECT *, if(date_format(toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(toimitettuaika, '%Y-%m-%d')) toimitettuaika, $sorttauskentta
@@ -383,7 +383,7 @@
 								and uusiotunnus = '$lasrow[tunnus]'
 								and kpl<>0
 								and tilausrivi.tyyppi = 'L'
-								ORDER BY otunnus, sorttauskentta, tunnus";
+								ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 					$tilres = mysql_query($query) or pupe_error($query);
 
 					$rivinumero = 1;

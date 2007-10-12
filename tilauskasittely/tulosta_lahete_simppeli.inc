@@ -241,7 +241,9 @@ if (!function_exists('tulosta_lahete')) {
 		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, $lahete_param, "JOO");
 		$h = 185;
 		
-		$sorttauskentta = generoi_sorttauskentta();
+		// katotaan miten halutaan sortattavan
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+		
 		if ($laskurow["tila"] == 'U') {
 			$where = " uusiotunnus='$otunnus' ";
 		}
@@ -273,7 +275,7 @@ if (!function_exists('tulosta_lahete')) {
 					WHERE $where and (perheid=0 or perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta='' or tilausrivin_lisatiedot.ei_nayteta IS NULL)
 					and tilausrivi.tyyppi!='D'
 					GROUP BY tilausrivi.tunnus
-					ORDER BY otunnus, sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
+					ORDER BY otunnus, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
 
 		//kuollaan jos yhtään riviä ei löydy

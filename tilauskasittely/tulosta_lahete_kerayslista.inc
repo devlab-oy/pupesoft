@@ -528,14 +528,14 @@ if (!function_exists('rivi_otsikot')) {
 
 if (!function_exists('rivi')) {
 	function rivi($thispage, $tyyppi="") {
-		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $norm, $pieni, $rivinkorkeus, $paino;
+		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino;
 		
 		// viivat rivien väliin...
 		$x[0] = 20;
 		$x[1] = 580;
 		$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
 
-		if (($perheid == 0 or $perheid != $row["perheid"]) and isset($perheid)) {
+		if ((($perheid == 0 and $perheid2 == 0) or $perheid != $row["perheid"] or $perheid2 != $row["perheid2"]) and isset($perheid) and isset($perheid2)) {
 			$pdf->draw_line($x, $y, $thispage, $rectparam);
 		}
 
@@ -773,7 +773,8 @@ if (!function_exists('rivi')) {
 				$kala = $pohja - $rivinkorkeus;
 			}
 
-			$perheid = $row["perheid"];
+			$perheid  = $row["perheid"];
+			$perheid2 = $row["perheid2"];
 		}
 		return($thispage);
 	}

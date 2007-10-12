@@ -29,15 +29,15 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$asrow = mysql_fetch_array($result);
 		
+		// katotaan miten halutaan sortattavan
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
+		
 		//työmääräyksen rivit
 		$query = "  SELECT tilausrivi.*,
 					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta,
 					tuote.sarjanumeroseuranta,
-					if(perheid = 0,
-					(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, tunnus)  from tilausrivi as t2 where t2.yhtio = tilausrivi.yhtio and t2.tunnus = tilausrivi.tunnus),
-					(select concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0'), tuoteno, perheid) from tilausrivi as t3 where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid)
-					) as sorttauskentta,
-					if (tuotetyyppi='K','TT','VV') tuotetyyppi
+					$sorttauskentta,
+					if (tuotetyyppi='K', 1, 0) tuotetyyppi
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -45,7 +45,7 @@
 					and tilausrivi.yhtio 	= '$kukarow[yhtio]'
 					and tilausrivi.yhtio 	= tuote.yhtio
 					and tilausrivi.tuoteno  = tuote.tuoteno
-					ORDER BY tuotetyyppi, sorttauskentta";
+					ORDER BY tuotetyyppi, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$tilausnumeroita = $otunnus;

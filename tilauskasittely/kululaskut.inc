@@ -485,6 +485,12 @@ if($silent == "") {
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+		
+		if ($nappikeikalle == 'menossa') {
+			echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
+		}
+		
 		echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
 		echo "</form>";
 	}	

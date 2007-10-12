@@ -1,5 +1,22 @@
 <?php
 
+
+echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
+			function submit_tallenna(){
+				document.paaformi.action='$PHP_SELF';
+				document.paaformi.submit();
+			}
+			function submit_kohd_kaikki(){
+				document.paaformi.action='$PHP_SELF?kohdista_koko_sivu=1';
+				document.paaformi.submit();
+			}
+			function submit_kohd_eimit(){
+				document.paaformi.action='$PHP_SELF?ala_kohdista_mitaan=1';
+				document.paaformi.submit();
+			}
+
+		</SCRIPT>";
+		
 // haetaan keikan tiedot
 $query    = "SELECT * FROM lasku WHERE tunnus='$otunnus' AND yhtio ='$kukarow[yhtio]'";
 $result   = mysql_query($query) or pupe_error($query);
@@ -640,7 +657,7 @@ if ($tila == '') {
 	$query  = "select sum(kpl+varattu) kappaleet, count(*) rivit from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$laskurow[tunnus]' and tyyppi='O'";
 	$kappaleetres = mysql_query($query) or pupe_error($query);
 	$kappaleetrow = mysql_fetch_array($kappaleetres);
-
+		
 	//n‰ytet‰‰n mitk‰ n‰ytet‰‰n
 	echo "<form action='$PHP_SELF' name='formi' method='post'>";
 	echo "<input type='hidden' name='toiminto' value='kohdista'>";
@@ -712,27 +729,32 @@ if ($tila == '') {
 	echo "<th>".t("N‰yt‰ vain suoratoimitukset").":</th><td><INPUT type='checkbox' $chk6 name='suoratoimitukset' value='vaan' onclick='submit()'></td>";
 	echo "</form>";
 
-	echo "</tr><tr>";
+	echo "</tr>";
 
-	//Sivunvaihdot
- 	$seuraava  = $alku + 50;
- 	$edellinen = $alku - 50;
+	echo "</table>";
 
- 	if ($edellinen < 0) {
- 		$edellinen = 0;
- 	}
+	// otsikko valmis
+	
+	echo "<table>";
+	echo "<tr>";
 
-	$viimenen_sivu = mysql_num_rows($result)+$alku-50;
+	echo "<td class='back'><input type='button' onclick='submit_tallenna();' value='".t("Tallenna muutokset")."'></td>";
+	echo "<td class='back'><input type='button' onclick='submit_kohd_kaikki();' value='".t("Kohdista kaikki rivit")."'></td>";
+	echo "<td class='back'><input type='button' onclick='submit_kohd_eimit();' value='".t("Poista kaikki kohdistukset")."'></td>";
 
-	echo "<td class='back' colspan='4' align='center'>
-	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=0&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&suoratoimitukset=$suoratoimitukset'><<<</a>
-	&nbsp;&nbsp;
-	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a>
-	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>
-	&nbsp;&nbsp;
-	<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$viimenen_sivu&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'>>>></a>
-	</td>";
-
+	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+	echo "<input type='hidden' name='toiminto' value='kohdista'>";
+	echo "<input type='hidden' name='tila' value='uusirivi'>";
+	echo "<input type='hidden' name='tee' value='K'>";
+	echo "<input type='hidden' name='alku' value='$alku'>";
+	echo "<input type='hidden' name='nayta_kohdistetut' value='$nayta_kohdistetut'>";
+	echo "<input type='hidden' name='nayta_kaikki' value='$nayta_kaikki'>";
+	echo "<input type='hidden' name='suoratoimitukset' value='$suoratoimitukset'>";
+	echo $hiddenit;
+	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
+	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+	echo "<td class='back'><input type='submit' value='".t("Tee uusi rivi")."'></td></form>";
 
 	//n‰ytet‰‰n mitk‰ n‰ytet‰‰n
 	echo "<form action='$PHP_SELF' name='formi' method='post'>";
@@ -745,15 +767,45 @@ if ($tila == '') {
 	echo $hiddenit;
 	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
 	//echo "<th>".t("Kohdista tiedostosta").":</th><td><input type='submit' value='".t("Tee se")."'></td></tr>";
-	echo "<td class='back' colspan='2' align='right'><input type='submit' value='".t("Kohdista tiedostosta")."'></td></tr>";
+	echo "<td class='back' colspan='2' align='right'><input type='submit' value='".t("Kohdista tiedostosta")."'></td>";
 	echo "</form>";
-	echo "</table>";
 
-	// otsikko valmis
-
-	echo "<br>";
-
+	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+	echo "<input type='hidden' name='toiminto' value='kohdista'>";
+	echo "<input type='hidden' name='laskunsumma' value='$laskunsumma'>";
+	echo "<input type='hidden' name='tee' value='K'>";
+	echo "<input type='hidden' name='tila' value='valmis'>";
+	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+	echo "<td class='back'><input type='submit' value='".t("Kohdistus valmis")."'></td></form>";
+	
+	echo "</tr></table><br>";
+	
 	echo "<table>";
+	
+	echo "<tr>";
+
+	//Sivunvaihdot
+ 	$seuraava  = $alku + 50;
+ 	$edellinen = $alku - 50;
+
+ 	if ($edellinen < 0) {
+ 		$edellinen = 0;
+ 	}
+
+	$viimenen_sivu = mysql_num_rows($result)+$alku-50;
+
+	echo 	"<td class='back' colspan='12' align='center'>
+			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=0&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&tila=$tila&ojarj=$ojarj$ulisa&suoratoimitukset=$suoratoimitukset'><<<</a>
+			&nbsp;&nbsp;
+			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$edellinen&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'><< ".t("Edellinen sivu")."</a>
+			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$seuraava&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'>".t("Seuraava sivu")." >></a>
+			&nbsp;&nbsp;
+			<a href='$PHP_SELF?toiminto=kohdista&toimittajaid=$toimittajaid&tee=K&otunnus=$otunnus&alku=$viimenen_sivu&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&tila=$tila&ojarj=$ojarj$ulisa'>>>></a>
+			</td>";
+
+	echo "</tr>";	
+	
 	echo "<tr></tr><tr><th>x</th>";
 
 	//hakukent‰t
@@ -1110,7 +1162,8 @@ if ($tila == '') {
 	echo "</th></tr>";
 	echo "</table>";
 
-
+	echo "<br>";
+	
 
 	echo "<table>";
 	echo "<tr>";
@@ -1135,6 +1188,20 @@ if ($tila == '') {
 	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
 	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 	echo "<td class='back'><input type='submit' value='".t("Tee uusi rivi")."'></td></form>";
+	
+	//n‰ytet‰‰n mitk‰ n‰ytet‰‰n
+	echo "<form action='$PHP_SELF' name='formi' method='post'>";
+	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+	echo "<input type='hidden' name='toiminto' value='kohdista'>";
+	echo "<input type='hidden' name='alku' value='$alku'>";
+	echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+	echo "<input type='hidden' name='tee' value='$tee'>";
+	echo "<input type='hidden' name='tila' value='FAILISTA'>";
+	echo $hiddenit;
+	echo "<input type='hidden' name='ojarj' value=\"$ojarj\">";
+	//echo "<th>".t("Kohdista tiedostosta").":</th><td><input type='submit' value='".t("Tee se")."'></td></tr>";
+	echo "<td class='back' colspan='2' align='right'><input type='submit' value='".t("Kohdista tiedostosta")."'></td>";
+	echo "</form>";
 
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";

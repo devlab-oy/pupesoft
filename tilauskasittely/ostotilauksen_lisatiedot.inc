@@ -16,8 +16,14 @@ if ($tee == "update") {
 		$kohdistettu = $laskurow["kohdistettu"];
 	}
 	else {
-		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, kohdistus pit‰‰ tarkastaa uudelleen.")."</font><br><br>";
 		$kohdistettu = "";
+	}
+	
+	if ($nappikeikalla != 'ollaan') {
+		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, kohdistus pit‰‰ tarkastaa uudelleen.")."</font><br><br>";
+	}
+	else {
+		echo "<font class='message'>".t("Muutit eturahtia ja/tai erikoisalennusta, muistathan painaa kohdistus valmis jotta muutosket huomioidaan.")."</font>";
 	}
 
 	// Hoidetaan pilkut pisteiksi....
@@ -122,6 +128,11 @@ if ($tee == "") {
 			<input type='hidden' name='otunnus' value='$otunnus'>
 			<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>
 			<input type='hidden' name='tee' value='update'>";
+	
+	if ($nappikeikalle == 'menossa') {
+		echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
+	}
+			
 	echo "<tr><td>".t("L‰hetysmaa").":</td><td colspan='3'>
 			<select name='maa_lahetys'>";
 

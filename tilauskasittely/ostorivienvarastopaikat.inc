@@ -474,7 +474,11 @@ if ($tee == "") {
 		echo "<td><input type='text' name='t4_kaikki' onKeyUp='WriteText(\"t4\");' value='' maxzise='3' size='5'></td>";
 		echo "</tr>";
 		echo "</table>";
-
+		
+		if ($nappikeikalle == 'menossa') {
+			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
+		}
+		
 		echo "<br><input type='submit' name='Laheta' value='".t("Päivitä varastopaikat")."'>";
 		echo "</form>";
 
@@ -486,6 +490,12 @@ if ($tee == "") {
 		echo "<input type='hidden' name='toiminto' value=''>";
 		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 		echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+		
+		if ($nappikeikalle == 'menossa') {
+			echo "<input type='hidden' name='otunnus' value='$otunnus'>";
+			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
+		}
+		
 		echo "<input type='submit' value='".t("Takaisin keikalle")."'>";
 		echo "</form>";
 	}

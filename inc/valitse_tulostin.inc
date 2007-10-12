@@ -41,6 +41,10 @@
 		<input type='hidden' name='tuotemerkki' value='$tuotemerkki'>
 		<input type='hidden' name='rajaus' value='$rajaus'>		
 		";
+		
+		if ($nappikeikalle == 'menossa') {
+			echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";
+		}
 
 	echo "<table>";
 	if ($toim == "LASKU") {

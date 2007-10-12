@@ -72,9 +72,9 @@
 			fclose($file);
 
 			if (count($tuote) > 0) {
-				$tee = "VALMIS";
-				$valmis = "OK";
-				$fileesta = "ON";
+				$tee 		= "VALMIS";
+				$valmis 	= "OK";
+				$fileesta 	= "ON";
 			}
 		}
 	}
@@ -101,12 +101,21 @@
 				$hyllytaso	= $tuotetiedot[4];
 				$kpl		= $maara[$i];				
 				$poikkeama  = 0;
+				$skp		= 0;
 
 				if ($kpl != '') {
 
 					//Sarjanumerot
-					if(is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != $kpl) {
-						echo "<font class='error'>".t("VIRHE: Sarjanumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno</font><br>";
+					if (substr($kpl,0,1) == '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl,1)) {
+						echo "<font class='error'>".t("VIRHE: Sarjanumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
+						$virhe = 1;
+					}
+					elseif (substr($kpl,0,1) == '-' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) substr($kpl,1)) {
+						echo "<font class='error'>".t("VIRHE: Sarjanumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
+						$virhe = 1;
+					}
+					elseif(substr($kpl,0,1) != '-' and substr($kpl,0,1) != '+' and is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_valitut[$i]) != (int) $kpl) {
+						echo "<font class='error'>".t("VIRHE: Sarjanumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
 						$virhe = 1;
 					}
 
@@ -261,16 +270,20 @@
 							
 							if (substr($kpl,0,1) == '+') {
 								$kpl = substr($kpl,1);
+								$skp = $kpl;
 								$kpl = $row['saldo'] + $kpl;
+								
 							}
 							elseif (substr($kpl,0,1) == '-') {
 								$kpl = substr($kpl,1);
+								$skp = $kpl*-1;
 								$kpl = $row['saldo'] - $kpl;
 							}
 							else {
 								//$kpl on käyttäjän syöttämä hyllysäoleva määrä joka muutetaan saldoksi lisäämällä siihen kerätyt kappaleet
 								//ja ottamalla huomioon $saldomuutos joka on saldon muutos listan ajohetkestä
 								$kpl = $kpl + $hylrow['keratty'] + $saldomuutos;
+								$skp = 0;
 							}
 
 							$nykyinensaldo = $row['saldo'];
@@ -417,14 +430,28 @@
 							
 							//Piilotetaan tän tuotepaikan pois-invatut sarjanumerot
 							if (is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_kaikki[$i]) > 0) {
-								foreach ($sarjanumero_kaikki[$i] as $snro_tun) {
-									if(!is_array($sarjanumero_valitut[$i]) or !in_array($snro_tun, $sarjanumero_valitut[$i])) {
+								if ((float) $skp == 0) {
+									// Ei ruksatut sarjanumerot poistetaan
+									foreach ($sarjanumero_kaikki[$i] as $snro_tun) {
+										if(!is_array($sarjanumero_valitut[$i]) or !in_array($snro_tun, $sarjanumero_valitut[$i])) {
+											$query = "	UPDATE sarjanumeroseuranta
+														SET myyntirivitunnus = '-1',
+														siirtorivitunnus 	 = '-1'
+														WHERE yhtio	= '$kukarow[yhtio]'
+														and tunnus = $snro_tun";
+											$sarjares = mysql_query($query) or pupe_error($query);								
+										}
+									}
+								}
+								elseif ((float) $skp < 0) {
+									// Mutetaan $skp-verrran miinus etumerkeillä poistetaan
+									foreach ($sarjanumero_valitut[$i] as $snro_tun) {
 										$query = "	UPDATE sarjanumeroseuranta
 													SET myyntirivitunnus = '-1',
 													siirtorivitunnus 	 = '-1'
 													WHERE yhtio	= '$kukarow[yhtio]'
 													and tunnus = $snro_tun";
-										$sarjares = mysql_query($query) or pupe_error($query);								
+										$sarjares = mysql_query($query) or pupe_error($query);
 									}
 								}
 							}
@@ -520,6 +547,25 @@
 		}
 
 		if ($tee == 'INVENTOI') {
+			
+			echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+				<!--
+
+				function toggleAll(toggleBox, toggleBoxBoxes) {
+										
+					var currForm  = toggleBox.form;
+					var isChecked = toggleBox.checked;
+					var nimi      = toggleBoxBoxes;
+
+					for (var elementIdx=0; elementIdx < currForm.elements.length; elementIdx++) {
+						if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name == nimi) {
+							currForm.elements[elementIdx].checked = isChecked;
+						}
+					}
+				}
+
+				//-->
+				</script>";
 
 			$thlisa = "<th>".t("Varastosaldo")."</th><th>".t("Ennpois")."/".t("Kerätty")."</th><th>".t("Hyllyssä")."</th>";
 
@@ -572,7 +618,7 @@
 											WHERE sarjanumeroseuranta.yhtio = tt.yhtio and sarjanumeroseuranta.tuoteno = tt.tuoteno and sarjanumeroseuranta.hyllyalue = tt.hyllyalue
 											and sarjanumeroseuranta.hyllynro = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
 								and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00')
-								ORDER BY sarjanumero+0";
+								ORDER BY sarjanumero";
 					$sarjares = mysql_query($query) or pupe_error($query);
 				}
 				
@@ -585,6 +631,8 @@
 						if (mysql_num_rows($sarjares) > 0) {
 							echo "<br><table>";
 							
+							$sarjalaskk = 1;
+							
 							while($sarjarow = mysql_fetch_array($sarjares)) {							
 								if ($sarjanumero[$tuoterow["tptunnus"]][$sarjarow["tunnus"]] != '') {
 									$chk = "CHECKED";	
@@ -594,13 +642,17 @@
 								}
 							
 								echo "<tr>
-										<td>$sarjarow[sarjanumero]</td><td>$sarjarow[ostohinta]</td>
+										<td>$sarjalaskk. $sarjarow[sarjanumero]</td><td>$sarjarow[ostohinta]</td>
 										<td>
 										<input type='hidden' name='sarjanumero_kaikki[$tuoterow[tptunnus]][]' value='$sarjarow[tunnus]'>
 										<input type='checkbox' name='sarjanumero_valitut[$tuoterow[tptunnus]][]' value='$sarjarow[tunnus]' $chk>
 										</td></tr>";
+							
+							
+									$sarjalaskk++;
 							}
 							
+							echo "<tr><td colspan='2'>".t("Ruksaa kaikki")."</th><td align='center'><input type='checkbox' onclick='toggleAll(this, \"sarjanumero_valitut[$tuoterow[tptunnus]][]\");'></td></tr>";				
 							echo "</table>";
 						}
 					}

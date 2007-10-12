@@ -622,7 +622,7 @@
 					and (sarjanumeroseuranta.myyntirivitunnus in (0, $rivitunnus) or lasku_myynti.tila='T')
 					$lisa
 					$lisa2
-					ORDER BY sarjanumeroseuranta.sarjanumero+0, sarjanumeroseuranta.tunnus";
+					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
 	}
 	elseif((($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON") or (($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA") and $hyvitysrivi == "ON")) {
 		// Ostetaan sarjanumeroita
@@ -652,7 +652,7 @@
 					$lisa
 					$lisa2
 					GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero
-					ORDER BY sarjanumeroseuranta.sarjanumero+0, sarjanumeroseuranta.tunnus";
+					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
 	}
 	elseif($from == "INVENTOINTI") {
 		// Inventoidaan
@@ -683,7 +683,7 @@
 					$lisa
 					$lisa2
 					GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero
-					ORDER BY sarjanumeroseuranta.sarjanumero+0, sarjanumeroseuranta.tunnus";
+					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
 	}
 	else {
 		// Listataan
@@ -713,7 +713,7 @@
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					$lisa
 					$lisa2
-					ORDER BY sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.sarjanumero+0, sarjanumeroseuranta.tunnus
+					ORDER BY sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus
 					LIMIT 50";
 	}
 	$sarjares = mysql_query($query) or pupe_error($query);

@@ -207,7 +207,8 @@
 			<th>".t("Laskunro")."</th>
 			<th colspan='2'>".t("Laskun pvm")."</th>
 			<th>".t("Eräpäivä")."</th>
-			<th colspan='2'>".t("Maksupäivä")."</th>
+			<th>".t("Maksupäivä")."</th>
+			<th>".t("Luontiaika")."</th>
 			<th>".t("ALV")."</th>";
 
 	if ($laskurow["tila"] == "O") {
@@ -218,7 +219,8 @@
 			<td>$laskurow[laskunro]</td>
 			<td colspan='2'>".tv1dateconv($laskurow["tapvm"])."</td>
 			<td>".tv1dateconv($laskurow["erpcm"])."</td>
-			<td colspan='2'>".tv1dateconv($laskurow["mapvm"])."</td>
+			<td>".tv1dateconv($laskurow["mapvm"])."</td>
+			<td>".tv1dateconv($laskurow["luontiaika"])."</td>
 			<td>".str_replace(".",",",$laskurow['alv'])." %</td>";
 
 	if ($laskurow["tila"] == "O") {

@@ -561,7 +561,7 @@
 			// Tilausrivit tälle tuotteelle
 			$query = "	SELECT lasku.nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl,
 						if(tilausrivi.tyyppi!='O' and tilausrivi.tyyppi!='W', tilausrivi.kerayspvm, tilausrivi.toimaika) pvm,
-						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro
+						varastopaikat.nimitys varasto, tilausrivi.tyyppi, lasku.laskunro, lasku.tilaustyyppi, tilausrivi.var, lasku2.laskunro as keikkanro, tilausrivi.jaksotettu
 						FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 						JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 						LEFT JOIN varastopaikat ON varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto
@@ -592,9 +592,10 @@
 
 				while ($jtrow = mysql_fetch_array($jtresult)) {
 
-					$tyyppi = "";
-					$merkki = "";
-					$keikka = "";
+					$tyyppi 	= "";
+					$vahvistettu= "";
+					$merkki 	= "";
+					$keikka 	= "";
 
 					if ($jtrow["tyyppi"] == "O") {
 						$tyyppi = t("Ostotilaus");
@@ -636,7 +637,11 @@
 						$tyyppi = t("Asiakkaallevalmistus");
 						$merkki = "+";
 					}
-
+					
+					if ($jtrow["jaksotettu"] == 1) {
+						$vahvistettu = " (".t("Vahvistettu").")";
+					}
+					
 					if($jtrow["varasto"] != "") {
 						$tyyppi = $tyyppi." - ".$jtrow["varasto"];
 					}
@@ -647,7 +652,7 @@
 							<td>$jtrow[nimi]</td>
 							<td><a href='$PHP_SELF?tuoteno=$tuoteno&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]'>$jtrow[tunnus]</a>$keikka</td>
 							<td>$tyyppi</td>
-							<td>".tv1dateconv($jtrow["pvm"])."</td>
+							<td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
 							<td align='right'>$merkki".abs($jtrow["kpl"])."</td>
 							<td align='right'>".sprintf('%.2f', $myyta)."</td>
 							</tr>";

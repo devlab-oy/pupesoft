@@ -67,6 +67,16 @@
 					$query = "UPDATE tilausrivi SET toimaika='$toimaika' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and tyyppi='O'";
 					$result = mysql_query($query) or pupe_error($query);										
 				}
+				
+				$query = "UPDATE tilausrivi SET  jaksotettu=0 where yhtio='$kukarow[yhtio]' and otunnus in ($t_otunnuksia) and tyyppi='O' and uusiotunnus=0";
+				$result = mysql_query($query) or pupe_error($query);
+				
+				if (count($vahvistetturivi) > 0) {
+					foreach($vahvistetturivi as $tunnus => $vahvistettu) {										
+						$query = "UPDATE tilausrivi SET  jaksotettu='$vahvistettu' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus' and tyyppi='O' and otunnus in ($t_otunnuksia) and tyyppi='O' and uusiotunnus=0";
+						$result = mysql_query($query) or pupe_error($query);										
+					}
+				}
 								
 				if(isset($poista)) {
 					foreach($poista as $tunnus => $kala) {
@@ -139,7 +149,7 @@
 		$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
 					concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
 					hinta, ale, round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),2) rivihinta, 
-					toimaika, tilausrivi.tunnus,
+					toimaika, tilausrivi.jaksotettu as vahvistettu, tilausrivi.tunnus,
 					toim_tuoteno
 					FROM tilausrivi
 					LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno									
@@ -175,10 +185,10 @@
 		
 					var currForm = toggleBox.form;
 					var isChecked = toggleBox.checked;
-					var nimi = toggleBox.name;
+					var nimi = toggleBox.name.substring(0,3);
 					
 					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {											
-						if (currForm.elements[elementIdx].type == 'checkbox') {
+						if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
 							currForm.elements[elementIdx].checked = isChecked;
 						}
 					}
@@ -191,6 +201,7 @@
 				<input type='hidden' name='ytunnus' value = '$ytunnus'>
 				<input type='hidden' name='toimittajaid' value = '$toimittajaid'>
 				<input type='hidden' name='otunnus' value = '$otunnus'>
+				<input type='hidden' name='t_otunnuksia' value = '".trim($tilaus_otunnukset)."'>
 				<input type='hidden' name='tee' value = 'PAIVITARIVI'>";
 				
 		while ($prow = mysql_fetch_array ($presult)) {
@@ -206,20 +217,28 @@
 				elseif(mysql_field_name($presult,$i) == 'toimaika') {										
 					echo "<td align='right'><input type='text' name='toimaikarivi[$prow[tunnus]]' value='$prow[$i]' size='10'></td>";
 				}
+				elseif (mysql_field_name($presult,$i) == 'vahvistettu') {
+					$chekkis = "";
+					if ($prow['vahvistettu'] == 1) {
+						$chekkis = 'CHECKED';
+					}
+					echo "<td><input type='checkbox' name='vahvistetturivi[$prow[tunnus]]' value='1' $chekkis></td>";
+				}
 				else {
 					echo "<td align='right'>$prow[$i]</td>";
 				}
 			}	
-			echo "<td><input type='checkbox' name='poista[$prow[tunnus]]' value='".t("Poista")."'></td>";			
+			echo "<td><input type='checkbox' name='poista[$prow[tunnus]]' value='Poista'></td>";			
 			echo "</tr>";
 		}
 		echo "<tr>
 				<td class='back' colspan='4' align='right'></td>
 				<td colspan='3' class='spec'>Tilauksen arvo:</td>
 				<td align='right' class='spec'>".sprintf("%.2f",$yhteensa)."</td>
-				<td class='back'></td>
 				<td align='right'>".t("Ruksaa kaikki").":</td>
-				<td><input type='checkbox' onclick='toggleAll(this);'></td>
+				<td><input type='checkbox' name='vahvist' onclick='toggleAll(this);'></td>
+				<td align='right'>".t("Ruksaa kaikki").":</td>
+				<td><input type='checkbox' name='poist' onclick='toggleAll(this);'></td>
 			</tr>";
 		echo "<tr>
 				<td class='back' colspan='8'></td>

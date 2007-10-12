@@ -287,6 +287,22 @@ if (!function_exists("table_exists")) {
 	}
 }
 
+if (!function_exists("viikonpaiva")) {
+	function viikonpaiva($day="", $now="") {
+
+	  $now = $now ? $now : "now";
+	  $day = $day ? $day : "now";
+
+	  $rel = date("N", strtotime($day)) - date("N");
+
+	  $time = strtotime("$rel days", strtotime($now));
+
+	  return date("Y-m-d", $time);
+
+	}
+}
+
+
 if (!function_exists("saldo_myytavissa")) {
 	function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
 

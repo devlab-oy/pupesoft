@@ -51,14 +51,14 @@
 		$laskures = mysql_query($query);
 
 		if (mysql_num_rows($laskures) == 0) {
-			echo "<font class='error'>Sinulla ei ole avointa tilausta!</font><br>";
+			echo "<font class='error'>".t("Sinulla ei ole avointa tilausta")."!</font><br>";
 		}
 		else {
 
 			// tilauksen tiedot
 			$laskurow = mysql_fetch_array($laskures);
 
-			echo "<font class='message'>Lisätään tuotteita tilaukselle $kukarow[kesken].</font><br>";
+			echo "<font class='message'>".t("Lisätään tuotteita tilaukselle")." $kukarow[kesken].</font><br>";
 
 			// käydään läpi formin kaikki rivit
 			foreach ($tilkpl as $yht_i => $kpl) {
@@ -70,7 +70,7 @@
 					$tuoteres = mysql_query($query);
 
 					if (mysql_num_rows($tuoteres) == 0) {
-						echo "<font class='error'>Tuotetta $tiltuoteno[$yht_i] ei löydy!</font><br>";
+						echo "<font class='error'>".t("Tuotetta")." $tiltuoteno[$yht_i] ".t("ei löydy")."!</font><br>";
 					}
 					else {
 
@@ -95,7 +95,7 @@
 
 						require ("lisaarivi.inc");
 
-						echo "<font class='message'>Lisättiin $kpl kpl tuotetta $trow[tuoteno].</font><br>";
+						echo "<font class='message'>".t("Lisättiin")." $kpl ".t("kpl tuotetta")." $trow[tuoteno].</font><br>";
 
 					} // tuote ok else
 
@@ -327,7 +327,7 @@
 				echo "<td>";
 				echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$tuote[tuoteno]'>";
 				echo "<input type='text' size='7' name='tilkpl[$yht_i]'>";
-				echo "<input type='submit' value = 'Lisää'>";
+				echo "<input type='submit' value = '".t("Lisää")."'>";
 				echo "</td>";
 				$yht_i++;
 			}

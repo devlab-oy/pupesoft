@@ -310,7 +310,7 @@
 		$pdf->draw_text(302,  767,  $viitelah,											$firstpage, $kirj);
 		$pdf->draw_text(302,  761,  "Vastaanottajan viite Mottagarens referens",		$firstpage, $norm);
 		
-		if (! isset($GLOBALS['tyhja'])) {
+		if (!isset($GLOBALS['tyhja'])) {
 			$query = "	select group_concat(viesti SEPARATOR ', ') viesti 
 						from lasku 
 						where yhtio = '$kukarow[yhtio]' 
@@ -450,13 +450,15 @@
 		//kuljetusohjeita
 		$pdf->draw_text(62, 382 , "Kuljetusohjeet Transportinstruktioner",				$firstpage, $norm);
 		
-		$query = "	SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
-					from rahtikirjat
-					where yhtio			= '$kukarow[yhtio]'
-					and otsikkonro		in ($otunnukset)";
-		$viestirar = mysql_query($query) or pupe_error($query);
-		
-		$viestirarrow = mysql_fetch_array($viestirar);
+		if (!isset($GLOBALS['tyhja'])) {
+			$query = "	SELECT GROUP_CONCAT(distinct if(viesti!='',viesti,NULL) separator '. ') viesti
+						from rahtikirjat
+						where yhtio			= '$kukarow[yhtio]'
+						and otsikkonro		in ($otunnukset)";
+			$viestirar = mysql_query($query) or pupe_error($query);
+
+			$viestirarrow = mysql_fetch_array($viestirar);
+		}
 		
 		$pdf->draw_paragraph(380, 62, 325, 410, $viestirarrow["viesti"],				$firstpage, $kirj);
 		

@@ -432,8 +432,32 @@
 				}
 			}
 			else {
-				$otsikko = t(mysql_field_name($result, $i));
-
+				switch (mysql_field_name($result,$i)) {
+					case "printteri1":
+						$otsikko = t("Lähete/Keräyslista");
+						break;
+					case "printteri2":
+						$otsikko = t("Rahtikirja matriisi");
+						break;
+					case "printteri3":
+						$otsikko = t("Osoitelappu");
+						break;
+					case "printteri4":
+						$otsikko = t("Rahtikirja A5");
+						break;
+					case "printteri5":
+						$otsikko = t("Lasku");
+						break;
+					case "printteri6":
+						$otsikko = t("Rahtikirja A4");
+						break;
+					case "printteri7":
+						$otsikko = t("JV-lasku/-kuitti");
+						break;
+					default:
+						$otsikko = t(mysql_field_name($result, $i));
+				}
+				
 				if ($rajattu_nakyma != '') {
  					$ulos = "";
  					$tyyppi = 0;

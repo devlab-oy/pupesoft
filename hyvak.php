@@ -12,7 +12,12 @@
 		
 	
 	if($keikalla == "on") {
-				
+		
+		//	Täällä haetaan laskurow aika monta kertaa, joskus voisi tehdä recodea?
+		$query = "	SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+		$abures = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($abures);
+		
 		//	Meillä on oikea toimittajaid
 		if($tee == "haekeikka") {
 			
@@ -31,7 +36,7 @@
 			}
 			
 			if($toimittajaid != "") {
-				echo "<table><tr><th>".t("Valittu toimittaja")."</th><td>{$toimittajarow["nimi"]} {$toimittajarow["osoite"]} {$toimittajarow["postino"]} {$toimittajarow["postitp"]} ({$toimittajarow["ytunnus"]})</td></tr></table><br>";
+				echo "<table><tr><th>".t("Valittu toimittaja")."</th><td>{$toimittajarow["nimi"]} {$toimittajarow["osoite"]} {$toimittajarow["postino"]} {$toimittajarow["postitp"]} ({$toimittajarow["ytunnus"]})</td><td class='back'><a href = 'javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=\");'>Vaihda toimittaja</a></td></tr></table><br>";
 
 				//	Listataan keikat
 				$query = "	SELECT comments, lasku.tunnus otunnus, lasku.laskunro keikka, sum(tilausrivi.rivihinta) varastossaarvo, count(distinct tilausrivi.tunnus) kpl, sum(if(kpl = 0, 0, 1)) varastossa
@@ -46,17 +51,47 @@
 							ORDER BY luontiaika";
 				$result = mysql_query($query) or pupe_error($query);
 				if(mysql_num_rows($result)>0) {
-					echo "<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>";
-					echo "<input type='hidden' name='tee' value = 'liita'>";			
-					echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
-					echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
-					echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th><tr>";
-					while($row = mysql_fetch_array($result)) {
-						echo "<tr><td>{$row["keikka"]}</td><td>{$row["comments"]}</td><td align='right'>{$row["kpl"]}/{$row["varastossa"]}</td><td align='right'>{$row["varastossaarvo"]}</td><td>";
-						echo "<input name='liita[".$row["otunnus"]."][liitasumma]' value='$liitasumma' size='10'>";
-						echo "</td><tr>";
+					//	Haetaan vientitieto..
+					
+					//	Kululaskun voi kohdistaa useaan keikkaan
+					if(in_array($laskurow["vienti"], array("B","E","H"))) {
+						echo "<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>";
+						echo "<input type='hidden' name='tee' value = 'liita'>";			
+						echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
+						echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
+						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th><tr>";
+						while($row = mysql_fetch_array($result)) {
+							echo "<tr><td>{$row["keikka"]}</td><td>{$row["comments"]}</td><td align='right'>{$row["kpl"]}/{$row["varastossa"]}</td><td align='right'>{$row["varastossaarvo"]}</td><td>";
+							echo "<input type='text' name='liita[".$row["otunnus"]."][liitasumma]' value='$liitasumma' size='10'>";
+							echo "</td><tr>";
+						}
+						echo "<tr><td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liitä keikkoihin")."'></td></tr></table></form>";						
 					}
-					echo "<tr><td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liitä keikkoihin")."'></td></tr></table></form>";
+					else {
+						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th><tr>";
+						while($row = mysql_fetch_array($result)) {
+							
+							$query = "	select sum(summa) summa
+										from tiliointi
+										where yhtio	= '$kukarow[yhtio]'
+										and ltunnus	= '$tunnus'
+										and tilino  = '$yhtiorow[alv]'
+										and korjattu = ''";
+							$alvires = mysql_query($query) or pupe_error($query);
+							$alvirow = mysql_fetch_array($alvires);
+							$summa_kaytettavissa = round((float) $laskurow["summa"] - (float) $alvirow["summa"], 2);
+							
+							echo "<tr><td>{$row["keikka"]}</td><td>{$row["comments"]}</td><td align='right'>{$row["kpl"]}/{$row["varastossa"]}</td><td align='right'>{$row["varastossaarvo"]}</td><td>";
+							echo "<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>";
+							echo "<input type='hidden' name='tee' value = 'liita'>";			
+							echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
+							echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
+							echo "<input type='hidden' name='liita[".$row["otunnus"]."][liitasumma]' value='' size='10'>";							
+							echo "<td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liitä keikkaan")."'></td>";
+							echo "</td><tr>";
+						}
+						
+					}
 				}
 				else {
 					echo "Ei avoimia keikkoja..<br>";
@@ -80,10 +115,10 @@
 			die("</body></html>");
 		}
 		elseif($toimittajaid > 0) {
-
+			
 			//	swapataan oikea tunnus talteen
-			$o_tunnus = $tunnus;
-			$silent 		= "JOO";
+			$o_tunnus 	= $tunnus;
+			$silent 	= "JOO";
 			$laskutunnus = $tunnus;
 			
 			if($tee == "liita") {
@@ -91,7 +126,8 @@
 					foreach($liita as $l => $v) {
 						$otunnus = $l;
 						$liitasumma = $v["liitasumma"];
-						if($liitasumma <> 0) {
+
+						if($liitasumma <> 0 or !in_array($laskurow["vienti"], array("B","E","H"))) {
 							require("tilauskasittely/kululaskut.inc");
 						}
 					}
@@ -109,19 +145,6 @@
 		else {
 			echo "OHO!";
 		}
-		/*
-		if($otunnus > 0) {
-			$tee 			= "liita";
-			$laskutunnus 	= $tunnus;
-			$silent 			= "JOO";
-			
-			require("tilauskasittely/kululaskut.inc");
-			
-			$tee = "";
-		}
-		else {
-		}
-		*/
 	}
 	
 	echo "<font class='head'>".t('Hyväksyttävät laskusi')."</font><hr>";	
@@ -893,23 +916,22 @@
 
 		echo "</tr></table>";
 
-		if(in_array($laskurow["vienti"], array("B","E","H"))) {
+		if(in_array($laskurow["vienti"], array("B","E","H","C","J","F","K","I","L"))) {
 			enable_ajax();
 			
 			echo "<br><table>";			
-			echo "<tr><th>".t("Jyvitetty keikalle")."</th><th>".t("Summa")."</th></tr>";
-			
+			echo "<tr><th>".t("Laskusta käytetty keikoilla")."</th><th>".t("Summa")."</th></tr>";
 			$query = "	select sum(summa) summa
 						from tiliointi
 						where yhtio	= '$kukarow[yhtio]'
-						and ltunnus	= '$laskurow[tunnus]'
+						and ltunnus	= '$tunnus'
 						and tilino  = '$yhtiorow[alv]'
 						and korjattu = ''";
 			$alvires = mysql_query($query) or pupe_error($query);
 			$alvirow = mysql_fetch_array($alvires);
-			
-			$jaljella = round((float) $laskurow["summa"] - (float) $alvirow["summa"], 2);
-			
+
+			$jaljella = round((float)$laskurow["summa"] - (float) $alvirow["summa"], 2);
+
 			$query = "	SELECT lasku.laskunro, keikka.nimi, lasku.summa, keikka.comments, keikka.vanhatunnus vanhatunnus, keikka.tunnus tunnus, keikka.liitostunnus toimittajaid, keikka.alatila
 						FROM lasku
 						JOIN lasku keikka ON keikka.yhtio = lasku.yhtio and keikka.laskunro = lasku.laskunro and keikka.tila = 'K'
@@ -920,6 +942,9 @@
 			$apure = mysql_query($query) or pupe_error($query);
 			if(mysql_num_rows($apure)>0) {
 				while($apurow = mysql_fetch_array($apure)) {
+					
+					if($apurow["comments"] != "") $apurow["comments"] = "<i>($apurow[comments])</i>";
+					
 					if($apurow["alatila"] != "X") {
 						echo "<form name='poista' action = '$PHP_SELF' method='post'>
 								<input type='hidden' name = 'keikalla' value = 'on'>
@@ -929,11 +954,12 @@
 								<input type='hidden' name = 'poistasumma' value = '$apurow[summa]'>							
 								<input type='hidden' name = 'otunnus' value = '$apurow[tunnus]'>
 								<input type='hidden' name = 'tunnus' value = '$tunnus'>";
-						echo "<tr><td>$apurow[laskunro] $apurow[nimi] ($apurow[comments])</td><td>$apurow[summa]</td><td class='back'><input type='submit' value='".t("poista")."'></tr>";
+						
+						echo "<tr><td>$apurow[laskunro] $apurow[nimi]$apurow[comments]</td><td>$apurow[summa]</td><td class='back'><input type='submit' value='".t("poista")."'></tr>";
 						echo "</form>";						
 					}
 					else {
-						echo "<tr><td>$apurow[laskunro] $apurow[nimi] ($apurow[comments])</td><td>$apurow[summa]</td><td class='back'>".t("Lukittu")."</tr>";
+						echo "<tr><td>$apurow[laskunro] $apurow[nimi]$apurow[comments]</td><td>$apurow[summa]</td><td class='back'>".t("Lukittu")."</tr>";
 					}
 					
 					$jaljella -= $apurow["summa"];
@@ -946,8 +972,16 @@
 
 			$lisa = "";
 			if($jaljella > 0) {
-				$lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus\");'>".t("Liitä keikkaan")."</a>";
+				//	Vaihtoomaisuuslaskuille ei tarvitse hakea toimittajaa, sen me tiedämme jo!
+				if(!in_array($laskurow["vienti"], array("B","E","H")) and $jaljella > 0) {
+					if($toimittajaid == "") $toimittajaid = $laskurow["liitostunnus"];
+					$lisa = "<script>javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus&toimittajaid=$toimittajaid\");</script>";
+				}
+				else {
+					$lisa = "<a id='uusi' href='javascript:sndReq(\"keikka\", \"hyvak.php?keikalla=on&tee=haekeikka&tunnus=$tunnus\");'>".t("Liitä keikkaan")."</a>";
+				}
 			}
+			
 			echo "<tr><th>".t("Jaljella")."</th><th>$jaljella $laskurow[valkoodi]</th><td class='back'>$lisa</td></tr>";
 
 			echo "</table>";
@@ -1408,11 +1442,28 @@
 		echo "<th>".t("Postitp")."</th>";
 		echo "<th>".t("Yhtiön valuutassa")."</th>";
 		echo "<th>".t("Laskun valuutassa")."</th>";
+		echo "<th>".t("Liitetty")."</th>";
 		echo "<th>".t("Tyyppi")."</th>";
 		echo "</tr>";
 
 		while ($trow = mysql_fetch_array ($result)) {
-
+			
+			$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='{$trow["tunnus"]}'";
+			$keikres = mysql_query($query) or pupe_error($query);
+			
+			//	Onko liitetty jo keikkaan
+			if(!in_array($trow["vienti"], array("A", "D", "G"))) {
+				if(mysql_num_rows($keikres) > 0) {
+					$liitetty = "<font style='color: #23ff14;'>ON</font>";
+				}
+				else {
+					$liitetty = "<font style='color: #fb0017;'>EI</font>";
+				}				
+			}
+			else {
+				$liitetty = "";
+			}
+			
 			echo "<tr>";
 
 			 // Eli vain tasolla 1/2 ja ensimmäiselle hyväksyjälle.
@@ -1442,6 +1493,7 @@
 			echo "<td valign='top'>$trow[postitp]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</td>";
 			echo "<td valign='top' style='text-align: right;'>$trow[summa] $trow[valkoodi]</td>";
+			echo "<td valign='top' style='text-align: right;'>$liitetty</td>";
 
 			// tehdään lasku linkki
 			echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";
@@ -1468,8 +1520,6 @@
 						<td class='back' valign='top'><input type='Submit' value='".t("Lisää kommentti")."'></td></form>";
 				}
 
-				$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='{$trow["tunnus"]}'";
-				$keikres = mysql_query($query) or pupe_error($query);
 				if ($oikeurow['paivitys'] == '1' and mysql_num_rows($keikres)==0) {
 					echo "<form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
 							 <input type='hidden' name='tee' value='D'>

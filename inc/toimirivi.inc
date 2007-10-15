@@ -369,20 +369,20 @@
 	
 	if (mysql_field_name($result, $i) == "tyyppi") {
 
-		$selo = $sels = $selp = $sel = "";
-		if ($trow[$i] == 'O') $selo = "selected";
-		elseif ($trow[$i] == 'S') $sels = "selected";
-		elseif ($trow[$i] == 'P') $selp = "selected";
-		else $sel = "selected";
+		$sel = array();
+		$sel[$trow[$i]] = "selected";
 		
 		$ulos  = "<td><select name='$nimi'>";
-		$ulos .= "<option value='' $sel>".t("Normaali toimittaja")."</option>";
-		$ulos .= "<option value='O' $selo>".t("Online toimittaja")."</option>";
-		$ulos .= "<option value='S' $sels>".t("Sisäinen toimittaja")."</option>";
-		$ulos .= "<option value='P' $selp>".t("Poistettu / Ei käytössä")."</option>";
+		$ulos .= "<option value=''>".t("Normaali toimittaja")."</option>";
+		$ulos .= "<option value='O' $sel[O]>".t("Online toimittaja")."</option>";
+		$ulos .= "<option value='S' $sel[S]>".t("Sisäinen toimittaja")."</option>";
+		$ulos .= "<option value='L' $sel[L]>".t("Kaikkien tuotteiden toimittaja")."</option>";
+		$ulos .= "<option value='P' $sel[P]>".t("Poistettu / Ei käytössä")."</option>";
 		$ulos .= "</select></td>";
 		
 		$jatko = 0;
 	}
+
+
 
 ?>

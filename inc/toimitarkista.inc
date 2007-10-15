@@ -1,9 +1,6 @@
 <?php
 
-	if ((mysql_field_name($result, $i) == "nimi") or
-		(mysql_field_name($result, $i) == "maa") or
-		(mysql_field_name($result, $i) == "ytunnus") or
-		(mysql_field_name($result, $i) == "oletus_hyvak1")) {
+	if ((mysql_field_name($result, $i) == "nimi") or (mysql_field_name($result, $i) == "maa") or (mysql_field_name($result, $i) == "ytunnus") or (mysql_field_name($result, $i) == "oletus_hyvak1")) {
 		if (trim($t[$i]) == '') {
 			$virhe[$i] = t("Tieto puuttuu");
 			$errori = 1;
@@ -159,6 +156,10 @@
 
 	}
 	
+	if (mysql_field_name($result, $i) == "oletus_valkoodi") {
+		$tmp_valkoodi = $t[$i];
+	}
+	
 	if (mysql_field_name($result, $i) == "tyyppi") {
 		$toimtyyppi = $t[$i]; // otetaan tää talteen
 	}
@@ -179,7 +180,20 @@
 			$virhe[$i] = "Tieto puuttuu!";
 			$errori = 1;
 		}
-
+		
+		if ($toimtyyppi == "L" and $tunnus > 0 and $errori != 1) {
+			// injisoidaan tuotteen_toimittajat kaikille tuotteille
+			$query = "	INSERT into tuotteen_toimittajat (yhtio, tuoteno, toim_tuoteno, toimittaja, liitostunnus, valuutta, alkuperamaa, tuotekerroin, laatija, luontiaika) 
+						SELECT yhtio, tuoteno, tuoteno, '$tmp_ytunnus', '$tunnus', '$tmp_valkoodi', '$tmp_maakoodi', 1, '$kukarow[kuka]', now() 
+						FROM tuote 
+						WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.ei_saldoa='' and tuote.status != 'P'  
+						ON DUPLICATE KEY UPDATE 
+						tuotteen_toimittajat.liitostunnus 	= $tunnus,
+						tuotteen_toimittajat.toimittaja		= '$tmp_ytunnus', 
+						tuotteen_toimittajat.valuutta		= '$tmp_valkoodi', 
+						tuotteen_toimittajat.alkuperamaa	= '$tmp_maakoodi'"; 
+			$vres = mysql_query($query) or pupe_error($query);
+		}
 	}
 
 ?>

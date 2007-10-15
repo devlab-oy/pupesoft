@@ -5,7 +5,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 }
 
 if (!function_exists("tsekit")) {
-	function tsekit($row,$kaikkivarastossayhteensa) {
+	function tsekit($row, $kaikkivarastossayhteensa) {
 		
 		global $kukarow, $yhtiorow;
 		
@@ -687,12 +687,11 @@ $nappikeikka = "";
 if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" or $toiminto == "tulosta" or $toiminto == "lisatiedot" or $toiminto == "varastopaikat" or $toiminto == "kululaskut" or $toiminto == "kaikkiok") {
 	
 	$query = "	SELECT *
-				FROM lasku USE INDEX (tila_index)
-				where lasku.yhtio = '$kukarow[yhtio]'
-				and lasku.liitostunnus = '$toimittajaid'
-				and lasku.tunnus = '$otunnus'";
+				FROM lasku
+				where lasku.yhtio 		= '$kukarow[yhtio]'
+				and lasku.liitostunnus 	= '$toimittajaid'
+				and lasku.tunnus 		= '$otunnus'";
 	$tsekkiresult = mysql_query($query) or pupe_error($query);
-
 	$tsekkirow = mysql_fetch_array($tsekkiresult);
 
 	list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($tsekkirow,$kaikkivarastossayhteensa);

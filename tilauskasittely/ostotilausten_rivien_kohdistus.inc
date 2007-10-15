@@ -480,19 +480,19 @@ if ($tila == '') {
 		$alvit = 0;
 	}
 
-	$query    = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale * 
-					(1+(if((SELECT max(kaytetty) kaytetty 
-							FROM sarjanumeroseuranta
-							WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
-							and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno 
-							and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100))) hinta
-					FROM tilausrivi use index (uusiotunnus_index)
-					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$toimittajaid')
-					LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
-					WHERE tilausrivi.yhtio ='$kukarow[yhtio]'
-					AND tilausrivi.uusiotunnus = '$otunnus'
-					AND tilausrivi.tyyppi != 'D'";
+	$query = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale * 
+				(1+(if((SELECT max(kaytetty) kaytetty 
+						FROM sarjanumeroseuranta
+						WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
+						and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno 
+						and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100))) hinta
+				FROM tilausrivi use index (uusiotunnus_index)
+				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
+				JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$toimittajaid')
+				LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
+				WHERE tilausrivi.yhtio ='$kukarow[yhtio]'
+				AND tilausrivi.uusiotunnus = '$otunnus'
+				AND tilausrivi.tyyppi != 'D'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$hintarow = mysql_fetch_array($result);
 

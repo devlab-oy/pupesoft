@@ -461,7 +461,7 @@ if ($tila == '') {
 	// jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi
 	if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
 
-		$alvit = " * (1+tuote.alv/100) ";
+		$alvit = "tuote.alv";
 
 		if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
@@ -470,17 +470,22 @@ if ($tila == '') {
 
 			// ollaan alv-rekisteröity
 			if (mysql_num_rows($alhire) == 1) {
-				$alvit = " * (1+tuotteen_alv.alv/100) ";
+				$alvit = "tuotteen_alv.alv";
 				$alvti = " ifnull(tuotteen_alv.alv, 0) ";
 			}
 		}
 
 	}
 	else {
-		$alvit = "";
+		$alvit = 0;
 	}
 
-	$query    = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale $alvit) hinta
+	$query    = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * (1-(tilausrivi.ale/100)) * $erikoisale * 
+					(1+(if((SELECT max(kaytetty) kaytetty 
+							FROM sarjanumeroseuranta
+							WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
+							and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno 
+							and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100))) hinta
 					FROM tilausrivi use index (uusiotunnus_index)
 					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
 					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$toimittajaid')
@@ -515,7 +520,12 @@ if ($tila == '') {
 							"tilausrivi.ale ale",
 							"$alvti alv",
 							"round((tilausrivi.varattu+tilausrivi.kpl) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) rivihinta",
-							"round((tilausrivi.varattu+tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * $erikoisale $alvit ,2) alerivihinta",
+							"round((tilausrivi.varattu+tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * $erikoisale * 
+							(1+(if((SELECT max(kaytetty) kaytetty 
+									FROM sarjanumeroseuranta
+									WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
+									and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno 
+									and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100)) ,2) alerivihinta",
 							"tilausrivi.kate kuluhinta",
 							"tilausrivi.toimaika toimaika",
 							"tilausrivi.kommentti kommentti");

@@ -109,7 +109,7 @@
 		echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa")."";
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[tunnus]) {
+			if ($trow[$i] == $vrow["tunnus"]) {
 				$sel = "selected";
 			}
 			echo "<option value = '$vrow[tunnus]' $sel>$vrow[tilikausi_alku] - $vrow[tilikausi_loppu]";
@@ -186,9 +186,11 @@
 	$alvk = (int) $alvk;
 	$alvp = (int) $alvp;
 	$tkausi = (int) $tkausi;
+	
 	// Tutkitaan ensiksi, mille tilikaudelle pyydettävä lista löytyy, jos lista on sopiva
 	$blvk = 0;
 	$blvp = 0;
+	
 	if ($tkausi == 0) {
 		$blvk = $alvk;
 		$blvp = $blvk;
@@ -205,6 +207,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
+	
 	if (mysql_num_rows($result) != 1) {
 		echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei löytynyt")."</font>";
 		exit;
@@ -277,76 +280,56 @@
 		$lisa .= " and lasku.liitostunnus='$toimittajaid' and tila in ('H','Y','M','P','Q') ";
 	}
 
-	//jos tili on valittu lasketaan sen alkusaldo
-	if (strlen(trim($tili)) > 0) {
-		$query = "	SELECT sum(summa) saldo
-					FROM tiliointi
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-					and tiliointi.korjattu=''
-					and tiliointi.tapvm >= '$tilikaudetrow[tilikausi_alku]'
-					and $lisa2";
-		$result   = mysql_query($query) or pupe_error($query);
-		$alkurow  = mysql_fetch_array ($result);
-		$kumsumma = $alkurow["saldo"];
-	}
-
-	$query = "	SELECT $alku , kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus
+	$query = "	SELECT $alku , kustp.nimi kustp, kohde.nimi kohde, projekti.nimi projekti, CONCAT_WS(' ', selite, lasku.nimi) selite, tiliointi.summa, vero, tiliointi.ltunnus, tiliointi.tilino xtilino
 				FROM tiliointi
 				LEFT JOIN tili ON tili.tilino = tiliointi.tilino and tili.yhtio = tiliointi.yhtio
 				LEFT JOIN lasku ON lasku.tunnus = tiliointi.ltunnus
 				LEFT JOIN kustannuspaikka kustp ON tiliointi.yhtio = kustp.yhtio and tiliointi.kustp = kustp.tunnus
 				LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio = kohde.yhtio and tiliointi.kohde = kohde.tunnus
 				LEFT JOIN kustannuspaikka projekti ON tiliointi.yhtio = projekti.yhtio and tiliointi.projekti = projekti.tunnus
-				WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
-					tiliointi.korjattu='' and
-					$lisa
+				WHERE tiliointi.yhtio = '$kukarow[yhtio]' 
+				and tiliointi.korjattu = '' 
+				and $lisa
 				ORDER BY $jarj";
 	$result = mysql_query($query) or pupe_error($query);
+	
 	echo "<table><tr>";
-	for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
+		
+	for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
 		echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
 		
 		if(isset($workbook)) {
 			$worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+		}		
+	}
+	
+	if (strlen(trim($tili)) > 0) {
+		echo "<th>".t("kum. summa")."</th>";
+		
+		if(isset($workbook)) {
+			$worksheet->write($excelrivi, $i+1, t("kum. summa"), $format_bold);
 		}
 	}
-
+	
 	if(isset($workbook)) {
 		$excelrivi++;
 	}
-
-	if (strlen(trim($tili)) > 0) {
-		echo "<th>".t("kum. summa")."</th>";
-		if(isset($workbook)) {
-			$worksheet->write($excelrivi, $i, t("kum. summa"), $format_bold);
-		}
-	}
 	echo "</tr>";
 
-	//tilin alkusaldo
-	if (strlen(trim($tili)) > 0) {
-		echo "<tr><td colspan='";
-		echo mysql_num_fields($result)-1;
-		echo "'></td>";
-		echo "<td align='right'>".sprintf("%.2f",$kumsumma)."</td></tr>";
-	}
+	$summaplus 		= 0.0;
+	$summamiinus 	= 0.0;
+	$summa 			= 0.0;
+	$edtili			= "";
 
-	$summaplus = 0.0;
-	$summamiinus = 0.0;
-	$summa = 0.0;
-
-	while ($trow=mysql_fetch_array ($result)) {
+	while ($trow = mysql_fetch_array ($result)) {
+		
 		echo "<tr>";
 
-		for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
-
-			if(isset($workbook)) {
-				$worksheet->write($excelrivi, $i, $trow[$i]);
-			}
-
-			if ($i == 0) {
+		for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
+			
+			if ($i == 0) {				
 				if ($edtrow[$i] == $trow[$i]) { // Vaihtuiko joku??
-					$trow[$i] = "&nbsp";
+					$trow[$i] = " ";
 				}
 				else {
 					if ($eka != 0) {
@@ -357,8 +340,8 @@
 						if (strlen(trim($tili)) > 0) {
 							echo "<td></td>";
 						}
-
 						echo "</tr><tr>";
+																	
 						$summa = 0;
 					}
 					else {
@@ -366,8 +349,39 @@
 					}
 					$edtrow[0] = $trow[0];
 				}
-			}
+				
+				//jos tili on valittu lasketaan sen alkusaldo
+				if (strlen(trim($tili)) > 0 and $edtili != $trow["xtilino"]) {
+					$query = "	SELECT sum(summa) saldo
+								FROM tiliointi
+								WHERE tiliointi.yhtio 	= '$kukarow[yhtio]'
+								and tiliointi.korjattu	= ''
+								and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
+								and tiliointi.tilino 	= '$trow[xtilino]'";
+					$alkres	  = mysql_query($query) or pupe_error($query);					
+					$alkurow  = mysql_fetch_array ($alkres);
+					$kumsumma = $alkurow["saldo"];
 
+					//tilin alkusaldo
+					echo "<td colspan='".(mysql_num_fields($result)-2)."'></td>";
+					echo "<td align='right'>".sprintf("%.2f",$kumsumma)."</td></tr>";
+					echo "<tr>";
+					
+					if(isset($workbook)) {
+						for ($a=0; $a<mysql_num_fields($result)-2; $a++) {
+							$worksheet->write($excelrivi, $a, "");
+						}
+						$worksheet->write($excelrivi, $a+1, $kumsumma);
+						
+						$excelrivi++;
+					}
+				}
+			}
+			
+			if(isset($workbook)) {
+				$worksheet->write($excelrivi, $i, $trow[$i]);	
+			}
+		
 			if ($i > 5) {
 				if ($i == 6) {
 
@@ -394,15 +408,14 @@
 
 				 }
 				 else {
-					echo "<td align = 'right'>";
+					echo "<td align = 'right' nowrap>";
 					echo str_replace(".",",",sprintf("%.2f", $trow[$i]));
 					echo "</td>";
 				 }
 
 			}
 			else {
-
-				if (($i == 5))$trow[$i]=str_replace("<br>"," ",$trow[$i]);
+				if (($i == 5)) $trow[$i] = str_replace("<br>"," ",$trow[$i]);
 
 				echo "<td>$trow[$i]</td>";
 			}
@@ -411,6 +424,7 @@
 		if (strlen(trim($tili)) > 0) {
 			//lasketaan ja echotaan kumulatiivinen summa
 			$kumsumma += $trow["summa"];
+			
 			echo "<td align='right'>".str_replace(".",",",sprintf("%.2f",$kumsumma))."</td>";
 			
 			if(isset($workbook)) {
@@ -418,14 +432,17 @@
 			}
 		}
 		
+		
 		echo "</tr>";
 		
 		if(isset($workbook)) {
 			$excelrivi++;
 		}
+		
+		$edtili = $trow["xtilino"];
 	}
 	
-	echo "<tr><td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right'>";
+	echo "<tr><td></td><td></td><td></td><td></td><td></td><td></td><td align = 'right' nowrap>";
 	printf("%.2f", $summa);
 	echo "</td><td>*</td>";
 
@@ -436,7 +453,7 @@
 	echo "</tr>";
 						
 	echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Negatiiviset yhteensä")."</td>";
-	echo "<td align = 'right'>";
+	echo "<td align = 'right' nowrap>";
 	printf("%.2f", $summamiinus);
 	echo "</td><td>*</td>";
 
@@ -447,7 +464,7 @@
 	echo "</tr>";
 
 	echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Positiiviset yhteensä")."</td>";
-	echo "<td align = 'right'>";
+	echo "<td align = 'right' nowrap>";
 	printf("%.2f", $summaplus);
 	echo "</td><td>*</td>";
 
@@ -459,7 +476,7 @@
 
 	$summa = $summaplus + $summamiinus;
 	echo "<tr><td></td><td></td><td></td><td></td><td></td><td align = 'right'>".t("Yhteensä")."</td>";
-	echo "<td align = 'right'>";
+	echo "<td align = 'right' nowrap>";
 	printf("%.2f", $summa);
 	echo "</td><td>*</td>";
 

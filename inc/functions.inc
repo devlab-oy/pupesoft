@@ -950,12 +950,16 @@ if (!function_exists("avain")) {
 
 		if ($as == '') {
 			$as = $returni;
+			$returnas = "";
 		}
 		else {
 			$as = " ".$as." ";
+			$returnas = " as $as";
 		}
 
 		if ($kieli != $yhtiorow["kieli"]) {
+			$returnas = "";
+			
 			if ($laji == 'join') {
 				if ($joini != '') {
 					$returni = " LEFT JOIN avainsana AS a on ".$joinaa.".yhtio = a.yhtio and ".$joinaa.".".trim($returni)." = a.selite and a.laji = '".$joini.$kieli."' ";
@@ -967,10 +971,10 @@ if (!function_exists("avain")) {
 				}
 			}
 			elseif ($laji == 'select') {
-				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) ".trim($as)." ";
+				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) as ".trim($as)." ";
 			}
 			elseif ($laji == 'select2') {
-				$returni = " if(isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) ".trim($as)." ";
+				$returni = " if(isnull(b.selitetark) or b.selitetark='', ".$joinaa.".".trim($returni).", b.selitetark) as ".trim($as)." ";
 			}
 			elseif ($laji == 'selectcon') {
 				$returni = " if(isnull(a.selitetark) or a.selitetark='', ".$joinaa.".".trim($returni).", a.selitetark) ";
@@ -983,7 +987,7 @@ if (!function_exists("avain")) {
 			$returni = '';
 		}
 
-		return $returni;
+		return $returni.$returnas;
 	}
 
 	/*esimerkki

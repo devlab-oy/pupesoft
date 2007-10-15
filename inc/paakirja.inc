@@ -265,7 +265,6 @@
 
 	if (strlen(trim($tili)) > 0) {
 		$lisa .= " and tiliointi.tilino >= '" . $tili . "' and  tiliointi.tilino <= '" . $tili2 . "'";
-		$lisa2 .= " and tiliointi.tilino >= '" . $tili . "' and  tiliointi.tilino <= '" . $tili2 . "'";
 	}
 
 	if ($kasin != '') {
@@ -357,7 +356,8 @@
 								WHERE tiliointi.yhtio 	= '$kukarow[yhtio]'
 								and tiliointi.korjattu	= ''
 								and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
-								and tiliointi.tilino 	= '$trow[xtilino]'";
+								and tiliointi.tilino 	= '$trow[xtilino]'
+								and $lisa2";
 					$alkres	  = mysql_query($query) or pupe_error($query);					
 					$alkurow  = mysql_fetch_array ($alkres);
 					$kumsumma = $alkurow["saldo"];

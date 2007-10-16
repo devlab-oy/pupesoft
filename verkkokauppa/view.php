@@ -37,7 +37,7 @@ else {
 */
 $id = (int) $_GET["id"];
 
-$query = "select * from liitetiedostot where tunnus='$id' and liitos = 'kalenteri'";
+$query = "select * from liitetiedostot where tunnus='$id' and liitos IN ('kalenteri', 'tuote')";
 $liiteres = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($liiteres) > 0) {

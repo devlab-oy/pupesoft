@@ -1081,6 +1081,7 @@
 			echo "<option value='1' $chk[1]> ".t("20 viimeisintä")."</option>";
 			echo "<option value='2' $chk[2]> ".t("Tilivuoden alusta")."</option>";
 			echo "<option value='3' $chk[3]> ".t("Edellinen tilivuosi")."</option>";
+			echo "<option value='4' $chk[4]> ".t("Kaikki tapahtumat")."</option>";			
 			echo "</select>";
 			echo "</th>";
 
@@ -1133,6 +1134,10 @@
 			elseif ($historia == '3') {
 				$maara = "";
 				$ehto  = " and tapahtuma.laadittu >= date_sub('$yhtiorow[tilikausi_alku]', interval 12 month) and tapahtuma.laadittu <= '$yhtiorow[tilikausi_alku]' ";
+			}
+			elseif ($historia == '4') {
+				$maara = "";
+				$ehto  = "";
 			}
 			else {
 				$maara = "LIMIT 20";

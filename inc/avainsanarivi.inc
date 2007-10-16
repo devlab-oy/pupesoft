@@ -473,7 +473,9 @@
 		$jatko  = 0;
 	}
 	
-	if ($sel55 == "selected" and mysql_field_name($result, $i) == "selitetark") {
+	if ($sel55 == "selected" and mysql_field_name($result, $i) == "selitetark" or
+		$sel12 == "selected" and mysql_field_name($result, $i) == "selitetark_3" or
+		$sel11 == "selected" and mysql_field_name($result, $i) == "selitetark_3") {
 		$ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 		$jatko = 0;
 	}
@@ -498,6 +500,5 @@
 			$trow[$i] = $ajarjestys;
 		}
 	}
-
 
 ?>

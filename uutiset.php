@@ -30,6 +30,14 @@ elseif ($toim == "RYJO") {
 	echo "<font class='head'>".t("Ryjo")."</font><hr>";
 	$tyyppi = "ryjo";
 }
+elseif ($toim == "VERKKOKAUPPAUUTINEN") {
+	echo "<font class='head'>".t("Verkkokaupan Uutiset")."</font><hr>";
+	$tyyppi = $toim;
+}
+elseif ($toim == "VERKKOKAUPPATARJOUS") {
+	echo "<font class='head'>".t("Verkkokaupan Tarjoukset")."</font><hr>";
+	$tyyppi = "ryjo";
+}
 
 if ($toim == "VIIKKOPALAVERI" or $toim == "ASIAKASPALVELU" or $toim == "RYJO") {
 	$kulisa = "";
@@ -96,7 +104,8 @@ if ($tee == 'LISAA') {
 						tapa 		= '$tyyppi',
 						tyyppi 		= '$tyyppi',
 						yhtio 		= '$kukarow[yhtio]',
-						pvmalku 	= now(), ";
+						pvmalku 	= now(), 
+						luontiaika	= now(),";
 			$postquery = "";
 		}
 

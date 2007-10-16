@@ -235,7 +235,7 @@
 	
 	//	Verkkokaupassa selataan vain verkkokauppatuotteita
 	if($verkkokauppa != "") {
-		$lisa .= " and hinnastoon = 'W'";
+		$lisa .= " and hinnastoon = 'W' and tuotemerkki != ''";
 	}
 	
 	if (strlen($ojarj) > 0) {
@@ -489,7 +489,7 @@
 		while ($row = mysql_fetch_array($result)) {
 			
 			
-			if($edtuoteno != $row["tuoteno"]) {
+			if($edtuoteno != $row["sorttauskentta"]) {
 				if($verkkokauppa != "") {
 					
 					//	Werkkokauppa aloitetaan aina ryhmä tai osasto kentällä joka on myös otsikko!
@@ -499,9 +499,9 @@
 						$o["style"]	= "style='text-align: center'";						
 						$otsikot[] = $o;
 					}
-					
+										
 					//	Merkki on tyhjä, se vaatii myös väliotsikon
-					if($haku[5] == "" and strtolower($edtuotemerkki) != strtolower($row["tuotemerkki"])) {
+					if(strtolower($edtuotemerkki) != strtolower($row["tuotemerkki"])) {
 						$o["laji"] 	= "merkki";
 						$o["class"] = "message";
 						$o["style"]	= "style='text-align: left'";						
@@ -509,18 +509,6 @@
 					
 						$valiotsikko = "OK";						
 					}
-
-					//	try on tyhjä, se vaatii myös väliotsikon
-					if($haku[4] == "" and $edtry != $row["edtry"]) {
-						$o["laji"] 	= "try";
-						$o["class"] = "message";
-						$o["style"]	= "style='text-align: left'";						
-						$otsikot[] = $o;						
-					
-						$valiotsikko = "OK";
-					}
-					
-					
 				}
 				else {
 					$class="message";
@@ -640,14 +628,19 @@
 				
 					if(mysql_num_rows($sarjares) > 0) {
 						$nimitys .= "<table width='100%' valign='top'>";
-
+						
+						$edsarjanimitys = "DUMMYDADA";
 						while ($sarjarow = mysql_fetch_array($sarjares)) {
-							if($sarjarow["nimitys"] != "") {
-								$nimitys .= "<tr><td valign='top'>$sarjarow[nimitys]</td></tr>";
+							if($edsarjanimitys != $sarjarow["nimitys"]) {
+								if($sarjarow["nimitys"] != "") {
+									$nimitys .= "<tr><td valign='top'>$sarjarow[nimitys]</td></tr>";
+								}
+								else {
+									$nimitys .= "<tr><td valign='top'>$row[nimitys]</td></tr>";
+								}								
 							}
-							else {
-								$nimitys .= "<tr><td valign='top'>$row[nimitys]</td></tr>";
-							}
+							
+							$edsarjanimitys = $sarjarow["nimitys"];
 						}
 					
 						$nimitys .= "</table>";

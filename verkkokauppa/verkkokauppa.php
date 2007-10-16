@@ -5,32 +5,116 @@ $_GET["ohje"] = "off";
 require ("parametrit.inc");
 
 if(!function_exists("menu")) {
-	function menu($osasto="") {
+	function menu($osasto="", $try="") {
 		global $yhtiorow, $kukarow;
 		
 		$val = "";
 		
-
 		if($osasto == "") {
+			$val 		=  "<a href='verkkokauppa.php'>".t("Alkuun")."</a><br>";
+			
 			$query = "	SELECT selite osasto, selitetark nimi
 			 			FROM avainsana
-						WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'OSASTO'
+						WHERE yhtio='{$kukarow["yhtio"]}' and laji = 'OSASTO' and selitetark_2 = 'verkkokauppa'
 						ORDER BY selitetark";
 			$ores = mysql_query($query) or pupe_error($query);
 			while($orow = mysql_fetch_array($ores)) {
-				$val .=  "<a id='{$orow["osasto"]}_P' href='javascript:sndReq(\"{$orow["osasto"]}_T\", \"verkkokauppa.php?tee=menu&osasto={$orow["osasto"]}\", \"{$orow["osasto"]}_P\", true)'>{$orow["nimi"]}</a><br><div id='{$orow["osasto"]}_T'></div>";
+				$target		= "{$orow["osasto"]}_T";
+				$parent		= "{$orow["osasto"]}_P";
+				$onclick	= "document.getElementById(\"$target\").style.display==\"none\"? sndReq(\"selain\", \"verkkokauppa.php?tee=kuvaus&osasto={$orow["osasto"]}\", \"\", false) : \"\";";
+				$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto={$orow["osasto"]}\", \"$parent\", false, true);";
+				$val .=  "<a id='$parent' onclick='$onclick' href='$href'>{$orow["nimi"]}</a><br><div id='$target' style='display: none'></div>";
 			}
 		}
-		else {
+		elseif($try == "") {
 			$query = "	SELECT distinct try, selitetark trynimi
 			 			FROM tuote
 						JOIN avainsana ON tuote.yhtio = avainsana.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY'
-						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P' and hinnastoon = 'W'
+						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P' and hinnastoon = 'W' and tuotemerkki != ''
 						ORDER BY selitetark";
 			$tryres = mysql_query($query) or pupe_error($query);
 			while($tryrow = mysql_fetch_array($tryres)) {
-				$val .=  "&nbsp;&nbsp;&nbsp;&nbsp;<a id='{$tryrow["try"]}_T' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto={$osasto}&try={$tryrow["try"]}\", \"\", true);'>{$tryrow["trynimi"]}</a><br>";
+				$target		= "{$osasto}_{$tryrow["try"]}_P";
+				$parent		= "{$osasto}_{$tryrow["try"]}_T";
+				$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$osasto&try={$tryrow["try"]}\", \"\", true); sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try={$tryrow["try"]}&tuotemerkki=\", \"\", true);";
+				
+				$val .=  "&nbsp;&nbsp;&nbsp;&nbsp;<a id='$parent' href='$href'>{$tryrow["trynimi"]}</a><br><div id=\"$target\" style='display: none'></div>";
 			}
+		}
+		else {
+			$query = "	SELECT distinct tuotemerkki
+			 			FROM tuote
+						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try = '$try' and status != 'P' and hinnastoon = 'W' and tuotemerkki != ''
+						ORDER BY tuotemerkki";
+			$meres = mysql_query($query) or pupe_error($query);
+			while($merow = mysql_fetch_array($meres)) {
+				$val .=  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki={$merow["tuotemerkki"]}\", \"\", true);'>{$merow["tuotemerkki"]}</a><br>";
+			}
+		}
+		
+		return $val;
+	}
+}
+
+if(!function_exists("kuvaus")) {
+	function kuvaus($osasto="", $try="") {
+		global $yhtiorow, $kukarow;
+
+		$val = "";
+		
+		if($osasto == "") {
+			$query = "	SELECT *
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]' and laji = 'OSASTO' and selitetark_2 = 'verkkokauppa'";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result) > 0) {
+				while($row = mysql_fetch_array($result)) {
+					$val .= "<font class='head'>{$row["selitetark"]}</font><br>{$row["selitetark_3"]}<br><br>";
+				}
+			}
+			else {
+				
+			}
+		}
+		elseif($try == "") {
+			$query = "	SELECT distinct selitetark, selitetark_3
+			 			FROM tuote
+						JOIN avainsana ON tuote.yhtio = avainsana.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY'
+						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P' and hinnastoon = 'W' and tuotemerkki != ''
+						ORDER BY selitetark";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result) > 0) {
+				while($row = mysql_fetch_array($result)) {
+					$val .= "<font class='head'>{$row["selitetark"]}</font><br>{$row["selitetark_3"]}<br><br>";
+				}
+			}
+			else {
+
+			}	
+		}
+		return $val;
+	}
+}
+
+if(!function_exists("uutiset")) {
+	function uutiset() {
+		global $yhtiorow, $kukarow;
+
+		$val = "";
+		
+		$query = "	SELECT *
+					FROM kalenteri
+					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'VERKKOKAUPPAUUTINEN'
+					ORDER BY luontiaika DESC
+					LIMIT 8";
+		$result = mysql_query($query) or pupe_error($query);
+		while($row = mysql_fetch_array($result)) {
+			if($row["kentta03"] > 0) {
+				$val .= "<img class='uutinen' src='view.php?id=$row[kentta03]'><br>";
+			}
+			
+			$val .= "<font class='head'>{$row["kentta01"]}</font><br>";
+			$val .= "<font class='message'>{$row["kentta02"]}</font><hr>";
 		}
 		
 		return $val;
@@ -39,6 +123,14 @@ if(!function_exists("menu")) {
 
 if($tee == "menu") {
 	die(menu($osasto, $try));
+}
+
+if($tee == "kuvaus") {
+	die(kuvaus($osasto, $try));	
+}
+
+if($tee == "uutiset") {
+	die(uutiset($osasto, $try));	
 }
 
 if($tee == "tuotteen_lisatiedot") {
@@ -328,14 +420,19 @@ if($tee == "selaa") {
 	$poistetut 	= "";
 	$poistuvat 	= "";
 	$lisatiedot	= "";
-	$ojarj		= "tuote_wrapper.tuotemerkki";
+	if($tuotemerkki != "") {
+		$ojarj		= "sorttauskentta, tuote_wrapper.tuotemerkki IN ('$tuotemerkki') DESC";
+	}
+	else {
+		$ojarj		= "tuote_wrapper.tuotemerkki";
+	}
 	
 	$haku[0]	= "";	
 	$haku[1]	= "";	
 	$haku[2]	= "";
 	$haku[3]	= $osasto;	
 	$haku[4]	= $try;
-	$haku[5]	= "";	
+	$haku[5]	= $tuotemerkki;	
 	
 	if($kukarow["kuka"] != "www" and $kukarow["kesken"] == 0) {
 		require_once("luo_myyntitilausotsikko.inc");
@@ -378,7 +475,8 @@ if($tee == "") {
 	
 	echo "	<div class='login' id='login'>$login_screen</div>
 			<div class='menu' id='menu'>".menu()."</div>
-			<div class='selain' id='selain'></div>
+			<div class='selain' id='selain'>".kuvaus()."</div>
+			<div class='uutiset' id='uutiset'>".uutiset()."</div>
 			</body></html>";
 }
 

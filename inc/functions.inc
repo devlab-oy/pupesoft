@@ -2098,61 +2098,104 @@ if(!function_exists("enable_ajax")) {
 
 <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
 <!--
-	function createRequestObject() {
-		var ro;
-		var browser = navigator.appName;
+	var toggeled = Array();
+	function AJAXInteraction(urli, id, data, href) {
+		
+		var http = createRequestObject();
+		http.onreadystatechange = handleResponse;
+		
+		function createRequestObject() {
+			var ro;
+			var browser = navigator.appName;
 
-		if (browser == "Microsoft Internet Explorer") {
-			ro = new ActiveXObject("Microsoft.XMLHTTP");
-		}
-		else {
-			ro = new XMLHttpRequest();
-		}
-		return ro;
-	}
-
-	var http = createRequestObject();
-
-	function sndReq(div, urli, href, load, method, data) {
-
-		id = div;
-
-		if (load) {
-			document.getElementById(id).innerHTML = "<div style='filter:alpha(opacity=0); -moz-opacity:0.7; opacity: 0.7; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0c0c0c;' z-index: 100><img style='position: absolute; top: 50%; left: 50%;' src='<?php echo $imgUrl; ?>'></div>";
+			if (browser == "Microsoft Internet Explorer") {
+				ro = new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			else {
+				ro = new XMLHttpRequest();
+			}
+			return ro;
 		}
 
-		if(method == "post") {
+		function handleResponse() {
+			if (http.readyState == 4) {
+				var response = http.responseText;
+				document.getElementById(id).innerHTML = response;
+			}
+		}
+		
+		this.doPost = function() {
 			http.open('post', urli, true);
 			http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 			http.send(data);
 		}
-		else {
+		
+		this.doGet = function() {			
 			http.open('get', urli + '&' + data);
+			http.send(null);			
+		}
+		
+		this.chgHref = function() {
+			document.getElementById(href).href = 'javascript:toggleGroup("' + id + '");';
+			toggeled.push(id);
 		}
 
-		http.onreadystatechange = handleResponse;
-		http.send(null);
-
-		if (href) {
-			chgHref(href, 'javascript:toggleGroup("' + id + '")');
+		this.unToggle = function() {
+			unToggle(id);
+			document.getElementById(href).href = document.getElementById(href).href+' unToggle("' + id + '");';
 		}
-
-		document.getElementById(id).style.display = 'block';
-
+				
+		this.showLoader = function() {
+			document.getElementById(id).innerHTML = "<div style='filter:alpha(opacity=0); -moz-opacity:0.7; opacity: 0.7; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0c0c0c;' z-index: 100><img style='position: absolute; top: 50%; left: 50%;' src='<?php echo $imgUrl; ?>'></div>";
+		}
+		
+		this.visible = function() {
+			document.getElementById(id).style.display = 'block';
+		}
 	}
 
-	function handleResponse() {
-		if (http.readyState == 4) {
-			var response = http.responseText;
-			document.getElementById(id).innerHTML = response;
+	function sndReq(div, urli, href, load, unToggle, method, data) {
+				
+		//	Luodaan uudi instanssi
+		var ai = new AJAXInteraction(urli, div, data, href);
+
+		//	Näytetään latausanimaatio
+		if(load) {
+			ai.showLoader();
 		}
+
+		//	Jos päivitetään togglegrouppaus
+		if(href) {
+			ai.chgHref();
+		}
+
+		if(unToggle) {
+			ai.unToggle();
+		}
+
+		//	Otetaan yhteydet
+		if(method == 'post') {
+			ai.doPost();
+		}
+		else {
+			ai.doGet();
+		}
+		
+		//	Varmistetaan näkyvyys
+		ai.visible();
+		
 	}
 
-	function chgHref(id, urli) {
-		document.getElementById(id).href = urli;
+	function unToggle(id) {
+		for (x in toggeled) {
+			if(toggeled[x] != id) {
+				document.getElementById(toggeled[x]).style.display = 'none';
+			}
+		}
 	}
 
 	function toggleGroup(id) {
+		
 		if (document.getElementById(id).style.display != 'none') {
 			document.getElementById(id).style.display = 'none';
 		}
@@ -2161,7 +2204,7 @@ if(!function_exists("enable_ajax")) {
 		}
 	}
 
-	function ajaxPost(formID, urli , minne, href, load, method) {
+	function ajaxPost(formID, urli , minne, href, load, unToggle, method) {
 
 		obj = document.getElementById(formID);
 		getstr = "";
@@ -2191,7 +2234,7 @@ if(!function_exists("enable_ajax")) {
 			}
 		}
 
-		sndReq(minne, urli, href, load, method, getstr);
+		sndReq(minne, urli, href, load, unToggle, method, getstr);
 	}
 
 //-->

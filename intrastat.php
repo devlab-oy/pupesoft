@@ -84,7 +84,7 @@
 		$query = "	(SELECT
 					tuote.tullinimike1,
 					lasku.maa_lahetys,
-					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
+					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
 					lasku.maa_maara,
 					lasku.laskunro,
 					tuote.tuoteno,
@@ -122,7 +122,7 @@
 					(SELECT
 					tuote.tullinimike1,
 					lasku.maa_lahetys,
-					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
+					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
 					lasku.maa_maara,
 					lasku.laskunro,
 					tuote.tuoteno,
@@ -155,7 +155,7 @@
 					(SELECT
 					tuote.tullinimike1,
 					lasku.maa_lahetys,
-					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
+					(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa,
 					lasku.maa_maara,
 					lasku.tunnus laskunro,
 					tuote.tuoteno,
@@ -184,7 +184,7 @@
 
 					ORDER BY laskunro, tuoteno ";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		$nim     = "";
 		$lask    = 1;
 		$arvoyht = 0;

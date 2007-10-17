@@ -684,7 +684,7 @@
 							if(strpos($kommentti, "###") !== FALSE) {
 								list($o, $v) = explode("###", $kommentti);
 
-								$oikpos = $pdf->strlen($o, $norm);
+								$oikpos = $pdf->strlen($o, $boldi);
 
 								if ($oikpos > $maxoik) {
 									$maxoik = $oikpos;
@@ -697,7 +697,7 @@
 							if (strpos($kommentti, "###") !== false) {
 								list($o, $v) = explode("###", $kommentti);
 
-								$pdf->draw_text(35, $pohja, trim($o), $thispage, $norm);
+								$pdf->draw_text(35, $pohja, trim($o), $thispage, $boldi);
 								$pdf->draw_text(35+$maxoik+5, $pohja, trim($v), $thispage, $norm);
 							}
 							else {

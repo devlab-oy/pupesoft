@@ -26,6 +26,9 @@ if (!function_exists('elmaedi_otsik')) {
 		fputs($tootedi, "IRFFPK_NU:$lasrow[tunnus]\n");
 		fputs($tootedi, "IRFFVN_NU:$lasrow[viesti]\n");
 		fputs($tootedi, "INADSE_CC:$lasrow[viesti]\n");
+		if ($yhtiorow["pankkitili1"] != "") fputs($tootedi, "INADSE_FI:BF @$yhtiorow[pankkitili1]\n");
+		if ($yhtiorow["pankkitili2"] != "") fputs($tootedi, "INADSE_FI:BF @$yhtiorow[pankkitili2]\n");
+		if ($yhtiorow["pankkitili3"] != "") fputs($tootedi, "INADSE_FI:BF @$yhtiorow[pankkitili3]\n");
 		fputs($tootedi, "IRFFCO_NU:$lasrow[viitetxt]\n");
 		fputs($tootedi, "IFTXAAITX:\n");
 		fputs($tootedi, "IFTXAAITX:\n");
@@ -66,7 +69,10 @@ if (!function_exists('elmaedi_otsik')) {
 		}
 
 		fputs($tootedi, "IRFFPQ_NU:$lasrow[viite]\n");
-		fputs($tootedi, "IMOA39_MA:$lasrow[summa]\n");
+		fputs($tootedi, "IMOA39_MA:$lasrow[summa]\n");								// laskun verollinen loppusumma
+		fputs($tootedi, "IMOA125MA:$lasrow[arvo]\n");								// laskun veroton loppusumma
+		fputs($tootedi, "IMOA124MA:".($lasrow["summa"] - $lasrow["arvo"])."\n");	// veron osuus
+
 	}
 }
 
@@ -105,7 +111,7 @@ if (!function_exists('elmaedi_rivi')) {
 		fputs($tootedi, "ILIN203MA:$tilrow[rivihinta]\n");
 		if ($tilrow['ale'] > 0) {
 			fputs($tootedi, "ILIN___AL:\n");
-			fputs($tootedi, "ILIN___PA:$tilrow[ale]\n");
+			fputs($tootedi, "ILIN___PA:1  @$tilrow[ale]\n");
 		}
 		fputs($tootedi, "ILINVATTX:$tilrow[alv]\n");
 		fputs($tootedi, "ILIN69_DT:" . sprintf("%-35.35s",vlas_dateconv($tilrow["toimitettuaika"])) . "@102\n");

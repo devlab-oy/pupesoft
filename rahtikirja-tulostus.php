@@ -220,8 +220,12 @@
 
 				while ($pak = mysql_fetch_array($pakka)) {
 					$pakkaus[]   = $pak[0];
-					$kilot[]     = $pak[1];
-					$kollit[]    = $pak[2];
+					
+					if ($pak[1] > 0 or $pak[2] > 0) {
+						$kilot[]     = $pak[1];
+						$kollit[]    = $pak[2];
+					}
+					
 					$kuutiot[]   = $pak[3];
 					$lavametri[] = $pak[4];
 					$kilotyht   += $pak[1];

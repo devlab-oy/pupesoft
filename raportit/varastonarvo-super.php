@@ -54,239 +54,9 @@
 
 			//-->
 			</script>";
-
-		// piirrell‰‰n formi
-		echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
-
-		echo "<table><tr valign='top'><td><table><tr><td class='back'>";
-
-		// n‰ytet‰‰n soveltuvat osastot
-		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
-		$res2  = mysql_query($query) or die($query);
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
-		}
-
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Tuoteosasto").":</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
-
-		while ($rivi = mysql_fetch_array($res2)) {
-			$mul_check = '';
-			if ($mul_osasto!="") {
-				if (in_array($rivi['selite'],$mul_osasto)) {
-					$mul_check = 'CHECKED';
-				}
-			}
-
-			echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
-		}
-
-		echo "</table>";
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "</div>";
-		}
-
-		echo "</table>";
-		echo "</td>";
-
-		echo "<td><table><tr><td valign='top' class='back'>";
-
-		// n‰ytet‰‰n soveltuvat tryt
-		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
-		$res2  = mysql_query($query) or die($query);
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
-		}
-
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Tuoterym‰").":</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
-
-		while ($rivi = mysql_fetch_array($res2)) {
-			$mul_check = '';
-			if ($mul_try!="") {
-				if (in_array($rivi['selite'],$mul_try)) {
-					$mul_check = 'CHECKED';
-				}
-			}
-
-			echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
-		}
-
-		echo "</table>";
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "</div>";
-		}
-
-		echo "</table>";
-		echo "</td>";
-
-		echo "<td><table><tr><td valign='top' class='back'>";
-
-		// n‰ytet‰‰n soveltuvat tuotemerkit
-		$query = "	SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki) WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != '' ORDER BY tuotemerkki";
-		$res2  = mysql_query($query) or die($query);
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "<div style='height:265;overflow:auto;'>";
-		}
-
-		echo "<table>";
-		echo "<tr><th colspan='2'>".t("Tuotemerkki").":</th></tr>";
-		echo "<tr><td><input type='checkbox' name='mul_tmr' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
-
-		while ($rivi = mysql_fetch_array($res2)) {
-			$mul_check = '';
-			if ($mul_tmr!="") {
-				if (in_array($rivi['tuotemerkki'], $mul_tmr)) {
-					$mul_check = 'CHECKED';
-				}
-			}
-
-			echo "<tr><td><input type='checkbox' name='mul_tmr[]' value='$rivi[tuotemerkki]' $mul_check></td><td> $rivi[tuotemerkki] </td></tr>";
-		}
-
-		echo "</table>";
-
-		if (mysql_num_rows($res2) > 11) {
-			echo "</div>";
-		}
-
-		echo "</table>";
-		echo "</td>";
-
-		echo "</tr>";
-		echo "</table>";
-
-
-		if ($osasto != "") {
-			$rukOchk = "CHECKED";
-		}
-		else {
-			$rukOchk = "";
-		}
-		if ($tuoteryhma != "") {
-			$rukTchk = "CHECKED";
-		}
-		else {
-			$rukTchk = "";
-		}
-
-		echo "<br><table>
-			<tr>
-			<th>".t("Listaa tuotteet jotka ei kuulu mihink‰‰n osastoon")."</th>
-			<td><input type='checkbox' name='osasto' value='tyhjat' $rukOchk></td>
-			</tr>
-			<tr>
-			<th>".t("Listaa tuotteet jotka ei kuulu mihink‰‰n tuoteryhm‰‰n")."</th>
-			<td><input type='checkbox' name='tuoteryhma' value='tyhjat' $rukTchk></td>
-			</tr></table>";
-
-
-		echo "<br><table>";
-
-		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
-		$vares = mysql_query($query) or pupe_error($query);
-
-		echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
-			. t('Saat kaikki varastot jos et valitse yht‰‰n')
-			. "</span></th>
-		    <td>";
-
-		$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
-
-        while ($varow = mysql_fetch_array($vares)) {
-			$sel = '';
-			if (in_array($varow['tunnus'], $varastot)) {
-				$sel = 'checked';
-			}
-
-			echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
-		}
-
-		echo "</td></tr>";
-		echo "</table>";
-
-		echo "<br><table>";
-		echo "<tr>";
-		echo "<th>Syˆt‰ vvvv-kk-pp:</th>";
-		echo "<td colspan='2'><input type='text' name='vv' size='7' value='$vv'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='pp' size='5' value='$pp'></td>";
-		echo "</tr>";
-
-		echo "<tr>";
-		echo "<th>Tyyppi:</th>";
-
-		$sel1 = "";
-		$sel2 = "";
-		$sel3 = "";
-
-		if ($tyyppi == "A") {
-			$sel1 = "SELECTED";
-		}
-		elseif($tyyppi == "B") {
-			$sel2 = "SELECTED";
-		}
-		elseif($tyyppi == "C") {
-			$sel3 = "SELECTED";
-		}
-
-		echo "<td>
-				<select name='tyyppi'>
-				<option value='A' $sel1>".t("N‰ytet‰‰n tuotteet joilla on saldoa")."</option>
-				<option value='B' $sel2>".t("N‰ytet‰‰n tuotteet joilla ei ole saldoa")."</option>
-				<option value='C' $sel3>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
-				</select>
-				</td>";
-		echo "</tr>";
-
-		echo "<tr>";
-		echo "<th>Varastonarvorajaus:</th>";
-		echo "<td>Alaraja:<input type='text' name='alaraja' size='7' value='$alaraja'> Yl‰raja:<input type='text' name='ylaraja' size='7' value='$ylaraja'></td>";
-		echo "</tr>";
-
-
-		$sel1 = "";
-		$sel2 = "";
-
-		if ($summaustaso == "S") {
-			$sel1 = "SELECTED";
-		}
-		elseif($summaustaso == "P") {
-			$sel2 = "SELECTED";
-		}
-		echo "<tr>";
-		echo "<th>Summaustaso:</th>";
-
-		echo "<td>
-				<select name='summaustaso'>
-				<option value='S' $sel1>".t("Varastonarvo summattuna")."</option>
-				<option value='P' $sel2>".t("Varastonarvo varastopaikoittain (HUOM: Vain nykyinen varastonarvo lasketaan.)")."</option>
-				</select>
-				</td>";
-		echo "</tr>";
-
-
-		echo "<tr><th valign='top'>".t("Tuotelista")."</th><td><textarea name='tuotteet' rows='5' cols='15'>$tuotteet</textarea></td></tr>";
-
-		echo "</table>";
-		echo "<br>";
-
-		if($valitaan_useita == '') {
-			echo "<input type='submit' value='Laske varastonarvot'>";
-		}
-		else {
-			echo "<input type='submit' name='valitaan_useita' value='Laske varastonarvot'>";
-		}
-
-		echo "</form>";
-
-
-		if (!empty($varastot) or count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tmr) > 0 or $tuotteet != '' or $tuoteryhma != '' or $osasto != '') {
+			
+			
+		if ($supertee == "RAPORTOI") {
 
 			$lisa  = "";
 			$lisa2 = "";
@@ -684,10 +454,242 @@
 			echo "<table>";
 			echo "<tr><th>Pvm</th><th>Varastonarvo</th></tr>";
 			echo "<tr><td>$vv-$kk-$pp</td><td align='right'>".sprintf("%.2f",$varvo)."</td></tr>";
-			echo "</table>";
+			echo "</table><br><br>";
 
 		}
+			
 
+		// piirrell‰‰n formi
+		echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
+		echo "<input type='hidden' name='supertee' value='RAPORTOI'>";
+
+		echo "<table><tr valign='top'><td><table><tr><td class='back'>";
+
+		// n‰ytet‰‰n soveltuvat osastot
+		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
+		$res2  = mysql_query($query) or die($query);
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+
+		echo "<table>";
+		echo "<tr><th colspan='2'>".t("Tuoteosasto").":</th></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+
+		while ($rivi = mysql_fetch_array($res2)) {
+			$mul_check = '';
+			if ($mul_osasto!="") {
+				if (in_array($rivi['selite'],$mul_osasto)) {
+					$mul_check = 'CHECKED';
+				}
+			}
+
+			echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+		}
+
+		echo "</table>";
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+
+		echo "</table>";
+		echo "</td>";
+
+		echo "<td><table><tr><td valign='top' class='back'>";
+
+		// n‰ytet‰‰n soveltuvat tryt
+		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
+		$res2  = mysql_query($query) or die($query);
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+
+		echo "<table>";
+		echo "<tr><th colspan='2'>".t("Tuoterym‰").":</th></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+
+		while ($rivi = mysql_fetch_array($res2)) {
+			$mul_check = '';
+			if ($mul_try!="") {
+				if (in_array($rivi['selite'],$mul_try)) {
+					$mul_check = 'CHECKED';
+				}
+			}
+
+			echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+		}
+
+		echo "</table>";
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+
+		echo "</table>";
+		echo "</td>";
+
+		echo "<td><table><tr><td valign='top' class='back'>";
+
+		// n‰ytet‰‰n soveltuvat tuotemerkit
+		$query = "	SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki) WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != '' ORDER BY tuotemerkki";
+		$res2  = mysql_query($query) or die($query);
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+
+		echo "<table>";
+		echo "<tr><th colspan='2'>".t("Tuotemerkki").":</th></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_tmr' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+
+		while ($rivi = mysql_fetch_array($res2)) {
+			$mul_check = '';
+			if ($mul_tmr!="") {
+				if (in_array($rivi['tuotemerkki'], $mul_tmr)) {
+					$mul_check = 'CHECKED';
+				}
+			}
+
+			echo "<tr><td><input type='checkbox' name='mul_tmr[]' value='$rivi[tuotemerkki]' $mul_check></td><td> $rivi[tuotemerkki] </td></tr>";
+		}
+
+		echo "</table>";
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+
+		echo "</table>";
+		echo "</td>";
+
+		echo "</tr>";
+		echo "</table>";
+
+
+		if ($osasto != "") {
+			$rukOchk = "CHECKED";
+		}
+		else {
+			$rukOchk = "";
+		}
+		if ($tuoteryhma != "") {
+			$rukTchk = "CHECKED";
+		}
+		else {
+			$rukTchk = "";
+		}
+
+		echo "<br><table>
+			<tr>
+			<th>".t("Listaa tuotteet jotka ei kuulu mihink‰‰n osastoon")."</th>
+			<td><input type='checkbox' name='osasto' value='tyhjat' $rukOchk></td>
+			</tr>
+			<tr>
+			<th>".t("Listaa tuotteet jotka ei kuulu mihink‰‰n tuoteryhm‰‰n")."</th>
+			<td><input type='checkbox' name='tuoteryhma' value='tyhjat' $rukTchk></td>
+			</tr></table>";
+
+
+		echo "<br><table>";
+
+		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+		$vares = mysql_query($query) or pupe_error($query);
+
+		echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
+			. t('Saat kaikki varastot jos et valitse yht‰‰n')
+			. "</span></th>
+		    <td>";
+
+		$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+
+        while ($varow = mysql_fetch_array($vares)) {
+			$sel = '';
+			if (in_array($varow['tunnus'], $varastot)) {
+				$sel = 'checked';
+			}
+
+			echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
+		}
+
+		echo "</td></tr>";
+		echo "</table>";
+
+		echo "<br><table>";
+		echo "<tr>";
+		echo "<th>Syˆt‰ vvvv-kk-pp:</th>";
+		echo "<td colspan='2'><input type='text' name='vv' size='7' value='$vv'><input type='text' name='kk' size='5' value='$kk'><input type='text' name='pp' size='5' value='$pp'></td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>Tyyppi:</th>";
+
+		$sel1 = "";
+		$sel2 = "";
+		$sel3 = "";
+
+		if ($tyyppi == "A") {
+			$sel1 = "SELECTED";
+		}
+		elseif($tyyppi == "B") {
+			$sel2 = "SELECTED";
+		}
+		elseif($tyyppi == "C") {
+			$sel3 = "SELECTED";
+		}
+
+		echo "<td>
+				<select name='tyyppi'>
+				<option value='A' $sel1>".t("N‰ytet‰‰n tuotteet joilla on saldoa")."</option>
+				<option value='B' $sel2>".t("N‰ytet‰‰n tuotteet joilla ei ole saldoa")."</option>
+				<option value='C' $sel3>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
+				</select>
+				</td>";
+		echo "</tr>";
+
+		echo "<tr>";
+		echo "<th>Varastonarvorajaus:</th>";
+		echo "<td>Alaraja:<input type='text' name='alaraja' size='7' value='$alaraja'> Yl‰raja:<input type='text' name='ylaraja' size='7' value='$ylaraja'></td>";
+		echo "</tr>";
+
+
+		$sel1 = "";
+		$sel2 = "";
+
+		if ($summaustaso == "S") {
+			$sel1 = "SELECTED";
+		}
+		elseif($summaustaso == "P") {
+			$sel2 = "SELECTED";
+		}
+		echo "<tr>";
+		echo "<th>Summaustaso:</th>";
+
+		echo "<td>
+				<select name='summaustaso'>
+				<option value='S' $sel1>".t("Varastonarvo summattuna")."</option>
+				<option value='P' $sel2>".t("Varastonarvo varastopaikoittain (HUOM: Vain nykyinen varastonarvo lasketaan.)")."</option>
+				</select>
+				</td>";
+		echo "</tr>";
+
+
+		echo "<tr><th valign='top'>".t("Tuotelista")."</th><td><textarea name='tuotteet' rows='5' cols='15'>$tuotteet</textarea></td></tr>";
+
+		echo "</table>";
+		echo "<br>";
+
+		if($valitaan_useita == '') {
+			echo "<input type='submit' value='Laske varastonarvot'>";
+		}
+		else {
+			echo "<input type='submit' name='valitaan_useita' value='Laske varastonarvot'>";
+		}
+
+		echo "</form>";
+		
 		require ("../inc/footer.inc");
 	}
 ?>

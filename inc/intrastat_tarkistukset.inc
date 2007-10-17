@@ -10,7 +10,7 @@ $specutxt = "";
 $lopetus  = "intrastat.php////tee=tulosta//kk=$kk//vv=$vv//tapa=$tapa//outputti=$outputti//lahetys=nope";
 
 // k‰yd‰‰n l‰pi kaikki tuotteet
-$query = "	select *, (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa
+$query = "	select *, (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno and tuotteen_toimittajat.alkuperamaa!='' ORDER BY if(alkuperamaa='$yhtiorow[maa]','2','1') LIMIT 1) alkuperamaa
 			from tuote where tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno in ($row[kaikkituotteet])";
 $intrtuores = mysql_query($query) or pupe_error($query);
 

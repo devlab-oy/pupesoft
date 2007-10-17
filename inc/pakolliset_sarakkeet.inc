@@ -77,7 +77,8 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "tuoteperhe" :
-				$pakolliset = array("ISATUOTENO","TUOTENO","TYYPPI");
+				$pakolliset  = array("ISATUOTENO","TUOTENO","TYYPPI");
+				$wherelliset = array("ISATUOTENO","TUOTENO","TYYPPI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "rahtimaksut" :

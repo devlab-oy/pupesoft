@@ -318,7 +318,8 @@
 							and tunnus	 		= '$kukarow[kesken]'
 							and liitostunnus	= 0";
 				$result = mysql_query($query) or pupe_error($query);
-				if(mysql_affected_rows($restul)>0) {
+				
+				if(mysql_affected_rows() > 0) {
 					echo "<font class='message'>".t("HUOM! Uudet otsikkotiedot haettu asiakasrekisteristä.")."</font><br>";
 				}
 				

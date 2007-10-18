@@ -319,6 +319,19 @@ if (!function_exists('tulosta_tarjous')) {
 			$pdf = alku($pdf, $laskurow,$kieli);
 			$h = 210;
 		}
+		
+		//	Runtech speciaalia.. Lisälauseke
+		if($kukarow["yhtio"] == "RTEC") {
+			$query = "	SELECT tilausrivi.tunnus
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and tuoteno LIKE ('EN1%')
+						LIMIT 1";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result) > 0) {
+				$pdf->write($h, 3, 0, 0, " ".t("Jos Runtechin asiantuntijaa vaaditaan asiakkaan toimesta viipymään tehtaalla pidempään, kuin on sovittu, lisätään loppulaskuun päiväveloitus tuntityöhinnaston kohdan 4 mukaan, sekä matkakulut syntyneiden kulujen mukaan.", $kieli), "norm", "L", "");
+				$h-=$pdf->ln(5);
+			}			
+		}
 
 		if($laskurow["sisviesti1"] != "") {
 			//	Maksusopimus

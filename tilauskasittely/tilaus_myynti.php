@@ -2023,6 +2023,15 @@ if ($tee == '') {
 							and yhtio		= '$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
+			
+			// Poistetaan myös ttehdaslisävarusteet
+			if ($tapa == "POISTA") {
+				$query = "	DELETE FROM tilausrivi
+							WHERE perheid2 	= '$rivitunnus'
+							and otunnus		= '$kukarow[kesken]'
+							and yhtio		= '$kukarow[yhtio]'";
+				$result = mysql_query($query) or pupe_error($query);
+			}
 
 			// Jos muokkaamme tilausrivin paikkaa ja se on speciaalikeissi, S,T,V niin laitetaan $paikka-muuttuja kuntoon
 			if ($tapa != "VAIHDA" and $tilausrivi["var"] == "S" and substr($paikka,0,3) != "@@@") {
@@ -4205,7 +4214,7 @@ if ($tee == '') {
 						if (file_exists("tulosta_vakuutushakemus.inc")) {
 							echo "<option value='VAKUUTUSHAKEMUS'>Vakuutushakemus</option>";
 						}
-						if (file_exists("tulosta_vakuutushakemus.inc")) {
+						if (file_exists("../tyomaarays/tulosta_tyomaarays.inc")) {
 							echo "<option value='TYOMAARAYS'>Työmäärys</option>";
 						}
 						if (file_exists("tulosta_rekisteriilmoitus.inc")) {

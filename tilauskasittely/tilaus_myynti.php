@@ -3326,7 +3326,7 @@ if ($tee == '') {
 						echo "<td $class align='left' valign='top'>&nbsp;</td>";
 					}
 				}
-				else {
+				elseif($kukarow['extranet'] == '') {
 					echo "<td $class align='left' valign='top'>$row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
 				}
 

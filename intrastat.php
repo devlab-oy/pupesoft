@@ -39,7 +39,7 @@
 		$tilastoloppu = '002';
 	}
 
-	echo "<font class='head'>Intrastat-ilmoitukset</font><hr>";
+	echo "<font class='head'>".t("Intrastat-ilmoitukset")."</font><hr>";
 
 	if ($tee == "tulosta") {
 
@@ -193,42 +193,42 @@
 		// tehd‰‰n kaunista ruutukamaa
 		$ulos = "<table>";
 		$ulos .= "<tr>";
-		$ulos .= "<th>Laskunro</th>";
-		$ulos .= "<th>Tuoteno</th>";
-		$ulos .= "<th>Nimitys</th>";
-		$ulos .= "<th>Tullinimike</th>";
-		$ulos .= "<th>KT</th>";
-		$ulos .= "<th>AM</th>";
-		$ulos .= "<th>LM</th>";
-		$ulos .= "<th>MM</th>";
-		$ulos .= "<th>KM</th>";
-		$ulos .= "<th>Rivihinta</th>";
-		$ulos .= "<th>Paino</th>";
-		$ulos .= "<th>Toinen paljous</th>";
-		$ulos .= "<th>Kpl</th>";
+		$ulos .= "<th>".t("Laskunro")."</th>";
+		$ulos .= "<th>".t("Tuoteno")."</th>";
+		$ulos .= "<th>".t("Nimitys")."</th>";
+		$ulos .= "<th>".t("Tullinimike")."</th>";
+		$ulos .= "<th>".t("KT")."</th>";
+		$ulos .= "<th>".t("AM")."</th>";
+		$ulos .= "<th>".t("LM")."</th>";
+		$ulos .= "<th>".t("MM")."</th>";
+		$ulos .= "<th>".t("KM")."</th>";
+		$ulos .= "<th>".t("Rivihinta")."</th>";
+		$ulos .= "<th>".t("Paino")."</th>";
+		$ulos .= "<th>".t("Toinen paljous")."</th>";
+		$ulos .= "<th>".t("Kpl")."</th>";
 		
 		if ($lisavar == "S") {
-			$ulos .= "<th>Tehdaslis‰varusteet</th>";
+			$ulos .= "<th>".t("Tehdaslis‰varusteet")."</th>";
 		}
 		
-		$ulos .= "<th>Virhe</th>";
+		$ulos .= "<th>".t("Virhe")."</th>";
 		$ulos .= "</tr>";
 
 		// tehd‰‰n tilastoarvot listausta
 		$tilastoarvot = "<table>
 			<tr>
 			<th>#</th>
-			<th>Tullinimike</th>
-			<th>Alkuper‰maa</th>
-			<th>L‰hetysmaa</th>
-			<th>M‰‰r‰maa</th>
-			<th>Kuljetusmuoto</th>
-			<th>Kauppat. luonne</th>
-			<th>Tilastoarvo</th>
-			<th>Paino</th>
-			<th>2-paljous</th>
-			<th>2-paljous m‰‰r‰</th>
-			<th>Laskutusarvo</th>
+			<th>".t("Tullinimike")."</th>
+			<th>".t("Alkuper‰maa")."</th>
+			<th>".t("L‰hetysmaa")."</th>
+			<th>".t("M‰‰r‰maa")."</th>
+			<th>".t("Kuljetusmuoto")."</th>
+			<th>".t("Kauppat. luonne")."</th>
+			<th>".t("Tilastoarvo")."</th>
+			<th>".t("Paino")."</th>
+			<th>".t("2-paljous")."</th>
+			<th>".t("2-paljous m‰‰r‰")."</th>
+			<th>".t("Laskutusarvo")."</th>
 			</tr>";
 		// 1. L‰hett‰j‰tietue
 
@@ -360,7 +360,7 @@
 			
 			if ($lisavar == "S") {
 				if ($row["perheid2set"] != "0") {
-					$ulos .= "<td valign='top'>Tehdaslis‰varusteet:<br>Paino: $lisavarrow[paino]<br>Arvo: $lisavarrow[rivihinta]</td>";
+					$ulos .= "<td valign='top'>".t("Tehdaslis‰varusteet").":<br>".t("Paino").": $lisavarrow[paino]<br>".t("Arvo").": $lisavarrow[rivihinta]</td>";
 				}
 				else {
 					$ulos .= "<td valign='top'></td>";
@@ -419,7 +419,7 @@
 
 		// tehd‰‰n kaunista ruutukamaa
 		$ulos .= "<tr>";
-		$ulos .= "<th colspan='9'>Yhteens‰:</th>";
+		$ulos .= "<th colspan='9'>".t("Yhteens‰").":</th>";
 		$ulos .= "<th>$totsumma</th>";
 		$ulos .= "<th>$bruttopaino</th>";
 		$ulos .= "<th></th>";
@@ -435,7 +435,7 @@
 
 		// tehd‰‰n tilaustoarvolistausta
 		$tilastoarvot .= "<tr>";
-		$tilastoarvot .= "<th colspan='7'>Yhteens‰:</td>";
+		$tilastoarvot .= "<th colspan='7'>".t("Yhteens‰").":</td>";
 		$tilastoarvot .= "<th>$arvoyht</th>";
 		$tilastoarvot .= "<th colspan='4'></th>";
 		$tilastoarvot .= "</tr>";
@@ -502,10 +502,10 @@
 				//$to = 'test.ascii.intrastat@tulli.fi'; 	// t‰m‰ on tullin testiosoite
 
 				mail($to, "", $content, $header, "-f $yhtiorow[admin_email]");
-				echo "<font class='message'>Tiedot l‰hetettiin tulliin.</font><br><br>";
+				echo "<font class='message'>".t("Tiedot l‰hetettiin tulliin").".</font><br><br>";
 			}
 			else {
-				echo "<font class='message'>Tietoja EI l‰hetetty tulliin.</font><br><br>";
+				echo "<font class='message'>".t("Tietoja EI l‰hetetty tulliin").".</font><br><br>";
 			}
 
 			// liitet‰‰n mukaan myˆs salaamattomat tiedostot
@@ -528,18 +528,18 @@
 			// katotaan l‰hetet‰‰nkˆ meili k‰ytt‰j‰lle
 			if (($lahetys == "mina" or $lahetys == "mole") and $kukarow["eposti"] != "") {
 				// j‰ l‰hetet‰‰n k‰ytt‰j‰lle
-				mail($kukarow["eposti"], "$yhtiorow[nimi] - Intrastat $tapa-ilmoitus $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[admin_email]");
+				mail($kukarow["eposti"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[admin_email]");
 			}
 
 			// ja aina adminille
-			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - Intrastat $tapa-ilmoitus $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[admin_email]");
+			mail($yhtiorow["admin_email"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content, $header, "-f $yhtiorow[admin_email]");
 
 		}
 		else {
 			if ($virhe != 0) {
-				echo "<font class='error'>Aineistossa on virheit‰! Korjaa virheet!</font><br>";
+				echo "<font class='error'>".t("Aineistossa on virheit‰")."! ".t("Korjaa virheet")."!</font><br>";
 			}
-			echo "<font class='error'>Aineistoa EI l‰hetetty minnek‰‰n.</font><br><br>";
+			echo "<font class='error'>".t("Aineistoa EI l‰hetetty minnek‰‰n").".</font><br><br>";
 		}
 
 		// echotaan oikea taulukko ruudulle
@@ -571,52 +571,52 @@
 
 	<table>
 		<tr>
-			<th>Valitse ilmoitus</th>
+			<th>".t("Valitse ilmoitus")."</th>
 			<td>
 				<select name='tapa'>
-				<option value='vienti' $sel2[vienti]>Vienti-ilmoitus</option>
-				<option value='tuonti' $sel2[tuonti]>Tuonti-ilmoitus</option>
+				<option value='vienti' $sel2[vienti]>".t("Vienti-ilmoitus")."</option>
+				<option value='tuonti' $sel2[tuonti]>".t("Tuonti-ilmoitus")."</option>
 				</select>
 			</td>
 		</tr>
 		<tr>
-			<th>Syˆt‰ kausi (kk-vvvv)</th>
+			<th>".t("Syˆt‰ kausi (kk-vvvv)")."</th>
 			<td>
 				<input type='text' name='kk' value='$kk' size='3'>
 				<input type='text' name='vv' value='$vv' size='5'>
 			</td>
 		</tr>
 		<tr>
-			<th>N‰yt‰ ruudulla</th>
+			<th>".t("N‰yt‰ ruudulla")."</th>
 			<td>
 				<select name='outputti'>
-				<option value='normi'   $sel1[normi]>Normaalilistaus</option>
-				<option value='tilasto' $sel1[tilasto]>Tilastoarvolistaus</option>
+				<option value='normi'   $sel1[normi]>".t("Normaalilistaus")."</option>
+				<option value='tilasto' $sel1[tilasto]>".t("Tilastoarvolistaus")."</option>
 				</select>
 			</td>
 		</tr>
 		<tr>
-			<th>Tietojen l‰hetys s‰hkˆpostilla</th>
+			<th>".t("Tietojen l‰hetys s‰hkˆpostilla")."</th>
 			<td>
 			<select name='lahetys'>
-			<option value='nope' $sel3[nope]>ƒl‰ l‰het‰ aineistoa minnek‰‰n</option>
-			<option value='mina' $sel3[mina]>L‰het‰ aineisto vain minulle</option>
-			<option value='tuli' $sel3[tuli]>L‰het‰ aineisto vain tulliin</option>
-			<option value='mole' $sel3[mole]>L‰het‰ aineisto tulliin sek‰ minulle</option>
+			<option value='nope' $sel3[nope]>".t("ƒl‰ l‰het‰ aineistoa minnek‰‰n")."</option>
+			<option value='mina' $sel3[mina]>".t("L‰het‰ aineisto vain minulle")."</option>
+			<option value='tuli' $sel3[tuli]>".t("L‰het‰ aineisto vain tulliin")."</option>
+			<option value='mole' $sel3[mole]>".t("L‰het‰ aineisto tulliin sek‰ minulle")."</option>
 			</select>
 		</tr>
 		<tr>
-			<th>Tehdaslis‰varusteet</th>
+			<th>".t("Tehdaslis‰varusteet")."</th>
 			<td>
 			<select name='lisavar'>
-			<option value='O' $sel4[O]>Omilla riveill‰‰n</option>
-			<option value='S' $sel4[S]>Yhdistet‰‰n laitteeseen</option>
+			<option value='O' $sel4[O]>".t("Omilla riveill‰‰n")."</option>
+			<option value='S' $sel4[S]>".t("Yhdistet‰‰n laitteeseen")."</option>
 			</select>
 		</tr>
 	</table>
 
 	<br>
-	<input type='submit' value='Luo aineisto'>
+	<input type='submit' value='".t("Luo aineisto")."'>
 	</form>";
 
 	require("inc/footer.inc");

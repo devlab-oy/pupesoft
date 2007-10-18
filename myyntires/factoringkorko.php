@@ -4,6 +4,25 @@ require ("../inc/parametrit.inc");
 
 echo "<font class='head'>".t("Kohdista viitesuoritus korkoihin")."</font><hr>";
 
+print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+	<!--
+
+	function toggleAll(toggleBox) {
+
+		var currForm = toggleBox.form;
+		var isChecked = toggleBox.checked;
+		var nimi = toggleBox.name;
+
+		for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+			if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
+				currForm.elements[elementIdx].checked = isChecked;
+			}
+		}
+	}
+
+	//-->
+	</script>";
+
 if (isset($tilino)){
 
 	// tutkaillaan tiliä
@@ -41,8 +60,11 @@ if (isset($tapa) and $tapa == 'paalle') {
 
 			while ($suoritusrow=mysql_fetch_array($result)) {
 				echo "<tr><td>$suoritusrow[viite]</td><td>$suoritusrow[nimi_maksaja]</td><td>$suoritusrow[summa]</td><td><input name='valitut[]' type='checkbox' value='$suoritusrow[tunnus]' CHECKED></td></tr>";
-			}				
-			echo "</table><br><input type='submit' value='".t("Kohdista")."'></form>";
+			}
+
+			echo "</table><br>";
+			echo "<input type='checkbox' name='val' onclick='toggleAll(this);' CHECKED> Ruksaa kaikki<br><br>";
+			echo "<input type='submit' value='".t("Kohdista")."'></form>";
 		}
 
 	}
@@ -63,7 +85,7 @@ if (isset($tapa) and $tapa == 'paalle') {
 				$result = mysql_query($query) or pupe_error($query);
 				//echo "$query<br>";
 				if (mysql_affected_rows() == 0) {
-					echo "<font class='error'>".t("Suorituksen päivitys epäonnistui")."! $tunnus</font><br>";	
+					echo "<font class='error'>".t("Suorituksen päivitys epäonnistui")."! $tunnus</font><br>";
 				}
 
 				// tehdään kirjanpitomuutokset
@@ -84,7 +106,7 @@ if (isset($tapa) and $tapa == 'pois') {
 		$query = "select suoritus.*, tiliointi.summa from suoritus, yriti, tiliointi where suoritus.yhtio='$kukarow[yhtio]' and suoritus.summa = 0 and kohdpvm != '0000-00-00' and viite like '$viite%' and suoritus.yhtio=yriti.yhtio and suoritus.tilino=yriti.tilino and yriti.factoring != '' and tiliointi.yhtio=suoritus.yhtio and selite = '".t("Kohdistettiin korkoihin")."' and tiliointi.tunnus=suoritus.ltunnus";
 		$result = mysql_query($query) or pupe_error($query);
 		//echo $query."<br>";
-		
+
 		if (mysql_num_rows($result) == 0) {
 			echo "<font class='error'>".t("Sopivia korkovientejä ei löydy")."!</font><br><br>";
 			unset($viite);
@@ -99,11 +121,11 @@ if (isset($tapa) and $tapa == 'pois') {
 
 			while ($suoritusrow=mysql_fetch_array($result)) {
 				echo "<tr><td>$suoritusrow[viite]</td><td>$suoritusrow[nimi_maksaja]</td><td>$suoritusrow[summa]</td><td><input name='valitut[]' type='checkbox' value='$suoritusrow[tunnus]' CHECKED></td></tr>";
-			}				
+			}
 			echo "</table><br><input type='submit' value='".t("Peru korkoviennit")."'></form>";
 		}
 	}
-	
+
 	if (isset($tilino) and is_array($valitut)) {
 		echo "Kohdistan!<br>";
 		foreach ($valitut as $valittu) {
@@ -138,7 +160,7 @@ if (isset($tapa) and $tapa == 'pois') {
 					$result = mysql_query($query) or pupe_error($query);
 					//echo "$query<br>";
 					if (mysql_affected_rows() == 0) {
-						echo "<font class='error'>".t("Suorituksen päivitys epäonnistui")."! $tunnus</font><br>";	
+						echo "<font class='error'>".t("Suorituksen päivitys epäonnistui")."! $tunnus</font><br>";
 					}
 					// tehdään kirjanpitomuutokset
 					$query = "update tiliointi set tilino='$tilino', selite = '".t("Korjatttu suoritus")."' where yhtio='$kukarow[yhtio]' and tunnus='$suoritusrow[ltunnus]'";
@@ -167,7 +189,7 @@ if (!isset($tapa)) {
 		echo "</form>";
 }
 else {
-	if (!isset($viite)) { 
+	if (!isset($viite)) {
 		if ($tapa == 'paalle') {
 			echo "<form name='eikat' action='$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tapa' value='$tapa'><table>";

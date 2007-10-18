@@ -196,7 +196,7 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero != '' or (int) $kukar
 	exit;
 }
 
-if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
+if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0 and $toim != "TARJOUS") {
 	// Vaihdetaan rivin otunnus
 	$query = "	UPDATE tilausrivi
 				SET otunnus = '$valitsetoimitus_vaihdarivi'
@@ -3044,19 +3044,25 @@ if ($tee == '') {
 						}
 					}
 					
-					
-					if ($row["toimitettuaika"] == '0000-00-00 00:00:00' and $row["uusiotunnus"] == 0 and $laskurow["tunnusnippu"] > 0) {
-						$query = " 	SELECT lasku.tunnus
-									FROM lasku
-									WHERE lasku.yhtio = '$kukarow[yhtio]'
-									and lasku.tunnusnippu = '$laskurow[tunnusnippu]'
-									and lasku.tila IN ('L','N','A','T','G','S','V','W','O','R')
-									and lasku.alatila != 'X'";
-						$toimres = mysql_query($query) or pupe_error($query);
-
-						if(mysql_num_rows($toimres) > 0) {
+					if($row["kommentti"] != "") {
+						echo "<tr>$buttonit<td valign='top' rowspan='2'>$echorivino</td>";
+					}
+					else {
+						echo "<tr>$buttonit<td align='right' valign='top' nowrap>$echorivino ";
 						
-							$osatoimulos = "<form action='$PHP_SELF' method='post'>
+						if($toim != "TARJOUS") {
+							if ($row["toimitettuaika"] == '0000-00-00 00:00:00' and $row["uusiotunnus"] == 0 and $laskurow["tunnusnippu"] > 0) {
+								$query = " 	SELECT lasku.tunnus
+											FROM lasku
+											WHERE lasku.yhtio = '$kukarow[yhtio]'
+											and lasku.tunnusnippu = '$laskurow[tunnusnippu]'
+											and lasku.tila IN ('L','N','A','T','G','S','V','W','O','R')
+											and lasku.alatila != 'X'";
+								$toimres = mysql_query($query) or pupe_error($query);
+
+								if(mysql_num_rows($toimres) > 0) {
+								echo $toim;
+									echo "	<form action='$PHP_SELF' method='post'>
 											<input type='hidden' name='toim' 			value = '$toim'>
 											<input type='hidden' name='lopetus' 		value = '$lopetus'>
 											<input type='hidden' name='projektilla' 	value = '$projektilla'>
@@ -3065,31 +3071,25 @@ if ($tee == '') {
 											<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
 											<input type='hidden' name='menutila' 		value = '$menutila'>
 											<select name='valitsetoimitus_vaihdarivi' onchange='submit();'>";
-						
-							while($toimrow = mysql_fetch_array($toimres)) {						
-								$sel = "";
-								if($toimrow["tunnus"] == $row["otunnus"]) {
-									$sel = "selected";
-								}
 
-								$osatoimulos .= "<option value ='$toimrow[tunnus]' $sel>$toimrow[tunnus]</option>";																					
+									while($toimrow = mysql_fetch_array($toimres)) {						
+										$sel = "";
+										if($toimrow["tunnus"] == $row["otunnus"]) {
+											$sel = "selected";
+										}
+
+										echo "<option value ='$toimrow[tunnus]' $sel>$toimrow[tunnus]</option>";																					
+									}
+
+									echo "</select></form>";						
+								}
 							}
-														
-							$osatoimulos .= "</select></form>";						
+							elseif ($laskurow["tunnusnippu"] > 0) {
+								echo "<select><option>$row[otunnus]</option></select>";
+							}							
 						}
-					}
-					elseif ($laskurow["tunnusnippu"] > 0) {
-						$osatoimulos = "<select><option>$row[otunnus]</option></select>";
-					}
-					else {
-						$osatoimulos = "";
-					}
-					
-					if($row["kommentti"] != "") {
-						echo "<tr>$buttonit<td valign='top' rowspan='2'>$echorivino $osatoimulos</td>";
-					}
-					else {
-						echo "<tr>$buttonit<td align='right' valign='top' nowrap>$echorivino $osatoimulos</td>";
+						
+						echo "</td>";
 					}
 					
 					$borderlask		= 0;

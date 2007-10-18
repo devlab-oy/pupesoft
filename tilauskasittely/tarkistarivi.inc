@@ -323,7 +323,7 @@
 							$paikat .= " ".tv1dateconv($alkurow["parasta_ennen"]);
 						}
 						
-						echo "</option>";
+						$paikat .= "</option>";
 						
 						$paikatlask++;
 						$kotipaikatlask++;

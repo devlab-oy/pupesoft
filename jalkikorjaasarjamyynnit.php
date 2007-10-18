@@ -4,15 +4,15 @@
 	
 	echo "<font class='head'>".t("Korjaa sarjanumeromyyyntejä").":</font><hr><br>";
 	
-	if ($tee == "PAIVITA" and $paivamaara != '') {
-		/*
+	if ($tee == "PAIVITA" and $otunnus > 0) {
+		
 		$query = "	SELECT distinct tilausrivi.tuoteno, sarjanumeroseuranta.ostorivitunnus
 					FROM tilausrivi 
 					JOIN tuote on tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.sarjanumeroseuranta = 'S'
 					JOIN sarjanumeroseuranta ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tuoteno = sarjanumeroseuranta.tuoteno and tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus
-					WHERE tilausrivi.yhtio			= '$kukarow[yhtio]'
-					and tilausrivi.tyyppi			= 'L'
-					and tilausrivi.laskutettuaika  >= '$paivamaara'
+					WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
+					and tilausrivi.tyyppi	= 'L'
+					and tilausrivi.otunnus  = '$otunnus'
 					order by sarjanumeroseuranta.sarjanumero";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -24,7 +24,7 @@
 									
 			jalkilaskentafunktio($vrow["tuoteno"], "", $ostohinta, $vrow["ostorivitunnus"]);
 		}	
-		*/	
+			
 		
 		/*
 		$query = "	SELECT tilausrivi.tuoteno, tilausrivin_lisatiedot.osto_vai_hyvitys, sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.kaytetty, tilausrivi.tunnus, sarjanumeroseuranta.tunnus sarjatunnus, sarjanumeroseuranta.myyntirivitunnus
@@ -171,10 +171,10 @@
 	
 	if ($tee == "") {
 		echo "<br><br>";
-		echo "Syötä päivämäärä josta lähtien korjataan: (vvvv-kk-pp)<br>";
+		echo "Syötä korjattava tilaus:<br>";
 		echo "<form method='post' action='$PHP_SELF'>";
 		echo "<input type='hidden' name='tee' value='PAIVITA'>";
-		echo "<input type='text' name='paivamaara' size='10'>";
+		echo "<input type='text' name='otunnus' size='10'>";
 		echo "<input type='submit' value='Korjaa'>";
 		echo "</form>";
 	}

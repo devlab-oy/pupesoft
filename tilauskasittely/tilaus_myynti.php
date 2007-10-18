@@ -1480,23 +1480,25 @@ if ($tee == '') {
 			}
 			echo "</select>";
 			
-			$query = "	SELECT *
-						FROM rahtisopimukset
-						WHERE toimitustapa = '$laskurow[toimitustapa]'
-						and  ytunnus = '$laskurow[ytunnus]'";
-			$pahsopres = mysql_query($query) or pupe_error($query);
-			$rahsoprow = mysql_fetch_array($pahsopres);
 			
-			if ($rahsoprow["tunnus"] > 0) {
-				$ylisa = "&tunnus=$rahsoprow[tunnus]";
+			if ($kukarow["extranet"] == "") {
+				$query = "	SELECT *
+							FROM rahtisopimukset
+							WHERE toimitustapa = '$laskurow[toimitustapa]'
+							and  ytunnus = '$laskurow[ytunnus]'";
+				$pahsopres = mysql_query($query) or pupe_error($query);
+				$rahsoprow = mysql_fetch_array($pahsopres);
+			
+				if ($rahsoprow["tunnus"] > 0) {
+					$ylisa = "&tunnus=$rahsoprow[tunnus]";
+				}
+				else {
+					$ylisa = "&uusi=1&ytunnus=$laskurow[ytunnus]&toimitustapa=$laskurow[toimitustapa]";
+					$rahsoprow["rahtisopimus"] = t("Lis‰‰ rahtisopimus");
+				}
+			
+				echo " <a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rahsoprow[rahtisopimus]</a>";
 			}
-			else {
-				$ylisa = "&uusi=1&ytunnus=$laskurow[ytunnus]&toimitustapa=$laskurow[toimitustapa]";
-				$rahsoprow["rahtisopimus"] = t("Lis‰‰ rahtisopimus");
-			}
-			
-			echo " <a href='".$palvelin2."yllapito.php?toim=rahtisopimukset$ylisa&lopetus=$PHP_SELF////toim=$toim//lopetus=$lopetus//tee=$tee//tilausnumero=$tilausnumero//from=LASKUTATILAUS'>$rahsoprow[rahtisopimus]</a>";
-			
 			
 			echo "</td>";
 		}

@@ -2254,7 +2254,7 @@ function yllapito(url, tag, submitOnSelect) {
 
 	toim=url.substr(0,url.indexOf("&"));
 	valinta=select.options[select.selectedIndex].value;
-
+	
 	//	Jos meill‰ on valintana uusi, siirryt‰‰n tekem‰‰n uusi tietue!
 	if(isNaN(valinta)) {
 
@@ -2265,7 +2265,7 @@ function yllapito(url, tag, submitOnSelect) {
 		switch (toim) {
 			case 'yhteyshenkilo':
 				width=400;
-				height=400;
+				height=500;
 				break;
 
 			case 'asiakkaan_positio':
@@ -2315,19 +2315,17 @@ function yllapito(url, tag, submitOnSelect) {
 
 		//	Joudutaan duusaamaan kokonaan uusi..
 		if(sain=='en') {
-			var newOpt=document.createElement('option');
+			
+			var newOpt=document.createElement('OPTION');
+			
 			newOpt.text='Muokkaa';
 			newOpt.value='muokkaa#'+valinta;
-
-			try {
-				select.add(newOpt, select.options[select.options.length-1]);
-			}
-			catch(ex) {
-				select.add(newOpt, select.options[select.options.length-1]);
-			}
+			
+			select.appendChild(newOpt);
 
 		}
-		 if (submitOnSelect) {
+		
+		 if (submitOnSelect) {	
 			document.forms[submitOnSelect].submit();
 		}
 	}
@@ -2339,9 +2337,8 @@ function suljeYllapito(sID,value,text) {
 		sID=sID.substr(2);
 
 		sel=window.opener.document.getElementById(sID);
-
 		//	merkataan oikea valituksi
-		for(i in sel.options) {
+		for (i=0;i<sel.length;i++) {
 			if(sel.options[i].value==value) {
 				sel.selectedIndex=i;
 				sel.options[i].text=text;

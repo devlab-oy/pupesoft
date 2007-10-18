@@ -227,26 +227,29 @@
 				echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
 				exit;
 			}
-			
-			if($suljeYllapito == "asiakkaan_kohde") {
+
+			if(substr($suljeYllapito, 0, 15) == "asiakkaan_kohde") {
 				$query = "SELECT kohde from asiakkaan_kohde where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
-				echo "<a href='#' onclick=\"suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[kohde]');\">Sulje ikkuna</a>";
+				js_yllapito();
+				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[kohde]');</SCRIPT>";
 				exit;
 			}
-			if($suljeYllapito == "asiakkaan_positio") {
+			if(substr($suljeYllapito, 0, 17) == "asiakkaan_positio") {
 				$query = "SELECT positio from asiakkaan_positio where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
-				echo "<a href='#' onclick=\"suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[positio]');\">Sulje ikkuna</a>";
+				js_yllapito();
+				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[positio]');</SCRIPT>";
 				exit;
 			}
-			if($suljeYllapito == "yhteyshenkilo_tekninen" or $suljeYllapito == "yhteyshenkilo_kaupallinen") {
+			if(substr($suljeYllapito, 0, 22) == "yhteyshenkilo_tekninen"  or substr($suljeYllapito, 0, 17) == "yhteyshenkilo_kaupallinen") {
 				$query = "SELECT nimi from yhteyshenkilo where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);
-				echo "<a href='#' onclick=\"suljeYllapito('$wanha$suljeYllapito','$tunnus','$aburow[nimi]');\">Sulje ikkuna</a>";
+				js_yllapito();
+				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$aburow[nimi]');</SCRIPT>";
 				exit;
 			}
 			

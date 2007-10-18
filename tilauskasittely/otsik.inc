@@ -1760,32 +1760,39 @@
 				$extralisa = "";
 			}
 			
-			echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
-			
-			$yhteysquery = "SELECT * FROM yhteyshenkilo where yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]' and tyyppi = 'A' and tilausyhteyshenkilo != ''";
-			$yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
-			
-			if (mysql_num_rows($yhteysresult) > 0) {
-				echo "<td colspan = '1'><select name='seltilausyhteyshenkilo'>";
-				echo "<option value = ''>".t("Ei valintaa")."</option>";
-				while ($yhteysrow = mysql_fetch_array($yhteysresult)) {
-					$sela = "";
-					if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
-						$sela = "SELECTED";
-						$srow["tilausyhteyshenkilo"] = "";
+			if($yhtiorow["tilauksen_yhteyshenkilot"] != "K") {
+				echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
+
+				$yhteysquery = "SELECT * FROM yhteyshenkilo where yhtio = '$kukarow[yhtio]' and liitostunnus = '$srow[liitostunnus]' and tyyppi = 'A' and tilausyhteyshenkilo != ''";
+				$yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
+
+				if (mysql_num_rows($yhteysresult) > 0) {
+					echo "<td colspan = '1'><select name='seltilausyhteyshenkilo'>";
+					echo "<option value = ''>".t("Ei valintaa")."</option>";
+					while ($yhteysrow = mysql_fetch_array($yhteysresult)) {
+						$sela = "";
+						if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
+							$sela = "SELECTED";
+							$srow["tilausyhteyshenkilo"] = "";
+						}
+						echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
+
 					}
-					echo "<option value = '$yhteysrow[nimi]' $sela>$yhteysrow[nimi]</option>";
-					
+					echo "</select>";
+					echo "<input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
 				}
-				echo "</select>";
-				echo "<input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
-			}
-			else {
-				echo "<td colspan = '1'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+				else {
+					echo "<td colspan = '1'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+				}
+				
 			}
 			
 			echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
-			echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+			
+			if($yhtiorow["tilauksen_kohteet"] != "K") {
+				echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";			
+			}
+
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>(".t("tilausvahvistus + keräyslista + lähete + lasku$extralisa").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>(".t("keräyslista + lähete").")</td></tr>";
 			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";

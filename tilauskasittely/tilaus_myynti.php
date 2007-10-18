@@ -15,6 +15,10 @@ else {
 	require ("alvpopup.inc");
 }
 
+if($yhtiorow["tilauksen_yhteyshenkilot"] == "K" or $yhtiorow["asiakkaan_kohde"] == "K") {
+	js_yllapito();
+}
+
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0) {
 	$query = "	UPDATE lasku 
 				SET tunnusnippu = tunnus 
@@ -3171,7 +3175,7 @@ if ($tee == '') {
 									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
 									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
-									<select id='asiakkaan_positio_$rivino' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id,'asiakkaan_positio_$rivino');\" $state>
+									<select id='asiakkaan_positio_$row[tunnus]' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id, 'asiakkaan_positio_$rivino');\" $state>
 									<option value=''>Asiakkaalla ei ole positiota</option>";
 
 							if(mysql_num_rows($posres) > 0) {

@@ -45,7 +45,7 @@
 				$sarjares1 = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($sarjares1) > 0) {
-					$query = "	SELECT tunnus, perheid2, (varattu+jt) kpl
+					$query = "	SELECT tunnus, perheid2, (varattu+jt+kpl) kpl
 								FROM tilausrivi 
 								WHERE yhtio  = '$kukarow[yhtio]' 
 								and tunnus   = '$lisatty_tun'";

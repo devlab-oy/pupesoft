@@ -336,6 +336,20 @@ if (!function_exists('tulosta_lasku')) {
 					$h = 190;
 				}
 				
+				$query = "	SELECT vienti_kurssi 
+							FROM lasku 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tunnus 	= '$row[otunnus]'";
+				$valres = mysql_query($query) or pupe_error($query);
+				$valrow = mysql_fetch_array($valres);
+
+				if ($valrow["vienti_kurssi"] > 0) {
+					$kurssi = $valrow["vienti_kurssi"];
+				}
+				else {
+					$kurssi = 1;
+				}
+				
 				//	Etsitään käännöksiä
 				if (strtolower($kieli) != strtolower($yhtiorow['kieli'])) {
 					$laji = 'nimitys_'.strtolower($kieli);
@@ -392,7 +406,7 @@ if (!function_exists('tulosta_lasku')) {
 				
 				if($rivi=="isa") {
 					if($laskurow["rivihintoja_ei_nayteta"] == "") {
-						$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',$row["hinta"]), $style_rivi, "R", "");
+						$pdf->write($h, 1, $s[1], $s[2], money_format('%!i',laskuval($row["hinta"], $kurssi)), $style_rivi, "R", "");
 						if ($row["alv"] >= 500) {
 							$pdf->write($h, 1, $s[2], $s[3], t("M.V.", $kieli), $style_rivi, "R", "");					
 						}
@@ -567,19 +581,21 @@ if (!function_exists('tulosta_lasku')) {
 			}
 			$aresult = mysql_query($aquery) or pupe_error($aquery);
 			$arow = mysql_fetch_array($aresult);
-
-			$pdf->write($h, 1, 0, $s[0], t("Arvonlisävero", $kieli)." ($arow[rivihinta])", "norm", "R", "");
-
-			if ($alvrow["alv"] >= 500) {
-				$pdf->write($h, 1, $s[0], $s[1], "M.V.", "norm", "R", "");							
-			}
-			else {
-				$pdf->write($h, 1, $s[0], $s[1], $alvrow["alv"]."%", "norm", "R", "");
-			}
 			
-			$pdf->write($h, 1, $s[1], 0, money_format('%i', $arow["alvrivihinta"]), "norm", "R", "");	
-			
-			$h-=$pdf->ln();
+			if($arow["alvrivihinta"] <> 0) {
+				$pdf->write($h, 1, 0, $s[0], t("Arvonlisävero", $kieli)." ($arow[rivihinta])", "norm", "R", "");
+
+				if ($alvrow["alv"] >= 500) {
+					$pdf->write($h, 1, $s[0], $s[1], "M.V.", "norm", "R", "");							
+				}
+				else {
+					$pdf->write($h, 1, $s[0], $s[1], $alvrow["alv"]."%", "norm", "R", "");
+				}
+
+				$pdf->write($h, 1, $s[1], 0, money_format('%i', $arow["alvrivihinta"]), "norm", "R", "");	
+
+				$h-=$pdf->ln();				
+			}
 		}
 
 		$pdf->write($h, 1, 0, $s[0], t("Lasku yhteensä", $kieli).":", "norm", "R", "B");

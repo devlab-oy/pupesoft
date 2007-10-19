@@ -272,12 +272,20 @@
 			$seuranta = "";
 			$seurantalisa = "";
 
+			$kohde = "";
+			$kohdelisa = "";
+
 			if ($yhtiorow["tilauksen_seuranta"] !="") {
 				$seuranta = " seuranta, ";
 				$seurantalisa = "LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus";
 			}
 
-			if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET") {
+			if ($yhtiorow["tilauksen_kohteet"] != "") {
+				$kohde = " asiakkaan_kohde.kohde kohde, ";
+				$kohdelisa = "LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde";
+			}
+
+			if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and $toim != "TARJOUS") {
 				$toimaikalisa = ' lasku.toimaika, ';
 			}
 
@@ -509,10 +517,11 @@
 			$miinus = 3;
 		}
 		elseif ($toim == "VALMISTUSMYYNTI") {
-			$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.viesti, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra, tilaustyyppi
+			$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.viesti, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra, tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
 						$seurantalisa
+						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and ((tila='V' and alatila in ('','A','B','J')) or (lasku.tila in ('L','N') and lasku.alatila in ('A','')))
 						$haku
@@ -536,9 +545,11 @@
 			$miinus = 4;
 		}
 		elseif ($toim == "VALMISTUSMYYNTISUPER") {
-			$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.viesti, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra, tilaustyyppi
+			$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.viesti, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra, tilaustyyppi
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
+						$seurantalisa
+						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and tila in ('L','N','V')
 						and alatila not in ('X','V')
@@ -614,12 +625,13 @@
 			$miinus = 2;
 		}
 		elseif ($toim == "TARJOUS") {
-			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta nimi asiakas, ytunnus, lasku.luontiaika,
+			$query = "	SELECT if(tunnusnippu>0,tunnusnippu,lasku.tunnus) tarjous, $seuranta nimi asiakas, $kohde ytunnus, lasku.luontiaika,
 						if(date_add(lasku.luontiaika, interval $yhtiorow[tarjouksen_voimaika] day) >= now(), '<font color=\'#00FF00\'>Voimassa</font>', '<font color=\'#FF0000\'>Er‰‰ntynyt</font>') voimassa,
 						DATEDIFF(lasku.luontiaika, date_sub(now(), INTERVAL $yhtiorow[tarjouksen_voimaika] day)) pva,
 						lasku.laatija,$toimaikalisa alatila, tila, lasku.tunnus tilaus, tunnusnippu
 						FROM lasku use index (tila_index)
 						$seurantalisa
+						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila ='T' and tilaustyyppi='T' and alatila in ('','A')
 						$haku
 						ORDER BY lasku.tunnus desc
@@ -730,9 +742,10 @@
 			$miinus = 2;
 		}
 		elseif ($toim == 'PROJEKTI') {
-			$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, tunnusnippu
+			$query = "	SELECT lasku.tunnus tilaus, $seuranta lasku.nimi asiakas, $kohde lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, tunnusnippu
 						FROM lasku use index (tila_index)
 						$seurantalisa
+						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N') and alatila NOT IN ('X')
 						$haku
 						ORDER by lasku.luontiaika desc
@@ -765,10 +778,11 @@
 		}
 		else {
 			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,
-						$seuranta $toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra
+						$seuranta $kohde  $toimaikalisa lasku.alatila, lasku.tila, kuka.extranet extra
 						FROM lasku use index (tila_index)
 						LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka
 						$seurantalisa
+						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('L','N')
 						and lasku.alatila in ('A','')

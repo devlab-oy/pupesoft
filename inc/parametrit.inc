@@ -270,7 +270,14 @@ if ($session != '' or $verkkokauppa != "") {
 	
 
 	if (isset($nayta_pdf) and $nayta_pdf == 1) {
-		header("Content-Type: application/pdf");
+		
+		$charset = "iso-8859-1";
+
+		if ($kukarow["kieli"] == "ru" or $kukarow["kieli"] == "ee") {
+			$charset = "utf-8";
+		}
+
+		header("Content-Type: application/pdf; charset=$charset");
 		header('Content-Disposition: inline; filename="pupesoft.pdf"');
 	}
 	elseif(isset($lataa_tiedosto) and $lataa_tiedosto == 1) {

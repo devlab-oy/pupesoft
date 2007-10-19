@@ -2095,6 +2095,102 @@ if (!function_exists("ostolaskun_vienti")) {
 	}
 }
 
+/*
+	Functio jolla voidaan syncronoida toimitusten sisältöjä
+*/
+
+if(!function_exists("paivita_toimitukset")) {
+	function paivita_toimitukset($otunnus, $originaali) {
+		global $kukarow, $yhtiorow;
+				
+		foreach(array("lasku","laskun_lisatiedot") as $taulu) {
+			
+			if(!is_array($originaali[$taulu]) or (int) $otunnus == 0) {
+				echo "<font class='error'>".t("Toimitusten päivittäminen EPÄONNISTUI")."!</font><br>";
+				return false;
+			}
+			
+			if($taulu == "lasku") {
+				$where = " and tunnus = '$otunnus'";
+			}
+			else {
+				$where = " and otunnus = '$otunnus'";
+			}
+			
+			$query = "	SELECT *
+						FROM $taulu
+						WHERE yhtio = '$kukarow[yhtio]' $where";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result) == 1) {
+				$uusirow = mysql_fetch_array($result);
+
+				$diffi = array_diff_assoc($uusirow, $originaali[$taulu]);
+
+				if(count($diffi) > 0 and is_array($diffi)) {
+					
+					//	Poistetaan numeeriset avaimet
+					$diff = array();
+					foreach($diffi as $key => $value) {
+						if(!is_numeric($key) and !in_array("tila", "alatila")) {
+							$diff[$key] = $value;
+						}
+					}
+					
+					//	Haetaan tunnukset jotka voidaan päivittää
+					if($taulu == "lasku") {
+						$query = "	SELECT *
+									FROM lasku
+									WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$otunnus' and tila IN ('L','N') and alatila != 'X' and tunnusnippu > 0";
+					}
+					else {
+						$query = "	SELECT laskun_lisatiedot.*
+									FROM lasku
+									JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+									WHERE lasku.yhtio = '$kukarow[yhtio]' and tunnusnippu = '$otunnus' and tila IN ('L','N') and alatila != 'X' and tunnusnippu > 0";
+					}
+					
+					$result = mysql_query($query) or pupe_error($query);
+					
+					if(mysql_num_rows($result) > 0) {
+
+						//	Rullataan kaikki toimitukset läpi
+						while($row = mysql_fetch_array($result)) {
+
+							//	Rullataan kaikki muutokset läpi..
+							$updquery = "";
+							foreach($diff as $col => $value) {
+
+								//	Luodaan päivitettävistä sarakkeista kysely..
+								if($row[$col] == $originaali[$taulu][$col]) {
+									if($updquery != "") {
+										$updquery .=", ";
+									}
+									$updquery .= " $col = '$value'"; 
+
+									//	Poikkeus joka vahvistaa säännön..
+									if(in_array($col, array("kerayspvm", "toimaika")) and $taulu == "lasku") {
+										$query = "	UPDATE tilausrivi
+													SET $col = '$value'
+													WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$row[tunnus]' and $col = '".$originaali[$taulu][$col]."'";
+										$res = mysql_query($query) or pupe_error($query);
+									}
+								}
+							}
+
+							if($updquery != "") {
+								$query = "UPDATE $taulu SET $updquery WHERE yhtio = '$kukarow[yhtio]' and tunnus = '{$row["tunnus"]}'";
+								$updres = mysql_query($query) or pupe_error($query);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return true;
+	}	
+}
+
 if(!function_exists("enable_ajax")) {
 	function enable_ajax() {
 		global $palvelin2, $kukarow;

@@ -2307,6 +2307,20 @@
 			$tee = "";
 		}
 
+		if($toim == "PROJEKTI" and $kukarow["kesken"] > 0) {
+			$abuq = "	SELECT * 
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
+			$abures = mysql_query($abuq) or pupe_error($abuq);
+			$originaali["lasku"] = mysql_fetch_array($abures);
+
+			$abuq = "	SELECT * 
+						FROM laskun_lisatiedot
+						WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$tilausnumero'";
+			$abures = mysql_query($abuq) or pupe_error($abuq);
+			$originaali["laskun_lisatiedot"] = mysql_fetch_array($abures);
+		}
+		
 		$query .= ", tila = '$ylatila'";
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
@@ -2479,6 +2493,10 @@
 				$result = mysql_query($query3) or pupe_error($query3);
 			}
 		
+			//	Tahdistetaan toimitukset
+			if($toim == "PROJEKTI") {
+				paivita_toimitukset($kukarow["kesken"], $originaali);
+			}
 		}
 
 	}

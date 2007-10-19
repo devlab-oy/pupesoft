@@ -867,11 +867,19 @@
 									$result = mysql_query($query) or pupe_error($query);
 								}
 								else {
+									if($yhtiorow["tilauksen_jarjestys"] == "M") {
+										$jarjestys = $lisatty_tun;
+									}
+									else {
+										$jarjestys = 0;
+									}
+									
 									$query = "	INSERT INTO tilausrivin_lisatiedot
 												SET yhtio			= '$kukarow[yhtio]',
 												tilausrivilinkki	= '$tilausrivilinkki',
 												toimittajan_tunnus	= '$toimittajan_tunnus',
 												tilausrivitunnus	= '$lisatty_tun',
+												jarjestys			= '$jarjestys',
 												luontiaika			= now(),
 												laatija 			= '$kukarow[kuka]'";
 									$result = mysql_query($query) or pupe_error($query);
@@ -1489,11 +1497,18 @@
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {
+				if($yhtiorow["tilauksen_jarjestys"] == "M") {
+					$jarjestys = $lisatty_tun;
+				}
+				else {
+					$jarjestys = 0;
+				}
 				$query = "	INSERT INTO tilausrivin_lisatiedot
 							SET yhtio			= '$kukarow[yhtio]',
 							tilausrivilinkki	= '$tilausrivilinkki',
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							tilausrivitunnus	= '$lisatty_tun',
+							jarjestys			= '$jarjestys',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'";
 				$result = mysql_query($query) or pupe_error($query);

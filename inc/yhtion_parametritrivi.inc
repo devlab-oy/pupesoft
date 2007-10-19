@@ -100,8 +100,25 @@
 		$ulos .= "<option value = '0' $sel[0]>".t("Normaali laskupohja");
 		$ulos .= "<option value = '2' $sel[2]>".t("Normaali laskupohja (Tuoteperheet yhdistetty)");		
 		$ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty laskupohja 1");
-		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2");		
+		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)");		
 		$ulos .= "<option value = '4' $sel[4]>".t("Pelkistetty laskupohja 3");		
+
+		
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "tilausvahvistustyyppi") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '0' $sel[0]>".t("Normaali tilausvahvistuspohja");
+		$ulos .= "<option value = '3' $sel[3]>".t("Pelkistetty tilausvahvistuspohja 2 (Tuoteperheet yhdistetty)");
 
 		
 		$ulos .= "</select></td>";
@@ -778,6 +795,7 @@
 		$ulos .= "<option value = '7' $sel[7]>".t("Tuotenumeroj‰rjestys");
 		$ulos .= "<option value = '8' $sel[8]>".t("Tilausj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
 		$ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys");
+		$ulos .= "<option value = 'M' {$sel["M"]}>".t("K‰ytt‰j‰n asettama j‰rjestys");		
 
 		$ulos .= "</select></td>";
 
@@ -1078,27 +1096,6 @@
 		$ulos .= "<option value='1' $sel1>".t("Osoitelapusta tulostetaan 1 kopiota.")."</option>";
 		$ulos .= "<option value='2' $sel2>".t("Osoitelapusta tulostetaan 2 kopiota.")."</option>";
 		$ulos .= "<option value='3' $sel3>".t("Osoitelapusta tulostetaan 3 kopiota.")."</option>";
-		$ulos .= "</select></td>";
-
-		$jatko = 0;
-	}
-
-	if (mysql_field_name($result, $i) == "tilausrivien_jarjestaminen") {
-
-		$ulos = "<td><select name='$nimi'>";
-
-		$sel1="";
-		$sel2="";
-
-		if ($trow[$i] == "") {
-			$sel1 = "selected";
-		}
-		else {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value=''  $sel1>".t("Tilausrivien j‰rjestyst‰ ei saa muuttaa")."</option>";
-		$ulos .= "<option value='X' $sel2>".t("Kaikki saavat muuttaa tilausrivien j‰rjestyst‰")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -1090,6 +1090,23 @@ if (!function_exists("generoi_sorttauskentta")) {
 																	where t3.yhtio = tilausrivi.yhtio and t3.tunnus = tilausrivi.perheid2),
 											if(tuotteen_toimittajat.toim_tuoteno!='', tuotteen_toimittajat.toim_tuoteno, tilausrivi.tuoteno)))) as sorttauskentta";
 		}
+		elseif ($jarjestys == "M") {
+			$sorttauskentta = "if (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0, (SELECT tl.jarjestys
+				 																		FROM tilausrivin_lisatiedot tl
+																						WHERE tl.yhtio=tilausrivi.yhtio and tl.tilausrivitunnus=tilausrivi.tunnus
+																						LIMIT 1),
+									if (tilausrivi.perheid > 0, (	SELECT tl.jarjestys
+																	FROM tilausrivin_lisatiedot tl
+																	WHERE tl.yhtio=tilausrivi.yhtio and tl.tilausrivitunnus=tilausrivi.perheid
+																	LIMIT 1),
+										if (tilausrivi.perheid > 0, (	SELECT tl.jarjestys
+																		FROM tilausrivin_lisatiedot tl
+																		WHERE tl.yhtio=tilausrivi.yhtio and tl.tilausrivitunnus=tilausrivi.perheid2
+																		LIMIT 1), tilausrivi.tunnus
+										)
+									)
+								) as sorttauskentta";
+		}
 
 		// joku default
 		else {

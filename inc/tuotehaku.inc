@@ -23,49 +23,53 @@
 			$lisa1 = "and tuote.tuoteno like '" . $tuoteno . "%'";
 		}
 
-
-		//Yhtiövalinnat
-		$query	= "	SELECT distinct yhtio, nimi
-					from yhtio
-					where konserni = '$yhtiorow[konserni]' and konserni != ''";
-		$presult = mysql_query($query) or pupe_error($query);
-
 		$yhtiot 	= "";
 		$konsyhtiot = array();
 
-		if (mysql_num_rows($presult) > 0) {
-			while ($prow = mysql_fetch_array($presult)) {
-				$yhtiot .= "'".$prow["yhtio"]."',";
-				$konsyhtiot[] = $prow["yhtio"];
-			}
-			$yhtiot = substr($yhtiot,0,-1);
-			$yhtiot = "yhtio in ($yhtiot) ";
-
-		}
-		else {
-			$yhtiot = "yhtio = '$kukarow[yhtio]' ";
-			$konsyhtiot[] = $kukarow["yhtio"];
-		}
-
-
 		//Voidaan hakea myös koko konsernin tuotteista
 		if($konsernihaku != "KYLLA") {
-			$yhtiot = "yhtio = '$kukarow[yhtio]' ";
+			$yhtiot 	  = "yhtio = '$kukarow[yhtio]' ";
+			$konsyhtiot[] = $kukarow["yhtio"];
+		}
+		else {
+			//Yhtiövalinnat
+			$query	= "	SELECT distinct yhtio, nimi
+						from yhtio
+						where konserni = '$yhtiorow[konserni]' and konserni != ''";
+			$presult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($presult) > 0) {
+				while ($prow = mysql_fetch_array($presult)) {
+					$yhtiot .= "'".$prow["yhtio"]."',";
+					$konsyhtiot[] = $prow["yhtio"];
+				}
+				$yhtiot = substr($yhtiot,0,-1);
+				$yhtiot = "yhtio in ($yhtiot) ";
+
+			}
+			else {
+				$yhtiot = "yhtio = '$kukarow[yhtio]' ";
+				$konsyhtiot[] = $kukarow["yhtio"];
+			}
 		}
 
 		// Poistettuja tuotteita ei näytetä paitsi jos niillä on saldoa
 		// Joinataan korvaavat mukaan
 		$query = "	SELECT tuote_wrapper.*, valitut.sorttauskentta
 					FROM tuote tuote_wrapper,
-					(SELECT if(korvaavat.id>0,(select concat(korvaavat.tuoteno,korvaavat.yhtio) from korvaavat korva2 use index (yhtio_id) where korva2.yhtio=korvaavat.yhtio and korva2.id=korvaavat.id ORDER BY jarjestys LIMIT 1),concat(tuote.tuoteno,tuote.yhtio)) sorttauskentta,
-					ifnull(korvaavat.tuoteno, tuote.tuoteno) tuoteno, tuote.yhtio, sum(tuotepaikat.saldo) saldo
-					FROM tuote
-					LEFT JOIN korvaavat use index (yhtio_id) ON korvaavat.yhtio=tuote.yhtio and korvaavat.id = (select id from korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1)
-					LEFT JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno
-					WHERE tuote.$yhtiot
-					$lisa1
-					GROUP BY 1,2,3
-					ORDER BY sorttauskentta, tuoteno) valitut
+						(SELECT if(korvaavat.id>0,(select concat(korvaavat.tuoteno,korvaavat.yhtio) from korvaavat korva2 use index (yhtio_id) where korva2.yhtio=korvaavat.yhtio and korva2.id=korvaavat.id ORDER BY jarjestys LIMIT 1),concat(tuote.tuoteno,tuote.yhtio)) sorttauskentta,
+						ifnull(korvaavat.tuoteno, tuote.tuoteno) tuoteno, 
+						tuote.yhtio,
+						tuote.status, 
+						sum(tuotepaikat.saldo) saldo
+						FROM tuote
+						LEFT JOIN korvaavat use index (yhtio_id) ON korvaavat.yhtio=tuote.yhtio and korvaavat.id = (select id from korvaavat use index (yhtio_tuoteno) where korvaavat.yhtio=tuote.yhtio and korvaavat.tuoteno=tuote.tuoteno LIMIT 1)
+						LEFT JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno
+						WHERE tuote.$yhtiot
+						$lisa1
+						GROUP BY 1,2,3,4
+						HAVING tuote.status not in ('P','X') or saldo > 0
+						ORDER BY sorttauskentta, tuoteno) valitut
 					WHERE tuote_wrapper.yhtio = valitut.yhtio
 					and tuote_wrapper.tuoteno = valitut.tuoteno
 					LIMIT 201";

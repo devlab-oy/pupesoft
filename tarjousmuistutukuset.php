@@ -6,7 +6,7 @@ require ("inc/connect.inc");
 require ("inc/functions.inc");
 
 //	Haetaan käyttäjittäin umpeutuneet tai kohta umpeutuvat tarjoukset
-$query = "	SELECT lasku.*, lasku.tunnusnippu tarjous, laskun_lisatiedot.seuranta, kuka.nimi tekija, kuka.eposti,
+$query = "	SELECT lasku.*, lasku.tunnusnippu tarjous, laskun_lisatiedot.seuranta, kuka.nimi tekija, kuka.eposti eposti,
 			if(date_add(lasku.luontiaika, interval yhtion_parametrit.tarjouksen_voimaika day) >= now(), 'Aktiiviset', 'Umpeutuneet') voimassa, 
 			yhteyshenkilo_tekninen.nimi yhteyshenkilo, yhteyshenkilo_tekninen.gsm yhteyshenkilo_gms, yhteyshenkilo_tekninen.puh yhteyshenkilo_puh, yhteyshenkilo_tekninen.email yhteyshenkilo_email,
 			asiakkaan_kohde.kohde asiakkaan_kohde,
@@ -19,16 +19,15 @@ $query = "	SELECT lasku.*, lasku.tunnusnippu tarjous, laskun_lisatiedot.seuranta
 			LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus
 			LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde			
 			WHERE tila = 'T' and alatila NOT IN ('B','T','X')
-			HAVING lasku.tunnus=viimeisin and pva < 21 and pva > -300
-			ORDER BY lasku.laatija, voimassa, pva";
+			HAVING lasku.tunnus=viimeisin and pva < 21
+			ORDER BY kuka.eposti, voimassa, pva";
 $result = mysql_query($query) or pupe_error($query);
 while($row=mysql_fetch_array($result)) {
-	if($row["laatija"] != $edlaatija) {
+	if($row["eposti"] != $edeposti) {
 		
 		if($viesti != "") {
 			$viesti .= "\n\nSoitteles asiakkaalle tai käy sulkemassa tarjous!\n\nNiinku olis jo!\n";
-			//mail("tuomas.koponen@oss-solutions.fi", "Tarjousmuistutus!", $viesti);			
-			echo $viesti;
+			mail($row["eposti"], "Tarjousmuistutus!", $viesti);
 		}
 		
 		$viesti = "$row[tekija], sinulla on kesken seuraavat tarjoukset\n";
@@ -50,10 +49,14 @@ while($row=mysql_fetch_array($result)) {
 	}	
 	$viesti .= "\n";
 	
-	$edlaatija = $row["laatija"];
+	$edeposti = $row["eposti"];
 	$edtila = $row["voimassa"];	
 }
 
+if($viesti != "") {
+	$viesti .= "\n\nSoitteles asiakkaalle tai käy sulkemassa tarjous!\n\nNiinku olis jo!\n";
+	mail($row["eposti"], "Tarjousmuistutus!", $viesti);
+}
 
 
 		

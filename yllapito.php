@@ -244,7 +244,7 @@
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$tunnus - $aburow[positio]');</SCRIPT>";
 				exit;
 			}
-			if(substr($suljeYllapito, 0, 22) == "yhteyshenkilo_tekninen"  or substr($suljeYllapito, 0, 17) == "yhteyshenkilo_kaupallinen") {
+			if(substr($suljeYllapito, 0, 22) == "yhteyshenkilo_tekninen"  or substr($suljeYllapito, 0, 22) == "yhteyshenkilo_kaupallinen") {
 				$query = "SELECT nimi from yhteyshenkilo where tunnus = $tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 				$aburow = mysql_fetch_array($result);

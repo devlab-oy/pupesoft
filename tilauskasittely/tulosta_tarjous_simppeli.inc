@@ -53,6 +53,7 @@ if (!function_exists('tulosta_tarjous')) {
 					//	Aloitellaan piirtely‰
 					$pdf = new pdf;
 					$pdf->enable('template');	
+					$pdf->enable('import');
 
 					$pdf->set_default('margin-top', 	mm_pt(10));
 					$pdf->set_default('margin-bottom', 	mm_pt(10));
@@ -457,7 +458,15 @@ if (!function_exists('tulosta_tarjous')) {
 		$pdf->write($h, 1, 0, $s[0], 		strtoupper(maa($yhtiorow["maa"],$kieli)), "norm", "L", "");
 		$pdf->write($h, 1, $s[0], $s[1], 	t("Email", $kieli).":", "norm", "L", "");
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["email"], "norm", "L", "");
-				
+
+		
+		if(file_exists($kukarow["yhtio"]."_tarjous_liitte.pdf")) {
+			ob_start(); // estet‰‰n outputti
+			$pdf->import->append(file_get_contents($kukarow["yhtio"]."_tarjous_liitte.pdf"));
+			$pages = $pdf->import->get_pages();
+			ob_end_clean(); // outputti takas p‰‰lle			
+		}
+		
 		// Tulostetaan sivu
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());

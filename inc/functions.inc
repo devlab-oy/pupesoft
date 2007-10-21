@@ -1413,7 +1413,7 @@ if (!function_exists("synkronoi")) {
 					if($table == "tuote") {
 						//	Oletetaan, että meillä on avainsanat sycronoituna (osasto/try)
 						
-						foreach(array("myyjanro","ostajanro","tilino","tilino_eu","tilino_ei_eu","kustp","kohde","projekti") as $value) {
+						foreach(array("myyjanro","ostajanro","tilino","tilino_eu","tilino_ei_eu","kustp","kohde","projekti","kehahin","vihahin","vihapvm","epakurantti25pvm","epakurantti50pvm","epakurantti75pvm","epakurantti100pvm") as $value) {
 							$override[$value] = "";
 						}
 						
@@ -1578,10 +1578,10 @@ if (!function_exists("synkronoi")) {
 						for ($i=1; $i < mysql_num_fields($masterres); $i++) {
 							//	Päivitetään vain muuttuneet kentät!
 							if (isset($masterrow[$i]) and !in_array(mysql_field_name($masterres, $i), array("yhtio","tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
-								//	Jos arvo pitää ylikirjoittaa niin ylikirjoitetaan (mm. liitostunnus)
-								if(isset($override[$i])) {
+								//	Jos arvo pitää ylikirjoittaa niin ylikirjoitetaan (mm. liitostunnus)								
+								if(isset($override[mysql_field_name($masterres, $i)])) {
 									//Nämä ohitetaan kokonaan
-									//$query .= ", ". mysql_field_name($masterres,$i)."='".$override[$i]."' ";
+									//$query .= ", ". mysql_field_name($masterres,$i)."='".$override[mysql_field_name($masterres, $i)]."' ";
 								}
 								else {
 									$query .= ", ". mysql_field_name($masterres,$i)."='".$masterrow[$i]."' ";
@@ -1591,7 +1591,7 @@ if (!function_exists("synkronoi")) {
 
 						$query = $query." ".$query2;
 						$updres = mysql_query($query) or pupe_error($query);
-												
+																		
 						if(mysql_affected_rows() > 0) {
 							
 							$erot = "";

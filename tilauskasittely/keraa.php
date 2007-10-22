@@ -1220,6 +1220,8 @@
 			echo "<tr><th>" . t("Laskutusosoite") ."</th><td>$otsik_row[osoite], $otsik_row[postitp]</td></tr>";
 			echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$otsik_row[toim_osoite], $otsik_row[toim_postitp]</td></tr>";
 		}
+		
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
 
 		$query = "	SELECT
 					concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka,
@@ -1227,7 +1229,7 @@
 					tilausrivi.tuoteno puhdas_tuoteno,
 					tilausrivi.varattu, tilausrivi.jt, tilausrivi.keratty, tilausrivi.tunnus, tilausrivi.var, tilausrivi.tilkpl,
 					tuote.ei_saldoa, tuote.sarjanumeroseuranta, tuote.tuoteno tuote,
-					concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+					$sorttauskentta
 					FROM tilausrivi, tuote
 					WHERE tuote.yhtio=tilausrivi.yhtio
 					and tuote.tuoteno=tilausrivi.tuoteno
@@ -1236,7 +1238,7 @@
 					and tilausrivi.yhtio	= '$kukarow[yhtio]'
 					and tilausrivi.tyyppi	in ($tyyppi)
 					and tilausrivi.kerattyaika = '0000-00-00 00:00:00'
-					ORDER BY tilausrivi.perheid, sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
+					ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 		$riveja = mysql_num_rows($result);
 

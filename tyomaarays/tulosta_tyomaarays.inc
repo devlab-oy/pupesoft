@@ -256,7 +256,7 @@ if (!function_exists('alku')) {
 						$query = "	SELECT nimi
 									FROM kuka
 									WHERE yhtio = '$kukarow[yhtio]' 
-									and tunnus  = '".$laskurow[$kentta]."'";
+									and kuka  	= '".$laskurow[$kentta]."'";
 						$yresult = mysql_query($query) or pupe_error($query);
 						$row = mysql_fetch_array($yresult);
 						

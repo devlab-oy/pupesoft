@@ -187,7 +187,7 @@
 	}
 
 	//Haetaan kaikki käyttäjät
-	$query = "	SELECT distinct kuka.nimi, kuka.kuka, kuka.osasto
+	$query = "	SELECT distinct if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, kuka.kuka, kuka.osasto
 				FROM kuka, oikeu
 				WHERE oikeu.yhtio	= kuka.yhtio
 				and oikeu.kuka		= kuka.kuka
@@ -238,7 +238,7 @@
 			$varitys = "td";
 		}
 
-		echo "<tr><$varitys><a href='$PHP_SELF?day=1&month=$month&year=$year&valkuka=$row[kuka]&osasto=$osasto' title='$row[nimi]'>".substr($nimi[0],0,1).". $nimi[1]</a></$varitys><td></td>";
+		echo "<tr><$varitys><a href='$PHP_SELF?day=1&month=$month&year=$year&valkuka=$row[kuka]&osasto=$osasto' title='$row[nimi]'>$row[nimi]</a></$varitys><td></td>";
 
 		for($i = 1; $i <= days_in_month($month, $year); $i++) {
 			$pva = to_mysql($i);
@@ -602,7 +602,7 @@
 			for($i = 1; $i <= days_in_month($month, $year); $i++) {
 				$pva = to_mysql($i);
 
-				$query = "	SELECT kalenteri.tunnus tunnus, pvmalku, pvmloppu, kalenteri.yhtio, kuka.nimi nimi, replace(kentta01,'\r\n',' ') kentta01,
+				$query = "	SELECT kalenteri.tunnus tunnus, pvmalku, pvmloppu, kalenteri.yhtio, if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, replace(kentta01,'\r\n',' ') kentta01,
 							date_format(pvmalku,'%H:%i') kello, date_format(pvmloppu,'%H:%i') lkello
 							FROM kalenteri, kuka
 							WHERE kalenteri.tyyppi = 'varauskalenteri'
@@ -630,10 +630,7 @@
 						}
 					}
 					echo "</div>";
-
-
-					$nimi = explode(' ', $krow["nimi"]);
-					echo "<td align='center' width='35'><a class='td' href='../varauskalenteri/varauskalenteri.php?lopetus=$lopetus&tee=NAYTA&year=$year&month=$month&day=$pva&tunnus=$krow[tunnus]&toim=$row[alanimi]' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">".substr($nimi[0],0,1).".".substr($nimi[1],0,1).".</a></td>";
+					echo "<td align='center' width='35'><a class='td' href='../varauskalenteri/varauskalenteri.php?lopetus=$lopetus&tee=NAYTA&year=$year&month=$month&day=$pva&tunnus=$krow[tunnus]&toim=$row[alanimi]' onmouseout=\"popUp(event,'$krow[tunnus]')\" onmouseover=\"popUp(event,'$krow[tunnus]')\">$krow[nimi]</a></td>";
 				}
 
 				if (weekday_number($i, $month, $year)==6) {

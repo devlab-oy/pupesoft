@@ -232,7 +232,10 @@
 			$pres = mysql_query($query) or pupe_error($query);
 			$prow = mysql_fetch_array($pres);
 			
-			$lisa .= " and tuote.tuoteno in ($prow[tuotteet]) ";		
+			if ($prow["tuotteet"] != "") {
+				$lisa .= " and tuote.tuoteno in ($prow[tuotteet]) ";		
+			}
+			
 			$ulisa .= "&haku[".$i."]=".$haku[$i];
 		}
 		elseif (strlen($haku[$i]) > 0 && $i == 2) {

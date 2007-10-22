@@ -540,7 +540,7 @@
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
 		//Sarjanumeroiden lisätietoja varten
-		if ($sarjanumeronLisatiedot == "OK" and require('sarjanumeron_lisatiedot_popup.inc')) {		
+		if ($sarjanumeronLisatiedot == "OK" and @include('sarjanumeron_lisatiedot_popup.inc')) {		
 			echo js_popup();	
 		}
 		else {

@@ -203,6 +203,14 @@
 							$lisatty_tun = mysql_insert_id();
 							
 							// ostorivin lisätiedot							
+							$query = "	INSERT INTO tilausrivin_lisatiedot
+										SET tilausrivitunnus 	= '$lisatty_tun',
+										luontiaika				= now(),
+										laatija 				= '$kukarow[kuka]',
+										yhtio		 	 		= '$kukarow[yhtio]'";
+							$updres = mysql_query($query) or pupe_error($query);	
+							
+							// myyntirivin lisätiedot							
 							$query = "	UPDATE tilausrivin_lisatiedot
 										SET tilausrivilinkki 	= '$lisatty_tun', 
 										toimittajan_tunnus		= '$ttrow[liitostunnus]',

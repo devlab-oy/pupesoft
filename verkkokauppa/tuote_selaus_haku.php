@@ -564,12 +564,13 @@
 					if ($lisatiedot != "") {
 						echo "<th>".t("Toim Tuoteno")."</th>";
 					}
-
-					echo "<th style='text-align: right'>".t("Hinta")."</th>";
-					if($verkkokauppa == "") {
-						echo "<th>".t("Aleryhm‰")."</th>";				
+					
+					if($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www")) {
+						echo "<th style='text-align: right'>".t("Hinta")."</th>";
+						if($verkkokauppa == "") {
+							echo "<th>".t("Aleryhm‰")."</th>";				
+						}					
 					}
-
 
 					if ($verkkokauppa == "" and $lisatiedot != "" and $kukarow["extranet"] == "") {
 						echo "<th>".t("Nettohinta")."</th>";
@@ -720,92 +721,94 @@
 			
 			//	Extranetk‰ytt‰jille voidaan n‰ytt‰‰ myˆs se heid‰n asiakashinta..
 			// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
-			if($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
+			if($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www")) {
+				if($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
 
-				// siihen tarvitaan:
-				// $laskurow[] (laskun tiedot)
-				// $trow[] (select * from tuote)
-				// $kukarow[] (kuka (tai vastaava))
-				// $kpl (tilatava m‰‰r‰)
-				// $netto = N jos halutaan nettohinta
-				// $debug (jos 1 niin n‰ytet‰‰n tulos)
-				$kpl = 1;
+					// siihen tarvitaan:
+					// $laskurow[] (laskun tiedot)
+					// $trow[] (select * from tuote)
+					// $kukarow[] (kuka (tai vastaava))
+					// $kpl (tilatava m‰‰r‰)
+					// $netto = N jos halutaan nettohinta
+					// $debug (jos 1 niin n‰ytet‰‰n tulos)
+					$kpl = 1;
 
-				// haetaan tuotteen tiedot
-				$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
-				$tuoteres = mysql_query($query);
-				$trow = mysql_fetch_array($tuoteres);
-				require("alehinta.inc");	
-				
-				$myyntihinta = number_format($hinta * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}11";
-			}
-			elseif ($kukarow["extranet"] != "") {
+					// haetaan tuotteen tiedot
+					$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+					$tuoteres = mysql_query($query);
+					$trow = mysql_fetch_array($tuoteres);
+					require("alehinta.inc");	
 
-				$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-				$oleasres = mysql_query($query) or pupe_error($query);
-				$oleasrow = mysql_fetch_array($oleasres);
+					$myyntihinta = number_format($hinta * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}11";
+				}
+				elseif ($kukarow["extranet"] != "") {
 
-				if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
+					$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+					$oleasres = mysql_query($query) or pupe_error($query);
+					$oleasrow = mysql_fetch_array($oleasres);
 
-					$myyntihinta = number_format($row["myyntihinta"], 2, ',', ' '). " $yhtiorow[valkoodi]";
+					if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
 
-					$query = "	select *
-								from hinnasto
-								where yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$row[tuoteno]'
-								and valkoodi = '$oleasrow[valkoodi]'
-								and laji = ''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-								order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-								limit 1";
-					$olhires = mysql_query($query) or pupe_error($query);
+						$myyntihinta = number_format($row["myyntihinta"], 2, ',', ' '). " $yhtiorow[valkoodi]";
 
-					if (mysql_num_rows($olhires) == 1) {
-						$olhirow = mysql_fetch_array($olhires);
-						$myyntihinta = "$olhirow[hinta] $olhirow[valkoodi]";
-					}
-					else {
-						$query = "select * from valuu where yhtio='$kukarow[yhtio]' and nimi='$oleasrow[valkoodi]'";
+						$query = "	select *
+									from hinnasto
+									where yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$row[tuoteno]'
+									and valkoodi = '$oleasrow[valkoodi]'
+									and laji = ''
+									and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+									order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+									limit 1";
 						$olhires = mysql_query($query) or pupe_error($query);
 
-						if (mysql_num_rows($oleasres) == 1) {
+						if (mysql_num_rows($olhires) == 1) {
 							$olhirow = mysql_fetch_array($olhires);
-							$myyntihinta = number_format(yhtioval($row["myyntihinta"], $olhirow["kurssi"]), 2, ',', ' '). " $yhtiorow[valkoodi]";
+							$myyntihinta = "$olhirow[hinta] $olhirow[valkoodi]";
+						}
+						else {
+							$query = "select * from valuu where yhtio='$kukarow[yhtio]' and nimi='$oleasrow[valkoodi]'";
+							$olhires = mysql_query($query) or pupe_error($query);
+
+							if (mysql_num_rows($oleasres) == 1) {
+								$olhirow = mysql_fetch_array($olhires);
+								$myyntihinta = number_format(yhtioval($row["myyntihinta"], $olhirow["kurssi"]), 2, ',', ' '). " $yhtiorow[valkoodi]";
+							}
+						}
+					}
+
+				}
+				else {
+					$query = "	SELECT distinct valkoodi, maa from hinnasto
+								where yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$row[tuoteno]'
+								and laji = ''
+								order by maa, valkoodi";
+					$hintavalresult = mysql_query($query) or pupe_error($query);
+
+					while ($hintavalrow = mysql_fetch_array($hintavalresult)) {
+
+						// katotaan onko tuotteelle valuuttahintoja
+						$query = "	SELECT *
+									from hinnasto
+									where yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$row[tuoteno]'
+									and valkoodi = '$hintavalrow[valkoodi]'
+									and maa = '$hintavalrow[maa]'
+									and laji = ''
+									and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+									order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
+									limit 1";
+						$hintaresult = mysql_query($query) or pupe_error($query);
+
+						while ($hintarow = mysql_fetch_array($hintaresult)) {
+							$myyntihinta .= "<br>$hintarow[maa]: $hintarow[hinta] $hintarow[valkoodi]";
 						}
 					}
 				}
 
+				echo "<td valign='top' class='$vari' align='right'>$myyntihinta</td>";				
 			}
-			else {
-				$query = "	SELECT distinct valkoodi, maa from hinnasto
-							where yhtio = '$kukarow[yhtio]'
-							and tuoteno = '$row[tuoteno]'
-							and laji = ''
-							order by maa, valkoodi";
-				$hintavalresult = mysql_query($query) or pupe_error($query);
-
-				while ($hintavalrow = mysql_fetch_array($hintavalresult)) {
-
-					// katotaan onko tuotteelle valuuttahintoja
-					$query = "	SELECT *
-								from hinnasto
-								where yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$row[tuoteno]'
-								and valkoodi = '$hintavalrow[valkoodi]'
-								and maa = '$hintavalrow[maa]'
-								and laji = ''
-								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-								order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-								limit 1";
-					$hintaresult = mysql_query($query) or pupe_error($query);
-
-					while ($hintarow = mysql_fetch_array($hintaresult)) {
-						$myyntihinta .= "<br>$hintarow[maa]: $hintarow[hinta] $hintarow[valkoodi]";
-					}
-				}
-			}
-
-			echo "<td valign='top' class='$vari' align='right'>$myyntihinta</td>";
 
 			if($verkkokauppa == "") {
 				echo "<td valign='top' class='$vari'>$row[aleryhma]</td>";

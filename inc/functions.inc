@@ -1155,23 +1155,12 @@ if (!function_exists("synkronoi")) {
 		//	Näillä tarttetaan vähän lisätietoo
 		if($table == "avainsana") {
 			$abulisa = ereg(",(avainsana\|*([\|a-zA-Z]*)),*", $yhtiorow["synkronoi"], $regs);
-			$lajit = explode("|",strtolower($regs[2]));
 
+			$lajit = explode("|",strtolower($regs[2]));
+			
 			//	saadaanko juuri tätä lajia synkronoida?
 			if(is_array($orig) and count($orig) > 0) {				
 				if(!in_array(strtolower($orig["laji"]), $lajit)) {
-					return false;
-				}
-			}
-			else {
-				$query = " 	SELECT tunnus 
-							from avainsana 
-							where yhtio	= '$yhtio' 
-							and tunnus	= '$tunnus' 
-							and laji IN ($lajit)";
-				$tarkres = mysql_query($query) or pupe_error($query);
-								
-				if(mysql_num_rows($tarkres)==0) {
 					return false;
 				}
 			}

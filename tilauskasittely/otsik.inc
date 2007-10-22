@@ -1517,15 +1517,16 @@
 						echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";
 
 						
-						$query = "	SELECT selite, selitetark
-									FROM avainsana
-									WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOLINJA'
-									ORDER BY jarjestys, selite";
+						$query = "	(SELECT 'a' kala, selite, selitetark FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOLINJA' )
+									UNION
+									(SELECT 'b' kala, kuka selite, nimi selitetark FROM kuka WHERE yhtio = '$kukarow[yhtio]' and extranet='')
+									ORDER BY 1,3";
 						$yresult = mysql_query($query) or pupe_error($query);
-
 
 						echo "<option value=''>".t("Valitse")."</option>";
 
+						$edg = "";
+						
 						while($row = mysql_fetch_array($yresult)) {
 							$sel = "";
 
@@ -1533,7 +1534,17 @@
 								$sel = 'selected';
 							}
 							
+							if ($edg != $row["kala"] and $row["kala"] == "a") {
+								echo "<optgroup label='".t("Asentajat")."'>";
+							}
+							elseif ($edg != $row["kala"] and $row["kala"] == "b") {
+								echo "</optgroup>";
+								echo "<optgroup label='".t("Muut")."'>";
+							}
+							
 							echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+							
+							$edg = $row['kala'];
 						}
 
 						echo "</select></td>";

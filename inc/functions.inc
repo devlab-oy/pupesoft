@@ -1401,7 +1401,6 @@ if (!function_exists("synkronoi")) {
 
 					if($table == "tuote") {
 						//	Oletetaan, että meillä on avainsanat sycronoituna (osasto/try)
-						
 						foreach(array("myyjanro","ostajanro","tilino","tilino_eu","tilino_ei_eu","kustp","kohde","projekti","kehahin","vihahin","vihapvm","epakurantti25pvm","epakurantti50pvm","epakurantti75pvm","epakurantti100pvm") as $value) {
 							$override[$value] = "";
 						}
@@ -1444,7 +1443,7 @@ if (!function_exists("synkronoi")) {
 						}
 						*/
 
-						//	Tarkastetaan että hinnat eivät mene aivan päin vittuja..
+						// Tarkastetaan että hinnat eivät mene aivan päin vittuja..
 						$query = "select tunnus from yhtion_parametrit where yhtio='$kohderow[yhtio]' and alv_kasittely!='$yhtion_parametrit[alv_kasittely]'";
 						$abures = mysql_query($query) or pupe_error($query);
 						
@@ -1463,6 +1462,9 @@ if (!function_exists("synkronoi")) {
 					}
 
 					if($table == "asiakas") {
+						foreach(array("myyjanro","tilino","kustp","kohde","projekti") as $value) {
+							$override[$value] = "";
+						}
 
 						//	koitetaan hakea oikean maksuehdon tunnus..
 						$query = "select * from maksuehto where yhtio='$yhtio' and tunnus='$masterrow[maksuehto]'";
@@ -1522,21 +1524,6 @@ if (!function_exists("synkronoi")) {
 						else {
 							$override["toimitustapa"] = "";
 						}
-
-						//	Onko tämä myyjä myös kohdeyrityksessä?
-						$override["myyjanro"] = "";
-						
-						/*
-						$query = "select * from kuka where yhtio='$yhtio' and tunnus='$masterrow[myyjanro]'";
-						$abures=mysql_query($query) or pupe_error($query);
-						$aburow=mysql_fetch_array($abures);
-
-						$query = "select tunnus from kuka where yhtio='$kohderow[yhtio]' and kuka='$aburow[kuka]'";
-						$tarkres=mysql_query($query) or pupe_error($query);
-						if(mysql_num_rows($tarkres)!=1 and $masterrow["myyjanro"]!="") {
-							$override["myyjanro"]="";
-						}
-						*/
 					}
 
 					//	Päivitetään vai tehdään uutta?
@@ -1580,7 +1567,7 @@ if (!function_exists("synkronoi")) {
 
 						$query = $query." ".$query2;
 						$updres = mysql_query($query) or pupe_error($query);
-																		
+
 						if(mysql_affected_rows() > 0) {
 							
 							$erot = "";

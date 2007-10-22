@@ -270,14 +270,7 @@ if ($session != '' or $verkkokauppa != "") {
 	
 
 	if (isset($nayta_pdf) and $nayta_pdf == 1) {
-		
-		$charset = "iso-8859-1";
-
-		if ($kukarow["kieli"] == "ru" or $kukarow["kieli"] == "ee") {
-			$charset = "utf-8";
-		}
-
-		header("Content-Type: application/pdf; charset=$charset");
+		header("Content-Type: application/pdf");
 		header('Content-Disposition: inline; filename="pupesoft.pdf"');
 	}
 	elseif(isset($lataa_tiedosto) and $lataa_tiedosto == 1) {
@@ -332,11 +325,12 @@ if ($session != '' or $verkkokauppa != "") {
 			$css = $yhtiorow['css'];
 		}
 
-		$charset = "iso-8859-1";
-		//$charset = "utf-8";
 
-		if ($kukarow["kieli"] == "ru" or $kukarow["kieli"] == "ee") {
+		if ($kukarow["kieli"] == "ru") {
 			$charset = "utf-8";
+		}
+		else {
+			$charset = "iso-8859-1";
 		}
 
 		header("Content-Type: text/html; charset=$charset");

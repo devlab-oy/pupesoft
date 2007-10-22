@@ -2973,8 +2973,8 @@ if ($tee == '') {
 					$buttonit = "";
 				}
 				
-				// Tuoteperheiden lapsille ei näytetä rivinumeroa JUPPE! mä laitoin tonne ton kohde jutun loppuun niin omassa casessa se meenee oikein, en ymmärrä onko tässä jokin syy
-				if ($row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0) or ($row["perheid2"] == -1 or ($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U") and ($yhtiorow["tilauksen_kohteet"] == "")))) {
+				// Tuoteperheiden lapsille ei näytetä rivinumeroa
+				if ($row["perheid"] == $row["tunnus"] or ($row["perheid2"] == $row["tunnus"] and $row["perheid"] == 0) or ($row["perheid2"] == -1 or ($row["perheid"] == 0 and $row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")))) {
 
 					if (($row["perheid2"] == 0 and ($row["var"] == "T" or $row["var"] == "U")) or $row["perheid2"] == -1) {
 						$pklisa = " and (perheid = '$row[tunnus]' or perheid2 = '$row[tunnus]')";

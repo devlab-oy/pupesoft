@@ -6,24 +6,9 @@
 	
 	$AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
 	
-	$query = "	SELECT selite, selitetark
-				FROM avainsana
-				WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOLINJA'
-				ORDER BY jarjestys, selite";
-	$kires = mysql_query($query) or pupe_error($query);
-
-	$ASENTAJA_ARRAY = array();
-	$ASENTAJA_ARRAY_TARK = array();
-
-	while ($kirow = mysql_fetch_array($kires)) {
-		$ASENTAJA_ARRAY[] = $kirow["selite"];
-		$ASENTAJA_ARRAY_TARK[] = $kirow["selitetark"];
-	}
-	
 	//kuukaudet ja päivät ja ajat
 	$MONTH_ARRAY = array(1=>'Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu');
 	$DAY_ARRAY = array("Maanantai", "Tiistai", "Keskiviikko", "Torstai", "Perjantai");
-	
 	
 	echo "<form name='haku' action='$PHP_SELF' method='post'>";
 	
@@ -38,16 +23,16 @@
 	echo "<tr>";
 			
 	if (trim($konserni) != '') {
-		echo "<th>Yhtiö</th>";
+		echo "<th>".t("Yhtiö")."</th>";
 	}
 			
-	echo "	<th>Työmääräys<br>Tilausviite</th>
-			<th>Ytunnus<br>Asiakas</th>
-			<th>Työaika<br>Työn suorittaja</th>
-			<th>Toimitetaan</th>
-			<th>Myyjä<br>Tyyppi</th>
-			<th>Työjono<br>Työstatus</th>
-			<th>Muokkaa</th>
+	echo "	<th>".t("Työmääräys")."<br>".t("Tilausviite")."</th>
+			<th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
+			<th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
+			<th>".t("Toimitetaan")."</th>
+			<th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
+			<th>".t("Työjono")."<br>".t("Työstatus")."</th>
+			<th>".t("Muokkaa")."</th>
 			</tr>";
 			
 	echo "<tr>";
@@ -138,9 +123,9 @@
 				a2.selitetark tyostatus, 
 				yhtio.nimi yhtio, 
 				yhtio.yhtio yhtioyhtio,
-				a3.selitetark suorittajanimi,
+				a3.nimi suorittajanimi,
 				group_concat(a4.selitetark) asekalsuorittajanimi,
-				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', a4.selitetark, '##', kalenteri.tunnus)) asennuskalenteri
+				group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', a4.selitetark_2, '##', kalenteri.tunnus)) asennuskalenteri
 				FROM lasku
 				JOIN yhtio ON lasku.yhtio=yhtio.yhtio
 				JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
@@ -148,9 +133,9 @@
 				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
 				LEFT JOIN avainsana a1 ON a1.yhtio=tyomaarays.yhtio and a1.laji='TYOM_TYOJONO'   and a1.selite=tyomaarays.tyojono
 				LEFT JOIN avainsana a2 ON a2.yhtio=tyomaarays.yhtio and a2.laji='TYOM_TYOSTATUS' and a2.selite=tyomaarays.tyostatus
-				LEFT JOIN avainsana a3 ON a3.yhtio=tyomaarays.yhtio and a3.laji='TYOM_TYOLINJA'  and a3.selite=tyomaarays.suorittaja
+				LEFT JOIN kuka a3 ON a3.yhtio=tyomaarays.yhtio and a3.kuka=tyomaarays.suorittaja
 				LEFT JOIN kalenteri ON kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus
-				LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selite=kalenteri.kuka
+				LEFT JOIN avainsana a4 ON a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka
 				WHERE $konsernit
 				and lasku.tila in ('A','L','N','S')
 				and lasku.alatila != 'X'

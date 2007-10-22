@@ -59,16 +59,16 @@
 						echo "<input type='hidden' name='tee' value = 'liita'>";			
 						echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
 						echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
-						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivej‰")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th><tr>";
+						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivej‰")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th></tr>";
 						while($row = mysql_fetch_array($result)) {
 							echo "<tr><td>{$row["keikka"]}</td><td>{$row["comments"]}</td><td align='right'>{$row["kpl"]}/{$row["varastossa"]}</td><td align='right'>{$row["varastossaarvo"]}</td><td>";
 							echo "<input type='text' name='liita[".$row["otunnus"]."][liitasumma]' value='$liitasumma' size='10'>";
-							echo "</td><tr>";
+							echo "</td></tr>";
 						}
-						echo "<tr><td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liit‰ keikkoihin")."'></td></tr></table></form>";						
+						echo "<tr><td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liit‰ keikkoihin")."'></td></tr></table></form>";
 					}
 					else {
-						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivej‰")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th><tr>";
+						echo "<table><tr><th>".t("Keikka")."</th><th>".t("Kommentit")."</th><th>".t("Rivej‰")."/".t("varasossa")."</th><th>".t("Varastonarvo")."</th></tr>";
 						while($row = mysql_fetch_array($result)) {
 							
 							$query = "	select sum(summa) summa
@@ -81,16 +81,18 @@
 							$alvirow = mysql_fetch_array($alvires);
 							$summa_kaytettavissa = round((float) $laskurow["summa"] - (float) $alvirow["summa"], 2);
 							
-							echo "<tr><td>{$row["keikka"]}</td><td>{$row["comments"]}</td><td align='right'>{$row["kpl"]}/{$row["varastossa"]}</td><td align='right'>{$row["varastossaarvo"]}</td><td>";
-							echo "<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>";
-							echo "<input type='hidden' name='tee' value = 'liita'>";			
-							echo "<input type='hidden' name='tunnus' value = '$tunnus'>";
-							echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
-							echo "<input type='hidden' name='liita[".$row["otunnus"]."][liitasumma]' value='' size='10'>";							
-							echo "<td class='back' colspan='5' align = 'right'><input type='submit' value='".t("Liit‰ keikkaan")."'></td>";
-							echo "</td><tr>";
+							echo "<tr><td>{$row["keikka"]}</td><td>{$row["comments"]}</td><td align='right'>{$row["kpl"]}/{$row["varastossa"]}</td><td align='right'>{$row["varastossaarvo"]}</td>";
+							echo "<td class='back' colspan='5' align = 'right'>
+									<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>
+									<input type='hidden' name='tee' value = 'liita'>
+									<input type='hidden' name='tunnus' value = '$tunnus'>
+									<input type='hidden' name='toimittajaid' value = '$toimittajaid'>
+									<input type='hidden' name='liita[".$row["otunnus"]."][liitasumma]' value='' size='10'>
+									<input type='submit' value='".t("Liit‰ keikkaan")."'>
+									</form>";
+							echo "</td></tr>";
 						}
-						
+						echo "</table>";
 					}
 				}
 				else {
@@ -98,8 +100,7 @@
 				}
 			}
 			else {
-				echo "<form id='toimi' name = 'toimi' action='javascript:ajaxPost(\"toimi\", \"hyvak.php\", \"keikka\", \"false\", \"false\", \"post\");' method='post' autocomplete='off'>";
-				echo "<input type='hidden' name='tee' value = '$tee'>";
+				echo "<form id='toimi' name = 'toimi' action='javascript:ajaxPost(\"toimi\", \"hyvak.php?tee=$tee\", \"keikka\", \"\", \"\", \"\", \"post\");' method='post' autocomplete='off'>";
 				echo "<input type='hidden' name='tunnus' value = '$tunnus'>";							
 				echo "<input type='hidden' name='keikalla' value = 'on'>";							
 				echo "<table>";
@@ -124,12 +125,16 @@
 			if($tee == "liita") {
 				if(count($liita) > 0) {
 					foreach($liita as $l => $v) {
+						//	Otetaan originaali laskurow talteen..
+						$olaskurow = $laskurow;
 						$otunnus = $l;
 						$liitasumma = $v["liitasumma"];
-
 						if($liitasumma <> 0 or !in_array($laskurow["vienti"], array("B","E","H"))) {
 							require("tilauskasittely/kululaskut.inc");
 						}
+						
+						//	Palautetaan Wanha
+						$laskurow = $olaskurow;
 					}
 				}
 			}
@@ -143,7 +148,7 @@
 			$tee = "";				
 		}
 		else {
-			echo "OHO!";
+			echo "Kui s‰‰ t‰nne p‰‰sit?!";
 		}
 	}
 	

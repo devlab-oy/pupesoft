@@ -816,10 +816,10 @@ while ($kello_nyt != '18:00') {
 		
 				// Vanhoja kalenteritapahtumia ei saa en‰‰ muuttaa ja Hyv‰ksyttyj‰ lomia ei saa ikin‰ muokata 
 				if (($kukarow["kuka"] == $row["kuka"] or $kukarow["kuka"] == $row["laatija"]) and $row["kuittaus"] == "") {
-					echo "<th rowspan='$kesto' style='border:1px solid #FF0000;'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&lopetus=$lopetus'>$row[tapa]</a> : ";
+					echo "<td class='tumma'  rowspan='$kesto' style='border:1px solid #FF0000;'>$kukanimi<a href='$PHP_SELF?valitut=$valitut&kenelle=$kenelle&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&lopetus=$lopetus'>$row[tapa]</a> : ";
 				}
 				else {
-					echo "<th rowspan='$kesto' style='border:1px solid #FF0000;'>$kukanimi $row[tapa]: ";
+					echo "<td class='tumma' rowspan='$kesto' style='border:1px solid #FF0000;'>$kukanimi $row[tapa]: ";
 				}
 												
 				if ($row["asiakas"] != 0) {
@@ -834,7 +834,7 @@ while ($kello_nyt != '18:00') {
 					echo "N/A";
 				}
 								
-				echo "<br>$row[kentta01]</th>\n";
+				echo "<br>$row[kentta01]</td>\n";
 				
 				$kalalask++;
 			}

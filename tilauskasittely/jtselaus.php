@@ -7,20 +7,18 @@
 		else {
 			require ("parametrit.inc");
 		}
-	}
-
-	if ($tee != "JT_TILAUKSELLE") {
+		
 		if ($toim == "ENNAKKO") {
 			echo "<font class='head'>".t("Ennakkotilausrivit")."</font><hr>";
 		}
 		else {
 			echo "<font class='head'>".t("JT rivit")."</font><hr>";
 		}
+	}
 
-		if ($vainvarastosta != "") {
-			$varastosta = array();
-			$varastosta[$vainvarastosta] = $vainvarastosta;
-		}
+	if ($tee != "JT_TILAUKSELLE" and $vainvarastosta != "") {
+		$varastosta = array();
+		$varastosta[$vainvarastosta] = $vainvarastosta;
 	}
 
 	$asiakasmaa = "";

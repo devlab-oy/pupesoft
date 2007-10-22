@@ -522,8 +522,19 @@ if ($toiminto != "kaikkiok" and $superirivit != "" and $suoratoimitus == '' and 
 	echo "<br><font class='message'>$laskuvirhe</font><br><br>";
 }
 
-// Toimitetaan asiakkaalle korvamerkityt jtrivit
-if ($toiminto != "kaikkiok" and $jtrivit != "") {
+//	Halutaanko toimittaa j‰lkk‰reit‰ automaattisesti ja saako k‰ytt‰j‰ ylip‰‰t‰‰n k‰sitell‰ j‰lkk‰reit‰..
+$query = "	SELECT paivitys
+			FROM oikeu
+			WHERE yhtio	= '$kukarow[yhtio]'
+			and kuka	= '$kukarow[kuka]'
+			and nimi	= 'tilauskasittely/jtselaus.php'
+			and alanimi = ''";
+$jtoikeudetres = mysql_query($query) or pupe_error($query);
+
+if ($toiminto != "kaikkiok" and $jtrivit != "" and mysql_num_rows($jtoikeudetres)<>0 and $yhtiorow["automaattinen_jt_toimitus"] != "") {
+	
+	$jtoikeudetrow = mysql_fetch_array($jtoikeudetres);
+	
 	$jtrivit 	= substr($jtrivit,0,-1);
 	$mista 		= 'varastoon.inc';
 	
@@ -538,7 +549,7 @@ if ($toiminto != "kaikkiok" and $jtrivit != "") {
 	}
 	
 	
-	function jt_toimita ($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen) {
+	function jt_toimita ($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee) {
 		global $yhtiorow, $kukarow, $oikeurow;
 		
 		$toimittaja		= "";
@@ -552,7 +563,6 @@ if ($toiminto != "kaikkiok" and $jtrivit != "") {
 		$toimi			= "";
 		$superit		= "";
 		$tilaus_on_jo	= "";
-		$tee 			= "JATKA";
 		
 		$vain_rivit 		= $jtrivit;
 		$from_varastoon_inc = "varastoon.inc";
@@ -561,9 +571,13 @@ if ($toiminto != "kaikkiok" and $jtrivit != "") {
 			
 	}
 
-	jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "automaaginen");
-	jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen");
+	jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "automaaginen", "JATKA");
+	jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
 	
+	//	Laitetaan tavarat liikkeelle jos sallitaan!
+	if($jtoikeudetrow["paivitys"] == 1 and $yhtiorow["automaattinen_jt_toimitus"] == "T") {
+		jt_toimita("ytunnus", "liitostunnus", "", "", "tosi_automaaginen", "TOIMITA");	
+	}
 }
 
 echo "<hr>";

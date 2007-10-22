@@ -32,27 +32,27 @@
 			}
 			else {
 				if ($toim == "ENNAKKO") {
-					$query = "	SELECT tilausrivi.*, tuote.ei_saldoa
-								FROM tilausrivi use index (PRIMARY), tuote
+					$query = "	SELECT tilausrivi.*, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen
+								FROM tilausrivi use index (PRIMARY), 
+								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno								
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tunnus  = '$tunnusarray[0]'
 								and tilausrivi.varattu > 0
-								and tilausrivi.tyyppi  = 'E'
-								and tilausrivi.yhtio = tuote.yhtio
-								and tilausrivi.tuoteno = tuote.tuoteno";
+								and tilausrivi.tyyppi  = 'E'";
 				}
 				else {
-					$query = "	SELECT tilausrivi.*, tuote.ei_saldoa
-								FROM tilausrivi, tuote
+					$query = "	SELECT tilausrivi.*, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen
+								FROM tilausrivi 
+								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus								
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.tunnus  = '$tunnusarray[0]'
 								and tilausrivi.varattu = 0
 								and tilausrivi.jt     <> 0
 								and tilausrivi.kpl     = 0
 								and tilausrivi.var     = 'J'
-								and tilausrivi.tyyppi in ('L','G')
-								and tilausrivi.yhtio=tuote.yhtio
-								and tilausrivi.tuoteno=tuote.tuoteno";
+								and tilausrivi.tyyppi in ('L','G')";
 				}
 				$rivitres = mysql_query($query) or pupe_error($query);
 
@@ -146,7 +146,8 @@
 								kohdistettu		= '$otsikkorivi[kohdistettu]' and
 								toimitusehto	= '$otsikkorivi[toimitusehto]' and
 								valkoodi 		= '$otsikkorivi[valkoodi]' and
-								vienti_kurssi	= '$otsikkorivi[vienti_kurssi]'
+								vienti_kurssi	= '$otsikkorivi[vienti_kurssi]' and
+								eilahetetta		= '$isarivirow[suoraan_laskutukseen]'
 								$erpcmlisa1";
 					$stresult = mysql_query($query) or pupe_error($query);
 				}
@@ -284,6 +285,9 @@
 							else {
 								$query .= "clearing='JT-TILAUS',";
 							}
+						}
+						elseif (mysql_field_name($stresult,$i)=='eilahetetta') {
+							$query .= "eilahetetta='".$isarivirow["suoraan_laskutukseen"]."',";
 						}
 						// ja kaikki muut paitsi tunnus sellaisenaan
 						elseif (mysql_field_name($stresult,$i)!='tunnus') {

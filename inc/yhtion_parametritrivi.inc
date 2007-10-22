@@ -385,8 +385,7 @@
 		$ulos = "<td><select name='$nimi'>";
 
 		$sel = array();
-		$apu = $trow[$i];
-		$sel[$apu] = "SELECTED";
+		$sel[$trow[$i]] = "SELECTED";
 
 		$ulos .= "<option value=''>".t("Myyntitilaukselta ei voi luoda ostorivejä")."</option>";
 		$ulos .= "<option value='Y' $sel[Y]>".t("Myyntitilaukselta voi luoda ostorivejä asiakkaalle ja varastoon")."</option>";
@@ -394,6 +393,21 @@
 		$ulos .= "<option value='Z' $sel[Z]>".t("Myyntitilaukselta voi luoda ostorivejä tai ostotilaus asiakkaalle ja varastoon")."</option>";
 		$ulos .= "<option value='X' $sel[X]>".t("Myyntitilaukselta voi luoda ostorivejä tai ostotilaus varastoon")."</option>";
 		
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "automaattinen_jt_toimitus") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
+
+		$ulos .= "<option value=''>".t("Jälkitoimitusrivejä ei toimiteta eikä kohdisteta automaattisesti")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Jälkitoimitusrivit kohdistetaan automaattisesti varastoonviennin yhteydessä")."</option>";
+		$ulos .= "<option value='T' $sel[T]>".t("Jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti varastoonviennin yhteydessä")."</option>";		
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -358,7 +358,7 @@
 				$sel2 = "";
 
 				if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
-					if ($row["var"] == 'T') {
+					if ($row["var"] == 'T' or ($row["var"] == "J" and $row["suoraan_laskutukseen"] == "")) {
 						$sel1 = "SELECTED";
 					}
 					else {

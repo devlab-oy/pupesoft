@@ -1108,7 +1108,7 @@ if ($tila == '') {
 		}
 		
 		//Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
-	   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi
+	   	$query = "	SELECT tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
 	   				FROM tilausrivin_lisatiedot
 	   				JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
 					JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
@@ -1117,7 +1117,12 @@ if ($tila == '') {
 		$varastoon_result = mysql_query($query) or pupe_error($query);
 		
 		if ($varastoon_row = mysql_fetch_array($varastoon_result)) {
-			$rivirow["kommentti"] .= "<br>".t("Tilattu asiakkaalle").": ".$varastoon_row["nimi"];
+			if($varastoon_row["suoraan_laskutukseen"] != "") {
+				$rivirow["kommentti"] .= "<br>".t("Suoratoimitus asiakkaalle").": ".$varastoon_row["nimi"];
+			}
+			else {
+				$rivirow["kommentti"] .= "<br>".t("Tilattu asiakkaalle").": ".$varastoon_row["nimi"];
+			}
 		}
 		
 		echo "<br>$rivirow[kommentti]</$td>";

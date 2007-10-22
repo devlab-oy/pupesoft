@@ -210,10 +210,18 @@
 										yhtio		 	 		= '$kukarow[yhtio]'";
 							$updres = mysql_query($query) or pupe_error($query);	
 							
-							// myyntirivin lisätiedot							
+							// myyntirivin lisätiedot
+							if($rivi["var"] == "U") {
+								$suoraan_laskutukseen = "o";
+							}
+							else {
+								$suoraan_laskutukseen = "";
+							}
+							
 							$query = "	UPDATE tilausrivin_lisatiedot
 										SET tilausrivilinkki 	= '$lisatty_tun', 
 										toimittajan_tunnus		= '$ttrow[liitostunnus]',
+										suoraan_laskutukseen	= '$suoraan_laskutukseen',
 										muutospvm				= now(),
 										muuttaja				= '$kukarow[kuka]'
 										WHERE yhtio		 	 = '$kukarow[yhtio]'

@@ -11,9 +11,17 @@
 
 	$AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00");
 	
-	$query = "	SELECT selite, selitetark
+	$lis = "";
+	
+	if ($tyojono != '') {
+		$lis = " and (selite = '' or selite = '$tyojono') ";	
+	}
+	
+	$query = "	SELECT selite, selitetark, selitetark_2
 				FROM avainsana
-				WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOLINJA'
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and laji = 'TYOM_TYOLINJA'
+				$lis
 				ORDER BY jarjestys, selite";
 	$kires = mysql_query($query) or pupe_error($query);
 
@@ -21,8 +29,8 @@
 	$ASENTAJA_ARRAY_TARK = array();
 
 	while ($kirow = mysql_fetch_array($kires)) {
-		$ASENTAJA_ARRAY[] = $kirow["selite"];
-		$ASENTAJA_ARRAY_TARK[] = $kirow["selitetark"];
+		$ASENTAJA_ARRAY[] = $kirow["selitetark"];
+		$ASENTAJA_ARRAY_TARK[] = $kirow["selitetark_2"];
 	}
 	
 	//kuukaudet ja päivät ja ajat
@@ -117,8 +125,7 @@
 					FROM kalenteri
 					WHERE 
 					$konsernit
-					and tyyppi 	= 'asennuskalenteri'
-					and tapa    = '$tyojono' 
+					and tyyppi 	= 'asennuskalenteri' 
 					and kuka 	= '$asentaja'
 					and (	(pvmalku >= '$year-$month-$day $aika:00' and pvmalku  < '$lyear-$lmonth-$lday $laika:00') or 
 							(pvmalku  < '$year-$month-$day $aika:00' and pvmloppu > '$lyear-$lmonth-$lday $laika:00') or
@@ -320,6 +327,8 @@
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOJONO'
 					ORDER BY jarjestys, selitetark_2";
 		$vresult = mysql_query($query) or pupe_error($query);
+		
+		echo "<option value = ''>".t("Kaikki työjonot")."</option>";
 
 		while ($vrow = mysql_fetch_array($vresult)) {
 			$sel="";
@@ -336,7 +345,7 @@
 		echo "</table><br>";
 	}
 	
-	if ($tee == "" and $tyojono != "") {
+	if ($tee == "") {
 		echo "<table>";
 		echo "<tr>";
 	
@@ -348,7 +357,7 @@
 					<table width='100%'>
 					<tr>";
 				
-			foreach($ASENTAJA_ARRAY as $b) {
+			foreach($ASENTAJA_ARRAY_TARK as $b) {
 				echo "<td align='center' nowrap width='40px'>$b</td>";
 			}
 	        echo "	</tr>
@@ -388,25 +397,29 @@
 				
 				echo "<td class='back' align='center'>$rivi";
 
-				$query = "	SELECT kalenteri.kuka, kalenteri.liitostunnus, kalenteri.pvmalku, kalenteri.pvmloppu, lasku.nimi, tyomaarays.komm1
+				$query = "	SELECT kalenteri.kuka, kalenteri.pvmalku, kalenteri.pvmloppu, kalenteri.tapa, kalenteri.tyyppi,
+							if(kalenteri.tyyppi='asennuskalenteri', kalenteri.liitostunnus, kalenteri.tunnus) liitostunnus, 							
+							if(lasku.nimi='', kalenteri.kuka, lasku.nimi) nimi, 
+							if(tyomaarays.komm1='' or tyomaarays.komm1 is null, kalenteri.kentta01, tyomaarays.komm1) komm1,							
+							tyomaarays.komm2
 							FROM kalenteri
 							LEFT JOIN avainsana ON kalenteri.yhtio = avainsana.yhtio and avainsana.laji = 'KALETAPA' and avainsana.selitetark = kalenteri.tapa
 							LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and lasku.tunnus=kalenteri.liitostunnus
 							LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
 							WHERE kalenteri.yhtio = '$kukarow[yhtio]'
-							and kalenteri.tyyppi = 'asennuskalenteri'
-							and kalenteri.tapa	= '$tyojono'
+							and kalenteri.tyyppi in ('asennuskalenteri','kalenteri')
+							
 							and (	(pvmalku >= '$year-$month-$i 00:00:00' and pvmalku <= '$year-$month-$i 23:59:00') or 
 									(pvmalku <  '$year-$month-$i 00:00:00' and pvmloppu > '$year-$month-$i 00:00:00') or
 									(pvmloppu >='$year-$month-$i 00:00:00' and pvmloppu<= '$year-$month-$i 23:59:00'))
 							order by pvmalku";
 				$vres = mysql_query($query) or pupe_error($query);
-	
+
 				$varaukset 	= array();
 		
 				if (mysql_num_rows($vres) > 0) {
 					while($vrow = mysql_fetch_array($vres)) {
-						foreach($ASENTAJA_ARRAY as $b) {	
+						foreach($ASENTAJA_ARRAY as $b) {							
 							foreach($AIKA_ARRAY as $a) {	
 								$slot = str_replace(array(":","-"," "), "", $year."-".sprintf('%02d', $month)."-".sprintf('%02d', $i)." ".$a);
 								$alku = str_replace(array(":","-"," "), "", substr($vrow["pvmalku"],0,16));
@@ -417,11 +430,19 @@
 										$div_arrayt[] = $vrow["liitostunnus"];
 										
 										echo "<div id='$vrow[liitostunnus]' class='popup' style='width:500px;'>";
-										echo "Työmääräys: $vrow[liitostunnus]<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."<br><a href='#' onclick=\"popUp(event,'$vrow[liitostunnus]')\">Sulje</a>";
+										
+										if($vrow["tyyppi"] == "asennuskalenteri") {
+											echo t("Työmääräys").": $vrow[liitostunnus]";
+										}
+										else {
+											echo t("Kalenterimerkintä").": $vrow[tapa]";	
+										}
+										
+										echo "<br><br>".str_replace("\n", "<br>", $vrow["komm1"]."<br>".$vrow["komm2"])."<br><a href='#' onclick=\"popUp(event,'$vrow[liitostunnus]')\">Sulje</a>";
 										echo "</div>";
 									}
 									
-									$varaukset[$b][$a] = $vrow["nimi"]."|||".$vrow["liitostunnus"];
+									$varaukset[$b][$a] = $vrow["nimi"]."|||".$vrow["liitostunnus"]."|||".$vrow["tapa"]."|||".$vrow["tyyppi"];	
 								}
 							}
 						}
@@ -435,8 +456,16 @@
 					echo "<tr>";
 					foreach($ASENTAJA_ARRAY as $b) {
 						if (isset($varaukset[$b][$a])) {
-							list($nimi, $tilausnumero) = explode("|||", $varaukset[$b][$a]);
-							echo "<td align='center' width='40px'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$tilausnumero</a></th>";
+							list($nimi, $tilausnumero, $tapa, $tyyppi) = explode("|||", $varaukset[$b][$a]);
+							
+							if ($tyyppi == "asennuskalenteri") {
+								$zul = $tilausnumero;
+							}
+							else {
+								$zul = $tapa;	
+							}
+							
+							echo "<td align='center' width='40px'><a class='td' href='tyojono.php?myyntitilaus_haku=$tilausnumero' onmouseout=\"popUp(event,'$tilausnumero')\" onmouseover=\"popUp(event,'$tilausnumero')\">$zul</a></th>";
 						}
 						elseif($liitostunnus > 0 and $tyojono != "") {
 		                    echo "<td align='center' width='40px'><a class='td' href='$PHP_SELF?year=$year&month=$month&day=$i&liitostunnus=$liitostunnus&tyojono=$tyojono&asentaja=$b&aika=$a&tee=VARAA'>&nbsp;</a></th>";			

@@ -59,7 +59,7 @@
 						if ($i == 5) { // Laskun tila
 							$laskutyyppi = $trow[$i];
 							require "inc/laskutyyppi.inc";
-			         			echo "<td>$laskutyyppi</td>";
+			         			echo "<td>".t($laskutyyppi)."</td>";
 						}
 						else {
 							echo "<td>$trow[$i]</td>";
@@ -308,20 +308,22 @@
 	                echo "</table><br>";
 		}
 		if ($selaus == 'T') {
-	                echo "<b>".t("Laskut per tila")."</b><hr>";
-	                $query = "SELECT tila, sum(summa * valuu.kurssi), count(*)
-	                          FROM lasku, valuu
-	                          WHERE lasku.yhtio = '$kukarow[yhtio]' and valuu.yhtio = '$kukarow[yhtio]' and
-	                              lasku.valkoodi = valuu.nimi
-	                          GROUP BY tila";
+			echo "<b>".t("Laskut per tila")."</b><hr>";
+			
+			$query = "	SELECT tila, sum(summa * valuu.kurssi), count(*)
+						FROM lasku, valuu
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and valuu.yhtio = '$kukarow[yhtio]' and
+						lasku.valkoodi = valuu.nimi
+						GROUP BY tila";
+			$result = mysql_query($query) or pupe_error($query);
 
-	                $result = mysql_query($query) or pupe_error($query);
-
-	                echo "<table>";
-	                echo "<tr><th>".t("Tila")."</th><th>".t("Summa")."</th><th>".t("Kpl")."</th></tr>";
-	                while ($trow=mysql_fetch_array ($result)) {
-	                        echo "<tr>";
-	                        for ($i=0; $i<mysql_num_fields($result); $i++) {
+			echo "<table>";
+			echo "<tr><th>".t("Tila")."</th><th>".t("Summa")."</th><th>".t("Kpl")."</th></tr>";
+			
+			while ($trow=mysql_fetch_array ($result)) {
+				echo "<tr>";
+			
+				for ($i=0; $i<mysql_num_fields($result); $i++) {
 					if (($i > 0) && ($i < 3)) {
 						echo "<td>";
 						printf("%.2f", $trow[$i]);
@@ -329,18 +331,18 @@
 					}
 					else {
 						if ($i == 0) { // Laskun tila
-                                                	$laskutyyppi = $trow[$i];
-                                                	require "inc/laskutyyppi.inc";
-                                                	echo "<td>$laskutyyppi</td>";
-                                        	}
+							$laskutyyppi = $trow[$i];
+							require "inc/laskutyyppi.inc";
+							echo "<td>".t($laskutyyppi)."</td>";
+						}
 						else {
-	                                		echo "<td>$trow[$i]</td>";
+							echo "<td>$trow[$i]</td>";
 						}
 					}
-	                        }
-	                        echo "</tr>";
-	                }
-	                echo "</table><br>";
+				}
+				echo "</tr>";
+			}
+			echo "</table><br>";
 		}
 		if ($selaus == 'E') {
 			echo "<b>".t("Laskut per eräpvm")."</b><hr>";

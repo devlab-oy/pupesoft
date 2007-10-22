@@ -397,6 +397,7 @@
 			$kresult = mysql_query($query) or pupe_error($query);
 			//echo str_replace("\t", " ", $query)."<br>";
 			unset($eka);
+			
 			if(mysql_num_rows($kresult)>0) {
 
 				echo "<tr class='aktiivi'><td rowspan='".mysql_num_rows($kresult)."' NOWRAP>{$row[projekti]} - {$row[seuranta]} - {$row[nimi]}</td><td rowspan='".mysql_num_rows($kresult)."' NOWRAP>";
@@ -408,12 +409,12 @@
 			 	require ("../inc/laskutyyppi.inc");
 				
 				if($row["tunnusnippu"] > 0) {
-					$laskutyyppi .= " TOIMITUKSET";
+					$laskutyyppilisa = " ".t("TOIMITUKSET");
 				}
 				
 				echo "<div id='$id' class='popup' style=\"width: 500px\">
 				<table width='500px' align='center'>
-				<caption><font class='head'>$laskutyyppi</font></caption>
+				<caption><font class='head'>".t($laskutyyppi)." $laskutyyppilisa</font></caption>
 				<tr>
 					<th>".t("Toimitus")."</th>
 					<th>".t("Keräysaika")."</th>						

@@ -1260,7 +1260,7 @@ if ($tee == "") {
 			echo "<td>$row[toim_nimi]</td>";
 			echo "<td>$row[viite]</td>";
 			echo "<td>$row[summa]</td>";
-			echo "<td>$laskutyyppi</td>";
+			echo "<td>".t($laskutyyppi)."</td>";
 			echo "<td class='back'><input type='Submit' value='".t("Tarkastele")."'></td>";
 			echo "</tr>";
 			echo "</form>";

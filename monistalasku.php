@@ -155,7 +155,7 @@ if ($tee == "ETSILASKU") {
 			//tehd‰‰n selv‰kielinen tila/alatila
 			require ("inc/laskutyyppi.inc");
 
-			echo "<$ero>$laskutyyppi $alatila</$ero>";
+			echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 
 			$sel = "";
 			if ($monistettavat[$row["tilaus"]] == 'MONISTA') {

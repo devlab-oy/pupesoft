@@ -186,7 +186,7 @@
 					
 					$laskutyyppi = $trow["tila"];
 					require "inc/laskutyyppi.inc";
-					echo "<td valign='top'>$laskutyyppi<br>".ostolaskun_vienti($trow["vienti"])."</td>";
+					echo "<td valign='top'>".t($laskutyyppi)."<br>".ostolaskun_vienti($trow["vienti"])."</td>";
 					
 					$yhteensa += $trow["summa"];						
 				

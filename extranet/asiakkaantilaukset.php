@@ -155,7 +155,7 @@
 			//tehd‰‰n selv‰kielinen tila/alatila
 			require ("laskutyyppi.inc");
 
-			echo "<$ero>$laskutyyppi $alatila</$ero>";
+			echo "<$ero>".t($laskutyyppi)." ".t($alatila)."</$ero>";
 
 			echo "<form method='post' action='$PHP_SELF'><td class='back'>
 					<input type='hidden' name='tee' value='NAYTATILAUS'>

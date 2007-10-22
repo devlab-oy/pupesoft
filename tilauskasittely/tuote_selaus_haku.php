@@ -186,7 +186,7 @@
 	$array = split(",", $kentat);
 	$arraynimet = split(",", $nimet);
 
-	$lisa = "";
+	$lisa  = "";
 	$ulisa = "";
 
 	$count = count($array);
@@ -217,8 +217,22 @@
 	*/
 
 	for ($i=0; $i<=$count; $i++) {
-		if (strlen($haku[$i]) > 0 && $i <= 1) {
+		
+		if (strlen($haku[$i]) > 0 && $i == 0) {
 			$lisa .= " and ".$array[$i]." like '%".$haku[$i]."%'";
+			$ulisa .= "&haku[".$i."]=".$haku[$i];
+		}
+		elseif (strlen($haku[$i]) > 0 && $i == 1) {
+			
+			//Otetaan konserniyhtiöt hanskaan
+			$query	= "	SELECT GROUP_CONCAT(distinct concat('\'',tuoteno,'\'')) tuotteet
+						FROM tuotteen_toimittajat
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and toim_tuoteno like '%".$haku[$i]."%'";
+			$pres = mysql_query($query) or pupe_error($query);
+			$prow = mysql_fetch_array($pres);
+			
+			$lisa .= " and tuote.tuoteno in ($prow[tuotteet]) ";		
 			$ulisa .= "&haku[".$i."]=".$haku[$i];
 		}
 		elseif (strlen($haku[$i]) > 0 && $i == 2) {
@@ -240,7 +254,7 @@
 		$poischeck = "CHECKED";
 	}
 	else {
-		$poislisa  = " HAVING tuote.status not in ('P','X') or saldo > 0 ";
+		$poislisa  = " HAVING (tuote.status not in ('P','X') or saldo > 0) ";
 		$poischeck = "";
 	}
 	
@@ -326,7 +340,6 @@
 				$avainlisa
 				ORDER BY avainsana.jarjestys, avainsana.selite";
 	$sresult = mysql_query($query) or pupe_error($query);
-
 
 	echo "<td nowrap valign='top'><select name='haku[3]'>";
 	echo "<option value='' $sel>".t("Ei valintaa")."</option>";
@@ -432,11 +445,11 @@
 				FROM tuote
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
 				$lisa
-				$poislisa 
+				$poislisa
 				ORDER BY tuote.tuoteno
 				LIMIT 500";
 	$result = mysql_query($query) or pupe_error($query);
-	
+			
 	if (mysql_num_rows($result) > 0) {
 		
 		$rows = array();
@@ -689,7 +702,8 @@
 
 			}
 			else {
-				$query = "	SELECT distinct valkoodi, maa from hinnasto
+				$query = "	SELECT distinct valkoodi, maa 
+							from hinnasto
 							where yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$row[tuoteno]'
 							and laji = ''

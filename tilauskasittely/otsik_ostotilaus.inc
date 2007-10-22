@@ -247,8 +247,23 @@
 			echo "</select></td></tr>";
 		}
 
-		echo "<tr><td>".t("Kuljetus").": </td><td valign='middle'>
-				<input type='text' name='kuljetus' value='$srow[kuljetus]' size='25'></td>";
+		echo "<tr><td>".t("Kuljetus").": </td><td valign='middle'>";
+		
+		$query = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='TOIMITUSTAPA_OS'";
+		$toimtapares  = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($toimtapares) > 0) {
+			echo "<select name = 'kuljetus'>";
+			while($toimtaparow  = mysql_fetch_array($toimtapares)) {
+				echo "<option value='$toimtaparow[selite]'>$toimtaparow[selite]</option>";
+			}
+			echo "</select>";
+		}
+		else {
+			echo "<input type='text' name='kuljetus' value='$srow[kuljetus]' size='25'>";
+		}
+		echo "</td>";
+
+		
 		echo "<td>".t("Toimitusehto").": </td><td valign='middle'>
 				<input type='text' name='maksaja' value='$srow[toimitusehto]' size='25'></td></tr>";
 

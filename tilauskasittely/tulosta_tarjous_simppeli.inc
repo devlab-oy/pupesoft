@@ -460,13 +460,6 @@ if (!function_exists('tulosta_tarjous')) {
 		$pdf->write($h, 1, $s[1], $s[2], 	$yhtiorow["email"], "norm", "L", "");
 
 		
-		if(file_exists($kukarow["yhtio"]."_tarjous_liitte.pdf")) {
-			ob_start(); // estetään outputti
-			$pdf->import->append(file_get_contents($kukarow["yhtio"]."_tarjous_liitte.pdf"));
-			$pages = $pdf->import->get_pages();
-			ob_end_clean(); // outputti takas päälle			
-		}
-		
 		// Tulostetaan sivu
 		//keksitään uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
@@ -483,7 +476,14 @@ if (!function_exists('tulosta_tarjous')) {
 		foreach($pages as $key => $value) {
 			$pdf->write(270, 2, 0, 0, ($key+1)."/".count($pages), "snadi", "R", "I", $value);
 		}
-		
+
+		if(file_exists($kukarow["yhtio"]."_tarjous_liitte.pdf")) {
+			ob_start(); // estetään outputti
+			$pdf->import->append(file_get_contents($kukarow["yhtio"]."_tarjous_liitte.pdf"));
+			$pages = $pdf->import->get_pages();
+			ob_end_clean(); // outputti takas päälle			
+		}
+				
 		//kirjoitetaan pdf faili levylle..
 		$fh = fopen($pdf_tarjousfilenimi, "w");
 		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdf_tarjousfilenimi");

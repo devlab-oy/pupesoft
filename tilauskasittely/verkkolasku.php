@@ -1086,29 +1086,25 @@
 							$komm = "";
 
 							if (trim($lasrow['tilausyhteyshenkilo']) != '') {
-								$komm .= "|".t("Tilaaja").": ".$lasrow['tilausyhteyshenkilo'];
+								$komm .= "\n".t("Tilaaja").": ".$lasrow['tilausyhteyshenkilo'];
 							}
 
 							if (trim($lasrow['asiakkaan_tilausnumero']) != '') {
-								$komm .= "|".t("Tilauksenne").": ".$lasrow['asiakkaan_tilausnumero'];
+								$komm .= "\n".t("Tilauksenne").": ".$lasrow['asiakkaan_tilausnumero'];
 							}
 
 							if (trim($lasrow['kohde']) != '') {
-								$komm .= "|".t("Kohde").": ".$lasrow['kohde'];
+								$komm .= "\n".t("Kohde").": ".$lasrow['kohde'];
 							}
 
 							if (trim($lasrow['sisviesti1']) != '') {
-								$komm .= "|".t("Kommentti").": ".$lasrow['sisviesti1'];
+								$komm .= "\n".t("Kommentti").": ".$lasrow['sisviesti1'];
 							}
 							
 							if (trim($komm) != '') {
-								// Vanhojen virheiden takia tehd‰‰n ereg_replace uudestaan.
-								$komm = ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+():%\r\n]", "", $komm);
-								
-								$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $komm);
+								$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", trim($komm));
 							}
 							
-
 							///* Jos t‰m‰ on valuuttalasku *///
 							if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 								$lasrow["kasumma"] 	= $lasrow["kasumma_valuutassa"];

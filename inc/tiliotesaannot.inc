@@ -19,19 +19,15 @@
 				nimitieto = '$maksaa' and
 				locate(selite, '$vientiselite') > 0";
 	$tiliotesaantoresult = mysql_query($query) or pupe_error($query);
-	//echo "$query (".mysql_num_rows($tiliotesaantoresult).") -->";
 
 	// Jotain löytyy
 	if (mysql_num_rows($tiliotesaantoresult) > 0) {
-		// WOW! Täydellinen osuma
 		if (mysql_num_rows($tiliotesaantoresult) == 1) {
 			$tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
-			//echo "Sääntö on $tiliointisaantorow[tilino]<br>";
 			$tiliotesaantotilino = $tiliointisaantorow['tilino'];
 		}
 		else {
-			echo t("Monta sopivaa sääntöä PANIC")."!";
-			exit;
+			echo t("Monta sopivaa sääntöä, käytetään oletustiliä")."!";
 		}
 	}
 	else {
@@ -45,19 +41,15 @@
 					nimitieto = '$maksaa' and
 					selite = ''";
 		$tiliotesaantoresult = mysql_query($query) or pupe_error($query);
-		//echo "$query (".mysql_num_rows($tiliotesaantoresult).") -->";
 
 		// Jotain löytyy
 		if (mysql_num_rows($tiliotesaantoresult) > 0) {
-			// WOW! Täydellinen osuma
 			if (mysql_num_rows($tiliotesaantoresult) == 1) {
 				$tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
-				//echo "Sääntö on $tiliointisaantorow[tilino]<br>";
 				$tiliotesaantotilino = $tiliointisaantorow['tilino'];
 			}
 			else {
-				echo t("Monta sopivaa sääntöä PANIC")."!";
-				exit;
+				echo t("Monta sopivaa sääntöä, käytetään oletustiliä")."!";
 			}
 		}
 		else {
@@ -70,19 +62,15 @@
 						nimitieto = '' and
 						selite = ''";
 			$tiliotesaantoresult = mysql_query($query) or pupe_error($query);
-			//echo "$query (".mysql_num_rows($tiliotesaantoresult).") -->";
 
 			// Jotain löytyy
 			if (mysql_num_rows($tiliotesaantoresult) > 0) {
-				// WOW! Täydellinen osuma
 				if (mysql_num_rows($tiliotesaantoresult) == 1) {
 					$tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
-					//echo "Sääntö on $tiliointisaantorow[tilino]<br>";
 					$tiliotesaantotilino = $tiliointisaantorow['tilino'];
 				}
 				else {
-					echo t("Monta sopivaa sääntöä PANIC")."!";
-					exit;
+					echo t("Monta sopivaa sääntöä, käytetään oletustiliä")."!";
 				}
 			}
 			else {
@@ -96,23 +84,15 @@
 							selite = ''";
 				$tiliotesaantoresult = mysql_query($query) or pupe_error($query);
 
-				//echo "$query (".mysql_num_rows($tiliotesaantoresult).") -->";
-
 				// Jotain löytyy
 				if (mysql_num_rows($tiliotesaantoresult) > 0) {
-					// WOW! Täydellinen osuma
 					if (mysql_num_rows($tiliotesaantoresult) == 1) {
 						$tiliointisaantorow = mysql_fetch_array ($tiliotesaantoresult);
-						//echo "Sääntö on $tiliointisaantorow[tilino]<br>";
 						$tiliotesaantotilino = $tiliointisaantorow['tilino'];
 					}
 					else {
-						echo t("Monta sopivaa sääntöä PANIC")."!";
-						exit;
+						echo t("Monta sopivaa sääntöä, käytetään oletustiliä")."!";
 					}
-				}
-				else {
-					//echo "Mitään ei löydy '$maksaa' '$koodi' '$koodiselite'";
 				}
 			}
 		}

@@ -505,12 +505,12 @@ if ($tee=='MONISTA') {
 						$tunken = "ostorivitunnus";
 					}
 
-					$query = "SELECT * FROM sarjanumeroseuranta WHERE yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]' and $tunken='$rivirow[tunnus]'";
+					$query = "	SELECT * 
+								FROM sarjanumeroseuranta 
+								WHERE yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]' and $tunken='$rivirow[tunnus]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
-					
-					if (mysql_num_rows($sarjares) == 1) {
-						$sarjarow = mysql_fetch_array($sarjares);
-
+										
+					while($sarjarow = mysql_fetch_array($sarjares)) {
 						if ($uusikpl > 0) {
 							$uusi_tunken = "myyntirivitunnus";
 						}
@@ -526,21 +526,20 @@ if ($tee=='MONISTA') {
 									and sarjanumero 	= '$sarjarow[sarjanumero]' 
 									and $uusi_tunken	= 0 
 									LIMIT 1";
-						$sarjares = mysql_query($query) or pupe_error($query);
+						$sarjares1 = mysql_query($query) or pupe_error($query);
 						
-						if (mysql_num_rows($sarjares) == 1) {
-							$sarjarow = mysql_fetch_array($sarjares);
+						if (mysql_num_rows($sarjares1) == 1) {
+							$sarjarow1 = mysql_fetch_array($sarjares1);
 							
 							$query = "	UPDATE sarjanumeroseuranta
 										SET $uusi_tunken= '$insid'
-										WHERE tunnus 	= '$sarjarow[tunnus]'
+										WHERE tunnus 	= '$sarjarow1[tunnus]'
 										and yhtio		= '$kukarow[yhtio]'";
 							$sres = mysql_query($query) or pupe_error($query);
 						}
 						else {
 							$query = "	INSERT INTO sarjanumeroseuranta
-										SET
-										yhtio			= '$kukarow[yhtio]',
+										SET yhtio		= '$kukarow[yhtio]',
 										tuoteno			= '$rivirow[tuoteno]',
 										sarjanumero		= '$sarjarow[sarjanumero]',
 										lisatieto		= '$sarjarow[lisatieto]',

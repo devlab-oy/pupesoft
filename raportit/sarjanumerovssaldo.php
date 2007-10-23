@@ -65,10 +65,18 @@
 					echo "<tr>
 							<td valign='top'><a href='../inventoi.php?tee=INVENTOI&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td><td valign='top'>$row[nimitys]</td>
 							<td valign='top'>$saldorow[nimitys] $saldorow[tyyppi]</td>
-							<td valign='top'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
-							<td valign='top' align='right'>".sprintf("%.2f", $saldo)."</td>
-							<td valign='top' align='right'>".sprintf("%.2f", $sarjarow["kpl"])."</td><td valign='top'>$sarjarow[sarjanumerot]</td>
-							</tr>";
+							<td valign='top'>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>";
+							
+					echo "<td valign='top' align='right'>".sprintf("%.2f", $saldo)."</td>";
+					
+					if ($row["sarjanumeroseuranta"] == "S") {		
+						echo "<td valign='top' align='right'>".sprintf("%.2f", $sarjarow["kpl"])."</td>";	
+					}
+					else {
+						echo "<td valign='top' align='right'>".sprintf("%.2f", $sarjarow["era_kpl"])."</td>";
+					}
+					
+					echo "<td valign='top'>$sarjarow[sarjanumerot]</td></tr>";
 				}
 			}
 		}

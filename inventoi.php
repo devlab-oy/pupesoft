@@ -118,6 +118,35 @@
 						echo "<font class='error'>".t("VIRHE: Sarjanumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
 						$virhe = 1;
 					}
+					
+					
+					if (is_array($eranumero_kaikki[$i])) {
+						if (is_array($eranumero_valitut[$i])) {
+							$erasyotetyt = 0;
+						
+							foreach($eranumero_valitut[$i] as $ekpl) {
+								$erasyotetyt += $ekpl;
+								
+							}
+							
+							if (substr($kpl,0,1) == '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != (int) substr($kpl,1)) {
+								echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
+								$virhe = 1;
+							}
+							elseif (substr($kpl,0,1) == '-' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != (int) substr($kpl,1)) {
+								echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
+								$virhe = 1;
+							}
+							elseif(substr($kpl,0,1) != '-' and substr($kpl,0,1) != '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != (int) $kpl) {
+								echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
+								$virhe = 1;
+							}
+						}
+						else {
+							echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
+							$virhe = 1;	
+						}
+					}
 
 					//Haetaan tuotepaikan tiedot
 					$query = "	SELECT *
@@ -455,6 +484,30 @@
 									}
 								}
 							}
+							
+							//Piilotetaan tän tuotepaikan pois-invatut sarjanumerot
+							if (is_array($eranumero_kaikki[$i]) and count($eranumero_kaikki[$i]) > 0) {
+								if ((float) $skp == 0) {
+									foreach ($eranumero_kaikki[$i] as $snro_tun) {
+										$query = "	UPDATE sarjanumeroseuranta
+													SET era_kpl = '".$eranumero_valitut[$i][$snro_tun]."'
+													WHERE yhtio	= '$kukarow[yhtio]'
+													and tunnus = $snro_tun";
+										$sarjares = mysql_query($query) or pupe_error($query);									
+									}
+								}
+								elseif ((float) $skp < 0) {
+									// Mutetaan $skp-verrran miinus etumerkeillä poistetaan
+									foreach ($sarjanumero_valitut[$i] as $snro_tun) {
+										$query = "	UPDATE sarjanumeroseuranta
+													SET myyntirivitunnus = '-1',
+													siirtorivitunnus 	 = '-1'
+													WHERE yhtio	= '$kukarow[yhtio]'
+													and tunnus = $snro_tun";
+										$sarjares = mysql_query($query) or pupe_error($query);
+									}
+								}
+							}
 						}
 
 						if($fileesta == "ON") {
@@ -600,8 +653,8 @@
 				$hyllyssa = sprintf('%.2f',$tuoterow['saldo']-$hylrow['keratty']);
 				$tdlisa = "<td valign='top'>".$tuoterow["saldo"]."</td><td valign='top'>$hylrow[ennpois]/$hylrow[keratty]</td><td valign='top'>".$hyllyssa."</td>";
 				
-				if ($tuoterow["sarjanumeroseuranta"] == "S") {
-					$query = "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta
+				if ($tuoterow["sarjanumeroseuranta"] != "") {
+					$query = "	SELECT sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, era_kpl
 								FROM sarjanumeroseuranta
 								LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 								LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -647,17 +700,35 @@
 										<input type='hidden' name='sarjanumero_kaikki[$tuoterow[tptunnus]][]' value='$sarjarow[tunnus]'>
 										<input type='checkbox' name='sarjanumero_valitut[$tuoterow[tptunnus]][]' value='$sarjarow[tunnus]' $chk>
 										</td></tr>";
-							
-							
-									$sarjalaskk++;
+										
+								$sarjalaskk++;
 							}
 							
 							echo "<tr><td colspan='2'>".t("Ruksaa kaikki")."</th><td align='center'><input type='checkbox' onclick='toggleAll(this, \"sarjanumero_valitut[$tuoterow[tptunnus]][]\");'></td></tr>";				
 							echo "</table>";
 						}
-					}
-					if ($tuoterow["sarjanumeroseuranta"] == "S") {
 						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=$tuoterow[tuoteno]&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//alku=$alku'>".t("Uusi sarjanumero")."</a>";
+					}
+					elseif ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {	
+						if (mysql_num_rows($sarjares) > 0) {
+							echo "<br><table>";
+							
+							$sarjalaskk = 1;
+							
+							while($sarjarow = mysql_fetch_array($sarjares)) {
+								echo "<tr><td>$sarjalaskk. $sarjarow[sarjanumero]</td>
+										<td>$sarjarow[era_kpl] ".t("KPL")."</td>
+										<td>
+										<input type='hidden' 		name='eranumero_kaikki[$tuoterow[tptunnus]][$sarjarow[tunnus]]' 	value='$sarjarow[tunnus]'>
+										<input type='text' size='5' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' 	value='$sarjarow[era_kpl]'>
+										</td></tr>";
+																					
+								$sarjalaskk++;
+							}
+							
+							echo "</table>";
+						}
+						echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=$tuoterow[tuoteno]&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//alku=$alku'>".t("Uusi eränumero")."</a>";
 					}
 					
 					echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";

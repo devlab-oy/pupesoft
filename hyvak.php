@@ -30,7 +30,7 @@
 				$hakutunnus = $ytunnus;
 				$hakuid		= $toimittajaid;
 
-				$PHP_SELF = "javascript:ajaxPost('kevyt_toimittajahaku', 'hyvak.php', 'keikka', 'false', 'false', 'post');";
+				$PHP_SELF = "javascript:ajaxPost('kevyt_toimittajahaku', 'hyvak.php', 'keikka', '', '', '', post');";
 				
 				require ("inc/kevyt_toimittajahaku.inc");
 			}

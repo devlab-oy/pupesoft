@@ -4,38 +4,50 @@
 	if ($luousitee == "") {
 		$kehahin = 0;
 
-		// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu)
-		$query	= "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
-					FROM sarjanumeroseuranta
-					LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-					LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' 
-					and sarjanumeroseuranta.tuoteno = '$tuoteno'
-					and sarjanumeroseuranta.myyntirivitunnus != -1
-					and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-					and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+		$query	= "	SELECT sarjanumeroseuranta
+					from tuote
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tuoteno = '$tuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
-		$ikrow  = mysql_fetch_array($result);
-			
-		$kehahin = sprintf('%.2f', $ikrow["kehahin"]);
+		$tuoterow = mysql_fetch_array($result);
 		
-		if ($kehahin == 0) {
-			$query = "	SELECT kehahin
-						FROM tuote
-						WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+		if ($tuoterow["sarjanumeroseuranta"] == "S") {
+			// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu)
+			$query	= "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
+						FROM sarjanumeroseuranta
+						LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+						LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' 
+						and sarjanumeroseuranta.tuoteno = '$tuoteno'
+						and sarjanumeroseuranta.myyntirivitunnus != -1
+						and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
+						and tilausrivi_osto.laskutettuaika != '0000-00-00'";
 			$result = mysql_query($query) or pupe_error($query);
-			$ikrow  = mysql_fetch_array ($result);
+			$ikrow  = mysql_fetch_array($result);
 			
 			$kehahin = sprintf('%.2f', $ikrow["kehahin"]);
+		
+			if ($kehahin == 0) {
+				$query = "	SELECT kehahin
+							FROM tuote
+							WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+				$result = mysql_query($query) or pupe_error($query);
+				$ikrow  = mysql_fetch_array ($result);
+			
+				$kehahin = sprintf('%.2f', $ikrow["kehahin"]);
+			}
+		
+		
+			echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
 		}
-		
-		
-		echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
-		
+		else {
+			echo "<font class='head'>".t("Eränumeroseuranta")."</font><hr>";
+		}
+			
 		echo "<table>";
 		echo "<tr><th>Inventoidaan tulotapahtuma tuotteelle:</th><td>$tuoteno</td></tr>";
-		echo "<tr><th>Tuotteen keskimääräinen hankintahinta:</th><td>$kehahin</td></tr>";
 		
+	
 		echo "<form action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tuoteno'		value='$tuoteno'>                          
 				<input type='hidden' name='luousitee'	value='DOIT'>                              
@@ -46,12 +58,21 @@
 				<input type='hidden' name='hyllytaso'	value='$hyllytaso'>                        
 				<input type='hidden' name='from'		value='INVENTOINTI'>                       
 				<input type='hidden' name='lopetus'		value='$lopetus'>";
-				
-		echo "<tr><th>Inventoitavan yksilön hankintahinta:</th><td><input type='text' name='kehahin' size='10'	value='$kehahin'></td>
-				<td class='back'><input type='submit' value='".t("Jatka")."'></td></tr>";
-				
+		
+		if ($tuoterow["sarjanumeroseuranta"] == "S") {	
+			echo "<tr><th>Tuotteen keskimääräinen hankintahinta:</th><td>$kehahin</td></tr>";
+			echo "<tr><th>".t("Inventoitavan yksilön hankintahinta").":</th><td><input type='text' name='kehahin' size='10'	value='$kehahin'></td></tr>";
+		}
+		else {
+			echo "<tr><th>".t("Erän suuruus").":</th><td><input type='text' name='iera_kpl' size='10'></td></tr>";
+		}
+		
 		echo "</table>";
+		
+		echo "<br><br><input type='submit' value='".t("Jatka")."'>";
 			
+		
+		
 		require ("../inc/footer.inc");
 		exit;
 	}
@@ -104,11 +125,18 @@
 					and tuoteno = '$tuoteno'";
 		$result  = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
+		
+		if ((int) $iera_kpl > 0) {
+			$skpl = $iera_kpl;
+		}
+		else {
+			$skpl = 1;
+		}
 	
 		$query = "	INSERT into tilausrivi set
-					varattu 		= '1',
-					tilkpl 			= '1',
-					kpl				= '1',
+					varattu 		= '0',
+					tilkpl 			= '$skpl',
+					kpl				= '$skpl',
 					jt				= '0',
 					hinta			= '$kehahin',
 					rivihinta		= '$kehahin',

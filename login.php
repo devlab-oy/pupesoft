@@ -25,7 +25,8 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 
 	$query = "	SELECT kuka, session, salasana, yhtio
 				FROM kuka
-				where kuka='$user'";
+				where kuka		= '$user'
+				and extranet 	= ''";
 	$result = mysql_query($query) or die("Kysely ep‰onnistui");
 	$krow = mysql_fetch_array ($result);
 
@@ -58,10 +59,8 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 			$usea = 1;
 		}
 
-		if (strlen(trim($uusi1)) > 0)
-		{
-			if (trim($uusi1) != trim($uusi2))
-			{
+		if (strlen(trim($uusi1)) > 0) {
+			if (trim($uusi1) != trim($uusi2)) {
 				$errormsg = t("Uudet salasanasi olivat erilaiset")."! ".t("Salasanaasi ei vaihdettu")."!";
 				$err = 1;
 				$usea = 0;
@@ -158,15 +157,14 @@ else {
 	echo "<a target='_top' href='/'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
 }
 
-echo "</a></td>
-<td>
-<font class='head'>".t("Sis‰‰nkirjautuminen",$browkieli)."</font><br><br>
-";
+echo "</a></td><td><font class='head'>".t("Sis‰‰nkirjautuminen",$browkieli)."</font><br><br>";
 
 if (isset($usea) and $usea == 1) {
 	$query = "	SELECT yhtio.nimi, yhtio.yhtio
 				FROM kuka, yhtio
-				WHERE kuka='$user' and yhtio.yhtio=kuka.yhtio 
+				WHERE kuka.kuka		= '$user' 
+				and yhtio.yhtio		= kuka.yhtio 
+				and kuka.extranet	= ''
 				ORDER BY nimi";
 	$result = mysql_query($query) or pupe_error($query);;
 

@@ -33,7 +33,7 @@
 			else {
 				if ($toim == "ENNAKKO") {
 					$query = "	SELECT tilausrivi.*, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen
-								FROM tilausrivi use index (PRIMARY), 
+								FROM tilausrivi use index (PRIMARY)
 								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno								
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -43,7 +43,7 @@
 				}
 				else {
 					$query = "	SELECT tilausrivi.*, tuote.ei_saldoa, tilausrivin_lisatiedot.suoraan_laskutukseen
-								FROM tilausrivi 
+								FROM tilausrivi use index (PRIMARY)
 								JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 								LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus								
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'

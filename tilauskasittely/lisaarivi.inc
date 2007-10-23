@@ -1058,7 +1058,7 @@
 		$puu_var		= array();
 
 		//Tehd‰‰n suoratoimitusautomaatio jos kyseess‰ on extranet tai ediasiakas
-		if (($yhtiorow["suoratoim_automaatio"] != '' or $kukarow["extranet"] != '' or $kutsuja == "EDITILAUS") and $var == "" and $toimittamatta > 0 and $suoratoimeikiitos == "" and $rivityyppi != 'E') {
+		if ($yhtiorow["suoratoim_automaatio"] != '' and $var == "" and $toimittamatta > 0 and $suoratoimeikiitos == "" and $rivityyppi != 'E') {
 
 			if ($lisaarivi_debug==1) echo "Tehd‰‰n suoratoimitusautomaatio<br>";
 
@@ -1162,7 +1162,7 @@
 				$trow = mysql_fetch_array($tuoteresult);
 			}
 
-			if ($rivityyppi != 'E' and $var == "X") {
+			if ($yhtiorow["suoratoim_automaatio"] != '' and $rivityyppi != 'E' and $var == "X") {
 
 				$var 			= "";
 				$suora_tuoteno 	= $trow["tuoteno"];

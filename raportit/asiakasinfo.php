@@ -650,32 +650,32 @@ if ($ytunnus!='') {
 			if($aletaulu != "" or $tee == "eposti") {
 				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
 				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-					$otsik = array("osasto", "try", "alennusryhmä", "tuoteno", "alennus", "alkupvm", "loppuvm");
-					$otsik_spread = array("osasto", "osasto_nimi", "try",  "try_nimi", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppuvm");					
+					$otsik = array("osasto", "try", "alennusryhmä", "tuoteno", "alennus", "alkupvm", "loppupvm");
+					$otsik_spread = array("osasto", "osasto_nimi", "try",  "try_nimi", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppupvm");					
 				}
 				else {
-					$otsik = array("osasto", "try", "alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "alkupvm", "loppuvm", "tyyppi");
-					$otsik_spread = array("osasto", "osasto_nimi", "try",  "try_nimi", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhmä",  "asiakasryhmä_nimi", "alennus", "alkupvm", "loppuvm");
+					$otsik = array("osasto", "try", "alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "alkupvm", "loppupvm", "tyyppi");
+					$otsik_spread = array("osasto", "osasto_nimi", "try",  "try_nimi", "alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhmä",  "asiakasryhmä_nimi", "alennus", "alkupvm", "loppupvm");
 				}
 			}
 			elseif($yhdistetty != "") {
 				$ulos  = "<table><caption><font class='message'>".t("Alennustaulukot")."</font></caption>";
 				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-					$otsik = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "osasto", "try", "alennus", "alkupvm", "loppuvm");					
+					$otsik = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "osasto", "try", "alennus", "alkupvm", "loppupvm");					
 				}
 				else {
-					$otsik = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhmä",  "asiakasryhmä_nimi", "osasto", "try", "alennus", "alkupvm", "loppuvm", "tyyppi");
+					$otsik = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "asiakasryhmä",  "asiakasryhmä_nimi", "osasto", "try", "alennus", "alkupvm", "loppupvm", "tyyppi");
 				}
 			}
 			else {
 				$ulos  = "<table><caption><font class='message'>".t("Aletaulukko")."</font></caption>";
 				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-					$otsik = array("alennusryhmä", "tuoteno", "alennus", "alkupvm", "loppuvm");
-					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppuvm");
+					$otsik = array("alennusryhmä", "tuoteno", "alennus", "alkupvm", "loppupvm");
+					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "alennus", "alkupvm", "loppupvm");
 				}
 				else {
-					$otsik = array("alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "alkupvm", "loppuvm", "tyyppi");
-					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "asiakasryhmä", "alennus", "alkupvm", "loppuvm");
+					$otsik = array("alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "alkupvm", "loppupvm", "tyyppi");
+					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "asiakasryhmä", "alennus", "alkupvm", "loppupvm");
 				}
 			}
 			
@@ -818,20 +818,20 @@ if ($ytunnus!='') {
 			$ashin  = "<table><caption><font class='message'>".t("Asiakashinnat")."</font></caption>";
 			if($yhdistetty != "") {
 				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-					$otsik = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
+					$otsik = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppupvm");
 				}
 				else {
-					$otsik = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm", "tyyppi");
+					$otsik = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppupvm", "tyyppi");
 				}				
 			}
 			else {
 				if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-					$otsik = array("alennusryhmä", "tuoteno", "hinta", "alkupvm", "loppuvm");
-					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
+					$otsik = array("alennusryhmä", "tuoteno", "hinta", "alkupvm", "loppupvm");
+					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppupvm");
 				}
 				else {
-					$otsik = array("alennusryhmä", "tuoteno", "asiakasryhmä", "hinta", "alkupvm", "loppuvm", "tyyppi");
-					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppuvm");
+					$otsik = array("alennusryhmä", "tuoteno", "asiakasryhmä", "hinta", "alkupvm", "loppupvm", "tyyppi");
+					$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi", "tuoteno", "tuoteno_nimi", "hinta", "alkupvm", "loppupvm");
 				}
 			}
 			
@@ -951,12 +951,12 @@ if ($ytunnus!='') {
 			$yhdistetty  = "<table><caption><font class='message'>".t("Yhdistetty alennustaulukko")."</font></caption>";
 			
 			if($kukarow["extranet"] != "" or $rajattunakyma == "JOO") {
-				$otsik = array("alennusryhmä",  "tuoteno", "alennus", "hinta", "alkupvm", "loppuvm");
-				$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "hinta", "alkupvm", "loppuvm");
+				$otsik = array("alennusryhmä",  "tuoteno", "alennus", "hinta", "alkupvm", "loppupvm");
+				$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "hinta", "alkupvm", "loppupvm");
 			}
 			else {
-				$otsik = array("alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "hinta", "alkupvm", "loppuvm", "tyyppi");
-				$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "hinta", "alkupvm", "loppuvm");
+				$otsik = array("alennusryhmä",  "tuoteno", "asiakasryhmä", "alennus", "hinta", "alkupvm", "loppupvm", "tyyppi");
+				$otsik_spread = array("alennusryhmä", "alennusryhmä_nimi",  "tuoteno", "tuoteno_nimi", "alennus", "hinta", "alkupvm", "loppupvm");
 			}
 			
 			// Duusataan otsikot

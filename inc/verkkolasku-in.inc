@@ -153,8 +153,9 @@
 			$ebid   = $laskun_ebid;
 			$selite = "Lasno: ".$laskun_numero;
 
-			//poistetaan ovt tunnuksesta ekat nelj‰ ja otetaan kaheksan seuraavaa ja numeroks
-			$ytunnus = (int) substr($laskuttajan_ovt,4,8);
+			//poistetaan ovt tunnuksesta ekat nelj‰ ja otetaan kaheksan seuraavaa
+			$ytunnus_nolla = substr($laskuttajan_ovt,4,8); // etunollalla
+			$ytunnus = (int) substr($laskuttajan_ovt,4,8); // ilman etunollaa
 			$ok = 0;
 
 			$query  = "SELECT * FROM toimi WHERE ovttunnus='$laskuttajan_ovt' and yhtio='$yhtio'";
@@ -163,7 +164,21 @@
 
 			if ($ok == 0) {
 				// Yritet‰‰n laventaa ytunnuksella
+				$query  = "SELECT * FROM toimi WHERE ytunnus='$ytunnus_nolla' and yhtio='$yhtio'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				if (mysql_num_rows($result) == 1) $ok = 1;
+			}
+
+			if ($ok == 0) {
+				// Yritet‰‰n laventaa ytunnuksella
 				$query  = "SELECT * FROM toimi WHERE ytunnus='$ytunnus' and yhtio='$yhtio'";
+				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
+				if (mysql_num_rows($result) == 1) $ok = 1;
+			}
+
+			if ($ok == 0) {
+				// Yritet‰‰n tarkentaa nimell‰
+				$query = "SELECT * FROM toimi WHERE ytunnus='$ytunnus_nolla' and yhtio='$yhtio' and nimi='$laskuttajan_nimi'";
 				$result = mysql_query($query) or die ("$query<br><br>".mysql_error());
 				if (mysql_num_rows($result) == 1) $ok = 1;
 			}

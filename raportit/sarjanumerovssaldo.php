@@ -8,7 +8,7 @@
 	$query = "	SELECT *
 	 			FROM tuote
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
-				and tuote.sarjanumeroseuranta = 'S'
+				and tuote.sarjanumeroseuranta != ''
 				ORDER BY tuoteno";
 	$result = mysql_query($query) or pupe_error($query);
 	
@@ -40,7 +40,7 @@
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', '', '');
     
 				
-				$query = "	SELECT count(sarjanumeroseuranta.tunnus) kpl, group_concat(sarjanumeroseuranta.sarjanumero SEPARATOR '<br>') sarjanumerot
+				$query = "	SELECT count(sarjanumeroseuranta.tunnus) kpl, group_concat(sarjanumeroseuranta.sarjanumero SEPARATOR '<br>') sarjanumerot, sum(sarjanumeroseuranta.era_kpl) era_kpl
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -61,7 +61,7 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 				$sarjarow = mysql_fetch_array($sarjares);
 				
-				if ((float) $saldo != (float) $sarjarow["kpl"]) {
+				if (($row["sarjanumeroseuranta"] == "S" and (float) $saldo != (float) $sarjarow["kpl"]) or (($row["sarjanumeroseuranta"] == "E" or $row["sarjanumeroseuranta"] == "F") and (float) $saldo != (float) $sarjarow["era_kpl"])) {
 					echo "<tr>
 							<td valign='top'><a href='../inventoi.php?tee=INVENTOI&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td><td valign='top'>$row[nimitys]</td>
 							<td valign='top'>$saldorow[nimitys] $saldorow[tyyppi]</td>

@@ -1082,23 +1082,32 @@
 
 							// Laskukohtaiset kommentit kuntoon
 							// T‰m‰ merkki | eli pystyviiva on rivinvaihdon merkki elmalla
-							// Laskun kommentti on stripattu erikoismerkeist‰ jo aikaisemmin joten se on nyt puhdas t‰ss‰
-							if (trim($lasrow['sisviesti1']) != '') {
-								$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $lasrow['sisviesti1']);
-							}
-							
-							//tilausyhteyshenkilo asiakkaan_tilausnumero kohde
+							// Kent‰t on stripattu erikoismerkeist‰ jo aikaisemmin joten se on nyt puhdas t‰ss‰
+							$komm = "";
+
 							if (trim($lasrow['tilausyhteyshenkilo']) != '') {
-								$lasrow['sisviesti1'] .= "|"."Tilaaja: ".$lasrow['tilausyhteyshenkilo'];
+								$komm .= "|".t("Tilaaja").": ".$lasrow['tilausyhteyshenkilo'];
 							}
-							
+
 							if (trim($lasrow['asiakkaan_tilausnumero']) != '') {
-								$lasrow['sisviesti1'] .= "|"."Tilauksenne: ".$lasrow['asiakkaan_tilausnumero'];								
+								$komm .= "|".t("Tilauksenne").": ".$lasrow['asiakkaan_tilausnumero'];
+							}
+
+							if (trim($lasrow['kohde']) != '') {
+								$komm .= "|".t("Kohde").": ".$lasrow['kohde'];
+							}
+
+							if (trim($lasrow['sisviesti1']) != '') {
+								$komm .= "|".t("Kommentti").": ".$lasrow['sisviesti1'];
 							}
 							
-							if (trim($lasrow['kohde']) != '') {
-								$lasrow['sisviesti1'] .= "|"."Kohde: ".$lasrow['kohde'];								
+							if (trim($komm) != '') {
+								// Vanhojen virheiden takia tehd‰‰n ereg_replace uudestaan.
+								$komm = ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+():%\r\n]", "", $komm);
+								
+								$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $komm);
 							}
+							
 
 							///* Jos t‰m‰ on valuuttalasku *///
 							if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {

@@ -276,10 +276,28 @@
 
 					// Laskukohtaiset kommentit kuntoon
 					// Tämä merkki | eli pystyviiva on rivinvaihdon merkki elmalla
-					// Laskun kommentti on stripattu erikoismerkeistä jo aikaisemmin joten se on nyt puhdas tässä
-					if (trim($lasrow['sisviesti1']) != '') {
-						$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $lasrow['sisviesti1']);
+					$komm = "";
+
+					if (trim($lasrow['tilausyhteyshenkilo']) != '') {
+						$komm .= "|".t("Tilaaja").": ".$lasrow['tilausyhteyshenkilo'];
 					}
+
+					if (trim($lasrow['asiakkaan_tilausnumero']) != '') {
+						$komm .= "|".t("Tilauksenne").": ".$lasrow['asiakkaan_tilausnumero'];
+					}
+
+					if (trim($lasrow['kohde']) != '') {
+						$komm .= "|".t("Kohde").": ".$lasrow['kohde'];
+					}
+
+					if (trim($lasrow['sisviesti1']) != '') {
+						$komm .= "|".t("Kommentti").": ".$lasrow['sisviesti1'];
+					}
+					
+					if (trim($komm) != '') {
+						$lasrow['sisviesti1'] = str_replace(array("\r\n","\r","\n"),"|", $komm);
+					}
+					
 
 					///* Jos tämä on valuuttalasku *///
 					if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {

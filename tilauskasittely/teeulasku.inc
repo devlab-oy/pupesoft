@@ -16,19 +16,22 @@ $comments			= "";
 $sisviestit1		= "";
 $viitetxt			= "";
 
-$query  = "	select
+$query  = "	SELECT
 			sum(arvo) arvo,
 			sum(arvo_valuutassa) arvo_valuutassa,
 			sum(summa) summa,
 			sum(summa_valuutassa) summa_valuutassa,
 			sum(kate) kate,
 			sum(bruttopaino) bruttopaino,
-			group_concat(distinct trim(comments) SEPARATOR ' / ') comments,
-			group_concat(distinct trim(sisviesti1) SEPARATOR ' / ') sisviestit1,
-			group_concat(distinct trim(viesti) SEPARATOR ' / ') viestit,
-			group_concat(distinct trim(viitetxt) SEPARATOR ' / ') viitetxt
-			from lasku
-			where yhtio='$kukarow[yhtio]'
+			group_concat(distinct trim(comments) 				SEPARATOR ' / ') comments,
+			group_concat(distinct trim(sisviesti1) 				SEPARATOR ' / ') sisviestit1,
+			group_concat(distinct trim(viesti) 					SEPARATOR ' / ') viestit,
+			group_concat(distinct trim(viitetxt) 				SEPARATOR ' / ') viitetxt,
+			group_concat(distinct trim(tilausyhteyshenkilo) 	SEPARATOR ' / ') tilausyhteyshenkilo,	
+			group_concat(distinct trim(asiakkaan_tilausnumero) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
+			group_concat(distinct trim(kohde) 					SEPARATOR ' / ') kohde
+			FROM lasku
+			WHERE yhtio = '$kukarow[yhtio]'
 			and tunnus in ($tunnukset)";
 $uusiuresult = mysql_query($query) or pupe_error($query);
 
@@ -42,16 +45,21 @@ if (mysql_num_rows($uusiuresult) > 0) {
 	$kate				= round($sumrow["kate"], 2);
 	$bruttopaino		= round($sumrow["bruttopaino"], 2);
 
-	$viestit			= $sumrow["viestit"];
-	$comments			= $sumrow["comments"];
-	$sisviestit1		= $sumrow["sisviestit1"];
-	$viitetxt			= $sumrow["viitetxt"];
-
-	//Onko tämä mysql-bugi vai group_concatin ominaisuus?
-	if ($viestit == " / ") 		$viestit 		= "";
-	if ($comments == " / ") 	$comments 		= "";
-	if ($sisviestit1 == " / ") 	$sisviestit1 	= "";
-	if ($viitetxt == " / ") 	$viitetxt 		= "";
+	$viestit				= $sumrow["viestit"];
+	$comments				= $sumrow["comments"];
+	$sisviestit1			= $sumrow["sisviestit1"];
+	$viitetxt				= $sumrow["viitetxt"];
+	$tilausyhteyshenkilo	= $sumrow["tilausyhteyshenkilo"];
+	$asiakkaan_tilausnumero	= $sumrow["asiakkaan_tilausnumero"];
+	$kohde					= $sumrow["kohde"];
+	
+	if ($viestit == " / ") 					$viestit 				= "";
+	if ($comments == " / ") 				$comments 				= "";
+	if ($sisviestit1 == " / ") 				$sisviestit1 			= "";
+	if ($viitetxt == " / ") 				$viitetxt 				= "";
+	if ($tilausyhteyshenkilo == " / ") 		$tilausyhteyshenkilo 	= "";
+	if ($asiakkaan_tilausnumero == " / ") 	$asiakkaan_tilausnumero = "";
+	if ($kohde == " / ") 					$kohde 					= "";
 }
 
 // haetaan laskulle otsikkotiedot ketjun ekalta laskulta
@@ -189,10 +197,13 @@ if ($lisa_comments != "") {
 
 
 //Siivotaan kommenteista kaikki kummalliset merkit pois
-$comments 		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $comments);
-$viestit		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viestit);
-$sisviestit1	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $sisviestit1);
-$viitetxt		= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viitetxt);
+$comments 				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $comments);
+$viestit				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viestit);
+$sisviestit1			= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $sisviestit1);
+$viitetxt				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viitetxt);
+$tilausyhteyshenkilo	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $tilausyhteyshenkilo);
+$asiakkaan_tilausnumero	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $asiakkaan_tilausnumero);
+$kohde					= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $kohde);
 
 
 // kirjotetaan kokonaan uusi lasku-olio laskusta.. helpottaa myyntireskontraa! tilaksi: U alatila: tyhjä
@@ -210,7 +221,7 @@ $query = "	INSERT into lasku SET
 			alv									= '$lasrow[alv]',
 			arvo								= '$arvo',
 			arvo_valuutassa						= '$arvo_valuutassa',
-			asiakkaan_tilausnumero				= '$lasrow[asiakkaan_tilausnumero]',
+			asiakkaan_tilausnumero				= '$asiakkaan_tilausnumero',
 			bruttopaino							= '$bruttopaino',
 			chn									= '$lasrow[chn]',
 			comments							= '$comments',
@@ -223,7 +234,7 @@ $query = "	INSERT into lasku SET
 			kauppatapahtuman_luonne			 	= '$lasrow[kauppatapahtuman_luonne]',
 			ultilno								= '$lasrow[kauppatapahtuman_luonne]',
 			kerayspvm							= '$lasrow[kerayspvm]',
-			kohde								= '$lasrow[kohde]',
+			kohde								= '$kohde',
 			kontti								= '$lasrow[kontti]',
 			kuljetusmuoto						= '$lasrow[kuljetusmuoto]',
 			laatija								= '$lasrow[laatija]',
@@ -256,7 +267,7 @@ $query = "	INSERT into lasku SET
 			summa_valuutassa					= '$summa_valuutassa',
 			tapvm								= '$lasrow[tapvm]',
 			tilausvahvistus						= '$lasrow[tilausvahvistus]',
-			tilausyhteyshenkilo					= '$lasrow[tilausyhteyshenkilo]',
+			tilausyhteyshenkilo					= '$tilausyhteyshenkilo',
 			toim_maa							= '$lasrow[toim_maa]',
 			toim_nimi							= '$lasrow[toim_nimi]',
 			toim_nimitark						= '$lasrow[toim_nimitark]',

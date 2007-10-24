@@ -30,6 +30,11 @@ require ("inc/parametrit.inc");
 
 echo "<font class='head'>".t("Kuvien sis‰‰nluku")."</font><hr>";
 
+$thumbkork = "65";
+$thumbleve = "96";
+$normaalikork = "480";
+$normaalileve = "640";
+
 if ($yhtiorow['kuvapankki_polku'] == '') {
 	die("Kuvapankkia ei ole m‰‰ritelty. Ei voida jatkaa!<br>");
 }
@@ -73,39 +78,17 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 	$ext = strtolower($path_parts['extension']);
 	
 	$image = getimagesize($upfile1);	// l‰hetetty kuva
-	$ix    = $image[0];			// kuvan x
-	$iy    = $image[1];			// kuvan y
+	
+	$leve = $image[0];       
 
-	// katotaan kuinka resizetaan ja cropataan
-	if ($ix > $iy and $ix > $xkoko) {
-		if ($ykoko/$iy*$ix < $xkoko) {
-			$resize = "-resize ".$xkoko."x";
-			$scale = round(($xkoko/$ix*$iy-$ykoko)/2,0);
-			$crop = "-crop ".$xkoko."x$ykoko+0+$scale";
-		}
-		else {
-			$resize = "-resize x$ykoko";
-			$scale = round(($ykoko/$iy*$ix-$xkoko)/2,0);
-			$crop = "-crop ".$xkoko."x$ykoko+$scale+0";
-		}
-	}
-
-	if ($iy >= $ix and $iy > $ykoko) {
-		if ($xkoko/$ix*$iy < $ykoko) {
-			$resize = "-resize x$ykoko";
-			$scale = round(($ykoko/$iy*$ix-$xkoko)/2,0);
-			$crop = "-crop ".$xkoko."x$ykoko+$scale+0";
-		}
-		else {
-			$resize = "-resize ".$xkoko."x";
-			$scale = round(($xkoko/$ix*$iy-$ykoko)/2,0);
-			$crop = "-crop ".$xkoko."x$ykoko+0+$scale";
-		}
-	}
-
+	$kork = $image[1];
+	
 	// teh‰‰n pienent‰m‰ll‰
 	$upfilesgh = strtolower("/tmp/$nimi"."1.".$ext);
-	system("/usr/bin/convert -resize '".$xkoko."x$ykoko>' $upfile1 $upfilesgh");
+	
+	
+    // skaalataan kuva oikenakokoiseksi
+    exec("convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh");
 	
 	$uusnimi = $dirri."/".$taulu."/".$type."/".$kuva;
 	
@@ -136,16 +119,6 @@ if (!is_writable($dirri)) {
 	die("Kuvapankkiin ($dirri) ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 }
 
-/*$handle = fopen("$dirri/kala.txt", "x+");
-	
-if ($handle === FALSE) {
-	die("Kuvapankkiin ($dirri) ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
-}
-else {
-	fclose($handle);
-	system("rm -f $dirri/kala.txt");
-}*/
-
 $files = listdir($dirri);
 
 if ($tee == 'GO') {
@@ -160,17 +133,14 @@ if ($tee == 'GO') {
 	
 			if ($toiminto == 'kasittele') {
 				if (file_exists($file)) {
-			
-					$thumbi = konvertoi(65,96,'thumb',$taulu,$kuva,$dirri,$file);
+					$thumbi = konvertoi($thumbkork,$thumbleve,'thumb',$taulu,$kuva,$dirri,$file);
 					if ($thumbi != '') {
-						array_push($files,$thumbi);
 						echo "Luotiin thumbnailkuva $kuva<br>";
 					}
 					
-					$normi = konvertoi(480,640,'normaali',$taulu,$kuva,$dirri,$file);
+					$normi = konvertoi($normaalikork,$normaalileve,'normaali',$taulu,$kuva,$dirri,$file);
 					
 					if ($normi != '') {
-						array_push($files,$normi);
 						echo "Luotiin normaali kuva $kuva<br>";
 					}
 					
@@ -185,11 +155,31 @@ if ($tee == 'GO') {
 		}
 		echo "<br>";
 	}
-
+	
+	$files = listdir($dirri);
+	
 	foreach ($files as $file) {
 		$polku = substr($file,$alkupituus);
 	
 		list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
+		
+		$koko = getimagesize($file);
+		$leve = $koko[0];       
+		$kork = $koko[1];
+		
+		if ($toiminto == 'thumb') {
+			if ($kork <> $thumbkork) {
+				continue;
+			}
+		}
+		elseif ($toiminto == 'normaali') {
+			if ($kork <> $normaalikork) {
+				continue;
+			}
+		}
+		else {
+			continue;
+		}
 		
 		$apukuva = $kuva; 
 		
@@ -203,14 +193,6 @@ if ($tee == 'GO') {
 		}
 		elseif ($toiminto == 'alkuperainen') {
 			// toistaiseksi ei tallenneta alkuper‰isi‰
-			continue;
-		}
-		
-		if ((!isset($thumbikset) or $thumbikset != '1') and $toiminto == 'thumb') {
-			continue;
-		}
-		
-		if ((!isset($normit) or $normit != '1') and $toiminto == 'normaali') {
 			continue;
 		}
 		
@@ -441,9 +423,9 @@ if ($convertit == '1') {
 	$chekkis3 = "CHECKED";
 }
 
-echo "<tr><td>Tuo Thumbnailit: </td><td> ($lukuthumbit) <input type='checkbox' name='thumbikset' value='1' $chekkis1></td></tr>";
+/*echo "<tr><td>Tuo Thumbnailit: </td><td> ($lukuthumbit) <input type='checkbox' name='thumbikset' value='1' $chekkis1></td></tr>";
 echo "<tr><td>Tuo Normaalit: </td><td> ($lukunormit) <input type='checkbox' name='normit' value='1' $chekkis2></td></tr>";
-echo "<tr><td colspan='2' class='back'>&nbsp;</td></tr>";
+echo "<tr><td colspan='2' class='back'>&nbsp;</td></tr>";*/
 echo "<tr><td>K‰sittele/Tuo K‰sitelt‰v‰t: </td><td> ($lukutconvertit) <input type='checkbox' name='convertit' value='1' $chekkis3></td><td class='back'>Huom! T‰m‰ hidastaa j‰rjestelm‰‰ huomattavasti!</td></tr>";
 echo "<td class='back' colspan='2'><br><input type='submit' value='".t("Tuo")."'></td>";
 echo "</table>";

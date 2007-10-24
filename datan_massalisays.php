@@ -41,7 +41,7 @@ Function listdir($start_dir='.') {
     $fh = opendir($start_dir);
     while (($file = readdir($fh)) !== false) {
       # loop through the files, skipping . and .., and recursing if necessary
-      if (strcmp($file, '.')==0 || strcmp($file, '..')==0) continue;
+      if (strcmp($file, '.')==0 || strcmp($file, '..')==0 || substr($file,0,1)==".") continue;
       $filepath = $start_dir . '/' . $file;
       if ( is_dir($filepath) )
         $files = array_merge($files, listdir($filepath));
@@ -129,13 +129,22 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 // testausta varten staattinen
 //$dirri = "kuvapankki";
 $dirri = $yhtiorow['kuvapankki_polku'];
-$polkuyhtio = $kukarow['yhtio'];
-$dirri .= "/".$polkuyhtio;
+$dirri .= "/".$kukarow['yhtio'];
 $alkupituus = strlen($dirri)+1;
 
 if (!is_writable($dirri)) {
-	die("Kuvapankkiin ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
+	die("Kuvapankkiin ($dirri) ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
 }
+
+/*$handle = fopen("$dirri/kala.txt", "x+");
+	
+if ($handle === FALSE) {
+	die("Kuvapankkiin ($dirri) ei ole m‰‰ritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
+}
+else {
+	fclose($handle);
+	system("rm -f $dirri/kala.txt");
+}*/
 
 $files = listdir($dirri);
 
@@ -395,13 +404,13 @@ foreach ($files as $file) {
 
 	list($taulu, $toiminto, $kuva) = split("/", $polku, 3);
 	
-	if ($toiminto == 'thumb') {
+	if ($toiminto == 'thumb' and $kuva != '') {
 		$lukuthumbit ++;
 	}
-	if ($toiminto == 'normaali') {
+	if ($toiminto == 'normaali' and $kuva != '') {
 		$lukunormit ++;
 	}
-	if ($toiminto == 'kasittele') {
+	if ($toiminto == 'kasittele' and $kuva != '') {
 		$lukutconvertit ++;
 	}
 	

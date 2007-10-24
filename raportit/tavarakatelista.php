@@ -35,7 +35,7 @@
 			}
 
 			// kirjoitetaan rivi
-			$rivi .= "$row[tullinimike1]\t$tullinimikeres[dm]\t$row[alkuperamaa]\t$row[tuoteno]\t$row[tuoteno]\r\n";
+			$rivi .= "$row[tullinimike1]\t$tullinimikeres[dm]\t$row[alkuperamaa]\t$row[tuoteno]\t$row[nimitys]\r\n";
 		}
 
 		if ($virtu == "") {

@@ -88,7 +88,7 @@ function konvertoi ($ykoko,$xkoko,$type,$taulu,$kuva,$dirri,$upfile1) {
 	
 	
     // skaalataan kuva oikenakokoiseksi
-    exec("convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh");
+    exec("nice -n 20 convert -resize x$ykoko -quality 80 $upfile1 $upfilesgh");
 	
 	$uusnimi = $dirri."/".$taulu."/".$type."/".$kuva;
 	
@@ -426,7 +426,7 @@ if ($convertit == '1') {
 /*echo "<tr><td>Tuo Thumbnailit: </td><td> ($lukuthumbit) <input type='checkbox' name='thumbikset' value='1' $chekkis1></td></tr>";
 echo "<tr><td>Tuo Normaalit: </td><td> ($lukunormit) <input type='checkbox' name='normit' value='1' $chekkis2></td></tr>";
 echo "<tr><td colspan='2' class='back'>&nbsp;</td></tr>";*/
-echo "<tr><td>K‰sittele/Tuo K‰sitelt‰v‰t: </td><td> ($lukutconvertit) <input type='checkbox' name='convertit' value='1' $chekkis3></td><td class='back'>Huom! T‰m‰ hidastaa j‰rjestelm‰‰ huomattavasti!</td></tr>";
+echo "<tr><td>K‰sittele/Tuo K‰sitelt‰v‰t: </td><td> ($lukutconvertit) <input type='checkbox' name='convertit' value='1' $chekkis3></td></tr>";
 echo "<td class='back' colspan='2'><br><input type='submit' value='".t("Tuo")."'></td>";
 echo "</table>";
 echo "</form>";

@@ -1332,7 +1332,7 @@
 					$kasitoimehto2 = $row["selitetark"];
 				}
 
-				echo "<input type='text' id='toimitusehto2Lisa' name='kasitoimehto2' value='$kasitoimehto2' size='20'>";
+				echo " <input type='text' id='toimitusehto2Lisa' name='kasitoimehto2' value='$kasitoimehto2' size='20'>";
 
 				echo "</td>";
 			}
@@ -1764,13 +1764,6 @@
 			else {
 				echo "<tr><th colspan='3'>".t("Tilauksen kommentit").":</th></tr>";
 			}
-
-			if($toim == "TARJOUS") {
-				$extralisa = " + tarjous";
-			}
-			else {
-				$extralisa = "";
-			}
 			
 			if($yhtiorow["tilauksen_yhteyshenkilot"] != "K") {
 				echo "<tr><td>".t("Tilausyhteyshenkilö").":</td>";
@@ -1791,34 +1784,24 @@
 
 					}
 					echo "</select>";
-					echo "<input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+					echo "<input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 				}
 				else {
-					echo "<td colspan = '1'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+					echo "<td colspan = '1'><input type='text' size='43' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 				}
 				
 			}
 			
-			echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";
+			echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 			
 			if($yhtiorow["tilauksen_kohteet"] != "K") {
-				echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>(".t("tilausvahvistus + lähete + lasku").")</td></tr>";			
+				echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";			
 			}
 
-			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>(".t("tilausvahvistus + keräyslista + lähete + lasku$extralisa").")</td></tr>";
-			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>(".t("keräyslista + lähete").")</td></tr>";
-			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>(".t("keräyslista").")</td></tr>";
-			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>(".t("lasku$extralisa").")</td></tr>";
-			
-			if($toim == "TARJOUS") {
-				if($kukarow["kesken"] == 0) {
-					$query = "	SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji = 'saate'";
-					$saateres = mysql_query($query) or pupe_error($query);
-					$saaterow = mysql_fetch_array($saateres);
-					$srow["saate"] = $saaterow["selite"];
-				}
-				echo "<tr><td>".t("Saateteksti")." :</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td>(".t("Tarjous").")</td></tr>";
-			}
+			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
+			echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("keräyslista")." + ".t("lähete")." + ".t("valmistus")." + ".t("työmääräys")."</td></tr>";
+			echo "<tr><td>".t("Kommentti")." 2:</td><td><textarea name='sisviesti2' rows='2' cols='40'>$srow[sisviesti2]</textarea></td><td>".t("keräyslista")." + ".t("valmistus")."</td></tr>";
+			echo "<tr><td>".t("Kommentti")." 3:</td><td><textarea name='sisviesti1' rows='2' cols='40'>$srow[sisviesti1]</textarea></td><td>".t("lasku")."</td></tr>";
 			echo "</table><br>";
 
 			echo "<table>";

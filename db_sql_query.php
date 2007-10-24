@@ -97,7 +97,7 @@
 			$sqlhaku = "SELECT ".implode(",", $kentat)." 
 						FROM $table 
 						WHERE yhtio='$kukarow[yhtio]' $where";
-			$result = mysql_query($sqlhaku) or pupe_error($query);
+			$result = mysql_query($sqlhaku) or pupe_error($sqlhaku);
 		
 			echo "<font class='message'>$sqlhaku<br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
 		

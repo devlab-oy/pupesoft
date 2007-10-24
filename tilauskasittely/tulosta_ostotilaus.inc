@@ -275,15 +275,10 @@
 
 							$ei_valia = "";
 							if($row["kommentti"] != "") {
-								if($pdf->pt_mm($pdf->writeStrlen($row["kommentti"], "snadi")) > $s[0]) {
-									$h-=$pdf->ln();						
-									$pdf->write($h, 2, 0, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
-									$h-=$pdf->ln();
-								} 
-								else {
-									$pdf->write($h, 1, 0, $s[0], "* ".$row["kommentti"], "snadi", "L", "I");	
-									$h-=$pdf->ln();
-								}
+								$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
+								$pdf->write($h, $nb, 0, $s[0], $row["kommentti"], "snadi", "L", "I");
+								$h-=$pdf->ln($nb);
+
 								$ei_valia = "OK";
 							}
 

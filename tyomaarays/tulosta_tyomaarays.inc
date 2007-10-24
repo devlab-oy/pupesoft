@@ -292,6 +292,10 @@ if (!function_exists('alku')) {
 			$komm .= "\n".t("Tilausviite", $kieli).":###".$laskurow['viesti'];								
 		}
 		
+		if (trim($laskurow['comments']) != '') {
+			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+		}
+		
 		if (trim($al_komm) != '') {
 			$komm .= $al_komm;
 		}

@@ -1,6 +1,8 @@
 <?php
+
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
+
 	require ("../inc/parametrit.inc");
 
 	echo "<font class='head'>".t("Tavarakatelista")."</font><hr>";
@@ -8,39 +10,38 @@
 	if ($tee != '') {
 
 		$rivi = "Tullinimike\tTullinimitys\tMaa\tTuotenumero\tNimitys\r\n";
-		$virtu= "";
+		$virtu = "";
 
 		// tehdään tullin aineisto
-		$query  = "select tullinimike1, (SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno=tuote.tuoteno LIMIT 1) alkuperamaa, tuoteno, nimitys
-					from tuote 
-					where yhtio='$kukarow[yhtio]' 
-					and tullinimike1 > 0
-					and status NOT IN ('P','X')
-					group by tullinimike1, alkuperamaa
-					order by tullinimike1, alkuperamaa";
+		$query = "	SELECT tuote.tullinimike1, ifnull(tuotteen_toimittajat.alkuperamaa, '') alkuperamaa, tuote.tuoteno, tuote.nimitys
+					FROM tuote
+					LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno)
+					WHERE tuote.yhtio = '$kukarow[yhtio]'
+					AND tuote.tullinimike1 > 0
+					AND tuote.status NOT IN ('P','X')
+					GROUP BY tullinimike1, alkuperamaa
+					ORDER BY tullinimike1, alkuperamaa";
 		$result = mysql_query($query) or pupe_error($query);
 
 		while ($row  = mysql_fetch_array($result)) {
-
 			// katotaanonko oikea tullinimike
-			$query = "select cn, dm from tullinimike where cn='$row[tullinimike1]' and kieli = '$yhtiorow[kieli]'";
+			$query = "SELECT cn, dm FROM tullinimike WHERE cn = '$row[tullinimike1]' AND kieli = '$yhtiorow[kieli]'";
 			$tulre = mysql_query($query) or pupe_error($query);
-			
+
 			$tullinimikeres = mysql_fetch_array($tulre);
-			
+
 			if (mysql_num_rows($tulre)==0) {
 				$virtu .= "'$row[tullinimike1]',";
 			}
 
 			// kirjoitetaan rivi
-			$rivi .= "{$row['tullinimike1']}\t{$tullinimikeres['dm']}\t{$row['alkuperamaa']}\t$row[tuoteno]\t".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."\r\n";
+			$rivi .= "$row[tullinimike1]\t$tullinimikeres[dm]\t$row[alkuperamaa]\t$row[tuoteno]\t$row[tuoteno]\r\n";
 		}
 
 		if ($virtu == "") {
-
 			// meilin infoja
 			$otsikko   = t("Tavarakatelista");
-			$failinimi = "$yhtiorow[yhtio].txt";
+			$failinimi = t("Tavarakatelista")."-$yhtiorow[yhtio].txt";
 
 			$bound     = uniqid(time()."_") ;
 
@@ -51,20 +52,20 @@
 			$content   = "--$bound\n";
 			$content  .= "Content-Type: text/plain; name=\"$failinimi\"\n" ;
 			$content  .= "Content-Transfer-Encoding: base64\n" ;
-			$content  .= "Content-Disposition: inline; filename=\"$failinimi\"\n\n";
+			$content  .= "Content-Disposition: attachment; filename=\"$failinimi\"\n\n";
 
 			$content .= chunk_split(base64_encode($rivi));
 			$content .= "\n" ;
 			$content .= "--$bound\n";
 
-			$boob     = mail($kukarow[eposti], $otsikko, $content, $headeri, "-f $yhtiorow[postittaja_email]");
+			$boob     = mail($kukarow["eposti"], $otsikko, $content, $headeri, "-f $yhtiorow[postittaja_email]");
 
-			echo t("Lähetettiin meili"). " $kukarow[eposti].";
+			echo t("Tavarakatelista lähetettiin osoitteeseen"). " $kukarow[eposti].<br><br>";
 		}
 		else {
 
 			$virtu = substr($virtu,0,-1); // vika pilkku pois
-			$query = "select tuoteno, osasto, try, nimitys, tullinimike1 from tuote where yhtio='$kukarow[yhtio]' and tullinimike1 in ($virtu) order by osasto, try, tuoteno";
+			$query = "SELECT tuoteno, osasto, try, nimitys, tullinimike1 FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tullinimike1 IN ($virtu) ORDER BY osasto, try, tuoteno";
 			$virre = mysql_query($query) or pupe_error($query);
 
 			echo "<font class='message'>".t("Virheellisiä tullinimikkeitä seuraavilla tuotteilla. Nämä on korjattava ennen lähetystä.")."</font><hr>";
@@ -83,13 +84,14 @@
 				echo "<td>$row[osasto]</td>";
 				echo "<td>$row[try]</td>";
 				echo "<td>$row[tuoteno]</td>";
-				echo "<td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
+				echo "<td>$row[nimitys]</td>";
 				echo "<td>$row[tullinimike1]</td>";
 				echo "</tr>";
 			}
 
 			echo "</table><br>";
 		}
+
 	}
 
 	echo "<form name='epaku' action='$PHP_SELF' method='post' autocomplete='off'>";

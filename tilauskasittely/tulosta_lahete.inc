@@ -245,8 +245,8 @@ if (!function_exists('alku')) {
 		if (trim($laskurow['viesti']) != '') {
 			$komm .= "\n".t("Tilausviite", $kieli).":###".$laskurow['viesti'];								
 		}
-		
-		if (trim($laskurow['comments']) != '') {
+
+		if (trim($laskurow['comments']) != '' and $tyyppi != "TILAUSVAHVISTUS") {
 			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
 		}
 		

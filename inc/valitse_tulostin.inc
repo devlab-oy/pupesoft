@@ -114,7 +114,7 @@
 	echo "<td><select name='kieli'>";
 
 	while ($apurow = mysql_fetch_array($fields)) {
-		if ($apurow[0] != "tunnus" and $apurow[0] != "aikaleima" and $apurow[0] != "kysytty") {
+		if (strlen($apurow[0]) == 2) {
 			$query = "select distinct nimi from maat where koodi='$apurow[0]'";
 			$maare = mysql_query($query);
 

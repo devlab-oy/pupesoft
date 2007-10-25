@@ -22,46 +22,11 @@ if ($oikeurow['paivitys'] != '1') { // Saako päivittää
 	}
 }
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
+if ($tee == "TEE" or $tee == "UPDATE") {
 
-	list($name,$ext) = split("\.", $_FILES['userfile']['name']);
-
-	if (strtoupper($ext) !="TXT" and strtoupper($ext)!="XLS" and strtoupper($ext)!="CSV") {
-		die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
-	}
-
-	if ($_FILES['userfile']['size']==0){
-		die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
-	}
-
-	if (strtoupper($ext)=="XLS") {
-		require_once ('excel_reader/reader.php');
-
-		// ExcelFile
-		$data = new Spreadsheet_Excel_Reader();
-
-		// Set output Encoding.
-		$data->setOutputEncoding('CP1251');
-		$data->setRowColOffset(0);
-		$data->read($_FILES['userfile']['tmp_name']);
-	}
-
-	echo "<font class='message'>".t("Tutkaillaan mitä olet lähettänyt").".<br></font>";
-
-	// luetaan eka rivi tiedostosta..
-	if (strtoupper($ext) == "XLS") {
-		$otsikot = array();
-
-		for ($excej = 0; $excej < $data->sheets[0]['numCols']; $excej++) {
-			$otsikot[] = strtoupper(trim($data->sheets[0]['cells'][0][$excej]));
-		}
-	}
-	else {
-		$file	 = fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
-
-		$rivi    = fgets($file);
-		$otsikot = explode("\t", strtoupper(trim($rivi)));
-	}
+	$file	 = fopen("http://www.pupesoft.com/softa/referenssisanakirja.sql","r") or die (t("Tiedoston avaus epäonnistui")."!");
+	$rivi    = fgets($file);
+	$otsikot = explode("\t", strtoupper(trim($rivi)));
 
 	if (count($otsikot) > 1) {
 		$sync_otsikot = array();
@@ -76,55 +41,119 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 		if (isset($sync_otsikot["fi"])) {
 			
 			echo "<table>";
+			echo "<tr><th>".t("Kysytty")."</td>
+			<th>".t("Me")." FI</td><th>".t("Ref")." FI</td>
+			<th>".t("Me")." SE</td><th>".t("Ref")." SE</td>
+			<th>".t("Me")." EN</td><th>".t("Ref")." EN</td>
+			</tr>";
 			
-			if (strtoupper($ext) == "XLS") {
-				for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
+			
+			$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = ''";
+			$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+			
+			$rivi = fgets($file);
+
+			while (!feof($file)) {
+				// luetaan rivi tiedostosta..
+				$poista	 = array("'", "\\");
+				$rivi	 = str_replace($poista,"",$rivi);
+				$rivi	 = explode("\t", trim($rivi));
+
+				if($rivi[$sync_otsikot["fi"]] != "") {
 					
-					if($data->sheets[0]['cells'][$excei][$sync_otsikot["fi"]] != "") {
+					$sanakirjaquery  = "SELECT kysytty,fi,se,en,de,dk FROM sanakirja WHERE fi = BINARY '".$rivi[$sync_otsikot["fi"]]."'";
+					$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+					
+					if (mysql_num_rows($sanakirjaresult) > 0) {
+						$sanakirjarow = mysql_fetch_array($sanakirjaresult);
 						
-						$sanakirjaquery  = "SELECT fi,se,en,de,dk FROM sanakirja WHERE fi = BINARY '".$data->sheets[0]['cells'][$excei][$sync_otsikot["fi"]]."'";
-						$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
+						$sanakirjaquery  = "UPDATE sanakirja SET synkronoi = 'X' where fi = BINARY '$sanakirjarow[fi]'";
+						$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
 						
-						if (mysql_num_rows($sanakirjaresult) > 0) {
-							$sanakirjarow = mysql_fetch_array($sanakirjaresult);
+						echo "<tr><td>".$rivi[$sync_otsikot["kysytty"]]."</td>";
 							
-							if($sanakirjarow["fi"] != '' or $data->sheets[0]['cells'][$excei][$sync_otsikot["fi"]] != "") echo "<tr><td>".$sanakirjarow["fi"]."</td><td>".$data->sheets[0]['cells'][$excei][$sync_otsikot["fi"]]."</td></tr>";
-							if($sanakirjarow["se"] != '' or $data->sheets[0]['cells'][$excei][$sync_otsikot["se"]] != "") echo "<tr><td>".$sanakirjarow["se"]."</td><td>".$data->sheets[0]['cells'][$excei][$sync_otsikot["se"]]."</td></tr>";
-							if($sanakirjarow["en"] != '' or $data->sheets[0]['cells'][$excei][$sync_otsikot["en"]] != "") echo "<tr><td>".$sanakirjarow["en"]."</td><td>".$data->sheets[0]['cells'][$excei][$sync_otsikot["en"]]."</td></tr>";
-							if($sanakirjarow["de"] != '' or $data->sheets[0]['cells'][$excei][$sync_otsikot["de"]] != "") echo "<tr><td>".$sanakirjarow["de"]."</td><td>".$data->sheets[0]['cells'][$excei][$sync_otsikot["de"]]."</td></tr>";
-							if($sanakirjarow["dk"] != '' or $data->sheets[0]['cells'][$excei][$sync_otsikot["dk"]] != "") echo "<tr><td>".$sanakirjarow["dk"]."</td><td>".$data->sheets[0]['cells'][$excei][$sync_otsikot["dk"]]."</td></tr>";
+						echo "<td>".$sanakirjarow["fi"]."</td><td>".$rivi[$sync_otsikot["fi"]]."</td>";
+						
+						if ($sanakirjarow["se"] != $rivi[$sync_otsikot["se"]]) {
 							
+							if ($tee == "UPDATE") {
+								$sanakirjaquery  = "UPDATE sanakirja SET se = '".$rivi[$sync_otsikot["se"]]."' where fi = BINARY '$sanakirjarow[fi]'";
+								$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+							}
+							
+							$e = "<font class='error'>";
+							$t = "</font>";
 						}
 						else {
-							echo "<tr><td><font class='error'>Sanaa ei löydy sanakirjasta!</font></td><td>".$data->sheets[0]['cells'][$excei][$sync_otsikot["fi"]]."</td></tr>";
+							$e = "";
+							$t = "";
 						}
+						
+						echo "<td>$e".$sanakirjarow["se"]."$t</td><td>".$rivi[$sync_otsikot["se"]]."</td>";
+						
+						if ($sanakirjarow["en"] != $rivi[$sync_otsikot["en"]]) {
+							
+							if ($tee == "UPDATE") {
+								$sanakirjaquery  = "UPDATE sanakirja SET en = '".$rivi[$sync_otsikot["en"]]."' where fi = BINARY '$sanakirjarow[fi]'";
+								$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+							}
+							
+							
+							$e = "<font class='error'>";
+							$t = "</font>";
+						}
+						else {
+							$e = "";
+							$t = "";
+						}
+						
+						echo "<td>$e".$sanakirjarow["en"]."$t</td><td>".$rivi[$sync_otsikot["en"]]."</td>";
+						echo "</tr>";
+					}
+					else {
+						
+						if ($tee == "UPDATE") {
+							$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '".$rivi[$sync_otsikot["fi"]]."', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
+							$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
+						}
+						
+						echo "<tr><td></td><td><font class='error'>Sanaa ei löydy sanakirjasta!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td></tr>";
 					}
 				}
-			}
-			else {
+
+				// luetaan seuraava rivi failista
 				$rivi = fgets($file);
-
-				while (!feof($file)) {
-					// luetaan rivi tiedostosta..
-					$poista	 = array("'", "\\");
-					$rivi	 = str_replace($poista,"",$rivi);
-					$rivi	 = explode("\t", trim($rivi));
-
-					// luetaan seuraava rivi failista
-					$rivi = fgets($file);
-				}
-				fclose($file);
 			}
 			
-			echo "</table>";
+			fclose($file);
+			
+			$sanakirjaquery  = "SELECT kysytty,fi,se,en,de,dk FROM sanakirja WHERE synkronoi='' and (se!='' or en!='') and kysytty>1 ORDER BY kysytty desc";
+			$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+
+			while ($sanakirjarow = mysql_fetch_array($sanakirjaresult)) {
+				echo "<tr><td>".$sanakirjarow["kysytty"]."</td>";
+				echo "<td>".$sanakirjarow["fi"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
+				echo "<td>".$sanakirjarow["se"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
+				echo "<td>".$sanakirjarow["en"]."</td><td><font class='error'>".t("Puuttuu referenssistä")."</font></td>";
+				echo "</tr>";
+			}
+			
+			echo "</table><br><br>";
+			
+			
+			echo "	<form method='post' action='$PHP_SELF'>
+					<input type='hidden' name='tee' value='UPDATE'>
+					<input type='submit' value='".t("Synkronoi")."'>
+
+					</form>";
 		}
 	}
 }
 else {
-	echo "	<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
+	echo "	<form method='post' action='$PHP_SELF'>
 			<table>
 			<tr><th>".t("Valitse tiedosto").":</th>
-				<td><input name='userfile' type='file'></td>
+				<td><input hidden name='tee' value='TEE'></td>
 				<td class='back'><input type='submit' value='".t("Lähetä")."'></td>
 			</tr>
 			</table>

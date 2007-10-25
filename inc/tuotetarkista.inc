@@ -93,8 +93,11 @@
 	    				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tem_tuoteno' and saldo != 0";
 	    	$sresult = mysql_query($query) or pupe_error($query);
 	    	$srow = mysql_fetch_array($sresult);
-
-	    	if ($srow["kpl"] > 0) {
+			
+			if (($srow["sarjanumeroseuranta"] == "" or $srow["sarjanumeroseuranta"] == "E" or $srow["sarjanumeroseuranta"] == "F") and (trim(strtoupper($t[$i])) == '' or trim(strtoupper($t[$i])) == 'E') or trim(strtoupper($t[$i])) == 'F') {
+				//annetaan vaihtaa
+			}
+	    	elseif ($srow["kpl"] > 0) {
 				$virhe[$i] = t("Seurantatyyppiä ei voida muuttaa, koska tuotteella on saldoa")."!";
 	    		$errori = 1;
 			}

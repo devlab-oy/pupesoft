@@ -1514,15 +1514,14 @@
 					}
 					elseif ($kentta == "suorittaja") {
 						
-						echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";
-
-						
-						$query = "	(SELECT 'a' kala, selite, selitetark FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and laji = 'TYOM_TYOLINJA' )
-									UNION
-									(SELECT 'b' kala, kuka selite, nimi selitetark FROM kuka WHERE yhtio = '$kukarow[yhtio]' and extranet='')
-									ORDER BY 1,3";
+						$query = "	SELECT if(avainsana.selitetark is null,'b','a') sort, kuka.kuka, kuka.nimi 
+									FROM kuka 
+									LEFT JOIN avainsana ON avainsana.yhtio=kuka.yhtio and avainsana.laji='TYOM_TYOLINJA' and avainsana.selitetark=kuka.kuka
+									WHERE kuka.yhtio = '$kukarow[yhtio]' and kuka.extranet=''
+									ORDER BY sort, kuka.nimi";
 						$yresult = mysql_query($query) or pupe_error($query);
 
+						echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";
 						echo "<option value=''>".t("Valitse")."</option>";
 
 						$edg = "";
@@ -1534,17 +1533,17 @@
 								$sel = 'selected';
 							}
 							
-							if ($edg != $row["kala"] and $row["kala"] == "a") {
+							if ($edg != $row["sort"] and $row["sort"] == "a") {
 								echo "<optgroup label='".t("Asentajat")."'>";
 							}
-							elseif ($edg != $row["kala"] and $row["kala"] == "b") {
+							elseif ($edg != $row["sort"] and $row["sort"] == "b") {
 								echo "</optgroup>";
 								echo "<optgroup label='".t("Muut")."'>";
 							}
 							
-							echo "<option value='$row[selite]' $sel>$row[selitetark]</option>";
+							echo "<option value='$row[kuka]' $sel>$row[nimi]</option>";
 							
-							$edg = $row['kala'];
+							$edg = $row['sort'];
 						}
 
 						echo "</select></td>";

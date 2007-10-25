@@ -55,7 +55,7 @@ if(!function_exists("menu")) {
 			while($merow = mysql_fetch_array($meres)) {
 				$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki={$merow["tuotemerkki"]}\", \"\", true);'>{$merow["tuotemerkki"]}</a></td></tr>";
 			}
-			$val = "</table>";
+			$val .= "</table>";
 		}
 		
 		return $val;

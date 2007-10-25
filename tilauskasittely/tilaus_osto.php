@@ -644,13 +644,16 @@
 			}
 
 			echo "<hr>";
+			
+			// katotaan miten halutaan sortattavan
+			$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 
 			//Listataan tilauksessa olevat tuotteet
 			$query = "	SELECT tilausrivi.nimitys, concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 						tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu',
 						round((varattu+jt)*tilausrivi.hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),2) rivihinta,
 						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale, tilausrivi.varattu varattukpl, tilausrivi.kommentti,
-						if(tilausrivi.perheid2=0, tilausrivi.tunnus, tilausrivi.perheid2) as sorttauskentta,
+						$sorttauskentta,
 						tilausrivi.var
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -658,7 +661,7 @@
 						WHERE otunnus = '$kukarow[kesken]'
 						and tilausrivi.yhtio='$kukarow[yhtio]'
 						and tilausrivi.tyyppi='O'
-						ORDER BY sorttauskentta desc, tilausrivi.tunnus";
+						ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
 			$presult = mysql_query($query) or pupe_error($query);
 
 			$rivienmaara = mysql_num_rows($presult);

@@ -792,7 +792,8 @@
 		mysql_field_name($result, $i) == "laskun_jarjestys" or 
 		mysql_field_name($result, $i) == "tilauksen_jarjestys" or  
 		mysql_field_name($result, $i) == "kerayslistan_jarjestys" or 
-		mysql_field_name($result, $i) == "laskun_jarjestys") {
+		mysql_field_name($result, $i) == "laskun_jarjestys" or
+		mysql_field_name($result, $i) == "ostotilauksen_jarjestys") {
 
 		$ulos = "<td><select name='$nimi'>";
 
@@ -820,7 +821,8 @@
 		mysql_field_name($result, $i) == "laskun_jarjestys_suunta" or 
 		mysql_field_name($result, $i) == "tilauksen_jarjestys_suunta" or  
 		mysql_field_name($result, $i) == "kerayslistan_jarjestys_suunta" or 
-		mysql_field_name($result, $i) == "laskun_jarjestys_suunta") {
+		mysql_field_name($result, $i) == "laskun_jarjestys_suunta" or
+		mysql_field_name($result, $i) == "ostotilauksen_jarjestys_suunta") {
 	
 
 		$ulos = "<td><select name='$nimi'>";

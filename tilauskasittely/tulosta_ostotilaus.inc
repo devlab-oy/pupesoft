@@ -944,6 +944,9 @@
 					}
 				}
 			}
+			
+			// katotaan miten halutaan sortattavan
+			$sorttauskentta = generoi_sorttauskentta($yhtiorow["ostotilauksen_jarjestys"]);
 
 			$query = "	SELECT toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
 						tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),2) rivihinta, 
@@ -954,7 +957,7 @@
 						join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 						WHERE tilausrivi.otunnus = '$otunnus'
 						and tilausrivi.yhtio	 = '$kukarow[yhtio]'
-						ORDER BY sorttauskentta desc, tilausrivi.tunnus";
+						ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
 			$result = mysql_query($query) or pupe_error($query);
 			
 			$lask 	= mysql_num_rows($result);

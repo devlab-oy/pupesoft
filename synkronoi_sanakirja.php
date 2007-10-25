@@ -117,7 +117,12 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 							$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 						}
 						
-						echo "<tr><td></td><td><font class='error'>Sanaa ei löydy sanakirjasta!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td></tr>";
+						echo "<tr>
+								<td>".$rivi[$sync_otsikot["kysytty"]]."</td>
+								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["fi"]]."</td>
+								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["se"]]."</td>
+								<td><font class='error'>".t("Sanaa puuttuu")."!</font></td><td>".$rivi[$sync_otsikot["en"]]."</td>
+								</tr>";
 					}
 				}
 

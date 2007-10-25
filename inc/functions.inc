@@ -1846,6 +1846,26 @@ if (! function_exists('ebid')) {
 
 			return "<a href='$url'>". t('Näytä lasku')."</a>";
 		}
+		elseif ($laskurow['tila'] == 'U') {
+
+			$out = "";
+
+			if ($laskurow['chn'] == '111') {
+				$out = t("Elma EDI-inhouse");
+			}
+			elseif ($laskurow['chn'] == '010') {
+				$out = t("eInvoice");
+			}
+			elseif ($laskurow['chn'] == '020') {
+				$out = t("Vienti eInvoice");
+			}
+			elseif ($laskurow['chn'] == '100') {
+				$out = t("Paperilasku");
+			}
+
+			return $out;
+
+	    }
 		else {
 
 			$query = "SELECT tunnus from liitetiedostot where liitostunnus='{$laskurow['tunnus']}' and liitos='lasku' and yhtio='{$kukarow['yhtio']}'";

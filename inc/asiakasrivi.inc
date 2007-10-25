@@ -276,11 +276,10 @@
 						JOIN yhtion_parametrit ON yhtion_parametrit.yhtio=yhtio.yhtio
 						where konserni	 = '$yhtiorow[konserni]' 
 						and synkronoi like '%$toim%'";
-			$vresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($vresult) > 0) {
-				$srowapu = mysql_fetch_array($vresult);
-
+			$vresult = mysql_query($query) or pupe_error($query);			
+			$srowapu = mysql_fetch_array($vresult);
+			
+			if ($srowapu["yhtiot"] != "") {
 				$tarkyhtio = $srowapu["yhtiot"];
 			}
 			else {

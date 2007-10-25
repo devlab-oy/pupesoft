@@ -1,8 +1,16 @@
 <?php
+	// valmis
+
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;
-
-	require('parametrit.inc');
+	
+	if (file_exists('parametrit.inc')) {
+		require('parametrit.inc');
+	}
+	else {
+		require('../inc/parametrit.inc');
+	}
+	
 	echo "<font class='head'>".t("Hinnasto asiakashinnoin")."</font><hr>";
 
 	if ($kukarow["eposti"] == "") {
@@ -137,8 +145,13 @@
 				$ale 	= '';
 				$hinta 	= '';
 				$netto 	= '';
-
-				require ("alehinta.inc");
+				
+				if (file_exists('alehinta.inc')) {
+					require ("alehinta.inc");
+				}
+				else {
+					require ("../inc/alehinta.inc");
+				}
 
 				if ($netto != '') {
 					$ale = t("Netto");
@@ -149,7 +162,7 @@
 				}
 
 				if ($netto == "") {
-					$asiakashinta = round($hinta * (1-($ale/100)),2);
+					$asiakashinta = round($hinta * (1-($ale/100)),$yhtiorow['hintapyoristys']);
 				}
 				else {
 					$asiakashinta = $hinta;
@@ -170,9 +183,9 @@
 					$rivi .= $ale."\t";
 				}
 
-				$rivi .= str_replace(".",",",sprintf('%.2f',$asiakashinta))."\t";
+				$rivi .= str_replace(".",",",sprintf("%.".$yhtiorow['hintapyoristys']."f",$asiakashinta))."\t";
 				$rivi .= "\r\n";
-
+				
 				fwrite($fh, $rivi);
 			}
 			fclose($fh);
@@ -185,24 +198,24 @@
 
 			$bound = uniqid(time()."_") ;
 
-			$header  = "From: <$yhtiorow[postittaja_email]>\r\n";
-			$header .= "MIME-Version: 1.0\r\n" ;
-			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
+			$header  = "From: <$yhtiorow[postittaja_email]>\n";
+			$header .= "MIME-Version: 1.0\n" ;
+			$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-			$content .= "--$bound\r\n";
+			$content .= "--$bound\n";
 
-			$content .= "Content-Type: application/zip; name=\"$ytunnus-price.zip\"\r\n" ;
-			$content .= "Content-Transfer-Encoding: base64\r\n" ;
-			$content .= "Content-Disposition: inline; filename=\"$ytunnus-price.zip\"\r\n\r\n";
+			$content .= "Content-Type: application/zip; name=\"$ytunnus-price.zip\"\n" ;
+			$content .= "Content-Transfer-Encoding: base64\n" ;
+			$content .= "Content-Disposition: inline; filename=\"$ytunnus-price.zip\"\n\n";
 
 			$handle  = fopen($liite, "r");
 			$sisalto = fread($handle, filesize($liite));
 			fclose($handle);
 
 			$content .= chunk_split(base64_encode($sisalto));
-			$content .= "\r\n" ;
+			$content .= "\n" ;
 
-			$content .= "--$bound\r\n";
+			$content .= "--$bound\n";
 			$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - Pricelist", $content, $header, "-f $yhtiorow[postittaja_email]");
 
 			exec("rm -f /tmp/".$filenimi);
@@ -231,6 +244,11 @@
 	echo "</table><br>";
 	echo "<input type='submit' value='Aja hinnasto'>";
 	echo "</form>";
-
-	require ("footer.inc");
+	
+	if (file_exists('parametrit.inc')) {
+		require ("footer.inc");
+	}
+	else {
+		require ("../inc/footer.inc");
+	}
 ?>

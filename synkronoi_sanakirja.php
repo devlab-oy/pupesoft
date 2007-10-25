@@ -150,13 +150,10 @@ if ($tee == "TEE" or $tee == "UPDATE") {
 	}
 }
 else {
-	echo "	<form method='post' action='$PHP_SELF'>
-			<table>
-			<tr><th>".t("Valitse tiedosto").":</th>
-				<td><input hidden name='tee' value='TEE'></td>
-				<td class='back'><input type='submit' value='".t("Lähetä")."'></td>
-			</tr>
-			</table>
+	echo "	<br><br>
+			<form method='post' action='$PHP_SELF'>
+			<input type='hidden' name='tee' value='TEE'>
+			<input type='submit' value='".t("Vertaa sanakirjoja")."'>
 			</form>";
 }
 	

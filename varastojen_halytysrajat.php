@@ -535,7 +535,7 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 		</td></tr>";
 	}
 
-	echo "<tr><th>Uusi tuote on</th>";
+	echo "<tr><th>".t("Uusi tuote")." on</th>";
 	echo "<td><select name='uusienika'>";
 	echo "<option value='12'>".t("alle 12 kk vanha")."</option>";
 	echo "<option value='6' selected>".t("alle 6 kk vanha")."</option>";
@@ -544,10 +544,11 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	echo "</select>";
 	echo "</td></tr>";
 
-	echo "<tr><th>Uusien tuotteiden näkyvyys</th>";
+	echo "<tr><th>".t("Uusien tuotteiden näkyvyys")."</th>";
 	echo "<td><select name='uudettuotteet'>";
 	echo "<option value='eiuusia'>".t("Älä listaa uusia tuotteita")."</option>";
 	echo "<option value='vainuudet'>".t("Listaa vain uudet tuotteet")."</option>";
+	echo "<option value='kaikki'>".t("Listaa kaikki tuotteet")."</option>";
 	echo "</select>";
 	echo "</td></tr>";
 

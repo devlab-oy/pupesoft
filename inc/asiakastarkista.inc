@@ -14,10 +14,9 @@
 						where konserni	 = '$yhtiorow[konserni]' 
 						and synkronoi like '%$toim%'";
 			$sresult = mysql_query($query) or pupe_error($query);
-
-			if (mysql_num_rows($sresult) > 0) {
-				$srowapu = mysql_fetch_array($sresult);
-
+			$srowapu = mysql_fetch_array($vresult);
+			
+			if ($srowapu["yhtiot"] != "") {
 				$tarkyhtio = $srowapu["yhtiot"];
 			}
 			else {

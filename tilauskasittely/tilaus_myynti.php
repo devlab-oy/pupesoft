@@ -2745,6 +2745,22 @@ if ($tee == '') {
 			else {
 				$rivino = $rivilaskuri+1;
 			}
+			
+			// Tarvitaan jos laskun valuutta on eri kuin hinnaston valuutta
+			function hinnaston_alv ($laskurow, $trow, $kpl, $netto) {
+				global $kukarow, $yhtiorow;
+				
+				if ($kukarow["extranet"] != "") {
+					require ("alehinta.inc");
+					require ("alv.inc");
+				}
+				else {
+					require ("inc/alehinta.inc");
+					require ("tilauskasittely/alv.inc");
+				}
+								
+				return $alehinta_val;
+			}
 
 			echo "<br><table>";
 
@@ -2853,6 +2869,8 @@ if ($tee == '') {
 				// Rivin tarkistukset
 				if ($muokkauslukko == "" and $muokkauslukko_rivi == "") {
 					require('tarkistarivi.inc');
+					
+					//tarkistarivi.inc:stä saadaan $trow jossa on select * from tuote
 				}
 
 				if ($toim == "TYOMAARAYS") {
@@ -3443,20 +3461,11 @@ if ($tee == '') {
 
 					echo "<td $class align='center' valign='top'>$row[netto]&nbsp;</td>";
 
-					$hinta = $row["hinta"];
+					$hinta = $row["hinta"];					
 					$netto = $row["netto"];
 					$kpl   = $row["varattu"]+$row["jt"];
-
-					if ($kukarow["extranet"] != "") {
-						require ("alehinta.inc");
-						require ("alv.inc");
-					}
-					else {
-						require ("inc/alehinta.inc");
-						require ("tilauskasittely/alv.inc");
-					}
-
-					if ($alehinta_val != $laskurow["valkoodi"]) {
+											
+					if (hinnaston_alv($laskurow, $trow, $kpl, $netto) != $laskurow["valkoodi"]) {
 						$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
 					}
 
@@ -3472,15 +3481,16 @@ if ($tee == '') {
 					$summa    = round($summa / $alvillisuus_jako, 2);
 					$brutto   = $hinta * ($row["varattu"] + $row["jt"]);
 					$kplhinta = $hinta * (1 - $row["ale"] / 100);
-
-					$myyntihinta = round(tuotteen_myyntihinta($laskurow, $trow, $row["tuoteno"]) / $alvillisuus_jako, 2);
+					$myyntihinta = round(tuotteen_myyntihinta($laskurow, $trow, 1) / $alvillisuus_jako, 2);
 
 					if ($kukarow['hinnat'] == 1) {
 						echo "<td $class align='right' valign='top'>$myyntihinta</td>";
 					}
 					else {
 						if ($myyntihinta != $hinta) $myyntihinta = sprintf('%.2f', $myyntihinta, 2)." (".sprintf('%.2f',$hinta).")";
+						
 						else $myyntihinta = sprintf('%.2f', $myyntihinta, 2);
+						
 						echo "<td $class align='right' valign='top'>$myyntihinta</td>";
 						echo "<td $class align='right' valign='top'>".($row["ale"] * 1)."</td>";
 						echo "<td $class align='right' valign='top'>".sprintf('%.2f', $kplhinta, 2)."</td>";

@@ -731,8 +731,8 @@
 			}
 			
 			if (!function_exists('rivi')) {
-				function rivi($thispage, $lask) {
-					global $pdf, $laskurow, $row, $yhtiorow, $kukarow, $sivu, $page, $rectparam, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kieli, $kala, $nimitykset;
+				function rivi($thispage) {
+					global $pdf, $laskurow, $row, $yhtiorow, $kukarow, $sivu, $page, $rectparam, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kieli, $kala, $nimitykset, $rivinumerot;
 					
 					// viivat rivien väliin...
 					$x[0] = 20;
@@ -747,7 +747,7 @@
 
 						loppu($thispage, 0);
 
-						$page[$sivu] = alku($tyyppi);
+						$page[$sivu] = alku();
 						$thispage    = $page[$sivu];
 					}
 					
@@ -766,7 +766,7 @@
 						$row["yksikko"] = $rarrow["toim_yksikko"];
 					}
 
-					$pdf->draw_text(25,  $kala, $lask,													$thispage, $pieni);
+					$pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],							$thispage, $pieni);					
 					$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],									$thispage, $norm);
 					$pdf->draw_text(170, $kala, "(".$row["tuoteno"].")",								$thispage, $norm);
 					$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]),							$thispage, $norm);
@@ -948,10 +948,10 @@
 			// katotaan miten halutaan sortattavan
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["ostotilauksen_jarjestys"]);
 
-			$query = "	SELECT toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
+			$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
 						tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),2) rivihinta, 
 						substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika,
-						if(tilausrivi.perheid2=0, tilausrivi.tunnus, tilausrivi.perheid2) as sorttauskentta
+						$sorttauskentta
 						FROM tilausrivi
 						join tuote USING (yhtio, tuoteno)
 						join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
@@ -960,16 +960,40 @@
 						ORDER BY sorttauskentta $yhtiorow[ostotilauksen_jarjestys_suunta], tilausrivi.tunnus";
 			$result = mysql_query($query) or pupe_error($query);
 			
-			$lask 	= mysql_num_rows($result);
-			$total 	= 0;
-			$sivu 	= 1;
-			
+			//generoidaan rivinumerot
+			$rivinumerot = array();
+
+			if($yhtiorow["ostotilauksen_jarjestys_suunta"] == "ASC") { 
+				$kal = 1;
+			}
+			else {
+				$kal = mysql_num_rows($result);
+			}
+
+			while ($row = mysql_fetch_array($result)) {
+				$rivinumerot[$row["tunnus"]] = $kal;
+				
+				if($yhtiorow["ostotilauksen_jarjestys_suunta"] == "ASC") { 
+					$kal++;
+				}
+				else {
+					$kal--;
+				}				
+			}
+
+			mysql_data_seek($result,0);
+
+			unset($pdf);
+			unset($page);
+
+			$sivu  = 1;
+			$total = 0;
+
+			// Aloitellaan lähetteen teko
 			$page[$sivu] = alku();
 
 			while ($row = mysql_fetch_array($result)) {
-				rivi($page[$sivu], $lask);
-				
-				$lask--;
+				rivi($page[$sivu]);
 				$total += $row["rivihinta"];
 			}
 

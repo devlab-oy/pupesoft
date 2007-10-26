@@ -295,16 +295,19 @@
 				echo "<font class='error'>".t("Erälle on syötettävä kappalemäärä")." $rivirow[tuoteno]/$sarjanumero.</font><br><br>";
 			}
 			
+			// Samaan ostoriviin ei voida liittää samaa eränumeroa useaan kertaan, mutta muuten eränumerot eivät ole uniikkeja.
 			$query = "	SELECT *
 						FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
-						WHERE yhtio 		= '$kukarow[yhtio]'
-						and sarjanumero 	= '$sarjanumero'
-						and tuoteno 		= '$rivirow[tuoteno]'
-						and myyntirivitunnus= 0";	
+						WHERE yhtio 		 = '$kukarow[yhtio]'
+						and sarjanumero 	 = '$sarjanumero'
+						and tuoteno 		 = '$rivirow[tuoteno]'
+						and $tunnuskentta	 = '$rivitunnus' 
+						and myyntirivitunnus = 0";	
 		}
+				
 		$sarjares = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($sarjares) == 0 and $insok == "OK") {
+		if ($insok == "OK" and mysql_num_rows($sarjares) == 0) {
 			
 			//jos ollaan syötetty kokonaan uusi sarjanuero
 			$query = "	INSERT into sarjanumeroseuranta 
@@ -950,12 +953,12 @@
 				$ylisa = "&liitostunnus=$sarjarow[tunnus]&uusi=1";
 			}
 
-			echo "<br><a href='".$palvelin2."yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF////$tunnuskentta=$rivitunnus//from=$from//aputoim=$aputoim//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku//lisatieto_haku=$lisatieto_haku' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\">".t("Lisätiedot")."</a>";
+			echo "<br><a href='".$palvelin2."yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF////$tunnuskentta=$rivitunnus//from=$from//aputoim=$aputoim//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku//lisatieto_haku=$lisatieto_haku//muut_siirrettavat=$muut_siirrettavat' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\">".t("Lisätiedot")."</a>";
 
 		}
 
 		if ($sarjarow['ostorivitunnus'] == 0 and $sarjarow['myyntirivitunnus'] == 0 and $keikkarow["tunnus"] == 0) {
-			echo "<br><a href='$PHP_SELF?toiminto=POISTA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku' onclick=\"return verify()\">".t("Poista")."</a>";
+			echo "<br><a href='$PHP_SELF?toiminto=POISTA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat' onclick=\"return verify()\">".t("Poista")."</a>";
 		}
 
 		echo "</tr>";

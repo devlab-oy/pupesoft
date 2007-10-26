@@ -136,6 +136,10 @@
 				$kuittaus = 'K';
 			}
 			
+			if ($kuka == "") {
+				$kuka = $kukarow["kuka"];
+			}
+			
 			if ($korjaus == '') {
 				if ($viesti != '') {
 					$kysely = "	INSERT INTO kalenteri
@@ -153,7 +157,7 @@
 								luontiaika		= now()";
 					$result = mysql_query($kysely) or pupe_error($kysely);
 					$muist = mysql_insert_id();
-					
+
 					if ($tyyppi == "Muistutus") {
 						$ok = 1;
 

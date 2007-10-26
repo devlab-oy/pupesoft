@@ -134,7 +134,13 @@
 					$width = imagesx($im);
 					$height = imagesy($im);
 					
-					echo "<td><img width='150px' src='view.php?id=$trow[tunnus]'></td><td valign='bottom'>$width x $height px. ".size_readable($trow["filesize"])."</td>";
+					$leveysimg = "150";
+					
+					if ($width < $leveysimg) {
+						$leveysimg = $width;
+					}
+					
+					echo "<td><img width='".$leveysimg."px' src='view.php?id=$trow[tunnus]'></td><td valign='bottom'>$width x $height px. ".size_readable($trow["filesize"])."</td>";
 				}
 				else {
 					echo "<td><a href='view.php?id=$trow[tunnus]'>$trow[filename]</a></td><td valign='bottom'>".size_readable($trow["filesize"])."</td>";

@@ -266,7 +266,7 @@ if (!function_exists('tulosta_tarjous')) {
 						if($row["kommentti"] != "") {
 							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
 							$pdf->write($h, $nb, 5, $s[0], $row["kommentti"], "snadi", "L", "I");	
-							$h-=$pdf->ln($nb);					
+							$h-=$pdf->ln($nb+0.25);
 						}
 
 						if($row["asiakkaan_positio"] > 0 and $row["ei_saldoa"] == "") {

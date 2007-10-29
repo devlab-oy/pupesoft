@@ -24,6 +24,7 @@ if($excel == "YES") {
 		$excelnimi = md5(uniqid(mt_rand(), true)).".xls";
 
 		$workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
+		$workbook->setVersion(8);
 		$worksheet =& $workbook->addWorksheet('Sheet 1');
 
 		$format_bold =& $workbook->addFormat();

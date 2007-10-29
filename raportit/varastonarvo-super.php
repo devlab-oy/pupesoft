@@ -288,6 +288,9 @@
 				elseif ($tyyppi == "B" and $muutoskpl == 0) {
 					$ok = "GO";
 				}
+				elseif ($tyyppi == "D" and $muutoskpl < 0) {
+					$ok = "GO";
+				}
 				else {
 					$ok = "NO-GO";
 				}
@@ -640,12 +643,16 @@
 		elseif($tyyppi == "C") {
 			$sel3 = "SELECTED";
 		}
+		elseif($tyyppi == "D") {
+			$sel4 = "SELECTED";
+		}
 
 		echo "<td>
 				<select name='tyyppi'>
 				<option value='A' $sel1>".t("N‰ytet‰‰n tuotteet joilla on saldoa")."</option>
 				<option value='B' $sel2>".t("N‰ytet‰‰n tuotteet joilla ei ole saldoa")."</option>
 				<option value='C' $sel3>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
+				<option value='D' $sel4>".t("N‰ytet‰‰n miinus-saldolliset tuotteet")."</option>
 				</select>
 				</td>";
 		echo "</tr>";

@@ -16,7 +16,9 @@ if ($tilvahasiakas['fax'] == '') {
 		$tilvah_nimi .= " / ".$tilvahasiakas["toim_nimi"];
 	}
 
-	echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalta puuttuu faxinumero")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
+	if ($silent == "") {
+		echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalta puuttuu faxinumero")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
+	}
 }
 else {
 
@@ -62,11 +64,11 @@ else {
 		$ulos .= sprintf("%-50.s",$laskurow['osoite'])								.$laskurow['toim_osoite']."\n";
 		$ulos .= sprintf("%-50.s",$laskurow['postino']." ".$laskurow['postitp'])	.$laskurow['toim_postino']." ".$laskurow['toim_postitp']."\n";
 		$ulos .= "\r\n";
-		
+
 		if ($laskurow['toimvko'] == 'V') {
 			$laskurow["toimaika"] = t("Viikko")." ".date("W", strtotime($laskurow["toimaika"]));
 		}
-		
+
 		$ulos .= sprintf("%-50.s",t("Toimitustapa", $kieli).": ".$laskurow['toimitustapa'])	.t("Toimitusaika", $kieli).": ".$laskurow['toimaika']."\n";
 		$ulos .= sprintf("%-50.s",t("Tilausnumero", $kieli).": ".$laskurow['tunnus'])		.t("Tilausviite", $kieli).": ".$laskurow['viesti']."\n";
 		$ulos .= sprintf("%-50.s",t("Myyjä", $kieli).": ".$krow['nimi'])."\n";

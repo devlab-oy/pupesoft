@@ -135,8 +135,12 @@ if (mysql_num_rows($tilvahresult) > 0)
 	$ftppath = $tilvahpath;
 	$ftpfile = realpath($tilvahvfilenimi);
 
-	require ("../inc/ftp-send.inc");
-
+	if ($kukarow["extranet"] == '') {
+		require ("../inc/ftp-send.inc");
+	}
+	else {
+		require ("ftp-send.inc");
+	}
 
 #	// n‰ytet‰‰n faili ruudulla...
 #	$toot = fopen(tilvahvfilenimi,"r");

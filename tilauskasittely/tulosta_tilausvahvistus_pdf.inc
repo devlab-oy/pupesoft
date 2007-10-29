@@ -1,5 +1,5 @@
 <?php
-	
+
 	if($yhtiorow["tilausvahvistustyyppi"] == 3) {
 		require_once('pdflib/pupepdf.class.php');
 
@@ -379,7 +379,7 @@
 					if(mysql_num_rows($result)>0) {
 						$pdf->write($h, 3, 0, 0, t("Jos Runtechin asiantuntijaa vaaditaan asiakkaan toimesta viipymään tehtaalla pisempään, kuin on sovittu, lisätään loppulaskuun päiväveloitus tuntityöhinnaston kohdan 4 mukaan, sekä matkakulut syntyneiden kulujen mukaan.", $kieli), "norm", "L", "");
 						$h-=$pdf->ln(5);
-					}				
+					}
 				}
 
 				if($laskurow["sisviesti1"] != "") {
@@ -549,12 +549,16 @@
 					$kires = mysql_query($querykieli) or pupe_error($querykieli);
 					if(mysql_num_rows($kires) > 0) {
 						$kirow = mysql_fetch_array($kires);
-						echo t("Tilausvahvistus tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
+						if ($silent == "") {
+							echo t("Tilausvahvistus tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
+						}
 						unset($returnvalue);
 						$line = exec("$komento $pdf_tilausvahvistusfilenimi", $output, $returnvalue);
 					}
 					if(mysql_num_rows($result) == 0 or $returnvalue!=0) {
-						echo "<font class='error'>".t("Tilausvahvistuksen tulostus epäonnistui")."!!!</font><br>\n";
+						if ($silent == "") {
+							echo "<font class='error'>".t("Tilausvahvistuksen tulostus epäonnistui")."!!!</font><br>\n";
+						}
 					}
 				}
 
@@ -562,7 +566,7 @@
 				system("rm -f $pdf_tilausvahvistusfilenimi");
 			}
 		}
-	
+
 		tulosta_tilausvahvistus($otunnus, $komento["Tilausvahvistus"], $kieli, $tee);
 	}
 	else {
@@ -637,14 +641,14 @@
 
 		while ($row = mysql_fetch_array($riresult)) {
 			rivi($page[$sivu], "TILAUSVAHVISTUS");
-			$total+= $row["rivihinta"];			
+			$total+= $row["rivihinta"];
 		}
 
 		loppu($page[$sivu], 1);
 
-		//tulostetaan sivu		
+		//tulostetaan sivu
 		print_pdf($komento["Tilausvahvistus"], "TILAUSVAHVISTUS");
-		
+
 	}
-	
+
 ?>

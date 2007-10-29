@@ -19,14 +19,16 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 		if ($tilvahasiakas["toim_nimi"] != "" and $tilvahasiakas["toim_nimi"] != $tilvahasiakas["nimi"]) {
 			$tilvah_nimi .= " / ".$tilvahasiakas["toim_nimi"];
 		}
-		echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole sähköpostiosoitetta")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
+		if ($silent == "") {
+			echo "<font class='error'>".t("TILAUSVAHVISTUS: Asiakkaalla ei ole sähköpostiosoitetta")."! $tilvah_nimi ($tilvahasiakas[ytunnus])</font><br><br>";
+		}
 		$virexx++;
 	}
-	else {		
+	else {
 		// lähetetään PDF vahvistus vain jos meillä on P kirjain vahvistuksessa
 		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
 			$komento["Tilausvahvistus"] = "asiakasemail".$tilvahasiakas['email'];
-									
+
 			require("tulosta_tilausvahvistus_pdf.inc");
 		}
 	}
@@ -36,14 +38,16 @@ if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 
 	if ($kukarow['eposti'] == '') {
-		echo "<font class='error'>".t("TILAUSVAHVISTUS: Sinulla ei ole sähköpostiosoitetta")."!</font><br><br>";
+		if ($silent == "") {
+			echo "<font class='error'>".t("TILAUSVAHVISTUS: Sinulla ei ole sähköpostiosoitetta")."!</font><br><br>";
+		}
 		$virexx++;
 	}
-	else {		
+	else {
 		// lähetetään PDF vahvistus vain jos meillä on P kirjain vahvistuksessa
 		if (strpos($laskurow['tilausvahvistus'], 'P') !== FALSE) {
 			$komento["Tilausvahvistus"] = "email";
-			
+
 			require("tulosta_tilausvahvistus_pdf.inc");
 		}
 	}

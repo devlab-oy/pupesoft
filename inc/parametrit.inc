@@ -145,7 +145,7 @@ elseif ($session == '' and $login != 'yes' and $verkkokauppa == '') {
 if($verkkokauppa != "") $_GET["ohje"] = "off";
 
 // jos meillä on sessio
-if ($session != '' or $verkkokauppa != "") {
+if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 	//	Kirjataan verkkokauppakäyttäjä	
 	if($verkkokauppa != "" and $session == "") {

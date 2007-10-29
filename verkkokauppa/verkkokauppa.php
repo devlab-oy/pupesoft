@@ -23,9 +23,9 @@ if(!function_exists("menu")) {
 				$parent		= "{$orow["osasto"]}_P";
 				$onclick	= "document.getElementById(\"$target\").style.display==\"none\"? sndReq(\"selain\", \"verkkokauppa.php?tee=kuvaus&osasto={$orow["osasto"]}\", \"\", false) : \"\";";
 				$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto={$orow["osasto"]}\", \"$parent\", false, true);";
-				$val .=  "<tr class='aktiivi'><td><a class = 'menu' id='$parent' onclick='$onclick' href='$href'>{$orow["nimi"]}</a></td></tr>";
+				$val .=  "<tr class='aktiivi'><td><a class = 'menu' id='$parent' onclick='$onclick' href='$href'>{$orow["nimi"]}</a><div id='$target' style='display: none'></div></td></tr>";
 			}
-			$val .= "</table><div id='$target' style='display: none'></div>";
+			$val .= "</table>";
 		}
 		elseif($try == "") {
 			$val = "<table class='menu'>";
@@ -41,9 +41,9 @@ if(!function_exists("menu")) {
 				$parent		= "{$osasto}_{$tryrow["try"]}_T";
 				$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$osasto&try={$tryrow["try"]}\", \"\", true); sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try={$tryrow["try"]}&tuotemerkki=\", \"\", true);";
 				
-				$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td><a class = 'menu' id='$parent' href='$href'>{$tryrow["trynimi"]}</a></td></tr>";
+				$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td><a class = 'menu' id='$parent' href='$href'>{$tryrow["trynimi"]}</a><div id=\"$target\" style='display: none'></div></td></tr>";
 			}
-			$val .= "</table><div id=\"$target\" style='display: none'></div>";
+			$val .= "</table>";
 		}
 		else {
 			$val = "<table class='menu'>";

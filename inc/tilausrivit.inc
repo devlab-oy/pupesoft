@@ -20,7 +20,7 @@
 						ORDER BY tilausrivi.toimaika, tilausrivi.tunnus";
 		}
 		else {
-			$query = "	SELECT nimitys, tuoteno, tilkpl tilattu, varattu toimitettu, jt jälkitoimitus, hinta, ale, round((varattu+jt)*hinta*(1-(ale/100)),2) rivihinta, if(alv>=500, '".t("M.V.")."', alv) alv, toimaika, kerayspvm
+			$query = "	SELECT nimitys, tuoteno, tilkpl tilattu, varattu toimitettu, jt jälkitoimitus, hinta, ale, round((varattu+jt)*hinta*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, if(alv>=500, '".t("M.V.")."', alv) alv, toimaika, kerayspvm
 						FROM tilausrivi
 						WHERE otunnus = '$tunnus' and yhtio='$kukarow[yhtio]'
 						ORDER BY toimaika, tunnus";	

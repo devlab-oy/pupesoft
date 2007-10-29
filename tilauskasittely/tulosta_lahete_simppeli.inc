@@ -66,7 +66,7 @@ if (!function_exists('tulosta_lahete')) {
 		}
 
 		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-			$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
+			$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], $yhtiorow[hintapyoristys])";
 		}
 		else {
 			$hinta_riv = "tilausrivi.hinta";
@@ -261,7 +261,7 @@ if (!function_exists('tulosta_lahete')) {
 			$alenaytetaan="";
 		}
 		
-		$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)";
+		$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),'$yhtiorow[hintapyoristys]')";
 		$perherivihinta = "	(select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi!='D')";
 		
 		// haetaan tilauksen kaikki rivit
@@ -302,8 +302,8 @@ if (!function_exists('tulosta_lahete')) {
 				}
 				
 				if ($laskurow['valkoodi'] != $yhtiorow['valkoodi']) {
-					$row["hinta"] 	  = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]),2);
-					$row["rivihinta"] = round(laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]),2);
+					$row["hinta"] 	  = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
+					$row["rivihinta"] = round(laskuval($row["rivihinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
 				}
 				
 				//	Etsitään käännöksiä

@@ -28,7 +28,7 @@ if ($laskurow["tila"] == "O") {
 	//Jos k‰ytt‰j‰ on valinnut drop-downista jonkun nollasta poikkeavan alvin, niin lasketaan sen verran alvia pois hinnasta
 	// Oletuksena ostohinnat ovat t‰ll‰ hetkell‰ ilman alvia
 	if ($alv != 0) {
-		$hinta = round($hinta / (1+$alv/100),2);
+		$hinta = round($hinta / (1+$alv/100),$yhtiorow['hintapyoristys']);
 	}
 
 	$alv = 0; //ostotilaus --> ei alvia riveille
@@ -63,7 +63,7 @@ else {
 
 	// Jos alvit t‰sm‰‰v‰t, ei tarvitse tehd‰ mit‰‰n. Muuten lasketaan uuden alvin sis‰lt‰v‰ myyntihinta.
 	if ($alv != $trow['alv']) {
-		$hinta = round($hinta / (1+$trow['alv']/100) * (1+$alv/100),2);
+		$hinta = round($hinta / (1+$trow['alv']/100) * (1+$alv/100),$yhtiorow['hintapyoristys']);
 	}
 }
 

@@ -1019,12 +1019,6 @@ if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAAT
 	require("../tyomaarays/tyomaarays.inc");
 }
 
-if ($kukarow["extranet"] == "" and $toim == "TARJOUS" and $tee == "SMS") {
-	$kala = exec("echo \"Terveisi‰ $yhtiorow[nimi]\" | /usr/bin/gnokii --sendsms +358505012254 -r");
-	echo "$kala<br>";
-	$tee = "";
-}
-
 //Voidaan tietyiss‰ tapauksissa kopsata t‰st‰ suoraan uusi tilaus
 if ($uusitoimitus != "") {
 	$toim 				= $uusitoimitus;
@@ -1881,7 +1875,7 @@ if ($tee == '') {
 				$posres = mysql_query($query) or pupe_error($query);
 				$posrow = mysql_fetch_array($posres);
 
-				$uhinta = round(($posrow["pituus"] * $lapsi["yksikkohinta"])/1000, 2);
+				$uhinta = round(($posrow["pituus"] * $lapsi["yksikkohinta"])/1000, $yhtiorow['hintapyoristys']);
 
 				$query = "	UPDATE tilausrivi 
 							SET hinta = '$uhinta' 
@@ -2075,7 +2069,7 @@ if ($tee == '') {
 
 
 			if ($tuoterow["alv"] != $tilausrivi["alv"] and $yhtiorow["alv_kasittely"] == "" and $tilausrivi["alv"] < 500) {
-				$hinta = sprintf('%.2f',round($tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuoterow['alv']/100),2));
+				$hinta = sprintf("%.".$yhtiorow['hintapyoristys']."f",round($tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuoterow['alv']/100),$yhtiorow['hintapyoristys']));
 			}
 			else {
 				$hinta	= $tilausrivi["hinta"];
@@ -3477,30 +3471,31 @@ if ($tee == '') {
 						$alvillisuus_jako = 1;
 					}
 
-					$hinta    = round($hinta / $alvillisuus_jako, 2);
-					$summa    = round($summa / $alvillisuus_jako, 2);
+					$hinta    = round($hinta / $alvillisuus_jako, $yhtiorow['hintapyoristys']);
+					$summa    = round($summa / $alvillisuus_jako, $yhtiorow['hintapyoristys']);
 					$brutto   = $hinta * ($row["varattu"] + $row["jt"]);
 					$kplhinta = $hinta * (1 - $row["ale"] / 100);
-					$myyntihinta = round(tuotteen_myyntihinta($laskurow, $trow, 1) / $alvillisuus_jako, 2);
+
+					$myyntihinta = round(tuotteen_myyntihinta($laskurow, $trow, 1) / $alvillisuus_jako, $yhtiorow['hintapyoristys']);
 
 					if ($kukarow['hinnat'] == 1) {
 						echo "<td $class align='right' valign='top'>$myyntihinta</td>";
 					}
 					else {
-						if ($myyntihinta != $hinta) $myyntihinta = sprintf('%.2f', $myyntihinta, 2)." (".sprintf('%.2f',$hinta).")";
-						
-						else $myyntihinta = sprintf('%.2f', $myyntihinta, 2);
+
+						if ($myyntihinta != $hinta) $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta)." (".sprintf("%.".$yhtiorow['hintapyoristys']."f",$hinta).")";
+						else $myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $myyntihinta);
 						
 						echo "<td $class align='right' valign='top'>$myyntihinta</td>";
 						echo "<td $class align='right' valign='top'>".($row["ale"] * 1)."</td>";
-						echo "<td $class align='right' valign='top'>".sprintf('%.2f', $kplhinta, 2)."</td>";
+						echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $kplhinta, 2)."</td>";
 					}
 
 					if ($kukarow['hinnat'] == 1) {
-						echo "<td $class align='right' valign='top'>".sprintf('%.2f',$brutto)."</td>";
+						echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f",$brutto)."</td>";
 					}
 					else {
-						echo "<td $class align='right' valign='top'>".sprintf('%.2f',$summa)."</td>";
+						echo "<td $class align='right' valign='top'>".sprintf("%.".$yhtiorow['hintapyoristys']."f",$summa)."</td>";
 					}
 
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
@@ -3512,7 +3507,10 @@ if ($tee == '') {
 							if ($kpl > 0) {
 								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
 								$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);
-
+								
+								echo "# JOTAIN...$ostohinta<br>";
+								
+								
 								// Kate = Hinta - Ostohinta
 								if ($kotisumma_alviton != 0) {
 									$kate = sprintf('%.2f',100*($kotisumma_alviton - $ostohinta)/$kotisumma_alviton)."%";

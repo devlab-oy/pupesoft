@@ -29,7 +29,7 @@
 				}
 
 				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-					$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
+					$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi],$yhtiorow[hintapyoristys])";
 				}
 				else {
 					$hinta_riv = "tilausrivi.hinta";
@@ -226,7 +226,7 @@
 				}
 
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
-				$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)";
+				$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),$yhtiorow[hintapyoristys])";
 				$perherivihinta = "	(select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi!='D')";
 
 				//	Käsitellään tuoterivit
@@ -281,7 +281,7 @@
 							$style_komm = "snadi";
 							//	Jos meillä on isätuote fiksataan yksikköhinta
 							if($row["perheid"]==$row["tunnus"]) {
-								$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),2);
+								$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),$yhtiorow['hintapyoristys']);
 
 								//	Ale 100 on varmaan feikki joten se piilotetaan..
 								if($row["ale"] == 100) {
@@ -594,8 +594,8 @@
 
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "  SELECT tilausrivi.*,
-					round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) ovhhinta,
-					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta,
+					round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
+					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 					$sorttauskentta,
 					if(tilausrivi.var='J', 1, 0) jtsort
 					FROM tilausrivi

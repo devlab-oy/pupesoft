@@ -726,14 +726,14 @@ if (!function_exists('rivi')) {
 			$oikpos = $pdf->strlen($row["varattu"], $norm);
 			$pdf->draw_text(415-$oikpos, $kala, $row["varattu"], 								$thispage, $norm);
 
-			$oikpos = $pdf->strlen(sprintf('%.2f', $row["hinta"]), $norm);
-			$pdf->draw_text(465-$oikpos, $kala, sprintf('%.2f', $row["hinta"]), 				$thispage, $norm);
+			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), $norm);
+			$pdf->draw_text(465-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["hinta"]), 				$thispage, $norm);
 
 			$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
 			$pdf->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 							$thispage, $norm);
 
-			$oikpos = $pdf->strlen(sprintf('%.2f', $row["rivihinta"]), $norm);
-			$pdf->draw_text(575-$oikpos, $kala, sprintf('%.2f', $row["rivihinta"]), 			$thispage, $norm);
+			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
+			$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$thispage, $norm);
 			
 			if ($pdf->strlen($row["nimitys"], $norm) >= 135) {
 				$kala = $kala - $rivinkorkeus;

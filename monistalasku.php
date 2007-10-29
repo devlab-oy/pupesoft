@@ -560,7 +560,7 @@ if ($tee=='MONISTA') {
 					$vanhahinta = $rivirow["hinta"];
 
 					if ($yhtiorow["alv_kasittely"] == "") {
-						$uusihinta = sprintf('%.2f',round($rivirow['hinta'] / (1+$rivirow['alv']/100) * (1+$trow["alv"]/100),2));
+						$uusihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f",round($rivirow['hinta'] / (1+$rivirow['alv']/100) * (1+$trow["alv"]/100),$yhtiorow['hintapyoristys']));
 					}
 					else {
 						$uusihinta = $rivirow['hinta'];

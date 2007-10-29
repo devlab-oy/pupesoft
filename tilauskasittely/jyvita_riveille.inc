@@ -19,7 +19,7 @@ if(strpos($jysum, "%") !== false) {
 	$anna_ea = "TOKI";
 }
 
-$jysum = round(str_replace(",",".", $jysum),2);
+$jysum = round(str_replace(",",".", $jysum),$yhtiorow['hintapyoristys']);
 
 //Lasketaan tilauksen arvot
 if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
@@ -74,7 +74,7 @@ else {
 		if(mysql_num_rows($rhire) == 1) {
 			$trow  = mysql_fetch_array($rhire);
 
-			$hinta		= round(($summa - $jysum),2);
+			$hinta		= round(($summa - $jysum),$yhtiorow['hintapyoristys']);
 			$alv 		= '';
 			$trow["alv"]= $laskurow["alv"];
 			$nimitys	= $trow["nimitys"];
@@ -124,12 +124,12 @@ else {
 		$result = mysql_query($query) or pupe_error($query);
 
 		while ($tirow = mysql_fetch_array($result)) {
-			$uushinta = round($tirow['hinta'] * $jypro, 2);
+			$uushinta = round($tirow['hinta'] * $jypro, $yhtiorow['hintapyoristys']);
 			$query = "UPDATE tilausrivi SET hinta = '$uushinta' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tirow[tunnus]'";
 			$upresult = mysql_query($query) or pupe_error($query);
 		}
 
-		$jysum = round($jysum,2);
+		$jysum = round($jysum,$yhtiorow['hintapyoristys']);
 
 		//  Päivitetään laskulle hinta-kenttään syötetty summa
 		$query	= "update lasku set hinta = '$jysum' where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";

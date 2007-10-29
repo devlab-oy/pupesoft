@@ -254,7 +254,7 @@
 		$tuoteno 		= $trow["tuoteno"];
 		
 		if ($tuoterow["alv"] != $trow["alv"] and $yhtiorow["alv_kasittely"] == "" and $trow["alv"] < 500) {
-			$hinta 		= sprintf('%.2f',round($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100),2));
+			$hinta 		= sprintf("%.".$yhtiorow['hintapyoristys']."f",round($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100),$yhtiorow['hintapyoristys']));
 		}
 		else {
 			$hinta		= $trow["hinta"];

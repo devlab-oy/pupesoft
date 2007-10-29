@@ -767,7 +767,7 @@
 
 								// Jos hinta ja alekertoimet on setattu
 								if (isset($myy_hintakerr[$indeksi])) {
-									$hinta = round($hinta * $myy_hintakerr[$indeksi],2);
+									$hinta = round($hinta * $myy_hintakerr[$indeksi],$yhtiorow['hintapyoristys']);
 								}
 
 								if (isset($myy_alekerroi[$indeksi])) {
@@ -775,7 +775,7 @@
 										$ale = 100.00;
 									}
 									else {
-										$ale = round($ale * $myy_alekerroi[$indeksi],2);
+										$ale = round($ale * $myy_alekerroi[$indeksi],$yhtiorow['hintapyoristys']);
 									}
 								}
 
@@ -1404,7 +1404,7 @@
 
 			// Jos hinta ja alekertoimet on setattu
 			if ($puu_hintake[$i] != "X") {
-				$hinta = round($hinta * $puu_hintake[$i],2);
+				$hinta = round($hinta * $puu_hintake[$i],$yhtiorow['hintapyoristys']);
 			}
 
 			if ($puu_alekerr[$i] != "X") {
@@ -1412,7 +1412,7 @@
 					$ale = 100.00;
 				}
 				else {
-					$ale = round($ale * $puu_alekerr[$i],2);
+					$ale = round($ale * $puu_alekerr[$i],$yhtiorow['hintapyoristys']);
 				}
 			}
 

@@ -384,7 +384,7 @@ if (!function_exists('tulosta_lasku')) {
 					$style_komm = "snadi";
 					//	Jos meillä on isätuote fiksataan yksikköhinta
 					if($row["perheid"]==$row["tunnus"]) {
-						$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),2);
+						$row["hinta"] = round(($row["rivihinta"]/$row["kpl"]),$yhtiorow['hintapyoristys']);
 						
 						//	Ale 100 on varmaan feikki joten se piilotetaan..
 						if($row["ale"] == 100) {

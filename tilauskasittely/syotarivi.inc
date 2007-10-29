@@ -37,7 +37,7 @@
 
 		echo "	<td valign='top'><input type='text' name='kpl' size='5' maxlength='5' value='$kpl'></td>
 				<td valign='top'><input type='text' name='var' size='2' maxlength='1' value='$var'></td>
-				<td valign='top'><input type='text' name='hinta' size='5' maxlength='12' value='$hinta'></td>
+				<td valign='top'><input type='text' name='hinta' size='".(5+$yhtiorow['hintapyoristys']-2)."' maxlength='".(12+$yhtiorow['hintapyoristys']-2)."' value='$hinta'></td>
 				<td valign='top'><input type='text' name='ale' size='5' maxlength='6' value='$ale'></td>
 				<td valign='top'><input type='text' name='netto' size='2' maxlength='1' value='$netto'></td>
 				<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'></td>
@@ -191,7 +191,7 @@
 		
 		echo "</select></td>";
 
-		echo "<td valign='top'><input type='text' size='5' name='hinta' value='$hinta'></td>
+		echo "<td valign='top'><input type='text' size='".(5+$yhtiorow['hintapyoristys']-2)."' name='hinta' value='$hinta'></td>
 			<td valign='top'><input type='text' size='5' name='ale' value='$ale'></td>";
 
 		$chke = $chkn = "";

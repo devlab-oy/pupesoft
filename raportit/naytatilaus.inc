@@ -350,7 +350,7 @@
 		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 					tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
 					concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', kpl,
-					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),2) rivihinta, 
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, 
 					tilausrivi.alv, tilausrivi.kommentti, tilausrivi.tunnus,
 					$sorttauskentta
 					FROM tilausrivi
@@ -365,7 +365,7 @@
 	else {
 		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", 
 					concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl, varattu+kpl kpl, jt,
-					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),2) rivihinta, 
+					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, 
 					alv, kerattyaika, keratty keraaja, toimaika, tilausrivi.kommentti, tilausrivi.tunnus,
 					$sorttauskentta
 					FROM tilausrivi

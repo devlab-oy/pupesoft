@@ -238,7 +238,11 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 	if (mysql_num_rows($result) == 1) {
 		$yhtion_parametritrow = mysql_fetch_array($result);
-
+		
+		if ($yhtion_parametritrow['hintapyoristys'] != 2 and $yhtion_parametritrow['hintapyoristys'] != 4) {
+			$yhtion_parametritrow['hintapyoristys'] = 2;
+		}
+		
 		// lisätään kaikki yhtiorow arrayseen
 		foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
 			$yhtiorow[$parametrit_nimi] = $parametrit_arvo;

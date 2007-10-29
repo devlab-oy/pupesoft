@@ -572,7 +572,7 @@ if ($tee == "MUOKKAA") {
 
 						$kpl 	= str_replace(",",".",$kpl_array[$trow["tuoteno"]]);
 						$hinta 	= str_replace(",",".",$hinta_array[$trow["tuoteno"]]);
-						$rivihinta = round($kpl*$hinta,2);
+						$rivihinta = round($kpl*$hinta,$yhtiorow['hintapyoristys']);
 
 						//	Ratkaistaan alv..
 						if ($tyyppi == "B") {

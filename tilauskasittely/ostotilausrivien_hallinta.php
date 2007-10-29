@@ -148,7 +148,7 @@
 
 		$query = "	SELECT tilausrivi.otunnus, tilausrivi.tuoteno, tuotteen_toimittajat.toim_tuoteno, tilausrivi.nimitys,
 					concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
-					hinta, ale, round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),2) rivihinta, 
+					hinta, ale, round((varattu+jt)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, 
 					toimaika, tilausrivi.jaksotettu as vahvistettu, tilausrivi.tunnus,
 					toim_tuoteno
 					FROM tilausrivi

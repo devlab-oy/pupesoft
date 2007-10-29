@@ -313,14 +313,14 @@ else {
 				// jos toimitustapana on joku nouto niin ei lisätä rahtikulua
 				if ($torow["nouto"] == "") {
 					if ($yhtiorow["alv_kasittely"] == '') {
-						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100)))/(1+alv/100),2) rivihinta, netto
+						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100)))/(1+alv/100),'$yhtiorow[hintapyoristys]') rivihinta, netto
 									FROM tilausrivi
 									WHERE otunnus 	= '$laskurow[tunnus]'
 									and yhtio	  	= '$kukarow[yhtio]'
 									and tyyppi		= 'L'";
 					}
 					else {
-						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100))),2) rivihinta, netto
+						$query = "	SELECT round(((varattu+jt)*hinta*(1-(ale/100))),'$yhtiorow[hintapyoristys]') rivihinta, netto
 									FROM tilausrivi
 									WHERE otunnus 	= '$laskurow[tunnus]'
 									and yhtio	  	= '$kukarow[yhtio]'

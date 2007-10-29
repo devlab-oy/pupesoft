@@ -198,7 +198,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 	else $kuluteksti = "";
 
-	$rivihin = round($ohinta,2);	// tilausrivin rivihinta talteen
+	$rivihin = round($ohinta,$yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
 	$ohinta  = round($ohinta / $tilrivirow['varattu'],4); // yhden hinta
 
 
@@ -234,7 +234,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		<td align='right'>$tilrivirow[varattu]</td>
 		<td align='right'>".sprintf('%.2f',round($tilrivirow['varattu']*$tuorow['tuotekerroin'],2))."</td>
 		<td align='right'>$tilrivirow[hinta]</td>
-		<td align='right'>".sprintf('%.2f',round($tilrivirow['hinta']*$tuorow['tuotekerroin'],2))."</td>
+		<td align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f",round($tilrivirow['hinta']*$tuorow['tuotekerroin'],$yhtiorow['hintapyoristys']))."</td>
 		<td align='right'>".sprintf('%.6f',round($osuus,6))."</td>
 		<td align='right'>$tv_nimrow[maara] $tv_nimrow[rahayksikko]</td>
 		<td align='right'>".sprintf('%.4f',$ohinta)."</td>

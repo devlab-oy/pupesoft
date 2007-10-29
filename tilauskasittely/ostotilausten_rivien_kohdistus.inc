@@ -519,13 +519,13 @@ if ($tila == '') {
 							"tilausrivi.hinta hinta",
 							"tilausrivi.ale ale",
 							"$alvti alv",
-							"round((tilausrivi.varattu+tilausrivi.kpl) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) rivihinta",
+							"round((tilausrivi.varattu+tilausrivi.kpl) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),'$yhtiorow[hintapyoristys]') rivihinta",
 							"round((tilausrivi.varattu+tilausrivi.kpl) * if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) * (tilausrivi.hinta * (1-(tilausrivi.ale/100))) * $erikoisale * 
 							(1+(if((SELECT max(kaytetty) kaytetty 
 									FROM sarjanumeroseuranta
 									WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
 									and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno 
-									and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100)) ,2) alerivihinta",
+									and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100)) ,'$yhtiorow[hintapyoristys]') alerivihinta",
 							"tilausrivi.kate kuluhinta",
 							"tilausrivi.toimaika toimaika",
 							"tilausrivi.kommentti kommentti");

@@ -144,7 +144,7 @@ if (!function_exists("korjaalaskut")) {
 					$uusikate = $tilausrivi['rivihinta'] - $tilausrivi['kpl'] * $kehahin;
 
 					// katotaan mik‰ on muutos
-					$muutos = round($uusikate - $tilausrivi["kate"], 2); // roundataan kahteen desimaaliin, koska meill‰ ei ole sen tarkempaa infoa tietokannassa niin v‰ltyt‰‰n turhilta muutoksilta
+					$muutos = round($uusikate - $tilausrivi["kate"], $yhtiorow['hintapyoristys']); // roundataan yhtiˆn desimaaliin, koska meill‰ ei ole sen tarkempaa infoa tietokannassa niin v‰ltyt‰‰n turhilta muutoksilta
 
 					// debug
 					if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Uusikate = $tilausrivi[rivihinta] - $tilausrivi[kpl] * $kehahin (muutos = $muutos)</font><br>";
@@ -717,7 +717,7 @@ if ($tuoteno != '') {
 					$apujlrow = mysql_fetch_array($result);
 
 					// lasketaan uusi rivihinta
-					$testiapukala = round($uusihinta * $apujlrow["kpl"], 2);
+					$testiapukala = round($uusihinta * $apujlrow["kpl"], $yhtiorow['hintapyoristys']);
 
 					// p‰ivitet‰‰n ostotilausrivin rivihinta
 					$query  = "UPDATE tilausrivi set rivihinta = '$testiapukala' WHERE yhtio='$kukarow[yhtio]' and tunnus='$rivitunnus'";

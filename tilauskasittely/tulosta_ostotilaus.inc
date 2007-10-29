@@ -58,7 +58,7 @@
 					$laskurow = mysql_fetch_array($result);
 
 					if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-						$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
+						$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], $yhtiorow[hintapyoristys])";
 					}
 					else {
 						$hinta_riv = "tilausrivi.hinta";
@@ -198,7 +198,7 @@
 
 					//	Käsitellään tilausrivit
 					$query = "	SELECT toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu, toimaika,
-								tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),2) rivihinta, kommentti
+								tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, kommentti
 								FROM tilausrivi
 								join tuote USING (yhtio, tuoteno)
 								join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
@@ -774,16 +774,16 @@
 					$oikpos = $pdf->strlen(($row["varattu"]*1)." ".$row["yksikko"], $norm);					
 					$pdf->draw_text(415-$oikpos, $kala, ($row["varattu"]*1)." ".$row["yksikko"], 		$thispage, $norm);
 					
-					$oikpos = $pdf->strlen(sprintf('%.2f',$row["hinta"]), $norm);					
-					$pdf->draw_text(470-$oikpos, $kala, sprintf('%.2f',$row["hinta"]), 					$thispage, $norm);
+					$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), $norm);					
+					$pdf->draw_text(470-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["hinta"]), 					$thispage, $norm);
 										
 					if ($row["ale"] != 0) {
 						$oikpos = $pdf->strlen(($row["ale"]*1)."%", $norm);
 						$pdf->draw_text(515-$oikpos, $kala, ($row["ale"]*1)."%", 						$thispage, $norm);
 					}
 					
-					$oikpos = $pdf->strlen(sprintf('%.2f',$row["rivihinta"]), $norm);					
-					$pdf->draw_text(575-$oikpos, $kala, sprintf('%.2f',$row["rivihinta"]), 				$thispage, $norm);
+					$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["rivihinta"]), $norm);					
+					$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f",$row["rivihinta"]), 				$thispage, $norm);
 					
 		            if ($nimitykset != "") {
 
@@ -949,7 +949,7 @@
 			$sorttauskentta = generoi_sorttauskentta($yhtiorow["ostotilauksen_jarjestys"]);
 
 			$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
-						tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),2) rivihinta, 
+						tilausrivi.hinta, tilausrivi.ale, round(tilausrivi.varattu*if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*(1-ale/100),'$yhtiorow[hintapyoristys]') rivihinta, 
 						substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika,
 						$sorttauskentta
 						FROM tilausrivi

@@ -30,7 +30,7 @@ if ($faarao == 'TUTKHM') {
 			$toim_tuoteno	= trim($rivi[1]);
 			$tuoteno		= trim($rivi[2]);
 			$kpl			= sprintf('%.2f', str_replace(',', '.', $rivi[3]));
-			$hinta			= sprintf('%.2f', str_replace(',', '.', $rivi[4]));
+			$hinta			= sprintf("%.".$yhtiorow['hintapyoristys']."f", str_replace(',', '.', $rivi[4]));
 			$kuluhinta		= sprintf('%.2f', str_replace(',', '.', $rivi[5]));
 
 			$tuote_etsi = "";

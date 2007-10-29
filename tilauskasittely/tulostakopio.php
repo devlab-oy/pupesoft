@@ -1321,7 +1321,7 @@
 
 				//työmääräyksen rivit
 				$query = "  SELECT tilausrivi.*,
-							round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta,
+							round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 							tuote.sarjanumeroseuranta,
 							$sorttauskentta,
 							if (tuotetyyppi='K', 1, 0) tuotetyyppi
@@ -1449,7 +1449,7 @@
 						$lahetetyyppi = $vrow["selite"];
 					}
 				}
-
+				
 				if ($lahetetyyppi == "tulosta_lahete_alalasku.inc") {
 					require_once ("tulosta_lahete_alalasku.inc");
 				}
@@ -1488,8 +1488,8 @@
 
 					//generoidaan lähetteelle ja keräyslistalle rivinumerot
 					$query = "  SELECT tilausrivi.*,
-								round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),2) ovhhinta,
-								round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta,
+								round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
+								round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 								$sorttauskentta,
 								if(tilausrivi.var='J', 1, 0) jtsort
 								FROM tilausrivi

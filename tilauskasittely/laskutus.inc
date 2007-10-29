@@ -123,8 +123,8 @@ else {
 			elseif 	($turow['epakurantti25pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] * 0.75;
 
 
-			$apuhinta1 = round($hinta,2);
-			$apuhinta2 = round($trow['varattu'] * $hinta,2);
+			$apuhinta1 = round($hinta, $yhtiorow['hintapyoristys']);
+			$apuhinta2 = round($trow['varattu'] * $hinta, $yhtiorow['hintapyoristys']);
 						
 			//Paivitetaan tuotteen saldo jos saldoa on varattu
 			if ($turow['ei_saldoa'] == '' and $trow['varattu'] != 0) {
@@ -325,7 +325,7 @@ else {
 		////// FUTURE: rivihinta_valuutassa = round($hinta_valuutassa,2), //////
 		$query = "	UPDATE tilausrivi
 					SET kate 		= round($kate,2),
-					rivihinta 		= round($hinta,2),
+					rivihinta 		= round($hinta,'$yhtiorow[hintapyoristys]'),
 					kpl 			= varattu,
 					varattu 		= 0,
 					laskutettu		= '$kukarow[kuka]',

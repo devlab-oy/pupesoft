@@ -443,7 +443,7 @@
 							$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);							
 						
 							if ($trow["alv"] != $lisataanrow["alv"] and $yhtiorow["alv_kasittely"] == "" and $lisataanrow["alv"] < 500) {
-								$hinta 			= sprintf('%.2f',round($lisataanrow["hinta"] / (1+$lisataanrow['alv']/100) * (1+$trow['alv']/100),2));
+								$hinta 			= sprintf('%.2f',round($lisataanrow["hinta"] / (1+$lisataanrow['alv']/100) * (1+$trow['alv']/100),$yhtiorow['hintapyoristys']));
 							}
 							else {
 								$hinta			= $lisataanrow["hinta"];

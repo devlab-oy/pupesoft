@@ -78,7 +78,7 @@
 		$alehinta_val = $laskurow["valkoodi"];
 
 		if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$hinta = round(yhtioval($hinta, $laskurow["vienti_kurssi"]),2);
+			$hinta = round(yhtioval($hinta, $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
 			$alehinta_val = $yhtiorow["valkoodi"];
 		}
 	}
@@ -133,9 +133,9 @@
 				}
 				elseif ($trow['kehahin'] > 0) {
 					if ($yhtiorow['alv_kasittely']=='')
-						$hinta	= round(($trow['kehahin'] * (1+($trow['alv']/100))) * (1+(abs($hrow["alennus"])/100)) ,2);
+						$hinta	= round(($trow['kehahin'] * (1+($trow['alv']/100))) * (1+(abs($hrow["alennus"])/100)) ,$yhtiorow['hintapyoristys']);
 					else
-						$hinta	= round(($trow['kehahin']  * (1+(abs($hrow["alennus"])/100))) ,2);
+						$hinta	= round(($trow['kehahin']  * (1+(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
 
 					$ale		= 0;
 					$netto		= "";
@@ -192,9 +192,9 @@
 				}
 				elseif ($trow['kehahin'] > 0) {
 					if ($yhtiorow['alv_kasittely']=='')
-						$hinta	= round(($trow['kehahin'] * (1+($trow['alv']/100))) * (1+(abs($hrow["alennus"])/100)) ,2);
+						$hinta	= round(($trow['kehahin'] * (1+($trow['alv']/100))) * (1+(abs($hrow["alennus"])/100)) ,$yhtiorow['hintapyoristys']);
 					else
-						$hinta	= round(($trow['kehahin']  * (1+(abs($hrow["alennus"])/100))) ,2);
+						$hinta	= round(($trow['kehahin']  * (1+(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
 					$ale		= 0;
 					$netto		= "";
 					$aperuste 	.= "Asiakasryhmä Katemyyntihinta. ";
@@ -263,7 +263,7 @@
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow       	= mysql_fetch_array ($hresult);
-				$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
+				$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
 				$netto			= $hrow["laji"];
 				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 				$alehinta_val	= $laskurow["valkoodi"];
@@ -650,7 +650,7 @@
 
 			if (mysql_num_rows($hresult) > 0) {
 				$hrow			= mysql_fetch_array ($hresult);
-				$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),2);
+				$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
 				$netto			= $hrow["laji"];
 				$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 				$alehinta_val   = $laskurow["valkoodi"];

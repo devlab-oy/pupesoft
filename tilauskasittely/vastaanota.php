@@ -443,7 +443,7 @@
 								toimitettuaika				= now(),
 								kpl							= varattu,
 								varattu						= 0,
-								rivihinta					= round(tilausrivi.kpl * tuote.myyntihinta / if('$yhtiorow[alv_kasittely]' = '', (1+tuote.alv/100), 1), 2)
+								rivihinta					= round(tilausrivi.kpl * tuote.myyntihinta / if('$yhtiorow[alv_kasittely]' = '', (1+tuote.alv/100), 1), '$yhtiorow[hintapyoristys]')
 								WHERE tilausrivi.tunnus		= '$tun'
 								and tilausrivi.yhtio		= '$kukarow[yhtio]'
 								and tilausrivi.tyyppi		= 'G'

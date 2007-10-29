@@ -997,6 +997,106 @@ if (!function_exists("avain")) {
 
 }
 
+if(!function_exists("desim")) {
+	function desim($summa) {
+		global $kukarow, $yhtiorow;
+		
+		$monta = '';
+		
+		//echo "1 JOTAIN... $summa | $monta<br>";
+		
+		$summa =  str_replace(',','.',$summa);
+		
+		//echo "2 JOTAIN... $summa | $monta<br>";
+		
+		if ($yhtiorow['hintapyoristys'] > '2') {
+			
+			if (strpos($summa,'.')) {
+				
+				list($koko, $desi) = explode(".",trim($summa));
+				
+				//echo "3 JOTAIN... $summa | $monta |< $koko @ $desi ><br>";
+				
+				if (strlen($desi) > 2 and substr($desi,-1) == '0') {
+					
+					while (strlen($desi) > 2 and substr($desi,-1) == '0') {
+						$desi = substr($desi,0,-1);
+					}
+					
+					$monta = strlen($desi);
+					
+					//echo "4 JOTAIN... $summa | $monta |< $koko @ $desi ><br>";	
+				}
+				elseif (strlen($desi) > 2) {
+					$monta = strlen($desi);
+				}
+			}
+		}
+		
+		if ($monta == '') {
+			$monta = '2';
+		}
+		elseif ($monta > '4') {
+			$monta = '4';
+		}
+		
+		//echo "5 JOTAIN... $summa | $monta |< $koko @ $desi ><br>";
+		
+	    return $monta;
+	}
+}
+
+if(!function_exists("desis")) {
+	function desis($summa) {
+		global $kukarow, $yhtiorow;
+		
+		$monta = '';
+		
+		//echo "1 JOTAIN... $summa | $monta<br>";
+		
+		$summa =  str_replace(',','.',$summa);
+		
+		//echo "2 JOTAIN... $summa | $monta<br>";
+		
+		if ($yhtiorow['hintapyoristys'] > '2') {
+			
+			if (strpos($summa,'.')) {
+				
+				list($koko, $desi) = explode(".",trim($summa));
+				
+				//echo "3 JOTAIN... $summa | $monta |< $koko @ $desi ><br>";
+				
+				if (strlen($desi) > 2 and substr($desi,-1) == '0') {
+					
+					while (strlen($desi) > 2 and substr($desi,-1) == '0') {
+						$desi = substr($desi,0,-1);
+					}
+					
+					$monta = strlen($desi);
+					
+					//echo "4 JOTAIN... $summa | $monta |< $koko @ $desi ><br>";	
+				}
+				elseif (strlen($desi) > 2) {
+					$monta = strlen($desi);
+				}
+			}
+		}
+		
+		if ($monta == '') {
+			$monta = '2';
+		}
+		elseif ($monta > '4') {
+			$monta = '4';
+		}
+		
+		$summa = sprintf("%.".$monta."f", $summa);
+		
+		//echo "5 JOTAIN... $summa | $monta |< $koko @ $desi ><br>";
+		
+	    return $summa;
+	}
+}
+
 // Tehd‰‰n l‰hetteen ja laskun sorttauskent‰t
 if (!function_exists("generoi_sorttauskentta")) {
 

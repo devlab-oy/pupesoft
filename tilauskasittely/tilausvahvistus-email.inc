@@ -134,10 +134,10 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			}
 
 			if ($naytatvale==2) {
-				$ulos .= sprintf("%8.s"  ,round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),2))." ";
+				$ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  ,round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys']))." ";
 			}
 			else {
-				$ulos .= sprintf("%8.s"  ,round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),2))." ";
+				$ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  ,round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys']))." ";
 			}
 
 			$ulos .= sprintf("%3.s"  	,$laskurow['valkoodi'])." ";
@@ -163,10 +163,10 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			$liite .= $rivino."\t".$tvtilausrivirow['nimitys']."\t".$tvtilausrivirow['tuoteno']."\t".$tvtilausrivirow['varattu']."\t";
 
 			if ($naytatvale==2) {
-				$liite .= round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),2)."\t";
+				$liite .= round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys'])."\t";
 			}
 			else {
-				$liite .= round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),2)."\t";
+				$liite .= round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys'])."\t";
 			}
 
 			if ($naytatvale==2) {

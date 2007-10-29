@@ -561,7 +561,7 @@ if (!function_exists('rivi_original')) {
 		$pdf->draw_text(340, $kala, $row["kpl"], 										$thispage, $norm);
 
 		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
-		$pdf->draw_text(390, $kala, sprintf('%.2f', laskuval($row["hinta"], $kurssi)),	$thispage, $norm);
+		$pdf->draw_text(390, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)),	$thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
@@ -579,8 +579,8 @@ if (!function_exists('rivi_original')) {
 		}
 
 		//Rivihinta
-		$oikpos = $pdf->strlen(sprintf('%.2f', $row["rivihinta"]), $norm);
-		$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $row["rivihinta"]), 		$thispage, $norm);
+		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
+		$pdf->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 		$thispage, $norm);
 
 		//Arvonlisävero
 		if ($row["alv"] >= 500) {
@@ -603,8 +603,8 @@ if (!function_exists('rivi_original')) {
 
 		//Verollinen rivihinta
 		if ($row["alv"] < 500) {
-			$oikpos = $pdf->strlen(sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100))), $pieni);
-			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100))), $thispage, $pieni);
+			$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100))), $pieni);
+			$pdf->draw_text(535-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100))), $thispage, $pieni);
 		}
 
 		//Jos rivikommentti on pitkä niin teemme siitä kauniimman
@@ -684,7 +684,7 @@ if (!function_exists('rivi_original')) {
 		$kala = $kala - 15;
 
 		$arvo	+= $row["rivihinta"];
-		$summa 	+= sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100)));
+		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100)));
 	}
 }
 
@@ -738,8 +738,8 @@ if (!function_exists('rivi_plain')) {
 		$pdf->draw_text(380-$oikpos, $kala, $row["kpl"], 													$thispage, $norm);
 
 		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
-		$oikpos = $pdf->strlen(sprintf('%.2f', laskuval($row["hinta"], $kurssi)), $norm);
-		$pdf->draw_text(455-$oikpos, $kala, sprintf('%.2f', laskuval($row["hinta"], $kurssi)),	$thispage, $norm);
+		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), $norm);
+		$pdf->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)),	$thispage, $norm);
 
 		//Alennus
 		if ($row["ale"] != 0) {
@@ -758,8 +758,8 @@ if (!function_exists('rivi_plain')) {
 		}
 
 		//Rivihinta
-		$oikpos = $pdf->strlen(sprintf('%.2f', $row["rivihinta"]), $norm);
-		$pdf->draw_text(575-$oikpos, $kala, sprintf('%.2f', $row["rivihinta"]), 			$thispage, $norm);
+		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
+		$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$thispage, $norm);
 
 		$kala = $kala - 10;
 
@@ -768,7 +768,7 @@ if (!function_exists('rivi_plain')) {
 		$kala = $kala - 15;
 
 		$arvo	+= $row["rivihinta"];
-		$summa 	+= sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100)));
+		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100)));
 	}
 }
 
@@ -844,8 +844,8 @@ if (!function_exists('rivi_plain_2')) {
 
 
 		// A-hinta (voi olla verollinen tai veroton riippuen yhtiöstä)
-		$oikpos = $pdf->strlen(sprintf('%.2f', laskuval($row["hinta"], $kurssi)), $norm);
-		$pdf->draw_text(455-$oikpos, $kala, sprintf('%.2f', laskuval($row["hinta"], $kurssi)), 			$thispage, $norm);
+		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), $norm);
+		$pdf->draw_text(455-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", laskuval($row["hinta"], $kurssi)), 			$thispage, $norm);
 
 
 		//Alennus
@@ -865,8 +865,8 @@ if (!function_exists('rivi_plain_2')) {
 		}
 
 		//Rivihinta
-		$oikpos = $pdf->strlen(sprintf('%.2f', $row["rivihinta"]), $norm);
-		$pdf->draw_text(575-$oikpos, $kala, sprintf('%.2f', $row["rivihinta"]), 			$thispage, $norm);
+		$oikpos = $pdf->strlen(sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), $norm);
+		$pdf->draw_text(575-$oikpos, $kala, sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]), 			$thispage, $norm);
 
 		$kala = $kala - 10;
 
@@ -875,7 +875,7 @@ if (!function_exists('rivi_plain_2')) {
 		$kala = $kala - 15;
 
 		$arvo	+= $row["rivihinta"];
-		$summa 	+= sprintf('%.2f', $row["rivihinta"]*(1+($row["alv"]/100)));
+		$summa 	+= sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["rivihinta"]*(1+($row["alv"]/100)));
 	}
 }
 
@@ -920,7 +920,7 @@ if (!function_exists('rivi_perhe')) {
 					// lasketaan isätuotteen riville lapsien hinnat yhteen
 					$query = "	SELECT
 								sum(tilausrivi.rivihinta) rivihinta,
-								round(sum(tilausrivi.rivihinta) / ($row[kpl]), 2) hinta
+								round(sum(tilausrivi.rivihinta) / ($row[kpl]), '$yhtiorow[hintapyoristys]') hinta
 								FROM tilausrivi
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 								and tilausrivi.otunnus in ($perherow[tunnukset])

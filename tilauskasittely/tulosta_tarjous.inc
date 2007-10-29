@@ -336,7 +336,7 @@
 				$page_tarjous2[$sivu] = $page_tarjous;
 				
 				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
-					$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], 2)";
+					$hinta_riv = "round(tilausrivi.hinta/$laskurow[vienti_kurssi], '$yhtiorow[hintapyoristys]')";
 				}
 				else {
 					$hinta_riv = "tilausrivi.hinta";
@@ -344,7 +344,7 @@
 				
 				//	K‰sitell‰‰n tuoterivit
 				$query = "	SELECT tilausrivi.*, 
-							round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2) rivihinta, 
+							round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta, 
 							tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.asiakkaan_positio, ei_saldoa
 							FROM tilausrivi
 							JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno

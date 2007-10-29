@@ -1,5 +1,4 @@
 <?php
-	// valmis
 
 	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
 	$useslave = 1;

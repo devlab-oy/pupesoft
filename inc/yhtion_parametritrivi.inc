@@ -493,6 +493,27 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "hintapyoristys") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel1="";
+		$sel2="";
+
+		if ($trow[$i] == "4") {
+			$sel2 = "selected";
+		}
+		else {
+			$sel1 = "selected";
+		}
+
+		$ulos .= "<option value='2' $sel1>".t("Hinta pyöristetään kahteen desimaaliin")."</option>";
+		$ulos .= "<option value='4' $sel2>".t("Hinta pyöristetään neljään desimaaliin")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "laskunsummapyoristys") {
 
 		$ulos = "<td><select name='$nimi'>";

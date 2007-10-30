@@ -495,6 +495,54 @@ if ($tee=='MONISTA') {
 				$insres = mysql_query($kysely) or pupe_error($kysely);
 				$insid  = mysql_insert_id();
 				
+				//Kopioidaan tilausrivin lisatiedot
+				$query = "	SELECT *
+							FROM tilausrivin_lisatiedot
+							WHERE tilausrivitunnus = '$rivirow[tunnus]' and yhtio = '$kukarow[yhtio]'";
+				$monistares2 = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($monistares2) > 0) {
+					$monistarow2 = mysql_fetch_array($monistares2);
+
+					$kysely = "	INSERT INTO tilausrivin_lisatiedot 
+								SET yhtio 			= '$kukarow[yhtio]',
+								laatija				= '$kukarow[kuka]',
+								luontiaika 			= now(), 
+								tilausrivitunnus	= $insid,";
+
+					for($i=0; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
+						switch (mysql_field_name($monistares2,$i)) {
+							case 'yhtio':
+							case 'laatija':
+							case 'luontiaika':
+							case 'tilausrivitunnus':
+							case 'tiliointirivitunnus':
+							case 'tilausrivilinkki':
+							case 'toimittajan_tunnus':
+							case 'tunnus':
+							case 'muutospvm':
+							case 'muuttaja':
+								break;
+							case 'osto_vai_hyvitys':
+								if ($monistarow2[$i] == "O" and $kumpi == 'HYVITA') {
+									$kysely .= mysql_field_name($monistares2, $i)."='',";	
+								}
+								elseif ($monistarow2[$i] == "" and $kumpi == 'HYVITA') {
+									$kysely .= mysql_field_name($monistares2, $i)."='O',";	
+								}
+								else {
+									$kysely .= mysql_field_name($monistares2, $i)."='".$monistarow2[$i]."',";	
+								}
+								break;
+							default:
+								$kysely .= mysql_field_name($monistares2, $i)."='".$monistarow2[$i]."',";
+						}
+					}
+					
+					$kysely  = substr($kysely, 0, -1);
+					$insres2 = mysql_query($kysely) or pupe_error($kysely);					
+				}
+				
 				
 				//Kopsataan sarjanumerot kuntoon jos tilauskella oli sellaisia
 				if ($kumpi == 'HYVITA') {
@@ -544,7 +592,13 @@ if ($tee=='MONISTA') {
 										sarjanumero		= '$sarjarow[sarjanumero]',
 										lisatieto		= '$sarjarow[lisatieto]',
 										kaytetty		= '$sarjarow[kaytetty]',
-										$uusi_tunken	= '$insid'";
+										$uusi_tunken	= '$insid',
+										takuu_alku 		= '$sarjarow[takuu_alku]',
+										takuu_loppu		= '$sarjarow[takuu_loppu]',
+										hyllyalue   	= '$sarjarow[hyllyalue]',
+										hyllynro    	= '$sarjarow[hyllynro]',
+										hyllytaso   	= '$sarjarow[hyllytaso]',
+										hyllyvali   	= '$sarjarow[hyllyvali]'";
 							$sres = mysql_query($query) or pupe_error($query);
 						}
 					}

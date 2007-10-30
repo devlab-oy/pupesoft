@@ -638,8 +638,8 @@ if (!function_exists('rivi_original')) {
 			$row["kommentti"] .= "\nEi sis‰ll‰ v‰hennett‰v‰‰ veroa.";
 		}
 
-		//Hetaan sarjanumeron tiedot
-		if ($toim == "PROFORMA" and $row["varattu"] < 0){
+		//Haetan sarjanumeron tiedot
+		if ($row["varattu"]+$row["kpl"] < 0){
 			$sarjanutunnus = "ostorivitunnus";
 		}
 		else {

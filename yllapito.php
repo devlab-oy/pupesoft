@@ -547,7 +547,12 @@
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
 		if ($toim == "avainsana" or 
 			$toim == "tili" or 
-			$toim == "taso") {
+			$toim == "taso" or
+			$toim == "asiakasalennus" or
+			$toim == "asiakashinta" or
+			$toim == "perusalennus" or
+			$toim == "hinnasto") {
+			
 			// Tehd‰‰n "poista tietue"-nappi
 			if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>

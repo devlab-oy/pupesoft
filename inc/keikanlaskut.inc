@@ -317,6 +317,7 @@
 				lasku.vienti in ('A','D','G') and
 				lasku.tapvm >= '$avv-$akk-$app' and
 				lasku.tapvm <= '$lvv-$lkk-$lpp'
+				GROUP BY lasku.tunnus
 				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
 	$result = mysql_query($query) or pupe_error($query);
 

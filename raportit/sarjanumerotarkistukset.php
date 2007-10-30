@@ -101,17 +101,15 @@
 		echo "</table><br>";
 
 		echo "<table>";
-		echo "<tr><th colspan='9'>Hakukentät</th></tr>";
-		echo "<tr><th>Myyntitilaus</th><th>Tuoteno</th><th>Nimitys</th><th>Myyntihinta</th><th>Ostohinta</th><th>Kate</th><th>Ostotilaus</th><th>O/H</th><th>Sarjanumero</th></tr>";
+		echo "<tr><th colspan='7'>Hakukentät</th></tr>";
+		echo "<tr><th>Myyntitilaus<br></th><th>Tuoteno</th><th>Nimitys</th><th>Myyntihinta<br>Ostohinta</th><th>Myyntikate<br>Ostokate</th><th>O/H</th><th>Sarjanumero</th></tr>";
 
 		echo "<tr>";
-		echo "<td valign='top'><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'></td>";
+		echo "<td valign='top'><input type='text' size='10' name='myyntitilaus_haku'		value='$myyntitilaus_haku'><br><input type='text' size='10' name='ostotilaus_haku' 			value='$ostotilaus_haku'></td>";
 		echo "<td valign='top'><input type='text' size='10' name='tuoteno_haku' 			value='$tuoteno_haku'></td>";
 		echo "<td valign='top'><input type='text' size='10' name='nimitys_haku' 			value='$nimitys_haku'></td>";
 		echo "<td valign='top'></td>";
 		echo "<td valign='top'></td>";
-		echo "<td valign='top'></td>";
-		echo "<td valign='top'><input type='text' size='10' name='ostotilaus_haku' 			value='$ostotilaus_haku'></td>";
 		echo "<td valign='top'></td>";
 		echo "<td valign='top'><input type='text' size='10' name='sarjanumero_haku' 		value='$sarjanumero_haku'></td>";
 		echo "<td class='back'><input type='submit' value='Hae'></td>";
@@ -125,12 +123,13 @@
 		function superlistaus ($tyyppi, $lisa1, $lisa2, $lisa3, $ostov) {
 			global $PHP_SELF, $kukarow, $yhtiorow, $myyntitilaus_haku, $tuoteno_haku, $nimitys_haku, $ostotilaus_haku, $sarjanumero_haku, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $jarjestys_1, $jarjestys_2, $jarjestys_3, $jarjestys_4, $jarjestys_5, $jarjestys_6;
 			
-			echo "<tr><th>Myyntitilaus</th><th>Tuoteno</th><th>Nimitys</th><th>Myyntihinta</th><th>Ostohinta</th><th>Kate</th><th>Ostotilaus</th><th>O/H</th><th>Sarjanumero</th></tr>";
+			echo "<tr><th>Myyntitilaus<br>Ostotilaus</th><th>Tuoteno</th><th>Nimitys</th><th>Myyntihinta<br>Ostohinta</th><th>Myyntikate<br>Ostokate</th><th>O/H</th><th>Sarjanumero</th></tr>";
 
 			if ($tyyppi == "myynti") {
 				$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
 							round(tilausrivi.rivihinta/tilausrivi.kpl,2) rivihinta, 
 							round(tilausrivi.kate/tilausrivi.kpl,2) kate, 
+							round(ostorivi.kate/abs(ostorivi.kpl),2) osto_kate,
 							round(ostorivi.rivihinta/ostorivi.kpl,2) ostohinta,
 							ostorivi.tunnus ostotunnus, 
 							if(ostorivi.tyyppi='O', ostorivi.uusiotunnus, ostorivi.otunnus) ostotilaus, 
@@ -138,7 +137,7 @@
 							tilausrivi.kpl, myyntilasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys, 
 							if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
 							tuote.kehahin,
-							(select count(*) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
+							(select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.myyntirivitunnus=tilausrivi.tunnus) css
 							FROM tilausrivi
 							JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta='S'
 							LEFT JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tuoteno=sarjanumeroseuranta.tuoteno and tilausrivi.tunnus=sarjanumeroseuranta.myyntirivitunnus
@@ -150,12 +149,13 @@
 							$lisa2
 							and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
 							$lisa3
-							order by sarjanumero, otunnus";
+							order by tilausrivi.tunnus";
 			}
 			else {			
 				$query = "	SELECT myyntirivi.otunnus, myyntirivi.tunnus myyntitunnus, tilausrivi.tuoteno, tilausrivi.nimitys,
 							round(myyntirivi.rivihinta/myyntirivi.kpl,2) rivihinta, 
 							round(myyntirivi.kate/myyntirivi.kpl,2) kate, 
+							round(tilausrivi.kate/abs(tilausrivi.kpl),2) osto_kate, 
 							round(tilausrivi.rivihinta/tilausrivi.kpl,2) ostohinta,
 							tilausrivi.tunnus ostotunnus, 
 							if(tilausrivi.tyyppi='O', tilausrivi.uusiotunnus, tilausrivi.otunnus) ostotilaus, 
@@ -163,7 +163,7 @@
 							tilausrivi.kpl, ostolasku.viesti, tilausrivin_lisatiedot.osto_vai_hyvitys, 
 							if(sarjanumeroseuranta.kaytetty='' or sarjanumeroseuranta.kaytetty is null, 'Uusi', 'Käytetty') kaytetty,
 							tuote.kehahin,
-							(select count(*) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.ostorivitunnus=tilausrivi.tunnus) css
+							(select count(distinct sarjanumero) from sarjanumeroseuranta css where css.yhtio=tilausrivi.yhtio and css.tuoteno=tilausrivi.tuoteno and css.ostorivitunnus=tilausrivi.tunnus) css
 							FROM tilausrivi
 							JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.sarjanumeroseuranta='S'
 							LEFT JOIN sarjanumeroseuranta ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tuoteno=sarjanumeroseuranta.tuoteno and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -175,7 +175,7 @@
 							$lisa2
 							and tilausrivi.laskutettuaika >= '$vva-$kka-$ppa' and tilausrivi.laskutettuaika <= '$vvl-$kkl-$ppl'
 							$lisa3
-							order by sarjanumero, otunnus";			
+							order by tilausrivi.tunnus";			
 			}
 			
 			$vresult = mysql_query($query) or pupe_error($query);
@@ -185,34 +185,35 @@
 				$keikkahinta = 0;
 				
 				// Katsotaan onko sarjanumerolle liitetty kulukeikka
-				$query  = "	select lasku.laskunro
-							FROM sarjanumeroseuranta
-							JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
-							WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]'
-							and sarjanumeroseuranta.myyntirivitunnus = '$vrow[myyntitunnus]'";
-				$keikkares = mysql_query($query) or pupe_error($query);
+				if ($vrow["myyntitunnus"] > 0) {
+					$query  = "	select lasku.laskunro
+								FROM sarjanumeroseuranta
+								JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.liitostunnus=sarjanumeroseuranta.tunnus and lasku.ytunnus=sarjanumeroseuranta.tunnus and lasku.tila = 'K' and lasku.alatila = 'S'
+								WHERE sarjanumeroseuranta.yhtio 		 = '$kukarow[yhtio]'
+								and sarjanumeroseuranta.myyntirivitunnus = '$vrow[myyntitunnus]'";
+					$keikkares = mysql_query($query) or pupe_error($query);
 
-				while($kulukeikkarow = mysql_fetch_array($keikkares)) {
-					// Haetaan kaikki keikkaan liitettyjen laskujen summa
-					$query = "	SELECT round(sum(summa*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
-								FROM lasku
-								WHERE yhtio		= '$kukarow[yhtio]'
-								and tila 		= 'K'
-								and laskunro 	= '$kulukeikkarow[laskunro]'
-								and vanhatunnus <> 0
-								and vienti in ('B','E','H')";
-					$result = mysql_query($query) or pupe_error($query);
-					$kulukulurow = mysql_fetch_array($result);
+					while($kulukeikkarow = mysql_fetch_array($keikkares)) {					
+						// Haetaan kaikki keikkaan liitettyjen laskujen summa
+						$query = "	SELECT round(sum(summa*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
+									FROM lasku
+									WHERE yhtio		= '$kukarow[yhtio]'
+									and tila 		= 'K'
+									and laskunro 	= '$kulukeikkarow[laskunro]'
+									and vanhatunnus <> 0
+									and vienti in ('B','E','H')";
+						$result = mysql_query($query) or pupe_error($query);
+						$kulukulurow = mysql_fetch_array($result);
 
-					$keikkahinta	+= $kulukulurow["kulusumma"];
+						$keikkahinta	+= $kulukulurow["kulusumma"];
+					}
 				}
 				
 				echo "<tr>
-						<td valign='top'><a name='$vrow[ostotunnus]'><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[otunnus]'>$vrow[otunnus]</a></td>
+						<td valign='top'><a name='$vrow[ostotunnus]'><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[otunnus]'>$vrow[otunnus]</a><br><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]'>$vrow[ostotilaus]</a></td>
 						<td valign='top'><a href='../tuote.php?tee=Z&tuoteno=$vrow[tuoteno]'>$vrow[tuoteno]</a></td>
 						<td valign='top'>$vrow[nimitys]<br><font class='message'>$vrow[viesti]</font></td>
-						<td valign='top' align='right'>$vrow[rivihinta]</td>
-						<td valign='top' align='right' nowrap>";
+						<td valign='top' align='right'>$vrow[rivihinta]<br>";
 						
 				if ((float) $vrow["ostohinta"] == 0 and $vrow["kehahin"] > 0) {
 					echo "<font style='color: 00FF00;'>$vrow[kehahin]</font>";
@@ -225,9 +226,9 @@
 				echo "</td>";
 																							
 				$vrow["ostohinta"] = sprintf('%.2f', $keikkahinta+$vrow["ostohinta"]);
-				
+
 				if ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] == 1) {
-					echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font></td>";
+					echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$vrow["ostohinta"])."</font><br>";
 				}
 				elseif ($vrow["myyntitunnus"] > 0 and abs(round($vrow["rivihinta"]-$vrow["ostohinta"],2) - $vrow["kate"]) > 0.01 and $vrow["kpl"] > 1) {
 					//Haetaan nyt tämän myyntirivin kaikki ostorivit
@@ -257,24 +258,29 @@
 					$uusisarjahin = round($uusisarjahin/$vrow["kpl"],2);
 				
 					if (round($vrow["rivihinta"]-$uusisarjahin,2) != $vrow["kate"]) {
-						echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font></td>";
+						echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate] <> ".sprintf('%.2f', $vrow["rivihinta"]-$uusisarjahin)."</font><br>";
 					}
 					else {
-						echo "<td valign='top' align='right'>$vrow[kate]</td>";
+						echo "<td valign='top' align='right' nowrap>$vrow[kate]<br>";
 					}
 				}
 				elseif ($vrow["myyntitunnus"] > 0 and $vrow["kate"] < 0) {
-					echo "<td valign='top' align='right'><font style='color: red;'>$vrow[kate]</font></td>";
+					echo "<td valign='top' align='right' nowrap><font style='color: red;'>$vrow[kate]</font><br>";
 				}
 				elseif($vrow["myyntitunnus"] > 0) {
-					echo "<td valign='top' align='right'>$vrow[kate]</td>";
+					echo "<td valign='top' align='right' nowrap>$vrow[kate]<br>";
 				}
 				else {
-					echo "<td valign='top' align='right'></td>";
+					echo "<td valign='top' align='right' nowrap><br>";
 				} 
-		
-				echo "	<td valign='top'><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$vrow[ostotilaus]'>$vrow[ostotilaus]</a></td>";
-			
+				
+				if ($vrow["osto_kate"] != 0) {
+					echo "<font style='color: red;'>$vrow[osto_kate]</font></td>";
+				}
+				else {
+					echo "</td>";
+				}
+				
 				if ($ostov == "JOO") {
 					$sel1 = $sel2 = "";
 				
@@ -342,7 +348,7 @@
 		}	
 		
 		if ($jarjestys_1 != "") {
-			echo "<tr><th colspan='9'>Myyydyt sarjanumerot joita ei olla ollenkaan ostettu</th></tr>";
+			echo "<tr><th colspan='7'>Myyydyt sarjanumerot joita ei olla ollenkaan ostettu</th></tr>";
 									
 			$lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl > 0";
 			$lisa3 = "having ostotunnus is null";
@@ -351,7 +357,7 @@
 		}
 	
 		if ($jarjestys_2 != "") {
-			echo "<tr><th colspan='9'>Myyydyt sarjanumerot</th></tr>";
+			echo "<tr><th colspan='7'>Myyydyt sarjanumerot</th></tr>";
 	
 			$lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl > 0";
 			$lisa3 = "having sarjanumero is not null and ostotunnus is not null and kpl=css";
@@ -360,7 +366,7 @@
 		}
 		
 		if ($jarjestys_3 != "") {
-			echo "<tr><th colspan='9'>Myydyt sarjanumerot ilman sarjanumeroa</th></tr>";
+			echo "<tr><th colspan='7'>Myydyt sarjanumerot ilman sarjanumeroa</th></tr>";
 			
 			$lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl > 0";
 			$lisa3 = "having sarjanumero is null or kpl!=css";
@@ -369,7 +375,7 @@
 		}
 
 		if ($jarjestys_4 != "") {
-			echo "<tr><th colspan='9'>Myyntipuolelta ostetut ja hyvitetyt sarjanumerot</th></tr>";
+			echo "<tr><th colspan='7'>Myyntipuolelta ostetut ja hyvitetyt sarjanumerot</th></tr>";
 			
 			$lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0";
 			$lisa3 = "having sarjanumero is not null";
@@ -378,7 +384,7 @@
 		}
 
 		if ($jarjestys_5 != "") {
-			echo "<tr><th colspan='9'>Myyntipuolelta ostetut ja hyvitetyt sarjanumerot ilman sarjanumeroa</th></tr>";
+			echo "<tr><th colspan='7'>Myyntipuolelta ostetut ja hyvitetyt sarjanumerot ilman sarjanumeroa</th></tr>";
 			
 			$lisa1 = "and tilausrivi.tyyppi = 'L' and tilausrivi.kpl < 0";
 			$lisa3 = "having sarjanumero is null or abs(kpl)!=css";
@@ -387,7 +393,7 @@
 		}
 
 		if ($jarjestys_6 != "") {
-			echo "<tr><th colspan='9'>Ostopuolelta ostetut sarjanumrot</th></tr>";
+			echo "<tr><th colspan='7'>Ostopuolelta ostetut sarjanumrot</th></tr>";
 			
 			$lisa1 = "and tilausrivi.tyyppi = 'O' and tilausrivi.kpl > 0";
 			$lisa3 = "";

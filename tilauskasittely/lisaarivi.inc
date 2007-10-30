@@ -885,6 +885,11 @@
 												jarjestys			= '$jarjestys',
 												luontiaika			= now(),
 												laatija 			= '$kukarow[kuka]'";
+									
+									if ($trow["sarjanumeroseuranta"] == "S" and $varattu < 0) {
+										$query .= " , osto_vai_hyvitys='O' ";	
+									}		
+										
 									$result = mysql_query($query) or pupe_error($query);
 								}
 																
@@ -1514,6 +1519,11 @@
 							jarjestys			= '$jarjestys',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'";
+				
+				if ($trow["sarjanumeroseuranta"] == "S" and $kpl < 0) {
+					$query .= " , osto_vai_hyvitys='O' ";	
+				}
+							
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			

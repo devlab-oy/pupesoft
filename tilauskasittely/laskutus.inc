@@ -258,6 +258,7 @@ else {
 								and sarjanumeroseuranta.kaytetty 	= '$sarjarow[kaytetty]'
 								and sarjanumeroseuranta.myyntirivitunnus > 0
 								and sarjanumeroseuranta.ostorivitunnus   > 0
+								and sarjanumeroseuranta.tunnus != '$sarjarow[tunnus]'
 								ORDER BY sarjanumeroseuranta.tunnus DESC
 								LIMIT 1";
 					$sarjares1 = mysql_query($query) or pupe_error($query);

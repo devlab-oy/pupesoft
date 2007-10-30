@@ -374,13 +374,14 @@
 						//Jos tuotteella on sarjanumero ja kyseessä on HYVITYSTÄ
 
 						//Tähän hyvitysriviin liitetyt sarjanumerot
-						$query = "	SELECT sarjanumero, kaytetty
+						$query = "	SELECT sarjanumero, kaytetty, tunnus
 									FROM sarjanumeroseuranta
 									WHERE yhtio 		= '$kukarow[yhtio]'
 									and ostorivitunnus 	= '$srow1[tunnus]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 
 						while($sarjarowx = mysql_fetch_array($sarjares)) {
+							
 							// Haetaan hyvitettävien myyntirivien kautta alkuperäiset ostorivit
 							$query  = "	SELECT sarjanumeroseuranta.tunnus
 										FROM sarjanumeroseuranta
@@ -391,6 +392,7 @@
 										and sarjanumeroseuranta.kaytetty 	= '$sarjarowx[kaytetty]'
 										and sarjanumeroseuranta.myyntirivitunnus > 0
 										and sarjanumeroseuranta.ostorivitunnus   > 0
+										and sarjanumeroseuranta.tunnus != '$sarjarowx[tunnus]'
 										ORDER BY sarjanumeroseuranta.tunnus DESC
 										LIMIT 1";
 							$sarjares12 = mysql_query($query) or pupe_error($query);

@@ -304,6 +304,65 @@
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
 	}
 
+	echo "<font class='head'>".t("Normaalit kululaskut, joilla on varastokirjauksia")."</font><hr>";
+
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus
+				FROM lasku
+				JOIN tiliointi AS tiliointi1 ON (tiliointi1.yhtio = lasku.yhtio and
+									tiliointi1.ltunnus = lasku.tunnus and
+									tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and
+									tiliointi1.korjattu = '')
+				WHERE lasku.yhtio = '$kukarow[yhtio]' and
+				lasku.tila in ('H','Y','M','P','Q') and
+				lasku.vienti in ('A','D','G') and
+				lasku.tapvm >= '$avv-$akk-$app' and
+				lasku.tapvm <= '$lvv-$lkk-$lpp'
+				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) > 0 ) {
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Ytunnus")."</th>";
+		echo "<th>".t("Nimi")."</th>";
+		echo "<th>".t("Summa valuutassa")."</th>";
+		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Tapvm")."</th>";
+		echo "<th>".t("Tyyppi")."</th>";
+		echo "</tr>";
+
+		$yhteesa = 0;
+
+		while ($trow = mysql_fetch_array($result)) {
+
+			$vienti = $trow["vienti"];
+			if ($trow["vienti"] == 'A') $vienti = t('Kotimaa');
+			if ($trow["vienti"] == 'D') $vienti = t('EU');
+			if ($trow["vienti"] == 'G') $vienti = t('ei-EU');
+
+			echo "<tr class='aktiivi'>";
+			echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
+			echo "<td>$trow[nimi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
+			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
+			echo "<td>$vienti</td>";
+			echo "</tr>";
+
+			$yhteesa += $trow["summaeur"];
+		}
+
+		echo "<tr>";
+		echo "<th colspan='3'>".t("Yhteensä")."</th>";
+		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+		echo "<th colspan='2'></th>";
+		echo "</tr>";
+		echo "</table><br>";
+	}
+	else {
+		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
+	}
+
 	echo "<font class='head'>".t("Keikkojen eturahdit")."</font><hr>";
 
 	$query = "	SELECT *, lasku.rahti_etu*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) rahti

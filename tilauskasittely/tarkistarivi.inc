@@ -162,7 +162,7 @@
 	$paikat	= "";
 
 	//Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille
-	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E" and $kpl_st > 0) {
+	if ($trow["ei_saldoa"] == "" and $row["tyyppi"] != "E") {
 		// tarkistetaan varaston tyyppi
 		$query = "	SELECT *
 					FROM varastopaikat
@@ -181,6 +181,7 @@
 		}
 
 		$paikatlask 	= 0;
+		$selpaikka		= "";
 		$kotipaikatlask = 0;
 		$omapaikatraja 	= 2;
 		
@@ -249,8 +250,8 @@
 		}
 		$omavarastores = mysql_query($query) or pupe_error($query);
 
-		//Tutkitaan voidaanko tätä rivi suoratoimittaa mistään varastosta (toitaiseksi vain ei sarjanumerollisille tuotteille)
-		if ($trow["sarjanumeroseuranta"] == "") {
+		//Tutkitaan voidaanko tätä rivi suoratoimittaa mistään varastosta
+		if ($trow["sarjanumeroseuranta"] == "" and $kpl_st > 0) {
 			$suora_tuoteno 	= $row["tuoteno"];
 			$suora_kpl 		= $kpl_st;
 
@@ -292,9 +293,17 @@
 
 						if ($trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F" and !in_array($row["var"], array("P","S")) and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]) {
 							$sel = "SELECTED";
+							
+							$selpaikka = "$alkurow[hyllyalue] $alkurow[hyllynro] $alkurow[hyllyvali] $alkurow[hyllytaso]";
 						}
 						elseif (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and $sarjarow["era"] == $alkurow["era"] and !in_array($row["var"], array("P","S")) and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]) {
-								$sel = "SELECTED";
+							$sel = "SELECTED";
+								
+							$selpaikka = "$alkurow[hyllyalue] $alkurow[hyllynro] $alkurow[hyllyvali] $alkurow[hyllytaso]";
+
+							if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
+								$selpaikka .= " $alkurow[era]";
+							}
 						}
 
 						$paikat .= "<option value='$alkurow[hyllyalue]#$alkurow[hyllynro]#$alkurow[hyllyvali]#$alkurow[hyllytaso]";
@@ -348,7 +357,7 @@
 		}
 
 		// Kääydään läpi tuotteen toimittajat
-		if ($kukarow["extranet"] == "" and in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '')) {
+		if ($kukarow["extranet"] == "" and in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $kpl_st > 0) {
 			if ($kotipaikatlask == 0) {
 				$paikat = "<option value=''></option>".$paikat;
 			}
@@ -360,23 +369,27 @@
 				if ($row["toimittajan_tunnus"] == $krow["liitostunnus"] and $row["hyllyalue"] == "" and $row["hyllynro"] == "") {
 					if ($row["var"] == 'T' or ($row["var"] == "J" and $row["suoraan_laskutukseen"] == "")) {
 						$sel1 = "SELECTED";
+						
+						$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
 					}
 					else {
 						$sel2 = "SELECTED";
+						
+						$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
 					}
 				}
 
 				// tallennetaan riville toimittajan tunnus
-				$paikat .= "<option value='¡¡¡$krow[liitostunnus]' $sel1>$krow[nimi] --> ".t("varastoon")."</option>";
+				$paikat .= "<option value='¡¡¡$krow[liitostunnus]' $sel1>$krow[nimi] --> ".t("tilaa")." ".t("varastoon").".</option>";
 				
 				if($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Y") {
-					$paikat .= "<option value='!!!$krow[liitostunnus]' $sel2>$krow[nimi] --> ".t("asiakkaalle")."</option>";
+					$paikat .= "<option value='!!!$krow[liitostunnus]' $sel2>$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle").".</option>";
 				}
 				
 				$paikatlask=$paikatlask+2;
 			}
 		}
-		elseif ($kotipaikatlask == 0) {
+		elseif ($kotipaikatlask == 0 and $kpl_st > 0) {
 			$paikat = "<option value='' $sel>".t("Jätä puutteeksi")."</option>".$paikat;
 		}
 

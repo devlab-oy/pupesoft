@@ -2293,6 +2293,12 @@
 			}
 			$tee = "";
 		}
+		elseif ($toim == "WEBTILAUSTARJOUS") {
+			if ($ylatila=='') {
+				$ylatila='F';
+			}
+			$tee = "";
+		}
 		else {
 			if ($ylatila=='') {
 				$ylatila='N';

@@ -115,6 +115,9 @@
 	elseif($laskurow["tila"] == 'B') {
 		$rivityyppi = 'B';	// Ostoskori
 	}
+	elseif($laskurow["tila"] == 'F') {
+		$rivityyppi = 'F';	// Tallennett web-tilaus/-tarjous
+	}
 	else {
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}

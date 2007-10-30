@@ -310,6 +310,21 @@
 					break;
 			}
 			break;
+		case "F":
+			$laskutyyppi = "Tallennettu web-tilaus/tarjous";
+			switch($alatila) {
+				case "D":
+					$alatila = "hylätty";
+					break;
+				case "A":
+					$alatila = "hyväksytty työmääräys";
+					break;
+				case "X":
+					$alatila = "valmis työmääräys";
+					break;
+			}
+			break;
+
 	}
 
 ?>

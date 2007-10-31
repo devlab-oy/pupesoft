@@ -865,14 +865,15 @@
 			$fnlina1 = "<font class='message'>(Varattu lisävarusteena tuotteelle: ";
 			$fnlina2 = ")</font>";
 			
-			$query = "	SELECT tuoteno 
+			$query = "	SELECT tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero 
 						FROM tilausrivi 
-						WHERE yhtio='$kukarow[yhtio]' and tunnus='$sarjarow[siirtorivitunnus]'";
+						LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+						WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$sarjarow[siirtorivitunnus]'";
 			$siires = mysql_query($query) or pupe_error($query);
 			$siirow = mysql_fetch_array($siires);
 			
 			$sarjarow["myynti_tunnus"] = 0;
-			$sarjarow["myynti_nimi"] = $siirow["tuoteno"];
+			$sarjarow["myynti_nimi"] = $siirow["tuoteno"]." ".$siirow["sarjanumero"];
 		
 		}
 		elseif ($sarjarow["myynti_tila"] == 'T') {

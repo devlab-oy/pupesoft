@@ -46,7 +46,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
-		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"eee\")'>Näytä / Piilota</a><br><br>";
+		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('eee')\">Näytä / Piilota</a><br><br>";
 
 		echo "<div id='eee' style='display:none'>";
 
@@ -99,7 +99,7 @@
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
 	}
 
-	echo "<font class='head'>".t("Rahtilaskut, joita ei ole liitetty kokonaan keikkoihin")."</font><hr>";
+	echo "<font class='head'>".t("Rahtilaskut joita ei ole liitetty kokonaan keikkoihin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
 				sum(tiliointi.summa) 'varastossa',
@@ -122,7 +122,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
-		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"kaa\")'>Näytä / Piilota</a><br><br>";
+		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('kaa')\">Näytä / Piilota</a><br><br>";
 
 		echo "<div id='kaa' style='display:none'>";
 
@@ -204,7 +204,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
-		echo mysql_num_rows($result)." tositetta. <a href='javascript:toggleGroup(\"koo\")'>Näytä / Piilota</a><br><br>";
+		echo mysql_num_rows($result)." tiliöintiä. <a href=\"javascript:toggleGroup('koo')\">Näytä / Piilota</a><br><br>";
 
 		echo "<div id='koo' style='display:none'>";
 
@@ -273,7 +273,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
-		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"nee\")'>Näytä / Piilota</a><br><br>";
+		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('nee')\">Näytä / Piilota</a><br><br>";
 
 		echo "<div id='nee' style='display:none'>";
 
@@ -326,7 +326,7 @@
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
 	}
 
-	echo "<font class='head'>".t("Normaalit kululaskut, joilla on varastokirjauksia")."</font><hr>";
+	echo "<font class='head'>".t("Normaalit kululaskut joilla on varastokirjauksia")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus, tiliointi1.ltunnus
 				FROM lasku
@@ -344,7 +344,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
-		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"vii\")'>Näytä / Piilota</a><br><br>";
+		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('vii')\">Näytä / Piilota</a><br><br>";
 
 		echo "<div id='vii' style='display:none'>";
 
@@ -412,7 +412,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
-		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"kuu\")'>Näytä / Piilota</a><br><br>";
+		echo mysql_num_rows($result)." laskua. <a href=\"javascript:toggleGroup('kuu')\">Näytä / Piilota</a><br><br>";
 
 		echo "<div id='kuu' style='display:none'>";
 
@@ -484,7 +484,7 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
-		echo mysql_num_rows($result)." keikkaa. <a href='javascript:toggleGroup(\"see\")'>Näytä / Piilota</a><br><br>";
+		echo mysql_num_rows($result)." keikkaa. <a href=\"javascript:toggleGroup('see')\">Näytä / Piilota</a><br><br>";
 
 		echo "<div id='see' style='display:none'>";
 

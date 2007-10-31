@@ -813,6 +813,7 @@
 		mysql_field_name($result, $i) == "laskun_jarjestys" or 
 		mysql_field_name($result, $i) == "tilauksen_jarjestys" or  
 		mysql_field_name($result, $i) == "kerayslistan_jarjestys" or 
+		mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
 		mysql_field_name($result, $i) == "laskun_jarjestys" or
 		mysql_field_name($result, $i) == "ostotilauksen_jarjestys") {
 
@@ -832,7 +833,11 @@
 		$ulos .= "<option value = '8' $sel[8]>".t("Tilausj‰rjestys, tuoteperheet pidet‰‰n yhdess‰");
 		$ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys");
 		$ulos .= "<option value = 'M' {$sel["M"]}>".t("K‰ytt‰j‰n asettama j‰rjestys");		
-
+		
+		if(	mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys" or
+			mysql_field_name($result, $i) == "kerayslistan_jarjestys") {
+			$ulos .= "<option value = 'S' {$sel["S"]}>".t("Rivit summattuina");	
+		}
 		$ulos .= "</select></td>";
 
 		$jatko = 0;
@@ -842,6 +847,7 @@
 		mysql_field_name($result, $i) == "laskun_jarjestys_suunta" or 
 		mysql_field_name($result, $i) == "tilauksen_jarjestys_suunta" or  
 		mysql_field_name($result, $i) == "kerayslistan_jarjestys_suunta" or 
+		mysql_field_name($result, $i) == "valmistus_kerayslistan_jarjestys_suunta" or
 		mysql_field_name($result, $i) == "laskun_jarjestys_suunta" or
 		mysql_field_name($result, $i) == "ostotilauksen_jarjestys_suunta") {
 	

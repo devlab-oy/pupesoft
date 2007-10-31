@@ -516,15 +516,42 @@ if (!function_exists('rivi_otsikot_valm')) {
 
 if (!function_exists('rivi_valm')) {
 	function rivi_valm($thispage, $tyyppi="") {
-		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino;
+		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $uusisivu;
 		
 		// viivat rivien väliin...
 		$x[0] = 20;
 		$x[1] = 580;
 		$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
+		
+		if($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"]) {
+			//	Tulostetaanko aina uusi sivu?       
+			$query = "SELECT tunnus FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '{$row["tuoteno"]}' and omasivu != ''";
+			$pres = mysql_query($query) or pupe_error($query);
+			
+			if(mysql_num_rows($pres) > 0) {
+
+				//	Uusi sivu
+				if(isset($perheid) and isset($perheid2)) {					
+					$page[$sivu] 	= uusi_sivu_valm($tyyppi);
+					$thispage    	= $page[$sivu];				
+				}
+				$uusisivu 		= "KOHTA";
+			}
+		}
 
 		if ((($perheid == 0 and $perheid2 == 0) or $perheid != $row["perheid"] or $perheid2 != $row["perheid2"]) and isset($perheid) and isset($perheid2)) {
-			$pdf->draw_line($x, $y, $thispage, $rectparam);
+			if($uusisivu == "JOO") {
+				//	Uusi sivu
+				$page[$sivu]	= uusi_sivu_valm($tyyppi);
+				$thispage  		= $page[$sivu];
+				$uusisivu 		= "";
+			}
+			elseif($uusisivu == "KOHTA") {
+				$uusisivu 		= "JOO";
+			}
+			else {
+				$pdf->draw_line($x, $y, $thispage, $rectparam);
+			}
 		}
 		
 		// Mahtuuko rivi tälle sivulle

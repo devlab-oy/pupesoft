@@ -53,11 +53,29 @@
 			$lisa1 = " ";
 		}
 		
-		$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+		if($laskurow["tila"] == "V") {
+			$sorttaus = "valmistus_kerayslistan_jarjestys";
+			$sorttaussuunta = "valmistus_kerayslistan_jarjestys_suunta";
+		}
+		else {
+			$sorttaus = "kerayslistan_jarjestys";
+			$sorttaussuunta = "kerayslistan_jarjestys_suunta";					
+		}
+		
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
+		
+		$select_lisa = $where_lisa = "";
+		
+		//	 Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+		if($yhtiorow[$sorttaus] == "S") {
+			$select_lisa = "sum(kpl) kpl, sum(tilkpl) tilkpl, sum(varattu) varattu, sum(jt) jt, '' perheid, '' perheid2, ";
+			$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+		}
 
 		// generoidaan keräyslistalle rivinumerot
 		$query = "	SELECT tilausrivi.*,
 					tuote.sarjanumeroseuranta,
+					$select_lisa
 					$sorttauskentta
 					FROM tilausrivi, tuote
 					WHERE tilausrivi.otunnus in ($tilausnumeroita)
@@ -66,6 +84,7 @@
 					and tilausrivi.tuoteno = tuote.tuoteno
 					and tilausrivi.tyyppi  != 'D'
 					$lisa1
+					$where_lisa
 					ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);
 

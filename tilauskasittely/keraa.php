@@ -1221,13 +1221,34 @@
 			echo "<tr><th>" . t("Toimitusosoite") ."</th><td>$otsik_row[toim_osoite], $otsik_row[toim_postitp]</td></tr>";
 		}
 		
-		$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+		if($toim == "VALMISTUS") {
+			$sorttaus = "valmistus_kerayslistan_jarjestys";
+			$sorttaussuunta = "valmistus_kerayslistan_jarjestys_suunta";
+		}
+		else {
+			$sorttaus = "kerayslistan_jarjestys";
+			$sorttaussuunta = "kerayslistan_jarjestys_suunta";					
+		}
+
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
+		
+		//	 Summataan rivit yhteen
+		if($yhtiorow[$sorttaus] == "S") {
+			$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, group_concat(tilausrivi.tunnus) rivitunnukset, tilausrivi.tunnus, ";
+			$group_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+		}
+		else {
+			$select_lisa = "tilausrivi.varattu, tilausrivi.jt, tilausrivi.keratty, tilausrivi.tunnus, tilausrivi.var, tilausrivi.tilkpl,";
+			$group_lisa = "";			
+		}
+		
+		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
 
 		$query = "	SELECT
 					concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) varastopaikka,
 					concat_ws(' ',tilausrivi.tuoteno, tilausrivi.nimitys) tuoteno,
 					tilausrivi.tuoteno puhdas_tuoteno,
-					tilausrivi.varattu, tilausrivi.jt, tilausrivi.keratty, tilausrivi.tunnus, tilausrivi.var, tilausrivi.tilkpl,
+					$select_lisa
 					tuote.ei_saldoa, tuote.sarjanumeroseuranta, tuote.tuoteno tuote,
 					$sorttauskentta
 					FROM tilausrivi, tuote
@@ -1238,7 +1259,8 @@
 					and tilausrivi.yhtio	= '$kukarow[yhtio]'
 					and tilausrivi.tyyppi	in ($tyyppi)
 					and tilausrivi.kerattyaika = '0000-00-00 00:00:00'
-					ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
+					$group_lisa
+					ORDER BY sorttauskentta ".$yhtiorow[$sorttaussuunta].", tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
 		$riveja = mysql_num_rows($result);
 
@@ -1320,7 +1342,19 @@
 							<td>$row[varastopaikka]</td>
 							<td>$row[tuoteno]</td>
 							<td>$row[varattu]</td>
-							<td><input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]'> $puute";
+							<td>";
+
+					//	kaikki gruupatut tunnukset mukaan!
+					if($yhtiorow[$sorttaus] == "S" and strpos($row["rivitunnukset"], ",") > 0) {
+						foreach(explode(",", $row["rivitunnukset"]) as $tunn) {
+							$tunn = trim($tunn);
+							echo "<input type='hidden' name='kerivi[]' value='$tunn'>";
+						}
+					}
+					else {
+						echo "<input type='text' size='4' name='maara[$row[tunnus]]' value='$maara[$i]'> $puute";
+						echo "<input type='hidden' name='kerivi[]' value='$row[tunnus]'>";
+					}
 
 					if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T") {
 
@@ -1397,8 +1431,8 @@
 						echo "<option value='MI'>".t("Mitätöi")."</option>";
 						echo "</select></td>";
 					}
-
-					echo "<input type='hidden' name='kerivi[]' value='$row[tunnus]'></tr>";
+										
+					echo "</tr>";
 				}
 				$i++;
 			}

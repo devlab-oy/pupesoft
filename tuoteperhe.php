@@ -16,18 +16,14 @@
 	}
 	
 	if ($tee == 'TALLENNAFAKTA') {
-		$query = "UPDATE tuoteperhe SET fakta = '', fakta2 = '' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno'";
+		$query = "UPDATE tuoteperhe SET fakta = '', fakta2 = '', omasivu = '' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
 		
-		$query = "UPDATE tuoteperhe SET fakta = '$fakta', fakta2 = '$fakta2'  WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
+		$query = "UPDATE tuoteperhe SET fakta = '$fakta', fakta2 = '$fakta2', omasivu = '$omasivu'  WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
+
+		echo "<br><br><font class='message'>".t("Reseptin tiedot tallennettu")."!</font><br>";
 		
-		echo "<br><br><font class='message'>".t("Faktatieto tallennettu")."!</font><br>";
-		
-		$tee = '';
-	}
-	
-	if ($tee == 'TALLENNAESITYSMUOTO') {
 		$query = "UPDATE tuoteperhe SET ei_nayteta = '$ei_nayteta' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
 		
@@ -382,16 +378,12 @@
 					echo "<th>".t("Tuotereseptin valmiste").": </th>";
 				}
 				
-				echo "<th>".t("Esitysmuoto").": </th>";
-				
-				echo "</td><td class='back'></td></tr>";
-				echo "<tr><td>$isatuoteno - $isarow[nimitys]</td><td>";
+				echo "<tr><td>$isatuoteno - $isarow[nimitys]</td></tr></table><br>";
 				
 				
-				$query = "SELECT fakta, fakta2, ei_nayteta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
+				$query = "SELECT fakta, fakta2, ei_nayteta, omasivu FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
 				$ressu = mysql_query($query) or pupe_error($query);
 				$faktarow = mysql_fetch_array($ressu);
-				
 				
 				if ($faktarow["ei_nayteta"] == "") {
 					$sel1 = "SELECTED";
@@ -400,21 +392,29 @@
 					$sel2 = "SELECTED";
 				}
 				
-				echo "<form action='$PHP_SELF' method='post'>
+				echo "<table><form action='$PHP_SELF' method='post'>
 						<input type='hidden' name='toim' value='$toim'>
 				  		<input type='hidden' name='tee' value='TALLENNAESITYSMUOTO'>
 				  		<input type='hidden' name='tunnus' value='$prow[tunnus]'>
 				  		<input type='hidden' name='isatuoteno' value='$isatuoteno'>	
 				  		<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
 				
+				echo "<tr><th>".t("Esitysmuoto").": </th></tr>";
+				echo "<tr><td>";
 				echo "	<select name='ei_nayteta'>
 						<option value='' $sel1>".t("Kaikki rivit n‰yet‰‰n")."</option>
 						<option value='E' $sel2>".t("Lapsirivej‰ ei n‰ytet‰")."</option>
-						</select>";
-				
-				echo "</td><td class='back'>  				
-					  <input type='submit' value='".t("Tallenna")."'>
-					  </form></td></tr>";
+						</select></td>";
+
+				if($toim == "RESEPTI") {
+					$sel = array($faktarow["omasivu"] => "SELECTED");
+					echo "<tr><th>".t("Reseptin tulostus").": </th></tr>";
+					echo "<tr><td>";
+					echo "	<select name='omasivu'>
+							<option value=''>".t("Resepti tulostetaan normaalisti")."</option>
+							<option value='E' {$sel["E"]}>".t("Resepti tulostetaan omalle sivulle")."</option>
+							</select></td>";
+				}
 				
 				echo "</table><br>";
 		

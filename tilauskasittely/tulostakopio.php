@@ -461,8 +461,9 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "KERAYSLISTA") {
+			
 			//myyntitilaus. Tulostetaan lähete.
-			$where1 .= " lasku.tila in ('L','N') ";
+			$where1 .= " lasku.tila in ('L','N','V') ";
 
 			if ($ytunnus{0} == '£') {
 				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -1587,10 +1588,27 @@
 					$lisa1 = " ";
 				}
 				
-				$sorttauskentta = generoi_sorttauskentta($yhtiorow["kerayslistan_jarjestys"]);
+				if($laskurow["tila"] == "V") {
+					$sorttaus = "valmistus_kerayslistan_jarjestys";
+					$sorttaussuunta = "valmistus_kerayslistan_jarjestys_suunta";
+				}
+				else {
+					$sorttaus = "kerayslistan_jarjestys";
+					$sorttaussuunta = "kerayslistan_jarjestys_suunta";					
+				}
+				
+				$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
+				
+				$select_lisa = $where_lisa = "";
+				
+				//	 Summataan rivit yhteen (HUOM! unohdetaan kaikki perheet!)
+				if($yhtiorow[$sorttaus] == "S") {
+					$select_lisa = "sum(kpl) kpl, sum(tilkpl) tilkpl, sum(varattu) varattu, sum(jt) jt, '' perheid, '' perheid2, ";
+					$where_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+				}
 
 				//keräyslistan rivit
-				$query = "  SELECT tilausrivi.*,
+				$query = "  SELECT tilausrivi.*, $select_lisa
 							tuote.sarjanumeroseuranta,
 							$sorttauskentta
 							FROM tilausrivi, tuote
@@ -1599,7 +1617,8 @@
 							and tilausrivi.yhtio 	= tuote.yhtio
 							and tilausrivi.tuoteno  = tuote.tuoteno
 							$lisa1
-							ORDER BY sorttauskentta $yhtiorow[kerayslistan_jarjestys_suunta], tilausrivi.tunnus";
+							$where_lisa
+							ORDER BY sorttauskentta $yhtiorow[$sorttaussuunta], tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tilausnumeroita = $otunnus;

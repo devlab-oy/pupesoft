@@ -40,7 +40,8 @@
 								selite			= '$rappari', 
 								selitetark		= '$valsarake',
 								selitetark_2	= '$operaattori[$val]',
-								selitetark_3	= '$rajaus[$val]'";								
+								selitetark_3	= '$rajaus[$val]',
+								jarjestys		= '$jarjestys[$val]'";								
 					$res = mysql_query($query) or pupe_error($query);
 				}
 			}
@@ -71,13 +72,15 @@
 									selite			= '$kysely', 
 									selitetark		= '$valsarake',
 									selitetark_2	= '$operaattori[$val]',
-									selitetark_3	= '$rajaus[$val]'";								
+									selitetark_3	= '$rajaus[$val]',
+									jarjestys		= '$jarjestys[$val]'";						
 						$res = mysql_query($query) or pupe_error($query);
 					}
 				}
 			}
 		
 			$where = "";
+			$order = "ORDER BY yhtio";
 		
 			$oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in','like' => 'like','gt' => '>','lt' => '<','gte' => '=>','lte' => '<=');
 		
@@ -86,6 +89,9 @@
 					if ($oper == "in") {
 						$raj = "('".str_replace(",", "','", $rajaus[$kentta])."')";
 					}
+					elseif ($oper == "like") {
+						$raj = "'".$rajaus[$kentta]."%'";
+					}
 					else {
 						$raj = "'".$rajaus[$kentta]."'";
 					}
@@ -93,10 +99,21 @@
 					$where .= " and $kentta ".$oper_array[$oper]." ".$raj;				
 				}
 			}
-				
+			
+			
+			asort($jarjestys);
+			
+			foreach($jarjestys as $kentta => $jarj) {				
+				if ($jarj != "") {
+					$order .= ", $kentta";
+				}
+			}	
+					
 			$sqlhaku = "SELECT ".implode(",", $kentat)." 
 						FROM $table 
-						WHERE yhtio='$kukarow[yhtio]' $where";
+						WHERE yhtio='$kukarow[yhtio]' 
+						$where
+						$order";
 			$result = mysql_query($sqlhaku) or pupe_error($sqlhaku);
 		
 			echo "<font class='message'>$sqlhaku<br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
@@ -122,6 +139,7 @@
         
 				if(isset($workbook)) {
 					for ($i=0; $i < mysql_num_fields($result); $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result,$i))), $format_bold);
+					$worksheet->write($excelrivi, $i, "TOIMINTO", $format_bold);
 					$excelrivi++;
 				}
         
@@ -138,6 +156,7 @@
 							}
 						}
 					}
+					$worksheet->writeString($excelrivi, $i, "MUUTA");
 					$excelrivi++;
 				}
         
@@ -211,7 +230,7 @@
 			echo "</table><br><br>";
 				
 			echo "<table>";
-			echo "<tr><th>Kenttä</th><th>Valitse</th><th>Operaattori</th><th>Rajaus</th></tr>";
+			echo "<tr><th>Kenttä</th><th>Valitse</th><th>Operaattori</th><th>Rajaus</th><th>Järjestys</th></tr>";
 
 			$kala = array();
 
@@ -237,6 +256,10 @@
 			
 					if ($srow["selitetark_3"] != '') {
 						$rajaus[$row[0]] = $srow["selitetark_3"];
+					}
+					
+					if ((int) $srow["jarjestys"] > 0) {
+						$jarjestys[$row[0]] = $srow["jarjestys"];
 					}
 				}
 			
@@ -265,11 +288,12 @@
 										<option value='gte'	$sel[gte]>&gt;=</option>
 										<option value='lte'	$sel[lte]>&lt;=</option>
 										</select></td>
-									<td><input type='text' name='rajaus[$row[0]]' value='".$rajaus[$row[0]]."'></td>
+									<td><input type='text' size='15' name='rajaus[$row[0]]' value='".$rajaus[$row[0]]."'></td>
+									<td><input type='text' size='5'  name='jarjestys[$row[0]]' value='".$jarjestys[$row[0]]."'></td>
 									</tr>");
 			}
 
-			sort($kala);
+			//sort($kala);
 		
 			foreach ($kala as $rivi) {
 				echo "$rivi";

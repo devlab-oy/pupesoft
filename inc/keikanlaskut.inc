@@ -1,5 +1,7 @@
 <?php
 
+	enable_ajax();
+
 	echo "<font class='head'>".t("Varastonarvo selvittelyä")."</font><hr>";
 
 	if (!isset($app)) $app = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -44,6 +46,10 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
+		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"eee\")'>Näytä / Piilota</a><br><br>";
+
+		echo "<div id='eee' style='display:none'>";
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("Ytunnus")."</th>";
@@ -87,15 +93,16 @@
 		echo "<th colspan='2'></th>";
 		echo "</tr>";
 		echo "</table><br>";
+		echo "</div>";
 	}
 	else {
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
 	}
 
-	echo "<br><font class='head'>".t("Rahtilaskut, joita ei ole liitetty kokonaan keikkoihin")."</font><hr>";
+	echo "<font class='head'>".t("Rahtilaskut, joita ei ole liitetty kokonaan keikkoihin")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.tapvm, lasku.vienti, lasku2.tunnus, lasku.tunnus latunnus,
-				sum(tiliointi.summa) 'varastossa', 
+				sum(tiliointi.summa) 'varastossa',
 				round(lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)),2) 'summaeur',
 				round(sum(lasku2.summa*(if(lasku2.maksu_kurssi=0, lasku2.vienti_kurssi, lasku2.maksu_kurssi))),2) 'kohdistettu'
 				FROM lasku
@@ -115,6 +122,10 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
+		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"kaa\")'>Näytä / Piilota</a><br><br>";
+
+		echo "<div id='kaa' style='display:none'>";
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("Ytunnus")."</th>";
@@ -164,6 +175,7 @@
 		echo "<th colspan='2'></th>";
 		echo "</tr>";
 		echo "</table><br>";
+		echo "</div>";
 	}
 	else {
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
@@ -192,6 +204,10 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
+		echo mysql_num_rows($result)." tositetta. <a href='javascript:toggleGroup(\"koo\")'>Näytä / Piilota</a><br><br>";
+
+		echo "<div id='koo' style='display:none'>";
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("Tili")."</th>";
@@ -229,6 +245,7 @@
 		echo "<th colspan='2'></th>";
 		echo "</tr>";
 		echo "</table><br>";
+		echo "</div>";
 	}
 	else {
 		echo "<font class='message'>".t("Ei tiliöintejä")."!</font><br><br>";
@@ -256,6 +273,10 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
+		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"nee\")'>Näytä / Piilota</a><br><br>";
+
+		echo "<div id='nee' style='display:none'>";
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("Ytunnus")."</th>";
@@ -299,6 +320,7 @@
 		echo "<th colspan='2'></th>";
 		echo "</tr>";
 		echo "</table><br>";
+		echo "</div>";
 	}
 	else {
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
@@ -322,6 +344,10 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
+		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"vii\")'>Näytä / Piilota</a><br><br>";
+
+		echo "<div id='vii' style='display:none'>";
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("Ytunnus")."</th>";
@@ -359,6 +385,86 @@
 		echo "<th colspan='2'></th>";
 		echo "</tr>";
 		echo "</table><br>";
+		echo "</div>";
+	}
+	else {
+		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
+	}
+
+	echo "<font class='head'>".t("Laskut joiden varastokirjaukset eivät stemmaa")."</font><hr>";
+
+	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
+					(SELECT sum(summa)
+						FROM tiliointi AS tiliointi1
+						WHERE tiliointi1.yhtio = lasku.yhtio and tiliointi1.ltunnus = lasku.tunnus and tiliointi1.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarastonmuutos]') and tiliointi1.korjattu = ''
+					) summa1,
+					(SELECT sum(summa)
+						FROM tiliointi AS tiliointi2
+						WHERE tiliointi2.yhtio = lasku.yhtio and tiliointi2.ltunnus = lasku.tunnus and tiliointi2.tilino in ('$yhtiorow[varasto]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[matkalla_olevat]') and tiliointi2.korjattu = ''
+					) summa2
+				FROM lasku
+				WHERE lasku.yhtio = '$kukarow[yhtio]' and
+				lasku.tila in ('H','Y','M','P','Q') and
+				lasku.tapvm >= '$avv-$akk-$app' and
+				lasku.tapvm <= '$lvv-$lkk-$lpp'
+				HAVING abs(abs(summa1) - abs(summa2)) > 0.01
+				ORDER BY lasku.tapvm, lasku.valkoodi, lasku.summa";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) > 0 ) {
+		echo mysql_num_rows($result)." laskua. <a href='javascript:toggleGroup(\"kuu\")'>Näytä / Piilota</a><br><br>";
+
+		echo "<div id='kuu' style='display:none'>";
+
+		echo "<table>";
+		echo "<tr>";
+		echo "<th>".t("Ytunnus")."</th>";
+		echo "<th>".t("Nimi")."</th>";
+		echo "<th>".t("Summa valuutassa")."</th>";
+		echo "<th>".t("Summa")."</th>";
+		echo "<th>".t("Ero")."</th>";
+		echo "<th>".t("Tapvm")."</th>";
+		echo "<th>".t("Tyyppi")."</th>";
+		echo "</tr>";
+
+		$yhteesa = 0;
+
+		while ($trow = mysql_fetch_array($result)) {
+
+			$vienti = $trow["vienti"];
+			if ($trow["vienti"] == 'A') $vienti = t('Kotimaa');
+			if ($trow["vienti"] == 'D') $vienti = t('EU');
+			if ($trow["vienti"] == 'G') $vienti = t('ei-EU');
+			if ($trow["vienti"] == 'B') $vienti = t('Kotimaa huolinta/rahti');
+			if ($trow["vienti"] == 'C') $vienti = t('Kotimaa vaihto-omaisuus');
+			if ($trow["vienti"] == 'J') $vienti = t('Kotimaa raaka-aine');
+			if ($trow["vienti"] == 'E') $vienti = t('EU huolinta/rahti');
+			if ($trow["vienti"] == 'F') $vienti = t('EU vaihto-omaisuus');
+			if ($trow["vienti"] == 'K') $vienti = t('EU raaka-aine');
+			if ($trow["vienti"] == 'H') $vienti = t('ei-EU huolinta/rahti');
+			if ($trow["vienti"] == 'I') $vienti = t('ei-EU vaihto-omaisuus');
+			if ($trow["vienti"] == 'L') $vienti = t('ei-EU raaka-aine');
+
+			echo "<tr class='aktiivi'>";
+			echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
+			echo "<td>$trow[nimi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
+			echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", (abs($trow["summa1"]) - abs($trow["summa2"])))." $yhtiorow[valkoodi]</td>";
+			echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
+			echo "<td>$vienti</td>";
+			echo "</tr>";
+
+			$yhteesa += (abs($trow["summa1"]) - abs($trow["summa2"]));
+		}
+
+		echo "<tr>";
+		echo "<th colspan='4'>".t("Yhteensä")."</th>";
+		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+		echo "<th colspan='2'></th>";
+		echo "</tr>";
+		echo "</table><br>";
+		echo "</div>";
 	}
 	else {
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
@@ -378,6 +484,10 @@
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0 ) {
+		echo mysql_num_rows($result)." keikkaa. <a href='javascript:toggleGroup(\"see\")'>Näytä / Piilota</a><br><br>";
+
+		echo "<div id='see' style='display:none'>";
+
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("Keikka")."</th>";
@@ -407,6 +517,7 @@
 		echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
 		echo "</tr>";
 		echo "</table><br>";
+		echo "</div>";
 	}
 	else {
 		echo "<font class='message'>".t("Ei keikkoja")."!</font><br><br>";

@@ -92,12 +92,7 @@
 					lasku.kuljetusmuoto,
 					round(sum(tilausrivi.kpl),0) kpl,
 					tullinimike.su_vientiilmo su,
-					if (round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi *
-					(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
-					/ lasku.summa) * lasku.bruttopaino), 0) > 0.5,
-					round(sum((tilausrivi.kpl * tilausrivi.hinta * lasku.vienti_kurssi *
-					(SELECT if(tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno LIMIT 1)
-					/ lasku.summa) * lasku.bruttopaino), 0), 1) as paino,
+					if(round(sum(tilausrivi.rivihinta / lasku.summa * lasku.bruttopaino), 0) > 0.5, round(sum(tilausrivi.rivihinta / lasku.summa * lasku.bruttopaino), 0), 1) as paino,
 					if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 					group_concat(lasku.tunnus) as kaikkitunnukset,
 					group_concat(distinct tilausrivi.perheid2) as perheid2set,

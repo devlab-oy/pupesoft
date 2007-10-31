@@ -594,7 +594,7 @@
 				
 			}
 
-			echo "<tr>";
+			echo "<tr class='aktiivi'>";
 
 			if (strtoupper($row["status"]) == "P") {
 				$vari = "tumma";
@@ -739,7 +739,7 @@
 					$trow = mysql_fetch_array($tuoteres);
 					require("alehinta.inc");	
 
-					$myyntihinta = number_format($hinta * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}11";
+					$myyntihinta = number_format($hinta * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}";
 				}
 				elseif ($kukarow["extranet"] != "") {
 
@@ -748,8 +748,6 @@
 					$oleasrow = mysql_fetch_array($oleasres);
 
 					if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
-
-						$myyntihinta = number_format($row["myyntihinta"], 2, ',', ' '). " $yhtiorow[valkoodi]";
 
 						$query = "	select *
 									from hinnasto
@@ -776,7 +774,9 @@
 							}
 						}
 					}
-
+					else {
+						$myyntihinta = number_format($row["myyntihinta"], 2, ',', ' '). " $yhtiorow[valkoodi]";	
+					}
 				}
 				else {
 					$query = "	SELECT distinct valkoodi, maa from hinnasto

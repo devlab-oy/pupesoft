@@ -230,7 +230,7 @@ if($tee == "tuotteen_lisatiedot") {
 					$liitetiedostot .= "{$row["selite"]}<br><a href='view.php?id={$row["tunnus"]}' target='_blank'><img src='view.php?id={$row["peukalokuva"]}'></a><br><font class='info'>".t("Klikkaa kuvaa")."</info><br>";
 				}
 				else {
-					$liitetiedostot .= "<a href='view.php?id={$row["tunnus"]}' target='_blank'>{$row["selite"]}</a><br>";
+					$liitetiedostot .= "<a href='view.php?id={$row["tunnus"]}'  class='liite'>{$row["selite"]}</a><br>";
 				}
 			}
 			else {				
@@ -241,7 +241,7 @@ if($tee == "tuotteen_lisatiedot") {
 						$edkaytto = $row["kayttotarkoitus"];
 					}
 					
-					$liitetiedostot .= "<a href='view.php?id={$row["tunnus"]}'>{$row["selite"]}</a><br>";
+					$liitetiedostot .= "<a href='view.php?id={$row["tunnus"]}' class='liite'>{$row["selite"]}</a><br>";
 				}
 			}
 		}

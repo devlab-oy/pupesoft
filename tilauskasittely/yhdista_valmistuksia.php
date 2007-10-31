@@ -1,5 +1,7 @@
 <?php
 	require ("../inc/parametrit.inc");
+
+	js_popup();
 	
 	echo "<font class='head'>".t("Yhdistä valmistuksia").":</font><hr>";
 	
@@ -142,11 +144,22 @@
 				<input type='hidden' name='toim'  value='$toim'>";
 
 		while ($prow = mysql_fetch_array ($presult)) {
+			$linkki = "";
+			$query = "SELECT fakta2 FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '$prow[tuoteno]' and fakta2 != '' ORDER BY isatuoteno, tuoteno LIMIT 1";
+			$faktares = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($faktares) > 0) {
+				$faktarow = mysql_fetch_array($faktares);
+				$id = uniqid();
+				echo "<div id='$id' class='popup' style='width: 400px'>
+						<font class='head'>Tuotteen yhdistettävyys</font><br>
+						$faktarow[fakta2]<br></div>";						
+				$linkki = "<div style='text-align: right; float:right;'>&nbsp;&nbsp;<a href='#' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"><img src='../pics/lullacons/info.png' height='13'></a></div>";
+			}
 			
 			echo "<tr>";
 			echo "<td>$prow[otunnus]</td>";			
 			echo "<td align='right'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
-			echo "<td><a href='../tuote.php?tee=Z&tuoteno=$prow[$i]'>$prow[tuoteno]</a></td>";
+			echo "<td><a href='../tuote.php?tee=Z&tuoteno=$prow[$i]'>$prow[tuoteno]</a>$linkki</td>";
 			echo "<td align='right'>$prow[tilattu]</td>";
 			echo "<td align='right'>$prow[kerayspvm]</td>";
 			echo "<td align='right'>$prow[toimaika]</td>";			

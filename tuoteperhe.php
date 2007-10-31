@@ -16,10 +16,10 @@
 	}
 	
 	if ($tee == 'TALLENNAFAKTA') {
-		$query = "UPDATE tuoteperhe SET fakta = '' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno'";
+		$query = "UPDATE tuoteperhe SET fakta = '', fakta2 = '' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
 		
-		$query = "UPDATE tuoteperhe SET fakta = '$fakta' WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
+		$query = "UPDATE tuoteperhe SET fakta = '$fakta', fakta2 = '$fakta2'  WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		echo "<br><br><font class='message'>".t("Faktatieto tallennettu")."!</font><br>";
@@ -388,7 +388,7 @@
 				echo "<tr><td>$isatuoteno - $isarow[nimitys]</td><td>";
 				
 				
-				$query = "SELECT fakta, ei_nayteta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
+				$query = "SELECT fakta, fakta2, ei_nayteta FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = '$hakutyyppi' and isatuoteno = '$isatuoteno' ORDER BY isatuoteno, tuoteno LIMIT 1";
 				$ressu = mysql_query($query) or pupe_error($query);
 				$faktarow = mysql_fetch_array($ressu);
 				
@@ -440,6 +440,11 @@
 				
 				echo "<td><textarea cols='35' rows='7' name='fakta'>$faktarow[fakta]</textarea></td>";
 				
+				if($toim == "RESEPTI") {
+					echo "</tr><tr>";
+					echo "<th>".t("Yhdistämisen lisätiedot").": </th></tr>";
+					echo "<td><textarea cols='35' rows='4' name='fakta2'>$faktarow[fakta2]</textarea></td>";
+				}
 				echo "<td class='back'>  				
 					  <input type='submit' value='".t("Tallenna")."'>
 					  </td></form>";		

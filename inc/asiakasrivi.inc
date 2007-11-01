@@ -411,7 +411,45 @@
 		$ulos .= "</select></td>";
 		$jatko = 0;
 	}
-	
+
+	if(	mysql_field_name($result, $i) == "laskutus_nimi" or
+		mysql_field_name($result, $i) == "laskutus_nimitark" or
+		mysql_field_name($result, $i) == "laskutus_osoite" or
+		mysql_field_name($result, $i) == "laskutus_postino" or
+		mysql_field_name($result, $i) == "laskutus_postitp" or	
+		mysql_field_name($result, $i) == "laskutus_maa") {
+			
+		if($yhtiorow['laskutyyppi'] == 3) {
+			if (mysql_field_name($result, $i) == "laskutus_maa") {
+				$query = "	SELECT distinct koodi, nimi
+							FROM maat
+							WHERE nimi != ''
+							ORDER BY koodi";
+				$vresult = mysql_query($query) or pupe_error($query);
+				$ulos = "<td><select name='$nimi'>";
+
+				$ulos .= "<option value = '' ></option>";
+
+				while ($vrow=mysql_fetch_array($vresult)) {
+					$sel="";
+					if (strtoupper($trow[$i]) == strtoupper($vrow[0])) {
+						$sel = "selected";
+					}
+					elseif($trow[$i] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["laskutus_maa"])) {
+						$sel = "selected";
+					}
+					$ulos .= "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+				}
+
+				$ulos .= "</select></td>";
+				$jatko = 0;
+			}	
+		}
+		else {
+			$tyyppi = 0;
+		}	
+	}
+
 	if (mysql_field_name($result, $i) == "toimitustapa") {
 		$query = "	SELECT toimitustapa.tunnus, selite
 						FROM toimitustapa

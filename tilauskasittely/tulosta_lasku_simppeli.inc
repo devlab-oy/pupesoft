@@ -19,10 +19,11 @@ if (!function_exists('tulosta_lasku')) {
 		}
 
 		// Haetaan laskun tiedot ja joinataan viimeisimmän laskun_lisätiedot...
-		$query = "	SELECT lasku.*, if(laskunro=0, '', laskunro) laskunro, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, if(lasku.tapvm='0000-00-00', now(), lasku.tapvm) päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
-					(select if(count(distinct(left(toimitettuaika,10)))>1,'useita', max(toimitettuaika)) from tilausrivi where yhtio=lasku.yhtio and $mika=lasku.tunnus) toimituspvm, '$yhtiorow[viivastyskorko]%' viivästyskorko, laskun_lisatiedot.rivihintoja_ei_nayteta,
+		$query = "	SELECT lasku.*, laskun_lisatiedot.*, if(laskunro=0, '', laskunro) laskunro, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, if(lasku.tapvm='0000-00-00', now(), lasku.tapvm) päiväys, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
+					(select if(count(distinct(left(toimitettuaika,10)))>1,'useita', max(toimitettuaika)) from tilausrivi where yhtio=lasku.yhtio and $mika=lasku.tunnus) toimituspvm, '$yhtiorow[viivastyskorko]%' viivästyskorko, 
 					concat_ws(' ', postino, postitp) postiosoite,
 					concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
+					concat_ws(' ', laskutus_postino, laskutus_postitp) laskutus_postiosoite,							
 					yhteyshenkilo_kaupallinen.nimi asiakkaan_kaupallinen_käsittelijä,
 					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö,
 					lasku.tunnus toimitus
@@ -187,8 +188,27 @@ if (!function_exists('tulosta_lasku')) {
 					}
 
 					//	Laitetaan osoitetiedot vasemmalle
-					$h=250;
-					$pdf->writeToTemplate($h, 1, 0, $s[1], t("Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
+					$h=260;
+					if($laskurow["laskutus_nimi"] != "") {
+						$pdf->writeToTemplate($h, 1, 0, $s[1], t("Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
+						$h-=$pdf->ln();
+						foreach(array("laskutus_nimi", "laskutus_nimitark", "laskutus_osoite", "laskutus_postiosoite", "laskutus_maa") as $key) {
+							if($key == "maa") {
+								$pdf->writeToTemplate($h, 1, 0, $s[0], strtoupper(maa($laskurow[$key], $kieli)), "norm", "L", "", $tid);
+							}
+							else {
+								$pdf->writeToTemplate($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "", $tid);
+							}
+							$h-=$pdf->ln();
+						}
+						$h-=$pdf->ln();	
+						
+						$pdf->writeToTemplate($h, 1, 0, $s[1], t("Ostaja", $kieli).":", "norm", "L", "B", $tid);
+					}							
+					else {
+						$pdf->writeToTemplate($h, 1, 0, $s[1], t("Ostaja/Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
+					}
+					
 					$h-=$pdf->ln();
 					foreach(array("nimi", "nimitark", "osoite", "postiosoite", "maa") as $key) {
 						if($key == "maa") {
@@ -212,8 +232,14 @@ if (!function_exists('tulosta_lasku')) {
 						}
 						$h-=$pdf->ln();	
 					}
-
-					$h=195;
+					
+					if($laskurow["laskutus_nimi"] != "") {
+						$h=180;
+					}
+					else {
+						$h=200;
+					}
+					
 					//	Tehdään template
 					$tid2=$pdf->template->create();
 					
@@ -263,7 +289,12 @@ if (!function_exists('tulosta_lasku')) {
 		}
 		
 		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, "JOO");
-		$h = 180;
+		if($laskurow["laskutus_nimi"] != "") {
+			$h=170;
+		}
+		else {
+			$h=190;
+		}
 		
 		if ($toim == 'PROFORMA') {
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {

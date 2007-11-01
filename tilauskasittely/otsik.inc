@@ -532,6 +532,52 @@
 					<td><input type='text' name='tpostino' size='10' maxlength='15' value='$srow[toim_postino]'> <input type='text' name='tpostitp' size='21' maxlength='20' value='$srow[toim_postitp]'></td></tr>";
 			echo "</table>";
 			echo "</td>";
+			
+			if($yhtiorow['laskutyyppi'] == 3) {
+				echo "<td valign='top'>";
+				echo "<table cellpadding='1' cellspacing='1'>";
+				echo "<tr>
+						<th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
+				echo "<tr>
+						<td valign='top'> ".t("Nimi").": </td>
+						<td><input type='text' name='laskutus_nimi' size='35' maxlength='31' value='$srow[laskutus_nimi]'></td></tr>";
+				echo "<tr>
+						<td></td>
+						<td><input type='text' name='laskutus_nimitark' size='35' maxlength='31'  value='$srow[laskutus_nimitark]'></td></tr>";
+				echo "<tr>
+						<td valign='top'>".t("Osoite").": </td>
+						<td><input type='text' name='laskutus_osoite' size='35' maxlength='31' value='$srow[laskutus_osoite]'></td></tr>";
+				echo "<tr>
+						<td valign='top'>".t("Postitp").": </td>
+						<td><input type='text' name='laskutus_postino' size='10' maxlength='15' value='$srow[laskutus_postino]'> <input type='text' name='laskutus_postitp' size='21' maxlength='20' value='$srow[laskutus_postitp]'></td></tr>";
+						
+				$query = "	SELECT distinct koodi, nimi
+							FROM maat
+							WHERE nimi != ''
+							ORDER BY koodi";
+				$vresult = mysql_query($query) or pupe_error($query);
+				
+				echo "<tr><td valign='top'> ".t("Maa").": </td>
+						<td><select name='laskutus_maa' style='width: 250px;'>";
+
+				while ($vrow=mysql_fetch_array($vresult)) {
+					$sel="";
+					if (strtoupper($srow["laskutus_maa"]) == strtoupper($vrow[0])) {
+						$sel = "selected";
+					}
+					elseif($srow["laskutus_maa"] == "" and strtoupper($vrow[0]) == strtoupper($yhtiorow["maa"])) {
+						$sel = "selected";
+					}
+					echo "<option value = '".strtoupper($vrow[0])."' $sel>".t($vrow[1])."</option>";
+				}
+
+				echo "</select></td></tr>";
+
+				echo "</table>";
+				echo "</td>";
+				
+			}
+			
 			echo "</tr>";
 
 			echo "</table><br>";
@@ -2471,6 +2517,12 @@
 							kolm_postino				= '$kolm_postino',
 							kolm_postitp				= '$kolm_postitp',
 							kolm_maa					= '$kolm_maa',
+							laskutus_nimi				= '$laskutus_nimi',
+							laskutus_nimitark			= '$laskutus_nimitark',
+							laskutus_osoite				= '$laskutus_osoite',
+							laskutus_postino			= '$laskutus_postino',
+							laskutus_postitp			= '$laskutus_postitp',
+							laskutus_maa				= '$laskutus_maa',
 							toimitusehto2				= '$toimitusehto2',
 							projektipaallikko			= '$projektipaallikko',
 							yhteyshenkilo_kaupallinen	= '$yhteyshenkilo_kaupallinen',

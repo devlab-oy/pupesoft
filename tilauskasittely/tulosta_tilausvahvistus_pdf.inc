@@ -8,9 +8,10 @@
 				global $yhtiorow, $kukarow, $fonts;
 
 				// Haetaan laskun tiedot
-				$query = "	SELECT lasku.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika päiväys, laskun_lisatiedot.asiakkaan_kohde, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, lasku.tunnus toimitus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT, laskun_lisatiedot.rivihintoja_ei_nayteta,
+				$query = "	SELECT lasku.*, laskun_lisatiedot.*, lasku.tunnus tunnus, valkoodi valuutta, lasku.nimi nimi, lasku.luontiaika päiväys, lasku.tunnusnippu projekti, if(lasku.tunnusnippu=0, lasku.tunnus,tunnusnippu) tilaus, lasku.tunnus toimitus, viesti asiakkaan_viite, sisviesti1 lisätiedot, lasku.ytunnus asiakkaan_VAT,
 							concat_ws(' ', postino, postitp) postiosoite,
 							concat_ws(' ', toim_postino, toim_postitp) toim_postiosoite,
+							concat_ws(' ', laskutus_postino, laskutus_postitp) laskutus_postiosoite,							
 							yhteyshenkilo_kaupallinen.nimi asiakkaan_kaupallinen_käsittelijä,
 							yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö
 							FROM lasku
@@ -135,8 +136,28 @@
 							}
 
 							//	Laitetaan toimitustiedot vasemmalle
-							$h=250;
-							$pdf->writeToTemplate($h, 1, 0, $s[1], t("Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
+							$h=260;
+							
+							if($laskurow["laskutus_nimi"] != "") {
+								$pdf->writeToTemplate($h, 1, 0, $s[1], t("Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
+								$h-=$pdf->ln();
+								foreach(array("laskutus_nimi", "laskutus_nimitark", "laskutus_osoite", "laskutus_postiosoite", "laskutus_maa") as $key) {
+									if($key == "maa") {
+										$pdf->writeToTemplate($h, 1, 0, $s[0], strtoupper(maa($laskurow[$key], $kieli)), "norm", "L", "", $tid);
+									}
+									else {
+										$pdf->writeToTemplate($h, 1, 0, $s[0], $laskurow[$key], "norm", "L", "", $tid);
+									}
+									$h-=$pdf->ln();
+								}
+								$h-=$pdf->ln();	
+								
+								$pdf->writeToTemplate($h, 1, 0, $s[1], t("Ostaja", $kieli).":", "norm", "L", "B", $tid);
+							}							
+							else {
+								$pdf->writeToTemplate($h, 1, 0, $s[1], t("Ostaja/Laskutusosoite", $kieli).":", "norm", "L", "B", $tid);
+							}
+
 							$h-=$pdf->ln();
 							foreach(array("nimi", "nimitark", "osoite", "postiosoite", "maa") as $key) {
 								if($key == "maa") {
@@ -147,7 +168,7 @@
 								}
 								$h-=$pdf->ln();
 							}
-							$h-=$pdf->ln(1.5);
+							$h-=$pdf->ln();
 
 							$pdf->writeToTemplate($h, 1, 0, $s[1], t("Toimitusosoite", $kieli).":", "norm", "L", "B", $tid);
 							$h-=$pdf->ln();
@@ -160,8 +181,14 @@
 								}
 								$h-=$pdf->ln();
 							}
-
-							$h=190;
+							
+							if($laskurow["laskutus_nimi"] != "") {
+								$h=170;
+							}
+							else {
+								$h=190;
+							}
+							
 							//	Tehdään template
 							$tid2=$pdf->template->create();
 
@@ -201,7 +228,12 @@
 				}
 
 				$pdf=alku($pdf, $laskurow,$kieli, "OK");
-				$h = 180;
+				if($laskurow["laskutus_nimi"] != "") {
+					$h=160;
+				}
+				else {
+					$h=180;
+				}
 
 				if($laskurow["tila"] == "R") {
 					$query = "	SELECT GROUP_CONCAT(tunnus) tunnukset

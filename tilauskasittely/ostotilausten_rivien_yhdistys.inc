@@ -24,7 +24,13 @@ if ($tee == "teeyhdistys") {
 				$query = "update tilausrivi set uusiotunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' order by yhtio";
 				$result = mysql_query($query) or pupe_error($query);
 
-				$query = "delete from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]'";
+				$query = "delete from lasku where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus = 0";
+				$result = mysql_query($query) or pupe_error($query);
+
+				$query = "update lasku set laskunro = '$laskurow[laskunro]' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus != 0";
+				$result = mysql_query($query) or pupe_error($query);
+				
+				$query = "update lasku set kohdistettu = '' where yhtio='$kukarow[yhtio]' and tila='K' and tunnus = '$otunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
 			else {

@@ -3,13 +3,19 @@
 // tarvitaan $kukarow, $tuoteno ja $tee jossa on paalle, puolipaalle tai pois
 $debug = 0;
 
-if ($tuoteno != "") {
+if (trim($tuoteno) == "") {
+	$tee='';	
+}
 
-	$query = "SELECT tuote.tunnus, tuote.tuoteno, kehahin, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, epakurantti100pvm, sum(saldo) saldo
-			FROM tuote
-			LEFT JOIN tuotepaikat ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
-			WHERE tuote.yhtio = '$kukarow[yhtio]' and tuote.tuoteno = '$tuoteno'
-			GROUP by 1,2,3,4,5,6,7";
+if ($tuoteno != "" and $tee != '') {
+
+	$query = "	SELECT tuote.tunnus, tuote.tuoteno, kehahin, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, epakurantti100pvm, sum(saldo) saldo
+				FROM tuote
+				LEFT JOIN tuotepaikat ON tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno
+				WHERE tuote.yhtio = '$kukarow[yhtio]' 
+				and tuote.sarjanumeroseuranta != 'S'
+				and tuote.tuoteno = '$tuoteno'
+				GROUP by 1,2,3,4,5,6,7";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 1) {

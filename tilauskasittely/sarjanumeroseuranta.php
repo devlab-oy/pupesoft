@@ -653,8 +653,8 @@
 					and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
 					and sarjanumeroseuranta.ostorivitunnus in (0, $rivitunnus)
 					$lisa
-					$lisa2
 					GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero
+					$lisa2
 					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
 	}
 	elseif($from == "INVENTOINTI") {
@@ -684,8 +684,8 @@
 					and sarjanumeroseuranta.ostorivitunnus in (0, $rivitunnus)
 					and sarjanumeroseuranta.myyntirivitunnus = 0
 					$lisa
-					$lisa2
 					GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero
+					$lisa2
 					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
 	}
 	else {

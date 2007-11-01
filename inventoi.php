@@ -457,7 +457,7 @@
 								$result = mysql_query($query) or pupe_error($query);
 							}
 							
-							//Piilotetaan tän tuotepaikan pois-invatut sarjanumerot
+							// Piilotetaan tän tuotepaikan pois-invatut sarjanumerot
 							if (is_array($sarjanumero_kaikki[$i]) and count($sarjanumero_kaikki[$i]) > 0) {
 								if ((float) $skp == 0) {
 									// Ei ruksatut sarjanumerot poistetaan
@@ -465,7 +465,9 @@
 										if(!is_array($sarjanumero_valitut[$i]) or !in_array($snro_tun, $sarjanumero_valitut[$i])) {
 											$query = "	UPDATE sarjanumeroseuranta
 														SET myyntirivitunnus = '-1',
-														siirtorivitunnus 	 = '-1'
+														siirtorivitunnus 	 = '-1',
+														muuttaja			 = '$kukarow[kuka]',
+														muutospvm			 = now()
 														WHERE yhtio	= '$kukarow[yhtio]'
 														and tunnus = $snro_tun";
 											$sarjares = mysql_query($query) or pupe_error($query);								
@@ -477,7 +479,9 @@
 									foreach ($sarjanumero_valitut[$i] as $snro_tun) {
 										$query = "	UPDATE sarjanumeroseuranta
 													SET myyntirivitunnus = '-1',
-													siirtorivitunnus 	 = '-1'
+													siirtorivitunnus 	 = '-1',
+													muuttaja			 = '$kukarow[kuka]',
+													muutospvm			 = now()
 													WHERE yhtio	= '$kukarow[yhtio]'
 													and tunnus = $snro_tun";
 										$sarjares = mysql_query($query) or pupe_error($query);
@@ -485,12 +489,14 @@
 								}
 							}
 							
-							//Piilotetaan tän tuotepaikan pois-invatut sarjanumerot
+							//Piilotetaan tän tuotepaikan pois-invatut eränumerot
 							if (is_array($eranumero_kaikki[$i]) and count($eranumero_kaikki[$i]) > 0) {
 								if ((float) $skp == 0) {
 									foreach ($eranumero_kaikki[$i] as $snro_tun) {
 										$query = "	UPDATE sarjanumeroseuranta
-													SET era_kpl = '".$eranumero_valitut[$i][$snro_tun]."'
+													SET era_kpl 		 = '".$eranumero_valitut[$i][$snro_tun]."',
+													muuttaja			 = '$kukarow[kuka]',
+													muutospvm			 = now()
 													WHERE yhtio	= '$kukarow[yhtio]'
 													and tunnus = $snro_tun";
 										$sarjares = mysql_query($query) or pupe_error($query);									
@@ -501,7 +507,9 @@
 									foreach ($sarjanumero_valitut[$i] as $snro_tun) {
 										$query = "	UPDATE sarjanumeroseuranta
 													SET myyntirivitunnus = '-1',
-													siirtorivitunnus 	 = '-1'
+													siirtorivitunnus 	 = '-1',
+													muuttaja			 = '$kukarow[kuka]',
+													muutospvm			 = now()
 													WHERE yhtio	= '$kukarow[yhtio]'
 													and tunnus = $snro_tun";
 										$sarjares = mysql_query($query) or pupe_error($query);

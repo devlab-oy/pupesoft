@@ -1793,8 +1793,19 @@
 			
 			echo "<tr><td>".t("Asiakkaan tilausnumero").":</td><td colspan = '1'><input type='text' size='43' name='asiakkaan_tilausnumero' value='$srow[asiakkaan_tilausnumero]'><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 			
-			if($yhtiorow["tilauksen_kohteet"] != "K") {
-				echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";			
+			if($yhtiorow["tilauksen_kohteet"] == "K") {
+				if($toim == "TARJOUS") {
+					if($kukarow["kesken"] == 0) {
+						$query = "	SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji = 'saate'";
+						$saateres = mysql_query($query) or pupe_error($query);
+						$saaterow = mysql_fetch_array($saateres);
+						$srow["saate"] = $saaterow["selite"];
+					}
+					echo "<tr><td>".t("Saateteksti")." :</td><td><textarea name='saate' rows='2' cols='40'>$srow[saate]</textarea></td><td>".t("tarjous")."</td></tr>";
+				}
+			}
+			else {
+				echo "<tr><td>".t("Kohde").":</td><td colspan = '1'><input type='text' size='43' name='kohde' value='$srow[kohde]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")."</td></tr>";
 			}
 
 			echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";

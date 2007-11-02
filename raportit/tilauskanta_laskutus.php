@@ -101,7 +101,7 @@
 			//echo "<pre>$query</pre>";
 						
 			if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus.php") !== FALSE) {
-				if(include('Spreadsheet/Excel/Writer.php')) {
+				if(@include('Spreadsheet/Excel/Writer.php')) {
 
 					//keksitään failille joku varmasti uniikki nimi:
 					list($usec, $sec) = explode(' ', microtime());
@@ -160,7 +160,7 @@
 				$worksheet->write($excelrivi, 0, t("Tilauskanta"));
 			}
 		
-			for ($i=$kka; $i <= $kkl; $i++) { 	
+			for ($i=$kka*1; $i <= $kkl; $i++) { 	
 				echo "<th>".$MONTH_ARRAY[$i]."</td>";
 				
 				if(isset($workbook)) {
@@ -225,7 +225,7 @@
 					}
 				}
 				
-				for ($i=$kka; $i <= $kkl; $i++) { 	
+				for ($i=$kka*1; $i <= $kkl; $i++) { 	
 					echo "<td valign='top' align='right'>".(float) $row[$i.".".$ii]."</td>";
 					
 					if(isset($workbook)) {
@@ -238,7 +238,7 @@
 				if ($ii == 6) {
 					echo "<tr><th>Index</th>";
 					
-					for ($i=$kka; $i <= $kkl; $i++) { 	
+					for ($i=$kka*1; $i <= $kkl; $i++) { 	
 						echo "<td valign='top' align='right'>".(float) round(($row[$i.".3"]/$row[$i.".4"]*100),0)."</td>";
 
 						if(isset($workbook)) {
@@ -250,7 +250,7 @@
 				if ($ii == 10) {
 					echo "<tr><th>Index</th>";
 					
-					for ($i=$kka; $i <= $kkl; $i++) { 	
+					for ($i=$kka*1; $i <= $kkl; $i++) { 	
 						echo "<td valign='top' align='right'>".(float) round(($row[$i.".7"]/$row[$i.".8"]*100),0)."</td>";
 
 						if(isset($workbook)) {

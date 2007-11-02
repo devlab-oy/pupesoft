@@ -13,7 +13,8 @@ if ($argv[1] == '') {
 
 $kukarow['yhtio'] = $argv[1];
 
-$keissit = array("Asiakas","Kustannupaikka","Laskunumero","Myynti","Nimike");
+$keissit = array("Asiakas","Kustannupaikka","Laskunumero","Myynti","Nimike","Monivarasto","Ostot","Ostotilausnumero","Varastonumero","Tapahtumalaji");
+//$keissit = array("Tapahtumalaji");
 
 mkdir("/tmp/infoglove");
 
@@ -29,7 +30,7 @@ foreach ($keissit as $keissi) {
 			break;
 		case "Kustannupaikka" :
 			// K = kustannuspaikka, O = kohde ja P = projekti
-			$query =	"SELECT tunnus, nimi
+			$query =	"SELECT tunnus, IF(INSTR(nimi,tunnus) != 0,LTRIM(RIGHT(nimi,CHAR_LENGTH(nimi)-CHAR_LENGTH(tunnus))),nimi) as nimi
 						FROM kustannuspaikka
 						WHERE kustannuspaikka.yhtio = '$kukarow[yhtio]' and tyyppi = 'K'";
 			break;
@@ -65,6 +66,42 @@ foreach ($keissit as $keissi) {
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						GROUP BY tuote.tuoteno";
 			break;
+		case "Monivarasto" :
+			$query =	"SELECT saldoaika, saldo, saldo*kehahin as Varastoarvo, tuotepaikat.tuoteno, LEFT(hyllyalue,1) as hyllyalue
+						FROM tuotepaikat
+						JOIN tuote ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno 
+						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+						ORDER BY tuotepaikat.tuoteno";
+			break;
+		case "Ostot" :
+			$query =	"SELECT tilausrivi.laskutettuaika, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.tuoteno, lasku.ytunnus, toimi.kustannuspaikka, lasku.laskunro
+						FROM lasku
+						JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus 
+						LEFT JOIN toimi ON lasku.yhtio = toimi.yhtio and lasku.liitostunnus = toimi.tunnus
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and tila = 'K' 
+						and alatila = 'X' 
+						and vanhatunnus = 0
+						ORDER BY lasku.tunnus";
+			break;
+		case "Ostotilausnumero" : 
+			$query =	"SELECT distinct laskunro
+						FROM lasku 
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and tila = 'K' 
+						and alatila = 'X' 
+						and vanhatunnus = 0
+						ORDER BY lasku.tunnus";
+			break;
+		case "Varastonumero" : 
+			$query =	"SELECT distinct LEFT(hyllyalue,1) as hyllyalue 
+						FROM tuotepaikat 
+						WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+						ORDER BY 1";
+			break;
+		case "Tapahtumalaji" : 
+			$query =	"SELECT 'Myynti' as Tapahtumalaji";
+			break;
 		default :
 			die("$keissi luonti epäonnistui!");
 	}
@@ -89,6 +126,7 @@ foreach ($keissit as $keissi) {
 	fclose($handle);
 }
 
+
 // Zipataan filet yhex zipix
 $cmd = "cd /tmp/infoglove/;/usr/bin/zip ".$kukarow['yhtio']."-infoglove.zip *";
 $palautus = exec($cmd);
@@ -102,5 +140,6 @@ $palautus = exec($cmd);
 //sit pitää dellata koko dirikka
 $cmd = "cd /tmp/;rm -rf infoglove/";
 $palautus = exec($cmd);
+
 
 ?>

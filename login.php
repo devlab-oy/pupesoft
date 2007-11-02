@@ -153,6 +153,9 @@ echo "
 if (file_exists("pics/pupesoft_logo.jpg")) {
 	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.jpg' border='0'>";
 }
+if (file_exists("pics/pupesoft_logo.gif")) {
+	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.gif' border='0'>";
+}
 else {
 	echo "<a target='_top' href='/'><img src='http://www.pupesoft.com/pupesoft.gif' border='0'>";
 }

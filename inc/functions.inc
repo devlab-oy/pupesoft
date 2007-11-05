@@ -2746,6 +2746,7 @@ if(!function_exists("aja_kysely")) {
 		global $kukarow, $hakukysely, $aja_kysely, $uusi_kysely, $tallenna_muutokset, $poista_kysely, $_POST;
 
 		if(!table_exists("muisti") or $hakukysely == "") {
+			echo "test";
 			return true;
 		}
 		
@@ -2875,6 +2876,8 @@ if(!function_exists("aja_kysely")) {
 			
 			echo "<font class='message'>".t("Suoritetaan kysely")." $aja_kysely</font>";
 		}
+
+		return true;
 	}	
 }
 

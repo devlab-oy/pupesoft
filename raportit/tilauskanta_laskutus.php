@@ -81,21 +81,21 @@
 				$i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1,  substr($i,0,4)));
 			}
 			
-			if ($kustannuspaikka != '') {
-				$kustp1 = ", asiakas, tuote";
-				$kustp2 = "and asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus and tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and (tuote.kustp='$kustannuspaikka' or asiakas.kustannuspaikka='$kustannuspaikka')";
-			}
-			
 			// Vika pilkku pois
 			$query  = substr($query, 0 ,-2);
 			
-			$query .= "	FROM lasku use index (yhtio_tila_tapvm), tilausrivi use index (yhtio_otunnus) $kustp1
-						WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='L'
-						and lasku.yhtio = '$kukarow[yhtio]'
+			if ($kustannuspaikka != '') {
+				$kustp = "	JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+							JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and (tuote.kustp='$kustannuspaikka' or asiakas.kustannuspaikka='$kustannuspaikka')) ";
+			}
+			
+			$query .= "	FROM lasku use index (yhtio_tila_tapvm) 
+						JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
+						$kustp
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila in ('L','N')
 						and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
-						and ((lasku.tapvm = '0000-00-00') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))
-						$kustp2";
+						and ((lasku.tapvm = '0000-00-00') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))";
 			$result = mysql_query($query) or pupe_error($query);
 			
 			//echo "<pre>$query</pre>";
@@ -239,10 +239,19 @@
 					echo "<tr><th>Index</th>";
 					
 					for ($i=$kka*1; $i <= $kkl; $i++) { 	
-						echo "<td valign='top' align='right'>".(float) round(($row[$i.".3"]/$row[$i.".4"]*100),0)."</td>";
-
-						if(isset($workbook)) {
-							$worksheet->writeNumber($excelrivi, $i, $row[$i.".".$ii]);
+						if ($row[$i.".4"] != 0) {
+							echo "<td valign='top' align='right'>".(float) round(($row[$i.".3"]/$row[$i.".4"]*100),0)."</td>";
+						
+							if(isset($workbook)) {
+								$worksheet->writeNumber($excelrivi, $i, round(($row[$i.".3"]/$row[$i.".4"]*100),0));
+							}
+						}
+						else {
+							echo "<td valign='top' align='right'>0</td>";	
+						
+							if(isset($workbook)) {
+								$worksheet->writeNumber($excelrivi, $i, 0);
+							}
 						}
 					}
 					echo "</tr>";
@@ -251,10 +260,19 @@
 					echo "<tr><th>Index</th>";
 					
 					for ($i=$kka*1; $i <= $kkl; $i++) { 	
-						echo "<td valign='top' align='right'>".(float) round(($row[$i.".7"]/$row[$i.".8"]*100),0)."</td>";
-
-						if(isset($workbook)) {
-							$worksheet->writeNumber($excelrivi, $i, $row[$i.".".$ii]);
+						if ($row[$i.".8"] != 0) {
+							echo "<td valign='top' align='right'>".(float) round(($row[$i.".7"]/$row[$i.".8"]*100),0)."</td>";
+							
+							if(isset($workbook)) {
+								$worksheet->writeNumber($excelrivi, $i, round(($row[$i.".7"]/$row[$i.".8"]*100),0));
+							}
+						}
+						else {
+							echo "<td valign='top' align='right'>0</td>";	
+						
+							if(isset($workbook)) {
+								$worksheet->writeNumber($excelrivi, $i, 0);
+							}
 						}
 					}
 					echo "</tr>";

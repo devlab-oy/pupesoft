@@ -163,7 +163,7 @@
 								round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) arvo, 
 								round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100))),2) summa, 
 								count(distinct lasku.tunnus) kpl
-								FROM lasku use index (tila_index)
+								FROM lasku
 								JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
 								WHERE lasku.yhtio = '$kukarow[yhtio]' 
 								and lasku.tunnus = '$prow[Tilausnro]'";
@@ -220,7 +220,7 @@
 			<td class='back'></td></tr>";
 
 	echo "<tr><th>".t("Syötä tuotenumeroväli (Ei pakollinen)").":</th>
-			<td colspan='3'><input type='text' name='tuotealku' value='$tuotealku' size='15'></td><td class='back'> - </td><td><input type='text' name='tuoteloppu' value='$tuoteloppu' size='15'></td></tr>";
+			<td colspan='3'><input type='text' name='tuotealku' value='$tuotealku' size='15'> - <input type='text' name='tuoteloppu' value='$tuoteloppu' size='15'></td></tr>";
 
 	$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 				FROM avainsana

@@ -2741,4 +2741,184 @@ function popUp(e, oi) {
 	}
 }
 
+if(!function_exists("aja_kysely")) {
+	function aja_kysely() {
+		global $kukarow, $hakukysely, $aja_kysely, $uusi_kysely, $tallenna_muutokset, $poista_kysely, $_POST;
+
+		if(!table_exists("muisti") or $hakukysely == "") {
+			return true;
+		}
+		
+		if($tallenna_muutokset != "") {
+			if($aja_kysely != "") {
+				$uusi_kysely = $aja_kysely;
+			}
+			else {
+				echo "<font class='error'>".t("Valitse kysely jonka muutokset tallennetaan")."</font>";
+				return false;
+			}
+		}
+
+		if($poista_kysely != "" and $aja_kysely == "") {
+			echo "<font class='error'>".t("Valitse kysely jonka haluat poistaa")."</font>";
+			return false;
+		}
+		
+		//	Tallennetaan uusi kysely
+		if($uusi_kysely != "") {
+			if(is_array($_POST) and count($_POST)>0) {
+
+				if($exclude != "") {
+					$exclude = implode(",", $exclude);
+				}
+				else {
+					$exclude = array();
+				}
+
+				//	Tälläiset arvot skipataan aina
+				$exclude[] = "uusi_kysely";
+				$exclude[] = "aja_kysely";
+				$exclude[] = "hakukysely";
+				$exclude[] = "tallenna_muutokset";				
+				
+				$exclude[] = "ppa";
+				$exclude[] = "kka";
+				$exclude[] = "vva";
+				$exclude[] = "ppl";
+				$exclude[] = "kkl";
+				$exclude[] = "vvl";
+				
+				$exclude[] = "tee";
+				$exclude[] = "toim";				
+
+				foreach($_POST as $key => $value) {
+
+					if(!in_array($key, $exclude)) {
+
+						//	Koitetaan arpoa pari speciaalia datatyyppiä
+						$type = "";							
+						if(is_array($value)) {
+							$value = serialize($value);
+							$type = "array";
+						}
+
+						//	Onko tämä arvo jo tallennettu?
+						$query = "	SELECT tunnus 
+									FROM muisti
+									WHERE yhtio='$kukarow[yhtio]' and haku = '$hakukysely' and kuka = '$kukarow[kuka]' and nimi = '$uusi_kysely' and var='$key'";
+						$result = mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($result)==0) {
+							$query = "	INSERT INTO muisti SET
+											yhtio		= '$kukarow[yhtio]',
+											kuka		= '$kukarow[kuka]',
+											haku		= '$hakukysely',
+											nimi		= '$uusi_kysely',
+											var			= '$key',
+											value		= '$value',
+											array 		= '$array',
+											luontiaika	= now(),
+											laatija		= '$kukarow[kuka]',
+											muokattu	= now(),
+											muokannut	= '$kukarow[kuka]'";
+							$result = mysql_query($query) or pupe_error($query);										
+						}
+						else {
+							$row = mysql_fetch_array($result);
+
+							$query = "	UPDATE muisti SET
+											value		= '$value',
+											array 		= '$array',
+											muokattu	= now(),
+											muokannut	= '$kukarow[kuka]'						
+										WHERE tunnus = '$row[tunnus]'";
+							$result = mysql_query($query) or pupe_error($query);																
+						}
+					}
+				}
+
+				return true;
+			}
+			
+			$aja_kysely = $uusi_kysely;
+			echo "<font class='message'>".t("Tallennettiin kysely")." $aja_kysely</font>";
+		}
+		//	Poistetaan kysely
+		elseif($poista_kysely != "" and $aja_kysely != "") {
+			$query = "	DELETE 
+						FROM muisti
+						WHERE yhtio='$kukarow[yhtio]' and haku = '$hakukysely' and kuka = '$kukarow[kuka]' and nimi = '$aja_kysely'";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			echo "<font class='message'>".t("Poistettiin kysely")." $aja_kysely</font>";
+			
+			return false;
+		}		
+		//	Ajetaan kysely muistista
+		elseif($aja_kysely != "") {
+			//	Onko tämä arvo jo tallennettu?
+			$query = "	SELECT *
+						FROM muisti
+						WHERE yhtio='$kukarow[yhtio]' and haku = '$hakukysely' and kuka = '$kukarow[kuka]' and nimi = '$aja_kysely'";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result)>0) {
+				while($row = mysql_fetch_array($result)) {
+					global ${$row["var"]};
+					if($row["type"] = "array") {
+						$row["value"] = unserialize($row["value"]);
+					}
+					
+					${$row["var"]} = $row["value"];
+				}
+			}
+			
+			return true;
+			
+			echo "<font class='message'>".t("Suoritetaan kysely")." $aja_kysely</font>";
+		}
+	}	
+}
+
+if(!function_exists("nayta_kyselyt")) {
+	function nayta_kyselyt($haku) {
+		global $kukarow, $aja_kysely;
+
+		if(!table_exists("muisti")) {
+			return false;
+		}
+
+		echo "<table>";
+		echo "<tr>
+			<th>".t("Tallenna kysely nimellä")."</th>
+			<td><input type='text' name='uusi_kysely' value='' size='30'><input type='hidden' name='hakukysely' value='$haku'></td>
+			</tr>
+			<tr><th>".t("Aja tallennettu kysely")."</th>
+			<td><select name='aja_kysely'>
+				<option value=''>".t("Valitse kysely")."</option>";
+
+		$lisa = "";
+		$query = "	SELECT distinct nimi
+					FROM muisti
+					WHERE yhtio='$kukarow[yhtio]' and haku = '$haku' and kuka = '$kukarow[kuka]'";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result)>0) {
+			while($row = mysql_fetch_array($result)) {
+				echo "<option value='$row[nimi]'>$row[nimi]</option>\n";
+			}
+		}
+		
+		echo "	</select></td>
+			</tr>\n";
+
+		echo "<tr><th>".t("Tallenna kyselyn muutokset")."</th>
+			 <td><input type='checkbox' name='tallenna_muutokset' value='X'></td></tr>";
+
+		echo "<tr><th>".t("Poista kysely")."</th>
+			 <td><input type='checkbox' name='poista_kysely' value='X'></td></tr>";
+			
+		echo "</table>";
+
+		return true;
+	}
+}
+
 ?>

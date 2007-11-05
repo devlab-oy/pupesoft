@@ -711,7 +711,7 @@
 		echo "<tr>";
 		echo "<td>$laskurow[kuka]</td>";
 
-		if ($kukarow['taso'] == 2 and $laskurow['hyvak1'] == $kukarow['kuka']) {
+		if (($kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $laskurow['hyvak1'] == $kukarow['kuka']) {
 			echo "<td><a href='$PHP_SELF?tee=M&tunnus=$tunnus'>".tv1dateconv($laskurow["tapvm"])."</a></td>";
 		}
 		else {
@@ -760,7 +760,7 @@
 		$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='$tunnus'";
 		$keikres = mysql_query($query) or pupe_error($query);
 
-		if (($kukarow['taso'] == 1 or $kukarow['taso'] == 2) and $oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0) {
+		if (($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') and $oikeurow['paivitys'] == '1' and mysql_num_rows($keikres) == 0) {
 
 			echo "	<td class='back'><form action = '$PHP_SELF' method='post' onSubmit = 'return verify()'>
 					<input type='hidden' name='tee' value='D'>
@@ -799,7 +799,7 @@
 		}
 
 		// ykkös ja kakkostasolla voidaan antaa kommentti
-		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) {
+		if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
 			echo "<br><table>";
 			// Mahdollisuus antaa kommentti
 			echo "	<form name='kommentti' action = '$PHP_SELF' method='post'>
@@ -810,7 +810,7 @@
 					<input type='hidden' name='id' value = '$id'>";
 
 			echo "	<tr>
-					<th colspan='2'>Lisää kommentti</th>
+					<th colspan='2'>".t("Lisää kommentti")."</th>
 					</tr>";
 
 			echo "	<tr>
@@ -838,13 +838,24 @@
 
 			echo "<form name='uusi' action = '$PHP_SELF' method='post'>
 					 <input type='hidden' name='tee' value='L'>
-					 <input type='hidden' name = 'nayta' value='$nayta'>
+					 <input type='hidden' name='nayta' value='$nayta'>
 					 <input type='hidden' name='tunnus' value='$tunnus'>
 					 <input type='hidden' name='iframe' value = '$iframe'>
 					 <input type='hidden' name='id' value = '$id'>";
 
 			echo "<tr><th colspan='2'>".t("Hyväksyjät")."</th></tr>";
 
+			$query = "	SELECT kuka, nimi
+			          	FROM kuka
+			          	WHERE yhtio = '$kukarow[yhtio]'
+						and hyvaksyja = 'o'
+						and kuka = '$laskurow[hyvak1]'
+			          	ORDER BY nimi";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow = mysql_fetch_array($vresult);
+			
+			echo "<tr><td>1. $vrow[nimi]</td><td>";
+			
 			$query = "SELECT kuka, nimi
 			          FROM kuka
 			          WHERE yhtio = '$kukarow[yhtio]' and hyvaksyja = 'o'
@@ -852,7 +863,7 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			$ulos = '';
-
+			
 			echo "<tr><td>";
 
 			// Täytetään 4 hyväksyntäkenttää (ensinmäinen on jo käytössä)
@@ -874,7 +885,7 @@
 					exit;
 				}
 
-				echo "<select name='hyvak[$i]'>
+				echo "$i. <select name='hyvak[$i]'>
 				      <option value=''>".t("Ei kukaan")."
 				      $ulos
 				      </select><br>";
@@ -945,6 +956,7 @@
 						and lasku.vanhatunnus	= '$tunnus'
 						HAVING vanhatunnus = 0";
 			$apure = mysql_query($query) or pupe_error($query);
+			
 			if(mysql_num_rows($apure)>0) {
 				while($apurow = mysql_fetch_array($apure)) {
 					
@@ -1007,7 +1019,7 @@
 		}
 
 		// Tätä ei siis tehdä jos kyseessä on kevenetty versio
-		if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) {
+		if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
 
 			echo "<br><table>
 					<tr>
@@ -1019,7 +1031,7 @@
 					<th>".t("Tee")."</th></tr>";
 
 			// vaan kakkostasolla saa tehdä muutoksia
-			if ($kukarow["taso"] == 2) {
+			if ($kukarow["taso"] == '2' or $kukarow["taso"] == '3') {
 
 				$query = "	SELECT tunnus, nimi
 							FROM kustannuspaikka
@@ -1201,7 +1213,7 @@
 				}
 
 				// Riviä saa muuttaa vaan jos taso 2
-				if ($tiliointirow['lukko'] != 1 and $tiliointirow['tapvm'] == $laskurow['tapvm'] and $kukarow["taso"] == 2) {
+				if ($tiliointirow['lukko'] != 1 and $tiliointirow['tapvm'] == $laskurow['tapvm'] and ($kukarow["taso"] == '2' or $kukarow["taso"] == '3')) {
 					echo "	<form action = '$PHP_SELF' method='post'>
 							<input type='hidden' name = 'nayta' value='$nayta'>
 							<input type='hidden' name='tunnus' value = '$tunnus'>
@@ -1471,8 +1483,8 @@
 			
 			echo "<tr>";
 
-			 // Eli vain tasolla 1/2 ja ensimmäiselle hyväksyjälle.
-			if (($kukarow['taso'] == '1' or $kukarow["taso"] == '2') and $trow['hyvak1'] == $kukarow['kuka']) {
+			 // Eli vain tasolla 1/2/3 ja ensimmäiselle hyväksyjälle.
+			if (($kukarow['taso'] == '1' or $kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $trow['hyvak1'] == $kukarow['kuka']) {
 				echo "<td valign='top'><a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a></td>";
 			}
 			else {
@@ -1508,8 +1520,8 @@
 					<td class='back' valign='top'><input type='Submit' value='".t("Valitse")."'></td>
 					</form>";
 
-			// ykkös ja kakkos tason spessuja
-			if ($kukarow['taso'] == 1 or $kukarow['taso'] == 2) {
+			// ykkös ja kakkos ja kolmos tason spessuja
+			if ($kukarow['taso'] == '1' or $kukarow['taso'] == '2' or $kukarow["taso"] == '3') {
 
 				// Mahdollisuus laittaa lasku holdiin
 				if ($trow['alatila'] != 'H') {
@@ -1540,6 +1552,7 @@
 
 		$query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus='{$trow["tunnus"]}'";
 		$keikres = mysql_query($query) or pupe_error($query);
+		
 		if ($oikeurow['paivitys'] == '1' and $kukarow['taso'] == 1 and mysql_num_rows($keikres)==0) {
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 					function verify() {

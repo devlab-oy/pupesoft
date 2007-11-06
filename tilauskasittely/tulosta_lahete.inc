@@ -107,8 +107,13 @@ if (!function_exists('alku')) {
 		$masresult = mysql_query($query) or pupe_error($query);
 		$masrow = mysql_fetch_array($masresult);
 	
-		//maksuehto tekstinä
-		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+		//maksuehto tekstinä jos on jokin muu kuin hinnaton maksuehto
+		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eiale_eihinta.inc") {
+			$maksuehto = "";
+		}
+		else {
+			$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
+		}
 		
 		if ($tyyppi == "TILAUSVAHVISTUS") {
 			$kerarow["kerattyaika"] = date("Y-m-d");

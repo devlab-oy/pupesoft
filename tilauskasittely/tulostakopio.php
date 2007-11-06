@@ -17,8 +17,11 @@
 	if (file_exists("../inc/parametrit.inc")) {
 		require('../inc/parametrit.inc');
 	}
-	else {
+	elseif (file_exists("inc/parametrit.inc")) {
 		require('inc/parametrit.inc');
+	}
+	else {
+		require('parametrit.inc');
 	}
 
 	if ($toim == "") $toim = "LASKU";
@@ -134,7 +137,31 @@
 		$laskunroloppu	= "";
 	}
 
-	if (($tee == "" or $tee == 'ETSILASKU') and $toim != 'SIIRTOLISTA'){
+	// Extranettaajat voivat ottaa kopioita omista laskuistaan ja l‰hetteist‰‰n
+	if($kukarow["extranet"] != "") {
+		if ($kukarow["oletus_asiakas"] > 0 and ($toim == "LAHETE" or $toim == "LASKU")) {
+			$query  = "	SELECT *
+						FROM asiakas
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tunnus  = '$kukarow[oletus_asiakas]'";
+			$vieres = mysql_query($query) or pupe_error($query);
+			
+			if(mysql_num_rows($vieres) == 1) {
+				$asiakasrow = mysql_fetch_array($vieres);
+				
+				$asiakasid 	= $asiakasrow["tunnus"];
+				$ytunnus	= $asiakasrow["ytunnus"];
+			}
+			else {
+				exit;
+			}
+		}
+		else {
+			// Extranet kaatuu t‰h‰n
+			exit;
+		} 
+	}
+	elseif (($tee == "" or $tee == 'ETSILASKU') and $toim != 'SIIRTOLISTA'){
 		
 		$muutparametrit = $vva."/".$kka."/".$ppa."/".$vvl."/".$kkl."/".$ppl;
 		
@@ -151,6 +178,7 @@
 			}
 		}
 	}
+	
 	
 	if (($tee == "" or $tee == 'ETSILASKU') and $toim == 'SIIRTOLISTA'){
 		if ($lahettava_varasto != '' or $vastaanottava_varasto != '') {
@@ -228,10 +256,22 @@
 		else {
 			if (((int) $asiakasid > 0 or (int) $toimittajaid > 0)) {
 				if ($toim == "OSTO" or $toim == "PURKU" or $toim == "TARIFFI" or $toim == "TUOTETARRA") {
-					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'>$toimittajarow[nimi]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td><td><a href='$PHP_SELF?lopetus=$lopetus&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka'>Vaihda toimittaja</a></td></tr>";
+					echo "<th>".t("Toimittajan nimi")."</th><td colspan='3'>$toimittajarow[nimi]<input type='hidden' name='toimittajaid' value='$toimittajaid'></td>";
+					
+					if($kukarow["extranet"] == "") {
+						echo "<td><a href='$PHP_SELF?lopetus=$lopetus&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka'>".t("Vaihda toimittaja")."</a></td>";
+					}
+					
+					echo "</tr>";
 				}
 				else {
-					echo "<th>".t("Asiakkaan nimi")."</th><td colspan='3'>$asiakasrow[nimi]<input type='hidden' name='asiakasid' value='$asiakasid'></td><td><a href='$PHP_SELF?lopetus=$lopetus&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka'>Vaihda asiakas</a></td></tr>";
+					echo "<th>".t("Asiakkaan nimi")."</th><td colspan='3'>$asiakasrow[nimi]<input type='hidden' name='asiakasid' value='$asiakasid'></td>";
+					
+					if($kukarow["extranet"] == "") {
+						echo "<td><a href='$PHP_SELF?lopetus=$lopetus&toim=$toim&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka'>".t("Vaihda asiakas")."</a></td>";
+					}
+					
+					echo "</tr>";
 				}
 			}
 			else {
@@ -253,8 +293,13 @@
 				echo "<th>".t("Laskunumero")."</th>";
 			}
     
-			echo "	<td colspan='3'><input type='text' size='15' name='laskunro'></td>
-					<td colspan='3'><input type='text' size='15' name='laskunroloppu'></td></tr>";
+			echo "<td colspan='3'><input type='text' size='15' name='laskunro'></td>";
+			
+			if($kukarow["extranet"] == "") {
+				echo "<td colspan='3'><input type='text' size='15' name='laskunroloppu'></td>";
+			}
+			
+			echo "</tr>";
 		}
 	
 		if ($toim == "OSOITELAPPU") {
@@ -612,7 +657,8 @@
 		}
 
 		if ($laskunro > 0) {
-			$where2 = " and lasku.laskunro = '$laskunro' ";
+			$where2 .= " and lasku.laskunro = '$laskunro' ";
+			
 			if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 			$use = " use index (lasno_index) ";
 		}
@@ -626,12 +672,14 @@
 			$larow = mysql_fetch_array($laresult);
 
 			if ($larow["laskunro"] > 0) {
-				$where2 = " and lasku.laskunro = '$larow[laskunro]' ";
+				$where2 .= " and lasku.laskunro = '$larow[laskunro]' ";
+				
 				if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 				$use = " use index (lasno_index) ";
 			}
 			else {
-				$where2 = " and lasku.tunnus = '$otunnus' ";
+				$where2 .= " and lasku.tunnus = '$otunnus' ";
+				
 				if (!isset($jarj)) $jarj = " lasku.tunnus desc";
 				$use = " use index (PRIMARY) ";
 			}
@@ -663,25 +711,26 @@
 					and lasku.tila != 'D'
 					$jarj";
 		$result = mysql_query($query) or pupe_error($query);
-
+		
 		if (mysql_num_rows($result) > 0) {
 
-			echo "	<form method='post' action='$PHP_SELF'>
-					<input type='hidden' name='lopetus' value='$lopetus'>
-					<input type='hidden' name='tee' value='$tee'>
-					<input type='hidden' name='toim' value='$toim'>
-					<input type='hidden' name='tila' value='monta'>
-					<input type='hidden' name='ytunnus' value='$ytunnus'>
-					<input type='hidden' name='asiakasid' value='$asiakasid'>
-					<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-					<input type='hidden' name='ppa' value='$ppa'>
-					<input type='hidden' name='kka' value='$kka'>
-					<input type='hidden' name='vva' value='$vva'>
-					<input type='hidden' name='ppl' value='$ppl'>
-					<input type='hidden' name='kkl' value='$kkl'>
-					<input type='hidden' name='vvl' value='$vvl'>
-					<input type='submit' value='".t("Tulosta useita kopioita")."'></form><br>";
-					
+			if($kukarow["extranet"] == "") {
+				echo "	<form method='post' action='$PHP_SELF'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
+						<input type='hidden' name='tee' value='$tee'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='tila' value='monta'>
+						<input type='hidden' name='ytunnus' value='$ytunnus'>
+						<input type='hidden' name='asiakasid' value='$asiakasid'>
+						<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+						<input type='hidden' name='ppa' value='$ppa'>
+						<input type='hidden' name='kka' value='$kka'>
+						<input type='hidden' name='vva' value='$vva'>
+						<input type='hidden' name='ppl' value='$ppl'>
+						<input type='hidden' name='kkl' value='$kkl'>
+						<input type='hidden' name='vvl' value='$vvl'>
+						<input type='submit' value='".t("Tulosta useita kopioita")."'></form><br>";
+			}		
 			echo "<table><tr>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.tunnus'>".t("Tilausnro")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
 			echo "<th valign='top'><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.ytunnus'>".t("Ytunnus")."</a><br><a href='$PHP_SELF?tee=$tee&ppl=$ppl&vvl=$vvl&kkl=$kkl&ppa=$ppa&vva=$vva&kka=$kka&toim=$toim&ytunnus=$ytunnus&asiakasid=$asiakasid&toimittajaid=$toimittajaid&jarj=lasku.nimi'>".t("Nimi")."</a></th>";
@@ -718,44 +767,60 @@
 				$alatila     = $row["alatila"];
 
 				//tehd‰‰n selv‰kielinen tila/alatila
-				require "../inc/laskutyyppi.inc";
-
+				if (file_exists("../inc/laskutyyppi.inc")) {
+					require('../inc/laskutyyppi.inc');
+				}
+				elseif (file_exists("inc/laskutyyppi.inc")) {
+					require('inc/laskutyyppi.inc');
+				}
+				else {
+					require('laskutyyppi.inc');
+				}
+				
 				echo "<$ero valign='top'>".t("$laskutyyppi")." ".t("$alatila")."</$ero>";
 
 				if ($tila != 'monta') {
+					echo "<td class='back' valign='top'>";
 
-					echo "<td class='back' valign='top'>
-							<form method='post' action='$PHP_SELF'>
-							<input type='hidden' name='lopetus' value='$lopetus'>
-							<input type='hidden' name='tee' value='NAYTAHTML'>
-							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='tunnus' value='$row[tunnus]'>
-							<input type='hidden' name='ytunnus' value='$ytunnus'>
-							<input type='hidden' name='asiakasid' value='$asiakasid'>
-							<input type='hidden' name='toimittajaid' value='$toimittajaid'>
-							<input type='hidden' name='otunnus' value='$otunnus'>
-							<input type='hidden' name='laskunro' value='$laskunro'>
-							<input type='hidden' name='ppa' value='$ppa'>
-							<input type='hidden' name='kka' value='$kka'>
-							<input type='hidden' name='vva' value='$vva'>
-							<input type='hidden' name='ppl' value='$ppl'>
-							<input type='hidden' name='kkl' value='$kkl'>
-							<input type='hidden' name='vvl' value='$vvl'>
-							<input type='submit' value='".t("N‰yt‰ ruudulla")."'></form>
-							<br>
-							<form method='post' action='$PHP_SELF' autocomplete='off'>
-							<input type='hidden' name='lopetus' value='$lopetus'>
-							<input type='hidden' name='otunnus' value='$row[tunnus]'>
-							<input type='hidden' name='toim' value='$toim'>
-							<input type='hidden' name='tee' value='NAYTATILAUS'>
-							<input type='submit' value='".t("N‰yt‰ pdf")."'></form>
-							<br>
+					if($kukarow["extranet"] == "") {
+						echo "	<form method='post' action='$PHP_SELF'>
+								<input type='hidden' name='lopetus' value='$lopetus'>
+								<input type='hidden' name='tee' value='NAYTAHTML'>
+								<input type='hidden' name='toim' value='$toim'>
+								<input type='hidden' name='tunnus' value='$row[tunnus]'>
+								<input type='hidden' name='ytunnus' value='$ytunnus'>
+								<input type='hidden' name='asiakasid' value='$asiakasid'>
+								<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+								<input type='hidden' name='otunnus' value='$otunnus'>
+								<input type='hidden' name='laskunro' value='$laskunro'>
+								<input type='hidden' name='ppa' value='$ppa'>
+								<input type='hidden' name='kka' value='$kka'>
+								<input type='hidden' name='vva' value='$vva'>
+								<input type='hidden' name='ppl' value='$ppl'>
+								<input type='hidden' name='kkl' value='$kkl'>
+								<input type='hidden' name='vvl' value='$vvl'>
+								<input type='submit' value='".t("N‰yt‰ ruudulla")."'></form>
+								<br>";
+						}
+								
+					echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
+						<input type='hidden' name='lopetus' value='$lopetus'>
+						<input type='hidden' name='otunnus' value='$row[tunnus]'>
+						<input type='hidden' name='toim' value='$toim'>
+						<input type='hidden' name='tee' value='NAYTATILAUS'>
+						<input type='submit' value='".t("N‰yt‰ pdf")."'></form>";
+						
+					if($kukarow["extranet"] == "") {	
+						echo "<br>
 							<form method='post' action='$PHP_SELF' autocomplete='off'>
 							<input type='hidden' name='otunnus' value='$row[tunnus]'>
 							<input type='hidden' name='lopetus' value='$lopetus'>
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='TULOSTA'>
-							<input type='submit' value='".t("Tulosta")."'></form></td>";
+							<input type='submit' value='".t("Tulosta")."'></form>";
+					}
+					
+					echo "</td>";
 				}
 
 				if ($tila == 'monta') {
@@ -1315,8 +1380,8 @@
 							FROM asiakas
 							WHERE tunnus='$laskurow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 				$result = mysql_query($query) or pupe_error($query);
-				$asrow = mysql_fetch_array($result);
-
+				$asrow = mysql_fetch_array($result);				
+				
 				// katotaan miten halutaan sortattavan
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["lahetteen_jarjestys"]);
 
@@ -1695,7 +1760,14 @@
 		}
 	}
 
+	if (file_exists("../inc/footer.inc")) {
+		require ('../inc/footer.inc');
+	}
+	elseif (file_exists("inc/footer.inc")) {
+		require ('inc/footer.inc');
+	}
+	else {
+		require ('footer.inc');
+	}
 	
-
-	require ('../inc/footer.inc');
 ?>

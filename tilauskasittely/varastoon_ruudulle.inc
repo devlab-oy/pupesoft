@@ -172,7 +172,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$alvit = 1;
 	}
 
-	$osuus   = $erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*$tuorow['tuotekerroin']/$laskurow['summa'];	// kuinka paljon tämä rivi on koko tilauksesta
+	$osuus   = round($erikoisale*$tilrivirow['hinta']*$alvit*abs($tilrivirow['varattu'])*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin'],2)/$laskurow['summa'];	// kuinka paljon tämä rivi on koko tilauksesta	
 	$rahtios = $osuus*$rahtikulut;	// lasketaan sama osuus rahtikuluista tälle riville
 
 	if ($tilrivirow['varattu'] < 0) {

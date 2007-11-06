@@ -481,7 +481,7 @@
 							WHERE korvaavat.yhtio = '$kukarow[yhtio]'
 							and korvaavat.id = '$mrow[korvaavat]'
 							$poislisa 
-							ORDER BY korvaavat.jarjestys";
+							ORDER BY korvaavat.jarjestys, korvaavat.tuoteno";
 				$kores = mysql_query($query) or pupe_error($query);
 				
 				$ekakorva = "";

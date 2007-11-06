@@ -158,7 +158,10 @@ echo "
 <tr>
 <td valign='top'><br>";
 
-if (file_exists("pics/pupesoft_logo.gif")) {
+if (file_exists("pics/pupesoft_logo.jpg")) {
+	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.jpg' border='0'>";
+}
+elseif (file_exists("pics/pupesoft_logo.gif")) {
 	echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.gif' border='0'>";
 }
 else {

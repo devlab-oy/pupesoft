@@ -2,58 +2,49 @@
 
 	require ("inc/parametrit.inc");
 
-	echo "<font class='head'>Valuuttakurssien päivitys<hr></font>";
+	echo "<font class='head'>".t("Valuuttakurssien päivitys")."<hr></font>";
 
-	ob_start();
+	$xml = @simplexml_load_file("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
 
-	$val_palautus = @readfile("http://www.suomenpankki.fi/ohi/fin/0_new/0.1_valuuttak/fix-rec.txt");
-
-	if ($val_palautus !== FALSE) {
-		$val_palautus = ob_get_contents();
-	}
-	else {
-		unset ($val_palautus);
-	}
-
-	ob_end_clean();
-
-	if (isset($val_palautus)) {
-
-		// splitataan rivit rivinvaihdosta
-		$rivit = explode("\n",$val_palautus);
-
-		// käydään läpi riveittäin
-		foreach ($rivit as $rivi) {
-
-			// splitataan rivi spacesta
-			$arvot = explode(" ", $rivi);
-
-			if ((float) $arvot[2] != 0) {
-				// haetaan valuuttakoodi
-				$valuutta = explode("/", $arvot[1]);
-
-				// haetaan kurssi
-				$kurssi = round(1 / (float) $arvot[2], 6);
-
-				// varmistetaan, että oli yhtiö kurssi on sama ku tuli boffin saitilta
-				if ($yhtiorow["valkoodi"] == $valuutta[1]) {
-
-					$query = "update valuu set kurssi='$kurssi' where yhtio='$kukarow[yhtio]' and nimi='$valuutta[0]'";
-					$result = mysql_query($query) or pupe_error($query);
-
-					echo "<font class='message'>Haettiin $arvot[0] kurssi valuutalle $valuutta[0]: $kurssi</font>";
-
-					if (mysql_affected_rows() != 0) {
-						echo "<font class='message'> ... Kurssi päivitetty.</font>";
-					}
-
-					echo "<br>";
+	if ($xml !== FALSE) {
+		
+		echo t("Kurssien lähde").": <a href='http://www.ecb.europa.eu/stats/exchange/eurofxref/html/index.en.html'>Reference rates European Central Bank</a><br><br>";
+		
+		$pvm = tv1dateconv($xml->Cube->Cube->attributes()->time);
+		
+		echo "<table>";
+		echo "<tr><th>".t("Valuutta")."</th><th>".t("Kurssi")." $pvm</th><th>".t("Kurssikerroin")."</th>";
+								
+		foreach ($xml->Cube->Cube->Cube as $valuutta) {
+			
+			$valkoodi = (string) $valuutta->attributes()->currency;
+			$kurssi   = (float)  $valuutta->attributes()->rate;	
+							
+			echo "<tr><td>$valkoodi</td><td align='right'>$kurssi</td><td align='right'>".sprintf("%.6f", (1/$kurssi))."</td>";
+				
+			if ($tee == "PAIVITA") {
+		    	$query = "	UPDATE valuu SET kurssi=round(1 / $kurssi, 6) 
+							WHERE yhtio	= '$kukarow[yhtio]' 
+							AND nimi	= '$valkoodi'";
+				$result = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_affected_rows() != 0) {
+					echo "<td class='back'>".t("Kurssi päivitetty").".</td>";
 				}
 			}
+			
+			echo "</tr>";
 		}
+		
+		echo "</table>";
+		
+		echo "<br><form method='post' action='$PHP_SELF'>
+				<input type='hidden' name='tee' value='PAIVITA'>
+				<input type='submit' value='".t("Päivitä kurssit")."'>
+				</form>";
 	}
 	else {
-		echo "<font class='error'>Valuuttakurssien päivitys epäonnistui!</font><br>";
+		echo "<font class='error'>".t("Valuuttakurssien haku epäonnistui")."!</font><br>";
 	}
 
 	require ("inc/footer.inc");

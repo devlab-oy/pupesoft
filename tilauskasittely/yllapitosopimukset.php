@@ -37,7 +37,20 @@
 		$laskuta_message = "";
 
 		foreach ($laskutapvm as $pointteri => $tapahtumapvm) {
+			
+			$edtapvmpp = "";
+			$edtapvmkk = "";
+			$edtapvmvv = "";
 
+			$setapvmpp = "";
+			$setapvmkk = "";
+			$setapvmvv = "";
+			
+			unset($ipp);
+			unset($edipp);
+			unset($seikk);
+			unset($seipp);
+			
 			$tilausnumero = $laskutatun[$pointteri];
 			list($tapvmvv,$tapvmkk,$tapvmpp) = split("-", $tapahtumapvm);
 
@@ -50,11 +63,11 @@
 			$soprow = mysql_fetch_array($result);
 
 			$sopimus_kk = explode(",",$soprow["sopimus_kk"]);
-			$sopimus_pp = explode(",",$soprow["sopimus_pp"]);			
+			$sopimus_pp = explode(",",$soprow["sopimus_pp"]);
 
-			$ipp = array_search($tapvmpp, $sopimus_pp);
-			$ikk = array_search($tapvmkk, $sopimus_kk);
-			
+			$ipp = array_search( (int) $tapvmpp, $sopimus_pp);
+			$ikk = array_search( (int) $tapvmkk, $sopimus_kk);
+						
 			//	Ratkaistaan päivämäärät
 			if($ipp > 0) {
 				$edipp = $ipp-1;
@@ -101,20 +114,23 @@
 			}
 			
 			//	Katsotaan, että tämä aika ei ole ennen tai jälkeen sopimuksen voimassaoloajan..
-			$edstamp	= strtotime("$edtapvmpp/$edtapvmkk/$edtapvmvv");
-			$sestamp	= strtotime("$setapvmpp/$setapvmkk/$setapvmvv");
-
+			$edstamp	= strtotime("$edtapvmvv-$edtapvmkk-$edtapvmpp");
+			$sestamp	= strtotime("$setapvmvv-$setapvmkk-$setapvmpp");
+			
 			if($edstamp <= $soprow["sopimus_alkupvm"]) {
 				$edtapvmpp = date("d", $soprow["sopimus_alkupvm"]);
 				$edtapvmkk = date("m", $soprow["sopimus_alkupvm"]);
 				$edtapvmvv = date("Y", $soprow["sopimus_alkupvm"]);			
 			}
-
+			
 			if($sestamp >= $soprow["sopimus_loppupvm"] and $soprow["sopimus_loppupvm"] > 0) {
 				$setapvmpp = date("d", $soprow["sopimus_loppupvm"]);
 				$setapvmkk = date("m", $soprow["sopimus_loppupvm"]);
 				$setapvmvv = date("Y", $soprow["sopimus_loppupvm"]);			
 			}
+			
+			unset($from);
+			unset($to);
 			
 			//	Korjataan kommentti
 			$from[]	= "/%ed/";
@@ -126,9 +142,15 @@
 			//	Jos ei kirjoiteta oikein, poistetaan muuttuja
 			$from[]	= "/%[\w]{2}/";
 			$to[]	= "";
-
+						
 			// monistetaan soppari
-			$ok = kopioi_tilaus($tilausnumero, array("viesti" => array("from" => $from, "to" => $to)), array("kommentti" => array("from" => $from, "to" => $to)));
+			$ok = kopioi_tilaus($tilausnumero, array(	"viesti" => array("from" => $from, "to" => $to),
+														"comments" => array("from" => $from, "to" => $to),
+														"sisviesti1" => array("from" => $from, "to" => $to),
+														"sisviesti2" => array("from" => $from, "to" => $to),
+													),	
+												array(	"kommentti" => array("from" => $from, "to" => $to)
+												));
 						
 			if ($ok !== FALSE) {
 

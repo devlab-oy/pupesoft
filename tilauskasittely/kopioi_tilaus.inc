@@ -3,7 +3,7 @@
 if (!function_exists("kopioi_tilaus")) {
 
 	// otetaan parametriksi tunnus
-	function kopioi_tilaus($tunnus, $muokkaa_lasku="", $muokkaa_rivi) {
+	function kopioi_tilaus($tunnus, $muokkaa_lasku="", $muokkaa_rivi="") {
 
 		// tarvitaan yhtiörowta ja kukarowta
 		global $yhtiorow, $kukarow;

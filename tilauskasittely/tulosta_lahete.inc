@@ -263,7 +263,7 @@ if (!function_exists('alku')) {
 			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
 		}
 		
-		//Tulostetaan laskun kommentti
+		// Tulostetaan laskun kommentti
 		if (trim($komm) != '') {
 			$kommentit = explode("\n", trim($komm));
 
@@ -289,6 +289,45 @@ if (!function_exists('alku')) {
 					
 					$pdf->draw_text(35, $pohja, trim($o), $thispage, $boldi);
 					$pdf->draw_text(35+$maxoik+5, $pohja, trim($v), $thispage, $norm);
+				
+					if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_asiakviivakoodi.inc" and substr($o, 0, -1) == t("Tilausviite", $kieli)) {
+						//viivakoodin arvo
+						$barcode  = $laskurow["tunnus"];
+						$oikpos = 35+$maxoik+5+$pdf->strlen($v, $norm);
+						
+						//luodaan viivakoodiolio
+						$obj = "";
+						$obj = new C39Object($width, $height, $style, $barcode);
+
+						if ($obj) {
+							$obj->SetFont($font);
+							$obj->DrawObject($xres);
+
+							//flushataan pdf ja saadaam filenimi johon se tallennettiin
+							$nimi1 = $obj->FlushObject();
+
+							//keksitään uudelle failille joku varmasti uniikki nimi:
+							list($usec, $sec) = explode(' ', microtime());
+							mt_srand((float) $sec + ((float) $usec * 100000));
+							$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
+
+							passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
+
+							$fh = fopen($nimi2, "r");
+							$data = fread($fh, filesize($nimi2));
+							fclose($fh);
+
+							$image 		= $pdf->png_embed($data);
+							$placement	= $pdf->image_place($image, $pohja-11, $oikpos, $thispage);
+
+							unset($obj);
+
+							//dellataan tmp filet kuleksimasta
+							system("rm -f $nimi1 $nimi2");
+							
+							$pohja = $pohja - 10;
+						}
+					}
 				}
 				else {
 					$pdf->draw_text(35, $pohja, trim($kommentti), $thispage, $norm);
@@ -326,22 +365,14 @@ if (!function_exists('alku')) {
 			$fh = fopen($nimi2, "r");
 			$data = fread($fh, filesize($nimi2));
 			fclose($fh);
-			$image = $pdf->png_embed($data);
-	
-			if(!$image) {
-				echo t("Viivakoodivirhe").": ".$image.$data;
-				exit;
-			}
-			$placement = $pdf->image_place($image, 805, 440, $thispage);
+			
+			$image 		= $pdf->png_embed($data);
+			$placement	= $pdf->image_place($image, 805, 440, $thispage);
 	
 			unset($obj);
 	
 			//dellataan tmp filet kuleksimasta
 			system("rm -f $nimi1 $nimi2");
-		}
-		else{
-			echo t("Oliota ei voitu luoda").".";
-			exit;
 		}
 	
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
@@ -1245,9 +1276,7 @@ if (!function_exists('rivi_asiakviivakoodi')) {
 						where yhtio='$kukarow[yhtio]' and ytunnus='$laskurow[ytunnus]' and tuoteno='$row[tuoteno]'";
 		$eanres = mysql_query($eanquery) or pupe_error($eanquery);
 		$eanrow = mysql_fetch_array($eanres);
-		
-		echo "$eanquery";
-						
+								
 		if ($eanrow["kommentti"] != "") {
 			//oletukset viivakoodeille
 			$output   = "png";

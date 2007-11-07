@@ -1025,7 +1025,7 @@
 													SET ei_nayteta 	= '$myy_lapsi_ein[$indeksi]', 
 													muutospvm		= now(),
 													muuttaja		= '$kukarow[kuka]'
-													WHERE tunnus 	= '$lisatty_tun'";
+													WHERE tilausrivitunnus 	= '$lisatty_tun'";
 										$result = mysql_query($query) or pupe_error($query);
 									}
 								}

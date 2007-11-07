@@ -128,7 +128,7 @@ echo "
 	<head>
 	<title>Login</title>";
 
-	if (file_exists("pics/pupeicon.gif'")) {
+	if (file_exists("pics/pupeicon.gif")) {
 	    echo "\n<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
 	}
 	else {

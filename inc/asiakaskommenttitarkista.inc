@@ -11,7 +11,8 @@
 					FROM asiakas
 					WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
 		$sresult = mysql_query($query) or pupe_error($query);
-		if (mysql_num_rows($sresult) != 1) {
+		
+		if (mysql_num_rows($sresult) == 0) {
 			$virhe[$i] = "".t("Asiakas puuttuu tai sitä ei löydy!")."";
 			$errori = 1;
 		}

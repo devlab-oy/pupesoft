@@ -499,6 +499,7 @@
 
 		$sel1="";
 		$sel2="";
+		$sel3="";
 
 		if ($trow[$i] == "4") {
 			$sel2 = "selected";

@@ -225,15 +225,23 @@
 		elseif (strlen($haku[$i]) > 0 && $i == 1) {
 			
 			//Otetaan konserniyhtiöt hanskaan
-			$query	= "	SELECT GROUP_CONCAT(distinct concat('\'',tuoteno,'\'')) tuotteet
+			$query	= "	SELECT distinct tuoteno
 						FROM tuotteen_toimittajat
 						WHERE yhtio = '$kukarow[yhtio]' 
-						and toim_tuoteno like '%".$haku[$i]."%'";
+						and toim_tuoteno like '%".$haku[$i]."%'
+						LIMIT 500";
 			$pres = mysql_query($query) or pupe_error($query);
-			$prow = mysql_fetch_array($pres);
 			
-			if ($prow["tuotteet"] != "") {
-				$lisa .= " and tuote.tuoteno in ($prow[tuotteet]) ";		
+			$toimtuotteet = "";
+			
+			while($prow = mysql_fetch_array($pres)) {
+				$toimtuotteet .= "'".$prow["tuoteno"]."',";
+			}
+			
+			$toimtuotteet = substr($toimtuotteet, 0, -1);
+			
+			if ($toimtuotteet != "") {
+				$lisa .= " and tuote.tuoteno in ($toimtuotteet) ";		
 			}
 			
 			$ulisa .= "&haku[".$i."]=".$haku[$i];

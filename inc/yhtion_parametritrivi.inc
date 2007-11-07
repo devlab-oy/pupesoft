@@ -503,12 +503,16 @@
 		if ($trow[$i] == "4") {
 			$sel2 = "selected";
 		}
+		elseif ($trow[$i] == "6") {
+			$sel3 = "selected";
+		}
 		else {
 			$sel1 = "selected";
 		}
 
 		$ulos .= "<option value='2' $sel1>".t("Hinta pyöristetään kahteen desimaaliin")."</option>";
 		$ulos .= "<option value='4' $sel2>".t("Hinta pyöristetään neljään desimaaliin")."</option>";
+		$ulos .= "<option value='6' $sel3>".t("Hinta pyöristetään kuuteen desimaaliin")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

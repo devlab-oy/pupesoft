@@ -239,7 +239,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 	if (mysql_num_rows($result) == 1) {
 		$yhtion_parametritrow = mysql_fetch_array($result);
 		
-		if ($yhtion_parametritrow['hintapyoristys'] != 2 and $yhtion_parametritrow['hintapyoristys'] != 4) {
+		if ($yhtion_parametritrow['hintapyoristys'] != 2 and $yhtion_parametritrow['hintapyoristys'] != 4 and $yhtion_parametritrow['hintapyoristys'] != 6) {
 			$yhtion_parametritrow['hintapyoristys'] = 2;
 		}
 		

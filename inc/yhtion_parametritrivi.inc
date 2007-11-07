@@ -885,6 +885,26 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "valmistusten_yhdistaminen") {
+
+		$sela = "";
+		$selb = "";
+
+		if ($trow[$i] == 'K') {
+			$selb = "selected";
+		}
+		else {
+			$sela = "selected";
+		}
+		
+		$ulos = "<td><select name='$nimi'>
+					<option value='' $sela>".t("Tuotteen yhdistet‰‰n normaalisti")."</option>
+					<option value='P' $selb>".t("Myˆs tuoteperheet koitetaan yhdist‰‰")."</option>		
+				</select><td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "tarjouksen_voimaika") {
 
 		$ulos = "<td><input type='text' name='$nimi' value = '$trow[$i]' size='5'> (P‰iv‰‰ luontiajasta)</td>";

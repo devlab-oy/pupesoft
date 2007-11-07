@@ -81,6 +81,105 @@
 				}			
 			}
 			
+			
+			if($yhtiorow["valmistusten_yhdistaminen"] == "P") {
+				//	Testataan saataisiinko jotain perheit‰ yhdistetty‰
+				$query = "	SELECT group_concat(tunnus) tunnukset, count(*) rivei
+				 			FROM tilausrivi
+							WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and tyyppi = 'W' and perheid = tunnus
+							GROUP BY tuoteno
+							HAVING rivei > 1";
+				$result = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($result)>0) {
+					while($row = mysql_fetch_array($result)) {
+
+						//	suoritetan vertailu by tuoteperhe
+						$query = "	SELECT perheid, 
+										group_concat(
+											concat(
+												tuoteno, 
+												(SELECT round((isa.kpl+isa.jt+isa.varattu)/(tilausrivi.kpl+tilausrivi.jt+tilausrivi.varattu), 2) FROM tilausrivi isa WHERE isa.yhtio = tilausrivi.yhtio and isa.tunnus=tilausrivi.perheid)
+											) ORDER BY tuoteno SEPARATOR '|'
+										) stringi
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and perheid IN ($row[tunnukset]) and tunnus > perheid
+						GROUP BY perheid
+						ORDER BY stringi";
+						$sresult = mysql_query($query) or pupe_error($query);
+
+						$edstringi = $edperheid = "";
+						$yhdistettavat = array();
+						$yhdista = array();
+						while($srow = mysql_fetch_array($sresult)) {
+
+							//	T‰nne menn‰‰n jos vaihdetaan summausta ja meill‰ on jotain yhdistett‰v‰‰
+							if($edstringi != "" and $edstringi != $srow["stringi"] and count($yhdista) > 1) {
+								$yhdistettavat[] = implode(',', $yhdista);
+								$yhdista = array();
+							}
+
+							//	Jos meill‰ on sama stringi kuin edellinen voidaan yhdist‰‰
+							if($edstringi == $srow["stringi"]) {
+								if(count($yhdista) == 0) {
+									$yhdista[] = $edperheid;
+								}
+								$yhdista[] = $srow["perheid"];
+							}
+
+							$edstringi = $srow["stringi"];
+							$edperheid = $srow["perheid"];
+						}
+
+						if(count($yhdista) > 1) {
+							$yhdistettavat[] = implode(',', $yhdista);
+							$yhdista = array();
+						}
+
+						//	Ou jea! Miell‰ on sopivat reseptit summataanpas nm‰ nyt sitten yhteen!
+						if(count($yhdistettavat) > 0) {
+							foreach($yhdistettavat as $tunnukset) {
+
+								$pilkunpaikka = strpos($tunnukset, ",");
+								$ekaperhe = substr($tunnukset, 0, $pilkunpaikka);
+								$loput = substr($tunnukset, ($pilkunpaikka+1));
+								//	tiedot varmasti ok?
+								if($ekaperhe > 0 and $loput != "") {
+
+									//	P‰ivitet‰‰n summa ekaan tietueeseen toinen tuhotaan! HUOM! t‰m‰ ei tajua mit‰‰n varastopaikoista, jos meill‰ on sama tuote 2 kertaa on myˆs suuri ongelma!
+									$query = "	SELECT tuoteno, sum(kpl) kpl, sum(varattu) varattu, sum(jt) jt, sum(tilkpl) tilkpl, group_concat(if(kommentti='', NULL, kommentti)) kommentti
+												FROM tilausrivi
+												WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($tunnukset)
+												GROUP BY tuoteno";
+									$sresult = mysql_query($query) or pupe_error($query);
+									while($srow = mysql_fetch_array($sresult)) {
+
+										//	P‰ivitet‰‰n ekan perheen tiedot
+										$query = "	UPDATE tilausrivi SET
+														kpl 		= '".round($srow[kpl], 2)."',
+														tilkpl		= '".round($srow[tilkpl], 2 )."',
+														varattu 	= '".round($srow[varattu], 2 )."',
+														jt 			= '".round($srow[jt], 2 )."',
+														kommentti 	= '$srow[kommentti]'
+													WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid = '$ekaperhe' and tuoteno = '$srow[tuoteno]'";
+										$updres = mysql_query($query) or pupe_error($query);
+
+										//	Merkataan loput poistetuiksi
+										$query = "	UPDATE tilausrivi SET
+														tyyppi = 'D',
+														kommentti = 'Tuote yhdistettiin perheeseen $ekaperhe'
+													WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($loput) and tuoteno = '$srow[tuoteno]'";
+										$updres = mysql_query($query) or pupe_error($query);
+									}
+								}
+								else {
+									echo "<font class='error'>".t("VIRHE: Rivej‰ ei osattu summata!")."</font><br>";
+								}
+							}
+						}
+					}
+				}				
+			}
+			
 			echo "Siirrettin rivit uudelle otsikolle!<br>";
 			echo "Valmis!<br><br>";
 			$tee = "";

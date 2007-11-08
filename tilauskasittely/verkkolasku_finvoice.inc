@@ -256,11 +256,11 @@ if (!function_exists('finvoice_alvierittely')) {
 			xml_add("VatBaseAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow[1]), 				$tootfinvoice);
 			xml_add("VatRatePercent",												pp($alvrow[0]), 				$tootfinvoice);
 			xml_add("VatRateAmount AmountCurrencyIdentifier=\"$lasrow[valkoodi]\"",	pp($alvrow[2]), 				$tootfinvoice);
+			
+			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
 			if($lasrow["sisviesti1"]!="") {
 				xml_add("InvoiceFreeText",											trim(str_replace("|", " ", $lasrow["sisviesti1"])), 				$tootfinvoice);			
 			}
-			
-			fputs($tootfinvoice, "</VatSpecificationDetails>\r\n");
 		}
 	}
 }

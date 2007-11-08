@@ -240,15 +240,15 @@ class Image_Barcode_Code39 extends Image_Barcode
      * @author   Ryan Briones <ryanbriones@webxdesign.org>
      *
      */
-    function &draw($text, $imgtype = 'png', $noText = false, $bHeight = 0)
-    {
+
+	function &draw($text, $imgtype = 'png', $barwidth, $barcodeheight, $noText) {
         // Check $text for invalid characters
         if ($this->checkInvalid($text)) {
             return PEAR::raiseError('Invalid text');
         }
 
         $this->text = $text;
-        $img = &$this->plot($noText, $bHeight);
+        $img = &$this->plot($noText, $barcodeheight);
 
         return $img;
     }

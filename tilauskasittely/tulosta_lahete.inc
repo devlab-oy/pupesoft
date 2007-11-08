@@ -271,7 +271,7 @@ if (!function_exists('alku')) {
 						$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 						$oikpos = 35+$maxoik+10+$pdf->strlen($v, $norm);
 	
-						imagejpeg(Image_Barcode::draw(trim($v), 'Code39', 'jpg', false, 1, 15), $nimi);
+						imagejpeg(Image_Barcode::draw(trim($v), 'Code39', 'jpg', false, 1, 15), $nimi, 90);
 
 						$fh = fopen($nimi, "r");
 						$data = fread($fh, filesize($nimi));
@@ -302,7 +302,7 @@ if (!function_exists('alku')) {
 		//viivakoodi
 		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 			
-		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi);
+		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
 
 		$fh = fopen($nimi, "r");
 		$data = fread($fh, filesize($nimi));
@@ -430,7 +430,7 @@ if (!function_exists('uusi_sivu')) {
 		//viivakoodi
 		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 			
-		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi);
+		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
 
 		$fh = fopen($nimi, "r");
 		$data = fread($fh, filesize($nimi));
@@ -779,7 +779,7 @@ if (!function_exists('rivi')) {
 		
 		if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
 			$row['varattu'] = ($row['varattu']+$row['kpl'])." ".strtolower($row["yksikko"]);
-			$row['varattu_viivakoodi'] = ($row['varattu']+$row['kpl']);
+			$row['varattu_viivakoodi'] = $kpl_rivilla;
 		}
 		else {	
 			if ($row["jt"] != 0) { // jälkitoimitus
@@ -1080,7 +1080,7 @@ if (!function_exists('rivi_viivakoodi')) {
 			//viivakoodi
 			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-			imagejpeg(Image_Barcode::draw($eanrow["eankoodi"], 'Code39', 'jpg', false, 1, 15), $nimi);
+			imagejpeg(Image_Barcode::draw($eanrow["eankoodi"], 'Code39', 'jpg', false, 1, 15), $nimi, 90);
 
 			$fh = fopen($nimi, "r");
 			$data = fread($fh, filesize($nimi));
@@ -1138,31 +1138,31 @@ if (!function_exists('rivi_asiakviivakoodi')) {
 			//viivakoodi
 			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 				
-			imagejpeg(Image_Barcode::draw($eanrow["kommentti"], 'Code39', 'jpg', false, 1, 15), $nimi);
+			imagejpeg(Image_Barcode::draw($eanrow["kommentti"], 'Code39', 'jpg', false, 1, 25, false), $nimi, 90);
 
 			$fh = fopen($nimi, "r");
 			$data = fread($fh, filesize($nimi));
 			fclose($fh);
 
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala-5, 45, $thispage);
+			$pdf->image_place($image, $kala-15, 45, $thispage);
 			
 			//viivakoodi
 			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-			imagejpeg(Image_Barcode::draw($row['varattu_viivakoodi'], 'Code39', 'jpg', false, 1, 15), $nimi);
+			imagejpeg(Image_Barcode::draw($row['varattu_viivakoodi'], 'Code39', 'jpg', false, 1, 25, false), $nimi, 90);
 
 			$fh = fopen($nimi, "r");
 			$data = fread($fh, filesize($nimi));
 			fclose($fh);
 
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala-5, 450, $thispage);
+			$pdf->image_place($image, $kala-15, 450, $thispage);
 
 			system("rm -f $nimi");
 			
 			
-			$kala = $kala - 20;
+			$kala = $kala - 30;
 			
 			system("rm -f $nimi");
 		}

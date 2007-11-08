@@ -1,20 +1,12 @@
 <?php
 
-//viivakoodien tulostamista varten
-define (__TRACE_ENABLED__, false);
-define (__DEBUG_ENABLED__, false);
-
-if (@include_once("barcode/barcode.php")) {
-	include_once("barcode/c39object.php");
-	include_once("pdflib/phppdflib.class.php");
+if (@include_once("pdflib/phppdflib.class.php")) {
+	include_once("viivakoodi/Barcode.php");
 }
 else {
-	include_once("barcode.php");
-	include_once("c39object.php");
 	include_once("phppdflib.class.php");
+	include_once("Barcode.php");
 }
-
-
 
 if ($kieli== '') {
 	$querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
@@ -57,22 +49,6 @@ if (!function_exists('alku')) {
 		}
 
 		$thispage = $pdf->new_page("a4");
-
-		//oletukset viivakoodeille
-		$output   = "png";
-		$width    = "140";
-		$height   = "20";
-		$xres     = "1";
-		$font     = "2";
-		$drawtext = "off";
-	
-		$style  = BCS_ALIGN_CENTER;
-		$style |= ($output  == "png" ) ? BCS_IMAGE_PNG  : 0;
-		$style |= ($output  == "jpeg") ? BCS_IMAGE_JPEG : 0;
-		$style |= ($border  == "on"  ) ? BCS_BORDER 	  : 0;
-		$style |= ($drawtext== "on"  ) ? BCS_DRAW_TEXT  : 0;
-		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
-		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 			
 		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
 			
@@ -291,42 +267,24 @@ if (!function_exists('alku')) {
 					$pdf->draw_text(35+$maxoik+5, $pohja, trim($v), $thispage, $norm);
 				
 					if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_asiakviivakoodi.inc" and substr($o, 0, -1) == t("Tilausviite", $kieli)) {
-						//viivakoodin arvo
-						$barcode  = $laskurow["tunnus"];
-						$oikpos = 35+$maxoik+5+$pdf->strlen($v, $norm);
-						
-						//luodaan viivakoodiolio
-						$obj = "";
-						$obj = new C39Object($width, $height, $style, $barcode);
+						//viivakoodi
+						$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+						$oikpos = 35+$maxoik+10+$pdf->strlen($v, $norm);
+	
+						imagejpeg(Image_Barcode::draw(trim($v), 'Code39', 'jpg', false, 1, 15), $nimi);
 
-						if ($obj) {
-							$obj->SetFont($font);
-							$obj->DrawObject($xres);
+						$fh = fopen($nimi, "r");
+						$data = fread($fh, filesize($nimi));
+						fclose($fh);
 
-							//flushataan pdf ja saadaam filenimi johon se tallennettiin
-							$nimi1 = $obj->FlushObject();
+						$image = $pdf->jfif_embed($data);
+						$pdf->image_place($image, $pohja-8, $oikpos, $thispage, $logoparam);
 
-							//keksitään uudelle failille joku varmasti uniikki nimi:
-							list($usec, $sec) = explode(' ', microtime());
-							mt_srand((float) $sec + ((float) $usec * 100000));
-							$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
+						$kala = $kala - 20;
 
-							passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-
-							$fh = fopen($nimi2, "r");
-							$data = fread($fh, filesize($nimi2));
-							fclose($fh);
-
-							$image 		= $pdf->png_embed($data);
-							$placement	= $pdf->image_place($image, $pohja-11, $oikpos, $thispage);
-
-							unset($obj);
-
-							//dellataan tmp filet kuleksimasta
-							system("rm -f $nimi1 $nimi2");
-							
-							$pohja = $pohja - 10;
-						}
+						system("rm -f $nimi");
+					
+						$pohja = $pohja - 10;
 					}
 				}
 				else {
@@ -341,39 +299,19 @@ if (!function_exists('alku')) {
 			$kala = 560;
 		}
 		
-		//viivakoodin arvo
-		$barcode  = $laskurow["tunnus"];
-	
-		//luodaan viivakoodiolio
-		$obj = "";
-		$obj = new C39Object($width, $height, $style, $barcode);
-	
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
-	
-			//flushataan pdf ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
-	
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-							
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-						
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
+		//viivakoodi
+		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 			
-			$image 		= $pdf->png_embed($data);
-			$placement	= $pdf->image_place($image, 805, 440, $thispage);
-	
-			unset($obj);
-	
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
+		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi);
+
+		$fh = fopen($nimi, "r");
+		$data = fread($fh, filesize($nimi));
+		fclose($fh);
+
+		$image = $pdf->jfif_embed($data);
+		$pdf->image_place($image, 805, 440, $thispage, $logoparam);
+				
+		system("rm -f $nimi");
 	
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
 		
@@ -388,22 +326,6 @@ if (!function_exists('uusi_sivu')) {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala;
 
 		$thispage = $pdf->new_page("a4");
-
-		//oletukset viivakoodeille
-		$output   = "png";
-		$width    = "140";
-		$height   = "20";
-		$xres     = "1";
-		$font     = "2";
-		$drawtext = "off";
-	
-		$style  = BCS_ALIGN_CENTER;
-		$style |= ($output  == "png" ) ? BCS_IMAGE_PNG  : 0;
-		$style |= ($output  == "jpeg") ? BCS_IMAGE_JPEG : 0;
-		$style |= ($border  == "on"  ) ? BCS_BORDER 	  : 0;
-		$style |= ($drawtext== "on"  ) ? BCS_DRAW_TEXT  : 0;
-		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
-		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 			
 		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
 			
@@ -505,47 +427,19 @@ if (!function_exists('uusi_sivu')) {
 		$pdf->draw_text(430, 771, t("Päiväys", $kieli), 						$thispage, $pieni);
 		$pdf->draw_text(430, 761, tv1dateconv($kerarow["kerattyaika"]), 		$thispage, $norm);
 		
-		//viivakoodin arvo
-		$barcode  = $laskurow["tunnus"];
-	
-		//luodaan viivakoodiolio
-		$obj = "";
-		$obj = new C39Object($width, $height, $style, $barcode);
-	
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
-	
-			//flushataan pdf ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
-	
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-	
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-	
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
-	
-			if(!$image) {
-				echo t("Viivakoodivirhe").": ".$image.$data;
-				exit;
-			}
-			$placement = $pdf->image_place($image, 805, 440, $thispage);
-	
-			unset($obj);
-	
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
-		else{
-			echo t("Oliota ei voitu luoda").".";
-			exit;
-		}
+		//viivakoodi
+		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+			
+		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi);
+
+		$fh = fopen($nimi, "r");
+		$data = fread($fh, filesize($nimi));
+		fclose($fh);
+
+		$image = $pdf->jfif_embed($data);
+		$pdf->image_place($image, 805, 440, $thispage, $logoparam);
+				
+		system("rm -f $nimi");
 
 		$kala = 715;
 	
@@ -885,17 +779,21 @@ if (!function_exists('rivi')) {
 		
 		if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
 			$row['varattu'] = ($row['varattu']+$row['kpl'])." ".strtolower($row["yksikko"]);
+			$row['varattu_viivakoodi'] = ($row['varattu']+$row['kpl']);
 		}
 		else {	
 			if ($row["jt"] != 0) { // jälkitoimitus
 				$row['varattu'] = t("**JT**", $kieli);
+				$row['varattu_viivakoodi'] = 0;
 			}
 			elseif ($row["var"] == 'P') { // puute
 				$row['varattu'] = t("PUUTE", $kieli);
+				$row['varattu_viivakoodi'] = 0;
 			}
 			else {
 				$row["varattu"] = "";
 				$row["kpl"] 	= "";
+				$row['varattu_viivakoodi'] = 0;
 			}
 		}
 		
@@ -1178,63 +1076,22 @@ if (!function_exists('rivi_viivakoodi')) {
 		$eanres = mysql_query($eanquery) or pupe_error($eanquery);
 		$eanrow = mysql_fetch_array($eanres);
 						
-		if ($eanrow["eankoodi"] != "") {
-						
-			//oletukset viivakoodeille
-			$output   = "png";
-			$width    = "220";
-			$height   = "20";
-			$xres     = "1";
-			$font     = "1";
-			$drawtext = "on";
+		if ($eanrow["eankoodi"] != "") {						
+			//viivakoodi
+			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+
+			imagejpeg(Image_Barcode::draw($eanrow["eankoodi"], 'Code39', 'jpg', false, 1, 15), $nimi);
+
+			$fh = fopen($nimi, "r");
+			$data = fread($fh, filesize($nimi));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+			$pdf->image_place($image, $kala-8, 350, $thispage, $logoparam);
+
+			system("rm -f $nimi");
 			
-			$style  = BCS_ALIGN_CENTER;
-			$style |= ($output  == "png") 	? BCS_IMAGE_PNG  	: 0;
-			$style |= ($output  == "jpeg") 	? BCS_IMAGE_JPEG 	: 0;
-			$style |= ($border  == "on") 	? BCS_BORDER 		: 0;
-			$style |= ($drawtext== "on") 	? BCS_DRAW_TEXT  	: 0;
-			$style |= ($stretchtext== "on") ? BCS_STRETCH_TEXT  : 0;
-			$style |= ($negative== "on") 	? BCS_REVERSE_COLOR : 0;
-		
-			//viivakoodin arvo
-			$barcode  = $eanrow["eankoodi"];
-	
-			//luodaan viivakoodiolio
-			$obj = "";
-			$obj = new C39Object($width, $height, $style, $barcode);
-	
-			if ($obj) {
-				$obj->SetFont($font);
-				$obj->DrawObject($xres);
-	
-				//flushataan pdf ja saadaam filenimi johon se tallennettiin
-				$nimi1 = $obj->FlushObject();
-	
-				//keksitään uudelle failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-	
-				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-	
-				$fh = fopen($nimi2, "r");
-				$data = fread($fh, filesize($nimi2));
-				fclose($fh);
-				$image = $pdf->png_embed($data);
-	
-				if(!$image) {
-					echo t("Viivakoodivirhe").": ".$image.$data;
-					exit;
-				}
-			
-				$placement = $pdf->image_place($image, $kala-8, 350, $thispage);
-				$kala = $kala - $rivinkorkeus-5;
-	
-				unset($obj);
-	
-				//dellataan tmp filet kuleksimasta
-				system("rm -f $nimi1 $nimi2");
-			}
+			$kala = $kala - $rivinkorkeus-5;
 		}
 	}
 }
@@ -1278,61 +1135,36 @@ if (!function_exists('rivi_asiakviivakoodi')) {
 		$eanrow = mysql_fetch_array($eanres);
 								
 		if ($eanrow["kommentti"] != "") {
-			//oletukset viivakoodeille
-			$output   = "png";
-			$width    = "220";
-			$height   = "20";
-			$xres     = "1";
-			$font     = "1";
-			$drawtext = "on";
+			//viivakoodi
+			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+				
+			imagejpeg(Image_Barcode::draw($eanrow["kommentti"], 'Code39', 'jpg', false, 1, 15), $nimi);
+
+			$fh = fopen($nimi, "r");
+			$data = fread($fh, filesize($nimi));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+			$pdf->image_place($image, $kala-5, 45, $thispage, $logoparam);
 			
-			$style  = BCS_ALIGN_CENTER;
-			$style |= ($output  == "png") 	? BCS_IMAGE_PNG  	: 0;
-			$style |= ($output  == "jpeg") 	? BCS_IMAGE_JPEG 	: 0;
-			$style |= ($border  == "on") 	? BCS_BORDER 		: 0;
-			$style |= ($drawtext== "on") 	? BCS_DRAW_TEXT  	: 0;
-			$style |= ($stretchtext== "on") ? BCS_STRETCH_TEXT  : 0;
-			$style |= ($negative== "on") 	? BCS_REVERSE_COLOR : 0;
-		
-			//viivakoodin arvo
-			$barcode  = $eanrow["kommentti"];
-	
-			//luodaan viivakoodiolio
-			$obj = "";
-			$obj = new C39Object($width, $height, $style, $barcode);
-	
-			if ($obj) {
-				$obj->SetFont($font);
-				$obj->DrawObject($xres);
-	
-				//flushataan pdf ja saadaam filenimi johon se tallennettiin
-				$nimi1 = $obj->FlushObject();
-	
-				//keksitään uudelle failille joku varmasti uniikki nimi:
-				list($usec, $sec) = explode(' ', microtime());
-				mt_srand((float) $sec + ((float) $usec * 100000));
-				$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-	
-				passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-	
-				$fh = fopen($nimi2, "r");
-				$data = fread($fh, filesize($nimi2));
-				fclose($fh);
-				$image = $pdf->png_embed($data);
-	
-				if(!$image) {
-					echo t("Viivakoodivirhe").": ".$image.$data;
-					exit;
-				}
+			//viivakoodi
+			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+
+			imagejpeg(Image_Barcode::draw($row['varattu_viivakoodi'], 'Code39', 'jpg', false, 1, 15), $nimi);
+
+			$fh = fopen($nimi, "r");
+			$data = fread($fh, filesize($nimi));
+			fclose($fh);
+
+			$image = $pdf->jfif_embed($data);
+			$pdf->image_place($image, $kala-5, 450, $thispage);
+
+			system("rm -f $nimi");
 			
-				$placement = $pdf->image_place($image, $kala-8, 350, $thispage);
-				$kala = $kala - $rivinkorkeus-5;
-	
-				unset($obj);
-	
-				//dellataan tmp filet kuleksimasta
-				system("rm -f $nimi1 $nimi2");
-			}
+			
+			$kala = $kala - 20;
+			
+			system("rm -f $nimi");
 		}
 	}
 }

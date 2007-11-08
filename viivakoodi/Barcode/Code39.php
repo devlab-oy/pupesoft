@@ -25,7 +25,7 @@
  */
 
 
-require_once "Image/Barcode.php";
+require_once "viivakoodi/Barcode.php";
 
 
 if (!function_exists('str_split')) {

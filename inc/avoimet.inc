@@ -516,8 +516,8 @@
 	        foreach($summa as $val => $sum) {
 				echo "<tr>";
 				echo "<th colspan='7'>".t("Avoimet yhteensä").":</th>";
-				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f", $sum)."</th>";				// tässä kirjanpidosta osasuoritukset poistettuna
-				echo "<td class='tumma' align='right' nowrap>$val</th>";
+				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f", $sum)."</td>";				// tässä kirjanpidosta osasuoritukset poistettuna
+				echo "<td class='tumma' align='right' nowrap>$val</td>";
 				echo "</tr>";
 				
 				if(!in_array($val, $kaikkival)) $kaikkival[] = $val;
@@ -526,8 +526,8 @@
 			foreach($suoritussumma as $val => $sum) {
 	        	echo "<tr>";
 				echo "<th colspan='7'>".t("Kohdistamattomat suoritukset yhteensä").":</th>";
-				echo "<td class='tumma' align='right' nowrap>$sum</th>";
-				echo "<td class='tumma' align='right' nowrap>$val</th>";
+				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f", $sum)."</td>";
+				echo "<td class='tumma' align='right' nowrap>$val</td>";
 				echo "</tr>";
 				
 				if(!in_array($val, $kaikkival)) $kaikkival[] = $val;
@@ -536,8 +536,8 @@
 			foreach($kaikkival as $val) {
 	        	echo "<tr>";
 				echo "<th colspan='7'>".t("Erotus avoimet - kohdistamattomat").":</th>";
-				echo "<td class='tumma' align='right' nowrap>".sprintf("%01.2f", ($summa[$val] + $suoritussumma[$val]))."</th>"; // tässä kirjanpidosta osasuoritukset poistettuna
-				echo "<td class='tumma' align='right' nowrap>$val</th>";
+				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f", ($summa[$val] + $suoritussumma[$val]))."</td>"; // tässä kirjanpidosta osasuoritukset poistettuna
+				echo "<td class='tumma' align='right' nowrap>$val</td>";
 				echo "</tr>";
 			}
 			
@@ -554,22 +554,22 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$trow = mysql_fetch_array ($result);
 
-				$trow["saldo"] 	= sprintf("%01.2f", $trow["saldo"]);
+				$trow["saldo"] 	= sprintf("%.2f", $trow["saldo"]);
 				$erotus 		= $suoritussumma + $summa - $trow["saldo"];
-				$erotus 		= sprintf("%01.2f", $erotus);
+				$erotus 		= sprintf("%.2f", $erotus);
 
 				echo "<tr><td class='back' colspan='9'>&nbsp;</td></tr>";
 
 		        echo "<tr>";
 				echo "<th colspan='7'>".t("Kirjanpidon tili %s yhteensä", "", $tili).":</th>";
-				echo "<th align='right' nowrap>$trow[saldo]</th>";
-				echo "<th align='right' nowrap>$yhtiorow[valkoodi]</th>";
+				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f",$trow["saldo"])."</td>";
+				echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
 				echo "</tr>";
 
 		        echo "<tr>";
 				echo "<th colspan='7'>".t("Erotus avoimet - kohdistamattomat - kirjanpito").":</th>";
-				echo "<th align='right' nowrap>$erotus</th>";
-				echo "<th align='right' nowrap>$yhtiorow[valkoodi]</th>";
+				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f",$erotus)."</td>";
+				echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
 				echo "</tr>";
 			}
 

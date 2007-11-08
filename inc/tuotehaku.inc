@@ -22,6 +22,11 @@
 			$tuoteno = substr($tuoteno,0,-1);
 			$lisa1 = "and tuote.tuoteno like '" . $tuoteno . "%'";
 		}
+		
+		if($kutsuja == "tuoteperhe.php") {
+			$perhelisa = ", IF((SELECT tuoteperhe.isatuoteno FROM tuoteperhe WHERE tuoteperhe.yhtio=tuote_wrapper.yhtio and tuoteperhe.isatuoteno=tuote_wrapper.tuoteno and tuoteperhe.tyyppi = '$hakutyyppi' LIMIT 1) IS NULL, 'pois', 'mukaan') rajaus";
+			$perhelisa2 = "HAVING rajaus='mukaan'";
+		}		
 
 		$yhtiot 	= "";
 		$konsyhtiot = array();
@@ -55,7 +60,7 @@
 
 		// Poistettuja tuotteita ei näytetä paitsi jos niillä on saldoa
 		// Joinataan korvaavat mukaan
-		$query = "	SELECT tuote_wrapper.*, valitut.sorttauskentta
+		$query = "	SELECT tuote_wrapper.*, valitut.sorttauskentta $perhelisa
 					FROM tuote tuote_wrapper,
 						(SELECT if(korvaavat.id>0,(select concat(korvaavat.tuoteno,korvaavat.yhtio) from korvaavat korva2 use index (yhtio_id) where korva2.yhtio=korvaavat.yhtio and korva2.id=korvaavat.id ORDER BY jarjestys LIMIT 1),concat(tuote.tuoteno,tuote.yhtio)) sorttauskentta,
 						ifnull(korvaavat.tuoteno, tuote.tuoteno) tuoteno, 
@@ -72,6 +77,7 @@
 						ORDER BY sorttauskentta, tuoteno) valitut
 					WHERE tuote_wrapper.yhtio = valitut.yhtio
 					and tuote_wrapper.tuoteno = valitut.tuoteno
+					$perhelisa2
 					LIMIT 201";
 		$thresult = mysql_query($query) or pupe_error($query);
 

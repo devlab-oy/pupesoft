@@ -137,6 +137,9 @@
 	}
 			
 	if ($tee != "KOPIOI") {
+		
+		if($hakutuoteno2 != "") $hakutuoteno = $hakutuoteno2;
+		
 		echo "<br><table>";
 		echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
 				<input type='hidden' name='toim' value='$toim'>
@@ -151,9 +154,14 @@
 		else{
 			echo "<th>".t("Etsi tuotereseptiä").": </th>";
 		}		  		  
+
+		echo "<td><input type='text' name='hakutuoteno' value='$hakutuoteno' size='20'></td></tr>";
 		
 		//	Haetaan tuotetta jos sellainen on annettu
 		if($hakutuoteno!="") {
+
+			echo "<tr><td class='back'><br></td></tr>";
+			
 			if ($tee != 'LISAA') {
 				$tuoteno=$hakutuoteno;
 			}
@@ -162,22 +170,16 @@
 			require_once "inc/tuotehaku.inc";
 
 			//on vaan löytynyt 1 muuten tulis virhettä ja ulosta
-			if ($ulos == '' and $varaosavirhe == '' and $tuoteno != '') {
-				$ulos="<input type='text' name='hakutuoteno' value='$hakutuoteno' size='20'>";
-			}
-			else {
+			if ($varaosavirhe != "") {
+				echo "<tr><td colspan='2'>$varaosavirhe</td></tr>";
 				$tee="SKIPPAA";
 			}
+			elseif($ulos != "") {
+				echo "<tr><td class='back' colspan='2'>$ulos</td><td class='back'><input type='submit' value='".("valitse")."'</td></tr>";
+			}
 		}
-		else {
-			$ulos="<input type='text' name='hakutuoteno' value='$hakutuoteno' size='20'>";
-		}
-		
-		echo "<td class='back'>$ulos</td>
-			<td class='back'><input type='submit' value='".t("Etsi")."'></td>
-			</tr>
-			</form>";
-		echo "</table>";
+
+		echo "</table></form>";
 	}
 									
 	if ($tee == 'LISAA') {

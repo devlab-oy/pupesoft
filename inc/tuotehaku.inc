@@ -107,7 +107,7 @@
 		elseif (mysql_num_rows($thresult) != 1) {
 
 			if ($multi == "" and $kutsuja == "tuoteperhe.php") {
-				$ulos = "<select name='hakutuoteno'>";
+				$ulos = "<select name='hakutuoteno2'>";
 			}
 			elseif ($multi == "" and $kutsuja != "yllapito.php") {
 				$ulos = "<select name='tuoteno'>";
@@ -115,6 +115,8 @@
 			elseif ($kutsuja != "yllapito.php") {
 				$ulos = "<select name='tuoteno_array[]' multiple='TRUE' size='6'>";
 			}
+			
+			$ulos .= "<option value=''>".t("Valise tuote")."</option>";
 
 			// Loopataan tuotteet läpi
 			while ($trow = mysql_fetch_array($thresult)) {

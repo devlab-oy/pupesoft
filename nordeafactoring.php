@@ -38,6 +38,7 @@
 		//Käyttöliittymä
 		echo "<br>";
 		echo "<form method='post' action='$PHP_SELF'>";
+		echo "Luo uusi siirtotiedosto<br>";
 		echo "<table>";
 		echo "<input type='hidden' name='toim' value='$toim'>";
 		echo "<input type='hidden' name='tee' value='TARKISTA'>";
@@ -110,6 +111,54 @@
 				<td><input type='text' name='factoringsiirtonumero' value='$arow[seuraava]' size='6'></td>";
 
 		echo "<td class='back'><input type='submit' value='Luo siirtoaineisto'></td></tr></form></table><br><br>";
+		
+		
+		//Käyttöliittymä
+		echo "<br>";
+		echo "<form method='post' action='$PHP_SELF'>";
+		echo "Uudelleenluo siirtotiedosto<br>";
+		echo "<table>";
+		echo "<input type='hidden' name='toim' value='$toim'>";
+		echo "<input type='hidden' name='tee' value='TARKISTA'>";
+		echo "<input type='hidden' name='tee_u' value='UUDELLEENLUO'>";
+
+		if ($valkoodi == '') {
+			$valkoodi = $yhtiorow["valkoodi"];
+		}
+
+		echo "<input type='hidden' name='ed_valkoodi' value='$valkoodi'>";
+
+		$query = "	SELECT *
+	                FROM factoring
+	             	WHERE yhtio 		= '$kukarow[yhtio]'
+					and factoringyhtio 	= '$factoringyhtio'
+					and valkoodi 		= '$valkoodi'";
+		$fres = mysql_query($query) or pupe_error($query);
+		$frow = mysql_fetch_array($fres);
+
+		echo "<tr><th>Sopimusnumero:</th><td>$frow[sopimusnumero]</td>";
+		echo "<tr><th>Valitse valuutta:</th><td><select name='valkoodi' onchange='submit();'>";
+
+		$query = "	SELECT nimi, tunnus
+	                FROM valuu
+	             	WHERE yhtio = '$kukarow[yhtio]'
+	               	ORDER BY jarjestys";
+		$vresult = mysql_query($query) or pupe_error($query);
+		
+		while ($vrow = mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($vrow['nimi'] == $valkoodi) {
+					$sel = "selected";
+			}
+			echo "<option value = '$vrow[nimi]' $sel>$vrow[nimi]</option>";
+		}
+
+		echo "</select></td></tr>";
+
+		echo "<tr><th>Siirtoluettelon numero:</th>
+				<td><input type='text' name='factoringsiirtonumero' value='$factoringsiirtonumero' size='6'></td>";
+
+		echo "<td class='back'><input type='submit' value='Uudeleenluo siirtoaineisto'></td></tr></form></table><br><br>";
 	}
 
 	if ($tee == 'TULOSTA') {
@@ -166,11 +215,20 @@
 			$ppl = $ppa;
 		}
 
-		if ($ppa == '' or $ppl == '' or $ppl < $ppa) {
+		if ($tee_u != 'UUDELLEENLUO' and ($ppa == '' or $ppl == '' or $ppl < $ppa)) {
 			echo "Huono laskunumeroväli!";
 			exit;
 		}
 
+		if ($tee_u == 'UUDELLEENLUO') {
+			$where = "	and lasku.factoringsiirtonumero = '$factoringsiirtonumero' ";
+		}
+		else {
+			$where = "	and lasku.laskunro >= '$ppa'
+						and lasku.laskunro <= '$ppl'
+						and lasku.factoringsiirtonumero = 0 ";
+		}
+		
 		$dquery = "	SELECT lasku.yhtio
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='$factoringyhtio'
@@ -178,12 +236,10 @@
 					and lasku.tila	  	  = 'U'
 					and lasku.alatila	  = 'X'
 					and lasku.summa 	 != 0
-					and lasku.laskunro >= '$ppa'
-					and lasku.laskunro <= '$ppl'
-					and lasku.factoringsiirtonumero = 0
-					and lasku.valkoodi	= '$valkoodi'";
+					and lasku.valkoodi	= '$valkoodi'
+					$where";		
 		$dresult = mysql_query ($dquery) or pupe_error($dquery);
-
+		
 		if (mysql_num_rows($dresult) == 0) {
 			echo "Huono laskunumeroväli! Yhtään siirettävää laskua ei löytynyt!";
 			exit;
@@ -219,17 +275,15 @@
 					lasku.liitostunnus
 					FROM lasku
 					JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.factoring='$factoringyhtio'
-					WHERE lasku.yhtio	= '$kukarow[yhtio]'
-					and lasku.tila	  	= 'U'
-					and lasku.alatila	= 'X'
-					and lasku.summa		!= 0
-					and lasku.laskunro >= '$ppa'
-					and lasku.laskunro <= '$ppl'
-					and lasku.factoringsiirtonumero = 0
+					WHERE lasku.yhtio	  = '$kukarow[yhtio]'
+					and lasku.tila	  	  = 'U'
+					and lasku.alatila	  = 'X'
+					and lasku.summa 	 != 0
 					and lasku.valkoodi	= '$valkoodi'
+					$where
 					ORDER BY laskunro";
 		$laskures = mysql_query ($query) or pupe_error($query);
-
+		
 		if (mysql_num_rows($laskures) > 0) {
 
 			$laskukpl  = 0;
@@ -480,21 +534,22 @@
 				echo "Aineistossa oli virheitä! Korjaa ne ja aja uudestaan!";
 			}
 			else {
-				$dquery = "	UPDATE lasku, maksuehto
-							SET lasku.factoringsiirtonumero = '$factoringsiirtonumero'
-							WHERE lasku.yhtio	= '$kukarow[yhtio]'
-							and lasku.tila	  	= 'U'
-							and lasku.alatila	= 'X'
-							and lasku.summa		!= 0
-							and lasku.laskunro >= '$ppa'
-							and lasku.laskunro <= '$ppl'
-							and lasku.factoringsiirtonumero = 0
-							and lasku.valkoodi	= '$valkoodi'
-							and lasku.yhtio = maksuehto.yhtio
-							and lasku.maksuehto = maksuehto.tunnus
-							and maksuehto.factoring = '$factoringyhtio'";
-				$dresult = mysql_query ($dquery) or pupe_error($dquery);
-
+				if ($tee_u != 'UUDELLEENLUO') {
+					$dquery = "	UPDATE lasku, maksuehto
+								SET lasku.factoringsiirtonumero = '$factoringsiirtonumero'
+								WHERE lasku.yhtio	= '$kukarow[yhtio]'
+								and lasku.tila	  	= 'U'
+								and lasku.alatila	= 'X'
+								and lasku.summa		!= 0
+								and lasku.laskunro >= '$ppa'
+								and lasku.laskunro <= '$ppl'
+								and lasku.factoringsiirtonumero = 0
+								and lasku.valkoodi	= '$valkoodi'
+								and lasku.yhtio = maksuehto.yhtio
+								and lasku.maksuehto = maksuehto.tunnus
+								and maksuehto.factoring = '$factoringyhtio'";
+					$dresult = mysql_query ($dquery) or pupe_error($dquery);					
+				}
 				//luodaan summatietue
 				//luodaan laskutietue                                                                           
 				if($toim == "OKO") {                                                                           

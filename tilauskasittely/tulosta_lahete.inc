@@ -278,7 +278,7 @@ if (!function_exists('alku')) {
 						fclose($fh);
 
 						$image = $pdf->jfif_embed($data);
-						$pdf->image_place($image, $pohja-8, $oikpos, $thispage, $logoparam);
+						$pdf->image_place($image, $pohja-8, $oikpos, $thispage);
 
 						$kala = $kala - 20;
 
@@ -309,7 +309,7 @@ if (!function_exists('alku')) {
 		fclose($fh);
 
 		$image = $pdf->jfif_embed($data);
-		$pdf->image_place($image, 805, 440, $thispage, $logoparam);
+		$pdf->image_place($image, 805, 440, $thispage);
 				
 		system("rm -f $nimi");
 	
@@ -437,7 +437,7 @@ if (!function_exists('uusi_sivu')) {
 		fclose($fh);
 
 		$image = $pdf->jfif_embed($data);
-		$pdf->image_place($image, 805, 440, $thispage, $logoparam);
+		$pdf->image_place($image, 805, 440, $thispage);
 				
 		system("rm -f $nimi");
 
@@ -1087,7 +1087,7 @@ if (!function_exists('rivi_viivakoodi')) {
 			fclose($fh);
 
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala-8, 350, $thispage, $logoparam);
+			$pdf->image_place($image, $kala-8, 350, $thispage);
 
 			system("rm -f $nimi");
 			
@@ -1145,7 +1145,7 @@ if (!function_exists('rivi_asiakviivakoodi')) {
 			fclose($fh);
 
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala-5, 45, $thispage, $logoparam);
+			$pdf->image_place($image, $kala-5, 45, $thispage);
 			
 			//viivakoodi
 			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";

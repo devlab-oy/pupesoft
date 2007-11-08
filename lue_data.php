@@ -91,7 +91,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	$eiyhtiota = "";
 
 	require ("inc/pakolliset_sarakkeet.inc");	
-	list($pakolliset, $kielletyt, $wherelliset) = pakolliset_sarakkeet($table);
+	list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota) = pakolliset_sarakkeet($table);
 	
 	// $trows 		sis‰lt‰‰ kaikki taulun sarakkeet tietokannasta
 	// $otsikot 	sis‰lt‰‰ kaikki sarakkeet saadusta tiedostosta
@@ -293,13 +293,12 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$valinta .= " and TUOTENO='$tuoteno'";
 			}
 			elseif ($table == 'sanakirja' and $otsikot[$j] == "FI") {
-				// jos ollaan mulkkaamassa RU tai EE ni tehd‰‰n utf-8 -> latin-1 konversio FI kent‰ll‰
-				if (in_array("RU", $otsikot) or in_array("EE", $otsikot)) {
-					//$rivi[$r] = recode_string("utf-8..latin1", $rivi[$r]);
+				// jos ollaan mulkkaamassa RU ni tehd‰‰n utf-8 -> latin-1 konversio FI kent‰ll‰
+				if (in_array("RU", $otsikot)) {
 					$rivi[$j] = iconv("UTF-8", "ISO-8859-1", $rivi[$j]);
-
-					$valinta .= " and ".$otsikot[$j]."='".trim($rivi[$j])."'";
 				}
+				
+				$valinta .= " and ".$otsikot[$j]."= BINARY '".trim($rivi[$j])."'";
 			}
 			elseif ($table == 'tuotepaikat' and $otsikot[$j] == "OLETUS") {
 				//ei haluta t‰t‰ t‰nne
@@ -534,9 +533,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 					// tehd‰‰n riville oikeellisuustsekkej‰
 					if ($table == 'sanakirja' and $otsikot[$r] == 'FI') {
-						// jos ollaan mulkkaamassa RU tai EE ni tehd‰‰n utf-8 -> latin-1 konversio FI kent‰ll‰
-						 if (in_array("RU", $otsikot) or in_array("EE", $otsikot)) {
-							//$rivi[$r] = recode_string("utf-8..latin1", $rivi[$r]);
+						// jos ollaan mulkkaamassa RU ni tehd‰‰n utf-8 -> latin-1 konversio FI kent‰ll‰
+						 if (in_array("RU", $otsikot)) {
 							$rivi[$r] = iconv("UTF-8", "ISO-8859-1", $rivi[$r]);
 						}
 					}
@@ -758,7 +756,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$query .= " ORDER BY tunnus";
 			}
 
-			if ($hylkaa == 0) {
+			if ($hylkaa == 0) {				
 				$iresult = mysql_query($query) or pupe_error($query);
 				
 				// tehd‰‰n ep‰kunrattijutut

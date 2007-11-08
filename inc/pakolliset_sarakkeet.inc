@@ -129,7 +129,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("FI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				$eiyhtiota = "TRIP";
-					break;
+				break;
 			case "tuotteen_toimittajat" :
 				$pakolliset = array("TUOTENO","TOIMITTAJA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM","LIITOSTUNNUS");
@@ -176,7 +176,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array();
 		}
 
-		return array($pakolliset, $kielletyt, $wherelliset);
+		return array($pakolliset, $kielletyt, $wherelliset, $eiyhtiota);
 	}	
 }
 

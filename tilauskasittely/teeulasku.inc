@@ -72,12 +72,21 @@ $query  = "	select *
 $uusiuresult = mysql_query($query) or pupe_error($query);
 $lasrow = mysql_fetch_array($uusiuresult);
 
+
+//haetaan laskun oletettu tulostuskieli ja t-funktioidaan sen kielen mukaisesti kantaa tallennettavat fraasit
+$querykieli = "	SELECT kieli
+				FROM asiakas
+				WHERE tunnus= '$lasrow[liitostunnus]'
+				AND yhtio 	= '$kukarow[yhtio]'";
+$resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
+$kielirow = mysql_fetch_array($resultkieli);
+
 $query  = "select distinct toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($tunnukset)";
 $uusiuresult = mysql_query($query) or pupe_error($query);
 
 // jos meillä on useita toimitusosoitteita, niin ei kirjoiteta vain ekaa siihen otsikolle. se on sekavaa.. kijotetaan vain "useita"
 if (mysql_num_rows($uusiuresult) != 1) {
-	$lasrow["toim_nimi"]     = t("Useita");
+	$lasrow["toim_nimi"]     = t("Useita", $kielirow["kieli"]);
 	$lasrow["toim_nimitark"] = "";
 	$lasrow["toim_osoite"]   = "";
 	$lasrow["toim_postino"]  = "";
@@ -175,14 +184,14 @@ if ($lasrow["vienti"] != '') {
 			$rahtirow["pakkaus"] .= " ".$rahtirow["pakkauskuvaustark"];
 		}
 
-		$lisa_comments .= "$rahtirow[kollit] ".t("kpl").". $rahtirow[pakkaus] $rahtirow[kilot] kg. \n";
+		$lisa_comments .= "$rahtirow[kollit] ".t("kpl", $kielirow["kieli"]).". $rahtirow[pakkaus] $rahtirow[kilot] kg. \n";
 	}
 }
 
 //Laitetaan laskun viestikenttään talteen tiettyjä lisätietoja
 if ($mehtorow["jv"] != '') {
-	$lisa_viestit 	.= t("Kuitti jälkivaatimuksesta");
-	$lisa_comments 	.= t("Kuitataan jälkivaatimuksella saaduksi. TÄTÄ LASKUA EI TULE MAKSAA!")."\n";
+	$lisa_viestit 	.= t("Kuitti jälkivaatimuksesta", $kielirow["kieli"]);
+	$lisa_comments 	.= t("Kuitataan jälkivaatimuksella saaduksi. TÄTÄ LASKUA EI TULE MAKSAA!", $kielirow["kieli"])."\n";
 }
 
 // Lisätään järjestelmän generoimat kommentit laskun kommenttikenttään
@@ -303,7 +312,7 @@ $uusiotunnus = (string) mysql_insert_id();
 // haetaan nyt varmuuden vuoksi vielä insertoidut tiedot takaisin..
 $query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
 $uusiuresult = mysql_query($query) or pupe_error($query);
-if (mysql_num_rows($uusiuresult)==0) die ("".t("Lasku")." $uusiotunnus ".t("katosi")."!");
+if (mysql_num_rows($uusiuresult)==0) die (t("Lasku")." $uusiotunnus ".t("katosi")."!");
 $laskurow = mysql_fetch_array($uusiuresult);
 
 // päivitetään tilausriveille uuden otsikon tiedot (ei päivitetä Puute ja Jt rivejä laskutetuiksi)
@@ -349,10 +358,10 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 
 			// jos meillä on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteensäriville kommenttiin...
 			if (strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) and $sumsrow["toim_nimi"] != "") {
-				$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteensä").": $sumsrow[summa] $sumsrow[valkoodi].";
+				$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 			}
 			else {
-				$sumskommentti = t("Tilaus")." $edotunnus ".t("yhteensä").": $sumsrow[summa] $sumsrow[valkoodi].";
+				$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 			}
 
 			$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";
@@ -380,10 +389,10 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 
 		// jos meillä on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteensäriville kommenttiin...
 		if (strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) and $sumsrow["toim_nimi"] != "") {
-			$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteensä").": $sumsrow[summa] $sumsrow[valkoodi].";
+			$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 		}
 		else {
-			$sumskommentti = t("Tilaus")." $edotunnus ".t("yhteensä").": $sumsrow[summa] $sumsrow[valkoodi].";
+			$sumskommentti = t("Tilaus", $kielirow["kieli"])." $edotunnus ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 		}
 
 		$query   = "UPDATE tilausrivi SET kommentti = concat(kommentti, '\n', '$sumskommentti') WHERE tunnus='$edtunnus' and yhtio='$kukarow[yhtio]'";

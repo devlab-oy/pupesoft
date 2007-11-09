@@ -139,7 +139,7 @@ if ($tee != '') {
 	flush();
 
 	// kirjoitetaan tmp file
-	$filenimi = "{$kukarow['yhtio']}-".t("hinnasto")."-".md5(uniqid(rand(),true)).".txt";
+	$filenimi = t("hinnasto")."-".date("YmdHis").".txt";
 
 	if (!$fh = fopen("/tmp/" . $filenimi, "w+")) {
 		die("filen luonti epäonnistui!");

@@ -139,7 +139,7 @@ if ($tee != '') {
 	flush();
 
 	// kirjoitetaan tmp file
-	$filenimi = t("hinnasto")."-".date("YmdHis").".txt";
+	$filenimi = t("hinnasto")."-".date("ymdHis").".txt";
 
 	if (!$fh = fopen("/tmp/" . $filenimi, "w+")) {
 		die("filen luonti epäonnistui!");

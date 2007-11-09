@@ -25,39 +25,46 @@
 
 			if ((int) $prosmuutos < 0 and substr($prosmuutos,0,1) == '-') {
 				$prosmuutos   = (int) $prosmuutos;
-				$lisa = " and inventointipoikkeama <= '$prosmuutos' ";
+				$lisa .= " and tuotepaikat.inventointipoikkeama <= '$prosmuutos' ";
 			}
 			elseif ((int) $prosmuutos > 0 and substr($prosmuutos,0,1) == '+') {
 				$prosmuutos   = (int) $prosmuutos;
-				$lisa = " and inventointipoikkeama >= '$prosmuutos' ";
+				$lisa .= " and tuotepaikat.inventointipoikkeama >= '$prosmuutos' ";
 			}
 			elseif ((int) $prosmuutos > 0) {
 				$prosmuutos   = (int) $prosmuutos;
-				$lisa = " and (inventointipoikkeama <= '-$prosmuutos' or inventointipoikkeama >= '$prosmuutos') ";
+				$lisa .= " and (inventointipoikkeama <= '-$prosmuutos' or tuotepaikat.inventointipoikkeama >= '$prosmuutos') ";
 			}
 
 			if ($kplmuutos <> 0) {
-				$lisa = " and abs(tapahtuma.kpl) >= abs('$kplmuutos') ";
+				$lisa .= " and abs(tapahtuma.kpl) >= abs('$kplmuutos') ";
+			}
+			
+			if ($sarjat != "") {
+				$lisa .= " and tuote.sarjanumeroseuranta='S' ";
+			}
+			
+			if ($vararvomuu != "") {
+				$lisa .= " HAVING arvo != 0 ORDER BY arvo";
+			}
+			else {
+				$lisa .= " ORDER BY sorttauskentta";	
 			}
 
-			$query = "	SELECT tuote.tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso, nimitys, yksikko, inventointiaika, inventointipoikkeama, selite, tapahtuma.kpl,
-						group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno,
-						concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta
+			$query = "	SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, 
+						tuotepaikat.inventointiaika, tuotepaikat.inventointipoikkeama, tapahtuma.selite, tapahtuma.kpl, tapahtuma.tunnus ttunnus, tapahtuma.hinta,
+						(tapahtuma.hinta*tapahtuma.kpl) arvo,
+						left(tapahtuma.laadittu, 10) tapvm,
+						(SELECT group_concat(toim_tuoteno) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno) as toim_tuoteno,
+						concat(lpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta
 						FROM tuote
-						JOIN tuotepaikat USING (yhtio, tuoteno)
-						JOIN tapahtuma ON tapahtuma.yhtio = tuote.yhtio
-						and tapahtuma.laji='Inventointi'
-						and tapahtuma.tuoteno=tuote.tuoteno
-						and tapahtuma.laadittu=tuotepaikat.inventointiaika
-						and tapahtuma.selite like concat('%',hyllyalue,'-',hyllynro,'-',hyllyvali,'-',hyllytaso,'%')
-						LEFT JOIN tuotteen_toimittajat use index (yhtio_tuoteno) ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno
+						JOIN tapahtuma ON tapahtuma.yhtio = tuote.yhtio and tapahtuma.laji='Inventointi' and tapahtuma.tuoteno=tuote.tuoteno
+						LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tapahtuma.yhtio and tuotepaikat.tuoteno=tapahtuma.tuoteno and tapahtuma.selite like concat('%',tuotepaikat.hyllyalue,'-',tuotepaikat.hyllynro,'-',tuotepaikat.hyllyvali,'-',tuotepaikat.hyllytaso,'%')						
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.ei_saldoa = ''
-						and inventointiaika >= '$vva-$kka-$ppa 00:00:00'
-						and inventointiaika <= '$vvl-$kkl-$ppl 23:59:59'
-						$lisa
-						GROUP BY 1,2,3,4,5,6,7,8,9,10,11
-						ORDER BY sorttauskentta";
+						and tapahtuma.laadittu >= '$vva-$kka-$ppa 00:00:00'
+						and tapahtuma.laadittu <= '$vvl-$kkl-$ppl 23:59:59'
+						$lisa";
 			$saldoresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($saldoresult) == 0) {
@@ -67,15 +74,30 @@
 			}
 			elseif ($tila != 'tulosta'){
 				echo "<table>";
+				
 				echo "<tr>";
-				echo "<th>".t("Tuoteno")."</th><th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("Kpl")."</th><th>".t("Poikkeamaprosentti")." %</th><th>".t("Selite")."</th>";
+				echo "<th>".t("Nimitys")."</th><th>".t("Varastopaikka")."</th><th>".t("Inventointiaika")."</th><th>".t("Kpl")."</th><th>".t("Poikkeamaprosentti")." %</th>";
 				echo "</tr>";
 
-
 				while ($tuoterow = mysql_fetch_array($saldoresult)) {
-					echo "<tr>";
-					echo "<td>$tuoterow[tuoteno]</td><td>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])."</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>$tuoterow[inventointiaika]</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td><td>$tuoterow[selite]</td>";
-					echo "</tr>";
+					echo "<tr><th colspan='5'>$tuoterow[tuoteno]</th></tr>";
+					
+					echo "<td>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])."</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>".tv1dateconv($tuoterow[inventointiaika], "P")."</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td></tr>";
+					
+					echo "<tr><td colspan='5'>$tuoterow[selite]</td></tr>";
+					
+					$query = "	SELECT sum(tiliointi.summa) summa
+							FROM lasku use index (yhtio_tila_tapvm)
+								JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu='' and tiliointi.tilino='$yhtiorow[varasto]'
+								WHERE lasku.yhtio	= '$kukarow[yhtio]'
+								and lasku.tila     	= 'X'
+								and lasku.tapvm     = '$tuoterow[tapvm]'
+								and lasku.viite    	= '$tuoterow[ttunnus]'";
+					$kpitores = mysql_query($query) or pupe_error($query);
+					$kpitorow = mysql_fetch_array($kpitores);
+					
+					echo "<tr><td>".t("Varastonmuutos").": ".sprintf('%.2f', $tuoterow["kpl"]*$tuoterow["hinta"])."</td><td colspan='4'>".t("Kirjanpito").": ".sprintf('%.2f', $kpitorow["summa"])."</td></tr>";
+					echo "<tr style='height: 5px;'></tr>";
 				}
 				echo "</table>";
 			}
@@ -214,6 +236,12 @@
 
 		echo "<tr><th>".t("Listaa tuotteet joiden kappalem‰‰r‰ on muuttunut v‰hint‰‰n")."</th>
 				<td colspan='3'><input type='text' size='15' name='kplmuutos' value='$kplmuutos' size='3'> ".t("kappaletta")."</td></tr>";
+
+		echo "<tr><th>".t("Listaa vain sarjanumerolliset tuotteet")."</th>
+				<td colspan='3'><input type='checkbox' name='sarjat' $sel></td></tr>";
+		
+		echo "<tr><th>".t("Listaa vain varastonarvoon vaikuttaneet inventoinnit")."</th>
+				<td colspan='3'><input type='checkbox' name='vararvomuu' $sel></td></tr>";
 
 		echo "<tr><td class='back'><br><input type='submit' value='".t("Aja raportti")."'></td></tr></form></table>";
 	}

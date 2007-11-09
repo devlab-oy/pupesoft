@@ -139,9 +139,9 @@
 				$sel = "SELECTED";
 			}
 			else {
-				$sel = "";	
+				$sel = "";
 			}
-			
+
 			echo "<option value='{$rowmaa['maa']}' $sel>".maa($rowmaa['maa'])."</option>";
 		}
 
@@ -167,7 +167,7 @@
 			else {
 				$sel = "";
 			}
-			
+
 			echo "<option value='$row[0]' $sel>$row[1]</option>";
 		}
 		echo "</select></td></tr>";
@@ -185,17 +185,17 @@
 		switch ($laji) {
 			case 'M' :
 				$lista = t("myyntisaamiset");
-				break;   
-			case 'MF' :  
+				break;
+			case 'MF' :
 				$lista = t("factoringmyyntisaamiset");
-				break;   
-			case 'MK' :  
+				break;
+			case 'MK' :
 				$lista = t("konsernimyyntisaamiset");
-				break;   
-			case 'O' :   
+				break;
+			case 'O' :
 				$lista = t("ostovelat");
-				break;   
-			case 'OK' :  
+				break;
+			case 'OK' :
 				$lista = t("konserniostovelat");
 				break;
 		}
@@ -405,7 +405,8 @@
 			echo "</tr>";
 
 			$summa = array(); // tässä kirjanpidosta osasuoritukset poistettuna
-			
+			$summatotal = 0;  // ässä koko höskä kotivaluutassa
+
 			while ($trow = mysql_fetch_array ($result)) {
 
 				if ($trow['tiliointiavoinsaldo'] == 0 and $rikki == 'on') {
@@ -416,7 +417,7 @@
 				}
 
 				if (($rikki == 'on' and $trow['tiliointiavoinsaldo'] == 0) or $trow['tiliointiavoinsaldo'] != 0) {
-					
+
 					echo "<tr class='aktiivi'>";
 					echo "<td $class><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[liitostunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
 					echo "<td $class>$trow[nimi]</td>";
@@ -425,20 +426,19 @@
 					echo "<td $class>".tv1dateconv($trow["mapvm"])."</td>";
 					echo "<td $class>".tv1dateconv($trow["erpcm"])."</td>";
 
+					$summatotal += $trow['tiliointiavoinsaldo'];
+
 					if ($valuutassako == 'V') {
 						echo "<td align='right' $class>".round(laskuval($trow["tiliointisumma"], $trow["vienti_kurssi"]), 2)."</td>";
 						echo "<td align='right' $class>".round(laskuval($trow["tiliointiavoinsaldo"], $trow["vienti_kurssi"]), 2)."</td>";
 						echo "<td align='right' $class>$trow[valkoodi]</td>";
-					
 						$summa[$trow["valkoodi"]] += round(laskuval($trow["tiliointiavoinsaldo"], $trow["vienti_kurssi"]), 2);	// paljo kirjanpidossa avoimena valuutassa
-						
 					}
 					else {
 						echo "<td align='right' $class>$trow[tiliointisumma]</td>";
 						echo "<td align='right' $class>$trow[tiliointiavoinsaldo]</td>";
 						echo "<td align='right' $class>$yhtiorow[valkoodi]</td>";
-						
-						$summa[$trow["valkoodi"]] += $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
+						$summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
 					}
 
 					// jos ollaan ajettu tälle päivälle voidaan echota errori avoimesta saldosta
@@ -459,7 +459,7 @@
 						tiliointi.summa tiliointisumma,
 						round(suoritus.summa*if(suoritus.kurssi=0, 1, kurssi),2)*-1 suoritussumma,
 						tiliointi.ltunnus,
-						suoritus.summa,
+						suoritus.summa*-1 summa,
 						suoritus.valkoodi
 				  		FROM suoritus
 						LEFT JOIN tiliointi ON (tiliointi.tunnus = suoritus.ltunnus and tiliointi.korjattu = '')
@@ -473,17 +473,20 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			$suoritussumma = array();
+			$suoritussummatotal = 0; // tässä koko höskä kotivaluutassa
 
 			while ($trow = mysql_fetch_array ($result)) {
 					echo "<tr class='aktiivi'>";
-					
+
+					$suoritussummatotal =+ $trow["suoritussumma"];
+
 					if ($trow["tunnus"] != NULL) {
 						echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[tunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
 					}
 					else {
 						echo "<td>*".t("ei asiakasta")."*</td>";
 					}
-					
+
 					echo "<td>$trow[nimi_maksaja]</td>";
 					echo "<td>$trow[viite]</td>";
 					echo "<td>".tv1dateconv($trow["kirjpvm"])."</td>";
@@ -495,13 +498,11 @@
 
 					if ($valuutassako == 'V') {
 						echo "<td></td><td align='right'><font class='message'>$trow[summa]</td><td align='right'>$trow[valkoodi]</font></td>";
-						
 						$suoritussumma[$trow["valkoodi"]] += $trow["summa"];
 					}
 					else {
 						echo "<td></td><td align='right'><font class='message'>$trow[suoritussumma]</td><td align='right'>$yhtiorow[valkoodi]</font></td>";
-						
-						$suoritussumma[$trow["valkoodi"]] += $trow["suoritussumma"];
+						$suoritussumma[$yhtiorow["valkoodi"]] += $trow["suoritussumma"];
 					}
 
 					if ($trow["suoritussumma"] != $trow["tiliointisumma"] and $trow["tiliointisumma"] != NULL) echo "<td class='back' nowrap><font class='error'>VIRHE: Kirjanpito / Suoritus summat heittävät!</font> (<a href='muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tiliointisumma] / $trow[suoritussumma]</a>)</td>";
@@ -510,26 +511,26 @@
 
 					echo "</tr>";
 			}
-			
+
 			$kaikkival = array();
-		
+
 	        foreach($summa as $val => $sum) {
 				echo "<tr>";
 				echo "<th colspan='7'>".t("Avoimet yhteensä").":</th>";
 				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f", $sum)."</td>";				// tässä kirjanpidosta osasuoritukset poistettuna
 				echo "<td class='tumma' align='right' nowrap>$val</td>";
 				echo "</tr>";
-				
+
 				if(!in_array($val, $kaikkival)) $kaikkival[] = $val;
 			}
-						
+
 			foreach($suoritussumma as $val => $sum) {
 	        	echo "<tr>";
 				echo "<th colspan='7'>".t("Kohdistamattomat suoritukset yhteensä").":</th>";
 				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f", $sum)."</td>";
 				echo "<td class='tumma' align='right' nowrap>$val</td>";
 				echo "</tr>";
-				
+
 				if(!in_array($val, $kaikkival)) $kaikkival[] = $val;
 			}
 
@@ -540,7 +541,7 @@
 				echo "<td class='tumma' align='right' nowrap>$val</td>";
 				echo "</tr>";
 			}
-			
+
 			// ei rajauksia, voidaan näyttää erotus kirjanpitoon
 			if ($lisa1 == "" and $lisa3 == "" and $valkoodi == "" and $maa == "") {
 
@@ -555,10 +556,16 @@
 				$trow = mysql_fetch_array ($result);
 
 				$trow["saldo"] 	= sprintf("%.2f", $trow["saldo"]);
-				$erotus 		= $suoritussumma + $summa - $trow["saldo"];
+				$erotus 		= $summatotal + $suoritussummatotal + $trow["saldo"];
 				$erotus 		= sprintf("%.2f", $erotus);
 
 				echo "<tr><td class='back' colspan='9'>&nbsp;</td></tr>";
+
+		        echo "<tr>";
+				echo "<th colspan='7'>".t("Avoimet - kohdistamattomat", "", $tili).":</th>";
+				echo "<td class='tumma' align='right' nowrap>".sprintf("%.2f",$summatotal + $suoritussummatotal)."</td>";
+				echo "<td class='tumma' align='right' nowrap>$yhtiorow[valkoodi]</td>";
+				echo "</tr>";
 
 		        echo "<tr>";
 				echo "<th colspan='7'>".t("Kirjanpidon tili %s yhteensä", "", $tili).":</th>";

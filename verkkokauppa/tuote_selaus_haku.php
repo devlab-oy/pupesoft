@@ -239,9 +239,10 @@
 	}
 	
 	if (strlen($ojarj) > 0) {
+		$ojarj = urldecode($ojarj);
 		$jarjestys = $ojarj;
 	}
-	echo "oja$ojarj";
+
 	if ($poistetut != "") {
 		$poislisa  = "";
 		$poischeck = "CHECKED";
@@ -473,7 +474,7 @@
 		echo "<input type='hidden' name='haku[3]' value = '$haku[3]'>";
 		echo "<input type='hidden' name='haku[4]' value = '$haku[4]'>";
 		echo "<input type='hidden' name='haku[5]' value = '$haku[5]'>";
-		echo "<input type='hidden' name='ojarj'   value = '$ojarj'>";		
+		echo "<input type='hidden' name='ojarj'   value = '".urlencode($ojarj)."'>";		
 		echo "<input type='hidden' name='tee' value = 'TI'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";

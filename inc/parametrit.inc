@@ -337,7 +337,10 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			$charset = "iso-8859-1";
 		}
 
-		header("Content-Type: text/html; charset=$charset");
+		if(!headers_sent()) {
+			header("Content-Type: text/html; charset=$charset");
+		}
+		
 		echo "<html>";
 		echo "<head>";
 		echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";

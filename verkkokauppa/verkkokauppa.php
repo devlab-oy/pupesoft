@@ -53,7 +53,7 @@ if(!function_exists("menu")) {
 						ORDER BY tuotemerkki";
 			$meres = mysql_query($query) or pupe_error($query);
 			while($merow = mysql_fetch_array($meres)) {
-				$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki={$merow["tuotemerkki"]}\", \"\", true);'>{$merow["tuotemerkki"]}</a></td></tr>";
+				$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td class='sisennys2'></td><td><a class = 'menu' id='{$osasto}_{$try}_{$merow["tuotemerkki"]}_P' href='javascript:sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemerkki={$merow["tuotemerkki"]}\", \"\", true);'>{$merow["tuotemerkki"]}</a></td></tr>";
 			}
 			$val .= "</table>";
 		}
@@ -290,9 +290,10 @@ if($tee == "poistakori") {
 		
 		$query = "	UPDATE kuka SET kesken = '' WHERE yhtio ='{$kukarow["yhtio"]}' and kuka = '{$kukarow["kuka"]}'";
 		$result = mysql_query($query) or pupe_error($query);
+		
+		echo "<center><font class ='message'>".t("Tilaus %s mitätöity", $kieli, $kukarow["kesken"])."</font></center>";
+		$kukarow["kesken"] = 0;
 	}
-
-	$tee = "tilatut";	
 }
 
 if($tee == "poistarivi") {
@@ -311,6 +312,33 @@ if($tee == "poistarivi") {
 
 		$query = "	DELETE FROM tilausrivi
 					WHERE yhtio = '{$kukarow["yhtio"]}' and tyyppi = 'L' and tunnus = '$rivitunnus' LIMIT 1";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+
+	$tee = "tilatut";	
+}
+
+if($tee == "tallenna_osoite") {
+	$query = "	SELECT tunnus
+				FROM lasku
+				WHERE yhtio = '{$kukarow["yhtio"]}' and
+				tila = 'N' and
+				tunnus = '{$kukarow["kesken"]}' and
+				alatila=''";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) == 1) {
+		$kalakori = mysql_fetch_array($result);
+
+		$query = "	UPDATE lasku SET
+						toim_nimi 		= '$toim_nimi',
+						toim_nimitark 	= '$toim_nimitark',
+						toim_osoite 	= '$toim_osoite',
+						toim_postino 	= '$toim_postino',
+						toim_postitp 	= '$toim_postitp',
+						viesti			= '$viesti',
+						comments		= '$comments'
+					WHERE yhtio = '{$kukarow["yhtio"]}' and tila = 'N' and tunnus = '$kukarow[kesken]' LIMIT 1";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
@@ -361,12 +389,21 @@ if($tee == "tilaa") {
 
 if($tee == "tilatut") {
 	
-	if($kukarow["kesken"] == 0) {
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '{$kukarow["yhtio"]}' and
+				tila = 'N' and
+				tunnus = '{$kukarow["kesken"]}' and
+				alatila=''";
+	$result = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($result) == 0) {
 		$tee = "selaa";
 	}
 	else {
-		$ulos = "<font class='head'>".t("Tilauksen tuotteet")." {$kukarow["kesken"]}</font><br>
-				<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try')\">Takaisin selaimelle</a>&nbsp;&nbsp;";
+		$laskurow = mysql_fetch_array($result);
+		
+		$ulos = "<font class='head'>".t("Tilauksen %s tuotteet", $kieli, $kukarow["kesken"])." </font><br>
+				<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">Takaisin selaimelle</a>&nbsp;&nbsp;";
 
 		$query = "	SELECT count(*) rivei
 					FROM tilausrivi 
@@ -376,7 +413,7 @@ if($tee == "tilatut") {
 
 		if($row["rivei"] > 0) {
 			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilaa')\";>Tilaa tuotteet</a>&nbsp;&nbsp;";
-			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try')\" disabled>Mitätöi tilaus</a>";
+			$ulos .= "<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistakori&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\" disabled>Mitätöi tilaus</a>";
 		}		
 
 		$ulos .= "<br><br>";
@@ -393,8 +430,12 @@ if($tee == "tilatut") {
 		$riviresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($riviresult) > 0) {
-			$ulos .=  "	<form>
-						<table style = 'width: 400px;'>
+			$ulos .=  "	<form id = 'laskutiedot' name = 'laskutiedot' method='POST' action=\"javascript:ajaxPost('laskutiedot', 'verkkokauppa.php?', 'selain', false, true);\">
+						<input type='hidden' name='tee' value = 'tallenna_osoite'>
+						<input type='hidden' name='osasto' value = '$osasto'>
+						<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>
+						<input type='hidden' name='try' value = '$try'>
+						<table style = 'width: 500px;'>
 						<tr>
 							<th>
 								".t("Laskutusosoite")."
@@ -402,29 +443,59 @@ if($tee == "tilatut") {
 							<th>
 								".t("Toimitusosoite")."
 							</th>
+							<td class='back'></td>
 						</tr>			
 						<tr>
-							<td>
-								$nimi<br>
-								$nimiatrk<br>
-								$osoite<br>
-								$postino $postitp<br>
-							</td>						
-							<td>
-								<input type = 'text' name='toim_nimi' value = '$toim_nimi'><br>
-								<input type = 'text' name='toim_nimitark' value = '$toim_nimitark'><br>
-								<input type = 'text' name='toim_osoite' value = '$toim_osoite'><br>
-								<input type = 'text' name='toim_postino' value = '$toim_postino'><input type = 'text' name='toim_postitp' value = '$toim_postitp'><br>
+							<td valign = 'top' width='250px'>
+								$laskurow[nimi]<br>
+								$laskurow[nimitark]<br>
+								$laskurow[osoite]<br>
+								$laskurow[postino] $laskurow[postitp]
+							</td>
+							<td valign = 'top' width='250px'>
+								<input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br>
+								<input type = 'text' name='toim_nimitark' value = '$laskurow[toim_nimitark]' size = '30'><br>
+								<input type = 'text' name='toim_osoite' value = '$laskurow[toim_osoite]' size = '30'><br>
+								<input type = 'text' name='toim_postino' value = '$laskurow[toim_postino]' size = '6'> <input type = 'text' name='toim_postitp' value = '$laskurow[toim_postitp]' size = '20'><br>
+							</td>
+							<td class='back' valign = 'bottom'>
+								<input type = 'submit' name='tallenna' value='".t("Tallenna")."'>
 							</td>
 						</tr>			
 						<tr>
-							<td class = 'back' align = 'right'>
-							<input type = 'hidden' name='tallenna' value='".t("Tallenna")."'>
-							sndReq('selain', 'verkkokauppa.php?tee=tilaa')
-							</td>						
-						</tr>
+							<td colspan='3' class='back'>
+								<br>
+							</td>
+						</tr>			
+						
+						<tr>
+							<th colspan='2'>
+								".t("Tilausviite")."
+							</th>
+							<td class='back'></td>
+						</tr>			
+						<tr>
+							<td colspan='2'>
+								<input type = 'text' name='viesti' value='$laskurow[viesti]' size = '62'>
+							</td>
+							<td class='back'></td>
+						</tr>			
+						<tr>
+							<th colspan='2'>
+								".t("Lisätiedot")."
+							</th>
+							<td class='back'></td>
+						</tr>			
+						<tr>
+							<td colspan='2'>
+							<textarea name='comments' cols = '60' rows = '3'>$laskurow[comments]</textarea>
+							</td>
+							<td class='back'></td>
+						</tr>			
 						</table>
 						</form><br>
+						
+						<font class='message'>".t("Tilausrivit").":</font><hr>
 						
 						<table style = 'width: 600px;'>
 						<tr>
@@ -446,7 +517,7 @@ if($tee == "tilatut") {
 							<td>$koririvi[varattu]</td>
 							<td>$koririvi[hinta]</td>
 							<td>$koririvi[rivihinta]</td>
-							<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&try=$try')\">Poista</a></td>
+							<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">Poista</a></td>
 						</tr>";
 
 			}
@@ -480,7 +551,7 @@ if($tee == "selaa") {
 	$haku[4]	= $try;
 	$haku[5]	= $tuotemerkki;	
 	
-	if($kukarow["kuka"] != "www" and $kukarow["kesken"] == 0) {
+	if($kukarow["kuka"] != "www" and (int) $kukarow["kesken"] == 0) {
 		require_once("luo_myyntitilausotsikko.inc");
 		$tilausnumero = luo_myyntitilausotsikko($kukarow["oletus_asiakas"], $tilausnumero, "");
 		$kukarow["kesken"] = $tilausnumero;

@@ -1450,7 +1450,7 @@
 
 			echo "</tr>";
 
-			if ($yhtiorow["splittauskielto"] != "") {
+			if ($yhtiorow["splittauskielto"] == "E") {
 				$laskkielto = "";
 				if (($yhtiorow["splittauskielto"] != '' and !isset($srow["splittauskielto"])) or $srow["splittauskielto"] != '') $laskkielto = 'CHECKED';
 

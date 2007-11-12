@@ -2207,7 +2207,7 @@ if(!function_exists("paivita_toimitukset")) {
 			}
 			
 			if($taulu == "lasku") {
-				$where = " and tunnus = '$otunnus'";
+				$where = " and tunnus = '$otunnus' and tunnusnippu > 0";
 			}
 			else {
 				$where = " and otunnus = '$otunnus'";
@@ -2227,7 +2227,7 @@ if(!function_exists("paivita_toimitukset")) {
 					//	Poistetaan numeeriset avaimet
 					$diff = array();
 					foreach($diffi as $key => $value) {
-						if(!is_numeric($key) and !in_array("tila", "alatila")) {
+						if(!is_numeric($key) and !in_array($key, array("tila", "alatila", "muutospvm"))) {
 							$diff[$key] = $value;
 						}
 					}
@@ -2236,7 +2236,7 @@ if(!function_exists("paivita_toimitukset")) {
 					if($taulu == "lasku") {
 						$query = "	SELECT *
 									FROM lasku
-									WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$otunnus' and tila IN ('L','N') and alatila != 'X' and tunnusnippu > 0";
+									WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$uusirow[tunnusnippu]' and tila IN ('L','N') and alatila != 'X' and tunnus != '$otunnus' and tunnusnippu > 0";
 					}
 					else {
 						$query = "	SELECT laskun_lisatiedot.*
@@ -2244,7 +2244,6 @@ if(!function_exists("paivita_toimitukset")) {
 									JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
 									WHERE lasku.yhtio = '$kukarow[yhtio]' and tunnusnippu = '$otunnus' and tila IN ('L','N') and alatila != 'X' and tunnusnippu > 0";
 					}
-					
 					$result = mysql_query($query) or pupe_error($query);
 					
 					if(mysql_num_rows($result) > 0) {

@@ -701,7 +701,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 		
 		echo "<font class='message'>".t("Osatoimitus")." ($aika) $kukarow[kesken] ".t("mitätöity")."!</font><br><br>";
 
-		if($projektilla > 0 or ($laskurow["tunnusnippu"] > 0 and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) {
+		if($projektilla > 0 and ($laskurow["tunnusnippu"] > 0 and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) {
 			$tilausnumero = $laskurow["tunnusnippu"];
 			
 			//	Hypätään takaisin otsikolle
@@ -964,18 +964,13 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		$aika=date("d.m.y @ G:i:s", time());
 		echo "<font class='message'>".t("Osatoimitus")." $otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
 
-		if($projektilla > 0 or ($laskurow["tunnusnippu"] > 0 and $laskurow["tunnusnippu"] != $laskurow["tunnus"])) {
+		if($projektilla > 0 and $laskurow["tunnusnippu"] > 0 and $laskurow["tunnusnippu"] != $laskurow["tunnus"]) {
 			$tilausnumero = $laskurow["tunnusnippu"];
 			
 			//	Hypätään takaisin otsikolle
 			echo "<font class='info'>".t("Palataan projektille odota hetki..")."</font><br>";
 			
-			if($projektilla > 0) {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF?toim=PROJEKTI&valitsetoimitus=$tilausnumero'>";
-			}
-			else {
-				echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF?toim=$toim&valitsetoimitus=$tilausnumero'>";
-			}
+			echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF?toim=PROJEKTI&valitsetoimitus=$tilausnumero'>";			
 			
 			exit;
 		}
@@ -3069,7 +3064,7 @@ if ($tee == '') {
 					}
 							
 					if($toim != "TARJOUS") {
-						if ($row["toimitettuaika"] == '0000-00-00 00:00:00' and $row["uusiotunnus"] == 0 and $laskurow["tunnusnippu"] > 0) {
+						if ($row["toimitettuaika"] == '0000-00-00 00:00:00' and $row["uusiotunnus"] == 0 and $laskurow["tunnusnippu"] > 0 and $yhtiorow["splittauskielto"] != "K") {
 							$query = " 	SELECT lasku.tunnus
 										FROM lasku
 										WHERE lasku.yhtio = '$kukarow[yhtio]'

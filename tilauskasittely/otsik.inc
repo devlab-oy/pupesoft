@@ -2363,7 +2363,7 @@
 			$tee = "";
 		}
 
-		if($toim == "PROJEKTI" and $kukarow["kesken"] > 0) {
+		if(($toim == "PROJEKTI" or $yhtiorow["splittauskielto"] == "K") and $kukarow["kesken"] > 0) {
 			$abuq = "	SELECT * 
 						FROM lasku
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
@@ -2556,7 +2556,7 @@
 			}
 		
 			//	Tahdistetaan toimitukset
-			if($toim == "PROJEKTI") {
+			if($toim == "PROJEKTI" or $yhtiorow["splittauskielto"] == "K") {
 				paivita_toimitukset($kukarow["kesken"], $originaali);
 			}
 		}

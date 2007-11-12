@@ -542,9 +542,16 @@ else {
 			$query = "select jv from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$maehrowx = mysql_fetch_array($result);
-
+			
+			if($yhtiorow["splittauskielto"] == "K") {
+				$sorttaus = "kerayspvm, sorttauskentta";
+			}
+			else {
+				$sorttaus = "sorttauskentta";
+			}
+			
 			//haetaan kaikkien tilausrivien varastopaikat
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,
+			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  kerayspvm, toimaika,
 						concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
 						LEFT JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
@@ -552,7 +559,7 @@ else {
 						and tilausrivi.otunnus = '$laskurow[tunnus]'
 						and tilausrivi.hyllyalue != ''
 						and varattu > 0
-						ORDER BY sorttauskentta";
+						ORDER BY $sorttaus";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//t‰ss‰ muuttujassa on sit kaikki tunnukset splitin j‰lkeen
@@ -560,9 +567,8 @@ else {
 			$tilausnumerot[] = $laskurow["tunnus"];
 
 			//mihin varastoon l‰hete kuuluu. aluksi x
-			$varasto   = 'x';
-			$edvarasto = 'x';
-
+			$varasto = $edvarasto = $kerayspvm = $edkerayspvm = "x";
+			 
 			while ($row = mysql_fetch_array($result)) {
 
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
@@ -620,8 +626,26 @@ else {
 				}
 
 				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if ($varasto != $edvarasto and $edvarasto != 'x' and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") {
-
+				if ((($varasto != $edvarasto and $edvarasto != 'x') and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $laskurow["splittauskielto"] != "E") or
+					($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K")) {
+					
+					//	Meid‰n on p‰ivitett‰v‰t tunnusnippu	
+					if($yhtiorow["splittauskielto"] == "K" and $laskurow["tunnusnippu"] == 0) {
+						$query = "update lasku set tunnusnippu = tunnus where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]' and tunnusnippu = 0";
+						$upresult = mysql_query($query) or pupe_error($query);
+						$laskurow["tunnusnippu"] = $laskurow["tunnus"];
+					}
+					
+					//	Uudenm otsikon toim ja kerpvm
+					if($yhtiorow["splittauskielto"] == "K") {
+						$toim_kerayspvm = $row["kerayspvm"];
+						$toim_toimaika = $row["toimaika"];						
+					}
+					else {
+						$toim_kerayspvm = $laskurow["kerayspvm"];
+						$toim_toimaika = $laskurow["toimaika"];												
+					}
+					
 					//tehd‰‰n uusi otsikko
 					$query = "INSERT into lasku SET
 							yhtio_nimi							= '$laskurow[yhtio_nimi]',
@@ -640,7 +664,7 @@ else {
 							erpcm								= '$laskurow[erpcm]',
 							kapvm								= '$laskurow[kapvm]',
 							kasumma								= '$laskurow[kasumma]',
-							kerayspvm							= '$laskurow[kerayspvm]',
+							kerayspvm							= '$toim_kerayspvm',
 							keraysvko							= '$laskurow[keraysvko]',
 							ketjutus							= '$laskurow[ketjutus]',
 							laatija								= '$laskurow[laatija]',
@@ -666,7 +690,7 @@ else {
 							toim_ovttunnus						= '$laskurow[toim_ovttunnus]',
 							toim_postino						= '$laskurow[toim_postino]',
 							toim_postitp						= '$laskurow[toim_postitp]',
-							toimaika							= '$laskurow[toimaika]',
+							toimaika							= '$toim_toimaika',
 							toimvko								= '$laskurow[toimvko]',
 							toimitusehto						= '$laskurow[toimitusehto]',
 							kohdistettu 						= '$laskurow[kohdistettu]',
@@ -738,8 +762,12 @@ else {
 
 					$laskurow["varasto"] = $varasto;
 				}
-				//edellinen varasto talteen
-				$edvarasto=$varasto;
+
+				//	edellinen varasto talteen
+				$edvarasto = $varasto;
+
+				//	edellinen kerayspvm talteen
+				$edkerayspvm = $row["kerayspvm"];
 
 				//jos tilausrivin laskunumero on eri
 				if ($row['otunnus'] != $laskurow['tunnus']) {

@@ -704,18 +704,11 @@
 
 		$ulos = "<td><select name='$nimi'>";
 
-		$sel1 = "";
-		$sel2 = "";
+		$sel = array($trow[$i] => "SELECTED");
 
-		if ($trow[$i] == '') {
-			$sel1 = "selected";
-		}
-		if ($trow[$i] == 'E') {
-			$sel2 = "selected";
-		}
-
-		$ulos .= "<option value = ''  $sel1>".t("Tilaukset splitataan varastoittain")."";
-		$ulos .= "<option value = 'E' $sel2>".t("Tilauksia ei oletuksena splitata varastoittain")."";
+		$ulos .= "<option value = ''>".t("Tilaukset splitataan varastoittain")."";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Tilauksia ei oletuksena splitata varastoittain")."";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Tilaukset splitataan keräyspäivien mukaan toimituksiin")."";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

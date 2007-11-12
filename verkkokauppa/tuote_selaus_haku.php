@@ -241,7 +241,7 @@
 	if (strlen($ojarj) > 0) {
 		$jarjestys = $ojarj;
 	}
-
+	echo "oja$ojarj";
 	if ($poistetut != "") {
 		$poislisa  = "";
 		$poischeck = "CHECKED";

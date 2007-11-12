@@ -393,7 +393,40 @@ if($tee == "tilatut") {
 		$riviresult = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($riviresult) > 0) {
-			$ulos .=  "<table style = 'width: 600px;'>
+			$ulos .=  "	<form>
+						<table style = 'width: 400px;'>
+						<tr>
+							<th>
+								".t("Laskutusosoite")."
+							</th>
+							<th>
+								".t("Toimitusosoite")."
+							</th>
+						</tr>			
+						<tr>
+							<td>
+								$nimi<br>
+								$nimiatrk<br>
+								$osoite<br>
+								$postino $postitp<br>
+							</td>						
+							<td>
+								<input type = 'text' name='toim_nimi' value = '$toim_nimi'><br>
+								<input type = 'text' name='toim_nimitark' value = '$toim_nimitark'><br>
+								<input type = 'text' name='toim_osoite' value = '$toim_osoite'><br>
+								<input type = 'text' name='toim_postino' value = '$toim_postino'><input type = 'text' name='toim_postitp' value = '$toim_postitp'><br>
+							</td>
+						</tr>			
+						<tr>
+							<td class = 'back' align = 'right'>
+							<input type = 'hidden' name='tallenna' value='".t("Tallenna")."'>
+							sndReq('selain', 'verkkokauppa.php?tee=tilaa')
+							</td>						
+						</tr>
+						</table>
+						</form><br>
+						
+						<table style = 'width: 600px;'>
 						<tr>
 							<th>Tuoteno</th>
 							<th>Nimitys</th>

@@ -35,7 +35,6 @@ while ($rivirow = mysql_fetch_array($result)) {
 }
 
 // takaisin selaukseen
-$toiminto = "";
 $ytunnus  = $laskurow["ytunnus"];
 
 if ($eipaikkoja == 0) {
@@ -48,6 +47,11 @@ if ($eipaikkoja == 0) {
 		// vied‰‰n oikeasti varastoon tai sitten n‰ytet‰‰n vaan ruudulla..
 		if ($tee == "varastoon") {
 			require ("varastoon.inc");
+			
+			// takaisin ihan alkuun
+			$toiminto 		= "dummy";
+			$ytunnus  		= "";
+			$toimittajaid 	= "";
 		}
 		else {
 
@@ -79,7 +83,7 @@ if ($eipaikkoja == 0) {
 				$tee = "";
 			}
 
-			require("varastoon_ruudulle.inc");
+			require("varastoon.inc");
 
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -87,7 +91,7 @@ if ($eipaikkoja == 0) {
 			echo "<input type='hidden' name='tee' value='varastoon'>";
 			echo "<input type='hidden' name='otunnus' value='$otunnus'>";
 			echo "<input type='submit' value='".t("Hyv‰lt‰ n‰ytt‰‰, vie varastoon!")."'>";
-			echo "</form><br><br>";
+			echo "</form>";
 
 			echo "<form action='$PHP_SELF' method='post'>";
 			echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
@@ -102,9 +106,6 @@ if ($eipaikkoja == 0) {
 			echo "<input type='submit' value='".t("Peruuta")."'>";
 			echo "</form>";
 		}
-
-		// ei n‰ytet‰ en‰‰ muuta
-		$toiminto = "dummy";
 	}
 	else {
 		echo "<font class='error'>".t("Lasku")." $otunnus ".t("katosi")."!</font><br>";

@@ -32,13 +32,7 @@ if ($tee == "update") {
 	$rahti_huolinta = str_replace ( ",", ".", $rahti_huolinta);
 	$erikoisale 	= str_replace ( ",", ".", $erikoisale);
 	$toimaika 		= $vv."-".$kk."-".$pp;
-
-	//Jos käyttäjä on syöttänyt alvillisen hinnan niin poistetaan alvi
-	if ((int) $alv != 0) {
-		$rahti_etu = round($rahti_etu/(1+($alv/100)),2);
-	}
-
-	$ultilno = $laskurow["ultilno"];
+	$ultilno 		= $laskurow["ultilno"];
 
 	// kokeillaan arpoa intrastat käsittelyä, molemmat maat pitää olla EU maita
 	if ($maa_lahetys != "" and $maa_maara != "") {
@@ -68,6 +62,7 @@ if ($tee == "update") {
 				bruttopaino = '$bruttopaino',
 				rahti_huolinta = '$rahti_huolinta',
 				rahti_etu = '$rahti_etu',
+				rahti_etu_alv = '$rahti_etu_alv',
 				rahti = '$rahti',
 				erikoisale = '$erikoisale',
 				toimaika = '$toimaika',
@@ -266,11 +261,8 @@ if ($tee == "") {
 		$lisamassa = "<font class='message'>".sprintf(t("Tilauksen paino tuoterekisterin tietojen mukaan on: %s kg, %s %%:lle kappaleista on annettu paino."),$painorow["massa"],$osumapros)."</font><br>";
 	}
 
-	
-	
-
 	echo "<tr><td valign='top'>".t("Nettopaino").":</td><td valign='top' colspan='3'><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]'></td><td valign='top' class='back'>$lisamassa</td></tr>";
-	echo "<tr><td valign='top'>".t("Eturahti").":</td><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td valign='top' nowrap>".t("ALV").": ".alv_popup_oletus('alv',0)."</td><td> ".t("vaihto-omaisuuslaskun valuutassa")."</td></tr>";
+	echo "<tr><td valign='top'>".t("Veroton")." ".t("Eturahti").":</td><td valign='top'><input type='text' name='rahti_etu' value='$laskurow[rahti_etu]'></td><td colspan='2' valign='top' nowrap>".t("Eturahdin ALV").": ".alv_popup_oletus('rahti_etu_alv', $laskurow["rahti_etu_alv"])."</td></tr>";
 	echo "<tr><td valign='top'>".t("Arvioitu kuluprosentti").":</td><td valign='top' colspan='3'><input type='text' name='rahti' value='$laskurow[rahti]'> n.nn %</td></tr>";
 	echo "<tr><td valign='top'>".t("Kulusumma")." $yhtiorow[valkoodi]:</td><td valign='top' colspan='3'><input type='text' name='rahti_huolinta' value='$laskurow[rahti_huolinta]'> ".t("ohittaa kuluprosentin")."</td></tr>";
 	echo "<tr><td valign='top'>".t("Erikoisalennus").":</td><td valign='top' colspan='3'><input type='text' name='erikoisale' value='$laskurow[erikoisale]'></td></tr>";

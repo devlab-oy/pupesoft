@@ -684,7 +684,7 @@ if ($toiminto == "" and $ytunnus != "") {
 $nappikeikka = "";
 
 // kohdisteaan keikkaa laskun tunnuksella $otunnus
-if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" or $toiminto == "tulosta" or $toiminto == "lisatiedot" or $toiminto == "varastopaikat" or $toiminto == "kululaskut" or $toiminto == "kaikkiok") {
+if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" or $toiminto == "tulosta" or $toiminto == "lisatiedot" or $toiminto == "varastopaikat" or $toiminto == "kululaskut" or $toiminto == "kalkyyli" or $toiminto == "kaikkiok") {
 	
 	$query = "	SELECT *
 				FROM lasku

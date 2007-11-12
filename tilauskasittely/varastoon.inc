@@ -1,42 +1,87 @@
 <?php
 
 // tarvitaan $laskurow array, jossa on meid‰n keikan otsikko
-
 $debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
-$varastoon_msg = "<table>";
+echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+		<!--
 
-$varastoon_msg .= "<th valign='top'>".t("Tuoteno")."</th>
-			<th valign='top'>".t("M‰‰r‰")."<br>".t("sis").".</th>
-			<th valign='top'>".t("M‰‰r‰")."<br>".t("ulk").".</th>
-			<th valign='top'>".t("Ostohinta")."<br>".t("ulk").".</th>
-			<th valign='top'>".t("Ostohinta")."<br>".t("sis").".</th>
-			<th valign='top'>".t("Osuus")."<br>".t("rahdista")."</th>
-			<th valign='top'>".t("Tulli")."</th>
-			<th valign='top'>".t("Ostohinta")."+<br>".t("Rahti")."+".t("Tulli")."</th>
-			<th valign='top'>".t("Rivihinta")."</th>
-			<th valign='top'>".t("Vanha")."<br>".t("kehahin")."</th>
-			<th valign='top'>".t("Uusi")."<br>".t("kehahin")."</th>
-			<th valign='top'>".t("Ei tullia")."</th>
-			</tr>";
+		function toggleAll(toggleBox) {
 
-// virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit‰‰ olla viety varastoon jo ennen t‰t‰..
-if ($toiminto == "kaikkiok" and $tee == "varma") {
+			var currForm = toggleBox.form;
+			var isChecked = toggleBox.checked;
+			var nimi = toggleBox.name;
+
+			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
+					currForm.elements[elementIdx].checked = isChecked;
+				}
+			}
+		}
+
+		//-->
+		</script>";
+
+$varastoon_msg  = "";
+
+if ($tee == "") {
+	$varastoon_msg .= "<form action='$PHP_SELF' method='post'>";
+	$varastoon_msg .= "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+
+	if ($toiminto == "kaikkiok") {
+		$varastoon_msg .= "<input type='hidden' name='toiminto' value='kaikkiok'>";
+	}
+	else {
+		$varastoon_msg .= "<input type='hidden' name='toiminto' value='kalkyyli'>";
+	}
+
+	$varastoon_msg .= "<input type='hidden' name='tee' value='eitullia'>";
+	$varastoon_msg .= "<input type='hidden' name='otunnus' value='$otunnus'>";
+}
+
+$varastoon_msg .= "	<table>
+					<th valign='top'>".t("Varastoon")."</th>
+					<th valign='top'>".t("Tuoteno")."</th>
+					<th valign='top'>".t("M‰‰r‰")."<br>".t("sis").".</th>
+					<th valign='top'>".t("M‰‰r‰")."<br>".t("ulk").".</th>
+					<th valign='top'>".t("Alennus")."</th>
+					<th valign='top'>".t("Ostohinta")."<br>".t("ulk").".</th>
+					<th valign='top'>".t("Ostohinta")."<br>".t("sis").".</th>
+					<th valign='top'>".t("Osuus")."<br>".t("rahdista")."</th>
+					<th valign='top'>".t("Tulli")."</th>
+					<th valign='top'>".t("Ostohinta")."+<br>".t("Rahti")."+".t("Tulli")."</th>
+					<th valign='top'>".t("Rivihinta")."</th>
+					<th valign='top'>".t("Vanha")."<br>".t("kehahin")."</th>
+					<th valign='top'>".t("Uusi")."<br>".t("kehahin")."</th>
+					<th valign='top'>".t("Ei tullia")."</th>
+					</tr>";
+
+if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
+	// virallinen laskenta, heetaan ihan kaikki rivit uudestaan (varattu=0) kaikki pit‰‰ olla viety varastoon jo ennen t‰t‰..
+	
 	$query = "	SELECT *, kpl varattu
 				FROM tilausrivi
 				WHERE uusiotunnus='$laskurow[tunnus]' and varattu=0 and yhtio='$kukarow[yhtio]' and tyyppi='O'
 				ORDER BY tunnus";
 }
-// tavallinen laskenta.. VARATTU PITƒƒ OLLA > 0 ja netto-kentt‰ tyhj‰!
-// jos nettokent‰ss‰ on jotain niin t‰t‰ rivi‰ ei haluttu viel‰ vied‰ varastoon
-else {
+elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
+	// tavallinen laskenta.. VARATTU PITƒƒ OLLA > 0 ja netto-kentt‰ tyhj‰!
+	// jos nettokent‰ss‰ on jotain niin t‰t‰ rivi‰ ei haluttu viel‰ vied‰ varastoon
+	
 	$query = "	SELECT *
 				FROM tilausrivi
 				WHERE uusiotunnus='$laskurow[tunnus]' and varattu<>0 and yhtio='$kukarow[yhtio]' and tyyppi='O' and netto=''
 				ORDER BY tunnus";
 }
-
-// haetaan tilausrivit
+elseif ($toiminto == "kalkyyli" and $tee == "") {
+	// N‰ytet‰‰n ruudulla
+	
+	$query = "	SELECT *
+				FROM tilausrivi
+				WHERE uusiotunnus='$laskurow[tunnus]' and varattu<>0 and yhtio='$kukarow[yhtio]' and tyyppi='O'
+				ORDER BY tunnus";
+	
+}
 $presult = mysql_query($query) or pupe_error($query);
 
 // lasketaan tilauksen rahtikulut
@@ -59,7 +104,7 @@ else {
 	$erikoisale = 1;
 }
 
-if ($toiminto == "kaikkiok" and $tee == "varma") {
+if (($toiminto == "kaikkiok" and $tee == "varma") or ($toiminto == "kaikkiok" and $tee == "")) {
 	// jos lasketaan virallista varastonarvoa, otetaan keikan summa huomioon (kululaskujen yhteenlaskettu summa OLETUSVALUUTASSA on laskurow.saldo_maksettu)
 	$rahtikulut = $laskurow['saldo_maksettu'] + round($laskurow['rahti_etu'] * $laskurow['maksu_kurssi'], 2);
 	$rahtitapa  = t("Virallinen");
@@ -72,20 +117,20 @@ else {
 		$erikoisale = 1-($laskurow['erikoisale']/100);
 	}
 	else {
-		$erikoisale=1;
+		$erikoisale = 1;
 	}
 
 	// lasketaan nyt varastoon viet‰vien rivien summa yhteens‰
 	$query    = "	SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if(tuotekerroin<=0,1,tuotekerroin) * tilausrivi.hinta * $erikoisale) summa
-					FROM tilausrivi use index (uusiotunnus_index), tuotteen_toimittajat
-					WHERE uusiotunnus='$otunnus'
-					and tilausrivi.yhtio ='$kukarow[yhtio]'
-					and varattu<>0
-					and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-					and tuotteen_toimittajat.yhtio=tilausrivi.yhtio
-					and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno";
+					FROM tilausrivi use index (uusiotunnus_index)
+					JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno)
+					WHERE tilausrivi.uusiotunnus = '$otunnus'
+					and tilausrivi.yhtio = '$kukarow[yhtio]'
+					and tilausrivi.netto = ''
+					and tilausrivi.varattu<>0";
 	$result   = mysql_query($query) or pupe_error($query);
 	$hintarow = mysql_fetch_array($result);
+		
 	$laskurow['summa'] = $hintarow['summa'];
 
 	// lasketaan itse rahtikulut
@@ -99,6 +144,7 @@ else {
 	}
 }
 
+echo "<br>";
 echo "<font class='message'>".t("Keikka")." $laskurow[laskunro] $laskurow[nimi]</font><br>";
 echo "<font class='message'>".t("Rahdin m‰‰r‰ yhteens‰").": $rahtikulut $yhtiorow[valkoodi] (".t("Peruste").": $rahtitapa)<br><hr></font>";
 
@@ -109,8 +155,11 @@ $jtvarastot	 = array();
 $rivia 		 = 0;
 
 require_once ('inc/ProgressBar.class.php');
-//$bar = new ProgressBar();
-$elements = mysql_num_rows($presult); // total number of elements to process
+
+if ($tee != "") {
+	$bar = new ProgressBar();
+	$elements = mysql_num_rows($presult); // total number of elements to process
+}
 
 // jos kyseess‰ on ihan virallinen varastonarvonlaskenta, tehd‰‰n n‰in
 if ($toiminto == "kaikkiok" and $tee == "varma") {
@@ -120,19 +169,22 @@ else {
 	echo "<font class='message'>".t("Vied‰‰n varastoon %s tuotetta", "", $elements).":<br></font>";
 }
 
-//$bar->initialize($elements); // print the empty bar
+if ($tee != "") {
+	$bar->initialize($elements); // print the empty bar
+}
 
 while ($tilrivirow = mysql_fetch_array($presult)) {
 
 	// lasketaan keskihankintahinta, tarvitaan tuotteen saldo ja tuotteen tiedot
-	$query  = "select sum(saldo) saldo from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
+	$query  = "SELECT sum(saldo) saldo from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
 	$salres = mysql_query($query) or pupe_error($query);
 	$salrow = mysql_fetch_array($salres);
 
-	$query  =	"select *
-				from tuote, tuotteen_toimittajat
-				where tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno='$tilrivirow[tuoteno]' and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-				and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno";
+	$query  = "	SELECT *
+				from tuote
+				JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]' and tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+				where tuote.yhtio	= '$kukarow[yhtio]' 
+				and tuote.tuoteno	= '$tilrivirow[tuoteno]'";
 	$tuores = mysql_query($query) or pupe_error($query);
 	$tuorow = mysql_fetch_array($tuores);
 
@@ -161,6 +213,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	if ($tilrivirow["var"] == "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 		// lis‰t‰‰n tulli
 		require ("taric_veroperusteet.inc");
+		
 		$ohinta = $ohinta * (1+($tulliprossa/100));
 		$tv_nimrow["maara"] = $tv_nimrow["maara"] * 1; // teh‰‰n numero, ett‰ lista n‰ytt‰‰ kivemmalta
 	}
@@ -210,7 +263,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 		$uusikehahin = "-> $uusikehahin";
 	}
-	else {
+	elseif($toiminto == "kalkyyli" and $tee == "varastoon") {
 		
 		// p‰ivitet‰‰n tilausrivin rivihintaa
 		$query  = "	UPDATE tilausrivi set
@@ -386,45 +439,76 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 	}
 
 	// n‰ytet‰‰n ruudulla
-	$varastoon_msg .= "<tr>
-		<td>$tilrivirow[tuoteno]</td>
-		<td align='right'>$tilrivirow[varattu]</td>
-		<td align='right'>" . round($tilrivirow['varattu']*$tuorow['tuotekerroin'],2) . "</td>
-		<td align='right'>$tilrivirow[hinta]</td>
-		<td align='right'>" . round($tilrivirow['hinta']*$tuorow['tuotekerroin'],2) . "</td>
-		<td align='right'>" . round($osuus,6) . "</td>
-		<td align='right'>$tv_nimrow[maara] $tv_nimrow[rahayksikko]</td>
-		<td align='right'>$ohinta</td>
-		<td align='right'>" . round($ohinta*$tilrivirow['varattu'],2) . " $kuluteksti</td>";
+	$varastoon_msg .= "	<tr>";
+	
+	if ($toiminto == "kalkyyli" and $tee == "") {
+		$chk = "";
+		if ($tilrivirow["netto"] == '') {
+			$chk = "CHECKED";
+		}
+
+		$varastoon_msg .= "<td align='center'><input type='checkbox' name='varastoonko[]' value='$tilrivirow[tunnus]' $chk></td>";
+	}
+	else {	
+		if ($tilrivirow["netto"] == '') {
+			$varastoon_msg .= "<td align='center'>x</td>";
+		}
+		else {
+			$varastoon_msg .= "<td></td>";
+		}
+	}
+
+	$varastoon_msg .= "	<td>$tilrivirow[tuoteno]</td>
+						<td align='right'>$tilrivirow[varattu]</td>
+						<td align='right'>" . round($tilrivirow['varattu']*$tuorow['tuotekerroin'],2) . "</td>
+						<td align='right'>$tilrivirow[ale]%</td>
+						<td align='right'>$tilrivirow[hinta]</td>
+						<td align='right'>" . round($tilrivirow['hinta']*$tuorow['tuotekerroin'],2) . "</td>
+						<td align='right'>" . round($osuus,6) . "</td>
+						<td align='right'>$tv_nimrow[maara] $tv_nimrow[rahayksikko]</td>
+						<td align='right'>$ohinta</td>
+						<td align='right'>" . round($ohinta*$tilrivirow['varattu'],2) . " $kuluteksti</td>";
 
 
 	if ($tuorow["sarjanumeroseuranta"] == "S") {
 		$varastoon_msg .= "	<td align='right'></td>
-				<td align='right'></td>";
+							<td align='right'></td>";
 	}
 	else {
 		$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]</td>
-				<td align='right'>$kehahin $uusikehahin</td>";
+							<td align='right'>$kehahin $uusikehahin</td>";
 	}
 
-	if ($tilrivirow["var"] != '') {
-		$varastoon_msg .= "<td>".t("ei tullia")."</td>";
+	if ($tee == "") {
+		$chk = "";
+		if ($tilrivirow["var"] != '') {
+			$chk = "CHECKED";
+		}
+		
+		$varastoon_msg .= "<td align='center'><input type='checkbox' name='eitullia[]' value='$tilrivirow[tunnus]' $chk></td>";
 	}
 	else {
-		$varastoon_msg .= "<td></td>";
+		if ($tilrivirow["var"] != '') {
+			$varastoon_msg .= "<td>".t("ei tullia")."</td>";
+		}
+		else {
+			$varastoon_msg .= "<td></td>";
+		}
 	}
 
 	$varastoon_msg .= "</tr>";
 	
-	//$bar->increase(); //calls the bar with every processed element
 	
+	if ($tee != "") {
+		$bar->increase(); //calls the bar with every processed element
+	}
 }
 
 echo $varastoon_msg."<br>";
 
 // jos kyseess‰ on ihan virallinen varastonarvonlaskenta, tehd‰‰n n‰in
 if ($toiminto == "kaikkiok" and $tee == "varma") {
-
+	
 	$rivia = mysql_num_rows($presult); // kaunistelua vaan loppua varten... t‰‰ tehd‰‰n elsess‰ affected rowssilla..
 
 	// laitetaan kohdistettu X kun lasku on viety varastoon...	laitetaan MAPVM kentt‰‰n t‰m‰ p‰iv‰ niin tiedet‰‰n koska viety varastoon
@@ -500,98 +584,124 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
 	}
 }
 
-echo "<tr>
-		<th colspan='8'>".t("Yhteens‰").":</th>
-		<th colspan='4'>$summa</th>
-		</tr>";
+if ($toiminto == "kalkyyli" and $tee == "") {
+	echo "<tr><td align='center'><input type='checkbox' name='var' onclick='toggleAll(this);'></td><td colspan='13'><--".t("Ruksaa kaikki")."</td></tr>";
+}
+
+echo "<tr>";
+
+if ($tee == "") {
+	echo "<td class='tumma' align='center'><input type='submit' value='".t("P‰ivit‰")."'></td>";
+}
+else {
+	echo "<th></th>";
+}
+
+echo "<th colspan='9' align='right'>".t("Yhteens‰").":</th><td class='tumma' align='right'>".sprintf("%.2f", $summa)."</th><th colspan='2'></th>";
+
+if ($tee == "") {
+	echo "<th><input type='submit' value='".t("P‰ivit‰")."'></form></th>";
+}
+else {
+	echo "<th></th>";
+}
+			
+echo "</tr>";
+
+
 echo "</table><br>";
 
-echo "<font class='message'>".t("Vientiin keikan")." $laskurow[laskunro] ".t("rivit varastoon")."! $rivia ".t("rivi‰").".</font><br><br>";
-
-$query 	= "SELECT automaatti_toimitus FROM toimi where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
-$result	= mysql_query($query) or pupe_error($query);
-$atrow 	= mysql_fetch_array($result);
-
-// jos ei olla virallisessa toimitellaan suoratoimituksia
-if ($toiminto != "kaikkiok" and $superirivit != "" and $suoratoimitus == '' and $atrow['automaatti_toimitus'] == 'S') {
-	$superirivit 	= substr($superirivit,0,-1);
-	$mista 			= 'varastoon.inc';
-	
-	require('jt_super_laskuta.inc');
-	
-	echo "<br><font class='message'>$laskuvirhe</font><br><br>";
+if ($toiminto == "kaikkiok" and $tee == "varma") {
+	echo "<font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon")."! ".t("Virallinen varastonarvo laskettu").": $rivia ".t("rivi‰").".</font><br><br>";
 }
+elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
+	echo "<font class='message'>".t("Vietiin keikka")." $laskurow[laskunro] ".t("varastoon").": $rivia ".t("rivi‰").".</font><br><br>";
 
-//	Halutaanko toimittaa j‰lkk‰reit‰ automaattisesti ja saako k‰ytt‰j‰ ylip‰‰t‰‰n k‰sitell‰ j‰lkk‰reit‰..
-$query = "	SELECT paivitys
-			FROM oikeu
-			WHERE yhtio	= '$kukarow[yhtio]'
-			and kuka	= '$kukarow[kuka]'
-			and nimi	= 'tilauskasittely/jtselaus.php'
-			and alanimi = ''";
-$jtoikeudetres = mysql_query($query) or pupe_error($query);
+	$query 	= "SELECT automaatti_toimitus FROM toimi where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
+	$result	= mysql_query($query) or pupe_error($query);
+	$atrow 	= mysql_fetch_array($result);
 
-if ($toiminto != "kaikkiok" and $jtrivit != "" and mysql_num_rows($jtoikeudetres)<>0 and $yhtiorow["automaattinen_jt_toimitus"] != "") {
+	// jos ei olla virallisessa toimitellaan suoratoimituksia
+	if ($superirivit != "" and $suoratoimitus == '' and $atrow['automaatti_toimitus'] == 'S') {
+		$superirivit 	= substr($superirivit,0,-1);
+		$mista 			= 'varastoon.inc';
 	
-	$jtoikeudetrow = mysql_fetch_array($jtoikeudetres);
+		require('jt_super_laskuta.inc');
 	
-	$jtrivit 	= substr($jtrivit,0,-1);
-	$mista 		= 'varastoon.inc';
+		echo "<br><font class='message'>$laskuvirhe</font><br><br>";
+	}
+
+	//	Halutaanko toimittaa j‰lkk‰reit‰ automaattisesti ja saako k‰ytt‰j‰ ylip‰‰t‰‰n k‰sitell‰ j‰lkk‰reit‰..
+	$query = "	SELECT paivitys
+				FROM oikeu
+				WHERE yhtio	= '$kukarow[yhtio]'
+				and kuka	= '$kukarow[kuka]'
+				and nimi	= 'tilauskasittely/jtselaus.php'
+				and alanimi = ''";
+	$jtoikeudetres = mysql_query($query) or pupe_error($query);
+
+	if ($jtrivit != "" and mysql_num_rows($jtoikeudetres)<>0 and $yhtiorow["automaattinen_jt_toimitus"] != "") {
 	
-	$varastosta = array();
+		$jtoikeudetrow = mysql_fetch_array($jtoikeudetres);
 	
-	foreach ($jtvarastot as $varasto) {
-		$v = kuuluukovarastoon($varasto[0], $varasto[1]);
+		$jtrivit 	= substr($jtrivit,0,-1);
+		$mista 		= 'varastoon.inc';
+	
+		$varastosta = array();
+	
+		foreach ($jtvarastot as $varasto) {
+			$v = kuuluukovarastoon($varasto[0], $varasto[1]);
 		
-		if ($v > 0 and !in_array($v, $varastosta)) {
-			$varastosta[$v] = $v;			
+			if ($v > 0 and !in_array($v, $varastosta)) {
+				$varastosta[$v] = $v;			
+			}
+		}
+	
+	
+		function jt_toimita ($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee) {
+			global $yhtiorow, $kukarow, $oikeurow;
+		
+			$toimittaja		= "";
+			$toimittajaid	= "";
+			$asiakasno 		= "";
+			$asiakasid		= "";
+			$asiakasmaa 	= "";
+			$jarj	 		= "tuoteno";
+			$tuotenumero	= "";
+			$tilaus			= "";			
+			$toimi			= "";
+			$superit		= "";
+			$tilaus_on_jo	= "";
+		
+			$vain_rivit 		= $jtrivit;
+			$from_varastoon_inc = "varastoon.inc";
+		
+			require('jtselaus.php');
+			
+		}
+
+		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "automaaginen", "JATKA");
+		jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
+	
+		//	Laitetaan tavarat liikkeelle jos sallitaan!
+		if($jtoikeudetrow["paivitys"] == 1 and $yhtiorow["automaattinen_jt_toimitus"] == "T") {
+			jt_toimita("ytunnus", "liitostunnus", "", "", "tosi_automaaginen", "TOIMITA");	
 		}
 	}
-	
-	
-	function jt_toimita ($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee) {
-		global $yhtiorow, $kukarow, $oikeurow;
-		
-		$toimittaja		= "";
-		$toimittajaid	= "";
-		$asiakasno 		= "";
-		$asiakasid		= "";
-		$asiakasmaa 	= "";
-		$jarj	 		= "tuoteno";
-		$tuotenumero	= "";
-		$tilaus			= "";			
-		$toimi			= "";
-		$superit		= "";
-		$tilaus_on_jo	= "";
-		
-		$vain_rivit 		= $jtrivit;
-		$from_varastoon_inc = "varastoon.inc";
-		
-		require('jtselaus.php');
-			
-	}
 
-	jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "automaaginen", "JATKA");
-	jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $varastosta, $jtrivit, "tosi_automaaginen", "JATKA");
-	
-	//	Laitetaan tavarat liikkeelle jos sallitaan!
-	if($jtoikeudetrow["paivitys"] == 1 and $yhtiorow["automaattinen_jt_toimitus"] == "T") {
-		jt_toimita("ytunnus", "liitostunnus", "", "", "tosi_automaaginen", "TOIMITA");	
-	}
+	echo "<hr>";
+	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<input type='hidden' name='toiminto' value=''>";
+	echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
+	echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
+	echo "<input type='submit' value='".t("Takaisin keikan valintaan")."'>";
+	echo "</form>&nbsp;";
+	echo "<form action='$PHP_SELF' method='post'>";
+	echo "<input type='hidden' name='toiminto' value=''>";
+	echo "<input type='hidden' name='toimittajaid' value=''>";
+	echo "<input type='hidden' name='ytunnus' value=''>";
+	echo "<input type='submit' value='".t("Takaisin toimittajan valintaan")."'>";
+	echo "</form>";
 }
-
-echo "<hr>";
-echo "<form action='$PHP_SELF' method='post'>";
-echo "<input type='hidden' name='toiminto' value=''>";
-echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";
-echo "<input type='hidden' name='ytunnus' value='$laskurow[ytunnus]'>";
-echo "<input type='submit' value='".t("Takaisin keikan valintaan")."'>";
-echo "</form>&nbsp;";
-echo "<form action='$PHP_SELF' method='post'>";
-echo "<input type='hidden' name='toiminto' value=''>";
-echo "<input type='hidden' name='toimittajaid' value=''>";
-echo "<input type='hidden' name='ytunnus' value=''>";
-echo "<input type='submit' value='".t("Takaisin toimittajan valintaan")."'>";
-echo "</form>";
 
 ?>

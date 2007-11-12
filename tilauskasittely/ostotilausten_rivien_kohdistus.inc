@@ -474,7 +474,6 @@ if ($tila == '') {
 				$alvti = " ifnull(tuotteen_alv.alv, 0) ";
 			}
 		}
-
 	}
 	else {
 		$alvit = 0;
@@ -499,6 +498,13 @@ if ($tila == '') {
 	// päivitetään samantien tämä tieto laskulle
 	$query   = "update lasku set summa='$hintarow[hinta]', kohdistettu='' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
 	$hinresu = mysql_query($query) or pupe_error($query);
+
+
+	//Jos käyttäjä on syöttänyt alvillisen hinnan niin lisätään alvi
+	if ((int) $laskurow["rahti_etu_alv"] != 0) {
+		$laskurow["rahti_etu"] = round($laskurow["rahti_etu"]*(1+($laskurow["rahti_etu_alv"]/100)),2);
+	}
+	
 
 	$valittusumma 			= sprintf("%.2f", $hintarow["hinta"]);
 	$laskunsumma  			= sprintf("%.2f", $kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma);

@@ -2639,6 +2639,70 @@ function toimehtoTarkenne(toimehto) {
 	}
 }
 
+if (!function_exists("js_showhide")) {
+	// scripti balloonien tekemiseen
+	function js_showhide () {
+
+?>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+<!--
+
+function showhide(layer_ref) {
+
+	var state = document.getElementById(layer_ref).style.display;	
+	if (state == 'block') {
+		state = 'none';
+	}
+	else {
+		state = 'block';
+	}
+
+	if (document.all) { //IS IE 4 or 5 (or 6 beta)
+		eval( "document.all." + layer_ref + ".style.display = state");
+	}
+	if (document.layers) { //IS NETSCAPE 4 or below
+		document.layers[layer_ref].display = state;
+	}
+	if (document.getElementById &&!document.all) {
+		hza = document.getElementById(layer_ref);
+		hza.style.display = state;
+	}
+}
+
+//-->
+</script>
+<?php
+
+	}
+}
+
+if(!function_exists("js_toimehtoTarkenne")) {
+	function js_toimehtoTarkenne() {
+?>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+<!--
+function toimehtoTarkenne(toimehto) {
+	tehto=document.getElementById(toimehto);
+	tehtoLisa=document.getElementById(toimehto+'Lisa');
+
+	teksti=tehto.options[tehto.selectedIndex].text;
+	arvo=tehto.options[tehto.selectedIndex].value;
+
+	i=teksti.indexOf("-");
+	if(i>0) {
+		tarkenne=teksti.substr((i+1));
+		tehtoLisa.value=tarkenne;
+	}
+	else {
+		tehtoLisa.value='';
+	}
+}
+//-->
+</script>
+<?php
+	}
+}
+
 if (!function_exists("js_popup")) {
 	// scripti balloonien tekemiseen
 	function js_popup () {

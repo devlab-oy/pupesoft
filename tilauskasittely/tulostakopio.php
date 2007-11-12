@@ -572,7 +572,7 @@
 		}
 		if ($toim == "PROFORMA") {
 			//myyntitilaus. Tulostetaan proforma.
-			$where1 .= " (lasku.tila in ('L','U','N') or (tila = 'N' and alatila IN ('A','T','U')))";
+			$where1 .= " lasku.tila in ('L','N','V')";
 
 			if ($ytunnus{0} == '£') {
 				$where2 .= " and lasku.nimi      = '$asiakasrow[nimi]'
@@ -592,7 +592,7 @@
 			$use = " use index (yhtio_tila_luontiaika) ";
 		}
 		if ($toim == "TILAUSVAHVISTUS") {
-			//myyntitilaus. Tulostetaan proforma.
+			//myyntitilaus.
 			$where1 .= " lasku.tila in ('N','L','R')";
 
 			if ($ytunnus{0} == '£') {

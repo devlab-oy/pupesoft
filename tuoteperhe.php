@@ -517,7 +517,7 @@
 						}
 						
 							
-						echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht,4)."</td>";
+						echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht,6)."</td>";
 						
 																									
 						echo "<form action='$PHP_SELF' method='post'>
@@ -573,7 +573,7 @@
 									<td><input type='text' name='alekerroin' size='10' value='$zrow[alekerroin]'></td>";
 						}
 						
-						echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht,4)."</td>";
+						echo "<td>$tuoterow[kehahin]</td><td>".round($lapsiyht,6)."</td>";
 						echo "<td class='back'><input type='submit' value='".t("Päivitä")."'></td></form></tr>";
 					}					
 				}
@@ -600,7 +600,7 @@
 					}
 							
 					echo "	<th align='right'>".t("Yhteensä").":</th>
-							<th>".round($resyht,4)."</th>";
+							<th>".round($resyht,6)."</th>";
 					
 					echo "	<td class='back'><input type='submit' value='".t("Lisää")."'></td>
 							</form>

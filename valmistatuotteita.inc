@@ -316,7 +316,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 			global $yhtiorow, $kukarow, $laskurow, $valmistettavat, $valmistetaan, $jaljella_tot;
 
 			if ((float) $kaikenkaikkiaan != (float) $isavarattu) {
-				$uusiarvo = round($uusiarvo * ($isavarattu/$kaikenkaikkiaan), 4);
+				$uusiarvo = round($uusiarvo * ($isavarattu/$kaikenkaikkiaan), 6);
 			}
 
 			if ($isarow['saldo'] + $isavarattu > 0 and $isarow['saldo'] > 0) {
@@ -335,7 +335,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 						rivitunnus 	= '$tilrivirow[tunnus]',
 						laji    	= 'valmistus',
 						kpl     	= '$isavarattu',
-						kplhinta	=  round($uusiarvo/$isavarattu, 4),
+						kplhinta	=  round($uusiarvo/$isavarattu, 6),
 						hinta   	= '$kehahin',
 						selite  	= '".t("Valmistettiin tuotetta työmääräyksellä")." $tilrivirow[otunnus] ($isarow[kehahin] --> $kehahin)',
 						laatija 	= '$kukarow[kuka]',

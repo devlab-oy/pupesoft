@@ -772,7 +772,7 @@ if ($tuoteno != '') {
 								// kehahin matikka. lasketaan uusi kehahin jos päädytään plussalle ja lähdetään plussalta
 								if ($uusisaldo + $trow['kpl'] > 0 and $uusisaldo > 0 and ($uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl']) > 0) {
 									if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Uusi kehahin (Matikka): uusikehahin = ($uusikehahin * $uusisaldo + $trow[kplhinta] * $trow[kpl]) / ($uusisaldo + $trow[kpl])</font><br>";
-									$uusikehahin = round(($uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl']) / ($uusisaldo + $trow['kpl']),4);
+									$uusikehahin = round(($uusikehahin * $uusisaldo + $trow['kplhinta'] * $trow['kpl']) / ($uusisaldo + $trow['kpl']),6);
 								}
 								else {
 									if ($jalkilaskenta_debug >= 1) echo "<font class='message'>Uusi kehahin: (Ei matikkaa): uusikehahin = $trow[kplhinta]</font><br>";

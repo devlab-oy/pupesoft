@@ -216,10 +216,10 @@ else {
 				$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $trow["tunnus"]);
 					
 				// Kate = Hinta - Ostohinta
-				$kate = round($hinta - round($ostohinta/$trow["varattu"], 4), 2);				
+				$kate = round($hinta - round($ostohinta/$trow["varattu"], 6), 2);				
 				
 				//Tämän sarjanumeroklöntin ostohinta keskimäärin
-				$turow["kehahin"] = round($ostohinta/$trow["varattu"], 4);	
+				$turow["kehahin"] = round($ostohinta/$trow["varattu"], 6);	
 											
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";
@@ -229,7 +229,7 @@ else {
 				
 				// Kate = 0
 				$kate 				= 0;
-				$turow["kehahin"] 	= round($hinta/$trow["varattu"],4) * -1;	
+				$turow["kehahin"] 	= round($hinta/$trow["varattu"],6) * -1;	
 											
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "tulo";
@@ -280,10 +280,10 @@ else {
 				}
 				
 				// Kate = Hinta - Alkuperäinen ostohinta
-				$kate = round($hinta - round($ostohinta/abs($trow["varattu"]), 4), 2);				
+				$kate = round($hinta - round($ostohinta/abs($trow["varattu"]), 6), 2);				
 								
 				//Tämän sarjanumeroklöntin ostohinta keskimäärin
-				$turow["kehahin"] = round($ostohinta/$trow["varattu"], 4) * -1;	
+				$turow["kehahin"] = round($ostohinta/$trow["varattu"], 6) * -1;	
 											
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";

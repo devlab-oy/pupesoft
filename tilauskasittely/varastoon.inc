@@ -153,7 +153,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$rahtios = $rahtios * -1;
 	}
 
-	$ohinta  = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios,4); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
+	$ohinta  = round($erikoisale*$tilrivirow['hinta']*(1-($tilrivirow['ale']/100))*$tuorow['tuotekerroin']*$laskurow['maksu_kurssi']*$tilrivirow['varattu']+$rahtios,6); // tuotteen rivihinta rahteineen OLETUSVALUUTASSA
 
 	$tulliprossa = "";
 	$tv_nimrow	 = "";
@@ -167,13 +167,13 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 
 	// lis‰t‰‰n riville extra kulu, jos sellanen oli annettu
 	if ($tilrivirow["kate"] != 0) {
-		$kuluteksti = "(".round($ohinta,4)." + $tilrivirow[kate])";
+		$kuluteksti = "(".round($ohinta,6)." + $tilrivirow[kate])";
 		$ohinta = $ohinta + $tilrivirow['kate'];
 	}
 	else $kuluteksti = "";
 
-	$rivihin = round($ohinta,2);	// tilausrivin rivihinta talteen
-	$ohinta  = round($ohinta / $tilrivirow['varattu'],4); // yhden tuotteen hinta kaikkine kuluineen
+	$rivihin = round($ohinta,$yhtiorow['hintapyoristys']);	// tilausrivin rivihinta talteen
+	$ohinta  = round($ohinta / $tilrivirow['varattu'],6); // yhden tuotteen hinta kaikkine kuluineen
 
 	//Keskihankintahintaa yll‰pidet‰‰n vain jos tuotteella ei ole sarjanumeroseurantaa tai marginaaliverostusta
 	if ($tuorow["sarjanumeroseuranta"] == "S") {
@@ -184,11 +184,11 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		if ($salrow['saldo'] + $tilrivirow['varattu'] > 0 and $salrow['saldo'] > 0) {
 			// kehahin matikka, tuotteella pit‰‰ olla saldoa ennen ja j‰lkeen ett‰ edes tehd‰‰n matikkaa
 			if ($debug >= 1) $varastoon_msg .= "<font class='message'>Tuote: $tuorow[tuoteno] Matikka: kehahin = ($salrow[saldo] * $tuorow[kehahin] + $ohinta * $tilrivirow[varattu]) / ($salrow[saldo] + $tilrivirow[varattu])</font><br>";
-			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']),4);
+			$kehahin = round(($salrow['saldo'] * $tuorow['kehahin'] + $ohinta * $tilrivirow['varattu']) / ($salrow['saldo'] + $tilrivirow['varattu']),6);
 		}
 		else {
 			// Jos j‰‰d‰‰n saldossa t‰m‰nkin tulon j‰lkeen miinukselle tai nollille, laitetaan kehahin suoraan t‰m‰n keikan hinnasta
-			$kehahin = round($ohinta,4);
+			$kehahin = round($ohinta,6);
 		}	
 	}
 
@@ -228,7 +228,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		// p‰ivitet‰‰n tuote
 		$query = "	UPDATE tuote set
 					$kehalis
-					vihahin     = round('$ohinta',2),
+					vihahin     = round('$ohinta','$yhtiorow[hintapyoristys]'),
 					vihapvm     = now()
 					WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
 		$result = mysql_query($query) or pupe_error($query);

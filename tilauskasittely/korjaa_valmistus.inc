@@ -145,7 +145,7 @@
 
 		while($taparow = mysql_fetch_array($res)) {
 
-			$uusihinta 		 = round($uusiarvo / $valmkpl,4);
+			$uusihinta 		 = round($uusiarvo / $valmkpl,6);
 			$tuoteno		 = $taparow["tuoteno"];
 			$pvm			 = $taparow["laadittu"];
 			$rivitunnus 	 = $taparow["rivitunnus"];

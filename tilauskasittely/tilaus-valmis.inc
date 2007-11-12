@@ -796,16 +796,11 @@ else {
 			$edvarasto 	= '';
 
 			//loopataan kaikki yhdestä tilausesta syntyneet lähetteet
-			foreach ($tilausnumerot as $tilausnumero) {
-				//luetaan laskun tiedot uudestaan tässä, per splitti
-				$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
-				$result = mysql_query($query) or pupe_error($query);
-				$laskurow = mysql_fetch_array($result);
-
+			if($laskurow["tunnusnippu"] > 0) {
 				//
 				// LÄHETETÄÄN TILAUSVAHVISTUS
 				//
-				// tulostetaan tässä, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
+				// Tässä haarassa tulostetaan tilausvahvistus KOKO tilauksesta
 
 				if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
 					$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
@@ -845,6 +840,59 @@ else {
 				$kutsuja = "tilaus-valmis.inc";
 
 				require("tilaus-valmis-valitsetila.inc");
+				
+			}
+			else {
+				foreach ($tilausnumerot as $tilausnumero) {
+					//luetaan laskun tiedot uudestaan tässä, per splitti
+					$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
+					$result = mysql_query($query) or pupe_error($query);
+					$laskurow = mysql_fetch_array($result);
+
+					//
+					// LÄHETETÄÄN TILAUSVAHVISTUS
+					//
+					// tulostetaan tässä, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
+
+					if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
+						$naytatvale = 2; // jos mellä on tilausvahvistuksessa kakkonen, ei haluta nähä aleja
+					else
+						$naytatvale = 1; // halutaan nähä alet
+
+					if (strpos(" ".$laskurow['tilausvahvistus'],'E'))
+						require("tilausvahvistus-edi.inc");
+
+					if (strpos(" ".$laskurow['tilausvahvistus'],'S'))
+						require("tilausvahvistus-email.inc");
+
+					if (strpos(" ".$laskurow['tilausvahvistus'],'F'))
+						require("tilausvahvistus-fax.inc");
+
+					if (strpos(" ".$laskurow['tilausvahvistus'],'O'))
+						require("tilausvahvistus-email.inc");
+
+					if (strpos(" ".$laskurow['tilausvahvistus'],'U'))
+						require("tilausvahvistus-futursoft.inc");
+
+					if (strpos(" ".$laskurow['tilausvahvistus'],'K')) {
+						$query = "	SELECT komento
+									FROM kirjoittimet
+									WHERE yhtio = '$kukarow[yhtio]' and
+									tunnus = '$kukarow[kirjoitin]'";
+						$tilvares = mysql_query($query) or pupe_error($query);
+
+						if ($tilvakir = mysql_fetch_array($tilvares)) {
+							$komento["Tilausvahvistus"] = $tilvakir["komento"];
+
+							require("tulosta_tilausvahvistus_pdf.inc");
+						}
+					}
+
+					///* Tässä katotaan onko lähetteellä tosiaan mitään kerättävää *///
+					$kutsuja = "tilaus-valmis.inc";
+
+					require("tilaus-valmis-valitsetila.inc");
+				}				
 			}
 		}
 	} // end jos yksikin rivi kerätty else haara

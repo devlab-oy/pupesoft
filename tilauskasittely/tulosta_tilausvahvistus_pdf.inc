@@ -627,7 +627,21 @@
 		else {
 			$tyyppilisa = " and tilausrivi.tyyppi in ('L','G','W') ";
 		}
-
+		
+		if($laskurow["tunnusnippu"] > 0) {
+			$query = "	SELECT group_concat(tunnus) tunnukset
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '{$laskurow["tunnusnippu"]}' and tunnusnippu > 0 and tila IN ('N','L')
+						GROUP BY tunnusnippu";
+			$abures = mysql_query($query) or pupe_error($query);
+			$aburow = mysql_fetch_array($abures);
+			
+			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+		}
+		else {
+			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+		}
+		
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
 		$query = "  SELECT tilausrivi.*,
 					round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
@@ -637,7 +651,7 @@
 					FROM tilausrivi
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-					WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+					WHERE $wherelisa
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
 					$tyyppilisa
 					ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";

@@ -837,17 +837,21 @@ else {
 				}
 
 				///* Tässä katotaan onko lähetteellä tosiaan mitään kerättävää *///
-				$kutsuja = "tilaus-valmis.inc";
-
-				require("tilaus-valmis-valitsetila.inc");
 				
+				//	Ja rullataan kaikki tilaukset läpi
+				foreach ($tilausnumerot as $tilausnumero) {
+					$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
+					$result = mysql_query($query) or pupe_error($query);
+					$laskurow = mysql_fetch_array($result);
+					
+					$kutsuja = "tilaus-valmis.inc";
+
+					require("tilaus-valmis-valitsetila.inc");
+				}
 			}
 			else {
 				foreach ($tilausnumerot as $tilausnumero) {
 					//luetaan laskun tiedot uudestaan tässä, per splitti
-					$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
-					$result = mysql_query($query) or pupe_error($query);
-					$laskurow = mysql_fetch_array($result);
 
 					//
 					// LÄHETETÄÄN TILAUSVAHVISTUS

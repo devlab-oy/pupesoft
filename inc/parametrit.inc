@@ -386,6 +386,9 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 			echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
 		}
+		elseif($_GET["sulje"] != "") {
+			echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); divi.innerHTML=''; divi.style.display='none';\"><font style='color: red;'>x</font></a><br></div>";
+		}
 	}
 }
 

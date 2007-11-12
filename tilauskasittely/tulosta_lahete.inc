@@ -148,7 +148,7 @@ if (!function_exists('alku')) {
 		if($laskurow["tunnusnippu"] > 0) {
 			if($tyyppi == "TILAUSVAHVISTUS") {
 				$pdf->draw_text(310, 792, t("Tilausnumero", $kieli), 	$thispage, $pieni);
-				$pdf->draw_text(310, 782, $laskurow["tunnusnippu"]."/".$laskurow["tunnus"],			$thispage, $boldi);
+				$pdf->draw_text(310, 782, $laskurow["tunnusnippu"],			$thispage, $boldi);
 			}
 			else {
 				$pdf->draw_text(310, 792, t("Tilausnumero/toimitus", $kieli), 	$thispage, $pieni);

@@ -116,7 +116,7 @@
 				$ulos = "<select name='tuoteno_array[]' multiple='TRUE' size='6'>";
 			}
 			
-			$ulos .= "<option value=''>".t("Valise tuote")."</option>";
+			$ulos .= "<option value=''>".t("Valitse tuote")."</option>";
 
 			// Loopataan tuotteet läpi
 			while ($trow = mysql_fetch_array($thresult)) {

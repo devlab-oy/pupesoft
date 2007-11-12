@@ -1207,7 +1207,7 @@
 			echo "<form action = '$PHP_SELF' method='post' autocomplete='off'>";
 			echo "<input type='hidden' name='tee' value='Z'>";
 			echo "<table><tr>";
-			echo "<td>Valitse listasta:</td>";
+			echo "<td>".t("Valitse listasta").":</td>";
 			echo "<td>$ulos</td>";
 			echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
 			echo "</tr></table>";

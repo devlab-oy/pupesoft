@@ -11,9 +11,16 @@
 		$tee = "VALITSE";
 	}
 	
+	if($ohitus == "OHITA") {
+		$valmistettavat = implode(",", $valmistettavat);
+		$tee = "VALITSE";
+	}
+	
 	if($tee=='YHDISTA') {		
 		//K‰yd‰‰n l‰pi rivit
-		if (count($valmistettavat) > 0) {
+		
+		
+		if (count($valmistettavat) > 1 or ($tilaukseen > 0 and count($valmistettavat) > 0)) {
 						
 			$query = "	SELECT *
 						FROM  lasku						
@@ -21,28 +28,57 @@
 						and	tunnus = (SELECT otunnus from tilausrivi WHERE tunnus=$valmistettavat[0])";	
 			$result = mysql_query($query) or pupe_error($query);
 			$laskurow    = mysql_fetch_array($result);
-						
-			$query = "	INSERT into
-						lasku SET
-						clearing			= '',					
-						nimi 				= 'Valmistusajo',	
-						toimaika 			= now(),
-						kerayspvm 			= now(),						
-						comments 			= '',						
-						viesti 				= '',						
-						yhtio 				= '$kukarow[yhtio]',
-						varasto 			= '$laskurow[varasto]',											
-						hyvaksynnanmuutos 	= '',
-						tilaustyyppi 		= 'W', 
-						tila				= 'V',
-						alatila				= 'J',
-						ytunnus				= 'Valmistusajo',
-						laatija 			= '$kukarow[kuka]',
-						luontiaika			= NOW()";
-			$result = mysql_query($query) or pupe_error($query);
-			$otunnus = mysql_insert_id();
+			
+			if($tilaukseen > 0) {
+				
+				//	Tarkastetaan ett‰ tunnus on oikein
+				$query = "	SELECT tunnus
+							FROM  lasku						
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and	tunnus = '$tilaukseen'
+							and tila = 'V'";	
+				$result = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($result) == 0) {
+					die("<font class='error'>VIRHE!!! Tilaus ei ole valmistus!</font>");
+				}
+				
+				$otunnus = $tilaukseen;
+				
+				
+				echo "<font class='message'>".t("Liitet‰‰n rivit valmistukseen")." $otunnus</font><br>";
+
+				$query = "	UPDATE lasku SET
+								comments = '$comments',
+								viesti = '$viesti'
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and	tunnus = '$otunnus'";	
+				$result = mysql_query($query) or pupe_error($query);
+			}	
+			else {
+				$query = "	INSERT into
+							lasku SET
+							clearing			= '',					
+							nimi 				= 'Valmistusajo',	
+							toimaika 			= now(),
+							kerayspvm 			= now(),						
+							comments 			= '$comments',						
+							viesti 				= '$viesti',						
+							yhtio 				= '$kukarow[yhtio]',
+							varasto 			= '$laskurow[varasto]',											
+							hyvaksynnanmuutos 	= '',
+							tilaustyyppi 		= 'W', 
+							tila				= 'V',
+							alatila				= 'J',
+							ytunnus				= 'Valmistusajo',
+							laatija 			= '$kukarow[kuka]',
+							luontiaika			= NOW()";
+				$result = mysql_query($query) or pupe_error($query);
+				$otunnus = mysql_insert_id();				
+				
+				echo "<font class='message'>".t("Luotiin uusi otsikko")." $otunnus</font><br>";
+				
+			}		
 		
-			echo "Luotiin uusi otsikko: $otunnus<br>";
 		
 			foreach($valmistettavat as $rivitunnus) {							
 				//Otetaan alkuper‰isen otsikon numero talteen
@@ -128,6 +164,8 @@
 
 							$edstringi = $srow["stringi"];
 							$edperheid = $srow["perheid"];
+
+							echo "<font class='info'>".t("Siirrettiin tuote")." $srow[tuoteno] !</font><br>";
 						}
 
 						if(count($yhdista) > 1) {
@@ -169,6 +207,8 @@
 														kommentti = 'Tuote yhdistettiin perheeseen $ekaperhe'
 													WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($loput) and tuoteno = '$srow[tuoteno]'";
 										$updres = mysql_query($query) or pupe_error($query);
+										
+										echo "<font class='info'>".t("Yhdistettiin")." $srow[tuoteno] !</font><br>";
 									}
 								}
 								else {
@@ -179,10 +219,14 @@
 					}
 				}				
 			}
-			
-			echo "Siirrettin rivit uudelle otsikolle!<br>";
-			echo "Valmis!<br><br>";
+
+			echo "<font class='message'>".t("Siirrettin rivit uudelle otsikolle")."!</font><br><br>";
 			$tee = "";
+		}
+		else {
+			echo "<font class='error'>",t("Valitse ainakin 2 rivi‰ jotka aiot yhdist‰‰")."</font><br><br>";
+			$tee = "VALITSE";
+			$valmistettavat = implode(",", $valmistettavat);
 		}
 	}
 	
@@ -193,7 +237,9 @@
 		$query = "	SELECT 
 					GROUP_CONCAT(DISTINCT lasku.tunnus SEPARATOR ', ') 'Tilaus',
 					GROUP_CONCAT(DISTINCT lasku.nimi SEPARATOR ', ') 'Asiakas/Nimi',
-					GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR ', ') 'Ytunnus'					
+					GROUP_CONCAT(DISTINCT lasku.ytunnus SEPARATOR ', ') 'Ytunnus',
+					GROUP_CONCAT(DISTINCT lasku.viesti SEPARATOR ', ') 'viestit',
+					GROUP_CONCAT(DISTINCT lasku.comments SEPARATOR ', ') 'comments'					
 					FROM tilausrivi, lasku
 					LEFT JOIN kuka ON lasku.myyja = kuka.tunnus and lasku.yhtio=kuka.yhtio
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
@@ -238,7 +284,7 @@
 		
 		$vanhaid = "KALA";
 
-		echo "	<form method='post' action='$PHP_SELF' autocomplete='off'>";
+		echo "	<form method='post' id = 'formi' action='$PHP_SELF' autocomplete='off'>";
 		echo "	<input type='hidden' name='tee' value='YHDISTA'>
 				<input type='hidden' name='toim'  value='$toim'>";
 
@@ -266,8 +312,56 @@
 			echo "</tr>";						
 		}
 		
-		echo "</table><br>";
-		echo "Yhdist‰ valitut: <input type='submit' value='".t("Yhdist‰")."'><br><br>";
+		echo "</table><br><br>";
+
+		$query = "	SELECT *
+					FROM  lasku						
+					WHERE yhtio = '$kukarow[yhtio]' 
+					and tila = 'V'
+					and	tunnus = '$tilaukseen'";	
+		$result = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($result);
+
+		echo "
+			<table>
+				<tr>
+					<th>".t("Valmistus").":</th>
+					<td>$laskurow[nimi]</td>
+				</tr>			
+				<tr>
+					<th>".t("Viite").":</th>
+					<td><input type='text' size='53' name='viesti' value='$laskurow[viesti]'></td>
+				</tr>
+				<tr>
+					<th>".t("Kommentit").":</th>
+					<td><textarea name='comments' rows='2' cols='60'>$laskurow[comments]</textarea></td>
+					</tr>
+			</table>
+			<br>";
+		
+		$query = "	SELECT tunnus, nimi
+					FROM lasku
+					WHERE yhtio = '$kukarow[yhtio]' and tila = 'V' and alatila IN ('', 'J') and ytunnus = 'Valmistusajo'";
+		$result = mysql_query($query) or pupe_error($query);
+		
+		echo "<table><tr><th>".t("Yhdist‰ valitut valmistukseen").":</th>
+				<td><input type='hidden' id='ohitus' name='ohitus' value=''><select name='tilaukseen' onchange = \"document.getElementById('ohitus').value='OHITA'; submit();\"><option value = ''>".t("Tee uusi valmistusajo")."</option>'";
+		
+		if(mysql_num_rows($result) > 0) {
+			while($row = mysql_fetch_array($result)) {
+				if($tilaukseen == $row["tunnus"]) {
+					$sel = "SELECTED";
+				}
+				else {
+					$sel = "";
+				}
+				echo "<option value='$row[tunnus]' $sel>$row[tunnus]</option>";
+			}
+		}
+		
+		echo "</select>
+				<td class='back'><input type='submit' value='".t("Yhdist‰")."'></td>
+			</tr></table></form>";
 	}
 	
 	// meill‰ ei ole valittua tilausta

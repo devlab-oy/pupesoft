@@ -66,6 +66,7 @@
 							yhtio 				= '$kukarow[yhtio]',
 							varasto 			= '$laskurow[varasto]',											
 							hyvaksynnanmuutos 	= '',
+							liitostunnus 		= '9999999999',
 							tilaustyyppi 		= 'W', 
 							tila				= 'V',
 							alatila				= 'J',

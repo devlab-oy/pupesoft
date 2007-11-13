@@ -469,19 +469,19 @@
 					toimitustapa		= '$toimitustapa'";
 
 		if ($toim == "VALMISTAVARASTOON") {
-			$query .= ",tilaustyyppi = 'W', tila='V', ytunnus='$vtrow[nimitys]', liitostunnus='99999999999'";
+			$query .= ",tilaustyyppi = 'W', tila='V', ytunnus='$vtrow[nimitys]', liitostunnus='9999999999'";
 
 			$tee = "";
 		}
 		elseif ($toim == "SIIRTOLISTA") {
-			$query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='99999999999'";
+			$query .= ",tilaustyyppi = 'G', tila='G', ytunnus='SIIRTO', liitostunnus='9999999999'";
 			$query .= ",kohdistettu = 'K'";
 
 
 			$tee = "";
 		}
 		elseif ($toim == "SIIRTOTYOMAARAYS") {
-			$query .= ",tilaustyyppi = 'S', tila='S', ytunnus='SISAINEN', liitostunnus='99999999999'";
+			$query .= ",tilaustyyppi = 'S', tila='S', ytunnus='SISAINEN', liitostunnus='9999999999'";
 
 			$tee = "";
 		}

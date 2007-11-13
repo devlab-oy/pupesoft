@@ -2770,8 +2770,8 @@ function popUp(e, oi, offsetX, offsetY, html) {
 		else ew = null;
 
 		// relatiivinen sijainti
-		if(!offsetY) offsetY=10;
-		if(!offsetX) offsetX=10;
+		if(!offsetY) offsetY=-10;
+		if(!offsetX) offsetX=-10;
 				
 		var y = getMouseY(e)-offsetY;
 		var x = getMouseX(e)-offsetX;			

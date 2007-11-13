@@ -688,8 +688,10 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 			jt_toimita("ytunnus", "liitostunnus", "", "", "tosi_automaaginen", "TOIMITA");	
 		}
 	}
+}
 
-	echo "<hr>";
+if ($tee != "") {
+	echo "<br><hr>";
 	echo "<form action='$PHP_SELF' method='post'>";
 	echo "<input type='hidden' name='toiminto' value=''>";
 	echo "<input type='hidden' name='toimittajaid' value='$laskurow[liitostunnus]'>";

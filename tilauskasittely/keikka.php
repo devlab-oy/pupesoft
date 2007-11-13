@@ -114,10 +114,9 @@ if (!function_exists("tsekit")) {
 					tilausrivi.uusiotunnus='$row[tunnus]' and
 					tilausrivi.tyyppi='O'";
 		$toimresult = mysql_query($query) or pupe_error($query);
-
-		$sarjanrook = 0;
-		$sarjanrot = "<font style='color:#00FF00;'>".t("ok")."</font>";
-
+		
+		$sarjanrook = 1;
+		
 		while ($toimrow = mysql_fetch_array($toimresult)) {
 	
 			if ($toimrow["kpl"] < 0) {
@@ -143,12 +142,21 @@ if (!function_exists("tsekit")) {
 			}
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$sarjarow = mysql_fetch_array($sarjares);
-
-			// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon
+			
+			// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon			
 			if ($sarjarow["kpl"] != abs($toimrow["kpl"])) {
-				$sarjanrook  = 1; // ei ole kaikilla tuotteilla sarjanumeroa
-				$sarjanrot = "kesken";
+				$sarjanrook++;
 			}
+		}
+		
+		// pitää olla yhtämonta sarjanumeroa liitettynä kun kamaa viety varastoon			
+		if ($sarjanrook == 1) {
+			$sarjanrook	= 1;
+			$sarjanrot	= "<font style='color:#00FF00;'>".t("ok")."</font>";
+		}
+		else {
+			$sarjanrook	= 0; // ei ole kaikilla tuotteilla sarjanumeroa
+			$sarjanrot	= "kesken";
 		}
 
 
@@ -653,12 +661,12 @@ if ($toiminto == "" and $ytunnus != "") {
 				}
 
 				// jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
-				if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 0) {
+				if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1) {
 					echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
 				}
 
 				// jos lisätiedot, kohdistus ja paikat on ok sekä kaikki rivit on viety varastoon, niin saadaan laskea virallinen varastonarvo
-				if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto and $sarjanrook == 0) {
+				if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto and $sarjanrook == 1) {
 					echo "<option value='kaikkiok'>"     .t("Laske virallinen varastonarvo")."</option>";
 				}
 
@@ -748,7 +756,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	}
 
 	// jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon
-	if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 0) {
+	if ($kplyhteensa > 0 and $varok == 1 and $kplyhteensa != $kplvarasto and $sarjanrook == 1) {
 		$nappikeikka .= "$formalku";
 		$nappikeikka .= "<input type='hidden' name='toiminto' value='kalkyyli'>";
 		$nappikeikka .= "<input type='submit' value='".t("Vie varastoon")."'>";

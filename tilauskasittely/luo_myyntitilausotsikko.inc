@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("luo_myyntitilausotsikko")) {
-	function luo_myyntitilausotsikko($asiakasid, $tilausnumero = '', $myyjanro = '') {
+	function luo_myyntitilausotsikko($asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '') {
 		global $kukarow, $yhtiorow, $toim, $session;
 
 		$query	= "	SELECT *

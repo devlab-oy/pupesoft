@@ -604,7 +604,7 @@
 							}
 						}
 
-						$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, kuka.nimi kukanimi
+						$query = "	SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, kuka.nimi kukanimi, kuka.eposti as kukamail
 									FROM lasku
 									JOIN asiakas on asiakas.yhtio=lasku.yhtio and asiakas.tunnus=lasku.liitostunnus
 									LEFT JOIN kuka on kuka.yhtio=lasku.yhtio and kuka.tunnus=lasku.myyja
@@ -645,7 +645,7 @@
 						}
 
 						// Lähetetään keräyspoikkeama myyjälle
-						if ($kukarow["eposti"] != '' and ($laskurow["kerayspoikkeama"] == 0 or $laskurow["kerayspoikkeama"] == 2)) {
+						if ($laskurow["kukamail"] != '' and ($laskurow["kerayspoikkeama"] == 0 or $laskurow["kerayspoikkeama"] == 2)) {
 							if (($laskurow["email"] == '' or $boob === FALSE) and $laskurow["kerayspoikkeama"] == 0) {
 								$ulos = t("Asiakkaalta puuttuu sähköpostiosoite! Keräyspoikkeamia ei voitu lähettää!")."\r\n\r\n\r\n".$ulos;
 							}
@@ -658,7 +658,7 @@
 
 							$ulos = t("Tilauksen keräsi").": $keraaja[nimi]\r\n\r\n".$ulos;
 
-							$boob = mail($kukarow["eposti"],  "$yhtiorow[nimi] - ".t("Keräyspoikkeamat")."", $ulos, $header, "-f $yhtiorow[postittaja_email]");
+							$boob = mail($laskurow["kukamail"],  "$yhtiorow[nimi] - ".t("Keräyspoikkeamat")."", $ulos, $header, "-f $yhtiorow[postittaja_email]");
 							if ($boob===FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
 						}
 					}

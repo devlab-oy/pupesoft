@@ -3180,7 +3180,7 @@ if(!function_exists("decodeURI")) {
 
 if (!function_exists("tee_menu")) {
 	// scripti javascript menujen tekemiseen
-	function tee_menu ($valinnat) {
+	function tee_menu ($valinnat, $nappi) {
 		if(is_array($valinnat) and count($valinnat)>0) {
 			$data = "";
 			foreach($valinnat as $key => $valinta) {
@@ -3188,7 +3188,7 @@ if (!function_exists("tee_menu")) {
 				$data .= "&menu[$key][href]=".urlencode($valinta["HREF"]);
 			}
 			
-			$data = "<div style='float: right;'><a href='#' onclick=\"popUp(event, 'ajax_menu', '30', '-10', 'tarjousseuranta.php?tee=GENEROIMENU$data');\">m</a></div>";
+			$data = "<div style='float: right;'><a href='#' onclick=\"popUp(event, 'ajax_menu', '30', '-10', 'tarjousseuranta.php?tee=GENEROIMENU$data');\">$nappi</a></div>";
 			return $data;
 		}
 		return true;

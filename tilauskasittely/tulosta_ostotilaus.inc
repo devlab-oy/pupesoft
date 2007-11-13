@@ -815,9 +815,11 @@
 		            }
 
 					if (trim($row["kommentti"]) != '') {
-						$kala = $kala - 15;
-						$pdf->draw_text(45,  $kala, $row["kommentti"],	$thispage, $norm);
-						$lask++;
+						foreach(explode("\n", wordwrap(trim($row["kommentti"]), 100, "\n")) as $kommentti) {
+							$kala = $kala - 15;
+							$pdf->draw_text(45,  $kala, $kommentti,	$thispage, $norm);
+							$lask++;
+						}	
 					}
 
 					$kala = $kala - 15;

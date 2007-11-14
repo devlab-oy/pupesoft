@@ -572,7 +572,7 @@ else {
 			while ($row = mysql_fetch_array($result)) {
 
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
-
+								
 				$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
 				$varaston_res = mysql_query($query) or pupe_error($query);
 				$varaston_row = mysql_fetch_array($varaston_res);
@@ -620,14 +620,11 @@ else {
 							$laskurow["maa_maara"] 							= $aputoimirow["maa_maara"];
 							$laskurow["maa_lahetys"] 						= $varaston_row["maa"];
 						}
-
 					}
-
 				}
 
-				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu
-				if ((($varasto != $edvarasto and $edvarasto != 'x') and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E" and $laskurow["splittauskielto"] != "E") or
-					($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K")) {
+				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseessä on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu				
+				if ((($varasto != $edvarasto and $edvarasto != 'x') and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K")) {
 					
 					//	Meidän on päivitettävät tunnusnippu	
 					if($yhtiorow["splittauskielto"] == "K" and $laskurow["tunnusnippu"] == 0) {
@@ -647,98 +644,98 @@ else {
 					}
 					
 					//tehdään uusi otsikko
-					$query = "INSERT into lasku SET
-							yhtio_nimi							= '$laskurow[yhtio_nimi]',
-							yhtio_osoite						= '$laskurow[yhtio_osoite]',
-							yhtio_postino						= '$laskurow[yhtio_postino]',
-							yhtio_postitp						= '$laskurow[yhtio_postitp]',
-							yhtio_maa							= '$laskurow[yhtio_maa]',
-							yhtio_ovttunnus						= '$laskurow[yhtio_ovttunnus]',
-							yhtio_kotipaikka					= '$laskurow[yhtio_kotipaikka]',
-							yhtio_toimipaikka					= '$laskurow[yhtio_toimipaikka]',
-							alatila								= 'A',
-							alv									= '$laskurow[alv]',
-							chn									= '$laskurow[chn]',
-							comments							= '$laskurow[comments]',
-							erikoisale							= '$laskurow[erikoisale]',
-							erpcm								= '$laskurow[erpcm]',
-							kapvm								= '$laskurow[kapvm]',
-							kasumma								= '$laskurow[kasumma]',
-							kerayspvm							= '$toim_kerayspvm',
-							keraysvko							= '$laskurow[keraysvko]',
-							ketjutus							= '$laskurow[ketjutus]',
-							laatija								= '$laskurow[laatija]',
-							laskunro							= '$laskurow[laskunro]',
-							laskutusvkopv						= '$laskurow[laskutusvkopv]',
-							luontiaika							= '$laskurow[luontiaika]',
-							maa 								= '$laskurow[maa]',
-							maksuehto							= '$laskurow[maksuehto]',
-							myyja								= '$laskurow[myyja]',
-							nimi								= '$laskurow[nimi]',
-							nimitark							= '$laskurow[nimitark]',
-							osoite								= '$laskurow[osoite]',
-							ovttunnus							= '$laskurow[ovttunnus]',
-							postino								= '$laskurow[postino]',
-							postitp								= '$laskurow[postitp]',
-							tapvm								= '$laskurow[tapvm]',
-							tila								= 'N',
-							tilausvahvistus						= '$laskurow[tilausvahvistus]',
-							toim_maa							= '$laskurow[toim_maa]',
-							toim_nimi							= '$laskurow[toim_nimi]',
-							toim_nimitark						= '$laskurow[toim_nimitark]',
-							toim_osoite							= '$laskurow[toim_osoite]',
-							toim_ovttunnus						= '$laskurow[toim_ovttunnus]',
-							toim_postino						= '$laskurow[toim_postino]',
-							toim_postitp						= '$laskurow[toim_postitp]',
-							toimaika							= '$toim_toimaika',
-							toimvko								= '$laskurow[toimvko]',
-							toimitusehto						= '$laskurow[toimitusehto]',
-							kohdistettu 						= '$laskurow[kohdistettu]',
-							toimitustapa						= '$laskurow[toimitustapa]',
-							valkoodi							= '$laskurow[valkoodi]',
-							vienti_kurssi						= '$laskurow[vienti_kurssi]',
-							vanhatunnus							= '$laskurow[tunnus]',
-							tunnusnippu							= '$laskurow[tunnusnippu]',
-							verkkotunnus						= '$laskurow[verkkotunnus]',
-							vienti 								= '$laskurow[vienti]',
-							viesti								= '$laskurow[viesti]',
-							tilausyhteyshenkilo					= '$laskurow[tilausyhteyshenkilo]',
-							asiakkaan_tilausnumero				= '$laskurow[asiakkaan_tilausnumero]',
-							kohde								= '$laskurow[kohde]',
-							viikorkopros						= '$laskurow[viikorkopros]',
-							viite								= '$laskurow[viite]',
-							viitetxt							= '$laskurow[viitetxt]',
-							varasto 							= '$varasto',
-							liitostunnus    					= '$laskurow[liitostunnus]',
-							yhtio								= '$laskurow[yhtio]',
-							clearing							= '$laskurow[clearing]',
-							tilaustyyppi						= '$laskurow[tilaustyyppi]',
-							osatoimitus							= '$laskurow[osatoimitus]',
-							ytunnus								= '$laskurow[ytunnus]',
-							jaksotettu							= '$laskurow[jaksotettu]',
-							maa_maara							= '$laskurow[maa_maara]',
-							maa_lahetys							= '$laskurow[maa_lahetys]',
-							kauppatapahtuman_luonne 			= '$laskurow[kauppatapahtuman_luonne]',
-							kuljetusmuoto						= '$laskurow[kuljetusmuoto]',
-							sisamaan_kuljetus					= '$laskurow[sisamaan_kuljetus]',
-							sisamaan_kuljetusmuoto  			= '$laskurow[sisamaan_kuljetusmuoto]',
-							sisamaan_kuljetus_kansallisuus		= '$laskurow[sisamaan_kuljetus_kansallisuus]',
-							kontti								= '$laskurow[kontti]',
-							aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
-							aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',
-							poistumistoimipaikka 				= '$laskurow[poistumistoimipaikka]',
-							poistumistoimipaikka_koodi 			= '$laskurow[poistumistoimipaikka_koodi]',
-							bruttopaino 						= '$laskurow[bruttopaino]',
-							lisattava_era 						= '$laskurow[lisattava_era]',
-							vahennettava_era 					= '$laskurow[vahennettava_era]',
-							ultilno								= '$ultilno'";
+					$query = "	INSERT into lasku SET
+								yhtio_nimi							= '$laskurow[yhtio_nimi]',
+								yhtio_osoite						= '$laskurow[yhtio_osoite]',
+								yhtio_postino						= '$laskurow[yhtio_postino]',
+								yhtio_postitp						= '$laskurow[yhtio_postitp]',
+								yhtio_maa							= '$laskurow[yhtio_maa]',
+								yhtio_ovttunnus						= '$laskurow[yhtio_ovttunnus]',
+								yhtio_kotipaikka					= '$laskurow[yhtio_kotipaikka]',
+								yhtio_toimipaikka					= '$laskurow[yhtio_toimipaikka]',
+								alatila								= 'A',
+								alv									= '$laskurow[alv]',
+								chn									= '$laskurow[chn]',
+								comments							= '$laskurow[comments]',
+								erikoisale							= '$laskurow[erikoisale]',
+								erpcm								= '$laskurow[erpcm]',
+								kapvm								= '$laskurow[kapvm]',
+								kasumma								= '$laskurow[kasumma]',
+								kerayspvm							= '$toim_kerayspvm',
+								keraysvko							= '$laskurow[keraysvko]',
+								ketjutus							= '$laskurow[ketjutus]',
+								laatija								= '$laskurow[laatija]',
+								laskunro							= '$laskurow[laskunro]',
+								laskutusvkopv						= '$laskurow[laskutusvkopv]',
+								luontiaika							= '$laskurow[luontiaika]',
+								maa 								= '$laskurow[maa]',
+								maksuehto							= '$laskurow[maksuehto]',
+								myyja								= '$laskurow[myyja]',
+								nimi								= '$laskurow[nimi]',
+								nimitark							= '$laskurow[nimitark]',
+								osoite								= '$laskurow[osoite]',
+								ovttunnus							= '$laskurow[ovttunnus]',
+								postino								= '$laskurow[postino]',
+								postitp								= '$laskurow[postitp]',
+								tapvm								= '$laskurow[tapvm]',
+								tila								= 'N',
+								tilausvahvistus						= '$laskurow[tilausvahvistus]',
+								toim_maa							= '$laskurow[toim_maa]',
+								toim_nimi							= '$laskurow[toim_nimi]',
+								toim_nimitark						= '$laskurow[toim_nimitark]',
+								toim_osoite							= '$laskurow[toim_osoite]',
+								toim_ovttunnus						= '$laskurow[toim_ovttunnus]',
+								toim_postino						= '$laskurow[toim_postino]',
+								toim_postitp						= '$laskurow[toim_postitp]',
+								toimaika							= '$toim_toimaika',
+								toimvko								= '$laskurow[toimvko]',
+								toimitusehto						= '$laskurow[toimitusehto]',
+								kohdistettu 						= '$laskurow[kohdistettu]',
+								toimitustapa						= '$laskurow[toimitustapa]',
+								valkoodi							= '$laskurow[valkoodi]',
+								vienti_kurssi						= '$laskurow[vienti_kurssi]',
+								vanhatunnus							= '$laskurow[tunnus]',
+								tunnusnippu							= '$laskurow[tunnusnippu]',
+								verkkotunnus						= '$laskurow[verkkotunnus]',
+								vienti 								= '$laskurow[vienti]',
+								viesti								= '$laskurow[viesti]',
+								tilausyhteyshenkilo					= '$laskurow[tilausyhteyshenkilo]',
+								asiakkaan_tilausnumero				= '$laskurow[asiakkaan_tilausnumero]',
+								kohde								= '$laskurow[kohde]',
+								viikorkopros						= '$laskurow[viikorkopros]',
+								viite								= '$laskurow[viite]',
+								viitetxt							= '$laskurow[viitetxt]',
+								varasto 							= '$varasto',
+								liitostunnus    					= '$laskurow[liitostunnus]',
+								yhtio								= '$laskurow[yhtio]',
+								clearing							= '$laskurow[clearing]',
+								tilaustyyppi						= '$laskurow[tilaustyyppi]',
+								osatoimitus							= '$laskurow[osatoimitus]',
+								ytunnus								= '$laskurow[ytunnus]',
+								jaksotettu							= '$laskurow[jaksotettu]',
+								maa_maara							= '$laskurow[maa_maara]',
+								maa_lahetys							= '$laskurow[maa_lahetys]',
+								kauppatapahtuman_luonne 			= '$laskurow[kauppatapahtuman_luonne]',
+								kuljetusmuoto						= '$laskurow[kuljetusmuoto]',
+								sisamaan_kuljetus					= '$laskurow[sisamaan_kuljetus]',
+								sisamaan_kuljetusmuoto  			= '$laskurow[sisamaan_kuljetusmuoto]',
+								sisamaan_kuljetus_kansallisuus		= '$laskurow[sisamaan_kuljetus_kansallisuus]',
+								kontti								= '$laskurow[kontti]',
+								aktiivinen_kuljetus 				= '$laskurow[aktiivinen_kuljetus]',
+								aktiivinen_kuljetus_kansallisuus	= '$laskurow[aktiivinen_kuljetus_kansallisuus]',
+								poistumistoimipaikka 				= '$laskurow[poistumistoimipaikka]',
+								poistumistoimipaikka_koodi 			= '$laskurow[poistumistoimipaikka_koodi]',
+								bruttopaino 						= '$laskurow[bruttopaino]',
+								lisattava_era 						= '$laskurow[lisattava_era]',
+								vahennettava_era 					= '$laskurow[vahennettava_era]',
+								ultilno								= '$ultilno'";
 					$uusires = mysql_query($query) or pupe_error($query);
 					$laskurow['tunnus'] = (string) mysql_insert_id();
 					$tilausnumerot[] = $laskurow["tunnus"];
 				}
 				elseif ($laskurow["varasto"] == 0) {
 					//päivitetään laskulle tieto mihin varastoon se kuuluu
-					$query  ="	update lasku set
+					$query = "	UPDATE lasku set
 								varasto 							= '$varasto',
 								ultilno 							= '$ultilno',
 								maa_maara							= '$laskurow[maa_maara]',
@@ -756,8 +753,8 @@ else {
 								bruttopaino 						= '$laskurow[bruttopaino]',
 								lisattava_era 						= '$laskurow[lisattava_era]',
 								vahennettava_era 					= '$laskurow[vahennettava_era]'
-								where yhtio ='$kukarow[yhtio]' and
-								tunnus = '$laskurow[tunnus]'";
+								where yhtio ='$kukarow[yhtio]' 
+								and tunnus = '$laskurow[tunnus]'";
 					$varresult = mysql_query($query) or pupe_error($query);
 
 					$laskurow["varasto"] = $varasto;
@@ -778,6 +775,7 @@ else {
 
 			$query = "select tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$laskurow[tunnus]'";
 			$result = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($result) > 1) {
 
 				$montakotilausta = mysql_num_rows($result);
@@ -840,6 +838,7 @@ else {
 				
 				//	Ja rullataan kaikki tilaukset läpi
 				foreach ($tilausnumerot as $tilausnumero) {
+					//luetaan laskun tiedot uudestaan tässä, per splitti
 					$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$result = mysql_query($query) or pupe_error($query);
 					$laskurow = mysql_fetch_array($result);
@@ -852,6 +851,9 @@ else {
 			else {
 				foreach ($tilausnumerot as $tilausnumero) {
 					//luetaan laskun tiedot uudestaan tässä, per splitti
+					$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
+					$result = mysql_query($query) or pupe_error($query);
+					$laskurow = mysql_fetch_array($result);
 
 					//
 					// LÄHETETÄÄN TILAUSVAHVISTUS

@@ -146,7 +146,7 @@
 								SET tapa 		= '$tapa',
 								asiakas  		= '$ytunnus',
 								liitostunnus 	= '$asiakasid',
-								henkilo  		= '$henkilo',
+								henkilo  		= '$yhtunnus',
 								kuka     		= '$kuka',
 								yhtio    		= '$kukarow[yhtio]',
 								tyyppi   		= '$tyyppi',
@@ -190,7 +190,6 @@
 				
 					$tapa     	= "";
 					$viesti   	= "";
-					$henkilo 	= "";
 					$tunnus   	= "";
 					$tyyppi	   	= "";
 					$mvva 		= "";
@@ -207,7 +206,7 @@
 							SET tapa 		= '$tapa',
 							asiakas  		= '$ytunnus',
 							liitostunnus 	= '$asiakasid',
-							henkilo  		= '$henkilo',
+							henkilo  		= '$yhtunnus',
 							kuka     		= '$kuka',
 							yhtio    		= '$kukarow[yhtio]',
 							tyyppi   		= '$tyyppi',
@@ -221,7 +220,6 @@
 			
 				$tapa     	= "";
 				$viesti   	= "";
-				$henkilo 	= "";
 				$tunnus   	= "";
 				$tyyppi	   	= "";
 				$mvva 		= "";
@@ -291,7 +289,7 @@
 
 			$tapa     	= $korjrow["tapa"];
 			$viesti   	= $korjrow["kentta01"];
-			$henkilo 	= $korjrow["henkilo"];
+			$yhtunnus 	= $korjrow["henkilo"];
 			$tunnus   	= $korjrow["tunnus"];
 			$tyyppi	   	= $korjrow["tyyppi"];
 			$mvva 		= substr($korjrow["pvmalku"],0,4);
@@ -326,7 +324,7 @@
 							<input type='hidden' name='ytunnus' value='$ytunnus'>
 							<input type='hidden' name='asiakasid' value='$asiakasid'>
 							<select name='yhtunnus' Onchange='submit();'>
-							<option value='kaikki'>".t("Yleistiedot")."</option>";
+							<option value=''>".t("Yleistiedot")."</option>";
 
 				while ($row = mysql_fetch_array($result)) {
 
@@ -498,7 +496,7 @@
 						<input type='hidden' name='tee' 		value='UUSIMEMO'>
 						<input type='hidden' name='from' 		value='$from'>
 						<input type='hidden' name='korjaus' 	value='$tunnus'>
-						<input type='hidden' name='henkilo' 	value='$henkilo'>
+						<input type='hidden' name='yhtunnus' 	value='$yhtunnus'>
 						<input type='hidden' name='ytunnus' 	value='$ytunnus'>
 						<input type='hidden' name='asiakasid' 	value='$asiakasid'>
 						<input type='hidden' name='muistutusko' value='$muistutusko'>";
@@ -516,8 +514,11 @@
 					echo "<th></th>";
 				}
 				
+				echo "$tyyppi<br>";
+				
+				$sel = array();
 				$sel[$tyyppi] = "SELECTED";
-								
+																
 				echo "<td><select name='tyyppi' Onchange='submit();'>
 						<option value='Memo' $sel[Memo]>".t("Memo")."</option>
 						<option value='Muistutus' $sel[Muistutus]>".t("Muistutus")."</option>";
@@ -658,7 +659,7 @@
 			}
 
 			$query .= "	ORDER by sorttauskentta desc, kalenteri.tunnus";
-			
+						
 			if (strpos($_SERVER['SCRIPT_NAME'], "asiakasmemo.php") === FALSE) {
 				$query .= "	LIMIT 5 ";
 			}

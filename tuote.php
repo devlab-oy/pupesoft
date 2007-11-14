@@ -175,10 +175,10 @@
 		}
 
 		if ($tuoterow["tuoteno"] != "" and (!in_array($tuoterow["status"], array('P', 'X')) or $salro["saldo"] != 0)) {
-
-			// Laitetaan kehahin oikein...
-			if ($tuoterow['sarjanumeroseuranta'] == "S") {
-				$query = "	SELECT avg(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl) kehahin
+						
+			// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
+			if ($tuoterow["sarjanumeroseuranta"] == "S") {
+				$query	= "	SELECT sarjanumeroseuranta.tunnus
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
 							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
@@ -188,9 +188,14 @@
 							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
 				$sarjares = mysql_query($query) or pupe_error($query);
-				$sarjarow = mysql_fetch_array($sarjares);
-
-				$tuoterow["kehahin"] = sprintf('%.4f', $sarjarow["kehahin"]);
+				
+				$kehahin = 0;
+				
+				while($sarjarow = mysql_fetch_array($sarjares)) {																	
+					$kehahin += sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]);
+				}
+									
+				$tuoterow['kehahin'] = sprintf('%.6f', ($kehahin / mysql_num_rows($sarjares)));
 			}
 			
 			if 		($tuoterow['epakurantti100pvm'] != '0000-00-00') $tuoterow['kehahin'] = 0;

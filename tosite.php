@@ -129,9 +129,9 @@
 				$excelrivi[][] = array();
 
 				if (strtoupper($ext) == "XLS") {
-					for ($excei = 1; $excei < $data->sheets[0]['numRows']; $excei++) {
+					for ($excei = 0; $excei < $data->sheets[0]['numRows']; $excei++) {
 						for ($excej = 0; $excej <= $data->sheets[0]['numCols']; $excej++) {
-							$excelrivi[$excei-1][$excej] = $data->sheets[0]['cells'][$excei][$excej];
+							$excelrivi[$excei][$excej] = $data->sheets[0]['cells'][$excei][$excej];
 						}
 					}
 				}

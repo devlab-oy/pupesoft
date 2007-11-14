@@ -152,7 +152,7 @@ if ($error == 0 and $tee == "file") {
 			}
 		}
 	}
-	$taulut .= 'tuote_muutokset WRITE, sanakirja WRITE';
+	$taulut .= 'tuote_muutokset WRITE, sanakirja WRITE, avainsana WRITE';
 		
 	$montako =count($tulos);
 

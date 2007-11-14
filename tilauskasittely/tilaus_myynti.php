@@ -3501,10 +3501,7 @@ if ($tee == '') {
 
 							if ($kpl > 0) {
 								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
-								$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);
-								
-								echo "# JOTAIN...$ostohinta<br>";
-								
+								$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);								
 								
 								// Kate = Hinta - Ostohinta
 								if ($kotisumma_alviton != 0) {

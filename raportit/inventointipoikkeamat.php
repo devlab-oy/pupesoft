@@ -1,9 +1,134 @@
 <?php
-	///* Tämä skripti käyttää slave-tietokantapalvelinta *///
-	$useslave = 1;
+
 	require ("../inc/parametrit.inc");
+	
 	echo "<font class='head'>".t("Inventointipoikkeamat").":</font><hr>";
 
+	if ($tee == 'KORJAA') {
+		
+		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
+					FROM lasku use index (yhtio_tila_tapvm)
+					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino='$yhtiorow[varasto]'
+					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino='$yhtiorow[varastonmuutos]'
+					WHERE lasku.yhtio	= '$kukarow[yhtio]'
+					and lasku.tila     	= 'X'
+					and lasku.tapvm     = '$tapvm'
+					and lasku.tapvm 	>= '$yhtiorow[tilikausi_alku]' 
+					and lasku.tapvm 	<= '$yhtiorow[tilikausi_loppu]'
+					and lasku.viite    	= '$ttunnus'";
+		$kpitores = mysql_query($query) or pupe_error($query);
+		$kpitorow = mysql_fetch_array($kpitores);
+		
+		if ($kpitorow["tosite"] > 0 and $kpitorow["varasto"] > 0 and $kpitorow["varastonmuutos"] > 0 and (float) $arvo != 0 and (float) $arvo != (float) $edarvo) {
+			
+			$arvo = (float) $arvo;
+			
+			$query = "	UPDATE tapahtuma 
+						SET kplhinta 	= round($arvo/$kpl,2), 
+						hinta			= round($arvo/$kpl,2),
+						selite			= concat(selite, ' - Inventointia muokattu')
+						where yhtio = '$kukarow[yhtio]' 
+						and laji 	= 'inventointi' 
+						and tunnus 	= '$ttunnus'";
+			$upresult = mysql_query($query) or pupe_error($query);
+						
+			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varasto] AND yhtio='$kukarow[yhtio]'";
+	        $result = mysql_query($query) or pupe_error($query);
+
+			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varastonmuutos] AND yhtio='$kukarow[yhtio]'";
+	        $result = mysql_query($query) or pupe_error($query);
+
+			$query = " INSERT into tiliointi set
+						yhtio    = '$kukarow[yhtio]',
+						ltunnus  = '$kpitorow[tosite]',
+						tilino   = '$yhtiorow[varasto]',
+						kustp    = '',
+						tapvm    = '$tapvm',
+						summa    = '$arvo',
+						vero     = '0',
+						lukko    = '',
+						selite   = 'KORJATTU: $kpitorow[sel1]',
+						laatija  = '$kukarow[kuka]',
+						laadittu = now()";
+			$result = mysql_query($query) or pupe_error($query);
+
+			$query = "INSERT into tiliointi set
+						yhtio    = '$kukarow[yhtio]',
+						ltunnus  = '$kpitorow[tosite]',
+						tilino   = '$yhtiorow[varastonmuutos]',
+						kustp    = '',
+						tapvm    = '$tapvm',
+						summa    = $arvo * -1,
+						vero     = '0',
+						lukko    = '',
+						selite   = 'KORJATTU: $kpitorow[sel2]',
+						laatija  = '$kukarow[kuka]',
+						laadittu = now()";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			echo "<font class='message'>".t("Inventointi korjattu")."!</font><br><br>";
+		}
+		else {
+			echo "<font class='error'>".t("Inventointia ei voitu korjata")."!</font><br><br>";
+		}
+		$tee = 'Y';
+	}
+	
+	if ($tee == 'PERU') {
+		
+		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
+					FROM lasku use index (yhtio_tila_tapvm)
+					JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino='$yhtiorow[varasto]'
+					JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino='$yhtiorow[varastonmuutos]'
+					WHERE lasku.yhtio	= '$kukarow[yhtio]'
+					and lasku.tila     	= 'X'
+					and lasku.tapvm     = '$tapvm'
+					and lasku.tapvm 	>= '$yhtiorow[tilikausi_alku]' 
+					and lasku.tapvm 	<= '$yhtiorow[tilikausi_loppu]'
+					and lasku.viite    	= '$ttunnus'";
+		$kpitores = mysql_query($query) or pupe_error($query);
+		$kpitorow = mysql_fetch_array($kpitores);
+		
+		if ($kpitorow["tosite"] > 0 and $kpitorow["varasto"] > 0 and $kpitorow["varastonmuutos"] > 0) {
+						
+			$query = "	UPDATE tapahtuma 
+						SET kpl		= 0, 						
+						kplhinta 	= 0, 
+						hinta		= 0,
+						selite		= concat(selite, ' - Inventointi peruttu')
+						where yhtio = '$kukarow[yhtio]' 
+						and laji 	= 'inventointi' 
+						and tunnus 	= '$ttunnus'";
+			$upresult = mysql_query($query) or pupe_error($query);
+						
+			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varasto] AND yhtio='$kukarow[yhtio]'";
+	        $result = mysql_query($query) or pupe_error($query);
+
+			$query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE tunnus=$kpitorow[varastonmuutos] AND yhtio='$kukarow[yhtio]'";
+	        $result = mysql_query($query) or pupe_error($query);
+	
+			$query = "	UPDATE sarjanumeroseuranta 
+						SET myyntirivitunnus = 0,
+						siirtorivitunnus 	 = 0,
+						muuttaja			 = '$kukarow[kuka]',
+						muutospvm			 = now(),
+						inventointitunnus	 = 0 
+						WHERE yhtio				= '$kukarow[yhtio]'
+						and inventointitunnus	= $ttunnus
+						and myyntirivitunnus 	= -1
+						and siirtorivitunnus 	= -1";
+	        $result = mysql_query($query) or pupe_error($query);
+	
+			echo "<font class='message'>".t("Inventointi peruttu")."!</font><br><br>";
+		}
+		else {
+			echo "<font class='error'>".t("Inventointia ei voitu perua")."!</font><br><br>";
+		}
+		
+		$tee = 'Y';
+	}
+	
+	
 	if ($tee == 'Y') {
 
 		if ($tila == 'tulosta') {
@@ -53,6 +178,9 @@
 
 			$query = "	SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, 
 						tuotepaikat.inventointiaika, tuotepaikat.inventointipoikkeama, tapahtuma.selite, tapahtuma.kpl, tapahtuma.tunnus ttunnus, tapahtuma.hinta,
+						tuote.sarjanumeroseuranta,
+						tapahtuma.laatija,
+						tapahtuma.laadittu,
 						(tapahtuma.hinta*tapahtuma.kpl) arvo,
 						left(tapahtuma.laadittu, 10) tapvm,
 						(SELECT group_concat(toim_tuoteno) FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno) as toim_tuoteno,
@@ -82,12 +210,12 @@
 				while ($tuoterow = mysql_fetch_array($saldoresult)) {
 					echo "<tr><th colspan='5'>$tuoterow[tuoteno]</th></tr>";
 					
-					echo "<td>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])."</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>".tv1dateconv($tuoterow[inventointiaika], "P")."</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td></tr>";
+					echo "<td>".asana('nimitys_',$tuoterow['tuoteno'],$tuoterow['nimitys'])."</td><td>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td><td>".tv1dateconv($tuoterow["laadittu"], "P")."</td><td>$tuoterow[kpl]</td><td>$tuoterow[inventointipoikkeama]</td></tr>";
 					
 					echo "<tr><td colspan='5'>$tuoterow[selite]</td></tr>";
 					
 					$query = "	SELECT sum(tiliointi.summa) summa
-							FROM lasku use index (yhtio_tila_tapvm)
+								FROM lasku use index (yhtio_tila_tapvm)
 								JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu='' and tiliointi.tilino='$yhtiorow[varasto]'
 								WHERE lasku.yhtio	= '$kukarow[yhtio]'
 								and lasku.tila     	= 'X'
@@ -97,6 +225,71 @@
 					$kpitorow = mysql_fetch_array($kpitores);
 					
 					echo "<tr><td>".t("Varastonmuutos").": ".sprintf('%.2f', $tuoterow["kpl"]*$tuoterow["hinta"])."</td><td colspan='4'>".t("Kirjanpito").": ".sprintf('%.2f', $kpitorow["summa"])."</td></tr>";
+					
+					if ($tuoterow["sarjanumeroseuranta"] == "S") {
+						$query = "	SELECT * 
+									FROM sarjanumeroseuranta
+									WHERE yhtio				= '$kukarow[yhtio]'							
+									and myyntirivitunnus 	= '-1'
+									and siirtorivitunnus	= '-1'
+									and inventointitunnus	= '$tuoterow[ttunnus]'";
+						$sarjares = mysql_query($query) or pupe_error($query);
+
+						while ($sarjarow = mysql_fetch_array($sarjares)) {
+							echo "<tr><td>".t("Snro").": </td><td colspan='4'>$sarjarow[sarjanumero]</td></tr>";
+						}
+					}
+					
+					if ($toim == "SUPER") {
+						echo "<tr><td>".t("Korjaa inventointi").": </td><td colspan='4'>";
+						echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";												
+						echo "<input type='hidden' name='tila'			value='$tila'>";
+						echo "<input type='hidden' name='toim' 			value='$toim'>";
+						echo "<input type='hidden' name='ppa' 			value='$ppa'>";
+						echo "<input type='hidden' name='kka' 			value='$kka'>";
+						echo "<input type='hidden' name='vva' 			value='$vva'>";
+						echo "<input type='hidden' name='ppl' 			value='$ppl'>";
+						echo "<input type='hidden' name='kkl' 			value='$kkl'>";
+						echo "<input type='hidden' name='vvl' 			value='$vvl'>";
+						echo "<input type='hidden' name='prosmuutos' 	value='$prosmuutos'>";
+						echo "<input type='hidden' name='kplmuutos' 	value='$kplmuutos'>";
+						echo "<input type='hidden' name='sarjat' 		value='$sarjat'>";
+						echo "<input type='hidden' name='vararvomuu' 	value='$vararvomuu'>";
+						echo "<input type='hidden' name='tee' 			value='KORJAA'>";
+						echo "<input type='hidden' name='ttunnus' 		value='$tuoterow[ttunnus]'>";
+						echo "<input type='hidden' name='tapvm' 		value='$tuoterow[tapvm]'>";
+						echo "<input type='hidden' name='edarvo' 		value='$kpitorow[summa]'>";
+						echo "<input type='hidden' name='kpl' 			value='$tuoterow[kpl]'>";
+						echo "<input type='text' size='15' name='arvo' value='".sprintf('%.2f', $kpitorow["summa"])."'>";
+						echo "<input type='submit' name='valmis' value='".t("Korjaa")."'>";
+						echo "</form>";												
+						echo "</td></tr>";
+					}
+					
+					if ($toim == "SUPER" and $tuoterow["sarjanumeroseuranta"] == "S" and mysql_num_rows($sarjares) == abs($tuoterow["kpl"])) {
+						echo "<tr><td>".t("Peru inventointi").": </td><td colspan='4'>";
+						echo "<form action='$PHP_SELF' method='post' autocomplete='off'>";												
+						echo "<input type='hidden' name='tila'			value='$tila'>";
+						echo "<input type='hidden' name='toim' 			value='$toim'>";
+						echo "<input type='hidden' name='ppa' 			value='$ppa'>";
+						echo "<input type='hidden' name='kka' 			value='$kka'>";
+						echo "<input type='hidden' name='vva' 			value='$vva'>";
+						echo "<input type='hidden' name='ppl' 			value='$ppl'>";
+						echo "<input type='hidden' name='kkl' 			value='$kkl'>";
+						echo "<input type='hidden' name='vvl' 			value='$vvl'>";
+						echo "<input type='hidden' name='prosmuutos' 	value='$prosmuutos'>";
+						echo "<input type='hidden' name='kplmuutos' 	value='$kplmuutos'>";
+						echo "<input type='hidden' name='sarjat' 		value='$sarjat'>";
+						echo "<input type='hidden' name='vararvomuu' 	value='$vararvomuu'>";
+						echo "<input type='hidden' name='tee' 			value='PERU'>";
+						echo "<input type='hidden' name='ttunnus' 		value='$tuoterow[ttunnus]'>";
+						echo "<input type='hidden' name='tapvm' 		value='$tuoterow[tapvm]'>";
+						echo "<input type='hidden' name='kpl' 			value='$tuoterow[kpl]'>";
+						echo "<input type='submit' name='valmis' value='".t("Peru")."'>";
+						echo "</form>";												
+						echo "</td></tr>";
+					}
+					
 					echo "<tr style='height: 5px;'></tr>";
 				}
 				echo "</table>";
@@ -212,7 +405,8 @@
 			$ppl = date("d");
 
 		echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
-		echo "<input type='hidden' name='tee' value='Y'>";
+		echo "	<input type='hidden' name='tee' value='Y'>
+				<input type='hidden' name='toim' value='$toim'>";
 
 		echo "<table><tr>";
 		echo "<th>".t("Valitse toiminto")."</th><td colspan='3'>

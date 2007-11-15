@@ -1,5 +1,5 @@
 <?php
-
+	
 	require ("../inc/parametrit.inc");
 	
 	if ($toim == "SUPER") {
@@ -8,7 +8,7 @@
 	else {
 		echo "<font class='head'>".t("Inventointipoikkeamat").":</font><hr>";
 	}
-
+	
 	if ($tee == 'KORJAA') {
 		
 		$query = "	SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
@@ -123,6 +123,31 @@
 						and myyntirivitunnus 	= -1
 						and siirtorivitunnus 	= -1";
 	        $result = mysql_query($query) or pupe_error($query);
+	
+			$query = "	UPDATE tuotepaikat
+						SET saldo = saldo-$kpl,
+						saldoaika = now()
+						WHERE yhtio   = '$kukarow[yhtio]' 
+						and tuoteno   = '$tuoteno' 
+						and hyllyalue = '$hyllyalue' 
+						and hyllynro  = '$hyllynro' 
+						and hyllytaso = '$hyllytaso' 
+						and hyllyvali = '$hyllyvali'
+						LIMIT 1";
+			$result = mysql_query($query) or pupe_error($query);
+			
+			echo "$query<br>";
+			
+			if (mysql_affected_rows() == 0) {
+				$query = "	UPDATE tuotepaikat
+							SET saldo = saldo-$kpl,
+							saldoaika = now()
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno	= '$tuoteno' 
+							and oletus != '' 
+							LIMIT 1";
+				$result = mysql_query($query) or pupe_error($query);
+			}
 	
 			echo "<font class='message'>".t("Inventointi peruttu")."!</font><br><br>";
 		}
@@ -287,6 +312,11 @@
 						echo "<input type='hidden' name='sarjat' 		value='$sarjat'>";
 						echo "<input type='hidden' name='vararvomuu' 	value='$vararvomuu'>";
 						echo "<input type='hidden' name='tee' 			value='PERU'>";
+						echo "<input type='hidden' name='tuoteno' 		value='$tuoterow[tuoteno]'>";
+						echo "<input type='hidden' name='hyllyalue' 	value='$tuoterow[hyllyalue]'>";
+						echo "<input type='hidden' name='hyllynro' 		value='$tuoterow[hyllynro]'>";
+						echo "<input type='hidden' name='hyllyvali' 	value='$tuoterow[hyllyvali]'>";
+						echo "<input type='hidden' name='hyllytaso' 	value='$tuoterow[hyllytaso]'>";
 						echo "<input type='hidden' name='ttunnus' 		value='$tuoterow[ttunnus]'>";
 						echo "<input type='hidden' name='tapvm' 		value='$tuoterow[tapvm]'>";
 						echo "<input type='hidden' name='kpl' 			value='$tuoterow[kpl]'>";

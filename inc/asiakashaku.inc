@@ -252,11 +252,12 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='tuoteno' 		  value='$tuoteno'>";
 			echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
 			
-			foreach ($varastosta as $varatunnu) {
-				echo "kala $varatunnu<br>";
-				
-				echo "<input type='hidden' name='varastosta[$varatunnu]' value='$varatunnu'>";
+			if (is_array($varastosta)) {
+				foreach ($varastosta as $varatunnu) {
+					echo "<input type='hidden' name='varastosta[$varatunnu]' value='$varatunnu'>";
+				}
 			}
+
 			
 			echo "<input type='submit' value='".t("Valitse")."'>";
 			echo "</td>";

@@ -704,8 +704,8 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 
 	list ($kaikkivarastossayhteensa,$kohdistus,$kohok,$kplvarasto,$kplyhteensa,$lisatiedot,$lisok,$llrow,$sarjanrook,$sarjanrot,$uusiot,$varastopaikat,$varastossaarvo,$varok) = tsekit($tsekkirow,$kaikkivarastossayhteensa);
 	
-	$formalku =	"<form action='$PHP_SELF' method='post'>";
-	$formalku .= "<td class='back'>";
+	$formalku =  "<td class='back'>";
+	$formalku .= "<form action='$PHP_SELF' method='post'>";	
 	$formalku .= "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 	$formalku .= "<input type='hidden' name='otunnus' value='$tsekkirow[tunnus]'>";
 	$formalku .= "<input type='hidden' name='ytunnus' value='$ytunnus'>";
@@ -714,7 +714,7 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
 	$formalku .= "<input type='hidden' name='laskunro' value='$tsekkirow[laskunro]'>";
 	$formalku .= "<input type='hidden' name='nappikeikalle' value='menossa'>";
 
-	$formloppu = "</td></form>";
+	$formloppu = "</form></td>";
 	
 	// näitä saa tehdä aina keikalle
 	$nappikeikka = "<table><tr>";

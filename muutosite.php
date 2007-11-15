@@ -794,7 +794,7 @@
 				
 				  	<tr>
 				  	<td>".t("Etsi virhett‰")."</td>
-				  	<td>".t("n‰yt‰ tositteet, jotka eiv‰t stemmaa")."</td>
+				  	<td>".t("n‰yt‰ tositteet, jotka eiv‰t t‰sm‰‰")."</td>
 				  	<td></td>
 				  	<td><form action = '$PHP_SELF?tee=Z' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 				  	</tr>
@@ -808,7 +808,7 @@
 				
 					<tr>
 				  	<td></td>
-				  	<td>".t("n‰yt‰ tositteet, joiden ostovelat ei stemmaa")."</td>
+				  	<td>".t("n‰yt‰ tositteet, joiden ostovelat ei t‰sm‰‰")."</td>
 				  	<td></td>
 				  	<td><form action = '$PHP_SELF?tee=W' method='post'><input type = 'submit' value = '".t("N‰yt‰")."'></form></td>
 				  	</tr>

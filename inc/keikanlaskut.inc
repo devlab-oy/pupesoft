@@ -391,7 +391,7 @@
 		echo "<font class='message'>".t("Ei laskuja")."!</font><br><br>";
 	}
 
-	echo "<font class='head'>".t("Laskut joiden varastokirjaukset eiv‰t stemmaa")."</font><hr>";
+	echo "<font class='head'>".t("Laskut joiden varastokirjaukset eiv‰t t‰sm‰‰")."</font><hr>";
 
 	$query = "	SELECT lasku.ytunnus, lasku.nimi, lasku.summa, lasku.valkoodi, lasku.summa*(if(lasku.maksu_kurssi=0, lasku.vienti_kurssi, lasku.maksu_kurssi)) 'summaeur', lasku.tapvm, lasku.vienti, lasku.tunnus latunnus,
 					(SELECT sum(summa)

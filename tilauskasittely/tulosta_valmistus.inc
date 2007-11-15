@@ -1,11 +1,6 @@
 <?php
 
-//viivakoodien tulostamista varten
-define (__TRACE_ENABLED__, false);
-define (__DEBUG_ENABLED__, false);
-
-require_once("barcode/barcode.php");
-require_once("barcode/c39object.php");
+require_once("viivakoodi/Barcode.php");
 require_once("pdflib/phppdflib.class.php");
 
 $norm["height"] 		= 10;
@@ -40,22 +35,6 @@ if (!function_exists('alku_valm')) {
 		}
 
 		$thispage = $pdf->new_page("a4");
-
-		//oletukset viivakoodeille
-		$output   = "png";
-		$width    = "140";
-		$height   = "20";
-		$xres     = "1";
-		$font     = "2";
-		$drawtext = "off";
-	
-		$style  = BCS_ALIGN_CENTER;
-		$style |= ($output  == "png" ) ? BCS_IMAGE_PNG  : 0;
-		$style |= ($output  == "jpeg") ? BCS_IMAGE_JPEG : 0;
-		$style |= ($border  == "on"  ) ? BCS_BORDER 	  : 0;
-		$style |= ($drawtext== "on"  ) ? BCS_DRAW_TEXT  : 0;
-		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
-		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 			
 		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
 			
@@ -278,47 +257,19 @@ if (!function_exists('alku_valm')) {
 			$kala = 560;
 		}
 		
-		//viivakoodin arvo
-		$barcode  = $laskurow["tunnus"];
-	
-		//luodaan viivakoodiolio
-		$obj = "";
-		$obj = new C39Object($width, $height, $style, $barcode);
-	
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
-	
-			//flushataan pdf ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
-	
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-	
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-	
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
-	
-			if(!$image) {
-				echo t("Viivakoodivirhe").": ".$image.$data;
-				exit;
-			}
-			$placement = $pdf->image_place($image, 805, 440, $thispage);
-	
-			unset($obj);
-	
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
-		else{
-			echo t("Oliota ei voitu luoda").".";
-			exit;
-		}
+		//viivakoodi
+		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+			
+		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
+
+		$fh = fopen($nimi, "r");
+		$data = fread($fh, filesize($nimi));
+		fclose($fh);
+
+		$image = $pdf->jfif_embed($data);
+		$pdf->image_place($image, 805, 440, $thispage);
+				
+		system("rm -f $nimi");
 	
 		rivi_otsikot_valm($thispage);
 		
@@ -331,22 +282,6 @@ if (!function_exists('uusi_sivu_valm')) {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala, $tilausnumeroita;
 
 		$thispage = $pdf->new_page("a4");
-
-		//oletukset viivakoodeille
-		$output   = "png";
-		$width    = "140";
-		$height   = "20";
-		$xres     = "1";
-		$font     = "2";
-		$drawtext = "off";
-	
-		$style  = BCS_ALIGN_CENTER;
-		$style |= ($output  == "png" ) ? BCS_IMAGE_PNG  : 0;
-		$style |= ($output  == "jpeg") ? BCS_IMAGE_JPEG : 0;
-		$style |= ($border  == "on"  ) ? BCS_BORDER 	  : 0;
-		$style |= ($drawtext== "on"  ) ? BCS_DRAW_TEXT  : 0;
-		$style |= ($stretchtext== "on" ) ? BCS_STRETCH_TEXT  : 0;
-		$style |= ($negative== "on"  ) ? BCS_REVERSE_COLOR  : 0;
 			
 		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
 			
@@ -439,47 +374,19 @@ if (!function_exists('uusi_sivu_valm')) {
 			$pdf->draw_text(430, 761, tv1dateconv($laskurow["toimaika"]), 	$thispage, $boldi);
 		}
 		
-		//viivakoodin arvo
-		$barcode  = $laskurow["tunnus"];
-	
-		//luodaan viivakoodiolio
-		$obj = "";
-		$obj = new C39Object($width, $height, $style, $barcode);
-	
-		if ($obj) {
-			$obj->SetFont($font);
-			$obj->DrawObject($xres);
-	
-			//flushataan pdf ja saadaam filenimi johon se tallennettiin
-			$nimi1 = $obj->FlushObject();
-	
-			//keksitään uudelle failille joku varmasti uniikki nimi:
-			list($usec, $sec) = explode(' ', microtime());
-			mt_srand((float) $sec + ((float) $usec * 100000));
-			$nimi2 = "/tmp/".md5(uniqid(mt_rand(), true)).".png";
-	
-			passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
-	
-			$fh = fopen($nimi2, "r");
-			$data = fread($fh, filesize($nimi2));
-			fclose($fh);
-			$image = $pdf->png_embed($data);
-	
-			if(!$image) {
-				echo t("Viivakoodivirhe").": ".$image.$data;
-				exit;
-			}
-			$placement = $pdf->image_place($image, 805, 440, $thispage);
-	
-			unset($obj);
-	
-			//dellataan tmp filet kuleksimasta
-			system("rm -f $nimi1 $nimi2");
-		}
-		else{
-			echo t("Oliota ei voitu luoda").".";
-			exit;
-		}
+		//viivakoodi
+		$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+			
+		imagejpeg(Image_Barcode::draw($laskurow["tunnus"], 'Code39', 'jpg', false, 1, 20), $nimi, 90);
+
+		$fh = fopen($nimi, "r");
+		$data = fread($fh, filesize($nimi));
+		fclose($fh);
+
+		$image = $pdf->jfif_embed($data);
+		$pdf->image_place($image, 805, 440, $thispage);
+				
+		system("rm -f $nimi");
 
 		$kala = 715;
 		
@@ -627,14 +534,17 @@ if (!function_exists('rivi_valmistus')) {
 		$lask_valm++;
 		
 		$pdf->draw_text(125, $kala, asana('nimitys_', $row['tuoteno'], $row['nimitys']), 		$thispage, $pb);
-
-	
+		
 		if (trim($row["kommentti"]) != '') {
 			
-			$kala = $kala - $rivinkorkeus;
-			$lask_valm++;
+			$komm = t("Kommentti").":\n".$row["kommentti"];
 			
-			$pdf->draw_text(125,  $kala, "* ".$row["kommentti"],								$thispage, $p);
+			foreach(explode("\n", wordwrap(trim($komm), 100, "\n")) as $kommentti) {
+				$kala = $kala - $rivinkorkeus;
+				$lask_valm++;
+				
+				$pdf->draw_text(125,  $kala, $kommentti,	$thispage, $p);
+			}	
 		}
 		
 		if ($row["tunnus"] == $row["perheid"]) {
@@ -651,13 +561,16 @@ if (!function_exists('rivi_valmistus')) {
 			if (mysql_num_rows($ressu) == 1) {
 				$faktarow = mysql_fetch_array($ressu);
 				
-				$kala -= 5;
+				$kala -= $rivinkorkeus;
 				
 				$faktarow["fakta"] = t("Työohje:")."\n".$faktarow["fakta"];
 				
-				$pohja = $pdf->draw_paragraph($kala, 125, 10, 570, $faktarow["fakta"], $thispage, $p);
-				$lask_valm += ceil(($kala - $pohja) / $rivinkorkeus);
-				$kala = $pohja - $rivinkorkeus;
+				
+				foreach(explode("\n", wordwrap($faktarow["fakta"], 100, "\n")) as $kommentti) {
+					$pdf->draw_text(125,  $kala, $kommentti,	$thispage, $p);
+					$kala = $kala - $rivinkorkeus;
+					$lask_valm++;
+				}
 			}
 			else {
 				$kala = $kala - $rivinkorkeus;

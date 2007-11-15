@@ -453,7 +453,7 @@
 				tuote.sarjanumeroseuranta,
 				tuote.status,
 				(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) saldo				
-				FROM tuote
+				FROM tuote use index (tuoteno, nimitys)
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
 				$lisa
 				$poislisa

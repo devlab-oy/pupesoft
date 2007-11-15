@@ -499,7 +499,8 @@
 														SET myyntirivitunnus = '-1',
 														siirtorivitunnus 	 = '-1',
 														muuttaja			 = '$kukarow[kuka]',
-														muutospvm			 = now()
+														muutospvm			 = now(),
+														inventointitunnus	 = $tapahtumaid
 														WHERE yhtio	= '$kukarow[yhtio]'
 														and tunnus = $snro_tun";
 											$sarjares = mysql_query($query) or pupe_error($query);								
@@ -513,7 +514,8 @@
 													SET myyntirivitunnus = '-1',
 													siirtorivitunnus 	 = '-1',
 													muuttaja			 = '$kukarow[kuka]',
-													muutospvm			 = now()
+													muutospvm			 = now(),
+													inventointitunnus	 = $tapahtumaid
 													WHERE yhtio	= '$kukarow[yhtio]'
 													and tunnus = $snro_tun";
 										$sarjares = mysql_query($query) or pupe_error($query);

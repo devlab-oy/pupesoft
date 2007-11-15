@@ -2,7 +2,12 @@
 
 	require ("../inc/parametrit.inc");
 	
-	echo "<font class='head'>".t("Inventointipoikkeamat").":</font><hr>";
+	if ($toim == "SUPER") {
+		echo "<font class='head'>".t("Inventointien korjaus").":</font><hr>";
+	}
+	else {
+		echo "<font class='head'>".t("Inventointipoikkeamat").":</font><hr>";
+	}
 
 	if ($tee == 'KORJAA') {
 		

@@ -1088,24 +1088,25 @@ if (!function_exists('rivi_viivakoodi')) {
 						where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 		$eanres = mysql_query($eanquery) or pupe_error($eanquery);
 		$eanrow = mysql_fetch_array($eanres);
-						
+	
 		if ($eanrow["eankoodi"] != "") {						
 			//viivakoodi
 			$nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
 
-			imagejpeg(Image_Barcode::draw($eanrow["eankoodi"], 'Code39', 'jpg', false, 1, 15), $nimi, 90);
+			imagejpeg(Image_Barcode::draw($eanrow["eankoodi"], 'Code39', 'jpg', false, 1, 25, false), $nimi, 90);
 
 			$fh = fopen($nimi, "r");
 			$data = fread($fh, filesize($nimi));
 			fclose($fh);
 
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala-8, 350, $thispage);
+			$pdf->image_place($image, $kala-8, 320, $thispage);
 
 			system("rm -f $nimi");
 			
 			$kala = $kala - $rivinkorkeus-5;
 		}
+		
 	}
 }
 

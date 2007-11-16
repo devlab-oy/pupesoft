@@ -1652,12 +1652,11 @@ if (!function_exists("synkronoi")) {
 					if($ok == 1) {
 						//	Duunataan itse päivitys/insert kysely!!!
 						for ($i=1; $i < mysql_num_fields($masterres); $i++) {
-							//	Päivitetään vain muuttuneet kentät!
 							if (isset($masterrow[$i]) and !in_array(mysql_field_name($masterres, $i), array("yhtio","tunnus","muuttaja","muutospvm","laatija","luontiaika"))) {
-								//	Jos arvo pitää ylikirjoittaa niin ylikirjoitetaan (mm. liitostunnus)								
 								if(isset($override[mysql_field_name($masterres, $i)])) {
-									//Nämä ohitetaan kokonaan
-									//$query .= ", ". mysql_field_name($masterres,$i)."='".$override[mysql_field_name($masterres, $i)]."' ";
+									if ($override[mysql_field_name($masterres, $i)] != "") {
+										$query .= ", ". mysql_field_name($masterres,$i)."='".$override[mysql_field_name($masterres, $i)]."' ";
+									}
 								}
 								else {
 									$query .= ", ". mysql_field_name($masterres,$i)."='".$masterrow[$i]."' ";

@@ -3508,13 +3508,13 @@ if ($tee == '') {
 									$kate = sprintf('%.2f',100*($kotisumma_alviton - $ostohinta)/$kotisumma_alviton)."%";
 								}
 							}
-							elseif ($kpl < 0 and $trow["osto_vai_hyvitys"] == "O") {
+							elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "O") {
 								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
 
 								// Kate = 0
 								$kate = "0%";
 							}
-							elseif ($kpl < 0 and $trow["osto_vai_hyvitys"] == "") {
+							elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "") {
 								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
 
 								//T‰h‰n hyvitysriviin liitetyt sarjanumerot
@@ -3929,8 +3929,8 @@ if ($tee == '') {
 									$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
 									if(tilausrivi.alv<500, $hinta_riv / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * (1-tilausrivi.ale/100) * (tilausrivi.alv/100), 0) alv_ei_erikoisaletta,
 									$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * (1-tilausrivi.ale/100) rivihinta_ei_erikoisaletta,
-									tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) kotirivihinta,
-									tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '', (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * (1-tilausrivi.ale/100) kotirivihinta_ei_erikoisaletta";
+									tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) kotirivihinta,
+									tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * (1-tilausrivi.ale/100) kotirivihinta_ei_erikoisaletta";
 					}
 
 					$aquery = "	SELECT
@@ -3940,9 +3940,11 @@ if ($tee == '') {
 								tuote.kehahin,
 								tilausrivi.tunnus,
 								tilausrivi.varattu+tilausrivi.jt varattu,
+								tilausrivin_lisatiedot.osto_vai_hyvitys,
 								$lisat
 								FROM tilausrivi
 								JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+								LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 								WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 								$tunnuslisa
 								and tilausrivi.tunnus in ($alvrow[rivit])";
@@ -3951,14 +3953,63 @@ if ($tee == '') {
 					while($arow = mysql_fetch_array($aresult)) {
 						$rivikate 		= 0;	// Rivin kate yhtiˆn valuutassa
 						$rivikate_eieri	= 0;	// Rivin kate yhtiˆn valuutassa ilman erikoisalennusta
-
+																		
 						if ($arow["sarjanumeroseuranta"] == "S") {
-							//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
-							$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $arow["tunnus"]);
+							//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰							
+							if ($arow["varattu"] > 0) {
+								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
+								$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $arow["tunnus"]);								
+																
+								// Kate = Hinta - Ostohinta
+								$rivikate 		= $arow["kotirivihinta"] - $ostohinta;
+								$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $ostohinta;
+							}
+							elseif ($arow["varattu"] < 0 and $arow["osto_vai_hyvitys"] == "O") {
+								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
 
-							$rivikate 		= $arow["kotirivihinta"] - $ostohinta;
-							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $ostohinta;
+								// Kate = 0
+								$rivikate 		= 0;
+								$rivikate_eieri = 0;
+							}
+							elseif ($arow["varattu"] < 0 and $arow["osto_vai_hyvitys"] == "") {
+								//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
 
+								//T‰h‰n hyvitysriviin liitetyt sarjanumerot
+								$query = "	SELECT sarjanumero, kaytetty
+											FROM sarjanumeroseuranta
+											WHERE yhtio 		= '$kukarow[yhtio]'
+											and ostorivitunnus 	= '$arow[tunnus]'";
+								$sarjares = mysql_query($query) or pupe_error($query);
+
+								$ostohinta = 0;
+
+								while($sarjarow = mysql_fetch_array($sarjares)) {
+
+									// Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
+									$query  = "	select tilausrivi.rivihinta/tilausrivi.kpl ostohinta
+												FROM sarjanumeroseuranta
+												JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
+												WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
+												and sarjanumeroseuranta.tuoteno 	= '$arow[tuoteno]'
+												and sarjanumeroseuranta.sarjanumero = '$sarjarow[sarjanumero]'
+												and sarjanumeroseuranta.kaytetty 	= '$sarjarow[kaytetty]'
+												and sarjanumeroseuranta.myyntirivitunnus > 0
+												and sarjanumeroseuranta.ostorivitunnus   > 0
+												ORDER BY sarjanumeroseuranta.tunnus
+												LIMIT 1";
+									$sarjares1 = mysql_query($query) or pupe_error($query);
+									$sarjarow1 = mysql_fetch_array($sarjares1);
+
+									$ostohinta += $sarjarow1["ostohinta"];
+								}
+
+								$rivikate 		= $arow["kotirivihinta"] - $ostohinta;
+								$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $ostohinta;
+							}
+							else {
+								$rivikate 		= 0;
+								$rivikate_eieri = 0;
+							}							
 						}
 						else {
 							$rivikate 		= $arow["kotirivihinta"]  - ($arow["kehahin"]*$arow["varattu"]);

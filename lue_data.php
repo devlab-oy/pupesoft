@@ -356,7 +356,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$query = "INSERT into $table SET laatija='$kukarow[kuka]', luontiaika=now() ";
 				}
 			}
-			if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
+			if (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {												
 				if ($eiyhtiota == "") {
 					$query = "UPDATE $table SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
       			}
@@ -757,22 +757,49 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			}
 
 			if ($hylkaa == 0) {				
+				
+				// Haetaan rivi niin kuin se oli ennen muutosta
+				$syncquery = "	SELECT *
+								FROM $table";
+				
+				if ($table == 'asiakasalennus' or $table == 'asiakashinta') {
+					$syncquery .= " WHERE yhtio = '$kukarow[yhtio]'";
+					$syncquery .= $and;
+				}
+				else {
+					$syncquery .= " WHERE ".$valinta;
+				}				
+				$syncres = mysql_query($syncquery) or pupe_error($syncquery);
+				$syncrow = mysql_fetch_array($syncres);
+				
+				
+				// Itse lue_datan p‰ivitysquery
 				$iresult = mysql_query($query) or pupe_error($query);
+				
+				
+				// Synkronoidaasn
+				if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
+					$tunnus = mysql_insert_id();					
+				}
+				else {
+					$tunnus = $syncrow["tunnus"];										
+				}
+				synkronoi($kukarow["yhtio"], $table, $tunnus, $syncrow, "");
+				
 				
 				// tehd‰‰n ep‰kunrattijutut
 				if ($tee != "") {
 					require("epakurantti.inc");
 				}
+				
 				$lask++;
 			}
 		}
 	}
-
+	
 	echo t("P‰ivitettiin")." $lask ".t("rivi‰")."!";
-
 }
-else
-{
+else {
 	echo "<form method='post' name='sendfile' enctype='multipart/form-data' action='$PHP_SELF'>
 			<table>
 			<tr>

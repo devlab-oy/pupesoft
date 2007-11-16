@@ -45,9 +45,9 @@
 		}
 
 		// Tositeselailu
-		if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S') {
+		if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å') {
 
-			if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S') {
+			if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å') {
 
 				// Etsitään virheet vain kuluvalta tilikaudelta!
 				if ($tee == 'Z') {
@@ -102,9 +102,43 @@
 								GROUP BY 1,2,3,4,5,6
 								HAVING saamistilejä > 1 and korjattu > 0";
 				}
+								
+				if ($tee == 'Å') {
+					$query = "	(SELECT distinct lasku.tunnus, lasku.laskunro, lasku.nimi, lasku.tapvm, tr1.tuoteno, s1.sarjanumero, if(tr1.alv>=500, 'MV', tr1.alv) alv1, if(tr2.alv>=500, 'MV', tr2.alv) alv2, l2.laskunro, l2.nimi
+								FROM lasku
+								JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu = '' and t1.tilino='$yhtiorow[osto_marginaali]'
+								JOIN tilausrivi tr1 ON lasku.yhtio=tr1.yhtio and lasku.tunnus=tr1.uusiotunnus and tr1.alv>=500 and tr1.kpl<0
+								JOIN sarjanumeroseuranta s1 ON tr1.yhtio=s1.yhtio and tr1.tunnus=s1.ostorivitunnus
+								JOIN tilausrivi tr2 ON s1.yhtio=tr2.yhtio and s1.myyntirivitunnus=tr2.tunnus
+								JOIN lasku l2 ON tr2.yhtio=l2.yhtio and tr2.uusiotunnus=l2.tunnus
+								WHERE lasku.yhtio	= '$kukarow[yhtio]' 
+								and lasku.tila		= 'U' 
+								and lasku.alatila	= 'X'
+								and lasku.tapvm >= '$yhtiorow[tilikausi_alku]' 
+								and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+								HAVING (alv1 != 'MV' or alv2 != 'MV')
+								ORDER by lasku.laskunro)
+								
+								UNION DISTINCT
+							
+								(SELECT distinct l2.tunnus, l2.laskunro, l2.nimi, l2.tapvm, tr1.tuoteno, s1.sarjanumero, if(tr2.alv>=500, 'MV', tr2.alv) alv2, if(tr1.alv>=500, 'MV', tr1.alv) alv1, lasku.laskunro, lasku.nimi
+								FROM lasku
+								JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu = '' and t1.tilino='$yhtiorow[myynti_marginaali]'
+								JOIN tilausrivi tr1 ON lasku.yhtio=tr1.yhtio and lasku.tunnus=tr1.uusiotunnus and tr1.alv>=500 and tr1.kpl>0
+								JOIN sarjanumeroseuranta s1 ON tr1.yhtio=s1.yhtio and tr1.tunnus=s1.myyntirivitunnus
+								JOIN tilausrivi tr2 ON s1.yhtio=tr2.yhtio and s1.ostorivitunnus=tr2.tunnus
+								JOIN lasku l2 ON tr2.yhtio=l2.yhtio and tr2.uusiotunnus=l2.tunnus
+								WHERE lasku.yhtio	= '$kukarow[yhtio]' 
+								and lasku.tila		= 'U' 
+								and lasku.alatila	= 'X'
+								and lasku.tapvm >= '$yhtiorow[tilikausi_alku]' 
+								and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
+								HAVING (alv1 != 'MV' or alv2 != 'MV')
+								ORDER by l2.laskunro)";
+				}
 				
 			}
-			else {
+			else { 
 
 				$plisa = "";
 				$lisa  = "";
@@ -209,7 +243,7 @@
 							echo "<tr><th height='10' colspan='".mysql_num_fields($result)."'></th></tr><tr>";
 						}
 						else {
-							echo "<td></td></tr><tr>";
+							echo "</tr><tr>";
 						}
 					}
 
@@ -217,15 +251,19 @@
 
 					for ($i=1; $i < mysql_num_fields($result); $i++) {
 						if ($i == 1) {
+							if (mysql_field_name($result,$i) == 'tapvm') {
+								$trow[$i] = tv1dateconv($trow[$i]);
+							}							
 							echo "<td><a href = '$PHP_SELF?tee=E&tunnus=$edtunnus&viivatut=$viivatut'>$trow[$i]</td>";
 						}
+						elseif (is_numeric($trow[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
+							echo "<td align='right'>$trow[$i]</td>";
+						}
+						elseif (mysql_field_name($result, $i) == "tapvm") {
+							echo "<td>".tv1dateconv($trow[$i])."</td>";
+						}
 						else {
-							if ($viivatut == 'on' and strlen($trow[7]) > 0) {
-								echo "<th>$trow[$i]</th>";
-							}
-							else {
-								echo "<td>$trow[$i]</td>";
-							}
+							echo "<td>$trow[$i]</td>";
 						}
 					}
 				}
@@ -825,6 +863,13 @@
 				  	<td>".t("näytä tositteet, joiden myyntisaamiset ovat väärin")."</td>
 				  	<td></td>
 				  	<td><form action = '$PHP_SELF?tee=S' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+					</tr>
+					
+					<tr>
+				  	<td></td>
+				  	<td>".t("näytä tositteet, joiden marginaaliverotiliöinnit ovat väärin")."</td>
+				  	<td></td>
+				  	<td><form action = '$PHP_SELF?tee=Å' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
 					</tr>
 					</table>";
 		}

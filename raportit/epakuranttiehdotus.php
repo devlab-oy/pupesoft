@@ -96,7 +96,7 @@ echo "<td><input type='text' name='try'    value='$try'></td>";
 echo "</tr>";
 
 echo "</table>";
-echo "<br><input type='submit' name='subnappi' value='Do it!'>";
+echo "<br><input type='submit' name='subnappi' value='Aja raportti'>";
 echo "</form><br><br>";
 
 if ($subnappi != '') {

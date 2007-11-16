@@ -51,9 +51,7 @@
 
 			$result = mysql_query($sqlhaku) or die ("<font class='error'>".mysql_error()."</font>");
 			
-			#TODO
-			//jos Juppe on joskus v‰‰r‰ss‰ niin menn‰‰n t‰h‰n. T‰m‰ kaatuu jos tulos on liian iso.
-			if ($kukarow['kuka'] == 'anttih') {
+			if (mysql_num_rows($result) < 2000) {
 				
 				if(include('Spreadsheet/Excel/Writer.php')) {
 				

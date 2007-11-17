@@ -967,6 +967,12 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		if($projektilla > 0 and $laskurow["tunnusnippu"] > 0 and $laskurow["tunnusnippu"] != $laskurow["tunnus"]) {
 			$tilausnumero = $laskurow["tunnusnippu"];
 			
+			//	P‰ivite‰‰n aina myˆs projektin aktiiviseksi jos se on ollut kesken
+			$query = "	UPDATE lasku SET
+							alatila = 'A'
+						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$laskurow[tunnusnippu]' and tunnusnippu > 0 and tila = 'R' and alatila= ''";
+			$updres = mysql_query($query) or pupe_error($query);
+						
 			//	Hyp‰t‰‰n takaisin otsikolle
 			echo "<font class='info'>".t("Palataan projektille odota hetki..")."</font><br>";
 			

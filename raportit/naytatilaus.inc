@@ -6,8 +6,9 @@
 	if ($kukarow["extranet"] != '') {
 		$lis = " and liitostunnus = '$kukarow[oletus_asiakas]' ";
 	}
-
-	$query = "	SELECT *
+	
+	$query = "	SELECT *, 
+				if(tila = 'L' and laskunro>0, (select mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U'), mapvm) mapvm
 				FROM lasku
 				WHERE tunnus = '$tunnus'
 				$lis
@@ -27,6 +28,21 @@
 		$rakirrow = mysql_fetch_array($rakre);
 		// spacet rivinvaihdoiksi niin n‰ytt‰‰ kivemmalta
 		$rakirrow['rahtikirjanro'] = str_replace(" ", "<br>", trim($rakirrow['rahtikirjanro']));
+	}
+
+	//	Onko koko projekti maksettu
+	if ($laskurow['tila']=='R') {
+
+		$query = "	SELECT count(distinct laskunro) laskuja, sum(if(laskunro=0, 1, 0)) laskuttamatta, 
+					sum(if((select mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U') = '0000-00-00', 1, 0)) maksamatta,
+					max((select mapvm from lasku l where l.yhtio = lasku.yhtio and l.laskunro = lasku.laskunro and l.tila = 'U')) maksettu
+					FROM lasku
+					WHERE yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnus]' and tila = 'L'";
+		$mares = mysql_query($query) or pupe_error($query);
+		$marow = mysql_fetch_array($mares);
+		if($marow["laskuttamatta"] == 0 and $marow["maksamatta"] == 0) {
+			$laskurow["mapvm"] = $marow["maksettu"];
+		}
 	}
 
 	echo "<table>";
@@ -418,7 +434,7 @@
 			}
 		}
 		else {
-			if ($prow["varattu"] < 0){
+			if ($prow["varattu"] + $prow["kpl"] < 0){
 				$sarjanutunnus = "ostorivitunnus";
 			}
 			else {

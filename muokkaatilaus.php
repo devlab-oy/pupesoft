@@ -750,7 +750,7 @@
 						$kohdelisa
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila IN ('R','L','N') and alatila NOT IN ('X')
 						$haku
-						ORDER by lasku.luontiaika desc
+						ORDER by lasku.tunnusnippu desc, tunnus asc
 						$rajaus";
 			$miinus = 4;
 		}

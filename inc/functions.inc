@@ -2435,9 +2435,21 @@ if(!function_exists("enable_ajax")) {
 					}
 				}
 			}
-			if (obj.elements[i].tagName == "SELECT") {
+			else if (obj.elements[i].tagName == "SELECT") {
 				var sel = obj.elements[i];
-				getstr += sel.name + "=" + sel.options[sel.selectedIndex].value + "&";
+				if(sel.multiple) {
+					for (var x = 0; x < sel.options.length; x++) {
+						if (sel.options[x].selected) {
+							getstr += sel.name + "=" + sel.options[x].value + "&";
+						}
+					}
+				}
+				else {
+					getstr += sel.name + "=" + sel.options[sel.selectedIndex].value + "&";
+				}
+			}
+			else if (obj.elements[i].tagName == "TEXTAREA") {
+				getstr += obj.elements[i].name + "=" + encodeURI(obj.elements[i].value) + "&";
 			}
 		}
 
@@ -2812,6 +2824,7 @@ function popUp(e, oi, offsetX, offsetY, html) {
 		}
 		
 		ds.visibility = "visible";
+		de.display = 'block';
 	}
 }
 //-->
@@ -3183,11 +3196,16 @@ if (!function_exists("tee_menu")) {
 		if(is_array($valinnat) and count($valinnat)>0) {
 			$data = "";
 			foreach($valinnat as $key => $valinta) {
-				$data .= "&menu[$key][menu]=".urlencode($valinta["TEKSTI"]); 
-				$data .= "&menu[$key][href]=".urlencode($valinta["HREF"]);
+				if(isset($valinta["VALI"])) {
+					$data .= "&menu[$key][vali]=".urlencode($valinta["VALI"]);
+				}
+				else {
+					$data .= "&menu[$key][menu]=".urlencode($valinta["TEKSTI"]); 
+					$data .= "&menu[$key][href]=".urlencode($valinta["HREF"]);					
+				}
 			}
 			
-			$data = "<div style='float: right;'><a href='#' onclick=\"popUp(event, 'ajax_menu', '30', '-10', 'tarjousseuranta.php?tee=GENEROIMENU$data');\">$nappi</a></div>";
+			$data = "<div style='float: right;'><a href='#' onclick=\"popUp(event, 'ajax_menu', '30', '-10', 'tarjousseuranta.php?tee=GENEROIMENU$data'); return false;\">$nappi</a></div>";
 			return $data;
 		}
 		return true;

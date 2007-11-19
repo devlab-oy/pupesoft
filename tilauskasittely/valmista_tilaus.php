@@ -106,8 +106,34 @@
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 1) {
+				$lasrow = mysql_fetch_array($result);
+				
 				//Haluaako k‰ytt‰j‰ muuttaa rivill‰ olevaa m‰‰r‰‰
 				if($edtilkpllat[$rivitunnus] != $tilkpl) {
+					
+					//	Lasketaan kerroin jos teemme rekrussiivisesti
+					if($rekru[$rivitunnus] != "") {
+						//	Varmistetaan, ett‰ t‰m‰ on perheen is‰
+						$query = "	SELECT tunnus
+									FROM tilausrivi
+									WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$rivitunnus' and tunnus = perheid";
+						$result = mysql_query($query) or pupe_error($query);
+						if(mysql_num_rows($result) <> 1) {
+							$virhe[$rivitunnus] = "<font class='message'>".t("Tuote ei ole perheen is‰. Rekrussiivinen p‰ivitys ei onnistu.")."!</font>";
+						}
+						else {
+							$perhekerroin = $tilkpl/$edtilkpllat[$rivitunnus];
+							$query = "	UPDATE tilausrivi
+										SET varattu = (varattu * $perhekerroin)
+										WHERE yhtio = '$kukarow[yhtio]'
+										and otunnus = '$lasrow[tunnus]'
+										and perheid  = '$rivitunnus' and perheid > 0
+										and var = 'V'";
+							$updresult = mysql_query($query) or pupe_error($query);
+							$virhe[$rivitunnus] = "<font class='message'>".t("Perheen lapset kerrottiin %s:lla.", $kieli, round($perhekerroin, 4))."!</font><br>";
+						}
+					}
+					
 					$laskurow = mysql_fetch_array($result);
 
 					$query = "	UPDATE tilausrivi
@@ -117,7 +143,7 @@
 					$updresult = mysql_query($query) or pupe_error($query);
 
 					$tee = "VALMISTA";
-					$virhe[$rivitunnus] = "<font class='message'>".t("Valmistettava m‰‰r‰ p‰ivitettiin")."!</font>";
+					$virhe[$rivitunnus] .= "<font class='message'>".t("Valmistettava m‰‰r‰ p‰ivitettiin")."!</font>";
 				}
 			}
 			else {
@@ -486,29 +512,42 @@
 
 
 			if ($toim == "KORJAA" and  $prow["tyyppi"] == 'V') {
-				echo "<td class='$class' align='right'>
+				echo "<td class='$class' align='left'>
 					<input type='hidden' name='edtilkpllat[$prow[tunnus]]'  value='$prow[korjataan]'>
-					<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[korjataan]'>
-					</td>";
-				echo "<td class='$class' align='right'>$prow[valmistettu_valmiiksi]</td>";
+					<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[korjataan]'>";
+					
+				if($prow["tyyppi"] == "W") {
+					echo "R:<input type = 'checkbox' name = 'rekru[$prow[tunnus]]'>";
+				}
+				echo "</td>";
+				
+				echo "<td class='$class' align='left'>$prow[valmistettu_valmiiksi]</td>";
 			}
 			elseif ($prow["tyyppi"] == 'L' or $prow["tyyppi"] == 'D' or $prow["perheid"] == 0) {
-				echo "<td class='$class' align='right'></td>";
-				echo "<td class='$class' align='right'>$prow[valmistettu]</td>";
+				echo "<td class='$class' align='left'></td>";
+				echo "<td class='$class' align='left'></td>";
+				echo "<td class='$class' align='left'>$prow[valmistettu]</td>";
 			}
 			elseif ($prow["toimitettuaika"] == "0000-00-00 00:00:00") {
-				echo "<td class='$class' align='right'>
+				echo "<td class='$class' align='left'>
 						<input type='hidden' name='edtilkpllat[$prow[tunnus]]'  value='$prow[valmistetaan]'>
-						<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[valmistetaan]'>
-						</td>";
+						<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[valmistetaan]'>";
+						
+				if($prow["tyyppi"] == "W") {
+					echo "R:<input type = 'checkbox' name = 'rekru[$prow[tunnus]]'>";
+				}
+
+				echo "</td>";
 				echo "<td class='$class'></td>";
 			}
 			elseif ($prow["tyyppi"] == 'V') {
 				echo "<td class='$class'></td>";
+				echo "<td class='$class' align='right'></td>";
 				echo "<td class='$class' align='right'>$prow[kaytetty]</td>";
 			}
 			else {
 				echo "<td class='$class'></td>";
+				echo "<td class='$class' align='right'></td>";				
 				echo "<td class='$class'></td>";
 			}
 

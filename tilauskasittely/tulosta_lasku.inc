@@ -149,7 +149,7 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);
 		$pdf->draw_rectangle(779, 420, 758, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 771, t("Viitenumero", $kieli), 	$thispage, $pieni);
-		$pdf->draw_text(310, 761, $laskurow["viite"], 			$thispage, $norm);
+		$pdf->draw_text(310, 761, $laskurow["viite"], 			$thispage, $boldi);
 		$pdf->draw_text(430, 771, t("Laskun numero", $kieli), 	$thispage, $pieni);
 		$pdf->draw_text(430, 761, $laskurow["laskunro"], 		$thispage, $boldi);
 

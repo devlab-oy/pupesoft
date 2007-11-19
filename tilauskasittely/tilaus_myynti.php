@@ -638,11 +638,11 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 				$query = "update sarjanumeroseuranta set siirtorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
-			elseif ($row["varattu"] < 0) {
+			elseif ($srow["varattu"] < 0) {
 				// dellataan koko rivi jos sitä ei ole vielä myyty
 				$query = "delete from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
 				$sarjares = mysql_query($query) or pupe_error($query);
-			
+							
 				if (mysql_affected_rows() == 0) {
 					// merkataan osorivitunnus nollaksi
 					$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
@@ -668,7 +668,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 				}
 			}
 		}
-		
+				
 		// Onko tätä ostotilauksella?
 		if ($srow["tilausrivilinkki"] > 0) {
 			$query = "	UPDATE tilausrivi 
@@ -3432,6 +3432,46 @@ if ($tee == '') {
 								</select>
 								</form></td>";
 					}
+					elseif ($kpl_ruudulle > 0 and $row["sarjanumeroseuranta"] == "S") {
+
+						$query = "	SELECT sarjanumeroseuranta.kaytetty
+									FROM sarjanumeroseuranta
+									WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+									and sarjanumeroseuranta.myyntirivitunnus  = '$row[tunnus]'";
+						$muutares = mysql_query($query) or pupe_error($query);
+						$muutarow = mysql_fetch_array($muutares);
+						
+						if ($muutarow["kaytetty"] != "") {						
+							echo "<td $class align='right' valign='top' nowrap>";
+
+							$sel1 = $sel2 = "";
+
+							if ($row["osto_vai_hyvitys"] == "H") {
+								$sel2 = "SELECTED";
+							}
+							else {
+								$sel1 = "SELECTED";
+							}
+
+							echo "	<form action='$PHP_SELF' method='post' name='ovaih'>
+									<input type='hidden' name='toim' value='$toim'>
+									<input type='hidden' name='lopetus' value='$lopetus'>
+									<input type='hidden' name='projektilla' value='$projektilla'>
+									<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
+									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+									<input type='hidden' name='menutila' value='$menutila'>
+									<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE_OSTO_VAI_HYVITYS'>
+									<select name='osto_vai_hyvitys' onchange='submit();'>
+									<option value=''  $sel1>$kpl_ruudulle ".("Myynti")."</option>
+									<option value='H' $sel2>$kpl_ruudulle ".("Hyvitys")."</option>
+									</select>
+									</form></td>";
+								
+						}
+						else {
+							echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
+						}
+					}
 					else {
 						echo "<td $class align='right' valign='top' nowrap>$kpl_ruudulle</td>";
 					}
@@ -4136,7 +4176,7 @@ if ($tee == '') {
 							<th colspan='5' align='right'>".t("Veroton yhteensä").":</th>
 							<td class='spec' align='right'>".sprintf("%.2f",$arvo_eieri)."</td>";
 
-					if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
+					if ($kukarow['extranet'] == '' and $kotiarvo_eieri != 0 and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y")) and $kotiarvo_eieri-$ostot_eieri != 0) {
 						echo "<td class='spec' align='right' nowrap>".sprintf("%.2f",100*$kate_eieri/($kotiarvo_eieri-$ostot_eieri))."%</td>";
 					}
 					elseif ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {

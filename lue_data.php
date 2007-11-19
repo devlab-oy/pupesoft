@@ -345,6 +345,31 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 		else {
 			echo t("Pakollista tietoa puuttuu/tiedot ovat virheelliset!")." $valinta<br>";
 		}
+		
+		//	Tarkastetaan tarkistarivi.incia vastaan..
+		//	Generoidaan oikeat arrayt
+		$errori = "";
+		$t = array();
+		
+		$query = "	SELECT *
+					FROM tuote
+					WHERE tunnus = 0";
+		$result = mysql_query($query) or pupe_error($query);
+		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
+
+			// Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
+			$t[$i] = $erivi[array_search(strtoupper(mysql_field_name($result, $i)), $otsikot)];
+			
+			require "inc/".$table."tarkista.inc";
+			
+			if($virhe[$i] != "") {
+				echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
+			}
+		}
+
+		if($errori != "") {
+			$tila = "ohita";
+		}
 
 		// lis‰t‰‰n rivi
 		if($tila != 'ohita') {

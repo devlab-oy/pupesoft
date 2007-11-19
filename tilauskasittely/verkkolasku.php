@@ -329,7 +329,6 @@
 
 				while($srow1 = mysql_fetch_array($sarjares1)) {
 					
-					
 					// Tsekataan alvit
 					$query = "	SELECT group_concat(distinct concat_ws(',', selite, selite+500)) alvit
 								FROM avainsana
@@ -337,9 +336,7 @@
 								and laji in ('ALV','ALVULK')";
 					$sarjares2 = mysql_query($query) or pupe_error($query);
 					$srow2 = mysql_fetch_array($sarjares2);
-					
-					echo "<br><br>";
-					
+										
 					if (!in_array($srow1["alv"], explode(",", $srow2["alvit"]))) {
 						$lasklisa .= " and tunnus!='$laskurow[tunnus]' ";
 

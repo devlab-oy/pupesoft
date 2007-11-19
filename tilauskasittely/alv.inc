@@ -40,7 +40,7 @@ elseif ($alv >= 500) {
 	if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 500; 										// EU-vienti ytunnuksella --> alviton
 	if ($laskurow["vienti"] == "K") $alv = 500; 																	// Vienti eu:n ulkopuolelle on aina verotonta
 
-	$alv = $alv * 1;
+	$alv = (float) $alv;
 }
 elseif ($yhtiorow["alv_kasittely"] != "") {
 	//T‰ss‰ keississ‰ kaikki hinnat ovat aina verottomia ja vero lis‰t‰‰n vasta laskutuksessa
@@ -49,7 +49,7 @@ elseif ($yhtiorow["alv_kasittely"] != "") {
 	if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 0; 										// EU-vienti ytunnuksella --> alviton
 	if ($laskurow["vienti"] == "K") $alv = 0; 																		// Vienti eu:n ulkopuolelle on aina verotonta
 
-	$alv = $alv * 1;
+	$alv = (float) $alv;
 }
 else {
 	//T‰ss‰ keississ‰ kaikki hinnat sis‰lt‰v‰t arvonlis‰veron
@@ -58,8 +58,8 @@ else {
 	if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 0; 										// EU-vienti ytunnuksella --> alviton
 	if ($laskurow["vienti"] == "K") $alv = 0; 																		// Vienti eu:n ulkopuolelle on aina verotonta
 
-	$alv = $alv * 1;
-	$trow['alv'] = $trow['alv'] * 1;
+	$alv = (float) $alv;
+	$trow['alv'] = (float) $trow['alv'];
 
 	// Jos alvit t‰sm‰‰v‰t, ei tarvitse tehd‰ mit‰‰n. Muuten lasketaan uuden alvin sis‰lt‰v‰ myyntihinta.
 	if ($alv != $trow['alv']) {

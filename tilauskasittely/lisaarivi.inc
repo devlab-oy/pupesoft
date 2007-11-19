@@ -244,34 +244,36 @@
 				$query = "select * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 				$kres1	= mysql_query($query) or die($query);
 
-				while ($krow1 = mysql_fetch_array($kres1)) {
-					// Käydään läpi kaikki korvaavat...
-					$query = 	"select korvaavat.*, tuote.myyntihinta
-								from korvaavat, tuote
-								where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
-								and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]'
-								order by jarjestys,
-								korvaavat.tuoteno";
-					$kres2  = mysql_query($query) or die($query);
+				$korkieltokommi = "";
 
-					$korkieltokommi = t("Voit tilata korvaavaa tuotetta");
-					$korkieltokommi= array();
+				if (mysql_num_rows($kres1) > 0) {
+					while ($krow1 = mysql_fetch_array($kres1)) {
+						// Käydään läpi kaikki korvaavat...
+						$query = 	"select korvaavat.*, tuote.myyntihinta
+									from korvaavat, tuote
+									where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
+									and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]'
+									order by jarjestys,
+									korvaavat.tuoteno";
+						$kres2  = mysql_query($query) or die($query);
 
+						$korkieltokommi = array();
 
-					while ($krow2 = mysql_fetch_array($kres2)) {
-						list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"]);
-						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet) and $krmyytavissa > 0) {
-							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lisätään tuoteno kommenttin
+						while ($krow2 = mysql_fetch_array($kres2)) {
+							list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"]);
+							if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet) and $krmyytavissa > 0) {
+								$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lisätään tuoteno kommenttin
+							}
 						}
-					}
 
-					if (count($korkieltokommi) == 1) {
-						$korkieltokommi = t("Voit tilata korvaavaa tuotetta ").$korkieltokommi[0];
-					}
-					elseif (count($korkieltokommi) > 1) {
-						$korkieltokommi = t("Voit tilata korvaavia tuotteita ").implode(", ",$korkieltokommi);
-					}
-				} // end käydään läpi korvaavat
+						if (count($korkieltokommi) == 1) {
+							$korkieltokommi = t("Voit tilata korvaavaa tuotetta ").$korkieltokommi[0];
+						}
+						elseif (count($korkieltokommi) > 1) {
+							$korkieltokommi = t("Voit tilata korvaavia tuotteita ").implode(", ",$korkieltokommi);
+						}
+					} // end käydään läpi korvaavat
+				} // end if jos palautuu jotain
 			} // end kieltokommentit
 		} // end etsitäänkö korvaavia
 

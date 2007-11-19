@@ -7,7 +7,7 @@
 
 	$type=substr($tietue,0,1);
 	
-	if ($type == 0) {
+	if ($type == 0 and substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) != "EOF") {
 		
 		echo "<table>";
 		echo "<tr><th>".t("Aineston luontipv")."</th><td>".substr($tietue,1,6)."</td></tr>";
@@ -15,11 +15,7 @@
 		echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue,11,2)."</td></tr>";
 		echo "</table><br>";
 		
-		
 		echo "<table>";
-		//echo "<td>Laskuttajan palvelutunnus</td><td>".substr($tietue,13,9)."</td>";
-		//echo "<td>Rahayksikön koodi</td><td>".substr($tietue,22,1)."</td>";
-		//echo "<td>Varalla</td><td>".substr($tietue,23,67)."</td>";
 		echo "<tr>";
 		echo "<th>".t("Arkistotunnus")."</th>";
 		echo "<th>".t("Tilinumero")."</th>";
@@ -31,11 +27,6 @@
 		echo "<th></th></tr>";
 	} 
 	elseif ($type == 3) {
-		//echo "<td>Oikaisutunnus</td><td>".substr($tietue,87,1)."</td>";
-		//echo "<td>Välitystapa</td><td>".substr($tietue,88,1)."</td>";
-		//echo "<td>Palautekoodi</td><td>".substr($tietue,89,1)."</td>";
-		//echo "<td>Maksajan nimen lähde</td><td>".substr($tietue,76,1)."</td>";
-
 
 		echo "<tr><td>".substr($tietue,27,16)."</td>";
 		echo "<td>".substr($tietue,1,14)."</td>";
@@ -44,24 +35,7 @@
 		echo "<td>".substr($tietue,63,12)."</td>";
 		echo "<td>". substr($tietue,77,10) / 100 ."</td>";
 		echo "<td>".substr($tietue,43,20)."</td>";
-		echo "<td>".t("Tapahtuma on käsitelty")." $tiliotedatarow[kasitelty]<br>";
-		
-		
-		/* Tätä käytetään, jos käytössä on viitteet_laskuksi, muuten käytetään tuota ei kommentoitua
-		$query = "SELECT tiliointi.tilino tilino, tili.nimi nimi, concat_ws('@',korjattu, korjausaika) korjattu, ltunnus
-								FROM tiliointi
-								LEFT JOIN tili on tili.yhtio=tiliointi.yhtio and tili.tilino=tiliointi.tilino
-								WHERE tiliointi.tunnus = '$tiliotedatarow[tiliointitunnus]'";
-		$tiliointiresult = mysql_query($query) or pupe_error($query);
-		$tiliointirow = mysql_fetch_array ($tiliointiresult);
-		echo "".t("Alkuperäinen tiliöinti on")." <a href='muutosite.php?tee=E&tunnus=$tiliointirow[ltunnus]'>$tiliointirow[tilino]/$tiliointirow[nimi]</a></font><br>";
-		if (($tiliointirow['korjattu'] != "0000-00-00 00:00:00") and ($tiliointirow['korjattu'] != "@0000-00-00 00:00:00")) {
-				echo "<br>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font></td></tr>";
-		}
-		else {
-				echo "</font></td></tr>";
-		}
-		*/
+		echo "<td>".t("Tapahtuma on käsitelty")." ".tv1dateconv($tiliotedatarow["kasitelty"])."<br>";
 		
 		$query = "	SELECT kohdpvm, nimi 
 					FROM suoritus
@@ -71,7 +45,7 @@
 		$suoritusrow = mysql_fetch_array ($suoritusresult);
 		
 		if ($suoritusrow['kohdpvm'] != '0000-00-00') { 
-			echo t("Suoritus on kohdistettu laskuun") . " " .$suoritusrow['kohdpvm'];
+			echo t("Suoritus on kohdistettu laskuun") . " " .tv1dateconv($suoritusrow['kohdpvm']);
 		}
 		else {
 			if (mysql_num_rows($suoritusresult)==1) {
@@ -96,7 +70,7 @@
 		echo "</table>";
 		//echo "<td>Varalla</td><td>".substr($tietue,35,5)."</td></tr>";
 	} 
-	else {
+	elseif(substr($tietue, 0,3) != "\$\$E" and substr($tietue, 0,3) != "EOF") {
 		echo "<td>".t("Tuntematon tietuetunnus")." $type</td>";
 	}
 ?>

@@ -238,6 +238,9 @@
 						echo "<font class='message'>".t("Tiliöinti korjattu")." $tiliointirow[korjattu]</font>";
 					}
 				}
+				elseif($kuittikoodi == ' ') {
+					echo "<font class='error'>".t("Tiliöinti puuttuu")."!</font>";
+				}
 			}
 		}
 

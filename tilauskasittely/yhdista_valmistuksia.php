@@ -25,7 +25,7 @@
 			$query = "	SELECT *
 						FROM  lasku						
 						WHERE yhtio = '$kukarow[yhtio]' 
-						and	tunnus = (SELECT otunnus from tilausrivi WHERE tunnus=$valmistettavat[0])";	
+						and	tunnus = (SELECT otunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus=$valmistettavat[0])";	
 			$result = mysql_query($query) or pupe_error($query);
 			$laskurow    = mysql_fetch_array($result);
 			
@@ -89,11 +89,17 @@
 							and tunnus = '$rivitunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 				$otsikrow = mysql_fetch_array($result);
+
+				//	Tallennetaan vanha otunnus
+				$query = "	UPDATE tilausrivin_lisatiedot	 
+							SET vanha_otunnus = (SELECT otunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus=$rivitunnus)
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tilausrivitunnus = '$rivitunnus'";
+				$result = mysql_query($query) or pupe_error($query);
 				
 				//Siirret‰‰n rivi uudelle otsikolle
 				$query = "	UPDATE tilausrivi 
-							SET uusiotunnus = otunnus, 
-							otunnus = '$otunnus'
+							SET otunnus = '$otunnus'
 							WHERE yhtio = '$kukarow[yhtio]' 
 							and perheid = '$rivitunnus'
 							and tyyppi in ('V','W')
@@ -407,14 +413,12 @@
 
 		$haku='';
 
-		//t‰ss‰ haku on teht‰v‰ hieman erilailla
+		// Haetaan jotain tuotetta
 		$query = "	SELECT group_concat(distinct perheid separator ',') haku
-					from tilausrivi, lasku
-					where tilausrivi.yhtio = '$kukarow[yhtio]' 
-					and lasku.yhtio = '$kukarow[yhtio]' 
-					and lasku.tunnus = tilausrivi.otunnus 
-					and lasku.tila 	= 'V' 
-					and lasku.alatila = 'J'
+					FROM tilausrivi
+					JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tila = 'V' and lasku.alatila = 'J'
+					JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.vanha_otunnus = 0
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
 					and tilausrivi.toimitettu = ''
 					and tilausrivi.varattu != 0
 					and tilausrivi.uusiotunnus = 0
@@ -482,17 +486,15 @@
 							tilausrivi.tunnus valmistettavat";
 			$grouppi	= " ";
 		}
-		
-		$query .= "	from tilausrivi, lasku
-					where tilausrivi.yhtio = '$kukarow[yhtio]' 
-					and lasku.yhtio = '$kukarow[yhtio]' 
-					and lasku.tunnus = tilausrivi.otunnus 
-					and lasku.tila 	= 'V' 
-					and lasku.alatila = 'J'
+				
+		$query .= "	FROM tilausrivi
+					JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.tila = 'V' and lasku.alatila = 'J'
+					JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.vanha_otunnus = 0
+					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' 
 					and tilausrivi.toimitettu = ''
 					and tilausrivi.varattu != 0
 					and tilausrivi.uusiotunnus = 0
-					and tilausrivi.tyyppi='W'	
+					and tilausrivi.tyyppi = 'W'	
 					$alku
 					$loppu			
 					$haku
@@ -522,11 +524,17 @@
 						<td valign='top'>$tilrow[varattu]</td>
 						<td valign='top'>$tilrow[kerayspvm]</td>
 						<td valign='top'>$tilrow[toimaika]</td>";
-								
-				echo "	<form method='post' action='$PHP_SELF'><td class='back'>
-						<input type='hidden' name='tee' value='VALITSE'>
-						<input type='hidden' name='valmistettavat' value='$tilrow[valmistettavat]'>
-						<input type='submit' value='".t("Valitse")."'></td></tr></form>";
+				
+				if ($haku != "") {
+					echo "	<td class = 'back'>
+								<form method='post' action='$PHP_SELF'><td class='back'>
+								<input type='hidden' name='tee' value='VALITSE'>
+								<input type='hidden' name='valmistettavat' value='$tilrow[valmistettavat]'>
+								<input type='submit' value='".t("Valitse")."'>
+								</form>
+							</td>";					
+				}
+				echo "</tr>";
 			}
 			echo "</table>";
 		}

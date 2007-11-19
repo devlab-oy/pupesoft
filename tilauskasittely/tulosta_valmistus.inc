@@ -430,7 +430,7 @@ if (!function_exists('rivi_valm')) {
 		$x[1] = 580;
 		$y[0] = $y[1] = $kala + $rivinkorkeus - 4;
 		
-		if($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"]) {
+		if(($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"]) and $tyyppi != "ETUSIVU") {
 			//	Tulostetaanko aina uusi sivu?       
 			$query = "SELECT tunnus FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '{$row["tuoteno"]}' and omasivu != ''";
 			$pres = mysql_query($query) or pupe_error($query);
@@ -481,12 +481,12 @@ if (!function_exists('rivi_valm')) {
 		
 		$rivinkorkeus	= 15;
 		
-		rivi_valmistus($thispage);
+		rivi_valmistus($thispage, $tyyppi);
 	}
 }
 
 if (!function_exists('rivi_valmistus')) {
-	function rivi_valmistus($thispage) {
+	function rivi_valmistus($thispage, $tyyppi = "") {
 		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $isakpl;
 	
 		$p["height"]	= 10;
@@ -577,7 +577,9 @@ if (!function_exists('rivi_valmistus')) {
 				$lask_valm++;	
 			}
 			
-			$pdf->draw_text(35,  $kala, "Raaka-aineet:",	$thispage, $p);	
+			if($tyyppi != "ETUSIVU") {
+				$pdf->draw_text(35,  $kala, "Raaka-aineet:",	$thispage, $p);	
+			}
 		}
 
 		$kala = $kala - $rivinkorkeus;

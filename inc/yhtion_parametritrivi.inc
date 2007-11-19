@@ -714,6 +714,19 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "valmistuksen_etusivu") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array($trow[$i] => "SELECTED");
+
+		$ulos .= "<option value = ''>".t("Valmistuksille ei tulosteta etusivua")."";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Valmistuksille tulostetaan etusivu")."";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "jyvita_alennus") {
 
 		$ulos = "<td><select name='$nimi'>";

@@ -1481,6 +1481,19 @@
 
 				// Aloitellaan lähetteen teko
 				$page[$sivu] = alku_valm($tyyppi);
+				
+				//	Koontisivu
+				if($yhtiorow["valmistuksen_etusivu"] != "") {					
+					while ($row = mysql_fetch_array($result)) {
+						if(in_array($row["tyyppi"], array("W", "L"))) {
+							rivi_valm($page[$sivu], "ETUSIVU");
+						}
+					}
+	
+					//$page[$sivu] 	= uusi_sivu_valm($tyyppi);
+					
+					mysql_data_seek($result,0);
+				}
 
 				while ($row = mysql_fetch_array($result)) {
 					rivi_valm($page[$sivu], $tyyppi);

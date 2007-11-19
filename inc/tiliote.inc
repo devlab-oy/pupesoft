@@ -7,8 +7,8 @@
 		echo "<tr><td></td><td></td><td>";
 
 		// Tämä on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
-		// eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä
-		if (substr($tietue, 187, 1) > $omataso and $tunnus == 'T10') {
+		// eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä		
+		if (substr($tietue, 187, 1) > $omataso and $tunnus == 'T10' and substr($yritirow["tilino"],0,1) == "8") {
 			$kuittikoodi = 'E';
 		}
 
@@ -442,7 +442,7 @@
 			$koodi = substr($tietue, 49, 3);
 
 			// Sampo häkki
-			if ($koodi == '700') {
+			if ($koodi == '700' and substr($yritirow["tilino"],0,1) == "8") {
 				$koodi = '702';
 			}
 

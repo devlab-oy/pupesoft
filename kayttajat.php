@@ -13,19 +13,22 @@
 	}
 
 	if (isset($muutparametrit)) {
-		list ($tee, $selkuka, $selyhtio) = split("#", $muutparametrit);
+		list ($tee, $selkuka, $selyhtio, $kumpi) = split("#", $muutparametrit);
 		$ytunnus = "";
+		$ytunnus2 = "";
 	}
 
 	if ($tee == "MUUTA" and $ytunnus != "" and $ytunnus != '0') {
-		$muutparametrit = "MUUTA#$selkuka#$selyhtio";
+		$muutparametrit = "MUUTA#$selkuka#$selyhtio#1";
 		$asiakasid = "";
+		$ytunnus2 = "";
 		require ("inc/asiakashaku.inc");
 
 		if ($monta == 1) {
 			$krow["oletus_asiakas"] = $asiakasid;
 			$tee = "MUUTA";
 			$firname = "";
+			$kumpi = 1;
 		}
 		else {
 			$tee = "eimitään";
@@ -38,6 +41,34 @@
 		$firname = "";
 
 		$query = "UPDATE kuka SET oletus_asiakas = '' WHERE tunnus='$selkuka'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+
+	if ($tee == "MUUTA" and $ytunnus2 != "" and $ytunnus2 != '0') {
+		$muutparametrit = "MUUTA#$selkuka#$selyhtio#2";
+		$ytunnus = $ytunnus2;
+		$asiakasid = "";
+		require ("inc/asiakashaku.inc");
+
+		if ($monta == 1) {
+			$krow["oletus_asiakastiedot"] = $asiakasid;
+			$tee = "MUUTA";
+			$firname = "";
+			$ytunnus2 = $ytunnus;
+			$ytunnus = "";
+			$kumpi = 2;
+		}
+		else {
+			$tee = "eimitään";
+		}
+	}
+	elseif ($ytunnus2 == '0') {
+		// Nollalla saa poistettua aletus_asiakkaan
+		$krow["oletus_asiakastiedot"] = "";
+		$tee = "MUUTA";
+		$firname = "";
+
+		$query = "UPDATE kuka SET oletus_asiakastiedot = '' WHERE tunnus='$selkuka'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
@@ -110,7 +141,7 @@
 			$extranet 						= $monta['extranet'];
 			$hyvaksyja 						= $monta['hyvaksyja'];
 			$naytetaan_katteet_tilauksella	= $monta['naytetaan_katteet_tilauksella'];
-			$naytetaan_asiakashinta			= $monta['naytetaan_asiakashinta'];			
+			$naytetaan_asiakashinta			= $monta['naytetaan_asiakashinta'];
 			$profile 						= $monta['profiilit'];
 			$piirit	 						= $monta['piirit'];
 
@@ -134,11 +165,11 @@
 			if (trim($password) != '') {
 				$password = md5(trim($password));
 			}
-			
-			if ($salasana == "" and trim($password) != '') { 
+
+			if ($salasana == "" and trim($password) != '') {
 				$salasana = $password; // jos meillä ei ole kopioitua salasanaa toisesta yrityksestä, käytetään syötettyä
 			}
-			
+
 			$query = "	INSERT into kuka
 						SET nimi 		= '$firname',
 						kuka 			= '$ktunnus',
@@ -326,7 +357,7 @@
 						jyvitys			= '$jyvitys',
 						oletus_ohjelma 	= '$oletus_ohjelma',
 						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
-						naytetaan_asiakashinta = '$naytetaan_asiakashinta',						
+						naytetaan_asiakashinta = '$naytetaan_asiakashinta',
 						profiilit 		= '$profile',
 						piirit			= '$piirit',
 						muuttaja		= '$kukarow[kuka]',
@@ -639,7 +670,7 @@
 				echo "<tr><th align='left'>".t("Oletusasiakas").":</th><td>";
 				echo "<input type='text' name='ytunnus'>";
 
-				if ($asiakasid != "") $krow["oletus_asiakas"] = $asiakasid;
+				if ($kumpi == "1" and $asiakasid != "") $krow["oletus_asiakas"] = $asiakasid;
 
 				if ($krow["oletus_asiakas"] != "") {
 
@@ -660,14 +691,48 @@
 					else {
 						echo " ".t("Asiakas ei löydy")."!";
 					}
+					
 				}
 				else {
 					echo " ".t("Oletusasiakasta ei ole syötetty")."!";
 				}
 
 				echo "</td></tr>";
+				
+				echo "<tr><th align='left'>".t("Oletusasiakastiedot").":</th><td>";
+				echo "<input type='text' name='ytunnus2'>";
+
+				if ($kumpi == "2" and $asiakasid != "") $krow["oletus_asiakastiedot"] = $asiakasid;
+
+				if ($krow["oletus_asiakastiedot"] != "") {
+
+					$query = "select * from asiakas where tunnus='$krow[oletus_asiakastiedot]'";
+					$vares = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($vares) == 1) {
+						$varow = mysql_fetch_array($vares);
+
+						echo " $varow[ytunnus] $varow[nimi]";
+
+						if ($varow["toim_ovttunnus"] != "") {
+							echo " / $varow[toim_ovttunnus] $varow[toim_nimi]";
+						}
+						
+						echo "<input type='hidden' name='oletus_asiakastiedot' value='$krow[oletus_asiakastiedot]'>";
+						
+					}
+					else {
+						echo " ".t("Asiakas ei löydy")."!";
+					}
+				}
+				else {
+					echo " ".t("Asiakastietoasiakasta ei ole syötetty")."!";
+				}
+
+				echo "</td></tr>";
+				
 			}
-			
+
 			$sel=array();
 			$sel[$krow["naytetaan_asiakashinta"]] = "SELECTED";
 			echo "<tr><th align='left'>".t("Näytetään asiakashinta tuotehaussa").":</th>
@@ -675,7 +740,7 @@
 					<option value=''  {$sel[""]}>".t("Näytetään tuotteen myyntihinta")."</option>
 					<option value='A' {$sel["A"]}>".t("Näytetään asiakashinta")."</option>
 					</select></td></tr>";
-			
+
 			if ($toim != 'extranet') {
 				echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";
 				echo "<option value=''>".t("Ei oletusta")."</option>";
@@ -822,7 +887,7 @@
 			$profiilit = explode(',', $krow["profiilit"]);
 
 			echo "<tr><th valign='top'>".t("Profiilit").":</th><td>";
-			
+
 			while ($prow = mysql_fetch_array($pres)) {
 
 				$chk = "";
@@ -839,7 +904,7 @@
 			}
 			echo "</td></tr>";
 
-			
+
 			if ($toim != 'extranet') {
 				$query = "	SELECT *
 							FROM avainsana
@@ -850,7 +915,7 @@
 				$piirit = explode(',', $krow["piirit"]);
 
 				echo "<tr><th valign='top'>".t("Piirit").":</th><td>";
-			
+
 				while ($prow = mysql_fetch_array($pres)) {
 
 
@@ -865,7 +930,7 @@
 				}
 				echo "</td></tr>";
 			}
-			
+
 			if ($selkuka == "UUSI" and $toim != "extranet") {
 				$query = "select yhtio, nimi from yhtio order by yhtio";
 				$yhres = mysql_query($query) or pupe_error($query);

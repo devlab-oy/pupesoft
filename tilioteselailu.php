@@ -201,7 +201,12 @@
 			echo "<tr>";
 
 			for ($i=0; $i<mysql_num_fields($result)-2 ; $i++) {
-				echo "<td>$row[$i]</td>";
+				if ($i == 0) {
+					echo "<td>".tv1dateconv($row[$i])."</td>";
+				}
+				else {
+					echo "<td>$row[$i]</td>";
+				}
 			}
 
 			echo "	<form name = 'valikko' action = '$PHP_SELF' method='post'>

@@ -89,6 +89,11 @@
 			echo t("Ei jälkivaatimuksia").".";
 			$jvehto = " having jv='' ";
 		}
+		elseif ($jv == 'vainvak') {
+			echo t("Vain VAK").". ";
+			$vainvakilliset = " JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+							JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.vakkoodi != '') ";
+		}
 		else {
 			$jvehto = " ";
 		}
@@ -99,6 +104,7 @@
 					rahtikirjat.merahti, rahtikirjat.rahtisopimus, if(maksuehto.jv is null,'',maksuehto.jv) jv, lasku.alv, lasku.vienti, rahtisopimukset.muumaksaja
 					FROM rahtikirjat
 					JOIN lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
+					$vainvakilliset
 					LEFT JOIN maksuehto on lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
 					LEFT JOIN rahtisopimukset on lasku.ytunnus = rahtisopimukset.ytunnus and rahtikirjat.toimitustapa = rahtisopimukset.toimitustapa and rahtikirjat.rahtisopimus = rahtisopimukset.rahtisopimus
 					WHERE rahtikirjat.tulostettu	= '0000-00-00 00:00:00'
@@ -237,7 +243,7 @@
 				$tulostuskpl = $kollityht;
 
 				// merkataan tilausrivit toimitetuiksi..
-				$query = "	update tilausrivi
+				$query = "	UPDATE tilausrivi
 							set toimitettu = '$kukarow[kuka]', toimitettuaika=now()
 							where otunnus in ($otunnukset)
 							and yhtio = '$kukarow[yhtio]'
@@ -246,7 +252,7 @@
 				$ures  = mysql_query($query) or pupe_error($query);
 
 				//haetaan rahtikirjan kaikki vakkoodit arrayseen
-				$query = "	select distinct(vakkoodi)
+				$query = "	SELECT distinct(vakkoodi)
 							from tilausrivi,tuote
 							where otunnus in ($otunnukset)
 							and tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -257,8 +263,10 @@
 							and var in ('','H')
 							and tilausrivi.tyyppi in ('L','G')";
 				$vres = mysql_query($query) or pupe_error($query);
-				while ($vak = mysql_fetch_array($vres)) $vakit[] = $vak[0];
-
+				
+				while ($vak = mysql_fetch_array($vres)) {
+					$vakit[] = $vak[0];
+				}
 
 				// nyt on kaikki tiedot rahtikirjaa varten haettu..
 				//
@@ -276,7 +284,7 @@
 				// tulostetaan rahtikirja
 
 				// merkataan rahtikirjat tulostetuksi..
-				$query = "	update rahtikirjat
+				$query = "	UPDATE rahtikirjat
 							set tulostettu=now()
 							where tunnus in ($tunnukset)
 							and yhtio = '$kukarow[yhtio]'";
@@ -310,7 +318,7 @@
 							$valittu_tulostin = $laskutulostin;
 						}
 
-						$query = "	update lasku
+						$query = "	UPDATE lasku
 									set alatila='D'
 									where tunnus in ($laskutettavat)
 									and yhtio = '$kukarow[yhtio]'";
@@ -357,7 +365,7 @@
 					echo "<li><font class='error'>".t("VIRHE: Rahtikirja-tiedostoa")." 'tilauskasittely/$toitarow[rahtikirja]' ".t("ei löydy")."!</font>";
 				}
 
-				$query = "	update rahtikirjat
+				$query = "	UPDATE rahtikirjat
 							set rahtikirjanro='$rahtikirjanro'
 							where tunnus in ($tunnukset)
 							and yhtio = '$kukarow[yhtio]'";
@@ -366,15 +374,15 @@
 				// jos ei JV merkataan rahtikirjat tulostetuksi otsikollekkin..
 				if ($rakir_row['jv'] == '') {
 					// kotimaan myynti menee alatilaan D
-					$query = "update lasku set alatila = 'D' where tunnus in ($otunnukset) and vienti = '' and yhtio='$kukarow[yhtio]'";
+					$query = "UPDATE lasku set alatila = 'D' where tunnus in ($otunnukset) and vienti = '' and yhtio='$kukarow[yhtio]'";
 					$ures  = mysql_query($query) or pupe_error($query);
 
 					// vientilaskut menee alatilaan B
-					$query = "update lasku set alatila = 'B' where tunnus in ($otunnukset) and vienti != '' and yhtio='$kukarow[yhtio]'";
+					$query = "UPDATE lasku set alatila = 'B' where tunnus in ($otunnukset) and vienti != '' and yhtio='$kukarow[yhtio]'";
 					$ures  = mysql_query($query) or pupe_error($query);
 
 					// verkkolaskutettavat EU-viennit menee alatilaan D, jos niillä on tarpeeksi lisätietoja
-					$query = "	update lasku set
+					$query = "	UPDATE lasku set
 								alatila = 'D',
 								bruttopaino = '$kilotyht'
 								where yhtio = '$kukarow[yhtio]'
@@ -433,7 +441,6 @@
 
 	} // end tee==tulosta
 
-
 	if($tee == '') {
 
 		// haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
@@ -478,6 +485,9 @@
 
 			echo "<tr><td>".t("Älä tulosta jälkivaatimuksia").":</td>";
 			echo "<td><input type='radio' name='jv' value='eijv'></td></tr>";
+			
+			echo "<tr><td>".t("Tulosta vain rahtikirjoja joilla on VAK-koodeja").":</td>";
+			echo "<td><input type='radio' name='jv' value='vainvak'></td></tr>";
 
 			echo "<tr><td>".t("Valitse jälkivaatimuslaskujen tulostuspaikka").":</td>";
 			echo "<td><select id='kirjoitin' name='laskukomento'>";

@@ -110,8 +110,6 @@ if (!function_exists('alku')) {
 			}
 		}
 
-		$pdf->draw_text(430, 815, t("Sivu", $kieli), $thispage, $norm);
-
 		//Vasen sarake
 		//$pdf->draw_rectangle(737, 20,  674, 300, $thispage, $rectparam);
 		$pdf->draw_text(50, 729, t("Laskutusosoite", $kieli), 	$thispage, $pieni);
@@ -409,8 +407,6 @@ if (!function_exists('uusi_sivu')) {
 				$pdf->draw_text(310, 815, t("Viennin hyvityslasku", $kieli), $thispage);
 			}
 		}
-
-		$pdf->draw_text(430, 815, t("Sivu", $kieli), $thispage, $norm);
 
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, 					$thispage, $rectparam);
@@ -953,8 +949,8 @@ if (!function_exists('loppu')) {
 		global $yhtiorow, $kukarow, $toim, $pdf, $page, $sivu, $laskurow, $sivu, $rectparam, $norm, $summa, $arvo, $pieni, $kieli, $masrow, $boldi, $uytunnus, $ytunpit, $pieni_boldi, $kateistyyppi;
 
 		if($vikasivu != "") {
-			for ($pp=1; $pp<=$sivu; $pp++) {
-				$pdf->draw_text(460, 815, "$pp / $sivu", $page[$pp], $norm);
+			for ($pp=1; $pp<=$sivu; $pp++) {				
+				$pdf->draw_text(430, 815, t("Sivu", $kieli).": $pp / $sivu", $page[$pp], $norm);
 			}
 		}
 
@@ -1024,7 +1020,10 @@ if (!function_exists('loppu')) {
 		if ($laskurow["yhtio_ovttunnus"] != "") {
 
 			// haetaan toimipaikan tiedot
-			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
+			$alhqur = "	SELECT * 
+						from yhtion_toimipaikat 
+						where yhtio		= '$kukarow[yhtio]' 
+						and vat_numero	= '$laskurow[yhtio_ovttunnus]'";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			if (mysql_num_rows($alhire) == 1) {

@@ -174,7 +174,7 @@
 				</table><br>
 				</form>";
 
-		$query = "	SELECT alku, concat_ws(' ', yriti.nimi, yriti.tilino) tili, if(tyyppi='1', 'tiliote', if(tyyppi='2','lmp','viitesiirrot')) laji, tyyppi, yriti.tilino
+		$query = "	SELECT alku, loppu, concat_ws(' ', yriti.nimi, yriti.tilino) tili, if(tyyppi='1', 'tiliote', if(tyyppi='2','lmp','viitesiirrot')) laji, tyyppi, yriti.tilino
 					FROM tiliotedata
 					JOIN yriti ON (yriti.yhtio = tiliotedata.yhtio and yriti.tilino = tiliotedata.tilino)
 	                WHERE tiliotedata.yhtio = '$kukarow[yhtio]' and
@@ -198,10 +198,15 @@
 		echo "</tr>";
 
 		while ($row = mysql_fetch_array ($result)) {
+			
+			if ($tilino != "" and $tyyppi == "1" and date("Y-m-d", mktime(0, 0, 0, substr($row["loppu"],5,2), substr($row["loppu"],8,2)+1,  substr($row["loppu"],0,4))) != $edalku and $edalku != "") {				
+				echo "<tr style='height: 5px;'></tr>";
+			}
+
 			echo "<tr>";
 
 			for ($i=0; $i<mysql_num_fields($result)-2 ; $i++) {
-				if ($i == 0) {
+				if ($i < 2) {
 					echo "<td>".tv1dateconv($row[$i])."</td>";
 				}
 				else {
@@ -209,6 +214,8 @@
 				}
 			}
 
+			$edalku = $row["alku"];
+			
 			echo "	<form name = 'valikko' action = '$PHP_SELF' method='post'>
 					<input type='hidden' name='tee' value='T'>
 					<input type='hidden' name='pvm' value='$row[alku]'>

@@ -128,7 +128,7 @@
 										WHERE yhtio = '$kukarow[yhtio]'
 										and otunnus = '$lasrow[tunnus]'
 										and perheid  = '$rivitunnus' and perheid > 0
-										and var = 'V'";
+										and tyyppi = 'V'";
 							$updresult = mysql_query($query) or pupe_error($query);
 							$virhe[$rivitunnus] = "<font class='message'>".t("Perheen lapset kerrottiin %s:lla.", $kieli, round($perhekerroin, 4))."!</font><br>";
 						}

@@ -1104,7 +1104,6 @@
 
 							// Laskukohtaiset kommentit kuntoon
 							// T‰m‰ merkki | eli pystyviiva on rivinvaihdon merkki elmalla
-							// Kent‰t on stripattu erikoismerkeist‰ jo aikaisemmin joten se on nyt puhdas t‰ss‰
 							$komm = "";
 
 							if (trim($lasrow['tilausyhteyshenkilo']) != '') {
@@ -1231,7 +1230,7 @@
 										ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 							$tilres = mysql_query($query) or pupe_error($query);
 
-							$rivinumero = 1;
+							$rivinumerot = array(0 => 0);
 
 							while ($tilrow = mysql_fetch_array($tilres)) {
 
@@ -1299,6 +1298,14 @@
 								$tilrow['nimitys'] 		= ereg_replace("[^A-Za-z0-9÷ˆƒ‰≈Â .,-/!|+()%#]", " ", $tilrow['nimitys']);
 
 								if ($lasrow["chn"] == "111") {
+
+									if ((int) substr(sprintf("%06s", $tilrow["tilaajanrivinro"]), -6) > 0 and !in_array((int) substr(sprintf("%06s", $tilrow["tilaajanrivinro"]), -6), $rivinumerot)) {
+										$rivinumero	= (int) substr(sprintf("%06s", $tilrow["tilaajanrivinro"]), -6);
+									}
+									else {
+										$rivinumero = (int) substr(sprintf("%06s", $tilrow["tunnus"]), -6);
+									}
+																		
 									elmaedi_rivi($tootedi, $tilrow, $rivinumero);
 								}
 								elseif($yhtiorow["verkkolasku_lah"] != "") {
@@ -1308,7 +1315,6 @@
 									$tilrow["kommentti"]= str_replace("|"," ",$tilrow["kommentti"]); //Poistetaan pipet. Itella ei niist‰ t‰‰ll‰ selvi‰
 									pupevoice_rivi($tootxml, $tilrow, $vatamount, $totalvat);
 								}
-								$rivinumero++;
 							}
 
 							//Lopetetaan lasku

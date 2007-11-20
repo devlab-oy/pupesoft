@@ -346,7 +346,7 @@
 			</table>
 			<br>";
 		
-		$query = "	SELECT tunnus, nimi
+		$query = "	SELECT tunnus, viesti
 					FROM lasku
 					WHERE yhtio = '$kukarow[yhtio]' and tila = 'V' and alatila IN ('', 'J') and ytunnus = 'Valmistusajo'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -362,7 +362,7 @@
 				else {
 					$sel = "";
 				}
-				echo "<option value='$row[tunnus]' $sel>$row[tunnus]</option>";
+				echo "<option value='$row[tunnus]' $sel>$row[tunnus] - $row[viesti]</option>";
 			}
 		}
 		

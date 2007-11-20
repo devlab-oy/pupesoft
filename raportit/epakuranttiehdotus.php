@@ -243,9 +243,12 @@ if ($subnappi != '') {
 			$raja = (float) str_replace(",",".",$raja);
 
 			if (table_exists("yhteensopivuus_tuote")) {
-				$query = "SELECT count(distinct atunnus) 
-				FROM yhteensopivuus_tuote 
-				WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$row[tuoteno]'";
+				$query = "SELECT count(yhteensopivuus_rekisteri.tunnus)
+				FROM yhteensopivuus_tuote, yhteensopivuus_rekisteri
+				WHERE yhteensopivuus_tuote.yhtio = yhteensopivuus_rekisteri.yhtio 
+				AND yhteensopivuus_tuote.atunnus = yhteensopivuus_rekisteri.autoid
+				AND yhteensopivuus_tuote.yhtio = '$kukarow[yhtio]'
+				AND yhteensopivuus_tuote.tuoteno = '$row[tuoteno]'";
 
 				$yhteensopivuus_res = mysql_query($query) or pupe_error($query);
 				$yhteensopivuus_row = mysql_fetch_array($yhteensopivuus_res);

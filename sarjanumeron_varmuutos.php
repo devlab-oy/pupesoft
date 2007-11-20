@@ -35,115 +35,119 @@
 
 		if (count($tuote) > 0) {
 			foreach($tuote as $i => $tuoteno) {
-				foreach ($sarjanumero_edarvo[$i] as $snro_tun => $edarvo) {
-					if($sarjanumero_uusiarvo[$i][$snro_tun] != '' and (float) $sarjanumero_uusiarvo[$i][$snro_tun] >= 0) {
-						$edarvo = (float) $edarvo;
-						$uuarvo = (float) $sarjanumero_uusiarvo[$i][$snro_tun];
+				if (count($sarjanumero_edarvo[$i]) > 0) {
+					foreach ($sarjanumero_edarvo[$i] as $snro_tun => $edarvo) {
+						if($sarjanumero_uusiarvo[$i][$snro_tun] != '' and (float) $sarjanumero_uusiarvo[$i][$snro_tun] >= 0) {
+							$edarvo = (float) $edarvo;
+							$uuarvo = (float) $sarjanumero_uusiarvo[$i][$snro_tun];
 						
-						$ero = round($uuarvo - $edarvo, 2);
+							$ero = round($uuarvo - $edarvo, 2);
 						
-						if (abs($ero) != 0) {
+							if (abs($ero) != 0) {
 							
-							$query = "	SELECT tilausrivi_osto.tunnus, tilausrivi_osto.alv, tilausrivi_osto.tyyppi, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, tilausrivi_osto.kpl
-										FROM sarjanumeroseuranta
-										LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-										LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-										WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
-										and sarjanumeroseuranta.tuoteno	= '$tuoteno'
-										and sarjanumeroseuranta.myyntirivitunnus != -1
-										and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00' and abs(tilausrivi_osto.kpl)=1)
-										and sarjanumeroseuranta.tunnus = '$snro_tun'
-										ORDER BY sarjanumero";
-							$sarjares = mysql_query($query) or pupe_error($query);
+								$query = "	SELECT tilausrivi_osto.tunnus, tilausrivi_osto.alv, tilausrivi_osto.tyyppi, round(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl, 2) ostohinta, tilausrivi_osto.kpl
+											FROM sarjanumeroseuranta
+											LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
+											LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+											WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+											and sarjanumeroseuranta.tuoteno	= '$tuoteno'
+											and sarjanumeroseuranta.myyntirivitunnus != -1
+											and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00' and abs(tilausrivi_osto.kpl)=1)
+											and sarjanumeroseuranta.tunnus = '$snro_tun'
+											ORDER BY sarjanumero";
+								$sarjares = mysql_query($query) or pupe_error($query);
 							
-							if (mysql_num_rows($sarjares) == 1) {
-								$sarjarow = mysql_fetch_array($sarjares);
+								if (mysql_num_rows($sarjares) == 1) {
+									$sarjarow = mysql_fetch_array($sarjares);
 								
-								if($sarjarow["alv"] >= 500) {
-									$sarjarow["alv"] -= 500;
-								}
+									if($sarjarow["alv"] >= 500) {
+										$sarjarow["alv"] -= 500;
+									}
 								
-								if ($yhtiorow["alv_kasittely"] == "" and $sarjarow["tyyppi"] == 'L' and $sarjarow["alv"] != 0) {
-									$uuhinta = round($uuarvo * (1+$sarjarow["alv"]/100));
-								}
-								else {
-									$uuhinta = $uuarvo;
-								}
+									if ($yhtiorow["alv_kasittely"] == "" and $sarjarow["tyyppi"] == 'L' and $sarjarow["alv"] != 0) {
+										$uuhinta = round($uuarvo * (1+$sarjarow["alv"]/100));
+									}
+									else {
+										$uuhinta = $uuarvo;
+									}
 																						
-								$query = "	UPDATE tilausrivi as tilausrivi_upd
-											SET hinta = '$uuhinta', 
-											rivihinta = '$uuarvo'
-											where yhtio	= '$kukarow[yhtio]' 
-											and tunnus	= '$sarjarow[tunnus]'";
-								$result = mysql_query($query) or pupe_error($query);
+									$query = "	UPDATE tilausrivi as tilausrivi_upd
+												SET hinta = '$uuhinta', 
+												rivihinta = if(tyyppi='O', $uuarvo, $uuarvo*-1)
+												where yhtio	= '$kukarow[yhtio]' 
+												and tunnus	= '$sarjarow[tunnus]'";
+									$result = mysql_query($query) or pupe_error($query);
 								
-								if ($ero < 0) {
-									$tkpl = -1;
-									$tero = abs($ero);
-								}
+									if ($ero < 0) {
+										$tkpl = -1;
+										$tero = abs($ero);
+									}
 								
-								else {
-									$tkpl = 1;
-									$tero = abs($ero);	
-								}
+									else {
+										$tkpl = 1;
+										$tero = abs($ero);	
+									}
 								
-								$query = "	INSERT into tapahtuma set
-											yhtio   = '$kukarow[yhtio]',
-											tuoteno = '$tuoteno',
-											laji    = 'Epäkurantti',
-											kpl     = '$tkpl',
-											hinta   = '$tero',
-											kplhinta= '$tero',
-											selite  = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo. $lisaselite',
-											laatija    = '$kukarow[kuka]',
-											laadittu = now()";
-								$result = mysql_query($query) or pupe_error($query);
-								$tapahtumaid = mysql_insert_id();
+									$query = "	INSERT into tapahtuma set
+												yhtio   = '$kukarow[yhtio]',
+												tuoteno = '$tuoteno',
+												laji    = 'Epäkurantti',
+												kpl     = '$tkpl',
+												hinta   = '$tero',
+												kplhinta= '$tero',
+												selite  = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo. $lisaselite',
+												laatija    = '$kukarow[kuka]',
+												laadittu = now()";
+									$result = mysql_query($query) or pupe_error($query);
+									$tapahtumaid = mysql_insert_id();
 							
-								$query = "	INSERT into lasku set
-											yhtio      = '$kukarow[yhtio]',
-											tapvm      = now(),
-											tila       = 'X',
-											laatija    = '$kukarow[kuka]',
-											viite      = '$tapahtumaid',
-											luontiaika = now()";
-								$result = mysql_query($query) or pupe_error($query);
-								$laskuid = mysql_insert_id($link);
+									$query = "	INSERT into lasku set
+												yhtio      = '$kukarow[yhtio]',
+												tapvm      = now(),
+												tila       = 'X',
+												laatija    = '$kukarow[kuka]',
+												viite      = '$tapahtumaid',
+												luontiaika = now()";
+									$result = mysql_query($query) or pupe_error($query);
+									$laskuid = mysql_insert_id($link);
 
-								$query = "INSERT into tiliointi set
-											yhtio    = '$kukarow[yhtio]',
-											ltunnus  = '$laskuid',
-											tilino   = '$yhtiorow[varasto]',
-											kustp    = '',
-											tapvm    = now(),
-											summa    = '$ero',
-											vero     = '0',
-											lukko    = '',
-											selite   = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo',
-											laatija  = '$kukarow[kuka]',
-											laadittu = now()";
-								$result = mysql_query($query) or pupe_error($query);
+									$query = "INSERT into tiliointi set
+												yhtio    = '$kukarow[yhtio]',
+												ltunnus  = '$laskuid',
+												tilino   = '$yhtiorow[varasto]',
+												kustp    = '',
+												tapvm    = now(),
+												summa    = '$ero',
+												vero     = '0',
+												lukko    = '',
+												selite   = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo',
+												laatija  = '$kukarow[kuka]',
+												laadittu = now()";
+									$result = mysql_query($query) or pupe_error($query);
 
-								$query = "INSERT into tiliointi set
-											yhtio    = '$kukarow[yhtio]',
-											ltunnus  = '$laskuid',
-											tilino   = '$yhtiorow[varastonmuutos]',
-											kustp    = '',
-											tapvm    = now(),
-											summa    = $ero * -1,
-											vero     = '0',
-											lukko    = '',
-											selite   = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo',
-											laatija  = '$kukarow[kuka]',
-											laadittu = now()";
-								$result = mysql_query($query) or pupe_error($query);
+									$query = "INSERT into tiliointi set
+												yhtio    = '$kukarow[yhtio]',
+												ltunnus  = '$laskuid',
+												tilino   = '$yhtiorow[varastonmuutos]',
+												kustp    = '',
+												tapvm    = now(),
+												summa    = $ero * -1,
+												vero     = '0',
+												lukko    = '',
+												selite   = '".t("Varastonarvon muutos").": $edarvo -> $uuarvo',
+												laatija  = '$kukarow[kuka]',
+												laadittu = now()";
+									$result = mysql_query($query) or pupe_error($query);
+								
+									echo "<font class='message'>$tuoteno: ".t("Varastonarvon muutos").": $edarvo -> $uuarvo</font><br>";
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-		
+		echo "<br><br>";
 		$tee = "INVENTOI";
 	}
 

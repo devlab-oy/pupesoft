@@ -14,7 +14,7 @@ elseif ($tee == 'vanhat') {
 	$lisa = "and laadittu >= '$vva-$kka-$ppa 00:00:00' and laadittu <= '$vvl-$kkl-$ppl 23:59:59'";
 }
 
-$query =	"select ytunnus, viitetxt tiltunnus, tilkpl, sisviesti2 astunnus,
+$query =	"select ytunnus, asiakkaan_tilausnumero tiltunnus, tilkpl, sisviesti2 astunnus,
 			DATE_FORMAT(laadittu, '%d-%m-%y') laadittu, tuote.eankoodi eankoodi, kommentti tuoteno,
 			aktiivinen_kuljetus suunnistus, lasku.tunnus xtunnus,
 			concat(lpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta

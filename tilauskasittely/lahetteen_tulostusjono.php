@@ -572,7 +572,8 @@
 			$grouppi = "GROUP BY lasku.tunnus";
 		}
 
-		$query = "	SELECT lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.toimitustapa, lasku.varasto, 
+		$query = "	SELECT lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto, 
+					if(tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa, 
 					if(maksuehto.jv!='', lasku.tunnus, '') jvgrouppi, 
 					if(lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
 					varastopaikat.nimitys varastonimi,

@@ -29,7 +29,7 @@ if (!function_exists('elmaedi_otsik')) {
 		if ($yhtiorow["pankkitili1"] != "") fputs($tootedi, "INADSE_FI:BF @$yhtiorow[pankkitili1]\n");
 		if ($yhtiorow["pankkitili2"] != "") fputs($tootedi, "INADSE_FI:BF @$yhtiorow[pankkitili2]\n");
 		if ($yhtiorow["pankkitili3"] != "") fputs($tootedi, "INADSE_FI:BF @$yhtiorow[pankkitili3]\n");
-		fputs($tootedi, "IRFFCO_NU:$lasrow[viitetxt]\n");
+		fputs($tootedi, "IRFFCO_NU:$lasrow[asiakkaan_tilausnumero]\n");
 		fputs($tootedi, "IFTXAAITX:\n");
 		fputs($tootedi, "IFTXAAITX:\n");
 		fputs($tootedi, "IFTXAAITX:\n");
@@ -96,7 +96,7 @@ if (!function_exists('elmaedi_rivi')) {
 	function elmaedi_rivi($tootedi, $tilrow, $rivinumero) {
 		global $yhtiorow;
 		
-		$query = "	select eankoodi
+		$query = "	SELECT eankoodi
 					from tuote
 					where yhtio='$yhtiorow[yhtio]' and tuoteno='$tilrow[tuoteno]'";
 		$eanres = mysql_query($query) or pupe_error($query);

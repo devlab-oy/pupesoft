@@ -161,6 +161,7 @@
 				echo "<th>".t("Summa")."</th>";
 				echo "<th>".t("Valuutta")."</th>";
 				echo "<th>".t("Viite/Viesti")."</th>";
+				echo "<th>".t("Keikka")."</th>";
 				echo "<th>".t("EBID")."</th>";
 				echo "<th>".t("Tila/Vienti")."</th>";
 				echo "</tr>";
@@ -180,6 +181,21 @@
 					echo "<td valign='top' align='right'>$trow[summa]</td>";
 					echo "<td valign='top'>$trow[valkoodi]</td>";
 					echo "<td valign='top'>".$trow["viite/viesti"]."</td>";
+					
+					//tehd‰‰n keikka linkki
+					echo "<td valign='top'>";
+					if ($trow["vienti"] == "C" || $trow["vienti"] == "F" || $trow["vienti"] == "I") {
+						$query = " SELECT keikka.laskunro, keikka.tunnus
+						FROM lasku 
+						JOIN lasku AS keikka on lasku.yhtio = keikka.yhtio and lasku.laskunro = keikka.laskunro and keikka.tila = 'K' and keikka.vanhatunnus = 0
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.vanhatunnus = '$trow[tunnus]'";
+						
+						$keikka_res = mysql_query($query) or pupe_error($query);
+						$keikka_row = mysql_fetch_array($keikka_res);
+						
+						echo "<a href='tilauskasittely\selaa_tilauksia.php?toim=KEIKKA&tee=tilaus&tunnus=$keikka_row[tunnus]'>".$keikka_row['laskunro']."</a>";
+					}
+					echo "</td>";
 					
 					// tehd‰‰n lasku linkki
 					echo "<td valign='top'>".ebid($trow['tunnus']) ."</td>";

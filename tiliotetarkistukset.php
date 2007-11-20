@@ -1,7 +1,7 @@
 <?php
 	require "inc/parametrit.inc";
 	
-	echo "<font class='head'>".t("Pankkiaineistojen virheet")."</font><hr>";
+	echo "<font class='head'>".t("Pankkiaineistojen selailu")."</font><hr>";
 
 	if ($tee == 'S') {
 		
@@ -28,7 +28,6 @@
 				if ($tiliotedatarow['tyyppi'] == 2) {
 					require "inc/LMP.inc";
 				}
-				
 			}
 			echo "</table>";
 

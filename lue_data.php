@@ -346,31 +346,6 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			echo t("Pakollista tietoa puuttuu/tiedot ovat virheelliset!")." $valinta<br>";
 		}
 		
-		//	Tarkastetaan tarkistarivi.incia vastaan..
-		//	Generoidaan oikeat arrayt
-		$errori = "";
-		$t = array();
-		
-		$query = "	SELECT *
-					FROM tuote
-					WHERE tunnus = 0";
-		$result = mysql_query($query) or pupe_error($query);
-		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
-
-			// Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
-			$t[$i] = $erivi[array_search(strtoupper(mysql_field_name($result, $i)), $otsikot)];
-			
-			require "inc/".$table."tarkista.inc";
-			
-			if($virhe[$i] != "") {
-				echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
-			}
-		}
-
-		if($errori != "") {
-			$tila = "ohita";
-		}
-
 		// lis‰t‰‰n rivi
 		if($tila != 'ohita') {
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
@@ -780,7 +755,52 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 				$query .= " ORDER BY tunnus";
 			}
+			
+			//	Tarkastetaan tarkistarivi.incia vastaan..
+			//	Generoidaan oikeat arrayt
+			$errori = "";
+			$t = array();
 
+			//	Otetaan talteen query..
+			$lue_data_query = $query;
+			
+			$tarq = "	SELECT *
+							FROM $table";
+			if ($table == 'asiakasalennus' or $table == 'asiakashinta') {
+				$tarq .= " WHERE yhtio = '$kukarow[yhtio]'";
+				$tarq .= $and;
+			}
+			else {
+				$tarq .= " WHERE ".$valinta;
+			}				
+			$result = mysql_query($tarq) or pupe_error($tarq);
+			$tarkrow = mysql_fetch_array($result);
+			$tunnus = $tarkrow["tunnus"];
+			for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
+				
+				// Tarkistetaan saako k‰ytt‰j‰ p‰ivitt‰‰ t‰t‰ kentt‰‰
+				$Lindexi = array_search(strtoupper(mysql_field_name($result, $i)), $otsikot);
+				if(isset($erivi[$Lindexi]) and $Lindexi !== false) {
+					$t[$i] = $erivi[$Lindexi];
+				}
+				else {
+					$t[$i] = $tarkrow[strtolower(mysql_field_name($result, $i))];
+				}
+				
+				require "inc/".$table."tarkista.inc";
+
+				if($virhe[$i] != "") {
+					echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
+				}
+			}
+
+			if($errori != "") {
+				$hylkaa++;
+			}
+			
+			//	Palautetaan vanha query..
+			$query = $lue_data_query;
+			
 			if ($hylkaa == 0) {				
 				
 				// Haetaan rivi niin kuin se oli ennen muutosta

@@ -1119,7 +1119,7 @@
 
 									if (mysql_num_rows($osre) > 0) {
 										$osrow = mysql_fetch_array($osre);
-										$row[$i] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=$osrow[sarjanumero]'>".$osrow['sarjanumero']."</a><br>";
+										$row[$i] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."'>".$osrow['sarjanumero']."</a><br>";
 									}
 								}
 								$row[$i] = substr($row[$i], 0, -4);

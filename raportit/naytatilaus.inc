@@ -457,7 +457,7 @@
 			$prow["kommentti"] .= "<br>";
 		}
 		while($sarjarow = mysql_fetch_array($sarjares)) {
-			$prow["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$prow[tuoteno]&sarjanumero_haku=$sarjarow[sarjanumero]'>$sarjarow[sarjanumero]</a><br>";
+			$prow["kommentti"] .= "# <a href='".$palvelin2."tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$prow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a><br>";
 		}
 		
 		if ($prow["kommentti"] != '') {

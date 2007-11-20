@@ -1017,7 +1017,7 @@
 					echo "<th>".t("Ostohinta")."</th></tr>";
 
 					while($sarjarow = mysql_fetch_array($sarjares)) {
-						echo "<tr><td>$sarjarow[nimitys]</td><td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=$sarjarow[sarjanumero]'>$sarjarow[sarjanumero]</a></td><td align='right'>".sprintf('%.2f', $sarjarow["ostosumma"])."</td></tr>";
+						echo "<tr><td>$sarjarow[nimitys]</td><td><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno_haku=$tuoterow[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a></td><td align='right'>".sprintf('%.2f', $sarjarow["ostosumma"])."</td></tr>";
 					}
 
 					echo "</table><br>";

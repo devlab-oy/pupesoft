@@ -64,6 +64,14 @@ if ($user != '') {	//kayttaja on syottanyt tietonsa login formiin
 				$errormsg = t("Uudet salasanasi olivat erilaiset")."! ".t("Salasanaasi ei vaihdettu")."!";
 				$err = 1;
 				$usea = 0;
+			} else if (strlen(trim($uusi1)) < 6) {
+				$errormsg = t("Uusi salasanasi on liian lyhyt").". ".t("Salasanan pitää olla vähintään 6 merkkiä pitkä").". ".t("Salasanaasi ei vaihdettu")."! ";
+				$err = 1;
+				$usea = 0;
+			} else if (stristr($uusi1, $krow["kuka"])) {
+				$errormsg = t("Salasanasi ei saa sisältää käyttäjätunnustasi").". ".t("Salasanaasi ei vaihdettu")."!";
+				$err = 1;
+				$usea = 0;
 			}
 			else {
 				$uusi1=md5(trim($uusi1));

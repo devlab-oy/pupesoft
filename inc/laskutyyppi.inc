@@ -175,6 +175,7 @@
 					$alatila = "toimitettu";
 					break;
 				case "V":
+				case "X":
 					$alatila = "vastaanotettu";
 					break;
 				case "E":

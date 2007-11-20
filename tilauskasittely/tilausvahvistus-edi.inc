@@ -50,7 +50,7 @@ if (mysql_num_rows($tilvahresult) > 0)
 	$ulos .= "RDTM4__DT:" . tv2dateconv($laskurow['luontiaika']) . "\n";
 	$ulos .= "RRFFCR_NU:" . tv2dateconv($laskurow['luontiaika']) . "\n";
 	$ulos .= "RRFFVN_NU:" . $laskurow['tunnus'] . "\n";
-	$ulos .= "RRFFCO_NU:" . $laskurow['viitetxt'] . "\n";  // Futursoftin asiakkaan tilausnumero
+	$ulos .= "RRFFCO_NU:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
 	$ulos .= "RFTXGENTX:" . $laskurow['viesti'] . "\n";
 	$ulos .= "RFTXGENTX:" . $laskurow['comments'] . "\n";
 	$ulos .= "RNADBY_PC:" . sprintf ("%-18.18s", $laskurow['ovttunnus']) . "100 91". "\n";

@@ -6,15 +6,19 @@
 $tulos_ulos_ulasku = "";
 
 // lasketaan laskulle loppusumma.. ja otetaan kaikki mahdolliset eriävät tiedot talteen
-$arvo				= 0;
-$summa				= 0;
-$summa_valuutassa 	= 0;
-$kate				= 0;
-$bruttopaino		= 0;
-$viestit			= "";
-$comments			= "";
-$sisviestit1		= "";
-$viitetxt			= "";
+$arvo					= 0;
+$summa					= 0;
+$summa_valuutassa 		= 0;
+$kate					= 0;
+$bruttopaino			= 0;
+$viestit 				= "";			
+$comments 				= "";
+$sisviestit1 			= "";
+$tilausyhteyshenkilo 	= "";
+$asiakkaan_tilausnumero	= "";
+$kohde 					= "";
+
+
 
 $query  = "	SELECT
 			sum(arvo) arvo,
@@ -26,7 +30,6 @@ $query  = "	SELECT
 			group_concat(distinct trim(comments) 				SEPARATOR ' / ') comments,
 			group_concat(distinct trim(sisviesti1) 				SEPARATOR ' / ') sisviestit1,
 			group_concat(distinct trim(viesti) 					SEPARATOR ' / ') viestit,
-			group_concat(distinct trim(viitetxt) 				SEPARATOR ' / ') viitetxt,
 			group_concat(distinct trim(tilausyhteyshenkilo) 	SEPARATOR ' / ') tilausyhteyshenkilo,	
 			group_concat(distinct trim(asiakkaan_tilausnumero) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
 			group_concat(distinct trim(kohde) 					SEPARATOR ' / ') kohde
@@ -48,7 +51,6 @@ if (mysql_num_rows($uusiuresult) > 0) {
 	$viestit				= $sumrow["viestit"];
 	$comments				= $sumrow["comments"];
 	$sisviestit1			= $sumrow["sisviestit1"];
-	$viitetxt				= $sumrow["viitetxt"];
 	$tilausyhteyshenkilo	= $sumrow["tilausyhteyshenkilo"];
 	$asiakkaan_tilausnumero	= $sumrow["asiakkaan_tilausnumero"];
 	$kohde					= $sumrow["kohde"];
@@ -56,7 +58,6 @@ if (mysql_num_rows($uusiuresult) > 0) {
 	if ($viestit == " / ") 					$viestit 				= "";
 	if ($comments == " / ") 				$comments 				= "";
 	if ($sisviestit1 == " / ") 				$sisviestit1 			= "";
-	if ($viitetxt == " / ") 				$viitetxt 				= "";
 	if ($tilausyhteyshenkilo == " / ") 		$tilausyhteyshenkilo 	= "";
 	if ($asiakkaan_tilausnumero == " / ") 	$asiakkaan_tilausnumero = "";
 	if ($kohde == " / ") 					$kohde 					= "";
@@ -209,7 +210,6 @@ if ($lisa_comments != "") {
 $comments 				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $comments);
 $viestit				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viestit);
 $sisviestit1			= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $sisviestit1);
-$viitetxt				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viitetxt);
 $tilausyhteyshenkilo	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $tilausyhteyshenkilo);
 $asiakkaan_tilausnumero	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $asiakkaan_tilausnumero);
 $kohde					= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $kohde);
@@ -299,7 +299,6 @@ $query = "	INSERT into lasku SET
 			yhtio								= '$lasrow[yhtio]',
 			ytunnus								= '$lasrow[ytunnus]',
 			liitostunnus						= '$lasrow[liitostunnus]',
-			viitetxt							= '$viitetxt',
 			sisviesti1							= '$sisviestit1',
 			alatila								= '',
 			tunnusnippu							= '$lasrow[tunnusnippu]',

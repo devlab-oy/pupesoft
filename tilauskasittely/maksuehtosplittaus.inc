@@ -160,7 +160,9 @@
 						yhtio								= '$laskurow[yhtio]',
 						ytunnus								= '$laskurow[ytunnus]',
 						liitostunnus						= '$laskurow[liitostunnus]',
-						viitetxt							= '$laskurow[viitetxt]',
+						tilausyhteyshenkilo					= '$laskurow[tilausyhteyshenkilo]',
+						asiakkaan_tilausnumero				= '$laskurow[asiakkaan_tilausnumero]',
+						kohde								= '$laskurow[kohde]',
 						sisviesti1							= '$laskurow[sisviesti1]',
 						alatila								= 'D',
 						tila								= 'L'";

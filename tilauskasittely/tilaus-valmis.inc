@@ -704,7 +704,6 @@ else {
 								kohde								= '$laskurow[kohde]',
 								viikorkopros						= '$laskurow[viikorkopros]',
 								viite								= '$laskurow[viite]',
-								viitetxt							= '$laskurow[viitetxt]',
 								varasto 							= '$varasto',
 								liitostunnus    					= '$laskurow[liitostunnus]',
 								yhtio								= '$laskurow[yhtio]',

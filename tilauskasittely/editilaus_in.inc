@@ -21,28 +21,28 @@ if (trim($argv[1])!='') {
 
 // nollataan kaikki laskun muuttujat (nämä samat pitää tehdä whilen lopussa)
 unset($arow);
-$editilaus_tila       = "N"; // laskun tila
-$editilaus_tyyppi     = "L"; // tilausrivi tyyppi
-$id                   = "";
-$edi_kommentti        = "";
-$vastaustapa          = "";
-$maksaja              = "";
-$viite                = "";
-$viitetxt             = "";
-$editilaus_otsikko_ok = "";
-$suunnistus           = "";
-$tnimi                = "";
-$tnimitark            = "";
-$tpostitp             = "";
-$tpostino             = "";
-$tosoite              = "";
-$lopnumero            = "";
-$lopnimi              = "";
-$loppostitp           = "";
-$loppostino           = "";
-$loposoite            = "";
-$lopviesti            = "";
-$ketjutus             = "";
+$editilaus_tila       	= "N"; // laskun tila
+$editilaus_tyyppi     	= "L"; // tilausrivi tyyppi
+$id                   	= "";
+$edi_kommentti        	= "";
+$vastaustapa          	= "";
+$maksaja              	= "";
+$viite                	= "";
+$asiakkaan_tilausnumero	= "";
+$editilaus_otsikko_ok 	= "";
+$suunnistus           	= "";
+$tnimi                	= "";
+$tnimitark            	= "";
+$tpostitp             	= "";
+$tpostino             	= "";
+$tosoite              	= "";
+$lopnumero            	= "";
+$lopnimi              	= "";
+$loppostitp           	= "";
+$loppostino           	= "";
+$loposoite            	= "";
+$lopviesti            	= "";
+$ketjutus             	= "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror      = 1; // oletetaan aina ettei  tuotetta löydy
@@ -250,8 +250,8 @@ while (!feof ($fd)) {
 		case 'OBGMINUMB' :
 		case 'OSTOTIL.OT_NRO' :
 		//Asiakkkaan tilausnumero
-			$viitetxt = $tieto;
-			$viite    = $tieto. ' '; // laitetaan asiakkaan tilausnumero talteen myös tilausviite-kenttään
+			$asiakkaan_tilausnumero = $tieto;
+			$viite    				= $tieto. ' '; // laitetaan asiakkaan tilausnumero talteen myös tilausviite-kenttään
 			break;
 
 		case 'ORFFZZ1NU'  :
@@ -571,7 +571,7 @@ while (!feof ($fd)) {
 							sisviesti2         					= '$lopviesti',
 							yhtio 			   					= '$kukarow[yhtio]',
 							ytunnus			   					= '$arow[ytunnus]',
-							viitetxt		   					= '$viitetxt',
+							asiakkaan_tilausnumero		   		= '$asiakkaan_tilausnumero',
 							aktiivinen_kuljetus					= '$suunnistus',
 							kuljetusmuoto						= '$arow[kuljetusmuoto]',
 							kauppatapahtuman_luonne				= '$arow[kauppatapahtuman_luonne]',
@@ -847,33 +847,33 @@ while (!feof ($fd)) {
 
 			// nollataan kaikki laskun muuttujat (kaikki nämä samat pitää nollata filen alussa)
 			unset($arow);
-			$editilaus_tila       = "N"; // laskun tila
-			$editilaus_tyyppi     = "L"; // tilausrivi tyyppi
-			$id                   = "";
-			$edi_kommentti        = "";
-			$vastaustapa          = "";
-			$maksaja              = "";
-			$viite                = "";
-			$viitetxt             = "";
-			$editilaus_otsikko_ok = "";
-			$suunnistus           = "";
-			$tnimi                = "";
-			$tnimitark            = "";
-			$tpostitp             = "";
-			$tpostino             = "";
-			$tosoite              = "";
-			$lopnumero            = "";
-			$lopnimi              = "";
-			$loppostitp           = "";
-			$loppostino           = "";
-			$loposoite            = "";
-			$edi_nimitys          = "";
-			$olinsapi             = "";
-			$olinvarasto          = "";
-			$lopviesti            = "";
-			$edi_sarjanumero      = "";
-			$edi_hinta            = "";
-			$ketjutus             = "";
+			$editilaus_tila       	= "N"; // laskun tila
+			$editilaus_tyyppi     	= "L"; // tilausrivi tyyppi
+			$id                   	= "";
+			$edi_kommentti        	= "";
+			$vastaustapa          	= "";
+			$maksaja              	= "";
+			$viite                	= "";
+			$asiakkaan_tilausnumero	= "";
+			$editilaus_otsikko_ok 	= "";
+			$suunnistus           	= "";
+			$tnimi                	= "";
+			$tnimitark            	= "";
+			$tpostitp             	= "";
+			$tpostino             	= "";
+			$tosoite              	= "";
+			$lopnumero            	= "";
+			$lopnimi              	= "";
+			$loppostitp           	= "";
+			$loppostino           	= "";
+			$loposoite            	= "";
+			$edi_nimitys          	= "";
+			$olinsapi             	= "";
+			$olinvarasto          	= "";
+			$lopviesti            	= "";
+			$edi_sarjanumero      	= "";
+			$edi_hinta            	= "";
+			$ketjutus             	= "";
 
 			break;
 	}

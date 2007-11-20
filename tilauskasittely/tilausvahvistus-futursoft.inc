@@ -26,7 +26,7 @@ if (mysql_num_rows($tilvahresult) > 0) {
 	$ulos .= "*MS\n";
 	$ulos .= "*RS TILVAHV " . $laskurow['tunnus'] . "\n";
 	$ulos .= "TILVAHV.TLV_NRO:" . $laskurow['tunnus'] . "\n";
-	$ulos .= "TILVAHV.TLV_AS_TILAUSNRO:" . $laskurow['viitetxt'] . "\n";
+	$ulos .= "TILVAHV.TLV_AS_TILAUSNRO:" . $laskurow['asiakkaan_tilausnumero'] . "\n";
 	$ulos .= "TILVAHV.TLV_TOIM_TILAUSNRO:" . $laskurow['tunnus'] . "\n";
 	$ulos .= "TILVAHV.TLV_PVM:" . tv1dateconv($laskurow['luontiaika']) . "\n";
 	$ulos .= "TILVAHV.TLV_KLO:" . substr($laskurow['luontiaika'],-8,8) . "\n";
@@ -63,7 +63,7 @@ if (mysql_num_rows($tilvahresult) > 0) {
 		$ulos .= "TILVAHVRIV.TVR_NRO:"        . $laskurow['tunnus'] . "\n";
 		$ulos .= "TILVAHVRIV.TVR_RIVINRO:"    . $rivino . "\n";
 		$ulos .= "TILVAHVRIV.TVR_TIL_RIVINRO:". $tvtilausrivirow['tilaajanrivinro'] . "\n";
-		$ulos .= "TILVAHVRIV.TVR_TILAUSNRO:"  . $laskurow['viitetxt'] . "\n";
+		$ulos .= "TILVAHVRIV.TVR_TILAUSNRO:"  . $laskurow['asiakkaan_tilausnumero'] . "\n";
 		$ulos .= "TILVAHVRIV.TVR_TUOTEKOODI:" . $tvtilausrivirow['tuoteno'] . "\n";
 		$ulos .= "TILVAHVRIV.TVR_TILATTUKPL:" . $tvtilausrivirow['tilkpl'] . "\n";
 		$ulos .= "TILVAHVRIV.TVR_TOIMKPL:"    . $tvtilausrivirow['varattu'] . "\n";

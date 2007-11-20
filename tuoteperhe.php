@@ -409,12 +409,22 @@
 						</select></td>";
 
 				if($toim == "RESEPTI") {
-					$sel = array($faktarow["omasivu"] => "SELECTED");
+					if($faktarow["omasivu"] != "") {
+						$sel1 = "";
+						$sel2 = "SELECTED";
+					}
+					else {
+						$sel1 = "SELECTED";
+						$sel2 = "";	
+					}
+					
+					echo "faktarow".$faktarow["omasivu"];
+					
 					echo "<tr><th>".t("Reseptin tulostus").": </th></tr>";
 					echo "<tr><td>";
 					echo "	<select name='omasivu'>
-							<option value=''>".t("Resepti tulostetaan normaalisti")."</option>
-							<option value='E' {$sel["E"]}>".t("Resepti tulostetaan omalle sivulle")."</option>
+							<option value='' $sel1>".t("Resepti tulostetaan normaalisti")."</option>
+							<option value='X' $sel2>".t("Resepti tulostetaan omalle sivulle")."</option>
 							</select></td>";
 				}
 				

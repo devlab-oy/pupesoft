@@ -8,8 +8,12 @@
 
 		// Tämä on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
 		// eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä		
-		if (substr($tietue, 187, 1) > $omataso and $tunnus == 'T10' and substr($yritirow["tilino"],0,1) == "8") {
-			$kuittikoodi = 'E';
+		if (substr($tietue, 187, 1) > $omataso and $tunnus == 'T10') {
+			$kuittikoodi 	= 'E';
+			$erialla 		= "E";
+		}
+		else {
+			$erialla 		= "";
 		}
 
 		// Jossain erityistapauksissa täytyy erittely käsitellä. Niille löytyy syötetyt säännöt
@@ -216,33 +220,39 @@
 		else {
 			// Miksi ei tiliöity?
 			if ($kuittikoodi != ' ') {
-				echo "<font class='message'>".t("Hylätty, koska erittely tulossa")." ($kuittikoodi) </font>";
+				echo "<font class='message'>".t("Hylätty, koska erittely tulossa")." ($kuittikoodi) </font><br>";
 								
-				$query = "	SELECT * 
-							FROM tiliotedata
-							WHERE alku = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."' 
-							and tilino = '$tiliotedatarow[tilino]' 
-							and tyyppi = '3'
-							ORDER BY alku, tunnus";
-				$tiliointiresult = mysql_query($query) or pupe_error($query);
 				
-				if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {					
-					echo "<a href='tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]'>".t("Avaa viiteaineisto")."</a><br>";										
+				if ($erialla == "E") {
+					echo "<font class='message'>".t("Erittely alla").".</font><br>";
 				}
 				else {
 					$query = "	SELECT * 
 								FROM tiliotedata
 								WHERE alku = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."' 
 								and tilino = '$tiliotedatarow[tilino]' 
-								and tyyppi = '2'
+								and tyyppi = '3'
 								ORDER BY alku, tunnus";
 					$tiliointiresult = mysql_query($query) or pupe_error($query);
-
+				
 					if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {					
-						echo "<a href='tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]'>".t("Avaa LMP-erittely")."</a><br>";										
+						echo "<a href='tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]'>".t("Avaa viiteaineisto")."</a><br>";										
 					}
 					else {
-						echo "<font class='error'>".t("VIRHE: Erittely kateissa")."!</font><br>";	
+						$query = "	SELECT * 
+									FROM tiliotedata
+									WHERE alku = '".(substr($pvm,0,2)+2000)."-".substr($pvm,2,2)."-".substr($pvm,4,2)."' 
+									and tilino = '$tiliotedatarow[tilino]' 
+									and tyyppi = '2'
+									ORDER BY alku, tunnus";
+						$tiliointiresult = mysql_query($query) or pupe_error($query);
+
+						if ($tiliointirow = mysql_fetch_array ($tiliointiresult)) {					
+							echo "<a href='tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]'>".t("Avaa LMP-erittely")."</a><br>";										
+						}
+						else {
+							echo "<font class='error'>".t("VIRHE: Erittely kateissa")."!</font><br>";	
+						}
 					}
 				}
 			}
@@ -499,7 +509,7 @@
 			$koodi = substr($tietue, 49, 3);
 
 			// Sampo häkki
-			if ($koodi == '700' and substr($yritirow["tilino"],0,1) == "8") {
+			if ($koodi == '700') {
 				$koodi = '702';
 			}
 

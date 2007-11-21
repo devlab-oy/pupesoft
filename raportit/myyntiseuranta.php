@@ -1770,7 +1770,7 @@
 				</tr>\n";
 			echo "</table><br>";
 
-			nayta_kyselyt("myyntiseuranta");
+			echo nayta_kyselyt("myyntiseuranta");
 			
 			echo "<br>";
 			echo "<input type='submit' value='".t("Aja raportti")."'>";

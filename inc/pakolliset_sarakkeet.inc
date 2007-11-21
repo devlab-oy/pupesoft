@@ -122,7 +122,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$kielletyt = array();
 				break;
 			case "rekisteritiedot" :
-				$pakolliset = array("REKNO");
+				$pakolliset = array("REKNO","MAA");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
 			case "sanakirja" :

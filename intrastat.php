@@ -265,7 +265,7 @@
 			$ulos .= "<th>".t("KM")."</th>";
 			$ulos .= "<th>".t("Rivihinta")."</th>";
 			$ulos .= "<th>".t("Paino")."</th>";
-			$ulos .= "<th>".t("Toinen paljous")."</th>";
+			$ulos .= "<th>".t("2. paljous")."</th>";
 			$ulos .= "<th>".t("Kpl")."</th>";
 
 			if ($lisavar == "S") {
@@ -287,7 +287,7 @@
 				$worksheet->write($excelrivi, 9, "KM", $format_bold);
 				$worksheet->write($excelrivi, 10, "Rivihinta", $format_bold);
 				$worksheet->write($excelrivi, 11, "Paino", $format_bold);
-				$worksheet->write($excelrivi, 12, "Toinen paljous", $format_bold);
+				$worksheet->write($excelrivi, 12, "2. paljous", $format_bold);
 				$worksheet->write($excelrivi, 13, "Kpl", $format_bold);			
 				if($lisavar == "S") {
 					$worksheet->write($excelrivi, 12, "Tehdaslisävarusteet", $format_bold);

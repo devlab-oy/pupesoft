@@ -776,22 +776,49 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$result = mysql_query($tarq) or pupe_error($tarq);
 			$tarkrow = mysql_fetch_array($result);
 			$tunnus = $tarkrow["tunnus"];
-			for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
+			if($table == "tuotteen_toimittajat") {
+									
+				$tee = "tarkistus";
+				$tuoteno = $erivi[array_search("TUOTENO", $otsikot)];
+				$toimittaja = $erivi[array_search("TOIMITTAJA", $otsikot)];
+				$alkuperamaa = $erivi[array_search("ALKUPERAMAA", $otsikot)];
+				$toim_tuoteno = $erivi[array_search("TOIM_TUOTENO", $otsikot)];
 				
-				// Tarkistetaan saako käyttäjä päivittää tätä kenttää
-				$Lindexi = array_search(strtoupper(mysql_field_name($result, $i)), $otsikot);
-				if(isset($erivi[$Lindexi]) and $Lindexi !== false) {
-					$t[$i] = $erivi[$Lindexi];
-				}
-				else {
-					$t[$i] = $tarkrow[strtolower(mysql_field_name($result, $i))];
-				}
-				
-				require "inc/".$table."tarkista.inc";
+				$tpque = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$toimittaja' order by tunnus limit 1";
+				$tpres = mysql_query($tpque) or pupe_error($tpque);
 
-				if($virhe[$i] != "") {
-					echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
+				if (mysql_num_rows($tpres) == 1) {
+					$tprow = mysql_fetch_array($tpres);
+					$toimittajatunnus = $tprow["tunnus"];
 				}
+				
+				$lue_data_result = $result;
+				require "inc/".$table."tarkista.inc";
+				$result = $lue_data_result;
+				
+				if(count($toimerrorit[$toimtunnus]) > 0) {
+					$virhe[$i] = implode(",", $toimerrorit[$toimtunnus]);
+					$errori = 1;
+				}
+			}
+			else {
+				for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
+
+					// Tarkistetaan saako käyttäjä päivittää tätä kenttää
+					$Lindexi = array_search(strtoupper(mysql_field_name($result, $i)), $otsikot);
+					if(isset($erivi[$Lindexi]) and $Lindexi !== false) {
+						$t[$i] = $erivi[$Lindexi];
+					}
+					else {
+						$t[$i] = $tarkrow[strtolower(mysql_field_name($result, $i))];
+					}
+
+					require "inc/".$table."tarkista.inc";
+					
+					if($virhe[$i] != "") {
+						echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
+					}					
+				}				
 			}
 
 			if($errori != "") {

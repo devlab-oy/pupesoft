@@ -12,7 +12,7 @@
 
 	if (!function_exists('alku_purku')) {
 		function alku_purku () {
-			global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam;
+			global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli;
 
 			$firstpage = $pdf->new_page("11.5x8in");
 
@@ -56,31 +56,31 @@
 
 
 			$pdf->draw_rectangle(570, 20,  530, 808, $firstpage, 			$rectparam);
-			$pdf->draw_text(280, 555, t("PURKULISTA"), 						$firstpage);
+			$pdf->draw_text(280, 555, t("PURKULISTA", $kieli), 				$firstpage);
 			$pdf->draw_text(440, 555, $laskurow["nimi"], 					$firstpage);
 
-			$pdf->draw_text(155, 545, t("Sivu"), 							$firstpage, $pieni);
+			$pdf->draw_text(155, 545, t("Sivu", $kieli), 					$firstpage, $pieni);
 			$pdf->draw_text(155, 535, $sivu, 								$firstpage, $p);
 
-			$pdf->draw_text(280,  545, t("Keikkanumero"),					$firstpage, $pieni);
+			$pdf->draw_text(280,  545, t("Keikkanumero", $kieli),			$firstpage, $pieni);
 			$pdf->draw_text(280,  535, $laskurow["laskunro"],				$firstpage, $p);
 
-			$pdf->draw_text(440, 545, t("Ajoaika"), 						$firstpage, $pieni);
+			$pdf->draw_text(440, 545, t("Ajoaika", $kieli), 				$firstpage, $pieni);
 			$pdf->draw_text(440, 535, tv1dateconv(date("Y-m-d H:i"), 'P'), 	$firstpage, $p);
 
-			$pdf->draw_text(520, 545, t("Kommentti"), 						$firstpage, $pieni);
+			$pdf->draw_text(520, 545, t("Kommentti", $kieli), 				$firstpage, $pieni);
 			$pdf->draw_text(520, 535, $laskurow["comments"],				$firstpage, $p);
 
 			$pdf->draw_rectangle(530, 20,  510, 808, $firstpage, $rectparam);
-			$pdf->draw_text(30,  520, t("Toimittajan koodi"),	$firstpage, $pieni);
-			$pdf->draw_text(155, 520, t("Tuotekoodi"),			$firstpage, $pieni);
-			$pdf->draw_text(280, 520, t("Nimitys"),				$firstpage, $pieni);
-			$pdf->draw_text(440, 520, t("Paikka(o.saldo)"),		$firstpage, $pieni);
-			$pdf->draw_text(520, 520, t("Yksikkö"),				$firstpage, $pieni);
-			$pdf->draw_text(570, 520, t("Määrä"),				$firstpage, $pieni);
-			$pdf->draw_text(620, 520, t("Kerroin"),				$firstpage, $pieni);
-			$pdf->draw_text(675, 520, t("Toim.Määrä"),			$firstpage, $pieni);
-			$pdf->draw_text(750, 520, t("Ostotilaus"),			$firstpage, $pieni);
+			$pdf->draw_text(30,  520, t("Toimittajan koodi", $kieli),	$firstpage, $pieni);
+			$pdf->draw_text(155, 520, t("Tuotekoodi", $kieli),			$firstpage, $pieni);
+			$pdf->draw_text(280, 520, t("Nimitys", $kieli),				$firstpage, $pieni);
+			$pdf->draw_text(440, 520, t("Paikka(o.saldo)", $kieli),		$firstpage, $pieni);
+			$pdf->draw_text(520, 520, t("Yksikkö", $kieli),				$firstpage, $pieni);
+			$pdf->draw_text(570, 520, t("Määrä", $kieli),				$firstpage, $pieni);
+			$pdf->draw_text(620, 520, t("Kerroin", $kieli),				$firstpage, $pieni);
+			$pdf->draw_text(675, 520, t("Toim.Määrä", $kieli),			$firstpage, $pieni);
+			$pdf->draw_text(750, 520, t("Ostotilaus", $kieli),			$firstpage, $pieni);
 
 			$pdf->draw_rectangle(530, 20, 10, 808, $firstpage, $rectparam);
 
@@ -90,7 +90,7 @@
 
 	if (!function_exists('print_pdf_purku')) {
 		function print_pdf_purku () {
-			global $pdf, $kukarow, $yhtiorow, $komento, $otunnus, $tee;
+			global $pdf, $kukarow, $yhtiorow, $komento, $otunnus, $tee, $kieli;
 
 			//keksitään uudelle failille joku varmasti uniikki nimi:
 			list($usec, $sec) = explode(' ', microtime());
@@ -277,13 +277,13 @@
 
 			while ($sarjarow = mysql_fetch_array($sarjares)) {
 				if ($row["sarjanumeroseuranta"] == "S") {
-					$row["kommentti"] .= " \n".t("S:nro").": ".$sarjarow["sarjanumero"];		
+					$row["kommentti"] .= " \n".t("S:nro", $kieli).": ".$sarjarow["sarjanumero"];		
 				}
 				elseif ($row["sarjanumeroseuranta"] == "E") {
-					$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"];	
+					$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"];	
 				}
 				elseif ($row["sarjanumeroseuranta"] == "F") {
-					$row["kommentti"] .= " \n".t("Erä").": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen").": ".tv1dateconv($sarjarow["parasta_ennen"]);	
+					$row["kommentti"] .= " \n".t("Erä", $kieli).": ".$sarjarow["sarjanumero"]." ".t("Parasta ennen", $kieli).": ".tv1dateconv($sarjarow["parasta_ennen"]);	
 				}
 			}
 		}
@@ -308,15 +308,15 @@
 	$pdf->draw_line($x, $y, $firstpage, $rectparam);
 	
 	$sumarum = sprintf('%.2f',$sumarum);
-	$pdf->draw_text(520,  $kala, t("Yhteensä"),	$firstpage, $p);
+	$pdf->draw_text(520,  $kala, t("Yhteensä", $kieli),	$firstpage, $p);
 	$pdf->draw_text(570,  $kala, $sumarum,	$firstpage, $p);
 	
 	$pdf->draw_rectangle(40, 20,  10, 200, $firstpage, $rectparam);
 	$pdf->draw_rectangle(40, 200, 10, 808, $firstpage, $rectparam);
 	$pdf->draw_rectangle(40, 500, 10, 808, $firstpage, $rectparam);
-	$pdf->draw_text(30,   30, t("Päivämäärä ja aika"),	$firstpage, $pieni);
-	$pdf->draw_text(210,  30, t("Allekirjoitus"),	$firstpage, $pieni);
-	$pdf->draw_text(504,  30, t("Nimenselvennys"),	$firstpage, $pieni);
+	$pdf->draw_text(30,   30, t("Päivämäärä ja aika", $kieli),	$firstpage, $pieni);
+	$pdf->draw_text(210,  30, t("Allekirjoitus", $kieli),	$firstpage, $pieni);
+	$pdf->draw_text(504,  30, t("Nimenselvennys", $kieli),	$firstpage, $pieni);
 
 	//kutsutaan lopuksi vielä print_pdf_purku funktiota
 	print_pdf_purku();

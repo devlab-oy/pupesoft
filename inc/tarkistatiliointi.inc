@@ -53,7 +53,7 @@
 	}
 
 	$summa += 0;
-	if ($summa == 0) {
+	if ($summa == 0 and $mistatullaan != 'ulask.php') {
 		$virhe = "".t("Summa puuttuu")."!";
 		$ok = 1;
 	}

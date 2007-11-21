@@ -249,11 +249,12 @@ if ($tee == 'I') {
 			}
 		}
 	}
-
-	if ($summa == 0) {
+	
+	// tämä poistuu nyt, pitää pystyä syöttämään nollalasku. its the laaawwww! 
+	/*if ($summa == 0) {
 		$errormsg .= "<font class='error'>".t("Laskulta puuttuu summa")."</font><br>";
 		$tee = 'E';
-	}
+	}*/
 
 	if ($luouusikeikka == "LUO" and $vienti != "C" and $vienti != "J" and $vienti != "F" and $vienti != "K" and $vienti != "I" and $vienti != "L") {
 		$errormsg .= "<font class='error'>".t("Keikkaa ei voi perustaa kululaskulle")."</font><br>";
@@ -321,6 +322,7 @@ if ($tee == 'I') {
 			$tili = $itili[$i];
 			$summa = $isumma[$i];
 			$selausnimi = 'itili[' . $i .']'; // Minka niminen mahdollinen popup on?
+			$mistatullaan = 'ulask.php'; // koska nykyään on sallittua syöttää nollalasku, eli tässä tapauksessa ei sallita että kaadutaan tilioinnin summan puuttumiseen
 			$ulos=''; // Mahdollinen popup tyhjennetaan
 			require "inc/tarkistatiliointi.inc";
 

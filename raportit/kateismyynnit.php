@@ -4,7 +4,7 @@
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Käteismyynnit")." $myy:</font><hr>";
-
+	
 	if ($tee != '') {
 
 		//Jos halutaa failiin
@@ -75,7 +75,7 @@
 
 
 		//Haetaan käteislaskut
-		$query = "	SELECT lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.tapvm,
+		$query = "	SELECT lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.laskutettu,
 					if(kuka.kassamyyja is null or kuka.kassamyyja='', 'Muut', kuka.kassamyyja) kassa, kuka.nimi myyja,
 					if(!isnull(avainsana.selitetark),avainsana.selitetark, 'Muut') kassanimi
 					FROM lasku use index (yhtio_tila_tapvm)
@@ -84,8 +84,8 @@
 					LEFT JOIN avainsana ON avainsana.yhtio=lasku.yhtio and avainsana.laji='KASSA' and avainsana.selite=kuka.kassamyyja
 					WHERE
 					lasku.yhtio = '$kukarow[yhtio]'
-					and tapvm >= '$vva-$kka-$ppa'
-					and tapvm <= '$vvl-$kkl-$ppl'
+					and laskutettu >= '$vva-$kka-$ppa'
+					and laskutettu <= '$vvl-$kkl-$ppl'
 					and lasku.tila	= 'U'
 					and lasku.alatila = 'X'
 					$lisa
@@ -93,6 +93,7 @@
 					$kassat
 					ORDER BY kassa, laskunro";
 		$result = mysql_query($query) or pupe_error($query);
+
 
 		echo "	<table><tr>
 				<th nowrap>".t("Kassa")."</th>
@@ -152,7 +153,7 @@
 			echo "<td>".substr($row["nimi"],0,23)."</td>";
 			echo "<td>$row[ytunnus]</td>";
 			echo "<td>$row[laskunro]</td>";
-			echo "<td>".tv1dateconv($row["tapvm"])."</td>";
+			echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 			echo "<td align='right'>".str_replace(".",",",$row['summa'])."</td></tr>";
 
 			if ($vaiht == 1) {
@@ -164,7 +165,7 @@
 				$prn .= sprintf ('%-25.25s', 	substr($row["nimi"],0,23));
 				$prn .= sprintf ('%-10.10s', 	$row["ytunnus"]);
 				$prn .= sprintf ('%-12.12s', 	$row["laskunro"]);
-				$prn .= sprintf ('%-12.12s', 	tv1dateconv($row["tapvm"]));
+				$prn .= sprintf ('%-19.19s', 	tv1dateconv($row["laskutettu"], "pitka"));
 				$prn .= str_replace(".",",",sprintf ('%-13.13s', 	$row["summa"]));
 				$prn .= "\n";
 
@@ -193,15 +194,15 @@
 
 		if ($katsuori != '') {
 			//Haetaan kassatilille laitetut suoritukset
-			$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa, lasku.tapvm
+			$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa, lasku.laskutettu
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tiliointi use index (tositerivit_index) ON tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino='$yhtiorow[kassa]'
 						JOIN suoritus use index (tositerivit_index) ON suoritus.yhtio=tiliointi.yhtio and suoritus.ltunnus=tiliointi.aputunnus
 						LEFT JOIN kuka ON lasku.laatija=kuka.kuka and lasku.yhtio=kuka.yhtio
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila	= 'X'
-						and lasku.tapvm >= '$vva-$kka-$ppa'
-						and lasku.tapvm <= '$vvl-$kkl-$ppl'
+						and lasku.laskutettu >= '$vva-$kka-$ppa'
+						and lasku.laskutettu <= '$vvl-$kkl-$ppl'
 						ORDER BY lasku.laskunro";
 			$result = mysql_query($query) or pupe_error($query);
 			
@@ -214,7 +215,7 @@
 				echo "<td>".substr($row["nimi"],0,23)."</td>";
 				echo "<td>$row[ytunnus]</td>";
 				echo "<td>$row[laskunro]</td>";
-				echo "<td>".tv1dateconv($row["tapvm"])."</td>";
+				echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
 				echo "<td align='right'>".str_replace(".",",",$row['summa'])."</td></tr>";
 
 				if ($vaiht == 1) {
@@ -226,7 +227,7 @@
 					$prn .= sprintf ('%-25.25s', 	substr($row["nimi"],0,23));
 					$prn .= sprintf ('%-10.10s', 	$row["ytunnus"]);
 					$prn .= sprintf ('%-12.12s', 	$row["laskunro"]);
-					$prn .= sprintf ('%-12.12s', 	tv1dateconv($row["tapvm"]));
+					$prn .= sprintf ('%-19.19s', 	tv1dateconv($row["laskutettu"], "pitka"));
 					$prn .= str_replace(".",",",sprintf ('%-13.13s', 	$row["summa"]));
 					$prn .= "\n";
 

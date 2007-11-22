@@ -118,6 +118,7 @@
 						FROM tili
 						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
 			$vresult = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($vresult) == 1) {
 				$vrow=mysql_fetch_array($vresult);
 				$ulos .= " " . $vrow[nimi] . "</td>";

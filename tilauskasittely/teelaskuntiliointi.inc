@@ -25,9 +25,11 @@ $query = "	SELECT tilausrivi.alv,
 			sum(tilausrivi.kate) kate,
 			sum(if(tuote.ei_saldoa='', tilausrivi.rivihinta-tilausrivi.kate,0)) varmuutos,
 			GROUP_CONCAT(tilausrivi.tunnus SEPARATOR ',') tunnukset,
-			if(tilausrivi.alv >= 500 and tilausrivi.kpl < 0, 'KYLLA', 'EI') marginaaliostot
+			if(tilausrivi.alv >= 500 and tilausrivi.kpl < 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'O', 'KYLLA', 'EI') marginaaliostot,
+			if(tilausrivi.alv >= 500 and tilausrivi.kpl > 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', 'KYLLA', 'EI') marginaalihyvitys
 			FROM tilausrivi
 			JOIN lasku on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+			LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)			
 			LEFT JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno)
 			LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio and tuotteen_alv.tuoteno = tilausrivi.tuoteno and tuotteen_alv.maa = '$lasku[maa]' and tuotteen_alv.maa != '')
 			LEFT JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = tilausrivi.yhtio and yhtion_toimipaikat.tunnus = '$lasku[yhtio_toimipaikka]')
@@ -35,7 +37,7 @@ $query = "	SELECT tilausrivi.alv,
 			WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
 			and tilausrivi.tyyppi		 = 'L'
 			and tilausrivi.yhtio		 = '$kukarow[yhtio]'
-			GROUP BY tilausrivi.alv, marginaaliostot, tuote.tilino, tuote.tilino_eu, tuote.tilino_ei_eu, tuote.kustp, tuote.kohde, tuote.projekti";
+			GROUP BY tilausrivi.alv, marginaaliostot, marginaalihyvitys, tuote.tilino, tuote.tilino_eu, tuote.tilino_ei_eu, tuote.kustp, tuote.kohde, tuote.projekti";
 $xresult = mysql_query($query) or pupe_error($query);
 
 $onkoalvia = ""; // apumuuttuja, että tiedetään onko alvillista
@@ -63,7 +65,7 @@ else {
 		$projekti		= 0;
 
 		// Valitaan myyntitili, jos rivillä on alv yli 500 niin kyseessä on marginaalimyyntiä
-		if ($xrow["alv"] >= 500 and $xrow["marginaaliostot"] == "EI") {
+		if ($xrow["alv"] >= 500 and $xrow["marginaaliostot"] == "EI" and $xrow["marginaalihyvitys"] == "EI") {
 			// Valitaan myyntitili, tässä on marginaalimyyntiä
 			$selite 	= "Marginaaliverolasku/Myynti ". $lasku['nimi']." ".$lasku['nimitark'];
 
@@ -106,7 +108,7 @@ else {
 			$alv = round($tiliointisumma - ($tiliointisumma / (1+ $xrow['alv'] / 100)), 2);
 			$tiliointisumma -= $alv;
 		}
-		elseif ($xrow["alv"] >= 500 and $xrow["marginaaliostot"] == "KYLLA") {
+		elseif ($xrow["alv"] >= 500 and ($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA")) {
 			// Valitaan ostotili, tässä on marginaaliostoa
 			$selite 		= "Marginaaliverolasku/Osto ". $lasku['nimi']." ".$lasku['nimitark'];
 
@@ -259,7 +261,7 @@ else {
 		// Kirjataan varastonmuutos, jos sita on
 		if ($varmuutos != 0) {
 
-			if($xrow["marginaaliostot"] == "KYLLA") {
+			if($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA") {
 				$selite		= "Varastoontulo ". $lasku['nimi'];
 			}
 			else {

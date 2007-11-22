@@ -525,9 +525,9 @@ if ($tee=='MONISTA') {
 								break;
 							case 'osto_vai_hyvitys':
 								if ($monistarow2[$i] == "O" and $kumpi == 'HYVITA') {
-									$kysely .= mysql_field_name($monistares2, $i)."='',";	
+									$kysely .= mysql_field_name($monistares2, $i)."='H',";	
 								}
-								elseif ($monistarow2[$i] == "" and $kumpi == 'HYVITA') {
+								elseif ($monistarow2[$i] == "H" and $kumpi == 'HYVITA') {
 									$kysely .= mysql_field_name($monistares2, $i)."='O',";	
 								}
 								else {

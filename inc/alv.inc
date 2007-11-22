@@ -89,18 +89,73 @@
 
 		if ($ruotsi != 'on') {
 
-			$query = "	SELECT if(lasku.tila='U','".t("myyntireskontra")."', if(lasku.tila='X','".t("muu")."','".t("ostoreskontra")."')) tyyppi, vero,
+			$query = "	(SELECT '".t("myyntireskontra")."' AS tyyppi, vero,
 						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
 						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
 						FROM tiliointi
-						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tila = 'U')
 						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
 						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
 						tiliointi.korjattu = '' and
 						tiliointi.tapvm >= '$alvv-$alvk-01' and
 						tiliointi.tapvm < '$alloppu' and
 						tiliointi.vero > 0
-						group by tyyppi, vero";
+						group by 1, 2)
+						UNION
+						(SELECT '".t("muu")."'AS tyyppi, vero,
+						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
+						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tila = 'X')
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+						tiliointi.korjattu = '' and
+						tiliointi.tapvm >= '$alvv-$alvk-01' and
+						tiliointi.tapvm < '$alloppu' and
+						tiliointi.vero > 0
+						group by 1, 2)
+						UNION
+						(SELECT '".t("ostoreskontra")."' AS tyyppi, vero,
+						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
+						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tila in ('H','Y','M','P','Q'))
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+						tiliointi.korjattu = '' and
+						tiliointi.tapvm >= '$alvv-$alvk-01' and
+						tiliointi.tapvm < '$alloppu' and
+						tiliointi.vero > 0
+						group by 1, 2)
+						UNION
+						(SELECT concat('".t("yhteisömyynnit")."',' ','".t("tili")."',': ',yhtio.myynti_eu) AS tyyppi, vero,
+						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
+						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tila='U' and lasku.vienti = 'E')
+						JOIN yhtio ON (yhtio.yhtio = tiliointi.yhtio and tiliointi.tilino = yhtio.myynti_eu)
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+						tiliointi.korjattu = '' and
+						tiliointi.tapvm >= '$alvv-$alvk-01' and
+						tiliointi.tapvm < '$alloppu' and
+						tiliointi.vero = 0
+						group by 1, 2)
+						UNION
+						(SELECT concat('".t("yhteisöostot")."',' ','".t("tili")."',': ',yhtio.osto_eu) AS tyyppi, vero,
+						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
+						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
+						FROM tiliointi
+						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.tila in ('H','Y','M','P','Q') and vienti = 'F')
+						JOIN yhtio ON (yhtio.yhtio = tiliointi.yhtio and tiliointi.tilino = yhtio.osto_eu)
+						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
+						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
+						tiliointi.korjattu = '' and
+						tiliointi.tapvm >= '$alvv-$alvk-01' and
+						tiliointi.tapvm < '$alloppu' and
+						tiliointi.vero = 0
+						group by 1, 2)
+						order by 1, 2";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<table><tr>";

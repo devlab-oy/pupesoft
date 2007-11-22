@@ -84,7 +84,7 @@ if (!function_exists("dateconv")) {
 if (!function_exists("t")) {
 	function t($stringi, $kieli = "") {
 		// tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
-		global $yhtiorow, $kukarow, $useslave, $link;
+		global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa;
 
 		require("salasanat.php");
 
@@ -125,10 +125,12 @@ if (!function_exists("t")) {
 				}
 
 				//Päivitetään aikaleima
-				$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
-				$sanakirjaresultupd = mysql_query($sanakirjaqueryupd, $link) or pupe_error($sanakirjaqueryupd);
+				if ($verkkokauppa == "") { 
+					$sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
+					$sanakirjaresultupd = mysql_query($sanakirjaqueryupd, $link) or pupe_error($sanakirjaqueryupd);
+				}
 			}
-			else {
+			elseif ($verkkokauppa == "") {
 				$sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
 				$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
 			}

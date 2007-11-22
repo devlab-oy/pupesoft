@@ -456,17 +456,17 @@
 				<th colspan='2' align='left' valign='top'>&nbsp;".t("Laskutusosoite").":</td></tr>";
 		echo "<tr>
 				<td valign='top'>".t("Nimi").": </td>
-				<td><input type='text' name='nimi' size='35' maxlength='31' value='$srow[nimi]'></td></tr>";
+				<td><input type='text' name='nimi' size='35' value='$srow[nimi]'></td></tr>";
 		echo "<tr>
 				<td></td>
-				<td><input type='text' name='nimitark' size='35' maxlength='31'  value='$srow[nimitark]'></td></tr>";
+				<td><input type='text' name='nimitark' size='35' value='$srow[nimitark]'></td></tr>";
 		echo "<tr>
 				<td valign='top'>".t("Osoite").": </td>
-				<td><input type='text' name='osoite' size='35' maxlength='31' value='$srow[osoite]'></td></tr>";
+				<td><input type='text' name='osoite' size='35' value='$srow[osoite]'></td></tr>";
 
 		echo "<tr>
 				<td valign='top'>".t("Postitp").": </td>
-				<td><input type='text' name='postino' size='10' maxlength='15' value='$srow[postino]'> <input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'></td></tr>";
+				<td><input type='text' name='postino' size='10' value='$srow[postino]'> <input type='text' name='postitp' size='21' value='$srow[postitp]'></td></tr>";
 
 		if ($templ > 0 and $asiakasid == '') {
 			echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM! Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
@@ -520,16 +520,16 @@
 					<th colspan='2' align='left' valign='top'>&nbsp; ".t("Toimitusosoite").":</td></tr>";
 			echo "<tr>
 					<td valign='top'> ".t("Nimi").": </td>
-					<td><input type='text' name='tnimi' size='35' maxlength='31' value='$srow[toim_nimi]'></td></tr>";
+					<td><input type='text' name='tnimi' size='35' value='$srow[toim_nimi]'></td></tr>";
 			echo "<tr>
 					<td></td>
-					<td><input type='text' name='tnimitark' size='35' maxlength='31'  value='$srow[toim_nimitark]'></td></tr>";
+					<td><input type='text' name='tnimitark' size='35' value='$srow[toim_nimitark]'></td></tr>";
 			echo "<tr>
 					<td valign='top'>".t("Osoite").": </td>
-					<td><input type='text' name='tosoite' size='35' maxlength='31' value='$srow[toim_osoite]'></td></tr>";
+					<td><input type='text' name='tosoite' size='35' value='$srow[toim_osoite]'></td></tr>";
 			echo "<tr>
 					<td valign='top'>".t("Postitp").": </td>
-					<td><input type='text' name='tpostino' size='10' maxlength='15' value='$srow[toim_postino]'> <input type='text' name='tpostitp' size='21' maxlength='20' value='$srow[toim_postitp]'></td></tr>";
+					<td><input type='text' name='tpostino' size='10' value='$srow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$srow[toim_postitp]'></td></tr>";
 			echo "</table>";
 			echo "</td>";
 			
@@ -540,16 +540,16 @@
 						<th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
 				echo "<tr>
 						<td valign='top'> ".t("Nimi").": </td>
-						<td><input type='text' name='laskutus_nimi' size='35' maxlength='31' value='$srow[laskutus_nimi]'></td></tr>";
+						<td><input type='text' name='laskutus_nimi' size='35' value='$srow[laskutus_nimi]'></td></tr>";
 				echo "<tr>
 						<td></td>
-						<td><input type='text' name='laskutus_nimitark' size='35' maxlength='31'  value='$srow[laskutus_nimitark]'></td></tr>";
+						<td><input type='text' name='laskutus_nimitark' size='35' value='$srow[laskutus_nimitark]'></td></tr>";
 				echo "<tr>
 						<td valign='top'>".t("Osoite").": </td>
-						<td><input type='text' name='laskutus_osoite' size='35' maxlength='31' value='$srow[laskutus_osoite]'></td></tr>";
+						<td><input type='text' name='laskutus_osoite' size='35' value='$srow[laskutus_osoite]'></td></tr>";
 				echo "<tr>
 						<td valign='top'>".t("Postitp").": </td>
-						<td><input type='text' name='laskutus_postino' size='10' maxlength='15' value='$srow[laskutus_postino]'> <input type='text' name='laskutus_postitp' size='21' maxlength='20' value='$srow[laskutus_postitp]'></td></tr>";
+						<td><input type='text' name='laskutus_postino' size='10' value='$srow[laskutus_postino]'> <input type='text' name='laskutus_postitp' size='21' value='$srow[laskutus_postitp]'></td></tr>";
 						
 				$query = "	SELECT distinct koodi, nimi
 							FROM maat
@@ -591,16 +591,16 @@
 							<th colspan='2' align='left' valign='top'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
 					echo "<tr>
 							<td valign='top'> ".t("Nimi").": </td>
-							<td><input type='text' name='kolm_nimi' size='35' maxlength='31' value='$srow[kolm_nimi]'></td></tr>";
+							<td><input type='text' name='kolm_nimi' size='35' value='$srow[kolm_nimi]'></td></tr>";
 					echo "<tr>
 							<td></td>
-							<td><input type='text' name='kolm_nimitark' size='35' maxlength='31'  value='$srow[kolm_nimitark]'></td></tr>";
+							<td><input type='text' name='kolm_nimitark' size='35' value='$srow[kolm_nimitark]'></td></tr>";
 					echo "<tr>
 							<td valign='top'>".t("Osoite").": </td>
-							<td><input type='text' name='kolm_osoite' size='35' maxlength='31' value='$srow[kolm_osoite]'></td></tr>";
+							<td><input type='text' name='kolm_osoite' size='35' value='$srow[kolm_osoite]'></td></tr>";
 					echo "<tr>
 							<td valign='top'>".t("Postitp").": </td>
-							<td><input type='text' name='kolm_postino' size='6' maxlength='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' maxlength='20' value='$srow[kolm_postitp]'></td></tr>";
+							<td><input type='text' name='kolm_postino' size='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' value='$srow[kolm_postitp]'></td></tr>";
 					echo "</table>";
 				echo "</td><td>";
 					echo "<table cellpadding='1' cellspacing='1'>";

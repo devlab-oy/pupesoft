@@ -1573,7 +1573,7 @@
 						while($row = mysql_fetch_array($yresult)) {
 							$sel = "";
 
-							if ($row['selite'] == $srow[$kentta]) {
+							if ($row['kuka'] == $srow[$kentta]) {
 								$sel = 'selected';
 							}
 							

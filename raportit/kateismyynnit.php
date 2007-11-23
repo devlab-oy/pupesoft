@@ -75,7 +75,7 @@
 
 
 		//Haetaan käteislaskut
-		$query = "	SELECT lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.laskutettu,
+		$query = "	SELECT lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.laskutettu, lasku.tapvm,
 					if(kuka.kassamyyja is null or kuka.kassamyyja='', 'Muut', kuka.kassamyyja) kassa, kuka.nimi myyja,
 					if(!isnull(avainsana.selitetark),avainsana.selitetark, 'Muut') kassanimi
 					FROM lasku use index (yhtio_tila_tapvm)
@@ -84,8 +84,8 @@
 					LEFT JOIN avainsana ON avainsana.yhtio=lasku.yhtio and avainsana.laji='KASSA' and avainsana.selite=kuka.kassamyyja
 					WHERE
 					lasku.yhtio = '$kukarow[yhtio]'
-					and laskutettu >= '$vva-$kka-$ppa'
-					and laskutettu <= '$vvl-$kkl-$ppl'
+					and tapvm >= '$vva-$kka-$ppa'
+					and tapvm <= '$vvl-$kkl-$ppl'
 					and lasku.tila	= 'U'
 					and lasku.alatila = 'X'
 					$lisa

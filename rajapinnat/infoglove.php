@@ -45,7 +45,7 @@ foreach ($keissit as $keissi) {
 						and lasku.tila = 'U' and lasku.alatila = 'X'";
 			break;
 		case "Myynti" :
-			$query =	"SELECT lasku.tapvm, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.kate, tuote.kehahin, tilausrivi.tuoteno, lasku.selaus AS asiakasnro, if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp, lasku.laskunro
+			$query =	"SELECT lasku.tapvm, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.kate, tuote.kehahin, tilausrivi.tuoteno, asiakas.selaus AS asiakasnro, if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp, lasku.laskunro
 						FROM lasku
 						JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus
 						LEFT JOIN tuote ON lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -113,7 +113,7 @@ foreach ($keissit as $keissi) {
 						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
 						if(tilausrivi.laskutettu!='',tilausrivi.rivihinta-tilausrivi.kate,round(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt),6)) AS 'keskihinta',
 						tilausrivi.tuoteno, 
-						lasku.selaus AS asiakasnro,
+						asiakas.selaus AS asiakasnro,
 						if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp,
 						lasku.tunnus
 						FROM lasku

@@ -22,14 +22,14 @@ if ($kausi == "") {
 function teetietue ($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, $projekti, $ytunnus, $nimi, $selite) {
 	//Kustannuspaikan koodien haku - start
 	//$query = "SELECT nimi FROM kustannuspaikka WHERE yhtio = '$yhtio' and tunnus = '$kustp'";
-	$query = "SELECT tarkenne FROM kustannuspaikka WHERE yhtio = '$yhtio' and tunnus = '$kustp'";
+	$query = "SELECT nimi FROM kustannuspaikka WHERE yhtio = '$yhtio' and tunnus = '$kustp'";
 	$vresult = mysql_query($query)
 				or die ("Kysely ei onnistu $query");
 	$kustprow = mysql_fetch_array($vresult);
 
 	//Projekti
 	//$query = "SELECT nimi FROM kustannuspaikka WHERE yhtio = '$yhtio' and tunnus = '$projekti'";
-	$query = "SELECT tarkenne FROM kustannuspaikka WHERE yhtio = '$yhtio' and tunnus = '$projekti'";
+	$query = "SELECT nimi FROM kustannuspaikka WHERE yhtio = '$yhtio' and tunnus = '$projekti'";
 	$vresult = mysql_query($query)
 				or die ("Kysely ei onnistu $query");
 	$projprow = mysql_fetch_array($vresult);
@@ -41,10 +41,10 @@ function teetietue ($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, 
 	$ulos .= sprintf ('%03d', '0'); 				//???? tositenumeron tarkenne 1
 	$ulos .= sprintf ('%03d', '0'); 				//???? tositenumeron tarkenne 2
 	$ulos .= sprintf ('%06d', $tilino);				//tili
-	if ((int) $kustprow['tarkenne']==0) $kustprow['tarkenne'] = ""; //tsekataan ettei seurantakohteille  tule turhia etunollia
-		$ulos .= sprintf ('%6.6s', $kustprow['tarkenne']);
-	if ((int) $projprow['tarkenne']==0) $projprow['tarkenne'] = ""; //tsekataan ettei seurantakohteille  tule turhia etunollia
-		$ulos .= sprintf ('%6.6s', $projprow['tarkenne']);
+	if ((int) $kustprow['nimi']==0) $kustprow['nimi'] = ""; //tsekataan ettei seurantakohteille  tule turhia etunollia
+		$ulos .= sprintf ('%6.6s', $kustprow['nimi']);
+	if ((int) $projprow['nimi']==0) $projprow['nimi'] = ""; //tsekataan ettei seurantakohteille  tule turhia etunollia
+		$ulos .= sprintf ('%6.6s', $projprow['nimi']);
 	$ulos .= sprintf ('%-10s', ' '); 				//???? projektilaji
 	$ulos .= sprintf ('%04d', $row['jakso']);			//jakso
 	if ($summa > 0) {
@@ -238,7 +238,7 @@ $query  = "	SELECT lasku.tapvm, nimi, lasku.summa, lasku.tunnus, count(*) kpl
 				korjattu = ''
 			WHERE lasku.yhtio='$kukarow[yhtio]'
 			and ((left(lasku.tapvm,7)='$kausi') or (left(lasku.tapvm,7)='$kausi'))
-			and tila != 'X' and lasku.tila != 'D'
+			and lasku.tila IN ('H','M','P','Q''Y','U')
 			GROUP BY 1,2,3,4
 			HAVING kpl < 2";
 
@@ -274,6 +274,7 @@ $query  = "	SELECT lasku.tapvm, nimi, lasku.summa, lasku.tunnus, count(*) kpl
 			WHERE lasku.yhtio='$kukarow[yhtio]'
 			and ((left(lasku.tapvm,7)='$kausi') or (left(lasku.tapvm,7)='$kausi'))
 			and mapvm != '0000-00-00'
+			and lasku.tila IN ('H','M','P','Q''Y','U')
 			GROUP BY 1,2,3,4
 			HAVING kpl < 2";
 
@@ -310,7 +311,7 @@ if ($tikonerr!=0) {
 // ORIG $nimi = '/var/data/tikon_out/TIKON-' . $yhtio . "-" . date("ymd.His-s") . ".dat";
 //$nimi = "/var/data/tikon_out/TIKON-" . $kukarow['yhtio'] . "-" . date("ymd.His-s") .".dat";
 
-$nimi = "/var/data/tikon_out/$kukarow[yhtio]/TIKON-$kukarow[yhtio]-".date("ymd.His-s").".dat";
+$nimi = "data/tikon_out/$kukarow[yhtio]/TIKON-$kukarow[yhtio]-".date("ymd.His-s").".dat";
 
 $hakemisto = dirname($nimi);
 if (!is_dir($hakemisto)) {
@@ -335,10 +336,9 @@ echo "<br><br>Raportti otettu $today.<br><br>";
 $query  = "	SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm,
 			date_format(tiliointi.tapvm, '%y%m') jakso, tilino, kustp, projekti, tiliointi.summa
 			summa, selite, ytunnus, ltunnus, mapvm, tiliointi.tunnus tunnus, lasku.laskunro laskunro, nimi
-			FROM tiliointi, lasku
-			WHERE tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.yhtio=lasku.yhtio
-			and lasku.tunnus=tiliointi.ltunnus and tosite='' and lasku.tila='L'
-			and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			FROM tiliointi
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and tosite='' and lasku.tila='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			WHERE tiliointi.yhtio='$kukarow[yhtio]'
 			ORDER BY ltunnus, tiliointi.tapvm, tilino, kustp, projekti";
 
 $result_ms = mysql_query($query) or pupe_error($query);
@@ -353,11 +353,9 @@ echo "Myyntisaamisia ".mysql_num_rows($result_ms)." kappaletta<br>";
 $query  = "	SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm,
 			date_format(tiliointi.tapvm, '%y%m') jakso, tilino, kustp, projekti, tiliointi.summa
 			summa, selite, ytunnus, ltunnus, mapvm, tiliointi.tunnus tunnus, nimi
-			FROM tiliointi, lasku
-			WHERE tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.yhtio=lasku.yhtio
-			and lasku.tunnus=tiliointi.ltunnus and tosite=''
-			and lasku.tila!='X' and lasku.tila!='L'
-			and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			FROM tiliointi
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and tosite='' and lasku.tila!='X' and lasku.tila!='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			WHERE tiliointi.yhtio='$kukarow[yhtio]'
 			ORDER BY ltunnus, tiliointi.tapvm, tilino, kustp, projekti";
 
 $result_ov = mysql_query($query) or pupe_error($query);
@@ -372,11 +370,9 @@ echo "Ostovelkoja, ".mysql_num_rows($result_ov)." kappaletta<br>";
 $query  = "	SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm,
 			date_format(tiliointi.tapvm, '%y%m') jakso, tilino, kustp, projekti,tiliointi.summa
 			summa, selite, ytunnus, ltunnus, mapvm, tiliointi.tunnus tunnus
-			FROM tiliointi, lasku
-			WHERE tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.yhtio=lasku.yhtio
-			and lasku.tunnus=tiliointi.ltunnus and tosite='' and
-			((lasku.tila!='X' and lasku.tapvm!=tiliointi.tapvm and left(tiliointi.tapvm,7)='$kausi') or
-			(lasku.tila ='X' and left(tiliointi.tapvm,7)='$kausi')) and korjattu='' and lasku.tila != 'D'
+			FROM tiliointi
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and tosite='' and ((lasku.tila!='X' and lasku.tapvm!=tiliointi.tapvm and left(tiliointi.tapvm,7)='$kausi') or (lasku.tila ='X' and left(tiliointi.tapvm,7)='$kausi')) and korjattu='' and lasku.tila != 'D'
+			WHERE tiliointi.yhtio='$kukarow[yhtio]'
 			ORDER BY tiliointi.tapvm, ltunnus, tilino, kustp, projekti";
 
 $result_mrt = mysql_query($query) or pupe_error($query);
@@ -398,28 +394,26 @@ echo "<br><font class=head>$yhtiorow[nimi] myyntisaamiset, $kausi:</font><br><br
 //Tehdään uusi kysely, jossa muutetaan lajittelujärjestys
 if ($summataan=='')
 	$query  = "	SELECT date_format(tiliointi.tapvm, '%e.%c.%Y') tapvm, lasku.nimi,
-			tiliointi.summa summa, tilino, k.tarkenne kustp, p.tarkenne proj,
+			tiliointi.summa summa, tilino, k.nimi kustp, p.nimi proj,
 			selite, lasku.laskunro laskunro, tosite, mapvm, tiliointi.tunnus tunnus, date_format(tiliointi.tapvm, '%y%m') jakso, ytunnus, ltunnus
-			FROM tiliointi, lasku
-			left join kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
-			left join kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
-			WHERE tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.yhtio=lasku.yhtio
-			and lasku.tunnus=tiliointi.ltunnus and lasku.tila='L'
-			and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			FROM tiliointi
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
+			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
+			WHERE tiliointi.yhtio='$kukarow[yhtio]'
 			ORDER BY tosite, tiliointi.tapvm, ltunnus, tilino, k.nimi, p.nimi";
 else $query  = "SELECT date_format(tiliointi.tapvm, '%e.%c.%Y') tapvm, lasku.nimi,
-			sum(tiliointi.summa) summa, tilino, k.tarkenne kustp, p.tarkenne proj,
+			sum(tiliointi.summa) summa, tilino, k.nimi kustp, p.nimi proj,
 			selite, lasku.laskunro laskunro, tosite, mapvm, tiliointi.tunnus tunnus, date_format(tiliointi.tapvm, '%y%m') jakso, ytunnus, ltunnus
-			FROM tiliointi, lasku
-			left join kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
-			left join kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
-			WHERE tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.yhtio=lasku.yhtio
-			and lasku.tunnus=tiliointi.ltunnus and lasku.tila='L'
-			and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			FROM tiliointi
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
+			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
+			WHERE tiliointi.yhtio='$kukarow[yhtio]'
 			GROUP BY tosite, tiliointi.tapvm, ltunnus, tilino, kustp, projekti
 			ORDER BY tosite, tiliointi.tapvm, ltunnus, tilino, kustp, projekti";
 
-$result_ms = mysql_query($query) or die ("$query epäonnistui!<br>".mysql_error());
+$result_ms = mysql_query($query) or pupe_error($query);
 
 
 //Tässä tehdään sarakeotsikot
@@ -445,26 +439,24 @@ echo "<br><font class=head>$yhtiorow[nimi] ostovelkojen tiliöinnit, $kausi:</fon
 //Tehdään uusi kysely, jossa muutetaan lajittelujärjestys
 if ($summataan=='')
 	$query  = "	SELECT date_format(tiliointi.tapvm, '%e.%c.%Y') tapvm, lasku.nimi,
-			tiliointi.summa summa, tilino, k.tarkenne kustp, p.tarkenne proj,
+			tiliointi.summa summa, tilino, k.nimi kustp, p.nimi proj,
 			selite,  tosite, mapvm, tiliointi.tunnus tunnus, ytunnus, date_format(tiliointi.tapvm, '%y%m') jakso, ltunnus
-			FROM tiliointi, lasku
-			left join kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
-			left join kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
-			WHERE tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.yhtio=lasku.yhtio
-			and lasku.tunnus=tiliointi.ltunnus and lasku.tila!='X' and lasku.tila!='L'
-			and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
-			ORDER BY tosite, tiliointi.tapvm, tilino, k.tarkenne, p.tarkenne";
+			FROM tiliointi
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila!='X' and lasku.tila!='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
+			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
+			WHERE tiliointi.yhtio='$kukarow[yhtio]'
+			ORDER BY tosite, tiliointi.tapvm, tilino, k.nimi, p.nimi";
 else $query  = "SELECT date_format(tiliointi.tapvm, '%e.%c.%Y') tapvm, lasku.nimi,
-			sum(tiliointi.summa) summa, tilino, k.tarkenne kustp, p.tarkenne proj,
+			sum(tiliointi.summa) summa, tilino, k.nimi kustp, p.nimi proj,
 			selite,  tosite, mapvm, tiliointi.tunnus tunnus, ytunnus, date_format(tiliointi.tapvm, '%y%m') jakso, ltunnus
-			FROM tiliointi, lasku
-			left join kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
-			left join kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
-			WHERE tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.yhtio=lasku.yhtio
-			and lasku.tunnus=tiliointi.ltunnus and lasku.tila!='X' and lasku.tila!='L'
-			and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
-			GROUP BY tosite, tiliointi.tapvm, tilino, k.tarkenne, p.tarkenne
-			ORDER BY tosite, tiliointi.tapvm, tilino, k.tarkenne, p.tarkenne";
+			FROM tiliointi
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila!='X' and lasku.tila!='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
+			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
+			WHERE tiliointi.yhtio='$kukarow[yhtio]'
+			GROUP BY tosite, tiliointi.tapvm, tilino, k.nimi, p.nimi
+			ORDER BY tosite, tiliointi.tapvm, tilino, k.nimi, p.nimi";
 $result_ov = mysql_query($query) or pupe_error($query);
 //Tässä tehdään sarakeotsikot
 echo "<table><tr>";
@@ -491,28 +483,24 @@ echo "<br><font class=head>$yhtiorow[nimi] tiliotteen tiliöinnit, $kausi:</font>
 if ($summataan=='')
 	$query  = "	SELECT date_format(tiliointi.tapvm, '%e.%c.%Y') tapvm, lasku.nimi,
 			tiliointi.summa summa, tilino,
-			selite, tosite, date_format(tiliointi.tapvm, '%y%m') jakso, k.tarkenne kustp, p.tarkenne proj, ltunnus, ytunnus, mapvm, tiliointi.tunnus tunnus
-			FROM tiliointi, lasku
-			left join kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
-			left join kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
-			WHERE tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.yhtio=lasku.yhtio
-			and lasku.tunnus=tiliointi.ltunnus and
-			((lasku.tila!='X' and lasku.tapvm!=tiliointi.tapvm and left(tiliointi.tapvm,7)='$kausi') or
-			(lasku.tila ='X' and left(tiliointi.tapvm,7)='$kausi')) and korjattu='' and tila != 'D'
-			ORDER BY tiliointi.tapvm, tosite, tilino, k.tarkenne, p.tarkenne";
+			selite, tosite, date_format(tiliointi.tapvm, '%y%m') jakso, k.nimi kustp, p.nimi proj, ltunnus, ytunnus, mapvm, tiliointi.tunnus tunnus
+			FROM tiliointi
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and ((lasku.tila!='X' and lasku.tapvm!=tiliointi.tapvm and left(tiliointi.tapvm,7)='$kausi') or (lasku.tila ='X' and left(tiliointi.tapvm,7)='$kausi')) and korjattu='' and tila != 'D'
+			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
+			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
+			WHERE tiliointi.yhtio='$kukarow[yhtio]'
+			ORDER BY tiliointi.tapvm, tosite, tilino, k.nimi, p.nimi";
 else $query  = "	SELECT date_format(tiliointi.tapvm, '%e.%c.%Y') tapvm, lasku.nimi,
 			sum(tiliointi.summa) summa, tilino,
-			selite, tosite, date_format(tiliointi.tapvm, '%y%m') jakso, k.tarkenne kustp, p.tarkenne proj, ltunnus, ytunnus, mapvm, tiliointi.tunnus tunnus
-			FROM tiliointi, lasku
-			left join kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
-			left join kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
-			WHERE tiliointi.yhtio='$kukarow[yhtio]' and tiliointi.yhtio=lasku.yhtio
-			and lasku.tunnus=tiliointi.ltunnus and
-			((lasku.tila!='X' and lasku.tapvm!=tiliointi.tapvm and left(tiliointi.tapvm,7)='$kausi') or
-			(lasku.tila ='X' and left(tiliointi.tapvm,7)='$kausi')) and korjattu='' and tila != 'D'
-			GROUP BY tiliointi.tapvm, tosite, tilino, k.tarkenne, p.tarkenne
-			ORDER BY tiliointi.tapvm, tosite, tilino, k.tarkenne, p.tarkenne";
-$result_rt = mysql_query($query) or die ("$query epäonnistui!<br>".mysql_error());
+			selite, tosite, date_format(tiliointi.tapvm, '%y%m') jakso, k.nimi kustp, p.nimi proj, ltunnus, ytunnus, mapvm, tiliointi.tunnus tunnus
+			FROM tiliointi
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and ((lasku.tila!='X' and lasku.tapvm!=tiliointi.tapvm and left(tiliointi.tapvm,7)='$kausi') or (lasku.tila ='X' and left(tiliointi.tapvm,7)='$kausi')) and korjattu='' and tila != 'D'
+			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
+			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
+			WHERE tiliointi.yhtio='$kukarow[yhtio]'
+			GROUP BY tiliointi.tapvm, tosite, tilino, k.nimi, p.nimi
+			ORDER BY tiliointi.tapvm, tosite, tilino, k.nimi, p.nimi";
+$result_rt = mysql_query($query) or pupe_error($query);
 //Tässä tehdään sarakeotsikot
 echo "<table><tr>";
 for ($i = 0; $i < mysql_num_fields($result_rt)-7; $i++) {

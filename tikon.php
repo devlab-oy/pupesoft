@@ -337,7 +337,7 @@ $query  = "	SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm,
 			date_format(tiliointi.tapvm, '%y%m') jakso, tilino, kustp, projekti, tiliointi.summa
 			summa, selite, ytunnus, ltunnus, mapvm, tiliointi.tunnus tunnus, lasku.laskunro laskunro, nimi
 			FROM tiliointi
-			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and tosite='' and lasku.tila='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and tosite='' and lasku.tila='U' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
 			WHERE tiliointi.yhtio='$kukarow[yhtio]'
 			ORDER BY ltunnus, tiliointi.tapvm, tilino, kustp, projekti";
 
@@ -354,7 +354,7 @@ $query  = "	SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm,
 			date_format(tiliointi.tapvm, '%y%m') jakso, tilino, kustp, projekti, tiliointi.summa
 			summa, selite, ytunnus, ltunnus, mapvm, tiliointi.tunnus tunnus, nimi
 			FROM tiliointi
-			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and tosite='' and lasku.tila!='X' and lasku.tila!='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and tosite='' and lasku.tila!='X' and lasku.tila!='U' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
 			WHERE tiliointi.yhtio='$kukarow[yhtio]'
 			ORDER BY ltunnus, tiliointi.tapvm, tilino, kustp, projekti";
 
@@ -397,7 +397,7 @@ if ($summataan=='')
 			tiliointi.summa summa, tilino, k.nimi kustp, p.nimi proj,
 			selite, lasku.laskunro laskunro, tosite, mapvm, tiliointi.tunnus tunnus, date_format(tiliointi.tapvm, '%y%m') jakso, ytunnus, ltunnus
 			FROM tiliointi
-			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila='U' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
 			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
 			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
 			WHERE tiliointi.yhtio='$kukarow[yhtio]'
@@ -406,7 +406,7 @@ else $query  = "SELECT date_format(tiliointi.tapvm, '%e.%c.%Y') tapvm, lasku.nim
 			sum(tiliointi.summa) summa, tilino, k.nimi kustp, p.nimi proj,
 			selite, lasku.laskunro laskunro, tosite, mapvm, tiliointi.tunnus tunnus, date_format(tiliointi.tapvm, '%y%m') jakso, ytunnus, ltunnus
 			FROM tiliointi
-			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila='U' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
 			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
 			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
 			WHERE tiliointi.yhtio='$kukarow[yhtio]'
@@ -442,7 +442,7 @@ if ($summataan=='')
 			tiliointi.summa summa, tilino, k.nimi kustp, p.nimi proj,
 			selite,  tosite, mapvm, tiliointi.tunnus tunnus, ytunnus, date_format(tiliointi.tapvm, '%y%m') jakso, ltunnus
 			FROM tiliointi
-			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila!='X' and lasku.tila!='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila!='X' and lasku.tila!='U' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
 			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
 			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
 			WHERE tiliointi.yhtio='$kukarow[yhtio]'
@@ -451,7 +451,7 @@ else $query  = "SELECT date_format(tiliointi.tapvm, '%e.%c.%Y') tapvm, lasku.nim
 			sum(tiliointi.summa) summa, tilino, k.nimi kustp, p.nimi proj,
 			selite,  tosite, mapvm, tiliointi.tunnus tunnus, ytunnus, date_format(tiliointi.tapvm, '%y%m') jakso, ltunnus
 			FROM tiliointi
-			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila!='X' and lasku.tila!='L' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
+			JOIN lasku ON tiliointi.yhtio=lasku.yhtio and lasku.tunnus=tiliointi.ltunnus and lasku.tila!='X' and lasku.tila!='U' and lasku.tapvm=tiliointi.tapvm and left(lasku.tapvm,7)='$kausi' and korjattu='' and lasku.tila != 'D'
 			LEFT JOIN kustannuspaikka k on tiliointi.yhtio=k.yhtio and k.tyyppi = 'k' and kustp = k.tunnus
 			LEFT JOIN kustannuspaikka p on tiliointi.yhtio=p.yhtio and p.tyyppi = 'p' and projekti = p.tunnus
 			WHERE tiliointi.yhtio='$kukarow[yhtio]'

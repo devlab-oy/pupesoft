@@ -841,30 +841,30 @@
 				$kervv = date("Y");
 			}
 
-			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
-
+			echo "<tr><td>".t("Keräysajankohta").": </td><td valign='middle'>";
+			
 			if ($toim == "YLLAPITO") {
 				echo t("Ei käytössä");
 			}
 			else {
-				echo "<input type='text' name='toimpp' value='$toimpp' size='3'><input type='text' name='toimkk' value='$toimkk' size='3'><input type='text' name='toimvv' value='$toimvv' size='6'>
-					<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'>";
-				
-				if ($srow["toimvko"] != '') {
-					$toimvko = date("W", strtotime($srow["toimaika"]));
+				echo "<input type='text' name='kerpp' value='$kerpp' size='3'><input type='text' name='kerkk' value='$kerkk' size='3'><input type='text' name='kervv' value='$kervv' size='6'>
+						<input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'>";
+						
+				if ($srow["keraysvko"] != '') {
+					$keraysvko = date("W", strtotime($srow["kerayspvm"]));
 				}
 				else {
-					$toimvko = "";
+					$keraysvko = "";
 				}
-				
-				echo t("Vko").": <input type='text' name='toimvko' value='$toimvko' size='2'>
-					<input type='hidden' name='vtoimvko' value='".$srow["toimvko"]."'>";
-				
-				echo "<select name='toimvkopva'>";
+
+				echo t("Vko").": <input type='text' name='keraysvko' value='$keraysvko' size='2'>
+					<input type='hidden' name='vkeraysvko' value='".$srow["keraysvko"]."'>";
+					
+				echo "<select name='keraysvkopva'>";
 				echo "<option value=''></option>";
 				
 				foreach ($DAY_ARRAY as $di => $day) {
-					if ($srow["toimvko"] == $di) {
+					if ($srow["keraysvko"] == $di) {
 						$sel = "SELECTED";
 					}
 					else {
@@ -876,7 +876,7 @@
 				
 				echo "</select>";
 			}
-
+			
 			echo "</td>";
 
 			if ($srow['vienti'] == '') {
@@ -920,29 +920,31 @@
 			}
 
 			echo "</tr>";
-			echo "<tr><td>".t("Keräysajankohta").": </td><td valign='middle'>";
+
+			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
+
 			if ($toim == "YLLAPITO") {
 				echo t("Ei käytössä");
 			}
 			else {
-				echo "<input type='text' name='kerpp' value='$kerpp' size='3'><input type='text' name='kerkk' value='$kerkk' size='3'><input type='text' name='kervv' value='$kervv' size='6'>
-						<input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"],0,10)."'>";
-						
-				if ($srow["keraysvko"] != '') {
-					$keraysvko = date("W", strtotime($srow["kerayspvm"]));
+				echo "<input type='text' name='toimpp' value='$toimpp' size='3'><input type='text' name='toimkk' value='$toimkk' size='3'><input type='text' name='toimvv' value='$toimvv' size='6'>
+					<input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'>";
+				
+				if ($srow["toimvko"] != '') {
+					$toimvko = date("W", strtotime($srow["toimaika"]));
 				}
 				else {
-					$keraysvko = "";
+					$toimvko = "";
 				}
-
-				echo t("Vko").": <input type='text' name='keraysvko' value='$keraysvko' size='2'>
-					<input type='hidden' name='vkeraysvko' value='".$srow["keraysvko"]."'>";
-					
-				echo "<select name='keraysvkopva'>";
+				
+				echo t("Vko").": <input type='text' name='toimvko' value='$toimvko' size='2'>
+					<input type='hidden' name='vtoimvko' value='".$srow["toimvko"]."'>";
+				
+				echo "<select name='toimvkopva'>";
 				echo "<option value=''></option>";
 				
 				foreach ($DAY_ARRAY as $di => $day) {
-					if ($srow["keraysvko"] == $di) {
+					if ($srow["toimvko"] == $di) {
 						$sel = "SELECTED";
 					}
 					else {
@@ -954,8 +956,8 @@
 				
 				echo "</select>";
 			}
-			echo "</td>";
 
+			echo "</td>";
 
 			//jos käyttäjällä on myyjänro
 			if ($kukarow["myyja"] != 0 and  (int) $srow["myyja"] == 0) {

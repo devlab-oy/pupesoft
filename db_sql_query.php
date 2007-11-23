@@ -82,7 +82,7 @@
 			$where = "";
 			$order = "ORDER BY yhtio";
 		
-			$oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in','like' => 'like','gt' => '>','lt' => '<','gte' => '=>','lte' => '<=');
+			$oper_array = array('on' => '=', 'not' => '!=', 'in' => 'in','like' => 'like','gt' => '>','lt' => '<','gte' => '>=','lte' => '<=');
 		
 			foreach($operaattori as $kentta => $oper) {
 				if ($oper != "") {

@@ -21,7 +21,7 @@
 	}
 	$laskurow = mysql_fetch_array($aresult);
 
-	if ($laskurow['tila']=='L') {
+	if ($laskurow['tila']=='L' or ($laskurow['tila']=='G') {
 		// haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
 		$query = "select * from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$laskurow[tunnus]' limit 1";
 		$rakre = mysql_query($query) or pupe_error($query);
@@ -155,7 +155,6 @@
 	
 	$possi = strpos(strtoupper($laskurow['toimitustapa']),"DPD");
 	
-	
 	// postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
 	if (strpos($rakirrow['rahtikirjanro'],"JFI")) {
 		$linkurl = "";
@@ -167,7 +166,7 @@
 
 		$linkurl = substr($linkurl,0,-4); // vika br pois
 	}
-	//luodaan dpd seurantalinkki
+	//luodaan dpd seurantalinkk
 	elseif ($possi !== FALSE and $rakirrow['rahtikirjanro'] != '' and $dpdtun != '' and $dpdss != '') {
 		$linkurl = "";
 		

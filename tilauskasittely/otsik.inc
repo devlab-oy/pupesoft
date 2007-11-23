@@ -827,7 +827,6 @@
 				list($kervv, $kerkk, $kerpp)    = split('-', $srow["kerayspvm"]);
 				$kerpp = substr($kerpp,0,2);
 				$toimpp = substr($toimpp,0,2);
-
 			}
 
 			//voidaan tarvita jos asiakas on vaihdettu
@@ -841,7 +840,6 @@
 				$kerkk = date("n");
 				$kervv = date("Y");
 			}
-
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>";
 
@@ -2232,6 +2230,14 @@
 
 		//Otetaan valuutan kurssi
 		list($valkoodi, $kurssi) = explode('##', $valkoodi);
+
+		//Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+		if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv)) {
+			$toimpp = $kerpp;
+			$toimkk = $kerkk;
+			$toimvv = $kervv;
+			$toimvko = $keraysvko;
+		}
 
 		$query .= "	lasku SET
 					yhtio_nimi							= '$yhtiorow[nimi]',

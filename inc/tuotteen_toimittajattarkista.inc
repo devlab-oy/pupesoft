@@ -68,7 +68,7 @@ else {
 $query = "select * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and liitostunnus='$tuotoimirow[tunnus]' and tuoteno='$tuoteno' and tunnus!='$toimtunnus'";
 $result = mysql_query($query) or pupe_error($query);
 
-if (mysql_num_rows($result) > 0) {
+if (mysql_num_rows($result) > 0 and $lue_datasta != 'MUUTA') {
 	$toimerrorit[$toimtunnus]["toimittaja"] = "<font class='error'>".t("Tämä toimittaja on jo tällä tuotteella")."!</font>";
 }
 

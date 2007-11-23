@@ -346,6 +346,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			echo t("Pakollista tietoa puuttuu/tiedot ovat virheelliset!")." $valinta<br>";
 		}
 		
+		echo "# JOTAIN...$tila<br>";
+		
+		
 		// lis‰t‰‰n rivi
 		if($tila != 'ohita') {
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
@@ -793,6 +796,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				}
 				
 				$lue_data_result = $result;
+				$lue_datasta = strtoupper(trim($rivi[$postoiminto]));
 				require "inc/".$table."tarkista.inc";
 				$result = $lue_data_result;
 				
@@ -824,6 +828,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			if($errori != "") {
 				$hylkaa++;
 			}
+			
+			echo "kala# JOTAIN...$hylkaa $virhe[$i]<br>";
+			
 			
 			//	Palautetaan vanha query..
 			$query = $lue_data_query;

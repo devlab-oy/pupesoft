@@ -977,7 +977,7 @@ if (!function_exists('loppu')) {
 
 		$pdf->draw_text(30,  92+$vientikala,  $erapaiva,		$thispage, $norm);
 		$pdf->draw_text(217, 102+$vientikala, t("Viitenumero", $kieli),	$thispage, $pieni);
-		$pdf->draw_text(217, 92+$vientikala,  $laskurow["viite"],		$thispage, $norm);
+		$pdf->draw_text(217, 92+$vientikala,  $laskurow["viite"],		$thispage, $boldi);
 
 
 

@@ -262,7 +262,7 @@
 		}
 		echo "</table><br>";
 
-		$query = "	SELECT tilausrivi.otunnus, tilausrivi.nimitys, tilausrivi.tuoteno, tilkpl tilattu, if(tyyppi!='L', varattu, 0) valmistetaan, if(tyyppi='L' or tyyppi='D', varattu, 0) valmistettu, 
+		$query = "	SELECT tilausrivi.otunnus, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tuoteno, tilkpl tilattu, if(tyyppi!='L', varattu, 0) valmistetaan, if(tyyppi='L' or tyyppi='D', varattu, 0) valmistettu, 
 					toimaika, kerayspvm, tilausrivi.tunnus tunnus, tilausrivi.perheid, tilausrivi.tyyppi, tilausrivi.toimitettuaika
 					FROM tilausrivi, tuote
 					WHERE 
@@ -271,7 +271,7 @@
 					and tilausrivi.yhtio='$kukarow[yhtio]'
 					and tuote.yhtio=tilausrivi.yhtio
 					and tuote.tuoteno=tilausrivi.tuoteno
-					and tyyppi = 'W'
+					and tyyppi IN ('W','M')
 					and tilausrivi.uusiotunnus = 0
 					ORDER BY perheid";
 		$presult = mysql_query($query) or pupe_error($query);
@@ -279,7 +279,7 @@
 		
 		echo "<table border='0' cellspacing='1' cellpadding='2'><tr>";
 		echo "<th>".t("Valmistus")."</a></th>";
-		echo "<th>".t("Nimitys")."</a></th>";
+		echo "<th>".t("Nimitys")."/".t("Kommentti")."</a></th>";
 		echo "<th>".t("Valmiste")."</a></th>";
 		echo "<th>".t("Valmistetaan")."</a></th>";
 		echo "<th>".t("Keräysaika")."</a></th>";
@@ -308,9 +308,14 @@
 				$linkki = "<div style='text-align: right; float:right;'>&nbsp;&nbsp;<a href='#' onmouseover=\"popUp(event, '$id');\" onmouseout=\"popUp(event, '$id');\"><img src='../pics/lullacons/info.png' height='13'></a></div>";
 			}
 			
+			$kommentti = "";
+			if($prow["kommentti"] != "") {
+				$kommentti = "<br><font class='info'>$prow[kommentti]</font>";
+			}
+			
 			echo "<tr>";
 			echo "<td>$prow[otunnus]</td>";			
-			echo "<td align='right'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."</td>";
+			echo "<td align='left'>".asana('nimitys_',$prow['tuoteno'],$prow['nimitys'])."$kommentti</td>";
 			echo "<td><a href='../tuote.php?tee=Z&tuoteno=$prow[$i]'>$prow[tuoteno]</a>$linkki</td>";
 			echo "<td align='right'>$prow[tilattu]</td>";
 			echo "<td align='right'>$prow[kerayspvm]</td>";
@@ -423,7 +428,7 @@
 					and tilausrivi.varattu != 0
 					and tilausrivi.uusiotunnus = 0
 					and tilausrivi.tuoteno='$etsi'
-					and tilausrivi.tyyppi in ('W','V')";
+					and tilausrivi.tyyppi in ('W','V','M')";
 		$tilre = mysql_query($query) or pupe_error($query);
 		$tilro = mysql_fetch_array($tilre);
 		
@@ -494,7 +499,7 @@
 					and tilausrivi.toimitettu = ''
 					and tilausrivi.varattu != 0
 					and tilausrivi.uusiotunnus = 0
-					and tilausrivi.tyyppi = 'W'	
+					and tilausrivi.tyyppi IN ('W','M')	
 					$alku
 					$loppu			
 					$haku

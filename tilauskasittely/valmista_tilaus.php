@@ -516,7 +516,7 @@
 					<input type='hidden' name='edtilkpllat[$prow[tunnus]]'  value='$prow[korjataan]'>
 					<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[korjataan]'>";
 					
-				if($prow["tyyppi"] == "W") {
+				if($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") {
 					echo "R:<input type = 'checkbox' name = 'rekru[$prow[tunnus]]'>";
 				}
 				echo "</td>";
@@ -533,7 +533,7 @@
 						<input type='hidden' name='edtilkpllat[$prow[tunnus]]'  value='$prow[valmistetaan]'>
 						<input type='text' size='8' name='tilkpllat[$prow[tunnus]]' value='$prow[valmistetaan]'>";
 						
-				if($prow["tyyppi"] == "W") {
+				if($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") {
 					echo "R:<input type = 'checkbox' name = 'rekru[$prow[tunnus]]'>";
 				}
 

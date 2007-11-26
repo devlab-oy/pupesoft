@@ -901,7 +901,7 @@
 		$sela = "";
 		$selb = "";
 
-		if ($trow[$i] == 'K') {
+		if ($trow[$i] == 'P') {
 			$selb = "selected";
 		}
 		else {

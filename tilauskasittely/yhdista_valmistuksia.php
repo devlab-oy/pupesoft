@@ -102,7 +102,7 @@
 							SET otunnus = '$otunnus'
 							WHERE yhtio = '$kukarow[yhtio]' 
 							and perheid = '$rivitunnus'
-							and tyyppi in ('V','W')
+							and tyyppi in ('V','W','M')
 							and uusiotunnus = 0";
 				$result = mysql_query($query) or pupe_error($query);
 				
@@ -129,7 +129,7 @@
 				//	Testataan saataisiinko jotain perheit‰ yhdistetty‰
 				$query = "	SELECT group_concat(tunnus) tunnukset, count(*) rivei
 				 			FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and tyyppi = 'W' and perheid = tunnus
+							WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and tyyppi IN ('W','M') and perheid = tunnus
 							GROUP BY tuoteno
 							HAVING rivei > 1";
 				$result = mysql_query($query) or pupe_error($query);
@@ -137,15 +137,15 @@
 					while($row = mysql_fetch_array($result)) {
 
 						//	suoritetan vertailu by tuoteperhe
-						$query = "	SELECT perheid, 
+						$query = "	SELECT tuoteno, perheid, 
 										group_concat(
 											concat(
-												tuoteno, 
-												(SELECT round((isa.kpl+isa.jt+isa.varattu)/(tilausrivi.kpl+tilausrivi.jt+tilausrivi.varattu), 1) FROM tilausrivi isa WHERE isa.yhtio = tilausrivi.yhtio and isa.tunnus=tilausrivi.perheid)
+												tuoteno, 'x',
+												(SELECT round((isa.kpl+isa.jt+isa.varattu)/((tilausrivi.kpl+tilausrivi.jt+tilausrivi.varattu)/10), 1) FROM tilausrivi isa WHERE isa.yhtio = tilausrivi.yhtio and isa.tunnus=tilausrivi.perheid)
 											) ORDER BY tuoteno SEPARATOR '|'
 										) stringi
 						FROM tilausrivi
-						WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and perheid IN ($row[tunnukset]) and tunnus > perheid
+						WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and perheid IN ($row[tunnukset])
 						GROUP BY perheid
 						ORDER BY stringi";
 						$sresult = mysql_query($query) or pupe_error($query);
@@ -160,21 +160,21 @@
 								$yhdistettavat[] = implode(',', $yhdista);
 								$yhdista = array();
 							}
-
+								
 							//	Jos meill‰ on sama stringi kuin edellinen voidaan yhdist‰‰
 							if($edstringi == $srow["stringi"]) {
 								if(count($yhdista) == 0) {
 									$yhdista[] = $edperheid;
 								}
 								$yhdista[] = $srow["perheid"];
+								
+								echo "<font class='info'>".t("Yhdistet‰‰n tuote")." $srow[tuoteno]!</font><br>";	
 							}
 
 							$edstringi = $srow["stringi"];
 							$edperheid = $srow["perheid"];
-
-							echo "<font class='info'>".t("Siirrettiin tuote")." $srow[tuoteno] !</font><br>";
 						}
-
+						
 						if(count($yhdista) > 1) {
 							$yhdistettavat[] = implode(',', $yhdista);
 							$yhdista = array();
@@ -215,7 +215,7 @@
 													WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($loput) and tuoteno = '$srow[tuoteno]'";
 										$updres = mysql_query($query) or pupe_error($query);
 										
-										echo "<font class='info'>".t("Yhdistettiin")." $srow[tuoteno] !</font><br>";
+										//echo "<font class='info'>".t("Yhdistettiin")." $srow[tuoteno] !</font><br>";
 									}
 								}
 								else {

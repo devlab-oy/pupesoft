@@ -201,49 +201,7 @@ if ($tila == "vaihdasuorituksentili") {
 }
 
 if ($tila == 'tee_kohdistus') {
-
-	$laskutunnukset = "";
-	$laskutunnuksetkale = "";
-
-	// $lasku_tunnukset[]
-	if (is_array($lasku_tunnukset)){
-		for ($i=0;$i<sizeof($lasku_tunnukset);$i++) {
-			if($i!=0) $laskutunnukset=$laskutunnukset . ",";
-			$laskutunnukset=$laskutunnukset . "$lasku_tunnukset[$i]";
-		}
-	}
-	else {
-		$laskutunnukset = 0;
-	}
-
-	// $lasku_tunnukset_kale[]
-	if (is_array($lasku_tunnukset_kale)) {
-		for ($i=0;$i<sizeof($lasku_tunnukset_kale);$i++) {
-			if($i!=0) $laskutunnuksetkale=$laskutunnuksetkale . ",";
-			$laskutunnuksetkale=$laskutunnuksetkale . "$lasku_tunnukset_kale[$i]";
-		}
-	}
-	else {
-		$laskutunnuksetkale = 0;
-	}
-
-	// Tarkistetaan muutama asia
-	if ($laskutunnukset == 0 and $laskutunnuksetkale == 0) {
-		echo "<font class='error'>".t("Olet kohdistamassa, mutta et ole valinnut mitään kohdistettavaa")."!</font>";
-		exit;
-	}
-
-	if ($osasuoritus == 1) {
-		if (sizeof($lasku_tunnukset) != 1) {
-			echo "<font class='error'>".t("Osasuoritukseen ei ole valittu yhtä laskua")."</font>";
-			exit;
-		}
-		if (sizeof($lasku_tunnukset_kale) > 0) {
-			echo "<font class='error'>".t("Osasuoritukseen ei voi valita käteisalennusta")."</font>";
-			exit;
-		}
-	}
-
+	// Tehdään error tsekit
 	$query = "LOCK TABLES yriti READ, yhtio READ, tili READ, lasku WRITE, suoritus WRITE, tiliointi WRITE, tiliointi as tiliointi2 WRITE, sanakirja WRITE";
 	$result = mysql_query($query) or pupe_error($query);
 
@@ -277,7 +235,97 @@ if ($tila == 'tee_kohdistus') {
 
 	// tehdään nätimpi errorihandlaus
 	if (mysql_num_rows($result) == 0) {
+	
+		echo "<font class='error'>".t("Suoritus katosi")."!</font><br>";
+		
+		$tila 	= 'kohdistaminen';
+		$query 	= "UNLOCK TABLES";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+	else {
+		$suoritus = mysql_fetch_array($result);
+		
+		$laskutunnukset = "";
+		$laskutunnuksetkale = "";
 
+		// $lasku_tunnukset[]
+		if (is_array($lasku_tunnukset)){
+			for ($i=0;$i<sizeof($lasku_tunnukset);$i++) {
+				if($i!=0) $laskutunnukset=$laskutunnukset . ",";
+				$laskutunnukset=$laskutunnukset . "$lasku_tunnukset[$i]";
+			}
+		}
+		else {
+			$laskutunnukset = 0;
+		}
+
+		// $lasku_tunnukset_kale[]
+		if (is_array($lasku_tunnukset_kale)) {
+			for ($i=0;$i<sizeof($lasku_tunnukset_kale);$i++) {
+				if($i!=0) $laskutunnuksetkale=$laskutunnuksetkale . ",";
+				$laskutunnuksetkale=$laskutunnuksetkale . "$lasku_tunnukset_kale[$i]";
+			}
+		}
+		else {
+			$laskutunnuksetkale = 0;
+		}
+
+		// Tarkistetaan muutama asia
+		if ($laskutunnukset == 0 and $laskutunnuksetkale == 0) {
+			echo "<font class='error'>".t("Olet kohdistamassa, mutta et ole valinnut mitään kohdistettavaa")."!</font><br>";
+
+			$tila 	= 'kohdistaminen';
+			$query 	= "UNLOCK TABLES";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+
+		if ($osasuoritus == 1) {
+			if (sizeof($lasku_tunnukset) != 1) {
+				echo "<font class='error'>".t("Jos osasuoritus, pitää valita vain ja ainoastaan yksi lasku")."</font><br>";
+				
+				$tila 	= 'kohdistaminen';
+				$query 	= "UNLOCK TABLES";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+			if (sizeof($lasku_tunnukset_kale) > 0) {
+				echo "<font class='error'>".t("Jos osasuoritus, ei voi valita kassa-alennusta")."</font><br>";
+				
+				$tila 	= 'kohdistaminen';
+				$query 	= "UNLOCK TABLES";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+		
+			
+			//Haetaan osasuoritettava lasku
+			if (strtoupper($suoritus['valkoodi']) != strtoupper($yhtiorow['valkoodi'])) {
+				$query = "SELECT summa_valuutassa-saldo_maksettu_valuutassa summa ";
+			}
+			else {
+				$query = "SELECT summa-saldo_maksettu summa ";
+			}
+			
+			$query .= "	FROM lasku
+						WHERE tunnus 	= '$laskutunnukset'
+						and  mapvm		= '0000-00-00'";
+			$jaresult = mysql_query($query) or pupe_error($query);
+			$jarow = mysql_fetch_array($jaresult);
+
+			if($suoritus["summa"] < 0 and $jarow["summa"] < 0) {
+	  			$jaljella = round($jarow["summa"]-$suoritus["summa"]);
+			}
+			else {
+				$jaljella = round($suoritus["summa"]-$jarow["summa"]);				
+			}
+			
+			if ($jaljella > 0) {
+				echo "<font class='error'>".t("Et voi osasuorittaa, jos jäjellä on positiivinen summa")."!</font><br>";
+				
+				$tila 	= 'kohdistaminen';
+				$query 	= "UNLOCK TABLES";
+				$result = mysql_query($query) or pupe_error($query);
+			}
+		}
+		
 		$query = "	SELECT * FROM suoritus
 					WHERE yhtio = '$kukarow[yhtio]' and
 					tunnus = '$suoritus_tunnus' and
@@ -286,8 +334,11 @@ if ($tila == 'tee_kohdistus') {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='error'>".t("Suoritus katosi!")."</font>";
-			exit;
+			echo "<font class='error'>".t("Suoritus katosi!")."</font><br>";
+			
+			$tila 	= 'kohdistaminen';
+			$query 	= "UNLOCK TABLES";
+			$result = mysql_query($query) or pupe_error($query);
 		}
 
 		$errorrow = mysql_fetch_array ($result);
@@ -298,8 +349,11 @@ if ($tila == 'tee_kohdistus') {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='error'>".t("Suorituksen tilinumero ei löydy! Käy lisäämässä tili yhtiölle!")."</font>";
-			exit;
+			echo "<font class='error'>".t("Suorituksen tilinumero ei löydy! Käy lisäämässä tili yhtiölle!")."</font><br>";
+			
+			$tila 	= 'kohdistaminen';
+			$query 	= "UNLOCK TABLES";
+			$result = mysql_query($query) or pupe_error($query);
 		}
 
 		$query = "	SELECT * FROM tiliointi
@@ -309,8 +363,11 @@ if ($tila == 'tee_kohdistus') {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='error'>".t("Suorituksen saamiset-tiliöinnit eivät löydy! Vaihda suorituksen saamiset-tiliä!")."</font>";
-			exit;
+			echo "<font class='error'>".t("Suorituksen saamiset-tiliöinnit eivät löydy! Vaihda suorituksen saamiset-tiliä!")."</font><br>";
+			
+			$tila 	= 'kohdistaminen';
+			$query 	= "UNLOCK TABLES";
+			$result = mysql_query($query) or pupe_error($query);
 		}
 
 		$errorrow = mysql_fetch_array ($result);
@@ -322,18 +379,27 @@ if ($tila == 'tee_kohdistus') {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) == 0) {
-			echo "<font class='error'>".t("Suorituksen raha-tiliöinnit eivät löydy!")."</font>";
-			exit;
+			echo "<font class='error'>".t("Suorituksen raha-tiliöinnit eivät löydy!")."</font><br>";
+			
+			$tila 	= 'kohdistaminen';
+			$query 	= "UNLOCK TABLES";
+			$result = mysql_query($query) or pupe_error($query);
 		}
+	}	
+}
 
-	}
-
-	$suoritus = mysql_fetch_array ($result);
-
+if ($tila == 'tee_kohdistus') {
+	
+	// Errortsekit on tehty, nyt kohdistetaan
 	if (trim($suoritus["viesti"]) != "") $suoritus["viesti"] = " / $suoritus[viesti]";
 	
 	// otetaan talteen, jos suorituksen kassatilillä on kustannuspaikka.. tarvitaan jos suoritukselle jää saldoa
-	$query = "select * from tiliointi WHERE aputunnus='$suoritus[ltunnus]' AND yhtio='$kukarow[yhtio]' and tilino='$suoritus[kassatilino]' and korjattu=''";
+	$query = "	SELECT * 
+				FROM tiliointi 
+				WHERE aputunnus	= '$suoritus[ltunnus]' 
+				and yhtio		= '$kukarow[yhtio]' 
+				and tilino		= '$suoritus[kassatilino]' 
+				and korjattu	= ''";
 	$result = mysql_query($query) or pupe_error($query);
 	$apurow = mysql_fetch_array($result);
 	$apukustp = $apurow["kustp"];
@@ -347,8 +413,8 @@ if ($tila == 'tee_kohdistus') {
 		//Haetaan osasuoritettava lasku
 		$query = "	SELECT summa - saldo_maksettu AS summa, summa_valuutassa - saldo_maksettu_valuutassa AS summa_valuutassa, 0 AS alennus, tunnus, vienti_kurssi
 					FROM lasku
-					WHERE tunnus = '$laskutunnukset'
-					and  mapvm='0000-00-00'";
+					WHERE tunnus 	= '$laskutunnukset'
+					and  mapvm		= '0000-00-00'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 1) {
@@ -364,11 +430,12 @@ if ($tila == 'tee_kohdistus') {
 
 		if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $suoritus["kurssi"],2);
 
-		$query_korko = "select viikorkopros * $suoritussumma * (if(to_days('$maksupvm')-to_days(erpcm) > 0, to_days('$maksupvm')-to_days(erpcm), 0))/36500 korkosumma from lasku WHERE tunnus='$ltunnus'";
-		//echo "<font class='head'>$query_korko</font>";
-
+		$query_korko = "SELECT viikorkopros * $suoritussumma * (if(to_days('$maksupvm')-to_days(erpcm) > 0, to_days('$maksupvm')-to_days(erpcm), 0))/36500 korkosumma 
+						from lasku 
+						WHERE tunnus='$ltunnus'";
 		$result_korko = mysql_query($query_korko) or die ("Kysely ei onnistu $query_korko <br>" . mysql_error());
 		$korko_row = mysql_fetch_array($result_korko);
+		
 		$korkosumma = $korko_row['korkosumma'];
 
 		// Aloitetaan kirjanpidon kirjaukset
@@ -435,8 +502,6 @@ if ($tila == 'tee_kohdistus') {
 		$query = "SELECT tunnus FROM tiliointi WHERE aputunnus=$suoritus[ltunnus] AND yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		//echo "<font class='message'>$query</font><br>";
-
 		if (mysql_num_rows($result) != 1) {
 			die ("Tiliöinti2 kateissa " . $suoritus["tunnus"]);
 		}
@@ -447,7 +512,6 @@ if ($tila == 'tee_kohdistus') {
         $query = "UPDATE tiliointi SET korjausaika=now(), korjattu='$kukarow[kuka]' WHERE aputunnus=$suoritus[ltunnus] AND yhtio='$kukarow[yhtio]'";
         $result = mysql_query($query) or pupe_error($query);
 	}
-
 	else {
 		//*** Tässä käsitellään tavallinen suoritus ***
 		$laskujen_summa = 0;
@@ -468,6 +532,9 @@ if ($tila == 'tee_kohdistus') {
 
 			if (mysql_num_rows($result) != sizeof($lasku_tunnukset)) {
 				echo "<font class='error'>".t("Joku laskuista katosi (joku maksoi sen sinua ennen?)")." '".mysql_num_rows($result)."' '".sizeof($lasku_tunnukset)."'</font><br>";
+				
+				$query = "UNLOCK TABLES";
+				$result = mysql_query($query) or pupe_error($query);
 				exit;
 			}
 
@@ -1009,8 +1076,8 @@ if ($tila == 'kohdistaminen') {
 	}
 
 	echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
-
 	echo"</form>";
+	
 	echo "<form action = '$PHP_SELF?tila=tee_kohdistus' method = 'post' onSubmit='return validate(this)'>";
 	$laskucount=0;
 
@@ -1131,7 +1198,13 @@ if ($tila == 'kohdistaminen') {
 	}
 
 	echo "	document.forms[1].summa.value=Math.round(summa*100)/100;
-	  		document.forms[1].jaljella.value=Math.round(($suoritus_summa-summa)*100)/100;
+			
+			if($suoritus_summa < 0 && summa < 0) {
+	  			document.forms[1].jaljella.value=Math.round((summa-($suoritus_summa))*100)/100;
+			}
+			else {
+				document.forms[1].jaljella.value=Math.round(($suoritus_summa-summa)*100)/100;				
+			}
 		}
 
 		function osasuo(form) {
@@ -1194,17 +1267,29 @@ if ($tila == 'kohdistaminen') {
 			var kokolasku=document.forms[1].summa.value
 			var suoritus_summa=$suoritus_summa;
 
-			if(suoritus_summa==0)
+			if(suoritus_summa==0) {
 				return true;
+			}
 
 			if (document.forms[3].osasuoritus.checked == false) {
 				var alennusprosentti = Math.round(100*(1-(suoritus_summa/kokolasku)));
 
-				if(jaljella<0) {
-					if(confirm('Haluatko varmasti antaa '+alennusprosentti+'% alennuksen? ('+(-1.0*jaljella)+' $yhtiorow[valkoodi])')==1) {
-					        return true;
-					} else return false;
+				if(jaljella < 0 && document.forms[3].pyoristys_virhe_ok.checked == true) {
+					if(confirm('Haluatko varmasti antaa '+alennusprosentti+'% alennuksen?\\nAlennus: '+(-1.0*jaljella)+' $yhtiorow[valkoodi] \\n\\nHUOM: Alennus kirjataan kassa-alennukseen!')==1) {
+						return true;
+					} 
+					else {
+						return false;
+					}
 				}
+				else if(jaljella < 0) {
+					if(confirm('Haluatko varmasti antaa '+alennusprosentti+'% alennuksen?\\nAlennus: '+(-1.0*jaljella)+' $yhtiorow[valkoodi] \\n\\nHUOM: Alennus vähentää myyntisaatavia!')==1) {
+						return true;
+					} 
+					else {
+						return false;
+					}
+				} 
 			}
 			return true;
 		}

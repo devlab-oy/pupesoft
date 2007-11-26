@@ -344,7 +344,7 @@ $query  = "	SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm,
 $result_ms = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result_ms) > 0) {
-	fputs($toot, rivit($result_ms, 30, $kukarow["yhtio"], $summataan));
+	fputs($toot, rivit($result_ms, 91, $kukarow["yhtio"], $summataan));
 }
 echo "Myyntisaamisia ".mysql_num_rows($result_ms)." kappaletta<br>";
 
@@ -361,7 +361,7 @@ $query  = "	SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm,
 $result_ov = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result_ov) > 0) {
-	fputs($toot, rivit($result_ov, 41, $kukarow["yhtio"], $summataan));
+	fputs($toot, rivit($result_ov, 93, $kukarow["yhtio"], $summataan));
 }
 echo "Ostovelkoja, ".mysql_num_rows($result_ov)." kappaletta<br>";
 
@@ -378,7 +378,7 @@ $query  = "	SELECT date_format(tiliointi.tapvm, '%d%m%Y') tapvm,
 $result_mrt = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result_mrt) > 0) {
-	fputs($toot, rivit($result_mrt, 11, $kukarow["yhtio"], $summataan));
+	fputs($toot, rivit($result_mrt, 50, $kukarow["yhtio"], $summataan));
 }
 echo "Tiliotteiden tiliöinnit,  ".mysql_num_rows($result_mrt)." tapahtumaa<br>";
 

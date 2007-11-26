@@ -152,7 +152,7 @@
 				if ($tav > 0 and $tav < 1000) {
 					$tav += 2000;
 				}
-
+				
 				if ($tav != 0 and $tak != 0 and $tap != 0) {
 					$plisa = " and tapvm = '$tav-$tak-$tap' ";
 				}
@@ -165,7 +165,7 @@
 				else {
 					$plisa = " and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]' ";
 				}
-
+				
 				if (strlen($selite) > 0) {
 					$lisa = " and selite";
 					if ($ohita == 'on') {
@@ -277,11 +277,11 @@
 
 			$query = "SELECT tilino, kustp, kohde, projekti, summa, vero, selite, tapvm, tosite
 						FROM tiliointi
-						WHERE tunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]'";
+						WHERE tunnus = '$ptunnus' and yhtio = '$kukarow[yhtio]' and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($result) == 0) {
-				echo t("Tiliöintiä ei löydy! Systeemivirhe!");
+				echo t("Tiliöintiä ei löydy tai se on lukitulla tilikaudella! Systeemivirhe!");
 				exit;
 			}
 
@@ -297,7 +297,6 @@
 			$tiliointipvm = $tiliointirow['tapvm'];
 			$tositenro = $tiliointirow['tosite'];
 			$ok = 1;
-
 
 			// Etsitään kaikki tiliöintirivit, jotka kuuluvat tähän tiliöintiin ja lasketaan niiden summa
 			$query = "	SELECT sum(summa) FROM tiliointi

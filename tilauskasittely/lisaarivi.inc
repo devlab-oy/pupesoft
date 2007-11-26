@@ -1305,16 +1305,12 @@
 							$var	= "J";
 						}
 						// Terminaalitoimitukset tai ostoskorit; var tyhj‰‰ ja varattu normisti
-						elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E') {
+						elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E' or $rivityyppi == 'F') {
 							$var 	= "";
 							$varattu = $kpl;
 						}
 						// Halutaan myyd‰ saldoista juurikaan mit‰‰n v‰litt‰m‰tt‰!
 						elseif ($yhtiorow["puute_jt_oletus"] == "H") {
-							$var 	= "";
-							$varattu = $kpl;
-						}
-						elseif ($rivityyppi == 'Z' or $rivityyppi == 'B' or $rivityyppi == 'E') {
 							$var 	= "";
 							$varattu = $kpl;
 						}

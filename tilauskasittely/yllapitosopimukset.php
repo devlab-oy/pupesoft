@@ -67,35 +67,37 @@
 
 			$ipp = array_search( (int) $tapvmpp, $sopimus_pp);
 			$ikk = array_search( (int) $tapvmkk, $sopimus_kk);
-						
 			//	Ratkaistaan päivämäärät
 			if($ipp > 0) {
+
 				$edipp = $ipp-1;
 				$edtapvmpp = $sopimus_pp[$edipp];
-				$edtapvmkk = $tapvmkk;				
+				$edtapvmkk = $tapvmkk;
 			}
 			else {
 				$edtapvmpp = end($sopimus_pp);
 				if($ikk > 0) {
-					$edikk = $i-1;
-					$edtapvmkk = $sopimus_kk[$edikk];					
+					$edikk = $ikk-1;
+					$edtapvmkk = $sopimus_kk[$edikk];
 				}
 				else {
 					$edtapvmkk = end($sopimus_kk);
 				}
 			}
-			
+
 			//	Ratkaistaan kuukaudet
 			if(count($sopimus_pp) == $ipp+1) {
-				$seikk = $seikk + 1;
+				$seikk = $ikk + 1;
 				$setapvmpp = $sopimus_pp[0];
-				$setapvmkk = $sopimus_kk[$seikk];					
+				$setapvmkk = $sopimus_kk[$seikk];
+				
 			}
 			else {
 				$seipp = $ipp+1;
 				$setapvmpp = $sopimus_pp[$seipp];
 				$setapvmkk = $sopimus_kk[$ikk];										
 			}
+
 			
 			//	Onko edellinen kuukausi viimevuodelta?
 			if($edtapvmkk > $tapvmkk) {
@@ -117,6 +119,7 @@
 			$edstamp	= strtotime("$edtapvmvv-$edtapvmkk-$edtapvmpp");
 			$sestamp	= strtotime("$setapvmvv-$setapvmkk-$setapvmpp");
 			
+			
 			if($edstamp <= $soprow["sopimus_alkupvm"]) {
 				$edtapvmpp = date("d", $soprow["sopimus_alkupvm"]);
 				$edtapvmkk = date("m", $soprow["sopimus_alkupvm"]);
@@ -134,10 +137,10 @@
 			
 			//	Korjataan kommentti
 			$from[]	= "/%ed/";
-			$to[]	= "$edtapvmpp.$edtapvmkk.$edtapvmvv - $tapvmpp.$tapvmkk.$tapvmvv";
+			$to[]	= "$edtapvmpp.$edtapvmkk.$edtapvmvv - ".date("d.m.Y", strtotime("$tapvmvv-$tapvmkk-".($tapvmpp-1)));
 
 			$from[]	= "/%se/";
-			$to[]	= "$tapvmpp.$tapvmkk.$tapvmvv - $setapvmpp.$setapvmkk.$setapvmvv";
+			$to[]	= "$tapvmpp.$tapvmkk.$tapvmvv - ".date("d.m.Y", strtotime("$setapvmvv-$setapvmkk-".($setapvmpp-1)));
 			
 			//	Jos ei kirjoiteta oikein, poistetaan muuttuja
 			$from[]	= "/%[\w]{2}/";

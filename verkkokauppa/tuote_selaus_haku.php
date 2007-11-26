@@ -733,7 +733,8 @@
 					// $netto = N jos halutaan nettohinta
 					// $debug (jos 1 niin n‰ytet‰‰n tulos)
 					$kpl = 1;
-
+					unset($hinta);
+					
 					// haetaan tuotteen tiedot
 					$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 					$tuoteres = mysql_query($query);

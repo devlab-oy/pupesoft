@@ -26,6 +26,17 @@ if(!function_exists("menu")) {
 				$val .=  "<tr class='aktiivi'><td><a class = 'menu' id='$parent' onclick='$onclick' href='$href'>{$orow["nimi"]}</a><div id='$target' style='display: none'></div></td></tr>";
 			}
 			$val .= "</table>";
+			
+			$val .= "<br><table>
+						<tr><td class='back'><font class='info'>Hae:</font></td></tr>
+						<tr>
+							<td><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\" method = 'post'>
+							<input type = 'text' size='15' name = 'tuotehaku'></form><br>
+							<a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\">".t("Nimityksellä")."</a><br>
+							<a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, true);\">".t("Tuotekoodilla")."</a>
+							</td>
+						</tr>
+					</table>";
 		}
 		elseif($try == "") {
 			$val = "<table class='menu'>";
@@ -532,6 +543,16 @@ if($tee == "tilatut") {
 
 if($tee == "selaa") {
 	
+	$tuoteno = $nimitys = "";
+	if($hakutapa != "" and $tuotehaku == "") {
+		die ("<font class='error'>".t("Anna jokin hakukriteeri")."</font>");
+	}
+	elseif($hakutapa == "koodilla") {
+		$tuoteno = $tuotehaku;
+	}
+	elseif($hakutapa == "nimi") {
+		$nimitys = $tuotehaku;
+	}
 		
 	ob_start();
 	$poistetut 	= "";
@@ -544,9 +565,9 @@ if($tee == "selaa") {
 		$ojarj		= "tuote_wrapper.tuotemerkki";
 	}
 	
-	$haku[0]	= "";	
+	$haku[0]	= $tuoteno;	
 	$haku[1]	= "";	
-	$haku[2]	= "";
+	$haku[2]	= $nimitys;
 	$haku[3]	= $osasto;	
 	$haku[4]	= $try;
 	$haku[5]	= $tuotemerkki;	

@@ -37,6 +37,9 @@
 			foreach($tuote as $i => $tuoteno) {
 				if (count($sarjanumero_edarvo[$i]) > 0) {
 					foreach ($sarjanumero_edarvo[$i] as $snro_tun => $edarvo) {
+						
+						$sarjanumero_uusiarvo[$i][$snro_tun] = str_replace(",", ".", $sarjanumero_uusiarvo[$i][$snro_tun]);
+						
 						if($sarjanumero_uusiarvo[$i][$snro_tun] != '' and (float) $sarjanumero_uusiarvo[$i][$snro_tun] >= 0) {
 							$edarvo = (float) $edarvo;
 							$uuarvo = (float) $sarjanumero_uusiarvo[$i][$snro_tun];

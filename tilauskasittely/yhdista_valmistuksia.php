@@ -141,7 +141,7 @@
 										group_concat(
 											concat(
 												tuoteno, 
-												(SELECT round((isa.kpl+isa.jt+isa.varattu)/(tilausrivi.kpl+tilausrivi.jt+tilausrivi.varattu), 2) FROM tilausrivi isa WHERE isa.yhtio = tilausrivi.yhtio and isa.tunnus=tilausrivi.perheid)
+												(SELECT round((isa.kpl+isa.jt+isa.varattu)/(tilausrivi.kpl+tilausrivi.jt+tilausrivi.varattu), 1) FROM tilausrivi isa WHERE isa.yhtio = tilausrivi.yhtio and isa.tunnus=tilausrivi.perheid)
 											) ORDER BY tuoteno SEPARATOR '|'
 										) stringi
 						FROM tilausrivi

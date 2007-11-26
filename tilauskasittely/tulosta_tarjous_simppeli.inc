@@ -478,10 +478,17 @@ if (!function_exists('tulosta_tarjous')) {
 		}
 
 		if(file_exists($kukarow["yhtio"]."_tarjous_liitte.pdf")) {
-			ob_start(); // estetään outputti
-			$pdf->import->append(file_get_contents($kukarow["yhtio"]."_tarjous_liitte.pdf"));
-			$pages = $pdf->import->get_pages();
-			ob_end_clean(); // outputti takas päälle			
+			$query = "	SELECT tilausrivi.tunnus
+						FROM tilausrivi
+						WHERE yhtio = '$kukarow[yhtio]' and otunnus='$laskurow[tunnus]' and tuoteno LIKE ('EN1%')
+						LIMIT 1";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result)==1) {
+				ob_start(); // estetään outputti
+				$pdf->import->append(file_get_contents($kukarow["yhtio"]."_tarjous_liitte.pdf"));
+				$pages = $pdf->import->get_pages();
+				ob_end_clean(); // outputti takas päälle
+			}
 		}
 				
 		//kirjoitetaan pdf faili levylle..

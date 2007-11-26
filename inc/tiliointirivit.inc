@@ -184,7 +184,7 @@
 
 	$query = "	SELECT lukko, tiliointi.tunnus, $slAsa, concat_ws('/', a.nimi, b.nimi, c.nimi),
 				tiliointi.summa, vero, concat_ws('/', tapvm, selite) selite
-				$slisa
+				$slisa, tapvm
 				FROM tiliointi
 				LEFT JOIN tili ON tili.yhtio = tiliointi.yhtio and tili.tilino = tiliointi.tilino
 				LEFT JOIN kustannuspaikka a ON a.yhtio = '$kukarow[yhtio]' and a.tunnus = tiliointi.kustp and a.tyyppi = 'K'
@@ -207,10 +207,10 @@
 
 		echo "<tr>";
 		if ($viivatut == 'on') {
-			$poistasarake = 1;
+			$poistasarake = 2;
 		}
 		else {
-			$poistasarake = 0;
+			$poistasarake = 1;
 		}
 
 		for ($i=2; $i < mysql_num_fields($result)-$poistasarake; $i++) {
@@ -245,7 +245,12 @@
 			}
 			
 		}
-		if (($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["poistettu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
+
+		$tilikausi_loppu = strtotime($yhtiorow['tilikausi_loppu']);
+		$tilikausi_alku = strtotime($yhtiorow['tilikausi_alku']);
+		$tiliointi_pvm = strtotime($trow['tapvm']);
+		
+		if (($tiliointi_pvm <= $tilikausi_loppu and $tiliointi_pvm >= $tilikausi_alku) and ($trow["lukko"] == "" or $kukarow["taso"] == 3) and $trow["poistettu"] == "" and $maara > 1 and $oikeurow["paivitys"] == 1 and ($kukarow["taso"] == 2 or $kukarow["taso"] == 3)) {
 			// Eli ei näytetä muuta-nappia, jos ei oikeuksia,
 			//jos rivi on poistettu TAI se on tiliöinnin viimeinen TAI se on lukittu,
 			//jos sen saa poistaa niin on hankalaa löytää heittävät tositteet...
@@ -265,7 +270,7 @@
 		else {
 			if ($maara > 1) {
 
-				if ($trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3)) {
+				if ($trow['lukko'] != '' or $oikeurow['paivitys'] != 1 or ($kukarow["taso"] != 2 and $kukarow["taso"] != 3) or ($tiliointi_pvm > $tilikausi_loppu or $tiliointi_pvm < $tilikausi_alku)) {
 					echo "<td><img src=pics/lullacons/error.png>";
 					//Rivi on poistettu
 					if ($trow['poistettu'] != '') {

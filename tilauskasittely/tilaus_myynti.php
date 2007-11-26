@@ -848,10 +848,20 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		else {
 			$tarjous = $laskurow["tunnus"];
 		}
+		
+		//	Tarkastetaan onko käytössä tarjousseuranta vai, jos on näitä muistutuksia ei kirjata..
+		$query = "	SELECT yhtio
+					FROM oikeu
+					WHERE yhtio	= '$kukarow[yhtio]'
+					and kuka	= '$kukarow[kuka]'
+					and nimi	= 'tilauskasittely/tarjousseuranta.php'
+					and alanimi = ''";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result) == 0) {
+			kalenteritapahtuma ("Memo", "Tarjous asiakkaalle", "Tarjous $tarjous tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]", $laskurow["liitostunnus"], "", $lasklisatied_row["yhteyshenkilo_tekninen"], $laskurow["tunnus"]);
 
-		kalenteritapahtuma ("Memo", "Tarjous asiakkaalle", "Tarjous $tarjous tulostettu.\n$laskurow[viesti]\n$laskurow[comments]\n$laskurow[sisviesti2]", $laskurow["liitostunnus"], "", $lasklisatied_row["yhteyshenkilo_tekninen"], $laskurow["tunnus"]);
-
-		kalenteritapahtuma ("Muistutus", "Tarjous asiakkaalle", "Muista tarjous $tarjous", $laskurow["liitostunnus"], "K", $lasklisatied_row["yhteyshenkilo_tekninen"], $laskurow["tunnus"]);
+			kalenteritapahtuma ("Muistutus", "Tarjous asiakkaalle", "Muista tarjous $tarjous", $laskurow["liitostunnus"], "K", $lasklisatied_row["yhteyshenkilo_tekninen"], $laskurow["tunnus"]);			
+		}
 
 		// tilaus ei enää kesken...
 		$query	= "update kuka set kesken=0 where yhtio='{$kukarow["yhtio"]}' and kuka='{$kukarow["kuka"]}'";

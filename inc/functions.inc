@@ -54,7 +54,7 @@ if (!function_exists("tv1dateconv")) {
 			$jatko = "";
 		}
 
-		if ($date == "0000-00-00" or $date == "0000-00-00 00:00:00") {
+		if ($date == "0000-00-00" or $date == "0000-00-00 00:00:00" or $date == "") {
 			return "";
 		}
 		elseif ($laskurow["maa"] == "SE") {
@@ -63,7 +63,6 @@ if (!function_exists("tv1dateconv")) {
 		else {
 			return substr($date,8,2).".".substr($date,5,2).".".substr($date,0,4).$jatko;
 		}
-
 	}
 }
 

@@ -25,11 +25,7 @@ if (! isset($_REQUEST['liitos']) and ! isset($_REQUEST['id'])) {
 }
 
 // uusi upload?
-if (isset($_POST['tee'])
-and $_POST['tee'] == 'file'
-and isset($_REQUEST['liitos'])
-and isset($_REQUEST['id'])
-and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+if (isset($_POST['tee']) and $_POST['tee'] == 'file' and isset($_REQUEST['liitos']) and isset($_REQUEST['id']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 
     $errormsg = '';
 
@@ -61,18 +57,17 @@ and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
 
 		// lis‰t‰‰n kuva
-		$query = "	insert into liitetiedostot set
-					yhtio    = '{$kukarow['yhtio']}',
-					liitos   = '". mysql_real_escape_string($_REQUEST['liitos']) . "',
-					liitostunnus = '" . (int) $_REQUEST['id']. "',
-					laatija    = '{$kukarow['kuka']}',
-					luontiaika = now(),
-					data     = '$data',
-					selite   = '$filename',
-					filename = '$filename',
-					filesize = '$filesize',
-					filetype = '$filetype'";
-
+		$query = "	INSERT into liitetiedostot set
+					yhtio    		= '{$kukarow['yhtio']}',
+					liitos   		= '". mysql_real_escape_string($_REQUEST['liitos']) . "',
+					liitostunnus 	= '" . (int) $_REQUEST['id']. "',
+					laatija    		= '{$kukarow['kuka']}',
+					luontiaika 		= now(),
+					data     		= '$data',
+					selite   		= '$filename',
+					filename 		= '$filename',
+					filesize 		= '$filesize',
+					filetype 		= '$filetype'";
 		$result = mysql_query($query) or pupe_error($query);
 		$liitostunnus = mysql_insert_id();
 		$kuva = $liitostunnus;
@@ -82,10 +77,11 @@ and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$laskurow = mysql_fetch_array($res);
 
 		// nollataan hyv‰ksyj‰t jos jokin n‰ist‰ tiloista
-		if (in_array($laskurow['tila'], array('H', 'M', 'Q')) and $kukarow["taso"] != 3) {
+		if (in_array($laskurow['tila'], array('H','M')) and $kukarow["taso"] != 3) {
 			nollaa_hyvak((int) $_REQUEST['id']);
 		}
-	} else {
+	} 
+	else {
 		echo $errormsg;
 	}
 }
@@ -101,14 +97,12 @@ if (isset($_POST['poista']) and isset($_POST['tunnus']) and isset($_REQUEST['lii
 	$res = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($res);
 
-	if (in_array($laskurow['tila'], array('H', 'M', 'Q')) and $kukarow["taso"] != 3) {
+	if (in_array($laskurow['tila'], array('H','M')) and $kukarow["taso"] != 3) {
 		nollaa_hyvak($_REQUEST['id']);
 	}
 }
 
 if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_REQUEST['id'])) {
-
-	echo "<h2>Lasku</h2>";
 
 	$query = "SELECT * from lasku where tunnus=" . (int) $_REQUEST['id'] . " and yhtio='{$kukarow['yhtio']}'";
 	$res = mysql_query($query) or pupe_error($query);
@@ -118,7 +112,7 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 	$res = mysql_query($query) or pupe_error($query);
 
 	// sallittu katselu
-	if (! in_array($laskurow['tila'], array('H', 'Y', 'M', 'P', 'Q', 'X')) or mysql_num_rows($res) == 0) {
+	if (! in_array($laskurow['tila'], array('H','Y','M','P','Q','X')) or mysql_num_rows($res) == 0) {
 		die ("<font class='error'>".t("V‰‰r‰ laskutyyppi!")."</font>");
 	}
 
@@ -128,10 +122,10 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 		<tr><th>". t('Osoite')."</th><td>{$laskurow['osoite']}</td></tr>
 		<tr><th>". t('Postitp')."</th><td>{$laskurow['postitp']}</td></tr>";
 
-	echo "</table>";
+	echo "</table><br>";
 
-	if (! in_array($laskurow['tila'], array('P', 'Y')) or $kukarow["taso"] == "3") {
-		echo "<p>Lis‰‰ uusi tiedosto: <form method='post' name='kuva' enctype='multipart/form-data'>
+	if (in_array($laskurow['tila'], array('H','M','X')) or $kukarow["taso"] == "3") {
+		echo "<p>".t("Lis‰‰ uusi tiedosto").": <form method='post' name='kuva' enctype='multipart/form-data'>
 				<input type='file' name='userfile'/>
 				<input type='hidden' name='id' value='" . $_REQUEST['id'] ."'>
 				<input type='hidden' name='tee' value='file'/>
@@ -172,24 +166,23 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 			<td>". $liite['filename']  . "</td>
 			<td>". $filesize . "</td>
 			<td>". $liite['filetype']  . "</td>
-			<td>". $liite['luontiaika'] . "</td>
+			<td>". tv1dateconv($liite['luontiaika'],"P") . "</td>
 			<td>". $liite['laatija']  . "</td>
 			";
 
-			echo "<td><form method='post' action='view.php?id={$liite['tunnus']}'><input type='submit' value='" . t('N‰yt‰ lasku')."'/></form></td>";
+		echo "<td><form method='post' action='view.php?id={$liite['tunnus']}'><input type='submit' value='" . t('N‰yt‰ lasku')."'/></form></td>";
 
-			if (! in_array($laskurow['tila'], array('P', 'Y')) or $kukarow["taso"] == "3") {
-				echo "<td><form action='' method='post'>
-					<input type='hidden' name='tunnus' value='{$liite['tunnus']}'/>
-					<input type='submit' name='poista' value='Poista' onclick='return confirm(\"" . t('Haluatko varmasti poistaa t‰m‰n liitteen') . "\");'/>
-					</form></td>";
-			}
+		if (in_array($laskurow['tila'], array('H','M','X')) or $kukarow["taso"] == "3") {
+			echo "<td><form action='' method='post'>
+				<input type='hidden' name='tunnus' value='{$liite['tunnus']}'/>
+				<input type='submit' name='poista' value='Poista' onclick='return confirm(\"" . t('Haluatko varmasti poistaa t‰m‰n liitteen') . "\");'/>
+				</form></td>";
+		}
 
 		echo "</tr>";
 	}
 
 	echo "</table>";
-
 	echo "<br /><br /><a href='muutosite.php?tee=E&tunnus={$laskurow['tunnus']}'>&laquo; " . t('Takaisin laskulle') . "</a>";
 }
 
@@ -198,9 +191,18 @@ function nollaa_hyvak($id) {
 	global $kukarow;
 
 	// nollataan hyv‰ksyj‰t jos jokin n‰ist‰ tiloista
-	$query = "	UPDATE lasku set h1time = '', h2time = '', h3time = '', h4time = '', h5time = '', hyvaksyja_nyt = hyvak1
-				WHERE tunnus =" . $id . " and yhtio='{$kukarow['yhtio']}'";
-	mysql_query($query) or pupe_error($query);
+	$query = "	UPDATE lasku 
+				SET h1time 		= '', 
+				h2time 			= '', 
+				h3time 			= '', 
+				h4time 			= '', 
+				h5time 			= '', 
+				hyvaksyja_nyt 	= hyvak1,
+				tila 			= if(tila='M', 'H', tila)
+				WHERE tunnus 	= $id 
+				and yhtio		= '{$kukarow['yhtio']}'
+				and tila in ('H','M')";
+	mysql_query($query) or pupe_error($query);	
 }
 
 require ('inc/footer.inc');

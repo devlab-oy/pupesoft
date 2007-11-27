@@ -28,7 +28,9 @@
 		if ($tee == 'G') {
 			$query = "SELECT tapvm, tunnus
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus > '$tunnus'
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and tunnus > '$tunnus'
+						and tila in ('H','Y','M','P','Q','X','U')
 						ORDER by tunnus
 						LIMIT 1";
 			$result = mysql_query($query) or pupe_error($query);
@@ -474,10 +476,10 @@
 		if ($tee == 'E' or $tee == 'F') {
 
 			// N‰ytet‰‰n laskun tai tositteen tiedot....
-			$query = "SELECT tila, concat_ws('@',lasku.laatija, lasku.luontiaika) Laatija,
+			$query = "SELECT tila, concat_ws('@', ifnull(kuka.nimi, lasku.laatija), lasku.luontiaika) Laatija,
 							ytunnus, lasku.nimi, nimitark, osoite, osoitetark, postino, postitp, maa,
 							lasku.valkoodi,
-							concat_ws(' ',tapvm, mapvm) 'tapvm mapvm',
+							concat_ws(' / ',tapvm, mapvm) 'tapvm / mapvm',
 							if(kasumma = 0,'',
 							if (tila = 'U',
 							if(lasku.valkoodi='$yhtiorow[valkoodi]',concat_ws('@',kasumma, kapvm),concat(kasumma, ' (', round(kasumma/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),lasku.valkoodi,')', '@', kapvm)),
@@ -485,18 +487,19 @@
 							if (tila = 'U',
 							if(lasku.valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa/if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),lasku.valkoodi,')', '@', erpcm)),
 							if(lasku.valkoodi='$yhtiorow[valkoodi]', concat_ws('@', summa, erpcm),concat(summa, ' (', round(summa*if(maksu_kurssi=0,vienti_kurssi,maksu_kurssi),2),'$yhtiorow[valkoodi])', '@', erpcm))) summa,
-							concat_ws('@',hyvak1,h1time) Hyv‰ksyj‰1,
-							concat_ws('@',hyvak2,h2time) Hyv‰ksyj‰2,
-							concat_ws('@',hyvak3,h3time) Hyv‰ksyj‰3,
-							concat_ws('@',hyvak4,h4time) Hyv‰ksyj‰4,
-							concat_ws('@',hyvak5,h5time) Hyv‰ksyj‰5,
-							concat_ws('@',maksaja,maksuaika) Maksaja,
+							concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak1), lasku.hyvak1), if(h1time='0000-00-00 00:00:00', null, h1time)) Hyv‰ksyj‰1,
+							concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak2), lasku.hyvak2), if(h2time='0000-00-00 00:00:00', null, h2time)) Hyv‰ksyj‰2,
+							concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak3), lasku.hyvak3), if(h3time='0000-00-00 00:00:00', null, h3time)) Hyv‰ksyj‰3,
+							concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak4), lasku.hyvak4), if(h4time='0000-00-00 00:00:00', null, h4time)) Hyv‰ksyj‰4,
+							concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvak5), lasku.hyvak5), if(h5time='0000-00-00 00:00:00', null, h5time)) Hyv‰ksyj‰5,
+							concat_ws('@', ifnull((select nimi from kuka where kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.maksaja), lasku.maksaja), maksuaika) Maksaja,
 							tilinumero, concat_ws(' ', viite, viesti) Maksutieto,
 							maa, ultilno, pankki1, pankki2, pankki3, pankki4, swift, clearing, maksutyyppi,
 							ebid,
 							toim_osoite, '' toim_osoitetark, toim_postino, toim_postitp, toim_maa, alatila, vienti, comments, yriti.nimi maksajanpankkitili, lasku.laskunro
 							FROM lasku
 							LEFT JOIN yriti ON lasku.yhtio=yriti.yhtio and maksu_tili=yriti.tunnus
+							LEFT JOIN kuka ON lasku.yhtio=kuka.yhtio and lasku.laatija=kuka.kuka 
 							WHERE lasku.tunnus = '$tunnus' and lasku.yhtio = '$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
@@ -543,53 +546,21 @@
 			$laskuntila = $trow['tila'];
 			$laskunpvm  = $trow[11];
 
-			if ($trow[14] == '@0000-00-00 00:00:00') $trow[14] = '';
-			if ($trow[14] == '0000-00-00 00:00:00') $trow[14] = '';
-			if ($trow[15] == '@0000-00-00 00:00:00') $trow[15] = '';
-			if ($trow[15] == '0000-00-00 00:00:00') $trow[15] = '';
-			if ($trow[16] == '@0000-00-00 00:00:00') $trow[16] = '';
-			if ($trow[16] == '0000-00-00 00:00:00') $trow[16] = '';
-			if ($trow[17] == '@0000-00-00 00:00:00') $trow[17] = '';
-			if ($trow[17] == '0000-00-00 00:00:00') $trow[17] = '';
-			if ($trow[18] == '@0000-00-00 00:00:00') $trow[18] = '';
-			if ($trow[18] == '0000-00-00 00:00:00') $trow[18] = '';
-			if ($trow[19] == '@0000-00-00 00:00:00') $trow[19] = '';
-			if ($trow[19] == '0000-00-00 00:00:00') $trow[19] = '';
 			echo "<table><tr><td valign='top'>"; // T‰m‰ taulukko pit‰‰ sis‰ll‰‰n kaikki tositteen perustiedot
 
 			// Yleiset tiedot
 			echo "<table>"; // T‰m‰ aloittaa vasemman sarakkeen
 
-			for ($i = 1; $i < 2; $i++) {
-				echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
-			}
+
+			list($aa, $bb) = explode("@", $trow[1]);	
+			echo "<tr><th>" . t(mysql_field_name($result,1)) ."</th><td>$aa@".tv1dateconv($bb, "P")."</td></tr>";			
 
 			if ($trow[0] != 'X') {
 				// Laskut
 				for ($i = 2; $i < 10; $i++) {
-					echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
-							<td>$trow[$i]</td></tr>";
+					echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
 				}
 
-				// Tehd‰‰n nappula, jolla voidaan vaihtaa n‰kym‰ksi tilausrivit/tiliˆintirivit
-				if ($tee == 'F') {
-					$ftee = 'E';
-					$fnappula = t('N‰yt‰ tiliˆinnit');
-				}
-				else {
-					$ftee = 'F';
-					$fnappula = t('N‰yt‰ tilausrivit');
-				}
-
-				echo "<form action = '$PHP_SELF' method='post'>
-					<input type = 'hidden' name = 'tee' value='$ftee'>
-					<input type = 'hidden' name = 'tunnus' value='$tunnus'>
-					<tr><td><input type = 'submit' value = '$fnappula'></form></td>
-					<form action = '$PHP_SELF' method='post'>
-						<input type = 'hidden' name = 'tee' value='G'>
-						<input type = 'hidden' name = 'tunnus' value='$tunnus'>
-						<td><input type = 'submit' value = '".t("Seuraava")."'><td></form>
-					</tr>";
 				echo "</table></td><td valign='top'>"; // Lopetettiin vasen sarake
 
 				echo "<table>"; // T‰ss‰ tehd‰‰n uusi sarake oikealle
@@ -600,18 +571,27 @@
 					//Perustiedot
 					if ($tee2 != 1) {
 						for ($i = 10; $i < 14; $i++) {
-							echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
-									<td>$trow[$i]</td></tr>";
+							if ($i == 11) {
+								list($aa, $bb) = explode(" / ", $trow[$i]);
+								
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>".tv1dateconv($aa)." / ".tv1dateconv($bb)."</td></tr>"; 	
+							}
+							elseif ($i == 13) {
+								list($aa, $bb) = explode("@", $trow[$i]);
+								
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$aa@".tv1dateconv($bb)."</td></tr>";
+							}
+							else {
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>"; 	
+							}													
 						}
 						for ($i = 32; $i < 37; $i++) {
-							echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
-									<td>$trow[$i]</td></tr>";
+							echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
 						}
 					}
 					else { //Laajennetut
 						for ($i = 0; $i < 14; $i++) {
-							echo "<tr><th>" . t(mysql_field_name($keikres,$i)) ."</th>
-								<td>$keikrow[$i]</td></tr>";
+							echo "<tr><th>" . t(mysql_field_name($keikres,$i)) ."</th><td>$keikrow[$i]</td></tr>";
 						}
 					}
 				}
@@ -619,14 +599,27 @@
 					// Perustiedot
 					if ($tee2 != 1) {
 						for ($i = 10; $i < 19; $i++) {
-							echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
-								<td>$trow[$i]</td></tr>";
+							if ($i == 11) {
+								list($aa, $bb) = explode(" / ", $trow[$i]);
+								
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>".tv1dateconv($aa)." / ".tv1dateconv($bb)."</td></tr>"; 	
+							}
+							elseif ($i >= 13 and $i <= 18) {
+								list($aa, $bb) = explode("@", $trow[$i]);
+								
+								if ($bb != "" and substr($bb,0,10) != "0000-00-00") {
+									$aa = $aa."@";
+								}
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$aa".tv1dateconv($bb, "P")."</td></tr>";
+							}
+							else {
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>"; 	
+							}
 						}
 					}
 					else { //Laajennetut
 						for ($i = 0; $i < 11; $i++) {
-							echo "<tr><th>" . t(mysql_field_name($keikres,$i)) ."</th>
-								<td>$keikrow[$i]</td></tr>";
+							echo "<tr><th>" . t(mysql_field_name($keikres,$i)) ."</th><td>$keikrow[$i]</td></tr>";
 						}
 						if (mysql_num_rows($muutkeikres) != 0) {
 							echo "<tr><th>keikan muut laskut</td><td>";
@@ -651,8 +644,7 @@
 				// Myynnille
 				if ($trow['tila'] == 'U' or $trow['tila'] == 'L') {
 					for ($i = 21; $i < 22; $i++) {
-							echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
-									<td>$trow[$i]</td></tr>";
+							echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
 					}
 				}
 				else {
@@ -663,16 +655,24 @@
 							
 						for ($i = 21; $i < 29; $i++) {
 							if ($trow[$i] != '') {
-								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
-									<td>$trow[$i]</td></tr>";
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
 							}
 						}
 					}
 					else {
 						//Kotimaan ostolaskuille
 						for ($i = 19; $i < 22; $i++) {
-							echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th>
-									<td>$trow[$i]</td></tr>";
+							if ($i == 19) {
+								list($aa, $bb) = explode("@", $trow[$i]);
+								
+								if ($bb != "" and substr($bb,0,10) != "0000-00-00") {
+									$aa = $aa."@";
+								}
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$aa".tv1dateconv($bb, "P")."</td></tr>";
+							}
+							else {
+								echo "<tr><th>" . t(mysql_field_name($result,$i)) ."</th><td>$trow[$i]</td></tr>";
+							}
 						}
 					}
 					if ($trow['maksajanpankkitili'] != '') {
@@ -680,11 +680,11 @@
 					}
 				}
 				// en jaksa mietti‰ indeksilukuja perkele!
-				if ($trow[comments] != '')
-					echo "<tr><th>".t("comments")."</th><td>$trow[comments]</td></tr>";
+				if ($trow["comments"] != '')
+					echo "<tr><th>".t("Kommentti")."</th><td>$trow[comments]</td></tr>";
 
 				// tehd‰‰n lasku linkki
-				echo "<tr><td></td><td>".ebid($tunnus) ."</td></tr>";
+				echo "<tr><th>".t("Laskun kuva")."</th><td>".ebid($tunnus) ."</td></tr>";
 
 			}
 			else {
@@ -696,6 +696,7 @@
 
 			}
 			echo "<tr>";
+			echo "<th></th><td>";
 
 			// N‰ytet‰‰n nappi vain jos siihen on oikeus
 			if ($oikeurow['paivitys'] == 1) {
@@ -703,12 +704,10 @@
 						<input type = 'hidden' name = 'tee' value='M'>
 						<input type = 'hidden' name = 'tila' value=''>
 						<input type = 'hidden' name = 'tunnus' value='$tunnus'>
-						<td><input type = 'submit' value = '".t("Muuta tietoja")."'></td>
+						<input type = 'submit' value = '".t("Muuta tietoja")."'>
 						</form>";
 			}
-			else {
-				echo "<td></td>";
-			}
+			
 
 			$queryoik = "SELECT tunnus from oikeu where nimi like '%liitetiedostot.php' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
 			$res = mysql_query($queryoik) or pupe_error($queryoik);
@@ -717,21 +716,10 @@
 				echo "<form method='get' action='liitetiedostot.php?liitos=lasku&id=$tunnus'>
 					<input type='hidden' name='id' value='$tunnus'>
 					<input type='hidden' name='liitos' value='lasku'>
-					<td><input type='submit' value='" . t('Muokkaa liitteit‰')."'></td>
-					</form></td>";
-			}
-		
-			//
-			if ($trow['tila'] == 'U') {
-				echo "</tr><tr>
-					<form action = '$PHP_SELF' method='post'>
-					<input type='hidden' name='pdf' value='GO'>
-					<input type='hidden' name='otunnus' value='$tunnus'>
-					<input type='hidden' name='tee' value='NAYTATILAUS'>
-					<td><input type='submit' value='" . t('N‰yt‰ laskun PDF')."'></td>
+					<input type='submit' value='" . t('Muokkaa liitteit‰')."'>
 					</form>";
 			}
-
+		
 			// N‰ytet‰‰n nappi vain jos tieoja on
 			if ($trow['vienti'] != '' and $trow['vienti'] != 'A' and $trow['vienti'] != 'D' and $trow['vienti'] != 'G') {
 				if ($tee2 != 1) {
@@ -739,22 +727,48 @@
 						<input type = 'hidden' name = 'tee' value='$tee'>
 						<input type = 'hidden' name = 'tee2' value='1'>
 						<input type = 'hidden' name = 'tunnus' value='$tunnus'>
-						<td><input type = 'submit' value = '".t("Lis‰‰ tietoja")."'></td></form>";
+						<input type = 'submit' value = '".t("Lis‰tiedot")."'></form>";
 				}
 				else {
 					echo "<form action = '$PHP_SELF' method='post'>
 						<input type = 'hidden' name = 'tee' value='$tee'>
 						<input type = 'hidden' name = 'tunnus' value='$tunnus'>
-						<td><input type = 'submit' value = '".t("Normaalit tiedot")."'></td></form>";
-				}
-				echo "</tr>";
+						<input type = 'submit' value = '".t("Normaalitiedot")."'></form>";
+				}		
 			}
-			else {
-				echo "<td></td></tr>";
+
+			
+			
+			if ($trow['tila'] == 'U') {
+				echo "<form action = '$PHP_SELF' method='post'>
+					<input type='hidden' name='pdf' value='GO'>
+					<input type='hidden' name='otunnus' value='$tunnus'>
+					<input type='hidden' name='tee' value='NAYTATILAUS'>
+					<input type='submit' value='" . t('N‰yt‰ laskun PDF')."'></form>";
 			}
-			//
+			
+			echo "</tr>";
 			echo "</table></td></tr>"; //Lopetettiin viimeinen sarake
 			echo "</table>";
+			
+			// Tehd‰‰n nappula, jolla voidaan vaihtaa n‰kym‰ksi tilausrivit/tiliˆintirivit
+			if ($tee == 'F') {
+				$ftee = 'E';
+				$fnappula = t('N‰yt‰ tiliˆinnit');
+			}
+			else {
+				$ftee = 'F';
+				$fnappula = t('N‰yt‰ tilausrivit');
+			}
+
+			echo "<form action = '$PHP_SELF' method='post'>
+				<input type = 'hidden' name = 'tee' value='$ftee'>
+				<input type = 'hidden' name = 'tunnus' value='$tunnus'>
+				<tr><td><input type = 'submit' value = '$fnappula'></form>
+				<form action = '$PHP_SELF' method='post'>
+					<input type = 'hidden' name = 'tee' value='G'>
+					<input type = 'hidden' name = 'tunnus' value='$tunnus'>
+					<td><input type = 'submit' value = '".t("Seuraava")."'></form>";
 
 			if ($tee == 'F') {
 				// Laskun tilausrivit

@@ -313,7 +313,15 @@ else {
 
 	// Kirjataan myyntisaamiset tai kassa
 	if ($mehtorow['kateinen'] != '') {
+
 		$myysaatili = $yhtiorow['kassa'];
+		
+		if ($mehtorow['kateinen'] == "p") $myysaatili = $yhtiorow['kassa'];
+		if ($mehtorow['kateinen'] == "n") $myysaatili = $yhtiorow['pankkikortti'];
+		if ($mehtorow['kateinen'] == "o") $myysaatili = $yhtiorow['luottokortti'];
+		
+		if ($myysaatili == "") $myysaatili = $yhtiorow['kassa'];
+		
 		$apusumma = $loppusumma;
 
 		// jos maksetaan k‰teisell‰ ja meill‰ on kassa-alennusta, tehd‰‰n kirjaus... vain jos alvikirjauksia EI OLE tehty!

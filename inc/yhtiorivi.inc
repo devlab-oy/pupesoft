@@ -79,6 +79,8 @@
 	}
 	
 	if ((mysql_field_name($result, $i) == "kassa") or
+		(mysql_field_name($result, $i) == "pankkikortti") or
+		(mysql_field_name($result, $i) == "luottokortti") or
 		(mysql_field_name($result, $i) == "myynti") or
 		(mysql_field_name($result, $i) == "myynti_eu") or
 		(mysql_field_name($result, $i) == "myynti_ei_eu") or

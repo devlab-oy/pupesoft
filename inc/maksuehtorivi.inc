@@ -74,11 +74,16 @@
 		if (strtoupper($trow[$i]) == 'P') {
 			$sel3 = "SELECTED";
 		}
+		if (strtoupper($trow[$i]) == 'N') {
+			$sel4 = "SELECTED";
+		}
 
 		$ulos  = "<td><select name='$nimi'>";
 		$ulos .= "<option value=''  $sel1> ".t("Tämä ei ole käteismaksuehto.")."</option>";
-		$ulos .= "<option value='o' $sel2> ".t("Käteismaksuehto, ei pyöristetä.")."</option>";
-		$ulos .= "<option value='p' $sel3> ".t("Käteismaksuehto, pyöristetään.")."</option>";
+		$ulos .= "<option value='n' $sel4> ".t("Käteismaksuehto, Pankkikortti ei pyöristetä.")."</option>";
+		$ulos .= "<option value='o' $sel2> ".t("Käteismaksuehto, Luottokortti ei pyöristetä.")."</option>";
+		$ulos .= "<option value='p' $sel3> ".t("Käteismaksuehto, Käteinen pyöristetään.")."</option>";
+
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

@@ -30,25 +30,25 @@
 
 		if($muutkassat != '') {
 			if ($kassat != '') {
-				$kassat = " and (".$kassat." or avainsana.selite is null)";
+				$kassat = " HAVING (".$kassat." or avainsana.selite is null)";
 			}
 			else {
-				$kassat = " and avainsana.selite is null ";
+				$kassat = " HAVING avainsana.selite is null ";
 			}
 		}
 		elseif($kassat != '') {
-			$kassat = " and ".$kassat;
+			$kassat = " HAVING ".$kassat;
 		}
 		else {
-			$kassat = " and avainsana.selite = 'EI NAYTETA KASSAKONEITA EIHAN' ";
+			$kassat = " HAVING avainsana.selite = 'EI NAYTETA KASSAKONEITA EIHAN' ";
 		}
 
 
-		if ($myyjanro > 0) {
+		if ((int) $myyjanro > 0) {
 			$query = "	SELECT tunnus
 						FROM kuka
-						WHERE yhtio='$kukarow[yhtio]'
-						and myyja = '$myyjanro'";
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and myyja 	= '$myyjanro'";
 			$result = mysql_query($query) or pupe_error($query);
 			$row = mysql_fetch_array($result);
 
@@ -57,7 +57,6 @@
 		elseif ($myyja != '') {
 			$lisa = " and lasku.laatija='$myyja' ";
 		}
-
 
 		$lisa2 = " and lasku.vienti in (";
 
@@ -77,15 +76,15 @@
 		//Haetaan käteislaskut
 		$query = "	SELECT lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.laskutettu, lasku.tapvm,
 					if(kuka.kassamyyja is null or kuka.kassamyyja='', 'Muut', kuka.kassamyyja) kassa, kuka.nimi myyja,
-					if(!isnull(avainsana.selitetark),avainsana.selitetark, 'Muut') kassanimi
+					if(!isnull(avainsana.selitetark),avainsana.selitetark, 'Muut') kassanimi, avainsana.selite
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen!=''
 					LEFT JOIN kuka ON lasku.laskuttaja=kuka.kuka and lasku.yhtio=kuka.yhtio
 					LEFT JOIN avainsana ON avainsana.yhtio=lasku.yhtio and avainsana.laji='KASSA' and avainsana.selite=kuka.kassamyyja
 					WHERE
 					lasku.yhtio = '$kukarow[yhtio]'
-					and tapvm >= '$vva-$kka-$ppa'
-					and tapvm <= '$vvl-$kkl-$ppl'
+					and lasku.tapvm >= '$vva-$kka-$ppa'
+					and lasku.tapvm <= '$vvl-$kkl-$ppl'
 					and lasku.tila	= 'U'
 					and lasku.alatila = 'X'
 					$lisa
@@ -93,7 +92,6 @@
 					$kassat
 					ORDER BY kassa, laskunro";
 		$result = mysql_query($query) or pupe_error($query);
-
 
 		echo "	<table><tr>
 				<th nowrap>".t("Kassa")."</th>
@@ -194,15 +192,15 @@
 
 		if ($katsuori != '') {
 			//Haetaan kassatilille laitetut suoritukset
-			$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa, lasku.laskutettu
+			$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa, lasku.tapvm
 						FROM lasku use index (yhtio_tila_tapvm)
 						JOIN tiliointi use index (tositerivit_index) ON tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.tilino='$yhtiorow[kassa]'
 						JOIN suoritus use index (tositerivit_index) ON suoritus.yhtio=tiliointi.yhtio and suoritus.ltunnus=tiliointi.aputunnus
 						LEFT JOIN kuka ON lasku.laatija=kuka.kuka and lasku.yhtio=kuka.yhtio
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila	= 'X'
-						and lasku.laskutettu >= '$vva-$kka-$ppa'
-						and lasku.laskutettu <= '$vvl-$kkl-$ppl'
+						and lasku.tapvm >= '$vva-$kka-$ppa'
+						and lasku.tapvm <= '$vvl-$kkl-$ppl'
 						ORDER BY lasku.laskunro";
 			$result = mysql_query($query) or pupe_error($query);
 			

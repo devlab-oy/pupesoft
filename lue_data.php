@@ -759,8 +759,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			//	Tarkastetaan tarkistarivi.incia vastaan..
 			//	Generoidaan oikeat arrayt
 			$errori = "";
-			$t = array();
-
+			$t 		= array();
+			$virhe 	= array();	
+			
 			//	Otetaan talteen query..
 			$lue_data_query = $query;
 			
@@ -776,8 +777,9 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$result = mysql_query($tarq) or pupe_error($tarq);
 			$tarkrow = mysql_fetch_array($result);
 			$tunnus = $tarkrow["tunnus"];
+			
 			if($table == "tuotteen_toimittajat") {
-									
+						
 				$tee = "tarkistus";
 				$tuoteno = $erivi[array_search("TUOTENO", $otsikot)];
 				$toimittaja = $erivi[array_search("TOIMITTAJA", $otsikot)];
@@ -814,20 +816,18 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$t[$i] = $tarkrow[strtolower(mysql_field_name($result, $i))];
 					}
 
-					require "inc/".$table."tarkista.inc";
+					if(@include("inc/".$table."tarkista.inc")) {
 					
-					if($virhe[$i] != "") {
-						echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
+						if($virhe[$i] != "") {
+							echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
+						}
 					}					
 				}				
 			}
 
 			if($errori != "") {
 				$hylkaa++;
-			}
-			
-			echo "kala# JOTAIN...$hylkaa $virhe[$i]<br>";
-			
+			}			
 			
 			//	Palautetaan vanha query..
 			$query = $lue_data_query;

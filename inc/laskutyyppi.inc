@@ -1,28 +1,11 @@
 <?php
-// Katsotaan tyyppi $laskutyyppi kentästä ja annetaan se selväkielisenä takaisin
+	// Katsotaan tyyppi $laskutyyppi kentästä ja annetaan se selväkielisenä takaisin
 	switch ($laskutyyppi) {
 		case "H":
 			$laskutyyppi = "Hyväksyttävänä";
 			switch($alatila) {
 				case "H":
 					$alatila = "Pysäytetty";
-			}
-			break;
-		case "K":
-			$laskutyyppi = "Saapuva ostotilaus";
-			
-			switch($alatila) {
-				case "X":
-					$alatila = "Valmis";
-				case "I":
-					$alatila = "Inventointi";
-			}
-			break;
-		case "Y":
-			$laskutyyppi = "Maksettu";
-			switch($alatila) {
-				case "K":
-					$alatila = "käteisalennuksella";
 			}
 			break;
 		case "M":
@@ -40,6 +23,23 @@
 			switch($alatila) {
 				case "K":
 					$alatila = "maksettu käteisalennuksella";
+			}
+			break;
+		case "Y":
+			$laskutyyppi = "Maksettu";
+			switch($alatila) {
+				case "K":
+					$alatila = "käteisalennuksella";
+			}
+			break;					
+		case "K":
+			$laskutyyppi = "Saapuva ostotilaus";
+			
+			switch($alatila) {
+				case "X":
+					$alatila = "Valmis";
+				case "I":
+					$alatila = "Inventointi";
 			}
 			break;
 		case "X":

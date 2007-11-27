@@ -324,7 +324,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 				if (mysql_num_rows($fresult) != 0 ) {
 					if ($table != 'asiakasalennus' and $table != 'asiakashinta') {
-						echo t("Rivi on jo olemassa, ei voida perustaa uutta!")." $valinta<br>";
+						echo "<font class='error'>".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font><br>$valinta<br>";
 						$tila = 'ohita';
 					}
 				}
@@ -332,22 +332,19 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			elseif (strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
 				if (mysql_num_rows($fresult) == 0) {
 					if ($table != 'asiakasalennus' and $table != 'asiakashinta') {
-						echo t("Riviä ei voida muuttaa, koska sitä ei löytynyt!")." $valinta<br>";
+						echo "<font class='error'>".t("Riviä ei voida muuttaa, koska sitä ei löytynyt!")."</font><br>$valinta<br>";
 						$tila = 'ohita';
 					}
 				}
 			}
 			else {
-				echo " ".t("Riviä ei voida käsitellä koska siltä puuttuu toiminto!")." $valinta<br>";
+				echo "<font class='error'>".t("Riviä ei voida käsitellä koska siltä puuttuu toiminto!")."</font><br>$valinta<br>";
 				$tila = 'ohita';
 			}
 		}
 		else {
-			echo t("Pakollista tietoa puuttuu/tiedot ovat virheelliset!")." $valinta<br>";
-		}
-		
-		echo "# JOTAIN...$tila<br>";
-		
+			echo "<font class='error'>".t("Pakollista tietoa puuttuu/tiedot ovat virheelliset!")."</font><br>$valinta<br>";
+		}		
 		
 		// lisätään rivi
 		if($tila != 'ohita') {

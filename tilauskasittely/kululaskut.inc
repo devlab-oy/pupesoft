@@ -215,10 +215,11 @@ if($silent == "") {
 	if ($toiminto == "kululaskut") {
 
 		// katotaan onko liitettyj‰ laskuja
-		$query  = "	select *
-					from lasku
-					where yhtio='$kukarow[yhtio]' and tila='K' and alatila in ('','S') and vanhatunnus<>0 and laskunro='$laskurow[laskunro]'
-					order by tapvm desc";
+		$query  = "	SELECT lasku.*, l2.comments
+					FROM lasku
+					LEFT JOIN lasku l2 ON l2.yhtio=lasku.yhtio and l2.tunnus = lasku.vanhatunnus
+					WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila='K' and lasku.alatila in ('','S') and lasku.vanhatunnus<>0 and lasku.laskunro='$laskurow[laskunro]'
+					ORDER BY lasku.tapvm desc";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) != 0) {
@@ -238,8 +239,13 @@ if($silent == "") {
 
 			while($llrow = mysql_fetch_array($result)) {
 
+				$comments = "";
+				if($llrow["comments"] != "") {
+					$comments = "<br><i>$llrow[comments]</i>asd";
+				}
+
 				echo "<tr>
-						<td>$llrow[nimi]</td>
+						<td>$llrow[nimi]$comments</td>
 						<td>$llrow[tapvm]</td>
 						<td align='right'>$llrow[summa]</td>
 						<td align='right'>$llrow[arvo]</td>
@@ -256,7 +262,17 @@ if($silent == "") {
 				// tehd‰‰n lasku linkki
 				echo "<td>" . ebid($osresrow['tunnus']) . "</td>";
 
-				echo "<td>$llrow[vienti]</td>";
+				$vienti_teksti = "";
+				if ($llrow["vienti"] == 'C') $vienti_teksti = t('Kotimaa vaihto-omaisuus');
+				if ($llrow["vienti"] == 'J') $vienti_teksti = t('Kotimaa raaka-aine');
+				if ($llrow["vienti"] == 'E') $vienti_teksti = t('EU huolinta/rahti');
+				if ($llrow["vienti"] == 'F') $vienti_teksti = t('EU vaihto-omaisuus');
+				if ($llrow["vienti"] == 'K') $vienti_teksti = t('EU raaka-aine');
+				if ($llrow["vienti"] == 'H') $vienti_teksti = t('ei-EU huolinta/rahti');
+				if ($llrow["vienti"] == 'I') $vienti_teksti = t('ei-EU vaihto-omaisuus');
+				if ($llrow["vienti"] == 'L') $vienti_teksti = t('ei-EU raaka-aine');
+				
+				echo "<td valign='top'><a class='puhdas' href='javascript: return false;' title='$vienti_teksti'>{$llrow["vienti"]}</a></td>";
 
 				echo "<td class='back'>
 						<form name='haku' action='$PHP_SELF' method='post' autocomplete='off'>
@@ -300,10 +316,17 @@ if($silent == "") {
 		$kentta   = "haku";
 	}
 
+	if(!isset($hakutapa) and !isset($tee)) {
+		$hakutapa = "N";
+		$haku = substr($laskurow["nimi"], 0, 6);
+		$tee = "haku";
+	}
+
 	if ($tee == "haku") {
 
 		$lisa = ""; // no hacking
-
+		
+		//	Haetaan oletuksena nimen alulla!!
 		if ($hakutapa == "S") {
 			$haku = (float) str_replace(",",".",$haku); // pilkut pisteiksi
 			$lisa = "and summa='$haku'";
@@ -345,7 +368,7 @@ if($silent == "") {
 		}
 		else {
 
-			echo "<table>";
+			echo "<br><table>";
 			echo "<tr>
 					<th>".t("Nimi")."</th>
 					<th>".t("Tapvm")."</th>
@@ -381,16 +404,16 @@ if($silent == "") {
 				$verotonsumma = $verosumma - $vero;
 
 
-				echo "<tr><td valign='top'>$llrow[nimi]";
+				echo "<tr><td valign='top'><strong>$llrow[nimi]</strong>";
 
 				if ($llrow["comments"] != '') {
-					echo "<br>$llrow[comments]";
+					echo "<br><i>$llrow[comments]</i>";
 				}
 
 				echo "</td>";
 
 
-				echo "	<td valign='top'>$llrow[tapvm]</td>
+				echo "	<td valign='top' NOWRAP>$llrow[tapvm]</td>
 						<td align='right' valign='top'>".sprintf('%.2f',$verosumma)."</td>
 						<td align='right' valign='top'>".sprintf('%.2f',$verotonsumma)."</td>
 						<td valign='top'>$llrow[valkoodi]</td>
@@ -398,8 +421,18 @@ if($silent == "") {
 
 				// tehd‰‰n lasku linkki
 				echo "<td>".ebid($llrow['tunnus']) ."</td>";
-
-				echo "<td valign='top'>$llrow[vienti]</td>";
+				
+				$vienti_teksti = "";
+				if ($llrow["vienti"] == 'C') $vienti_teksti = t('Kotimaa vaihto-omaisuus');
+				if ($llrow["vienti"] == 'J') $vienti_teksti = t('Kotimaa raaka-aine');
+				if ($llrow["vienti"] == 'E') $vienti_teksti = t('EU huolinta/rahti');
+				if ($llrow["vienti"] == 'F') $vienti_teksti = t('EU vaihto-omaisuus');
+				if ($llrow["vienti"] == 'K') $vienti_teksti = t('EU raaka-aine');
+				if ($llrow["vienti"] == 'H') $vienti_teksti = t('ei-EU huolinta/rahti');
+				if ($llrow["vienti"] == 'I') $vienti_teksti = t('ei-EU vaihto-omaisuus');
+				if ($llrow["vienti"] == 'L') $vienti_teksti = t('ei-EU raaka-aine');
+				
+				echo "<td valign='top'><a class='puhdas' href='javascript: return false;' title='$vienti_teksti'>{$llrow["vienti"]}</a></td>";
 
 				$query = "	select sum(arvo) arvo, GROUP_CONCAT(DISTINCT laskunro ORDER BY laskunro SEPARATOR ', ') laskunrot
 							from lasku

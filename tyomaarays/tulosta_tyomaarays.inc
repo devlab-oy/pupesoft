@@ -246,7 +246,7 @@ if (!function_exists('alku')) {
 
 			if (trim($laskurow[$kentta]) != '' and trim($laskurow[$kentta]) != '0000-00-00') {
 				if (strtoupper($al_row["selitetark_2"]) == "TEXT") {					
-					$al_komm .= "\n$al_row[selitetark]:###".wordwrap(str_replace("\n","\n###", $laskurow[$kentta]), 100, "\n###");
+					$al_komm .= "\n$al_row[selitetark]:###".wordwrap(str_replace("\n","\n###", $laskurow[$kentta]), 90, "\n###");
 				}
 				else {
 					if (strtoupper($al_row["selitetark_2"]) == "DATE") {
@@ -293,7 +293,7 @@ if (!function_exists('alku')) {
 		}
 		
 		if (trim($laskurow['comments']) != '') {
-			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");							
 		}
 		
 		if (trim($al_komm) != '') {

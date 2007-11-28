@@ -262,15 +262,15 @@
 	}
 	
 	if (trim($laskurow['comments']) != '') {
-		$komm .= "\n".t("Kommentti")." 1:###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+		$komm .= "\n".t("Kommentti")." 1:###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");							
 	}
 		
 	if ($laskurow["sisviesti2"] != "") {
-		$komm .= "\n".t("Kommentti")." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 100, "\n###");
+		$komm .= "\n".t("Kommentti")." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");
 	}
 	
 	if ($laskurow["sisviesti1"] != "") {
-		$komm .= "\n".t("Kommentti")." 3:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 100, "\n###");
+		$komm .= "\n".t("Kommentti")." 3:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
 	}
 	
 	if ($laskurow["noutaja"] != '') {

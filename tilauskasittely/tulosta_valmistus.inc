@@ -216,11 +216,11 @@ if (!function_exists('alku_valm')) {
 			}
 
 			if (trim($laskurow['comments']) != '') {
-				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+				$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");							
 			}
 
 			if (trim($laskurow['sisviesti2']) != '') {
-				$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 100, "\n###");							
+				$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");							
 			}
 
 			//Tulostetaan laskun kommentti
@@ -390,11 +390,11 @@ if (!function_exists('uusi_sivu_valm')) {
 		}
 		
 		if (trim($laskurow['comments']) != '') {
-			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");							
 		}
 		
 		if (trim($laskurow['sisviesti2']) != '') {
-			$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 100, "\n###");							
+			$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");							
 		}
 		
 		//Tulostetaan laskun kommentti
@@ -598,7 +598,7 @@ if (!function_exists('rivi_valmistus')) {
 			
 			$komm = t("Kommentti").":\n".$row["kommentti"];
 			
-			foreach(explode("\n", wordwrap(trim($komm), 100, "\n")) as $kommentti) {
+			foreach(explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
 				$kala = $kala - $rivinkorkeus;
 				$lask_valm++;
 				
@@ -625,7 +625,7 @@ if (!function_exists('rivi_valmistus')) {
 				$faktarow["fakta"] = t("Työohje:")."\n".$faktarow["fakta"];
 				
 				
-				foreach(explode("\n", wordwrap($faktarow["fakta"], 100, "\n")) as $kommentti) {
+				foreach(explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
 					$pdf->draw_text(125,  $kala, $kommentti,	$thispage, $p);
 					$kala = $kala - $rivinkorkeus;
 					$lask_valm++;

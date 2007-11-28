@@ -237,11 +237,11 @@ if (!function_exists('alku')) {
 		}
 		
 		if (trim($laskurow['comments']) != '') {
-			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 100, "\n###");							
+			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");							
 		}
 		
 		if (trim($laskurow['sisviesti2']) != '') {
-			$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 100, "\n###");							
+			$komm .= "\n".t("Kommentti", $kieli)." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");							
 		}
 		
 		//Tulostetaan laskun kommentti

@@ -287,7 +287,7 @@ if (!function_exists('alku')) {
 		}
 
 		if (trim($laskurow['sisviesti1']) != '') {
-			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 100, "\n###");
+			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
 		}
 
 		if ($yhtiorow["laskutyyppi"] == 1 or $yhtiorow["laskutyyppi"] == 4) {
@@ -296,7 +296,7 @@ if (!function_exists('alku')) {
 			$apulaskuro = mysql_fetch_array($result);
 
 			if ($apulaskuro["tilnot"] != "0") {
-				$komm .= "\n".t("Tilausnumero(t)", $kieli). ":###".wordwrap(str_replace("\n","\n###", $apulaskuro["tilnot"]), 100, "\n###");
+				$komm .= "\n".t("Tilausnumero(t)", $kieli). ":###".wordwrap(str_replace("\n","\n###", $apulaskuro["tilnot"]), 90, "\n###");
 			}
 		}
 
@@ -820,6 +820,7 @@ if (!function_exists('rivi_plain_2')) {
 			$kala2 = $kala;
 			$rivit = explode("\n", wordwrap($row['nimitys'], 90, "\n"));
 			$pos = 0;
+			
 			for ($i=0; $i<count($rivit); $i++) {
 				$kala2 = $kala - (15 * $i);
 				$pdf->draw_text(20,  $kala2, $rivit[$i],	$thispage, $norm);

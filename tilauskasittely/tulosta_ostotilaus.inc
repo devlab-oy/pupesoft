@@ -665,7 +665,7 @@
 					$komm = "";
 					
 					if (trim($laskurow['sisviesti1']) != '') {
-						$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 100, "\n###");							
+						$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");							
 					}
 					
 					//Tulostetaan laskun kommentti
@@ -815,7 +815,7 @@
 		            }
 
 					if (trim($row["kommentti"]) != '') {
-						foreach(explode("\n", wordwrap(trim($row["kommentti"]), 100, "\n")) as $kommentti) {
+						foreach(explode("\n", wordwrap(trim($row["kommentti"]), 90, "\n")) as $kommentti) {
 							$kala = $kala - 15;
 							$pdf->draw_text(45,  $kala, $kommentti,	$thispage, $norm);
 							$lask++;

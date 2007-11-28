@@ -181,23 +181,24 @@
 		
 		//Laskurivien otsikkotiedot
 		//eka rivi
-		$pdf->draw_text(30,  $kala, t("Laskun numero", $kieli),				$firstpage, $pieni);
-		$pdf->draw_text(120, $kala, t("Laskun pvm", $kieli),				$firstpage, $pieni);
-		$pdf->draw_text(200, $kala, t("Eräpäivä", $kieli),					$firstpage, $pieni);
-		$pdf->draw_text(280, $kala, t("Myöhässä pv", $kieli),				$firstpage, $pieni);
-		$pdf->draw_text(340, $kala, t("Viimeisin muistutuspvm", $kieli),	$firstpage, $pieni);
-		$pdf->draw_text(440, $kala, t("Laskun summa", $kieli),				$firstpage, $pieni);
-		$pdf->draw_text(520, $kala, t("Perintäkerta", $kieli),				$firstpage, $pieni);
+		$pdf->draw_text(30,  $kala, t("Laskun numero", $kieli)." / ".t("Viite", $kieli),			$firstpage, $pieni);
+		$pdf->draw_text(180, $kala, t("Laskun pvm", $kieli),									$firstpage, $pieni);
+		$pdf->draw_text(240, $kala, t("Eräpäivä", $kieli),										$firstpage, $pieni);
+		$pdf->draw_text(295, $kala, t("Myöhässä pv", $kieli),									$firstpage, $pieni);
+		$pdf->draw_text(360, $kala, t("Viimeisin muistutuspvm", $kieli),						$firstpage, $pieni);
+		$pdf->draw_text(455, $kala, t("Laskun summa", $kieli),									$firstpage, $pieni);
+		$pdf->draw_text(525, $kala, t("Perintäkerta", $kieli),									$firstpage, $pieni);
 
 		$kala -= 15;
 
 		//toka rivi
 		if ($kaatosumma != 0 and $sivu == 1) {
 			$pdf->draw_text(30,  $kala, t("Kohdistamattomia suorituksia", $kieli),	$firstpage, $norm);
-			$pdf->draw_text(440, $kala, $kaatosumma,								$firstpage, $norm);
+			
+			$oikpos = $pdf->strlen(sprintf("%.2f", $kaatosumma), $norm);
+			$pdf->draw_text(500-$oikpos, $kala, sprintf("%.2f", $kaatosumma),		$firstpage, $norm);
 			$kala -= 13;
 		}
-
 
 		return($firstpage);
 	}
@@ -213,13 +214,22 @@
 			$lask = 1;
 		}
 		
-		$pdf->draw_text(30,  $kala, $row["laskunro"],					$firstpage, $norm);
-		$pdf->draw_text(120, $kala, tv1dateconv($row["tapvm"]), 		$firstpage, $norm);
-		$pdf->draw_text(200, $kala, tv1dateconv($row["erpcm"]), 		$firstpage, $norm);
-		$pdf->draw_text(280, $kala, $row["ika"], 						$firstpage, $norm);
-		$pdf->draw_text(340, $kala, tv1dateconv($row["kpvm"]),			$firstpage, $norm);
-		$pdf->draw_text(440, $kala, $row["summa"], 						$firstpage, $norm);
-		$pdf->draw_text(520, $kala, $row["karhuttu"]+1, 				$firstpage, $norm);
+		$pdf->draw_text(30,  $kala, $row["laskunro"]." / ".$row["viite"],	$firstpage, $norm);
+		$pdf->draw_text(180, $kala, tv1dateconv($row["tapvm"]), 			$firstpage, $norm);
+		$pdf->draw_text(240, $kala, tv1dateconv($row["erpcm"]), 			$firstpage, $norm);
+		
+		$oikpos = $pdf->strlen($row["ika"], $norm);
+		$pdf->draw_text(338-$oikpos, $kala, $row["ika"], 					$firstpage, $norm);
+		
+		
+		$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]),				$firstpage, $norm);
+		
+		$oikpos = $pdf->strlen($row["summa"], $norm);
+		$pdf->draw_text(500-$oikpos, $kala, $row["summa"], 					$firstpage, $norm);
+				
+		$oikpos = $pdf->strlen(($row["karhuttu"]+1), $norm);
+		$pdf->draw_text(560-$oikpos, $kala, ($row["karhuttu"]+1), 			$firstpage, $norm);
+		
 		$kala = $kala - 13;
 
 		$lask++;
@@ -333,7 +343,7 @@
 	}
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
-				l.summa-l.saldo_maksettu summa, l.erpcm, l.laskunro,
+				l.summa-l.saldo_maksettu summa, l.erpcm, l.laskunro, l.viite,
 				TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus)

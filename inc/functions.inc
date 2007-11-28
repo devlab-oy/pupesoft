@@ -2354,7 +2354,7 @@ if(!function_exists("enable_ajax")) {
 		}
 				
 		this.showLoader = function() {
-			document.getElementById(id).innerHTML = "<div style='filter:alpha(opacity=0); -moz-opacity:0.7; opacity: 0.7; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0c0c0c;' z-index: 100><img style='position: absolute; top: 50%; left: 50%;' src='<?php echo $imgUrl; ?>'></div>";
+			document.getElementById(id).innerHTML = "<div style='filter:alpha(opacity=30); -moz-opacity:0.3; opacity: 0.3; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #0c0c0c;' z-index: 100><img style='position: absolute; top: 50%; left: 50%;' src='<?php echo $imgUrl; ?>'></div>";
 		}
 		
 		this.visible = function() {

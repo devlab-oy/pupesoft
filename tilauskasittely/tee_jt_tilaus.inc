@@ -9,9 +9,10 @@
 	// $olpaikalta = pakotetaan myym‰‰n oletuspaikalta
 	// $varataan_saldoa = varataanko saldoa
 	// $alv = alviprossa
+	// $varastosta = mist‰ varastosta myyd‰‰n
 	
 	if (!function_exists("tee_jt_tilaus")) {
-		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka = '', $tilaus_on_jo = '', $olpaikalta = '', $varataan_saldoa = '', $alv = '') {
+		function tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka = '', $tilaus_on_jo = '', $varastosta = '', $olpaikalta = '', $varataan_saldoa = '', $alv = '') {
 			global $yhtiorow, $kukarow, $toim;
 
 			if ($loput[$tunnukset] == 'MITA') {

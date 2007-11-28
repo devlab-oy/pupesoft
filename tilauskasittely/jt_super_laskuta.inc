@@ -65,7 +65,7 @@
 			$olpaikalta 		= "TIETENKII";
 
 			require ("tee_jt_tilaus.inc");
-			tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $olpaikalta, $varataan_saldoa, $alv);
+			tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta, $olpaikalta, $varataan_saldoa, $alv);
 			
 			if ($paikka != '') {
 				$laskuvirhe .= "Toimitetaan paikalta $paikka\n";
@@ -113,7 +113,7 @@
 				$laskuvirhe .= "$jtrivit[nimi] ($jtrivit[ytunnus]): ".t("Toimitetaan osatoimitus").". $jtrivit[tuoteno] ".t("yritet‰‰n toimittaa")." $kpl[$tunnukset] ".t("kpl")." ".t("jtss‰ rivill‰")." $jtrivit[jt] ".t("kpl")." ".t("viem‰ss‰ varastoon")." $rivi[kpl] ".t("kpl")." ($jtrivit[tunnus])\n";
 
 				require ("tee_jt_tilaus.inc");
-				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $olpaikalta, $varataan_saldoa, $alv);
+				tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta, $olpaikalta, $varataan_saldoa, $alv);
 
 				//jt-tilausten laskutunnukset talteen, n‰m‰ pit‰‰ sitten merkata valmiiksi lopus
 				if (!in_array($id, $jt_otsikot)) $jt_otsikot[] = $id;

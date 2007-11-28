@@ -43,7 +43,7 @@
 			unset($_POST);
 		}
 		
-		if(count($_POST)>0) {
+		if(count($_POST) > 0) {
 			if(!function_exists("vararvo")) {
 				function vararvo($tuoteno, $vv, $kk, $pp) {
 					global $kukarow, $yhtiorow;

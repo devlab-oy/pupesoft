@@ -453,29 +453,35 @@ if ($ytunnus!='') {
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 0) {
-
-			// Päivämäärät rappareita varten
-			$kka = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-			$vva = date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-			$ppa = date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-			$kkl = date("m");
-			$vvl = date("Y");
-			$ppl = date("d");
 			
 			$otee = $tee;
 			$oasiakasrow = $asiakasrow;
+			$orajaus = $rajaus;
 			
+			$_POST["fuuli"]	= "on";
+			$tee 			= "go";
+			$ajotapa 		= "lasku";
+			$ajotapanlisa 	= "summattuna";
+			$yhtiot[]		= $kukarow["yhtio"];
+			$asiakasosasto 	= "";
+			$asiakasosasto2 = "";
+			$asiakasryhma 	= "";
+			$asiakasryhma2 	= "";
+			$jarjestys[1]	= "on";
 			$asiakasid		= $asiakasrow["tunnus"];
 			$asiakas		= $ytunnus;
-			$tee			= "go";
-			$tuoteosasto2	= "kaikki";
-			$yhtiot[]		= $kukarow["yhtio"];
-			$jarjestys[1]	= "on";
+			$rajaus			= array();
+			$toimittaja 	= "";
+			$kka 			= date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+			$vva 			= date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+			$ppa 			= date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+			$kkl 			= date("m");
+			$vvl 			= date("Y");
+			$ppl 			= date("d");
 			
 			//	Huijataan myyntiseurantaa
 			if($lopetus == "") $lopetus = "block";
 			
-
 			require("myyntiseuranta.php");
 			
 			if($lopetus == "block") $lopetus = "";
@@ -484,6 +490,7 @@ if ($ytunnus!='') {
 			$ytunnus 	= $asiakas;
 			$tee 		= $otee;
 			$asiakasrow = $oasiakasrow;
+			$rajaus 	= $orajaus;
 		}
 	}
 	

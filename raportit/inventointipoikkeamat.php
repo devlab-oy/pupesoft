@@ -198,6 +198,10 @@
 			if ($sarjat != "") {
 				$lisa .= " and tuote.sarjanumeroseuranta='S' ";
 			}
+
+			if (!empty($varastot)) {
+				$lisa .= " and varastopaikat.tunnus IN (" . implode(', ', $varastot) . ")";
+	        }
 			
 			if ($vararvomuu != "") {
 				$lisa .= " HAVING arvo != 0 ORDER BY arvo";
@@ -218,6 +222,9 @@
 						FROM tuote
 						JOIN tapahtuma ON tapahtuma.yhtio = tuote.yhtio and tapahtuma.laji='Inventointi' and tapahtuma.tuoteno=tuote.tuoteno
 						LEFT JOIN tuotepaikat ON tuotepaikat.yhtio=tapahtuma.yhtio and tuotepaikat.tuoteno=tapahtuma.tuoteno and tapahtuma.selite like concat('%',tuotepaikat.hyllyalue,'-',tuotepaikat.hyllynro,'-',tuotepaikat.hyllyvali,'-',tuotepaikat.hyllytaso,'%')						
+						LEFT JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio and
+	                	concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+	                	concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))												
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.ei_saldoa = ''
 						and tapahtuma.laadittu >= '$vva-$kka-$ppa 00:00:00'
@@ -449,6 +456,26 @@
 				<option value='inventoi'>".t("Näytä ruudulla")."</option>
 				<option value='tulosta'>".t("Tulosta inventointipoikkeamalista")."</option>
 				</select></td></tr>";
+
+		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+		$vares = mysql_query($query) or pupe_error($query);
+
+		echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
+			. t('Saat kaikki varastot jos et valitse yhtään')
+			. "</span></th>
+		    <td colspan='3'>";
+
+		$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+
+	    while ($varow = mysql_fetch_array($vares)) {
+			$sel = '';
+			if (in_array($varow['tunnus'], $varastot)) {
+				$sel = 'checked';
+			}
+
+			echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
+		}
+		echo "</td></tr>";
 
 		echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
 				<td><input type='text' name='ppa' value='$ppa' size='3'></td>

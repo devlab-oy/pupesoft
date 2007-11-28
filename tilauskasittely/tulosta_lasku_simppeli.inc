@@ -234,10 +234,10 @@ if (!function_exists('tulosta_lasku')) {
 					}
 					
 					if($laskurow["laskutus_nimi"] != "") {
-						$h=180;
+						$h=170;
 					}
 					else {
-						$h=200;
+						$h=190;
 					}
 					
 					//	Tehd‰‰n template
@@ -290,10 +290,10 @@ if (!function_exists('tulosta_lasku')) {
 		
 		$pdf = alku($pdf, $laskurow, $toim, $otsikko, $kieli, "JOO");
 		if($laskurow["laskutus_nimi"] != "") {
-			$h=170;
+			$h=160;
 		}
 		else {
-			$h=190;
+			$h=170;
 		}
 		
 		if ($toim == 'PROFORMA') {

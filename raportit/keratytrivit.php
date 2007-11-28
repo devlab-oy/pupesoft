@@ -15,6 +15,13 @@
 		else {
 			$lefti = "LEFT";
 		}
+		
+		if (!empty($varastot)) {
+			$lisa = " and varastopaikat.tunnus IN (" . implode(', ', $varastot) . ")";
+        }
+		else {
+			$lisa = "";
+		}
 
 		if ($tapa == 'keraaja') {
 
@@ -25,18 +32,22 @@
 						kuka.nimi,
 						kuka.keraajanro,
 						sec_to_time(unix_timestamp(kerattyaika)-unix_timestamp(lahetepvm)) aika,
-						sum(if(var  = 'P', 1, 0)) puutteet,
-						sum(if(var != 'P' and tyyppi='L', 1, 0)) kappaleet,
-						sum(if(var != 'P' and tyyppi='G', 1, 0)) siirrot,
+						sum(if(tilausrivi.var  = 'P', 1, 0)) puutteet,
+						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='L', 1, 0)) kappaleet,
+						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
 						count(*) yht
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
 						JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-						$lefti JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = tilausrivi.keratty)
+						$lefti JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = tilausrivi.keratty)						
+						LEFT JOIN varastopaikat ON (varastopaikat.yhtio=tilausrivi.yhtio and
+		                concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) and
+		                concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))												
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.kerattyaika >= '$vva-$kka-$ppa 00:00:00'
 						and tilausrivi.kerattyaika <= '$vvl-$kkl-$ppl 23:59:59'
 						and tilausrivi.var in ('','H','P')
 						and tilausrivi.tyyppi in ('L','G')
+						$lisa
 						GROUP BY keratty, otunnus
 						ORDER BY keratty, kerattyaika";
 			$result = mysql_query($query) or pupe_error($query);
@@ -66,10 +77,10 @@
 				if ($edkeraaja != $row["keratty"] and $summa > 0 and $edkeraaja != "EKADUUD") {
 					echo "<tr>
 							<th colspan='6'>".t("Yhteensä").":</th>
-							<th>$psumma</th>
-							<th>$ssumma</th>
-							<th>$ksumma</th>
-							<th>$summa</th>
+							<td class='tumma' align='right'>$psumma</td>
+							<td class='tumma' align='right'>$ssumma</td>
+							<td class='tumma' align='right'>$ksumma</td>
+							<td class='tumma' align='right'>$summa</td>
 							</tr>";
 					echo "<tr><td class='back'><br></td></tr>";
 
@@ -96,8 +107,8 @@
 						<td>$row[nimi] ($row[keratty])</td>
 						<td>$row[keraajanro]</td>
 						<td>$row[otunnus]</td>
-						<td>$row[lahetepvm]</td>
-						<td>$row[kerattyaika]</td>
+						<td>".tv1dateconv($row["lahetepvm"],"P")."</td>
+						<td>".tv1dateconv($row["kerattyaika"],"P")."</td>
 						<td>$row[aika]</td>
 						<td align='right'>$row[puutteet]</td>
 						<td align='right'>$row[siirrot]</td>
@@ -123,10 +134,10 @@
 			if ($summa > 0) {
 				echo "<tr>
 						<th colspan='6'>".t("Yhteensä").":</th>
-						<th>$psumma</th>
-						<th>$ssumma</th>
-						<th>$ksumma</th>
-						<th>$summa</th>
+						<td class='tumma' align='right'>$psumma</td>
+						<td class='tumma' align='right'>$ssumma</td>
+						<td class='tumma' align='right'>$ksumma</td>
+						<td class='tumma' align='right'>$summa</td>
 					</tr>";
 				echo "<tr><td class='back'><br></td></tr>";
 			}
@@ -134,10 +145,10 @@
 			// Kaikki yhteensä
 			echo "<tr>
 					<th colspan='6'>".t("Kaikki yhteensä").":</th>
-					<th>$psummayht</th>
-					<th>$ssummayht</th>
-					<th>$ksummayht</th>
-					<th>$summayht</th>
+					<td class='tumma' align='right'>$psummayht</td>
+					<td class='tumma' align='right'>$ssummayht</td>
+					<td class='tumma' align='right'>$ksummayht</td>
+					<td class='tumma' align='right'>$summayht</td>
 					</tr>";
 
 			echo "</table><br>";
@@ -152,19 +163,23 @@
 				$vvaa = $vva;
 			}
 
-			$query = "	SELECT date_format(left(kerattyaika,10), '%j') pvm,
-						left(kerattyaika,10) kerattyaika,
-						sum(if(var  = 'P', 1, 0)) puutteet,
-						sum(if(var != 'P' and tyyppi='L', 1, 0)) kappaleet,
-						sum(if(var != 'P' and tyyppi='G', 1, 0)) siirrot,
+			$query = "	SELECT date_format(left(tilausrivi.kerattyaika,10), '%j') pvm,
+						left(tilausrivi.kerattyaika,10) kerattyaika,
+						sum(if(tilausrivi.var  = 'P', 1, 0)) puutteet,
+						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='L', 1, 0)) kappaleet,
+						sum(if(tilausrivi.var != 'P' and tilausrivi.tyyppi='G', 1, 0)) siirrot,
 						count(*) yht
 						FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
 						$lefti JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = tilausrivi.yhtio and kuka.kuka = tilausrivi.keratty)
+						LEFT JOIN varastopaikat ON (varastopaikat.yhtio=tilausrivi.yhtio and
+		                concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')) and
+		                concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.kerattyaika >= '$vvaa-01-01 00:00:00'
 						and tilausrivi.kerattyaika <= '$vvaa-12-31 23:59:59'
 						and tilausrivi.var in ('','H','P')
 						and tilausrivi.tyyppi in ('L','G')
+						$lisa
 						GROUP BY pvm
 						ORDER BY 1";
 			$result = mysql_query($query) or pupe_error($query);
@@ -209,10 +224,15 @@
 
 			for ($i=1; $i<367; $i++) {
 
-				if (strlen($kerattyaika[$i]) == 0) $kerattyaika[$i] = $i;
-
 				echo "<tr>";
-				echo "<td>$kerattyaika[$i]</td>";
+				
+				if (strlen($kerattyaika[$i]) == 0) {
+					echo "<td>$i</td>";
+				}
+				else {
+					echo "<td>".tv1dateconv($kerattyaika[$i],"P")."</td>";
+				}
+								
 				echo "<td align='right'>$puutteet[$i]</td>";
 				echo "<td align='right'>$siirrot[$i]</td>";
 				echo "<td align='right'>$kappaleet[$i]</td>";
@@ -223,10 +243,10 @@
 
 			echo "<tr>";
 			echo "<th>".t("Yhteensä")."</th>";
-			echo "<th>$psummayht</th>";
-			echo "<th>$ssummayht</th>";
-			echo "<th>$ksummayht</th>";
-			echo "<th>$summayht</th>";
+			echo "<td class='tumma' align='right'>$psummayht</td>";
+			echo "<td class='tumma' align='right'>$ssummayht</td>";
+			echo "<td class='tumma' align='right'>$ksummayht</td>";
+			echo "<td class='tumma' align='right'>$summayht</td>";
 			echo "</tr>";
 
 			echo "</table><br>";
@@ -258,6 +278,29 @@
 				</select>
 			</td>
 		</tr>";
+
+
+	$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+	$vares = mysql_query($query) or pupe_error($query);
+
+	echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
+		. t('Saat kaikki varastot jos et valitse yhtään')
+		. "</span></th>
+	    <td colspan='3'>";
+
+	$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+
+    while ($varow = mysql_fetch_array($vares)) {
+		$sel = '';
+		if (in_array($varow['tunnus'], $varastot)) {
+			$sel = 'checked';
+		}
+
+		echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
+	}
+
+	echo "</td></tr>";
+
 
 	echo "<tr>
 			<th>".t("Syötä päivämäärä (pp-kk-vvvv)")."</th>

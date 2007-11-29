@@ -605,6 +605,7 @@
 					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
+					tilausrivi_osto.tunnus								osto_rivitunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					varastopaikat.nimitys								varastonimi,
@@ -639,6 +640,7 @@
 					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
+					tilausrivi_osto.tunnus								osto_rivitunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
@@ -669,6 +671,7 @@
 					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
+					tilausrivi_osto.tunnus								osto_rivitunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
@@ -699,6 +702,7 @@
 					lasku_myynti.tila									myynti_tila,
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
+					tilausrivi_osto.tunnus								osto_rivitunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					varastopaikat.nimitys								varastonimi,
@@ -861,14 +865,21 @@
 
 		echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$sarjarow[osto_tunnus]'>$sarjarow[osto_tunnus] $sarjarow[osto_nimi]</a><br>";
 
-		if ($sarjarow["siirtorivitunnus"] > 0 and $tunnuskentta!= 'siirtorivitunnus') {
+		if (($sarjarow["siirtorivitunnus"] > 0 and $tunnuskentta!= 'siirtorivitunnus') or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"]!=$sarjarow["osto_rivitunnus"])) {
 			$fnlina1 = "<font class='message'>(Varattu lisävarusteena tuotteelle: ";
 			$fnlina2 = ")</font>";
+			
+			if ($sarjarow["osto_perheid2"] > 0) {
+				$ztun = $sarjarow["osto_perheid2"];
+			}
+			else {
+				$ztun = $sarjarow["siirtorivitunnus"];		
+			}
 			
 			$query = "	SELECT tilausrivi.tuoteno, sarjanumeroseuranta.sarjanumero 
 						FROM tilausrivi 
 						LEFT JOIN sarjanumeroseuranta ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
-						WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$sarjarow[siirtorivitunnus]'";
+						WHERE tilausrivi.yhtio='$kukarow[yhtio]' and tilausrivi.tunnus='$ztun'";
 			$siires = mysql_query($query) or pupe_error($query);
 			$siirow = mysql_fetch_array($siires);
 			

@@ -34,14 +34,15 @@ if ($alku != '' and $loppu != '') {
 	$fh = fopen("/tmp/".$file1, "w");
 
 	// haetaan kaikki vuoden tapahtumat.. uh
-	$query  = "	select tiliointi.tapvm, tilino, kustp, kohde, projekti, tiliointi.summa, tiliointi.vero, selite, tiliointi.laatija, tiliointi.laadittu, ytunnus, nimi, nimitark, osoite, osoitetark, postino, postitp
-				from tiliointi, lasku
-				where tiliointi.yhtio='$kukarow[yhtio]'
-				and lasku.yhtio=tiliointi.yhtio
-				and lasku.tunnus=tiliointi.ltunnus
-				and tiliointi.tapvm >= '$alku'
-				and tiliointi.tapvm <= '$loppu'
-				and tiliointi.korjattu=''";
+	$query  = "	SELECT tiliointi.tapvm, tiliointi.tilino, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti, 
+				tiliointi.summa, tiliointi.vero, tiliointi.selite, tiliointi.laatija, 
+				tiliointi.laadittu, lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.osoitetark, lasku.postino, lasku.postitp
+				FROM tiliointi
+				JOIN lasku ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus
+				where tiliointi.yhtio	= '$kukarow[yhtio]'
+				and tiliointi.tapvm    >= '$alku'
+				and tiliointi.tapvm    <= '$loppu'
+				and tiliointi.korjattu	= ''";
 	$result = mysql_query($query) or pupe_error($query);
 
 	while($row = mysql_fetch_array($result)) {

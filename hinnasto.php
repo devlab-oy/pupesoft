@@ -274,6 +274,7 @@ echo "<tr>
 	<td>
 		<select name='hinnasto'>
 			<option value='futur'>" . t('Futursoft') . "</option>
+			<option value='automaster'>" . t('Automaster') . "</option>
 			<option value='vienti'>" . t('Vientihinnasto') . "</option>
 		</select>
 	</td>

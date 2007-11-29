@@ -1100,11 +1100,11 @@ if (!function_exists('rivi_viivakoodi')) {
 			fclose($fh);
 
 			$image = $pdf->jfif_embed($data);
-			$pdf->image_place($image, $kala-8, 320, $thispage);
+			$pdf->image_place($image, $kala-$rivinkorkeus, 320, $thispage);
 
 			system("rm -f $nimi");
 			
-			$kala = $kala - $rivinkorkeus-5;
+			$kala = $kala-$rivinkorkeus-$rivinkorkeus;
 		}
 		
 	}

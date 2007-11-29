@@ -632,8 +632,9 @@ if (!function_exists('rivi')) {
 			$tresult = mysql_query($query) or pupe_error($query);
 			$trow	 = mysql_fetch_array($tresult);
 			
-			$pdf->draw_text(330, $kala, $trow["toim_tuoteno"], 	$thispage, $norm);
-
+			
+			$pdf->draw_text(330, $kala, pdf_substr($trow["toim_tuoteno"], 80, $pdf, $norm), $thispage, $norm);
+			
 			$rivipaikkahyllyssa  = 0;
 			$rivivarastohyllyssa = 0;
 

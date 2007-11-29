@@ -3586,7 +3586,7 @@ if ($tee == '') {
 
 								// Kate = Hinta - Ostohinta
 								if ($kotisumma_alviton != 0) {
-									$kate = sprintf('%.2f',100*($kotisumma_alviton - $ostohinta)/$kotisumma_alviton)."%";
+									$kate = sprintf('%.2f',100*($kotisumma_alviton - ($ostohinta * $kpl))/$kotisumma_alviton)."%";
 								}
 							}
 							elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "O") {
@@ -4044,8 +4044,8 @@ if ($tee == '') {
 								$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $arow["tunnus"]);
 
 								// Kate = Hinta - Ostohinta
-								$rivikate 		= $arow["kotirivihinta"] - $ostohinta;
-								$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - $ostohinta;
+								$rivikate 		= $arow["kotirivihinta"] - ($ostohinta * $arow["varattu"]);
+								$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"] - ($ostohinta * $arow["varattu"]);
 							}
 							elseif ($arow["varattu"] < 0 and $arow["osto_vai_hyvitys"] == "O") {
 								//Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on OSTOA

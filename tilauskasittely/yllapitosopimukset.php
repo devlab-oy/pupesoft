@@ -67,9 +67,10 @@
 
 			$ipp = array_search( (int) $tapvmpp, $sopimus_pp);
 			$ikk = array_search( (int) $tapvmkk, $sopimus_kk);
-			//	Ratkaistaan päivämäärät
-			if($ipp > 0) {
 
+			
+			//	Ratkaistaan edellinen kausi
+			if($ipp > 0) {
 				$edipp = $ipp-1;
 				$edtapvmpp = $sopimus_pp[$edipp];
 				$edtapvmkk = $tapvmkk;
@@ -85,19 +86,23 @@
 				}
 			}
 
-			//	Ratkaistaan kuukaudet
+			//	Ratkaistaan seuraava kausi
 			if(count($sopimus_pp) == $ipp+1) {
-				$seikk = $ikk + 1;
 				$setapvmpp = $sopimus_pp[0];
-				$setapvmkk = $sopimus_kk[$seikk];
-				
+
+				$seikk = $ikk + 1;
+				if($seikk >= count($sopimus_kk)) {
+					$setapvmkk = $sopimus_kk[0];
+				}
+				else {
+					$setapvmkk = $sopimus_kk[$seikk];
+				}
 			}
 			else {
 				$seipp = $ipp+1;
 				$setapvmpp = $sopimus_pp[$seipp];
 				$setapvmkk = $sopimus_kk[$ikk];										
 			}
-
 			
 			//	Onko edellinen kuukausi viimevuodelta?
 			if($edtapvmkk > $tapvmkk) {

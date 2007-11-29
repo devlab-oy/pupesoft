@@ -53,7 +53,7 @@
 				if ($tmp_maakoodi == 'FI') {
 					require 'pankkitilinoikeellisuus.php';
 					if ($pankkitili == '') {
-						$virhe[$i] = t("Pankkitili on virheellinen");
+						$virhe[$i] = t("Pankkitili '$pankkitili' on virheellinen");
 						$errori = 1;
 					}
 					else {
@@ -134,7 +134,7 @@
 				$srowapu = mysql_fetch_array($sresult);
 				// ei löydetty itteämme
 				if ($srowapu['tunnus'] != $tunnus) {
-					$virhe[$i] = t("Samalla ytunnuksella on useita toimittajia! Lisää tarkenne ovt-tunnkseen.");
+					$virhe[$i] = t("Samalla ytunnuksella '$tmp_ytunnus' on useita toimittajia! Lisää tarkenne ovt-tunnkseen.");
 					$errori = 1;
 				}
 			}
@@ -145,6 +145,7 @@
 		// katotaan löytyykö email osoitteen domain...
 		list($nimi, $domain) = split("@", trim($t[$i]));
 
+ 		$domain = trim($domain);
 		if ($domain != "") {
 			exec("host -t MX $domain | grep \"not found\"", $output);
 		}

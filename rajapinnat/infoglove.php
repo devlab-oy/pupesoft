@@ -26,7 +26,7 @@ foreach ($keissit as $keissi) {
 	
 	switch ($keissi) {
 		case "Asiakas" :
-			$query =	"SELECT if(asiakas.selaus!='' and asiakas.selaus is not null, asiakas.selaus, asiakas.ytunnus) AS asiakasnro, asiakas.nimi, asiakas.ryhma, avainsana.selitetark, asiakas.maa, asiakas.konserni, asiakas.kustannuspaikka, kustannuspaikka.nimi
+			$query =	"SELECT asiakas.tunnus, if(asiakas.selaus!='' and asiakas.selaus is not null, asiakas.selaus, asiakas.ytunnus) AS asiakasnro, asiakas.nimi, asiakas.ryhma, avainsana.selitetark, asiakas.maa, asiakas.konserni, asiakas.kustannuspaikka, kustannuspaikka.nimi
 						FROM asiakas
 						LEFT JOIN avainsana ON avainsana.yhtio=asiakas.yhtio and avainsana.laji = 'ASIAKASRYHMA' and avainsana.selite = asiakas.ryhma
 						LEFT JOIN kustannuspaikka ON kustannuspaikka.yhtio = asiakas.yhtio and kustannuspaikka.tunnus = asiakas.kustannuspaikka and kustannuspaikka.tyyppi = 'K'
@@ -45,7 +45,7 @@ foreach ($keissit as $keissi) {
 						and lasku.tila = 'U' and lasku.alatila = 'X'";
 			break;
 		case "Myynti" :
-			$query =	"SELECT lasku.tapvm, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.kate, tuote.kehahin, tilausrivi.tuoteno, if(asiakas.selaus!='' and asiakas.selaus is not null, asiakas.selaus, lasku.ytunnus) AS asiakasnro, if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp, lasku.laskunro
+			$query =	"SELECT lasku.tapvm, tilausrivi.kpl, tilausrivi.rivihinta, tilausrivi.kate, tuote.kehahin, tilausrivi.tuoteno, asiakas.tunnus AS asiakasnro, if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp, lasku.laskunro
 						FROM lasku
 						JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.uusiotunnus
 						LEFT JOIN tuote ON lasku.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -113,7 +113,7 @@ foreach ($keissit as $keissi) {
 						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
 						if(tilausrivi.laskutettu!='',tilausrivi.rivihinta-tilausrivi.kate,round(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt),6)) AS 'keskihinta',
 						tilausrivi.tuoteno, 
-						if(asiakas.selaus!='' and asiakas.selaus is not null, asiakas.selaus, lasku.ytunnus) AS asiakasnro,
+						asiakas.tunnus AS asiakasnro,
 						if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp,
 						lasku.tunnus
 						FROM lasku

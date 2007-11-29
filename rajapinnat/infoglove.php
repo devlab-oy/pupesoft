@@ -151,17 +151,17 @@ foreach ($keissit as $keissi) {
 
 // Zipataan filet yhex zipix
 $cmd = "cd /tmp/infoglove/;/usr/bin/zip ".$kukarow['yhtio']."-infoglove.zip *";
-//$palautus = exec($cmd);
+$palautus = exec($cmd);
 
 // sit pitäis siirtää ssh:lla jonnekki
 // tarvitaan $infoglove_host $infoglove_user
 $cmd = "cd /tmp/infoglove/;scp -i /home/$infoglove_user/.ssh/id_dsa ".$kukarow['yhtio']."-infoglove.zip ".$infoglove_user."@".$infoglove_host.":.";
-//$palautus = exec($cmd);
+$palautus = exec($cmd);
 //echo "$cmd\n";
 
 //sit pitää dellata koko dirikka
 $cmd = "cd /tmp/;rm -rf infoglove/";
-//$palautus = exec($cmd);
+$palautus = exec($cmd);
 
 
 ?>

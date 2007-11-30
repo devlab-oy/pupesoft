@@ -1297,6 +1297,26 @@ if ($tee == '') {
 
 		}
 
+		if($toim == "TARJOUS") {
+			$query = "	SELECT yhtio
+						FROM oikeu
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and kuka	= '$kukarow[kuka]'
+						and nimi	= 'tilauskasittely/tarjousseuranta.php'
+						and alanimi = ''";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result) > 0) {
+				echo "<td class='back'>
+						<form action = 'tarjousseuranta.php' method='post'>
+							<input type='hidden' name='tarjous' value='$tilausnumero'>
+							<input type='hidden' name='tee' value='TARJOUSKALENTERI'>
+							<input type='hidden' name='lopetus' value='tilaus_myynti.php?toim=$toim&projektilla=$projektilla&valitsetoimitus=$tilausnumero'>
+							<input type='Submit' value='".t("Tarjousseuranta")."'>
+						</form>
+					</td>";
+			}			
+		}
+
 		echo "	<td class='back'>
 					<form action='tuote_selaus_haku.php' method='post'>
 						<input type='hidden' name='toim_kutsu' value='$toim'>

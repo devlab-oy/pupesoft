@@ -1876,7 +1876,7 @@ if ($tee == '') {
 	if ($kukarow["extranet"] == "" and $tila == "LISATIETOJA_RIVILLE") {
 
 		//	Mitä laitellaan??
-		if($asiakkaan_positio != "") {
+		if(isset($asiakkaan_positio)) {
 			$lisaalisa = " asiakkaan_positio = '$asiakkaan_positio',";
 		}
 		else {
@@ -1904,13 +1904,15 @@ if ($tee == '') {
 			//	Korjataan tuotteen yksikköhinta.. tuo em homma on se tapa jolla se kuuluisi tehdä, mutta nyt käytönnössä se on aika vaikea toteuttaa..
 			if($lapsi["vaaditaan_kpl2"] == "P") {
 
-				$query  = "	SELECT if(pituus=0,'1000',pituus) pituus
+				$query  = "	SELECT pituus
 							FROM asiakkaan_positio
 							WHERE yhtio			 = '$kukarow[yhtio]'
 							and tunnus = '$asiakkaan_positio'";
 				$posres = mysql_query($query) or pupe_error($query);
 				$posrow = mysql_fetch_array($posres);
-
+				if((int)$posrow["pituus"] == 0) {
+					$posrow["pituus"] = 1000;
+				}
 				$uhinta = round(($posrow["pituus"] * $lapsi["yksikkohinta"])/1000, $yhtiorow['hintapyoristys']);
 
 				$query = "	UPDATE tilausrivi

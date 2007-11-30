@@ -201,7 +201,7 @@
 
 	if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
-		$ulos = "<td><select name='$nimi'>";
+		$ulos = "<td><select name='$nimi' Style=\"width: 270px; font-size: 8pt; padding: 0\">";
 
 		$sel = array();
 		$sel[$trow[$i]] = "selected";

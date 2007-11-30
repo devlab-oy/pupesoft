@@ -1469,7 +1469,7 @@
 			$keikres = mysql_query($query) or pupe_error($query);
 			
 			//	Onko liitetty jo keikkaan
-			if(!in_array($trow["vienti"], array("A", "D", "G"))) {
+			if(in_array($trow["vienti"], array("B", "C", "J", "E", "F", "K", "H", "I", "L"))) {
 				if(mysql_num_rows($keikres) > 0) {
 					$liitetty = "<font style='color: #23ff14;'>ON</font>";
 				}

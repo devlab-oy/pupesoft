@@ -721,7 +721,7 @@
 						$sarjares = mysql_query($query) or pupe_error($query);
 						$sarjarow = mysql_fetch_array($sarjares);
 
-						if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
+						if ($sarjatarkrow["kpl"] == abs($prow["varattukpl"])) {
 							echo " (<a href='sarjanumeroseuranta.php?tuoteno=$prow[tuoteno]&ostorivitunnus=$prow[tunnus]&from=riviosto' style='color:00FF00'>sarjanro OK</font></a>)";
 						}
 						else {

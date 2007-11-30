@@ -2753,80 +2753,89 @@ function popUp(e, oi, offsetX, offsetY, html) {
 		myDiv.setAttribute('class', 'popup');
 		myDiv.setAttribute('id', oi);
 		myDiv.setAttribute('name', oi);
-		myDiv.style.display = 'none';
+		myDiv.style.display = 'block';
 		document.body.appendChild(myDiv);
 	}
 	
-	var de = document.getElementById(oi);
-	var ds = de.style;
-
-	if (e.type == "mouseout") {
-		ds.display = "none";
-		ds.visibility = "hidden";
+	if(html) {
+		sndReq(oi, html+'&ohje=off&sulje='+oi);
+		timer = 100;
 	}
 	else {
-
-		ds.display = "block";
-
-		//	Detectoidaan ikkunan koko
-		var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
-		var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
-
-		//	Detectoidaan div:n koko
-		if(de.clientHeight) eh = de.clientHeight;
-		else if (de.clip.height) eh = de.clip.height;
-		else eh = null;
-
-		if(de.clientWidth) ew = de.clientWidth;
-		else if (de.clip.width) ew = de.clip.width;
-		else ew = null;
-
-		// relatiivinen sijainti
-		if(!offsetY) offsetY=-10;
-		if(!offsetX) offsetX=-10;
-				
-		var y = getMouseY(e)-offsetY;
-		var x = getMouseX(e)-offsetX;			
-
-		var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-		var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
-
-		//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
-		if(eh != null && ew != null && x != null && y != null) {
-
-			c=0;
-			//	Riittääkö leveys
-			if(x+ew-2>ww) {
-				c=x+ew-ww+2;
-				x -= c;
-			}
-
-			if (wh - y - eh < -5 && c > 10) {
-				y -= eh + 22;
-			}
-			else if(y - scrollY + eh + 2 > wh) {
-				y -= y - scrollY + eh - wh + 20;
-			}
-
-			//	Oikea laita on kuitenkin aina tärkein!
-			if(x<2) {
-				x=2;
-			}
-			if(y<2) {
-				y=2;
-			}
-		}
-
-		ds.left=x;
-		ds.top=y;
-		
-		if(html) {
-			sndReq(oi, html+'&ohje=off&sulje='+oi);
-		}
-		
-		ds.visibility = "visible";
-		de.display = 'block';
+		timer = 10;
 	}
+	
+	// relatiivinen sijainti
+	if(!offsetY) offsetY=-10;
+	if(!offsetX) offsetX=-10;
+
+	var y = getMouseY(e)-(offsetY);
+	var x = getMouseX(e)-(offsetX);			
+	
+	setTimeout( function (oi, x, y) {
+
+		var de = document.getElementById(oi);
+		var ds = de.style;
+
+		if (e.type == "mouseout") {
+			ds.display = "none";
+			ds.visibility = "hidden";
+		}
+		else {
+
+			ds.display = "block";
+			ds.visibility = "hidden";
+			
+			//	Detectoidaan ikkunan koko
+			var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
+			var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
+
+			//	Detectoidaan div:n koko
+			if(de.clientHeight) eh = de.clientHeight;
+			else if (de.clip.height) eh = de.clip.height;
+			else eh = null;
+
+			if(de.clientWidth) ew = de.clientWidth;
+			else if (de.clip.width) ew = de.clip.width;
+			else ew = null;
+
+			var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
+			var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+
+			//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
+			if(eh != null && ew != null && x != null && y != null) {
+
+				c=0;
+				//	Riittääkö leveys
+				if(x+ew-2>ww) {
+					c=x+ew-ww+2;
+					x -= c;
+				}
+
+				if (wh - y - eh < -5 && c > 10) {
+					y -= eh + 22;
+				}
+				else if(y - scrollY + eh + 2 > wh) {
+					y -= y - scrollY + eh - wh + 20;
+				}
+
+				//	Oikea laita on kuitenkin aina tärkein!
+				if(x<2) {
+					x=2;
+				}
+				if(y<2) {
+					y=2;
+				}
+			}
+
+			ds.left=x;
+			ds.top=y;
+
+			ds.visibility = "visible";
+			de.display = 'block';
+		}		
+	}
+	, timer, oi, x, y);
 }
 //-->
 </script>

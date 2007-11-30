@@ -163,6 +163,7 @@
 					lasku.tunnus otunnus,
 					lasku.viesti,
 					lasku.sisviesti2,
+					GROUP_CONCAT(if(kommentti='',NULL,kommentti) separator '<br>') AS kommentit,
 					count(*) riveja
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
@@ -242,14 +243,26 @@
 
 					$ero="td";
 					if ($tunnus==$tilrow['otunnus']) $ero="th";
-
+					
 					echo "<tr>";
-					if(trim($tilrow["sisviesti2"]) != "") {
+					if(trim($tilrow["sisviesti2"]) != "" or trim($tilrow['kommentit'] != '')) {
 						echo "<div id='$tilrow[tunnus]' class='popup' style='width:500px;'>";
-						echo t("Lisätiedot").":<br>";
-						echo $tilrow["sisviesti2"];
+						
+						if (trim($tilrow["sisviesti2"]) != "") {
+							echo t("Lisätiedot").":<br>";
+							echo $tilrow["sisviesti2"];
+							echo "<br>";
+						}
+						if (trim($tilrow['kommentit'] != '')) {
+							echo t("Rivikommentit").":<br>";
+							echo $tilrow["kommentit"];
+							echo "<br>";
+						}
+						
 						echo "</div>";
-						echo "<$ero valign='top'><a class='menu' onmouseout=\"popUp(event,'$tilrow[tunnus]')\" onmouseover=\"popUp(event,'$tilrow[otunnus]')\">$tilrow[t_tyyppi] $tilrow[prioriteetti]</a></$ero>";
+						echo "<$ero valign='top'><a class='menu' onmouseout=\"popUp(event,'$tilrow[otunnus]')\" onmouseover=\"popUp(event,'$tilrow[otunnus]')\">$tilrow[t_tyyppi] $tilrow[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'></a></$ero>";
+						
+						
 					}
 					else {
 						echo "<$ero valign='top'>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";
@@ -588,7 +601,8 @@
 					GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ',') otunnus,
 					count(distinct otunnus) tilauksia, 
 					count(*) riveja,
-					GROUP_CONCAT(distinct(if(sisviesti2 != '', concat(lasku.tunnus,' - ', sisviesti2,'<br>'), NULL)) SEPARATOR '') ohjeet					
+					GROUP_CONCAT(distinct(if(sisviesti2 != '', concat(lasku.tunnus,' - ', sisviesti2,'<br>'), NULL)) SEPARATOR '') ohjeet,
+					GROUP_CONCAT(if(kommentti='',NULL,kommentti) separator '<br>') AS kommentit				
 					FROM lasku
 					JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus
 					LEFT JOIN varastopaikat ON varastopaikat.yhtio=lasku.yhtio and varastopaikat.tunnus=lasku.varasto
@@ -642,12 +656,21 @@
 				if ($tunnus==$tilrow['otunnus']) $ero="th";
 
 				echo "<tr class='aktiivi'>";
-				if(trim($tilrow["ohjeet"]) != "") {
+				
+				if(trim($tilrow["ohjeet"]) != "" or trim($tilrow['kommentit'] != '')) {
 					echo "<div id='$tilrow[otunnus]' class='popup' style='width:500px;'>";
-					echo t("Lisätiedot").":<br>";
-					echo $tilrow["ohjeet"];
+					if (trim($tilrow["ohjeet"]) != "") {
+						echo t("Lisätiedot").":<br>";
+						echo $tilrow["ohjeet"];
+						echo "<br>";
+					}
+					if (trim($tilrow['kommentit'] != '')) {
+						echo t("Rivikommentit").":<br>";
+						echo $tilrow["kommentit"];
+						echo "<br>";
+					}
 					echo "</div>";
-					echo "<$ero valign='top'><a class='menu' onmouseout=\"popUp(event,'$tilrow[otunnus]')\" onmouseover=\"popUp(event,'$tilrow[otunnus]')\">$tilrow[t_tyyppi] $tilrow[prioriteetti]</a></$ero>";
+					echo "<$ero valign='top'><a class='menu' onmouseout=\"popUp(event,'$tilrow[otunnus]')\" onmouseover=\"popUp(event,'$tilrow[otunnus]')\">$tilrow[t_tyyppi] $tilrow[prioriteetti] <IMG SRC='../pics/lullacons/alert.png'></a></$ero>";
 				}
 				else {
 					echo "<$ero valign='top'>$tilrow[t_tyyppi] $tilrow[prioriteetti]</$ero>";

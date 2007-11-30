@@ -47,9 +47,9 @@
 		}
 
 		// Tositeselailu
-		if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å') {
+		if ($tee == 'Y' or $tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä') {
 
-			if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å') {
+			if  ($tee == 'Z' or $tee == 'X' or $tee == 'W' or $tee == 'T' or $tee == 'S' or $tee == 'Å' or $tee == 'Ä') {
 
 				// Etsitään virheet vain kuluvalta tilikaudelta!
 				if ($tee == 'Z') {
@@ -137,6 +137,23 @@
 								and lasku.tapvm <= '$yhtiorow[tilikausi_loppu]'
 								HAVING (alv1 != 'MV' or alv2 != 'MV')
 								ORDER by l2.laskunro)";
+				}
+				
+				if ($tee == 'Ä') {
+					$query = "	SELECT lasku.tunnus ltunnus, lasku.ytunnus, lasku.nimi, lasku.tapvm, lasku.summa, ifnull(sum(t1.summa),0) + ifnull(sum(t2.summa),0) + ifnull(sum(t3.summa),0) ero
+								FROM lasku
+								LEFT JOIN tiliointi t1 ON (lasku.yhtio = t1.yhtio and lasku.tunnus = t1.ltunnus and t1.korjattu = '' and t1.tilino = '$yhtiorow[myyntisaamiset]')
+								LEFT JOIN tiliointi t2 ON (lasku.yhtio = t2.yhtio and lasku.tunnus = t2.ltunnus and t2.korjattu = '' and t2.tilino = '$yhtiorow[factoringsaamiset]')
+								LEFT JOIN tiliointi t3 ON (lasku.yhtio = t3.yhtio and lasku.tunnus = t3.ltunnus and t3.korjattu = '' and t3.tilino = '$yhtiorow[konsernimyyntisaamiset]')
+								WHERE lasku.yhtio = '$kukarow[yhtio]' 
+								and lasku.tila	  = 'U' 
+								and lasku.alatila = 'X'
+								and lasku.mapvm  != '0000-00-00'
+								and lasku.tapvm  >= '$yhtiorow[tilikausi_alku]' 
+								and lasku.tapvm  <= '$yhtiorow[tilikausi_loppu]'
+								GROUP BY ltunnus
+								HAVING round(sum(t1.summa),2) != 0 or round(sum(t2.summa),2) != 0 or round(sum(t3.summa),2) != 0
+								ORDER by lasku.laskunro";
 				}
 				
 			}
@@ -884,6 +901,15 @@
 				  	<td></td>
 				  	<td><form action = '$PHP_SELF?tee=Å' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
 					</tr>
+
+					<tr>
+				  	<td></td>
+				  	<td>".t("näytä maksetut laskut, joilla on myyntisaamisia")."</td>
+				  	<td></td>
+				  	<td><form action = '$PHP_SELF?tee=Ä' method='post'><input type = 'submit' value = '".t("Näytä")."'></form></td>
+					</tr>
+
+
 					</table>";
 		}
 

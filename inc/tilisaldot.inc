@@ -164,12 +164,14 @@
 			}
 			
 			echo "</tr>";
-			
+//			echo "summa: $summa summa2: $summa2";
 			if(isset($workbook)) {
 				$excelrivi++;
 			}
+		} // round($summa2,2)
+		if ($tilino == 0) { 
+			echo "<tr><td class='tumma' colspan='3'><strong>".t("Summa").":</strong></td><td align='right' class='tumma'><strong>".round($summa2,2)."</strong></td></tr>";
 		}
-		if ($tilino == 0) echo "<tr><td></td><td></td><td></td><td align='right'>".round($summa2,2)."</td>";
 		
 		echo "</table><br>";
 	}

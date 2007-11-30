@@ -212,27 +212,23 @@
 
 	if (mysql_field_name($result, $i) == "oletus_vienti") { //oletusvienti
 
-		if ($trow[$i]=='A') $vientia='selected';
-		if ($trow[$i]=='B') $vientib='selected';
-		if ($trow[$i]=='C') $vientic='selected';
-		if ($trow[$i]=='D') $vientid='selected';
-		if ($trow[$i]=='E') $vientie='selected';
-		if ($trow[$i]=='F') $vientif='selected';
-		if ($trow[$i]=='G') $vientig='selected';
-		if ($trow[$i]=='H') $vientih='selected';
-		if ($trow[$i]=='I') $vientii='selected';
+		$sel = array();
+		$sel[$trow[$i]] = "SELECTED";
 
 		$ulos = "<td>
 			<select name='$nimi'>
-				<option value='A' $vientia>".t("Kotimaa")."</option>
-				<option value='B' $vientib>".t("Kotimaa huolinta/rahti")."</option>
-				<option value='C' $vientic>".t("Kotimaa vaihto-omaisuus")."</option>
-				<option value='D' $vientid>".t("EU")."</option>
-				<option value='E' $vientie>".t("EU huolinta/rahti")."</option>
-				<option value='F' $vientif>".t("EU vaihto-omaisuus")."</option>
-				<option value='G' $vientig>".t("ei-EU")."</option>
-				<option value='H' $vientih>".t("ei-EU huolinta/rahti")."</option>
-				<option value='I' $vientii>".t("ei-EU vaihto-omaisuus")."</option>
+				<option value='A' {$sel["A"]}>".t("Kotimaa")."</option>
+				<option value='B' {$sel["B"]}>".t("Kotimaa huolinta/rahti")."</option>
+				<option value='C' {$sel["C"]}>".t("Kotimaa vaihto-omaisuus")."</option>
+				<option value='J' {$sel["J"]}>".t("Kotimaa Raaka-aine")."</option>				
+				<option value='D' {$sel["D"]}>".t("EU")."</option>
+				<option value='E' {$sel["E"]}>".t("EU huolinta/rahti")."</option>
+				<option value='F' {$sel["F"]}>".t("EU vaihto-omaisuus")."</option>
+				<option value='K' {$sel["K"]}>".t("EU Raaka-aine")."</option>
+				<option value='G' {$sel["G"]}>".t("ei-EU")."</option>
+				<option value='H' {$sel["H"]}>".t("ei-EU huolinta/rahti")."</option>
+				<option value='I' {$sel["I"]}>".t("ei-EU vaihto-omaisuus")."</option>
+				<option value='L' {$sel["L"]}>".t("ei-EU Raaka-aine")."</option>				
 			</select>
 			</td>";
 

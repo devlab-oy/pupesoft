@@ -42,17 +42,15 @@ if ($tee == "") {
 $varastoon_msg .= "	<table>
 					<th valign='top'>".t("Varastoon")."</th>
 					<th valign='top'>".t("Tuoteno")."</th>
-					<th valign='top'>".t("M‰‰r‰")."<br>".t("sis").".</th>
-					<th valign='top'>".t("M‰‰r‰")."<br>".t("ulk").".</th>
+					<th valign='top'>".t("M‰‰r‰")." ".t("sis").".<br>".t("M‰‰r‰")." ".t("ulk").".</th>
 					<th valign='top'>".t("Alennus")."</th>
-					<th valign='top'>".t("Ostohinta")."<br>".t("ulk").".</th>
-					<th valign='top'>".t("Ostohinta")."<br>".t("sis").".</th>
+					<th valign='top'>".t("Ostohinta")." ".t("ulk").".<br>".t("Ostohinta")." ".t("sis").".</th>
 					<th valign='top'>".t("Osuus")."<br>".t("rahdista")."</th>
+					<th valign='top'>".t("Rahti")."</th>
 					<th valign='top'>".t("Tulli")."</th>
-					<th valign='top'>".t("Ostohinta")."+<br>".t("Rahti")."+".t("Tulli")."</th>
+					<th valign='top'>".t("Ostohinta")."+<br>".t("Rahti")."+<br>".t("Tulli")."</th>
 					<th valign='top'>".t("Rivihinta")."</th>
-					<th valign='top'>".t("Vanha")."<br>".t("kehahin")."</th>
-					<th valign='top'>".t("Uusi")."<br>".t("kehahin")."</th>
+					<th valign='top'>".t("Vanha")." ".t("kehahin")."<br>".t("Uusi")." ".t("kehahin")."</th>
 					<th valign='top'>".t("Ei tullia")."</th>
 					</tr>";
 
@@ -447,36 +445,33 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 			$chk = "CHECKED";
 		}
 
-		$varastoon_msg .= "<td align='center'><input type='checkbox' name='varastoonko[]' value='$tilrivirow[tunnus]' $chk></td>";
+		$varastoon_msg .= "<td align='center' valign='top'><input type='checkbox' name='varastoonko[]' value='$tilrivirow[tunnus]' $chk></td>";
 	}
 	else {	
 		if ($tilrivirow["netto"] == '') {
-			$varastoon_msg .= "<td align='center'>x</td>";
+			$varastoon_msg .= "<td align='center' valign='top'>x</td>";
 		}
 		else {
 			$varastoon_msg .= "<td></td>";
 		}
 	}
 
-	$varastoon_msg .= "	<td>$tilrivirow[tuoteno]</td>
-						<td align='right'>$tilrivirow[varattu]</td>
-						<td align='right'>" . round($tilrivirow['varattu']*$tuorow['tuotekerroin'],2) . "</td>
-						<td align='right'>$tilrivirow[ale]%</td>
-						<td align='right'>$tilrivirow[hinta]</td>
-						<td align='right'>" . round($tilrivirow['hinta']*$tuorow['tuotekerroin'],2) . "</td>
-						<td align='right'>" . round($osuus,6) . "</td>
-						<td align='right'>$tv_nimrow[maara] $tv_nimrow[rahayksikko]</td>
-						<td align='right'>$ohinta</td>
-						<td align='right'>" . round($ohinta*$tilrivirow['varattu'],2) . " $kuluteksti</td>";
+	$varastoon_msg .= "	<td valign='top'>$tilrivirow[tuoteno]</td>
+						<td align='right' valign='top'>$tilrivirow[varattu]<br>".sprintf('%.2f', $tilrivirow['varattu']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>$tilrivirow[ale]%</td>
+						<td align='right' valign='top'>$tilrivirow[hinta]<br>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $tilrivirow['hinta']*$tuorow['tuotekerroin'])."</td>
+						<td align='right' valign='top'>".sprintf('%.6f', $osuus)."</td>
+						<td align='right' valign='top'>".sprintf('%.6f', $osuus*$rahtikulut)."</td>
+						<td align='right' valign='top'>$tv_nimrow[maara] $tv_nimrow[rahayksikko]</td>
+						<td align='right' valign='top'>$ohinta</td>
+						<td align='right' valign='top'>".sprintf('%.'.$yhtion_parametritrow['hintapyoristys'].'f', $ohinta*$tilrivirow['varattu']) . " $kuluteksti</td>";
 
 
 	if ($tuorow["sarjanumeroseuranta"] == "S") {
-		$varastoon_msg .= "	<td align='right'></td>
-							<td align='right'></td>";
+		$varastoon_msg .= "	<td align='right'></td>";
 	}
 	else {
-		$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]</td>
-							<td align='right'>$kehahin $uusikehahin</td>";
+		$varastoon_msg .= "	<td align='right'>$tuorow[kehahin]<br>$kehahin $uusikehahin</td>";
 	}
 
 	if ($tee == "") {
@@ -485,11 +480,11 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 			$chk = "CHECKED";
 		}
 		
-		$varastoon_msg .= "<td align='center'><input type='checkbox' name='eitullia[]' value='$tilrivirow[tunnus]' $chk></td>";
+		$varastoon_msg .= "<td align='center' valign='top'><input type='checkbox' name='eitullia[]' value='$tilrivirow[tunnus]' $chk></td>";
 	}
 	else {
 		if ($tilrivirow["var"] != '') {
-			$varastoon_msg .= "<td>".t("ei tullia")."</td>";
+			$varastoon_msg .= "<td valign='top'>".t("ei tullia")."</td>";
 		}
 		else {
 			$varastoon_msg .= "<td></td>";
@@ -597,7 +592,7 @@ else {
 	echo "<th></th>";
 }
 
-echo "<th colspan='9' align='right'>".t("Yhteens‰").":</th><td class='tumma' align='right'>".sprintf("%.2f", $summa)."</th><th colspan='2'></th>";
+echo "<th colspan='8' align='right'>".t("Yhteens‰").":</th><td class='tumma' align='right'>".sprintf("%.2f", $summa)."</th><th></th>";
 
 if ($tee == "") {
 	echo "<th><input type='submit' value='".t("P‰ivit‰")."'></form></th>";

@@ -46,7 +46,14 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		}
 	
 		// katotaan onko liitettyj‰ laskuja, mutta ei vaihto-omaisuuslaskuja
-		$query  = "select * from lasku where yhtio='$kukarow[yhtio]' and tila='K' and alatila='' and vanhatunnus<>0 and laskunro='$laskurow[laskunro]' and vienti not in ('C','F','I','J','K','L')";
+		$query  = "	SELECT * 
+					from lasku 
+					where yhtio = '$kukarow[yhtio]' 
+					and tila = 'K' 
+					and alatila = '' 
+					and vanhatunnus <> 0 
+					and laskunro = '$laskurow[laskunro]' 
+					and vienti not in ('C','F','I','J','K','L')";
 		$result = mysql_query($query) or pupe_error($query);
 
 		$summa = 0;
@@ -100,27 +107,9 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		echo t("Kululaskuja yhteens‰").": ".$summa." $yhtiorow[valkoodi]";
 		echo "</font><br>";
 
-		// yht‰‰n kululaskua ei ole liitetty, kokeillaan keksi‰ jotain kuluja! :)
+		// yht‰‰n kululaskua ei ole liitetty
 		if ($summa == 0) {
-
-			echo "<font class='error'>".t("Yht‰‰n kululaskua ei ole liitetty keikkaan!")." ";
-
-			if ($laskurow["rahti_huolinta"] != 0) {
-				echo t("K‰ytet‰‰n keikalle syˆtetty‰ kulusummaa.");
-				$summa = $laskurow["rahti_huolinta"];
-			}
-			elseif ($laskurow['rahti'] != 0) {
-				if ($laskurow["maksu_kurssi"] == 0) {	//t‰m‰ olisi huonompi juttu, mut ei mik‰‰n stopperi
-					$laskurow["maksu_kurssi"] = $laskurow["vienti_kurssi"];
-				}
-				echo t("K‰ytet‰‰n keikalle syˆtetty‰ kuluprosenttia")." ".$laskurow['rahti']."%";
-				$summa = round($laskurow['summa'] * $laskurow['maksu_kurssi'] * ($laskurow['rahti'] / 100), 2);
-			}
-			else {
-				echo t("Keikalle ei lˆytynyt yht‰‰n kuluja!");
-			}
-
-			echo "</font><br>";
+			echo "<font class='error'>".t("Yht‰‰n kululaskua ei ole liitetty keikkaan!")."<br>";		
 		}
 
 		// p‰ivitet‰‰n kululaskujen summa kentt‰‰n saldo_maksettu keikan otsikolle

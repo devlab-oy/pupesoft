@@ -163,7 +163,7 @@ if (!function_exists("maa")) {
 			$kieli = $GLOBALS["kieli"];
 		}
 
-		return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
+		return ucfirst(mb_strtolower(substr(t($maa['nimi'], $kieli), 5)));
 	}
 }
 

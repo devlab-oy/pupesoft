@@ -155,6 +155,7 @@
 					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
 					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin,
+					group_concat(distinct tuotteen_toimittajat.alkuperamaa order by tuotteen_toimittajat.tunnus) alkuperamaa,
 					group_concat(distinct concat_ws(' ',tuotteen_toimittajat.ostohinta,upper(tuotteen_toimittajat.valuutta)) order by tuotteen_toimittajat.tunnus separator '<br>') ostohinta
 					FROM tuote
 					LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno
@@ -247,7 +248,7 @@
 			while ($hintavalrow = mysql_fetch_array($hintavalresult)) {
 
 				// katotaan onko tuotteelle valuuttahintoja
-				$query = "	select *
+				$query = "	SELECT *
 							from hinnasto
 							where yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$tuoterow[tuoteno]'
@@ -264,7 +265,32 @@
 				}
 
 			}
-
+			
+			
+			if ($tullirow1['cn'] != '') {
+				$alkuperamaat = array();
+				$alkuperamaat[] = split(',',$tuoterow['alkuperamaa']);
+				$tuorow = $tuoterow;
+				$prossat = '';
+				$prossa_str = '';
+				
+				foreach ($alkuperamaat as $alkuperamaa) {
+					foreach ($alkuperamaa as $alkupmaa) {					
+					
+						$laskurow['maa_lahetys'] = $alkupmaa;				    
+						
+						
+						include('tilauskasittely/taric_veroperusteet.inc');
+												
+						$prossa_str = trim($tulliprossa,"0");
+						if (strlen($prossa_str) > 1) {
+							$prossat .= "<br>".trim($tulliprossa,"0")." ".$alkupmaa;
+						}
+					}
+				}
+			}
+			
+						
 			//eka laitetaan tuotteen yleiset (aika staattiset) tiedot
 			echo "<table>";
 
@@ -298,9 +324,9 @@
 					</tr>";
 
 			//5
-			echo "<tr><th>".t("Tullinimike")."</th><th colspan='4'>".t("Tullinimikkeen kuvaus")."</th><th>".t("Toinen paljous")."</th></tr>";
-			echo "<tr><td>$tullirow1[cn]</td><td colspan='4'>".substr($tullirow3['dm'],0,20)." - ".substr($tullirow2['dm'],0,20)." - ".substr($tullirow1['dm'],0,20)."</td><td>$tullirow1[su]</td></tr>";
-
+			echo "<tr><th>".t("Tullinimike")." / %</th><th colspan='4'>".t("Tullinimikkeen kuvaus")."</th><th>".t("Toinen paljous")."</th></tr>";
+			echo "<tr><td>$tullirow1[cn] $prossat</td><td colspan='4'>".substr($tullirow3['dm'],0,20)." - ".substr($tullirow2['dm'],0,20)." - ".substr($tullirow1['dm'],0,20)."</td><td>$tullirow1[su]</td></tr>";
+			// $prossa
 
 			//6
 			echo "<tr><th>".t("Luontipvm")."</th><th>".t("Muutospvm")."</th><th>".t("Epäkurantti25pvm")."</th><th>".t("Epäkurantti50pvm")."</th><th>".t("Epäkurantti75pvm")."</th><th>".t("Epäkurantti100pvm")."</th></tr>";

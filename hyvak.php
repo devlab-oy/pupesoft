@@ -423,25 +423,27 @@
 			$updres = mysql_query($query) or pupe_error($query);
 
 		}
+		
+		echo $laskurow["h1time"]."<br>";
 
 		// Kuka hyväksyi??
-		if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak1']) {
+		if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak1'] and $laskurow["h1time"]=="0000-00-00 00:00:00") {
 			$kentta = "h1time";
 			$laskurow['h1time'] = "99";
 		}
-		if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak2']) {
+		elseif ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak2'] and $laskurow["h2time"]=="0000-00-00 00:00:00") {
 			$kentta = "h2time";
 			$laskurow['h2time'] = "99";
 		}
-		if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak3']) {
+		elseif ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak3'] and $laskurow["h3time"]=="0000-00-00 00:00:00") {
 			$kentta = "h3time";
 			$laskurow['h3time'] = "99";
 		}
-		if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak4']) {
+		elseif ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak4'] and $laskurow["h4time"]=="0000-00-00 00:00:00") {
 			$kentta = "h4time";
 			$laskurow['h4time'] = "99";
 		}
-		if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak5']) {
+		elseif ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak5'] and $laskurow["h5time"]=="0000-00-00 00:00:00") {
 			$kentta = "h5time";
 			$laskurow['h5time'] = "99";
 		}
@@ -826,7 +828,7 @@
 		echo "<tr>";
 
 		// Jos laskua hyvaksyy ensimmäinen henkilö ja laskulla on annettu mahdollisuus hyvksyntälistan muutokseen näytetään se!";
-		if ($laskurow['hyvak1'] == $laskurow['hyvaksyja_nyt'] and $laskurow['hyvaksynnanmuutos'] != '') {
+		if ($laskurow['hyvak1'] == $laskurow['hyvaksyja_nyt'] and $laskurow['h1time'] == '0000-00-00 00:00:00' and $laskurow['hyvaksynnanmuutos'] != '') {
 
 			echo "<td class='back' valign='top'><table>";
 

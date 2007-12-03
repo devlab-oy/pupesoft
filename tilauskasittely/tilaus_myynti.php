@@ -3834,7 +3834,10 @@ if ($tee == '') {
 								</form> ";
 					}
 				}
-
+				elseif($row["toimitettuaika"] != '0000-00-00 00:00:00') {
+					echo "<font class='info'>".t("Toimitettu").": ".$row["toimitettuaika"]."</font>";
+				}
+				
 				if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "SIIRTOTYOMAARAYS") and $riviok == 0) {
 					//Tutkitaan tuotteiden lisävarusteita
 					$query  = "	SELECT *

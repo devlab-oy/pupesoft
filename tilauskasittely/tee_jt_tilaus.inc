@@ -148,7 +148,8 @@
 								toimitusehto	= '$otsikkorivi[toimitusehto]' and
 								valkoodi 		= '$otsikkorivi[valkoodi]' and
 								vienti_kurssi	= '$otsikkorivi[vienti_kurssi]' and
-								eilahetetta		= '$isarivirow[suoraan_laskutukseen]'
+								eilahetetta		= '$isarivirow[suoraan_laskutukseen]' and
+								tunnusnippu		= '$otsikkorivi[tunnusnippu]'
 								$erpcmlisa1";
 					$stresult = mysql_query($query) or pupe_error($query);
 				}

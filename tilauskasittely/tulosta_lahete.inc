@@ -86,19 +86,6 @@ if (!function_exists('alku')) {
 			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $norm);
 		}
 		
-		// haetaan maksuehdon tiedot
-		$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-		$masresult = mysql_query($query) or pupe_error($query);
-		$masrow = mysql_fetch_array($masresult);
-	
-		//maksuehto tekstinä jos on jokin muu kuin hinnaton maksuehto
-		if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eiale_eihinta.inc") {
-			$maksuehto = "";
-		}
-		else {
-			$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
-		}
-		
 		if ($tyyppi == "TILAUSVAHVISTUS") {
 			$kerarow["kerattyaika"] = date("Y-m-d");
 		}
@@ -213,11 +200,21 @@ if (!function_exists('alku')) {
 		$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 708, t("Toimitusehto", $kieli), 		$thispage, $pieni);
 		$pdf->draw_text(310, 698, $laskurow["toimitusehto"], 		$thispage, $norm);
-
-		$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
-		$pdf->draw_text(310, 687, t("Maksuehto", $kieli), 			$thispage, $pieni);
-		$pdf->draw_text(310, 677, $maksuehto, 						$thispage, $norm);
 		
+		$pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
+		
+		//maksuehto tekstinä jos on jokin muu kuin hinnaton maksuehto
+		if (str_replace("perhe_", "", $lahetetyyppi) != "tulosta_lahete_eiale_eihinta.inc") {
+			
+			// haetaan maksuehdon tiedot
+			$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+			$masresult = mysql_query($query) or pupe_error($query);
+			$masrow = mysql_fetch_array($masresult);
+						
+			$pdf->draw_text(310, 687, t("Maksuehto", $kieli), 							$thispage, $pieni);
+			$pdf->draw_text(310, 677, $masrow["teksti"]." ".$masrow["kassa_teksti"], 	$thispage, $norm);
+		}
+						
 		$pdf->draw_rectangle(674, 300, 653, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 666, t("", $kieli), 	$thispage, $pieni);
 		$pdf->draw_text(310, 656, $laskurow[""], 	$thispage, $norm);
@@ -336,7 +333,7 @@ if (!function_exists('alku')) {
 
 if (!function_exists('uusi_sivu')) {
 	function uusi_sivu ($tyyppi = "") {
-		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala;
+		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $kateistyyppi, $kieli, $boldi, $kala;
 
 		$thispage = $pdf->new_page("a4");
 			
@@ -375,14 +372,6 @@ if (!function_exists('uusi_sivu')) {
 			$pdf->draw_text(60, 795, $yhtiorow["postitp"], 	$thispage, $norm);
 			$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $norm);
 		}
-		
-		// haetaan maksuehdon tiedot
-		$query  = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-		$masresult = mysql_query($query) or pupe_error($query);
-		$masrow = mysql_fetch_array($masresult);
-	
-		//maksuehto tekstinä
-		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 		
 		if ($tyyppi == "TILAUSVAHVISTUS") {
 			$kerarow["kerattyaika"] = date("Y-m-d");

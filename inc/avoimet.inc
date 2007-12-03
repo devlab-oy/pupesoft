@@ -556,7 +556,7 @@
 				$trow = mysql_fetch_array ($result);
 
 				$trow["saldo"] 	= sprintf("%.2f", $trow["saldo"]);
-				$erotus 		= $summatotal + $suoritussummatotal + $trow["saldo"];
+				$erotus 		= $summatotal + $suoritussummatotal - $trow["saldo"];
 				$erotus 		= sprintf("%.2f", $erotus);
 
 				echo "<tr><td class='back' colspan='9'>&nbsp;</td></tr>";

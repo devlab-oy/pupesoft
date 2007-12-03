@@ -416,6 +416,9 @@
 			if (mysql_field_name($presult,$i) == 'kerattyaika' or mysql_field_name($presult,$i) == 'toimaika') {
 				echo "<td>".tv1dateconv($prow[$i],"pitka")."</td>";
 			}
+			elseif (mysql_field_name($presult,$i) == 'tuoteno') {
+				echo "<td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=$prow[$i]'>$prow[$i]</a></td>";
+			}
 			else {
 				echo "<td>".str_replace(".",",",$prow[$i])."</td>";
 			}
@@ -654,6 +657,7 @@
 				if ($tunnus==$row['tilaus']) $ero="th";
 
 				echo "<tr class='aktiivi'>";
+				
 				for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
 					if (mysql_field_name($result,$i) == 'toimaika') {
 						echo "<$ero>".tv1dateconv($row[$i])."</$ero>";
@@ -661,7 +665,6 @@
 					else {
 						echo "<$ero>$row[$i]</$ero>";						
 					}
-
 				}
 
 				$laskutyyppi	= $row["tila"];

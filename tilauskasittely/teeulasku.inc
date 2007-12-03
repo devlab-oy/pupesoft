@@ -343,7 +343,10 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 
 		if ($valsurow["otunnus"] != $edotunnus and $edotunnus != '') {
 
-			$query 		= "SELECT summa, valkoodi, nimi, toim_nimi, toim_osoite, vienti_kurssi FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$edotunnus'";
+			$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi 
+							FROM lasku 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tunnus = '$edotunnus'";
 			$sumsresult = mysql_query($query) or pupe_error($query);
 			$sumsrow	= mysql_fetch_array($sumsresult);
 
@@ -356,7 +359,8 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 			}
 
 			// jos meillä on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteensäriville kommenttiin...
-			if (strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) and $sumsrow["toim_nimi"] != "") {
+			if ((strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) or
+			 	strtoupper($sumsrow["osoite"]) != strtoupper($sumsrow["toim_osoite"])) and $sumsrow["toim_nimi"] != "") {
 				$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 			}
 			else {
@@ -373,8 +377,10 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 
 	//laitetaan välisumma vikallekin tilaukselle
 	if ($edtunnus != "") {
-
-		$query 		= "SELECT summa, valkoodi, nimi, toim_nimi, toim_osoite, vienti_kurssi FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$edotunnus'";
+		$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi 
+						FROM lasku 
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and tunnus = '$edotunnus'";
 		$sumsresult = mysql_query($query) or pupe_error($query);
 		$sumsrow	= mysql_fetch_array($sumsresult);
 
@@ -387,7 +393,8 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 		}
 
 		// jos meillä on eri toimitusosoite kun laskutusosoite, kirjotetaan toimitusosoitteen asiakasnimi yhteensäriville kommenttiin...
-		if (strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) and $sumsrow["toim_nimi"] != "") {
+		if ((strtoupper($sumsrow["nimi"]) != strtoupper($sumsrow["toim_nimi"]) or
+		 	strtoupper($sumsrow["osoite"]) != strtoupper($sumsrow["toim_osoite"])) and $sumsrow["toim_nimi"] != "") {
 			$sumskommentti = "$sumsrow[toim_nimi] $sumsrow[toim_osoite] ".t("yhteensä", $kielirow["kieli"]).": $sumsrow[summa] $sumsrow[valkoodi].";
 		}
 		else {

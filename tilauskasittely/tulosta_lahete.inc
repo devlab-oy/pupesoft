@@ -37,7 +37,7 @@ $rivinkorkeus			= 15;
 //muutamat funktiot...
 if (!function_exists('alku')) {
 	function alku($tyyppi = "") {
-		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow;
+		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $useita;
 	
 		//PDF parametrit
 		if (!isset($pdf)) {
@@ -149,8 +149,24 @@ if (!function_exists('alku')) {
 		
 		$pdf->draw_text(430, 792, t("Toimitusaika", $kieli), 	$thispage, $pieni);
 		
+		$useita = "EI";
+		if($laskurow["nippu"] > 0) {
+			$query = "	SELECT count(distinct(toimaika))
+						FROM tilausrivi
+						WHERE yhtio='$kukarow[yhtio]'
+						and otunnus IN ({$laskurow["nippu"]})";
+			$toimaikares = mysql_query($query) or pupe_error($query);
+			$toimaikarow = mysql_fetch_array($toimaikares);
+			
+			if($toimaikarow[0] > 1) {
+				$useita = "JOO";
+			}
+		}
 		
-		if ($laskurow["toimvko"] != '') {
+		if($useita == "JOO") {
+			$pdf->draw_text(430, 782, t("Useita", $kieli), 	$thispage, $norm);
+		}
+		elseif ($laskurow["toimvko"] != '') {
 			$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
 			
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
@@ -560,7 +576,7 @@ if (!function_exists('rivi_otsikot')) {
 
 if (!function_exists('rivi')) {
 	function rivi($thispage, $tyyppi="") {
-		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $jtid, $summa, $norm, $pieni, $rivinkorkeus;
+		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $jtid, $summa, $norm, $pieni, $rivinkorkeus, $useita;
 			
 		// viivat rivien väliin...
 		$x[0] = 20;
@@ -772,6 +788,10 @@ if (!function_exists('rivi')) {
 				// lapsia ei lisätä
 				$piilotarivi = 1;
 			}
+		}
+		
+		if($useita == "JOO") {
+			$row["kommentti"] .= "\n".t("Toimitusaika", $kieli).": ".tv1dateconv($row["toimaika"]);
 		}
 		
 		$row["tilkpl"] 	= ($row["tilkpl"]*1);

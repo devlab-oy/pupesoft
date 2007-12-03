@@ -637,9 +637,13 @@
 			$aburow = mysql_fetch_array($abures);
 			
 			$wherelisa = " tilausrivi.otunnus IN ($aburow[tunnukset])";
+			
+			//	Laitetaan tämä tässä talteen!
+			$laskurow["nippu"] = $aburow["tunnukset"];
 		}
 		else {
 			$wherelisa = "tilausrivi.otunnus = '$laskurow[tunnus]'";
+			$laskurow["nippu"] = $aburow["tunnus"];
 		}
 		
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot

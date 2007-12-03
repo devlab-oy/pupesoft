@@ -1,6 +1,26 @@
 <?php
 	
 	require ("../inc/parametrit.inc");
+
+	echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+		<!--
+
+		function toggleAll(toggleBox) {
+
+			var currForm = toggleBox.form;
+			var isChecked = toggleBox.checked;
+			var nimi = toggleBox.name;
+
+			for (var elementIdx=1; elementIdx<currForm.elements.length; elementIdx++) {
+				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,7) == nimi && currForm.elements[elementIdx].value != '".t("Ei valintaa")."') {
+					currForm.elements[elementIdx].checked = isChecked;
+				}
+			}
+		}
+
+		//-->
+		</script>";
+	
 	
 	if ($toim == "SUPER") {
 		echo "<font class='head'>".t("Inventointien korjaus").":</font><hr>";
@@ -199,15 +219,28 @@
 				$lisa .= " and tuote.sarjanumeroseuranta='S' ";
 			}
 
+			if (count($mul_osasto) > 0) {
+				$sel_osasto = "('".str_replace(',','\',\'',implode(",", $mul_osasto))."')";
+				$lisa .= " and tuote.osasto in $sel_osasto ";
+			}
+			if (count($mul_try) > 0) {
+				$sel_tuoteryhma = "('".str_replace(',','\',\'',implode(",", $mul_try))."')";
+				$lisa .= " and tuote.try in $sel_tuoteryhma ";
+			}
+			if (count($mul_tmr) > 0) {
+				$sel_tuotemerkki = "('".str_replace(',','\',\'',implode(",", $mul_tmr))."')";
+				$lisa .= " and tuote.tuotemerkki in $sel_tuotemerkki ";
+			}
+
 			if (!empty($varastot)) {
 				$lisa .= " and varastopaikat.tunnus IN (" . implode(', ', $varastot) . ")";
 	        }
-			
+
 			if ($vararvomuu != "") {
 				$lisa .= " HAVING arvo != 0 ORDER BY arvo";
 			}
 			else {
-				$lisa .= " ORDER BY sorttauskentta";	
+				$lisa2 .= " ORDER BY sorttauskentta";	
 			}
 
 			$query = "	SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, 
@@ -229,7 +262,8 @@
 						and tuote.ei_saldoa = ''
 						and tapahtuma.laadittu >= '$vva-$kka-$ppa 00:00:00'
 						and tapahtuma.laadittu <= '$vvl-$kkl-$ppl 23:59:59'
-						$lisa";
+						$lisa
+						$lisa2";
 			$saldoresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($saldoresult) == 0) {
@@ -446,16 +480,126 @@
 		if (!isset($ppl))
 			$ppl = date("d");
 
+		// piirrellään formi
 		echo "<form name='inve' action='$PHP_SELF' method='post' autocomplete='off'>";
 		echo "	<input type='hidden' name='tee' value='Y'>
 				<input type='hidden' name='toim' value='$toim'>";
 
-		echo "<table><tr>";
-		echo "<th>".t("Valitse toiminto")."</th><td colspan='3'>
+		echo "<table>";
+		echo "<tr><th colspan='1'>".t("Valitse toiminto")."</th><td colspan='2'>
 				<select name='tila'>
 				<option value='inventoi'>".t("Näytä ruudulla")."</option>
 				<option value='tulosta'>".t("Tulosta inventointipoikkeamalista")."</option>
 				</select></td></tr>";
+
+		echo "<input type='hidden' name='supertee' value='RAPORTOI'>";
+
+		echo "<tr valign='top'><td><table><tr><td class='back'>";
+
+		// näytetään soveltuvat osastot
+		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
+		$res2  = mysql_query($query) or die($query);
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+
+		echo "<table>";
+		echo "<tr><th colspan='2'>".t("Tuoteosasto").":</th></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+
+		while ($rivi = mysql_fetch_array($res2)) {
+			$mul_check = '';
+			if ($mul_osasto!="") {
+				if (in_array($rivi['selite'],$mul_osasto)) {
+					$mul_check = 'CHECKED';
+				}
+			}
+
+			echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+		}
+
+		echo "</table>";
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+
+		echo "</table>";
+		echo "</td>";
+
+		echo "<td><table><tr><td valign='top' class='back'>";
+
+		// näytetään soveltuvat tryt
+		$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
+		$res2  = mysql_query($query) or die($query);
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+
+		echo "<table>";
+		echo "<tr><th colspan='2'>".t("Tuoterymä").":</th></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+
+		while ($rivi = mysql_fetch_array($res2)) {
+			$mul_check = '';
+			if ($mul_try!="") {
+				if (in_array($rivi['selite'],$mul_try)) {
+					$mul_check = 'CHECKED';
+				}
+			}
+
+			echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+		}
+
+		echo "</table>";
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+
+		echo "</table>";
+		echo "</td>";
+
+		echo "<td><table><tr><td valign='top' class='back'>";
+
+		// näytetään soveltuvat tuotemerkit
+		$query = "	SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki) WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != '' ORDER BY tuotemerkki";
+		$res2  = mysql_query($query) or die($query);
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "<div style='height:265;overflow:auto;'>";
+		}
+
+		echo "<table>";
+		echo "<tr><th colspan='2'>".t("Tuotemerkki").":</th></tr>";
+		echo "<tr><td><input type='checkbox' name='mul_tmr' onclick='toggleAll(this);'></td><td nowrap>".t("Ruksaa kaikki")."</td></tr>";
+
+		while ($rivi = mysql_fetch_array($res2)) {
+			$mul_check = '';
+			if ($mul_tmr!="") {
+				if (in_array($rivi['tuotemerkki'], $mul_tmr)) {
+					$mul_check = 'CHECKED';
+				}
+			}
+
+			echo "<tr><td><input type='checkbox' name='mul_tmr[]' value='$rivi[tuotemerkki]' $mul_check></td><td> $rivi[tuotemerkki] </td></tr>";
+		}
+
+		echo "</table>";
+
+		if (mysql_num_rows($res2) > 11) {
+			echo "</div>";
+		}
+
+		echo "</table>";
+		echo "</td>";
+
+		echo "</tr>";
+		echo "</table>";
+		
+		echo "<table>";
 
 		$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
 		$vares = mysql_query($query) or pupe_error($query);

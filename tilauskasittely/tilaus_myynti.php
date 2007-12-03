@@ -2827,10 +2827,21 @@ if ($tee == '') {
 				echo t("Tilausrivit").":</font>";
 
 				// jos meillä on yhtiön myyntihinnoissa alvit mukana ja meillä on alvillinen tilaus, annetaan mahdollisuus switchata listaus alvittomaksi
-				if ($yhtiorow["alv_kasittely"] == "" and $laskurow["alv"] != 0 and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "EXTRANET")) {
+				if ($laskurow["alv"] != 0 and $toim != "VALMISTAVARASTOON" and $toim != "SIIRTOLISTA" and $toim != "SIIRTOTYOMAARAYS") {
 
 					$sele = array();
 
+					if ($tilausrivi_alvillisuus == "") {
+						if ($yhtiorow["alv_kasittely"] == "") {
+							// verolliset hinnat
+							$tilausrivi_alvillisuus = "K";
+						}
+						else {
+							// verottomat hinnat
+							$tilausrivi_alvillisuus = "E";	
+						}					
+					}
+																					
 					if ($tilausrivi_alvillisuus == "E") {
 						$sele["E"] = "checked";
 					}
@@ -3027,6 +3038,7 @@ if ($tee == '') {
 									<input type='hidden' id='rivi_$rivino' name='jarjesta' value='$rivino'>";
 
 					$buttonit .= "<img src='".$palvelin2."pics/noimage.gif' border='0' height = '10'>";
+					
 					if($rivino > 1) {
 						$buttonit .= "	<a href='#' onClick=\"getElementById('rivi_$rivino').value='moveUp'; document.forms['siirra_$rivino'].submit();\"><img src='".$palvelin2."pics/lullacons/arrow-single-up-green.png' border='0' height = '10' width = '10'></a><br>";
 					}
@@ -3560,22 +3572,43 @@ if ($tee == '') {
 					if (hinnaston_alv($laskurow, $trow, $kpl, $netto) != $laskurow["valkoodi"]) {
 						$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
 					}
-
-					// halutaan alvittomat hinnat
-					if ($tilausrivi_alvillisuus == "E") {
-						$alvillisuus_jako = 1 + $row["alv"] / 100;
+					
+					if ($yhtiorow["alv_kasittely"] == "") {
+						// Oletuksena verolliset hinnat
+						
+						if ($tilausrivi_alvillisuus == "E") {
+							// Halutaan alvittomat hinnat
+							$alvillisuus_jako = 1 + $row["alv"] / 100;														
+						}
+						else {
+							// Oletukset
+							$alvillisuus_jako = 1;
+						}
+						
+						$hinta    		= round($hinta / $alvillisuus_jako, $yhtiorow['hintapyoristys']);
+						$summa    		= round($summa / $alvillisuus_jako, $yhtiorow['hintapyoristys']);
+						$myyntihinta	= round(tuotteen_myyntihinta($laskurow, $trow, 1) / $alvillisuus_jako, $yhtiorow['hintapyoristys']);
 					}
 					else {
-						$alvillisuus_jako = 1;
+						// Oletuksena verottomat hinnat
+						
+						if ($tilausrivi_alvillisuus == "E") {
+							// Oletukset
+							$alvillisuus_kerto = 1;												
+						}
+						else {
+							// Halutaan alvilliset hinnat
+							$alvillisuus_kerto = 1 + $row["alv"] / 100;														
+						}
+						
+						$hinta    		= round($hinta * $alvillisuus_kerto, $yhtiorow['hintapyoristys']);
+						$summa    		= round($summa * $alvillisuus_kerto, $yhtiorow['hintapyoristys']);
+						$myyntihinta	= round(tuotteen_myyntihinta($laskurow, $trow, 1) * $alvillisuus_kerto, $yhtiorow['hintapyoristys']);
 					}
 
-					$hinta    = round($hinta / $alvillisuus_jako, $yhtiorow['hintapyoristys']);
-					$summa    = round($summa / $alvillisuus_jako, $yhtiorow['hintapyoristys']);
 					$brutto   = $hinta * ($row["varattu"] + $row["jt"]);
 					$kplhinta = $hinta * (1 - $row["ale"] / 100);
-
-					$myyntihinta = round(tuotteen_myyntihinta($laskurow, $trow, 1) / $alvillisuus_jako, $yhtiorow['hintapyoristys']);
-
+					
 					if ($kukarow['hinnat'] == 1) {
 						echo "<td $class align='right' valign='top'>$myyntihinta</td>";
 					}

@@ -478,7 +478,15 @@
 		echo "<input type='hidden' name='tee' value = 'TI'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
-
+		
+		if($verkkokauppa != "") {
+			if($yhtiorow["alv_kasittely"] != "") {
+				echo "<font class='message'>".t("Tuotteiden hinnat ovat arvonlisäverottomia").".</font>";
+			}
+			else {
+				echo "<font class='message'>".t("Tuotteiden hinnat sisältävät arvonlisaveron").".</font>";
+			}
+		}
 		echo "<table>";
 
 		
@@ -713,8 +721,13 @@
 				}				
 			}
 			else {
+				if($row["toim_tuoteno"] != "") {
+					$toimlisa = "<br><a id='$row[tuoteno]_P' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P\")'>{$row["toim_tuoteno"]}</a>";
+				}
+				else $toimlisa = "";
+				
 				echo "<td valign='top' class='$vari'>
-				<a id='$row[tuoteno]_P' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P\")'>{$row["tuoteno"]}</a>
+				<a id='$row[tuoteno]_P' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P\")'>{$row["tuoteno"]}</a>$toimlisa
 				</td>";
 				
 				echo "<td valign='top' class='$vari'>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";				

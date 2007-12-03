@@ -34,6 +34,7 @@ if(!function_exists("menu")) {
 							<input type = 'text' size='15' name = 'tuotehaku'></form><br>
 							<a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\">".t("Nimityksellä")."</a><br>
 							<a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla', 'selain', false, true);\">".t("Tuotekoodilla")."</a>
+							<a href=\"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=toim_tuoteno', 'selain', false, true);\">".t("Toimittajan koodilla")."</a>
 							</td>
 						</tr>
 					</table>";
@@ -519,7 +520,7 @@ if($tee == "tilatut") {
 						</tr>";
 
 
-
+			$summa = 0;
 			while ($koririvi = mysql_fetch_array($riviresult)) {
 
 				$ulos .= "<tr>
@@ -530,8 +531,27 @@ if($tee == "tilatut") {
 							<td>$koririvi[rivihinta]</td>
 							<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">Poista</a></td>
 						</tr>";
+				$summa += $koririvi["rivihinta"];
 
 			}
+			
+			echo "	<tr>
+						<td class = 'back' colspan = '4'></td>
+						<td class = 'tumma'>".number_format($summa, 2, ',', ' ')."</td>
+					</tr>
+					<tr>
+						<td class = 'back' colspan = '4'>";
+
+			if($yhtiorow["alv_kasittely"] != "") {
+				echo "<font class='message'>".t("Hinnat ovat eivät sisällä arvonlisäveroa").".</font>";
+			}
+			else {
+				echo "<font class='message'>".t("Hinnat sisältävät arvonlisäveron").".</font>";
+			}
+			
+			echo "		</td>
+					</tr>";
+					
 		}
 		else {
 			$ulos .= "<font class='message'>Tilauksessa ei ole tavaraa.</font><br>";
@@ -553,6 +573,9 @@ if($tee == "selaa") {
 	elseif($hakutapa == "nimi") {
 		$nimitys = $tuotehaku;
 	}
+	elseif($hakutapa == "toim_tuoteno") {
+		$toim_tuoteno = $tuotehaku;
+	}
 		
 	ob_start();
 	$poistetut 	= "";
@@ -566,7 +589,7 @@ if($tee == "selaa") {
 	}
 	
 	$haku[0]	= $tuoteno;	
-	$haku[1]	= "";	
+	$haku[1]	= $toim_tuoteno;	
 	$haku[2]	= $nimitys;
 	$haku[3]	= $osasto;	
 	$haku[4]	= $try;

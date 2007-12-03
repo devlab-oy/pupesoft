@@ -2463,10 +2463,10 @@
 		// varmistetaan, että meillä on kukarow
 		if ((int) $kukarow["kesken"] != 0) {
 			
-			if (($toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"]!="")) and $tunnusnippu=="") {
+			if ($tunnusnippu == "" and $toim == "PROJEKTI" or ($toim=="TARJOUS" and $yhtiorow["tarjouksen_voi_versioida"] != "") or (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")) and $yhtiorow["myyntitilaus_osatoimitus"] != "")) {
 				$query = "	UPDATE lasku
 							SET tunnusnippu = '$kukarow[kesken]'
-							WHERE tunnus = '$kukarow[kesken]'";
+							WHERE tunnus = '$kukarow[kesken]' and tunnusnippu = 0";
 				$result = mysql_query($query) or pupe_error($query);
 
 				if($toim=="PROJEKTI") {

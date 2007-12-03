@@ -63,7 +63,7 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('L') and
 					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 23:59:59'
+					luontiaika < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";
@@ -104,7 +104,7 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('O') and
 					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 23:59:59'
+					luontiaika < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";
@@ -144,7 +144,7 @@
 					tila in ('K') and
 					vanhatunnus = 0 and
 					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 23:59:59'
+					luontiaika < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";
@@ -198,7 +198,7 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('V') and
 					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 23:59:59'
+					luontiaika < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";
@@ -241,7 +241,7 @@
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('T') and
 					luontiaika >= '$vv-$kk-01 00:00:00' and
-					luontiaika < '$nkv-$nkk-01 23:59:59'
+					luontiaika < '$nkv-$nkk-01 00:00:00'
 					$etsi
 					GROUP BY pvm
 					ORDER BY luontiaika";

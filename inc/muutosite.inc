@@ -1,4 +1,5 @@
 <?php
+
 require_once ("inc/tilinumero.inc");
 
 function erottele ($pvm) {
@@ -47,7 +48,7 @@ $query = "	SELECT *
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) != 1) {
-	echo "".t("Tositetta")." $tunnus ".t("ei löytynytkään")."!";
+	echo t("Tositetta")." $tunnus ".t("ei löytynytkään")."!";
 	exit;
 }
 $trow = mysql_fetch_array($result);
@@ -79,7 +80,7 @@ if ($tila == 'A') {
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) != 1) {
-		echo "".t("Tositetta")." $tunnus ".t("ei löytynytkään")."!";
+		echo t("Tositetta")." $tunnus ".t("ei löytynytkään")."!";
 		exit;
 	}
 
@@ -550,14 +551,13 @@ if ($tila == 'W') {
 	$query = "	UPDATE tiliointi
 				SET korjattu = '$kukarow[kuka]',
 				korjausaika = now()
-				WHERE ltunnus = '$tunnus' AND
+				WHERE ltunnus = '$tunnus' and
 				yhtio ='$kukarow[yhtio]' and
 				korjattu = '' and
 				(tilino = '$yhtiorow[varasto]' or tilino = '$yhtiorow[varastonmuutos]' or
 				tilino = '$yhtiorow[matkalla_olevat]' or tilino = '$yhtiorow[raaka_ainevarasto]' or
 				tilino = '$yhtiorow[raaka_ainevarastonmuutos]')";
 	$result = mysql_query($query) or pupe_error($query);
-	//echo "$query<br>";
 
 	$query = "	UPDATE lasku
 				SET vienti = '$vienti'
@@ -568,17 +568,19 @@ if ($tila == 'W') {
 	//Tehdään varastotiliöinnit
 	if ($vienti != 'A' and $vienti != 'D' and $vienti != 'G' and $vienti != '') {
 
-		$query = "SELECT kustp, kohde, projekti, summa from tiliointi
-					WHERE yhtio='$kukarow[yhtio]'
-					and ltunnus='$tunnus'
-					and tapvm='$trow[tapvm]'
-					and tilino!='$yhtiorow[alv]'
-					and tilino!='$yhtiorow[ostovelat]'
-					and tilino!='$yhtiorow[konserniostovelat]'
-					and korjattu='' group by 1,2,3";
+		$query = "	SELECT kustp, kohde, projekti, summa 
+					from tiliointi
+					WHERE yhtio		= '$kukarow[yhtio]'
+					and ltunnus		= '$tunnus'
+					and tapvm		= '$trow[tapvm]'
+					and tilino 	   != '$yhtiorow[alv]'
+					and tilino 	   != '$yhtiorow[ostovelat]'
+					and tilino 	   != '$yhtiorow[konserniostovelat]'
+					and korjattu	= '' 
+					group by 1,2,3";
 		$result = mysql_query($query) or pupe_error($query);
 
-		while ($tiliointirow=mysql_fetch_array ($result)) {
+		while ($tiliointirow = mysql_fetch_array ($result)) {
 
 			// jos raaka-ainevarastoon
 			if ($vienti == "J" or $vienti == "K" or $vienti == "L") {
@@ -588,20 +590,20 @@ if ($tila == 'W') {
 				$vientitili = $yhtiorow["varastonmuutos"];
 			}
 
-			$query = "INSERT into tiliointi set
-						yhtio ='$kukarow[yhtio]',
-						ltunnus = '$tunnus',
-						tilino = '$vientitili',
-						kustp = '$tiliointirow[kustp]',
-						kohde = '$tiliointirow[kohde]',
-						projekti = '$tiliointirow[projekti]',
-						tapvm = '$trow[tapvm]',
-						summa = $tiliointirow[summa] * -1,
-						vero = '',
-						lukko = '',
-						tosite = '$tiliointirow[tosite]',
-						laatija = '$kukarow[kuka]',
-						laadittu = now()";
+			$query = "	INSERT into tiliointi set
+						yhtio 		= '$kukarow[yhtio]',
+						ltunnus 	= '$tunnus',
+						tilino 		= '$vientitili',
+						kustp 		= '$tiliointirow[kustp]',
+						kohde 		= '$tiliointirow[kohde]',
+						projekti 	= '$tiliointirow[projekti]',
+						tapvm 		= '$trow[tapvm]',
+						summa 		= $tiliointirow[summa] * -1,
+						vero 		= '',
+						lukko 		= '',
+						tosite 		= '$tiliointirow[tosite]',
+						laatija 	= '$kukarow[kuka]',
+						laadittu 	= now()";
 			$xresult = mysql_query($query) or pupe_error($query);
 
 		}
@@ -615,30 +617,30 @@ if ($tila == 'W') {
 		}
 
 		//Haetaan kululaskun kaikki verotiliöinnit jotta voidaan tallentaa myös veroton summa
-		$query = "	select sum(summa) summa
+		$query = "	SELECT sum(summa) summa
 					from tiliointi
-					where yhtio	= '$kukarow[yhtio]'
-					and ltunnus	= '$tunnus'
-					and tilino  = '$yhtiorow[alv]'
-					and korjattu = ''";
+					where yhtio		= '$kukarow[yhtio]'
+					and ltunnus		= '$tunnus'
+					and tilino  	= '$yhtiorow[alv]'
+					and korjattu 	= ''";
 		$alvires = mysql_query($query) or pupe_error($query);
 		$alvirow = mysql_fetch_array($alvires);
-
+				
 		//Ostoreskontralaskun veroton arvo
-		$vientisumma = $trow["summa"] - $alvirow["summa"];
+		$vientisumma = round($trow["summa"]*$trow["vienti_kurssi"],2) - $alvirow["summa"];
 
-		$query = "INSERT into tiliointi set
-					yhtio = '$kukarow[yhtio]',
-					ltunnus = '$tunnus',
-					tilino = '$vientitili',
-					kustp = '',
-					tapvm = '$trow[tapvm]',
-					summa = $vientisumma,
-					vero = '',
-					lukko = '',
-					tosite = '$tiliointirow[tosite]',
-					laatija = '$kukarow[kuka]',
-					laadittu = now()";
+		$query = "	INSERT into tiliointi set
+					yhtio 		= '$kukarow[yhtio]',
+					ltunnus 	= '$tunnus',
+					tilino 		= '$vientitili',
+					kustp 		= '',
+					tapvm 		= '$trow[tapvm]',
+					summa 		= $vientisumma,
+					vero 		= '',
+					lukko 		= '',
+					tosite 		= '$tiliointirow[tosite]',
+					laatija 	= '$kukarow[kuka]',
+					laadittu 	= now()";
 		$xresult = mysql_query($query) or pupe_error($query);
 	}
 

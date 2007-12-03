@@ -30,15 +30,15 @@ if ($kohok == 1 and $lisok == 1 and $sarjanrook == 1 and $varok == 1) {
 		if ($tee == "eitullia") {
 			//merkataan ne rivit joille ei pidä laskea tullia
 			$query = "	UPDATE tilausrivi
-						SET var=''
-						WHERE uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'";
+						SET var = ''
+						WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]'";
 			$varresult = mysql_query($query) or pupe_error($query);
 
 			if (count($eitullia) > 0) {
 				foreach($eitullia as $eitul) {
 					$query = "	UPDATE tilausrivi
-								SET var='T'
-								WHERE tunnus='$eitul' and uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'";
+								SET var = 'T'
+								WHERE tunnus = '$eitul' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]'";
 					$varresult = mysql_query($query) or pupe_error($query);
 				}
 			}

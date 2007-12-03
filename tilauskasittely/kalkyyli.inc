@@ -30,15 +30,15 @@ if ($sarjanrook == 1 and $varok == 1) {
 		if ($tee == "eitullia") {
 			//merkataan ne rivit joille ei pidä laskea tullia
 			$query = "	UPDATE tilausrivi
-						SET var='', netto='X'
-						WHERE uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'";
+						SET var = '', netto = 'X'
+						WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
 			$varresult = mysql_query($query) or pupe_error($query);
 
 			if (count($eitullia) > 0) {
 				foreach($eitullia as $eitul) {
 					$query = "	UPDATE tilausrivi
-								SET var='T'
-								WHERE tunnus='$eitul' and uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'";
+								SET var = 'T'
+								WHERE tunnus = '$eitul' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
 					$varresult = mysql_query($query) or pupe_error($query);
 				}
 			}
@@ -46,8 +46,8 @@ if ($sarjanrook == 1 and $varok == 1) {
 			if (count($varastoonko) > 0) {
 				foreach($varastoonko as $varas) {
 					$query = "	UPDATE tilausrivi
-								SET netto=''
-								WHERE tunnus='$varas' and uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'";
+								SET netto = ''
+								WHERE tunnus = '$varas' and uusiotunnus = '$laskurow[tunnus]' and yhtio = '$kukarow[yhtio]' and kpl = 0";
 					$varresult = mysql_query($query) or pupe_error($query);
 				}
 			}

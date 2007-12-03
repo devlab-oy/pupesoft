@@ -424,8 +424,6 @@
 
 		}
 		
-		echo $laskurow["h1time"]."<br>";
-
 		// Kuka hyväksyi??
 		if ($laskurow['hyvaksyja_nyt'] == $laskurow['hyvak1'] and $laskurow["h1time"]=="0000-00-00 00:00:00") {
 			$kentta = "h1time";
@@ -520,7 +518,7 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 
-		echo "'$laskurow[hyvaksyja_nyt]' ".t("hyväksyi laskun")." $viesti<br><br>";
+		echo "<br><font class='message'>'$laskurow[hyvaksyja_nyt]' ".t("hyväksyi laskun")." $viesti</font><br><br>";
 
 		$tunnus = '';
 		$tee = '';

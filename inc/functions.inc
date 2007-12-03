@@ -162,8 +162,12 @@ if (!function_exists("maa")) {
 		if($kieli=="") {
 			$kieli = $GLOBALS["kieli"];
 		}
-
-		return ucfirst(mb_strtolower(substr(t($maa['nimi'], $kieli), 5)));
+		if(function_exists("mb_strtolower")) {
+			return ucfirst(mb_strtolower(substr(t($maa['nimi'], $kieli), 5)));
+		}
+		else {
+			return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
+		}
 	}
 }
 
@@ -182,7 +186,6 @@ if (!function_exists("alias")) {
 			$aliasrow = mysql_fetch_array($aliasresult);
 
 			$stringi = $aliasrow['selitetark'];
-
 		}
 
 		$stringi = t($stringi);

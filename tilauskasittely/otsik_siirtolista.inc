@@ -1,5 +1,60 @@
 <?php
 
+	$query = "	SELECT DISTINCT maa
+				FROM varastopaikat
+				WHERE tunnus IN ('$varasto', '$clearing')
+				LIMIT 10";
+	$result = mysql_query($query) or pupe_error($query);
+
+	while ($maarow = mysql_fetch_array($result)) {
+		$maat[] = $maarow['maa'];
+	}
+	
+	if ($maat[0] != $maat[1]) {
+
+		$maa_lahetys = $maat[0];
+		$maa_maara = $maat[1];
+
+		if ($maa_lahetys == $yhtiorow["maa"] and $maa_maara != $yhtiorow["maa"]) {
+			$ultilno = "-1"; // miinus yks tarkoittaa, että lisätiedot pitää syöttää ja VIENTI-intrastat pitää lähettää
+		}
+		elseif ($maa_maara == $yhtiorow["maa"] and $maa_lahetys != $yhtiorow["maa"]) {
+			$ultilno = "-2"; // miinus kaks tarkoittaa, että lisätiedot pitää syöttää ja TUONTI-intrastat pitää lähettää
+		}
+		else {
+			$ultilno = "";
+		}
+		
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE tunnus = $clearing AND yhtio ='$kukarow[yhtio]'";
+
+		$result_intra = mysql_query($query) or pupe_error($query);
+		
+		$intrarow = mysql_fetch_array($result_intra);
+
+		$query = "	UPDATE lasku
+					SET maa_maara = '$intrarow[maa_maara]',
+					maa_lahetys = '$varasto',
+					kauppatapahtuman_luonne = '$intrarow[kauppatapahtuman_luonne]',
+					kuljetusmuoto = '$intrarow[kuljetusmuoto]',
+					sisamaan_kuljetus = '$intrarow[sisamaan_kuljetus]',
+					sisamaan_kuljetusmuoto  = '$intrarow[sisamaan_kuljetusmuoto]',
+					sisamaan_kuljetus_kansallisuus = '$intrarow[sisamaan_kuljetus_kansallisuus]',
+					kontti  = '$intrarow[kontti]',
+					aktiivinen_kuljetus = '$intrarow[aktiivinen_kuljetus]',
+					aktiivinen_kuljetus_kansallisuus = '$intrarow[aktiivinen_kuljetus_kansallisuus]',
+					poistumistoimipaikka = '$intrarow[poistumistoimipaikka]',
+					poistumistoimipaikka_koodi = '$intrarow[poistumistoimipaikka_koodi]',
+					bruttopaino = '$intrarow[bruttopaino]',
+					lisattava_era = '$intrarow[lisattava_era]',
+					vahennettava_era = '$intrarow[vahennettava_era]',
+					ultilno = '$ultilno'
+					WHERE tunnus = $tilausnumero and yhtio='$kukarow[yhtio]'";
+
+		$result = mysql_query($query) or pupe_error($query);
+	}
+
 	//tässä joko tehdään uutta otsikkoa tai muutetaan olemassa olevaa
 	if ($tee == '' or $kopioitava_otsikko != 0) {
 		//päivitetään kukarow[kesken] kun käyttäjä tekee uutta tilausta
@@ -13,7 +68,7 @@
 			$tilausnumero 		= 0;
 		}
 	}
-
+	
 	//katsotaan että kukarow kesken ja $tilausnumero stemmaavat keskenään
 	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 		echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("Käy aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";

@@ -2554,7 +2554,7 @@ if ($tee == '') {
 	}
 
 	//Syöttörivi
-	if ($muokkauslukko == "" and ($toim != 'PROJEKTI' or $rivitunnus != 0)) {
+	if ($muokkauslukko == "" and (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS")) or $rivitunnus != 0)) {
 		if (file_exists("myyntimenu.inc")) {
 
 			/*

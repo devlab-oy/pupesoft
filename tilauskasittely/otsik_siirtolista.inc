@@ -1,5 +1,5 @@
 <?php
-
+	/*
 	$query = "	SELECT DISTINCT maa
 				FROM varastopaikat
 				WHERE tunnus IN ('$varasto', '$clearing')
@@ -68,6 +68,7 @@
 			$tilausnumero 		= 0;
 		}
 	}
+	*/
 	
 	//katsotaan että kukarow kesken ja $tilausnumero stemmaavat keskenään
 	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {

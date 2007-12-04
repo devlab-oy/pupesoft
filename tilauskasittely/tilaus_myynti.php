@@ -2554,8 +2554,8 @@ if ($tee == '') {
 	}
 
 	//Syöttörivi
-	if ($muokkauslukko == "" and (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS")) or $rivitunnus != 0)) {
-		if (file_exists("myyntimenu.inc")) {
+	if ($muokkauslukko == "" and ($toim != "PROJEKTI" or $rivitunnus != 0)) {
+		if (file_exists("myyntimenu.inc") and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS"))) {
 
 			/*
 				Customoidut menuratkaisut onnistuu nyt myyntimenu.inc tiedostolla

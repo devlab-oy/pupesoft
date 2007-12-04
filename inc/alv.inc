@@ -214,34 +214,28 @@
 		}
 		echo "</table><br><br>";
 
+		
 		if ($ruotsi != 'on') {
-			$query = "	SELECT vero, tiliointi.tilino, nimi, round(sum(summa * (1+vero/100)),2) Bruttosumma,
-						round(sum(summa * vero / 100),2) Verot, count(*) Kpl
-						FROM tiliointi
-						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and
-						tiliointi.korjattu = '' and
-						tiliointi.tapvm >= '$alvv-$alvk-01' and
-						tiliointi.tapvm < '$alloppu' and
-						vero > 0
-						GROUP BY vero, tiliointi.tilino
-						ORDER BY vero, tiliointi.tilino";
+			$verolisa = " tiliointi.vero ";
 		}
 		else {
-			$query = "	SELECT concat_ws(' ',vero, if(lasku.tila='U','".t("ulos")."','".t("sisään")."')) vero, tiliointi.tilino, tili.nimi,
-						round(sum(tiliointi.summa * (1+vero/100)),2) Bruttosumma,
-						round(sum(tiliointi.summa * vero / 100),2) Verot, count(*) Kpl
-						FROM tiliointi
-						JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
-						LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
-						WHERE tiliointi.yhtio = '$kukarow[yhtio]' and 
-						tiliointi.korjattu = '' and
-						tiliointi.tapvm >= '$alvv-$alvk-01' and
-						tiliointi.tapvm < '$alloppu' and
-						tiliointi.vero > 0 and
-						GROUP BY vero, tiliointi.tilino
-						ORDER BY vero, tiliointi.tilino";
+			$verolisa = " concat_ws(' ',vero, if(lasku.tila='U','".t("ulos")."','".t("sisään")."')) vero ";
 		}
+		
+		$query = "	SELECT $verolisa, tiliointi.tilino, tili.nimi, 
+					round(sum(tiliointi.summa * (1+tiliointi.vero/100)),2) Bruttosumma,
+					round(sum(tiliointi.summa * tiliointi.vero/100),2) Verot, 
+					count(*) Kpl
+					FROM tiliointi
+					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
+					LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+					and tiliointi.korjattu = ''
+					and tiliointi.tapvm >= '$alvv-$alvk-01'
+					and tiliointi.tapvm < '$alloppu'
+					and tiliointi.vero 	> 0
+					GROUP BY tiliointi.vero, tiliointi.tilino
+					ORDER BY tiliointi.vero, tiliointi.tilino";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<table><tr>";
@@ -287,82 +281,76 @@
 			echo "</tr>";
 		}
 		$verotot += $verosum;
-		$kpltot += $kplsum;
-		echo "<td></td><td></td><td></td><td></td>
-				<td align = 'right'>$verosum</td>
-				<td align = 'right'>$kplsum</td></tr><tr>";
-		echo "<td></td><td></td><td></td><td></td>
-				<td align = 'right'>$verotot</td>
-				<td align = 'right'>$kpltot</td></tr>";
+		$kpltot  += $kplsum;
+		echo "<td></td><td></td><td></td><td></td><td align = 'right'>$verosum</td><td align = 'right'>$kplsum</td></tr><tr>";
+		echo "<td></td><td></td><td></td><td></td><td align = 'right'>$verotot</td><td align = 'right'>$kpltot</td></tr>";
 		echo "</table><br>";
 		
 		unset($edvero);
 		$verosum = 0;
-		$kplsum = 0;
+		$kplsum  = 0;
 		
-		
-		$query = "	SELECT vero, tiliointi.tilino, tili.nimi,
-					round(sum((tiliointi.summa / laskulx.vienti_kurssi) * (1+vero/100)),2) Bruttosumma,
-					round(sum((tiliointi.summa / laskulx.vienti_kurssi) * vero / 100),2) Verot, count(*) Kpl, lasku.valkoodi
+		// Erikseen vielä laskujen valuutassa
+		$query = "	SELECT $verolisa, tiliointi.tilino, tili.nimi,
+					round(sum((tiliointi.summa/if(lasku.tila='U', (select avg(vienti_kurssi) from lasku lx where lx.yhtio=lasku.yhtio and lx.laskunro=lasku.laskunro and lx.tila='L' and lx.alatila='X'), if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi))) * (1+vero/100)),2) Bruttosumma,
+					round(sum((tiliointi.summa/if(lasku.tila='U', (select avg(vienti_kurssi) from lasku lx where lx.yhtio=lasku.yhtio and lx.laskunro=lasku.laskunro and lx.tila='L' and lx.alatila='X'), if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi))) * vero/100),2) Verot, count(*) Kpl, 
+					lasku.valkoodi
 					FROM tiliointi
-					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.valkoodi != '$yhtiorow[valkoodi]' and lasku.tila = 'U')
-					JOIN lasku as laskulx ON (laskulx.yhtio = lasku.yhtio and laskulx.laskunro = lasku.laskunro and laskulx.tila = 'L' and laskulx.alatila = 'X')
+					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.valkoodi != '$yhtiorow[valkoodi]' and lasku.valkoodi!='')
 					LEFT JOIN tili ON (tili.yhtio = tiliointi.yhtio and tiliointi.tilino = tili.tilino)
-					WHERE tiliointi.yhtio = '$kukarow[yhtio]' and 
-					tiliointi.korjattu = '' and
-					tiliointi.tapvm >= '$alvv-$alvk-01' and
-					tiliointi.tapvm < '$alloppu' and
-					tiliointi.vero > 0
-					GROUP BY valkoodi, vero, tiliointi.tilino
-					ORDER BY valkoodi, vero, tiliointi.tilino";
-		
-			$result = mysql_query($query) or pupe_error($query);
+					WHERE tiliointi.yhtio = '$kukarow[yhtio]'
+					and tiliointi.korjattu = ''
+					and tiliointi.tapvm >= '$alvv-$alvk-01'
+					and tiliointi.tapvm < '$alloppu'
+					and tiliointi.vero 	> 0
+					GROUP BY tiliointi.vero, tiliointi.tilino
+					ORDER BY tiliointi.vero, tiliointi.tilino";
+		$result = mysql_query($query) or pupe_error($query);
 
-			echo "<table><tr>";
-			for ($i = 0; $i < mysql_num_fields($result); $i++) {
-				echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
-			}
-			while ($trow=mysql_fetch_array ($result)) {
-				echo "<tr>";
-				for ($i = 0; $i<mysql_num_fields($result); $i++) {
-					if ($i == 0) { // Rivin alussa tehtävät jutut
-						if ($edvero ==  $trow[$i]) { // Vaihtuiko verokanta?
-							$trow[$i] = "";
-						}
-						else {
-							if (isset($edvero)) { // Ei summaa listan alkuun!
-								echo "<td></td><td></td><td></td><td></td>
-									  <td align = 'right'>$verosum</td>
-									  <td align = 'right'>$kplsum</td><td></td></tr><tr>";
-								$verosum = 0;
-								$kplsum = 0;
-							}
-							$edvero = $trow[$i];
-						}
-					}
-					if ($i > 2) {
-						echo "<td align = 'right'>";
-						if ($i > 4) {
-							echo $trow[$i];
-						}
-						else {
-							printf("%.2f", $trow[$i]);
-						}
-						echo "</td>";
+		echo "<table><tr>";
+		for ($i = 0; $i < mysql_num_fields($result); $i++) {
+			echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
+		}
+		while ($trow=mysql_fetch_array ($result)) {
+			echo "<tr>";
+			for ($i = 0; $i<mysql_num_fields($result); $i++) {
+				if ($i == 0) { // Rivin alussa tehtävät jutut
+					if ($edvero ==  $trow[$i]) { // Vaihtuiko verokanta?
+						$trow[$i] = "";
 					}
 					else {
-						echo "<td>$trow[$i]</td>";
+						if (isset($edvero)) { // Ei summaa listan alkuun!
+							echo "<td></td><td></td><td></td><td></td>
+								  <td align = 'right'>$verosum</td>
+								  <td align = 'right'>$kplsum</td><td></td></tr><tr>";
+							$verosum = 0;
+							$kplsum = 0;
+						}
+						$edvero = $trow[$i];
 					}
 				}
-				$verosum += $trow['Verot'];
-				$kplsum += $trow['Kpl'];
-				echo "</tr>";
+				if ($i > 2) {
+					echo "<td align = 'right'>";
+					if ($i > 4) {
+						echo $trow[$i];
+					}
+					else {
+						printf("%.2f", $trow[$i]);
+					}
+					echo "</td>";
+				}
+				else {
+					echo "<td>$trow[$i]</td>";
+				}
 			}
-			echo "<td></td><td></td><td></td><td></td>
-					<td align = 'right'>$verosum</td>
-					<td align = 'right'>$kplsum</td><td></td></tr>";
-			echo "</table><br>";
+			$verosum += $trow['Verot'];
+			$kplsum += $trow['Kpl'];
+			
+			echo "</tr>";
 		}
+		echo "<td></td><td></td><td></td><td></td><td align = 'right'>$verosum</td><td align = 'right'>$kplsum</td><td></td></tr>";
+		echo "</table><br>";
+	}
 
 	if ($tee == '2') {
 		echo "<font class='head'>".t("Alv-tarkistus kaudelta")." $alvv-$alvk</font><hr>";

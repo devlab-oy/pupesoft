@@ -35,6 +35,7 @@
 
 		if ($komento != "") {
 			$kirjoitin_tunnus = $komento; // jos ollaan valittu oma printteri
+			
 		}
 		elseif ($avainrow["selitetark_2"] == "1") {
 			$kirjoitin_tunnus = $print["printteri6"]; // Rahtikirja A4
@@ -506,12 +507,27 @@
 						where yhtio='$kukarow[yhtio]'
 						ORDER BY kirjoitin";
 			$kires = mysql_query($query) or pupe_error($query);
-
+			
+			
+			
 			while ($kirow = mysql_fetch_array($kires)) {
 				echo "<option id='K$kirow[tunnus]' value='$kirow[komento]' ".$sel[$kirow["tunnus"]].">$kirow[kirjoitin]</option>";
 			}
 
 			echo "</select></td></tr>";
+			
+			echo "<tr><td>".t("Valitse tulostin").":</td>";
+			echo "<td><select name='komento'>";
+			echo "<option value='' SELECTED>".t("Oletustulostimelle")."</option>";
+			
+			mysql_data_seek($kires, 0);			
+			
+			while ($kirow = mysql_fetch_array($kires)) {
+				echo "<option id='K$kirow[tunnus]' value='$kirow[tunnus]'>$kirow[kirjoitin]</option>";
+			}
+			
+			echo "</select></td></tr>";
+			
 			echo "</table><br>";
 			echo "<input type='submit' value='".t("Tulosta rahtikirjat")."'>";
 			echo "</form>";

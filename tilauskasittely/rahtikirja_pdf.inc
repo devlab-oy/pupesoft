@@ -567,15 +567,17 @@
 	if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 	fclose($fh);
 	
+	if ($kirjoitin == "email") {
+		$liite = $pdffilenimi;
+		$kutsu = "PDF-rahtikirja";
+		require("inc/sahkoposti.inc");
 	
-	//testaukseen voi myös laittaa sähköpostiin
-	//	$liite = $pdffilenimi;
-	//	$kutsu = "PDF-rahtikirja";
-	//	require("inc/sahkoposti.inc");
-	
-
-	//itse print komento...
-	$line = exec("$kirjoitin $pdffilenimi");
+	}
+	else {
+		//itse print komento...
+		$line = exec("$kirjoitin $pdffilenimi");
+	}
+		
     
 	system("rm -f $pdffilenimi");
 

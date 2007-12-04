@@ -61,7 +61,7 @@
 		$pres  = mysql_query($query) or pupe_error($query);
 		$print = mysql_fetch_array($pres);
 
-		$kirjoitin = $print['komento'];
+		$kirjoitin = $print['komento'];		
 		$merkisto  = $print['merkisto'];
 		$pvm       = date("j.n.Y");
 

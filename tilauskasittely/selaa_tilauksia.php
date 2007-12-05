@@ -46,9 +46,19 @@
 	$npk = date("m",mktime(0, 0, 0, $kk, $pp+1, $vv));
 	$npp = date("d",mktime(0, 0, 0, $kk, $pp+1, $vv));
 
-	$etsi='';
-	if (is_string($haku))  $etsi = "and (lasku.nimi LIKE '%$haku%' or lasku.toim_nimi LIKE '%$haku%') ";
-	if (is_numeric($haku)) $etsi = "and lasku.ytunnus LIKE '%$haku%'";
+	$etsi = '';
+
+	if (is_string($haku)) {		
+		$etsi = "and (lasku.nimi LIKE '%$haku%' or lasku.toim_nimi LIKE '%$haku%') ";
+	}
+	
+	if (is_numeric($haku)) {
+		$etsi = "and lasku.ytunnus LIKE '%$haku%' ";
+	}
+	
+	if ($keikkanrohaku != '' and $toim == 'KEIKKA' and is_numeric($keikkanrohaku)) {
+		$etsi = "and lasku.laskunro = $keikkanrohaku ";
+	}
 
 	// tässä myyntitilausten queryt
 	if ($toim == "MYYNTI") {
@@ -75,8 +85,8 @@
 					FROM lasku use index (yhtio_tila_luontiaika)
 					JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
-					tila in ('L') and
-					luontiaika >= '$vv-$kk-$pp 00:00:00' and
+					tila in ('L') and 
+					luontiaika >= '$vv-$kk-$pp 00:00:00' and 
 					luontiaika <= '$vv-$kk-$pp 23:59:59'
 					$etsi
 					GROUP BY lasku.tunnus
@@ -156,12 +166,13 @@
 					JOIN tilausrivi use index (uusiotunnus_index) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and
 					tila in ('K') and
-					vanhatunnus = 0 and
-					luontiaika >= '$vv-$kk-$pp 00:00:00' and
-					luontiaika <= '$vv-$kk-$pp 23:59:59'
-					$etsi
+					vanhatunnus = 0 ";
+					if (!isset($keikkanrohaku)) {
+						$query2 .= " and luontiaika >= '$vv-$kk-$pp 00:00:00' and luontiaika <= '$vv-$kk-$pp 23:59:59' ";
+					}
+		$query2 .= "$etsi
 					GROUP BY lasku.tunnus
-					ORDER BY luontiaika";
+					ORDER BY lasku.laskunro";
 
 		// tilausnäkymä
 		$query3 = "	SELECT lasku.laskunro keikka, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, tilausrivi.hinta,
@@ -274,26 +285,26 @@
 
 	if ($tee == "paiva") {
 		$result = mysql_query($query2) or pupe_error($query2);
-		echo "<a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$epv&kk=$epk&pp=$epp&haku=$haku'>".t("Edellinen päivä")."</a> - <a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$npv&kk=$npk&pp=$npp&haku=$haku'>".t("Seuraava päivä")."</a>";
-		echo " - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk&haku=$haku>".t("Kuukausinäkymä")."</a>";
+		echo "<a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$epv&kk=$epk&pp=$epp&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Edellinen päivä")."</a> - <a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$npv&kk=$npk&pp=$npp&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Seuraava päivä")."</a>";
+		echo " - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Kuukausinäkymä")."</a>";
 		echo "<br><br>";
 		//echo "$query2<br><br>";
 	}
 	elseif ($tee == "kk") {
 		$result = mysql_query($query1) or pupe_error($query1);
-		echo "<a href='$PHP_SELF?toim=$toim&tee=kk&vv=$ekv&kk=$ekk&pp=$ekp&haku=$haku'>".t("Edellinen kuukausi")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$nkv&kk=$nkk&pp=$nkp&haku=$haku'>".t("Seuraava kuukausi")."</a>";
+		echo "<a href='$PHP_SELF?toim=$toim&tee=kk&vv=$ekv&kk=$ekk&pp=$ekp&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Edellinen kuukausi")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$nkv&kk=$nkk&pp=$nkp&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Seuraava kuukausi")."</a>";
 		echo "<br><br>";
 		//echo "$query1<br><br>";
 	}
 	elseif ($tee == "tilaus") {
 		$result = mysql_query($query3) or pupe_error($query3);
-		echo "<a href=$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp>".t("Päivänäkymä")."</a> - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
+		echo "<a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp'>".t("Päivänäkymä")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk'>".t("Kuukausinäkymä")."</a>";
 		echo "<br><br>";
 		//echo "$query3<br><br>";
 	}
 	elseif ($tee == 'tilhaku' and $toim == 'KEIKKA') {
 		$result = mysql_query($query4) or pupe_error($query4);
-		echo "<a href=$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp>".t("Päivänäkymä")."</a> - <a href=$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk>".t("Kuukausinäkymä")."</a>";
+		echo "<a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp'>".t("Päivänäkymä")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk'>".t("Kuukausinäkymä")."</a>";
 		echo "<br><br>";
 		//echo "$query4<br><br>";
 	}
@@ -312,11 +323,13 @@
 
 		echo "<table>";
 		echo "<tr>";
-		echo "<th>".t("Hae nimellä tai numerolla").":</th>";
+		echo "<th>".t("Hae asiakkaan nimellä tai numerolla").":</th>";
 		echo "<td><input type='text' name='haku' value='$haku'></td>";
 		if ($toim == "KEIKKA") {
 			echo "</tr>";
-			echo "<tr>";
+			echo "<tr><th>".t("Hae keikkanumerolla").":</th>";
+			echo "<td><input type='text' name='keikkanrohaku' value='$keikkanrohaku'></td>";
+			echo "</tr><tr>";
 			echo "<th>".t("Hae tilausnumerolla").":</th>";
 			echo "<td><input type='text' name='tilhaku' value='$tilhaku'></td>";
 		}
@@ -389,6 +402,7 @@
 				echo "<input type='hidden' name='tunnus' value='$row[tunnus]'>";
 				echo "<input type='hidden' name='haku' value='$haku'>";
 				echo "<input type='hidden' name='tilhaku' value='$tilhaku'>";
+				echo "<input type='hidden' name='keikkanrohaku' value='$keikkanrohaku'>";
 				echo "<td class='back'><input type='submit' value='".t("Näytä")."'></td>";
 				echo "</form>";
 			}

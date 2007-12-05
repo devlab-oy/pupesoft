@@ -2554,7 +2554,7 @@ if ($tee == '') {
 	}
 
 	//Syöttörivi
-	if ($muokkauslukko == "" and ($toim != "PROJEKTI" or $rivitunnus != 0)) {
+	if ($muokkauslukko == "" and ($toim != "PROJEKTI" or $rivitunnus != 0) or $toim == "YLLAPITO") {
 		if (file_exists("myyntimenu.inc") and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TARJOUS"))) {
 
 			/*
@@ -3725,7 +3725,7 @@ if ($tee == '') {
 				$varaosavirhe = "";
 				$varaosakommentti = "";
 
-				if ($muokkauslukko == "" and $muokkauslukko_rivi == "") {
+				if (($muokkauslukko == "" and $muokkauslukko_rivi == "") or $toim == "YLLAPITO") {
 					echo "<form action='$PHP_SELF' method='post' name='muokkaa'>
 							<input type='hidden' name='toim' 			value = '$toim'>
 							<input type='hidden' name='lopetus' 		value = '$lopetus'>

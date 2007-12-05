@@ -5,7 +5,7 @@
 	}
 
 	if ($tee != '') {
-		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE";
+		$query  = "LOCK TABLE tuotepaikat WRITE, tapahtuma WRITE, sanakirja WRITE, tilausrivin_lisatiedot WRITE, tuote READ, varastopaikat READ, tilausrivi READ, tilausrivi as tilausrivi_osto READ, sarjanumeroseuranta WRITE";
 		$result = mysql_query($query) or pupe_error($query);
 	}
 
@@ -46,8 +46,7 @@
 			$tee		='Y';
 		}
 	}
-	
-	
+		
 	// Itse varastopaikkoja muutellaan
 	if ($tee == 'MUUTA') {
 		$query = "	SELECT tunnus
@@ -177,7 +176,6 @@
 		$tee = 'M';
 	}
 
-
 	// Siirretään saldo, jos se on vielä olemassa
 	if ($tee == 'N') { 
 		if ($mista == $minne) {
@@ -282,25 +280,31 @@
 					$ostorow = mysql_fetch_array($sarjares);
 
 					// Haetaan muut lisävarusteet
-					$query = "	SELECT tuoteno, round(kpl/$ostorow[kpl]) kpl, round(tilkpl/$ostorow[kpl]) tilkpl, tilkpl sistyomaarayskpl, var, tyyppi, concat_ws('#', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka
-								FROM tilausrivi 
-								WHERE yhtio  = '$kukarow[yhtio]' 
-								and perheid2 = '$sarjarow[perheid2]'
-								and tyyppi  != 'D'
-								and tunnus  != '$sarjarow[perheid2]'
-								and perheid2!= 0";
+					$query = "	SELECT tilausrivi.tuoteno, round(tilausrivi.kpl/$ostorow[kpl]) kpl, round(tilausrivi.tilkpl/$ostorow[kpl]) tilkpl, tilausrivi.tilkpl sistyomaarayskpl, 
+								tilausrivi.var, tilausrivi.tyyppi, concat_ws('#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+								if(tuote.sarjanumeroseuranta='S', tilausrivin_lisatiedot.sistyomaarays_sarjatunnus, 0) sarjatunnus
+								FROM tilausrivi
+								JOIN tuote ON tilausrivi.tuoteno=tuote.tuoteno and tilausrivi.yhtio=tuote.yhtio
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+								WHERE tilausrivi.yhtio  = '$kukarow[yhtio]' 
+								and tilausrivi.perheid2 = '$sarjarow[perheid2]'
+								and tilausrivi.tyyppi  != 'D'
+								and tilausrivi.tunnus  != '$sarjarow[perheid2]'
+								and tilausrivi.perheid2!= 0";
 					$sarjares = mysql_query($query) or pupe_error($query);
-					
+										
 					while ($lisavarrow = mysql_fetch_array($sarjares)) {
 						if ($lisavarrow["tyyppi"] == 'G' and $lisavarrow["sistyomaarayskpl"] > 0) {
 							$tuotteet[]	 	= $lisavarrow["tuoteno"];
 							$kappaleet[] 	= $lisavarrow["sistyomaarayskpl"];
 							$lisavaruste[]	= "LISAVARUSTE";
+							$lisavar_sarj[]	= $lisavarrow["sarjatunnus"];
 						}
 						elseif ($lisavarrow["var"] != 'P' and $lisavarrow["kpl"] > 0) {
 							$tuotteet[]	 	= $lisavarrow["tuoteno"];
 							$kappaleet[] 	= $lisavarrow["kpl"];
 							$lisavaruste[]	= "LISAVARUSTE";
+							$lisavar_sarj[]	= $lisavarrow["sarjatunnus"];
 						}
 					}
 				}
@@ -349,8 +353,7 @@
 					$saldook++;
 				}
 			}
-			
-			
+						
 			if ($saldook == 0) { 
 				for($iii=0; $iii< count($tuotteet); $iii++) {						
 					$query = "	SELECT *
@@ -483,10 +486,12 @@
 						laatija 	= '$kukarow[kuka]',
 						laadittu 	= now()";
 			$result = mysql_query($query) or pupe_error($query);
-			
-			// Päivitetään sarjanumerot
-			if (mysql_num_rows($sarjaresult) > 0) {
-				foreach($sarjano_array as $sarjano) {
+		}
+		
+		//Päivitetään sarjanumerot
+		if (mysql_num_rows($sarjaresult) > 0) {
+			foreach($sarjano_array as $sarjano) {
+				if ($sarjano > 0) {
 					$query = "	UPDATE sarjanumeroseuranta 
 								set hyllyalue	= '$minnerow[hyllyalue]',
 								hyllynro 		= '$minnerow[hyllynro]',
@@ -494,28 +499,27 @@
 								hyllytaso		= '$minnerow[hyllytaso]',
 								muuttaja		= '$kukarow[kuka]', 
 								muutospvm		= now()
-								WHERE tuoteno 	= '$tuotteet[$iii]' 
-								and yhtio 		= '$kukarow[yhtio]' 
-								and tunnus		= '$sarjano'";
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and tunnus='$sarjano'";
 					$result = mysql_query($query) or pupe_error($query);
 				}
 			}
 		}
-		
-		//Päivitetään sarjanumerot
-		if (mysql_num_rows($sarjaresult) > 0) {
-			foreach($sarjano_array as $sarjano) {
-				$query = "	UPDATE sarjanumeroseuranta 
-							set hyllyalue	= '$minnerow[hyllyalue]',
-							hyllynro 		= '$minnerow[hyllynro]',
-							hyllyvali 		= '$minnerow[hyllyvali]',
-							hyllytaso		= '$minnerow[hyllytaso]',
-							muuttaja		= '$kukarow[kuka]', 
-							muutospvm		= now()
-							WHERE tuoteno = '$tuotteet[$iii]' 
-							and yhtio = '$kukarow[yhtio]' 
-							and tunnus='$sarjano'";
-				$result = mysql_query($query) or pupe_error($query);
+		// Päivitetään lisävausteiden sarjanumerot
+		if (count($lisavar_sarj) > 0) {
+			foreach($lisavar_sarj as $sarjano) {
+				if ($sarjano > 0) {
+					$query = "	UPDATE sarjanumeroseuranta 
+								set hyllyalue	= '$minnerow[hyllyalue]',
+								hyllynro 		= '$minnerow[hyllynro]',
+								hyllyvali 		= '$minnerow[hyllyvali]',
+								hyllytaso		= '$minnerow[hyllytaso]',
+								muuttaja		= '$kukarow[kuka]', 
+								muutospvm		= now()
+								WHERE yhtio		= '$kukarow[yhtio]' 
+								and tunnus		= '$sarjano'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
 			}
 		}
 		

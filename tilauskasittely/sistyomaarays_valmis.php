@@ -26,7 +26,7 @@
 		}
 		else {
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tilausrivi WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE";
+			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tilausrivi WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE";
 			$locre = mysql_query($query) or pupe_error($query);
 			
 			$query = "	SELECT *
@@ -35,15 +35,41 @@
 			$result = mysql_query($query) or pupe_error($query);
 		
 			if (mysql_num_rows($result) == 1) {				
+				//Haetaan jatkojalostettavat tuotteet
+				$query    = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta
+								FROM tilausrivi use index (yhtio_otunnus)
+								JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno	and tuote.sarjanumeroseuranta != ''						
+								WHERE tilausrivi.yhtio='$kukarow[yhtio]'
+								and tilausrivi.otunnus='$tilausnumero'";
+				$jres = mysql_query($query) or pupe_error($query);
+
+				while($srow1 = mysql_fetch_array($jres)) {
+					$query = "	SELECT count(distinct sarjanumero) kpl
+								FROM sarjanumeroseuranta
+								WHERE yhtio 			= '$kukarow[yhtio]'
+								and tuoteno 			= '$srow1[tuoteno]'
+								and siirtorivitunnus 	= '$srow1[tunnus]'";
+					$sarjares2 = mysql_query($query) or pupe_error($query);
+					$srow2 = mysql_fetch_array($sarjares2);
+
+					if ($srow2["kpl"] != abs($srow1["varattu"])) {
+						echo t("Tilaukselta puuttuu sarjanumeroita, ei voida merkata valmiiksi").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
+						
+						require ("../inc/footer.inc");
+						exit;
+					}
+				}
+
 				$query = "	UPDATE lasku
 							SET alatila = 'X'
 							WHERE yhtio = '$kukarow[yhtio]' and alatila='C' and tila = 'S' and tunnus = '$tilausnumero'";
 				$result = mysql_query($query) or pupe_error($query);
 				
 				//Haetaan jatkojalostettavat tuotteet
-				$query    = "	SELECT tilausrivi.tunnus, tilausrivi.varattu varattu, tilausrivi.tuoteno
+				$query    = "	SELECT tilausrivi.tunnus, tilausrivi.varattu varattu, 
+								tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso
 								FROM tilausrivi use index (yhtio_otunnus)
-								JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+								JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno							
 								WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 								and tilausrivi.otunnus='$tilausnumero'
 								and tilausrivi.perheid2=tilausrivi.tunnus";
@@ -93,8 +119,8 @@
 						
 						$ostohinta = (int) $ostohinta;
 						
-						//Ruuvataan liitetyt lisävarusteet kiinni laitteen alkuperäiseen ostoriviin
-						// Jos lisävauste on sarjanumeroitava, niin sarjanumeron tunnus menee
+						// Ruuvataan liitetyt lisävarusteet kiinni laitteen alkuperäiseen ostoriviin
+						// Jos lisävaruste on sarjanumeroitava, niin sarjanumeron tunnus menee
 						// lisävarusterivin sistyomaarays_sarjatunnus-kentässä
 						$query = "	UPDATE tilausrivi 
 									SET perheid2	= '$sarjarow[ostorivitunnus]', 
@@ -114,17 +140,141 @@
 						$sarjares = mysql_query($query) or pupe_error($query);
 
 						if ($lisarow["ei_saldoa"] == '') {
-							//Varataan lisävarusteen saldoa
-							$query = "	UPDATE tuotepaikat 
-										SET saldo_varattu = saldo_varattu + $lisarow[varattu] 
-										WHERE yhtio		= '$kukarow[yhtio]' 
-										and tuoteno		= '$lisarow[tuoteno]'
-										and hyllyalue 	= '$lisarow[hyllyalue]'
-										and hyllynro  	= '$lisarow[hyllynro]'
-										and hyllyvali 	= '$lisarow[hyllyvali]'
-										and hyllytaso 	= '$lisarow[hyllytaso]'
-										LIMIT 1";
-							$sarjares = mysql_query($query) or pupe_error($query);
+							//Siirretään lisävaruste samaan paikkaan ku isätuote ja varataan lisävarusteen saldoa 						
+							if($lisarow["hyllyalue"] != $srow["hyllyalue"] or $lisarow["hyllynro"] != $srow["hyllynro"] or $lisarow["hyllyvali"] != $srow["hyllyvali"] or $lisarow["hyllytaso"] != $srow["hyllytaso"]) {
+								// Tehdään saldosiirto	
+									
+								// Katsotaan löytyykö jatkojalostettavan tuotteen paikka myös lisävarusteelta
+								$query = "	SELECT *
+											FROM tuotepaikat
+											WHERE tuoteno 	= '$lisarow[tuoteno]' 
+											and yhtio 		= '$kukarow[yhtio]' 
+											and hyllyalue	= '$srow[hyllyalue]'
+											and hyllynro 	= '$srow[hyllynro]'
+											and hyllyvali 	= '$srow[hyllyvali]'
+											and hyllytaso	= '$srow[hyllytaso]'";
+								$sarjares = mysql_query($query) or pupe_error($query);
+
+								if (mysql_num_rows($sarjares) == 0) {
+									// Lisätään tuotepaikkoja
+									$query = "	INSERT INTO tuotepaikat
+												SET tuoteno = '$lisarow[tuoteno]',
+												yhtio 		= '$kukarow[yhtio]',
+												hyllyalue	= '$srow[hyllyalue]',
+												hyllynro 	= '$srow[hyllynro]',
+												hyllyvali 	= '$srow[hyllyvali]',
+												hyllytaso	= '$srow[hyllytaso]'";
+									$sarjares = mysql_query($query) or pupe_error($query);
+									$minne  = mysql_insert_id();
+									
+									$query = "	SELECT *
+												FROM tuotepaikat
+												WHERE tuoteno 	= '$lisarow[tuoteno]' 
+												and yhtio 		= '$kukarow[yhtio]' 
+												and tunnus		= '$minne'";
+									$sarjares = mysql_query($query) or pupe_error($query);
+									$minnerow  = mysql_fetch_array($sarjares);
+									
+									$query = "	INSERT into tapahtuma set
+												yhtio 		= '$kukarow[yhtio]',
+												tuoteno 	= '$lisarow[tuoteno]',
+												kpl 		= '0',
+												kplhinta	= '0',
+												hinta 		= '0',
+												laji 		= 'uusipaikka',
+												selite 		= '".t("Lisättiin tuotepaikka")." $srow[hyllyalue] $srow[hyllynro] $srow[hyllyvali] $srow[hyllytaso]. ".t("Sisäinen työmääräys")."',
+												laatija 	= '$kukarow[kuka]',
+												laadittu 	= now()";
+									$sarjares = mysql_query($query) or pupe_error($query);
+								}
+								else {
+									$minnerow  = mysql_fetch_array($sarjares);
+								}
+								
+								// Vähennetään
+								$query = "	UPDATE tuotepaikat 
+											SET saldo = saldo - $lisarow[varattu]
+											WHERE yhtio		= '$kukarow[yhtio]' 
+											and tuoteno		= '$lisarow[tuoteno]'
+											and hyllyalue 	= '$lisarow[hyllyalue]'
+											and hyllynro  	= '$lisarow[hyllynro]'
+											and hyllyvali 	= '$lisarow[hyllyvali]'
+											and hyllytaso 	= '$lisarow[hyllytaso]'
+											LIMIT 1";
+								$sarjares = mysql_query($query) or pupe_error($query);
+								
+								$query = "	INSERT into tapahtuma set
+											yhtio 		= '$kukarow[yhtio]',
+											tuoteno 	= '$lisarow[tuoteno]',
+											kpl 		= $lisarow[varattu] * -1,
+											hinta 		= '0',
+											laji 		= 'siirto',
+											selite 		= '".t("Paikasta")." $lisarow[hyllyalue] $lisarow[hyllynro] $lisarow[hyllyvali] $lisarow[hyllytaso] ".t("vähennettiin")." $lisarow[varattu]. ".t("Sisäinen työmääräys")."',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+								$sarjares = mysql_query($query) or pupe_error($query);
+								
+								//Lisätään
+								$query = "	UPDATE tuotepaikat 
+											SET saldo = saldo + $lisarow[varattu] 
+											WHERE yhtio		= '$kukarow[yhtio]' 
+											and tuoteno		= '$lisarow[tuoteno]'
+											and hyllyalue 	= '$minnerow[hyllyalue]'
+											and hyllynro  	= '$minnerow[hyllynro]'
+											and hyllyvali 	= '$minnerow[hyllyvali]'
+											and hyllytaso 	= '$minnerow[hyllytaso]'
+											LIMIT 1";
+								$sarjares = mysql_query($query) or pupe_error($query);
+								
+								$query = "	INSERT into tapahtuma set
+											yhtio 		= '$kukarow[yhtio]',
+											tuoteno 	= '$lisarow[tuoteno]',
+											kpl 		= $lisarow[varattu],
+											hinta 		= '0',
+											laji 		= 'siirto',
+											selite 		= '".t("Paikalle")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso] ".t("lisättiin")." $lisarow[varattu]. ".t("Sisäinen työmääräys")."',
+											laatija 	= '$kukarow[kuka]',
+											laadittu 	= now()";
+								$sarjares = mysql_query($query) or pupe_error($query);
+																																
+								// Varataan lisävarusteet
+								$query = "	UPDATE tuotepaikat 
+											SET saldo_varattu = saldo_varattu + $lisarow[varattu] 
+											WHERE yhtio		= '$kukarow[yhtio]' 
+											and tuoteno		= '$lisarow[tuoteno]'
+											and hyllyalue 	= '$minnerow[hyllyalue]'
+											and hyllynro  	= '$minnerow[hyllynro]'
+											and hyllyvali 	= '$minnerow[hyllyvali]'
+											and hyllytaso 	= '$minnerow[hyllytaso]'
+											LIMIT 1";
+								$sarjares = mysql_query($query) or pupe_error($query);															
+							}
+							else {
+								// Varataan lisävarusteet
+								$query = "	UPDATE tuotepaikat 
+											SET saldo_varattu = saldo_varattu + $lisarow[varattu] 
+											WHERE yhtio		= '$kukarow[yhtio]' 
+											and tuoteno		= '$lisarow[tuoteno]'
+											and hyllyalue 	= '$lisarow[hyllyalue]'
+											and hyllynro  	= '$lisarow[hyllynro]'
+											and hyllyvali 	= '$lisarow[hyllyvali]'
+											and hyllytaso 	= '$lisarow[hyllytaso]'
+											LIMIT 1";
+								$sarjares = mysql_query($query) or pupe_error($query);
+							}
+														
+							if ($lisarow["sarjanumeroseuranta"] == "S") {
+								//Päivitetään sarjanumeroiden varastopaikkatiedot
+								$query = "	UPDATE sarjanumeroseuranta 
+											SET hyllyalue	= '$srow[hyllyalue]',
+											hyllynro 		= '$srow[hyllynro]',
+											hyllyvali 		= '$srow[hyllyvali]',
+											hyllytaso		= '$srow[hyllytaso]'
+											WHERE yhtio				= '$kukarow[yhtio]' 
+											and tuoteno				= '$lisarow[tuoteno]' 
+											and siirtorivitunnus	= '$lisarow[rivitunnus]'";
+								$sarjares = mysql_query($query) or pupe_error($query);
+							}													
 						}
 						
 						//Päivitetään varmuuden vuoksi alkuperäisen ostorivin perheid2 (se voi olla nolla)
@@ -137,7 +287,7 @@
 						if ($lisarow["sarjanumeroseuranta"] != '') {
 							//Varataan sarjanumero jatkojalostettavalle tuotteelle
 							$query = "	UPDATE sarjanumeroseuranta 
-										SET siirtorivitunnus = $sarjarow[ostorivitunnus] 
+										SET siirtorivitunnus 	= $sarjarow[ostorivitunnus] 
 										WHERE yhtio				= '$kukarow[yhtio]' 
 										and tuoteno				= '$lisarow[tuoteno]' 
 										and siirtorivitunnus	= '$lisarow[rivitunnus]'";

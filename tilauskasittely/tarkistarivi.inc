@@ -77,6 +77,30 @@
 		$riviok++;
 		$tilausok++;
 	}
+			
+	if ($row["var"] != '' and $toim == "SIIRTOTYOMAARAYS") {
+		$varaosavirhe .= t("VIRHE: Sisäisellä työmääräyksellä Var pitää olla tyhjä!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
+	
+	if (($row["perheid2"] == $row["tunnus"] or $row["perheid2"] == 0) and $row["sarjanumeroseuranta"] == "" and $toim == "SIIRTOTYOMAARAYS") {
+		$varaosavirhe .= t("VIRHE: Jatkojalostettava tuote on oltava sarjanumeroeurannassa!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
+	
+	if ($row["perheid2"] == 0 and $row["sarjanumeroseuranta"] != "" and $toim == "SIIRTOTYOMAARAYS") {
+		$varaosavirhe .= t("HUOM: Lisävarusteita ei ole liitetty!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
+	
+	if ($row["varattu"] <= 0 and $toim == "SIIRTOTYOMAARAYS") {
+		$varaosavirhe .= t("HUOM: Määrä on oltava suurempi kuin nolla!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
 
 	if (!in_array($row["netto"], array('','N','E'))) {
 		$varaosavirhe .= t("VIRHE: Netto voi olla tyhjä, N tai E!")."<br>";
@@ -185,7 +209,7 @@
 		$kotipaikatlask = 0;
 		$omapaikatraja 	= 2;
 		
-		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V') {
+		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $row["var"] != 'V' and $toim != "SIIRTOTYOMAARAYS") {
 			// Katsotaan onko tälle tuotteelle toimittajaa ja oletusvienti on jotain vaihto-omaisuutta (Tilaa-toimittajalta drop-downiin mukaan)
 			$query = "	SELECT tyyppi_tieto, liitostunnus, toimi.nimi
 						FROM tuotteen_toimittajat use index (yhtio_tuoteno)
@@ -357,7 +381,7 @@
 		}
 
 		// Kääydään läpi tuotteen toimittajat
-		if ($kukarow["extranet"] == "" and in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $kpl_st > 0) {
+		if ($kukarow["extranet"] == "" and in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $kpl_st > 0 and $toim != "SIIRTOTYOMAARAYS") {
 			if ($kotipaikatlask == 0) {
 				$paikat = "<option value=''></option>".$paikat;
 			}

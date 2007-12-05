@@ -583,26 +583,30 @@
 				$query	= "	SELECT sarjanumeroseuranta.*, tilausrivi_osto.nimitys nimitys
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
-							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]' and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
-							and (tilausrivi_myynti.tunnus is null)
+							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus							
+							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
+							and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
+							and sarjanumeroseuranta.myyntirivitunnus != -1
+							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
 							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 				
 				// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
 				if ($row["sarjanumeroseuranta"] == "S") {
 					$nimitys = "";
-				
+					$nimilask = 1;
+					
 					if(mysql_num_rows($sarjares) > 0) {
 						$nimitys .= "<table width='100%' valign='top'>";
 
 						while ($sarjarow = mysql_fetch_array($sarjares)) {
 							if($sarjarow["nimitys"] != "") {
-								$nimitys .= "<tr><td valign='top'>$sarjarow[nimitys]</td></tr>";
+								$nimitys .= "<tr><td valign='top'>$nimilask $sarjarow[nimitys]</td></tr>";
 							}
 							else {
-								$nimitys .= "<tr><td valign='top'>$row[nimitys]</td></tr>";
+								$nimitys .= "<tr><td valign='top'>$nimilask $row[nimitys]</td></tr>";
 							}
+							$nimilask++;
 						}
 					
 						$nimitys .= "</table>";
@@ -809,6 +813,8 @@
 				}
 
 				echo "<td valign='top' $csp><table width='100%'>";
+				
+				$nimilask = 1;
 
 				while ($sarjarow = mysql_fetch_array($sarjares)) {
 					
@@ -818,9 +824,11 @@
 					}
 
 					echo "<tr>
-							<td class='$vari' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\" nowrap>
+							<td class='$vari' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\" nowrap>$nimilask 
 							<a href='sarjanumeroseuranta.php?tuoteno_haku=$row[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a>
 							</td>";
+					
+					$nimilask++;
 
 					if ($kukarow["kesken"] != 0 or is_numeric($ostoskori)) {
 						echo "<td valign='top' class='$vari' nowrap>";

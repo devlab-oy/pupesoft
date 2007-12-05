@@ -16,6 +16,8 @@
 		}
 	}
 
+	$DAY_ARRAY = array(1=>"Ma","Ti","Ke","To","Pe","La","Su");
+
 	if ($tee != "JT_TILAUKSELLE" and $vainvarastosta != "") {
 		$varastosta = array();
 		$varastosta[$vainvarastosta] = $vainvarastosta;
@@ -502,7 +504,7 @@
 			//haetaan vain tuoteperheiden is‰t tai sellaset tuotteet jotka eiv‰t kuulu tuoteperheisiin
 			if ($toim == "ENNAKKO") {
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.varattu jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
-							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko
+							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, lasku.toimvko
 							FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
@@ -518,7 +520,7 @@
 			}
 			else {
 				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
-							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko
+							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, lasku.toimvko
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.osatoimitus = '' $laskulisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
@@ -733,10 +735,10 @@
 								echo "<th valign='top'>".t("JT")."<br>".t("Hinta")."<br>".t("Ale")."</th>";
 								
 								if(count($suoravarasto) > 0 or $suorana != "") {
-									echo "<th valign='top'>".t("Status")."<br>".t("Suoratoimittaja")."</th>";
+									echo "<th valign='top'>".t("Status")."<br>".t("Suoratoimittaja")."<br>".t("Toimaika")."</th>";
 								}
 								else {
-									echo "<th valign='top'>".t("Status")."</th>";
+									echo "<th valign='top'>".t("Status")."<br>".t("Toimaika")."</th>";
 								}
 
 
@@ -953,9 +955,26 @@
 								$juresult = mysql_query($query) or pupe_error($query);
 								$jurow    = mysql_fetch_array ($juresult);
 
+								if (strtotime($jtrow['ttoimaika']) == strtotime($jtrow['ltoimaika'])) {
+									unset($toimvko);
+									unset($toimpva);
+									if ($jtrow['toimvko'] > 0 and $jtrow['toimvko'] != 7) {
+										$toimvko = date("W", strtotime($jtrow['ltoimaika']));
+										$toimpva = date("N", strtotime($jtrow['ltoimaika']));
+									} else if ($jtrow['toimvko'] > 0 and $jtrow['toimvko'] == 7) {
+										$toimvko = date("W", strtotime($jtrow['ltoimaika']));
+									}
+									$toimaika = $jtrow['ltoimaika'];
+								} else {
+									unset($toimvko);
+									unset($toimpva);
+									$toimaika = $jtrow['ttoimaika'];
+								}
+
 								// Riitt‰‰ kaikille
 								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "")  and $perheok==0) {
 
+									
 									// Jos haluttiin toimittaa t‰m‰ rivi automaagisesti
 									if ($kukarow["extranet"] == "" and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
 										echo "<font class='message'>".t("Tuote")." $jtrow[tuoteno] ".t("lis‰ttiin tilaukseen")."!</font><br>";
@@ -973,7 +992,18 @@
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
 										if ($kukarow["extranet"] == "") {
-											echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:green;'>".t("Riitt‰‰ kaikille")."!</font></td>";
+											echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:green;'>".t("Riitt‰‰ kaikille")."!</font><br>";
+											if (!isset($toimpva) and $toimvko > 0) {
+												echo t("Viikko")." $toimvko";
+											} else if ($toimvko > 0 and isset($toimpva)) {
+												echo t("Viikko")." $toimvko";
+												if (isset($toimpva)) {
+													echo " ($DAY_ARRAY[$toimpva])";
+												}
+											} else {
+												echo tv1dateconv($toimaika);
+											}
+											echo "</td>";
 											echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI'></td>";
 											echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4'></td>";
 											echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA'></td>";
@@ -1013,7 +1043,18 @@
 										
 									}
 									elseif($automaaginen == "") {
-										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:yellowgreen;'>".t("Ei riit‰ kaikille")."!</font></td>";
+										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:yellowgreen;'>".t("Ei riit‰ kaikille")."!</font><br>";
+										if (!isset($toimpva) and $toimvko > 0) {
+											echo t("Viikko")." $toimvko";
+										} else if ($toimvko > 0 and isset($toimpva)) {
+											echo t("Viikko")." $toimvko";
+											if (isset($toimpva)) {
+												echo " ($DAY_ARRAY[$toimpva])";
+											}
+										} else {
+											echo tv1dateconv($toimaika);
+										}
+										echo "</td>";
 										echo "	<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>
 												<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI'></td>
 												<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4'></td>
@@ -1048,7 +1089,18 @@
 								// Ei riit‰ koko riville
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
 									if ($automaaginen == '') {
-										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:orange;'>".t("Ei riit‰ koko riville")."!</font></td>";
+										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:orange;'>".t("Ei riit‰ koko riville")."!</font><br>";
+										if (!isset($toimpva) and $toimvko > 0) {
+											echo t("Viikko")." $toimvko";
+										} else if ($toimvko > 0 and isset($toimpva)) {
+											echo t("Viikko")." $toimvko";
+											if (isset($toimpva)) {
+												echo " ($DAY_ARRAY[$toimpva])";
+											}
+										} else {
+											echo tv1dateconv($toimaika);
+										}
+										echo "</td>";
 										echo "	<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>
 												<td valign='top' align='center' $class>&nbsp;</td>
 												<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4'></td>
@@ -1060,7 +1112,18 @@
 								// Rivi‰ ei voida toimittaa
 								else {
 									if ($automaaginen == '') {
-										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:red;'>".t("Rivi‰ ei voida toimittaa")."!</font></td>";
+										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:red;'>".t("Rivi‰ ei voida toimittaa")."!</font><br>";
+											if (!isset($toimpva) and $toimvko > 0) {
+												echo t("Viikko")." $toimvko";
+											} else if ($toimvko > 0 and isset($toimpva)) {
+												echo t("Viikko")." $toimvko";
+												if (isset($toimpva)) {
+													echo " ($DAY_ARRAY[$toimpva])";
+												}
+											} else {
+												echo tv1dateconv($toimaika);
+											}
+										echo "</td>";
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
 										if ($kukarow["extranet"] == "") {
@@ -1077,6 +1140,7 @@
 										}
 									}
 								}
+								
 							}
 							else {
 								echo "<td valign='top' align='center' $classlisa>&nbsp;</td>";	
@@ -1173,7 +1237,18 @@
 									echo "$perherow[hinta]<br>$perherow[ale]%</td>";
 									
 									if ($oikeurow['paivitys'] == '1') {
-										echo "<td valign='top' $class>$kokonaismyytavissa $perherow[yksikko]<br></font></td>";
+										echo "<td valign='top' $class>$kokonaismyytavissa $perherow[yksikko]<br></font>";
+										if (!isset($toimpva) and $toimvko > 0) {
+											echo t("Viikko")." $toimvko";
+										} else if ($toimvko > 0 and isset($toimpva)) {
+											echo t("Viikko")." $toimvko";
+											if (isset($toimpva)) {
+												echo " ($DAY_ARRAY[$toimpva])";
+											}
+										} else {
+											echo tv1dateconv($toimaika);
+										}
+										echo "</td>";
 
 										if ($kukarow["extranet"] == "") {
 											echo "	<td valign='top' align='center' $class>&nbsp;</td>
@@ -1191,7 +1266,6 @@
 									else {
 										echo "<td valign='top' align='center' $classlisa>&nbsp;</td>";	
 									}
-
 									echo "</tr>";
 								}
 

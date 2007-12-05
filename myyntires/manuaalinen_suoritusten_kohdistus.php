@@ -49,8 +49,6 @@ function kopioitiliointipaittain($tunnus, $type = '') {
 
 	$query = substr($query,0,-2);
 	$result = mysql_query($query) or pupe_error($query);
-
-	echo "$query<br>";
 }
 
 if ($tila == "muokkaasuoritusta") {
@@ -683,7 +681,7 @@ if ($tila == 'tee_kohdistus') {
 
 						$isa = 0;
 
-						while ($tiliointirow = mysql_fetch_array ($yresult)) {
+						while ($tiliointirow = mysql_fetch_array($yresult)) {
 							// Kuinka paljon on tämän viennin osuus
 							$summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) * -1 / $lasku["alkup_summa"] * $lasku["alennus"],2);
 												
@@ -716,7 +714,7 @@ if ($tila == 'tee_kohdistus') {
 											laatija 	= '$kukarow[kuka]',
 											laadittu 	= now(),
 											aputunnus 	= $isa";
-								$xresult = mysql_query($query) or pupe_error($query);
+								$xresult = mysql_query($query) or pupe_error($query);								
 							}
 						}
 
@@ -1221,7 +1219,7 @@ if ($tila == 'kohdistaminen') {
 			var maara=0;
 			var kmaara=0;";
 
-	if ($laskucount>1)
+	if ($laskucount>1) {
 		echo "
 			for(i=0;i<document.forms[3].elements['lasku_tunnukset[]'].length;i++) {
 				if(document.forms[3].elements['lasku_tunnukset[]'][i].checked) {
@@ -1233,31 +1231,32 @@ if ($tila == 'kohdistaminen') {
 	        		kmaara+=1.0;
 	      		}
 	    	}
-
-			maara = maara + kmaara;
-
-			if(document.forms[3].osasuoritus.checked) {
-				if ((kmaara==0) == false) {
-					alert ('".t("Jos osasuoritus, ei voi valita kassa-alennusta")."');
-					return false;
-				}
-				if ((maara==1) == false) {
-					alert ('".t("Jos osasuoritus, pitää valita vain ja ainoastaan yksi lasku")."! ' + maara + ' valittu');
-					return false;
-				}
-			}";
-
+			
+			maara = maara + kmaara;";
+	}
 	if ($laskucount==1) {
 		echo "
 			if(document.forms[3].elements['lasku_tunnukset[]'].checked) {
 	        	maara=1;
 	    	}
 	    	if(document.forms[3].elements['lasku_tunnukset_kale[]'].checked) {
-	       		maara=1;
-	    	}";
+	       		kmaara=1;
+	    	}
+	
+			maara = maara + kmaara;";
 	}
 
-	echo "
+	echo "	if(document.forms[3].osasuoritus.checked) {
+				if (kmaara!=0) {
+					alert ('".t("Jos osasuoritus, ei voi valita kassa-alennusta")."');
+					return false;
+				}
+				if (maara!=1) {
+					alert ('".t("Jos osasuoritus, pitää valita vain ja ainoastaan yksi lasku")."! ' + maara + ' valittu');
+					return false;
+				}
+			}
+
 			if ((maara==0) == true) {
 				alert('".t("Jotta voit kohdistaa, on ainakin yksi lasku valittava. Jos mitään kohdistettavaa ei löydy, klikkaa menusta Manuaalikohdistus päästäksesi takaisin alkuun")."');
 				return false;

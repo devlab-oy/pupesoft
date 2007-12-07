@@ -247,7 +247,7 @@ if ($tee == "") {
 		$lisa .= " and kuvaus like '%$kuvaus_haku%' ";
 	}
 	if ($pyytaja_haku != "") {
-		$lisa .= " and pyytaja like '%$pyytaja_haku%' ";
+		$lisa .= " and (pyytaja like '%$pyytaja_haku%' or asiakas.nimi like '%$pyytaja_haku%') ";
 	}
 	if ($projekti_haku != "") {
 		$lisa .= " and projekti like '%$projekti_haku%' ";
@@ -262,7 +262,7 @@ if ($tee == "") {
 		$lisa .= " and prioriteetti = '$prioriteetti_haku' ";
 	}
 	if ($tekija_haku != "") {
-		$lisa .= " and nimi like '%$tekija_haku%' ";
+		$lisa .= " and kuka.nimi like '%$tekija_haku%' ";
 	}
 
 	$query = "	SELECT kuka.nimi, todo.*, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, if(tekija='$kukarow[tunnus]', prioriteetti-50,0) sorttaus, asiakas.nimi asiakasnimi

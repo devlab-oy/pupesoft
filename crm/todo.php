@@ -149,7 +149,12 @@ if ($tee == "valmis") {
 
 if ($tee == "") {
 	
+	enable_ajax();
+	echo "<a href=\"javascript:toggleGroup('uusidiv')\">Lisää uusi tehtävä</a><br><br>";
+	
+	
 	echo "
+	<div id='uusidiv' style='display:none'>
 	<form name='uusi' method='post' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>
 	<input type='hidden' name='tee' value='uusi'>
 
@@ -227,10 +232,8 @@ if ($tee == "") {
 		</tr>
 
 	</table>
-	</form><br>";
-	
-	echo "<font class='head'>Työt</font><hr>";
-	
+	</form><br></div>";
+		
 	if ($sort == "pyytaja")			$sort = "order by sorttaus,pyytaja,prioriteetti,deadline,projekti,aika";
 	elseif ($sort == "projekti")	$sort = "order by sorttaus,projekti,prioriteetti,deadline,aika";
 	elseif ($sort == "kesto_arvio")	$sort = "order by sorttaus,kesto_arvio,prioriteetti,deadline,aika";

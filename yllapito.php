@@ -553,6 +553,7 @@
 			$toim == "perusalennus" or
 			$toim == "yhteensopivuus_tuote" or
 			$toim == "toimitustapa" or
+			$toim == "kirjoittimet" or
 			$toim == "hinnasto") {
 			
 			// Tehd‰‰n "poista tietue"-nappi

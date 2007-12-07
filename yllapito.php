@@ -552,6 +552,7 @@
 			$toim == "asiakashinta" or
 			$toim == "perusalennus" or
 			$toim == "yhteensopivuus_tuote" or
+			$toim == "toimitustapa" or
 			$toim == "hinnasto") {
 			
 			// Tehd‰‰n "poista tietue"-nappi

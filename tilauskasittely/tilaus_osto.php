@@ -85,7 +85,20 @@
 		}
 		$laskurow = mysql_fetch_array($aresult);
 		
-
+		
+		if($tee == "vahvista") {
+			$query = "UPDATE tilausrivi SET  jaksotettu=1 where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi='O' and uusiotunnus=0";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_affected_rows() > 0) {
+				echo "<font class='message'>".t("Toimitus vahvistettu")."</font><br><br>";
+			}
+			else {
+				echo "<font class='error'>".t("Toimituksella ei ollut vahvistettavia rivej‰")."</font><br><br>";
+			}
+			
+			$tee = "Y";
+		}
+		
 		if ($tee == 'poista') {
 			// poistetaan tilausrivit, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
 			$query = "UPDATE tilausrivi SET tyyppi='D' where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
@@ -674,7 +687,8 @@
 						round((varattu+jt)*tilausrivi.hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(tilausrivi.ale/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 						tilausrivi.alv, toimaika, kerayspvm, uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid2, tilausrivi.hinta, tilausrivi.ale, tilausrivi.varattu varattukpl, tilausrivi.kommentti,
 						$sorttauskentta,
-						tilausrivi.var
+						tilausrivi.var,
+						tilausrivi.jaksotettu
 						FROM tilausrivi
 						LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 						LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
@@ -852,7 +866,16 @@
 						echo "</tr>";
 					}
 					
-					echo "<tr><td></td><td>".t("Toimitusaika").": ".tv1dateconv($prow[toimaika])."</td><td colspan='8'>".t("Kommentti").": $prow[kommentti]</td></tr>";
+					echo "<tr>";
+					if($prow["jaksotettu"] == 1) {
+						echo "<td></td><td><font style = 'color: #a4fa7b;'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font></td>";
+
+					}
+					else {
+						echo "<td></td><td>".t("Toimitusaika").": ".tv1dateconv($prow["toimaika"])."</td>";
+					}
+					
+					echo "<td colspan='8'>".t("Kommentti").": $prow[kommentti]</td></tr>";
 					
 					/*if ($prow["kommentti"] != "") {
 						echo "<tr><td></td><td colspan='8'>".t("Kommentti").": $prow[kommentti]</td></tr>";
@@ -885,9 +908,17 @@
 			echo "<br><br><table width='100%'><tr>";
 
 			if ($rivienmaara > 0 and $laskurow["liitostunnus"] != '' and $tilausok == 0) {
-				echo "	<form action = '$PHP_SELF' method='post'>
-						<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-						<td class='back' align='left'><input type='hidden' name='tee' value='valmis'><input type='Submit' value='".t("Tilaus valmis")."'></form></td>";
+				echo "	<td class='back' align='left'>
+						<form action = '$PHP_SELF' method='post'>
+							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+							<input type='hidden' name='tee' value='valmis'><input type='Submit' value='".t("Tilaus valmis")."'>
+						</form></td>";
+
+				echo "	<td class='back' align='left'>
+						<form action = '$PHP_SELF' method='post'>
+							<input type='hidden' name='tilausnumero' value='$tilausnumero'>
+							<input type='hidden' name='tee' value='vahvista'><input type='Submit' value='".t("Vahvista toimitus")."'>
+						</form></td>";
 			}
 			if ($eimitatoi != "EISAA") {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>

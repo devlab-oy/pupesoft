@@ -3,7 +3,7 @@
 	require('../inc/parametrit.inc');
 	
 	// jos ei olla postattu mit‰‰n, niin halutaan varmaan tehd‰ kokonaan uusi tilaus..
-	if (count($_POST) == 0) {
+	if (count($_POST) == 0 and $from == "") {
 		$tila				= '';
 		$tilausnumero		= '';
 		$laskurow			= '';
@@ -13,7 +13,11 @@
 		$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
 	}
-
+	
+	if($from == "LASKUTATILAUS") {
+		$tee = "AKTIVOI";
+	}
+	
 	if ($tee == 'AKTIVOI') {
 		// katsotaan onko muilla aktiivisena
 		$query = "select * from kuka where yhtio='$kukarow[yhtio]' and kesken='$tilausnumero' and kesken!=0";
@@ -831,11 +835,23 @@
 				}
 			}
 
-			echo "<tr>
-					<td class='back' colspan='6' align='right'></td>
-					<td colspan='3' class='spec'>Tilauksen arvo:</td>
-					<td align='right' class='spec'>".sprintf("%.2f",$yhteensa)."</td>
-					</tr>";
+			echo "	<tr>
+					<th colspan='2' nowrap>".t("N‰yt‰ lomake").":</th>
+					<td colspan='2' nowrap>
+					<form name='valmis' action='tulostakopio.php' method='post' name='tulostakopio'>
+						<input type='hidden' name='otunnus' value='$tilausnumero'>
+						<input type='hidden' name='tilausnumero' value='$tilausnumero'>						
+						<input type='hidden' name='toim' value='OSTO'>
+						<input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tilausnumero=$tilausnumero//from=LASKUTATILAUS//lopetus=$lopetus//tee='>
+						<input type='submit' name='NAYTATILAUS' value='".t("N‰yt‰")."'>
+						<input type='submit' name='TULOSTA' value='".t("Tulosta")."'>
+					</form>
+				</td>
+				<td class='back' colspan='2'></td>
+				
+				<td colspan='3' class='spec'>Tilauksen arvo:</td>
+				<td align='right' class='spec'>".sprintf("%.2f",$yhteensa)."</td>
+				</tr>";
 			echo "</table>";
 
 

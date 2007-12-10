@@ -259,7 +259,7 @@ if ($tee == "") {
 		$lisa .= " and projekti like '%$projekti_haku%' ";
 	}
 	if ($aika_haku != "") {
-		$lisa .= " and kesto_arvio like '%$aika_haku%' ";
+		$lisa .= " and kesto_arvio > '$aika_haku' ";
 	}
 	if ($deadline_haku != "") {
 		$lisa .= " and deadline like '%$deadline_haku%' ";

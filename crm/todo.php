@@ -65,7 +65,7 @@ if ($tee == "muokkaa") {
 						WHERE kuka.yhtio = '$kukarow[yhtio]' 
 						and kuka.myyja != 0 
 						GROUP BY kuka.tunnus
-						ORDER BY nimi";
+						ORDER BY aika desc";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<td><select style='width: 150px;' name='tekija'>";

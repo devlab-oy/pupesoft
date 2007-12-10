@@ -2759,36 +2759,39 @@ function popUp(e, oi, offsetX, offsetY, html) {
 		myDiv.style.display = 'block';
 		document.body.appendChild(myDiv);
 	}
-	
-	if(html) {
-		sndReq(oi, html+'&ohje=off&sulje='+oi);
-		timer = 100;
+		
+	if(e.type == "mouseout") {
+		var de = document.getElementById(oi);
+		var ds = de.style;		
+		
+		ds.display = "none";
+		ds.visibility = "hidden";
 	}
 	else {
-		timer = 10;
-	}
-	
-	// relatiivinen sijainti
-	if(!offsetY) offsetY=-10;
-	if(!offsetX) offsetX=-10;
-
-	var y = getMouseY(e)-(offsetY);
-	var x = getMouseX(e)-(offsetX);			
-	
-	setTimeout( function (oi, x, y) {
-
-		var de = document.getElementById(oi);
-		var ds = de.style;
-
-		if (e.type == "mouseout") {
-			ds.display = "none";
-			ds.visibility = "hidden";
+		
+		if(html) {
+			sndReq(oi, html+'&ohje=off&sulje='+oi);
+			timer = 100;
 		}
 		else {
+			timer = 10;
+		}
+
+		// relatiivinen sijainti
+		if(!offsetY) offsetY=-10;
+		if(!offsetX) offsetX=-10;
+
+		var y = getMouseY(e)-(offsetY);
+		var x = getMouseX(e)-(offsetX);
+		
+		function pop(oi, x, y) {
+
+			var de = document.getElementById(oi);
+			var ds = de.style;
 
 			ds.display = "block";
 			ds.visibility = "hidden";
-			
+
 			//	Detectoidaan ikkunan koko
 			var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
 			var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
@@ -2836,9 +2839,11 @@ function popUp(e, oi, offsetX, offsetY, html) {
 
 			ds.visibility = "visible";
 			de.display = 'block';
-		}		
+
+		}
+
+		setTimeout( function () { pop(oi, x, y); }, timer);		
 	}
-	, timer, oi, x, y);
 }
 //-->
 </script>

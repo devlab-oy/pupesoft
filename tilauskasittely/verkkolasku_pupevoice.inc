@@ -22,7 +22,10 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("Email", 								$yhtiorow['admin_email'],		$tootxml);
 
 		if (strtoupper($yhtiorow['kieli']) == 'SE' or $kieli == "SE") {
-			xml_add("Language",							"SV",							$tootxml);
+			xml_add("Language", "SV", $tootxml);
+		}
+		elseif (strtoupper($yhtiorow['kieli']) == 'EE' or $kieli == "EE") {
+			xml_add("Language", "ET", $tootxml);
 		}
 
 		fputs($tootxml, "</CHN>\n");

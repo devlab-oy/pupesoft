@@ -212,6 +212,14 @@
 			else {
 				$tuoterow['hinnastoon'] = "<font style='color:00FF00'>".t("Kyllä")."</font>";
 			}
+			
+			// Varastoon
+			if (strtoupper($tuoterow['ei_varastoida']) == 'O') {
+			 	$tuoterow['ei_varastoida'] = "<font style='color:FF0000'>".t("Ei")."</font>";
+			}
+			else {
+				$tuoterow['ei_varastoida'] = "<font style='color:00FF00'>".t("Kyllä")."</font>";
+			}
 
 			//tullinimike
 			$cn1 = $tuoterow["tullinimike1"];
@@ -314,8 +322,8 @@
 				</tr>";
 
 			//4
-			echo "<tr><th>".t("Hälyraja")."</th><th>".t("Tilerä")."</th><th>".t("Toierä")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
-			echo "<tr><td valign='top' align='right'>$tuoterow[halytysraja]</td>
+			echo "<tr><th>".t("Hälyraja")." / ".t("Varastoitava")."</th><th>".t("Tilerä")."</th><th>".t("Toierä")."</th><th>".t("Kerroin")."</th><th>".t("Tarrakerroin")."</th><th>".t("Tarrakpl")."</th>";
+			echo "<tr><td valign='top' align='right'>$tuoterow[halytysraja] / $tuoterow[ei_varastoida]</td>
 						<td valign='top' align='right'>$tuoterow[osto_era]</td>
 						<td valign='top' align='right'>$tuoterow[myynti_era]</td>
 						<td valign='top' align='right'>$tuoterow[tuotekerroin]</td>

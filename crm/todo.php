@@ -197,7 +197,13 @@ if ($tee == "") {
 
 		echo "<input name='pyytaja' type='text' size='15'></td>";
 
-		$query  = "	SELECT * FROM kuka WHERE yhtio = '$kukarow[yhtio]' and myyja != 0 ORDER BY nimi";
+		$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika 
+					FROM kuka 
+					LEFT JOIN todo on (todo.tekija = kuka.tunnus)
+					WHERE kuka.yhtio = '$kukarow[yhtio]' 
+					and kuka.myyja != 0 
+					GROUP BY kuka.tunnus
+					ORDER BY aika desc";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "<td><select style='width: 100px;' name='tekija'>";
@@ -206,7 +212,7 @@ if ($tee == "") {
 		while ($asiakas = mysql_fetch_array($result)) {
 			$sel = "";
 			if ($rivi["tekija"] == $asiakas["tunnus"]) $sel = "SELECTED";					
-			echo "<option value='$asiakas[tunnus]' $sel>$asiakas[nimi]</option>";
+			echo "<option value='$asiakas[tunnus]' $sel>$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)</option>";
 		}
 
 		echo "</select></td>";
@@ -259,7 +265,7 @@ if ($tee == "") {
 		$lisa .= " and projekti like '%$projekti_haku%' ";
 	}
 	if ($aika_haku != "") {
-		$lisa .= " and kesto_arvio > '$aika_haku' ";
+		$lisa .= " and kesto_arvio = '$aika_haku' ";
 	}
 	if ($deadline_haku != "") {
 		$lisa .= " and deadline like '%$deadline_haku%' ";

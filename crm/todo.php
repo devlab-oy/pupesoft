@@ -59,7 +59,13 @@ if ($tee == "muokkaa") {
 
 			echo "</td>";
 
-			$query  = "	SELECT * FROM kuka WHERE yhtio = '$kukarow[yhtio]' and myyja != 0 ORDER BY nimi";
+			$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika 
+						FROM kuka 
+						LEFT JOIN todo on (todo.tekija = kuka.tunnus)
+						WHERE kuka.yhtio = '$kukarow[yhtio]' 
+						and kuka.myyja != 0 
+						GROUP BY kuka.tunnus
+						ORDER BY nimi";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<td><select style='width: 150px;' name='tekija'>";
@@ -68,7 +74,7 @@ if ($tee == "muokkaa") {
 			while ($asiakas = mysql_fetch_array($result)) {
 				$sel = "";
 				if ($rivi["tekija"] == $asiakas["tunnus"]) $sel = "SELECTED";					
-				echo "<option value='$asiakas[tunnus]' $sel>$asiakas[nimi]</option>";
+				echo "<option value='$asiakas[tunnus]' $sel>$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)</option>";
 			}
 
 			echo "</select></td>";
@@ -267,8 +273,8 @@ if ($tee == "") {
 
 	$query = "	SELECT kuka.nimi, todo.*, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, if(tekija='$kukarow[tunnus]', prioriteetti-50,0) sorttaus, asiakas.nimi asiakasnimi
 				FROM todo
-				LEFT JOIN kuka on (kuka.yhtio=todo.yhtio and tekija=kuka.tunnus)
-				LEFT JOIN asiakas on (kuka.yhtio=asiakas.yhtio and asiakas=asiakas.tunnus)
+				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
+				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
 				WHERE todo.yhtio  = '$kukarow[yhtio]'
 				and kuittaus = ''
 				$lisa
@@ -350,7 +356,7 @@ if ($tee == "") {
 		$rivi["kuvaus"] = str_replace("\n", "<br>", $rivi["kuvaus"]);
 
 		echo "<td>$rivi[kuvaus]</td>";
-		echo "<td>$rivi[pyytaja] $rivi[asiakasnimi]</td>";
+		echo "<td>$rivi[asiakasnimi] $rivi[pyytaja]</td>";
 		echo "<td>$rivi[nimi]</td>";
 		echo "<td>$rivi[projekti]</td>";
         echo "<td>$rivi[kesto_arvio]</td>";

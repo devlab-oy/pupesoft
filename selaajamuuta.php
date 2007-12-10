@@ -152,7 +152,7 @@
 	echo "<div id='oikea' style='position: absolute; top: 100px; left: 525px; height: 700px; width:520px; overflow: scroll;'>";
 	if ($tunnus != '') {
 		// tehd‰‰n lasku linkki
-		echo "<td>".ebid($laskurow['tunnus']) ."</td>";
+		echo "<td>".ebid($tunnus) ."</td>";
 	}
 	else {
 		echo "<font class='message'> ".t("Laskua ei ole valittu")."</font>";

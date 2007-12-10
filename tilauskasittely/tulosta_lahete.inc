@@ -819,6 +819,29 @@ if (!function_exists('rivi')) {
 			}
 		}
 		
+		//Haetan sarjanumeron tiedot
+		if ($row["varattu"]+$row["kpl"] < 0){
+			$sarjanutunnus = "ostorivitunnus";
+		}
+		else {
+			$sarjanutunnus = "myyntirivitunnus";
+		}
+
+		$query = "	select distinct sarjanumero
+					from sarjanumeroseuranta
+					where yhtio = '$kukarow[yhtio]'
+					and tuoteno = '$row[tuoteno]'
+					and $sarjanutunnus='$row[tunnus]'
+					and sarjanumero != ''";
+		$sarjares = mysql_query($query) or pupe_error($query);
+
+		if ($row["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
+			$row["kommentti"] .= "\n";
+		}
+		while($sarjarow = mysql_fetch_array($sarjares)) {
+			$row["kommentti"] .= t("S:nro").": $sarjarow[sarjanumero]\n";
+		}
+
 		// Mahtuuko rivi tälle sivulle
 		$kala_nyt = $kala;
 				

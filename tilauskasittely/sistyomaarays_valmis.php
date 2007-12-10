@@ -117,7 +117,7 @@
 							$ostohinta = $lisarow["kehahin"];
 						}
 						
-						$ostohinta = (int) $ostohinta;
+						$ostohinta = (float) $ostohinta;
 						
 						// Ruuvataan liitetyt lisävarusteet kiinni laitteen alkuperäiseen ostoriviin
 						// Jos lisävaruste on sarjanumeroitava, niin sarjanumeron tunnus menee

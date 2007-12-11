@@ -4,8 +4,12 @@
 define (__TRACE_ENABLED__, false);
 define (__DEBUG_ENABLED__, false);
 
-require_once("barcode/barcode.php");
-require_once("barcode/c39object.php");
+// jos php-gd on installoitu niin loidataab barcode library
+if (in_array("gd", get_loaded_extensions())) {
+	require_once("barcode/barcode.php");
+	require_once("barcode/c39object.php");
+}
+
 require_once("pdflib/phppdflib.class.php");
 
 $norm["height"] 		= 10;
@@ -296,9 +300,11 @@ if (!function_exists('alku')) {
 		$barcode  = $laskurow["tunnus"];
 	
 		//luodaan viivakoodiolio
-		$obj = "";
-		$obj = new C39Object($width, $height, $style, $barcode);
-	
+		unset($obj);
+		if (class_exists("C39Object")) { 
+			$obj = new C39Object($width, $height, $style, $barcode);
+		}
+
 		if ($obj) {
 			$obj->SetFont($font);
 			$obj->DrawObject($xres);
@@ -328,10 +334,6 @@ if (!function_exists('alku')) {
 	
 			//dellataan tmp filet kuleksimasta
 			system("rm -f $nimi1 $nimi2");
-		}
-		else{
-			echo t("Oliota ei voitu luoda").".";
-			exit;
 		}
 	
 		rivi_otsikot($thispage);

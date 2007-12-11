@@ -1095,6 +1095,9 @@
 							if (strtoupper($asiakas_apu_row["kieli"]) == "SE") {
 								$laskun_kieli = "SE";
 							}
+							elseif (strtoupper($asiakas_apu_row["kieli"]) == "EE") {
+								$laskun_kieli = "EE";
+							}
 							elseif ($kieli != "") {
 								$laskun_kieli = $kieli;
 							}

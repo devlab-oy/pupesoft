@@ -162,48 +162,48 @@
 	}
 	
 	//haetaan rivien arvot
-	
+				
 	$query = "	SELECT
-				luokka,
-				tuoteno,
-				nimitys,
-				osasto,
-				tulopvm,
-				try,
-				tuotemerkki,
-				summa,
-				kate,
-				katepros,
-				kate/$sumrow[yhtkate] * 100	kateosuus,
-				vararvo,
-				varaston_kiertonop,
-				myyntierankpl,
-				myyntieranarvo,
-				rivia,
-				kpl,
-				puuterivia,
-				palvelutaso,
-				ostoerankpl,
-				ostoeranarvo,
-				osto_rivia,
-				osto_kpl,
-				osto_summa,
-				kustannus,
-				kustannus_osto,
-				kustannus_yht,
-				kate-kustannus_yht total
+				abc_aputaulu.luokka,
+				abc_aputaulu.tuoteno,
+				abc_aputaulu.nimitys,
+				abc_aputaulu.osasto,
+				abc_aputaulu.tulopvm,
+				abc_aputaulu.try,
+				abc_aputaulu.tuotemerkki,
+				abc_aputaulu.summa,
+				abc_aputaulu.kate,
+				abc_aputaulu.katepros,
+				abc_aputaulu.kate/$sumrow[yhtkate] * 100	kateosuus,
+				abc_aputaulu.vararvo,
+				abc_aputaulu.varaston_kiertonop,
+				abc_aputaulu.myyntierankpl,
+				abc_aputaulu.myyntieranarvo,
+				abc_aputaulu.rivia,
+				abc_aputaulu.kpl,
+				abc_aputaulu.puuterivia,
+				abc_aputaulu.palvelutaso,
+				abc_aputaulu.ostoerankpl,
+				abc_aputaulu.ostoeranarvo,
+				abc_aputaulu.osto_rivia,
+				abc_aputaulu.osto_kpl,
+				abc_aputaulu.osto_summa,
+				abc_aputaulu.kustannus,
+				abc_aputaulu.kustannus_osto,
+				abc_aputaulu.kustannus_yht,
+				abc_aputaulu.kate-abc_aputaulu.kustannus_yht total,
+				tuote.ei_varastoida
 				FROM abc_aputaulu
-				WHERE yhtio = '$kukarow[yhtio]'
-				and tyyppi= '$abcchar'
-				and luokka = '$luokka'
+				JOIN tuote ON abc_aputaulu.tuoteno = tuote.tuoteno and tuote.yhtio = '$kukarow[yhtio]'
+				WHERE abc_aputaulu.yhtio = '$kukarow[yhtio]'
+				and abc_aputaulu.tyyppi= '$abcchar'
+				and abc_aputaulu.luokka = '$luokka'
 				$osastolisa
 				$trylisa
 				$tuotemerkkilisa
 				$lisa
 				$hav
 				ORDER BY $jarjestys";
-				
-			
 				
 			
 								
@@ -249,41 +249,6 @@
 
 	echo "<td class='back'><input type='Submit' value='".t("Etsi")."'></td></form></tr>";
 
-	//haetaan tuoteen varastoitavuus
-	if (mysql_num_rows($res) != 0) {
-		
-		$query = "	SELECT
-					DISTINCT tuoteno, ei_varastoida
-					FROM tuote 
-					WHERE yhtio = '$kukarow[yhtio]'";
-	
-		if (mysql_num_rows($res) == 1) {
-			$row = mysql_fetch_array($res);
-			$query .= " and tuoteno = '$row[tuoteno]'";
-		}
-		else {
-			$counter = 1;
-			
-			while ($row = mysql_fetch_array($res)) {
-				
-				if ($counter == 1) {
-					$query .= " and (tuoteno = '$row[tuoteno]'";
-				}
-				
-				if ($counter > 1) {
-					$query .= " or tuoteno = '$row[tuoteno]'";
-				}
-				
-				$counter++;
-			}
-			
-			$query .= ")";
-			
-			
-		}	
-		
-		$tuores = mysql_query($query) or pupe_error($query);
-	}
 	
 		//jos rivejä ei löydy
 	if (mysql_num_rows($res) == 0) {
@@ -291,24 +256,16 @@
 	}
 	else {
 		
-		mysql_data_seek($res,0);
+		//mysql_data_seek($res,0);
 		while ($row = mysql_fetch_array($res)) {
 			
-			//chekataan että otetaan oikea varastoitavuus tieto
-			while($varastorow = mysql_fetch_array($tuores)){			
-				
-				if ($varastorow['tuoteno'] == $row['tuoteno']) {
-					if (strtoupper($varastorow['ei_varastoida']) == 'O') {
-						$varastorow['ei_varastoida'] = "<font style='color:FF0000'>".t("Ei varastoitava")."</font>";
-					}
-					else {
-						$varastorow['ei_varastoida'] = "<font style='color:00FF00'>".t("Varastoitava")."</font>";
-					}
-					
-					mysql_data_seek($tuores,0);
-					break;
-				}
+						
+			if (strtoupper($row['ei_varastoida']) == 'O') {
+				$row['ei_varastoida'] = "<font style='color:FF0000'>".t("Ei varastoitava")."</font>";
 			}
+			else {
+				$row['ei_varastoida'] = "";
+			}		
 			
 			echo "<tr>";
 
@@ -316,7 +273,7 @@
 
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'>$ryhmanimet[$l]</a></td>";
 			echo "<td><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
-			echo "<td>$row[nimitys] $varastorow[ei_varastoida]</td>";		
+			echo "<td>$row[nimitys] $row[ei_varastoida]</td>";		
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&tuotemerkki=$tuotemerkki'>$row[osasto]</a></td>";
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&try=$row[try]&tuotemerkki=$tuotemerkki'>$row[try]</a></td>";
 			echo "<td>".tv1dateconv($row["tulopvm"])."</td>";

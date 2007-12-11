@@ -193,7 +193,7 @@
 						$keikka_res = mysql_query($query) or pupe_error($query);
 						$keikka_row = mysql_fetch_array($keikka_res);
 						
-						echo "<a href='tilauskasittely\selaa_tilauksia.php?toim=KEIKKA&tee=tilaus&tunnus=$keikka_row[tunnus]'>".$keikka_row['laskunro']."</a>";
+						echo "<a href='tilauskasittely/selaa_tilauksia.php?toim=KEIKKA&tee=tilaus&tunnus=$keikka_row[tunnus]'>".$keikka_row['laskunro']."</a>";
 					}
 					echo "</td>";
 					

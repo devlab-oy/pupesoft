@@ -209,9 +209,19 @@ if (!function_exists('alku')) {
 		$pdf->draw_text(430, 740, tv1dateconv($laskurow["luontiaika"], "pitka"), 		$thispage, $norm);
 	
 
-		$pdf->draw_rectangle(737, 300, 716, 580, $thispage, $rectparam);
+		$pdf->draw_rectangle(737, 300, 716, 420, $thispage, $rectparam);
 		$pdf->draw_text(310, 729, t("Toimitustapa", $kieli), 		$thispage, $pieni);
 		$pdf->draw_text(310, 719, $laskurow["toimitustapa"],	 	$thispage, $norm);
+		
+		//etsitään rahtisopimusnumero
+		$query = "SELECT rahtisopimus from rahtisopimukset where ytunnus = $laskurow[ytunnus] and toimitustapa = '$laskurow[toimitustapa]'";
+		$rahtiresult = mysql_query($query) or pupe_error($query);
+		$rahtirow = mysql_fetch_array($rahtiresult);
+		
+		$pdf->draw_rectangle(737, 420, 716, 580, $thispage, $rectparam);
+		$pdf->draw_text(430, 729, t("Rahtisopimus", $kieli), 		$thispage, $pieni);
+		$pdf->draw_text(430, 719, $rahtirow["rahtisopimus"],	 	$thispage, $norm);
+		
 
 		$pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
 		$pdf->draw_text(310, 708, t("Toimitusehto", $kieli), 		$thispage, $pieni);

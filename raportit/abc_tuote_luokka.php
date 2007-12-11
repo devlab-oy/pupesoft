@@ -160,8 +160,9 @@
 	if ($sumrow["yhtkate"] == 0) {
 		$sumrow["yhtkate"] = 0.01;
 	}
-
+	
 	//haetaan rivien arvot
+	
 	$query = "	SELECT
 				luokka,
 				tuoteno,
@@ -201,6 +202,11 @@
 				$lisa
 				$hav
 				ORDER BY $jarjestys";
+				
+			
+				
+			
+								
 	$res = mysql_query($query) or pupe_error($query);
 
 	echo "<table>";
@@ -231,6 +237,7 @@
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=kustannus_osto&sort=desc$ulisa'>".t("Oston")."<br>".t("kustan").".</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=kustannus_yht&sort=desc$ulisa'>".t("Kustan").".<br>".t("yht")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&order=total&sort=desc$ulisa'>".t("Kate -")."<br>".t("Kustannus")."</a></th>";
+	
 
 	echo "<form action='$PHP_SELF?tee=LUOKKA&luokka=$luokka' method='post'>";
 	echo "<input type='hidden' name='toim' value='$toim'>";
@@ -242,21 +249,74 @@
 
 	echo "<td class='back'><input type='Submit' value='".t("Etsi")."'></td></form></tr>";
 
+	//haetaan tuoteen varastoitavuus
+	if (mysql_num_rows($res) != 0) {
+		
+		$query = "	SELECT
+					DISTINCT tuoteno, ei_varastoida
+					FROM tuote 
+					WHERE yhtio = '$kukarow[yhtio]'";
+	
+		if (mysql_num_rows($res) == 1) {
+			$row = mysql_fetch_array($res);
+			$query .= " and tuoteno = '$row[tuoteno]'";
+		}
+		else {
+			$counter = 1;
+			
+			while ($row = mysql_fetch_array($res)) {
+				
+				if ($counter == 1) {
+					$query .= " and (tuoteno = '$row[tuoteno]'";
+				}
+				
+				if ($counter > 1) {
+					$query .= " or tuoteno = '$row[tuoteno]'";
+				}
+				
+				$counter++;
+			}
+			
+			$query .= ")";
+			
+			
+		}	
+		
+		$tuores = mysql_query($query) or pupe_error($query);
+	}
+	
 		//jos rivejä ei löydy
 	if (mysql_num_rows($res) == 0) {
 		echo "</table>";
 	}
 	else {
-
+		
+		mysql_data_seek($res,0);
 		while ($row = mysql_fetch_array($res)) {
-
+			
+			//chekataan että otetaan oikea varastoitavuus tieto
+			while($varastorow = mysql_fetch_array($tuores)){			
+				
+				if ($varastorow['tuoteno'] == $row['tuoteno']) {
+					if (strtoupper($varastorow['ei_varastoida']) == 'O') {
+						$varastorow['ei_varastoida'] = "<font style='color:FF0000'>".t("Ei varastoitava")."</font>";
+					}
+					else {
+						$varastorow['ei_varastoida'] = "<font style='color:00FF00'>".t("Varastoitava")."</font>";
+					}
+					
+					mysql_data_seek($tuores,0);
+					break;
+				}
+			}
+			
 			echo "<tr>";
 
 			$l = $row["luokka"];
 
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki'>$ryhmanimet[$l]</a></td>";
 			echo "<td><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td>";
-			echo "<td>$row[nimitys]</td>";
+			echo "<td>$row[nimitys] $varastorow[ei_varastoida]</td>";		
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&tuotemerkki=$tuotemerkki'>$row[osasto]</a></td>";
 			echo "<td><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&try=$row[try]&tuotemerkki=$tuotemerkki'>$row[try]</a></td>";
 			echo "<td>".tv1dateconv($row["tulopvm"])."</td>";

@@ -139,11 +139,6 @@
 					(SELECT laskunro, ytunnus, liitostunnus
 					FROM lasku use index (yhtio_tunnusnippu)
 					WHERE tunnusnippu = '$otunnus'
-					and yhtio = '$kukarow[yhtio]')
-					UNION
-					(SELECT laskunro, ytunnus, liitostunnus
-					FROM lasku use index (yhtio_asiakkaan_tilausnumero)
-					WHERE asiakkaan_tilausnumero = '$otunnus'
 					and yhtio = '$kukarow[yhtio]')";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
@@ -178,7 +173,24 @@
 		$ytunnus  = $row["ytunnus"];
 		$asiakasid = $row["liitostunnus"];
 	}
-
+	elseif($astilnro != '') {
+		$query = "	SELECT laskunro, ytunnus, liitostunnus, tunnus
+					FROM lasku use index (yhtio_asiakkaan_tilausnumero)
+					WHERE asiakkaan_tilausnumero = '$astilnro'
+					and yhtio = '$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$row = mysql_fetch_array($result);
+		
+		if ($row["laskunro"] > 0) {
+			$laskunro = $row["laskunro"];
+		}
+		else {
+			$otunnus = $row["tunnus"];
+		}
+		$ytunnus   = $row["ytunnus"];
+		$asiakasid = $row["liitostunnus"];
+	}
+	
 	if ($ytunnus != '') {
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
 			<input type='hidden' name='ytunnus' value='$ytunnus'>
@@ -413,6 +425,9 @@
 			echo "<tr><th>".t("Tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='otunnus'></td></tr>";
 		}
 		echo "<tr><th>".t("Laskunumero")."</th><td class='back'></td><td><input type='text' size='10' name='laskunro'></td></tr>";
+		if ($toim == "MYYNTI") {
+			echo "<tr><th>".t("Asiakkaan tilausnumero")."</th><td class='back'></td><td><input type='text' size='10' name='astilnro'></td></tr>";
+		}
 		echo "</table>";
     	
 		echo "<br><input type='submit' value='".t("Etsi")."'>";

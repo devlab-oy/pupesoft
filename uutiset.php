@@ -30,13 +30,13 @@ elseif ($toim == "RYJO") {
 	echo "<font class='head'>".t("Ryjo")."</font><hr>";
 	$tyyppi = "ryjo";
 }
-elseif ($toim == "VERKKOKAUPPAUUTINEN") {
+elseif ($toim == "VERKKOKAUPPA") {
 	echo "<font class='head'>".t("Verkkokaupan Uutiset")."</font><hr>";
 	$tyyppi = $toim;
 }
-elseif ($toim == "VERKKOKAUPPATARJOUS") {
-	echo "<font class='head'>".t("Verkkokaupan Tarjoukset")."</font><hr>";
-	$tyyppi = "ryjo";
+elseif ($toim == "VERKKOKAUPAN_YHTEYSTIEDOT") {
+	echo "<font class='head'>".t("Verkkokaupan Yhteystiedot")."</font><hr>";
+	$tyyppi = $toim;
 }
 
 if ($toim == "VIIKKOPALAVERI" or $toim == "ASIAKASPALVELU" or $toim == "RYJO") {
@@ -112,6 +112,8 @@ if ($tee == 'LISAA') {
 		$query .= "	kentta01 	= '$otsikko',
 					kentta02 	= '$uutinen',
 					kentta03 	= '$kuva',
+					kentta09 	= '$kentta09',
+					kentta10 	= '$kentta10',										
 					konserni 	= '$konserni',
 					kieli 		= '$lang',
 					kokopaiva	= '$kokopaiva',
@@ -133,6 +135,8 @@ if ($tee == 'LISAA') {
 		echo "<font class='error'>".t("Sek‰ otsikko ett‰ uutinen on syˆtett‰v‰!")."</font><br><br>";
 		$rivi["kentta01"]  = $otsikko;
 		$rivi["kentta02"]  = $uutinen;
+		$rivi["kentta09"]  = $kentta09;
+		$rivi["kentta10"]  = $kentta10;				
 		$rivi["konserni"]  = $konserni;
 		$rivi["kokopaiva"] = $kokopaiva;
 		$tee = "SYOTA";
@@ -228,6 +232,60 @@ if ($tee == "SYOTA") {
 			echo "<option value='$apurow[0]' $sel>".t($maa)."</option>";
 		}
 	}
+	
+	if($toim == "VERKKOKAUPPA") {
+		echo "<tr>
+			<th>".t("Osasto")."</th>
+			<td>";
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'osasto' and selitetark_2 = 'verkkokauppa'
+					ORDER BY selite";
+		$result = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($result)>0) {
+			echo "<select name='kentta09'>
+					<option value = ''>".t("Etusivu")."</option>";
+
+			while($orow = mysql_fetch_array($result)) {
+				if($rivi["kentta09"] == $orow["selite"]) $sel = "SELECTED";
+				else $sel = "";
+				echo "<option value='$orow[selite]' $sel>$orow[selite] - $orow[selitetark]</option>";
+			}
+			echo "</select>";
+		}
+		else {
+			echo t("Yht‰‰n verkkokauppaosasto ei ole m‰‰ritetty")."!!";
+		}	
+		echo "	</td>
+			</tr>";		
+	}
+	
+/*
+	echo "<tr>
+		<th>".t("Tuoteryhm‰")."</th>
+		<td>";
+	$query = "	SELECT *, (SELECT tunnus from tuote where yhtio = avainsana.yhtio and try = avainsana.selite and hinnastoon = 'W' and tuotemerkki != '' and status != 'P' limit 1) onvaiei
+				FROM avainsana
+				WHERE yhtio = '$kukarow[yhtio]' and laji = 'try'
+				HAVING onvaiei > 0
+				ORDER BY selite";
+	$result = mysql_query($query) or pupe_error($query);
+	if(mysql_num_rows($result)>0) {
+		echo "<select name='kentta10'>
+				<option value = ''>".t("Osaston etusivu")."</option>";
+		while($orow = mysql_fetch_array($result)) {
+			if($rivi["kentta10"] == $orow["selite"]) $sel = "SELECTED";
+			else $sel = "";
+			echo "<option value='$orow[selite]' $sel>$orow[selite] - $orow[selitetark]</option>";
+		}
+		echo "</select>";
+	}
+	else {
+		echo t("Yht‰‰n verkkokauppaosasto ei ole m‰‰ritetty")."!!";
+	}	
+	echo "	</td>
+		</tr>";
+*/
 	
 	if ($rivi['kokopaiva'] != "") $check = "CHECKED";
 	else $check = "";
@@ -438,6 +496,16 @@ if ($tee == '') {
 			
 			echo"<tr><th colspan='2'>";
 			echo "Toimittaja: $uutinen[nimi]<br>P‰iv‰m‰‰r‰: $uutinen[pvmalku]";
+			
+			if($toim == "VERKKOKAUPPA") {
+				if($uutinen["kentta09"] == "") {
+					$uutinen["kentta09"] = "Etusivu";
+					$uutinen["kentta10"] = "";
+				}
+				elseif($uutinen["kentta10"] == "") $uutinen["kentta10"] = "Osaston etusivu";
+				
+				echo "<br>Osasto: $uutinen[kentta09]<br>Try: $uutinen[kentta10]";
+			}
 
 			if (strpos($_SERVER['SCRIPT_NAME'], "uutiset.php")  !== FALSE) {
 				if (($toim == "VIIKKOPALAVERI" or $toim == "ASIAKASPALVELU" or $toim == "RYJO") and ($uutinen["kuittaus"] == "")) {

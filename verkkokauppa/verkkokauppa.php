@@ -18,7 +18,13 @@ if(!function_exists("menu")) {
 		}
 		
 		if($osasto == "") {
-			$val 		=  "<table class='menu'><tr class='aktiivi'><td class='back'><a href='verkkokauppa.php'>".t("Alkuun")."</a></td></tr><tr><td class='back'><table>
+			$val 		=  "<table class='menu'>
+								<tr class='aktiivi'>
+									<td class='back'><a href='verkkokauppa.php'>".t("Etusivulle")."</a><br><a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=yhteystiedot', false, true);\">".t("Yhteystiedot")."</a></td>
+								</tr>
+								<tr>
+									<td class='back'>
+										<table>
 						<tr><td class='back'><font class='info'>Hae:</font></td></tr>
 						<tr>
 							<td class='back'><form id = 'tuotehaku' name='tuotehaku'  action = \"javascript:ajaxPost('tuotehaku', 'verkkokauppa.php?tee=selaa&hakutapa=nimi', 'selain', false, true);\" method = 'post'>
@@ -159,27 +165,31 @@ if(!function_exists("tilaukset_linkki")) {
 }
 
 if(!function_exists("uutiset")) {
-	function uutiset($osasto="", $try="") {
+	function uutiset($osasto="", $try="", $yhteystiedot="") {
 		global $yhtiorow, $kukarow;
 		
-		
-		$val = "
-		<table class='uutinen'>
-			<tr><td class='back' align = 'right'>".tilaukset_linkki()."</td></tr>";
-			
-		if($osasto == "") {
-			$lisa = " and kentta09 = '' and kentta10 = ''";
-		}
-		elseif($try == "") {
-			$lisa = " and kentta09 = '$osasto' and kentta10 = ''";			
+		if($yhteystiedot != "") {
+			$lisa = "and tyyppi = 'VERKKOKAUPAN_YHTEYSTIEDOT'";
 		}
 		else {
-			$lisa = " and kentta09 = '$osasto' and kentta10 = '$try'";
+			$val = "
+			<table class='uutinen'>
+				<tr><td class='back' align = 'right'>".tilaukset_linkki()."</td></tr>";
+			
+			if($osasto == "") {
+				$lisa = "and tyyppi = 'VERKKOKAUPPA' and kentta09 = '' and kentta10 = ''";
+			}
+			elseif($try == "") {
+				$lisa = "and tyyppi = 'VERKKOKAUPPA' and kentta09 = '$osasto' and kentta10 = ''";			
+			}
+			else {
+				$lisa = "and tyyppi = 'VERKKOKAUPPA' and kentta09 = '$osasto' and kentta10 = '$try'";
+			}			
 		}
 		
 		$query = "	SELECT *
 					FROM kalenteri
-					WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'VERKKOKAUPPA' $lisa
+					WHERE yhtio = '$kukarow[yhtio]'  $lisa
 					ORDER BY kokopaiva asc , luontiaika DESC
 					LIMIT 8";
 		$result = mysql_query($query) or pupe_error($query);
@@ -189,8 +199,10 @@ if(!function_exists("uutiset")) {
 				$val .= "<img class='uutinen' src='view.php?id=$row[kentta03]'><br>";
 			}
 			
-			$search = "/#{2}([^#]+)#{2}([^#]+)#{2}/";
+			$search = "/#{2}([^#]+)#{2}(([^#]+)#{2}){0,1}/";
 			preg_match_all($search, $row["kentta02"], $matches, PREG_SET_ORDER);
+			//echo "<pre>".print_r($matches, true)."</pre>";
+			
 			if(count($matches) > 0) {
 				$search = array();
 				$replace = array();
@@ -201,15 +213,21 @@ if(!function_exists("uutiset")) {
 					 			FROM tuote
 								WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
 					$tres = mysql_query($query) or pupe_error($query);
+					
+					//	Tämä me korvataan aina!
+					$search[] = "/$m[0]/";
+					
 					if(mysql_num_rows($tres) <> 1) {
-						$search[] = "/$m[0]/";
 						$replace[]	= "";
 					}
 					else {
 						$trow = mysql_fetch_array($tres);
-						$search[] = "/$m[0]/";
-
-						$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$$trow[tuoteno]', false, true);\">	$m[2]</a>";
+						if(count($m) == 4) {
+							$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$trow[tuoteno]', false, true);\">$m[3]</a>";							
+						}
+						else {
+							$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$trow[tuoteno]', false, true);\">$trow[nimitys]</a>";							
+						}
 					}
 				}
 				
@@ -230,8 +248,8 @@ if($tee == "menu") {
 	die(menu($osasto, $try));
 }
 
-if($tee == "kuvaus") {
-	die(uutiset($osasto, $try));	
+if($tee == "yhteystiedot") {
+	die(uutiset("", "", "JOO"));	
 }
 
 if($tee == "uutiset") {

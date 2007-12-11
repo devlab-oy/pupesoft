@@ -50,8 +50,8 @@ if ($tee == "muokkaa") {
 
 				while ($asiakas = mysql_fetch_array($result)) {
 					$sel = "";
-					if ($rivi["asiakas"] == $asiakas["tunnus"]) $sel = "SELECTED";					
-					echo "<option value='$asiakas[tunnus]' $sel>$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])</option>";
+					if ($rivi["asiakas"] == $asiakas["tunnus"]) $sel = "SELECTED";
+					echo "<option title='$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])' value='$asiakas[tunnus]' $sel>$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])</option>";
 				}
 
 				echo "</select>";
@@ -59,11 +59,11 @@ if ($tee == "muokkaa") {
 
 			echo "</td>";
 
-			$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika 
-						FROM kuka 
+			$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika
+						FROM kuka
 						LEFT JOIN todo on (todo.tekija = kuka.tunnus)
-						WHERE kuka.yhtio = '$kukarow[yhtio]' 
-						and kuka.myyja != 0 
+						WHERE kuka.yhtio = '$kukarow[yhtio]'
+						and kuka.myyja != 0
 						GROUP BY kuka.tunnus
 						ORDER BY aika desc";
 			$result = mysql_query($query) or pupe_error($query);
@@ -73,8 +73,8 @@ if ($tee == "muokkaa") {
 
 			while ($asiakas = mysql_fetch_array($result)) {
 				$sel = "";
-				if ($rivi["tekija"] == $asiakas["tunnus"]) $sel = "SELECTED";					
-				echo "<option value='$asiakas[tunnus]' $sel>$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)</option>";
+				if ($rivi["tekija"] == $asiakas["tunnus"]) $sel = "SELECTED";
+				echo "<option title='$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)' value='$asiakas[tunnus]' $sel>$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)</option>";
 			}
 
 			echo "</select></td>";
@@ -154,11 +154,11 @@ if ($tee == "valmis") {
 }
 
 if ($tee == "") {
-	
+
 	enable_ajax();
 	echo "<a href=\"javascript:toggleGroup('uusidiv')\">Lis‰‰ uusi teht‰v‰</a><br><br>";
-	
-	
+
+
 	echo "
 	<div id='uusidiv' style='display:none'>
 	<form name='uusi' method='post' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>
@@ -178,7 +178,7 @@ if ($tee == "") {
 		<tr>
 			<td><textarea name='kuvaus' cols='55' rows='4'></textarea></td>
 			<td>";
-	
+
 		$query  = "	SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' ORDER BY selaus, nimi";
 		$result = mysql_query($query) or pupe_error($query);
 
@@ -188,8 +188,8 @@ if ($tee == "") {
 
 			while ($asiakas = mysql_fetch_array($result)) {
 				$sel = "";
-				if ($rivi["asiakas"] == $asiakas["tunnus"]) $sel = "SELECTED";					
-				echo "<option value='$asiakas[tunnus]' $sel>$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])</option>";
+				if ($rivi["asiakas"] == $asiakas["tunnus"]) $sel = "SELECTED";
+				echo "<option title='$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])' value='$asiakas[tunnus]' $sel>$asiakas[nimi] $asiakas[nimitark] ($asiakas[ytunnus])</option>";
 			}
 
 			echo "</select><br>";
@@ -197,11 +197,11 @@ if ($tee == "") {
 
 		echo "<input name='pyytaja' type='text' size='15'></td>";
 
-		$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika 
-					FROM kuka 
+		$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika
+					FROM kuka
 					LEFT JOIN todo on (todo.tekija = kuka.tunnus)
-					WHERE kuka.yhtio = '$kukarow[yhtio]' 
-					and kuka.myyja != 0 
+					WHERE kuka.yhtio = '$kukarow[yhtio]'
+					and kuka.myyja != 0
 					GROUP BY kuka.tunnus
 					ORDER BY aika desc";
 		$result = mysql_query($query) or pupe_error($query);
@@ -211,13 +211,13 @@ if ($tee == "") {
 
 		while ($asiakas = mysql_fetch_array($result)) {
 			$sel = "";
-			if ($rivi["tekija"] == $asiakas["tunnus"]) $sel = "SELECTED";					
-			echo "<option value='$asiakas[tunnus]' $sel>$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)</option>";
+			if ($rivi["tekija"] == $asiakas["tunnus"]) $sel = "SELECTED";
+			echo "<option title='$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)' value='$asiakas[tunnus]' $sel>$asiakas[nimi] ($asiakas[kpl] kpl / $asiakas[aika] h)</option>";
 		}
 
 		echo "</select></td>";
-	
-			
+
+
 			echo "</td>
 			<td><input name='kesto_arvio' type='text' size='6'></td>
 			<td><input name='deadline' type='text' size='10'</td>
@@ -245,7 +245,7 @@ if ($tee == "") {
 
 	</table>
 	</form><br></div>";
-		
+
 	if ($sort == "pyytaja")			$sort = "order by sorttaus,pyytaja,prioriteetti,deadline,projekti,aika";
 	elseif ($sort == "projekti")	$sort = "order by sorttaus,projekti,prioriteetti,deadline,aika";
 	elseif ($sort == "kesto_arvio")	$sort = "order by sorttaus,kesto_arvio,prioriteetti,deadline,aika";
@@ -291,7 +291,7 @@ if ($tee == "") {
 	$numero = 0;
 
 	echo "<table width='1000'>";
-	
+
 	echo "<tr>
 		<th><a href='?sort=none&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>#</a></th>
 		<th><a href='?sort=kuvaus&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>kuvaus</a></th>
@@ -322,7 +322,7 @@ if ($tee == "") {
 	echo "<td><input type='submit' value='Hae'></td>";
 	echo "</tr>";
 	echo "</form>";
-	
+
 	while ($rivi = mysql_fetch_array($result)) {
 
 		$sel = array();
@@ -342,7 +342,7 @@ if ($tee == "") {
 		if ($rivi["deadline"] == '9999-99-99') {
 			$rivi["deadline"] = "";
 		}
-		
+
 		if ($rivi["sorttaus"] != 0) {
 			$omat++;
 		}
@@ -350,7 +350,7 @@ if ($tee == "") {
 			echo "<tr><td colspan='9' class='back'>&nbsp;</td></tr>";
 			$omat = 0;
 		}
-		
+
 		echo "<tr class='aktiivi'>";
 
 		echo "<form method='post' name='todo' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku#ankkuri_$numero' autocomplete='off'>";

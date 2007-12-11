@@ -290,7 +290,7 @@ if ($tee == "") {
 	$tunnit = 0;
 	$numero = 0;
 
-	echo "<table width='1000'>";
+	echo "<table width='1000' cellpadding='2'>";
 
 	echo "<tr>
 		<th><a href='?sort=none&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>#</a></th>
@@ -357,7 +357,7 @@ if ($tee == "") {
 		echo "<input type='hidden' name='tee' value='valmis'>";
 		echo "<input type='hidden' name='tunnus' value='$rivi[tunnus]'>";
 
-		echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku' name='ankkuri_$numero'>$numero</a></th>";
+		echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku' name='ankkuri_$numero'>$rivi[tunnus]</a></th>";
 
 		$rivi["kuvaus"] = str_replace("\n", "<br>", $rivi["kuvaus"]);
 
@@ -378,7 +378,12 @@ if ($tee == "") {
 
 	echo "</table><br>";
 
-	$query = "select * from todo where yhtio = '$kukarow[yhtio]' and kuittaus != '' order by aika desc limit 20";
+	$query = "	SELECT * 
+				FROM todo 
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and kuittaus != '' 
+				ORDER BY aika DESC 
+				LIMIT 20";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
@@ -414,7 +419,7 @@ if ($tee == "") {
 			$numero ++;
 
 			echo "<tr class='aktiivi'>";
-			echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>$numero</a></th>";
+			echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>$rivi[tunnus]</a></th>";
 			echo "<td width='550'>$rivi[kuvaus]</td>";
 			echo "<td>$rivi[pyytaja]</td>";
 			echo "<td>$rivi[projekti]</td>";

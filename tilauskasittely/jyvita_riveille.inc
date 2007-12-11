@@ -46,8 +46,14 @@ $nega_summa = $tarow["nega_summa"];
 if ($anna_ea == "TOKI" and ($jysum < 0 or $jysum >= 100)) {
 	echo "<font class='error'>".t("Erikoisalennus tulee olla")." 0 - 100%!!</font><br>";
 }
-elseif ($jysum <= 0 and $anna_ea != "TOKI" and $plus_summa != 0) {
-	echo "<font class='error'>".t("Et voi jyvitt‰‰ summaa jos sinulla on sek‰ veloitus- ett‰ hyvitysrivej‰ ja loppusumma j‰‰ miinukselle")."!!</font><br><br>";
+elseif ($jysum == 0) {
+	echo "<font class='error'>".t("Jyvitett‰v‰ summa ei saa olla nolla")."!</font><br>";
+}
+elseif ($jysum < 0 and $nega_summa >= 0) {
+	echo "<font class='error'>".t("Et voi jyvitt‰‰ summaa negatiiviseksi jos sinulla ei ole hyvitysrivej‰")."!</font><br>";
+}
+elseif ($jysum > 0 and $plus_summa <= 0) {
+	echo "<font class='error'>".t("Et voi jyvitt‰‰ summaa positiiviseksi jos sinulla ei ole veloitusrivej‰")."!</font><br>";
 }
 else {
 
@@ -68,10 +74,10 @@ else {
 
 		echo "jyvitet‰‰n tuotteella";
 
-		$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[alennus_tuotenumero]'";
+		$query = "SELECT * FROM tuote WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$yhtiorow[alennus_tuotenumero]'";
 		$rhire = mysql_query($query) or pupe_error($query);
 
-		if(mysql_num_rows($rhire) == 1) {
+		if (mysql_num_rows($rhire) == 1) {
 			$trow  = mysql_fetch_array($rhire);
 
 			$hinta		= round(($summa - $jysum),$yhtiorow['hintapyoristys']);
@@ -81,61 +87,72 @@ else {
 
 			require("alv.inc");
 
-			$query  = "insert into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  (now(), '$hinta', 'N', '-1', '-1', '$tilausnumero', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+			$query  = "INSERT INTO tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) VALUES (now(), '$hinta', 'N', '-1', '-1', '$tilausnumero', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 			$addtil = mysql_query($query) or pupe_error($query);
 		}
 		else {
-			echo "VIRHE: Alennusta ei voitu antaa alennustuote puuttuu!<br>";
+			echo t("VIRHE: Alennusta ei voitu antaa alennustuote puuttuu")."!<br>";
 		}
 	}
 	else {
+
 		// Jyvitet‰‰n riveille uusihinta ja tallennetaan syˆtetty summa lasku.hinta-kentt‰‰n
 		// huomioidaan hyvitysrivit ja ei muuteta niitten hintoja
 
-		// jos meill‰ on tilaus kokonaan hyvityst‰
-		if ($plus_summa == 0) {
-			$jypro = $jysum / $nega_summa;
+		$boob_jyva = 0;
+
+		// jos jyvityssumma on miinusta ja meill‰ on hivitysrivej‰, kosketaan vain hyvitysriveihin
+		if ($jysum < 0 and $nega_summa != 0) {
+			$halu_summa = $jysum - $plus_summa;
+			$jypro = $halu_summa / $nega_summa;
 
 			// Rullataan tilausrivej‰
 			$query = "	SELECT tunnus, tuoteno, hinta, tilkpl, ale
 						FROM tilausrivi
-						where yhtio 	 = '$kukarow[yhtio]'
+						WHERE yhtio 	 = '$kukarow[yhtio]'
 						and varattu + jt < 0
 						and otunnus 	 = '$tilausnumero'
 						and rivihinta 	 = 0
 						and uusiotunnus  = 0
-						order by hinta";
+						ORDER BY hinta";
 		}
-		else {
+		elseif ($jysum > 0 and $plus_summa != 0) {
 			$halu_summa = $jysum - $nega_summa;
 			$jypro = $halu_summa / $plus_summa;
 
 			// Rullataan tilausrivej‰
 			$query = "	SELECT tunnus, tuoteno, hinta, tilkpl, ale
 						FROM tilausrivi
-						where yhtio 	 = '$kukarow[yhtio]'
+						WHERE yhtio 	 = '$kukarow[yhtio]'
 						and varattu + jt > 0
 						and otunnus 	 = '$tilausnumero'
 						and rivihinta 	 = 0
 						and uusiotunnus  = 0
-						order by hinta";
+						ORDER BY hinta";
+		}
+		else {
+			echo "<font class='error'>".t("Jyvitys ep‰onnistui")."!</font><br>";
+			$boob_jyva = 1;
 		}
 
-		$result = mysql_query($query) or pupe_error($query);
+		if ($boob_jyva == 0) {
+			$result = mysql_query($query) or pupe_error($query);
 
-		while ($tirow = mysql_fetch_array($result)) {
-			$uushinta = round($tirow['hinta'] * $jypro, $yhtiorow['hintapyoristys']);
-			$query = "UPDATE tilausrivi SET hinta = '$uushinta' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tirow[tunnus]'";
-			$upresult = mysql_query($query) or pupe_error($query);
+			while ($tirow = mysql_fetch_array($result)) {
+				$uushinta = round($tirow['hinta'] * $jypro, $yhtiorow['hintapyoristys']);
+				$query = "UPDATE tilausrivi SET hinta = '$uushinta' WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tirow[tunnus]'";
+				$upresult = mysql_query($query) or pupe_error($query);
+			}
+
+			$jysum = round($jysum,$yhtiorow['hintapyoristys']);
+
+			//  P‰ivitet‰‰n laskulle hinta-kentt‰‰n syˆtetty summa
+			$query	= "UPDATE lasku SET hinta = '$jysum' WHERE tunnus = '$kukarow[kesken]' and yhtio = '$kukarow[yhtio]'";
+			$result	= mysql_query($query) or pupe_error($query);
+
+			$laskurow["hinta"] = $jysum;
 		}
 
-		$jysum = round($jysum,$yhtiorow['hintapyoristys']);
-
-		//  P‰ivitet‰‰n laskulle hinta-kentt‰‰n syˆtetty summa
-		$query	= "update lasku set hinta = '$jysum' where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-		$result	= mysql_query($query) or pupe_error($query);
-
-		$laskurow["hinta"] = $jysum;
 	}
 }
 

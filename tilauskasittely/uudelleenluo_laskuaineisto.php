@@ -350,26 +350,25 @@
 					$alvresult = mysql_query($alvquery) or pupe_error($alvquery);
 
 					while ($alvrow1 = mysql_fetch_array($alvresult)) {
-						// Valuuttajutut kuntoon
-						if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $lasrow["vienti_kurssi"] != 0) {
-							$rivihinta_q 	= "(rivihinta/$lasrow[vienti_kurssi])";
-						}
-						else {
-							$rivihinta_q 	= "rivihinta";
-						}
 
 						if ($alvrow1["alv"] >= 500) {
-							$aquery = "	SELECT alv, round(sum($rivihinta_q),2) rivihinta, round(sum(0),2) alvrivihinta
+							$aquery = "	SELECT tilausrivi.alv,
+										round(sum(tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
+										round(sum(0),2) alvrivihinta
 										FROM tilausrivi
-										WHERE uusiotunnus = '$lasrow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow1[alv]'
-										GROUP by alv";
+										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+										WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]' and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.alv = '$alvrow1[alv]' and tilausrivi.tyyppi = 'L'
+										GROUP BY alv";
 						}
 						else {
-							$aquery = "	SELECT alv, round(sum($rivihinta_q),2) rivihinta, round(sum($rivihinta_q*(alv/100)),2) alvrivihinta
+							$aquery = "	SELECT tilausrivi.alv,
+										round(sum(tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1)),2) rivihinta,
+										round(sum((tilausrivi.rivihinta/if(lasku.vienti_kurssi>0, lasku.vienti_kurssi, 1))*(tilausrivi.alv/100)),2) alvrivihinta
 										FROM tilausrivi
-										WHERE uusiotunnus = '$lasrow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow1[alv]'
-										GROUP by alv";
-						}
+										JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+										WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]' and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.alv = '$alvrow1[alv]' and tilausrivi.tyyppi = 'L'
+										GROUP BY alv";
+						}						
 						$aresult = mysql_query($aquery) or pupe_error($aquery);
 						$alvrow = mysql_fetch_array($aresult);
 
@@ -398,11 +397,12 @@
 					$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 
 					// Kirjoitetaan rivitietoja tilausriveiltä
-					$query = "	SELECT *, if(date_format(toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(toimitettuaika, '%Y-%m-%d')) toimitettuaika, $sorttauskentta
+					$query = "	SELECT tilausrivi.*, lasku.vienti_kurssi, if(date_format(tilausrivi.toimitettuaika, '%Y-%m-%d') = '0000-00-00', date_format(now(), '%Y-%m-%d'), date_format(tilausrivi.toimitettuaika, '%Y-%m-%d')) toimitettuaika, $sorttauskentta
 								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]'
-								and uusiotunnus = '$lasrow[tunnus]'
-								and kpl<>0
+								JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.uusiotunnus = '$lasrow[tunnus]'
+								and tilausrivi.kpl <> 0
 								and tilausrivi.tyyppi = 'L'
 								ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 					$tilres = mysql_query($query) or pupe_error($query);
@@ -459,13 +459,13 @@
 						if ($lasrow["valkoodi"] != '' and trim(strtoupper($lasrow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 							// Rivihinta
 							if ($yhtiorow["alv_kasittely"] == '') {
-								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100) / (1+$tilrow["alv"]/100), $yhtiorow['hintapyoristys']);
+								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100) / (1+$tilrow["alv"]/100), $yhtiorow['hintapyoristys']);
 							}
 							else {
-								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100), $yhtiorow['hintapyoristys']);
+								$tilrow["rivihinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"])*$tilrow["kpl"]*(1-$tilrow["ale"]/100), $yhtiorow['hintapyoristys']);
 							}
 							// Yksikköhinta
-							$tilrow["hinta"] = round(laskuval($tilrow["hinta"], $lasrow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
+							$tilrow["hinta"] = round(laskuval($tilrow["hinta"], $tilrow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
 						}
 
 						$vatamount = round($tilrow['rivihinta']*$tilrow['alv']/100, 2);

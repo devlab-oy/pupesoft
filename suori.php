@@ -73,8 +73,9 @@
 		}
 
 		$rahasumma = (float) $summa;
+		$kurssi    = (float) $kurssi;
 
-		if ($rahasumma == 0) {
+		if ($rahasumma == 0 and $laskurow["summa"] != 0) {
 			echo "<font class='error'>".t("Et antanut maksettua summaa")."!</font><br>";
 			$tee = 'W';
 		}

@@ -246,12 +246,16 @@ if ($tee == "") {
 	</table>
 	</form><br></div>";
 
-	if ($sort == "pyytaja")			$sort = "order by sorttaus,pyytaja,prioriteetti,deadline,projekti,aika";
-	elseif ($sort == "projekti")	$sort = "order by sorttaus,projekti,prioriteetti,deadline,aika";
-	elseif ($sort == "kesto_arvio")	$sort = "order by sorttaus,kesto_arvio,prioriteetti,deadline,aika";
-	elseif ($sort == "kuvaus")		$sort = "order by sorttaus,kuvaus,prioriteetti,deadline,aika";
-	elseif ($sort == "deadline")	$sort = "order by sorttaus,deadline,prioriteetti,aika";
-	else 							$sort = "order by sorttaus,prioriteetti,deadline,kesto_arvio desc,aika,projekti";
+	if ($sort == "pyytaja")				$sort = "order by sorttaus,pyytaja,prioriteetti,deadline,projekti,aika";
+	elseif ($sort == "projekti")		$sort = "order by sorttaus,projekti,prioriteetti,deadline,aika";
+	elseif ($sort == "kesto_arvio")		$sort = "order by sorttaus,kesto_arvio,prioriteetti,deadline,aika";
+	elseif ($sort == "kuvaus")			$sort = "order by sorttaus,kuvaus,prioriteetti,deadline,aika";
+	elseif ($sort == "deadline")		$sort = "order by sorttaus,deadline,prioriteetti,aika";
+	elseif ($sort == "tunnus")			$sort = "order by sorttaus,tunnus,deadline,kesto_arvio desc,aika,projekti";
+	elseif ($sort == "kuvaus")			$sort = "order by sorttaus,kuvaus,deadline,kesto_arvio desc,aika,projekti";
+	elseif ($sort == "tekija")			$sort = "order by sorttaus,tekija,deadline,kesto_arvio desc,aika,projekti";
+	elseif ($sort == "prioriteetti")	$sort = "order by sorttaus,prioriteetti,deadline,kesto_arvio desc,aika,projekti";
+	else 								$sort = "order by sorttaus,prioriteetti,deadline,kesto_arvio desc,aika,projekti";
 
 	$lisa = "";
 
@@ -276,8 +280,12 @@ if ($tee == "") {
 	if ($tekija_haku != "") {
 		$lisa .= " and kuka.nimi like '%$tekija_haku%' ";
 	}
+	if ($tunnus_haku != "") {
+		$lisa .= " and todo.tunnus = '$tunnus_haku' ";
+	}
 
-	$query = "	SELECT kuka.nimi, todo.*, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, if(tekija='$kukarow[tunnus]', prioriteetti-50,0) sorttaus, asiakas.nimi asiakasnimi
+
+	$query = "	SELECT kuka.nimi, todo.*, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, if(tekija='$kukarow[tunnus]', prioriteetti-50,0) sorttaus, asiakas.nimi asiakasnimi, todo.tunnus
 				FROM todo
 				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
 				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
@@ -293,14 +301,14 @@ if ($tee == "") {
 	echo "<table width='1000' cellpadding='2'>";
 
 	echo "<tr>
-		<th><a href='?sort=none&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>#</a></th>
-		<th><a href='?sort=kuvaus&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>kuvaus</a></th>
-		<th><a href='?sort=pyytaja&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>pyytäjä</a></th>
-		<th><a href='?sort=tekija&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>tekijä</a></th>
-		<th><a href='?sort=projekti&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>projekti</a></th>
-		<th><a href='?sort=kesto_arvio&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>aika-arvio</a></th>
-		<th><a href='?sort=deadline&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>deadline</a></th>
-		<th><a href='?sort=prioriteetti&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>prio</a></th>
+		<th><a href='?sort=tunnus&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>#</a></th>
+		<th><a href='?sort=kuvaus&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>kuvaus</a></th>
+		<th><a href='?sort=pyytaja&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>pyytäjä</a></th>
+		<th><a href='?sort=tekija&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>tekijä</a></th>
+		<th><a href='?sort=projekti&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>projekti</a></th>
+		<th><a href='?sort=kesto_arvio&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>aika-arvio</a></th>
+		<th><a href='?sort=deadline&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>deadline</a></th>
+		<th><a href='?sort=prioriteetti&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>prio</a></th>
 		<th>kuittaus</th>
 	</tr>";
 
@@ -311,8 +319,8 @@ if ($tee == "") {
 	echo "<form name='haku' action='todo.php' method='post'>";
 	echo "<input type='hidden' name='sort' value = '$sort'>";
 	echo "<tr>";
-	echo "<td></td>";
-	echo "<td><input type='text' size='10' name='kuvaus_haku' 		value='$kuvaus_haku'></td>";
+	echo "<td><input type='text' size='4' name='tunnus_haku' 		value='$tunnus_haku'></td>";
+	echo "<td><input type='text' size='40' name='kuvaus_haku' 		value='$kuvaus_haku'></td>";
 	echo "<td><input type='text' size='10' name='pyytaja_haku' 		value='$pyytaja_haku'></td>";
 	echo "<td><input type='text' size='10' name='tekija_haku' 		value='$tekija_haku'></td>";
 	echo "<td><input type='text' size='10' name='projekti_haku' 	value='$projekti_haku'></td>";
@@ -386,7 +394,7 @@ if ($tee == "") {
 				LIMIT 20";
 	$result = mysql_query($query) or pupe_error($query);
 
-	if (mysql_num_rows($result) > 0) {
+	if (mysql_num_rows($result) > 0 and $lisa == "") {
 
 		echo "<font class='head'>20 VIIMEKSI TEHTYÄ</font><hr>";
 		echo "<table>";

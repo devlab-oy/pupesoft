@@ -177,7 +177,41 @@
 		}
 	}
 	elseif ($kukarow["kesken"] != 0 and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "N") and $verkkokauppa != "") {
-		echo "<br><a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$haku[3]&try=$haku[4]')\">Tilauksen tuotteet</a><br><br>";
+		if(!function_exists("tilaukset_linkki")) {
+			function tilaukset_linkki() {
+				global $yhtiorow, $kukarow, $osasto, $try;
+
+				$val = "";
+				if($kukarow["kesken"] > 0) {
+					$query = "	SELECT *
+								FROM lasku
+								WHERE yhtio = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]'";
+					$result = mysql_query($query) or pupe_error($query);
+					if(mysql_num_rows($result) == 1) {
+						$laskurow = mysql_fetch_array($result);
+						$query = "	SELECT round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),$yhtiorow[hintapyoristys]) summa
+									FROM tilausrivi
+									WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi != 'D'";
+						$result = mysql_query($query) or pupe_error($query);
+						$row = mysql_fetch_array($result);
+
+						$val .= "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$haku[3]&try=$haku[4]&osasto=$osasto&try=$try')\">".t("Tilauksen tuotteen")." <em>".t("Yhteensä")." $row[summa]</em></a><br>";
+
+					}
+				}
+
+				if($yhtiorow["alv_kasittely"] != "") {
+					$val .=  "<font class='message'>".t("Tuotteiden hinnat ovat arvonlisäverottomia").".</font>";
+				}
+				else {
+					$val .=  "<font class='message'>".t("Tuotteiden hinnat sisältävät arvonlisaveron").".</font>";
+				}
+
+				return $val;
+			}
+		}
+		
+		echo tilaukset_linkki();
 	}
 
 	$kentat	= "tuote.tuoteno,toim_tuoteno,tuote.nimitys,tuote.osasto,tuote.try,tuote.tuotemerkki";
@@ -478,15 +512,6 @@
 		echo "<input type='hidden' name='tee' value = 'TI'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
-		
-		if($verkkokauppa != "") {
-			if($yhtiorow["alv_kasittely"] != "") {
-				echo "<font class='message'>".t("Tuotteiden hinnat ovat arvonlisäverottomia").".</font>";
-			}
-			else {
-				echo "<font class='message'>".t("Tuotteiden hinnat sisältävät arvonlisaveron").".</font>";
-			}
-		}
 		echo "<table>";
 
 		

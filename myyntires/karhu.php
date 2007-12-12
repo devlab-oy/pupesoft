@@ -68,11 +68,6 @@ if ($tee == "ALOITAKARHUAMINEN") {
 	$maksuehtolista = "";
 	$ktunnus = (int) $ktunnus;
 
-	$maa_lisa = "";
-	if ($mehto_maa != "") {
-		$maa_lisa = "and (sallitut_maat like '%$mehto_maa%' or sallitut_maat = '') ";
-	}
-
 	if ($ktunnus != 0) {
 		$query = "	SELECT *
 					FROM factoring
@@ -83,12 +78,17 @@ if ($tee == "ALOITAKARHUAMINEN") {
 			$factoringrow = mysql_fetch_array($result);
 			$query = "	SELECT GROUP_CONCAT(tunnus) karhuttavat
 						FROM maksuehto
-						WHERE yhtio = '$kukarow[yhtio]' and factoring = '$factoringrow[factoringyhtio]' $maa_lisa";
+						WHERE yhtio = '$kukarow[yhtio]' and factoring = '$factoringrow[factoringyhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			if (mysql_num_rows($result) == 1) {
-				$maksuehdotrow = mysql_fetch_array($result);
+			$maksuehdotrow = mysql_fetch_array($result);
+
+			if ($maksuehdotrow["karhuttavat"] != '') {
 				$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat]) and lasku.valkoodi = '$factoringrow[valkoodi]'";
+			} 
+			else {
+				echo "Ei karhuttavaa";
+				exit;
 			}
 		}
 		else {
@@ -99,12 +99,16 @@ if ($tee == "ALOITAKARHUAMINEN") {
 	else {
 		$query = "	SELECT GROUP_CONCAT(tunnus) karhuttavat
 					FROM maksuehto
-					WHERE yhtio = '$kukarow[yhtio]' and factoring = '' $maa_lisa";
+					WHERE yhtio = '$kukarow[yhtio]' and factoring = ''";
 		$result = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($result) == 1) {
-			$maksuehdotrow = mysql_fetch_array($result);
+		$maksuehdotrow = mysql_fetch_array($result);
+
+		if ($maksuehdotrow["karhuttavat"] != '') {
 			$maksuehtolista = " and lasku.maksuehto in ($maksuehdotrow[karhuttavat])";
+		} else {
+			echo "Ei karhuttavaa";
+			exit;
 		}
 	}
 
@@ -124,10 +128,16 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 	if ($syot_ytunnus != '') {
 		$asiakaslisa = " and asiakas.ytunnus >= '$syot_ytunnus' ";
-	} elseif (isset($_POST['ytunnus_spec']) && ! empty($_POST['ytunnus_spec'])) {
+	} 
+	elseif (isset($_POST['ytunnus_spec']) and ! empty($_POST['ytunnus_spec'])) {
 		$asiakaslisa = sprintf(" and asiakas.ytunnus = '%s' ", mysql_real_escape_string($_POST['ytunnus_spec']));
 	}
 
+	$maa_lisa = "";
+	if ($lasku_maa != "") {
+		$maa_lisa = "and lasku.maa = '$lasku_maa'";
+	}
+	
 	$query = "	SELECT asiakas.ytunnus, GROUP_CONCAT(distinct lasku.tunnus) karhuttavat, sum(summa) karhuttava_summa
 				FROM lasku
 				JOIN (	SELECT lasku.tunnus,
@@ -144,8 +154,9 @@ if ($tee == "ALOITAKARHUAMINEN") {
 						and (lasku.erpcm < date_sub(now(), interval $lpvm_aikaa day) or lasku.summa < 0)
 						and lasku.summa	!= 0
 						$maksuehtolista
+						$maa_lisa
 						group by lasku.tunnus
-						HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut
+						HAVING (kpvm is null or kpvm < date_sub(now(), interval $kpvm_aikaa day))) as laskut 
 				JOIN asiakas ON lasku.yhtio=asiakas.yhtio and lasku.liitostunnus=asiakas.tunnus
 				WHERE lasku.tunnus = laskut.tunnus
 				$konslisa
@@ -182,7 +193,7 @@ if ($tee == 'KARHUA')  {
 				TO_DAYS(now())-TO_DAYS(lasku.erpcm) as ika,
 				max(karhukierros.pvm) as kpvm,
 				count(distinct karhu_lasku.ktunnus) as karhuttu,
-				if(maksuehto.jv!='', '".t("J‰lkivaatimus")."' ,'') jv
+				if(maksuehto.jv!='', '".t("J‰lkivaatimus")."' ,'') jv, lasku.yhtio_toimipaikka, lasku.valkoodi
 				FROM lasku
 				LEFT JOIN karhu_lasku on (lasku.tunnus=karhu_lasku.ltunnus)
 				LEFT JOIN karhukierros on (karhukierros.tunnus=karhu_lasku.ktunnus)
@@ -217,12 +228,12 @@ if ($tee == 'KARHUA')  {
 	echo "<tr><th>". t('Karhuviesti') ."</th><td>";
 	
 	$max = 0;
+
 	while ($lasku = mysql_fetch_array($result)) {
 		if ($lasku['karhuttu'] > $max) {
 			$max = $lasku['karhuttu'];
 		}
 	}
-		
 	mysql_data_seek($result,0);
 	
 	if ($asiakastiedot["kieli"] != "" and strtoupper($asiakastiedot["kieli"]) != strtoupper($yhtiorow["maa"])) {
@@ -311,7 +322,7 @@ if ($tee == 'KARHUA')  {
 	} else {
 		$submit_text = 'Tulosta paperille';
 	}
-	
+
 	echo "<table>";
 	echo "<tr>";
 	echo "<td class='back'><input type='button' onclick='javascript:document.lahetaformi.submit();' value='".t('Tulosta paperille')."'></td>";
@@ -335,6 +346,7 @@ if ($tee == 'KARHUA')  {
 	echo "<th>".t("Lasku karhutaan")."</th></tr>";
 	$summmmma = 0;
 
+	$valuutat = array();
 	while ($lasku = mysql_fetch_array($result)) {
 		echo "<tr class='aktiivi'><td>";
 		if ($kukarow['taso'] < 2) {
@@ -369,6 +381,11 @@ if ($tee == 'KARHUA')  {
 		echo "<td><input type='checkbox' name = 'lasku_tunnus[]' value = '$lasku[tunnus]' $chk> $lasku[jv]</td></tr>\n";
 		
 		$summmmma += $lasku["summa"];
+
+		// ker‰t‰‰n eri valuutat taulukkoon
+		if (!in_array($lasku["valkoodi"], $valuutat)) {
+			$valuutat[] = $lasku["valkoodi"];
+		}
 	}
 
 	$summmmma -= $kaatosumma;
@@ -382,6 +399,7 @@ if ($tee == 'KARHUA')  {
 	echo "<table>";
 	echo "<tr>";
 
+	echo "<input name='karhut_samalle_laskulle' type='hidden' value='".count($valuutat)."'>";
 	echo "<input name='tee' type='hidden' value='LAHETA'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
 	echo "<input name='ktunnus' type='hidden' value='$ktunnus'>";
@@ -444,48 +462,25 @@ if ($tee == "") {
 		echo "<input type='hidden' name='ktunnus' value='0'>";
 	}
 
-	$apuqu = "	select distinct sallitut_maat
-				from maksuehto
-				where yhtio = '$kukarow[yhtio]' and sallitut_maat != ''";
-	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+	echo "<tr><th>".t("Karhua vain laskuja maahan").": </th>";
+	echo "<td><select name='lasku_maa'>";
+	echo "<option value=''>".t("Ei maavalintaa")."</option>";
 
-	if (mysql_num_rows($meapu) > 0) {
+	$query = "	SELECT distinct koodi, nimi
+				FROM maat
+				where nimi != ''
+				ORDER BY koodi";
+	$meapu = mysql_query($query) or pupe_error($query);
 
-		$maa_lisa = " and koodi in (";
-
-		while ($row = mysql_fetch_array($meapu)) {
-			$maat = split('[, ]', $row["sallitut_maat"]);
-			foreach ($maat as $maa) {
-				$maa_lisa .= "'$maa',";
-			}
+	while ($row = mysql_fetch_array($meapu)) {
+		$sel = '';
+		if ($row["koodi"] == $lasku_maa) {
+			$sel = 'selected';
 		}
-
-		$maa_lisa = substr($maa_lisa, 0, -1);
-		$maa_lisa .= ")";
-
-		echo "<tr><th>".t("Karhua vain maksuehtoja maasta").": </th>";
-		echo "<td><select name='mehto_maa'>";
-		echo "<option value=''>".t("Ei maavalintaa")."</option>";
-
-		$query = "	SELECT distinct koodi, nimi
-					FROM maat
-					where nimi != '' $maa_lisa
-					ORDER BY koodi";
-		$meapu = mysql_query($query) or pupe_error($query);
-
-		while ($row = mysql_fetch_array($meapu)) {
-			$sel = '';
-			if ($row["koodi"] == $mehto_maa) {
-				$sel = 'selected';
-			}
-			echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
-		}
-		echo "</select></td>";
-		echo "</tr>";
+		echo "<option value='$row[koodi]' $sel>$row[nimi]</option>";
 	}
-	else {
-		echo "<input type='hidden' name='mehto_maa' value=''>";
-	}
+	echo "</select></td>";
+	echo "</tr>";
 
 	$apuqu = "	select kuka, nimi, puhno, eposti, tunnus
 				from kuka

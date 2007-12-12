@@ -223,23 +223,34 @@
 		
 		
 		$pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]),				$firstpage, $norm);
-		
-		$oikpos = $pdf->strlen($row["summa"], $norm);
-		$pdf->draw_text(500-$oikpos, $kala, $row["summa"], 					$firstpage, $norm);
-				
+
+		if ($row["valkoodi"] != $yhtiorow["valkoodi"]) {
+			$oikpos = $pdf->strlen($row["summa_valuutassa"], $norm);
+			$pdf->draw_text(500-$oikpos, $kala, $row["summa_valuutassa"]." ".$row["valkoodi"], 	$firstpage, $norm);
+		} 
+		else {
+			$oikpos = $pdf->strlen($row["summa"], $norm);
+			$pdf->draw_text(500-$oikpos, $kala, $row["summa"]." ".$row["valkoodi"], 				$firstpage, $norm);
+		}
+
 		$oikpos = $pdf->strlen(($row["karhuttu"]+1), $norm);
 		$pdf->draw_text(560-$oikpos, $kala, ($row["karhuttu"]+1), 			$firstpage, $norm);
 		
 		$kala = $kala - 13;
 
 		$lask++;
-		$summa+=$row["summa"];
+		
+		if ($row["valkoodi"] != $yhtiorow["valkoodi"]) {
+			$summa += $row["summa_valuutassa"];
+		} else {
+			$summa += $row["summa"];
+		}
 		return($summa);
 	}
 
 	function loppu ($firstpage, $summa) {
 
-		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $factoringrow, $maksuehtotiedot;
+		global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $ktunnus, $maksuehtotiedot, $toimipaikkarow, $laskutiedot, $frow, $karhut_samalle_laskulle;
 
 		//yhteensärivi
 		$pdf->draw_rectangle(110, 20, 90, 580,	$firstpage, $rectparam);
@@ -247,38 +258,73 @@
 		$pdf->draw_rectangle(110, 394, 90, 580,	$firstpage, $rectparam);
 		$pdf->draw_rectangle(110, 540, 90, 580,	$firstpage, $rectparam);
 
-		$pdf->draw_text(404, 92,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
-		$pdf->draw_text(464, 92,  $summa,						$firstpage, $norm);
-		$pdf->draw_text(550, 92,  $yhtiorow["valkoodi"],		$firstpage, $norm);
+		if ($karhut_samalle_laskulle == 1) {
+			$pdf->draw_text(404, 92,  t("YHTEENSÄ", $kieli).":",	$firstpage, $norm);
+			$pdf->draw_text(464, 92,  $summa,						$firstpage, $norm);
+			$pdf->draw_text(550, 92,  $laskutiedot["valkoodi"],		$firstpage, $norm);
+		}
 
 		//Pankkiyhteystiedot
 		$pdf->draw_rectangle(90, 20, 20, 580,	$firstpage, $rectparam);
 
 		if ($ktunnus != 0) {
 			$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
-			$pdf->draw_text(30, 72,  $factoringrow["pankkinimi1"]." ".$factoringrow["pankkitili1"],	$firstpage, $norm);
+			$pdf->draw_text(30, 72,  $frow["pankkinimi1"]." ".$frow["pankkitili1"],	$firstpage, $norm);
 		}
 		else {
 
-			if ($maksuehtotiedot["pankkinimi1"] != "") {
-				$yhtiorow["pankkinimi1"]	= $maksuehtotiedot["pankkinimi1"];
-				$yhtiorow["pankkitili1"]	= $maksuehtotiedot["pankkitili1"];
-				$yhtiorow["pankkiiban1"]	= $maksuehtotiedot["pankkiiban1"];
-				$yhtiorow["pankkiswift1"]	= $maksuehtotiedot["pankkiswift1"];
-				$yhtiorow["pankkinimi2"]	= $maksuehtotiedot["pankkinimi2"];
-				$yhtiorow["pankkitili2"]	= $maksuehtotiedot["pankkitili2"];
-				$yhtiorow["pankkiiban2"]	= $maksuehtotiedot["pankkiiban2"];
-				$yhtiorow["pankkiswift2"]	= $maksuehtotiedot["pankkiswift2"];
-				$yhtiorow["pankkinimi3"]	= $maksuehtotiedot["pankkinimi3"];
-				$yhtiorow["pankkitili3"]	= $maksuehtotiedot["pankkitili3"];
-				$yhtiorow["pankkiiban3"]	= $maksuehtotiedot["pankkiiban3"];
-				$yhtiorow["pankkiswift3"]	= $maksuehtotiedot["pankkiswift3"];
-			}
+			$pankkitiedot = array();
 
+			//Laitetaan pankkiyhteystiedot kuntoon
+			if ($maksuehtotiedot["factoring"] != "") {
+				$pankkitiedot["pankkinimi1"]  =	$factoringrow["pankkinimi1"];
+				$pankkitiedot["pankkitili1"]  =	$factoringrow["pankkitili1"];
+				$pankkitiedot["pankkiiban1"]  =	$factoringrow["pankkiiban1"];
+				$pankkitiedot["pankkiswift1"] =	$factoringrow["pankkiswift1"];
+				$pankkitiedot["pankkinimi2"]  =	$factoringrow["pankkinimi2"];
+				$pankkitiedot["pankkitili2"]  =	$factoringrow["pankkitili2"];
+				$pankkitiedot["pankkiiban2"]  =	$factoringrow["pankkiiban2"];
+				$pankkitiedot["pankkiswift2"] = $factoringrow["pankkiswift2"];
+				$pankkitiedot["pankkinimi3"]  =	"";
+				$pankkitiedot["pankkitili3"]  =	"";
+				$pankkitiedot["pankkiiban3"]  =	"";
+				$pankkitiedot["pankkiswift3"] =	"";
+
+			}
+			elseif ($maksuehtotiedot["pankkinimi1"] != "") {
+				$pankkitiedot["pankkinimi1"]  =	$maksuehtotiedot["pankkinimi1"];
+				$pankkitiedot["pankkitili1"]  =	$maksuehtotiedot["pankkitili1"];
+				$pankkitiedot["pankkiiban1"]  =	$maksuehtotiedot["pankkiiban1"];
+				$pankkitiedot["pankkiswift1"] =	$maksuehtotiedot["pankkiswift1"];
+				$pankkitiedot["pankkinimi2"]  =	$maksuehtotiedot["pankkinimi2"];
+				$pankkitiedot["pankkitili2"]  =	$maksuehtotiedot["pankkitili2"];
+				$pankkitiedot["pankkiiban2"]  =	$maksuehtotiedot["pankkiiban2"];
+				$pankkitiedot["pankkiswift2"] = $maksuehtotiedot["pankkiswift2"];
+				$pankkitiedot["pankkinimi3"]  =	$maksuehtotiedot["pankkinimi3"];
+				$pankkitiedot["pankkitili3"]  =	$maksuehtotiedot["pankkitili3"];
+				$pankkitiedot["pankkiiban3"]  =	$maksuehtotiedot["pankkiiban3"];
+				$pankkitiedot["pankkiswift3"] =	$maksuehtotiedot["pankkiswift3"];
+			}
+			else {
+				$pankkitiedot["pankkinimi1"]  =	$yhtiorow["pankkinimi1"];
+				$pankkitiedot["pankkitili1"]  =	$yhtiorow["pankkitili1"];
+				$pankkitiedot["pankkiiban1"]  =	$yhtiorow["pankkiiban1"];
+				$pankkitiedot["pankkiswift1"] =	$yhtiorow["pankkiswift1"];
+				$pankkitiedot["pankkinimi2"]  =	$yhtiorow["pankkinimi2"];
+				$pankkitiedot["pankkitili2"]  =	$yhtiorow["pankkitili2"];
+				$pankkitiedot["pankkiiban2"]  =	$yhtiorow["pankkiiban2"];
+				$pankkitiedot["pankkiswift2"] = $yhtiorow["pankkiswift2"];
+				$pankkitiedot["pankkinimi3"]  =	$yhtiorow["pankkinimi3"];
+				$pankkitiedot["pankkitili3"]  =	$yhtiorow["pankkitili3"];
+				$pankkitiedot["pankkiiban3"]  =	$yhtiorow["pankkiiban3"];
+				$pankkitiedot["pankkiswift3"] =	$yhtiorow["pankkiswift3"];
+			}
+			
+			
 			$pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),	$firstpage, $pieni);
-			$pdf->draw_text(30, 72,  $yhtiorow["pankkinimi1"]." ".$yhtiorow["pankkitili1"],	$firstpage, $norm);
-			$pdf->draw_text(217, 72, $yhtiorow["pankkinimi2"]." ".$yhtiorow["pankkitili2"],	$firstpage, $norm);
-			$pdf->draw_text(404, 72, $yhtiorow["pankkinimi3"]." ".$yhtiorow["pankkitili3"],	$firstpage, $norm);
+			$pdf->draw_text(30, 72,  $pankkitiedot["pankkinimi1"]." ".$pankkitiedot["pankkitili1"],	$firstpage, $norm);
+			$pdf->draw_text(217, 72, $pankkitiedot["pankkinimi2"]." ".$pankkitiedot["pankkitili2"],	$firstpage, $norm);
+			$pdf->draw_text(404, 72, $pankkitiedot["pankkinimi3"]." ".$pankkitiedot["pankkitili3"],	$firstpage, $norm);
 		}
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
@@ -286,24 +332,25 @@
 		$pdf->draw_rectangle(70, 207, 20, 580,	$firstpage, $rectparam);
 		$pdf->draw_rectangle(70, 394, 20, 580,	$firstpage, $rectparam);
 
-		$pdf->draw_text(30, 55, $yhtiorow["nimi"],		$firstpage, $pieni);
-		$pdf->draw_text(30, 45, $yhtiorow["osoite"],	$firstpage, $pieni);
-		$pdf->draw_text(30, 35, $yhtiorow["postino"]."  ".$yhtiorow["postitp"],	$firstpage, $pieni);
-		$pdf->draw_text(30, 25, $yhtiorow["maa"],		$firstpage, $pieni);
+		$pdf->draw_text(30, 55, $toimipaikkarow["nimi"],					$firstpage, $pieni);
+		$pdf->draw_text(30, 45, $toimipaikkarow["osoite"],					$firstpage, $pieni);
+		$pdf->draw_text(30, 35, $toimipaikkarow["postino"]."  ".$toimipaikkarow["postitp"],	$firstpage, $pieni);
+		$pdf->draw_text(30, 25, $toimipaikkarow["maa"],						$firstpage, $pieni);
 
-		$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",			$firstpage, $pieni);
-		$pdf->draw_text(247, 55, $yhtiorow["puhelin"],				$firstpage, $pieni);
-		$pdf->draw_text(217, 45, t("Fax", $kieli).":",				$firstpage, $pieni);
-		$pdf->draw_text(247, 45, $yhtiorow["fax"],					$firstpage, $pieni);
-		$pdf->draw_text(217, 35, t("Email", $kieli).":",			$firstpage, $pieni);
-		$pdf->draw_text(247, 35, $yhtiorow["email"],				$firstpage, $pieni);
 
-		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$firstpage, $pieni);
-		$pdf->draw_text(444, 55, $yhtiorow["ytunnus"],				$firstpage, $pieni);
-		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$firstpage, $pieni);
-		$pdf->draw_text(444, 45, $yhtiorow["kotipaikka"],			$firstpage, $pieni);
-		$pdf->draw_text(404, 35, t("Enn.per.rek", $kieli),			$firstpage, $pieni);
-		$pdf->draw_text(404, 25, t("Alv.rek", $kieli),				$firstpage, $pieni);
+		$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",					$firstpage, $pieni);
+		$pdf->draw_text(247, 55, $toimipaikkarow["puhelin"],				$firstpage, $pieni);
+		$pdf->draw_text(217, 45, t("Fax", $kieli).":",						$firstpage, $pieni);
+		$pdf->draw_text(247, 45, $toimipaikkarow["fax"],					$firstpage, $pieni);
+		$pdf->draw_text(217, 35, t("Email", $kieli).":",					$firstpage, $pieni);
+		$pdf->draw_text(247, 35, $toimipaikkarow["email"],					$firstpage, $pieni);
+
+		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",					$firstpage, $pieni);
+		$pdf->draw_text(444, 55, $toimipaikkarow["vat_numero"],				$firstpage, $pieni);
+		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",				$firstpage, $pieni);
+		$pdf->draw_text(444, 45, $toimipaikkarow["kotipaikka"],				$firstpage, $pieni);
+		$pdf->draw_text(404, 35, t("Enn.per.rek", $kieli),					$firstpage, $pieni);
+		$pdf->draw_text(404, 25, t("Alv.rek", $kieli),						$firstpage, $pieni);
 
 	}
 
@@ -343,8 +390,8 @@
 	}
 
 	$query = "	SELECT l.tunnus, l.tapvm, l.liitostunnus,
-				l.summa-l.saldo_maksettu summa, l.erpcm, l.laskunro, l.viite,
-				TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu
+				l.summa-l.saldo_maksettu summa, l.summa_valuutassa-l.saldo_maksettu_valuutassa summa_valuutassa, l.erpcm, l.laskunro, l.viite,
+				TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, max(kk.pvm) as kpvm, count(distinct kl.ktunnus) as karhuttu, l.yhtio_toimipaikka, l.valkoodi, l.maksuehto
 				FROM lasku l
 				LEFT JOIN karhu_lasku kl on (l.tunnus=kl.ltunnus)
 				LEFT JOIN karhukierros kk on (kk.tunnus=kl.ktunnus)
@@ -358,7 +405,7 @@
 
 	$query = "	SELECT *
 				FROM maksuehto
-				WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$laskutiedot[maksuehto]'";
+				WHERE maksuehto.yhtio='$kukarow[yhtio]' AND maksuehto.tunnus = '$laskutiedot[maksuehto]'";
 	$maksuehtoresult = mysql_query($query) or pupe_error($query);
 	$maksuehtotiedot = mysql_fetch_array($maksuehtoresult);
 
@@ -388,6 +435,42 @@
 				and asiakas_tunnus in ($lirow[liitokset])";
 	$summaresult = mysql_query($query) or pupe_error($query);
 	$kaato = mysql_fetch_array($summaresult);
+
+	// haetaan yhtiön toimipaikkojen yhteystiedot
+	if ($laskutiedot["yhtio_toimipaikka"] != '' and $laskutiedot["yhtio_toimipaikka"] != 0) {
+		$toimipaikkaquery = "	SELECT *
+								FROM yhtion_toimipaikat
+								WHERE yhtio='$kukarow[yhtio]' AND tunnus='$laskutiedot[yhtio_toimipaikka]'";
+
+		$toimipaikkares = mysql_query($toimipaikkaquery) or pupe_error($toimipaikkaquery);
+		$toimipaikkarow = mysql_fetch_array($toimipaikkares);
+	} else {
+		$toimipaikkarow["nimi"] 		= $yhtiorow["nimi"];
+		$toimipaikkarow["osoite"] 		= $yhtiorow["osoite"];
+		$toimipaikkarow["postino"] 		= $yhtiorow["postino"];
+		$toimipaikkarow["postitp"] 		= $yhtiorow["postitp"];
+		$toimipaikkarow["maa"] 			= $yhtiorow["maa"];
+		$toimipaikkarow["puhelin"] 		= $yhtiorow["puhelin"];
+		$toimipaikkarow["fax"] 			= $yhtiorow["fax"];
+		$toimipaikkarow["email"] 		= $yhtiorow["email"];
+		$toimipaikkarow["vat_numero"] 	= $yhtiorow["ytunnus"];
+		$toimipaikkarow["kotipaikka"] 	= $yhtiorow["kotipaikka"];
+	}
+
+	//Haetaan factoringsopimuksen tiedot
+	if ($maksuehtotiedot["factoring"] != '') {
+		$query = "	SELECT *
+					FROM factoring
+					WHERE yhtio 		= '$kukarow[yhtio]'
+					and factoringyhtio 	= '$maksuehtotiedot[factoring]'
+					and valkoodi 		= '$laskutiedot[valkoodi]'";
+		$fres = mysql_query($query) or pupe_error($query);
+		$frow = mysql_fetch_array($fres);
+	}
+	else {
+		unset($frow);
+	}
+
 
 	$kaatosumma=$kaato["summa"] * -1;
 	if (!$kaatosumma) $kaatosumma='0.00';

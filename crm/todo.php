@@ -261,7 +261,7 @@ if ($tee == "") {
 
 		echo "<div id='vanhadiv' style='display:none'>";
 		echo "<font class='head'>20 VIIMEKSI TEHTYÄ</font><hr>";
-		echo "<table>";
+		echo "<table width='1000' cellpadding='2'>";
 
 		echo "
 		<tr>

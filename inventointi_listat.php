@@ -107,8 +107,8 @@
 			if ($ahyllyalue != '' and $lhyllyalue != '') {
 				///* Inventoidaan tietty varastoalue *///
 				$apaikka = strtoupper(sprintf("%-05s",$ahyllyalue)).strtoupper(sprintf("%05s",$ahyllynro)).strtoupper(sprintf("%05s",$ahyllyvali)).strtoupper(sprintf("%05s",$ahyllytaso));
-				$lpaikka = strtoupper(sprintf("%-05s",$lhyllyalue)).strtoupper(sprintf("%05s",$lhyllynro)).strtoupper(sprintf("%05s",$lhyllyvali)).strtoupper(sprintf("%05s",$lhyllytaso));
-
+				$lpaikka = strtoupper(sprintf("%-'Ö5s",$lhyllyalue)).strtoupper(sprintf("%'Ö5s",$lhyllynro)).strtoupper(sprintf("%'Ö5s",$lhyllyvali)).strtoupper(sprintf("%'Ö5s",$lhyllytaso));
+				
 				$kutsu .= " ".t("Varastopaikat").": $apaikka - $lpaikka ";
 			
 				if ($from == '') {

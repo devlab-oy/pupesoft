@@ -292,8 +292,8 @@
 		
 		// Erikseen vielä laskujen valuutassa
 		$query = "	SELECT $verolisa, tiliointi.tilino, tili.nimi,
-					round(sum((tiliointi.summa/if(lasku.tila='U', (select avg(vienti_kurssi) from lasku lx where lx.yhtio=lasku.yhtio and lx.laskunro=lasku.laskunro and lx.tila='L' and lx.alatila='X'), if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi))) * (1+vero/100)),2) Bruttosumma,
-					round(sum((tiliointi.summa/if(lasku.tila='U', (select avg(vienti_kurssi) from lasku lx where lx.yhtio=lasku.yhtio and lx.laskunro=lasku.laskunro and lx.tila='L' and lx.alatila='X'), if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi))) * vero/100),2) Verot, count(*) Kpl, 
+					round(sum((tiliointi.summa/if(lasku.tila='U', (select avg(vienti_kurssi) from lasku lx where lx.yhtio=lasku.yhtio and lx.laskunro=lasku.laskunro and lx.tila='L' and lx.alatila='X'), vienti_kurssi)) * (1+vero/100)),2) Bruttosumma,
+					round(sum((tiliointi.summa/if(lasku.tila='U', (select avg(vienti_kurssi) from lasku lx where lx.yhtio=lasku.yhtio and lx.laskunro=lasku.laskunro and lx.tila='L' and lx.alatila='X'), vienti_kurssi)) * vero/100),2) Verot, count(*) Kpl, 
 					lasku.valkoodi
 					FROM tiliointi
 					JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and lasku.valkoodi != '$yhtiorow[valkoodi]' and lasku.valkoodi!='')

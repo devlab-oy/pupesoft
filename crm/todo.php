@@ -364,7 +364,7 @@ if ($tee == "") {
 	echo "<option value=''>Kaikki</option>";
 
 	$sel = "";
-	if ($tekija == 0) $sel = "SELECTED";	
+	if ($tekija == "0") $sel = "SELECTED";	
 	echo "<option value='0' $sel>Ei tekij‰‰</option>";
 
 	while ($asiakas = mysql_fetch_array($result)) {

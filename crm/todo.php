@@ -19,7 +19,7 @@ if ($tee == "muokkaa") {
 	$prioriteetti = $rivi["prioriteetti"];
 	$prio_sel[$prioriteetti] = "SELECTED";
 
-	echo "<form method='post' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>
+	echo "<form method='post' action='todo.php?tekija=$tekija&sort=$sort&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>
 	<input type='hidden' name='tee' value='paivita'>
 	<input type='hidden' name='tunnus' value='$rivi[tunnus]'>
 	<input type='hidden' name='vanhakuittaus' value='$rivi[kuittaus]'>
@@ -68,7 +68,7 @@ if ($tee == "muokkaa") {
 						ORDER BY aika desc";
 			$result = mysql_query($query) or pupe_error($query);
 
-			echo "<td><select style='width: 150px;' name='tekija'>";
+			echo "<td><select style='width: 150px;' name='seltekija'>";
 			echo "<option value=''>Ei valittu</option>";
 
 			while ($asiakas = mysql_fetch_array($result)) {
@@ -124,7 +124,7 @@ if ($tee == "paivita") {
 				projekti         = '$projekti',
 				pyytaja          = '$pyytaja',
 				kesto_arvio      = '$kesto_arvio',
-				tekija           = '$tekija',
+				tekija           = '$seltekija',
 				asiakas          = '$asiakas',
 				kesto_toteutunut = '$kesto_toteutunut',
 				muuttaja		 = '$kukarow[kuka]',
@@ -442,11 +442,11 @@ if ($tee == "") {
 
 		echo "<tr class='aktiivi'>";
 
-		echo "<form method='post' name='todo' action='todo.php?sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku#ankkuri_$numero' autocomplete='off'>";
+		echo "<form method='post' name='todo' action='todo.php?tekija=$tekija&sort=$sort&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku#ankkuri_$numero' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='valmis'>";
 		echo "<input type='hidden' name='tunnus' value='$rivi[tunnus]'>";
 
-		echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku' name='ankkuri_$numero'>$rivi[tunnus]</a></th>";
+		echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&tekija=$tekija&tunnus_haku=$tunnus_haku&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&tekija_haku=$tekija_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku' name='ankkuri_$numero'>$rivi[tunnus]</a></th>";
 
 		$rivi["kuvaus"] = str_replace("\n", "<br>", $rivi["kuvaus"]);
 

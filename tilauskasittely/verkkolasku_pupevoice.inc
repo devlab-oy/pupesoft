@@ -19,7 +19,7 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("Paper", 								substr($lasrow['chn'], 0, 1), 	$tootxml);
 		xml_add("Einvoice", 							substr($lasrow['chn'], 1, 1), 	$tootxml);
 		xml_add("Edi", 									substr($lasrow['chn'], 2, 1), 	$tootxml);
-		xml_add("Email", 								$yhtiorow['admin_email'],		$tootxml);
+		xml_add("Email", 								$yhtiorow['alert_email'],		$tootxml);
 
 		if (strtoupper($yhtiorow['kieli']) == 'SE' or $kieli == "SE") {
 			xml_add("Language", "SV", $tootxml);

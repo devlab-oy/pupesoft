@@ -537,6 +537,52 @@ if (!function_exists("saldo_myytavissa")) {
 					$hyllyssa   += $row["saldo"] - $ennrow["keratty"];
 
 					if ($pvm != '') {
+						// jos lasketaan tulevaisuuteen niin otetaan tietenkin huomioon jo kerätyt rivit
+						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
+							$query = "	SELECT
+										ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty
+										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+										JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero) ON sarjanumeroseuranta.yhtio = tilausrivi.yhtio
+										and sarjanumeroseuranta.tuoteno 			= tilausrivi.tuoteno
+										and sarjanumeroseuranta.hyllyalue 			= tilausrivi.hyllyalue
+										and sarjanumeroseuranta.hyllynro  			= tilausrivi.hyllynro
+										and sarjanumeroseuranta.hyllyvali 			= tilausrivi.hyllyvali
+										and sarjanumeroseuranta.hyllytaso 			= tilausrivi.hyllytaso
+										and sarjanumeroseuranta.myyntirivitunnus 	= tilausrivi.tunnus
+										and sarjanumeroseuranta.sarjanumero 		= '$era'
+										WHERE tilausrivi.yhtio = '$yhtiolisa'
+										and tilausrivi.tyyppi in ('L','G','V')
+										and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+										and tilausrivi.tuoteno = '$tuoteno'
+										and tilausrivi.varattu > 0
+										and tilausrivi.hyllyalue = '$row[hyllyalue]'
+										and tilausrivi.hyllynro  = '$row[hyllynro]'
+										and tilausrivi.hyllyvali = '$row[hyllyvali]'
+										and tilausrivi.hyllytaso = '$row[hyllytaso]'
+										and tilausrivi.kerayspvm > '$pvm'";
+						}
+						else {
+							$query = "	SELECT
+										ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)),0) keratty
+										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+										WHERE tilausrivi.yhtio = '$yhtiolisa'
+										and tilausrivi.tyyppi in ('L','G','V')
+										and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+										and tilausrivi.tuoteno = '$tuoteno'
+										and tilausrivi.varattu > 0
+										and tilausrivi.hyllyalue = '$row[hyllyalue]'
+										and tilausrivi.hyllynro  = '$row[hyllynro]'
+										and tilausrivi.hyllyvali = '$row[hyllyvali]'
+										and tilausrivi.hyllytaso = '$row[hyllytaso]'
+										and tilausrivi.kerayspvm > '$pvm'";
+						}
+						
+						$keraresult = mysql_query($query) or die($query);
+						$kerarow = mysql_fetch_array($keraresult);
+
+						$myytavissa -= $kerarow["keratty"];
+						$hyllyssa -= $kerarow["keratty"];
+						
 						// jos lasketaan tulevaisuuteen niin otetaan varastoonvalmistukset huomioon
 						if (($tuote["sarjanumeroseuranta"] == "E" or $tuote["sarjanumeroseuranta"] == "F") and $era != '') {
 							$query = "	SELECT
@@ -2771,6 +2817,10 @@ function popUp(e, oi, offsetX, offsetY, html) {
 		
 		if(html) {
 			sndReq(oi, html+'&ohje=off&sulje='+oi);
+			timer = 100;
+		}
+		else {
+			timer = 10;
 		}
 
 		// relatiivinen sijainti
@@ -2780,60 +2830,65 @@ function popUp(e, oi, offsetX, offsetY, html) {
 		var y = getMouseY(e)-(offsetY);
 		var x = getMouseX(e)-(offsetX);
 		
-		var de = document.getElementById(oi);
-		var ds = de.style;
+		function pop(oi, x, y) {
 
-		ds.display = "block";
-		ds.visibility = "hidden";
+			var de = document.getElementById(oi);
+			var ds = de.style;
 
-		//	Detectoidaan ikkunan koko
-		var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
-		var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
+			ds.display = "block";
+			ds.visibility = "hidden";
 
-		//	Detectoidaan div:n koko
-		if(de.clientHeight) eh = de.clientHeight;
-		else if (de.clip.height) eh = de.clip.height;
-		else eh = null;
+			//	Detectoidaan ikkunan koko
+			var ww = window.innerWidth != null? window.innerWidth: document.body.clientWidth != null? document.body.clientWidth:null;
+			var wh = window.innerHeight != null? window.innerHeight: document.body.clientHeight != null? document.body.clientHeight:null;
 
-		if(de.clientWidth) ew = de.clientWidth;
-		else if (de.clip.width) ew = de.clip.width;
-		else ew = null;
+			//	Detectoidaan div:n koko
+			if(de.clientHeight) eh = de.clientHeight;
+			else if (de.clip.height) eh = de.clip.height;
+			else eh = null;
 
-		var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
-		var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
+			if(de.clientWidth) ew = de.clientWidth;
+			else if (de.clip.width) ew = de.clip.width;
+			else ew = null;
 
-		//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
-		if(eh != null && ew != null && x != null && y != null) {
+			var scrollY = document.body.scrollTop + document.documentElement.scrollTop;
+			var scrollX = document.body.scrollLeft + document.documentElement.scrollLeft;
 
-			c=0;
-			//	Riittääkö leveys
-			if(x+ew-2>ww) {
-				c=x+ew-ww+2;
-				x -= c;
+			//	Jos saimme riittävästi tietoa voimme kalkuloida oikean position
+			if(eh != null && ew != null && x != null && y != null) {
+
+				c=0;
+				//	Riittääkö leveys
+				if(x+ew-2>ww) {
+					c=x+ew-ww+2;
+					x -= c;
+				}
+
+				if (wh - y - eh < -5 && c > 10) {
+					y -= eh + 22;
+				}
+				else if(y - scrollY + eh + 2 > wh) {
+					y -= y - scrollY + eh - wh + 20;
+				}
+
+				//	Oikea laita on kuitenkin aina tärkein!
+				if(x<2) {
+					x=2;
+				}
+				if(y<2) {
+					y=2;
+				}
 			}
 
-			if (wh - y - eh < -5 && c > 10) {
-				y -= eh + 22;
-			}
-			else if(y - scrollY + eh + 2 > wh) {
-				y -= y - scrollY + eh - wh + 20;
-			}
+			ds.left=x;
+			ds.top=y;
 
-			//	Oikea laita on kuitenkin aina tärkein!
-			if(x<2) {
-				x=2;
-			}
-			if(y<2) {
-				y=2;
-			}
+			ds.visibility = "visible";
+			de.display = 'block';
+
 		}
 
-		ds.left=x;
-		ds.top=y;
-
-		ds.visibility = "visible";
-		de.display = 'block';
-		
+		setTimeout( function () { pop(oi, x, y); }, timer);		
 	}
 }
 //-->

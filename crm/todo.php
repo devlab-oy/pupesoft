@@ -61,7 +61,7 @@ if ($tee == "muokkaa") {
 
 			$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika
 						FROM kuka
-						LEFT JOIN todo on (todo.tekija = kuka.tunnus)
+						LEFT JOIN todo on (todo.yhtio = kuka.yhtio and todo.tekija = kuka.tunnus and todo.kuittaus = '')
 						WHERE kuka.yhtio = '$kukarow[yhtio]'
 						and kuka.myyja != 0
 						GROUP BY kuka.tunnus
@@ -199,7 +199,7 @@ if ($tee == "") {
 
 		$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika
 					FROM kuka
-					LEFT JOIN todo on (todo.tekija = kuka.tunnus)
+					LEFT JOIN todo on (todo.yhtio = kuka.yhtio and todo.tekija = kuka.tunnus and todo.kuittaus = '')
 					WHERE kuka.yhtio = '$kukarow[yhtio]'
 					and kuka.myyja != 0
 					GROUP BY kuka.tunnus
@@ -352,7 +352,7 @@ if ($tee == "") {
 	
 	$query  = "	SELECT kuka.*, count(distinct todo.tunnus) kpl, ifnull(sum(kesto_arvio),0) aika
 				FROM kuka
-				LEFT JOIN todo on (todo.tekija = kuka.tunnus)
+				LEFT JOIN todo on (todo.yhtio = kuka.yhtio and todo.tekija = kuka.tunnus and todo.kuittaus = '')
 				WHERE kuka.yhtio = '$kukarow[yhtio]'
 				and kuka.myyja != 0
 				GROUP BY kuka.tunnus

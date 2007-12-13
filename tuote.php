@@ -479,7 +479,7 @@
 						$kokonaismyytavissa += $myytavissa;
 
 						echo "<tr>
-								<td>$saldorow[nimitys] $saldorow[tyyppi]</td>
+								<td>$saldorow[nimitys] $saldorow[tyyppi] $saldorow[era]</td>
 								<td>$saldorow[hyllyalue] $saldorow[hyllynro] $saldorow[hyllyvali] $saldorow[hyllytaso]</td>
 								<td align='right'>".sprintf("%.2f", $saldo)."</td>
 								<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>
@@ -538,7 +538,7 @@
 					$firmanimi = '';
 
 					while ($superrow = mysql_fetch_array($kres)) {
-						$query = "	select yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso, alkuhyllyalue, loppuhyllyalue, alkuhyllynro, loppuhyllynro, sum(saldo) saldo
+						$query = "	SELECT yhtio.nimi, yhtio.yhtio, yhtio.tunnus, varastopaikat.tunnus, varastopaikat.nimitys, hyllyalue, hyllynro, hyllyvali, hyllytaso, alkuhyllyalue, loppuhyllyalue, alkuhyllynro, loppuhyllynro, sum(saldo) saldo
 									from tuotepaikat
 									join yhtio on yhtio.yhtio=tuotepaikat.yhtio
 									join varastopaikat on tuotepaikat.yhtio = varastopaikat.yhtio
@@ -555,7 +555,7 @@
 
 							while ($krow  = mysql_fetch_array($kres2)) {
 								// katotaan ennakkopoistot toimittavalta yritykseltä
-								$query = "	select sum(varattu) varattu
+								$query = "	SELECT sum(varattu) varattu
 											from tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 											where yhtio='$krow[yhtio]' and
 											tyyppi='L' and
@@ -567,7 +567,7 @@
 								$krtur = mysql_fetch_array($krtre);
 
 								// sitten katotaan ollaanko me jo varattu niitä JT rivejä toimittajalta
-								$query =	"select sum(jt) varattu
+								$query = "	SELECT sum(jt) varattu
 											from tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 											where yhtio='$kukarow[yhtio]' and tyyppi='L' and laskutettuaika='0000-00-00' and var='S'
 											and tuoteno='$tuoteno' and tilaajanrivinro='$superrow[liitostunnus]'

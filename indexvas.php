@@ -9,7 +9,7 @@ else {
 	require ("parametrit.inc");
 	require ("functions.inc");
 }
-
+ 
 unset($data);		
 if( (int) $yhtiorow["lasku_logo"] > 0) {
 	$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");

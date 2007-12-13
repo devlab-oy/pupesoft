@@ -204,7 +204,7 @@ $tikonerr=0;
 // mapvm=tapvm
 $query  = "	SELECT tapvm, nimi, summa, tunnus
 			FROM lasku
-			WHERE yhtio='$kukarow[yhtio]' and mapvm=tapvm and mapvm!='0000-00-00'
+			WHERE yhtio='$kukarow[yhtio]' and tila IN ('H','M','P','Q''Y','U') and mapvm=tapvm and mapvm!='0000-00-00'
 			and ((left(lasku.tapvm,7)='$kausi') or (left(lasku.tapvm,7)='$kausi'))";
 
 $result = mysql_query($query) or pupe_error($query);

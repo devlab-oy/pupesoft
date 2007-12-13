@@ -525,7 +525,6 @@
 			}
 			elseif ($prow["tyyppi"] == 'L' or $prow["tyyppi"] == 'D' or $prow["perheid"] == 0) {
 				echo "<td class='$class' align='left'></td>";
-				echo "<td class='$class' align='left'></td>";
 				echo "<td class='$class' align='left'>$prow[valmistettu]</td>";
 			}
 			elseif ($prow["toimitettuaika"] == "0000-00-00 00:00:00") {
@@ -541,12 +540,10 @@
 				echo "<td class='$class'></td>";
 			}
 			elseif ($prow["tyyppi"] == 'V') {
-				echo "<td class='$class'></td>";
 				echo "<td class='$class' align='right'></td>";
 				echo "<td class='$class' align='right'>$prow[kaytetty]</td>";
 			}
 			else {
-				echo "<td class='$class'></td>";
 				echo "<td class='$class' align='right'></td>";				
 				echo "<td class='$class'></td>";
 			}
@@ -601,9 +598,8 @@
 				}
 			}
 
-
 			if ($prow["tyyppi"] == "L" and $toim != "KORJAA" and $toim != 'TUTKAA') {
-				echo "<td><input type='checkbox' name='osatoimitetaan[$prow[tunnus]]' value='$prow[tunnus]'></td>";
+				echo "<td align='center'><input type='checkbox' name='osatoimitetaan[$prow[tunnus]]' value='$prow[tunnus]'></td>";
 			}
 
 			echo "</tr>";

@@ -1062,7 +1062,7 @@ if ($tila == '') {
 							and $tunken = '$rivirow[rivitunnus]'";
 			}
 			else {
-				$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
+				$query = "	SELECT sum(abs(era_kpl)) kpl, min(sarjanumero) sarjanumero
 							FROM sarjanumeroseuranta
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$rivirow[tuoteno]'

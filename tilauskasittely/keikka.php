@@ -134,7 +134,7 @@ if (!function_exists("tsekit")) {
 							and $tunken = '$toimrow[tunnus]'";
 			}
 			else {
-				$query = "	SELECT sum(era_kpl) kpl, min(sarjanumero) sarjanumero
+				$query = "	SELECT sum(abs(era_kpl)) kpl, min(sarjanumero) sarjanumero
 							FROM sarjanumeroseuranta
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$toimrow[tuoteno]'

@@ -3480,4 +3480,195 @@ if(!function_exists("nayta_kyselyt")) {
 	}
 }
 
+
+if (! function_exists('tallenna_liite')) {
+	function tallenna_liite($userfile, $liitos, $liitostunnus, $selite, $kayttotarkoitus, $tunnus=0) {
+		global $kukarow, $yhtiorow, $_FILES, $kieli;
+		
+		$file = array();
+		if(is_array($_FILES[$userfile])) {
+			$file = $_FILES[$userfile];
+		}
+		elseif(file_exists($userfile)) {
+			
+			//	experimentaalia
+			$a = getimagesize($userfile);
+			$file["name"] 		= basename($userfile);
+			$file["type"] 		= $a["mime"];
+			$file["tmp_name"] 	= basename($userfile);;
+			$file["size"] 		= filesize($userfile);
+			$file["error"] 		= 0;
+		}
+
+		$tark = tarkasta_liite($userfile);
+		if($tark !== true or $file["error"] == 4) {
+			return false;
+		}					
+		
+		$data = mysql_real_escape_string(file_get_contents($file["tmp_name"]));
+		
+		$filename = $file["name"];
+		$filetype = $file["type"];
+		$filesize = $file["size"];
+		
+		//	Tarkastetaan, että kuvatunnus on oikea..
+		if($tunnus > 0) {
+			$query = "	SELECT tunnus FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";  
+			$result = mysql_query($query) or pupe_error($query);			
+			if(mysql_num_rows($result) == 0) {
+				$tunnus = 0;
+			}
+		}
+		
+		//	Onko meillä jokin kuvatyyppi?
+		list($type, $crap) = explode("/", $filetype);
+		if($type == "image") {
+			$size = getimagesize($file["tmp_name"], $imageinfo);
+			$image_width 	= $size[0];
+			$image_height 	= $size[1];
+			$image_bits 	= $size["bits"];
+			$image_channels	= $size["channels"];			
+			//echo "<pre>".print_r($size, true)."</pre>";
+
+			unset($size);
+		}
+		else {
+			$image_width 	= "";
+			$image_height 	= "";
+			$image_bits 	= "";
+			$image_channels	= "";
+		}
+		
+		// lisätään kuva
+		if($tunnus > 0) {
+			$query = "	UPDATE liitetiedostot SET
+							data     		= '$data',
+							selite   		= '".trim($selite)."',
+							filename 		= '$filename',
+							filesize 		= '$filesize',
+							filetype 		= '$filetype',
+							image_width		= '$image_width',							
+							image_height	= '$image_height',
+							image_bits		= '$image_bits',							
+							image_channels	= '$image_channels',
+							kayttotarkoitus	= '$teetyyppi',
+							laatija			= '$kukarow[kuka]',
+							luontiaika		= now()
+						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			$id = $tunnus;
+		}
+		else {
+			$query = "	INSERT INTO liitetiedostot SET
+							yhtio    		= '$kukarow[yhtio]',
+							liitos   		= '$liitos',
+							liitostunnus 	= '$liitostunnus',
+							data     		= '$data',
+							selite   		= '".trim($selite)."',
+							filename 		= '$filename',
+							filesize 		= '$filesize',
+							filetype 		= '$filetype',
+							image_width		= '$image_width',							
+							image_height	= '$image_height',
+							image_bits		= '$image_bits',							
+							image_channels	= '$image_channels',
+							kayttotarkoitus	= '$kayttotarkoitus',
+							laatija			= '$kukarow[kuka]',
+							luontiaika		= now()";
+			$result = mysql_query($query) or pupe_error($query);
+			$id = mysql_insert_id();
+		}
+		return $id;
+	}
+}
+
+if (! function_exists('tarkasta_liite')) {
+	function tarkasta_liite($userfile, $sallitut_tiedostot="") {
+		global $kukarow, $yhtiorow, $_FILES, $kieli;
+		
+		if(!is_array($_FILES[$userfile])) {
+			return false;
+		}
+		
+		$file = $_FILES[$userfile];
+		
+		// otetaan file extensio
+		$path_parts = pathinfo($file['name']);
+		$ext = strtoupper($path_parts['extension']);
+		if ($ext == "JPEG") $ext = "jpg";
+		
+		//	Sallitut tiedostot on aina upper
+		if(is_array($sallitut_tiedostot)){
+			foreach($sallitut_tiedostot as &$s) {
+				$s = strtoupper($s);
+			}
+		}
+		
+		//	Ei saatu erroreita. jatketaan..
+		if($file["error"] == 0) {
+			
+			//	Paketti riittävän pieni mysql:lle
+			$query = "SHOW variables like 'max_allowed_packet'";
+			$result = mysql_query($query) or pupe_error($query);
+			$varirow = mysql_fetch_array($result);
+			
+			if($file["size"] < $varirow[1]) {
+				//	Tämä on ainoa haara jossa voimme jatkaa!
+				if(!is_array($sallitut_tiedostot) and $sallitut_tiedostot == "") {
+					return true;
+				}
+				elseif(in_array(strtoupper($ext), $sallitut_tiedostot)) {
+					return true;
+				}
+				else {
+					if(count($sallitut_tiedostot)>1) {
+						//	Kaunistellaan..
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallitut tiedostomuodot on %s ja %s", $kieli, implode(", ", array_slice($sallitut_tiedostot, 0, -1)), end($sallitut_tiedostot)).".</font><br><br>";
+						
+					}
+					else {
+						return "<font class='error'>".t("VIRHE! Tiedostomuoto '$ext' ei kelpaa, sallittu tiedostomuoto on %s", $kieli, $sallitut_tiedostot[0]).".</font><br><br>";						
+					}
+				}
+			}
+			else {
+				return "<font class='error'>".t("VIRHE! Ladattu tiedosto oli liian suuri! Suurin sallittu tiedostokoko on %s", $kieli, size_readable($file["size"]))."!</font><br><br>";
+			}
+		}
+		elseif($file["error"] == 1 or $file["error"] == 2) {
+			return "<font class='error'>".t("VIRHE! Tiedosto on liian suuri!")."!</font><br><br>";
+		}
+		elseif($file["error"] == 3) {
+			return "<font class='error'>".t("VIRHE! Tiedoston lataus epäonnistui!")."!</font><br><br>";
+		}
+		elseif($file["error"] == 4) {
+			return true;							
+		}
+		elseif($file["error"] == 7) {
+			return "<font class='error'>".t("VIRHE! Palvelinasetuksissa on virhe!")."!</font><br><br>";
+		}
+		else {
+			return "<font class='error'>".t("VIRHE! Tapahtui virhe tallennettaessa tiedostoa!")."!</font><br><br>";
+		}
+	}
+}
+
+if (! function_exists('hae_liite')) {
+	function hae_liite($tunnus, $liitos, $palautus="") {
+		global $kukarow, $yhtiorow;
+		
+		$query = "select * from liitetiedostot where tunnus='$tunnus' and liitos = '$liitos'";
+		$liiteres = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($liiteres) > 0) {
+			$liiterow = mysql_fetch_array($liiteres);
+			if($palautus != "") {
+				return $liiterow;
+			}
+			return $liiterow["data"];
+		}
+		
+		return false;
+	}
+}
+
 ?>

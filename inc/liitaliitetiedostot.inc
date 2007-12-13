@@ -26,41 +26,15 @@
 
 		// lis‰t‰‰n kuva
 		if ($teekuva == "insert") {
-			if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-
-				$query = "SHOW variables like 'max_allowed_packet'";
-				$result = mysql_query($query) or pupe_error($query);
-				$varirow = mysql_fetch_array($result);
-
-				$filetype = $_FILES['userfile']['type'];
-				$filesize = $_FILES['userfile']['size'];
-				$filename = $_FILES['userfile']['name'];
-
-				$file = fopen($_FILES['userfile']['tmp_name'], 'r');
-				$data = addslashes(fread($file, $filesize));
-
-				$selite = trim($otsikko);
-
-				if ($filesize > $varirow[1]) {
-					echo "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
-				}
-				else {
-					// lis‰t‰‰n kuva
-					$query = "	insert into liitetiedostot set
-								yhtio    		= '$kukarow[yhtio]',
-								liitos   		= '$toim',
-								liitostunnus 	= '$tunnus',
-								data     		= '$data',
-								selite   		= '$kuvaotsikko',
-								filename 		= '$filename',
-								filesize 		= '$filesize',
-								filetype 		= '$filetype',
-								kayttotarkoitus	= '$teetyyppi',
-								laatija			= '$kukarow[kuka]',
-								luontiaika		= now()";
-					$result = mysql_query($query) or pupe_error($query);
-				}
+						
+			$retval = tarkasta_liite("userfile");
+			if($retval !== true) {
+				echo $retval;
 			}
+			else {
+				tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi);
+			}
+			
 			$teekuva = "";
 		}
 

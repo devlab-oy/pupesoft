@@ -33,8 +33,7 @@
 			}
 			break;					
 		case "K":
-			$laskutyyppi = "Saapuva ostotilaus";
-			
+			$laskutyyppi = "Saapuva ostotilaus";			
 			switch($alatila) {
 				case "X":
 					$alatila = "Valmis";
@@ -327,7 +326,6 @@
 					break;
 			}
 			break;
-
 	}
 
 ?>

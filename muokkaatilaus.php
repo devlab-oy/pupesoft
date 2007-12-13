@@ -576,9 +576,12 @@
 			$miinus = 5;
 		}
 		elseif ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYSSUPER") {
-			$query = "	SELECT tunnus tilaus, concat(nimi,'<br>',tilausyhteyshenkilo,'<br>',viesti) asiakas, ytunnus, lasku.luontiaika, laatija,$toimaikalisa alatila, tila, lasku.tunnus
+			$query = "	SELECT lasku.tunnus tilaus, 
+						concat_ws('<br>',lasku.nimi,lasku.tilausyhteyshenkilo,lasku.viesti,concat_ws(' ', ifnull((SELECT selitetark_2 FROM avainsana WHERE avainsana.yhtio=tyomaarays.yhtio and avainsana.laji = 'sarjanumeron_li' and avainsana.selite = 'MERKKI' and avainsana.selitetark=tyomaarays.merkki LIMIT 1), tyomaarays.merkki), tyomaarays.mallivari)) asiakas, 
+						lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa alatila, lasku.tila, lasku.tunnus
 						FROM lasku use index (tila_index)
-						WHERE yhtio = '$kukarow[yhtio]' and tila in ('A','L','N') and tilaustyyppi='A' and alatila in ('','A','B','C','J')
+						LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('A','L','N') and lasku.tilaustyyppi='A' and lasku.alatila in ('','A','B','C','J')
 						$haku
 						order by lasku.luontiaika desc
 						$rajaus";

@@ -44,13 +44,25 @@
 			
 			$firstpage = $pdf_tarjous->new_page("a4");
 
-			if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
-				
+			unset($data);		
+			if( (int) $yhtiorow["lasku_logo"] > 0) {
+				$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+				$data = $liite["data"];
+				$isizelogo[0] = $liite["image_width"];
+				$isizelogo[1] = $liite["image_height"];
+				unset($liite);
+			}
+			elseif(file_exists($yhtiorow["lasku_logo"])) {
 				$filename = $yhtiorow["lasku_logo"];
 
 				$fh = fopen($filename, "r");
 				$data = fread($fh, filesize($filename));
 				fclose($fh);
+
+				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+			}
+
+			if($data) {
 
 				$image = $pdf_tarjous->jfif_embed($data);
 

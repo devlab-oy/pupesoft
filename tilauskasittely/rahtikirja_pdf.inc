@@ -211,21 +211,31 @@
 		// sitten aletaan piirtämään itse PDF sisältöä
 		$pdf->draw_text(302,  812,  "RAHTIKIRJA FRAKTSEDEL",							$firstpage, $iso);
 		
-		if ($yhtiorow["oslapp_rakir_logo"] != '' and trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
-
+		unset($data);		
+		if( (int) $yhtiorow["lasku_logo"] > 0) {
+			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+			$data = $liite["data"];
+			$isizelogo[0] = $liite["image_width"];
+			$isizelogo[1] = $liite["image_height"];
+			unset($liite);
+		}
+		elseif(file_exists($yhtiorow["lasku_logo"])) {
 			$filename = $yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
 			$data = fread($fh, filesize($filename));
 			fclose($fh);
-
+			
+			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+		}
+		
+		if($data) {
 			$image = $pdf->jfif_embed($data);
-
+		
 			if(!$image) {
 				echo t("Logokuvavirhe");
 			}
 			else {
-				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
 
 				$logoparam = array();
 

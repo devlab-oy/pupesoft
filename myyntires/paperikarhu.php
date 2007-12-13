@@ -41,23 +41,32 @@
 		$pdf->draw_text(320, 780, t("MAKSUKEHOTUS", $kieli), 	$firstpage);
 		$pdf->draw_text(470, 780, t("Sivu", $kieli)." ".$sivu, 	$firstpage, $norm);
 		
-		//Yhtiön nimi
-		if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"]) and isset($_POST['ekirje_laheta']) === false) {
-			
+		unset($data);
+		if( (int) $yhtiorow["lasku_logo"] > 0) {
+			$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+			$data = $liite["data"];
+			$isizelogo[0] = $liite["image_width"];
+			$isizelogo[1] = $liite["image_height"];
+			unset($liite);
+		}
+		elseif(file_exists($yhtiorow["lasku_logo"])) {
 			$filename = $yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");
 			$data = fread($fh, filesize($filename));
 			fclose($fh);
-
+			
+			$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+		}
+		
+		if($data) {
+			
 			$image = $pdf->jfif_embed($data);
-
+						
 			if(!$image) {
 				echo t("Logokuvavirhe");
 			}
-			else {
-				$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
-				
+			else {				
 				$logoparam = array();
 				
 				if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (120 / $isizelogo[0]) <= 50) {
@@ -66,9 +75,8 @@
 				else {
 					$logoparam['scale'] = 50  / $isizelogo[1];
 				}
-								
 				$placement = $pdf->image_place($image, 785, 20, $firstpage, $logoparam);
-			}
+			}			
 		}
 		else {
 			$pdf->draw_text(30, 805,  $yhtiorow["nimi"], $firstpage);

@@ -155,7 +155,17 @@
 				$errori = 1;
 			}
 
+			$tiedostopaate = "";
 			require "inc/".$toim."tarkista.inc";
+			
+			//	Tarkastammeko liitetiedoston?
+			if(is_array($tiedostopaate) and is_array($_FILES["liite_$i"])) {
+				$viesti = tarkasta_liite("liite_$i", $tiedostopaate);
+				if($viesti !== true) {
+					$virhe[$i] = $viesti;
+					$errori = 1;
+				}
+			}
 		}
 
 		if ($errori != '') {
@@ -178,14 +188,36 @@
 			}
 			// Päivitetään
 			else {
+				
+				//	Jos poistettiin jokin liite, poistetaan se nyt
+				if(is_array($poista_liite)) {
+					foreach($poista_liite as $key => $val) {
+						if($val > 0) {
+							$delquery = " DELETE FROM liitetiedostot WHERE yhtio = '{$kukarow["yhtio"]}' and liitos = 'Yllapito' and tunnus = '$val'";
+							$delres = mysql_query($delquery);
+							if(mysql_affected_rows() == 1) {
+								$t[$key] = "";
+							}							
+						}
+					}
+				}
+								
 				// Taulun ensimmäinen kenttä on aina yhtiö
 				$query = "UPDATE $toim SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
-					if (isset($t[$i])) {
-						if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
+					if (isset($t[$i]) or is_array($_FILES["liite_$i"])) {
 
+						if(is_array($_FILES["liite_$i"])) {							
+							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
+							if($id !== false) {
+								$t[$i] = $id;
+							}
+						}
+
+						if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";
+						
 					}
 				}
 
@@ -370,7 +402,7 @@
 			echo "<b>".t("Sinulla ei ole oikeuksia päivittää tätä tietoa")."</b><br>";
 		}
 
-		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa' name='mainform' method = 'post' autocomplete='off'>";
+		echo "<form action = 'yllapito.php?ojarj=$ojarj$ulisa' name='mainform' method = 'post' autocomplete='off' enctype='multipart/form-data'>";
 		echo "<input type = 'hidden' name = 'toim' value = '$aputoim'>";
 		echo "<input type = 'hidden' name = 'limit' value = '$limit'>";
 		echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
@@ -473,8 +505,9 @@
 			// $tyyppi --> 2 rivi näytetään, mutta sitä ei voida muokata, eikä sen arvoa pävitetä
 			// $tyyppi --> 3 rivi näytetään, mutta sitä ei voida muokata, mutta sen arvo päivitetään
 			// $tyyppi --> 4 riviä ei näytetä ollenkaan, mutta sen arvo päivitetään
+			// $tyyppi --> 5 liitetiedosto
 
-			if ($tyyppi > 0 and $tyyppi < 4) {
+			if (($tyyppi > 0 and $tyyppi < 4) or $tyyppi == 5) {
 				echo "<tr>";
 				echo "<th align='left'>$otsikko</th>";
 			}
@@ -517,12 +550,24 @@
 			elseif($tyyppi == 4) {
 				echo "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>";
 			}
+			elseif($tyyppi == 5) {
+				echo "<td>";
+
+				if($trow[$i] > 0) {
+					echo "<a href='view.php?id=".$trow[$i]."'>".t("Näytä liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '{$trow[$i]}'>";	
+				}
+				else {
+					echo "<input type = 'text' name = '$nimi' value = '$trow[$i]'>";
+				}
+				
+				echo "<input type = 'file' name = 'liite_$i'></td>";
+			}
 
 			if (isset($virhe[$i])) {
 				echo "<td class='back'><font class='error'>$virhe[$i]</font></td>\n";
 			}
 
-			if ($tyyppi > 0 and $tyyppi < 4) {
+			if (($tyyppi > 0 and $tyyppi < 4) or $tyyppi == 5) {
 				echo "</tr>";
 			}
 		}
@@ -567,7 +612,7 @@
 
 				if ($rajattu_nakyma == '') {
 					echo "<br><br>
-						<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()'>
+						<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
 						<input type = 'hidden' name = 'toim' value = '$aputoim'>
 						<input type = 'hidden' name = 'limit' value = '$limit'>
 						<input type = 'hidden' name = 'laji' value = '$laji'>

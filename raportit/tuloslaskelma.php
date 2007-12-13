@@ -210,13 +210,25 @@
 				$firstpage = $pdf->new_page("11.5x8in");
 				$bottom = "530";
 
-				if (trim($yhtiorow["lasku_logo"]) != '' and file_exists($yhtiorow["lasku_logo"])) {
+				unset($data);		
+				if( (int) $yhtiorow["lasku_logo"] > 0) {
+					$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+					$data = $liite["data"];
+					$isizelogo[0] = $liite["image_width"];
+					$isizelogo[1] = $liite["image_height"];
+					unset($liite);
+				}
+				elseif(file_exists($yhtiorow["lasku_logo"])) {
 					$filename = $yhtiorow["lasku_logo"];
 
 					$fh = fopen($filename, "r");
 					$data = fread($fh, filesize($filename));
 					fclose($fh);
 
+					$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+				}
+
+				if($data) {
 					$image = $pdf->jfif_embed($data);
 
 					if(!$image) {
@@ -226,11 +238,10 @@
 						$logoparam = array();
 						$logoparam['scale'] = 0.15;
 
-						$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
 						$iy    = $isizelogo[1]*0.15*0.35714;	// kuvan y-korkeus millimetreissä
 
 						$placement = $pdf->image_place($image, mm_pt(200-$iy), 10, $firstpage, $logoparam);
-					}
+					}				
 				}
 				else {
 					$pdf->draw_text(10, 560,  $yhtiorow["nimi"], $firstpage);
@@ -442,7 +453,7 @@
 			echo "<form method='post' action='$PHP_SELF'>";
 			echo "<input type='hidden' name='toim' value='$toim'>";
 			echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-			echo "<input type='hidden' name='kaunisnimi' value='$otsikko.pdf'>";
+			echo "<input type='hidden' name='kaunisnimi' value='".urlencode($otsikko).".pdf'>";
 			echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
 			echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
 			echo "</table><br>";

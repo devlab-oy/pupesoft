@@ -287,6 +287,25 @@ if ($tee == 'GO') {
 						$kuvaselite .= " normaali";
 					}
 					
+					/*
+						Maccen pit‰‰ tutkia t‰m‰! en tied‰ kuin t‰‰ toimii!
+						
+					$size = getimagesize($file["tmp_name"]);
+					list($type, $crap) = explode("/", $size["mime"]);					
+					if($type == "image") {
+						$image_width 	= $size[0];
+						$image_height 	= $size[1];
+						$image_bits 	= $size["bits"];
+						$image_channels	= $size["channels"];
+					}
+					else {
+						$image_width 	= "";
+						$image_height 	= "";
+						$image_bits 	= "";
+						$image_channels	= "";
+					}
+					*/
+					
 					$query = "	INSERT INTO liitetiedostot SET
 								yhtio    			= '$kukarow[yhtio]',
 								liitos   			= '$taulu',
@@ -296,6 +315,10 @@ if ($tee == 'GO') {
 								filename 			= '$apukuva',
 								filesize 			= '$filesize',
 								filetype 			= '$filetype',
+								image_width			= '$image_width',							
+								image_height		= '$image_height',
+								image_bits			= '$image_bits',							
+								image_channels		= '$image_channels',								
 								kayttotarkoitus		= '$toiminto',
 								laatija				= '$kukarow[kuka]',
 								luontiaika			= now()";

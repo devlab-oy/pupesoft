@@ -1299,5 +1299,9 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "logo" or mysql_field_name($result, $i) == "lasku_logo") {
+		$tyyppi = 5;
+	}
 	
 ?>

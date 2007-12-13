@@ -125,5 +125,13 @@
 		}
 	}
 
+	if (mysql_field_name($result, $i) == "lasku_logo") {
+		$tiedostopaate = array("JPG");
+	}
+
+	if (mysql_field_name($result, $i) == "logo") {
+		$tiedostopaate = array("JPG","PNG", "GIF");
+	}
+
 
 ?>

@@ -796,20 +796,33 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 	$msiirto = "";
 
 	if ($toim == "VALMISTAASIAKKAALLE") {
-		$query = "	select yhtio
+		$query = "	SELECT yhtio
 					from tilausrivi
 					where yhtio = '$kukarow[yhtio]'
 					and otunnus = '$kukarow[kesken]'
 					and tyyppi in ('W','M','V')
-					and varattu  > 0";
+					and varattu > 0";
 		$sres  = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($sres) == 0) {
 			echo "<font class='message'> ".t("Ei valmistettavaa. Valmistus siirrettiin myyntipuolelle")."! </font><br>";
-
-			$query  = "	update lasku set
-						tila 	= 'N',
-						alatila	= ''
+			
+			if ($laskurow["alatila"] == "") {
+				$utila = "N";
+				$atila = "";
+			}
+			elseif ($laskurow["alatila"] == "J") {
+				$utila = "N";
+				$atila = "J";
+			}
+			else {
+				$utila = "L";
+				$atila = $laskurow["alatila"];
+			}
+						
+			$query  = "	UPDATE lasku set
+						tila 	= '$utila',
+						alatila	= '$atila'
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus = '$kukarow[kesken]'
 						and tila = 'V'";

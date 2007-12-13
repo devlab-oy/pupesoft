@@ -1,5 +1,5 @@
 <?php
-	
+
 	//katsotaan ett‰ kukarow kesken ja $tilausnumero stemmaavat kesken‰‰n
 	if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0) and $aktivoinnista != 'true') {
 		echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("K‰y aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
@@ -515,61 +515,78 @@
 			$query2 .= $postquery2;
 			$result = mysql_query($query2) or pupe_error($query2);
 		}
-		
+
 		if ($toim == 'SIIRTOLISTA' and $tilausnumero != '' and $varasto != '' and $clearing != '') {
-			$query = "	SELECT DISTINCT maa
+
+			// varasto = l‰hett‰v‰ varasto
+			$query = "	SELECT maa
 						FROM varastopaikat
-						WHERE tunnus IN ('$varasto', '$clearing')
-						LIMIT 10";
+						WHERE tunnus = '$varasto'";
 			$result = mysql_query($query) or pupe_error($query);
+			$maarow = mysql_fetch_array($result);
+			$maa_lahetys = $maarow["maa"];
 
-			while ($maarow = mysql_fetch_array($result)) {
-				$maat[] = $maarow['maa'];
-			}
+			// clearing = vastaanottava varasto
+			$query = "	SELECT maa
+						FROM varastopaikat
+						WHERE tunnus = '$clearing'";
+			$result = mysql_query($query) or pupe_error($query);
+			$maarow = mysql_fetch_array($result);
+			$maa_maara = $maarow["maa"];
 
-			if ($maat[0] != $maat[1]) {
+			// kokeillaan arpoa intrastat k‰sittely‰, molemmat maat pit‰‰ olla EU maita
+			if ($maa_lahetys != "" and $maa_maara != "") {
 
-				$maa_lahetys = $maat[0];
-				$maa_maara = $maat[1];
-
-				if ($maa_lahetys == $yhtiorow["maa"] and $maa_maara != $yhtiorow["maa"]) {
-					$ultilno = "-1"; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
-				}
-				elseif ($maa_maara == $yhtiorow["maa"] and $maa_lahetys != $yhtiorow["maa"]) {
-					$ultilno = "-2"; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
-				}
-				else {
-					$ultilno = "";
-				}
-
-				$query = "	SELECT *
-							FROM varastopaikat
-							WHERE tunnus = $clearing AND yhtio ='$kukarow[yhtio]'";
-
-				$result_intra = mysql_query($query) or pupe_error($query);
-
-				$intrarow = mysql_fetch_array($result_intra);
-
-				$query = "	UPDATE lasku
-							SET maa_maara = '$intrarow[maa_maara]',
-							maa_lahetys = '$varasto',
-							kauppatapahtuman_luonne = '$intrarow[kauppatapahtuman_luonne]',
-							kuljetusmuoto = '$intrarow[kuljetusmuoto]',
-							sisamaan_kuljetus = '$intrarow[sisamaan_kuljetus]',
-							sisamaan_kuljetusmuoto  = '$intrarow[sisamaan_kuljetusmuoto]',
-							sisamaan_kuljetus_kansallisuus = '$intrarow[sisamaan_kuljetus_kansallisuus]',
-							kontti  = '$intrarow[kontti]',
-							aktiivinen_kuljetus = '$intrarow[aktiivinen_kuljetus]',
-							aktiivinen_kuljetus_kansallisuus = '$intrarow[aktiivinen_kuljetus_kansallisuus]',
-							poistumistoimipaikka = '$intrarow[poistumistoimipaikka]',
-							poistumistoimipaikka_koodi = '$intrarow[poistumistoimipaikka_koodi]',
-							bruttopaino = '$intrarow[bruttopaino]',
-							lisattava_era = '$intrarow[lisattava_era]',
-							vahennettava_era = '$intrarow[vahennettava_era]',
-							ultilno = '$ultilno'
-							WHERE tunnus = $tilausnumero and yhtio='$kukarow[yhtio]'";
-
+				$query = "SELECT distinct koodi from maat where koodi in ('$maa_lahetys','$maa_maara') and eu = 'ON'";
 				$result = mysql_query($query) or pupe_error($query);
+
+				if (mysql_num_rows($result) == 2) {
+					if ($maa_lahetys == $yhtiorow["maa"] and $maa_maara != $yhtiorow["maa"]) {
+						$ultilno = "-1"; // miinus yks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja VIENTI-intrastat pit‰‰ l‰hett‰‰
+					}
+					elseif ($maa_maara == $yhtiorow["maa"] and $maa_lahetys != $yhtiorow["maa"]) {
+						$ultilno = "-2"; // miinus kaks tarkoittaa, ett‰ lis‰tiedot pit‰‰ syˆtt‰‰ ja TUONTI-intrastat pit‰‰ l‰hett‰‰
+					}
+					else {
+						$ultilno = "";
+					}
+
+					$query = "	SELECT *
+								FROM varastopaikat
+								WHERE yhtio ='$kukarow[yhtio]'
+								and tunnus in ('$clearing', '$varasto')
+								and maa = '$yhtiorow[maa]'";
+					$result_intra = mysql_query($query) or pupe_error($query);
+
+					if (mysql_num_rows($result_intra) == 1) {
+
+						$intrarow = mysql_fetch_array($result_intra);
+
+						$query = "	UPDATE lasku
+									SET maa_maara						= '$maa_maara',
+									maa_lahetys							= '$maa_lahetys',
+									kauppatapahtuman_luonne				= '$intrarow[kauppatapahtuman_luonne]',
+									kuljetusmuoto						= '$intrarow[kuljetusmuoto]',
+									sisamaan_kuljetus					= '$intrarow[sisamaan_kuljetus]',
+									sisamaan_kuljetusmuoto				= '$intrarow[sisamaan_kuljetusmuoto]',
+									sisamaan_kuljetus_kansallisuus 		= '$intrarow[sisamaan_kuljetus_kansallisuus]',
+									kontti								= '$intrarow[kontti]',
+									aktiivinen_kuljetus					= '$intrarow[aktiivinen_kuljetus]',
+									aktiivinen_kuljetus_kansallisuus	= '$intrarow[aktiivinen_kuljetus_kansallisuus]',
+									poistumistoimipaikka				= '$intrarow[poistumistoimipaikka]',
+									poistumistoimipaikka_koodi			= '$intrarow[poistumistoimipaikka_koodi]',
+									bruttopaino							= '$intrarow[bruttopaino]',
+									lisattava_era						= '$intrarow[lisattava_era]',
+									vahennettava_era					= '$intrarow[vahennettava_era]',
+									ultilno								= '$ultilno'
+									WHERE tunnus = '$tilausnumero'
+									and yhtio = '$kukarow[yhtio]'";
+						$result = mysql_query($query) or pupe_error($query);
+
+					}
+
+				}
+
 			}
 
 			//t‰ss‰ joko tehd‰‰n uutta otsikkoa tai muutetaan olemassa olevaa

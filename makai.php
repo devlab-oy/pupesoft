@@ -44,9 +44,10 @@
 			require_once ("inc/pankkitiedot.inc");			
 			$pankkitiedot = array();
 
-			while ($row=mysql_fetch_array($result)) {
-				if ((substr($row["tilino"], 0, 1) >= '0' and substr($row["tilino"], 0, 1) <= '9') or substr($row["tilino"], 0, 1) <= 'K') {
-					
+			while ($row = mysql_fetch_array($result)) {
+
+				if (substr($row["tilino"], 0, 1) >= '0' and substr($row["tilino"], 0, 1) <= '9') {
+
 					$pankkitili = $row["tilino"];
 					
 					require("inc/pankkitilinoikeellisuus.php");

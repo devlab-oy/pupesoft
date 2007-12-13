@@ -353,7 +353,7 @@ if ($tee=='MONISTA') {
 						$vquery = "	SELECT kurssi
 									FROM valuu
 									WHERE yhtio = '$kukarow[yhtio]'
-									and nimi= '$monistarow[valkoodi]'";
+									and nimi	= '$monistarow[valkoodi]'";
 						$vresult = mysql_query($vquery) or pupe_error($vquery);
 						$valrow = mysql_fetch_array($vresult);
 						$values .= ", '$valrow[kurssi]'";
@@ -370,7 +370,12 @@ if ($tee=='MONISTA') {
 			echo t("Uusi tilausnumero on")." $utunnus<br><br>";
 
 
-			$query = "SELECT * from tilausrivi where uusiotunnus='$lasku' and kpl<>0 and yhtio ='$kukarow[yhtio]'";
+			$query = "	SELECT * 
+						from tilausrivi 
+						where uusiotunnus	= '$lasku' 
+						and kpl			   	<> 0 
+						and tyyppi 			= 'L'
+						and yhtio 			= '$kukarow[yhtio]'";
 			$rivires = mysql_query($query) or pupe_error($query);
 
 			while ($rivirow = mysql_fetch_array($rivires)) {

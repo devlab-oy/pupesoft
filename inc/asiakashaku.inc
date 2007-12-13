@@ -210,9 +210,9 @@ if ($monta > 1 and $monta <= $limit) {
 
 		if ($kutsuja != "yllapito.php") {
 			// jos mikätahansa on eri ja mikätahansa on erisuurta ku tyhjää.. tää on varmaan huomenna daily WTF:ssä.. :)
-			if (($asiakas['toim_nimi'] != $asiakas["nimi"] or $asiakas['toim_osoite'] != $asiakas["osoite"] or $asiakas['toim_postino'] != $asiakas["postino"] or $asiakas['toim_postitp'] != $asiakas["postitp"]) and
-				($asiakas['toim_nimi'] != "" or $asiakas['toim_osoite'] != "" or $asiakas['toim_postino'] != "" or $asiakas['toim_postitp'] != "")) {
-				$brnim     = '<br>'.$asiakas['toim_nimi'];
+			if (($asiakas['toim_nimi'] != $asiakas["nimi"] or $asiakas['toim_osoite'] != $asiakas["osoite"] or $asiakas['toim_postino'] != $asiakas["postino"] or $asiakas['toim_postitp'] != $asiakas["postitp"] or $asiakas["toim_nimitark"] != $asiakas["nimitark"]) and
+				($asiakas['toim_nimi'] != "" or $asiakas['toim_osoite'] != "" or $asiakas['toim_postino'] != "" or $asiakas['toim_postitp'] != "" or $asiakas["toim_nimitark"] != "")) {
+				$brnim     = '<br>'.$asiakas['toim_nimi']." ".$asiakas['toim_nimitark'];
 				$bros      = '<br>'.$asiakas['toim_osoite'];
 				$brpostino = '<br>'.$asiakas['toim_postino'];
 				$brpostitp = '<br>'.$asiakas['toim_postitp'];
@@ -221,7 +221,7 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<tr class='aktiivi'>
 					<td>$asiakas[ytunnus]</td>
 					<td>$asiakas[asiakasnro]</td>
-					<td>$asiakas[nimi] $brnim</td>
+					<td>$asiakas[nimi] $asiakas[nimitark] $brnim</td>
 					<td>$asiakas[osoite] $bros</td>
 					<td>$asiakas[postino] $brpostino</td>
 					<td>$asiakas[postitp] $brpostitp</td>";

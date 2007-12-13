@@ -1043,10 +1043,7 @@
 								if (mysql_num_rows($osre) == 1) {
 									$osrow = mysql_fetch_array($osre);
 									$row[$i] = $osrow['nimi'];
-								}
-								else {
-									$row[$i] = t("Tyhjä");
-								}
+								}								
 							}
 
 							// jos kyseessa on ostaja, haetaan sen nimi

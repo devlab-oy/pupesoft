@@ -44,10 +44,14 @@
 	}
 
 	if (mysql_field_name($result, $i) == "tilino") {
+
 		if (strtoupper($yhtiorow['maa']) == 'FI') {
-			if ((substr($t[$i], 0, 1) >= 0) and (substr($t[$i], 0, 1) <= '9')) {
+
+			if (is_numeric(substr($t[$i], 0, 1))) {
+
 				$pankkitili = $t[$i];
 				require 'pankkitilinoikeellisuus.php';
+
 				if ($pankkitili == '') {
 					$virhe[$i] = "".t("Pankkitili on virheellinen")."";
 					$errori = 1;

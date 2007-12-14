@@ -311,9 +311,25 @@ if ($tee == "") {
 		echo "<option value='$varow[tunnus]' $sel>".t("Varastoon")." - $varow[nimitys]</option>";
 	}
 
-	echo "</select></td></tr>";
-	echo "</form>
-		</table><br>";
+	echo "</select></td>";
+	echo "</form>";
+	
+	
+	
+	if ($varasto == 'y') {
+		echo "<form action='$PHP_SELF' method='post'>";
+		echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>
+			<input type='hidden' name='toiminto' value='varastopaikat'>
+			<input type='hidden' name='varasto' value='$varasto'>
+			<input type='hidden' name='otunnus' value='$otunnus'>
+			<input type='hidden' name='taytapaikat' value='jees'>";
+
+		echo "<td colspan='2'><input type='submit' value='".t("Täytä paikkakentät")."'></td>";
+		echo "</form>";
+	}
+	
+	echo "</tr>";
+	echo "</table><br>";
 
 	// otsikko valmis
 
@@ -365,6 +381,26 @@ if ($tee == "") {
 					}
 				}
 			</script> ";
+			
+		echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+				<!--
+
+				function toggleAll(toggleBox) {
+
+					var currForm = toggleBox.form;
+					var isChecked = toggleBox.checked;
+
+					for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+						if (currForm.elements[elementIdx].type == 'checkbox') {
+							currForm.elements[elementIdx].checked = isChecked;
+						}
+					}
+				}
+
+				//-->
+				</script>";
+				
+
 
 		//hakukentät
 		echo "<form action='$PHP_SELF' name='varastopaikkaformi' method='post'>";
@@ -400,7 +436,7 @@ if ($tee == "") {
 			$paikkares = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($paikkares) >= 1) {
-				echo "<td><select name='rivivarasto[$rivirow[tunnus]]'>";
+				echo "<td><select name='rivivarasto[$rivirow[tunnus]]' onchange = \"if(this.options[this.selectedIndex].value=='') { document.getElementById('oletusbox_{$rivirow["tunnus"]}').checked=true;} else {document.getElementById('oletusbox_{$rivirow["tunnus"]}').checked=false;}\">";
 				echo "<option value=''>".t("Uusi paikka")." --></option>";
 
 				while ($paikkarow = mysql_fetch_array($paikkares)) {
@@ -440,7 +476,7 @@ if ($tee == "") {
 				
 				echo "</select></td>";
 				
-				echo "<td>".t("Oletus").":<input type='checkbox' name='oletusbox[$rivirow[tunnus]]'></td>";
+				echo "<td>".t("Oletus").":<input type='checkbox' id='oletusbox_{$rivirow["tunnus"]}' name='oletusbox[$rivirow[tunnus]]'></td>";
 			}
 			else {
 				echo "<td><font class='error'>".t("Ei varastopaikkaa")."!";
@@ -451,7 +487,7 @@ if ($tee == "") {
 				echo "<td></td>";
 			}
 			
-			if ($varasto == 'y') {
+			if ($varasto == 'y' and $taytapaikat == 'jees') {
 				$rivlla1 = $rivirow["r1"];
 				$rivlla2 = $rivirow["r2"];
 				$rivlla3 = $rivirow["r3"];
@@ -464,7 +500,11 @@ if ($tee == "") {
 			echo "<td><input type='text' name='t4[$rivirow[tunnus]]' value='$rivlla4' maxzise='3' size='5'></td>";
 
 		}
-
+		echo "</tr><tr>";
+		echo "<td colspan='4' class='back'></td>";
+		echo "<td colspan='1' class='back'>Ruksaa kaikki:";
+		echo "<input type='checkbox' name='chbox' onclick='toggleAll(this)'></td>";
+		
 		echo "</tr><tr>";
 		echo "<td colspan='3' class='back'></td>";
 		echo "<td colspan='2' align='right' class='back'>".t("Täytä kaikki kentät").":</td>";

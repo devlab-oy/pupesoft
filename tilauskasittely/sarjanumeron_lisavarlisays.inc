@@ -31,7 +31,7 @@
 				$ostorow = mysql_fetch_array($sarjares);
 								
 				// Haetaan muut lisävarusteet
-				$query = "	SELECT tilausrivi.tuoteno, round(tilausrivi.kpl/$ostorow[kpl]) kpl, round(tilausrivi.tilkpl/$ostorow[kpl]) tilkpl, 
+				$query = "	SELECT tilausrivi.tuoteno, round(tilausrivi.kpl/$ostorow[kpl],2) kpl, round(tilausrivi.tilkpl/$ostorow[kpl],2) tilkpl, 
 							tilausrivi.tilkpl sistyomaarayskpl, tilausrivi.var, tilausrivi.tyyppi, 
 							concat_ws('#', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka, 
 							tilausrivin_lisatiedot.sistyomaarays_sarjatunnus, tilausrivi.perheid2
@@ -43,7 +43,7 @@
 							and tilausrivi.tunnus  != '$sarjarow[perheid2]'
 							and tilausrivi.perheid2!= 0";
 				$sarjares1 = mysql_query($query) or pupe_error($query);
-
+				
 				if (mysql_num_rows($sarjares1) > 0) {
 					$query = "	SELECT tunnus, perheid2, (varattu+jt+kpl) kpl
 								FROM tilausrivi 

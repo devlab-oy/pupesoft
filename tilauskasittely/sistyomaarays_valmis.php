@@ -26,7 +26,7 @@
 		}
 		else {
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tilausrivi WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE";
+			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tilausrivi WRITE, tilausrivi as tilausrivi2 WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE";
 			$locre = mysql_query($query) or pupe_error($query);
 			
 			$query = "	SELECT *
@@ -84,6 +84,88 @@
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 
+					// Jos samalla ostorivill‰ on useita kappaleita niin meid‰n on splitattava ostorivi osiin
+					$query = "	SELECT *
+								FROM tilausrivi 
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and tunnus  = '$sarjarow[ostorivitunnus]'";
+					$monista = mysql_query($query) or pupe_error($query);					
+					$ostorow = mysql_fetch_array($monista);
+					
+					if ($ostorow["kpl"] > 1) {
+						//Haetaan alkuper‰inen ostorivi ja sen tehdaslis‰varusteet
+						$query = " (SELECT * 
+									FROM tilausrivi 
+									WHERE tilausrivi.yhtio  = '$kukarow[yhtio]' 
+									and tilausrivi.tunnus 	= '$ostorow[tunnus]')
+									UNION
+								   (SELECT * 
+									FROM tilausrivi as tilausrivi2
+									WHERE tilausrivi2.yhtio  = '$kukarow[yhtio]' 
+									and tilausrivi2.perheid2 = '$ostorow[tunnus]'
+									and tilausrivi2.tyyppi  != 'D'
+									and tilausrivi2.tunnus  != '$ostorow[tunnus]'
+									and tilausrivi2.perheid2!= 0)";
+						$monistares2 = mysql_query($query) or pupe_error($query);					
+												
+						while ($ostokokorow = mysql_fetch_array($monistares2)) {
+							
+							$maara = round($ostokokorow["kpl"] / $ostorow["kpl"],2);								
+							
+							if ($maara > 0) {			
+								// V‰hennet‰‰n alkuper‰isen ostorivin m‰‰r‰‰ yhdell‰
+								$query = "	UPDATE tilausrivi 
+											SET kpl=kpl-$maara, tilkpl=tilkpl-$maara
+											WHERE yhtio = '$kukarow[yhtio]' 
+											and tunnus  = '$ostokokorow[tunnus]'";
+								$insres2 = mysql_query($query) or pupe_error($query);
+																													
+								//Kopioidaan tilausrivi
+								$kysely = "	INSERT INTO tilausrivi SET ";
+
+								for($i=0; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta														
+									switch (mysql_field_name($monistares2,$i)) {
+										case 'kpl':
+										case 'tilkpl':
+											$kysely .= mysql_field_name($monistares2,$i)."='$maara',";
+											break;
+										default:
+											$kysely .= mysql_field_name($monistares2,$i)."='".$ostokokorow[$i]."',";
+									}
+								}
+
+								$kysely  = substr($kysely, 0, -1);
+								$insres2 = mysql_query($kysely) or pupe_error($kysely);
+								$insid   = mysql_insert_id();
+								
+								if ($ostokokorow["tunnus"] == $ostokokorow["perheid2"] or $ostokokorow["perheid2"] == $perheid2) {
+									if ($ostokokorow["tunnus"] == $ostokokorow["perheid2"]) {
+										$uusi_perheid2 	= $insid;
+									}
+									
+									$perheid2 = $ostokokorow["perheid2"];
+									
+									$query = "	UPDATE tilausrivi 
+												SET perheid2 = $uusi_perheid2
+												WHERE yhtio = '$kukarow[yhtio]' 
+												and tunnus  = '$insid'";
+									$insres2 = mysql_query($query) or pupe_error($query);
+								}
+								
+								// Siirret‰‰n jatkojalostettavan tuotteen sarjanumero uudelle tilausriville
+								if ($ostokokorow["tunnus"] == $ostorow["tunnus"]) {
+									$query = "	UPDATE sarjanumeroseuranta 
+												SET ostorivitunnus = $insid
+												WHERE yhtio = '$kukarow[yhtio]' 
+												and tunnus  = '$sarjarow[tunnus]'";
+									$insres2 = mysql_query($query) or pupe_error($query);
+									
+									$sarjarow["ostorivitunnus"] = $insid;
+								}																
+							}																					
+						}
+					}
+					
 					// Haetaan lis‰varusteet 
 					$query    = "	SELECT tilausrivi.*, tuote.ei_saldoa, tuote.kehahin, tuote.sarjanumeroseuranta, tilausrivi.tunnus as rivitunnus
 									FROM tilausrivi
@@ -297,7 +379,7 @@
 					
 					//Irroitetaan jatkojalostettavan tuotteen sarjanumero
 					$query = "	UPDATE sarjanumeroseuranta 
-								SET siirtorivitunnus=0 
+								SET siirtorivitunnus = 0 
 								WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 					

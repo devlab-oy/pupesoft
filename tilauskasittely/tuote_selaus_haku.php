@@ -13,12 +13,10 @@
 	}
 
 	echo "
-	<SCRIPT type='application/javascript'>
+	<SCRIPT type='text/javascript'>
 		var popup_location;
 		function picture_popup(tuote_tunnus, maxwidth, totalheight, tuoteno) {
-			winW = screen.width;
-			popup_location = winW - maxwidth;
-			window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', 'asdf' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left='+popup_location+',top = 0, width='+maxwidth+', height='+totalheight);
+			window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+maxwidth+', height='+totalheight);
 		}
 	</SCRIPT>";
 	
@@ -518,6 +516,7 @@
 							tuote.status, 
 							tuote.ei_saldoa, 
 							tuote.yksikko,
+							tuote.tunnus,
 							(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 							tuote.sarjanumeroseuranta,
 							tuote.status,
@@ -1000,17 +999,16 @@
 						AND liitos='tuote' 
 						AND liitostunnus='$row[tunnus]'";
 			$kuvares = mysql_query($query) or pupe_error($query);
-
 			$apurow = mysql_fetch_array($kuvares);
 			$maxwidth = $apurow["max_width"] + 30;
-			$totalheight = $apurow["total_height"] + 25;
+			$totalheight = $apurow["total_height"] + 40;
 
 			if ($apurow["kpl"] > 0) {
 				$images_exist = 1;
 			}
 
 			if ($lisatiedot != "" and isset($images_exist)) {
-				echo "<td valign='top' class='back'><input type='button' value='".t("Kuva")."' onClick=\"picture_popup('$row[tunnus]', '$maxwidth', '$totalheight', '$row[tuoteno]')\"></td>";
+				echo "<td valign='top' class='back'><input type='button' value='".t("Kuva")."' onClick=\"javascript:picture_popup('$row[tunnus]', '$maxwidth', '$totalheight', '$row[tuoteno]')\"></td>";
 			}
 
 			echo "</tr>";

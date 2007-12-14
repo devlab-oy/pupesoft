@@ -1121,7 +1121,7 @@ if ($tee == '') {
 	}
 
 	// Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty
-	if ($pikaotsikko=='TRUE' and ($toimitustapa != '' or $tilausvahvistus != '' or $viesti != '' or $myyjanro != '' or $myyja != '' or $maksutapa != '')) {
+	if ($pikaotsikko=='TRUE' and $kukarow['extranet'] == '' and ($toimitustapa != '' or $tilausvahvistus != '' or $viesti != '' or $myyjanro != '' or $myyja != '' or $maksutapa != '')) {
 		if ($myyjanro != '') {
 			$apuqu = "	select *
 						from kuka use index (yhtio_myyja)
@@ -1730,6 +1730,8 @@ if ($tee == '') {
 			}
 		}
 		else {
+			echo "<input type='hidden' size='30' name='myyjanro' value='$laskurow[myyja]'>";
+			
 			echo "</tr>";
 		}
 	}

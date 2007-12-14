@@ -607,7 +607,7 @@
 						LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
 						LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-						and tilausrivi.tyyppi in ('L','E','O','G','V','W')
+						and tilausrivi.tyyppi in ('L','E','O','G','V','W','M')
 						and tilausrivi.tuoteno = '$tuoteno'
 						and tilausrivi.laadittu > '0000-00-00 00:00:00'
 						and tilausrivi.laskutettuaika = '0000-00-00'
@@ -669,11 +669,11 @@
 						$tyyppi = t("Hyvitys");
 						$merkki = "+";
 					}
-					elseif($jtrow["tyyppi"] == "W" and $jtrow["tilaustyyppi"] == "W") {
+					elseif(($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "W") {
 						$tyyppi = t("Valmistus");
 						$merkki = "+";
 					}
-					elseif($jtrow["tyyppi"] == "W" and $jtrow["tilaustyyppi"] == "V") {
+					elseif(($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "V") {
 						$tyyppi = t("Asiakkaallevalmistus");
 						$merkki = "+";
 					}

@@ -413,6 +413,7 @@
 
 	$query = "	SELECT *
 				FROM maksuehto
+				LEFT JOIN pankkiyhteystiedot ON (pankkiyhteystiedot.yhtio = maksuehto.yhtio AND pankkiyhteystiedot.tunnus = maksuehto.pankkiyhteystiedot)
 				WHERE maksuehto.yhtio='$kukarow[yhtio]' AND maksuehto.tunnus = '$laskutiedot[maksuehto]'";
 	$maksuehtoresult = mysql_query($query) or pupe_error($query);
 	$maksuehtotiedot = mysql_fetch_array($maksuehtoresult);

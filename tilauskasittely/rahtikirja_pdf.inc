@@ -353,7 +353,7 @@
 		$pdf->draw_text(62,  617, "Lähtö- ja lastauspaikka",							$firstpage, $norm);
 		$pdf->draw_text(65,  593,  $yhtiorow["postino"]."   ".strtoupper($yhtiorow["postitp"]),		$firstpage, $kirj);
 		$pdf->draw_text(62,  573, "Määräpaikan postinumero ja -toimipaikka",			$firstpage, $norm);
-		$pdf->draw_text(65,  550,  $rakir_row["toim_postino"]." ".strtoupper($rakir_row["toim_postitp"]), $firstpage, $kirj);
+		$pdf->draw_text(65,  550,  $rakir_row["toim_postino"]." ".strtoupper($rakir_row["toim_postitp"]), $firstpage, $iso);
 	
 		//oikeeta laitaa
 		$pdf->draw_text(302,  617, "Toimituslauseke Leveransklausul",					$firstpage, $norm);

@@ -1285,6 +1285,36 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "varaako_jt_saldoa") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("J‰lkitoimitusrivit eiv‰t varaa saldoa")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("J‰lkitoimitusrivit varaavat saldoa")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "varastopaikan_lippu") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Myynniss‰ ei n‰ytet‰ vaarastopaikan maan lippu")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myynniss‰ n‰ytet‰‰n vaarastopaikan maan lippu")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "myyntitilaus_asiakasmemo") {
 
 		$ulos = "<td><select name='$nimi'>";

@@ -12,6 +12,43 @@
 		$kori_polku = "ostoskori.php";
 	}
 
+	echo "
+	<SCRIPT type='application/javascript'>
+		var popup_location;
+		function picture_popup(tuote_tunnus, maxwidth, totalheight, tuoteno) {
+			winW = screen.width;
+			popup_location = winW - maxwidth;
+			window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', 'asdf' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left='+popup_location+',top = 0, width='+maxwidth+', height='+totalheight);
+		}
+	</SCRIPT>";
+	
+	if ($toiminto == "avaa_kuva") {
+
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio='$kukarow[yhtio]'
+					AND tuoteno='$tuoteno'";
+		$tuotekuvausres = mysql_query($query) or pupe_error($query);
+
+		$query = "	SELECT tunnus
+		 			FROM liitetiedostot 
+					WHERE yhtio='$kukarow[yhtio]' 
+					AND liitos='tuote' 
+					AND liitostunnus='$tunnus'";
+
+		$kuvares = mysql_query($query) or pupe_error($query);
+
+		echo "<table border='0' cellspacing='5' width='$maxwidth'>";
+		while ($kuvarow = mysql_fetch_array($kuvares)) {
+			$tuotekuvausrow = mysql_fetch_array($tuotekuvausres);
+			echo "<tr><td class='back' align='center' valign='top'><img src='".$palvelin2."view.php?id=$kuvarow[tunnus]'></td></tr>";
+			echo "<tr><td class='back' align='center' valign='top'>$tuotekuvausrow[kuvaus]</td></tr>";
+			echo "<tr><td class='back'><br></td></tr>";
+		}
+		echo "</table>";
+		exit;
+	}
+
 	echo "<font class='head'>".t("Etsi ja selaa tuotteita").":</font><hr>";
 
 	//	Tarkastetaan k‰sitell‰‰nkˆ lis‰tietoja
@@ -29,7 +66,7 @@
 		$toim_kutsu = "RIVISYOTTO";
 	}
 
-	$query    = "select * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
+	$query    = "SELECT * from lasku where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result   = mysql_query($query) or pupe_error($query);
 	$laskurow = mysql_fetch_array($result);
 
@@ -449,6 +486,7 @@
 				tuote.status, 
 				tuote.ei_saldoa, 
 				tuote.yksikko,
+				tuote.tunnus,
 				(SELECT group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') FROM tuotteen_toimittajat use index (yhtio_tuoteno) WHERE tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno) toim_tuoteno,
 				tuote.sarjanumeroseuranta,
 				tuote.status,
@@ -530,6 +568,7 @@
         if ($kukarow["kesken"] != 0 or is_numeric($ostoskori)) {
 			echo "<th></th>";
 		}
+		
 		echo "</tr>";
 
 		$edtuoteno = "";
@@ -681,7 +720,7 @@
 			// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
 			if ($kukarow["extranet"] != "") {
 
-				$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+				$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
 				$oleasres = mysql_query($query) or pupe_error($query);
 				$oleasrow = mysql_fetch_array($oleasres);
 
@@ -689,7 +728,7 @@
 
 					$myyntihinta = "$row[myyntihinta] $yhtiorow[valkoodi]";
 
-					$query = "	select *
+					$query = "	SELECT *
 								from hinnasto
 								where yhtio = '$kukarow[yhtio]'
 								and tuoteno = '$row[tuoteno]'
@@ -705,7 +744,7 @@
 						$myyntihinta = "$olhirow[hinta] $olhirow[valkoodi]";
 					}
 					else {
-						$query = "select * from valuu where yhtio='$kukarow[yhtio]' and nimi='$oleasrow[valkoodi]'";
+						$query = "SELECT * from valuu where yhtio='$kukarow[yhtio]' and nimi='$oleasrow[valkoodi]'";
 						$olhires = mysql_query($query) or pupe_error($query);
 
 						if (mysql_num_rows($oleasres) == 1) {
@@ -761,7 +800,7 @@
 			}
 			elseif ($kukarow["extranet"] != "") {
 
-				$query = "	select *
+				$query = "	SELECT *
 							from tuoteperhe
 							join tuote on tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno and ei_saldoa = ''
 							where tuoteperhe.yhtio = '$kukarow[yhtio]' and isatuoteno = '$row[tuoteno]' and tyyppi in ('','P')";
@@ -849,9 +888,9 @@
 					echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
 					echo "<input type='submit' value = '".t("Lis‰‰")."'>";
 					echo "</td>";
-					$yht_i++;
+					$yht_i++;	
 				}
-
+				
 				echo "</td>";
 			}
 			else {
@@ -933,7 +972,7 @@
 								}
 							}
 
-							echo "<tr>
+							echo "	<tr>
 									<td class='$vari' nowrap>$saldorow[nimitys] $saldorow[tyyppi]</td>
 									<td class='$vari' align='right' nowrap>".sprintf("%.2f", $myytavissa)." $row[yksikko]</td>
 									</tr>";
@@ -953,6 +992,26 @@
 				$yht_i++;
 			}
 
+			unset($images_exist);
+			
+			$query = "	SELECT MAX(image_width) AS max_width, SUM(image_height) AS total_height, count(liitostunnus) AS kpl
+			 			FROM liitetiedostot 
+						WHERE yhtio='$kukarow[yhtio]' 
+						AND liitos='tuote' 
+						AND liitostunnus='$row[tunnus]'";
+			$kuvares = mysql_query($query) or pupe_error($query);
+
+			$apurow = mysql_fetch_array($kuvares);
+			$maxwidth = $apurow["max_width"] + 30;
+			$totalheight = $apurow["total_height"] + 25;
+
+			if ($apurow["kpl"] > 0) {
+				$images_exist = 1;
+			}
+
+			if ($lisatiedot != "" and isset($images_exist)) {
+				echo "<td valign='top' class='back'><input type='button' value='".t("Kuva")."' onClick=\"picture_popup('$row[tunnus]', '$maxwidth', '$totalheight', '$row[tuoteno]')\"></td>";
+			}
 
 			echo "</tr>";
 		}

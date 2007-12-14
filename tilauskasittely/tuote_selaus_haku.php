@@ -14,10 +14,11 @@
 
 	echo "
 	<SCRIPT type='text/javascript'>
-		var popup_location;
+	<!--
 		function picture_popup(tuote_tunnus, maxwidth, totalheight, tuoteno) {
 			window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+maxwidth+', height='+totalheight);
 		}
+	//-->
 	</SCRIPT>";
 	
 	if ($toiminto == "avaa_kuva") {

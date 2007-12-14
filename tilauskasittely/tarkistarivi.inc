@@ -206,6 +206,7 @@
 
 		$paikatlask 	= 0;
 		$selpaikka		= "";
+		$selpaikkamaa	= "";
 		$kotipaikatlask = 0;
 		$omapaikatraja 	= 2;
 
@@ -319,14 +320,17 @@
 							$sel = "SELECTED";
 
 							$selpaikka = "$alkurow[hyllyalue] $alkurow[hyllynro] $alkurow[hyllyvali] $alkurow[hyllytaso]";
+							$selpaikkamaa = $alkurow['varastomaa'];
 						}
 						elseif (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and $sarjarow["era"] == $alkurow["era"] and !in_array($row["var"], array("P","S")) and $alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]) {
 							$sel = "SELECTED";
 
 							$selpaikka = "$alkurow[hyllyalue] $alkurow[hyllynro] $alkurow[hyllyvali] $alkurow[hyllytaso]";
+							$selpaikkamaa = $alkurow['varastomaa'];
 
 							if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
 								$selpaikka .= " $alkurow[era]";
+								
 							}
 						}
 
@@ -395,11 +399,13 @@
 						$sel1 = "SELECTED";
 
 						$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("varastoon");
+						$selpaikkamaa = "";
 					}
 					else {
 						$sel2 = "SELECTED";
 
 						$selpaikka = "$krow[nimi] --> ".t("tilaa")." ".t("asiakkaalle");
+						$selpaikkamaa = "";
 					}
 				}
 

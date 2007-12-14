@@ -2896,7 +2896,7 @@ if ($tee == '') {
 				echo "<th>".t("Nimitys")."</th>";
 			}
 
-			if($kukarow['extranet'] == '') {
+			if($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '') {
 				echo "	<th>".t("Paikka")."</th>";
 			}
 
@@ -3339,8 +3339,16 @@ if ($tee == '') {
 				}
 				elseif ($muokkauslukko_rivi == "" and $kukarow['extranet'] == '' and $trow["ei_saldoa"] == "") {
 					if ($paikat != '') {
-						echo "	<td $class align='left' valign='top'>
-									<form action='$PHP_SELF' method='post' name='paikat'>
+					
+						echo "	<td $class align='left' valign='top'>";
+									
+						//valitaan näytetävä lippu varaston tai yhtiön maanperusteella
+						if ($selpaikkamaa != '' and $yhtiorow['varastopaikan_lippu'] != '') {										
+											echo "<img src='../pics/flag_icons/gif/".strtolower($selpaikkamaa).".gif'>";
+									}	
+									
+									
+						echo "<form action='$PHP_SELF' method='post' name='paikat'>
 										<input type='hidden' name='toim' 			value = '$toim'>
 										<input type='hidden' name='lopetus' 		value='$lopetus'>
 										<input type='hidden' name='projektilla' 	value = '$projektilla'>
@@ -3352,22 +3360,19 @@ if ($tee == '') {
 										$paikat
 									</form>
 								</td>";
+								
 					}
 					else {
-
-						$query = "	select *
-									from varastopaikat
-									where yhtio='$kukarow[yhtio]'
-									and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))
-									and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$row[hyllyalue]'), 5, '0'),lpad(upper('$row[hyllynro]'), 5, '0'))";
-						$varastore = mysql_query($query) or pupe_error($query);
-						$varastoro = mysql_fetch_array($varastore);
-
-						if (strtoupper($varastoro['maa']) != strtoupper($yhtiorow['maa'])) {
-							echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varastoro['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
+						
+						
+						if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
+							echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
+						}
+						elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
+							echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font>";
 						}
 						else {
-							echo "<td $class align='left' valign='top'>$row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
+							echo "<td $class align='left' valign='top'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
 						}
 
 						if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and !in_array($row["var"], array('P','J','S','T','U'))) {
@@ -3411,13 +3416,36 @@ if ($tee == '') {
 					}
 				}
 				elseif($kukarow['extranet'] == '') {
-					echo "<td $class align='left' valign='top'>$row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
+					
+					if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
+						echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
+					}
+					elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
+						echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
+					}
+					else {
+						echo "<td $class align='left' valign='top'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
+					}
+					
+					//echo "<td $class align='left' valign='top'><img src='../pics/flag_icons/gif/".strtolower($yhtiorow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
 				}
-
+				elseif ($kukarow['extranet'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
+					
+					if ($varow['maa'] != '' ) {
+						echo "<td $class align='left' valign='top'><img src='".$palvelin2."flag_icons/gif/".strtolower($varow['maa']).".gif'></td>";
+					}
+					else {
+						echo "<td $class align='left' valign='top'></td>";
+					}
+					
+					
+				}
+				
 				if($kukarow['extranet'] == '') {
 					echo "<td $class valign='top'><a href='../tuote.php?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a>";
 				}
 				else {
+									
 					echo "<td $class valign='top'>$row[tuoteno]";
 				}
 
@@ -4246,6 +4274,9 @@ if ($tee == '') {
 					$ycspan++;
 				}
 				if($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
+					$ycspan++;
+				}
+				if($kukarow["extranet"] != "" and $yhtiorow['varastopaikan_lippu'] != '') {
 					$ycspan++;
 				}
 

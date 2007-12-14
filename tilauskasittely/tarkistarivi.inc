@@ -1,10 +1,10 @@
 <?php
 	//sis‰‰n tulee $row jossa on tilausrivi kaikki tiedot
 
-	$riviok = 0;
-	$saako_hyvaksya = 0;
-	$saako_jalkitoimittaa = 0;
-	$varaosavirhe = "";
+	$riviok 				= 0;
+	$saako_hyvaksya 		= 0;
+	$saako_jalkitoimittaa 	= 0;
+	$varaosavirhe 			= "";
 
 	$tquery	= "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 	$tres	= mysql_query($tquery) or pupe_error($tquery);
@@ -28,8 +28,21 @@
 		$riviok++;
 		$tilausok++;
 	}
+	
+	if ($row["var"] == "J" and $row["tyyppi"] != "E") {
+		if ($yhtiorow["varaako_jt_saldoa"] == "" and $row["jt"] == 0) {
+			$varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
+			$riviok++;
+			$tilausok++;
+		}
+		if ($yhtiorow["varaako_jt_saldoa"] != "" and $row["varattu"] == 0) {
+			$varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
+			$riviok++;
+			$tilausok++;
+		}	
+	}
 
-	if ($row["jt"] == 0 and in_array($row["var"], array('J','S','U','T')) and $row["tyyppi"] != "E") {
+	if ($row["jt"] == 0 and in_array($row["var"], array('S','U','T')) and $row["tyyppi"] != "E") {
 		$varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
 		$riviok++;
 		$tilausok++;
@@ -47,7 +60,7 @@
 		$tilausok++;
 	}
 
-	if ($row["jt"] != 0 and $row["tyyppi"] == "E") {
+	if ($row["var"] == "J" and $row["tyyppi"] == "E") {
 		$varaosavirhe .= t("VIRHE: Et voi syˆtt‰‰ jt-rivi‰ ennakkotilaukseen!")."<br>";
 		$riviok++;
 		$tilausok++;
@@ -86,6 +99,12 @@
 
 	if (($row["perheid2"] == $row["tunnus"] or $row["perheid2"] == 0) and $row["sarjanumeroseuranta"] == "" and $toim == "SIIRTOTYOMAARAYS") {
 		$varaosavirhe .= t("VIRHE: Jatkojalostettava tuote on oltava sarjanumeroeurannassa!")."<br>";
+		$riviok++;
+		$tilausok++;
+	}
+	
+	if (($row["perheid2"] == $row["tunnus"] or $row["perheid2"] == 0) and $row["varattu"] != 1 and $toim == "SIIRTOTYOMAARAYS") {
+		$varaosavirhe .= t("VIRHE: Jatkojalostettava m‰‰r‰ on oltava yksi!")."<br>";
 		$riviok++;
 		$tilausok++;
 	}
@@ -227,6 +246,8 @@
 		//Katotaan voidaanko t‰m‰ myyd‰ joltain toiselta paikalta
 		if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
 
+			$paikat .= "<option value='EIERAAVIELA#EIEI'>".t("Valitse er‰")."</option>";
+						
 			if ($trow["sarjanumeroseuranta"] == "F") {
 				$pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
 				$pepvmlisa2 = ", 16";
@@ -288,23 +309,23 @@
 			(in_array($row["var"], array('','H','S','T','U','J')) and mysql_num_rows($omavarastores) >= $omapaikatraja) or
 			(in_array($row["var"], array('S','T','U','J')) and mysql_num_rows($omavarastores) > 0)) {
 
+			if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
+		   		$query	= "	SELECT sarjanumeroseuranta.sarjanumero era
+		   					FROM sarjanumeroseuranta
+		   					WHERE yhtio = '$kukarow[yhtio]'
+							and tuoteno = '$row[tuoteno]'
+		   					and myyntirivitunnus = '$row[tunnus]'
+		   					LIMIT 1";
+		   		$sarjares = mysql_query($query) or pupe_error($query);
+		   		$sarjarow = mysql_fetch_array($sarjares);
+			}
+
 			while($alkurow = mysql_fetch_array($omavarastores)) {
 
 				if ($alkurow["hyllyalue"] != "!!M" and
 					($alkurow["varastotyyppi"] != "E" or
 					$laskurow["varasto"] == $alkurow["varasto"] or
 					($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
-
-					if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
-				   		$query	= "	SELECT sarjanumeroseuranta.sarjanumero era
-				   					FROM sarjanumeroseuranta
-				   					WHERE yhtio = '$kukarow[yhtio]'
-									and tuoteno = '$row[tuoteno]'
-				   					and myyntirivitunnus = '$row[tunnus]'
-				   					LIMIT 1";
-				   		$sarjares = mysql_query($query) or pupe_error($query);
-				   		$sarjarow = mysql_fetch_array($sarjares);
-					}
 
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], '', $alkurow["era"]);
 
@@ -386,7 +407,7 @@
 
 		// K‰‰yd‰‰n l‰pi tuotteen toimittajat
 		if ($kukarow["extranet"] == "" and in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $kpl_st > 0 and $toim != "SIIRTOTYOMAARAYS") {
-			if ($kotipaikatlask == 0) {
+			if ($kotipaikatlask == 0 and $trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F") {
 				$paikat = "<option value=''></option>".$paikat;
 			}
 

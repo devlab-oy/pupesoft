@@ -223,7 +223,13 @@
 				echo "<td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'></td></tr>";
 				
 				if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
-					echo "<tr><th>".t("Er‰n suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$muutarow[era_kpl]'></td></tr>";
+					if ($muutarow["era_kpl"] >= 0 and $muutarow["myyntirivitunnus"] == 0 and $muutarow["ostorivitunnus"] == 0) {
+						echo "<tr><th>".t("Er‰n suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$muutarow[era_kpl]'></td></tr>";
+					}
+					else {
+						echo "<tr><th>".t("Er‰n suuruus")."</th><td>$muutarow[era_kpl]</td></tr>";	
+						echo "<input type='hidden' name='era_kpl' value='$muutarow[era_kpl]'>";
+					}
 				}
 				
 				if ($rivirow["sarjanumeroseuranta"] == "F") {
@@ -290,11 +296,41 @@
 						and (ostorivitunnus = 0 or myyntirivitunnus = 0)";
 		}
 		else {
-			if ((float) $era_kpl == 0) {
+			if ((float) $era_kpl <= 0) {
 				$insok = "EI";
 				echo "<font class='error'>".t("Er‰lle on syˆtett‰v‰ kappalem‰‰r‰")." $rivirow[tuoteno]/$sarjanumero.</font><br><br>";
 			}
 			
+			if ((float) $era_kpl > $rivirow["varattu"]) {
+				$insok = "EI";
+				echo "<font class='error'>".t("Er‰n koko on liian suuri")." $rivirow[varattu]/$era_kpl.</font><br><br>";
+			}
+			
+			if ($from == "KERAA" and (float) $era_kpl != $rivirow["varattu"]) {
+				$insok = "EI";
+				echo "<font class='error'>".t("Er‰n koko on oltava sama kuin rivin m‰‰r‰")." $rivirow[varattu]/$era_kpl.</font><br><br>";
+			}
+			
+			if ($from == "KERAA" and $rivirow["hyllyalue"] == "") {
+				// Haetaan oletuspaikka
+				$query = "	SELECT *
+							FROM tuotepaikat 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and tuoteno = '$rivirow[tuoteno]'
+							and oletus != ''";
+				$result = mysql_query($query) or pupe_error($query);
+				$saldorow = mysql_fetch_array($result);
+				
+				$rivirow["hyllyalue"] = $saldorow["hyllyalue"];
+				$rivirow["hyllynro"]  = $saldorow["hyllynro"];
+				$rivirow["hyllyvali"] = $saldorow["hyllyvali"];
+				$rivirow["hyllytaso"] = $saldorow["hyllytaso"];
+			}
+			
+			if ($from == "KERAA" and $tunnuskentta == "myyntirivitunnus") {
+				$tunnuskentta = "ostorivitunnus";
+			}
+
 			// Samaan ostoriviin ei voida liitt‰‰ samaa er‰numeroa useaan kertaan, mutta muuten er‰numerot eiv‰t ole uniikkeja.
 			$query = "	SELECT *
 						FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
@@ -402,15 +438,20 @@
 		if (count($sarjataan) > 0 and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F")) {
 			$ktark = implode(",", $sarjataan);
 			
-			$query = "	SELECT sum(era_kpl) kpl 
+			$query = "	SELECT sum(abs(era_kpl)) kpl 
 						FROM sarjanumeroseuranta
 						WHERE yhtio	= '$kukarow[yhtio]'
 						and tunnus in ($ktark)";
 			$sarres = mysql_query($query) or pupe_error($query);
 			$sarrow = mysql_fetch_array($sarres);
 			
-			if ($rivirow["varattu"] < $sarrow["kpl"]) {
-				echo "<font class='error'>".t('Riviin voi liitt‰‰ vain yhden er‰n tuotteita')." $rivirow[varattu] < $sarrow[kpl]</font><br><br>";	
+			if ($from == "KERAA" and $rivirow["varattu"] != $sarrow["kpl"]) {
+				echo "<font class='error'>".t('Riviin voi liitt‰‰ vain')." $rivirow[varattu] $rivirow[yksikko].</font><br><br>";
+
+				$lisaysok = "";
+			}
+			elseif ($rivirow["varattu"] < $sarrow["kpl"]) {
+				echo "<font class='error'>".t('Riviin voi liitt‰‰ enint‰‰n')." $rivirow[varattu] $rivirow[yksikko].</font><br><br>";	
 				
 				$lisaysok = "";
 			}
@@ -460,8 +501,8 @@
 				}
 			}
 		}
-		else {
-			echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).".</font><br><br>";
+		elseif($rivirow["varattu"] < count($sarjataan)) {
+			echo "<font class='error'>".sprintf(t('Riviin voi liitt‰‰ enint‰‰n %s sarjanumeroa'), abs($rivirow["varattu"])).". ".$rivirow["varattu"]." ".count($sarjataan)."</font><br><br>";
 		}
 		
 		if ($rivirow["varattu"] >= count($sarjataan) and count($sarjataan) > 0 and $lisaysok == "OK") {
@@ -842,8 +883,13 @@
 		echo "<tr>";
 		echo "<td valign='top'>".strtoupper($sarjarow["sarjanumero"])."<a name='$sarjarow[sarjanumero]'></a>";
 		
-		if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
-			echo "<br>".t("Er‰ss‰").": $sarjarow[era_kpl] $rivirow[yksikko]";
+		if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {			
+			if ($sarjarow["era_kpl"] < 0) {
+				echo "<br>".t("Er‰ss‰").": ".abs($sarjarow["era_kpl"])." $rivirow[yksikko]<br><font class='error'>".t("Er‰ on jo myyty")."!</font>";
+			}
+			else {
+				echo "<br>".t("Er‰ss‰").": $sarjarow[era_kpl] $rivirow[yksikko]";
+			}		
 		}
 		
 		echo "</td>";
@@ -969,7 +1015,7 @@
 
 		}
 
-		if ($sarjarow['ostorivitunnus'] == 0 and $sarjarow['myyntirivitunnus'] == 0 and $keikkarow["tunnus"] == 0) {
+		if ($sarjarow['ostorivitunnus'] == 0 and $sarjarow['myyntirivitunnus'] == 0 and $keikkarow["tunnus"] == 0 and $sarjarow["era_kpl"] >= 0) {
 			echo "<br><a href='$PHP_SELF?toiminto=POISTA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat' onclick=\"return verify()\">".t("Poista")."</a>";
 		}
 

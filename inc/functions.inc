@@ -3257,6 +3257,8 @@ if (!function_exists("tee_menu")) {
 					$data .= "&menu[$key][menu]=".urlencode($valinta["TEKSTI"]); 
 					$data .= "&menu[$key][href]=".urlencode($valinta["HREF"]);
 					$data .= "&menu[$key][div]=".urlencode($valinta["DIV"]);
+					$data .= "&menu[$key][offsetx]=".urlencode($valinta["OFFSETX"]);
+					$data .= "&menu[$key][offsety]=".urlencode($valinta["OFFSETY"]);
 				}
 			}
 			

@@ -23,79 +23,26 @@
 		// Talletetaan k‰ytt‰j‰n nimell‰ tositteen/liitteen kuva, jos sellainen tuli
 		// koska, jos tulee virheit‰ tiedosto katoaa. Kun kaikki on ok, annetaan sille oikea nimi
 		if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-
-			$filetype = $_FILES['userfile']['type'];
-			$filesize = $_FILES['userfile']['size'];
-			$filename = $_FILES['userfile']['name'];
-
-			// otetaan file extensio
-			$path_parts = pathinfo($_FILES['userfile']['name']);
-			$ext = $path_parts['extension'];
-			if (strtoupper($ext) == "JPEG") $ext = "jpg";
-
-			$query = "SHOW variables like 'max_allowed_packet'";
-			$result = mysql_query($query) or pupe_error($query);
-			$varirow = mysql_fetch_array($result);
-
-			// extensio pit‰‰ olla oikein
-			if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
-				echo "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
-				$tee = "N";
-				$kuva = "";
+			$retval = tarkasta_liite("userfile", array("PNG", "JPG", "GIF", "PDF"));
+			if($retval === true) {
+				$kuva = tallenna_liite("userfile", "lasku", 0, "");
 			}
-			// ja file jonkun kokonen
-			elseif ($_FILES['userfile']['size'] == 0) {
-				echo "<font class='error'>".t("Tiedosto on tyhj‰")."!</font>";
-				$tee = "N";
-				$kuva = "";
-			}
-			elseif ($filesize > $varirow[1]) {
-				echo "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
-				$tee = "N";
-				$kuva = "";
-			}
-			// Talletetaan laskun kuva kantaan
 			else {
-				$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
-
-				// lis‰t‰‰n kuva
-				$query = "	insert into liitetiedostot set
-							yhtio      = '{$kukarow['yhtio']}',
-							liitos     = 'lasku',
-							laatija    = '{$kukarow['kuka']}',
-							luontiaika = now(),
-							data       = '$data',
-							filename   = '$filename',
-							filesize   = '$filesize',
-							filetype   = '$filetype'";
-				$result = mysql_query($query) or pupe_error($query);
-				$kuva = mysql_insert_id();
+				echo $retval;
+				$tee = "N";
 			}
 		}
-		elseif (isset($_FILES['userfile']['error']) and $_FILES['userfile']['error'] != 4) {
-			// nelonen tarkoittaa, ettei mit‰‰n file‰ uploadattu.. eli jos on joku muu errori niin ei p‰‰stet‰ eteenp‰in
-			echo "<font class='error'>".t("Laskun kuvan l‰hetys ep‰onnistui")."! (Error: ".$_FILES['userfile']['error'].")</font><br>";
-			$tee = "N";
-		}
+
 
 		if (is_uploaded_file($_FILES['tositefile']['tmp_name'])) {
 
 			//	ei koskaan p‰ivitet‰ automaattisesti
 			$tee = "N";
-
-			list($name, $ext) = split("\.", $_FILES['tositefile']['name']);
-
-			// extensio pit‰‰ olla oikein
-			if (!in_array(strtoupper($ext), array("XLS","CSV","TXT"))) {
-				echo "<font class='error'>".t("Ainoastaan .xls .cvs .txt tiedostot sallittuja")."! $ext</font>";
-				$fnimi = "";
-			}
-			// ja file jonkun kokonen
-			elseif ($_FILES['tositefile']['size'] == 0) {
-				echo "<font class='error'>".t("Tiedosto on tyhj‰")."!</font>";
-				$fnimi = "";
-			}
-			else {
+			
+			$retval = tarkasta_liite("tositefile", array("TXT", "CSV", "XLS"));
+			if($retval === true) {
+				list($name, $ext) = split("\.", $_FILES['tositefile']['name']);
+				
 				if (strtoupper($ext)=="XLS") {
 					require_once ('excel_reader/reader.php');
 
@@ -169,6 +116,13 @@
 			
 				//	Lis‰t‰‰n viel‰ 2 tyhj‰‰ rivi‰ loppuun
 				$maara+=2;
+				
+			}
+			else {
+				
+				//	Liitetiedosto ei kelpaa
+				echo $retval;
+				$tee = "N";
 			}
 		}
 		elseif (isset($_FILES['tositefile']['error']) and $_FILES['tositefile']['error'] != 4) {

@@ -3474,7 +3474,7 @@ if(!function_exists("nayta_kyselyt")) {
 
 
 if (! function_exists('tallenna_liite')) {
-	function tallenna_liite($userfile, $liitos, $liitostunnus, $selite, $kayttotarkoitus, $tunnus=0) {
+	function tallenna_liite($userfile, $liitos, $liitostunnus, $selite, $kayttotarkoitus="", $tunnus=0) {
 		global $kukarow, $yhtiorow, $_FILES, $kieli;
 		
 		$file = array();

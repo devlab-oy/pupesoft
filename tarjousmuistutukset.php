@@ -75,14 +75,14 @@ while($row=mysql_fetch_array($result)) {
 	}
 	
 	//	Jos meidän 1. kontakti asiakkaalle sijoittuu seuraavalle viikolle
-	if($row["kulunut"] >= 10 and $row["kulunut"] <= 14) {
+	if($row["kulunut"] >= 9 and $row["kulunut"] <= 14) {
 		if($viesti_1 == "") {
 			$viesti_1 = "Ensiviikolla 1. kontaktit asiakkaisiin\n";
 		}
 		$viesti_1 .= tee_viesti();
 	}
 	//	Jos meidän 2. kontakti asiakkaalle sijoittuu seuraavalle viikolle
-	elseif($row["kulunut"] >= 41 and $row["kulunut"] <= 45) {
+	elseif($row["kulunut"] >= 40 and $row["kulunut"] <= 45) {
 		if($viesti_2 == "") {
 			$viesti_2 = "Ensiviikolla 2. kontaktit asiakkaisiin\n";
 		}
@@ -90,7 +90,7 @@ while($row=mysql_fetch_array($result)) {
 	}
 	//	 Jos viimeinen voitelu sattuu seuraavalle kuukaudelle
 
-	if($row["pva"] >= 0 and $row["pva"] <= 5) {
+	if($row["pva"] >= 0 and $row["pva"] <= 6) {
 		if($viesti_3 == "") {
 			$viesti_3 = "Seuraavien asiakkaiden tarjoukset umpeutuvat ensiviikolla\n";
 		}

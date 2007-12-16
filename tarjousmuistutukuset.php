@@ -5,60 +5,110 @@
 require ("inc/connect.inc");
 require ("inc/functions.inc");
 
-//	Haetaan käyttäjittäin umpeutuneet tai kohta umpeutuvat tarjoukset
-$query = "	SELECT lasku.*, lasku.tunnusnippu tarjous, laskun_lisatiedot.seuranta, kuka.nimi tekija, kuka.eposti eposti,
-			if(date_add(lasku.luontiaika, interval yhtion_parametrit.tarjouksen_voimaika day) >= now(), 'Aktiiviset', 'Umpeutuneet') voimassa, 
-			yhteyshenkilo_tekninen.nimi yhteyshenkilo, yhteyshenkilo_tekninen.gsm yhteyshenkilo_gms, yhteyshenkilo_tekninen.puh yhteyshenkilo_puh, yhteyshenkilo_tekninen.email yhteyshenkilo_email,
-			asiakkaan_kohde.kohde asiakkaan_kohde,
-			(select max(tunnus) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu) viimeisin,
-			DATEDIFF(lasku.luontiaika, date_sub(now(), INTERVAL yhtion_parametrit.tarjouksen_voimaika day)) pva
-			FROM lasku
-			JOIN yhtion_parametrit ON lasku.yhtio = yhtion_parametrit.yhtio
-			JOIN kuka ON kuka.yhtio = lasku.yhtio and kuka.kuka=lasku.laatija
-			LEFT JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus			
-			LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus
-			LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde			
-			WHERE tila = 'T' and alatila NOT IN ('B','T','X')
-			HAVING lasku.tunnus=viimeisin and pva < 21
-			ORDER BY kuka.eposti, voimassa, pva";
-$result = mysql_query($query) or pupe_error($query);
-while($row=mysql_fetch_array($result)) {
-	if($row["eposti"] != $edeposti) {
-		
-		if($viesti != "") {
-			$viesti .= "\n\nSoitteles asiakkaalle tai käy sulkemassa tarjous!\n\nNiinku olis jo!\n";
-			mail($row["eposti"], "Tarjousmuistutus!", $viesti);
-		}
-		
-		$viesti = "$row[tekija], sinulla on kesken seuraavat tarjoukset\n";
-		$edtila = "";
-	}
+function tee_viesti() {
+	global $row;
 	
-	if($row["voimassa"] != $edtila) {
-		$viesti .= "\n\n".$row["voimassa"]." tilaukset:\n\n";
-	}
-
-	$viesti .= sprintf("%-8s", $row["tarjous"]);
+	$viesti = sprintf("%-8s", $row["tarjous"]);
 	$viesti .= sprintf("%-5s", $row["seuranta"]);
-	$viesti .= "$row[nimi] $row[nimitark], $row[asiakkaan_kohde] ($row[pva])\n";
-	if($row[yhteyshenkilo] != "") {
-		$viesti .= sprintf("%-14s", "Yhteyshenkilö:")." $row[yhteyshenkilo]\n";
-		$viesti .= sprintf("%-14s", "Gsm:")." $row[yhteyshenkilo_gsm]\n";
-		$viesti .= sprintf("%-14s", "Puh:")." $row[yhteyshenkilo_puh]\n";
-		$viesti .= sprintf("%-14s", "email:")." $row[yhteyshenkilo_email]\n";
-	}	
+	$viesti .= "$row[nimi] $row[nimitark], $row[asiakkaan_kohde]\n";
+	if($row["yhteyshenkilo_tekninen"] > 0) {
+		$query = "	SELECT * 
+					FROM yhteyshenkilo 
+					WHERE yhtio = '$row[yhtio]' and tunnus = '$row[yhteyshenkilo_tekninen]'";
+		$result = mysql_query($query) or pupe_error($query);					
+		$yrow = mysql_fetch_array($result);
+		$viesti .= sprintf("%-14s", "Yhteyshenkilö:")." $yrow[nimi]\n";
+		$viesti .= sprintf("%-14s", "Gsm:")." $yrow[gsm]\n";
+		$viesti .= sprintf("%-14s", "Puh:")." $yrow[puh]\n";
+		$viesti .= sprintf("%-14s", "email:")." $yrow[email]\n";
+	}
 	$viesti .= "\n";
 	
-	$edeposti = $row["eposti"];
-	$edtila = $row["voimassa"];	
+	return $viesti;
 }
 
-if($viesti != "") {
-	$viesti .= "\n\nSoitteles asiakkaalle tai käy sulkemassa tarjous!\n\nNiinku olis jo!\n";
-	mail($row["eposti"], "Tarjousmuistutus!", $viesti);
+function mailaa() {
+	global $row, $edlaatija, $viesti_1, $viesti_2, $viesti_3, $viesti_4;
+	
+	if($viesti_4.$viesti_3.$viesti_2.$viesti_1 != "") {
+		$query = "	SELECT * 
+					FROM kuka
+					WHERE yhtio = '$row[yhtio]' and kuka = '$edlaatija'";
+		$result = mysql_query($query) or pupe_error($query);
+		$yrow = mysql_fetch_array($result);
+
+		$viesti = "\n\nTässä olisi vähän listaa kelle pitäis ensiviikolla soitella!\n\n$viesti_1\n$viesti_2\n$viesti_3\n\n\n$viesti_4";
+
+		$viesti_1 = $viesti_2 = $viesti_3 = $viesti_4 = "";
+
+		//echo "\n\nLähetettiin $yrow[eposti]:\n$viesti\n";		
+	}
+	else {
+		return true;
+	}
+	
+	return mail($yrow["eposti"], "Tarjousmuistutus!", $viesti);
 }
 
 
-		
+//	Haetaan käyttäjittäin umpeutuneet tai kohta umpeutuvat tarjoukset
+$query = "	SELECT versio.*, if(versio.tunnusnippu>0, versio.tunnusnippu, versio.tunnus) tarjous, versio.laatija laatija,
+				laskun_lisatiedot.seuranta, laskun_lisatiedot.yhteyshenkilo_tekninen, 
+				asiakkaan_kohde.kohde asiakkaan_kohde,
+				DATEDIFF(now(), versio.luontiaika) kulunut,
+				DATEDIFF(versio.luontiaika, date_sub(now(), INTERVAL laskun_lisatiedot.tarjouksen_voimaika day)) pva
+			FROM lasku
+			JOIN lasku versio ON versio.yhtio=lasku.yhtio and versio.tunnus=if(lasku.tunnusnippu>0,(select max(l.tunnus) from lasku l where l.yhtio=lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu and l.tila='T'), lasku.tunnus)
+			LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = versio.yhtio and laskun_lisatiedot.otunnus=versio.tunnus			
+			LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde			
+			WHERE lasku.tila = 'T' and lasku.alatila NOT IN ('B','T','X')
+			ORDER BY versio.laatija, pva";
+$result = mysql_query($query) or pupe_error($query);					
+
+$edlaatija = "";
+
+while($row=mysql_fetch_array($result)) {
+	
+	//	Lähetetään maili
+	if($row["laatija"] != $edlaatija and $edlaatija != "") {
+		mailaa();
+	}
+	
+	//	Jos meidän 1. kontakti asiakkaalle sijoittuu seuraavalle viikolle
+	if($row["kulunut"] >= 10 and $row["kulunut"] <= 14) {
+		if($viesti_1 == "") {
+			$viesti_1 = "Ensiviikolla 1. kontaktit asiakkaisiin\n";
+		}
+		$viesti_1 .= tee_viesti();
+	}
+	//	Jos meidän 2. kontakti asiakkaalle sijoittuu seuraavalle viikolle
+	elseif($row["kulunut"] >= 41 and $row["kulunut"] <= 45) {
+		if($viesti_2 == "") {
+			$viesti_2 = "Ensiviikolla 2. kontaktit asiakkaisiin\n";
+		}
+		$viesti_2 .= tee_viesti();
+	}
+	//	 Jos viimeinen voitelu sattuu seuraavalle kuukaudelle
+
+	if($row["pva"] >= 0 and $row["pva"] <= 5) {
+		if($viesti_3 == "") {
+			$viesti_3 = "Seuraavien asiakkaiden tarjoukset umpeutuvat ensiviikolla\n";
+		}
+		$viesti_3 .= tee_viesti();
+	}
+	elseif($row["pva"] < 0) {
+		if($viesti_4 == "") {
+			$viesti_4 = "SEURAAVAT TARJOUKSET OVAT JO UMPEUTUNEET JA KÄSITTELEMÄTTÄ!!!\n";
+		}
+		$viesti_4 .= tee_viesti();		
+	}
+	
+	$edlaatija = $row["laatija"];
+	$edrow = $row;
+}
+
+$row = $edrow;
+mailaa();
+
 
 ?>

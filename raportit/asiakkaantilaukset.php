@@ -4,6 +4,7 @@
 
 	require ("../inc/parametrit.inc");
 
+	$til = "";
 	if ($toim == 'MYYNTI') {
 		echo "<font class='head'>".t("Asiakkaan tilaukset").":</font><hr>";
 		
@@ -33,6 +34,13 @@
 		echo "<font class='head'>".t("Asiakkaan reklamaatiot").":</font><hr>";
 		
 		$til = " tila in ('L','N','C') and tilaustyyppi='R' ";
+	}
+	
+	//	Voidaan n‰ytt‰‰ vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
+	if($tee=="NAYTA" and $til != "") {
+		require ("raportit/naytatilaus.inc");
+		require ("inc/footer.inc");
+		die();
 	}
 	
 	if ($ytunnus == '' and $otunnus == '' and $laskunro == '' and $sopimus == '' and $kukarow['kesken'] != 0 and $til != '') {

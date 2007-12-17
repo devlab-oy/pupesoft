@@ -272,6 +272,22 @@ if (!function_exists('alku')) {
 						
 						$laskurow[$kentta] = $row["nimi"];						
 					}
+					elseif ($kentta == "merkki") {												
+						$query = "	SELECT selitetark_2
+									FROM avainsana
+									WHERE yhtio = '$kukarow[yhtio]' 
+									and laji = 'sarjanumeron_li' 
+									and selite = 'MERKKI'
+									and selitetark = '".$laskurow[$kentta]."'
+									LIMIT 1";
+						$yresult = mysql_query($query) or pupe_error($query);
+						
+						if (mysql_num_rows($yresult) > 0) {
+							$row = mysql_fetch_array($yresult);	
+							
+							$laskurow[$kentta] = $row["selitetark_2"];	
+						}
+					}
 				
 					$pdf->draw_text($al_lask, $kala, $al_row["selitetark"].":",	$thispage, $norm);
 					$pdf->draw_text($al_lask+70, $kala, $laskurow[$kentta], 	$thispage, $norm);

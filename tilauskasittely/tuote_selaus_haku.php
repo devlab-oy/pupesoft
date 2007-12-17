@@ -619,17 +619,19 @@
 
 			// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
 			if ($row["sarjanumeroseuranta"] != "") {
-				$query	= "	SELECT sarjanumeroseuranta.*, tilausrivi_osto.nimitys nimitys
+				$query	= "	SELECT sarjanumeroseuranta.*, tilausrivi_osto.nimitys nimitys, tilausrivi_myynti.tyyppi, lasku_myynti.nimi myynimi, lasku_myynti.tunnus myytunnus
 							FROM sarjanumeroseuranta
 							LEFT JOIN tilausrivi tilausrivi_myynti use index (PRIMARY) ON tilausrivi_myynti.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_myynti.tunnus=sarjanumeroseuranta.myyntirivitunnus
-							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus							
+							LEFT JOIN tilausrivi tilausrivi_osto   use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio   and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus
+							LEFT JOIN lasku lasku_myynti use index (PRIMARY) ON lasku_myynti.yhtio=sarjanumeroseuranta.yhtio and lasku_myynti.tunnus=tilausrivi_myynti.otunnus						
 							WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 							and sarjanumeroseuranta.tuoteno = '$row[tuoteno]'
 							and sarjanumeroseuranta.myyntirivitunnus != -1
-							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
-							and tilausrivi_osto.laskutettuaika != '0000-00-00'";
+							and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.tyyppi='T')
+							and tilausrivi_osto.laskutettuaika != '0000-00-00'
+							order by nimitys";
 				$sarjares = mysql_query($query) or pupe_error($query);
-				
+								
 				// Sarjanumerollisille tuotteille haetaan nimitys ostopuolen tilausriviltä
 				if ($row["sarjanumeroseuranta"] == "S") {
 					$nimitys = "";
@@ -864,8 +866,13 @@
 
 					echo "<tr>
 							<td class='$vari' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\" nowrap>$nimilask 
-							<a href='sarjanumeroseuranta.php?tuoteno_haku=$row[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a>
-							</td>";
+							<a href='sarjanumeroseuranta.php?tuoteno_haku=$row[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a>";
+					
+					if ($sarjarow["tyyppi"] == "T") {
+						echo "<br><font class='message'>(".t("Tarjous").": $sarjarow[myytunnus] $sarjarow[myynimi])</font>";
+					}
+						
+					echo "</td>";
 					
 					$nimilask++;
 

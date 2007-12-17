@@ -934,7 +934,7 @@
 		
 		}
 		elseif ($sarjarow["myynti_tila"] == 'T') {
-			$fnlina1 = "<font class='message'>(Tarjous: ";
+			$fnlina1 = "<font class='message'>(".t("Tarjous").": ";
 			$fnlina2 = ")</font>";
 		}
 		else {

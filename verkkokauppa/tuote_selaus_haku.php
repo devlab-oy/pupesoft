@@ -181,6 +181,10 @@
 			function tilaukset_linkki() {
 				global $yhtiorow, $kukarow, $osasto, $try;
 
+				if($kukarow["kuka"] == "www") {
+					return "";
+				}
+
 				$val = "";
 				if($kukarow["kesken"] > 0) {
 					$query = "	SELECT *
@@ -195,16 +199,16 @@
 						$result = mysql_query($query) or pupe_error($query);
 						$row = mysql_fetch_array($result);
 
-						$val .= "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$haku[3]&try=$haku[4]&osasto=$osasto&try=$try')\">".t("Tilauksen tuotteen")." <em>".t("Yhteensä")." $row[summa]</em></a><br>";
+						$val .= "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$osasto&try=$try')\">".t("Tilaus %s %s, yhteensä %s %s", $kieli, $laskurow["tunnus"], $laskurow["viesti"], number_format($row["summa"], 2, ',', ' '), $laskurow["valkoodi"])."</a><br>";
 
 					}
 				}
 
 				if($yhtiorow["alv_kasittely"] != "") {
-					$val .=  "<font class='message'>".t("Tuotteiden hinnat ovat arvonlisäverottomia").".</font>";
+					$val .=  "<font class='info'>".t("Hinnat eivät sisällä arvonlisäveroa").".</font>";
 				}
 				else {
-					$val .=  "<font class='message'>".t("Tuotteiden hinnat sisältävät arvonlisaveron").".</font>";
+					$val .=  "<font class='info'>".t("Hinnat sisältävät arvonlisäveron").".</font>";
 				}
 
 				return $val;
@@ -746,7 +750,7 @@
 				}				
 			}
 			else {
-				if($row["toim_tuoteno"] != "") {
+				if($row["toim_tuoteno"] != "" and $kukarow["kuka"] != "www") {
 					$toimlisa = "<br><a id='$row[tuoteno]_P' href='javascript:sndReq(\"{$row["tuoteno"]}_T\", \"verkkokauppa.php?tee=tuotteen_lisatiedot&tuoteno={$row["tuoteno"]}\", \"{$row["tuoteno"]}_P\")'>{$row["toim_tuoteno"]}</a>";
 				}
 				else $toimlisa = "";

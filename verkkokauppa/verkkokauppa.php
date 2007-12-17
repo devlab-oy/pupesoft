@@ -45,7 +45,7 @@ if(!function_exists("menu")) {
 			while($orow = mysql_fetch_array($ores)) {
 				$target		= "{$orow["osasto"]}_T";
 				$parent		= "{$orow["osasto"]}_P";
-				$onclick	= "document.getElementById(\"$target\").style.display==\"none\"? sndReq(\"selain\", \"verkkokauppa.php?tee=kuvaus&osasto={$orow["osasto"]}\", \"\", false) : \"\";";
+				$onclick	= "document.getElementById(\"$target\").style.display==\"none\"? sndReq(\"selain\", \"verkkokauppa.php?tee=uutiset&osasto={$orow["osasto"]}\", \"\", false) : \"\";";
 				$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto={$orow["osasto"]}\", \"$parent\", false, true);";
 				$val .=  "<tr class='aktiivi'><td><a class = 'menu' id='$parent' onclick='$onclick' href='$href'>{$orow["nimi"]}</a><div id='$target' style='display: none'></div></td></tr>";
 			}
@@ -130,51 +130,15 @@ if(!function_exists("kuvaus")) {
 	}
 } */
 
-if(!function_exists("tilaukset_linkki")) {
-	function tilaukset_linkki() {
-		global $yhtiorow, $kukarow, $osasto, $try;
-		
-		$val = "";
-		if($kukarow["kesken"] > 0) {
-			$query = "	SELECT *
-						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]'";
-			$result = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($result) == 1) {
-				$laskurow = mysql_fetch_array($result);
-				$query = "	SELECT round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),$yhtiorow[hintapyoristys]) summa
-							FROM tilausrivi
-							WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi != 'D'";
-				$result = mysql_query($query) or pupe_error($query);
-				$row = mysql_fetch_array($result);
-				
-				$val .= "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$haku[3]&try=$haku[4]&osasto=$osasto&try=$try')\">".t("Tilauksen tuotteen")." <em>".t("Yhteensä")." $row[summa]</em></a><br>";
-				
-			}
-		}
-		
-		if($yhtiorow["alv_kasittely"] != "") {
-			$val .=  "<font class='message'>".t("Tuotteiden hinnat ovat arvonlisäverottomia").".</font>";
-		}
-		else {
-			$val .=  "<font class='message'>".t("Tuotteiden hinnat sisältävät arvonlisaveron").".</font>";
-		}
-		
-		return $val;
-	}
-}
-
 if(!function_exists("uutiset")) {
 	function uutiset($osasto="", $try="", $yhteystiedot="") {
 		global $yhtiorow, $kukarow;
 		
+		$linkki = "";
 		if($yhteystiedot != "") {
 			$lisa = "and tyyppi = 'VERKKOKAUPAN_YHTEYSTIEDOT'";
 		}
 		else {
-			$val = "
-			<table class='uutinen'>
-				<tr><td class='back' align = 'right'>".tilaukset_linkki()."</td></tr>";
 			
 			if($osasto == "") {
 				$lisa = "and tyyppi = 'VERKKOKAUPPA' and kentta09 = '' and kentta10 = ''";
@@ -184,16 +148,41 @@ if(!function_exists("uutiset")) {
 			}
 			else {
 				$lisa = "and tyyppi = 'VERKKOKAUPPA' and kentta09 = '$osasto' and kentta10 = '$try'";
-			}			
+			}
+			
+			if($kukarow["kesken"] > 0) {
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and tila = 'N' and tunnus = '$kukarow[kesken]'";
+				$result = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($result) == 1) {
+					$laskurow = mysql_fetch_array($result);
+					$query = "	SELECT round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100))),$yhtiorow[hintapyoristys]) summa
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]' and tyyppi != 'D'";
+					$result = mysql_query($query) or pupe_error($query);
+					$row = mysql_fetch_array($result);
+				
+					$linkki = "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$osasto&try=$try')\">".t("Tilaus %s %s, yhteensä %s %s", $kieli, $laskurow["tunnus"], $laskurow["viesti"], number_format($row["summa"], 2, ',', ' '), $laskurow["valkoodi"])."</a><br>";
+				}
+			}	
 		}
 		
 		$query = "	SELECT *
 					FROM kalenteri
 					WHERE yhtio = '$kukarow[yhtio]'  $lisa
-					ORDER BY kokopaiva asc , luontiaika DESC
+					ORDER BY kokopaiva DESC , luontiaika DESC
 					LIMIT 8";
 		$result = mysql_query($query) or pupe_error($query);
-		while($row = mysql_fetch_array($result)) {
+		if(mysql_num_rows($result)>0) {
+			$val = "
+				<table class='uutinen'>";
+				
+			if($linkki != "") {
+				$val .= "<tr><td class='back'>$linkki</td></tr>";
+			}
+
+			while($row = mysql_fetch_array($result)) {
 			$val .= "<tr><td class='back'>";
 			if($row["kentta03"] > 0) {
 				$val .= "<img class='uutinen' src='view.php?id=$row[kentta03]'><br>";
@@ -237,8 +226,9 @@ if(!function_exists("uutiset")) {
 			$val .= "<font class='uutinen'>{$row["kentta02"]}</font><hr>";
 			$val .= "</td></tr>";
 		}
+			$val .= "</table>";
+		}
 		
-		$val .= "</table>";
 		
 		return $val;
 	}
@@ -294,7 +284,7 @@ if($tee == "tuotteen_lisatiedot") {
 		$search[]	= "/\!\!(.*)\!\!/m";
 		$replace[]	= "<font class='bold'>\$1</font>";
 
-		$tekstit = preg_replace($search, $replace, $row["tekstit"]);		
+		$tekstit = preg_replace($search, $replace, nl2br($row["tekstit"]));
 	}
 	else {
 		$tekstit = "";
@@ -529,7 +519,7 @@ if($tee == "tilatut") {
 		$ulos .= "<br><br>";
 
 
-		$query = "	SELECT tuoteno, nimitys, tilausrivi.hinta, round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta, (varattu+jt) varattu, tilausrivi.tunnus
+		$query = "	SELECT tuoteno, nimitys, tilausrivi.hinta, round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta, (varattu+jt) varattu, tilausrivi.alv, tilausrivi.tunnus
 					FROM tilausrivi
 					JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
 					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
@@ -667,42 +657,51 @@ if($tee == "tilatut") {
 						
 						<table style = 'width: 600px;'>
 						<tr>
-							<th>Tuoteno</th>
-							<th>Nimitys</th>
-							<th>Määrä</th>
-							<th>Yksikköhinta</th>
-							<th>Rivihinta</th>
+							<th>".t("Tuoteno")."</th>
+							<th>".t("Nimitys")."</th>
+							<th>".t("Määrä")."</th>
+							<th>".t("Yksikköhinta")."</th>
+							<th>".t("Rivihinta")."</th>
+							<th>".t("Verollinen")."</th>
+							<th>".t("Alv")."</th>
 							<td class='back'></td>
 						</tr>";
 
 
-			$summa = 0;
+			$summa = $summa_verolla = 0;
 			while ($koririvi = mysql_fetch_array($riviresult)) {
 
+				$rivihinta_verolla = $koririvi["rivihinta"] * (1+($koririvi["alv"]/100));
+				
 				$ulos .= "<tr>
 							<td>$koririvi[tuoteno]</td>
 							<td>$koririvi[nimitys]</td>
-							<td>$koririvi[varattu]</td>
-							<td>$koririvi[hinta]</td>
-							<td>$koririvi[rivihinta]</td>
+							<td>".number_format($koririvi["varattu"], 2, ',', ' ')."</td>
+							<td>".number_format($koririvi["hinta"], 2, ',', ' ')."</td>
+							<td>".number_format($koririvi["rivihinta"], 2, ',', ' ')."</td>
+							<td>".number_format($rivihinta_verolla, 2, ',', ' ')."</td>
+							<td>".number_format($koririvi["alv"], 2, ',', ' ')."%</td>							
 							<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">Poista</a></td>
 						</tr>";
 				$summa += $koririvi["rivihinta"];
+				$summa_verolla += $rivihinta_verolla;
 
 			}
 			
-			$ulos .= "	<tr>
+			$ulos .= "	
+					<tr>
 						<td class = 'back' colspan = '4'></td>
 						<td class = 'tumma'>".number_format($summa, 2, ',', ' ')."</td>
+						<td class = 'tumma'>".number_format($summa_verolla, 2, ',', ' ')."</td>						
 					</tr>
 					<tr>
 						<td class = 'back' colspan = '4'>";
 
 			if($yhtiorow["alv_kasittely"] != "") {
-				$ulos .= "<font class='message'>".t("Hinnat ovat eivät sisällä arvonlisäveroa").".</font>";
+				$ulos .= "<font class='message'>".t("Yksikköhinnat eivät sisällä arvonlisäveroa").".</font>";
 			}
 			else {
-				$ulos .= "<font class='message'>".t("Hinnat sisältävät arvonlisäveron").".</font>";
+				$ulos .= "<font class='message'>".t("Yksikköhinnat sisältävät arvonlisäveron").".</font>";
 			}
 			
 			$ulos .= "		</td>

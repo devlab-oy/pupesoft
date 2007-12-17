@@ -163,6 +163,12 @@
 	
 	if (mysql_field_name($result, $i) == "tyyppi") {
 		$toimtyyppi = $t[$i]; // otetaan t‰‰ talteen
+		
+		// Jos toimittaja merkataan poistetuksi niin unohdetaan kaikki errortsekit...
+		if ($toimtyyppi == "P") {						
+			unset($virhe);
+			$errori = 0;
+		}
 	}
 	
 	if (mysql_field_name($result, $i) == "tyyppi_tieto") {

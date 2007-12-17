@@ -545,6 +545,7 @@ if ($tuoteno != '') {
 						SET kplhinta = '$uusihinta', selite = concat(selite, '$selite_txt')
 						WHERE yhtio = '$kukarow[yhtio]'
 						and laji in ('tulo','valmistus')
+						and laadittu >= '$yhtiorow[tilikausi_alku]'
 						and rivitunnus='$rivitunnus'";
 			$paivresult = mysql_query($query) or pupe_error($query);
 
@@ -591,7 +592,8 @@ if ($tuoteno != '') {
 								SET hinta = '$uusihinta'
 								WHERE yhtio = '$kukarow[yhtio]'
 								and rivitunnus = '$sarjarow[myyntirivitunnus]'
-								and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi')";
+								and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi')
+								and laadittu >= '$yhtiorow[tilikausi_alku]'";
 					if ($jalkilaskenta_debug > 1) echo "$query<br>";
 					$upresu = mysql_query($query) or pupe_error($query);
 				}
@@ -637,6 +639,18 @@ if ($tuoteno != '') {
 		else {
 			$tapahtuma = mysql_fetch_array($result);
 			$pvm = $tapahtuma["laadittu"]; // kääntöpisteen tarkka aika talteen
+			
+			// verrataan vähän aikoja
+			list($tkvv,$tkkk,$tkpp) = split("-",$yhtiorow["tilikausi_alku"]);
+			list($klvv,$klkk,$klpp) = split("-",$tapahtuma["laadittu"]);
+
+			$tilikausi_alku = (int) date('Ymd',mktime(0,0,0,$tkkk,$tkpp,$tkvv));
+			$korjaus_alku   = (int) date('Ymd',mktime(0,0,0,$klkk,$klpp,$klvv));
+
+			// yritetään korjata jotain joka on lukitulla tilikaudella.. kerrotaan siitä
+			if ($korjaus_alku < $tilikausi_alku) {
+				echo "<font class='error'>".t("Korjauksia kaikkiin tapahtumiin ei voida tehdä, koska tapahtumia on lukitulla tilikaudella")."!</font><br>";
+			}
 		}
 
 		if (($tuote['epakurantti25pvm'] != '0000-00-00') or ($tuote['epakurantti50pvm'] != '0000-00-00') or ($tuote['epakurantti75pvm'] != '0000-00-00') or ($tuote['epakurantti50pvm'] != '0000-00-00')) {
@@ -708,7 +722,7 @@ if ($tuoteno != '') {
 				if ($jlerror == 0) {
 					// Päivitetään korjattava tapahtuma
 					$selite_txt = ", Jälkilaskennan ostohinta: $uusihinta (".tv1dateconv(date("Y-m-d")).")";
-					$query = "UPDATE tapahtuma SET kplhinta='$uusihinta', selite = concat(selite, '$selite_txt') WHERE tunnus='$tapahtuma[tunnus]'";
+					$query = "UPDATE tapahtuma SET kplhinta = '$uusihinta', selite = concat(selite, '$selite_txt') WHERE tunnus = '$tapahtuma[tunnus]' and laadittu >= '$yhtiorow[tilikausi_alku]'";
 					$result = mysql_query($query) or pupe_error($query);
 
 					// haetaan ostotilausrivin tiedot
@@ -892,7 +906,7 @@ if ($tuoteno != '') {
 
 								// päivitetään hinta vain jos hinta on eri
 								if ($trow["hinta"] != $uusikehahin) {
-									$query = "UPDATE tapahtuma SET hinta = '$uusikehahin' $kulutuslisa WHERE tunnus = '$trow[tunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'kulutus')";
+									$query = "UPDATE tapahtuma SET hinta = '$uusikehahin' $kulutuslisa WHERE tunnus = '$trow[tunnus]' and laji in ('tulo', 'valmistus', 'laskutus', 'inventointi', 'kulutus') and laadittu >= '$yhtiorow[tilikausi_alku]'";
 									if ($jalkilaskenta_debug > 1) echo "$query<br>";
 									$upresu = mysql_query($query) or pupe_error($query);
 								}
@@ -910,7 +924,7 @@ if ($tuoteno != '') {
 					} // end if numrows > 0
 
 					// päivitetään lopulta tuotteelle uusi kehahin ja vihahin
-					$query = "UPDATE tuote SET kehahin = '$uusikehahin', vihahin = '$uusihinta' WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+					$query = "UPDATE tuote SET kehahin = '$uusikehahin', vihahin = round('$uusihinta','$yhtiorow[hintapyoristys]'), vihapvm = now() WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 					if ($jalkilaskenta_debug > 1) echo "$query<br>";
 					$result = mysql_query($query) or pupe_error($query);
 				}

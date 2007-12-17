@@ -3735,7 +3735,7 @@ if ($tee == '') {
 							}
 						}
 						elseif ($kukarow['extranet'] == '' and $kotisumma_alviton != 0) {
-							$kate = sprintf('%.2f',100*($kotisumma_alviton - ($row["kehahin"]*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
+							$kate = sprintf('%.2f',100*($kotisumma_alviton - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"])))/$kotisumma_alviton)."%";
 						}
 
 						echo "<td $class align='right' valign='top' nowrap>$kate</td>";
@@ -4199,8 +4199,8 @@ if ($tee == '') {
 							}
 						}
 						else {
-							$rivikate 		= $arow["kotirivihinta"]  - ($arow["kehahin"]*$arow["varattu"]);
-							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - ($arow["kehahin"]*$arow["varattu"]);
+							$rivikate 		= $arow["kotirivihinta"]  - (kehahin($arow["tuoteno"])*$arow["varattu"]);
+							$rivikate_eieri = $arow["kotirivihinta_ei_erikoisaletta"]  - (kehahin($arow["tuoteno"])*$arow["varattu"]);
 						}
 
 						if ($arow['ei_saldoa'] == '' and $arow['varattu'] > 0) {

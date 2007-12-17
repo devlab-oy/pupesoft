@@ -845,6 +845,27 @@ if (!function_exists("laskuval")) {
 	}
 }
 
+// Tehdään valuuttamuunnos yhtiön valuutasta laskun valuuttaan.
+if (!function_exists("kehahin")) {
+	function kehahin($tuoteno) {
+		
+		global $kukarow, $yhtiorow;
+		
+		$query = "SELECT round(if(epakurantti100pvm='0000-00-00', if(epakurantti75pvm='0000-00-00', if(epakurantti50pvm='0000-00-00', if(epakurantti25pvm='0000-00-00', kehahin, kehahin*0.75), kehahin*0.5), kehahin*0.25), 0),6) kehahin
+				  FROM tuote
+				  WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) > 0) {
+			$row = mysql_fetch_array($result);
+			return $row["kehahin"];
+		}
+		else {
+			return 0;
+		}
+	}
+}
+
+
 // Haetaan tuotteen avainsanoista/avainsanoista korvaavuuksia.
 if (!function_exists("asana")) {
 	function asana($laji, $sana, $sana2 = '') {

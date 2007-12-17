@@ -107,7 +107,7 @@ foreach ($keissit as $keissi) {
 			$query =	"SELECT 'Myynti' as Tapahtumalaji";
 			break;
 		case "Myyntitil" : 
-		$query =		"SELECT left(tilausrivi.laadittu,10) AS 'paivays', 
+		$query =		"SELECT left(lasku.luontiaika,10) AS 'paivays', 
 						tilausrivi.tilkpl AS 'maara', 
 						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
 						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',

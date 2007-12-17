@@ -1014,6 +1014,29 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		if ($kukarow["extranet"] == "") {
 			$aika=date("d.m.y @ G:i:s", time());
 			echo "<font class='message'>$otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
+
+			if (($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kateinen != '' and $kukarow['extranet'] == '') {
+				echo "	<script type='text/javascript' language='JavaScript'>
+						<!--
+							function update_summa(kaikkiyhteensa) {
+								kateinen = document.getElementById('kateisraha').value;
+								summa = 0;
+								if (document.getElementById('kateisraha').value != '') {
+									summa = kateinen - kaikkiyhteensa;
+								}
+								summa = Math.round(summa*100)/100;
+								document.getElementById('loppusumma').innerHTML = '<b>' + summa.toFixed(2) + '</b>'; 
+							}
+						-->
+						</script>";
+				echo "<table><form name='laskuri'>";
+				echo "<tr><th>".t("Yhteensä")."</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
+				echo "<tr><th>".t("Annettu")."</th><td><input size='7' autocomplete='off' type='text' id='kateisraha' name='kateisraha' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+				echo "<tr><th>".t("Takaisin")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
+				echo "</form></table><br><br>";
+				$formi = "laskuri";
+				$kentta = "kateisraha";
+			}
 		}
 
 		$tee				= '';
@@ -1021,7 +1044,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		$laskurow			= '';
 		$kukarow['kesken']	= '';
 
-		if ($kukarow["extranet"] != "") {
+		if ($kukarow["extranet"] != "") {			
 			echo "<font class='head'>$otsikko</font><hr><br><br>";
 			echo "<font class='message'>".t("Tilaus valmis. Kiitos tilauksestasi")."!</font><br><br>";
 
@@ -4697,6 +4720,7 @@ if ($tee == '') {
 			$maksuehtorow = mysql_fetch_array($result);
 
 			// jos kyseessä on käteiskauppaa
+			$kateinen = "";
 			if ($maksuehtorow['kateinen']!='') {
 				$kateinen = "X";
 			}
@@ -4772,7 +4796,7 @@ if ($tee == '') {
 				if (($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "X") and in_array($toim, array("PROJEKTI","RIVISYOTTO", "PIKATILAUS"))) {
 					echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." & ".t("Tee tilauksesta ostotilaus")."'><br>";
 				}
-
+				echo "<input type='hidden' name='kateinen' value='$kateinen'>";
 				echo "<input type='submit' ACCESSKEY='V' value='$otsikko ".t("valmis")."'>";
 				echo "</form>";
 			}

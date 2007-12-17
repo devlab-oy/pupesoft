@@ -132,10 +132,10 @@
 					$aperuste 	.= "Katemyyntihinta (kokoepäkurantti). ";
 				}
 				elseif ($trow['kehahin'] > 0) {
-					if ($yhtiorow['alv_kasittely']=='')
-						$hinta	= round(($trow['kehahin'] * (1+($trow['alv']/100))) * (1+(abs($hrow["alennus"])/100)) ,$yhtiorow['hintapyoristys']);
+					if ($yhtiorow['alv_kasittely']=='')						
+						$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) * (1+($trow['alv']/100)), $yhtiorow['hintapyoristys']);																		
 					else
-						$hinta	= round(($trow['kehahin']  * (1+(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
+						$hinta	= round(($trow['kehahin'] / (1-(abs($hrow["alennus"])/100))) ,$yhtiorow['hintapyoristys']);
 
 					$ale		= 0;
 					$netto		= "";

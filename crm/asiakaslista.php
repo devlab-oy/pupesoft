@@ -14,7 +14,7 @@
 	}
 	
 	$otsikko   = 'Asiakaslista';
-	$kentat    = "tunnus::if(toim_postitp!='',toim_postitp,postitp)::postino::ytunnus::yhtio::nimi";
+	$kentat    = "tunnus::if(toim_postitp!='',toim_postitp,postitp)::postino::ytunnus::yhtio::asiakasnro::nimi";
 	$jarjestys = 'selaus, nimi';
 
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
@@ -63,7 +63,7 @@
 	
 	
 	if ($tee == "lahetalista") {		
-		$query = "	SELECT tunnus, postitp, ytunnus, yhtio, nimi, nimitark, osoite, postino, postitp, maa, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
+		$query = "	SELECT tunnus, postitp, ytunnus, yhtio, asiakasnro, nimi, nimitark, osoite, postino, postitp, maa, toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa,
 					puhelin, fax, email, osasto, piiri, ryhma, fakta, toimitustapa, yhtio
 					FROM asiakas 
 					WHERE $konsernit 
@@ -71,7 +71,7 @@
 		$tiednimi = "asiakaslista.xls";
 	}
 	else {
-		$query = "	SELECT tunnus, if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, ytunnus, yhtio, nimi, puhelin
+		$query = "	SELECT tunnus, if(toim_postitp!='',toim_postitp,postitp) postitp, if(toim_postino!=00000,toim_postino,postino) postino, ytunnus, yhtio, asiakasnro,nimi, puhelin
 					FROM asiakas 
 					WHERE $konsernit 
 					$lisa";
@@ -92,7 +92,7 @@
 			$liite = "paikka\tytunnus\tnimi\tnimitark\tosoite\tpostino\tpostitp\tmaa\ttoim_nimi\ttoim_nimitark\ttoim_osoite\ttoim_postino\ttoim_postitp\ttoim_maa\tpuhelin\tfax\temail\tosasto\tpiiri\tryhma\tfakta\ttoimitustapa\r\n";
 		}
 		else {
-			$liite = "postitp\tpostino\tytunnus\tyhtio\tnimi\tpvm\tkampanjat\tpvm käyty\tkm\tlähtö\tpaluu\tpvraha\tkommentit\r\n";
+			$liite = "postitp\tpostino\tytunnus\tyhtio\tasiakasnro\tnimi\tpvm\tkampanjat\tpvm käyty\tkm\tlähtö\tpaluu\tpvraha\tkommentit\r\n";
 		}
 		while ($trow=mysql_fetch_array ($result)) {
 			for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
@@ -251,7 +251,7 @@
 	}
 
 	echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form></tr>\n\n";
-
+	
 	while ($trow=mysql_fetch_array ($result)) {
 		echo "<tr>";
 		for ($i=1; $i<mysql_num_fields($result)-1; $i++) {

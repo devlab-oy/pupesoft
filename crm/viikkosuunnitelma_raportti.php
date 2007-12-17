@@ -247,12 +247,12 @@ if ($tee == '') {
 		$query = "	SELECT kuka.nimi kukanimi, 
 					if(asiakas.toim_postitp!='', asiakas.toim_postitp, asiakas.postitp) postitp, 
 					if(asiakas.toim_postino!='' and asiakas.toim_postino!='00000', asiakas.toim_postino, asiakas.postino) postino, 
-					kalenteri.asiakas ytunnus, kalenteri.yhtio, 
+					kalenteri.asiakas ytunnus, asiakas.asiakasnro asiakasno, kalenteri.yhtio, 
 					if (kalenteri.asiakas!='', asiakas.nimi, 'N/A') nimi, 
 					left(kalenteri.pvmalku,10) pvmalku, 					
 					kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
 					FROM kalenteri
-					LEFT JOIN asiakas use index (ytunnus_index) on asiakas.ytunnus=kalenteri.asiakas and asiakas.yhtio='$yhtio' $lisa
+					LEFT JOIN asiakas use index (ytunnus_index) on asiakas.tunnus=kalenteri.liitostunnus and asiakas.yhtio='$yhtio' $lisa
 					LEFT JOIN kuka on kuka.kuka = kalenteri.kuka and kuka.yhtio='$yhtio'
 					WHERE kalenteri.yhtio='$yhtio'
 					and kalenteri.kuka in ($vertaa)
@@ -265,7 +265,7 @@ if ($tee == '') {
 		
 		if (mysql_num_rows($result) > 0) {
 			
-			echo "<tr><th>".t("Edustaja")."</th><th>".t("Yhtio")."</th><th>".t("Paikka")."</th><th>".t("Postino")."</th><th>".t("Asiakas")."</th><th>".t("Nimi")."</th><th>".t("Pvm")."</th>";
+			echo "<tr><th>".t("Edustaja")."</th><th>".t("Yhtio")."</th><th>".t("Paikka")."</th><th>".t("Postino")."</th><th>".t("Asiakas")."</th><th>".t("Asiakasno")."</th><th>".t("Nimi")."</th><th>".t("Pvm")."</th>";
 		
 			if ($vstk == "Asiakaskäynti") {
 				echo "<th>".t("Kampanjat")."</th><th>".t("PvmKäyty")."</th><th>".t("Km")."</th><th>".t("Lähtö")."</th><th>".t("Paluu")."</th><th>".t("PvRaha")."</th><th>".t("Kommentit")."</th></tr>";
@@ -278,6 +278,7 @@ if ($tee == '') {
 						<td>$row[postitp]</td>
 						<td>$row[postino]</td>
 						<td>$row[ytunnus]</td>
+						<td>$row[asiakasno]</td>
 						<td><a href='asiakasmemo.php?ytunnus=$row[ytunnus]'>$row[nimi]</a></td>
 						<td>$row[pvmalku]</td>";
 						

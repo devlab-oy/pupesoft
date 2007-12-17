@@ -131,11 +131,11 @@ if ($tee == '') {
 	$konsernit = " and kalenteri.yhtio in (".substr($konsernit, 0, -1).") ";			
 	
 	
-	$query = "	SELECT asiakas.postitp, asiakas.postino, asiakas.ytunnus, kalenteri.yhtio, asiakas.nimi, left(kalenteri.pvmalku,10) pvmalku, 
+	$query = "	SELECT asiakas.postitp, asiakas.postino, asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, asiakas.nimi, left(kalenteri.pvmalku,10) pvmalku, 
 				kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
 				FROM kalenteri, asiakas use index (ytunnus_index) 
 				WHERE asiakas.yhtio=kalenteri.yhtio 
-				and asiakas.ytunnus=kalenteri.asiakas
+				and asiakas.tunnus=kalenteri.liitostunnus
 				$konsernit
 				and kalenteri.kuka     = '$kukarow[kuka]'
 				and kalenteri.pvmalku >= '$viikkoalku 00:00:00'
@@ -146,7 +146,7 @@ if ($tee == '') {
 	$result = mysql_query($query) or pupe_error($query);
 		
 	echo "<table>";
-	echo "<tr><tr><th>".t("Paikka")."</th><th>".t("Postino")."</th><th>".t("Asiakas")."</th><th>".t("Yhtiö")."</th><th>".t("Nimi")."</th><th>".t("Pvm")."</th>";
+	echo "<tr><tr><th>".t("Paikka")."</th><th>".t("Postino")."</th><th>".t("Asiakas")."</th><th>".t("Asiakasno")."</th><th>".t("Yhtiö")."</th><th>".t("Nimi")."</th><th>".t("Pvm")."</th>";
 	
 	if ($vstk == "Asiakaskäynti") {
 		echo "<th>".t("Kampanjat")."</th><th>".t("PvmKäyty")."</th><th>".t("Km")."</th><th>".t("Lähtö")."</th><th>".t("Paluu")."</th><th>".t("PvRaha")."</th><th>".t("Kommentit")."</th></tr>";
@@ -158,6 +158,7 @@ if ($tee == '') {
 				<td>$row[postitp]</td>
 				<td>$row[postino]</td>
 				<td>$row[ytunnus]</td>
+				<td>$row[asiakasno]</td>
 				<td>$row[yhtio]</td>";
 				
 		if($kukarow["yhtio"] == $row["yhtio"]) {	

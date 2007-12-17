@@ -2,14 +2,14 @@
 	//Haetaan viikon päivät	
 	viikonpaivat($kausi);
 		
-	$query = "	SELECT asiakas.ytunnus, kalenteri.yhtio, left(kalenteri.pvmalku,10) pvmalku,
+	$query = "	SELECT asiakas.ytunnus, asiakas.asiakasnro,kalenteri.yhtio, left(kalenteri.pvmalku,10) pvmalku,
 				asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.maa, asiakas.postitp,
 				asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite, asiakas.toim_postino, asiakas.toim_maa, asiakas.toim_postitp,
 				asiakas.puhelin, asiakas.fax, asiakas.email,				
 				kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
 				FROM kalenteri
 				LEFT JOIN kuka ON kalenteri.kuka=kuka.kuka and kalenteri.yhtio=kuka.yhtio
-				LEFT JOIN asiakas ON kalenteri.yhtio=asiakas.yhtio and kalenteri.asiakas=asiakas.ytunnus
+				LEFT JOIN asiakas ON kalenteri.yhtio=asiakas.yhtio and kalenteri.liitostunnus=asiakas.tunnus
 				WHERE kalenteri.yhtio='$kukarow[yhtio]'
 				and kalenteri.kuka = '$kukarow[kuka]'
 				and pvmalku >= '$viikkoalku'
@@ -23,6 +23,7 @@
 		
 		$viesti  = "";
 		$viesti .= "Asiakas:  $row[ytunnus]\r\n";
+		$viesti .= "Asiakasno:  $row[asiakasnro]\r\n";
 		$viesti .= "Nimi:     $row[nimi]\r\n";
 		$viesti .= "Nimitark: $row[nimitark]\r\n";
 		$viesti .= "Osoite:   $row[osoite]\r\n";

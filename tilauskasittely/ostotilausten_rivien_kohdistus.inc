@@ -502,14 +502,13 @@ if ($tila == '') {
 
 	//Jos käyttäjä on syöttänyt alvillisen hinnan niin lisätään alvi
 	if ((int) $laskurow["rahti_etu_alv"] != 0) {
-		$laskurow["rahti_etu"] = round($laskurow["rahti_etu"]*(1+($laskurow["rahti_etu_alv"]/100)),2);
+		$laskurow["rahti_etu"] = round($laskurow["rahti_etu"]*(1+($laskurow["rahti_etu_alv"]/100)), 2);
 	}
 	
-
-	$valittusumma 			= sprintf("%.2f", $hintarow["hinta"]);
-	$laskunsumma  			= sprintf("%.2f", $kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma);
+	$valittusumma 			= sprintf("%.2f", round($hintarow["hinta"],2));
+	$laskunsumma  			= sprintf("%.2f", round($kulurow["summa"]-$laskurow["rahti_etu"]-$valittusumma, 2));
 	$checksumma   			= $kulurow["summa"]-$laskurow["rahti_etu"]-$hintarow["hinta"];
-	$kohdistettava_summa 	= sprintf("%.2f", $kulurow["summa"] - $laskurow["rahti_etu"]);
+	$kohdistettava_summa 	= sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"], 2));
 
 	if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
 		$laskunsumma = '0.00';
@@ -721,7 +720,7 @@ if ($tila == '') {
 	</tr>
 	<tr>
 		<th>".t("Erikoisalennus")."</th><td>$laskurow[erikoisale]</td>
-		<th>".t("Kohdistettu summa (riv/kpl)")."</th><td style='text-align:right;$ok'> $valittusumma $kulurow[valkoodi] ($kappaleetrow[rivit]/".str_replace('.00','',$kappaleetrow['kappaleet']).")</td>
+		<th>".t("Kohdistettu summa (riv/kpl)")."</th><td style='text-align:right;$ok'> $valittusumma $kulurow[valkoodi] ($kappaleetrow[rivit]/".(float) $kappaleetrow['kappaleet'].")</td>
 		<th>".t("Näytä kaikki yhdellä sivulla").":</th><td><INPUT type='checkbox' $chk3 name='nayta_kaikki' value='kaikki' onclick='submit()'></td>
 	</tr>";
 

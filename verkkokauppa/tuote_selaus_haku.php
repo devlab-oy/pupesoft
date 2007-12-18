@@ -179,7 +179,7 @@
 	elseif ($kukarow["kesken"] != 0 and ($laskurow["tila"] == "L" or $laskurow["tila"] == "N" or $laskurow["tila"] == "N") and $verkkokauppa != "") {
 		if(!function_exists("tilaukset_linkki")) {
 			function tilaukset_linkki() {
-				global $yhtiorow, $kukarow, $osasto, $try;
+				global $yhtiorow, $kukarow, $haku;
 
 				if($kukarow["kuka"] == "www") {
 					return "";
@@ -199,7 +199,7 @@
 						$result = mysql_query($query) or pupe_error($query);
 						$row = mysql_fetch_array($result);
 
-						$val .= "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto=$osasto&try=$try')\">".t("Tilaus %s %s, yhteensä %s %s", $kieli, $laskurow["tunnus"], $laskurow["viesti"], number_format($row["summa"], 2, ',', ' '), $laskurow["valkoodi"])."</a><br>";
+						$val .= "<a href='#' onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=tilatut&osasto={$haku[3]}&try={$haku[4]}')\">".t("Tilaus %s %s, yhteensä %s %s", $kieli, $laskurow["tunnus"], $laskurow["viesti"], number_format($row["summa"], 2, ',', ' '), $laskurow["valkoodi"])."</a><br>";
 
 					}
 				}
@@ -1129,4 +1129,5 @@
 	else {
 		//require ("footer.inc");
 	}
+
 ?>

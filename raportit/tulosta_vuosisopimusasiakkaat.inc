@@ -155,24 +155,24 @@ function loppu ($firstpage) {
 
 		$bound = uniqid(time()."_") ;
 
-		$header  = "From: <$yhtiorow[postittaja_email]>\r\n";
-		$header .= "MIME-Version: 1.0\r\n" ;
-		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
+		$header  = "From: <$yhtiorow[postittaja_email]>\n";
+		$header .= "MIME-Version: 1.0\n" ;
+		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-		$content  = "--$bound\r\n";
+		$content  = "--$bound\n";
 
-		$content .= "Content-Type: application/pdf; name=\"Ostoseuranta.pdf\"\r\n" ;
-		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: inline; filename=\"Ostoseuranta.pdf\"\r\n\r\n";
+		$content .= "Content-Type: application/pdf; name=\"Ostoseuranta.pdf\"\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: inline; filename=\"Ostoseuranta.pdf\"\n\n";
 
 		$handle  = fopen($pdffilenimi, "r");
 		$sisalto = fread($handle, filesize($pdffilenimi));
 		fclose($handle);
 
 		$content .= chunk_split(base64_encode($sisalto));
-		$content .= "\r\n" ;
+		$content .= "\n" ;
 
-		$content .= "--$bound\r\n";
+		$content .= "--$bound\n";
 
 		$boob     = mail($edemail,  $yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
 		//$boob     = mail($kukarow["eposti"],  $yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), $content, $header, "-f $yhtiorow[postittaja_email]");
@@ -188,10 +188,22 @@ function loppu ($firstpage) {
 	elseif ($edemail!='' and $emailok!='') {
 		echo "Skipataan asiakas $edasiakas.<br>";
 	}
-	// muissa keiseissa tulostetaan paprulle
+	// muissa keiseissa tulostetaan paprulle ta sähköpostiin
 	else {
 		echo "Tulostetaan asiakkaan $edasiakas ostoseuranta.. ";
-		$line = exec($komento." ".$pdffilenimi);
+		
+		if ($komento == "email") {
+			$liite = $pdffilenimi;
+			$ctype = '';
+			$kutsu = "Ostoseuranta.pdf";
+			
+			require("../inc/sahkoposti.inc");
+		}
+		else{
+			$line = exec($komento." ".$pdffilenimi);
+		}
+		
+		
 		echo "ok.<br>";
 	}
 

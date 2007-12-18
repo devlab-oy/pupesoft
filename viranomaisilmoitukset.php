@@ -68,7 +68,8 @@ if ($tee == "VSRALVYV") {
 			//	Onko syötetty maa oikea
 			$query = "SELECT distinct(koodi) from maat where koodi = '$maa'";
 			$result = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($result) == 1) {
+
+			if (mysql_num_rows($result) == 1) {
 				$query = "	UPDATE asiakas SET maa = '$maa'
 							WHERE yhtio = '$kukarow[yhtio]'and ytunnus='$ytunnus'";
 				$result = mysql_query($query) or pupe_error($query);
@@ -77,6 +78,7 @@ if ($tee == "VSRALVYV") {
 			else {
 				echo "<font class='error'>".t("Syötetty maa on väärin")."</font><br>";
 			}
+			
 		}
 
 		$query = "SELECT group_concat(distinct(koodi) SEPARATOR '\',\'') from maat where eu != '' and koodi != 'FI'";
@@ -84,31 +86,40 @@ if ($tee == "VSRALVYV") {
 		$row = mysql_fetch_array($result);
 		$eumaat = $row[0];
 
-		$query = "	SELECT lasku.ytunnus, if(lasku.maa='', asiakas.maa, lasku.maa) as maa,
-					asiakas.nimi, sum(rivihinta) summa, sum(round(rivihinta*100,0)) arvo, count(distinct(lasku.tunnus)) laskuja, lasku.ytunnus, lasku.liitostunnus, if(lasku.maa='','X','') asiakkaan_maa
+		$query = "	SELECT lasku.ytunnus, 
+					if(lasku.maa='', asiakas.maa, lasku.maa) as maa,
+					asiakas.nimi, 
+					sum(rivihinta) summa, 
+					sum(round(rivihinta*100,0)) arvo, 
+					count(distinct(lasku.tunnus)) laskuja, 
+					lasku.liitostunnus, 
+					if(lasku.maa='','X','') asiakkaan_maa
 					FROM lasku USE INDEX (yhtio_tila_tapvm)
-					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus
-					JOIN tuote USE INDEX (tuoteno_index) ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuotetyyppi=''
-					LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and lasku.liitostunnus = asiakas.tunnus
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and tila = 'U'
-					and lasku.tapvm >= '$alkupvm' and lasku.tapvm < '$loppupvm'
-					and lasku.vienti='E'
+					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuotetyyppi = '')
+					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and lasku.liitostunnus = asiakas.tunnus)
+					WHERE lasku.yhtio = '$kukarow[yhtio]' 
+					and tila = 'U'
+					and lasku.tapvm >= '$alkupvm' 
+					and lasku.tapvm < '$loppupvm'
+					and lasku.vienti = 'E'
 					GROUP BY lasku.ytunnus
 					HAVING maa IN ('','$eumaat')";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
 		$ok=0;
-		if(mysql_num_rows($result)>0) {
+
+		if (mysql_num_rows($result) > 0) {
 
 			$summa = 0;
 			$osatiedot = "";
 			$i=0;
 
 			echo "<table cellpadding='1'><tr><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
+
 			while ($row=mysql_fetch_array($result)) {
 
 				if ($row["maa"] == "") {
-
 					$query = "	SELECT distinct koodi, nimi
 								FROM maat
 								WHERE nimi != ''
@@ -134,9 +145,7 @@ if ($tee == "VSRALVYV") {
 								<font class='error'>".t("VIRHE!!! asiakkaan maa puuttuu!!")."</font><br>
 								<input type='submit' name='tallenna' value='".t("Korjaa asiakkaan maa")."'>
 								</td></form></tr>";
-
 					$ok = 1;
-
 				}
 				elseif($row["maa"] != "" and $row["asiakkaan_maa"] == "X") {
 					echo "<tr><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[summa]</td><td>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
@@ -199,32 +208,34 @@ if ($tee == "VSRALVYV") {
 	}
 	else {
 		//	Haetaan alkupiste
-		$query = "select ((year(now())-year(min(tilikausi_alku)))*4), quarter(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
+		$query = "SELECT ((year(now())-year(min(tilikausi_alku)))*4), quarter(now()) from tilikaudet where tilikausi_alku != '0000-00-00' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);
+
 		$kausia = $row[0]+$row[1]+1;
 		$kvarttaali = $row[1];
 		$vuosi = date("Y");
 
 		//	Ei näytetä ihan kaikeka
-		if($kausia > 10) $kausia = 10;
+		if ($kausia > 10) $kausia = 10;
 
 		echo "<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
 				<input type='hidden' name='tee' value='$tee'>
 				<select name='kohdekausi' onchange='submit();'>
 					<option value = ''>".t('Valitse kohdekausi')."</option>";
 
-		for($i=1;$i<$kausia;$i++) {
+		for ($i=1; $i<$kausia; $i++) {
 
 			echo "<option value='$kvarttaali/$vuosi'>$kvarttaali/$vuosi</option>";
 
-			if($kvarttaali == 1) {
+			if ($kvarttaali == 1) {
 				$kvarttaali = 4;
 				$vuosi--;
 			}
 			else {
 				$kvarttaali--;
 			}
+
 		}
 		echo "</select>";
 	}
@@ -238,6 +249,6 @@ if ($tee == "") {
 			</select></form>";
 }
 
-
 require ("inc/footer.inc");
+
 ?>

@@ -198,7 +198,7 @@
 		//Laitetaan varriksi Y jotta ei tarvitse mennä myyntihaaraan
 		$var = "Y";
 	}
-
+	
 	if ($laskurow['tila'] != "O" and trim($var) == "") {
 
 		if ($lisaarivi_debug==1) echo "Mennään myyntihaaraan: $tuoteno<br>";
@@ -328,7 +328,7 @@
 				}
 
 				// Käydään läpi tuotepaikat		
-				if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
+				if (isset($paikka) and (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and ($paikka != "EIERAAVIELA#EIEI"))) {
 					$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa, 
 								tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 								sarjanumeroseuranta.sarjanumero era,
@@ -799,10 +799,9 @@
 									}
 									else {
 										$rivinumero = $tilrivinumero;
-									}
-									
+									}									
 								}
-
+								
 								// jos olemme saaneet tuotenimityksen syotarivistä ja sallimme nimityksen muutoksen
 								if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and trim($tuotenimitys != "")) {
 									// lisätään saatu nimitys kaikille tuotteille
@@ -984,7 +983,7 @@
 												hyllytaso   = '$myy_hyllytaso[$indeksi]',
 												hyllyvali   = '$myy_hyllyvali[$indeksi]',
 												sarjanumero = '$myy_era[$indeksi]'";								
-									$lisa_res = mysql_query($query) or pupe_error($query);
+									$lisa_res = mysql_query($query) or pupe_error($query);									
 								}
 
 								if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {
@@ -1197,8 +1196,19 @@
 					$rivinumero  = substr($superpaikka, 3, strpos($superpaikka,'#')-3);
 				}
 			}
-
-
+			
+			if ($yhtiorow['rivinumero_syotto'] != '') {
+				if (!isset($tilrivinumero) or (int) $tilrivinumero == 0) {
+					$query = "SELECT max(tilaajanrivinro) as trivinro from tilausrivi where yhtio = '$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
+					$triviresult = mysql_query($query) or pupe_error($query);
+					$trivinrow = mysql_fetch_array($triviresult);
+					
+					$rivinumero = $trivinrow["trivinro"]+1;
+				}
+				else {
+					$rivinumero = $tilrivinumero;
+				}									
+			}
 
 			//Käsinsyöteyt hinnat nollataan kun lisätään tuoteperheiden lapsia
 			//Ostossa splittaukset menee aina samalla hinnalla
@@ -1262,8 +1272,17 @@
 			if ($laskurow['tila'] != 'O') {
 				switch ($var) {
 					case 'J' : // Jälkitoimitukseen
-						$varattu 	= 0;
-						$jt 		= $kpl;
+						
+						// Yhtiön parametri: varaako JT-rivi saldoja
+						if ($yhtiorow["varaako_jt_saldoa"] == "") {
+							$varattu 	= 0;
+							$jt 		= $kpl;
+						}
+						else {
+							$varattu 	= $kpl;
+							$jt 		= 0;
+						}
+																		
 						break;
 					case 'P' : // Puute
 						$varattu 	= 0;

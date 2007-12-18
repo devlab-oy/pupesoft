@@ -250,7 +250,7 @@
 						
 			if ($trow["sarjanumeroseuranta"] == "F") {
 				$pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
-				$pepvmlisa2 = ", 16";
+				$pepvmlisa2 = ", 17";
 			}
 			else {
 				$pepvmlisa1 = "";
@@ -259,6 +259,7 @@
 			$query = "	SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
 						tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
 						sarjanumeroseuranta.sarjanumero era,
+						sarjanumeroseuranta.ostorivitunnus,
 						$pepvmlisa1
 						concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
 						varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
@@ -277,7 +278,7 @@
 						and sarjanumeroseuranta.era_kpl != 0
 						WHERE tuote.yhtio = '$kukarow[yhtio]'
 						and tuote.tuoteno = '$row[tuoteno]'
-						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 $pepvmlisa2
+						GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 $pepvmlisa2
 						ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
 		}
 		else {
@@ -328,12 +329,24 @@
 					($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
 
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], '', $alkurow["era"]);
-
-					if (in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or
+					
+					$myytavissa = (float) $myytavissa;
+					
+					//Jos er‰ on keksitty k‰sin t‰‰lt‰ ker‰yksest‰
+					$query = "	SELECT tyyppi, (varattu+kpl+jt) kpl, tunnus
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno = '$row[tuoteno]'
+								and tunnus	= '$alkurow[ostorivitunnus]'";
+					$lisa_res = mysql_query($query) or pupe_error($query);
+					$lisa_row = mysql_fetch_array($lisa_res);
+					
+					if (($lisa_row["tyyppi"] == "O" or $lisa_row["kpl"] < 0 or $lisa_row["tunnus"] == $row["tunnus"]) and
+						(in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or
 						$myytavissa >= $kpl_st or
 						($row["var"] != "P" and $toim != "TARJOUS" and
 						(($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and $trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F") or
-						 ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and $sarjarow["era"] == $alkurow["era"])))) {
+						 ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and $sarjarow["era"] == $alkurow["era"]))))) {
 
 						$sel = "";
 

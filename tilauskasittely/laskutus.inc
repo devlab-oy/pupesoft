@@ -132,7 +132,7 @@ else {
 				if ($turow["sarjanumeroseuranta"] == "E" or $turow["sarjanumeroseuranta"] == "F") {
 					if ($trow["varattu"] > 0) {
 						
-						$query = "	SELECT ostorivitunnus
+						$query = "	SELECT ostorivitunnus, myyntirivitunnus
 									FROM sarjanumeroseuranta
 									WHERE yhtio			 = '$kukarow[yhtio]'
 									and tuoteno			 = '$trow[tuoteno]'
@@ -141,22 +141,45 @@ else {
 						$lisa_res = mysql_query($query) or pupe_error($query);
 						$lisa_row = mysql_fetch_array($lisa_res);
 						
-						$query = "	UPDATE sarjanumeroseuranta
-									SET era_kpl = era_kpl-$trow[varattu]
-									WHERE yhtio 			= '$kukarow[yhtio]' 
-									and tuoteno				= '$trow[tuoteno]' 
-									and ostorivitunnus 		= '$lisa_row[ostorivitunnus]'
-									and myyntirivitunnus 	= 0
-									LIMIT 1";
-						$lisa_res = mysql_query($query) or pupe_error($query);
-						
-						$query = "	UPDATE sarjanumeroseuranta
-									SET era_kpl = era_kpl+$trow[varattu]
-									WHERE yhtio			 = '$kukarow[yhtio]'
-									and tuoteno			 = '$trow[tuoteno]'
-									and myyntirivitunnus = '$trow[tunnus]'
-									LIMIT 1";
-						$lisa_res = mysql_query($query) or pupe_error($query);
+						if ($lisa_row["ostorivitunnus"] != $lisa_row["myyntirivitunnus"]) {
+							// Normikeissi jossa erä on jo tuloutettu
+							$query = "	UPDATE sarjanumeroseuranta
+										SET era_kpl = era_kpl-$trow[varattu]
+										WHERE yhtio 			= '$kukarow[yhtio]' 
+										and tuoteno				= '$trow[tuoteno]' 
+										and ostorivitunnus 		= '$lisa_row[ostorivitunnus]'
+										and myyntirivitunnus 	= 0
+										LIMIT 1";
+							$lisa_res = mysql_query($query) or pupe_error($query);
+
+							$query = "	UPDATE sarjanumeroseuranta
+										SET era_kpl = era_kpl+$trow[varattu]
+										WHERE yhtio			 = '$kukarow[yhtio]'
+										and tuoteno			 = '$trow[tuoteno]'
+										and myyntirivitunnus = '$trow[tunnus]'
+										LIMIT 1";
+							$lisa_res = mysql_query($query) or pupe_error($query);	
+						}
+						else {
+							// Laskutetaan vaikka ei olla vielä ostettu
+							$query = "	UPDATE sarjanumeroseuranta
+										SET era_kpl = $trow[varattu]*-1,
+										ostorivitunnus = 0										
+										WHERE yhtio 			= '$kukarow[yhtio]' 
+										and tuoteno				= '$trow[tuoteno]' 
+										and ostorivitunnus 		= '$trow[tunnus]'
+										and myyntirivitunnus 	= 0
+										LIMIT 1";
+							$lisa_res = mysql_query($query) or pupe_error($query);
+
+							$query = "	UPDATE sarjanumeroseuranta
+										SET era_kpl = $trow[varattu]
+										WHERE yhtio			 = '$kukarow[yhtio]'
+										and tuoteno			 = '$trow[tuoteno]'
+										and myyntirivitunnus = '$trow[tunnus]'
+										LIMIT 1";
+							$lisa_res = mysql_query($query) or pupe_error($query);
+						}												
 					}
 				}
 				

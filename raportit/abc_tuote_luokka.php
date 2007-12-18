@@ -111,7 +111,7 @@
 	echo "</form>";
 	echo "</table><br>";
 
-	$kentat = array('luokka','tuoteno','nimitys','osasto','try','tulopvm','summa','kate','katepros','kateosuus','vararvo','varaston_kiertonop','kpl','myyntierankpl','myyntieranarvo','rivia','puuterivia','palvelutaso','ostoerankpl','ostoeranarvo','osto_rivia','kustannus','kustannus_osto','kustannus_yht','total');
+	$kentat = array('abc_aputaulu.luokka','abc_aputaulu.tuoteno','abc_aputaulu.nimitys','abc_aputaulu.osasto','abc_aputaulu.try','abc_aputaulu.tulopvm','abc_aputaulu.summa','abc_aputaulu.kate','abc_aputaulu.katepros','kateosuus','abc_aputaulu.vararvo','abc_aputaulu.varaston_kiertonop','abc_aputaulu.kpl','abc_aputaulu.myyntierankpl','abc_aputaulu.myyntieranarvo','abc_aputaulu.rivia','abc_aputaulu.puuterivia','abc_aputaulu.palvelutaso','abc_aputaulu.ostoerankpl','abc_aputaulu.ostoeranarvo','abc_aputaulu.osto_rivia','abc_aputaulu.kustannus','abc_aputaulu.kustannus_osto','abc_aputaulu.kustannus_yht','abc_aputaulu.total');
 
 	for ($i=0; $i<=count($kentat); $i++) {
 		if (strlen($haku[$i]) > 0 and $kentat[$i] != 'kateosuus') {
@@ -128,19 +128,19 @@
 		$jarjestys = $order." ".$sort;
 	}
 	else {
-		$jarjestys = "luokka, $abcwhat desc";
+		$jarjestys = "abc_aputaulu.luokka, $abcwhat desc";
 	}
 	
 	$osastolisa = $trylisa = $tuotemerkkilisa = "";
 
 	if ($osasto != '') {
-		$osastolisa = " and osasto='$osasto' ";
+		$osastolisa = " and abc_aputaulu.osasto='$osasto' ";
 	}
 	if ($try != '') {
-		$trylisa = " and try='$try' ";
+		$trylisa = " and abc_aputaulu.try='$try' ";
 	}
 	if ($tuotemerkki != '') {
-		$tuotemerkkilisa = " and tuotemerkki='$tuotemerkki' ";
+		$tuotemerkkilisa = " and abc_aputaulu.tuotemerkki='$tuotemerkki' ";
 	}
 
 	//kauden yhteismyynnit ja katteet

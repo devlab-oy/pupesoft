@@ -272,7 +272,7 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 		$tuoteno	= $tilrivirow["tuoteno"];
 		$uusihinta	= $ohinta;
 		$pvm		= $tilrivirow["laskutettuaika"]; // koska tämä tuote oli viety varastoon
-		$rivitunnus = $tilrivirow["tunnus"]; // rivin tunnus, tällä löydetään varmasti oikea tapahtuma
+		$rivitunnus = $tilrivirow["tunnus"]; 		// rivin tunnus, tällä löydetään varmasti oikea tapahtuma
 
 		$uusikehahin = jalkilaskentafunktio($tuoteno, $pvm, $uusihinta, $rivitunnus);
 
@@ -301,7 +301,27 @@ while ($tilrivirow = mysql_fetch_array($presult)) {
 					WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tilrivirow[tuoteno]'";
 		$result = mysql_query($query) or pupe_error($query);
 
-
+		if ($tuorow["sarjanumeroseuranta"] == "E" or $tuorow["sarjanumeroseuranta"] == "F") {
+			
+			$query = "	SELECT era_kpl, tunnus
+						FROM sarjanumeroseuranta
+						WHERE yhtio 		 = '$kukarow[yhtio]'
+						and tuoteno 		 = '$tilrivirow[tuoteno]'
+						and ostorivitunnus 	 = '$tilrivirow[tunnus]'
+						and myyntirivitunnus = 0";
+			$sarjares = mysql_query($query) or pupe_error($query);
+			
+			while($sarjarow = mysql_fetch_array($sarjares)) {
+				if ($sarjarow["era_kpl"] < 0) {
+					$query = "	UPDATE sarjanumeroseuranta
+								SET era_kpl = 0
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and tunnus 	= $sarjarow[tunnus]";
+					$lisa_res = mysql_query($query) or pupe_error($query);
+				}
+			}									
+		}
+		
 		// muuten tässä ollaan sitten viemässä kamaa ihan oikeesti saldoille.. tehdään siihen liittyvät hommat.
 		$uusikehahin = "";
 

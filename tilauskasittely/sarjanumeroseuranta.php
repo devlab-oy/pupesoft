@@ -966,7 +966,7 @@
 				echo "<td valign='top'>".t("Lukittu")."</td>";
 			}
 			elseif ($from == "PIKATILAUS" or $from == "RIVISYOTTO" or $from == "TARJOUS" or $from == "SIIRTOLISTA" or $from == "SIIRTOTYOMAARAYS" or $from == "KERAA" or $from == "KORJAA" or $from == "riviosto" or $from == "kohdista" or $from == "INVENTOINTI") {
-				if (($from != "SIIRTOTYOMAARAYS" and $from != "SIIRTOLISTA" and $sarjarow["siirtorivitunnus"] > 0) or (($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON" and $sarjarow["osto_laskaika"] > '0000-00-00')) {
+				if (($from != "SIIRTOTYOMAARAYS" and $laskurow["tila"] != "G" and $from != "SIIRTOLISTA" and $sarjarow["siirtorivitunnus"] > 0) or (($from == "riviosto" or $from == "kohdista") and $ostonhyvitysrivi != "ON" and $sarjarow["osto_laskaika"] > '0000-00-00')) {
 					$dis = "DISABLED";
 				}
 				else {

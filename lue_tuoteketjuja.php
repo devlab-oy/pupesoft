@@ -24,27 +24,25 @@ if ($oikeurow['paivitys'] != '1') { // Saako päivittää
 
 flush();
 
-$vikaa=0;
-$tarkea=0;
-$lask=0;
-$postoiminto = 'X';
-$kielletty=0;
+$vikaa			= 0;
+$tarkea			= 0;
+$lask			= 0;
+$postoiminto 	= 'X';
+$kielletty		= 0;
 
 if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 	list($name,$ext) = split("\.", $_FILES['userfile']['name']);
 
-	if (strtoupper($ext) !="TXT" and strtoupper($ext)!="CSV")
-	{
+	if (strtoupper($ext) !="TXT" and strtoupper($ext)!="CSV") {
 		die ("<font class='error'><br>".t("Ainoastaa .txt ja .csv tiedostot sallittuja")."!</font>");
 	}
 
-	if ($_FILES['userfile']['size']==0)
-	{
+	if ($_FILES['userfile']['size']==0) {
 		die ("<font class='error'><br>".t("Tiedosto oli tyhjä")."!</font>");
 	}
 
-	$file=fopen($_FILES['userfile']['tmp_name'],"r") or die ("".t("Tiedoston avaus epäonnistui")."!");
+	$file=fopen($_FILES['userfile']['tmp_name'],"r") or die (t("Tiedoston avaus epäonnistui")."!");
 
 	echo "<font class='message'>".t("Tutkaillaan mitä olet lähettänyt").".<br></font>";
 
@@ -56,16 +54,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	$query = "SHOW COLUMNS FROM $table";
 	$fres  = mysql_query($query) or pupe_error($query);
 
-	while ($row=mysql_fetch_array($fres))
-	{
+	while ($row=mysql_fetch_array($fres)) {
 		//pushataan arrayseen kaikki sarakenimet ja tietuetyypit
 		$trows[] = strtoupper($row[0]);
 		$ttype[] = $row[1];
 	}
 
 	// määritellään pakolliset sarakkeet
-	switch ($table)
-	{
+	switch ($table) {
 		case "korvaavat" :
 			$pakolliset = array("TUOTENO");
 			$kielletyt = array("");
@@ -75,7 +71,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$kielletyt = array("TYYPPI", "KERROIN", "HINTAKERROIN", "ALEKERROIN", "EI_NAYTETA");
 			break;
 		default :
-			echo "".t("mitenkäs tälläsen taulun valitsit")."!?!";
+			echo t("mitenkäs tälläsen taulun valitsit")."!?!";
 			exit;
 	}
 	// $trows 		sisältää kaikki taulun sarakkeet tietokannasta
@@ -105,7 +101,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			}
 			if (in_array($column, $kielletyt)) {
 				// katotaan ettei kiellettyjä sarakkkeita muuteta
-				echo "".t("Sarake").": $column ".t("on kielletty sarake")."!<br>";	
+				echo t("Sarake").": $column ".t("on kielletty sarake")."!<br>";	
 				$kielletty++;
 			}
 		}
@@ -160,28 +156,35 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$frow =  mysql_fetch_array($fresult);
         	
 				$id = $frow[0]+1;
-				echo "".t("Ei vielä missään")." $id!<br>";
+				echo t("Ei vielä missään")." $id!<br>";
 			}
 			elseif (mysql_num_rows($hresult) == 1) {
 				$frow =  mysql_fetch_array($hresult);
 				$id = $frow[0];
         	
-				echo "".t("Löytyi")." $id!<br>";
+				echo t("Löytyi")." $id!<br>";
 			}
 			else {
-				echo "".t("Joku tuotteista")." ($haku) ".t("on jo useassa ketjussa! Korjaa homma")."!<br>";
+				echo t("Joku tuotteista")." ($haku) ".t("on jo useassa ketjussa! Korjaa homma")."!<br>";
 				$id = 0;
 			}
         	
 			if ($id > 0) {
 				if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
-					$alku = "INSERT into korvaavat SET YHTIO='$kukarow[yhtio]'";
-					$loppu = ", id='$id'";
+					$alku 		= "INSERT into korvaavat SET yhtio='$kukarow[yhtio]'";
+					$loppu 		= ", id='$id'";
+					$toiminto 	= "LISAA";
+				}
+				elseif (strtoupper(trim($rivi[$postoiminto])) == 'POISTA') {
+					$alku 		= "DELETE from korvaavat where yhtio='$kukarow[yhtio]' ";
+					$loppu 		= " and id='$id' ";
+					$toiminto 	= "POISTA";
 				}
 				else {
 					//tuntematon toiminto
-					echo "".t("Tuntematon tai puuttuva toiminto")."!<br>";
+					echo t("Tuntematon tai puuttuva toiminto")."!<br>";
 					unset($rivi);
+					$toiminto 	= "";
 				}
         	
 				for($j=0; $j<count($rivi); $j++) {
@@ -199,19 +202,31 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 										WHERE tuoteno='$rivi[$j]' and id='$id' and yhtio='$kukarow[yhtio]'";
 							$kresult = mysql_query($kquery) or pupe_error($kquery);
 
-							if (mysql_num_rows($kresult) == 0) {
-								$kysely = ", TUOTENO='$rivi[$j]'";
-								$query = $alku.$kysely.$loppu;
+							if ((mysql_num_rows($kresult) == 0 and $toiminto != 'POISTA') or (mysql_num_rows($kresult) == 1 and $toiminto == 'POISTA')) {
+								
+								if($toiminto != 'POISTA') {
+									$kysely = ", tuoteno='$rivi[$j]'";
+								}
+								else {
+									$kysely = " and tuoteno='$rivi[$j]'";
+								}
 
+								$query = $alku.$kysely.$loppu;
 								$iresult = mysql_query($query) or pupe_error($query);
-								echo "".t("Lisättiin ketjuun")." $id $rivi[$j]!<br>";
+								
+								if($toiminto != 'POISTA') {
+									echo t("Lisättiin ketjuun")." $id $rivi[$j]!<br>";
+								}
+								else {
+									echo t("Poistettiin ketjusta")." $id $rivi[$j]!<br>";
+								}								
 							}
 							else {
-								echo "".t("Tuote")." $rivi[$j] ".t("on jo tässä ketjussa")."!<br>";
+								echo t("Tuote")." $rivi[$j] ".t("on jo tässä ketjussa")."!<br>";
 							}
 						}
 						else {
-							echo "".t("Tuotetta")." $rivi[$j] ".t("ei löydy")."!<br>";
+							echo t("Tuotetta")." $rivi[$j] ".t("ei löydy")."!<br>";
 						}
 					}
 				}
@@ -234,7 +249,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) == 0) {
-						echo "".t("tuotetta")." $rivi[$r] ".t("ei löydy! rivi hylätty")."<br>";
+						echo t("tuotetta")." $rivi[$r] ".t("ei löydy! rivi hylätty")."<br>";
 						$virhe++;
 					}
 					else {
@@ -245,11 +260,11 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$result = mysql_query($query) or pupe_error($query);
 					
 					if (mysql_num_rows($result) == 0 and strtoupper(trim($rivi[$postoiminto])) == 'MUUTA') {
-						echo "".t("tuoteperhettä ei löydy! ei voida muuttaa")."<br>";
+						echo t("tuoteperhettä ei löydy! ei voida muuttaa")."<br>";
 						$virhe++;
 					}
 					elseif (mysql_num_rows($result) != 0 and strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
-						echo "".t("tuoteperhe on jo olemassa! ei voida lisätä")."<br>";
+						echo t("tuoteperhe on jo olemassa! ei voida lisätä")."<br>";
 						$virhe++;						
 					}
 				}
@@ -259,7 +274,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$result = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($result) == 0) {
-						echo "".t("tuotetta")." $rivi[$r] ".t("ei löydy! rivi hylätty")."<br>";
+						echo t("tuotetta")." $rivi[$r] ".t("ei löydy! rivi hylätty")."<br>";
 						$virhe++;
 					}
 				}
@@ -292,8 +307,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	} // end while eof
 
 	fclose($file);
-
-	echo "".t("Päivitettiin")." $lask ".t("riviä")."!";
+	echo t("Päivitettiin")." $lask ".t("riviä")."!";
 }
 
 else {

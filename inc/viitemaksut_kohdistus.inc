@@ -310,13 +310,15 @@
 				$row["myyntisaamiset"] = $row["oletus_selvittelytili"];
 			}
 
+			$maksaja_espattu = mysql_real_escape_string($row["nimi_maksaja"]);
+
 			# Myyntisaamiset tai selvittely
-			$query = "INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[myyntisaamiset]', -$row[summa],' maksoi viitteell‰ v‰‰rin','1')";
+			$query = "INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[myyntisaamiset]', -$row[summa],' $maksaja_espattu maksoi viitteell‰ v‰‰rin','1')";
 			$insres = mysql_query($query) or pupe_error($query);
 			$tlast_id = mysql_insert_id();
 
 			# Kassatili
-			$query = "INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, aputunnus, lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[oletus_rahatili]', $row[summa],' maksoi viitteell‰ v‰‰rin','$tlast_id','1')";
+			$query = "INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, ltunnus, tilino, summa, selite, aputunnus, lukko) values ('$row[yhtio]','automaattikohdistus',now(),'$row[kirjpvm]','".$laskut[$row["yhtio"]]."','$row[oletus_rahatili]', $row[summa],' $maksaja_espattu maksoi viitteell‰ v‰‰rin','$tlast_id','1')";
 			$insres = mysql_query($query) or pupe_error($query);
 
 			$query = "UPDATE suoritus SET ltunnus='$tlast_id' WHERE tunnus='$row[tunnus]'";

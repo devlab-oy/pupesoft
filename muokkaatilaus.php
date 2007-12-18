@@ -720,7 +720,14 @@
 			$miinus = 3;
 		}
 		elseif ($toim == 'OSTOSUPER') {
-			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
+			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
+							(SELECT count(*) 
+							FROM tilausrivi AS aputilausrivi 
+							WHERE aputilausrivi.yhtio = lasku.yhtio 
+							AND aputilausrivi.otunnus = lasku.tunnus 
+							AND aputilausrivi.uusiotunnus > 0
+							AND aputilausrivi.kpl <> 0 
+							AND aputilausrivi.tyyppi = 'O') varastokpl
 						FROM tilausrivi use index (yhtio_tyyppi_kerattyaika),
 						lasku use index (primary)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -735,10 +742,17 @@
 						GROUP by 1
 						ORDER by lasku.luontiaika desc
 						$rajaus";
-			$miinus = 3;
+			$miinus = 4;
 		}
 		elseif ($toim == 'OSTO') {
-			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus
+			$query = "	SELECT lasku.tunnus tilaus, lasku.nimi asiakas, lasku.ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa lasku.alatila, lasku.tila, lasku.tunnus,
+							(SELECT count(*) 
+							FROM tilausrivi AS aputilausrivi 
+							WHERE aputilausrivi.yhtio = lasku.yhtio 
+							AND aputilausrivi.otunnus = lasku.tunnus 
+							AND aputilausrivi.uusiotunnus > 0
+							AND aputilausrivi.kpl <> 0 
+							AND aputilausrivi.tyyppi = 'O') varastokpl
 						FROM lasku use index (tila_index)
 						WHERE lasku.yhtio = '$kukarow[yhtio]' and tila='O' and alatila=''
 						$haku
@@ -981,10 +995,16 @@
 							$tarkenne = " (".t("Reklamaatio").") ";
 						}
 
-						echo "<td valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")."</td>";
+						if ($row["varastokpl"] > 0) {
+							$varastotila = "<font class='info'><br>".t("Viety osittain varastoon")."</font>";
+						} else {
+							$varastotila = "";
+						}
+						
+						echo "<td valign='top'>".t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila</td>";
 					
 						if(isset($workbook)) {
-							$worksheet->writeString($excelrivi, $i, t("$laskutyyppi")."$tarkenne".t("$alatila"));
+							$worksheet->writeString($excelrivi, $i, t("$laskutyyppi")."$tarkenne".t("$alatila")." $varastotila");
 							$i++;
 						}
 					}

@@ -44,10 +44,10 @@ if ($tee == "VSRALVYV") {
 				break;
 			case 2:
 				$alkupvm = "$vuosi-04-01";
-				$loppupvm = "$vuosi-06-01";
+				$loppupvm = "$vuosi-07-01";
 				break;
 			case 3:
-				$alkupvm = "$vuosi-06-01";
+				$alkupvm = "$vuosi-07-01";
 				$loppupvm = "$vuosi-10-01";
 				break;
 			case 4:

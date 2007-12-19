@@ -4,7 +4,7 @@
 	require('../inc/parametrit.inc');
 
 	echo "<font class='head'>".t("Käteismyynnit")." $myy:</font><hr>";
-	
+
 	if ($tee != '') {
 
 		//Jos halutaa failiin
@@ -72,7 +72,7 @@
 
 
 		//Haetaan käteislaskut
-		$query = "	SELECT if(lasku.kassalipas='', 'Muut', lasku.kassalipas) kassa, if(ifnull(avainsana.selitetark, '') ='', 'Muut', avainsana.selitetark) kassanimi, maksuehto.kateinen, 
+		$query = "	SELECT if(lasku.kassalipas='', 'Muut', lasku.kassalipas) kassa, if(ifnull(avainsana.selitetark, '') ='', 'Muut', avainsana.selitetark) kassanimi, maksuehto.kateinen,
 					lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.laskutettu, lasku.tapvm
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN maksuehto ON (maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen != '')
@@ -129,18 +129,18 @@
 				// Tarkistetaan mikä maksutapa
 				if ($kateinen == 'n') {
 					$kateismaksu = t("Pankkikortti");
-				} 
+				}
 				elseif ($kateinen == 'o') {
 					$kateismaksu = t("Luottokortti");
-				} 
+				}
 				else {
 					$kateismaksu = t("Käteinen");
 				}
-				
+
 				echo "<tr>";
 				echo "<th colspan='5'>$kateismaksu ".t("yhteensä").":</th>";
 				echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</th></tr>";
-				
+
 				if ($vaiht == 1) {
 					$prn  = sprintf ('%-35.35s', 	$kateismaksu." ".t("yhteensä").":");
 					$prn .= "............................................";
@@ -155,7 +155,7 @@
 
 
 			if ($edkassa != $row["kassa"] and $edkassa != '') {
-				
+
 				echo "<tr>";
 				echo "<th colspan='5'>$edkassanimi yhteensä:</th>";
 				echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</th></tr>";
@@ -167,7 +167,7 @@
 						<th nowrap>".t("Laskunumero")."</th>
 						<th nowrap>".t("Pvm")."</th>
 						<th nowrap>$yhtiorow[valkoodi]</th></tr>";
-						
+
 				if ($vaiht == 1) {
 					$prn  = sprintf ('%-35.35s', 	$edkassanimi." ".t("yhteensä").":");
 					$prn .= "............................................";
@@ -223,11 +223,11 @@
 			} else {
 				$kateismaksu = t("Käteinen");
 			}
-			
+
 			echo "<tr>";
 			echo "<th colspan='5'>{$row["kassanimi"]} $kateismaksu ".t("yhteensä").":</th>";
 			echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</th></tr>";
-			
+
 			echo "<tr>";
 			echo "<th colspan='5'>$edkassanimi yhteensä:</th>";
 			echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</th></tr>";
@@ -240,7 +240,7 @@
 
 				fwrite($fh, $prn);
 				$rivit++;
-				
+
 				$prn  = sprintf ('%-35.35s', 	$edkassanimi." ".t("yhteensä").":");
 				$prn .= "............................................";
 				$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$kassayhteensa)));
@@ -250,9 +250,9 @@
 
 			$kassayhteensa = 0;
 		}
-		
+
 		echo "</table>";
-		
+
 		if ($katsuori != '') {
 			//Haetaan kassatilille laitetut suoritukset
 			$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa, lasku.tapvm
@@ -266,67 +266,73 @@
 						and lasku.tapvm <= '$vvl-$kkl-$ppl'
 						ORDER BY lasku.laskunro";
 			$result = mysql_query($query) or pupe_error($query);
-			
+
 			$kassayhteensa = 0;
-			
-			echo "<br><table>";
-			echo "<tr>
-					<th nowrap>".t("Kassa")."</th>
-					<th nowrap>".t("Asiakas")."</th>
-					<th nowrap>".t("Ytunnus")."</th>
-					<th nowrap>".t("Laskunumero")."</th>
-					<th nowrap>".t("Pvm")."</th>
-					<th nowrap>$yhtiorow[valkoodi]</th></tr>";
 
-			while ($row = mysql_fetch_array($result)) {
+			if (mysql_num_rows($result) == 0) {
 
-				echo "<tr>";
-				echo "<td>".t("Käteissuoritus")."</td>";
-				echo "<td>".substr($row["nimi"],0,23)."</td>";
-				echo "<td>$row[ytunnus]</td>";
-				echo "<td>$row[laskunro]</td>";
-				echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
-				echo "<td align='right'>".str_replace(".",",",$row['summa'])."</td></tr>";
+				echo "<br><table>";
+				echo "<tr>
+						<th nowrap>".t("Kassa")."</th>
+						<th nowrap>".t("Asiakas")."</th>
+						<th nowrap>".t("Ytunnus")."</th>
+						<th nowrap>".t("Laskunumero")."</th>
+						<th nowrap>".t("Pvm")."</th>
+						<th nowrap>$yhtiorow[valkoodi]</th></tr>";
 
-				if ($vaiht == 1) {
-					if ($rivit >= 60) {
-						fwrite($fh, $ots);
-						$rivit = 1;
+				while ($row = mysql_fetch_array($result)) {
+
+					echo "<tr>";
+					echo "<td>".t("Käteissuoritus")."</td>";
+					echo "<td>".substr($row["nimi"],0,23)."</td>";
+					echo "<td>$row[ytunnus]</td>";
+					echo "<td>$row[laskunro]</td>";
+					echo "<td>".tv1dateconv($row["laskutettu"], "pitka")."</td>";
+					echo "<td align='right'>".str_replace(".",",",$row['summa'])."</td></tr>";
+
+					if ($vaiht == 1) {
+						if ($rivit >= 60) {
+							fwrite($fh, $ots);
+							$rivit = 1;
+						}
+						$prn  = sprintf ('%-20.20s', 	t("Käteissuoritus"));
+						$prn .= sprintf ('%-25.25s', 	substr($row["nimi"],0,23));
+						$prn .= sprintf ('%-10.10s', 	$row["ytunnus"]);
+						$prn .= sprintf ('%-12.12s', 	$row["laskunro"]);
+						$prn .= sprintf ('%-19.19s', 	tv1dateconv($row["laskutettu"], "pitka"));
+						$prn .= str_replace(".",",",sprintf ('%-13.13s', 	$row["summa"]));
+						$prn .= "\n";
+
+						fwrite($fh, $prn);
+						$rivit++;
 					}
-					$prn  = sprintf ('%-20.20s', 	t("Käteissuoritus"));
-					$prn .= sprintf ('%-25.25s', 	substr($row["nimi"],0,23));
-					$prn .= sprintf ('%-10.10s', 	$row["ytunnus"]);
-					$prn .= sprintf ('%-12.12s', 	$row["laskunro"]);
-					$prn .= sprintf ('%-19.19s', 	tv1dateconv($row["laskutettu"], "pitka"));
-					$prn .= str_replace(".",",",sprintf ('%-13.13s', 	$row["summa"]));
-					$prn .= "\n";
-
-					fwrite($fh, $prn);
-					$rivit++;
-				}
-				$yhteensa += $row["summa"];
-				$kassayhteensa += $row["summa"];
-			}
-			if ($kassayhteensa != 0) {
-				echo "<tr>";
-				echo "<th colspan='5'>".t("Käteissuoritukset yhteensä").":</th>";
-				echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</th></tr>";
-
-				if ($vaiht == 1) {
-					$prn  = sprintf ('%-35.35s', 	t("Käteissuoritukset yhteensä").":");
-					$prn .= "............................................";
-					$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$kassayhteensa)));
-					$prn .= "\n\n";
-					fwrite($fh, $prn);
+					$yhteensa += $row["summa"];
+					$kassayhteensa += $row["summa"];
 				}
 
-				$kassayhteensa = 0;
+				if ($kassayhteensa != 0) {
+					echo "<tr>";
+					echo "<th colspan='5'>".t("Käteissuoritukset yhteensä").":</th>";
+					echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</th></tr>";
+
+					if ($vaiht == 1) {
+						$prn  = sprintf ('%-35.35s', 	t("Käteissuoritukset yhteensä").":");
+						$prn .= "............................................";
+						$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$kassayhteensa)));
+						$prn .= "\n\n";
+						fwrite($fh, $prn);
+					}
+
+					$kassayhteensa = 0;
+				}
+
+				echo "</table>";
+
 			}
+
 		}
-		
-		echo "<tr><td class='back'>&nbsp;</td></tr>";
-		echo "<tr><th colspan='5'>".t("Kaikki kassat yhteensä").":</th><th align='right'>".str_replace(".",",",sprintf('%.2f',$yhteensa))."</th></tr>";
-		echo "</table>";
+
+		echo "<br><font class='head'>".t("Kaikki kassat yhteensä").": ".str_replace(".",",",sprintf('%.2f',$yhteensa))."</font><br>";
 
 		if ($vaiht == 1) {
 			$prn  = sprintf ('%-35.35s', 	t("Yhteensä").":");
@@ -334,7 +340,7 @@
 			$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$yhteensa)));
 			$prn .= "\n";
 			fwrite($fh, $prn);
-			
+
 			echo "<pre>",file_get_contents($filenimi),"</pre>";
 			fclose($fh);
 
@@ -402,9 +408,9 @@
 
 
 	$query  = "	SELECT *
-				FROM avainsana 
-				WHERE yhtio='$kukarow[yhtio]' 
-				and laji='KASSA' 
+				FROM avainsana
+				WHERE yhtio='$kukarow[yhtio]'
+				and laji='KASSA'
 				order by selite";
 	$vares = mysql_query($query) or pupe_error($query);
 
@@ -431,7 +437,7 @@
 			<td><input type='text' name='ppa' value='$ppa' size='3'></td>
 			<td><input type='text' name='kka' value='$kka' size='3'></td>
 			<td><input type='text' name='vva' value='$vva' size='5'></td></tr>";
-	
+
 	echo "<tr><th>".t("Syötä loppupäivämäärä (pp-kk-vvvv)")."</th>
 			<td><input type='text' name='ppl' value='$ppl' size='3'></td>
 			<td><input type='text' name='kkl' value='$kkl' size='3'></td>

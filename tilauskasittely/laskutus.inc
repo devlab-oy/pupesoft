@@ -32,7 +32,7 @@ else {
 	if ($orow['erikoisale'] != 0) {
 
 		// jos laskulla on erikoisalennus, siirretään se riveille, mutta EI riveille joilla on NETTOHINTA...
-		$query = "	update tilausrivi set ale = round(ale + $orow[erikoisale] - (ale * $orow[erikoisale] / 100),2)
+		$query = "	UPDATE tilausrivi set ale = round(ale + $orow[erikoisale] - (ale * $orow[erikoisale] / 100),2)
 					where otunnus='$orow[tunnus]' 
 					and yhtio='$kukarow[yhtio]' 
 					and netto in ('','E')
@@ -289,16 +289,24 @@ else {
 										
 					$ostohinta += $sarjarow1["ostohinta"];
 					
-					//Tehdään sarjanumerotauluun uusi vapaa sarjanumero-olio
+					// Tehdään sarjanumerotauluun uusi vapaa sarjanumero-olio
 					$query = "	UPDATE sarjanumeroseuranta
 								SET myyntirivitunnus=ostorivitunnus, ostorivitunnus='$sarjarow1[ostorivitunnus]'
 								WHERE yhtio = '$kukarow[yhtio]' 
 								and tunnus 	= '$sarjarow[tunnus]'";
 					$sarjares1 = mysql_query($query) or pupe_error($query);
 					
+					//Jos nyt hyvitettävä sarjanumero onkin jo myyty eteenpäin.
+					if ($sarjarow["myyntirivitunnus"] > 0) {
+						$myritu = $sarjarow["myyntirivitunnus"];
+					}
+					else {
+						$myritu = 0;
+					}
+															
 					$query = "	INSERT into sarjanumeroseuranta 
-								(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu)
-								VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$sarjarow1[kaytetty]','$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]')";
+								(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)
+								VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]','$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
 					$sarjares1 = mysql_query($query) or pupe_error($query);	
 				}
 				

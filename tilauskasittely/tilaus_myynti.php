@@ -1193,10 +1193,7 @@ if ($tee == '') {
 					echo "<font class='error'>".t("Toimitustapa on oltava nouto, koska maksuehto on käteinen")."!</font><br><br>";
 				}
 				
-				$kassalipasquery = "SELECT kassamyyja FROM kuka WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$myyja'";
-				$kassalipasresult = mysql_query($kassalipasquery) or pupe_error($kassalipasquery);
-				$kassalipasrow = mysql_fetch_array($kassalipasresult);
-				$kassalipas = $kassalipasrow["kassamyyja"];
+				$kassalipas = $kukarow["kassamyyja"];
 			}
 		}
 

@@ -2145,6 +2145,8 @@
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 		$meapurow = mysql_fetch_array($meapu);
 
+		$kassalipas = "";
+		
 		// jos kyseessä oli käteinen
 		if ($meapurow["kateinen"] != "") {
 			// haetaan toimitustavan tiedot tarkastuksia varten
@@ -2159,6 +2161,7 @@
 				$apuro = mysql_fetch_array($meapu);
 				$toimitustapa = $apuro['selite'];
 			}
+			$kassalipas = $kukarow["kassamyyja"];
 		}
 
 		// jos kyseessä oli käsin syötetty eräpäivä ja maksuehto on väärin laitetaan oikea maksuehto... hakee järjestyksessä ekan
@@ -2241,11 +2244,6 @@
 			$toimvko = $keraysvko;
 		}
 
-		$kassalipasquery = "SELECT kassamyyja FROM kuka WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$myyja'";
-		$kassalipasresult = mysql_query($kassalipasquery) or pupe_error($kassalipasquery);
-		$kassalipasrow = mysql_fetch_array($kassalipasresult);
-		$kassalipas = $kassalipasrow["kassamyyja"];
-		
 		$query .= "	lasku SET
 					yhtio_nimi							= '$yhtiorow[nimi]',
 					yhtio_osoite						= '$yhtiorow[osoite]',

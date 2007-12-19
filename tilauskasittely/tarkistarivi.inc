@@ -332,21 +332,22 @@
 					
 					$myytavissa = (float) $myytavissa;
 					
-					//Jos er‰ on keksitty k‰sin t‰‰lt‰ ker‰yksest‰
-					$query = "	SELECT tyyppi, (varattu+kpl+jt) kpl, tunnus
-								FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]'
-								and tuoteno = '$row[tuoteno]'
-								and tunnus	= '$alkurow[ostorivitunnus]'";
-					$lisa_res = mysql_query($query) or pupe_error($query);
-					$lisa_row = mysql_fetch_array($lisa_res);
+					if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
+						//Jos er‰ on keksitty k‰sin t‰‰lt‰ ker‰yksest‰
+						$query = "	SELECT tyyppi, (varattu+kpl+jt) kpl, tunnus
+									FROM tilausrivi
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$row[tuoteno]'
+									and tunnus	= '$alkurow[ostorivitunnus]'";
+						$lisa_res = mysql_query($query) or pupe_error($query);
+						$lisa_row = mysql_fetch_array($lisa_res);
+					}
 					
-					if (($lisa_row["tyyppi"] == "O" or $lisa_row["kpl"] < 0 or $lisa_row["tunnus"] == $row["tunnus"]) and
-						(in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or
+					if (in_array($yhtiorow["puute_jt_oletus"], array('H','O')) or
 						$myytavissa >= $kpl_st or
 						($row["var"] != "P" and $toim != "TARJOUS" and
 						(($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and $trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F") or
-						 ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and $sarjarow["era"] == $alkurow["era"]))))) {
+						 ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"] and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") and ($lisa_row["tyyppi"] == "O" or $lisa_row["kpl"] < 0 or $lisa_row["tunnus"] == $row["tunnus"]) and $sarjarow["era"] == $alkurow["era"])))) {
 
 						$sel = "";
 

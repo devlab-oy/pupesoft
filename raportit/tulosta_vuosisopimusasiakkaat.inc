@@ -22,7 +22,7 @@ $lask = 1;
 $sivu = 1;
 
 function alku () {
-	global $pdf, $row, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $pvm;
+	global $pdf, $row, $yhtiorow, $kukarow, $asrow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $pvm;
 
 	// jos ollaan syötetty poikkeava päivä, käytetään sitä
 	if ($pvm != '') {
@@ -46,7 +46,7 @@ function alku () {
 	$pdf->draw_text(530, 815, "Sivu $sivu", 					$firstpage, $norm);
 
 	//vasen sarake
-	$pdf->draw_text(50, 729, $row["ytunnus"], 					$firstpage, $pieni);
+	$pdf->draw_text(50, 729, $asrow["ytunnus"], 					$firstpage, $pieni);
 	$pdf->draw_text(50, 717, $row["nimi"], 						$firstpage, $norm);
 	$pdf->draw_text(50, 707, $row["nimitark"], 					$firstpage, $norm);
 	$pdf->draw_text(50, 697, $row["osoite"], 					$firstpage, $norm);
@@ -112,7 +112,7 @@ function rivi ($firstpage) {
 }
 
 function loppu ($firstpage) {
-	global $pdf, $kala, $rectparam, $norm, $pieni, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $yhtiorow, $kukarow, $edasiakas, $edemail, $komento, $emailok, $asnum;
+	global $pdf, $kala, $rectparam, $norm, $pieni, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $yhtiorow, $kukarow, $edasiakas, $edemail, $edasiakasno, $komento, $emailok, $asnum;
 
 	//kirjoitetaan yhteensärivit loppuun
 	$kala -= 15;
@@ -151,7 +151,7 @@ function loppu ($firstpage) {
 
 	// asiakkaalla on emailosoite ja ei olla ruksattu, lähetetään sähköposti 
 	if ($edemail!='' and $emailok=='') {
-		echo "Lähetetään meili asiakkaalle $edasiakas ($edemail).. ";
+		echo "Lähetetään meili asiakkaalle $edasiakasno ($edemail).. ";
 
 		$bound = uniqid(time()."_") ;
 
@@ -186,11 +186,11 @@ function loppu ($firstpage) {
 	}
 	// asiakkaalla on email, mutta halutaan skipata emailien lähetys...
 	elseif ($edemail!='' and $emailok!='') {
-		echo "Skipataan asiakas $edasiakas.<br>";
+		echo "Skipataan asiakas $edasiakasno.<br>";
 	}
 	// muissa keiseissa tulostetaan paprulle ta sähköpostiin
 	else {
-		echo "Tulostetaan asiakkaan $edasiakas ostoseuranta.. ";
+		echo "Tulostetaan asiakkaan $edasiakasno ostoseuranta.. ";
 		
 		if ($komento == "email") {
 			$liite = $pdffilenimi;

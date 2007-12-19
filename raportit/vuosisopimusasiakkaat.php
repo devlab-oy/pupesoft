@@ -56,7 +56,7 @@
 
 		//valittu asiakas
 		if ($ytunnus != '' and $asiakasid != "") {
-			echo "vain asiakas $ytunnus... ";
+			echo "vain asiakas ytunnus: $ytunnus...<br> ";
 			$aswhere = " and liitostunnus='$asiakasid' ";
 		}
 		else {
@@ -129,9 +129,9 @@
 		$laskuri   = 0;
 
 		while ($row = mysql_fetch_array($result)) {
-
+			
 			// asiakas vaihtui!
-			if ($edasiakas != $row["ytunnus"]) {
+			if ($edasiakas != $row["liitostunnus"]) {
 
 				// jos ei olla ekalla rundilla
 				if ($edasiakas != '') {
@@ -153,14 +153,14 @@
 					$sivu = 1;
 				}
 
-				$query = "SELECT email from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$row[liitostunnus]'";
+				$query = "SELECT email, ytunnus, asiakasnro from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$row[liitostunnus]'";
 				$asres = mysql_query($query) or pupe_error($query);
 				$asrow = mysql_fetch_array($asres);
 
 				// edellinen ytunnus ja email talteen
-				$edasiakas = $row["ytunnus"];
+				$edasiakas = $row["liitostunnus"];
 				$edemail   = $asrow["email"];				
-			
+				$edasiakasno = $asrow["asiakasno"];
 				
 				// uus pdf header
 				$firstpage = alku();
@@ -169,7 +169,7 @@
 			// tehd‰‰n rivi
 			rivi($firstpage);
 		}
-
+		
 		// kirjotetaan viel‰ vika sivu ulos....
 		loppu($firstpage);
 

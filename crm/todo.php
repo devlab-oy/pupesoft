@@ -255,70 +255,7 @@ if ($tee == "") {
 	</table>
 	</form><br></div>";
 	
-	
-	//***************** VANHAT
-
-	$query = "	SELECT kuka.nimi, todo.*, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
-				FROM todo
-				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
-				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
-				WHERE todo.yhtio  = '$kukarow[yhtio]'
-				and kuittaus != ''
-				ORDER BY aika DESC 
-				LIMIT 200";
-	$result = mysql_query($query) or pupe_error($query);
-
-	if (mysql_num_rows($result) > 0) {
-
-		echo "<div id='vanhadiv' style='display:none'>";
-		echo "<font class='head'>20 VIIMEKSI TEHTYÄ</font><hr>";
-		echo "<table width='1000' cellpadding='2'>";
-
-		echo "
-		<tr>
-			<th>#</th>
-			<th>kuvaus</th>
-			<th>pyytäjä</th>
-			<th>projekti</th>
-			<th>prio</th>
-			<th>aika-arvio</th>
-			<th>aika-tot.</th>
-			<th>kuittaus</th>
-		</tr>
-		";
-
-		$numero = 0;
-
-		while ($rivi = mysql_fetch_array($result)) {
-
-			if ($rivi["prioriteetti"] == 0) {
-				$rivi["prioriteetti"] = "bug";
-			}
-
-			if ($rivi["prioriteetti"] == -1) {
-				$rivi["prioriteetti"] = "tarjouspyyntö";
-			}
-
-			$numero ++;
-
-			echo "<tr class='aktiivi'>";
-			echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>$rivi[tunnus]</a></th>";
-			echo "<td width='550'>$rivi[kuvaus]</td>";
-			echo "<td>$rivi[asiakasnimi] $rivi[pyytaja]</td>";
-			echo "<td>$rivi[projekti]</td>";
-			echo "<td>$rivi[prioriteetti]</td>";
-			echo "<td>$rivi[kesto_arvio]</td>";
-			echo "<td>$rivi[kesto_toteutunut]</td>";
-			echo "<td>$rivi[kuittaus]</td>";
-			echo "</tr>\n";
-		}
-	}
-
-	echo "</table><br></div>";
-		
-	
 	//***************** NYKYISET
-
 	if ($sort == "pyytaja")				$sort = "order by pyytaja,";
 	elseif ($sort == "projekti")		$sort = "order by projekti,";
 	elseif ($sort == "kesto_arvio")		$sort = "order by kesto_arvio,";
@@ -410,6 +347,78 @@ if ($tee == "") {
 	echo "</select><br><br>";
 
 
+	//***************** VANHAT
+	$query = "	SELECT kuka.nimi, todo.*, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
+				FROM todo
+				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)
+				LEFT JOIN asiakas on (asiakas.yhtio = todo.yhtio and todo.asiakas = asiakas.tunnus)
+				WHERE todo.yhtio  = '$kukarow[yhtio]'
+				and kuittaus != ''
+				and aika >= date_sub(now(), interval 30 day)
+				$lisa
+				ORDER BY aika DESC";
+	$result = mysql_query($query) or pupe_error($query);
+
+	if (mysql_num_rows($result) > 0) {
+
+		echo "<div id='vanhadiv' style='display:none'>";
+		echo "<font class='head'>Viimeksi tehdyt</font><hr>";
+		echo "<table width='1000' cellpadding='2'>";
+
+		echo "
+		<tr>
+			<th>#</th>
+			<th>kuvaus</th>
+			<th>pyytäjä</th>
+			<th>projekti</th>
+			<th>prio</th>
+			<th>aika-arvio</th>
+			<th>aika-tot.</th>
+			<th>kuittaus</th>
+		</tr>
+		";
+
+		$numero = 0;
+
+		while ($rivi = mysql_fetch_array($result)) {
+
+			if ($rivi["prioriteetti"] == 0) {
+				$rivi["prioriteetti"] = "bug";
+			}
+
+			if ($rivi["prioriteetti"] == -1) {
+				$rivi["prioriteetti"] = "tarjouspyyntö";
+			}
+
+			$numero ++;
+
+			echo "<tr class='aktiivi'>";
+			echo "<th><a href='?tunnus=$rivi[tunnus]&tee=muokkaa&sort=$sort&kuvaus_haku=$kuvaus_haku&pyytaja_haku=$pyytaja_haku&projekti_haku=$projekti_haku&aika_haku=$aika_haku&deadline_haku=$deadline_haku&prioriteetti_haku=$prioriteetti_haku'>$rivi[tunnus]</a></th>";
+			echo "<td width='550'>$rivi[kuvaus]</td>";
+			echo "<td>$rivi[asiakasnimi] $rivi[pyytaja]</td>";
+			echo "<td>$rivi[projekti]</td>";
+			echo "<td>$rivi[prioriteetti]</td>";
+			echo "<td>$rivi[kesto_arvio]</td>";
+			echo "<td>$rivi[kesto_toteutunut]</td>";
+			echo "<td>$rivi[kuittaus]</td>";
+			echo "</tr>\n";
+		}
+	}
+
+	echo "</table><br></div>";
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	$query = "	SELECT kuka.nimi, todo.*, if(deadline='0000-00-00', '9999-99-99', deadline) deadline, asiakas.nimi asiakasnimi, todo.tunnus
 				FROM todo
 				LEFT JOIN kuka on (kuka.yhtio = todo.yhtio and todo.tekija = kuka.tunnus)

@@ -269,7 +269,7 @@
 
 			$kassayhteensa = 0;
 
-			if (mysql_num_rows($result) == 0) {
+			if (mysql_num_rows($result) > 0) {
 
 				echo "<br><table>";
 				echo "<tr>

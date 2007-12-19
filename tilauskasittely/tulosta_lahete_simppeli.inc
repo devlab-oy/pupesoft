@@ -401,7 +401,7 @@ if (!function_exists('tulosta_lahete')) {
 						$summa+=$row["rivihinta"];
 					}
 
-					$h-=$pdf->ln(0.5);	
+					$h-=$pdf->ln(1.2);	
 				}
 				else {
 					$pdf->write($h, 1, 5, $s[0], $row["tuoteno"]." ".$row["nimitys"], "snadi", "L", "");

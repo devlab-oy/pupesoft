@@ -1,10 +1,17 @@
 <?php
 	require ("inc/parametrit.inc");
-	
-	//Verkkolaskuille ei ole vakiopaikkaa! Anna t‰ss‰ polut miss‰ haluat laskuja s‰ilytt‰‰
-	$poistetut='/home/jarmo/einv/hylatyt';
-	$vaarat="/home/jarmo/einv/error";
-	$oikeat="/home/jarmo/einv";
+		
+	//	Laitetaan vakiopaikat verkkolaskuille jos niit‰ ei ole m‰‰ritelty salasanoissa.
+	if(isset($verkkolaskuvirheet_poistetut) == "") {
+		$verkkolaskuvirheet_poistetut	= '/home/jarmo/einv/hylatyt';
+	}
+	if(isset($verkkolaskuvirheet_vaarat) == "") {
+		$verkkolaskuvirheet_vaarat		= "/home/jarmo/einv/error";
+	}
+	if(isset($verkkolaskuvirheet_oikeat) == "") {
+		$verkkolaskuvirheet_oikeat		= "/home/jarmo/einv";
+	}
+
 	
 	if (isset($tunnus)) {
 		$toim='toimi';
@@ -14,7 +21,7 @@
 	
 	if (isset($tiedosto)) {
 		if ($tapa=='') {
-			$xmlstr=file_get_contents($vaarat."/".$tiedosto);
+			$xmlstr=file_get_contents($verkkolaskuvirheet_vaarat."/".$tiedosto);
 			$xml = simplexml_load_string($xmlstr);
 			$result=$xml->xpath('Group2/NAD[@e3035="II"]');
 			$result2=$xml->xpath('Group2/Group3/RFF[@eC506.1153="VA"]');
@@ -176,12 +183,12 @@
 			exit;
 		}
 		if ($tapa == 'U') {
-			passthru("mv $vaarat/$tiedosto $oikeat/");
+			passthru("mv $verkkolaskuvirheet_vaarat/$tiedosto $verkkolaskuvirheet_oikeat/");
 			echo "<font class='message'>Tiedosto k‰sitell‰‰n uudestaan</font><br>";
 		}
 		 
 		if ($tapa == 'P') {
-			passthru("mv $vaarat/$tiedosto $poistetut/");
+			passthru("mv $verkkolaskuvirheet_vaarat/$tiedosto $verkkolaskuvirheet_poistetut/");
 			echo "<font class='message'>Tiedosto hyl‰ttiin</font><br>";
 		}
 	}
@@ -189,13 +196,13 @@
 	$laskuri = 0;
 	$valitutlaskut = 0;
 	echo "<font class='head'>".t("Hyl‰tyt verkkolaskut")."</font><hr>";
-	if ($handle = opendir($vaarat)) {
+	if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 		echo "<table><tr>";
 		echo "<th>Toiminto</th><th>ly & ovt</th><th>Nimi</th><th>Maskutili & summa</th></tr><tr>";
 		while (false !== ($file = readdir($handle))) {
 			if ($file != "." && $file != "..") {
 				$tunnistus = '';
-				$xmlstr=file_get_contents($vaarat."/".$file);
+				$xmlstr=file_get_contents($verkkolaskuvirheet_vaarat."/".$file);
 				$xml = simplexml_load_string($xmlstr);
 				
 				$ok=0; //Ei t‰m‰n yrityksen lasku
@@ -208,7 +215,7 @@
 				}
 				else
 					$ok=1;
-				
+
 				if ($ok==1) {
 					$ok=0;
 					echo "<tr><td>";
@@ -297,8 +304,6 @@
 					echo "<td>".$xresult4[0]['eC078.3194']."<br>";
 					echo $laskun_summa_eur. "<br>";
 					$ebid = $xresult3[0]['eC506.1154'];
-					
-					$ebid = $laskurow['ebid'];
 
 					$verkkolaskutunnus = $yhtiorow['verkkotunnus_vas'];
 					$salasana		   = $yhtiorow['verkkosala_vas'];

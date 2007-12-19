@@ -75,8 +75,8 @@
 						FROM taso
 						WHERE yhtio = '$kukarow[yhtio]' AND
 						tyyppi = '$kirjain' AND
-						LEFT(taso, 1) = '$aputyyppi' AND
-						taso != ''
+						LEFT(taso, 1) = '$aputyyppi'
+						and taso != ''
 						ORDER BY taso";
 			$tasores = mysql_query($query) or pupe_error($query);
 
@@ -351,7 +351,7 @@
 								$apu = sprintf($muoto, $summarow[$tilii] * -1 / $tarkkuus);
 								if ($apu == 0) $apu = "";
 																	
-								$tilirivi2 .= "<td align='right' nowrap>$apu</td>";
+								$tilirivi2 .= "<td align='right' nowrap>".number_format($apu, $desi, ',', ' ')."</td>";
 								if ($summarow[$tilii] != 0) $tulos++;
 							}
 
@@ -375,14 +375,16 @@
 					$tulos = 0;
 
 					for ($i = $alkukausi; $i < count($kaudet); $i++) {
-
+						
 						$query = "	SELECT summattava_taso 
 									FROM taso 
 									WHERE yhtio = '$kukarow[yhtio]' and taso = '$key' and summattava_taso != '' and tyyppi = '$kirjain'";
 						$summares = mysql_query($query) or pupe_error($query);
 
 						if ($summarow = mysql_fetch_array ($summares)) {
-							$summa[$kaudet[$i]][$key] = $summa[$kaudet[$i]][$key] + $summa[$kaudet[$i]][$summarow["summattava_taso"]];
+							foreach(explode(",", $summarow["summattava_taso"]) as $staso) {
+								$summa[$kaudet[$i]][$key] = $summa[$kaudet[$i]][$key] + $summa[$kaudet[$i]][$staso];
+							}
 						}
 
 						// formatoidaan luku toivottuun muotoon
@@ -395,7 +397,7 @@
 							$tulos++; // summaillaan tätä jos meillä oli rivillä arvo niin osataan tulostaa
 						}
 
-						$rivi .= "<td class='$class' align='right' nowrap>$apu</td>";
+						$rivi .= "<td class='$class' align='right' nowrap>".number_format($apu, $desi,  ',', ' ')."</td>";
 					}
 					
 					$rivi .= "</tr>\n";

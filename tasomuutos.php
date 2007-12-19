@@ -143,18 +143,30 @@ if ($tee == "lisaa") {
 
 	$valittuu="";
 	if ($tyyppi='U') $valittuu="selected";
-
-	echo "
-		<tr><th align='left'>Sisennetäänkö ylemmät tasot</th><td>
-		<select name='sisennys'>
-		<option value = 'E' >Ei</option>
-		<option value = 'K' >Kyllä</option>
-		</select></td></tr>
 	
-		<tr><th align='left'>Tyyppi</th><td>
-		<option value = 'S' >Sisäinen</option>
-		<option value = 'U' $valittuu>Ulkoinen</option>
-		</select></td></tr>
+	if(!isset($uusitaso)) {
+		$uusitaso = $taso;
+	}
+	echo "
+		<tr>
+			<th align='left'>Sisennetäänkö ylemmät tasot</th>
+			<td>	
+				<select name='sisennys'>
+					<option value = 'E' >Ei</option>
+					<option value = 'K' >Kyllä</option>
+				</select>
+			</td>
+		</tr>
+	
+		<tr>
+			<th align='left'>Tyyppi</th>
+			<td>	
+				<select name='tyyppi'>
+					<option value = 'S' >Sisäinen taso</option>
+					<option value = 'U' $valittuu>Ulkoinen taso</option>
+				</select>
+			</td>
+		</tr>
 	
 		<tr><th align='left'>Laji</th>
 		<td><select name='laji'>
@@ -201,6 +213,7 @@ if ($tee == "muutamuuta") {
 	
 	if ($tee == "muutamuuta") {
 		
+		echo "Muutetaan tasot<br><br>";
 		$query = "	SELECT *
 					FROM taso
 					WHERE yhtio = '$kukarow[yhtio]' 
@@ -208,41 +221,45 @@ if ($tee == "muutamuuta") {
 					and tyyppi = '$kirjain'
 					ORDER BY CHAR_LENGTH(taso) desc";
 		$vresult = mysql_query($query) or pupe_error($query);
-	
-		echo "$query<br>";
-	
+			
 		while ($vrow = mysql_fetch_array($vresult)) {
 			
-			echo "$vrow[taso] --> $uusitaso".substr($vrow["taso"], strlen($uusitaso))."<br>";
+			$uusitilitaso = $uusitaso.substr($vrow["taso"], strlen($uusitaso)-(strlen($uusitaso)-strlen($taso)));
+			
+			echo "$vrow[taso] --> $uusitilitaso<br>";
 		
 			$query = "	UPDATE taso
-						SET taso = concat('$uusitaso', substring(taso, CHAR_LENGTH('$uusitaso')+1))
+						SET taso = '$uusitilitaso'
 						WHERE yhtio = '$kukarow[yhtio]'
 						and taso 	= '$vrow[taso]'
 						and tyyppi 	= '$kirjain'";
 			$res = mysql_query($query) or pupe_error($query);
-		
+			
 			if ($kirjain == "S") {
 				$query = "	UPDATE tili
-							SET sisainen_taso = concat('$uusitaso', substring(sisainen_taso, CHAR_LENGTH('$uusitaso')+1))
+							SET sisainen_taso = '$uusitilitaso'
 							WHERE yhtio = '$kukarow[yhtio]' 
 							and sisainen_taso = '$vrow[taso]'";
 				$res = mysql_query($query) or pupe_error($query);
 			
 				$query = "	UPDATE budjetti
-							SET taso = concat('$uusitaso', substring(taso, CHAR_LENGTH('$uusitaso')+1))
+							SET taso = '$uusitilitaso'
 							WHERE yhtio = '$kukarow[yhtio]' 
 							and taso = '$vrow[taso]'";
 				$res = mysql_query($query) or pupe_error($query);
 			}
 			else {
 				$query = "	UPDATE tili
-							SET ulkoinen_taso = concat('$uusitaso', substring(ulkoinen_taso, CHAR_LENGTH('$uusitaso')+1))
+							SET ulkoinen_taso = '$uusitilitaso'
 							WHERE yhtio = '$kukarow[yhtio]' 
 							and ulkoinen_taso = '$vrow[taso]'";
 				$res = mysql_query($query) or pupe_error($query);	
 			}
 		}
+		
+		//	Näytätään tämä ruutu hetkisenaikaa..
+		echo "VALMIS!!<br>Palataan takaisin sinne mistä tultiinkin<br>";
+		flush();
 	}
 	
 	$tee = "";
@@ -306,7 +323,8 @@ if ($tee == "tilitaso") {
 
 	echo "<tr><th align='left'>Uusi tasokoodi</th>";		
 		
-	$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='$kirjain' and left(taso,1)='$taso' order by taso";
+	$query = "select * from taso where yhtio='$kukarow[yhtio]' and tyyppi='$kirjain' and left(taso,1)='$taso' 
+	order by taso";
 	$tasoresu = mysql_query($query) or pupe_error($query);
 
 	echo "<td><select name='uusitaso'>\n";
@@ -328,7 +346,7 @@ if ($tee == "") {
 		$lopetus = str_replace('////','?', $lopetus);
 		$lopetus = str_replace('//','&',  $lopetus);
 		
-		echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=$lopetus'>";
+		echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$lopetus'>";
 		exit;
 	}
 }

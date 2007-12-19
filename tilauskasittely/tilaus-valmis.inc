@@ -117,10 +117,16 @@ elseif ($laskurow["tila"] == 'T') {
 else {
 	// T‰ss‰ on normaalit tilaukset
 
+	// katotaan ollaanko valittu joku poikkeava kassalipas
+	if ($kertakassa != '') {
+		$query = "UPDATE lasku SET kassalipas = '$kertakassa' where yhtio='$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+	}
+
 	// Aktivoituiko "Odottaa jt-rivej‰" tilaus?
 	if (($laskurow["tila"] == 'N' or $laskurow["tila"] == 'G') and $laskurow["alatila"] == 'T') {
 		// Onko jotain tulostettavaa?
-		$query = "	select *
+		$query = "	SELECT *
 					from tilausrivi
 					where yhtio = '$kukarow[yhtio]'
 					and otunnus = '$laskurow[tunnus]'
@@ -168,7 +174,7 @@ else {
 	}
 
 	// Katotaan, onko t‰m‰ jo ker‰tty...
-	$query = "	select tilausrivi.*
+	$query = "	SELECT tilausrivi.*
 				from tilausrivi use index (yhtio_otunnus)
 				join tuote on tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 				where tilausrivi.yhtio='$kukarow[yhtio]'
@@ -181,7 +187,6 @@ else {
 		//tila L ja alatila C, B, D, E niin tilaus on ker‰tty otsikko
 		//jos otsikko sanoo, ett‰ tilaus on ker‰tty mutta rivit kuitenkaan ei ole ker‰tty niin merkataan ne kumminkin ker‰tyiksi
 		//tai jos yksikin rivi on ker‰tty (l‰hetett‰ ei tulosteta uudestaan) niin p‰ivitet‰‰n ker‰‰m‰ttˆm‰t rivit ker‰tyksi aktiiviselle k‰ytt‰j‰lle
-
 		$query = "	UPDATE tilausrivi
 					SET keratty='$kukarow[kuka]', kerattyaika=now()
 					WHERE yhtio='$kukarow[yhtio]'
@@ -356,7 +361,7 @@ else {
 						$kyht = $myht + $nyht;
 					}
 
-					$query = "	select rahtihinta
+					$query = "	SELECT rahtihinta
 								from rahtimaksut
 								where yhtio		 = '$kukarow[yhtio]'
 								and toimitustapa = '$laskurow[toimitustapa]'
@@ -375,7 +380,7 @@ else {
 
 					//lis‰t‰‰n rahtikulurivi vain jos rahtikulu on erisuuri kuin nolla, nollarivej‰ on ilmeisesti turha llis‰t‰
 					if ($hirow["rahtihinta"] != 0) {
-						$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+						$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 						$rhire = mysql_query($query) or pupe_error($query);
 						$trow  = mysql_fetch_array($rhire);
 
@@ -387,7 +392,7 @@ else {
 
 						require("alv.inc");
 
-						$query  = "insert into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+						$query  = "INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 						$addtil = mysql_query($query) or pupe_error($query);
 
 						$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin rahtikulua").": $hinta $laskurow[valkoodi]<br>";
@@ -400,7 +405,7 @@ else {
 
 							require("alv.inc");
 
-							$query  = "insert into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+							$query  = "INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 							$addtil = mysql_query($query) or pupe_error($query);
 
 							$tilaus_valmis_ulos .= t("Tilaukselle lis‰ttiin j‰lkivaatimuskulua").": $hinta $laskurow[valkoodi]<br>";
@@ -534,12 +539,12 @@ else {
 			$laskurow['varasto'] = 0;
 
 			//Toimitustavan hetier‰ tarvitaan
-			$query = "select tulostustapa from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
+			$query = "SELECT tulostustapa from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$laskurow[toimitustapa]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$totarowx = mysql_fetch_array($result);
 
 			// Maksuehdon jv tieto tarvitaan
-			$query = "select jv from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+			$query = "SELECT jv from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 			$result = mysql_query($query) or pupe_error($query);
 			$maehrowx = mysql_fetch_array($result);
 			
@@ -573,7 +578,7 @@ else {
 
 				$varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
 								
-				$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
+				$query = "SELECT * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
 				$varaston_res = mysql_query($query) or pupe_error($query);
 				$varaston_row = mysql_fetch_array($varaston_res);
 
@@ -583,7 +588,7 @@ else {
 				// varasto pit‰‰ lˆyty‰, toimitusosoitteen maa ja varastonmaa pit‰‰ lˆyty‰ ja kauppatapahtuman_luonnetta ei saa olla annettu viel‰
 				if (mysql_num_rows($varaston_res) == 1 and $laskurow["toim_maa"] != "" and $varaston_row["maa"] != "") {
 
-					$query = "select distinct koodi from maat where koodi in ('$laskurow[toim_maa]','$varaston_row[maa]') and eu = 'ON'";
+					$query = "SELECT distinct koodi from maat where koodi in ('$laskurow[toim_maa]','$varaston_row[maa]') and eu = 'ON'";
 					$euapuresult = mysql_query($query) or pupe_error($query);
 
 					// kummatkin maat pit‰‰ olla EU:ssa
@@ -643,6 +648,7 @@ else {
 						$toim_toimaika = $laskurow["toimaika"];												
 					}
 					
+				
 					//tehd‰‰n uusi otsikko
 					$query = "	INSERT into lasku SET
 								yhtio_nimi							= '$laskurow[yhtio_nimi]',
@@ -678,6 +684,7 @@ else {
 								postino								= '$laskurow[postino]',
 								postitp								= '$laskurow[postitp]',
 								tapvm								= '$laskurow[tapvm]',
+								kassalipas							= '$laskurow[kassalipas]',
 								tila								= 'N',
 								tilausvahvistus						= '$laskurow[tilausvahvistus]',
 								toim_maa							= '$laskurow[toim_maa]',

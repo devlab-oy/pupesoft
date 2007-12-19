@@ -214,7 +214,6 @@ $tilausyhteyshenkilo	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $t
 $asiakkaan_tilausnumero	= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $asiakkaan_tilausnumero);
 $kohde					= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $kohde);
 
-
 // kirjotetaan kokonaan uusi lasku-olio laskusta.. helpottaa myyntireskontraa! tilaksi: U alatila: tyhjä
 $query = "	INSERT into lasku SET
 			yhtio_nimi							= '$lasrow[yhtio_nimi]',
@@ -248,6 +247,7 @@ $query = "	INSERT into lasku SET
 			kuljetusmuoto						= '$lasrow[kuljetusmuoto]',
 			laatija								= '$lasrow[laatija]',
 			laskunro							= '$lasrow[laskunro]',
+			kassalipas							= '$lasrow[kassalipas]',
 			laskutettu							=  now(),
 			laskuttaja							= '$kukarow[kuka]',
 			laskutusvkopv						= '$lasrow[laskutusvkopv]',

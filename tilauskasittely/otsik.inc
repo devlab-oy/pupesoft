@@ -156,14 +156,14 @@
 
 	if ($maksuehto != "") {
 		// haetaan maksuehdon tiedot tarkastuksia varten
-		$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
+		$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$maksuehto'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 		$meapurow = mysql_fetch_array($meapu);
 	}
 
 	if ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin"] != '') {
 		
-		$erpquery = "select * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
+		$erpquery = "SELECT * from maksuehto where yhtio = '$kukarow[yhtio]' and erapvmkasin != '' and kaytossa = '' order by tunnus limit 1";
 		$erpres = mysql_query($erpquery) or pupe_error($erpquery);
 
 		$erpcmvv = (int) $erpcmvv;
@@ -384,7 +384,7 @@
 
 		//Tutkitaan onko tilauksella rivejä
 		if ($kukarow["kesken"] != 0) {
-			$query = "select otunnus from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+			$query = "SELECT otunnus from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
 			$tempr = mysql_query($query) or pupe_error($query);
 			$templ = mysql_num_rows($tempr);
 		}
@@ -406,7 +406,7 @@
 		// jos meillä on lasku menossa ulkomaille
 		if ($srow["maa"] != "" and $srow["maa"] != $yhtiorow["maa"]) {
 			// tutkitaan ollaanko siellä alv-rekisteröity
-			$alhqur = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$srow[maa]' and vat_numero != ''";
+			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$srow[maa]' and vat_numero != ''";
 			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
 
 			// ollaan alv-rekisteröity, aina kotimaa myynti ja alvillista
@@ -415,7 +415,7 @@
 				$alhiro  = mysql_fetch_array($alhire);
 
 				// haetaan maan oletusalvi
-				$query = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$srow[maa]'";
+				$query = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='ALVULK' and selitetark='o' and selitetark_2='$srow[maa]'";
 				$alhire = mysql_query($query) or pupe_error($query);
 
 				// jos ei löydy niin mennään erroriin
@@ -967,7 +967,7 @@
 				$myyjanro = "";
 			}
 
-			echo "<td>".t("Myyjänro").": <input type='text' size='8' name='myyjanro' value='$myyjanro'> ".t("tai")."</td>";
+			echo "<td>".t("Myyjä")."</td>";
 			echo "<td><select name='myyja'>";
 
 			$query = "	SELECT tunnus, kuka, nimi, myyja, asema
@@ -1883,7 +1883,7 @@
 	if (isset($jatka)) {
 
 		//otetaan laskun Ytunnus talteen
-		$apuqu = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
+		$apuqu = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus = '$kukarow[kesken]'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 		$apuro = mysql_fetch_array($meapu);
 
@@ -1976,7 +1976,7 @@
 				require ("alv.inc");
 				$uusihinta = $hinta;
 
-				$query = "update tilausrivi set hinta='$uusihinta', ale='$uusiale', netto='$netto', alv='$alv' where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";
+				$query = "UPDATE tilausrivi set hinta='$uusihinta', ale='$uusiale', netto='$netto', alv='$alv' where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";
 				$tres  = mysql_query($query) or pupe_error($query);
 
 				$netto		= '';
@@ -2101,7 +2101,7 @@
 
 
 			//Tsekataan vielä, että olio varmasi löytyy, muuten lisätään se
-			$apuqu = "select yhtio from tyomaarays where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
+			$apuqu = "SELECT yhtio from tyomaarays where yhtio='$kukarow[yhtio]' and otunnus = '$kukarow[kesken]'";
 			$mexapu = mysql_query($apuqu) or pupe_error($apuqu);
 
 			if (mysql_num_rows($mexapu) == 0) {
@@ -2241,6 +2241,11 @@
 			$toimvko = $keraysvko;
 		}
 
+		$kassalipasquery = "SELECT kassamyyja FROM kuka WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$myyja'";
+		$kassalipasresult = mysql_query($kassalipasquery) or pupe_error($kassalipasquery);
+		$kassalipasrow = mysql_fetch_array($kassalipasresult);
+		$kassalipas = $kassalipasrow["kassamyyja"];
+		
 		$query .= "	lasku SET
 					yhtio_nimi							= '$yhtiorow[nimi]',
 					yhtio_osoite						= '$yhtiorow[osoite]',
@@ -2274,6 +2279,7 @@
 					toimitusehto 						= '$toimitusehto',
 					kohdistettu 						= '$maksaja',
 					myyja 								= '$myyja',
+					kassalipas							= '$kassalipas',
 					alv 								= '$alv',
 					comments 							= '$comments',
 					ovttunnus 							= '$ovttunnus',

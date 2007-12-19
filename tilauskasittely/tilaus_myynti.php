@@ -89,7 +89,7 @@ if ($tee == 'AKTIVOI') {
 		echo "<font class='error'>".t("Tilaus on aktiivisena k‰ytt‰j‰ll‰")." $row[nimi]. ".t("Tilausta ei voi t‰ll‰ hetkell‰ muokata").".</font><br>";
 
 		// poistetaan aktiiviset tilaukset jota t‰ll‰ k‰ytt‰j‰ll‰ oli
-		$query = "update kuka set kesken='' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+		$query = "UPDATE kuka set kesken='' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		exit;
@@ -152,7 +152,7 @@ if ($kukarow["extranet"] == "" and count($_POST) == 0 and ($from != "LASKUTATILA
 	$kukarow["kesken"]	= '';
 
 	//varmistellaan ettei vanhat kummittele...
-	$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
 }
 
@@ -332,7 +332,7 @@ if ((int) $kukarow["kesken"] != 0) {
 
 	$laskurow = mysql_fetch_array($result);
 	if($yhtiorow["tilauksen_kohteet"] == "K") {
-		$query 	= "	select *
+		$query 	= "	SELECT *
 					from laskun_lisatiedot
 					where otunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 		$result  	= mysql_query($query) or pupe_error($query);
@@ -447,12 +447,12 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
 	while ($srow = mysql_fetch_array($sres)) {
 		if ($srow["varattu"] < 0) {
 			// dellataan koko rivi jos sit‰ ei ole viel‰ myyty
-			$query = "delete from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
+			$query = "DELETE from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
 			$sarjares = mysql_query($query) or pupe_error($query);
 
 			if (mysql_affected_rows() == 0) {
 				// merkataan osorivitunnus nollaksi
-				$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
+				$query = "UPDATE sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -477,7 +477,7 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
 	}
 
 	//	P‰ivitet‰‰n myˆs muut tunnusnipun j‰senet sympatian vuoksi hyl‰tyiksi *** t‰m‰n voisi varmaan tehd‰ myˆs kaikki kerralla? ***
-	$query = "select tunnus from lasku where yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = $laskurow[tunnusnippu] and tunnus != '$kukarow[kesken]'";
+	$query = "SELECT tunnus from lasku where yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = $laskurow[tunnusnippu] and tunnus != '$kukarow[kesken]'";
 	$abures = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($abures) > 0) {
@@ -499,12 +499,12 @@ if ($kukarow["extranet"] == "" and $tee == "HYLKAATARJOUS" and $muokkauslukko ==
 			while ($srow = mysql_fetch_array($sres)) {
 				if ($srow["varattu"] < 0) {
 					// dellataan koko rivi jos sit‰ ei ole viel‰ myyty
-					$query = "delete from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
+					$query = "DELETE from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
 					$sarjares = mysql_query($query) or pupe_error($query);
 
 					if (mysql_affected_rows() == 0) {
 						// merkataan osorivitunnus nollaksi
-						$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
+						$query = "UPDATE sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
 						$sarjares = mysql_query($query) or pupe_error($query);
 					}
 				}
@@ -635,17 +635,17 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 		if ($srow["sarjanumeroseuranta"] != "") {
 			if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
 				// merktaan siirtolistatunnus nollaks
-				$query = "update sarjanumeroseuranta set siirtorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
+				$query = "UPDATE sarjanumeroseuranta set siirtorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
 			}
 			elseif ($srow["varattu"] < 0) {
 				// dellataan koko rivi jos sit‰ ei ole viel‰ myyty
-				$query = "delete from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
+				$query = "DELETE from sarjanumeroseuranta where yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]' and myyntirivitunnus=0";
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				if (mysql_affected_rows() == 0) {
 					// merkataan osorivitunnus nollaksi
-					$query = "update sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
+					$query = "UPDATE sarjanumeroseuranta set ostorivitunnus=0 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and ostorivitunnus='$srow[tunnus]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 				}
 			}
@@ -692,7 +692,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "") {
 	$query = "UPDATE lasku SET tila='D', alatila='L', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mit‰tˆi tilauksen")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 	$result = mysql_query($query) or pupe_error($query);
 
-	$query	= "update kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+	$query	= "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if($kukarow["extranet"] == "" and $laskurow["tunnusnippu"] > 0 and $toim != "TARJOUS" and $toim != "PROJEKTI") {
@@ -853,7 +853,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		if($laskurow["tunnusnippu"] > 0) {
 			$result = mysql_query($query) or pupe_error($query);
 
-			$query  = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tunnus <= '$laskurow[tunnus]' and tila='T'";
+			$query  = "SELECT tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tunnus <= '$laskurow[tunnus]' and tila='T'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			$tarjous = $laskurow["tunnusnippu"]."/".mysql_num_rows($result);
@@ -877,7 +877,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 		}
 
 		// tilaus ei en‰‰ kesken...
-		$query	= "update kuka set kesken=0 where yhtio='{$kukarow["yhtio"]}' and kuka='{$kukarow["kuka"]}'";
+		$query	= "UPDATE kuka set kesken=0 where yhtio='{$kukarow["yhtio"]}' and kuka='{$kukarow["kuka"]}'";
 		$result = mysql_query($query) or pupe_error($query);
 
 	}
@@ -933,7 +933,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 		// Extranetk‰ytt‰j‰ jonka tilaukset on hyv‰ksytett‰v‰ meid‰n myyjill‰
 		if ($kukarow["extranet"] != "" and $kukarow["taso"] == 2) {
-			$query  = "	update lasku set
+			$query  = "	UPDATE lasku set
 						tila = 'N',
 						alatila='F'
 						where yhtio='$kukarow[yhtio]'
@@ -944,7 +944,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 
 			// tilaus ei en‰‰ kesken...
-			$query	= "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+			$query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 		}
@@ -1089,7 +1089,7 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
 	}
 
 	//T‰ss‰ halutaan jo hakea uuden tilauksen tiedot
-	$query   	= "	select *
+	$query   	= "	SELECT *
 					from lasku
 					where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 	$result  	= mysql_query($query) or pupe_error($query);
@@ -1146,7 +1146,7 @@ if ($tee == '') {
 	// T‰ss‰ p‰ivitet‰‰n 'pikaotsikkoa' jos kenttiin on jotain syˆtetty
 	if ($pikaotsikko=='TRUE' and $kukarow['extranet'] == '' and ($toimitustapa != '' or $tilausvahvistus != '' or $viesti != '' or $myyjanro != '' or $myyja != '' or $maksutapa != '')) {
 		if ($myyjanro != '') {
-			$apuqu = "	select *
+			$apuqu = "	SELECT *
 						from kuka use index (yhtio_myyja)
 						where yhtio='$kukarow[yhtio]' and myyja='$myyjanro'";
 			$meapu = mysql_query($apuqu) or pupe_error($apuqu);
@@ -1171,6 +1171,8 @@ if ($tee == '') {
 		$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 		$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 
+		$kassalipas = "";
+
 		if (mysql_num_rows($meapu) == 1 and $toimitustapa != '') {
 			$meapurow = mysql_fetch_array($meapu);
 
@@ -1190,6 +1192,11 @@ if ($tee == '') {
 
 					echo "<font class='error'>".t("Toimitustapa on oltava nouto, koska maksuehto on k‰teinen")."!</font><br><br>";
 				}
+				
+				$kassalipasquery = "SELECT kassamyyja FROM kuka WHERE yhtio='$kukarow[yhtio]' AND tunnus = '$myyja'";
+				$kassalipasresult = mysql_query($kassalipasquery) or pupe_error($kassalipasquery);
+				$kassalipasrow = mysql_fetch_array($kassalipasresult);
+				$kassalipas = $kassalipasrow["kassamyyja"];
 			}
 		}
 
@@ -1198,19 +1205,20 @@ if ($tee == '') {
 					viesti 			= '$viesti',
 					tilausvahvistus = '$tilausvahvistus',
 					myyja			= '$myyja',
+					kassalipas		= '$kassalipas',
 					maksuehto		= '$laskurow[maksuehto]'
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		//Haetaan laskurow uudestaan
-		$query   	= "	select *
+		$query   	= "	SELECT *
 						from lasku
 						where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 		$result  	= mysql_query($query) or pupe_error($query);
 		$laskurow   = mysql_fetch_array($result);
 
 		if($yhtiorow["tilauksen_kohteet"] == "K") {
-			$query 	= "	select *
+			$query 	= "	SELECT *
 						from laskun_lisatiedot
 						where otunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
 			$result  	= mysql_query($query) or pupe_error($query);
@@ -2003,7 +2011,7 @@ if ($tee == '') {
 			$xperheidkaks =  0;
 		}
 
-		$query = "	update tilausrivi set
+		$query = "	UPDATE tilausrivi set
 					perheid2	= $xperheidkaks
 					where yhtio = '$kukarow[yhtio]'
 					and tunnus 	= '$rivitunnus'
@@ -2560,7 +2568,7 @@ if ($tee == '') {
 
 		if ($lisavarusteita == "ON" and $perheid2 > 0) {
 			//P‰ivitet‰‰n is‰lle perheid2 jotta tiedet‰‰n, ett‰ lis‰varusteet on nyt lis‰tty
-			$query = "	update tilausrivi set
+			$query = "	UPDATE tilausrivi set
 						perheid2	= '$perheid2'
 						where yhtio = '$kukarow[yhtio]'
 						and tunnus 	= '$perheid2'";
@@ -4760,9 +4768,9 @@ if ($tee == '') {
 				if ($kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or ($kukarow["dynaaminen_kassamyynti"] != "" or ($kukarow["dynaaminen_kassamyynti"] == "" and $yhtiorow["dynaaminen_kassamyynti"] != "")))) {
 
 					if ($kukarow["dynaaminen_kassamyynti"] != "" or ($kukarow["dynaaminen_kassamyynti"] == "" and $yhtiorow["dynaaminen_kassamyynti"] != "")) {
-						echo "<select name='kertakassa'><option value=''>".t("Ei kassaan")."</option>";
+						echo "</tr><tr><td class='back'>Kassalipas: <select name='kertakassa'><option value=''>".t("Ei kassaan")."</option>";
 
-						$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='KASSA' order by selite";
+						$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' AND laji='KASSA' ORDER BY selite";
 						$vares = mysql_query($query) or pupe_error($query);
 
 						while ($varow = mysql_fetch_array($vares)) {
@@ -4771,13 +4779,13 @@ if ($tee == '') {
 							echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
 						}
 
-						echo "</select>";
+						echo "</select></td></tr>";
 					}
 
-					echo "Valitse kuittikopion tulostuspaikka: <select name='valittu_kopio_tulostin'>";
+					echo "<tr><td class='back'>Tulostuspaikka: <select name='valittu_kopio_tulostin'>";
 					echo "<option value=''>".t("Oletus")."</option>";
 
-					$querykieli = "	select *
+					$querykieli = "	SELECT *
 									from kirjoittimet
 									where yhtio = '$kukarow[yhtio]'
 									ORDER BY kirjoitin";
@@ -4810,7 +4818,7 @@ if ($tee == '') {
 
 		//	Projekti voidaan poistaa vain jos meill‰ ei ole sill‰ mit‰‰n toimituksia
 		if ($laskurow["tunnusnippu"] > 0 and $toim == "PROJEKTI") {
-			$query = "select tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
+			$query = "SELECT tunnus from lasku where yhtio='$kukarow[yhtio]' and tunnusnippu='$laskurow[tunnusnippu]' and tila IN ('L','A','V','N')";
 			$abures = mysql_query($query) or pupe_error($query);
 
 			$projektilask = mysql_num_rows($abures);

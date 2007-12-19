@@ -314,13 +314,30 @@ else {
 	// Kirjataan myyntisaamiset tai kassa
 	if ($mehtorow['kateinen'] != '') {
 
+		$query = "	SELECT *
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' AND selite = '$lasku[kassalipas]' AND laji = 'KASSA'";
+		$kateisresult = mysql_query($query) or pupe_error($query);
+		$kateisrow = mysql_fetch_array($kateisresult);
+
 		$myysaatili = $yhtiorow['kassa'];
 		
-		if ($mehtorow['kateinen'] == "p") $myysaatili = $yhtiorow['kassa'];
-		if ($mehtorow['kateinen'] == "n") $myysaatili = $yhtiorow['pankkikortti'];
-		if ($mehtorow['kateinen'] == "o") $myysaatili = $yhtiorow['luottokortti'];
+		// Jos maksu on käteinen ja avainsanojen takaa löytyy käteismaksutili, niin avainsanojen takaa löytyvä tili ylikirjoittaa yhtiön takaa löytyvän käteismaksutilin
+		if (strtolower($mehtorow['kateinen']) == "p" and $kateisrow['selitetark_2'] != '') { 
+			$myysaatili = $kateisrow['selitetark_2'];
+		}
 		
-		if ($myysaatili == "") $myysaatili = $yhtiorow['kassa'];
+		if ($mehtorow['kateinen'] == "n") {
+			$myysaatili = $yhtiorow['pankkikortti'];
+		}
+		
+		if ($mehtorow['kateinen'] == "o") {
+			$myysaatili = $yhtiorow['luottokortti'];
+		}
+		
+		if ($myysaatili == "") {
+			$myysaatili = $yhtiorow['kassa'];
+		}
 		
 		$apusumma = $loppusumma;
 

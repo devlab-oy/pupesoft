@@ -319,6 +319,27 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "selitetark_2" and $avain_sel["KASSA"] == "SELECTED") {
+	
+		if ($ulosarray[$i] != '') {
+			$ulos=$ulosarray[$i];
+			$jatko = 0;
+		}
+		else {
+			$ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+			$query = "	SELECT nimi
+						FROM tili
+						WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
+			$vresult = mysql_query($query) or pupe_error($query);
+		
+			if (mysql_num_rows($vresult) == 1) {
+				$vrow=mysql_fetch_array($vresult);
+				$ulos .= " " . $vrow[nimi] . "</td>";
+				$jatko = 0;
+			}
+		}
+	}
+	
 	if ($avain_sel["KARHUVIESTI"] == "SELECTED" and (mysql_field_name($result, $i) == "selite" or mysql_field_name($result, $i) == "selitetark_2" or mysql_field_name($result, $i) == "selitetark_3")) {
 		$tyyppi = 0;
 		$jatko  = 0;

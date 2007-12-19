@@ -96,9 +96,10 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 	// $trows 		sisältää kaikki taulun sarakkeet tietokannasta
 	// $otsikot 	sisältää kaikki sarakkeet saadusta tiedostosta
 
-	foreach ($otsikot as $column) {
+	foreach ($otsikot as $key => $column) {
 
 		$column = strtoupper(trim($column));
+		$otsikot[$key] = strtoupper(trim($column)); // trimmataan myös itte otsikot arrayn arvo, sitä käytetään myöhemmin
 
 		if ($column != '') {
 			//laitetaan kaikki paitsi valintasarake talteen.

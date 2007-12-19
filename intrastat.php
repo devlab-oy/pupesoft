@@ -187,7 +187,7 @@
 					lasku.kuljetusmuoto,
 					round(sum(tilausrivi.kpl),0) kpl,
 					tullinimike.su_vientiilmo su,
-					if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1)) paino,
+					if(count(tilausrivi.tunnus) = count(if(tuote.tuotemassa > 0,1,0)),if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) = 0,1,round(sum(tilausrivi.kpl*tuote.tuotemassa),0)),if(round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0) > 0.5, round(sum((tilausrivi.rivihinta/lasku.summa)*lasku.bruttopaino),0), if(round(sum(tilausrivi.kpl*tuote.tuotemassa),0) > 0.5, round(sum(tilausrivi.kpl*tuote.tuotemassa),0),1))) paino,
 					if(round(sum(tilausrivi.rivihinta),0) > 0.50, round(sum(tilausrivi.rivihinta),0), 1) rivihinta,
 					group_concat(lasku.tunnus) as kaikkitunnukset,
 					group_concat(distinct tilausrivi.perheid2) as perheid2set,
@@ -428,7 +428,7 @@
 				$tilastoarvot .= "<td>$row[kuljetusmuoto]</td>";																					//kuljetusmuoto
 				$tilastoarvot .= "<td>$row[kauppatapahtuman_luonne]</td>";																			//kauppatapahtuman luonne
 				$tilastoarvot .= "<td>$row[rivihinta]</td>";																						//tilastoarvo
-				$tilastoarvot .= "<td>$row[paino]</td>";																							//nettopaino
+				$tilastoarvot .= "<td>$row[paino] | $row[paino2]</td>";																							//nettopaino
 
 				if ($row["su"] != '') {
 					$tilastoarvot .= "<td>$row[su]</td>"; 																							//2 paljouden lajikoodi

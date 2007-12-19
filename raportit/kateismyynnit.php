@@ -15,7 +15,6 @@
 			$vaiht = 0;
 		}
 
-
 		$kassat = "";
 		$lisa   = "";
 		$lisa2  = "";
@@ -25,24 +24,23 @@
 				$kassat .= "'".$var."',";
 			}
 			$kassat = substr($kassat,0,-1);
-			$kassat = " avainsana.selite in ($kassat) ";
 		}
 
-		if($muutkassat != '') {
+		if ($muutkassat != '') {
 			if ($kassat != '') {
-				$kassat = " HAVING (".$kassat." or avainsana.selite is null)";
+				$kassat .= ",''";
 			}
 			else {
-				$kassat = " HAVING avainsana.selite is null ";
+				$kassat = "''";
 			}
 		}
-		elseif($kassat != '') {
-			$kassat = " HAVING ".$kassat;
+
+		if ($kassat != "") {
+			$kassat = " and lasku.kassalipas in ($kassat) ";
 		}
 		else {
-			$kassat = " HAVING avainsana.selite = 'EI NAYTETA KASSAKONEITA EIHAN' ";
+			$kassat = " and lasku.kassalipas = 'ei nayteta eihakat, akja'";
 		}
-
 
 		if ((int) $myyjanro > 0) {
 			$query = "	SELECT tunnus
@@ -67,20 +65,18 @@
 		if ($ulko == 'ULKO') {
 			if ($koti == 'KOTI') {
 				$lisa2 .= ",";
-			}
+				}
 			$lisa2 .= "'K','E'";
 		}
 		$lisa2 .= ") ";
 
 
 		//Haetaan käteislaskut
-		$query = "	SELECT lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.laskutettu, lasku.tapvm,
-					if(kuka.kassamyyja is null or kuka.kassamyyja='', 'Muut', kuka.kassamyyja) kassa, kuka.nimi myyja,
-					if(!isnull(avainsana.selitetark),avainsana.selitetark, 'Muut') kassanimi, avainsana.selite
+		$query = "	SELECT if(lasku.kassalipas='', 'Muut', lasku.kassalipas) kassa, if(ifnull(avainsana.selitetark, '') ='', 'Muut', avainsana.selitetark) kassanimi, maksuehto.kateinen, 
+					lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.laskutettu, lasku.tapvm
 					FROM lasku use index (yhtio_tila_tapvm)
-					JOIN maksuehto ON maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen!=''
-					LEFT JOIN kuka ON lasku.laskuttaja=kuka.kuka and lasku.yhtio=kuka.yhtio
-					LEFT JOIN avainsana ON avainsana.yhtio=lasku.yhtio and avainsana.laji='KASSA' and avainsana.selite=kuka.kassamyyja
+					JOIN maksuehto ON (maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen != '')
+					LEFT JOIN avainsana ON (avainsana.selite=lasku.kassalipas and avainsana.yhtio = lasku.yhtio and avainsana.laji = 'KASSA')
 					WHERE
 					lasku.yhtio = '$kukarow[yhtio]'
 					and lasku.tapvm >= '$vva-$kka-$ppa'
@@ -90,7 +86,7 @@
 					$lisa
 					$lisa2
 					$kassat
-					ORDER BY kassa, laskunro";
+					ORDER BY kassa, kateinen, laskunro";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "	<table><tr>
@@ -126,11 +122,52 @@
 
 		while ($row = mysql_fetch_array($result)) {
 
+			if (($kateinen != $row["kateinen"] and $kateinen != '') or ($edkassa != $row["kassa"] and $edkassa != '')) {
+
+				$kateismaksu = "";
+
+				// Tarkistetaan mikä maksutapa
+				if ($kateinen == 'n') {
+					$kateismaksu = t("Pankkikortti");
+				} 
+				elseif ($kateinen == 'o') {
+					$kateismaksu = t("Luottokortti");
+				} 
+				else {
+					$kateismaksu = t("Käteinen");
+				}
+				
+				echo "<tr>";
+				echo "<th colspan='5'>$kateismaksu ".t("yhteensä").":</th>";
+				echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</th></tr>";
+				
+				if ($vaiht == 1) {
+					$prn  = sprintf ('%-35.35s', 	$kateismaksu." ".t("yhteensä").":");
+					$prn .= "............................................";
+					$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$kateismaksuyhteensa)));
+					$prn .= "\n";
+
+					fwrite($fh, $prn);
+					$rivit++;
+				}
+				$kateismaksuyhteensa = 0;
+			}
+
+
 			if ($edkassa != $row["kassa"] and $edkassa != '') {
+				
 				echo "<tr>";
 				echo "<th colspan='5'>$edkassanimi yhteensä:</th>";
 				echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</th></tr>";
-
+				echo "<tr><td class='back'>&nbsp;</td></tr>";
+				echo "<tr>
+						<th nowrap>".t("Kassa")."</th>
+						<th nowrap>".t("Asiakas")."</th>
+						<th nowrap>".t("Ytunnus")."</th>
+						<th nowrap>".t("Laskunumero")."</th>
+						<th nowrap>".t("Pvm")."</th>
+						<th nowrap>$yhtiorow[valkoodi]</th></tr>";
+						
 				if ($vaiht == 1) {
 					$prn  = sprintf ('%-35.35s', 	$edkassanimi." ".t("yhteensä").":");
 					$prn .= "............................................";
@@ -141,8 +178,10 @@
 					$rivit++;
 				}
 				$kassayhteensa = 0;
+				$kateismaksuyhteensa = 0;
 			}
 
+			$kateinen    = $row["kateinen"];
 			$edkassa 	 = $row["kassa"];
 			$edkassanimi = $row["kassanimi"];
 
@@ -170,16 +209,38 @@
 				fwrite($fh, $prn);
 				$rivit++;
 			}
+			$kateismaksuyhteensa += $row["summa"];
 			$yhteensa += $row["summa"];
 			$kassayhteensa += $row["summa"];
 		}
 
 		if ($edkassa != '') {
+			$kateismaksu = "";
+			if ($kateinen == 'n') {
+				$kateismaksu = t("Pankkikortti");
+			} elseif ($kateinen == 'o') {
+				$kateismaksu = t("Luottokortti");
+			} else {
+				$kateismaksu = t("Käteinen");
+			}
+			
 			echo "<tr>";
-			echo "<th colspan='5'>$edkassa yhteensä:</th>";
+			echo "<th colspan='5'>{$row["kassanimi"]} $kateismaksu ".t("yhteensä").":</th>";
+			echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</th></tr>";
+			
+			echo "<tr>";
+			echo "<th colspan='5'>$edkassanimi yhteensä:</th>";
 			echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kassayhteensa))."</th></tr>";
 
 			if ($vaiht == 1) {
+				$prn  = sprintf ('%-35.35s', 	$kateismaksu." ".t("yhteensä").":");
+				$prn .= "............................................";
+				$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$kateismaksuyhteensa)));
+				$prn .= "\n";
+
+				fwrite($fh, $prn);
+				$rivit++;
+				
 				$prn  = sprintf ('%-35.35s', 	$edkassanimi." ".t("yhteensä").":");
 				$prn .= "............................................";
 				$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$kassayhteensa)));
@@ -189,7 +250,9 @@
 
 			$kassayhteensa = 0;
 		}
-
+		
+		echo "</table>";
+		
 		if ($katsuori != '') {
 			//Haetaan kassatilille laitetut suoritukset
 			$query = "	SELECT suoritus.nimi_maksaja nimi, tiliointi.summa, lasku.tapvm
@@ -205,6 +268,15 @@
 			$result = mysql_query($query) or pupe_error($query);
 			
 			$kassayhteensa = 0;
+			
+			echo "<br><table>";
+			echo "<tr>
+					<th nowrap>".t("Kassa")."</th>
+					<th nowrap>".t("Asiakas")."</th>
+					<th nowrap>".t("Ytunnus")."</th>
+					<th nowrap>".t("Laskunumero")."</th>
+					<th nowrap>".t("Pvm")."</th>
+					<th nowrap>$yhtiorow[valkoodi]</th></tr>";
 
 			while ($row = mysql_fetch_array($result)) {
 
@@ -251,6 +323,8 @@
 				$kassayhteensa = 0;
 			}
 		}
+		
+		echo "<tr><td class='back'>&nbsp;</td></tr>";
 		echo "<tr><th colspan='5'>".t("Kaikki kassat yhteensä").":</th><th align='right'>".str_replace(".",",",sprintf('%.2f',$yhteensa))."</th></tr>";
 		echo "</table>";
 
@@ -260,7 +334,8 @@
 			$prn .= str_replace(".",",",sprintf ('%-13.13s', sprintf('%.2f',$yhteensa)));
 			$prn .= "\n";
 			fwrite($fh, $prn);
-
+			
+			echo "<pre>",file_get_contents($filenimi),"</pre>";
 			fclose($fh);
 
 			//haetaan tilausken tulostuskomento

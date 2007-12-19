@@ -21,6 +21,7 @@
 		if (mysql_num_rows($sresult) == 0) {
 			$ulos .= "<option value='nimitys_en'>".t("Tuotteen englanninkielinen nimitys")."</option>";
 			$ulos .= "<option value='nimitys_se'>".t("Tuotteen ruotsinkielinen nimitys")."</option>";
+			$ulos .= "<option value='nimitys_ee'>".t("Tuotteen eestinkielinen nimitys")."</option>";
 		}
 		
 		while ($srow = mysql_fetch_array($sresult)) {

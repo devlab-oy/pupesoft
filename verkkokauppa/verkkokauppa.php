@@ -228,6 +228,9 @@ if(!function_exists("uutiset")) {
 		}
 			$val .= "</table>";
 		}
+		else {
+			$val = $linkki;
+		}
 		
 		
 		return $val;
@@ -655,7 +658,7 @@ if($tee == "tilatut") {
 						
 						<font class='message'>".t("Tilausrivit").":</font><hr>
 						
-						<table style = 'width: 600px;'>
+						<table style = 'width: 700px;'>
 						<tr>
 							<th>".t("Tuoteno")."</th>
 							<th>".t("Nimitys")."</th>
@@ -674,13 +677,13 @@ if($tee == "tilatut") {
 				$rivihinta_verolla = $koririvi["rivihinta"] * (1+($koririvi["alv"]/100));
 				
 				$ulos .= "<tr>
-							<td>$koririvi[tuoteno]</td>
+							<td NOWRAP>$koririvi[tuoteno]</td>
 							<td>$koririvi[nimitys]</td>
 							<td>".number_format($koririvi["varattu"], 2, ',', ' ')."</td>
-							<td>".number_format($koririvi["hinta"], 2, ',', ' ')."</td>
-							<td>".number_format($koririvi["rivihinta"], 2, ',', ' ')."</td>
-							<td>".number_format($rivihinta_verolla, 2, ',', ' ')."</td>
-							<td>".number_format($koririvi["alv"], 2, ',', ' ')."%</td>							
+							<td NOWRAP>".number_format($koririvi["hinta"], 2, ',', ' ')."</td>
+							<td NOWRAP>".number_format($koririvi["rivihinta"], 2, ',', ' ')."</td>
+							<td NOWRAP>".number_format($rivihinta_verolla, 2, ',', ' ')."</td>
+							<td NOWRAP>".number_format($koririvi["alv"], 2, ',', ' ')."%</td>							
 							<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">Poista</a></td>
 						</tr>";
 				$summa += $koririvi["rivihinta"];
@@ -774,9 +777,9 @@ if($tee == "") {
 		$login_screen = "
 			<form name='login' id= 'loginform' action='login_extranet.php' method='post'>
 				<input type='hidden' id = 'location' name='location' value='".$palvelin."verkkokauppa.php'>
-				<font class='info'>".t("K‰ytt‰j‰tunnus",$browkieli).":</font>
+				<font class='login'>".t("K‰ytt‰j‰tunnus",$browkieli).":</font>
 				<input type='text' value='' name='user' size='15' maxlength='30'>
-				<font class='info'>".t("Salasana",$browkieli).":</font>
+				<font class='login'>".t("Salasana",$browkieli).":</font>
 				<input type='password' name='salasana' size='15' maxlength='30'>
 				<input type='submit' value='".t("Kirjaudu sis‰‰n",$browkieli)."'>
 				<br>
@@ -786,13 +789,22 @@ if($tee == "") {
 	}
 	else {
 		$login_screen = "
-			<form action = '".$palvelin2."logout.php' method='post'>Tervetuloa {$kukarow["nimi"]}, <input type = 'hidden' name='location' value='".$palvelin."verkkokauppa.php'><input type='submit' value='".t("Kirjaudu ulos")."'></form>";
+			<form action = '".$palvelin2."logout.php' method='post'><font class='login'>Tervetuloa {$kukarow["nimi"]},</font> <input type = 'hidden' name='location' value='".$palvelin."verkkokauppa.php'><input type='submit' value='".t("Kirjaudu ulos")."'></form>";
 	}
 	
-	echo "	<div class='login' id='login'>$login_screen</div>
-			<div class='menu' id='menu'>".menu()."</div>
-			<div class='selain' id='selain'>".uutiset()."</div>
-			</body></html>";
+	$verkkokauppa =  "	
+					<div class='login' id='login'>$login_screen</div>
+					<div class='menu' id='menu'>".menu()."</div>
+					<div class='selain' id='selain'>".uutiset()."</div>
+				</body>
+			</html>";
+
+	if(file_exists("verkkokauppa.template")) {
+		echo str_replace("<verkkokauppa>", $verkkokauppa, file_get_contents("verkkokauppa.template"));
+	}
+	else {
+		echo "Verkkokauppapohjan m‰‰rittely puuttuu..<br>";
+	}
 }
 
 

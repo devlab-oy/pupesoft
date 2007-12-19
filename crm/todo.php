@@ -265,7 +265,7 @@ if ($tee == "") {
 				WHERE todo.yhtio  = '$kukarow[yhtio]'
 				and kuittaus != ''
 				ORDER BY aika DESC 
-				LIMIT 20";
+				LIMIT 200";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {

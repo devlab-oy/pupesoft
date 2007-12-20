@@ -9,41 +9,37 @@ else {
 	require ("parametrit.inc");
 	require ("functions.inc");
 }
- 
-unset($data);		
-if( (int) $yhtiorow["lasku_logo"] > 0) {
-	$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
-	$data = $liite["data"];
-	$isizelogo[0] = $liite["image_width"];
-	$isizelogo[1] = $liite["image_height"];
+
+unset($data);	
+if( (int) $yhtiorow["logo"] > 0) {
+	$liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
+	if($liite !== false) {
+		$isizelogo[0] = $liite["image_width"];
+		$isizelogo[1] = $liite["image_height"];		
+	}
 	unset($liite);
 }
-elseif(file_exists($yhtiorow["lasku_logo"])) {
-	$filename = $yhtiorow["lasku_logo"];
+elseif(file_exists($yhtiorow["logo"])) {
+	$filename = $yhtiorow["logo"];
 
 	$fh = fopen($filename, "r");
 	$data = fread($fh, filesize($filename));
 	fclose($fh);
 	
-	$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+	$isizelogo = getimagesize($yhtiorow["logo"]);
 }
 
-if ( (int) $yhtiorow["logo"] > 0 or ($yhtiorow["logo"] != '' and @file($yhtiorow["logo"]) !== FALSE)) {
-	
-
+if (( (int) $yhtiorow["logo"] > 0 and $liite !== false) or ($yhtiorow["logo"] != '' and @file($yhtiorow["logo"]) !== FALSE)) {
 	if((int) $yhtiorow["logo"] > 0) {
-
-		$image 	= hae_liite($yhtiorow["logo"], "Yllapito", "array");
-		$ix    	= $image["width"];			// kuvan x
-		$iy    	= $image["height"];			// kuvan y
 		$logo 	= "view.php?id=".$yhtiorow["logo"];
 	}
 	else {
 		$image = getimagesize($yhtiorow["logo"]);
-		$ix    = $image[0];			// kuvan x
-		$iy    = $image[1];			// kuvan y		
 		$logo = $yhtiorow["logo"];		
 	}
+
+	$ix    = $isizelogo[0];			// kuvan x
+	$iy    = $isizelogo[1];			// kuvan y		
 
 	if ($ix > $iy) {
 		$koko = "width='150'";
@@ -51,8 +47,6 @@ if ( (int) $yhtiorow["logo"] > 0 or ($yhtiorow["logo"] != '' and @file($yhtiorow
 	else {
 		$koko = "height='70'";
 	}
-
-	
 }
 else {
 	$logo = "http://www.pupesoft.com/pupesoft.gif";

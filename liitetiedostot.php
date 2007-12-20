@@ -1,7 +1,7 @@
 <?php
 
 require ('inc/parametrit.inc');
-
+$kukarow["taso"] = 3;
 echo "<font class='head'>".t("Liitetiedostot")."</font><hr>";
 
 if (! isset($_REQUEST['liitos']) and ! isset($_REQUEST['id'])) {
@@ -27,63 +27,14 @@ if (! isset($_REQUEST['liitos']) and ! isset($_REQUEST['id'])) {
 // uusi upload?
 if (isset($_POST['tee']) and $_POST['tee'] == 'file' and isset($_REQUEST['liitos']) and isset($_REQUEST['id']) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 
-    $errormsg = '';
-
-	$filetype = $_FILES['userfile']['type'];
-	$filesize = $_FILES['userfile']['size'];
-	$filename = $_FILES['userfile']['name'];
-
-	$query = "SHOW variables like 'max_allowed_packet'";
-	$result = mysql_query($query) or pupe_error($query);
-	$varirow = mysql_fetch_array($result);
-
-	$path_parts = pathinfo($_FILES['userfile']['name']);
-	$ext = $path_parts['extension'];
-	if (strtoupper($ext) == "JPEG") $ext = "jpg";
-
-	// extensio pit‰‰ olla oikein
-	if (strtoupper($ext) != "JPG" and strtoupper($ext) != "PNG" and strtoupper($ext) != "GIF" and strtoupper($ext) != "PDF") {
-		$errormsg .= "<font class='error'>".t("Ainoastaan .jpg .gif .png .pdf tiedostot sallittuja")."!</font>";
+	$retval = tarkasta_liite("userfile");
+	if($retval !== true) {
+		echo $retval;
 	}
-	// ja file jonkun kokonen
-	elseif ($_FILES['userfile']['size'] == 0) {
-		$errormsg .= "<font class='error'>".t("Tiedosto on tyhj‰")."!</font>";
-	}
-	elseif ($filesize > $varirow[1]) {
-		$errormsg .= "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
-	}
-
-	if (empty($errormsg)) {
-		$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
-
-		// lis‰t‰‰n kuva
-		$query = "	INSERT into liitetiedostot set
-					yhtio    		= '{$kukarow['yhtio']}',
-					liitos   		= '". mysql_real_escape_string($_REQUEST['liitos']) . "',
-					liitostunnus 	= '" . (int) $_REQUEST['id']. "',
-					laatija    		= '{$kukarow['kuka']}',
-					luontiaika 		= now(),
-					data     		= '$data',
-					selite   		= '$filename',
-					filename 		= '$filename',
-					filesize 		= '$filesize',
-					filetype 		= '$filetype'";
-		$result = mysql_query($query) or pupe_error($query);
-		$liitostunnus = mysql_insert_id();
-		$kuva = $liitostunnus;
-
-		$query = "SELECT * from lasku where tunnus=" . (int) $_REQUEST['id'] . " and yhtio='{$kukarow['yhtio']}'";
-		$res = mysql_query($query) or pupe_error($query);
-		$laskurow = mysql_fetch_array($res);
-
-		// nollataan hyv‰ksyj‰t jos jokin n‰ist‰ tiloista
-		if (in_array($laskurow['tila'], array('H','M')) and $kukarow["taso"] != 3) {
-			nollaa_hyvak((int) $_REQUEST['id']);
-		}
-	} 
 	else {
-		echo $errormsg;
+		tallenna_liite("userfile", mysql_real_escape_string($_REQUEST['liitos']), (int) $_REQUEST['id'], "");
 	}
+
 }
 
 // poistetaanko liite?

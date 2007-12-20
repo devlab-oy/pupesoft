@@ -52,39 +52,14 @@ if ($tee == 'LISAA') {
 	if (strlen($otsikko) > 0 and strlen($uutinen) > 0) {
 
 		$liitostunnus = 0;
-
-		if (is_uploaded_file($_FILES['userfile']['tmp_name'])) {
-
-			$filetype = $_FILES['userfile']['type'];
-			$filesize = $_FILES['userfile']['size'];
-			$filename = $_FILES['userfile']['name'];
-
-			$file = fopen($_FILES['userfile']['tmp_name'], 'r');
-			$data = addslashes(fread($file, $filesize));
-
-			$selite = trim($otsikko);
-
-			$query = "SHOW variables like 'max_allowed_packet'";
-			$result = mysql_query($query) or pupe_error($query);
-			$varirow = mysql_fetch_array($result);
-
-			if ($filesize > $varirow[1]) {
-				echo "<font class='error'>".t("Liitetiedosto on liian suuri")."! ($varirow[1]) </font>";
-			}
-			else {
-				// lis‰t‰‰n kuva
-				$query = "	insert into liitetiedostot set
-							yhtio    = '$kukarow[yhtio]',
-							liitos   = 'kalenteri',
-							data     = '$data',
-							selite   = '$selite',
-							filename = '$filename',
-							filesize = '$filesize',
-							filetype = '$filetype'";
-				$result = mysql_query($query) or pupe_error($query);
-				$liitostunnus = mysql_insert_id();
-				$kuva = $liitostunnus;
-			}
+		
+		$retval = tarkasta_liite("userfile");
+		if($retval !== true) {
+			echo $retval;
+		}
+		else {
+			$liitostunnus = tallenna_liite("userfile", "kalenteri", 0, $selite);
+			$kuva = $liitostunnus;
 		}
 
 		$uutinen = nl2br(strip_tags($uutinen, '<a>'));

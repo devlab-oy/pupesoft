@@ -386,14 +386,20 @@ if ($tee=='MONISTA') {
 						}
 						break;
 					case 'vienti_kurssi';
-						$vquery = "	SELECT kurssi
-									FROM valuu
-									WHERE yhtio = '$kukarow[yhtio]'
-									and nimi	= '$monistarow[valkoodi]'";
-						$vresult = mysql_query($vquery) or pupe_error($vquery);
-						$valrow = mysql_fetch_array($vresult);
-						$values .= ", '$valrow[kurssi]'";
-						break;
+						// hyvityksiss‰ pidet‰‰n kurssi samana
+						if ($kumpi == 'HYVITA') {
+							$values .= ", '".$monistarow[$i]."'";
+						}
+						else {
+							$vquery = "	SELECT kurssi
+										FROM valuu
+										WHERE yhtio = '$kukarow[yhtio]'
+										and nimi	= '$monistarow[valkoodi]'";
+							$vresult = mysql_query($vquery) or pupe_error($vquery);
+							$valrow = mysql_fetch_array($vresult);
+							$values .= ", '$valrow[kurssi]'";
+						}
+						break; 
 					default:
 						$values .= ", '".$monistarow[$i]."'";
 				}

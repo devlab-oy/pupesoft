@@ -231,10 +231,31 @@ if (!isset($ppl4)) $ppl4 = date("d");
 
 // katsotaan tarvitaanko mennä toimittajahakuun
 if (($ytunnus != "" and $toimittajaid == "") or ($edytunnus != $ytunnus)) {
+	
+	$muutparametrit = "";
+	
+	foreach ($_POST as $key => $value) {
+		if ($key != "toimittajaid") {
+			$muutparametrit .= $key."=".$value."##";
+		}
+	}
+			
 	if ($edytunnus != $ytunnus) $toimittajaid = "";
 	require ("inc/kevyt_toimittajahaku.inc");
+
 	$ytunnus = $toimittajarow["ytunnus"];
-	$tee = "";
+	
+	if($toimittajaid == 0) {
+		$tee = "";
+	}
+}
+
+if (isset($muutparametrit) and $toimittajaid > 0) {
+	foreach (explode("##", $muutparametrit) as $muutparametri) {
+		list($a, $b) = explode("=", $muutparametri); 
+		
+		${$a} = $b;	
+	}
 }
 
 // tehdään itse raportti
@@ -288,6 +309,12 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	}
 	if ($eihinnastoon != '') {
 		$lisaa .= " and tuote.hinnastoon != 'E' ";
+	}
+	if ($varastointi == 'vainvarastoitavat') {
+		$lisaa .= " and tuote.ei_varastoida = '' ";
+	}
+	if ($varastointi == 'vaineivarastoitavat') {
+		$lisaa .= " and tuote.ei_varastoida != '' ";
 	}
 	if ($vainuudet != '') {
 		$lisaa .= " and tuote.luontiaika >= date_sub(current_date, interval 12 month) ";
@@ -371,7 +398,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 	$query = "	select
 				group_concat(tuote.yhtio) yhtio,
 				tuote.tuoteno,
-				CEIL(tuote.halytysraja) halytysraja,
+				tuote.halytysraja,
 				tuote.tahtituote,
 				tuote.status,
 				tuote.nimitys,
@@ -397,12 +424,12 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 				LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
 				WHERE
 				tuote.yhtio in ($yhtiot)
-				$lisaa
+				$lisaa				
 				and tuote.ei_saldoa = ''
 				GROUP BY tuote.tuoteno
 				ORDER BY id, tuote.tuoteno, yhtio";
 	$res = mysql_query($query) or pupe_error($query);
-
+		
 	flush();
 	
 	echo "<table>";
@@ -521,9 +548,9 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 		
 		// sitte vielä totalit
 		list($enp, $vku) = myynnit();
-		
+
 		if (($saldot - $enp + $ostot) <= $row["halytysraja"]) {
-						
+			
 			if ((float) $kiertonopeus_tavoite[$row["abcluokka"]] == 0) $kiertonopeus_tavoite[$row["abcluokka"]] = 1;
 			
 			// Lisätään varatut tilaukseen ja verrataan tilauspistettä vapaasaldoon
@@ -532,7 +559,15 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 			$lisa = (float) $row["halytysraja"] - $vapaasaldo;
 			
 			if ($row["ei_varastoida_clean"] == "" or $lisa != 0) {
-				$ostoehdotus = round($lisa + (2 * (($vku / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"])),2);			
+
+				$ostoehdotus 		= $row["halytysraja"] - $vapaasaldo;
+				$ostoehdotus_lisa 	= (2 * (($vku / $kiertonopeus_tavoite[$row["abcluokka"]]) - $row["varmuus_varasto"]));
+				
+				if ($ostoehdotus_lisa > 0) {
+					$ostoehdotus += $ostoehdotus_lisa;
+				}
+								
+				$ostoehdotus = round($ostoehdotus, 2);													
 			}
 		}
 		else {
@@ -580,362 +615,373 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 }
 
 // näytetään käyttöliittymä..
-if ($tee == "" or !isset($ehdotusnappi)) {
 
 	$abcnimi = $ryhmanimet[$abcrajaus];
 
-	echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
-			<input type='hidden' name='tee' value='RAPORTOI'>
+echo "	<form action='$PHP_SELF' method='post' autocomplete='off'>
+		<input type='hidden' name='tee' value='RAPORTOI'>
 
-			<table>";
+		<table>";
 
-	echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
+echo "<tr><th>".t("Osasto")."</th><td colspan='3'>";
 
-	$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
-				FROM avainsana
-				".avain('join','OSASTO_')."
-				WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji='OSASTO'
-				GROUP BY avainsana.selite
-				ORDER BY avainsana.selite+0";
-	$sresult = mysql_query($query) or pupe_error($query);
+$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
+			FROM avainsana
+			".avain('join','OSASTO_')."
+			WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji='OSASTO'
+			GROUP BY avainsana.selite
+			ORDER BY avainsana.selite+0";
+$sresult = mysql_query($query) or pupe_error($query);
 
-	echo "<select name='osasto'>";
-	echo "<option value=''>".t("Näytä kaikki")."</option>";
+echo "<select name='osasto'>";
+echo "<option value=''>".t("Näytä kaikki")."</option>";
 
-	while ($srow = mysql_fetch_array($sresult)) {
-		$sel = '';
-		if ($osasto == $srow["selite"]) {
-			$sel = "selected";
-		}
-		echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+while ($srow = mysql_fetch_array($sresult)) {
+	$sel = '';
+	if ($osasto == $srow["selite"]) {
+		$sel = "selected";
 	}
-	echo "</select>";
+	echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+}
+echo "</select>";
 
-	echo "</td></tr>
-			<tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>";
+echo "</td></tr>
+		<tr><th>".t("Tuoteryhmä")."</th><td colspan='3'>";
 
-	//Tehdään osasto & tuoteryhmä pop-upit
-	$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
-				FROM avainsana
-				".avain('join','TRY_')."
-				WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji = 'TRY'
-				GROUP BY avainsana.selite
-				ORDER BY avainsana.selite+0";
-	$sresult = mysql_query($query) or pupe_error($query);
+//Tehdään osasto & tuoteryhmä pop-upit
+$query = "	SELECT distinct avainsana.selite, group_concat(".avain('selectcon')." SEPARATOR ' / ') selitetark
+			FROM avainsana
+			".avain('join','TRY_')."
+			WHERE avainsana.yhtio in ($yhtiot) and avainsana.laji = 'TRY'
+			GROUP BY avainsana.selite
+			ORDER BY avainsana.selite+0";
+$sresult = mysql_query($query) or pupe_error($query);
 
-	echo "<select name='tuoryh'>";
-	echo "<option value=''>".t("Näytä kaikki")."</option>";
+echo "<select name='tuoryh'>";
+echo "<option value=''>".t("Näytä kaikki")."</option>";
 
-	while ($srow = mysql_fetch_array($sresult)) {
-		$sel = '';
-		if ($tuoryh == $srow["selite"]) {
-			$sel = "selected";
-		}
-		echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+while ($srow = mysql_fetch_array($sresult)) {
+	$sel = '';
+	if ($tuoryh == $srow["selite"]) {
+		$sel = "selected";
 	}
-	echo "</select>";
+	echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
+}
+echo "</select>";
 
-	echo "</td></tr>
-			<tr><th>".t("Tuotemerkki")."</th><td colspan='3'>";
+echo "</td></tr>
+		<tr><th>".t("Tuotemerkki")."</th><td colspan='3'>";
 
-	//Tehdään osasto & tuoteryhmä pop-upit
-	$query = "	SELECT distinct tuotemerkki
-				FROM tuote
-				WHERE yhtio in ($yhtiot) and tuotemerkki != ''
-				ORDER BY tuotemerkki";
-	$sresult = mysql_query($query) or pupe_error($query);
+//Tehdään osasto & tuoteryhmä pop-upit
+$query = "	SELECT distinct tuotemerkki
+			FROM tuote
+			WHERE yhtio in ($yhtiot) and tuotemerkki != ''
+			ORDER BY tuotemerkki";
+$sresult = mysql_query($query) or pupe_error($query);
 
-	echo "<select name='tuotemerkki'>";
-	echo "<option value=''>".t("Näytä kaikki")."</option>";
+echo "<select name='tuotemerkki'>";
+echo "<option value=''>".t("Näytä kaikki")."</option>";
 
-	while ($srow = mysql_fetch_array($sresult)) {
-		$sel = '';
-		if ($tuotemerkki == $srow["tuotemerkki"]) {
-			$sel = "selected";
-		}
-		echo "<option value='$srow[tuotemerkki]' $sel>$srow[tuotemerkki]</option>";
+while ($srow = mysql_fetch_array($sresult)) {
+	$sel = '';
+	if ($tuotemerkki == $srow["tuotemerkki"]) {
+		$sel = "selected";
 	}
-	echo "</select>";
+	echo "<option value='$srow[tuotemerkki]' $sel>$srow[tuotemerkki]</option>";
+}
+echo "</select>";
 
-	echo "</td></tr>";
+echo "</td></tr>";
 
-	// katotaan onko abc aputaulu rakennettu
-	$query  = "select count(*) from abc_aputaulu where yhtio in ($yhtiot) and tyyppi in ('TK','TR','TP')";
-	$abcres = mysql_query($query) or pupe_error($query);
-	$abcrow = mysql_fetch_array($abcres);
+// katotaan onko abc aputaulu rakennettu
+$query  = "select count(*) from abc_aputaulu where yhtio in ($yhtiot) and tyyppi in ('TK','TR','TP')";
+$abcres = mysql_query($query) or pupe_error($query);
+$abcrow = mysql_fetch_array($abcres);
 
-	// jos on niin näytetään tällänen vaihtoehto
-	if ($abcrow[0] > 0) {
-		echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td colspan='3'>";
+// jos on niin näytetään tällänen vaihtoehto
+if ($abcrow[0] > 0) {
+	echo "<tr><th>".t("ABC-luokkarajaus/rajausperuste")."</th><td colspan='3'>";
 
-		$sel = array();
-		$sel[$abcrajaus] = "SELECTED";
+	$sel = array();
+	$sel[$abcrajaus] = "SELECTED";
 
-		echo "<select name='abcrajaus' onchange='submit()'>
-		<option value=''>".t("Ei rajausta")."</option>
-		<option $sel[0] value='0'>".t("Luokka A-30")."</option>
-		<option $sel[1] value='1'>".t("Luokka B-20 ja paremmat")."</option>
-		<option $sel[2] value='2'>".t("Luokka C-15 ja paremmat")."</option>
-		<option $sel[3] value='3'>".t("Luokka D-15 ja paremmat")."</option>
-		<option $sel[4] value='4'>".t("Luokka E-10 ja paremmat")."</option>
-		<option $sel[5] value='5'>".t("Luokka F-05 ja paremmat")."</option>
-		<option $sel[6] value='6'>".t("Luokka G-03 ja paremmat")."</option>
-		<option $sel[7] value='7'>".t("Luokka H-02 ja paremmat")."</option>
-		<option $sel[8] value='8'>".t("Luokka I-00 ja paremmat")."</option>
-		</select>";
+	echo "<select name='abcrajaus' onchange='submit()'>
+	<option value=''>".t("Ei rajausta")."</option>
+	<option $sel[0] value='0'>".t("Luokka A-30")."</option>
+	<option $sel[1] value='1'>".t("Luokka B-20 ja paremmat")."</option>
+	<option $sel[2] value='2'>".t("Luokka C-15 ja paremmat")."</option>
+	<option $sel[3] value='3'>".t("Luokka D-15 ja paremmat")."</option>
+	<option $sel[4] value='4'>".t("Luokka E-10 ja paremmat")."</option>
+	<option $sel[5] value='5'>".t("Luokka F-05 ja paremmat")."</option>
+	<option $sel[6] value='6'>".t("Luokka G-03 ja paremmat")."</option>
+	<option $sel[7] value='7'>".t("Luokka H-02 ja paremmat")."</option>
+	<option $sel[8] value='8'>".t("Luokka I-00 ja paremmat")."</option>
+	</select>";
 
-		$sel = array();
-		$sel[$abcrajaustapa] = "SELECTED";
+	$sel = array();
+	$sel[$abcrajaustapa] = "SELECTED";
 
-		echo "<select name='abcrajaustapa'>
-		<option $sel[TK] value='TK'>".t("Myyntikate")."</option>
-		<option $sel[TM] value='TM'>".t("Myynti")."</option>
-		<option $sel[TR] value='TR'>".t("Myyntirivit")."</option>
-		<option $sel[TP] value='TP'>".t("Myyntikappaleet")."</option>
-		</select>
-		</td></tr>";
-	}
+	echo "<select name='abcrajaustapa'>
+	<option $sel[TK] value='TK'>".t("Myyntikate")."</option>
+	<option $sel[TM] value='TM'>".t("Myynti")."</option>
+	<option $sel[TR] value='TR'>".t("Myyntirivit")."</option>
+	<option $sel[TP] value='TP'>".t("Myyntikappaleet")."</option>
+	</select>
+	</td></tr>";
+}
 
-	echo "<tr><th>".t("Toimittaja")."</th><td colspan='3'><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
-	echo "<input type='hidden' name='edytunnus' value='$ytunnus'>";
-	echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
+echo "<tr><th>".t("Toimittaja")."</th><td colspan='3'><input type='text' size='20' name='ytunnus' value='$ytunnus'></td></tr>";
+echo "<input type='hidden' name='edytunnus' value='$ytunnus'>";
+echo "<input type='hidden' name='toimittajaid' value='$toimittajaid'>";
 
-	echo "</table><table><br>";
+$sel[$varastointi]	= " selected";
 
-	echo "	<tr>
-			<th></th><th colspan='3'>".t("Alkupäivämäärä (pp-kk-vvvv)")."</th>
-			<th></th><th colspan='3'>".t("Loppupäivämäärä (pp-kk-vvvv)")."</th>
-			</tr>";
+echo "<tr><th>".t("Varastointi")."</th><td colspan='3'>";
+
+echo "<select name='varastointi'>
+	<option value='kaikki' $sel[kaikki]>".t("Kaikki")."</option>
+	<option value='vainvarastoitavat' $sel[vainvarastoitavat]>".t("Vain varastoitavat")."</option>
+	<option value='vaineivarastoitavat' $sel[vaineivarastoitavat]>".t("Vain  ei varastoitavat")."</option>
+	</select>";
+
+echo "</td></tr>";
+
+echo "</table><table><br>";
+
+echo "	<tr>
+		<th></th><th colspan='3'>".t("Alkupäivämäärä (pp-kk-vvvv)")."</th>
+		<th></th><th colspan='3'>".t("Loppupäivämäärä (pp-kk-vvvv)")."</th>
+		</tr>";
 /*
-	echo "	<tr><th>".t("Kausi 1")."</th>
-			<td><input type='text' name='ppa1' value='$ppa1' size='5'></td>
-			<td><input type='text' name='kka1' value='$kka1' size='5'></td>
-			<td><input type='text' name='vva1' value='$vva1' size='5'></td>
-			<td class='back'>&nbsp;-&nbsp;</td>
-			<td><input type='text' name='ppl1' value='$ppl1' size='5'></td>
-			<td><input type='text' name='kkl1' value='$kkl1' size='5'></td>
-			<td><input type='text' name='vvl1' value='$vvl1' size='5'></td>
-			</tr>";
+echo "	<tr><th>".t("Kausi 1")."</th>
+		<td><input type='text' name='ppa1' value='$ppa1' size='5'></td>
+		<td><input type='text' name='kka1' value='$kka1' size='5'></td>
+		<td><input type='text' name='vva1' value='$vva1' size='5'></td>
+		<td class='back'>&nbsp;-&nbsp;</td>
+		<td><input type='text' name='ppl1' value='$ppl1' size='5'></td>
+		<td><input type='text' name='kkl1' value='$kkl1' size='5'></td>
+		<td><input type='text' name='vvl1' value='$vvl1' size='5'></td>
+		</tr>";
 
-	echo "	<tr><th>".t("Kausi 2")."</th>
-			<td><input type='text' name='ppa2' value='$ppa2' size='5'></td>
-			<td><input type='text' name='kka2' value='$kka2' size='5'></td>
-			<td><input type='text' name='vva2' value='$vva2' size='5'></td>
-			<td class='back'>&nbsp;-&nbsp;</td>
-			<td><input type='text' name='ppl2' value='$ppl2' size='5'></td>
-			<td><input type='text' name='kkl2' value='$kkl2' size='5'></td>
-			<td><input type='text' name='vvl2' value='$vvl2' size='5'></td>
-			</tr>";
+echo "	<tr><th>".t("Kausi 2")."</th>
+		<td><input type='text' name='ppa2' value='$ppa2' size='5'></td>
+		<td><input type='text' name='kka2' value='$kka2' size='5'></td>
+		<td><input type='text' name='vva2' value='$vva2' size='5'></td>
+		<td class='back'>&nbsp;-&nbsp;</td>
+		<td><input type='text' name='ppl2' value='$ppl2' size='5'></td>
+		<td><input type='text' name='kkl2' value='$kkl2' size='5'></td>
+		<td><input type='text' name='vvl2' value='$vvl2' size='5'></td>
+		</tr>";
 
-	echo "	<tr><th>".t("Kausi 3")."</th>
-			<td><input type='text' name='ppa3' value='$ppa3' size='5'></td>
-			<td><input type='text' name='kka3' value='$kka3' size='5'></td>
-			<td><input type='text' name='vva3' value='$vva3' size='5'></td>
-			<td class='back'>&nbsp;-&nbsp;</td>
-			<td><input type='text' name='ppl3' value='$ppl3' size='5'></td>
-			<td><input type='text' name='kkl3' value='$kkl3' size='5'></td>
-			<td><input type='text' name='vvl3' value='$vvl3' size='5'></td>
-			</tr>";
+echo "	<tr><th>".t("Kausi 3")."</th>
+		<td><input type='text' name='ppa3' value='$ppa3' size='5'></td>
+		<td><input type='text' name='kka3' value='$kka3' size='5'></td>
+		<td><input type='text' name='vva3' value='$vva3' size='5'></td>
+		<td class='back'>&nbsp;-&nbsp;</td>
+		<td><input type='text' name='ppl3' value='$ppl3' size='5'></td>
+		<td><input type='text' name='kkl3' value='$kkl3' size='5'></td>
+		<td><input type='text' name='vvl3' value='$vvl3' size='5'></td>
+		</tr>";
 */
-	echo "	<tr><th>".t("Kausi")."</th>
-			<td><input type='text' name='ppa4' value='$ppa4' size='5'></td>
-			<td><input type='text' name='kka4' value='$kka4' size='5'></td>
-			<td><input type='text' name='vva4' value='$vva4' size='5'></td>
-			<td class='back'>&nbsp;-&nbsp;</td>
-			<td><input type='text' name='ppl4' value='$ppl4' size='5'></td>
-			<td><input type='text' name='kkl4' value='$kkl4' size='5'></td>
-			<td><input type='text' name='vvl4' value='$vvl4' size='5'></td>
-			</tr>";
+echo "	<tr><th>".t("Kausi")."</th>
+		<td><input type='text' name='ppa4' value='$ppa4' size='5'></td>
+		<td><input type='text' name='kka4' value='$kka4' size='5'></td>
+		<td><input type='text' name='vva4' value='$vva4' size='5'></td>
+		<td class='back'>&nbsp;-&nbsp;</td>
+		<td><input type='text' name='ppl4' value='$ppl4' size='5'></td>
+		<td><input type='text' name='kkl4' value='$kkl4' size='5'></td>
+		<td><input type='text' name='vvl4' value='$vvl4' size='5'></td>
+		</tr>";
 
-	echo "</table><table><br>";
+echo "</table><table><br>";
+
+$chk = "";
+if ($eliminoi != "") $chk = "checked";
+echo "<tr><th>".t("Älä huomioi konsernimyyntiä")."</th><td colspan='3'><input type='checkbox' name='eliminoi' $chk></td></tr>";
+
+$chk = "";
+if ($erikoisvarastot != "") $chk = "checked";
+echo "<tr><th>".t("Älä huomioi erikoisvarastoja")."</th><td colspan='3'><input type='checkbox' name='erikoisvarastot' $chk></td></tr>";
+
+$chk = "";
+if ($poistetut != "") $chk = "checked";
+echo "<tr><th>".t("Älä näytä poistettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistetut' $chk></td></tr>";
+
+$chk = "";
+if ($poistuva != "") $chk = "checked";
+echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistuva' $chk></td></tr>";
+
+$chk = "";
+if ($eihinnastoon != "") $chk = "checked";
+echo "<tr><th>".t("Älä näytä tuotteita joita ei näytetä hinnastossa")."</th><td colspan='3'><input type='checkbox' name='eihinnastoon' $chk></td></tr>";
+
+if ($abcrajaus != "") {
+	echo "<tr><td class='back'><br></td></tr>";
+	echo "<tr><th colspan='4'>".t("ABC-rajaus")." $ryhmanimet[$abcrajaus]</th></tr>";
 
 	$chk = "";
-	if ($eliminoi != "") $chk = "checked";
-	echo "<tr><th>".t("Älä huomioi konsernimyyntiä")."</th><td colspan='3'><input type='checkbox' name='eliminoi' $chk></td></tr>";
+	if ($eiuusia != "") $chk = "checked";
+	echo "<tr><th>".t("Älä listaa 12kk sisällä perustettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='eiuusia' $chk></td></tr>";
 
 	$chk = "";
-	if ($erikoisvarastot != "") $chk = "checked";
-	echo "<tr><th>".t("Älä huomioi erikoisvarastoja")."</th><td colspan='3'><input type='checkbox' name='erikoisvarastot' $chk></td></tr>";
+	if ($vainuudet != "") $chk = "checked";
+	echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='vainuudet' $chk></td></tr>";
+}
 
-	$chk = "";
-	if ($poistetut != "") $chk = "checked";
-	echo "<tr><th>".t("Älä näytä poistettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistetut' $chk></td></tr>";
+echo "</table><table><br>";
 
-	$chk = "";
-	if ($poistuva != "") $chk = "checked";
-	echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='poistuva' $chk></td></tr>";
+// yhtiövalinnat
+$query	= "	SELECT distinct yhtio, nimi
+			from yhtio
+			where konserni = '$yhtiorow[konserni]' and konserni != ''";
+$presult = mysql_query($query) or pupe_error($query);
 
-	$chk = "";
-	if ($eihinnastoon != "") $chk = "checked";
-	echo "<tr><th>".t("Älä näytä tuotteita joita ei näytetä hinnastossa")."</th><td colspan='3'><input type='checkbox' name='eihinnastoon' $chk></td></tr>";
+$vlask 		= 0;
+$useampi_yhtio = 0;
 
-	if ($abcrajaus != "") {
-		echo "<tr><td class='back'><br></td></tr>";
-		echo "<tr><th colspan='4'>".t("ABC-rajaus")." $ryhmanimet[$abcrajaus]</th></tr>";
+if (mysql_num_rows($presult) > 0) {
+
+	$yhtiot = "";
+
+	while ($prow = mysql_fetch_array($presult)) {
 
 		$chk = "";
-		if ($eiuusia != "") $chk = "checked";
-		echo "<tr><th>".t("Älä listaa 12kk sisällä perustettuja tuotteita")."</th><td colspan='3'><input type='checkbox' name='eiuusia' $chk></td></tr>";
-
-		$chk = "";
-		if ($vainuudet != "") $chk = "checked";
-		echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='vainuudet' $chk></td></tr>";
-	}
-
-	echo "</table><table><br>";
-
-	// yhtiövalinnat
-	$query	= "	SELECT distinct yhtio, nimi
-				from yhtio
-				where konserni = '$yhtiorow[konserni]' and konserni != ''";
-	$presult = mysql_query($query) or pupe_error($query);
-
-	$vlask 		= 0;
-	$useampi_yhtio = 0;
-
-	if (mysql_num_rows($presult) > 0) {
-
-		$yhtiot = "";
-
-		while ($prow = mysql_fetch_array($presult)) {
-
-			$chk = "";
-			if (is_array($valitutyhtiot)) {
-				if (in_array($prow["yhtio"], $valitutyhtiot) != '') {
-					$chk = "CHECKED";
-					$yhtiot .= "'$prow[yhtio]',";
-					$useampi_yhtio++;
-				}
-			}
-			elseif ($prow["yhtio"] == $kukarow["yhtio"]) {
+		if (is_array($valitutyhtiot)) {
+			if (in_array($prow["yhtio"], $valitutyhtiot) != '') {
 				$chk = "CHECKED";
+				$yhtiot .= "'$prow[yhtio]',";
+				$useampi_yhtio++;
 			}
-
-			if ($vlask == 0) {
-				echo "<tr><th rowspan='".mysql_num_rows($presult)."'>Huomioi yhtiön saldot, myynnit ja ostot:</th>";
-			}
-			else {
-				echo "<tr>";
-			}
-
-			echo "<td colspan='3'><input type='checkbox' name='valitutyhtiot[]' value='$prow[yhtio]' $chk onClick='submit();'> $prow[nimi]</td></tr>";
-
-			$vlask++;
+		}
+		elseif ($prow["yhtio"] == $kukarow["yhtio"]) {
+			$chk = "CHECKED";
 		}
 
-		$yhtiot = substr($yhtiot,0,-1);
+		if ($vlask == 0) {
+			echo "<tr><th rowspan='".mysql_num_rows($presult)."'>Huomioi yhtiön saldot, myynnit ja ostot:</th>";
+		}
+		else {
+			echo "<tr>";
+		}
 
-		if ($yhtiot == "") $yhtiot = "'$kukarow[yhtio]'";
+		echo "<td colspan='3'><input type='checkbox' name='valitutyhtiot[]' value='$prow[yhtio]' $chk onClick='submit();'> $prow[nimi]</td></tr>";
 
-		echo "</table><table><br>";
-
+		$vlask++;
 	}
+
+	$yhtiot = substr($yhtiot,0,-1);
+
+	if ($yhtiot == "") $yhtiot = "'$kukarow[yhtio]'";
+
+	echo "</table><table><br>";
+
+}
+
+// katsotaan onko firmalla varastoja useassa maassa
+$query = "	SELECT distinct maa 
+			from varastopaikat 
+			where maa != '' 
+			and yhtio in ($yhtiot) 
+			order by yhtio, maa";
+$vtresult = mysql_query($query) or pupe_error($query);
+
+$useampi_maa = 0;
+
+// useampi maa löytyy, annetaan mahdollisuus tutkailla saldoja per maa
+if (mysql_num_rows($vtresult) > 1) {
+
+	$useampi_maa = 1;
 
 	// katsotaan onko firmalla varastoja useassa maassa
 	$query = "select distinct maa from varastopaikat where maa != '' and yhtio in ($yhtiot) order by yhtio, maa";
 	$vtresult = mysql_query($query) or pupe_error($query);
-
-	$useampi_maa = 0;
-
-	// useampi maa löytyy, annetaan mahdollisuus tutkailla saldoja per maa
-	if (mysql_num_rows($vtresult) > 1) {
-
-		$useampi_maa = 1;
-
-		// katsotaan onko firmalla varastoja useassa maassa
-		$query = "select distinct maa from varastopaikat where maa != '' and yhtio in ($yhtiot) order by yhtio, maa";
-		$vtresult = mysql_query($query) or pupe_error($query);
-		$vlask = 0;
-
-		while ($vrow = mysql_fetch_array($vtresult)) {
-
-			$chk = "";
-			if (is_array($valitutmaat)) {
-				if (in_array($vrow["maa"], $valitutmaat) != '') {
-					$chk = "CHECKED";
-				}
-			}
-
-			if ($vlask == 0) {
-				echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot, myynnit ja ostot maittain:")."</th>";
-			}
-			else {
-				echo "<tr>";
-			}
-
-			echo "<td colspan='3'><input type='checkbox' name='valitutmaat[]' value='$vrow[maa]' $chk>$vrow[maa] - ".maa($vrow["maa"])."</td></tr>";
-
-			$vlask++;
-		}
-
-		echo "</table><table><br>";
-
-	}
-
-	//Valitaan varastot joiden saldot huomioidaan
-	$query = "	SELECT *
-				FROM varastopaikat
-				WHERE yhtio in ($yhtiot)
-				ORDER BY yhtio, nimitys";
-	$vtresult = mysql_query($query) or pupe_error($query);
-
 	$vlask = 0;
 
-	if (mysql_num_rows($vtresult) > 1) {
-		while ($vrow = mysql_fetch_array($vtresult)) {
+	while ($vrow = mysql_fetch_array($vtresult)) {
 
-			$chk = "";
-			if (is_array($valitutvarastot)) {
-				if (in_array($vrow["tunnus"], $valitutvarastot) != '') {
-					$chk = "CHECKED";
-				}
+		$chk = "";
+		if (is_array($valitutmaat)) {
+			if (in_array($vrow["maa"], $valitutmaat) != '') {
+				$chk = "CHECKED";
 			}
-
-			if ($vlask == 0) {
-				echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot, myynnit ja ostot varastoittain:")."</th>";
-			}
-			else {
-				echo "<tr>";
-			}
-
-			echo "<td colspan='3'><input type='checkbox' name='valitutvarastot[]' value='$vrow[tunnus]' $chk>";
-
-			if ($useampi_yhtio > 1) {
-				$query = "select nimi from yhtio where yhtio='$vrow[yhtio]'";
-				$yhtres = mysql_query($query) or pupe_error($query);
-				$yhtrow = mysql_fetch_array($yhtres);
-				echo "$yhtrow[nimi]: ";
-			}
-
-			echo "$vrow[nimitys] ";
-
-			if ($vrow["tyyppi"] != "") {
-				echo " *$vrow[tyyppi]* ";
-			}
-			if ($useampi_maa == 1) {
-				echo "(".maa($vrow["maa"]).")";
-			}
-
-			echo "</td></tr>";
-
-			$vlask++;
 		}
-	}
-	elseif (mysql_num_rows($vtresult) == 1) {
-		$vrow = mysql_fetch_array($vtresult);
-		echo "<input type='hidden' name='valitutvarastot[]' value='$vrow[tunnus]'>";
-	}
-	else {
-		echo "<font class='error'>Yhtään varastoa ei löydy, raporttia ei voida ajaa!</font>";
-		exit;
+
+		if ($vlask == 0) {
+			echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot, myynnit ja ostot maittain:")."</th>";
+		}
+		else {
+			echo "<tr>";
+		}
+
+		echo "<td colspan='3'><input type='checkbox' name='valitutmaat[]' value='$vrow[maa]' $chk>$vrow[maa] - ".maa($vrow["maa"])."</td></tr>";
+
+		$vlask++;
 	}
 
-	echo "</table>";
-
-	echo "<br><input type='submit' name='ehdotusnappi' value = '".t("Aja ostoehdotus")."'>
-		</form>";
+	echo "</table><table><br>";
 
 }
+
+//Valitaan varastot joiden saldot huomioidaan
+$query = "	SELECT *
+			FROM varastopaikat
+			WHERE yhtio in ($yhtiot)
+			ORDER BY yhtio, nimitys";
+$vtresult = mysql_query($query) or pupe_error($query);
+
+$vlask = 0;
+
+if (mysql_num_rows($vtresult) > 1) {
+	while ($vrow = mysql_fetch_array($vtresult)) {
+
+		$chk = "";
+		if (is_array($valitutvarastot)) {
+			if (in_array($vrow["tunnus"], $valitutvarastot) != '') {
+				$chk = "CHECKED";
+			}
+		}
+
+		if ($vlask == 0) {
+			echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot, myynnit ja ostot varastoittain:")."</th>";
+		}
+		else {
+			echo "<tr>";
+		}
+
+		echo "<td colspan='3'><input type='checkbox' name='valitutvarastot[]' value='$vrow[tunnus]' $chk>";
+
+		if ($useampi_yhtio > 1) {
+			$query = "select nimi from yhtio where yhtio='$vrow[yhtio]'";
+			$yhtres = mysql_query($query) or pupe_error($query);
+			$yhtrow = mysql_fetch_array($yhtres);
+			echo "$yhtrow[nimi]: ";
+		}
+
+		echo "$vrow[nimitys] ";
+
+		if ($vrow["tyyppi"] != "") {
+			echo " *$vrow[tyyppi]* ";
+		}
+		if ($useampi_maa == 1) {
+			echo "(".maa($vrow["maa"]).")";
+		}
+
+		echo "</td></tr>";
+
+		$vlask++;
+	}
+}
+elseif (mysql_num_rows($vtresult) == 1) {
+	$vrow = mysql_fetch_array($vtresult);
+	echo "<input type='hidden' name='valitutvarastot[]' value='$vrow[tunnus]'>";
+}
+else {
+	echo "<font class='error'>Yhtään varastoa ei löydy, raporttia ei voida ajaa!</font>";
+	exit;
+}
+
+echo "</table>";
+echo "<br><input type='submit' name='ehdotusnappi' value = '".t("Aja ostoehdotus")."'></form>";
 
 require ("../inc/footer.inc");
 

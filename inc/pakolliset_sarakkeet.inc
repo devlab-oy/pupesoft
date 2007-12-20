@@ -171,6 +171,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				$pakolliset = array("TYYPPI", "LAJI", "TASO", "NIMI");
 				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				break;
+			case "etaisyydet" :
+				$pakolliset = array("VARASTO_POSTINO", "POSTINO", "KM", "POSTITP");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
+				$wherelliset = array("VARASTO_POSTINO","POSTINO");
+				break;
 			default :
 				$pakolliset = array("TUNTEMATON_TAULU");
 				$kielletyt = array();

@@ -882,39 +882,40 @@ else {
 			<tr>
 				<td>".t("Valitse tietokannan taulu").":</td>
 				<td><select name='table'>
+					<option value='asiakas'>".t("Asiakas")."</option>
+					<option value='asiakasalennus'>".t("Asiakasalennukset")."</option>
+					<option value='asiakashinta'>".t("Asiakashinnat")."</option>
+					<option value='asiakaskommentti'>".t("Asiakaskommentit")."</option>
+					<option value='autodata'>".t("Autodatatiedot")."</option>
+					<option value='autodata_tuote'>".t("Autodata tuotetiedot")."</option>
+					<option value='avainsana'>".t("Avainsanat")."</option>
+					<option value='etaisyydet'>".t("Etäisyydet varastosta")."</option>
+					<option value='hinnasto'>".t("Hinnasto")."</option>
+					<option value='kalenteri'>".t("Kalenteritietoja")."</option>
+					<option value='maksuehto'>".t("Maksuehto")."</option>
+					<option value='perusalennus'>".t("Perusalennukset")."</option>
+					<option value='rahtimaksut'>".t("Rahtimaksut")."</option>
+					<option value='rahtisopimukset'>".t("Rahtisopimukset")."</option>
+					<option value='rekisteritiedot'>".t("Rekisteritiedot")."</option>
+					<option value='sanakirja'>".t("Sanakirja")."</option>
+					<option value='sarjanumeron_lisatiedot'>".t("Sarjanumeron lisätiedot")."</option>
+					<option value='taso'>".t("Tilikartan rakenne")."</option>
+					<option value='tili'>".t("Tilikartta")."</option>
+					<option value='todo'>".t("Todo-lista")."</option>
+					<option value='toimi'>".t("Toimittaja")."</option>
+					<option value='toimitustapa'>".t("Toimitustapoja")."</option>
+					<option value='tullinimike'>".t("Tullinimikeet")."</option>
 					<option value='tuote'>".t("Tuote")."</option>
 					<option value='tuotepaikat'>".t("Tuotepaikat")."</option>
-					<option value='asiakas'>".t("Asiakas")."</option>
-					<option value='toimi'>".t("Toimittaja")."</option>
-					<option value='tullinimike'>".t("Tullinimikeet")."</option>
-					<option value='asiakashinta'>".t("Asiakashinnat")."</option>
-					<option value='asiakasalennus'>".t("Asiakasalennukset")."</option>
-					<option value='asiakaskommentti'>".t("Asiakaskommentit")."</option>
-					<option value='perusalennus'>".t("Perusalennukset")."</option>
-					<option value='avainsana'>".t("Avainsanat")."</option>
-					<option value='tili'>".t("Tilikartta")."</option>
 					<option value='tuoteperhe'>".t("Tuoteperheet")."</option>
-					<option value='rahtimaksut'>".t("Rahtimaksut")."</option>
-					<option value='yhteyshenkilo'>".t("Yhteyshenkilöt")."</option>
+					<option value='tuotteen_alv'>".t("Tuotteiden ulkomaan ALV")."</option>
 					<option value='tuotteen_avainsanat'>".t("Tuotteen avainsanat")."</option>
-					<option value='kalenteri'>".t("Kalenteritietoja")."</option>
+					<option value='tuotteen_orginaalit'>".t("Tuotteiden originaalit")."</option>
+					<option value='tuotteen_toimittajat'>".t("Tuotteen toimittajat")."</option>
 					<option value='yhteensopivuus_auto'>".t("Yhteensopivuus automallit")."</option>
 					<option value='yhteensopivuus_mp'>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote'>".t("Yhteensopivuus tuotteet")."</option>
-					<option value='tuotteen_orginaalit'>".t("Tuotteiden originaalit")."</option>
-					<option value='autodata'>".t("Autodatatiedot")."</option>
-					<option value='autodata_tuote'>".t("Autodata tuotetiedot")."</option>
-					<option value='rekisteritiedot'>".t("Rekisteritiedot")."</option>
-					<option value='sanakirja'>".t("Sanakirja")."</option>
-					<option value='tuotteen_toimittajat'>".t("Tuotteen toimittajat")."</option>
-					<option value='todo'>".t("Todo-lista")."</option>
-					<option value='maksuehto'>".t("Maksuehto")."</option>
-					<option value='hinnasto'>".t("Hinnasto")."</option>
-					<option value='rahtisopimukset'>".t("Rahtisopimukset")."</option>
-					<option value='toimitustapa'>".t("Toimitustapoja")."</option>
-					<option value='tuotteen_alv'>".t("Tuotteiden ulkomaan ALV")."</option>
-					<option value='sarjanumeron_lisatiedot'>".t("Sarjanumeron lisätiedot")."</option>
-					<option value='taso'>".t("Tilikartan rakenne")."</option>
+					<option value='yhteyshenkilo'>".t("Yhteyshenkilöt")."</option>
 					</select></td>
 			</tr>
 

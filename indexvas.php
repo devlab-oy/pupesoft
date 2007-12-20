@@ -10,7 +10,7 @@ else {
 	require ("functions.inc");
 }
 
-unset($data);	
+unset($isizelogo);	
 if( (int) $yhtiorow["logo"] > 0) {
 	$liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
 	if($liite !== false) {
@@ -19,17 +19,11 @@ if( (int) $yhtiorow["logo"] > 0) {
 	}
 	unset($liite);
 }
-elseif(file_exists($yhtiorow["logo"])) {
-	$filename = $yhtiorow["logo"];
-
-	$fh = fopen($filename, "r");
-	$data = fread($fh, filesize($filename));
-	fclose($fh);
-	
+elseif(@file($yhtiorow["logo"])) {
 	$isizelogo = getimagesize($yhtiorow["logo"]);
 }
 
-if (( (int) $yhtiorow["logo"] > 0 and $liite !== false) or ($yhtiorow["logo"] != '' and @file($yhtiorow["logo"]) !== FALSE)) {
+if (is_array($isizelogo)) {
 	if((int) $yhtiorow["logo"] > 0) {
 		$logo 	= "view.php?id=".$yhtiorow["logo"];
 	}

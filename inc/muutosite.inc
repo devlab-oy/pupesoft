@@ -254,6 +254,14 @@ if ($tila == 'R') {
 	$tila = 'X';
 }
 
+//T‰‰ll‰ p‰ivitet‰‰n maksuehto
+if ($tila == 'maksuehto') {
+	$query = "UPDATE lasku SET maksuehto = '$maksuehto' WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$tee = 'E';
+	$tila = 'X';
+}
+
 //T‰‰ll‰ tarkistetaan laskun uusi kassa-alepvm
 if ($tila == 'B') {
 
@@ -763,6 +771,38 @@ if ($tila == '') {
 						<input type = 'text' name = 'kk' maxlength='2' size='2' value = '$pvm[kk]'>
 						<input type = 'text' name = 'vv' maxlength='4' size='4' value = '$pvm[vv]'></td>
 						<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr></form>";
+			}
+
+			// voidaan vaihtaa myyntilaskun mapvm jos se ei ole viel‰ maksettu
+			if ($trow['tila'] == 'U' and $trow['mapvm'] == '0000-00-00') {
+
+				echo "<form action = '$PHP_SELF' method='post'>
+						<input type = 'hidden' name='tila' value='maksuehto'>
+						<input type = 'hidden' name='tee' value='M'>
+						<input type = 'hidden' name='tunnus' value='$tunnus'>
+						<tr><th>".t("Vaihda maksuehto")."</th>";
+
+						echo "<td><select name='maksuehto'>";
+
+						$query = "	SELECT maksuehto.tunnus, concat_ws(' ', ".avain('selectcon','MEHTOKATXT_').",  ".avain('selectcon2','MEHTOTXT_').") mehto
+									FROM maksuehto
+									".avain('join','MEHTOKATXT_')."
+									".avain('join2','MEHTOTXT_')."
+									WHERE maksuehto.yhtio 	= '$kukarow[yhtio]'
+									and maksuehto.kaytossa 	= ''
+									and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$trow[maa]%')
+									order by maksuehto.jarjestys, mehto, maksuehto.tunnus";
+						$mresult = mysql_query($query) or pupe_error($query);
+
+						while ($row = mysql_fetch_array($mresult)) {
+							$sel = "";
+							if ($trow["maksuehto"] == $row["tunnus"]) {
+								$sel = 'selected';
+							}
+							echo "<option value='$row[0]' $sel>$row[1]";
+						}
+						echo "</select></td>";
+						echo "<td><input type = 'submit' value = '".t("P‰ivit‰")."'></td></tr></form>";
 			}
 		}
 	}

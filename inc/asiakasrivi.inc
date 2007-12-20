@@ -581,7 +581,7 @@
 
 	if (mysql_field_name($result, $i) == "toimitusehto") {
 
-		$query = "	SELECT concat(selite, ' ', selitetark) toimehto
+		$query = "	SELECT concat_ws(' ', selite, selitetark) toimehto
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
 					ORDER BY jarjestys, selite";

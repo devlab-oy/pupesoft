@@ -122,6 +122,7 @@ foreach ($keissit as $keissi) {
 						LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila IN ('N','L')
+						and lasku.luontiaika != '0000-00-00 00:00:00'
 						ORDER BY lasku.tunnus, tilausrivi.tunnus";
 			break;
 		default :

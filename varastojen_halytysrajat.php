@@ -72,6 +72,9 @@ $apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
 $lpvm = substr($lsuurin,0,4)."-".substr($lsuurin,4,2)."-".substr($lsuurin,6,2);
 
 if (isset($tuoteno) and $tuoteno != '') {
+	//tarvitaan multiple select boksin tekoon
+	$kutsuja = "varastojen_halytysraja.php";
+	$multi = "multiple";
 	require 'inc/tuotehaku.inc';
 	
 	if (empty($trow)) {
@@ -79,16 +82,29 @@ if (isset($tuoteno) and $tuoteno != '') {
 	}
 }
 
-if ((isset($_POST['muutparametrit']) and $_POST['muutparametrit'] != '') and ! isset($tuoteno)) {
+
+if ((isset($_POST['muutparametrit']) and $_POST['muutparametrit'] != '') and !isset($tuoteno) and !isset($tuoteno_array)) {
 	$tuoteno = $muutparametrit;
+}
+
+if (isset($tuoteno_array)) {
+
+	$muutparametrit = "";
+	foreach ($tuoteno_array as $tarray => $tuotevalue) {
+		$muutparametrit .= "'$tuotevalue',";
+	}
+	$muutparametrit = substr($muutparametrit,0,-1); // vika pilkku pois
+	
 }
 
 // katsotaan tarvitaanko menn‰ toimittajahakuun
 if ($ytunnus_haku != "") {
 	$ytunnus = $ytunnus_haku;
+	
 	if (isset($tuoteno)) {
 		$muutparametrit = $tuoteno;
 	}
+	
 	
 	$toimittajaid = "";
 	require ("inc/kevyt_toimittajahaku.inc");
@@ -125,13 +141,20 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 	// scripti balloonien tekemiseen
 	js_popup();
-
-	$query = "select * from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
-	$vtresult = mysql_query($query) or pupe_error($query);
-	$vrow = mysql_fetch_array($vtresult);
+	
+	
+	//varastot queryyn
+	if (!empty($varastot)) {
+		$lisa_varastot = " and varastopaikat.tunnus IN (";
+		foreach ($varastot as $key => $value) {
+			$lisa_varastot .= "'$value',";
+		}
+		$lisa_varastot = substr($lisa_varastot,0,-1); // vika pilkku pois	
+		
+		$lisa_varastot .= ")";
+    }
 
 	echo "<table><tr><td class='back' valign='top'>";
-	echo "<table><tr><th>Varasto</th><td>$vrow[nimitys]</td></tr>";
 	echo "<tr><th>H‰lytysrajan laskenta</th><td>$tarve pv tarve</td></tr>";
 
 	$lisaa  = ""; // tuote-rajauksia
@@ -156,10 +179,18 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	if ($poistuva != '') {
 		$lisaa .= " and tuote.status != 'X' ";
 	}
+	
 	if ($tuoteno != '') {
 		echo "<tr><th>".t("Tuoteno")."</th><td>$tuoteno</td></tr>";
 		$lisaa .= " and tuote.tuoteno = '$tuoteno' ";
 	}
+	//usea tuote
+	if (isset($tuoteno_array)) {
+		echo "<tr><th>".t("Tuoteno")."</th><td>$tuoteno</td></tr>";
+		$lisaa .= " and tuote.tuoteno in ($muutparametrit) ";
+	}
+	
+	
 	if ($eihinnastoon != '') {
 		$lisaa .= " and tuote.hinnastoon != 'E' ";
 	}
@@ -199,6 +230,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	$erorow = mysql_fetch_array($result);
 
 	// t‰ss‰ on itse query
+		
 	$query = "	select
 				tuote.tuoteno,
 				tuote.nimitys,
@@ -210,6 +242,8 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				varastopaikat.alkuhyllynro,
 				varastopaikat.loppuhyllyalue,
 				varastopaikat.loppuhyllynro,
+				varastopaikat.tunnus,
+				varastopaikat.nimitys varastonnimi,
 				tuotepaikat.tilausmaara,
 				tuotepaikat.halytysraja,
 				tuotepaikat.tunnus paikkatunnus
@@ -220,14 +254,15 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
 				and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
 				and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-				and varastopaikat.tunnus = '$varasto')
+				$lisa_varastot)
 				WHERE
 				tuote.yhtio = '$kukarow[yhtio]'
 				$lisaa
 				and tuote.ei_saldoa = ''
-				group by tuote.tuoteno
-				ORDER BY tuote.tuoteno";
+				group by tuote.tuoteno, varastopaikat.tunnus
+				ORDER BY tuote.tuoteno, varastopaikat.tunnus";			
 	$res = mysql_query($query) or pupe_error($query);
+	
 
 	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
 		<input type='hidden' name='tee' value='paivita'>";
@@ -236,16 +271,15 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 	echo "<tr>";
 	echo "<th>".t("Tuoteno")."</th>";
+	echo "<th>".t("Varasto")."</th>";
 	echo "<th>".t("Nimitys")."</th>";
 	echo "<th>".t("S")."</th>";
 	if ($abcpaalla == "kylla") {
 		echo "<th>".t("Abc")."</th>";
 	}
 	echo "<th>".t("Puute")."</th>";
-	echo "<th>".t("Kok.Saldo")."</th>";
-	echo "<th>".t("Kok.Myynti")."</th>";
-	echo "<th>".t("Var.Saldo")."</th>";
-	echo "<th>".t("Var.Myynti")."</th>";
+	echo "<th>".t("Kok.Saldo")."<br>".t("Var.Saldo")."</th>";
+	echo "<th>".t("Kok.Myynti")."<br>".t("Var.Myynti")."</th>";
 	echo "<th>".t("H‰lytysraja")."</th>";
 	echo "<th>".t("Tilausm‰‰r‰")."</th>";
 	echo "<th>".t("H‰lyehdotus")."</th>";
@@ -262,6 +296,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 		echo "<tr>";
 		echo "<td>$row[tuoteno]</td>";
+		echo "<td>$row[varastonnimi]</td>";
 		echo "<td>".asana('nimitys_',$row['tuoteno'],$row['nimitys'])."</td>";
 		echo "<td>$row[status]</td>";
 
@@ -304,16 +339,16 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
 		// saldo myyt‰vissa kaikki varastot
 		list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI");
-		echo "<td align='right'>".sprintf("%.2f",$saldo)."</td>";
-
-		echo "<td align='right'><a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[kpl1]</a></td>";
-
+		echo "<td align='right'>".sprintf("%.2f",$saldo)."<br>";
+		
 		// saldo myyt‰vissa t‰m‰ varasto
-		list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $varasto);
-		echo "<td align='right'>".sprintf("%.2f",$saldo)."</td>";
+		list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $row[tunnus]);
+		echo sprintf("%.2f",$saldo)."</td>";
+		
 
-		echo "<td align='right'><a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[varastonkpl1]</a></td>";
-
+		echo "<td align='right'><a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[kpl1]</a><br>";
+		echo "<a class='menu' onmouseout=\"popUp(event,'$row[paikkatunnus]')\" onmouseover=\"popUp(event,'$row[paikkatunnus]')\">$summarow[varastonkpl1]</a></td>";
+		
 		// t‰ss‰ lasketaan ehdotettava h‰lytysraja: lasketaan p‰iv‰n myynti ja kerrotaan haluituilla p‰ivill‰
 		$halyehdotus = ceil($summarow["varastonkpl1"] / $erorow["ero"] * $tarve);
 
@@ -331,29 +366,28 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		echo "</tr>\n";
 
 		// teh‰‰n popup divi myynneist‰
-		$divit .= "<div id='$row[paikkatunnus]' class='popup' style='width:750px;'>";
-		$divit .= "<table style='width:750px;'><tr>";
-		$divit .= "<th nowrap>".t("Kok.Myynti 1")."</th>";
-		$divit .= "<th nowrap>".t("Var.Myynti 1")."</th>";
-		$divit .= "<th nowrap>".t("Kok.Myynti 2")."</th>";
-		$divit .= "<th nowrap>".t("Var.Myynti 2")."</th>";
-		$divit .= "<th nowrap>".t("Kok.Myynti 3")."</th>";
-		$divit .= "<th nowrap>".t("Var.Myynti 3")."</th>";
-		$divit .= "<th nowrap>".t("Kok.Myynti 4")."</th>";
-		$divit .= "<th nowrap>".t("Var.Myynti 5")."</th>";
-		$divit .= "<th><a href='#' onclick=\"popUp(event,'$row[paikkatunnus]')\">X</a></th>";
-		$divit .= "</tr><tr>";
-		$divit .= "<td align='right'>$summarow[kpl1]</td>";
-		$divit .= "<td align='right'>$summarow[varastonkpl1]</td>";
-		$divit .= "<td align='right'>$summarow[kpl2]</td>";
-		$divit .= "<td align='right'>$summarow[varastonkpl2]</td>";
-		$divit .= "<td align='right'>$summarow[kpl3]</td>";
-		$divit .= "<td align='right'>$summarow[varastonkpl3]</td>";
-		$divit .= "<td align='right'>$summarow[kpl4]</td>";
-		$divit .= "<td align='right'>$summarow[varastonkpl4]</td>";
-		$divit .= "<td class='back'></td>";
-		$divit .= "</tr></table>";
-		$divit .= "</div>\n";
+		$divit .= "<div id='$row[paikkatunnus]' class='popup' style='width:250px;'>";
+		$divit .= "<table style='width:250px;'>";
+		$divit .= "<tr><th nowrap>".t("Kok.Myynti 1")."</th>";
+		$divit .= "<td align='right'>$summarow[kpl1]</td></tr>";
+		$divit .= "<tr><th nowrap>".t("Var.Myynti 1")."</th>";
+		$divit .= "<td align='right'>$summarow[varastonkpl1]</td></tr>";
+		$divit .= "<tr><th nowrap>".t("Kok.Myynti 2")."</th>";
+		$divit .= "<td align='right'>$summarow[kpl2]</td></tr>";
+		$divit .= "<tr><th nowrap>".t("Var.Myynti 2")."</th>";
+		$divit .= "<td align='right'>$summarow[varastonkpl2]</td></tr>";
+		$divit .= "<tr><th nowrap>".t("Kok.Myynti 3")."</th>";
+		$divit .= "<td align='right'>$summarow[kpl3]</td></tr>";
+		$divit .= "<tr><th nowrap>".t("Var.Myynti 3")."</th>";
+		$divit .= "<td align='right'>$summarow[varastonkpl3]</td></tr>";
+		$divit .= "<tr><th nowrap>".t("Kok.Myynti 4")."</th>";
+		$divit .= "<td align='right'>$summarow[kpl4]</td></tr>";
+		$divit .= "<tr><th nowrap>".t("Var.Myynti 4")."</th>";
+		$divit .= "<td align='right'>$summarow[varastonkpl4]</td></tr>";
+		$divit .= "<tr><th><a href='#' onclick=\"popUp(event,'$row[paikkatunnus]')\">X</a></th>";
+		$divit .= "<td class='back'></td></tr>";
+		$divit .= "</table>";
+		$divit .= "</div>\n";		
 
 	}
 
@@ -388,10 +422,11 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 	}
 	
 	echo "<tr><th>".t("Tuotenumero (haku)")."</th><td>$varaosavirhe";
-	if (isset($tuoteno) and trim($ulos) != '') {
-		echo $ulos;
-	} else {
-		echo "<input type='text' size='20' name='tuoteno' value='$tuoteno'>";
+	if (isset($tuoteno)  and trim($ulos) != '') {
+		echo $ulos;		
+	} 
+	else {
+		echo "<input type='text' size='20' name='tuoteno' value='$tuoteno'></td>";
 	}
 	
 	echo "</td></tr></table>";
@@ -405,15 +440,21 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 				ORDER BY nimitys";
 	$vtresult = mysql_query($query) or pupe_error($query);
 
-	echo "<tr><th>".t("K‰sitelt‰v‰ varasto")."</th>\n";
-	echo "<td><select name='varasto'>\n";
-
-	while ($vrow = mysql_fetch_array($vtresult)) {
+		
+	echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
+		. t('Saat kaikki varastot jos et valitse yht‰‰n')
+		. "</span></th>
+	    <td>";
+	
+	$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+	
+	while ($varow = mysql_fetch_array($vtresult)) {
 		$sel = '';
-		if ($varasto == $vrow["tunnus"]) {
-			$sel = "selected";
+		if (in_array($varow['tunnus'], $varastot)) {
+			$sel = 'checked';
 		}
-		echo "<option value='$vrow[tunnus]' $sel>$vrow[nimitys]</option>\n";
+
+		echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
 	}
 
 	echo "</select></td></tr>\n";

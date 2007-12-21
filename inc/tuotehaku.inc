@@ -1,5 +1,25 @@
 <?php
 
+	if (substr($tuoteno, -1) != '*' and $yhtiorow["automaattinen_tuotehaku"] != '') {
+		$query = "	SELECT *
+					FROM tuote
+					WHERE yhtio = '$hakyhtio' and tuoteno = '$tuoteno'";
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_num_rows($result) == 0) {
+			$query = "	SELECT *
+						FROM tuote
+						WHERE yhtio = '$hakyhtio' and tuoteno LIKE '$tuoteno%'";
+			$result = mysql_query($query) or pupe_error($query);
+			if (mysql_num_rows($result) != 1) {
+				$tuoteno = $tuoteno . "*";
+			} 
+			else {
+				$tuotenorow = mysql_fetch_array($result);
+				$tuoteno = $tuotenorow["tuoteno"];
+			}
+		}
+	}
+
  	// Nyt me selataan
 	if ((substr($tuoteno,0,1) == '*' or substr($tuoteno,-1) == '*') and trim(strlen($tuoteno)) > 2) {
 
@@ -181,7 +201,7 @@
  				///* Toimittajan tuotenumerospecial*///
 			if (substr($tuoteno,0,1) == '?') {
 
-				$query = "select * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and toim_tuoteno='".substr($tuoteno,1)."'";
+				$query = "SELECT * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and toim_tuoteno='".substr($tuoteno,1)."'";
 				$tresult = mysql_query($query) or pupe_error($query);
 
 				while ($toimirivi = mysql_fetch_array($tresult)) {

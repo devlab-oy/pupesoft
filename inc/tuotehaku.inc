@@ -1,16 +1,18 @@
 <?php
 
 
-	if (substr($tuoteno, -1) != '*' and $yhtiorow["automaattinen_tuotehaku"] != '') {
+	if (substr($tuoteno,0,1) != '*' and substr($tuoteno,-1) != '*' and $yhtiorow["automaattinen_tuotehaku"] != '') {
 		$query = "	SELECT *
 					FROM tuote
-					WHERE yhtio = '$hakyhtio' and tuoteno = '$tuoteno'";
+					WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
 		$result = mysql_query($query) or pupe_error($query);
+		
 		if (mysql_num_rows($result) == 0) {
 			$query = "	SELECT *
 						FROM tuote
-						WHERE yhtio = '$hakyhtio' and tuoteno LIKE '$tuoteno%'";
+						WHERE yhtio = '$kukarow[yhtio]' and tuoteno LIKE '$tuoteno%'";
 			$result = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($result) != 1) {
 				$tuoteno = $tuoteno . "*";
 			} 

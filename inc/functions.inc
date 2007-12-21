@@ -120,7 +120,12 @@ if (!function_exists("t")) {
 					$stringi = $sanakirjarow[$indeksi];
 				}
 				else {
-					$stringi = $sanakirjarow["fi"];
+					if ($indeksi == 'ru') {
+						$stringi = t("$stringi","EN");
+					}
+					else {
+						$stringi = $sanakirjarow["fi"];						
+					}
 				}
 
 				//P‰ivitet‰‰n aikaleima

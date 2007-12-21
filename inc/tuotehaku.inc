@@ -1,5 +1,6 @@
 <?php
 
+
 	if (substr($tuoteno, -1) != '*' and $yhtiorow["automaattinen_tuotehaku"] != '') {
 		$query = "	SELECT *
 					FROM tuote

@@ -1218,6 +1218,7 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "automaattinen_tuotehaku") {
+		
 		$ulos = "<td><select name='$nimi'>";
 		
 		$sel1="";

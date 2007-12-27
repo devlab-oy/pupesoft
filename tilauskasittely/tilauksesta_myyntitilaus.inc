@@ -375,9 +375,6 @@
 							$kysely = "	UPDATE tilausrivin_lisatiedot SET ";
 
 							for($i=0; $i < mysql_num_fields($monistares2)-1; $i++) { // Ei monisteta tunnusta
-
-								$fields .= ", ".mysql_field_name($monistares2,$i);
-
 								switch (mysql_field_name($monistares2,$i)) {
 									case 'yhtio':
 									case 'tilausrivitunnus':

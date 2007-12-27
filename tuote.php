@@ -557,10 +557,10 @@
 								// katotaan ennakkopoistot toimittavalta yritykseltä
 								$query = "	SELECT sum(varattu) varattu
 											from tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-											where yhtio='$krow[yhtio]' and
-											tyyppi='L' and
-											varattu>0 and
-											tuoteno='$tuoteno'
+											where yhtio	= '$krow[yhtio]' and
+											tyyppi		= 'L' and
+											varattu		> 0 and
+											tuoteno		= '$tuoteno'
 											and concat(rpad(upper('$krow[alkuhyllyalue]')  ,5,'0'),lpad(upper('$krow[alkuhyllynro]')  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
 											and concat(rpad(upper('$krow[loppuhyllyalue]') ,5,'0'),lpad(upper('$krow[loppuhyllynro]') ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))";
 								$krtre = mysql_query($query) or pupe_error($query);
@@ -569,9 +569,16 @@
 								// sitten katotaan ollaanko me jo varattu niitä JT rivejä toimittajalta
 								$query = "	SELECT sum(jt) varattu
 											from tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-											where yhtio='$kukarow[yhtio]' and tyyppi='L' and laskutettuaika='0000-00-00' and var='S'
-											and tuoteno='$tuoteno' and tilaajanrivinro='$superrow[liitostunnus]'
-											and hyllyalue = '$krow[hyllyalue]' and hyllynro = '$krow[hyllynro]' and hyllyvali = '$krow[hyllyvali]' and hyllytaso = '$krow[hyllytaso]'";
+											where yhtio			= '$kukarow[yhtio]' 
+											and tyyppi			= 'L' 
+											and laskutettuaika	= '0000-00-00' 
+											and var				= 'S'
+											and tuoteno			= '$tuoteno' 
+											and tilaajanrivinro	= '$superrow[liitostunnus]'
+											and hyllyalue 		= '$krow[hyllyalue]' 
+											and hyllynro 		= '$krow[hyllynro]' 
+											and hyllyvali 		= '$krow[hyllyvali]' 
+											and hyllytaso 		= '$krow[hyllytaso]'";
 								$krtre = mysql_query($query) or pupe_error($query);
 								$krtu2 = mysql_fetch_array($krtre);
 

@@ -269,8 +269,13 @@
 		if ($toim == "ENNAKKO") {
 			$kpl 		= $trow["varattu"];
 		}
-		else {
-			$kpl 		= $trow["jt"];
+		else {			
+			if ($yhtiorow["varaako_jt_saldoa"] == "") {
+				$kpl 	= $trow["jt"];
+			}
+			else {
+				$kpl 	= $trow["jt"]+$trow["varattu"];
+			}			
 		}
 
 		$ale 			= $trow["ale"];
@@ -499,6 +504,12 @@
 				break;
 		}
 
+		if ($yhtiorow["varaako_jt_saldoa"] != "") {
+			$lisavarattu = " + tilausrivi.varattu";
+		}
+		else {
+			$lisavarattu = "";
+		}
 
 		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika"))) {
 			//haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
@@ -509,17 +520,17 @@
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and lasku.tila='E' and lasku.alatila='A' $laskulisa)
 							JOIN tuote use index (tuoteno_index) ON (tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno $tuotelisa)
 							$toimittajalisa
-							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-							and tilausrivi.tyyppi = 'E'
-							and tilausrivi.laskutettuaika = '0000-00-00'
-							and tilausrivi.varattu > 0
+							WHERE tilausrivi.yhtio 			= '$kukarow[yhtio]'
+							and tilausrivi.tyyppi 			= 'E'
+							and tilausrivi.laskutettuaika 	= '0000-00-00'
+							and tilausrivi.varattu 			> 0
 							and ((tilausrivi.tunnus = tilausrivi.perheid and tilausrivi.perheid2 = 0) or (tilausrivi.tunnus = tilausrivi.perheid2) or (tilausrivi.perheid = 0 and tilausrivi.perheid2 = 0))
 							$tilausrivilisa
 							$order
 							$limit";
 			}
 			else {
-				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
+				$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro, lasku.ytunnus, tilausrivi.jt $lisavarattu jt, lasku.nimi, lasku.toim_nimi, lasku.viesti, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
 							lasku.tunnus ltunnus, tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, lasku.clearing, lasku.varasto, tuote.yksikko, tilausrivi.toimaika ttoimaika, lasku.toimaika ltoimaika, lasku.toimvko
 							FROM tilausrivi use index (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.osatoimitus = '' $laskulisa)
@@ -527,19 +538,18 @@
 							$toimittajalisa
 							WHERE tilausrivi.yhtio 	= '$kukarow[yhtio]'
 							and tilausrivi.tyyppi in ('L','G')
-							and tilausrivi.var 			= 'J'
-							and tilausrivi.keratty 		= ''
-							and tilausrivi.uusiotunnus 	= 0
-							and tilausrivi.varattu 		= 0
-							and tilausrivi.kpl 			= 0
-							and tilausrivi.jt 		   <> 0
+							and tilausrivi.var 				= 'J'
+							and tilausrivi.keratty 			= ''
+							and tilausrivi.uusiotunnus 		= 0
+							and tilausrivi.kpl 				= 0
+							and tilausrivi.jt $lisavarattu	> 0
 							and ((tilausrivi.tunnus=tilausrivi.perheid and tilausrivi.perheid2=0) or (tilausrivi.tunnus=tilausrivi.perheid2) or (tilausrivi.perheid=0 and tilausrivi.perheid2=0))
 							$tilausrivilisa
 							$order
 							$limit";
-			}
+			}			
 			$isaresult = mysql_query($query) or pupe_error($query);
-
+			
 			if (mysql_num_rows($isaresult) > 0) {
 
 				$jt_rivilaskuri = 1;
@@ -564,12 +574,12 @@
 							$query = "	SELECT *
 										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
 										JOIN lasku use index (primary) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus = '$sjtrow[tunnus]' and lasku.tila='O')
-										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-										and tilausrivi.otunnus = lasku.tunnus
-										and tilausrivi.tyyppi = 'O'
-										and tilausrivi.uusiotunnus = 0
-										and tilausrivi.varattu != 0
-										and tilausrivi.tuoteno = '$jtrow[tuoteno]'";
+										WHERE tilausrivi.yhtio 		= '$kukarow[yhtio]'
+										and tilausrivi.otunnus 		= lasku.tunnus
+										and tilausrivi.tyyppi 		= 'O'
+										and tilausrivi.uusiotunnus 	= 0
+										and tilausrivi.varattu 		!= 0
+										and tilausrivi.tuoteno 		= '$jtrow[tuoteno]'";
 							$sjtres = mysql_query($query) or pupe_error($query);
 
 							if (mysql_num_rows($sjtres) > 0) {
@@ -634,14 +644,14 @@
 							$lapsires = mysql_query($query) or pupe_error($query);
 						}
 						elseif ($jtrow["perheid"] > 0 or $jtrow["perheid2"] > 0) {
-							$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.jt, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
+							$query = "	SELECT tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.jt $lisavarattu jt, tilausrivi.tilkpl, tilausrivi.hinta, tilausrivi.ale,
 										tilausrivi.tunnus tunnus, tuote.ei_saldoa, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.otunnus, tuote.yksikko
 										FROM tilausrivi use index (yhtio_otunnus)
 										JOIN tuote use index (tuoteno_index) ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 										WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 										$otunlisa
 										$pklisa
-										and tilausrivi.jt > 0
+										and tilausrivi.jt $lisavarattu > 0
 										and tilausrivi.tunnus != '$jtrow[tunnus]'
 										ORDER BY tilausrivi.tunnus";
 							$lapsires = mysql_query($query) or pupe_error($query);
@@ -658,7 +668,7 @@
 
 								if ($perherow["ei_saldoa"] == "") {
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "", $vara, "", "", "", "", "", $asiakasmaa);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
 
 										$lapsitoimittamatta -= $myytavissa;
 									}
@@ -681,7 +691,7 @@
 
 						if ($jtrow["ei_saldoa"] == "") {
 							foreach ($varastosta as $vara) {
-								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "", $vara, "", "", "", "", "", $asiakasmaa);
+								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
 								$kokonaismyytavissa += $myytavissa;
 							}
 
@@ -936,21 +946,20 @@
 								if ($toim == "ENNAKKO") {
 									$query = "	SELECT sum(varattu) jt, count(*) kpl
 												FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-												WHERE yhtio = '$kukarow[yhtio]'
-												and tyyppi = 'E'
-												and tuoteno = '$jtrow[tuoteno]'
-												and varattu > 0";
+												WHERE yhtio 	= '$kukarow[yhtio]'
+												and tyyppi 		= 'E'
+												and tuoteno 	= '$jtrow[tuoteno]'
+												and varattu 	> 0";
 								}
 								else {
-									$query = "	SELECT sum(jt) jt, count(*) kpl
+									$query = "	SELECT sum(jt $lisavarattu) jt, count(*) kpl
 												FROM tilausrivi use index(yhtio_tyyppi_var)
-												WHERE yhtio='$kukarow[yhtio]'
-												and tyyppi in ('L','G')
-												and tuoteno='$jtrow[tuoteno]'
-												and varattu=0
-												and jt<>0
-												and kpl=0
-												and var='J'";
+												WHERE yhtio			= '$kukarow[yhtio]'
+												and tyyppi 			in ('L','G')
+												and tuoteno			= '$jtrow[tuoteno]'
+												and jt $lisavarattu > 0
+												and kpl				= 0
+												and var				= 'J'";
 								}
 								$juresult = mysql_query($query) or pupe_error($query);
 								$jurow    = mysql_fetch_array ($juresult);
@@ -958,14 +967,18 @@
 								if (strtotime($jtrow['ttoimaika']) == strtotime($jtrow['ltoimaika'])) {
 									unset($toimvko);
 									unset($toimpva);
+									
 									if ($jtrow['toimvko'] > 0 and $jtrow['toimvko'] != 7) {
 										$toimvko = date("W", strtotime($jtrow['ltoimaika']));
 										$toimpva = date("N", strtotime($jtrow['ltoimaika']));
-									} else if ($jtrow['toimvko'] > 0 and $jtrow['toimvko'] == 7) {
+									} 
+									else if ($jtrow['toimvko'] > 0 and $jtrow['toimvko'] == 7) {
 										$toimvko = date("W", strtotime($jtrow['ltoimaika']));
 									}
+									
 									$toimaika = $jtrow['ltoimaika'];
-								} else {
+								} 
+								else {
 									unset($toimvko);
 									unset($toimpva);
 									$toimaika = $jtrow['ttoimaika'];
@@ -973,7 +986,6 @@
 
 								// Riittää kaikille
 								if (($kokonaismyytavissa >= $jurow["jt"] or $jtrow["ei_saldoa"] != "")  and $perheok==0) {
-
 									
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
 									if ($kukarow["extranet"] == "" and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
@@ -1044,14 +1056,17 @@
 									}
 									elseif($automaaginen == "") {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!</font><br>";
+										
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
-										} else if ($toimvko > 0 and isset($toimpva)) {
+										} 
+										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
-										} else {
+										} 
+										else {
 											echo tv1dateconv($toimaika);
 										}
 										echo "</td>";
@@ -1090,14 +1105,17 @@
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
 									if ($automaaginen == '') {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:orange;'>".t("Ei riitä koko riville")."!</font><br>";
+										
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
-										} else if ($toimvko > 0 and isset($toimpva)) {
+										} 
+										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
-										} else {
+										} 
+										else {
 											echo tv1dateconv($toimaika);
 										}
 										echo "</td>";
@@ -1113,16 +1131,19 @@
 								else {
 									if ($automaaginen == '') {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:red;'>".t("Riviä ei voida toimittaa")."!</font><br>";
-											if (!isset($toimpva) and $toimvko > 0) {
-												echo t("Viikko")." $toimvko";
-											} else if ($toimvko > 0 and isset($toimpva)) {
-												echo t("Viikko")." $toimvko";
-												if (isset($toimpva)) {
-													echo " ($DAY_ARRAY[$toimpva])";
-												}
-											} else {
-												echo tv1dateconv($toimaika);
+											
+										if (!isset($toimpva) and $toimvko > 0) {
+											echo t("Viikko")." $toimvko";
+										} 
+										else if ($toimvko > 0 and isset($toimpva)) {
+											echo t("Viikko")." $toimvko";
+											if (isset($toimpva)) {
+												echo " ($DAY_ARRAY[$toimpva])";
 											}
+										} 
+										else {
+											echo tv1dateconv($toimaika);
+										}
 										echo "</td>";
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
@@ -1193,7 +1214,7 @@
 									$kokonaismyytavissa = 0;
 
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "", $vara, "", "", "", "", "", $asiakasmaa);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
 
 										$kokonaismyytavissa += $myytavissa;
 									}
@@ -1238,14 +1259,17 @@
 									
 									if ($oikeurow['paivitys'] == '1') {
 										echo "<td valign='top' $class>$kokonaismyytavissa $perherow[yksikko]<br></font>";
+										
 										if (!isset($toimpva) and $toimvko > 0) {
 											echo t("Viikko")." $toimvko";
-										} else if ($toimvko > 0 and isset($toimpva)) {
+										} 
+										else if ($toimvko > 0 and isset($toimpva)) {
 											echo t("Viikko")." $toimvko";
 											if (isset($toimpva)) {
 												echo " ($DAY_ARRAY[$toimpva])";
 											}
-										} else {
+										} 
+										else {
 											echo tv1dateconv($toimaika);
 										}
 										echo "</td>";

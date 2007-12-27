@@ -7,13 +7,20 @@
 	$kerattavia 	= 0;
 	$ei_kerattavia 	= 0;
 	$tilaus_valmis_message = "";
+	
+	if ($yhtiorow["varaako_jt_saldoa"] != "") {
+		$lisavarattu = " + tilausrivi.varattu";
+	}
+	else {
+		$lisavarattu = "";
+	}
 
 	$query = "	SELECT count(*) riveja,
-				sum(if(var = 'P' and tilkpl > 0, 1, 0)) puutteet,
-				sum(if(var in ('J','S') and jt > 0, 1, 0)) jteet,
-				sum(if(varattu < 0, 1, 0)) hyvitykset,
-				sum(if((('$yhtiorow[kerataanko_saldottomat]' = '' and ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and varattu > 0, 1, 0)) normaalit_kerataan,
-				sum(if('$yhtiorow[kerataanko_saldottomat]' = '' and ei_saldoa != '' and varattu > 0, 1, 0)) saldottomat
+				sum(if(tilausrivi.var = 'P' and tilausrivi.tilkpl > 0, 1, 0)) puutteet,
+				sum(if(tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
+				sum(if(tilausrivi.var not in ('P','J','S') and tilausrivi.varattu < 0, 1, 0)) hyvitykset,
+				sum(if(tilausrivi.var not in ('P','J','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu > 0, 1, 0)) normaalit_kerataan,
+				sum(if(tilausrivi.var not in ('P','J','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu > 0, 1, 0)) saldottomat
 				FROM tilausrivi
 				LEFT JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'

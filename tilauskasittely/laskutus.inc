@@ -9,10 +9,12 @@ $tulos_ulos_laskutus = "";
 if ($poikkeava_pvm != '') {
 	//poikkeava
 	$laskutuspvm = $laskvv."-".$laskkk."-".$laskpp;
+	$laskutus_tapahtumapvm = $laskvv."-".$laskkk."-".$laskpp." 23:59:59";
 }
 else {
 	// today
 	$laskutuspvm = date("Y-n-j");
+	$laskutus_tapahtumapvm = date("Y-n-j H:i:s");
 }
 
 // Etsit‰‰n lasku
@@ -337,7 +339,7 @@ else {
 						selite     = '$orow[nimi] $orow[nimitark] ($apuhinta1) [$apuhinta2]',
 						laatija    = '$kukarow[kuka]',
 						rivitunnus = '$trow[tunnus]',
-						laadittu   = now()";
+						laadittu   = '$laskutus_tapahtumapvm'";
 			$updlaskutusres = mysql_query($query) or pupe_error($query);
 			
 			// Tilausrivin kate (alviton) 

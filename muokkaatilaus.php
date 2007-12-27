@@ -698,10 +698,9 @@
 			$miinus = 3;
 		}
 		elseif ($toim == "LASKUTUSKIELTO") {
-			$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, lasku.laatija,$toimaikalisa alatila, tila, lasku.tunnus
+			$query = "	SELECT lasku.tunnus tilaus, nimi asiakas, ytunnus, lasku.luontiaika, lasku.laatija, $toimaikalisa alatila, tila, lasku.tunnus
 						FROM lasku use index (tila_index)
-						JOIN maksuehto ON lasku.yhtio = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus and lasku.chn = '999'
-						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('N','L') and lasku.alatila != 'X'
+						WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('N','L') and lasku.alatila != 'X' and lasku.chn = '999'
 						$haku
 						order by lasku.luontiaika desc
 						$rajaus";
@@ -713,7 +712,7 @@
 		   				count(distinct lasku.tunnus) kpl
 		   				FROM lasku use index (tila_index)
 		   				JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-		   				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('N','L') and lasku.alatila != 'X'";
+		   				WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila in ('N','L') and lasku.alatila != 'X' and lasku.chn = '999'";
 		   $sumresult = mysql_query($sumquery) or pupe_error($sumquery);
 		   $sumrow = mysql_fetch_array($sumresult);
 

@@ -110,12 +110,12 @@
 
 		$query = "SELECT distinct(tapvm)
 				FROM tiliointi
-				WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and korjattu = ''";
+				WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and korjattu = '' and tapvm >= '$yhtiorow[tilikausi_alku]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {
-			echo "<br>".t("Tapvm");
-			echo "<select name = 'tiliointipvm'>";
+			echo " ".t("Tapvm");
+			echo ": <select name = 'tiliointipvm'>";
 
 			while ($tiliointirow=mysql_fetch_array($result)) {
 				$valittu = "";
@@ -123,13 +123,19 @@
 				if ($tiliointirow[0] == $tiliointipvm) $valittu = "selected";
 				if ($tiliointirow[0] == $laspvm) $pselite = t("Laskun pvm");
 				if ($tiliointirow[0] == $suopvm) $pselite = t("Suoritus pvm");
-				echo "<option value = '$tiliointirow[0]' $valittu>$tiliointirow[0] $pselite";
+				echo "<option value = '$tiliointirow[0]' $valittu>$tiliointirow[0] $pselite</option>";
 			}
 			echo "</select>";
 		}
 		else {
-			$tiliointirow=mysql_fetch_array($result);
-			echo "$tiliointirow[0]<input type='hidden' name='tiliointipvm' value ='$tiliointirow[0]'>";
+			$tiliointirow = mysql_fetch_array($result);
+			
+			// tapahtumapäivä on vanhalla tilikaudella, ei anneta lisätä kun tälle päivälle
+			if (strtotime($tiliointirow[0]) < strtotime($yhtiorow['tilikausi_alku'])) {
+				$tiliointirow[0] = date("Y-m-d");
+			}
+			
+			echo " ".t("Tapvm").": $tiliointirow[0]<input type='hidden' name='tiliointipvm' value ='$tiliointirow[0]'>";
 		}
 		echo "</td>
 			<td>$ulos</td>

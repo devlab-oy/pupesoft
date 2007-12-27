@@ -1281,8 +1281,7 @@
 						else {
 							$varattu 	= $kpl;
 							$jt 		= 0;
-						}
-																		
+						}																		
 						break;
 					case 'P' : // Puute
 						$varattu 	= 0;

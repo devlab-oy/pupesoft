@@ -319,6 +319,22 @@ if (!function_exists("saldo_myytavissa")) {
 		// Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
 
 		global $kukarow, $yhtiorow;
+		
+		
+		
+		//Speciaalitapaus jossa JT-rivit varaavat saldoa
+		if ($tyyppi == "JTSPEC") {
+			
+			if ($yhtiorow["varaako_jt_saldoa"] != "") {
+				$varaako_jt_saldoa = " and tilausrivi.var != 'J' ";
+			}
+			else {
+				$varaako_jt_saldoa = "";
+			}
+			
+			$tyyppi = "";
+		}
+		
 
 		$varasto = (int) $varasto;
 
@@ -512,6 +528,7 @@ if (!function_exists("saldo_myytavissa")) {
 									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
 									and tilausrivi.tuoteno = '$tuoteno'
 									and tilausrivi.varattu > 0
+									$varaako_jt_saldoa
 									and tilausrivi.hyllyalue = '$row[hyllyalue]'
 									and tilausrivi.hyllynro  = '$row[hyllynro]'
 									and tilausrivi.hyllyvali = '$row[hyllyvali]'
@@ -528,6 +545,7 @@ if (!function_exists("saldo_myytavissa")) {
 									and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
 									and tilausrivi.tuoteno = '$tuoteno'
 									and tilausrivi.varattu > 0
+									$varaako_jt_saldoa
 									and tilausrivi.hyllyalue = '$row[hyllyalue]'
 									and tilausrivi.hyllynro  = '$row[hyllynro]'
 									and tilausrivi.hyllyvali = '$row[hyllyvali]'
@@ -732,6 +750,7 @@ if (!function_exists("saldo_myytavissa")) {
 									tilausrivi.tyyppi in ('L','G','V') and
 									tilausrivi.tuoteno = '$tuoteno' and
 									tilausrivi.varattu > 0
+									$varaako_jt_saldoa
 									$kerayslisa ";
 						$ennresult = mysql_query($query) or die($query);
 						$ennrow = mysql_fetch_array($ennresult);

@@ -306,7 +306,6 @@
 						$result = mysql_query($query1) or pupe_error($query1);
 						$tilrivirow = mysql_fetch_array($result);
 
-
 						//Aloitellaan tilausrivi p‰ivitysquery‰
 						$query = "	UPDATE tilausrivi
 									SET yhtio=yhtio ";
@@ -359,19 +358,45 @@
 								$query .= "	, var			= ''
 											, jt			= 0
 											, varattu		= '".$maara[$apui]."'";
+								
+								if ($yhtiorow["varaako_jt_saldoa"] == "") {
+									$jtsek = $tilrivirow['jt'];
+								}
+								else {
+									$jtsek = $tilrivirow['jt']+$tilrivirow['varattu'];
+								}
 
 								// JT-riville tehd‰‰n osatoimitus ja loput j‰tet‰‰n j‰lkitoimitukseen
-								if($maara[$apui] < $tilrivirow['jt']) {
-									$rotunnus	= $tilrivirow['otunnus'];
-									$rtyyppi	= $tilrivirow['tyyppi'];
-									$rtilkpl 	= round($tilrivirow['jt']-$maara[$apui],2);
-									$rvarattu	= 0;
-									$rjt  		= round($tilrivirow['jt']-$maara[$apui],2);
-									$rvar		= $tilrivirow['var'];
-									$keratty	= "''";
-									$kerattyaik	= "''";
-									$rkomm 		= $tilrivirow["kommentti"];
+								if($maara[$apui] < $jtsek) {
+									$rotunnus		= $tilrivirow['otunnus'];
+									$rtyyppi		= $tilrivirow['tyyppi'];																		
+									$rtilkpl 		= round($jtsek-$maara[$apui],2);
+																		
+									if ($yhtiorow["varaako_jt_saldoa"] == "") {
+										$rvarattu	= 0;
+										$rjt  		= round($jtsek-$maara[$apui],2);
+									}
+									else {
+										$rvarattu	= round($jtsek-$maara[$apui],2);
+										$rjt  		= 0;
+									}
+									
+									$rvar			= $tilrivirow['var'];
+									$keratty		= "''";
+									$kerattyaik		= "''";
+									$rkomm 			= $tilrivirow["kommentti"];
 								}
+							}
+							elseif($tilrivirow["var"] == 'J' and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI") {
+								// Varastomiehell‰ on nyt oikeus nollata myˆs JT-rivi jos h‰n saa l‰hetetty‰ $poikkeama_kasittely[$apui] == "MI"
+								if ($keraysvirhe == 0) {
+									$query .= ", keratty = '$who',
+												 kerattyaika = now()";
+								}
+																
+								$query .= "	, var			= ''
+											, jt			= 0
+											, varattu		= 0";
 							}
 							elseif ($maara[$apui] >= 0 and $maara[$apui] < $tilrivirow['varattu'] and ($otsikkorivi['clearing'] == 'ENNAKKOTILAUS' or $otsikkorivi['clearing'] == 'JT-TILAUS')) {
 								// Jos t‰m‰ on toimitettava ennakkotilaus tai jt-tilaus
@@ -398,8 +423,16 @@
 									$rotunnus	= 0;
 									$rtyyppi	= "L";
 									$rtilkpl 	= round($tilrivirow['varattu']-$maara[$apui],2);
-									$rvarattu	= 0;
-									$rjt  		= round($tilrivirow['varattu']-$maara[$apui],2);
+									
+									if ($yhtiorow["varaako_jt_saldoa"] == "") {
+										$rvarattu	= 0;
+										$rjt  		= round($tilrivirow['varattu']-$maara[$apui],2);
+									}
+									else {
+										$rvarattu	= round($tilrivirow['varattu']-$maara[$apui],2);
+										$rjt  		= 0;
+									}
+
 									$rvar		= "J";
 									$keratty	= "''";
 									$kerattyaik	= "''";
@@ -457,7 +490,7 @@
 										$rvar		= $tilrivirow['var'];
 										$keratty	= "''";
 										$kerattyaik	= "''";
-										$rkomm 		= $tilrivirow['kommentti'];
+										$rkomm 		= $tilrivirow['kommentti'];										
 									}
 								}
 								else {
@@ -485,14 +518,21 @@
 										$rvar		= "";
 									}
 									else {
-										$rvarattu	= 0;
-										$rjt  		= $rtilkpl;
+										if ($yhtiorow["varaako_jt_saldoa"] == "") {
+											$rvarattu	= 0;
+											$rjt  		= $rtilkpl;
+										}
+										else {
+											$rvarattu	= $rtilkpl;
+											$rjt  		= 0;
+										}
+										
 										$rvar		= "J";
 									}
 
 									$keratty	= "''";
 									$kerattyaik	= "''";
-									$rkomm 		= $tilrivirow["kommentti"];
+									$rkomm 		= $tilrivirow["kommentti"];									
 								}
 								elseif($poikkeama_kasittely[$apui] == "MI") {
 									// Riville tehd‰‰n osatoimitus ja loput mit‰tˆid‰‰n
@@ -603,6 +643,7 @@
 											yksikko 	= '$tilrivirow[yksikko]',
 											kpl 		= '0',
 											tilkpl 		= '$rtilkpl',
+											jt	 		= '$rjt',
 											ale 		= '$tilrivirow[ale]',
 											alv 		= '$tilrivirow[alv]',
 											netto		= '$tilrivirow[netto]',
@@ -619,7 +660,7 @@
 											perheid2	= '$tilrivirow[perheid2]',
 											nimitys 	= '$tilrivirow[nimitys]',
 											jaksotettu	= '$tilrivirow[jaksotettu]'";
-								$riviresult = mysql_query($querys) or pupe_error($querys);
+								$riviresult = mysql_query($querys) or pupe_error($querys);								
 							}
 
 							//p‰ivitet‰‰n tuoteperheiden saldottomat j‰senet oikeisiin m‰‰riin (ne voi olla alkuper‰isell‰kin l‰hetteell‰ == vanhatunnus)
@@ -1358,14 +1399,14 @@
 
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
 		
-		//	 Summataan rivit yhteen
+		// Summataan rivit yhteen
 		if($yhtiorow[$sorttaus] == "S") {
-			$select_lisa = "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, group_concat(tilausrivi.tunnus) rivitunnukset, tilausrivi.tunnus, ";
-			$group_lisa = "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
+			$select_lisa	= "sum(tilausrivi.kpl) kpl, sum(tilausrivi.tilkpl) tilkpl, sum(tilausrivi.varattu) varattu, sum(tilausrivi.jt) jt, group_concat(tilausrivi.tunnus) rivitunnukset, tilausrivi.tunnus, ";
+			$group_lisa 	= "GROUP BY tilausrivi.tuoteno, tilausrivi.hyllyalue, tilausrivi.hyllyvali, tilausrivi.hyllyalue, tilausrivi.hyllynro";
 		}
 		else {
-			$select_lisa = "tilausrivi.varattu, tilausrivi.jt, tilausrivi.keratty, tilausrivi.tunnus, tilausrivi.var, tilausrivi.tilkpl,";
-			$group_lisa = "";			
+			$select_lisa 	= "tilausrivi.varattu, tilausrivi.jt, tilausrivi.keratty, tilausrivi.tunnus, tilausrivi.var, tilausrivi.tilkpl,";
+			$group_lisa 	= "";
 		}
 		
 		$sorttauskentta = generoi_sorttauskentta($yhtiorow[$sorttaus]);
@@ -1379,9 +1420,9 @@
 					tuote.ei_saldoa, tuote.sarjanumeroseuranta, tuote.tuoteno tuote,
 					$sorttauskentta
 					FROM tilausrivi, tuote
-					WHERE tuote.yhtio=tilausrivi.yhtio
-					and tuote.tuoteno=tilausrivi.tuoteno
-					and tilausrivi.var in ('', 'H' $var_lisa)
+					WHERE tuote.yhtio		= tilausrivi.yhtio
+					and tuote.tuoteno		= tilausrivi.tuoteno
+					and tilausrivi.var 		in ('', 'H' $var_lisa)
 					and otunnus in ($tilausnumeroita)
 					and tilausrivi.yhtio	= '$kukarow[yhtio]'
 					and tilausrivi.tyyppi	in ($tyyppi)
@@ -1438,7 +1479,13 @@
 				elseif ($row['var']=='J') {
 					// jos kyseess‰ on JT-rivi
 					$puute 			= t("**JT**");
-					$row['varattu']	= $row['jt'];
+					
+					if ($yhtiorow["varaako_jt_saldoa"] == "") {
+						$row['varattu']	= $row['jt'];
+					}
+					else {
+						$row['varattu']	= $row['jt']+$row['varattu'];
+					}					
 				}
 				elseif ($row['var']=='H') {
 					// jos kyseess‰ on v‰kisinhyv‰ksytty-rivi

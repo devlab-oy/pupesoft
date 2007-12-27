@@ -108,9 +108,12 @@
 
 		list($laspvm,$suopvm) = split(" ",$laskunpvm);
 
-		$query = "SELECT distinct(tapvm)
-				FROM tiliointi
-				WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and korjattu = '' and tapvm >= '$yhtiorow[tilikausi_alku]'";
+		// haetaan kaikki tiliöintien tapahtumapäivät plus unionilla tämä päivä mukaan
+		$query = "	(SELECT distinct(tapvm)
+					FROM tiliointi
+					WHERE yhtio = '$kukarow[yhtio]' and ltunnus = '$tunnus' and korjattu = '' and tapvm >= '$yhtiorow[tilikausi_alku]')
+					UNION
+					(SELECT CURDATE())";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result) > 1) {
@@ -123,6 +126,7 @@
 				if ($tiliointirow[0] == $tiliointipvm) $valittu = "selected";
 				if ($tiliointirow[0] == $laspvm) $pselite = t("Laskun pvm");
 				if ($tiliointirow[0] == $suopvm) $pselite = t("Suoritus pvm");
+				if ($tiliointirow[0] == date("Y-m-d")) $pselite = t("Tämä pvm");
 				echo "<option value = '$tiliointirow[0]' $valittu>$tiliointirow[0] $pselite</option>";
 			}
 			echo "</select>";

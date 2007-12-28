@@ -922,18 +922,31 @@
 
 					// jos kyseessä on "odottaa JT tuotteita rivi ja kyseessa on toim=JTTOIMITA"
 					if ($row["tila"] == "N" and $row["alatila"] == "U") {
-						$query = "select tuoteno, jt from tilausrivi where yhtio='$kukarow[yhtio]' and tyyppi='L' and otunnus='$row[tilaus]'";
+						
+						if ($yhtiorow["varaako_jt_saldoa"] != "") {
+							$lisavarattu = " + tilausrivi.varattu";
+						}
+						else {
+							$lisavarattu = "";
+						}
+						
+						$query = "	SELECT tilausrivi.tuoteno, tilausrivi.jt $lisavarattu jt 
+									from tilausrivi 
+									where tilausrivi.yhtio	= '$kukarow[yhtio]' 
+									and tilausrivi.tyyppi	= 'L' 
+									and tilausrivi.otunnus	= '$row[tilaus]'";
 						$countres = mysql_query($query) or pupe_error($query);
 
 						$jtok = 0;
+						
 						while($countrow = mysql_fetch_array($countres)) {
-							list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "", 0, "");
-							if($jtapu_myytavissa < $countrow["jt"]) {
+							list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "JTSPEC", 0, "");
+							
+							if ($jtapu_myytavissa < $countrow["jt"]) {
 								$jtok--;
 							}
 						}
 					}
-
 
 					echo "<tr class='aktiivi'>";
 

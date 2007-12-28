@@ -19,6 +19,46 @@ if (trim($argv[1])!='') {
 	$edi_tyyppi	= $argv[2];
 }
 
+if (!function_exists('jt_toimita')) {
+	function jt_toimita ($asiakasno, $asiakasid, $asiakasmaa) {
+		global $yhtiorow, $kukarow, $edi_ulos;
+		
+		$automaaginen 			= "automaaginen";
+		$tee 					= "JATKA";		
+		$oikeurow['paivitys'] 	= '1';
+		$toimittaja				= "";
+		$toimittajaid			= "";
+		$jarj	 				= "tuoteno";
+		$tuotenumero			= "";
+		$tilaus					= "";
+		$toimi					= "";
+		$superit				= "";
+		$tilaus_on_jo			= "KYLLA";
+		$from_varastoon_inc 	= "editilaus_in.inc";
+		
+		if ($asiakasmaa != '') {
+			$asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%$asiakasmaa%' or varastopaikat.sallitut_maat = '')";
+		}
+
+		$query = "	SELECT *
+					FROM varastopaikat
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tyyppi  = '' 
+					$asiakasmaalisa";
+		$vtresult = mysql_query($query) or pupe_error($query);
+		
+		$varastosta = array();
+
+		while ($vrow = mysql_fetch_array($vtresult)) {
+			$varastosta[$vrow["tunnus"]] = $vrow["tunnus"];
+		}
+
+		if ($asiakasid > 0 and count($varastosta) > 0) {
+			require('jtselaus.php');
+		}
+	}
+}
+
 // nollataan kaikki laskun muuttujat (n‰m‰ samat pit‰‰ tehd‰ whilen lopussa)
 unset($arow);
 $editilaus_tila       	= "N"; // laskun tila
@@ -71,7 +111,7 @@ if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus ep‰onnistui"
 //jotta filenimi ei varmasti katoaisi matkalla
 $mailfile = $filename;
 
-$toimpvm = date(Y)."-".date(n)."-".date(j);
+$toimpvm 	 = date("Y-n-j");
 $vastaustapa = "";
 
 if ($edi_tyyppi == "futursoft") {
@@ -810,12 +850,9 @@ while (!feof ($fd)) {
 
 					if ($yhtiorow['jt_automatiikka'] != '') {
 						//lis‰t‰‰n tilaukseen ne jt-rivit jotka riitt‰v‰t kaikille
-						require ("jtautomatiikka.inc");
-
 						$edi_ulos .= "\n";
-						$edi_ulos .= jtautomatiikka($arow["tunnus"], "EDI", $laskurow["tunnus"]);
+						jt_toimita($laskurow["ytunnus"], $laskurow["liitostunnus"], $laskurow["maa"]);
 						$edi_ulos .= "\n";
-
 					}
 
 					// katsotaan ollaanko tehty JT-supereita..

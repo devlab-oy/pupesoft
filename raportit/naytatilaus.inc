@@ -360,6 +360,13 @@
 	// katotaan miten halutaan sortattavan
 	$sorttauskentta = generoi_sorttauskentta($yhtiorow["tilauksen_jarjestys"]);
 	
+	if ($yhtiorow["varaako_jt_saldoa"] != "") {
+		$lisavarattu = " + tilausrivi.varattu";
+	}
+	else {
+		$lisavarattu = "";
+	}
+	
 	//Listataan tilauksessa olevat tuotteet
 	if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
 		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
@@ -379,7 +386,9 @@
 	}
 	else {
 		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", 
-					concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl, varattu+kpl kpl, jt,
+					concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl,
+					if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu+tilausrivi.kpl, 0) kpl,
+					if(tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0) jt,
 					hinta, ale, var V, netto N, 					
 					round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 					alv, kerattyaika, keratty keraaja, toimaika, tilausrivi.kommentti, tilausrivi.tunnus,

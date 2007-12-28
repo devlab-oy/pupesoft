@@ -251,8 +251,14 @@
 
 				$tuoteno	= $coprivirow['tuoteno'];
 
-				if ($coprivirow["var"] == "J" or $coprivirow["var"] == "S" or $coprivirow["var"] == "T" or $coprivirow["var"] == "U") {
-					$kpl	= $coprivirow['jt'];
+				if ($coprivirow["var"] == "J" or $coprivirow["var"] == "S" or $coprivirow["var"] == "T" or $coprivirow["var"] == "U") {					
+					if ($yhtiorow["varaako_jt_saldoa"] == "") {
+						$kpl = $coprivirow['jt'];
+					}
+					else {
+						$kpl = $coprivirow['jt']+$coprivirow['varattu'];
+					}
+					
 					$var	= "J";
 				}
 				elseif ($tilausrivi["var"] == "P") {

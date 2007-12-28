@@ -693,18 +693,15 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
 		function jt_toimita ($toimittaja, $toimittajaid, $varastosta, $jtrivit, $automaaginen, $tee) {
 			global $yhtiorow, $kukarow, $oikeurow;
 
-			$toimittaja		= "";
-			$toimittajaid	= "";
-			$asiakasno 		= "";
-			$asiakasid		= "";
-			$asiakasmaa 	= "";
-			$jarj	 		= "tuoteno";
-			$tuotenumero	= "";
-			$tilaus			= "";
-			$toimi			= "";
-			$superit		= "";
-			$tilaus_on_jo	= "";
-
+			$asiakasno 			= "";
+			$asiakasid			= "";
+			$asiakasmaa 		= "";
+			$jarj	 			= "tuoteno";
+			$tuotenumero		= "";
+			$tilaus				= "";
+			$toimi				= "";
+			$superit			= "";
+			$tilaus_on_jo		= "";
 			$vain_rivit 		= $jtrivit;
 			$from_varastoon_inc = "varastoon.inc";
 

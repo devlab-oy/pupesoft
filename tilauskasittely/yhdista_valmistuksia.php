@@ -200,10 +200,10 @@
 
 										//	P‰ivitet‰‰n ekan perheen tiedot
 										$query = "	UPDATE tilausrivi SET
-														kpl 		= '".round($srow[kpl], 2)."',
-														tilkpl		= '".round($srow[tilkpl], 2 )."',
-														varattu 	= '".round($srow[varattu], 2 )."',
-														jt 			= '".round($srow[jt], 2 )."',
+														kpl 		= '".round($srow['kpl'], 2)."',
+														tilkpl		= '".round($srow['tilkpl'], 2 )."',
+														varattu 	= '".round($srow['varattu'], 2 )."',
+														jt 			= '".round($srow['jt'], 2 )."',
 														kommentti 	= '$srow[kommentti]'
 													WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid = '$ekaperhe' and tuoteno = '$srow[tuoteno]'";
 										$updres = mysql_query($query) or pupe_error($query);

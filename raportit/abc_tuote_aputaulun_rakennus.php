@@ -268,7 +268,7 @@ if ($tee == 'YHTEENVETO') {
 
 		// ensimmäinen tulo
 		$query = "	SELECT ifnull(left(min(laadittu),10), 0) tulopvm
-					FROM tapahtuma USE INDEX (yhtio_tuote_laadittu) 
+					FROM tapahtuma USE INDEX (yhtio_laji_tuoteno) 
 					WHERE yhtio = '$kukarow[yhtio]' and 
 					tuoteno = '$row[tuoteno]' and 
 					laji = 'tulo'";
@@ -343,7 +343,7 @@ if ($tee == 'YHTEENVETO') {
 
 		// ensimmäinen tulo
 		$query = "	SELECT ifnull(left(min(laadittu),10), 0) tulopvm
-					FROM tapahtuma USE INDEX (yhtio_tuote_laadittu) 
+					FROM tapahtuma USE INDEX (yhtio_laji_tuoteno) 
 					WHERE yhtio = '$kukarow[yhtio]' and 
 					tuoteno = '$row[tuoteno]' and 
 					laji = 'tulo'";

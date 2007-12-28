@@ -12,11 +12,17 @@
 	//
 	// tulostetaan rahtikirja
 
-	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$postirow = mysql_fetch_array($tempr);
+	if ($phpnimi == "rahtikirja_custom.php") {
+		$postirow = $osoitelappurow;
+		$rakir_row = $osoitelappurow;
+	}
+	else {
+		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
+		$tempr = mysql_query($query) or pupe_error($query);
+		$postirow = mysql_fetch_array($tempr);
+	}
 
-	$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and ytunnus='$postirow[liitostunnus]'";
+	$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and ytunnus='$postirow[liitostunnus]'";
 	$tempr = mysql_query($query) or pupe_error($query);
 	$asiakasrow = mysql_fetch_array($tempr);
 

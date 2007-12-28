@@ -1,5 +1,9 @@
 <?php
 
+if ($phpnimi == "rahtikirja_custom.php") {
+	$rakir_row = $osoitelappurow;
+}
+
 $tulostusnimi = $rakir_row['toim_nimi']." ".$rakir_row['toim_nimitark'];
 
 // rahtikirjanumero on ensimmäisen tilauksen tilausnumero...

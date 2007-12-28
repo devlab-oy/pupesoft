@@ -24,10 +24,16 @@ if ($kollityht > 0) {
 	//	Näin se oli muuallakin onkai se sitten oikein?
 	$rahtikirjanro = $lotsikot[0];
 
-	//Tulostetaan standardi kolliosoitelappu
-	$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
-	$tempr = mysql_query($query) or pupe_error($query);
-	$laskurow = mysql_fetch_array($tempr);
+	if ($phpnimi == "rahtikirja_custom.php") {
+		$laskurow = $osoitelappurow;
+		$rakir_row = $osoitelappurow;
+	}
+	else {
+		//Tulostetaan standardi kolliosoitelappu
+		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
+		$tempr = mysql_query($query) or pupe_error($query);
+		$laskurow = mysql_fetch_array($tempr);
+	}
 
 	if (!function_exists('tarkiste')) {
 

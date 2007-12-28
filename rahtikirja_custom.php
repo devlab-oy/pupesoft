@@ -111,7 +111,57 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	$k = mysql_fetch_array($res);
 	
     $kirjoitin = $k['komento'];
-	include 'tilauskasittely/rahtikirja_pdf.inc';
+	$tulostuskpl = $oslappkpl;
+
+	$query = "	SELECT * FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND ytunnus='$ytunnus'";
+	$asres = mysql_query($query) or pupe_error($query);
+	$asiakasrow = mysql_fetch_array($asres);
+	
+	$osoitelappurow["tunnus"] = $otsikkonro;
+	
+	if ($tnimi != '') {
+		$osoitelappurow["toim_postino"] = $tpostino;
+		$osoitelappurow["toim_nimi"] = $tnimi;
+		$osoitelappurow["toim_nimitark"] = $tnimitark;
+		$osoitelappurow["toim_postitp"] = $tpostitp;
+		$osoitelappurow["toim_osoite"] = $tosoite;
+		$osoitelappurow["toim_maa"] = $asiakasrow["toim_maa"];
+	}
+	else if ($asiakasrow["toim_nimi"] != '') {
+		$osoitelappurow["toim_postino"] = $asiakasrow["toim_postino"];
+		$osoitelappurow["toim_nimi"] = $asiakasrow["toim_nimi"];
+		$osoitelappurow["toim_nimitark"] = $asiakasrow["toim_nimitark"];
+		$osoitelappurow["toim_postitp"] = $asiakasrow["toim_postitp"];
+		$osoitelappurow["toim_maa"] = $asiakasrow["toim_maa"];
+		$osoitelappurow["toim_osoite"] = $asiakasrow["toim_osoite"];
+	}
+	else {
+		$osoitelappurow["toim_postino"] = $asiakasrow["postino"];
+		$osoitelappurow["toim_nimi"] = $asiakasrow["nimi"];
+		$osoitelappurow["toim_nimitark"] = $asiakasrow["nimitark"];
+		$osoitelappurow["toim_postitp"] = $asiakasrow["postitp"];
+		$osoitelappurow["toim_maa"] = $asiakasrow["maa"];
+		$osoitelappurow["toim_osoite"] = $asiakasrow["osoite"];
+	}
+
+		$osoitelappurow["nimi"] = $asiakasrow["nimi"];
+		$osoitelappurow["nimitark"] = $asiakasrow["nimitark"];
+		$osoitelappurow["osoite"] = $asiakasrow["osoite"];
+		$osoitelappurow["postino"] = $asiakasrow["postino"];
+		$osoitelappurow["postitp"] = $asiakasrow["postitp"];
+		$osoitelappurow["viesti"] = "";
+		$osoitelappurow["liitostunnus"] = $asiakasrow["tunnus"];
+		$osoitelappurow["toimitustapa"] = $asiakasrow["toimitustapa"];
+		$osoitelappurow["maksuehto"] = $asiakasrow["maksuehto"];
+		$osoitelappurow["yhteyshenkilo"] = $kukarow["tunnus"];
+		$osoitelappurow["sisviesti1"] = $asiakasrow["sisviesti1"];
+
+	$query  = "SELECT * FROM toimitustapa WHERE yhtio='{$GLOBALS['kukarow']['yhtio']}' AND selite='$toimitustapa' ORDER BY jarjestys,selite";
+	$result = mysql_query($query) or pupe_error($query);
+	
+	$toitarow = mysql_fetch_array($result);
+
+	include "tilauskasittely/{$toitarow['rahtikirja']}";
 		
 	//haetaan osoitelapun tulostuskomento
 	$query  = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus='$valittu_oslapp_tulostin'";
@@ -121,38 +171,7 @@ if (isset($_POST['tee']) && $_POST['tee'] == 'Valmis') {
 	
 	// Tulostetaan osoitelappu
 	if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
-		$query = "	SELECT * FROM asiakas WHERE yhtio='$kukarow[yhtio]' AND ytunnus='$ytunnus'";
-		$asres = mysql_query($query) or pupe_error($query);
-		$asiakasrow = mysql_fetch_array($asres);
-		
-		$osoitelappurow["tunnus"] = $otsikkonro;
-		
-		if ($asiakasrow["toim_nimi"] != '') {
-			$osoitelappurow["toim_postino"] = $asiakasrow["toim_postino"];
-			$osoitelappurow["toim_nimi"] = $asiakasrow["toim_nimi"];
-			$osoitelappurow["toim_nimitark"] = $asiakasrow["toim_nimitark"];
-			$osoitelappurow["toim_postitp"] = $asiakasrow["toim_postitp"];
-			$osoitelappurow["toim_maa"] = $asiakasrow["toim_maa"];
-			$osoitelappurow["toim_osoite"] = $asiakasrow["toim_osoite"];
-		}
-		else {
-			$osoitelappurow["toim_postino"] = $asiakasrow["postino"];
-			$osoitelappurow["toim_nimi"] = $asiakasrow["nimi"];
-			$osoitelappurow["toim_nimitark"] = $asiakasrow["nimitark"];
-			$osoitelappurow["toim_postitp"] = $asiakasrow["postitp"];
-			$osoitelappurow["toim_maa"] = $asiakasrow["maa"];
-			$osoitelappurow["toim_osoite"] = $asiakasrow["osoite"];
-		}
-		
-		$osoitelappurow["viesti"] = "";
-		$osoitelappurow["liitostunnus"] = $asiakasrow["tunnus"];
-		$osoitelappurow["toimitustapa"] = $asiakasrow["toimitustapa"];
-		$osoitelappurow["maksuehto"] = $asiakasrow["maksuehto"];
-		$osoitelappurow["yhteyshenkilo"] = $kukarow["tunnus"];
-		$osoitelappurow["sisviesti1"] = $asiakasrow["sisviesti1"];
-		
-//		$tunnus = $osoitelappurow["tunnus"];
-		
+
 		if ($oslappkpl > 0) {
 			$oslapp .= " -#$oslappkpl ";
 		}
@@ -192,12 +211,32 @@ if ($asiakasid) {
 	}
 	
     echo "<form action='' method='post' name='rahtikirja'><table>";
-	echo "<tr><th align='left'>",t("Asiakas"),"</th><td>{$asiakasrow['nimi']} {$asiakasrow['nimitark']}<br>{$asiakasrow['osoite']}<br>{$asiakasrow['postino']} {$asiakasrow['postitp']}</td>";
+//	echo "<tr><th align='left'>",t("Asiakas"),"</th><td>{$asiakasrow['nimi']} {$asiakasrow['nimitark']}<br>{$asiakasrow['osoite']}<br>{$asiakasrow['postino']} {$asiakasrow['postitp']}</td>";
+
+	echo "<tr><td valign='top'>";
+//	echo "<table cellpadding='1' cellspacing='1'>";
+	echo "<tr>
+			<th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiakkaan tiedot").":</td></tr>";
+	echo "<tr>
+			<td valign='top'> ".t("Nimi").": </td>
+			<td><input type='text' name='tnimi' size='35' value='$asiakasrow[toim_nimi]'></td></tr>";
+	echo "<tr>
+			<td></td>
+			<td><input type='text' name='tnimitark' size='35' value='$asiakasrow[toim_nimitark]'></td></tr>";
+	echo "<tr>
+			<td valign='top'>".t("Osoite").": </td>
+			<td><input type='text' name='tosoite' size='35' value='$asiakasrow[toim_osoite]'></td></tr>";
+	echo "<tr>
+			<td valign='top'>".t("Postitp").": </td>
+			<td><input type='text' name='tpostino' size='10' value='$asiakasrow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$asiakasrow[toim_postitp]'></td></tr>";
+
+/*
 	echo "<th colspan='2'>",t("Toimitusosoite"),"</th><td>{$asiakasrow['toim_nimi']} {$asiakasrow['toim_nimitark']}<br />
 		{$asiakasrow['toim_osoite']}<br />
 		{$asiakasrow['toim_postino']} {$asiakasrow['toim_postitp']}
 		</td>
 	</tr>";
+*/
 ?>
 
 </tr>

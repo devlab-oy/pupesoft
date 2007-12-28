@@ -35,7 +35,10 @@
 		
 		// lähettäjän viite otetaan laskulta
 		$viitelah = $lotsikot[0];
-	} 
+	}
+	else if ($osoitelappurow["toim_nimi"] != '') {
+		$rakir_row = $osoitelappurow;
+	}
 	else {
 		$query = "	SELECT asiakas.*, rahtikirjat.merahti, rahtikirjat.rahtisopimus
 					FROM asiakas 

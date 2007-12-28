@@ -5,20 +5,24 @@
 // $kukarow[yhtio] jostain saadaan yhtio
 // $yhtiorow array josta saada lähettäjän tiedot
 
-
-//Tulostetaan standardi kolliosoitelappu
-$query = "	SELECT lasku.*, if(yhteyshenkilo.nimi!='',concat_ws(' / ', yhteyshenkilo.nimi,if(yhteyshenkilo.gsm!='',yhteyshenkilo.gsm,if(yhteyshenkilo.puh!='',yhteyshenkilo.puh,NULL))),'') yhteyshenkilo
-			FROM lasku
-			LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
-			LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
-			WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus'";
-$tempr = mysql_query($query) or pupe_error($query);
-$laskurow = mysql_fetch_array($tempr);
+if ($phpnimi != "rahtikirja_custom.php") {
+	//Tulostetaan standardi kolliosoitelappu
+	$query = "	SELECT lasku.*, if(yhteyshenkilo.nimi!='',concat_ws(' / ', yhteyshenkilo.nimi,if(yhteyshenkilo.gsm!='',yhteyshenkilo.gsm,if(yhteyshenkilo.puh!='',yhteyshenkilo.puh,NULL))),'') yhteyshenkilo
+				FROM lasku
+				LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
+				LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
+				WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tunnus='$tunnus'";
+	$tempr = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array($tempr);
+}
+else {
+	$laskurow = $osoitelappurow;
+}
 
 $prikomento = explode('-#', $oslapp);
 
 // haetaan printterin osoitetiedot
-$query = "select * from kirjoittimet where yhtio='$kukarow[yhtio]' and trim(komento) like concat(trim('$prikomento[0]'),'%') and nimi!=''";
+$query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' and trim(komento) like concat(trim('$prikomento[0]'),'%') and nimi!=''";
 $pres  = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($pres) > 0) {

@@ -834,7 +834,7 @@ if (!function_exists('rivi')) {
 			$row['varattu_viivakoodi'] = $kpl_rivilla;
 		}
 		else {	
-			if ($row["jt"] != 0) { // jälkitoimitus
+			if ($row["var"] == 'J') { // jälkitoimitus
 				$row['varattu'] = t("**JT**", $kieli);
 				$row['varattu_viivakoodi'] = 0;
 			}
@@ -912,7 +912,7 @@ if (!function_exists('rivi')) {
 		if(substr($lahetetyyppi, 0, 6) != "perhe_" or $piilotarivi == "") {
 			if (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete.inc") {
 				// tulosta_lahete.inc
-				if ($row["jt"] == 0 and $row["var"] != 'P') {
+				if ($row["var"] != 'J' and $row["var"] != 'P') {
 					$summa += $row['rivihinta'];
 				}
 				else {
@@ -923,7 +923,7 @@ if (!function_exists('rivi')) {
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_brutto.inc") {
 				// tulosta_lahete_brutto.inc
-				if ($row["jt"] == 0 and $row["var"] != 'P') {
+				if ($row["var"] != 'J' and $row["var"] != 'P') {
 					$summa += round($row['ovhhinta'] * $kpl_rivilla, 2);
 				}
 				else {
@@ -934,7 +934,7 @@ if (!function_exists('rivi')) {
 			}
 			elseif (str_replace("perhe_", "", $lahetetyyppi) == "tulosta_lahete_eialeja.inc") {
 				//tulosta_lahete_eialeja.inc
-				if ($row["jt"] == 0 and $row["var"] != 'P') {
+				if ($row["var"] != 'J' and $row["var"] != 'P') {
 					$summa += $row['brutto_rivihinta'];
 				}
 				else {

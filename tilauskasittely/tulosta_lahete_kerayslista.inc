@@ -747,7 +747,7 @@ if (!function_exists('rivi')) {
 				$pdf->draw_text(575-$oikpos, $kala, $row['varattu']+$row['kpl'], 	$thispage, $norm);
 			}
 			else {
-				if ($row["jt"] != 0) { // jälkitoimitus
+				if ($row["var"] == 'J') { // jälkitoimitus
 					$oikpos = $pdf->strlen(t("**JT**", $kieli), $norm);
 					$pdf->draw_text(575-$oikpos, $kala, t("**JT**", $kieli), 	$thispage, $norm);
 				}

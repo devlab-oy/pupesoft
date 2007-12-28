@@ -549,10 +549,10 @@
 							$limit";
 			}			
 			$isaresult = mysql_query($query) or pupe_error($query);
-			
+									
 			if (mysql_num_rows($isaresult) > 0) {
 
-				$jt_rivilaskuri = 1;
+				$jt_rivilaskuri = 0;
 
 				while ($jtrow = mysql_fetch_array($isaresult)) {
 
@@ -721,7 +721,7 @@
 						if ($kokonaismyytavissa > 0 or $toimi == '' or $paikatlask > 0) {
 
 							//Tulostetaan otsikot
-							if ($automaaginen == '' and $jt_rivilaskuri == 1) {
+							if ($automaaginen == '' and $jt_rivilaskuri == 0) {
 								echo "<table>";
 								echo "<tr>";
 								echo "<th>#</th>";
@@ -989,8 +989,14 @@
 									
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
 									if ($kukarow["extranet"] == "" and ($automaaginen == 'automaaginen' or $automaaginen == 'tosi_automaaginen')) {
-										echo "<font class='message'>".t("Tuote")." $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
-
+										
+										if ($from_varastoon_inc == "editilaus_in.inc") {
+											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
+										}
+										else {
+											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
+										}																				
+										
 										// Pomitaan tämä rivi/perhe
 										$loput[$tunnukset] 	= "KAIKKI";
 										$kpl[$tunnukset] 	= 0;
@@ -999,22 +1005,27 @@
 										// Toimitetaan jtrivit
 										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta);
 										
+										$jt_rivilaskuri++;
 									}
 									else {
 										echo "<input type='hidden' name='jt_rivitunnus[]' value='$tunnukset'>";
 
 										if ($kukarow["extranet"] == "") {
 											echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:green;'>".t("Riittää kaikille")."!</font><br>";
+											
 											if (!isset($toimpva) and $toimvko > 0) {
 												echo t("Viikko")." $toimvko";
-											} else if ($toimvko > 0 and isset($toimpva)) {
+											} 
+											elseif ($toimvko > 0 and isset($toimpva)) {
 												echo t("Viikko")." $toimvko";
 												if (isset($toimpva)) {
 													echo " ($DAY_ARRAY[$toimpva])";
 												}
-											} else {
+											} 
+											else {
 												echo tv1dateconv($toimaika);
 											}
+											
 											echo "</td>";
 											echo "<td valign='top' align='center' $class>".t("K")."<input type='radio' name='loput[$tunnukset]' value='KAIKKI'></td>";
 											echo "<td valign='top' align='center' $class><input type='text' name='kpl[$tunnukset]' size='4'></td>";
@@ -1036,15 +1047,23 @@
 													<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
 
 										}
-									}
+										
+										$jt_rivilaskuri++;
+									}															
 								}
 								// Riittää tälle riville mutta ei kaikille
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa >= $jtrow["jt"] and $perheok==0) {
 									
 									// Jos haluttiin toimittaa tämä rivi automaagisesti
 									if ($kukarow["extranet"] == "" and $automaaginen == 'tosi_automaaginen') {
-										echo "<font class='message'>".t("Tuote")." $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
-
+										
+										if ($from_varastoon_inc == "editilaus_in.inc") {
+											$edi_ulos .= "\n".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!";
+										}
+										else {
+											echo "<font class='message'>".t("JT-rivi")." --> ".t("Tuoteno").": $jtrow[tuoteno] ".t("lisättiin tilaukseen")."!</font><br>";
+										}
+										
 										// Pomitaan tämä rivi/perhe
 										$loput[$tunnukset] 	= "KAIKKI";
 										$kpl[$tunnukset] 	= 0;
@@ -1053,6 +1072,7 @@
 										// Toimitetaan jtrivit
 										tee_jt_tilaus($tunnukset, $tunnusarray, $kpl, $loput, $suoratoimpaikka, $tilaus_on_jo, $varastosta);
 										
+										$jt_rivilaskuri++;										
 									}
 									elseif($automaaginen == "") {
 										echo "<td valign='top' $class>$kokonaismyytavissa $jtrow[yksikko]<br><font style='color:yellowgreen;'>".t("Ei riitä kaikille")."!</font><br>";
@@ -1076,6 +1096,8 @@
 												<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA'></td>
 												<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA'></td>
 												<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
+									
+										$jt_rivilaskuri++;
 									}
 								}
 								// Suoratoimitus
@@ -1100,6 +1122,8 @@
 									echo "<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA'></td>";
 									echo "<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA'></td>";
 									echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
+									
+									$jt_rivilaskuri++;
 								}
 								// Ei riitä koko riville
 								elseif ($kukarow["extranet"] == "" and $kokonaismyytavissa > 0 and $perheok==0) {
@@ -1125,6 +1149,8 @@
 												<td valign='top' align='center' $class>".t("P")."<input type='radio' name='loput[$tunnukset]' value='POISTA'></td>
 												<td valign='top' align='center' $class>".t("J")."<input type='radio' name='loput[$tunnukset]' value='JATA'></td>
 												<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>";
+												
+										$jt_rivilaskuri++;
 									}
 								}
 								// Riviä ei voida toimittaa
@@ -1159,6 +1185,8 @@
 													<td valign='top' align='center' $class>".t("Mitätöi")."<input type='radio' name='loput[$tunnukset]' value='MITA'></td>
 													<td valign='top' align='center' $classlisa>".t("Älä tee mitään")."<input type='radio' name='loput[$tunnukset]' value=''></td>";
 										}
+										
+										$jt_rivilaskuri++;
 									}
 								}
 								
@@ -1295,8 +1323,6 @@
 
 								unset($lapsires);
 							}
-
-							$jt_rivilaskuri++;
 						}
 					}
 				}
@@ -1311,12 +1337,22 @@
 					echo "</table>";
 					echo "<br>";
 				}
-				else {
-					echo t("Yhtään riviä ei löytynyt")."!<br>";
+				elseif ($jt_rivilaskuri == 0) {
+					if ($from_varastoon_inc == "editilaus_in.inc") {
+						$edi_ulos .= "\n".t("Yhtään JT-riviä ei löytynyt")."!";
+					}
+					else {
+						echo t("Yhtään JT-riviä ei löytynyt")."!<br>";
+					}										
 				}
 			}
 			else {
-				echo t("Yhtään riviä ei löytynyt")."!<br>";
+				if ($from_varastoon_inc == "editilaus_in.inc") {
+					$edi_ulos .= "\n".t("Yhtään JT-riviä ei löytynyt")."!";
+				}
+				else {
+					echo t("Yhtään JT-riviä ei löytynyt")."!<br>";
+				}
 			}
 			$tee = '';
 		}

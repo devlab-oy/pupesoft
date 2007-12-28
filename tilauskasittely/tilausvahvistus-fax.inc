@@ -31,17 +31,22 @@ else {
 
 	if (!$toot = fopen($tilvahvfilenimi, "w")) die(t("TILAUSVAHVISTUS: Tiedoston luonti epäonnistui")."!");
 
-	$query = "SELECT tilausrivi.tunnus, eankoodi, myyntihinta, aleryhma,
-					tilausrivi.tuoteno, varattu, toimaika, kommentti, tilkpl, tilausrivi.alv, tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, jt, var
-					FROM tilausrivi
-					LEFT JOIN tuote USING (yhtio, tuoteno)
-					WHERE otunnus = '$laskurow[tunnus]' and tilausrivi.yhtio='$kukarow[yhtio]'
-					ORDER BY tunnus";
+	$query = "	SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
+				if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0) varattu,
+				if(tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0) jt,
+				tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
+				tilausrivi.nimitys, tilausrivi.hinta, tilausrivi.ale, tilausrivi.kommentti, tilausrivi.var
+				FROM tilausrivi
+				LEFT JOIN tuote USING (yhtio, tuoteno)
+				WHERE tilausrivi.otunnus = '$laskurow[tunnus]'
+				and tilausrivi.yhtio	 = '$kukarow[yhtio]'
+				ORDER BY tilausrivi.tunnus";
 	$tilvahresult = mysql_query($query) or pupe_error($query);
 
 	$query = "	SELECT nimi, eposti
 				FROM kuka
-				WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[myyja]'";
+				WHERE yhtio = '$kukarow[yhtio]' 
+				and tunnus  = '$laskurow[myyja]'";
 	$kresult = mysql_query($query) or pupe_error($query);
 	$krow = mysql_fetch_array($kresult);
 

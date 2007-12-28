@@ -48,6 +48,9 @@ if (mysql_num_rows($uusiuresult) > 0) {
 	$kate				= round($sumrow["kate"], 2);
 	$bruttopaino		= round($sumrow["bruttopaino"], 2);
 
+	// generoidaan vientikurssi
+	$vienti_kurssi		= round($arvo/$arvo_valuutassa, 6);
+	
 	$viestit				= $sumrow["viestit"];
 	$comments				= $sumrow["comments"];
 	$sisviestit1			= $sumrow["sisviestit1"];
@@ -229,6 +232,7 @@ $query = "	INSERT into lasku SET
 			alv									= '$lasrow[alv]',
 			arvo								= '$arvo',
 			arvo_valuutassa						= '$arvo_valuutassa',
+			vienti_kurssi						= '$vienti_kurssi',
 			asiakkaan_tilausnumero				= '$asiakkaan_tilausnumero',
 			bruttopaino							= '$bruttopaino',
 			chn									= '$lasrow[chn]',

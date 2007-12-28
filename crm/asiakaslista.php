@@ -100,9 +100,7 @@
 			}
 			$liite .= "\r\n";
 		}
-		
-		
-		
+						
 		$bound = uniqid(time()."_") ;
 		
 		$header  = "From: <$yhtiorow[postittaja_email]>\r\n";
@@ -139,8 +137,8 @@
 		
 	}
 
-	echo "<li><a href='$PHP_SELF?tee=laheta&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&myyjanro=$asmyyja".$ulisa."'>".t("Lähetä viikkosuunnitelmapohja sähköpostiisi")."</a><br>";
-	echo "<li><a href='$PHP_SELF?tee=lahetalista&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&myyjanro=$asmyyja".$ulisa."'>".t("Lähetä asiakaslista sähköpostiisi")."</a><br>";
+	echo "<li><a href='$PHP_SELF?tee=laheta&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä viikkosuunnitelmapohja sähköpostiisi")."</a><br>";
+	echo "<li><a href='$PHP_SELF?tee=lahetalista&asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja".$ulisa."'>".t("Lähetä asiakaslista sähköpostiisi")."</a><br>";
 	
 	echo "<br><table>
 			<form action='$PHP_SELF' method='post'>
@@ -240,7 +238,7 @@
 	
 	
 	for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
-		echo "<th><a href='$PHP_SELF?asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
+		echo "<th><a href='$PHP_SELF?asos=$asos&asryhma=$asryhma&aspiiri=$aspiiri&konserni=$konserni&asmyyja=$asmyyja&ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
 
 		if 	(mysql_field_len($result,$i)>10) $size='20';
 		elseif	(mysql_field_len($result,$i)<5)  $size='5';

@@ -317,10 +317,7 @@ if (!function_exists("saldo_myytavissa")) {
 
 		// Tämä funktio palauttaa myytävissä olevan saldon sallituista varastoista (tyyppi='')
 		// Laskuttamattomia hyvityksiä ei katsota myytäviksi vaan ne pitää laskuttaa ennenkuin näkyvät täällä (varattu > 0)
-
 		global $kukarow, $yhtiorow;
-		
-		
 		
 		//Speciaalitapaus jossa JT-rivit varaavat saldoa
 		if ($tyyppi == "JTSPEC") {

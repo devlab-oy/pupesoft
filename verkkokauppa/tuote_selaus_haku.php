@@ -879,6 +879,7 @@
 					}
 					
 					$toimlisa = "";
+					
 					if((int)$myytavissa <= 0) {
 						//	Arvotaan milloin kamaa on tulossa.. copypaste tuote.php
 						$query = "	SELECT lasku.nimi, lasku.tunnus, (tilausrivi.varattu+tilausrivi.jt) kpl, tilausrivi.yksikko,
@@ -891,13 +892,13 @@
 									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 									and tilausrivi.tyyppi in ('O')
 									and tilausrivi.tuoteno = '$row[tuoteno]'
-									and tilausrivi.laadittu > '0000-00-00 00:00:00'
 									and tilausrivi.laskutettuaika = '0000-00-00'
-									and (tilausrivi.varattu != 0 or jt != 0)
+									and tilausrivi.varattu + tilausrivi.jt != 0
 									and tilausrivi.var not in ('P')
 									ORDER BY pvm
 									LIMIT 1";
 						$jtresult = mysql_query($query) or pupe_error($query);
+						
 						if(mysql_num_rows($jtresult)>0) {
 							$jtrow = mysql_fetch_array($jtresult);
 							$toimlisa = "<br><font class='info'>$jtrow[kpl]$jtrow[yksikko] $jtrow[pvm]</font>";
@@ -909,6 +910,7 @@
 										WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$row[tuoteno]' and toimitusaika>0
 										LIMIT 1";
 							$jtresult = mysql_query($query) or pupe_error($query);
+							
 							if(mysql_num_rows($jtresult)>0) {
 								$jtrow = mysql_fetch_array($jtresult);
 								$toimlisa = "<br><font class='info'>".t("toimitusaika: %s p‰iv‰‰", $kieli, $jtrow["toimitusaika"])."</font>";

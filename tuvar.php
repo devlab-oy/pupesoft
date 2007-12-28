@@ -293,9 +293,8 @@
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi = 'G'
 						and tilausrivi.tuoteno = '$tuoteno'
-						and tilausrivi.laadittu > '0000-00-00 00:00:00'
 						and tilausrivi.laskutettuaika = '0000-00-00'
-						and (tilausrivi.varattu != 0 or jt != 0)
+						and tilausrivi.varattu + tilausrivi.jt != 0
 						and tilausrivi.var not in ('P')
 						ORDER BY tyyppi, var";
 			$jtresult = mysql_query($query) or pupe_error($query);
@@ -320,45 +319,11 @@
 					$merkki = "";
 					$keikka = "";
 
-					if ($jtrow["tyyppi"] == "O") {
-						$tyyppi = t("Ostotilaus");
-						$merkki = "+";
-
-						$query = "	SELECT laskunro
-									FROM lasku
-									WHERE yhtio = '$kukarow[yhtio]'
-									and tunnus='$jtrow[uusiotunnus]'";
-						$keikkares = mysql_query($query) or pupe_error($query);
-
-						if (mysql_num_rows($keikkares) > 0) {
-							$keikkarow = mysql_fetch_array($keikkares);
-							$keikka = " / ".$keikkarow["laskunro"];
-						}
-					}
-					elseif($jtrow["tyyppi"] == "E") {
-						$tyyppi = t("Ennakkotilaus");
-						$merkki = "-";
-					}
-					elseif($jtrow["tyyppi"] == "G") {
+					if($jtrow["tyyppi"] == "G") {
 						$tyyppi = t("Varastosiirto");
 						$merkki = "-";
 					}
-					elseif($jtrow["tyyppi"] == "V") {
-						$tyyppi = t("Valmistus");
-						$merkki = "-";
-					}
-					elseif($jtrow["tyyppi"] == "L" and $jtrow["var"] == "J") {
-						$tyyppi = t("Jälkitoimitus");
-						$merkki = "-";
-					}
-					elseif(($jtrow["tyyppi"] == "L" or $jtrow["tyyppi"] == "N") and $jtrow["varattu"] > 0) {
-						$tyyppi = t("Myynti");
-						$merkki = "-";
-					}
-					elseif(($jtrow["tyyppi"] == "L" or $jtrow["tyyppi"] == "N") and $jtrow["varattu"] < 0) {
-						$tyyppi = t("Hyvitys");
-						$merkki = "+";
-					}
+					
 					echo "<tr>
 							<td>$jtrow[nimi]</td>
 							<td>$jtrow[otunnus] $keikka</td>";

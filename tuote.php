@@ -616,9 +616,8 @@
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tyyppi in ('L','E','O','G','V','W','M')
 						and tilausrivi.tuoteno = '$tuoteno'
-						and tilausrivi.laadittu > '0000-00-00 00:00:00'
 						and tilausrivi.laskutettuaika = '0000-00-00'
-						and (tilausrivi.varattu != 0 or jt != 0)
+						and tilausrivi.varattu + tilausrivi.jt != 0
 						and tilausrivi.var not in ('P')
 						ORDER BY pvm";
 			$jtresult = mysql_query($query) or pupe_error($query);

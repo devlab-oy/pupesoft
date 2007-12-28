@@ -18,6 +18,14 @@
 		// ABC luokkanimet
 		$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 		$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
+		
+		// Jos jt-rivit varaavat saldoa niin se vaikuttaa asioihin
+		if ($yhtiorow["varaako_jt_saldoa"] != "") {
+			$lisavarattu = " + tilausrivi.varattu";
+		}
+		else {
+			$lisavarattu = "";
+		}
 
 		// Tarvittavat p‰iv‰m‰‰r‰t
 		if (!isset($kka1)) $kka1 = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
@@ -509,20 +517,21 @@
 				echo "<font class='error'>".t("VIRHE: Ajat h‰lytysraportin varastopaikoittain, mutta et valinnut yht‰‰n varastoa.")."</font>";
 				exit;
 			}
-
+			
 			if ($abcrajaus != "") {
 				// katotaan JT:ss‰ olevat tuotteet
 				$query = "	SELECT group_concat(distinct concat(\"'\",tilausrivi.tuoteno,\"'\") separator ',')
 							FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
 							JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno $lisaa)
 							WHERE tilausrivi.$yhtiot
-							and tyyppi = 'L'
-							and var = 'J'
-							and jt > 0";
+							and tyyppi 	= 'L'
+							and var 	= 'J'
+							and jt $lisavarattu > 0";
 				$vtresult = mysql_query($query) or pupe_error($query);
 				$vrow = mysql_fetch_array($vtresult);
 
 				$jt_tuotteet = "''";
+				
 				if ($vrow[0] != "") {
 					$jt_tuotteet = $vrow[0];
 				}
@@ -884,18 +893,18 @@
 				$result   = mysql_query($query) or pupe_error($query);
 				$kulutrow = mysql_fetch_array($result);
 
-				//tilauksessa, ennakkopoistot ja jt	Huom! varastolisa m‰‰ritelty jo aiemmin! 
+				//tilauksessa, ennakkopoistot ja jt	Huom! varastolisa m‰‰ritelty jo aiemmin! 				
 				$query = "	SELECT
-							sum(if(tyyppi='O', varattu, 0)) tilattu,
-							sum(if(tyyppi='L' or tyyppi='V', varattu, 0)) ennpois,
-							sum(if(tyyppi='L' or tyyppi='G', jt, 0)) jt
+							sum(if(tilausrivi.tyyppi='O', tilausrivi.varattu, 0)) tilattu,
+							sum(if((tilausrivi.tyyppi='L' or tilausrivi.tyyppi='V') and tilausrivi.var not in ('P','J','S'), tilausrivi.varattu, 0)) ennpois,
+							sum(if((tilausrivi.tyyppi='L' or tilausrivi.tyyppi='G') and tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0)) jt
 							$varastolisa
 							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 							WHERE yhtio = '$row[yhtio]'
 		 					and tyyppi in ('L','V','O','G')
 							and tuoteno = '$row[tuoteno]'
 							and laskutettuaika = '0000-00-00'
-							and (varattu>0 or jt>0)";
+							and (varattu+jt > 0)";
 				$result = mysql_query($query) or pupe_error($query);
 				$ennp   = mysql_fetch_array($result);
 

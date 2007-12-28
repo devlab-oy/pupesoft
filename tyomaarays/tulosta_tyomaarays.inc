@@ -740,7 +740,7 @@ if (!function_exists('rivi')) {
 			$row['varattu'] = ($row['varattu']+$row['kpl'])." ".strtolower($row["yksikko"]);
 		}
 		else {	
-			if ($row["jt"] != 0) { // jälkitoimitus
+			if ($row["var"] == 'J') { // jälkitoimitus
 				$row['varattu'] = t("**JT**", $kieli);
 			}
 			elseif ($row["var"] == 'P') { // puute

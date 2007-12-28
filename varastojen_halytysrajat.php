@@ -259,8 +259,8 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				tuote.yhtio = '$kukarow[yhtio]'
 				$lisaa
 				and tuote.ei_saldoa = ''
-				group by tuote.tuoteno, varastopaikat.tunnus
-				ORDER BY tuote.tuoteno, varastopaikat.tunnus";			
+				group by tuote.tuoteno, varastopaikat.tunnus, tuotepaikat.tunnus
+				ORDER BY tuote.tuoteno, varastopaikat.tunnus, tuotepaikat.tunnus";			
 	$res = mysql_query($query) or pupe_error($query);
 	
 

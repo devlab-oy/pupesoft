@@ -31,7 +31,7 @@
 	
 	echo "</form></table>";
 
-	$query = "	SELECT messenger.tunnus, messenger.viesti, kuka.nimi 
+	$query = "	SELECT messenger.tunnus, messenger.viesti, kuka.nimi, messenger.luontiaika 
 				FROM messenger JOIN kuka ON (kuka.yhtio=messenger.yhtio AND kuka.kuka=messenger.kuka) 
 				WHERE messenger.yhtio='$kukarow[yhtio]' AND messenger.vastaanottaja='$kukarow[kuka]' LIMIT 20";
 	$result = mysql_query($query) or pupe_error($query);

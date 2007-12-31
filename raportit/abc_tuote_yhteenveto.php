@@ -121,7 +121,7 @@
 		if ($lisatiedot == "TARK") echo "<th nowrap>".t("Tuotteita")."<br>".t("KPL")."</th>";
 		echo "<th nowrap>".t("Varast").".<br>".t("arvo")."</th>";
 		echo "<th nowrap>".t("Varast").".<br>".t("kiert").".</th>";
-		echo "<th nowrap>".t("Kate")." x<br>".t("kiert").".</th>";
+		echo "<th nowrap>".t("Kate")."% x<br>".t("kiert").".</th>";
 		echo "<th nowrap>".t("Myydyt")."<br>".t("KPL")."</th>";
 		if ($lisatiedot == "TARK") echo "<th nowrap>".t("Myyerä")."<br>".t("KPL")."</th>";
 		if ($lisatiedot == "TARK") echo "<th nowrap>".t("Myyerä")."<br>$yhtiorow[valkoodi]</th>";
@@ -191,7 +191,7 @@
 					sum(kpl)/sum(rivia) 				myyntieranakpl,
 					sum(kate)/sum(summa)*100 			kateprosentti,
 					(sum(summa)-sum(kate))/sum(vararvo) kiertonopeus,
-					sum(kate) * ((sum(summa)-sum(kate))/sum(vararvo)) kate_kertaa_kierto,
+					(sum(kate)/sum(summa)*100) * ((sum(summa)-sum(kate))/sum(vararvo)) kate_kertaa_kierto,
 					sum(kate)/$sumrow[yhtkate] * 100	kateosuus,
 					100 - ((sum(puuterivia)/(sum(puuterivia)+sum(rivia))) * 100) palvelutaso,
 					sum(kate)-sum(kustannus_yht)		total
@@ -255,35 +255,36 @@
 		}
 
 		//yhteensärivi
-		if ($ryhmamyyntiyht != 0) $kateprosenttiyht = round ($ryhmakateyht / $ryhmamyyntiyht * 100,2);
+		if ($ryhmamyyntiyht != 0) $kateprosenttiyht = round($ryhmakateyht / $ryhmamyyntiyht * 100,2);	
 		else $kateprosenttiyht = 0;
 
-		if ($sumrow["yhtkate"] != 0) $kateosuusyht = round ($ryhmakateyht / $sumrow["yhtkate"] * 100,2);
+		if ($sumrow["yhtkate"] != 0) $kateosuusyht = round($ryhmakateyht / $sumrow["yhtkate"] * 100,2);
 		else $kateosuusyht = 0;
 
-		if ($ryhmanvarastonarvoyht != 0) {
-			$kiertonopeusyht 	= round (($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht,2);
-			$kate_kertaa_kierto = round($ryhmakateyht*(($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht),2);
-		}
-		else { 
-			$kiertonopeusyht 	= 0;
-			$kate_kertaa_kierto = 0;
-		}
+		if ($ryhmanvarastonarvoyht != 0) $kiertonopeusyht = round(($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht,2);
+		else $kiertonopeusyht = 0;
 
-		if ($rivilkmyht != 0)	$myyntieranarvoyht = round ($ryhmamyyntiyht / $rivilkmyht,2);
+		if ($rivilkmyht != 0) $myyntieranarvoyht = round($ryhmamyyntiyht / $rivilkmyht,2);
 		else $myyntieranarvoyht = 0;
 
-		if ($rivilkmyht != 0)	$myyntieranakplyht = round ($ryhmakplyht / $rivilkmyht,2);
+		if ($rivilkmyht != 0) $myyntieranakplyht = round($ryhmakplyht / $rivilkmyht,2);
 		else $myyntieranakplyht = 0;
 
-		if ($ryhmapuuterivityht + $rivilkmyht != 0)	$palvelutasoyht = round (100 - ($ryhmapuuterivityht / ($ryhmapuuterivityht + $rivilkmyht) * 100),2);
+		if ($ryhmapuuterivityht + $rivilkmyht != 0)	$palvelutasoyht = round(100 - ($ryhmapuuterivityht / ($ryhmapuuterivityht + $rivilkmyht) * 100),2);
 		else $palvelutasoyht = 0;
 
-		if ($ryhmaostotrivityht != 0)	$ostoeranarvoyht = round ($ryhmaostotyht / $ryhmaostotrivityht,2);
+		if ($ryhmaostotrivityht != 0) $ostoeranarvoyht = round($ryhmaostotyht / $ryhmaostotrivityht,2);
 		else $ostoeranarvoyht = 0;
 
-		if ($ryhmaostotrivityht != 0)	$ostoeranakplyht = round ($ryhmaostotkplyht / $ryhmaostotrivityht,2);
+		if ($ryhmaostotrivityht != 0) $ostoeranakplyht = round($ryhmaostotkplyht / $ryhmaostotrivityht,2);
 		else $ostoeranakplyht = 0;
+
+		if ($ryhmamyyntiyht != 0 and $ryhmanvarastonarvoyht != 0) { 
+			$kate_kertaa_kierto = round(($ryhmakateyht / $ryhmamyyntiyht * 100) * (($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht), 2);
+		}
+		else { 
+			$kate_kertaa_kierto = 0;
+		}
 
 		echo "<tr>";
 		echo "<td>".t("Yhteensä").":</td>";

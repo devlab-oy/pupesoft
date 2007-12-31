@@ -174,8 +174,7 @@
 		$sumrow["yhtkate"] = 0.01;
 	}
 	
-	//haetaan rivien arvot
-				
+	//haetaan rivien arvot	
 	$query = "	SELECT
 				abc_aputaulu.luokka,
 				abc_aputaulu.tuoteno,
@@ -190,7 +189,7 @@
 				abc_aputaulu.kate/$sumrow[yhtkate] * 100	kateosuus,
 				abc_aputaulu.vararvo,
 				abc_aputaulu.varaston_kiertonop,				
-				abc_aputaulu.kate * abc_aputaulu.varaston_kiertonop kate_kertaa_kierto,				
+				abc_aputaulu.katepros * abc_aputaulu.varaston_kiertonop kate_kertaa_kierto,				
 				abc_aputaulu.myyntierankpl,
 				abc_aputaulu.myyntieranarvo,
 				abc_aputaulu.rivia,
@@ -235,7 +234,7 @@
 	if ($lisatiedot == "TARK") echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=kateosuus&sort=desc$ulisa'>".t("Osuus")." %<br>".t("kat").".</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=vararvo&sort=desc$ulisa'>".t("Varast").".<br>".t("arvo")."</a></th>";
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=varaston_kiertonop&sort=desc$ulisa'>".t("Varast").".<br>".t("kiert").".</a></th>";	
-	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=kate_kertaa_kierto&sort=desc$ulisa'>".t("Kate")." x<br>".t("kiert").".</a></th>";	
+	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=kate_kertaa_kierto&sort=desc$ulisa'>".t("Kate")."% x<br>".t("kiert").".</a></th>";	
 	echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=kpl&sort=desc$ulisa'>".t("Myydyt")."<br>".t("KPL")."</a></th>";
 	if ($lisatiedot == "TARK") echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=myyntierankpl&sort=desc$ulisa'>".t("Myyerä")."<br>".t("KPL")."</a></th>";
 	if ($lisatiedot == "TARK") echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$luokka&try=$try&osasto=$osasto&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=myyntieranarvo&sort=desc$ulisa'>".t("Myyerä")."<br>$yhtiorow[valkoodi]</a></th>";
@@ -344,36 +343,36 @@
 		}
 
 		//yhteensärivi
-		if ($ryhmamyyntiyht != 0) $kateprosenttiyht = round ($ryhmakateyht / $ryhmamyyntiyht * 100,2);
+		if ($ryhmamyyntiyht != 0) $kateprosenttiyht = round($ryhmakateyht / $ryhmamyyntiyht * 100,2);	
 		else $kateprosenttiyht = 0;
 
-		if ($sumrow["yhtkate"] != 0) $kateosuusyht = round ($ryhmakateyht / $sumrow["yhtkate"] * 100,2);
+		if ($sumrow["yhtkate"] != 0) $kateosuusyht = round($ryhmakateyht / $sumrow["yhtkate"] * 100,2);
 		else $kateosuusyht = 0;
 
-		if ($ryhmanvarastonarvoyht != 0) {
-			$kiertonopeusyht 	= round (($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht,2);
-			$kate_kertaa_kierto = round($ryhmakateyht*(($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht),2);
-		}
-		else { 
-			$kiertonopeusyht 	= 0;
-			$kate_kertaa_kierto = 0;
-		}
+		if ($ryhmanvarastonarvoyht != 0) $kiertonopeusyht = round(($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht,2);
+		else $kiertonopeusyht = 0;
 
-		if ($rivilkmyht != 0)	$myyntieranarvoyht = round ($ryhmamyyntiyht / $rivilkmyht,2);
+		if ($rivilkmyht != 0) $myyntieranarvoyht = round($ryhmamyyntiyht / $rivilkmyht,2);
 		else $myyntieranarvoyht = 0;
 
-		if ($rivilkmyht != 0)	$myyntieranakplyht = round ($ryhmakplyht / $rivilkmyht,2);
+		if ($rivilkmyht != 0) $myyntieranakplyht = round($ryhmakplyht / $rivilkmyht,2);
 		else $myyntieranakplyht = 0;
 
-		if ($ryhmapuuterivityht + $rivilkmyht != 0)	$palvelutasoyht = round (100 - ($ryhmapuuterivityht / ($ryhmapuuterivityht + $rivilkmyht) * 100),2);
+		if ($ryhmapuuterivityht + $rivilkmyht != 0)	$palvelutasoyht = round(100 - ($ryhmapuuterivityht / ($ryhmapuuterivityht + $rivilkmyht) * 100),2);
 		else $palvelutasoyht = 0;
 
-		if ($ryhmaostotrivityht != 0)	$ostoeranarvoyht = round ($ryhmaostotyht / $ryhmaostotrivityht,2);
+		if ($ryhmaostotrivityht != 0) $ostoeranarvoyht = round($ryhmaostotyht / $ryhmaostotrivityht,2);
 		else $ostoeranarvoyht = 0;
 
-		if ($ryhmaostotrivityht != 0)	$ostoeranakplyht = round ($ryhmaostotkplyht / $ryhmaostotrivityht,2);
+		if ($ryhmaostotrivityht != 0) $ostoeranakplyht = round($ryhmaostotkplyht / $ryhmaostotrivityht,2);
 		else $ostoeranakplyht = 0;
 
+		if ($ryhmamyyntiyht != 0 and $ryhmanvarastonarvoyht != 0) { 
+			$kate_kertaa_kierto = round(($ryhmakateyht / $ryhmamyyntiyht * 100) * (($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht), 2);
+		}
+		else { 
+			$kate_kertaa_kierto = 0;
+		}
 		
 		echo "<tr>";
 		

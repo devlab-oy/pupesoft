@@ -14,7 +14,7 @@
 	echo "<input type='hidden' name='status' value='X'>";
 	echo "<tr><th>".t("Vastaanottaja").": <select name='vastaanottaja'>";
 
-	$query = "	SELECT nimi, kuka FROM kuka WHERE yhtio='allr' AND extranet='' ORDER BY nimi, kuka";
+	$query = "	SELECT nimi, kuka FROM kuka WHERE yhtio='$kukarow[yhtio]' AND extranet='' ORDER BY nimi, kuka";
 
 	$result = mysql_query($query) or pupe_error($query);
 	while ($userrow = mysql_fetch_array($result)) {

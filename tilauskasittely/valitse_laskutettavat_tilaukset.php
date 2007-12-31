@@ -212,6 +212,10 @@
 			$tilloppp = $tillop[2];
 			$tillopkk = $tillop[1]-1;
 			$tillopvv = $tillop[0];
+						
+			$tanaanpp = date("d");
+			$tanaankk = date("m")-1;
+			$tanaanvv = date("Y");
 
 			echo "	<SCRIPT LANGUAGE=JAVASCRIPT>
 
@@ -224,8 +228,12 @@
 							kk = Number(kk.value)-1;
 							vv = Number(vv.value);
 
-							if (vv == 0 && pp == 0 && kk == -1) {
-								var dateSyotetty = new Date();
+							if (vv == 0 && pp == 0 && kk == -1) {								
+								var tanaanpp = $tanaanpp;
+								var tanaankk = $tanaankk;
+								var tanaanvv = $tanaanvv;
+								
+								var dateSyotetty = new Date(tanaanvv, tanaankk, tanaanpp);
 							}
 							else {
 								if (vv > 0 && vv < 1000) {

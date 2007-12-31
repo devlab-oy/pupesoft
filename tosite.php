@@ -325,7 +325,6 @@
 						vv = vv+2000;
 					}
 
-
 					var dateSyotetty = new Date(vv,kk,pp);
 					var dateTallaHet = new Date();
 					var ero = (dateTallaHet.getTime() - dateSyotetty.getTime()) / 86400000;

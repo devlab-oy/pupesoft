@@ -385,11 +385,42 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			$hreffi = "http://www.pupesoft.com/trac/wiki/$kukarow[kieli]/".basename($phpnimi).$urltoim;
 
 			echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
+			
 		}
 		elseif($_GET["sulje"] != "") {
 			echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); divi.innerHTML=''; divi.style.display='none'; return false;\"><font style='color: red;'>x</font></a><br></div>";
 		}
-	}
-}
+		
+		if ($tee == "message_luettu") {
+			$query = "UPDATE messenger SET status='' WHERE yhtio='$kukarow[yhtio]' AND vastaanottaja='$kukarow[kuka]' AND tunnus='$message_tunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			exit;
+		}
 
+		// Messenger-viestit (X = ei luettu)
+		if (basename($phpnimi) != 'indexvas.php') {
+			$message_query = "	SELECT messenger.tunnus, messenger.viesti, kuka.nimi FROM messenger 
+								JOIN kuka ON (kuka.yhtio=messenger.yhtio AND kuka.kuka=messenger.kuka) 
+								WHERE messenger.yhtio='$kukarow[yhtio]' AND messenger.vastaanottaja='$kukarow[kuka]' and messenger.status='X'";
+			$message_result = mysql_query($message_query) or pupe_error($message_query);
+
+			if (mysql_num_rows($message_result) > 0 ) {
+
+				enable_ajax();
+
+				while ($message_row = mysql_fetch_array($message_result)) {
+
+					echo "<div id='$message_row[tunnus]'>";
+					echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'>";
+					echo "<font class='info'> {$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
+					echo "<b>{$message_row['viesti']}</b></font><br>";
+					echo "</div>";
+				}
+
+			}
+		}
+	}
+
+
+}
 ?>

@@ -293,13 +293,28 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_rectangle(mm_pt(150),mm_pt(138),mm_pt(150),mm_pt(143),						$firstpage, $rectparam);
 	$pdf->draw_rectangle(mm_pt(150),mm_pt(143),mm_pt(145),mm_pt(143),						$firstpage, $rectparam);
 
+	$query = "	SELECT * 
+				FROM toimitustapa
+				WHERE yhtio = '$kukarow[yhtio]' AND selite = '$laskurow[toimitustapa]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$toimitustaparow = mysql_fetch_array($result);
+
+	if (($toimitustaparow["tulostustapa"] == "K" or $toimitustaparow["tulostustapa"] == "L") and $toimitustaparow["toim_nimi"] != '') {
+		$laskurow["toim_nimi"] 			= $toimitustaparow["toim_nimi"];
+		$laskurow["toim_nimitark"] 		= $toimitustaparow["toim_nimitark"];
+		$laskurow["toim_osoite"] 		= $toimitustaparow["toim_osoite"];
+		$laskurow["toim_maa"] 			= $toimitustaparow["toim_maa"];
+		$laskurow["toim_postino"] 		= $toimitustaparow["toim_postino"];
+		$laskurow["toim_postitp"] 		= $toimitustaparow["toim_postitp"];
+	}
+
 	$pdf->draw_text(mm_pt(15),	mm_pt(145), "Minne - Till - To: " ,							$firstpage, $otsik);
 	$pdf->draw_text(mm_pt(15),	mm_pt(140), $laskurow['toim_nimi'],							$firstpage, $iso);
 	$pdf->draw_text(mm_pt(15),	mm_pt(133), $laskurow['toim_nimitark'],						$firstpage, $iso);
 	$pdf->draw_text(mm_pt(15),	mm_pt(126), $laskurow['toim_osoite'],						$firstpage, $iso);
 	$pdf->draw_text(mm_pt(15),	mm_pt(119), $laskurow['toim_maa']."-".$laskurow['toim_postino']." ".$laskurow['toim_postitp'],	$firstpage, $huge);
 	
-	$query = "	select *
+	$query = "	SELECT *
 				from asiakas
 				where yhtio = '$kukarow[yhtio]'
 				and tunnus  = '$laskurow[liitostunnus]'";

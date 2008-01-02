@@ -14,7 +14,7 @@
 		$query = "	SELECT lasku.myyja, kuka.nimi, month(tapvm) kk, sum(arvo) summa, sum(kate) kate
 					FROM lasku use index (yhtio_tila_tapvm)
 					LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja
-					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'U' and lasku.alatila = 'X' and tapvm >= '$vv-01-01' and tapvm < '$vvl-01-01'
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'L' and lasku.alatila = 'X' and tapvm >= '$vv-01-01' and tapvm < '$vvl-01-01'
 					GROUP BY myyja, nimi, kk
 					HAVING summa <> 0 or kate <> 0
 					ORDER BY myyja";

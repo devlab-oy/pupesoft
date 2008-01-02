@@ -338,7 +338,7 @@ while (!feof ($fd)) {
 							WHERE yhtio='$kukarow[yhtio]' and ovttunnus='$tieto'";
 				$result = mysql_query($query) or die($query);
 
-				if (mysql_num_rows($result) != 0) {
+				if (mysql_num_rows($result) == 1) {
 					$arow = mysql_fetch_array($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
 					$edi_ulos .= "$arow[nimi]\n";
@@ -350,13 +350,13 @@ while (!feof ($fd)) {
 							WHERE yhtio='$kukarow[yhtio]' and asiakasnro='$tieto'";
 				$result = mysql_query($query) or die($query);
 
-				if (mysql_num_rows($result) == 0) {
-					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
-				}
-				else {
+				if (mysql_num_rows($result) == 1) {
 					$arow = mysql_fetch_array($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
 					$edi_ulos .= "$arow[nimi]\n";
+				}
+				else {
+					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
 				}
 			}
 
@@ -400,13 +400,13 @@ while (!feof ($fd)) {
 							WHERE yhtio='$kukarow[yhtio]' and asiakasnro='$tieto'";
 				$result = mysql_query($query) or die($query);
 
-				if (mysql_num_rows($result) == 0) {
-					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
-				}
-				else {
+				if (mysql_num_rows($result) == 1) {
 					$arow = mysql_fetch_array($result);
 					$vastaustapa .= $arow['tilausvahvistus'];
 					$edi_ulos .= "$arow[nimi]\n";
+				}
+				else {
+					$edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
 				}
 
 			}

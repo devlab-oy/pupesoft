@@ -208,7 +208,7 @@
 						(SELECT alkuperamaa FROM tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.alkuperamaa!='' LIMIT 1) alkuperamaa,
 						if(sum(tilausrivi.rivihinta)>0,sum(tilausrivi.rivihinta),0.01) rivihinta
 						FROM tilausrivi use index (uusiotunnus_index)
-						JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno and tuote.ei_saldoa = ''
+						JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
 						LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
 						WHERE tilausrivi.uusiotunnus 	= '$laskurow[tunnus]'
 						and tilausrivi.yhtio			= '$kukarow[yhtio]'
@@ -218,7 +218,7 @@
 
 			if (mysql_num_rows($cresult) == 0) {
 				///* Tarkistetaan, että tilausrivejä löytyy*///
-				echo "Laskunumero: $laskurow[laskunro], ".t("Vitunmoinen virhe! Tilausrivejä ei löytynyt laskulle tai laskun summa oli nolla")."<br>";
+				echo "Laskunumero: $laskurow[laskunro], ".t("Virhe! Laskulla ei ole yhtään tilausriviä tai laskun summa oli nolla")."!<br>";
 			}
 			else {
 

@@ -34,7 +34,10 @@
 
 	echo "<td><select name='osasto2'>";
 	echo "<option value=''>".t("Osasto")."</option>";
-
+	
+	if ($osasto == "KAIKKI") $sel = "selected";
+	echo "<option value='KAIKKI' $sel>".t("Osastoittain")."</option>";
+ 
 	while ($srow = mysql_fetch_array($sresult)) {
 		if ($osasto == $srow[0]) $sel = "selected";
 		else $sel = "";
@@ -57,6 +60,9 @@
 
 	echo "<td><select name='try2'>";
 	echo "<option value=''>".t("Tuoteryhmä")."</option>";
+	
+	if ($try == "KAIKKI") $sel = "selected";
+	echo "<option value='KAIKKI' $sel>".t("Tuoteryhmittäin")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
 		if ($try == $srow[0]) $sel = "selected";
@@ -79,6 +85,9 @@
 
 	echo "<td><select name='tuotemerkki2'>";
 	echo "<option value=''>".t("Tuotemerkki")."</option>";
+	
+	if ($tuotemerkki == "KAIKKI") $sel = "selected";
+	echo "<option value='KAIKKI' $sel>".t("Tuotemerkeittäin")."</option>";
 
 	while ($srow = mysql_fetch_array($sresult)) {
 		if ($tuotemerkki == $srow[0]) $sel = "selected";
@@ -139,13 +148,13 @@
 
 		$osastolisa = $trylisa = $tuotemerkkilisa = "";
 
-		if ($osasto != '') {
+		if ($osasto != '' and $osasto != 'KAIKKI') {
 			$osastolisa = " and osasto='$osasto' ";
 		}
-		if ($try != '') {
+		if ($try != '' and $try != 'KAIKKI') {
 			$trylisa = " and try='$try' ";
 		}
-		if ($tuotemerkki != '') {
+		if ($tuotemerkki != '' and $tuotemerkki != 'KAIKKI') {
 			$tuotemerkkilisa = " and tuotemerkki='$tuotemerkki' ";
 		}
 
@@ -166,9 +175,26 @@
 			$sumrow["yhtkate"] = 0.01;
 		}
 
+
+		if ($osasto == 'KAIKKI') {
+			$prequery 	= " SELECT osasto,";
+			$postquery  = " GROUP BY osasto ORDER BY  $abcwhat desc";
+		}
+		elseif ($try == 'KAIKKI') {
+			$prequery 	= " SELECT try,";
+			$postquery = " GROUP BY try ORDER BY  $abcwhat desc";
+		}
+		elseif ($tuotemerkki == 'KAIKKI') {
+			$prequery 	= " SELECT tuotemerkki,";
+			$postquery = " GROUP BY tuotemerkki ORDER BY  $abcwhat desc";
+		}
+		else {
+			$prequery 	= " SELECT luokka,";
+			$postquery = " GROUP BY luokka ORDER BY luokka, $abcwhat desc";
+		}
+
 		//haetaan luokkien arvot
-		$query = "	SELECT
-					luokka,
+		$query = "	$prequery
 					count(tuoteno)						tuotelkm,
 					max(summa) 							max,
 					min(summa)	 						min,
@@ -201,8 +227,7 @@
 					$osastolisa
 					$trylisa
 					$tuotemerkkilisa
-					GROUP BY luokka
-					ORDER BY luokka, $abcwhat desc";
+					$postquery";
 		$res = mysql_query($query) or pupe_error($query);
 
 		$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
@@ -211,7 +236,35 @@
 		while ($row = mysql_fetch_array($res)) {
 			
 			echo "<tr>";
-			echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";			
+			
+			if ($osasto == 'KAIKKI') {
+				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
+							FROM avainsana
+							".avain('join','OSASTO_')."
+							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' and avainsana.selite='$row[osasto]'";
+				$keyres = mysql_query($query) or pupe_error($query);
+				$keyosa = mysql_fetch_array($keyres);
+				
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&lisatiedot=$lisatiedot'>$row[osasto] $keyosa[selitetark]</a></td>";
+			}
+			elseif ($try == 'KAIKKI') {
+				
+				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
+							FROM avainsana
+							".avain('join','TRY_')."
+							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' and avainsana.selite='$row[try]'";
+				$keyres = mysql_query($query) or pupe_error($query);
+				$keytry = mysql_fetch_array($keyres);
+				
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&try=$row[try]&lisatiedot=$lisatiedot'>$row[try] $keytry[selitetark]</a></td>";
+			}
+			elseif ($tuotemerkki == 'KAIKKI') {
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuotemerkki=$row[tuotemerkki]&lisatiedot=$lisatiedot'>$row[tuotemerkki]</a></td>";
+			}
+			else {
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";
+			}
+
 			echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
 			if ($lisatiedot == "TARK") echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["max"]))."</td>";
 			if ($lisatiedot == "TARK") echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["min"]))."</td>";

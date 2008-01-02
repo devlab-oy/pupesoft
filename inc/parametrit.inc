@@ -399,10 +399,19 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 		// Messenger-viestit (X = ei luettu)
 		if (basename($phpnimi) != 'indexvas.php') {
-			$message_query = "	SELECT messenger.tunnus, messenger.viesti, kuka.nimi, messenger.luontiaika 
+			$query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
+			$result = mysql_query($query) or pupe_error($query);
+			$konserni_yhtiot = "";
+
+			while ($row = mysql_fetch_array($result)) {
+				$konserni_yhtiot .= " '".$row["yhtio"]."' ,";
+			}
+			$konserni_yhtiot = " messenger.yhtio in (".substr($konserni_yhtiot, 0, -1).") ";
+			
+			$message_query = "	SELECT messenger.tunnus, messenger.viesti, kuka.nimi, messenger.luontiaika
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)
 								JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka) 
-								WHERE messenger.yhtio = '$kukarow[yhtio]' AND messenger.vastaanottaja = '$kukarow[kuka]' and messenger.status = 'X'";
+								WHERE $konserni_yhtiot AND messenger.vastaanottaja = '$kukarow[kuka]' AND extranet='' AND messenger.status = 'X'";
 			$message_result = mysql_query($message_query) or pupe_error($message_query);
 
 			if (mysql_num_rows($message_result) > 0) {

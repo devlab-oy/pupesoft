@@ -204,6 +204,7 @@
 								join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 								WHERE tilausrivi.otunnus = '$otunnus'
 								and tilausrivi.yhtio='$kukarow[yhtio]'
+								and tyyppi != 'D'
 								ORDER BY tilausrivi.toimaika, toim_tuoteno";
 					$grand_total=0;
 					$riresult = mysql_query($query) or pupe_error($query);

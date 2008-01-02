@@ -161,8 +161,23 @@
 		if ($lasktuote > 0) {
 			$iltasiivo .= "Poistettiin $lasktuote tuotteelta yhteensä $laskpois duplikaatti tuotteen_toimittajaa\n";
 		}
-
-
+		
+		// Korjataan rikkinäiset käyttöoikeudet (jos samassa sovelluksessa on duplikaatti linkkejä)
+		$query = "	SELECT kuka, sovellus, nimi, alanimi, group_concat(tunnus) tunnukset,  count(*) kpl 
+					FROM oikeu 
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kuka   != ''
+					group by 1,2,3,4
+					having kpl > 1";
+		$result = mysql_query($query) or pupe_error($query);
+		
+		while ($row = mysql_fetch_array($result)) {
+			$query = "DELETE FROM oikeu WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($row[tunnukset]) LIMIT ".($row["kpl"]-1);
+			$delresult = mysql_query($query) or pupe_error($query);
+			
+			$iltasiivo .= "Poistettiin käyttäjältä $row[kuka] duplikaatti käyttöoikeus: $row[sovellus] $row[nimi] $row[alanimi]\n";
+		}
+		
 		if ($iltasiivo != "") {
 			echo "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]\n\n";
 			echo $iltasiivo;

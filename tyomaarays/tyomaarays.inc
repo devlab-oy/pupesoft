@@ -1,13 +1,20 @@
 <?php
 
-	if (($tee ==  "VALMIS" or $tee == "LEPAA") and $toim != "REKLAMAATIO") {
+	if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 		//tulostetaan tilaus kun se on valmis
 		$otunnus = $kukarow["kesken"];
 
-		if (count($komento) == 0) {
-			echo "<font class='head'>Työmääräys:</font><hr>";
-			
+		if ($toim != "REKLAMAATIO") {
 			$tulostimet[0] = "Työmääräys";
+			require_once ("tulosta_tyomaarays.inc");
+		}
+		else {
+			$tulostimet[0] = "Keräyslista";
+			require_once ("tulosta_lahete_kerayslista.inc");
+		}
+
+		if (count($komento) == 0) {
+			echo "<font class='head'>$tulostimet[0]:</font><hr>";
 			require("../inc/valitse_tulostin.inc");
 		}
 		
@@ -18,8 +25,6 @@
 			$where = " otunnus='$laskurow[tunnus]' ";
 		}
 		
-		require_once ("tulosta_tyomaarays.inc");
-
 		$otunnus = $laskurow["tunnus"];
 		
 		//hatetaan asiakkaan tiedot
@@ -79,7 +84,7 @@
 		loppu($page[$sivu], 1);
 		
 		//tulostetaan sivu
-		print_pdf($komento["Työmääräys"]);
+		print_pdf($komento[$tulostimet[0]]);
 	}
 
 	if (($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and $tee == 'LEPAA') {

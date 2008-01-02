@@ -209,8 +209,7 @@
 	
 	echo "</select></td></tr>\n\n";
 					
-					
-	$query = "	SELECT distinct asiakas.myyjanro, kuka.kuka
+	$query = "	SELECT distinct asiakas.myyjanro, kuka.nimi
 				FROM asiakas
 				LEFT JOIN kuka ON kuka.yhtio = asiakas.yhtio and kuka.myyja=asiakas.myyjanro
 				WHERE asiakas.yhtio='$kukarow[yhtio]' and asiakas.myyjanro!=0  order by myyjanro";
@@ -225,7 +224,7 @@
 		if ($asmyyja == $asosrow["myyjanro"]) {
 			$sel2 = "selected";
 		}
-		echo "<option value='$asosrow[myyjanro]' $sel2>$asosrow[myyjanro] - $asosrow[kuka]</option>";
+		echo "<option value='$asosrow[myyjanro]' $sel2>$asosrow[myyjanro] - $asosrow[nimi]</option>";
 	}
 	
 	echo "</select></td></tr>\n\n";				

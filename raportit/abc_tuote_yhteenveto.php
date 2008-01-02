@@ -120,7 +120,27 @@
 		echo "<table>";
 
 		echo "<tr>";
-		echo "<th nowrap>".t("ABC")."<br>".t("Luokka")."</th>";
+		
+		if (strlen($order) > 0) {
+			$orderurl = $order.",";
+		}
+		
+		if ($osasto == 'KAIKKI') {
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=".$orderurl."osasto'>".t("Osasto")."</a><br>&nbsp;</th>";
+		}
+		
+		if ($try == 'KAIKKI') {
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=".$orderurl."try'>".t("Tuoteryhmä")."</a><br>&nbsp;</th>";
+		}
+		
+		if ($tuotemerkki == 'KAIKKI') {
+			echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot&order=".$orderurl."tuotemerkki'>".t("Tuotemerkki")."</a><br>&nbsp;</th>";
+		}
+		
+		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI')  {
+			echo "<th nowrap>".t("ABC")."<br>".t("Luokka")."</th>";			
+		}
+		
 		echo "<th nowrap>".t("Myynti")."<br>".t("tot")."</th>";
 		if ($lisatiedot == "TARK") echo "<th nowrap>".t("Myynti")."<br>".t("max")."</th>";
 		if ($lisatiedot == "TARK") echo "<th nowrap>".t("Myynti")."<br>".t("min")."</th>";
@@ -175,24 +195,39 @@
 			$sumrow["yhtkate"] = 0.01;
 		}
 
+		$prequery = " SELECT ";
+		$groupby  = " GROUP BY ";
+		$orderby  = " ORDER BY ";
 
 		if ($osasto == 'KAIKKI') {
-			$prequery 	= " SELECT osasto,";
-			$postquery  = " GROUP BY osasto ORDER BY  $abcwhat desc";
+			$prequery .= " osasto,";
+			$groupby  .= " osasto,";
 		}
-		elseif ($try == 'KAIKKI') {
-			$prequery 	= " SELECT try,";
-			$postquery = " GROUP BY try ORDER BY  $abcwhat desc";
+		
+		if ($try == 'KAIKKI') {
+			$prequery .= " try,";
+			$groupby  .= " try,";
 		}
-		elseif ($tuotemerkki == 'KAIKKI') {
-			$prequery 	= " SELECT tuotemerkki,";
-			$postquery = " GROUP BY tuotemerkki ORDER BY  $abcwhat desc";
+		
+		if ($tuotemerkki == 'KAIKKI') {
+			$prequery .= " tuotemerkki,";
+			$groupby  .= " tuotemerkki,";
+		}
+		
+		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI')  {
+			$prequery .= " luokka,";
+			$groupby  .= " luokka,";
+			$orderby  .= " luokka,";			
+		}
+		$groupby  = substr($groupby, 0, -1);
+		
+		if (strlen($order) > 0) {
+			$orderby  = " ORDER BY $order ";
 		}
 		else {
-			$prequery 	= " SELECT luokka,";
-			$postquery = " GROUP BY luokka ORDER BY luokka, $abcwhat desc";
+			$orderby .= " $abcwhat desc";
 		}
-
+		
 		//haetaan luokkien arvot
 		$query = "	$prequery
 					count(tuoteno)						tuotelkm,
@@ -227,9 +262,10 @@
 					$osastolisa
 					$trylisa
 					$tuotemerkkilisa
-					$postquery";
+					$groupby
+					$orderby";
 		$res = mysql_query($query) or pupe_error($query);
-
+				
 		$ryhmanimet   = array('A-30','B-20','C-15','D-15','E-10','F-05','G-03','H-02','I-00');
 		$ryhmaprossat = array(30.00,20.00,15.00,15.00,10.00,5.00,3.00,2.00,0.00);
 
@@ -247,7 +283,8 @@
 				
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&osasto=$row[osasto]&lisatiedot=$lisatiedot'>$row[osasto] $keyosa[selitetark]</a></td>";
 			}
-			elseif ($try == 'KAIKKI') {
+			
+			if ($try == 'KAIKKI') {
 				
 				$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 							FROM avainsana
@@ -258,11 +295,13 @@
 				
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&try=$row[try]&lisatiedot=$lisatiedot'>$row[try] $keytry[selitetark]</a></td>";
 			}
-			elseif ($tuotemerkki == 'KAIKKI') {
+			
+			if ($tuotemerkki == 'KAIKKI') {
 				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&tuotemerkki=$row[tuotemerkki]&lisatiedot=$lisatiedot'>$row[tuotemerkki]</a></td>";
 			}
-			else {
-				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";
+			
+			if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI')  {
+				echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&lisatiedot=$lisatiedot'>".$ryhmanimet[$row["luokka"]]."</a></td>";		
 			}
 
 			echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["summa"]))."</td>";
@@ -340,7 +379,26 @@
 		}
 
 		echo "<tr>";
-		echo "<td>".t("Yhteensä").":</td>";
+		
+		$colspan = 0;
+		
+		if ($osasto == 'KAIKKI') {
+			$colspan++;
+		}
+		
+		if ($try == 'KAIKKI') {
+			$colspan++;
+		}
+		
+		if ($tuotemerkki == 'KAIKKI') {
+			$colspan++;
+		}
+		
+		if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI')  {
+			$colspan++;
+		}
+		
+		echo "<td colspan='$colspan'>".t("Yhteensä").":</td>";
 		echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmamyyntiyht))."</td>";
 		if ($lisatiedot == "TARK") echo "<td align='right' class='spec' nowrap></td>";
 		if ($lisatiedot == "TARK") echo "<td align='right' class='spec' nowrap></td>";

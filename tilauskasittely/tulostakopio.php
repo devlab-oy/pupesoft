@@ -1454,6 +1454,7 @@
 							WHERE otunnus = '$laskurow[tunnus]'
 							and yhtio = '$kukarow[yhtio]'
 							and var in ('','H')
+							and tyyppi != 'D'
 							ORDER BY sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
 

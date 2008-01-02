@@ -924,12 +924,13 @@
 						// Luodaan tullausnumero jos sellainen tarvitaan
 						// Jos on esim puhtaasti hyvitystä niin ei generoida tullausnumeroa
 						if ($lasrow["vienti"] == 'K' and $lasrow["sisainen"] == "") {
-							$query = "	SELECT yhtio
+							$query = "	SELECT tilausrivi.yhtio
 										FROM tilausrivi
-										WHERE uusiotunnus = '$lasrow[tunnus]'
-										and kpl > 0
-										and yhtio = '$kukarow[yhtio]'
-										and tyyppi = 'L'";
+										JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
+										WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]'
+										and tilausrivi.kpl > 0
+										and tilausrivi.yhtio = '$kukarow[yhtio]'
+										and tilausrivi.tyyppi = 'L'";
 							$cresult = mysql_query($query) or pupe_error($query);
 
 							$hyvitys = "";
@@ -1792,7 +1793,7 @@
 			$tilloppp = $tillop[2];
 			$tillopkk = $tillop[1]-1;
 			$tillopvv = $tillop[0];
-			
+
 			$tanaanpp = date("d");
 			$tanaankk = date("m")-1;
 			$tanaanvv = date("Y");
@@ -1812,7 +1813,7 @@
 								var tanaanpp = $tanaanpp;
 								var tanaankk = $tanaankk;
 								var tanaanvv = $tanaanvv;
-								
+
 								var dateSyotetty = new Date(tanaanvv, tanaankk, tanaanpp);
 							}
 							else {

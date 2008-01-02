@@ -112,7 +112,7 @@
 		echo "<font class='head'>".t("Suorituksen kohdistaminen asiakkaaseen")."<hr></font>";
 
 		$query = "	SELECT suoritus.yhtio,
-					concat_ws('/',yriti.oletus_rahatili, yriti.nimi) tilino,
+					concat_ws(' ',yriti.oletus_rahatili, yriti.nimi) tilino,
 					tilino_maksaja,
 					nimi_maksaja,
 					viite,
@@ -120,7 +120,7 @@
 					suoritus.summa,
 					maksupvm,
 					kirjpvm,
-					concat_ws('/',tili.tilino, tili.nimi) vastatili,
+					concat_ws(' ',tili.tilino, tili.nimi) vastatili,
 					asiakas_tunnus,
 					tili.tilino ttilino,
 					yriti.oletus_selvittelytili
@@ -134,15 +134,12 @@
 		echo "<table>";
 		echo "<tr>";
 		echo "<th>".t("rahatili")." / ".t("vastatili")."</th>";
-		echo "<th>".t("tilino_maksaja")."</th>";
 		echo "<th>".t("nimi_maksaja")."</th>";
-		echo "<th>".t("viite")."</th>";
-		echo "<th>".t("viesti")."</th>";
 		echo "<th>".t("summa")."</th>";
 		echo "<th>".t("maksupvm")."</th>";
 		echo "<th>".t("kirjpvm")."</th>";
 		echo "</tr>";
-
+		
 		if (mysql_num_rows($result) > 0) {
 			$suoritus = mysql_fetch_array ($result);
 
@@ -154,14 +151,20 @@
 
 			echo "<tr>";
 			echo "<td>$suoritus[tilino]<br>$suoritus[vastatili]</td>";
-			echo "<td>$suoritus[tilino_maksaja]</td>";
-			echo "<td>$suoritus[nimi_maksaja]</td>";
-			echo "<td>$suoritus[viite]</td>";
-			echo "<td>$suoritus[viesti]</td>";
-			echo "<td>$suoritus[summa]</td>";
-			echo "<td>$suoritus[maksupvm]</td>";
-			echo "<td>$suoritus[kirjpvm]</td>";
-			echo "<td></td>";
+			echo "<td valign='top'>$suoritus[nimi_maksaja]</td>";
+			echo "<td valign='top'>$suoritus[summa]</td>";
+			echo "<td valign='top'>".tv1dateconv($suoritus["maksupvm"])."</td>";
+			echo "<td valign='top'>".tv1dateconv($suoritus["kirjpvm"])."</td>";
+			echo "</tr>";
+			
+			echo "<tr>";
+			echo "<th>".t("viite")."</th>";
+			echo "<th colspan='4'>".t("viesti")."</th>";
+			echo "</tr>";
+			
+			echo "<tr>";
+			echo "<td valign='top'>$suoritus[viite]</td>";
+			echo "<td valign='top' colspan='4'>$suoritus[viesti]</td>";
 			echo "</tr>";
 		}
 
@@ -206,7 +209,8 @@
 
 		echo "<th>".t("ytunnus")."	<br><input type='text' name = 'haku[ytunnus]' value = '$haku[ytunnus]' size='15'></th>";
 		echo "<th>".t("nimi")."		<br><input type='text' name = 'haku[nimi]'    value = '$haku[nimi]' size='15'></th>";
-		echo "<th>".t("postitp")."	<br><input type='text' name = 'haku[postitp]' value = '$haku[postitp]' size='15'></th>";
+		echo "<th>".t("postino")."	<br><input type='text' name = 'haku[postino]' value = '$haku[postino]' size='8'></th>";
+		echo "<th>".t("postitp")."	<br><input type='text' name = 'haku[postitp]' value = '$haku[postitp]' size='12'></th>";
 		echo "<th valign='top'>".t("avoimia")."<br>".t("laskuja")."</th>";
 		echo "<th valign='top'>".t("saamisettili")."</th>";
 		echo "<th valign='bottom'><input type='submit' value = '".t("Etsi")."'></th>";
@@ -222,9 +226,10 @@
 					<input type='hidden' name='tunnus' value='$tunnus'>";
 
 			echo "<tr>";
-			echo "<td>$trow[ytunnus]</td>";
-			echo "<td><a href='myyntilaskut_asiakasraportti.php?tila=tee_raportti&tunnus=$trow[tunnus]'>$trow[nimi]</a></td>";
-			echo "<td>$trow[postino] $trow[postitp]</td>";
+			echo "<td valign='top'>$trow[ytunnus]</td>";
+			echo "<td valign='top'><a href='myyntilaskut_asiakasraportti.php?tila=tee_raportti&tunnus=$trow[tunnus]'>$trow[nimi] $trow[nimitark]</a><br>$trow[toim_nimi] $trow[toim_nimitark]</td>";
+			echo "<td valign='top'>$trow[postino]<br>$trow[toim_postino]</td>";
+			echo "<td valign='top'>$trow[postitp]<br>$trow[toim_postitp]</td>";
 
 			// Onko asiakkaalla avoimia laskuja
 			$query = "	SELECT count(*) maara
@@ -236,7 +241,7 @@
 			$lresult = mysql_query($query) or pupe_error($query);
 			$lasku = mysql_fetch_array ($lresult);
 
-			echo "<td>$lasku[maara]</td>";
+			echo "<td valign='top'>$lasku[maara]</td>";
 
 			$sel1 = '';
 			$sel2 = '';
@@ -260,10 +265,9 @@
 				$sel5 = "selected";
 			}
 
-			echo "<td><select name='vastatili'>";
+			echo "<td valign='top'><select name='vastatili'>";
 			echo "<option value='$yhtiorow[myyntisaamiset]' $sel1>"		.t("Myyntisaamiset").		" ($yhtiorow[myyntisaamiset])</option>";
 			echo "<option value='$yhtiorow[factoringsaamiset]' $sel2>"	.t("Factoringsaamiset").	" ($yhtiorow[factoringsaamiset])</option>";
-//			echo "<option value='$yhtiorow[selvittelytili]' $sel3>"		.t("Selvittelytili").		" ($yhtiorow[selvittelytili])</option>";
 
 			if ($suoritus["oletus_selvittelytili"] != "") {
 				echo "<option value='$suoritus[oletus_selvittelytili]' $sel4>".t("Pankkitilin selvittelytili")." ($suoritus[oletus_selvittelytili])</option>";
@@ -273,7 +277,7 @@
 			}
 			echo "</select></td>";
 
-			echo "<td><input type='submit' value='".t("kohdista")."'></td>";
+			echo "<td valign='top'><input type='submit' value='".t("kohdista")."'></td>";
 			echo "</tr>";
 			echo "</form>";
 		}
@@ -332,28 +336,16 @@
 
 		echo "<br><font class='message'>".t("Valitse x kohdistaaksesi suorituksia asiakkaisiin tai")." <a href='$PHP_SELF?tila=suoritus_asiakaskohdistus_kaikki'>".t("t‰st‰")."</a> ".t("kaikki helpot").".</font><br><br>";
 
-		$tila 		= '';
-		$kentat 	= "nimi_maksaja, kirjpvm, suoritus.summa, suoritus.valkoodi, suoritus.tilino, viite, viesti, concat(asiakas.nimi, ' (', asiakas.ytunnus, ')') asiakas, tiliointi.tilino ttilino, suoritus.tunnus, asiakas_tunnus";
-	    $hakukentat = "nimi_maksaja, kirjpvm, suoritus.summa, suoritus.valkoodi, suoritus.tilino, viite, viesti, asiakas.nimi/asiakas.ytunnus, tiliointi.tilino, suoritus.tunnus, asiakas_tunnus";
-		$kentankoko = array(15,10,8,5,15,15,20,10,10);
-		$array 		= split(",", $hakukentat);
-		$count 		= count($array);
+		$tila = '';
 
-		for ($i=0; $i<=$count; $i++) {
-	    	if (strlen($haku[$i]) > 0) {
-
-				if (strpos($array[$i], "/") !== FALSE) {
-					list($a, $b) = explode("/", $array[$i]);
-
-					$lisa .= " and (".$a." like '%".$haku[$i]."%' or ".$b." like '%".$haku[$i]."%') ";
+		if (count($haku) > 0) {
+			foreach ($haku as $kentta => $arvo) {
+				if (strlen($arvo) > 0) {
+					$lisa  .= " and $kentta like '%$arvo%'";
+					$ulisa .= "&haku[$kentta]=$arvo";
 				}
-				else {
-					$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
-				}
-
-				$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
-	    	}
-	    }
+			}
+		}
 
 		if (strlen($ojarj) > 0) {
 			$jarjestys = $ojarj;
@@ -372,66 +364,84 @@
 
 		$maxrows = 500;
 		
-		$query = "	SELECT $kentat
+		$query = "	SELECT suoritus.nimi_maksaja, suoritus.kirjpvm, suoritus.summa, suoritus.valkoodi, 
+					suoritus.tilino, suoritus.viite, suoritus.viesti, suoritus.tunnus, suoritus.asiakas_tunnus,
+					asiakas.ytunnus,
+					asiakas.nimi, 
+					asiakas.nimitark,					
+					asiakas.osoite,
+					asiakas.postitp,
+					asiakas.toim_nimi, 
+					asiakas.toim_nimitark,
+					asiakas.toim_osoite,
+					asiakas.toim_postitp,	
+					tiliointi.tilino ttilino	
 					FROM suoritus
 					LEFT JOIN asiakas ON (asiakas.yhtio = suoritus.yhtio AND asiakas.tunnus = suoritus.asiakas_tunnus)
 					LEFT JOIN tiliointi ON (tiliointi.yhtio = suoritus.yhtio and tiliointi.tunnus = suoritus.ltunnus)
-					WHERE suoritus.yhtio = '$kukarow[yhtio]' AND kohdpvm = '0000-00-00'  $lisa
+					WHERE suoritus.yhtio = '$kukarow[yhtio]' 
+					AND suoritus.kohdpvm = '0000-00-00'  
+					$lisa
 				 	ORDER BY $jarjestys";
 		$result = mysql_query($query) or pupe_error($query);
 
         echo "<table><tr><th>x</th>";
-
-        for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
-			$sorti = $i + 1;
-        	echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=".$sorti.$ulisa."'>" . t(mysql_field_name($result,$i))."</a></th>";
-        }
-
+        echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=nimi_maksaja".$ulisa."'>".t("Maksaja")."<br>".t("Asiakas")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=kirjpvm".$ulisa."'>".t("Pvm")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=summa".$ulisa."'>".t("Summa")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=valkoodi".$ulisa."'>".t("Valuutta")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=tilino".$ulisa."'>".t("Tilino")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=viite".$ulisa."'>".t("Viite")."<br>".t("Viesti")."</a></th>";
+		echo "<th><a href='$PHP_SELF?tila=$tila&ojarj=ttilino".$ulisa."'>".t("Tili")."</a></th>";
 		echo "<th></th></tr>";
+		
 		echo "<tr><td></td>";
-
-		for ($i = 0; $i < mysql_num_fields($result)-3; $i++) {
-			echo "<td><input type='text' size='$kentankoko[$i]' name = 'haku[$i]' value = '$haku[$i]'></td>";
-		}
-
-		echo "<td></td>";
-		echo "<td><input type='submit' value='".t("Etsi")."'></td></tr>";
+		echo "<td valign='top'><input type='text' size='10' name='haku[nimi_maksaja]' value='$haku[nimi_maksaja]'><br><input type='text' size='10' name='haku[nimi]' value='$haku[nimi]'></td>";
+		echo "<td valign='top'><input type='text' size='10' name='haku[kirjpvm]' value='$haku[kirjpvm]'></td>";
+		echo "<td valign='top'><input type='text' size='5'  name='haku[summa]' value='$haku[summa]'></td>";
+		echo "<td valign='top'><input type='text' size='5'  name='haku[valkoodi]' value='$haku[valkoodi]'></td>";
+		echo "<td valign='top'><input type='text' size='5'  name='haku[tilino]' value='$haku[tilino]'></td>";
+		echo "<td valign='top'><input type='text' size='15' name='haku[viite]' value='$haku[viite]'><br><input type='text' size='15' name='haku[viesti]' value='$haku[viesti]'></td>";
+		echo "<td valign='top'><input type='text' size='5'  name='haku[ttilino]' value='$haku[$i]'></td>";
+		echo "<td valign='top'></td>";
+		echo "<td valign='top'><input type='submit' value='".t("Etsi")."'></td></tr>";
 		echo "</form>";
 
 		$row = 0;
+		
+		// scripti balloonien tekemiseen
+		js_popup();
 
-	    while ($maksurow=mysql_fetch_array ($result)) {
+	    while($maksurow = mysql_fetch_array ($result)) {
 
 			echo "<tr class='aktiivi'>";
 
-			for ($i=0; $i<mysql_num_fields($result)-2; $i++) {
-				switch ($i) {
-				case 0:
-					if ($maksurow["asiakas_tunnus"]!=0) {
-						echo "<td></td><td><a href='$PHP_SELF?tunnus=$maksurow[tunnus]&tila=tarkenna'>$maksurow[$i]</a></td>";
-					}
-					else {
-						echo "<td><a href='$PHP_SELF?tunnus=$maksurow[tunnus]&tila=tarkenna'>x</a></td><td>$maksurow[$i]</td>";
-					}
-					break;
-				case 3:
-	                echo "<td>";
-	                echo tilinumero_print($maksurow[$i]);
-	                echo "</td>";
-					break;
-				case 1:
-					//if ($maksurow["asiakas_tunnus"]!=0) {
-						//echo "<td><a href='../crm/asiakasmemo.php?ytunnus=$maksurow[asiakas_tunnus]'>$maksurow[$i]</a></td>";
-					//}
-					//else {
-						echo "<td>$maksurow[$i]</td>";
-					//}
-					break;
-			 	default:
-		    		echo "<td>$maksurow[$i]</td>";
-		    		break;
-		    	}
+			if ($maksurow["asiakas_tunnus"]!=0) {
+				echo "<td valign='top'></td><td><a href='$PHP_SELF?tunnus=$maksurow[tunnus]&tila=tarkenna'>$maksurow[nimi_maksaja]</a>";
 			}
+			else {
+				echo "<td valign='top'><a href='$PHP_SELF?tunnus=$maksurow[tunnus]&tila=tarkenna'>x</a></td><td>$maksurow[nimi_maksaja]";
+			}
+
+			echo "<div id='$maksurow[tunnus]' class='popup' style='width: 500px;'>
+					$maksurow[ytunnus]<br>
+					$maksurow[nimi] $maksurow[nimitark]<br>$maksurow[osoite] $maksurow[postitp]<br><br>
+					$maksurow[toim_nimi] $maksurow[toim_nimitark]<br>$maksurow[toim_osoite] $maksurow[toim_postitp]
+					</div>";
+
+			echo "<br><a onmouseout=\"popUp(event,'$maksurow[tunnus]')\" onmouseover=\"popUp(event,'$maksurow[tunnus]')\">$maksurow[ytunnus]</a> $maksurow[nimi] $maksurow[nimitark]</td>";
+
+			echo "<td valign='top'>".tv1dateconv($maksurow["kirjpvm"])."</td>";
+			
+			echo "<td valign='top' align='right'>$maksurow[summa]</td>";
+			echo "<td valign='top'>$maksurow[valkoodi]</td>";
+			
+			echo "<td valign='top'>".tilinumero_print($maksurow["tilino"])."</td>";
+
+			echo "<td valign='top'>$maksurow[viite]<br>$maksurow[viesti]</td>";
+			echo "<td valign='top'>$maksurow[ttilino]</td>";
+
+			
 
 			// tehd‰‰n nappi kuitin tulostukseen
 			echo "<form method='post' action='$PHP_SELF'>";
@@ -439,7 +449,7 @@
 			echo "<input type='hidden' name='asiakas_tunnus' value='$maksurow[asiakas_tunnus]'>";
 			echo "<input type='hidden' name='summa' value='$maksurow[summa]'>";
 			echo "<input type='hidden' name='selite' value='$maksurow[viesti]'>";
-			echo "<td><input type='submit' value='".t("Tulosta kuitti")."'></td></tr>";
+			echo "<td valign='top'><input type='submit' value='".t("Tulosta kuitti")."'></td></tr>";
 			echo "</form>";
 
 			$row++;

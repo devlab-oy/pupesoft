@@ -933,7 +933,7 @@ if ($tila == 'kohdistaminen') {
 
 	echo "<tr>";
 	echo "<td>$suoritus[nimi_maksaja]</td>";
-	echo "<td>$suoritus[summa]</td>";
+	echo "<td align='right'>$suoritus[summa]</td>";
 	echo "<td>$suoritus[valkoodi]</td>";
 	echo "<td>$suoritus[tieto]</td>";
 	echo "<td>$suoritus[tilino]</td>";
@@ -1106,11 +1106,18 @@ if ($tila == 'kohdistaminen') {
 			$errormessage = "<font class='message'>".t('V‰‰r‰ saamisettili')." ($suoritus_ttilino)</font>";
 		}
 
-		echo "<td>$maksurow[summa]</td>";
-		echo "<td>$maksurow[kasumma]</td>";
+		echo "<td align='right'>$maksurow[summa]</td>";
+		
+		if ($maksurow["kasumma"] != 0) {
+			echo "<td align='right'>$maksurow[kasumma]</td>";
+		}
+		else {
+			echo "<td align='right'></td>";
+		}
+		
 		echo "<td><a href='../muutosite.php?tee=E&tunnus=$maksurow[tunnus]'>$maksurow[laskunro]</a></td>";
-		echo "<td>$maksurow[erpcm]</td>";
-		echo "<td>$maksurow[kapvm]</td>";
+		echo "<td>".tv1dateconv($maksurow["erpcm"])."</td>";
+		echo "<td>".tv1dateconv($maksurow["kapvm"])."</td>";
 		echo "<td>$maksurow[viite]</td>";
 		echo "<td>$maksurow[ytunnus]</td>";
 		echo "<th></th>";
@@ -1305,7 +1312,7 @@ if ($tila == '') {
 	$query = "	SELECT distinct suoritus.tilino,
 				nimi,
 				yriti.valkoodi
-				FROM suoritus
+				FROM suoritus use index (yhtio_kohdpvm)
 				JOIN yriti ON (yriti.yhtio = suoritus.yhtio and yriti.tilino = suoritus.tilino)
 				WHERE suoritus.yhtio = '$kukarow[yhtio]'
 				AND kohdpvm = '0000-00-00'
@@ -1325,7 +1332,7 @@ if ($tila == '') {
 	echo "</select></td></tr>";
 
 	$query = "	SELECT distinct valkoodi
-				FROM suoritus
+				FROM suoritus use index (yhtio_kohdpvm)
 				WHERE yhtio = '$kukarow[yhtio]'
 				AND kohdpvm = '0000-00-00'
 				ORDER BY valkoodi";
@@ -1343,15 +1350,14 @@ if ($tila == '') {
 
 	echo "</select></td></tr>";
 
-	$query = "	SELECT distinct a.maa
-				FROM suoritus s, asiakas a
-				WHERE s.asiakas_tunnus <> 0
-				AND s.asiakas_tunnus = a.tunnus
-				AND s.yhtio ='$kukarow[yhtio]'
-				AND a.yhtio = s.yhtio
-				AND kohdpvm = '0000-00-00'
-				AND ltunnus != 0
-				ORDER BY a.maa";
+	$query = "	SELECT distinct asiakas.maa
+				FROM suoritus use index (yhtio_kohdpvm)
+				JOIN asiakas ON asiakas.yhtio=suoritus.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus
+				WHERE suoritus.asiakas_tunnus<>0
+				AND suoritus.yhtio = '$kukarow[yhtio]'
+				AND suoritus.kohdpvm = '0000-00-00'
+				AND suoritus.ltunnus != 0
+				ORDER BY asiakas.maa";
 	$vresult = mysql_query($query) or pupe_error($query);
 
 	echo "<tr><th>".t("N‰yt‰ vain suoritukset maasta")."</th>";
@@ -1371,34 +1377,45 @@ if ($tila == '') {
 	$lisa = "";
 
 	if ($tilino != "") {
-		$lisa .= " and s.tilino = '$tilino' ";
+		$lisa .= " and suoritus.tilino = '$tilino' ";
 	}
 
 	if ($valuutta != "") {
-		$lisa .= " and s.valkoodi = '$valuutta' ";
+		$lisa .= " and suoritus.valkoodi = '$valuutta' ";
 	}
 
 	if ($maa != "") {
-		$lisa .= " and a.maa = '$maa' ";
+		$lisa .= " and asiakas.maa = '$maa' ";
 	}
 
-	$query = "	SELECT s.asiakas_tunnus tunnus, group_concat(distinct a.nimi) nimi, group_concat(distinct a.ytunnus) ytunnus, COUNT(s.asiakas_tunnus) maara, sum(if(s.viite>0, 1,0)) viitteita
-				FROM suoritus s, asiakas a
-				WHERE s.asiakas_tunnus<>0
-				AND s.asiakas_tunnus=a.tunnus
-				AND s.yhtio ='$kukarow[yhtio]'
-				AND a.yhtio ='$kukarow[yhtio]'
-				AND kohdpvm='0000-00-00'
-				AND ltunnus!=0
+	$query = "	SELECT suoritus.asiakas_tunnus tunnus, 
+				min(asiakas.ytunnus) ytunnus,
+				min(asiakas.nimi) nimi, 
+				min(asiakas.nimitark) nimitark,					
+				min(asiakas.osoite) osoite,
+				min(asiakas.postitp) postitp,
+				min(asiakas.toim_nimi) toim_nimi, 
+				min(asiakas.toim_nimitark) toim_nimitark,
+				min(asiakas.toim_osoite) toim_osoite,
+				min(asiakas.toim_postitp) toim_postitp,
+				count(suoritus.asiakas_tunnus) maara, 
+				sum(if(suoritus.viite>0, 1,0)) viitteita
+				FROM suoritus use index (yhtio_kohdpvm)
+				JOIN asiakas ON asiakas.yhtio=suoritus.yhtio and suoritus.asiakas_tunnus=asiakas.tunnus
+				WHERE suoritus.asiakas_tunnus<>0
+				AND suoritus.yhtio = '$kukarow[yhtio]'
+				AND suoritus.kohdpvm = '0000-00-00'
+				AND suoritus.ltunnus!=0
 				$lisa
-				GROUP BY s.asiakas_tunnus
-				ORDER BY a.nimi";
+				GROUP BY suoritus.asiakas_tunnus
+				ORDER BY asiakas.nimi";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "	<table>
 			<tr>
 			<th>".t("Ytunnus")."</th>
-			<th>".t("Asiakas")."</th>
+			<th>".t("Nimi")."</th>
+			<th>".t("Postitp")."</th>
 			<th>".t("Suorituksia")."</th>
 			<th>".t("Viitteellisi‰")."<br>".t("suorituksia")."</th>
 			<th>".t("Avoimia")."<br>".t("laskuja")."
@@ -1410,24 +1427,36 @@ if ($tila == '') {
 		$query = "	SELECT COUNT(*) maara
 					FROM lasku USE INDEX (yhtio_tila_mapvm)
 					WHERE yhtio ='$kukarow[yhtio]'
-					and mapvm='0000-00-00'
+					and mapvm = '0000-00-00'
 					and tila = 'U'
 					and (ytunnus = '$asiakas[ytunnus]' or nimi = '$asiakas[nimi]' or liitostunnus = '$asiakas[tunnus]')";
 		$lresult = mysql_query($query) or pupe_error($query);
 		$lasku = mysql_fetch_array ($lresult);
 
 		echo "<tr class='aktiivi'>
-				<td>$asiakas[ytunnus]</td>
-				<td>$asiakas[nimi]</td>
-				<td>$asiakas[maara]</td>
-				<td>$asiakas[viitteita]</td>
-				<td>$lasku[maara]</td>";
+				<td valign='top'>$asiakas[ytunnus]</td>
+				<td valign='top'>$asiakas[nimi] $asiakas[nimitark]";
+				
+		if ($asiakas["nimi"] != $asiakas["toim_nimi"]) {
+			echo "<br>$asiakas[toim_nimi] $asiakas[toim_nimitark]";
+		}
+		
+		echo "	</td>";
+				
+		echo "	<td valign='top'>$asiakas[postitp]";
+		
+		if ($asiakas["postitp"] != $asiakas["toim_postitp"]) {
+			echo "<br>$asiakas[toim_postitp]</td>";
+		}						
+		echo "	<td valign='top'>$asiakas[maara]</td>
+				<td valign='top'>$asiakas[viitteita]</td>
+				<td valign='top'>$lasku[maara]</td>";
 
 		echo "<form action='$PHP_SELF' method='POST'>";
 		echo "<input type='hidden' name='tila' value='suorituksenvalinta'>";
 		echo "<input type='hidden' name='asiakas_tunnus' value='$asiakas[tunnus]'>";
 		echo "<input type='hidden' name='asiakas_nimi' value='$asiakas[nimi]'>";
-		echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td>";
+		echo "<td class='back' valign='top'><input type='submit' value='".t("Valitse")."'></td>";
 		echo "</form>";
 
 		echo "</tr>";

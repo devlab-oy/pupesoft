@@ -117,24 +117,31 @@ if ($tee == "paivita") {
 	
 	$laskuri = 0;
 	
-	//päivitetään kohde varaston tuotteen hälyraja
+	
+		
+	//päivitetään kohde varaston tuotteen hälyraja		
+	$edtuote = "";
+		
 	if (isset($kopioitavaraja) && isset($kohde)) {
 		foreach ($kopioitavaraja as $tunnus => $haly) {
-			foreach ($kohde as $tuotetunnus => $paikkatunnus) {
-				if ($kopioitavatuoteno[$tunnus] == $tuotetunnus) {
-					$query = "	UPDATE tuotepaikat SET
-					 			halytysraja = '$haly'
-								WHERE yhtio='$kukarow[yhtio]' and
-								tunnus = '$paikkatunnus'";
-					$result = mysql_query($query) or pupe_error($query);
+			if ($edtuote == "" or $edtuote != $kopioitavatuoteno[$tunnus]) {
+				foreach ($kohde as $paikkatunnus => $tuotetunnus) {
+					if ($kopioitavatuoteno[$tunnus] == $tuotetunnus) {
+						$query = "	UPDATE tuotepaikat SET
+					 				halytysraja = '$kohdehaly[$paikkatunnus]'
+									WHERE yhtio='$kukarow[yhtio]' and
+									tunnus = '$paikkatunnus'";
+						$result = mysql_query($query) or pupe_error($query);
 					
-					$laskuri++;
-					break;
-				}			
-			}
+						$laskuri++;
+					}
+				}
+				
+				$edtuote = $kopioitavatuoteno[$tunnus];	
+			}		
 		}
-	}
-	
+	}	
+		
 
 	echo "Päivitetiin $laskuri tuotetta.<br><br>";
 	$tee = "";
@@ -149,7 +156,14 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	
 	//varastot queryyn
 	if (!empty($kopioitavavarasto) && !empty($kohdevarasto)) {
-		$lisa_varastot = " and varastopaikat.tunnus IN ($kopioitavavarasto, $kohdevarasto)";		
+		$lisa_varastot = " and varastopaikat.tunnus IN ($kopioitavavarasto, $kohdevarasto)";	
+		
+		if ($kopioitavavarasto >= $kohdevarasto) {
+			$jarjestys = "ORDER BY tuote.tuoteno, varastopaikat.tunnus desc, tuotepaikat.tunnus";
+		}			
+		else {
+			$jarjestys = "ORDER BY tuote.tuoteno, varastopaikat.tunnus asc, tuotepaikat.tunnus";
+		}
     }
 
 	echo "<table><tr><td class='back' valign='top'>";
@@ -277,14 +291,13 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 				tuote.yhtio = '$kukarow[yhtio]'
 				$lisaa
 				and tuote.ei_saldoa = ''
-				group by tuote.tuoteno, varastopaikat.tunnus
-				ORDER BY tuote.tuoteno, varastopaikat.tunnus";			
+				group by tuote.tuoteno, varastopaikat.tunnus, tuotepaikat.tunnus
+				$jarjestys";			
 	$res = mysql_query($query) or pupe_error($query);
 	
-
+	
 	echo "<form action='$PHP_SELF' method='post' autocomplete='off'>
 		<input type='hidden' name='tee' value='paivita'>";
-
 	echo "\n<table>";
 
 	echo "<tr>";
@@ -300,8 +313,14 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 	echo "<th>".t("Kok.Myynti")."<br>".t("Var.Myynti")."</th>";
 	echo "<th>".t("Hälytysraja")."</th>";
 	
+	
 
 	echo "</tr>\n";
+
+
+	$edtuoteno = "";
+	$edkohdetuoteno = "";
+	$summa = 0;
 
 	while ($row = mysql_fetch_array($res)) {
 
@@ -318,10 +337,39 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 			echo "<td>$row[varastonnimi]</td>";
 			echo "<input type='hidden' name='kopioitavaraja[$row[paikkatunnus]]' value='$row[halytysraja]'>";
 			echo "<input type='hidden' name='kopioitavatuoteno[$row[paikkatunnus]]' value='$row[tuoteno]'>";
+			
+			if ($edtuoteno != $row[tuoteno]) {
+				$summa = 0;
+			}
+			
+			if ($edtuote == "" or $edtuote == $row[tuoteno]) {
+				$summa += $row[halytysraja];
+				$edtuoteno = $row[tuoteno];
+			}		
+		
 		}
 		elseif ($kohdevarasto == $row[tunnus]) {
 			echo "<th>$row[varastonnimi]</th>";			
-			echo "<input type='hidden' name='kohde[$row[tuoteno]]' value='$row[paikkatunnus]'>";
+			
+			echo "<input type='hidden' name='kohde[$row[paikkatunnus]]' value='$row[tuoteno]'>";
+						
+			if ($edtuoteno != "") {
+				$edkohdetuoteno = $edtuoteno;				
+			}
+			
+			
+			if ($edkohdetuoteno == $row[tuoteno]){
+				echo "<input type='hidden' name='kohdehaly[$row[paikkatunnus]]' value='$summa'>";				
+				
+			}
+			else {
+				echo "<input type='hidden' name='kohdehaly[$row[paikkatunnus]]' value='$row[halytysraja]'>";
+				$edkohdetuoteno = "";
+			}
+			
+			
+			$summa = 0;
+			$edtuoteno = "";
 		}
 		
 		
@@ -378,6 +426,7 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 		
 		
 		echo "<td align='right'>$row[halytysraja]</td>";
+			
 		
 
 		echo "</tr>\n";

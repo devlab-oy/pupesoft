@@ -817,6 +817,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 						$t[$i] = $tarkrow[strtolower(mysql_field_name($result, $i))];
 					}
 
+					$trow = $tarkrow;
 					if(@include("inc/".$table."tarkista.inc")) {
 					
 						if($virhe[$i] != "") {

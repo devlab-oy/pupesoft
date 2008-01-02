@@ -166,42 +166,42 @@
 				$excelsarake = 0;
 
 				if ($summaustaso == "P") {
-					$worksheet->write($excelrivi, $excelsarake, t("Varasto"), 	$format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Varasto"), 	$format_bold);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, t("Hyllyalue"), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllyalue"), $format_bold);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, t("Hyllynro"), 	$format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllynro"), 	$format_bold);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, t("Hyllyvali"), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllyvali"), $format_bold);
 					$excelsarake++;
-					$worksheet->write($excelrivi, $excelsarake, t("Hyllytaso"), $format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Hyllytaso"), $format_bold);
 					$excelsarake++;
 				}
 				elseif (!empty($varastot)) {
-					$worksheet->write($excelrivi, $excelsarake, t("Varastot"), 	$format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Varastot"), 	$format_bold);
 					$excelsarake++;
 				}
 
 				if ($tuotemerkki != '') {
-					$worksheet->write($excelrivi, $excelsarake, t("Tuotemerkki"), 	$format_bold);
+					$worksheet->writeString($excelrivi, $excelsarake, t("Tuotemerkki"), 	$format_bold);
 					$excelsarake++;
 				}
 
-				$worksheet->write($excelrivi, $excelsarake, t("Osasto"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Osasto"), 		$format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Tuoteryhmä"), 	$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä"), 	$format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Tuoteno"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Tuoteno"), 		$format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Nimitys"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Nimitys"), 		$format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Saldo"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Saldo"), 		$format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Kehahin"), 		$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"), 		$format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Varastonarvo"), 	$format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"), 	$format_bold);
 				$excelsarake++;
-				$worksheet->write($excelrivi, $excelsarake, t("Kiertonopeus 12kk"), $format_bold);
+				$worksheet->writeString($excelrivi, $excelsarake, t("Kiertonopeus 12kk"), $format_bold);
 
 				$excelrivi++;
 				$excelsarake = 0;
@@ -395,45 +395,45 @@
 								$paikkarow = array();
 							}
 
-							$worksheet->write($excelrivi, $excelsarake, $paikkarow["nimitys"], 	$format_bold);
+							$worksheet->writeString($excelrivi, $excelsarake, $paikkarow["nimitys"], 	$format_bold);
 							$excelsarake++;
-							$worksheet->write($excelrivi, $excelsarake, $row["hyllyalue"], $format_bold);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyalue"], $format_bold);
 							$excelsarake++;
-							$worksheet->write($excelrivi, $excelsarake, $row["hyllynro"], 	$format_bold);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllynro"], 	$format_bold);
 							$excelsarake++;
-							$worksheet->write($excelrivi, $excelsarake, $row["hyllyvali"], $format_bold);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyvali"], $format_bold);
 							$excelsarake++;
-							$worksheet->write($excelrivi, $excelsarake, $row["hyllytaso"], $format_bold);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllytaso"], $format_bold);
 							$excelsarake++;
 
 						}
 						elseif (!empty($varastot)) {
-							$worksheet->write($excelrivi, $excelsarake, $row["varastot"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["varastot"]);
 							$excelsarake++;
 						}
 
 						if ($tuotemerkki != '') {
-							$worksheet->write($excelrivi, $excelsarake, $row["tuotemerkki"]);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["tuotemerkki"]);
 							$excelsarake++;
 						}
 
-						$worksheet->write($excelrivi, $excelsarake, $row["osasto"]);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["osasto"]);
 						$excelsarake++;
-						$worksheet->write($excelrivi, $excelsarake, $row["try"]);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["try"]);
 						$excelsarake++;
-						$worksheet->write($excelrivi, $excelsarake, $row["tuoteno"]);
+						$worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
 						$excelsarake++;
-						$worksheet->write($excelrivi, $excelsarake, asana('nimitys_',$row['tuoteno'],$row['nimitys']));
+						$worksheet->writeString($excelrivi, $excelsarake, asana('nimitys_',$row['tuoteno'],$row['nimitys']));
 						$excelsarake++;
-						$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$muutoskpl));
+						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$muutoskpl));
 						$excelsarake++;
-						$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$kehasilloin));
+						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kehasilloin));
 						$excelsarake++;
-						$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$muutoshinta));
+						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$muutoshinta));
 						$excelsarake++;
-						$worksheet->write($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
+						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
 						$excelsarake++;
-						$worksheet->write($excelrivi, $excelsarake, $kehalisa);
+						$worksheet->writeString($excelrivi, $excelsarake, $kehalisa);
 
 						$excelrivi++;
 						$excelsarake = 0;

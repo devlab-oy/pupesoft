@@ -11,7 +11,7 @@
 		$vvl = $vv + 1;
 
 		//myynnit vuoden alusta
-		$query = "	SELECT lasku.myyja, kuka.nimi, month(tapvm) kk, sum(arvo) summa, sum(kate) kate
+		$query = "	SELECT lasku.myyja, kuka.nimi, month(tapvm) kk, round(sum(arvo),0) summa, round(sum(kate),0) kate
 					FROM lasku use index (yhtio_tila_tapvm)
 					LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.tunnus = lasku.myyja
 					WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = 'L' and lasku.alatila = 'X' and tapvm >= '$vv-01-01' and tapvm < '$vvl-01-01'
@@ -75,7 +75,7 @@
 				}
 				echo "</td>";
 			}
-			echo "<td>".str_replace(".",",",$sumyht)."<br>".str_replace(".",",",$katyht)."</td>";
+			echo "<td align='right'>".str_replace(".",",",$sumyht)."<br>".str_replace(".",",",$katyht)."</td>";
 			echo "</tr>";
 		}
 	}

@@ -490,7 +490,7 @@
 
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, "ORVOT", '', '', '', '', '', '', '', $aikalisa);
 
-				if ($saldo != 0) {
+				if ($myytavissa != 0) {
 					echo "<tr><td>".t("Tuntematon")."</td><td>?</td>";
 					echo "<td align='right'>".sprintf("%.2f", $saldo)."</td>
 							<td align='right'>".sprintf("%.2f", $hyllyssa)."</td>

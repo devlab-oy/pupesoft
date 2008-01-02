@@ -493,7 +493,22 @@ if (!function_exists("saldo_myytavissa")) {
 			$result = mysql_query($query) or die($query);
 
 			if (mysql_num_rows($result) == 0) {
-				return array(FALSE, FALSE, FALSE, FALSE);
+				// tuotteella ei ole yhtään paikkaa.. katotaan silti varatut
+				// etsitään varatut kaikilta paikoilta joilla on joku muu varastopaikka (NOT IN)
+				$query = "	SELECT sum(varattu) varattu
+							FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+							WHERE tilausrivi.yhtio = '$yhtiolisa' and
+							tilausrivi.tyyppi in ('L','G','V') and
+							tilausrivi.tuoteno = '$tuoteno' and
+							tilausrivi.varattu > 0
+							$varaako_jt_saldoa
+							$kerayslisa ";
+				$ennresult = mysql_query($query) or die($query);
+				$ennrow = mysql_fetch_array($ennresult);
+
+				$orposaldomyytavissa -= $ennrow["varattu"];
+				
+				return array(0, 0, $orposaldomyytavissa, FALSE);
 			}
 			else {
 				$saldo			= 0;
@@ -691,7 +706,6 @@ if (!function_exists("saldo_myytavissa")) {
 
 					$myytavissa += $ostrow["varattu"];
 				}
-
 
 				// katsotaan löytyykö tuotetta varattuna joltain muulta paikalta, jota ei ole enää olemassa tuotepaikoissa
 				// ekaks haetaan ihan kaikki nykyiset paikat suoraan mysql muotoon

@@ -816,12 +816,12 @@ if ($tuoteno != '') {
 							// jos kyseessä on inventointi ja ollaan löydetty jo eka tulo
 							if ($trow['laji'] == 'Inventointi' and $eka == 0) {
 								// etsitään tuotteen tiliöinti
-								$query = "	select *
+								$query = "	SELECT *
 											from lasku use index (yhtio_tila_tapvm)
-											where yhtio='$kukarow[yhtio]' and
-											tila = 'X' and
-											tapvm >= '$trow[laadittu]' and
-											viite = '$trow[tunnus]'";
+											where yhtio	= '$kukarow[yhtio]' 
+											and tila 	= 'X'
+											and tapvm  >= '".substr($trow["laadittu"], 0, 10)."'
+											and viite 	= '$trow[tunnus]'";
 								$invresult = mysql_query($query) or pupe_error($query);
 
 								if (mysql_num_rows($invresult) == 1) {

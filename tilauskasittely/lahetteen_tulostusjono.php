@@ -399,7 +399,7 @@
 			$karajaus 	= 1;
 			
 			//	Varastorajaus jos käyttäjällä on joku varasto valittuna
-			if($kukarow['varasto']>0) {
+			if($kukarow['varasto'] > 0) {
 				$tuvarasto 	= $kukarow['varasto'];
 			}
 			else {
@@ -414,14 +414,6 @@
 		
 		if(is_numeric($karajaus)) {
 			$haku .= " and lasku.kerayspvm<=date_add(now(), INTERVAL $karajaus day)";
-		}
-
-		if (!is_numeric($etsi) and $etsi != '') {
-			$haku .= "and (lasku.nimi LIKE '%$etsi%' or lasku.toim_nimi LIKE '%$etsi%')";
-		}
-
-		if (is_numeric($etsi) and $etsi != '') {
-			$haku .= "and lasku.tunnus='$etsi'";
 		}
 
 		if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
@@ -452,6 +444,15 @@
 				$haku .= " and lasku.clearing='JT-TILAUS' ";
 			}
 		}
+		
+		if (!is_numeric($etsi) and $etsi != '') {
+			$haku = "and (lasku.nimi LIKE '%$etsi%' or lasku.toim_nimi LIKE '%$etsi%')";
+		}
+		
+		if (is_numeric($etsi) and $etsi != '') {
+			$haku = "and lasku.tunnus='$etsi'";
+		}
+		
 		$formi	= "find";
 		$kentta	= "etsi";
 
@@ -512,7 +513,9 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$sel=array();
 		$sel[$tutyyppi]="selected";
+		
 		echo "<option value='KAIKKI' {$seltuty["KAIKKI"]}>".t("Näytä kaikki")."</option>";		
+		
 		if(mysql_num_rows($result)>0) {
 			while($row = mysql_fetch_array($result)) {
 				if($row["clearing"] == "") {

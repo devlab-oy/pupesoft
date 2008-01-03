@@ -148,7 +148,7 @@
 			}
 
 			// Katsotaan onko tämä koontikuljetus
-			if ($toitarow["tulostustapa"] == "K" or $toitarow["tulostustapa"] == "L") {
+			if ($tulosta_myos_normaali == 0) {
 				// Monen asiakkaan rahtikirjat tulostuu aina samalle paperille
 				$asiakaslisa = " ";
 
@@ -162,15 +162,15 @@
 
 			}
 			else {
-				// Normaalissa keississä ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
-				$asiakaslisa = "and lasku.ytunnus			= '$rakir_row[ytunnus]'
-								and lasku.toim_maa			= '$rakir_row[toim_maa]'
-								and lasku.toim_nimi			= '$rakir_row[toim_nimi]'
-								and lasku.toim_nimitark		= '$rakir_row[toim_nimitark]'
-								and lasku.toim_osoite		= '$rakir_row[toim_osoite]'
-								and lasku.toim_ovttunnus	= '$rakir_row[toim_ovttunnus]'
-								and lasku.toim_postino		= '$rakir_row[toim_postino]'
-								and lasku.toim_postitp		= '$rakir_row[toim_postitp]' ";
+			// Normaalissa keississä ainoastaan saman toimitusasiakkaan kirjat menee samalle paperille
+			$asiakaslisa = "and lasku.ytunnus			= '$rakir_row[ytunnus]'
+							and lasku.toim_maa			= '$rakir_row[toim_maa]'
+							and lasku.toim_nimi			= '$rakir_row[toim_nimi]'
+							and lasku.toim_nimitark		= '$rakir_row[toim_nimitark]'
+							and lasku.toim_osoite		= '$rakir_row[toim_osoite]'
+							and lasku.toim_ovttunnus	= '$rakir_row[toim_ovttunnus]'
+							and lasku.toim_postino		= '$rakir_row[toim_postino]'
+							and lasku.toim_postitp		= '$rakir_row[toim_postitp]' ";
 			}
 
 			if ($rakir_row['jv'] != '') {
@@ -445,7 +445,7 @@
 	if($tee == '') {
 
 		// haetaan kaikki distinct toimitustavat joille meillä on rahtikirjoja tulostettavana..
-		$query = "	select distinct lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7
+		$query = "	SELECT distinct lasku.toimitustapa, varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.printteri7
 					from rahtikirjat
 					join lasku on rahtikirjat.otsikkonro = lasku.tunnus and rahtikirjat.yhtio = lasku.yhtio and lasku.tila in ('L','G') and lasku.alatila = 'B'
 					join toimitustapa on lasku.yhtio = toimitustapa.yhtio 

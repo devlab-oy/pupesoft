@@ -299,7 +299,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$result = mysql_query($query) or pupe_error($query);
 	$toimitustaparow = mysql_fetch_array($result);
 
-	if (($toimitustaparow["tulostustapa"] == "K" or $toimitustaparow["tulostustapa"] == "L") and $toimitustaparow["toim_nimi"] != '') {
+	if (($toimitustaparow["tulostustapa"] == "K" or $toimitustaparow["tulostustapa"] == "L") and $toimitustaparow["toim_nimi"] != '' and $tulosta_myos_normaali == 0) {
 		$laskurow["toim_nimi"] 			= $toimitustaparow["toim_nimi"];
 		$laskurow["toim_nimitark"] 		= $toimitustaparow["toim_nimitark"];
 		$laskurow["toim_osoite"] 		= $toimitustaparow["toim_osoite"];
@@ -338,7 +338,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_text(mm_pt(4), mm_pt(60), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",	$firstpage, $otsik);
 	
 	// Onko tilaus jälkivaatimus
-	$apuqu = "select * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+	$apuqu = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
 	$meapu = mysql_query($apuqu) or pupe_error($apuqu);
 	$meapurow = mysql_fetch_array($meapu);
 	

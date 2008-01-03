@@ -34,7 +34,7 @@
 	if ($rahtikirjan_esisyotto != "" and $tee == "add" and $yhtiorow["rahtikirjojen_esisyotto"] == "M") {
 
 		// esisyöttö sallittu vain N tilassa oleville tilauksille
-		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otsikkonro' and tila='N'";
+		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otsikkonro' and tila='N'";
 		$tilre = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($tilre) == 0) {
@@ -45,7 +45,7 @@
 		$tutkimus = 0;
 
 		// dellataan kaikki rahtikirjat tällä otsikolla
-		$query = "delete from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro'";
+		$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		// katotaan ollaanko syötetty jotain
@@ -91,27 +91,27 @@
 		if ($tutkimus > 0) {
 
 			if ($muutos == 'yes') {
-				$query = "delete from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro' and rahtikirjanro='$rakirno'";
+				$query = "DELETE from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro' and rahtikirjanro='$rakirno'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				// merkataan tilaus takaisin kerätyksi, paitsi jos se on vientitilaus jolle vientitiedot on syötetty
-				$query = "update lasku set alatila='C' where yhtio='$kukarow[yhtio]' and tunnus='$otsikkonro' and alatila!='E'";
+				$query = "UPDATE lasku set alatila='C' where yhtio='$kukarow[yhtio]' and tunnus='$otsikkonro' and alatila!='E'";
 				$result = mysql_query($query) or pupe_error($query);
 
 				//Voi käydä niin, että rahtikirja on jo tulostunut. Poistetaan mahdolliset tulostusflagit
-				$query = "	update tilausrivi set toimitettu = '', toimitettuaika=''
+				$query = "	UPDATE tilausrivi set toimitettu = '', toimitettuaika=''
 							where otunnus = '$otsikkonro' and yhtio = '$kukarow[yhtio]' and var not in ('P','J') and tyyppi='$tila'";
 				$result  = mysql_query($query) or pupe_error($query);
 				
 				//	Poistetaan kaikki lavaeloitukset
-				$query = "	select group_concat(distinct(concat('\'', selitetark_2, '\''))) veloitukset
+				$query = "	SELECT group_concat(distinct(concat('\'', selitetark_2, '\''))) veloitukset
 							from avainsana
 							join tuote on tuote.yhtio=avainsana.yhtio and tuote.tuoteno=avainsana.selitetark_2
 							WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='pakkaus'";
 				$pakres = mysql_query($query) or pupe_error($query);
 				$pakrow = mysql_fetch_array($pakres);
 				if($pakrow["veloitukset"]!="") {
-					$query = "delete from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus='$otsikkonro' and tuoteno IN ({$pakrow["veloitukset"]})";
+					$query = "DELETE from tilausrivi where yhtio='{$kukarow["yhtio"]}' and otunnus='$otsikkonro' and tuoteno IN ({$pakrow["veloitukset"]})";
 					$delres = mysql_query($query) or pupe_error($query);
 				}
 			}
@@ -146,7 +146,7 @@
 					require("tilauskasittely/lisaarivi.inc");
 					
 					//	Merkataan tämä rivi kerätyksi ja toimitetuksi..
-					$query = "	update tilausrivi set 
+					$query = "	UPDATE tilausrivi set 
 								kerattyaika	= now(),
 								keratty		= '{$kukarow["kuka"]}'
 								where yhtio = '$kukarow[yhtio]' and tunnus='{$lisatyt_rivit1[0]}'";
@@ -228,7 +228,7 @@
 						$lavametri[$i]	= str_replace(',', '.', $lavametri[$i]);
 
 						if ($rakirno == '') {
-							$query = "select max(rahtikirjanro) rakirno from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro'";
+							$query = "SELECT max(rahtikirjanro) rakirno from rahtikirjat where yhtio='$kukarow[yhtio]' and otsikkonro='$otsikkonro'";
 							$result = mysql_query($query) or pupe_error($query);
 							$rakirow = mysql_fetch_array($result);
 							$rakirno = $rakirow["rakirno"]+1;
@@ -238,7 +238,7 @@
 						$tilaukset = explode(',', $tunnukset);
 
 						foreach ($tilaukset as $otsikkonro) {
-							$query  = "insert into rahtikirjat
+							$query  = "INSERT into rahtikirjat
 										(poikkeava,rahtikirjanro,kilot,kollit,kuutiot,lavametri,merahti,otsikkonro,pakkaus,rahtisopimus,toimitustapa,tulostuspaikka,pakkauskuvaus,pakkauskuvaustark,viesti,yhtio) values
 										('','$rakirno','$kilot[$i]','$kollit[$i]','$kuutiot[$i]','$lavametri[$i]','$merahti','$otsikkonro','$pakkaus[$i]','$rahtisopimus','$toimitustapa','$tulostuspaikka','$pakkauskuvaus[$i]','$pakkauskuvaustark[$i]','$viesti','$kukarow[yhtio]')";
 							$result = mysql_query($query) or pupe_error($query);
@@ -294,7 +294,7 @@
 			echo "<br>";
 
 			// Haetaan laskun kaikki tiedot ja katsotaan onko kyseessä jäkivaatimus
-			$query    = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otsikkonro'";
+			$query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otsikkonro'";
 			$result   = mysql_query($query) or pupe_error($query);
 			$laskurow = mysql_fetch_array($result);
 
@@ -307,13 +307,13 @@
 			}
 
 			// Päivitetään laskuille syötetyt tiedot
-			$query = "	update lasku
+			$query = "	UPDATE lasku
 						set alatila='$alatila', kohdistettu='$merahti', rahtisopimus='$rahtisopimus', toimitustapa='$toimitustapa'
 						where yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset)";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// Katsotaan pitäisikö tämä rahtikirja tulostaa heti...
-			$query = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
+			$query = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$toimitustapa'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			if ((mysql_num_rows($result)==1)) {
@@ -326,6 +326,12 @@
 					// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
 					// $tee						tässä pitää olla teksti tulosta
 					
+					if ($row["toim_nimi"] != '') {
+						$tulosta_myos_normaali = 1;
+					} else {
+						$tulosta_myos_normaali = 0;						
+					}
+
 					$toimitustapa_varasto = $toimitustapa."!!!!".$tulostuspaikka;
 					$tee				  = "tulosta";
 
@@ -545,12 +551,28 @@
 			// Tulostetaan osoitelappu
 			if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
 				$tunnus = $laskurow["tunnus"];
+
+				$tulosta_myos_normaali = 0;
 				
 				if ($oslappkpl > 0) {
 					$oslapp .= " -#$oslappkpl ";
 				}
 										
 				require ("tilauskasittely/osoitelappu_pdf.inc");
+
+				$query = "	SELECT * 
+							FROM toimitustapa
+							WHERE yhtio = '$kukarow[yhtio]' AND selite = '$laskurow[toimitustapa]'";
+				$result = mysql_query($query) or pupe_error($query);
+				$toimitustaparow = mysql_fetch_array($result);
+
+				if ($toimitustaparow["tulostustapa"] == "L" or $toimitustaparow["tulostustapa"] == "K") {
+
+					$tulosta_myos_normaali = 1;
+
+					require ("tilauskasittely/osoitelappu_pdf.inc");
+					
+				}
 			}
 			
 			echo "<br><br>";
@@ -1296,7 +1318,7 @@
 		$i = 0;
 
 		while ($row = mysql_fetch_array($result)) {
-			$query = "	select sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
+			$query = "	SELECT sum(kollit) kollit, sum(kilot) kilot, sum(kuutiot) kuutiot, sum(lavametri) lavametri, min(pakkauskuvaustark) pakkauskuvaustark
 						from rahtikirjat use index (otsikko_index)
 						where yhtio			= '$kukarow[yhtio]'
 						and otsikkonro		= '$id'
@@ -1388,7 +1410,7 @@
 				echo "<tr><th>".t("Rahti").":</th><td><input type='text' size='6' name='k_rahtikulut' value='$k_rahtikulut'></td><td>$yhtiorow[valkoodi]</td></tr>";
 			}
 			
-			$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[kasittelykulu_tuotenumero]'";
+			$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[kasittelykulu_tuotenumero]'";
 			$rhire = mysql_query($query) or pupe_error($query);
 			
 			if (mysql_num_rows($rhire) == 1) {

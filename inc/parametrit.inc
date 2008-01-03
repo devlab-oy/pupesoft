@@ -412,20 +412,19 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)
 								JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka) 
 								WHERE $konserni_yhtiot AND messenger.vastaanottaja = '$kukarow[kuka]' AND extranet='' AND messenger.status = 'X'";
-			$message_result = mysql_query($message_query) or pupe_error($message_query);
+			if($message_result = mysql_query($message_query)) {
+				if (mysql_num_rows($message_result) > 0) {
 
-			if (mysql_num_rows($message_result) > 0) {
+					enable_ajax();
 
-				enable_ajax();
-
-				while ($message_row = mysql_fetch_array($message_result)) {
-					echo "<div id='$message_row[tunnus]'>";
-					echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'>";
-					echo "<font class='info'> {$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
-					echo "<b>{$message_row['viesti']}</b></font><br>";
-					echo "</div>";
+					while ($message_row = mysql_fetch_array($message_result)) {
+						echo "<div id='$message_row[tunnus]'>";
+						echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'>";
+						echo "<font class='info'> {$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
+						echo "<b>{$message_row['viesti']}</b></font><br>";
+						echo "</div>";
+					}
 				}
-
 			}
 		}
 	}

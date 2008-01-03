@@ -35,8 +35,8 @@ else {
 
 		// jos laskulla on erikoisalennus, siirret‰‰n se riveille, mutta EI riveille joilla on NETTOHINTA...
 		$query = "	UPDATE tilausrivi set ale = round(ale + $orow[erikoisale] - (ale * $orow[erikoisale] / 100),2)
-					where otunnus='$orow[tunnus]' 
-					and yhtio='$kukarow[yhtio]' 
+					where otunnus='$orow[tunnus]'
+					and yhtio='$kukarow[yhtio]'
 					and netto in ('','E')
 					and tyyppi='L'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -50,8 +50,8 @@ else {
 	$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys
 				FROM tilausrivi
 				LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-				WHERE tilausrivi.otunnus 	= '$kukarow[kesken]' 
-				and tilausrivi.yhtio 		= '$kukarow[yhtio]' 
+				WHERE tilausrivi.otunnus 	= '$kukarow[kesken]'
+				and tilausrivi.yhtio 		= '$kukarow[yhtio]'
 				and tilausrivi.var 			not in ('P','J')
 				and tilausrivi.tyyppi 		= 'L'
 				ORDER BY tilausrivi.tunnus";
@@ -73,36 +73,36 @@ else {
 	$pyorerotus_valuutassa			= 0;
 	$arvosumma_valuutassa			= 0;
 	$kassa_erapvm 					= "";
-	
+
 	while ($trow = mysql_fetch_array ($presult)) {
-					
+
 		// Marginaaliverotus
 		if ($trow["alv"] >= 500) {
 			$hinta_valuutassa	    = laskuval($trow["hinta"], $orow["vienti_kurssi"]) / (1 - $trow["ale"] / 100);				//Kappalehinta alennuksineen valuutassa
-			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);												//Kappalehinta alennuksineen
-			
-			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"];								//Rivihinta valuutassa 
-			$loppusumma 		   += $hinta * $trow["varattu"];																//Rivihinta			
+			$hinta 					= round($trow["hinta"] * (1 - $trow["ale"] / 100), $yhtiorow["hintapyoristys"]);			//Kappalehinta alennuksineen
+
+			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"];								//Rivihinta valuutassa
+			$loppusumma 		   += round($hinta * $trow["varattu"], $yhtiorow["hintapyoristys"]);														//Rivihinta
 		}
 		// Myyntihinnat sis‰lt‰v‰t arvonlis‰veron
 		elseif ($yhtiorow["alv_kasittely"] == '') {
 			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);												//Verollinen kappalehinta alennuksineen
-			
-			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"];								//Verollinen rivihinta valuutassa 
-			$loppusumma 		   += $hinta * $trow["varattu"];																//Verollinen rivihinta
-			
+
+			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"];								//Verollinen rivihinta valuutassa
+			$loppusumma 		   += round($hinta * $trow["varattu"], $yhtiorow["hintapyoristys"]);														//Verollinen rivihinta
+
 			$hinta_valuutassa	    = laskuval($hinta, $orow["vienti_kurssi"]) / (1 + ($trow["alv"] / 100));					//Veroton kappalehinta alennuksineen valuutassa
-			$hinta 					= $hinta / (1 + ($trow["alv"] / 100));														//Veroton kappalehinta alennuksineen			
+			$hinta 					= round($hinta / (1 + ($trow["alv"] / 100)), $yhtiorow["hintapyoristys"]);											//Veroton kappalehinta alennuksineen
 		}
 		// Myyntihinnat ovat verottomia
 		else {
 			$hinta_valuutassa	    = laskuval($trow["hinta"], $orow["vienti_kurssi"]) * (1 - $trow["ale"] / 100);				//Veroton kappalehinta alennuksineen valuutassa
-			$hinta 					= $trow["hinta"] * (1 - $trow["ale"] / 100);												//Veroton kappalehinta alennuksineen
-			
-			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"] * (1 + ($trow["alv"] / 100));	//Verollinen rivihinta valuutassa 
-			$loppusumma 		   += $hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100));									//Verollinen rivihinta
+			$hinta 					= round($trow["hinta"] * (1 - $trow["ale"] / 100), $yhtiorow["hintapyoristys"]);			//Veroton kappalehinta alennuksineen
+
+			$loppusumma_valuutassa += laskuval($hinta, $orow["vienti_kurssi"]) * $trow["varattu"] * (1 + ($trow["alv"] / 100));	//Verollinen rivihinta valuutassa
+			$loppusumma 		   += round($hinta * $trow["varattu"] * (1 + ($trow["alv"] / 100)), $yhtiorow["hintapyoristys"]);							//Verollinen rivihinta
 		}
-				
+
 		// Etsit‰‰n tuote
 		$query = "	SELECT kehahin, ei_saldoa, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, epakurantti100pvm, sarjanumeroseuranta
 					FROM tuote
@@ -124,16 +124,15 @@ else {
 			elseif 	($turow['epakurantti50pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] * 0.5;
 			elseif 	($turow['epakurantti25pvm'] != '0000-00-00') $turow['kehahin'] = $turow['kehahin'] * 0.75;
 
-
 			$apuhinta1 = round($hinta, $yhtiorow['hintapyoristys']);
 			$apuhinta2 = round($trow['varattu'] * $hinta, $yhtiorow['hintapyoristys']);
-						
+
 			//Paivitetaan tuotteen saldo jos saldoa on varattu
 			if ($turow['ei_saldoa'] == '' and $trow['varattu'] != 0) {
-				
+
 				if ($turow["sarjanumeroseuranta"] == "E" or $turow["sarjanumeroseuranta"] == "F") {
 					if ($trow["varattu"] > 0) {
-						
+
 						$query = "	SELECT ostorivitunnus, myyntirivitunnus
 									FROM sarjanumeroseuranta
 									WHERE yhtio			 = '$kukarow[yhtio]'
@@ -142,13 +141,13 @@ else {
 									LIMIT 1";
 						$lisa_res = mysql_query($query) or pupe_error($query);
 						$lisa_row = mysql_fetch_array($lisa_res);
-						
+
 						if ($lisa_row["ostorivitunnus"] != $lisa_row["myyntirivitunnus"]) {
 							// Normikeissi jossa er‰ on jo tuloutettu
 							$query = "	UPDATE sarjanumeroseuranta
 										SET era_kpl = era_kpl-$trow[varattu]
-										WHERE yhtio 			= '$kukarow[yhtio]' 
-										and tuoteno				= '$trow[tuoteno]' 
+										WHERE yhtio 			= '$kukarow[yhtio]'
+										and tuoteno				= '$trow[tuoteno]'
 										and ostorivitunnus 		= '$lisa_row[ostorivitunnus]'
 										and myyntirivitunnus 	= 0
 										LIMIT 1";
@@ -160,15 +159,15 @@ else {
 										and tuoteno			 = '$trow[tuoteno]'
 										and myyntirivitunnus = '$trow[tunnus]'
 										LIMIT 1";
-							$lisa_res = mysql_query($query) or pupe_error($query);	
+							$lisa_res = mysql_query($query) or pupe_error($query);
 						}
 						else {
 							// Laskutetaan vaikka ei olla viel‰ ostettu
 							$query = "	UPDATE sarjanumeroseuranta
 										SET era_kpl = $trow[varattu]*-1,
-										ostorivitunnus = 0										
-										WHERE yhtio 			= '$kukarow[yhtio]' 
-										and tuoteno				= '$trow[tuoteno]' 
+										ostorivitunnus = 0
+										WHERE yhtio 			= '$kukarow[yhtio]'
+										and tuoteno				= '$trow[tuoteno]'
 										and ostorivitunnus 		= '$trow[tunnus]'
 										and myyntirivitunnus 	= 0
 										LIMIT 1";
@@ -181,103 +180,101 @@ else {
 										and myyntirivitunnus = '$trow[tunnus]'
 										LIMIT 1";
 							$lisa_res = mysql_query($query) or pupe_error($query);
-						}												
+						}
 					}
 				}
-				
-				
-				
+
 				///* P‰ivitet‰‰n saldo tilausrivin osoittamalla paikalla *///
 				$query = "	UPDATE tuotepaikat
 							SET saldo = saldo-$trow[varattu],
 							saldoaika = now()
-							WHERE yhtio   = '$kukarow[yhtio]' 
-							and tuoteno   = '$trow[tuoteno]' 
-							and hyllyalue = '$trow[hyllyalue]' 
-							and hyllynro  = '$trow[hyllynro]' 
-							and hyllytaso = '$trow[hyllytaso]' 
+							WHERE yhtio   = '$kukarow[yhtio]'
+							and tuoteno   = '$trow[tuoteno]'
+							and hyllyalue = '$trow[hyllyalue]'
+							and hyllynro  = '$trow[hyllynro]'
+							and hyllytaso = '$trow[hyllytaso]'
 							and hyllyvali = '$trow[hyllyvali]'";
 				$laskutusres = mysql_query($query) or pupe_error($query);
 
 				if (mysql_affected_rows() == 0) {
 					$tulos_ulos_laskutus .= "<font class='error'>".t("Saldoa tuotteelle")." $trow[tuoteno] ".t("ei voitu p‰ivitt‰‰ paikalla")." $trow[hyllyalue]-$trow[hyllynro]-$trow[hyllytaso]-$trow[hyllyvali].</font><br>\r\n";
-					
+
 					///* P‰ivitet‰‰n saldo tuotteen oletuspaikalla jos tilausrivill‰ ei ollut sopivaa paikkaa *///
 					$query = "	UPDATE tuotepaikat
 								SET saldo = saldo-$trow[varattu],
 								saldoaika = now()
-								WHERE yhtio = '$kukarow[yhtio]' 
-								and tuoteno	= '$trow[tuoteno]' 
-								and oletus != '' 
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tuoteno	= '$trow[tuoteno]'
+								and oletus != ''
 								LIMIT 1";
 					$laskutusres = mysql_query($query) or pupe_error($query);
-					
+
 					if (mysql_affected_rows() == 0) {
 						$tulos_ulos_laskutus .= "<font class='error'>".t("Saldoa tuotteelle")." $trow[tuoteno] ".t("ei voitu p‰ivitt‰‰ oletuspaikalla").".<br></font>\r\n";
-						
+
 						///* P‰ivitet‰‰n saldo jollekin sopivalle paikalle jos oletuspaikkaa ei lˆytynyt *///
 						$query = "	UPDATE tuotepaikat
 									SET saldo = saldo-$trow[varattu],
 									saldoaika = now(),
 									oletus = 'X'
-									WHERE yhtio = '$kukarow[yhtio]' 
-									and tuoteno	= '$trow[tuoteno]' 
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tuoteno	= '$trow[tuoteno]'
 									LIMIT 1";
 						$laskutusres = mysql_query($query) or pupe_error($query);
-						
-						if (mysql_affected_rows() == 0) {						
+
+						if (mysql_affected_rows() == 0) {
 							$tulos_ulos_laskutus .= "<font class='error'>".t("Tuotteella")." $trow[tuoteno] ".t("ei ole yht‰‰n varastopaikkaa").". ".t("Perustetaan uusi").".<br></font>\r\n";
-							
+
 							$query = "	INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, tuoteno, saldo, saldoaika)
 										VALUES ('$kukarow[yhtio]','Z','99','99','99','X','$trow[tuoteno]',$trow[varattu]*-1,now())";
-							$laskutusres = mysql_query($query) or pupe_error($query);											
-						}					
+							$laskutusres = mysql_query($query) or pupe_error($query);
+						}
 					}
 				}
 			}
-			
+
 			if ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] > 0) {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
 				$ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $trow["tunnus"]);
-					
+
 				// Kate = Hinta - Ostohinta
-				$kate = round($hinta - round($ostohinta/$trow["varattu"], 6), 2);				
-				
+				$kate = round($hinta - round($ostohinta/$trow["varattu"], 6), 2);
+
 				//T‰m‰n sarjanumeroklˆntin ostohinta keskim‰‰rin
-				$turow["kehahin"] = round($ostohinta/$trow["varattu"], 6);	
-											
+				$turow["kehahin"] = round($ostohinta/$trow["varattu"], 6);
+
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";
 			}
 			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "O") {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
-				
+
 				// Kate = 0
 				$kate 				= 0;
-				$turow["kehahin"] 	= round($hinta/$trow["varattu"],6) * -1;	
-											
+				$turow["kehahin"] 	= round($hinta/$trow["varattu"], 6) * -1;
+
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "tulo";
 			}
 			elseif ($turow['ei_saldoa'] == '' and $turow["sarjanumeroseuranta"] == "S" and $trow["varattu"] < 0 and $trow["osto_vai_hyvitys"] == "") {
 				//Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
-				
+
 				//T‰h‰n hyvitysriviin liitetyt sarjanumerot
 				$query = "	SELECT *
 							FROM sarjanumeroseuranta
-							WHERE yhtio 		= '$kukarow[yhtio]' 
+							WHERE yhtio 		= '$kukarow[yhtio]'
 							and ostorivitunnus 	= '$trow[tunnus]'";
 				$sarjares = mysql_query($query) or pupe_error($query);
-				
+
 				$ostohinta = 0;
-				
+
 				while($sarjarow = mysql_fetch_array($sarjares)) {
-					
+
 					// Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
 					$query  = "	SELECT sarjanumeroseuranta.*, tilausrivi.rivihinta/tilausrivi.kpl ostohinta
 								FROM sarjanumeroseuranta
 								JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-								WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]' 
+								WHERE sarjanumeroseuranta.yhtio 	= '$kukarow[yhtio]'
 								and sarjanumeroseuranta.tuoteno 	= '$trow[tuoteno]'
 								and sarjanumeroseuranta.sarjanumero = '$sarjarow[sarjanumero]'
 								and sarjanumeroseuranta.kaytetty 	= '$sarjarow[kaytetty]'
@@ -288,16 +285,16 @@ else {
 								LIMIT 1";
 					$sarjares1 = mysql_query($query) or pupe_error($query);
 					$sarjarow1 = mysql_fetch_array($sarjares1);
-										
+
 					$ostohinta += $sarjarow1["ostohinta"];
-					
+
 					// Tehd‰‰n sarjanumerotauluun uusi vapaa sarjanumero-olio
 					$query = "	UPDATE sarjanumeroseuranta
 								SET myyntirivitunnus=ostorivitunnus, ostorivitunnus='$sarjarow1[ostorivitunnus]'
-								WHERE yhtio = '$kukarow[yhtio]' 
+								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus 	= '$sarjarow[tunnus]'";
 					$sarjares1 = mysql_query($query) or pupe_error($query);
-					
+
 					//Jos nyt hyvitett‰v‰ sarjanumero onkin jo myyty eteenp‰in.
 					if ($sarjarow["myyntirivitunnus"] > 0) {
 						$myritu = $sarjarow["myyntirivitunnus"];
@@ -305,30 +302,30 @@ else {
 					else {
 						$myritu = 0;
 					}
-															
-					$query = "	INSERT into sarjanumeroseuranta 
+
+					$query = "	INSERT into sarjanumeroseuranta
 								(yhtio, tuoteno, sarjanumero, lisatieto, ostorivitunnus, myyntirivitunnus, kaytetty, laatija, luontiaika, takuu_alku, takuu_loppu, hyllyalue, hyllynro, hyllyvali, hyllytaso)
 								VALUES ('$kukarow[yhtio]','$sarjarow[tuoteno]','$sarjarow[sarjanumero]','$sarjarow[lisatieto]','$sarjarow1[ostorivitunnus]','$myritu','$sarjarow1[kaytetty]','$kukarow[kuka]',now(),'$sarjarow1[takuu_alku]','$sarjarow1[takuu_loppu]', '$sarjarow[hyllyalue]', '$sarjarow[hyllynro]', '$sarjarow[hyllyvali]', '$sarjarow[hyllytaso]')";
-					$sarjares1 = mysql_query($query) or pupe_error($query);	
+					$sarjares1 = mysql_query($query) or pupe_error($query);
 				}
-				
+
 				// Kate = Hinta - Alkuper‰inen ostohinta
-				$kate = round($hinta - round($ostohinta/abs($trow["varattu"]), 6), 2);				
-								
+				$kate = round($hinta - round($ostohinta/abs($trow["varattu"]), 6), 2);
+
 				//T‰m‰n sarjanumeroklˆntin ostohinta keskim‰‰rin
-				$turow["kehahin"] = round($ostohinta/$trow["varattu"], 6) * -1;	
-											
+				$turow["kehahin"] = round($ostohinta/$trow["varattu"], 6) * -1;
+
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";
 			}
 			else {
 				// Kate = Hinta - Kehahin (alviton)
 				$kate = $hinta - $turow["kehahin"];
-				
+
 				//tapahtuman otsikko
 				$tapahtumattyyppi = "laskutus";
 			}
-			
+
 			$query = "	INSERT into tapahtuma set
 						yhtio      = '$kukarow[yhtio]',
 						tuoteno    = '$trow[tuoteno]',
@@ -341,13 +338,13 @@ else {
 						rivitunnus = '$trow[tunnus]',
 						laadittu   = '$laskutus_tapahtumapvm'";
 			$updlaskutusres = mysql_query($query) or pupe_error($query);
-			
-			// Tilausrivin kate (alviton) 
-			$kate = $kate * $trow["varattu"];
-			
+
+			// Tilausrivin kate (alviton)
+			$kate = round($kate * $trow["varattu"], 2);
+
 			// Rivihinta alviton
-			$hinta = $hinta * $trow["varattu"];
-						
+			$hinta = round($hinta * $trow["varattu"], $yhtiorow["hintapyoristys"]);
+
 		} // tuote ei lˆydy else haara
 
 		// Kumuloidaan
@@ -358,20 +355,20 @@ else {
 		// P‰ivitet‰‰n tilausrivi
 		////// FUTURE: rivihinta_valuutassa = round($hinta_valuutassa,2), //////
 		$query = "	UPDATE tilausrivi
-					SET kate 		= round($kate,2),
-					rivihinta 		= round($hinta,'$yhtiorow[hintapyoristys]'),
+					SET kate 		= round($kate, 2),
+					rivihinta 		= round($hinta, $yhtiorow[hintapyoristys]),
 					kpl 			= varattu,
 					varattu 		= 0,
 					laskutettu		= '$kukarow[kuka]',
 					laskutettuaika	= '$laskutuspvm'
-					WHERE tunnus = $trow[tunnus] 
+					WHERE tunnus = $trow[tunnus]
 					and yhtio	 = '$kukarow[yhtio]'";
 		$laskutusres = mysql_query($query) or pupe_error($query);
 	}
 
 	// tehd‰‰n maksuehtok‰sittely vain jos er‰p‰iv‰‰ ei ole syˆtetty jo laskulle...
 	if ($orow["erpcm"] == "0000-00-00") {
-		
+
 		// Etsit‰‰n maksuehto
 		$query = "	SELECT *
 					FROM maksuehto
@@ -401,8 +398,8 @@ else {
 			else {
 				$kassa_erapvm = "'$xrow[kassa_abspvm]'";
 			}
-			$kassa_loppusumma 				= round($loppusumma*$xrow['kassa_alepros']/100, 2);
-			$kassa_loppusumma_valuutassa 	= round($loppusumma_valuutassa*$xrow['kassa_alepros']/100, 2);
+			$kassa_loppusumma 				= round($loppusumma * $xrow['kassa_alepros']/100, 2);
+			$kassa_loppusumma_valuutassa 	= round($loppusumma_valuutassa * $xrow['kassa_alepros']/100, 2);
 		}
 		else {
 			$kassa_erapvm 					= "''";
@@ -418,62 +415,72 @@ else {
 		$kassa_loppusumma_valuutassa 	= "";
 	}
 
-	// P‰ivitet‰‰n lasku	
+	// P‰ivitet‰‰n lasku
 	if (isset($kateistyyppi) and $kateistyyppi == 'p') {
 		// Pyˆristet‰‰n k‰teismyynti l‰himp‰‰n viiteen senttiin
-		$ei_pyorist = round($loppusumma,2);
+		$ei_pyorist = round($loppusumma, 2);
 		$loppusumma = round(round($loppusumma / 0.05) * 0.05, 2);
 		$pyorerotus = $ei_pyorist - $loppusumma;
 		$arvosumma	= round($tothinta - $pyorerotus, 2);
-		$katesumma  = round($totkate - $pyorerotus, 2);
-		
+//		$katesumma  = round($totkate - $pyorerotus, 2);
+		$katesumma	= round($totkate, 2);
+
 		// Pyˆristet‰‰n k‰teismyynti l‰himp‰‰n viiteen senttiin myˆs laskun valuutassa
 		$ei_pyorist_valuutassa = round($loppusumma_valuutassa,2);
 		$loppusumma_valuutassa = round(round($loppusumma_valuutassa / 0.05) * 0.05, 2);
 		$pyorerotus_valuutassa = $ei_pyorist_valuutassa - $loppusumma_valuutassa;
-		$arvosumma_valuutassa  = round($tothinta_valuutassa - $pyorerotus_valuutassa, 2);		
+		$arvosumma_valuutassa  = round($tothinta_valuutassa - $pyorerotus_valuutassa, 2);
 	}
 	else {
-		$loppusumma 			= round($loppusumma,2);
-		$loppusumma_valuutassa 	= round($loppusumma_valuutassa,2);
-		$arvosumma				= round($tothinta,2);
-		$arvosumma_valuutassa	= round($tothinta_valuutassa,2);
-		$katesumma  			= round($totkate,2);
+		$loppusumma 			= round($loppusumma, 2);
+		$loppusumma_valuutassa 	= round($loppusumma_valuutassa, 2);
+		$arvosumma				= round($tothinta, 2);
+		$arvosumma_valuutassa	= round($tothinta_valuutassa, 2);
+		$katesumma  			= round($totkate, 2);
 	}
-	
+
 	$viivastyskorko = $yhtiorow['viivastyskorko'];
-	
+
 	if(isset($korkolasku) and $korkolasku == "kylla") {
 		$viivastyskorko = $orow['viivastyskorko'];
 	}
-	
+
 	// Etsit‰‰n asiakas
 	$query = "	SELECT laskunsummapyoristys
 				FROM asiakas
 				WHERE tunnus='$orow[liitostunnus]' and yhtio='$kukarow[yhtio]'";
 	$asres = mysql_query($query) or pupe_error($query);
 	$asrow = mysql_fetch_array($asres);
-	
+
 	//K‰sin syˆtetty summa johon lasku pyˆristet‰‰n joko kotivaluutassa tai laskun valuutassa
-	if (abs($orow["hinta"]-$loppusumma) <= 0.5) {
-		$loppusumma = sprintf("%.2f",$orow["hinta"]);
+	if (abs($orow["hinta"] - $loppusumma) <= 0.5) {
+		$pyorerotus = $orow["hinta"] - $loppusumma;
+		$arvosumma	= round($tothinta + $pyorerotus, 2);
+		$loppusumma = round($orow["hinta"], 2);
+//		$katesumma  = round($totkate + $pyorerotus, 2);
 	}
-	if (abs($orow["hinta"]-$loppusumma_valuutassa) <= 0.5) {
-		$loppusumma_valuutassa = sprintf("%.2f",$orow["hinta"]);
+	if (abs($orow["hinta"] - $loppusumma_valuutassa) <= 0.5) {
+		$pyorerotus = $orow["hinta"] - $loppusumma_valuutassa;
+		$arvosumma_valuutassa = round($tothinta_valuutassa + $pyorerotus, 2);
+		$loppusumma_valuutassa = round($orow["hinta"], 2);
 	}
 
 	// jos halutaan pyˆrist‰‰ laskun loppusumma
 	if ($yhtiorow["laskunsummapyoristys"] == 'o' or $asrow["laskunsummapyoristys"] == 'o') {
 		// jos ollaan kotivaluutassa pyoristet‰‰m loppusumma
 		if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
-        	$loppusumma = round($loppusumma,0);
+			$pyorerotus = $loppusumma - round($loppusumma, 0);
+			$arvosumma	= round($arvosumma - $pyorerotus, 2);
+        	$loppusumma = round($loppusumma, 0);
 		}
 		// jos ollaan eri kuin kotivaluutassa pyˆristet‰‰n loppusumma_valuutassa
 		if (trim(strtoupper($orow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$loppusumma_valuutassa = round($loppusumma_valuutassa,0);
+			$pyorerotus = $loppusumma_valuutassa - round($loppusumma_valuutassa, 0);
+			$arvosumma_valuutassa	= round($arvosumma_valuutassa - $pyorerotus, 2);
+			$loppusumma_valuutassa = round($loppusumma_valuutassa, 0);
 		}
 	}
-	
+
 	$query = "	UPDATE lasku
 				SET alatila 		= 'V',
 				arvo 				= '$arvosumma',
@@ -490,15 +497,16 @@ else {
 				tapvm 				= '$laskutuspvm',
 				maksuehto 			= '$orow[maksuehto]',
 				laskutettu 			= now()
-				WHERE tunnus = '$kukarow[kesken]' 
+				WHERE tunnus = '$kukarow[kesken]'
 				and yhtio	 = '$kukarow[yhtio]'";
 	$laskutusres = mysql_query($query) or pupe_error($query);
-	
-	$id = 0; 
-	
+
+	$id = 0;
+
 	// Ei en‰‰ kesken
 	$query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kesken='$kukarow[kesken]'";
-	$laskutusres = mysql_query($query) or pupe_error($query);	
+	$laskutusres = mysql_query($query) or pupe_error($query);
+
 } // end tilaus ei lˆydy else haara
 
 //echotaan rudulle jos kyseess‰ ei ole batch-ajo

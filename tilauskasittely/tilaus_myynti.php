@@ -1438,6 +1438,32 @@ if ($tee == '') {
 					</form>
 				</td>";
 		}
+		
+		if($yhtiorow["myyntitilauksen_liitteet"] != "") {
+			
+			$queryoik = "SELECT tunnus from oikeu where nimi like '%liitetiedostot.php' and kuka='{$kukarow['kuka']}' and yhtio='{$yhtiorow['yhtio']}'";
+			$res = mysql_query($queryoik) or pupe_error($queryoik);
+
+			if (mysql_num_rows($res) == 1) {
+
+				if($laskurow["tunnusnippu"] > 0) {
+					$id = $laskurow["tunnusnippu"];
+				}
+				else {
+					$id = $laskurow["tunnus"];
+				}
+
+				echo "<td class='back'>
+						<form method='get' action='../liitetiedostot.php'>
+							<input type='hidden' name='id' value='$id'>
+							<input type='hidden' name='liitos' value='lasku'>
+							<input type='hidden' name='lopetus' value='".urlencode("tilauskasittely/tilaus_myynti.php?toim=$toim&projektilla=$projektilla&valitsetoimitus=$tilausnumero")."'>
+							<input type='submit' value='" . t('Tilauksen liitetiedostot')."'>
+						</form>
+					</td>";
+
+			}			
+		}
 
 		if ($kukarow["extranet"] == "" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T") and file_exists("osamaksusoppari.inc")) {
 			echo "<td class='back'>

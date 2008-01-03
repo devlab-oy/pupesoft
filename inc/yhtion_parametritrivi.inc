@@ -1351,6 +1351,21 @@
 		$jatko = 0;
 	}
 
+	if (mysql_field_name($result, $i) == "myyntitilauksen_liitteet") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+
+		$ulos .= "<option value = ''>".t("Myyntitilaukselle ei saa liitt‰‰ liitetiedostoja")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilaukselle saa liitt‰‰ liitetiedostoja")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
 	if (mysql_field_name($result, $i) == "logo" or mysql_field_name($result, $i) == "lasku_logo") {
 		$tyyppi = 5;
 	}

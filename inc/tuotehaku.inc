@@ -151,10 +151,16 @@
 				}
 
 				$kokonaismyytavissa = 0;
+				
+				if ($yhtiorow["saldo_kasittely"] == "T") {
+					$saldoaikalisa = date("Y-m-d");
+				}
+				else {
+					$saldoaikalisa = "";
+				}
 
 				foreach($konsyhtiot as $yhtio) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($trow["tuoteno"], "", 0, $yhtio);
-					
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($trow["tuoteno"], '', 0, $yhtio, '', '', '', '', '', $saldoaikalisa);
 					$kokonaismyytavissa += $myytavissa;
 				}
 

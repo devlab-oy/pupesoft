@@ -35,6 +35,10 @@ if ($tee == 'LAHETA') {
 	$tee = "KOROTA";
 }
 
+if (!is_numeric($kasittelykulu) or $kasittelykulu < 0) {
+	$tee = "";
+}
+
 if ($tee == "ALOITAKOROTUS") {
 	
 	$korkolisa = "";
@@ -218,6 +222,7 @@ if ($tee == "KOROTA")  {
 	echo "<tr>";
 	
 	echo "<input name='tee' type='hidden' value='LAHETA'>";
+	echo "<input name='kasittelykulu' type='hidden' value='$kasittelykulu'>";
 	
 	foreach($korotettavat as $tunnukset) {
 		echo "\n<input type='hidden' name='korotettavat[]' value='$tunnukset'>";		
@@ -243,6 +248,7 @@ if ($tee == "KOROTA")  {
 		echo "\n<input type='hidden' name='korotettavat[]' value='$tunnukset'>";		
 	}
 	
+	echo "<input name='kasittelykulu' type='hidden' value='$kasittelykulu'>";
 	echo "<input name='korkosumma' type='hidden' value='$korkosumma'>";
 	echo "<input name='vmehto' type='hidden' value='$vmehto'>";
 	echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";		
@@ -265,6 +271,7 @@ if ($tee == "") {
 	echo t("Syötä ytunnus jos haluat lähettää korkolaskun tietylle asiakkaalle").".<br>";
 	echo t("Jätä kenttä tyhjäksi jos haluat aloittaa ensimmäisestä asiakkaasta").".<br>";
 	echo t("Minimi korkosumma on summa euroissa, jonka yli korkolaskun loppusumman on oltava, että sitä edes ehdotetaan. (tyhjä=kaikki laskut)")."<br>";
+	echo t("Käsittelykulun myyntihinta").".<br>";
 	echo t("Korkoa lasketaan laskuille jotka on maksettu alku- ja loppupäivämäärän välillä").".<br><br>";
 	echo "<table>";
 
@@ -312,8 +319,22 @@ if ($tee == "") {
 	
 	echo "<tr><th>".t("Minimi korkosumma").":</th>";
 	echo "<td colspan='3'><input type='text' name='korkosumma' value='$korkosumma'></td></tr>";
+	
+	if ($yhtiorow["kasittelykulu_tuotenumero"] != '') {
 		
-	$apuqu = "	select kuka, nimi, puhno, eposti, tunnus
+		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$valuutta = $laskurow["valkoodi"];
+		}
+		else {
+			$valuutta = $yhtiorow["valkoodi"];
+		}
+		
+		echo "<tr><th>".t("Käsittelykulu").":</th>";
+		echo "<td colspan='3'><input type='text' name='kasittelykulu' value='$kasittelykulu'> $valuutta</td></tr>";
+	}
+	
+		
+	$apuqu = "	SELECT kuka, nimi, puhno, eposti, tunnus
 				from kuka 
 				where yhtio='$kukarow[yhtio]' and nimi!='' and puhno!='' and eposti!='' and extranet=''";
 	$meapu = mysql_query($apuqu) or pupe_error($apuqu);

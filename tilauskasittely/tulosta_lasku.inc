@@ -1132,7 +1132,7 @@ if (!function_exists('loppu')) {
 		}
 
 	    if ($masrow["factoring"] != '') {
-			// jos factoroidaan tulostaan eri kentät
+			// jos factoroidaan tulostetaan eri kentät
 			$query = "	SELECT *
 						FROM factoring
 						WHERE yhtio 		= '$kukarow[yhtio]'

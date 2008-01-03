@@ -141,10 +141,37 @@
 		$kukarow["kesken"] = $otunnus;
 		$korkolasku = "kylla";
 
-		$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
+		$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$laskurow = mysql_fetch_array($result);
 		
+		if ($yhtiorow["kasittelykulu_tuotenumero"] != '') {
+
+			$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[kasittelykulu_tuotenumero]'";
+			$result = mysql_query($query) or pupe_error($query);
+			$trow = mysql_fetch_array($result);
+
+			$kasittelykulu = laskuval($kasittelykulu, $laskurow["vienti_kurssi"]);
+
+			$ytunnus         = $laskurow["ytunnus"];
+			$kpl             = 1;
+			$tuoteno         = $yhtiorow["kasittelykulu_tuotenumero"];
+			$toimaika 	     = $laskurow["toimaika"];
+			$kerayspvm	     = $laskurow["kerayspvm"];
+			$hinta 		     = $kasittelykulu;
+			$netto 		     = "N";
+			$ale 		     = "";
+			$var		     = "H";
+			$alv		     = "";
+			$paikka		     = "";
+			$varasto 	     = "";
+			$rivitunnus		 = "";
+			$korvaavakielto	 = "";
+			$varataan_saldoa = "";
+
+			require ("tilauskasittely/lisaarivi.inc");
+		}
+				
 		$valittu_tulostin = $kukarow["kirjoitin"];
 		
 		require ("../tilauskasittely/tilaus-valmis.inc");

@@ -162,6 +162,24 @@ if ($tee != '') {
 	}
 
 	while ($tuoterow = mysql_fetch_array($result)) {
+		
+		if (!empty($kukarow['extranet'])) {
+			$query = "  SELECT selite 
+						FROM tuotteen_avainsanat 
+						WHERE yhtio = '{$kukarow['yhtio']}' and laji like '%{$laskurowfake['maa']}%' and tuoteno = '{$tuoterow['tuoteno']}'";
+
+			$avresult = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($avresult) > 0) {
+				$avainrow = mysql_fetch_array($avresult);
+
+				$tuoterow['nimitys'] = $avainrow['selite'];			
+			}
+		}
+		
+		
+		 
+		
 		// tehd‰‰n yksi rivi
 		$ulos = hinnastorivi($tuoterow, $laskurowfake);
 		fwrite($fh, $ulos);

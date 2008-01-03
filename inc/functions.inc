@@ -508,7 +508,7 @@ if (!function_exists("saldo_myytavissa")) {
 
 				$orposaldomyytavissa -= $ennrow["varattu"];
 				
-				return array(0, 0, $orposaldomyytavissa, FALSE);
+				return array(FALSE, FALSE, $orposaldomyytavissa, FALSE);
 			}
 			else {
 				$saldo			= 0;

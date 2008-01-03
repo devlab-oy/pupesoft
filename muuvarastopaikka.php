@@ -591,7 +591,7 @@
 			}
 		}
 		else {
-			echo "<font class='error'>".("Uusi varastopaikka löytyy j otuotteelta").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
+			echo "<font class='error'>".("Uusi varastopaikka löytyy jo tuotteelta").": $tuoteno ($ahyllyalue, $ahyllynro, $ahyllyvali, $ahyllytaso)</font><br>";
 		}
 		$tee = 'M';
 	}

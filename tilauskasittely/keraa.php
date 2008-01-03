@@ -1631,7 +1631,14 @@
 								$laskurow["varasto"] == $alkurow["varasto"] or 
 								($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
 
-								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["puhdas_tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], '', $alkurow["era"]);
+								if ($yhtiorow["saldo_kasittely"] == "T") {
+									$saldoaikalisa = date("Y-m-d");
+								}
+								else {
+									$saldoaikalisa = "";
+								}
+									
+								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["puhdas_tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 								
 								$myytavissa = (float) $myytavissa;
 								

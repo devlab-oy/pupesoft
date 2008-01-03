@@ -50,6 +50,14 @@
 
 		$paikka	= $olparow["olpaikka"];
 	}
+	
+	// Jos yhtiˆn saldok‰sittely on ajasta riippuvainen
+	if ($yhtiorow["saldo_kasittely"] == "T") {
+		$saldoaikalisa = $kerayspvm;
+	}
+	else {
+		$saldoaikalisa = "";
+	}
 
 	//muutetaan pilkkuja pisteiksi
 	$kpl 	= str_replace(',','.',$kpl);
@@ -260,7 +268,8 @@
 						$korkieltokommi = array();
 
 						while ($krow2 = mysql_fetch_array($kres2)) {
-							list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"]);
+							list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+							
 							if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet) and $krmyytavissa > 0) {
 								$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lis‰t‰‰n tuoteno kommenttin
 							}
@@ -323,7 +332,8 @@
 				}
 				else {
 					// katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
-					list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($tuoteno, "ORVOT", "", "", "", "", "", "", $laskurow["toim_maa"]);
+					list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($tuoteno, 'ORVOT', '', '', '', '', '', '', $laskurow["toim_maa"], $saldoaikalisa);
+					
 					$orvot *= -1;
 				}
 
@@ -375,9 +385,9 @@
 				while ($zrow = mysql_fetch_array($zres)) {
 
 					// Saldolliset tuotteet
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], '', $zrow["era"]);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
 
-					if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er‰: $zrow[era]) <br>";
+					if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er‰: $zrow[era]) PVM: $saldoaikalisa<br>";
 
 					//Tutkitaan myyd‰‰nkˆ tietty‰ jo varattua lis‰varustetta
 					if ($perheid2 > 0 and $perheid2!=$rivitunnus and strtoupper($zrow["hyllyalue"]."#".$zrow["hyllynro"]."#".$zrow["hyllyvali"]."#".$zrow["hyllytaso"]) == strtoupper($paikka)) {

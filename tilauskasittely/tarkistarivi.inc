@@ -222,7 +222,14 @@
 			$tilausok++;
 			$saako_hyvaksya++;
 		}
-
+		
+		if ($yhtiorow["saldo_kasittely"] == "T") {
+			$saldoaikalisa = $row["kerayspvm"];
+		}
+		else {
+			$saldoaikalisa = "";
+		}
+				
 		$paikatlask 	= 0;
 		$selpaikka		= "";
 		$selpaikkamaa	= "";
@@ -328,7 +335,7 @@
 					$laskurow["varasto"] == $alkurow["varasto"] or
 					($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"]))) {
 
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], '', $alkurow["era"]);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 					
 					$myytavissa = (float) $myytavissa;
 					
@@ -405,7 +412,7 @@
 		elseif($row["var"] == "P" and mysql_num_rows($omavarastores) > 0) {
 			while($alkurow = mysql_fetch_array($omavarastores)) {
 
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], '', $alkurow["era"]);
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 
 				if($myytavissa > 0 and ($alkurow["varastotyyppi"] == "E" or $alkurow["hyllyalue"] == "!!M")) {
 					if($kukarow["extranet"] != "") {

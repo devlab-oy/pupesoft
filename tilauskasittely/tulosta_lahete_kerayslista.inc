@@ -718,8 +718,14 @@ if (!function_exists('rivi')) {
 
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
+						if ($yhtiorow["saldo_kasittely"] == "T") {
+							$saldoaikalisa = date("Y-m-d");
+						}
+						else {
+							$saldoaikalisa = "";
+						}
 
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', '', $saldorow["era"]);
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
 
 						if ($saldorow['hyllyalue'] == $row['hyllyalue'] and $saldorow['hyllynro'] == $row['hyllynro'] and $saldorow['hyllyvali'] == $row['hyllyvali'] and $saldorow['hyllytaso'] == $row['hyllytaso']){
 							$rivipaikkahyllyssa  += $hyllyssa;

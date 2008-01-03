@@ -361,7 +361,6 @@
 	echo "<th nowrap valign='top'>";
 	echo "<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[5]$ulisa'>".t("$arraynimet[5]")."</a>";
 
-
 	if ($kukarow["extranet"] == "") {
 		echo "<br><a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[5]$ulisa'>".t("N‰yt‰ poistuvat")." / ".t("lis‰tiedot")."</a>";
 	}
@@ -424,7 +423,6 @@
 		echo "<option value='$srow[0]' $sel>$srow[0] $srow[1]</option>";
 	}
 	echo "</select></td>";
-
 
 	$query = "	SELECT distinct tuotemerkki
 				FROM tuote use index (yhtio_tuotemerkki)
@@ -542,6 +540,12 @@
 			}
 		}
 		
+		if ($yhtiorow["saldo_kasittely"] == "T") {
+			$saldoaikalisa = date("Y-m-d");
+		}
+		else {
+			$saldoaikalisa = "";
+		}
 		
 		echo "<table>";
 
@@ -813,19 +817,19 @@
 
 				if ($row['ei_saldoa'] == '') {
 					foreach($konsyhtiot as $yhtio) {
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"]);
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 						$kokonaismyytavissa += $myytavissa;
 					}
 				}
 
-				$lapset=mysql_num_rows($isiresult);
-				$oklapset=0;
+				$lapset   = mysql_num_rows($isiresult);
+				$oklapset = 0;
 
 				if ($lapset > 0) {
 					while ($isirow = mysql_fetch_array($isiresult)) {
 						$lapsikokonaismyytavissa = 0;
 						foreach($konsyhtiot as $yhtio) {
-							list($lapsisaldo, $lapsihyllyssa, $lapsimyytavissa) = saldo_myytavissa($isirow["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"]);
+							list($lapsisaldo, $lapsihyllyssa, $lapsimyytavissa) = saldo_myytavissa($isirow["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 							$lapsikokonaismyytavissa += $lapsimyytavissa;
 						}
 						if ($lapsikokonaismyytavissa > 0) {
@@ -956,12 +960,12 @@
 					echo "<table width='100%'>";
 
 					// katotaan jos meill‰ on tuotteita varaamassa saldoa joiden varastopaikkaa ei en‰‰ ole olemassa...
-					list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($row["tuoteno"], "ORVOT");
+					list($saldo, $hyllyssa, $orvot) = saldo_myytavissa($row["tuoteno"], 'ORVOT', '', '', '', '', '', '', '', $saldoaikalisa);
 					$orvot *= -1;
 
 					while ($saldorow = mysql_fetch_array ($varresult)) {
 
-						list($saldo, $hyllyssa, $myytavissa, $sallittu) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], $laskurow["toim_maa"], '', $saldorow["era"]);
+						list($saldo, $hyllyssa, $myytavissa, $sallittu) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $saldorow["era"]);
 
 						//	Listataan vain varasto jo se ei ole kielletty
 						if($sallittu === TRUE) {

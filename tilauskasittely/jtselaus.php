@@ -510,6 +510,13 @@
 		else {
 			$lisavarattu = "";
 		}
+		
+		if ($yhtiorow["saldo_kasittely"] == "T") {
+			$saldoaikalisa = date("Y-m-d");
+		}
+		else {
+			$saldoaikalisa = "";
+		}
 
 		if (in_array($jarj, array("ytunnus","tuoteno","luontiaika","toimaika"))) {
 			//haetaan vain tuoteperheiden isät tai sellaset tuotteet jotka eivät kuulu tuoteperheisiin
@@ -668,7 +675,7 @@
 
 								if ($perherow["ei_saldoa"] == "") {
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $saldoaikalisa);
 
 										$lapsitoimittamatta -= $myytavissa;
 									}
@@ -691,7 +698,7 @@
 
 						if ($jtrow["ei_saldoa"] == "") {
 							foreach ($varastosta as $vara) {
-								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
+								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $saldoaikalisa);
 								$kokonaismyytavissa += $myytavissa;
 							}
 
@@ -1242,7 +1249,7 @@
 									$kokonaismyytavissa = 0;
 
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $saldoaikalisa);
 
 										$kokonaismyytavissa += $myytavissa;
 									}

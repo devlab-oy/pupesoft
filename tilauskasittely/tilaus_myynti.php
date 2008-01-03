@@ -2856,6 +2856,18 @@ if ($tee == '') {
 			else {
 				$rivino = $rivilaskuri+1;
 			}
+			
+			if ($yhtiorow["saldo_kasittely"] == "T") {
+				if ($laskurow["kerayspvm"] != '0000-00-00') {
+					$saldoaikalisa = date("Y-m-d");
+				}
+				else {
+					$saldoaikalisa = date("Y-m-d");	
+				}				
+			}
+			else {
+				$saldoaikalisa = "";
+			}
 
 			// Tarvitaan jos laskun valuutta on eri kuin hinnaston valuutta
 			function hinnaston_alv ($laskurow, $trow, $kpl, $netto) {
@@ -3054,7 +3066,9 @@ if ($tee == '') {
 				}
 				elseif($yhtiorow["puute_jt_oletus"] == "H") {
 					//	Tarkastetaan saldo ja informoidaan k‰ytt‰j‰‰
-					if (array_sum(saldo_myytavissa($trow["tuoteno"])) < 0) {
+					list(, , $tsek_myytavissa) = saldo_myytavissa($trow["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+					
+					if ($tsek_myytavissa < 0) {
 						$class = " class='spec' ";
 					}
 					else {
@@ -3904,7 +3918,7 @@ if ($tee == '') {
 					}
 
 					if ($row["var"] == "J" and ($laskurow["alatila"] == "T" or $laskurow["alatila"] == "U")) {
-						list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"]);
+						list( , , $jtapu_myytavissa) = saldo_myytavissa($countrow["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 
 						if($jtapu_myytavissa >= $kpl_ruudulle) {
 							echo "<form action='$PHP_SELF' method='post' name='toimita'>

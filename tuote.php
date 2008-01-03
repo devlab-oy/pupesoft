@@ -164,7 +164,10 @@
 					GROUP BY tuote.tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 
-		$query = "select sum(saldo) saldo from tuotepaikat  where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+		$query = "	SELECT sum(saldo) saldo 
+					from tuotepaikat  
+					where tuoteno	= '$tuoteno' 
+					and yhtio		= '$kukarow[yhtio]'";
 		$salre = mysql_query($query) or pupe_error($query);
 		$salro = mysql_fetch_array($salre);
 
@@ -176,7 +179,14 @@
 		}
 
 		if ($tuoterow["tuoteno"] != "" and (!in_array($tuoterow["status"], array('P', 'X')) or $salro["saldo"] != 0)) {
-						
+			
+			if ($yhtiorow["saldo_kasittely"] == "T") {
+				$saldoaikalisa = date("Y-m-d");
+			}
+			else {
+				$saldoaikalisa = "";
+			}
+					
 			// Jos tuote on sarjanumeroseurannassa niin kehahinta lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole myyty(=laskutettu))
 			if ($tuoterow["sarjanumeroseuranta"] == "S") {
 				$query	= "	SELECT sarjanumeroseuranta.tunnus
@@ -372,7 +382,7 @@
 				$korva2result = mysql_query($query) or pupe_error($query);
 
 				while ($row = mysql_fetch_array($korva2result)) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
 					echo "<tr><td><a href='$PHP_SELF?tee=Z&tuoteno=$row[tuoteno]'>$row[tuoteno]</a></td><td>$myytavissa</td></tr>";
 				}
@@ -411,13 +421,7 @@
 			echo "<tr>";
 			echo "<td class='back' valign='top' align='left'>";
 
-			if ($yhtiorow["saldo_kasittely"] == "T") {
-				$aikalisa = date("Y-m-d");
-			}
-			else {
-				$aikalisa = "";
-			}
-
+			
 			if ($tuoterow["ei_saldoa"] == '') {
 				// Saldot
 				echo "<table>";
@@ -471,7 +475,7 @@
 				if (mysql_num_rows($sresult) > 0) {
 					while ($saldorow = mysql_fetch_array ($sresult)) {
 
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $aikalisa, $saldorow["era"]);
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($saldorow["tuoteno"], '', '', '', $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
 
 						//summataan kokonaissaldoa
 						$kokonaissaldo += $saldo;
@@ -488,7 +492,7 @@
 					}
 				}
 
-				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, "ORVOT", '', '', '', '', '', '', '', $aikalisa);
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, 'ORVOT', '', '', '', '', '', '', '', $saldoaikalisa);
 
 				if ($myytavissa != 0) {
 					echo "<tr><td>".t("Tuntematon")."</td><td>?</td>";

@@ -139,7 +139,6 @@
 			$tunnukset     	= "";
 			$rahtikirjanro 	= "";
 
-
 			if ($rakir_row['merahti'] == 'K') {
 				$rahdinmaksaja = "L‰hett‰j‰";
 			}
@@ -148,7 +147,7 @@
 			}
 
 			// Katsotaan onko t‰m‰ koontikuljetus
-			if ($tulosta_myos_normaali == 0) {
+			if ($toitarow["tulostustapa"] == "L" or $toitarow["tulostustapa"] == "K") {
 				// Monen asiakkaan rahtikirjat tulostuu aina samalle paperille
 				$asiakaslisa = " ";
 
@@ -350,7 +349,7 @@
 				}
 
 				echo "<font class='message'>".t("Asiakas")." $rakir_row[toim_nimi]</font><li>".t("Yhdistet‰‰n tilaukset").": ";
-
+				
 				foreach($lotsikot as $doit) echo "$doit ";
 
 				echo "$rahinta $jvtext";

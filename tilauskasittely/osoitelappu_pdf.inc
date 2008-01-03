@@ -293,13 +293,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 	$pdf->draw_rectangle(mm_pt(150),mm_pt(138),mm_pt(150),mm_pt(143),						$firstpage, $rectparam);
 	$pdf->draw_rectangle(mm_pt(150),mm_pt(143),mm_pt(145),mm_pt(143),						$firstpage, $rectparam);
 
-	$query = "	SELECT * 
-				FROM toimitustapa
-				WHERE yhtio = '$kukarow[yhtio]' AND selite = '$laskurow[toimitustapa]'";
-	$result = mysql_query($query) or pupe_error($query);
-	$toimitustaparow = mysql_fetch_array($result);
-
-	if (($toimitustaparow["tulostustapa"] == "K" or $toimitustaparow["tulostustapa"] == "L") and $toimitustaparow["toim_nimi"] != '' and $tulosta_myos_normaali == 0) {
+	if ($tiedot == "toimitusta") {
 		$laskurow["toim_nimi"] 			= $toimitustaparow["toim_nimi"];
 		$laskurow["toim_nimitark"] 		= $toimitustaparow["toim_nimitark"];
 		$laskurow["toim_osoite"] 		= $toimitustaparow["toim_osoite"];

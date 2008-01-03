@@ -326,12 +326,6 @@
 					// $toimitustapa_varasto	toimitustavan selite!!!!varastopaikan tunnus
 					// $tee						tässä pitää olla teksti tulosta
 					
-					if ($row["toim_nimi"] != '') {
-						$tulosta_myos_normaali = 1;
-					} else {
-						$tulosta_myos_normaali = 0;						
-					}
-
 					$toimitustapa_varasto = $toimitustapa."!!!!".$tulostuspaikka;
 					$tee				  = "tulosta";
 
@@ -552,11 +546,11 @@
 			if ($valittu_oslapp_tulostin != "" and $oslapp != '' and $oslappkpl > 0) {
 				$tunnus = $laskurow["tunnus"];
 
-				$tulosta_myos_normaali = 0;
-				
 				if ($oslappkpl > 0) {
 					$oslapp .= " -#$oslappkpl ";
 				}
+				
+				$tiedot = "";
 										
 				require ("tilauskasittely/osoitelappu_pdf.inc");
 
@@ -566,9 +560,9 @@
 				$result = mysql_query($query) or pupe_error($query);
 				$toimitustaparow = mysql_fetch_array($result);
 
-				if ($toimitustaparow["tulostustapa"] == "L" or $toimitustaparow["tulostustapa"] == "K") {
+				if (($toimitustaparow["tulostustapa"] == "L" or $toimitustaparow["tulostustapa"] == "K") and $toimitustaparow["toim_nimi"] != '') {
 
-					$tulosta_myos_normaali = 1;
+					$tiedot = "toimitusta";
 
 					require ("tilauskasittely/osoitelappu_pdf.inc");
 					

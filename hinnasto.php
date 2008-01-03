@@ -261,11 +261,30 @@ while($srow = mysql_fetch_array ($sresult)) {
 }
 echo "</select></td><th>tai syötä käsin</th><td><input type='text' name='try2' value='$try' size='15'></td></tr>";
 
-$query = "	SELECT distinct tuotemerkki
-			FROM tuote
-			WHERE yhtio='{$kukarow['yhtio']}' and tuotemerkki != ''
-			ORDER BY tuotemerkki";
-$sresult = mysql_query($query) or pupe_error($query);
+if (empty($kukarow['extranet'])) {
+	$query = "	SELECT distinct tuotemerkki
+				FROM tuote
+				WHERE yhtio='{$kukarow['yhtio']}' and tuotemerkki != ''
+				ORDER BY tuotemerkki";
+	$sresult = mysql_query($query) or pupe_error($query);
+}
+else {
+	// otetaan valuuttatiedot oletus asiakkaalta
+	$query = "SELECT maa from asiakas where tunnus='{$kukarow['oletus_asiakas']}' and yhtio ='{$kukarow['yhtio']}'";
+	$res = mysql_query($query) or pupe_error($query);
+
+	// käytetään tätä laskurowna
+	$asmaa = mysql_fetch_array($res);
+	
+	
+	$query = "	SELECT distinct tuotemerkki
+				FROM tuote
+				WHERE yhtio='{$kukarow['yhtio']}' and tuotemerkki != ''
+				and ((tuote.vienti = '' or tuote.vienti like '%-{$asmaa['maa']}%' or tuote.vienti like '%+%')
+				and tuote.vienti not like '%+{$asmaa['maa']}%')
+				ORDER BY tuotemerkki";
+	$sresult = mysql_query($query) or pupe_error($query);
+}
 
 echo "<tr><th>".t('Valitse tuotemerkki alasvetovalikosta')."</th><td><select name='tuotemerkki'>";
 echo "<option value=''>".t("Tuotemerkki")."</option>";

@@ -35,7 +35,7 @@ if ($tee == 'LAHETA') {
 	$tee = "KOROTA";
 }
 
-if (!is_numeric($kasittelykulu) or $kasittelykulu < 0) {
+if (($yhtiorow["kasittelykulu_tuotenumero"] != '') and (!is_numeric($kasittelykulu) or $kasittelykulu < 0)) {
 	$tee = "";
 }
 

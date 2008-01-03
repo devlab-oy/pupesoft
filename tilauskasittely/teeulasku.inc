@@ -11,7 +11,7 @@ $summa					= 0;
 $summa_valuutassa 		= 0;
 $kate					= 0;
 $bruttopaino			= 0;
-$viestit 				= "";			
+$viestit 				= "";
 $comments 				= "";
 $sisviestit1 			= "";
 $tilausyhteyshenkilo 	= "";
@@ -30,7 +30,7 @@ $query  = "	SELECT
 			group_concat(distinct trim(comments) 				SEPARATOR ' / ') comments,
 			group_concat(distinct trim(sisviesti1) 				SEPARATOR ' / ') sisviestit1,
 			group_concat(distinct trim(viesti) 					SEPARATOR ' / ') viestit,
-			group_concat(distinct trim(tilausyhteyshenkilo) 	SEPARATOR ' / ') tilausyhteyshenkilo,	
+			group_concat(distinct trim(tilausyhteyshenkilo) 	SEPARATOR ' / ') tilausyhteyshenkilo,
 			group_concat(distinct trim(asiakkaan_tilausnumero) 	SEPARATOR ' / ') asiakkaan_tilausnumero,
 			group_concat(distinct trim(kohde) 					SEPARATOR ' / ') kohde
 			FROM lasku
@@ -49,15 +49,20 @@ if (mysql_num_rows($uusiuresult) > 0) {
 	$bruttopaino		= round($sumrow["bruttopaino"], 2);
 
 	// generoidaan vientikurssi
-	$vienti_kurssi		= round($arvo/$arvo_valuutassa, 6);
-	
+	if ($arvo_valuutassa == 0) {
+		$vienti_kurssi = 1;
+	}
+	else {
+		$vienti_kurssi = round($arvo/$arvo_valuutassa, 6);
+	}
+
 	$viestit				= $sumrow["viestit"];
 	$comments				= $sumrow["comments"];
 	$sisviestit1			= $sumrow["sisviestit1"];
 	$tilausyhteyshenkilo	= $sumrow["tilausyhteyshenkilo"];
 	$asiakkaan_tilausnumero	= $sumrow["asiakkaan_tilausnumero"];
 	$kohde					= $sumrow["kohde"];
-	
+
 	if ($viestit == " / ") 					$viestit 				= "";
 	if ($comments == " / ") 				$comments 				= "";
 	if ($sisviestit1 == " / ") 				$sisviestit1 			= "";
@@ -347,9 +352,9 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 
 		if ($valsurow["otunnus"] != $edotunnus and $edotunnus != '') {
 
-			$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi 
-							FROM lasku 
-							WHERE yhtio = '$kukarow[yhtio]' 
+			$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]'
 							and tunnus = '$edotunnus'";
 			$sumsresult = mysql_query($query) or pupe_error($query);
 			$sumsrow	= mysql_fetch_array($sumsresult);
@@ -381,9 +386,9 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 
 	//laitetaan välisumma vikallekin tilaukselle
 	if ($edtunnus != "") {
-		$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi 
-						FROM lasku 
-						WHERE yhtio = '$kukarow[yhtio]' 
+		$query 		= "	SELECT summa, valkoodi, nimi, toim_nimi, osoite, toim_osoite, vienti_kurssi
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]'
 						and tunnus = '$edotunnus'";
 		$sumsresult = mysql_query($query) or pupe_error($query);
 		$sumsrow	= mysql_fetch_array($sumsresult);

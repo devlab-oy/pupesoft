@@ -658,14 +658,17 @@ if (!function_exists('rivi_original')) {
 		}
 
 		//Haetan sarjanumeron tiedot
-		if ($row["varattu"]+$row["kpl"] < 0){
+		if ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0) {
+			$sarjanutunnus = "myyntirivitunnus";
+		}
+		elseif ($row["varattu"]+$row["kpl"] < 0){
 			$sarjanutunnus = "ostorivitunnus";
 		}
 		else {
 			$sarjanutunnus = "myyntirivitunnus";
 		}
 
-		$query = "	select distinct sarjanumero
+		$query = "	SELECT distinct sarjanumero
 					from sarjanumeroseuranta
 					where yhtio = '$kukarow[yhtio]'
 					and tuoteno = '$row[tuoteno]'

@@ -1196,10 +1196,10 @@
 					require_once("tulosta_lasku.inc");
 
 					if ($laskurow["tila"] == 'U') {
-						$where = " uusiotunnus='$otunnus' ";
+						$where = " tilausrivi.uusiotunnus='$otunnus' ";
 					}
 					else {
-						$where = " otunnus='$otunnus' ";
+						$where = " tilausrivi.otunnus='$otunnus' ";
 					}
 
 					// katotaan miten halutaan sortattavan
@@ -1214,19 +1214,20 @@
 						}
 
 						$lisa = " 	$hinta_riv / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)) rivihinta,
-									(varattu+kpl) kpl, ";
+									(tilausrivi.varattu+tilausrivi.kpl) kpl, ";
 					}
 					else {
 						$lisa = "";
 					}
 
 					// haetaan tilauksen kaikki rivit
-					$query = "  SELECT *, $lisa $sorttauskentta
+					$query = "  SELECT tilausrivi.*, $lisa tilausrivin_lisatiedot.osto_vai_hyvitys, $sorttauskentta
 								FROM tilausrivi
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								WHERE $where
-								and yhtio  = '$kukarow[yhtio]'
-								and tyyppi = 'L'
-								ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
+								and tilausrivi.yhtio  = '$kukarow[yhtio]'
+								and tilausrivi.tyyppi = 'L'
+								ORDER BY tilausrivi.otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 
 					//kuollaan jos yhtään riviä ei löydy

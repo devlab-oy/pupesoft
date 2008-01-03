@@ -374,6 +374,7 @@
 					concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', kpl,
 					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, 
 					tilausrivi.alv, tilausrivi.kommentti, tilausrivi.tunnus,
+					'dummy' osto_vai_hyvitys, tilausrivi.uusiotunnus,
 					$sorttauskentta
 					FROM tilausrivi
 					JOIN tuote USING (yhtio, tuoteno)
@@ -392,8 +393,10 @@
 					hinta, ale, var V, netto N, 					
 					round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 					alv, kerattyaika, keratty keraaja, toimaika, tilausrivi.kommentti, tilausrivi.tunnus,
+					tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.uusiotunnus,
 					$sorttauskentta
 					FROM tilausrivi
+					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 					".nimitys('join','tilausrivi')."
 					WHERE $where 
 					and tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -404,7 +407,7 @@
 
 	echo "<table><tr>";
 
-	for ($i = 0; $i < mysql_num_fields($presult)-3; $i++) {
+	for ($i = 0; $i < mysql_num_fields($presult)-5; $i++) {
 		$ojarj=$i+1; // sortti numeron mukaan niin ei tuu onglemia
 		if($nippu>0) {
 			echo "<th align='left'><a href = '$PHP_SELF?tee=NAYTATILAUS&toim=$toim&asiakasid=$asiakasid&toimittajaid=$toimittajaid&tunnus=$tunnus&nippu=$nippu&otunnus=$nippu&ojarj=$ojarj'>".t(mysql_field_name($presult,$i))."</a></th>";			
@@ -421,7 +424,7 @@
 	while ($prow = mysql_fetch_array ($presult)) {
 
 		echo "<tr class='aktiivi'>";
-		for ($i=0; $i < mysql_num_fields($presult)-3; $i++) {
+		for ($i=0; $i < mysql_num_fields($presult)-5; $i++) {
 			if (mysql_field_name($presult,$i) == 'kerattyaika' or mysql_field_name($presult,$i) == 'toimaika') {
 				echo "<td>".tv1dateconv($prow[$i],"pitka")."</td>";
 			}
@@ -434,24 +437,25 @@
 		}
 		echo "</tr>";
 
-		
 		//Haetaan sarjanumeron tiedot
 		if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
-			if ($prow["kpl"]+$prow["varattu"] > 0){
+			if ($prow["kpl"] + $prow["varattu"] > 0){
 				$sarjanutunnus = "ostorivitunnus";
 			}
 			else {
 				$sarjanutunnus = "myyntirivitunnus";
 			}
 		}
-		else {
-			if ($prow["varattu"] + $prow["kpl"] < 0){
+		else {	
+			if ($prow["uusiotunnus"] > 0 and $prow["osto_vai_hyvitys"] == '' and $prow["varattu"] + $prow["kpl"] < 0) {
+				$sarjanutunnus = "myyntirivitunnus";
+			}
+			elseif ($prow["varattu"] + $prow["kpl"] < 0) {
 				$sarjanutunnus = "ostorivitunnus";
 			}
 			else {
 				$sarjanutunnus = "myyntirivitunnus";
 			}
-
 		}
 		
 		$query = "	SELECT distinct sarjanumero
@@ -644,10 +648,10 @@
 		echo "<br><b>".t("Liitetyt tilaukset").":</b><hr>";
 				
 		$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
-						FROM lasku use index (yhtio_tila_luontiaika)
-						WHERE yhtio = '$kukarow[yhtio]'
-						and tunnusnippu = '$laskurow[tunnusnippu]'
-						and tila IN ('L','G','E','V','W','N','R','A')";
+					FROM lasku use index (yhtio_tunnusnippu)
+					WHERE yhtio = '$kukarow[yhtio]'
+					and tunnusnippu = '$laskurow[tunnusnippu]'
+					and tila IN ('L','G','E','V','W','N','R','A')";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		if (mysql_num_rows($result)!=0) {

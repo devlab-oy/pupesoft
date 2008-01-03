@@ -1486,7 +1486,8 @@
 						$otunnus = $laskurow["tunnus"];
 
 						// haetaan maksuehdon tiedot
-						$query  = "	select * from maksuehto
+						$query  = "	SELECT * 
+									from maksuehto
 									left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 									where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
 						$result = mysql_query($query) or pupe_error($query);
@@ -1513,12 +1514,13 @@
 							$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 
 							// haetaan tilauksen kaikki rivit
-							$query = "	SELECT *, $sorttauskentta
+							$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys, $sorttauskentta
 										FROM tilausrivi
-										WHERE uusiotunnus='$laskurow[tunnus]'
-										and yhtio='$kukarow[yhtio]'
-										and tyyppi='L'
-										ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
+										LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+										WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
+										and tilausrivi.yhtio		 = '$kukarow[yhtio]'
+										and tilausrivi.tyyppi		 = 'L'
+										ORDER BY tilausrivi.otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 							$result = mysql_query($query) or pupe_error($query);
 
 							$sivu 	= 1;

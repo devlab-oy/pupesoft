@@ -97,14 +97,15 @@
 				$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 
 				// haetaan tilauksen kaikki rivit
-				$query = "  SELECT *, $sorttauskentta
+				$query = "	SELECT tilausrivi.*, tilausrivin_lisatiedot.osto_vai_hyvitys, $sorttauskentta
 							FROM tilausrivi
+							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 							WHERE $where
-							and yhtio  = '$kukarow[yhtio]'
-							and tyyppi = 'L'
-							ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
+							and tilausrivi.yhtio		 = '$kukarow[yhtio]'
+							and tilausrivi.tyyppi		 = 'L'
+							ORDER BY tilausrivi.otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 				$result = mysql_query($query) or pupe_error($query);
-
+				
 				//kuollaan jos yhtään riviä ei löydy
 				if (mysql_num_rows($result) == 0) {
 					echo t("Laskurivejä ei löytynyt");

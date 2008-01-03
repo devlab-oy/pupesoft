@@ -231,11 +231,13 @@
 								and tilausrivi_osto.laskutettuaika != '0000-00-00'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 					
-					while($sarjarow = mysql_fetch_array($sarjares)) {												
-						$kehahin += sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]);
-					}
+					if (mysql_num_rows($sarjares) > 0) {
+						while($sarjarow = mysql_fetch_array($sarjares)) {												
+							$kehahin += sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]);
+						}
 										
-					$kehahin = sprintf('%.2f', ($kehahin / mysql_num_rows($sarjares)));					
+						$kehahin = sprintf('%.2f', ($kehahin / mysql_num_rows($sarjares)));					
+					}
 				}
 				else {
 					$kehahin = sprintf('%.2f', $row["kehahin"]);

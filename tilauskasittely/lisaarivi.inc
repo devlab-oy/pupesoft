@@ -51,6 +51,14 @@
 		$paikka	= $olparow["olpaikka"];
 	}
 	
+	// Päivämäärien oikeellisuustsekki
+	if (!checkdate(substr($toimaika,5,2), substr($toimaika,8,2), substr($toimaika,0,4))) {
+		$toimaika = date("Y-m-d");
+	}
+	if (!checkdate(substr($kerayspvm,5,2), substr($kerayspvm,8,2), substr($kerayspvm,0,4))) {
+		$kerayspvm = date("Y-m-d");
+	}
+
 	// Jos yhtiön saldokäsittely on ajasta riippuvainen
 	if ($yhtiorow["saldo_kasittely"] == "T") {
 		$saldoaikalisa = $kerayspvm;

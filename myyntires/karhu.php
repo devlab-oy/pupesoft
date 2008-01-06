@@ -1,6 +1,10 @@
 <?php
 
-require ("../inc/parametrit.inc");
+if (strpos($_SERVER['SCRIPT_NAME'], "karhu.php")  !== FALSE) {
+	require ("../inc/parametrit.inc");
+}
+
+
 
 echo "<font class='head'>".t("Karhu")."</font><hr>";
 
@@ -206,6 +210,7 @@ if($tee == "KARHUAKAIKKI") {
 		}
 
 	}
+	unset($karhuttavat);
 }
 
 if ($tee == 'KARHUA' and $karhuttavat[0] == "") {

@@ -168,15 +168,43 @@ if ($tee == "ALOITAKARHUAMINEN") {
 
 	if (mysql_num_rows($result) > 0) {
 		$karhuttavat = array();
-
+		unset($pdf);
 		while($karhuttavarow = mysql_fetch_array($result)) {
 			$karhuttavat[] = $karhuttavarow["karhuttavat"];
 		}
-		$tee = "KARHUA";
+		if($karhuakaikki != "") {
+			$tee = "KARHUAKAIKKI";
+		} 
+		else {
+			$tee = "KARHUA";
+		}
 	}
 	else {
 		echo "<font class='message'>".t("Ei karhuttavia asiakkaita")."!</font><br><br>";
 		$tee = "";
+	}
+}
+
+if($tee == "KARHUAKAIKKI") {
+
+	foreach($karhuttavat as $murr) {
+		
+		if(strpos(",", $murr)) {
+			$lasku_tunnus = implode(",", $murr);
+		}
+		else {
+			$lasku_tunnus = array($murr);
+		}
+
+		try {
+			// koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
+			require ('paperikarhu.php');
+
+		} catch (Exception $e) {
+			$ekarhu_success = false;
+			echo "<font class='error'>Ei voitu l‰hett‰‰ karhua eKirjeen‰, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
+		}
+
 	}
 }
 

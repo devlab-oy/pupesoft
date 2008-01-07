@@ -495,7 +495,7 @@
 					if ($mukaan == "ytunnus" and $osoitetarrat == "") {
 						if ($group!="") $group .= ",asiakas.tunnus";
 						else $group  .= "asiakas.tunnus";
-						$select .= "concat_ws(' ',asiakas.ytunnus,asiakas.toim_ovttunnus,asiakas.toim_nimi) ytunnus, ";
+						$select .= "concat_ws(' ',asiakas.ytunnus,if(asiakas.toim_ovttunnus='',NULL,asiakas.toim_ovttunnus)) ytunnus, concat_ws('<br>',concat_ws(' ',asiakas.nimi,asiakas.nimitark),if(asiakas.toim_nimi='' and asiakas.nimi!=asiakas.toim_nimi,NULL,concat_ws(' ',asiakas.toim_nimi,asiakas.toim_nimitark))) nimi, ";
 						$order  .= "asiakas.ytunnus,";
 						$gluku++;
 					}
@@ -1009,18 +1009,6 @@
 								}
 							}
 
-							// jos kyseessa on ytunnus, haetaan sen nimi
-							if (mysql_field_name($result, $i) == "ytunnus") {
-								$query = "	SELECT nimi
-											FROM asiakas
-											WHERE yhtio in ($yhtio) and ytunnus='$row[$i]' and ytunnus!='' limit 1";
-								$osre = mysql_query($query) or pupe_error($query);
-								if (mysql_num_rows($osre) == 1) {
-									$osrow = mysql_fetch_array($osre);
-									$row[$i] = $row[$i] ." ". $osrow['nimi'];
-								}
-							}
-
 							// jos kyseessa on myyjä, haetaan sen nimi
 							if (mysql_field_name($result, $i) == "tuotemyyja" or mysql_field_name($result, $i) == "asiakasmyyja") {
 								$query = "	SELECT nimi
@@ -1197,7 +1185,7 @@
 								if (mysql_num_rows($result) <= $rivilimitti) echo "<td valign='top'>$row[$i]</td>";
 
 								if(isset($workbook)) {
-									$worksheet->writeString($excelrivi, $i, $row[$i]);
+									$worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", "\n", $row[$i])));
 								}
 							}
 						}

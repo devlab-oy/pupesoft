@@ -3,11 +3,11 @@
 	// otetaan sis‰‰n voidaan ottaa $myyntirivitunnus tai $ostorivitunnus
 	// ja $from niin tiedet‰‰n mist‰ tullaan ja minne palata
 
-	if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
+	if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE) {
 		require("../inc/parametrit.inc");
 	}
 
-	//	Tarkastetaan k‰sitell‰‰nkˆ lis‰tietoja
+	// Tarkastetaan k‰sitell‰‰nkˆ lis‰tietoja
 	$query = "describe sarjanumeron_lisatiedot";
 	$sarjatestres = mysql_query($query);
 
@@ -18,11 +18,9 @@
 		$sarjanumeronLisatiedot = "";
 	}
 	
-	
 	if ($toiminto == "luouusitulo") {
 		require('sarjanumeroseuranta_luouusitulo.inc');
 	}
-	
 
 	echo "<font class='head'>".t("Sarjanumeroseuranta")."</font><hr>";
 
@@ -223,7 +221,7 @@
 				echo "<td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'></td></tr>";
 				
 				if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
-					if ($muutarow["era_kpl"] >= 0 and $muutarow["myyntirivitunnus"] == 0 and $muutarow["ostorivitunnus"] == 0) {
+					if ($muutarow["era_kpl"] >= 0 and $muutarow["myyntirivitunnus"] == 0 and ($muutarow["ostorivitunnus"] == 0 or $from == "kohdista")) {
 						echo "<tr><th>".t("Er‰n suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$muutarow[era_kpl]'></td></tr>";
 					}
 					else {
@@ -695,9 +693,16 @@
 					WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
 					and sarjanumeroseuranta.tuoteno = '$rivirow[tuoteno]'
 					and sarjanumeroseuranta.ostorivitunnus in (0, $rivitunnus)
-					$lisa
-					GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero
-					$lisa2
+					$lisa";
+					
+		if ($rivirow["sarjanumeroseuranta"] == "S" or $rivirow["sarjanumeroseuranta"] == "T") {
+			$query	.= " GROUP BY sarjanumeroseuranta.ostorivitunnus, sarjanumeroseuranta.sarjanumero ";
+		}
+		else {
+			$query	.= " GROUP BY sarjanumeroseuranta.tunnus ";
+		}
+		
+		$query .= "	$lisa2
 					ORDER BY sarjanumeroseuranta.sarjanumero, sarjanumeroseuranta.tunnus";
 	}
 	elseif($from == "INVENTOINTI") {
@@ -806,7 +811,7 @@
 				}
 			</SCRIPT>";
 
-	if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
+	if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php") {
 		echo "<form name='haku' action='$PHP_SELF' method='post'>";
 		echo "<input type='hidden' name='$tunnuskentta' 	value = '$rivitunnus'>";
 		echo "<input type='hidden' name='from' 				value = '$from'>";
@@ -981,7 +986,7 @@
 		echo "<td valign='top' nowrap>";
 
 		//jos saa muuttaa niin n‰ytet‰‰n muokkaa linkki
-		if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
+		if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php") {
 			echo "<a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=$tuoteno_haku&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat'>".t("Muokkaa")."</a>";
 		}
 		

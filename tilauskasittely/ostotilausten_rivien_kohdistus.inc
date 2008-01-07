@@ -1059,6 +1059,9 @@ if ($tila == '') {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$rivirow[tuoteno]'
 							and $tunken = '$rivirow[rivitunnus]'";
+			
+				$snro_ok = t("S:nro ok");
+				$snro	 = t("S:nro");
 			}
 			else {
 				$query = "	SELECT sum(abs(era_kpl)) kpl, min(sarjanumero) sarjanumero
@@ -1066,15 +1069,19 @@ if ($tila == '') {
 							WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$rivirow[tuoteno]'
 							and $tunken = '$rivirow[rivitunnus]'";
+			
+				$snro_ok = t("E:nro ok");
+				$snro	 = t("E:nro");
 			}
+						
 			$sarjares = mysql_query($query) or pupe_error($query);
 			$sarjarow = mysql_fetch_array($sarjares);
 
 			if ($sarjarow["kpl"] == abs($rivirow["siskpl"])) {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow[sarjanumero]' style='color:00FF00'>Sarjanro OK</font></a>)";
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow[sarjanumero]' style='color:00FF00'>$snro_ok</font></a>)";
 			}
 			else {
-				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow[sarjanumero]' style='color:DD0000'>Sarjanro</a>)";
+				echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=$rivirow[tuoteno]&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&suoratoimitukset=$suoratoimitukset&ojarj=$ojarj$ulisa#$sarjarow[sarjanumero]' style='color:DD0000'>$snro</a>)";
 			}
 		}
 		echo "</$td>";

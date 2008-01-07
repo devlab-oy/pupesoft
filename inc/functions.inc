@@ -1364,7 +1364,7 @@ if (!function_exists("synkronoi")) {
 
 		//	Näillä tarttetaan vähän lisätietoo
 		if($table == "avainsana") {
-			$abulisa = ereg(",(avainsana\|*([\|a-zA-Z]*)),*", $yhtiorow["synkronoi"], $regs);
+			$abulisa = ereg(",(avainsana\|*([\|a-zA-Z_]*)),*", $yhtiorow["synkronoi"], $regs);
 
 			$lajit = explode("|",strtolower($regs[2]));
 			

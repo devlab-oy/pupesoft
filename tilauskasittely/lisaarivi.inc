@@ -814,6 +814,7 @@
 										$trivinrow = mysql_fetch_array($triviresult);
 										
 										$rivinumero = $trivinrow["trivinro"]+1;
+										$tilrivinumero = $rivinumero;
 									}
 									else {
 										$rivinumero = $tilrivinumero;

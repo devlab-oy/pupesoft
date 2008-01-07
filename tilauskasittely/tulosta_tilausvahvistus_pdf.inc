@@ -647,18 +647,39 @@
 		}
 		
 		//generoidaan lähetteelle ja keräyslistalle rivinumerot
-		$query = "  SELECT tilausrivi.*,
-					round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
-					round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
-					$sorttauskentta,
-					if(tilausrivi.var='J', 1, 0) jtsort
-					FROM tilausrivi
-					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-					JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-					WHERE $wherelisa
-					and tilausrivi.yhtio = '$kukarow[yhtio]'
-					$tyyppilisa
-					ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+		//Rivit groupataan tilausvahvistukselle
+		if (strpos(" ".$laskurow['tilausvahvistus'],'Y')) {
+			$query = "  SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tilaajanrivinro, tilausrivi.otunnus, sum(tilausrivi.varattu) varattu,
+						sum(tilausrivi.kpl) kpl, sum(tilausrivi.jt) jt, sum(tilausrivi.hinta), tilausrivi.netto, tilausrivi.ale, min(tilausrivi.tunnus) tunnus, tilausrivi.toimaika, tilausrivi.hinta,
+						sum(tilausrivi.tilkpl) tilkpl, tilausrivi.keratty, tilausrivi.var, tilausrivi.yksikko,
+						sum(round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]')) ovhhinta,
+						sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]')) rivihinta,
+						$sorttauskentta,
+						if(tilausrivi.var='J', 1, 0) jtsort
+						FROM tilausrivi
+						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+						JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+						WHERE $wherelisa
+						and tilausrivi.yhtio = '$kukarow[yhtio]'
+						$tyyppilisa
+						GROUP BY tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.kommentti, tilausrivi.tilaajanrivinro, tilausrivi.otunnus, tilausrivi.netto, tilausrivi.ale, tilausrivi.toimaika, tilausrivi.hinta, tilausrivi.keratty, tilausrivi.var, tilausrivi.yksikko
+						ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+		}
+		else {
+			$query = "  SELECT tilausrivi.*,
+						round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
+						round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
+						$sorttauskentta,
+						if(tilausrivi.var='J', 1, 0) jtsort
+						FROM tilausrivi
+						JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+						JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+						WHERE $wherelisa
+						and tilausrivi.yhtio = '$kukarow[yhtio]'
+						$tyyppilisa
+						ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
+		}	
+		
 		$riresult = mysql_query($query) or pupe_error($query);
 
 		//generoidaan rivinumerot

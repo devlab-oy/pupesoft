@@ -81,6 +81,8 @@
 				
 	if ($lisa == "" and ($tee != 'laheta' or $tee != 'lahetalista')) {
 		$limit = " LIMIT 200 ";
+	} else {
+		$limit = " ";
 	}
 
 				

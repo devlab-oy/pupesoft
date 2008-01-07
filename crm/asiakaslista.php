@@ -77,10 +77,12 @@
 					$lisa";
 		$tiednimi = "viikkosuunnitelma.xls";
 	}			
+
 				
-	if ($lisa == "") {
+	if ($lisa == "" and ($tee != 'laheta' or $tee != 'lahetalista')) {
 		$limit = " LIMIT 200 ";
 	}
+
 				
 	$query .= "$ryhma ORDER BY $jarjestys $limit";
 	$result = mysql_query($query) or pupe_error($query);
@@ -89,37 +91,37 @@
 	if ($tee == 'laheta' or $tee == 'lahetalista') {
 		
 		if ($tee == "lahetalista") {
-			$liite = "paikka\tytunnus\tnimi\tnimitark\tosoite\tpostino\tpostitp\tmaa\ttoim_nimi\ttoim_nimitark\ttoim_osoite\ttoim_postino\ttoim_postitp\ttoim_maa\tpuhelin\tfax\temail\tosasto\tpiiri\tryhma\tfakta\ttoimitustapa\r\n";
+			$liite = "paikka\tytunnus\tnimi\tnimitark\tosoite\tpostino\tpostitp\tmaa\ttoim_nimi\ttoim_nimitark\ttoim_osoite\ttoim_postino\ttoim_postitp\ttoim_maa\tpuhelin\tfax\temail\tosasto\tpiiri\tryhma\tfakta\ttoimitustapa\n";
 		}
 		else {
-			$liite = "postitp\tpostino\tytunnus\tyhtio\tasiakasnro\tnimi\tpvm\tkampanjat\tpvm käyty\tkm\tlähtö\tpaluu\tpvraha\tkommentit\r\n";
+			$liite = "postitp\tpostino\tytunnus\tyhtio\tasiakasnro\tnimi\tpvm\tkampanjat\tpvm käyty\tkm\tlähtö\tpaluu\tpvraha\tkommentit\n";
 		}
 		while ($trow=mysql_fetch_array ($result)) {
 			for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
 				$liite .= $trow[$i]."\t";
 			}
-			$liite .= "\r\n";
+			$liite .= "\n";
 		}
 						
 		$bound = uniqid(time()."_") ;
 		
-		$header  = "From: <$yhtiorow[postittaja_email]>\r\n";
-		$header .= "MIME-Version: 1.0\r\n" ;
-		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\r\n" ;
+		$header  = "From: <$yhtiorow[postittaja_email]>\n";
+		$header .= "MIME-Version: 1.0\n" ;
+		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 		
-		$content = "--$bound\r\n" ;
+		$content = "--$bound\n" ;
 		
-		$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\r\n";
-		$content .= "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
-		$content .= "\r\n\r\n"; 
+		$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
+		$content .= "Content-Transfer-Encoding: quoted-printable\n\n";
+		$content .= "\n\n"; 
 		
-		$content .= "--$bound\r\n" ;
+		$content .= "--$bound\n" ;
 					
-		$content .= "Content-Type: application/vnd.ms-excel\r\n" ;
-		$content .= "Content-Transfer-Encoding: base64\r\n" ;
-		$content .= "Content-Disposition: attachment; filename=\"".$tiednimi."\"\r\n\r\n";
+		$content .= "Content-Type: application/vnd.ms-excel\n" ;
+		$content .= "Content-Transfer-Encoding: base64\n" ;
+		$content .= "Content-Disposition: attachment; filename=\"".$tiednimi."\"\n\n";
 		$content .= chunk_split(base64_encode($liite));
-		$content .= "\r\n";
+		$content .= "\n";
 					
 		$to = $kukarow['eposti'];
 		

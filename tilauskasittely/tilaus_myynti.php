@@ -2176,12 +2176,12 @@ if ($tee == '') {
 			if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
 
 				// tutkitaan ollaanko siellä alv-rekisteröity
-				$query = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
+				$query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
 				$alhire = mysql_query($query) or pupe_error($query);
 
 				// ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
 				if (mysql_num_rows($alhire) == 1) {
-					$query = "select * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$tilausrivi[tuoteno]' limit 1";
+					$query = "SELECT * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$tilausrivi[tuoteno]' limit 1";
 					$alhire = mysql_query($query) or pupe_error($query);
 
 					// ei löytynyt alvia, se on pakko löytyä
@@ -2893,22 +2893,6 @@ if ($tee == '') {
 			}
 			else {
 				$saldoaikalisa = "";
-			}
-
-			// Tarvitaan jos laskun valuutta on eri kuin hinnaston valuutta
-			function hinnaston_alv ($laskurow, $trow, $kpl, $netto) {
-				global $kukarow, $yhtiorow;
-
-				if ($kukarow["extranet"] != "") {
-					require ("alehinta.inc");
-					require ("alv.inc");
-				}
-				else {
-					require ("inc/alehinta.inc");
-					require ("tilauskasittely/alv.inc");
-				}
-
-				return $alehinta_val;
 			}
 
 			echo "<br><table>";
@@ -3703,8 +3687,11 @@ if ($tee == '') {
 					$hinta = $row["hinta"];
 					$netto = $row["netto"];
 					$kpl   = $row["varattu"]+$row["jt"];
-
-					if (hinnaston_alv($laskurow, $trow, $kpl, $netto) != $laskurow["valkoodi"]) {
+					
+					// Tarvitaan jos laskun valuutta on eri kuin hinnaston valuutta					
+					list(, , , , $alehinta_val) = alehinta($laskurow, $trow, $kpl, $netto, '', '');
+					
+					if ($alehinta_val != $laskurow["valkoodi"]) {
 						$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
 					}
 					

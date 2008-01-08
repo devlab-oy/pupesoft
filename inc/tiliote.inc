@@ -672,6 +672,40 @@
 				echo "<tr><th colspan='5'>".t("Otot")." $jakso ".t("alusta")." kpl " . substr($tietue,40,8) * 1 . "</th><th style='text-align:right;'>" . substr($tietue,48,19) / 100 . "</th></tr>";
 			}
 			break;
+		case 'T60':
+			if (substr($tietue,6,3) == '200') { // Pankkikohtainen tieto! Tässä kuvataan Nordea
+				echo "<tr><td colspan='6'>" . t("Koronlakentatiedot") . "</td></tr>";
+				echo "<tr><th colspan='6'>" . t("Korkokausi") . " " . substr($tietue,11,13) . "</th></tr>";
+				if (substr($tietue,24,1) == '1') {
+					echo "<tr><th colspan='6'>" . t("Talletuksen keskisaldo") . " " . substr($tietue,25,1) . substr($tietue,26,18) / 100 . "</th></tr>";
+				}
+				if (substr($tietue,44,1) == '1') {
+					echo "<tr><th colspan='6'>" . t("Talletuskorko") . " " . substr($tietue,45,7) / 1000 . "</th></tr>";
+				}
+				if (substr($tietue,52,1) == '1') {
+					echo "<tr><th colspan='6'>" . t("Luoton keskisaldo") . " " . " " . substr($tietue,53,1) . substr($tietue,54,18) / 100 . "</th></tr>";
+				}
+				if (substr($tietue,72,1) == '1') {
+					echo "<tr><th colspan='6'>" . t("Luottokorko") . " " . substr($tietue,73,7) / 1000 . "</th></tr>";
+				}
+				if (substr($tietue,80,1) == '1') {
+					echo "<tr><th colspan='6'>" . t("Limiitinkäyttöaste") . " " . substr($tietue,81,7) / 1000  . "</th></tr>";
+				}
+				if (substr($tietue,88,1) == '1') {
+					echo "<tr><th colspan='6'>" . t("Pysyväsaldo") . " " . substr($tietue,89,1) . substr($tietue,90,18) / 100 . "</th></tr>";
+				}
+				if (substr($tietue,108,1) == '1') {
+					echo "<tr><th colspan='6'>" . t("Talletusviitekorko") . " '" . substr($tietue,109,35) . " " . substr($tietue,144,7) / 1000 . "</th></tr>";
+				}
+				if (substr($tietue,151,1) == '1') {
+					echo "<tr><th colspan='6'>" . t("Luottoviitekorko") . " '" . substr($tietue,152,35) . " " . substr($tietue,187,7) / 1000 . "</th></tr>";
+				}
+			}
+			else {
+				echo "<tr><td colspan='6'>";
+				echo t("Tietue T60 ei ole tunnistettu pankkiryhmälle").": ". substr($tietue,6,3) . "</td></tr>";	
+			}	
+			break;
 		case '$$E':
 			break;
 		case 'EOF':

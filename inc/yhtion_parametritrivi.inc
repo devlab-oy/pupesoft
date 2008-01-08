@@ -1370,4 +1370,28 @@
 		$tyyppi = 5;
 	}
 	
+	if (mysql_field_name($result, $i) == "korvaavan_hinta_ylaraja") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$apu = $trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = ''>".t("Korvaava tuote myyd‰‰n hinnasta riippumatta")."</option>";
+		$ulos .= "<option value = '10' $sel[10]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "10%")."</option>";	
+		$ulos .= "<option value = '20' $sel[20]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "20%")."</option>";
+		$ulos .= "<option value = '30' $sel[30]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "30%")."</option>";
+		$ulos .= "<option value = '40' $sel[40]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "40%")."</option>";
+		$ulos .= "<option value = '50' $sel[50]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "50%")."</option>";
+		$ulos .= "<option value = '60' $sel[60]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "60%")."</option>";
+		$ulos .= "<option value = '70' $sel[70]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "70%")."</option>";
+		$ulos .= "<option value = '80' $sel[80]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "80%")."</option>";
+		$ulos .= "<option value = '90' $sel[90]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "90%")."</option>";
+		$ulos .= "<option value = '100' $sel[100]>".sprintf(t('Korvaava tuote myyd‰‰n jos se on korkeintaan %s kalliimpi'), "100%")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 ?>

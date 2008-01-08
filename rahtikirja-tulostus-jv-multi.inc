@@ -116,25 +116,22 @@
 			$rahdinhinta = "<li>Rahdin hinta: $rahti[rahtihinta] $yhtiorow[valkoodi] ($kilotyht kg)";
 
 			// kirjoitetaan hintarivi ekalle otsikolle
-			$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+			$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
 			$rhire = mysql_query($query) or pupe_error($query);
 			$trow  = mysql_fetch_array($rhire);
 
 			$otunnus			= $oikeaotsiko[0];
 			$laskurow["alv"]	= $row["alv"];
-			$hinta				= $rahti["rahtihinta"]; // rahtihinta
 			$laskurow["tila"]	= "L";
 			$laskurow["vienti"]	= $row["vienti"];
-			$alv 				= '';
 			$nimitys			= "$toimitustapa";
 			$kommentti			= "";
 
-			require("tilauskasittely/alv.inc");
-
-			$rahtihinta			= $hinta; // rahtihinta tarvitaan matikassa
+			list($rahtihinta, $alv) = alv($laskurow, $trow, $rahti["rahtihinta"], '', '');
 
 			if ($laskutettu == "ei") {
-				$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  ('$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+				$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+							values  ('$rahtihinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 				$addtil = mysql_query($query) or pupe_error($query);
 			}
 		}
@@ -150,16 +147,12 @@
 
 	$otunnus			= $oikeaotsiko[0];
 	$laskurow["alv"]	= $row["alv"];
-	$hinta				= $toitarow['jvkulu']; // jv kulu
 	$laskurow["tila"]	= "L";
 	$laskurow["vienti"]	= $row["vienti"];
-	$alv 				= 'X';
 	$nimitys			= "Jälkivaatimuskulu";
 	$kommentti			= "";
 
-	require("tilauskasittely/alv.inc");
-
-	$jvhinta			= $hinta; // jv kulu tarvitaan matikassa
+	list($jvhinta, $alv) = alv($laskurow, $trow, $toitarow['jvkulu'], '', '');
 
 	if ($laskutettu == "ei") {
 
@@ -169,7 +162,8 @@
 
 		echo "<font class='message'>".t("Laskutetaan tilaus")."...<br></font>";
 
-		$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  ('$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+		$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+					values ('$jvhinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 		$addtil = mysql_query($query) or pupe_error($query);
 
 		// annetaan tässä vaiheessa jälkivaatimukselle lasku- ja viitenumero...

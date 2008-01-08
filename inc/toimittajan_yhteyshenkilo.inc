@@ -25,6 +25,17 @@
 	}
 	else {
 
+		if($oletusyhteyshenkilo != "") {
+			$query = "	SELECT tunnus
+						FROM yhteyshenkilo
+						WHERE yhtio = '$kukarow[yhtio]' and oletusyhteyshenkilo != '' and liitostunnus = '$tunnus' and tunnus != '$henkilotunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result) > 0) {
+				echo "<font class='error'>".t("Oletusyhteyshenkilö on jo valittu")."!</font>";
+				$tee = "";
+			}
+		}
+
 		// päivitetään toimittaja
 		if ($tee == "update") {
 			
@@ -39,6 +50,7 @@
 						www 			= '$www',
 						fakta 			= '$fakta',
 						tilausyhteyshenkilo = '$tilausyhteyshenkilo',
+						oletusyhteyshenkilo = '$oletusyhteyshenkilo',						
 						muuttaja		= '$kukarow[kuka]', 
 						muutospvm		= now()
 						where yhtio = '$kukarow[yhtio]' 
@@ -73,6 +85,7 @@
 						www 			= '$www',
 						fakta 			= '$fakta',
 						tilausyhteyshenkilo = '$tilausyhteyshenkilo',
+						oletusyhteyshenkilo = '$oletusyhteyshenkilo',
 						laatija			= '$kukarow[kuka]',
 						luontiaika		= now()";
 			$result = mysql_query($query) or pupe_error($query);
@@ -95,7 +108,15 @@
 			echo "<tr><th>".t("www")."</th>					<td><input type='text' name='www' 					value='$www'></td></tr>";
 			echo "<tr><th>".t("fakta")."</th>				<td><input type='text' name='fakta'			 		value='$fakta'></td></tr>";
 			echo "<tr><th>".t("Tilausyhteyshenkilö")."</th>	<td><select name='tilausyhteyshenkilo'><option value = ''>".t("Ei")."</option><option value = 'o'>".t("Kyllä")."</option></select></td></tr>";
-
+			
+			$query = "	SELECT tunnus
+						FROM yhteyshenkilo
+						WHERE yhtio = '$kukarow[yhtio]' and oletusyhteyshenkilo != '' and liitostunnus = '$tunnus' and tunnus != '$trow[tunnus]'";
+			$tarkres = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($tarkres) == 0) {
+				echo "<tr><th>".t("Oletusyhteyshenkilö")."</th><td><input type='checkbox' name='oletusyhteyshenkilo'></td></tr>";
+			}			
+			
 			echo "</table><hr>";
 
 			echo "<input type='hidden' name='tee' value='insert'>";
@@ -135,7 +156,27 @@
 				}
 				
 				echo "<tr><th>".t("Tilausyhteyshenkilö")."</th>	<td><select name='tilausyhteyshenkilo'><option value = '' $sela>".t("Ei")."</option><option value = 'o' $sel>".t("Kyllä")."</option></select></td></tr>";
-
+				
+				$query = "	SELECT tunnus
+							FROM yhteyshenkilo
+							WHERE yhtio = '$kukarow[yhtio]' and oletusyhteyshenkilo != '' and liitostunnus = '$tunnus' and tunnus != '$trow[tunnus]'";
+				$tarkres = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($tarkres) > 0) {
+					$state = "DISABLED";
+				}
+				else {
+					$state = "";
+				}
+				
+				if($trow["oletusyhteyshenkilo"] != "") {
+					$sel = "CHECKED";
+				}
+				else {
+					$sel = "";
+				}
+				
+				echo "<tr><th>".t("Oletusyhteyshenkilö")."</th><td><input type='checkbox' name='oletusyhteyshenkilo' $sel $state></td></tr>";
+				
 				echo "<tr><td class='back'>";
 				echo "<input type='hidden' name='tee' value='update'>";
 				echo "<input type='hidden' name='toim' value='$aputoim'>";

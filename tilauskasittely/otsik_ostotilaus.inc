@@ -310,7 +310,7 @@
 				echo "<option value = ''>".t("Ei valintaa")."</option>";
 				while ($yhteysrow = mysql_fetch_array($yhteysresult)) {
 					$sela = "";
-					if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"]) {
+					if ($yhteysrow["nimi"] == $srow["tilausyhteyshenkilo"] or ($kukarow["kesken"] == 0 and $yhteysrow["oletusyhteyshenkilo"] != "")) {
 						$sela = "SELECTED";
 						$srow["tilausyhteyshenkilo"] = "";
 					}

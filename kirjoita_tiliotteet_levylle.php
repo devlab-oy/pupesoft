@@ -8,7 +8,7 @@
 		$lisa='';
 		if ($kausi != '') $lisa = "and DATE_FORMAT(alku, '%Y-%m') = '$kausi'";
 		
-		$query = "SELECT distinct aineisto
+		$query = "SELECT distinct aineisto, tilino
 					  FROM tiliotedata
 					  WHERE yhtio='$kukarow[yhtio]' and tyyppi = '1' $lisa";
 		$result = mysql_query ($query)
@@ -24,7 +24,7 @@
 		
 		$aineisto='';
 		while ($tilioterow=mysql_fetch_array($result)) {
-			if ($aineisto!=$tilioterow['aineisto']) {
+			if ($aineisto!=$tilioterow['aineisto'] or $tilino!=$tilioterow['tilino']) {
 				$sisalto = $otsikko . $sisalto;
 				if ($sisalto != '') {
 					$sisalto .= "</table>";
@@ -33,6 +33,7 @@
 					$sisalto='';
 				}
 				$aineisto=$tilioterow['aineisto'];
+				$tilino!=$tilioterow['tilino'];
 			}
 			$tietue = $tilioterow['tieto'];
 			require "inc/tiliote-plain.inc";

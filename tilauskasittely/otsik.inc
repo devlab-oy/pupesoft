@@ -336,7 +336,6 @@
 				$result = mysql_query($query) or pupe_error($query);
 
 				$tiedot_laskulta = "YES";
-
 			}
 
 			if (substr($asiakasid,0,1) == "£") {
@@ -1891,16 +1890,17 @@
 		$laskunalv = $alv;
 
 		// HUOM!!! Asiakkaanvaihto ei nyt tällä hetkellä mene tähän haaraan. Vaatii redesignin!!!!!
-		//tutkitaan onko ytunnus-, alvi- tai vienti-kenttä vaihtunut
-		if ((int) $kukarow["kesken"] != 0 and ($apuro['liitostunnus'] != $asiakasid or $apuro['alv'] != $alv or $apuro['vienti'] != $vienti)) {
+		//tutkitaan onko ytunnus-, alvi- tai vienti-kenttä vaihtunut		
+		if ((int) $kukarow["kesken"] != 0 and ($from == 'vaihdaasiakas' or $apuro['liitostunnus'] != $asiakasid or $apuro['alv'] != $alv or $apuro['vienti'] != $vienti)) {
+						
 			// Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan
 			// Netotettuja rivejä ei päivitetä
-			$query = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
+			$query = "SELECT * from tilausrivi where yhtio='$kukarow[yhtio]' and otunnus='$kukarow[kesken]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			while ($row = mysql_fetch_array($result)) {
 
-				$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+				$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 				$tres  = mysql_query($query) or pupe_error($query);
 				$trow  = mysql_fetch_array($tres);
 
@@ -1910,30 +1910,28 @@
 				$laskurow['liitostunnus'] = $asiakasid;
 				$laskurow['maa']          = $maa;
 
-				$kpl	= $row['tilkpl'];
-				$debug	= 0;
-				$netto	= $row['netto'];
-
 				// Hinnat lasketaan uudestaan vain jos asiakas vaihdetaan
 				// Ei esim jos vain alvi tai vientikenttää muutetaan
-				if ($apuro["liitostunnus"] != $asiakasid and $asiakasid > 0) {
+				if (($from == 'vaihdaasiakas' or $apuro["liitostunnus"] != $asiakasid) and $asiakasid > 0) {
 
-					if ($netto != "N") {
+					if ($row['netto'] == "") {
 						$hinta 	= '';
 						$ale	= '';
 					}
 					else {
 						//Alvihinta korjataan vain jos yhtiölla on verolliset myyntihinnat
 						if ($row["alv"] != '' and $row["alv"] < 500 and $yhtiorow["alv_kasittely"] == "" ) {
-							$hinta = sprintf('%.2f',round($row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100),2));
+							$hinta = sprintf('%.'.$yhtiorow["hintapyoristys"].'f', $row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100));
 						}
 						else {
 							$hinta = $row['hinta'];
 						}
+						
 						$ale = $row['ale'];
 					}
 
-					require ("../inc/alehinta.inc"); // haetaan tuotteelle asiakaskohtaisia hintoja..
+					// haetaan tuotteelle asiakaskohtaisia hintoja..
+					list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $row['tilkpl'], $row['netto'], $hinta, $ale);
 
 					$uusihinta	= '';
 					$uusiale 	= '';
@@ -1955,26 +1953,24 @@
 				else {
 					//Asiakas ei vaihtunut hinnat pysyvät samoina, alvia joudumme ehkä korjaamaan
 					if ($row["alv"] != '' and $row["alv"] < 500 and $yhtiorow["alv_kasittely"] == "") {
-						$uusihinta = sprintf('%.2f',round($row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100),2));
+						$uusihinta = sprintf('%.'.$yhtiorow["hintapyoristys"].'f', $row['hinta'] / (1+$row['alv']/100) * (1+$trow["alv"]/100));
 					}
 					else {
 						$uusihinta = $row['hinta'];
 					}
+					
 					$uusiale = $row['ale'];
 				}
 
 				//lasketaan alvit
-				$hinta 	= $uusihinta;
-
 				if ($row["alv"] < 500) {
 					$alv = "";
 				}
 				else {
 					$alv = 500;
 				}
-
-				require ("alv.inc");
-				$uusihinta = $hinta;
+				
+				list($uusihinta, $alv) = alv($laskurow, $trow, $uusihinta, $alv, $alehinta_alv);
 
 				$query = "UPDATE tilausrivi set hinta='$uusihinta', ale='$uusiale', netto='$netto', alv='$alv' where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";
 				$tres  = mysql_query($query) or pupe_error($query);

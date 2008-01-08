@@ -828,7 +828,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$funktio($t, $i, $result, $tunnus, &$virhe);
 
 					if($virhe[$i] != "") {
-						echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
+						echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".mysql_field_name($result, $i).": ".$virhe[$i]." ($t[$i])</font><br>";
 						$errori = 1;
 					}
 					

@@ -170,7 +170,7 @@ if(!function_exists("asiakastarkista")) {
 
 		}
 
-		if (mysql_field_name($result, $i) == "maksuehto" and trim($t[$i]) != '') {
+		if (mysql_field_name($result, $i) == "maksuehto" and $t[$i] > 0) {
 
 			$query   = "select tunnus from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$t[$i]'
 						and (sallitut_maat = '' or sallitut_maat like '%$trow[maa]%')";

@@ -123,7 +123,7 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
 		
-		//	Tehd‰‰n muuttujista referenssit jolla luomme otsikolliset avaimet!
+		//	Tehd‰‰n muuttujista linkit jolla luomme otsikolliset avaimet!
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
 			$t[mysql_field_name($result, $i)] = &$t[$i];
 		}

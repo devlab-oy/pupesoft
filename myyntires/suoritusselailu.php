@@ -396,13 +396,13 @@
 		echo "<th></th></tr>";
 		
 		echo "<tr><td></td>";
-		echo "<td valign='top'><input type='text' size='10' name='haku[nimi_maksaja]' value='$haku[nimi_maksaja]'><br><input type='text' size='10' name='haku[nimi]' value='$haku[nimi]'></td>";
-		echo "<td valign='top'><input type='text' size='10' name='haku[kirjpvm]' value='$haku[kirjpvm]'></td>";
-		echo "<td valign='top'><input type='text' size='5'  name='haku[summa]' value='$haku[summa]'></td>";
-		echo "<td valign='top'><input type='text' size='5'  name='haku[valkoodi]' value='$haku[valkoodi]'></td>";
-		echo "<td valign='top'><input type='text' size='5'  name='haku[tilino]' value='$haku[tilino]'></td>";
-		echo "<td valign='top'><input type='text' size='15' name='haku[viite]' value='$haku[viite]'><br><input type='text' size='15' name='haku[viesti]' value='$haku[viesti]'></td>";
-		echo "<td valign='top'><input type='text' size='5'  name='haku[ttilino]' value='$haku[$i]'></td>";
+		echo "<td valign='top'><input type='text' size='10' name='haku[suoritus.nimi_maksaja]' value='".$haku["suoritus.nimi_maksaja"]."'><br><input type='text' size='10' name='haku[asiakas.nimi]' value='".$haku["asiakas.nimi"]."'></td>";
+		echo "<td valign='top'><input type='text' size='10' name='haku[suoritus.kirjpvm]' value='".$haku["suoritus.kirjpvm"]."'></td>";
+		echo "<td valign='top'><input type='text' size='5'  name='haku[suoritus.summa]' value='".$haku["suoritus.summa"]."'></td>";
+		echo "<td valign='top'><input type='text' size='5'  name='haku[suoritus.valkoodi]' value='".$haku["suoritus.valkoodi"]."'></td>";
+		echo "<td valign='top'><input type='text' size='5'  name='haku[suoritus.tilino]' value='".$haku["suoritus.tilino"]."'></td>";
+		echo "<td valign='top'><input type='text' size='15' name='haku[suoritus.viite]' value='".$haku["suoritus.viite"]."'><br><input type='text' size='15' name='haku[suoritus.viesti]' value='".$haku["suoritus.viesti"]."'></td>";
+		echo "<td valign='top'><input type='text' size='5'  name='haku[tiliointi.tilino]' value='".$haku["tiliointi.tilino"]."'></td>";
 		echo "<td valign='top'></td>";
 		echo "<td valign='top'><input type='submit' value='".t("Etsi")."'></td></tr>";
 		echo "</form>";

@@ -1,7 +1,10 @@
 <?php
 
-	if (mysql_field_name($result, $i) == "tunnus") {
-		$tunnus = $t[$i];
+if(!function_exists("factoringtarkista")) {
+	function factoringtarkista (&$t, $i, $result, $tunnus, &$virhe) {
+		global $kukarow, $yhtiorow, $alias_set;
+		
 	}
+}
 
 ?>

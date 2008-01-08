@@ -1,66 +1,70 @@
 <?php
 
-	if (mysql_field_name($result, $i) == "nimi") {
-		if (trim($t[$i]) == '') {
-			$virhe[$i] = t("Tieto puuttuu");
-			$errori = 1;
+if(!function_exists("yrititarkista")) {
+	function yrititarkista (&$t, $i, $result, $tunnus, &$virhe) {
+		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
+		
+		if (mysql_field_name($result, $i) == "nimi") {
+			if (trim($t[$i]) == '') {
+				$virhe[$i] = t("Tieto puuttuu");
+			}
 		}
-	}
 
-	if (mysql_field_name($result, $i) == "oletus_rahatili" or
-		mysql_field_name($result, $i) == "oletus_kulutili" or
-		(mysql_field_name($result, $i) == "oletus_selvittelytili" and $t[$i] != "")) {
+		if (mysql_field_name($result, $i) == "oletus_rahatili" or
+			mysql_field_name($result, $i) == "oletus_kulutili" or
+			(mysql_field_name($result, $i) == "oletus_selvittelytili" and $t[$i] != "")) {
 
-		$query = "	SELECT nimi
-					FROM tili
-					WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
-		$sresult = mysql_query($query) or pupe_error($query);
+			$query = "	SELECT nimi
+						FROM tili
+						WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
+			$sresult = mysql_query($query) or pupe_error($query);
 
-		if (mysql_num_rows($sresult) != 1) {
-			//Olisiko siellä nimi
-			if ($t[$i] != '') {
-				$query = "	SELECT nimi, tilino
-							FROM tili
-							WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
-							ORDER BY tilino";
-				$sresult = mysql_query($query) or pupe_error($query);
-				if (mysql_num_rows($sresult) > 0) {
-					$ulosarray[$i] = "<td><select name='$nimi'><option value = '' $sel>".t("Ei valintaa")."</option>";
-					while ($vrow=mysql_fetch_array($sresult)) {
-						$sel="";
-						if ($trow[$i] == $vrow[0]) {
-							$sel = "selected";
+			if (mysql_num_rows($sresult) != 1) {
+				//Olisiko siellä nimi
+				if ($t[$i] != '') {
+					$query = "	SELECT nimi, tilino
+								FROM tili
+								WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
+								ORDER BY tilino";
+					$sresult = mysql_query($query) or pupe_error($query);
+					if (mysql_num_rows($sresult) > 0) {
+						$ulosarray[$i] = "<td><select name='$nimi'><option value = '' $sel>".t("Ei valintaa")."</option>";
+						while ($vrow=mysql_fetch_array($sresult)) {
+							$sel="";
+							if ($trow[$i] == $vrow[0]) {
+								$sel = "selected";
+							}
+							$ulosarray[$i] .= "<option value = '$vrow[tilino]' $sel>$vrow[tilino] $vrow[nimi]</option>";
 						}
-						$ulosarray[$i] .= "<option value = '$vrow[tilino]' $sel>$vrow[tilino] $vrow[nimi]</option>";
+						$ulosarray[$i] .= "</select></td>";
+						$virhe[$i] = t("Valitse tili");
 					}
-					$ulosarray[$i] .= "</select></td>";
-					$virhe[$i] = t("Valitse tili");
-				}
 
+				}
+				if ($virhe[$i] == '') $virhe[$i] = t("Tili puuttuu tai sitä ei löydy");
 			}
-			if ($virhe[$i] == '') $virhe[$i] = t("Tili puuttuu tai sitä ei löydy");
-			$errori = 1;
 		}
-	}
 
-	if (mysql_field_name($result, $i) == "tilino") {
+		if (mysql_field_name($result, $i) == "tilino") {
 
-		if (strtoupper($yhtiorow['maa']) == 'FI') {
+			if (strtoupper($yhtiorow['maa']) == 'FI') {
 
-			if (is_numeric(substr($t[$i], 0, 1))) {
+				if (is_numeric(substr($t[$i], 0, 1))) {
 
-				$pankkitili = $t[$i];
-				require 'pankkitilinoikeellisuus.php';
+					$pankkitili = $t[$i];
+					require 'pankkitilinoikeellisuus.php';
 
-				if ($pankkitili == '') {
-					$virhe[$i] = "".t("Pankkitili on virheellinen")."";
-					$errori = 1;
-				}
-				else {
-					$t[$i]=$pankkitili;
+					if ($pankkitili == '') {
+						$virhe[$i] = "".t("Pankkitili on virheellinen")."";
+					}
+					else {
+						$t[$i]=$pankkitili;
+					}
 				}
 			}
 		}
 	}
+}
+
 
 ?>

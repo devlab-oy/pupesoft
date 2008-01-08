@@ -1,10 +1,10 @@
 <?php
 
-	//muutetaan pilkut pisteiksi
-	if ((mysql_field_name($result, $i) == "kilotalku") or
-		(mysql_field_name($result, $i) == "kilotloppu") or
-		(mysql_field_name($result, $i) == "rahtihinta")) {
-			$t[$i]=str_replace(",",".",$t[$i]);
+if(!function_exists("rahtimaksuttarkista")) {
+	function rahtimaksuttarkista (&$t, $i, $result, $tunnus, &$virhe) {
+		global $kukarow, $yhtiorow, $alias_set;
+		
 	}
+}
 
 ?>

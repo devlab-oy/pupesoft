@@ -82,7 +82,7 @@
 	}
 	
 	if (mysql_field_name($result, $i) == "laji") {
-		
+
 		//	Lis‰t‰‰n perheeseen joten t‰t‰ listaa ei n‰ytet‰
 		if($lukossa == "") {
 			
@@ -180,11 +180,12 @@
 			if($laji != "")	{
 				$trow[$i] = $laji;
 			}
-			
+
 			$tyyppi = 3;
 		}
 	}
-	
+			
+			
 	if (mysql_field_name($result, $i) == "kieli") {
 		
 		$kieli = $trow[$i];

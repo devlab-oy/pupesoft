@@ -794,14 +794,15 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					$tprow = mysql_fetch_array($tpres);
 					$toimittajatunnus = $tprow["tunnus"];
 				}
-				
+
+				unset($toimerrorit);				
 				$lue_data_result = $result;
 				$lue_datasta = strtoupper(trim($rivi[$postoiminto]));
 				require "inc/".$table."tarkista.inc";
 				$result = $lue_data_result;
-				
+
 				if(count($toimerrorit[$toimtunnus]) > 0) {
-					$virhe[$i] = implode(",", $toimerrorit[$toimtunnus]);
+					echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".implode("<br>", $toimerrorit[$toimtunnus])."</font><br>";
 					$errori = 1;
 				}
 			}
@@ -816,14 +817,22 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					else {
 						$t[$i] = $tarkrow[strtolower(mysql_field_name($result, $i))];
 					}
-
-					$trow = $tarkrow;
-					if(@include("inc/".$table."tarkista.inc")) {
 					
-						if($virhe[$i] != "") {
-							echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
-						}
-					}					
+					$funktio = $table."tarkista";
+					if(!function_exists($funktio)) {
+						require("inc/$funktio.inc");
+					}
+					
+					unset($virhe);
+					
+					$funktio($t, $i, $result, $tunnus, &$virhe);
+
+					if($virhe[$i] != "") {
+						echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".$virhe[$i]."</font><br>";
+						$errori = 1;
+					}
+					
+					//$trow = $tarkrow;
 				}				
 			}
 

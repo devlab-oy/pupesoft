@@ -1,6 +1,6 @@
 <?php
 
-	if ($_POST["toim"] == "yhtion_parametrit") {
+		if ($_POST["toim"] == "yhtion_parametrit") {
 		$apucss = $_POST["css"];
 		$apucsspieni = $_POST["css_pieni"];
 		$apucssextranet = $_POST["css_extranet"];
@@ -123,6 +123,11 @@
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
 		
+		//	Tehdään muuttujista referenssit jolla luomme otsikolliset avaimet!
+		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
+			$t[mysql_field_name($result, $i)] = &$t[$i];
+		}
+		
 		// Tarkistetaan
 		$errori = '';
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
@@ -154,9 +159,19 @@
 				$virhe[$i] = t("Sinulla ei ole oikeutta päivittää tätä kenttää");
 				$errori = 1;
 			}
-
+			
 			$tiedostopaate = "";
-			require "inc/".$toim."tarkista.inc";
+			
+			$funktio = $toim."tarkista";
+			if(!function_exists($funktio)) {
+				require("inc/$funktio.inc");
+			}
+			
+			$funktio($t, $i, $result, $tunnus, &$virhe);
+			
+			if($virhe[$i] != "") {
+				$errori = 1;
+			}
 			
 			//	Tarkastammeko liitetiedoston?
 			if(is_array($tiedostopaate) and is_array($_FILES["liite_$i"])) {

@@ -223,9 +223,16 @@
 			if ($laji == 'OK') 	$tili=$yhtiorow['konserniostovelat'];
 			else 				$tili=$yhtiorow['ostovelat'];
 
+			if($rikki == "on") {
+				$tiliointijoini = "LEFT";
+			}
+			else {
+				$tiliointijoini = "";				
+			}
+
 			$query = "	SELECT lasku.liitostunnus, lasku.*, concat_ws(' ', viite, viesti) maksutieto, tiliointi.summa * -1 avoinsaldo
 						FROM lasku use index (yhtio_tila_tapvm)
-						JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
+						$tiliointijoini JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
 						and lasku.tunnus	= tiliointi.ltunnus
 						and lasku.tapvm		= tiliointi.tapvm
 						and tilino			= '$tili'
@@ -356,6 +363,13 @@
 			elseif ($laji == 'MA') 	$tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
 			else 					$tili = "'$yhtiorow[myyntisaamiset]'";
 
+			if($rikki == "on") {
+				$tiliointijoini = "LEFT";
+			}
+			else {
+				$tiliointijoini = "";				
+			}
+
 			$query = "	SELECT lasku.*,
 						lasku.laskunro maksutieto,
 						lasku.tunnus laskutunnus,
@@ -364,7 +378,7 @@
 						sum(tiliointi.summa) tiliointiavoinsaldo,
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0)) tiliointisumma
 						FROM lasku $indeksi
-						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
+						$tiliointijoini JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
 						and lasku.tunnus		= tiliointi.ltunnus
 						and tiliointi.tilino	in ($tili)
 						and tiliointi.korjattu	= ''
@@ -435,7 +449,13 @@
 						$summa[$trow["valkoodi"]] += round(laskuval($trow["tiliointiavoinsaldo"], $trow["vienti_kurssi"]), 2);	// paljo kirjanpidossa avoimena valuutassa
 					}
 					else {
-						echo "<td align='right' $class>$trow[tiliointisumma]</td>";
+						if($rikki == "on") {
+							echo "<td align='right' $class>$trow[summa]</td>";	
+						}
+						else {
+							echo "<td align='right' $class>$trow[tiliointisumma]</td>";
+						}
+						
 						echo "<td align='right' $class>$trow[tiliointiavoinsaldo]</td>";
 						echo "<td align='right' $class>$yhtiorow[valkoodi]</td>";
 						$summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena

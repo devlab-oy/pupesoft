@@ -520,13 +520,17 @@
 
 			$query 	 = "	SELECT tunnus
 							FROM avainsana
-							WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$karhuviesti' and kieli = '$kieli'";
+							WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$karhuviesti' and kieli = '$kieli'
+							ORDER BY jarjestys DESC
+							LIMIT 1";
 			$res 	 = mysql_query($query) or pupe_error();
 			if(mysql_num_rows($res) == 0) {
 
 				$query 	 = "	SELECT tunnus
 								FROM avainsana
-								WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$karhuviesti' and kieli = '$kieli'";
+								WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$karhuviesti' and kieli = '$kieli'
+								ORDER BY jarjestys ASC
+								LIMIT 1";
 				$res 	 = mysql_query($query) or pupe_error();
 			}			
 		}

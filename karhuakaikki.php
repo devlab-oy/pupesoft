@@ -8,6 +8,14 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 	require ("inc/connect.inc");
 	require ("inc/functions.inc");
 	
+	if($argv[2] != "") {
+		$lpvm_aikaa = $argv[2];
+	}
+
+	if($argv[3] != "") {
+		$kpvm_aikaa = $argv[3];
+	}
+	
 	$query    = "select * from kuka where kuka='$argv[1]' limit 1";
 	$kukares = mysql_query($query) or pupe_error($query);
 	if(mysql_num_rows($kukares) == 0) die("Karhuajaa ei löyry!\n$query\n");

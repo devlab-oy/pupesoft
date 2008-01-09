@@ -10,11 +10,15 @@ echo "<font class='head'>".t("Karhu")."</font><hr>";
 
 //vain n‰in monta p‰iv‰‰ sitten karhutut
 //laskut huomioidaan n‰kym‰sss‰
-$kpvm_aikaa = 10;
+if(!isset($kpvm_aikaa)) {
+	$kpvm_aikaa = 10;
+}
 
 //vain n‰in monta p‰iv‰‰ sitten er‰‰ntyneet
 //laskut huomioidaan n‰kym‰sss‰
-$lpvm_aikaa = 7;
+if(!isset($lpvm_aikaa)) {
+	$lpvm_aikaa = 7;
+}
 
 if ($kukarow["kirjoitin"] == 0) {
 	echo "<font class='error'>".t("Sinulla pit‰‰ olla henkilˆkohtainen tulostin valittuna, ett‰ voit tulostaa karhuja").".</font><br>";

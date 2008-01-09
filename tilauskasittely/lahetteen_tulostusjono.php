@@ -289,7 +289,7 @@
 					if ($tilrow['keraysvko'] != '') {
 						echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["kerayspvm"]));
 						
-						if ($tilrow['keraysvko'] != '6') {
+						if ($tilrow['keraysvko'] != '7') {
 							echo "/".$DAY_ARRAY[$tilrow["keraysvko"]];
 						}
 						
@@ -304,7 +304,7 @@
 						if ($tilrow["toimvko"] != '') {
 							echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]));
 							
-							if ($tilrow['toimvko'] != '6') {
+							if ($tilrow['toimvko'] != '7') {
 								echo "/".$DAY_ARRAY[$tilrow["toimvko"]];
 							}
 							
@@ -693,7 +693,7 @@
 				if ($tilrow['keraysvko'] != '') {					
 					echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["kerayspvm"]));
 					
-					if ($tilrow['keraysvko'] != '6') {
+					if ($tilrow['keraysvko'] != '7') {
 						echo "/".$DAY_ARRAY[$tilrow["keraysvko"]];
 					}
 					
@@ -708,7 +708,7 @@
 					if ($tilrow["toimvko"] != '') {
 						echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]));
 						
-						if ($tilrow['toimvko'] != '6') {
+						if ($tilrow['toimvko'] != '7') {
 							echo "/".$DAY_ARRAY[$tilrow["toimvko"]];
 						}
 						

@@ -181,7 +181,7 @@ if (!function_exists('alku')) {
 			
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 			
-			if ($laskurow['toimvko'] != '6') {
+			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 			
@@ -456,7 +456,7 @@ if (!function_exists('uusi_sivu')) {
 			
 			$taika = t("Vko")." ".date("W", strtotime($laskurow["toimaika"]));
 			
-			if ($laskurow['toimvko'] != '6') {
+			if ($laskurow['toimvko'] != '7') {
 				$taika .= "/".$DAY_ARRAY[$laskurow["toimvko"]];
 			}
 			

@@ -219,7 +219,7 @@
 
 	if(!function_exists("rivi")) {
 		function rivi ($firstpage, $summa) {
-			global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
+			global $firstpage, $pdf, $yhtiorow, $kukarow, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli;
 
 			// siirrytäänkö uudelle sivulle?
 			if ($kala < 123) {

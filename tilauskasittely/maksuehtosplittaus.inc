@@ -74,7 +74,6 @@
 		if ($hyvitetaan != 0) {
 			$otunnus		= $laskurow['tunnus'];
 			$hinta			= $hyvitetaan*-1;
-			$alv 			= '';
 			$trow["alv"]	= $laskurow["alv"];
 			$nimitys		= t("Maksuehtohyvitys");
 
@@ -85,13 +84,14 @@
 				$tuoteno = $yhtiorow["maksuehto_tuotenumero"];
 			}
 
-			require("alv.inc");
+			list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-			$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika) values  ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
+			$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika) 
+						values ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
 			$addtil = mysql_query($query) or pupe_error($query);
 
 			//p‰ivitet‰‰n alkuper‰isen otsikon maksuehto
-			$query = "	update lasku set
+			$query = "	UPDATE lasku set
 						maksuehto 	= '$mrow[osamaksuehto1]'
 						where yhtio	= '$kukarow[yhtio]'
 						and tunnus 	= '$laskurow[tunnus]'";
@@ -171,8 +171,6 @@
 
 
 			$otunnus		= $uusitunnus;
-			$hinta			= $hyvitetaan;
-			$alv 			= '';
 			$trow["alv"]	= $laskurow["alv"];
 			$nimitys		= t("Maksuehtoveloitus");
 
@@ -183,9 +181,10 @@
 				$tuoteno = $yhtiorow["maksuehto_tuotenumero"];
 			}
 
-			require("alv.inc");
+			list($hinta, $alv) = alv($laskurow, $trow, $hyvitetaan, '', '');
 
-			$query  = "insert into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika) values  ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
+			$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti, keratty, kerattyaika, toimitettu, toimitettuaika, toimaika) 
+						values ('$hinta', 'N', '1', '1', '$otunnus', '$tuoteno', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '','$kukarow[kuka]',now(),'$kukarow[kuka]',now(),now())";
 			$addtil = mysql_query($query) or pupe_error($query);
 		}
 	}

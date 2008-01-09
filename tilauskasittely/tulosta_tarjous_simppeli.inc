@@ -264,7 +264,7 @@ if (!function_exists('tulosta_tarjous')) {
 						}
 						$h-=$pdf->ln(1.25);
 						if($row["kommentti"] != "") {
-							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[1]-5));
+							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[1]-5))+1;
 							$pdf->write($h, $nb, 5, $s[1], $row["kommentti"], "snadi", "L", "I");	
 							$h-=$pdf->ln($nb+0.25);
 						}

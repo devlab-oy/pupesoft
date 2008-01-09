@@ -125,7 +125,7 @@
 							$h-=$pdf->ln(0.5);
 
 							//	Sitten yhteyshenkilöitä
-							foreach(array("asiakkaan_viite", "toimittajan_yhteyshenkilö", "asiakkaan_yhteyshenkilö", "asiakkaan_kaupallinen_käsittelijä") as $key) {
+							foreach(array("asiakkaan_tilausnumero", "asiakkaan_viite", "toimittajan_yhteyshenkilö", "asiakkaan_yhteyshenkilö", "asiakkaan_kaupallinen_käsittelijä") as $key) {
 								if($laskurow[$key] != "") {
 									$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 									$h-=$pdf->ln();
@@ -350,7 +350,7 @@
 						}
 
 						if($row["kommentti"] != "") {
-							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5));
+							$nb=$pdf->countParagraphHeight($row["kommentti"], "snadi", ($s[0]-5)+1);
 							$pdf->write($h, $nb, 5+$offset, $s[0], $row["kommentti"], $style_komm, "L", "I");
 							$h-=$pdf->ln($nb);
 						}

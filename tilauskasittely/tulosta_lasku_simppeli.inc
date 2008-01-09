@@ -177,7 +177,7 @@ if (!function_exists('tulosta_lasku')) {
 					$h-=$pdf->ln(0.5);
 
 					//	Sitten yhteyshenkilöitä
-					foreach(array("asiakkaan_viite", "toimittajan_yhteyshenkilö", "asiakkaan_yhteyshenkilö", "asiakkaan_kaupallinen_käsittelijä") as $key) {
+					foreach(array("asiakkaan_tilausnumero", "asiakkaan_viite", "toimittajan_yhteyshenkilö", "asiakkaan_yhteyshenkilö", "asiakkaan_kaupallinen_käsittelijä") as $key) {
 						if($laskurow[$key] != "" or $key == "asiakkaan_viite") {
 							$pdf->writeToTemplate($h, 1, $s[0], 0, t(str_replace("_"," ",ucfirst($key)), $kieli).":", "norm", "L", "B", $tid);
 							$h-=$pdf->ln();					
@@ -469,7 +469,7 @@ if (!function_exists('tulosta_lasku')) {
 				
 				if($row["kommentti"] != "" and $rivi=="isa") {
 					if($laskurow["tila"] != "U") {
-						$nb=$pdf->countParagraphHeight($row["kommentti"], $style_komm, ($s[0]-$abuw));
+						$nb=$pdf->countParagraphHeight($row["kommentti"], $style_komm, ($s[0]-$abuw))+1;
 						$pdf->write($h, $nb, $offset, $s[0], $row["kommentti"], $style_komm, "L", "I");	
 					}
 					else {

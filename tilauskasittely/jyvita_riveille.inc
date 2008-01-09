@@ -80,12 +80,11 @@ else {
 		if (mysql_num_rows($rhire) == 1) {
 			$trow  = mysql_fetch_array($rhire);
 
-			$hinta		= round(($summa - $jysum),$yhtiorow['hintapyoristys']);
-			$alv 		= '';
-			$trow["alv"]= $laskurow["alv"];
-			$nimitys	= $trow["nimitys"];
+			$hinta		 = round(($summa - $jysum),$yhtiorow['hintapyoristys']);
+			$trow["alv"] = $laskurow["alv"];
+			$nimitys	 = $trow["nimitys"];
 
-			require("alv.inc");
+			list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
 			$query  = "INSERT INTO tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) VALUES (now(), '$hinta', 'N', '-1', '-1', '$tilausnumero', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 			$addtil = mysql_query($query) or pupe_error($query);

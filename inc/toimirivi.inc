@@ -373,7 +373,8 @@
 		$ulos .= "<option value='O' $sel[O]>".t("Online toimittaja")."</option>";
 		$ulos .= "<option value='S' $sel[S]>".t("Sisäinen toimittaja")."</option>";
 		$ulos .= "<option value='L' $sel[L]>".t("Kaikkien tuotteiden toimittaja")."</option>";
-		$ulos .= "<option value='P' $sel[P]>".t("Poistettu / Ei käytössä")."</option>";
+		$ulos .= "<option value='K' $sel[K]>".t("Käyttäjä")."</option>";
+		$ulos .= "<option value='P' $sel[P]>".t("Poistettu / Ei käytössä")."</option>";		
 		$ulos .= "</select></td>";
 		
 		$jatko = 0;

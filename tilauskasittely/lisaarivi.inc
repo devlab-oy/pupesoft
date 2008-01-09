@@ -1254,9 +1254,8 @@
 			if ($laskurow['tila'] != 'O') {
 				switch ($var) {
 					case 'J' : // Jälkitoimitukseen
-						
 						// Yhtiön parametri: varaako JT-rivi saldoja
-						if ($yhtiorow["varaako_jt_saldoa"] == "") {
+						if ($yhtiorow["varaako_jt_saldoa"] == "" or $rivityyppi == 'G') {
 							$varattu 	= 0;
 							$jt 		= $kpl;
 						}

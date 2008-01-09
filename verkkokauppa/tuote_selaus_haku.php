@@ -766,22 +766,12 @@
 			// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
 			if($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www")) {
 				if($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
-
-					// siihen tarvitaan:
-					// $laskurow[] (laskun tiedot)
-					// $trow[] (select * from tuote)
-					// $kukarow[] (kuka (tai vastaava))
-					// $kpl (tilatava m‰‰r‰)
-					// $netto = N jos halutaan nettohinta
-					// $debug (jos 1 niin n‰ytet‰‰n tulos)
-					$kpl = 1;
-					unset($hinta);
-					
 					// haetaan tuotteen tiedot
-					$query    = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+					$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
 					$tuoteres = mysql_query($query);
 					$trow = mysql_fetch_array($tuoteres);
-					require("alehinta.inc");	
+					
+					list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');	
 
 					$myyntihinta = number_format($hinta * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}";
 				}

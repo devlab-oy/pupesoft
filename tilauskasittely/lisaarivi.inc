@@ -100,7 +100,8 @@
 	$myy_lapsi_ein 	= array();
 	$lisatyt_rivit1 = array();
 	$lisatyt_rivit2 = array();
-
+	$korkieltokommi = array();
+	
 	// debuggia varten, laita 1 jos haluut messuja
 	$lisaarivi_debug = 0;
 	
@@ -220,9 +221,10 @@
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 
 		// Etsit‰‰n korvaavia tuotteita
-		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "") {
+		if ($trow["ei_saldoa"] == "" and $korvaavakielto == "" and $rivityyppi == 'L') {
+
 			// Tutkitaan ensin saako t‰lle asiakkaalle myyd‰ korvaavia t‰st‰ tuoteryhm‰st‰
-			$query = "  select yhtio
+			$query = "  SELECT yhtio
 						from korvaavat_kiellot
 						where yhtio = '$kukarow[yhtio]'
 						and ytunnus in ('$laskurow[ytunnus]','*')
@@ -231,67 +233,67 @@
 						and laji    = 'K'";
 			$kkres  = mysql_query($query) or die($query);
 
-			// Jos result on nolla, niin saadaan myyd‰ korvaavia
-			if (mysql_num_rows($kkres) == 0 and $rivityyppi == 'L') {
+			if (mysql_num_rows($kkres) > 0) {
+				$korvaavat_kiellot = "KIELTO";
+			}
+			else {
+				$korvaavat_kiellot = "";
+			}
+			
+			// Otetaan alkuper‰isen tuotteen hinta talteen
+			list($korva_isa_hinta, , $korva_isa_ale, , ) = alehinta($laskurow, $trow, $kpl, '', '', '');
 
-				// Tehd‰‰n homma siten, ett‰ etsit‰‰n kaikki korvaavat jo t‰ss‰ vaiheessa arrayseen
-				$query = "select * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-				$kres1	= mysql_query($query) or die($query);
+			// Tehd‰‰n homma siten, ett‰ etsit‰‰n kaikki korvaavat jo t‰ss‰ vaiheessa arrayseen
+			$query = "	SELECT * 
+						from korvaavat 
+						where tuoteno	= '$tuoteno' 
+						and yhtio		= '$kukarow[yhtio]'";
+			$kres1 = mysql_query($query) or die($query);
 
-				while ($krow1 = mysql_fetch_array($kres1)) {
-					// K‰yd‰‰n l‰pi kaikki korvaavat...
-					$query = 	"select korvaavat.*
-								from korvaavat, tuote
-								where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
-								and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]'
-								order by jarjestys,
-								korvaavat.tuoteno";
-					$kres2  = mysql_query($query) or die($query);
+			while ($krow1 = mysql_fetch_array($kres1)) {
+				// K‰yd‰‰n l‰pi kaikki korvaavat...
+				$query = "	SELECT tuote.*
+							FROM korvaavat
+							JOIN tuote ON korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
+							WHERE korvaavat.id	='$krow1[id]' 
+							and korvaavat.yhtio	='$kukarow[yhtio]'
+							order by korvaavat.jarjestys, korvaavat.tuoteno";
+				$kres2  = mysql_query($query) or die($query);
 
-					while ($krow2 = mysql_fetch_array($kres2)) {
+				while ($krow2 = mysql_fetch_array($kres2)) {
+											
+					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+					list($korva_hinta, , $korva_ale, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
+										
+					if ($korvaavat_kiellot == "KIELTO") {
+						//Korvaavien myynti kielletty korvaavat_kiellot-taulussa													
+						if ($krmyytavissa > 0) {
+							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
+						}
+					}
+					elseif($yhtiorow["korvaavan_hinta_ylaraja"] != '' and (($korva_hinta*(1-($korva_ale/100))) / ($korva_isa_hinta*(1-($korva_isa_ale/100)))) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
+						//Korvaavien myynti kielletty koska korvaava tuote on liian kallis							
+						if ($krmyytavissa > 0) {
+							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])");
+						}
+					}						
+					else {								
+						//Yritet‰‰n myyd‰ korvaava tuote
+						if ($krmyytavissa > 0) {
+							$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lis‰t‰‰n tuoteno kommenttin
+						}
+												
 						if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
 					}
-
-				} // end k‰yd‰‰n l‰pi korvaavat
-			} // end saako myyd‰ korvaavia
-			elseif ($rivityyppi == 'L') {
-				//jos olisi voinut myyd‰ korvaavaa, mutta se oli kielletty, laitetaan kommenttii
-				// Tehd‰‰n homma siten, ett‰ etsit‰‰n kaikki korvaavat jo t‰ss‰ vaiheessa arrayseen
-				$query = "select * from korvaavat where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-				$kres1	= mysql_query($query) or die($query);
-
-				$korkieltokommi = "";
-
-				if (mysql_num_rows($kres1) > 0) {
-					while ($krow1 = mysql_fetch_array($kres1)) {
-						// K‰yd‰‰n l‰pi kaikki korvaavat...
-						$query = 	"select korvaavat.*, tuote.myyntihinta
-									from korvaavat, tuote
-									where korvaavat.yhtio = tuote.yhtio and korvaavat.tuoteno = tuote.tuoteno
-									and id='$krow1[id]' and korvaavat.yhtio='$kukarow[yhtio]'
-									order by jarjestys,
-									korvaavat.tuoteno";
-						$kres2  = mysql_query($query) or die($query);
-
-						$korkieltokommi = array();
-
-						while ($krow2 = mysql_fetch_array($kres2)) {
-							list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
-							
-							if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet) and $krmyytavissa > 0) {
-								$korkieltokommi[] = strtoupper($krow2["tuoteno"]." ($krow2[myyntihinta])"); // lis‰t‰‰n tuoteno kommenttin
-							}
-						}
-
-						if (count($korkieltokommi) == 1) {
-							$korkieltokommi = t("Voit tilata korvaavaa tuotetta ").$korkieltokommi[0];
-						}
-						elseif (count($korkieltokommi) > 1) {
-							$korkieltokommi = t("Voit tilata korvaavia tuotteita ").implode(", ",$korkieltokommi);
-						}
-					} // end k‰yd‰‰n l‰pi korvaavat
-				} // end if jos palautuu jotain
-			} // end kieltokommentit
+				}
+			} // end k‰yd‰‰n l‰pi korvaavat
+			
+			if (count($korkieltokommi) == 1) {
+				$korkieltokommi = t("Voit tilata korvaavaa tuotetta").": ".$korkieltokommi[0];
+			}
+			elseif (count($korkieltokommi) > 1) {
+				$korkieltokommi = t("Voit tilata korvaavia tuotteita").": ".implode(", ",$korkieltokommi);
+			}
 		} // end etsit‰‰nkˆ korvaavia
 
 		// Haetaan tuoteperheet, jos $paikka on erisuuri kuin tyhj‰ niin vaihdetaan vain jonkun tuotteen paikkaa eik‰ p‰ivitet‰ tuoteperheit‰
@@ -329,7 +331,7 @@
 		// Sitten k‰yd‰‰n kaikkien tuotteiden saldot l‰pi kaikilta varastopaikoilta
 		foreach ($kaikkituotteet as $tuoteno) {
 
-			$query = "select ei_saldoa from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+			$query = "SELECT ei_saldoa from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 			$zres = mysql_query($query) or pupe_error($query);
 			$zrow = mysql_fetch_array($zres);
 
@@ -562,7 +564,7 @@
 		if ($lisaarivi_debug==1) echo "Kaikkiaan myyt‰viss‰: $saldoyhteensa kappaletta<br>";
 
 		//tutkitaan ensin saako t‰lle asiakkaalle myyd‰ osatoimituksen t‰st‰ tuoteryhm‰st‰
-		$query = "  select yhtio
+		$query = "  SELECT yhtio
 					from korvaavat_kiellot
 					where yhtio = '$kukarow[yhtio]'
 					and ytunnus in ('$laskurow[ytunnus]','*')
@@ -748,25 +750,8 @@
 								$tres = mysql_query($query) or die($query);
 								$trow = mysql_fetch_array($tres);
 
-								$saasto_hinta = $hinta;
-								$saasto_ale   = $ale;
-								$saasto_netto = $netto;
-								$saasto_alv   = $alv;
-
-								if ($kukarow["extranet"] != '') {
-									require ("alehinta.inc");
-									require ("alv.inc");
-								}
-								else {
-									if (file_exists("../inc/alehinta.inc")) {
-										require ("../inc/alehinta.inc");
-										require ("alv.inc");
-									}
-									else {
-										require ("inc/alehinta.inc");
-										require ("tilauskasittely/alv.inc");
-									}
-								}
+								list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $myy_kpl[$indeksi], $netto, $hinta, $ale);			
+								list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 
 								// jos ollaan laittamassa muuta tuotetta kun mit‰ tilattiin, lis‰t‰‰n rivikommentti
 								if (strtoupper($myy_tuoteno[$indeksi]) != strtoupper($alkupera_trow["tuoteno"]) and $myy_tyyppi[$indeksi] == "NORMAALI") {
@@ -776,11 +761,10 @@
 									if ((int) $rivinumero != 0 and $edi_tyyppi != "" and $korvaavan_isaa_myyty == 1) {
 										$rivinumero = 0; // jos myyd‰‰n korvaava tuote ja ollaan myyty jo tilattuakin tuotetta, niin ei pistet‰ samaa rivinumeroa..
 									}
-
 								}
 
 								if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
-									$edi_ulos .= " --> ".t("Myyd‰‰n")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".t("kpl")." ".t("Ale")." $ale% ".t("Hinta")." $hinta $aperuste ".t("ALV")." $alv% $rivikomm\n";
+									$edi_ulos .= " --> ".t("Myyd‰‰n")." $myy_tuoteno[$indeksi] ".t("paikalta")." $myy_hyllyalue[$indeksi]-$myy_hyllynro[$indeksi]-$myy_hyllyvali[$indeksi]-$myy_hyllytaso[$indeksi]: $myy_kpl[$indeksi] ".t("kpl")." ".t("Ale")." $lis_ale% ".t("Hinta")." $lis_hinta $aperuste ".t("ALV")." $lis_alv% $rivikomm\n";
 									if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
 								}
 
@@ -790,15 +774,15 @@
 
 								// Jos hinta ja alekertoimet on setattu
 								if (isset($myy_hintakerr[$indeksi])) {
-									$hinta = round($hinta * $myy_hintakerr[$indeksi],$yhtiorow['hintapyoristys']);
+									$lis_hinta = round($lis_hinta * $myy_hintakerr[$indeksi],$yhtiorow['hintapyoristys']);
 								}
 
 								if (isset($myy_alekerroi[$indeksi])) {
 									if ((int) $myy_alekerroi[$indeksi] == -1) {
-										$ale = 100.00;
+										$lis_ale = 100.00;
 									}
 									else {
-										$ale = round($ale * $myy_alekerroi[$indeksi],$yhtiorow['hintapyoristys']);
+										$lis_ale = round($lis_ale * $myy_alekerroi[$indeksi],$yhtiorow['hintapyoristys']);
 									}
 								}
 
@@ -845,10 +829,10 @@
 											yksikko 	= '$trow[yksikko]',
 											kpl 		= '0',
 											tilkpl 		= '$tilattu',
-											ale 		= '$ale',
-											alv 		= '$alv',
-											netto		= '$netto',
-											hinta 		= '$hinta',
+											ale 		= '$lis_ale',
+											alv 		= '$lis_alv',
+											netto		= '$lis_netto',
+											hinta 		= '$lis_hinta',
 											kerayspvm 	= '$kerayspvm',
 											otunnus 	= '$kukarow[kesken]',
 											tyyppi 		= '$rivityyppi',
@@ -1053,15 +1037,9 @@
 								$rivitunnus		= "";
 								$kommentti 		= "";
 								$tuotenimitys 	= "";
-
-								$hinta = $saasto_hinta;
-								$ale   = $saasto_ale;
-								$netto = $saasto_netto;
-								$alv   = $saasto_alv;
-
+								
 							} // T‰ll‰ rundilla myydyt
 						} // Jos tuoteperhett‰ lˆytyi riitt‰v‰sti tai myytiin pelk‰‰ is‰‰
-
 					} // Jos vil‰ on toimittamatta kappaleita
 				} // end if toimittamatta > 0
 			} // end foreach myy_tuoteno
@@ -1269,23 +1247,8 @@
 			}
 
 			if ($laskurow['tila'] != 'O') {
-				if ($kukarow["extranet"] != '') {
-					require ("alehinta.inc");
-					require ("alv.inc");
-				}
-				else {
-					
-					if ($lisaarivi_debug==1) echo "Eka haara hinta t‰‰ll‰ $hinta<br>";
-					
-					if (file_exists("../inc/alehinta.inc")) {
-						require ("../inc/alehinta.inc");
-						require ("alv.inc");
-					}
-					else {
-						require ("inc/alehinta.inc");
-						require ("tilauskasittely/alv.inc");
-					}
-				}
+				list($lis_hinta, $lis_netto, $lis_ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $kpl, $netto, $hinta, $ale);			
+				list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
 			}
 
 			if ($laskurow['tila'] != 'O') {
@@ -1432,13 +1395,13 @@
 
 			if ($kutsuja == "EDITILAUS" or $lisaarivi_debug == 1) {
 				if ($var == "J") {
-					$edi_ulos .= " --> ".t("JT")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $kpl ".t("kpl")." ".t("Ale")." $ale ".t("Hinta")." $hinta $aperuste $rivikomm\n";
+					$edi_ulos .= " --> ".t("JT")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".t("kpl")." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
 				elseif($var == "P") {
-					$edi_ulos .= " --> ".t("PUUTE")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $kpl ".t("kpl")." ".t("Ale")." $ale ".t("Hinta")." $hinta $aperuste $rivikomm\n";
+					$edi_ulos .= " --> ".t("PUUTE")." $trow[tuoteno] ".t("paikalta")." $p_hyllyalue-$p_hyllynro-$p_hyllyvali-$p_hyllytaso: $lis_kpl ".t("kpl")." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
 				elseif($var == "S") {
-					$edi_ulos .= " --> ".t("SUORATOIMITUS")." $trow[tuoteno] ".t("toimittajalta")." $rivinumero: $kpl ".t("kpl")." ".t("Ale")." $ale ".t("Hinta")." $hinta $aperuste $rivikomm\n";
+					$edi_ulos .= " --> ".t("SUORATOIMITUS")." $trow[tuoteno] ".t("toimittajalta")." $rivinumero: $kpl ".t("kpl")." ".t("Ale")." $lis_ale ".t("Hinta")." $lis_hinta $aperuste $rivikomm\n";
 				}
 
 				if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
@@ -1447,19 +1410,19 @@
 
 			// Jos hinta ja alekertoimet on setattu
 			if ($puu_hintake[$i] != "X") {
-				$hinta = round($hinta * $puu_hintake[$i],$yhtiorow['hintapyoristys']);
+				$lis_hinta = round($lis_hinta * $puu_hintake[$i],$yhtiorow['hintapyoristys']);
 			}
 
 			if ($puu_alekerr[$i] != "X") {
 				if ((int) $puu_alekerr[$i] == -1) {
-					$ale = 100.00;
+					$lis_ale = 100.00;
 				}
 				else {
-					$ale = round($ale * $puu_alekerr[$i],$yhtiorow['hintapyoristys']);
+					$lis_ale = round($lis_ale * $puu_alekerr[$i],$yhtiorow['hintapyoristys']);
 				}
 			}
 
-			if ($korkieltokommi != '') {
+			if (!is_array($korkieltokommi) and $korkieltokommi != '') {
 				$kommentti .= $korkieltokommi;
 			}
 
@@ -1496,10 +1459,10 @@
 						kpl 		= '0',
 						tilkpl 		= '$kpl',
 						jt			= '$jt',
-						ale 		= '$ale',
-						alv 		= '$alv',
-						netto		= '$netto',
-						hinta 		= '$hinta',
+						ale 		= '$lis_ale',
+						alv 		= '$lis_alv',
+						netto		= '$lis_netto',
+						hinta 		= '$lis_hinta',
 						kerayspvm 	= '$kerayspvm',
 						otunnus 	= '$kukarow[kesken]',
 						tyyppi 		= '$rivityyppi',

@@ -392,7 +392,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		}
 		
 		if ($tee == "message_luettu") {
-			$query = "UPDATE messenger SET status='', kuittausaika=now() WHERE yhtio='$kukarow[yhtio]' AND vastaanottaja='$kukarow[kuka]' AND tunnus='$message_tunnus'";
+			$query = "UPDATE messenger SET status='' WHERE yhtio='$kukarow[yhtio]' AND vastaanottaja='$kukarow[kuka]' AND tunnus='$message_tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			exit;
 		}

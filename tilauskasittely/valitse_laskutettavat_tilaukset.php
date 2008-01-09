@@ -171,7 +171,6 @@
             echo "<br><br>";
         }
 		$laskutettavat	= "";
-		$otunnus		= "";
 		$tee	 		= "";
 	}
 
@@ -362,7 +361,7 @@
 					$pakka = mysql_fetch_array($pakre);
 
 					//haetaan tällä rahtikirjalle rahtimaksu
-					$query = "	select *
+					$query = "	SELECT *
 								from rahtimaksut
 								where toimitustapa = '$row[toimitustapa]'
 								and kilotalku <= '$pakka[kilot]'
@@ -371,11 +370,11 @@
 					$rares = mysql_query($query) or pupe_error($query);
 					$rahti = mysql_fetch_array($rares);
 
-					$otunnus	= $row['tunnus'];
-					$hinta		= $rahti["rahtihinta"]; // rahtihinta
-					$alv 		= '';
-
-					require("alv.inc");
+					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[rahti_tuotenumero]'";
+					$rhire = mysql_query($query) or pupe_error($query);
+					$trow  = mysql_fetch_array($rhire);
+										
+					list($hinta, $alv) = alv($row, $trow, $rahti["rahtihinta"], '', '');
 
 					if ($row["kohdistettu"] == "K") {
 						$rahti_hinta = "(" . (float) $hinta ." $row[valkoodi])";

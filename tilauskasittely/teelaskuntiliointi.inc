@@ -319,12 +319,18 @@ else {
 					WHERE yhtio = '$kukarow[yhtio]' AND selite = '$lasku[kassalipas]' AND laji = 'KASSA'";
 		$kateisresult = mysql_query($query) or pupe_error($query);
 		$kateisrow = mysql_fetch_array($kateisresult);
-
-		$myysaatili = $yhtiorow['kassa'];
 		
+		$myysaatili = $yhtiorow['kassa'];
+
+		$myysaa_kateinen = array();
+		$myysaa_kateinen['kateinen'] 		= $yhtiorow['kassa'];
+		$myysaa_kateinen['pankkikortti'] 	= $yhtiorow['pankkikortti'];
+		$myysaa_kateinen['luottokortti'] 	= $yhtiorow['luottokortti'];
+
 		// Jos maksu on käteinen ja avainsanojen takaa löytyy käteismaksutili, niin avainsanojen takaa löytyvä tili ylikirjoittaa yhtiön takaa löytyvän käteismaksutilin
 		if (strtolower($mehtorow['kateinen']) == "p" and $kateisrow['selitetark_2'] != '') { 
 			$myysaatili = $kateisrow['selitetark_2'];
+			$myysaa_kateinen['kateinen'] = $kateisrow['selitetark_2'];
 		}
 		
 		if ($mehtorow['kateinen'] == "n") {
@@ -338,7 +344,7 @@ else {
 		if ($myysaatili == "") {
 			$myysaatili = $yhtiorow['kassa'];
 		}
-		
+
 		$apusumma = $loppusumma;
 
 		// jos maksetaan käteisellä ja meillä on kassa-alennusta, tehdään kirjaus... vain jos alvikirjauksia EI OLE tehty!
@@ -379,21 +385,49 @@ else {
 
 	$selite = "Lasku ". $lasku['nimi']." ".$lasku['nimitark'];
 
-	$query = "	INSERT into tiliointi set
-				yhtio 		= '$kukarow[yhtio]',
-				ltunnus 	= '$tunnus',
-				tilino 		= '$myysaatili',
-				kustp 		= '',
-				kohde 		= '',
-				projekti 	= '',
-				tapvm 		= '$tapvm',
-				summa 		= '$apusumma',
-				vero 		= '0',
-				selite 		= '$selite',
-				lukko 		= '1',
-				laatija 	= '$kukarow[kuka]',
-				laadittu 	= now()";
-	$laskutusres = mysql_query($query) or pupe_error($query);
+	if (isset($kateismaksu)) {
+
+		$loppusumma = 0;
+
+		foreach ($kateismaksu as $tili => $arvo) {			
+			if ((float) $arvo != 0) {						
+				$query = "	INSERT into tiliointi set
+							yhtio 		= '$kukarow[yhtio]',
+							ltunnus 	= '$tunnus',
+							tilino 		= '$myysaa_kateinen[$tili]',
+							kustp 		= '',
+							kohde 		= '',
+							projekti 	= '',
+							tapvm 		= '$tapvm',
+							summa 		= '$arvo',
+							vero 		= '0',
+							selite 		= '$selite',
+							lukko 		= '1',
+							laatija 	= '$kukarow[kuka]',
+							laadittu 	= now()";
+				$laskutusres = mysql_query($query) or pupe_error($query);
+				$loppusumma += $arvo;
+			}
+		}
+		
+	}
+	else {
+		$query = "	INSERT into tiliointi set
+					yhtio 		= '$kukarow[yhtio]',
+					ltunnus 	= '$tunnus',
+					tilino 		= '$myysaatili',
+					kustp 		= '',
+					kohde 		= '',
+					projekti 	= '',
+					tapvm 		= '$tapvm',
+					summa 		= '$apusumma',
+					vero 		= '0',
+					selite 		= '$selite',
+					lukko 		= '1',
+					laatija 	= '$kukarow[kuka]',
+					laadittu 	= now()";
+		$laskutusres = mysql_query($query) or pupe_error($query);
+	}
 
 	// Kirjataan pyoristykset, jos niita on
 	$vastasumma = round($vastasumma,2);

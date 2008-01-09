@@ -783,6 +783,107 @@ if (isset($tyhjenna)) {
 	$rivinumero = '';
 }
 
+if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
+
+	if ($kassamyyja_kesken != 'ei' and !isset($seka)) {
+
+		echo "<table><tr><th>".t("Maksutapa").":</th>";
+
+		$query_maksuehto = " SELECT *
+							 FROM maksuehto
+							 WHERE yhtio='$kukarow[yhtio]' and kateinen != '' and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
+		$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
+
+		while ($maksuehtorow = mysql_fetch_array($maksuehtores)) {
+			echo "<form action='' method='post'>";
+			echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+			echo "<input type='hidden' name='tee' value='VALMIS'>";
+			echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
+			echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
+			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
+			echo "<td><input type='submit' value='{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}'></td>";
+			echo "</form>";
+		}
+		
+		echo "<form action='' method='post'>";
+		echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+		echo "<input type='hidden' name='tee' value='VALMIS'>";
+		echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
+		echo "<input type='hidden' name='seka' value='X'>";
+		echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+		echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
+		echo "<td><input type='submit' value='Seka'></td>";
+
+		echo "</form></tr></table>";
+		
+		exit;
+	}
+	elseif ($kassamyyja_kesken == 'ei' and $seka == 'X') {
+
+		echo "<table><form action='' name='laskuri' method='post'>";
+
+		echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+		echo "<input type='hidden' name='tee' value='VALMIS'>";
+		echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
+		echo "<input type='hidden' name='kateinen' value='$kateinen'>";		
+		echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
+		echo "<input type='hidden' name='seka' id='seka' value='X'>";
+
+		echo "	<script type='text/javascript' language='JavaScript'>
+				<!--
+					function update_summa(kaikkiyhteensa) {
+						
+						kateinen = Number(document.getElementById('kateismaksu').value.replace(\",\",\".\"));
+						pankki = Number(document.getElementById('pankkikortti').value.replace(\",\",\".\"));
+						luotto = Number(document.getElementById('luottokortti').value.replace(\",\",\".\"));
+
+						summa = kaikkiyhteensa - (kateinen + pankki + luotto);
+						
+						summa = Math.round(summa*100)/100;
+						
+						if (summa == 0 && (document.getElementById('kateismaksu').value != '' || document.getElementById('pankkikortti').value != '' || document.getElementById('luottokortti').value != '')) {
+							summa = 0.00;
+							document.getElementById('hyvaksy_nappi').disabled = false;
+							document.getElementById('seka').value = 'kylla';
+						} else {
+							document.getElementById('hyvaksy_nappi').disabled = true;							
+						}
+						
+						document.getElementById('loppusumma').innerHTML = '<b>' + summa.toFixed(2) + '</b>'; 
+					}
+				-->
+				</script>";
+
+		echo "<tr><th>".t("Laskun loppusumma")."</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
+		
+		echo "<tr><td>".t("Käteisellä")."</td><td><input type='text' name='kateismaksu[kateinen]' id='kateismaksu' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+		echo "<tr><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+		echo "<tr><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+
+		echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
+		echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' disabled></td></tr>";
+
+		echo "</form><br><br>";
+
+		$formi = "laskuri";
+		$kentta = "kateismaksu";
+
+		exit;
+	}
+	
+	echo "</table>";
+
+} elseif ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
+	
+	$query_maksuehto = "UPDATE lasku SET maksuehto='$maksutapa', kassalipas='$kertakassa' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$kukarow[kesken]'";
+	$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
+	
+}
+
 // Tilaus valmis
 if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
@@ -949,6 +1050,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
 		}
 		else {
+			
 			//Luodaan valituista riveistä suoraan normaali ostotilaus
 			if($kukarow["extranet"] == "" and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
 				require("tilauksesta_ostotilaus.inc");
@@ -1019,7 +1121,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 				echo "	<script type='text/javascript' language='JavaScript'>
 						<!--
 							function update_summa(kaikkiyhteensa) {
-								kateinen = document.getElementById('kateisraha').value;
+								kateinen = document.getElementById('kateisraha').value.replace(\",\",\".\");
 								summa = 0;
 								if (document.getElementById('kateisraha').value != '') {
 									summa = kateinen - kaikkiyhteensa;
@@ -1030,7 +1132,15 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 						-->
 						</script>";
 				echo "<table><form name='laskuri'>";
-				echo "<tr><th>".t("Yhteensä")."</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
+				
+				if (!isset($kateismaksu['kateinen']) or $kateismaksu['kateinen'] == '') {
+					$yhteensa_teksti = t("Yhteensä");
+				} else {
+					$yhteensa_teksti = t("Käteinen");
+					$kaikkiyhteensa = $kateismaksu['kateinen'];
+				}
+				
+				echo "<tr><th>$yhteensa_teksti</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
 				echo "<tr><th>".t("Annettu")."</th><td><input size='7' autocomplete='off' type='text' id='kateisraha' name='kateisraha' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
 				echo "<tr><th>".t("Takaisin")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
 				echo "</form></table><br><br>";
@@ -1753,26 +1863,6 @@ if ($tee == '') {
 				echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
 			}
 			echo "</select></td></tr>";
-
-			if (($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $meapurow['kateinen'] != '') {
-				echo "<tr><th>".t("Maksutapa").":</th>";
-				echo "<td align='left'><select name='maksutapa' onchange='submit()'>";
-
-				$query_maksuehto = " SELECT *
-									 FROM maksuehto
-									 WHERE yhtio='$kukarow[yhtio]' and kateinen != '' and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
-				$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
-
-				while ($maksuehtorow = mysql_fetch_array($maksuehtores)) {
-					$sel = "";
-					if ($maksutapa == $maksuehtorow['tunnus'] or $laskurow['maksuehto'] == $maksuehtorow['tunnus']) {
-						$sel = 'selected';
-					}
-					echo "<option value='$maksuehtorow[tunnus]' $sel>$maksuehtorow[teksti] $maksuehtorow[kassa_teksti]</option>";
-				}
-				echo "</select>";
-				echo "</td><td></td><td></td></tr>";
-			}
 
 			$query = "	SELECT a.fakta, l.ytunnus, round(a.luottoraja,0) luottoraja, a.luokka
 						FROM asiakas a, lasku l
@@ -4823,7 +4913,11 @@ if ($tee == '') {
 
 						while ($varow = mysql_fetch_array($vares)) {
 							$sel='';
-							if ($varow['selite']==$kukarow["kassamyyja"]) $sel = 'selected';
+							
+							if ($varow['selite'] == $laskurow["kassalipas"]) {
+								$sel = 'selected';
+							}
+							
 							echo "<option value='$varow[selite]' $sel>$varow[selitetark]</option>";
 						}
 

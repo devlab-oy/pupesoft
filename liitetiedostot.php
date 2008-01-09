@@ -131,7 +131,7 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 				</form><br>";
 		}
 
-		$query = "	SELECT *
+		$query = "	SELECT *, (select selitetark from avainsana a where a.yhtio = liitetiedostot.yhtio and laji = 'TIL-LITETY' and a.selite = liitetiedostot.kayttotarkoitus) kayttotarkoitus
 					FROM liitetiedostot
 					WHERE liitostunnus=".(int) $_REQUEST['id']." AND liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);

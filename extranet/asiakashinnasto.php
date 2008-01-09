@@ -139,19 +139,9 @@
 
 				//haetaan asiakkaan oma hinta
 				$laskurow["ytunnus"] = $ytunnus;
-				$kpl 	= 1;
-				$trow 	= $rrow;
-				$ale 	= '';
-				$hinta 	= '';
-				$netto 	= '';
 				
-				if (file_exists('alehinta.inc')) {
-					require ("alehinta.inc");
-				}
-				else {
-					require ("../inc/alehinta.inc");
-				}
-
+				list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $rrow, 1, '', '', '');
+				
 				if ($netto != '') {
 					$ale = t("Netto");
 				}
@@ -159,7 +149,7 @@
 				if ($hinta == 0) {
 					$hinta = $rrow["myyntihinta"];
 				}
-
+				
 				if ($netto == "") {
 					$asiakashinta = round($hinta * (1-($ale/100)),$yhtiorow['hintapyoristys']);
 				}

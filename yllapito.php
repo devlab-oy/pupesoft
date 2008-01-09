@@ -4,7 +4,7 @@
 		$apucss = $_POST["css"];
 		$apucsspieni = $_POST["css_pieni"];
 		$apucssextranet = $_POST["css_extranet"];
-		$apucssverkkokauppa = $_POST["css_verkkokauppa"];		
+		$apucssverkkokauppa = $_POST["css_verkkokauppa"];
 	}
 	else {
 		unset($apucss);
@@ -46,7 +46,7 @@
 	if ($_POST["toim"] == "yhtion_parametrit" and isset($apucssverkkokauppa)) {
 		$t[$cssverkkokauppa] = $apucssverkkokauppa;
 	}
-	
+
 	$rajauslisa	= "";
 
 	require ("inc/$toim.inc");
@@ -90,19 +90,19 @@
 					WHERE tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
-				
+
 		$query = "	DELETE from $toim
 					WHERE tunnus='$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
-		
+
 		//	Jos poistetaan perheen osa palataan perheelle
 		if($seuraavatunnus > 0) $tunnus = $seuraavatunnus;
 		else $tunnus = 0;
-		
+
 		$seuraavatunnus = 0;
-		
+
 		// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 		if ($lopetus != '') {
 			// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
@@ -122,12 +122,12 @@
 					WHERE tunnus = '$tunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$trow = mysql_fetch_array($result);
-		
+
 		//	Tehd‰‰n muuttujista linkit jolla luomme otsikolliset avaimet!
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
 			$t[mysql_field_name($result, $i)] = &$t[$i];
 		}
-		
+
 		// Tarkistetaan
 		$errori = '';
 		for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
@@ -159,20 +159,22 @@
 				$virhe[$i] = t("Sinulla ei ole oikeutta p‰ivitt‰‰ t‰t‰ kentt‰‰");
 				$errori = 1;
 			}
-			
+
 			$tiedostopaate = "";
-			
+
 			$funktio = $toim."tarkista";
 			if(!function_exists($funktio)) {
 				require("inc/$funktio.inc");
 			}
-			
-			$funktio($t, $i, $result, $tunnus, &$virhe);
-			
+
+			if(function_exists($funktio)) {
+				$funktio($t, $i, $result, $tunnus, &$virhe);
+			}
+
 			if($virhe[$i] != "") {
 				$errori = 1;
 			}
-			
+
 			//	Tarkastammeko liitetiedoston?
 			if(is_array($tiedostopaate) and is_array($_FILES["liite_$i"])) {
 				$viesti = tarkasta_liite("liite_$i", $tiedostopaate);
@@ -203,7 +205,7 @@
 			}
 			// P‰ivitet‰‰n
 			else {
-				
+
 				//	Jos poistettiin jokin liite, poistetaan se nyt
 				if(is_array($poista_liite)) {
 					foreach($poista_liite as $key => $val) {
@@ -212,18 +214,18 @@
 							$delres = mysql_query($delquery);
 							if(mysql_affected_rows() == 1) {
 								$t[$key] = "";
-							}							
+							}
 						}
 					}
 				}
-								
+
 				// Taulun ensimm‰inen kentt‰ on aina yhtiˆ
 				$query = "UPDATE $toim SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
 
 				for ($i=1; $i < mysql_num_fields($result); $i++) {
 					if (isset($t[$i]) or is_array($_FILES["liite_$i"])) {
 
-						if(is_array($_FILES["liite_$i"])) {							
+						if(is_array($_FILES["liite_$i"])) {
 							$id = tallenna_liite("liite_$i", "Yllapito", 0, "Yhtio", "$toim.".mysql_field_name($result,$i), $t[$i]);
 							if($id !== false) {
 								$t[$i] = $id;
@@ -232,7 +234,7 @@
 
 						if(mysql_field_type($result,$i)=='real') $t[$i] = str_replace ( ",", ".", $t[$i]);
 						$query .= ", ". mysql_field_name($result,$i)."='".$t[$i]."' ";
-						
+
 					}
 				}
 
@@ -248,10 +250,10 @@
 				//	Javalla tieto ett‰ t‰t‰ muokattiin..
 				$wanha = "P_";
 			}
-			
-			//	T‰m‰ funktio tekee myˆs oikeustarkistukset!			
+
+			//	T‰m‰ funktio tekee myˆs oikeustarkistukset!
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
-			
+
 			// Siirryt‰‰n takaisin sielt‰ mist‰ tultiin
 			if ($lopetus != '') {
 				// Jotta urlin parametrissa voisi p‰‰ss‰t‰ toisen urlin parametreineen
@@ -266,7 +268,7 @@
 				}
 
 				$lopetus .= "yllapidossa=$toim&yllapidontunnus=$tunnus";
-				
+
 				if (strpos($lopetus, "tilaus_myynti.php") !== FALSE and $toim == "asiakas") {
 					$lopetus.= "&asiakasid=$tunnus";
 				}
@@ -299,7 +301,7 @@
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>suljeYllapito('$wanha$suljeYllapito','$tunnus','$aburow[nimi]');</SCRIPT>";
 				exit;
 			}
-			
+
 
 			$uusi 	 = 0;
 
@@ -320,21 +322,21 @@
 	else {
 		$array = split(",", $kentat);
 	}
-	
+
 	$count = count($array);
 
 	for ($i=0; $i<=$count; $i++) {
     	if (strlen($haku[$i]) > 0) {
-        	
+
 			if (strpos($array[$i], "/") !== FALSE) {
 				list($a, $b) = explode("/", $array[$i]);
-				
+
 				$lisa .= " and (".$a." like '%".$haku[$i]."%' or ".$b." like '%".$haku[$i]."%') ";
 			}
 			else {
 				$lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
 			}
-			
+
 			$ulisa .= "&haku[" . $i . "]=" . $haku[$i];
     	}
     }
@@ -363,7 +365,7 @@
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("Uusi $otsikko_nappi")."'></form>";
 		}
-		
+
 		if (mysql_num_rows($result) >= 350) {
 			echo "	<form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
 					<input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -371,7 +373,7 @@
 					<input type = 'hidden' name = 'laji' value = '$laji'>
 					<input type = 'submit' value = '".t("N‰yt‰ kaikki")."'></form>";
 		}
-		
+
 		echo "	<br><br><table><tr class='aktiivi'>
 				<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>
 				<input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -423,7 +425,7 @@
 		echo "<input type = 'hidden' name = 'laji' value = '$laji'>";
 		echo "<input type = 'hidden' name = 'tunnus' value = '$tunnus'>";
 		echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
-		echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";		
+		echo "<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>";
 		echo "<input type = 'hidden' name = 'upd' value = '1'>";
 
 		// Kokeillaan geneerist‰
@@ -459,7 +461,7 @@
 				mysql_field_name($result, $i) == "luontiaika") {
 				$tyyppi = 2;
 			}
-			
+
 			//Haetaan tietokantasarakkeen nimialias
 			$al_nimi   = mysql_field_name($result, $i);
 
@@ -507,7 +509,7 @@
 					default:
 						$otsikko = t(mysql_field_name($result, $i));
 				}
-				
+
 				if ($rajattu_nakyma != '') {
  					$ulos = "";
  					$tyyppi = 0;
@@ -538,7 +540,7 @@
 						preg_match($search, $matches[2], $matches2);
 						if(count($matches2)==0) {
 							$ulos .= "<td class='back'><font class='error'>OBS!! '".$trow[$i]."'</font></td>";
-						}						
+						}
 					}
 				}
 				echo $ulos;
@@ -569,12 +571,12 @@
 				echo "<td>";
 
 				if($trow[$i] > 0) {
-					echo "<a href='view.php?id=".$trow[$i]."'>".t("N‰yt‰ liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '{$trow[$i]}'>";	
+					echo "<a href='view.php?id=".$trow[$i]."'>".t("N‰yt‰ liitetiedosto")."</a><input type = 'hidden' name = '$nimi' value = '$trow[$i]'> ".("Poista").": <input type = 'checkbox' name = 'poista_liite[$i]' value = '{$trow[$i]}'>";
 				}
 				else {
 					echo "<input type = 'text' name = '$nimi' value = '$trow[$i]'>";
 				}
-				
+
 				echo "<input type = 'file' name = 'liite_$i'></td>";
 			}
 
@@ -596,17 +598,17 @@
 		}
 
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
-		
+
 		if($lukossa == "ON") {
 			echo "<input type='hidden' name='lukossa' value = '$lukossa'>";
-			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";			
+			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";
 		}
-		
+
 		echo "</form>";
 
 		// M‰‰ritell‰‰n mit‰ tietueita saa poistaa
-		if ($toim == "avainsana" or 
-			$toim == "tili" or 
+		if ($toim == "avainsana" or
+			$toim == "tili" or
 			$toim == "taso" or
 			$toim == "asiakasalennus" or
 			$toim == "asiakashinta" or
@@ -615,7 +617,7 @@
 			$toim == "toimitustapa" or
 			$toim == "kirjoittimet" or
 			$toim == "hinnasto") {
-			
+
 			// Tehd‰‰n "poista tietue"-nappi
 			if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {
 				echo "<SCRIPT LANGUAGE=JAVASCRIPT>
@@ -633,7 +635,7 @@
 						<input type = 'hidden' name = 'laji' value = '$laji'>
 						<input type = 'hidden' name = 'tunnus' value = '$tunnus'>
 						<input type = 'hidden' name = 'lopetus' value = '$lopetus'>
-						<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>						
+						<input type = 'hidden' name = 'suljeYllapito' value = '$suljeYllapito'>
 						<input type = 'hidden' name = 'del' value ='1'>
 						<input type='hidden' name='seuraavatunnus' value = '$seuraavatunnus'>
 						<input type = 'submit' value = '".t("Poista $otsikko_nappi")."'></form>";

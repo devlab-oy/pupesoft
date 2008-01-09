@@ -6,7 +6,7 @@
 	if($tee=='P') {
 
 		// jos kyseess‰ ei ole nouto tai noutajan nimi on annettu, voidaan merkata tilaus toimitetuksi..
-		if (($nouto!='yes') or ($noutaja!='')) {
+		if (($nouto != 'yes') or ($noutaja != '')) {
 			$query = "	UPDATE tilausrivi
 						SET toimitettu = '$kukarow[kuka]',
 						toimitettuaika = now() 
@@ -17,17 +17,11 @@
 						and tyyppi = 'L'";
 			$result = mysql_query($query) or pupe_error($query);
 
-			//p‰ivitet‰‰n noutaja laskulle...
-			if ($nouto == 'yes') {
-				$query = "update lasku set noutaja='$noutaja' where tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
-				$result = mysql_query($query) or pupe_error($query);
-			}
-
-			$query = "update lasku set alatila='D' where tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
+			$query = "UPDATE lasku set alatila='D', noutaja='$noutaja', kassalipas='$kassalipas' where tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// jos kyseess‰ on k‰teismyynti‰, tulostetaaan k‰teislasku
-			$query  = "select * from lasku, maksuehto where lasku.tunnus='$otunnus' and lasku.yhtio='$kukarow[yhtio]' and maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto";
+			$query  = "SELECT * from lasku, maksuehto where lasku.tunnus='$otunnus' and lasku.yhtio='$kukarow[yhtio]' and maksuehto.yhtio=lasku.yhtio and maksuehto.tunnus=lasku.maksuehto";
 			$result = mysql_query($query) or pupe_error($query);
 			$tilrow = mysql_fetch_array($result);
 
@@ -88,9 +82,10 @@
 
 		while ($tilrow = mysql_fetch_array($tilre)) {
 			// etsit‰‰n sopivia tilauksia
-			$query = "	SELECT tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, toimitustapa, date_format(luontiaika, '%Y-%m-%d') laadittu, laatija, toimaika
+			$query = "	SELECT lasku.tunnus 'tilaus', concat_ws(' ', nimi, nimitark) asiakas, maksuehto.teksti maksuehto, toimitustapa, date_format(lasku.luontiaika, '%Y-%m-%d') laadittu, lasku.laatija, toimaika
 						FROM lasku
-						WHERE tunnus='$tilrow[0]' and tila='L' $haku and yhtio='$kukarow[yhtio]' and (alatila='C' or alatila='B') ORDER by laadittu desc";
+						LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio AND maksuehto.tunnus = lasku.maksuehto)
+						WHERE lasku.tunnus='$tilrow[0]' and tila='L' $haku and lasku.yhtio='$kukarow[yhtio]' and (alatila='C' or alatila='B') ORDER by laadittu desc";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//piirret‰‰n taulukko...
@@ -186,7 +181,7 @@
 
 		echo "</table><br>";
 
-		$query = "select * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$row[toimitustapa]'";
+		$query = "SELECT * FROM toimitustapa WHERE yhtio='$kukarow[yhtio]' AND selite='$row[toimitustapa]'";
 		$tores = mysql_query($query) or pupe_error($query);
 		$toita = mysql_fetch_array($tores);
 
@@ -195,11 +190,30 @@
 				<input type='hidden' name='tee' value='P'>";
 
 
-		// jos kyseess‰ on nouto jota *EI* makseta k‰teisell‰, kysyt‰‰n noutajan nime‰..
+		if ($toita['nouto'] != '' and $row['kateinen'] != '') {
+
+			echo "<table><tr><th>Valitse kassalipas</th><td>";
+
+			$query = "SELECT * FROM avainsana WHERE yhtio='{$kukarow['yhtio']}' AND laji='KASSA'";
+			$kassares = mysql_query($query) or pupe_error($query);
+
+			echo "<input type='hidden' name='noutaja' value=''>";
+			echo "<select name='kassalipas'>";
+			echo "<option value=''>Ei kassalipasta</option>";
+						
+			while ($kassarow = mysql_fetch_array($kassares)) {
+				echo "<option value='{$kassarow['selite']}'>{$kassarow['selitetark']}</option>";
+			}
+			echo "</select>";
+			echo "</td></tr></table><br>";
+		}
+		
 		if ($toita['nouto']!='' and $row['kateinen']=='') {
+			// jos kyseess‰ on nouto jota *EI* makseta k‰teisell‰, kysyt‰‰n noutajan nime‰..	
 			echo "<table><tr><th>".t("Syˆt‰ noutajan nimi")."</th></tr>";
 			echo "<tr><td><input size='60' type='text' name='noutaja'></td></tr></table><br>";
 			echo "<input type='hidden' name='nouto' value='yes'>";
+			echo "<input type='hidden' name='kassalipas' value=''>";
 
 			//kursorinohjausta
 			$formi="rivit";

@@ -21,7 +21,8 @@ if ($tila == 'K') {
 
 	$query = "	SELECT lasku.*, tiliointi.ltunnus, tiliointi.tilino, tiliointi.summa, tiliointi.vero
 				FROM lasku
-				JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.tapvm = lasku.tapvm AND tiliointi.tilino NOT IN ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[alv]'))
+				JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio AND tiliointi.ltunnus = lasku.tunnus AND tiliointi.tapvm = lasku.tapvm 
+				AND tiliointi.tilino NOT IN ('$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[alv]'))
 				WHERE lasku.yhtio		= '$kukarow[yhtio]'
 				AND lasku.mapvm			= '0000-00-00'
 				AND lasku.tila			= 'U'
@@ -31,8 +32,8 @@ if ($tila == 'K') {
 	$laskuresult = mysql_query($query) or pupe_error($query);
 
 	while ($lasku = mysql_fetch_array($laskuresult)) {
-
-		if ($lasku['tilino'] != $yhtiorow['myyntisaamiset'] and $lasku['tilino'] != $yhtiorow['factorincsaamiset'] and $lasku['tilino'] != $yhtiorow['konsernimyyntisaamiset']) {
+		
+		if ($lasku['tilino'] != $yhtiorow['myyntisaamiset'] and $lasku['tilino'] != $yhtiorow['factoringsaamiset'] and $lasku['tilino'] != $yhtiorow['konsernimyyntisaamiset']) {
 			// Hoidetaan alv
 			$alv = round($lasku['summa'] * $lasku['vero'] / 100, 2);
 
@@ -52,12 +53,10 @@ if ($tila == 'K') {
 						laatija		= '$kukarow[kuka]',
 						laadittu	= now()";
 			$result = mysql_query($query) or pupe_error($query);
+			$isa = mysql_insert_id ($link);
 
 			// Tiliöidään alv
-			if ($lasku['vero'] != 0) {
-				// Näin löydämme tähän liittyvät alvit....
-				$isa = mysql_insert_id ($link);
-
+			if ($lasku['vero'] != 0) {				
 				$query = "	INSERT INTO tiliointi SET
 							yhtio		= '$kukarow[yhtio]',
 							ltunnus		= '$lasku[ltunnus]',
@@ -98,11 +97,10 @@ if ($tila == 'K') {
 
 		$query = "UPDATE lasku set mapvm = '$tpv-$tpk-$tpp' where yhtio ='$kukarow[yhtio]' and tunnus = '$lasku[ltunnus]'";
 		$result = mysql_query($query) or pupe_error($query);
-
 	}
 
-	echo "<font class='message'>".t("Laskut on tiliöity luottotappioksi")."!</font><br>";
-
+	echo "<font class='message'>".t("Laskut on tiliöity luottotappioksi")."!</font><br><br>";
+	$tila = "";
 }
 
 if ($tila == 'N') {
@@ -151,18 +149,18 @@ if ($tila == 'N') {
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<tr>";
-	echo "<th>".t("laskunro")."</th>";
-	echo "<th>".t("tapvm")."</th>";
-	echo "<th>".t("erapvm")."</th>";
-	echo "<th>".t("summa")."</th>";
+	echo "<th>".t("Laskunro")."</th>";
+	echo "<th>".t("Tapvm")."</th>";
+	echo "<th>".t("Eräpvm")."</th>";
+	echo "<th>".t("Summa")."</th>";
 	echo "</tr>";
 
 	while ($lasku = mysql_fetch_array ($result)) {
 		echo "<tr>";
 		echo "<td>$lasku[laskunro]</td>";
-		echo "<td>$lasku[tapvm]</td>";
-		echo "<td>$lasku[erpcm]</td>";
-		echo "<td>$lasku[summa]</td>";
+		echo "<td>".tv1dateconv($lasku["tapvm"])."</td>";
+		echo "<td>".tv1dateconv($lasku["erpcm"])."</td>";
+		echo "<td align='right'>$lasku[summa]</td>";
 		echo "</tr>";
 	}
 
@@ -172,20 +170,28 @@ if ($tila == 'N') {
 	echo "<input type='hidden' name='tila' value='K'>";
 	echo "<input type='hidden' name='liitostunnus' value='$liitostunnus'>";
 
+
+	if (!isset($tpk)) $tpk = date("m");
+	if (!isset($tpv)) $tpv = date("Y");
+	if (!isset($tpp)) $tpp = date("d");
+
 	echo "<table>";
 	echo "<tr>";
 	echo "<th colspan='2'>".t("Kirjaa luottotappioksi")."</th>";
 	echo "</tr><tr>";
 	echo "<td>".t("Päivämäärä")." ".t("pp-kk-vvvv")."</td>";
-	echo "<td><input type='text' name='tpp' maxlength='2' size=2><input type='text' name='tpk' maxlength='2' size=2><input type='text' name='tpv' maxlength='4' size=4></td>";
+	echo "<td>
+			<input type='text' name='tpp' maxlength='2' size='2' value='$tpp'>
+			<input type='text' name='tpk' maxlength='2' size='2' value='$tpk'>
+			<input type='text' name='tpv' maxlength='4' size='5' value='$tpv'></td>";
 	echo "<td class='back'><input type='submit' value='".t("Luottotappio")."'></td>";
 	echo "</tr>";
 	echo "</table>";
 
 	echo "</form>";
 
-	$formi='pvm';
-	$kentta='tpp';
+	$formi	='pvm';
+	$kentta	='tpp';
 }
 
 if ($tila == "") {
@@ -211,7 +217,7 @@ if ($tila == "") {
 	echo "<th>".t("valitse")."</th>";
 	echo "</tr>";
 
-	while ($asiakas=mysql_fetch_array ($result)) {
+	while ($asiakas = mysql_fetch_array ($result)) {
 
 		echo "<form action = '$PHP_SELF' method = 'post'>";
 		echo "<input type='hidden' name='tila' value='N'>";

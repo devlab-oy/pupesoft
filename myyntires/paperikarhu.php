@@ -494,19 +494,55 @@
 
 	$kaatosumma=$kaato["summa"] * -1;
 	if (!$kaatosumma) $kaatosumma='0.00';
-    
-    if (isset($_POST['karhuviesti'])) {
-		$query 	 = "select selitetark from avainsana where tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
-		$res 	 = mysql_query($query) or pupe_error();
-		$viestit = mysql_fetch_array($res);
+
+    //	Arvotaan oikea karhuviesti
+	if(!isset($karhuviesti)) {
 		
-        $karhuviesti = $viestit["selitetark"];
-    } 
-	else {
-        // otetaan defaulttina eka viesti
-        $karhuviesti = 'Virhe';
-    }
+		//	Lasketaan kuinka vanhoja laskuja t‰ss‰ karhutaan
+		$query 	 = "	SELECT count(*) 
+						FROM karhu_lasku
+						WHERE ltunnus IN (".implode(",", $lasku_tunnus).")
+						GROUP BY ltunnus;";
+		$res 	 = mysql_query($query) or pupe_error();
+		$r = 0;
+		while($a = mysql_fetch_array($res)) {
+			$r += $a[0];
+		}
 	
+		//	T‰m‰ on mik‰ on karhujen keskim‰‰r‰inen kierroskerta
+		$avg = floor(($r/mysql_num_rows($res))+1);
+		
+		$query 	 = "	SELECT tunnus
+						FROM avainsana
+						WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$karhuviesti' and kieli = '$kieli'";
+		$res 	 = mysql_query($query) or pupe_error();
+		if(mysql_num_rows($res) == 0) {
+
+			$query 	 = "	SELECT tunnus
+							FROM avainsana
+							WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$karhuviesti' and kieli = '$kieli'";
+			$res 	 = mysql_query($query) or pupe_error();
+			if(mysql_num_rows($res) == 0) {
+
+				$query 	 = "	SELECT tunnus
+								FROM avainsana
+								WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$karhuviesti' and kieli = '$kieli'";
+				$res 	 = mysql_query($query) or pupe_error();
+			}			
+		}
+		
+		$kv = mysql_fetch_array($res);
+		$karhuviesti = $kv["tunnus"];
+	}
+
+	$query 	 = "select selitetark from avainsana where tunnus='$karhuviesti' AND laji = 'KARHUVIESTI' AND yhtio ='{$yhtiorow['yhtio']}'";
+	$res 	 = mysql_query($query) or pupe_error();
+	$viestit = mysql_fetch_array($res);
+
+    $karhuviesti = $viestit["selitetark"];
+	if(trim($karhuviesti) == "") {
+			die($query);
+	}
 	$firstpage = alku($karhuviesti);
 
 	$summa=0.0;

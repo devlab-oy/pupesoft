@@ -208,7 +208,8 @@ if($tee == "KARHUAKAIKKI") {
 			$ekarhu_success = false;
 			echo "<font class='error'>Ei voitu lähettää karhua eKirjeenä, karhuaminen peruttiin. Virhe: " . $e->getMessage() . "</font>";
 		}
-
+		
+		unset($karhuviesti);
 	}
 	unset($karhuttavat);
 }

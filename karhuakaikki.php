@@ -32,7 +32,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
 		}
 	}
 
-	
+	$yhteyshenkilo = $kukarow["tunnus"];
 	$karhuakaikki = "JOO";
 	$tee = "ALOITAKARHUAMINEN";
 	

@@ -338,13 +338,13 @@
 						$trow  = mysql_fetch_array($rhire);
 
 						$hinta		= 0; // rahtihinta
-						$alv 		= '';
 						$trow["alv"]= $laskurow["alv"];
 						$nimitys	= $laskurow["toimitustapa"];
 
-						require("alv.inc");
+						list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-						$query  = "INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  ('$hinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+						$query  = "	INSERT into tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+									values ('$hinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 						$addtil = mysql_query($query) or pupe_error($query);
 
 						if ($debug==1) echo t("Lisättiin rahtikulu")." $otsikkorivi[nimi] $id<br>";

@@ -573,18 +573,14 @@
 						$rhire = mysql_query($query) or pupe_error($query);
 						$trow  = mysql_fetch_array($rhire);
 
-
 						$hinta		        = $tjvrow['jvkulu']; // jv kulu
-						$alv               	= '';
 						$nimitys            = "Jälkivaatimuskulu";
 						$kommentti          = "";
 
-						require("tilauskasittely/alv.inc");
+						list($jvhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-						// jv kulu tarvitaan tulostuksessa
-						$jvhinta            = $hinta;
-
-						$query  = "INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  ('$hinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+						$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+									values ('$jvhinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 						$addtil = mysql_query($query) or pupe_error($query);
 
 						if ($silent == "") {
@@ -693,16 +689,13 @@
 
 							$otunnus	= $laskurow['tunnus'];
 							$hinta		= $rahti["rahtihinta"]; // rahtihinta
-							$alv 		= '';
 							$nimitys	= "$pvm $laskurow[toimitustapa]";
 							$kommentti  = "Rahtikirja: $rahtikirjanrot";
 
-							require("alv.inc");
+							list($rahinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-							//rahdin hinta tarvitaan tulostuksessa
-							$rahinta = $hinta;
-
-							$query  = "INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  ('$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
+							$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+										values ('$rahinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 							$addtil = mysql_query($query) or pupe_error($query);
 
 							if ($silent == "") {

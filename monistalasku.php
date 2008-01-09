@@ -702,7 +702,7 @@ if ($tee=='MONISTA') {
 				//tehdään alvikorjaus jos käyttäjä on pyytänyt sitä
 				if ($alvik == "on" and $rivirow["hinta"] != 0) {
 
-					$query = "select * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]'";
+					$query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$rivirow[tuoteno]'";
 					$tres  = mysql_query($query) or pupe_error($query);
 					$trow  = mysql_fetch_array($tres);
 
@@ -716,16 +716,12 @@ if ($tee=='MONISTA') {
 					}
 
 					//lasketaan alvit
-					$hinta 	= $uusihinta;
-					$alv 	= "";
-
-					require ("tilauskasittely/alv.inc");
-					$uusihinta = $hinta;
-
+					list($uusihinta, $alv) = alv($laskurow, $trow, $uusihinta, '', '');					
+					
 					if ($vanhahinta != $uusihinta) {
 						echo t("Korjataan hinta").": $vanhahinta --> $uusihinta<br>";
 
-						$query = "update tilausrivi set hinta='$uusihinta', alv='$alv' where yhtio='$kukarow[yhtio]' and otunnus='$utunnus' and tunnus='$insid'";
+						$query = "UPDATE tilausrivi set hinta='$uusihinta', alv='$alv' where yhtio='$kukarow[yhtio]' and otunnus='$utunnus' and tunnus='$insid'";
 						$tres  = mysql_query($query) or pupe_error($query);
 					}
 				}

@@ -156,7 +156,7 @@
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
 					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin,
 					group_concat(distinct tuotteen_toimittajat.alkuperamaa order by tuotteen_toimittajat.tunnus) alkuperamaa,
-					group_concat(distinct concat_ws(' ',tuotteen_toimittajat.ostohinta,upper(tuotteen_toimittajat.valuutta)) order by tuotteen_toimittajat.tunnus separator '<br>') ostohinta
+					group_concat(distinct concat_ws(' ',tuotteen_toimittajat.ostohinta,upper(tuotteen_toimittajat.valuutta), '/',tuotteen_toimittajat.alennus, '%') order by tuotteen_toimittajat.tunnus separator '<br>') ostohinta
 					FROM tuote
 					LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
@@ -322,12 +322,16 @@
 					<td>$tuoterow[aleryhma]</td><td>$tuoterow[tahtituote]</td><td>$peralrow[alennus]%</td><td>$tuoterow[vakkoodi]</td></tr>";
 
 			//3
-			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Netto/Ovh")."</th><th>".t("Ostohinta")."</th><th>".t("Kehahinta")."</th><th>".t("Vihahinta")."</th>";
+			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Netto/Ovh")."</th><th>".t("Ostohinta")." / ".t("Alennus")."</th><th>".t("Kehahinta")."</th><th>".t("Vihahinta")."</th>";
 			echo "<tr><td valign='top' >$tuoterow[toim_tuoteno]</td>
 						<td valign='top' align='right'>$tuoterow[myyntihinta] $yhtiorow[valkoodi]$valuuttalisa</td>
 						<td valign='top' align='right'>$tuoterow[nettohinta]/$tuoterow[myymalahinta]</td>
-						<td valign='top' align='right'>$tuoterow[ostohinta]</td>
-						<td valign='top' align='right'>$tuoterow[kehahin]</td>
+						<td valign='top' align='right'>";
+						if ($tuoterow[ostohinta][0] != '/') {
+							echo $tuoterow[ostohinta];
+						}
+						
+						echo"</td><td valign='top' align='right'>$tuoterow[kehahin]</td>
 						<td valign='top' align='right'>$tuoterow[vihahin] ".tv1dateconv($tuoterow["vihapvm"])."</td>
 				</tr>";
 

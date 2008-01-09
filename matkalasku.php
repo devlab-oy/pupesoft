@@ -852,7 +852,14 @@ if ($tee == "MUOKKAA") {
 						else {
 							$sel="";
 						}
-						$valinta .= "<option value='$trow[tuoteno]' $sel>$trow[nimitys]</option>";
+
+						if($viranomaistyyppi == "A") {
+							$valinta .= "<option value='$trow[tuoteno]' $sel>$trow[vienti] - $trow[nimitys]</option>";
+						}
+						else {
+							$valinta .= "<option value='$trow[tuoteno]' $sel>$trow[nimitys]</option>";
+						}
+						
 					}
 					$valinta .= "</select>";
 				}

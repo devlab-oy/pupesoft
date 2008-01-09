@@ -63,8 +63,8 @@
 		echo "<form action='$PHP_SELF' name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form>";
 
 		$haku='';
-		if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";
-		if (is_numeric($etsi)) $haku="and tunnus='$etsi'";
+		if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
+		if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
 
 		$query = "	select distinct otunnus
 					from tilausrivi, lasku, toimitustapa

@@ -186,11 +186,10 @@ while (!feof($handle)) {
 						$varaosavirhe = '';
 
 						if ($tee == 'Y') {	//tässä meillä ei ole käyttöliittymää ja rivi halutaan aina kuiteski lisätä tilaukselle joten alvihomma tulee ratkasta tässä
-							//tuotteen tiedot alv.inc muodossa
+							//tuotteen tiedot alv muodossa
 							$trow = $tuoterow;
-							$aalv = '';
 
-							require ("alv.inc");
+							list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 						}
 
 						$tee='UV';

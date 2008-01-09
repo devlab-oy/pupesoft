@@ -32,7 +32,7 @@ if (isset($_POST['tee']) and $_POST['tee'] == 'file' and isset($_REQUEST['liitos
 		echo $retval;
 	}
 	else {
-		tallenna_liite("userfile", mysql_real_escape_string($_REQUEST['liitos']), (int) $_REQUEST['id'], "");
+		tallenna_liite("userfile", mysql_real_escape_string($_REQUEST['liitos']), (int) $_REQUEST['id'], $selite, $kayttotarkoitus);
 	}
 
 }
@@ -72,10 +72,26 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 
 		if (mysql_num_rows($res) > 0) {
 			$ok = true;
-		}		
+		}
+		$litety = "<td>&nbsp;</td>";		
 	}
+	//	Nämä ovat varmaankin sitten itse tilauksia?
 	elseif(in_array($laskurow['tila'], array("L","N","R","E","T"))) {
 		$ok = true;
+		
+		//	Näille voidaan laittaa myös minkä lajin liite on kyseessä
+		$query = "	SELECT selite, selitetark
+					FROM avainsana
+					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TIL-LITETY'
+					ORDER BY jarjestys, selite";
+		$ares = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($ares) > 0) {
+			$litety = "<td><select name ='kayttotarkoitus'>";
+			while($a = mysql_fetch_array($ares)) {
+				$litety .= "<option value = '$a[selite]'>$a[selitetark]</option>";
+			}
+			$litety .= "</select></td>";
+		}
 	}
 	
 	if($ok === true) {
@@ -101,10 +117,12 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 				
 				<table>
 					<tr>
+						<th>".t("Käyttötarkoitus"),"</th>
 						<th>".t("Selite"),"</th>
 						<th>".t("Tiedosto"),"</th>
 					</tr>
 					<tr>
+						$litety
 						<td><input type='text' name='selite' value='' size='20'></td>
 						<td><input type='file' name='userfile'></td>
 						<td class='back'><input type='submit' name='submit' value='".t('Liitä tiedosto')."'></td>
@@ -113,13 +131,14 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 				</form><br>";
 		}
 
-		$query = "	SELECT liitostunnus,tunnus,filename,filesize,selite,filetype,laatija,luontiaika
+		$query = "	SELECT *
 					FROM liitetiedostot
 					WHERE liitostunnus=".(int) $_REQUEST['id']." AND liitos='lasku' and yhtio='{$kukarow['yhtio']}'";
 		$res = mysql_query($query) or pupe_error($query);
 
 		echo "<table>
 			<tr>
+				<th>".t('Käyttötarkoitus')."</th>
 			    <th>".t('Selite')."</th>
 				<th>".t('Tiedosto')."</th>
 				<th>".t('Koko')."</th>
@@ -141,6 +160,7 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 			$filesize = sprintf("%.2f",$filesize)." $type[$ii]";
 
 			echo "<tr>
+				<td>".$liite['kayttotarkoitus'] ."</td>
 				<td>".$liite['selite'] ."</td>
 				<td>".$liite['filename'] ."</td>
 				<td>".$filesize."</td>

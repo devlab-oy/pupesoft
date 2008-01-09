@@ -168,6 +168,7 @@
 			$ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
 			$ulos .= "<option value='VAKIOVIESTI' {$avain_sel['VAKIOVIESTI']}>				".t("Vakioviesti")."</option>";	
 			$ulos .= "<option value='LITETY' {$avain_sel['LITETY']}>						".t("Liitetiedostotyyppi")."</option>";
+			$ulos .= "<option value='TIL-LITETY' {$avain_sel['TIL-LITETY']}>				".t("Tilauksen liitetiedostotyyppi")."</option>";
 			$ulos .= "<option value='JAKELULISTA' {$avain_sel['JAKELULISTA']}>				".t("Email jakelulista")."</option>";
 			$ulos .= "<option value='TRIVITYYPPI' {$avain_sel['TRIVITYYPPI']}>				".t("Tilausrivin tyyppi")."</option>";						
 			$ulos .= "</optgroup>";

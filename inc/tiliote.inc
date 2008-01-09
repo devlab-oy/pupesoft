@@ -313,8 +313,10 @@
 
 			if ($boob == 0) {
 				echo "<font class='message'><a href='suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=". -1*$maara . "'>".t("Ostosuoritus")."</a></font><br>";
-				echo "<font class='message'><a href='myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z'>".t("Myyntisuoritus muu")." </a></font>";
 			}
+			
+			//	Annetaan Muu aina
+			echo "<font class='message'><a href='myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z'>".t("Myyntisuoritus muu")." </a></font>";
 
 		}
 		echo "</td><td>";

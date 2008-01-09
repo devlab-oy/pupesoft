@@ -384,28 +384,29 @@ else {
 						$rhire = mysql_query($query) or pupe_error($query);
 						$trow  = mysql_fetch_array($rhire);
 
-						$otunnus	= $laskurow['tunnus'];
-						$hinta		= $hirow["rahtihinta"]; // rahtihinta
-						$alv 		= '';
-						$trow["alv"]= $laskurow["alv"];
-						$nimitys	= $laskurow["toimitustapa"];
+						$otunnus	 = $laskurow['tunnus'];
+						$hinta		 = $hirow["rahtihinta"]; // rahtihinta
+						$trow["alv"] = $laskurow["alv"];
+						$nimitys	 = $laskurow["toimitustapa"];
 
-						require("alv.inc");
+						list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-						$query  = "INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+						$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+									values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 						$addtil = mysql_query($query) or pupe_error($query);
 
 						$tilaus_valmis_ulos .= t("Tilaukselle lisättiin rahtikulua").": $hinta $laskurow[valkoodi]<br>";
 
 						if ($torow["jvkulu"] != 0) {
-							$otunnus	= $laskurow['tunnus'];
-							$hinta	= $torow["jvkulu"]; // jvkulu
-							$alv 		= '';
-							$nimitys	= t("Jälkivaatimuskulu");
+							$otunnus	 = $laskurow['tunnus'];
+							$hinta		 = $torow["jvkulu"]; // jvkulu
+							$trow["alv"] = $laskurow["alv"];
+							$nimitys	 = t("Jälkivaatimuskulu");
 
-							require("alv.inc");
+							list($hinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-							$query  = "INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) values  (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
+							$query  = "	INSERT into tilausrivi (laadittu, hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+										values (now(), '$hinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '')";
 							$addtil = mysql_query($query) or pupe_error($query);
 
 							$tilaus_valmis_ulos .= t("Tilaukselle lisättiin jälkivaatimuskulua").": $hinta $laskurow[valkoodi]<br>";

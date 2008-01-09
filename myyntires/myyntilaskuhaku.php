@@ -107,7 +107,7 @@
 				}
 			
 				echo "<td valign='top'>".tv1dateconv($trow["erpcm"])."</td>";
-				echo "<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&laskunro=$trow[laskunro]'>$trow[laskunro]</td>";
+				echo "<td valign='top'><a href = '../tilauskasittely/tulostakopio.php?toim=LASKU&tee=ETSILASKU&laskunro=$trow[laskunro]'>$trow[laskunro]</td>";
 				echo "<td valign='top'>$trow[nimi]</td>";
 				echo "<td valign='top' align='right'>$trow[summa]</td>";
 				echo "<td valign='top'>$trow[valkoodi]</td>";

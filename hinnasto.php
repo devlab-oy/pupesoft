@@ -313,6 +313,7 @@ echo "<tr>
 			<option value='futur'>" . t('Futursoft') . "</option>
 			<option value='automaster'>" . t('Automaster') . "</option>
 			<option value='vienti'>" . t('Vientihinnasto') . "</option>
+			<option value='tab'>" . t('Tab eroteltu') . "</option>
 		</select>
 	</td>
 	</tr>

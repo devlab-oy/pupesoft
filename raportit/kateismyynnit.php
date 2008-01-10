@@ -71,11 +71,29 @@
 		$lisa2 .= ") ";
 
 
+
+		$myyntisaamiset_tilit = "'{$yhtiorow['kassa']}', '{$yhtiorow['pankkikortti']}', '{$yhtiorow['luottokortti']}',";
+
+		$query = "	SELECT DISTINCT selitetark_2
+					FROM avainsana
+					WHERE yhtio = '{$kukarow['yhtio']}' AND laji = 'KASSA' AND selitetark_2 != ''";
+		$myysaatilit_result = mysql_query($query) or pupe_error($query);
+		
+		while ($myysaatilit_row = mysql_fetch_array($myysaatilit_result)) {
+
+			$myyntisaamiset_tilit .= "'{$myysaatilit_row['selitetark_2']}',";
+			
+		}
+
+		$myyntisaamiset_tilit = substr($myyntisaamiset_tilit, 0, -1);
+
+
 		//Haetaan käteislaskut
-		$query = "	SELECT if(lasku.kassalipas='', 'Muut', lasku.kassalipas) kassa, if(ifnull(avainsana.selitetark, '') ='', 'Muut', avainsana.selitetark) kassanimi, maksuehto.kateinen,
+		$query = "	SELECT if(lasku.kassalipas='', 'Muut', lasku.kassalipas) kassa, if(ifnull(avainsana.selitetark, '') ='', 'Muut', avainsana.selitetark) kassanimi, tiliointi.tilino,
 					lasku.nimi, lasku.ytunnus, lasku.laskunro, lasku.tunnus, lasku.summa, lasku.laskutettu, lasku.tapvm
 					FROM lasku use index (yhtio_tila_tapvm)
 					JOIN maksuehto ON (maksuehto.yhtio=lasku.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen != '')
+					JOIN tiliointi ON (tiliointi.yhtio=lasku.yhtio and tiliointi.ltunnus=lasku.tunnus and tiliointi.korjattu = '' and tiliointi.tilino in ($myyntisaamiset_tilit))
 					LEFT JOIN avainsana ON (avainsana.selite=lasku.kassalipas and avainsana.yhtio = lasku.yhtio and avainsana.laji = 'KASSA')
 					WHERE
 					lasku.yhtio = '$kukarow[yhtio]'
@@ -86,7 +104,7 @@
 					$lisa
 					$lisa2
 					$kassat
-					ORDER BY kassa, kateinen, laskunro";
+					ORDER BY kassa, tilino, laskunro";
 		$result = mysql_query($query) or pupe_error($query);
 
 		echo "	<table><tr>
@@ -122,21 +140,21 @@
 
 		while ($row = mysql_fetch_array($result)) {
 
-			if (($kateinen != $row["kateinen"] and $kateinen != '') or ($edkassa != $row["kassa"] and $edkassa != '')) {
+			if (($kateinen != $row["tilino"] and $kateinen != '') or ($edkassa != $row["kassa"] and $edkassa != '')) {
 
 				$kateismaksu = "";
 
-				// Tarkistetaan mikä maksutapa
-				if ($kateinen == 'n') {
+				if ($row['tilino'] == $yhtiorow['pankkikortti']) {
 					$kateismaksu = t("Pankkikortti");
 				}
-				elseif ($kateinen == 'o') {
-					$kateismaksu = t("Luottokortti");
+				else if ($row['tilino'] == $yhtiorow['luottokortti']) {
+					$kateismaksu = t("Luottokortti");					
 				}
 				else {
 					$kateismaksu = t("Käteinen");
 				}
-
+				
+				
 				echo "<tr>";
 				echo "<th colspan='5'>$kateismaksu ".t("yhteensä").":</th>";
 				echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</th></tr>";
@@ -181,7 +199,7 @@
 				$kateismaksuyhteensa = 0;
 			}
 
-			$kateinen    = $row["kateinen"];
+			$kateinen    = $row["tilino"];
 			$edkassa 	 = $row["kassa"];
 			$edkassanimi = $row["kassanimi"];
 
@@ -215,15 +233,6 @@
 		}
 
 		if ($edkassa != '') {
-			$kateismaksu = "";
-			if ($kateinen == 'n') {
-				$kateismaksu = t("Pankkikortti");
-			} elseif ($kateinen == 'o') {
-				$kateismaksu = t("Luottokortti");
-			} else {
-				$kateismaksu = t("Käteinen");
-			}
-
 			echo "<tr>";
 			echo "<th colspan='5'>{$row["kassanimi"]} $kateismaksu ".t("yhteensä").":</th>";
 			echo "<th align='right'>".str_replace(".",",",sprintf('%.2f',$kateismaksuyhteensa))."</th></tr>";
@@ -416,16 +425,16 @@
 
 	while ($varow = mysql_fetch_array($vares)) {
 		$sel='';
-		if ((!isset($kassakone) and $tee=="") or $kassakone[$varow["selite"]] != '') $sel = 'CHECKED';
+		if ($kassakone[$varow["selite"]] != '') $sel = 'CHECKED';
 		echo "<tr><th>".t("Näytä")."</th><td colspan='3'><input type='checkbox' name='kassakone[$varow[selite]]' value='$varow[selite]' $sel> $varow[selitetark]</td></tr>";
 	}
 
 	$sel='';
-	if ((!isset($muutkassat) and $tee=="") or $muutkassat != '') $sel = 'CHECKED';
+	if ($muutkassat != '') $sel = 'CHECKED';
 	echo "<tr><th>".t("Näytä")."</th><td colspan='3'><input type='checkbox' name='muutkassat' value='MUUT' $sel>".t("Muut kassat")."</td></tr>";
 
 	$sel='';
-	if ((!isset($katsuori) and $tee=="") or $katsuori != '') $sel = 'CHECKED';
+	if ($katsuori != '') $sel = 'CHECKED';
 	echo "<tr><th>".t("Näytä")."</th><td colspan='3'><input type='checkbox' name='katsuori' value='MUUT' $sel>".t("Käteissuoritukset")."</td></tr>";
 
 	echo "<tr><td class='back'><br></td></tr>";

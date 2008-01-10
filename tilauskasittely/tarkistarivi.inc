@@ -30,12 +30,12 @@
 	}
 	
 	if ($row["var"] == "J" and $row["tyyppi"] != "E") {
-		if (($yhtiorow["varaako_jt_saldoa"] == "" or $row["tyyppi"] == 'G') and $row["jt"] == 0) {
+		if (($yhtiorow["varaako_jt_saldoa"] == "") and $row["jt"] == 0) {
 			$varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
 			$riviok++;
 			$tilausok++;
 		}
-		if ($yhtiorow["varaako_jt_saldoa"] != "" and $row["varattu"] == 0 and $row["tyyppi"] != 'G') {
+		if ($yhtiorow["varaako_jt_saldoa"] != "" and $row["varattu"] == 0) {
 			$varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
 			$riviok++;
 			$tilausok++;

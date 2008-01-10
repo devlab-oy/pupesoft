@@ -619,7 +619,7 @@
 			// Myyd‰‰n tietyst‰ varastosta
 			if (is_array($varasto) and $paikka == '') {
 
-				if ($lisaarivi_debug==1) echo "Halutaan myyd‰ varastoista $varasto<br>";
+				if ($lisaarivi_debug==1) echo "Halutaan myyd‰ varastoista ", var_dump($varasto).".<br>";
 
 				foreach ($myy_tuoteno as $i => $tuoteno) {
 					if (!in_array($myy_varasto[$i], $varasto) and $myy_varasto[$i] != "") {
@@ -1261,7 +1261,7 @@
 				switch ($var) {
 					case 'J' : // J‰lkitoimitukseen
 						// Yhtiˆn parametri: varaako JT-rivi saldoja
-						if ($yhtiorow["varaako_jt_saldoa"] == "" or $rivityyppi == 'G') {
+						if ($yhtiorow["varaako_jt_saldoa"] == "") {
 							$varattu 	= 0;
 							$jt 		= $kpl;
 						}
@@ -1306,7 +1306,14 @@
 						// Tai jos yhtiˆlle on konffattu, ett‰ se haluaa ylimemen‰t jteiksi
 						// Sis‰isiss‰ tyˆm‰‰r‰ykiss‰ ei haluta JT-rivej‰
 						if ((($rivityyppi == 'G' and $yhtiorow["puute_jt_oletus"] != "H") or ($yhtiorow["puute_jt_oletus"] == "J" and $kpl > 0)) and $laskurow["tila"] != 'S') {
-							$jt 	= $kpl;
+							if ($yhtiorow["varaako_jt_saldoa"] == "") {
+								$varattu 	= 0;
+								$jt 		= $kpl;
+							}
+							else {
+								$varattu 	= $kpl;
+								$jt 		= 0;
+							}
 							$var	= "J";
 						}
 						// Terminaalitoimitukset tai ostoskorit; var tyhj‰‰ ja varattu normisti

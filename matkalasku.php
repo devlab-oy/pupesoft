@@ -466,7 +466,7 @@ if ($tee == "MUOKKAA") {
 								and lasku.tilaustyyppi	= 'M'
 								and lasku.tila IN ('H','Y','M','P','Q')
 								and liitostunnus = '$laskurow[liitostunnus]'
-								and (	(kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika <= '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
+								and (	(kerattyaika >= '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and kerattyaika < '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
 										(kerattyaika <  '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika > '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm') or
 										(toimitettuaika > '$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm' and toimitettuaika <= '$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm'))
 								GROUP BY otunnus";
@@ -1155,12 +1155,12 @@ if ($tee == "MUOKKAA") {
 			$summa=0;
 			while ($row=mysql_fetch_array($result)) {
 			
-				if (($row["perhe"] != $edperhe) and $eka != "joo") {
+				if (($row["perhe"] != $edperhe) and $eka != "joo" and $row["perheid2"] == $edperheid2) {
 					echo "<tr><td class='back' colspan = '5' height='10' style='border-right: 1px solid;'></td></tr>";
 				}
 
 				if (($row["perheid2"] != $edperheid2) and $eka != "joo") {
-					echo "<tr><td class='back' colspan = '6' height='15'></td></tr>";
+					echo "<tr><td class='back' colspan = '6' height='25'></td></tr>";
 				}
 				
 				echo "<tr>";

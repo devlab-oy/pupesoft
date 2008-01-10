@@ -787,14 +787,45 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 
 	if ($kassamyyja_kesken != 'ei' and !isset($seka)) {
 
-		echo "<table><tr><th>".t("Maksutapa").":</th>";
-
 		$query_maksuehto = " SELECT *
 							 FROM maksuehto
-							 WHERE yhtio='$kukarow[yhtio]' and kateinen != '' and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
+							 WHERE yhtio='$kukarow[yhtio]' and kateinen != '' and kaytossa = '' and (maksuehto.sallitut_maat = '' or maksuehto.sallitut_maat like '%$laskurow[maa]%')";
 		$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
 
-		while ($maksuehtorow = mysql_fetch_array($maksuehtores)) {
+		if (mysql_num_rows($maksuehtores) > 1) {
+			echo "<table><tr><th>".t("Maksutapa").":</th>";
+
+			while ($maksuehtorow = mysql_fetch_array($maksuehtores)) {
+				echo "<form action='' method='post'>";
+				echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+				echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+				echo "<input type='hidden' name='tee' value='VALMIS'>";
+				echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
+				echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
+				echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+				echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
+				echo "<td><input type='submit' value='{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}'></td>";
+				echo "</form>";
+			}
+	
+			/*
+			echo "<form action='' method='post'>";
+			echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+			echo "<input type='hidden' name='tee' value='VALMIS'>";
+			echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
+			echo "<input type='hidden' name='seka' value='X'>";
+			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
+			echo "<td><input type='submit' value='Seka'></td>";
+			echo "</form></tr>";
+			*/
+
+			echo "</table>";
+	
+			exit;
+		}
+		else {
 			echo "<form action='' method='post'>";
 			echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -803,24 +834,11 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 			echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
 			echo "<input type='hidden' name='kateinen' value='$kateinen'>";
 			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
-			echo "<td><input type='submit' value='{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}'></td>";
-			echo "</form>";
+			echo "</form></tr>";
 		}
-		
-		echo "<form action='' method='post'>";
-		echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
-		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-		echo "<input type='hidden' name='tee' value='VALMIS'>";
-		echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
-		echo "<input type='hidden' name='seka' value='X'>";
-		echo "<input type='hidden' name='kateinen' value='$kateinen'>";
-		echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
-		echo "<td><input type='submit' value='Seka'></td>";
-
-		echo "</form></tr></table>";
-		
-		exit;
+		echo "</table>";
 	}
+/*
 	elseif ($kassamyyja_kesken == 'ei' and $seka == 'X') {
 
 		echo "<table><form action='' name='laskuri' method='post'>";
@@ -874,8 +892,7 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 
 		exit;
 	}
-	
-	echo "</table>";
+*/	
 
 } elseif ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
 	

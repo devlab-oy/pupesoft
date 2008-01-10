@@ -417,24 +417,25 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 					enable_ajax();
 					js_popup();
-
+					
 					while ($message_row = mysql_fetch_array($message_result)) {
-						echo "<div id='$message_row[tunnus]' style='float: none; width: 420px; height: 20px;'>";
+						echo "<div id='msg_$message_row[tunnus]' style='float: none; width: 420px; height: 20px;'>";
+						echo "<table><tr><td class='back'>";
 						echo "<font class='info'> {$message_row['nimi']}@".tv1dateconv($message_row['luontiaika'],'yes').":</font> ";
-						
-						echo "<div style='float: right;'>";
-						echo "<button onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false); document.getElementById('$message_row[tunnus]').style.display='none';\" style='font-size: 10px;'>".t("Kuittaa")."!</button>";		
-						echo "</div>";
-						
+												
 						if(strlen($message_row['viesti'])>25) {
-							echo "<div id='msg_$message_row[tunnus]' class='popup'><table><tr><th>".t("Viesti käyttäjältä")." {$message_row['nimi']}</th></tr><tr><td>".nl2br($message_row["viesti"])."</td></tr></table></div>";
-							echo "<a href = '#' onMouseover=\"popUp(event, 'msg_$message_row[tunnus]', -10, -20); return false;\" onMouseout=\"popUp(event, 'msg_$message_row[tunnus]'); return false;\"><font class='message'>$message_row[kooste]..</font></a>";
+							echo "<div id='msg_$message_row[tunnus]_viesti' class='popup'><table><tr><th>".t("Viesti käyttäjältä")." {$message_row['nimi']}</th></tr><tr><td>".nl2br($message_row["viesti"])."</td></tr></table></div>";
+							echo "<a href = '#' onMouseover=\"popUp(event, 'msg_$message_row[tunnus]_viesti', -10, -20); return false;\" onMouseout=\"popUp(event, 'msg_$message_row[tunnus]_viesti'); return false;\"><font class='message'>$message_row[kooste]..</font></a>";
 						}
 						else {
 							echo "<font class='message'>$message_row[kooste]</font>";
 						}
 						
-						echo "</div>";
+						echo "</td><td class='back' width='15'>&nbsp;</td><td class='back'>";
+						echo "<button onClick=\"javascript:sndReq('msg_$message_row[tunnus]','?tee=message_luettu&message_tunnus=$message_row[tunnus]&ohje=off&no_css=yes', false, false); document.getElementById('msg_$message_row[tunnus]').style.display='none';\" style='font-size: 10px;'>".t("Kuittaa")."!</button>";
+						echo "</td>";
+						
+						echo "</tr></table></div>";
 					}
 					
 					echo "<br>";

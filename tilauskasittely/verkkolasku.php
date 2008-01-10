@@ -70,7 +70,27 @@
 			if ($argv[3] == "eiketjut") {
 				$eiketjut = "KYLLA";
 			}
-
+			
+			// katotaan onko annettu mahdollisia muita parametreja. kolme ekaa on pakollisia
+			$sahkopostiin = '';
+			$sopimukset = '';
+			
+			for ($i=3; $i <= $argc; $i++) { 
+				echo "$argv[$i]\n";
+				// l‰hetet‰‰nkˆ laskut asiakkaan s‰hkˆpostiin? oletuksen ei
+				if ($argv[$i] == 'sahkopostiin') {
+					$sahkopostiin = 'pannaan';
+					
+				}
+				// laskutetaanko sopimukset? oletuksena ei
+				elseif ($argv[$i] == 'sopimukset') {
+					$sopimukset = 'laskutetaan';
+				}
+			}
+			
+			
+			die;
+			
 			$komentorivilta = "ON";
 
 			$tee = "TARKISTA";
@@ -93,7 +113,11 @@
 
 		require ("../inc/parametrit.inc");
 	}
-
+	
+	if ($sahkopostiin == 'pannaan') {
+		$yhtiorow['lasku_tulostin'] = "email";
+	}
+	
 	if ($tee == "lataa_tiedosto") {
 		echo $file;
 		exit;
@@ -324,7 +348,8 @@
 							LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 							WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 							and tilausrivi.otunnus = '$laskurow[tunnus]'
-							and tilausrivi.tyyppi  = 'L'";
+							and tilausrivi.tyyppi  = 'L'
+							and tilausrivi.var not in ('P','J','S')";
 				$sarjares1 = mysql_query($query) or pupe_error($query);
 
 				while($srow1 = mysql_fetch_array($sarjares1)) {
@@ -1575,6 +1600,26 @@
 											where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
 							$kires = mysql_query($querykieli) or pupe_error($querykieli);
 							$kirow = mysql_fetch_array($kires);
+							
+							$kutsulisa = "";
+							
+							if ($sahkopostiin == 'pannaan') {
+								if ($sopimukset == 'laskutetaan') {
+									$weeri = "LASKT_EMAIL_SOP";
+								}
+								else {
+									$weeri = "LASKT_EMAIL";
+								}
+								
+								$mailquery = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = '$weeri' and kieli = '$laskun_kieli' and selite = '$laskurow[ytunnus]' and selitetark != '' and order by jarjestys limit 1";
+								$mailresult = mysql_query($mailquery) or pupe_error($mailquery);
+								if (mysql_num_rows($mailresult) > 0) {
+									$mailrow = mysql_fetch_array($mailresult);
+									$kukarow["eposti"] = $mailrow["selitetark"];
+									$kutsulisa = $mailrow["selitetark_2"];
+									$viestisisalto = "\n"."$mailrow[selitetark_2]"."\n\n";
+								}
+							}
 
 							if ($silent == "") $tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
 
@@ -1584,7 +1629,7 @@
 							}
 							elseif ($kukarow["eposti"] != '') {
 								// l‰hetet‰‰n meili
-								$kutsu = "lasku $lasku";
+								$kutsu = "lasku $lasku $kutsulisa";
 								$liite = $pdffilenimi;
 								include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 							}

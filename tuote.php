@@ -151,14 +151,15 @@
 		echo "<font class='message'>".t("Tuotetiedot")."</font><hr>";
 		
 		$query = "	SELECT tuote.*, date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
-					group_concat(distinct tuotteen_toimittajat.toimittaja order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
+					group_concat(distinct concat(tuotteen_toimittajat.toimittaja, ' ', toimi.nimi) order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
 					group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
 					group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
 					group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin,
 					group_concat(distinct tuotteen_toimittajat.alkuperamaa order by tuotteen_toimittajat.tunnus) alkuperamaa,
 					group_concat(distinct concat_ws(' ',tuotteen_toimittajat.ostohinta,upper(tuotteen_toimittajat.valuutta), '/',tuotteen_toimittajat.alennus, '%') order by tuotteen_toimittajat.tunnus separator '<br>') ostohinta
 					FROM tuote
-					LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno
+					LEFT JOIN tuotteen_toimittajat ON (tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+					LEFT JOIN toimi on (toimi.yhtio = tuote.yhtio and toimi.tunnus = tuotteen_toimittajat.liitostunnus)
 					WHERE tuote.yhtio = '$kukarow[yhtio]'
 					and tuote.tuoteno = '$tuoteno'
 					GROUP BY tuote.tuoteno";

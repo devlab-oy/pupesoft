@@ -581,7 +581,7 @@
 
 	if (mysql_field_name($result, $i) == "toimitusehto") {
 
-		$query = "	SELECT concat_ws(' ', selite, selitetark) toimehto
+		$query = "	SELECT concat_ws(' ', selite, selitetark) toimehto, selite
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TOIMEHTO'
 					ORDER BY jarjestys, selite";
@@ -594,7 +594,7 @@
 			if ($kirow["toimehto"] == $trow[$i]) $select = 'SELECTED';
 			else $select = '';
 
-			$ulos .= "<option value='$kirow[toimehto]' $select>$kirow[toimehto]</option>";
+			$ulos .= "<option value='$kirow[selite]' $select>$kirow[toimehto]</option>";
 		}
 
 		$ulos .= "</select></td>";

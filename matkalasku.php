@@ -809,8 +809,8 @@ if ($tee == "MUOKKAA") {
 		echo "<td>$laskurow[toim_nimi]<br>$laskurow[toim_nimitark]<br>$laskurow[toim_osoite]<br>$laskurow[toim_postino] $laskurow[toim_postitp]</td>";
 
 		echo "</tr>";
-
-		if ($laskurow["tila"] == "H" and $laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2) {
+		
+		if ($laskurow["tila"] == "H" and $laskurow["hyvaksyja_nyt"] == $kukarow["kuka"]) {
 
 			// t‰ss‰ alotellaan koko formi.. t‰m‰ pit‰‰ kirjottaa aina
 			echo "	<form name='tilaus' action='$PHP_SELF' method='post' autocomplete='off' enctype='multipart/form-data'>
@@ -830,7 +830,7 @@ if ($tee == "MUOKKAA") {
 			$liiteres=mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($liiteres)>0) {
 				while ($liiterow=mysql_fetch_array($liiteres)) {
-					if ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2) {
+					if ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"]) {
 						$lisa = "&nbsp;&nbsp;&nbsp;&nbsp;<a href='matkalasku.php?tee=$tee&tilausnumero=$tilausnumero&poistakuva={$liiterow["tunnus"]}'>*".t("poista")."*</a>";
 					}
 					else {
@@ -891,7 +891,7 @@ if ($tee == "MUOKKAA") {
 							and status !='P'
 							and tuote.tilino!=''
 							$lisat
-							ORDER BY tuote.vienti, tuote.nimitys";
+							ORDER BY tuote.vienti IN ('$yhtiorow[maa]') DESC, tuote.vienti ASC, tuote.nimitys";
 				$tres=mysql_query($query) or pupe_error($query);
 				$valinta="";
 				if (mysql_num_rows($tres)>0){
@@ -905,7 +905,7 @@ if ($tee == "MUOKKAA") {
 							$sel="";
 						}
 
-						if($viranomaistyyppi == "A") {
+						if($viranomaistyyppi == "A" and $trow["vienti"] != $yhtiorow["maa"]) {
 							$valinta .= "<option value='$trow[tuoteno]' $sel>$trow[vienti] - $trow[nimitys]</option>";
 						}
 						else {
@@ -1198,7 +1198,7 @@ if ($tee == "MUOKKAA") {
 					$border["t"]["r"] .= $b;
 
 					
-					$query = "	SELECT count(*), sum(if(perheid=0 or perheid=tilausrivi.tunnus,1,0)), sum(if(kommentti!='',1,0)) kommentteja, sum(if(tuotetyyppi='A',1,0)) aikoja
+					$query = "	SELECT count(*), sum(if(perheid=0 or perheid=tilausrivi.tunnus,1,0)), sum(if(kommentti !='' and (perheid = 0 or perheid=tilausrivi.tunnus),1,0)) kommentteja, sum(if(tuotetyyppi='A' and (perheid = 0 or perheid=tilausrivi.tunnus),1,0)) aikoja
 								FROM tilausrivi
 								JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 								WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and otunnus = $tilausnumero and perheid2 = $row[perheid2] and kpl > 0 and tilausrivi.tyyppi = 'M'";
@@ -1236,7 +1236,7 @@ if ($tee == "MUOKKAA") {
 				echo "<td style='font-weight: bold; ".$border["t"]["m"]."'>$row[nimitys]</td><td style='".$border["t"]["m"]."'>$row[kustannuspaikka]</td><td align='right' style='font-weight: bold; ".$border["t"]["m"]."'>$row[kpl]</td><td align='right' style='font-weight: bold; ".$border["t"]["m"]."'>$row[hinta]</td><td align='right' style='font-weight: bold; ".$border["t"]["r"]."'>$row[rivihinta]</td>";
 				
 				//	Aina kun perhe vaihtuu voidaan n‰ytt‰‰ nappulat!
-				if (($row["perhe"] != $edperhe) and ($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2)) {
+				if (($row["perhe"] != $edperhe) and (($laskurow["hyvaksyja_nyt"] == $kukarow["kuka"] and $kukarow["taso"] == 2) or ($laskurow["hyvak1"] == $kukarow["kuka"]))) {
 					echo "<td class='back'><div style='float:left;'><form action = '$PHP_SELF' method='post' autocomplete='off'>";
 					echo "<input type='hidden' name='tee' value='$tee'>";
 					echo "<input type='hidden' name='lopetus' value='$lopetus'>";

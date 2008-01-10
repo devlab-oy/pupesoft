@@ -1230,7 +1230,10 @@
 				$rarres = mysql_query($query) or pupe_error($query);
 				$rarrow	 = mysql_fetch_array($rarres);
 
-				$hinta = $rarrow["ostohinta"];
+				$lis_hinta = $rarrow["ostohinta"];
+			}
+			elseif ($laskurow['tila'] == 'O') {
+				$lis_hinta = $hinta;
 			}
 			
 			if ($laskurow['tila'] == 'O' and $ale == "") {
@@ -1243,7 +1246,10 @@
 				$rarres = mysql_query($query) or pupe_error($query);
 				$rarrow	 = mysql_fetch_array($rarres);
 
-				$ale = $rarrow["alennus"];
+				$lis_ale = $rarrow["alennus"];
+			}
+			elseif ($laskurow['tila'] == 'O') {
+				$lis_ale = $ale;
 			}
 
 			if ($laskurow['tila'] != 'O') {

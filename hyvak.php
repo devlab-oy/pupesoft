@@ -1270,6 +1270,15 @@
 							<input type='Submit' value='".t("Hyv‰ksy tiliˆinti ja lasku")."'>
 							</form></td>";
 			}
+			
+			if($laskurow["tilaustyyppi"] == "M") {
+				echo "<td class='back'><form action = 'matkalasku.php' method='post'>
+							<input type='hidden' name = 'tilausnumero' value='$tunnus'>
+							<input type='hidden' name = 'tee' value='MUOKKAA'>
+							<input type='hidden' name = 'lopetus' value='".urlencode("hyvak.php?tunnus={$laskurow["tunnus"]}")."'>
+							<input type='Submit' value='".t("Tarkastele matkalaskua")."'>
+							</form></td>";				
+			}
 
 			// N‰ytet‰‰n alv-erittely, jos on useita kantoja.
 			if ($naytalisa != '') {

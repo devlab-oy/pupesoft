@@ -408,7 +408,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			}
 			$konserni_yhtiot = " messenger.yhtio in (".substr($konserni_yhtiot, 0, -1).") ";
 			
-			$message_query = "	SELECT messenger.tunnus, messenger.viesti, kuka.nimi, messenger.luontiaika
+			$message_query = "	SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)
 								JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka) 
 								WHERE $konserni_yhtiot AND messenger.vastaanottaja = '$kukarow[kuka]' AND extranet='' AND messenger.status = 'X'";
@@ -416,14 +416,28 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				if (mysql_num_rows($message_result) > 0) {
 
 					enable_ajax();
+					js_popup();
 
 					while ($message_row = mysql_fetch_array($message_result)) {
-						echo "<div id='$message_row[tunnus]'>";
-						echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'>";
-						echo "<font class='info'> {$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
-						echo "<b>{$message_row['viesti']}</b></font><br>";
+						echo "<div id='$message_row[tunnus]' style='float: none; width: 420px; height: 20px;'>";
+						echo "<font class='info'> {$message_row['nimi']}@".tv1dateconv($message_row['luontiaika'],'yes').":</font> ";
+						
+						echo "<div style='float: right;'>";
+						echo "<button onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false); document.getElementById('$message_row[tunnus]').style.display='none';\" style='font-size: 10px;'>".t("Kuittaa")."!</button>";		
+						echo "</div>";
+						
+						if(strlen($message_row['viesti'])>25) {
+							echo "<div id='msg_$message_row[tunnus]' class='popup'><table><tr><th>".t("Viesti käyttäjältä")." {$message_row['nimi']}</th></tr><tr><td>".nl2br($message_row["viesti"])."</td></tr></table></div>";
+							echo "<a href = '#' onMouseover=\"popUp(event, 'msg_$message_row[tunnus]', -10, -20); return false;\" onMouseout=\"popUp(event, 'msg_$message_row[tunnus]'); return false;\"><font class='message'>$message_row[kooste]..</font></a>";
+						}
+						else {
+							echo "<font class='message'>$message_row[kooste]</font>";
+						}
+						
 						echo "</div>";
 					}
+					
+					echo "<br>";
 				}
 			}
 		}

@@ -807,8 +807,7 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 				echo "<td><input type='submit' value='{$maksuehtorow['teksti']} {$maksuehtorow['kassa_teksti']}'></td>";
 				echo "</form>";
 			}
-	
-			/*
+
 			echo "<form action='' method='post'>";
 			echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
 			echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -819,7 +818,6 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 			echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
 			echo "<td><input type='submit' value='Seka'></td>";
 			echo "</form></tr>";
-			*/
 
 			echo "</table>";
 	
@@ -838,7 +836,6 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 		}
 		echo "</table>";
 	}
-/*
 	elseif ($kassamyyja_kesken == 'ei' and $seka == 'X') {
 
 		echo "<table><form action='' name='laskuri' method='post'>";
@@ -892,9 +889,8 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 
 		exit;
 	}
-*/	
-
-} elseif ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
+} 
+elseif ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
 	
 	$query_maksuehto = "UPDATE lasku SET maksuehto='$maksutapa', kassalipas='$kertakassa' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$kukarow[kesken]'";
 	$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);

@@ -462,9 +462,13 @@ if($tee=="" or $tee=="LASKE") {
 							if($laskurow[$sarake]>0) {
 								echo "<td class='green'>".luku($laskurow[$sarake])."$lisa</td>";							
 							}
-							else {
-								echo "<td></td>";
+							if($laskurow[$sarake]<0) {
+								echo "<td class='red'>".luku($laskurow[$sarake])."$lisa !!!</td>";
 							}
+							else {
+								echo "<td>$laskurow[$sarake]</td>";
+							}
+							
 							$sarakeTotal[$sarake]+=$laskurow[$sarake];
 							$riviTotal+=$laskurow[$sarake];						
 

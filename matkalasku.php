@@ -316,7 +316,8 @@ if ($tee == "MUOKKAA") {
 						tilausrivin_lisatiedot.kulun_kohdemaan_alv,
 						kustp.tunnus kustp,
 						kohde.tunnus kohde,
-						projekti.tunnus projekti
+						projekti.tunnus projekti,
+						if(tuotetyyppi='A', tuote.vienti, tilausrivin_lisatiedot.kulun_kohdemaa) vienti
 						FROM tilausrivi use index (PRIMARY)
 						LEFT JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
 						LEFT JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus
@@ -411,6 +412,8 @@ if ($tee == "MUOKKAA") {
 				}
 				else {
 					$tyhjenna="joo";
+					unset($tapahtumarow);
+					$perheid2 = 0;
 				}
 			}
 		}
@@ -680,6 +683,11 @@ if ($tee == "MUOKKAA") {
 							$query = " 	UPDATE tilausrivi set perheid2='$lisatty_tun'
 										WHERE yhtio='$kukarow[yhtio]' and tunnus='$perheid2'";
 							$updres=mysql_query($query) or die($query);
+						}
+						
+						//	Jos muokattiin perheen isukkia halutaan oikea kommentti!
+						if( (int) $perheid2 == 0 or $perheid2==$lisatty_tun) {
+							$tapahtumarow["kommentti"] = $kommentti;
 						}
 						
 						$rivitunnus=0;
@@ -973,6 +981,8 @@ if ($tee == "MUOKKAA") {
 				$kustp = $tapahtumarow["kustp"];
 				$kohde = $tapahtumarow["kohde"];
 				$projekti = $tapahtumarow["projekti"];
+				
+				$maa = $tapahtumarow["vienti"];
 			}
 			
 			//	Tehdään kustannuspaikkamenut
@@ -1149,7 +1159,7 @@ if ($tee == "MUOKKAA") {
 		
 		if (mysql_num_rows($result) > 0) {
 			
-			echo "<br><br><font class='message'>".t("Rivit")."</font><hr><table cellpadding='0' cellspacing='0'>";
+			echo "<br><br><font class='message'>".t("Kulurivit")."</font><hr><table cellpadding='0' cellspacing='0'>";
 
 			$saa_hyvaksya="JOO";
 

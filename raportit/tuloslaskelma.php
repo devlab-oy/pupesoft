@@ -290,7 +290,14 @@
 			
 
 			for ($i = $alkukausi; $i < count($kaudet); $i++) {
-				echo "<td class='tumma' align='right' valign='bottom'>$kaudet[$i]</td>";
+				
+				if($i==count($kaudet)-1) {
+					$w = 115;
+				}
+				else {
+					$w = 78;
+				}
+				echo "<td class='tumma' align='right' valign='bottom' width = '$w'>$kaudet[$i]</td>";
 			}
 			echo "</tr>\n";
 
@@ -314,7 +321,7 @@
 					// laitetaan ykkös ja kakkostason rivit tummalla selkeyden vuoksi
 					if (strlen($key) < 3 and $rtaso > 2) $class = "tumma";
 
-					$rivi  = "<tr>";					
+					$rivi  = "<tr class='aktiivi'>";					
 					
 					if ($toim == "TASOMUUTOS") {
 						$rivi .= "<td class='back' nowrap><a href='".$palvelin2."tasomuutos.php?taso=$key&kirjain=$kirjain&tee=muuta&lopetus=$lopetus'>$key</a></td>";

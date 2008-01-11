@@ -70,27 +70,7 @@
 			if ($argv[3] == "eiketjut") {
 				$eiketjut = "KYLLA";
 			}
-			
-			// katotaan onko annettu mahdollisia muita parametreja. kolme ekaa on pakollisia
-			$sahkopostiin = '';
-			$sopimukset = '';
-			
-			for ($i=3; $i <= $argc; $i++) { 
-				echo "$argv[$i]\n";
-				// l‰hetet‰‰nkˆ laskut asiakkaan s‰hkˆpostiin? oletuksen ei
-				if ($argv[$i] == 'sahkopostiin') {
-					$sahkopostiin = 'pannaan';
-					
-				}
-				// laskutetaanko sopimukset? oletuksena ei
-				elseif ($argv[$i] == 'sopimukset') {
-					$sopimukset = 'laskutetaan';
-				}
-			}
-			
-			
-			die;
-			
+
 			$komentorivilta = "ON";
 
 			$tee = "TARKISTA";
@@ -113,11 +93,7 @@
 
 		require ("../inc/parametrit.inc");
 	}
-	
-	if ($sahkopostiin == 'pannaan') {
-		$yhtiorow['lasku_tulostin'] = "email";
-	}
-	
+
 	if ($tee == "lataa_tiedosto") {
 		echo $file;
 		exit;
@@ -604,7 +580,7 @@
 
 						list($jvhinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-						$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+						$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 									values ('$jvhinta', 'N', '1', '1', '$laskurow[tunnus]', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 						$addtil = mysql_query($query) or pupe_error($query);
 
@@ -719,7 +695,7 @@
 
 							list($rahinta, $alv) = alv($laskurow, $trow, $hinta, '', '');
 
-							$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti) 
+							$query  = "	INSERT INTO tilausrivi (hinta, netto, varattu, tilkpl, otunnus, tuoteno, nimitys, yhtio, tyyppi, alv, kommentti)
 										values ('$rahinta', 'N', '1', '1', '$otunnus', '$trow[tuoteno]', '$nimitys', '$kukarow[yhtio]', 'L', '$alv', '$kommentti')";
 							$addtil = mysql_query($query) or pupe_error($query);
 
@@ -1504,7 +1480,7 @@
 						$otunnus = $laskurow["tunnus"];
 
 						// haetaan maksuehdon tiedot
-						$query  = "	SELECT * 
+						$query  = "	SELECT *
 									from maksuehto
 									left join pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
 									where maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$laskurow[maksuehto]'";
@@ -1600,26 +1576,6 @@
 											where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";
 							$kires = mysql_query($querykieli) or pupe_error($querykieli);
 							$kirow = mysql_fetch_array($kires);
-							
-							$kutsulisa = "";
-							
-							if ($sahkopostiin == 'pannaan') {
-								if ($sopimukset == 'laskutetaan') {
-									$weeri = "LASKT_EMAIL_SOP";
-								}
-								else {
-									$weeri = "LASKT_EMAIL";
-								}
-								
-								$mailquery = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = '$weeri' and kieli = '$laskun_kieli' and selite = '$laskurow[ytunnus]' and selitetark != '' and order by jarjestys limit 1";
-								$mailresult = mysql_query($mailquery) or pupe_error($mailquery);
-								if (mysql_num_rows($mailresult) > 0) {
-									$mailrow = mysql_fetch_array($mailresult);
-									$kukarow["eposti"] = $mailrow["selitetark"];
-									$kutsulisa = $mailrow["selitetark_2"];
-									$viestisisalto = "\n"."$mailrow[selitetark_2]"."\n\n";
-								}
-							}
 
 							if ($silent == "") $tulos_ulos .= t("Lasku tulostuu kirjoittimelle").": $kirow[kirjoitin]<br>\n";
 
@@ -1629,7 +1585,7 @@
 							}
 							elseif ($kukarow["eposti"] != '') {
 								// l‰hetet‰‰n meili
-								$kutsu = "lasku $lasku $kutsulisa";
+								$kutsu = "lasku $lasku";
 								$liite = $pdffilenimi;
 								include ("inc/sahkoposti.inc"); // sanotaan include eik‰ require niin ei kuolla
 							}

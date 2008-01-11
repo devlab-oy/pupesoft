@@ -25,6 +25,8 @@
 				lasku.kapvm kapvm,
 				lasku.saldo_maksettu saldo_maksettu,
 				lasku.saldo_maksettu_valuutassa saldo_maksettu_valuutassa,
+				lasku.pyoristys pyoristys,
+				lasku.pyoristys_valuutassa pyoristys_valuutassa,
 				lasku.kasumma kasumma,
 				lasku.kasumma_valuutassa kasumma_valuutassa,
 				lasku.valkoodi laskuvaluutta,
@@ -52,8 +54,8 @@
 				JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
 				LEFT JOIN factoring ON (factoring.yhtio = lasku.yhtio and factoring.valkoodi = lasku.valkoodi and factoring.factoringyhtio = maksuehto.factoring)
 				HAVING saamisetkpl > 0 and (
-				(laskuvaluutta  = yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma-saldo_maksettu-kasumma-suoritettu) 								   < 0.01)) or (abs(laskusumma-saldo_maksettu-suoritettu) 					    < 0.01))) or
-				(laskuvaluutta != yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-kasumma_valuutassa-suoritettu) < 0.01)) or (abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-suoritettu) < 0.01)))
+				(laskuvaluutta  = yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma-saldo_maksettu-kasumma-suoritettu-lasku.pyoristys) 					 							< 0.01)) or (abs(laskusumma-saldo_maksettu-suoritettu-lasku.pyoristys) 						  			< 0.01))) or
+				(laskuvaluutta != yhtiovaluutta and (((kapvm >= adddate(kirjpvm,-4) and abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-kasumma_valuutassa-suoritettu-lasku.pyoristys_valuutassa)	< 0.01)) or (abs(laskusumma_valuutassa-saldo_maksettu_valuutassa-suoritettu-lasku.pyoristys_valuutassa)	< 0.01)))
 				)";
 	$suorires = mysql_query($query) or pupe_error($query);
 

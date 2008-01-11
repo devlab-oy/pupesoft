@@ -1024,12 +1024,12 @@ if (!function_exists('loppu')) {
 				$pdf->draw_text(490, 92+$vientikala,  sprintf('%.2f', $summa),			$thispage, $boldi);
 			}
 			elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]), $boldi);
-				$pdf->draw_text(535-$oikpos, 92+$vientikala, sprintf('%.2f', $laskurow["summa_valuutassa"]), $thispage, $boldi);
+				$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["pyoristys_valuutassa"]), $boldi);
+				$pdf->draw_text(535-$oikpos, 92+$vientikala, sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["pyoristys_valuutassa"]), $thispage, $boldi);
 			}
 			else {
-				$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa"]), $boldi);
-				$pdf->draw_text(535-$oikpos, 92+$vientikala, sprintf('%.2f', $laskurow["summa"]), $thispage, $boldi);
+				$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa"]-$laskurow["pyoristys"]), $boldi);
+				$pdf->draw_text(535-$oikpos, 92+$vientikala, sprintf('%.2f', $laskurow["summa"]-$laskurow["pyoristys"]), $thispage, $boldi);
 			}
 
 			$pdf->draw_text(550, 92+$vientikala,  $laskurow["valkoodi"],				$thispage, $boldi);
@@ -1374,12 +1374,12 @@ if (!function_exists('alvierittely')) {
 			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summa), 						$thispage, $norm);
 		}
 		elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]), $norm);
-			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["summa_valuutassa"]), $thispage, $norm);
+			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["pyoristys_valuutassa"]), $norm);
+			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["pyoristys_valuutassa"]), $thispage, $norm);
 		}
 		else {
-			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa"]), $norm);
-			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["summa"]), 			$thispage, $norm);
+			$oikpos = $pdf->strlen(sprintf('%.2f', $laskurow["summa"]-$laskurow["pyoristys"]), $norm);
+			$pdf->draw_text(535-$oikpos, $kala, sprintf('%.2f', $laskurow["summa"]-$laskurow["pyoristys"]), 			$thispage, $norm);
 		}
 
 		$pdf->draw_text(550, $kala, $laskurow["valkoodi"], 										$thispage, $boldi);

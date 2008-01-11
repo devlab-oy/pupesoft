@@ -18,13 +18,13 @@ $tilausyhteyshenkilo 	= "";
 $asiakkaan_tilausnumero	= "";
 $kohde 					= "";
 
-
-
 $query  = "	SELECT
 			sum(arvo) arvo,
 			sum(arvo_valuutassa) arvo_valuutassa,
 			sum(summa) summa,
 			sum(summa_valuutassa) summa_valuutassa,
+			sum(pyoristys) pyoristys,
+			sum(pyoristys_valuutassa) pyoristys_valuutassa,
 			sum(kate) kate,
 			sum(bruttopaino) bruttopaino,
 			group_concat(distinct trim(comments) 				SEPARATOR ' / ') comments,
@@ -41,12 +41,14 @@ $uusiuresult = mysql_query($query) or pupe_error($query);
 if (mysql_num_rows($uusiuresult) > 0) {
 	$sumrow = mysql_fetch_array($uusiuresult);
 
-	$arvo				= round($sumrow["arvo"], 2);
-	$arvo_valuutassa	= round($sumrow["arvo_valuutassa"], 2);
-	$summa				= round($sumrow["summa"], 2);
-	$summa_valuutassa	= round($sumrow["summa_valuutassa"], 2);
-	$kate				= round($sumrow["kate"], 2);
-	$bruttopaino		= round($sumrow["bruttopaino"], 2);
+	$arvo					= round($sumrow["arvo"], 2);
+	$arvo_valuutassa		= round($sumrow["arvo_valuutassa"], 2);
+	$summa					= round($sumrow["summa"], 2);
+	$summa_valuutassa		= round($sumrow["summa_valuutassa"], 2);
+	$pyoristys				= round($sumrow["pyoristys"], 2);
+	$pyoristys_valuutassa	= round($sumrow["pyoristys_valuutassa"], 2);
+	$kate					= round($sumrow["kate"], 2);
+	$bruttopaino			= round($sumrow["bruttopaino"], 2);
 
 	// generoidaan vientikurssi
 	if ($arvo_valuutassa == 0) {
@@ -72,12 +74,12 @@ if (mysql_num_rows($uusiuresult) > 0) {
 }
 
 // haetaan laskulle otsikkotiedot ketjun ekalta laskulta
-$query  = "	select *
-			from lasku
-			where yhtio = '$kukarow[yhtio]'
+$query  = "	SELECT *
+			FROM lasku
+			WHERE yhtio = '$kukarow[yhtio]'
 			and tunnus in ($tunnukset)
-			order by tunnus
-			limit 1";
+			ORDER BY tunnus
+			LIMIT 1";
 $uusiuresult = mysql_query($query) or pupe_error($query);
 $lasrow = mysql_fetch_array($uusiuresult);
 
@@ -90,7 +92,7 @@ $querykieli = "	SELECT kieli
 $resultkieli = mysql_query($querykieli) or pupe_error($querykieli);
 $kielirow = mysql_fetch_array($resultkieli);
 
-$query  = "select distinct toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($tunnukset)";
+$query  = "SELECT distinct toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp, toim_maa from lasku where yhtio='$kukarow[yhtio]' and tunnus in ($tunnukset)";
 $uusiuresult = mysql_query($query) or pupe_error($query);
 
 // jos meillä on useita toimitusosoitteita, niin ei kirjoiteta vain ekaa siihen otsikolle. se on sekavaa.. kijotetaan vain "useita"
@@ -104,9 +106,9 @@ if (mysql_num_rows($uusiuresult) != 1) {
 }
 
 // haetaan maksuehdon tiedot, jotta osataan tiliöidä käteismyynti kassaan
-$query = "	select *
-			from maksuehto
-			where yhtio = '$kukarow[yhtio]'
+$query = "	SELECT *
+			FROM maksuehto
+			WHERE yhtio = '$kukarow[yhtio]'
 			and tunnus  = '$lasrow[maksuehto]'";
 $xresult = mysql_query($query) or pupe_error($query);
 
@@ -133,7 +135,6 @@ if ($mehtorow['kateinen']!='') {
 ///* Lasketaan Kassa-alennus *///
 $kassaale 				= round($summa*$mehtorow['kassa_alepros']/100,2);
 $kassaale_valuutassa 	= round($summa_valuutassa*$mehtorow['kassa_alepros']/100,2);
-
 
 $lisa_comments 	= "";
 $lisa_viestit	= "";
@@ -213,7 +214,6 @@ if ($lisa_comments != "") {
 	$viestit = $lisa_viestit." ".$viestit;
 }
 
-
 //Siivotaan kommenteista kaikki kummalliset merkit pois
 $comments 				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $comments);
 $viestit				= ereg_replace("[^A-Za-z0-9ÖöÄäÅå .,-/!|+():%\r\n]", "", $viestit);
@@ -237,6 +237,8 @@ $query = "	INSERT into lasku SET
 			alv									= '$lasrow[alv]',
 			arvo								= '$arvo',
 			arvo_valuutassa						= '$arvo_valuutassa',
+			pyoristys							= '$pyoristys',
+			pyoristys_valuutassa				= '$pyoristys_valuutassa',
 			vienti_kurssi						= '$vienti_kurssi',
 			asiakkaan_tilausnumero				= '$asiakkaan_tilausnumero',
 			bruttopaino							= '$bruttopaino',
@@ -318,7 +320,7 @@ $uusiotsikko = mysql_query($query) or pupe_error($query);
 $uusiotunnus = (string) mysql_insert_id();
 
 // haetaan nyt varmuuden vuoksi vielä insertoidut tiedot takaisin..
-$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
+$query = "SELECT * FROM lasku WHERE yhtio='$kukarow[yhtio]' and tunnus='$uusiotunnus'";
 $uusiuresult = mysql_query($query) or pupe_error($query);
 if (mysql_num_rows($uusiuresult)==0) die (t("Lasku")." $uusiotunnus ".t("katosi")."!");
 $laskurow = mysql_fetch_array($uusiuresult);
@@ -337,9 +339,9 @@ if (count($montakotilausta) > 1 and $yhtiorow['laskutyyppi'] != 1) {
 	$sorttauskentta = generoi_sorttauskentta($yhtiorow["laskun_jarjestys"]);
 
 	//laitetaan välisummat rivin kommenttiin aina kun otunnus vaihtuu
-	$query = "	select otunnus, tunnus, $sorttauskentta
-				from tilausrivi
-				where yhtio='$kukarow[yhtio]'
+	$query = "	SELECT otunnus, tunnus, $sorttauskentta
+				FROM tilausrivi
+				WHERE yhtio='$kukarow[yhtio]'
 				and otunnus in ($tunnukset)
 				and kpl != 0
 				ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";

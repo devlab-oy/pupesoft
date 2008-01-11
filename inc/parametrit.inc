@@ -147,15 +147,15 @@ if($verkkokauppa != "") $_GET["ohje"] = "off";
 // jos meillä on sessio
 if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
-	//	Kirjataan verkkokauppakäyttäjä	
+	//	Kirjataan verkkokauppakäyttäjä
 	if($verkkokauppa != "" and $session == "") {
 		//	Täällä ei ole mitään oikeuksia
 		$oikeurow = array();
 		$kukarow["kuka"] 		= "www";
 		$kukarow["nimi"] 		= "Verkkokauppa";
-		$kukarow["extranet"] 	= "X";			
-		$kukarow["yhtio"] 		= $verkkokauppa;	
-		
+		$kukarow["extranet"] 	= "X";
+		$kukarow["yhtio"] 		= $verkkokauppa;
+
 	}
 	else {
 
@@ -194,7 +194,7 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				$toimlisa = "";
 			}
 
-			$query = "	SELECT *, substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi))) 
+			$query = "	SELECT *, substring(alanimi, 1, if(LOCATE('&',alanimi) > 0, LOCATE('&',alanimi)-1, CHAR_LENGTH(alanimi)))
 						FROM oikeu
 						WHERE yhtio = '$kukarow[yhtio]'
 						and kuka = '$kukarow[kuka]'
@@ -238,11 +238,11 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 
 	if (mysql_num_rows($result) == 1) {
 		$yhtion_parametritrow = mysql_fetch_array($result);
-		
+
 		if ($yhtion_parametritrow['hintapyoristys'] != 2 and $yhtion_parametritrow['hintapyoristys'] != 4 and $yhtion_parametritrow['hintapyoristys'] != 6) {
 			$yhtion_parametritrow['hintapyoristys'] = 2;
 		}
-		
+
 		// lisätään kaikki yhtiorow arrayseen
 		foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
 			$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
@@ -265,13 +265,13 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			}
 	 	}
 	}
-	
+
 	// haetaan jotain tarpeellisia funktioita mukaan..
 	require ("functions.inc");
 
 	// luodaan tietokantayhteys uudelleen, niin saadaan slave käyttöön jos sellaista tarvitaan
 	require("connect.inc");
-	
+
 
 	if (isset($nayta_pdf) and $nayta_pdf == 1) {
 		header("Content-Type: application/pdf");
@@ -340,20 +340,20 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 		if(!headers_sent()) {
 			header("Content-Type: text/html; charset=$charset");
 		}
-		
+
 		echo "<html>";
 		echo "<head>";
 		echo "<META Http-Equiv='Cache-Control' Content='no-cache'>";
 		echo "<META Http-Equiv='Pragma' Content='no-cache'>";
 		echo "<META Http-Equiv='Expires' Content='0'>";
 		echo "<meta http-equiv='Content-Type' content='text/html; charset=$charset'>";
-		
+
 		if ($_GET["no_css"] != "yes") {
 			echo "<style type='text/css'>";
 			echo $css;
 			echo "</style>";
 		}
-		
+
 		echo "<title>$yhtiorow[nimi] - ".date('Y-m-d H:i:s')."</title>";
 		echo "</head>";
 
@@ -385,12 +385,12 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 			$hreffi = "http://www.pupesoft.com/trac/wiki/$kukarow[kieli]/".basename($phpnimi).$urltoim;
 
 			echo "<div align='right'><a target='_blank' href='$hreffi'>".t("OHJE")."</a><br></div>";
-			
+
 		}
 		elseif($_GET["sulje"] != "") {
 			echo "<div><a href='#' onclick=\"divi=document.getElementById('{$_GET["sulje"]}'); divi.innerHTML=''; divi.style.display='none'; return false;\"><font style='color: red;'>x</font></a><br></div>";
 		}
-		
+
 		if ($tee == "message_luettu") {
 			$query = "UPDATE messenger SET status='' WHERE yhtio='$kukarow[yhtio]' AND vastaanottaja='$kukarow[kuka]' AND tunnus='$message_tunnus'";
 			$result = mysql_query($query) or pupe_error($query);
@@ -407,38 +407,23 @@ if ($session != '' or ($verkkokauppa != "" and $login != 'yes')) {
 				$konserni_yhtiot .= " '".$row["yhtio"]."' ,";
 			}
 			$konserni_yhtiot = " messenger.yhtio in (".substr($konserni_yhtiot, 0, -1).") ";
-			
+
 			$message_query = "	SELECT messenger.tunnus, left(messenger.viesti, 25) kooste, messenger.viesti, kuka.nimi, messenger.luontiaika
 								FROM messenger USE INDEX (yhtio_vastaanottaja_status)
-								JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka) 
+								JOIN kuka USE INDEX (kuka_index) ON (kuka.yhtio = messenger.yhtio AND kuka.kuka = messenger.kuka)
 								WHERE $konserni_yhtiot AND messenger.vastaanottaja = '$kukarow[kuka]' AND extranet='' AND messenger.status = 'X'";
 			if($message_result = mysql_query($message_query)) {
 				if (mysql_num_rows($message_result) > 0) {
 
 					enable_ajax();
-					js_popup();
-					
+
 					while ($message_row = mysql_fetch_array($message_result)) {
-						echo "<div id='msg_$message_row[tunnus]' style='float: none; width: 420px; height: 20px;'>";
-						echo "<table><tr><td class='back'>";
-						echo "<font class='info'> {$message_row['nimi']}@".tv1dateconv($message_row['luontiaika'],'yes').":</font> ";
-												
-						if(strlen($message_row['viesti'])>25) {
-							echo "<div id='msg_$message_row[tunnus]_viesti' class='popup'><table><tr><th>".t("Viesti käyttäjältä")." {$message_row['nimi']}</th></tr><tr><td>".nl2br($message_row["viesti"])."</td></tr></table></div>";
-							echo "<a href = '#' onMouseover=\"popUp(event, 'msg_$message_row[tunnus]_viesti', -10, -20); return false;\" onMouseout=\"popUp(event, 'msg_$message_row[tunnus]_viesti'); return false;\"><font class='message'>$message_row[kooste]..</font></a>";
-						}
-						else {
-							echo "<font class='message'>$message_row[kooste]</font>";
-						}
-						
-						echo "</td><td class='back' width='15'>&nbsp;</td><td class='back'>";
-						echo "<button onClick=\"javascript:sndReq('msg_$message_row[tunnus]','?tee=message_luettu&message_tunnus=$message_row[tunnus]&ohje=off&no_css=yes', false, false); document.getElementById('msg_$message_row[tunnus]').style.display='none';\" style='font-size: 10px;'>".t("Kuittaa")."!</button>";
-						echo "</td>";
-						
-						echo "</tr></table></div>";
+						echo "<div id='$message_row[tunnus]'>";
+						echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'>";
+						echo "<font class='info'> {$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'],'yes').": ";
+						echo "<b>{$message_row['viesti']}</b></font><br>";
+						echo "</div>";
 					}
-					
-					echo "<br>";
 				}
 			}
 		}

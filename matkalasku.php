@@ -222,8 +222,8 @@ if ($tee == "MUOKKAA") {
 
 			$query = "	select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$ltunnus'";
 			$result=mysql_query($query) or pupe_error($query);
-			$laskurow=mysql_num_rows($result);
-						
+			$laskurow=mysql_fetch_array($result);
+			
 			$query = "	SELECT sum((-1*summa)) summa, count(*) kpl
 						FROM tiliointi
 						WHERE yhtio = '$kukarow[yhtio]'

@@ -280,7 +280,7 @@
 				$hintaresult = mysql_query($query) or pupe_error($query);
 
 				while ($hintarow = mysql_fetch_array($hintaresult)) {
-					$valuuttalisa .= "<br>$hintarow[maa]: $hintarow[hinta] $hintarow[valkoodi]";
+					$valuuttalisa .= "<br>$hintarow[maa]: ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $hintarow["hinta"])." $hintarow[valkoodi]";
 				}
 
 			}
@@ -325,11 +325,11 @@
 			//3
 			echo "<tr><th>".t("Toimtuoteno")."</th><th>".t("Myyntihinta")."</th><th>".t("Netto/Ovh")."</th><th>".t("Ostohinta")." / ".t("Alennus")."</th><th>".t("Kehahinta")."</th><th>".t("Vihahinta")."</th>";
 			echo "<tr><td valign='top' >$tuoterow[toim_tuoteno]</td>
-						<td valign='top' align='right'>$tuoterow[myyntihinta] $yhtiorow[valkoodi]$valuuttalisa</td>
-						<td valign='top' align='right'>$tuoterow[nettohinta]/$tuoterow[myymalahinta]</td>
+						<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myyntihinta"])." $yhtiorow[valkoodi]$valuuttalisa</td>
+						<td valign='top' align='right'>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["nettohinta"])."/".sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["myymalahinta"])."</td>
 						<td valign='top' align='right'>";
 						if ($tuoterow[ostohinta][0] != '/') {
-							echo $tuoterow[ostohinta];
+							echo sprintf("%.".$yhtiorow['hintapyoristys']."f", $tuoterow["ostohinta"]);
 						}
 						
 						echo"</td><td valign='top' align='right'>$tuoterow[kehahin]</td>

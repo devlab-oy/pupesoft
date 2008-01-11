@@ -381,9 +381,9 @@
 				<input type = 'hidden' name = 'laji' value = '$laji'>";
 
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
-			echo "<th><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
+			echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&ojarj=".mysql_field_name($result,$i).$ulisa."&limit=$limit&laji=$laji'>" . t(mysql_field_name($result,$i)) . "</a>";
 
-			if 	(mysql_field_len($result,$i)>10) $size='20';
+			if 	(mysql_field_len($result,$i)>10) $size='15';
 			elseif	(mysql_field_len($result,$i)<5)  $size='5';
 			else	$size='10';
 

@@ -114,7 +114,7 @@
 				echo "<tr>$jarjlisa
 						<th colspan='6' align='left'>".t("Tuotteen nimitys")."</th>
 						</tr><tr>$jarjlisa
-						<td valign='top' class='back' colspan='6'><input type='text' maxlength='35' size='50' name='tuotenimitys' value = '$tuotenimitys'></td></tr>";
+						<td valign='top' colspan='6'><input type='text' maxlength='35' size='50' name='tuotenimitys' value = '$tuotenimitys'></td></tr>";
 			}
 
 			//Jos emillä on marginaalimyyntiä niin pitää muistaa ja kertoa se myös lisääriville

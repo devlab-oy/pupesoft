@@ -17,8 +17,8 @@ $query = "SELECT * FROM yhtio, yhtion_parametrit WHERE yhtio.yhtio = yhtion_para
 $result = mysql_query($query) or pupe_error($query);
 $yhtiorow = mysql_fetch_array($result);
 
-$keissit = array("Asiakas","Kustannupaikka","Laskunumero","Myynti","Nimike","Monivarasto","Ostot","Ostotilausnumero","Varastonumero","Tapahtumalaji","Myyntitil");
-//$keissit = array("Myyntitil");
+$keissit = array("Asiakas","Toimittaja","Kustannupaikka","Laskunumero","Myynti","Nimike","Monivarasto","Ostot","Ostotilausnumero","Varastonumero","Tapahtumalaji","Myyntitil");
+//$keissit = array("Toimittaja");
 
 mkdir("/tmp/infoglove");
 
@@ -31,6 +31,12 @@ foreach ($keissit as $keissi) {
 						LEFT JOIN avainsana ON avainsana.yhtio=asiakas.yhtio and avainsana.laji = 'ASIAKASRYHMA' and avainsana.selite = asiakas.ryhma
 						LEFT JOIN kustannuspaikka ON kustannuspaikka.yhtio = asiakas.yhtio and kustannuspaikka.tunnus = asiakas.kustannuspaikka and kustannuspaikka.tyyppi = 'K'
 						WHERE asiakas.yhtio = '$kukarow[yhtio]'";
+			break;
+		case "Toimittaja" :
+			$query =	"SELECT toimi.tunnus, toimi.ytunnus AS toimittajanro, toimi.nimi, '' AS ryhma, '', toimi.maa, '' AS konserni, toimi.kustannuspaikka, kustannuspaikka.nimi
+						FROM toimi
+						LEFT JOIN kustannuspaikka ON kustannuspaikka.yhtio = toimi.yhtio and kustannuspaikka.tunnus = toimi.kustannuspaikka and kustannuspaikka.tyyppi = 'K'
+						WHERE toimi.yhtio = '$kukarow[yhtio]'";
 			break;
 		case "Kustannupaikka" :
 			// K = kustannuspaikka, O = kohde ja P = projekti
@@ -163,6 +169,5 @@ $palautus = exec($cmd);
 //sit pitää dellata koko dirikka
 $cmd = "cd /tmp/;rm -rf infoglove/";
 $palautus = exec($cmd);
-
 
 ?>

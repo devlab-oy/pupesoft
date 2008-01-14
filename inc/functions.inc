@@ -311,6 +311,54 @@ if (!function_exists("viikonpaiva")) {
 	}
 }
 
+if (!function_exists("tuoteperhe_myytavissa")) {
+	function tuoteperhe_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
+		global $kukarow, $yhtiorow;
+		
+		$query = " 	SELECT distinct tuote.tuoteno, tuoteperhe.kerroin
+					from tuoteperhe
+					join tuote on tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno and ei_saldoa = ''
+					where tuoteperhe.yhtio = '$kukarow[yhtio]' and isatuoteno = '$tuoteno' and tyyppi in ('','P')";
+		$isiresult = mysql_query($query) or pupe_error($query);
+
+		$tuotteet = array();
+
+		while ($isirow = mysql_fetch_array($isiresult)) {
+			$tuotteet[$isirow["kerroin"]] = $isirow["tuoteno"];
+		}		
+		
+		$query = "	SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys
+		 			FROM tuote
+					JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+					JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+					and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+					and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+					WHERE tuote.yhtio = '$kukarow[yhtio]'
+					and tuote.tuoteno in ('".implode("','", $tuotteet)."')
+					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys";
+		$varresult = mysql_query($query) or pupe_error($query);
+		
+		$varasto_myytavissa = array();
+		
+		while ($saldorow = mysql_fetch_array($varresult)) {
+			
+			$perhe_myytavissa = array();
+			
+			foreach($tuotteet as $kerroin => $tuoteno) {
+								
+				list(,,$myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $saldorow["tunnus"], $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era);
+				$perhe_myytavissa[] = round($myytavissa/$kerroin, 2);
+			}
+			
+			arsort($perhe_myytavissa);
+			
+			$varasto_myytavissa[$saldorow["nimitys"]] = array_pop($perhe_myytavissa);			
+		}
+		
+		return($varasto_myytavissa);
+	}
+}
+
 if (!function_exists("saldo_myytavissa")) {
 	function saldo_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
 

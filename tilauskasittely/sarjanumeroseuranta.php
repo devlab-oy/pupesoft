@@ -501,7 +501,7 @@
 				$sarres = mysql_query($query) or pupe_error($query);
 				$sarrow = mysql_fetch_array($sarres);
 
-				$query = "	update sarjanumeroseuranta
+				$query = "	UPDATE sarjanumeroseuranta
 							set $tunnuskentta='',
 							muuttaja	= '$kukarow[kuka]',
 							muutospvm	= now()
@@ -547,7 +547,7 @@
 				$sarjares = mysql_query($query) or pupe_error($query);
 
 				// Tutkitaan oliko tämä sarjanumero käytettytuote?
-				$query = "	SELECT $tunnuskentta rivitunnus, kaytetty
+				$query = "	SELECT $tunnuskentta rivitunnus, kaytetty, ostorivitunnus
 							FROM sarjanumeroseuranta
 							WHERE tunnus = '$sarjatun'";
 				$sarres = mysql_query($query) or pupe_error($query);
@@ -560,6 +560,23 @@
 								and tunnus  = '$sarjarow[rivitunnus]'
 								and alv < 500";
 					$sarjares = mysql_query($query) or pupe_error($query);
+				}
+				
+				if ($rivirow["sarjanumeroseuranta"] == "S" and $tunnuskentta == "myyntirivitunnus") {
+					$query = "	SELECT nimitys
+								FROM tilausrivi
+								WHERE yhtio = '$kukarow[yhtio]'
+								and tunnus  = '$sarjarow[ostorivitunnus]'";
+					$nimires = mysql_query($query) or pupe_error($query);
+					$nimirow = mysql_fetch_array($nimires);
+					
+					if ($nimirow["nimitys"] != "") {
+						$query = "	UPDATE tilausrivi
+									SET nimitys = '$nimirow[nimitys]'
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tunnus  = '$sarjarow[rivitunnus]'";
+						$nimires = mysql_query($query) or pupe_error($query);					
+					}
 				}
 
 				//Tutkitaan lisävarusteita

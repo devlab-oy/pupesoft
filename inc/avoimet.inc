@@ -207,6 +207,13 @@
 			$valkoodi = " and lasku.valkoodi = '{$_POST['savalkoodi']}'";
 			$valkoodi2 = " and suoritus.valkoodi = '{$_POST['savalkoodi']}'";
 		}
+		
+		if ($ojarj != "") {
+			$jarj = $ojarj;
+		}
+		else {
+			$jarj = "lasku.ytunnus";
+		}
 
 		if (substr($laji,0,1) == 'O') {
 
@@ -243,7 +250,7 @@
 						and tila in ('H','Y','M','P','Q')
 						$lisa
 						$valkoodi1
-						ORDER BY ytunnus";
+						ORDER BY $jarj";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// poimitaan kuluva päivä, raportin timestampille
@@ -257,10 +264,10 @@
 
 			echo "<table>";
 			echo "<tr>";
-			echo "<th>".t("Ytunnus")."</th>";
-			echo "<th>".t("Nimi")."</th>";
-			echo "<th>".t("Maksutieto")."</th>";
-			echo "<th>".t("Pvm")."</th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus'>".t("Ytunnus")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi'>".t("Nimi")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.viesti'>".t("Maksutieto")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm'>".t("Pvm")."</a></th>";
 			echo "<th>".t("Maksupäivä")."</th>";
 			echo "<th>".t("Oletusmaksupäivä")."</th>";
 			echo "<th>".t("Eräpäivä")."</th>";
@@ -393,7 +400,7 @@
 						$valkoodi
 						$maa
 						GROUP BY lasku.tunnus
-						ORDER BY lasku.ytunnus, lasku.laskunro";
+						ORDER BY $jarj, lasku.laskunro";
 			$result = mysql_query($query) or pupe_error($query);
 
 			// poimitaan kuluva päivä, raportin timestampille
@@ -407,10 +414,10 @@
 
 			echo "<table>";
 			echo "<tr>";
-			echo "<th>".t("Ytunnus")."</th>";
-			echo "<th>".t("Nimi")."</th>";
-			echo "<th>".t("Laskunro")."</th>";
-			echo "<th>".t("Pvm")."</th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus'>".t("Ytunnus")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi'>".t("Nimi")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm'>".t("Pvm")."</a></th>";
 			echo "<th>".t("Maksupäivä")."</th>";
 			echo "<th>".t("Eräpäivä")."</th>";
 			echo "<th>".t("Laskun summa")."</th>";

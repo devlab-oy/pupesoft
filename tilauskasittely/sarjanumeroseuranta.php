@@ -161,6 +161,14 @@
 					$sarjares = mysql_query($query) or pupe_error($query);
 				}
 			}
+			
+			if (trim($nimitys_nimitys) != "") {
+				$query = "	UPDATE tilausrivi
+							SET nimitys = '$nimitys_nimitys'
+							WHERE yhtio = '$kukarow[yhtio]'
+							and tunnus  = '$sarrow[ostorivitunnus]'";
+				$sarjares = mysql_query($query) or pupe_error($query);
+			}
 
 			echo "<font class='message'>".t("Pävitettiin sarjanumeron tiedot")."!</font><br><br>";
 
@@ -172,7 +180,7 @@
 			$era_kpl		= "";
 		}
 		else {
-			$query = "	SELECT sarjanumeroseuranta.* , tuote.tuoteno, tuote.nimitys
+			$query = "	SELECT sarjanumeroseuranta.* , tuote.tuoteno, tuote.nimitys, tuote.sarjanumeroseuranta
 						FROM sarjanumeroseuranta
 						LEFT JOIN tuote use index (tuoteno_index) ON sarjanumeroseuranta.yhtio=tuote.yhtio and sarjanumeroseuranta.tuoteno=tuote.tuoteno
 						WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
@@ -239,13 +247,25 @@
 					echo "<tr><th>".t("Parasta ennen")."</th><td>
 						<input type='text' name='peppa' value='$peppa' size='3'>
 						<input type='text' name='pekka' value='$pekka' size='3'>
-						<input type='text' name='pevva' value='$pevva' size='5'></td>";
+						<input type='text' name='pevva' value='$pevva' size='5'></td></tr>";
 				}
-
-				echo "<tr><th>".t("Lisätieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$muutarow[lisatieto]</textarea></td></tr>";
-
 				
-				if ($rivirow["sarjanumeroseuranta"] == "S") {
+				
+				if ($muutarow["sarjanumeroseuranta"] == "S") {
+					$query	= "	SELECT tilausrivi.nimitys nimitys, tilausrivi.tunnus ostotunnus
+								FROM tilausrivi						
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+								and tilausrivi.tunnus  = '$muutarow[ostorivitunnus]'";
+					$nimires = mysql_query($query) or pupe_error($query);					
+					$nimirow = mysql_fetch_array($nimires);
+					
+					echo "<tr><th>".t("Nimitys")."</th><td><input type='text' name='nimitys_nimitys' value='$nimirow[nimitys]' size='15'></td>";
+				}
+				
+				echo "<tr><th>".t("Lisätieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$muutarow[lisatieto]</textarea></td></tr>";
+																				
+				if ($rivirow["sarjanumeroseuranta"] == "S") {					
+					
 					$chk = "";
 					if ($muutarow["kaytetty"] == 'K') {
 						$chk = "CHECKED";

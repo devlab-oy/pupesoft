@@ -75,16 +75,16 @@
 		
 
 		// Aloitellaan lähetteen teko
-		$page[$sivu] = alku($tyyppi);
+		$page[$sivu] = alku_kerayslista($tyyppi);
 
 		while ($row = mysql_fetch_array($result)) {
-			rivi($page[$sivu], $tyyppi);
+			rivi_kerayslista($page[$sivu], $tyyppi);
 		}
 
-		loppu($page[$sivu], 1);
+		loppu_kerayslista($page[$sivu], 1);
 		
 		//tulostetaan sivu
-		print_pdf($komento[$tulostimet[0]]);
+		print_pdf_kerayslista($komento[$tulostimet[0]]);
 	}
 
 	if (($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and $tee == 'LEPAA') {

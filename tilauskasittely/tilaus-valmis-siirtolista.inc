@@ -479,14 +479,13 @@
 				}
 				
 				// Aloitellaan lähetteen teko
-				$page[$sivu] = alku($tyyppi);
+				$page[$sivu] = alku_kerayslista($tyyppi);
 
 				while ($row = mysql_fetch_array($result)) {
-					rivi($page[$sivu], $tyyppi);
+					rivi_kerayslista($page[$sivu], $tyyppi);
 				}
 
-				loppu($page[$sivu], 1);
-				
+				loppu_kerayslista($page[$sivu], 1);
 				
 				//tulostetaan failit ja valitaan sopivat printterit
 				if ($laskurow["varasto"] == '') {
@@ -522,7 +521,7 @@
 				}
 
 				//tulostetaan sivu
-				print_pdf($komento);
+				print_pdf_kerayslista($komento);
 				
 				if ($returnvalue != 0) {
 					echo "<font class='error'>$komento".t("Keräyslistan tulostus epäonnistui")."! ".t("Tilaus $laskurow[tunnus]")." ".t("siirrettiin tulostusjonoon").".

@@ -30,8 +30,8 @@ $iso["font"] 			= "Helvetica-Bold";
 $rectparam["width"] 	= 0.3;
 $rivinkorkeus			= 17;
 
-if (!function_exists('alku')) {
-	function alku($tyyppi = "") {
+if (!function_exists('alku_kerayslista')) {
+	function alku_kerayslista($tyyppi = "") {
 		global $pdf, $sivu, $lahetetyyppi, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $tilausnumeroita;
 	
 		//PDF parametrit
@@ -346,14 +346,14 @@ if (!function_exists('alku')) {
 			system("rm -f $nimi1 $nimi2");
 		}
 	
-		rivi_otsikot($thispage);
+		rivi_otsikot_kerayslista($thispage);
 		
 		return($thispage);
 	}
 }
 
-if (!function_exists('uusi_sivu')) {
-	function uusi_sivu ($tyyppi = "") {
+if (!function_exists('uusi_sivu_kerayslista')) {
+	function uusi_sivu_kerayslista ($tyyppi = "") {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala, $tilausnumeroita;
 
 		$thispage = $pdf->new_page("a4");
@@ -525,14 +525,14 @@ if (!function_exists('uusi_sivu')) {
 
 		$kala = 715;
 		
-		rivi_otsikot($thispage);
+		rivi_otsikot_kerayslista($thispage);
 				
 		return($thispage);
 	}
 }
 
-if (!function_exists('rivi_otsikot')) {
-	function rivi_otsikot ($thispage) {
+if (!function_exists('rivi_otsikot_kerayslista')) {
+	function rivi_otsikot_kerayslista ($thispage) {
 		global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala;
 	
 		$pdf->draw_rectangle($kala+30, 20, 20, 580, $thispage, $rectparam);
@@ -557,8 +557,8 @@ if (!function_exists('rivi_otsikot')) {
 	}
 }
 
-if (!function_exists('rivi')) {
-	function rivi($thispage, $tyyppi="") {
+if (!function_exists('rivi_kerayslista')) {
+	function rivi_kerayslista($thispage, $tyyppi="") {
 		global $pdf, $page, $lahetetyyppi, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino;
 		
 		// viivat rivien väliin...
@@ -575,9 +575,9 @@ if (!function_exists('rivi')) {
 			
 			$sivu++;
 
-			loppu($thispage, 0);
+			loppu_kerayslista($thispage, 0);
 
-			$page[$sivu] = uusi_sivu($tyyppi);
+			$page[$sivu] = uusi_sivu_kerayslista($tyyppi);
 			$thispage    = $page[$sivu];
 
 		}
@@ -818,8 +818,8 @@ if (!function_exists('rivi')) {
 	}
 }
 
-if (!function_exists('loppu')) {
-	function loppu ($thispage, $tots) {
+if (!function_exists('loppu_kerayslista')) {
+	function loppu_kerayslista ($thispage, $tots) {
 		global $pdf, $sivu, $laskurow, $viite, $pieni, $norm, $rectparam, $kieli, $yhtiorow, $kala, $rivinkorkeus, $page, $paino;
 		
 		//Alimmat kolme laatikkoa, yhtiötietoja
@@ -897,8 +897,8 @@ if (!function_exists('loppu')) {
 	}
 }
 
-if (!function_exists('print_pdf')) {
-	function print_pdf ($komento) {
+if (!function_exists('print_pdf_kerayslista')) {
+	function print_pdf_kerayslista ($komento) {
 		global $pdf, $kukarow, $yhtiorow, $kateinen, $returnvalue, $kieli, $tee;
 
 		$returnvalue=0;

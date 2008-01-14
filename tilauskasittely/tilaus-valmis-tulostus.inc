@@ -107,13 +107,13 @@
 		$paino = 0;
 
 		// Aloitellaan lähetteen teko
-		$page[$sivu] = alku();
+		$page[$sivu] = alku_kerayslista();
 
 		while ($row = mysql_fetch_array($riresult)) {
-			rivi($page[$sivu]);
+			rivi_kerayslista($page[$sivu]);
 		}
 
-		loppu($page[$sivu], 1);
+		loppu_kerayslista($page[$sivu], 1);
 
 
 		//tulostetaan faili ja valitaan sopivat printterit
@@ -168,7 +168,7 @@
 
 		if ($komento != "") {
 			//tulostetaan sivu
-			print_pdf($komento);
+			print_pdf_kerayslista($komento);
 		}
 		else {
 			$returnvalue = 1;

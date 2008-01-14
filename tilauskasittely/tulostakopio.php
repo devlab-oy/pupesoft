@@ -1733,21 +1733,21 @@
 				}
 
 				// Aloitellaan lähetteen teko
-				$page[$sivu] = alku($tyyppi);
+				$page[$sivu] = alku_kerayslista($tyyppi);
 
 				while ($row = mysql_fetch_array($result)) {
-					rivi($page[$sivu], $tyyppi);
+					rivi_kerayslista($page[$sivu], $tyyppi);
 				}
 
-				loppu($page[$sivu], 1);
+				loppu_kerayslista($page[$sivu], 1);
 				
 				if ($toim == "SIIRTOLISTA") {
-					print_pdf($komento["Siirtolista"]);
+					print_pdf_kerayslista($komento["Siirtolista"]);
 					$tee = '';
 				}
 				else {
 					//tulostetaan sivu
-					print_pdf($komento["Keräyslista"]);
+					print_pdf_kerayslista($komento["Keräyslista"]);
 					$tee = '';
 				}
 			}

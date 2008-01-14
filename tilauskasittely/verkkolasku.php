@@ -1524,6 +1524,9 @@
 							$summa 	= 0;
 							$arvo 	= 0;
 
+							unset($pdf);
+							unset($page);
+							
 							// aloitellaan laskun teko
 							$page[$sivu] = alku();
 
@@ -1619,7 +1622,7 @@
 							system("rm -f $pdffilenimi");
 
 							unset($pdf);
-							unset($pdf);
+							unset($page);
 						}
 
 						if ($laskurow["vienti"] == "K" and $hyvitys == "EI") {

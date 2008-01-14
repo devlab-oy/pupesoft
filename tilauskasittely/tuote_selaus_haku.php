@@ -864,7 +864,7 @@
 			
 			if ($row["tuoteperhe"] == $row["tuoteno"]) {
 				// Tuoteperheen isä
-				//$saldot = tuoteperhe_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+				$saldot = tuoteperhe_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 			
 				echo "<td valign='top' $classrigh>";
 				echo "<table width='100%'>";

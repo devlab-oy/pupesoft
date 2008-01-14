@@ -116,6 +116,8 @@
 			$ulos .= "<option value='ASLUOKKA_SE' {$avain_sel['ASLUOKKA_SE']}>				".t("Ruotsinkielinen asiakasluokka")."</option>";
 			$ulos .= "<option value='ASOSASTO_SE' {$avain_sel['ASOSASTO_SE']}>				".t("Ruotsinkielinen asiakasosasto")."</option>";
 			$ulos .= "<option value='ASRYHMA_SE' {$avain_sel['ASRYHMA_SE']}>				".t("Ruotsinkielinen asiakasryhma")."</option>";
+			$ulos .= "<option value='LASKT_EMAIL' {$avain_sel['LASKT_EMAIL']}>				".t("Laskutustiedot autom. sähköpostitukseen")."</option>";
+			$ulos .= "<option value='LASKT_EMAIL_SOP' {$avain_sel['LASKT_EMAIL_SOP']}>		".t("Laskutustiedot autom. sähköpostitukseen (Sopimus)")."</option>";
 			$ulos .= "</optgroup>";
 			
 			$ulos .= "<optgroup label='".t("Yhtiön avainsanat")."'>";
@@ -170,7 +172,8 @@
 			$ulos .= "<option value='LITETY' {$avain_sel['LITETY']}>						".t("Liitetiedostotyyppi")."</option>";
 			$ulos .= "<option value='TIL-LITETY' {$avain_sel['TIL-LITETY']}>				".t("Tilauksen liitetiedostotyyppi")."</option>";
 			$ulos .= "<option value='JAKELULISTA' {$avain_sel['JAKELULISTA']}>				".t("Email jakelulista")."</option>";
-			$ulos .= "<option value='TRIVITYYPPI' {$avain_sel['TRIVITYYPPI']}>				".t("Tilausrivin tyyppi")."</option>";						
+			$ulos .= "<option value='LUETTELO' {$avain_sel['LUETTELO']}>					".t("Luettelotyyppi")."</option>";
+			$ulos .= "<option value='TRIVITYYPPI' {$avain_sel['TRIVITYYPPI']}>				".t("Tilausrivin tyyppi")."</option>";
 			$ulos .= "</optgroup>";
 			
 			$ulos .= "</select></td>";

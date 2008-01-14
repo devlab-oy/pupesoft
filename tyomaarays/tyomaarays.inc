@@ -75,16 +75,36 @@
 		
 
 		// Aloitellaan lähetteen teko
-		$page[$sivu] = alku_kerayslista($tyyppi);
-
-		while ($row = mysql_fetch_array($result)) {
-			rivi_kerayslista($page[$sivu], $tyyppi);
+		if ($toim != "REKLAMAATIO") {
+			$page[$sivu] = alku($tyyppi);
 		}
-
-		loppu_kerayslista($page[$sivu], 1);
+		else {
+			$page[$sivu] = alku_kerayslista($tyyppi);
+		}
 		
+		while ($row = mysql_fetch_array($result)) {
+			if ($toim != "REKLAMAATIO") {
+				rivi($page[$sivu], $tyyppi);
+			}
+			else {
+				rivi_kerayslista($page[$sivu], $tyyppi);
+			}	
+		}
+		
+		if ($toim != "REKLAMAATIO") {
+			loppu($page[$sivu], 1);
+		}
+		else {
+			loppu_kerayslista($page[$sivu], 1);
+		}
+				
 		//tulostetaan sivu
-		print_pdf_kerayslista($komento[$tulostimet[0]]);
+		if ($toim != "REKLAMAATIO") {
+			print_pdf($komento[$tulostimet[0]]);
+		}
+		else {
+			print_pdf_kerayslista($komento[$tulostimet[0]]);
+		}		
 	}
 
 	if (($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO") and $tee == 'LEPAA') {

@@ -895,20 +895,25 @@
 
 				while ($sarjarow = mysql_fetch_array($sarjares)) {
 					
-					if ($sarjanumeronLisatiedot == "OK") {
-						list($divitx, $text_output, $kuvalisa_bin, $hankintahinta, $tuotemyyntihinta) = sarjanumeronlisatiedot_popup($sarjarow["tunnus"], '', 'popup', '', '');
-						$divit .= $divitx;
-					}
+					if ($kukarow["extranet"] == "") {
+						if ($sarjanumeronLisatiedot == "OK") {
+							list($divitx, $text_output, $kuvalisa_bin, $hankintahinta, $tuotemyyntihinta) = sarjanumeronlisatiedot_popup($sarjarow["tunnus"], '', 'popup', '', '');
+							$divit .= $divitx;
+						}
 
-					echo "<tr>
-							<td class='$vari' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\" nowrap>$nimilask 
-							<a href='sarjanumeroseuranta.php?tuoteno_haku=$row[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a>";
+						echo "<tr>
+								<td class='$vari' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\" nowrap>$nimilask 
+								<a href='sarjanumeroseuranta.php?tuoteno_haku=$row[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a>";
 					
-					if ($sarjarow["tyyppi"] == "T") {
-						echo "<br><font class='message'>(".t("Tarjous").": $sarjarow[myytunnus] $sarjarow[myynimi])</font>";
-					}
+						if ($sarjarow["tyyppi"] == "T") {
+							echo "<br><font class='message'>(".t("Tarjous").": $sarjarow[myytunnus] $sarjarow[myynimi])</font>";
+						}
 						
-					echo "</td>";
+						echo "</td>";
+					}
+					else {
+						echo "<tr><td class='$vari' nowrap>$nimilask $sarjarow[sarjanumero]</a></td>";
+					}
 					
 					$nimilask++;
 

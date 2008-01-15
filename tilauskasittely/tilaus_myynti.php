@@ -892,9 +892,12 @@ if ($tee == "VALMIS" and $kateinen != '' and ($kukarow['kassamyyja'] != '' or $k
 } 
 elseif ($tee == "VALMIS" and $kassamyyja_kesken == 'ei' and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $kukarow['extranet'] == '') {
 	
-	$query_maksuehto = "UPDATE lasku SET maksuehto='$maksutapa', kassalipas='$kertakassa' WHERE yhtio='$kukarow[yhtio]' AND tunnus='$kukarow[kesken]'";
+	$query_maksuehto = "UPDATE lasku 
+						SET maksuehto 	= '$maksutapa', 
+						kassalipas 		= '$kertakassa' 
+						WHERE yhtio	= '$kukarow[yhtio]' 
+						AND tunnus	= '$kukarow[kesken]'";
 	$maksuehtores = mysql_query($query_maksuehto) or pupe_error($query_maksuehto);
-	
 }
 
 // Tilaus valmis
@@ -1267,8 +1270,8 @@ if ($tee == '') {
 	}
 
 	// Tässä päivitetään 'pikaotsikkoa' jos kenttiin on jotain syötetty
-	if ($pikaotsikko=='TRUE' and $kukarow['extranet'] == '' and ($toimitustapa != '' or $tilausvahvistus != '' or $viesti != '' or $myyjanro != '' or $myyja != '' or $maksutapa != '')) {
-		if ($myyjanro != '') {
+	if ($pikaotsikko=='TRUE' and ($toimitustapa != '' or $tilausvahvistus != '' or $viesti != '' or $myyjanro != '' or $myyja != '' or $maksutapa != '')) {		
+		if ((int) $myyjanro > 0) {			
 			$apuqu = "	SELECT *
 						from kuka use index (yhtio_myyja)
 						where yhtio='$kukarow[yhtio]' and myyja='$myyjanro'";
@@ -1277,13 +1280,18 @@ if ($tee == '') {
 			if (mysql_num_rows($meapu)==1) {
 				$apuro = mysql_fetch_array($meapu);
 				$myyja = $apuro['tunnus'];
+				
+				$pika_paiv_myyja = " myyja = '$myyja', ";						
 			}
 			elseif (mysql_num_rows($meapu)>1) {
 				echo "<font class='error'>".t("Syöttämäsi myyjänumero")." $myyjanro ".t("löytyi usealla käyttäjällä")."!</font><br><br>";
 			}
 			else {
 				echo "<font class='error'>".t("Syöttämäsi myyjänumero")." $myyjanro ".t("ei löytynyt")."!</font><br><br>";
-			}
+			}						
+		}
+		elseif ((int) $myyja > 0) {
+			$pika_paiv_myyja = " myyja = '$myyja', ";
 		}
 
 		if ($maksutapa != '') {
@@ -1317,15 +1325,15 @@ if ($tee == '') {
 				}
 				
 				$kassalipas = $kukarow["kassamyyja"];
-			}
+			}			
 		}
 
 		$query  = "	UPDATE lasku SET
 					toimitustapa	= '$toimitustapa',
 					viesti 			= '$viesti',
 					tilausvahvistus = '$tilausvahvistus',
-					myyja			= '$myyja',
-					kassalipas		= '$kassalipas',
+					$pika_paiv_myyja
+					kassalipas 		= '$kassalipas', 
 					maksuehto		= '$laskurow[maksuehto]'
 					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
 		$result = mysql_query($query) or pupe_error($query);
@@ -4919,7 +4927,7 @@ if ($tee == '') {
 				if ($kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or ($kukarow["dynaaminen_kassamyynti"] != "" or ($kukarow["dynaaminen_kassamyynti"] == "" and $yhtiorow["dynaaminen_kassamyynti"] != "")))) {
 
 					if ($kukarow["dynaaminen_kassamyynti"] != "" or ($kukarow["dynaaminen_kassamyynti"] == "" and $yhtiorow["dynaaminen_kassamyynti"] != "")) {
-						echo "</tr><tr><td class='back'>Kassalipas: <select name='kertakassa'><option value=''>".t("Ei kassaan")."</option>";
+						echo "</tr><tr><td class='back'>".t("Kassalipas").": <select name='kertakassa'><option value=''>".t("Ei kassaan")."</option>";
 
 						$query  = "SELECT * FROM avainsana WHERE yhtio='$kukarow[yhtio]' AND laji='KASSA' ORDER BY selite";
 						$vares = mysql_query($query) or pupe_error($query);

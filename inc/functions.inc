@@ -315,10 +315,33 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 	function tuoteperhe_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
 		global $kukarow, $yhtiorow;
 		
+		if ($yhtio == "") {
+			$yhtio = $kukarow["yhtio"];
+		}
+		
+		$valinta1 = ""; // varaston tyyppi
+
+		// katotaan ollaanko annettu parametriksi joku tietty varastotyyppi
+		if ($tyyppi == "E") {
+			$valinta1 = " and varastopaikat.tyyppi = 'E' ";
+		}
+		elseif ($tyyppi == "V") {
+			$valinta1 = " and varastopaikat.tyyppi = 'V' ";
+		}
+		elseif ($tyyppi == "KAIKKI") {
+			$valinta1 = "";
+		}
+		elseif ($tyyppi == "ORVOT") {
+			$valinta1 = "";
+		}
+		else {
+			$valinta1 = " and varastopaikat.tyyppi = '' ";
+		}
+		
 		$query = " 	SELECT distinct tuote.tuoteno, tuoteperhe.kerroin
 					from tuoteperhe
 					join tuote on tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno and ei_saldoa = ''
-					where tuoteperhe.yhtio = '$kukarow[yhtio]' and isatuoteno = '$tuoteno' and tyyppi in ('','P')";
+					where tuoteperhe.yhtio = '$yhtio' and isatuoteno = '$tuoteno' and tyyppi in ('','P')";
 		$isiresult = mysql_query($query) or pupe_error($query);
 
 		$tuotteet = array();
@@ -333,7 +356,8 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 					JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
 					and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 					and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-					WHERE tuote.yhtio = '$kukarow[yhtio]'
+					$valinta1
+					WHERE tuote.yhtio = '$yhtio'
 					and tuote.tuoteno in ('".implode("','", $tuotteet)."')
 					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys";
 		$varresult = mysql_query($query) or pupe_error($query);

@@ -883,53 +883,6 @@
 			elseif ($row['ei_saldoa'] != '' and $kukarow["extranet"] == "") {
 				echo "<td valign='top' class='green' $classrigh>".t("Saldoton")."</td>";
 			}
-			elseif ($kukarow["extranet"] != "") {
-
-				$query = "	SELECT *
-							from tuoteperhe
-							join tuote on tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno and ei_saldoa = ''
-							where tuoteperhe.yhtio = '$kukarow[yhtio]' and isatuoteno = '$row[tuoteno]' and tyyppi in ('','P')";
-				$isiresult = mysql_query($query) or pupe_error($query);
-
-				// katotaan paljonko on myytävissä
-				$kokonaismyytavissa = 0;
-
-				if ($row['ei_saldoa'] == '') {
-					foreach($konsyhtiot as $yhtio) {
-						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
-						$kokonaismyytavissa += $myytavissa;
-					}
-				}
-
-				$lapset   = mysql_num_rows($isiresult);
-				$oklapset = 0;
-
-				if ($lapset > 0) {
-					while ($isirow = mysql_fetch_array($isiresult)) {
-						$lapsikokonaismyytavissa = 0;
-						foreach($konsyhtiot as $yhtio) {
-							list($lapsisaldo, $lapsihyllyssa, $lapsimyytavissa) = saldo_myytavissa($isirow["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
-							$lapsikokonaismyytavissa += $lapsimyytavissa;
-						}
-						if ($lapsikokonaismyytavissa > 0) {
-							$oklapset++;
-						}
-					}
-				}
-
-				if ($lapset > 0 and $lapset == $oklapset and ($row['ei_saldoa'] != '' or $kokonaismyytavissa > 0)) {
-					echo "<td valign='top' class='green' $classrigh>".t("On")."</td>";
-				}
-				elseif ($lapset > 0 and $lapset <> $oklapset) {
-					echo "<td valign='top' class='red' $classrigh>".t("Ei")."</td>";
-				}
-				elseif ($kokonaismyytavissa > 0 or $row['ei_saldoa'] != '') {
-					echo "<td valign='top' class='green' $classrigh>".t("On")."</td>";
-				}
-				else {
-					echo "<td valign='top' class='red' $classrigh>".t("Ei")."</td>";
-				}
-			}
 			elseif ($row["sarjanumeroseuranta"] == "S") {
 
 				if (is_resource($sarjares) and mysql_num_rows($sarjares)) {
@@ -982,6 +935,53 @@
 				}
 				
 				echo "</td>";
+			}
+			elseif ($kukarow["extranet"] != "") {
+
+				$query = "	SELECT *
+							from tuoteperhe
+							join tuote on tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno and ei_saldoa = ''
+							where tuoteperhe.yhtio = '$kukarow[yhtio]' and isatuoteno = '$row[tuoteno]' and tyyppi in ('','P')";
+				$isiresult = mysql_query($query) or pupe_error($query);
+
+				// katotaan paljonko on myytävissä
+				$kokonaismyytavissa = 0;
+
+				if ($row['ei_saldoa'] == '') {
+					foreach($konsyhtiot as $yhtio) {
+						list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+						$kokonaismyytavissa += $myytavissa;
+					}
+				}
+
+				$lapset   = mysql_num_rows($isiresult);
+				$oklapset = 0;
+
+				if ($lapset > 0) {
+					while ($isirow = mysql_fetch_array($isiresult)) {
+						$lapsikokonaismyytavissa = 0;
+						foreach($konsyhtiot as $yhtio) {
+							list($lapsisaldo, $lapsihyllyssa, $lapsimyytavissa) = saldo_myytavissa($isirow["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+							$lapsikokonaismyytavissa += $lapsimyytavissa;
+						}
+						if ($lapsikokonaismyytavissa > 0) {
+							$oklapset++;
+						}
+					}
+				}
+
+				if ($lapset > 0 and $lapset == $oklapset and ($row['ei_saldoa'] != '' or $kokonaismyytavissa > 0)) {
+					echo "<td valign='top' class='green' $classrigh>".t("On")."</td>";
+				}
+				elseif ($lapset > 0 and $lapset <> $oklapset) {
+					echo "<td valign='top' class='red' $classrigh>".t("Ei")."</td>";
+				}
+				elseif ($kokonaismyytavissa > 0 or $row['ei_saldoa'] != '') {
+					echo "<td valign='top' class='green' $classrigh>".t("On")."</td>";
+				}
+				else {
+					echo "<td valign='top' class='red' $classrigh>".t("Ei")."</td>";
+				}
 			}
 			else {
 

@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("toimitarkista")) {
-	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function toimitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
 		
 		static $tmp_maakoodi, $ytunnus, $hetu, $tmp_ytunnus, $tmp_valkoodi, $tmp_valkoodi, $toimtyyppi;

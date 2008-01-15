@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("asiakastarkista")) {
-	function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select;
 		
 		static $asiak_laji, $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus;

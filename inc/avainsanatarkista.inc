@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("avainsanatarkista")) {
-	function avainsanatarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function avainsanatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
 		
 		static $seliteerrori, $laji;

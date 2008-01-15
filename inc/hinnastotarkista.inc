@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("hinnastotarkista")) {
-	function hinnastotarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function hinnastotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		static $chtuoteno, $chalkupvm, $chloppupvm;

@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("asiakasalennustarkista")) {
-	function asiakasalennustarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function asiakasalennustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chalkupvm, $chloppupvm;

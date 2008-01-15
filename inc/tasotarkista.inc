@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("tasotarkista")) {
-	function tasotarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function tasotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		static $tyyppitalteen;

@@ -767,7 +767,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 			$lue_data_query = $query;
 			
 			$tarq = "	SELECT *
-							FROM $table";
+						FROM $table";
 			if ($table == 'asiakasalennus' or $table == 'asiakashinta') {
 				$tarq .= " WHERE yhtio = '$kukarow[yhtio]'";
 				$tarq .= $and;
@@ -819,20 +819,21 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					}
 					
 					$funktio = $table."tarkista";
+					
 					if(!function_exists($funktio)) {
-						require("inc/$funktio.inc");
+						@include("inc/$funktio.inc");
 					}
 					
 					unset($virhe);
 					
-					$funktio($t, $i, $result, $tunnus, &$virhe);
-
+					if(function_exists($funktio)) {
+						$funktio($t, $i, $result, $tunnus, &$virhe, $tarkrow);
+					}
+					
 					if($virhe[$i] != "") {
 						echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".mysql_field_name($result, $i).": ".$virhe[$i]." ($t[$i])</font><br>";
 						$errori = 1;
-					}
-					
-					//$trow = $tarkrow;
+					}					
 				}				
 			}
 

@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("asiakkaan_positiotarkista")) {
-	function asiakkaan_positiotarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function asiakkaan_positiotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		static $kohde;

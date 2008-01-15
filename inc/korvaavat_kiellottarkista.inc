@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("korvaavat_kiellottarkista")) {
-	function korvaavat_kiellottarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function korvaavat_kiellottarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		if (mysql_field_name($result, $i) == "ytunnus" and $t[$i] != '*') {

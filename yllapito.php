@@ -163,12 +163,13 @@
 			$tiedostopaate = "";
 
 			$funktio = $toim."tarkista";
+			
 			if(!function_exists($funktio)) {
 				require("inc/$funktio.inc");
 			}
 
 			if(function_exists($funktio)) {
-				$funktio($t, $i, $result, $tunnus, &$virhe);
+				$funktio($t, $i, $result, $tunnus, &$virhe, $trow);
 			}
 
 			if($virhe[$i] != "") {

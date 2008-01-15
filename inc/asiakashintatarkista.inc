@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("asiakashintatarkista")) {
-	function asiakashintatarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function asiakashintatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 		
 		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chalkupvm, $chloppupvm;

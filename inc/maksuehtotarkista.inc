@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("maksuehtotarkista")) {
-	function maksuehtotarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function maksuehtotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		static $prossa, $moniehto;

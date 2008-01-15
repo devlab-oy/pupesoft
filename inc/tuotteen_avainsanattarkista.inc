@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("tuotteen_avainsanattarkista")) {
-	function tuotteen_avainsanattarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function tuotteen_avainsanattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 		
 		static $chtuoteno, $lajitalteen;

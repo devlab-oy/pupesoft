@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("yhtiotarkista")) {
-	function yhtiotarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function yhtiotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
 		
 		if ((mysql_field_name($result, $i) == "kotipaikka") or

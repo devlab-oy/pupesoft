@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("tuotetarkista")) {
-	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		static $tem_tuoteno;

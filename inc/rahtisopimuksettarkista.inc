@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("rahtisopimuksettarkista")) {
-	function rahtisopimuksettarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function rahtisopimuksettarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 		
 		static $chytunnus;

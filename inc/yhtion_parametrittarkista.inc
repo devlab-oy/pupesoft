@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("yhtion_parametrittarkista")) {
-	function yhtion_parametrittarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function yhtion_parametrittarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $tiedostopaate;
 		
 		static $tmp_lasku_polku_http;

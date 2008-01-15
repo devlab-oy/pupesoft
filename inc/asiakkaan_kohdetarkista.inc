@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("asiakkaan_kohdetarkista")) {
-	function asiakkaan_kohdetarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function asiakkaan_kohdetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		static $asiakas;

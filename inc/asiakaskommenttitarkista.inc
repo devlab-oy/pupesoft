@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("asiakaskommenttitarkista")) {
-	function asiakaskommenttitarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function asiakaskommenttitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 
 		if (mysql_field_name($result, $i) == "kommentti") {

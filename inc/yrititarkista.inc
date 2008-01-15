@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("yrititarkista")) {
-	function yrititarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function yrititarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set, $ulosarray;
 		
 		if (mysql_field_name($result, $i) == "nimi") {

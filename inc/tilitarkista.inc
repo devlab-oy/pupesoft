@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("tilitarkista")) {
-	function tilitarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function tilitarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		if (mysql_field_name($result, $i) == "tilino" and trim($t[$i]) != '') {

@@ -1,7 +1,7 @@
 <?php
 
 if(!function_exists("tuotteen_alvtarkista")) {
-	function tuotteen_alvtarkista (&$t, $i, $result, $tunnus, &$virhe) {
+	function tuotteen_alvtarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
 		
 		if (mysql_field_name($result, $i) == "tuoteno") {

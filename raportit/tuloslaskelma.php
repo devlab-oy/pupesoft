@@ -71,15 +71,6 @@
 				$tilikarttataso = "sisainen_taso";
 			}
 
-			$query = "	SELECT *
-						FROM taso
-						WHERE yhtio = '$kukarow[yhtio]' AND
-						tyyppi = '$kirjain' AND
-						LEFT(taso, 1) = '$aputyyppi'
-						and taso != ''
-						ORDER BY taso";
-			$tasores = mysql_query($query) or pupe_error($query);
-
 			// edellinen taso
 			$taso     = array();
 			$tasonimi = array();
@@ -99,9 +90,10 @@
 				$totalalku = date("Y-m-d", mktime(0, 0, 0, $plvk, 1, $plvv));
 			}
 
-			$alkuquery = "";
-			$budjejoin = "";
-
+			$alkuquery1 = "";
+			$alkuquery2 = "";
+			$alkuquery3 = "";
+			
 			for ($i = $startmonth;  $i <= $endmonth;) {
 
 				$alku    = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
@@ -110,7 +102,10 @@
 
 				$headny = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
 
-				$alkuquery .= " sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny', \n";
+				$alkuquery1 .= " sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny', \n";
+				$alkuquery2 .= " sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny', \n";
+				$alkuquery3 .= " sum(if(tiliointi.tapvm >= '$alku' and tiliointi.tapvm <= '$loppu', tiliointi.summa, 0)) '$headny', \n";
+				
 				$kaudet[] = $headny;
 
 				if ($vertailued != "") {
@@ -118,17 +113,19 @@
 					$loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), date("t", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4))),  substr($i,0,4)-1));
 					$headed   = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)-1));
 
-					$alkuquery .= " sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed', \n";
+					$alkuquery1 .= " sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed', \n";
+					$alkuquery2 .= " sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed', \n";
+					$alkuquery3 .= " sum(if(tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed', \n";
+					
 					$kaudet[] = $headed;
 				}
 
 				// sisäisessä tuloslaskelmassa voidaan joinata budjetti
 				if ($vertailubu != "" and $kirjain == "S") {
-					//$alkuquery .= " (SELECT sum(budjetti.summa) 'budj $headny' FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi = '$bukausi' $lisa2), \n";
-					$alkuquery .= " if(budjetti.kausi = '$bukausi', min(budjetti.summa), 0) 'budj $headny', ";
-					//$alkuquery .= " if budjetti.kausi 'budj $headny', ";
-
-					$budjejoin = " LEFT JOIN budjetti USE INDEX (yhtio_taso_kausi) ON (budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi >= '$annettuabu' $lisa2) ";
+					$alkuquery1 .= " (SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.$tilikarttataso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny', \n";
+					$alkuquery2 .= " 0 'budj $headny', \n";
+					$alkuquery3 .= " (SELECT sum(budjetti.summa) FROM budjetti USE INDEX (yhtio_taso_kausi) WHERE budjetti.yhtio = tili.yhtio and budjetti.taso = tili.taso and budjetti.kausi = '$bukausi' $lisa2) 'budj $headny', \n";
+					
 					$kaudet[] = "budj $headny";
 				}
 
@@ -136,17 +133,25 @@
 			}
 
 			// yhteensäotsikkomukaan
-			
 			$vka = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv));
 			$vkl = date("Y/m", mktime(0, 0, 0, $alvk+1, 1, $alvv));
 			
 			$kaudet[] = $vka." - ".$vkl;
-
+			
+			$query = "	SELECT *
+						FROM taso
+						WHERE yhtio = '$kukarow[yhtio]' AND
+						tyyppi = '$kirjain' AND
+						LEFT(taso, 1) = '$aputyyppi'
+						and taso != ''
+						ORDER BY taso";
+			$tasores = mysql_query($query) or pupe_error($query);
+			
 			while ($tasorow = mysql_fetch_array($tasores)) {
 
 				// millä tasolla ollaan (1,2,3,4,5,6)
-				$tasoluku = strlen($tasorow["taso"]);
-
+				$tasoluku = strlen($tasorow["taso"]);												
+				
 				// tasonimi talteen (rightpäddätään Ö:llä, niin saadaan oikeaan järjestykseen)
 				$apusort = str_pad($tasorow["taso"], 20, "Ö");
 				$tasonimi[$apusort] = $tasorow["nimi"];
@@ -157,26 +162,44 @@
 					$taso[$i] = substr($tasorow["taso"], 0, $i+1);
 				}
 
-				$query = "	SELECT $alkuquery
+				$query = "	SELECT $alkuquery1
 							sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl'
 						 	FROM tili
 							LEFT JOIN tiliointi USE INDEX (yhtio_tilino_tapvm) ON (tiliointi.yhtio = tili.yhtio and tiliointi.tilino = tili.tilino and tiliointi.korjattu = '' and tiliointi.tapvm >= '$totalalku' and tiliointi.tapvm < '$totalloppu' $lisa)
-							$budjejoin
-							WHERE tili.yhtio = '$kukarow[yhtio]' AND
-							tili.$tilikarttataso = '$tasorow[taso]'
+							WHERE tili.yhtio 		 = '$kukarow[yhtio]'
+							and tili.$tilikarttataso = '$tasorow[taso]'
 							group by tili.$tilikarttataso";
 				$tilires = mysql_query($query) or pupe_error($query);
 
+				if (mysql_num_rows($tilires) == 0) {
+					// Ei tiliöintejä, mutta budjetti voi olla
+					$query = "	SELECT $alkuquery3
+								sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) '$vka - $vkl'
+							 	FROM budjetti
+								JOIN budjetti tili ON (tili.yhtio = budjetti.yhtio and tili.tunnus=budjetti.tunnus)
+								LEFT JOIN tiliointi USE INDEX (PRIMARY) ON (tiliointi.tunnus = 0)
+								WHERE budjetti.yhtio  = '$kukarow[yhtio]'
+								and budjetti.taso 	  = '$tasorow[taso]'
+								group by budjetti.taso";
+					$tilires = mysql_query($query) or pupe_error($query);					
+				}
+				
 				while ($tilirow = mysql_fetch_array ($tilires)) {
 					// summataan kausien saldot
 					foreach ($kaudet as $kausi) {
 						// summataan kaikkia pienempiä summaustasoja
-						for ($i = $tasoluku - 1 ; $i >= 0; $i--) {
+						if (substr($kausi,0,4) == "budj") {
+							$i = $tasoluku - 1;
+								
 							$summa[$kausi][$taso[$i]] += $tilirow[$kausi];
+						}
+						else {
+							for ($i = $tasoluku - 1; $i >= 0; $i--) {
+								$summa[$kausi][$taso[$i]] += $tilirow[$kausi];
+							}						
 						}
 					}
 				}
-
 			}
 
 			// Haluaako käyttäjä nähä kaikki kaudet
@@ -288,7 +311,6 @@
 				echo "<td class='back' colspan='1'></td>";	
 			}
 			
-
 			for ($i = $alkukausi; $i < count($kaudet); $i++) {
 				
 				if($i==count($kaudet)-1) {
@@ -338,7 +360,7 @@
 						$tilires = mysql_query($query) or pupe_error($query);
 
 						while ($tilirow = mysql_fetch_array($tilires)) {
-							$query = "	SELECT tilino, $alkuquery
+							$query = "	SELECT tilino, $alkuquery2
 										sum(if(tiliointi.tapvm >= '$annettualk' and tiliointi.tapvm <= '$totalloppu', tiliointi.summa, 0)) 'Total'
 										FROM tiliointi
 										WHERE yhtio = '$kukarow[yhtio]'
@@ -347,7 +369,7 @@
 										AND tapvm >= '$totalalku'
 										AND tapvm < '$totalloppu'
 										$lisa
-										GROUP BY tilino";
+										GROUP BY tilino";							
 							$summares = mysql_query($query) or pupe_error($query);
 							$summarow = mysql_fetch_array($summares);
 
@@ -373,7 +395,6 @@
 								
 								$tilirivi .= "<td nowrap>$tilirow[tilino] - $tilirow[nimi]</td>$tilirivi2</tr>";
 							}
-
 						}
 					}
 
@@ -385,10 +406,14 @@
 						
 						$query = "	SELECT summattava_taso 
 									FROM taso 
-									WHERE yhtio = '$kukarow[yhtio]' and taso = '$key' and summattava_taso != '' and tyyppi = '$kirjain'";
+									WHERE yhtio 		 = '$kukarow[yhtio]' 
+									and taso 			 = '$key' 
+									and summattava_taso != '' 
+									and tyyppi 			 = '$kirjain'";
 						$summares = mysql_query($query) or pupe_error($query);
 
-						if ($summarow = mysql_fetch_array ($summares)) {
+						// Budjettia ei summata
+						if ($summarow = mysql_fetch_array ($summares) and substr($kaudet[$i],0,4) != "budj") {														
 							foreach(explode(",", $summarow["summattava_taso"]) as $staso) {
 								$summa[$kaudet[$i]][$key] = $summa[$kaudet[$i]][$key] + $summa[$kaudet[$i]][$staso];
 							}
@@ -678,7 +703,7 @@
 		echo "<tr><th>".t("Vertailu")."</th>";
 		echo "<td>";
 		echo "&nbsp;<input type='checkbox' name='vertailued' $vchek> ".t("Edellinen vastaava");
-//		echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek DISABLED> ".t("Budjetti");
+		echo "<br>&nbsp;<input type='checkbox' name='vertailubu' $bchek> ".t("Budjetti");
 		echo "</td></tr>";
 
 		echo "</table><br>

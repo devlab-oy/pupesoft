@@ -415,17 +415,24 @@
 				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 
 				if($myytavissa > 0 and ($alkurow["varastotyyppi"] == "E" or $alkurow["hyllyalue"] == "!!M")) {
+					
 					if($kukarow["extranet"] != "") {
-						$varaosakommentti .= t("Tuote saatavissa asiakaspalvelun kautta")."!<br>";
+						if ($laskurow["toim_maa"] == $alkurow["varastomaa"]) {
+							if ($yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] != 0 and $yhtiorow["erikoisvarastomyynti_alarajasumma_rivi"] < $row["hinta"]*$row["tilkpl"]*(1-$row["ale"]/100)) {
+								$varaosakommentti .= t("Tuote saatavissa asiakaspalvelun kautta")."!<br>";
+							}							
+						}					
+						
 					}
 					else {
 						$varaosakommentti .= t("Tuote saatavilla erikoisvarastossa")."!<br>";
 					}
+						
 					break;
 				}
 			}
-		}
-
+		}	
+		
 		// Kääydään läpi tuotteen toimittajat
 		if ($kukarow["extranet"] == "" and in_array($row["var"], array('','H','S','T','U','J','P')) and ($toim == "TARJOUS" or $yhtiorow["tee_osto_myyntitilaukselta"] != '') and $kpl_st > 0 and $toim != "SIIRTOTYOMAARAYS") {
 			if ($kotipaikatlask == 0 and $trow["sarjanumeroseuranta"] != "E" and $trow["sarjanumeroseuranta"] != "F") {

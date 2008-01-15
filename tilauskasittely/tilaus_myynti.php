@@ -1903,8 +1903,7 @@ if ($tee == '') {
 			}
 		}
 		else {
-			echo "<input type='hidden' size='30' name='myyjanro' value='$laskurow[myyja]'>";
-			
+			echo "<input type='hidden' size='30' name='myyja' value='$laskurow[myyja]'>";			
 			echo "</tr>";
 		}
 	}

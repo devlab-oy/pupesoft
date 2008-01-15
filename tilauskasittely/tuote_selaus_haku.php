@@ -659,7 +659,12 @@
 			// Peek ahead
 			$row_seuraava = next($rows); 
 						
-			if($row["tuoteperhe"] == $row["tuoteno"]) {
+			if ($row["tuoteperhe"] == $row["tuoteno"] and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"]) {
+				$classleft = "";
+				$classmidl = ""; 
+				$classrigh = "";
+			}			
+			elseif($row["tuoteperhe"] == $row["tuoteno"]) {
 				$classleft = "style='border-top: 1px solid; border-left: 1px solid;' ";
 				$classmidl = "style='border-top: 1px solid;' ";
 				$classrigh = "style='border-top: 1px solid; border-right: 1px solid;' ";

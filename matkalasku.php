@@ -1150,7 +1150,6 @@ if ($tee == "MUOKKAA") {
 					LEFT JOIN kustannuspaikka kohde ON tiliointi.yhtio=kohde.yhtio and tiliointi.kohde=kohde.tunnus
 					WHERE tilausrivi.yhtio='$kukarow[yhtio]'
 					and otunnus='$tilausnumero'
-					and tilausrivi.kpl > 0
 					and tilausrivi.tyyppi='M'
 					ORDER BY tilausrivi.perheid2, tilausrivi.tunnus";
 		$result = mysql_query($query) or pupe_error($query);
@@ -1211,7 +1210,7 @@ if ($tee == "MUOKKAA") {
 					$query = "	SELECT count(*), sum(if(perheid=0 or perheid=tilausrivi.tunnus,1,0)), sum(if(kommentti !='' and (perheid = 0 or perheid=tilausrivi.tunnus),1,0)) kommentteja, sum(if(tuotetyyppi='A' and (perheid = 0 or perheid=tilausrivi.tunnus),1,0)) aikoja
 								FROM tilausrivi
 								JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-								WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and otunnus = $tilausnumero and perheid2 = $row[perheid2] and kpl > 0 and tilausrivi.tyyppi = 'M'";
+								WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and otunnus = $tilausnumero and perheid2 = $row[perheid2] and tilausrivi.tyyppi = 'M'";
 					$abures = mysql_query($query) or pupe_error($query);
 					$aburow = mysql_fetch_array($abures);
 					$valeja = $aburow[0]+$aburow[1]+$aburow[2]+$aburow[3]+$aburow[4]-1;

@@ -787,7 +787,7 @@
 			echo "<td valign='top' class='$vari' $classmidl>$row[osasto]</td>";
 			echo "<td valign='top' class='$vari' $classmidl>$row[try]</td>";
 
-			$myyntihinta = $row["myyntihinta"]. " $yhtiorow[valkoodi]";
+			$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"]). " $yhtiorow[valkoodi]";
 
 			// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
 			if ($kukarow["extranet"] != "") {
@@ -798,7 +798,7 @@
 
 				if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
 
-					$myyntihinta = "$row[myyntihinta] $yhtiorow[valkoodi]";
+					$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["myyntihinta"])." $yhtiorow[valkoodi]";
 
 					$query = "	SELECT *
 								from hinnasto
@@ -813,7 +813,7 @@
 
 					if (mysql_num_rows($olhires) == 1) {
 						$olhirow = mysql_fetch_array($olhires);
-						$myyntihinta = "$olhirow[hinta] $olhirow[valkoodi]";
+						$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", $olhirow["hinta"])." $olhirow[valkoodi]";
 					}
 					else {
 						$query = "SELECT * from valuu where yhtio='$kukarow[yhtio]' and nimi='$oleasrow[valkoodi]'";
@@ -821,7 +821,7 @@
 
 						if (mysql_num_rows($oleasres) == 1) {
 							$olhirow = mysql_fetch_array($olhires);
-							$myyntihinta = yhtioval($row["myyntihinta"], $olhirow["kurssi"]). " $oleasrow[valkoodi]";
+							$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", yhtioval($row["myyntihinta"], $olhirow["kurssi"])). " $oleasrow[valkoodi]";
 						}
 					}
 				}

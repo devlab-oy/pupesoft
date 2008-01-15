@@ -12,14 +12,36 @@
 		$kori_polku = "ostoskori.php";
 	}
 
-	echo "
-	<SCRIPT type='text/javascript'>
-	<!--
-		function picture_popup(tuote_tunnus, maxwidth, totalheight, tuoteno) {
-			window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+maxwidth+', height='+totalheight);
+	echo "<SCRIPT type='text/javascript'>
+			<!--
+				function picture_popup(tuote_tunnus, maxwidth, totalheight, tuoteno) {
+					window.open('$PHP_SELF?tuoteno='+tuoteno+'&ohje=off&toiminto=avaa_kuva&tunnus='+tuote_tunnus+'&laji=tuotekuva', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top = 0, width='+maxwidth+', height='+totalheight);
+				}
+			//-->
+			</SCRIPT>";
+	
+	echo "<SCRIPT type='text/javascript'>
+			<!--
+				function sarjanumeronlisatiedot_popup(tunnus) {
+					window.open('$PHP_SELF?tunnus='+tunnus+'&toiminto=sarjanumeronlisatiedot_popup', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=0,top=0,width=800,height=600');
+				}
+			//-->
+			</SCRIPT>";
+	
+	if ($toiminto == "sarjanumeronlisatiedot_popup") {
+		@include('sarjanumeron_lisatiedot_popup.inc');
+		
+		if ($kukarow["extranet"] != "") {
+			$hinnat = 'MY';
 		}
-	//-->
-	</SCRIPT>";
+		else {
+			$hinnat = '';
+		}
+		
+		list($divitx, , , ,) = sarjanumeronlisatiedot_popup($tunnus, '', '', $hinnat, '');		
+		echo "$divitx";		
+		exit;
+	}
 	
 	if ($toiminto == "avaa_kuva") {
 
@@ -49,17 +71,6 @@
 	}
 
 	echo "<font class='head'>".t("Etsi ja selaa tuotteita").":</font><hr>";
-
-	//	Tarkastetaan käsitelläänkö lisätietoja
-	$query = "describe sarjanumeron_lisatiedot";
-	$sarjatestres = mysql_query($query);
-
-	if (mysql_error() == "") {
-		$sarjanumeronLisatiedot = "OK";
-	}
-	else {
-		$sarjanumeronLisatiedot = "";
-	}
 
 	if ($toim_kutsu == "") {
 		$toim_kutsu = "RIVISYOTTO";
@@ -625,16 +636,6 @@
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
 
-		//Sarjanumeroiden lisätietoja varten
-		if ($sarjanumeronLisatiedot == "OK" and @include('sarjanumeron_lisatiedot_popup.inc')) {		
-			echo js_popup();	
-		}
-		else {
-			$sarjanumeronLisatiedot = "";
-		}
-		
-		$divit = "";
-
 		foreach($rows as $row) {
 
 			echo "<tr>";
@@ -896,14 +897,8 @@
 				while ($sarjarow = mysql_fetch_array($sarjares)) {
 					
 					if ($kukarow["extranet"] == "") {
-						if ($sarjanumeronLisatiedot == "OK") {
-							list($divitx, $text_output, $kuvalisa_bin, $hankintahinta, $tuotemyyntihinta) = sarjanumeronlisatiedot_popup($sarjarow["tunnus"], '', 'popup', '', '');
-							$divit .= $divitx;
-						}
 
-						echo "<tr>
-								<td class='$vari' onmouseout=\"popUp(event,'$sarjarow[tunnus]')\" onmouseover=\"popUp(event,'$sarjarow[tunnus]')\" nowrap>$nimilask 
-								<a href='sarjanumeroseuranta.php?tuoteno_haku=$row[tuoteno]&sarjanumero_haku=".urlencode($sarjarow["sarjanumero"])."'>$sarjarow[sarjanumero]</a>";
+						echo "<tr><td class='$vari' nowrap>$nimilask <a onClick=\"javascript:sarjanumeronlisatiedot_popup('$sarjarow[tunnus]')\">$sarjarow[sarjanumero]</a>";
 					
 						if ($sarjarow["tyyppi"] == "T") {
 							echo "<br><font class='message'>(".t("Tarjous").": $sarjarow[myytunnus] $sarjarow[myynimi])</font>";
@@ -912,7 +907,7 @@
 						echo "</td>";
 					}
 					else {
-						echo "<tr><td class='$vari' nowrap>$nimilask $sarjarow[sarjanumero]</a></td>";
+						echo "<tr><td class='$vari' nowrap>$nimilask <a onClick=\"javascript:sarjanumeronlisatiedot_popup('$sarjarow[tunnus]')\">$sarjarow[sarjanumero]</a></td>";
 					}
 					
 					$nimilask++;
@@ -1078,7 +1073,7 @@
 				echo "</td>";
 			}
 
-			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F" or $kukarow["extranet"] != "") and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
+			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F") and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
 				echo "<td valign='top' align='right' class='$vari' nowrap>";
 				echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 				echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
@@ -1113,8 +1108,6 @@
 		echo "</form>";
 		echo "</table>";
 
-		//sarjanumeroiden piilotetut divit
-		echo $divit;
 	}
 	else {
 		echo t("Yhtään tuotetta ei löytynyt")."!";

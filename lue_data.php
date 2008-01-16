@@ -787,7 +787,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$alkuperamaa = $erivi[array_search("ALKUPERAMAA", $otsikot)];
 				$toim_tuoteno = $erivi[array_search("TOIM_TUOTENO", $otsikot)];
 				
-				$tpque = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$toimittaja' order by tunnus limit 1";
+				$tpque = "	SELECT tunnus 
+							from toimi 
+							where yhtio	= '$kukarow[yhtio]' 
+							and ytunnus	= '$toimittaja' 
+							and tyyppi != 'P'
+							order by tunnus desc
+							limit 1";
 				$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 				if (mysql_num_rows($tpres) == 1) {

@@ -797,6 +797,7 @@
 					and tilausrivi.otunnus = '$id'
 					and tilausrivi.tyyppi  = 'G'
 					and tilausrivi.varattu != 0
+					and var not in ('P','J','S')
 					ORDER BY sorttauskentta, tuoteno";
 		$result = mysql_query($query) or pupe_error($query);
 

@@ -933,6 +933,7 @@ else {
 					<option value='yhteensopivuus_mp'>".t("Yhteensopivuus mp-mallit")."</option>
 					<option value='yhteensopivuus_tuote'>".t("Yhteensopivuus tuotteet")."</option>
 					<option value='yhteyshenkilo'>".t("Yhteyshenkilöt")."</option>
+					<option value='abc_parametrit'>".t("ABC-parametrit")."</option>
 					</select></td>
 			</tr>
 

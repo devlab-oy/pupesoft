@@ -107,19 +107,24 @@
 									and tilausrivi2.tunnus  != '$ostorow[tunnus]'
 									and tilausrivi2.perheid2!= 0)";
 						$monistares2 = mysql_query($query) or pupe_error($query);					
-												
+						
 						while ($ostokokorow = mysql_fetch_array($monistares2)) {
 							
-							$maara = round($ostokokorow["kpl"] / $ostorow["kpl"],2);								
+							$maara = round($ostokokorow["kpl"] / $ostorow["kpl"],2);							
 							
-							if ($maara > 0) {			
+							if ($maara > 0) {
+								
+								$kplhinta  		= ($ostokokorow["rivihinta"] / $ostokokorow["kpl"]);								
+								$rivihinta 		= round(($ostokokorow["kpl"]-$maara) * $kplhinta, $yhtiorow['hintapyoristys']);
+								$koprivihinta 	= round($maara * $kplhinta, $yhtiorow['hintapyoristys']);
+								
 								// V‰hennet‰‰n alkuper‰isen ostorivin m‰‰r‰‰ yhdell‰
 								$query = "	UPDATE tilausrivi 
-											SET kpl=kpl-$maara, tilkpl=tilkpl-$maara
+											SET kpl=kpl-$maara, tilkpl=tilkpl-$maara, rivihinta=$rivihinta
 											WHERE yhtio = '$kukarow[yhtio]' 
 											and tunnus  = '$ostokokorow[tunnus]'";
 								$insres2 = mysql_query($query) or pupe_error($query);
-																													
+																																					
 								//Kopioidaan tilausrivi
 								$kysely = "	INSERT INTO tilausrivi SET ";
 
@@ -128,6 +133,9 @@
 										case 'kpl':
 										case 'tilkpl':
 											$kysely .= mysql_field_name($monistares2,$i)."='$maara',";
+											break;
+										case 'rivihinta':
+											$kysely .= mysql_field_name($monistares2,$i)."='$koprivihinta',";
 											break;
 										default:
 											$kysely .= mysql_field_name($monistares2,$i)."='".$ostokokorow[$i]."',";

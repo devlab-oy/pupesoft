@@ -1041,45 +1041,13 @@ if (!function_exists('loppu')) {
 		//Pankkiyhteystiedot
 		$pdf->draw_rectangle(90+$vientikala, 20, 20, 580,	$thispage, $rectparam);
 
-		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
-		if ($laskurow["yhtio_ovttunnus"] != "") {
-
-			// haetaan toimipaikan tiedot
-			$alhqur = "	SELECT * 
-						from yhtion_toimipaikat 
-						where yhtio		= '$kukarow[yhtio]' 
-						and vat_numero	= '$laskurow[yhtio_ovttunnus]'";
-			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
-
-			if (mysql_num_rows($alhire) == 1) {
-
-				// haetaan toimipaikan tiedot
-				$alhiro = mysql_fetch_array($alhire);
-
-				// fax ja puhelin ei ole laskulla
-				$yhtiorow['puhelin']	= $alhiro['puhelin'];
-				$yhtiorow['fax']		= $alhiro['fax'];
-				$yhtiorow['email']		= $alhiro['email'];
-
-			}
-
-			// loput tiedot otetaan laskulta
-			$yhtiorow["nimi"] 		= $laskurow["yhtio_nimi"];
-			$yhtiorow["osoite"] 	= $laskurow["yhtio_osoite"];
-			$yhtiorow["postino"] 	= $laskurow["yhtio_postino"];
-			$yhtiorow["postitp"] 	= $laskurow["yhtio_postitp"];
-			$yhtiorow["maa"] 		= $laskurow["yhtio_maa"];
-			$yhtiorow["kotipaikka"]	= $laskurow["yhtio_kotipaikka"];
-			$vatnumero				= $laskurow["yhtio_ovttunnus"];
-		}
-
 		//Haetaan factoringsopimuksen tiedot
 		if ($masrow["factoring"] != '') {
 			$query = "	SELECT *
 						FROM factoring
 						WHERE yhtio 		= '{$kukarow['yhtio']}'
 						and factoringyhtio 	= '{$masrow['factoring']}'
-						and valkoodi 		= '{$lasrow['valkoodi']}'";
+						and valkoodi 		= '{$laskurow['valkoodi']}'";
 			$fres = mysql_query($query) or pupe_error($query);
 			$frow = mysql_fetch_array($fres);
 		}
@@ -1204,7 +1172,8 @@ if (!function_exists('loppu')) {
 				if($pankkitiedot["pankkiswift3"]) {
 					$pdf->draw_text(404, 72, "SWIFT: ".$pankkitiedot["pankkiswift3"],										$thispage, $norm);
 				}
-			} else {
+			} 
+			else {
 				// ja normitilauksissa tällästä
 			    $pdf->draw_text(30, 82,  t("Pankkiyhteys", $kieli),														$thispage, $pieni);
 	        	$pdf->draw_text(30, 72,  $pankkitiedot["pankkinimi1"]." ".$pankkitiedot["pankkitili1"],							$thispage, $norm);
@@ -1212,57 +1181,99 @@ if (!function_exists('loppu')) {
 	        	$pdf->draw_text(404, 72, $pankkitiedot["pankkinimi3"]." ".$pankkitiedot["pankkitili3"],							$thispage, $norm);
             }
 		}
+		
+		
+		// jos meillä on lasku menossa ulkomaille ja se laskutetaan eri ovttunnuksella
+		if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
+
+			// haetaan toimipaikan tiedot
+			$alhqur = "SELECT * from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
+			$alhire = mysql_query($alhqur) or pupe_error($alhqur);
+
+			if (mysql_num_rows($alhire) == 1) {
+
+				// haetaan toimipaikan tiedot
+				$alhiro = mysql_fetch_array($alhire);
+
+				$y_puhelin		= $alhiro['puhelin'];
+				$y_fax			= $alhiro['fax'];
+				$y_email		= $alhiro['email'];
+				$y_nimi 		= $laskurow["yhtio_nimi"];
+				$y_osoite 		= $laskurow["yhtio_osoite"];
+				$y_postino	 	= $laskurow["yhtio_postino"];
+				$y_postitp	 	= $laskurow["yhtio_postitp"];
+				$y_maa 			= $laskurow["yhtio_maa"];
+				$y_kotipaikka	= $laskurow["yhtio_kotipaikka"];
+				$y_vatnumero	= $laskurow["yhtio_ovttunnus"];
+			}
+			else {
+				$y_puhelin		= $yhtiorow['puhelin'];
+				$y_fax			= $yhtiorow['fax'];
+				$y_email		= $yhtiorow['email'];
+				$y_nimi 		= $yhtiorow["nimi"];
+				$y_osoite 		= $yhtiorow["osoite"];
+				$y_postino	 	= $yhtiorow["postino"];
+				$y_postitp	 	= $yhtiorow["postitp"];
+				$y_maa 			= $yhtiorow["maa"];
+				$y_kotipaikka	= $yhtiorow["kotipaikka"];
+				$y_vatnumero	= $yhtiorow["ovttunnus"];
+			}
+		}
+		else {
+			$y_puhelin		= $yhtiorow['puhelin'];
+			$y_fax			= $yhtiorow['fax'];
+			$y_email		= $yhtiorow['email'];
+			$y_nimi 		= $yhtiorow["nimi"];
+			$y_osoite 		= $yhtiorow["osoite"];
+			$y_postino	 	= $yhtiorow["postino"];
+			$y_postitp	 	= $yhtiorow["postitp"];
+			$y_maa 			= $yhtiorow["maa"];
+			$y_kotipaikka	= $yhtiorow["kotipaikka"];
+			$y_vatnumero	= $yhtiorow["ytunnus"];
+		}
 
 		//Alimmat kolme laatikkoa, yhtiötietoja
 		$pdf->draw_rectangle(70, 20, 20, 580,	$thispage, $rectparam);
 		$pdf->draw_rectangle(70, 207, 20, 580,	$thispage, $rectparam);
 		$pdf->draw_rectangle(70, 394, 20, 580,	$thispage, $rectparam);
 
-		$pdf->draw_text(30, 55, $yhtiorow["nimi"],		$thispage, $pieni);
-		$pdf->draw_text(30, 45, $yhtiorow["osoite"],	$thispage, $pieni);
-		$pdf->draw_text(30, 35, $yhtiorow["postino"]."  ".$yhtiorow["postitp"],	$thispage, $pieni);
-		$pdf->draw_text(30, 25, $yhtiorow["maa"],		$thispage, $pieni);
+		$pdf->draw_text(30, 55, $y_nimi,					$thispage, $pieni);
+		$pdf->draw_text(30, 45, $y_osoite,					$thispage, $pieni);
+		$pdf->draw_text(30, 35, $y_postino."  ".$y_postitp,	$thispage, $pieni);
+		$pdf->draw_text(30, 25, $y_maa,						$thispage, $pieni);
 
-		$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",			$thispage, $pieni);
-		$pdf->draw_text(257, 55, $yhtiorow["puhelin"],				$thispage, $pieni);
-		$pdf->draw_text(217, 45, t("Telefax", $kieli).":",			$thispage, $pieni);
-		$pdf->draw_text(257, 45, $yhtiorow["fax"],					$thispage, $pieni);
-		$pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",		$thispage, $pieni);
-		$pdf->draw_text(257, 35, $yhtiorow["email"],				$thispage, $pieni);
+		$pdf->draw_text(217, 55, t("Puhelin", $kieli).":",		$thispage, $pieni);
+		$pdf->draw_text(257, 55, $y_puhelin,					$thispage, $pieni);
+		$pdf->draw_text(217, 45, t("Telefax", $kieli).":",		$thispage, $pieni);
+		$pdf->draw_text(257, 45, $y_fax,						$thispage, $pieni);
+		$pdf->draw_text(217, 35, t("Sähköposti", $kieli).":",	$thispage, $pieni);
+		$pdf->draw_text(257, 35, $y_email,						$thispage, $pieni);
 
 		//jos on suomalainen yritys tehdään ytunnus nätiks
 		if (strtoupper($yhtiorow["maa"])== 'FI') {
 			//muutetaan ytunnus takas oikean näköseks
-			$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
+			$ytunpit = 8-strlen($y_vatnumero);
 
 			if ($ytunpit > 0) {
-				$uytunnus = $yhtiorow["ytunnus"];
+				$uytunnus = $y_vatnumero;
 				while ($ytunpit > 0) {
 				    $uytunnus = "0".$uytunnus; $ytunpit--;
 				}
 			}
 			else {
-				$uytunnus = $yhtiorow["ytunnus"];
+				$uytunnus = $y_vatnumero;
 			}
 
 			$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
 		}
 		else {
-			$uytunnus = $yhtiorow["ytunnus"];
+			$uytunnus = $y_vatnumero;
 		}
-
-        if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-            $uytunnus = $laskurow['yhtio_ovttunnus'];
-        }
-		else {
-    		$uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-        }
-
 
 		$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$thispage, $pieni);
 		$pdf->draw_text(444, 55, $uytunnus,							$thispage, $pieni);
 		$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$thispage, $pieni);
-		$pdf->draw_text(444, 45, $yhtiorow["kotipaikka"],			$thispage, $pieni);
+		$pdf->draw_text(444, 45, $y_kotipaikka,						$thispage, $pieni);
 		$pdf->draw_text(404, 35, t("Enn.per.rek", $kieli),			$thispage, $pieni);
 		$pdf->draw_text(404, 25, t("Alv.rek", $kieli),				$thispage, $pieni);
 	}

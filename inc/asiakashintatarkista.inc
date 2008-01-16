@@ -68,7 +68,9 @@ if(!function_exists("asiakashintatarkista")) {
 
 				if (mysql_num_rows($sresult) != 1) {
 
-					$tuoteno 		= $t[$i]."*";
+					if (substr($t[$i], -1) != '*') $tuoteno = $t[$i]."*";
+					else $tuoteno = $t[$i];
+					
 					$kutsuja 		= "yllapito.php";
 					$ulos			= "";
 

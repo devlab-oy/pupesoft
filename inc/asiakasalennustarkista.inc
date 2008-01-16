@@ -2,7 +2,7 @@
 
 if(!function_exists("asiakasalennustarkista")) {
 	function asiakasalennustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
-		global $kukarow, $yhtiorow, $alias_set;
+		global $kukarow, $yhtiorow, $alias_set, $alasveto;
 		
 		static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chalkupvm, $chloppupvm;
 		
@@ -15,18 +15,36 @@ if(!function_exists("asiakasalennustarkista")) {
 				$virhe[$i] = "".t("Tieto puuttuu!")."";
 			}
 		}
-
+		
 		if (mysql_field_name($result, $i) == "ytunnus") {
 			$chytunnus = $t[$i];
+
 			if ($chytunnus != '') {
 				$query = "	SELECT ytunnus
 							FROM asiakas
 							WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
+
 				if (mysql_num_rows($sresult) == 0) {
-					$virhe[$i] = "".t("Asiakas puuttuu tai sitä ei löydy!")."";
+
+					$ytunnus 		= $chytunnus;
+					$kutsuja 		= "yllapito.php";
+					$ulos 			= "";				
+					require("asiakashaku.inc");
+
+					if ($ulos != "" and $ytunnus == "") {
+						$alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
+						$virhe[$i]    = t("Valitse asiakas!");
+					}
+					elseif ($ytunnus != "") {
+						$t[$i]  = $ytunnus;
+						$virhe[$i] = t("Asiakas löytyi!");
+					}	
+					else {
+						$virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");	
+					}	
 				}
-			}
+			}	
 		}
 
 		if (mysql_field_name($result, $i) == "asiakas_ryhma") {
@@ -49,8 +67,22 @@ if(!function_exists("asiakasalennustarkista")) {
 							FROM tuote
 							WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
 				$sresult = mysql_query($query) or pupe_error($query);
+
 				if (mysql_num_rows($sresult) != 1) {
-					$virhe[$i] = "".t("Tuotenumero puuttuu tai sitä ei löydy!")."";
+
+					if (substr($t[$i], -1) != '*') $tuoteno = $t[$i]."*";
+					else $tuoteno = $t[$i];
+					
+					$kutsuja 		= "yllapito.php";
+					$ulos			= "";
+
+					require ("inc/tuotehaku.inc");
+
+					if ($ulos != "") {	
+						$alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
+					}
+
+					$virhe[$i] = t("Tuotenumero puuttuu tai sitä ei löydy!");
 				}
 			}
 		}

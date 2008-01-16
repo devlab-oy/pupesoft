@@ -4,7 +4,7 @@
 	
 	echo "<font class='head'>".t("Korjaa sarjanumeromyyyntejä").":</font><hr><br>";
 	
-	if ($tee == "PAIVITA" and $otunnus > 0) {
+	if ($tee == "PAIVITA" and checkdate(substr($paivamaara,5,2), substr($paivamaara,8,2), substr($paivamaara,0,4))) {
 		
 		$query = "	SELECT distinct tilausrivi.tuoteno, sarjanumeroseuranta.ostorivitunnus
 					FROM tilausrivi 
@@ -12,7 +12,7 @@
 					JOIN sarjanumeroseuranta ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio and tilausrivi.tuoteno = sarjanumeroseuranta.tuoteno and tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus
 					WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
 					and tilausrivi.tyyppi	= 'L'
-					and tilausrivi.otunnus  = '$otunnus'
+					and tilausrivi.laskutettuaika >= '$paivamaara'
 					order by sarjanumeroseuranta.sarjanumero";
 		$vresult = mysql_query($query) or pupe_error($query);
 
@@ -170,6 +170,16 @@
 	}
 	
 	if ($tee == "") {
+		
+		echo "<br><br>";
+		echo "Syötä päivämäärä josta korjataan:<br>";
+		echo "<form method='post' action='$PHP_SELF'>";
+		echo "<input type='hidden' name='tee' value='PAIVITA'>";
+		echo "<input type='text' name='paivamaara' size='15'>";
+		echo "<input type='submit' value='Korjaa'>";
+		echo "</form>";
+		
+		/*
 		echo "<br><br>";
 		echo "Syötä korjattava tilaus:<br>";
 		echo "<form method='post' action='$PHP_SELF'>";
@@ -177,6 +187,7 @@
 		echo "<input type='text' name='otunnus' size='10'>";
 		echo "<input type='submit' value='Korjaa'>";
 		echo "</form>";
+		*/
 	}
 	
 	require ("inc/footer.inc");

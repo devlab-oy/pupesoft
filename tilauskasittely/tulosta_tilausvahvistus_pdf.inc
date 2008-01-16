@@ -414,12 +414,12 @@
 					}
 				}
 
-				if($laskurow["sisviesti1"] != "") {
+				if($laskurow["comments"] != "") {
 					//	Maksusopimus
 					$pdf->write($h, 1, 0, 0, t("LISÄTIEDOT", $kieli), "norm", "L", "B");
 					$h-=$pdf->ln(1.25);
-					$nb=$pdf->countParagraphHeight($laskurow["sisviesti1"], "norm")+2;
-					$pdf->write($h, $nb, 0, 0, $laskurow["sisviesti1"], "norm", "L", "I");
+					$nb=$pdf->countParagraphHeight($laskurow["comments"], "norm")+2;
+					$pdf->write($h, $nb, 0, 0, $laskurow["comments"], "norm", "L", "I");
 					$h-=$pdf->ln($nb);
 				}
 

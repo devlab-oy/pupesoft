@@ -77,7 +77,7 @@ if (!function_exists('pupevoice_otsik')) {
 			$y_vatnumero	= $yhtiorow["ovttunnus"];
 		}
 		
-		xml_add("SellerPartyIdentifier", 				$y_ovttunnus,									$tootxml);
+		xml_add("SellerPartyIdentifier", 				$yhtiorow['ovttunnus'],							$tootxml);
 		xml_add("SellerPartyDomicile", 					$y_kotipaikka,									$tootxml);
 		xml_add("SellerPartyVat", 						$y_vatnumero,									$tootxml);
 		xml_add("SellerOrganisationName", 				$y_nimi, 										$tootxml);

@@ -540,12 +540,12 @@
 				}
 				elseif($silent == "") {
 					$tulos_ulos .= "\n".t("Nollasummaista laskua ei lähetetty")."! $lasrow[laskunro] $lasrow[nimi]<br>\n";
-				}
-
-				//Aineistojen lopputägit
-				elmaedi_aineisto_loppu($tootedi, $timestamppi);
-				pupevoice_aineisto_loppu($tootxml);
+				}				
 			}
+			
+			//Aineistojen lopputägit
+			elmaedi_aineisto_loppu($tootedi, $timestamppi);
+			pupevoice_aineisto_loppu($tootxml);
 
 			// suljetaan faili
 			fclose($tootxml);

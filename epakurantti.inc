@@ -4,10 +4,10 @@
 $debug = 0;
 
 if (trim($tuoteno) == "") {
-	$tee='';	
+	$tee = '';	
 }
 
-if ($tuoteno != "" and $tee != '') {
+if ($tuoteno != "" and ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois")) {
 
 	$query = "	SELECT tuote.tunnus, tuote.tuoteno, kehahin, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, epakurantti100pvm, sum(saldo) saldo
 				FROM tuote
@@ -22,7 +22,7 @@ if ($tuoteno != "" and $tee != '') {
 		echo "<font class='error'>";
 		printf (t("Tuote %s ei löydy!"), $tuoteno);
 		echo "</font><br>";
-		$tee='';
+		$tee = '';
 	}
 	$tuoterow = mysql_fetch_array($result);
 

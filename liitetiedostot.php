@@ -80,10 +80,10 @@ if (isset($_REQUEST['liitos']) and $_REQUEST['liitos'] == 'lasku' and isset($_RE
 		$ok = true;
 		
 		//	Näille voidaan laittaa myös minkä lajin liite on kyseessä
-		$query = "	SELECT selite, selitetark
+		$query = "	SELECT selite, if(selitetark_2='PAKOLLINEN', concat('* ', selitetark), concat('&nbsp;&nbsp;', selitetark)) selitetark
 					FROM avainsana
 					WHERE yhtio = '$kukarow[yhtio]' and laji = 'TIL-LITETY'
-					ORDER BY jarjestys, selite";
+					ORDER BY selitetark_2 DESC, jarjestys, selite";
 		$ares = mysql_query($query) or pupe_error($query);
 		if(mysql_num_rows($ares) > 0) {
 			$litety = "<td><select name ='kayttotarkoitus'>";

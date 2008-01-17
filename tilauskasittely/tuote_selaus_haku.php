@@ -852,7 +852,7 @@
 					$hintaresult = mysql_query($query) or pupe_error($query);
 
 					while ($hintarow = mysql_fetch_array($hintaresult)) {
-						$myyntihinta .= "<br>$hintarow[maa]: $hintarow[hinta] $hintarow[valkoodi]";
+						$myyntihinta .= "<br>$hintarow[maa]: ".sprintf("%.".$yhtiorow['hintapyoristys']."f", $hintarow["hinta"])." $hintarow[valkoodi]";
 					}
 				}
 			}
@@ -861,7 +861,7 @@
 			echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]</td>";
 
 			if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-				echo "<td valign='top' class='$vari' $classmidl>$row[nettohinta]</td>";
+				echo "<td valign='top' class='$vari' $classmidl>".sprintf("%.".$yhtiorow['hintapyoristys']."f", $row["nettohinta"])."</td>";
 				echo "<td valign='top' class='$vari' $classmidl>$row[status]</td>";
 			}
 
@@ -870,7 +870,7 @@
 			
 			if ($row["tuoteperhe"] == $row["tuoteno"]) {
 				// Tuoteperheen isä
-				$saldot = tuoteperhe_myytavissa($row["tuoteno"], "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+				$saldot = tuoteperhe_myytavissa($row["tuoteno"], "", "", 0, $yhtio, "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
 			
 				echo "<td valign='top' $classrigh>";
 				echo "<table width='100%'>";

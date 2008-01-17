@@ -312,7 +312,7 @@ if (!function_exists("viikonpaiva")) {
 }
 
 if (!function_exists("tuoteperhe_myytavissa")) {
-	function tuoteperhe_myytavissa($tuoteno, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
+	function tuoteperhe_myytavissa($tuoteno, $summaus, $tyyppi = '', $varasto = 0, $yhtio = '', $hyllyalue = '', $hyllynro = '', $hyllyvali = '', $hyllytaso = '', $maa = '', $pvm = '', $era = '') {
 		global $kukarow, $yhtiorow;
 		
 		if ($yhtio == "") {
@@ -338,6 +338,13 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 			$valinta1 = " and varastopaikat.tyyppi = '' ";
 		}
 		
+		$query = " 	SELECT *
+					from tuote
+					where tuote.yhtio = '$yhtio' 
+					and tuote.tuoteno = '$tuoteno'";
+		$asires = mysql_query($query) or pupe_error($query);
+		$asirow = mysql_fetch_array($asires);
+				
 		$query = " 	SELECT distinct tuote.tuoteno, tuoteperhe.kerroin
 					from tuoteperhe
 					join tuote on tuoteperhe.yhtio = tuote.yhtio and tuoteperhe.tuoteno = tuote.tuoteno and ei_saldoa = ''
@@ -345,10 +352,21 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		$isiresult = mysql_query($query) or pupe_error($query);
 
 		$tuotteet = array();
-
+				
+		if ($asirow["ei_saldoa"] == "") {
+			$tuotteet[$tuoteno] = 1;
+			$tuotteet_str 		= "'".$tuoteno."',";
+		}
+		else {
+			$tuotteet_str 		= "";
+		}
+		
 		while ($isirow = mysql_fetch_array($isiresult)) {
-			$tuotteet[$isirow["kerroin"]] = $isirow["tuoteno"];
-		}		
+			$tuotteet[$isirow["tuoteno"]] = $isirow["kerroin"];
+			$tuotteet_str 				 .= "'".$isirow["tuoteno"]."',";
+		}
+		
+		$tuotteet_str = substr($tuotteet_str, 0, -1);				
 		
 		$query = "	SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys
 		 			FROM tuote
@@ -358,25 +376,37 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 					and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
 					$valinta1
 					WHERE tuote.yhtio = '$yhtio'
-					and tuote.tuoteno in ('".implode("','", $tuotteet)."')
+					and tuote.tuoteno in ($tuotteet_str)
 					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys";
 		$varresult = mysql_query($query) or pupe_error($query);
 		
 		$varasto_myytavissa = array();
 		
+		if ($summaus == "KAIKKI") {
+			$perhe_myytavissa = array();	
+		}
+		
 		while ($saldorow = mysql_fetch_array($varresult)) {
 			
-			$perhe_myytavissa = array();
-			
-			foreach($tuotteet as $kerroin => $tuoteno) {
-								
-				list(,,$myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $saldorow["tunnus"], $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era);
-				$perhe_myytavissa[] = round($myytavissa/$kerroin, 2);
+			if ($summaus != "KAIKKI") {
+				$perhe_myytavissa = array();	
 			}
 			
+			foreach($tuotteet as $tuoteno => $kerroin) {
+								
+				list(,,$myytavissa) = saldo_myytavissa($tuoteno, $tyyppi, $saldorow["tunnus"], $yhtio, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $maa, $pvm, $era);
+				$perhe_myytavissa[$tuoteno] += round($myytavissa/$kerroin, 2);				
+			}
+						
+			if ($summaus != "KAIKKI") {
+				arsort($perhe_myytavissa);
+				$varasto_myytavissa[$saldorow["nimitys"]] = array_pop($perhe_myytavissa);
+			}
+		}
+		
+		if ($summaus == "KAIKKI") {
 			arsort($perhe_myytavissa);
-			
-			$varasto_myytavissa[$saldorow["nimitys"]] = array_pop($perhe_myytavissa);			
+			$varasto_myytavissa[] = array_pop($perhe_myytavissa);	
 		}
 		
 		return($varasto_myytavissa);

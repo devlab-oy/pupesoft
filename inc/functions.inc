@@ -4362,10 +4362,11 @@ if (!function_exists("tee_menu")) {
 					$data .= "&menu[$key][div]=".urlencode($valinta["DIV"]);
 					$data .= "&menu[$key][offsetx]=".urlencode($valinta["OFFSETX"]);
 					$data .= "&menu[$key][offsety]=".urlencode($valinta["OFFSETY"]);
+					$data .= "&menu[$key][target]=".urlencode($valinta["TARGET"]);					
 				}
 			}
 			
-			$data = "<div style='float: right;'><a href='#' onclick=\"popUp(event, 'ajax_menu', '30', '-10', 'tarjousseuranta.php?tee=GENEROIMENU$data'); return false;\">$nappi</a></div>";
+			$data = "<a href='#' onclick=\"popUp(event, 'ajax_menu', '30', '-10', 'tarjousseuranta.php?tee=GENEROIMENU$data'); return false;\">$nappi</a>";
 			return $data;
 		}
 		return true;

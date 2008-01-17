@@ -291,19 +291,44 @@ echo "<tr>";
 echo "<th>".t("Aja tuotemerkeitt‰in").":</th><td><input type='checkbox' name='merkki' $chk></td>";
 echo "</tr>";
 
-if ($varastomukaan != '') {
+if ($varastot != '') {
 	$chk = 'checked';
 }
 else {
 	$chk = '';
 }
 
+echo "<tr><th valign=top>" . t('Varastot') . "<br /><br /><span style='font-size: 0.8em;'>"
+	. t('Saat kaikki varastot jos et valitse yht‰‰n')
+	. "</span></th>
+    <td>";
+
+$varastot = (isset($_POST['varastot']) && is_array($_POST['varastot'])) ? $_POST['varastot'] : array();
+
+$query  = "SELECT tunnus, nimitys FROM varastopaikat WHERE yhtio='$kukarow[yhtio]'";
+$vares = mysql_query($query) or pupe_error($query);
+
+while ($varow = mysql_fetch_array($vares)) {
+	$sel = '';
+	if (in_array($varow['tunnus'], $varastot)) {
+		$sel = 'checked';
+	}
+
+	echo "<input type='checkbox' name='varastot[]' value='{$varow['tunnus']}' $sel/>{$varow['nimitys']}<br />\n";
+}
+
+echo "</td></tr>";
+
+/*
 echo "<tr>";
 echo "<th>".t("Aja varastoittain").":</th><td><input type='checkbox' name='varastomukaan' $chk></td>";
 echo "</tr>";
+*/
 
 echo "</table>";
 echo "<br>";
+
+
 
 if($valitaan_useita == '') {
 	echo "<input type='submit' value='Laske varastonarvot'>";
@@ -334,11 +359,25 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		$merkkilisa2 = " GROUP BY tuote.tuotemerkki ORDER BY tuote.tuotemerkki";
 	}
 
-	if ($varastomukaan != '') {
-		$merkkilisa1 = "varastopaikat.nimitys,";
+	if ($varastot != '') {
+		
+		$varasto = "";
+		
+		foreach ($varastot as $var) {
+			$varasto = "AND varastopaikat.tunnus IN (";
+			if (end($varastot) != $var) {
+				$varasto .= "$var,";
+			}
+			else {
+				$varasto .= "$var";
+			}
+			$varasto .= ")";
+		}
+		
+		$merkkilisa1 .= "varastopaikat.nimitys,";
 		$merkkilisa2 = " GROUP BY varastopaikat.nimitys ORDER BY varastopaikat.nimitys";
-		$varastojoini = "LEFT JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio and
-			concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) and
+		$varastojoini = "LEFT JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio $varasto AND
+			concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) AND
 			concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))";
 	}
 
@@ -379,7 +418,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		echo "<th>".t("Tuotemerkki")."</th>";
 	}
 
-	if ($varastomukaan != '') {
+	if ($varastot != '') {
 		echo "<th>".t("Varasto")."</th>";
 	}
 
@@ -387,12 +426,16 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	$varvo = 0;
 
 	while ($row = mysql_fetch_array($result)) {
-
 		$varvo  = $row["varasto"];
 
 		echo "<tr>";
 
-		if ($merkki != '' or $varastomukaan != '') {
+		if ($merkki != '' and $varastot != '') {
+			echo "<td>$row[0]</td>";
+			echo "<td>$row[1]</td>";
+			$varastosumma += $row["varasto"];
+		}
+		else if ($merkki != '' or $varastot != '') {
 			echo "<td>$row[0]</td>";
 			$varastosumma += $row["varasto"];
 		}
@@ -416,7 +459,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 						order by kausi desc";
 			$xresult = mysql_query($query) or pupe_error($query);
 
-			while ($xrow = mysql_fetch_array($xresult)) {
+			while ($xrow = mysql_fetch_array($xresult)) {				
 				$varvo = $varvo - $xrow["muutos"];
 				$apukausi = date("Y-m-d", mktime(0, 0, 0, $xrow["mm"], 0, $xrow["yy"]));
 
@@ -434,7 +477,16 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	
 	if ($varastosumma != 0) {
 		echo "<tr>";
-		echo "<th colspan='2'>".t("Yhteens‰")."</th>";
+		echo "<th colspan='";
+		
+		if ($merkki != '' and $varastot != '') {
+			echo 3;
+		}
+		else {
+			echo 2;
+		}
+		
+		echo "'>".t("Yhteens‰")."</th>";
 		echo "<th>".str_replace(".",",",sprintf("%.2f",$varastosumma))."</th>";
 		echo "</tr>";
 	}

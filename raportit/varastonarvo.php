@@ -345,7 +345,6 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	$merkkilisa1	= "";
 	$merkkilisa2	= "";
 	$varastojoini   = "";
-	$varastojoini2 	= "";
 	$varastosumma	= 0;
 	$groupby = "GROUP BY ";
 	$orderby = "ORDER BY ";
@@ -363,7 +362,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		$orderby .= "tuote.tuotemerkki";
 	}
 
-	if ($varastot != '') {
+	if ($varastot != '' && count($varastot) > 0) {
 		
 		$varasto = "";
 
@@ -394,10 +393,9 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		$varastojoini = "JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio $varasto AND
 			concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) AND
 			concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))";
-		
-		if ($merkki != '') {
-			$varastojoini2 = " AND ";
-		}
+	}
+	else {
+		$varastojoini = "";
 	}
 
 	// kuus kuukautta taakseppäin kuun eka päivä

@@ -4347,32 +4347,6 @@ if(!function_exists("decodeURI")) {
 	}	
 }
 
-if (!function_exists("tee_menu")) {
-	// scripti javascript menujen tekemiseen
-	function tee_menu ($valinnat, $nappi) {
-		if(is_array($valinnat) and count($valinnat)>0) {
-			$data = "";
-			foreach($valinnat as $key => $valinta) {
-				if(isset($valinta["VALI"])) {
-					$data .= "&menu[$key][vali]=".urlencode($valinta["VALI"]);
-				}
-				else {
-					$data .= "&menu[$key][menu]=".urlencode($valinta["TEKSTI"]); 
-					$data .= "&menu[$key][href]=".urlencode($valinta["HREF"]);
-					$data .= "&menu[$key][div]=".urlencode($valinta["DIV"]);
-					$data .= "&menu[$key][offsetx]=".urlencode($valinta["OFFSETX"]);
-					$data .= "&menu[$key][offsety]=".urlencode($valinta["OFFSETY"]);
-					$data .= "&menu[$key][target]=".urlencode($valinta["TARGET"]);					
-				}
-			}
-			
-			$data = "<a href='#' onclick=\"popUp(event, 'ajax_menu', '30', '-10', 'tarjousseuranta.php?tee=GENEROIMENU$data'); return false;\">$nappi</a>";
-			return $data;
-		}
-		return true;
-	}
-}
-
 if(!function_exists("aja_kysely")) {
 	function aja_kysely() {
 		global $kukarow, $hakukysely, $aja_kysely, $uusi_kysely, $tallenna_muutokset, $poista_kysely, $_POST;

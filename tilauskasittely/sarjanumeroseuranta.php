@@ -683,6 +683,8 @@
 					tilausrivi_osto.perheid2							osto_perheid2,
 					tilausrivi_osto.tunnus								osto_rivitunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
+					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
+					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					varastopaikat.nimitys								varastonimi,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
@@ -718,6 +720,8 @@
 					tilausrivi_osto.perheid2							osto_perheid2,
 					tilausrivi_osto.tunnus								osto_rivitunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
+					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
+					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
 					era_kpl
@@ -756,6 +760,8 @@
 					tilausrivi_osto.perheid2							osto_perheid2,
 					tilausrivi_osto.tunnus								osto_rivitunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
+					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
+					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
 					era_kpl
@@ -787,6 +793,8 @@
 					tilausrivi_osto.perheid2							osto_perheid2,
 					tilausrivi_osto.tunnus								osto_rivitunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
+					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
+					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
 					(tilausrivi_myynti.rivihinta/tilausrivi_myynti.kpl)	myyntihinta,
 					varastopaikat.nimitys								varastonimi,
 					concat_ws(' ', sarjanumeroseuranta.hyllyalue, sarjanumeroseuranta.hyllynro, sarjanumeroseuranta.hyllyvali, sarjanumeroseuranta.hyllytaso) tuotepaikka,
@@ -939,6 +947,10 @@
 		
 		if ($sarjarow["takuu_alku"] != '' and $sarjarow["takuu_alku"] != '0000-00-00') {
 			echo "<br>".t("Takuu").": ".tv1dateconv($sarjarow["takuu_alku"])." - ".tv1dateconv($sarjarow["takuu_loppu"]);
+		}
+
+		if ($rivirow["sarjanumeroseuranta"] != "E" and $rivirow["sarjanumeroseuranta"] != "F" and ($sarjarow["myynti_laskaika"] == "0000-00-00" or $sarjarow["myynti_laskaika"] == "")) {		
+			echo "<br>".t("Varastointiaika").": ".$sarjarow["varpvm"]." ".t("pva").". (".tv1dateconv($sarjarow["osto_laskaika"]).")";
 		}
 		
 		echo "</td>";

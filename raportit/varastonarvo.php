@@ -345,7 +345,10 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	$merkkilisa1	= "";
 	$merkkilisa2	= "";
 	$varastojoini   = "";
+	$varastojoini2 	= "";
 	$varastosumma	= 0;
+	$groupby = "GROUP BY ";
+	$orderby = "ORDER BY ";
 
 	if ($tuoteryhma != "kaikki" and $sel_tuoteryhma != "" and $sel_tuoteryhma != t("Ei valintaa")) {
 		$trylisa .= " and tuote.try in ('$sel_tuoteryhma') ";
@@ -356,7 +359,8 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 
 	if ($merkki != '') {
 		$merkkilisa1 = "tuote.tuotemerkki,";
-		$merkkilisa2 = " GROUP BY tuote.tuotemerkki ORDER BY tuote.tuotemerkki";
+		$groupby .= "tuote.tuotemerkki";
+		$orderby .= "tuote.tuotemerkki";
 	}
 
 	if ($varastot != '') {
@@ -378,10 +382,22 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		$varasto .= ")";
 		
 		$merkkilisa1 .= "varastopaikat.nimitys,";
-		$merkkilisa2 = " GROUP BY varastopaikat.nimitys ORDER BY varastopaikat.nimitys";
+		
+		if ($merkki != '') {
+			$groupby .= ",varastopaikat.nimitys";
+			$orderby .= ",varastopaikat.nimitys";
+		}
+		else {			
+			$groupby .= "varastopaikat.nimitys";
+			$orderby .= "varastopaikat.nimitys";
+		}
 		$varastojoini = "JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio $varasto AND
 			concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')) AND
 			concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0')))";
+		
+		if ($merkki != '') {
+			$varastojoini2 = " AND ";
+		}
 	}
 
 	// kuus kuukautta taakseppäin kuun eka päivä
@@ -410,7 +426,8 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 				$varastojoini
 				WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
 				and tuotepaikat.saldo <> 0
-				$merkkilisa2";
+				$groupby
+				$orderby";
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<table>";

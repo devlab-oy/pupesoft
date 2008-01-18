@@ -172,7 +172,7 @@ if(!function_exists("toimitarkista")) {
 		if (mysql_field_name($result, $i) == "tyyppi_tieto") {
 
 			if ($toimtyyppi == "S") {
-				$query = "select * from yhtio where konserni='$yhtiorow[konserni]' and yhtio='$t[$i]' and yhtio!='$kukarow[yhtio]'";
+				$query = "SELECT * from yhtio where konserni='$yhtiorow[konserni]' and yhtio='$t[$i]' and yhtio!='$kukarow[yhtio]'";
 				$tyychkre = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($tyychkre) == 0) {
@@ -197,6 +197,37 @@ if(!function_exists("toimitarkista")) {
 							tuotteen_toimittajat.alkuperamaa	= '$tmp_maakoodi'"; 
 				$vres = mysql_query($query) or pupe_error($query);
 			}
+			
+			if ($toimtyyppi == "PP" and $tunnus > 0 and $errori != 1) {
+				// poistetaan tuotteen_toimittajat kaikille tuotteille
+				$query = "	SELECT lasku.yhtio
+							from lasku 
+							join tilausrivi on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' and tilausrivi.varattu != 0
+							where lasku.yhtio		= '$kukarow[yhtio]' 
+							and lasku.liitostunnus	= '$tunnus'
+							and lasku.tila = 'O'";																				
+				$tyychkre1 = mysql_query($query) or pupe_error($query);
+								
+				$query = "	SELECT lasku.yhtio 
+							from lasku 
+							where lasku.yhtio		= '$kukarow[yhtio]'
+							and lasku.liitostunnus	= '$tunnus'
+							and lasku.tila 	= 'K'
+							and lasku.alatila != 'X'
+							and lasku.vanhatunnus = 0";																				
+				$tyychkre2 = mysql_query($query) or pupe_error($query);
+								
+				if (mysql_num_rows($tyychkre1) == 0 and mysql_num_rows($tyychkre2) == 0) {
+			
+					$query = "	DELETE FROM tuotteen_toimittajat
+								WHERE tuotteen_toimittajat.yhtio		= '$kukarow[yhtio]'
+								and tuotteen_toimittajat.liitostunnus 	= $tunnus"; 
+					$vres = mysql_query($query) or pupe_error($query);
+				}
+				else {
+					$virhe[$i] = "Tuotteen toimittajia ei voitu poistaa!";	
+				}
+			}			
 		}
 	}
 }

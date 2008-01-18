@@ -1,6 +1,5 @@
 <?php	
 
-
 $toimerrorit  = array();
 $toim_valinta = array();
 
@@ -15,9 +14,10 @@ else {
 	$haku1 = " and ytunnus='$toimittaja' ";
 }
 
-$query = "select * from toimi where yhtio='$kukarow[yhtio]' $haku1";
+$query = "SELECT * from toimi where yhtio='$kukarow[yhtio]' $haku1";
 $result = mysql_query($query) or pupe_error($query);
-	if (mysql_num_rows($result) == 0) {
+
+if (mysql_num_rows($result) == 0) {
 
 	$toimerrorit[$toimtunnus]["toimittaja"] = "<font class='error'>".t("Virheellinen ytunnus").": $toimittaja!</font>";
 
@@ -30,7 +30,7 @@ $result = mysql_query($query) or pupe_error($query);
 		$haku1 = " and nimi like '%$toimittaja%' ";
 	}
 
-	$query = "select tunnus, ytunnus, nimi, nimitark, postino, postitp, if(maa='$yhtiorow[maa]', tilinumero, ultilno) tilinumero from toimi where yhtio='$kukarow[yhtio]' $haku1";
+	$query = "SELECT tunnus, ytunnus, nimi, nimitark, postino, postitp, if(maa='$yhtiorow[maa]', tilinumero, ultilno) tilinumero from toimi where yhtio='$kukarow[yhtio]' $haku1";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
@@ -46,7 +46,6 @@ $result = mysql_query($query) or pupe_error($query);
 			$toimerrorit[$toimtunnus]["toimittaja"] = "<font class='error'>".t("Löytyi useita toimittajia samalla ytunnuksella").": $toimittaja!</font>";
 		}
 	}
-
 }
 elseif(mysql_num_rows($result) > 1) {
 
@@ -62,9 +61,10 @@ elseif(mysql_num_rows($result) > 1) {
 }
 else {
 	$tuotoimirow = mysql_fetch_array($result);
+	$toimittajatunnus = $tuotoimirow["tunnus"];
 }
 
-$query = "select * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and liitostunnus='$tuotoimirow[tunnus]' and tuoteno='$tuoteno' and tunnus!='$toimtunnus'";
+$query = "SELECT * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and liitostunnus='$tuotoimirow[tunnus]' and tuoteno='$tuoteno' and tunnus!='$toimtunnus'";
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) > 0 and $lue_datasta != 'MUUTA') {

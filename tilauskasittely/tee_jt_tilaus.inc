@@ -25,12 +25,18 @@
 			if ($loput[$tunnukset] == 'MITA') {
 				if ($toim == "ENNAKKO") {
 					$query = "	DELETE FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset) and kpl=0 and tyyppi='E'";
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and tunnus 	in ($tunnukset) 
+								and kpl		= 0 
+								and tyyppi	= 'E'";
 				}
 				else {
 					$query = "	DELETE FROM tilausrivi
-								WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($tunnukset) and varattu=0 and kpl=0 and var='J' and tyyppi in ('L','G')";
-
+								WHERE yhtio = '$kukarow[yhtio]' 
+								and tunnus 	in ($tunnukset) 
+								and kpl		= 0 
+								and var		= 'J' 
+								and tyyppi in ('L','G')";
 				}
 				$tresult = mysql_query($query) or pupe_error($query);
 

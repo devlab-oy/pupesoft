@@ -7,7 +7,7 @@ $id = (int) $_GET["id"];
 $query = "	SELECT * 
 			from liitetiedostot 
 			where tunnus = '$id'
-			and liitos	 = 'tuote'";
+			and liitos in ('tuote','sarjanumeron_lisatiedot')";
 $liiteres = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($liiteres) > 0) {

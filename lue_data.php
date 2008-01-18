@@ -542,8 +542,13 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 
 					// tehdään riville oikeellisuustsekkejä
 					if ($table == 'tuotteen_toimittajat' and $otsikot[$r] == 'TOIMITTAJA') {
-
-						$tpque = "select tunnus from toimi where yhtio='$kukarow[yhtio]' and ytunnus='$rivi[$r]' order by tunnus limit 1";
+						$tpque = "	SELECT tunnus 
+									from toimi 
+									where yhtio	= '$kukarow[yhtio]' 
+									and ytunnus	= '$rivi[$r]' 
+									and tyyppi != 'P'
+									order by tunnus
+									limit 1";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
 						if (mysql_num_rows($tpres) == 0) {
@@ -786,21 +791,8 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				$toimittaja = $erivi[array_search("TOIMITTAJA", $otsikot)];
 				$alkuperamaa = $erivi[array_search("ALKUPERAMAA", $otsikot)];
 				$toim_tuoteno = $erivi[array_search("TOIM_TUOTENO", $otsikot)];
+				$toimittajatunnus = $tpttrow["tunnus"];
 				
-				$tpque = "	SELECT tunnus 
-							from toimi 
-							where yhtio	= '$kukarow[yhtio]' 
-							and ytunnus	= '$toimittaja' 
-							and tyyppi != 'P'
-							order by tunnus desc
-							limit 1";
-				$tpres = mysql_query($tpque) or pupe_error($tpque);
-
-				if (mysql_num_rows($tpres) == 1) {
-					$tprow = mysql_fetch_array($tpres);
-					$toimittajatunnus = $tprow["tunnus"];
-				}
-
 				unset($toimerrorit);				
 				$lue_data_result = $result;
 				$lue_datasta = strtoupper(trim($rivi[$postoiminto]));
@@ -810,7 +802,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				if(count($toimerrorit[$toimtunnus]) > 0) {
 					echo "&nbsp;&nbsp;&nbsp;&nbsp;<font class='error'>".implode("<br>", $toimerrorit[$toimtunnus])."</font><br>";
 					$errori = 1;
-				}
+				}				
 			}
 			else {
 				for ($i=1; $i < mysql_num_fields($result)-1; $i++) {			
@@ -865,24 +857,22 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 				}				
 				$syncres = mysql_query($syncquery) or pupe_error($syncquery);
 				$syncrow = mysql_fetch_array($syncres);
-				
-				
+								
 				// Itse lue_datan päivitysquery
 				$iresult = mysql_query($query) or pupe_error($query);
 				
-				
-				// Synkronoidaasn
+				// Synkronoidaan
 				if (strtoupper(trim($rivi[$postoiminto])) == 'LISAA') {
 					$tunnus = mysql_insert_id();					
 				}
 				else {
 					$tunnus = $syncrow["tunnus"];										
 				}
+				
 				synkronoi($kukarow["yhtio"], $table, $tunnus, $syncrow, "");
-				
-				
+								
 				// tehdään epäkunrattijutut
-				if ($tee != "") {
+				if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois") {
 					require("epakurantti.inc");
 				}
 				

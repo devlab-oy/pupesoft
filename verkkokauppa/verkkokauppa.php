@@ -2,7 +2,283 @@
 
 $_GET["ohje"] = "off";
 
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/inc".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/extranet".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/tilauskasittely");
 require ("parametrit.inc");
+
+if($verkkokauppa == "") die("Mihin verkkokauppaan sitä ollaan menemässä?");
+
+
+function tilaus($tunnus, $muokkaa="") {
+	global $yhtiorow, $kukarow;
+
+	$query = "	SELECT *
+				FROM lasku
+				WHERE yhtio = '{$kukarow["yhtio"]}' and tunnus = '$tunnus' and liitostunnus = '$kukarow[oletus_asiakas]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$laskurow = mysql_fetch_array($result);
+	
+	$ulos = "";
+	$query = "	SELECT tuoteno, nimitys, tilausrivi.hinta, round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta, (varattu+jt) varattu, tilausrivi.alv, tilausrivi.tunnus
+				FROM tilausrivi
+				JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and liitostunnus = '$kukarow[oletus_asiakas]'
+				WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and otunnus = '$tunnus' 
+				GROUP BY tilausrivi.tunnus";
+	$riviresult = mysql_query($query) or pupe_error($query);
+	
+	if($muokkaa != "" and ($laskurow["tila"] != "N" or $laskurow["alatila"] != "" or $kukarow["kesken"] != $tunnus)) {
+		$ulos .= "<font class='error'>".t("Tilausta ei voi enää muokata")."!</font><br>";
+		$muokkaa = "";
+	}
+	
+	if (mysql_num_rows($riviresult) > 0) {
+
+		list($toimvv, $toimkk, $toimpp) = explode("-", $laskurow["toimaika"]);
+
+		$ulos .=  "	<form id = 'laskutiedot' name = 'laskutiedot' method='POST' action=\"javascript:ajaxPost('laskutiedot', 'verkkokauppa.php?', 'selain', false, true);\">
+					<input type='hidden' name='tee' value = 'tallenna_osoite'>
+					<input type='hidden' name='osasto' value = '$osasto'>
+					<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>
+					<input type='hidden' name='try' value = '$try'>
+					<table style = 'width: 500px;'>
+					<tr>
+						<th>
+							".t("Laskutusosoite")."
+						</th>
+						<th>
+							".t("Toimitusosoite")."
+						</th>
+						<td class='back'></td>
+					</tr>			
+					<tr>
+						<td valign = 'top' width='250px'>
+							$laskurow[nimi]<br>
+							$laskurow[nimitark]<br>
+							$laskurow[osoite]<br>
+							$laskurow[postino] $laskurow[postitp]
+						</td>
+						<td valign = 'top' width='250px'>";
+						
+		if($muokkaa == "") {			
+			$ulos .= "		$laskurow[toim_nimi]<br>
+							$laskurow[toim_nimitark]<br>
+							$laskurow[toim_osoite]<br>
+							$laskurow[toim_postino] $laskurow[toim_postitp]";
+		}
+		else {
+			$ulos .= "		<input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br>
+							<input type = 'text' name='toim_nimitark' value = '$laskurow[toim_nimitark]' size = '30'><br>
+							<input type = 'text' name='toim_osoite' value = '$laskurow[toim_osoite]' size = '30'><br>
+							<input type = 'text' name='toim_postino' value = '$laskurow[toim_postino]' size = '6'> <input type = 'text' name='toim_postitp' value = '$laskurow[toim_postitp]' size = '20'>";
+		}
+		
+		$ulos .= "	</td>
+						<td class='back'>								
+						</td>
+					</tr>			
+					<tr>
+						<td colspan='3' class='back'>
+							<br>
+						</td>
+					</tr>			
+
+					<tr>
+						<th>
+							".t("Toimitusaika")."
+						</th>
+						<td>";
+
+			if($muokkaa == "") {
+				$ulos .=  "	$toimpp.$toimkk. $toimvv";
+			}
+			else {
+				$ulos .=  "	<input type = 'text' name = 'toimpp' value='$toimpp' size = '3'>
+							<input type = 'text' name = 'toimkk' value='$toimkk' size = '3'>
+							<input type = 'text' name = 'toimvv' value='$toimvv' size = '5'>";				
+			}
+			
+			$ulos .=  "	</td>
+						<td class='back'></td>
+					</tr>									
+
+					<tr>
+						<td colspan='3' class='back'>
+							<br>
+						</td>
+					</tr>			
+
+					<tr>
+						<th colspan='2'>
+							".t("Tilausyhteyshenkilö")."
+						</th>
+						<td class='back'></td>
+					</tr>									
+					<tr>
+						<td colspan='2'>";
+						
+			if($muokkaa == "") {
+				$ulos .=  "	$laskurow[tilausyhteyshenkilo]&nbsp;";
+			}
+			else {
+				$ulos .=  "	<input type = 'text' name='tilausyhteyshenkilo' value='$laskurow[tilausyhteyshenkilo]' size = '62'>";
+			}
+						
+			$ulos .=  "	</td>
+						<td class='back'></td>
+					</tr>
+
+					<tr>
+						<th colspan='2'>
+							".t("Asiakkaan tilausnumero")."
+						</th>
+						<td class='back'></td>
+					</tr>									
+					<tr>
+						<td colspan='2'>";
+						
+			if($muokkaa == "") {
+				$ulos .=  "	$laskurow[asiakkaan_tilausnumero]&nbsp;";
+			}
+			else {
+				$ulos .=  "	<input type = 'text' name='asiakkaan_tilausnumero' value='$laskurow[asiakkaan_tilausnumero]' size = '62'>";
+			}
+						
+			$ulos .= "	</td>
+						<td class='back'></td>
+					</tr>
+					<tr>
+						<th colspan='2'>
+							".t("Kohde")."
+						</th>
+						<td class='back'></td>
+					</tr>									
+					<tr>
+						<td colspan='2'>";
+
+			if($muokkaa == "") {
+				$ulos .= "	$laskurow[kohde]&nbsp;";
+			}
+			else {
+				$ulos .= "	<input type = 'text' name='kohde' value='$laskurow[kohde]' size = '62'>";
+			}
+						
+						
+			$ulos .= "	</td>
+						<td class='back'></td>
+					</tr>
+					<tr>
+						<th colspan='2'>
+							".t("Tilausviite")."
+						</th>
+						<td class='back'></td>
+					</tr>									
+					<tr>
+						<td colspan='2'>";
+
+			if($muokkaa == "") {
+				$ulos .= "	$laskurow[viesti]&nbsp;";
+			}
+			else {
+				$ulos .= "	<input type = 'text' name='viesti' value='$laskurow[viesti]' size = '62'>";
+			}
+						
+			$ulos .= "	</td>
+						<td class='back'></td>
+					</tr>
+
+					<tr>
+						<th colspan='2'>
+							".t("Lisätiedot")."
+						</th>
+						<td class='back'></td>
+					</tr>			
+					<tr>
+						<td colspan='2'>";
+
+			if($muokkaa == "") {
+				$ulos .= "	$laskurow[comments]&nbsp;
+					</td>
+					<td class='back'></td>
+					</tr>			
+					</table>";
+			}
+			else {
+				$ulos .= "	<textarea name='comments' cols = '60' rows = '3'>$laskurow[comments]</textarea>
+					</td>
+					<td class='back'><input type = 'submit' name='tallenna' value='".t("Tallenna")."'></td>
+					</tr>			
+					</table>
+					</form>";
+			}
+						
+						
+			$ulos .= "
+					<br>
+
+					<font class='message'>".t("Tilausrivit").":</font><hr>
+
+					<table style = 'width: 700px;'>
+					<tr>
+						<th>".t("Tuoteno")."</th>
+						<th>".t("Nimitys")."</th>
+						<th>".t("Määrä")."</th>
+						<th>".t("Yksikköhinta")."</th>
+						<th>".t("Rivihinta")."</th>
+						<th>".t("Verollinen")."</th>
+						<th>".t("Alv")."</th>
+						<td class='back'></td>
+					</tr>";
+
+
+		$summa = $summa_verolla = 0;
+		while ($koririvi = mysql_fetch_array($riviresult)) {
+
+			$rivihinta_verolla = $koririvi["rivihinta"] * (1+($koririvi["alv"]/100));
+			
+			$ulos .= "<tr>
+						<td NOWRAP>$koririvi[tuoteno]</td>
+						<td>$koririvi[nimitys]</td>
+						<td>".number_format($koririvi["varattu"], 2, ',', ' ')."</td>
+						<td NOWRAP>".number_format($koririvi["hinta"], 2, ',', ' ')."</td>
+						<td NOWRAP>".number_format($koririvi["rivihinta"], 2, ',', ' ')."</td>
+						<td NOWRAP>".number_format($rivihinta_verolla, 2, ',', ' ')."</td>
+						<td NOWRAP>".number_format($koririvi["alv"], 2, ',', ' ')."%</td>";
+			if($muokkaa != "") {
+				$ulos .= "	<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">Poista</a></td>";
+			}
+						
+			$ulos .= "</tr>";
+			
+			$summa += $koririvi["rivihinta"];
+			$summa_verolla += $rivihinta_verolla;
+
+		}
+
+		$ulos .= "	
+				<tr>
+					<td class = 'back' colspan = '4'></td>
+					<td class = 'tumma'>".number_format($summa, 2, ',', ' ')."</td>
+					<td class = 'tumma'>".number_format($summa_verolla, 2, ',', ' ')."</td>						
+				</tr>
+				<tr>
+					<td class = 'back' colspan = '4'>";
+
+		if($yhtiorow["alv_kasittely"] != "") {
+			$ulos .= "<font class='message'>".t("Yksikköhinnat eivät sisällä arvonlisäveroa").".</font>";
+		}
+		else {
+			$ulos .= "<font class='message'>".t("Yksikköhinnat sisältävät arvonlisäveron").".</font>";
+		}
+
+		$ulos .= "		</td>
+				</tr>";
+
+	}
+	else {
+		$ulos = "<font class='message'>".t("Tilauksella ei ole tavaraa").".</font><br>";
+	}
+	
+	return $ulos;
+}
 
 if(!function_exists("menu")) {
 	function menu($osasto="", $try="") {
@@ -521,202 +797,191 @@ if($tee == "tilatut") {
 
 		$ulos .= "<br><br>";
 
-
-		$query = "	SELECT tuoteno, nimitys, tilausrivi.hinta, round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),2) rivihinta, (varattu+jt) varattu, tilausrivi.alv, tilausrivi.tunnus
-					FROM tilausrivi
-					JOIN lasku ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus
-					WHERE tilausrivi.yhtio = '$kukarow[yhtio]' and
-					otunnus = '$kukarow[kesken]' and
-					tyyppi = 'L'
-					and var != 'D'
-					GROUP BY tilausrivi.tunnus";
-		$riviresult = mysql_query($query) or pupe_error($query);
-
-		if (mysql_num_rows($riviresult) > 0) {
-			
-			list($toimvv, $toimkk, $toimpp) = explode("-", $laskurow["toimaika"]);
-			
-			$ulos .=  "	<form id = 'laskutiedot' name = 'laskutiedot' method='POST' action=\"javascript:ajaxPost('laskutiedot', 'verkkokauppa.php?', 'selain', false, true);\">
-						<input type='hidden' name='tee' value = 'tallenna_osoite'>
-						<input type='hidden' name='osasto' value = '$osasto'>
-						<input type='hidden' name='tuotemerkki' value = '$tuotemerkki'>
-						<input type='hidden' name='try' value = '$try'>
-						<table style = 'width: 500px;'>
-						<tr>
-							<th>
-								".t("Laskutusosoite")."
-							</th>
-							<th>
-								".t("Toimitusosoite")."
-							</th>
-							<td class='back'></td>
-						</tr>			
-						<tr>
-							<td valign = 'top' width='250px'>
-								$laskurow[nimi]<br>
-								$laskurow[nimitark]<br>
-								$laskurow[osoite]<br>
-								$laskurow[postino] $laskurow[postitp]
-							</td>
-							<td valign = 'top' width='250px'>
-								<input type = 'text' name='toim_nimi' value = '$laskurow[toim_nimi]' size = '30'><br>
-								<input type = 'text' name='toim_nimitark' value = '$laskurow[toim_nimitark]' size = '30'><br>
-								<input type = 'text' name='toim_osoite' value = '$laskurow[toim_osoite]' size = '30'><br>
-								<input type = 'text' name='toim_postino' value = '$laskurow[toim_postino]' size = '6'> <input type = 'text' name='toim_postitp' value = '$laskurow[toim_postitp]' size = '20'><br>
-							</td>
-							<td class='back'>								
-							</td>
-						</tr>			
-						<tr>
-							<td colspan='3' class='back'>
-								<br>
-							</td>
-						</tr>			
-
-						<tr>
-							<th>
-								".t("Toimitusaika")."
-							</th>
-							<td>
-								<input type = 'text' name = 'toimpp' value='$toimpp' size = '3'>
-								<input type = 'text' name = 'toimkk' value='$toimkk' size = '3'>
-								<input type = 'text' name = 'toimvv' value='$toimvv' size = '5'>
-							</td>
-							<td class='back'></td>
-						</tr>									
-
-						<tr>
-							<td colspan='3' class='back'>
-								<br>
-							</td>
-						</tr>			
-						
-						<tr>
-							<th colspan='2'>
-								".t("Tilausyhteyshenkilö")."
-							</th>
-							<td class='back'></td>
-						</tr>									
-						<tr>
-							<td colspan='2'>
-								<input type = 'text' name='tilausyhteyshenkilo' value='$laskurow[tilausyhteyshenkilo]' size = '62'>
-							</td>
-							<td class='back'></td>
-						</tr>
-
-						<tr>
-							<th colspan='2'>
-								".t("Asiakkaan tilausnumero")."
-							</th>
-							<td class='back'></td>
-						</tr>									
-						<tr>
-							<td colspan='2'>
-								<input type = 'text' name='asiakkaan_tilausnumero' value='$laskurow[asiakkaan_tilausnumero]' size = '62'>
-							</td>
-							<td class='back'></td>
-						</tr>
-						<tr>
-							<th colspan='2'>
-								".t("Kohde")."
-							</th>
-							<td class='back'></td>
-						</tr>									
-						<tr>
-							<td colspan='2'>
-								<input type = 'text' name='kohde' value='$laskurow[kohde]' size = '62'>
-							</td>
-							<td class='back'></td>
-						</tr>
-						<tr>
-							<th colspan='2'>
-								".t("Tilausviite")."
-							</th>
-							<td class='back'></td>
-						</tr>									
-						<tr>
-							<td colspan='2'>
-								<input type = 'text' name='viesti' value='$laskurow[viesti]' size = '62'>
-							</td>
-							<td class='back'></td>
-						</tr>
-									
-						<tr>
-							<th colspan='2'>
-								".t("Lisätiedot")."
-							</th>
-							<td class='back'></td>
-						</tr>			
-						<tr>
-							<td colspan='2'>
-							<textarea name='comments' cols = '60' rows = '3'>$laskurow[comments]</textarea>
-							</td>
-							<td class='back'><input type = 'submit' name='tallenna' value='".t("Tallenna")."'></td>
-						</tr>			
-						</table>
-						</form><br>
-						
-						<font class='message'>".t("Tilausrivit").":</font><hr>
-						
-						<table style = 'width: 700px;'>
-						<tr>
-							<th>".t("Tuoteno")."</th>
-							<th>".t("Nimitys")."</th>
-							<th>".t("Määrä")."</th>
-							<th>".t("Yksikköhinta")."</th>
-							<th>".t("Rivihinta")."</th>
-							<th>".t("Verollinen")."</th>
-							<th>".t("Alv")."</th>
-							<td class='back'></td>
-						</tr>";
-
-
-			$summa = $summa_verolla = 0;
-			while ($koririvi = mysql_fetch_array($riviresult)) {
-
-				$rivihinta_verolla = $koririvi["rivihinta"] * (1+($koririvi["alv"]/100));
-				
-				$ulos .= "<tr>
-							<td NOWRAP>$koririvi[tuoteno]</td>
-							<td>$koririvi[nimitys]</td>
-							<td>".number_format($koririvi["varattu"], 2, ',', ' ')."</td>
-							<td NOWRAP>".number_format($koririvi["hinta"], 2, ',', ' ')."</td>
-							<td NOWRAP>".number_format($koririvi["rivihinta"], 2, ',', ' ')."</td>
-							<td NOWRAP>".number_format($rivihinta_verolla, 2, ',', ' ')."</td>
-							<td NOWRAP>".number_format($koririvi["alv"], 2, ',', ' ')."%</td>							
-							<td class='back'><a href='#' onclick = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=poistarivi&rivitunnus={$koririvi["tunnus"]}&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki')\">Poista</a></td>
-						</tr>";
-				$summa += $koririvi["rivihinta"];
-				$summa_verolla += $rivihinta_verolla;
-
-			}
-			
-			$ulos .= "	
-					<tr>
-						<td class = 'back' colspan = '4'></td>
-						<td class = 'tumma'>".number_format($summa, 2, ',', ' ')."</td>
-						<td class = 'tumma'>".number_format($summa_verolla, 2, ',', ' ')."</td>						
-					</tr>
-					<tr>
-						<td class = 'back' colspan = '4'>";
-
-			if($yhtiorow["alv_kasittely"] != "") {
-				$ulos .= "<font class='message'>".t("Yksikköhinnat eivät sisällä arvonlisäveroa").".</font>";
-			}
-			else {
-				$ulos .= "<font class='message'>".t("Yksikköhinnat sisältävät arvonlisäveron").".</font>";
-			}
-			
-			$ulos .= "		</td>
-					</tr>";
-					
-		}
-		else {
-			$ulos .= "<font class='message'>Tilauksessa ei ole tavaraa.</font><br>";
-		}
+		$ulos .= tilaus($kukarow["kesken"], "JOO");
 
 		die($ulos);		
 	}
+}
+
+if($tee == "asiakastiedot") {
+	
+	//	Yläpalkkiin tulee vähän toimintoja
+	echo "
+	<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=asiakastiedot', false, true);\">".t("Asiakastiedot")."</a>
+	&nbsp;&nbsp;
+	<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria', false, true);\">".t("Tilaushistoria")."</a>
+	<br><br><br>";
+	
+	if($nayta == "") $nayta = "asiakastiedot";
+	
+	if($nayta == "asiakastiedot") {
+		$query = "	SELECT *, 
+							concat_ws('<br>', nimi, nimitark, osoite, postino, postitp) laskutusosoite,
+							concat_ws('<br>', toim_nimi, toim_nimitark, toim_osoite, toim_postino, toim_postitp) toimitusosoite
+					FROM asiakas
+					WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$asiakasrow = mysql_fetch_array($result);
+		
+		echo "<table>
+				<tr>
+					<th>".t("Laskutusosoite")."</th><th>".t("Toimitusosoite")."</th>
+				</tr>
+				<tr>
+					<td>{$asiakasrow["laskutusosoite"]}</td><td>{$asiakasrow["toimitusosoite"]}</td>
+				</tr>
+			</table>";
+	}
+	elseif($nayta == "tilaushistoria") {
+		
+		$aika = "";
+		$tilaukset = array();
+		if($tila == "kesken") {
+			$aika = "luontiaika";
+			$tilat = "tila = 'N' and alatila = ''";
+		}
+		elseif($tila == "kasittely") {
+			$aika = "luontiaika";
+			$tilat = "tila = 'N' and alatila = 'F'";
+		}
+		elseif($tila == "odottaa") {
+			$aika = "luontiaika";
+			$tilat = "tila = 'N' and alatila NOT IN ('', 'F')";			
+		}
+		elseif($tila == "toimituksessa") {
+			$aika = "lahetepvm";
+			$tilat = "tila = 'L' and alatila IN ('A', 'B', 'C', 'E')";
+		}
+		elseif($tila == "toimitettu") {
+			$aika = "(select max(toimitettuaika) from tilausrivi where tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)";
+			$tilat = "tila = 'L' and alatila IN ('D', 'J', 'V', 'X')";
+		}
+		
+		if($aika != "") {
+			$query = "	SELECT lasku.*, date_format($aika, '%d. %m. %Y') aika,
+						(
+							SELECT sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
+							FROM tilausrivi
+							WHERE tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tyyppi != 'D'
+						) summa
+						FROM lasku
+						WHERE yhtio='$kukarow[yhtio]' and liitostunnus = '$kukarow[oletus_asiakas]' and $tilat";
+			$result = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($result)>0) {
+				if($tila == "kesken") {
+					$aika = "Avattu";
+				}
+				elseif($tila == "kasittely") {
+					$aika = "Avattu";
+				}
+				elseif($tila == "odottaa") {
+					$aika = "Tilattu";
+				}
+				elseif($tila == "toimituksessa") {
+					$aika = "Kerätty";
+				}
+				elseif($tila == "toimitettu") {
+					$aika = "Toimitettu";
+				}
+
+				$tilaukset[$tila] .= "	<tr>
+												<th>".t("Tilaus")."</th>
+												<th>".t($aika)."</th>
+												<th>".t("Tilausviite")."</th>
+												<th>".t("Summa")."</th>
+												<td class='back'></td>
+										<tr>";
+
+				while($laskurow = mysql_fetch_array($result)) {
+					$lisa = "";
+					
+					if($tilaus == $laskurow["tunnus"]) {
+						$lisa .= "	<tr>
+										<td class='back' colspan='5'><br>".tilaus($laskurow["tunnus"])."<br></td>
+									</tr>";
+					}
+					
+					$tilaukset[$tila] .= "	<tr>
+												<td>{$laskurow[tunnus]}</td>
+												<td>{$laskurow["aika"]}</td>
+												<td>{$laskurow[viesti]}</td>
+												<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
+												<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=$tila&tilaus=$laskurow[tunnus]', false, true);\">".t("Avaa")."</a></td>
+											</tr>$lisa";
+				}				
+			}			
+			else {
+				$tilaukset[$tila] = "
+					<tr>
+						<td class='back' colspan='5'>".t("Ei tilauksia")."</td>
+					</tr>";
+			}
+			$tilaukset[$tila] .= "
+			<tr>
+				<td class='back' colspan='5'><br></td>
+			</tr>";
+			
+		}
+		
+		echo "<table width='700'>
+			<tr>
+				<td class='back' colspan='5'>
+					<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=kesken', false, true);\">".t("Keskeneräiset tilaukset")."</a>
+				</td>
+			</tr>
+			<tr>
+				<td class='back'><br></td>
+			</tr>
+			{$tilaukset["kesken"]}
+
+			<tr>
+				<td class='back' colspan='5'>
+					<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=kasittely', false, true);\">".t("Odottaa käsittelyä")."</a>
+				</td>
+			</tr>
+			<tr>
+				<td class='back'><br></td>
+			</tr>
+			{$tilaukset["kasittely"]}
+
+			<tr>
+				<td class='back' colspan='5'>
+					<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=odottaa', false, true);\">".t("Odottaa toimitusta")."</a>
+				</td>
+			</tr>
+			<tr>
+				<td class='back'><br></td>
+			</tr>
+			{$tilaukset["odottaa"]}
+
+			<tr>
+				<td class='back' colspan='5'>
+					<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=toimituksessa', false, true);\">".t("Tilaus toimituksessa")."</a>
+				</td>								
+			</tr>
+			<tr>
+				<td class='back'><br></td>
+			</tr>
+			{$tilaukset["toimituksessa"]}
+
+			<tr>
+				<td class='back' colspan='5'>
+					<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=toimitettu', false, true);\">".t("tilaus toimitettu")."</a>
+				</td>
+			</tr>
+			<tr>
+				<td class='back'><br></td>
+			</tr>
+			{$tilaukset["toimitettu"]}
+			
+		</table>
+		";
+		
+	}
+	else {
+		
+	}
+	
 }
 
 if($tee == "selaa") {
@@ -789,13 +1054,16 @@ if($tee == "") {
 	}
 	else {
 		$login_screen = "
-			<form action = '".$palvelin2."logout.php' method='post'><font class='login'>Tervetuloa {$kukarow["nimi"]},</font> <input type = 'hidden' name='location' value='".$palvelin."verkkokauppa.php'><input type='submit' value='".t("Kirjaudu ulos")."'></form>";
+			<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot', false, true);\">".t("Asiakastiedot")."</a>
+			&nbsp;&nbsp;
+			<a href = '".$palvelin2."logout.php?location='".$palvelin."verkkokauppa.php'>".t("Kirjaudu ulos")."</a>";
 	}
 	
 	$verkkokauppa =  "	
 					<div class='login' id='login'>$login_screen</div>
 					<div class='menu' id='menu'>".menu()."</div>
 					<div class='selain' id='selain'>".uutiset()."</div>
+					<div class='mainos' id='mainos'>mainos</div>
 				</body>
 			</html>";
 

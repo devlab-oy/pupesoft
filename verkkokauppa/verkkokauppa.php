@@ -220,6 +220,7 @@ function tilaus($tunnus, $muokkaa="") {
 					<tr>
 						<th>".t("Tuoteno")."</th>
 						<th>".t("Nimitys")."</th>
+						<th>".t("Saldo")."</th>						
 						<th>".t("Määrä")."</th>
 						<th>".t("Yksikköhinta")."</th>
 						<th>".t("Rivihinta")."</th>
@@ -233,10 +234,12 @@ function tilaus($tunnus, $muokkaa="") {
 		while ($koririvi = mysql_fetch_array($riviresult)) {
 
 			$rivihinta_verolla = $koririvi["rivihinta"] * (1+($koririvi["alv"]/100));
+			list(, , $saldo) = saldo_myytavissa($koririvi["tuoteno"], "KAIKKI");
 			
 			$ulos .= "<tr>
 						<td NOWRAP>$koririvi[tuoteno]</td>
 						<td>$koririvi[nimitys]</td>
+						<td><em>".number_format($saldo, 2, ',', ' ')."</em></td>
 						<td>".number_format($koririvi["varattu"], 2, ',', ' ')."</td>
 						<td NOWRAP>".number_format($koririvi["hinta"], 2, ',', ' ')."</td>
 						<td NOWRAP>".number_format($koririvi["rivihinta"], 2, ',', ' ')."</td>

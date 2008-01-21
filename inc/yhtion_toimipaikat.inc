@@ -104,6 +104,7 @@
 					email 			= '$toim_email',
 					lasku_logo		= '$lasku_logo',
 					tilino			= '$toim_tilino',
+					alv				= '$toim_alv',
 					kustp			= '$toim_kustp',
 					kohde			= '$toim_kohde',
 					projekti		= '$toim_projekti',
@@ -236,7 +237,7 @@
 	// selataan vanhoja
 	if ($tee == "") {
 
-		$query  = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]'";
+		$query  = "SELECT * FROM yhtion_toimipaikat WHERE yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		while ($trow = mysql_fetch_array($result)) {
@@ -244,20 +245,21 @@
 			echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 
 			echo "<table>";
-			echo "<tr><th>".t("Ovtlisa")."</th>	<td><input type='text' name='toim_ovtlisa'  value='$trow[ovtlisa]'></td></tr>";
-			echo "<tr><th>".t("VAT-numero")."</th><td><input type='text' name='vat_numero'  value='$trow[vat_numero]'></td><td class='back'><a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/$kukarow[kieli]/vieshome.htm'>Tarkista numero t‰‰lt‰!</a></td></tr>";
-			echo "<tr><th>".t("Kotipaikka")."</th>	<td><input type='text' name='toim_kotipaikka'value='$trow[kotipaikka]'></td></tr>";
-			echo "<tr><th>".t("Nimi")."</th>	<td><input type='text' name='toim_nimi'     value='$trow[nimi]'></td></tr>";
-			echo "<tr><th>".t("Osoite")."</th>	<td><input type='text' name='toim_osoite'   value='$trow[osoite]'></td></tr>";
-			echo "<tr><th>".t("Postino")."</th>	<td><input type='text' name='toim_postino'  value='$trow[postino]'></td></tr>";
-			echo "<tr><th>".t("Postitp")."</th>	<td><input type='text' name='toim_postitp'  value='$trow[postitp]'></td></tr>";
-			echo "<tr><th>".t("Maa")."</th>		<td><input type='text' name='toim_maa'      value='$trow[maa]'></td></tr>";
-			echo "<tr><th>".t("Fax")."</th>		<td><input type='text' name='toim_fax'      value='$trow[fax]'></td></tr>";
-			echo "<tr><th>".t("Puhelin")."</th>	<td><input type='text' name='toim_puhelin'  value='$trow[puhelin]'></td></tr>";
-			echo "<tr><th>".t("Email")."</th>	<td><input type='text' name='toim_email'    value='$trow[email]'></td></tr>";
-			echo "<tr><th>".t("Lasku logo")."</th><td><input type='text' name='lasku_logo'  value='$trow[lasku_logo]'></td></tr>";
+			echo "<tr><th>".t("Ovtlisa")."</th>		<td><input type='text' name='toim_ovtlisa'  	value='$trow[ovtlisa]'></td></tr>";
+			echo "<tr><th>".t("VAT-numero")."</th>	<td><input type='text' name='vat_numero'  		value='$trow[vat_numero]'></td><td class='back'><a target='uusiytj' href='http://ec.europa.eu/taxation_customs/vies/$kukarow[kieli]/vieshome.htm'>Tarkista numero t‰‰lt‰!</a></td></tr>";
+			echo "<tr><th>".t("Kotipaikka")."</th>	<td><input type='text' name='toim_kotipaikka'	value='$trow[kotipaikka]'></td></tr>";
+			echo "<tr><th>".t("Nimi")."</th>		<td><input type='text' name='toim_nimi' 		value='$trow[nimi]'></td></tr>";
+			echo "<tr><th>".t("Osoite")."</th>		<td><input type='text' name='toim_osoite'   	value='$trow[osoite]'></td></tr>";
+			echo "<tr><th>".t("Postino")."</th>		<td><input type='text' name='toim_postino'  	value='$trow[postino]'></td></tr>";
+			echo "<tr><th>".t("Postitp")."</th>		<td><input type='text' name='toim_postitp'  	value='$trow[postitp]'></td></tr>";
+			echo "<tr><th>".t("Maa")."</th>			<td><input type='text' name='toim_maa'      	value='$trow[maa]'></td></tr>";
+			echo "<tr><th>".t("Fax")."</th>			<td><input type='text' name='toim_fax'      	value='$trow[fax]'></td></tr>";
+			echo "<tr><th>".t("Puhelin")."</th>		<td><input type='text' name='toim_puhelin'  	value='$trow[puhelin]'></td></tr>";
+			echo "<tr><th>".t("Email")."</th>		<td><input type='text' name='toim_email'    	value='$trow[email]'></td></tr>";
+			echo "<tr><th>".t("Lasku logo")."</th>	<td><input type='text' name='lasku_logo'		value='$trow[lasku_logo]'></td></tr>";
 
-			echo "<tr><th>".t("Tilino")."</th>			<td><input type='text' name='toim_tilino'   value='$trow[tilino]'></td></tr>";
+			echo "<tr><th>".t("Tilino")."</th>		<td><input type='text' name='toim_tilino'   	value='$trow[tilino]'></td></tr>";
+			echo "<tr><th>".t("Alv")."</th>			<td><input type='text' name='toim_alv'   		value='$trow[alv]'></td></tr>";
 
 			echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
 			echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";	

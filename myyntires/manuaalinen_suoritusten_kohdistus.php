@@ -653,22 +653,44 @@ if ($tila == 'tee_kohdistus') {
 					$totkasumma = 0;
 
 					#Etsitään myynti-tiliöinnit
-					$query = "	SELECT summa, vero, kustp, kohde, projekti
-								FROM tiliointi use index (tositerivit_index)
-								WHERE ltunnus	= '$lasku[tunnus]'
-								and yhtio 		= '$kukarow[yhtio]'
-								and tapvm 		= '$lasku[tapvm]'
-								and abs(summa) <> 0
-								and tilino	   <> '$yhtiorow[myyntisaamiset]'
-								and tilino	   <> '$yhtiorow[konsernimyyntisaamiset]'
-								and tilino	   <> '$yhtiorow[alv]'
-								and tilino	   <> '$yhtiorow[varasto]'
-								and tilino	   <> '$yhtiorow[varastonmuutos]'
-								and tilino	   <> '$yhtiorow[pyoristys]'
-								and tilino	   <> '$yhtiorow[myynninkassaale]'
-								and tilino	   <> '$yhtiorow[factoringsaamiset]'
-								and korjattu 	= ''";
-					$yresult = mysql_query($query) or pupe_error($query);
+					
+					// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
+					if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
+						$query = "	SELECT summa, vero, kustp, kohde, projekti
+									FROM tiliointi use index (tositerivit_index)
+									WHERE ltunnus	= '$lasku[tunnus]'
+									and yhtio 		= '$kukarow[yhtio]'
+									and tapvm 		= '$lasku[tapvm]'
+									and abs(summa) <> 0
+									and tilino	   <> '$yhtiorow[myyntisaamiset]'
+									and tilino	   <> '$yhtiorow[konsernimyyntisaamiset]'
+									and tilino	   <> '$yhtiorow[toim_alv]'
+									and tilino	   <> '$yhtiorow[varasto]'
+									and tilino	   <> '$yhtiorow[varastonmuutos]'
+									and tilino	   <> '$yhtiorow[pyoristys]'
+									and tilino	   <> '$yhtiorow[myynninkassaale]'
+									and tilino	   <> '$yhtiorow[factoringsaamiset]'
+									and korjattu 	= ''";
+						$yresult = mysql_query($query) or pupe_error($query);
+					}
+					else {
+						$query = "	SELECT summa, vero, kustp, kohde, projekti
+									FROM tiliointi use index (tositerivit_index)
+									WHERE ltunnus	= '$lasku[tunnus]'
+									and yhtio 		= '$kukarow[yhtio]'
+									and tapvm 		= '$lasku[tapvm]'
+									and abs(summa) <> 0
+									and tilino	   <> '$yhtiorow[myyntisaamiset]'
+									and tilino	   <> '$yhtiorow[konsernimyyntisaamiset]'
+									and tilino	   <> '$yhtiorow[alv]'
+									and tilino	   <> '$yhtiorow[varasto]'
+									and tilino	   <> '$yhtiorow[varastonmuutos]'
+									and tilino	   <> '$yhtiorow[pyoristys]'
+									and tilino	   <> '$yhtiorow[myynninkassaale]'
+									and tilino	   <> '$yhtiorow[factoringsaamiset]'
+									and korjattu 	= ''";
+						$yresult = mysql_query($query) or pupe_error($query);
+					}
 
 					if (mysql_num_rows($yresult) == 0) {
 						echo "<font class='error'>".t("En löytänyt laskun myynnin vientejä! Alv varmaankin heittää")."</font> ";
@@ -702,19 +724,37 @@ if ($tila == 'tee_kohdistus') {
 
 							if ($tiliointirow['vero'] != 0) {
 
-								$query = "	INSERT into tiliointi set
-											yhtio 		= '$kukarow[yhtio]',
-											ltunnus 	= '$lasku[tunnus]',
-											tilino 		= '$yhtiorow[alv]',
-											tapvm 		= '$suoritus[maksupvm]',
-											summa 		= $alv,
-											vero 		= '',
-											selite 		= '$selite',
-											lukko 		= '1',
-											laatija 	= '$kukarow[kuka]',
-											laadittu 	= now(),
-											aputunnus 	= $isa";
-								$xresult = mysql_query($query) or pupe_error($query);								
+								// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
+								if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
+									$query = "	INSERT into tiliointi set
+												yhtio 		= '$kukarow[yhtio]',
+												ltunnus 	= '$lasku[tunnus]',
+												tilino 		= '$yhtiorow[toim_alv]',
+												tapvm 		= '$suoritus[maksupvm]',
+												summa 		= $alv,
+												vero 		= '',
+												selite 		= '$selite',
+												lukko 		= '1',
+												laatija 	= '$kukarow[kuka]',
+												laadittu 	= now(),
+												aputunnus 	= $isa";
+									$xresult = mysql_query($query) or pupe_error($query);								
+								}
+								else {
+									$query = "	INSERT into tiliointi set
+												yhtio 		= '$kukarow[yhtio]',
+												ltunnus 	= '$lasku[tunnus]',
+												tilino 		= '$yhtiorow[alv]',
+												tapvm 		= '$suoritus[maksupvm]',
+												summa 		= $alv,
+												vero 		= '',
+												selite 		= '$selite',
+												lukko 		= '1',
+												laatija 	= '$kukarow[kuka]',
+												laadittu 	= now(),
+												aputunnus 	= $isa";
+									$xresult = mysql_query($query) or pupe_error($query);
+								}
 							}
 						}
 

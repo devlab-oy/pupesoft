@@ -56,24 +56,47 @@ if ($tila == 'K') {
 			$isa = mysql_insert_id ($link);
 
 			// Tiliöidään alv
-			if ($lasku['vero'] != 0) {				
-				$query = "	INSERT INTO tiliointi SET
-							yhtio		= '$kukarow[yhtio]',
-							ltunnus		= '$lasku[ltunnus]',
-							tilino		= '$yhtiorow[alv]',
-							kustp		= '',
-							kohde		= '',
-							projekti	= '',
-							tapvm		= '$tpv-$tpk-$tpp',
-							summa		= $alv * -1,
-							vero		= '',
-							selite		= '$lasku[selite]',
-							lukko		= '1',
-							tosite		= '$lasku[tosite]',
-							laatija		= '$kukarow[kuka]',
-							laadittu	= now(),
-							aputunnus	= '$isa'";
-				$result = mysql_query($query) or pupe_error($query);
+			if ($lasku['vero'] != 0) {
+				
+				// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
+				if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
+					$query = "	INSERT INTO tiliointi SET
+								yhtio		= '$kukarow[yhtio]',
+								ltunnus		= '$lasku[ltunnus]',
+								tilino		= '$yhtiorow[toim_alv]',
+								kustp		= '',
+								kohde		= '',
+								projekti	= '',
+								tapvm		= '$tpv-$tpk-$tpp',
+								summa		= $alv * -1,
+								vero		= '',
+								selite		= '$lasku[selite]',
+								lukko		= '1',
+								tosite		= '$lasku[tosite]',
+								laatija		= '$kukarow[kuka]',
+								laadittu	= now(),
+								aputunnus	= '$isa'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
+				else {
+					$query = "	INSERT INTO tiliointi SET
+								yhtio		= '$kukarow[yhtio]',
+								ltunnus		= '$lasku[ltunnus]',
+								tilino		= '$yhtiorow[alv]',
+								kustp		= '',
+								kohde		= '',
+								projekti	= '',
+								tapvm		= '$tpv-$tpk-$tpp',
+								summa		= $alv * -1,
+								vero		= '',
+								selite		= '$lasku[selite]',
+								lukko		= '1',
+								tosite		= '$lasku[tosite]',
+								laatija		= '$kukarow[kuka]',
+								laadittu	= now(),
+								aputunnus	= '$isa'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
 			}
 		}
 		else {

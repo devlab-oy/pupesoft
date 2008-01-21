@@ -230,25 +230,46 @@ else {
 
 			//Tiliöidaan ALV, jos sitä on
 			if ($xrow['alv'] > 0) {
-
+				
 				$onkoalvia = "kylla"; // apumuuttuja, että tiedetään alempana, että tehtiin alvikirjauksia
 
-				$query = "	INSERT into tiliointi set
-							yhtio 		= '$kukarow[yhtio]',
-							ltunnus 	= '$tunnus',
-							tilino 		= '$yhtiorow[alv]',
-							kustp 		= '',
-							kohde 		= '',
-							projekti 	= '',
-							tapvm 		= '$tapvm',
-							summa 		= $alv * -1,
-							vero 		= '0',
-							selite 		= '$selite',
-							lukko 		= '1',
-							laatija 	= '$kukarow[kuka]',
-							laadittu 	= now(),
-							aputunnus	= $isa";
-				$laskutusres = mysql_query($query) or pupe_error($query);
+				// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
+				if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
+					$query = "	INSERT into tiliointi set
+								yhtio 		= '$kukarow[yhtio]',
+								ltunnus 	= '$tunnus',
+								tilino 		= '$yhtiorow[toim_alv]',
+								kustp 		= '',
+								kohde 		= '',
+								projekti 	= '',
+								tapvm 		= '$tapvm',
+								summa 		= $alv * -1,
+								vero 		= '0',
+								selite 		= '$selite',
+								lukko 		= '1',
+								laatija 	= '$kukarow[kuka]',
+								laadittu 	= now(),
+								aputunnus	= $isa";
+					$laskutusres = mysql_query($query) or pupe_error($query);
+				}
+				else {
+					$query = "	INSERT into tiliointi set
+								yhtio 		= '$kukarow[yhtio]',
+								ltunnus 	= '$tunnus',
+								tilino 		= '$yhtiorow[alv]',
+								kustp 		= '',
+								kohde 		= '',
+								projekti 	= '',
+								tapvm 		= '$tapvm',
+								summa 		= $alv * -1,
+								vero 		= '0',
+								selite 		= '$selite',
+								lukko 		= '1',
+								laatija 	= '$kukarow[kuka]',
+								laadittu 	= now(),
+								aputunnus	= $isa";
+					$laskutusres = mysql_query($query) or pupe_error($query);
+				}
 			}
 		}
 

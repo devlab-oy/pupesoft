@@ -328,8 +328,6 @@ echo "</tr>";
 echo "</table>";
 echo "<br>";
 
-
-
 if($valitaan_useita == '') {
 	echo "<input type='submit' value='Laske varastonarvot'>";
 }
@@ -397,6 +395,11 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 	else {
 		$varastojoini = "";
 	}
+	
+	if ($merkki == '' && $varasto == '' && count($varastot) == 0) {
+		$groupby = "";
+		$orderby = "";
+	}
 
 	// kuus kuukautta taakseppäin kuun eka päivä
 	$kausi = date("Y-m-d", mktime(0, 0, 0, date("m")-12, 1, date("Y")));
@@ -436,7 +439,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		echo "<th>".t("Tuotemerkki")."</th>";
 	}
 
-	if ($varastot != '') {
+	if ($varastot != '' && count($varastot) > 0) {
 		echo "<th>".t("Varasto")."</th>";
 	}
 
@@ -448,12 +451,12 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 
 		echo "<tr>";
 
-		if ($merkki != '' and $varastot != '') {
+		if ($merkki != '' and $varastot != '' and count($varastot) > 0) {
 			echo "<td>$row[0]</td>";
 			echo "<td>$row[1]</td>";
 			$varastosumma += $row["varasto"];
 		}
-		else if ($merkki != '' or $varastot != '') {
+		else if ($merkki != '' or count($varastot) > 0) {
 			echo "<td>$row[0]</td>";
 			$varastosumma += $row["varasto"];
 		}
@@ -497,7 +500,7 @@ if ($sel_tuoteryhma != "" or $sel_osasto != "" or $osasto == "kaikki" or $tuoter
 		echo "<tr>";
 		echo "<th colspan='";
 		
-		if ($merkki != '' and $varastot != '') {
+		if ($merkki != '' and count($varastot) > 0) {
 			echo 3;
 		}
 		else {

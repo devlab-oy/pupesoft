@@ -296,29 +296,42 @@ if ($tee=='MONISTA') {
 						}
 						break;
 					case 'tunnus':
-					case 'kapvm':
 					case 'tapvm':
+					case 'kapvm':
+					case 'erpcm':					
+					case 'suoraveloitus':
 					case 'olmapvm':
 					case 'summa':
+					case 'summa_valuutassa':
 					case 'kasumma':
+					case 'kasumma_valuutassa':
 					case 'hinta':
 					case 'kate':
 					case 'arvo':
-					case 'maksuaika':
+					case 'arvo_valuutassa':	
+					case 'saldo_maksettu':	
+					case 'saldo_maksettu_valuutassa':	
+					case 'pyoristys':				
+					case 'pyoristys_valuutassa':
+					case 'maksaja':
+					case 'lahetepvm':					
 					case 'lahetepvm':
+					case 'laskuttaja':
+					case 'laskutettu':
 					case 'viite':
 					case 'laskunro':
 					case 'mapvm':
 					case 'tilausvahvistus':
 					case 'viikorkoeur':
 					case 'tullausnumero':
-					case 'laskutuspvm':
-					case 'erpcm':
-					case 'laskuttaja':
-					case 'laskutettu':
-					case 'lahetepvm':
-					case 'maksaja':
-					case 'maksettu':
+					case 'kerayslista':
+					case 'viikorkoeur':					
+					case 'noutaja':
+					case 'jaksotettu':
+					case 'factoringsiirtonumero':					
+					case 'vanhatunnus':										
+					case 'laskutuspvm':										
+					case 'maksuaika':					
 					case 'maa_maara':
 					case 'kuljetusmuoto':
 					case 'kauppatapahtuman_luonne':
@@ -388,7 +401,15 @@ if ($tee=='MONISTA') {
 					case 'vienti_kurssi';
 						// hyvityksissä pidetään kurssi samana
 						if ($kumpi == 'HYVITA') {
-							$values .= ", '".$monistarow[$i]."'";
+							if ($monistarow[$i] == 0) {
+								// Vanhoilla u-laskuilla ei ole vienti kurssia....
+								$vienti_kurssi = round($monistarow["arvo"]/$monistarow["arvo_valuutassa"], 6);
+								
+								$values .= ", '$vienti_kurssi'";
+							}
+							else {
+								$values .= ", '".$monistarow[$i]."'";
+							}																				
 						}
 						else {
 							$vquery = "	SELECT kurssi
@@ -419,6 +440,7 @@ if ($tee=='MONISTA') {
 			//Kopioidaan otsikon lisatiedot
 			$query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$lasku' and yhtio ='$kukarow[yhtio]'";
 			$monistalisres = mysql_query($query) or pupe_error($query);
+			
 			if (mysql_num_rows($monistalisres) > 0) {
 				$monistalisrow = mysql_fetch_array($monistalisres);
 
@@ -504,8 +526,12 @@ if ($tee=='MONISTA') {
 						case 'kerattyaika':
 						case 'kpl':
 						case 'rivihinta':
+						case 'rivihinta_valuutassa':
 						case 'kate':
 						case 'uusiotunnus':
+						case 'jaksotettu':
+							$rvalues .= ", ''";
+							break;						
 						case 'kommentti':
 							if ($toim == 'SOPIMUS') {
 								$rvalues .= ", '$rivirow[kommentti]'";
@@ -764,7 +790,7 @@ if ($tee=='MONISTA') {
 			}
 			
 			if($slask == "on") {
-				$query = "	select *
+				$query = "	SELECT *
 							from lasku
 							where yhtio = '$kukarow[yhtio]'
 							and tunnus	= '$utunnus'";

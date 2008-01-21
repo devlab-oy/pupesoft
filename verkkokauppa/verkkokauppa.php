@@ -2,7 +2,6 @@
 
 $_GET["ohje"] = "off";
 
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/inc".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/extranet".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/tilauskasittely");
 require ("parametrit.inc");
 
 if($verkkokauppa == "") die("Mihin verkkokauppaan sitä ollaan menemässä?");

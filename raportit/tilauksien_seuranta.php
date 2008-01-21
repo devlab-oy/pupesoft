@@ -460,10 +460,10 @@ if($tee=="" or $tee=="LASKE") {
 							}					
 
 							if($laskurow[$sarake]>0) {
-								echo "<td class='green'>".luku($laskurow[$sarake])."$lisa</td>";							
+								echo "<td><font class='green'>".luku($laskurow[$sarake])."$lisa</font></td>";							
 							}
-							if($laskurow[$sarake]<0) {
-								echo "<td class='red'>".luku($laskurow[$sarake])."$lisa !!!</td>";
+							elseif($laskurow[$sarake]<0) {
+								echo "<td><font class='green'>".luku($laskurow[$sarake])."$lisa !!!</font></td>";
 							}
 							else {
 								echo "<td>$laskurow[$sarake]</td>";

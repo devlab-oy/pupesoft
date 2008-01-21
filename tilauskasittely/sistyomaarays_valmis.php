@@ -26,12 +26,15 @@
 		}
 		else {
 			// lock tables
-			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tilausrivi WRITE, tilausrivi as tilausrivi2 WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE";
+			$query = "LOCK TABLES lasku WRITE, tapahtuma WRITE, tiliointi WRITE, tilausrivi WRITE, tilausrivi as tilausrivi2 WRITE, sanakirja WRITE, tilausrivi as tilausrivi_osto READ, tuote READ, sarjanumeroseuranta WRITE, tuotepaikat WRITE, tilausrivin_lisatiedot WRITE";
 			$locre = mysql_query($query) or pupe_error($query);
 			
 			$query = "	SELECT *
 						FROM lasku
-						WHERE yhtio = '$kukarow[yhtio]' and alatila='C' and tila = 'S' and tunnus = '$tilausnumero'";
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and alatila	= 'C' 
+						and tila 	= 'S' 
+						and tunnus 	= '$tilausnumero'";
 			$result = mysql_query($query) or pupe_error($query);
 		
 			if (mysql_num_rows($result) == 1) {				
@@ -77,10 +80,15 @@
 
 				while($srow = mysql_fetch_array($jres)) {
 					
+					//Jotta saadaan oma kulukeikka per laite
+					unset($otunnus);
+					
 					//Haetaan jatkojalostettavan tuotteen ostorivitunnus 
 					$query = "	SELECT * 
 								FROM sarjanumeroseuranta 
-								WHERE yhtio='$kukarow[yhtio]' and tuoteno='$srow[tuoteno]' and siirtorivitunnus='$srow[tunnus]'";
+								WHERE yhtio			 = '$kukarow[yhtio]' 
+								and tuoteno			 = '$srow[tuoteno]' 
+								and siirtorivitunnus = '$srow[tunnus]'";
 					$sarjares = mysql_query($query) or pupe_error($query);
 					$sarjarow = mysql_fetch_array($sarjares);
 
@@ -174,8 +182,8 @@
 						}
 					}
 					
-					// Haetaan lisävarusteet 
-					$query    = "	SELECT tilausrivi.*, tuote.ei_saldoa, tuote.kehahin, tuote.sarjanumeroseuranta, tilausrivi.tunnus as rivitunnus
+					// Haetaan liitetyt lisävarusteet ja työkulut
+					$query    = "	SELECT tilausrivi.*, tuote.ei_saldoa, tuote.kehahin, tuote.vihahin, tuote.sarjanumeroseuranta, tilausrivi.tunnus as rivitunnus
 									FROM tilausrivi
 									JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 									WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
@@ -185,7 +193,7 @@
 					$kres = mysql_query($query) or pupe_error($query);
 
 					while ($lisarow = mysql_fetch_array($kres)) {
-						$ostohinta = 0;
+						$ostohinta 			  = 0;
 						$ostorivinsarjanumero = 0;
 						
 						if ($lisarow["sarjanumeroseuranta"] == "S") {
@@ -366,6 +374,79 @@
 								$sarjares = mysql_query($query) or pupe_error($query);
 							}													
 						}
+						else {
+							// Lisävaruste on työkulu													 
+							// Työkulujen arvo 
+							$tyokulut = round($lisarow["varattu"]*$lisarow["vihahin"],2);
+							
+							if ($tyokulut != 0) {
+								
+								if (!isset($otunnus)) {
+									// haetaan seuraava vapaa keikkaid
+									$query  = "SELECT max(laskunro)+1 from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
+									$result = mysql_query($query) or pupe_error($query);
+									$row    = mysql_fetch_array($result);
+									$id		= $row[0];
+
+									$query = "	INSERT into lasku set
+												yhtio        = '$kukarow[yhtio]',
+												laskunro     = '$id',
+												ytunnus	     = '$sarjarow[tunnus]',
+												nimi         = 'Sisäinen työmääräys: $tilausnumero',
+												liitostunnus = '$sarjarow[tunnus]',
+												tila         = 'K',
+												alatila      = 'S',
+												luontiaika	 = now(),
+												laatija		 = '$kukarow[kuka]'";
+									$result = mysql_query($query) or pupe_error($query);
+									$otunnus = mysql_insert_id();
+								}	
+																		
+								$query = "	INSERT into lasku set
+											yhtio      		= '$kukarow[yhtio]',
+											tapvm      		= now(),
+											tila       		= 'X',
+											laskunro    	= '$id',
+											maksu_kurssi 	= '1',
+											vienti_kurssi	= '1',
+											laatija    		= '$kukarow[kuka]',
+											vanhatunnus		= '$otunnus',
+											arvo	   		= $tyokulut,
+											summa	   		= $tyokulut,
+											vienti	   		= 'B',
+											luontiaika 		= now()";
+								$result = mysql_query($query) or pupe_error($query);
+								$laskuid = mysql_insert_id($link);
+								
+								$query = "INSERT into tiliointi set
+											yhtio    = '$kukarow[yhtio]',
+											ltunnus  = '$laskuid',
+											tilino   = '$yhtiorow[varasto]',
+											kustp    = '',
+											tapvm    = now(),
+											summa    = '$tyokulut',
+											vero     = '0',
+											lukko    = '',
+											selite   = 'Varastonmuutos sisäinen työmääräys $tilausnumero: $srow[tuoteno] ($sarjarow[sarjanumero])',
+											laatija  = '$kukarow[kuka]',
+											laadittu = now()";
+								$result = mysql_query($query) or pupe_error($query);
+									
+								$query = "INSERT into tiliointi set
+											yhtio    = '$kukarow[yhtio]',
+											ltunnus  = '$laskuid',
+											tilino   = '$yhtiorow[varastonmuutos_valmistuksesta]',
+											kustp    = '',
+											tapvm    = now(),
+											summa    = $tyokulut * -1,
+											vero     = '0',
+											lukko    = '',
+											selite   = 'Varastonmuutos sisäinen työmääräys $tilausnumero: $srow[tuoteno] ($sarjarow[sarjanumero])',
+											laatija  = '$kukarow[kuka]',
+											laadittu = now()";
+								$result = mysql_query($query) or pupe_error($query);
+							}
+						}
 						
 						//Päivitetään varmuuden vuoksi alkuperäisen ostorivin perheid2 (se voi olla nolla)
 						$query = "	UPDATE tilausrivi 
@@ -441,7 +522,7 @@
 
 		if (mysql_num_rows($result)!=0) {
 
-			echo "<table border='0' cellpadding='2' cellspacing='1'>";
+			echo "<table>";
 
 			echo "<tr>";
 

@@ -482,10 +482,10 @@ if($tee=="" or $tee=="LASKE") {
 
 				echo "<tr><th>".t("Yhteensä")."</th>";
 				foreach($sarakeTotal as $summa) {
-					echo "<th><font class='message'>".luku($summa)."</font></th>";
+					echo "<th>".luku($summa)."</th>";
 				}
 
-				echo "<th><font class='message'>".luku($grantTotal)."</font></th></tr>";
+				echo "<th>".luku($grantTotal)."</th></tr>";
 				echo "</table>";
 
 			}

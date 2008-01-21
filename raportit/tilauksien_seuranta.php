@@ -460,10 +460,10 @@ if($tee=="" or $tee=="LASKE") {
 							}					
 
 							if(round($laskurow[$sarake], 2)>0) {
-								echo "<td><font class='green'>".luku($laskurow[$sarake])."$lisa</font></td>";							
+								echo "<td><font class='message'>".luku($laskurow[$sarake])."$lisa</font></td>";							
 							}
 							elseif(round($laskurow[$sarake], 2)<0) {
-								echo "<td><font class='green'>".luku($laskurow[$sarake])."$lisa !!!</font></td>";
+								echo "<td><font class='error'>".luku($laskurow[$sarake])."$lisa !!!</font></td>";
 							}
 							else {
 								echo "<td></td>";
@@ -475,17 +475,17 @@ if($tee=="" or $tee=="LASKE") {
 						}
 					}
 
-					echo "<td>".luku($riviTotal)."</td></tr>";
+					echo "<td><font class='message'>".luku($riviTotal)."</font></td></tr>";
 					$grantTotal+=$riviTotal;
 
 				}
 
 				echo "<tr><th>".t("Yhteensä")."</th>";
 				foreach($sarakeTotal as $summa) {
-					echo "<th>".luku($summa)."</th>";
+					echo "<th><font class='message'>".luku($summa)."</font></th>";
 				}
 
-				echo "<th>".luku($grantTotal)."</th></tr>";
+				echo "<th><font class='message'>".luku($grantTotal)."</font></th></tr>";
 				echo "</table>";
 
 			}

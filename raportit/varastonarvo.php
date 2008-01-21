@@ -35,6 +35,10 @@ echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
 
 if ($valitaan_useita == "") {
 
+	if ($sel_tuoteryhma == "" and $sel_osasto == "" and $valitse_yksittain != '') {
+		echo "<font class='error'>Valitse osasto tai tuoteryhm‰!!!</font>";
+	}
+
 	echo "<table>";
 
 	// n‰ytet‰‰n soveltuvat osastot
@@ -329,7 +333,7 @@ echo "</table>";
 echo "<br>";
 
 if($valitaan_useita == '') {
-	echo "<input type='submit' value='Laske varastonarvot'>";
+	echo "<input type='submit' name='valitse_yksittain' value='Laske varastonarvot'>";
 }
 else {
 	echo "<input type='submit' name='valitaan_useita' value='Laske varastonarvot'>";

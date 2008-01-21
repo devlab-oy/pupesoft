@@ -233,7 +233,7 @@ else {
 				
 				$onkoalvia = "kylla"; // apumuuttuja, että tiedetään alempana, että tehtiin alvikirjauksia
 
-				// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy
+				// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy 
 				if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
 					$query = "	INSERT into tiliointi set
 								yhtio 		= '$kukarow[yhtio]',

@@ -104,7 +104,7 @@
 					email 			= '$toim_email',
 					lasku_logo		= '$lasku_logo',
 					tilino			= '$toim_tilino',
-					alv				= '$toim_alv',
+					alv				= '$toim_alv', 
 					kustp			= '$toim_kustp',
 					kohde			= '$toim_kohde',
 					projekti		= '$toim_projekti',

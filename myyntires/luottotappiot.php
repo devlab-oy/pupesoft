@@ -82,7 +82,7 @@ if ($tila == 'K') {
 					$query = "	INSERT INTO tiliointi SET
 								yhtio		= '$kukarow[yhtio]',
 								ltunnus		= '$lasku[ltunnus]',
-								tilino		= '$yhtiorow[alv]',
+								tilino		= '$yhtiorow[alv]', 
 								kustp		= '',
 								kohde		= '',
 								projekti	= '',

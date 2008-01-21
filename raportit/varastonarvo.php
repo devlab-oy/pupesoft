@@ -36,7 +36,7 @@ echo "<form action='$PHP_SELF' name='formi' method='post' autocomplete='OFF'>";
 if ($valitaan_useita == "") {
 
 	if ($sel_tuoteryhma == "" and $sel_osasto == "" and $valitse_yksittain != '') {
-		echo "<font class='error'>Valitse osasto tai tuoteryhmä!!!</font>";
+		echo "<font class='error'>".t("Valitse osasto tai tuoteryhmä!!!")."</font>";
 	}
 
 	echo "<table>";

@@ -796,6 +796,7 @@ if (!function_exists("saldo_myytavissa")) {
 									and tilausrivi.toimaika <= '$pvm'";
 					}
 					else {
+						// löytyykö ostorivejä?
 						$query = "	SELECT
 									ifnull(sum(tilausrivi.varattu),0) varattu
 									FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
@@ -805,7 +806,66 @@ if (!function_exists("saldo_myytavissa")) {
 									and tilausrivi.tuoteno 	= '$tuoteno'
 									and tilausrivi.varattu 	> 0
 									and tilausrivi.toimaika <= '$pvm'";
+						$osttarkres = mysql_query($query) or die($query);
+						$osttarkrow = mysql_fetch_array($osttarkres);
+									
+						if ($osttarkrow['varattu'] != 0) {
+							// jos löytyy, niin onko ne tälle paikalle tulossa
+							$query = "	SELECT
+										ifnull(sum(tilausrivi.varattu),0) varattu
+										FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+										WHERE tilausrivi.yhtio 	= '$yhtiolisa'
+										and tilausrivi.tyyppi 	= 'O'
+										and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+										and tilausrivi.tuoteno 	= '$tuoteno'
+										and tilausrivi.varattu 	> 0
+										and tilausrivi.hyllyalue = '$hyllyalue'
+										and tilausrivi.hyllynro  = '$hyllynro'
+										and tilausrivi.hyllyvali = '$hyllyvali'
+										and tilausrivi.hyllytaso = '$hyllytaso'
+										and tilausrivi.toimaika <= '$pvm'";
+							$osttarkres = mysql_query($query) or die($query);
+							$osttarkrow = mysql_fetch_array($osttarkres);
+							
+							if ($osttarkrow['varattu'] == 0) {
+								// jos ei ole, niin onko paikka olemassa jonne ne on tulossa
+								$tarkquery = "	SELECT
+											ifnull(sum(tilausrivi.varattu),0) varattu
+											FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+											JOIN tuotepaikat ON tilausrivi.yhtio = tuotepaikat.yhtio and tilausrivi.tuoteno = tuotepaikat.tuoteno and tilausrivi.hyllyalue = tuotepaikat.hyllyalue and tilausrivi.hyllynro = tuotepaikat.hyllynro and tilausrivi.hyllyvali = tuotepaikat.hyllyvali and tilausrivi.hyllytaso = tuotepaikat.hyllytaso
+											WHERE tilausrivi.yhtio 	= '$yhtiolisa'
+											and tilausrivi.tyyppi 	= 'O'
+											and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+											and tilausrivi.tuoteno 	= '$tuoteno'
+											and tilausrivi.varattu 	> 0
+											and tilausrivi.toimaika <= '$pvm'";
+								$osttarkres = mysql_query($tarkquery) or die($tarkquery);
+								$osttarkrow = mysql_fetch_array($osttarkres);
+								
+								if ($osttarkrow['varattu'] == 0) {
+									// eli on joutumassa ns. orvolle paikalle, niin leikitää että ne tulee oletuspaikalle
+									$query = "	SELECT
+												ifnull(sum(tilausrivi.varattu),0) varattu
+												FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
+												JOIN tuotepaikat ON tilausrivi.yhtio = tuotepaikat.yhtio and tilausrivi.tuoteno = tuotepaikat.tuoteno 
+												and tuotepaikat.hyllyalue = '$hyllyalue' 
+												and tuotepaikat.hyllynro = '$hyllynro' 
+												and tuotepaikat.hyllyvali = '$hyllyvali'
+												and tuotepaikat.hyllytaso = '$hyllytaso' 
+												and tuotepaikat.oletus != ''
+												WHERE tilausrivi.yhtio 	= '$yhtiolisa'
+												and tilausrivi.tyyppi 	= 'O'
+												and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
+												and tilausrivi.tuoteno 	= '$tuoteno'
+												and tilausrivi.varattu 	> 0
+												and tilausrivi.toimaika <= '$pvm'";
+									$osttarkres = mysql_query($query) or die($query);
+									$osttarkrow = mysql_fetch_array($osttarkres);
+								}
+							}
+						}
 					}
+					
 					$ostresult = mysql_query($query) or die($query);
 					$ostrow = mysql_fetch_array($ostresult);
 

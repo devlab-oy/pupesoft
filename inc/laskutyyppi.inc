@@ -37,8 +37,10 @@
 			switch($alatila) {
 				case "X":
 					$alatila = "Valmis";
+					break;	
 				case "I":
 					$alatila = "Inventointi";
+					break;	
 			}
 			break;
 		case "X":
@@ -214,6 +216,9 @@
 						break;
 					case "P":
 						$alatila = "JT poiminnassa";
+						break;
+					case "X":
+						$alatila = "Valmis";
 						break;
 				}
 				break;

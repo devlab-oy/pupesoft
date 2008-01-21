@@ -3299,7 +3299,7 @@ if(!function_exists("sarjanumeron_ostohinta")) {
 				$query = "	SELECT round(sum(arvo*if(maksu_kurssi!=0, maksu_kurssi, vienti_kurssi)),2) kulusumma
 							FROM lasku
 							WHERE yhtio		= '$kukarow[yhtio]'
-							and tila 		= 'K'
+							and tila 		IN ('K','X')
 							and laskunro 	= '$kulukeikkarow[laskunro]'
 							and vanhatunnus <> 0
 							and vienti in ('B','E','H')";

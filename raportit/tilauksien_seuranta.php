@@ -459,14 +459,14 @@ if($tee=="" or $tee=="LASKE") {
 								$lisa="<br><font class='info'>".trim($lisa)."</font>";
 							}					
 
-							if($laskurow[$sarake]>0) {
+							if(round($laskurow[$sarake], 2)>0) {
 								echo "<td><font class='green'>".luku($laskurow[$sarake])."$lisa</font></td>";							
 							}
-							elseif($laskurow[$sarake]<0) {
+							elseif(round($laskurow[$sarake], 2)<0) {
 								echo "<td><font class='green'>".luku($laskurow[$sarake])."$lisa !!!</font></td>";
 							}
 							else {
-								echo "<td>$laskurow[$sarake]</td>";
+								echo "<td></td>";
 							}
 							
 							$sarakeTotal[$sarake]+=$laskurow[$sarake];

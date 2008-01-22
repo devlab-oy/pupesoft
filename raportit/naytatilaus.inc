@@ -336,7 +336,7 @@
 	elseif ($laskurow["tila"] == 'R') {
 		$query = "	SELECT group_concat(tunnus) tunnukset
 		 			FROM lasku 
-					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = '$tunnus' and tila IN ('L','G','E','V','W','N')
+					WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu > 0 and tunnusnippu = '$tunnus' and tila IN ('L','G','E','V','W','N','R')
 					GROUP BY tunnusnippu";
 		$result = mysql_query($query) or pupe_error($query);
 		$row = mysql_fetch_array($result);

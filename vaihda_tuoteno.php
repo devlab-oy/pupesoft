@@ -340,6 +340,21 @@ if ($error == 0 and $tee == "file") {
 							}
 						}
 						elseif($uusi_on_jo == "" or ($uusi_on_jo == "OK" and $tulos2 != 'tuote')) {
+							if ($tulos2 == 'tuotteen_toimittajat') {
+								$query = "	SELECT * FROM $tulos2
+											WHERE yhtio = '$kukarow[yhtio]'
+											and tuoteno	= '$uustuoteno'
+											ORDER BY yhtio";
+								$result2 = mysql_query($query) or pupe_error($query);
+								if (mysql_num_rows($result2) > 0) {
+									$query = "	DELETE FROM $tulos2
+												WHERE yhtio = '$kukarow[yhtio]'
+												and tuoteno	= '$vantuoteno'
+												ORDER BY yhtio";
+									$result2 = mysql_query($query) or pupe_error($query);
+								}
+							}
+							
 							$query = "	UPDATE $tulos2
 										SET tuoteno	= '$uustuoteno'
 										WHERE yhtio = '$kukarow[yhtio]'

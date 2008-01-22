@@ -1129,7 +1129,7 @@
 
 			if ($yhtiorow['karayksesta_rahtikirjasyottoon'] != '') {
 				$query = "	SELECT tunnus 
-							sFROM lasku
+							FROM lasku
 							WHERE lasku.yhtio 	= '$kukarow[yhtio]'
 							and lasku.tila 		= 'L'
 							and lasku.alatila 	= 'C'

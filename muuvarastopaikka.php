@@ -257,7 +257,7 @@
 			echo "<font class='error'>".t("Tarkista sarjanumerovalintasi")."!</font><br><br>";
 			$tee = $uusitee;
 		}
-		elseif (mysql_num_rows($sarjaresult) > 0 and $kutsuja != "vastaanota.php") {
+		elseif (mysql_num_rows($sarjaresult) > 0) {
 			foreach($sarjano_array as $sarjatun) {
 				//Tutkitaan lisävarusteita
 				$query = "	SELECT tilausrivi_osto.perheid2
@@ -313,107 +313,105 @@
 		
 		//tähän erroriin tullaan vain jos kyseessä ei ole siirtolista
 		//koska jos meillä on kerätty siirtolista niin ne määrät myös halutaan siirtää vaikka saldo menisikin nollille tai miinukselle
-		if ($kutsuja != "vastaanota.php") {
+		$saldook = 0;
+								
+		for($iii=0; $iii< count($tuotteet); $iii++) {
 		
-			$saldook = 0;
+			// Tutkitaan lisävarusteiden tuotepaikkoja
+			$query = "	SELECT *
+						FROM tuotepaikat
+						WHERE tuoteno 	= '$tuotteet[$iii]' 
+						and yhtio 		= '$kukarow[yhtio]' 
+						and hyllyalue	= '$mistarow[hyllyalue]'
+						and hyllynro 	= '$mistarow[hyllynro]'
+						and hyllyvali 	= '$mistarow[hyllyvali]'
+						and hyllytaso	= '$mistarow[hyllytaso]'";
+			$result = mysql_query($query) or die($query);
 		
-			for($iii=0; $iii< count($tuotteet); $iii++) {
+			if (mysql_num_rows($result) == 1) {
+				list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuotteet[$iii], '', '', '', $mistarow["hyllyalue"], $mistarow["hyllynro"], $mistarow["hyllyvali"], $mistarow["hyllytaso"]);
+			
+				$lisavartprow = mysql_fetch_array($result);
+			
+				//Tutkitaan siirretäänkö tiettyä jo varattua lisävarustetta
+				if($lisavaruste[$iii] == "LISAVARUSTE") {
+					// Tuotepaikka josta lisävaruste otetaan
+					$otetaan[$iii] = $lisavartprow["tunnus"];
 				
-				// Tutkitaan lisävausteiden tuotepaikkoja
+					$myytavissa += $kappaleet[$iii];
+				}
+			
+				if ($kappaleet[$iii] > $myytavissa and $kutsuja != "vastaanota.php") {
+					echo "Tuotetta ei voida siirtää. Saldo ei riittänyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
+					$saldook++;
+				}
+			}
+			elseif($kutsuja != "vastaanota.php") {
+				echo t("Tuotetta ei voida siirtää. Tuotetta ei löytynyt paikalta").": $tuotteet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
+				$saldook++;
+			}
+		}
+								
+		if ($saldook > 0) { //Taravat myytiin alta!
+			echo "<font class='error'>".t("Siirettävä määrä on liian iso")."</font><br><br>";
+			$tee = $uusitee;
+		}
+		
+		// Varmistetaan, että vastaanottavat paikat löytyy
+		if ($saldook == 0) { 
+			for($iii=0; $iii< count($tuotteet); $iii++) {						
 				$query = "	SELECT *
 							FROM tuotepaikat
 							WHERE tuoteno 	= '$tuotteet[$iii]' 
 							and yhtio 		= '$kukarow[yhtio]' 
-							and hyllyalue	= '$mistarow[hyllyalue]'
-							and hyllynro 	= '$mistarow[hyllynro]'
-							and hyllyvali 	= '$mistarow[hyllyvali]'
-							and hyllytaso	= '$mistarow[hyllytaso]'";
+							and hyllyalue	= '$minnerow[hyllyalue]'
+							and hyllynro 	= '$minnerow[hyllynro]'
+							and hyllyvali 	= '$minnerow[hyllyvali]'
+							and hyllytaso	= '$minnerow[hyllytaso]'";
 				$result = mysql_query($query) or die($query);
-				
-				if (mysql_num_rows($result) == 1) {
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuotteet[$iii], '', '', '', $mistarow["hyllyalue"], $mistarow["hyllynro"], $mistarow["hyllyvali"], $mistarow["hyllytaso"]);
+		
+				// Vastaanottavaa paikkaa ei löydy, perustetaan se
+				if (mysql_num_rows($result) == 0) {
+					$query = "	INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, laatija, luontiaika)
+							  	VALUES (
+								'$kukarow[yhtio]',
+								'$minnerow[hyllyalue]',
+								'$minnerow[hyllynro]',
+								'$minnerow[hyllyvali]',
+								'$minnerow[hyllytaso]',
+								'$tuotteet[$iii]',
+								'$kukarow[kuka]',
+								now())";
+					$result = mysql_query($query) or die($query);
+					$lisatty_tun = mysql_insert_id();
 					
-					$lisavartprow = mysql_fetch_array($result);
-					
-					//Tutkitaan siirretäänkö tiettyä jo varattua lisävarustetta
+					// Tuotepaikka jonne lisävaruste viedään
 					if($lisavaruste[$iii] == "LISAVARUSTE") {
-						// Tuotepaikka josta lisävaruste otetaan
-						$otetaan[$iii] = $lisavartprow["tunnus"];
-						
-						$myytavissa += $kappaleet[$iii];
+						$siirretaan[$iii] = $lisatty_tun;
 					}
 					
-					if ($kappaleet[$iii] > $myytavissa) {
-						echo "Tuotetta ei voida siirtää. Saldo ei riittänyt. $tuotteet[$iii] $kappaleet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
-						$saldook++;
-					}
+					$query = "	INSERT into tapahtuma set
+								yhtio 		= '$kukarow[yhtio]',
+								tuoteno 	= '$tuotteet[$iii]',
+								kpl 		= '0',
+								kplhinta	= '0',
+								hinta 		= '0',
+								laji 		= 'uusipaikka',
+								selite 		= '".t("Lisättiin tuotepaikka")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso]',
+								laatija 	= '$kukarow[kuka]',
+								laadittu 	= now()";
+					$result = mysql_query($query) or die($query);
+
+					echo t("Uusi varastopaikka luotiin tuotteelle").": $tuotteet[$iii] ($minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso])<br>";
 				}
 				else {
-					echo t("Tuotetta ei voida siirtää. Tuotetta ei löytynyt paikalta").": $tuotteet[$iii] ($mistarow[hyllyalue] $mistarow[hyllynro] $mistarow[hyllyvali] $mistarow[hyllytaso])<br>";
-					$saldook++;
-				}
-			}
-						
-			if ($saldook == 0) { 
-				for($iii=0; $iii< count($tuotteet); $iii++) {						
-					$query = "	SELECT *
-								FROM tuotepaikat
-								WHERE tuoteno 	= '$tuotteet[$iii]' 
-								and yhtio 		= '$kukarow[yhtio]' 
-								and hyllyalue	= '$minnerow[hyllyalue]'
-								and hyllynro 	= '$minnerow[hyllynro]'
-								and hyllyvali 	= '$minnerow[hyllyvali]'
-								and hyllytaso	= '$minnerow[hyllytaso]'";
-					$result = mysql_query($query) or die($query);
-			
-					// Vastaanottavaa paikkaa ei löydy, perustetaan se
-					if (mysql_num_rows($result) == 0) {
-						$query = "	INSERT into tuotepaikat (yhtio, hyllyalue, hyllynro, hyllyvali, hyllytaso, tuoteno, laatija, luontiaika)
-								  	VALUES (
-									'$kukarow[yhtio]',
-									'$minnerow[hyllyalue]',
-									'$minnerow[hyllynro]',
-									'$minnerow[hyllyvali]',
-									'$minnerow[hyllytaso]',
-									'$tuotteet[$iii]',
-									'$kukarow[kuka]',
-									now())";
-						$result = mysql_query($query) or die($query);
-						$lisatty_tun = mysql_insert_id();
-						
-						// Tuotepaikka jonne lisävaruste viedään
-						if($lisavaruste[$iii] == "LISAVARUSTE") {
-							$siirretaan[$iii] = $lisatty_tun;
-						}
-						
-						$query = "	INSERT into tapahtuma set
-									yhtio 		= '$kukarow[yhtio]',
-									tuoteno 	= '$tuotteet[$iii]',
-									kpl 		= '0',
-									kplhinta	= '0',
-									hinta 		= '0',
-									laji 		= 'uusipaikka',
-									selite 		= '".t("Lisättiin tuotepaikka")." $minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso]',
-									laatija 	= '$kukarow[kuka]',
-									laadittu 	= now()";
-						$result = mysql_query($query) or die($query);
-
-						echo t("Uusi varastopaikka luotiin tuotteelle").": $tuotteet[$iii] ($minnerow[hyllyalue] $minnerow[hyllynro] $minnerow[hyllyvali] $minnerow[hyllytaso])<br>";
-					}
-					else {
-						$lisavartprow = mysql_fetch_array($result);
-						
-						// Tuotepaikka jonne lisävaruste viedään
-						if($lisavaruste[$iii] == "LISAVARUSTE") {
-							$siirretaan[$iii] = $lisavartprow["tunnus"];
-						}
+					$lisavartprow = mysql_fetch_array($result);
+					
+					// Tuotepaikka jonne lisävaruste viedään
+					if($lisavaruste[$iii] == "LISAVARUSTE") {
+						$siirretaan[$iii] = $lisavartprow["tunnus"];
 					}
 				}
-			}
-			
-			if ($saldook > 0) { //Taravat myytiin alta!
-				echo "<font class='error'>".t("Siirettävä määrä on liian iso")."</font><br><br>";
-				$tee = $uusitee;
 			}
 		}	
 	}

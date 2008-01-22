@@ -809,7 +809,7 @@ if (!function_exists("saldo_myytavissa")) {
 						$osttarkres = mysql_query($query) or die($query);
 						$osttarkrow = mysql_fetch_array($osttarkres);
 									
-						if ($osttarkrow['varattu'] != 0) {
+						if ($osttarkrow['varattu'] != 0 and $hyllyalue != '') {
 							// jos löytyy, niin onko ne tälle paikalle tulossa
 							$query = "	SELECT
 										ifnull(sum(tilausrivi.varattu),0) varattu

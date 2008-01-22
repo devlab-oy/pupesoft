@@ -17,8 +17,8 @@ $query = "SELECT * FROM yhtio, yhtion_parametrit WHERE yhtio.yhtio = yhtion_para
 $result = mysql_query($query) or pupe_error($query);
 $yhtiorow = mysql_fetch_array($result);
 
-$keissit = array("Asiakas","Toimittaja","Kustannupaikka","Laskunumero","Myynti","Nimike","Monivarasto","Ostot","Ostotilausnumero","Varastonumero","Tapahtumalaji","Myyntitil");
-//$keissit = array("Toimittaja");
+$keissit = array("Asiakas","Toimittaja","Kustannupaikka","Laskunumero","Myynti","Nimike","Monivarasto","Ostot","Ostotilausnumero","Varastonumero","Tapahtumalaji","Myyntitil","Avointil");
+//$keissit = array("Avointil");
 
 mkdir("/tmp/infoglove");
 
@@ -113,7 +113,7 @@ foreach ($keissit as $keissi) {
 			$query =	"SELECT 'Myynti' as Tapahtumalaji";
 			break;
 		case "Myyntitil" : 
-		$query =		"SELECT left(lasku.luontiaika,10) AS 'paivays', 
+			$query =	"SELECT left(lasku.luontiaika,10) AS 'paivays', 
 						tilausrivi.tilkpl AS 'maara', 
 						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
 						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
@@ -129,6 +129,28 @@ foreach ($keissit as $keissi) {
 						WHERE lasku.yhtio = '$kukarow[yhtio]'
 						and lasku.tila IN ('N','L')
 						and lasku.luontiaika != '0000-00-00 00:00:00'
+						ORDER BY lasku.tunnus, tilausrivi.tunnus";
+			break;
+		case "Avointil" : 
+			$query =	"SELECT left(lasku.luontiaika,10) AS 'paivays', 
+						tilausrivi.tilkpl AS 'maara', 
+						round(if(tilausrivi.laskutettu!='',tilausrivi.rivihinta/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1),(tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)),'$yhtiorow[hintapyoristys]') AS 'arvo',
+						if(tilausrivi.laskutettu!='',tilausrivi.kate,round((tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*(1-tilausrivi.ale/100)/if('$yhtiorow[alv_kasittely]'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)),'$yhtiorow[hintapyoristys]')) AS 'kate',
+						if(tilausrivi.laskutettu!='',tilausrivi.rivihinta-tilausrivi.kate,round(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt),6)) AS 'keskihinta',
+						tilausrivi.tuoteno, 
+						asiakas.tunnus AS asiakasnro,
+						if(tuote.kustp != '', tuote.kustp, asiakas.kustannuspaikka) as kustp,
+						lasku.tunnus
+						FROM lasku
+						JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+						LEFT JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+						LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+						WHERE lasku.yhtio = '$kukarow[yhtio]'
+						and lasku.tila IN ('N','L')
+						and lasku.luontiaika != '0000-00-00 00:00:00'
+						and lasku.laskunro = 0
+						and tilausrivi.kpl = 0
+						and lasku.alatila != 'X'
 						ORDER BY lasku.tunnus, tilausrivi.tunnus";
 			break;
 		default :
@@ -149,7 +171,7 @@ foreach ($keissit as $keissi) {
 	
 		$ulos .="\n";
 	
-		if (fwrite($handle, $ulos) === FALSE) die("failin kirjoitus epäonnistui");
+		if (fwrite($handle, $ulos) === FALSE) die ("failin kirjoitus epäonnistui");
 	}
 	
 	fclose($handle);

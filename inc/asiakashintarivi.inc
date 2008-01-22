@@ -72,6 +72,22 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "laji") {
+
+		if ($trow[$i] == 'N') {
+			$chkn = 'SELECTED';
+		}
+		elseif($trow[$i] == "E") {
+			$chke = 'SELECTED';
+		}
+
+		$ulos  = "<td><select name='$nimi'>";
+		$ulos .= "<option value='N' $chkn>".t("N-Nettohinta")."</option>";
+		$ulos .= "<option value='E' $chke>".t("E-Nettohinta")."</option>";
+		$ulos .= "<option value=''>".t("Yhtiön oletus")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 	
 	if (mysql_field_name($result, $i) == "ytunnus" and isset($alasveto[$i])) {
 		$ulos = "<td>".$alasveto[$i]."</td>";
@@ -87,5 +103,7 @@
 		mysql_field_name($result, $i) == "loppupvm") {
 		$tyyppi = 1.5;
 	}
+	
+
 
 ?>

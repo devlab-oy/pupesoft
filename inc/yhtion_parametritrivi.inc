@@ -1393,5 +1393,34 @@
 
 		$jatko = 0;
 	}
-	
+
+	if (mysql_field_name($result, $i) == "monikayttajakalenteri") {
+		
+		$ulos = "<td><select name='$nimi'>";
+		
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+		
+		$ulos .= "<option value = 'K' $sel[K]>".t("Kyllä")."</option>";
+		$ulos .= "<option value = 'E' $sel[E]>".t("Ei")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+
+	if (mysql_field_name($result, $i) == "automaattinen_asiakasnumerointi") {
+		
+		$ulos = "<td><select name='$nimi'>";
+		
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+		
+		$ulos .= "<option value = ''>".t("Ei")."</option>";
+		$ulos .= "<option value = 'K' $sel[K]>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
 ?>

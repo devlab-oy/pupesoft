@@ -208,9 +208,14 @@
 
 	if (mysql_field_name($result, $i) == "asiakasnro") {
 
+		if ($yhtiorow["automaattinen_asiakasnumerointi"] != '' and $trow[$i] == '') {
+			$as_sel = "SELECTED";
+		}
+
 		$ulos = "<td><input type='text' name='$nimi' value='$trow[$i]'>";
 
 		$ulos .= "<select name='asiakasnro_select'>";
+		
 		$ulos .= "<option value = ''></option>";
 
 		$apu_asiakasnumero = 1;
@@ -247,12 +252,12 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vresult) == 0) {
-				$ulos .= "<option value = '$apu_asiakasnumero'>$apu_asiakasnumero</option>";
+				$ulos .= "<option value = '$apu_asiakasnumero' $as_sel>$apu_asiakasnumero</option>";
 				$monta++;
+				$as_sel = "";
 			}
 
 			$apu_asiakasnumero++;
-
 		}
 
 		$ulos .= "</select></td>";

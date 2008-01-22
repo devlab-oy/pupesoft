@@ -536,64 +536,65 @@ $ckhk = "";
 if (trim($konserni) != '') {
 	$ckhk = "CHECKED";
 }
-//konsernivalinta
-echo "<tr><td>";
-echo "	<form action='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
-		<input type='hidden' name='lopetus' value='$lopetus'>";
-echo "<input type='checkbox' name='konserni' $ckhk onclick='submit();'>".t("Kaikkien konserniyritysten merkinnät")."";
-echo "</form>";
-echo "</td></tr>";
 
+if ($yhtiorow["monikayttajakalenteri"] == "K" or $kukarow["asema"] == "MP") {
 
+	//konsernivalinta
+	echo "<tr><td>";
+	echo "	<form action='$PHP_SELF?valitut=$valitut&year=$year&kuu=$kuu&paiva=$paiva' method='post'>
+			<input type='hidden' name='lopetus' value='$lopetus'>";
+	echo "<input type='checkbox' name='konserni' $ckhk onclick='submit();'>".t("Kaikkien konserniyritysten merkinnät")."";
+	echo "</form>";
+	echo "</td></tr>";
 
+	//kalenterivalinnat
+	echo "<tr><td class='back'>";
+	echo "<br><br>";
 
-//kalenterivalinnat
-echo "<tr><td class='back'>";
-echo "<br><br>";
+	echo "<table>";
 
-echo "<table>";
-
-if (in_array("$kukarow[kuka]", $ruksatut)) { // Oletko valinnut itsesi
-	$checked = 'checked';
-}
-
-echo "<tr>
-		<form action='$PHP_SELF?year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni' method='post'>
-		<input type='hidden' name='lopetus' value='$lopetus'>
-		<td class='back' valign='bottom' align='left'>".t("Näytä kalenterit").":
-		<div style='width:250;height:265;overflow:auto;'>
-		
-		<table width='100%'><tr>
-		<td><input type='checkbox' name='kalen[]' value = '$kukarow[kuka]' $checked onclick='submit()'></td>
-		<td>".t("Oma")."</td></tr>";
-
-$query = "	SELECT distinct kuka.nimi, kuka.kuka
-			FROM kuka, oikeu
-			WHERE kuka.yhtio	= '$kukarow[yhtio]'
-			and oikeu.yhtio		= kuka.yhtio
-			and oikeu.kuka		= kuka.kuka
-			and oikeu.nimi		= 'crm/kalenteri.php' 
-			and kuka.tunnus <> '$kukarow[tunnus]'
-			ORDER BY kuka.nimi";
-$result = mysql_query($query) or pupe_error($query);
-
-while ($row = mysql_fetch_array($result)) {
-	$checked = '';
-	if (in_array("$row[kuka]", $ruksatut)) {
+	if (in_array("$kukarow[kuka]", $ruksatut)) { // Oletko valinnut itsesi
 		$checked = 'checked';
 	}
-	echo "<tr><td nowrap><input type='checkbox' name='kalen[]' value='$row[kuka]' $checked onclick='submit()'></td><td>$row[nimi]</td></tr>";
+
+	echo "<tr>
+			<form action='$PHP_SELF?year=$year&kuu=$kuu&paiva=$paiva&konserni=$konserni' method='post'>
+			<input type='hidden' name='lopetus' value='$lopetus'>";
+
+	echo "	<td class='back' valign='bottom' align='left'>".t("Näytä kalenterit").":
+			<div style='width:250;height:265;overflow:auto;'>
+		
+			<table width='100%'><tr>
+			<td><input type='checkbox' name='kalen[]' value = '$kukarow[kuka]' $checked onclick='submit()'></td>
+			<td>".t("Oma")."</td></tr>";
+
+	$query = "	SELECT distinct kuka.nimi, kuka.kuka
+				FROM kuka, oikeu
+				WHERE kuka.yhtio	= '$kukarow[yhtio]'
+				and oikeu.yhtio		= kuka.yhtio
+				and oikeu.kuka		= kuka.kuka
+				and oikeu.nimi		= 'crm/kalenteri.php' 
+				and kuka.tunnus <> '$kukarow[tunnus]'
+				ORDER BY kuka.nimi";
+	$result = mysql_query($query) or pupe_error($query);
+
+	while ($row = mysql_fetch_array($result)) {
+		$checked = '';
+		if (in_array("$row[kuka]", $ruksatut)) {
+			$checked = 'checked';
+		}
+		echo "<tr><td nowrap><input type='checkbox' name='kalen[]' value='$row[kuka]' $checked onclick='submit()'></td><td>$row[nimi]</td></tr>";
+	}
+
+
+	echo "</table>
+			</div>
+			</td>
+
+			</form>
+			</tr>
+			</table>";
 }
-
-
-echo "</table>
-		</div>
-		</td>
-		</form>
-		</tr>";
-echo "</table>";
-
-
 
 echo "</td></tr>";
 echo "</table>";

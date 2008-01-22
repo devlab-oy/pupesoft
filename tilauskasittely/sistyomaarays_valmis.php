@@ -183,7 +183,7 @@
 					}
 					
 					// Haetaan liitetyt lisävarusteet ja työkulut
-					$query    = "	SELECT tilausrivi.*, tuote.ei_saldoa, tuote.kehahin, tuote.vihahin, tuote.sarjanumeroseuranta, tilausrivi.tunnus as rivitunnus
+					$query    = "	SELECT tilausrivi.*, tuote.ei_saldoa, tuote.kehahin, tuote.myyntihinta, tuote.alv, tuote.sarjanumeroseuranta, tilausrivi.tunnus as rivitunnus
 									FROM tilausrivi
 									JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 									WHERE tilausrivi.yhtio	= '$kukarow[yhtio]'
@@ -376,11 +376,18 @@
 						}
 						else {
 							// Lisävaruste on työkulu													 
-							// Työkulujen arvo 
-							$tyokulut = round($lisarow["varattu"]*$lisarow["vihahin"],2);
+							
+							// Työkulujen arvo 							
+							// Alvihinta korjataan vain jos yhtiölla on verolliset myyntihinnat
+							if ($lisarow["alv"] != '' and $yhtiorow["alv_kasittely"] == "" ) {
+								$tyokulut = round($lisarow["varattu"] * $lisarow["myyntihinta"] / (1+$lisarow['alv']/100), 2);
+							}
+							else {
+								$tyokulut = round($lisarow["varattu"] * $lisarow["myyntihinta"], 2);
+							}							
 							
 							if ($tyokulut != 0) {
-								
+																
 								if (!isset($otunnus)) {
 									// haetaan seuraava vapaa keikkaid
 									$query  = "SELECT max(laskunro)+1 from lasku where yhtio='$kukarow[yhtio]' and tila='K'";

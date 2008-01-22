@@ -559,7 +559,7 @@ if ($ytunnus!='') {
 								'asiakasale' tyyppi $tuotecols
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
-							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and osasto != 0 and try != 0 and hinnastoon != 'E' and status != 'P'
 							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakas_ryhma='' and asiakasalennus.tuoteno!=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
@@ -580,7 +580,7 @@ if ($ytunnus!='') {
 								'asiakasale' tyyppi $tuotecols
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
-							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							$tuotejoin
 							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and ytunnus='$ytunnus' and asiakas_ryhma='' and asiakasalennus.tuoteno=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
@@ -604,7 +604,7 @@ if ($ytunnus!='') {
 								'asiakasryhmäale' tyyppi $tuotecols
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
-							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							JOIN tuote ON tuote.yhtio=asiakasalennus.yhtio and tuote.tuoteno=asiakasalennus.tuoteno and osasto != 0 and try != 0 and hinnastoon != 'E' and status != 'P'
 							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '' and ytunnus='' and asiakasalennus.tuoteno!=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
@@ -626,7 +626,7 @@ if ($ytunnus!='') {
 								'asiakasryhmäale' tyyppi $tuotecols			
 							FROM asiakasalennus
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakasalennus.yhtio and perusalennus.ryhma=asiakasalennus.ryhma						
-							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakasalennus.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							$tuotejoin
 							WHERE asiakasalennus.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma != '' and ytunnus='' and asiakasalennus.tuoteno=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
@@ -874,7 +874,7 @@ if ($ytunnus!='') {
 							FROM asiakashinta
 							LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
-							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and ytunnus = '$asiakasrow[ytunnus]' and ytunnus!=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
 						)
@@ -894,7 +894,7 @@ if ($ytunnus!='') {
 							FROM asiakashinta
 							LEFT JOIN tuote ON asiakashinta.yhtio=tuote.yhtio and asiakashinta.tuoteno=tuote.tuoteno
 							LEFT JOIN perusalennus ON perusalennus.yhtio=asiakashinta.yhtio and perusalennus.ryhma=asiakashinta.ryhma
-							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and laji='ASIAKASRYHMA'
+							LEFT JOIN avainsana ON avainsana.yhtio=asiakashinta.yhtio and avainsana.selite=asiakas_ryhma and avainsana.laji='ASIAKASRYHMA'
 							WHERE asiakashinta.yhtio='$kukarow[yhtio]' and asiakas_ryhma = '$asiakasrow[ryhma]' and asiakas_ryhma!=''
 								and ((alkupvm <= current_date and if(loppupvm = '0000-00-00','9999-99-99',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))							
 						)

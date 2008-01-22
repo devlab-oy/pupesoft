@@ -262,7 +262,7 @@
 
 				while ($krow2 = mysql_fetch_array($kres2)) {
 											
-					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+					list(, , $krmyytavissa) = saldo_myytavissa($krow2["tuoteno"], $jtspec, '', '', '', '', '', '', '', $saldoaikalisa);
 					list($korva_hinta, , $korva_ale, , ) = alehinta($laskurow, $krow2, $kpl, '', '', '');
 										
 					if ($korvaavat_kiellot == "KIELTO") {
@@ -395,7 +395,7 @@
 				while ($zrow = mysql_fetch_array($zres)) {
 
 					// Saldolliset tuotteet
-					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, '', '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
+					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $jtspec, '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
 
 					if ($lisaarivi_debug==1) echo "Saldo_myytävissä funktio sanoo $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Erä: $zrow[era]) PVM: $saldoaikalisa<br>";
 

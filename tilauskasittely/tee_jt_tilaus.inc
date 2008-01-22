@@ -453,7 +453,9 @@
 							$var				= "";
 							$perheid		 	= $lisataanrow["perheid"];
 							$perheid2		 	= $lisataanrow["perheid2"];
-							$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);							
+							$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);
+							
+							$jtspec				= "JTSPEC";							
 						
 							if ($trow["alv"] != $lisataanrow["alv"] and $yhtiorow["alv_kasittely"] == "" and $lisataanrow["alv"] < 500) {
 								$hinta 			= sprintf('%.2f',round($lisataanrow["hinta"] / (1+$lisataanrow['alv']/100) * (1+$trow['alv']/100),$yhtiorow['hintapyoristys']));

@@ -675,7 +675,7 @@
 
 								if ($perherow["ei_saldoa"] == "") {
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $saldoaikalisa);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
 
 										$lapsitoimittamatta -= $myytavissa;
 									}
@@ -698,7 +698,7 @@
 
 						if ($jtrow["ei_saldoa"] == "") {
 							foreach ($varastosta as $vara) {
-								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $saldoaikalisa);
+								list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($jtrow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
 								$kokonaismyytavissa += $myytavissa;
 							}
 
@@ -1249,7 +1249,7 @@
 									$kokonaismyytavissa = 0;
 
 									foreach ($varastosta as $vara) {
-										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa, $saldoaikalisa);
+										list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($perherow["tuoteno"], "JTSPEC", $vara, "", "", "", "", "", $asiakasmaa);
 
 										$kokonaismyytavissa += $myytavissa;
 									}

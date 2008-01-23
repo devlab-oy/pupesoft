@@ -7,7 +7,7 @@ if (trim($tuoteno) == "") {
 	$tee = '';	
 }
 
-if ($tuoteno != "" and ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois")) {
+if ($tuoteno != "" and ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "vahvista")) {
 
 	$query = "	SELECT tuote.tunnus, tuote.tuoteno, kehahin, epakurantti25pvm, epakurantti50pvm, epakurantti75pvm, epakurantti100pvm, sum(saldo) saldo
 				FROM tuote

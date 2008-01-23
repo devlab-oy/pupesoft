@@ -529,9 +529,9 @@
 				(SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno) saldo				
 				FROM tuote use index (tuoteno, nimitys)
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
-				$lisa
-				$poislisa
 				$kieltolisa
+				$lisa
+				$poislisa				
 				ORDER BY tuote.tuoteno
 				LIMIT 500";
 	$result = mysql_query($query) or pupe_error($query);
@@ -565,8 +565,8 @@
 							JOIN tuote ON tuote.yhtio=korvaavat.yhtio and tuote.tuoteno=korvaavat.tuoteno
 							WHERE korvaavat.yhtio = '$kukarow[yhtio]'
 							and korvaavat.id = '$mrow[korvaavat]'
-							$poislisa 
 							$kieltolisa
+							$poislisa 							
 							ORDER BY korvaavat.jarjestys, korvaavat.tuoteno";
 				$kores = mysql_query($query) or pupe_error($query);
 				
@@ -604,8 +604,8 @@
 								JOIN tuote ON tuote.yhtio=tuoteperhe.yhtio and tuote.tuoteno=tuoteperhe.tuoteno
 								WHERE tuoteperhe.yhtio 	  = '$kukarow[yhtio]'
 								and tuoteperhe.isatuoteno = '$mrow[tuoteperhe]'
-								$poislisa 
 								$kieltolisa
+								$poislisa 								
 								ORDER BY tuoteperhe.tuoteno";
 					$kores = mysql_query($query) or pupe_error($query);
 

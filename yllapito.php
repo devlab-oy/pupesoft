@@ -617,7 +617,8 @@
 			$toim == "yhteensopivuus_tuote" or
 			$toim == "toimitustapa" or
 			$toim == "kirjoittimet" or
-			$toim == "hinnasto") {
+			$toim == "hinnasto" or
+			($toim == "toimi" and $kukarow["taso"] == "3")) {
 
 			// Tehd‰‰n "poista tietue"-nappi
 			if ($uusi != 1 and $toim != "yhtio" and $toim != "yhtion_parametrit") {
@@ -656,6 +657,11 @@
 
 		if ($errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
 			require ("inc/toimittajan_yhteyshenkilo.inc");
+			/*
+			if ($toim == "asiakas") {
+				require ("inc/asiakkaan_avainsanat.inc");
+			}
+			*/
 		}
 
 		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or $toim == "tuote")) {

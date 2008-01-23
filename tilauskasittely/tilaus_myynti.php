@@ -30,6 +30,10 @@ if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and $kukar
 	$valitsetoimitus = $toim;
 }
 
+if (isset($from) and $from == "LASKUTATILAUS") {
+	$takaisin = $from;
+}
+
 // Vaihdetaan tietyn projektin toiseen toimitukseen
 //	HUOM! tämä käyttää aktivointia joten tämä on oltava aika alussa!! (valinta on onchage submit rivisyötössä joten noita muita paremetreja ei oikein voi passata eteenpäin..)
 if ((int) $valitsetoimitus > 0) {
@@ -3968,6 +3972,7 @@ if ($tee == '') {
 							<input type='hidden' name='tuotenimitys' 	value = '$row[nimitys]'>
 							<input type='hidden' name='tila' 			value = 'MUUTA'>
 							<input type='hidden' name='tapa' 			value = 'MUOKKAA'>
+							<input type='hidden' name='takaisin'		value = '$takaisin'>
 							<input type='Submit' value='".t("Muokkaa")."'>
 							</form> ";
 
@@ -3980,6 +3985,7 @@ if ($tee == '') {
 							<input type='hidden' name='menutila'	 	value = '$menutila'>
 							<input type='hidden' name='tila' 			value = 'MUUTA'>
 							<input type='hidden' name='tapa' 			value = 'POISTA'>
+							<input type='hidden' name='takaisin'		value = '$takaisin'>
 							<input type='Submit' value='".t("Poista")."'>
 							</form> ";
 
@@ -4914,7 +4920,12 @@ if ($tee == '') {
 					<input type='hidden' name='projektilla' value='$projektilla'>
 					<input type='hidden' name='tee' value='VALMIS'>
 					<input type='hidden' name='tilausnumero' value='$tilausnumero'>
-					<input type='hidden' name='kaikkiyhteensa' value='".sprintf('%.2f',$summa)."'>";
+					<input type='hidden' name='kaikkiyhteensa' value='".sprintf('%.2f',$summa)."'>
+					<input type='hidden' name='takaisin' value = '$takaisin'>";
+					
+				if ($takaisin != "") {
+					echo "<input type='hidden' name='takaisin_valmis' value = 'YES'>";
+				}
 
 				if($arvo_ulkomaa != 0) {
 					echo "<input type='hidden' name='toimitetaan_ulkomaailta' value='YES'>";
@@ -5026,6 +5037,11 @@ if ($tee == '') {
 	}
 }
 
+if ($takaisin == "LASKUTATILAUS" and $takaisin_valmis == "YES") {
+	echo "	<form action='valitse_laskutettavat_tilaukset.php' method='post'>
+			<input type='submit' value='".t("Takaisin tilauksen laskutukseen")."'>
+			</form>";
+}
 
 if (file_exists("../inc/footer.inc")) {
 	require ("../inc/footer.inc");

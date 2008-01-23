@@ -44,6 +44,7 @@
 				<td valign='top' class='back'>
 				<input type='hidden' name='perheid' value = '$perheid'>
 				<input type='hidden' name='perheid2' value = '$perheid2'>
+				<input type='hidden' name='takaisin' value = '$takaisin'>
 				<input type='submit' name='tyhjenna' value='".t("Tyhjennä")."'> <font class='error'>$varaosavirhe</font></td>
 			</tr>";
 

@@ -575,7 +575,9 @@ if ($tila == '') {
 
 	$limit = '';
 	$lisa2 = '';
-
+	
+	$alku = (int) $alku;
+	
 	if ($nayta_kohdistetut == "jees") {
 		$limit = "";
 		$lisa2 = " and tilausrivi.uusiotunnus in ('$otunnus') ";

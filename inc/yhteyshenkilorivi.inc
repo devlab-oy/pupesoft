@@ -40,4 +40,31 @@
 		}
 	}
 	
+	if (mysql_field_name($result, $i) == "tilausyhteyshenkilo") {
+		
+		
+		if ($trow[$i] == "o") {
+			$sel = "SELECTED";
+		}
+		
+		
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' >".t("Ei")."</option>";
+		$ulos .= "<option value='K' $sel>".t("Kyllä")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
+	
+	if (mysql_field_name($result, $i) == "oletusyhteyshenkilo") {
+		
+		
+		if ($trow[$i] == "o") {
+			$sel = "CHECKED";
+		}
+		
+		
+		$ulos = "<td><input type='checkbox' name='oletusyhteyshenkilo' $sel $state></td>";
+		$jatko = 0;
+	}
+	
 ?>

@@ -130,7 +130,11 @@
 			$kilot  += $rahtirow["kilot"];
 			$kollit += $rahtirow["kollit"];
 		}
-
+		
+		if ($laskurow["bruttopaino"] > 0) {
+			$kilot = $laskurow["bruttopaino"];
+		}
+		
 		$query = "	SELECT
 					tuote.tullinimike1,
 					tuote.tullinimike2,

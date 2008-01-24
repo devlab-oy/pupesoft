@@ -111,16 +111,16 @@ if (!function_exists('alku')) {
 		//maksuehto tekstinä
 		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 
-		$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 	$thispage, $iso);
+		$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 		$thispage, $iso);
 
-		if ($tyyppi == "SIIRTOLISTA") {
-			$pdf->draw_text(310,815, t("Siirtolista", $kieli), 			$thispage, $iso);	
+		if ($tyyppi == "SISAINEN") {
+			$pdf->draw_text(300,815, t("Sisäinen työmääräys", $kieli), 	$thispage, $iso);
 		}
 		else {
 			$pdf->draw_text(310,815, t("Työmääräys", $kieli), 			$thispage, $iso);		
 		}
 
-		$pdf->draw_text(310, 803, t("Sivu", $kieli), 				$thispage, $norm);
+		$pdf->draw_text(310, 803, t("Sivu", $kieli), 					$thispage, $norm);
 
 		//Vasen sarake
 		//$pdf->draw_rectangle(737, 20,  674, 300, $thispage, $rectparam);
@@ -484,11 +484,16 @@ if (!function_exists('uusi_sivu')) {
 		//maksuehto tekstinä
 		$maksuehto = $masrow["teksti"]." ".$masrow["kassa_teksti"];
 
-		$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 	$thispage, $iso);
+		$pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"], 		$thispage, $iso);
 
-		$pdf->draw_text(310,815, t("Työmääräys", $kieli), 			$thispage, $iso);		
+		if ($tyyppi == "SISAINEN") {
+			$pdf->draw_text(300,815, t("Sisäinen työmääräys", $kieli), 	$thispage, $iso);
+		}
+		else {
+			$pdf->draw_text(310,815, t("Työmääräys", $kieli), 			$thispage, $iso);		
+		}		
 
-		$pdf->draw_text(310, 803, t("Sivu", $kieli), 				$thispage, $norm);
+		$pdf->draw_text(310, 803, t("Sivu", $kieli), 					$thispage, $norm);
 
 		//Oikea sarake
 		$pdf->draw_rectangle(800, 300, 779, 580, $thispage, $rectparam);		
@@ -793,11 +798,19 @@ if (!function_exists('rivi')) {
 		$kala = $kala - $rivinkorkeus;
 
 		if ($row["sarjanumeroseuranta"] != "") {
+			
+			if ($tyyppi == "SISAINEN") {
+				$tunken = "siirtorivitunnus";
+			}
+			else {
+				$tunken = "myyntirivitunnus";
+			}
+			
 			$query	= "	SELECT sarjanumero, parasta_ennen
 	   					FROM sarjanumeroseuranta
 	   					WHERE yhtio = '$kukarow[yhtio]'
 						and tuoteno = '$row[tuoteno]'
-	   					and myyntirivitunnus = '$row[tunnus]'";
+	   					and $tunken = '$row[tunnus]'";
 	   		$sarjares = mysql_query($query) or pupe_error($query);
 
 			while ($sarjarow = mysql_fetch_array($sarjares)) {

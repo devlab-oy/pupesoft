@@ -413,7 +413,6 @@ else {
 		foreach ($kateismaksu as $tili => $arvo) {			
 			if ((float) $arvo != 0) {
 				$arvo = str_replace(",",".",$arvo);
-				echo "<br>$arvo<br>";
 				$query = "	INSERT into tiliointi set
 							yhtio 		= '$kukarow[yhtio]',
 							ltunnus 	= '$tunnus',

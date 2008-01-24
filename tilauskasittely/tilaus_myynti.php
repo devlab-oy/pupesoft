@@ -307,7 +307,7 @@ if ($tee == "" and ($toim == "PIKATILAUS" and ((int) $kukarow["kesken"] == 0 and
 //Haetaan otsikon kaikki tiedot
 if ((int) $kukarow["kesken"] != 0) {
 
-	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO")) {
+	if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS")) {
 		$query  = "	SELECT *
 					FROM lasku, tyomaarays
 					WHERE lasku.tunnus='$kukarow[kesken]'
@@ -4200,8 +4200,12 @@ if ($tee == '') {
 				if ($row['kommentti'] != '') {
 					$cspan = 10;
 
-					if ($toim == "VALMISTAVARASTOON" or $toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
+					if ($toim == "VALMISTAVARASTOON") {
 						$cspan -= 6;
+					}
+					
+					if ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS") {
+						$cspan -= 7;
 					}
 
 					if ($kukarow['hinnat'] == 1) {

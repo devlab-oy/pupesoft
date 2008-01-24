@@ -73,6 +73,13 @@
 		$sivu  = 1;
 		$paino = 0;
 		
+		if ($toim == "SIIRTOTYOMAARAYS") {
+			$tyyppi = "SISAINEN";
+		}
+		else {
+			$tyyppi = "";
+		}
+		
 
 		// Aloitellaan lähetteen teko
 		if ($toim != "REKLAMAATIO") {

@@ -329,7 +329,8 @@ if ($tee=='MONISTA') {
 					case 'noutaja':
 					case 'jaksotettu':
 					case 'factoringsiirtonumero':					
-					case 'vanhatunnus':										
+					case 'vanhatunnus':
+					case 'tunnusnippu':										
 					case 'laskutuspvm':										
 					case 'maksuaika':					
 					case 'maa_maara':
@@ -716,6 +717,7 @@ if ($tee=='MONISTA') {
 										$uusi_tunken	= '$insid',
 										takuu_alku 		= '$sarjarow[takuu_alku]',
 										takuu_loppu		= '$sarjarow[takuu_loppu]',
+										era_kpl			= '$sarjarow[era_kpl]',
 										hyllyalue   	= '$sarjarow[hyllyalue]',
 										hyllynro    	= '$sarjarow[hyllynro]',
 										hyllytaso   	= '$sarjarow[hyllytaso]',

@@ -251,7 +251,7 @@
 		}
 
 		//Katotaan voidaanko tämä myydä joltain toiselta paikalta
-		if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F") {
+		if ($kpl_st > 0 and ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F")) {
 
 			$paikat .= "<option value='EIERAAVIELA#EIEI'>".t("Valitse erä")."</option>";
 						

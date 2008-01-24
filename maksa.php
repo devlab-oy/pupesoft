@@ -6,11 +6,13 @@
 	if (count($_POST) == 0) {
 		// Tarkistetaan  laskujen oletusmaksupvm, eli poistetaan vanhentuneet kassa-alet. tehd‰‰n ta‰m‰ aina kun aloitetaan maksatus
 		$query = "	UPDATE lasku use index (yhtio_tila_mapvm)
-	           		SET olmapvm = if(kapvm='0000-00-00', if(kapvm < now(), erpcm, kapvm), erpcm)
+	           		SET olmapvm = if(kapvm < now(), erpcm, kapvm)
 	            	WHERE yhtio = '$kukarow[yhtio]' 
 					and tila in ('H', 'M')
 					and mapvm = '0000-00-00'";
-		$result = mysql_query($query) or pupe_error($query);	
+		$result = mysql_query($query) or pupe_error($query);
+		if (mysql_affected_rows() != 0)
+			printf(t("P‰ivitin %d laskua, joiden oletusmaksup‰iv‰ oli muuttunut"), mysql_affected_rows());
 	}
 
     if ($tee == 'O') {
@@ -451,7 +453,7 @@
 							maksu_tili = '',
 							tila = 'M',
 							alatila = '',
-							olmapvm=if(kapvm<now(),if(kapvm='0000-00-00',erpcm,kapvm),erpcm)
+							olmapvm = if(kapvm < now(), erpcm, kapvm)
 							WHERE tunnus='$lasku' and yhtio = '$kukarow[yhtio]' and tila='P'";
 				$updresult = mysql_query($query) or pupe_error($query);
 
@@ -783,7 +785,7 @@
 			echo "<br>".t("Pankkiin l‰htev‰t maksut")."<hr>";
 			echo "<table><tr>";
 			echo "<th valign='top'>".t("Nimi")."</th>";
-			echo "<th valign='top'>".t("Kapvm")."<br>".t("Er‰pvm")."</th>";
+			echo "<th valign='top'>".t("Kapvm")."<br>".t("Er‰pvm")."<br>".t("Maksupvm")."</th>";
 			echo "<th valign='top'>".t("Summa")."<br>".t("kassa-alella")."</th>";
 			echo "<th valign='top'>".t("Summa")."</th>";
 			echo "<th valign='top'>".t("Ebid")."</th>";
@@ -809,7 +811,7 @@
 					echo "<td valign='top'><a href='muutosite.php?tee=E&tunnus=$trow[tunnus]'>$trow[nimi]</a></td>";
 				}
 				
-				echo "<td valign='top'>".tv1dateconv($trow['kapvm'])."<br>".tv1dateconv($trow['erpcm'])."</td>";				
+				echo "<td valign='top'>".tv1dateconv($trow['kapvm'])."<br>".tv1dateconv($trow['erpcm'])."<br>".tv1dateconv($trow['olmapvm'])."</td>";				
 				
 				if ($trow['kapvm'] != '0000-00-00') {
 					echo "<td valign='top' align='right' nowrap>$trow[ykasumma] $yhtiorow[valkoodi]<br>";

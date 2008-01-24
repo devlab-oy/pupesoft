@@ -1200,9 +1200,15 @@
 			}
 
 			$query = "	SELECT tapahtuma.laatija, tapahtuma.laadittu, tapahtuma.laji, tapahtuma.kpl, tapahtuma.kplhinta, tapahtuma.hinta,
-						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, tapahtuma.selite, lasku.tunnus laskutunnus
+						if(tapahtuma.laji in ('tulo','valmistus'), tapahtuma.kplhinta, tapahtuma.hinta)*tapahtuma.kpl arvo, 
+						tapahtuma.selite, lasku.tunnus laskutunnus,
+						concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+						tapahtuma.tuoteno,
+						tilausrivi.tunnus trivitunn,
+						tilausrivin_lisatiedot.osto_vai_hyvitys																		
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
 						LEFT JOIN tilausrivi use index (primary) ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)						
 						LEFT JOIN lasku use index (primary) ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
 						WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 						and tapahtuma.tuoteno = '$tuoteno'
@@ -1226,8 +1232,8 @@
 
 				if ($tapahtumalaji == "" or strtoupper($tapahtumalaji)==strtoupper($prow["laji"])) {
 					echo "<tr class='aktiivi'>";
-					echo "<td nowrap>$prow[laatija]@".tv1dateconv($prow["laadittu"], "pitka")."</td>";
-					echo "<td nowrap>";
+					echo "<td nowrap valign='top'>$prow[laatija]@".tv1dateconv($prow["laadittu"], "pitka")."</td>";
+					echo "<td nowrap valign='top'>";
 
 					if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {
 						echo "<a href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>".t("$prow[laji]")."</a>";
@@ -1241,12 +1247,61 @@
 
 					echo "</td>";
 
-					echo "<td nowrap align='right'>$prow[kpl]</td>";
-					echo "<td nowrap align='right'>$prow[kplhinta]</td>";
-					echo "<td nowrap align='right'>$prow[hinta]</td>";
-					echo "<td nowrap align='right'>".sprintf('%.2f', $prow["arvo"])."</td>";
-					echo "<td nowrap align='right'>".sprintf('%.2f', $vararvo_nyt)."</td>";
-					echo "<td>$prow[selite]</td>";
+					echo "<td nowrap align='right' valign='top'>$prow[kpl]</td>";
+					echo "<td nowrap align='right' valign='top'>$prow[kplhinta]</td>";
+					echo "<td nowrap align='right' valign='top'>$prow[hinta]</td>";
+					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $prow["arvo"])."</td>";
+					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $vararvo_nyt)."</td>";
+					echo "<td valign='top'>$prow[selite]";
+					
+					if (trim($prow["paikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[paikka]";
+					
+					
+					if ($tuoterow["sarjanumeroseuranta"] != "" and ($prow["laji"] == "tulo" or $prow["laji"] == "laskutus")) {
+						
+						if ($prow["laji"] == "tulo") {
+							//Haetan sarjanumeron tiedot
+							if ($prow["kpl"] < 0) {
+								$sarjanutunnus = "myyntirivitunnus";
+							}
+							else {
+								$sarjanutunnus = "ostorivitunnus";
+							}
+						}
+						if ($prow["laji"] == "laskutus") {
+							//Haetan sarjanumeron tiedot
+							if ($prow["osto_vai_hyvitys"] == '' and $prow["kpl"] < 0) {
+								$sarjanutunnus = "myyntirivitunnus";
+							}
+							elseif ($prow["kpl"] < 0){
+								$sarjanutunnus = "ostorivitunnus";
+							}
+							else {
+								$sarjanutunnus = "myyntirivitunnus";
+							}
+						}
+
+						$query = "	SELECT distinct sarjanumero
+									from sarjanumeroseuranta
+									where yhtio = '$kukarow[yhtio]'
+									and tuoteno = '$prow[tuoteno]'
+									and $sarjanutunnus='$prow[trivitunn]'
+									and sarjanumero != ''
+									group by sarjanumero
+									order by sarjanumero";
+						$sarjares = mysql_query($query) or pupe_error($query);
+
+						while($sarjarow = mysql_fetch_array($sarjares)) {							
+							if ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F") {
+								echo "<br>".t("E:nro").": $sarjarow[sarjanumero]";
+							}
+							else {
+								echo "<br>".t("S:nro").": $sarjarow[sarjanumero]";
+							}
+						}
+					}
+														
+					echo "</td>";
 					echo "</tr>";
 				}
 			}

@@ -74,8 +74,8 @@
 				$lisa .= " and tuote.tuotemerkki in $sel_tuotemerkki ";
 			}
 
-			if ($tuotteet != '') {
-				$tuotteet = explode("\n", $tuotteet);
+			if ($tuotteet_lista != '') {
+				$tuotteet = explode("\n", $tuotteet_lista);
 				$tuoterajaus = "";
 
 				foreach($tuotteet as $tuote) {
@@ -236,11 +236,11 @@
 							$kehahin += sarjanumeron_ostohinta("tunnus", $sarjarow["tunnus"]);
 						}
 										
-						$kehahin = sprintf('%.2f', ($kehahin / mysql_num_rows($sarjares)));					
+						$kehahin = sprintf('%.6f', ($kehahin / mysql_num_rows($sarjares)));					
 					}
 				}
 				else {
-					$kehahin = sprintf('%.2f', $row["kehahin"]);
+					$kehahin = $row["kehahin"];
 				}
 
 				if ($summaustaso == "S" and ($pp != date("d") or $kk != date("m") or $vv != date("Y"))) {
@@ -399,13 +399,13 @@
 
 							$worksheet->writeString($excelrivi, $excelsarake, $paikkarow["nimitys"], 	$format_bold);
 							$excelsarake++;
-							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyalue"], $format_bold);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyalue"], 		$format_bold);
 							$excelsarake++;
-							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllynro"], 	$format_bold);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllynro"], 		$format_bold);
 							$excelsarake++;
-							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyvali"], $format_bold);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllyvali"], 		$format_bold);
 							$excelsarake++;
-							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllytaso"], $format_bold);
+							$worksheet->writeString($excelrivi, $excelsarake, $row["hyllytaso"], 		$format_bold);
 							$excelsarake++;
 
 						}
@@ -429,9 +429,9 @@
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$muutoskpl));
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kehasilloin));
+						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$kehasilloin));
 						$excelsarake++;
-						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$muutoshinta));
+						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f",$muutoshinta));
 						$excelsarake++;
 						$worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f",$kierto));
 						$excelsarake++;
@@ -689,7 +689,7 @@
 		echo "</tr>";
 
 
-		echo "<tr><th valign='top'>".t("Tuotelista")."</th><td><textarea name='tuotteet' rows='5' cols='15'>$tuotteet</textarea></td></tr>";
+		echo "<tr><th valign='top'>".t("Tuotelista")."</th><td><textarea name='tuotteet_lista' rows='5' cols='15'>$tuotteet_lista</textarea></td></tr>";
 
 		echo "</table>";
 		echo "<br>";

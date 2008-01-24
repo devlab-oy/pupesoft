@@ -783,11 +783,19 @@ if (!function_exists('rivi_kerayslista')) {
 			$kala = $kala - $rivinkorkeus;
 			
 			if ($row["sarjanumeroseuranta"] != "") {
+				
+				if ($tyyppi == "SIIRTOLISTA") {
+					$tunken = "siirtorivitunnus";
+				}
+				else {
+					$tunken = "myyntirivitunnus";
+				}
+					
 				$query	= "	SELECT sarjanumero, parasta_ennen
 		   					FROM sarjanumeroseuranta
 		   					WHERE yhtio = '$kukarow[yhtio]'
 							and tuoteno = '$row[tuoteno]'
-		   					and myyntirivitunnus = '$row[tunnus]'";
+		   					and $tunken = '$row[tunnus]'";
 		   		$sarjares = mysql_query($query) or pupe_error($query);
 		   		
 				while ($sarjarow = mysql_fetch_array($sarjares)) {

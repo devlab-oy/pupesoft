@@ -320,22 +320,28 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		}
 		
 		$valinta1 = ""; // varaston tyyppi
+		$valinta3 = "";
 
 		// katotaan ollaanko annettu parametriksi joku tietty varastotyyppi
 		if ($tyyppi == "E") {
 			$valinta1 = " and varastopaikat.tyyppi = 'E' ";
+			$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 		}
 		elseif ($tyyppi == "V") {
 			$valinta1 = " and varastopaikat.tyyppi = 'V' ";
+			$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 		}
 		elseif ($tyyppi == "KAIKKI") {
 			$valinta1 = "";
+			$valinta3 = "";
 		}
 		elseif ($tyyppi == "ORVOT") {
 			$valinta1 = "";
+			$valinta3 = " HAVING varastopaikat.tyyppi is null ";
 		}
 		else {
 			$valinta1 = " and varastopaikat.tyyppi = '' ";
+			$valinta3 = " HAVING varastopaikat.tyyppi is not null ";
 		}
 		
 		$query = " 	SELECT *
@@ -377,6 +383,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 					$valinta1
 					WHERE tuote.yhtio = '$yhtio'
 					and tuote.tuoteno in ($tuotteet_str)
+					$valinta3
 					ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys";
 		$varresult = mysql_query($query) or pupe_error($query);
 		

@@ -299,6 +299,42 @@ if (!function_exists('alku')) {
 		if (trim($laskurow['sisviesti1']) != '') {
 			$komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
 		}
+		
+		// Tutkitaan onko tämä työmääräys
+		$query = "	SELECT group_concat(distinct otunnus) otunnus
+					FROM tilausrivi
+					WHERE yhtio='$kukarow[yhtio]'
+					and $where";
+		$tyomres = mysql_query($query) or pupe_error($query);	
+		$tyomrow = mysql_fetch_array($tyomres);
+		
+		$squery = "	SELECT tyomaarays.*
+					FROM tyomaarays
+					WHERE tyomaarays.yhtio = '$kukarow[yhtio]'
+					and tyomaarays.otunnus in ($tyomrow[otunnus])";
+		$tyomres = mysql_query($squery) or pupe_error($query);	
+		
+		while ($tyomrow = mysql_fetch_array($tyomres)) {
+			
+			$query = "	SELECT selitetark_2
+						FROM avainsana
+						WHERE yhtio = '$kukarow[yhtio]' 
+						and laji = 'sarjanumeron_li' 
+						and selite = 'MERKKI'
+						and selitetark = '$tyomrow[merkki]'
+						LIMIT 1";
+			$merkkires = mysql_query($query) or pupe_error($query);
+
+			if (mysql_num_rows($merkkires) > 0) {
+				$merkkirow = mysql_fetch_array($merkkires);					
+				$tyomrow["merkki"] = $merkkirow["selitetark_2"];	
+			}
+										
+			$komm .= "\n".t("Työmääräys", $kieli). ":###$tyomrow[otunnus]";
+			if ($tyomrow["valmnro"] != "") $komm .= "\n".t("Sarjanumero", $kieli). ":###$tyomrow[valmnro]";
+			if ($tyomrow["merkki"] != "") $komm .= "\n".t("Merkki", $kieli). ":###$tyomrow[merkki]";
+			if ($tyomrow["mallivari"] != "") $komm .= "\n".t("Malli", $kieli). ":###$tyomrow[mallivari]";
+		}
 
 		if ($yhtiorow["laskutyyppi"] == 1 or $yhtiorow["laskutyyppi"] == 4) {
 			$query 		= "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot from lasku where yhtio='$kukarow[yhtio]' and laskunro='$laskurow[laskunro]' and tila = 'L'";

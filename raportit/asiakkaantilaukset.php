@@ -47,12 +47,19 @@
 	
 		$query = "SELECT ytunnus, liitostunnus FROM lasku WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[kesken]' and $til";
 		$keskenresult = mysql_query($query) or pupe_error($query);
+
 		if (mysql_num_rows($keskenresult) == 1) {
 			$keskenrow = mysql_fetch_array($keskenresult);	
 		
 			$ytunnus = $keskenrow['ytunnus'];
-			$asiakasid = $keskenrow['liitostunnus'];
-		
+			
+			if ($toim == 'OSTO') {
+				$toimittajaid 	= $keskenrow['liitostunnus'];
+			}
+			else {
+				$asiakasid 		= $keskenrow['liitostunnus'];
+			}
+					
 			if (!isset($kka))
 				$kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 			if (!isset($vva))
@@ -155,7 +162,13 @@
 			$laskunro = $row["laskunro"];
 		}
 		$ytunnus   = $row["ytunnus"];
-		$asiakasid = $row["liitostunnus"];
+		
+		if ($toim == 'OSTO') {
+			$toimittajaid 	= $row["liitostunnus"];	
+		}
+		else {
+			$asiakasid 		= $row["liitostunnus"];	
+		}		
 	}
 	elseif($sopimus > 0) {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus
@@ -167,7 +180,13 @@
 
 		$laskunro = $row["laskunro"];
 		$ytunnus  = $row["ytunnus"];
-		$asiakasid = $row["liitostunnus"];
+		
+		if ($toim == 'OSTO') {
+			$toimittajaid 	= $row["liitostunnus"];	
+		}
+		else {
+			$asiakasid 		= $row["liitostunnus"];	
+		}
 	}
 	elseif($laskunro > 0) {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus
@@ -179,7 +198,13 @@
 
 		$laskunro = $row["laskunro"];
 		$ytunnus  = $row["ytunnus"];
-		$asiakasid = $row["liitostunnus"];
+		
+		if ($toim == 'OSTO') {
+			$toimittajaid 	= $row["liitostunnus"];	
+		}
+		else {
+			$asiakasid 		= $row["liitostunnus"];	
+		}
 	}
 	elseif($astilnro != '') {
 		$query = "	SELECT laskunro, ytunnus, liitostunnus, tunnus
@@ -196,9 +221,15 @@
 			$otunnus = $row["tunnus"];
 		}
 		$ytunnus   = $row["ytunnus"];
-		$asiakasid = $row["liitostunnus"];
+		
+		if ($toim == 'OSTO') {
+			$toimittajaid 	= $row["liitostunnus"];	
+		}
+		else {
+			$asiakasid 		= $row["liitostunnus"];	
+		}
 	}
-	
+		
 	if ($ytunnus != '') {
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>
 			<input type='hidden' name='ytunnus' value='$ytunnus'>
@@ -259,7 +290,10 @@
 		}
 		
 		if ($toim == 'OSTO') {
-			$asiakasid = $toimittajaid;
+			$litunn = $toimittajaid;
+		}
+		else {
+			$litunn = $asiakasid;
 		}
 
 		if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
@@ -267,7 +301,7 @@
 				$query = "	SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.liitostunnus = '$asiakasid'
+							and lasku.liitostunnus = '$litunn'
 							and $til
 							and lasku.laskunro='$laskunro'";
 			}
@@ -275,14 +309,14 @@
 				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.liitostunnus = '$asiakasid'
+							and lasku.liitostunnus = '$litunn'
 							and $til
 							and tunnus='$sopimus')
 							UNION
 							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.liitostunnus = '$asiakasid'
+							and lasku.liitostunnus = '$litunn'
 							and $til
 							and lasku.clearing='sopimus'
 							and lasku.swift='$sopimus')";
@@ -291,14 +325,14 @@
 				$query = "	(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.liitostunnus = '$asiakasid'
+							and lasku.liitostunnus = '$litunn'
 							and $til
 							and lasku.tunnus='$otunnus')
 							UNION
 							(SELECT lasku.tunnus tilaus, laskunro, concat_ws(' ', nimi, nimitark) asiakas, ytunnus, toimaika, laatija, summa, tila, alatila
 							FROM lasku
 							WHERE lasku.yhtio = '$kukarow[yhtio]'
-							and lasku.liitostunnus = '$asiakasid'
+							and lasku.liitostunnus = '$litunn'
 							and $til
 							and lasku.tunnusnippu='$otunnus')";
 			}
@@ -326,7 +360,7 @@
 							and lasku.postitp	= '$asiakasrow[postitp]' ";
 			}
 			else {
-				$query .= "	and lasku.liitostunnus	= '$asiakasid'";
+				$query .= "	and lasku.liitostunnus	= '$litunn'";
 			}
 			
 			$query .= "	and $til

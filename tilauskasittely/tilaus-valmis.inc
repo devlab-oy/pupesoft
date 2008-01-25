@@ -557,7 +557,7 @@ else {
 			}
 			
 			//haetaan kaikkien tilausrivien varastopaikat
-			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  kerayspvm, toimaika,
+			$query = "	SELECT tilausrivi.otunnus, tilausrivi.tunnus, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso,  tilausrivi.kerayspvm, tilausrivi.toimaika,
 						concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
 						FROM tilausrivi
 						LEFT JOIN tuote on tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
@@ -628,29 +628,18 @@ else {
 						}
 					}
 				}
-
-				//varaasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu				
+										
+				//varasto vaihtuu, splitataan tilaus, paitsi jos kyseess‰ on jv-tilaus jonka rahtikirja tulostetaan heti, tai jos spliauskielto on trigattu				
 				if ((($varasto != $edvarasto and $edvarasto != 'x') and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E") or ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $yhtiorow["splittauskielto"] == "K")) {
 					
-					//	Meid‰n on p‰ivitett‰v‰t tunnusnippu	
+					// Meid‰n on p‰ivitett‰v‰ tunnusnippu	
 					if($yhtiorow["splittauskielto"] == "K" and $laskurow["tunnusnippu"] == 0) {
-						$query = "update lasku set tunnusnippu = tunnus where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]' and tunnusnippu = 0";
+						$query = "UPDATE lasku set tunnusnippu = tunnus where yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]' and tunnusnippu = 0";
 						$upresult = mysql_query($query) or pupe_error($query);
 						$laskurow["tunnusnippu"] = $laskurow["tunnus"];
 					}
-					
-					//	Uudenm otsikon toim ja kerpvm
-					if($yhtiorow["splittauskielto"] == "K") {
-						$toim_kerayspvm = $row["kerayspvm"];
-						$toim_toimaika = $row["toimaika"];						
-					}
-					else {
-						$toim_kerayspvm = $laskurow["kerayspvm"];
-						$toim_toimaika = $laskurow["toimaika"];												
-					}
-					
-				
-					//tehd‰‰n uusi otsikko
+														
+					// Tehd‰‰n uusi otsikko
 					$query = "	INSERT into lasku SET
 								yhtio_nimi							= '$laskurow[yhtio_nimi]',
 								yhtio_osoite						= '$laskurow[yhtio_osoite]',
@@ -668,7 +657,7 @@ else {
 								erpcm								= '$laskurow[erpcm]',
 								kapvm								= '$laskurow[kapvm]',
 								kasumma								= '$laskurow[kasumma]',
-								kerayspvm							= '$toim_kerayspvm',
+								kerayspvm							= '$laskurow[kerayspvm]',
 								keraysvko							= '$laskurow[keraysvko]',
 								ketjutus							= '$laskurow[ketjutus]',
 								laatija								= '$laskurow[laatija]',
@@ -695,7 +684,7 @@ else {
 								toim_ovttunnus						= '$laskurow[toim_ovttunnus]',
 								toim_postino						= '$laskurow[toim_postino]',
 								toim_postitp						= '$laskurow[toim_postitp]',
-								toimaika							= '$toim_toimaika',
+								toimaika							= '$laskurow[toimaika]',
 								toimvko								= '$laskurow[toimvko]',
 								toimitusehto						= '$laskurow[toimitusehto]',
 								kohdistettu 						= '$laskurow[kohdistettu]',
@@ -775,24 +764,47 @@ else {
 
 				//jos tilausrivin laskunumero on eri
 				if ($row['otunnus'] != $laskurow['tunnus']) {
-					$query = "update tilausrivi set otunnus='$laskurow[tunnus]' where tunnus='$row[tunnus]' and yhtio='$kukarow[yhtio]'";
+					$query = "UPDATE tilausrivi set otunnus='$laskurow[tunnus]' where tunnus='$row[tunnus]' and yhtio='$kukarow[yhtio]'";
 					$ohno  = mysql_query($query) or pupe_error($query);
 				}
 			}
 
-			$query = "select tunnus, sisviesti2 from lasku where yhtio = '$kukarow[yhtio]' and vanhatunnus = '$laskurow[tunnus]'";
-			$result = mysql_query($query) or pupe_error($query);
-			
-			if (mysql_num_rows($result) > 1) {
+			// Jos tilaus splittaantui moneen osaan
+			if(count($tilausnumerot) > 1) {
+				foreach ($tilausnumerot as $tilausnumero) {	
+					$upviesti = t("Tilaus jakaantunut")." ".count($tilausnumerot)." ".t("tilaukseksi")."!";
 
-				$montakotilausta = mysql_num_rows($result);
-
-				while ($row = mysql_fetch_array($result)) {
-
-					$upviesti = $row["sisviesti2"]." ".t("tilaus jakaantunut")." $montakotilausta ".t("tilaukseksi")."!";
-
-					$query = "update lasku set sisviesti2 = '$upviesti' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]'";
+					$query = "	UPDATE lasku set sisviesti2 = concat_ws(' ', sisviesti2, '$upviesti') 
+								where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$upresult = mysql_query($query) or pupe_error($query);
+				}
+			}
+			
+			// Laitetaan splittien toim ja kerpvm ‰t kuntoon / viikkojutut on pakko nollata splitille
+			if($yhtiorow["splittauskielto"] == "K" and count($tilausnumerot) > 1) {
+				foreach ($tilausnumerot as $tilausnumero) {
+					
+					$query = "	SELECT min(kerayspvm) kerayspvm, min(toimaika) toimaika 
+					 			from tilausrivi 
+								where yhtio='$kukarow[yhtio]' and otunnus='$tilausnumero'";
+					$result = mysql_query($query) or pupe_error($query);
+					$toimaikatilrirow = mysql_fetch_array($result);
+										
+					$query = "	SELECT kerayspvm, toimaika
+								from lasku 
+								where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
+					$result = mysql_query($query) or pupe_error($query);
+					$toimaikalaskurow = mysql_fetch_array($result);
+													
+					if ($toimaikatilrirow["kerayspvm"] != substr($toimaikalaskurow["kerayspvm"],0,10) or $toimaikatilrirow["toimaika"] != $toimaikalaskurow["toimaika"]) {
+						$query = "	UPDATE lasku 
+									set kerayspvm 	= '$toimaikatilrirow[kerayspvm]', 
+									toimaika		= '$toimaikatilrirow[toimaika]', 
+									keraysvko		= '', 
+									toimvko			= '' 
+									where yhtio = '$kukarow[yhtio]' and tunnus = '$tilausnumero'";
+						$upresult = mysql_query($query) or pupe_error($query);						
+					}									
 				}
 			}
 
@@ -846,7 +858,7 @@ else {
 				//	Ja rullataan kaikki tilaukset l‰pi
 				foreach ($tilausnumerot as $tilausnumero) {
 					//luetaan laskun tiedot uudestaan t‰ss‰, per splitti
-					$query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
+					$query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tilausnumero'";
 					$result = mysql_query($query) or pupe_error($query);
 					$laskurow = mysql_fetch_array($result);
 					
@@ -914,7 +926,7 @@ else {
 $hinta = '';
 
 // tilaus ei en‰‰ kesken...
-$query	= "update kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+$query	= "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
 $result = mysql_query($query) or pupe_error($query);
 
 if ($silent == "") {

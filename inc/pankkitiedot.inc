@@ -79,7 +79,7 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			$pankki["rahalaitos"]		= '4 ';
 			$pankki["pankkilaitos"] 	= "Nooa";
 			$pankki["tiedostonimilum2"]	= "XXXXLUM2.DAT";
-			$pankki["ytunnus"]		= sprintf("%010.10s",$yhtiorow["ytunnus"])." ";
+			$pankki["ytunnus"]			= sprintf("%010.10s",$yhtiorow["ytunnus"])." ";
 			break;
 		case (5) : //osuuspankit (Op), OKO ja Okopankki
 			$pankki["rahalaitos"]		= '5 ';
@@ -108,12 +108,14 @@ function pankkitiedot($tilino, $asiakastunnus) {
 			$pankki["tiedostonimi"] 	= "LEOL2L.DAT";
 			$pankki["tiedostonimilum2"]	= "LEUM2L.DAT";
 			break;
-		case ("K") : //Maksetaan kassasta
-			$pankki["rahalaitos"]		= '  ';
-			$pankki["pankkilaitos"] 	= "Kassa";
-			$pankki["tiedostonimi"] 	= "Kassa.DAT";
-			$pankki["tiedostonimilum2"] = "Kassa_ulk.DAT";
-			break;
+		default :		
+			if (trim($tmp_tilino) != "" and !is_numeric($tmp_tilino)) { //Maksetaan kassasta tai selvittelytililtä
+				$pankki["rahalaitos"]		= '  ';
+				$pankki["pankkilaitos"] 	= "Kassa_Selivittely";
+				$pankki["tiedostonimi"] 	= "Kassa_Selivittely.DAT";
+				$pankki["tiedostonimilum2"] = "Kassa_Selivittely_ulk.DAT";
+			}		
+		break;
 	}
 
 	if($pankki["rahalaitos"] == "" or strlen($pankki["rahalaitos"]) != 2) {

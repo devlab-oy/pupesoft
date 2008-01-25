@@ -45,28 +45,23 @@
 			$pankkitiedot = array();
 
 			while ($row = mysql_fetch_array($result)) {
+				$pankkitili = $row["tilino"];
 
-				// tili k‰sitell‰‰n vaan jos se alkaa numerolla
-				if (is_numeric(substr($row["tilino"], 0, 1))) {
+				require("inc/pankkitilinoikeellisuus.php");
 
-					$pankkitili = $row["tilino"];
-
-					require("inc/pankkitilinoikeellisuus.php");
-
-					if ($pankkitili == "") {
-						echo "<font class='error'>Pankkitili $row[nimi], '$row[tilino]' on virheellinen</font><br>";
-						exit;
-					}
-					elseif ($row["tilino"] != $pankkitili) {
-						$query = "UPDATE yriti SET tilino = '$pankkitili' WHERE tunnus = $row[tunnus]";
-						$xresult = mysql_query($query) or pupe_error($query);
-
-						echo "P‰ivitin tilin $row[nimi]<br><br>";
-					}
-
-					//Haetaan tilinumeron perusteella pankin tiedot
-					$pankkitiedot[$pankkitili] = pankkitiedot($pankkitili, $row["asiakastunnus"]);
+				if ($pankkitili == "") {
+					echo "<font class='error'>Pankkitili $row[nimi], '$row[tilino]' on virheellinen</font><br>";
+					exit;
 				}
+				elseif ($row["tilino"] != $pankkitili) {
+					$query = "UPDATE yriti SET tilino = '$pankkitili' WHERE tunnus = $row[tunnus]";
+					$xresult = mysql_query($query) or pupe_error($query);
+
+					echo "P‰ivitin tilin $row[nimi]<br><br>";
+				}
+
+				//Haetaan tilinumeron perusteella pankin tiedot
+				$pankkitiedot[$pankkitili] = pankkitiedot($pankkitili, $row["asiakastunnus"]);
 			}
 		}
 

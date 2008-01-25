@@ -1402,7 +1402,7 @@
 		$apu = $trow[$i];
 		$sel[$apu] = "SELECTED";
 		
-		$ulos .= "<option value = 'K' $sel[K]>".t("Kyllä")."</option>";
+		$ulos .= "<option value = '' $sel>".t("Kyllä")."</option>";
 		$ulos .= "<option value = 'E' $sel[E]>".t("Ei")."</option>";
 		$ulos .= "</select></td>";
 

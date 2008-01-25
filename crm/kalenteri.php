@@ -537,7 +537,7 @@ if (trim($konserni) != '') {
 	$ckhk = "CHECKED";
 }
 
-if ($yhtiorow["monikayttajakalenteri"] == "K" or $kukarow["asema"] == "MP") {
+if ($yhtiorow["monikayttajakalenteri"] == "" or $kukarow["asema"] == "MP") {
 
 	//konsernivalinta
 	echo "<tr><td>";
@@ -868,7 +868,8 @@ echo "</tr>";
 	
 
 //kalenterivalinta end
-echo "</table></th></tr></table><br><br>";
+echo "</table></th></tr></table><br>
+<br>";
 
 require ("../inc/footer.inc");
 

@@ -522,6 +522,7 @@ if($tee == "menu") {
 
 if($tee == "monistalasku") {
 	
+	
 	//	Tehd‰‰n t‰m‰ funktiossa niin ei saada v‰‰ri‰ muuttujia injisoitua
 	function monistalasku($laskunro) {
 		global $yhtiorow, $kukarow;
@@ -878,15 +879,26 @@ if($tee == "asiakastiedot") {
 	}
 	elseif($nayta == "tilaushistoria") {
 
+		$selv = array();
+		$selv[$vainomat] = "SELECTED";
+		
 		echo "<table width='800'>
 			<tr>
-				<td class='back' colspan='5'>
+				<td class='back' colspan='5'> 
+				<div style='float: right;'>
+				<form id = 'vainoma' name='tilaushaku' action = \"javascript:ajaxPost('vainoma', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tila=$tila', 'selain', false, true);\" method = 'post'>
+					<select name='vainomat' onchange='submit();'>
+						<option value=''>N‰yt‰ kaikkien tilaukset</option>
+						<option value='x' {$selv["x"]}>N‰yt‰ vain minun tilaukset</option>
+					</select>
+				</form>
+				</div><br>
 				Tilaushaku:<br>
-				<form id = 'tilaushaku' name='tilaushaku' action = \"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=viitteet', 'selain', false, true);\" method = 'post'>
+				<form id = 'tilaushaku' name='tilaushaku' action = \"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=viitteet', 'selain', false, true);\" method = 'post'>
 					<input type = 'text' size='50' name = 'tilaushaku' value='$tilaushaku'>
 				</form><br>
-				<a href=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=viitteet', 'selain', false, true);\">".t("Hae laskun viitteist‰")."</a><br>
-				<a href=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=toimitusosoite', 'selain', false, true);\">".t("Hae laskun toimitusosoitteesta")."</a><br>
+				<a href=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=viitteet', 'selain', false, true);\">".t("Hae laskun viitteist‰")."</a><br>
+				<a href=\"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=toimitusosoite', 'selain', false, true);\">".t("Hae laskun toimitusosoitteesta")."</a><br>
 				<br>
 				</td>
 			</tr>";
@@ -903,6 +915,9 @@ if($tee == "asiakastiedot") {
 				}
 				
 				if($where != "") {
+					
+					if($vainomat != "") $where .= " and laatija = '{$kukarow["kuka"]}'";
+					
 					$query = "	SELECT lasku.*, date_format(luontiaika, '%d. %m. %Y') luontiaika, if(laskutettu>0,date_format(laskutettu, '%d. %m. %Y'), '') laskutettu,
 								(
 									SELECT sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
@@ -937,7 +952,7 @@ if($tee == "asiakastiedot") {
 										<td>{$laskurow["laskutettu"]}</td>														
 										<td>{$laskurow[viesti]}</td>
 										<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-										<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tilaus=$laskurow[tunnus]', false, true);\">".t("Avaa")."</a>$monista</td>
+										<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tilaus=$laskurow[tunnus]', false, true);\">".t("Avaa")."</a>$monista</td>
 									</tr>";
 							
 							if($tilaus == $laskurow["tunnus"]) {
@@ -987,8 +1002,11 @@ if($tee == "asiakastiedot") {
 				$aika = "(select max(toimitettuaika) from tilausrivi where tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)";
 				$tilat = "tila = 'L' and alatila IN ('D', 'J', 'V', 'X')";
 			}
-
+			
 			if($aika != "") {
+				
+				if($vainomat != "") $tilat .= " and laatija = '{$kukarow["kuka"]}'";
+				
 				$query = "	SELECT lasku.*, date_format($aika, '%d. %m. %Y') aika,
 							(
 								SELECT sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)))
@@ -1037,7 +1055,7 @@ if($tee == "asiakastiedot") {
 													<td>{$laskurow["aika"]}</td>
 													<td>{$laskurow[viesti]}</td>
 													<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-													<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=$tila&tilaus=$laskurow[tunnus]', false, true);\">".t("Avaa")."</a></td>
+													<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&tilaus=$laskurow[tunnus]', false, true);\">".t("Avaa")."</a></td>
 												</tr>$lisa";
 					}				
 				}			
@@ -1057,7 +1075,7 @@ if($tee == "asiakastiedot") {
 			echo "
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=kesken', false, true);\">".t("Keskener‰iset tilaukset")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kesken', false, true);\">".t("Keskener‰iset tilaukset")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -1067,7 +1085,7 @@ if($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=kasittely', false, true);\">".t("Odottaa k‰sittely‰")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=kasittely', false, true);\">".t("Odottaa k‰sittely‰")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -1077,7 +1095,7 @@ if($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=odottaa', false, true);\">".t("Odottaa toimitusta")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=odottaa', false, true);\">".t("Odottaa toimitusta")."</a>
 					</td>
 				</tr>
 				<tr>
@@ -1087,7 +1105,7 @@ if($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=toimituksessa', false, true);\">".t("Tilaus toimituksessa")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimituksessa', false, true);\">".t("Tilaus toimituksessa")."</a>
 					</td>								
 				</tr>
 				<tr>
@@ -1097,7 +1115,7 @@ if($tee == "asiakastiedot") {
 
 				<tr>
 					<td class='back' colspan='5'>
-						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&tila=toimitettu', false, true);\">".t("tilaus toimitettu")."</a>
+						<a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=toimitettu', false, true);\">".t("tilaus toimitettu")."</a>
 					</td>
 				</tr>
 				<tr>

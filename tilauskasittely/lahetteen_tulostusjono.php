@@ -95,7 +95,7 @@
 				//jos kaikki on ok...
 				if (mysql_num_rows($keskenresult)==0) {
 
-					$query    = "	select *
+					$query    = "	SELECT *
 									from lasku
 									where tunnus in ($tilausnumeroita)
 									and ((tila = '$tila' and alatila = '$lalatila') $tila_lalatila_lisa)
@@ -156,8 +156,8 @@
 					if(min(lasku.clearing)='','N',if(min(lasku.clearing)='JT-TILAUS','J',if(min(lasku.clearing)='ENNAKKOTILAUS','E',''))) t_tyyppi,
 					left(min(lasku.kerayspvm),10) kerayspvm,
 					left(min(lasku.toimaika),10) toimaika,
-					keraysvko,
-					toimvko,
+					min(keraysvko) keraysvko,
+					min(toimvko) toimvko,
 					varastopaikat.nimitys varastonimi,
 					varastopaikat.tunnus varastotunnus,
 					lasku.tunnus otunnus,
@@ -599,8 +599,8 @@
 					min(if(lasku.clearing = '', 'N', if(lasku.clearing = 'JT-TILAUS', 'J', if(lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
 					left(min(lasku.kerayspvm),10) kerayspvm,
 					left(min(lasku.toimaika),10) toimaika,
-					min(keraysvko),
-					min(toimvko),
+					min(keraysvko) keraysvko,
+					min(toimvko) toimvko,
 					GROUP_CONCAT(distinct lasku.tunnus SEPARATOR ',') otunnus,
 					count(distinct otunnus) tilauksia, 
 					count(*) riveja,

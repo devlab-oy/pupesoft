@@ -54,7 +54,7 @@ function hinnastorivi($tuote, $laskurow) {
 		}
 	}
 	
-	$myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1);
+	$myyntihinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", tuotteen_myyntihinta($laskurow, $tuote, 1));
 
 	$out  = sprintf('%-20.20s'	,$tuote["tuoteno"]);
 	$out .= sprintf('%-60.60s'	,asana('nimitys_',$tuote['tuoteno'],$tuote['nimitys']));

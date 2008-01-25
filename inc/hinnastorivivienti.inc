@@ -1,8 +1,7 @@
 <?php
-ini_set('error_reporting', E_ALL | E_STRICT);
 
 function hinnastorivi($tuote, $laskurow) {
-    global $kukarow;
+    global $kukarow, $yhtiorow;
     
     static $rivi = 1;
     

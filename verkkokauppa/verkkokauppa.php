@@ -1194,7 +1194,7 @@ if($tee == "") {
 				<input type='text' value='' name='user' size='15' maxlength='30'>
 				<font class='login'>".t("Salasana",$browkieli).":</font>
 				<input type='password' name='salasana' size='15' maxlength='30'>
-				<input type='submit' value='".t("Kirjaudu sis‰‰n",$browkieli)."'>
+				<button onclick='submit()'>".t("Kirjaudu sis‰‰n",$browkieli)."</button>
 				<br>
 				$errormsg
 			</form>";
@@ -1202,9 +1202,9 @@ if($tee == "") {
 	}
 	else {
 		$login_screen = "
-			<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot', false, true);\">".t("Asiakastiedot")."</a>
+			<button onclick=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot', false, true);\">".t("Asiakastiedot")."</button>
 			&nbsp;&nbsp;
-			<a href = '".$palvelin2."logout.php?location='".$palvelin."verkkokauppa.php'>".t("Kirjaudu ulos")."</a>";
+			<button onclick=\"javascript:document.location='".$palvelin2."logout.php?location=".$palvelin2."verkkokauppa.php';\">".t("Kirjaudu ulos")."</button>";
 	}
 	
 	$verkkokauppa =  "	

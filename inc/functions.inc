@@ -374,7 +374,7 @@ if (!function_exists("tuoteperhe_myytavissa")) {
 		
 		$tuotteet_str = substr($tuotteet_str, 0, -1);				
 		
-		$query = "	SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys
+		$query = "	SELECT distinct varastopaikat.tunnus, varastopaikat.nimitys, varastopaikat.tyyppi
 		 			FROM tuote
 					JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
 					JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio

@@ -75,14 +75,20 @@
 			$komres = mysql_query($query) or pupe_error($query);
 			$komrow = mysql_fetch_array($komres);
 			$komento = $komrow['komento'];
-			for($a = 0; $a < $tkpl; $a++) {
-				if ($malli== 'Tec') {
-					require("inc/tulosta_tuotetarrat_tec.inc");
-				}
-				elseif ($malli== 'Intermec') {
-					require("inc/tulosta_tuotetarrat_intermec.inc");
+			if ($malli != 'Zebra') {
+				for($a = 0; $a < $tkpl; $a++) {
+					if ($malli== 'Tec') {
+						require("inc/tulosta_tuotetarrat_tec.inc");
+					}
+					elseif ($malli== 'Intermec') {
+						require("inc/tulosta_tuotetarrat_intermec.inc");
+					}
 				}
 			}
+			else {
+				require("inc/tulosta_tuotetarrat_zebra.inc");
+			}
+
 			$tuoteno = '';
 			$tee = '';
 		}
@@ -122,6 +128,7 @@
 	$pohjat=array();
 	$pohjat[]='Tec';
 	$pohjat[]='Intermec';
+	$pohjat[]='Zebra';
 
 	echo "<td><select name='malli'>";
 	echo "<option value='$kirow[tunnus]'>".t("Ei mallia")."</option>";

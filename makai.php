@@ -35,9 +35,10 @@
 
 		if ($kotimaa == "FI") {
 			// Tarkistetaan yrityksen pankkitilien oikeellisuudet
-			$query = "SELECT tilino, nimi, tunnus, asiakastunnus
-					  FROM yriti
-					  WHERE yhtio ='$kukarow[yhtio]'";
+			$query = "	SELECT tilino, nimi, tunnus, asiakastunnus
+					  	FROM yriti
+					  	WHERE yhtio ='$kukarow[yhtio]'
+					  	and tilino != ''";
 			$result = mysql_query($query) or pupe_error($query);
 
 			//Haetaan funktio joka tuo pankin tietoja
@@ -46,9 +47,11 @@
 
 			while ($row = mysql_fetch_array($result)) {
 				$pankkitili = $row["tilino"];
-
-				require("inc/pankkitilinoikeellisuus.php");
-
+				
+				if (is_numeric(substr($row["tilino"], 0, 1))) {
+					require("inc/pankkitilinoikeellisuus.php");
+				}
+				
 				if ($pankkitili == "") {
 					echo "<font class='error'>Pankkitili $row[nimi], '$row[tilino]' on virheellinen</font><br>";
 					exit;

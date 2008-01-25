@@ -1,15 +1,17 @@
 <?php
 
-require('inc/parametrit.inc');
+if($vain_monista == ""){
+	require('inc/parametrit.inc');
 
-if ($tee == 'NAYTATILAUS') {
-	echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
-	require ("raportit/naytatilaus.inc");
-	echo "<br><br><br>";
-	$tee = "ETSILASKU";
+	if ($tee == 'NAYTATILAUS') {
+		echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+		require ("raportit/naytatilaus.inc");
+		echo "<br><br><br>";
+		$tee = "ETSILASKU";
+	}	
+	
+	echo "<font class='head'>".t("Monista lasku")."</font><hr>";
 }
-
-echo "<font class='head'>".t("Monista lasku")."</font><hr>";
 
 if ($tee == '') {
 	if ($ytunnus != '') {
@@ -234,7 +236,10 @@ if ($tee=='MONISTA') {
 	// Jos hyvitä on 'on', niin silloin $kklkm täytyy aina olla 1
 	// $korjaaalvit array kertoo korjataanko kopioitavat tilauksen alvit
 	// $suoraanlasku array sanoo että tilausta ei kerätä vaan se menee suoraan laskutusjonoon
-
+	
+	// Otetaan uudet tunnukset talteen
+	$tulos_ulos = array();	
+	
 	foreach($monistettavat as $lasku => $kumpi) {
 
 		$alvik 		= "";
@@ -429,8 +434,10 @@ if ($tee=='MONISTA') {
 
 			$kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 			$insres  = mysql_query($kysely) or pupe_error($kysely);
-			$utunnus = mysql_insert_id($link);
-
+			$utunnus = mysql_insert_id();
+			
+			$tulos_ulos[] = $utunnus;
+			
 			if ($toim == 'SOPIMUS') {
 				echo t("Uusi sopimusnumero on")." $utunnus<br><br>";
 			}
@@ -808,7 +815,7 @@ if ($tee=='MONISTA') {
 	$tee = ''; //mennään alkuun
 }
 
-if ($tee == '') {
+if ($tee == '' and $vain_monista == "") {
 	//syötetään tilausnumero
 	echo "<br><table>";
 	echo "<form action = '$PHP_SELF' method = 'post'>";
@@ -832,7 +839,8 @@ if ($tee == '') {
 		echo "</form>";
 	}
 
+	require ('inc/footer.inc');
 }
 
-require ('inc/footer.inc');
+
 ?>

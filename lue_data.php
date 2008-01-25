@@ -541,23 +541,40 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name'])==TRUE) {
 					}
 
 					// tehdään riville oikeellisuustsekkejä
-					if ($table == 'tuotteen_toimittajat' and $otsikot[$r] == 'TOIMITTAJA') {
+					if ($table == 'tuotteen_toimittajat' and $otsikot[$r] == 'TOIMITTAJA' and !in_array("LIITOSTUNNUS", $otsikot)) {
+
 						$tpque = "	SELECT tunnus 
 									from toimi 
 									where yhtio	= '$kukarow[yhtio]' 
 									and ytunnus	= '$rivi[$r]' 
-									and tyyppi != 'P'
-									order by tunnus
-									limit 1";
+									and tyyppi != 'P'";
 						$tpres = mysql_query($tpque) or pupe_error($tpque);
 
-						if (mysql_num_rows($tpres) == 0) {
-							echo t("Toimittajaa")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>";
+						if (mysql_num_rows($tpres) != 1) {
+							echo t("Toimittajaa")." '$rivi[$r]' ".t("ei löydy! Tai samalla ytunnuksella löytyy useita toimittajia! Lisää toimittajan tunnus LIITOSTUNNUS-sarakkeeseen. Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>";
 							$hylkaa++; // ei päivitetä tätä riviä
 						}
 						else {
 							$tpttrow = mysql_fetch_array($tpres);
 							$query .= ", liitostunnus='$tpttrow[tunnus]' ";
+							$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
+						}
+					}
+					elseif($table == 'tuotteen_toimittajat' and $otsikot[$r] == 'LIITOSTUNNUS') {
+						$tpque = "	SELECT tunnus 
+									from toimi 
+									where yhtio	= '$kukarow[yhtio]' 
+									and tunnus	= '$rivi[$r]' 
+									and tyyppi != 'P'";
+						$tpres = mysql_query($tpque) or pupe_error($tpque);
+
+						if (mysql_num_rows($tpres) != 1) {
+							echo t("Toimittajaa")." '$rivi[$r]' ".t("ei löydy! Riviä ei päivitetty/lisätty")."! ".t("TUOTENO")." = $tuoteno<br>";
+							$hylkaa++; // ei päivitetä tätä riviä
+						}
+						else {
+							$tpttrow = mysql_fetch_array($tpres);
+							$valinta .= " and liitostunnus='$tpttrow[tunnus]' ";
 						}
 					}
 

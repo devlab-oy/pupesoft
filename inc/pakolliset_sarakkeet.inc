@@ -132,7 +132,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
 				break;
 			case "tuotteen_toimittajat" :
 				$pakolliset = array("TUOTENO","TOIMITTAJA");
-				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM","LIITOSTUNNUS");
+				$kielletyt = array("LAATIJA", "LUONTIAIKA","MUUTTAJA","MUUTOSPVM");
 				$wherelliset = array("TUOTENO","TOIMITTAJA");				
 				break;
 			case "kuka" :

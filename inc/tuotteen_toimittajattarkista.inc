@@ -14,7 +14,11 @@ else {
 	$haku1 = " and ytunnus='$toimittaja' ";
 }
 
-$query = "SELECT * from toimi where yhtio='$kukarow[yhtio]' $haku1";
+$query = "	SELECT * 
+			from toimi 
+			where yhtio = '$kukarow[yhtio]'
+			and tyyppi != 'P' 
+			$haku1";
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) == 0) {
@@ -30,7 +34,11 @@ if (mysql_num_rows($result) == 0) {
 		$haku1 = " and nimi like '%$toimittaja%' ";
 	}
 
-	$query = "SELECT tunnus, ytunnus, nimi, nimitark, postino, postitp, if(maa='$yhtiorow[maa]', tilinumero, ultilno) tilinumero from toimi where yhtio='$kukarow[yhtio]' $haku1";
+	$query = "	SELECT tunnus, ytunnus, nimi, nimitark, postino, postitp, if(maa='$yhtiorow[maa]', tilinumero, ultilno) tilinumero 
+				from toimi 
+				where yhtio = '$kukarow[yhtio]' 
+				and tyyppi != 'P'
+				$haku1";
 	$result = mysql_query($query) or pupe_error($query);
 
 	if (mysql_num_rows($result) > 0) {
@@ -64,7 +72,12 @@ else {
 	$toimittajatunnus = $tuotoimirow["tunnus"];
 }
 
-$query = "SELECT * from tuotteen_toimittajat where yhtio='$kukarow[yhtio]' and liitostunnus='$tuotoimirow[tunnus]' and tuoteno='$tuoteno' and tunnus!='$toimtunnus'";
+$query = "	SELECT * 
+			from tuotteen_toimittajat 
+			where yhtio='$kukarow[yhtio]' 
+			and liitostunnus='$tuotoimirow[tunnus]' 
+			and tuoteno='$tuoteno' 
+			and tunnus!='$toimtunnus'";
 $result = mysql_query($query) or pupe_error($query);
 
 if (mysql_num_rows($result) > 0 and $lue_datasta != 'MUUTA') {

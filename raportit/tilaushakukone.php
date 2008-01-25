@@ -142,6 +142,74 @@ if(isset($poista)) {
 	$tee = "NAYTA";
 }
 
+if($tee == "VAIHDAPP") {
+	
+	//	Haetaan vanhan projektipäällikkön nimi
+	$query = " 	SELECT kuka.*
+				FROM laskun_lisatiedot
+				JOIN kuka ON kuka.yhtio=laskun_lisatiedot.yhtio and kuka.kuka=laskun_lisatiedot.projektipaallikko
+				WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]' and otunnus='$tarjous' and projektipaallikko!=''";
+	$result = mysql_query($query) or pupe_error($query);
+	$row = mysql_fetch_array($result);
+	$wanha_pp=$row;
+	
+	//	Haetaan kaikki tunnukset
+	$query = "	select group_concat(tunnus) tunnukset
+	 			from lasku
+				WHERE yhtio = '$kukarow[yhtio]' and (tunnus=$tarjous or tunnusnippu='$tarjous') and tila IN ('L','G','E','V','W','N','R')";
+	$result = mysql_query($query) or pupe_error($query);
+	$row = mysql_fetch_array($result);
+
+	$query = "	update laskun_lisatiedot set 
+					projektipaallikko='$projektipaallikko'
+				WHERE yhtio = '$kukarow[yhtio]' and otunnus IN ($row[tunnukset])";
+	$result = mysql_query($query) or pupe_error($query);
+	
+	$query = "select tila from lasku where yhtio = '$kukarow[yhtio]' and tunnus='$tarjous'";
+	$result = mysql_query($query) or pupe_error($query);
+	$row = mysql_fetch_array($result);
+	
+	if($row["tila"] == "R") {
+		$teksti = "Projektin";
+		$teksti2 = "projektille";		
+	}
+	else {
+		$teksti = "Tilauksen";
+		$teksti2 = "tilaukselle";
+	}
+	
+	//	Lähetetään käyttäjille viestit jos tämä oli projekti
+	$header  = "From: <$yhtiorow[postittaja_email]>\n";
+	$header .= "MIME-Version: 1.0\n" ;
+
+	$subject = t("$teksti $tarjous projektipäällikkö vaihdettu");
+			
+	//	Mailataan iha eka sille uudelle projektipäällikölle
+	$query = " select * from kuka where yhtio = '$kukarow[yhtio]' and kuka='$projektipaallikko'";
+	$result = mysql_query($query) or pupe_error($query);
+	$row = mysql_fetch_array($result);
+	
+	$msg = "Teidät on valittu projektipäälliköksi $teksti2 $tarjous\n\n";
+	mail($row["eposti"], $subject, $msg, $header, " -f $yhtiorow[postittaja_email]");
+	
+	//	Informoidaan myös vanhaa jotta sekin tietää jostain jotain, edes nyt..
+	if($wanha_pp["eposti"] != "") {
+		$msg = "$teksti $tarjous projektipääliköksi vaihdettiin $projektipaallikko\n\n";
+		mail($wanha_pp["eposti"], $subject, $msg, $header, " -f $yhtiorow[postittaja_email]");
+	}
+	
+	//	Myös joku muu haluaa tästä tietää, laitetaan niille muille projektipäälliköille myös postia!
+	$query = "	SELECT distinct kuka, eposti
+				FROM kuka
+				WHERE yhtio = '$kukarow[yhtio]' and asema = 'PP' and kuka != '$projektipaallikko' and kuka != '{$wanha_pp["kuka"]}'";
+	$kres=mysql_query($query) or pupe_error($query);
+	while($krow=mysql_fetch_array($kres)){
+		$msg = "Projektipäällikkö vaihdettiin $teksti2 $tarjous.\n\nUusi projektipaallikko on $projektipaallikko\n\n";
+		//mail($krow["eposti"], $subject, $msg, $header, " -f $yhtiorow[postittaja_email]");
+	}
+	$tee = "NAYTA";
+}
+
 if($tee == "KALENTERITAPAHTUMA") {
 	
 	$hiddenlisa = "";
@@ -347,6 +415,97 @@ if($tee == "KALENTERITAPAHTUMA") {
 	die("</body></html>");
 }
 
+if($tee == "TALLENNA_KALENTERITAPAHTUMA") {
+
+	if($tapp != "" and $takk != "" and $tavv != "") {
+		$pvm = "$tavv-$takk-$tapp";
+	}
+
+	if($viesti != "") {
+		$viesti = utf8_decode($viesti);
+
+		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
+		$result = mysql_query($query) or pupe_error($query);
+		$asrow = mysql_fetch_array($result);
+
+		if($ktunnus > 0) {
+			$query = "	UPDATE kalenteri SET ";
+			$where = " WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$ktunnus'";
+		}
+		else {
+			$query = "	INSERT INTO kalenteri SET
+							yhtio 		= '{$kukarow["yhtio"]}',
+							luontiaika	= now(),
+							laatija 	= '{$kukarow["kuka"]}',";
+			$where = "";
+		}
+
+		if($pvm != "") $pvm = "'$pvm'";
+		else $pvm = "now()";
+
+		if($kuka == "") $kuka = $kukarow["kuka"];
+
+		//Tehdään asiakasmemotapahtuma jos se on tarpeellinen
+		$kysely = "	tapa 		= '$tapa',
+					asiakas  	 	= '$asrow[ytunnus]',
+					liitostunnus	= '$liitostunnus',
+					henkilo  		= '$henkilo',
+					kuka     		= '$kuka',
+					tyyppi   		= '$tyyppi',
+					pvmalku  		= $pvm,
+					otunnus  		= '$otunnus',
+					kuittaus  		= '$kuittaus',
+					kentta01 		= '$viesti'";
+		$query .= $kysely.$where;
+		$result = mysql_query($query) or pupe_error($query);
+
+		if($jakelu != "") {
+
+			//	Haetaan kaikki listata
+			$query = "	SELECT group_concat(distinct(concat(nimi,' <',eposti,'>'))) eposti, group_concat(nimi SEPARATOR ', ') nimi, count(*) osotteita
+						FROM kuka
+						WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".str_replace(",","','", implode(",", $jakelu))."') and eposti != ''
+						GROUP BY yhtio";
+			$jres = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($jres)>0) {
+				$jrow = mysql_fetch_array($jres);
+
+				$header  = "From: <$yhtiorow[postittaja_email]>\n";
+				$header .= "MIME-Version: 1.0\n" ;
+				$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
+
+				$subject = t("Tarjousseurannan pikaviesti käyttäjältä %s", $kieli, $kukarow["nimi"]);
+
+				$query = "	SELECT *
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
+				$abures = mysql_query($query) or pupe_error($query);
+				$aburow = mysql_fetch_array($abures);
+
+				$msg = " Viesti koskee tarjousta:\n$aburow[tunnusnippu] - $aburow[nimi] $aburow[nimitark]\n\n";
+				$msg .= "Viesti:\n$viesti\n\n";
+
+				if(mail($jrow["eposti"], $subject, $msg, $header, " -f $yhtiorow[postittaja_email]")) {
+					if($jrow["osoitteita"] > 1) {
+						echo "<font class='message'>".t("Sähköpostin lähetettiin käyttäjille %s", $kieli, $jrow["nimi"])."</font>";
+					}
+					else {
+						echo "<font class='message'>".t("Sähköpostin lähetettiin käyttäjälle %s", $kieli, $jrow["nimi"])."</font>";
+					}
+				}
+				else {
+					echo "<font class='error'>".t("Sähköpostin lähetys epäonnistui")."</font>";
+				}
+			}
+		}		
+	}
+	else {
+		echo "<font class='message'>".t("Et antanut mitään viestiä!")."</font><br>";
+	}
+
+	$tee = "NAYTA";
+}
+
 if($tee == "HYLKAATARJOUS") {
 
 	$query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$otunnus' and tila = 'T'";
@@ -456,95 +615,32 @@ if($tee == "HYLKAATARJOUS") {
 	$hakupalkki = "OHI";
 }
 
-if($tee == "TALLENNA_KALENTERITAPAHTUMA") {
+if($tee == "SULJEPROJEKTI") {
+	$query = "	SELECT lasku.tunnus, projekti
+				FROM lasku
+				JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus and projekti>0
+				WHERE lasku.yhtio='$kukarow[yhtio]' and tila='R' and alatila='B' and lasku.tunnus='$tarjous'";
+	$result = mysql_query($query) or pupe_error($query);
 
-	if($tapp != "" and $takk != "" and $tavv != "") {
-		$pvm = "$tavv-$takk-$tapp";
-	}
+	if(mysql_num_rows($result)== 1) {
+		$aburow=mysql_fetch_array($result);
 
-	if($viesti != "") {
-		$viesti = utf8_decode($viesti);
+		//	Suljetaan projekti
+		$query = "update lasku set alatila='X', mapvm=now() where yhtio = '$kukarow[yhtio]' and tunnus='$tarjous'";
+		$updres = mysql_query($query) or pupe_error($query);
 
-		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
-		$result = mysql_query($query) or pupe_error($query);
-		$asrow = mysql_fetch_array($result);
+		$query = "update kustannuspaikka set kaytossa='' where yhtio = '$kukarow[yhtio]' and tunnus='$aburow[projekti]'";
+		$updres = mysql_query($query) or pupe_error($query);
 
-		if($ktunnus > 0) {
-			$query = "	UPDATE kalenteri SET ";
-			$where = " WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$ktunnus'";
-		}
-		else {
-			$query = "	INSERT INTO kalenteri SET
-							yhtio 		= '{$kukarow["yhtio"]}',
-							luontiaika	= now(),
-							laatija 	= '{$kukarow["kuka"]}',";
-			$where = "";
-		}
-
-		if($pvm != "") $pvm = "'$pvm'";
-		else $pvm = "now()";
-
-		if($kuka == "") $kuka = $kukarow["kuka"];
-
-		//Tehdään asiakasmemotapahtuma jos se on tarpeellinen
-		$kysely = "	tapa 		= '$tapa',
-					asiakas  	 	= '$asrow[ytunnus]',
-					liitostunnus	= '$liitostunnus',
-					henkilo  		= '$henkilo',
-					kuka     		= '$kuka',
-					tyyppi   		= '$tyyppi',
-					pvmalku  		= $pvm,
-					otunnus  		= '$otunnus',
-					kuittaus  		= '$kuittaus',
-					kentta01 		= '$viesti'";
-		$query .= $kysely.$where;
-		$result = mysql_query($query) or pupe_error($query);
-
-		if($jakelu != "") {
-
-			//	Haetaan kaikki listata
-			$query = "	SELECT group_concat(distinct(concat(nimi,' <',eposti,'>'))) eposti, group_concat(nimi SEPARATOR ', ') nimi, count(*) osotteita
-						FROM kuka
-						WHERE yhtio = '$kukarow[yhtio]' and kuka IN ('".str_replace(",","','", implode(",", $jakelu))."') and eposti != ''
-						GROUP BY yhtio";
-			$jres = mysql_query($query) or pupe_error($query);
-			if(mysql_num_rows($jres)>0) {
-				$jrow = mysql_fetch_array($jres);
-
-				$header  = "From: <$yhtiorow[postittaja_email]>\n";
-				$header .= "MIME-Version: 1.0\n" ;
-				$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\n";
-
-				$subject = t("Tarjousseurannan pikaviesti käyttäjältä %s", $kieli, $kukarow["nimi"]);
-
-				$query = "	SELECT *
-							FROM lasku
-							WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$otunnus'";
-				$abures = mysql_query($query) or pupe_error($query);
-				$aburow = mysql_fetch_array($abures);
-
-				$msg = " Viesti koskee tarjousta:\n$aburow[tunnusnippu] - $aburow[nimi] $aburow[nimitark]\n\n";
-				$msg .= "Viesti:\n$viesti\n\n";
-
-				if(mail($jrow["eposti"], $subject, $msg, $header, " -f $yhtiorow[postittaja_email]")) {
-					if($jrow["osoitteita"] > 1) {
-						echo "<font class='message'>".t("Sähköpostin lähetettiin käyttäjille %s", $kieli, $jrow["nimi"])."</font>";
-					}
-					else {
-						echo "<font class='message'>".t("Sähköpostin lähetettiin käyttäjälle %s", $kieli, $jrow["nimi"])."</font>";
-					}
-				}
-				else {
-					echo "<font class='error'>".t("Sähköpostin lähetys epäonnistui")."</font>";
-				}
-			}
-		}		
+		echo "<font class='message'>".t("Suljettiin projekti '$tarjous'")."</font><br>";
 	}
 	else {
-		echo "<font class='message'>".t("Et antanut mitään viestiä!")."</font><br>";
+		echo "<font class='error'>".t("VIRHE!!! Tilaus '$tarjous' ei ole projekti tai se on väärässä tilassa")."</font><br>";
 	}
 
-	$tee = "NAYTA";
+	$tee 		= "";
+	$tarjous 	= "";
+	$aja_kysely	= "tmpquery";
 }
 
 if($tee == "NAYTA") {
@@ -557,8 +653,7 @@ if($tee == "NAYTA") {
 	$query = "	SELECT 	lasku.laatija, lasku.tunnus tarjous, lasku.tila, lasku.alatila, lasku.liitostunnus, lasku.jaksotettu,
 							lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp, lasku.maa,
 							lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa,
-							projektipaallikko.nimi,
-							laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
+							laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa, laskun_lisatiedot.projektipaallikko,
 							date_format(lasku.luontiaika, '%d.%m. %Y') avattu,
 						versio.tunnus tunnus, versio.luontiaika,
 							concat_ws(' ',versio.nimi, versio.nimitark) asiakas, 
@@ -575,9 +670,8 @@ if($tee == "NAYTA") {
 						if(lasku.tunnusnippu>0,(select count(*) from lasku l where l.yhtio = lasku.yhtio and l.tila IN ($laskutilat) and l.tunnusnippu=lasku.tunnusnippu),1) versioita
 						
 				FROM lasku
-				JOIN lasku versio ON versio.yhtio = lasku.yhtio and versio.tunnus = if(lasku.tunnusnippu>0,(select max(l.tunnus) from lasku l where l.yhtio = lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu),lasku.tunnus)
+				JOIN lasku versio ON versio.yhtio = lasku.yhtio and versio.tunnus = if(lasku.tila='T',(select max(l.tunnus) from lasku l where l.yhtio = lasku.yhtio and l.tunnusnippu=lasku.tunnusnippu),lasku.tunnus)
 				LEFT JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = versio.yhtio and laskun_lisatiedot.otunnus=versio.tunnus
-				LEFT JOIN kuka projektipaallikko ON projektipaallikko.yhtio = laskun_lisatiedot.yhtio and projektipaallikko.tunnus=laskun_lisatiedot.projektipaallikko				
 				LEFT JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
 				LEFT JOIN kuka laatija ON laatija.yhtio=lasku.yhtio and laatija.kuka=lasku.laatija
 				LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen
@@ -920,6 +1014,20 @@ if($tee == "NAYTA") {
 	$aburow = mysql_fetch_array($abures);
 	$laskurow["tapahtumia"] = (int) $aburow["tapahtumia"];
 
+	$query = "	SELECT tunnus, kuka, nimi
+				FROM kuka
+				WHERE yhtio = '$kukarow[yhtio]' and asema = 'PP'
+				ORDER BY nimi";
+	$yresult = mysql_query($query) or pupe_error($query);
+	$ppaall = "";
+	while($row = mysql_fetch_array($yresult)) {
+		$sel = "";
+		if ($row["kuka"] == $laskurow["projektipaallikko"]) {
+			$sel = 'selected';
+		}
+		$ppaall .= "<option value='$row[kuka]' $sel>{$row["nimi"]}</option>\n";
+	}
+	
 	echo "	<center>
 			<table width = '600'>
 				<caption>".t("Perustiedot")."</caption>
@@ -949,7 +1057,12 @@ if($tee == "NAYTA") {
 				<tr>
 					<td>{$laskurow["laatija_nimi"]}</td>
 					<td>{$laskurow["avattu"]}</td>
-					<td>{$laskurow["projektipaallikko"]}</td>
+					<td>
+						<select id='pp' name='projektipaallikko' onchange=\"sndReq('tarjouskalenteri_$tarjous', 'tilaushakukone.php?ohje=off&toim=$toim&setti=$setti&tee=VAIHDAPP&nakyma=$vaihda&tarjous=$tarjous&projektipaallikko='+this.options[this.selectedIndex].value, 'kasittele_$tarjous', true);\">
+						<option value = ''>".t("Valitse projektipäällikkö")."</option>
+						$ppaall
+						</select>
+					</td>
 					<td>{$laskurow["versioita"]}</td>						
 					<td><font style='color: ".color_code($laskurow["seuraava_aika"], 20).";'>{$laskurow["seuraava"]}</font></td>
 				</tr>
@@ -1149,16 +1262,39 @@ if($tee == "NAYTA") {
 		";
 	}
 	
+	
 	echo "<br><br>";
 
 	$menu = array();
 	$menu[]	= array("VALI" => "Toiminnot");	
 	$menu[] = array("TEKSTI" => "Lisää muistutus", "HREF" => "tilaushakukone.php?tarjous=$tarjous&toim=$toim&setti=$setti&nakyma=$nakyma&tee=KALENTERITAPAHTUMA&tyyppi=Muistutus&liitostunnus=$laskurow[liitostunnus]");
 	$menu[] = array("TEKSTI" => "Lisää asiakasmuistio", "HREF" => "tilaushakukone.php?tarjous=$tarjous&otunnus=$tarjous&toim=$toim&setti=$setti&nakyma=$nakyma&tee=KALENTERITAPAHTUMA&tyyppi=Memo&liitostunnus=$laskurow[liitostunnus]");
+	
+	if($laji == "TILAUS") {
+		if($laskurow["tila"] == "R") {
+			//	Tarkastetaan onko nipussa toimittamattomia tilauksia
+			$query = "	SELECT tunnus
+						FROM lasku
+						WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$tarjous' and (tila='N' or (tila='L' and alatila != 'X'))";
+			$tarkres = mysql_query($query) or pupe_error($query);
+			if(mysql_num_rows($tarkres)==0) {
 
-	if($laskurow["alatila"] == "A" and $laskurow["tila"] == "T") {
-		$menu[] = array("TEKSTI" => "Hylkää tarjous", "HREF" => "tilaushakukone.php?tarjous=$tarjous&toim=$toim&setti=$setti&tee=HYLKAATARJOUS&otunnus=$laskurow[versio]&liitostunnus=$laskurow[liitostunnus]", "DIV" => "main");
-	}	
+				//	Tarkastetaan onko nipussa maksamattomia laskuja?
+				$query = "	SELECT tunnus
+							FROM lasku
+							WHERE yhtio = '$kukarow[yhtio]' and tunnusnippu = '$tarjous' and tila='U' and mapvm='0000-00-00'";
+				$tarkres = mysql_query($query) or pupe_error($query);
+				if(mysql_num_rows($tarkres)==0) {
+					$menu[] = array("TEKSTI" => "Sulje projekti", "HREF" => "tilaushakukone.php?tarjous=$tarjous&toim=$toim&setti=$setti&tee=SULJEPROJEKTI", "DIV" => "main");
+				}
+			}
+		}
+	}
+	elseif($laji == "TARJOUS") {
+		if($laskurow["alatila"] == "A" and $laskurow["tila"] == "T") {
+			$menu[] = array("TEKSTI" => "Hylkää tarjous", "HREF" => "tilaushakukone.php?tarjous=$tarjous&toim=$toim&setti=$setti&tee=HYLKAATARJOUS&otunnus=$laskurow[versio]&liitostunnus=$laskurow[liitostunnus]", "DIV" => "main");
+		}			
+	}
 
 	$versioita = $laskurow["versioita"];
 	unset($teksti);

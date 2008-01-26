@@ -2226,7 +2226,7 @@ if (!function_exists("alv")) {
 }
 
 if (!function_exists("alehinta")) {
-	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale) {
+	function alehinta ($laskurow, $trow, $kpl, $netto, $hinta, $ale, $palautus="") {
 		global $yhtiorow, $kukarow;
 	
 		// Tämä rutiini määrittelee riville hinnan ja alennuksen
@@ -2247,9 +2247,13 @@ if (!function_exists("alehinta")) {
 		// $aperuste (selkokielinen teksti mihin päädyttiin)
 		// $alehinta_alv jos on joku erikoialv tälle hinnaston tuotteelle
 		// $alehinta_val hinnan valuutta
-		
+		// $hintaperuste hinnan peruste koodina		
+		// $aleperuste  alennuksen peruste koodina		
+
 		$aperuste 		= "";
 		$alehinta_alv 	= 0;
+		$hintaperuste	= false;
+		$aleperuste		= false;		
 		
 		// oletetaan yhtiön valuutta jos sitä ei tiedetä
 		if ($laskurow["valkoodi"] == "") $laskurow["valkoodi"] = $yhtiorow["valkoodi"];
@@ -2297,9 +2301,12 @@ if (!function_exists("alehinta")) {
 
 		// 1. käyttäjän syöttämä hinta/nettohinta
 		if ($hinta != '') {
+			$hintaperuste = 1;
+			
 			// nettohinta jos netto-kentässä tulee N
 			if ($netto == 'N') {
 				$aperuste .= "Käyttäjän antama nettohinta ";
+				
 				$ale = 0;
 			}
 			else {
@@ -2319,7 +2326,7 @@ if (!function_exists("alehinta")) {
 
 			// 2. asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) laskun valuutassa
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				
+
 				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2362,6 +2369,7 @@ if (!function_exists("alehinta")) {
 					$hinta         = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
 					$aperuste     .= "Asiakkaan tuotteen nettohinta laskun valuutassa. ";
 					$alehinta_val  = $laskurow["valkoodi"];
+					$hintaperuste = 2;
 				}
 			}
 
@@ -2408,12 +2416,13 @@ if (!function_exists("alehinta")) {
 					
 					$hinta		= $hrow[0];
 					$aperuste	.= "Asiakkaan tuotteen nettohinta.".$hrow['laji'];
+					$hintaperuste = 3;
 				}
 			}
 
 			// 4. asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) laskun valuutassa
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2456,12 +2465,13 @@ if (!function_exists("alehinta")) {
 					$hinta        = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
 					$aperuste    .= "Asiakkaan tuotealeryhmän nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
+					$hintaperuste = 4;
 				}
 			}
 
 			// 5. asiakas.ytunnus tuote.aleryhmä nettohinta (asiakkaan tuotealeryhmän hinta) yhtiön valuutassa
 			if ($hinta == 0) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2502,12 +2512,13 @@ if (!function_exists("alehinta")) {
 
 					$hinta		= $hrow[0];
 					$aperuste	.= "Asiakkaan tuotealeryhmän nettohinta. ";
+					$hintaperuste = 5;
 				}
 			}
 
 			// 6. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta) laskun valuutassa
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2550,12 +2561,13 @@ if (!function_exists("alehinta")) {
 					$hinta        = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
 					$aperuste    .= "Asiakasaleryhmän tuotteen nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
+					$hintaperuste = 6;
 				}
 			}
 
 			// 7. asiakas.ryhmä tuote.tuoteno nettohinta (asiakasaleryhmän tuotteen hinta)
 			if ($hinta == 0) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2597,12 +2609,13 @@ if (!function_exists("alehinta")) {
 
 					$hinta		= $hrow[0];
 					$aperuste	.= "Asiakasaleryhmän tuotteen nettohinta. ";
+					$hintaperuste = 7;
 				}
 			}
 
 			// 8. asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta)
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2645,12 +2658,13 @@ if (!function_exists("alehinta")) {
 					$hinta        = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
 					$aperuste    .= "Asiakasaleryhmän tuotealeryhmän nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
+					$hintaperuste = 8;
 				}
 			}
 
 			// 9. asiakas.ryhmä tuote.aleryhmä nettohinta (asiakasaleryhmän tuotealeryhmän hinta)
 			if ($hinta == 0) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM asiakashinta
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2692,12 +2706,13 @@ if (!function_exists("alehinta")) {
 
 					$hinta		= $hrow[0];
 					$aperuste	.= "Asiakasaleryhmän tuotealeryhmän nettohinta. ";
+					$hintaperuste = 9;
 				}
 			}
 			
 			// 10. asiakas.ytunnus tuote.aleryhmä negatiivinen-aleprosentti (asiakkaan katemyyntihinta netto)
 			if ($hinta == 0) {
-
+				
 				$query = "	SELECT alennus
 							FROM asiakasalennus
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2739,6 +2754,7 @@ if (!function_exists("alehinta")) {
 						$ale		= 0;
 						$netto		= "";
 						$aperuste 	.= "Katemyyntihinta (kokoepäkurantti). ";
+						$hintaperuste = 10;
 					}
 					elseif ($trow['kehahin'] > 0) {
 						if ($yhtiorow['alv_kasittely']=='')						
@@ -2749,6 +2765,7 @@ if (!function_exists("alehinta")) {
 						$ale		= 0;
 						$netto		= "";
 						$aperuste 	.= "Katemyyntihinta. ";
+						$hintaperuste = 10;
 					}
 				}
 			}
@@ -2797,6 +2814,7 @@ if (!function_exists("alehinta")) {
 						$ale		= 0;
 						$netto		= "";
 						$aperuste 	.= "Asiakasryhmä Katemyyntihinta (kokoepäkurantti). ";
+						$hintaperuste = 11;
 					}
 					elseif ($trow['kehahin'] > 0) {
 						if ($yhtiorow['alv_kasittely']=='')						
@@ -2808,6 +2826,7 @@ if (!function_exists("alehinta")) {
 						$ale		= 0;
 						$netto		= "";
 						$aperuste 	.= "Asiakasryhmä Katemyyntihinta. ";
+						$hintaperuste = 11;
 					}
 				}
 
@@ -2815,7 +2834,6 @@ if (!function_exists("alehinta")) {
 
 			// 12. asiakas.ytunnus tuote.aleryhmä aleprosentti == 999.99 (asiakkaan myymälähinta)
 			if ($hinta == 0) {
-				
 				$query = "	SELECT alennus
 							FROM asiakasalennus
 							WHERE yhtio = '$kukarow[yhtio]'
@@ -2851,12 +2869,13 @@ if (!function_exists("alehinta")) {
 					$ale		= 0;
 					$netto		= "";
 					$aperuste 	.= "Myymälähinta. ";
+					$hintaperuste = 12;
 				}
 			}
 			
 			// 13. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM hinnasto
 							WHERE yhtio  = '$kukarow[yhtio]'
@@ -2877,12 +2896,13 @@ if (!function_exists("alehinta")) {
 					$netto			= $hrow["laji"];
 					$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 					$alehinta_val	= $laskurow["valkoodi"];
+					$hintaperuste = 13;
 				}
 			}
 
 			// 14. hinnasto.hinta tuotteen nettohinta hinnastosta yhtiön valuutassa
 			if ($hinta == 0) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM hinnasto
 							WHERE yhtio  = '$kukarow[yhtio]'
@@ -2902,21 +2922,24 @@ if (!function_exists("alehinta")) {
 					$hinta 			= $hrow["hinta"];
 					$netto			= $hrow["laji"];
 					$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
+					$hintaperuste = 14;
 				}
 			}
 
 			
 			// 15. tuote.nettohinta (tuotteen nettohinta)
 			if ($hinta == 0 and $netto != 'E' and $trow['nettohinta'] > 0) {
+				
 				$hinta 			= $trow['nettohinta'];
 				$aperuste 		.= "Tuotteen nettohinta. ";
 				$netto 			= 'N';
 				$ale			= 0;
+				$hintaperuste = 15;
 			}
 
 			// 16. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
 			if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM hinnasto
 							WHERE yhtio  = '$kukarow[yhtio]'
@@ -2937,12 +2960,13 @@ if (!function_exists("alehinta")) {
 					$netto			= $hrow["laji"];
 					$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 					$alehinta_val   = $laskurow["valkoodi"];
+					$hintaperuste = 16;
 				}
 			}
 
 			// 17. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtion valuutassa
 			if ($hinta == 0) {
-
+				
 				$query = "	SELECT hinta, laji
 							FROM hinnasto
 							WHERE yhtio  = '$kukarow[yhtio]'
@@ -2962,41 +2986,52 @@ if (!function_exists("alehinta")) {
 					$hinta 			= $hrow["hinta"];
 					$netto			= $hrow["laji"];
 					$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
+					$hintaperuste = 17;
 				}
 			}
 
 			// 18. tuote.myyntihinta (tuotteen bruttohinta)
 			if ($hinta == 0) {
+				
 				$hinta		= $trow['myyntihinta'];
 				$aperuste	.= "Tuotteen myyntihinta. ";
+				$hintaperuste = 18;
 			}
 
 		}
 
 		if (substr($ale,-1) == "+") {
-			// 0. käyttäjän syöttämä EURO-määräinen alennus
+			$aleperuste = 1;
+			
+			// 1. käyttäjän syöttämä EURO-määräinen alennus
 			$hinta_xxx = $hinta + substr($ale,0,-1);
 			$ale = (1 - ($hinta/$hinta_xxx))*100;
 			$hinta = $hinta_xxx;
 		}
 		elseif(substr($ale,-1) == "-") {
-			// 0. käyttäjän syöttämä EURO-määräinen alennus
+			$aleperuste = 3;
+			
+			// 2. käyttäjän syöttämä EURO-määräinen alennus
 			$hinta_xxx = $hinta - substr($ale,0,-1);
 			$ale = (1 - ($hinta_xxx/$hinta))*100;
 		}
 		elseif ($ale > 0) {
-			// 0. käyttäjän syöttämä alennus
+			$aleperuste = 3;
+			
+			// 3. käyttäjän syöttämä alennus
 			$aperuste .= " Käyttäjän syöttämä ale";
 		}
 		elseif (is_numeric($ale) and $ale == 0) {
-			// 0. käyttäjän syöttämä alennus
+			$aleperuste = 4;
+			
+			// 4. käyttäjän syöttämä alennus
 			$aperuste .= " Ei alennusta";
 		}
 		elseif ($ale == "" and $netto != 'N' and $netto != 'E') {
 
 			$ale = 0;
 
-			// 1. asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
+			// 5. asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
 			$query = "	SELECT alennus
 						FROM asiakasalennus
 						WHERE yhtio = '$kukarow[yhtio]'
@@ -3012,12 +3047,14 @@ if (!function_exists("alehinta")) {
 			$hresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($hresult) > 0) {
+				$aleperuste = 5;
+				
 				$hrow = mysql_fetch_array ($hresult);
 				$ale  = $hrow[0];
 				$aperuste .= " Asiakkaan tuotteen alennus";
 			}
 
-			// 2. asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
+			// 6. asiakas.ytunnus tuote.aleryhmä aleprosentti (asiakkaan tuotealeryhmän alennus)
 			if ($ale == 0) {
 
 				$query = "	SELECT alennus
@@ -3035,13 +3072,15 @@ if (!function_exists("alehinta")) {
 				$hresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($hresult) > 0) {
+					$aleperuste = 6;
+					
 					$hrow = mysql_fetch_array ($hresult);
 					$ale  = $hrow[0];
 					$aperuste .= " Asiakkaan tuotealeryhmän alennus";
 				}
 			}
 
-			// 3. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasaleryhmän tuotteen alennus)
+			// 7. asiakas.ryhmä tuote.tuoteno aleprosentti (asiakasaleryhmän tuotteen alennus)
 			if ($ale == 0) {
 
 				$query = "	SELECT alennus
@@ -3060,13 +3099,15 @@ if (!function_exists("alehinta")) {
 				$hresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($hresult) > 0) {
+					$aleperuste = 7;
+					
 					$hrow = mysql_fetch_array ($hresult);
 					$ale  = $hrow[0];
 					$aperuste .= " Asiakasaleryhmän tuotteen alennus";
 				}
 			}
 
-			// 4. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasaleryhmän tuotealeryhmän alennus)
+			// 8. asiakas.ryhmä tuote.aleryhmä aleprosentti (asiakasaleryhmän tuotealeryhmän alennus)
 			if ($ale == 0) {
 
 				for($aasi = strlen($trow["aleryhma"]); $aasi>0; $aasi--) {
@@ -3095,6 +3136,8 @@ if (!function_exists("alehinta")) {
 					$hresult = mysql_query($query) or pupe_error($query);
 
 					if (mysql_num_rows($hresult) > 0) {
+						$aleperuste = 8;
+						
 						$hrow = mysql_fetch_array ($hresult);
 						$ale  = $hrow[0];
 						$aperuste .= " Asiakasaleryhmän tuotealeryhmän alennus";
@@ -3103,7 +3146,7 @@ if (!function_exists("alehinta")) {
 				}
 			}
 
-			// 5. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus)
+			// 9. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus)
 			if ($ale == 0) {
 
 				$query = "	SELECT alennus
@@ -3116,6 +3159,8 @@ if (!function_exists("alehinta")) {
 				$hresult = mysql_query($query) or pupe_error($query);
 
 				if (mysql_num_rows($hresult) > 0) {
+					$aleperuste = 9;
+					
 					$hrow = mysql_fetch_array ($hresult);
 					$ale  = $hrow[0];
 					$aperuste .= " Tuotealeryhmän perusalennus";
@@ -3133,7 +3178,36 @@ if (!function_exists("alehinta")) {
 		//$debug = 1;
 		if ($debug == 1) echo t("Tulin tulokseen").": $aperuste.  ALE: $ale ".t("% HINTA")." $hinta $yhtiorow[valkoodi]<br><br>";
 		
-		return array($hinta, $netto, $ale, $alehinta_alv, $alehinta_val);
+		if($palautus != "") {
+			$ret=array();
+			
+			$a = explode(",", $palautus);
+			if(is_array($a)) {
+				foreach($a as $palauta) {
+					if(isset(${$palauta})) {
+						$ret[$palauta] = ${$palauta};
+					}
+					else {
+						echo "<font class='error'>Muuttujaa '$palauta' ei voida palauttaa!</font><br>";
+						$ret[$palauta] = false;
+					}
+				}				
+			}
+			else {
+				if(isset(${$palautus})) {
+					$ret[$palautus] = ${$palautus};
+				}
+				else {
+					echo "<font class='error'>Muuttujaa '$palauta' ei voida palauttaa!</font><br>";
+					$ret[$palautus] = false;
+				}
+			}
+
+			return $ret;
+		}
+		else {
+			return array($hinta, $netto, $ale, $alehinta_alv, $alehinta_val);
+		}
 	}
 }
 

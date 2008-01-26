@@ -142,6 +142,7 @@
 			$hyvaksyja 						= $monta['hyvaksyja'];
 			$naytetaan_katteet_tilauksella	= $monta['naytetaan_katteet_tilauksella'];
 			$naytetaan_asiakashinta			= $monta['naytetaan_asiakashinta'];
+			$naytetaan_tuotteet				= $monta['naytetaan_tuotteet'];
 			$profile 						= $monta['profiilit'];
 			$piirit	 						= $monta['piirit'];
 
@@ -197,8 +198,9 @@
 						lomaoikeus		= '$lomaoikeus',
 						asema			= '$asema',
 						toimipaikka		= '$toimipaikka',
-						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
-						naytetaan_asiakashinta = '$naytetaan_asiakashinta',
+						naytetaan_katteet_tilauksella 	= '$naytetaan_katteet_tilauksella',
+						naytetaan_asiakashinta 			= '$naytetaan_asiakashinta',
+						naytetaan_tuotteet				= '$naytetaan_tuotteet',
 						profiilit 		= '$profile',
 						piirit			= '$piirit',
 						laatija			= '$kukarow[kuka]',
@@ -356,8 +358,9 @@
 						dynaaminen_kassamyynti = '$dynaaminen_kassamyynti',
 						jyvitys			= '$jyvitys',
 						oletus_ohjelma 	= '$oletus_ohjelma',
-						naytetaan_katteet_tilauksella = '$naytetaan_katteet_tilauksella',
-						naytetaan_asiakashinta = '$naytetaan_asiakashinta',
+						naytetaan_katteet_tilauksella 	= '$naytetaan_katteet_tilauksella',
+						naytetaan_asiakashinta 			= '$naytetaan_asiakashinta',
+						naytetaan_tuotteet				= '$naytetaan_tuotteet',
 						profiilit 		= '$profile',
 						piirit			= '$piirit',
 						muuttaja		= '$kukarow[kuka]',
@@ -740,6 +743,15 @@
 					<option value=''  {$sel[""]}>".t("N‰ytet‰‰n tuotteen myyntihinta")."</option>
 					<option value='A' {$sel["A"]}>".t("N‰ytet‰‰n asiakashinta")."</option>
 					</select></td></tr>";
+
+			$sel=array();
+			$sel[$krow["naytetaan_tuotteet"]] = "SELECTED";
+			echo "<tr><th align='left'>".t("N‰ytett‰v‰t tuotteet tuotehaussa").":</th>
+					<td><select name='naytetaan_tuotteet'>
+					<option value=''  {$sel[""]}>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
+					<option value='A' {$sel["A"]}>".t("N‰ytet‰‰n tuotteet joilla on asiakashinta tai asiakasale")."</option>
+					</select></td></tr>";
+					
 
 			if ($toim != 'extranet') {
 				echo "<tr><th align='left'>".t("Oletusohjelma").":</th><td><select name='oletus_ohjelma'>";

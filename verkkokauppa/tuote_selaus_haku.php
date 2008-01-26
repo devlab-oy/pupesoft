@@ -273,7 +273,7 @@
 	
 	//	Verkkokaupassa selataan vain verkkokauppatuotteita
 	if($verkkokauppa != "") {
-		$lisa .= " and hinnastoon = 'W' and tuotemerkki != ''";
+		$lisa .= " and hinnastoon IN ('W','V') and tuotemerkki != ''";
 	}
 	
 	if (strlen($ojarj) > 0) {
@@ -526,6 +526,15 @@
 		
 		while ($row = mysql_fetch_array($result)) {
 			
+			//	Onko t‰m‰ sallittu rivi verkkokaupassa?
+			$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+			$tuoteres = mysql_query($query);
+			$trow = mysql_fetch_array($tuoteres);
+			$hinnat = alehinta($laskurow, $trow, 1, '', '', '', "hinta,hintaperuste,aleperuste,aperuste");
+
+			if 	(($kukarow["naytetaan_tuotteet"] == "A" or $trow["hinnastoon"] == "V") and ($hinnat["hintaperuste"]<2 or $hinnat["hintaperuste"] > 12)) {
+				continue;
+			}
 			
 			if($edtuoteno != $row["sorttauskentta"]) {
 				if($verkkokauppa != "") {
@@ -766,14 +775,8 @@
 			// jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
 			if($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www")) {
 				if($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
-					// haetaan tuotteen tiedot
-					$query    = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
-					$tuoteres = mysql_query($query);
-					$trow = mysql_fetch_array($tuoteres);
-					
-					list($hinta, $netto, $ale, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, 1, '', '', '');	
-
-					$myyntihinta = number_format($hinta * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}";
+					// haetaan tuotteen tiedot					
+					$myyntihinta = number_format($hinnat["hinta"] * (1-($ale/100)), 2, ',', ' ')." {$laskurow["valkoodi"]}";
 				}
 				elseif ($kukarow["extranet"] != "") {
 

@@ -324,6 +324,7 @@
 			<option value=''>".t("Tuote näytetään hinnastossa, mutta ei verkkokaupassa")."</option>
 			<option value='E' $sele>".t("Tuotetta ei näytetä hinnastossa, eikä verkkokaupassa")."</option>
 			<option value='W' $selw>".t("Tuote näkyy hinnastossa ja weppikaupassa")."</option>
+			<option value='V' $selv>".t("Tuote näkyy hinnastossa sekä weppikaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>			
 			</select></td>";
 		$jatko = 0;
 	}

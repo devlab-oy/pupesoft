@@ -218,8 +218,6 @@
 		
 		$ulos .= "<option value = ''></option>";
 
-		$apu_asiakasnumero = 1;
-
 		//jos konsernin asiakkaat synkronoidaan niin asiakkaiden yksilöivät tiedot on oltava konsernitasolla-yksilölliset
 		$query = "	SELECT *
 					FROM yhtio 
@@ -243,12 +241,23 @@
 			$tarkyhtio = "'$kukarow[yhtio]'";
 		}
 
+		$query = "	SELECT MAX(asiakasnro) asiakasnro
+					FROM asiakas USE INDEX (asno_index)
+					WHERE yhtio IN ($tarkyhtio)";
+		$vresult = mysql_query($query) or pupe_error($query);
+		
+		$vrrow = mysql_fetch_array($vresult);
+
+		$apu_asiakasnumero = $vrrow["asiakasnro"];
+
+		$apu_asiakasnro++;
+
 		for ($monta = 0; $monta < 5;) {
 
 			$query = "	SELECT asiakasnro
 						FROM asiakas USE INDEX (asno_index)
-						WHERE yhtio in ($tarkyhtio)
-						and asiakasnro='$apu_asiakasnumero'";
+						WHERE yhtio IN ($tarkyhtio)
+						AND asiakasnro='$apu_asiakasnumero'";
 			$vresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($vresult) == 0) {

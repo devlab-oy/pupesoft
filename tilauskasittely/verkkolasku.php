@@ -1576,7 +1576,11 @@
 
 								if ($silent == "") $tulos_ulos .= t("Lasku tulostuu varastoon").": $prirow[nimitys]<br>\n";
 							}
-
+							
+							if (isset($valittu_tulostin)) {
+								$yhtiorow[lasku_tulostin] = $valittu_tulostin;
+							}
+							
 							$querykieli = "	select *
 											from kirjoittimet
 											where yhtio='$kukarow[yhtio]' and tunnus='$yhtiorow[lasku_tulostin]'";

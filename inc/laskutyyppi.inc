@@ -100,6 +100,31 @@
 					break;
 			}
 			break;
+		case "V":
+			$laskutyyppi = "Valmistus";
+			switch($alatila) {
+				case "":
+					$alatila = "kesken";
+					break;
+				case "J":
+					$alatila = "tulostusjonossa";
+					break;
+				case "A":
+					$alatila = "tulostettu";
+					break;
+				case "C":
+					$alatila = "kerätty";
+					break;
+				case "V":
+					$alatila = "valmistettu";
+					break;
+				case "E":
+					$alatila = "ei kerättävää";
+				case "Y":
+					$alatila = "rivit valmistuksessa toisella otsikolla";
+					break;
+			}
+			break;		
 		case "A":
 			$laskutyyppi = "Työmääräys";
 			break;
@@ -191,39 +216,7 @@
 			}
 			break;
 		case "S":
-				$laskutyyppi = "Sisäinen työmääräys";
-				switch($alatila) {
-					case "":
-						$alatila = "kesken";
-						break;
-					case "J":
-						$alatila = "tulostusjonossa";
-						break;
-					case "A":
-						$alatila = "tulostettu";
-						break;
-					case "C":
-						$alatila = "kerätty";
-						break;
-					case "V":
-						$alatila = "vastaanotettu";
-						break;
-					case "E":
-						$alatila = "ei kerättävää";
-						break;
-					case "T":
-						$alatila = "odottaa JT tuotteita";
-						break;
-					case "P":
-						$alatila = "JT poiminnassa";
-						break;
-					case "X":
-						$alatila = "Valmis";
-						break;
-				}
-				break;
-		case "V":
-			$laskutyyppi = "Valmistus";
+			$laskutyyppi = "Sisäinen työmääräys";
 			switch($alatila) {
 				case "":
 					$alatila = "kesken";
@@ -238,12 +231,19 @@
 					$alatila = "kerätty";
 					break;
 				case "V":
-					$alatila = "valmistettu";
+					$alatila = "vastaanotettu";
 					break;
 				case "E":
 					$alatila = "ei kerättävää";
-				case "Y":
-					$alatila = "rivit valmistuksessa toisella otsikolla";
+					break;
+				case "T":
+					$alatila = "odottaa JT tuotteita";
+					break;
+				case "P":
+					$alatila = "JT poiminnassa";
+					break;
+				case "X":
+					$alatila = "Valmis";
 					break;
 			}
 			break;

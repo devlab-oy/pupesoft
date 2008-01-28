@@ -323,6 +323,7 @@
 
 		$sel1 = "";
 		$sel2 = "";
+		$sel3 = "";
 
 		if ($trow[$i] == "") {
 			$sel1 = "selected";
@@ -330,9 +331,13 @@
 		elseif ($trow[$i] == "Y") {
 			$sel2 = "selected";
 		}
+		elseif ($trow[$i] == "T") {
+			$sel3 = "selected";
+		}
 
 		$ulos .= "<option value=''  $sel1>".t("Asiakkaan tilauksia EI yhdistet‰ yhdelle ker‰yslistalle")."</option>";
 		$ulos .= "<option value='Y' $sel2>".t("Asiakkaan tilaukset yhdistet‰‰n yhdelle ker‰yslistalle jos mahdollista")."</option>";
+		$ulos .= "<option value='T' $sel3>".t("Asiakkaan tilaukset yhdistet‰‰n yhdelle ker‰yslistalle Ytunnuksen mukaan")."</option>";
 		$ulos .= "</select></td>";
 
 		$jatko = 0;

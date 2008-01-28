@@ -288,6 +288,20 @@
 		}
 	}
 	
+	// Katsotaan onko liitetiedostoja
+	$liitequery = "	SELECT tunnus
+					FROM liitetiedostot USE INDEX (yhtio_liitos_liitostunnus) 
+					WHERE yhtio='$kukarow[yhtio]' 
+					AND liitos='myyntilasku' 
+					AND liitostunnus='$laskurow[tunnus]'";
+	$liiteres = mysql_query($liitequery) or pupe_error($liitequery);
+	$liiterow = mysql_fetch_array($liiteres);
+	
+	if (mysql_num_rows($liiteres) > 0) {
+		$kuvapalvelin = substr($palvelin2, 0, -1);
+		echo "<tr><th>".t("Liitetiedosto")."</th><td colspan='8'><a href='$kuvapalvelin/view.php?id=$liiterow[tunnus]' target='_blank'>".t("Näytä")."</a></td></tr>";
+	}
+	
 	if ($laskurow["tila"] == 'K') {
 		$query = "	SELECT yhtio
 					FROM oikeu

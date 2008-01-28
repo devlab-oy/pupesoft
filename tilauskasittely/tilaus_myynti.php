@@ -934,7 +934,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 			}
 			elseif ($laskurow["alatila"] == "J") {
 				$utila = "N";
-				$atila = "J";
+				$atila = "A";
 			}
 			else {
 				$utila = "L";

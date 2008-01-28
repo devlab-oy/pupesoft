@@ -1,6 +1,6 @@
 <?php
 
-		if ($_POST["toim"] == "yhtion_parametrit") {
+	if ($_POST["toim"] == "yhtion_parametrit") {
 		$apucss = $_POST["css"];
 		$apucsspieni = $_POST["css_pieni"];
 		$apucssextranet = $_POST["css_extranet"];
@@ -242,7 +242,7 @@
 				$query .= " where tunnus = $tunnus";
 			}
 			$result = mysql_query($query) or pupe_error($query);
-
+						
 			if ($tunnus == '') {
 				$tunnus = mysql_insert_id();
 				$wanha = "";
@@ -251,6 +251,64 @@
 				//	Javalla tieto että tätä muokattiin..
 				$wanha = "P_";
 			}
+			
+			if ($tunnus > 0 and isset($paivita_myos_avoimet_tilaukset) and $toim == "asiakas") {
+
+				$query = "	SELECT *
+							FROM asiakas
+							WHERE tunnus = '$tunnus'
+							and yhtio 	 = '$kukarow[yhtio]'";
+				$otsikres = mysql_query($query) or pupe_error($query);
+				
+				if (mysql_num_rows($otsikres) == 1) {
+					$otsikrow = mysql_fetch_array($otsikres);
+				
+					$query = "	SELECT tunnus
+								FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+								WHERE yhtio 		= '$kukarow[yhtio]'
+								and ((tila in ('N','L') and alatila in ('','A','B','C')) or (tila = 'T' and alatila in ('','A')))
+								and liitostunnus	= $otsikrow[tunnus]
+								and tapvm			= '0000-00-00'";
+					$laskuores = mysql_query($query) or pupe_error($query); 
+					
+					while ($laskuorow = mysql_fetch_array($laskuores)) {					
+						$query = "	UPDATE lasku
+									SET ytunnus			= '$otsikrow[ytunnus]',
+									ovttunnus			= '$otsikrow[ovttunnus]',
+									nimi				= '$otsikrow[nimi]',
+									nimitark			= '$otsikrow[nimitark]',
+									osoite 				= '$otsikrow[osoite]',
+									postino 			= '$otsikrow[postino]',
+									postitp				= '$otsikrow[postitp]',
+									maa   				= '$otsikrow[maa]',
+									toim_ovttunnus 		= '$otsikrow[toim_ovttunnus]',
+									toim_nimi      		= '$otsikrow[toim_nimi]',
+									toim_nimitark  		= '$otsikrow[toim_nimitark]',
+									toim_osoite    		= '$otsikrow[toim_osoite]',
+									toim_postino  		= '$otsikrow[toim_postino]',
+									toim_postitp 		= '$otsikrow[toim_postitp]',
+									toim_maa    		= '$otsikrow[toim_maa]',
+									tilausyhteyshenkilo	= '$otsikrow[tilausyhteyshenkilo]'
+									WHERE yhtio 		= '$kukarow[yhtio]'
+									and tunnus			= '$laskuorow[tunnus]'";
+						$updaresult = mysql_query($query) or pupe_error($query);
+						
+						$query = "	UPDATE laskun_lisatiedot
+									SET kolm_ovttunnus	= '$otsikrow[kolm_ovttunnus]',
+									kolm_nimi   		= '$otsikrow[kolm_nimi]',
+									kolm_nimitark		= '$otsikrow[kolm_nimitark]',
+									kolm_osoite  		= '$otsikrow[kolm_osoite]',
+									kolm_postino  		= '$otsikrow[kolm_postino]',
+									kolm_postitp 		= '$otsikrow[kolm_postitp]',
+									kolm_maa    		= '$otsikrow[kolm_maa]'
+									WHERE yhtio 		= '$kukarow[yhtio]'
+									and otunnus			= '$laskuorow[tunnus]'";
+						$updaresult = mysql_query($query) or pupe_error($query);
+						
+					}
+				}
+			}						
+			
 
 			//	Tämä funktio tekee myös oikeustarkistukset!
 			synkronoi($kukarow["yhtio"], $toim, $tunnus, $trow, "");
@@ -304,7 +362,7 @@
 			}
 
 
-			$uusi 	 = 0;
+			$uusi = 0;
 
 			if (isset($yllapitonappi) and $lukossa != "ON" or isset($paluunappi)) {
 				$tunnus  = 0;
@@ -600,6 +658,10 @@
 
 		echo "<br><input type = 'submit' name='yllapitonappi' value = '$nimi'>";
 
+		if ($toim == "asiakas") {
+			echo "<br><input type = 'submit' name='paivita_myos_avoimet_tilaukset' value = '$nimi ja päivitä tiedot myös avoimille tilauksille'>";
+		}
+				
 		if($lukossa == "ON") {
 			echo "<input type='hidden' name='lukossa' value = '$lukossa'>";
 			echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type = 'submit' name='paluunappi' value = '".t("Palaa avainsanoihin")."'>";
@@ -654,9 +716,10 @@
 		if ($errori == '' and $uusi != 1 and $toim == "yhtio") {
 			require ("inc/yhtion_toimipaikat.inc");
 		}
-
+		
 		if ($errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
 			require ("inc/toimittajan_yhteyshenkilo.inc");
+			
 			/*
 			if ($toim == "asiakas") {
 				require ("inc/asiakkaan_avainsanat.inc");

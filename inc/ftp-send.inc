@@ -92,8 +92,16 @@ else {
 			$tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $yhtiorow[admin_email])</font><br>\n";
 		}
 	}
-	else {
-//		$tulos_ulos_ftp .= "<font class='message'>".t("Aineiston FTP-siirto onnistui!")."</font><br>\n";
+	elseif ($palautus_pyynto != "") {
+		$rivi  = "$PHP_SELF\n";
+		$rivi .= "\n";
+		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";
+		$rivi .= "\n";
+		$rivi .= "$ftpuser @ $ftphost : $ftppath\n";
+		$rivi .= "\n";
+		$rivi .= "\n";
+
+		$silari = mail($yhtiorow['admin_email'], "".t("Tiedostonsiirto onnistui")."!", $rivi, "From: $yhtiorow[postittaja_email]\n", "-f $yhtiorow[postittaja_email]");
 	}
 }
 

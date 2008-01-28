@@ -564,6 +564,21 @@
 			$ulos .= "</select></td>";
 			$jatko = 0;
 	}
+	
+	if (mysql_field_name($result, $i) == "tilausvahvistus_yhteyshenkilolle") {
+		
+				
+		if ($trow[$i] == "K") {
+			$sel = "SELECTED";
+		}
+		
+		
+		$ulos = "<td><select name='$nimi'>";
+		$ulos .= "<option value='' >".t("Ei l‰hetet‰")."</option>";
+		$ulos .= "<option value='K' $sel>".t("L‰hetet‰‰n")."</option>";
+		$ulos .= "</select></td>";
+		$jatko = 0;
+	}
 
 	if (mysql_field_name($result, $i) == "kerayspoikkeama") {
 			$sel			= array();

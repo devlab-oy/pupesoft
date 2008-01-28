@@ -1344,7 +1344,7 @@ if (!function_exists('kuittaus')) {
 
 if (!function_exists('print_pdf')) {
 	function print_pdf ($komento, $tyyppi="") {
-		global $pdf, $kukarow, $yhtiorow, $kateinen, $returnvalue, $kieli, $tee;
+		global $pdf, $kukarow, $yhtiorow, $kateinen, $returnvalue, $kieli, $tee, $laskurow;
 	
 		$oslapp='';
 		$returnvalue=0;
@@ -1377,7 +1377,8 @@ if (!function_exists('print_pdf')) {
 			}
 			else {
 				require("sahkoposti.inc");
-			}
+			}			
+			
 		}
 		elseif ($tee == 'NAYTATILAUS') {
 			//Työnnetään tuo pdf vaan putkeen!
@@ -1386,6 +1387,33 @@ if (!function_exists('print_pdf')) {
 		elseif ($komento != '' and $komento != 'edi') {
 			echo t("Lähete tulostuu")."...<br>";
 			$line = exec("$komento $pdffilenimi", $output, $returnvalue);
+		}
+		
+		//lähetetään sähköposti asiakkaan yhteyshenkilölle
+		if ($laskurow['tilausyhteyshenkilo'] != "" and $tyyppi == "TILAUSVAHVISTUS" and strpos(" ".$laskurow['tilausvahvistus'],'L')) {
+			$liite = $pdffilenimi;
+			
+			
+			if ($kukarow["extranet"] == '') {
+				$query = "	SELECT yhteyshenkilo.email
+							FROM yhteyshenkilo
+							JOIN asiakas ON yhteyshenkilo.yhtio = asiakas.yhtio and asiakas.tunnus = '$laskurow[liitostunnus]'
+							WHERE yhteyshenkilo.yhtio = '$kukarow[yhtio]'
+							and yhteyshenkilo.nimi = '$laskurow[tilausyhteyshenkilo]'
+							and yhteyshenkilo.tilausyhteyshenkilo = 'o'";
+				$result = mysql_query($query) or pupe_error($query);
+				
+				if(mysql_num_rows($result) > 0) {
+					$yhteysrow = mysql_fetch_array($result);
+				
+					if ($yhteysrow["email"] != '') {
+						$komento = "asiakasemail".$yhteysrow['email'];
+						require("../inc/sahkoposti.inc");
+						echo t("Lähetetään tilausvahvistus yhteyshenkilölle")."...<br>";
+					}
+					
+				}				
+			}
 		}
 		
 		//poistetaan tmp file samantien kuleksimasta...

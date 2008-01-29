@@ -1,6 +1,6 @@
 <?php	
 
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/inc".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/extranet".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/tilauskasittely");
+
 $_GET["ohje"] = "off";
 
 require ("parametrit.inc");

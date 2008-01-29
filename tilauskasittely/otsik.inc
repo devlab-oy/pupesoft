@@ -303,7 +303,16 @@
 	if (isset($jatka) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
 
-		// lis‰t‰‰n kuva
+		if (strtoupper($ext) == "JPEG" or strtoupper($ext) == "JPG" or strtoupper($ext) == "GIF" or strtoupper($ext) == "PNG") {
+			$size = getimagesize($_FILES['userfile']['tmp_name'], $imageinfo);
+			
+			$liitetiedosto_image_width 		= $size[0];
+			$liitetiedosto_image_height 	= $size[1];
+			$liitetiedosto_image_bits   	= $size["bits"];
+			$liitetiedosto_image_channels   = $size["channels"];
+		}
+
+		// lis‰t‰‰n liitetiedosto
 		$query = "	INSERT into liitetiedostot set
 					yhtio      = '{$kukarow['yhtio']}',
 					liitos     = 'myyntilasku',
@@ -314,6 +323,11 @@
 					filename   = '$filename',
 					filesize   = '$filesize',
 					filetype   = '$filetype'";
+					
+		if (!empty($liitetiedosto_image_width) and !empty($liitetiedosto_image_height) and !empty($liitetiedosto_image_bits) and !empty($liitetiedosto_image_channels)) {
+			$query .= ", image_width = '$image_width', image_height = '$image_height', image_bits = '$image_bits', image_channels = '$image_channels'";
+		}
+		
 		$result = mysql_query($query) or pupe_error($query);
 		$liitetiedostotunnus = mysql_insert_id();
 		$kuva = $liitetiedostotunnus;

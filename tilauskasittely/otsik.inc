@@ -2482,14 +2482,14 @@
 		$query .= $postquery;
 		$result = mysql_query($query) or pupe_error($query);
 		$id = mysql_insert_id();
+		
+		// laitetaan liitetiedostolle tunnus
+		if ($liitetiedostotunnus != '') {
+			$liitequery = "UPDATE liitetiedostot SET liitostunnus=$id WHERE yhtio='$kukarow[yhtio]' AND tunnus=$kuva";
+			$liiteres = mysql_query($liitequery) or pupe_error($liitequery);
+		}
 
 		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
-			
-			// laitetaan liitetiedostolle tunnus
-			if ($liitetiedostotunnus != '') {
-				$liitequery = "UPDATE liitetiedostot SET liitostunnus=$id WHERE yhtio='$kukarow[yhtio]' AND tunnus=$kuva";
-				$liiteres = mysql_query($liitequery) or pupe_error($liitequery);
-			}
 
 			$query = "	UPDATE kuka
 						SET kesken = '$id'

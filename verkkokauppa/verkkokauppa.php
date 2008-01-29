@@ -1,5 +1,6 @@
 <?php	
 
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/inc".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/extranet".PATH_SEPARATOR."/Users/tuomas/Sites/pupesoft/tilauskasittely");
 $_GET["ohje"] = "off";
 
 require ("parametrit.inc");
@@ -479,7 +480,7 @@ if(!function_exists("uutiset")) {
 					//	Haetaan tuotenumero
 					$query = "	SELECT tuoteno, nimitys
 					 			FROM tuote
-								WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$m[1]'";
+								WHERE yhtio = '$kukarow[yhtio]' and tuoteno like ('$m[1]%')";
 					$tres = mysql_query($query) or pupe_error($query);
 					
 					//	Tämä me korvataan aina!
@@ -491,10 +492,10 @@ if(!function_exists("uutiset")) {
 					else {
 						$trow = mysql_fetch_array($tres);
 						if(count($m) == 4) {
-							$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$trow[tuoteno]', false, true);\">$m[3]</a>";							
+							$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$m[1]', false, true);\">$m[3]</a>";							
 						}
 						else {
-							$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$trow[tuoteno]', false, true);\">$trow[nimitys]</a>";							
+							$replace[]	= "<a href = \"javascript:sndReq('selain', 'verkkokauppa.php?tee=selaa&hakutapa=koodilla&tuotehaku=$m[1]', false, true);\">$trow[nimitys]</a>";							
 						}
 					}
 				}
@@ -553,6 +554,16 @@ if($tee == "monistalasku") {
 	$utunnus = monistalasku($laskunro);
 	
 	if($utunnus!==false) {
+		
+		//	Merkataan olemassaoleva tilaus poistetuksia, mutta ei kuitenkana poistetan mittään
+		if($kukarow["kesken"] > 0) {
+			$query = "	UPDATE lasku SET tila = 'D', alatila = 'L' WHERE yhtio ='{$kukarow["yhtio"]}' and tunnus = '{$kukarow["kesken"]}'";
+			$result = mysql_query($query) or pupe_error($query);				
+			
+			$query = "	UPDATE tilausrivi SET tyyppi = 'D' WHERE yhtio ='{$kukarow["yhtio"]}' and otunnus = '{$kukarow["kesken"]}'";
+			$result = mysql_query($query) or pupe_error($query);							
+		}
+		
 		$kukarow["kesken"] = $utunnus;
 		$query = "	UPDATE kuka SET kesken = '$utunnus' WHERE yhtio ='{$kukarow["yhtio"]}' and kuka = '{$kukarow["kuka"]}'";
 		$result = mysql_query($query) or pupe_error($query);	
@@ -951,7 +962,7 @@ if($tee == "asiakastiedot") {
 								<tr>";
 						while($laskurow=mysql_fetch_array($result)) {
 							if($laskurow["laskunro"] > 0) {
-								$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\">".t("Monista")."</a>";
+								$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?\\n\\nOlemassaoleva tilaus poistetaan.")."')\">".t("Monista")."</a>";
 							}
 							else {
 								$monista = "";
@@ -1060,13 +1071,20 @@ if($tee == "asiakastiedot") {
 											<td class='back' colspan='5'><br>".tilaus($laskurow["tunnus"])."<br></td>
 										</tr>";
 						}
-
+						
+						if($laskurow["laskunro"] > 0) {
+							$monista = " <a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&tee=monistalasku&laskunro=$laskurow[laskunro]', false, true);\" onclick=\"return confirm('".t("Oletko varma, että haluat monistaa tilauksen?\\n\\nOlemassaoleva tilaus poistetaan.")."')\">".t("Monista")."</a>";
+						}
+						else {
+							$monista = "";
+						}
+						
 						$tilaukset[$tila] .= "	<tr>
 													<td>{$laskurow[tunnus]}</td>
 													<td>{$laskurow["aika"]}</td>
 													<td>{$laskurow[viesti]}</td>
 													<td>".number_format($laskurow["summa"], 2, ',', ' ')."</td>
-													<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&tilaus=$laskurow[tunnus]', false, true);\">".t("Avaa")."</a></td>
+													<td class='back'><a href=\"javascript:sndReq('selain', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&tila=$tila&tilaus=$laskurow[tunnus]', false, true);\">".t("Avaa")."</a> $monista</td>
 												</tr>$lisa";
 					}				
 				}			

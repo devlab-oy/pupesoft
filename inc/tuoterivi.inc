@@ -319,12 +319,15 @@
 		if ($trow[$i] == 'W') {
 			$selw = "SELECTED";
 		}
+		if ($trow[$i] == 'V') {
+			$selv = "SELECTED";
+		}
 
 		$ulos = "<td><select name = '$nimi'>
 			<option value=''>".t("Tuote n‰ytet‰‰n hinnastossa, mutta ei verkkokaupassa")."</option>
 			<option value='E' $sele>".t("Tuotetta ei n‰ytet‰ hinnastossa, eik‰ verkkokaupassa")."</option>
-			<option value='W' $selw>".t("Tuote n‰kyy hinnastossa ja weppikaupassa")."</option>
-			<option value='V' $selv>".t("Tuote n‰kyy hinnastossa sek‰ weppikaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>			
+			<option value='W' $selw>".t("Tuote n‰kyy hinnastossa ja verkkokaupassa")."</option>
+			<option value='V' $selv>".t("Tuote n‰kyy hinnastossa sek‰ verkkokaupassa jos asiakkaalla asiakasalennus tai asiakashinta")."</option>			
 			</select></td>";
 		$jatko = 0;
 	}

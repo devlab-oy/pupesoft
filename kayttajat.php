@@ -143,6 +143,7 @@
 			$naytetaan_katteet_tilauksella	= $monta['naytetaan_katteet_tilauksella'];
 			$naytetaan_asiakashinta			= $monta['naytetaan_asiakashinta'];
 			$naytetaan_tuotteet				= $monta['naytetaan_tuotteet'];
+			$naytetaan_tilaukset			= $monta['naytetaan_tilaukset'];			
 			$profile 						= $monta['profiilit'];
 			$piirit	 						= $monta['piirit'];
 
@@ -201,6 +202,7 @@
 						naytetaan_katteet_tilauksella 	= '$naytetaan_katteet_tilauksella',
 						naytetaan_asiakashinta 			= '$naytetaan_asiakashinta',
 						naytetaan_tuotteet				= '$naytetaan_tuotteet',
+						naytetaan_tilaukset				= '$naytetaan_tilaukset',
 						profiilit 		= '$profile',
 						piirit			= '$piirit',
 						laatija			= '$kukarow[kuka]',
@@ -361,6 +363,7 @@
 						naytetaan_katteet_tilauksella 	= '$naytetaan_katteet_tilauksella',
 						naytetaan_asiakashinta 			= '$naytetaan_asiakashinta',
 						naytetaan_tuotteet				= '$naytetaan_tuotteet',
+						naytetaan_tilaukset				= '$naytetaan_tilaukset',
 						profiilit 		= '$profile',
 						piirit			= '$piirit',
 						muuttaja		= '$kukarow[kuka]',
@@ -750,6 +753,14 @@
 					<td><select name='naytetaan_tuotteet'>
 					<option value=''  {$sel[""]}>".t("N‰ytet‰‰n kaikki tuotteet")."</option>
 					<option value='A' {$sel["A"]}>".t("N‰ytet‰‰n tuotteet joilla on asiakashinta tai asiakasale")."</option>
+					</select></td></tr>";
+
+			$sel=array();
+			$sel[$krow["naytetaan_tilaukset"]] = "SELECTED";
+			echo "<tr><th align='left'>".t("N‰ytett‰v‰t tilaukset verkkokaupassa").":</th>
+					<td><select name='naytetaan_tilaukset'>
+					<option value=''  {$sel[""]}>".t("N‰ytet‰‰n kaikki tilaukset")."</option>
+					<option value='O' {$sel["O"]}>".t("N‰ytet‰‰n vain omat tilaukset")."</option>
 					</select></td></tr>";
 					
 

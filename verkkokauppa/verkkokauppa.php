@@ -878,13 +878,13 @@ if($tee == "asiakastiedot") {
 			</table>";
 	}
 	elseif($nayta == "tilaushistoria") {
-
-		$selv = array();
-		$selv[$vainomat] = "SELECTED";
 		
-		echo "<table width='800'>
-			<tr>
-				<td class='back' colspan='5'> 
+		$vainoomat="";
+		if($kukarow["naytetaan_tilaukset"] != "O") {
+			$selv = array();
+			$selv[$vainomat] = "SELECTED";
+			
+			$vainoomat = "
 				<div style='float: right;'>
 				<form id = 'vainoma' name='tilaushaku' action = \"javascript:ajaxPost('vainoma', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tila=$tila', 'selain', false, true);\" method = 'post'>
 					<select name='vainomat' onchange='submit();'>
@@ -892,7 +892,18 @@ if($tee == "asiakastiedot") {
 						<option value='x' {$selv["x"]}>Näytä vain omat tilaukset</option>
 					</select>
 				</form>
-				</div><br>
+				</div>";
+		}
+		else {
+			$vainomat = "x";
+		}
+		
+		
+		echo "<table width='800'>
+			<tr>
+				<td class='back' colspan='5'> 
+				$vainoomat
+				<br>
 				Tilaushaku:<br>
 				<form id = 'tilaushaku' name='tilaushaku' action = \"javascript:ajaxPost('tilaushaku', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&vainomat=$vainomat&hakutapa=viitteet', 'selain', false, true);\" method = 'post'>
 					<input type = 'text' size='50' name = 'tilaushaku' value='$tilaushaku'>

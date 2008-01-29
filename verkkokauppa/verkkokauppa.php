@@ -464,7 +464,7 @@ if(!function_exists("uutiset")) {
 			while($row = mysql_fetch_array($result)) {
 			$val .= "<tr><td class='back'>";
 			if($row["kentta03"] > 0) {
-				$val .= "<img class='uutinen' src='view.php?id=$row[kentta03]'><br>";
+				$val .= "<div id='kuva'><img class='uutinen' src='view.php?id=$row[kentta03]'></div>";
 			}
 			
 			$search = "/#{2}([^#]+)#{2}(([^#]+)#{2}){0,1}/";
@@ -889,7 +889,7 @@ if($tee == "asiakastiedot") {
 				<form id = 'vainoma' name='tilaushaku' action = \"javascript:ajaxPost('vainoma', 'verkkokauppa.php?tee=asiakastiedot&nayta=tilaushistoria&hakutapa=$hakutapa&tilaushaku=$tilaushaku&tila=$tila', 'selain', false, true);\" method = 'post'>
 					<select name='vainomat' onchange='submit();'>
 						<option value=''>Näytä kaikkien tilaukset</option>
-						<option value='x' {$selv["x"]}>Näytä vain minun tilaukset</option>
+						<option value='x' {$selv["x"]}>Näytä vain omat tilaukset</option>
 					</select>
 				</form>
 				</div><br>
@@ -1211,7 +1211,7 @@ if($tee == "") {
 					<div class='login' id='login'>$login_screen</div>
 					<div class='menu' id='menu'>".menu()."</div>
 					<div class='selain' id='selain'>".uutiset()."</div>
-					<div class='mainos' id='mainos'>mainos</div>
+					<div class='mainos' id='mainos'></div>
 				</body>
 			</html>";
 

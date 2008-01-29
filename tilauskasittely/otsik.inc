@@ -315,8 +315,8 @@
 					filesize   = '$filesize',
 					filetype   = '$filetype'";
 		$result = mysql_query($query) or pupe_error($query);
-		$liitostunnus = mysql_insert_id();
-		$kuva = $liitostunnus;
+		$liitetiedostotunnus = mysql_insert_id();
+		$kuva = $liitetiedostotunnus;
 	}
 
 	if ($tila == "" and !isset($jatka)) {
@@ -2486,8 +2486,7 @@
 		if ((int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
 			
 			// laitetaan liitetiedostolle tunnus
-			if ($liitostunnus != '') {
-//				echo "kuva: $kuva liitostunnus: $liitostunnus id: $id<br>";
+			if ($liitetiedostotunnus != '') {
 				$liitequery = "UPDATE liitetiedostot SET liitostunnus=$id WHERE yhtio='$kukarow[yhtio]' AND tunnus=$kuva";
 				$liiteres = mysql_query($liitequery) or pupe_error($liitequery);
 			}

@@ -300,7 +300,7 @@
 		unset($jatka);
 	}			
 
-	if (isset($jatka)) {
+	if (isset($jatka) and is_uploaded_file($_FILES['userfile']['tmp_name'])) {
 		$data = mysql_real_escape_string(file_get_contents($_FILES['userfile']['tmp_name']));
 
 		// lis‰t‰‰n kuva

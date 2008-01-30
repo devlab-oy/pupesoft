@@ -139,7 +139,7 @@
 			
 			// katotaan ollaanko valittu tilaajaksi joku muu toimipiste
 			if (isset($srow)) {
-				if ($toimipiste != 0) {
+				if ($toimipiste != 0 and strlen(trim($srow["toim_nimi"])) == 0) {
 					$edique  = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and tunnus='$toimipiste'";
 					$ediotr = mysql_query($edique) or pupe_error($edique);
 					$edioro = mysql_fetch_array($ediotr);
@@ -176,9 +176,9 @@
 			echo "</td></tr>";
 
 			if ($kukarow['kesken'] == 0) {
-				$toimpp = $kerpp = date(j);
-				$toimkk = $kerkk = date(n);
-				$toimvv = $kervv = date(Y);
+				$toimpp = $kerpp = date("j");
+				$toimkk = $kerkk = date("n");
+				$toimvv = $kervv = date("Y");
 			}
 			else {
 				list($toimvv, $toimkk, $toimpp) = split('-', $srow["toimaika"]);
@@ -373,6 +373,26 @@
 			$postquery = " WHERE tunnus = '$kukarow[kesken]'";
 		}
 
+		
+		// katotaan ollaanko valittu tietty varasto johon kamat tilataan
+		if ($varasto > 0) {
+			$edique  = "SELECT *
+						FROM varastopaikat
+						WHERE yhtio= '$kukarow[yhtio]'
+						and tunnus = '$varasto'";
+			$vares = mysql_query($edique) or pupe_error($edique);
+			$varow = mysql_fetch_array($vares);
+			
+			if ($varow["nimi"] != "" and $varow["osoite"] != "" and $varow["postino"] != "" and $varow["postitp"] != "") {
+				$tnimi     = $varow["nimi"];
+				$tnimitark = $varow["nimitark"];
+				$tosoite   = $varow["osoite"];
+				$tpostino  = $varow["postino"];
+				$tpostitp  = $varow["postitp"];
+				$tmaa  	   = $varow["maa"];	
+			}						
+		}
+		
 		// katotaan ollaanko valittu tilaajaksi joku muu toimipiste
 		if ($toimipiste != 0) {
 			$edique  = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and tunnus='$toimipiste'";
@@ -387,7 +407,7 @@
 			$tpostitp  	= $edioro["postitp"];
 			$tmaa  		= $edioro["maa"];
 		}
-
+						
 		// varmistellaan, ett‰ meill‰ menee jotain toimitusosoite kentt‰‰n
 		if(strlen(trim($tnimi)) == 0) {
 			$tnimi     = $yhtiorow["nimi"];

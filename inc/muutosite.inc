@@ -1,4 +1,4 @@
-<?php
+o<?php
 
 require_once ("inc/tilinumero.inc");
 
@@ -376,7 +376,7 @@ if ($tila == 'Q') {
 	$query = "LOCK table tiliointi WRITE";
 	$result = mysql_query($query) or pupe_error($query);
 
-	$query = "SELECT tunnus FROM tiliointi WHERE tilino = '$yhtiorow[ostovelat]' and ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and korjattu=''";
+	$query = "SELECT tunnus FROM tiliointi WHERE (tilino = '$yhtiorow[ostovelat]' or tilino='$yhtiorow[konserniostovelat]') and ltunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and korjattu=''";
 	$result = mysql_query($query) or pupe_error($query);
 
 	while ($xrow=mysql_fetch_array ($result)) {
@@ -387,7 +387,7 @@ if ($tila == 'Q') {
 				summa = round(-1 * $summa * $trow[vienti_kurssi],2),
 				laadittu = now(),
 				laatija='$kukarow[kuka]'
-				WHERE tilino = '$yhtiorow[ostovelat]' and
+				WHERE (tilino = '$yhtiorow[ostovelat]' or tilino='$yhtiorow[konserniostovelat]') and
 				ltunnus = '$tunnus' and
 				yhtio = '$kukarow[yhtio]' and
 				korjattu=''";
@@ -482,7 +482,7 @@ if ($tila == 'S') {
 						FROM tiliointi
 						WHERE ltunnus = '$tunnus' and
 						yhtio = '$kukarow[yhtio]' and
-						tilino = '$yhtiorow[ostovelat]' and
+						(tilino = '$yhtiorow[ostovelat]' or tilino='$yhtiorow[konserniostovelat]') and
 						abs(round($trow[summa] * $trow[vienti_kurssi],2) - summa) <= 0.01 and
 						korjattu = ''";
 			$result = mysql_query($query) or pupe_error($query);
@@ -497,7 +497,7 @@ if ($tila == 'S') {
 						laatija = '$kukarow[kuka]'
 						WHERE ltunnus = '$tunnus' and
 						yhtio = '$kukarow[yhtio]' and
-						tilino = '$yhtiorow[ostovelat]' and
+						(tilino = '$yhtiorow[ostovelat]' or tilino='$yhtiorow[konserniostovelat]') and
 						abs(round($trow[summa] * $trow[vienti_kurssi],2) - summa) <= 0.01 and
 						korjattu = ''";
 			$result = mysql_query($query) or pupe_error($query);

@@ -255,17 +255,6 @@
 
 		$tuoteno 		= $trow["tuoteno"];
 		
-		if ($tuoterow["alv"] != $trow["alv"] and $yhtiorow["alv_kasittely"] == "" and $trow["alv"] < 500) {
-			$hinta 		= sprintf("%.".$yhtiorow['hintapyoristys']."f",round($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100),$yhtiorow['hintapyoristys']));
-		}
-		else {
-			$hinta		= $trow["hinta"];
-		}
-
-		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-			$hinta 		= laskuval($hinta, $laskurow["vienti_kurssi"]);
-		}
-
 		if ($toim == "ENNAKKO") {
 			$kpl 		= $trow["varattu"];
 		}
@@ -276,6 +265,24 @@
 			else {
 				$kpl 	= $trow["jt"]+$trow["varattu"];
 			}			
+		}
+		
+		// Tutkitaan onko tämä myyty ulkomaan alvilla
+		list(,,,$tsek_alehinta_alv,) = alehinta($laskurow, $tuoterow, $kpl, '', '', '');
+		
+		if ($tsek_alehinta_alv > 0) {
+			$tuoterow["alv"] = $tsek_alehinta_alv;
+		}
+		
+		if ($tuoterow["alv"] != $trow["alv"] and $yhtiorow["alv_kasittely"] == "" and $trow["alv"] < 500) {
+			$hinta 		= sprintf("%.".$yhtiorow['hintapyoristys']."f",round($trow["hinta"] / (1+$trow['alv']/100) * (1+$tuoterow['alv']/100), $yhtiorow['hintapyoristys']));
+		}
+		else {
+			$hinta		= $trow["hinta"];
+		}
+
+		if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+			$hinta 		= laskuval($hinta, $laskurow["vienti_kurssi"]);
 		}
 
 		$ale 			= $trow["ale"];
@@ -939,13 +946,13 @@
 								}
 
 								if ($oikeurow['paivitys'] == '1' and $kukarow["extranet"] == "") {
-									echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$jtrow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>$jtrow[jt]</a><br>";
+									echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$jtrow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>".($jtrow["jt"]*1)."</a><br>";
 								}
 								else {
-									echo "<td valign='top' align='right' $class>$jtrow[jt]<br>";
+									echo "<td valign='top' align='right' $class>".($jtrow["jt"]*1)."<br>";
 								}
 
-								echo "$jtrow[hinta]<br>$jtrow[ale]%</td>";
+								echo sprintf("%.".$yhtiorow['hintapyoristys']."f", $jtrow["hinta"])."<br>$jtrow[ale]%</td>";
 
 							}
 
@@ -1290,7 +1297,7 @@
 										echo "<td valign='top' align='right' $class>$perherow[jt]<br>";
 									}
 
-									echo "$perherow[hinta]<br>$perherow[ale]%</td>";
+									echo sprintf("%.".$yhtiorow['hintapyoristys']."f", $perherow["hinta"])."<br>$perherow[ale]%</td>";
 									
 									if ($oikeurow['paivitys'] == '1') {
 										echo "<td valign='top' $class>$kokonaismyytavissa $perherow[yksikko]<br></font>";

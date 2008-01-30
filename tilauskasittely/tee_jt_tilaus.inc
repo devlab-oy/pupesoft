@@ -456,14 +456,21 @@
 							$kommentti		 	= trim($otsikkorivi['viesti']." ".$lisataanrow['kommentti']);
 							
 							$jtspec				= "JTSPEC";							
-						
-							if ($trow["alv"] != $lisataanrow["alv"] and $yhtiorow["alv_kasittely"] == "" and $lisataanrow["alv"] < 500) {
-								$hinta 			= sprintf('%.2f',round($lisataanrow["hinta"] / (1+$lisataanrow['alv']/100) * (1+$trow['alv']/100),$yhtiorow['hintapyoristys']));
+							
+							// Tutkitaan onko tämä myyty ulkomaan alvilla
+							list(,,,$tsek_alehinta_alv,) = alehinta($laskurow, $trow, $kpl, '', '', '');
+
+							if ($tsek_alehinta_alv > 0) {
+								$trow["alv"] = $tsek_alehinta_alv;
+							}
+							
+							if ($yhtiorow["alv_kasittely"] == "" and $trow["alv"] != $lisataanrow["alv"] and $lisataanrow["alv"] < 500) {
+								$hinta 			= sprintf('%.2f',round($lisataanrow["hinta"] / (1+$lisataanrow['alv']/100) * (1+$trow["alv"]/100), $yhtiorow['hintapyoristys']));
 							}
 							else {
 								$hinta			= $lisataanrow["hinta"];
 							}
-
+							
 							if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 								$hinta 			= laskuval($hinta, $laskurow["vienti_kurssi"]);
 							}

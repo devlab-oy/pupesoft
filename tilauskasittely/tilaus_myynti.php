@@ -2278,56 +2278,7 @@ if ($tee == '') {
 			if ($tapa != "VAIHDA" and $tilausrivi["var"] == "U" and substr($paikka,0,3) != "!!!") {
 				$paikka = "!!!".$tilausrivi["toimittajan_tunnus"];
 			}
-
-			//haetaan tuotteen alv matikkaa varten
-			$query = "	SELECT *
-						FROM tuote
-						WHERE tuoteno = '$tilausrivi[tuoteno]' and yhtio='$kukarow[yhtio]'";
-			$tuoteresult = mysql_query($query) or pupe_error($query);
-			$tuoterow = mysql_fetch_array($tuoteresult);
-
-			// jos meillä on lasku menossa ulkomaille
-			if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
-
-				// tutkitaan ollaanko siellä alv-rekisteröity
-				$query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";
-				$alhire = mysql_query($query) or pupe_error($query);
-
-				// ollaan alv-rekisteröity, haetaan tuotteelle oikea ALV
-				if (mysql_num_rows($alhire) == 1) {
-					$query = "SELECT * from tuotteen_alv where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and tuoteno='$tilausrivi[tuoteno]' limit 1";
-					$alhire = mysql_query($query) or pupe_error($query);
-
-					// ei löytynyt alvia, se on pakko löytyä
-					if (mysql_num_rows($alhire) == 0) {
-						$alehinta_alv        = -999.99; // tää on näin että tiedetään että kävi huonosti ja ei anneta lisätä tuotetta
-						$alv                 = -999.99;
-						$tuoterow["alv"]     = -999.99;
-						$tilausrivi["alv"]   = -999.99;
-						$tilausrivi["hinta"] = "0";
-						$netto               = "";
-						$hinta               = "0";
-					}
-					else {
-						$alehi_alrow     = mysql_fetch_array($alhire);
-						$alehinta_alv    = $alehi_alrow["alv"];
-						$tuoterow["alv"] = $alehi_alrow["alv"];
-					}
-				}
-			}
-
-
-			if ($tuoterow["alv"] != $tilausrivi["alv"] and $yhtiorow["alv_kasittely"] == "" and $tilausrivi["alv"] < 500) {
-				$hinta = sprintf("%.".$yhtiorow['hintapyoristys']."f",round($tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuoterow['alv']/100),$yhtiorow['hintapyoristys']));
-			}
-			else {
-				$hinta	= $tilausrivi["hinta"];
-			}
-
-			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
-			}
-
+			
 			$tuoteno 	= $tilausrivi['tuoteno'];
 
 			if ($tilausrivi["var"] == "J") {
@@ -2347,6 +2298,31 @@ if ($tee == '') {
 			else {
 				$kpl	= $tilausrivi['varattu'];
 			}
+			
+			$query = "	SELECT *
+						FROM tuote
+						WHERE yhtio  = '$kukarow[yhtio]'
+						and  tuoteno = '$tilausrivi[tuoteno]'";
+			$aresult = mysql_query($query) or pupe_error($query);
+			$tuoterow = mysql_fetch_array($aresult);
+			
+			// Tutkitaan onko tämä myyty ulkomaan alvilla
+			list(,,,$tsek_alehinta_alv,) = alehinta($laskurow, $tuoterow, $kpl, '', '', '');
+			
+			if ($tsek_alehinta_alv > 0) {
+				$tuoterow["alv"] = $tsek_alehinta_alv;
+			}
+						
+			if ($tuoterow["alv"] != $tilausrivi["alv"] and $yhtiorow["alv_kasittely"] == "" and $tilausrivi["alv"] < 500) {
+				$hinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", round($tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuoterow["alv"]/100), $yhtiorow['hintapyoristys']));
+			}
+			else {
+				$hinta	= $tilausrivi["hinta"];
+			}
+
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+				$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+			}			
 
 			$netto		= $tilausrivi['netto'];
 			$ale		= $tilausrivi['ale'];

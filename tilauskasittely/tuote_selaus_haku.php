@@ -336,9 +336,11 @@
 	}
 
 	if ($kukarow["extranet"] != "") {
+		$extra_poislisa = " and tuote.hinnastoon != 'E' ";
 		$avainlisa = " and avainsana.jarjestys < 10000";
 	}
 	else {
+		$extra_poislisa = "";
 		$avainlisa = "";
 	}
 	
@@ -531,6 +533,7 @@
 				WHERE tuote.yhtio = '$kukarow[yhtio]'
 				$kieltolisa
 				$lisa
+				$extra_poislisa
 				$poislisa				
 				ORDER BY tuote.tuoteno
 				LIMIT 500";

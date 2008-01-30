@@ -322,8 +322,11 @@ while (!feof ($fd)) {
 			if (!is_array($arow)) {
 				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 
-				$query = "SELECT * FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and toim_ovttunnus='$tieto'";
+				$query = "	SELECT * 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and toim_ovttunnus = '$tieto'
+							and toim_ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -334,8 +337,11 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$query = "SELECT * FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and ovttunnus='$tieto'";
+				$query = "	SELECT * 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and ovttunnus = '$tieto'
+							and ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -346,8 +352,11 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$query = "SELECT * FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and asiakasnro='$tieto'";
+				$query = "	SELECT * 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and asiakasnro = '$tieto'
+							and asiakasnro not in ('','0')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -372,8 +381,11 @@ while (!feof ($fd)) {
 			if (!is_array($arow)) {
 				$edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 
-				$query = "SELECT * FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and toim_ovttunnus='$tieto'";
+				$query = "	SELECT * 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and toim_ovttunnus = '$tieto'
+							and toim_ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -384,8 +396,11 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$query = "SELECT * FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and ovttunnus='$tieto'";
+				$query = "	SELECT * 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and ovttunnus = '$tieto'
+							and ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -396,8 +411,11 @@ while (!feof ($fd)) {
 			}
 
 			if (!is_array($arow)) {
-				$query = "SELECT * FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and asiakasnro='$tieto'";
+				$query = "	SELECT * 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and asiakasnro = '$tieto'
+							and asiakasnro not in ('','0')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {
@@ -422,8 +440,11 @@ while (!feof ($fd)) {
 
 				$edi_ulos .= t("Tilaava toim_asiakas")." $tieto -> ";
 
-				$query = "	SELECT * FROM asiakas
-							WHERE yhtio='$kukarow[yhtio]' and toim_ovttunnus='$tieto'";
+				$query = "	SELECT * 
+							FROM asiakas
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and toim_ovttunnus = '$tieto'
+							and toim_ovttunnus not in ('','0')";
 				$result = mysql_query($query) or die($query);
 
 				if (mysql_num_rows($result) == 1) {

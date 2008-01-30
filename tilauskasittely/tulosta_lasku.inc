@@ -1286,7 +1286,7 @@ if (!function_exists('loppu')) {
 		$pdf->draw_text(257, 35, $y_email,						$thispage, $pieni);
 
 		//jos on suomalainen yritys tehdään ytunnus nätiks
-		if (strtoupper($yhtiorow["maa"])== 'FI') {
+		if (strtoupper($y_maa) == 'FI') {
 			//muutetaan ytunnus takas oikean näköseks
 			$ytunpit = 8-strlen($y_vatnumero);
 

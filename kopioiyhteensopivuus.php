@@ -169,12 +169,12 @@
 	
 	if ($tee == '') {
 		
-		if ($vehicle_type == "" or $vehicle_type == "mp") {
+		if ($toim == "MP") {
 			$vehicle_type = "mp";
 			$kentat = 'tunnus, merkki, malli, cc, vm';
 			$jarjestys = 'merkki, malli';
 		}
-		else {
+		else if ($toim == "") {
 			$vehicle_type = "auto";
 			$kentat = 'tunnus, merkki, malli, mallitarkenne, korityyppi, cc, moottorityyppi, polttoaine, sylinterimaara, sylinterinhalkaisija, teho_kw, teho_hv, alkukk, alkuvuosi, loppukk, loppuvuosi, lisatiedot';
 			$jarjestys = 'merkki, malli';
@@ -199,23 +199,8 @@
 		$result = mysql_query ($query)
 				or die ("Kysely ei onnistu $query");
 
-		echo "<table><form action = '$PHP_SELF' method = 'post'>";
+		echo "<table><form action = '$PHP_SELF' method = 'post'><tr>";
 
-		$select_auto = "";
-		$select_mp = "";
-		
-		if ($vehicle_type == "mp") {
-			$select_mp = "selected";
-		}
-		else {
-			$select_auto = "selected";
-		}
-		
-		echo "<tr><th>".t("Valitse tyyppi").":</th><td class='back'><select name='vehicle_type' onChange='submit();'>";
-		echo "<option value='mp' $select_mp>".t("Moottoripyörä")."</option>";
-		echo "<option value='auto' $select_auto>".t("Auto")."</option>";
-		echo "</select></td></tr><tr>";
-		
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
 			echo "<th valign='top' align='left'><a href = '$PHP_SELF?ojarj=".$array[$i].$ulisa ."'> 
 					" . t(mysql_field_name($result,$i)) . "</a>";

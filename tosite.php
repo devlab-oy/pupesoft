@@ -343,7 +343,7 @@
 					dateTiliLoppu = dateTiliLoppu.getTime();
 
 					dateSyotetty = dateSyotetty.getTime();
-
+					
 					if(dateSyotetty < dateTiliAlku || dateSyotetty > dateTiliLoppu) {
 						var msg = '".t("VIRHE: Syötetty päivämäärä ei sisälly kuluvaan tilikauteen")."!';
 
@@ -354,7 +354,8 @@
 							return false;
 						}
 					}
-
+					
+					
 					if(ero >= 30) {
 						var msg = '".t("Oletko varma, että haluat päivätä laskun yli 30pv menneisyyteen")."?';
 						return confirm(msg);
@@ -363,7 +364,20 @@
 						var msg = '".t("Oletko varma, että haluat päivätä laskun yli 14pv tulevaisuuteen")."?';
 						return confirm(msg);
 					}
-
+										
+					if (vv < dateTallaHet.getFullYear()) {
+						if (5 < dateTallaHet.getDate()) {
+							var msg = '".t("Oletko varma, että haluat päivätä laskun menneisyyteen")."?';
+							return confirm(msg);
+						}												
+					}
+					else if (vv == dateTallaHet.getFullYear()) {
+						if (kk < dateTallaHet.getMonth() && 5 < dateTallaHet.getDate()) {
+							var msg = '".t("Oletko varma, että haluat päivätä laskun menneisyyteen")."?';
+							return confirm(msg);
+						}
+					}
+					
 
 				}
 			</SCRIPT>";

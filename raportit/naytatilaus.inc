@@ -383,10 +383,13 @@
 	
 	//Listataan tilauksessa olevat tuotteet
 	if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
-		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
-					tilausrivi.tuoteno, toim_tuoteno, concat_ws('/',tilkpl,round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
-					concat_ws('/',varattu,round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', kpl,
-					hinta, ale, var V, netto N, round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, 
+		$query = "	SELECT otunnus tilaus, ".nimitys('select','tilausrivi').", concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+					tilausrivi.tuoteno, toim_tuoteno, 
+					concat_ws('/', round(tilkpl,4), round(tilkpl*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tilattu sis/ulk',
+					concat_ws('/', round(varattu,4),round(varattu*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4)) 'tulossa sis/ulk', 
+					kpl,
+					round(hinta, '$yhtiorow[hintapyoristys]') hinta, ale, 
+					round((varattu+kpl)*hinta*if(tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*(1-(ale/100)),'$yhtiorow[hintapyoristys]') rivihinta, 
 					tilausrivi.alv, tilausrivi.kommentti, tilausrivi.tunnus,
 					'dummy' osto_vai_hyvitys, tilausrivi.uusiotunnus,
 					$sorttauskentta
@@ -400,11 +403,11 @@
 					ORDER BY $jarjestys";
 	}
 	else {
-		$query = "	SELECT otunnus tilausnumero, ".nimitys('select','tilausrivi').", 
+		$query = "	SELECT otunnus tilaus, ".nimitys('select','tilausrivi').", 
 					concat_ws(' ', hyllyalue, hyllynro, hyllyvali, hyllytaso) paikka, tilausrivi.tuoteno, tilkpl,
 					if(tilausrivi.var not in ('P','J','S'), tilausrivi.varattu+tilausrivi.kpl, 0) kpl,
 					if(tilausrivi.var in ('J','S'), tilausrivi.jt $lisavarattu, 0) jt,
-					hinta, ale, var V, netto N, 					
+					round(hinta, '$yhtiorow[hintapyoristys]') hinta, ale, var V, netto N, 					
 					round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
 					alv, kerattyaika, keratty keraaja, toimaika, tilausrivi.kommentti, tilausrivi.tunnus,
 					tilausrivin_lisatiedot.osto_vai_hyvitys, tilausrivi.uusiotunnus,
@@ -442,11 +445,17 @@
 			if (mysql_field_name($presult,$i) == 'kerattyaika' or mysql_field_name($presult,$i) == 'toimaika') {
 				echo "<td>".tv1dateconv($prow[$i],"pitka")."</td>";
 			}
+			elseif (mysql_field_name($presult,$i) == 'kpl' or mysql_field_name($presult,$i) == 'tilkpl' or mysql_field_name($presult,$i) == 'jt' or mysql_field_name($presult,$i) == 'ale' or mysql_field_name($presult,$i) == 'alv') {
+				echo "<td align='right'>".($prow[$i]*1)."</td>";
+			}
 			elseif (mysql_field_name($presult,$i) == 'tuoteno') {
 				echo "<td><a href='".$palvelin2."tuote.php?tee=Z&tuoteno=$prow[$i]'>$prow[$i]</a></td>";
 			}
+			elseif (is_numeric($prow[$i])) { 
+				echo "<td align='right'>$prow[$i]</td>";
+			}
 			else {
-				echo "<td>".str_replace(".",",",$prow[$i])."</td>";
+				echo "<td>$prow[$i]</td>";
 			}
 		}
 		echo "</tr>";
@@ -505,7 +514,15 @@
 		}
 	}
 
-	echo "<tr><td class='back' colspan='11' align='right'>".t("Veroton arvo yhteensä").":</td><td class='back'>".sprintf('%.2f',$summa)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+	if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
+		$colspan = 10;
+	}
+	else {
+		$colspan = 11;
+	}
+
+
+	echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Veroton arvo yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$summa)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
 
 	//Haetaan kaikki alvikannat riveiltä
 	$alvquery = "	SELECT distinct alv
@@ -547,18 +564,18 @@
 			$alvi = ($alvrow["alv"]*1)."%";
 		}
 		
-		echo "<tr><td class='back' colspan='11' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back'>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";		
+		echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back'>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";		
 	
 		$summa += $arow["alvrivihinta"];
 	}
 
 	if ($summa != 0) {
-		echo "<tr><td class='back' colspan='11' align='right'>".t("Yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$summa)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+		echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Yhteensä").":</td><td class='back' align='right'>".sprintf('%.2f',$summa)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
 	}
 
 	if($ennakkosumma != 0) {
 		echo "<tr><td class='back'><br></td></tr>";
-		echo "<tr><td class='back' colspan='11' align='right'>".t("Ennakkolaskutus").":</td><td class='back' align='right'>".sprintf('%.2f',$ennakkosumma)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+		echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Ennakkolaskutus").":</td><td class='back' align='right'>".sprintf('%.2f',$ennakkosumma)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
 		
 		//Haetaan kaikki alvikannat riveiltä
 		$alvquery = "	SELECT distinct alv
@@ -600,13 +617,13 @@
 				$alvi = ($alvrow["alv"]*1)."%";
 			}
 
-			echo "<tr><td class='back' colspan='11' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back'>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";
+			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='back'>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='back'>$alvi</td></tr>";
 		
 			$ennakkosumma += $arow["alvrivihinta"];
 		}
 		
 		if ($ennakkosumma != 0) {
-			echo "<tr><td class='back' colspan='11' align='right'>".t("Yhteensä").":</td><td align='right' class='back'>".sprintf('%.2f',$ennakkosumma)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
+			echo "<tr><td class='back' colspan='$colspan' align='right'>".t("Yhteensä").":</td><td align='right' class='back'>".sprintf('%.2f',$ennakkosumma)."</td><td class='back'>$laskurow[valkoodi]</td></tr>";
 		}
 		
 	}

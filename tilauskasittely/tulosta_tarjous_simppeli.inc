@@ -147,6 +147,16 @@ if (!function_exists('tulosta_tarjous')) {
 		$rivihinta = "round($hinta_riv * if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+$laskurow[erikoisale]-(tilausrivi.ale*$laskurow[erikoisale]/100))/100)),2)";
 		$perherivihinta = "	(select sum(".str_replace("tilausrivi.","t.",$rivihinta).") from tilausrivi t where t.perheid=tilausrivi.perheid and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.tyyppi in  ('T'))";
 		
+		//	Voidaanko näyttää alet?
+		$query = "select tunnus from tilausrivi where yhtio = '$kukarow[yhtio]' and ale > 0 and otunnus IN ({$laskurow["tunnus"]})";
+		$abures = mysql_query($query) or pupe_error($query);
+		if(mysql_num_rows($abures) > 0) {
+			$alenaytetaan="OK";
+		}
+		else {
+			$alenaytetaan="";
+		}
+		
 		//	Käsitellään tuoterivit
 		$q = "	SELECT tilausrivi.*, 
 					if(tilausrivi.perheid=0,$rivihinta,$perherivihinta) rivihinta,
@@ -160,7 +170,13 @@ if (!function_exists('tulosta_tarjous')) {
 					and tilausrivi.tyyppi in  ('T')
 					$ennakkolisa";
 		$grand_total=0;
-		$s=$pdf->teeSarakkeet(array(55,30,30,30));		
+		if($alenaytetaan == "OK") {
+			$s=$pdf->teeSarakkeet(array(75,30,13,20,20));
+		}
+		else {
+			$s=$pdf->teeSarakkeet(array(75,30,30,20));
+			
+		}
 		
 		foreach(array("Tuotteet","Palvelut","Alennukset","Ylläpito", "Optio") as $key) {
 			
@@ -214,9 +230,15 @@ if (!function_exists('tulosta_tarjous')) {
 
 				$pdf->write($h, 1, 0, $s[1], t("Tuote", $kieli)." / ".t("Kommentti", $kieli), "norm", "L", "B");
 				$pdf->write($h, 1, $s[1], $s[2], t("Määrä", $kieli), "norm", "R", "B");
+								
 				if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 					$pdf->write($h, 1, $s[2], $s[3], t("Hinta/yks", $kieli), "norm", "R", "B");
-					$pdf->write($h, 1, $s[3], $s[4], t("Yhteensä", $kieli), "norm", "R", "B");					
+					
+					if($alenaytetaan=="OK") {
+						$pdf->write($h, 1, $s[3], $s[4], t("Alennus", $kieli), "norm", "R", "B");
+					}
+					
+					$pdf->write($h, 1, $s[4], $s[5], t("Yhteensä", $kieli), "norm", "R", "B");					
 				}
 				$h-=$pdf->ln(1.5);
 
@@ -258,9 +280,15 @@ if (!function_exists('tulosta_tarjous')) {
 						
 						$pdf->write($h, 1, 0, $s[1], $row["tuoteno"]." ".$row["nimitys"], "norm", "L", "");
 						$pdf->write($h, 1, $s[1], $s[2], $row["tilkpl"]." ".strtolower(ta($kieli, "Y", $row["yksikko"])), "norm", "R", "");
+																		
 						if($laskurow["rivihintoja_ei_nayteta"] == "" or $key == "Optio") {
 							$pdf->write($h, 1, $s[2], $s[3], money_format('%!i',$row["hinta"]), "norm", "R", "");
-							$pdf->write($h, 1, $s[3], $s[4], money_format('%!i',$row["rivihinta"]), "norm", "R", "");						
+							
+							if($alenaytetaan=="OK" and $row["ale"] > 0) {
+								$pdf->write($h, 1, $s[3], $s[4], money_format('%!i',$row["ale"]), "norm", "R", "");
+							}
+							
+							$pdf->write($h, 1, $s[4], $s[5], money_format('%!i',$row["rivihinta"]), "norm", "R", "");						
 						}
 						$h-=$pdf->ln(1.25);
 						if($row["kommentti"] != "") {
@@ -305,7 +333,7 @@ if (!function_exists('tulosta_tarjous')) {
 				}
 
 				if($laskurow["rivihintoja_ei_nayteta"] == "" and $key != "Optio") {
-					$pdf->write($h, 1, $s[1], $s[3], t(ucfirst(strtolower($key))." yhteensä",$kieli).": ", "norm", "R", "B");				
+					$pdf->write($h, 1, $s[0], $s[3], t(ucfirst(strtolower($key))." yhteensä",$kieli).": ", "norm", "R", "B");				
 					$pdf->write($h, 1, $s[3], 0, money_format('%!i',$summa), "norm", "R", "B");
 				}
 				$grand_total+=$summa;

@@ -313,6 +313,9 @@
 
 				if (mysql_num_rows($perheresult) > 0) {
 					while ($perherow = mysql_fetch_array($perheresult)) {
+						
+						if ($lisaarivi_debug==1) echo "Tuoteperheen lapsi: $perherow[tuoteno]<br>";
+						
 						//T‰t‰ tuoteperhett‰ halutaan myyd‰
 						if (!in_array(strtoupper($perherow["tuoteno"]), $tuoteperhe)) $tuoteperhe[]=strtoupper($perherow["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
 						if (!in_array(strtoupper($perherow["tuoteno"]), $kaikkituotteet)) $kaikkituotteet[]=strtoupper($perherow["tuoteno"]); // lis‰t‰‰n tuoteno arrayseen
@@ -397,7 +400,7 @@
 					// Saldolliset tuotteet
 					list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuoteno, $jtspec, '', '', $zrow["hyllyalue"], $zrow["hyllynro"], $zrow["hyllyvali"], $zrow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $zrow["era"]);
 
-					if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er‰: $zrow[era]) PVM: $saldoaikalisa<br>";
+					if ($lisaarivi_debug==1) echo "Saldo_myyt‰viss‰ funktio sanoo $tuoteno: $zrow[hyllyalue], $zrow[hyllynro], $zrow[hyllyvali], $zrow[hyllytaso]: $saldo, $hyllyssa, $myytavissa kappaletta (Er‰: $zrow[era]) PVM: $saldoaikalisa<br>";
 
 					//Tutkitaan myyd‰‰nkˆ tietty‰ jo varattua lis‰varustetta
 					if ($perheid2 > 0 and $perheid2!=$rivitunnus and strtoupper($zrow["hyllyalue"]."#".$zrow["hyllynro"]."#".$zrow["hyllyvali"]."#".$zrow["hyllytaso"]) == strtoupper($paikka)) {
@@ -430,7 +433,7 @@
 					$zzrow[$zzrowlask]["hyllyvali"]		= $zrow["hyllyvali"];
 					$zzrow[$zzrowlask]["hyllytaso"]		= $zrow["hyllytaso"];
 
-					if ($lisaarivi_debug==1) echo "Myyt‰viss‰ paikalta $zrow[hyllyalue]: $myytavissa kappaletta<br>";
+					if ($lisaarivi_debug==1) echo "Myyt‰viss‰ $tuoteno paikalta $zrow[hyllyalue]: $myytavissa kappaletta<br>";
 
 					// tilatulla tuotteella oli saldoa.. laitetaan lippu p‰‰lle, ett‰ huomataan osatoimituskeisi oikein..
 					if ($tuoteno == $alkupera_trow["tuoteno"]) {
@@ -491,7 +494,7 @@
 					foreach($zzrow as $zrow) {
 						if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and ($zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or $laskurow["varasto"] == $zrow["varasto"]))) {
 
-							if ($lisaarivi_debug==1) echo "Myyd‰‰n paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
+							if ($lisaarivi_debug==1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]: $zrow[myytavissa] kappaletta<br>";
 
 							// lis‰t‰‰n tuotteen tiedot arrayseen, koska t‰m‰n tuotteen voi myyd‰
 							$myy_tuoteno[$i]   = strtoupper($tuoteno);
@@ -519,7 +522,7 @@
 				elseif ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI") {
 					// Jos tuotteella taas ei ole ollenkaan tuotepaikkoja ja myyd‰‰n kuitenkin (eli ei piitata saldoista)
 					
-					if ($lisaarivi_debug==1) echo "Tuotteella ei ole yht‰‰n tuotepaikkaa! Myyd‰‰n silti koska saldoista ei nyt piitata!<br>";
+					if ($lisaarivi_debug==1) echo "Tuotteella $tuoteno ei ole yht‰‰n tuotepaikkaa! Myyd‰‰n silti koska saldoista ei nyt piitata!<br>";
 					
 					$myy_tuoteno[$i]   = strtoupper($tuoteno);
 					$myy_kpl[$i]       = $toimittamatta;
@@ -529,7 +532,13 @@
 					$myy_hyllytaso[$i] = "";
 					$myy_varasto[$i]   = "";
 					$myy_era[$i]   	   = "";
-					$myy_tyyppi[$i]    = "NORMAALI";
+					
+					if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
+						$myy_tyyppi[$i] = "NORMAALI";
+					}
+					else {
+						$myy_tyyppi[$i] = "LAPSITUOTE";
+					}
 				}
 			}
 			else {
@@ -543,7 +552,6 @@
 				$myy_hyllytaso[$i] = "";
 				$myy_varasto[$i]   = "";
 				$myy_era[$i]   	   = "";
-				$myy_tyyppi[$i]    = "NORMAALI";
 
 				if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
 					$myy_tyyppi[$i] = "NORMAALI";

@@ -240,7 +240,7 @@
 					WHERE yhtio = '$kukarow[yhtio]'
 					and tunnus = '$laskurow[tunnus]'
 					and tila in ('N','L')
-					and alatila in ('','A','F')";
+					and alatila in ('','A','F','U')";
 		$result = mysql_query($query) or pupe_error($query);
 		
 		///* T‰h‰n menn‰‰n jos l‰hete tosiaan tulostetaan *///

@@ -193,7 +193,7 @@
 
 				echo "<table>";
 				
-				if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
+				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F") {
 					echo "<tr><th colspan='2'>".t("Muuta eränumerotietoja").":</th></tr>";
 				}
 				else {
@@ -219,7 +219,7 @@
 						<input type='hidden' name='myyntitilaus_haku'	value='$myyntitilaus_haku'>
 						<input type='hidden' name='lisatieto_haku' 		value='$lisatieto_haku'>";
 				
-				if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
+				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F") {
 					echo "<tr><th>".t("Eränumero")."</th>";
 				}
 				else {
@@ -228,7 +228,7 @@
 				
 				echo "<td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'></td></tr>";
 				
-				if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F") {
+				if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F") {
 					if ($muutarow["era_kpl"] >= 0 and $muutarow["myyntirivitunnus"] == 0 and ($muutarow["ostorivitunnus"] == 0 or $from == "kohdista")) {
 						echo "<tr><th>".t("Erän suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$muutarow[era_kpl]'></td></tr>";
 					}
@@ -238,7 +238,7 @@
 					}
 				}
 				
-				if ($rivirow["sarjanumeroseuranta"] == "F") {
+				if ($muutarow["sarjanumeroseuranta"] == "F") {
 					
 					$pevva = substr($muutarow["parasta_ennen"],0,4);
 					$pekka = substr($muutarow["parasta_ennen"],5,2);
@@ -264,7 +264,7 @@
 				
 				echo "<tr><th>".t("Lisätieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$muutarow[lisatieto]</textarea></td></tr>";
 																				
-				if ($rivirow["sarjanumeroseuranta"] == "S") {					
+				if ($muutarow["sarjanumeroseuranta"] == "S") {					
 					
 					$chk = "";
 					if ($muutarow["kaytetty"] == 'K') {

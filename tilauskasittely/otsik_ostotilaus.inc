@@ -57,7 +57,7 @@
 		echo "<form method='post' action='$PHP_SELF' autocomplete='off'>";
 		echo "<input type='hidden' name='tee' value='MUUOTAOSTIKKOA'>";
 		echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-		echo "<table border='0' cellpadding='2' cellspacing='1'>";
+		echo "<table>";
 
 
 
@@ -106,65 +106,28 @@
 				<input type='hidden' name='ylatila' value='$ylatila'>
 				<input type='hidden' name='alatila' value='$alatila'>";
 				
-		echo "<table cellpadding='1' cellspacing='1'>
+		echo "<table>
 				<tr><th colspan='2' align='left' valign='top'>&nbsp;".t("Toimittajan tiedot").":</td></tr>
 				<tr><td valign='top'>".t("Nimi").": </td><td><input type='text' name='nimi' size='35' maxlength='31' value='$srow[nimi]'></td></tr>
 				<tr><td></td><td><input type='text' name='nimitark' size='35' maxlength='31'  value='$srow[nimitark]'></td></tr>
 				<tr><td valign='top'>".t("Osoite").": </td><td><input type='text' name='osoite' size='35' maxlength='31' value='$srow[osoite]'></td></tr>
 				<tr>
-					<td valign='top'>".t("Postitp").": </td><td><input type='text' name='postino' size='6' maxlength='6' value='$srow[postino]'>
-					<input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'>
-					<input type='hidden' name='maa' value='$srow[maa]'>";
+			  	<td valign='top'>".t("Postitp").": </td><td><input type='text' name='postino' size='6' maxlength='6' value='$srow[postino]'>
+			  	<input type='text' name='postitp' size='21' maxlength='20' value='$srow[postitp]'>
+			  	<input type='hidden' name='maa' value='$srow[maa]'>";
 		
 		if($toimittajaid == 0 or $tila == "vaihdaasiakas") {
-			echo "		</td>
-						</tr></table>
-					</td>
-				</tr>
-				<tr>
+			echo "	</td></tr></table></td></tr><tr>
 					<td class='back' colspan = '2' align = 'right'><input type = 'hidden' name = 'tila' value = 'vaihdaasiakas'><input type='submit' value='".t("Hae")."'></td>
-				</tr>
-				</table>
-				</form>";
+					</tr></table></form>";
 
 			$formi  = "paaformi";
 			$kentta = "nimi";			
 		}
 		else {
 			
-			echo "		</td>
-					</tr>
-					</table>
-					</td>";
-			
-			// katotaan ollaanko valittu tilaajaksi joku muu toimipiste
-			if (isset($srow)) {
-				if ($toimipiste != 0 and strlen(trim($srow["toim_nimi"])) == 0) {
-					$edique  = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and tunnus='$toimipiste'";
-					$ediotr = mysql_query($edique) or pupe_error($edique);
-					$edioro = mysql_fetch_array($ediotr);
-
-					// laitetaan toimipisteen tiedot toimitusosoitteeseen jos siell‰ ei viel‰ muuta ole
-					$srow["toim_nimi"] 		= $edioro["nimi"];
-					$srow["toim_nimitark"] 	= $edioro["nimitark"];
-					$srow["toim_osoite"] 	= $edioro["osoite"];
-					$srow["toim_postino"] 	= $edioro["postino"];
-					$srow["toim_postitp"] 	= $edioro["postitp"];
-					$srow["toim_maa"] 		= $edioro["maa"];
-				}
-
-				// varmistellaan, ett‰ meill‰ menee jotain toimitusosoite kentt‰‰n
-				if(strlen(trim($srow["toim_nimi"])) == 0) {
-					$srow["toim_nimi"] 		= $yhtiorow["nimi"];
-					$srow["toim_nimitark"] 	= $yhtiorow["nimitark"];
-					$srow["toim_osoite"] 	= $yhtiorow["osoite"];
-					$srow["toim_postino"] 	= $yhtiorow["postino"];
-					$srow["toim_postitp"] 	= $yhtiorow["postitp"];
-					$srow["toim_maa"] 		= $yhtiorow["maa"];
-				}
-			}
-			
-			echo "<td colspan = '2'><table cellpadding='1' cellspacing='1'>";
+			echo "</td></tr></table></td>";			
+			echo "<td colspan = '2'><table>";
 			echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Toimitusosoite").":</td></tr>";
 			echo "<tr><td valign='top'> ".t("Nimi").": </td><td><input type='text' name='tnimi' size='35' maxlength='31' value='$srow[toim_nimi]'></td></tr>";
 			echo "<tr><td> </td><td><input type='text' name='tnimitark' size='35' maxlength='31'  value='$srow[toim_nimitark]'></td></tr>";
@@ -187,7 +150,7 @@
 				$toimpp = substr($toimpp,0,2);
 
 			}
-
+			
 			//voidaan tarvita
 			if ($toimvv == '') {
 				$toimpp = date("j");
@@ -199,7 +162,6 @@
 				$kerkk = date("n");
 				$kervv = date("Y");
 			}
-
 
 			echo "<tr><td>".t("Toimitusajankohta").": </td><td valign='middle'>
 					<input type='text' name='toimpp' value='$toimpp' size='3'>
@@ -375,15 +337,15 @@
 
 		
 		// katotaan ollaanko valittu tietty varasto johon kamat tilataan
-		if ($varasto > 0) {
+		if ($varasto > 0 and strlen(trim($tnimi)) == 0) {
 			$edique  = "SELECT *
 						FROM varastopaikat
-						WHERE yhtio= '$kukarow[yhtio]'
-						and tunnus = '$varasto'";
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tunnus 	= '$varasto'";
 			$vares = mysql_query($edique) or pupe_error($edique);
 			$varow = mysql_fetch_array($vares);
 			
-			if ($varow["nimi"] != "" and $varow["osoite"] != "" and $varow["postino"] != "" and $varow["postitp"] != "") {
+			if ($varow["nimi"] != "" and $varow["osoite"] != "") {
 				$tnimi     = $varow["nimi"];
 				$tnimitark = $varow["nimitark"];
 				$tosoite   = $varow["osoite"];
@@ -394,18 +356,23 @@
 		}
 		
 		// katotaan ollaanko valittu tilaajaksi joku muu toimipiste
-		if ($toimipiste != 0) {
-			$edique  = "select * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and tunnus='$toimipiste'";
+		if ($toimipiste > 0 and strlen(trim($tnimi)) == 0) {
+			$edique  = "SELECT * 
+						from yhtion_toimipaikat 
+						where yhtio	= '$kukarow[yhtio]' 
+						and tunnus	= '$toimipiste'";
 			$ediotr = mysql_query($edique) or pupe_error($edique);
 			$edioro = mysql_fetch_array($ediotr);
 
 			// laitetaan toimipisteen tiedot toimitusosoitteeseen jos siell‰ ei viel‰ muuta ole
-			$tnimi     	= $edioro["nimi"];
-			$tnimitark 	= $edioro["nimitark"];
-			$tosoite   	= $edioro["osoite"];
-			$tpostino  	= $edioro["postino"];
-			$tpostitp  	= $edioro["postitp"];
-			$tmaa  		= $edioro["maa"];
+			if ($edioro["nimi"] != "" and $edioro["osoite"] != "") {
+				$tnimi     	= $edioro["nimi"];
+				$tnimitark 	= $edioro["nimitark"];
+				$tosoite   	= $edioro["osoite"];
+				$tpostino  	= $edioro["postino"];
+				$tpostitp  	= $edioro["postitp"];
+				$tmaa  		= $edioro["maa"];
+			}
 		}
 						
 		// varmistellaan, ett‰ meill‰ menee jotain toimitusosoite kentt‰‰n

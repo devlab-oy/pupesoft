@@ -83,7 +83,8 @@
 		echo "<input type = 'hidden' name = 'tee' value ='write'>";
 		echo "<input type = 'hidden' name = 'id' value ='$id'>";
 		echo "<input type = 'hidden' name = 'vehicle_type' value='$vehicle_type'>";
-		
+		echo "<input type='hidden' name='toim' value='$toim'>";
+
 		// Kokeillaan geneeristä
 		$query = "	SELECT *
 					FROM yhteensopivuus_$vehicle_type
@@ -200,6 +201,8 @@
 				or die ("Kysely ei onnistu $query");
 
 		echo "<table><form action = '$PHP_SELF' method = 'post'><tr>";
+		
+		echo "<input type='hidden' name='toim' value='$toim'>";
 
 		for ($i = 1; $i < mysql_num_fields($result); $i++) {
 			echo "<th valign='top' align='left'><a href = '$PHP_SELF?ojarj=".$array[$i].$ulisa ."'> 

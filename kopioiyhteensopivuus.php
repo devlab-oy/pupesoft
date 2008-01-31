@@ -172,12 +172,12 @@
 		
 		if ($toim == "MP") {
 			$vehicle_type = "mp";
-			$kentat = 'tunnus, merkki, malli, cc, vm';
+			$kentat = 'tunnus, tunnus, merkki, malli, cc, vm';
 			$jarjestys = 'merkki, malli';
 		}
 		else if ($toim == "") {
 			$vehicle_type = "auto";
-			$kentat = 'tunnus, merkki, malli, mallitarkenne, korityyppi, cc, moottorityyppi, polttoaine, sylinterimaara, sylinterinhalkaisija, teho_kw, teho_hv, alkukk, alkuvuosi, loppukk, loppuvuosi, lisatiedot';
+			$kentat = 'tunnus, tunnus, merkki, malli, mallitarkenne, korityyppi, cc, moottorityyppi, polttoaine, sylinterimaara, sylinterinhalkaisija, teho_kw, teho_hv, alkukk, alkuvuosi, loppukk, loppuvuosi, lisatiedot';
 			$jarjestys = 'merkki, malli';
 		}
 		

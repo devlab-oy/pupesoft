@@ -1428,4 +1428,17 @@
 
 		$jatko = 0;
 	}
+
+	if (mysql_field_name($result, $i) == "tuotteen_oletuspaikka") {
+		
+		$ulos = "<td><select name='$nimi'>";
+		
+		$sel = array();
+		$apu = $trow[$i];
+		$sel[$apu] = "SELECTED";
+		
+		$ulos = "<td><input type='text' name='$nimi' value = '$trow[$i]' size='25'></td>";
+
+		$jatko = 0;
+	}
 ?>

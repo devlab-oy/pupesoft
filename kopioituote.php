@@ -36,9 +36,42 @@
 			}
 			else {
 				$otsikkorivi = mysql_fetch_array($stresult);
+				
+				$tuotepaikat_query = "	SELECT *
+										FROM tuotepaikat
+										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
+				$tuotepaikat_result = mysql_query($tuotepaikat_query) or pupe_error($tuotepaikat_query);
+				
+				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0) {
+					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
+
+					if ($hyllyalue == "") {
+						$hyllyalue = 0;
+					}
+					if ($hyllynro == "") {
+						$hyllynro = 0;
+					}
+					if ($hyllyvali == "") {
+						$hyllyvali = 0;
+					}
+					if ($hyllytaso == "") {
+						$hyllytaso = 0;
+					}
+
+					$tuotepaikka_query = "	INSERT INTO tuotepaikat set
+					 						yhtio			= '$kukarow[yhtio]',
+								 			tuoteno     	= '$tuoteno',
+								 			oletus      	= 'X',
+						   		 			saldoaika   	= now(),
+											hyllyalue   	= '$hyllyalue',
+											hyllynro    	= '$hyllynro',
+											hyllyvali   	= '$hyllyvali',
+											hyllytaso   	= '$hyllytaso'";
+					$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
+				}
 
 				// tehd‰‰n vanhasta tuotteesta 1:1 kopio...
-				$query = "insert into tuote set ";
+				$query = "INSERT into tuote set ";
 
 				for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 

@@ -200,21 +200,23 @@ if(!function_exists("toimitarkista")) {
 			
 			if ($toimtyyppi == "PP" and $tunnus > 0 and $errori != 1) {
 				// poistetaan tuotteen_toimittajat kaikille tuotteille
-				$query = "	SELECT lasku.yhtio
+				$query = "	SELECT lasku.yhtio, group_concat(DISTINCT tilausrivi.otunnus) tilaukset 
 							from lasku 
 							join tilausrivi on tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi='O' and tilausrivi.varattu != 0
 							where lasku.yhtio		= '$kukarow[yhtio]' 
 							and lasku.liitostunnus	= '$tunnus'
-							and lasku.tila = 'O'";																				
+							and lasku.tila = 'O'
+							group by 1";																				
 				$tyychkre1 = mysql_query($query) or pupe_error($query);
 								
-				$query = "	SELECT lasku.yhtio 
+				$query = "	SELECT lasku.yhtio, group_concat(DISTINCT lasku.laskunro) tilaukset 
 							from lasku 
 							where lasku.yhtio		= '$kukarow[yhtio]'
 							and lasku.liitostunnus	= '$tunnus'
 							and lasku.tila 	= 'K'
 							and lasku.alatila != 'X'
-							and lasku.vanhatunnus = 0";																				
+							and lasku.vanhatunnus = 0
+							group by 1";																				
 				$tyychkre2 = mysql_query($query) or pupe_error($query);
 								
 				if (mysql_num_rows($tyychkre1) == 0 and mysql_num_rows($tyychkre2) == 0) {
@@ -225,7 +227,10 @@ if(!function_exists("toimitarkista")) {
 					$vres = mysql_query($query) or pupe_error($query);
 				}
 				else {
-					$virhe[$i] = "Tuotteen toimittajia ei voitu poistaa!";	
+					$tyychkro1 = mysql_fetch_array($tyychkre1);
+					$tyychkro2 = mysql_fetch_array($tyychkre2);
+					
+					$virhe[$i] = "Tuotteen toimittajia ei voitu poistaa!<br>Tilaukset: ($tyychkro1[tilaukset]) ovat auki.<br>Keikat: ($tyychkro2[tilaukset]) ovat auki.";	
 				}
 			}			
 		}

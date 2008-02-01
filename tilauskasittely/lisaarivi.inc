@@ -541,6 +541,9 @@
 						$myy_tyyppi[$i] = "LAPSITUOTE";
 						$lapsiyhteensa += $toimittamatta; // summaillaan kaikkien lapsien saldoa yhteensä.
 					}
+					
+					//Kasvatetaan äiti-indeksiä
+					$i++;
 				}
 			}
 			else {

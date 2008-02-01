@@ -2832,7 +2832,7 @@ if ($tee == '') {
 
 	 // erikoisceisi, jos halutaan pieni tuotekysely tilaustaulussa...
 	if ($tuoteno != '' and $kpl == '' and $kukarow['extranet'] == '') {
-		$query	= "select * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+		$query	= "SELECT * from tuote where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 		$result = mysql_query($query) or pupe_error($query);
 
 		if (mysql_num_rows($result)!=0) {
@@ -2847,17 +2847,17 @@ if ($tee == '') {
 				<tr>$jarjlisa<th>".t("Hinta")."</th><td align='right'>$tuote[myyntihinta] $yhtiorow[valkoodi]</td></tr>
 				<tr>$jarjlisa<th>".t("Nettohinta")."</th><td align='right'>$tuote[nettohinta] $yhtiorow[valkoodi]</td></tr>";
 
-			$query = "select * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
+			$query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
 			$tres  = mysql_query($query) or pupe_error($query);
 
 			while ($salrow = mysql_fetch_array($tres)) {
-				$query =	"select * from varastopaikat where yhtio='$kukarow[yhtio]'
+				$query =	"SELECT * from varastopaikat where yhtio='$kukarow[yhtio]'
 							and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0'))
 							and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$salrow[hyllyalue]'), 5, '0'),lpad(upper('$salrow[hyllynro]'), 5, '0')) ";
 				$nimre = mysql_query($query) or pupe_error($query);
 				$nimro = mysql_fetch_array($nimre);
 
-				$query = "	select sum(varattu)
+				$query = "	SELECT sum(varattu)
 							from tilausrivi
 							where hyllyalue='$salrow[hyllyalue]'
 							and hyllynro='$salrow[hyllynro]'
@@ -4135,7 +4135,7 @@ if ($tee == '') {
 
 							echo "<td valign='top'>&nbsp;</td>";
 							echo "<td valign='top'>$prow[tuoteno]</td>";
-							echo "<td valign='top'><input type='text' name='kpl_array[$prow[tuoteno]]'   size='2' maxlength='8'		Style='font-size: 8pt; padding:0;'></td>";
+							echo "<td valign='top' align='right'><input type='text' name='kpl_array[$prow[tuoteno]]' size='2' maxlength='8'></td>";
 
 							if ($toim != "SIIRTOTYOMAARAYS") {
 								echo "	<td valign='top'><input type='text' name='var_array[$prow[tuoteno]]'   size='2' maxlength='1'></td>
@@ -4663,7 +4663,7 @@ if ($tee == '') {
 										<input type='hidden' name='lopetus' value='$lopetus'>
 										<input type='hidden' name='projektilla' value='$projektilla'>";
 
-						echo "	<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",$summa)."'  Style='font-size: 8pt; padding:0; text-align:right'></td>";
+						echo "	<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f",$summa)."' Style='text-align:right'></td>";
 
 						if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 							echo "<td class='spec' align='right'>&nbsp;</td>";

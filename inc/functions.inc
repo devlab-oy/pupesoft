@@ -4756,6 +4756,7 @@ if (! function_exists('tallenna_liite')) {
 		if($tunnus > 0) {
 			$query = "	SELECT tunnus FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";  
 			$result = mysql_query($query) or pupe_error($query);			
+			
 			if(mysql_num_rows($result) == 0) {
 				$tunnus = 0;
 			}
@@ -4801,23 +4802,35 @@ if (! function_exists('tallenna_liite')) {
 			$id = $tunnus;
 		}
 		else {
+			if ((int) $jarjestys == 0) {
+				$query = "	SELECT max(jarjestys) jarjestys 
+							FROM liitetiedostot 
+							WHERE yhtio 		= '$kukarow[yhtio]'
+							and liitos   		= '$liitos'
+							and liitostunnus 	= '$liitostunnus'";  
+				$result = mysql_query($query) or pupe_error($query);
+				$row = mysql_fetch_array($result);
+				
+				$jarjestys = $row["jarjestys"]+1;
+			}
+			
 			$query = "	INSERT INTO liitetiedostot SET
-							yhtio    		= '$kukarow[yhtio]',
-							liitos   		= '$liitos',
-							liitostunnus 	= '$liitostunnus',
-							data     		= '$data',
-							selite   		= '".trim($selite)."',
-							filename 		= '$filename',
-							filesize 		= '$filesize',
-							filetype 		= '$filetype',
-							image_width		= '$image_width',							
-							image_height	= '$image_height',
-							image_bits		= '$image_bits',							
-							image_channels	= '$image_channels',
-							kayttotarkoitus	= '$kayttotarkoitus',
-							jarjestys		= '$jarjestys',
-							laatija			= '$kukarow[kuka]',
-							luontiaika		= now()";
+					  	yhtio    		= '$kukarow[yhtio]',
+					  	liitos   		= '$liitos',
+					  	liitostunnus 	= '$liitostunnus',
+					  	data     		= '$data',
+					  	selite   		= '".trim($selite)."',
+					  	filename 		= '$filename',
+					  	filesize 		= '$filesize',
+					  	filetype 		= '$filetype',
+					  	image_width		= '$image_width',							
+					  	image_height	= '$image_height',
+					  	image_bits		= '$image_bits',							
+					  	image_channels	= '$image_channels',
+					  	kayttotarkoitus	= '$kayttotarkoitus',
+					  	jarjestys		= '$jarjestys',
+					  	laatija			= '$kukarow[kuka]',
+					  	luontiaika		= now()";
 			$result = mysql_query($query) or pupe_error($query);
 			$id = mysql_insert_id();
 		}

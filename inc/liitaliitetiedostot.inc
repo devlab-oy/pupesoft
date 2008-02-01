@@ -101,7 +101,7 @@
 						where yhtio = '$kukarow[yhtio]' 
 						and liitos = '$toim' 
 						and liitostunnus = '$tunnus'
-						order by tunnus";
+						order by jarjestys, tunnus";
 			$result = mysql_query($query) or pupe_error($query);
 
 			echo "<table>";

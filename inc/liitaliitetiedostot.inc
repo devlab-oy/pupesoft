@@ -19,7 +19,26 @@
 
 		// poistetaan kuva
 		if ($teekuva == "poista") {
-			$query = "delete from liitetiedostot where yhtio='$kukarow[yhtio]' and liitos = '$toim' and liitostunnus='$tunnus' and tunnus='$kuvatunnus'";
+			$query = "	DELETE from liitetiedostot 
+						where yhtio			= '$kukarow[yhtio]' 
+						and liitos 			= '$toim' 
+						and liitostunnus	= '$tunnus' 
+						and tunnus			= '$kuvatunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			$teekuva = "";
+		}
+		
+		if ($teekuva == "paivita") {
+			$query = "	UPDATE liitetiedostot SET
+						selite   		= '$kuvaotsikko',
+						kayttotarkoitus	= '$teetyyppi',
+						jarjestys		= '$liite_jarjestys',
+						muuttaja		= '$kukarow[kuka]',
+						muutospvm		= now()
+						where yhtio			= '$kukarow[yhtio]' 
+						and liitos 			= '$toim' 
+						and liitostunnus	= '$tunnus' 
+						and tunnus			= '$kuvatunnus'";
 			$result = mysql_query($query) or pupe_error($query);
 			$teekuva = "";
 		}
@@ -32,7 +51,7 @@
 				echo $retval;
 			}
 			else {
-				tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi);
+				tallenna_liite("userfile", $toim, $tunnus, $kuvaotsikko, $teetyyppi, 0, $liite_jarjestys);
 			}
 			
 			$teekuva = "";
@@ -64,6 +83,7 @@
 			
 			echo "<tr><th>Liitä tiedosto</th><td><input name='userfile' type='file'></td></tr>";
 			echo "<tr><th>".t("Selite")."</th><td><input type='text' name='kuvaotsikko' value='$kuvaotsikko'></tr>";
+			echo "<tr><th>".t("Järjestys")."</th><td><input type='text' name='liite_jarjestys' value='$liite_jarjestys'></tr>";
 			echo "</table><hr>";
 			
 			echo "<input type = 'hidden' name = 'teekuva' value='insert'>";
@@ -75,8 +95,7 @@
 
 		// selataan vanhoja
 		if ($teekuva == "") {
-
-
+			
 			$query  = "	SELECT * 
 						from liitetiedostot 
 						where yhtio = '$kukarow[yhtio]' 
@@ -89,15 +108,37 @@
 			
 			while ($trow = mysql_fetch_array($result)) {
 				echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
+				echo "<td class='back' valign='bottom'>";
+				echo "<input type='hidden' name='teekuva' value='paivita'>";
+				echo "<input type='hidden' name='toim' value='$aputoim'>";
+				echo "<input type='hidden' name='tunnus' value='$tunnus'>";
+				echo "<input type='hidden' name='kuvatunnus' value='$trow[tunnus]'>";
+				echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
 				
 				$query = "	SELECT selite, selitetark
 							FROM avainsana
-							WHERE yhtio = '$kukarow[yhtio]' and laji = 'LITETY' and selite = '$trow[kayttotarkoitus]'";
+							WHERE yhtio = '$kukarow[yhtio]' and laji = 'LITETY'
+							ORDER BY jarjestys, selite";
 				$kires = mysql_query($query) or pupe_error($query);
-				$kirow = mysql_fetch_array($kires);
+
+				echo "<tr><th>".t("Tyyppi")."</th><td colspan='2'><select name='teetyyppi'>";
+
+				while ($kirow=mysql_fetch_array($kires)) {
+					if ($kirow["selite"] == $trow["kayttotarkoitus"]) $select='SELECTED';
+					else $select = '';
+
+					echo "<option value='$kirow[selite]' $select>$kirow[selitetark]</option>";
+				}
+
+				echo "</select></td></tr>";
 				
-				echo "<tr><th colspan='2'>$kirow[selitetark]: $trow[selite]</th></tr>";
-				echo "<tr>";
+				
+				echo "<tr><th>".t("Selite")."</th><td colspan='2'><input type='text' name='kuvaotsikko' value='$trow[selite]'></td></tr>";
+				echo "<tr><th>".t("Järjestys")."</th><td colspan='2'><input type='text' name='liite_jarjestys' value='$trow[jarjestys]'></td>";
+				echo "<td class='back'><input type='submit' class='btn' value='".t("Päivitä tiedot")."'></td></tr>";
+				echo "</form>";
+				
+				echo "<tr><th>".t("Liite")."</th>";
 				
 				$path_parts = pathinfo($trow['filename']);
 				$ext = $path_parts['extension'];
@@ -119,7 +160,6 @@
 				else {
 					echo "<td><a href='view.php?id=$trow[tunnus]'>$trow[filename]</a></td><td valign='bottom'>".size_readable($trow["filesize"])."</td>";
 				}
-				
 
 				echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 				echo "<td class='back' valign='bottom'>";

@@ -953,10 +953,20 @@
 					}
 					
 					if($prow["jaksotettu"] == 1) {
-						echo "<td $kommclass2><font style = 'color: #a4fa7b;'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font></td>";
+						echo "<td $kommclass2><font style = 'color: #00FF00;'>".t("Vahvistettu toimitusaika").": ".tv1dateconv($prow["toimaika"])."</font></td>";
 					}
 					else {
-						echo "<td $kommclass2>".t("Toimitusaika").": ".tv1dateconv($prow["toimaika"])."</td>";
+						
+						if ($paivitetty_ok == "YES") {
+							echo "<td $kommclass2>".t("Toimitusaika").": ".tv1dateconv($ehdotus_pvm)."</td>";
+						}
+						else {
+							echo "<td $kommclass2>".t("Toimitusaika").": ".tv1dateconv($prow["toimaika"])."</td>";
+						}
+						
+
+					//	echo "<td $kommclass2>".t("Toimitusaika").": ".tv1dateconv($prow["toimaika"])."</td>";
+
 					}
 					
 					if (trim($prow["kommentti"]) != "") {

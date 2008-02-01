@@ -252,7 +252,7 @@
 				$query = "	SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
 							FROM sarjanumeroseuranta
 							WHERE yhtio='$kukarow[yhtio]'
-							and tuoteno = '$rivirow[tuoteno]'
+							and tuoteno = '$muutarow[tuoteno]'
 							and sarjanumero like '".t("PUUTTUU")."-%'";
 				$vresult = mysql_query($query) or pupe_error($query);
 				$vrow = mysql_fetch_array($vresult);
@@ -267,7 +267,7 @@
 				$query = "	SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
 							FROM sarjanumeroseuranta
 							WHERE yhtio='$kukarow[yhtio]'
-							and tuoteno = '$rivirow[tuoteno]'
+							and tuoteno = '$muutarow[tuoteno]'
 							and sarjanumero like '".t("EI SARJANUMEROA")."-%'";
 				$vresult = mysql_query($query) or pupe_error($query);
 				$vrow = mysql_fetch_array($vresult);

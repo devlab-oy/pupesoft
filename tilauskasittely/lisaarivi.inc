@@ -862,17 +862,20 @@
 								$result = mysql_query($query) or die($query.mysql_error());
 								$lisatty_tun = mysql_insert_id();
 								
+								@include("trivityyppivalinta.inc");								
+								
 								$query  = "	SELECT *
 											FROM tilausrivin_lisatiedot
 											WHERE yhtio			 = '$kukarow[yhtio]'
 											and tilausrivitunnus = '$lisatty_tun'";
 								$lisatied_res = mysql_query($query) or pupe_error($query);
-
+																														
 								if (mysql_num_rows($lisatied_res) > 0) {
 									$lisatied_row = mysql_fetch_array($lisatied_res);
 
 									$query = "	UPDATE tilausrivin_lisatiedot
 												SET 
+												positio = if (positio = '', '$trivtyrow[selite]', positio),
 												tilausrivilinkki	= '$tilausrivilinkki',
 												toimittajan_tunnus	= '$toimittajan_tunnus',
 												muutospvm			= now(),
@@ -891,6 +894,7 @@
 									
 									$query = "	INSERT INTO tilausrivin_lisatiedot
 												SET yhtio			= '$kukarow[yhtio]',
+												positio 			= '$trivtyrow[selite]',
 												tilausrivilinkki	= '$tilausrivilinkki',
 												toimittajan_tunnus	= '$toimittajan_tunnus',
 												tilausrivitunnus	= '$lisatty_tun',
@@ -1502,6 +1506,8 @@
 			}
 			$result = mysql_query($query) or die($query);
 			$lisatty_tun = mysql_insert_id();
+						
+			@include("trivityyppivalinta.inc");	
 			
 			$query  = "	SELECT *
 						FROM tilausrivin_lisatiedot
@@ -1514,6 +1520,7 @@
 
 				$query = "	UPDATE tilausrivin_lisatiedot
 							SET 
+							positio = if (positio = '', '$trivtyrow[selite]', positio),
 							tilausrivilinkki	= '$tilausrivilinkki',
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							muutospvm			= now(),
@@ -1531,6 +1538,7 @@
 				}
 				$query = "	INSERT INTO tilausrivin_lisatiedot
 							SET yhtio			= '$kukarow[yhtio]',
+							positio 			= '$trivtyrow[selite]',
 							tilausrivilinkki	= '$tilausrivilinkki',
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							tilausrivitunnus	= '$lisatty_tun',

@@ -4200,19 +4200,16 @@ if ($tee == '') {
 
 					if ($borderlask == 0 and $pknum > 1) {
 						$kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
-						$kommclass2 = " style='border-bottom: 1px solid;'";
 					}
 					elseif($pknum > 0) {
 						$kommclass1 = " style='border-right: 1px solid;'";
-						$kommclass2 = " style='border-right: 1px solid;'";
 					}
 					else {
 						$kommclass1 = "";
-						$kommclass2 = "";
 					}
 
 					if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
-						echo "<td $kommclass2>&nbsp;</td>";
+						echo "<td>&nbsp;</td>";
 					}
 
 					echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br>".str_replace("\n", "<br>", $row["kommentti"])."</td>";

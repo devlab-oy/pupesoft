@@ -77,9 +77,9 @@
 		$ytunnus 	= $nimi;
 		$asiakasid	= "";
 		$kutsuja    = "otsik.inc";
-		$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim";
+		$ahlopetus 	= "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO";
 		$lause 		= "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
-
+		
 		require ("../inc/asiakashaku.inc");
 
 		if ($asiakasid == '' and $monta > 1) {

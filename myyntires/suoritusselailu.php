@@ -308,7 +308,7 @@
 
 		while ($row = mysql_fetch_array($result)) {
 			$sel = '';
-			if ($tilino == $row['tilino']) $sel = 'selected';
+			if (isset($tilino) and $tilino == $row['tilino']) $sel = 'selected';
 			echo "<option value='$row[tilino]' $sel>$row[nimi] ".tilinumero_print($row['tilino'])." $row[valkoodi]</option>\n";
 		}
 		echo "</select></td></tr>";

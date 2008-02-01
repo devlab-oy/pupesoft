@@ -4723,7 +4723,7 @@ if(!function_exists("nayta_kyselyt")) {
 }
 
 if (! function_exists('tallenna_liite')) {
-	function tallenna_liite($userfile, $liitos, $liitostunnus, $selite, $kayttotarkoitus="", $tunnus=0) {
+	function tallenna_liite($userfile, $liitos, $liitostunnus, $selite, $kayttotarkoitus="", $tunnus=0, $jarjestys = 0) {
 		global $kukarow, $yhtiorow, $_FILES, $kieli;
 		
 		$file = array();
@@ -4793,6 +4793,7 @@ if (! function_exists('tallenna_liite')) {
 							image_bits		= '$image_bits',							
 							image_channels	= '$image_channels',
 							kayttotarkoitus	= '$teetyyppi',
+							jarjestys		= '$jarjestys',
 							laatija			= '$kukarow[kuka]',
 							luontiaika		= now()
 						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
@@ -4814,6 +4815,7 @@ if (! function_exists('tallenna_liite')) {
 							image_bits		= '$image_bits',							
 							image_channels	= '$image_channels',
 							kayttotarkoitus	= '$kayttotarkoitus',
+							jarjestys		= '$jarjestys',
 							laatija			= '$kukarow[kuka]',
 							luontiaika		= now()";
 			$result = mysql_query($query) or pupe_error($query);

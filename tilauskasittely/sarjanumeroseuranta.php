@@ -1092,6 +1092,20 @@
 		}
 
 		if ($sarjanumeronLisatiedot == "OK") {
+			$query = "	SELECT *
+						FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
+						WHERE yhtio		 = '$kukarow[yhtio]'
+						and liitostunnus = '$sarjarow[tunnus]'";
+			$lisares = mysql_query($query) or pupe_error($query);
+			$lisarow = mysql_fetch_array($lisares);
+
+			if ($lisarow["tunnus"] != 0) {
+				$ylisa = "&tunnus=$lisarow[tunnus]";
+			}
+			else {
+				$ylisa = "&liitostunnus=$sarjarow[tunnus]&uusi=1";
+			}
+						
 			echo "<br><a href='".$palvelin2."yllapito.php?toim=sarjanumeron_lisatiedot$ylisa&lopetus=$PHP_SELF////$tunnuskentta=$rivitunnus//from=$from//aputoim=$aputoim//otunnus=$otunnus//sarjanumero_haku=$sarjanumero_haku//tuoteno_haku=$tuoteno_haku//nimitys_haku=$nimitys_haku//varasto_haku=$varasto_haku//ostotilaus_haku=$ostotilaus_haku//myyntitilaus_haku=$myyntitilaus_haku//lisatieto_haku=$lisatieto_haku//muut_siirrettavat=$muut_siirrettavat'>".t("Lisätiedot")."</a>";			
 			echo "<br><a onClick=\"javascript:sarjanumeronlisatiedot_popup('$sarjarow[tunnus]')\"><u>Lisätietoikkuna</u></a>";
 		}

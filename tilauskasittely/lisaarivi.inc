@@ -489,7 +489,6 @@
 				// näin tehtiin vaan ennen
 				// usort($zzrow, "zzrowcmp");
 				
-				
 				if(count($zzrow) > 0) {
 					// Jos tuotteella on tuotepaikkoja
 					foreach($zzrow as $zrow) {
@@ -536,9 +535,11 @@
 					
 					if (!in_array(strtoupper($tuoteno),$tuoteperhe)) {
 						$myy_tyyppi[$i] = "NORMAALI";
+						$saldoyhteensa += $toimittamatta; // summaillaan kaikkien isien saldoa yhteensä.
 					}
 					else {
 						$myy_tyyppi[$i] = "LAPSITUOTE";
+						$lapsiyhteensa += $toimittamatta; // summaillaan kaikkien lapsien saldoa yhteensä.
 					}
 				}
 			}

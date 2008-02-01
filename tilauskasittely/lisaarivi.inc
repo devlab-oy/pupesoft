@@ -76,6 +76,7 @@
 	$saldoyhteensa			= 0; 					// tähän summaillaan saldoa yhteensä
 	$lapsiyhteensa			= 0;
 	$korvaavan_isaa_myyty	= 0;
+	$perheid_lisaarivi		= 0;
 	$suoratoimeikiitos  	= '';
 	$lop					= "";
 	$tuoteperhe				= array(); 				// Tuoteperheiden lapset menevät tänne

@@ -136,6 +136,9 @@
 	elseif($laskurow["tila"] == 'F') {
 		$rivityyppi = 'F';	// Tallennett web-tilaus/-tarjous
 	}
+	elseif($laskurow["tila"] == '0') {
+		$rivityyppi = '0';	// Soppari
+	}
 	else {
 		$rivityyppi = 'L'; // Myyntitilausrivi
 	}

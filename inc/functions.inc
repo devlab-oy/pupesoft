@@ -2283,8 +2283,8 @@ if (!function_exists("alehinta")) {
 		if ($hinta != '') {
 			$hintaperuste = 1;
 			
-			// nettohinta jos netto-kentässä tulee N
-			if ($netto == 'N') {
+			// nettohinta jos netto-kentässä tulee N tai E
+			if ($netto == 'N' or $netto == 'E') {
 				$aperuste .= "Käyttäjän antama nettohinta ";
 				
 				$ale = 0;

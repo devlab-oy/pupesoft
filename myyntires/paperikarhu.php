@@ -160,7 +160,7 @@
 			$pdf->draw_rectangle(718, 320, 697, 575, $firstpage, $rectparam);
 			$pdf->draw_rectangle(718, 420, 697, 575, $firstpage, $rectparam);
 			$pdf->draw_text(330, 710, t("Viivästykorko", $kieli), 	$firstpage, $pieni);
-			$pdf->draw_text(330, 700, $yhtiorow["viivastyskorko"], 	$firstpage, $norm);
+			$pdf->draw_text(330, 700, $yhtiorow["viivästyskorko"], 	$firstpage, $norm);
 			$pdf->draw_text(430, 710, t("Sähköposti", $kieli), 		$firstpage, $pieni);
 			$pdf->draw_text(430, 700, $yrow["eposti"], 				$firstpage, $norm);
 

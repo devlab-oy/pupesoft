@@ -89,10 +89,10 @@
 
 			if (isset($_POST['ekirje_laheta']) === false) {
 				// vastaanottaja
-				$pdf->draw_text(50, 720, $asiakastiedot["nimi"], 															$firstpage, $iso);
-				$pdf->draw_text(50, 708, $asiakastiedot["nimitark"], 														$firstpage, $iso);
-				$pdf->draw_text(50, 694, $asiakastiedot["osoite"], 															$firstpage, $iso);
-				$pdf->draw_text(50, 681, $asiakastiedot["postino"]." ".$asiakastiedot["postitp"],							$firstpage, $iso);
+				$pdf->draw_text(50, 720, substr($asiakastiedot["nimi"], 0, 40),												$firstpage, $iso);
+				$pdf->draw_text(50, 708, substr($asiakastiedot["nimitark"], 0, 40), 										$firstpage, $iso);
+				$pdf->draw_text(50, 694, substr($asiakastiedot["osoite"], 0, 40), 											$firstpage, $iso);
+				$pdf->draw_text(50, 681, substr($asiakastiedot["postino"]." ".$asiakastiedot["postitp"], 0, 40),			$firstpage, $iso);
 
 				// jos vastaanottaja on eri maassa kuin yhtio niin lis‰t‰‰n maan nimi
 				if ($yhtiorow['maa'] != $asiakastiedot['maa']) {

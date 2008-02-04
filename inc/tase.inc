@@ -50,8 +50,39 @@
     		echo "<font class='error'>".t("Anna sekä kausi että vuosi")."</font><br>";
     		$tee = '';
     	}
-    }
-
+    
+	    if ($kustp != ' ' and $kustp2 != ' ') {
+	    	//Nimillä tarkistetaan
+	    	$query = "SELECT nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and tunnus = '$kustp'";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow=mysql_fetch_array($vresult);
+			
+	        $query = "SELECT nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and tunnus = '$kustp2'";
+						
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow2=mysql_fetch_array($vresult);
+			
+	    	if ($vrow['nimi'] > $vrow2['nimi']) {
+	    		echo "<font class='error'>".t("Aloituskustannuspaikka on pienempi kuin lopetus")."</font><br>";
+	    		$tee = '';
+	    		unset($vrow);
+	    	}
+	    	else {
+		    	// Tehdään lista, jossa on halutut kustannuspaikat
+		    	$query = "SELECT GROUP_CONCAT(tunnus) lista
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and nimi >= '$vrow[nimi]' and nimi <= '$vrow2[nimi]'";
+				$vresult = mysql_query($query) or pupe_error($query);
+				$vrow=mysql_fetch_array($vresult);
+				//echo "Valitut ovat $vrow[lista]<br>";
+			}
+		}
+	}
+	
 	if ($tee == "aja") {
 
 		$timeparts = explode(" ",microtime());
@@ -138,7 +169,12 @@
 		// Onko meillä lisärajoitteita??
 		$lisa = '';
 		if (strlen(trim($kustp)) > 0) {
-			$lisa .= " and kustp = '" . $kustp . "'";
+			if (strlen(trim($kustp2)) > 0) {
+				$lisa .= " and kustp in (" . $vrow['lista'] . ")";
+			}
+			else {
+				$lisa .= " and kustp = '" . $kustp . "'";
+			}
 		}
 		if (strlen(trim($proj)) > 0) {
 			$lisa .= " and projekti = '" . $proj . "'";
@@ -741,7 +777,7 @@
 				<option $sel[12] value = '12'>12</option>
 				</select></td></tr>";
 
-		echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
+		echo "<tr><th>".t("Kustannuspaikka")."</th>";
 
 		$query = "SELECT tunnus, nimi
 					FROM kustannuspaikka
@@ -759,7 +795,20 @@
 			echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
 		}
 
-		echo "</select></td>";
+		echo "</select> - <select name='kustp2'><option value=' '>".t("Ei valintaa");
+		
+		mysql_data_seek($vresult,0);
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow['tunnus'] or $kustp2 == $vrow["tunnus"]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
+		}
+
+		echo "</select>";		
+		
+		echo "</td>";
 		echo "</tr>";
 		echo "<tr><th>".t("Vain kohde")."</th>";
 

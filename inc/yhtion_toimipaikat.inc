@@ -104,7 +104,7 @@
 					email 			= '$toim_email',
 					lasku_logo		= '$lasku_logo',
 					tilino			= '$toim_tilino',
-					alv				= '$toim_alv', 
+					toim_alv		= '$toim_alv', 
 					kustp			= '$toim_kustp',
 					kohde			= '$toim_kohde',
 					projekti		= '$toim_projekti',
@@ -139,6 +139,7 @@
 					email 			= '$toim_email',
 					lasku_logo		= '$lasku_logo',
 					tilino			= '$toim_tilino',
+					toim_alv		= '$toim_alv',
 					kustp			= '$toim_kustp',
 					kohde			= '$toim_kohde',
 					projekti		= '$toim_projekti',
@@ -167,7 +168,8 @@
 		echo "<tr><th>".t("Email")."</th>		<td><input type='text' name='toim_email'    value='$toim_email'></td></tr>";
 		echo "<tr><th>".t("Lasku logo")."</th>	<td><input type='text' name='lasku_logo'    value='$lasku_logo'></td></tr>";
 
-		echo "<tr><th>".t("Tilino")."</th>			<td><input type='text' name='toim_tilino'   value='$toim_tilino'></td></tr>";
+		echo "<tr><th>".t("Tilino")."</th>		<td><input type='text' name='toim_tilino'   value='$toim_tilino'></td></tr>";
+		echo "<tr><th>".t("Alv")."</th>			<td><input type='text' name='toim_alv'   value='$toim_alv'></td></tr>";
 
 		echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
 		echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";	
@@ -259,7 +261,7 @@
 			echo "<tr><th>".t("Lasku logo")."</th>	<td><input type='text' name='lasku_logo'		value='$trow[lasku_logo]'></td></tr>";
 
 			echo "<tr><th>".t("Tilino")."</th>		<td><input type='text' name='toim_tilino'   	value='$trow[tilino]'></td></tr>";
-			echo "<tr><th>".t("Alv")."</th>			<td><input type='text' name='toim_alv'   		value='$trow[alv]'></td></tr>";
+			echo "<tr><th>".t("Alv")."</th>			<td><input type='text' name='toim_alv'   		value='$trow[toim_alv]'></td></tr>";
 
 			echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
 			echo "<select name='toim_kustp'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";	

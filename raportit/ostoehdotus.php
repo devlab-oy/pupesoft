@@ -274,7 +274,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 		//tilauksessa/siirtolistalla jt
 		$query = "	SELECT 
 					sum(if (tilausrivi.tyyppi = 'O', tilausrivi.varattu, 0)) tilattu,
-					sum(if (tilausrivi.tyyppi = 'G', tilausrivi.jt, 0)) siirtojt
+					sum(if (tilausrivi.tyyppi = 'G', tilausrivi.jt $lisavarattu, 0)) siirtojt
 					FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
 					JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $varastotapa)					
 					WHERE tilausrivi.yhtio in ($yhtiot)

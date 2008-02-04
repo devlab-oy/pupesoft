@@ -1205,11 +1205,13 @@
 						concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
 						tapahtuma.tuoteno,
 						tilausrivi.tunnus trivitunn,
-						tilausrivin_lisatiedot.osto_vai_hyvitys																		
+						tilausrivin_lisatiedot.osto_vai_hyvitys,
+						lasku2.tunnus lasku2tunnus																
 						FROM tapahtuma use index (yhtio_tuote_laadittu)
 						LEFT JOIN tilausrivi use index (primary) ON tilausrivi.yhtio=tapahtuma.yhtio and tilausrivi.tunnus=tapahtuma.rivitunnus
 						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)						
 						LEFT JOIN lasku use index (primary) ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus
+						LEFT JOIN lasku as lasku2 use index (primary) ON lasku2.yhtio=tilausrivi.yhtio and lasku2.tunnus=tilausrivi.uusiotunnus
 						WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
 						and tapahtuma.tuoteno = '$tuoteno'
 						$ehto
@@ -1253,6 +1255,11 @@
 					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $prow["arvo"])."</td>";
 					echo "<td nowrap align='right' valign='top'>".sprintf('%.2f', $vararvo_nyt)."</td>";
 					echo "<td valign='top'>$prow[selite]";
+					
+					if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {
+						echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]'>".t("Näytä keikka")."</a>";
+					}
+					
 					
 					if (trim($prow["paikka"]) != "") echo "<br>".t("Varastopaikka").": $prow[paikka]";
 					

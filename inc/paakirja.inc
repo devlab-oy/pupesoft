@@ -26,7 +26,40 @@
 		require ("inc/kevyt_toimittajahaku.inc");
 		$toim_ytunnus = $ytunnus;
 	}
-
+	
+	if ($tee != '') {
+	    if ($kustp != ' ' and $kustp2 != ' ') {
+	    	//Nimill‰ tarkistetaan
+	    	$query = "SELECT nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and tunnus = '$kustp'";
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow=mysql_fetch_array($vresult);
+			
+	        $query = "SELECT nimi
+						FROM kustannuspaikka
+						WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and tunnus = '$kustp2'";
+						
+			$vresult = mysql_query($query) or pupe_error($query);
+			$vrow2=mysql_fetch_array($vresult);
+			
+	    	if ($vrow['nimi'] > $vrow2['nimi']) {
+	    		echo "<font class='error'>".t("Aloituskustannuspaikka on pienempi kuin lopetus")."</font><br>";
+	    		$tee = '';
+	    		unset($vrow);
+	    	}
+	    	else {
+		    	// Tehd‰‰n lista, jossa on halutut kustannuspaikat
+		    	$query = "SELECT GROUP_CONCAT(tunnus) lista
+							FROM kustannuspaikka
+							WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'K' and nimi >= '$vrow[nimi]' and nimi <= '$vrow2[nimi]'";
+				$vresult = mysql_query($query) or pupe_error($query);
+				$vrow=mysql_fetch_array($vresult);
+				//echo "Valitut ovat $vrow[lista]<br>";
+			}
+		}
+	}
+	
 	if ($tee == '') {
 		echo "<font class='head'>".t("P‰‰- ja p‰iv‰kirja")."</font><hr>
 				<form name = 'valinta' action = 'raportit.php' method='post'>
@@ -131,12 +164,25 @@
 		echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[0]) {
+			if ($trow[$i] == $vrow['tunnus'] or $kustp == $vrow["tunnus"]) {
 				$sel = "selected";
 			}
 			echo "<option value = '$vrow[0]' $sel>$vrow[1]";
 		}
-		echo "</select></td>";
+		echo "</select> - <select name='kustp2'><option value=' '>".t("Ei valintaa");
+		
+		mysql_data_seek($vresult,0);
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow['tunnus'] or $kustp2 == $vrow["tunnus"]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[tunnus]' $sel>$vrow[nimi]";
+		}
+
+		echo "</select>";		
+		
+		echo "</td>";
 		echo "</tr>";
 		echo "<tr><th>".t("Vain kohde")."</th>";
 	 	$query = "SELECT tunnus, nimi
@@ -147,7 +193,7 @@
 		echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[0]) {
+			if ($trow[$i] == $vrow['tunnus'] or $kohde == $vrow['tunnus']) {
 				$sel = "selected";
 			}
 			echo "<option value = '$vrow[0]' $sel>$vrow[1]";
@@ -163,7 +209,7 @@
 		echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
 		while ($vrow=mysql_fetch_array($vresult)) {
 			$sel="";
-			if ($trow[$i] == $vrow[0]) {
+			if ($trow[$i] == $vrow['tunnus'] or $proj == $vrow['tunnus']) {
 				$sel = "selected";
 			}
 			echo "<option value = '$vrow[0]' $sel>$vrow[1]";
@@ -257,8 +303,14 @@
 		$lisa2 .= " and tiliointi.projekti = '" . $proj . "'";
 	}
 	if (strlen(trim($kustp)) > 0) {
-		$lisa .= " and tiliointi.kustp = '" . $kustp . "'";
-		$lisa2 .= " and tiliointi.kustp = '" . $kustp . "'";
+		if (strlen(trim($kustp2)) > 0) {
+			$lisa .= " and tiliointi.kustp in (" . $vrow['lista'] . ")";
+			$lisa2 .= " and tiliointi.kustp in (" . $vrow['lista'] . ")";
+		}
+		else {
+			$lisa .= " and tiliointi.kustp = '" . $kustp . "'";
+			$lisa2 .= " and tiliointi.kustp = '" . $kustp . "'";
+		}
 	}
 
 	if ($tili2 == 0) $tili2 = $tili;

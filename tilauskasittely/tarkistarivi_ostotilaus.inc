@@ -7,6 +7,7 @@
 	$query = "	SELECT *
 				FROM tuote
 				LEFT JOIN tuotteen_toimittajat ON tuote.yhtio	= tuotteen_toimittajat.yhtio and tuote.tuoteno	= tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+				LEFT JOIN toimi ON tuote.yhtio = toimi.yhtio and toimi.tunnus = '$laskurow[liitostunnus]'
 				WHERE tuote.tuoteno	= '$prow[tuoteno]'
 				and tuote.yhtio		= '$kukarow[yhtio]'";
 	$rarresult = mysql_query($query) or pupe_error($query);
@@ -134,11 +135,16 @@
 		}
 	}
 	
-	//tilausajan päivitys toimittajan aikaan
-	if ($trow["toimitusaika"] != 0 and $riviok == 0) {
+	//toimitusajan päivitys toimittajan toimitusaikaan
+	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0) {	
 		
-		$ehdotus_pvm = date('Y-m-d',time() + $trow["toimitusaika"] * 24 * 60 * 60);
-		
+		if ($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') {
+			$ehdotus_pvm = date('Y-m-d',time() + $trow["toimitusaika"] * 24 * 60 * 60);
+		}
+		elseif ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '') {
+			$ehdotus_pvm = date('Y-m-d',time() + $trow["oletus_toimaika"] * 24 * 60 * 60);
+		}
+				
 		if ($paivitatoimaika == "ON" and $prow["tunnus"] == $paiv_rivitunnus and $JOPATO != '') {
 			
 			if ($JOPATO != '') {

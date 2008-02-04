@@ -42,7 +42,7 @@
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
 				$tuotepaikat_result = mysql_query($tuotepaikat_query) or pupe_error($tuotepaikat_query);
 				
-				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0) {
+				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0 and $otsikkorivi["ei_saldoa"] == "") {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
 
 					if ($hyllyalue == "") {

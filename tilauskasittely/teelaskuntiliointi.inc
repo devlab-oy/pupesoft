@@ -5,7 +5,7 @@
 $tulos_ulos_tiliointi = "";
 
 //Tehtaan tiliointiaineisto suoraan sql:lla
-$query = "	SELECT tilausrivi.alv,
+$query = "	SELECT tilausrivi.alv alv,
 			if(tuote.tilino != '', tuote.tilino, asiakas.tilino) as tilino,
 			if(tuote.tilino_eu != '', tuote.tilino_eu, asiakas.tilino) as tilino_eu,
 			if(tuote.tilino_ei_eu != '', tuote.tilino_ei_eu, asiakas.tilino) as tilino_ei_eu,
@@ -13,20 +13,21 @@ $query = "	SELECT tilausrivi.alv,
 			if(tuote.kohde != '', tuote.kohde, asiakas.kohde) as kohde ,
 			if(tuote.projekti != '', tuote.projekti, asiakas.projekti) as projekti,
 			tuotteen_alv.tilino alvtilino,
-			tuotteen_alv.kustp alvkusp,
+			tuotteen_alv.kustp alvkustp,
 			tuotteen_alv.kohde alvkohde,
 			tuotteen_alv.projekti alvprojekti,
+			yhtion_toimipaikat.toim_alv yhtioalvtilino,
 			yhtion_toimipaikat.tilino yhtiotilino,
-			yhtion_toimipaikat.kustp yhtiokusp,
+			yhtion_toimipaikat.kustp yhtiokustp,
 			yhtion_toimipaikat.kohde yhtiokohde,
 			yhtion_toimipaikat.projekti yhtioprojekti,
-			yhtion_toimipaikat.vat_numero,
+			yhtion_toimipaikat.vat_numero vat_numero,
+			if(tilausrivi.alv >= 500 and tilausrivi.kpl < 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'O', 'KYLLA', 'EI') marginaaliostot,
+			if(tilausrivi.alv >= 500 and tilausrivi.kpl > 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', 'KYLLA', 'EI') marginaalihyvitys,			
 			sum(tilausrivi.rivihinta) summa,
 			sum(tilausrivi.kate) kate,
 			sum(if(tuote.ei_saldoa='', tilausrivi.rivihinta-tilausrivi.kate,0)) varmuutos,
-			GROUP_CONCAT(tilausrivi.tunnus SEPARATOR ',') tunnukset,
-			if(tilausrivi.alv >= 500 and tilausrivi.kpl < 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'O', 'KYLLA', 'EI') marginaaliostot,
-			if(tilausrivi.alv >= 500 and tilausrivi.kpl > 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', 'KYLLA', 'EI') marginaalihyvitys
+			GROUP_CONCAT(tilausrivi.tunnus SEPARATOR ',') tunnukset			
 			FROM tilausrivi
 			JOIN lasku on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
 			LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)			
@@ -37,7 +38,7 @@ $query = "	SELECT tilausrivi.alv,
 			WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
 			and tilausrivi.tyyppi		 = 'L'
 			and tilausrivi.yhtio		 = '$kukarow[yhtio]'
-			GROUP BY tilausrivi.alv, marginaaliostot, marginaalihyvitys, tuote.tilino, tuote.tilino_eu, tuote.tilino_ei_eu, tuote.kustp, tuote.kohde, tuote.projekti";
+			GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19";
 $xresult = mysql_query($query) or pupe_error($query);
 
 $onkoalvia = ""; // apumuuttuja, että tiedetään onko alvillista
@@ -234,42 +235,29 @@ else {
 				$onkoalvia = "kylla"; // apumuuttuja, että tiedetään alempana, että tehtiin alvikirjauksia
 
 				// jos yhtiön toimipaikka löytyy, otetaan alvtilinumero tämän takaa jos se löytyy 
-				if ($lasku["yhtio_toimipaikka"] != '' and $yhtiorow["toim_alv"] != '') {
-					$query = "	INSERT into tiliointi set
-								yhtio 		= '$kukarow[yhtio]',
-								ltunnus 	= '$tunnus',
-								tilino 		= '$yhtiorow[toim_alv]',
-								kustp 		= '',
-								kohde 		= '',
-								projekti 	= '',
-								tapvm 		= '$tapvm',
-								summa 		= $alv * -1,
-								vero 		= '0',
-								selite 		= '$selite',
-								lukko 		= '1',
-								laatija 	= '$kukarow[kuka]',
-								laadittu 	= now(),
-								aputunnus	= $isa";
-					$laskutusres = mysql_query($query) or pupe_error($query);
+				if ($lasku["yhtio_toimipaikka"] != '' and $xrow["yhtioalvtilino"] != '') {
+					$alvitilino = $xrow["yhtioalvtilino"];
 				}
 				else {
-					$query = "	INSERT into tiliointi set
-								yhtio 		= '$kukarow[yhtio]',
-								ltunnus 	= '$tunnus',
-								tilino 		= '$yhtiorow[alv]',
-								kustp 		= '',
-								kohde 		= '',
-								projekti 	= '',
-								tapvm 		= '$tapvm',
-								summa 		= $alv * -1,
-								vero 		= '0',
-								selite 		= '$selite',
-								lukko 		= '1',
-								laatija 	= '$kukarow[kuka]',
-								laadittu 	= now(),
-								aputunnus	= $isa";
-					$laskutusres = mysql_query($query) or pupe_error($query);
+					$alvitilino = $yhtiorow["alv"];
 				}
+					
+				$query = "	INSERT into tiliointi set
+							yhtio 		= '$kukarow[yhtio]',
+							ltunnus 	= '$tunnus',
+							tilino 		= '$alvitilino',
+							kustp 		= '',
+							kohde 		= '',
+							projekti 	= '',
+							tapvm 		= '$tapvm',
+							summa 		= $alv * -1,
+							vero 		= '0',
+							selite 		= '$selite',
+							lukko 		= '1',
+							laatija 	= '$kukarow[kuka]',
+							laadittu 	= now(),
+							aputunnus	= $isa";
+				$laskutusres = mysql_query($query) or pupe_error($query);				
 			}
 		}
 

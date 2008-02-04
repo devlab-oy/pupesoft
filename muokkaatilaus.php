@@ -1054,8 +1054,15 @@
 						$lisa1 = t("Rivisyöttöön");
 						$lisa2 = t("Pikatilaukseen");
 					}
-					elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER" or (($toim == "VALMISTUSMYYNTI" or $toim == "VALMISTUSMYYNTISUPER") and $row["tila"] == "V")) {
+					elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER" or (($toim == "VALMISTUSMYYNTI" or $toim == "VALMISTUSMYYNTISUPER") and $row["tila"] == "V" and $row["tilaustyyppi"] == "V")) {
 						$aputoim1 = "VALMISTAASIAKKAALLE";
+						$lisa1 = t("Muokkaa");
+
+						$aputoim2 = "";
+						$lisa2 = "";
+					}
+					elseif ($toim == "VALMISTUS" or $toim == "VALMISTUSSUPER" or (($toim == "VALMISTUSMYYNTI" or $toim == "VALMISTUSMYYNTISUPER") and $row["tila"] == "V" and $row["tilaustyyppi"] != "V")) {
+						$aputoim1 = "VALMISTAVARASTOON";
 						$lisa1 = t("Muokkaa");
 
 						$aputoim2 = "";

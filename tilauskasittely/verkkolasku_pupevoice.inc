@@ -45,6 +45,7 @@ if (!function_exists('pupevoice_otsik')) {
 
 				$y_puhelin		= $alhiro['puhelin'];
 				$y_fax			= $alhiro['fax'];
+				$y_email		= $alhiro['email'];
 				$y_nimi 		= $lasrow["yhtio_nimi"];
 				$y_osoite 		= $lasrow["yhtio_osoite"];
 				$y_postino	 	= $lasrow["yhtio_postino"];
@@ -56,6 +57,7 @@ if (!function_exists('pupevoice_otsik')) {
 			else {
 				$y_puhelin		= $yhtiorow['puhelin'];
 				$y_fax			= $yhtiorow['fax'];
+				$y_email		= $yhtiorow['email'];
 				$y_nimi 		= $yhtiorow["nimi"];
 				$y_osoite 		= $yhtiorow["osoite"];
 				$y_postino	 	= $yhtiorow["postino"];
@@ -68,6 +70,7 @@ if (!function_exists('pupevoice_otsik')) {
 		else {
 			$y_puhelin		= $yhtiorow['puhelin'];
 			$y_fax			= $yhtiorow['fax'];
+			$y_email		= $yhtiorow['email'];
 			$y_nimi 		= $yhtiorow["nimi"];
 			$y_osoite 		= $yhtiorow["osoite"];
 			$y_postino	 	= $yhtiorow["postino"];
@@ -87,6 +90,7 @@ if (!function_exists('pupevoice_otsik')) {
 		xml_add("SellerCountryName", 					$y_maa,											$tootxml);
 		xml_add("SellerPhoneNumber", 					$y_puhelin, 									$tootxml);
 		xml_add("SellerFaxNumber", 						$y_fax, 										$tootxml);
+		xml_add("SellerEmail", 							$y_email, 										$tootxml);
 
 		xml_add("SellerAccountName1", 					$pankkitiedot['pankkinimi1'],					$tootxml);
 		xml_add("SellerAccountID1", 					$pankkitiedot['pankkitili1'],					$tootxml);

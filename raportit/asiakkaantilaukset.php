@@ -18,7 +18,7 @@
 	if ($toim == 'OSTO') {
 		echo "<font class='head'>".t("Toimittajan tilaukset").":</font><hr>";
 		
-		$til = " tila ='O' ";
+		$til = " (tila = 'O' or (tila = 'K' and vanhatunnus=0)) ";
 	}
 	if ($toim == 'TARJOUS') {
 		echo "<font class='head'>".t("Asiakkaan tarjoukset").":</font><hr>";
@@ -189,20 +189,30 @@
 		}
 	}
 	elseif($laskunro > 0) {
-		$query = "	SELECT laskunro, ytunnus, liitostunnus
-					FROM lasku
-					WHERE laskunro='$laskunro'
-					and yhtio = '$kukarow[yhtio]' ";
-		$result = mysql_query($query) or pupe_error($query);
-		$row = mysql_fetch_array($result);
-
-		$laskunro = $row["laskunro"];
-		$ytunnus  = $row["ytunnus"];
-		
 		if ($toim == 'OSTO') {
+			$query = "	SELECT laskunro, ytunnus, liitostunnus
+						FROM lasku
+						WHERE laskunro	= '$laskunro'
+						and tila		= 'K'
+						and vanhatunnus = 0
+						and yhtio 		= '$kukarow[yhtio]' ";
+			$result = mysql_query($query) or pupe_error($query);
+			$row = mysql_fetch_array($result);
+
+			$laskunro 		= $row["laskunro"];
+			$ytunnus  		= $row["ytunnus"];
 			$toimittajaid 	= $row["liitostunnus"];	
 		}
 		else {
+			$query = "	SELECT laskunro, ytunnus, liitostunnus
+						FROM lasku
+						WHERE laskunro	= '$laskunro'
+						and yhtio 		= '$kukarow[yhtio]' ";
+			$result = mysql_query($query) or pupe_error($query);
+			$row = mysql_fetch_array($result);
+
+			$laskunro 		= $row["laskunro"];
+			$ytunnus  		= $row["ytunnus"];
 			$asiakasid 		= $row["liitostunnus"];	
 		}
 	}

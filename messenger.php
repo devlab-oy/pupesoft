@@ -21,6 +21,15 @@
 		$kpl = 20;
 	}
 
+	$viimeisin_vastaanottaja_query = "	SELECT DISTINCT messenger.vastaanottaja viimeisin
+										FROM kuka
+										LEFT JOIN messenger ON (messenger.yhtio=kuka.yhtio AND messenger.kuka=kuka.kuka)
+										WHERE extranet='' AND messenger.tunnus = (SELECT max(tunnus) FROM messenger WHERE kuka='$kukarow[kuka]')
+										ORDER BY viimeisin
+										DESC";
+	$viimeisin_result = mysql_query($viimeisin_vastaanottaja_query) or pupe_error($viimeisin_vastaanottaja_query);
+	$viimeisin_row = mysql_fetch_array($viimeisin_result);
+
 	echo "<table>";
 	echo "<form action='' method='post' name='messenger_form'>";
 	echo "<input type='hidden' name='messenger' value='X'>";
@@ -32,11 +41,15 @@
 	$result = mysql_query($query) or pupe_error($query);
 	while ($userrow = mysql_fetch_array($result)) {
 		if ($userrow["nimi"] != '') {
-			echo "<option value='{$userrow['kuka']}'>{$userrow['nimi']}</option>";
+			if ($viimeisin_row["viimeisin"] == $userrow["kuka"]) {
+				echo "<option value='{$userrow['kuka']}' selected>{$userrow['nimi']}</option>";
+			}
+			else {
+				echo "<option value='{$userrow['kuka']}'>{$userrow['nimi']}</option>";
+			}
 		}
 	}
 	echo "</select></th></tr>";
-	
 	echo "<tr><td><textarea rows='20' cols='50' name='message'>";
 	echo "</textarea></td></tr>";
 	

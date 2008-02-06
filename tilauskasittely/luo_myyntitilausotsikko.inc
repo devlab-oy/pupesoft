@@ -68,7 +68,7 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 			$maksaja = $apuro['merahti'];
 
 			if ($myyjanro != "") {
-				$apuqu = "	select *
+				$apuqu = "	SELECT *
 							from kuka use index (yhtio_myyja)
 							where yhtio='$kukarow[yhtio]' and myyja='$myyjanro'";
 				$meapu = mysql_query($apuqu) or pupe_error($apuqu);
@@ -87,15 +87,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 				}
 			}
 
-			if ($myyjanro == "") {
-				if ($kukarow["myyja"] == 0) {
-					$myyja = $kukarow["tunnus"];
-				}
-				else {
-					$myyja = $kukarow["myyja"];
-				}
+			if ((int) $myyja == 0) {
+				$myyja = $kukarow["tunnus"];
 			}
-
+			
 			$alv 				= $asiakasrow["alv"];
 			$ovttunnus 			= $asiakasrow["ovttunnus"];
 			$toim_ovttunnus 	= $asiakasrow["toim_ovttunnus"];
@@ -207,6 +202,10 @@ if(!function_exists("luo_myyntitilausotsikko")) {
 					$alv_velvollisuus = $alhiro["vat_numero"];
 				}
 			}
+		}
+		
+		if ($toim == "TARJOUS") {
+			$tilaustyyppi = 'T';
 		}
 
 		$jatka	= "JATKA";

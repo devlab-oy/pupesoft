@@ -219,8 +219,8 @@
 		//Laitetaan varriksi Y jotta ei tarvitse menn‰ myyntihaaraan
 		$var = "Y";
 	}
-	
-	if ($laskurow['tila'] != "O" and trim($var) == "") {
+		
+	if ($laskurow['tila'] != "O" and trim($var) == "" and $trow["tuoteno"] != "") {
 
 		if ($lisaarivi_debug==1) echo "Menn‰‰n myyntihaaraan: $tuoteno<br>";
 

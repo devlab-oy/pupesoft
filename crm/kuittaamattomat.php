@@ -16,7 +16,7 @@
 			$result = mysql_query($query) or pupe_error($query);
 			$prow = mysql_fetch_array ($result);
 
-			$viesti = $prow["kentta01"] . " -- $kukarow[nimi] ".t("kuittasi")." -- " . $muuta;
+			$viesti = $kukarow["nimi"]." ".t("kuittasi").": ".$muuta;
 		        
 			$kysely = "	INSERT INTO kalenteri
 						SET asiakas  	= '$prow[asiakas]',
@@ -28,7 +28,8 @@
 						tapa     		= '$prow[tapa]',
 						kentta01 		= '$viesti',
 						kuittaus 		= '',
-						pvmalku  		= now()";
+						pvmalku  		= now(),
+						perheid 		= '$kaletunnus'";
 			$result = mysql_query($kysely) or pupe_error($kysely);
 			
 			$query = "	UPDATE kalenteri
@@ -163,8 +164,7 @@
 			$tee 		= 'MUISTUTUS';	
 		}	
 	}
-	
-	
+		
 	if($tee == "MUISTUTUS") {
 		echo "<table>";
 		echo "	<form action='".$palvelin2."crm/kuittaamattomat.php' method='POST'>
@@ -176,10 +176,10 @@
 		echo "<tr><th colspan='3'>".t("Lisää muistutus")."</th>";
 		echo "<tr><td colspan='3'><textarea cols='83' rows='3' name='viesti' wrap='hard'>$viesti</textarea></td></tr>";
 		
-			echo "	<tr>
-				<th>".t("Yhteydenottaja: ")."</th>
-				<td colspan='2'><select name='kuka'>
-				<option value='$kukarow[kuka]'>".t("Itse")."</option>";
+		echo "	<tr>
+			<th>".t("Yhteydenottaja: ")."</th>
+			<td colspan='2'><select name='kuka'>
+			<option value='$kukarow[kuka]'>".t("Itse")."</option>";
 
 		$query = "	SELECT distinct kuka.tunnus, kuka.nimi, kuka.kuka
 					FROM kuka, oikeu
@@ -262,8 +262,7 @@
 				</td></tr>";
 		echo "</table>";
 	}
-	
-	
+		
 	if ($tee == "") {
 		
 		if (strpos($_SERVER['SCRIPT_NAME'], "kuittaamattomat.php") !== FALSE) {
@@ -311,14 +310,19 @@
 			$kuka = $kukarow["kuka"];
 		}
 	
-		
-	
 		//* listataan muistutukset *///
-		$query = "	SELECT yhteyshenkilo.nimi yhteyshenkilo, kalenteri.*
+		$query = "	SELECT yhteyshenkilo.nimi yhteyshenkilo, kuka1.nimi nimi1, kuka2.nimi nimi2, 
+					lasku.tunnus laskutunnus, lasku.tila laskutila, lasku.alatila laskualatila, kuka3.nimi laskumyyja, lasku.muutospvm laskumpvm,
+					kalenteri.*,					
+					date_format(pvmalku, '%Y%m%d%H%i%s') voimassa
 					FROM kalenteri
 					LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio
-					where kalenteri.kuka = '$kuka'
-					and kalenteri.tyyppi = 'Muistutus'
+					LEFT JOIN kuka as kuka1 ON (kuka1.yhtio=kalenteri.yhtio and kuka1.kuka=kalenteri.kuka)
+					LEFT JOIN kuka as kuka2 ON (kuka2.yhtio=kalenteri.yhtio and kuka2.kuka=kalenteri.myyntipaallikko)
+					LEFT JOIN lasku ON kalenteri.yhtio=lasku.yhtio and kalenteri.otunnus=lasku.tunnus
+					LEFT JOIN kuka as kuka3 ON (kuka3.yhtio = lasku.yhtio and kuka3.tunnus = lasku.myyja)
+					where (kalenteri.kuka = '$kuka' or kalenteri.myyntipaallikko = '$kuka')
+					and kalenteri.tyyppi in ('Muistutus','Lead')
 					and kuittaus		 = 'K' 
 					and kalenteri.yhtio  = '$kukarow[yhtio]' 
 					and left(kalenteri.tyyppi,7) != 'DELETED'
@@ -328,12 +332,13 @@
 		if (mysql_num_rows($result) > 0) {
 			echo "<table>";		
 			
-			echo "<tr>";		
-			echo "<th>".t("Päivämäärä")."</th>";
-			echo "<th>".t("Viesti")."</th>";
-			echo "<th>".t("Tapa")."</th>";		
-			echo "<th>".t("Asiakas")."</th>";
-			echo "<th>".t("Yhteyshenkilö")."</th>";
+			echo "<tr>";
+			echo "<th valign='top'>".t("Asiaa hoitaa")."</th>";
+			echo "<th valign='top'>".t("Päivämäärä")."<br>".t("Muistutus")."</th>";
+			echo "<th valign='top'>".t("Viesti")."</th>";
+			echo "<th valign='top'>".t("Tyyppi")."<br>".t("Tapa")."</th>";		
+			echo "<th valign='top'>".t("Asiakas")."</th>";
+			echo "<th valign='top'>".t("Yhteyshenkilö")."</th>";
 			echo "</tr>";		
 			
 			while ($prow = mysql_fetch_array ($result)) {			
@@ -354,14 +359,47 @@
 					$aslisa = "";
 				}
 				
-				echo "<form action='".$palvelin2."crm/kuittaamattomat.php?&tee=A&kaletunnus=$prow[tunnus]' method='post'><tr>";	
-				echo "<td>".tv1dateconv($prow["pvmalku"], "P")."</td>";
-				echo "<td>$prow[kentta01]</td>";
-				echo "<td>$prow[tapa]</td>";
-				echo "<td>$prow[asiakas] $aslisa</td>";
-				echo "<td>$prow[yhteyshenkilo]</td>";				
-				echo "<td><input type='submit' value='".t("Kuittaa")."'></td>";			
-				echo "</tr></form>";		
+				echo "<tr>";	
+				echo "<td valign='top'>$prow[nimi1]</td>";
+				echo "<td valign='top'>".tv1dateconv($prow["luontiaika"], "P")."<br>";
+				
+				
+				if (date("YmdHis") > $prow["voimassa"]) {
+					echo "<font style='color:FF0000;'>".tv1dateconv($prow["pvmalku"], "P")."</font>";
+				}
+				else {
+					echo "<font style='color:00FF00;'>".tv1dateconv($prow["pvmalku"], "P")."</font>";	
+				}
+				echo "</td>";
+				
+				echo "<td valign='top'>$prow[kentta01]";
+				
+				if ($prow["laskutunnus"] > 0) {
+					$laskutyyppi = $prow["laskutila"];
+					$alatila	 = $prow["laskualatila"];
+
+					//tehdään selväkielinen tila/alatila
+					require "inc/laskutyyppi.inc";
+										
+					echo "<br><br>".t("$laskutyyppi")." ".t("$alatila").":  <a href='../raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]'>$prow[laskutunnus]</a> / ".tv1dateconv($prow["laskumpvm"])." ($prow[laskumyyja])";
+				}
+				
+				if ($prow["laskutunnus"] == 0 and $prow["tyyppi"] == "Lead") {
+					echo "<br><br><a href='".$palvelin2."tilauskasittely/tilaus_myynti.php?toim=TARJOUS&asiakasid=$prow[liitostunnus]'>".t("Tee tarjous")."</a>";
+				}
+				
+				
+				echo "</td>";
+				echo "<td valign='top'>$prow[tyyppi]<br>$prow[tapa]</td>";
+				echo "<td valign='top'>$prow[asiakas] $aslisa</td>";
+				echo "<td valign='top'>$prow[yhteyshenkilo]</td>";								
+				
+				if ($prow["kuka"] == $kukarow["kuka"]) {
+					echo "<td class='back' valign='top'><form action='".$palvelin2."crm/kuittaamattomat.php?&tee=A&kaletunnus=$prow[tunnus]' method='post'>
+							<input type='submit' value='".t("Kuittaa")."'></form></td>";			
+				}
+				
+				echo "</tr>";		
 			}		
 			
 			echo "</table>";

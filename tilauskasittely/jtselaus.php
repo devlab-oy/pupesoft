@@ -1285,11 +1285,11 @@
 
 										echo "$perherow[toim_nimi]</td>";
 
-										if ($kukarow["resoluutio"] == 'I') {
+										if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
 											echo "<td valign='top' $class>$perherow[otunnus]<br>$perherow[viesti]</td>";
 										}
 									}
-
+									
 									if ($kukarow["extranet"] == "") {
 										echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$perherow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&superit=$superit&suorana=$suorana&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>$perherow[jt]</a><br>";
 									}

@@ -3192,10 +3192,10 @@ if (!function_exists("alehinta")) {
 }
 
 if (!function_exists("kalenteritapahtuma")) {
-	function kalenteritapahtuma ($tyyppi, $tapa, $viesti, $liitostunnus, $kuittaus="", $henkilo="", $otunnus="") {
+	function kalenteritapahtuma ($tyyppi, $tapa, $viesti, $liitostunnus, $kuittaus="", $henkilo="", $otunnus="", $pvmalku='now()') {
 		global $yhtiorow, $kukarow;
 
-		$query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
+		$query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
 		$result = mysql_query($query) or pupe_error($query);
 		$asrow = mysql_fetch_array($result);
 
@@ -3208,7 +3208,7 @@ if (!function_exists("kalenteritapahtuma")) {
 					kuka     		= '$kukarow[kuka]',
 					yhtio    		= '$kukarow[yhtio]',
 					tyyppi   		= '$tyyppi',
-					pvmalku  		= now(),
+					pvmalku  		= $pvmalku,
 					otunnus  		= '$otunnus',
 					kuittaus  		= '$kuittaus',
 					kentta01 		= '$viesti'";

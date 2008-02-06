@@ -26,7 +26,8 @@ if (!function_exists('tulosta_lasku')) {
 					concat_ws(' ', laskutus_postino, laskutus_postitp) laskutus_postiosoite,							
 					yhteyshenkilo_kaupallinen.nimi asiakkaan_kaupallinen_käsittelijä,
 					yhteyshenkilo_tekninen.nimi asiakkaan_yhteyshenkilö,
-					lasku.tunnus toimitus
+					lasku.tunnus toimitus,
+					lasku.pyoristys
 					FROM lasku
 					LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and if(laskunro>0, (select max(tunnus) from lasku l where l.yhtio=lasku.yhtio and l.laskunro=lasku.laskunro and l.tila='L'), lasku.tunnus)=laskun_lisatiedot.otunnus
 					LEFT JOIN yhteyshenkilo yhteyshenkilo_tekninen ON laskun_lisatiedot.yhtio=yhteyshenkilo_tekninen.yhtio and laskun_lisatiedot.yhteyshenkilo_tekninen=yhteyshenkilo_tekninen.tunnus					
@@ -635,8 +636,8 @@ if (!function_exists('tulosta_lasku')) {
 			$laskusumma=$summa_verolla;
 		}
 		else {
-			$pdf->write($h, 1, $s[1], 0, money_format('%i',$laskurow["summa"]), "norm", "R", "B");
-			$laskusumma=$laskurow["summa"];			
+			$pdf->write($h, 1, $s[1], 0, money_format('%i',$laskurow["summa"]-$laskurow["pyoristys"]), "norm", "R", "B");
+			$laskusumma=$laskurow["summa"]-$laskurow["pyoristys"];			
 		}
 		$h-=$pdf->ln(4);
 		

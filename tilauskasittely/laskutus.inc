@@ -439,7 +439,7 @@ else {
 	$katesumma  			= round((float) $katesumma, 2);
 
 	// jos maksetaan käteisellä pyöristetään lähimpään viiteen senttiin
-	if (isset($kateistyyppi) and $kateistyyppi == 'p') {
+	if ($xrow["kateinen"] == 'p') {
 		// kotivaluutassa
 		if (trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
 			$pyorerotus = round((float) $loppusumma, 2) - round((float) round((float) $loppusumma / 0.05) * 0.05, 2);

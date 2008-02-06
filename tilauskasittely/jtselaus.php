@@ -1284,10 +1284,10 @@
 										}
 
 										echo "$perherow[toim_nimi]</td>";
-
-										if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-											echo "<td valign='top' $class>$perherow[otunnus]<br>$perherow[viesti]</td>";
-										}
+									}
+									
+									if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
+										echo "<td valign='top' $class>$perherow[otunnus]<br>$perherow[viesti]</td>";
 									}
 									
 									if ($kukarow["extranet"] == "") {

@@ -459,11 +459,11 @@ else {
 
 	// käsin syötetty summa johon lasku pyöristetään kotivaluutassa
 	if (abs($orow["hinta"] - $loppusumma) <= 0.5 and trim(strtoupper($orow["valkoodi"])) == trim(strtoupper($yhtiorow["valkoodi"]))) {
-		$pyorerotus = $orow["hinta"] - $loppusumma;
+		$pyorerotus = $loppusumma - $orow["hinta"];
 	}
 	// käsin syötetty summa johon lasku pyöristetään valuutassa
 	if (abs($orow["hinta"] - $loppusumma_valuutassa) <= 0.5 and trim(strtoupper($orow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-		$pyorerotus_valuutassa = $orow["hinta"] - $loppusumma_valuutassa;
+		$pyorerotus_valuutassa = $loppusumma_valuutassa - $orow["hinta"];
 	}
 
 	// jos halutaan pyöristää laskun loppusumma lähimpään tasalukuun

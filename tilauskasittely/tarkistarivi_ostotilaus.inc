@@ -136,7 +136,7 @@
 	}
 	
 	//toimitusajan päivitys toimittajan toimitusaikaan
-	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0) {	
+	if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($trow["oletus_toimaika"] != 0 and $trow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE) {	
 		
 		if ($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') {
 			$ehdotus_pvm = date('Y-m-d',time() + $trow["toimitusaika"] * 24 * 60 * 60);

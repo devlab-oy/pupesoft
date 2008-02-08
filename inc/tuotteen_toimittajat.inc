@@ -22,6 +22,7 @@
 		$ostohinta 		= str_replace(',','.', $ostohinta);
 		$tuotekerroin 	= str_replace(',','.', $tuotekerroin);
 		$osto_era 		= str_replace(',','.', $osto_era);
+		$alennus 		= str_replace(',','.', $alennus);
 
 		if ($kikkeli == 1) {			
 			$tee = "uusi";

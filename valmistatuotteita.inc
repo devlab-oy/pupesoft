@@ -206,7 +206,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 		unset($tuoteresult);
 
 		if ($perherow["paikka"] != '') {
-			$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus
+			$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus,
+						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
 						FROM tuote, tuotepaikat
 						WHERE tuote.yhtio = tuotepaikat.yhtio
 						and tuote.tuoteno = tuotepaikat.tuoteno
@@ -217,7 +218,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 			if(mysql_num_rows($tuoteresult) != 1) {
 				//jos ei lˆytynyt yksiselitteist‰ rivi‰ yritet‰‰n oletuspaikkaa
-				$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus
+				$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus,
+							tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
 							FROM tuote, tuotepaikat
 							WHERE tuote.yhtio = tuotepaikat.yhtio
 							and tuote.tuoteno = tuotepaikat.tuoteno
@@ -229,7 +231,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 		}
 		else {
 			//K‰ytet‰‰n oletuspaikkaa
-			$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus
+			$query = "	SELECT saldo, kehahin, ei_saldoa, yksikko, tuotepaikat.tunnus tunnus,
+						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
 						FROM tuote, tuotepaikat
 						WHERE tuote.yhtio = tuotepaikat.yhtio
 						and tuote.tuoteno = tuotepaikat.tuoteno
@@ -241,7 +244,8 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
 		if(mysql_num_rows($tuoteresult) == 0) {
 			//sittenh‰n tuote on saldoton
-			$query = "	SELECT kehahin, ei_saldoa, yksikko
+			$query = "	SELECT tuote.kehahin, tuote.ei_saldoa, tuote.yksikko, 
+						tuote.epakurantti25pvm, tuote.epakurantti50pvm, tuote.epakurantti75pvm, tuote.epakurantti100pvm
 						FROM tuote
 						WHERE tuote.tuoteno = '$perherow[tuoteno]'
 						and tuote.yhtio = '$kukarow[yhtio]'";
@@ -265,6 +269,11 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 		
 		$kpl = str_replace(',','.',$kpl);
 		
+		if 		($tuoterow['epakurantti100pvm'] != '0000-00-00') $tuoterow['kehahin'] = 0;
+		elseif 	($tuoterow['epakurantti75pvm'] != '0000-00-00')  $tuoterow['kehahin'] = $tuoterow['kehahin'] * 0.25;
+		elseif 	($tuoterow['epakurantti50pvm'] != '0000-00-00')  $tuoterow['kehahin'] = $tuoterow['kehahin'] * 0.5;
+		elseif 	($tuoterow['epakurantti25pvm'] != '0000-00-00')  $tuoterow['kehahin'] = $tuoterow['kehahin'] * 0.75;
+				
 		$arvo = $tuoterow['kehahin'] * $kpl;
 		$uusiarvo += $arvo;
 

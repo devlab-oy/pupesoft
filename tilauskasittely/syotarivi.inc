@@ -13,21 +13,30 @@
 		require ("alvpopup.inc");
 	}
 
-	if ($kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
+	//if ($kukarow["extranet"] == '' and ($toim == "PIKATILAUS" or $toim == "SIIRTOTYOMAARAYS")) {
+	if ($kukarow["extranet"] == '' and ($toim == "PIKATILAUS")) {
 		// Pikatilauksen syöttörivi
-		echo "<table>
-				<tr>$jarjlisa
-					<th align='left'>".t("Tuotenumero")."</th>
-					<th align='left'>".t("Määrä")."</th>
-					<th align='left'>".t("Var")."</th>
-					<th align='left'>".t("Hinta")."</th>
-					<th align='left'>".t("Ale")."</th>
-					<th align='left'>".t("Netto")."</th>
-					<td valign='top' class='back'></td>
-				</tr>
-			<tr>$jarjlisa";
+		echo "<table><tr>$jarjlisa";
+				
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<th align='left'>".t("Perhe")."</th>";
+		}		
+				
+		echo "	<th align='left'>".t("Tuotenumero")."</th>
+				<th align='left'>".t("Määrä")."</th>
+				<th align='left'>".t("Var")."</th>
+				<th align='left'>".t("Hinta")."</th>
+				<th align='left'>".t("Ale")."</th>
+				<th align='left'>".t("Netto")."</th>
+				<td valign='top' class='back'></td>
+				</tr>";
+		
+		echo "<tr>$jarjlisa";
 
-
+		if ($tila == "LISAARESEPTIIN") {
+			echo "<td valign='top' style='color: #00FF00;'>$perheid $perheid2</td>";
+		}
+		
 		if ($ulos == '') {
 			echo "<td valign='top'><input type='text' name='tuoteno' size='15' maxlength='20' value='$tuoteno'></td>";
 		}
@@ -106,11 +115,22 @@
 			}
 			
 			echo "</tr><tr>$jarjlisa";
+		}
 			
+		if ($rivitunnus!='' or $toim == "SIIRTOTYOMAARAYS") {	
 			
-			echo "<tr>$jarjlisa<th colspan='6' align='left'>".t("Rivikommentti").":</tg></tr>";
-			echo "<tr>$jarjlisa<td valign='top' colspan='6'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea>";
-
+			if ($tila == "LISAARESEPTIIN") {
+				$colspan = '7';
+			}
+			else {
+				$colspan = '6';
+			}
+			
+			echo "<tr>$jarjlisa<th colspan='$colspan' align='left'>".t("Rivikommentti").":</tg></tr>";
+			echo "<tr>$jarjlisa<td valign='top' colspan='$colspan'><textarea name='kommentti' cols='50' rows='2' wrap='soft'>$kommentti</textarea>";
+		}
+		
+		if ($rivitunnus!='') {
 			if ($yhtiorow["nimityksen_muutos_tilauksella"] == "Y" and ($toim == "TARJOUS" or $laskurow["tilaustyyppi"] == "T")) {
 				echo "<tr>$jarjlisa
 						<th colspan='6' align='left'>".t("Tuotteen nimitys")."</th>
@@ -301,7 +321,7 @@
 
 		echo "</td></tr></table></form>";
 	}
-	elseif ($kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON")) {
+	elseif ($kukarow["extranet"] == '' and ($toim == "SIIRTOLISTA" or $toim == "MYYNTITILI" or $toim == "VALMISTAVARASTOON" or $toim == "KORJAA" or $toim == "SIIRTOTYOMAARAYS")) {
 		// Rivisyötön syöttörivi
 		echo "<table>
 				<tr>$jarjlisa";
@@ -318,7 +338,7 @@
 		echo "<tr>$jarjlisa";
 
 		if ($tila == "LISAARESEPTIIN") {
-			echo "<td valign='top'>$perheid $perheid2</td>";
+			echo "<td valign='top' style='color: #00FF00;'>$perheid $perheid2</td>";
 		}
 
 		if ($ulos == '') {

@@ -8,6 +8,61 @@
 		echo "<hr>";
 		$tee = "VALITSE";
 	}
+	
+	
+	if ($tee == "SYOTARIVI") {
+		echo t("Tee uusi rivi").":<br>";
+
+		echo "	<form method='post' action='$PHP_SELF' autocomplete='off'>";
+		echo "	<input type='hidden' name='tee' value='LISAARIVI'>
+				<input type='hidden' name='valmistettavat' value='$valmistettavat'>
+				<input type='hidden' name='toim'  value='$toim'>
+				<input type='hidden' name='perheid'  value='$perheid'>
+				<input type='hidden' name='otunnus'  value='$otunnus'>";
+				
+		require('syotarivi.inc');
+		require('../inc/footer.inc');
+		exit;
+	}
+	if ($tee == "LISAARIVI") {
+		
+		$query	= "	SELECT *
+					from tuote
+					where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
+
+		if (mysql_num_rows($result) > 0) {
+			//Tuote löytyi
+			$trow = mysql_fetch_array($result);
+				
+			$laskurow["tila"] 	= 'V';
+			$kukarow["kesken"]	= $otunnus;
+			$perheid 			= $perheid;
+		
+			require('lisaarivi.inc');
+			
+			$lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);
+			
+			if ($lisatyt_rivit[0] > 0) {
+				$valmistettavat .= ",".$lisatyt_rivit[0];
+				
+				$query = "	UPDATE tilausrivi
+							SET toimitettu	= '$kukarow[kuka]', 
+							toimitettuaika	= now(),
+							keratty			= '$kukarow[kuka]', 
+							kerattyaika		= now()							
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and tunnus	= '$lisatyt_rivit[0]'";
+				$result = mysql_query($query) or pupe_error($query);
+				
+			}
+		}
+		else {
+			echo t("Tuotetta ei löydy")."!<br>";
+		}
+		
+		$tee = "VALMISTA";
+	}
 
 	//HUOMHUOM!!
 	$query = "SET SESSION group_concat_max_len = 100000";
@@ -78,8 +133,6 @@
 		$tee = "VALMISTA";
 	}
 
-
-
 	if ($tee=='TEEVALMISTUS') {
 		//Käydään läpi rivien kappalemäärät ja tehdään samalla pieni tsekki, että onko rivi jo valmistettu
 		foreach ($tilkpllat as $rivitunnus => $tilkpl) {
@@ -141,7 +194,7 @@
 								WHERE yhtio = '$kukarow[yhtio]'
 								and tunnus  = '$rivitunnus'";
 					$updresult = mysql_query($query) or pupe_error($query);
-
+					
 					$tee = "VALMISTA";
 					$virhe[$rivitunnus] .= "<font class='message'>".t("Valmistettava määrä päivitettiin")."!</font>";
 				}
@@ -419,7 +472,7 @@
 						and tilausrivi.otunnus in ($row[Tilaus])
 						and	tilausrivi.perheid in ($valmistettavat)";
 			$ktres = mysql_query($query) or pupe_error($query);
-			$ktrow    = mysql_fetch_array($ktres);
+			$ktrow = mysql_fetch_array($ktres);
 
 			$valmistettavat = $ktrow["valmistettavat"];
 		}
@@ -445,7 +498,8 @@
 					tilausrivi.perheid,
 					tilausrivi.tyyppi,
 					tilausrivi.toimitettuaika,
-					tilausrivi.otunnus otunnus
+					tilausrivi.otunnus otunnus,
+					tilausrivi.uusiotunnus laskutettu
 					FROM tilausrivi, tuote
 					WHERE
 					tilausrivi.otunnus in ($row[Tilaus])
@@ -458,7 +512,7 @@
 		$presult = mysql_query($query) or pupe_error($query);
 		$riveja = mysql_num_rows($presult);
 
-		echo "<table border='0' cellspacing='1' cellpadding='2'><tr>";
+		echo "<table><tr>";
 		$miinus = 3;
 
 		echo "<th>#</th>";
@@ -584,18 +638,33 @@
 							and toimitettuaika = '0000-00-00 00:00:00'";
 				$sumres = mysql_query($query) or pupe_error($query);
 				$sumrow = mysql_fetch_array($sumres);
+				
+				$query = "	SELECT count(*) laskuja
+							FROM lasku
+							WHERE yhtio	= '$kukarow[yhtio]'
+							and tunnus 	= '$prow[laskutettu]'
+							and tila 	= 'U'
+							and alatila	= 'X'";
+				$slres = mysql_query($query) or pupe_error($query);
+				$slrow = mysql_fetch_array($slres);
 
-				if ($sumrow["valmistetut"] != 0) {
-					echo "<td><input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$sumrow[valmistetut]'>";
-					
-					echo "<input type='checkbox' name='perutamakorj[$prow[tunnus]]' value='$prow[tunnus]'> Peru tämä valmistus.</td>";
-					echo "<td class='back'>".$virhe[$prow["tunnus"]]."</td>";					
+				if ($sumrow["valmistetut"] != 0 and $slrow["laskuja"] == 0) {
+					echo "<td><input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$sumrow[valmistetut]'>";				
+					echo "<input type='checkbox' name='perutamakorj[$prow[tunnus]]' value='$prow[tunnus]'> Peru tämä valmistus.";
 					
 					$voikokorjata++;
 				}
-				else {
-					echo "<td class='back'><font class='error'>Riviä ei voida korjata!</font></td>";
+				elseif($sumrow["valmistetut"] != 0 and $slrow["laskuja"] > 0) {
+					echo "<td class='back'><font class='error'>Riviä ei voida perua!</font>";
+					echo "<input type='hidden' name='valmkpllat[$prow[tunnus]]' value='$sumrow[valmistetut]'>";					
+					$voikokorjata++;
 				}
+				else {
+					echo "<td class='back'><font class='error'>Riviä ei voida korjata!</font>";
+				}
+						
+				echo "<br><a href='$PHP_SELF?toim=$toim&tee=SYOTARIVI&valmistettavat=$valmistettavat&perheid=$prow[perheid]&otunnus=$prow[otunnus]'>Lisää raaka-aine</a></td>";
+				echo "<td class='back'>".$virhe[$prow["tunnus"]]."</td>";
 			}
 
 			if ($prow["tyyppi"] == "L" and $toim != "KORJAA" and $toim != 'TUTKAA') {

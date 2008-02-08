@@ -558,7 +558,24 @@
 		echo "<tr>
 				<td valign='top'>".t("Postitp").": </td>
 				<td><input type='text' name='postino' size='10' value='$srow[postino]'> <input type='text' name='postitp' size='21' value='$srow[postitp]'></td></tr>";
-
+				
+		if ($srow["liitostunnus"] > 0) {		
+			$query  = "	SELECT laji
+						FROM asiakas
+						WHERE yhtio='$kukarow[yhtio]' and tunnus='$srow[liitostunnus]'";
+			$result = mysql_query($query) or pupe_error($query);
+			$eakas = mysql_fetch_array($result);
+			
+			if ($eakas["laji"] == 'H') {
+				$ealisa = "asiakas!!!VAHITTAISMYYNTI!!!true";
+			}
+			else {
+				$ealisa = "asiakas";
+			}
+			
+			echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//tila=$tila//from=ASIAKASYLLAPITO'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
+		}
+		
 		if ($templ > 0 and $asiakasid == '') {
 			echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM! Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
 		}

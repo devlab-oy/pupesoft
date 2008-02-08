@@ -120,16 +120,16 @@ if(!function_exists("tuotetarkista")) {
 				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0) {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
 
-					if ($hyllyalue == "") {
+					if ($hyllyalue == "" or !isset($hyllyalue)) {
 						$hyllyalue = 0;
 					}
-					if ($hyllynro == "") {
+					if ($hyllynro == "" or !isset($hyllynro)) {
 						$hyllynro = 0;
 					}
-					if ($hyllyvali == "") {
+					if ($hyllyvali == "" or !isset($hyllyvali)) {
 						$hyllyvali = 0;
 					}
-					if ($hyllytaso == "") {
+					if ($hyllytaso == "" or !isset($hyllytaso)) {
 						$hyllytaso = 0;
 					}
 
@@ -141,7 +141,11 @@ if(!function_exists("tuotetarkista")) {
 											hyllyalue   	= '$hyllyalue',
 											hyllynro    	= '$hyllynro',
 											hyllyvali   	= '$hyllyvali',
-											hyllytaso   	= '$hyllytaso'";
+											hyllytaso   	= '$hyllytaso',
+											luontiaika		= now(),
+											laatija			= '$kukarow[kuka]',
+											muutospvm		= now(),
+											muuttaja		= '$kukarow[kuka]'";
 					$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
 				}				
 			}

@@ -340,7 +340,9 @@ if (!function_exists('tulosta_lasku')) {
 					JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 					LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno 
 					LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-					WHERE tilausrivi.yhtio='$kukarow[yhtio]' and $where and (perheid=0 or perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta='' or tilausrivin_lisatiedot.ei_nayteta IS NULL)
+					WHERE tilausrivi.yhtio='$kukarow[yhtio]' 
+					and $where 
+					and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 					GROUP BY tilausrivi.tunnus
 					ORDER BY otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 		$riresult = mysql_query($query) or pupe_error($query);

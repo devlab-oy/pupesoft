@@ -1227,6 +1227,7 @@
 								WHERE $where
 								and tilausrivi.yhtio  = '$kukarow[yhtio]'
 								and tilausrivi.tyyppi = 'L'
+								and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 								ORDER BY tilausrivi.otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 					$result = mysql_query($query) or pupe_error($query);
 
@@ -1586,9 +1587,11 @@
 								FROM tilausrivi
 								JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 								JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+								LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 								WHERE tilausrivi.otunnus = '$otunnus'
 								and tilausrivi.yhtio = '$kukarow[yhtio]'
 								$tyyppilisa
+								and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 								ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 					$riresult = mysql_query($query) or pupe_error($query);
 
@@ -1635,12 +1638,9 @@
 									and tunnus != '$laskurow[tunnus]'";
 						$perheresult = mysql_query($query) or pupe_error($query);			
 						$tunrow = mysql_fetch_array($perheresult);						
-
-					
-					
 					
 						//generoidaan lähetteelle ja keräyslistalle rivinumerot
-						if ($tunrow[tunnukset] != "") {
+						if ($tunrow["tunnukset"] != "") {
 							$query = "  SELECT tilausrivi.*,
 										round(if(tuote.myymalahinta != 0, tuote.myymalahinta, tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
 										round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * if(tilausrivi.netto='N', (1-tilausrivi.ale/100), (1-(tilausrivi.ale+lasku.erikoisale-(tilausrivi.ale*lasku.erikoisale/100))/100)),'$yhtiorow[hintapyoristys]') rivihinta,
@@ -1649,9 +1649,11 @@
 										FROM tilausrivi
 										JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
 										JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+										LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
 										WHERE tilausrivi.otunnus in ('$tunrow[tunnukset]')
 										and tilausrivi.yhtio = '$kukarow[yhtio]'
 										$tyyppilisa
+										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 										ORDER BY jtsort, sorttauskentta $yhtiorow[lahetteen_jarjestys_suunta], tilausrivi.tunnus";
 							$riresult = mysql_query($query) or pupe_error($query);
 					

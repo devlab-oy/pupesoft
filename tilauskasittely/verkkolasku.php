@@ -1517,6 +1517,7 @@
 										WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
 										and tilausrivi.yhtio		 = '$kukarow[yhtio]'
 										and tilausrivi.tyyppi		 = 'L'
+										and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
 										ORDER BY tilausrivi.otunnus, sorttauskentta $yhtiorow[laskun_jarjestys_suunta], tilausrivi.tunnus";
 							$result = mysql_query($query) or pupe_error($query);
 

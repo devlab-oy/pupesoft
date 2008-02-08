@@ -905,6 +905,7 @@
 												positio 			= '$trivtyrow[selite]',
 												tilausrivilinkki	= '$tilausrivilinkki',
 												toimittajan_tunnus	= '$toimittajan_tunnus',
+												ei_nayteta 			= '$myy_lapsi_ein[$indeksi]', 
 												tilausrivitunnus	= '$lisatty_tun',
 												jarjestys			= '$jarjestys',
 												luontiaika			= now(),
@@ -1042,16 +1043,7 @@
 
 										$query = "UPDATE tilausrivi SET perheid='$perheid_lisaarivi' where yhtio='$kukarow[yhtio]' and tunnus in ('$perheid_lisaarivi','$lisatty_tun')";
 										$result = mysql_query($query) or pupe_error($query);
-									}
-
-									if ($myy_lapsi_ein[$indeksi] != "") {
-										$query = "	UPDATE tilausrivin_lisatiedot
-													SET ei_nayteta 	= '$myy_lapsi_ein[$indeksi]', 
-													muutospvm		= now(),
-													muuttaja		= '$kukarow[kuka]'
-													WHERE tilausrivitunnus 	= '$lisatty_tun'";
-										$result = mysql_query($query) or pupe_error($query);
-									}
+									}								
 								}
 
 								$rivitunnus		= "";
@@ -1081,6 +1073,7 @@
 		$puu_kpl 		= array();
 		$puu_hintake	= array();
 		$puu_alekerr	= array();
+		$puu_ein 		= array();
 		$puu_var		= array();
 
 		//Tehdään suoratoimitusautomaatio jos kyseessä on extranet tai ediasiakas
@@ -1121,6 +1114,7 @@
 			$puu_kpl[] 		= $toimittamatta;
 			$puu_hintake[]	= "X";
 			$puu_alekerr[]	= "X";
+			$puu_ein[]		= "";
 			$puu_var[]		= $var;
 
 			if (substr($var,0,4) == "LOJ#") {
@@ -1128,6 +1122,7 @@
 				$puu_kpl[] 		= substr($var,4) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
+				$puu_ein[]		= "";
 				$puu_var[]		= "";
 			}
 			elseif(substr($lop,0,4) == "LOP#") {
@@ -1135,6 +1130,7 @@
 				$puu_kpl[] 		= substr($lop,4) - $toimittamatta;
 				$puu_hintake[]	= "X";
 				$puu_alekerr[]	= "X";
+				$puu_ein[]		= "";
 				$puu_var[]		= "P";
 			}
 		}
@@ -1146,6 +1142,7 @@
 			$puu_kpl[]	 	= $toimittamatta;
 			$puu_hintake[]	= "X";
 			$puu_alekerr[]	= "X";
+			$puu_ein[]		= "";
 			$puu_var[]		= $var;
 		}
 
@@ -1167,6 +1164,7 @@
 				$puu_kpl[] 		= $toimittamatta*$perherow["kerroin"];
 				$puu_hintake[]	= $perherow["hintakerroin"];
 				$puu_alekerr[]	= $perherow["alekerroin"];
+				$puu_ein[] 		= $perherow["ei_nayteta"];
 				$puu_var[]		= $var;
 			}
 		}
@@ -1551,6 +1549,7 @@
 							toimittajan_tunnus	= '$toimittajan_tunnus',
 							tilausrivitunnus	= '$lisatty_tun',
 							jarjestys			= '$jarjestys',
+							ei_nayteta			= '$puu_ein[$i]',
 							luontiaika			= now(),
 							laatija 			= '$kukarow[kuka]'";
 				

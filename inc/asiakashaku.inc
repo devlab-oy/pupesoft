@@ -155,15 +155,33 @@ elseif ($ytunnus != '') {
 		$monta  = mysql_num_rows($result);
 	}
 }
+elseif ($asiakasnro != '') {
+	$query = "	SELECT *
+				FROM asiakas
+				WHERE $konsyhtiot AND asiakasnro='$asiakasnro' $asiakasrajaus";
+	$result = mysql_query($query) or pupe_error($query);
+	$monta  = mysql_num_rows($result);
+}
 
 if ($monta == 0) {
-	echo "<font class='error'>".t("Asiakas")." '$ytunnus' ".t("ei löydy")."!</font><br>";
-	$ytunnus = "";
+	if ($ytunnus) {
+		echo "<font class='error'>".t("Asiakas")." '$ytunnus' ".t("ei löydy")."!</font><br>";
+		$ytunnus = "";
+	}
+	else if ($asiakasnro) {
+		echo "<font class='error'>".t("Asiakas")." '$asiakasnro' ".t("ei löydy")."!</font><br>";
+		$asiakasnro = "";
+	}
 }
 
 if ($monta == 1) {
 	$asiakasrow  = mysql_fetch_array($result);
 	$ytunnus     = $asiakasrow['ytunnus'];
+	
+	if ($asiakasnro != "") {
+		$asiakasnro  = $asiakasrow['asiakasnro'];
+	}
+	
 	$asiakasid   = $asiakasrow['tunnus'];
 }
 
@@ -242,6 +260,7 @@ if ($monta > 1 and $monta <= $limit) {
 			echo "<input type='hidden' name='tila' 			  value='$tila'>";
 			echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
 			echo "<input type='hidden' name='ytunnus'  		  value='$numero'>";
+			echo "<input type='hidden' name='asiakasnro'      value='$asiakasnro'>";
 			echo "<input type='hidden' name='toimittajaid'	  value='$toimittajaid'>";
 			echo "<input type='hidden' name='asiakasyhtio'    value='$asiakas[yhtio]'>";
 			echo "<input type='hidden' name='alatila'		  value='$alatila'>";

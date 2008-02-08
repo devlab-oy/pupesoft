@@ -56,6 +56,7 @@
 
 		//valittu asiakas
 		if ($ytunnus != '' and $asiakasid != "") {
+			$asnum = $ytunnus;
 			echo "vain asiakas ytunnus: $ytunnus...<br> ";
 			$aswhere = " and liitostunnus='$asiakasid' ";
 		}

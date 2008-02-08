@@ -241,16 +241,29 @@
 			$tarkyhtio = "'$kukarow[yhtio]'";
 		}
 
-		$query = "	SELECT MAX(asiakasnro) asiakasnro
+		if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != '' and $yhtiorow["automaattinen_asiakasnumerointi"] != '') {
+			$aloituskohta = " AND asiakasnro >= {$yhtiorow["asiakasnumeroinnin_aloituskohta"]}";
+			$selecti = "asiakasnro+0";
+		}
+		else {
+			$aloituskohta = "";
+			$selecti = "MAX(asiakasnro)+0 asiakasnro";
+		}
+
+		$query = "	SELECT $selecti
 					FROM asiakas USE INDEX (asno_index)
-					WHERE yhtio IN ($tarkyhtio)";
+					WHERE yhtio IN ($tarkyhtio) $aloituskohta";
 		$vresult = mysql_query($query) or pupe_error($query);
 		
 		$vrrow = mysql_fetch_array($vresult);
 
-		$apu_asiakasnumero = $vrrow["asiakasnro"];
-
-		$apu_asiakasnro++;
+		if ($yhtiorow["asiakasnumeroinnin_aloituskohta"] != '' and $yhtiorow["automaattinen_asiakasnumerointi"] != '') {
+			$apu_asiakasnumero = $yhtiorow["asiakasnumeroinnin_aloituskohta"];
+		}
+		else {
+			$apu_asiakasnumero = $vrrow["asiakasnro"];
+			$apu_asiakasnro++;
+		}
 
 		for ($monta = 0; $monta < 5;) {
 

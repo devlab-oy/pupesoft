@@ -243,7 +243,7 @@
 		if (!isset($lmonth)) $lmonth = $month;
 		if (!isset($lyear)) $lyear   = $year;
 		
-		echo  "<tr><th nowrap>".t("Työn alku").":</th><td>".tv1dateconv("$year-$month-$day")." - $aika</td></tr>";
+		echo  "<tr><th nowrap>".t("Työn alku").":</th><td>".tv1dateconv(sprintf('%04d',$year)."-".sprintf('%02d',$month)."-".sprintf('%02d',$day))." - $aika</td></tr>";
 		
 		echo  "<tr>
 			<th nowrap>".t("Työn loppu").":</th>
@@ -296,11 +296,11 @@
 	if ($tee == "") {
 		echo "<table>";
 		echo "<th>".t("Kuukausi").":</th>";
-		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&tyojono=$tyojono'> << </a></td>";
+		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$backmmonth&year=$backymonth&tyojono=$tyojono&liitostunnus=$liitostunnus&tyotunnus=$tyotunnus'> << </a></td>";
 		echo "<td>
 				<form method='POST' action='$PHP_SELF'>
 				<input type='hidden' name='liitostunnus'  value='$liitostunnus'>
-				<input type='hidden' name='tyojono'  value='$tyojono'>				
+				<input type='hidden' name='tyotunnus'  value='$tyotunnus'>
 				<select name='month' Onchange='submit();'>";
 
 		$i=1;   
@@ -316,7 +316,7 @@
 		}
 	
 		echo "</select></td>";
-		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&tyojono=$tyojono'> >> </a></td>";
+		echo "<td><a class='menu' href='$PHP_SELF?day=1&month=$nextmmonth&year=$nextymonth&tyojono=$tyojono&liitostunnus=$liitostunnus&tyotunnus=$tyotunnus'> >> </a></td>";
 		
 		echo "<th>".t("Työjono").":</th><td>";
 				

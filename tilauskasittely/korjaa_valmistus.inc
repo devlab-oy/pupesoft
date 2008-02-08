@@ -1,7 +1,9 @@
 <?php
 
 	//käytetään tilausriveillä olevia tuotteita
-	$query = "	SELECT tilausrivi.*, if(varattu!=0, varattu, kpl) varattu, trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, tuote.ei_saldoa
+	$query = "	SELECT tilausrivi.*, if(varattu!=0, varattu, kpl) varattu, 
+				trim(concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)) paikka, 
+				tuote.ei_saldoa, tuote.kehahin
 				FROM tilausrivi
 				JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
 				WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
@@ -20,7 +22,7 @@
 			$perherow["varattu"] = 0;
 		}
 
-		//katsotaan mikä tuotteen keskihankintahinta oli valmistusta tehdessä
+		// Katsotaan mikä tuotteen keskihankintahinta oli valmistusta tehdessä
 		$query = "	SELECT *
 					FROM tapahtuma
 					WHERE yhtio 	= '$kukarow[yhtio]'
@@ -28,8 +30,32 @@
 					and rivitunnus	= '$perherow[tunnus]'
 					LIMIT 1";
 		$tuoteresult = mysql_query($query) or pupe_error($query);
+		
+		if (mysql_num_rows($tuoteresult) == 0) {
+			// Raaka-aine listätty jälkikäteen tehdään tapahtuma
+			$query = "	INSERT into tapahtuma set
+						yhtio    	= '$kukarow[yhtio]',
+						tuoteno  	= '$perherow[tuoteno]',
+						laji     	= 'kulutus',
+						kpl      	=  round($perherow[varattu]*-1 ,2),
+						kplhinta 	= '$perherow[kehahin]',
+						hinta    	= '$perherow[kehahin]',
+						rivitunnus	= '$perherow[tunnus]',
+						selite   	= '".t("Käytettiin tuotteen")." $tilrivirow[tuoteno] ".t("valmistamiseen")." ".t("työmääräyksellä")." $tilrivirow[otunnus]',
+						laatija  	= '$kukarow[kuka]',
+						laadittu 	= now()";
+			$tapahtumaresult = mysql_query($query) or pupe_error($query);
+			$tapahtumaid = mysql_insert_id();
+						
+			$query = "	SELECT *
+						FROM tapahtuma
+						WHERE yhtio = '$kukarow[yhtio]'
+						and laji 	= 'kulutus'
+						and tunnus	= '$tapahtumaid'";
+			$tuoteresult = mysql_query($query) or pupe_error($query);
+		}
 		$tuoterow = mysql_fetch_array($tuoteresult);
-
+		
 		$arvo = $tuoterow['hinta'] * $perherow['varattu'];
 		$uusiarvo += $arvo;
 
@@ -38,7 +64,7 @@
 			echo "<br><font class='message'>Raaka aineen $perherow[tuoteno] kulutusta muutettu! $perherow[kpl] --> $perherow[varattu]. Teemme jälkilaskennan raaka-aineelle.</font><br>";
 
 			//Suoritetaan jälkilaskenta
-			$query   = "select *
+			$query   = "SELECT *
 						from tapahtuma
 						where yhtio='$kukarow[yhtio]' and laji='kulutus' and rivitunnus='$perherow[tunnus]'
 						order by tunnus";
@@ -137,7 +163,7 @@
 	}
 	else {
 		// Suoritetaan jälkilaskenta valmisteelle
-		$query   = "select *
+		$query   = "SELECT *
 					from tapahtuma
 					where yhtio='$kukarow[yhtio]' and laji='valmistus' and rivitunnus='$tilrivirow[tunnus]'
 					order by tunnus";

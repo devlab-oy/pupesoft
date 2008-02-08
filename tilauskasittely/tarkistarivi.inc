@@ -139,7 +139,7 @@
 		$tilausok++;
 	}
 
-	if (in_array($trow["status"], array("P","X")) and $row["var2"] != "OK") {
+	if ($kukarow["extranet"] == "" and in_array($trow["status"], array("P","X")) and $row["var2"] != "OK") {
 		$varaosavirhe .= t("HUOM: Tämä on poistuva tuote!")."<br>";
 		$riviok++;
 	}

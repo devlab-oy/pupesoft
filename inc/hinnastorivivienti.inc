@@ -1,7 +1,7 @@
 <?php
 
 function hinnastorivi($tuote, $laskurow) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $kl_alenimi;
     
     static $rivi = 1;
     
@@ -9,11 +9,17 @@ function hinnastorivi($tuote, $laskurow) {
 	$query = "	SELECT b.tunnus, b.ryhma
 				FROM tuote a
 				LEFT JOIN perusalennus b ON a.yhtio = b.yhtio and a.aleryhma = b.ryhma
-				WHERE a.tuoteno = '$tuote[tuoteno]' and a.yhtio = '$kukarow[yhtio]'";
+				WHERE a.tuoteno = '$tuote[tuoteno]' 
+				and a.yhtio = '$kukarow[yhtio]'";
 	$aleresult = mysql_query($query) or pupe_error($query);
 	$alerow = mysql_fetch_array($aleresult);
 
-	$aletun = $alerow['ryhma'];
+	if ($kl_alenimi == "") {
+		$aletun = $alerow['ryhma'];		
+	}
+	else {
+		$aletun = $alerow['tunnus'];
+	}
 
 	$tunpit = strlen($aletun);
 
@@ -65,7 +71,7 @@ function hinnastorivi($tuote, $laskurow) {
 	$out .= sprintf('%-20.20s'	,$edellinen);
 	$out .= sprintf('%-3.3s'	,'');
 	$out .= "\r\n";
-	
+
     return $out;
 }
 ?>

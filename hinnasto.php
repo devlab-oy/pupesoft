@@ -122,20 +122,30 @@ if ($tee != '') {
 
 	// asetetaan vienti kurssi
 	$laskurowfake['vienti_kurssi'] = $kurssi['kurssi'];
+	
+	if ($kl_hinnastoon != "" and $kukarow['extranet'] == '') {
+		$kl_lisa = " ";
+	}
+	else {
+		$kl_lisa = " and tuote.hinnastoon!='E' ";	
+	}
     
 	$query = "	SELECT tuote.*, korvaavat.id
 				FROM tuote
 				LEFT JOIN korvaavat use index (yhtio_tuoteno) ON (tuote.tuoteno=korvaavat.tuoteno and tuote.yhtio=korvaavat.yhtio)
-				WHERE $where tuote.yhtio='$kukarow[yhtio]' and tuote.status in ('','a') and hinnastoon != 'E'
+				WHERE $where tuote.yhtio='$kukarow[yhtio]' 
+				and tuote.status in ('','a') 
+				$kl_lisa
 				and ((tuote.vienti = '' or tuote.vienti like '%-{$laskurowfake['maa']}%' or tuote.vienti like '%+%')
 				and tuote.vienti not like '%+{$laskurowfake['maa']}%')
 				ORDER BY tuote.osasto+0, tuote.try+0";
 	$result = mysql_query($query) or pupe_error($query);
+
 	if (mysql_num_rows($result) == 0) {
 		echo t('Yht‰‰n tuotetta ei lˆytynyt hinnastoon.') . '<br />';
 		die();
 	}
-
+	
 	flush();
 
 	// kirjoitetaan tmp file
@@ -176,10 +186,7 @@ if ($tee != '') {
 				$tuoterow['nimitys'] = $avainrow['selite'];			
 			}
 		}
-		
-		
-		 
-		
+						 		
 		// tehd‰‰n yksi rivi
 		$ulos = hinnastorivi($tuoterow, $laskurowfake);
 		fwrite($fh, $ulos);
@@ -296,6 +303,16 @@ while ($srow = mysql_fetch_array($sresult)) {
 }
 
 echo "</select></td></tr>";
+
+
+if ($kukarow['extranet'] == '') {
+	echo "<tr><th>".t("Listaa kaikki tuotteet").":</th>
+			<td><input type='checkbox' name='kl_hinnastoon'> (".t("muuten hinnastoon fl‰gi <> E").")</td></tr>";
+
+
+	echo "<tr><th>".t("N‰yt‰ aleryhm‰n tunnus").":</th>
+			<td><input type='checkbox' name='kl_alenimi'> (".t("muuten n‰ytet‰‰n aleryhm‰n nimi").")</td></tr>";
+}
 
 echo "<tr>
 	<th>" .t('Muutosp‰iv‰m‰‰r‰') . "</th>

@@ -152,10 +152,10 @@
 		echo "<tr><th>".t("Valitse listausjärjestys")."</th><td align='right' colspan='4'><select name='jarjestys'>";
 		echo "<option value='tuoteno' ";
 			if ($sel == "tuoteno") { echo "selected"; }
-		echo ">".t("Tunnus")."</option>";
+		echo ">".t("Tuotenumero")."</option>";
 		echo "<option value='hylly' ";
 			if ($sel == "hylly") { echo "selected"; }
-		echo ">".t("Hylly")."</option>";
+		echo ">".t("Paikka")."</option>";
 		echo "</select></td></tr>";
 	
 		echo "<tr><td class='back'><input type='submit' value='".t("Tulosta")."'></td></tr>";

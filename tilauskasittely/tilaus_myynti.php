@@ -3833,13 +3833,6 @@ if ($tee == '') {
 					$netto = $row["netto"];
 					$kpl   = $row["varattu"]+$row["jt"];
 					
-					// Tarvitaan jos laskun valuutta on eri kuin hinnaston valuutta					
-					list(, , , , $alehinta_val) = alehinta($laskurow, $trow, $kpl, $netto, '', '');
-					
-					if ($alehinta_val != $laskurow["valkoodi"]) {
-						$hinta = round(laskuval($hinta, $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
-					}
-					
 					if ($yhtiorow["alv_kasittely"] == "") {
 						// Oletuksena verolliset hinnat
 						

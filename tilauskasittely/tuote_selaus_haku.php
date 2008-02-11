@@ -911,7 +911,7 @@
 					foreach ($saldot as $varasto => $myytavissa) {								
 						$kokonaismyytavissa += $myytavissa;								
 					}
-					
+
 					if ($kokonaismyytavissa > 0) {
 						echo "<td valign='top' class='green' $classrigh>".t("On")."</td>";
 					}
@@ -999,7 +999,18 @@
 					echo "<td valign='top' class='green' $classrigh>".t("On")."</td>";
 				}
 				else {
-					echo "<td valign='top' class='red' $classrigh>".t("Ei")."</td>";
+					$tulossa_query = " 	SELECT IFNULL(MIN(toimaika),'') paivamaara
+					 					FROM tilausrivi
+										WHERE yhtio='{$kukarow['yhtio']}' AND tuoteno='{$row['tuoteno']}' AND varattu > 0 AND tyyppi='O'";
+					$tulossa_result = mysql_query($tulossa_query) or pupe_error($tulossa_query);
+					$tulossa_row = mysql_fetch_array($tulossa_result);
+
+					if (mysql_num_rows($tulossa_result) > 0 and $tulossa_row["paivamaara"] != '') {
+						echo "<td valign='top' $classrigh>".t("Tulossa")." ".tv1dateconv($tulossa_row['paivamaara'])."</td>";
+					}
+					else {
+						echo "<td valign='top' class='red' $classrigh>".t("Ei")."</td>";
+					}
 				}
 			}
 			else {

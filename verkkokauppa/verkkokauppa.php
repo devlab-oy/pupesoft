@@ -334,19 +334,46 @@ if(!function_exists("menu")) {
 					}
 		elseif($try == "") {
 			$val = "<table class='menu'>";
-			$query = "	SELECT distinct try, selitetark trynimi
+			$query = "	SELECT tuoteno, try, selitetark trynimi, hinnastoon
 			 			FROM tuote
 						JOIN avainsana ON tuote.yhtio = avainsana.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY'
-						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P' and hinnastoon = 'W' and tuotemerkki != ''
+						WHERE tuote.yhtio='{$kukarow["yhtio"]}' and osasto = '$osasto' and try != '' and status != 'P' and hinnastoon IN ('W', 'V') and tuotemerkki != ''
 						ORDER BY selitetark";
 			$tryres = mysql_query($query) or pupe_error($query);
 			while($tryrow = mysql_fetch_array($tryres)) {
+				
+				if($tryrow["hinnastoon"] == "V") {
+					
+					if(!is_array($asiakasrow)) {
+						$query    = "	SELECT * 
+										FROM asiakas
+										WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+						$asres = mysql_query($query);
+						$asiakasrow = mysql_fetch_array($asres);
+					}
+					
+					$query    = "	SELECT * 
+									FROM tuote
+									WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tryrow[tuoteno]'";
+					$tuoteres = mysql_query($query);
+					$trow = mysql_fetch_array($tuoteres);
+					$hinnat = alehinta(array(
+								"valkoodi" => "EUR", 
+								"maa" => $yhtiorow["maa"], 
+								"vienti_kurssi" => 1, 
+								"liitostunnus" => $asiakasrow["tunnus"], 
+								"ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste");
+					if 	(($kukarow["naytetaan_tuotteet"] == "A" or $trow["hinnastoon"] == "V") and ($hinnat["hintaperuste"]<2 or $hinnat["hintaperuste"] > 12)) {
+						continue;
+					}
+				}
 
 				$target		= "{$osasto}_{$tryrow["try"]}_P";
 				$parent		= "{$osasto}_{$tryrow["try"]}_T";
 				$href 		= "javascript:sndReq(\"$target\", \"verkkokauppa.php?tee=menu&osasto=$osasto&try={$tryrow["try"]}\", \"\", true); sndReq(\"selain\", \"verkkokauppa.php?tee=selaa&osasto=$osasto&try={$tryrow["try"]}&tuotemerkki=\", \"\", true);";
-				
-				$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td><a class = 'menu' id='$parent' href='$href'>{$tryrow["trynimi"]}</a><div id=\"$target\" style='display: none'></div></td></tr>";
+
+				$val .=  "<tr class='aktiivi'><td class='sisennys1'></td><td><a class = 'menu' id='$parent' href='$href'>{$tryrow["trynimi"]}</a><div id=\"$target\" style='display: none'></div></td></tr>";					
+
 			}
 			$val .= "</table>";
 		}

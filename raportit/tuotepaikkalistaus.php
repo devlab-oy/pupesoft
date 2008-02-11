@@ -43,12 +43,11 @@
 			$wherelisa = " 	AND hyllyalue >= '$ahyllyalue' AND hyllynro >= '$ahyllynro' AND hyllyvali >= '$ahyllyvali' AND hyllytaso >= '$ahyllytaso'
 							AND hyllyalue <= '$lhyllyalue' AND hyllynro <= '$lhyllynro' AND hyllyvali <= '$lhyllyvali' AND hyllytaso <= '$lhyllytaso'";
 		}
-
-		if (isset($jarjestys) and $jarjestys == "hylly") {
+		
+		$jarj = "ORDER BY 1";
+		
+		if ($jarjestys == "hylly") {
 			$jarj = "ORDER BY 3";
-		}
-		else {
-			$jarj = "ORDER BY 1";
 		}
 		
 		$tuotepaikka_query = "	SELECT tuote.tuoteno, tuote.nimitys, CONCAT_WS('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllyosoite 

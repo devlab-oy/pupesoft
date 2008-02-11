@@ -298,6 +298,7 @@
 					
 						$laskurow['maa_lahetys'] = $alkupmaa;				    
 						
+						$mista = 'tuote.php';
 						
 						include('tilauskasittely/taric_veroperusteet.inc');
 												

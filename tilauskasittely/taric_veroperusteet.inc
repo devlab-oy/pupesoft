@@ -183,7 +183,9 @@
 
 			// Toivottavasti löytyi jokin toimenpide
 			if (mysql_num_rows($tv_nimres) == 0) {
-				echo "<font class='error'>".t("Ei löytynyt yhtään toimenpidettä tuotteelle/nimikkeelle").": $tuorow[tuoteno]/$nimike_taso1 ".t("Alkuperämaa/maaryhmät").": $alkuperamaa/$maat ".t("Korjaa tuotteen tullinimike ennenkuin viet sen varastoon")."!</font><br>";
+				if ($mista != 'tuote.php') {
+					echo "<font class='error'>".t("Ei löytynyt yhtään toimenpidettä tuotteelle/nimikkeelle").": $tuorow[tuoteno]/$nimike_taso1 ".t("Alkuperämaa/maaryhmät").": $alkuperamaa/$maat ".t("Korjaa tuotteen tullinimike ennenkuin viet sen varastoon")."!</font><br>";
+				}
 			}
 			else {
 				///* Luupataan löydetyt toimentpiteet *///

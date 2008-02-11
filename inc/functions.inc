@@ -2296,7 +2296,7 @@ if (!function_exists("alehinta")) {
 			$alehinta_val = $laskurow["valkoodi"];
 
 			if (trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$hinta = round(yhtioval($hinta, $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
+				$hinta = round(yhtioval($hinta, $laskurow["vienti_kurssi"]), 6);
 				$alehinta_val = $yhtiorow["valkoodi"];
 			}
 		}
@@ -2346,7 +2346,7 @@ if (!function_exists("alehinta")) {
 						}
 					}
 					
-					$hinta         = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+					$hinta         = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$aperuste     .= "Asiakkaan tuotteen nettohinta laskun valuutassa. ";
 					$alehinta_val  = $laskurow["valkoodi"];
 					$hintaperuste = 2;
@@ -2442,7 +2442,7 @@ if (!function_exists("alehinta")) {
 						}
 					}
 
-					$hinta        = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$aperuste    .= "Asiakkaan tuotealeryhmän nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 4;
@@ -2538,7 +2538,7 @@ if (!function_exists("alehinta")) {
 						}
 					}
 
-					$hinta        = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$aperuste    .= "Asiakasaleryhmän tuotteen nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 6;
@@ -2635,7 +2635,7 @@ if (!function_exists("alehinta")) {
 						}
 					}
 
-					$hinta        = yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]);
+					$hinta        = round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$aperuste    .= "Asiakasaleryhmän tuotealeryhmän nettohinta laskun valuutassa. ";
 					$alehinta_val = $laskurow["valkoodi"];
 					$hintaperuste = 8;
@@ -2872,7 +2872,7 @@ if (!function_exists("alehinta")) {
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow       	= mysql_fetch_array ($hresult);
-					$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
+					$hinta 			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$netto			= $hrow["laji"];
 					$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 					$alehinta_val	= $laskurow["valkoodi"];
@@ -2936,11 +2936,11 @@ if (!function_exists("alehinta")) {
 
 				if (mysql_num_rows($hresult) > 0) {
 					$hrow			= mysql_fetch_array ($hresult);
-					$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]),$yhtiorow['hintapyoristys']);
+					$hinta			= round(yhtioval($hrow["hinta"], $laskurow["vienti_kurssi"]), 6);
 					$netto			= $hrow["laji"];
 					$aperuste		.= "Tuotteen hinnastohinta laskun valuutassa";
 					$alehinta_val   = $laskurow["valkoodi"];
-					$hintaperuste = 16;
+					$hintaperuste = 16;					
 				}
 			}
 
@@ -2966,7 +2966,7 @@ if (!function_exists("alehinta")) {
 					$hinta 			= $hrow["hinta"];
 					$netto			= $hrow["laji"];
 					$aperuste		.= "Tuotteen hinnastohinta yhtiön valuutassa";
-					$hintaperuste = 17;
+					$hintaperuste = 17;					
 				}
 			}
 

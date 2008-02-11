@@ -790,7 +790,7 @@
 
 								// Jos hinta ja alekertoimet on setattu
 								if (isset($myy_hintakerr[$indeksi])) {
-									$lis_hinta = round($lis_hinta * $myy_hintakerr[$indeksi],$yhtiorow['hintapyoristys']);
+									$lis_hinta = round($lis_hinta * $myy_hintakerr[$indeksi], $yhtiorow['hintapyoristys']);
 								}
 
 								if (isset($myy_alekerroi[$indeksi])) {
@@ -798,7 +798,7 @@
 										$lis_ale = 100.00;
 									}
 									else {
-										$lis_ale = round($lis_ale * $myy_alekerroi[$indeksi],$yhtiorow['hintapyoristys']);
+										$lis_ale = round($lis_ale * $myy_alekerroi[$indeksi], $yhtiorow['hintapyoristys']);
 									}
 								}
 
@@ -1440,7 +1440,7 @@
 
 			// Jos hinta ja alekertoimet on setattu
 			if ($puu_hintake[$i] != "X") {
-				$lis_hinta = round($lis_hinta * $puu_hintake[$i],$yhtiorow['hintapyoristys']);
+				$lis_hinta = round($lis_hinta * $puu_hintake[$i], $yhtiorow['hintapyoristys']);
 			}
 
 			if ($puu_alekerr[$i] != "X") {
@@ -1448,7 +1448,7 @@
 					$lis_ale = 100.00;
 				}
 				else {
-					$lis_ale = round($lis_ale * $puu_alekerr[$i],$yhtiorow['hintapyoristys']);
+					$lis_ale = round($lis_ale * $puu_alekerr[$i], $yhtiorow['hintapyoristys']);
 				}
 			}
 

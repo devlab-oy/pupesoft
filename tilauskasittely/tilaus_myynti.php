@@ -2370,11 +2370,11 @@ if ($tee == '') {
 				$hinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", round($tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuoterow["alv"]/100), $yhtiorow['hintapyoristys']));
 			}
 			else {
-				$hinta	= $tilausrivi["hinta"];
+				$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", $tilausrivi["hinta"]);
 			}
 
 			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+				$hinta = round(laskuval($hinta, $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
 			}			
 
 			$netto		= $tilausrivi['netto'];
@@ -3175,7 +3175,7 @@ if ($tee == '') {
 
 				//K‰‰nnet‰‰n t‰n rivin hinta oikeeseen valuuttaan
 				$row["kotihinta"] = $row["hinta"];
-				$row["hinta"] = laskuval($row["hinta"], $laskurow["vienti_kurssi"]);
+				$row["hinta"] = round(laskuval($row["hinta"], $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
 
 
 				// T‰n rivin rivihinta
@@ -3837,7 +3837,7 @@ if ($tee == '') {
 					list(, , , , $alehinta_val) = alehinta($laskurow, $trow, $kpl, $netto, '', '');
 					
 					if ($alehinta_val != $laskurow["valkoodi"]) {
-						$hinta = laskuval($hinta, $laskurow["vienti_kurssi"]);
+						$hinta = round(laskuval($hinta, $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
 					}
 					
 					if ($yhtiorow["alv_kasittely"] == "") {

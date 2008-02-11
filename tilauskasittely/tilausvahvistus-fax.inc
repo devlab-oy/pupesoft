@@ -82,7 +82,13 @@ else {
 			$ulos .= t("Kommentti", $kieli).": ".$laskurow['comments']."\n";
 		$ulos .= "\n";
 
-		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("Kpl", $kieli)."   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli)."\n";
+		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("Kpl", $kieli);
+		
+		if ($naytatvale != 3) {
+			$ulos .= "   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli);
+		}
+		
+		$ulos .= "\n";
 		$ulos .= "---------------------------------------------------------------------------------\n";
 
 		$rivino=0;
@@ -106,16 +112,25 @@ else {
 				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['jt']).t("J‰lkitoimitukseen", $kieli);
 			}
 
-			if ($naytatvale==2) {
+			if ($naytatvale==3) {
+				// menn‰‰n ohi koska ei haluta n‰ytt‰‰ hintoja
+			}
+			else if ($naytatvale==2) {
 				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['myyntihinta'])." ";
 			}
 			else {
 				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['hinta'])." ";
 			}
 
-			$ulos .= sprintf("%3.s"  ,$laskurow['valkoodi'])." ";
+			// kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n valkoodia
+			if ($naytatvale != 3) {
+				$ulos .= sprintf("%3.s"  ,$laskurow['valkoodi'])." ";
+			}
 
-			if ($naytatvale==2) {
+			if ($naytatvale==3) {
+				// menn‰‰n ohi koska ei haluta n‰ytt‰‰ alea
+			}
+			else if ($naytatvale==2) {
 				$ulos .= sprintf("%6.s"  ,$tvtilausrivirow['aleryhma']);
 			}
 			else {

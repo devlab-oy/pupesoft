@@ -120,11 +120,24 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
 		$ulos .= "\n";
 
-		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("EAN", $kieli)."          ".t("Kpl", $kieli)."   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli)."\n";
+		$ulos .= t("Nro", $kieli)." ".t("Nimitys", $kieli)."                       ".t("Tuotenumero", $kieli)."              ".t("EAN", $kieli)."          ".t("Kpl", $kieli);
+		
+		if ($naytatvale != 3) {
+			$ulos .= "   ".t("Hinta", $kieli)." ".t("Val", $kieli)."   ".t("Ale", $kieli);
+		}
+		
+		$ulos .= "\n";		
 		$ulos .= "----------------------------------------------------------------------------------------------\n";
 
 		$rivino = 0;
-		$liite  = t("Rivino", $kieli)."\t".t("Nimitys", $kieli)."\t".t("Tuoteno", $kieli)."\t".t("Varattu", $kieli)."\t".t("Hinta", $kieli)."\t".t("Ale", $kieli)."\n";
+		$liite  = t("Rivino", $kieli)."\t".t("Nimitys", $kieli)."\t".t("Tuoteno", $kieli)."\t".t("Varattu", $kieli);
+		
+		// kaikilla muilla paitsi kolmosella n‰ytet‰‰n n‰m‰
+		if ($naytatvale != 3) {
+			$liite .= "\t".t("Hinta", $kieli)."\t".t("Ale", $kieli);
+		}
+		
+		$liite .= "\n";
 
 		while ($tvtilausrivirow=mysql_fetch_array($tilvahresult)) {
 			$rivino++;
@@ -148,16 +161,25 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 				$ulos .= sprintf("%8.s"  ,$tvtilausrivirow['jt']).t(" J‰lkitoimitukseen", $kieli);
 			}
 
-			if ($naytatvale==2) {
+			if ($naytatvale==3) {
+				// menn‰‰n ohi koska ei haluta n‰hd‰ hintoja
+			}
+			else if ($naytatvale==2) {
 				$ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  ,round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys']))." ";
 			}
 			else {
 				$ulos .= sprintf("%".(8+$yhtiorow['hintapyoristys']-2).".s"  ,round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys']))." ";
 			}
 
-			$ulos .= sprintf("%3.s"  	,$laskurow['valkoodi'])." ";
+			// n‰ytet‰‰n valkoodi kaikilla muilla paitsi kolmosella, koska kolmosella ei n‰ytet‰ mit‰‰n hintoja
+			if ($naytatvale != 3) {
+				$ulos .= sprintf("%3.s"  	,$laskurow['valkoodi'])." ";
+			}
 
-			if ($naytatvale==2) {
+			if ($naytatvale==3) {
+				// kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n ale:a
+			}
+			else if ($naytatvale==2) {
 				$ulos .= sprintf("%6.s"  ,$tvtilausrivirow['aleryhma']);
 			}
 			else {
@@ -177,14 +199,20 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 			// Tehr‰‰n liitetiedosto
 			$liite .= $rivino."\t".$tvtilausrivirow['nimitys']."\t".$tvtilausrivirow['tuoteno']."\t".$tvtilausrivirow['varattu']."\t";
 
-			if ($naytatvale==2) {
+			if ($naytatvale==3) {
+				// ei hintoja kolmosella
+			}
+			else if ($naytatvale==2) {
 				$liite .= round(laskuval($tvtilausrivirow['myyntihinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys'])."\t";
 			}
 			else {
 				$liite .= round(laskuval($tvtilausrivirow['hinta'], $laskurow['vienti_kurssi']),$yhtiorow['hintapyoristys'])."\t";
 			}
 
-			if ($naytatvale==2) {
+			if ($naytatvale==3) {
+				// kolmosella ei haluta n‰ytt‰‰ myˆsk‰‰n ale:a
+			}
+			else if ($naytatvale==2) {
 				$liite .= $tvtilausrivirow['aleryhma'];
 			}
 			else {

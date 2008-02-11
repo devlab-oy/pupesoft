@@ -40,7 +40,9 @@ if ($laskurow["tilaustyyppi"] == 'E') {
 	//
 	// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
 
-	if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
+	if (strpos(" ".$laskurow['tilausvahvistus'],'3'))
+		$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+	else if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
 		$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 	else
 		$naytatvale = 1; // halutaan n‰h‰ alet
@@ -819,7 +821,9 @@ else {
 				//
 				// T‰ss‰ haarassa tulostetaan tilausvahvistus KOKO tilauksesta
 
-				if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
+				if (strpos(" ".$laskurow['tilausvahvistus'],'3'))
+					$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+				else if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
 					$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 				else
 					$naytatvale = 1; // halutaan n‰h‰ alet
@@ -879,7 +883,9 @@ else {
 					//
 					// tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
 
-					if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
+					if (strpos(" ".$laskurow['tilausvahvistus'],'3'))
+						$naytatvale = 3; // jos mell‰ on tilausvahvistuksessa kolmonen, ei haluta n‰hd‰ hintoja, pelk‰st‰‰n kpl-m‰‰r‰t
+					else if (strpos(" ".$laskurow['tilausvahvistus'],'2'))
 						$naytatvale = 2; // jos mell‰ on tilausvahvistuksessa kakkonen, ei haluta n‰h‰ aleja
 					else
 						$naytatvale = 1; // halutaan n‰h‰ alet

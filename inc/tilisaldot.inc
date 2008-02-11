@@ -54,7 +54,7 @@
 				$alkupvm = substr($yhtiorow['tilikausi_alku'],0,5) . sprintf("%02d",$alvk) . "-01";
 				
 				if ($alvk != 12) $loppupvm = substr($yhtiorow['tilikausi_alku'],0,5) . sprintf("%02d",$alvk+1) . "-01";
-				else $loppupvm = substr($yhtiorow['tilikausi_alku'],0,5) + 1 . "01-01";
+				else $loppupvm = substr($yhtiorow['tilikausi_alku'],0,4) + 1 . "-01-01";
 				
 				if ($alkupvm < $yhtiorow['tilikausi_alku']) { //Kausi on tilikauden "etupuoella"
 					$alkupvm = substr($alkupvm,0,4) + 1 . substr($alkupvm,4,6);

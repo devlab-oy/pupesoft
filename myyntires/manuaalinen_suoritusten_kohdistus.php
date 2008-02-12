@@ -434,8 +434,13 @@ if ($tila == 'tee_kohdistus') {
 		$result_korko = mysql_query($query_korko) or die ("Kysely ei onnistu $query_korko <br>" . mysql_error());
 		$korko_row = mysql_fetch_array($result_korko);
 		
-		$korkosumma = $korko_row['korkosumma'];
-
+		if ($korko_row['korkosumma'] > 0) {
+			$korkosumma = $korko_row['korkosumma'];
+		}
+		else {
+			$korkosumma = 0;
+		}
+		
 		// Aloitetaan kirjanpidon kirjaukset
 		// Kassatili
 		$query = "	INSERT INTO tiliointi(yhtio, laatija, laadittu, tapvm, tilino, summa, ltunnus, selite, kustp)
@@ -617,12 +622,16 @@ if ($tila == 'tee_kohdistus') {
 
 				if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $suoritus["kurssi"],2);
 
-				$query_korko = "select viikorkopros * $suoritussumma * (if(to_days('$maksupvm')-to_days(erpcm) > 0, to_days('$maksupvm')-to_days(erpcm), 0))/36500 korkosumma from lasku WHERE tunnus='$ltunnus'";
-				//echo "<font class='head'>$query_korko</font>";
-
+				$query_korko = "SELECT viikorkopros * $suoritussumma * (if(to_days('$maksupvm')-to_days(erpcm) > 0, to_days('$maksupvm')-to_days(erpcm), 0))/36500 korkosumma from lasku WHERE tunnus='$ltunnus'";
 				$result_korko = mysql_query($query_korko) or die ("Kysely ei onnistu $query_korko <br>" . mysql_error());
 				$korko_row = mysql_fetch_array($result_korko);
-				$korkosumma = $korko_row['korkosumma'];
+				
+				if ($korko_row['korkosumma'] > 0) {
+					$korkosumma = $korko_row['korkosumma'];
+				}
+				else {
+					$korkosumma = 0;
+				}
 
 				//Kohdistammeko pyöristykset ym:t tähän?
 			 	if($kaatosumma != 0 and $pyoristys_virhe_ok == 1 and $lasku["tunnus"] == $kohdistuslasku["tunnus"]) {

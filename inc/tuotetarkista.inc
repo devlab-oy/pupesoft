@@ -34,7 +34,9 @@ if(!function_exists("tuotetarkista")) {
 
 		if ((mysql_field_name($result, $i) == "tilino" or
 			mysql_field_name($result, $i) == "tilino_eu" or
-			mysql_field_name($result, $i) == "tilino_ei_eu") and $t[$i] != 0) {
+			mysql_field_name($result, $i) == "tilino_ei_eu" or
+			mysql_field_name($result, $i) == "tilino_marginaali" or
+			mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != 0) {
 
 			$query = "	SELECT nimi
 						FROM tili

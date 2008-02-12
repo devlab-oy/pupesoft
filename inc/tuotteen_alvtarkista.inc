@@ -24,7 +24,12 @@ if(!function_exists("tuotteen_alvtarkista")) {
 			}
 		}
 
-		if (mysql_field_name($result, $i) == "tilino" and $t[$i] != 0) {
+		if ((mysql_field_name($result, $i) == "tilino" or 
+			mysql_field_name($result, $i) == "tilino_eu" or 
+			mysql_field_name($result, $i) == "tilino_ei_eu" or 
+			mysql_field_name($result, $i) == "tilino_marginaali" or 
+			mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != 0) {
+			
 			$query = "	SELECT nimi
 						FROM tili
 						WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";

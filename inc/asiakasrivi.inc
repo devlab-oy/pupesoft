@@ -9,9 +9,14 @@
 		$tyyppi = 0;
 	}
 	
-	if (mysql_field_name($result, $i) == "tilino") {
+	if (mysql_field_name($result, $i) == "tilino" or
+		mysql_field_name($result, $i) == "tilino_eu" or
+		mysql_field_name($result, $i) == "tilino_ei_eu" or
+		mysql_field_name($result, $i) == "tilino_marginaali" or
+		mysql_field_name($result, $i) == "tilino_osto_marginaali") {
+
 		if ($ulosarray[$i] != '') {
-			$ulos=$ulosarray[$i];
+			$ulos = $ulosarray[$i];
 			$jatko = 0;
 		}
 		else {
@@ -22,7 +27,7 @@
 			$vresult = mysql_query($query) or pupe_error($query);
 			if (mysql_num_rows($vresult) == 1) {
 				$vrow=mysql_fetch_array($vresult);
-				$ulos .= " " . $vrow[nimi] . "</td>";
+				$ulos .= " " . $vrow["nimi"] . "</td>";
 				$jatko = 0;
 			}
 		}

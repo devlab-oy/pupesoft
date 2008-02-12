@@ -2195,7 +2195,12 @@ if (!function_exists("alv")) {
 
 			// Jos alvit t‰sm‰‰v‰t, ei tarvitse tehd‰ mit‰‰n. Muuten lasketaan uuden alvin sis‰lt‰v‰ myyntihinta.
 			if ($alv != $trow['alv']) {
-				$hinta = round($hinta / (1+$trow['alv']/100) * (1+$alv/100),$yhtiorow['hintapyoristys']);
+				if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+					$hinta = round($hinta / (1+$trow['alv']/100) * (1+$alv/100), 6);
+				}
+				else {
+					$hinta = round($hinta / (1+$trow['alv']/100) * (1+$alv/100), $yhtiorow['hintapyoristys']);
+				}				
 			}
 		}
 

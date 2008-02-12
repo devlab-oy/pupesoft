@@ -731,6 +731,7 @@
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
 					tilausrivi_osto.tunnus								osto_rivitunnus,
+					tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
 					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
@@ -769,6 +770,7 @@
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
 					tilausrivi_osto.tunnus								osto_rivitunnus,
+					tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
 					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
@@ -810,6 +812,7 @@
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
 					tilausrivi_osto.tunnus								osto_rivitunnus,
+					tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
 					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
@@ -844,6 +847,7 @@
 					(tilausrivi_osto.rivihinta/tilausrivi_osto.kpl)		ostohinta,
 					tilausrivi_osto.perheid2							osto_perheid2,
 					tilausrivi_osto.tunnus								osto_rivitunnus,
+					tilausrivi_osto.uusiotunnus							osto_uusiotunnus,
 					tilausrivi_osto.laskutettuaika						osto_laskaika,
 					tilausrivi_myynti.laskutettuaika					myynti_laskaika,
 					DATEDIFF(now(), tilausrivi_osto.laskutettuaika)		varpvm,
@@ -1002,8 +1006,16 @@
 				$sarjarow["myyntirivitunnus"] = "";
 			}
 
-			echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$sarjarow[osto_tunnus]'>$sarjarow[osto_tunnus] $sarjarow[osto_nimi]</a><br>";
-
+			
+			if ($sarjarow["osto_uusiotunnus"] > 0) {
+				$ostuns = $sarjarow["osto_uusiotunnus"];
+			}
+			else {
+				$ostuns = $sarjarow["osto_tunnus"];	
+			}			
+			
+			echo "<td colspan='2' valign='top'><a href='../raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$ostuns'>$ostuns $sarjarow[osto_nimi]</a><br>";
+			
 			if (($sarjarow["siirtorivitunnus"] > 0 and $tunnuskentta!= 'siirtorivitunnus') or ($sarjarow["osto_perheid2"] > 0 and $sarjarow["osto_perheid2"]!=$sarjarow["osto_rivitunnus"])) {
 				$fnlina1 = "<font class='message'>(Varattu lisävarusteena tuotteelle: ";
 				$fnlina2 = ")</font>";

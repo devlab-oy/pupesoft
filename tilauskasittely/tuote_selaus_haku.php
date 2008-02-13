@@ -9,7 +9,12 @@
 	else {
 		require ("parametrit.inc");
 		require ("ostoskori.inc");
+		
 		$kori_polku = "ostoskori.php";
+		
+		if ($toim == "FUTURSOFT") {
+			$kori_polku .= "?toim=".$toim."&ostoskori=".$ostoskori;
+		}		
 	}
 
 	echo "<SCRIPT type='text/javascript'>
@@ -386,6 +391,10 @@
 	echo "<table><tr>
 			<form action = '$PHP_SELF?toim_kutsu=$toim_kutsu' method = 'post'>";
 	echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
+	if ($toim == "FUTURSOFT") {
+		echo "<input type='hidden' name='toim' value = '$toim'>";
+	}
+	
 
 	echo "<th nowrap valign='top'>
 		<a href = '$PHP_SELF?toim_kutsu=$toim_kutsu&ojarj=$array[0]$ulisa'>".t("$arraynimet[0]")."</a><br>
@@ -668,6 +677,9 @@
 		echo "<input type='hidden' name='tee' value = 'TI'>";
 		echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 		echo "<input type='hidden' name='ostoskori' value='$ostoskori'>";
+		if ($toim == "FUTURSOFT") {
+			echo "<input type='hidden' name='toim' value = '$toim'>";
+		}
 
 		foreach($rows as $row) {
 
@@ -982,6 +994,9 @@
 
 				if ($kukarow["kesken"] != 0 or is_numeric($ostoskori)) {
 					echo "<td valign='top' align='right' class='$vari' nowrap>";
+					if ($toim == "FUTURSOFT") {
+						echo "<input type='hidden' name='toim' value = '$toim'>";
+					}
 					echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 					echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
 					echo "<input type='submit' value = '".t("Lisää")."'>";
@@ -1105,6 +1120,9 @@
 
 			if (($row["sarjanumeroseuranta"] == "" or $row["sarjanumeroseuranta"] == "E"  or $row["sarjanumeroseuranta"] == "F") and ($kukarow["kesken"] != 0 or is_numeric($ostoskori))) {
 				echo "<td valign='top' align='right' class='$vari' nowrap>";
+				if ($toim == "FUTURSOFT") {
+					echo "<input type='hidden' name='toim' value = '$toim'>";
+				}
 				echo "<input type='hidden' name='tiltuoteno[$yht_i]' value = '$row[tuoteno]'>";
 				echo "<input type='text' size='3' name='tilkpl[$yht_i]'> ";
 				echo "<input type='submit' value = '".t("Lisää")."'>";

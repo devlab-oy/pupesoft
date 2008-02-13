@@ -68,9 +68,10 @@
 
 	// Haetaan tilausrivin tiedot
 	if ($from != '' and $rivitunnus != "") {
-		$query    = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta, tuote.yksikko
+		$query    = "	SELECT tilausrivi.*, tuote.sarjanumeroseuranta, tuote.yksikko, tilausrivin_lisatiedot.osto_vai_hyvitys
 						FROM tilausrivi use index (PRIMARY)
 						JOIN tuote ON tilausrivi.yhtio=tuote.yhtio and tilausrivi.tuoteno=tuote.tuoteno
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
 						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
 						and tilausrivi.tunnus  = '$rivitunnus'";
 		$sarjares = mysql_query($query) or pupe_error($query);
@@ -1237,8 +1238,11 @@
 			if ($kaytetty == "K") {
 				$chk = "CHECKED";
 			}
+			elseif ($sarjanumero == "" and $rivirow["osto_vai_hyvitys"] == "O") {
+				$chk = "CHECKED";
+			}
 
-			echo "<tr><th>".t("Käytetty")."</th><td><input type='checkbox' name='kaytetty' value='K'></td></tr>";
+			echo "<tr><th>".t("Käytetty")."</th><td><input type='checkbox' name='kaytetty' value='K' $chk></td></tr>";
 		
 			echo "<tr><th>".t("Takuu")."</th><td>
 			<input type='text' name='tppa' value='' size='3'>

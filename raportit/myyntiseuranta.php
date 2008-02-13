@@ -155,23 +155,36 @@
 
 			if (isset($muutparametrit)) {
 
-				list($tee,$ajotapa,$ajotapanlisa,$yhtiot, $asiakasosasto, $asiakasosasto2, $asiakasryhma, $asiakasryhma2,
-				$mul_osasto, $mul_piiri, $mul_try, $asiakasnro, $ytunnus, $toimittaja, $jarjestys, $ruksit, $rajaus, $nimitykset, $kateprossat, $piiyhteensa,
+				list($tee, $ajotapa, $ajotapanlisa, $yhtiot, $mul_oasiakasosasto, $mul_asiakasryhma,
+				$mul_osasto, $mul_piiri, $mul_try, $asiakasnro, $ytunnus, $toimittaja, $jarjestys, 
+				$ruksit, $rajaus, $nimitykset, $kateprossat, $piiyhteensa,
 				$osoitetarrat, $ppa, $kka, $vva, $ppl, $kkl, $vvl) = explode("//", $muutparametrit);
 
-				if ($yhtiot != "") $yhtiot_x 			= explode("!!", $yhtiot);
-				else unset($yhtiot);
-				if ($mul_osasto != "") $mul_osasto_x 	= explode("!!", $mul_osasto);
+				if ($yhtiot != "") $yhtiot_x 							= explode("!!", $yhtiot);
+				else unset($yhtiot);				
+				
+				if ($mul_oasiakasosasto != "") $mul_oasiakasosasto_x	= explode("!!", $mul_oasiakasosasto);
+				else unset($mul_oasiakasosasto);
+				
+				if ($mul_asiakasryhma != "") $mul_asiakasryhma_x		= explode("!!", $mul_asiakasryhma);
+				else unset($mul_asiakasryhma);
+				
+				if ($mul_osasto != "") $mul_osasto_x 					= explode("!!", $mul_osasto);
 				else unset($mul_osasto);
-				if ($mul_try != "") $mul_try_x 			= explode("!!", $mul_try);
-				else unset($mul_try);
-				if ($jarjestys != "") $jarjestys_x 		= explode("!!", $jarjestys);
-				else unset($jarjestys);
-				if ($ruksit != "") $ruksit_x 			= explode("!!", $ruksit);
-				else unset($ruksit);
-				if ($rajaus != "") $rajaus_x 			= explode("!!", $rajaus);
-				else unset($rajaus);
-				if ($mul_piiri != "") $mul_piiri_x 		= explode("!!", $mul_piiri);
+				
+				if ($mul_try != "") $mul_try_x 							= explode("!!", $mul_try);
+				else unset($mul_try);                   				
+				
+				if ($jarjestys != "") $jarjestys_x 						= explode("!!", $jarjestys);
+				else unset($jarjestys);                 				
+				
+				if ($ruksit != "") $ruksit_x 							= explode("!!", $ruksit);
+				else unset($ruksit);                    				
+				
+				if ($rajaus != "") $rajaus_x 							= explode("!!", $rajaus);
+				else unset($rajaus);                    				
+				
+				if ($mul_piiri != "") $mul_piiri_x 						= explode("!!", $mul_piiri);
 				else unset($mul_piiri);
 
 				if (count($yhtiot_x) > 0) {
@@ -181,6 +194,24 @@
 						list ($b, $c) = explode("#", $a);
 
 						$yhtiot[$b] = $c;
+					}
+				}
+				if (count($mul_oasiakasosasto_x) > 0) {
+					$mul_oasiakasosasto = array();
+
+					foreach($mul_oasiakasosasto_x as $a) {
+						list ($b, $c) = explode("#", $a);
+
+						$mul_oasiakasosasto[$b] = $c;
+					}
+				}
+				if (count($mul_asiakasryhma_x) > 0) {
+					$mul_asiakasryhma = array();
+
+					foreach($mul_asiakasryhma_x as $a) {
+						list ($b, $c) = explode("#", $a);
+
+						$mul_asiakasryhma[$b] = $c;
 					}
 				}
 				if (count($mul_osasto_x) > 0) {
@@ -240,13 +271,8 @@
 			}
 
 			// tutkaillaan saadut muuttujat
-			$asiakasosasto   = trim($asiakasosasto);
-			$asiakasryhma    = trim($asiakasryhma);
 			$ytunnus         = trim($ytunnus);
 			$toimittaja    	 = trim($toimittaja);
-
-			if ($asiakasosasto == "") $asiakasosasto = trim($asiakasosasto2);
-			if ($asiakasryhma  == "") $asiakasryhma  = trim($asiakasryhma2);
 
 			// hehe, n‰in on helpompi verrata p‰iv‰m‰‰ri‰
 			$query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
@@ -315,8 +341,28 @@
 					$muutparametrit .= "//";
 				}
 
-				$muutparametrit .= $asiakasosasto."//".$asiakasosasto2."//".$asiakasryhma."//".$asiakasryhma2."//";
+				if (count($mul_oasiakasosasto) > 0) {
+					foreach($mul_oasiakasosasto as $a => $b) {
+						$muutparametrit .= "$a#".$b."!!";
+					}
 
+					$muutparametrit = substr($muutparametrit, 0, -2)."//";
+				}
+				else {
+					$muutparametrit .= "//";
+				}
+								
+				if (count($mul_asiakasryhma) > 0) {
+					foreach($mul_asiakasryhma as $a => $b) {
+						$muutparametrit .= "$a#".$b."!!";
+					}
+
+					$muutparametrit = substr($muutparametrit, 0, -2)."//";
+				}
+				else {
+					$muutparametrit .= "//";
+				}				
+				
 				if (count($mul_osasto) > 0) {
 					foreach($mul_osasto as $a => $b) {
 						$muutparametrit .= "$a#".$b."!!";
@@ -467,7 +513,7 @@
 					$gluku++;
 				}
 
-				if ($asiakasosasto != "") {
+				if ($mul_oasiakasosasto != "") {
 					if ($group!="") $group .= ",asiakas.osasto";
 					else $group .= "asiakas.osasto";
 					$select .= "asiakas.osasto asos, ";
@@ -475,7 +521,7 @@
 					$gluku++;
 				}
 
-				if ($asiakasryhma != "") {
+				if ($mul_asiakasryhma != "") {
 					if ($group!="") $group .= ",asiakas.ryhma";
 					else $group .= "asiakas.ryhma";
 					$select .= "asiakas.ryhma asry, ";
@@ -688,7 +734,15 @@
 						$gluku++;
 
 						if ($rajaus[$i] != "") {
-							$lisa .= " and (tuote.kustp='$rajaus[$i]' or asiakas.kustannuspaikka='$rajaus[$i]') ";
+							
+							if (strpos($rajaus[$i], "-") !== FALSE) {
+								list($kusta, $kustl) = explode("-", $rajaus[$i]);
+							
+								$lisa .= " and ((tuote.kustp >= '$kusta' and tuote.kustp <= '$kustl') or (asiakas.kustannuspaikka >= '$kusta' and asiakas.kustannuspaikka <= '$kustl')) ";								
+							}
+							else {							
+								$lisa .= " and (tuote.kustp='$rajaus[$i]' or asiakas.kustannuspaikka='$rajaus[$i]') ";
+							}							
 						}
 					}
 				}
@@ -700,33 +754,30 @@
 					$gluku++;
 				}
 
-				if ($asiakasryhma  == "kaikki") {
-					$asiakasryhma = "";
-					$asiakasryhmasel = "selected";
+				if (is_array($mul_oasiakasosasto) and count($mul_oasiakasosasto) > 0) {
+					$sel_oasiakasosasto = "('".str_replace(',','\',\'',implode(",", $mul_oasiakasosasto))."')";
+					$lisa .= " and asiakas.osasto in $sel_oasiakasosasto ";
 				}
-
-				if ($asiakasosasto == "kaikki") {
-					$asiakasosasto = "";
-					$asiakasosastosel = "selected";
+				
+				if (is_array($mul_asiakasryhma) and count($mul_asiakasryhma) > 0) {
+					$sel_asiakasryhma = "('".str_replace(',','\',\'',implode(",", $mul_asiakasryhma))."')";
+					$lisa .= " and asiakas.ryhma in $sel_asiakasryhma ";
 				}
-
-				if ($asiakasryhma  != "") $lisa .= " and asiakas.ryhma     = '$asiakasryhma' ";
-
-				if ($asiakasosasto != "") $lisa .= " and asiakas.osasto    = '$asiakasosasto' ";
-
-				if (count($mul_osasto) > 0) {
+				
+				if (is_array($mul_osasto) and count($mul_osasto) > 0) {
 					$sel_osasto = "('".str_replace(',','\',\'',implode(",", $mul_osasto))."')";
 					$lisa .= " and tuote.osasto in $sel_osasto ";
 				}
+				
 				if (is_array($mul_try) and count($mul_try) > 0) {
 					$sel_tuoteryhma = "('".str_replace(',','\',\'',implode(",", $mul_try))."')";
 					$lisa .= " and tuote.try in $sel_tuoteryhma ";
 				}
+				
 				if (is_array($mul_piiri) and count($mul_piiri) > 0) {
 					$sel_piiri = "('".str_replace(',','\',\'',implode(",", $mul_piiri))."')";
 					$lisa .= " and asiakas.piiri in $sel_piiri ";
 				}
-
 
 				if ($toimittaja != "") {
 					$query = "select tuoteno from tuotteen_toimittajat where yhtio in ($yhtio) and toimittaja='$toimittaja'";
@@ -1478,55 +1529,51 @@
 			}
 
 			echo "<table>";
-			echo "<tr>";
-			echo "<th>".t("Syˆt‰ asiakasosasto")."</th>";
-			echo "<td><input type='text' name='asiakasosasto' size='10'></td>";
+			echo "<tr>";			
+			echo "<td valign='top' class='back'>";
 
+			// n‰ytet‰‰n soveltuvat asiakasosastot
 			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 						FROM avainsana
 						".avain('join','ASOSASTO_')."
 						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASOSASTO'
 						ORDER BY avainsana.selite+0";
-			$result = mysql_query($query) or pupe_error($query);
+			$res2  = mysql_query($query) or die($query);
 
-			echo "<td><select name='asiakasosasto2'>";
-			echo "<option value=''>".t("Asiakasosasto")."</option>";
-			echo "<option value='kaikki' $asiakasosastosel>".t("Kaikki")."</option>";
-
-			while ($row = mysql_fetch_array($result)) {
-				if ($asiakasosasto == $row["selite"]) $sel = "selected";
-				else $sel = "";
-				echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
+			if (mysql_num_rows($res2) > 11) {
+				echo "<div style='height:265;overflow:auto;'>";
 			}
 
-			echo "</select></td>";
-			echo "<th>".t("ja/tai asiakasryhm‰")."</th>";
-			echo "<td><input type='text' name='asiakasryhma' size='10'></td>";
+			echo "<table>";
+			echo "<tr><th colspan='2'>".t("Valitse asiakasosasto(t)").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_oas' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
 
+			while ($rivi = mysql_fetch_array($res2)) {
+				$mul_check = '';
+				if ($mul_oasiakasosasto!="") {
+					if (in_array($rivi['selite'],$mul_oasiakasosasto)) {
+						$mul_check = 'CHECKED';
+					}
+				}
+
+				echo "<tr><td><input type='checkbox' name='mul_oasiakasosasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+			}
+
+			echo "</table>";
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "</div>";
+			}
+			
+			echo "</td>";
+			echo "<td valign='top' class='back'>";
+
+			// n‰ytet‰‰n soveltuvat asiakasryhmat
 			$query = "	SELECT distinct avainsana.selite, ".avain('select')."
 						FROM avainsana
 						".avain('join','ASRYHMA_')."
 						WHERE avainsana.yhtio in ($yhtio) and avainsana.laji='ASIAKASRYHMA'
 						ORDER BY avainsana.selite+0";
-			$result = mysql_query($query) or pupe_error($query);
-
-			echo "<td><select name='asiakasryhma2'>";
-			echo "<option value=''>".t("Asiakasryhm‰")."</option>";
-			echo "<option value='kaikki' $asiakasryhmasel>".t("Kaikki")."</option>";
-
-			while ($row = mysql_fetch_array($result)) {
-				if ($asiakasryhma == $row["selite"]) $sel = "selected";
-				else $sel = "";
-				echo "<option value='$row[selite]' $sel>$row[selite] $row[selitetark]</option>";
-			}
-
-			echo "</select></td>";
-			echo "</tr></table><br>\n";
-
-			echo "<table><tr valign='top'><td><table><tr><td class='back'>";
-
-			// n‰ytet‰‰n soveltuvat osastot
-			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
 			$res2  = mysql_query($query) or die($query);
 
 			if (mysql_num_rows($res2) > 11) {
@@ -1534,18 +1581,18 @@
 			}
 
 			echo "<table>";
-			echo "<tr><th colspan='2'>".t("Valitse tuoteosasto(t)").":</th></tr>";
-			echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
+			echo "<tr><th colspan='2'>".t("Valitse asiakasryhma(t)").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_asi' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
 
 			while ($rivi = mysql_fetch_array($res2)) {
 				$mul_check = '';
-				if ($mul_osasto!="") {
-					if (in_array($rivi['selite'],$mul_osasto)) {
+				if ($mul_asiakasryhma!="") {
+					if (in_array($rivi['selite'],$mul_asiakasryhma)) {
 						$mul_check = 'CHECKED';
 					}
 				}
 
-				echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+				echo "<tr><td><input type='checkbox' name='mul_asiakasryhma[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
 			}
 
 			echo "</table>";
@@ -1553,45 +1600,10 @@
 			if (mysql_num_rows($res2) > 11) {
 				echo "</div>";
 			}
-
-			echo "</table>";
-			echo "</td>";
-
-			echo "<td><table><tr><td valign='top' class='back'>";
-
-			// n‰ytet‰‰n soveltuvat tryt
-			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
-			$res2  = mysql_query($query) or die($query);
-
-			if (mysql_num_rows($res2) > 11) {
-				echo "<div style='height:265;overflow:auto;'>";
-			}
-
-			echo "<table>";
-			echo "<tr><th colspan='2'>".t("Valitse tuoterym‰t(t)").":</th></tr>";
-			echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
-
-			while ($rivi = mysql_fetch_array($res2)) {
-				$mul_check = '';
-				if ($mul_try!="") {
-					if (in_array($rivi['selite'],$mul_try)) {
-						$mul_check = 'CHECKED';
-					}
-				}
-
-				echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
-			}
-
-			echo "</table>";
-
-			if (mysql_num_rows($res2) > 11) {
-				echo "</div>";
-			}
-
-			echo "</table>";
-			echo "</td>";
-
-			echo "<td colspan='3'><table><tr><td valign='top' class='back'>";
+			
+			echo "</td>";						
+			echo "<td valign='top' class='back'>";
+			
 			// n‰ytet‰‰n sallityt piirit
 			$query = "	SELECT *
 						FROM avainsana
@@ -1626,12 +1638,78 @@
 				echo "</div>";
 			}
 
+			echo "</td>";
+			echo "</tr></table><br>\n";
+
+
+
+			echo "<table><tr>";
+			echo "<td valign='top' class='back'>";
+
+			// n‰ytet‰‰n soveltuvat osastot
+			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','OSASTO_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='OSASTO' order by avainsana.selite+0";
+			$res2  = mysql_query($query) or die($query);
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "<div style='height:265;overflow:auto;'>";
+			}
+
+			echo "<table>";
+			echo "<tr><th colspan='2'>".t("Valitse tuoteosasto(t)").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_osa' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
+
+			while ($rivi = mysql_fetch_array($res2)) {
+				$mul_check = '';
+				if ($mul_osasto!="") {
+					if (in_array($rivi['selite'],$mul_osasto)) {
+						$mul_check = 'CHECKED';
+					}
+				}
+
+				echo "<tr><td><input type='checkbox' name='mul_osasto[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+			}
+
 			echo "</table>";
 
-			echo "</td>";
+			if (mysql_num_rows($res2) > 11) {
+				echo "</div>";
+			}
 
-			echo "</tr>\n";
-			echo "</table><br>";
+			echo "</td>";
+			echo "<td valign='top' class='back'>";
+
+			// n‰ytet‰‰n soveltuvat tryt
+			$query = "SELECT avainsana.selite, ".avain('select')." FROM avainsana ".avain('join','TRY_')." WHERE avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='TRY' order by avainsana.selite+0";
+			$res2  = mysql_query($query) or die($query);
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "<div style='height:265;overflow:auto;'>";
+			}
+
+			echo "<table>";
+			echo "<tr><th colspan='2'>".t("Valitse tuoterym‰t(t)").":</th></tr>";
+			echo "<tr><td><input type='checkbox' name='mul_try' onclick='toggleAll(this);'></td><td>".t("Ruksaa kaikki")."</td></tr>";
+
+			while ($rivi = mysql_fetch_array($res2)) {
+				$mul_check = '';
+				if ($mul_try!="") {
+					if (in_array($rivi['selite'],$mul_try)) {
+						$mul_check = 'CHECKED';
+					}
+				}
+
+				echo "<tr><td><input type='checkbox' name='mul_try[]' value='$rivi[selite]' $mul_check></td><td>$rivi[selite] - $rivi[selitetark]</td></tr>";
+			}
+
+			echo "</table>";
+
+			if (mysql_num_rows($res2) > 11) {
+				echo "</div>";
+			}
+
+			echo "</td>";			
+			echo "</tr>";
+			echo "</table><br>\n";
 			
 			// lis‰rajaukset n‰kym‰..
 			if ($ruksit[1]  != '') 		$ruk1chk  	= "CHECKED";
@@ -1752,6 +1830,7 @@
 				<td><input type='text' name='jarjestys[13]' size='2' value='$jarjestys[13]'></td>
 				<td><input type='checkbox' name='ruksit[13]' value='kustannuspaikka' $ruk13chk></td>
 				<td><input type='text' name='rajaus[13]' value='$rajaus[13]'></td>
+				<td class='back'>".t("(V‰liviivalla rajataan kustannuspaikkav‰li)")."</td>
 				</tr>
 				<tr>
 				<td class='back'><br></td>

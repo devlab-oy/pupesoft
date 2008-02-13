@@ -42,7 +42,7 @@
 										WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
 				$tuotepaikat_result = mysql_query($tuotepaikat_query) or pupe_error($tuotepaikat_query);
 				
-				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($sresult) == 0 and $otsikkorivi["ei_saldoa"] == "") {
+				if ($yhtiorow["tuotteen_oletuspaikka"] != "" and mysql_num_rows($tuotepaikat_result) == 0 and $otsikkorivi["ei_saldoa"] == "") {
 					list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode("-", $yhtiorow["tuotteen_oletuspaikka"]);
 
 					if ($hyllyalue == "") {
@@ -66,7 +66,11 @@
 											hyllyalue   	= '$hyllyalue',
 											hyllynro    	= '$hyllynro',
 											hyllyvali   	= '$hyllyvali',
-											hyllytaso   	= '$hyllytaso'";
+											hyllytaso   	= '$hyllytaso'
+											luontiaika		= now(),
+											laatija			= '$kukarow[kuka]',
+											muutospvm		= now(),
+											muuttaja		= '$kukarow[kuka]'";
 					$tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
 				}
 

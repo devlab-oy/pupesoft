@@ -19,6 +19,12 @@ if (file_exists("inc/parametrit.inc")) {
 else {
 	require ("parametrit.inc");
 	$post_myynti = $pyytaja;
+	
+	
+	if ($toim == "FUTURSOFT") {
+		$post_myynti .= "?toim=".$toim."&ostoskori=".$ostoskori;
+	}
+	
 	$pyytaja = substr($pyytaja,0,-4);
 }
 
@@ -179,7 +185,7 @@ if ($tee == "") {
 	else {
 		$lisa = "";
 	}
-
+	
 	$query = "	SELECT lasku.*, count(*) rivit
 				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
 				JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = 'B')
@@ -191,7 +197,7 @@ if ($tee == "") {
 				HAVING rivit > 0
 				ORDER BY alatila";
 	$result = mysql_query($query) or pupe_error($query);
-
+	
 	if (mysql_num_rows($result) > 0) {
 
 		while ($ostoskori = mysql_fetch_array($result)) {
@@ -204,6 +210,7 @@ if ($tee == "") {
 			echo "<form method='post' action='ostoskori.php'>";
 			echo "<th colspan='3' style='text-align:right;'>";			
 			echo "<input type='hidden' name='tee' value='poistakori'>
+					<input type='hidden' name='toim' value='$toim'>
 					<input type='hidden' name='pyytaja' value='$pyytaja'>
 					<input type='hidden' name='ostoskori' value='$ostoskori[alatila]'>
 					<input type='submit' value='".t("Tyhjennä ostoskori")."'>";
@@ -238,6 +245,7 @@ if ($tee == "") {
 				echo "<form method='post' action='ostoskori.php'>";
 				echo "<td>";
 				echo "<input type='hidden' name='tee' value='poistarivi'>
+						<input type='hidden' name='toim' value='$toim'>
 						<input type='hidden' name='pyytaja' value='$pyytaja'>
 						<input type='hidden' name='ostoskori' value='$ostoskori[alatila]'>
 						<input type='hidden' name='rivitunnus' value='$koririvi[tunnus]'>

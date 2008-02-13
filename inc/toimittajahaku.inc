@@ -88,7 +88,7 @@
 			require ("footer.inc");
 			exit;
 		}
-		elseif ($laji == 'K' or $laji == 'H' or $laji == 'M' or $laji == 'Y' or $laji == 'o') {
+		elseif ($laji == 'K' or $laji == 'H' or $laji == 'M' or $laji == 'Y' or $laji == 'Q' or $laji == 'o') {
 			
 			if ($ytunnus != "") {
 				//Jos taas p‰‰ss‰t‰‰n $ytunnusta niin haetaan sen perusteella
@@ -277,7 +277,7 @@
 			
 			echo "<th>".t("valitse")."</th><th></th></tr>";
 
-			while ($trow=mysql_fetch_array ($result)) {
+			while ($trow = mysql_fetch_array ($result)) {
 				echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
 						<tr>
 						<input type='hidden' name='tunnus' value='$trow[tunnus]'>
@@ -289,8 +289,9 @@
 				
 				echo "<td><select name = 'laji'>
 						<option value = 'K'>".t("Kaikki")."
-						<option value = 'H'>".t("Hyv‰ksym‰tt‰")."
+						<option value = 'H'>".t("Hyv‰ksytt‰v‰n‰")."
 						<option value = 'M'>".t("Maksamatta")."
+						<option value = 'Q'>".t("Odottaa suoritusta")."
 						<option value = 'Y'>".t("Maksettu")."
 						<option value = 'O'>".t("Ostoraportti")."
 						</select></td>

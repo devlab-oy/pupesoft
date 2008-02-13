@@ -1,5 +1,6 @@
 <?php
 
+
 if(!function_exists("tuotetarkista")) {
 	function tuotetarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
 		global $kukarow, $yhtiorow, $alias_set;
@@ -24,7 +25,7 @@ if(!function_exists("tuotetarkista")) {
 			}
 			$tem_tuoteno = $t[$i];
 		}
-
+		
 		if (mysql_field_name($result, $i) == "nimitys") {		
 			if (trim($t[$i]) == '') {
 				$virhe[$i] .= t("Nimitys puuttuu")."!";
@@ -105,7 +106,6 @@ if(!function_exists("tuotetarkista")) {
 				}
 		    }				
 		}
-		
 
 		if (mysql_field_name($result, $i) == "ei_saldoa") {
 			$query = "	SELECT *

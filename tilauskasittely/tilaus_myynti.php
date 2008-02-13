@@ -3260,6 +3260,7 @@ if ($tee == '') {
 									<input type='hidden' name='projektilla' value='$projektilla'>
 									<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
 									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' id='rivi_$rivino' name='jarjesta' value='$rivino'>";
 
@@ -3382,6 +3383,7 @@ if ($tee == '') {
 										<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 										<input type='hidden' name='edtilausnumero' 	value = '$row[otunnus]'>
 										<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+										<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
 										<input type='hidden' name='menutila' 		value = '$menutila'>
 										<select name='valitsetoimitus_vaihdarivi' onchange='submit();'>";
 
@@ -3449,6 +3451,7 @@ if ($tee == '') {
 								<input type='hidden' name='projektilla' value='$projektilla'>
 								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 								<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+								<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
 								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
 								<select name='positio' onchange='submit();' $state>";
@@ -3477,6 +3480,7 @@ if ($tee == '') {
 									<input type='hidden' name='projektilla' value='$projektilla'>
 									<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
 									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE'>
 									<select id='asiakkaan_positio_$row[tunnus]' name='asiakkaan_positio' onchange=\"yllapito('asiakkaan_positio&asiakkaan_kohde=$lasklisatied_row[asiakkaan_kohde]', this.id, 'asiakkaan_positio_$rivino');\" $state>
@@ -3565,6 +3569,7 @@ if ($tee == '') {
 										<input type='hidden' name='projektilla' 	value = '$projektilla'>
 										<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 										<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+										<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
 										<input type='hidden' name='tuotenimitys' 	value = '$row[nimitys]'>
 										<input type='hidden' name='menutila' 		value = '$menutila'>
 										<input type='hidden' name='tila' 			value = 'MUUTA'>
@@ -3616,6 +3621,7 @@ if ($tee == '') {
 										<input type='hidden' name='projektilla' 	value = '$projektilla'>
 										<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 										<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+										<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
 										<input type='hidden' name='tuotenimitys' 	value = '$row[nimitys]'>
 										<input type='hidden' name='menutila' 		value = '$menutila'>
 										<input type='hidden' name='tila' 			value = 'MUUTA'>
@@ -3757,6 +3763,7 @@ if ($tee == '') {
 								<input type='hidden' name='projektilla' value='$projektilla'>
 								<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 								<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+								<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
 								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE_OSTO_VAI_HYVITYS'>
 								<select name='osto_vai_hyvitys' onchange='submit();'>
@@ -3792,6 +3799,7 @@ if ($tee == '') {
 									<input type='hidden' name='projektilla' value='$projektilla'>
 									<input type='hidden' name='tilausnumero' value = '$tilausnumero'>
 									<input type='hidden' name='rivitunnus' value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
 									<input type='hidden' name='menutila' value='$menutila'>
 									<input type='hidden' name='tila' value = 'LISATIETOJA_RIVILLE_OSTO_VAI_HYVITYS'>
 									<select name='osto_vai_hyvitys' onchange='submit();'>
@@ -3992,6 +4000,7 @@ if ($tee == '') {
 							<input type='hidden' name='projektilla' 	value = '$projektilla'>
 							<input type='hidden' name='tilausnumero'	value = '$tilausnumero'>
 							<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+							<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
 							<input type='hidden' name='menutila' 		value = '$menutila'>
 							<input type='hidden' name='tuotenimitys' 	value = '$row[nimitys]'>
 							<input type='hidden' name='tila' 			value = 'MUUTA'>
@@ -4006,6 +4015,7 @@ if ($tee == '') {
 							<input type='hidden' name='projektilla' 	value = '$projektilla'>
 							<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 							<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+							<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
 							<input type='hidden' name='menutila'	 	value = '$menutila'>
 							<input type='hidden' name='tila' 			value = 'MUUTA'>
 							<input type='hidden' name='tapa' 			value = 'POISTA'>
@@ -4080,6 +4090,7 @@ if ($tee == '') {
 									<input type='hidden' name='projektilla' 	value = '$projektilla'>
 									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu'	value = '$row[laadittu]'>
 									<input type='hidden' name='menutila' 		value = '$menutila'>
 									<input type='hidden' name='tila' 			value = 'MUUTA'>
 									<input type='hidden' name='tapa' 			value = 'POISJTSTA'>
@@ -4095,6 +4106,7 @@ if ($tee == '') {
 									<input type='hidden' name='projektilla' 	value = '$projektilla'>
 									<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 									<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+									<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
 									<input type='hidden' name='menutila' 		value = '$menutila'>
 									<input type='hidden' name='tila' 			value = 'MUUTA'>
 									<input type='hidden' name='tapa' 			value = 'JT'>
@@ -4109,6 +4121,7 @@ if ($tee == '') {
 								<input type='hidden' name='projektilla' 	value = '$projektilla'>
 								<input type='hidden' name='tilausnumero'	value = '$tilausnumero'>
 								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
 								<input type='hidden' name='menutila' 		value = '$menutila'>
 								<input type='hidden' name='tila' 			value = 'MUUTA'>
 								<input type='hidden' name='tapa' 			value = 'PUUTE'>
@@ -4123,6 +4136,7 @@ if ($tee == '') {
 								<input type='hidden' name='projektilla' 	value = '$projektilla'>
 								<input type='hidden' name='tilausnumero' 	value = '$tilausnumero'>
 								<input type='hidden' name='rivitunnus' 		value = '$row[tunnus]'>
+								<input type='hidden' name='rivilaadittu' 	value = '$row[laadittu]'>
 								<input type='hidden' name='menutila' 		value = '$menutila'>
 								<input type='hidden' name='tila' 			value = 'OOKOOAA'>
 								<input type='Submit' value='".t("Hyväksy")."'>
@@ -4211,6 +4225,7 @@ if ($tee == '') {
 
 						echo "	<input type='hidden' name='tila' value='LISLISAV'>
 								<input type='hidden' name='rivitunnus' value='$row[tunnus]'>
+								<input type='hidden' name='rivilaadittu' value = '$row[laadittu]'>
 								<input type='hidden' name='menutila' value='$menutila'>
 								<input type='submit' value='".t("Lisää lisävarusteita")."'>
 								</form> ";

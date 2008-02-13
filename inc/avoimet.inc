@@ -1,6 +1,6 @@
 <?php
 
-	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$rikki,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto) = split("/",$muutparametrit);
+	if ($muutparametrit != '') list($tee,$vv,$kk,$pp,$laji,$naytetaankokommentit,$savalkoodi,$valuutassako,$maa,$maksuehto) = split("/",$muutparametrit);
 
 	echo "<font class=head>".t("Avoimet laskut")."</font><hr>";
 
@@ -30,7 +30,7 @@
 	// Valitaan asiakas, jos sitä ei tiedetä
 	if ($tee != '' and $ytunnus != '') {
 
-		$muutparametrit = $tee."/".$vv."/".$kk."/".$pp."/".$laji."/".$rikki."/".$naytetaankokommentit."/".$savalkoodi."/".$valuutassako."/".$maa."/".$maksuehto;
+		$muutparametrit = $tee."/".$vv."/".$kk."/".$pp."/".$laji."/".$naytetaankokommentit."/".$savalkoodi."/".$valuutassako."/".$maa."/".$maksuehto;
 
 		if (substr($laji,0,1) == 'M') {
 			include "asiakashaku.inc";
@@ -49,9 +49,13 @@
 		$kuu  = date("n");
 
 		// poimitaan erikseen edellisen kuun viimeisen päivän vv,kk,pp raportin oletuspäivämääräksi
-		if (!isset($vv)) $vv = date("Y",mktime(0,0,0,$kuu-1,1,$year));
-		if (!isset($kk)) $kk = date("n",mktime(0,0,0,$kuu-1,1,$year));
-		if (!isset($pp)) $pp = date("j",mktime(0,0,0,$kuu,0,$year));
+//		if (!isset($vv)) $vv = date("Y",mktime(0,0,0,$kuu-1,1,$year));
+//		if (!isset($kk)) $kk = date("n",mktime(0,0,0,$kuu-1,1,$year));
+//		if (!isset($pp)) $pp = date("j",mktime(0,0,0,$kuu,0,$year));
+
+		if (!isset($vv)) $vv = date("Y");
+		if (!isset($kk)) $kk = date("n");
+		if (!isset($pp)) $pp = date("j");
 
 		$sel[$laji] = " selected ";
 
@@ -84,14 +88,9 @@
 				</tr>";
 
 		echo "	<tr>
-				<th>".t("Näytä laskut, joilta puuttuu kaikki tiliöinnit").":</th>
-				<td colspan='3'><input type = 'checkbox' name = 'rikki'></td>
+				<th>".t("Älä näytä laskujen kommentteja").":</th>
+				<td colspan='3'><input type = 'checkbox' name = 'naytetaankokommentit'></td>
 				</tr>";
-
-			echo "	<tr>
-					<th>".t("Älä näytä laskujen kommentteja").":</th>
-					<td colspan='3'><input type = 'checkbox' name = 'naytetaankokommentit'></td>
-					</tr>";
 
 		$query = "	SELECT nimi, tunnus
  	                FROM valuu
@@ -207,7 +206,7 @@
 			$valkoodi = " and lasku.valkoodi = '{$_POST['savalkoodi']}'";
 			$valkoodi2 = " and suoritus.valkoodi = '{$_POST['savalkoodi']}'";
 		}
-		
+
 		if ($ojarj != "") {
 			$jarj = $ojarj;
 		}
@@ -230,16 +229,9 @@
 			if ($laji == 'OK') 	$tili=$yhtiorow['konserniostovelat'];
 			else 				$tili=$yhtiorow['ostovelat'];
 
-			if($rikki == "on") {
-				$tiliointijoini = "LEFT";
-			}
-			else {
-				$tiliointijoini = "";				
-			}
-
 			$query = "	SELECT lasku.liitostunnus, lasku.*, concat_ws(' ', viite, viesti) maksutieto, tiliointi.summa * -1 avoinsaldo
 						FROM lasku use index (yhtio_tila_tapvm)
-						$tiliointijoini JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
+						JOIN tiliointi use index (tositerivit_index) ON lasku.yhtio=tiliointi.yhtio
 						and lasku.tunnus	= tiliointi.ltunnus
 						and lasku.tapvm		= tiliointi.tapvm
 						and tilino			= '$tili'
@@ -264,10 +256,10 @@
 
 			echo "<table>";
 			echo "<tr>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus'>".t("Ytunnus")."</a></th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi'>".t("Nimi")."</a></th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.viesti'>".t("Maksutieto")."</a></th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm'>".t("Pvm")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus'>".t("Ytunnus")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi'>".t("Nimi")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.viesti'>".t("Maksutieto")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm'>".t("Pvm")."</a></th>";
 			echo "<th>".t("Maksupäivä")."</th>";
 			echo "<th>".t("Oletusmaksupäivä")."</th>";
 			echo "<th>".t("Eräpäivä")."</th>";
@@ -278,7 +270,7 @@
 			$summa = 0;
 
 			while ($trow = mysql_fetch_array ($result)) {
-				if (($rikki == 'on' and $trow['avoinsaldo'] == 0) or $trow['avoinsaldo'] != 0) {
+				if ($trow['avoinsaldo'] != 0) {
 
 					$summa += $trow['avoinsaldo'];
 
@@ -370,13 +362,6 @@
 			elseif ($laji == 'MA') 	$tili = "'$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]', '$yhtiorow[konsernimyyntisaamiset]'";
 			else 					$tili = "'$yhtiorow[myyntisaamiset]'";
 
-			if($rikki == "on") {
-				$tiliointijoini = "LEFT";
-			}
-			else {
-				$tiliointijoini = "";				
-			}
-
 			$query = "	SELECT lasku.*,
 						lasku.laskunro maksutieto,
 						lasku.tunnus laskutunnus,
@@ -385,7 +370,7 @@
 						sum(tiliointi.summa) tiliointiavoinsaldo,
 						sum(if(tiliointi.tapvm = lasku.tapvm, tiliointi.summa, 0)) tiliointisumma
 						FROM lasku $indeksi
-						$tiliointijoini JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
+						JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio
 						and lasku.tunnus		= tiliointi.ltunnus
 						and tiliointi.tilino	in ($tili)
 						and tiliointi.korjattu	= ''
@@ -414,10 +399,10 @@
 
 			echo "<table>";
 			echo "<tr>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus'>".t("Ytunnus")."</a></th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi'>".t("Nimi")."</a></th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
-			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&rikki=$rikki&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm'>".t("Pvm")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.ytunnus'>".t("Ytunnus")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.nimi'>".t("Nimi")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.laskunro'>".t("Laskunro")."</a></th>";
+			echo "<th><a href='$PHP_SELF?toim=$toim&tee=$tee&vv=$vv&kk=$kk&pp=$pp&laji=$laji&toimittajaid=$toimittajaid&asiakasid=$asiakasid&naytetaankokommentit=$naytetaankokommentit&savalkoodi=$savalkoodi&valuutassako=$valuutassako&maa=$maa&maksuehto=$maksuehto&ojarj=lasku.tapvm'>".t("Pvm")."</a></th>";
 			echo "<th>".t("Maksupäivä")."</th>";
 			echo "<th>".t("Eräpäivä")."</th>";
 			echo "<th>".t("Laskun summa")."</th>";
@@ -430,22 +415,15 @@
 
 			while ($trow = mysql_fetch_array ($result)) {
 
-				if ($trow['tiliointiavoinsaldo'] == 0 and $rikki == 'on') {
-					$class = " class='spec' ";
-				}
-				else {
-					$class = "";
-				}
-
-				if (($rikki == 'on' and $trow['tiliointiavoinsaldo'] == 0) or $trow['tiliointiavoinsaldo'] != 0) {
+				if ($trow['tiliointiavoinsaldo'] != 0) {
 
 					echo "<tr class='aktiivi'>";
-					echo "<td $class><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[liitostunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
-					echo "<td $class>$trow[nimi]</td>";
-					echo "<td $class>$trow[maksutieto]</td>";
-					echo "<td $class>".tv1dateconv($trow["tapvm"])."</td>";
-					echo "<td $class>".tv1dateconv($trow["mapvm"])."</td>";
-					echo "<td $class>".tv1dateconv($trow["erpcm"])."</td>";
+					echo "<td><a href='myyntires/myyntilaskut_asiakasraportti.php?tunnus=$trow[liitostunnus]&tila=tee_raportti'>$trow[ytunnus]</a></td>";
+					echo "<td>$trow[nimi]</td>";
+					echo "<td>$trow[maksutieto]</td>";
+					echo "<td>".tv1dateconv($trow["tapvm"])."</td>";
+					echo "<td>".tv1dateconv($trow["mapvm"])."</td>";
+					echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
 
 					$summatotal += $trow['tiliointiavoinsaldo'];
 
@@ -456,13 +434,7 @@
 						$summa[$trow["valkoodi"]] += round(laskuval($trow["tiliointiavoinsaldo"], $trow["vienti_kurssi"]), 2);	// paljo kirjanpidossa avoimena valuutassa
 					}
 					else {
-						if($rikki == "on") {
-							echo "<td align='right' $class>$trow[summa]</td>";	
-						}
-						else {
-							echo "<td align='right' $class>$trow[tiliointisumma]</td>";
-						}
-						
+						echo "<td align='right' $class>$trow[tiliointisumma]</td>";
 						echo "<td align='right' $class>$trow[tiliointiavoinsaldo]</td>";
 						echo "<td align='right' $class>$yhtiorow[valkoodi]</td>";
 						$summa[$yhtiorow["valkoodi"]] += $trow['tiliointiavoinsaldo'];	// paljo kirjanpidossa avoimena
@@ -474,7 +446,7 @@
 					}
 
 					if ($trow["tiliointisumma"] != $trow["laskusumma"]) {
-						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito summat heittävät!</font> ($trow[laskusumma] / <a href='muutosite.php?tee=E&tunnus=$trow[laskutunnus]'>$trow[tiliointisumma]</a>)</td>";
+//						echo "<td class='back' nowrap><font class='error'>VIRHE: Lasku / Kirjanpito summat heittävät!</font> ($trow[laskusumma] / <a href='muutosite.php?tee=E&tunnus=$trow[laskutunnus]'>$trow[tiliointisumma]</a>)</td>";
 					}
 
 					echo "</tr>";

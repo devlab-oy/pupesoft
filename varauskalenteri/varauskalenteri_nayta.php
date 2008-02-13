@@ -22,7 +22,6 @@
 	echo "<tr><th>Is‰nn‰t:</th><td><pre>$row[kentta06]</pre></td></tr>";
 	echo "<tr><th>Vieraat:</th><td><pre>$row[kentta07]</pre></td></tr>";
 	echo "<tr><th>Vieraslukum‰‰r‰:</th><td><pre>$row[kentta08]</pre></td></tr>";
-	echo "<tr><th>Ruokatoivomus:</th><td><pre>$row[kentta09]</pre></td></tr>";
 	echo "<tr><th>Juomatoivomus:</th><td><pre>$row[kentta10]</pre></td></tr>";
 	echo "</table>";
 	

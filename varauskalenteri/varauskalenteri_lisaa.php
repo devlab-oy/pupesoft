@@ -44,7 +44,7 @@
 	}
 	
 	if ($toim == "Sauna") {
-		if ($kentta03 != '' && $kentta06 != '' && $kentta07 != '') {			
+		if ($kentta03 != '') {			
 			$meili = "\n\n\n$kukarow[nimi] on varannut saunan ajalle:\n\n##################################################\n$day-$month-$year   Klo: $kello --> Klo: $lkello\n##################################################\n\n\n";
 			$meili .= "Yhtiö:\n$kentta01\n";
 			$meili .= "Osasto:\n$kentta02\n\n";
@@ -53,7 +53,6 @@
 			$meili .= "Isäntä:\n$kentta06\n\n";
 			$meili .= "Vieraat:\n$kentta07\n\n";
 			$meili .= "Vieraslukumäärä:\n$kentta08\n\n\n";
-			$meili .= "Ruokatoivomus:\n$kentta09\n";
 			$meili .= "Juomatoivomus:\n$kentta10\n";
 			
 			$tulos = mail("$yhtiorow[varauskalenteri_email]", "Saunavaraus", $meili,"From: ".$kukarow["nimi"]."<".$kukarow["eposti"].">\nReply-To: ".$kukarow["nimi"]."<".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");

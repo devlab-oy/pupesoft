@@ -112,16 +112,6 @@
 		echo "<tr><th>".t("Isännät").":</th><td><textarea name='kentta06' cols='30' rows='3' wrap='hard'>$kukarow[nimi]</textarea></td></tr>";
 		echo "<tr><th>".t("Vieraat").":</th><td><textarea name='kentta07' cols='30' rows='2' wrap='hard'></textarea></td></tr>";
 		echo "<tr><th>".t("Vieraslukumäärä").":</th><td><input type='text' name='kentta08' size='31'></td></tr>";
-		echo "<tr><th>".t("Ruokatoivomus").":</th><td><select name='kentta09'>
-		<option value='Ei ruokaa kiitos'>Ei ruokaa kiitos</option>
-		<option value='Kiusauksia: Janssoninkiusaus, Salaatti+kastike, Patonki+levite'>Kiusauksia: Janssoninkiusaus, Salaatti+kastike, Patonki+levite</option>
-		<option value='Kiusauksia: Kinkkukiusaus, Salatti+kastike, Patonki+levite'>Kiusauksia: Kinkkukiusaus, Salaatti+kastike, Patonki+levite</option>	
-		<option value='Tex-Mex: Chili con carne, Tomaattikuulia, Jalapeno-vihreäsalaatti'>Tex-Mex: Chili con carne, Tomaattikuulia, Jalapeno-vihreäsalaatti</option>		
-		<option value='Tex-Mex: Chili con pollo (kana), Tomaattikuulia, Jalapeno-vihreäsalaatti'>Tex-Mex: Chili con pollo (kana), Tomaattikuulia, Jalapeno-vihreäsalaatti</option>		
-		<option value='Pizzasauna: Erilaisia pizzoja, Salaatti+kastike'>Pizzasauna: Erilaisia pizzoja, Salaatti+kastike</option>
-		<option value='Nakkisauna: Nakkeja, Bratwurstia, Perunasalaatti, Salaatti+kastike, Patonki+levite'>Nakkisauna: Nakkeja, Bratwurstia, Perunasalaatti, Salaatti+kastike, Patonki+levite</option>
-		<option value='Keräilysauna: Jotain kivaa mitä kaapista löytyy'>Keräilysauna: Jotain kivaa mitä kaapista löytyy</option>		
-		</select></td></tr>";
 		echo "<tr><th>Juomatoivomus:</th><td><textarea name='kentta10' cols='30' rows='3' wrap='hard'></textarea></td></tr>";
 	}
 	echo "</table>";

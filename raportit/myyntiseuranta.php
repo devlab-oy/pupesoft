@@ -1174,6 +1174,21 @@
 									$row[$i] = 0;
 								}
 							}
+							
+							// kustannuspaikka
+							if (mysql_field_name($result, $i) == "kustpaikka") {
+								// n‰ytet‰‰n soveltuvat kustannuspaikka
+								$query = "	SELECT nimi
+											FROM kustannuspaikka
+											WHERE yhtio = '$kukarow[yhtio]' 
+											and tunnus = '$row[$i]'";
+								$osre = mysql_query($query) or pupe_error($query);
+								
+								if (mysql_num_rows($osre) == 1) {
+									$osrow = mysql_fetch_array($osre);
+									$row[$i] = $osrow['nimi'];
+								}																															
+							}
 
 							// jos kyseessa on sarjanumero
 							if (mysql_field_name($result, $i) == "sarjanumero") {

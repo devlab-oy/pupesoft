@@ -421,7 +421,7 @@
 					$alkres	  = mysql_query($query) or pupe_error($query);
 					$alkurow  = mysql_fetch_array ($alkres);
 					$kumsumma = $alkurow["saldo"];
-echo "$query";
+
 					//tilin alkusaldo
 					echo "<td colspan='".(mysql_num_fields($result)-2)."'></td>";
 					echo "<td align='right'>".sprintf("%.2f",$kumsumma)."</td></tr>";

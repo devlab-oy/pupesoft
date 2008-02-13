@@ -138,10 +138,17 @@
 			echo "</table>";
 			echo "</td></tr>";
 
-			if ($kukarow['kesken'] == 0) {
+			if ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] != '2') {
 				$toimpp = $kerpp = date("j");
 				$toimkk = $kerkk = date("n");
 				$toimvv = $kervv = date("Y");
+			}
+			elseif ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] == '2') {
+				$toimittajan_toimaika = date('Y-m-d',time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
+				
+				list($toimvv, $toimkk, $toimpp) = split('-', $toimittajan_toimaika);
+				list($kervv, $kerkk, $kerpp)    = split('-', $toimittajan_toimaika);
+				
 			}
 			else {
 				list($toimvv, $toimkk, $toimpp) = split('-', $srow["toimaika"]);

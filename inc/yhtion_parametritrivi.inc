@@ -143,6 +143,23 @@
 		$jatko = 0;
 	}
 	
+	if (mysql_field_name($result, $i) == "ostotilaukseen_toimittajan_toimaika") {
+
+		$ulos = "<td><select name='$nimi'>";
+
+		$apu = (int)$trow[$i];
+		$sel = array();
+		$sel[$apu] = "selected";
+
+		$ulos .= "<option value = '0' $sel[0]>".t("Ei käytetä");
+		$ulos .= "<option value = '1' $sel[1]>".t("Ehdottaa toimitusaikaa");		
+		$ulos .= "<option value = '2' $sel[2]>".t("Laittaa automaattisesti toimitusajan");
+		
+		$ulos .= "</select></td>";
+
+		$jatko = 0;
+	}
+	
 	if (mysql_field_name($result, $i) == "tyomaaraystyyppi") {
 
 		$ulos = "<td><select name='$nimi'>";

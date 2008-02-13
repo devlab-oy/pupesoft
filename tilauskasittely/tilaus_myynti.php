@@ -4256,7 +4256,7 @@ if ($tee == '') {
 						echo "<td>&nbsp;</td>";
 					}
 
-					echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br>".str_replace("\n", "<br>", $row["kommentti"])."</td>";
+					echo "<td $kommclass1 colspan='$cspan' valign='top'>".t("Kommentti").":<br><font class='message'>".str_replace("\n", "<br>", $row["kommentti"])."</font></td>";
 
 					echo "</tr>";
 				}

@@ -118,6 +118,7 @@
 			$ulos .= "<option value='ASRYHMA_SE' {$avain_sel['ASRYHMA_SE']}>				".t("Ruotsinkielinen asiakasryhma")."</option>";
 			$ulos .= "<option value='LASKT_EMAIL' {$avain_sel['LASKT_EMAIL']}>				".t("Laskutustiedot autom. sähköpostitukseen")."</option>";
 			$ulos .= "<option value='LASKT_EMAIL_SOP' {$avain_sel['LASKT_EMAIL_SOP']}>		".t("Laskutustiedot autom. sähköpostitukseen (Sopimus)")."</option>";
+			$ulos .= "<option value='ASAVAINSANA' {$avain_sel['ASAVAINSANA']}>				".t("Asiakkaan avainsanojen laji")."</option>";
 			$ulos .= "</optgroup>";
 			
 			$ulos .= "<optgroup label='".t("Yhtiön avainsanat")."'>";

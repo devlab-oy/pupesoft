@@ -4,7 +4,7 @@
 	$vresult = mysql_query($query) or pupe_error($query);
 	if (mysql_num_rows($vresult)>0) {
 		
-		if ($tee == 'asinsert') {
+		if ($asavtee == 'asinsert') {
 			if ($liitostunnus != '' and $uuslaji != '' and $uussana != '' and isset($puttoni)) {
 				$query = "	INSERT INTO asiakkaan_avainsanat SET
 							yhtio = '$kukarow[yhtio]',
@@ -15,14 +15,14 @@
 							luontiaika = now()";
 				$result = mysql_query($query) or pupe_error($query);
 			}
-			$tee = "";
+			$asavtee = "";
 		}
-		elseif ($tee == 'aspoista') {
+		elseif ($asavtee == 'aspoista') {
 			if ($poistunnus != '') {
 				$query = "	DELETE FROM asiakkaan_avainsanat WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$poistunnus'";
 				$result = mysql_query($query) or pupe_error($query);
 			}
-			$tee = "";
+			$asavtee = "";
 		}
 		
 		
@@ -40,7 +40,7 @@
 		while ($row = mysql_fetch_array($result)) {
 			echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 			echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
-			echo "<input type='hidden' name='tee' value='aspoista'>";
+			echo "<input type='hidden' name='asavtee' value='aspoista'>";
 			echo "<input type='hidden' name='toim' value='$aputoim'>";
 			echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 			echo "<input type='hidden' name='poistunnus' value='$row[tunnus]'>";
@@ -90,7 +90,7 @@
 		
 		echo "<form action='yllapito.php?ojarj=$ojarj$ulisa' method='post'>";
 		echo "<input type='hidden' name='lopetus' value = '$lopetus'>";
-		echo "<input type='hidden' name='tee' value='asinsert'>";
+		echo "<input type='hidden' name='asavtee' value='asinsert'>";
 		echo "<input type='hidden' name='toim' value='$aputoim'>";
 		echo "<input type='hidden' name='tunnus' value='$tunnus'>";
 		echo "<input type='hidden' name='liitostunnus' value='$tunnus'>";

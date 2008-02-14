@@ -720,11 +720,9 @@
 		if ($errori == '' and ($toim == "toimi" or $toim == "asiakas")) {
 			require ("inc/toimittajan_yhteyshenkilo.inc");
 			
-			/*
 			if ($toim == "asiakas") {
-				require ("inc/asiakkaan_avainsanat.inc");
+				include ("inc/asiakkaan_avainsanat.inc");
 			}
-			*/
 		}
 
 		if ($errori == '' and ($toim == "sarjanumeron_lisatiedot" or $toim == "tuote")) {

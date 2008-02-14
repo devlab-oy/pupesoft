@@ -2367,16 +2367,19 @@ if ($tee == '') {
 			}
 						
 			if ($tuoterow["alv"] != $tilausrivi["alv"] and $yhtiorow["alv_kasittely"] == "" and $tilausrivi["alv"] < 500) {
-				$hinta = sprintf("%.".$yhtiorow['hintapyoristys']."f", round($tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuoterow["alv"]/100), $yhtiorow['hintapyoristys']));
+				$hinta = (float) $tilausrivi["hinta"] / (1+$tilausrivi['alv']/100) * (1+$tuoterow["alv"]/100);
 			}
 			else {
-				$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", $tilausrivi["hinta"]);
+				$hinta = (float) $tilausrivi["hinta"];
 			}
-
-			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-				$hinta = round(laskuval($hinta, $laskurow["vienti_kurssi"]), $yhtiorow['hintapyoristys']);
-			}			
-
+			
+			if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {				
+				$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", (float) laskuval($hinta, $laskurow["vienti_kurssi"]));
+			}
+			else {				
+				$hinta	= sprintf("%.".$yhtiorow['hintapyoristys']."f", $hinta);
+			}
+			
 			$netto		= $tilausrivi['netto'];
 			$ale		= $tilausrivi['ale'];
 			$alv 		= $tilausrivi['alv'];
@@ -2596,7 +2599,7 @@ if ($tee == '') {
 		}
 
 		foreach($tuoteno_array as $tuoteno) {
-			$query	= "	select *
+			$query	= "	SELECT *
 						from tuote
 						where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
 			$result = mysql_query($query) or pupe_error($query);
